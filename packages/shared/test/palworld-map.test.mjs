@@ -303,8 +303,10 @@ test("Pal별 일반 스폰 상태는 검증된 overlay 공개 조건을 유지�
 const emptyLocationCounts = {
   "fast-travel": 0,
   dungeon: 0,
+  npc: 0,
   egg: 0,
   "skill-fruit": 0,
+  treasure: 0,
   lifmunk: 0,
   journal: 0,
   resource: 0

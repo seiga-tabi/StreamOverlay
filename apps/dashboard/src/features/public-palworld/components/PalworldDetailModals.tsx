@@ -139,11 +139,15 @@ function itemDetailTranslationStatuses(
   detail: PalworldItemDetail,
   locale: PalworldLocale,
 ): PalworldTranslationDisplayStatus[] {
+  const recipeMaterials = detail.recipes?.flatMap((recipe) => recipe.materials)
+    ?? detail.craftingMaterials;
+  const facilities = detail.craftingFacilities
+    ?? (detail.craftingFacility ? [detail.craftingFacility] : []);
   return [
     resolvePalworldName(detail, locale).status,
     resolvePalworldDescription(detail, locale).status,
-    ...referenceTranslationStatuses(detail.craftingMaterials.map(({ item }) => item), locale),
-    ...(detail.craftingFacility ? [resolvePalworldName(detail.craftingFacility, locale).status] : []),
+    ...referenceTranslationStatuses(recipeMaterials.map(({ item }) => item), locale),
+    ...facilities.map((facility) => resolvePalworldName(facility, locale).status),
     ...referenceTranslationStatuses(detail.dropPals, locale),
     ...detail.acquisitionMethods.flatMap((method) => {
       const label = acquisitionText(method, locale);
@@ -152,6 +156,138 @@ function itemDetailTranslationStatuses(
     }),
     ...referenceTranslationStatuses(detail.relatedItems, locale),
   ];
+}
+
+function PalworldItemRecipes({
+  detail,
+  locale,
+  onOpenItem,
+}: {
+  detail: PalworldItemDetail;
+  locale: PalworldLocale;
+  onOpenItem: (itemId: string) => void;
+}) {
+  const text = palworldI18n[locale];
+  if (detail.recipes !== undefined) {
+    if (detail.recipes.length === 0) return <p>{text.craftingRecipeEmpty}</p>;
+    return (
+      <div className="palworld-item-recipe-list">
+        {detail.recipes.map((recipe, index) => (
+          <article className="palworld-item-recipe" key={recipe.sourceRowId}>
+            <div className="palworld-item-recipe-header">
+              <h5>
+                {text.craftingRecipeNumber.replace("{number}", String(index + 1))}
+              </h5>
+              <dl className="palworld-item-recipe-metrics">
+                <div>
+                  <dt>{text.craftingResultCount}</dt>
+                  <dd>{recipe.resultCount.toLocaleString(locale === "ko" ? "ko-KR" : "ja-JP")}</dd>
+                </div>
+                {recipe.workAmount === undefined ? null : (
+                  <div>
+                    <dt>{text.craftingWorkAmount}</dt>
+                    <dd>{recipe.workAmount.toLocaleString(locale === "ko" ? "ko-KR" : "ja-JP")}</dd>
+                  </div>
+                )}
+              </dl>
+            </div>
+            <div className="palworld-item-reference-list">
+              {recipe.materials.map(({ item, quantity }) => (
+                <PalworldItemReferenceButton
+                  item={item}
+                  locale={locale}
+                  quantity={quantity}
+                  onOpen={onOpenItem}
+                  key={item.id}
+                />
+              ))}
+            </div>
+            <PalworldTranslationBadges
+              locale={locale}
+              showMachineAssisted={false}
+              sourceIntegrities={referenceTranslationSourceIntegrities(
+                recipe.materials.map(({ item }) => item),
+                locale,
+              )}
+              statuses={referenceTranslationStatuses(
+                recipe.materials.map(({ item }) => item),
+                locale,
+              )}
+            />
+          </article>
+        ))}
+      </div>
+    );
+  }
+  if (detail.craftingMaterials.length === 0) return <p>{text.sourceNotProvided}</p>;
+  return (
+    <>
+      <div className="palworld-item-reference-list">
+        {detail.craftingMaterials.map(({ item, quantity }) => (
+          <PalworldItemReferenceButton
+            item={item}
+            locale={locale}
+            quantity={quantity}
+            onOpen={onOpenItem}
+            key={item.id}
+          />
+        ))}
+      </div>
+      <PalworldTranslationBadges
+        locale={locale}
+        showMachineAssisted={false}
+        sourceIntegrities={referenceTranslationSourceIntegrities(
+          detail.craftingMaterials.map(({ item }) => item),
+          locale,
+        )}
+        statuses={referenceTranslationStatuses(
+          detail.craftingMaterials.map(({ item }) => item),
+          locale,
+        )}
+      />
+    </>
+  );
+}
+
+function PalworldItemFacilities({
+  detail,
+  locale,
+}: {
+  detail: PalworldItemDetail;
+  locale: PalworldLocale;
+}) {
+  const text = palworldI18n[locale];
+  const facilities = detail.craftingFacilities
+    ?? (detail.craftingFacility ? [detail.craftingFacility] : []);
+  if (facilities.length === 0) return <p>{text.sourceNotProvided}</p>;
+  const names = facilities.map((facility) => resolvePalworldName(facility, locale));
+  return (
+    <>
+      <ul className="palworld-item-facility-list">
+        {facilities.map((facility, index) => (
+          <li key={facility.id}>
+            <span className="palworld-item-facility-media" aria-hidden="true">
+              <PalworldMedia
+                alt=""
+                imageUrl={facility.imageUrl}
+                intrinsicHeight={facility.imageHeight}
+                intrinsicWidth={facility.imageWidth}
+                kind="building"
+                locale={locale}
+              />
+            </span>
+            <strong>{names[index]!.text}</strong>
+          </li>
+        ))}
+      </ul>
+      <PalworldTranslationBadges
+        locale={locale}
+        showMachineAssisted={false}
+        sourceIntegrities={names.map((name) => name.sourceIntegrity)}
+        statuses={names.map((name) => name.status)}
+      />
+    </>
+  );
 }
 
 function SkillDescription({
@@ -478,11 +614,8 @@ export function ItemDetailModal({
               <DataRow locale={locale} labelKo={palworldI18n.ko.maxStack} labelJa={palworldI18n.ja.maxStack}>{detail.maxStack ?? text.originalDataUnavailable}</DataRow>
               <DataRow locale={locale} labelKo={palworldI18n.ko.durability} labelJa={palworldI18n.ja.durability}>{detail.durability ?? text.originalDataUnavailable}</DataRow>
             </dl>
-            <section><h4 data-ko={palworldI18n.ko.craftingMaterials} data-ja={palworldI18n.ja.craftingMaterials}>{text.craftingMaterials}</h4>{detail.craftingMaterials.length ? <><div className="palworld-item-reference-list">{detail.craftingMaterials.map(({ item, quantity }) => <PalworldItemReferenceButton item={item} locale={locale} quantity={quantity} onOpen={onOpenItem} key={item.id} />)}</div><PalworldTranslationBadges locale={locale} showMachineAssisted={false} sourceIntegrities={referenceTranslationSourceIntegrities(detail.craftingMaterials.map(({ item }) => item), locale)} statuses={referenceTranslationStatuses(detail.craftingMaterials.map(({ item }) => item), locale)} /></> : <p>{detail.recipes !== undefined ? text.craftingRecipeEmpty : text.sourceNotProvided}</p>}</section>
-            <section><h4 data-ko={palworldI18n.ko.craftingFacility} data-ja={palworldI18n.ja.craftingFacility}>{text.craftingFacility}</h4>{detail.craftingFacility ? (() => {
-              const facilityName = resolvePalworldName(detail.craftingFacility, locale);
-              return <p>{facilityName.text} <PalworldTranslationBadges locale={locale} showMachineAssisted={false} sourceIntegrities={[facilityName.sourceIntegrity]} statuses={[facilityName.status]} /></p>;
-            })() : <p>{text.sourceNotProvided}</p>}</section>
+            <section><h4 data-ko={palworldI18n.ko.craftingRecipes} data-ja={palworldI18n.ja.craftingRecipes}>{text.craftingRecipes}</h4><PalworldItemRecipes detail={detail} locale={locale} onOpenItem={onOpenItem} /></section>
+            <section><h4 data-ko={palworldI18n.ko.craftingFacility} data-ja={palworldI18n.ja.craftingFacility}>{text.craftingFacility}</h4><PalworldItemFacilities detail={detail} locale={locale} /></section>
             <section><h4 data-ko={palworldI18n.ko.dropPals} data-ja={palworldI18n.ja.dropPals}>{text.dropPals}</h4>{detail.dropPals.length ? <><div className="palworld-link-list">{detail.dropPals.map((pal) => {
               const palDisplayName = referenceName(pal, locale);
               return <button className="palworld-related-pal-link" type="button" onClick={() => onOpenPal(pal.id)} key={pal.id}><span className="palworld-related-pal-media"><PalworldMedia kind="pal" imageUrl={pal.imageUrl} alt={palDisplayName} locale={locale} {...imageDimensions(pal)} /></span><span>{palDisplayName}</span></button>;

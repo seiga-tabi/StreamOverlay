@@ -55,6 +55,40 @@ npm --workspace apps/server run import:palworld-technology-buildings -- \
 - `/Game/Pal/Texture/BuildObject/PNG`
 - `/Game/Pal/Texture/BuildObject/Icon`
 
+## 아이템 제작식·제작 시설·획득 방법
+
+아이템 상세의 제작식과 획득 방법은 운영자가 제공한 고정 export를 현재
+`catalog.json`의 `sourceInternalId`와 exact join한 결과만 사용한다.
+
+- 제작식: `Content.zip`의 `DT_ItemRecipeDataTable_Common`
+- 제작 시설: `Blueprint.zip`의 `PalMapObjectItemConverterParameterComponent`와
+  `delta.zip`의 `DT_MapObjectMasterDataTable_Common`
+- 상점: `delta.zip`의 `DT_ItemShopCreateData_Common`
+- 보물 상자: `delta.zip`의 `DT_ItemLotteryDataTable`
+- 생산 시설 획득: `delta.zip`의 `DT_MapObjectItemProductDataTable_Common`
+
+제작 시설은 Blueprint의 허용 `TypeA`, `TypeB`, `TargetRankMax`를 모두 만족하고,
+공개 기술 해금 건축물과 Blueprint class가 exact match하는 경우에만 표시한다.
+상점명이나 보물 상자 위치처럼 공개 위치까지 검증되지 않은 값은 추정하지 않고
+획득 유형만 표시한다. `InventoryItemIcon.zip`은 아이콘만 포함하므로 이 상세
+데이터 생성에는 사용하지 않는다.
+
+현재 고정 export에서는 catalog 대상 제작식 1,243행 중 재료 참조까지 전부
+일치하는 1,237행을 게시한다. 재료가 catalog에 없는 6행은 일부 재료만 표시하지
+않고 fail-closed 방식으로 제외한다.
+
+재생성 명령:
+
+```bash
+npm run import:palworld-item-details -- \
+  --blueprint-archive /absolute/path/Blueprint.zip \
+  --blueprint-sha256 633316b83bec9d8d2a07fae7e76ba877cb794fcbe9ca2ea407f109b3e7ca066d \
+  --content-archive /absolute/path/Content.zip \
+  --content-sha256 1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384 \
+  --delta-archive /absolute/path/delta.zip \
+  --delta-sha256 2108e7bd6029117473b2ff38d5c9884ec6b717af7645b11e4db44b9b0459a443
+```
+
 ## 출처와 재현성
 
 - Pal 287종은 고정 source와 mapping에서 결정적으로 생성한다. item·skill 통합 catalog도 위 checksum의 Atlas·pyPal archive에서 allowlist importer로 정규화하며, 해당 integrity gate가 실패하면 기존 sample fallback을 `ready`로 표시하지 않는다.

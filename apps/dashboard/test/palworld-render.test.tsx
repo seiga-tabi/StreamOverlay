@@ -1099,8 +1099,9 @@ test("상세의 빈 데이터는 제작식 없음과 현재 원본 미제공을 
     "utf8",
   );
 
-  assert.match(detailSource, /detail\.recipes !== undefined \? text\.craftingRecipeEmpty : text\.sourceNotProvided/u);
-  assert.match(detailSource, /detail\.craftingFacility[\s\S]*text\.sourceNotProvided/u);
+  assert.match(detailSource, /if \(detail\.recipes !== undefined\)[\s\S]*detail\.recipes\.length === 0\) return <p>\{text\.craftingRecipeEmpty\}<\/p>/u);
+  assert.match(detailSource, /detail\.craftingFacilities[\s\S]*if \(facilities\.length === 0\) return <p>\{text\.sourceNotProvided\}<\/p>/u);
+  assert.match(detailSource, /palworld-item-facility-media[\s\S]*imageUrl=\{facility\.imageUrl\}[\s\S]*kind="building"/u);
   assert.match(detailSource, /detail\.relatedItems\.length[\s\S]*text\.sourceNotProvided/u);
   assert.match(
     skillSource,

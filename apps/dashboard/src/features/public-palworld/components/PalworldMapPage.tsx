@@ -175,6 +175,7 @@ const PALWORLD_MAP_LOCATION_LABELS: Readonly<
 > = {
   "fast-travel": mapLabel(palworldI18n.ko.mapFastTravel, palworldI18n.ja.mapFastTravel),
   dungeon: mapLabel(palworldI18n.ko.mapDungeon, palworldI18n.ja.mapDungeon),
+  npc: mapLabel(palworldI18n.ko.mapMerchantsNpcs, palworldI18n.ja.mapMerchantsNpcs),
   egg: mapLabel(palworldI18n.ko.mapEggs, palworldI18n.ja.mapEggs),
   lifmunk: mapLabel(
     palworldI18n.ko.mapLifmunkEffigies,
@@ -184,6 +185,7 @@ const PALWORLD_MAP_LOCATION_LABELS: Readonly<
     palworldI18n.ko.mapSkillFruits,
     palworldI18n.ja.mapSkillFruits,
   ),
+  treasure: mapLabel(palworldI18n.ko.mapTreasures, palworldI18n.ja.mapTreasures),
   journal: mapLabel(palworldI18n.ko.mapJournals, palworldI18n.ja.mapJournals),
   resource: mapLabel(palworldI18n.ko.mapResources, palworldI18n.ja.mapResources),
 };
@@ -192,9 +194,11 @@ const PALWORLD_MAP_LOCATION_FALLBACKS: Readonly<
 > = {
   "fast-travel": "◇",
   dungeon: "▣",
+  npc: "♙",
   egg: "●",
   lifmunk: "✦",
   "skill-fruit": "◆",
+  treasure: "◇",
   journal: "▤",
   resource: "◆",
 };
@@ -1419,16 +1423,8 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
       layers: [
         locationLayer("fast-travel"),
         locationLayer("dungeon"),
-        {
-        id: "npc",
-        label: mapLabel(palworldI18n.ko.mapMerchantsNpcs, palworldI18n.ja.mapMerchantsNpcs),
-        description: unavailableDescription,
-        statusLabel: unavailableStatus,
-        iconAsset: PALWORLD_MAP_LAYER_ICONS.npc,
-        iconFallback: "♙",
-        selected: false,
-        state: "data_unavailable",
-      }],
+        locationLayer("npc"),
+      ],
     }, {
       id: "statues",
       label: mapLabel(
@@ -1462,16 +1458,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
       collapsed: collapsedFilterGroups.has("collectibles"),
       layers: [
         locationLayer("skill-fruit"),
-        {
-        id: "treasure",
-        label: mapLabel(palworldI18n.ko.mapTreasures, palworldI18n.ja.mapTreasures),
-        description: unavailableDescription,
-        statusLabel: unavailableStatus,
-        iconAsset: PALWORLD_MAP_LAYER_ICONS.treasure,
-        iconFallback: "◇",
-        selected: false,
-        state: "data_unavailable",
-      },
+        locationLayer("treasure"),
         locationLayer("journal"),
         {
         id: "ancient-ruin",

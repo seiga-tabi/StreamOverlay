@@ -194,7 +194,9 @@ function deriveSnapshotCoverage(
       snapshot.items.length
     ),
     craftingFacilities: coverageCount(
-      snapshot.items.filter((item) => item.craftingFacility !== undefined).length,
+      snapshot.items.filter((item) =>
+        (item.craftingFacilities?.length ?? (item.craftingFacility === undefined ? 0 : 1)) > 0
+      ).length,
       snapshot.items.length
     ),
     dropPals: coverageCount(

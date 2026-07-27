@@ -28,8 +28,10 @@ import {
 const CATEGORY_SYMBOLS: Record<PalworldMapLocationCategory, string> = {
   "fast-travel": "◇",
   dungeon: "▣",
+  npc: "♙",
   egg: "●",
   "skill-fruit": "◆",
+  treasure: "◇",
   lifmunk: "✦",
   journal: "▤",
   resource: "◆",

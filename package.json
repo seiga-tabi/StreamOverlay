@@ -37,6 +37,7 @@
     "preflight:palworld-pak": "npm --workspace apps/server run preflight:palworld-pak --",
     "extract:palworld-translations": "npm --workspace apps/server run extract:palworld-translations",
     "import:palworld-translations": "npm --workspace apps/server run import:palworld-translations --",
+    "import:palworld-item-details": "npm --workspace apps/server run import:palworld-item-details --",
     "validate:palworld-translations": "npm --workspace apps/server run validate:palworld-translations",
     "test:run": "npm --workspace packages/shared run test:run && npm --workspace apps/server run test:run && npm --workspace apps/bridge run test:run && npm --workspace apps/dashboard run test:run && npm --workspace apps/overlay run test:run && npm run test:ops && npm run check:tokens && npm run check:css-overrides && npm run test:visual:baseline && npm run test:visual:diff",
     "test": "npm run build:shared && npm --workspace packages/shared run test:run && npm run build:server && npm --workspace apps/server run test:run && npm run build:bridge && npm --workspace apps/bridge run test:run && npm --workspace apps/dashboard run test:run && npm --workspace apps/overlay run test:run && npm run test:ops && npm run check:tokens && npm run check:css-overrides && npm run test:visual:baseline && npm run test:visual:diff",

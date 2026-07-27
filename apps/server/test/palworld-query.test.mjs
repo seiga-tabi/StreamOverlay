@@ -251,8 +251,10 @@ test("지도 위치 query는 world·레이어·offset·limit allowlist만 허용
       layers: [
         "fast-travel",
         "dungeon",
+        "npc",
         "egg",
         "skill-fruit",
+        "treasure",
         "lifmunk",
         "journal",
         "resource"

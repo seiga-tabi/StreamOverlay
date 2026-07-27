@@ -8,15 +8,17 @@
   "sourceArchiveSha256": "344628b020ffc8ee4642188e356013fc3e955f2ec8addf5ae384786c494f6186",
   "indexMemberSha256": "0f3b811f079e1fbb24b745a55d7e0d77dc4ac3b0574f6d9d4df7b7ae4a39a661",
   "memberInventorySha256": "6b6a85b984df3f933a452ec9a420e541ba7d1eb9ea199a7670cbfc6d0be0b406",
-  "mapLocationsArtifactSha256": "76250fa3571e63abacc5a40f1f59675e5ffc47e65d4a7ee293773ff35e6faf2f",
-  "mapLocationsManifestSha256": "9fac2ba54e1488e43b3965b4975e66a4749b9543756e138cd63310f8841bbf1b",
+  "mapLocationsArtifactSha256": "49573fd77c7aaa32fd30374b38f4e3744fd7e27a9f64b424d66835712233632f",
+  "mapLocationsManifestSha256": "a30df9ca1c966607a46275d30883071644f508c5b90947a50e38adba9b854f75",
   "selectedMemberCount": 7487,
-  "totalLocations": 18295,
+  "totalLocations": 19814,
   "categoryCounts": {
     "fast-travel": 152,
     "dungeon": 170,
+    "npc": 8,
     "egg": 1816,
     "skill-fruit": 47,
+    "treasure": 1511,
     "lifmunk": 407,
     "journal": 64,
     "resource": 15639
@@ -34,19 +36,19 @@
     }
   ],
   "importAudit": {
-    "sourceRawExact": 18318,
-    "mainIncluded": 18102,
-    "treeIncluded": 193,
+    "sourceRawExact": 19837,
+    "mainIncluded": 19583,
+    "treeIncluded": 231,
     "treeExcluded": 0,
     "coordinateUnresolved": 0,
     "outOfBoundsExcluded": 0,
     "exactDuplicates": 23,
-    "taxonomyMappingSha256": "28bb81538efb8f27fa0398ab8ba029263c1bae8e997d9f22092dd46550ec215a",
+    "taxonomyMappingSha256": "788a3df875c06ab5c228a765aa8c6dfc5a0052f73dd94e5dd4b09bc19bcff653",
     "transformMappingSha256": "82fdaea95a4ffb2408575ffad0135aabad902db65c82a83de4d142f90bf26bb4"
   },
   "reviewedAt": "2026-07-26T00:00:00.000Z",
   "reviewer": "streamoverlay-data-maintenance",
   "rightsVerified": false,
   "usageBasis": "operator_reference_use",
-  "evidenceChecksum": "9f23fa18155bcfa34798a32d088ec50732b6134921b06e6aca84ccb503b99e92"
+  "evidenceChecksum": "80eab6ef53e70cf7f13d651b6ad153772ea451c0c36443e5785ad235f57d5954"
 }

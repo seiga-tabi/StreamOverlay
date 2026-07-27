@@ -2830,6 +2830,101 @@
   gap: var(--yoro-space-2);
 }
 
+.palworld-item-recipe-list {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-3);
+}
+
+.palworld-item-recipe {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-3);
+  padding: var(--yoro-space-3);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-surface-muted);
+}
+
+.palworld-item-recipe-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  min-inline-size: 0;
+  gap: var(--yoro-space-3);
+}
+
+.palworld-item-recipe-header h5 {
+  margin: 0;
+  color: var(--yoro-color-text-strong);
+}
+
+.palworld-item-recipe-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--yoro-space-2);
+  margin: 0;
+}
+
+.palworld-item-recipe-metrics > div {
+  display: flex;
+  align-items: baseline;
+  gap: var(--yoro-space-1);
+}
+
+.palworld-item-recipe-metrics dt {
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-xs);
+}
+
+.palworld-item-recipe-metrics dd {
+  margin: 0;
+  color: var(--yoro-color-text-strong);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.palworld-item-facility-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  min-inline-size: 0;
+  gap: var(--yoro-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.palworld-item-facility-list > li {
+  display: grid;
+  grid-template-columns: var(--yoro-size-touch-target) minmax(0, 1fr);
+  align-items: center;
+  min-inline-size: 0;
+  min-block-size: calc(var(--yoro-size-touch-target) + (var(--yoro-space-2) * 2));
+  gap: var(--yoro-space-2);
+  padding: var(--yoro-space-2);
+  border: thin solid var(--yoro-color-border-strong);
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-surface-muted);
+  color: var(--yoro-color-text-strong);
+}
+
+.palworld-item-facility-list > li strong {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.palworld-item-facility-media {
+  display: block;
+  inline-size: var(--yoro-size-touch-target);
+  block-size: var(--yoro-size-touch-target);
+  overflow: hidden;
+  border-radius: var(--yoro-radius-md);
+}
+
+.palworld-item-facility-media .palworld-media-fallback small {
+  display: none;
+}
+
 .palworld-item-reference-button {
   display: grid;
   grid-template-columns: var(--yoro-size-touch-target) minmax(0, 1fr);
@@ -5236,6 +5331,7 @@
     grid-template-columns: minmax(var(--yoro-size-touch-target), auto);
     inline-size: auto;
     max-inline-size: none;
+    padding: var(--yoro-space-0);
   }
 
   .palworld-map-viewport > .palworld-map-controls .is-zoom-in {
@@ -5507,6 +5603,15 @@
 }
 
 @media (max-width: 48rem) {
+  .palworld-item-recipe-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .palworld-item-recipe-metrics {
+    justify-content: flex-start;
+  }
+
   .palworld-breeding-combination-scroll {
     block-size: clamp(24rem, 58dvh, 34rem);
     scrollbar-gutter: auto;

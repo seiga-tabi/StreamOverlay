@@ -35,8 +35,10 @@ function categoryCounts() {
   return {
     "fast-travel": 1,
     dungeon: 1,
+    npc: 0,
     egg: 1,
     "skill-fruit": 0,
+    treasure: 0,
     lifmunk: 0,
     journal: 0,
     resource: 0

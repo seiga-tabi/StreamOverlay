@@ -211,8 +211,12 @@ test("runtime meta는 레코드 존재 여부가 아니라 실제 상세 필드�
     itemDescriptions: items.filter((item) =>
       item.descriptionKo !== undefined || item.descriptionJa !== undefined || item.descriptionEn !== undefined
     ).length,
-    craftingRecipes: items.filter((item) => item.craftingMaterials.length > 0).length,
-    craftingFacilities: items.filter((item) => item.craftingFacility !== undefined).length,
+    craftingRecipes: items.filter((item) =>
+      (item.recipes?.length ?? item.craftingMaterials.length) > 0
+    ).length,
+    craftingFacilities: items.filter((item) =>
+      (item.craftingFacilities?.length ?? (item.craftingFacility === undefined ? 0 : 1)) > 0
+    ).length,
     dropPals: items.filter((item) => item.dropPals.length > 0).length,
     technologyLevels: items.filter((item) => item.technologyLevel !== undefined).length,
     prices: items.filter((item) => item.sellPrice !== undefined).length,
@@ -231,9 +235,65 @@ test("runtime meta는 레코드 존재 여부가 아니라 실제 상세 필드�
       total: meta.coverage[field].total
     });
   }
-  assert.equal(meta.coverage.craftingFacilities.available, 0);
+  assert.equal(meta.coverage.craftingFacilities.available, 1183);
   assert.equal(meta.coverage.itemDetails.available, meta.counts.items);
   assert.equal(meta.coverage.craftingRecipes.available < meta.coverage.itemDetails.available, true);
+});
+
+test("아이템 상세는 고정 ZIP의 제작식·제작 시설·획득 방법을 exact join으로 제공한다", () => {
+  const palSphere = service.getItem("pal-sphere");
+  assert.deepEqual(
+    palSphere.recipes?.map((recipe) => ({
+      sourceRowId: recipe.sourceRowId,
+      resultCount: recipe.resultCount,
+      workAmount: recipe.workAmount,
+      materials: recipe.materials.map((material) => [
+        material.item.id,
+        material.quantity
+      ])
+    })),
+    [{
+      sourceRowId: "PalSphere",
+      resultCount: 1,
+      workAmount: 300,
+      materials: [["pal-crystal-s", 1]]
+    }]
+  );
+  assert.deepEqual(
+    palSphere.craftingFacilities?.map((facility) => facility.nameKo),
+    [
+      "원시적인 작업대",
+      "스피어 제작대",
+      "스피어라인 공장",
+      "스피어라인 공장 Ⅱ",
+      "고도 문명 스피어 공장",
+      "고대 문명 작업대"
+    ]
+  );
+  assert.equal(
+    palSphere.craftingFacilities?.every((facility) =>
+      /^\/images\/palworld\/1\.0\.1\/technology\/assets\/item\/[0-9a-f]{64}\.webp$/u.test(
+        facility.imageUrl ?? ""
+      )
+      && facility.imageWidth === 256
+      && facility.imageHeight === 256
+    ),
+    true
+  );
+  assert.deepEqual(
+    palSphere.acquisitionMethods.map((method) => method.type),
+    ["craft", "merchant", "chest"]
+  );
+
+  const paldiumFragment = service.getItem("pal-crystal-s");
+  assert.equal(paldiumFragment.recipes?.length, 13);
+  assert.deepEqual(paldiumFragment.craftingMaterials, []);
+  assert.equal(
+    paldiumFragment.recipes?.every((recipe) =>
+      recipe.materials.every((material) => material.item.id.length > 0)
+    ),
+    true
+  );
 });
 
 test("Pal 상세는 active composite에 고정된 농축 규칙으로 단계별 능력치를 반환한다", () => {

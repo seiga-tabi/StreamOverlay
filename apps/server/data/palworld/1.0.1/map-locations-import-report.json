@@ -11,7 +11,7 @@
     "selectedMemberCount": 7487
   },
   "checksums": {
-    "mappingSha256": "28bb81538efb8f27fa0398ab8ba029263c1bae8e997d9f22092dd46550ec215a",
+    "mappingSha256": "788a3df875c06ab5c228a765aa8c6dfc5a0052f73dd94e5dd4b09bc19bcff653",
     "transformMappingSha256": "82fdaea95a4ffb2408575ffad0135aabad902db65c82a83de4d142f90bf26bb4",
     "transformSha256": "4f209e0f1438ae2dda38d1240bc3b232d07099dd3e0a7b766f23fc4aa25f576d",
     "targetMapAssetSha256": "3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003",
@@ -20,9 +20,9 @@
   "counts": {
     "selectedMembers": 7487,
     "actorsScanned": 791613,
-    "sourceActors": 18318,
-    "included": 18102,
-    "treeIncluded": 193,
+    "sourceActors": 19837,
+    "included": 19583,
+    "treeIncluded": 231,
     "treeExcluded": 0,
     "coordinateUnresolved": 0,
     "outOfBoundsExcluded": 0,
@@ -46,6 +46,15 @@
         "outOfBoundsExcluded": 0,
         "exactDuplicates": 0
       },
+      "npc": {
+        "sourceActors": 8,
+        "included": 8,
+        "treeIncluded": 0,
+        "treeExcluded": 0,
+        "coordinateUnresolved": 0,
+        "outOfBoundsExcluded": 0,
+        "exactDuplicates": 0
+      },
       "egg": {
         "sourceActors": 1816,
         "included": 1786,
@@ -59,6 +68,15 @@
         "sourceActors": 47,
         "included": 35,
         "treeIncluded": 12,
+        "treeExcluded": 0,
+        "coordinateUnresolved": 0,
+        "outOfBoundsExcluded": 0,
+        "exactDuplicates": 0
+      },
+      "treasure": {
+        "sourceActors": 1511,
+        "included": 1473,
+        "treeIncluded": 38,
         "treeExcluded": 0,
         "coordinateUnresolved": 0,
         "outOfBoundsExcluded": 0,
@@ -578,15 +596,11 @@
     },
     {
       "family": "npc",
-      "actors": 263,
+      "actors": 255,
       "sourceClasses": [
         {
           "sourceClass": "BP_MonoNPCSpawner_C",
           "actors": 160
-        },
-        {
-          "sourceClass": "BP_MonoNPCSpawner_MedalTrader_C",
-          "actors": 4
         },
         {
           "sourceClass": "BP_MonoNPCSpawner_Quest_Police_LoneWolf3_C",
@@ -638,10 +652,6 @@
         },
         {
           "sourceClass": "BP_MonoNPCSpawnerBossBase_BOSS_Believer_Fat_GatlingGun_C",
-          "actors": 1
-        },
-        {
-          "sourceClass": "BP_MonoNPCSpawnerBossBase_BOSS_DarkTrader_C",
           "actors": 1
         },
         {
@@ -730,18 +740,6 @@
         },
         {
           "sourceClass": "BP_MonoNPCSpawnerBossBase_BOSS_Police_Rifle_C",
-          "actors": 1
-        },
-        {
-          "sourceClass": "BP_MonoNPCSpawnerBossBase_Male_Trader01_C",
-          "actors": 1
-        },
-        {
-          "sourceClass": "BP_MonoNPCSpawnerBossBase_Male_Trader02_C",
-          "actors": 1
-        },
-        {
-          "sourceClass": "BP_MonoNPCSpawnerBossBase_Male_Trader03_C",
           "actors": 1
         },
         {
@@ -861,87 +859,15 @@
     },
     {
       "family": "treasure",
-      "actors": 10008,
+      "actors": 8497,
       "sourceClasses": [
         {
           "sourceClass": "BP_LevelObject_TreasureMapPoint_C",
           "actors": 42
         },
         {
-          "sourceClass": "BP_PalMapObjectSpawner_Treasure_Darkisland01_C",
-          "actors": 201
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_Treasure_desert_01_C",
-          "actors": 263
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_Treasure_Element_Desert_C",
-          "actors": 32
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_Treasure_Element_Forest_C",
-          "actors": 22
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_Treasure_Element_Sakurajima_C",
-          "actors": 47
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_Treasure_Element_SkyIsland_C",
-          "actors": 8
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_Treasure_Forest_Grade_01_C",
-          "actors": 123
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_Treasure_Forest_Grade_02_C",
-          "actors": 108
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_Treasure_Forest_Grade_03_C",
-          "actors": 16
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_Treasure_Grass_Grade_01_C",
-          "actors": 173
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_Treasure_Grass_Grade_02_C",
-          "actors": 4
-        },
-        {
           "sourceClass": "BP_PalMapObjectSpawner_Treasure_Ruins_Grade_01_C",
           "actors": 48
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_Treasure_Sakurajima1_C",
-          "actors": 68
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_Treasure_SkyIsland_01_C",
-          "actors": 76
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_Treasure_SnowyMountain_01_C",
-          "actors": 178
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_Treasure_specialspot_01_C",
-          "actors": 17
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_Treasure_Volcano_Grade_01_C",
-          "actors": 7
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_Treasure_Volcano_Grade_02_C",
-          "actors": 130
-        },
-        {
-          "sourceClass": "BP_PalMapObjectSpawner_Treasure_WorldTree_C",
-          "actors": 38
         },
         {
           "sourceClass": "BP_PalMapObjectSpawnerTreasureBox_VisibleContent_C",

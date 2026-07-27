@@ -22,6 +22,7 @@
     "import:palworld-images": "tsx src/scripts/import-palworld-images.ts",
     "import:palworld-catalog": "tsx src/scripts/import-palworld-catalog.ts",
     "import:palworld-technology-buildings": "tsx src/scripts/import-palworld-technology-buildings.ts",
+    "import:palworld-item-details": "tsx src/scripts/import-palworld-item-details.ts",
     "preflight:palworld-pak": "tsx src/scripts/preflight-palworld-pak.ts",
     "import:palworld-pak": "tsx src/scripts/import-palworld-pak.ts",
     "promote:palworld-pak": "tsx src/scripts/promote-palworld-pak.ts",

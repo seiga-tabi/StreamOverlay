@@ -495,6 +495,9 @@ export type PalworldFacilityReference = {
   nameKo?: string;
   nameJa?: string;
   nameEn: string;
+  imageUrl?: string;
+  imageWidth?: number;
+  imageHeight?: number;
   localization?: PalworldLocalizationFallback;
 };
 
@@ -647,6 +650,7 @@ export type PalworldItemDetail = PalworldItemSummary & {
   recipes?: PalworldItemRecipe[];
   technologyUnlocks?: PalworldItemTechnologyUnlock[];
   craftingFacility?: PalworldFacilityReference;
+  craftingFacilities?: PalworldFacilityReference[];
   dropPals: PalworldPalReference[];
   acquisitionMethods: PalworldAcquisitionMethod[];
   relatedItems: PalworldItemReference[];
@@ -2130,7 +2134,16 @@ function validateItemReferenceAt(value: unknown, path: string): PalworldValidati
 }
 
 function validateFacilityReferenceAt(value: unknown, path: string): PalworldValidationResult<PalworldFacilityReference> {
-  const record = recordAt(value, path, ["id", "nameKo", "nameJa", "nameEn", "localization"]);
+  const record = recordAt(value, path, [
+    "id",
+    "nameKo",
+    "nameJa",
+    "nameEn",
+    "imageUrl",
+    "imageWidth",
+    "imageHeight",
+    "localization"
+  ]);
   if (!record.ok) return record;
   const id = idAt(record.data.id, `${path}.id`);
   if (!id.ok) return id;
@@ -2152,6 +2165,15 @@ function validateFacilityReferenceAt(value: unknown, path: string): PalworldVali
   } else if (record.data.nameKo === undefined || record.data.nameJa === undefined) {
     return invalid(`${path}.localization`, "한국어·일본어 이름이 없으면 fallback 상태를 명시해야 합니다.");
   }
+  if (record.data.imageUrl !== undefined) {
+    const imageUrl = stringAt(record.data.imageUrl, `${path}.imageUrl`, MAX_URL_LENGTH);
+    if (!imageUrl.ok) return imageUrl;
+    if (!/^\/images\/palworld\/(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\/technology\/assets\/item\/[0-9a-f]{64}\.webp$/u.test(imageUrl.data)) {
+      return invalid(`${path}.imageUrl`, "검증된 로컬 제작 시설 이미지 경로여야 합니다.");
+    }
+  }
+  const dimensions = validateOptionalImageDimensionsAt(record.data, path, "imageUrl");
+  if (!dimensions.ok) return dimensions;
   return valid(record.data as PalworldFacilityReference);
 }
 
@@ -2990,6 +3012,7 @@ function validateItemDetailAt(value: unknown, path: string): PalworldValidationR
     "recipes",
     "technologyUnlocks",
     "craftingFacility",
+    "craftingFacilities",
     "dropPals",
     "acquisitionMethods",
     "relatedItems",
@@ -3078,6 +3101,30 @@ function validateItemDetailAt(value: unknown, path: string): PalworldValidationR
   if (candidate.craftingFacility !== undefined) {
     const facility = validateFacilityReferenceAt(candidate.craftingFacility, `${path}.craftingFacility`);
     if (!facility.ok) return facility;
+  }
+  if (candidate.craftingFacilities !== undefined) {
+    const facilities = arrayAt(
+      candidate.craftingFacilities,
+      `${path}.craftingFacilities`,
+      MAX_API_COLLECTION_SIZE,
+      validateFacilityReferenceAt
+    );
+    if (!facilities.ok) return facilities;
+    const uniqueFacilities = uniqueStringsAt(
+      facilities.data.map((facility) => facility.id),
+      `${path}.craftingFacilities`,
+      "제작 시설"
+    );
+    if (!uniqueFacilities.ok) return uniqueFacilities;
+    if (
+      candidate.craftingFacility !== undefined
+      && !facilities.data.some((facility) => facility.id === (candidate.craftingFacility as PalworldFacilityReference).id)
+    ) {
+      return invalid(
+        `${path}.craftingFacility`,
+        "대표 제작 시설은 craftingFacilities 목록에 포함되어야 합니다."
+      );
+    }
   }
   const dropPals = arrayAt(candidate.dropPals, `${path}.dropPals`, MAX_API_COLLECTION_SIZE, validatePalReferenceAt);
   if (!dropPals.ok) return dropPals;

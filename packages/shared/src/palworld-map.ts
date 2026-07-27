@@ -16,8 +16,10 @@ export const PALWORLD_PAL_SPAWN_STATES = [
 export const PALWORLD_MAP_LOCATION_CATEGORIES = [
   "fast-travel",
   "dungeon",
+  "npc",
   "egg",
   "skill-fruit",
+  "treasure",
   "lifmunk",
   "journal",
   "resource"

@@ -11,16 +11,16 @@ export const PALWORLD_MAP_READY_LAYER_IDS = [
   "spawn",
   "fast-travel",
   "dungeon",
+  "npc",
   "egg",
   "lifmunk",
   "skill-fruit",
+  "treasure",
   "journal",
   "resource",
   ...PALWORLD_MAP_COLLECTIBLE_TYPE_IDS,
 ] as const;
 export const PALWORLD_MAP_PENDING_LAYER_IDS = [
-  "npc",
-  "treasure",
   "ancient-ruin",
 ] as const;
 export const PALWORLD_MAP_EXPLORER_LAYER_IDS = [

@@ -146,6 +146,31 @@
       "subtype": "tower"
     },
     {
+      "sourceClass": "BP_MonoNPCSpawner_MedalTrader_C",
+      "category": "npc",
+      "subtype": "medal-trader"
+    },
+    {
+      "sourceClass": "BP_MonoNPCSpawnerBossBase_BOSS_DarkTrader_C",
+      "category": "npc",
+      "subtype": "dark-trader"
+    },
+    {
+      "sourceClass": "BP_MonoNPCSpawnerBossBase_Male_Trader01_C",
+      "category": "npc",
+      "subtype": "merchant-1"
+    },
+    {
+      "sourceClass": "BP_MonoNPCSpawnerBossBase_Male_Trader02_C",
+      "category": "npc",
+      "subtype": "merchant-2"
+    },
+    {
+      "sourceClass": "BP_MonoNPCSpawnerBossBase_Male_Trader03_C",
+      "category": "npc",
+      "subtype": "merchant-3"
+    },
+    {
       "sourceClass": "BP_PalMapObjectSpawner_SkillFruits_DarkIsland_C",
       "category": "skill-fruit",
       "subtype": "dark-island"
@@ -183,6 +208,96 @@
     {
       "sourceClass": "BP_PalMapObjectSpawner_SkillFruits_WorldTree_C",
       "category": "skill-fruit",
+      "subtype": "world-tree"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_Treasure_Darkisland01_C",
+      "category": "treasure",
+      "subtype": "dark-island"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_Treasure_desert_01_C",
+      "category": "treasure",
+      "subtype": "desert"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_Treasure_Element_Desert_C",
+      "category": "treasure",
+      "subtype": "element-desert"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_Treasure_Element_Forest_C",
+      "category": "treasure",
+      "subtype": "element-forest"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_Treasure_Element_Sakurajima_C",
+      "category": "treasure",
+      "subtype": "element-sakurajima"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_Treasure_Element_SkyIsland_C",
+      "category": "treasure",
+      "subtype": "element-sky-island"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_Treasure_Forest_Grade_01_C",
+      "category": "treasure",
+      "subtype": "forest-1"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_Treasure_Forest_Grade_02_C",
+      "category": "treasure",
+      "subtype": "forest-2"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_Treasure_Forest_Grade_03_C",
+      "category": "treasure",
+      "subtype": "forest-3"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_Treasure_Grass_Grade_01_C",
+      "category": "treasure",
+      "subtype": "grass-1"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_Treasure_Grass_Grade_02_C",
+      "category": "treasure",
+      "subtype": "grass-2"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_Treasure_Sakurajima1_C",
+      "category": "treasure",
+      "subtype": "sakurajima"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_Treasure_SkyIsland_01_C",
+      "category": "treasure",
+      "subtype": "sky-island"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_Treasure_SnowyMountain_01_C",
+      "category": "treasure",
+      "subtype": "snowy-mountain"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_Treasure_specialspot_01_C",
+      "category": "treasure",
+      "subtype": "special-spot"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_Treasure_Volcano_Grade_01_C",
+      "category": "treasure",
+      "subtype": "volcano-1"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_Treasure_Volcano_Grade_02_C",
+      "category": "treasure",
+      "subtype": "volcano-2"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_Treasure_WorldTree_C",
+      "category": "treasure",
       "subtype": "world-tree"
     },
     {
@@ -349,8 +464,10 @@
   "expectedSourceCounts": {
     "fast-travel": 152,
     "dungeon": 170,
+    "npc": 8,
     "egg": 1816,
     "skill-fruit": 47,
+    "treasure": 1511,
     "lifmunk": 407,
     "journal": 64,
     "resource": 15662

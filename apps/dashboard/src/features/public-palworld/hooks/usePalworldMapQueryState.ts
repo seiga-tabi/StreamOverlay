@@ -19,9 +19,11 @@ export const PALWORLD_MAP_LAYERS = [
   "spawn",
   "fast-travel",
   "dungeon",
+  "npc",
   "egg",
   "lifmunk",
   "skill-fruit",
+  "treasure",
   "journal",
   "resource",
 ] as const;

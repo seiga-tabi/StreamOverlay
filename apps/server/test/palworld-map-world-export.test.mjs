@@ -41,13 +41,23 @@ test("Maps.zip 위치 taxonomy는 exact actor class와 고정 원본 수량을 �
   assert.deepEqual(mapping.expectedSourceCounts, {
     "fast-travel": 152,
     dungeon: 170,
+    npc: 8,
     egg: 1816,
     "skill-fruit": 47,
+    treasure: 1511,
     lifmunk: 407,
     journal: 64,
     resource: 15662
   });
-  assert.equal(mapping.classes.length, 65);
+  assert.equal(mapping.classes.length, 88);
+  assert.equal(
+    mapping.classes.filter((entry) => entry.category === "npc").length,
+    5
+  );
+  assert.equal(
+    mapping.classes.filter((entry) => entry.category === "treasure").length,
+    18
+  );
   assert.equal(
     mapping.classes.filter((entry) => entry.category === "resource").length,
     18
@@ -119,7 +129,7 @@ test("세계수 transform evidence는 map image manifest의 source·output hash�
   );
 });
 
-test("생성된 위치 artifact는 raw 18,318건을 MainMap과 세계수 지도에 정확히 분리한다", async () => {
+test("생성된 위치 artifact는 raw 19,837건을 MainMap과 세계수 지도에 정확히 분리한다", async () => {
   const [artifactBytes, manifest, report] = await Promise.all([
     readFile(path.join(releaseRoot, "map-locations.json")),
     readFile(path.join(releaseRoot, "map-locations-manifest.json"), "utf8")
@@ -128,31 +138,35 @@ test("생성된 위치 artifact는 raw 18,318건을 MainMap과 세계수 지도�
       .then(JSON.parse)
   ]);
   const artifact = await loadPalworldMapLocationsArtifact(releaseRoot);
-  assert.equal(artifact.totalLocations, 18295);
+  assert.equal(artifact.totalLocations, 19814);
   assert.equal(artifact.worlds.length, 2);
   assert.equal(artifact.worlds[0].world, "main");
-  assert.equal(artifact.worlds[0].locationCount, 18102);
+  assert.equal(artifact.worlds[0].locationCount, 19583);
   assert.deepEqual(artifact.worlds[0].categoryCounts, {
     "fast-travel": 137,
     dungeon: 170,
+    npc: 8,
     egg: 1786,
     "skill-fruit": 35,
+    treasure: 1473,
     lifmunk: 360,
     journal: 55,
     resource: 15559
   });
   assert.equal(artifact.worlds[1].world, "tree");
-  assert.equal(artifact.worlds[1].locationCount, 193);
+  assert.equal(artifact.worlds[1].locationCount, 231);
   assert.deepEqual(artifact.worlds[1].categoryCounts, {
     "fast-travel": 15,
     dungeon: 0,
+    npc: 0,
     egg: 30,
     "skill-fruit": 12,
+    treasure: 38,
     lifmunk: 47,
     journal: 9,
     resource: 80
   });
-  assert.equal(report.counts.sourceActors, 18318);
+  assert.equal(report.counts.sourceActors, 19837);
   assert.equal(report.excludedByReason.tree_world_without_active_map, 0);
   assert.equal(report.excludedByReason.attached_parent_coordinate_unresolved, 0);
   assert.equal(report.counts.exactDuplicates, 23);
@@ -169,6 +183,16 @@ test("생성된 위치 artifact는 raw 18,318건을 MainMap과 세계수 지도�
       + report.counts.byCategory.resource.outOfBoundsExcluded
       + report.counts.byCategory.resource.exactDuplicates,
     15662
+  );
+  assert.equal(
+    report.counts.byCategory.npc.included
+      + report.counts.byCategory.npc.treeIncluded,
+    8
+  );
+  assert.equal(
+    report.counts.byCategory.treasure.included
+      + report.counts.byCategory.treasure.treeIncluded,
+    1511
   );
   assert.equal(sha256(artifactBytes), manifest.artifactSha256);
   assert.equal(
@@ -291,10 +315,10 @@ test("candidate는 exact-checksum compatibility authorization으로만 provider�
     artifact,
     compatibilityAuthorization: authorization
   });
-  assert.equal(provider.diagnostics().total, 18295);
-  assert.equal(authorization.approval.importAudit.sourceRawExact, 18318);
-  assert.equal(authorization.approval.importAudit.mainIncluded, 18102);
-  assert.equal(authorization.approval.importAudit.treeIncluded, 193);
+  assert.equal(provider.diagnostics().total, 19814);
+  assert.equal(authorization.approval.importAudit.sourceRawExact, 19837);
+  assert.equal(authorization.approval.importAudit.mainIncluded, 19583);
+  assert.equal(authorization.approval.importAudit.treeIncluded, 231);
   assert.equal(authorization.approval.importAudit.treeExcluded, 0);
   assert.equal(authorization.approval.importAudit.coordinateUnresolved, 0);
   assert.equal(authorization.approval.importAudit.exactDuplicates, 23);

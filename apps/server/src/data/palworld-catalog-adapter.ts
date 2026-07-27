@@ -6,8 +6,10 @@ import {
   type PalworldDomainCoverageMap,
   type PalworldElement,
   type PalworldElementDefinition,
+  type PalworldFacilityReference,
   type PalworldItemCategory,
   type PalworldItemDetail,
+  type PalworldItemRecipe,
   type PalworldItemReference,
   type PalworldPassiveEffect,
   type PalworldPassiveEffectState,
@@ -40,6 +42,12 @@ import {
   resolvePalworldTechnologyLevel,
   resolvePalworldTechnologyPalSourceInternalId
 } from "./palworld-technology-compatibility.js";
+import {
+  PALWORLD_CRAFTING_FACILITY_RULES,
+  PALWORLD_ITEM_DETAILS_BY_SOURCE_INTERNAL_ID,
+  PALWORLD_ITEM_DETAIL_SOURCE,
+} from "./palworld-item-details.generated.js";
+import { PALWORLD_TECHNOLOGY_BUILDINGS } from "./palworld-technology-buildings.generated.js";
 
 const ELEMENT_NAMES: Readonly<Record<PalworldElement, { ko: string; ja: string; en: string }>> = {
   neutral: { ko: "무속성", ja: "無属性", en: "Neutral" },
@@ -362,31 +370,130 @@ function catalogSkill(
   };
 }
 
-function acquisitionMethods(item: PalworldCatalogItem): PalworldAcquisitionMethod[] {
+function acquisitionMethod(
+  type: PalworldAcquisitionMethod["type"],
+  labelKo: string,
+  labelJa: string,
+  labelEn: string,
+): PalworldAcquisitionMethod {
+  return {
+    type,
+    labelKo,
+    labelJa,
+    labelEn,
+    translation: {
+      label: { ko: "human_reviewed", ja: "human_reviewed" }
+    }
+  };
+}
+
+function acquisitionMethods(
+  item: PalworldCatalogItem,
+  recipes: readonly PalworldItemRecipe[],
+  generatedEnabled: boolean,
+  generated: {
+    merchant?: true;
+    chest?: true;
+    gathering?: true;
+  } | undefined,
+): PalworldAcquisitionMethod[] {
   const methods: PalworldAcquisitionMethod[] = [];
-  if (item.craftingMaterials.length > 0) {
-    methods.push({
-      type: "craft",
-      labelKo: "제작식 확인",
-      labelJa: "製作レシピあり",
-      labelEn: "Crafting recipe available",
-      translation: {
-        label: { ko: "human_reviewed", ja: "human_reviewed" }
-      }
-    });
+  if (recipes.length > 0 || (!generatedEnabled && item.craftingMaterials.length > 0)) {
+    methods.push(acquisitionMethod(
+      "craft",
+      "제작식으로 제작 가능",
+      "レシピから製作可能",
+      "Available through crafting recipes",
+    ));
   }
   if (item.dropPalIds.length > 0) {
-    methods.push({
-      type: "drop",
-      labelKo: "Pal 드롭",
-      labelJa: "パルのドロップ",
-      labelEn: "Pal drop",
-      translation: {
-        label: { ko: "human_reviewed", ja: "human_reviewed" }
-      }
-    });
+    methods.push(acquisitionMethod(
+      "drop",
+      "Pal 드롭 데이터에 포함",
+      "パルのドロップデータに収録",
+      "Included in Pal drop data",
+    ));
+  }
+  if (generated?.merchant) {
+    methods.push(acquisitionMethod(
+      "merchant",
+      "상점 판매 목록에 포함",
+      "ショップの販売リストに収録",
+      "Included in merchant inventories",
+    ));
+  }
+  if (generated?.chest) {
+    methods.push(acquisitionMethod(
+      "chest",
+      "보물 상자 획득 목록에 포함",
+      "宝箱の入手候補に収録",
+      "Included in treasure chest loot tables",
+    ));
+  }
+  if (generated?.gathering) {
+    methods.push(acquisitionMethod(
+      "gathering",
+      "생산 시설의 생산 목록에 포함",
+      "生産設備の生産リストに収録",
+      "Included in production facility outputs",
+    ));
   }
   return methods;
+}
+
+function sourceCategoryParts(item: PalworldCatalogItem): {
+  typeA: string;
+  typeB: string;
+} {
+  const separator = item.sourceCategory.indexOf("/");
+  if (separator <= 0 || separator === item.sourceCategory.length - 1) {
+    throw new TypeError(
+      `Palworld catalog sourceCategory 형식이 올바르지 않습니다: ${item.sourceCategory}`,
+    );
+  }
+  return {
+    typeA: item.sourceCategory.slice(0, separator),
+    typeB: item.sourceCategory.slice(separator + 1),
+  };
+}
+
+const technologyBuildingBySourceRowId = new Map(
+  PALWORLD_TECHNOLOGY_BUILDINGS.map((building) => [
+    building.sourceRowId,
+    building,
+  ]),
+);
+
+function generatedCraftingFacilities(
+  item: PalworldCatalogItem,
+  enabled: boolean,
+  hasRecipes: boolean,
+): PalworldFacilityReference[] {
+  if (!enabled || !hasRecipes) return [];
+  const { typeA, typeB } = sourceCategoryParts(item);
+  return PALWORLD_CRAFTING_FACILITY_RULES
+    .filter((rule) =>
+      rule.targetRankMax >= item.rank
+      && (rule.targetTypesA.length === 0 || rule.targetTypesA.includes(typeA))
+      && rule.targetTypesB.includes(typeB)
+    )
+    .map((rule) => {
+      const building = technologyBuildingBySourceRowId.get(rule.sourceRowId);
+      if (!building) {
+        throw new TypeError(
+          `Palworld 제작 시설 기술 참조가 없습니다: ${rule.sourceRowId}`,
+        );
+      }
+      return {
+        id: building.id,
+        nameKo: building.nameKo,
+        nameJa: building.nameJa,
+        nameEn: building.sourceRowId,
+        imageUrl: building.imageUrl,
+        imageWidth: building.imageWidth,
+        imageHeight: building.imageHeight,
+      };
+    });
 }
 
 function coverageCount(available: number, total: number): { available: number; missing: number; total: number } {
@@ -561,6 +668,14 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
     item.id,
     catalogItemReference(item, localizedItemsById.get(item.id), assetAvailability.items, translationIndex)
   ]));
+  const itemReferencesBySourceInternalId = new Map(
+    catalog.items.map((item) => [
+      item.sourceInternalId,
+      itemReferences.get(item.id)!,
+    ]),
+  );
+  const generatedItemDetailsEnabled =
+    input.catalogChecksum === PALWORLD_ITEM_DETAIL_SOURCE.catalogSha256;
   const nonBlueprintItemsBySourceInternalId = new Map(
     catalog.items.flatMap((item) =>
       publicItemType(item) === "blueprint" ? [] : [[item.sourceInternalId, item] as const]
@@ -782,7 +897,7 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
       : itemReferences.get(blueprintTargetItem.id);
     const descriptionKoTranslation = translatedField(translationIndex, "ko", "item", item.id, "description");
     const descriptionJaTranslation = translatedField(translationIndex, "ja", "item", item.id, "description");
-    const materials = item.craftingMaterials.map((material) => {
+    const legacyMaterials = item.craftingMaterials.map((material) => {
       const materialItem = catalogItemsById.get(material.itemId);
       const materialReference = itemReferences.get(material.itemId);
       if (!materialItem || !materialReference) {
@@ -790,6 +905,36 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
       }
       return { item: materialReference, quantity: material.quantity };
     });
+    const generatedDetail = generatedItemDetailsEnabled
+      ? PALWORLD_ITEM_DETAILS_BY_SOURCE_INTERNAL_ID[item.sourceInternalId]
+      : undefined;
+    const recipes: PalworldItemRecipe[] = (generatedDetail?.recipes ?? []).map((recipe) => ({
+      sourceRowId: recipe.sourceRowId,
+      resultCount: recipe.resultCount,
+      workAmount: recipe.workAmount,
+      materials: recipe.materials.map((material) => {
+        const materialReference = itemReferencesBySourceInternalId.get(
+          material.sourceInternalId,
+        );
+        if (!materialReference) {
+          throw new TypeError(
+            `Palworld 제작식 재료 exact 참조가 없습니다: ${item.sourceInternalId} -> ${material.sourceInternalId}`,
+          );
+        }
+        return {
+          item: materialReference,
+          quantity: material.quantity,
+        };
+      }),
+    }));
+    const materials = generatedItemDetailsEnabled
+      ? (recipes.length === 1 ? recipes[0]!.materials.map((material) => ({ ...material })) : [])
+      : legacyMaterials;
+    const craftingFacilities = generatedCraftingFacilities(
+      item,
+      generatedItemDetailsEnabled,
+      recipes.length > 0,
+    );
     const dropPals = item.dropPalIds.map((palId) => {
       const pal = palsById.get(palId);
       if (!pal) throw new TypeError(`Palworld item drop Pal 참조가 없습니다: ${item.id} -> ${palId}`);
@@ -830,8 +975,18 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
       maxStack: item.maxStack,
       ...(item.durability === undefined ? {} : { durability: item.durability }),
       craftingMaterials: materials,
+      ...(generatedItemDetailsEnabled ? { recipes } : {}),
+      ...(craftingFacilities.length === 0 ? {} : {
+        craftingFacility: craftingFacilities[0]!,
+        craftingFacilities,
+      }),
       dropPals,
-      acquisitionMethods: acquisitionMethods(item),
+      acquisitionMethods: acquisitionMethods(
+        item,
+        recipes,
+        generatedItemDetailsEnabled,
+        generatedDetail,
+      ),
       relatedItems: [],
       translation: {
         name: { ...reference.translation!.name! },
@@ -946,8 +1101,16 @@ function adaptPalworldCatalogInternal(input: PalworldCatalogAdapterInput): Palwo
       items.filter((item) => item.descriptionKo !== undefined || item.descriptionJa !== undefined || item.descriptionEn !== undefined).length,
       items.length
     ),
-    craftingRecipes: coverageCount(items.filter((item) => item.craftingMaterials.length > 0).length, items.length),
-    craftingFacilities: coverageCount(items.filter((item) => item.craftingFacility !== undefined).length, items.length),
+    craftingRecipes: coverageCount(
+      items.filter((item) => (item.recipes?.length ?? item.craftingMaterials.length) > 0).length,
+      items.length
+    ),
+    craftingFacilities: coverageCount(
+      items.filter((item) =>
+        (item.craftingFacilities?.length ?? (item.craftingFacility === undefined ? 0 : 1)) > 0
+      ).length,
+      items.length
+    ),
     dropPals: coverageCount(items.filter((item) => item.dropPals.length > 0).length, items.length),
     technologyLevels: coverageCount(items.filter((item) => item.technologyLevel !== undefined).length, items.length),
     prices: coverageCount(items.filter((item) => item.sellPrice !== undefined).length, items.length),
