@@ -1852,11 +1852,46 @@ test("Pal 도감 모바일 필터 Modal은 즉시 적용·focus 복귀·scroll l
     await assertHealthyDocument(page, errors);
   }
 
-  await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/palworld/pals?element=ground");
-  await expect(page.locator(".palworld-pal-filter-panel")).toBeVisible();
-  await expect(page.getByTestId("pal-filter-trigger")).toBeHidden();
-  await assertHealthyDocument(page, errors);
+  const desktopViewports = [
+    { width: 1280, height: 900 },
+    { width: 1366, height: 900 },
+    { width: 1440, height: 1000 },
+    { width: 1535, height: 1000 },
+    { width: 1536, height: 1000 },
+  ];
+
+  for (const viewport of desktopViewports) {
+    await page.setViewportSize(viewport);
+    await page.goto("/palworld/pals");
+    const filterPanel = page.locator(".palworld-pal-filter-panel");
+    const firstCard = page.getByTestId("pal-card").first();
+    await expect(filterPanel).toBeVisible();
+    await expect(firstCard).toBeVisible();
+    await expect(page.getByTestId("pal-filter-trigger")).toBeHidden();
+
+    const [filterPanelBox, firstCardBox, filterGroupBoxes] = await Promise.all([
+      filterPanel.boundingBox(),
+      firstCard.boundingBox(),
+      filterPanel.locator(".palworld-pal-filter-group").evaluateAll((groups) =>
+        groups.map((group) => {
+          const bounds = group.getBoundingClientRect();
+          return { width: bounds.width, x: bounds.x, y: bounds.y };
+        })
+      ),
+    ]);
+    expect(filterPanelBox).not.toBeNull();
+    expect(firstCardBox).not.toBeNull();
+    expect(filterGroupBoxes).toHaveLength(3);
+    expect(Math.abs(filterPanelBox!.y - firstCardBox!.y)).toBeLessThanOrEqual(1);
+    expect(Math.max(...filterGroupBoxes.map((bounds) => bounds.x))
+      - Math.min(...filterGroupBoxes.map((bounds) => bounds.x))).toBeLessThanOrEqual(1);
+    expect(filterGroupBoxes[1]!.y).toBeGreaterThan(filterGroupBoxes[0]!.y);
+    expect(filterGroupBoxes[2]!.y).toBeGreaterThan(filterGroupBoxes[1]!.y);
+    expect(Math.max(...filterGroupBoxes.map((bounds) => bounds.width))
+      - Math.min(...filterGroupBoxes.map((bounds) => bounds.width))).toBeLessThanOrEqual(1);
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+    await assertHealthyDocument(page, errors);
+  }
 });
 
 test("Pal 도감 API 오류는 결과 없음과 구분하고 동일 query로 재시도한다", async ({ page }) => {

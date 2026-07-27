@@ -149,6 +149,55 @@ export function PalworldPalsPage({
         </form>
       </Card>
 
+      <div className="palworld-catalog-mobile-toolbar">
+        <Button
+          aria-expanded={filterOpen}
+          aria-haspopup="dialog"
+          className="palworld-pal-mobile-filter-trigger palworld-pals-mobile-filter-trigger"
+          data-testid="pal-filter-trigger"
+          onClick={() => setFilterOpen(true)}
+          ref={filterTriggerRef}
+          type="button"
+          variant="secondary"
+        >
+          {text.filterCount.replace("{count}", String(detailFilterCount))}
+        </Button>
+      </div>
+
+      <Modal
+        className="palworld-pals-filter-modal"
+        onClose={() => setFilterOpen(false)}
+        open={filterOpen}
+        returnFocusRef={filterTriggerRef}
+        size="lg"
+      >
+        <ModalHeader>
+          <div>
+            <ModalTitle>{text.detailedFilters}</ModalTitle>
+            <ModalDescription>{text.detailedFiltersDescription}</ModalDescription>
+          </div>
+          <ModalCloseButton aria-label={text.closeFilters}>×</ModalCloseButton>
+        </ModalHeader>
+        <ModalContent>
+          <PalworldPalsFilterControls facets={facets} locale={locale} onUpdate={update} params={params} />
+        </ModalContent>
+        <ModalFooter>
+          <Button disabled={!hasFilters} onClick={clearFilters} type="button" variant="ghost">{text.clearFilters}</Button>
+          <Button onClick={() => setFilterOpen(false)} type="button">{text.close}</Button>
+        </ModalFooter>
+      </Modal>
+
+      <PalworldPalsAppliedFilters locale={locale} onRemove={removeFilter} params={params} />
+
+      <PalworldPalsResultToolbar
+        loadedCount={response?.items.length ?? 0}
+        loading={loading}
+        locale={locale}
+        onUpdate={update}
+        pagination={response?.pagination}
+        params={params}
+      />
+
       <div className="palworld-catalog-layout">
         <aside aria-label={text.detailedFilters} className="palworld-catalog-filter-rail palworld-pals-desktop-filter">
           <PalworldPalsDesktopFilterPanel
@@ -162,54 +211,6 @@ export function PalworldPalsPage({
         </aside>
 
         <div className="palworld-catalog-results">
-          <div className="palworld-catalog-mobile-toolbar">
-            <Button
-              aria-expanded={filterOpen}
-              aria-haspopup="dialog"
-              className="palworld-pal-mobile-filter-trigger palworld-pals-mobile-filter-trigger"
-              data-testid="pal-filter-trigger"
-              onClick={() => setFilterOpen(true)}
-              ref={filterTriggerRef}
-              type="button"
-              variant="secondary"
-            >
-              {text.filterCount.replace("{count}", String(detailFilterCount))}
-            </Button>
-          </div>
-
-          <Modal
-            className="palworld-pals-filter-modal"
-            onClose={() => setFilterOpen(false)}
-            open={filterOpen}
-            returnFocusRef={filterTriggerRef}
-            size="lg"
-          >
-            <ModalHeader>
-              <div>
-                <ModalTitle>{text.detailedFilters}</ModalTitle>
-                <ModalDescription>{text.detailedFiltersDescription}</ModalDescription>
-              </div>
-              <ModalCloseButton aria-label={text.closeFilters}>×</ModalCloseButton>
-            </ModalHeader>
-            <ModalContent>
-              <PalworldPalsFilterControls facets={facets} locale={locale} onUpdate={update} params={params} />
-            </ModalContent>
-            <ModalFooter>
-              <Button disabled={!hasFilters} onClick={clearFilters} type="button" variant="ghost">{text.clearFilters}</Button>
-              <Button onClick={() => setFilterOpen(false)} type="button">{text.close}</Button>
-            </ModalFooter>
-          </Modal>
-
-          <PalworldPalsAppliedFilters locale={locale} onRemove={removeFilter} params={params} />
-
-          <PalworldPalsResultToolbar
-            loadedCount={response?.items.length ?? 0}
-            loading={loading}
-            locale={locale}
-            onUpdate={update}
-            pagination={response?.pagination}
-            params={params}
-          />
 
           <div aria-busy={loading || loadMoreLoading} className="palworld-pals-results" data-testid="palworld-pals-results">
         {loading && !error ? <PalworldLoading locale={locale} /> : null}
