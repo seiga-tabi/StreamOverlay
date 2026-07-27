@@ -1799,6 +1799,8 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   );
   assert.doesNotMatch(korean, /현재 화면의 위치/u);
   assert.doesNotMatch(korean, /현재 게시 릴리스에서 검증된/u);
+  assert.doesNotMatch(korean, /현재 릴리스에서 검증된 필드 보스 위치/u);
+  assert.doesNotMatch(korean, /Pal을 선택하면 사용할 수 있습니다/u);
   assert.doesNotMatch(korean, /휠·핀치/u);
   assert.doesNotMatch(korean, /게임 월드에서 검증된 위치를 표시합니다/u);
   assert.match(japanese, /Palworld ワールドマップ/u);
@@ -1815,6 +1817,8 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
     /検証済みのフィールドボス、野生スポーン、移動・収集地点が表示されたPalworldワールドマップ/u
   );
   assert.doesNotMatch(japanese, /現在公開中のリリースで検証済み/u);
+  assert.doesNotMatch(japanese, /現在のリリースで検証済みのフィールドボス位置/u);
+  assert.doesNotMatch(japanese, /パルを選択すると利用できます/u);
   assert.doesNotMatch(japanese, /ホイール・ピンチ/u);
   assert.doesNotMatch(japanese, /ゲームワールドで検証済みの位置を表示します/u);
 

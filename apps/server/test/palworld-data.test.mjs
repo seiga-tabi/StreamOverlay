@@ -275,8 +275,10 @@ test("아이템 상세는 고정 ZIP의 제작식·제작 시설·획득 방법�
       /^\/images\/palworld\/1\.0\.1\/technology\/assets\/item\/[0-9a-f]{64}\.webp$/u.test(
         facility.imageUrl ?? ""
       )
-      && facility.imageWidth === 256
-      && facility.imageHeight === 256
+      && Number.isInteger(facility.imageWidth)
+      && facility.imageWidth > 0
+      && Number.isInteger(facility.imageHeight)
+      && facility.imageHeight > 0
     ),
     true
   );

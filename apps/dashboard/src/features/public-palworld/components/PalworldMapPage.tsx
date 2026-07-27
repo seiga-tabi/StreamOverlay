@@ -1388,10 +1388,6 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
       layers: [{
         id: "boss",
         label: mapLabel(palworldI18n.ko.mapBossMarkers, palworldI18n.ja.mapBossMarkers),
-        description: mapLabel(
-          palworldI18n.ko.mapBossLayerDescription,
-          palworldI18n.ja.mapBossLayerDescription,
-        ),
         statusLabel: layerStatusLabel(markerState),
         count: markerResponse?.markers.length,
         iconAsset: PALWORLD_MAP_LAYER_ICONS.boss,
@@ -1401,14 +1397,12 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
       }, {
         id: "spawn",
         label: mapLabel(palworldI18n.ko.palWildSpawnAreas, palworldI18n.ja.palWildSpawnAreas),
-        description: mapLabel(
-          activeFocusPalId
-            ? palworldI18n.ko.mapSpawnLayerDescription
-            : palworldI18n.ko.mapSpawnSelectPal,
-          activeFocusPalId
-            ? palworldI18n.ja.mapSpawnLayerDescription
-            : palworldI18n.ja.mapSpawnSelectPal,
-        ),
+        description: activeFocusPalId
+          ? mapLabel(
+              palworldI18n.ko.mapSpawnLayerDescription,
+              palworldI18n.ja.mapSpawnLayerDescription,
+            )
+          : undefined,
         statusLabel: layerStatusLabel(spawnDisplayState),
         count: spawnResponse?.points.length,
         iconAsset: focusedSpawnIcon,
