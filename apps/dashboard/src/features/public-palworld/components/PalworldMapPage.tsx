@@ -1342,16 +1342,11 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
           }
         : PALWORLD_MAP_LAYER_ICONS.spawn;
     const importedLocationState = layerDisplayState(locationState);
-    const importedLocationDescription = mapLabel(
-      palworldI18n.ko.mapImportedLocationDescription,
-      palworldI18n.ja.mapImportedLocationDescription,
-    );
     const locationLayer = (
       id: PalworldMapLocationCategory,
     ): PalworldMapLayerGroup["layers"][number] => ({
       id,
       label: PALWORLD_MAP_LOCATION_LABELS[id],
-      description: importedLocationDescription,
       statusLabel: layerStatusLabel(importedLocationState),
       count: importedLocationState === "ready" ? locationCounts.get(id) : undefined,
       iconAsset: PALWORLD_MAP_LAYER_ICONS[id],
@@ -1366,7 +1361,6 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
       return {
         id,
         label: PALWORLD_MAP_COLLECTIBLE_TYPE_LABELS[id],
-        description: importedLocationDescription,
         statusLabel: layerStatusLabel(importedLocationState),
         count: importedLocationState === "ready"
           ? collectibleTypeCounts.get(id)
@@ -2122,6 +2116,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
                 <div className="palworld-map-controls" aria-label={text.mapZoomLevel} data-map-interactive="true">
                   <Button
                     aria-label={text.mapZoomOut}
+                    className="palworld-map-control is-zoom-out"
                     disabled={view.zoom <= PALWORLD_MAP_MIN_ZOOM + PALWORLD_MAP_ZOOM_EPSILON}
                     onClick={() => zoomAt(viewRef.current.zoom - PALWORLD_MAP_ZOOM_STEP)}
                     size="sm"
@@ -2129,9 +2124,16 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
                   >
                     −
                   </Button>
-                  <output aria-live="polite" aria-label={`${text.mapZoomLevel} ${zoomPercent}%`}>{zoomPercent}%</output>
+                  <output
+                    aria-live="polite"
+                    aria-label={`${text.mapZoomLevel} ${zoomPercent}%`}
+                    className="palworld-map-zoom-output"
+                  >
+                    {zoomPercent}%
+                  </output>
                   <Button
                     aria-label={text.mapZoomIn}
+                    className="palworld-map-control is-zoom-in"
                     disabled={view.zoom >= PALWORLD_MAP_MAX_ZOOM - PALWORLD_MAP_ZOOM_EPSILON}
                     onClick={() => zoomAt(viewRef.current.zoom + PALWORLD_MAP_ZOOM_STEP)}
                     size="sm"
@@ -2140,6 +2142,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
                     +
                   </Button>
                   <Button
+                    className="palworld-map-control is-zoom-reset"
                     disabled={view.zoom <= PALWORLD_MAP_MIN_ZOOM + PALWORLD_MAP_ZOOM_EPSILON && view.x === 0 && view.y === 0}
                     onClick={() => {
                       resetView();

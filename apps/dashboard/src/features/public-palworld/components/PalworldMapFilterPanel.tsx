@@ -92,12 +92,10 @@ function LayerStatus({
   layer: PalworldMapLayerOption;
   locale: PalworldLocale;
 }) {
-  if (!layer.statusLabel) return null;
+  if (!layer.statusLabel || layer.state === "ready") return null;
   const tone = layer.state === "error"
     ? "warning"
-    : layer.state === "ready"
-      ? "info"
-      : "neutral";
+    : "neutral";
   return (
     <Badge
       data-ja={layer.statusLabel.ja}
@@ -122,6 +120,7 @@ function LayerRow({
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
 }) {
   const ready = isPalworldMapLayerReady(layer);
+  const label = resolvePalworldMapLabel(layer.label, locale);
   const description = layer.description
     ? resolvePalworldMapLabel(layer.description, locale)
     : undefined;
@@ -144,8 +143,8 @@ function LayerRow({
           fallbackSymbol={layer.iconFallback}
         />
         <span className="palworld-map-filter-layer-copy">
-          <strong data-ja={layer.label.ja} data-ko={layer.label.ko}>
-            {resolvePalworldMapLabel(layer.label, locale)}
+          <strong data-ja={layer.label.ja} data-ko={layer.label.ko} title={label}>
+            {label}
           </strong>
           {layer.description ? (
             <small data-ja={layer.description.ja} data-ko={layer.description.ko}>
@@ -155,7 +154,7 @@ function LayerRow({
         </span>
         {validCount ? (
           <span
-            aria-label={`${resolvePalworldMapLabel(layer.label, locale)} ${layer.count}`}
+            aria-label={`${label} ${layer.count}`}
             className="palworld-map-filter-layer-count"
           >
             {layer.count}

@@ -378,21 +378,6 @@ export function PalworldBreedingPage({
     navigate({ ...query, ...genders });
   }
 
-  function usePairInCalculator(pair: PalworldBreedingPair): void {
-    const genders = breedingPairGendersForParents(pair, pair.parentA.id, pair.parentB.id);
-    setParentA(pair.parentA);
-    setParentB(pair.parentB);
-    setTarget(null);
-    setGenderExpanded(Boolean(genders));
-    navigate({
-      mode: "parents",
-      parentA: pair.parentA.id,
-      parentB: pair.parentB.id,
-      ...genders,
-      page: 1,
-    });
-  }
-
   async function loadMoreReversePairs(): Promise<void> {
     const current = reverse.data;
     if (
@@ -566,15 +551,17 @@ export function PalworldBreedingPage({
         <section className="palworld-breeding-result" data-testid="breeding-result" aria-busy={directLoading || partnerInitialLoading}>
           <BreedingRequestStatus message={directAnnouncement} />
           <BreedingRequestStatus message={partnerAnnouncement} />
-          <div className="palworld-section-title"><h2>{text.breedingResult}</h2></div>
+          <h2 className="yoro-u-sr-only">{text.breedingResult}</h2>
           {!query.parentA && !query.parentB ? <PalworldEmpty description={text.autoCalculateHint} includeDefaultDescription={false} locale={locale} title={text.selectAtLeastOneParent} /> : null}
           {singleParentId ? <section className="palworld-breeding-result" data-testid="breeding-partner-results">
-            <div className="palworld-section-title">
-              <div>
-                <h3 id="palworld-breeding-partner-list-title" data-ko={palworldI18n.ko.partnerPairSuggestions} data-ja={palworldI18n.ja.partnerPairSuggestions}>{text.partnerPairSuggestions}</h3>
-                <p data-ko={palworldI18n.ko.partnerPairSuggestionsDescription} data-ja={palworldI18n.ja.partnerPairSuggestionsDescription}>{text.partnerPairSuggestionsDescription}</p>
-              </div>
-            </div>
+            <h3
+              className="yoro-u-sr-only"
+              data-ko={palworldI18n.ko.partnerPairSuggestions}
+              data-ja={palworldI18n.ja.partnerPairSuggestions}
+              id="palworld-breeding-partner-list-title"
+            >
+              {text.partnerPairSuggestions}
+            </h3>
             {partnerInitialLoading ? <BreedingCombinationListSkeleton locale={locale} variant="partner-results" /> : null}
             {partnerInitialError ? <PalworldError error={partnerInitialError} locale={locale} onRetry={retryPartners} /> : null}
             {currentPartnerResponse?.state === "data_unavailable" ? <PalworldError
@@ -601,7 +588,6 @@ export function PalworldBreedingPage({
                   loading={partnerLoadMoreLoading}
                   locale={locale}
                   onOpenPal={onOpenPal}
-                  onUsePair={usePairInCalculator}
                   pairs={currentPartnerResponse.items}
                   selectedParentId={singleParentId}
                   total={currentPartnerResponse.pagination.total}
@@ -690,7 +676,6 @@ export function PalworldBreedingPage({
                 loading={reverseLoadMoreLoading}
                 locale={locale}
                 onOpenPal={onOpenPal}
-                onUsePair={usePairInCalculator}
                 pairs={reverse.data.items}
                 total={reverse.data.pagination.total}
                 variant="reverse-results"

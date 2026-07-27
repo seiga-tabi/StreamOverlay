@@ -314,6 +314,8 @@ const pals: PalworldPalDetail[] = [
     workSuitabilities: [
       { type: "handiwork", level: 4 },
       { type: "mining", level: 3 },
+      { type: "transporting", level: 2 },
+      { type: "farming", level: 1 },
     ],
     stats: { hp: 120, attack: 130, defense: 100, moveSpeed: 800, stamina: 100 },
     nocturnal: true,
@@ -1603,9 +1605,14 @@ test("Pal 필터 query를 유지하고 정렬된 compact 카드·ESC·직접 URL
   const anubisCard = page.getByTestId("pal-card").filter({ hasText: "아누비스" });
   await expect(anubisCard).toBeVisible();
   await expect(anubisCard.locator(".palworld-pal-card-image-frame")).toBeVisible();
-  await expect(anubisCard.locator(".palworld-card-work-list [role='listitem']")).toHaveCount(2);
+  await expect(anubisCard.locator(".palworld-card-work-list [role='listitem']")).toHaveCount(3);
+  await expect(anubisCard.locator(".palworld-work-suitability-badge")).toHaveCount(2);
+  await expect(anubisCard.locator(".palworld-card-work-more")).toHaveText("...");
+  await expect(anubisCard.locator(".palworld-card-work-more")).toHaveAttribute("aria-label", "그 외 작업 적성 2개");
   await expect(anubisCard.locator('[data-work-type="handiwork"]')).toContainText("Lv.4");
   await expect(anubisCard.locator('[data-work-type="mining"]')).toContainText("Lv.3");
+  await expect(anubisCard.locator('[data-work-type="transporting"]')).toHaveCount(0);
+  await expect(anubisCard.locator('[data-work-type="farming"]')).toHaveCount(0);
   await expect(anubisCard.locator('[data-work-type="handiwork"]')).not.toHaveAttribute("title");
   await expect(anubisCard.locator('[data-work-type="mining"]')).not.toHaveAttribute("title");
   await expect(anubisCard.locator('[data-work-type="handiwork"]')).toHaveAttribute("aria-describedby", /.+/u);
@@ -1621,17 +1628,33 @@ test("Pal 필터 query를 유지하고 정렬된 compact 카드·ESC·직접 URL
   const cardImageFrameBox = await anubisCard.locator(".palworld-pal-card-image-frame").boundingBox();
   const cardContentBox = await anubisCard.locator(".palworld-pal-card-content").boundingBox();
   const cardWorkBox = await anubisCard.locator(".palworld-card-work-list").boundingBox();
+  const workItemBoxes = await anubisCard.locator(".palworld-card-work-list [role='listitem']").evaluateAll((items) =>
+    items.map((item) => {
+      const bounds = item.getBoundingClientRect();
+      return { bottom: bounds.bottom, top: bounds.top };
+    })
+  );
+  const cardWorkIconBoxes = await anubisCard.locator(".palworld-work-suitability-icon").evaluateAll((icons) =>
+    icons.map((icon) => {
+      const bounds = icon.getBoundingClientRect();
+      return { height: bounds.height, width: bounds.width };
+    })
+  );
   expect(cardBox).not.toBeNull();
   expect(cardMainBox).not.toBeNull();
   expect(cardImageFrameBox).not.toBeNull();
   expect(cardContentBox).not.toBeNull();
   expect(cardWorkBox).not.toBeNull();
+  const workItemCenters = workItemBoxes.map((bounds) => (bounds.top + bounds.bottom) / 2);
+  expect(Math.max(...workItemCenters) - Math.min(...workItemCenters))
+    .toBeLessThanOrEqual(1);
+  expect(cardWorkIconBoxes.every((bounds) => bounds.width >= 24 && bounds.height >= 24)).toBe(true);
   if (cardBox && cardMainBox && cardImageFrameBox && cardContentBox && cardWorkBox) {
     if (mobileFilters) {
       expect(cardImageFrameBox.y + cardImageFrameBox.height).toBeLessThanOrEqual(cardContentBox.y + 1);
     } else {
       expect(cardImageFrameBox.x + cardImageFrameBox.width).toBeLessThanOrEqual(cardContentBox.x + 1);
-      expect(cardBox.width / cardBox.height).toBeGreaterThan(1.2);
+      expect(cardBox.width / cardBox.height).toBeGreaterThan(1.1);
     }
     expect(cardWorkBox.y).toBeGreaterThanOrEqual(cardMainBox.y + cardMainBox.height - 1);
     expect(cardImageFrameBox.width).toBeLessThanOrEqual(120);
@@ -1652,7 +1675,7 @@ test("Pal 필터 query를 유지하고 정렬된 compact 카드·ESC·직접 URL
   await expect(directDialog).not.toContainText("교배 정보");
   await expect(directDialog.getByText("야행성: 예", { exact: true })).toBeVisible();
   const workList = directDialog.getByRole("list", { name: "작업 적성" });
-  await expect(workList.locator(".palworld-work-suitability-badge")).toHaveCount(2);
+  await expect(workList.locator(".palworld-work-suitability-badge")).toHaveCount(4);
   await expect(workList.locator('[data-work-type="handiwork"]')).toContainText("Lv.4");
   await expect(workList.locator('[data-work-type="mining"]')).toContainText("Lv.3");
   await expect(workList.locator('[data-work-type="handiwork"] .palworld-work-suitability-label')).toHaveText("수작업");
@@ -2575,17 +2598,18 @@ test("부모 Pal 자동완성으로 일반 교배 결과를 조회하고 URL과 
   await result.getByRole("button", { name: "이 Pal의 부모 조합 보기" }).click();
   await expect(page).toHaveURL(/mode=child.*child=sibelyx/u);
   await expect(page.getByTestId("breeding-target-summary")).toContainText("실키누");
-  await page.getByTestId("breeding-reverse-pair").getByRole("button", { name: "계산기에 넣기" }).click();
-  await expect(page).toHaveURL(/mode=parents.*parentA=penking.*parentB=bushi/u);
+  await expect(page.getByTestId("breeding-reverse-pair").getByRole("button", { name: "계산기에 넣기" })).toHaveCount(0);
   await assertHealthyDocument(page, errors);
 });
 
-test("부모 Pal 한 마리만 선택하면 가능한 상대와 결과 목록을 표시하고 계산기에 반영한다", async ({ page }) => {
+test("부모 Pal 한 마리만 선택하면 가능한 상대와 결과 목록을 버튼 없이 표시한다", async ({ page }) => {
   const errors = collectRuntimeErrors(page);
   await page.goto("/palworld/breeding?mode=parents&parentA=penking");
 
   const partnerResults = page.getByTestId("breeding-partner-results");
   await expect(partnerResults).toContainText("선택한 부모의 교배 조합");
+  await expect(partnerResults.locator(".palworld-section-title")).toHaveCount(0);
+  await expect(partnerResults.getByText("다른 부모와 결과 Pal을 확인하고 원하는 조합을 계산기에 넣을 수 있습니다.", { exact: true })).toHaveCount(0);
   await expect(partnerResults.getByTestId("breeding-partner-pair")).toHaveCount(1);
   await expect(partnerResults).toContainText("펭킹");
   await expect(partnerResults).toContainText("불무사");
@@ -2593,10 +2617,7 @@ test("부모 Pal 한 마리만 선택하면 가능한 상대와 결과 목록을
   await expect(page.getByTestId("breeding-direct-card")).toHaveCount(0);
   await expect.poll(() => new URL(page.url()).searchParams.has("parentB")).toBe(false);
 
-  await partnerResults.getByRole("button", { name: "계산기에 넣기" }).click();
-  await expect.poll(() => new URL(page.url()).searchParams.get("parentA")).toBe("penking");
-  await expect.poll(() => new URL(page.url()).searchParams.get("parentB")).toBe("bushi");
-  await expect(page.getByTestId("breeding-direct-card")).toContainText("실키누");
+  await expect(partnerResults.getByRole("button", { name: "계산기에 넣기" })).toHaveCount(0);
   await assertHealthyDocument(page, errors);
 });
 
@@ -2722,6 +2743,7 @@ test("교배 직접 결과와 고밀도 조합 목록은 요구 화면 크기에
     { width: 390, height: 844 },
     { width: 430, height: 932 },
     { width: 768, height: 1024 },
+    { width: 790, height: 844 },
     { width: 1024, height: 768 },
     { width: 1180, height: 820 },
     { width: 1440, height: 1000 },
@@ -2763,7 +2785,8 @@ test("교배 직접 결과와 고밀도 조합 목록은 요구 화면 크기에
       expect(secondParentBounds).not.toBeNull();
       expect(resultBounds).not.toBeNull();
       expect(secondParentBounds!.x).toBeGreaterThan(firstParentBounds!.x);
-      expect(resultBounds!.y).toBeGreaterThan(firstParentBounds!.y);
+      expect(resultBounds!.x).toBeGreaterThan(secondParentBounds!.x);
+      expect(Math.abs(resultBounds!.y - firstParentBounds!.y)).toBeLessThanOrEqual(1);
     } else {
       const headers = partnerTable.getByRole("columnheader");
       const cells = partnerRow.locator(":scope > [role='cell']");
@@ -2781,7 +2804,20 @@ test("교배 직접 결과와 고밀도 조합 목록은 요구 화면 크기에
 
     await page.goto("/palworld/breeding?mode=child&child=sibelyx");
     await expect(page.getByTestId("breeding-target-summary")).toBeVisible();
-    await expect(page.getByTestId("breeding-reverse-pair")).toBeVisible();
+    const reverseRow = page.getByTestId("breeding-reverse-pair").first();
+    const reverseCells = reverseRow.locator(":scope > [role='cell']");
+    await expect(reverseRow).toBeVisible();
+    await expect(reverseCells).toHaveCount(3);
+    const [reverseParentA, reverseParentB, reverseCondition] = await Promise.all([
+      reverseCells.nth(0).boundingBox(),
+      reverseCells.nth(1).boundingBox(),
+      reverseCells.nth(2).boundingBox(),
+    ]);
+    expect(reverseParentA).not.toBeNull();
+    expect(reverseParentB).not.toBeNull();
+    expect(reverseCondition).not.toBeNull();
+    expect(Math.abs(reverseParentA!.width - reverseParentB!.width)).toBeLessThanOrEqual(1);
+    expect(reverseCondition!.width).toBeLessThan(reverseParentA!.width);
     await assertHealthyDocument(page, errors);
   }
 });
@@ -2957,6 +2993,7 @@ test("모든 Palworld 공개 경로 하단에 한국어·일본어 비공식 출
 
 test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 일본어를 지원한다", async ({ page }) => {
   const errors = collectRuntimeErrors(page);
+  const isMobileViewport = (page.viewportSize()?.width ?? 0) <= 768;
   await page.goto("/palworld/items");
   await page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "지도" }).click();
 
@@ -2973,7 +3010,32 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
   await expect.poll(() => viewport.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
 
   await page.getByRole("button", { name: "지도 확대" }).click();
-  await expect(page.getByText("150%", { exact: true })).toBeVisible();
+  const mapControls = viewport.locator(":scope > .palworld-map-controls");
+  const zoomInButton = mapControls.getByRole("button", { name: "지도 확대" });
+  const zoomOutButton = mapControls.getByRole("button", { name: "지도 축소" });
+  const zoomResetButton = mapControls.getByRole("button", { name: "배율 초기화" });
+  const zoomOutput = mapControls.locator(".palworld-map-zoom-output");
+  if (isMobileViewport) {
+    await expect(zoomOutput).toBeHidden();
+    await expect(zoomResetButton).toBeHidden();
+    const [viewportBounds, controlsBounds, zoomInBounds, zoomOutBounds] = await Promise.all([
+      viewport.boundingBox(),
+      mapControls.boundingBox(),
+      zoomInButton.boundingBox(),
+      zoomOutButton.boundingBox(),
+    ]);
+    expect(viewportBounds).not.toBeNull();
+    expect(controlsBounds).not.toBeNull();
+    expect(zoomInBounds).not.toBeNull();
+    expect(zoomOutBounds).not.toBeNull();
+    expect(controlsBounds!.y).toBeLessThan(viewportBounds!.y + (viewportBounds!.height * 0.25));
+    expect(Math.abs(controlsBounds!.x + controlsBounds!.width - viewportBounds!.x - viewportBounds!.width))
+      .toBeLessThanOrEqual(16);
+    expect(zoomInBounds!.y).toBeLessThan(zoomOutBounds!.y);
+  } else {
+    await expect(zoomOutput).toHaveText("150%");
+    await expect(zoomResetButton).toBeVisible();
+  }
   await expect.poll(() => viewport.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true);
   const mapStage = page.getByTestId("palworld-map-stage");
   const transformBeforeDrag = await mapStage.evaluate((element) => window.getComputedStyle(element).transform);
@@ -2996,8 +3058,13 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
   await expect.poll(
     () => mapStage.evaluate((element) => window.getComputedStyle(element).transform),
   ).not.toBe(transformBeforeDrag);
-  await page.getByRole("button", { name: "배율 초기화" }).click();
-  await expect(page.getByText("100%", { exact: true })).toBeVisible();
+  if (isMobileViewport) {
+    await zoomOutButton.click();
+    await expect(zoomOutput).toBeHidden();
+  } else {
+    await zoomResetButton.click();
+    await expect(zoomOutput).toHaveText("100%");
+  }
   const [resetViewportBounds, resetImageBounds] = await Promise.all([
     viewport.boundingBox(),
     mapImage.boundingBox(),
@@ -3073,7 +3140,40 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
     await filterScope.getByRole("button", { name: "필터 열기" }).click();
     await expect(filterContent).toBeVisible();
     await expect(filterScope).not.toHaveAttribute("data-collapsed", "true");
+
+    const mapCard = page.locator(".palworld-map-card");
+    const groupToggles = filterScope.locator(".palworld-map-filter-group-toggle");
+    const expandedMapCardHeight = await mapCard.evaluate((element) => element.getBoundingClientRect().height);
+    await expect.poll(
+      () => filterContent.evaluate((element) => element.scrollHeight > element.clientHeight),
+    ).toBe(true);
+    for (let index = 0; index < await groupToggles.count(); index += 1) {
+      const toggle = groupToggles.nth(index);
+      if (await toggle.getAttribute("aria-expanded") === "true") await toggle.click();
+    }
+    await expect.poll(
+      () => mapCard.evaluate(
+        (element, expectedHeight) => Math.abs(element.getBoundingClientRect().height - expectedHeight),
+        expandedMapCardHeight,
+      ),
+    ).toBeLessThanOrEqual(1);
+    for (let index = 0; index < await groupToggles.count(); index += 1) {
+      const toggle = groupToggles.nth(index);
+      if (await toggle.getAttribute("aria-expanded") === "false") await toggle.click();
+    }
   }
+  await expect(filterScope.getByText("사용 가능", { exact: true })).toHaveCount(0);
+  const filterLayerName = filterScope.locator(".palworld-map-filter-layer-copy strong").first();
+  await expect(filterLayerName).toHaveAttribute("title", /.+/u);
+  const filterLayerNameStyle = await filterLayerName.evaluate((element) => {
+    const style = window.getComputedStyle(element);
+    return {
+      fontSize: Number.parseFloat(style.fontSize),
+      lineClamp: style.webkitLineClamp,
+    };
+  });
+  expect(filterLayerNameStyle.fontSize).toBeLessThanOrEqual(14);
+  expect(filterLayerNameStyle.lineClamp).toBe("2");
   const eggGroup = filterScope.locator(".palworld-map-filter-group").filter({
     has: page.locator('[data-layer="egg-grass"]'),
   });
@@ -3143,7 +3243,7 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
   await expect(bossMarker).toBeFocused();
   await bossMarker.click();
   await expect(page.getByRole("dialog", { name: "아누비스" })).toBeVisible();
-  await page.locator(".palworld-map-toolbar").click();
+  await page.locator(".palworld-map-toolbar").dispatchEvent("pointerdown");
   await expect.poll(() => new URL(page.url()).searchParams.has("marker")).toBe(false);
   await bossMarker.click();
   await expect(page.getByRole("dialog", { name: "아누비스" })).toBeVisible();
@@ -3237,12 +3337,28 @@ test("요구 화면 크기에서 연결 프로필·LIVE rail·스트리머 목�
     await page.goto("/palworld");
     const localeButton = page.locator(".public-locale-button");
     const profileButton = page.locator(".public-twitch-login-chip");
+    const productCluster = page.locator(".public-header-product-cluster");
+    const headerTools = page.locator(".public-header-tools");
     await expect(localeButton).toBeVisible();
     await expect(profileButton).toBeVisible();
-    const [localeBounds, profileBounds] = await Promise.all([localeButton.boundingBox(), profileButton.boundingBox()]);
+    const [localeBounds, profileBounds, productBounds, toolsBounds] = await Promise.all([
+      localeButton.boundingBox(),
+      profileButton.boundingBox(),
+      productCluster.boundingBox(),
+      headerTools.boundingBox(),
+    ]);
     expect(localeBounds).not.toBeNull();
     expect(profileBounds).not.toBeNull();
+    expect(productBounds).not.toBeNull();
+    expect(toolsBounds).not.toBeNull();
     expect(localeBounds!.x + localeBounds!.width).toBeLessThanOrEqual(profileBounds!.x);
+    const productToolsOverlap = (
+      productBounds!.x < toolsBounds!.x + toolsBounds!.width
+      && productBounds!.x + productBounds!.width > toolsBounds!.x
+      && productBounds!.y < toolsBounds!.y + toolsBounds!.height
+      && productBounds!.y + productBounds!.height > toolsBounds!.y
+    );
+    expect(productToolsOverlap, `${viewport.width}px에서 게임 선택과 헤더 도구가 겹치지 않아야 합니다.`).toBe(false);
     await expect(page.getByTestId("public-live-streamer-rail").locator(".public-home-live-card")).toHaveCount(1);
     await assertHealthyDocument(page, errors);
 

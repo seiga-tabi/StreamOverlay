@@ -1081,13 +1081,12 @@ test("교배 UI는 결과 Pal을 강조하고 역검색 카드에서 목표 Pal 
   };
   const tabs = renderToStaticMarkup(<BreedingModeTabs locale="ja" mode="child" onMode={() => undefined} />);
   const direct = renderToStaticMarkup(<DirectBreedingResult locale="ko" onCopy={() => undefined} onOpenPal={() => undefined} onViewParents={() => undefined} pair={pair} />);
-  const reverse = renderToStaticMarkup(<ReverseBreedingPairCard locale="ko" onOpenPal={() => undefined} onUsePair={() => undefined} pair={pair} />);
-  const partner = renderToStaticMarkup(<BreedingPartnerPairCard locale="ko" onOpenPal={() => undefined} onUsePair={() => undefined} pair={pair} selectedParentId="penking" />);
+  const reverse = renderToStaticMarkup(<ReverseBreedingPairCard locale="ko" onOpenPal={() => undefined} pair={pair} />);
+  const partner = renderToStaticMarkup(<BreedingPartnerPairCard locale="ko" onOpenPal={() => undefined} pair={pair} selectedParentId="penking" />);
   const partnerList = renderToStaticMarkup(<BreedingCombinationList
     labelledBy="partner-list-title"
     locale="ko"
     onOpenPal={() => undefined}
-    onUsePair={() => undefined}
     pairs={[pair]}
     selectedParentId="penking"
     total={287}
@@ -1097,7 +1096,6 @@ test("교배 UI는 결과 Pal을 강조하고 역검색 카드에서 목표 Pal 
     labelledBy="reverse-list-title"
     locale="ja"
     onOpenPal={() => undefined}
-    onUsePair={() => undefined}
     pairs={[pair]}
     total={1}
     variant="reverse-results"
@@ -1132,16 +1130,16 @@ test("교배 UI는 결과 Pal을 강조하고 역검색 카드에서 목표 Pal 
   assert.match(reverse, /펭킹/u);
   assert.match(reverse, /불무사/u);
   assert.doesNotMatch(reverse, /실키누/u);
-  assert.match(reverse, /계산기에 넣기/u);
+  assert.doesNotMatch(reverse, /계산기에 넣기/u);
   assert.match(partner, /data-testid="breeding-partner-pair"/u);
   assert.match(partner, /펭킹[\s\S]*불무사[\s\S]*실키누/u);
-  assert.match(partner, /계산기에 넣기/u);
+  assert.doesNotMatch(partner, /계산기에 넣기/u);
   assert.match(partnerList, /role="table"/u);
   assert.match(partnerList, /aria-rowcount="288"/u);
   assert.match(partnerList, /가능한 조합 287개/u);
   assert.match(partnerList, /현재 1\/287개 표시/u);
   assert.match(partnerList, /선택한 부모[\s\S]*상대 부모[\s\S]*결과 Pal/u);
-  assert.match(reverseList, /親パル1[\s\S]*親パル2[\s\S]*条件・操作/u);
+  assert.match(reverseList, /親パル1[\s\S]*親パル2[\s\S]*配合条件/u);
   assert.doesNotMatch(reverseList, /シルキーヌ/u);
   assert.match(target, /data-testid="breeding-target-summary"/u);
   assert.match(target, /실키누/u);
@@ -1154,6 +1152,15 @@ test("교배 UI는 결과 Pal을 강조하고 역검색 카드에서 목표 Pal 
   assert.match(breedingPageSource, /data-testid="breeding-partner-scroll"[\s\S]*<PalworldAutoLoadControl/u);
   assert.match(breedingPageSource, /data-testid="breeding-reverse-scroll"[\s\S]*<PalworldAutoLoadControl/u);
   assert.match(
+    breedingPageSource,
+    /className="yoro-u-sr-only"[\s\S]*?id="palworld-breeding-partner-list-title"/u,
+  );
+  assert.doesNotMatch(breedingPageSource, /text\.partnerPairSuggestionsDescription/u);
+  assert.doesNotMatch(
+    breedingPageSource,
+    /className="palworld-section-title"><h2>\{text\.breedingResult\}/u,
+  );
+  assert.match(
     breedingCss,
     /\.palworld-breeding-combination-scroll\s*\{[\s\S]*?block-size:\s*clamp\([^;]+;[\s\S]*?overflow-y:\s*auto;/u,
   );
@@ -1164,6 +1171,10 @@ test("교배 UI는 결과 Pal을 강조하고 역검색 카드에서 목표 Pal 
   assert.match(
     breedingCss,
     /\.palworld-breeding-combination-copy > strong\s*\{[\s\S]*?color:\s*var\(--yoro-color-text-strong\);/u,
+  );
+  assert.match(
+    breedingCss,
+    /\.palworld-breeding-combination-scroll \.palworld-breeding-combination-header\s*\{[\s\S]*?position:\s*sticky;[\s\S]*?inset-block-start:\s*0;[\s\S]*?border-block-end:\s*thin solid var\(--yoro-color-border-strong\);/u,
   );
   assert.equal(palworldI18n.ko.partnerPairSuggestions, "선택한 부모의 교배 조합");
   assert.equal(palworldI18n.ja.partnerPairSuggestions, "選択した親パルの配合組み合わせ");
@@ -1421,31 +1432,52 @@ test("Pal 카드는 왼쪽 이미지·오른쪽 정보·하단 작업 적성 구
       { type: "handiwork" as const, level: 1 },
       { type: "transporting" as const, level: 2 },
       { type: "farming" as const, level: 1 },
+      { type: "mining" as const, level: 3 },
     ]
   };
   const korean = renderToStaticMarkup(<PalCard locale="ko" pal={pal} onOpen={() => undefined} />);
   const japanese = renderToStaticMarkup(<PalCard locale="ja" pal={pal} onOpen={() => undefined} />);
+  const twoWorkKorean = renderToStaticMarkup(
+    <PalCard
+      locale="ko"
+      onOpen={() => undefined}
+      pal={{ ...pal, workSuitabilities: pal.workSuitabilities.slice(0, 2) }}
+    />,
+  );
+  const cardCss = readFileSync(
+    new URL("../src/styles/pages/public-palworld/14-palworld.css", import.meta.url),
+    "utf8",
+  );
   assert.match(korean, /class="yoro-card palworld-entity-card palworld-pal-card"/u);
   assert.match(korean, /class="palworld-pal-card-main"[\s\S]*class="palworld-pal-card-media"[\s\S]*class="palworld-pal-card-image-frame"[\s\S]*class="yoro-card__content palworld-pal-card-content"/u);
   assert.match(korean, new RegExp(`src="${imageUrl.replaceAll("/", "\\/")}" alt="도로롱"`));
-  assert.match(korean, /class="palworld-card-work-list"[\s\S]*role="list"/u);
+  assert.match(korean, /class="palworld-card-work-list has-overflow"[\s\S]*role="list"/u);
+  assert.match(twoWorkKorean, /class="palworld-card-work-list"[\s\S]*role="list"/u);
+  assert.doesNotMatch(cardCss, /\.palworld-card-work-list\.has-many/u);
+  assert.match(
+    cardCss,
+    /\.palworld-card-work-list\s*\{[\s\S]*?flex-wrap:\s*nowrap;[\s\S]*?\}/u,
+  );
   assert.ok(korean.indexOf("palworld-pal-card-main") < korean.indexOf("palworld-card-work-list"));
   assert.equal((korean.match(/role="listitem"/gu) ?? []).length, 3);
-  assert.equal((korean.match(/palworld-work-suitability-badge is-compact/gu) ?? []).length, 3);
-  assert.equal((korean.match(/palworld-work-suitability-icon is-source-image/gu) ?? []).length, 3);
-  assert.equal((korean.match(/palworld-work-suitability-label yoro-u-sr-only/gu) ?? []).length, 3);
+  assert.equal((korean.match(/palworld-work-suitability-badge is-compact/gu) ?? []).length, 2);
+  assert.equal((korean.match(/palworld-work-suitability-icon is-source-image/gu) ?? []).length, 2);
+  assert.equal((korean.match(/palworld-work-suitability-label yoro-u-sr-only/gu) ?? []).length, 2);
   assert.match(korean, new RegExp(`src="${workSuitabilityIconUrl("handiwork")?.replaceAll("/", "\\/")}"`));
   assert.match(korean, new RegExp(`src="${workSuitabilityIconUrl("transporting")?.replaceAll("/", "\\/")}"`));
-  assert.match(korean, new RegExp(`src="${workSuitabilityIconUrl("farming")?.replaceAll("/", "\\/")}"`));
+  assert.doesNotMatch(korean, new RegExp(`src="${workSuitabilityIconUrl("farming")?.replaceAll("/", "\\/")}"`));
   assert.doesNotMatch(korean, /<svg/u);
   assert.match(korean, /data-work-type="handiwork"[\s\S]*aria-describedby="[^"]+"[\s\S]*Lv\.1/u);
   assert.match(korean, /class="palworld-work-suitability-tooltip">수작업: Lv\.1/u);
   assert.match(korean, /data-work-type="transporting"[\s\S]*Lv\.2/u);
-  assert.match(korean, /data-work-type="farming"[\s\S]*Lv\.1/u);
+  assert.doesNotMatch(korean, /data-work-type="farming"/u);
+  assert.doesNotMatch(korean, /data-work-type="mining"/u);
+  assert.match(korean, /class="palworld-card-work-more"[^>]+data-ko="그 외 작업 적성 2개"[^>]+role="listitem"[^>]*>\.\.\.<\/span>/u);
   assert.match(korean, /<button[^>]+aria-haspopup="dialog"[^>]+class="yoro-button palworld-card-open-action"/u);
   assert.doesNotMatch(korean, /<article[^>]+role="button"/u);
   assert.match(japanese, /alt="モコロン"/);
   assert.match(japanese, /class="palworld-work-suitability-tooltip">手作業: Lv\.1/u);
+  assert.match(japanese, /aria-label="ほかの作業適性 2件"/u);
 });
 
 test("첫 화면 Pal 이미지만 eager·high priority로 요청하고 고정 크기로 layout shift를 방지한다", () => {
@@ -1496,6 +1528,10 @@ test("Palworld 2행 메뉴는 세로 overflow 없이 모바일 가로 스크롤 
   assert.match(css, /\.palworld-secondary-row\.can-scroll-end\s*\{[\s\S]*?mask-image:\s*linear-gradient/u);
   assert.match(css, /\.palworld-secondary-row\.can-scroll-start\.can-scroll-end\s*\{[\s\S]*?mask-image:\s*linear-gradient/u);
   assert.match(css, /\.palworld-shell\.public-dashboard-shell[\s\S]*?button\.active::after\s*\{[\s\S]*?bottom:\s*var\(--yoro-space-1\)\s*!important/u);
+  assert.match(
+    css,
+    /@media \(min-width:\s*48\.001rem\) and \(max-width:\s*63\.999rem\)[\s\S]*?\.palworld-header-layout > \.public-header-product-cluster\s*\{[\s\S]*?grid-column:\s*1\s*!important;[\s\S]*?\.palworld-header-layout > \.public-header-tools\s*\{[\s\S]*?grid-column:\s*2\s*!important;[\s\S]*?\.palworld-header-layout > \.palworld-secondary-row\s*\{[\s\S]*?grid-row:\s*2\s*!important;[\s\S]*?\.palworld-header-layout > \.palworld-search-form\s*\{[\s\S]*?grid-row:\s*3\s*!important;/u,
+  );
 });
 
 test("긴 한국어·일본어 번역문과 상세 링크는 페이지 너비를 확장하지 않는다", () => {
@@ -1572,6 +1608,10 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   );
   assert.doesNotMatch(korean, /pyPalworldAPI|>1\.0\.1</u);
   assert.match(korean, /aria-label="지도 확대"/u);
+  assert.match(korean, /class="[^"]*palworld-map-control is-zoom-in[^"]*"/u);
+  assert.match(korean, /class="[^"]*palworld-map-control is-zoom-out[^"]*"/u);
+  assert.match(korean, /class="palworld-map-zoom-output"/u);
+  assert.match(korean, /class="[^"]*palworld-map-control is-zoom-reset[^"]*"/u);
   assert.match(korean, /aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight \+ - Home"/u);
   assert.match(
     korean,
@@ -1638,6 +1678,7 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   assert.doesNotMatch(korean, /현재 화면의 위치/u);
   assert.doesNotMatch(korean, /현재 게시 릴리스에서 검증된/u);
   assert.doesNotMatch(korean, /휠·핀치/u);
+  assert.doesNotMatch(korean, /게임 월드에서 검증된 위치를 표시합니다/u);
   assert.match(japanese, /Palworld ワールドマップ/u);
   assert.match(japanese, />フィルター 1件</u);
   assert.match(japanese, /移動・場所/u);
@@ -1653,6 +1694,7 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   );
   assert.doesNotMatch(japanese, /現在公開中のリリースで検証済み/u);
   assert.doesNotMatch(japanese, /ホイール・ピンチ/u);
+  assert.doesNotMatch(japanese, /ゲームワールドで検証済みの位置を表示します/u);
 
   const css = readFileSync(
     new URL("../src/styles/pages/public-palworld/14-palworld.css", import.meta.url),
@@ -1661,6 +1703,14 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   assert.match(
     css,
     /\.palworld-map-filter-content\[hidden\],\s*\.palworld-map-filter-group > ul\[hidden\]\s*\{[\s\S]*?display:\s*none/u,
+  );
+  assert.match(
+    css,
+    /@media \(min-width:\s*48\.001rem\)[\s\S]*?\.palworld-map-workspace\s*\{[\s\S]*?align-items:\s*start;/u,
+  );
+  assert.match(
+    css,
+    /\.palworld-map-desktop-filter \.palworld-map-filter-content\s*\{[\s\S]*?block-size:\s*auto;[\s\S]*?max-block-size:\s*calc\(100dvh/u,
   );
   const layoutZoomRule = css.match(
     /\.palworld-map-stage-layout-zoom\s*\{[\s\S]*?\n\}/u,
@@ -1692,6 +1742,7 @@ test("월드 지도 필터와 마커 상세는 검증된 레이어만 선택하�
           label: { ko: "필드 보스", ja: "フィールドボス" },
           selected: true,
           state: "ready",
+          statusLabel: { ko: "사용 가능", ja: "利用可能" },
         }, {
           id: "spawn",
           iconFallback: "●",
@@ -1720,7 +1771,17 @@ test("월드 지도 필터와 마커 상세는 검증된 레이어만 선택하�
 
   assert.match(filter, /data-layer="boss"[\s\S]*type="checkbox" checked=""/u);
   assert.match(filter, /palworld-map-filter-layer-icon-fallback[^>]*>◆</u);
+  assert.doesNotMatch(filter, /사용 가능|利用可能/u);
   assert.match(filter, /data-layer="spawn"[\s\S]*<input disabled=""[^>]*type="checkbox"/u);
+  assert.match(filter, /준비되지 않음/u);
+  const filterCss = readFileSync(
+    new URL("../src/styles/pages/public-palworld/14-palworld.css", import.meta.url),
+    "utf8",
+  );
+  assert.match(
+    filterCss,
+    /\.palworld-map-filter-layer-copy strong\s*\{[\s\S]*?font-size:\s*var\(--yoro-font-size-sm\);[\s\S]*?-webkit-line-clamp:\s*2;/u,
+  );
   assert.match(popover, /role="dialog"/u);
   assert.match(popover, /aria-modal="false"/u);
   assert.match(popover, /aria-label="위치 정보 닫기"/u);

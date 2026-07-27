@@ -27,6 +27,7 @@ function itemRarityTone(rarity: number): "neutral" | "info" | "warning" {
 }
 
 type ImageDimensions = { imageWidth?: number; imageHeight?: number };
+const PAL_CARD_WORK_SUITABILITY_LIMIT = 2;
 
 function imageDimensions(value: ImageDimensions): { intrinsicWidth?: number; intrinsicHeight?: number } {
   return { intrinsicWidth: value.imageWidth, intrinsicHeight: value.imageHeight };
@@ -36,6 +37,12 @@ export function PalCard({ locale, onOpen, pal, priority = false }: { locale: Pal
   const text = palworldI18n[locale];
   const name = resolvePalworldName(pal, locale);
   const displayName = name.text;
+  const visibleWorkSuitabilities = pal.workSuitabilities.slice(0, PAL_CARD_WORK_SUITABILITY_LIMIT);
+  const hiddenWorkSuitabilityCount = Math.max(0, pal.workSuitabilities.length - visibleWorkSuitabilities.length);
+  const hiddenWorkSuitabilityLabel = text.additionalWorkSuitabilities.replace(
+    "{count}",
+    hiddenWorkSuitabilityCount.toLocaleString(locale === "ja" ? "ja-JP" : "ko-KR"),
+  );
   return (
     <Card className="palworld-entity-card palworld-pal-card" variant="interactive" padding="none" data-testid="pal-card">
       <div className="palworld-pal-card-main">
@@ -61,14 +68,29 @@ export function PalCard({ locale, onOpen, pal, priority = false }: { locale: Pal
       {pal.workSuitabilities.length ? (
         <div
           aria-label={text.workSuitabilities}
-          className="palworld-card-work-list"
+          className={[
+            "palworld-card-work-list",
+            hiddenWorkSuitabilityCount > 0 ? "has-overflow" : "",
+          ].filter(Boolean).join(" ")}
           data-ja={palworldI18n.ja.workSuitabilities}
           data-ko={palworldI18n.ko.workSuitabilities}
           role="list"
         >
-          {pal.workSuitabilities.map((work) => (
+          {visibleWorkSuitabilities.map((work) => (
             <PalworldWorkSuitabilityBadge compact key={work.type} level={work.level} locale={locale} type={work.type} />
           ))}
+          {hiddenWorkSuitabilityCount > 0 ? (
+            <span
+              aria-label={hiddenWorkSuitabilityLabel}
+              className="palworld-card-work-more"
+              data-ja={palworldI18n.ja.additionalWorkSuitabilities.replace("{count}", hiddenWorkSuitabilityCount.toLocaleString("ja-JP"))}
+              data-ko={palworldI18n.ko.additionalWorkSuitabilities.replace("{count}", hiddenWorkSuitabilityCount.toLocaleString("ko-KR"))}
+              role="listitem"
+              title={hiddenWorkSuitabilityLabel}
+            >
+              ...
+            </span>
+          ) : null}
         </div>
       ) : null}
       <Button
