@@ -1,5 +1,7 @@
 export * from "./actions.js";
 export * from "./community.js";
+export * from "./discord-internal.js";
+export * from "./bot-management.js";
 export * from "./events.js";
 export * from "./followers.js";
 export * from "./overlay.js";

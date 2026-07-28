@@ -16,6 +16,8 @@ import {
   normalizeRiotIdKey,
   normalizeLolRole,
   parseRiotIdDetailed,
+  parseDiscordInstallationObservationRequest,
+  parseDiscordSetupSessionRequest,
   toSafeErrorMessage,
   validatePalworldServerConnectionInput,
   validatePalworldServerDashboardResponse,
@@ -116,6 +118,7 @@ import {
   clientIp,
   dashboardSessionCookie,
   dashboardSessionIdFromRequest,
+  stateChangingRequestHasTrustedOrigin,
   tokenMatches,
   type AuthPrincipal,
   type DashboardRole
@@ -161,6 +164,32 @@ import {
 import type { PalworldMapMarkerProvider } from "../data/palworld-map-marker-artifact.js";
 import type { PalworldSpawnProvider } from "../data/palworld-spawn-artifact.js";
 import type { PalworldMapLocationsProvider } from "../data/palworld-map-locations-artifact.js";
+import {
+  clearDiscordOnboardingCookie,
+  DISCORD_ONBOARDING_COOKIE,
+  discordOnboardingCookie,
+  DiscordOnboardingError,
+  type DiscordOnboardingService
+} from "../services/discord-onboarding-service.js";
+import {
+  clearDiscordManagementCookie,
+  DISCORD_MANAGEMENT_OAUTH_COOKIE,
+  DISCORD_MANAGEMENT_SESSION_COOKIE,
+  discordManagementOAuthCookie,
+  discordManagementReturnUrl,
+  discordManagementSessionCookie,
+  DiscordManagementError,
+  requireManagementOrganizationId,
+  type DiscordManagementService
+} from "../services/discord-management-service.js";
+import {
+  isManagementOrganizationId,
+  parseCreatePalworldGameServerInput
+} from "@streamops/shared";
+import {
+  DISCORD_INTERNAL_MAX_BODY_BYTES,
+  type DiscordInternalAuthVerifier
+} from "../security/discord-internal-auth.js";
 
 const MAX_JSON_BODY_BYTES = 1_000_000;
 const MAX_ALERT_GIF_BYTES = 5_000_000;
@@ -788,7 +817,7 @@ function corsHeaders(req: IncomingMessage): Record<string, string> {
   const origin = requestHeaders.origin;
   const responseHeaders: Record<string, string> = {
     "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-StreamOps-Dashboard-Token, X-StreamOps-Dashboard-Surface, X-StreamOps-Streamer-Slug, X-StreamOps-Dashboard-Key, X-StreamOps-CSRF",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-StreamOps-Dashboard-Token, X-StreamOps-Dashboard-Surface, X-StreamOps-Streamer-Slug, X-StreamOps-Dashboard-Key, X-StreamOps-CSRF, X-Discord-CSRF",
     "Vary": "Origin"
   };
   if (typeof origin === "string") {
@@ -1253,6 +1282,32 @@ function headerValue(headers: Record<string, string>, name: string): string | un
 function requestHeaderValue(req: IncomingMessage, name: string): string | undefined {
   const value = req.headers[name.toLowerCase()];
   return Array.isArray(value) ? value[0] : value;
+}
+
+function requestCookie(req: IncomingMessage, name: string): string | undefined {
+  const header = req.headers.cookie;
+  if (!header) return undefined;
+  for (const item of header.split(";")) {
+    const separator = item.indexOf("=");
+    if (separator < 0 || item.slice(0, separator).trim() !== name) continue;
+    try {
+      return decodeURIComponent(item.slice(separator + 1).trim());
+    } catch {
+      return undefined;
+    }
+  }
+  return undefined;
+}
+
+function discordSetupReturnUrl(status: "connected" | "error"): string {
+  const target = new URL("/setup/discord", appConfig.dashboardBaseUrl);
+  target.searchParams.set("discord", status);
+  return target.toString();
+}
+
+function discordJsonBodyAllowed(req: IncomingMessage): boolean {
+  const contentType = requestHeaderValue(req, "content-type")?.split(";", 1)[0]?.trim().toLowerCase();
+  return contentType === "application/json";
 }
 
 export function verifyInboundEmailSignature(req: IncomingMessage, body: Buffer, secret: string, nowSeconds = Math.floor(Date.now() / 1000)): boolean {
@@ -1984,6 +2039,10 @@ type HttpHandlerInput = {
   palworldMapLocationsProvider?: PalworldMapLocationsProvider;
   palworldServerMonitor?: PalworldServerMonitor;
   palworldServerUnavailableCode?: PalworldServerAvailabilityErrorCode;
+  discordOnboarding?: DiscordOnboardingService;
+  discordManagement?: DiscordManagementService;
+  discordDatabaseReady?: () => boolean;
+  discordInternalAuth?: DiscordInternalAuthVerifier;
 };
 
 const PALWORLD_SERVER_DASHBOARD_PATH = "/api/dashboard/palworld-server";
@@ -5691,7 +5750,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
           ? inboundEmailLimiter
           : url.pathname.startsWith("/api/dashboard/auth/")
           ? dashboardLoginLimiter
-          : url.pathname.startsWith("/api/twitch/auth/") || url.pathname.startsWith("/api/public/twitch/auth/")
+          : url.pathname.startsWith("/api/twitch/auth/")
+            || url.pathname.startsWith("/api/public/twitch/auth/")
+            || url.pathname.startsWith("/api/discord/")
             ? oauthLimiter
           : palworldLimitGroup?.list
             ? publicPalworldListApiLimiter
@@ -5713,9 +5774,351 @@ export function createHttpHandler(input: HttpHandlerInput) {
         }
       }
 
+      if (url.pathname.startsWith("/internal/discord/")) {
+        const internalPaths = new Set([
+          "/internal/discord/setup-sessions",
+          "/internal/discord/installations/upsert",
+          "/internal/discord/installations/revoked"
+        ]);
+        if (!internalPaths.has(url.pathname) || req.method !== "POST") {
+          return sendJson(req, res, 404, { error: "not found" });
+        }
+        if (
+          !appConfig.discordBotInternal.enabled
+          || !appConfig.discordSaas.enabled
+          || !appConfig.database.enabled
+          || !input.discordOnboarding
+          || !input.discordInternalAuth
+          || input.discordDatabaseReady?.() !== true
+        ) {
+          return sendJson(req, res, 503, {
+            error: "Discord Bot 내부 기능을 사용할 수 없습니다.",
+            code: "feature_unavailable"
+          });
+        }
+        if (req.headers.origin || req.headers["access-control-request-method"]) {
+          return sendJson(req, res, 403, {
+            error: "브라우저 요청은 허용되지 않습니다.",
+            code: "internal_only"
+          });
+        }
+        if (!discordJsonBodyAllowed(req)) {
+          return sendJson(req, res, 415, {
+            error: "application/json Content-Type이 필요합니다."
+          });
+        }
+        const rawBody = await readRawBody(req, DISCORD_INTERNAL_MAX_BODY_BYTES);
+        const verified = input.discordInternalAuth.verify({
+          body: rawBody,
+          headers: req.headers,
+          method: req.method,
+          path: url.pathname
+        });
+        if (!verified.ok) {
+          return sendJson(req, res, 401, {
+            error: "내부 인증에 실패했습니다.",
+            code: verified.code
+          });
+        }
+        let body: unknown;
+        try {
+          body = JSON.parse(rawBody.toString("utf8"));
+        } catch {
+          return sendJson(req, res, 400, { error: "올바른 JSON body가 아닙니다." });
+        }
+        if (url.pathname === "/internal/discord/setup-sessions") {
+          const setup = parseDiscordSetupSessionRequest(body);
+          if (
+            !setup
+            || setup.applicationId !== appConfig.discordBotInternal.applicationId
+          ) {
+            return sendJson(req, res, 400, {
+              error: "setup session 요청 형식이 올바르지 않습니다."
+            });
+          }
+          const issued = await input.discordOnboarding.issueSetupSession({
+            applicationId: setup.applicationId,
+            guildId: setup.guildId,
+            userId: setup.userId,
+            issuedVia: "bot_command"
+          });
+          return sendJson(req, res, 201, issued, noStoreHeaders());
+        }
+        const observation = parseDiscordInstallationObservationRequest(body);
+        if (
+          !observation
+          || observation.applicationId !== appConfig.discordBotInternal.applicationId
+        ) {
+          return sendJson(req, res, 400, {
+            error: "installation 요청 형식이 올바르지 않습니다."
+          });
+        }
+        if (url.pathname === "/internal/discord/installations/upsert") {
+          await input.discordOnboarding.observeBotInstallation(observation);
+          return sendJson(req, res, 204, {}, noStoreHeaders());
+        }
+        await input.discordOnboarding.revokeBotInstallation(observation);
+        return sendJson(req, res, 204, {}, noStoreHeaders());
+      }
+
       const auth = authorizeHttpRequest(req, url.pathname, sessions);
       if (!auth.ok) {
         return sendJson(req, res, auth.status, { error: auth.message, code: auth.code });
+      }
+
+      if (url.pathname.startsWith("/api/discord/")) {
+        if (!appConfig.discordSaas.enabled) {
+          return sendJson(req, res, 404, { error: "not found" });
+        }
+        if (
+          !appConfig.database.enabled
+          || !input.discordOnboarding
+          || input.discordDatabaseReady?.() !== true
+        ) {
+          return sendJson(req, res, 503, {
+            error: "Discord 연결 기능을 사용할 수 없습니다.",
+            code: "database_unavailable"
+          });
+        }
+        if (url.pathname.startsWith("/api/discord/management/")) {
+          if (!appConfig.discordBotManagement.enabled || !input.discordManagement) {
+            return sendJson(req, res, 404, { error: "not found" });
+          }
+          const oauthCookie = requestCookie(req, DISCORD_MANAGEMENT_OAUTH_COOKIE);
+          const managementCookie = requestCookie(req, DISCORD_MANAGEMENT_SESSION_COOKIE);
+          if (req.method === "GET" && url.pathname === "/api/discord/management/oauth/start") {
+            if (url.search) {
+              return sendJson(req, res, 400, { error: "query는 허용되지 않습니다." });
+            }
+            const started = await input.discordManagement.beginLogin();
+            return sendRedirect(res, started.authorizationUrl, {
+              "Set-Cookie": discordManagementOAuthCookie(started.cookieValue),
+              "Cache-Control": "no-store"
+            });
+          }
+          if (req.method === "GET" && url.pathname === "/api/discord/management/oauth/callback") {
+            const allowed = new Set(["code", "state", "error", "error_description"]);
+            if (
+              [...url.searchParams.keys()].some((key) => !allowed.has(key))
+              || url.searchParams.has("error")
+            ) {
+              return sendRedirect(res, discordManagementReturnUrl("error"), {
+                "Set-Cookie": clearDiscordManagementCookie(DISCORD_MANAGEMENT_OAUTH_COOKIE),
+                "Cache-Control": "no-store"
+              });
+            }
+            try {
+              const completed = await input.discordManagement.completeLogin({
+                state: url.searchParams.get("state") ?? "",
+                code: url.searchParams.get("code") ?? "",
+                oauthCookie
+              });
+              return sendRedirect(res, discordManagementReturnUrl(), {
+                "Set-Cookie": [
+                  clearDiscordManagementCookie(DISCORD_MANAGEMENT_OAUTH_COOKIE),
+                  discordManagementSessionCookie(completed.sessionToken)
+                ],
+                "Cache-Control": "no-store"
+              });
+            } catch {
+              return sendRedirect(res, discordManagementReturnUrl("error"), {
+                "Set-Cookie": clearDiscordManagementCookie(DISCORD_MANAGEMENT_OAUTH_COOKIE),
+                "Cache-Control": "no-store"
+              });
+            }
+          }
+          if (req.method === "GET" && url.pathname === "/api/discord/management/session") {
+            if (url.search) {
+              return sendJson(req, res, 400, { error: "query는 허용되지 않습니다." });
+            }
+            const session = await input.discordManagement.session(managementCookie);
+            return sendJson(req, res, 200, session ?? { authenticated: false }, noStoreHeaders());
+          }
+          if (req.method === "POST" && url.pathname === "/api/discord/management/logout") {
+            if (!stateChangingRequestHasTrustedOrigin(req)) {
+              return sendJson(req, res, 403, { error: "trusted Origin이 필요합니다.", code: "origin_denied" });
+            }
+            const session = await input.discordManagement.session(managementCookie);
+            const csrfToken = requestHeaderValue(req, "x-discord-csrf");
+            if (!session || !csrfToken || session.csrfToken !== csrfToken) {
+              return sendJson(req, res, 403, { error: "CSRF token이 필요합니다.", code: "csrf_required" });
+            }
+            await input.discordManagement.logout(managementCookie);
+            return sendJson(req, res, 204, {}, {
+              "Set-Cookie": clearDiscordManagementCookie(DISCORD_MANAGEMENT_SESSION_COOKIE)
+            });
+          }
+          const gameServersMatch = url.pathname.match(
+            /^\/api\/discord\/management\/organizations\/([^/]+)\/game-servers$/u
+          );
+          if (gameServersMatch) {
+            const organizationId = requireManagementOrganizationId(gameServersMatch[1] ?? "");
+            if (req.method === "GET") {
+              if (url.search) {
+                return sendJson(req, res, 400, { error: "query는 허용되지 않습니다." });
+              }
+              const items = await input.discordManagement.listGameServers({
+                cookieValue: managementCookie,
+                organizationId
+              });
+              return sendJson(req, res, 200, { items }, noStoreHeaders());
+            }
+            if (req.method === "POST") {
+              if (!stateChangingRequestHasTrustedOrigin(req)) {
+                return sendJson(req, res, 403, { error: "trusted Origin이 필요합니다.", code: "origin_denied" });
+              }
+              if (!discordJsonBodyAllowed(req)) {
+                return sendJson(req, res, 415, { error: "application/json Content-Type이 필요합니다." });
+              }
+              const value = parseCreatePalworldGameServerInput(await readJsonBody<unknown>(req));
+              if (!value) {
+                return sendJson(req, res, 400, { error: "게임 서버 요청 형식이 올바르지 않습니다.", code: "invalid_input" });
+              }
+              const server = await input.discordManagement.createGameServer({
+                cookieValue: managementCookie,
+                csrfToken: requestHeaderValue(req, "x-discord-csrf"),
+                organizationId,
+                value
+              });
+              return sendJson(req, res, 201, { server }, noStoreHeaders());
+            }
+          }
+          const gameServerActionMatch = url.pathname.match(
+            /^\/api\/discord\/management\/organizations\/([^/]+)\/game-servers\/([^/]+)\/(disable|agent-token)$/u
+          );
+          if (gameServerActionMatch) {
+            const organizationId = requireManagementOrganizationId(gameServerActionMatch[1] ?? "");
+            const gameServerId = gameServerActionMatch[2] ?? "";
+            const action = gameServerActionMatch[3];
+            if (!isManagementOrganizationId(gameServerId)) {
+              return sendJson(req, res, 404, { error: "not found" });
+            }
+            if (!stateChangingRequestHasTrustedOrigin(req)) {
+              return sendJson(req, res, 403, { error: "trusted Origin이 필요합니다.", code: "origin_denied" });
+            }
+            const csrfToken = requestHeaderValue(req, "x-discord-csrf");
+            if (req.method === "POST" && action === "disable") {
+              await input.discordManagement.disableGameServer({
+                cookieValue: managementCookie,
+                csrfToken,
+                organizationId,
+                gameServerId
+              });
+              return sendJson(req, res, 204, {}, noStoreHeaders());
+            }
+            if (req.method === "POST" && action === "agent-token") {
+              const issued = await input.discordManagement.issueAgentToken({
+                cookieValue: managementCookie,
+                csrfToken,
+                organizationId,
+                gameServerId
+              });
+              return sendJson(req, res, 201, issued, noStoreHeaders());
+            }
+            if (req.method === "DELETE" && action === "agent-token") {
+              await input.discordManagement.revokeAgentToken({
+                cookieValue: managementCookie,
+                csrfToken,
+                organizationId,
+                gameServerId
+              });
+              return sendJson(req, res, 204, {}, noStoreHeaders());
+            }
+          }
+        }
+        const onboardingCookie = requestCookie(req, DISCORD_ONBOARDING_COOKIE);
+        if (req.method === "GET" && url.pathname === "/api/discord/oauth/start") {
+          const allowed = new Set(["setup"]);
+          if ([...url.searchParams.keys()].some((key) => !allowed.has(key))) {
+            return sendJson(req, res, 400, { error: "허용되지 않은 query입니다." });
+          }
+          const setupToken = url.searchParams.get("setup") ?? "";
+          const started = await input.discordOnboarding.beginOAuth(setupToken);
+          return sendRedirect(res, started.authorizationUrl, {
+            "Set-Cookie": discordOnboardingCookie(started.cookieValue),
+            "Cache-Control": "no-store"
+          });
+        }
+        if (req.method === "GET" && url.pathname === "/api/discord/oauth/callback") {
+          const allowed = new Set(["code", "state", "error", "error_description"]);
+          if ([...url.searchParams.keys()].some((key) => !allowed.has(key))) {
+            return sendRedirect(res, discordSetupReturnUrl("error"), {
+              "Set-Cookie": clearDiscordOnboardingCookie(),
+              "Cache-Control": "no-store"
+            });
+          }
+          if (url.searchParams.has("error")) {
+            return sendRedirect(res, discordSetupReturnUrl("error"), {
+              "Set-Cookie": clearDiscordOnboardingCookie(),
+              "Cache-Control": "no-store"
+            });
+          }
+          try {
+            await input.discordOnboarding.completeOAuth({
+              state: url.searchParams.get("state") ?? "",
+              code: url.searchParams.get("code") ?? "",
+              cookieValue: onboardingCookie
+            });
+          } catch {
+            return sendRedirect(res, discordSetupReturnUrl("error"), {
+              "Set-Cookie": clearDiscordOnboardingCookie(),
+              "Cache-Control": "no-store"
+            });
+          }
+          return sendRedirect(res, discordSetupReturnUrl("connected"), {
+            "Cache-Control": "no-store"
+          });
+        }
+        if (
+          req.method === "GET"
+          && (url.pathname === "/api/discord/session" || url.pathname === "/api/discord/onboarding/guilds")
+        ) {
+          if (url.search) return sendJson(req, res, 400, { error: "query는 허용되지 않습니다." });
+          const session = await input.discordOnboarding.session(onboardingCookie);
+          return sendJson(req, res, 200, session ?? { authenticated: false });
+        }
+        if (req.method === "POST" && url.pathname === "/api/discord/onboarding/guild") {
+          if (!stateChangingRequestHasTrustedOrigin(req)) {
+            return sendJson(req, res, 403, { error: "trusted Origin이 필요합니다.", code: "origin_denied" });
+          }
+          if (!discordJsonBodyAllowed(req)) {
+            return sendJson(req, res, 415, { error: "application/json Content-Type이 필요합니다." });
+          }
+          const body = await readJsonBody<Record<string, unknown>>(req);
+          if (
+            Object.keys(body).some((key) => !["guildId", "organizationId"].includes(key))
+            || typeof body.guildId !== "string"
+            || (body.organizationId !== undefined && typeof body.organizationId !== "string")
+          ) {
+            return sendJson(req, res, 400, { error: "Guild 연결 요청 형식이 올바르지 않습니다." });
+          }
+          const connected = await input.discordOnboarding.connectGuild({
+            cookieValue: onboardingCookie,
+            csrfToken: requestHeaderValue(req, "x-discord-csrf"),
+            guildId: body.guildId,
+            ...(typeof body.organizationId === "string" ? { organizationId: body.organizationId } : {})
+          });
+          return sendJson(req, res, 200, {
+            completed: true,
+            guild: connected.guild,
+            organization: connected.organization
+          }, { "Set-Cookie": clearDiscordOnboardingCookie() });
+        }
+        if (req.method === "POST" && url.pathname === "/api/discord/oauth/logout") {
+          if (!stateChangingRequestHasTrustedOrigin(req)) {
+            return sendJson(req, res, 403, { error: "trusted Origin이 필요합니다.", code: "origin_denied" });
+          }
+          if (!discordJsonBodyAllowed(req)) {
+            return sendJson(req, res, 415, { error: "application/json Content-Type이 필요합니다." });
+          }
+          const session = await input.discordOnboarding.session(onboardingCookie);
+          const csrfToken = requestHeaderValue(req, "x-discord-csrf");
+          if (!session || !csrfToken || session.csrfToken !== csrfToken) {
+            return sendJson(req, res, 403, { error: "CSRF token이 필요합니다.", code: "csrf_required" });
+          }
+          await input.discordOnboarding.logout(onboardingCookie);
+          return sendJson(req, res, 204, {}, { "Set-Cookie": clearDiscordOnboardingCookie() });
+        }
       }
 
       if (req.method === "POST" && url.pathname === "/api/inbound-email/cloudflare") {
@@ -7034,6 +7437,18 @@ export function createHttpHandler(input: HttpHandlerInput) {
       return sendJson(req, res, 404, { error: "not found" });
     } catch (error) {
       if (error instanceof HttpRequestError) return sendJson(req, res, error.status, error.payload);
+      if (error instanceof DiscordOnboardingError) {
+        return sendJson(req, res, error.status, {
+          error: "Discord 연결 요청을 처리할 수 없습니다.",
+          code: error.code
+        });
+      }
+      if (error instanceof DiscordManagementError) {
+        return sendJson(req, res, error.status, {
+          error: "YORO Bot 관리 요청을 처리할 수 없습니다.",
+          code: error.code
+        }, noStoreHeaders());
+      }
       if (error instanceof PalworldQueryError) {
         return sendJson(req, res, 400, { error: error.publicMessage, code: error.code });
       }

@@ -66,6 +66,12 @@ import { websocketLimiter } from "./security/rate-limit.js";
 import { getEnabledModules } from "./modules/index.js";
 import { refreshLolProfileForEntry } from "./modules/lol-profile-enrichment.module.js";
 import { closeLolGameMonitors } from "./modules/lol-game-monitor.module.js";
+import { DatabaseHealthMonitor } from "./database/health.js";
+import { loadMigrationManifest, type MigrationManifest } from "./database/migration-manifest.js";
+import { closeDatabasePool, databasePool } from "./database/pool.js";
+import { DiscordOnboardingService } from "./services/discord-onboarding-service.js";
+import { DiscordManagementService } from "./services/discord-management-service.js";
+import { DiscordInternalAuthVerifier } from "./security/discord-internal-auth.js";
 import {
   PALWORLD_SERVER_SAFE_REGISTRATION_POLICY,
   newId,
@@ -78,6 +84,36 @@ import {
 assertRuntimeConfig();
 
 const logger = new JsonlLogger(appConfig.paths.logs, appConfig.logging);
+const postgresPool = databasePool();
+let databaseMigrationManifest: MigrationManifest | undefined;
+if (appConfig.database.enabled) {
+  try {
+    databaseMigrationManifest = await loadMigrationManifest();
+  } catch {
+    logger.error({
+      type: "database.migration_manifest_unavailable",
+      errorCode: "DATABASE_MIGRATION_MISMATCH"
+    });
+  }
+}
+const databaseHealth = new DatabaseHealthMonitor(
+  appConfig.database.enabled,
+  postgresPool,
+  databaseMigrationManifest
+);
+await databaseHealth.checkNow();
+databaseHealth.start();
+const discordOnboarding = appConfig.discordSaas.enabled && postgresPool
+  ? new DiscordOnboardingService(postgresPool, logger)
+  : undefined;
+const discordManagement = appConfig.discordBotManagement.enabled && postgresPool
+  ? new DiscordManagementService(postgresPool, logger)
+  : undefined;
+const discordInternalAuth = appConfig.discordBotInternal.enabled
+  ? new DiscordInternalAuthVerifier(appConfig.discordBotInternal.authKey)
+  : undefined;
+discordOnboarding?.startCleanup();
+discordManagement?.startCleanup();
 let palworldDataService: PalworldDataService | undefined;
 let palworldMapMarkerProvider: PalworldMapMarkerProvider | undefined;
 let palworldSpawnProvider: PalworldSpawnProvider | undefined;
@@ -490,7 +526,26 @@ const server = http.createServer(createHttpHandler({
   palworldMapLocationsProvider,
   palworldServerMonitor,
   palworldServerUnavailableCode,
-  readiness: () => store.getReadiness(),
+  discordOnboarding,
+  discordManagement,
+  discordDatabaseReady: () => databaseHealth.snapshot().ready,
+  discordInternalAuth,
+  readiness: () => {
+    const storeReadiness = store.getReadiness();
+    const database = databaseHealth.snapshot();
+    return {
+      ok: storeReadiness.ok && database.ready,
+      checks: {
+        ...(storeReadiness.checks ?? {}),
+        databaseEnabled: database.enabled,
+        databaseReady: database.ready
+      },
+      errors: [
+        ...(storeReadiness.errors ?? []),
+        ...(database.errorCode === undefined ? [] : [`database:${database.errorCode}`])
+      ]
+    };
+  },
   isShuttingDown: () => shuttingDown,
   connectionStatus: () => ({
     http: httpSockets.size,
@@ -751,6 +806,9 @@ function shutdown(signal: NodeJS.Signals): void {
   logger.event({ type: "server.shutdown_started", signal });
   twitchEventSub.stop();
   palworldServerMonitor?.stop();
+  discordOnboarding?.stopCleanup();
+  discordManagement?.stopCleanup();
+  databaseHealth.stop();
   closeLolGameMonitors();
   closeWebSocketServer(bridgeWss);
   closeWebSocketServer(dashboardWss);
@@ -758,23 +816,25 @@ function shutdown(signal: NodeJS.Signals): void {
   let forceTimer: NodeJS.Timeout;
   server.close((error) => {
     clearTimeout(forceTimer);
-    void store.closeAsync()
-      .then(() => {
+    void Promise.allSettled([store.closeAsync(), closeDatabasePool()])
+      .then((results) => {
+        const closeFailed = results.some((result) => result.status === "rejected");
         if (error) {
           logger.error({ type: "server.shutdown_failed", signal, error: toSafeErrorMessage(error) });
           process.exitCode = 1;
           return;
         }
+        if (closeFailed) {
+          logger.error({
+            type: "server.shutdown_persistence_failed",
+            signal,
+            errorCode: "RUNTIME_RESOURCE_CLOSE_FAILED"
+          });
+          process.exitCode = 1;
+          return;
+        }
         logger.event({ type: "server.shutdown_completed", signal });
         process.exitCode = 0;
-      })
-      .catch((closeError: unknown) => {
-        logger.error({
-          type: "server.shutdown_persistence_failed",
-          signal,
-          error: toSafeErrorMessage(closeError)
-        });
-        process.exitCode = 1;
       });
   });
   server.closeIdleConnections?.();

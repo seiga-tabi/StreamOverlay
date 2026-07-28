@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "migrations": [
+    {
+      "id": "0001_database_foundation",
+      "file": "0001_database_foundation.sql",
+      "description": "Database migration 기록과 사용자·조직·조직 구성원 기반",
+      "checksumSha256": "67043e9003ed4739129246ac500f07f308c296b7f2ea3ae9f1edc0182982654d",
+      "destructive": false,
+      "transaction": true
+    },
+    {
+      "id": "0002_discord_saas_core",
+      "file": "0002_discord_saas_core.sql",
+      "description": "Discord 설치·게임 서버·암호화 연결·Agent 설치 기반",
+      "checksumSha256": "e6d3d81b4564ea039db870629471fbba0fa3fcc17f686b3965b926f9837779e6",
+      "destructive": false,
+      "transaction": true
+    },
+    {
+      "id": "0003_status_and_notification",
+      "file": "0003_status_and_notification.sql",
+      "description": "서버 상태·이벤트·알림·구독·권한·감사 기록 기반",
+      "checksumSha256": "2fb5abf16286d1948482e53e59514584ab18040c4ba2a303a0960c43476a0abd",
+      "destructive": false,
+      "transaction": true
+    },
+    {
+      "id": "0004_discord_oauth_onboarding",
+      "file": "0004_discord_oauth_onboarding.sql",
+      "description": "Discord OAuth identity·setup session·검증된 Guild 후보 기반",
+      "checksumSha256": "e8b570f048b2a503a6ea2478ecf2205d403818b7a578c1f5e889c178e0a36b24",
+      "destructive": false,
+      "transaction": true
+    },
+    {
+      "id": "0005_discord_bot_setup_binding",
+      "file": "0005_discord_bot_setup_binding.sql",
+      "description": "Discord Bot 설치 관찰과 setup session Guild·실행자 binding",
+      "checksumSha256": "180b3c900bb0dfd39f117c8dde3c833517cdb66f60b3af831a912c8ada0def29",
+      "destructive": false,
+      "transaction": true
+    },
+    {
+      "id": "0006_bot_management_and_agent_bootstrap",
+      "file": "0006_bot_management_and_agent_bootstrap.sql",
+      "description": "Discord 관리 session과 Palworld Agent 일회용 bootstrap 기반",
+      "checksumSha256": "8a915675ac6122a04689197b9cb49ff45d7d96659d2157055ca11a86d9adc951",
+      "destructive": false,
+      "transaction": true
+    }
+  ]
+}

@@ -61,6 +61,7 @@ COPY --from=build /app/packages/shared/dist ./packages/shared/dist
 COPY --from=build /app/apps/server/dist ./apps/server/dist
 RUN find /app/packages/shared/dist -maxdepth 1 -type f \( -name '*.d.ts' -o -name '*.d.ts.map' \) -delete
 COPY --from=build /app/apps/server/config ./apps/server/config
+COPY --from=build /app/apps/server/migrations ./apps/server/migrations
 COPY --from=build /app/.palworld-runtime-bundle/apps/server/data/palworld ./apps/server/data/palworld
 COPY --from=build /app/.palworld-runtime-bundle/apps/server/src/data/palworld-mappings ./apps/server/src/data/palworld-mappings
 COPY --from=build /app/apps/dashboard/dist ./apps/dashboard/dist

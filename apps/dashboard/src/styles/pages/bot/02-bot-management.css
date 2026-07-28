@@ -1,0 +1,71 @@
+.bot-management-page {
+  display: grid;
+  gap: var(--space-5);
+  width: min(100% - (var(--space-4) * 2), 72rem);
+  margin-inline: auto;
+  padding-block: var(--space-6);
+}
+
+.bot-management-header {
+  min-width: 0;
+}
+
+.bot-management-header h1,
+.bot-management-header p {
+  margin-block: var(--space-2);
+}
+
+.bot-management-create,
+.bot-management-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--space-3);
+}
+
+.bot-management-field {
+  display: grid;
+  min-width: min(100%, 15rem);
+  gap: var(--space-2);
+}
+
+.bot-management-field input,
+.bot-management-field select {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 2.75rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  padding: var(--space-2) var(--space-3);
+}
+
+.bot-management-servers {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.bot-management-token {
+  display: grid;
+  gap: var(--space-3);
+  overflow-wrap: anywhere;
+}
+
+.bot-management-error {
+  color: var(--danger);
+}
+
+@media (max-width: 48rem) {
+  .bot-management-page {
+    width: min(100% - (var(--space-3) * 2), 72rem);
+    padding-block: var(--space-4);
+  }
+
+  .bot-management-create,
+  .bot-management-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

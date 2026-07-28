@@ -19,6 +19,7 @@ coverage/
 *.tsbuildinfo
 *.wav.tmp
 secrets/
+discord-bot-secrets/
 .vscode/
 .idea/
 __pycache__/

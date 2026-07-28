@@ -229,6 +229,140 @@ test("production 설정은 Twitch OAuth token 암호화 key를 요구한다", ()
   assert.match(weak.stdout, /TWITCH_TOKEN_ENCRYPTION_KEY/);
 });
 
+test("Discord SaaS는 feature·Database 상태에 따라 안전하게 설정을 검증한다", () => {
+  const disabled = runConfigValidation({
+    DISCORD_SAAS_ENABLED: "false"
+  });
+  assert.equal(disabled.status, 0, disabled.stderr || disabled.stdout);
+
+  const databaseDisabled = runConfigValidation({
+    DISCORD_SAAS_ENABLED: "true",
+    DATABASE_ENABLED: "false"
+  });
+  assert.equal(databaseDisabled.status, 0, databaseDisabled.stderr || databaseDisabled.stdout);
+
+  const databaseUrl = "postgresql://streamops_app:correct-horse-battery-staple@postgres/streamops";
+  const missing = runConfigValidation({
+    DATABASE_ENABLED: "true",
+    DATABASE_URL: databaseUrl,
+    DISCORD_SAAS_ENABLED: "true"
+  });
+  assert.equal(missing.status, 2);
+  assert.match(missing.stdout, /DISCORD_CLIENT_ID/u);
+  assert.match(missing.stdout, /DISCORD_CLIENT_SECRET/u);
+  assert.match(missing.stdout, /DISCORD_OAUTH_TOKEN_ENCRYPTION_KEY/u);
+
+  const reusedKey = strongEncryptionKey(4);
+  const reuse = runConfigValidation({
+    DATABASE_ENABLED: "true",
+    DATABASE_URL: databaseUrl,
+    DISCORD_SAAS_ENABLED: "true",
+    DISCORD_CLIENT_ID: "123456789012345678",
+    DISCORD_CLIENT_SECRET: strongSecret("discord_client"),
+    DISCORD_OAUTH_REDIRECT_URI: "https://bot.example.com/api/discord/oauth/callback",
+    DISCORD_OAUTH_TOKEN_ENCRYPTION_KEY: reusedKey
+  });
+  assert.equal(reuse.status, 2);
+  assert.match(reuse.stdout, /Twitch token encryption key를 재사용할 수 없습니다/u);
+  assert.doesNotMatch(reuse.stdout, new RegExp(reusedKey, "u"));
+
+  const valid = runConfigValidation({
+    DATABASE_ENABLED: "true",
+    DATABASE_URL: databaseUrl,
+    DISCORD_SAAS_ENABLED: "true",
+    DISCORD_CLIENT_ID: "123456789012345678",
+    DISCORD_CLIENT_SECRET: strongSecret("discord_client"),
+    DISCORD_OAUTH_REDIRECT_URI: "https://bot.example.com/api/discord/oauth/callback",
+    DISCORD_OAUTH_TOKEN_ENCRYPTION_KEY: strongEncryptionKey(12)
+  });
+  assert.equal(valid.status, 0, valid.stderr || valid.stdout);
+});
+
+test("Discord Bot 내부 API는 별도 secret file과 기존 기능 준비 상태를 요구한다", () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "streamops-discord-bot-secret-"));
+  const internalKeyPath = path.join(dir, "discord_bot_internal_auth_key");
+  writeFileSync(internalKeyPath, strongSecret("discord_bot_internal"), { mode: 0o600 });
+  const databaseUrl = "postgresql://streamops_app:correct-horse-battery-staple@postgres/streamops";
+  const base = {
+    DATABASE_ENABLED: "true",
+    DATABASE_URL: databaseUrl,
+    DISCORD_SAAS_ENABLED: "true",
+    DISCORD_CLIENT_ID: "123456789012345678",
+    DISCORD_CLIENT_SECRET: strongSecret("discord_client"),
+    DISCORD_OAUTH_REDIRECT_URI: "https://bot.example.com/api/discord/oauth/callback",
+    DISCORD_OAUTH_TOKEN_ENCRYPTION_KEY: strongEncryptionKey(12),
+    DISCORD_BOT_INTERNAL_API_ENABLED: "true",
+    DISCORD_APPLICATION_ID: "123456789012345678"
+  };
+  try {
+    const valid = runConfigValidation({
+      ...base,
+      DISCORD_BOT_INTERNAL_AUTH_KEY: undefined,
+      DISCORD_BOT_INTERNAL_AUTH_KEY_FILE: internalKeyPath
+    });
+    assert.equal(valid.status, 0, valid.stderr || valid.stdout);
+
+    const direct = runConfigValidation({
+      ...base,
+      DISCORD_BOT_INTERNAL_AUTH_KEY: strongSecret("discord_bot_direct"),
+      DISCORD_BOT_INTERNAL_AUTH_KEY_FILE: undefined
+    });
+    assert.equal(direct.status, 2);
+    assert.match(direct.stdout, /DISCORD_BOT_INTERNAL_AUTH_KEY_FILE/u);
+    assert.doesNotMatch(direct.stdout, /discord_bot_direct/u);
+
+    const databaseDisabled = runConfigValidation({
+      ...base,
+      DATABASE_ENABLED: "false",
+      DISCORD_BOT_INTERNAL_AUTH_KEY: undefined,
+      DISCORD_BOT_INTERNAL_AUTH_KEY_FILE: internalKeyPath
+    });
+    assert.equal(databaseDisabled.status, 2);
+    assert.match(databaseDisabled.stdout, /Database와 Discord SaaS/u);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("Discord Bot 관리 기능은 Database·Discord SaaS와 정확한 callback·TTL을 요구한다", () => {
+  const databaseUrl = "postgresql://streamops_app:correct-horse-battery-staple@postgres/streamops";
+  const base = {
+    DATABASE_ENABLED: "true",
+    DATABASE_URL: databaseUrl,
+    DISCORD_SAAS_ENABLED: "true",
+    DISCORD_CLIENT_ID: "123456789012345678",
+    DISCORD_CLIENT_SECRET: strongSecret("discord_client"),
+    DISCORD_OAUTH_REDIRECT_URI: "https://bot.example.com/api/discord/oauth/callback",
+    DISCORD_OAUTH_TOKEN_ENCRYPTION_KEY: strongEncryptionKey(12),
+    DISCORD_BOT_MANAGEMENT_ENABLED: "true",
+    DISCORD_MANAGEMENT_OAUTH_REDIRECT_URI:
+      "https://bot.example.com/api/discord/management/oauth/callback"
+  };
+
+  const valid = runConfigValidation(base);
+  assert.equal(valid.status, 0, valid.stderr || valid.stdout);
+
+  const databaseDisabled = runConfigValidation({
+    ...base,
+    DATABASE_ENABLED: "false"
+  });
+  assert.equal(databaseDisabled.status, 2);
+  assert.match(databaseDisabled.stdout, /Database와 Discord SaaS/u);
+
+  const unsafeCallback = runConfigValidation({
+    ...base,
+    DISCORD_MANAGEMENT_OAUTH_REDIRECT_URI:
+      "https://attacker.example/api/discord/management/oauth/callback?next=external",
+    DISCORD_MANAGEMENT_IDLE_TTL_SECONDS: "28801",
+    AGENT_BOOTSTRAP_TTL_SECONDS: "1801"
+  });
+  assert.equal(unsafeCallback.status, 2);
+  assert.match(unsafeCallback.stdout, /정확한 관리 callback URL/u);
+  assert.match(unsafeCallback.stdout, /DISCORD_MANAGEMENT_IDLE_TTL_SECONDS/u);
+  assert.match(unsafeCallback.stdout, /AGENT_BOOTSTRAP_TTL_SECONDS/u);
+  assert.doesNotMatch(unsafeCallback.stdout, /attacker\.example/u);
+});
+
 test("production 설정은 약한 secret, http URL, wildcard CORS를 거부하고 secret 값을 출력하지 않는다", () => {
   const result = runConfigValidation({
     BRIDGE_SHARED_SECRET: "dev-secret-change-me",
@@ -267,6 +401,56 @@ test("secret은 *_FILE에서 읽을 수 있고 직접 값과 동시에 설정하
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test("Database는 기본 비활성 상태에서 연결 secret을 요구하거나 파일을 읽지 않는다", () => {
+  const result = runConfigValidation({
+    DATABASE_ENABLED: "false",
+    DATABASE_URL: undefined,
+    DATABASE_URL_FILE: "/존재하지-않는-경로/database_url"
+  });
+
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+});
+
+test("production Database는 안전한 범위와 credential을 검증한다", () => {
+  const password = "Q7x9vK2mN4pR6tW8yZ1cD3fG5hJ7";
+  const valid = runConfigValidation({
+    DATABASE_ENABLED: "true",
+    DATABASE_URL: `postgresql://streamops_app:${password}@postgres/streamops`,
+    DATABASE_SSL_MODE: "disable",
+    DATABASE_POOL_MAX: "10",
+    DATABASE_CONNECTION_TIMEOUT_MS: "5000",
+    DATABASE_STATEMENT_TIMEOUT_MS: "10000"
+  });
+  assert.equal(valid.status, 0, valid.stderr || valid.stdout);
+
+  const invalid = runConfigValidation({
+    DATABASE_ENABLED: "true",
+    DATABASE_URL: "postgresql://postgres:password@db.example.com/streamops",
+    DATABASE_SSL_MODE: "disable",
+    DATABASE_POOL_MAX: "11",
+    DATABASE_MIGRATION_MODE: "apply"
+  });
+  assert.equal(invalid.status, 2, invalid.stderr || invalid.stdout);
+  assert.match(invalid.stdout, /DATABASE_POOL_MAX/u);
+  assert.match(invalid.stdout, /DATABASE_MIGRATION_MODE/u);
+  assert.match(invalid.stdout, /credential/u);
+  assert.match(invalid.stdout, /verify-full/u);
+  assert.doesNotMatch(invalid.stdout, /postgresql:\/\//u);
+  assert.doesNotMatch(invalid.stdout, /password@/u);
+});
+
+test("DATABASE_URL과 DATABASE_URL_FILE 동시 설정을 secret 노출 없이 차단한다", () => {
+  const result = runConfigValidation({
+    DATABASE_ENABLED: "false",
+    DATABASE_URL: "postgresql://private-user:private-password@postgres/streamops",
+    DATABASE_URL_FILE: "/tmp/database-url-secret"
+  });
+
+  assert.equal(result.status, 3);
+  assert.match(result.stderr, /DATABASE_URL.*DATABASE_URL_FILE/u);
+  assert.doesNotMatch(result.stderr, /private-user|private-password/u);
 });
 
 test("local no-auth mode는 dashboard와 overlay token 입력을 요구하지 않는다", () => {

@@ -2,11 +2,11 @@ import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { publicI18n, t } from "../i18n/public-lol-i18n";
 import type { PublicMainPage } from "../types/public-lol";
 
-export type PublicGameId = "league-of-legends" | "palworld";
+export type PublicGameId = "league-of-legends" | "palworld" | "yoro-bot";
 
 type PublicGameOption = {
   id: PublicGameId;
-  page?: Extract<PublicMainPage, "search" | "palworld">;
+  page?: Extract<PublicMainPage, "search" | "palworld" | "bot">;
   logo?: string;
   ko: string;
   ja: string;
@@ -43,6 +43,14 @@ const games: PublicGameOption[] = [
     subtitleKo: publicI18n.ko.palworldSubtitle,
     subtitleJa: publicI18n.ja.palworldSubtitle
   },
+  {
+    id: "yoro-bot",
+    page: "bot",
+    ko: publicI18n.ko.yoroBot,
+    ja: publicI18n.ja.yoroBot,
+    subtitleKo: publicI18n.ko.yoroBotSubtitle,
+    subtitleJa: publicI18n.ja.yoroBotSubtitle
+  },
 ];
 
 function isPublicGameId(value: string | null): value is PublicGameId {
@@ -51,23 +59,26 @@ function isPublicGameId(value: string | null): value is PublicGameId {
 
 function gameIdForPage(page: PublicMainPage): PublicGameId | undefined {
   if (page === "palworld") return "palworld";
+  if (page === "bot") return "yoro-bot";
   return "league-of-legends";
 }
 
 function gameLabel(game: PublicGameOption): string {
   if (game.id === "league-of-legends") return t().leagueOfLegends;
-  return t().palworld;
+  if (game.id === "palworld") return t().palworld;
+  return t().yoroBot;
 }
 
 function gameSubtitle(game: PublicGameOption): string {
   if (game.id === "league-of-legends") return t().leagueOfLegendsSubtitle;
-  return t().palworldSubtitle;
+  if (game.id === "palworld") return t().palworldSubtitle;
+  return t().yoroBotSubtitle;
 }
 
 function gameSelectionLabel(game: PublicGameOption): string {
-  return game.id === "league-of-legends"
-    ? t().selectLeagueOfLegends
-    : t().selectPalworld;
+  if (game.id === "league-of-legends") return t().selectLeagueOfLegends;
+  if (game.id === "palworld") return t().selectPalworld;
+  return t().selectYoroBot;
 }
 
 export function PublicGameSelector({
@@ -207,7 +218,9 @@ export function PublicGameSelector({
                 alt=""
                 aria-hidden="true"
               />
-            ) : null}
+            ) : (
+              <span className="public-game-selector-mark is-yoro-bot" aria-hidden="true">B</span>
+            )}
             <span className="public-game-selector-copy">
               <strong data-ko={game.ko} data-ja={game.ja}>{gameLabel(game)}</strong>
               <small data-ko={game.subtitleKo} data-ja={game.subtitleJa}>
@@ -266,7 +279,9 @@ export function PublicGameSelector({
             alt=""
             aria-hidden="true"
           />
-        ) : null}
+        ) : (
+          <span className="public-game-selector-mark is-yoro-bot" aria-hidden="true">B</span>
+        )}
         <span className="public-game-selector-label" data-ko={selectedGame.ko} data-ja={selectedGame.ja}>
           {gameLabel(selectedGame)}
         </span>

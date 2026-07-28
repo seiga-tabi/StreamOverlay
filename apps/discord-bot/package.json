@@ -1,0 +1,25 @@
+{
+  "name": "@streamops/discord-bot",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "node dist/index.js",
+    "commands:plan": "tsx src/register-commands.ts plan",
+    "commands:apply": "tsx src/register-commands.ts apply",
+    "test:run": "node --test test/*.test.mjs",
+    "test": "npm run build && npm run test:run"
+  },
+  "dependencies": {
+    "@streamops/shared": "^0.1.0",
+    "discord.js": "^14.27.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.4"
+  }
+}

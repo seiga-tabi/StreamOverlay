@@ -6,6 +6,8 @@ const { isPublicDashboardAppRoute } = await import("../dist/routing/public-dashb
 test("공개 페이지 URL을 Dashboard SPA 진입 경로로 허용한다", () => {
   for (const pathname of [
     "/lol",
+    "/bot",
+    "/bot/",
     "/lol/summoners/jp/test-JP1",
     "/follow",
     "/participation",

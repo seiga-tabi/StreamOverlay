@@ -1,0 +1,122 @@
+import fs from "node:fs";
+import path from "node:path";
+
+function env(name: string, fallback = ""): string {
+  return process.env[name] ?? fallback;
+}
+
+function boolEnv(name: string, fallback = false): boolean {
+  const value = process.env[name];
+  if (value === undefined) return fallback;
+  return ["1", "true", "yes", "on"].includes(value.toLowerCase());
+}
+
+function intEnv(name: string, fallback: number): number {
+  const value = Number(process.env[name]);
+  return Number.isFinite(value) ? Math.trunc(value) : fallback;
+}
+
+function secret(name: string, production: boolean): string {
+  const direct = process.env[name];
+  const filePath = process.env[`${name}_FILE`];
+  if (direct && filePath) throw new Error(`${name}와 ${name}_FILE을 동시에 설정할 수 없습니다.`);
+  if (!filePath) {
+    if (production && direct) throw new Error(`production에서는 ${name}_FILE을 사용해야 합니다.`);
+    return direct ?? "";
+  }
+  try {
+    const resolved = path.resolve(filePath);
+    const stat = fs.lstatSync(resolved);
+    if (!stat.isFile() || stat.isSymbolicLink()) throw new Error("invalid");
+    if (production && (stat.mode & 0o077) !== 0) throw new Error("permission");
+    return fs.readFileSync(resolved, "utf8").trim();
+  } catch {
+    throw new Error(`${name}_FILE을 안전하게 읽을 수 없습니다.`);
+  }
+}
+
+function safeBaseUrl(value: string, production: boolean, label: string): string {
+  try {
+    const url = new URL(value);
+    if (
+      url.username
+      || url.password
+      || url.search
+      || url.hash
+      || url.pathname !== "/"
+      || !["http:", "https:"].includes(url.protocol)
+      || (production && label === "public" && url.protocol !== "https:")
+    ) throw new Error("invalid");
+    return url.origin;
+  } catch {
+    throw new Error(`${label === "public" ? "공개" : "내부"} base URL이 올바르지 않습니다.`);
+  }
+}
+
+const nodeEnv = env("NODE_ENV", "development");
+const production = nodeEnv === "production";
+const enabled = boolEnv("DISCORD_BOT_ENABLED", false);
+const token = enabled ? secret("DISCORD_BOT_TOKEN", production) : "";
+const internalAuthKey = enabled ? secret("DISCORD_BOT_INTERNAL_AUTH_KEY", production) : "";
+
+export const botConfig = Object.freeze({
+  nodeEnv,
+  production,
+  enabled,
+  token,
+  internalAuthKey,
+  applicationId: env("DISCORD_APPLICATION_ID").trim(),
+  testGuildId: env("DISCORD_TEST_GUILD_ID").trim(),
+  internalBaseUrl: safeBaseUrl(
+    env("DISCORD_BOT_INTERNAL_BASE_URL", "http://server:3000"),
+    production,
+    "internal"
+  ),
+  publicBaseUrl: safeBaseUrl(
+    env("DISCORD_BOT_PUBLIC_BASE_URL", "http://localhost:3000"),
+    production && enabled,
+    "public"
+  ),
+  healthPort: intEnv("DISCORD_BOT_HEALTH_PORT", 3100),
+  requestTimeoutMs: intEnv("DISCORD_BOT_INTERNAL_TIMEOUT_MS", 5_000),
+  release: {
+    version: env("APP_VERSION", "0.1.0-dev"),
+    gitSha: env("GIT_SHA", "unknown"),
+    builtAt: env("BUILD_TIME", "unknown")
+  }
+});
+
+export function validateBotConfig(): string[] {
+  if (!botConfig.enabled) return [];
+  const errors: string[] = [];
+  if (!/^[0-9]{1,32}$/u.test(botConfig.applicationId)) {
+    errors.push("DISCORD_APPLICATION_ID가 올바르지 않습니다.");
+  }
+  if (botConfig.testGuildId && !/^[0-9]{1,32}$/u.test(botConfig.testGuildId)) {
+    errors.push("DISCORD_TEST_GUILD_ID가 올바르지 않습니다.");
+  }
+  if (botConfig.production && botConfig.testGuildId) {
+    errors.push("production에서는 test Guild command를 사용할 수 없습니다.");
+  }
+  if (botConfig.token.length < 30 || /\s/u.test(botConfig.token)) {
+    errors.push("Discord Bot token이 설정되지 않았거나 올바르지 않습니다.");
+  }
+  if (botConfig.internalAuthKey.length < 32 || /\s/u.test(botConfig.internalAuthKey)) {
+    errors.push("Discord Bot 내부 인증 key는 32자 이상의 별도 secret이어야 합니다.");
+  }
+  if (botConfig.token && botConfig.token === botConfig.internalAuthKey) {
+    errors.push("Discord Bot token과 내부 인증 key를 재사용할 수 없습니다.");
+  }
+  if (botConfig.healthPort < 1024 || botConfig.healthPort > 65_535) {
+    errors.push("DISCORD_BOT_HEALTH_PORT는 1024에서 65535 사이여야 합니다.");
+  }
+  if (botConfig.requestTimeoutMs < 500 || botConfig.requestTimeoutMs > 30_000) {
+    errors.push("DISCORD_BOT_INTERNAL_TIMEOUT_MS는 500에서 30000 사이여야 합니다.");
+  }
+  return errors;
+}
+
+export function assertBotConfig(): void {
+  const errors = validateBotConfig();
+  if (errors.length) throw new Error(errors.join("\n"));
+}

@@ -43,6 +43,35 @@ services:
       TWITCH_API_TIMEOUT_MS: ${TWITCH_API_TIMEOUT_MS:-10000}
       BRIDGE_SHARED_SECRET: ${BRIDGE_SHARED_SECRET:-}
       BRIDGE_SHARED_SECRET_FILE: ${BRIDGE_SHARED_SECRET_FILE:-}
+      DATABASE_ENABLED: ${DATABASE_ENABLED:-false}
+      DATABASE_URL: ${DATABASE_URL:-}
+      DATABASE_URL_FILE: ${DATABASE_URL_FILE:-}
+      DATABASE_POOL_MAX: ${DATABASE_POOL_MAX:-10}
+      DATABASE_IDLE_TIMEOUT_MS: ${DATABASE_IDLE_TIMEOUT_MS:-30000}
+      DATABASE_CONNECTION_TIMEOUT_MS: ${DATABASE_CONNECTION_TIMEOUT_MS:-5000}
+      DATABASE_STATEMENT_TIMEOUT_MS: ${DATABASE_STATEMENT_TIMEOUT_MS:-10000}
+      DATABASE_MIGRATION_MODE: ${DATABASE_MIGRATION_MODE:-check}
+      DATABASE_SSL_MODE: ${DATABASE_SSL_MODE:-disable}
+      DISCORD_SAAS_ENABLED: ${DISCORD_SAAS_ENABLED:-false}
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID:-}
+      DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET:-}
+      DISCORD_CLIENT_SECRET_FILE: ${DISCORD_CLIENT_SECRET_FILE:-}
+      DISCORD_OAUTH_REDIRECT_URI: ${DISCORD_OAUTH_REDIRECT_URI:-}
+      DISCORD_OAUTH_TOKEN_ENCRYPTION_KEY: ${DISCORD_OAUTH_TOKEN_ENCRYPTION_KEY:-}
+      DISCORD_OAUTH_TOKEN_ENCRYPTION_KEY_FILE: ${DISCORD_OAUTH_TOKEN_ENCRYPTION_KEY_FILE:-}
+      DISCORD_SETUP_LINK_TTL_SECONDS: ${DISCORD_SETUP_LINK_TTL_SECONDS:-600}
+      DISCORD_OAUTH_SESSION_TTL_SECONDS: ${DISCORD_OAUTH_SESSION_TTL_SECONDS:-900}
+      DISCORD_API_TIMEOUT_MS: ${DISCORD_API_TIMEOUT_MS:-10000}
+      DISCORD_BOT_INTERNAL_API_ENABLED: ${DISCORD_BOT_INTERNAL_API_ENABLED:-false}
+      DISCORD_BOT_INTERNAL_AUTH_KEY: ${DISCORD_BOT_INTERNAL_AUTH_KEY:-}
+      DISCORD_BOT_INTERNAL_AUTH_KEY_FILE: ${DISCORD_BOT_INTERNAL_AUTH_KEY_FILE:-/run/secrets/discord_bot_internal_auth_key}
+      DISCORD_APPLICATION_ID: ${DISCORD_APPLICATION_ID:-}
+      DISCORD_BOT_MANAGEMENT_ENABLED: ${DISCORD_BOT_MANAGEMENT_ENABLED:-false}
+      DISCORD_MANAGEMENT_OAUTH_REDIRECT_URI: ${DISCORD_MANAGEMENT_OAUTH_REDIRECT_URI:-http://localhost:3000/api/discord/management/oauth/callback}
+      DISCORD_MANAGEMENT_OAUTH_TTL_SECONDS: ${DISCORD_MANAGEMENT_OAUTH_TTL_SECONDS:-600}
+      DISCORD_MANAGEMENT_IDLE_TTL_SECONDS: ${DISCORD_MANAGEMENT_IDLE_TTL_SECONDS:-28800}
+      DISCORD_MANAGEMENT_ABSOLUTE_TTL_SECONDS: ${DISCORD_MANAGEMENT_ABSOLUTE_TTL_SECONDS:-86400}
+      AGENT_BOOTSTRAP_TTL_SECONDS: ${AGENT_BOOTSTRAP_TTL_SECONDS:-600}
       RIOT_API_KEY: ${RIOT_API_KEY:-}
       RIOT_ACCOUNT_REGION: ${RIOT_ACCOUNT_REGION:-asia}
       RIOT_LOL_PLATFORM: ${RIOT_LOL_PLATFORM:-kr}
@@ -104,6 +133,9 @@ services:
       - ./reports:/app/reports
       - ./secrets:/run/secrets:ro
       - streamops_state:/app/.streamops
+    networks:
+      - default
+      - database_internal
     healthcheck:
       test: ["CMD", "node", "-e", "const port=process.env.PORT||3000; fetch(`http://127.0.0.1:$${port}/health/ready`).then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 30s
@@ -111,6 +143,115 @@ services:
       retries: 3
       start_period: 15s
     stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  discord-bot:
+    image: ${YORO_DISCORD_BOT_IMAGE:-streamops-discord-bot:local}
+    build:
+      context: .
+      dockerfile: apps/discord-bot/Dockerfile
+      args:
+        APP_VERSION: ${APP_VERSION:-0.1.0-dev}
+        GIT_SHA: ${GIT_SHA:-0000000000000000000000000000000000000000}
+        BUILD_TIME: ${BUILD_TIME:-1970-01-01T00:00:00.000Z}
+    profiles:
+      - discord-bot
+    restart: unless-stopped
+    depends_on:
+      server:
+        condition: service_healthy
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      DISCORD_BOT_ENABLED: ${DISCORD_BOT_ENABLED:-false}
+      DISCORD_BOT_TOKEN_FILE: /run/secrets/discord_bot_token
+      DISCORD_APPLICATION_ID: ${DISCORD_APPLICATION_ID:-}
+      DISCORD_TEST_GUILD_ID: ${DISCORD_TEST_GUILD_ID:-}
+      DISCORD_BOT_INTERNAL_AUTH_KEY_FILE: /run/secrets/discord_bot_internal_auth_key
+      DISCORD_BOT_INTERNAL_BASE_URL: http://server:${PORT:-3000}
+      DISCORD_BOT_PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:3000}
+      DISCORD_BOT_HEALTH_PORT: 3100
+      DISCORD_BOT_INTERNAL_TIMEOUT_MS: ${DISCORD_BOT_INTERNAL_TIMEOUT_MS:-5000}
+      APP_VERSION: ${APP_VERSION:-0.1.0-dev}
+      GIT_SHA: ${GIT_SHA:-0000000000000000000000000000000000000000}
+      BUILD_TIME: ${BUILD_TIME:-1970-01-01T00:00:00.000Z}
+    secrets:
+      - source: discord_bot_token
+        target: discord_bot_token
+        uid: "10002"
+        gid: "10002"
+        mode: 0400
+      - source: discord_bot_internal_auth_key
+        target: discord_bot_internal_auth_key
+        uid: "10002"
+        gid: "10002"
+        mode: 0400
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - default
+      - database_internal
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3100/health/ready').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    mem_limit: 256m
+    cpus: 0.25
+    stop_grace_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  postgres:
+    image: ${POSTGRES_IMAGE:-postgres:16.6-bookworm}
+    restart: unless-stopped
+    profiles:
+      - database
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-streamops_app}
+      POSTGRES_DB: ${POSTGRES_DB:-streamops}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    command:
+      - postgres
+      - -c
+      - shared_buffers=256MB
+      - -c
+      - effective_cache_size=1GB
+      - -c
+      - work_mem=4MB
+      - -c
+      - maintenance_work_mem=64MB
+      - -c
+      - max_connections=30
+    secrets:
+      - postgres_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - database_internal
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    shm_size: 128m
+    mem_limit: 768m
+    cpus: 0.75
     logging:
       driver: json-file
       options:
@@ -135,3 +276,16 @@ services:
 
 volumes:
   streamops_state:
+  postgres_data:
+
+networks:
+  database_internal:
+    internal: true
+
+secrets:
+  postgres_password:
+    file: ${POSTGRES_PASSWORD_FILE:-./secrets/postgres_password}
+  discord_bot_token:
+    file: ${DISCORD_BOT_TOKEN_SOURCE_FILE:-./discord-bot-secrets/discord_bot_token}
+  discord_bot_internal_auth_key:
+    file: ${DISCORD_BOT_INTERNAL_AUTH_KEY_SOURCE_FILE:-./secrets/discord_bot_internal_auth_key}

@@ -1,0 +1,711 @@
+import crypto from "node:crypto";
+import type { Pool } from "pg";
+import { appConfig } from "../config.js";
+import { withTransaction } from "../database/transaction.js";
+import { SafeDatabaseError } from "../database/errors.js";
+import {
+  DiscordOnboardingRepository,
+  type DiscordAuthenticatedSession,
+  type DiscordGuildCandidateRecord
+} from "../database/repositories/discord-onboarding-repository.js";
+import {
+  decryptDiscordSecret,
+  discordPkceChallenge,
+  discordSafeToken,
+  discordSecretHash,
+  encryptDiscordSecret
+} from "./discord-oauth-crypto.js";
+import { isDiscordSnowflake } from "@streamops/shared";
+
+const DISCORD_API_BASE = "https://discord.com/api/v10";
+const DISCORD_AUTHORIZE_URL = "https://discord.com/oauth2/authorize";
+const DISCORD_TOKEN_URL = "https://discord.com/api/oauth2/token";
+const ADMINISTRATOR = 1n << 3n;
+const MANAGE_GUILD = 1n << 5n;
+const SETUP_RETURN_PATH = "/setup/discord";
+
+export const DISCORD_ONBOARDING_COOKIE = "yoro_discord_onboarding";
+
+export type DiscordOnboardingErrorCode =
+  | "feature_disabled"
+  | "database_unavailable"
+  | "setup_session_invalid"
+  | "setup_session_expired"
+  | "setup_session_consumed"
+  | "discord_session_unavailable"
+  | "discord_oauth_failed"
+  | "discord_response_invalid"
+  | "guild_permission_required"
+  | "guild_already_connected"
+  | "discord_identity_mismatch"
+  | "guild_binding_mismatch"
+  | "bot_installation_required"
+  | "setup_session_active"
+  | "organization_permission_required"
+  | "csrf_required";
+
+export class DiscordOnboardingError extends Error {
+  constructor(
+    readonly code: DiscordOnboardingErrorCode,
+    readonly status: 400 | 401 | 403 | 404 | 409 | 503
+  ) {
+    super(code);
+    this.name = "DiscordOnboardingError";
+  }
+}
+
+type DiscordTokenRecord = {
+  accessToken: string;
+  tokenType: "Bearer";
+  expiresAt: string;
+  scope: "identify guilds";
+};
+
+type DiscordTokenResponse = {
+  access_token?: unknown;
+  token_type?: unknown;
+  expires_in?: unknown;
+  scope?: unknown;
+};
+
+type DiscordProfileResponse = {
+  id?: unknown;
+  username?: unknown;
+  global_name?: unknown;
+  avatar?: unknown;
+};
+
+type DiscordGuildResponse = {
+  id?: unknown;
+  name?: unknown;
+  icon?: unknown;
+  owner?: unknown;
+  permissions?: unknown;
+};
+
+export type DiscordManageableGuild = Readonly<{
+  id: string;
+  name: string;
+  iconUrl?: string;
+  manageable: true;
+}>;
+
+export type DiscordOnboardingSessionView = Readonly<{
+  authenticated: true;
+  csrfToken: string;
+  guilds: readonly DiscordManageableGuild[];
+  organizations: readonly { id: string; displayName: string }[];
+}>;
+
+type AuditLogger = {
+  event?: (entry: Record<string, unknown>) => void;
+  error?: (entry: Record<string, unknown>) => void;
+};
+
+type FetchLike = typeof fetch;
+
+function validSnowflake(value: unknown): value is string {
+  return typeof value === "string" && /^[0-9]{1,32}$/u.test(value);
+}
+
+function safeName(value: unknown, fallback: string, maximum: number): string {
+  if (typeof value !== "string") return fallback;
+  const normalized = value.replace(/[\u0000-\u001f\u007f]/gu, "").trim().slice(0, maximum);
+  return normalized || fallback;
+}
+
+function avatarReference(value: unknown): string | undefined {
+  return typeof value === "string" && /^[a-f0-9_]{1,128}$/iu.test(value)
+    ? value
+    : undefined;
+}
+
+export function parseDiscordManageableGuild(value: DiscordGuildResponse): DiscordManageableGuild | undefined {
+  if (!validSnowflake(value.id)) return undefined;
+  if (typeof value.permissions !== "string" || !/^[0-9]{1,80}$/u.test(value.permissions)) return undefined;
+  let permissions: bigint;
+  try {
+    permissions = BigInt(value.permissions);
+  } catch {
+    return undefined;
+  }
+  const manageable = value.owner === true
+    || (permissions & ADMINISTRATOR) === ADMINISTRATOR
+    || (permissions & MANAGE_GUILD) === MANAGE_GUILD;
+  if (!manageable) return undefined;
+  const icon = avatarReference(value.icon);
+  return Object.freeze({
+    id: value.id,
+    name: safeName(value.name, `Discord ${value.id}`, 120),
+    ...(icon ? {
+      iconUrl: `https://cdn.discordapp.com/icons/${value.id}/${icon}.webp?size=128`
+    } : {}),
+    manageable: true as const
+  });
+}
+
+function parseCookieBinding(cookieValue: string | undefined): {
+  binding: string;
+  csrfToken: string;
+} | undefined {
+  if (!cookieValue || cookieValue.length > 256) return undefined;
+  const [binding, csrfToken, extra] = cookieValue.split(".");
+  if (
+    extra !== undefined
+    || !binding
+    || !csrfToken
+    || !/^[A-Za-z0-9_-]{32,128}$/u.test(binding)
+    || !/^[A-Za-z0-9_-]{32,128}$/u.test(csrfToken)
+  ) return undefined;
+  return { binding, csrfToken };
+}
+
+function safeSetupToken(value: string): string {
+  if (!/^[A-Za-z0-9_-]{32,128}$/u.test(value)) {
+    throw new DiscordOnboardingError("setup_session_invalid", 404);
+  }
+  return value;
+}
+
+export function discordOnboardingCookie(value: string): string {
+  return [
+    `${DISCORD_ONBOARDING_COOKIE}=${encodeURIComponent(value)}`,
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Lax",
+    `Max-Age=${appConfig.discordSaas.oauthSessionTtlSeconds}`,
+    appConfig.nodeEnv === "production" ? "Secure" : ""
+  ].filter(Boolean).join("; ");
+}
+
+export function clearDiscordOnboardingCookie(): string {
+  return [
+    `${DISCORD_ONBOARDING_COOKIE}=`,
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Lax",
+    "Max-Age=0",
+    appConfig.nodeEnv === "production" ? "Secure" : ""
+  ].filter(Boolean).join("; ");
+}
+
+export class DiscordOnboardingService {
+  private cleanupTimer?: NodeJS.Timeout;
+
+  constructor(
+    private readonly pool: Pool,
+    private readonly logger?: AuditLogger,
+    private readonly fetchImpl: FetchLike = fetch
+  ) {}
+
+  startCleanup(): void {
+    if (this.cleanupTimer) return;
+    this.cleanupTimer = setInterval(() => {
+      void this.expireSessions().catch(() => undefined);
+    }, 60_000);
+    this.cleanupTimer.unref();
+  }
+
+  stopCleanup(): void {
+    if (this.cleanupTimer) clearInterval(this.cleanupTimer);
+    this.cleanupTimer = undefined;
+  }
+
+  async issueSetupSession(input: {
+    applicationId?: string;
+    guildId?: string;
+    userId?: string;
+    issuedVia?: "bot_command" | "operator_test";
+  } = {}): Promise<{ url: string; expiresAt: string }> {
+    const issuedVia = input.issuedVia ?? "operator_test";
+    const repository = new DiscordOnboardingRepository(this.pool);
+    // 만료 시각이 지난 세션이 다음 명령을 막지 않도록 새 발급 직전에 상태를 정리합니다.
+    await repository.expireSessions();
+    if (issuedVia === "bot_command") {
+      if (
+        !isDiscordSnowflake(input.applicationId)
+        || !isDiscordSnowflake(input.guildId)
+        || !isDiscordSnowflake(input.userId)
+      ) {
+        throw new DiscordOnboardingError("setup_session_invalid", 404);
+      }
+      const installed = await repository.activeBotInstallationExists({
+          applicationId: input.applicationId,
+          guildId: input.guildId
+        });
+      if (!installed) {
+        throw new DiscordOnboardingError("bot_installation_required", 409);
+      }
+    }
+    const token = discordSafeToken();
+    const expiresAt = new Date(Date.now() + appConfig.discordSaas.setupLinkTtlSeconds * 1_000);
+    try {
+      await repository.issueSetupSession({
+        id: crypto.randomUUID(),
+        tokenHash: discordSecretHash(token),
+        expiresAt,
+        issuedVia,
+        ...(issuedVia === "bot_command" ? {
+          requestedApplicationId: input.applicationId,
+          requestedDiscordGuildId: input.guildId,
+          requestedByDiscordUserId: input.userId
+        } : {})
+      });
+    } catch (error) {
+      if (error instanceof SafeDatabaseError && error.code === "DATABASE_CONFLICT") {
+        throw new DiscordOnboardingError("setup_session_active", 409);
+      }
+      throw error;
+    }
+    const url = new URL(SETUP_RETURN_PATH, appConfig.dashboardBaseUrl);
+    url.searchParams.set("setup", token);
+    this.logger?.event?.({ type: "discord.setup.issued", expiresAt: expiresAt.toISOString() });
+    return { url: url.toString(), expiresAt: expiresAt.toISOString() };
+  }
+
+  async observeBotInstallation(input: {
+    applicationId: string;
+    guildId: string;
+  }): Promise<void> {
+    if (
+      !isDiscordSnowflake(input.applicationId)
+      || !isDiscordSnowflake(input.guildId)
+      || input.applicationId !== appConfig.discordBotInternal.applicationId
+    ) {
+      throw new DiscordOnboardingError("setup_session_invalid", 404);
+    }
+    await new DiscordOnboardingRepository(this.pool).observeBotInstallation(input);
+    this.logger?.event?.({ type: "discord.installation.observed" });
+  }
+
+  async revokeBotInstallation(input: {
+    applicationId: string;
+    guildId: string;
+  }): Promise<void> {
+    if (
+      !isDiscordSnowflake(input.applicationId)
+      || !isDiscordSnowflake(input.guildId)
+      || input.applicationId !== appConfig.discordBotInternal.applicationId
+    ) {
+      throw new DiscordOnboardingError("setup_session_invalid", 404);
+    }
+    await new DiscordOnboardingRepository(this.pool).revokeBotInstallation(input);
+    this.logger?.event?.({ type: "discord.installation.revoked" });
+  }
+
+  async beginOAuth(setupToken: string): Promise<{
+    authorizationUrl: string;
+    cookieValue: string;
+  }> {
+    const oauthSessionId = crypto.randomUUID();
+    const state = discordSafeToken();
+    const binding = discordSafeToken();
+    const csrfToken = discordSafeToken();
+    const verifier = discordSafeToken(48);
+    const expiresAt = new Date(Date.now() + appConfig.discordSaas.oauthSessionTtlSeconds * 1_000);
+    const encryptedVerifier = encryptDiscordSecret(
+      verifier,
+      appConfig.discordSaas.tokenEncryptionKey,
+      appConfig.discordSaas.tokenEncryptionKeyVersion,
+      {
+        sessionId: oauthSessionId,
+        discordUserId: "pending",
+        purpose: "pkce_verifier"
+      }
+    );
+    const created = await withTransaction(this.pool, async (client) =>
+      new DiscordOnboardingRepository(client).beginOAuthSession({
+        setupTokenHash: discordSecretHash(safeSetupToken(setupToken)),
+        oauthSessionId,
+        stateHash: discordSecretHash(state),
+        cookieBindingHash: discordSecretHash(binding),
+        csrfTokenHash: discordSecretHash(csrfToken),
+        encryptedPkceVerifier: encryptedVerifier,
+        expiresAt
+      })
+    );
+    if (!created) throw new DiscordOnboardingError("setup_session_expired", 404);
+    const authorizationUrl = new URL(DISCORD_AUTHORIZE_URL);
+    authorizationUrl.searchParams.set("response_type", "code");
+    authorizationUrl.searchParams.set("client_id", appConfig.discordSaas.clientId);
+    authorizationUrl.searchParams.set("scope", "identify guilds");
+    authorizationUrl.searchParams.set("redirect_uri", appConfig.discordSaas.redirectUri);
+    authorizationUrl.searchParams.set("state", state);
+    authorizationUrl.searchParams.set("code_challenge", discordPkceChallenge(verifier));
+    authorizationUrl.searchParams.set("code_challenge_method", "S256");
+    this.logger?.event?.({
+      type: "discord.oauth.started",
+      correlationId: oauthSessionId
+    });
+    return {
+      authorizationUrl: authorizationUrl.toString(),
+      cookieValue: `${binding}.${csrfToken}`
+    };
+  }
+
+  async completeOAuth(input: {
+    state: string;
+    code: string;
+    cookieValue?: string;
+  }): Promise<void> {
+    const cookie = parseCookieBinding(input.cookieValue);
+    if (
+      !cookie
+      || !/^[A-Za-z0-9_-]{32,128}$/u.test(input.state)
+      || input.code.length < 1
+      || input.code.length > 1024
+    ) {
+      throw new DiscordOnboardingError("discord_oauth_failed", 401);
+    }
+    const oauth = await withTransaction(this.pool, async (client) =>
+      new DiscordOnboardingRepository(client).consumeOAuthState({
+        stateHash: discordSecretHash(input.state),
+        cookieBindingHash: discordSecretHash(cookie.binding)
+      })
+    );
+    if (!oauth) throw new DiscordOnboardingError("discord_oauth_failed", 401);
+
+    let verifier: string;
+    try {
+      verifier = decryptDiscordSecret(
+        oauth.encryptedPkceVerifier,
+        appConfig.discordSaas.tokenEncryptionKey,
+        {
+          sessionId: oauth.id,
+          discordUserId: "pending",
+          purpose: "pkce_verifier"
+        }
+      );
+    } catch {
+      await new DiscordOnboardingRepository(this.pool).markEncryptionFailed(oauth.id);
+      throw new DiscordOnboardingError("discord_session_unavailable", 503);
+    }
+
+    try {
+      const token = await this.exchangeCode(input.code, verifier);
+      const profile = await this.fetchProfile(token.accessToken);
+      const manageableGuilds = await this.fetchManageableGuilds(token.accessToken);
+      if (
+        oauth.issuedVia === "bot_command"
+        && oauth.requestedByDiscordUserId !== profile.id
+      ) {
+        await new DiscordOnboardingRepository(this.pool).revokeBoundSession({
+          oauthSessionId: oauth.id,
+          setupSessionId: oauth.setupSessionId
+        });
+        throw new DiscordOnboardingError("discord_identity_mismatch", 403);
+      }
+      const guilds = oauth.requestedDiscordGuildId
+        ? manageableGuilds.filter((guild) => guild.id === oauth.requestedDiscordGuildId)
+        : manageableGuilds;
+      if (oauth.requestedDiscordGuildId && guilds.length !== 1) {
+        await new DiscordOnboardingRepository(this.pool).revokeBoundSession({
+          oauthSessionId: oauth.id,
+          setupSessionId: oauth.setupSessionId
+        });
+        throw new DiscordOnboardingError("guild_permission_required", 403);
+      }
+      await withTransaction(this.pool, async (client) => {
+        const repository = new DiscordOnboardingRepository(client);
+        const identity = await repository.upsertDiscordIdentity({
+          identityId: crypto.randomUUID(),
+          userId: crypto.randomUUID(),
+          discordUserId: profile.id,
+          displayName: profile.displayName,
+          ...(profile.avatarReference ? { avatarReference: profile.avatarReference } : {})
+        });
+        const encryptedToken = encryptDiscordSecret(
+          JSON.stringify(token),
+          appConfig.discordSaas.tokenEncryptionKey,
+          appConfig.discordSaas.tokenEncryptionKeyVersion,
+          {
+            sessionId: oauth.id,
+            discordUserId: profile.id,
+            purpose: "oauth_token"
+          }
+        );
+        await repository.authenticateOAuthSession({
+          oauthSessionId: oauth.id,
+          setupSessionId: oauth.setupSessionId,
+          identityId: identity.identityId,
+          encryptedTokenRecord: encryptedToken,
+          tokenExpiresAt: new Date(token.expiresAt)
+        });
+        await repository.replaceGuildCandidates(oauth.id, guilds);
+      });
+      this.logger?.event?.({
+        type: "discord.oauth.completed",
+        correlationId: oauth.id
+      });
+    } catch (error) {
+      this.logger?.error?.({
+        type: "discord.oauth.failed",
+        correlationId: oauth.id,
+        errorCode: error instanceof DiscordOnboardingError ? error.code : "discord_oauth_failed"
+      });
+      if (error instanceof DiscordOnboardingError) throw error;
+      throw new DiscordOnboardingError("discord_oauth_failed", 503);
+    }
+  }
+
+  async session(cookieValue?: string): Promise<DiscordOnboardingSessionView | undefined> {
+    const cookie = parseCookieBinding(cookieValue);
+    if (!cookie) return undefined;
+    const repository = new DiscordOnboardingRepository(this.pool);
+    const session = await repository.findAuthenticatedByCookie(discordSecretHash(cookie.binding));
+    if (!session || !crypto.timingSafeEqual(session.csrfTokenHash, discordSecretHash(cookie.csrfToken))) {
+      return undefined;
+    }
+    await this.decryptToken(session);
+    const [guilds, organizations] = await Promise.all([
+      repository.listGuildCandidates(session.oauthSessionId),
+      repository.listOwnedOrganizations(session.internalUserId)
+    ]);
+    return Object.freeze({
+      authenticated: true as const,
+      csrfToken: cookie.csrfToken,
+      guilds: guilds.map((guild) => ({ ...guild, manageable: true as const })),
+      organizations
+    });
+  }
+
+  async connectGuild(input: {
+    cookieValue?: string;
+    csrfToken?: string;
+    guildId: string;
+    organizationId?: string;
+  }): Promise<{ guild: { id: string; name: string }; organization: { id: string; displayName: string } }> {
+    const cookie = parseCookieBinding(input.cookieValue);
+    if (!cookie || !input.csrfToken || input.csrfToken !== cookie.csrfToken) {
+      throw new DiscordOnboardingError("csrf_required", 403);
+    }
+    const repository = new DiscordOnboardingRepository(this.pool);
+    const session = await repository.findAuthenticatedByCookie(discordSecretHash(cookie.binding));
+    if (!session || !crypto.timingSafeEqual(session.csrfTokenHash, discordSecretHash(input.csrfToken))) {
+      throw new DiscordOnboardingError("discord_session_unavailable", 401);
+    }
+    if (!validSnowflake(input.guildId)) {
+      throw new DiscordOnboardingError("guild_permission_required", 403);
+    }
+    if (
+      session.requestedDiscordGuildId
+      && session.requestedDiscordGuildId !== input.guildId
+    ) {
+      throw new DiscordOnboardingError("guild_binding_mismatch", 403);
+    }
+    if (
+      session.requestedByDiscordUserId
+      && session.requestedByDiscordUserId !== session.discordUserId
+    ) {
+      throw new DiscordOnboardingError("discord_identity_mismatch", 403);
+    }
+    const token = await this.decryptToken(session);
+    const verifiedGuild = (await this.fetchManageableGuilds(token.accessToken))
+      .find((guild) => guild.id === input.guildId);
+    if (!verifiedGuild) {
+      this.logger?.event?.({
+        type: "discord.guild.connection_rejected",
+        errorCode: "guild_permission_required"
+      });
+      throw new DiscordOnboardingError("guild_permission_required", 403);
+    }
+
+    const result = await withTransaction(this.pool, async (client) => {
+      const transactional = new DiscordOnboardingRepository(client);
+      const setupStatus = await transactional.lockSetupForConnection(
+        session.setupSessionId,
+        session.discordIdentityId
+      );
+      if (setupStatus === "completed") {
+        throw new DiscordOnboardingError("setup_session_consumed", 409);
+      }
+      if (setupStatus !== "authenticated" && setupStatus !== "guild_selected") {
+        throw new DiscordOnboardingError("setup_session_expired", 409);
+      }
+      let organizationId = input.organizationId;
+      let organizationDisplayName = verifiedGuild.name;
+      if (organizationId) {
+        if (!await transactional.ownedOrganizationExists(session.internalUserId, organizationId)) {
+          throw new DiscordOnboardingError("organization_permission_required", 403);
+        }
+        const organizations = await transactional.listOwnedOrganizations(session.internalUserId);
+        const selected = organizations.find((organization) => organization.id === organizationId);
+        if (!selected) throw new DiscordOnboardingError("organization_permission_required", 403);
+        organizationDisplayName = selected.displayName;
+      } else {
+        organizationId = crypto.randomUUID();
+        await transactional.createOrganizationForGuild({
+          organizationId,
+          userId: session.internalUserId,
+          displayName: verifiedGuild.name
+        });
+      }
+      const connectedOrganization = await transactional.connectedGuildOrganization(verifiedGuild.id);
+      if (connectedOrganization) {
+        if (connectedOrganization !== organizationId) {
+          throw new DiscordOnboardingError("guild_already_connected", 409);
+        }
+        await transactional.completeExistingGuild({
+          setupSessionId: session.setupSessionId,
+          oauthSessionId: session.oauthSessionId,
+          organizationId
+        });
+        return {
+          guild: { id: verifiedGuild.id, name: verifiedGuild.name },
+          organization: { id: organizationId, displayName: organizationDisplayName }
+        };
+      }
+      await transactional.connectGuild({
+        guildRecordId: crypto.randomUUID(),
+        organizationId,
+        discordGuildId: verifiedGuild.id,
+        displayName: verifiedGuild.name,
+        setupSessionId: session.setupSessionId,
+        oauthSessionId: session.oauthSessionId,
+        actorUserId: session.internalUserId,
+        auditId: crypto.randomUUID(),
+        targetHash: discordSecretHash(verifiedGuild.id),
+        ...(session.requestedApplicationId ? {
+          installationId: crypto.randomUUID(),
+          applicationId: session.requestedApplicationId
+        } : {})
+      });
+      return {
+        guild: { id: verifiedGuild.id, name: verifiedGuild.name },
+        organization: { id: organizationId, displayName: organizationDisplayName }
+      };
+    });
+    this.logger?.event?.({
+      type: "discord.guild.connected",
+      organizationId: result.organization.id,
+      guildId: result.guild.id
+    });
+    return result;
+  }
+
+  async logout(cookieValue?: string): Promise<void> {
+    const cookie = parseCookieBinding(cookieValue);
+    if (!cookie) return;
+    await new DiscordOnboardingRepository(this.pool).revokeByCookie(
+      discordSecretHash(cookie.binding)
+    );
+  }
+
+  async expireSessions(): Promise<number> {
+    const expired = await new DiscordOnboardingRepository(this.pool).expireSessions();
+    if (expired > 0) this.logger?.event?.({ type: "discord.setup.expired", count: expired });
+    return expired;
+  }
+
+  private async decryptToken(session: DiscordAuthenticatedSession): Promise<DiscordTokenRecord> {
+    let plaintext: string;
+    try {
+      plaintext = decryptDiscordSecret(
+        session.encryptedTokenRecord,
+        appConfig.discordSaas.tokenEncryptionKey,
+        {
+          sessionId: session.oauthSessionId,
+          discordUserId: session.discordUserId,
+          purpose: "oauth_token"
+        }
+      );
+    } catch {
+      await new DiscordOnboardingRepository(this.pool).markEncryptionFailed(session.oauthSessionId);
+      throw new DiscordOnboardingError("discord_session_unavailable", 503);
+    }
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(plaintext);
+    } catch {
+      throw new DiscordOnboardingError("discord_session_unavailable", 503);
+    }
+    const record = parsed as Partial<DiscordTokenRecord>;
+    if (
+      typeof record.accessToken !== "string"
+      || record.tokenType !== "Bearer"
+      || record.scope !== "identify guilds"
+      || typeof record.expiresAt !== "string"
+      || Date.parse(record.expiresAt) <= Date.now()
+    ) {
+      throw new DiscordOnboardingError("discord_session_unavailable", 401);
+    }
+    return record as DiscordTokenRecord;
+  }
+
+  private async exchangeCode(code: string, verifier: string): Promise<DiscordTokenRecord> {
+    const body = new URLSearchParams({
+      grant_type: "authorization_code",
+      code,
+      redirect_uri: appConfig.discordSaas.redirectUri,
+      client_id: appConfig.discordSaas.clientId,
+      client_secret: appConfig.discordSaas.clientSecret,
+      code_verifier: verifier
+    });
+    const response = await this.fetchImpl(DISCORD_TOKEN_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body,
+      signal: AbortSignal.timeout(appConfig.discordSaas.apiTimeoutMs)
+    });
+    if (!response.ok) throw new DiscordOnboardingError("discord_oauth_failed", 503);
+    const token = await response.json() as DiscordTokenResponse;
+    const scopes = typeof token.scope === "string"
+      ? token.scope.split(/\s+/u).filter(Boolean).sort().join(" ")
+      : "";
+    if (
+      typeof token.access_token !== "string"
+      || token.access_token.length < 16
+      || token.token_type !== "Bearer"
+      || !Number.isFinite(token.expires_in)
+      || Number(token.expires_in) <= 0
+      || scopes !== "guilds identify"
+    ) {
+      throw new DiscordOnboardingError("discord_response_invalid", 503);
+    }
+    return {
+      accessToken: token.access_token,
+      tokenType: "Bearer",
+      expiresAt: new Date(Date.now() + Number(token.expires_in) * 1_000).toISOString(),
+      scope: "identify guilds"
+    };
+  }
+
+  private async fetchProfile(accessToken: string): Promise<{
+    id: string;
+    displayName: string;
+    avatarReference?: string;
+  }> {
+    const response = await this.discordGet("/users/@me", accessToken);
+    const profile = await response.json() as DiscordProfileResponse;
+    if (!validSnowflake(profile.id)) {
+      throw new DiscordOnboardingError("discord_response_invalid", 503);
+    }
+    const avatar = avatarReference(profile.avatar);
+    return {
+      id: profile.id,
+      displayName: safeName(profile.global_name ?? profile.username, `Discord ${profile.id}`, 80),
+      ...(avatar ? { avatarReference: avatar } : {})
+    };
+  }
+
+  private async fetchManageableGuilds(accessToken: string): Promise<DiscordManageableGuild[]> {
+    const response = await this.discordGet("/users/@me/guilds", accessToken);
+    const raw = await response.json() as unknown;
+    if (!Array.isArray(raw) || raw.length > 500) {
+      throw new DiscordOnboardingError("discord_response_invalid", 503);
+    }
+    return raw
+      .map((value) => parseDiscordManageableGuild(value as DiscordGuildResponse))
+      .filter((value): value is DiscordManageableGuild => Boolean(value))
+      .sort((left, right) => left.name.localeCompare(right.name) || left.id.localeCompare(right.id));
+  }
+
+  private async discordGet(pathname: string, accessToken: string): Promise<Response> {
+    const response = await this.fetchImpl(`${DISCORD_API_BASE}${pathname}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      signal: AbortSignal.timeout(appConfig.discordSaas.apiTimeoutMs)
+    });
+    if (!response.ok) throw new DiscordOnboardingError("discord_oauth_failed", 503);
+    return response;
+  }
+}

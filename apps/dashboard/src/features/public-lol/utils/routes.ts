@@ -9,6 +9,7 @@ const PUBLIC_CONTACT_PATH = "/contact";
 const PUBLIC_PAGE_PATHS: Partial<Record<PublicMainPage, string>> = {
   search: "/",
   palworld: "/palworld",
+  bot: "/bot",
   subscriptions: "/follow",
   followJoin: "/participation",
   patch: "/community/server",

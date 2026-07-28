@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import crypto from "node:crypto";
 import fs from "node:fs";
+import net from "node:net";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -36,6 +37,25 @@ function envOrFile(name: string, fallback = ""): string {
     }
   }
   return direct ?? fallback;
+}
+
+function secretEnvOrFile(name: string): string {
+  const direct = process.env[name];
+  const filePath = process.env[`${name}_FILE`];
+  if (direct && filePath) {
+    throw new Error(`${name}와 ${name}_FILE은 동시에 설정할 수 없습니다.`);
+  }
+  if (!filePath) return direct ?? "";
+  try {
+    const stat = fs.lstatSync(filePath);
+    if (!stat.isFile() || stat.isSymbolicLink()) throw new Error("invalid secret file");
+    if (nodeEnv === "production" && (stat.mode & 0o077) !== 0) {
+      throw new Error("insecure secret file");
+    }
+    return fs.readFileSync(filePath, "utf8").trim();
+  } catch {
+    throw new Error(`${name}_FILE을 안전하게 읽을 수 없습니다.`);
+  }
 }
 
 function boolEnv(name: string, fallback = false): boolean {
@@ -97,6 +117,19 @@ const dashboardAuthToken = localNoAuth ? "" : envOrFile("DASHBOARD_AUTH_TOKEN");
 const overlayAccessToken = localNoAuth ? "" : envOrFile("OVERLAY_ACCESS_TOKEN");
 const bridgeSharedSecret = envOrFile("BRIDGE_SHARED_SECRET", "dev-secret-change-me");
 const imageBuild = imageReleaseMetadata();
+const databaseEnabled = boolEnv("DATABASE_ENABLED", false);
+if (process.env.DATABASE_URL && process.env.DATABASE_URL_FILE) {
+  throw new Error("DATABASE_URL과 DATABASE_URL_FILE은 동시에 설정할 수 없습니다.");
+}
+const databaseUrl = databaseEnabled ? envOrFile("DATABASE_URL") : "";
+const discordSaasEnabled = boolEnv("DISCORD_SAAS_ENABLED", false);
+const discordClientSecret = secretEnvOrFile("DISCORD_CLIENT_SECRET");
+const discordTokenEncryptionKey = secretEnvOrFile("DISCORD_OAUTH_TOKEN_ENCRYPTION_KEY");
+const discordBotInternalApiEnabled = boolEnv("DISCORD_BOT_INTERNAL_API_ENABLED", false);
+const discordBotInternalAuthKey = discordBotInternalApiEnabled
+  ? secretEnvOrFile("DISCORD_BOT_INTERNAL_AUTH_KEY")
+  : "";
+const discordBotManagementEnabled = boolEnv("DISCORD_BOT_MANAGEMENT_ENABLED", false);
 
 export const appConfig = {
   nodeEnv,
@@ -135,6 +168,46 @@ export const appConfig = {
   },
   bridge: {
     sharedSecret: bridgeSharedSecret
+  },
+  database: {
+    enabled: databaseEnabled,
+    url: databaseUrl,
+    poolMax: intEnv("DATABASE_POOL_MAX", 10),
+    idleTimeoutMs: intEnv("DATABASE_IDLE_TIMEOUT_MS", 30_000),
+    connectionTimeoutMs: intEnv("DATABASE_CONNECTION_TIMEOUT_MS", 5_000),
+    statementTimeoutMs: intEnv("DATABASE_STATEMENT_TIMEOUT_MS", 10_000),
+    migrationMode: env("DATABASE_MIGRATION_MODE", "check"),
+    sslMode: env("DATABASE_SSL_MODE", "disable")
+  },
+  discordSaas: {
+    enabled: discordSaasEnabled,
+    clientId: env("DISCORD_CLIENT_ID").trim(),
+    clientSecret: discordClientSecret,
+    redirectUri: env(
+      "DISCORD_OAUTH_REDIRECT_URI",
+      `${env("PUBLIC_BASE_URL", "http://localhost:3000")}/api/discord/oauth/callback`
+    ).trim(),
+    tokenEncryptionKey: discordTokenEncryptionKey,
+    tokenEncryptionKeyVersion: 1,
+    setupLinkTtlSeconds: intEnv("DISCORD_SETUP_LINK_TTL_SECONDS", 600),
+    oauthSessionTtlSeconds: intEnv("DISCORD_OAUTH_SESSION_TTL_SECONDS", 900),
+    apiTimeoutMs: intEnv("DISCORD_API_TIMEOUT_MS", 10_000)
+  },
+  discordBotInternal: {
+    enabled: discordBotInternalApiEnabled,
+    authKey: discordBotInternalAuthKey,
+    applicationId: env("DISCORD_APPLICATION_ID").trim()
+  },
+  discordBotManagement: {
+    enabled: discordBotManagementEnabled,
+    redirectUri: env(
+      "DISCORD_MANAGEMENT_OAUTH_REDIRECT_URI",
+      `${env("PUBLIC_BASE_URL", "http://localhost:3000")}/api/discord/management/oauth/callback`
+    ).trim(),
+    oauthTtlSeconds: intEnv("DISCORD_MANAGEMENT_OAUTH_TTL_SECONDS", 600),
+    idleTtlSeconds: intEnv("DISCORD_MANAGEMENT_IDLE_TTL_SECONDS", 28_800),
+    absoluteTtlSeconds: intEnv("DISCORD_MANAGEMENT_ABSOLUTE_TTL_SECONDS", 86_400),
+    agentTokenTtlSeconds: intEnv("AGENT_BOOTSTRAP_TTL_SECONDS", 600)
   },
   riot: {
     apiKey: env("RIOT_API_KEY"),
@@ -251,6 +324,227 @@ function validateHttpsUrl(errors: string[], name: string, value: string): void {
     if (parsed.username || parsed.password) errors.push(`${name}에 URL 인증 정보를 포함할 수 없습니다.`);
   } catch {
     errors.push(`${name}이 올바른 URL이 아닙니다.`);
+  }
+}
+
+function isPrivateDatabaseHostname(hostname: string): boolean {
+  const normalized = hostname.toLowerCase();
+  if (
+    normalized === "localhost"
+    || normalized === "postgres"
+    || normalized.endsWith(".localhost")
+    || normalized.endsWith(".local")
+    || normalized.endsWith(".internal")
+  ) return true;
+  const ipVersion = net.isIP(normalized);
+  if (ipVersion === 4) {
+    const [a, b] = normalized.split(".").map(Number);
+    return a === 10
+      || a === 127
+      || (a === 169 && b === 254)
+      || (a === 172 && b! >= 16 && b! <= 31)
+      || (a === 192 && b === 168);
+  }
+  if (ipVersion === 6) {
+    return normalized === "::1"
+      || normalized.startsWith("fc")
+      || normalized.startsWith("fd")
+      || normalized.startsWith("fe8")
+      || normalized.startsWith("fe9")
+      || normalized.startsWith("fea")
+      || normalized.startsWith("feb");
+  }
+  return false;
+}
+
+function validateDatabaseConfig(errors: string[]): void {
+  const config = appConfig.database;
+  if (!config.enabled) return;
+  if (!config.url) {
+    errors.push("DATABASE_ENABLED=true이면 DATABASE_URL 또는 DATABASE_URL_FILE이 필요합니다.");
+    return;
+  }
+  if (config.poolMax < 1 || config.poolMax > 10) {
+    errors.push("DATABASE_POOL_MAX는 1에서 10 사이여야 합니다.");
+  }
+  if (config.idleTimeoutMs < 1_000 || config.idleTimeoutMs > 300_000) {
+    errors.push("DATABASE_IDLE_TIMEOUT_MS는 1000에서 300000 사이여야 합니다.");
+  }
+  if (config.connectionTimeoutMs < 500 || config.connectionTimeoutMs > 30_000) {
+    errors.push("DATABASE_CONNECTION_TIMEOUT_MS는 500에서 30000 사이여야 합니다.");
+  }
+  if (config.statementTimeoutMs < 500 || config.statementTimeoutMs > 60_000) {
+    errors.push("DATABASE_STATEMENT_TIMEOUT_MS는 500에서 60000 사이여야 합니다.");
+  }
+  if (config.migrationMode !== "check") {
+    errors.push("DATABASE_MIGRATION_MODE는 check만 허용합니다.");
+  }
+  if (!["disable", "require", "verify-full"].includes(config.sslMode)) {
+    errors.push("DATABASE_SSL_MODE는 disable, require, verify-full 중 하나여야 합니다.");
+  }
+  try {
+    const parsed = new URL(config.url);
+    if (!["postgres:", "postgresql:"].includes(parsed.protocol)) {
+      errors.push("Database 연결 설정은 PostgreSQL URL이어야 합니다.");
+      return;
+    }
+    if (!parsed.hostname || !parsed.pathname || parsed.pathname === "/") {
+      errors.push("Database 연결 설정에 host와 database 이름이 필요합니다.");
+    }
+    if (parsed.searchParams.has("sslmode")) {
+      errors.push("Database URL의 sslmode query는 허용하지 않으며 DATABASE_SSL_MODE을 사용해야 합니다.");
+    }
+    if (isProduction()) {
+      if (!parsed.username || !parsed.password) {
+        errors.push("production Database 연결 설정에는 username과 password가 필요합니다.");
+      }
+      if (
+        parsed.username.toLowerCase() === "postgres"
+        || parsed.password.length < 20
+        || isWeakSecret(parsed.password)
+      ) {
+        errors.push("production Database credential은 기본 계정이나 약한 password를 사용할 수 없습니다.");
+      }
+      if (!isPrivateDatabaseHostname(parsed.hostname) && config.sslMode !== "verify-full") {
+        errors.push("공개 Database hostname은 production에서 DATABASE_SSL_MODE=verify-full이 필요합니다.");
+      }
+    }
+  } catch {
+    errors.push("Database 연결 설정이 올바른 PostgreSQL URL이 아닙니다.");
+  }
+}
+
+function validateDiscordSaasConfig(errors: string[]): void {
+  const config = appConfig.discordSaas;
+  if (!config.enabled) return;
+  if (!appConfig.database.enabled) return;
+  if (!config.clientId || !/^\d{1,32}$/u.test(config.clientId)) {
+    errors.push("DISCORD_CLIENT_ID가 올바르지 않습니다.");
+  }
+  if (!config.clientSecret || config.clientSecret.length < 24 || isWeakSecret(config.clientSecret)) {
+    errors.push("DISCORD_CLIENT_SECRET이 설정되지 않았거나 약한 값입니다.");
+  }
+  if (!isValidEncryptionKey(config.tokenEncryptionKey)) {
+    errors.push("DISCORD_OAUTH_TOKEN_ENCRYPTION_KEY는 강한 32바이트 key여야 합니다.");
+  }
+  if (
+    config.tokenEncryptionKey
+    && appConfig.twitch.tokenEncryptionKey
+    && secretsEqual(config.tokenEncryptionKey, appConfig.twitch.tokenEncryptionKey)
+  ) {
+    errors.push("Discord OAuth와 Twitch token encryption key를 재사용할 수 없습니다.");
+  }
+  if (
+    config.tokenEncryptionKey
+    && appConfig.security.dashboardAuthToken
+    && secretsEqual(config.tokenEncryptionKey, appConfig.security.dashboardAuthToken)
+  ) {
+    errors.push("Discord OAuth encryption key와 Dashboard 인증 secret을 재사용할 수 없습니다.");
+  }
+  try {
+    const redirect = new URL(config.redirectUri);
+    if (
+      redirect.username
+      || redirect.password
+      || redirect.hash
+      || redirect.search
+      || redirect.pathname !== "/api/discord/oauth/callback"
+    ) {
+      errors.push("DISCORD_OAUTH_REDIRECT_URI는 query·fragment 없는 정확한 callback URL이어야 합니다.");
+    }
+    if (isProduction() && redirect.protocol !== "https:") {
+      errors.push("DISCORD_OAUTH_REDIRECT_URI는 production에서 HTTPS여야 합니다.");
+    }
+    if (!isProduction() && !["http:", "https:"].includes(redirect.protocol)) {
+      errors.push("DISCORD_OAUTH_REDIRECT_URI protocol이 올바르지 않습니다.");
+    }
+  } catch {
+    errors.push("DISCORD_OAUTH_REDIRECT_URI가 올바른 URL이 아닙니다.");
+  }
+  if (config.setupLinkTtlSeconds < 60 || config.setupLinkTtlSeconds > 1_800) {
+    errors.push("DISCORD_SETUP_LINK_TTL_SECONDS는 60에서 1800 사이여야 합니다.");
+  }
+  if (config.oauthSessionTtlSeconds < 300 || config.oauthSessionTtlSeconds > 3_600) {
+    errors.push("DISCORD_OAUTH_SESSION_TTL_SECONDS는 300에서 3600 사이여야 합니다.");
+  }
+  if (config.apiTimeoutMs < 1_000 || config.apiTimeoutMs > 30_000) {
+    errors.push("DISCORD_API_TIMEOUT_MS는 1000에서 30000 사이여야 합니다.");
+  }
+}
+
+function validateDiscordBotInternalConfig(errors: string[]): void {
+  const config = appConfig.discordBotInternal;
+  if (!config.enabled) return;
+  if (!appConfig.database.enabled || !appConfig.discordSaas.enabled) {
+    errors.push("Discord Bot 내부 API에는 Database와 Discord SaaS 활성화가 필요합니다.");
+  }
+  if (!/^[0-9]{1,32}$/u.test(config.applicationId)) {
+    errors.push("DISCORD_APPLICATION_ID가 올바르지 않습니다.");
+  }
+  if (config.authKey.length < 32 || isWeakSecret(config.authKey)) {
+    errors.push("DISCORD_BOT_INTERNAL_AUTH_KEY는 32자 이상의 강한 별도 secret이어야 합니다.");
+  }
+  if (
+    isProduction()
+    && process.env.DISCORD_BOT_INTERNAL_AUTH_KEY
+    && !process.env.DISCORD_BOT_INTERNAL_AUTH_KEY_FILE
+  ) {
+    errors.push("production에서는 DISCORD_BOT_INTERNAL_AUTH_KEY_FILE을 사용해야 합니다.");
+  }
+  for (const other of [
+    appConfig.discordSaas.clientSecret,
+    appConfig.discordSaas.tokenEncryptionKey,
+    appConfig.twitch.tokenEncryptionKey,
+    appConfig.security.dashboardAuthToken,
+    appConfig.bridge.sharedSecret
+  ]) {
+    if (other && config.authKey && secretsEqual(config.authKey, other)) {
+      errors.push("Discord Bot 내부 인증 key는 다른 credential과 재사용할 수 없습니다.");
+      break;
+    }
+  }
+}
+
+function validateDiscordBotManagementConfig(errors: string[]): void {
+  const config = appConfig.discordBotManagement;
+  if (!config.enabled) return;
+  if (!appConfig.database.enabled || !appConfig.discordSaas.enabled) {
+    errors.push("Discord Bot 관리 기능에는 Database와 Discord SaaS 활성화가 필요합니다.");
+  }
+  try {
+    const redirect = new URL(config.redirectUri);
+    if (
+      redirect.username
+      || redirect.password
+      || redirect.hash
+      || redirect.search
+      || redirect.pathname !== "/api/discord/management/oauth/callback"
+    ) {
+      errors.push("DISCORD_MANAGEMENT_OAUTH_REDIRECT_URI는 정확한 관리 callback URL이어야 합니다.");
+    }
+    if (isProduction() && redirect.protocol !== "https:") {
+      errors.push("DISCORD_MANAGEMENT_OAUTH_REDIRECT_URI는 production에서 HTTPS여야 합니다.");
+    }
+    if (!isProduction() && !["http:", "https:"].includes(redirect.protocol)) {
+      errors.push("DISCORD_MANAGEMENT_OAUTH_REDIRECT_URI protocol이 올바르지 않습니다.");
+    }
+  } catch {
+    errors.push("DISCORD_MANAGEMENT_OAUTH_REDIRECT_URI가 올바른 URL이 아닙니다.");
+  }
+  if (config.oauthTtlSeconds < 300 || config.oauthTtlSeconds > 1_800) {
+    errors.push("DISCORD_MANAGEMENT_OAUTH_TTL_SECONDS는 300에서 1800 사이여야 합니다.");
+  }
+  if (config.idleTtlSeconds < 900 || config.idleTtlSeconds > 28_800) {
+    errors.push("DISCORD_MANAGEMENT_IDLE_TTL_SECONDS는 900에서 28800 사이여야 합니다.");
+  }
+  if (
+    config.absoluteTtlSeconds < config.idleTtlSeconds
+    || config.absoluteTtlSeconds > 86_400
+  ) {
+    errors.push("DISCORD_MANAGEMENT_ABSOLUTE_TTL_SECONDS는 idle 이상 86400 이하여야 합니다.");
+  }
+  if (config.agentTokenTtlSeconds < 60 || config.agentTokenTtlSeconds > 1_800) {
+    errors.push("AGENT_BOOTSTRAP_TTL_SECONDS는 60에서 1800 사이여야 합니다.");
   }
 }
 
@@ -397,6 +691,10 @@ export function legalRuntimeConfigReady(): boolean {
 
 export function validateRuntimeConfig(): RuntimeConfigValidationResult {
   const errors: string[] = [];
+  validateDatabaseConfig(errors);
+  validateDiscordSaasConfig(errors);
+  validateDiscordBotInternalConfig(errors);
+  validateDiscordBotManagementConfig(errors);
   if (isProduction()) {
     validateBuildMetadata(errors);
     if (appConfig.allowInsecureDev) errors.push("ALLOW_INSECURE_DEV는 production에서 사용할 수 없습니다.");

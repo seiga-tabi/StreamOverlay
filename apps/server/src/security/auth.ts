@@ -219,6 +219,15 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
   ) return "PUBLIC";
   if (method === "GET" && (pathname === "/api/public/twitch/auth/start" || pathname === "/api/public/twitch/auth/callback")) return "OAUTH_CALLBACK";
   if (method === "GET" && (pathname === "/api/twitch/auth/start" || pathname === "/api/twitch/auth/callback")) return "OAUTH_CALLBACK";
+  if (
+    pathname === "/api/discord/session"
+    || pathname === "/api/discord/onboarding/guilds"
+    || pathname === "/api/discord/onboarding/guild"
+    || pathname === "/api/discord/oauth/logout"
+  ) return "PUBLIC";
+  if (method === "GET" && (pathname === "/api/discord/oauth/start" || pathname === "/api/discord/oauth/callback")) {
+    return "OAUTH_CALLBACK";
+  }
   if (pathname.startsWith("/api/")) return "DASHBOARD_ADMIN";
   return "PUBLIC";
 }

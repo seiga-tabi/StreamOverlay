@@ -114,16 +114,19 @@ function assertPngAsset(fileName: string, width: number, height: number): void {
   assert.equal(data.readUInt32BE(20), height);
 }
 
-test("게임 선택 메뉴에는 LoL과 펠월드 두 항목만 표시한다", () => {
+test("게임 선택 메뉴에는 LoL, 펠월드, YORO Bot 세 항목을 표시한다", () => {
   setActivePublicLocale("ko");
   const html = renderToStaticMarkup(<PublicGameSelector activePage="palworld" onPage={() => undefined} mode="tray" />);
-  assert.equal((html.match(/role="option"/g) ?? []).length, 2);
+  assert.equal((html.match(/role="option"/g) ?? []).length, 3);
   assert.match(html, /리그 오브 레전드/);
   assert.match(html, /펠월드/);
+  assert.match(html, /YORO Bot/);
+  assert.match(html, /Discord 서버 도우미/);
   assert.match(html, /src="\/images\/games\/league-of-legends-f01a628bbea2\.png"/);
   assert.match(html, /src="\/images\/games\/palworld-a88d83f86cfe\.png"/);
   assert.doesNotMatch(html, /src="\/images\/games\/(?:league-of-legends|palworld)\.png"/);
   assert.equal((html.match(/class="public-game-selector-logo is-(?:league-of-legends|palworld)"[^>]*alt=""[^>]*aria-hidden="true"/g) ?? []).length, 2);
+  assert.match(html, /public-game-selector-mark is-yoro-bot/u);
   assert.doesNotMatch(html, /발로란트|마인크래프트/);
 
   assertPngAsset("league-of-legends-f01a628bbea2.png", 48, 48);

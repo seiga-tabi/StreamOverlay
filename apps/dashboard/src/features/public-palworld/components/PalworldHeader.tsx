@@ -117,6 +117,11 @@ export function PalworldHeader({
       setPalworldUrl("/palworld");
       return;
     }
+    if (nextPage === "bot") {
+      window.history.pushState({}, "", "/bot");
+      window.dispatchEvent(new CustomEvent("publicroutechange"));
+      return;
+    }
     window.history.pushState({}, "", "/");
     window.dispatchEvent(new CustomEvent("publicroutechange"));
   }

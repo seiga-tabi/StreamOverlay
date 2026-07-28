@@ -1,0 +1,112 @@
+.discord-setup-shell {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: var(--space-6);
+  background: var(--bg);
+}
+
+.discord-setup-card {
+  width: min(100%, 42rem);
+}
+
+.discord-setup-card h1,
+.discord-setup-card h2,
+.discord-setup-card p {
+  overflow-wrap: anywhere;
+}
+
+.discord-setup-card h1:focus {
+  outline: none;
+}
+
+.discord-setup-step,
+.discord-setup-complete {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.discord-guild-list {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-2);
+  padding: 0;
+  border: 0;
+}
+
+.discord-guild-list legend {
+  margin-bottom: var(--space-2);
+  font-weight: 700;
+}
+
+.discord-guild-option {
+  min-width: 0;
+  min-height: 3.5rem;
+  display: grid;
+  grid-template-columns: auto 3rem minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.discord-guild-option:has(input:checked) {
+  border-color: var(--brand);
+  background: var(--bg-soft);
+}
+
+.discord-guild-option img,
+.discord-guild-fallback {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+}
+
+.discord-guild-fallback {
+  display: grid;
+  place-items: center;
+  background: var(--surface-muted);
+  font-weight: 800;
+}
+
+.discord-guild-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.discord-organization-field {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.discord-organization-field select {
+  width: 100%;
+  min-height: 2.75rem;
+}
+
+.discord-setup-error {
+  color: var(--danger);
+}
+
+@media (max-width: 48rem) {
+  .discord-setup-shell {
+    place-items: start stretch;
+    padding: var(--space-4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .discord-setup-shell *,
+  .discord-setup-shell *::before,
+  .discord-setup-shell *::after {
+    scroll-behavior: auto;
+    transition-duration: 0.01ms;
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+  }
+}

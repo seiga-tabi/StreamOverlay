@@ -10,6 +10,10 @@
     "start": "node dist/index.js",
     "validate:config": "tsx src/scripts/validate-config.ts",
     "validate:runtime": "tsx src/scripts/validate-runtime-config.ts",
+    "db:migrate:check": "tsx src/scripts/database-migrate.ts check",
+    "db:migrate:plan": "tsx src/scripts/database-migrate.ts plan",
+    "db:migrate:apply": "tsx src/scripts/database-migrate.ts apply",
+    "test:database": "node --test test-database/database-integration.test.mjs",
     "migrate:twitch-token-encryption": "tsx src/scripts/migrate-twitch-token-encryption.ts",
     "migrate:remove-tts-config": "tsx src/scripts/migrate-remove-tts-config.ts",
     "fetch:palworld-data": "tsx src/scripts/fetch-palworld-paldex.ts",
@@ -45,10 +49,12 @@
   "dependencies": {
     "@streamops/shared": "^0.1.0",
     "dotenv": "^16.4.5",
+    "pg": "^8.22.0",
     "ws": "^8.18.0"
   },
   "devDependencies": {
     "@types/node": "^20.14.10",
+    "@types/pg": "^8.20.0",
     "@types/ws": "^8.5.10",
     "@types/yauzl": "^3.4.0",
     "sharp": "0.35.3",

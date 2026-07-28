@@ -1,0 +1,61 @@
+# PostgreSQL 기반 구조
+
+PostgreSQL은 향후 Discord SaaS와 게임 서버 상태 기능 전용 기반입니다. 기존 Twitch token, Followers, Riot ID, session, Overlay, Community, Palworld runtime은 현재 JSON·파일 저장소를 그대로 사용하며 PostgreSQL로 복제하거나 dual-write하지 않습니다.
+
+## 활성화
+
+기본값은 `DATABASE_ENABLED=false`입니다. 이 상태에서는 pool 생성, 연결, migration 검사가 모두 생략되며 기존 Server readiness에 영향을 주지 않습니다.
+
+활성화 시에는 `DATABASE_URL_FILE`을 우선 사용합니다.
+
+```text
+DATABASE_ENABLED=true
+DATABASE_URL_FILE=/run/secrets/database_url
+DATABASE_POOL_MAX=10
+DATABASE_IDLE_TIMEOUT_MS=30000
+DATABASE_CONNECTION_TIMEOUT_MS=5000
+DATABASE_STATEMENT_TIMEOUT_MS=10000
+DATABASE_MIGRATION_MODE=check
+DATABASE_SSL_MODE=disable
+```
+
+`DATABASE_URL`과 `DATABASE_URL_FILE`은 동시에 설정할 수 없습니다. production은 기본 계정·약한 password를 거부하고, 공개 hostname에는 `DATABASE_SSL_MODE=verify-full`을 요구합니다. URL과 credential은 로그·health 응답에 포함하지 않습니다.
+
+## Local·staging Compose
+
+PostgreSQL은 `database` profile에만 존재하며 host port를 기본 공개하지 않습니다.
+
+```bash
+docker compose --env-file /dev/null --profile database up -d postgres
+```
+
+실제 실행 전 repository 밖 또는 권한이 제한된 `secrets/postgres_password`를 준비하고 `0600` 권한을 적용합니다. Server 연결 URL은 별도 `/run/secrets/database_url` 파일로 제공합니다.
+
+PostgreSQL은 application state와 분리된 `postgres_data` volume과 internal network를 사용합니다. 기본 pool 10개이며 향후 Bot·Worker pool을 포함한 총합은 PostgreSQL `max_connections=30` 안에서 운영합니다. 4GB VPS에서는 Server, Bot, Worker의 pool 합계를 먼저 계산한 뒤 늘립니다.
+
+## Tenant 격리
+
+모든 tenant table은 `organization_id NOT NULL`을 가집니다. 관계가 있는 table은 `(organization_id, resource_id)` composite foreign key를 사용해 다른 조직의 ID를 연결할 수 없게 합니다.
+
+Repository 공개 method는 항상 `TenantContext`를 요구합니다.
+
+```ts
+type TenantContext = {
+  organizationId: string;
+  actorUserId?: string;
+};
+```
+
+ID만 받는 전역 조회 method는 만들지 않습니다. 조회·수정·삭제 모두 `organization_id` 조건을 포함하며 cross-tenant 결과는 `not_found`와 동일하게 처리합니다.
+
+## 상태와 보안
+
+- Discord·Twitch token 원문 column을 만들지 않습니다.
+- 연결 credential은 `encrypted_config`와 key version만 저장할 준비를 하며, 암호화 저장 API는 이번 단계에 포함하지 않습니다.
+- Agent credential은 원문이 아니라 hash만 저장합니다.
+- Agent 전체 payload를 history에 저장하지 않고 필요한 metric만 column으로 저장합니다.
+- `/health/live`는 Database 장애와 독립적입니다.
+- 활성 Database가 unavailable·migration pending·mismatch이면 `/health/ready`가 실패합니다.
+- migration은 Server 시작 시 자동 적용하지 않습니다.
+
+Discord OAuth onboarding은 `0004_discord_oauth_onboarding`부터 이 기반을 사용합니다. OAuth가 생성한 Organization과 Guild 관계도 transaction 안에서 저장되며, setup token·OAuth state는 원문 대신 SHA-256 hash만 저장합니다. Agent ingestion과 Notification Worker는 아직 구현하지 않습니다.

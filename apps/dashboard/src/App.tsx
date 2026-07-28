@@ -33,6 +33,18 @@ import { lazyNamed } from "./shared/lazyNamed";
 
 const PublicLolPage = lazyNamed(() => import("./pages/PublicLolPage"), "PublicLolPage");
 const PublicPalworldPage = lazyNamed(() => import("./pages/PublicPalworldPage"), "PublicPalworldPage");
+const PublicBotPage = lazyNamed(
+  () => import("./features/public-bot/PublicBotPage"),
+  "PublicBotPage",
+);
+const DiscordSetupPage = lazyNamed(
+  () => import("./features/discord-onboarding/DiscordSetupPage"),
+  "DiscordSetupPage",
+);
+const BotManagementPage = lazyNamed(
+  () => import("./features/bot-management/BotManagementPage"),
+  "BotManagementPage",
+);
 const EventsPage = lazyNamed(() => import("./pages/EventsPage"), "EventsPage");
 const TournamentsPage = lazyNamed(() => import("./pages/TournamentsPage"), "TournamentsPage");
 const StreamerRiotRequestsPage = lazyNamed(
@@ -436,9 +448,27 @@ export default function App() {
   }
 
   if (surface === "public") {
+    const discordSetup = window.location.pathname === "/setup/discord"
+      || window.location.pathname === "/setup/discord/";
+    const botManagement = window.location.pathname === "/bot/manage"
+      || window.location.pathname === "/bot/manage/";
+    const botPublic = window.location.pathname === "/bot"
+      || window.location.pathname === "/bot/";
     const palworldPublic = isPalworldPath(window.location.pathname);
     return (
-      palworldPublic ? (
+      botManagement ? (
+        <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>
+          <BotManagementPage />
+        </Suspense>
+      ) : discordSetup ? (
+        <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>
+          <DiscordSetupPage />
+        </Suspense>
+      ) : botPublic ? (
+        <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>
+          <PublicBotPage />
+        </Suspense>
+      ) : palworldPublic ? (
         <PalworldPageErrorBoundary>
           <Suspense fallback={(
             <SkeletonCard
