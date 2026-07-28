@@ -464,8 +464,7 @@
 .public-dashboard-shell .public-twitch-channel-meta span,
 .public-dashboard-shell .yoro-card__title,
 .public-dashboard-shell .yoro-metric__value,
-.public-home-shared-shell .public-home-live-head h2,
-.public-home-shared-shell .public-home-live-card strong {
+.public-home-shared-shell .public-home-live-head h2 {
   color: var(--public-gray-text) !important;
   text-shadow: none !important;
 }
@@ -486,8 +485,6 @@
 .public-dashboard-shell .yoro-card__description,
 .public-dashboard-shell .yoro-metric__label,
 .public-dashboard-shell .yoro-metric__description,
-.public-home-shared-shell .public-home-live-card small,
-.public-home-shared-shell .public-home-live-card em,
 .public-home-shared-shell .public-home-live-head button {
   color: var(--public-gray-muted) !important;
 }

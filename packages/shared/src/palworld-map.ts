@@ -88,6 +88,7 @@ export type PalworldMapMarkersResponse = {
   world: PalworldMapWorld;
   markers: PalworldMapMarker[];
   metadata: PalworldDataMetadata;
+  coordinateTransform?: PalworldMapLocationArtifactTransform;
   overlay?: PalworldMapOverlayProvenance;
 };
 
@@ -562,7 +563,7 @@ export function validatePalworldMapMarkersResponse(
     value,
     "response",
     ["state", "world", "markers", "metadata"],
-    ["overlay"]
+    ["coordinateTransform", "overlay"]
   );
   if (!record.ok) return record;
   if (
@@ -598,9 +599,23 @@ export function validatePalworldMapMarkersResponse(
   }
   const metadata = validatePalworldDataMetadata(record.data.metadata);
   if (!metadata.ok) return invalid("response.metadata", metadata.error);
+  if (record.data.coordinateTransform !== undefined) {
+    const transform = validateLocationArtifactTransformAt(
+      record.data.coordinateTransform,
+      "response.coordinateTransform"
+    );
+    if (!transform.ok) return transform;
+  }
   if (state === "data_unavailable") {
-    if (record.data.markers.length !== 0 || record.data.overlay !== undefined) {
-      return invalid("response", "data_unavailable 상태에는 marker와 overlay를 포함할 수 없습니다.");
+    if (
+      record.data.markers.length !== 0
+      || record.data.coordinateTransform !== undefined
+      || record.data.overlay !== undefined
+    ) {
+      return invalid(
+        "response",
+        "data_unavailable 상태에는 marker, coordinateTransform, overlay를 포함할 수 없습니다."
+      );
     }
   } else {
     if (record.data.markers.length === 0 || record.data.overlay === undefined) {

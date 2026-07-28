@@ -12,7 +12,60 @@ import {
   palworldMapLocationClusterZoomBand,
 } from "../src/features/public-palworld/utils/map-location-clusters";
 import { PALWORLD_MAP_COLLECTIBLE_TYPE_IDS } from "../src/features/public-palworld/utils/map-collectible-types";
+import {
+  palworldMapToWorldCoordinate,
+  worldToPalworldMapCoordinate,
+} from "../src/features/public-palworld/utils/map-coordinates";
 import { PALWORLD_ROUTE_EVENT } from "../src/features/public-palworld/utils/routes";
+
+const coordinateTransform = {
+  status: "verified" as const,
+  revision: "main-map-transform-v1",
+  horizontalAxis: "world_y" as const,
+  verticalAxis: "world_x" as const,
+  invertHorizontal: false,
+  invertVertical: true,
+  sourceBounds: {
+    minX: -1_099_400,
+    maxX: 349_400,
+    minY: -724_400,
+    maxY: 724_400,
+  },
+};
+
+test("검증된 게임 좌표와 지도 좌표는 축 반전 규칙을 보존해 왕복 변환된다", () => {
+  const world = { x: -375_000, y: 0 };
+  const normalized = worldToPalworldMapCoordinate(coordinateTransform, world);
+  assert.ok(normalized);
+  assert.equal(normalized.x, 0.5);
+  assert.equal(normalized.y, 0.5);
+
+  const restored = palworldMapToWorldCoordinate(coordinateTransform, normalized);
+  assert.ok(restored);
+  assert.ok(Math.abs(restored.x - world.x) < 0.000001);
+  assert.ok(Math.abs(restored.y - world.y) < 0.000001);
+});
+
+test("좌표 변환은 검증된 월드 경계 밖 값과 비정상 숫자를 거부한다", () => {
+  assert.equal(
+    worldToPalworldMapCoordinate(coordinateTransform, {
+      x: coordinateTransform.sourceBounds.maxX + 1,
+      y: 0,
+    }),
+    undefined,
+  );
+  assert.equal(
+    worldToPalworldMapCoordinate(coordinateTransform, {
+      x: Number.NaN,
+      y: 0,
+    }),
+    undefined,
+  );
+  assert.equal(
+    palworldMapToWorldCoordinate(coordinateTransform, { x: 1.01, y: 0.5 }),
+    undefined,
+  );
+});
 
 test("지도 query는 허용된 값만 exact match로 복원한다", () => {
   assert.deepEqual(
@@ -37,9 +90,9 @@ test("지도 query는 허용된 값만 exact match로 복원한다", () => {
     },
   );
   assert.equal(
-    parsePalworldMapQuery(new URLSearchParams("zoom=5")).zoom,
-    5,
-    "지도 최대 확대 배율 500%를 URL에서 복원한다.",
+    parsePalworldMapQuery(new URLSearchParams("zoom=10")).zoom,
+    10,
+    "지도 최대 확대 배율 1000%를 URL에서 복원한다.",
   );
 
   assert.deepEqual(
@@ -58,7 +111,7 @@ test("지도 query는 허용된 값만 exact match로 복원한다", () => {
 
 test("지도 query의 중복 key와 불완전한 좌표 쌍은 기본값으로 제한한다", () => {
   const parsed = parsePalworldMapQuery(new URLSearchParams(
-    "world=tree&world=main&layers=&period=day&period=night&focusPal=anubis&focusPal=cattiva&x=0.25&zoom=5.001",
+    "world=tree&world=main&layers=&period=day&period=night&focusPal=anubis&focusPal=cattiva&x=0.25&zoom=10.001",
   ));
   assert.deepEqual(parsed, {
     layers: [],

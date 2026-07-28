@@ -11,7 +11,7 @@
     "selectedMemberCount": 7487
   },
   "checksums": {
-    "mappingSha256": "788a3df875c06ab5c228a765aa8c6dfc5a0052f73dd94e5dd4b09bc19bcff653",
+    "mappingSha256": "b77426935144226ad5c2a202df6826a09383fa81ceca4ea4c7f228eaacb45342",
     "transformMappingSha256": "82fdaea95a4ffb2408575ffad0135aabad902db65c82a83de4d142f90bf26bb4",
     "transformSha256": "4f209e0f1438ae2dda38d1240bc3b232d07099dd3e0a7b766f23fc4aa25f576d",
     "targetMapAssetSha256": "3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003",
@@ -20,8 +20,8 @@
   "counts": {
     "selectedMembers": 7487,
     "actorsScanned": 791613,
-    "sourceActors": 19837,
-    "included": 19583,
+    "sourceActors": 19857,
+    "included": 19603,
     "treeIncluded": 231,
     "treeExcluded": 0,
     "coordinateUnresolved": 0,
@@ -101,8 +101,8 @@
         "exactDuplicates": 0
       },
       "resource": {
-        "sourceActors": 15662,
-        "included": 15559,
+        "sourceActors": 15682,
+        "included": 15579,
         "treeIncluded": 80,
         "treeExcluded": 0,
         "coordinateUnresolved": 0,

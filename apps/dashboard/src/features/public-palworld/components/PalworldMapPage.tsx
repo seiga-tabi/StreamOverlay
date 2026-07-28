@@ -83,12 +83,14 @@ import {
   palworldSpawnPointRadius,
   summarizePalworldSpawnPoints,
 } from "../utils/spawns";
+import { palworldMapToWorldCoordinate } from "../utils/map-coordinates";
 import {
   type PalworldMapExplorerLayerId,
   type PalworldMapLayerDisplayState,
   type PalworldMapLayerGroup,
   type PalworldMapLocalizedLabel,
 } from "./PalworldMapExplorerTypes";
+import { PalworldMapCoordinateControl } from "./PalworldMapCoordinateControl";
 import { PalworldMapFilterPanel } from "./PalworldMapFilterPanel";
 import { PalworldMapLocationLayer } from "./PalworldMapLocationLayer";
 import { PalworldMapMarkerPopover } from "./PalworldMapMarkerPopover";
@@ -271,6 +273,14 @@ const PALWORLD_MAP_COLLECTIBLE_TYPE_LABELS: Readonly<
   "egg-world-tree": mapLabel(
     palworldI18n.ko.mapEggWorldTree,
     palworldI18n.ja.mapEggWorldTree,
+  ),
+  "resource-ancient-beast-bone": mapLabel(
+    palworldI18n.ko.mapResourceAncientBeastBone,
+    palworldI18n.ja.mapResourceAncientBeastBone,
+  ),
+  "resource-ancient-tree-bark": mapLabel(
+    palworldI18n.ko.mapResourceAncientTreeBark,
+    palworldI18n.ja.mapResourceAncientTreeBark,
   ),
   "resource-night-stone": mapLabel(
     palworldI18n.ko.mapResourceNightStone,
@@ -523,6 +533,9 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
       : [],
     [activeFocusPalId, bossLayerSelected, markerResponse, markerState],
   );
+  const coordinateTransform = markerState === "ready"
+    ? markerResponse?.coordinateTransform
+    : undefined;
   const selectedMarker = useMemo(
     () => mapQuery.marker
       ? visibleBossMarkers.find((marker) => marker.id === mapQuery.marker)
@@ -1366,6 +1379,10 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
       palworldI18n.ko.mapCoordinateExportRequired,
       palworldI18n.ja.mapCoordinateExportRequired,
     );
+    const fixedLocationUnavailableDescription = mapLabel(
+      palworldI18n.ko.mapFixedLocationUnavailable,
+      palworldI18n.ja.mapFixedLocationUnavailable,
+    );
     return [{
       id: "pal",
       label: mapLabel(palworldI18n.ko.mapPalLayers, palworldI18n.ja.mapPalLayers),
@@ -1427,7 +1444,35 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
         palworldI18n.ja.mapResourceLayers,
       ),
       collapsed: collapsedFilterGroups.has("resources"),
-      layers: PALWORLD_MAP_RESOURCE_TYPE_IDS.map(collectibleTypeLayer),
+      layers: [
+        ...PALWORLD_MAP_RESOURCE_TYPE_IDS.map(collectibleTypeLayer),
+        {
+          id: "resource-chromite",
+          label: mapLabel(
+            palworldI18n.ko.mapResourceChromite,
+            palworldI18n.ja.mapResourceChromite,
+          ),
+          description: fixedLocationUnavailableDescription,
+          statusLabel: unavailableStatus,
+          iconAsset: PALWORLD_MAP_LAYER_ICONS["resource-chromite"],
+          iconFallback: "◆",
+          selected: false,
+          state: "data_unavailable",
+        },
+        {
+          id: "resource-hexolite-quartz",
+          label: mapLabel(
+            palworldI18n.ko.mapResourceHexoliteQuartz,
+            palworldI18n.ja.mapResourceHexoliteQuartz,
+          ),
+          description: fixedLocationUnavailableDescription,
+          statusLabel: unavailableStatus,
+          iconAsset: PALWORLD_MAP_LAYER_ICONS["resource-hexolite-quartz"],
+          iconFallback: "◆",
+          selected: false,
+          state: "data_unavailable",
+        },
+      ],
     }, {
       id: "collectibles",
       label: mapLabel(
@@ -1495,6 +1540,39 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
     ),
   );
 
+  function locateMapCoordinate(coordinate: { x: number; y: number }): void {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    const nextView = focusPalworldMapViewAt(
+      {
+        normalizedX: coordinate.x,
+        normalizedY: coordinate.y,
+      },
+      viewport.clientWidth,
+      viewport.clientHeight,
+      Math.max(3, viewRef.current.zoom),
+    );
+    commitView(nextView);
+    pushQuery({
+      center: coordinate,
+      marker: null,
+      zoom: nextView.zoom,
+    });
+  }
+
+  function worldPositionDetail(coordinate: {
+    normalizedX: number;
+    normalizedY: number;
+  }): string | undefined {
+    if (!coordinateTransform) return undefined;
+    const worldCoordinate = palworldMapToWorldCoordinate(coordinateTransform, {
+      x: coordinate.normalizedX,
+      y: coordinate.normalizedY,
+    });
+    if (!worldCoordinate) return undefined;
+    return `X ${Math.round(worldCoordinate.x).toLocaleString()} · Y ${Math.round(worldCoordinate.y).toLocaleString()}`;
+  }
+
   function renderFilterControls(testId: string): ReactNode {
     return (
       <>
@@ -1553,7 +1631,10 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
       details={[{
         label: mapLabel(palworldI18n.ko.mapMarkerLevel, palworldI18n.ja.mapMarkerLevel),
         value: `${text.levelPrefix}${selectedMarker.level}`,
-      }, {
+      }, ...(worldPositionDetail(selectedMarker) ? [{
+        label: mapLabel(palworldI18n.ko.mapWorldPosition, palworldI18n.ja.mapWorldPosition),
+        value: worldPositionDetail(selectedMarker)!,
+      }] : []), {
         label: mapLabel(palworldI18n.ko.mapNormalizedPosition, palworldI18n.ja.mapNormalizedPosition),
         value: `${(selectedMarker.normalizedX * 100).toFixed(1)}% · ${(selectedMarker.normalizedY * 100).toFixed(1)}%`,
       }]}
@@ -1594,7 +1675,10 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
         palworldI18n.ko.mapImportedLocationDescription,
         palworldI18n.ja.mapImportedLocationDescription,
       )}
-      details={[{
+      details={[...(worldPositionDetail(selectedMapLocation) ? [{
+        label: mapLabel(palworldI18n.ko.mapWorldPosition, palworldI18n.ja.mapWorldPosition),
+        value: worldPositionDetail(selectedMapLocation)!,
+      }] : []), {
         label: mapLabel(palworldI18n.ko.mapNormalizedPosition, palworldI18n.ja.mapNormalizedPosition),
         value: `${(selectedMapLocation.normalizedX * 100).toFixed(1)}% · ${(selectedMapLocation.normalizedY * 100).toFixed(1)}%`,
       }]}
@@ -1932,6 +2016,13 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
                     {text.mapZoomReset}
                   </Button>
                 </div>
+                {coordinateTransform ? (
+                  <PalworldMapCoordinateControl
+                    locale={locale}
+                    onLocate={locateMapCoordinate}
+                    transform={coordinateTransform}
+                  />
+                ) : null}
                 <span aria-live="polite" className="yoro-u-sr-only">
                   {copyState === "copied"
                     ? text.mapLinkCopied

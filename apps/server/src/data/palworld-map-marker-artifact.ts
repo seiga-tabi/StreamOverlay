@@ -502,6 +502,16 @@ export function createPalworldMapMarkerProvider(input: {
   }
   const responses = new Map<PalworldMapWorld, Omit<PalworldMapMarkersResponse, "metadata">>();
   for (const world of artifact.worlds) {
+    if (world.transform.status !== "verified") {
+      fail(
+        `artifact.worlds.${world.world}.transform.status`,
+        "공개 marker 응답에는 검증된 좌표 transform이 필요합니다."
+      );
+    }
+    const coordinateTransform = {
+      ...world.transform,
+      status: "verified" as const
+    };
     const markers = world.markers.map((entry) => {
       const pal = input.palworldDataService.getPal(entry.palId);
       const activeSourceInternalId = input.palworldDataService.sourceInternalIdForPal(entry.palId);
@@ -525,6 +535,7 @@ export function createPalworldMapMarkerProvider(input: {
       state: "ready",
       world: world.world,
       markers,
+      coordinateTransform,
       overlay: {
         schemaVersion: 1,
         technicalStatus: "ready",

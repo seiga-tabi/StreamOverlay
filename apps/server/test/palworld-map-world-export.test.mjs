@@ -47,9 +47,9 @@ test("Maps.zip 위치 taxonomy는 exact actor class와 고정 원본 수량을 �
     treasure: 1511,
     lifmunk: 407,
     journal: 64,
-    resource: 15662
+    resource: 15682
   });
-  assert.equal(mapping.classes.length, 88);
+  assert.equal(mapping.classes.length, 90);
   assert.equal(
     mapping.classes.filter((entry) => entry.category === "npc").length,
     5
@@ -60,7 +60,7 @@ test("Maps.zip 위치 taxonomy는 exact actor class와 고정 원본 수량을 �
   );
   assert.equal(
     mapping.classes.filter((entry) => entry.category === "resource").length,
-    18
+    20
   );
   assert.equal(
     mapping.candidateFamilies.some((entry) => entry.id === "resource"),
@@ -129,7 +129,7 @@ test("세계수 transform evidence는 map image manifest의 source·output hash�
   );
 });
 
-test("생성된 위치 artifact는 raw 19,837건을 MainMap과 세계수 지도에 정확히 분리한다", async () => {
+test("생성된 위치 artifact는 raw 19,857건을 MainMap과 세계수 지도에 정확히 분리한다", async () => {
   const [artifactBytes, manifest, report] = await Promise.all([
     readFile(path.join(releaseRoot, "map-locations.json")),
     readFile(path.join(releaseRoot, "map-locations-manifest.json"), "utf8")
@@ -138,10 +138,10 @@ test("생성된 위치 artifact는 raw 19,837건을 MainMap과 세계수 지도�
       .then(JSON.parse)
   ]);
   const artifact = await loadPalworldMapLocationsArtifact(releaseRoot);
-  assert.equal(artifact.totalLocations, 19814);
+  assert.equal(artifact.totalLocations, 19834);
   assert.equal(artifact.worlds.length, 2);
   assert.equal(artifact.worlds[0].world, "main");
-  assert.equal(artifact.worlds[0].locationCount, 19583);
+  assert.equal(artifact.worlds[0].locationCount, 19603);
   assert.deepEqual(artifact.worlds[0].categoryCounts, {
     "fast-travel": 137,
     dungeon: 170,
@@ -151,7 +151,7 @@ test("생성된 위치 artifact는 raw 19,837건을 MainMap과 세계수 지도�
     treasure: 1473,
     lifmunk: 360,
     journal: 55,
-    resource: 15559
+    resource: 15579
   });
   assert.equal(artifact.worlds[1].world, "tree");
   assert.equal(artifact.worlds[1].locationCount, 231);
@@ -166,7 +166,7 @@ test("생성된 위치 artifact는 raw 19,837건을 MainMap과 세계수 지도�
     journal: 9,
     resource: 80
   });
-  assert.equal(report.counts.sourceActors, 19837);
+  assert.equal(report.counts.sourceActors, 19857);
   assert.equal(report.excludedByReason.tree_world_without_active_map, 0);
   assert.equal(report.excludedByReason.attached_parent_coordinate_unresolved, 0);
   assert.equal(report.counts.exactDuplicates, 23);
@@ -182,7 +182,7 @@ test("생성된 위치 artifact는 raw 19,837건을 MainMap과 세계수 지도�
       + report.counts.byCategory.resource.coordinateUnresolved
       + report.counts.byCategory.resource.outOfBoundsExcluded
       + report.counts.byCategory.resource.exactDuplicates,
-    15662
+    15682
   );
   assert.equal(
     report.counts.byCategory.npc.included
@@ -214,6 +214,8 @@ test("생성된 위치 artifact는 raw 19,837건을 MainMap과 세계수 지도�
   assert.equal(subtypeCounts.get("statue-lunaris"), 4);
   assert.equal(subtypeCounts.get("statue-relaxaurus"), 4);
   assert.equal(subtypeCounts.get("statue-yakumo"), 4);
+  assert.equal(subtypeCounts.get("ancient-beast-bone"), 10);
+  assert.equal(subtypeCounts.get("ancient-tree-bark"), 10);
   assert.deepEqual(
     new Set(
       artifact.worlds
@@ -222,6 +224,8 @@ test("생성된 위치 artifact는 raw 19,837건을 MainMap과 세계수 지도�
         .map((entry) => entry.subtype)
     ),
     new Set([
+      "ancient-beast-bone",
+      "ancient-tree-bark",
       "night-stone",
       "pal-crystal",
       "coal",
@@ -315,9 +319,9 @@ test("candidate는 exact-checksum compatibility authorization으로만 provider�
     artifact,
     compatibilityAuthorization: authorization
   });
-  assert.equal(provider.diagnostics().total, 19814);
-  assert.equal(authorization.approval.importAudit.sourceRawExact, 19837);
-  assert.equal(authorization.approval.importAudit.mainIncluded, 19583);
+  assert.equal(provider.diagnostics().total, 19834);
+  assert.equal(authorization.approval.importAudit.sourceRawExact, 19857);
+  assert.equal(authorization.approval.importAudit.mainIncluded, 19603);
   assert.equal(authorization.approval.importAudit.treeIncluded, 231);
   assert.equal(authorization.approval.importAudit.treeExcluded, 0);
   assert.equal(authorization.approval.importAudit.coordinateUnresolved, 0);

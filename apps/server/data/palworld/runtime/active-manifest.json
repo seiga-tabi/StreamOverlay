@@ -152,17 +152,17 @@
       {
         "kind": "map-locations",
         "file": "map-locations.json",
-        "sha256": "49573fd77c7aaa32fd30374b38f4e3744fd7e27a9f64b424d66835712233632f"
+        "sha256": "2d6b0ebe03b8600b2c2e9e20d551e93f50395bbd43e09f514e616402f082fd9d"
       },
       {
         "kind": "map-locations-manifest",
         "file": "map-locations-manifest.json",
-        "sha256": "a30df9ca1c966607a46275d30883071644f508c5b90947a50e38adba9b854f75"
+        "sha256": "80c951d322bbe08cf44c9b36a3de43b04adb99844dfb9e87ee6cf220e81c7436"
       },
       {
         "kind": "map-locations-compatibility",
         "file": "map-locations-compatibility.json",
-        "sha256": "4699928547ac04f0d70659ae359b9d5b6b853f582f3a073f476eb058630e50a2"
+        "sha256": "66e8c4bd1f443fc2723ec6719004b9493b0c21ca8804b23bc113189a4e214c23"
       },
       {
         "kind": "map-layer-icons-manifest",

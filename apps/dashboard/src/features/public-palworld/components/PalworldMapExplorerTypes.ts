@@ -22,6 +22,8 @@ export const PALWORLD_MAP_READY_LAYER_IDS = [
 ] as const;
 export const PALWORLD_MAP_PENDING_LAYER_IDS = [
   "ancient-ruin",
+  "resource-chromite",
+  "resource-hexolite-quartz",
 ] as const;
 export const PALWORLD_MAP_EXPLORER_LAYER_IDS = [
   ...PALWORLD_MAP_READY_LAYER_IDS,

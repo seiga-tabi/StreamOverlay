@@ -46,10 +46,25 @@ const READY_ITEM_IMAGE_URL = `/images/palworld/1.0.1/items/${"b".repeat(64)}.web
 const READY_WORLD_MAP_URL = "/images/palworld/1.0.1/maps/dfb08d86604f7e563aaf4c4de4a426af169982ee67792867d8945ab105f66e8a.webp";
 const READY_TREE_MAP_URL = "/images/palworld/1.0.1/maps/c49b2a18bf1512019f0e18c592c20d74cd491b10394ab8121581cc294f74a2cf.webp";
 const LOCAL_WEBP_FIXTURE = resolve("apps/dashboard/public/images/yorogg-logo.webp");
+const MAIN_MAP_COORDINATE_TRANSFORM = {
+  status: "verified" as const,
+  revision: "main-map-transform-v1",
+  horizontalAxis: "world_y" as const,
+  verticalAxis: "world_x" as const,
+  invertHorizontal: false,
+  invertVertical: true,
+  sourceBounds: {
+    minX: -1_099_400,
+    maxX: 349_400,
+    minY: -724_400,
+    maxY: 724_400,
+  },
+};
 
 const mapMarkers: PalworldMapMarkersResponse = {
   state: "ready",
   world: "main",
+  coordinateTransform: MAIN_MAP_COORDINATE_TRANSFORM,
   markers: [{
     id: "anubis-field-boss",
     sourceRowId: "Anubis_FieldBoss",
@@ -143,6 +158,18 @@ function mapLocationsResponse(url: URL): PalworldMapLocationsResponse {
     subtype: "grass-01",
     normalizedX: 0.35,
     normalizedY: 0.45,
+  }, {
+    id: `${world}-resource-ancient-beast-bone-001`,
+    category: "resource" as const,
+    subtype: "ancient-beast-bone",
+    normalizedX: 0.62,
+    normalizedY: 0.58,
+  }, {
+    id: `${world}-resource-ancient-tree-bark-001`,
+    category: "resource" as const,
+    subtype: "ancient-tree-bark",
+    normalizedX: 0.68,
+    normalizedY: 0.52,
   }, {
     id: `${world}-resource-copper-ore-001`,
     category: "resource" as const,
@@ -1464,6 +1491,46 @@ test.beforeEach(async ({ page }) => {
   await installApiFixtures(page);
 });
 
+test("모바일 통합 메뉴는 전체 시트가 자연스럽게 올라오고 내부 콘텐츠는 따로 이동하지 않는다", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/palworld");
+  await page.getByRole("button", { name: "메뉴 열기", exact: true }).click();
+
+  const sheet = page.locator(".public-bottom-sheet");
+  const dialog = sheet.locator(".yoro-modal__dialog");
+  const surface = sheet.locator(".public-bottom-sheet__surface");
+  await expect(sheet).toHaveAttribute("data-sheet-state", "open");
+  const motion = await sheet.evaluate((element) => {
+    const dialogElement = element.querySelector<HTMLElement>(".yoro-modal__dialog");
+    const surfaceElement = element.querySelector<HTMLElement>(".public-bottom-sheet__surface");
+    if (!dialogElement || !surfaceElement) return null;
+    const backdropStyle = window.getComputedStyle(element);
+    const dialogStyle = window.getComputedStyle(dialogElement);
+    const surfaceStyle = window.getComputedStyle(surfaceElement);
+    return {
+      backdropDuration: backdropStyle.transitionDuration,
+      dialogDuration: dialogStyle.transitionDuration,
+      dialogProperty: dialogStyle.transitionProperty,
+      surfaceDuration: surfaceStyle.transitionDuration,
+      surfaceProperty: surfaceStyle.transitionProperty,
+    };
+  });
+  expect(motion).toEqual({
+    backdropDuration: "0.44s",
+    dialogDuration: "0.44s",
+    dialogProperty: "transform",
+    surfaceDuration: "0s",
+    surfaceProperty: "all",
+  });
+  await expect(dialog).toBeVisible();
+  await expect(surface).toBeVisible();
+
+  await page.keyboard.press("Escape");
+  await expect(sheet).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "메뉴 열기", exact: true })).toBeFocused();
+});
+
 test("LoL·Palworld LIVE rail은 한 화면에 두 카드와 PC 이동 버튼·모바일 터치 스크롤을 제공한다", async ({ page }) => {
   await installConnectedTwitchFixtures(page, { liveCount: 8 });
   await page.setViewportSize({ width: 1440, height: 1000 });
@@ -1497,13 +1564,19 @@ test("LoL·Palworld LIVE rail은 한 화면에 두 카드와 PC 이동 버튼·�
   await expect(lolRail.locator(".public-home-live-card")).toHaveCount(8);
   const lolCardMetrics = await lolRail.evaluate((element) => {
     const firstCard = element.querySelector<HTMLElement>(".public-home-live-card");
+    const title = firstCard?.querySelector<HTMLElement>("strong");
+    const description = firstCard?.querySelector<HTMLElement>("small");
     const gap = Number.parseFloat(getComputedStyle(element).columnGap);
     return {
       cardWidth: firstCard?.getBoundingClientRect().width ?? 0,
       expectedWidth: (element.getBoundingClientRect().width - gap) / 2,
+      titleColor: title ? getComputedStyle(title).color : "",
+      descriptionColor: description ? getComputedStyle(description).color : "",
     };
   });
   expect(Math.abs(lolCardMetrics.cardWidth - lolCardMetrics.expectedWidth)).toBeLessThanOrEqual(2);
+  expect(lolCardMetrics.titleColor).toBe("rgb(33, 37, 41)");
+  expect(lolCardMetrics.descriptionColor).toBe("rgb(116, 123, 131)");
   const lolNextButton = page.getByRole("button", { name: "다음 LIVE 스트리머 보기" });
   await expect(lolNextButton).toBeVisible();
 
@@ -3517,10 +3590,12 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
   await expect(page.getByRole("button", { name: "지도 범례" })).toHaveCount(0);
   await expect(page.locator(".palworld-map-layer-legend, .palworld-map-legend-sheet")).toHaveCount(0);
   const mobileFilterTrigger = page.getByRole("button", { name: "필터 1개" });
+  const coordinateControl = page.locator(".palworld-map-coordinate-control");
   const filterScope = mobileViewport
     ? page.getByTestId("palworld-map-mobile-filters")
     : page.locator(".palworld-map-desktop-filter");
   if (mobileViewport) {
+    await expect(coordinateControl).toBeHidden();
     await expect(mobileFilterTrigger).toBeVisible();
     await mobileFilterTrigger.click();
     await expect(filterScope).toBeVisible();
@@ -3528,6 +3603,7 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
     await expect(filterScope.locator(".palworld-map-mobile-filters__footer")).toBeVisible();
     await expect.poll(() => page.evaluate(() => document.body.style.overflow)).toBe("hidden");
   } else {
+    await expect(coordinateControl).toBeVisible();
     await expect(mobileFilterTrigger).toBeHidden();
     const filterContent = filterScope.locator(".palworld-map-filter-content");
     const explorerMain = page.locator(".palworld-map-explorer-main");
@@ -3602,8 +3678,10 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
     () => new URL(page.url()).searchParams.get("layers")?.split(","),
   ).toContain("resource");
   await expect(
-    page.locator('.palworld-map-location-marker[data-category="resource"]'),
+    page.locator('.palworld-map-location-marker[data-category="resource"]').first(),
   ).toBeVisible();
+  await expect(page.getByRole("button", { name: "고대 짐승뼈" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "고대나무껍질" })).toBeVisible();
   await resourceGroupAll.uncheck();
   await expect.poll(
     () => new URL(page.url()).searchParams.get("layers")?.split(",") ?? [],

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -196,6 +197,24 @@ test("모바일 통합 메뉴는 게임·언어·Twitch를 중첩 팝오버 없�
   assert.match(html, /현재 Twitch 로그인을 사용할 수 없습니다/u);
   assert.doesNotMatch(html, /public-locale-popover/u);
   assert.doesNotMatch(html, /public-twitch-profile-menu/u);
+
+  const css = readFileSync(
+    new URL("../src/shared/ui/BottomSheet.css", import.meta.url),
+    "utf8",
+  );
+  assert.match(
+    css,
+    /--public-bottom-sheet-open-duration:\s*[\s\S]*?var\(--yoro-motion-duration-slow\)[\s\S]*?var\(--yoro-motion-duration-instant\)/u,
+  );
+  assert.match(
+    css,
+    /\.public-bottom-sheet\[data-sheet-state="open"\] \.yoro-modal__dialog\s*\{[\s\S]*?transform:\s*translate3d\(0,\s*0,\s*0\)/u,
+  );
+  assert.doesNotMatch(
+    css,
+    /\.public-bottom-sheet\[data-sheet-state="open"\] \.public-bottom-sheet__surface/u,
+  );
+  assert.match(css, /overflow-anchor:\s*none/u);
 });
 
 test("모바일 Twitch inline 패널은 로그인 계정과 기존 action을 일반 버튼으로 제공한다", () => {

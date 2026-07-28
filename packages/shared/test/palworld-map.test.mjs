@@ -77,6 +77,21 @@ const marker = {
   normalizedY: 0.75
 };
 
+const coordinateTransform = {
+  status: "verified",
+  revision: "main-map-transform-v1",
+  horizontalAxis: "world_y",
+  verticalAxis: "world_x",
+  invertHorizontal: false,
+  invertVertical: true,
+  sourceBounds: {
+    minX: -1_099_400,
+    maxX: 349_400,
+    minY: -724_400,
+    maxY: 724_400
+  }
+};
+
 const spawnPoint = {
   id: "main-anubis-08-24",
   cellX: 8,
@@ -102,6 +117,7 @@ test("Palworld 지도 marker 응답은 unavailable과 ready 상태를 구분한�
     world: "main",
     markers: [marker],
     metadata,
+    coordinateTransform,
     overlay
   }).ok, true);
 });
@@ -131,6 +147,24 @@ test("Palworld 지도 marker 응답은 unknown field와 잘못된 provenance를 
     ...ready,
     markers: [marker, { ...marker, id: "main-anubis-002" }]
   }).ok, false);
+  assert.equal(validatePalworldMapMarkersResponse({
+    ...ready,
+    coordinateTransform: {
+      ...coordinateTransform,
+      horizontalAxis: "world_x",
+      verticalAxis: "world_x"
+    }
+  }).ok, false);
+  assert.equal(validatePalworldMapMarkersResponse({
+    ...ready,
+    coordinateTransform: {
+      ...coordinateTransform,
+      sourceBounds: {
+        ...coordinateTransform.sourceBounds,
+        maxX: Number.POSITIVE_INFINITY
+      }
+    }
+  }).ok, false);
 });
 
 test("data_unavailable 지도 응답은 candidate provenance나 marker를 노출하지 않는다", () => {
@@ -146,6 +180,13 @@ test("data_unavailable 지도 응답은 candidate provenance나 marker를 노출
     world: "tree",
     markers: [marker],
     metadata
+  }).ok, false);
+  assert.equal(validatePalworldMapMarkersResponse({
+    state: "data_unavailable",
+    world: "tree",
+    markers: [],
+    metadata,
+    coordinateTransform
   }).ok, false);
 });
 

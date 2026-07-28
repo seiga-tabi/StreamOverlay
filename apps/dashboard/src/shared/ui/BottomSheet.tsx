@@ -17,6 +17,8 @@ import {
 import "./BottomSheet.css";
 
 type BottomSheetPresence = "closed" | "opening" | "open" | "closing";
+const BOTTOM_SHEET_OPEN_FALLBACK_MS = 560;
+const BOTTOM_SHEET_CLOSE_FALLBACK_MS = 320;
 
 type BodyStyleSnapshot = {
   left: string;
@@ -128,12 +130,18 @@ export function BottomSheet({
       frameRef.current = window.requestAnimationFrame(() => {
         frameRef.current = window.requestAnimationFrame(() => {
           setPresence((current) => current === "opening" ? "open" : current);
-          fallbackTimerRef.current = window.setTimeout(() => finishPresence("open"), 440);
+          fallbackTimerRef.current = window.setTimeout(
+            () => finishPresence("open"),
+            BOTTOM_SHEET_OPEN_FALLBACK_MS,
+          );
         });
       });
     } else {
       setPresence((current) => current === "closed" ? "closed" : "closing");
-      fallbackTimerRef.current = window.setTimeout(() => finishPresence("closed"), 300);
+      fallbackTimerRef.current = window.setTimeout(
+        () => finishPresence("closed"),
+        BOTTOM_SHEET_CLOSE_FALLBACK_MS,
+      );
     }
 
     return clearScheduledWork;
@@ -164,22 +172,21 @@ export function BottomSheet({
       data-sheet-state={presence}
       id={id}
       initialFocusRef={closeButtonRef}
+      onTransitionEnd={(event) => {
+        const target = event.target;
+        if (
+          !(target instanceof HTMLElement)
+          || !target.classList.contains("yoro-modal__dialog")
+          || event.propertyName !== "transform"
+        ) return;
+        if (presence === "closing") finishPresence("closed");
+      }}
       onClose={onClose}
       open
       returnFocusRef={returnFocusRef}
       size="sm"
     >
-      <div
-        className="public-bottom-sheet__surface"
-        onTransitionEnd={(event) => {
-          if (
-            event.target !== event.currentTarget
-            || event.propertyName !== "transform"
-          ) return;
-          if (presence === "closing") finishPresence("closed");
-          if (presence === "opening") finishPresence("open");
-        }}
-      >
+      <div className="public-bottom-sheet__surface">
         <ModalHeader className="public-bottom-sheet__header">
           <ModalTitle>{title}</ModalTitle>
           <ModalCloseButton aria-label={closeLabel} ref={closeButtonRef}>

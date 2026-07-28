@@ -31,6 +31,7 @@ import { ItemCard, PalCard } from "../src/features/public-palworld/components/Pa
 import { PalworldItemReferenceButton } from "../src/features/public-palworld/components/PalworldItemReferenceButton";
 import { PalworldMapFilterPanel } from "../src/features/public-palworld/components/PalworldMapFilterPanel";
 import { PalworldMapLocationLayer } from "../src/features/public-palworld/components/PalworldMapLocationLayer";
+import { PalworldMapCoordinateControl } from "../src/features/public-palworld/components/PalworldMapCoordinateControl";
 import { PalworldMapMarkerPopover } from "../src/features/public-palworld/components/PalworldMapMarkerPopover";
 import { isLocalPalworldImageUrl, PalworldMedia } from "../src/features/public-palworld/components/PalworldMedia";
 import { PalworldMobileDismissHandle } from "../src/features/public-palworld/components/PalworldMobileDismissHandle";
@@ -1830,6 +1831,19 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   assert.match(korean, /초원 알/u);
   assert.match(korean, /천락 알/u);
   assert.match(korean, /광물·광석/u);
+  assert.match(korean, /고대 짐승뼈/u);
+  assert.match(korean, /고대나무껍질/u);
+  assert.match(korean, /크로마이트/u);
+  assert.match(korean, /헥소 석영/u);
+  assert.match(korean, /수수한 석영 클러스터/u);
+  assert.match(
+    korean,
+    /data-layer="resource-chromite"[\s\S]*<input disabled=""/u,
+  );
+  assert.match(
+    korean,
+    /data-layer="resource-hexolite-quartz"[\s\S]*<input disabled=""/u,
+  );
   assert.match(korean, /밤별 모래/u);
   assert.match(korean, /팰지움 파편/u);
   assert.match(korean, /금속 광석/u);
@@ -1837,7 +1851,7 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   assert.match(korean, /data-layer="fast-travel"[\s\S]*<input disabled=""/u);
   assert.equal(
     (korean.match(/class="palworld-map-filter-layer-icon"/gu) ?? []).length,
-    39,
+    43,
   );
   assert.match(
     korean,
@@ -1992,10 +2006,54 @@ test("월드 지도 필터와 마커 상세는 검증된 레이어만 선택하�
   assert.match(popover, />아누비스</u);
 });
 
+test("지도 좌표 이동 컨트롤은 한국어·일본어 입력과 검증 범위를 제공한다", () => {
+  const transform = {
+    status: "verified" as const,
+    revision: "main-map-transform-v1",
+    horizontalAxis: "world_y" as const,
+    verticalAxis: "world_x" as const,
+    invertHorizontal: false,
+    invertVertical: true,
+    sourceBounds: {
+      minX: -1_099_400,
+      maxX: 349_400,
+      minY: -724_400,
+      maxY: 724_400,
+    },
+  };
+  const korean = renderToStaticMarkup(
+    <PalworldMapCoordinateControl
+      locale="ko"
+      onLocate={() => undefined}
+      transform={transform}
+    />,
+  );
+  const japanese = renderToStaticMarkup(
+    <PalworldMapCoordinateControl
+      locale="ja"
+      onLocate={() => undefined}
+      transform={transform}
+    />,
+  );
+
+  assert.match(korean, /게임 내 좌표로 이동/u);
+  assert.match(korean, /X 좌표/u);
+  assert.match(korean, /Y 좌표/u);
+  assert.match(korean, /min="-1099400"/u);
+  assert.match(korean, /max="724400"/u);
+  assert.match(korean, /지도에서 찾기/u);
+  assert.match(japanese, /ゲーム内座標へ移動/u);
+  assert.match(japanese, /マップで探す/u);
+});
+
 test("지도 필터는 검증된 게임 WebP만 활성화하고 동상·지역 알 subtype을 완전하게 제공한다", () => {
   const resourceIconIds = [
+    "resource-ancient-beast-bone",
+    "resource-ancient-tree-bark",
+    "resource-chromite",
     "resource-coal",
     "resource-copper-ore",
+    "resource-hexolite-quartz",
     "resource-night-stone",
     "resource-pal-crystal",
     "resource-quartz",
@@ -2035,8 +2093,12 @@ test("지도 필터는 검증된 게임 WebP만 활성화하고 동상·지역 �
   assert.deepEqual(
     Object.fromEntries(resourceIconIds.map((id) => [id, resourceSources.get(id)])),
     {
+      "resource-ancient-beast-bone": "BeastBone_Ancient",
+      "resource-ancient-tree-bark": "Wood_Ancient",
+      "resource-chromite": "Chromium",
       "resource-coal": "Coal",
       "resource-copper-ore": "CopperOre",
+      "resource-hexolite-quartz": "RainbowCrystal",
       "resource-night-stone": "NightStone",
       "resource-pal-crystal": "Pal_crystal_S",
       "resource-quartz": "Quartz",
@@ -2082,8 +2144,8 @@ test("월드 지도 이동과 기준점 확대는 지도 경계를 벗어나지 
     { x: 0, y: 0, zoom: 1 },
   );
   assert.deepEqual(
-    clampPalworldMapView({ x: -9_000, y: -9_000, zoom: 8 }, 1_000, 800),
-    { x: -4_000, y: -3_200, zoom: 5 },
+    clampPalworldMapView({ x: -12_000, y: -12_000, zoom: 12 }, 1_000, 800),
+    { x: -9_000, y: -7_200, zoom: 10 },
   );
 
   const zoomed = zoomPalworldMapViewAt(

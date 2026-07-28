@@ -30,6 +30,8 @@ export const PALWORLD_MAP_EGG_TYPE_IDS = [
 ] as const;
 
 export const PALWORLD_MAP_RESOURCE_TYPE_IDS = [
+  "resource-ancient-beast-bone",
+  "resource-ancient-tree-bark",
   "resource-night-stone",
   "resource-pal-crystal",
   "resource-coal",
@@ -83,6 +85,8 @@ const EGG_SUBTYPE_PREFIXES: Readonly<
 const RESOURCE_SUBTYPE_TYPES: Readonly<
   Record<string, PalworldMapResourceTypeId>
 > = Object.freeze({
+  "ancient-beast-bone": "resource-ancient-beast-bone",
+  "ancient-tree-bark": "resource-ancient-tree-bark",
   "night-stone": "resource-night-stone",
   "pal-crystal": "resource-pal-crystal",
   "pal-crystal-small": "resource-pal-crystal",

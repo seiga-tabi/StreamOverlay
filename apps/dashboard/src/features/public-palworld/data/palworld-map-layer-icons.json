@@ -138,6 +138,33 @@
       "height": 256
     },
     {
+      "id": "resource-ancient-beast-bone",
+      "kind": "item",
+      "mappingStatus": "representative_runtime_asset",
+      "sourceReference": "BeastBone_Ancient",
+      "imageUrl": "/images/palworld/1.0.1/items/654dbf7ce65989397571c609ec24da5f3af37b6ea81253f4b2f10fa6a732357c.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "resource-ancient-tree-bark",
+      "kind": "item",
+      "mappingStatus": "representative_runtime_asset",
+      "sourceReference": "Wood_Ancient",
+      "imageUrl": "/images/palworld/1.0.1/items/537d10b34c2c43fd2714e119bcf641c8734c1d4d162481e701d8d61e6430d3ab.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "resource-chromite",
+      "kind": "item",
+      "mappingStatus": "representative_runtime_asset",
+      "sourceReference": "Chromium",
+      "imageUrl": "/images/palworld/1.0.1/items/9cc19b8e64cb758811ea9c3bbe1c2276a8df6884b7d509e1c3217f6e552a976e.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
       "id": "resource-coal",
       "kind": "item",
       "mappingStatus": "representative_runtime_asset",
@@ -152,6 +179,15 @@
       "mappingStatus": "representative_runtime_asset",
       "sourceReference": "CopperOre",
       "imageUrl": "/images/palworld/1.0.1/items/1380acde21a21533ea2568c01d57c9637dad154850bdcf4db36a44c11cbe0289.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
+      "id": "resource-hexolite-quartz",
+      "kind": "item",
+      "mappingStatus": "representative_runtime_asset",
+      "sourceReference": "RainbowCrystal",
+      "imageUrl": "/images/palworld/1.0.1/items/0a75c7bf996b5c2efab761635717e41cc421c892163b1ce8d51f21441bef1c7e.webp",
       "width": 256,
       "height": 256
     },

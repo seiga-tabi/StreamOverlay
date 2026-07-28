@@ -334,6 +334,89 @@
   block-size: var(--yoro-space-5);
 }
 
+.public-game-header .public-app-locale-menu .public-locale-button {
+  gap: var(--yoro-space-2);
+  inline-size: auto;
+  min-inline-size: calc(var(--yoro-size-touch-target) + var(--yoro-space-5));
+  block-size: var(--yoro-size-touch-target);
+  min-block-size: var(--yoro-size-touch-target);
+  padding-inline: var(--yoro-space-3);
+  border: thin solid var(--public-game-chrome-border-strong) !important;
+  border-radius: var(--yoro-radius-md);
+  background: var(--public-game-chrome-surface-muted) !important;
+  color: var(--public-game-chrome-text) !important;
+  box-shadow: none;
+  transition:
+    border-color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
+    background-color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
+    color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard);
+}
+
+.public-game-header .public-app-locale-menu .public-locale-button:hover,
+.public-game-header .public-app-locale-menu .public-locale-button:focus-visible,
+.public-game-header .public-app-locale-menu .public-locale-button[aria-expanded="true"] {
+  border-color: var(--public-game-accent) !important;
+  background: var(--public-game-chrome-surface) !important;
+  color: var(--public-game-accent) !important;
+}
+
+.public-game-header .public-app-locale-menu .public-locale-button:focus-visible {
+  outline: none;
+  box-shadow: var(--yoro-shadow-focus);
+}
+
+.public-game-header .public-app-locale-menu .public-globe-icon {
+  inline-size: var(--yoro-space-4);
+  block-size: var(--yoro-space-4);
+  opacity: .88;
+}
+
+.public-game-header .public-app-locale-menu .public-locale-current-code {
+  color: inherit;
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.public-game-header .public-app-locale-menu .public-locale-chevron {
+  transition: transform var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard);
+}
+
+.public-game-header .public-app-locale-menu.is-open .public-locale-chevron {
+  transform: rotate(180deg);
+}
+
+.public-game-header .public-app-locale-menu .public-locale-popover {
+  border: thin solid var(--public-game-chrome-border-strong) !important;
+  background: var(--public-game-chrome-surface) !important;
+  color: var(--public-game-chrome-text) !important;
+  box-shadow: var(--yoro-shadow-panel);
+}
+
+.public-game-header .public-app-locale-menu .public-locale-popover button {
+  color: var(--public-game-chrome-text-muted) !important;
+}
+
+.public-game-header .public-app-locale-menu .public-locale-popover button:hover,
+.public-game-header .public-app-locale-menu .public-locale-popover button:focus-visible,
+.public-game-header .public-app-locale-menu .public-locale-popover button.active {
+  background: var(--public-game-chrome-surface-muted) !important;
+  color: var(--public-game-chrome-text) !important;
+}
+
+.public-game-header .public-app-locale-menu .public-locale-popover button:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 var(--yoro-focus-ring-width) var(--public-game-accent);
+}
+
+.public-game-header .public-app-locale-menu .public-locale-option-code {
+  background: var(--public-game-chrome-surface-muted);
+  color: inherit;
+}
+
+.public-game-header .public-app-locale-menu .public-locale-option-check {
+  color: var(--public-game-accent);
+}
+
 .yoro-app-shell__footer.public-game-footer {
   box-sizing: border-box;
   display: grid;

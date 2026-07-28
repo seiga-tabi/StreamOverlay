@@ -301,6 +301,11 @@
       "subtype": "world-tree"
     },
     {
+      "sourceClass": "BP_PalMapObjectSpawner_DamagableWood0001_C",
+      "category": "resource",
+      "subtype": "ancient-tree-bark"
+    },
+    {
       "sourceClass": "BP_PalMapObjectSpawner_NightStone_C",
       "category": "resource",
       "subtype": "night-stone"
@@ -391,6 +396,11 @@
       "subtype": "world-tree-ore"
     },
     {
+      "sourceClass": "BP_PalMapObjectSpawner_bone_C",
+      "category": "resource",
+      "subtype": "ancient-beast-bone"
+    },
+    {
       "sourceClass": "bp_palmapobjectspawner_palegg_Sakurajima_grade_01_C",
       "category": "egg",
       "subtype": "sakurajima-1"
@@ -470,7 +480,7 @@
     "treasure": 1511,
     "lifmunk": 407,
     "journal": 64,
-    "resource": 15662
+    "resource": 15682
   },
   "candidateFamilies": [
     {

@@ -174,6 +174,7 @@ test("active overlay만 Pal 참조를 exact join하여 ready marker로 반환한
   assert.equal(main.res.statusCode, 200);
   assert.equal(main.body.state, "ready");
   assert.equal(main.body.markers[0].pal.nameKo, "아누비스");
+  assert.deepEqual(main.body.coordinateTransform, artifact().worlds[0].transform);
   assert.equal(main.body.overlay.sourceGameVersion, metadata.gameVersion);
   assert.equal(main.body.overlay.sourceSteamBuildId, "fixture-build-001");
   assert.equal(
@@ -277,6 +278,9 @@ test("checksum compatibility approval이 있는 고정 candidate는 실제 보�
   assert.equal(main.res.statusCode, 200);
   assert.equal(main.body.state, "ready");
   assert.equal(main.body.markers.length, 83);
+  assert.equal(main.body.coordinateTransform.status, "verified");
+  assert.equal(main.body.coordinateTransform.horizontalAxis, "world_y");
+  assert.equal(main.body.coordinateTransform.verticalAxis, "world_x");
   assert.equal(
     main.body.overlay.activationBasis,
     "versioned_compatibility_approval"

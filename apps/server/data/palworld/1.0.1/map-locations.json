@@ -14,7 +14,7 @@
     "rightsVerified": false,
     "usageBasis": "operator_reference_use"
   },
-  "totalLocations": 19814,
+  "totalLocations": 19834,
   "worlds": [
     {
       "world": "main",
@@ -33,7 +33,7 @@
           "maxY": 724400
         }
       },
-      "locationCount": 19583,
+      "locationCount": 19603,
       "categoryCounts": {
         "fast-travel": 137,
         "dungeon": 170,
@@ -43,7 +43,7 @@
         "treasure": 1473,
         "lifmunk": 360,
         "journal": 55,
-        "resource": 15559
+        "resource": 15579
       },
       "locations": [
         {
@@ -48119,6 +48119,18 @@
           "normalizedY": 0.480970665
         },
         {
+          "id": "resource-193265c925c714d6666d",
+          "sourceActorId": "BP_PalMapObjectSpawner_bone_C_UAID_C87F5459F57205AF02_1782971163",
+          "sourceClass": "BP_PalMapObjectSpawner_bone_C",
+          "sourceMemberPath": "MainWorld_5/PL_MainWorld5/_Generated_/MainGrid_L0_X6_Y17_DLA2255F0E.json",
+          "sourceActorExportIndex": 0,
+          "sourceInstanceId": "42AF2AB1-4554BC84-935FEB80-E134984F",
+          "category": "resource",
+          "subtype": "ancient-beast-bone",
+          "normalizedX": 0.808648537,
+          "normalizedY": 0.133165378
+        },
+        {
           "id": "resource-193461764a99ce46666e",
           "sourceActorId": "BP_PalMapObjectSpawner_PalCrystal_C_UAID_A036BC08DD469F6802_1229675350_b7237be42e0420de",
           "sourceClass": "BP_PalMapObjectSpawner_PalCrystal_C",
@@ -52653,6 +52665,18 @@
           "subtype": "stone",
           "normalizedX": 0.362200117,
           "normalizedY": 0.764645017
+        },
+        {
+          "id": "resource-1fbd61597ffb2fe321af",
+          "sourceActorId": "BP_PalMapObjectSpawner_bone_C_UAID_C87F5459F57205AF02_1871659168",
+          "sourceClass": "BP_PalMapObjectSpawner_bone_C",
+          "sourceMemberPath": "MainWorld_5/PL_MainWorld5/_Generated_/MainGrid_L0_X6_Y18_DLA2255F0E.json",
+          "sourceActorExportIndex": 0,
+          "sourceInstanceId": "0943543B-472A7264-83D734BD-6FB6B656",
+          "category": "resource",
+          "subtype": "ancient-beast-bone",
+          "normalizedX": 0.823253727,
+          "normalizedY": 0.129313915
         },
         {
           "id": "resource-1fc48457791aeba9f893",
@@ -57837,6 +57861,18 @@
           "subtype": "copper-ore",
           "normalizedX": 0.472198695,
           "normalizedY": 0.432330094
+        },
+        {
+          "id": "resource-26b1773ffabd466b096d",
+          "sourceActorId": "BP_PalMapObjectSpawner_DamagableWood0001_C_UAID_C87F5459F5721AD402_1468956311",
+          "sourceClass": "BP_PalMapObjectSpawner_DamagableWood0001_C",
+          "sourceMemberPath": "MainWorld_5/PL_MainWorld5/_Generated_/MainGrid_L0_X-17_Y7_DL0.json",
+          "sourceActorExportIndex": 30,
+          "sourceInstanceId": "09B3F83A-4D1E9483-EFC37D9D-B0321854",
+          "category": "resource",
+          "subtype": "ancient-tree-bark",
+          "normalizedX": 0.627719492,
+          "normalizedY": 0.533068747
         },
         {
           "id": "resource-26b2bcaf8928e0b74ea9",
@@ -70725,6 +70761,18 @@
           "subtype": "sulfur",
           "normalizedX": 0.532820539,
           "normalizedY": 0.447017464
+        },
+        {
+          "id": "resource-389cea78caa45c9bc8f9",
+          "sourceActorId": "BP_PalMapObjectSpawner_DamagableWood0001_C_UAID_C87F5459F5721AD402_1242514307",
+          "sourceClass": "BP_PalMapObjectSpawner_DamagableWood0001_C",
+          "sourceMemberPath": "MainWorld_5/PL_MainWorld5/_Generated_/MainGrid_L0_X-17_Y7_DL0.json",
+          "sourceActorExportIndex": 28,
+          "sourceInstanceId": "E9848110-42285FA1-72305B93-538612CC",
+          "category": "resource",
+          "subtype": "ancient-tree-bark",
+          "normalizedX": 0.640247101,
+          "normalizedY": 0.539991717
         },
         {
           "id": "resource-389d1c2747c5c32811a6",
@@ -89099,6 +89147,18 @@
           "normalizedY": 0.126184856
         },
         {
+          "id": "resource-5217e78967f53eeec2c7",
+          "sourceActorId": "BP_PalMapObjectSpawner_bone_C_UAID_C87F5459F57205AF02_1895102170",
+          "sourceClass": "BP_PalMapObjectSpawner_bone_C",
+          "sourceMemberPath": "MainWorld_5/PL_MainWorld5/_Generated_/MainGrid_L0_X6_Y17_DLA2255F0E.json",
+          "sourceActorExportIndex": 4,
+          "sourceInstanceId": "CA625179-43B38B1B-050FB89E-4696526F",
+          "category": "resource",
+          "subtype": "ancient-beast-bone",
+          "normalizedX": 0.8158545,
+          "normalizedY": 0.126187189
+        },
+        {
           "id": "resource-521f6e27debeff1fb19b",
           "sourceActorId": "BP_PalMapObjectSpawner_RockStone7_C_UAID_5811222FB8EAEA9D01_1637125911",
           "sourceClass": "BP_PalMapObjectSpawner_RockStone7_C",
@@ -89265,6 +89325,18 @@
           "subtype": "copper-ore",
           "normalizedX": 0.435102585,
           "normalizedY": 0.525312065
+        },
+        {
+          "id": "resource-52826b2c22a72b460194",
+          "sourceActorId": "BP_PalMapObjectSpawner_DamagableWood0001_C_UAID_C87F5459F5721AD402_1498149312",
+          "sourceClass": "BP_PalMapObjectSpawner_DamagableWood0001_C",
+          "sourceMemberPath": "MainWorld_5/PL_MainWorld5/_Generated_/MainGrid_L0_X-17_Y6_DL0.json",
+          "sourceActorExportIndex": 2,
+          "sourceInstanceId": "1F944E8F-466C0137-EBCB528D-A47B8BC5",
+          "category": "resource",
+          "subtype": "ancient-tree-bark",
+          "normalizedX": 0.621193898,
+          "normalizedY": 0.540717725
         },
         {
           "id": "resource-52862a1a85a751a4a693",
@@ -90993,6 +91065,18 @@
           "subtype": "pal-crystal",
           "normalizedX": 0.591259304,
           "normalizedY": 0.388737314
+        },
+        {
+          "id": "resource-54e27bf1a7f87cc43739",
+          "sourceActorId": "BP_PalMapObjectSpawner_DamagableWood0001_C_UAID_C87F5459F5721AD402_1349310308",
+          "sourceClass": "BP_PalMapObjectSpawner_DamagableWood0001_C",
+          "sourceMemberPath": "MainWorld_5/PL_MainWorld5/_Generated_/MainGrid_L0_X-18_Y6_DL0.json",
+          "sourceActorExportIndex": 0,
+          "sourceInstanceId": "10C87AA5-460CD3AA-7F699EB1-87C8BE26",
+          "category": "resource",
+          "subtype": "ancient-tree-bark",
+          "normalizedX": 0.614708724,
+          "normalizedY": 0.54545831
         },
         {
           "id": "resource-54ef86f7e7ad91b1c647",
@@ -96323,6 +96407,18 @@
           "normalizedY": 0.245466196
         },
         {
+          "id": "resource-5b5ac4b7ea64c5e8a426",
+          "sourceActorId": "BP_PalMapObjectSpawner_bone_C_UAID_C87F5459F57205AF02_1913910171",
+          "sourceClass": "BP_PalMapObjectSpawner_bone_C",
+          "sourceMemberPath": "MainWorld_5/PL_MainWorld5/_Generated_/MainGrid_L0_X6_Y17_DLA2255F0E.json",
+          "sourceActorExportIndex": 5,
+          "sourceInstanceId": "48C91BD0-4D2FA339-C65678AB-4EE1D767",
+          "category": "resource",
+          "subtype": "ancient-beast-bone",
+          "normalizedX": 0.810953893,
+          "normalizedY": 0.125807565
+        },
+        {
           "id": "resource-5b5fd262d048bdff6e97",
           "sourceActorId": "BP_PalMapObjectSpawner_RockCopper_C_UAID_5811222FCA361ABA01_1086104992",
           "sourceClass": "BP_PalMapObjectSpawner_RockCopper_C",
@@ -96849,6 +96945,18 @@
           "subtype": "coal",
           "normalizedX": 0.719626588,
           "normalizedY": 0.337934843
+        },
+        {
+          "id": "resource-5c23368cdb334777577b",
+          "sourceActorId": "BP_PalMapObjectSpawner_DamagableWood0001_C_UAID_C87F5459F5721AD402_1100100303",
+          "sourceClass": "BP_PalMapObjectSpawner_DamagableWood0001_C",
+          "sourceMemberPath": "MainWorld_5/PL_MainWorld5/_Generated_/MainGrid_L0_X-17_Y7_DL0.json",
+          "sourceActorExportIndex": 26,
+          "sourceInstanceId": "132AB14E-4F5A06E0-A25F46A5-DDE71F91",
+          "category": "resource",
+          "subtype": "ancient-tree-bark",
+          "normalizedX": 0.623764495,
+          "normalizedY": 0.535256764
         },
         {
           "id": "resource-5c3112f827a735d14183",
@@ -108071,6 +108179,18 @@
           "normalizedY": 0.190233297
         },
         {
+          "id": "resource-6b658038fb4ee9006f37",
+          "sourceActorId": "BP_PalMapObjectSpawner_bone_C_UAID_C87F5459F57205AF02_1929729172",
+          "sourceClass": "BP_PalMapObjectSpawner_bone_C",
+          "sourceMemberPath": "MainWorld_5/PL_MainWorld5/_Generated_/MainGrid_L0_X7_Y18_DLA2255F0E.json",
+          "sourceActorExportIndex": 0,
+          "sourceInstanceId": "3825C3B5-46ABF50F-CB3A26A1-455A90D3",
+          "category": "resource",
+          "subtype": "ancient-beast-bone",
+          "normalizedX": 0.818456654,
+          "normalizedY": 0.116593043
+        },
+        {
           "id": "resource-6b6d10f6baf709aa6280",
           "sourceActorId": "BP_PalMapObjectSpawner_RockStone4_C_UAID_5811222FB8EAB2AB01_1140343657",
           "sourceClass": "BP_PalMapObjectSpawner_RockStone4_C",
@@ -112245,6 +112365,18 @@
           "subtype": "stone",
           "normalizedX": 0.272170141,
           "normalizedY": 0.783487369
+        },
+        {
+          "id": "resource-71b1f85d368d67ba9536",
+          "sourceActorId": "BP_PalMapObjectSpawner_bone_C_UAID_C87F5459F57205AF02_1854225167",
+          "sourceClass": "BP_PalMapObjectSpawner_bone_C",
+          "sourceMemberPath": "MainWorld_5/PL_MainWorld5/_Generated_/MainGrid_L0_X6_Y17_DLA2255F0E.json",
+          "sourceActorExportIndex": 3,
+          "sourceInstanceId": "F364BFA0-422326D9-7490E8A3-489BF2B8",
+          "category": "resource",
+          "subtype": "ancient-beast-bone",
+          "normalizedX": 0.811409442,
+          "normalizedY": 0.120202927
         },
         {
           "id": "resource-71b78fb1b5447bf6d99b",
@@ -119795,6 +119927,18 @@
           "normalizedY": 0.308511851
         },
         {
+          "id": "resource-7bff868904767c0629fe",
+          "sourceActorId": "BP_PalMapObjectSpawner_DamagableWood0001_C_UAID_C87F5459F5721AD402_1191997305",
+          "sourceClass": "BP_PalMapObjectSpawner_DamagableWood0001_C",
+          "sourceMemberPath": "MainWorld_5/PL_MainWorld5/_Generated_/MainGrid_L0_X-17_Y6_DL0.json",
+          "sourceActorExportIndex": 0,
+          "sourceInstanceId": "CE83863D-416898B6-BEE10EBC-9B857C1D",
+          "category": "resource",
+          "subtype": "ancient-tree-bark",
+          "normalizedX": 0.621093319,
+          "normalizedY": 0.533089453
+        },
+        {
           "id": "resource-7c03bacbdbb679ba9e74",
           "sourceActorId": "BP_PalMapObjectSpawner_RockStone4_C_UAID_5811222FB8EA529C01_1238607178",
           "sourceClass": "BP_PalMapObjectSpawner_RockStone4_C",
@@ -120861,6 +121005,18 @@
           "subtype": "coal",
           "normalizedX": 0.519218917,
           "normalizedY": 0.473539591
+        },
+        {
+          "id": "resource-7d717029af6eee158d04",
+          "sourceActorId": "BP_PalMapObjectSpawner_DamagableWood0001_C_UAID_C87F5459F5721AD402_1208080306",
+          "sourceClass": "BP_PalMapObjectSpawner_DamagableWood0001_C",
+          "sourceMemberPath": "MainWorld_5/PL_MainWorld5/_Generated_/MainGrid_L0_X-18_Y7_DL0.json",
+          "sourceActorExportIndex": 5,
+          "sourceInstanceId": "111C5A04-4B5ED542-3E3D50B3-374E3D92",
+          "category": "resource",
+          "subtype": "ancient-tree-bark",
+          "normalizedX": 0.630632247,
+          "normalizedY": 0.542448923
         },
         {
           "id": "resource-7d7367f7fcaddd780427",
@@ -171215,6 +171371,18 @@
           "normalizedY": 0.359817187
         },
         {
+          "id": "resource-c08649c6e11236cd8c09",
+          "sourceActorId": "BP_PalMapObjectSpawner_bone_C_UAID_C87F5459F57205AF02_1880376169",
+          "sourceClass": "BP_PalMapObjectSpawner_bone_C",
+          "sourceMemberPath": "MainWorld_5/PL_MainWorld5/_Generated_/MainGrid_L0_X6_Y18_DLA2255F0E.json",
+          "sourceActorExportIndex": 1,
+          "sourceInstanceId": "8F1083F3-47699960-D25B6EA3-430BAAB7",
+          "category": "resource",
+          "subtype": "ancient-beast-bone",
+          "normalizedX": 0.820044174,
+          "normalizedY": 0.129921314
+        },
+        {
           "id": "resource-c08f18236536336bc9cb",
           "sourceActorId": "BP_PalMapObjectSpawner_RockStone5_C_UAID_5811222FB8EA6AA001_1825624567",
           "sourceClass": "BP_PalMapObjectSpawner_RockStone5_C",
@@ -174357,6 +174525,18 @@
           "subtype": "stone",
           "normalizedX": 0.618849945,
           "normalizedY": 0.32806972
+        },
+        {
+          "id": "resource-c4d1902a09e0d3ab5dec",
+          "sourceActorId": "BP_PalMapObjectSpawner_DamagableWood0001_C_UAID_C87F5459F5721AD402_1376095309",
+          "sourceClass": "BP_PalMapObjectSpawner_DamagableWood0001_C",
+          "sourceMemberPath": "MainWorld_5/PL_MainWorld5/_Generated_/MainGrid_L0_X-17_Y6_DL0.json",
+          "sourceActorExportIndex": 1,
+          "sourceInstanceId": "EF9D6B6B-4895AC75-BA048288-B362A4D0",
+          "category": "resource",
+          "subtype": "ancient-tree-bark",
+          "normalizedX": 0.615633628,
+          "normalizedY": 0.53713418
         },
         {
           "id": "resource-c4d3e63f3b597f6a6b1b",
@@ -180633,6 +180813,18 @@
           "subtype": "stone",
           "normalizedX": 0.746401988,
           "normalizedY": 0.289925304
+        },
+        {
+          "id": "resource-cd30473295d94250e6eb",
+          "sourceActorId": "BP_PalMapObjectSpawner_DamagableWood0001_C_UAID_C87F5459F5721AD402_1408166310",
+          "sourceClass": "BP_PalMapObjectSpawner_DamagableWood0001_C",
+          "sourceMemberPath": "MainWorld_5/PL_MainWorld5/_Generated_/MainGrid_L0_X-17_Y7_DL0.json",
+          "sourceActorExportIndex": 29,
+          "sourceInstanceId": "B35BDD7B-4E958193-B47E5E94-6D6FFC0C",
+          "category": "resource",
+          "subtype": "ancient-tree-bark",
+          "normalizedX": 0.624930977,
+          "normalizedY": 0.532261182
         },
         {
           "id": "resource-cd3acd17bdf5b2759f9e",
@@ -193631,6 +193823,18 @@
           "normalizedY": 0.25131792
         },
         {
+          "id": "resource-df343d5019ece2f40db6",
+          "sourceActorId": "BP_PalMapObjectSpawner_bone_C_UAID_C87F5459F57205AF02_1828495165",
+          "sourceClass": "BP_PalMapObjectSpawner_bone_C",
+          "sourceMemberPath": "MainWorld_5/PL_MainWorld5/_Generated_/MainGrid_L0_X5_Y17_DLA2255F0E.json",
+          "sourceActorExportIndex": 1,
+          "sourceInstanceId": "ECFBBA1F-4B8C6B96-8B66C885-DFA92F3D",
+          "category": "resource",
+          "subtype": "ancient-beast-bone",
+          "normalizedX": 0.81374931,
+          "normalizedY": 0.137672557
+        },
+        {
           "id": "resource-df3511eaa59b55f764a4",
           "sourceActorId": "BP_PalMapObjectSpawner_PalCrystal_C_UAID_5811222FCA366CB401_1842313873_c6bd52ec04610803",
           "sourceClass": "BP_PalMapObjectSpawner_PalCrystal_C",
@@ -200433,6 +200637,18 @@
           "subtype": "quartz",
           "normalizedX": 0.469902678,
           "normalizedY": 0.204158272
+        },
+        {
+          "id": "resource-e8e807ccdf161e943d4c",
+          "sourceActorId": "BP_PalMapObjectSpawner_bone_C_UAID_C87F5459F57205AF02_1811351164",
+          "sourceClass": "BP_PalMapObjectSpawner_bone_C",
+          "sourceMemberPath": "MainWorld_5/PL_MainWorld5/_Generated_/MainGrid_L0_X6_Y17_DLA2255F0E.json",
+          "sourceActorExportIndex": 1,
+          "sourceInstanceId": "9EEBA3C5-4AC663BD-CB227C98-546FF274",
+          "category": "resource",
+          "subtype": "ancient-beast-bone",
+          "normalizedX": 0.811602706,
+          "normalizedY": 0.131460519
         },
         {
           "id": "resource-e8ea337b5a7a64729dd8",
@@ -210839,6 +211055,18 @@
           "normalizedY": 0.188104583
         },
         {
+          "id": "resource-f718269091452ff8ded4",
+          "sourceActorId": "BP_PalMapObjectSpawner_bone_C_UAID_C87F5459F57205AF02_1839407166",
+          "sourceClass": "BP_PalMapObjectSpawner_bone_C",
+          "sourceMemberPath": "MainWorld_5/PL_MainWorld5/_Generated_/MainGrid_L0_X6_Y17_DLA2255F0E.json",
+          "sourceActorExportIndex": 2,
+          "sourceInstanceId": "0CE7EC1C-476D802F-FECABA97-0B42CA81",
+          "category": "resource",
+          "subtype": "ancient-beast-bone",
+          "normalizedX": 0.815895914,
+          "normalizedY": 0.129382938
+        },
+        {
           "id": "resource-f71a1beba445de1fc6ef",
           "sourceActorId": "BP_PalMapObjectSpawner_RockCopper_C_UAID_5811222FCA36BB8A01_1716643352",
           "sourceClass": "BP_PalMapObjectSpawner_RockCopper_C",
@@ -211077,6 +211305,18 @@
           "subtype": "pal-crystal",
           "normalizedX": 0.498819713,
           "normalizedY": 0.286167863
+        },
+        {
+          "id": "resource-f7690df127af88cc0487",
+          "sourceActorId": "BP_PalMapObjectSpawner_DamagableWood0001_C_UAID_C87F5459F5721AD402_1126123304",
+          "sourceClass": "BP_PalMapObjectSpawner_DamagableWood0001_C",
+          "sourceMemberPath": "MainWorld_5/PL_MainWorld5/_Generated_/MainGrid_L0_X-17_Y7_DL0.json",
+          "sourceActorExportIndex": 27,
+          "sourceInstanceId": "CFF0E692-46E2F957-8616E5AF-C65779E3",
+          "category": "resource",
+          "subtype": "ancient-tree-bark",
+          "normalizedX": 0.629514081,
+          "normalizedY": 0.5378037
         },
         {
           "id": "resource-f76a84b65b68da55c50c",
