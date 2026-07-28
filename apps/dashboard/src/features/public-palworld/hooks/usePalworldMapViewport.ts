@@ -10,7 +10,7 @@ import {
 import type { PalworldMapMarker } from "@streamops/shared";
 
 export const PALWORLD_MAP_MIN_ZOOM = 1;
-export const PALWORLD_MAP_MAX_ZOOM = 3;
+export const PALWORLD_MAP_MAX_ZOOM = 5;
 export const PALWORLD_MAP_ZOOM_STEP = 0.5;
 export const PALWORLD_MAP_ZOOM_EPSILON = 0.001;
 const PALWORLD_MAP_KEYBOARD_PAN_STEP = 48;

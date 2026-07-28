@@ -40,7 +40,8 @@ import {
   palworldTwitchReturnTo,
   palworldUrl,
   setPalworldUrl,
-  withQueryParam
+  withQueryParam,
+  type PalworldPage,
 } from "../features/public-palworld/utils/routes";
 import { applyPalworldSeo } from "../features/public-palworld/utils/seo";
 import {
@@ -101,7 +102,9 @@ export function PublicPalworldPage({
   const selectedSkillId = detailRoute.selection?.type === "skill" ? detailRoute.selection.id : undefined;
   const selectedCondensationStars = palworldCondensationStarsFromParams(params);
   const selectedSpawnPeriod = palworldSpawnPeriodFromParams(params);
-  const pageFrame = page === "map"
+  const pageFrame = page === "home"
+    ? "home"
+    : page === "map"
     ? "map"
     : page === "technology"
       ? "technology"
@@ -301,6 +304,16 @@ export function PublicPalworldPage({
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
+  const navigatePage = useCallback((nextPage: PalworldPage) => {
+    setPalworldUrl(palworldUrl(nextPage));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
+  const navigatePalworldHref = useCallback((href: string) => {
+    setPalworldUrl(href);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
   const openPalPage = useCallback((id: string) => {
     setPalworldUrl(palworldUrl("pals", new URLSearchParams({ pal: id })));
   }, []);
@@ -407,6 +420,7 @@ export function PublicPalworldPage({
             liveStreamers={liveStreamers}
             locale={locale}
             onLiveRetry={() => void retryTwitch()}
+            onNavigate={navigatePalworldHref}
             onOpenItem={openItemPage}
             onOpenPal={openPalPage}
             onSearch={navigateSearch}

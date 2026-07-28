@@ -28,9 +28,36 @@
       (() => {
         const consentKey = "yoro.ads.consent";
         const scriptSelector = "script[data-yoro-adsense]";
+        const publicExactPaths = new Set([
+          "/",
+          "/lol",
+          "/follow",
+          "/participation",
+          "/community",
+          "/privacy",
+          "/terms",
+          "/contact",
+          "/palworld",
+          "/palworld/pals",
+          "/palworld/breeding",
+          "/palworld/items",
+          "/palworld/technology",
+          "/palworld/skills",
+          "/palworld/map",
+          "/palworld/search",
+          "/lol/tournaments"
+        ]);
+        const publicPathPrefixes = [
+          "/lol/summoners/",
+          "/lol/tournaments/",
+          "/community/server",
+          "/community/party",
+          "/community/posts/"
+        ];
         const isAdEligiblePath = () => {
           const pathname = window.location.pathname.replace(/\/+$/, "") || "/";
-          return pathname === "/" || pathname === "/lol" || pathname.startsWith("/lol/");
+          return publicExactPaths.has(pathname)
+            || publicPathPrefixes.some((prefix) => pathname.startsWith(prefix));
         };
         const loadAdsense = () => {
           if (!isAdEligiblePath()) return;
@@ -42,15 +69,21 @@
           script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7880271953912430";
           document.head.append(script);
         };
+        const loadAdsenseWhenConsented = () => {
+          try {
+            if (window.localStorage.getItem(consentKey) === "granted") loadAdsense();
+          } catch {
+            // 저장소 접근이 차단된 환경에서는 동의 전 상태를 유지합니다.
+          }
+        };
 
-        try {
-          if (window.localStorage.getItem(consentKey) === "granted") loadAdsense();
-        } catch {
-          // 저장소 접근이 차단된 환경에서는 동의 전 상태를 유지합니다.
-        }
+        loadAdsenseWhenConsented();
         window.addEventListener("yoro:ads-consent", (event) => {
           if (event instanceof CustomEvent && event.detail?.granted === true) loadAdsense();
         });
+        window.addEventListener("publicroutechange", loadAdsenseWhenConsented);
+        window.addEventListener("palworldroutechange", loadAdsenseWhenConsented);
+        window.addEventListener("popstate", loadAdsenseWhenConsented);
       })();
     </script>
     <title>YORO.gg</title>

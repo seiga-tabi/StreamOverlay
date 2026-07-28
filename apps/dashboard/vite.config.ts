@@ -169,6 +169,7 @@ function palworldStaticAssetPolicy(): Plugin {
       const generated = JSON.parse(generatedText) as {
         schemaVersion?: unknown;
         map?: { imageUrl?: unknown; width?: unknown; height?: unknown };
+        displayMap?: { imageUrl?: unknown; width?: unknown; height?: unknown };
         maps?: Record<
           string,
           { imageUrl?: unknown; width?: unknown; height?: unknown }
@@ -466,15 +467,22 @@ function palworldStaticAssetPolicy(): Plugin {
         };
       });
       const mainMap = mapManifest.entries?.find((entry) => entry.id === "main");
+      const mainDisplayMap = mapManifest.entries?.find(
+        (entry) => entry.id === "main-display"
+      );
       const generatedMapIds = Object.keys(generated.maps ?? {}).sort();
       const manifestMapIds = (mapManifest.entries ?? [])
         .flatMap((entry) => typeof entry.id === "string" ? [entry.id] : [])
         .sort();
       if (
         mainMap === undefined
+        || mainDisplayMap === undefined
         || generated.map?.imageUrl !== mainMap.imageUrl
         || generated.map.width !== mainMap.outputWidth
         || generated.map.height !== mainMap.outputHeight
+        || generated.displayMap?.imageUrl !== mainDisplayMap.imageUrl
+        || generated.displayMap.width !== mainDisplayMap.outputWidth
+        || generated.displayMap.height !== mainDisplayMap.outputHeight
         || JSON.stringify(generatedMapIds) !== JSON.stringify(manifestMapIds)
         || (mapManifest.entries ?? []).some((entry) => {
           const generatedEntry =

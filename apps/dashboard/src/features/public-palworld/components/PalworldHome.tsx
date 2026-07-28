@@ -1,6 +1,14 @@
 import type { PublicLiveStreamerCard, PublicLiveStreamerRailState } from "../../../shared/PublicLiveStreamerRail";
 import { PublicLiveStreamerRail } from "../../../shared/PublicLiveStreamerRail";
+import {
+  PublicGameHomeHero,
+} from "../../../shared/PublicGameHome";
 import { palworldI18n, type PalworldLocale, type PalworldTextKey } from "../i18n/palworld-i18n";
+import {
+  PalworldHomeDashboard,
+  PalworldHomeQuickSearch,
+  usePalworldHomeDashboardData,
+} from "./PalworldHomeDashboard";
 import { PalworldSearchForm } from "./PalworldSearchForm";
 
 function localizedText(locale: PalworldLocale, key: PalworldTextKey) {
@@ -18,6 +26,7 @@ export function PalworldHome({
   onLiveRetry,
   onOpenItem,
   onOpenPal,
+  onNavigate,
   onSearch,
   onTwitchLogin,
   twitchConfigured,
@@ -31,12 +40,14 @@ export function PalworldHome({
   onLiveRetry: () => void;
   onOpenItem: (id: string) => void;
   onOpenPal: (id: string) => void;
+  onNavigate: (href: string) => void;
   onSearch: (query: string) => void;
   onTwitchLogin: () => void;
   twitchConfigured: boolean;
   twitchConnected: boolean;
 }) {
   const text = palworldI18n[locale];
+  const { data: dashboardData, retry: retryDashboardData } = usePalworldHomeDashboardData(locale);
   const liveState: PublicLiveStreamerRailState = liveError
     ? "error"
     : !twitchConfigured
@@ -45,12 +56,7 @@ export function PalworldHome({
         ? "login-required"
         : "ready";
 
-  return <>
-    <section className="palworld-hero" aria-labelledby="palworld-home-title">
-      <h1 className="yoro-u-sr-only" id="palworld-home-title" data-ko={palworldI18n.ko.brand} data-ja={palworldI18n.ja.brand}>{text.brand}</h1>
-      <PalworldSearchForm locale={locale} variant="hero" onSearch={onSearch} onPal={(pal) => onOpenPal(pal.id)} onItem={(item) => onOpenItem(item.id)} />
-    </section>
-    <PublicLiveStreamerRail
+  const liveContent = <PublicLiveStreamerRail
       emptyDescription={localizedText(locale, "noLiveStreamersDescription")}
       emptyTitle={localizedText(locale, liveError ? "twitchErrorTitle" : "noLiveStreamers")}
       errorDescription={localizedText(locale, "twitchErrorDescription")}
@@ -69,6 +75,39 @@ export function PalworldHome({
       title={localizedText(locale, "followedLiveTitle")}
       viewAll={localizedText(locale, "viewAll")}
       watch={localizedText(locale, "watchStream")}
-    />
-  </>;
+    />;
+
+  return (
+    <div className="palworld-home-content">
+      <PublicGameHomeHero
+        description={localizedText(locale, "homeHeroDescription")}
+        eyebrow={localizedText(locale, "homeEyebrow")}
+        game="palworld"
+        liveContent={liveContent}
+        search={(
+          <PalworldSearchForm
+            locale={locale}
+            variant="hero"
+            onSearch={onSearch}
+            onPal={(pal) => onOpenPal(pal.id)}
+            onItem={(item) => onOpenItem(item.id)}
+          />
+        )}
+        title={localizedText(locale, "homeHeroTitle")}
+      >
+        <PalworldHomeQuickSearch
+          data={dashboardData}
+          locale={locale}
+          onOpenItem={onOpenItem}
+          onOpenPal={onOpenPal}
+        />
+      </PublicGameHomeHero>
+      <PalworldHomeDashboard
+        data={dashboardData}
+        locale={locale}
+        onNavigate={onNavigate}
+        onRetry={retryDashboardData}
+      />
+    </div>
+  );
 }

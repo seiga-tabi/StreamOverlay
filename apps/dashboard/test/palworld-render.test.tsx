@@ -9,6 +9,7 @@ import type {
   PalworldItemReference,
   PalworldItemSummary,
   PalworldMapMarker,
+  PalworldMetaResponse,
   PalworldPalCondensationProfile,
   PalworldPalListFacets,
   PalworldPalReference,
@@ -22,6 +23,10 @@ import { PublicGameSelector } from "../src/features/public-lol/components/Public
 import { setActivePublicLocale } from "../src/features/public-lol/i18n/public-lol-i18n";
 import { PalworldHeader } from "../src/features/public-palworld/components/PalworldHeader";
 import { PalworldHome } from "../src/features/public-palworld/components/PalworldHome";
+import {
+  PalworldHomeDataStatus,
+  PalworldHomeUpdates,
+} from "../src/features/public-palworld/components/PalworldHomeDashboard";
 import { ItemCard, PalCard } from "../src/features/public-palworld/components/PalworldCards";
 import { PalworldItemReferenceButton } from "../src/features/public-palworld/components/PalworldItemReferenceButton";
 import { PalworldMapFilterPanel } from "../src/features/public-palworld/components/PalworldMapFilterPanel";
@@ -681,13 +686,14 @@ test("Palworld 헤더는 공유 Twitch 프로필과 Dashboard·로그아웃 메�
   assert.match(html, /Pal Viewer/u);
 });
 
-test("Palworld 홈은 기존 meta·shortcut·summary 없이 로그인 CTA가 있는 LIVE rail을 렌더한다", () => {
+test("Palworld 홈은 실제 경로의 기능 대시보드와 로그인 CTA가 있는 LIVE rail을 렌더한다", () => {
   const html = renderToStaticMarkup(<PalworldHome
     liveError={false}
     liveLoading={false}
     liveStreamers={[]}
     locale="ko"
     onLiveRetry={() => undefined}
+    onNavigate={() => undefined}
     onOpenItem={() => undefined}
     onOpenPal={() => undefined}
     onSearch={() => undefined}
@@ -696,10 +702,70 @@ test("Palworld 홈은 기존 meta·shortcut·summary 없이 로그인 CTA가 있
     twitchConnected={false}
   />);
   assert.doesNotMatch(html, /palworld-hero-meta|palworld-shortcuts|palworld-summary/u);
-  assert.doesNotMatch(html, /등록된 Pal|등록된 아이템|게임 버전|데이터 갱신일/u);
+  assert.match(html, /PALWORLD DATABASE/u);
+  assert.match(html, /href="\/palworld\/pals"/u);
+  assert.match(html, /href="\/palworld\/breeding"/u);
+  assert.match(html, /href="\/palworld\/map"/u);
+  assert.match(html, /href="\/palworld\/technology"/u);
   assert.match(html, /팔로우 중인 LIVE 스트리머/u);
   assert.match(html, /Twitch 로그인 후 팔로우 중인 스트리머의 방송 상태를 확인할 수 있습니다/u);
   assert.match(html, /data-testid="public-live-streamer-rail"/u);
+});
+
+test("Palworld 홈 데이터 현황과 업데이트는 meta의 실제 수·release·검증일만 표시한다", () => {
+  const metadata = {
+    gameVersion: "1.0.1.100619",
+    release: "1.0.1",
+    steamBuildId: "100619",
+    sourceName: "검증된 runtime snapshot",
+    sourceUrl: "https://example.com/palworld",
+    sourceRevision: "source-r1",
+    extractedAt: "2026-07-20T00:00:00.000Z",
+    verifiedAt: "2026-07-22T00:00:00.000Z",
+    license: "operator_reference_use",
+  };
+  const domain = { status: "ready" as const, recordCount: 0, metadata };
+  const meta: PalworldMetaResponse = {
+    metadata,
+    counts: { pals: 181, items: 842, breedingPairs: 32_761, skills: 206 },
+    domains: {
+      pals: { ...domain, recordCount: 181 },
+      items: { ...domain, recordCount: 842 },
+      breeding: { ...domain, recordCount: 32_761 },
+      skills: { ...domain, recordCount: 206 },
+    },
+    gates: {
+      dataIntegrity: { passed: true, status: "ready" },
+      imageAssets: {
+        status: "operator_acknowledged",
+        policyStatus: "operator_acknowledged",
+        technicalPassed: true,
+        publicActivationAllowed: true,
+        rightsVerified: false,
+        usageBasis: "operator_reference_use",
+        readyImages: 181,
+        fallbackPals: 0,
+        publicNoticeRequired: true,
+      },
+    },
+  };
+  const dataStatus = renderToStaticMarkup(
+    <PalworldHomeDataStatus locale="ko" meta={{ state: "ready", data: meta }} onRetry={() => undefined} />,
+  );
+  const updates = renderToStaticMarkup(
+    <PalworldHomeUpdates locale="ja" meta={{ state: "ready", data: meta }} onRetry={() => undefined} />,
+  );
+
+  assert.match(dataStatus, /데이터 현황/u);
+  assert.match(dataStatus, /181/u);
+  assert.match(dataStatus, /842/u);
+  assert.match(dataStatus, /32,761/u);
+  assert.match(dataStatus, /1\.0\.1/u);
+  assert.doesNotMatch(dataStatus, /\+\d+/u);
+  assert.match(updates, /最新アップデート/u);
+  assert.match(updates, /検証済みデータ/u);
+  assert.match(updates, /dateTime="2026-07-22T00:00:00\.000Z"/u);
+  assert.doesNotMatch(updates, /2024\.05|新しいパル|パッチ/u);
 });
 
 test("기술 해금 아이템은 레벨별로 묶이고 카드 전체에서 상세를 열 수 있다", () => {
@@ -1699,6 +1765,12 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   assert.ok(mainMapImage);
   assert.ok(treeMapImage);
   assert.equal(mainMapImage.imageUrl, mapUrl);
+  assert.equal(mapUrl, generatedStaticAssets.displayMap.imageUrl);
+  assert.notEqual(
+    mapUrl,
+    generatedStaticAssets.map.imageUrl,
+    "표시 지도는 좌표 기준 지도에 합성된 빠른 이동 아이콘을 포함하지 않는다.",
+  );
   assert.equal(isLocalPalworldMapUrl(mapUrl), true);
   assert.equal(isLocalPalworldMapUrl(`/images/palworld/2.3.4/maps/${"a".repeat(64)}.webp`), true);
   assert.equal(isLocalPalworldMapUrl("https://example.com/map.webp"), false);
@@ -2002,6 +2074,10 @@ test("월드 지도 이동과 기준점 확대는 지도 경계를 벗어나지 
     clampPalworldMapView({ x: -400, y: -300, zoom: 1 }, 1_000, 800),
     { x: 0, y: 0, zoom: 1 },
   );
+  assert.deepEqual(
+    clampPalworldMapView({ x: -9_000, y: -9_000, zoom: 8 }, 1_000, 800),
+    { x: -4_000, y: -3_200, zoom: 5 },
+  );
 
   const zoomed = zoomPalworldMapViewAt(
     { x: 0, y: 0, zoom: 1 },
@@ -2182,7 +2258,7 @@ test("월드 지도 추가 위치 마커는 상세 연결 상태와 최소 터�
   );
 });
 
-test("월드 지도 subtype cluster는 검증된 실제 아이콘과 위치 수를 함께 표시한다", () => {
+test("월드 지도 subtype cluster는 접근성 위치 수를 유지하고 지도에는 실제 아이콘만 표시한다", () => {
   const labels = {
     "fast-travel": { ko: "빠른 이동", ja: "ファストトラベル" },
     dungeon: { ko: "던전", ja: "ダンジョン" },
@@ -2229,7 +2305,7 @@ test("월드 지도 subtype cluster는 검증된 실제 아이콘과 위치 수�
 
   assert.match(html, /aria-label="쿠룰리스 상, 2개 위치"/u);
   assert.match(html, new RegExp(`src="${imageUrl}"`, "u"));
-  assert.match(html, /<strong aria-hidden="true">2<\/strong>/u);
+  assert.doesNotMatch(html, /<strong aria-hidden="true">2<\/strong>/u);
   assert.equal((html.match(/palworld-map-location-marker/gu) ?? []).length, 1);
 });
 
@@ -2369,12 +2445,19 @@ test("Pal 상세 위치는 일반 스폰과 필드 보스를 분리 조회하고
   );
 });
 
-test("페이지 상단 소개 문구는 숨기고 Pal·도감 번호·레벨 표기는 한국어·일본어 i18n을 통해 제공한다", () => {
+test("홈 Hero 제목은 표시하고 하위 페이지 소개 문구와 Pal 표기는 한국어·일본어 i18n을 통해 제공한다", () => {
   assert.equal(palworldI18n.ko.palEntityLabel, "Pal");
   assert.equal(palworldI18n.ja.palEntityLabel, "パル");
 
+  const homeSource = readFileSync(
+    new URL("../src/features/public-palworld/components/PalworldHome.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(homeSource, /PublicGameHomeHero/u);
+  assert.match(homeSource, /homeHeroTitle/u);
+  assert.match(homeSource, /homeHeroDescription/u);
+
   const sources = [
-    ["PalworldHome.tsx", ["homeKicker", "description"]],
     ["PalworldPalsPage.tsx", ["palsKicker", "palsDescription"]],
     ["PalworldBreedingPage.tsx", ["breedingKicker", "breedingDescription"]],
     ["PalworldItemsPage.tsx", ["itemsKicker", "itemsDescription"]],

@@ -13,6 +13,7 @@ import { StatusPill } from "../src/shared/ui/Status";
 import { PublicTwitchAccountChip, PublicTwitchAccountPanel } from "../src/shared/PublicTwitchAccountChip";
 import { PublicMobileMenuSheet } from "../src/shared/PublicMobileMenuSheet";
 import { PublicGameHeaderFrame } from "../src/shared/PublicGameChrome";
+import { TWITCH_GLITCH_ICON_URL } from "../src/shared/TwitchGlitchIcon";
 
 test("Shared Button loading 상태가 중복 클릭 방지와 접근성 속성을 함께 출력한다", () => {
   const html = renderToStaticMarkup(<Button loading loadingLabel="검색 중">검색</Button>);
@@ -107,6 +108,7 @@ test("공통 Twitch account chip이 미로그인 상태에서 token 없이 로�
 
   assert.match(html, /aria-expanded="false"/);
   assert.match(html, />Twitch ログイン</);
+  assert.match(html, new RegExp(`src="${TWITCH_GLITCH_ICON_URL}"`, "u"));
   assert.doesNotMatch(html, /role="menu"/);
   assert.doesNotMatch(html, /Twitch ログアウト/);
 });
@@ -219,6 +221,7 @@ test("모바일 Twitch inline 패널은 로그인 계정과 기존 action을 일
 
   assert.match(html, />YORO</u);
   assert.match(html, />@yoro</u);
+  assert.match(html, new RegExp(`src="${TWITCH_GLITCH_ICON_URL}"`, "u"));
   assert.match(html, />대시보드</u);
   assert.match(html, />로그아웃</u);
   assert.doesNotMatch(html, /role="menu"/u);
@@ -275,6 +278,7 @@ test("LoL 홈은 공통 LIVE rail로 기존 스트리머 카드와 전체 보기
         statusLabel: "LIVE",
       }]}
       loading={false}
+      onPage={() => undefined}
       onShowStreamers={() => undefined}
       searchForm={<form aria-label="소환사 검색" />}
       showEmptyResult={false}
@@ -283,7 +287,10 @@ test("LoL 홈은 공통 LIVE rail로 기존 스트리머 카드와 전체 보기
   );
 
   assert.match(html, /data-testid="public-live-streamer-rail"/u);
-  assert.match(html, /class="public-home-brand-logo-image" src="\/images\/yorogg-home-logo\.webp"/u);
+  assert.match(html, /class="public-game-home__picture"/u);
+  assert.match(html, /\/images\/public-home\/lol\/mobile\.[a-f0-9]{16}\.avif/u);
+  assert.match(html, /public-game-home__eyebrow[\s\S]*전적 검색/u);
+  assert.match(html, /<h1 id="public-lol-home-title"[\s\S]*YORO\.gg<\/h1>/u);
   assert.match(html, /LoL Streamer/u);
   assert.match(html, /League of Legends/u);
   assert.match(html, /href="https:\/\/www\.twitch\.tv\/lol_streamer"/u);

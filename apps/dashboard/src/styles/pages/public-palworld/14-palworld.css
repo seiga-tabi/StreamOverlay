@@ -121,6 +121,10 @@
   min-inline-size: 0;
 }
 
+.palworld-search-form input[type="search"]::-webkit-search-cancel-button {
+  appearance: none;
+}
+
 .palworld-search-form.is-header {
   flex: 0 1 var(--yoro-size-public-header-search-max);
   inline-size: min(42vw, var(--yoro-size-public-header-search-max));
@@ -1199,12 +1203,12 @@
   justify-content: center;
   min-inline-size: var(--yoro-size-touch-target);
   min-block-size: var(--yoro-size-touch-target);
-  gap: var(--yoro-space-1);
+  gap: var(--yoro-space-0);
   padding: var(--yoro-space-1);
-  border: var(--yoro-focus-ring-width) solid currentColor;
-  border-radius: var(--yoro-radius-pill);
-  background: var(--yoro-color-surface-strong);
-  box-shadow: var(--yoro-shadow-soft);
+  border: 0;
+  border-radius: var(--yoro-radius-sm);
+  background: transparent;
+  box-shadow: none;
   font: inherit;
   font-size: var(--yoro-font-size-xs);
   font-weight: var(--yoro-font-weight-black);
@@ -1233,28 +1237,12 @@
 .palworld-map-location-marker:focus-visible,
 .palworld-map-location-marker[data-selected="true"] {
   z-index: var(--yoro-z-sticky);
-  background: var(--palworld-accent-soft);
+  background: transparent;
 }
 
 .palworld-map-location-marker:focus-visible {
   outline: var(--yoro-focus-ring-width) solid var(--yoro-color-focus-ring);
   outline-offset: var(--yoro-focus-ring-width);
-}
-
-.palworld-map-location-marker > strong {
-  position: absolute;
-  inset-block-start: calc(var(--yoro-space-1) * -1);
-  inset-inline-end: calc(var(--yoro-space-1) * -1);
-  display: grid;
-  place-items: center;
-  min-inline-size: var(--yoro-space-5);
-  min-block-size: var(--yoro-space-5);
-  padding-inline: var(--yoro-space-1);
-  border: thin solid var(--yoro-color-border-on-dark);
-  border-radius: var(--yoro-radius-pill);
-  background: var(--yoro-color-surface-strong);
-  color: var(--yoro-color-text-strong);
-  font-variant-numeric: tabular-nums;
 }
 
 .palworld-map-boss-marker:hover,

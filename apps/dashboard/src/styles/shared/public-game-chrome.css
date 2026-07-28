@@ -157,6 +157,16 @@
   opacity: 1;
 }
 
+.public-game-header__search-content > .palworld-search-form.is-header input {
+  color: var(--yoro-color-text-strong);
+  -webkit-text-fill-color: var(--yoro-color-text-strong);
+}
+
+.public-game-header__search-content > .palworld-search-form.is-header input::placeholder {
+  color: var(--yoro-color-text-muted);
+  -webkit-text-fill-color: var(--yoro-color-text-muted);
+}
+
 .public-game-header__mobile-toggle {
   display: none;
 }
@@ -530,6 +540,27 @@
   min-inline-size: 0;
 }
 
+.twitch-glitch-icon {
+  display: block;
+  inline-size: 1.1em;
+  block-size: 1.28em;
+  object-fit: contain;
+}
+
+.public-twitch-account-panel__login > .twitch-glitch-icon,
+.public-twitch-login-chip .twitch-glitch-icon,
+.public-twitch-profile-menu-head .twitch-glitch-icon,
+.public-twitch-account-panel__profile .twitch-glitch-icon {
+  flex: none;
+  inline-size: var(--yoro-space-5);
+  block-size: var(--yoro-space-6);
+}
+
+.public-profile-link-icon.twitch .twitch-glitch-icon {
+  inline-size: calc(var(--yoro-space-6) + var(--yoro-space-1));
+  block-size: calc(var(--yoro-space-6) + var(--yoro-space-1));
+}
+
 .public-twitch-account-panel__login,
 .public-twitch-account-panel__actions > button {
   display: inline-flex;
@@ -698,6 +729,7 @@
   .public-game-header__product,
   .public-game-header__mobile-toggle {
     min-block-size: var(--yoro-size-touch-target);
+    padding-block-end: var(--yoro-space-2);
   }
 
   .public-game-header__desktop-game-selector {

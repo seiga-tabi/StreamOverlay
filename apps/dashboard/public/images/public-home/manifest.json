@@ -1,0 +1,203 @@
+{
+  "schemaVersion": 1,
+  "rightsVerified": false,
+  "usageBasis": "operator_reference_use",
+  "games": {
+    "lol": {
+      "sourceFilename": "롤 공식일러스트.jpg",
+      "sourceSha256": "b4232dc123c790947b01935fc326ef3c2aa026ca7c5b67c3a198ea1a9b26cdc1",
+      "sourceWidth": 1215,
+      "sourceHeight": 717,
+      "rightsVerified": false,
+      "usageBasis": "operator_reference_use",
+      "variants": {
+        "desktop": {
+          "avif": {
+            "url": "/images/public-home/lol/desktop.8373f07fdc4f4b5a.avif",
+            "outputSha256": "8373f07fdc4f4b5ab236a2016e7137926ea203dfb74a87581fb36db44ac3950f",
+            "width": 1215,
+            "height": 660,
+            "format": "avif",
+            "purpose": "desktop",
+            "crop": {
+              "left": 0,
+              "top": 20,
+              "width": 1215,
+              "height": 660
+            }
+          },
+          "webp": {
+            "url": "/images/public-home/lol/desktop.eac474d130d37c60.webp",
+            "outputSha256": "eac474d130d37c608220f82c466ed4ebf3f614fd1b60af2a04c79b2c8c55e2c3",
+            "width": 1215,
+            "height": 660,
+            "format": "webp",
+            "purpose": "desktop",
+            "crop": {
+              "left": 0,
+              "top": 20,
+              "width": 1215,
+              "height": 660
+            }
+          },
+          "jpg": {
+            "url": "/images/public-home/lol/desktop.ca4cdeb7f85bdc91.jpg",
+            "outputSha256": "ca4cdeb7f85bdc91559501ec68b0313bbac2ee8fc34f4a2e2c65647998d4dfce",
+            "width": 1215,
+            "height": 660,
+            "format": "jpg",
+            "purpose": "desktop",
+            "crop": {
+              "left": 0,
+              "top": 20,
+              "width": 1215,
+              "height": 660
+            }
+          }
+        },
+        "mobile": {
+          "avif": {
+            "url": "/images/public-home/lol/mobile.a3da908a356f4d12.avif",
+            "outputSha256": "a3da908a356f4d1240e4705240dc6731a54ec8cd0cd45be3b0222b53c55317e1",
+            "width": 785,
+            "height": 717,
+            "format": "avif",
+            "purpose": "mobile",
+            "crop": {
+              "left": 430,
+              "top": 0,
+              "width": 785,
+              "height": 717
+            }
+          },
+          "webp": {
+            "url": "/images/public-home/lol/mobile.de241c226edf9ad5.webp",
+            "outputSha256": "de241c226edf9ad53a620e8bf88a70a275aab4ef7bd509f01fb3e550ab180031",
+            "width": 785,
+            "height": 717,
+            "format": "webp",
+            "purpose": "mobile",
+            "crop": {
+              "left": 430,
+              "top": 0,
+              "width": 785,
+              "height": 717
+            }
+          },
+          "jpg": {
+            "url": "/images/public-home/lol/mobile.3fb8e59b9224eb73.jpg",
+            "outputSha256": "3fb8e59b9224eb739cd28fc4357cb16ea227a3e7ff14e1f0f8dc7e0030a99618",
+            "width": 785,
+            "height": 717,
+            "format": "jpg",
+            "purpose": "mobile",
+            "crop": {
+              "left": 430,
+              "top": 0,
+              "width": 785,
+              "height": 717
+            }
+          }
+        }
+      }
+    },
+    "palworld": {
+      "sourceFilename": "팰월드 공식 일러.jpeg",
+      "sourceSha256": "398f2b4ef1a0e3c35ca40ebc17efb014e20a09d4fa45ba3919136c8ee4825e08",
+      "sourceWidth": 1920,
+      "sourceHeight": 1080,
+      "rightsVerified": false,
+      "usageBasis": "operator_reference_use",
+      "variants": {
+        "desktop": {
+          "avif": {
+            "url": "/images/public-home/palworld/desktop.c4149b938919145c.avif",
+            "outputSha256": "c4149b938919145c3b76d85f2835318ac90c77de493a61c935809649e71be0c8",
+            "width": 1920,
+            "height": 760,
+            "format": "avif",
+            "purpose": "desktop",
+            "crop": {
+              "left": 0,
+              "top": 30,
+              "width": 1920,
+              "height": 760
+            }
+          },
+          "webp": {
+            "url": "/images/public-home/palworld/desktop.dfdafb785aa4b97e.webp",
+            "outputSha256": "dfdafb785aa4b97e5f465fab76e0b7c945edf077fb994100b364ad33135a62ef",
+            "width": 1920,
+            "height": 760,
+            "format": "webp",
+            "purpose": "desktop",
+            "crop": {
+              "left": 0,
+              "top": 30,
+              "width": 1920,
+              "height": 760
+            }
+          },
+          "jpg": {
+            "url": "/images/public-home/palworld/desktop.2b60a3c0916ddf0b.jpg",
+            "outputSha256": "2b60a3c0916ddf0b26b07680ede3f3e0a1a2d03f7a5f343d47ef3c95ce7af546",
+            "width": 1920,
+            "height": 760,
+            "format": "jpg",
+            "purpose": "desktop",
+            "crop": {
+              "left": 0,
+              "top": 30,
+              "width": 1920,
+              "height": 760
+            }
+          }
+        },
+        "mobile": {
+          "avif": {
+            "url": "/images/public-home/palworld/mobile.66eb386fdc0702b6.avif",
+            "outputSha256": "66eb386fdc0702b631950078f64c2b99011366ec7ac62f4a6feb6781959bf4b4",
+            "width": 780,
+            "height": 820,
+            "format": "avif",
+            "purpose": "mobile",
+            "crop": {
+              "left": 1020,
+              "top": 20,
+              "width": 780,
+              "height": 820
+            }
+          },
+          "webp": {
+            "url": "/images/public-home/palworld/mobile.55006924a94b1dd3.webp",
+            "outputSha256": "55006924a94b1dd393080380418f411482d8a5f03038e0e9f3ebd803873ea7f4",
+            "width": 780,
+            "height": 820,
+            "format": "webp",
+            "purpose": "mobile",
+            "crop": {
+              "left": 1020,
+              "top": 20,
+              "width": 780,
+              "height": 820
+            }
+          },
+          "jpg": {
+            "url": "/images/public-home/palworld/mobile.b44b7b700d569414.jpg",
+            "outputSha256": "b44b7b700d569414fce08c822c1c5857b7554a85611363b202d639e2a67b6286",
+            "width": 780,
+            "height": 820,
+            "format": "jpg",
+            "purpose": "mobile",
+            "crop": {
+              "left": 1020,
+              "top": 20,
+              "width": 780,
+              "height": 820
+            }
+          }
+        }
+      }
+    }
+  }
+}

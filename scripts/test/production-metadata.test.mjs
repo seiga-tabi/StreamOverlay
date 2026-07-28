@@ -24,13 +24,26 @@ test("공개 SEO 메타데이터는 운영 도메인 yoro.gg를 사용한다", a
   assert.doesNotMatch(`${html}\n${robots}\n${sitemap}\n${ads}`, /gg\.seigatabi\.com/);
 });
 
-test("AdSense는 명시적 광고 동의 전에는 직접 로드되지 않는다", async () => {
+test("AdSense는 명시적 광고 동의 후 모든 공개 페이지에서 한 번만 로드된다", async () => {
   const html = await readFile(path.join(projectRoot, "apps/dashboard/index.html"), "utf8");
 
   assert.doesNotMatch(html, /<script[^>]+src="https:\/\/pagead2\.googlesyndication\.com/i);
   assert.match(html, /yoro\.ads\.consent/);
   assert.match(html, /yoro:ads-consent/);
   assert.match(html, /event\.detail\?\.granted === true/);
-  assert.match(html, /pathname === "\/" \|\| pathname === "\/lol" \|\| pathname\.startsWith\("\/lol\/"\)/);
-  assert.doesNotMatch(html, /pathname\.startsWith\("\/(?:admin|dashboard|palworld)/);
+  assert.match(html, /script\.async = true/);
+  assert.match(html, /script\.crossOrigin = "anonymous"/);
+  assert.match(html, /adsbygoogle\.js\?client=ca-pub-7880271953912430/);
+  assert.match(html, /"\/palworld\/pals"/);
+  assert.match(html, /"\/palworld\/breeding"/);
+  assert.match(html, /"\/palworld\/items"/);
+  assert.match(html, /"\/palworld\/technology"/);
+  assert.match(html, /"\/palworld\/skills"/);
+  assert.match(html, /"\/palworld\/map"/);
+  assert.match(html, /"\/lol\/summoners\/"/);
+  assert.match(html, /"\/community\/posts\/"/);
+  assert.match(html, /window\.addEventListener\("publicroutechange", loadAdsenseWhenConsented\)/);
+  assert.match(html, /window\.addEventListener\("palworldroutechange", loadAdsenseWhenConsented\)/);
+  assert.doesNotMatch(html, /"\/(?:admin|dashboard|streamer)"/);
+  assert.match(html, /document\.querySelector\(scriptSelector\)/);
 });

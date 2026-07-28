@@ -34,7 +34,7 @@
   "targetPaldexSteamBuildId": "24181105",
   "markerArtifactSha256": "11f54e4ddc48b2374e755ec04d1139a687fad0b7702f36221c349029e2afb1e8",
   "markerManifestSha256": "c4ecbb6dd844b4480aaf2bf3a3ee73e23b5a3144be516b579b2c904d0f7b0586",
-  "mapImagesManifestSha256": "d32f3282f7e6458e531277f875396475f2770cb6667a4d13e65d7259a079d547",
+  "mapImagesManifestSha256": "10f7981b04c43c6e4a254d5713769efd5f024b256fb45f9db4f0222450903bfe",
   "targetMapAssetSha256": "3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003",
   "targetTreeMapAssetSha256": "c49b2a18bf1512019f0e18c592c20d74cd491b10394ab8121581cc294f74a2cf",
   "transformRevision": "main-map-fmodel-bounds-v1",
@@ -50,7 +50,7 @@
   },
   "reviewedAt": "2026-07-25T00:00:00.000Z",
   "reviewer": "streamoverlay-data-maintenance",
-  "evidenceChecksum": "1bf88547a53df087e70356e847c0ee3ede921f45800b3b0cb50a240e041eea3a",
+  "evidenceChecksum": "1804f2a79f67e369dc716a7efb10ba98f24d6bd2d6140916eed66f2258899fea",
   "rightsVerified": false,
   "usageBasis": "operator_reference_use"
 }

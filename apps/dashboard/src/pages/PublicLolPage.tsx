@@ -29,6 +29,7 @@ import { Navigation, NavigationBadge, NavigationItem, NavigationSection } from "
 import { PageHeader, PageHeaderActions, PageHeaderDescription, PageHeaderEyebrow, PageHeaderStatus, PageHeaderTitle } from "../shared/ui/PageHeader";
 import { Skeleton, SkeletonAvatar, SkeletonButton, SkeletonCard, SkeletonText } from "../shared/ui/Skeleton";
 import { Badge, Metric, StatusPill } from "../shared/ui/Status";
+import { TwitchGlitchIcon } from "../shared/TwitchGlitchIcon";
 import {
   Toast,
   ToastCloseButton,
@@ -1162,14 +1163,14 @@ function publicHomeSearchPanelText(): PublicHomeSearchPanelText {
       ja: "YORO.gg",
     },
     title: {
-      label: t().emptyTitle,
-      ko: publicI18n.ko.emptyTitle,
-      ja: publicI18n.ja.emptyTitle,
+      label: t().homeSearchTitle,
+      ko: publicI18n.ko.homeSearchTitle,
+      ja: publicI18n.ja.homeSearchTitle,
     },
     description: {
-      label: t().emptyDescription,
-      ko: publicI18n.ko.emptyDescription,
-      ja: publicI18n.ja.emptyDescription,
+      label: t().homeSearchDescription,
+      ko: publicI18n.ko.homeSearchDescription,
+      ja: publicI18n.ja.homeSearchDescription,
     },
     loadingStatus: {
       label: t().searching,
@@ -1232,6 +1233,56 @@ function publicHomeSearchPanelText(): PublicHomeSearchPanelText {
         : "등록된 스트리머가 LIVE 방송을 시작하면 여기에 표시됩니다.",
       ko: "등록된 스트리머가 LIVE 방송을 시작하면 여기에 표시됩니다.",
       ja: "登録済みの配信者がLIVE配信を開始すると、ここに表示されます。",
+    },
+    primaryFeaturesTitle: {
+      label: t().homePrimaryFeatures,
+      ko: publicI18n.ko.homePrimaryFeatures,
+      ja: publicI18n.ja.homePrimaryFeatures,
+    },
+    participationTitle: {
+      label: t().homeParticipationTitle,
+      ko: publicI18n.ko.homeParticipationTitle,
+      ja: publicI18n.ja.homeParticipationTitle,
+    },
+    participationDescription: {
+      label: t().homeParticipationDescription,
+      ko: publicI18n.ko.homeParticipationDescription,
+      ja: publicI18n.ja.homeParticipationDescription,
+    },
+    tournamentTitle: {
+      label: t().homeTournamentTitle,
+      ko: publicI18n.ko.homeTournamentTitle,
+      ja: publicI18n.ja.homeTournamentTitle,
+    },
+    tournamentDescription: {
+      label: t().homeTournamentDescription,
+      ko: publicI18n.ko.homeTournamentDescription,
+      ja: publicI18n.ja.homeTournamentDescription,
+    },
+    communityTitle: {
+      label: t().homeCommunityTitle,
+      ko: publicI18n.ko.homeCommunityTitle,
+      ja: publicI18n.ja.homeCommunityTitle,
+    },
+    communityDescription: {
+      label: t().homeCommunityDescription,
+      ko: publicI18n.ko.homeCommunityDescription,
+      ja: publicI18n.ja.homeCommunityDescription,
+    },
+    streamerTitle: {
+      label: t().homeStreamerTitle,
+      ko: publicI18n.ko.homeStreamerTitle,
+      ja: publicI18n.ja.homeStreamerTitle,
+    },
+    streamerDescription: {
+      label: t().homeStreamerDescription,
+      ko: publicI18n.ko.homeStreamerDescription,
+      ja: publicI18n.ja.homeStreamerDescription,
+    },
+    additionalFeaturesTitle: {
+      label: t().homeAdditionalFeatures,
+      ko: publicI18n.ko.homeAdditionalFeatures,
+      ja: publicI18n.ja.homeAdditionalFeatures,
     },
   };
 }
@@ -2062,7 +2113,7 @@ function PublicStreamerRegistrationScreen({
         <button className="public-back-button" type="button" onClick={onBack}>{t().streamerRiotRegisterBack}</button>
         <div className="public-streamer-register-head">
           <span className="public-streamer-register-avatar">
-            {status.user?.profileImageUrl ? <img src={status.user.profileImageUrl} alt="" /> : "T"}
+            {status.user?.profileImageUrl ? <img src={status.user.profileImageUrl} alt="" /> : <TwitchGlitchIcon />}
           </span>
           <div>
             <h1>{t().streamerRiotRegister}</h1>
@@ -5905,9 +5956,6 @@ function MatchTeamDetails({
           },
           streamerBadge: visibleStreamer && streamerBadgeTitle ? {
             title: streamerBadgeTitle,
-            label: "T",
-            ko: "T",
-            ja: "T"
           } : undefined,
           riotId: searchableRiotIdViewModel({
             riotId: hideRiotIds ? undefined : player.riotId,
@@ -7605,6 +7653,7 @@ export function PublicLolPage({
             liveLoading={followedLoading}
             liveStreamers={homeLiveStreamers}
             loading={loading}
+            onPage={changeMainPage}
             onShowStreamers={() => changeMainPage("subscriptions")}
             searchForm={
               <SearchForm

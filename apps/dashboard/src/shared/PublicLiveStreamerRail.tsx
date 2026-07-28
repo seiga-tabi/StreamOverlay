@@ -8,6 +8,7 @@ import {
 } from "./ui/EmptyState";
 import { Skeleton, SkeletonButton, SkeletonCard, SkeletonText } from "./ui/Skeleton";
 import { StatusPill } from "./ui/Status";
+import { TwitchGlitchIcon } from "./TwitchGlitchIcon";
 
 export type PublicLiveRailText = {
   label: string;
@@ -118,13 +119,13 @@ export function PublicLiveStreamerRail({
           </EmptyState>
         ) : state === "login-required" || state === "not-configured" ? (
           <EmptyState className="public-home-live-empty" variant="streamer">
-            <EmptyStateIcon>T</EmptyStateIcon>
+            <EmptyStateIcon><TwitchGlitchIcon /></EmptyStateIcon>
             <EmptyStateTitle as="h3" data-ko={unavailableTitle.ko} data-ja={unavailableTitle.ja}>{unavailableTitle.label}</EmptyStateTitle>
             <EmptyStateDescription data-ko={unavailableDescription.ko} data-ja={unavailableDescription.ja}>{unavailableDescription.label}</EmptyStateDescription>
             {state === "login-required" && onLogin && loginAction ? <EmptyStateActions><Button size="sm" onClick={onLogin} data-ko={loginAction.ko} data-ja={loginAction.ja}>{loginAction.label}</Button></EmptyStateActions> : null}
           </EmptyState>
         ) : streamers.length > 0 ? streamers.map((streamer) => (
-          <article className="public-home-live-card" key={streamer.id} tabIndex={0}>
+          <article className="public-home-live-card" key={streamer.id}>
             <StatusPill className="public-home-live-pill" size="sm" tone="live">{streamer.statusLabel}</StatusPill>
             <span className="public-home-live-avatar">
               {streamer.avatarUrl ? <img src={streamer.avatarUrl} alt="" /> : <span aria-hidden="true">{streamer.avatarLabel}</span>}

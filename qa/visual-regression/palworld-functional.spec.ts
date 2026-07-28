@@ -43,7 +43,7 @@ const metadata: PalworldDataMetadata = {
 
 const READY_PAL_IMAGE_URL = `/images/palworld/1.0.1/pals/${"a".repeat(64)}.webp`;
 const READY_ITEM_IMAGE_URL = `/images/palworld/1.0.1/items/${"b".repeat(64)}.webp`;
-const READY_WORLD_MAP_URL = "/images/palworld/1.0.1/maps/3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003.webp";
+const READY_WORLD_MAP_URL = "/images/palworld/1.0.1/maps/dfb08d86604f7e563aaf4c4de4a426af169982ee67792867d8945ab105f66e8a.webp";
 const READY_TREE_MAP_URL = "/images/palworld/1.0.1/maps/c49b2a18bf1512019f0e18c592c20d74cd491b10394ab8121581cc294f74a2cf.webp";
 const LOCAL_WEBP_FIXTURE = resolve("apps/dashboard/public/images/yorogg-logo.webp");
 
@@ -1456,7 +1456,7 @@ test("펠월드 홈은 Hero 검색과 Twitch 로그인 LIVE rail만 표시하고
   await page.goto("/palworld");
 
   await expect(page.locator(".palworld-shell")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "펠월드 데이터베이스", level: 1 })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Palworld DB", level: 1 })).toBeVisible();
   await expect(page.getByTestId("hero-search")).toBeVisible();
   await expect(page.getByTestId("header-search")).toHaveCount(0);
   await expect(page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "홈" })).toHaveAttribute("aria-current", "page");
@@ -1572,7 +1572,7 @@ test("Twitch 팔로우 API 오류가 발생해도 Palworld 홈 검색은 계속 
   await expect(option).toBeVisible();
   if ((page.viewportSize()?.width ?? 1440) <= 600) {
     const optionReceivesPointer = await option.evaluate((element) => {
-      const hero = element.closest(".palworld-hero");
+      const hero = element.closest(".public-game-home__hero, .palworld-hero");
       if (!hero) return false;
       const optionRect = element.getBoundingClientRect();
       const heroRect = hero.getBoundingClientRect();

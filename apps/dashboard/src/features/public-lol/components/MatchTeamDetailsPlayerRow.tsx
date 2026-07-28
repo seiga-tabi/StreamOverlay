@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { PublicTeamMetricStat, type PublicTeamMetricStatViewModel } from "./PublicTeamMetricStat";
 import { SearchableRiotId, type SearchableRiotIdViewModel } from "./SearchableRiotId";
 import { TeamChampionAvatar, type TeamChampionAvatarViewModel } from "./TeamChampionAvatar";
+import { TwitchGlitchIcon } from "../../../shared/TwitchGlitchIcon";
 
 export type MatchTeamDetailsPlayerRankViewModel = {
   className: string;
@@ -11,9 +12,6 @@ export type MatchTeamDetailsPlayerRankViewModel = {
 
 export type MatchTeamDetailsPlayerStreamerBadgeViewModel = {
   title: string;
-  label: string;
-  ko: string;
-  ja: string;
 };
 
 export type MatchTeamDetailsPlayerKdaViewModel = {
@@ -69,7 +67,7 @@ export function MatchTeamDetailsPlayerRow({
 
 
               >
-                {player.streamerBadge.label}
+                <TwitchGlitchIcon />
               </span>
             ) : null}
             <span className="public-team-player-id-stack">

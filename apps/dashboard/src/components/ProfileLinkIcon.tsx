@@ -1,3 +1,5 @@
+import { TwitchGlitchIcon } from "../shared/TwitchGlitchIcon";
+
 type ProfileLinkIconProps = {
   platform?: string;
   url?: string;
@@ -38,12 +40,7 @@ function ProfileLinkIconGlyph({ platform }: { platform: string }) {
         </svg>
       );
     case "twitch":
-      return (
-        <svg viewBox="0 0 48 48" aria-hidden="true">
-          <path d="M12 7h29v20.6L32.7 36h-7.2L19 42h-5.1v-6H7V13l5-6Zm4.1 4.6v20h6.4v4.2l4.5-4.2h5.5l4.4-4.5V11.6H16.1Z" fill="currentColor" />
-          <path d="M25.1 17.1h3.6v9.8h-3.6v-9.8Zm8.2 0h3.6v9.8h-3.6v-9.8Z" fill="var(--profile-link-twitch-cutout, #9146ff)" />
-        </svg>
-      );
+      return <TwitchGlitchIcon />;
     case "discord":
       return (
         <svg viewBox="0 0 24 24" aria-hidden="true">

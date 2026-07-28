@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
+import { TwitchGlitchIcon } from "./TwitchGlitchIcon";
 
 export type PublicTwitchAccountUser = {
   login: string;
@@ -75,7 +76,7 @@ export function PublicTwitchAccountPanel({
           }}
           type="button"
         >
-          <span aria-hidden="true">T</span>
+          <TwitchGlitchIcon />
           <strong>{loginLoading ? loginLoadingLabel : loginLabel}</strong>
         </button>
         {!configured ? (
@@ -100,7 +101,9 @@ export function PublicTwitchAccountPanel({
             }}
           />
         ) : null}
-        <span aria-hidden="true" hidden={Boolean(user?.profileImageUrl)}>T</span>
+        <span aria-hidden="true" hidden={Boolean(user?.profileImageUrl)}>
+          <TwitchGlitchIcon />
+        </span>
         <div>
           <strong>{displayName}</strong>
           {user?.login ? <small>@{user.login}</small> : null}
@@ -260,7 +263,7 @@ export function PublicTwitchAccountChip({
         title={connected ? displayName : loginTitle}
         type="button"
       >
-        {user?.profileImageUrl ? <img src={user.profileImageUrl} alt="" /> : <span aria-hidden="true">T</span>}
+        {user?.profileImageUrl ? <img src={user.profileImageUrl} alt="" /> : <span aria-hidden="true"><TwitchGlitchIcon /></span>}
         <strong
           data-ja={connected ? undefined : loginLabelJa}
           data-ko={connected ? undefined : loginLabelKo}
@@ -271,7 +274,7 @@ export function PublicTwitchAccountChip({
       {connected && open ? (
         <div className="public-twitch-profile-menu" id={menuId} role="menu" aria-label={menuLabel}>
           <div className="public-twitch-profile-menu-head" role="presentation">
-            {user?.profileImageUrl ? <img src={user.profileImageUrl} alt="" /> : <span aria-hidden="true">T</span>}
+            {user?.profileImageUrl ? <img src={user.profileImageUrl} alt="" /> : <span aria-hidden="true"><TwitchGlitchIcon /></span>}
             <div>
               <strong>{displayName}</strong>
               {user?.login ? <small>@{user.login}</small> : null}

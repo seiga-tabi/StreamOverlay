@@ -71,7 +71,7 @@ const PALWORLD_MAP_DEFAULT_LAYERS: readonly PalworldMapLayer[] = [
 const PALWORLD_MAP_PUBLIC_ID_PATTERN = /^[a-z0-9][a-z0-9_-]{0,79}$/u;
 const PALWORLD_MAP_NORMALIZED_COORDINATE_PATTERN =
   /^(?:0(?:\.\d{1,6})?|1(?:\.0{1,6})?)$/u;
-const PALWORLD_MAP_ZOOM_PATTERN = /^(?:[1-2](?:\.\d{1,3})?|3(?:\.0{1,3})?)$/u;
+const PALWORLD_MAP_ZOOM_PATTERN = /^(?:[1-4](?:\.\d{1,3})?|5(?:\.0{1,3})?)$/u;
 
 function singleQueryValue(
   params: URLSearchParams,

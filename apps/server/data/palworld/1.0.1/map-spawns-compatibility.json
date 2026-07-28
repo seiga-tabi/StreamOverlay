@@ -34,7 +34,7 @@
   "targetPaldexSteamBuildId": "24181105",
   "spawnArtifactSha256": "86ec04ed0a7003bc0dce3000987fcf0f2ef04a452f22d4f70a08d36ca2f4efe6",
   "spawnManifestSha256": "19e1920f1bb03679ed2839a8bfe1d6cf04ae66190ce6989373fa6edfe4eb48ee",
-  "mapImagesManifestSha256": "d32f3282f7e6458e531277f875396475f2770cb6667a4d13e65d7259a079d547",
+  "mapImagesManifestSha256": "10f7981b04c43c6e4a254d5713769efd5f024b256fb45f9db4f0222450903bfe",
   "targetMapAssetSha256": "3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003",
   "transformRevision": "main-map-fmodel-spawns-v1",
   "counts": {
@@ -46,7 +46,7 @@
   },
   "reviewedAt": "2026-07-25T00:00:00.000Z",
   "reviewer": "streamoverlay-data-maintenance",
-  "evidenceChecksum": "3e436f33b11b973a9e98f27224dfe71c87d98ac9a20a6d4e55e3fc27e363e71a",
+  "evidenceChecksum": "a047b3eae89e639d5de377603a5971afed056b260a3f2d29dce9bc0f67c1117d",
   "rightsVerified": false,
   "usageBasis": "operator_reference_use"
 }

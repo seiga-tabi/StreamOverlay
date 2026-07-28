@@ -20,6 +20,17 @@
       "imageUrl": "/images/palworld/1.0.1/maps/3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003.webp"
     },
     {
+      "id": "main-display",
+      "sourceMember": "Pal/Texture/UI/Map/T_WorldMap.png",
+      "sourceSha256": "f02560929cf0f30ee16ba2d2693f9ca65ca5400db14e13bca862268092499b62",
+      "outputSha256": "dfb08d86604f7e563aaf4c4de4a426af169982ee67792867d8945ab105f66e8a",
+      "outputFileName": "dfb08d86604f7e563aaf4c4de4a426af169982ee67792867d8945ab105f66e8a.webp",
+      "outputWidth": 4096,
+      "outputHeight": 4096,
+      "outputBytes": 1074914,
+      "imageUrl": "/images/palworld/1.0.1/maps/dfb08d86604f7e563aaf4c4de4a426af169982ee67792867d8945ab105f66e8a.webp"
+    },
+    {
       "id": "tree",
       "sourceMember": "Pal/Texture/UI/Map/T_TreeMap.png",
       "sourceSha256": "6f79de30a1d0fbbd4306dcc10ee9b5b098d84defcb8612cf962bb8baffcf941e",

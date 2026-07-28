@@ -16,6 +16,12 @@ import { PALWORLD_ROUTE_EVENT } from "../src/features/public-palworld/utils/rout
 
 test("지도 query는 허용된 값만 exact match로 복원한다", () => {
   assert.deepEqual(
+    parsePalworldMapQuery(new URLSearchParams()).layers,
+    ["boss", "spawn"],
+    "빠른 이동 지점은 사용자가 필터에서 선택하기 전까지 표시하지 않는다.",
+  );
+
+  assert.deepEqual(
     parsePalworldMapQuery(new URLSearchParams(
       "world=tree&layers=spawn,boss&focusPal=anubis&period=night&x=0.125&y=1&zoom=2.5&marker=main-001-anubis",
     )),
@@ -29,6 +35,11 @@ test("지도 query는 허용된 값만 exact match로 복원한다", () => {
       world: "tree",
       zoom: 2.5,
     },
+  );
+  assert.equal(
+    parsePalworldMapQuery(new URLSearchParams("zoom=5")).zoom,
+    5,
+    "지도 최대 확대 배율 500%를 URL에서 복원한다.",
   );
 
   assert.deepEqual(
@@ -47,7 +58,7 @@ test("지도 query는 허용된 값만 exact match로 복원한다", () => {
 
 test("지도 query의 중복 key와 불완전한 좌표 쌍은 기본값으로 제한한다", () => {
   const parsed = parsePalworldMapQuery(new URLSearchParams(
-    "world=tree&world=main&layers=&period=day&period=night&focusPal=anubis&focusPal=cattiva&x=0.25&zoom=3.001",
+    "world=tree&world=main&layers=&period=day&period=night&focusPal=anubis&focusPal=cattiva&x=0.25&zoom=5.001",
   ));
   assert.deepEqual(parsed, {
     layers: [],

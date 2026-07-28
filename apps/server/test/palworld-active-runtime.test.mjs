@@ -639,11 +639,15 @@ test("legacy composite v12는 패시브 locale evidence와 지도 artifact를 �
 test("map image manifest는 active release·content hash·권리 상태를 exact 검증한다", async () => {
   const releaseRoot = path.dirname(legacyManifestPath);
   const manifest = await loadPalworldMapImageManifest(releaseRoot, "1.0.1");
-  assert.equal(manifest.entries.length, 2);
+  assert.equal(manifest.entries.length, 3);
   assert.equal(manifest.entries[0].id, "main");
-  assert.equal(manifest.entries[1].id, "tree");
-  assert.equal(manifest.entries[1].outputWidth, 4096);
-  assert.equal(manifest.entries[1].outputHeight, 4096);
+  assert.equal(manifest.entries[1].id, "main-display");
+  assert.equal(manifest.entries[1].sourceSha256, manifest.entries[0].sourceSha256);
+  assert.equal(manifest.entries[1].outputWidth, manifest.entries[0].outputWidth);
+  assert.equal(manifest.entries[1].outputHeight, manifest.entries[0].outputHeight);
+  assert.equal(manifest.entries[2].id, "tree");
+  assert.equal(manifest.entries[2].outputWidth, 4096);
+  assert.equal(manifest.entries[2].outputHeight, 4096);
   assert.equal(manifest.rightsVerified, false);
   assert.equal(manifest.status, "operator_acknowledged");
   assert.throws(

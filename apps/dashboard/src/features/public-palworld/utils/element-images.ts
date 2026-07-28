@@ -40,11 +40,33 @@ function staticAssets(): {
   if (generatedAssets.schemaVersion !== 1) {
     return { elements: Object.freeze({}), maps: Object.freeze({}) };
   }
-  const map = generatedAssets.map;
-  const safeMap = isLocalPalworldMapUrl(map.imageUrl) && safeDimensions(map.width) && safeDimensions(map.height)
-    ? { imageUrl: map.imageUrl, width: map.width, height: map.height }
+  const coordinateMap = generatedAssets.map;
+  const safeCoordinateMap = isLocalPalworldMapUrl(coordinateMap.imageUrl)
+    && safeDimensions(coordinateMap.width)
+    && safeDimensions(coordinateMap.height)
+    ? {
+        imageUrl: coordinateMap.imageUrl,
+        width: coordinateMap.width,
+        height: coordinateMap.height,
+      }
     : undefined;
-  const expectedRelease = safeMap ? assetRelease(safeMap.imageUrl) : undefined;
+  const displayMap = generatedAssets.displayMap;
+  const safeDisplayMap = safeCoordinateMap
+    && isLocalPalworldMapUrl(displayMap.imageUrl)
+    && safeDimensions(displayMap.width)
+    && safeDimensions(displayMap.height)
+    && displayMap.width === safeCoordinateMap.width
+    && displayMap.height === safeCoordinateMap.height
+    && assetRelease(displayMap.imageUrl) === assetRelease(safeCoordinateMap.imageUrl)
+    ? {
+        imageUrl: displayMap.imageUrl,
+        width: displayMap.width,
+        height: displayMap.height,
+      }
+    : undefined;
+  const expectedRelease = safeCoordinateMap
+    ? assetRelease(safeCoordinateMap.imageUrl)
+    : undefined;
   const maps = new Map<PalworldMapWorld, PalworldElementImage>();
   const generatedMaps = generatedAssets.maps as Partial<
     Record<PalworldMapWorld, PalworldElementImage>
@@ -65,15 +87,17 @@ function staticAssets(): {
       });
     }
   }
+  const mainCoordinateMap = maps.get("main");
   if (
-    safeMap
-    && (
-      maps.get("main")?.imageUrl !== safeMap.imageUrl
-      || maps.get("main")?.width !== safeMap.width
-      || maps.get("main")?.height !== safeMap.height
-    )
+    !safeCoordinateMap
+    || !safeDisplayMap
+    || mainCoordinateMap?.imageUrl !== safeCoordinateMap.imageUrl
+    || mainCoordinateMap.width !== safeCoordinateMap.width
+    || mainCoordinateMap.height !== safeCoordinateMap.height
   ) {
     maps.delete("main");
+  } else {
+    maps.set("main", safeDisplayMap);
   }
   const entries = new Map<PalworldElement, PalworldElementImage>();
   const duplicates = new Set<PalworldElement>();
@@ -104,7 +128,7 @@ function staticAssets(): {
     maps: Object.freeze(Object.fromEntries(maps)) as Readonly<
       Partial<Record<PalworldMapWorld, PalworldElementImage>>
     >,
-    ...(safeMap ? { map: Object.freeze(safeMap) } : {}),
+    ...(safeDisplayMap ? { map: Object.freeze(safeDisplayMap) } : {}),
   };
 }
 

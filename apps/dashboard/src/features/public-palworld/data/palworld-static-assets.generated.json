@@ -146,9 +146,19 @@
     "width": 4096,
     "height": 4096
   },
+  "displayMap": {
+    "imageUrl": "/images/palworld/1.0.1/maps/dfb08d86604f7e563aaf4c4de4a426af169982ee67792867d8945ab105f66e8a.webp",
+    "width": 4096,
+    "height": 4096
+  },
   "maps": {
     "main": {
       "imageUrl": "/images/palworld/1.0.1/maps/3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003.webp",
+      "width": 4096,
+      "height": 4096
+    },
+    "main-display": {
+      "imageUrl": "/images/palworld/1.0.1/maps/dfb08d86604f7e563aaf4c4de4a426af169982ee67792867d8945ab105f66e8a.webp",
       "width": 4096,
       "height": 4096
     },

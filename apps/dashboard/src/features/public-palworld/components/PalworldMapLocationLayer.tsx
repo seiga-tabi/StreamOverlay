@@ -177,9 +177,6 @@ export const PalworldMapLocationLayer = memo(function PalworldMapLocationLayer({
               asset={markerIcon}
               fallbackSymbol={CATEGORY_SYMBOLS[cluster.category]}
             />
-            {singleLocation ? null : (
-              <strong aria-hidden="true">{cluster.count}</strong>
-            )}
           </button>
         );
       })}
