@@ -71,6 +71,7 @@ import { loadMigrationManifest, type MigrationManifest } from "./database/migrat
 import { closeDatabasePool, databasePool } from "./database/pool.js";
 import { DiscordOnboardingService } from "./services/discord-onboarding-service.js";
 import { DiscordManagementService } from "./services/discord-management-service.js";
+import { AgentIngestionService } from "./services/agent-ingestion-service.js";
 import { DiscordInternalAuthVerifier } from "./security/discord-internal-auth.js";
 import {
   PALWORLD_SERVER_SAFE_REGISTRATION_POLICY,
@@ -109,11 +110,15 @@ const discordOnboarding = appConfig.discordSaas.enabled && postgresPool
 const discordManagement = appConfig.discordBotManagement.enabled && postgresPool
   ? new DiscordManagementService(postgresPool, logger)
   : undefined;
+const agentIngestion = appConfig.agentIngestion.enabled && postgresPool
+  ? new AgentIngestionService(postgresPool, logger)
+  : undefined;
 const discordInternalAuth = appConfig.discordBotInternal.enabled
   ? new DiscordInternalAuthVerifier(appConfig.discordBotInternal.authKey)
   : undefined;
 discordOnboarding?.startCleanup();
 discordManagement?.startCleanup();
+agentIngestion?.startCleanup();
 let palworldDataService: PalworldDataService | undefined;
 let palworldMapMarkerProvider: PalworldMapMarkerProvider | undefined;
 let palworldSpawnProvider: PalworldSpawnProvider | undefined;
@@ -530,6 +535,8 @@ const server = http.createServer(createHttpHandler({
   discordManagement,
   discordDatabaseReady: () => databaseHealth.snapshot().ready,
   discordInternalAuth,
+  agentIngestion,
+  agentDatabaseReady: () => databaseHealth.snapshot().ready,
   readiness: () => {
     const storeReadiness = store.getReadiness();
     const database = databaseHealth.snapshot();
@@ -808,6 +815,7 @@ function shutdown(signal: NodeJS.Signals): void {
   palworldServerMonitor?.stop();
   discordOnboarding?.stopCleanup();
   discordManagement?.stopCleanup();
+  agentIngestion?.stopCleanup();
   databaseHealth.stop();
   closeLolGameMonitors();
   closeWebSocketServer(bridgeWss);

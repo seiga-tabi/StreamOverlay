@@ -58,4 +58,6 @@ ID만 받는 전역 조회 method는 만들지 않습니다. 조회·수정·삭
 - 활성 Database가 unavailable·migration pending·mismatch이면 `/health/ready`가 실패합니다.
 - migration은 Server 시작 시 자동 적용하지 않습니다.
 
-Discord OAuth onboarding은 `0004_discord_oauth_onboarding`부터 이 기반을 사용합니다. OAuth가 생성한 Organization과 Guild 관계도 transaction 안에서 저장되며, setup token·OAuth state는 원문 대신 SHA-256 hash만 저장합니다. Agent ingestion과 Notification Worker는 아직 구현하지 않습니다.
+Discord OAuth onboarding은 `0004_discord_oauth_onboarding`부터 이 기반을 사용합니다. OAuth가 생성한 Organization과 Guild 관계도 transaction 안에서 저장되며, setup token·OAuth state는 원문 대신 SHA-256 hash만 저장합니다.
+
+`0007_agent_registration_and_ingestion`부터 Agent 등록과 status 저장 기반을 사용합니다. Agent credential과 nonce는 SHA-256 hash만 저장하고, current·history·online/offline event는 하나의 transaction에서 갱신합니다. 오래된 관측은 current를 덮지 않습니다. 실제 Agent daemon과 Notification Worker는 아직 구현하지 않았습니다.

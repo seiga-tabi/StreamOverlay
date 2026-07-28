@@ -18,6 +18,8 @@ import {
   parseRiotIdDetailed,
   parseDiscordInstallationObservationRequest,
   parseDiscordSetupSessionRequest,
+  parseAgentRegistrationInput,
+  parsePalworldAgentStatusPayload,
   toSafeErrorMessage,
   validatePalworldServerConnectionInput,
   validatePalworldServerDashboardResponse,
@@ -182,6 +184,10 @@ import {
   requireManagementOrganizationId,
   type DiscordManagementService
 } from "../services/discord-management-service.js";
+import {
+  AgentIngestionError,
+  type AgentIngestionService
+} from "../services/agent-ingestion-service.js";
 import {
   isManagementOrganizationId,
   parseCreatePalworldGameServerInput
@@ -2043,6 +2049,8 @@ type HttpHandlerInput = {
   discordManagement?: DiscordManagementService;
   discordDatabaseReady?: () => boolean;
   discordInternalAuth?: DiscordInternalAuthVerifier;
+  agentIngestion?: AgentIngestionService;
+  agentDatabaseReady?: () => boolean;
 };
 
 const PALWORLD_SERVER_DASHBOARD_PATH = "/api/dashboard/palworld-server";
@@ -5774,6 +5782,105 @@ export function createHttpHandler(input: HttpHandlerInput) {
         }
       }
 
+      if (
+        url.pathname === "/api/agent/v1/register"
+        || url.pathname === "/api/agent/v1/status"
+      ) {
+        if (!appConfig.agentIngestion.enabled) {
+          return sendJson(req, res, 404, { error: "not found" });
+        }
+        if (!appConfig.database.enabled) {
+          return sendJson(req, res, 503, {
+            error: "Agent 기능에 필요한 Database를 사용할 수 없습니다.",
+            code: "feature_unavailable"
+          }, noStoreHeaders());
+        }
+        if (!input.agentIngestion || input.agentDatabaseReady?.() !== true) {
+          return sendJson(req, res, 503, {
+            error: "Agent 기능을 사용할 수 없습니다.",
+            code: "agent_unavailable"
+          }, noStoreHeaders());
+        }
+        if (req.method !== "POST") {
+          return sendJson(req, res, 404, { error: "not found" });
+        }
+        if (url.search) {
+          return sendJson(req, res, 400, {
+            error: "query는 허용되지 않습니다.",
+            code: "agent_payload_invalid"
+          }, noStoreHeaders());
+        }
+        if (req.headers.origin || req.headers["access-control-request-method"]) {
+          return sendJson(req, res, 403, {
+            error: "브라우저 요청은 허용되지 않습니다.",
+            code: "agent_authentication_failed"
+          }, noStoreHeaders());
+        }
+        if (!discordJsonBodyAllowed(req)) {
+          return sendJson(req, res, 415, {
+            error: "application/json Content-Type이 필요합니다.",
+            code: "agent_payload_invalid"
+          }, noStoreHeaders());
+        }
+        const rawBody = await readRawBody(req, appConfig.agentIngestion.maximumBodyBytes);
+        let body: unknown;
+        try {
+          body = JSON.parse(rawBody.toString("utf8"));
+        } catch {
+          return sendJson(req, res, 400, {
+            error: "올바른 JSON body가 아닙니다.",
+            code: "agent_payload_invalid"
+          }, noStoreHeaders());
+        }
+        if (url.pathname === "/api/agent/v1/register") {
+          const registration = parseAgentRegistrationInput(body);
+          if (!registration) {
+            return sendJson(req, res, 400, {
+              error: "Agent 등록 요청 형식이 올바르지 않습니다.",
+              code: "agent_registration_invalid"
+            }, noStoreHeaders());
+          }
+          return sendJson(
+            req,
+            res,
+            201,
+            await input.agentIngestion.register(registration),
+            noStoreHeaders()
+          );
+        }
+        const authorization = requestHeaderValue(req, "authorization")?.trim() ?? "";
+        const match = /^Bearer ([A-Za-z0-9_-]{48,192})$/u.exec(authorization);
+        const timestamp = requestHeaderValue(req, "x-yoro-agent-timestamp")?.trim() ?? "";
+        const nonce = requestHeaderValue(req, "x-yoro-agent-nonce")?.trim() ?? "";
+        const payloadVersion = requestHeaderValue(req, "x-yoro-payload-version")?.trim() ?? "";
+        if (!match || !/^\d{10}$/u.test(timestamp) || payloadVersion !== "1") {
+          return sendJson(req, res, 401, {
+            error: "Agent 인증에 실패했습니다.",
+            code: "agent_authentication_failed"
+          }, noStoreHeaders());
+        }
+        const payload = parsePalworldAgentStatusPayload(body);
+        if (!payload) {
+          return sendJson(req, res, 400, {
+            error: "Agent 상태 payload가 올바르지 않습니다.",
+            code: "agent_payload_invalid"
+          }, noStoreHeaders());
+        }
+        return sendJson(
+          req,
+          res,
+          202,
+          await input.agentIngestion.ingest({
+            agentToken: match[1]!,
+            requestTimestamp: Number(timestamp),
+            nonce,
+            payload,
+            ipHash: crypto.createHash("sha256").update(ip).digest("hex")
+          }),
+          noStoreHeaders()
+        );
+      }
+
       if (url.pathname.startsWith("/internal/discord/")) {
         const internalPaths = new Set([
           "/internal/discord/setup-sessions",
@@ -7446,6 +7553,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if (error instanceof DiscordManagementError) {
         return sendJson(req, res, error.status, {
           error: "YORO Bot 관리 요청을 처리할 수 없습니다.",
+          code: error.code
+        }, noStoreHeaders());
+      }
+      if (error instanceof AgentIngestionError) {
+        return sendJson(req, res, error.status, {
+          error: "Agent 요청을 처리할 수 없습니다.",
           code: error.code
         }, noStoreHeaders());
       }

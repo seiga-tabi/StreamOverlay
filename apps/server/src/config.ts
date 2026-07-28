@@ -130,6 +130,7 @@ const discordBotInternalAuthKey = discordBotInternalApiEnabled
   ? secretEnvOrFile("DISCORD_BOT_INTERNAL_AUTH_KEY")
   : "";
 const discordBotManagementEnabled = boolEnv("DISCORD_BOT_MANAGEMENT_ENABLED", false);
+const agentIngestionEnabled = boolEnv("AGENT_INGESTION_ENABLED", false);
 
 export const appConfig = {
   nodeEnv,
@@ -208,6 +209,14 @@ export const appConfig = {
     idleTtlSeconds: intEnv("DISCORD_MANAGEMENT_IDLE_TTL_SECONDS", 28_800),
     absoluteTtlSeconds: intEnv("DISCORD_MANAGEMENT_ABSOLUTE_TTL_SECONDS", 86_400),
     agentTokenTtlSeconds: intEnv("AGENT_BOOTSTRAP_TTL_SECONDS", 600)
+  },
+  agentIngestion: {
+    enabled: agentIngestionEnabled,
+    credentialTtlDays: intEnv("AGENT_CREDENTIAL_TTL_DAYS", 90),
+    clockSkewSeconds: intEnv("AGENT_CLOCK_SKEW_SECONDS", 300),
+    nonceTtlSeconds: intEnv("AGENT_NONCE_TTL_SECONDS", 600),
+    maximumBodyBytes: intEnv("AGENT_MAXIMUM_BODY_BYTES", 16 * 1024),
+    rateLimitPerMinute: intEnv("AGENT_RATE_LIMIT_PER_MINUTE", 120)
   },
   riot: {
     apiKey: env("RIOT_API_KEY"),
@@ -548,6 +557,26 @@ function validateDiscordBotManagementConfig(errors: string[]): void {
   }
 }
 
+function validateAgentIngestionConfig(errors: string[]): void {
+  const config = appConfig.agentIngestion;
+  if (!config.enabled) return;
+  if (config.credentialTtlDays < 1 || config.credentialTtlDays > 365) {
+    errors.push("AGENT_CREDENTIAL_TTL_DAYS는 1에서 365 사이여야 합니다.");
+  }
+  if (config.clockSkewSeconds < 30 || config.clockSkewSeconds > 900) {
+    errors.push("AGENT_CLOCK_SKEW_SECONDS는 30에서 900 사이여야 합니다.");
+  }
+  if (config.nonceTtlSeconds < config.clockSkewSeconds || config.nonceTtlSeconds > 3_600) {
+    errors.push("AGENT_NONCE_TTL_SECONDS는 clock skew 이상 3600 이하여야 합니다.");
+  }
+  if (config.maximumBodyBytes < 1_024 || config.maximumBodyBytes > 65_536) {
+    errors.push("AGENT_MAXIMUM_BODY_BYTES는 1024에서 65536 사이여야 합니다.");
+  }
+  if (config.rateLimitPerMinute < 1 || config.rateLimitPerMinute > 600) {
+    errors.push("AGENT_RATE_LIMIT_PER_MINUTE는 1에서 600 사이여야 합니다.");
+  }
+}
+
 function validateCorsOrigins(errors: string[]): void {
   if (appConfig.security.corsOrigins.length === 0) {
     errors.push("CORS_ORIGINS가 설정되지 않았습니다.");
@@ -695,6 +724,7 @@ export function validateRuntimeConfig(): RuntimeConfigValidationResult {
   validateDiscordSaasConfig(errors);
   validateDiscordBotInternalConfig(errors);
   validateDiscordBotManagementConfig(errors);
+  validateAgentIngestionConfig(errors);
   if (isProduction()) {
     validateBuildMetadata(errors);
     if (appConfig.allowInsecureDev) errors.push("ALLOW_INSECURE_DEV는 production에서 사용할 수 없습니다.");

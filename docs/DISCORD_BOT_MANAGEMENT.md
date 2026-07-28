@@ -1,6 +1,6 @@
 # YORO Bot Organization 관리와 Agent 설치 준비
 
-이 단계는 Discord onboarding을 완료한 사용자가 `/bot/manage`에서 Organization과 Palworld 게임 서버를 관리하고, 10분 일회용 Agent 설치 토큰을 발급하는 기반만 제공합니다. 실제 Agent 실행 파일, 상태 수집, Ingestion API, Notification Worker와 서버 제어 기능은 포함하지 않습니다.
+이 단계는 Discord onboarding을 완료한 사용자가 `/bot/manage`에서 Organization과 Palworld 게임 서버를 관리하고, 10분 일회용 Agent 설치 토큰을 발급하는 기반을 제공합니다. Server의 등록·상태 Ingestion protocol은 `YORO_AGENT_PROTOCOL.md`에 정의되어 있습니다. 실제 Agent 실행 파일, Notification Worker와 서버 제어 기능은 포함하지 않습니다.
 
 ## Onboarding OAuth와 관리 OAuth
 
@@ -48,14 +48,14 @@ Free 기본값은 활성 게임 서버 1개입니다. 생성 transaction에서 e
 - 한 game server에는 활성 token 하나만 허용합니다.
 - 새 token 발급은 같은 transaction에서 이전 활성 token을 폐기합니다.
 - UI는 token을 `localStorage`, URL, analytics 또는 오류 payload에 저장하지 않습니다.
-- 실제 Agent가 없으므로 실행되지 않는 `docker run`, `latest` image 또는 download URL을 제공하지 않습니다.
+- 실제 Agent daemon이 없으므로 실행되지 않는 `docker run`, `latest` image 또는 download URL을 제공하지 않습니다.
 
-유출이 의심되면 관리 화면에서 즉시 폐기하고 새 token을 발급합니다. 아직 Agent consume API는 공개하지 않습니다.
+유출이 의심되면 관리 화면에서 즉시 폐기하고 새 token을 발급합니다. bootstrap은 `/api/agent/v1/register`에서 한 번 소비되며, 반환된 Agent credential 원문은 응답 한 번에서만 확인할 수 있습니다.
 
 ## Migration과 staging 검증
 
 1. PostgreSQL backup과 checksum을 검증합니다.
-2. migration `check`, `plan`으로 `0006_bot_management_and_agent_bootstrap`을 확인합니다.
+2. migration `check`, `plan`으로 `0006_bot_management_and_agent_bootstrap`과 `0007_agent_registration_and_ingestion`을 확인합니다.
 3. 별도 운영 승인 후에만 `apply`합니다.
 4. feature가 비활성인 image로 먼저 배포하고 기존 방송 기능과 health를 확인합니다.
 5. staging Discord identity·Organization으로 management login, role, tenant A/B, entitlement와 token 폐기를 검증합니다.

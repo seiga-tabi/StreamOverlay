@@ -48,6 +48,14 @@
       "checksumSha256": "8a915675ac6122a04689197b9cb49ff45d7d96659d2157055ca11a86d9adc951",
       "destructive": false,
       "transaction": true
+    },
+    {
+      "id": "0007_agent_registration_and_ingestion",
+      "file": "0007_agent_registration_and_ingestion.sql",
+      "description": "Agent credential 교환·nonce replay 방어·상태 ingestion 기반",
+      "checksumSha256": "94eca9c0bc6ec5aafbd2a5aa20e9891e48b9152a36a68e886ded987b102cb2eb",
+      "destructive": false,
+      "transaction": true
     }
   ]
 }

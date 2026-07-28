@@ -187,6 +187,107 @@ test("liveness는 재시작 감지에 필요한 instance 메타데이터를 반�
   assert.ok(body.uptimeSeconds >= 0);
 });
 
+test("Agent API는 feature·Database 경계를 격리하고 browser 요청을 차단한다", async () => {
+  const previous = {
+    agentEnabled: appConfig.agentIngestion.enabled,
+    databaseEnabled: appConfig.database.enabled
+  };
+  const base = {
+    store: {},
+    twitchAuth: {},
+    actions: { async dispatchOne() {} }
+  };
+  const registrationBody = {
+    bootstrapToken: "a".repeat(48),
+    agentVersion: "1.0.0",
+    platform: "linux",
+    architecture: "x64"
+  };
+  try {
+    appConfig.agentIngestion.enabled = false;
+    let handler = createHttpHandler(base);
+    let req = createRequest("POST", "/api/agent/v1/register", registrationBody, {
+      "content-type": "application/json"
+    });
+    let res = createResponse();
+    await handler(req, res);
+    assert.equal(res.statusCode, 404);
+
+    appConfig.agentIngestion.enabled = true;
+    appConfig.database.enabled = false;
+    handler = createHttpHandler(base);
+    req = createRequest("POST", "/api/agent/v1/register", registrationBody, {
+      "content-type": "application/json"
+    });
+    res = createResponse();
+    await handler(req, res);
+    assert.equal(res.statusCode, 503);
+    assert.equal(JSON.parse(res.body).code, "feature_unavailable");
+
+    appConfig.database.enabled = true;
+    handler = createHttpHandler({
+      ...base,
+      agentDatabaseReady: () => true,
+      agentIngestion: {
+        async register() {
+          return {
+            installationId: "10000000-0000-4000-8000-000000000001",
+            agentToken: "b".repeat(64),
+            gameServer: {
+              id: "20000000-0000-4000-8000-000000000001",
+              gameType: "palworld"
+            },
+            ingestion: {
+              endpoint: "https://example.test/api/agent/v1/status",
+              payloadVersion: 1
+            }
+          };
+        },
+        async ingest() {
+          return { accepted: true, currentUpdated: true, duplicate: false };
+        }
+      }
+    });
+    req = createRequest("POST", "/api/agent/v1/register", registrationBody, {
+      "content-type": "application/json",
+      origin: "https://browser.example"
+    });
+    res = createResponse();
+    await handler(req, res);
+    assert.equal(res.statusCode, 403);
+
+    req = createRequest("POST", "/api/agent/v1/register", registrationBody, {
+      "content-type": "application/json"
+    });
+    res = createResponse();
+    await handler(req, res);
+    assert.equal(res.statusCode, 201);
+    assert.equal(JSON.parse(res.body).ingestion.payloadVersion, 1);
+
+    const now = Math.floor(Date.now() / 1_000);
+    req = createRequest("POST", "/api/agent/v1/status", {
+      payloadVersion: 1,
+      observedAt: new Date(now * 1_000).toISOString(),
+      online: true,
+      players: 1,
+      maxPlayers: 16
+    }, {
+      "content-type": "application/json",
+      authorization: `Bearer ${"b".repeat(64)}`,
+      "x-yoro-agent-timestamp": String(now),
+      "x-yoro-agent-nonce": "c".repeat(24),
+      "x-yoro-payload-version": "1"
+    });
+    res = createResponse();
+    await handler(req, res);
+    assert.equal(res.statusCode, 202);
+    assert.equal(JSON.parse(res.body).accepted, true);
+  } finally {
+    appConfig.agentIngestion.enabled = previous.agentEnabled;
+    appConfig.database.enabled = previous.databaseEnabled;
+  }
+});
+
 test("관리자 서버 현황은 민감정보 없이 현재 런타임 상태를 반환한다", async () => {
   const handler = createHttpHandler({
     store: {

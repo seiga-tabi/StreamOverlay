@@ -12,6 +12,7 @@ import {
 import { EntitlementRepository } from "../dist/database/repositories/entitlement-repository.js";
 import { DiscordOnboardingRepository } from "../dist/database/repositories/discord-onboarding-repository.js";
 import { DiscordManagementRepository } from "../dist/database/repositories/discord-management-repository.js";
+import { AgentIngestionService, AgentIngestionError } from "../dist/services/agent-ingestion-service.js";
 import { GameServerRepository } from "../dist/database/repositories/game-server-repository.js";
 import { NotificationJobRepository } from "../dist/database/repositories/notification-job-repository.js";
 import { OrganizationRepository } from "../dist/database/repositories/organization-repository.js";
@@ -53,7 +54,7 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
   await t.test("check와 plan 기반 검사는 빈 DB를 변경하지 않는다", async () => {
     const inspection = await inspectMigrationState(pool, manifest);
     assert.equal(inspection.status, "pending");
-    assert.equal(inspection.pending.length, 6);
+    assert.equal(inspection.pending.length, 7);
     const table = await pool.query(
       "SELECT to_regclass('public.schema_migrations')::TEXT AS name"
     );
@@ -374,6 +375,167 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
     );
   });
 
+  await t.test("Agent 등록·nonce·stale·event 저장은 원자적이고 tenant binding을 유지한다", async () => {
+    const management = new DiscordManagementRepository(pool);
+    const serverA = (await gameServers.list(contextA))[0];
+    const membershipA = await management.requireMembership(userA, organizationA);
+    const bootstrapToken = crypto.randomBytes(48).toString("base64url");
+    await withTransaction(pool, async (client) => {
+      await new DiscordManagementRepository(client).issueAgentBootstrap({
+        context: membershipA.context,
+        role: membershipA.role,
+        gameServerId: serverA.id,
+        tokenHash: crypto.createHash("sha256").update(bootstrapToken).digest(),
+        expiresAt: new Date(Date.now() + 10 * 60_000)
+      });
+    });
+    const logEntries = [];
+    const service = new AgentIngestionService(pool, {
+      event(entry) {
+        logEntries.push(entry);
+      },
+      error(entry) {
+        logEntries.push(entry);
+      }
+    });
+    const register = () => service.register({
+      bootstrapToken,
+      agentVersion: "1.0.0-test",
+      platform: "linux",
+      architecture: "x64"
+    });
+    const registrations = await Promise.allSettled([register(), register()]);
+    assert.equal(registrations.filter((result) => result.status === "fulfilled").length, 1);
+    const registration = registrations.find((result) => result.status === "fulfilled").value;
+    assert.equal(registration.gameServer.id, serverA.id);
+    assert.equal(registration.gameServer.gameType, "palworld");
+
+    const storedCredential = await pool.query(
+      `SELECT encode(credential_hash, 'hex') AS credential_hash, status
+       FROM agent_installations
+       WHERE organization_id = $1 AND game_server_id = $2`,
+      [organizationA, serverA.id]
+    );
+    assert.equal(storedCredential.rows[0].status, "active");
+    assert.notEqual(storedCredential.rows[0].credential_hash, registration.agentToken);
+    assert.doesNotMatch(JSON.stringify(logEntries), new RegExp(registration.agentToken, "u"));
+    const bootstrap = await pool.query(
+      `SELECT status, consumed_at FROM agent_bootstrap_sessions
+       WHERE organization_id = $1 AND game_server_id = $2
+       ORDER BY created_at DESC LIMIT 1`,
+      [organizationA, serverA.id]
+    );
+    assert.equal(bootstrap.rows[0].status, "consumed");
+    assert.ok(bootstrap.rows[0].consumed_at);
+
+    const baseSeconds = Math.floor(Date.now() / 1_000);
+    const firstPayload = {
+      payloadVersion: 1,
+      observedAt: new Date((baseSeconds - 3) * 1_000).toISOString(),
+      online: true,
+      players: 2,
+      maxPlayers: 16,
+      gameVersion: "test-1"
+    };
+    const first = await service.ingest({
+      agentToken: registration.agentToken,
+      requestTimestamp: baseSeconds,
+      nonce: crypto.randomBytes(24).toString("base64url"),
+      payload: firstPayload
+    });
+    assert.deepEqual(first, { accepted: true, currentUpdated: true, duplicate: false });
+    assert.equal(
+      (await pool.query(
+        "SELECT COUNT(*)::INTEGER AS count FROM server_events WHERE organization_id = $1",
+        [organizationA]
+      )).rows[0].count,
+      0
+    );
+
+    const replayNonce = crypto.randomBytes(24).toString("base64url");
+    const secondPayload = {
+      ...firstPayload,
+      observedAt: new Date((baseSeconds - 2) * 1_000).toISOString(),
+      online: false,
+      players: 0
+    };
+    await service.ingest({
+      agentToken: registration.agentToken,
+      requestTimestamp: baseSeconds,
+      nonce: replayNonce,
+      payload: secondPayload
+    });
+    await assert.rejects(
+      service.ingest({
+        agentToken: registration.agentToken,
+        requestTimestamp: baseSeconds,
+        nonce: replayNonce,
+        payload: secondPayload
+      }),
+      (error) => error instanceof AgentIngestionError
+        && error.code === "agent_request_replayed"
+    );
+
+    const duplicate = await service.ingest({
+      agentToken: registration.agentToken,
+      requestTimestamp: baseSeconds,
+      nonce: crypto.randomBytes(24).toString("base64url"),
+      payload: secondPayload
+    });
+    assert.equal(duplicate.duplicate, true);
+    const stale = await service.ingest({
+      agentToken: registration.agentToken,
+      requestTimestamp: baseSeconds,
+      nonce: crypto.randomBytes(24).toString("base64url"),
+      payload: {
+        ...firstPayload,
+        observedAt: new Date((baseSeconds - 4) * 1_000).toISOString()
+      }
+    });
+    assert.equal(stale.currentUpdated, false);
+    assert.equal(stale.duplicate, false);
+
+    const current = await pool.query(
+      `SELECT online, players, observed_at FROM server_current_status
+       WHERE organization_id = $1 AND game_server_id = $2`,
+      [organizationA, serverA.id]
+    );
+    assert.equal(current.rows[0].online, false);
+    assert.equal(current.rows[0].players, 0);
+    const event = await pool.query(
+      `SELECT event_type, safe_metadata FROM server_events
+       WHERE organization_id = $1 AND game_server_id = $2`,
+      [organizationA, serverA.id]
+    );
+    assert.equal(event.rows.length, 1);
+    assert.equal(event.rows[0].event_type, "server.offline");
+    assert.deepEqual(event.rows[0].safe_metadata, {
+      previousOnline: true,
+      online: false
+    });
+
+    const conflictNonce = crypto.randomBytes(24).toString("base64url");
+    await assert.rejects(
+      service.ingest({
+        agentToken: registration.agentToken,
+        requestTimestamp: baseSeconds,
+        nonce: conflictNonce,
+        payload: { ...secondPayload, players: 1 }
+      }),
+      (error) => error instanceof AgentIngestionError
+        && error.code === "agent_payload_conflict"
+    );
+    const conflictNonceHash = crypto.createHash("sha256").update(conflictNonce).digest();
+    assert.equal(
+      (await pool.query(
+        `SELECT COUNT(*)::INTEGER AS count FROM agent_request_nonces
+         WHERE agent_installation_id = $1 AND nonce_hash = $2`,
+        [registration.installationId, conflictNonceHash]
+      )).rows[0].count,
+      0
+    );
+  });
+
   await t.test("management session은 opaque token과 CSRF hash만 저장하고 즉시 폐기된다", async () => {
     const repository = new DiscordManagementRepository(pool);
     const rawSession = "MANAGEMENT_SESSION_SENTINEL_plaintext_forbidden";
@@ -484,7 +646,13 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
       `INSERT INTO server_current_status (
          organization_id, game_server_id, online, players, max_players,
          observed_at, payload_version
-       ) VALUES ($1, $2, TRUE, 1, 10, NOW(), 1)`,
+       ) VALUES ($1, $2, TRUE, 1, 10, NOW(), 1)
+       ON CONFLICT (organization_id, game_server_id) DO UPDATE
+         SET online = EXCLUDED.online,
+             players = EXCLUDED.players,
+             max_players = EXCLUDED.max_players,
+             observed_at = EXCLUDED.observed_at,
+             payload_version = EXCLUDED.payload_version`,
       [organizationA, serverA.id]
     );
     await pool.query(

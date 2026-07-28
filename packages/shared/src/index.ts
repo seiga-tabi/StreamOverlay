@@ -15,3 +15,4 @@ export * from "./support-mail.js";
 export * from "./tournament.js";
 export * from "./twitch.js";
 export * from "./utils.js";
+export * from "./yoro-agent.js";

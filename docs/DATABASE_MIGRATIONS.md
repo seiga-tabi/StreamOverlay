@@ -36,7 +36,7 @@ Server의 `DATABASE_MIGRATION_MODE`는 `check`만 허용합니다. Server 시작
 
 `schema_migrations`에는 migration ID, SHA-256, 적용 시각, 실행 시간, application version, dirty 상태를 저장합니다. SQL·parameter·Database URL은 로그나 public API에 노출하지 않습니다.
 
-현재 Discord 기반 migration은 onboarding `0004`, Bot binding `0005`, Organization 관리 session과 Agent bootstrap `0006`입니다. 기존에 적용한 `0001`~`0006` SQL은 수정하지 않으며, 다음 변경은 새 번호의 additive migration으로 추가합니다. staging에서 `check`와 `plan`을 확인한 뒤 별도 승인으로 적용합니다.
+현재 Discord 기반 migration은 onboarding `0004`, Bot binding `0005`, Organization 관리 session과 Agent bootstrap `0006`, Agent credential·nonce·status idempotency 기반 `0007`입니다. 기존에 적용한 `0001`~`0006` SQL은 수정하지 않았습니다. staging에서 `check`와 `plan`을 확인한 뒤 별도 승인으로 `0007`을 적용합니다.
 
 ## Rollback
 
