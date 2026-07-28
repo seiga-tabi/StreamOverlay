@@ -2,10 +2,10 @@ import {
   useEffect,
   useMemo,
   useState,
+  type CSSProperties,
   type ReactNode,
 } from "react";
 import type {
-  PalworldFacetEntry,
   PalworldItemSummary,
   PalworldMetaResponse,
   PalworldPaginatedResponse,
@@ -375,31 +375,6 @@ export function PalworldHomePrimaryFeatures({
   );
 }
 
-function facetIcons<T extends string>(
-  facets: PalworldFacetEntry<T>[],
-  resolveImage: (value: T) => { imageUrl: string; width?: number; height?: number } | undefined,
-): ReactNode {
-  const visible = facets.slice(0, 6);
-  return (
-    <span className="palworld-home-quick-icon-row">
-      {visible.map((facet) => {
-        const image = resolveImage(facet.value);
-        return image ? (
-          <img
-            alt=""
-            height={image.height ?? 28}
-            key={facet.value}
-            loading="lazy"
-            src={image.imageUrl}
-            width={image.width ?? 28}
-          />
-        ) : null;
-      })}
-      {facets.length > visible.length ? <span aria-hidden="true">…</span> : null}
-    </span>
-  );
-}
-
 export function PalworldHomeQuickExplore({
   data,
   locale,
@@ -409,8 +384,10 @@ export function PalworldHomeQuickExplore({
   locale: PalworldLocale;
   onNavigate: (href: string) => void;
 }) {
-  const element = data.pals.state === "ready" ? data.pals.data.facets.elements[0]?.value : undefined;
-  const work = data.pals.state === "ready" ? data.pals.data.facets.workSuitabilities[0]?.value : undefined;
+  const elementFacets = data.pals.state === "ready" ? data.pals.data.facets.elements : [];
+  const workFacets = data.pals.state === "ready" ? data.pals.data.facets.workSuitabilities : [];
+  const element = elementFacets.find((facet) => facet.value === "fire")?.value;
+  const work = workFacets.find((facet) => facet.value === "mining")?.value;
   const firstItem = data.items.state === "ready" ? data.items.data.items[0] : undefined;
   const skillType = data.skills.state === "ready" ? data.skills.data.facets.types[0]?.value : undefined;
   const elementImage = element ? PALWORLD_ELEMENT_IMAGES[element] : undefined;
@@ -420,8 +397,6 @@ export function PalworldHomeQuickExplore({
     : firstItem?.category
       ? { key: "category", value: firstItem.category }
       : undefined;
-  const elementFacets = data.pals.state === "ready" ? data.pals.data.facets.elements : [];
-  const workFacets = data.pals.state === "ready" ? data.pals.data.facets.workSuitabilities : [];
   const skillFacets = data.skills.state === "ready" ? data.skills.data.facets.types : [];
 
   return (
@@ -438,11 +413,9 @@ export function PalworldHomeQuickExplore({
             : palworldI18n[locale].homeAttributePalsDescription,
         }}
         title={localizedText(locale, "homeAttributePals")}
-        visual={<QuickExploreVisual>{elementFacets.length > 0
-          ? facetIcons(elementFacets, (value) => PALWORLD_ELEMENT_IMAGES[value])
-          : elementImage
-            ? <img alt="" height={elementImage.height} src={elementImage.imageUrl} width={elementImage.width} />
-            : <PalworldHomeIcon kind="pals" />}</QuickExploreVisual>}
+        visual={<QuickExploreVisual>{elementImage
+          ? <img alt="" height={elementImage.height} src={elementImage.imageUrl} width={elementImage.width} />
+          : <PalworldHomeIcon kind="pals" />}</QuickExploreVisual>}
       />
       <PublicHomeFeatureCard
         {...navigateAnchor(`/palworld/pals${work ? `?work=${encodeURIComponent(work)}` : ""}`, onNavigate)}
@@ -453,14 +426,9 @@ export function PalworldHomeQuickExplore({
             : palworldI18n[locale].homeWorkPalsDescription,
         }}
         title={localizedText(locale, "homeWorkPals")}
-        visual={<QuickExploreVisual>{workFacets.length > 0
-          ? facetIcons(workFacets, (value) => {
-              const imageUrl = workSuitabilityIconUrl(value);
-              return imageUrl ? { imageUrl } : undefined;
-            })
-          : workImage
-            ? <img alt="" height={64} src={workImage} width={64} />
-            : <PalworldHomeIcon kind="technology" />}</QuickExploreVisual>}
+        visual={<QuickExploreVisual>{workImage
+          ? <img alt="" height={64} src={workImage} width={64} />
+          : <PalworldHomeIcon kind="technology" />}</QuickExploreVisual>}
       />
       <PublicHomeFeatureCard
         {...navigateAnchor(`/palworld/items${itemFilter ? `?${itemFilter.key}=${encodeURIComponent(itemFilter.value)}` : ""}`, onNavigate)}
@@ -562,6 +530,17 @@ export function PalworldHomeDataStatus({
     ...(meta.data.counts.skills === undefined ? [] : [{ key: "skills" as const, count: meta.data.counts.skills }]),
     { key: "homeBreedingPairs" as const, count: meta.data.counts.breedingPairs },
   ];
+  const total = rows.reduce((sum, row) => sum + row.count, 0);
+  const percentage = (count: number) => total > 0 ? (count / total) * 100 : 0;
+  const palsEnd = percentage(meta.data.counts.pals);
+  const itemsEnd = palsEnd + percentage(meta.data.counts.items);
+  const skillsEnd = itemsEnd + percentage(meta.data.counts.skills ?? 0);
+  const chartStyle = {
+    "--palworld-home-chart-pals-end": `${palsEnd}%`,
+    "--palworld-home-chart-items-end": `${itemsEnd}%`,
+    "--palworld-home-chart-skills-end": `${skillsEnd}%`,
+  } as CSSProperties;
+  const numberLocale = locale === "ja" ? "ja-JP" : "ko-KR";
 
   return (
     <section aria-labelledby="palworld-home-data-title" className="palworld-home-dashboard-panel palworld-home-dashboard-panel--data">
@@ -569,18 +548,35 @@ export function PalworldHomeDataStatus({
         <h2 id="palworld-home-data-title">{palworldI18n[locale].homeDataStatus}</h2>
         <StatusPill size="sm" tone={status.tone}>{palworldI18n[locale][status.key]}</StatusPill>
       </header>
-      <dl className="palworld-home-data-list">
-        {rows.map((row) => (
-          <div key={row.key}>
-            <dt>{palworldI18n[locale][row.key]}</dt>
-            <dd>{row.count.toLocaleString(locale === "ja" ? "ja-JP" : "ko-KR")}</dd>
-          </div>
-        ))}
-      </dl>
-      <p className="palworld-home-data-version">
-        <span>{palworldI18n[locale].dataVersion}</span>
-        <strong>{meta.data.metadata.release ?? meta.data.metadata.gameVersion}</strong>
-      </p>
+      <div className="palworld-home-data-overview">
+        <div className="palworld-home-data-chart" style={chartStyle} aria-hidden="true">
+          <span>
+            <small>{palworldI18n[locale].homeTotalData}</small>
+            <strong>{total.toLocaleString(numberLocale)}</strong>
+          </span>
+        </div>
+        <dl className="palworld-home-data-list">
+          {rows.map((row) => (
+            <div data-data-key={row.key} key={row.key}>
+              <dt><span aria-hidden="true" />{palworldI18n[locale][row.key]}</dt>
+              <dd>
+                {row.count.toLocaleString(numberLocale)}
+                <small>{total > 0 ? ` (${((row.count / total) * 100).toFixed(1)}%)` : ""}</small>
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+      <div className="palworld-home-data-metadata">
+        <div>
+          <small>{palworldI18n[locale].dataVersion}</small>
+          <strong>{meta.data.metadata.release ?? meta.data.metadata.gameVersion}</strong>
+        </div>
+        <div>
+          <small>{palworldI18n[locale].homeLastVerified}</small>
+          <strong>{formatVerifiedAt(locale, meta.data.metadata.verifiedAt)}</strong>
+        </div>
+      </div>
     </section>
   );
 }
@@ -678,7 +674,7 @@ export function PalworldHomeDashboard({
   onRetry: () => void;
 }) {
   return (
-    <>
+    <div className="palworld-home-dashboard">
       <div className="palworld-home-dashboard-main">
         <PalworldHomePrimaryFeatures data={data} locale={locale} onNavigate={onNavigate} />
         <PalworldHomeQuickExplore data={data} locale={locale} onNavigate={onNavigate} />
@@ -688,6 +684,6 @@ export function PalworldHomeDashboard({
         <PalworldHomeUpdates locale={locale} meta={data.meta} onRetry={onRetry} />
         <PalworldHomeMoreFeatures locale={locale} onNavigate={onNavigate} />
       </div>
-    </>
+    </div>
   );
 }
