@@ -29,6 +29,8 @@ export type PublicHomeSearchPanelText = {
   guideTitle: PublicHomeSearchPanelLocalizedText;
   guideDescription: PublicHomeSearchPanelLocalizedText;
   liveTitle: PublicHomeSearchPanelLocalizedText;
+  livePrevious: PublicHomeSearchPanelLocalizedText;
+  liveNext: PublicHomeSearchPanelLocalizedText;
   liveViewAll: PublicHomeSearchPanelLocalizedText;
   liveWatch: PublicHomeSearchPanelLocalizedText;
   liveEmptyTitle: PublicHomeSearchPanelLocalizedText;
@@ -74,8 +76,10 @@ export function PublicHomeSearchPanel({
       loading={liveLoading}
       loadingLabel={text.loadingStatus}
       onViewAll={onShowStreamers}
+      previous={text.livePrevious}
       streamers={liveStreamers}
       title={text.liveTitle}
+      next={text.liveNext}
       viewAll={text.liveViewAll}
       watch={text.liveWatch}
     />

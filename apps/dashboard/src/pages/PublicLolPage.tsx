@@ -1212,6 +1212,16 @@ function publicHomeSearchPanelText(): PublicHomeSearchPanelText {
       ko: "현재 LIVE 스트리머",
       ja: "現在LIVE配信者",
     },
+    livePrevious: {
+      label: activePublicLocale === "ja" ? "前のLIVE配信者を見る" : "이전 LIVE 스트리머 보기",
+      ko: "이전 LIVE 스트리머 보기",
+      ja: "前のLIVE配信者を見る",
+    },
+    liveNext: {
+      label: activePublicLocale === "ja" ? "次のLIVE配信者を見る" : "다음 LIVE 스트리머 보기",
+      ko: "다음 LIVE 스트리머 보기",
+      ja: "次のLIVE配信者を見る",
+    },
     liveViewAll: {
       label: activePublicLocale === "ja" ? "すべて見る" : "전체 보기",
       ko: "전체 보기",

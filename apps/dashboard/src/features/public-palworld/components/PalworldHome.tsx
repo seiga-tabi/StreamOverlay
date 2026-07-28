@@ -69,10 +69,12 @@ export function PalworldHome({
       notConfiguredTitle={localizedText(locale, "twitchNotConfiguredTitle")}
       onLogin={onTwitchLogin}
       onRetry={onLiveRetry}
+      previous={localizedText(locale, "livePrevious")}
       retryAction={localizedText(locale, "retryTwitch")}
       state={liveState}
       streamers={liveStreamers}
       title={localizedText(locale, "followedLiveTitle")}
+      next={localizedText(locale, "liveNext")}
       viewAll={localizedText(locale, "viewAll")}
       watch={localizedText(locale, "watchStream")}
     />;

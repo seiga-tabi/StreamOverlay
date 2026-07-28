@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "release": "1.0.1",
+  "rightsVerified": false,
+  "usageBasis": "operator_reference_use",
+  "entries": [
+    {
+      "id": "pals",
+      "sourceArchive": "Content.zip",
+      "sourceArchiveSha256": "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
+      "sourceEntry": "Pal/Texture/PalIcon/Normal/T_Carbunclo_icon_normal.png",
+      "sourceRowId": "Carbunclo",
+      "canonicalEntityId": "lifmunk",
+      "sourceSha256": "d42220de92cbf5b9b6d8443ad2163bb420f207416f52018f630b52cac151193b",
+      "outputSha256": "c1fd7f549eec0ba53181d89593a0d30509bb17a7041775a33bab650645d0642b",
+      "imageUrl": "/images/public-home/palworld/features/1.0.1/c1fd7f549eec0ba53181d89593a0d30509bb17a7041775a33bab650645d0642b.webp",
+      "width": 128,
+      "height": 128,
+      "format": "webp",
+      "purpose": "primary-pals",
+      "rightsVerified": false,
+      "usageBasis": "operator_reference_use"
+    },
+    {
+      "id": "breeding",
+      "sourceArchive": "InventoryItemIcon.zip",
+      "sourceArchiveSha256": "6b06519e21dd00937e54d7ffcd9cba7948917bd4e76d34bffd65a53848fd7dc1",
+      "sourceEntry": "Texture/T_itemicon_Material_PalEgg.png",
+      "sourceRowId": "PalEgg_Normal_01",
+      "canonicalEntityId": "pal-egg-normal-01",
+      "sourceSha256": "cefd1ce300196dc5a5662a316d6e66c7c2991ff4e60b836c695a4f84f7e4b63b",
+      "outputSha256": "ce72746f9594065fc537f62dbdbd3bd935ffbeded2f7c6addbef817ab66af6e7",
+      "imageUrl": "/images/public-home/palworld/features/1.0.1/ce72746f9594065fc537f62dbdbd3bd935ffbeded2f7c6addbef817ab66af6e7.webp",
+      "width": 256,
+      "height": 256,
+      "format": "webp",
+      "purpose": "primary-breeding",
+      "rightsVerified": false,
+      "usageBasis": "operator_reference_use"
+    },
+    {
+      "id": "map",
+      "sourceArchive": "Content.zip",
+      "sourceArchiveSha256": "1248184a4b527d947b5411940726d5b41fa0e212b355b7e4cc917821e0496384",
+      "sourceEntry": "Pal/Texture/UI/InGame/T_icon_compass_Teleport.png",
+      "sourceRowId": "DT_LocationUIData.PointFastTravel",
+      "canonicalEntityId": "fast-travel",
+      "sourceSha256": "a5e38894861f57c9e4c771ab365251a87ca685e82516287d7bfffc510e0360bc",
+      "outputSha256": "60c51341996086c4a7e8408a7f847cb7163c1e9e0135536d795dea426ae56dc3",
+      "imageUrl": "/images/public-home/palworld/features/1.0.1/60c51341996086c4a7e8408a7f847cb7163c1e9e0135536d795dea426ae56dc3.webp",
+      "width": 80,
+      "height": 80,
+      "format": "webp",
+      "purpose": "primary-map",
+      "rightsVerified": false,
+      "usageBasis": "operator_reference_use"
+    }
+  ]
+}

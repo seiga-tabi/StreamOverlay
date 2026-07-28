@@ -1761,38 +1761,6 @@
   -webkit-text-fill-color: rgba(248, 249, 250, .58) !important;
 }
 
-/* 메인 LIVE 스트리머 카드: 방송보기 버튼 하단 잘림 방지 */
-.public-home-shared-shell .public-home-live-rail {
-  padding-bottom: 12px !important;
-}
-
-.public-home-shared-shell .public-home-live-card {
-  height: auto !important;
-  min-height: 244px !important;
-  padding-bottom: 20px !important;
-}
-
-.public-home-shared-shell .public-home-live-card small {
-  line-height: 1.35 !important;
-}
-
-.public-home-shared-shell .public-home-live-card > .public-home-live-action {
-  flex: 0 0 auto !important;
-  min-height: 40px !important;
-  margin-top: auto !important;
-  padding: 0 14px !important;
-}
-
-@media (max-width: 760px) {
-  .public-home-shared-shell .public-home-live-card {
-    min-height: 236px !important;
-  }
-
-  .public-home-shared-shell .public-home-live-card > .public-home-live-action {
-    margin-top: auto !important;
-  }
-}
-
 /* Twitch 프로필 메뉴: 홈/비홈 화면에서 같은 그레이톤 메뉴로 보이도록 최종 통일 */
 .public-dashboard-shell .public-twitch-profile-menu,
 .public-dashboard-shell.theme-dark .public-twitch-profile-menu,

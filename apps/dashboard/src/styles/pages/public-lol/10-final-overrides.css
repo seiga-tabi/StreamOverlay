@@ -582,19 +582,6 @@
   max-height: var(--yoro-size-home-brand-height);
 }
 
-.public-home-shared-shell .public-home-live-section {
-  margin-top: var(--yoro-space-4) !important;
-  padding-top: var(--yoro-space-6) !important;
-}
-
-.public-home-shared-shell .public-home-live-empty .yoro-empty-state__title {
-  color: var(--yoro-color-on-dark-primary) !important;
-}
-
-.public-home-shared-shell .public-home-live-empty .yoro-empty-state__description {
-  color: var(--yoro-color-on-dark-secondary) !important;
-}
-
 .public-profile-shared-top.details-collapsed.yoro-card {
   grid-template-columns: minmax(0, 1fr) !important;
 }

@@ -399,9 +399,7 @@
 .public-profile-shared-shell .public-overview-metric-card,
 .public-profile-shared-shell .public-champion-analysis-card,
 .public-profile-shared-shell .public-champion-top-card,
-.public-home-shared-shell .public-home-shared-search-card.yoro-card,
-.public-home-shared-shell .public-home-live-card,
-.public-home-shared-shell .public-home-live-empty.yoro-empty-state {
+.public-home-shared-shell .public-home-shared-search-card.yoro-card {
   border-color: var(--public-gray-border) !important;
   background: var(--public-gray-surface) !important;
   color: var(--public-gray-text) !important;

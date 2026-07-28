@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Button } from "./ui/Button";
 import {
   EmptyState,
@@ -50,10 +51,12 @@ export function PublicLiveStreamerRail({
   onLogin,
   onRetry,
   onViewAll,
+  previous,
   retryAction,
   state = "ready",
   streamers,
   title,
+  next,
   viewAll,
   watch,
 }: {
@@ -70,20 +73,60 @@ export function PublicLiveStreamerRail({
   onLogin?: () => void;
   onRetry?: () => void;
   onViewAll?: () => void;
+  previous: PublicLiveRailText;
   retryAction?: PublicLiveRailText;
   state?: PublicLiveStreamerRailState;
   streamers: PublicLiveStreamerCard[];
   title: PublicLiveRailText;
+  next: PublicLiveRailText;
   viewAll: PublicLiveRailText;
   watch: PublicLiveRailText;
 }) {
-  const showPagination = streamers.length > 5;
+  const railId = useId();
+  const railRef = useRef<HTMLDivElement>(null);
+  const [canScrollPrevious, setCanScrollPrevious] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
   const unavailableTitle = state === "not-configured"
     ? notConfiguredTitle ?? loginTitle ?? emptyTitle
     : loginTitle ?? emptyTitle;
   const unavailableDescription = state === "not-configured"
     ? notConfiguredDescription ?? loginDescription ?? emptyDescription
     : loginDescription ?? emptyDescription;
+
+  const updateScrollControls = useCallback(() => {
+    const rail = railRef.current;
+    if (!rail) return;
+    const maxScrollLeft = Math.max(0, rail.scrollWidth - rail.clientWidth);
+    setCanScrollPrevious(rail.scrollLeft > 2);
+    setCanScrollNext(maxScrollLeft - rail.scrollLeft > 2);
+  }, []);
+
+  useEffect(() => {
+    const rail = railRef.current;
+    if (!rail) return;
+    updateScrollControls();
+    const resizeObserver = typeof ResizeObserver === "undefined"
+      ? null
+      : new ResizeObserver(updateScrollControls);
+    resizeObserver?.observe(rail);
+    Array.from(rail.children).forEach((child) => resizeObserver?.observe(child));
+    rail.addEventListener("scroll", updateScrollControls, { passive: true });
+    window.addEventListener("resize", updateScrollControls);
+    return () => {
+      resizeObserver?.disconnect();
+      rail.removeEventListener("scroll", updateScrollControls);
+      window.removeEventListener("resize", updateScrollControls);
+    };
+  }, [loading, state, streamers, updateScrollControls]);
+
+  const scrollRail = (direction: -1 | 1) => {
+    const rail = railRef.current;
+    if (!rail) return;
+    rail.scrollBy({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+      left: direction * Math.max(rail.clientWidth * 0.82, 1),
+    });
+  };
 
   return (
     <section className="public-home-live-section" aria-labelledby="public-home-live-title">
@@ -96,12 +139,28 @@ export function PublicLiveStreamerRail({
           </button>
         ) : null}
       </div>
-      <div
-        className="public-home-live-rail"
-        aria-busy={loading || undefined}
-        aria-label={title.label}
-        data-testid="public-live-streamer-rail"
-      >
+      <div className="public-home-live-viewport">
+        {canScrollPrevious ? (
+          <button
+            type="button"
+            className="public-home-live-control public-home-live-control--previous"
+            aria-controls={railId}
+            aria-label={previous.label}
+            data-ko={previous.ko}
+            data-ja={previous.ja}
+            onClick={() => scrollRail(-1)}
+          >
+            <span aria-hidden="true">‹</span>
+          </button>
+        ) : null}
+        <div
+          ref={railRef}
+          id={railId}
+          className="public-home-live-rail"
+          aria-busy={loading || undefined}
+          aria-label={title.label}
+          data-testid="public-live-streamer-rail"
+        >
         {loading ? (
           Array.from({ length: 4 }, (_, index) => (
             <SkeletonCard className="public-home-live-card public-home-live-skeleton" key={index} loadingLabel={loadingLabel.label} size="md">
@@ -152,8 +211,21 @@ export function PublicLiveStreamerRail({
             <EmptyStateDescription data-ko={emptyDescription.ko} data-ja={emptyDescription.ja}>{emptyDescription.label}</EmptyStateDescription>
           </EmptyState>
         )}
+        </div>
+        {canScrollNext ? (
+          <button
+            type="button"
+            className="public-home-live-control public-home-live-control--next"
+            aria-controls={railId}
+            aria-label={next.label}
+            data-ko={next.ko}
+            data-ja={next.ja}
+            onClick={() => scrollRail(1)}
+          >
+            <span aria-hidden="true">›</span>
+          </button>
+        ) : null}
       </div>
-      {showPagination ? <div className="public-home-live-pagination" aria-hidden="true"><span className="active" /><span /><span /><span /><span /></div> : null}
     </section>
   );
 }

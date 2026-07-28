@@ -1281,10 +1281,22 @@ async function installApiFixtures(page: Page): Promise<void> {
   });
 }
 
-async function installConnectedTwitchFixtures(page: Page, { longContent = false } = {}) {
+async function installConnectedTwitchFixtures(page: Page, { liveCount = 1, longContent = false } = {}) {
   let connected = true;
   let statusRequests = 0;
   let followedRequests = 0;
+  const additionalLiveChannels = Array.from({ length: Math.max(0, liveCount - 1) }, (_, index) => ({
+    twitchUserId: `live-${index + 2}`,
+    twitchLogin: `live_pal_${index + 2}`,
+    twitchDisplayName: `Live Pal ${index + 2}`,
+    profileImageUrl: "/images/yorogg-mark.png",
+    followedAt: "2026-07-20T00:00:00.000Z",
+    isLive: true,
+    channelUrl: `https://www.twitch.tv/live_pal_${index + 2}`,
+    gameName: "Palworld",
+    title: `Palworld LIVE ${index + 2}`,
+    viewerCount: 100 + index,
+  }));
   const channels = [
     {
       twitchUserId: "55",
@@ -1298,6 +1310,7 @@ async function installConnectedTwitchFixtures(page: Page, { longContent = false 
       title: longContent ? "아주 긴 방송 제목도 모바일 페이지 전체 너비를 확장하지 않아야 합니다" : "오늘도 팰 모험",
       viewerCount: 321,
     },
+    ...additionalLiveChannels,
     {
       twitchUserId: "55",
       twitchLogin: "live_pal_duplicate",
@@ -1449,6 +1462,57 @@ test.beforeEach(async ({ page }) => {
     });
   });
   await installApiFixtures(page);
+});
+
+test("LoL·Palworld LIVE rail은 정사각형 카드와 PC 이동 버튼·모바일 터치 스크롤을 제공한다", async ({ page }) => {
+  await installConnectedTwitchFixtures(page, { liveCount: 8 });
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/palworld");
+
+  const rail = page.getByTestId("public-live-streamer-rail");
+  await expect(rail.locator(".public-home-live-card")).toHaveCount(8);
+  const cardMetrics = await rail.evaluate((element) => Array.from(element.querySelectorAll<HTMLElement>(".public-home-live-card")).map((card) => ({
+    height: card.getBoundingClientRect().height,
+    width: card.getBoundingClientRect().width,
+  })));
+  expect(cardMetrics.every(({ height, width }) => Math.abs(height - width) <= 2)).toBe(true);
+
+  const nextButton = page.getByRole("button", { name: "다음 LIVE 스트리머 보기" });
+  await expect(nextButton).toBeVisible();
+  const initialScrollLeft = await rail.evaluate((element) => element.scrollLeft);
+  await nextButton.click();
+  await expect.poll(() => rail.evaluate((element) => element.scrollLeft)).toBeGreaterThan(initialScrollLeft);
+  await expect(page.getByRole("button", { name: "이전 LIVE 스트리머 보기" })).toBeVisible();
+
+  await chooseGame(page, "league");
+  await expect(page).toHaveURL(/\/$/u);
+  const lolRail = page.getByTestId("public-live-streamer-rail");
+  await expect(lolRail.locator(".public-home-live-card")).toHaveCount(8);
+  const lolCardMetrics = await lolRail.evaluate((element) => Array.from(element.querySelectorAll<HTMLElement>(".public-home-live-card")).map((card) => ({
+    height: card.getBoundingClientRect().height,
+    width: card.getBoundingClientRect().width,
+  })));
+  expect(lolCardMetrics.every(({ height, width }) => Math.abs(height - width) <= 2)).toBe(true);
+  const lolNextButton = page.getByRole("button", { name: "다음 LIVE 스트리머 보기" });
+  await expect(lolNextButton).toBeVisible();
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(lolNextButton).toBeHidden();
+  const mobileMetrics = await lolRail.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      hasHorizontalOverflow: element.scrollWidth > element.clientWidth,
+      overflowX: style.overflowX,
+      scrollSnapType: style.scrollSnapType,
+      touchAction: style.touchAction,
+    };
+  });
+  expect(mobileMetrics).toMatchObject({
+    hasHorizontalOverflow: true,
+    overflowX: "auto",
+    scrollSnapType: "inline mandatory",
+    touchAction: "pan-x",
+  });
 });
 
 test("펠월드 홈은 Hero 검색과 Twitch 로그인 LIVE rail만 표시하고 게임 선택으로 LoL과 왕복 이동한다", async ({ page }) => {

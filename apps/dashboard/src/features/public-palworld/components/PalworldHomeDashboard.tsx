@@ -5,12 +5,14 @@ import {
   type ReactNode,
 } from "react";
 import type {
+  PalworldFacetEntry,
   PalworldItemSummary,
   PalworldMetaResponse,
   PalworldPaginatedResponse,
   PalworldPalListResponse,
   PalworldSkillListResponse,
 } from "@streamops/shared";
+import { PALWORLD_ITEM_FILTER_CATEGORIES } from "@streamops/shared";
 import {
   PublicHomeFeatureCard,
   PublicHomeFeaturePanel,
@@ -34,13 +36,8 @@ import {
 } from "../api/palworld";
 import { palworldI18n, type PalworldLocale, type PalworldTextKey } from "../i18n/palworld-i18n";
 import { PALWORLD_ELEMENT_IMAGES } from "../utils/element-images";
-import {
-  categoryLabel,
-  elementLabel,
-  itemTypeLabel,
-  skillTypeLabel,
-  workLabel,
-} from "../utils/labels";
+import { PALWORLD_MAP_IMAGES } from "../utils/element-images";
+import { PALWORLD_HOME_FEATURE_ASSETS } from "../utils/home-feature-assets";
 import { resolvePalworldName } from "../utils/localization";
 import { workSuitabilityIconUrl } from "../utils/work-suitability-icons";
 
@@ -240,37 +237,166 @@ function QuickExploreVisual({ children }: { children: ReactNode }) {
   return <span className="palworld-home-quick-visual">{children}</span>;
 }
 
+function formatMetric(locale: PalworldLocale, count: number, unit: "items" | "pairs" | "worlds"): string {
+  const formatted = count.toLocaleString(locale === "ja" ? "ja-JP" : "ko-KR");
+  if (locale === "ja") {
+    if (unit === "pairs") return `${formatted}件`;
+    if (unit === "worlds") return `${formatted}ワールド`;
+    return `${formatted}種`;
+  }
+  if (unit === "pairs") return `${formatted}건`;
+  if (unit === "worlds") return `${formatted}개 월드`;
+  return `${formatted}종`;
+}
+
+function PrimaryFeatureImage({
+  assetId,
+  fallback,
+}: {
+  assetId: "breeding" | "map" | "pals";
+  fallback: ReactNode;
+}) {
+  const asset = PALWORLD_HOME_FEATURE_ASSETS[assetId];
+  if (!asset) return <>{fallback}</>;
+  return (
+    <img
+      alt=""
+      decoding="async"
+      height={asset.height}
+      loading="lazy"
+      src={asset.imageUrl}
+      width={asset.width}
+    />
+  );
+}
+
+function PalworldHomePrimaryFeatureCard({
+  assetId,
+  description,
+  href,
+  locale,
+  metric,
+  metricLabel,
+  onNavigate,
+  title,
+}: {
+  assetId: "breeding" | "map" | "pals";
+  description: PalworldTextKey;
+  href: string;
+  locale: PalworldLocale;
+  metric?: string;
+  metricLabel: PalworldTextKey;
+  onNavigate: (href: string) => void;
+  title: PalworldTextKey;
+}) {
+  return (
+    <a
+      className={`palworld-home-primary-card palworld-home-primary-card--${assetId}`}
+      href={href}
+      onClick={(event) => {
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
+        onNavigate(href);
+      }}
+    >
+      <span className="palworld-home-primary-card__body">
+        <span className="palworld-home-primary-card__copy">
+          <strong data-ko={palworldI18n.ko[title]} data-ja={palworldI18n.ja[title]}>
+            {palworldI18n[locale][title]}
+          </strong>
+          <small data-ko={palworldI18n.ko[description]} data-ja={palworldI18n.ja[description]}>
+            {palworldI18n[locale][description]}
+          </small>
+        </span>
+        <span className="palworld-home-primary-card__image" aria-hidden="true">
+          <PrimaryFeatureImage assetId={assetId} fallback={<PalworldHomeIcon kind={assetId} />} />
+        </span>
+        <span className="palworld-home-primary-card__arrow" aria-hidden="true">›</span>
+      </span>
+      {metric ? (
+        <span className="palworld-home-primary-card__metric">
+          <small data-ko={palworldI18n.ko[metricLabel]} data-ja={palworldI18n.ja[metricLabel]}>
+            {palworldI18n[locale][metricLabel]}
+          </small>
+          <strong>{metric}</strong>
+        </span>
+      ) : null}
+    </a>
+  );
+}
+
 export function PalworldHomePrimaryFeatures({
+  data,
   locale,
   onNavigate,
 }: {
+  data: PalworldHomeDashboardData;
   locale: PalworldLocale;
   onNavigate: (href: string) => void;
 }) {
+  const meta = data.meta.state === "ready" ? data.meta.data : undefined;
+  const mapWorldCount = Object.keys(PALWORLD_MAP_IMAGES).length;
   return (
     <PublicHomeFeaturePanel
       className="public-game-home__feature-panel--primary palworld-home-primary-features"
       title={localizedText(locale, "homePrimaryTools")}
     >
-      <PublicHomeFeatureCard
-        {...navigateAnchor("/palworld/pals", onNavigate)}
-        description={localizedText(locale, "homePalsDescription")}
-        title={localizedText(locale, "pals")}
-        visual={<PalworldHomeIcon kind="pals" />}
+      <PalworldHomePrimaryFeatureCard
+        assetId="pals"
+        description="homePalsDescription"
+        href="/palworld/pals"
+        locale={locale}
+        metric={meta ? formatMetric(locale, meta.counts.pals, "items") : undefined}
+        metricLabel="homeRegisteredPals"
+        onNavigate={onNavigate}
+        title="pals"
       />
-      <PublicHomeFeatureCard
-        {...navigateAnchor("/palworld/breeding", onNavigate)}
-        description={localizedText(locale, "homeBreedingDescription")}
-        title={localizedText(locale, "breeding")}
-        visual={<PalworldHomeIcon kind="breeding" />}
+      <PalworldHomePrimaryFeatureCard
+        assetId="breeding"
+        description="homeBreedingDescription"
+        href="/palworld/breeding"
+        locale={locale}
+        metric={meta ? formatMetric(locale, meta.counts.breedingPairs, "pairs") : undefined}
+        metricLabel="homeAvailableCombinations"
+        onNavigate={onNavigate}
+        title="breeding"
       />
-      <PublicHomeFeatureCard
-        {...navigateAnchor("/palworld/map", onNavigate)}
-        description={localizedText(locale, "homeMapDescription")}
-        title={localizedText(locale, "map")}
-        visual={<PalworldHomeIcon kind="map" />}
+      <PalworldHomePrimaryFeatureCard
+        assetId="map"
+        description="homeMapDescription"
+        href="/palworld/map"
+        locale={locale}
+        metric={mapWorldCount > 0 ? formatMetric(locale, mapWorldCount, "worlds") : undefined}
+        metricLabel="homeExplorableWorlds"
+        onNavigate={onNavigate}
+        title="map"
       />
     </PublicHomeFeaturePanel>
+  );
+}
+
+function facetIcons<T extends string>(
+  facets: PalworldFacetEntry<T>[],
+  resolveImage: (value: T) => { imageUrl: string; width?: number; height?: number } | undefined,
+): ReactNode {
+  const visible = facets.slice(0, 6);
+  return (
+    <span className="palworld-home-quick-icon-row">
+      {visible.map((facet) => {
+        const image = resolveImage(facet.value);
+        return image ? (
+          <img
+            alt=""
+            height={image.height ?? 28}
+            key={facet.value}
+            loading="lazy"
+            src={image.imageUrl}
+            width={image.width ?? 28}
+          />
+        ) : null;
+      })}
+      {facets.length > visible.length ? <span aria-hidden="true">…</span> : null}
+    </span>
   );
 }
 
@@ -290,10 +416,13 @@ export function PalworldHomeQuickExplore({
   const elementImage = element ? PALWORLD_ELEMENT_IMAGES[element] : undefined;
   const workImage = work ? workSuitabilityIconUrl(work) : undefined;
   const itemFilter = firstItem?.itemType
-    ? { key: "itemType", value: firstItem.itemType, label: itemTypeLabel(firstItem.itemType, locale) }
-    : firstItem
-      ? { key: "category", value: firstItem.category, label: categoryLabel(firstItem.category, locale) }
+    ? { key: "itemType", value: firstItem.itemType }
+    : firstItem?.category
+      ? { key: "category", value: firstItem.category }
       : undefined;
+  const elementFacets = data.pals.state === "ready" ? data.pals.data.facets.elements : [];
+  const workFacets = data.pals.state === "ready" ? data.pals.data.facets.workSuitabilities : [];
+  const skillFacets = data.skills.state === "ready" ? data.skills.data.facets.types : [];
 
   return (
     <PublicHomeFeaturePanel
@@ -304,25 +433,43 @@ export function PalworldHomeQuickExplore({
         {...navigateAnchor(`/palworld/pals${element ? `?element=${encodeURIComponent(element)}` : ""}`, onNavigate)}
         description={{
           ...localizedText(locale, "homeAttributePalsDescription"),
-          label: element ? elementLabel(element, locale) : palworldI18n[locale].homeAttributePalsDescription,
+          label: elementFacets.length > 0
+            ? palworldI18n[locale].homeSupportedCount.replace("{count}", String(elementFacets.length))
+            : palworldI18n[locale].homeAttributePalsDescription,
         }}
         title={localizedText(locale, "homeAttributePals")}
-        visual={<QuickExploreVisual>{elementImage ? <img alt="" height={elementImage.height} src={elementImage.imageUrl} width={elementImage.width} /> : <PalworldHomeIcon kind="pals" />}</QuickExploreVisual>}
+        visual={<QuickExploreVisual>{elementFacets.length > 0
+          ? facetIcons(elementFacets, (value) => PALWORLD_ELEMENT_IMAGES[value])
+          : elementImage
+            ? <img alt="" height={elementImage.height} src={elementImage.imageUrl} width={elementImage.width} />
+            : <PalworldHomeIcon kind="pals" />}</QuickExploreVisual>}
       />
       <PublicHomeFeatureCard
         {...navigateAnchor(`/palworld/pals${work ? `?work=${encodeURIComponent(work)}` : ""}`, onNavigate)}
         description={{
           ...localizedText(locale, "homeWorkPalsDescription"),
-          label: work ? workLabel(work, locale) : palworldI18n[locale].homeWorkPalsDescription,
+          label: workFacets.length > 0
+            ? palworldI18n[locale].homeSupportedCount.replace("{count}", String(workFacets.length))
+            : palworldI18n[locale].homeWorkPalsDescription,
         }}
         title={localizedText(locale, "homeWorkPals")}
-        visual={<QuickExploreVisual>{workImage ? <img alt="" height={64} src={workImage} width={64} /> : <PalworldHomeIcon kind="technology" />}</QuickExploreVisual>}
+        visual={<QuickExploreVisual>{workFacets.length > 0
+          ? facetIcons(workFacets, (value) => {
+              const imageUrl = workSuitabilityIconUrl(value);
+              return imageUrl ? { imageUrl } : undefined;
+            })
+          : workImage
+            ? <img alt="" height={64} src={workImage} width={64} />
+            : <PalworldHomeIcon kind="technology" />}</QuickExploreVisual>}
       />
       <PublicHomeFeatureCard
         {...navigateAnchor(`/palworld/items${itemFilter ? `?${itemFilter.key}=${encodeURIComponent(itemFilter.value)}` : ""}`, onNavigate)}
         description={{
           ...localizedText(locale, "homeItemTypesDescription"),
-          label: itemFilter?.label ?? palworldI18n[locale].homeItemTypesDescription,
+          label: palworldI18n[locale].homeSupportedCount.replace(
+            "{count}",
+            String(PALWORLD_ITEM_FILTER_CATEGORIES.length),
+          ),
         }}
         title={localizedText(locale, "homeItemTypes")}
         visual={<PalworldHomeIcon kind="items" />}
@@ -331,7 +478,9 @@ export function PalworldHomeQuickExplore({
         {...navigateAnchor(`/palworld/skills${skillType ? `?type=${encodeURIComponent(skillType)}` : ""}`, onNavigate)}
         description={{
           ...localizedText(locale, "homeSkillTypesDescription"),
-          label: skillType ? skillTypeLabel(skillType, locale) : palworldI18n[locale].homeSkillTypesDescription,
+          label: skillFacets.length > 0
+            ? palworldI18n[locale].homeSupportedCount.replace("{count}", String(skillFacets.length))
+            : palworldI18n[locale].homeSkillTypesDescription,
         }}
         title={localizedText(locale, "homeSkillTypes")}
         visual={<PalworldHomeIcon kind="skills" />}
@@ -531,7 +680,7 @@ export function PalworldHomeDashboard({
   return (
     <>
       <div className="palworld-home-dashboard-main">
-        <PalworldHomePrimaryFeatures locale={locale} onNavigate={onNavigate} />
+        <PalworldHomePrimaryFeatures data={data} locale={locale} onNavigate={onNavigate} />
         <PalworldHomeQuickExplore data={data} locale={locale} onNavigate={onNavigate} />
       </div>
       <div className="palworld-home-dashboard-bottom">
