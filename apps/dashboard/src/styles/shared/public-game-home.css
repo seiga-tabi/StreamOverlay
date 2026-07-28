@@ -74,14 +74,20 @@
 
 .public-game-home__copy,
 .public-game-home__live {
+  position: relative;
   min-inline-size: 0;
 }
 
 .public-game-home__copy {
+  z-index: var(--yoro-z-dropdown);
   display: grid;
   align-content: end;
   gap: var(--yoro-space-3);
   max-inline-size: 43rem;
+}
+
+.public-game-home__live {
+  z-index: var(--yoro-z-base);
 }
 
 .public-game-home__eyebrow {
@@ -173,7 +179,8 @@
 
 .public-game-home__live .public-home-live-rail {
   display: grid;
-  grid-auto-columns: clamp(12rem, 19vw, 13.5rem);
+  grid-template-columns: none;
+  grid-auto-columns: calc(50% - var(--yoro-space-1));
   grid-auto-flow: column;
   gap: var(--yoro-space-2);
   overflow-x: auto;
@@ -242,10 +249,10 @@
   display: flex;
   align-items: flex-start;
   flex-direction: column;
-  aspect-ratio: 1;
+  aspect-ratio: auto;
   block-size: auto;
   min-inline-size: 0;
-  min-block-size: 0;
+  min-block-size: 16rem;
   padding: var(--yoro-space-4);
   overflow: hidden;
   border: thin solid var(--yoro-color-border);
@@ -348,9 +355,9 @@
 
 @media (max-width: 48rem) {
   .public-game-home__live .public-home-live-rail {
-    grid-auto-columns: min(72vw, 13.5rem);
+    grid-auto-columns: calc(50% - var(--yoro-space-1));
     scroll-snap-type: inline mandatory;
-    touch-action: pan-x;
+    touch-action: pan-x pan-y;
     -webkit-overflow-scrolling: touch;
   }
 
@@ -679,7 +686,6 @@
   grid-column: 1;
   grid-row: 1;
   min-inline-size: 0;
-  padding-block-end: 2.5rem;
   gap: var(--yoro-space-2);
 }
 
@@ -705,11 +711,13 @@
   grid-column: 2;
   grid-row: 1;
   align-self: center;
+  justify-self: center;
   place-items: center;
-  inline-size: 100%;
+  inline-size: min(100%, 7rem);
   min-inline-size: 0;
-  block-size: 100%;
-  max-block-size: 8.5rem;
+  block-size: auto;
+  aspect-ratio: 1;
+  max-block-size: 7rem;
   overflow: hidden;
   pointer-events: none;
 }
@@ -725,33 +733,16 @@
 
 .palworld-home-primary-card--breeding .palworld-home-primary-card__image {
   align-self: center;
-  justify-self: end;
+  justify-self: center;
   inline-size: min(100%, 7rem);
   block-size: min(100%, 7rem);
 }
 
 .palworld-home-primary-card--map .palworld-home-primary-card__image {
-  inline-size: 100%;
-  block-size: 70%;
+  inline-size: min(100%, 5.5rem);
+  block-size: auto;
   align-self: center;
   justify-self: center;
-}
-
-.palworld-home-primary-card__arrow {
-  z-index: 3;
-  display: grid;
-  grid-column: 2;
-  grid-row: 1;
-  align-self: end;
-  justify-self: end;
-  place-items: center;
-  inline-size: 2rem;
-  block-size: 2rem;
-  border: thin solid var(--palworld-home-feature-accent);
-  border-radius: var(--yoro-radius-pill);
-  background: color-mix(in srgb, var(--palworld-home-feature-accent) 22%, transparent);
-  color: var(--yoro-color-text-on-dark);
-  font-size: var(--yoro-font-size-xl);
 }
 
 .palworld-home-primary-card__metric {
@@ -1053,10 +1044,6 @@
     border-color: var(--palworld-home-feature-accent);
   }
 
-  .palworld-home-primary-card:hover .palworld-home-primary-card__arrow {
-    transform: translateX(.125rem);
-  }
-
   .public-game-home__feature-card:hover {
     transform: translateY(-.125rem);
     border-color: var(--public-home-accent);
@@ -1175,7 +1162,7 @@
   .public-game-home__hero {
     isolation: isolate;
     min-block-size: 0;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .public-game-home__picture,
@@ -1315,14 +1302,18 @@
   }
 
   .palworld-home-primary-card__image {
-    inline-size: 100%;
-    block-size: 100%;
-    max-block-size: 7.5rem;
+    inline-size: min(100%, 5.75rem);
+    block-size: auto;
+    max-block-size: 5.75rem;
   }
 
   .palworld-home-primary-card--breeding .palworld-home-primary-card__image {
-    inline-size: min(100%, 6.5rem);
-    block-size: min(100%, 6.5rem);
+    inline-size: min(100%, 5.75rem);
+    block-size: auto;
+  }
+
+  .palworld-home-primary-card--map .palworld-home-primary-card__image {
+    inline-size: min(100%, 5rem);
   }
 
   .palworld-home-primary-features.public-game-home__feature-panel--primary
@@ -1376,8 +1367,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .palworld-home-primary-card,
-  .palworld-home-primary-card__arrow {
+  .palworld-home-primary-card {
     transition: none;
   }
 

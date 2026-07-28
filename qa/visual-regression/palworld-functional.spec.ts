@@ -1464,18 +1464,25 @@ test.beforeEach(async ({ page }) => {
   await installApiFixtures(page);
 });
 
-test("LoL·Palworld LIVE rail은 정사각형 카드와 PC 이동 버튼·모바일 터치 스크롤을 제공한다", async ({ page }) => {
+test("LoL·Palworld LIVE rail은 한 화면에 두 카드와 PC 이동 버튼·모바일 터치 스크롤을 제공한다", async ({ page }) => {
   await installConnectedTwitchFixtures(page, { liveCount: 8 });
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/palworld");
 
   const rail = page.getByTestId("public-live-streamer-rail");
   await expect(rail.locator(".public-home-live-card")).toHaveCount(8);
-  const cardMetrics = await rail.evaluate((element) => Array.from(element.querySelectorAll<HTMLElement>(".public-home-live-card")).map((card) => ({
-    height: card.getBoundingClientRect().height,
-    width: card.getBoundingClientRect().width,
-  })));
-  expect(cardMetrics.every(({ height, width }) => Math.abs(height - width) <= 2)).toBe(true);
+  const cardMetrics = await rail.evaluate((element) => {
+    const cards = Array.from(element.querySelectorAll<HTMLElement>(".public-home-live-card"));
+    const railRect = element.getBoundingClientRect();
+    const gap = Number.parseFloat(getComputedStyle(element).columnGap);
+    return {
+      cardWidth: cards[0]?.getBoundingClientRect().width ?? 0,
+      expectedWidth: (railRect.width - gap) / 2,
+      thirdCardStartsOutside: (cards[2]?.getBoundingClientRect().left ?? 0) >= railRect.right - 1,
+    };
+  });
+  expect(Math.abs(cardMetrics.cardWidth - cardMetrics.expectedWidth)).toBeLessThanOrEqual(2);
+  expect(cardMetrics.thirdCardStartsOutside).toBe(true);
 
   const nextButton = page.getByRole("button", { name: "다음 LIVE 스트리머 보기" });
   await expect(nextButton).toBeVisible();
@@ -1488,11 +1495,15 @@ test("LoL·Palworld LIVE rail은 정사각형 카드와 PC 이동 버튼·모바
   await expect(page).toHaveURL(/\/$/u);
   const lolRail = page.getByTestId("public-live-streamer-rail");
   await expect(lolRail.locator(".public-home-live-card")).toHaveCount(8);
-  const lolCardMetrics = await lolRail.evaluate((element) => Array.from(element.querySelectorAll<HTMLElement>(".public-home-live-card")).map((card) => ({
-    height: card.getBoundingClientRect().height,
-    width: card.getBoundingClientRect().width,
-  })));
-  expect(lolCardMetrics.every(({ height, width }) => Math.abs(height - width) <= 2)).toBe(true);
+  const lolCardMetrics = await lolRail.evaluate((element) => {
+    const firstCard = element.querySelector<HTMLElement>(".public-home-live-card");
+    const gap = Number.parseFloat(getComputedStyle(element).columnGap);
+    return {
+      cardWidth: firstCard?.getBoundingClientRect().width ?? 0,
+      expectedWidth: (element.getBoundingClientRect().width - gap) / 2,
+    };
+  });
+  expect(Math.abs(lolCardMetrics.cardWidth - lolCardMetrics.expectedWidth)).toBeLessThanOrEqual(2);
   const lolNextButton = page.getByRole("button", { name: "다음 LIVE 스트리머 보기" });
   await expect(lolNextButton).toBeVisible();
 
@@ -1511,8 +1522,40 @@ test("LoL·Palworld LIVE rail은 정사각형 카드와 PC 이동 버튼·모바
     hasHorizontalOverflow: true,
     overflowX: "auto",
     scrollSnapType: "inline mandatory",
-    touchAction: "pan-x",
+    touchAction: "pan-x pan-y",
   });
+});
+
+test("LoL 홈 연관 검색은 Hero와 LIVE 영역보다 위에서 포인터 입력을 받는다", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.localStorage.setItem("loltrace.recent.jp", JSON.stringify([{
+      gameName: "YoroTester",
+      tagLine: "JP1",
+      source: "recent",
+    }]));
+  });
+  await page.goto("/");
+
+  const search = page.locator(".public-game-home--lol .public-home-shared-input");
+  await expect(search).toBeVisible();
+  await search.focus();
+  const panel = page.locator(".public-game-home--lol .public-suggestion-panel");
+  await expect(panel).toBeVisible();
+
+  const stacking = await panel.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + Math.min(rect.width / 2, Math.max(2, rect.width - 2));
+    const y = Math.min(window.innerHeight - 2, rect.top + Math.min(rect.height / 2, 48));
+    const hit = document.elementFromPoint(x, y);
+    return {
+      copyZIndex: getComputedStyle(element.closest(".public-game-home__copy") as Element).zIndex,
+      hitInsidePanel: hit !== null && element.contains(hit),
+      panelZIndex: getComputedStyle(element).zIndex,
+    };
+  });
+  expect(Number(stacking.copyZIndex)).toBeGreaterThanOrEqual(30);
+  expect(Number(stacking.panelZIndex)).toBeGreaterThanOrEqual(30);
+  expect(stacking.hitInsidePanel, "LoL 연관 검색 항목이 다른 Hero 콘텐츠에 가려지면 안 됩니다.").toBe(true);
 });
 
 test("펠월드 홈은 Hero 검색과 Twitch 로그인 LIVE rail만 표시하고 게임 선택으로 LoL과 왕복 이동한다", async ({ page }) => {
@@ -1529,6 +1572,33 @@ test("펠월드 홈은 Hero 검색과 Twitch 로그인 LIVE rail만 표시하고
   await expect(page.getByText("Twitch 로그인 후 팔로우 중인 스트리머의 방송 상태를 확인할 수 있습니다.")).toBeVisible();
   await expect(page.getByTestId("public-live-streamer-rail").getByRole("button", { name: "Twitch 로그인" })).toBeVisible();
   await expect(page.getByTestId("palworld-secondary-nav").getByRole("button")).toHaveCount(7);
+  const primaryCards = page.locator(".palworld-home-primary-card");
+  await expect(primaryCards).toHaveCount(3);
+  await expect(page.locator(".palworld-home-primary-card__arrow")).toHaveCount(0);
+  const primaryImageMetrics = await primaryCards.evaluateAll((cards) => cards.map((card) => {
+    const image = card.querySelector<HTMLElement>(".palworld-home-primary-card__image");
+    if (!image) return { centerRatio: Number.NaN, staysInside: false };
+    const cardRect = card.getBoundingClientRect();
+    const imageRect = image.getBoundingClientRect();
+    return {
+      centerRatio: ((imageRect.left + (imageRect.width / 2)) - cardRect.left) / cardRect.width,
+      staysInside: (
+        imageRect.left >= cardRect.left - 1
+        && imageRect.right <= cardRect.right + 1
+        && imageRect.top >= cardRect.top - 1
+        && imageRect.bottom <= cardRect.bottom + 1
+      ),
+    };
+  }));
+  expect(
+    primaryImageMetrics.every(({ staysInside }) => staysInside),
+    "주요 기능 이미지는 모바일과 PC 카드 경계 안에 전부 표시되어야 합니다.",
+  ).toBe(true);
+  const primaryImageCenters = primaryImageMetrics.map(({ centerRatio }) => centerRatio);
+  expect(
+    Math.max(...primaryImageCenters) - Math.min(...primaryImageCenters),
+    "주요 기능 이미지 세 개는 같은 세로 중심축에 정렬되어야 합니다.",
+  ).toBeLessThanOrEqual(0.02);
   await assertHealthyDocument(page, errors);
 
   await chooseGame(page, "league");
@@ -3444,24 +3514,8 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
   await expect.poll(
     () => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1),
   ).toBe(true);
-  const legendTrigger = mobileViewport
-    ? page.locator(".palworld-map-mobile-command-bar").getByRole("button", { name: "지도 범례" })
-    : page.locator(".palworld-map-layer-legend").getByRole("button", { name: "지도 범례" });
-  await expect(legendTrigger).toBeVisible();
-  await legendTrigger.click();
-  if (mobileViewport) {
-    const legendSheet = page.getByRole("dialog", { name: "지도 범례" });
-    await expect(legendSheet).toBeVisible();
-    await expect.poll(() => page.evaluate(() => document.body.style.overflow)).toBe("hidden");
-    await legendSheet.getByRole("button", { name: "닫기" }).click();
-    await expect(legendSheet).toBeHidden();
-    await expect(legendTrigger).toBeFocused();
-  } else {
-    await expect(legendTrigger).toHaveAttribute("aria-expanded", "true");
-    await expect(page.locator(".palworld-map-legend-content")).toBeVisible();
-    await legendTrigger.click();
-    await expect(legendTrigger).toHaveAttribute("aria-expanded", "false");
-  }
+  await expect(page.getByRole("button", { name: "지도 범례" })).toHaveCount(0);
+  await expect(page.locator(".palworld-map-layer-legend, .palworld-map-legend-sheet")).toHaveCount(0);
   const mobileFilterTrigger = page.getByRole("button", { name: "필터 1개" });
   const filterScope = mobileViewport
     ? page.getByTestId("palworld-map-mobile-filters")
@@ -3807,27 +3861,16 @@ test("요구 화면 크기에서 연결 프로필·LIVE rail·스트리머 목�
       expect(toolbarBounds!.x).toBeGreaterThanOrEqual(mapBounds!.x);
       expect(toolbarBounds!.x + toolbarBounds!.width).toBeLessThanOrEqual(mapBounds!.x + mapBounds!.width);
     }
-    const mapLegend = mobileMapLayout
-      ? page.getByRole("dialog", { name: "지도 범례" })
-      : page.getByRole("group", { name: "지도 범례" });
+    await expect(page.getByRole("button", { name: "지도 범례" })).toHaveCount(0);
+    await expect(page.locator(".palworld-map-layer-legend, .palworld-map-legend-sheet")).toHaveCount(0);
     if (mobileMapLayout) {
-      await page.locator(".palworld-map-mobile-command-bar")
-        .getByRole("button", { name: "지도 범례" })
-        .click();
-    } else {
-      await mapLegend.getByRole("button", { name: "지도 범례" }).click();
+      await expect.poll(() => mapViewport.evaluate((element) =>
+        window.getComputedStyle(element).touchAction
+      )).toBe("none");
     }
-    await expect(mapLegend).toBeVisible();
-    await expect(mapLegend).toContainText("일반 야생 스폰");
-    await expect.poll(() => mapLegend.evaluate((element) =>
-      element.scrollWidth <= element.clientWidth + 1
-    )).toBe(true);
     await expect.poll(() => page.evaluate(() =>
       document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1
     )).toBe(true);
-    if (mobileMapLayout) {
-      await mapLegend.getByRole("button", { name: "닫기" }).click();
-    }
     await assertHealthyDocument(page, errors);
   }
 });

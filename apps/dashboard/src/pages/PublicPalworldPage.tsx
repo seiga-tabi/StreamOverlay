@@ -1,4 +1,11 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { PublicTwitchFollowedLolResponse, PublicTwitchViewerStatus } from "../features/public-lol/types/public-lol";
 import { AppShell, AppShellHeader, AppShellMain } from "../shared/ui/AppShell";
 import {
@@ -10,20 +17,15 @@ import {
   ToastViewport,
 } from "../shared/ui/Toast";
 import { SkeletonCard } from "../shared/ui/Skeleton";
+import { lazyNamed } from "../shared/lazyNamed";
 import { usePublicLocale } from "../features/public-lol/hooks/usePublicLocale";
 import { usePublicTheme } from "../features/public-lol/hooks/usePublicTheme";
 import { setActivePublicLocale } from "../features/public-lol/i18n/public-lol-i18n";
-import { PalworldBreedingPage } from "../features/public-palworld/components/PalworldBreedingPage";
 import { PalworldHeader } from "../features/public-palworld/components/PalworldHeader";
 import { PalworldHome } from "../features/public-palworld/components/PalworldHome";
-import { PalworldItemsPage } from "../features/public-palworld/components/PalworldItemsPage";
 import { PalworldNotFoundPage } from "../features/public-palworld/components/PalworldNotFoundPage";
-import { PalworldPalsPage } from "../features/public-palworld/components/PalworldPalsPage";
 import { PalworldSearchForm } from "../features/public-palworld/components/PalworldSearchForm";
-import { PalworldSearchResults } from "../features/public-palworld/components/PalworldSearchResults";
-import { PalworldSkillsPage, SkillDetailModal } from "../features/public-palworld/components/PalworldSkillsPage";
 import { PalworldSourceFooter } from "../features/public-palworld/components/PalworldSourceFooter";
-import { PalworldTechnologyPage } from "../features/public-palworld/components/PalworldTechnologyPage";
 import { palworldI18n, type PalworldLocale } from "../features/public-palworld/i18n/palworld-i18n";
 import {
   PALWORLD_VERSION_MISMATCH_EVENT,
@@ -52,9 +54,23 @@ import {
 } from "../features/public-twitch/api";
 
 const noServerLocalePreference = async (): Promise<PalworldLocale | undefined> => undefined;
-const PalworldMapPage = lazy(async () => ({ default: (await import("../features/public-palworld/components/PalworldMapPage")).PalworldMapPage }));
-const PalDetailModal = lazy(async () => ({ default: (await import("../features/public-palworld/components/PalworldDetailModals")).PalDetailModal }));
-const ItemDetailModal = lazy(async () => ({ default: (await import("../features/public-palworld/components/PalworldDetailModals")).ItemDetailModal }));
+const loadPalworldDeferredPages = () =>
+  import("../features/public-palworld/components/PalworldDeferredPages");
+const PalworldBreedingPage = lazyNamed(loadPalworldDeferredPages, "PalworldBreedingPage");
+const PalworldItemsPage = lazyNamed(loadPalworldDeferredPages, "PalworldItemsPage");
+const PalworldMapPage = lazyNamed(
+  () => import("../features/public-palworld/components/PalworldMapPage"),
+  "PalworldMapPage",
+);
+const PalworldPalsPage = lazyNamed(loadPalworldDeferredPages, "PalworldPalsPage");
+const PalworldSearchResults = lazyNamed(loadPalworldDeferredPages, "PalworldSearchResults");
+const PalworldSkillsPage = lazyNamed(loadPalworldDeferredPages, "PalworldSkillsPage");
+const PalworldTechnologyPage = lazyNamed(loadPalworldDeferredPages, "PalworldTechnologyPage");
+const loadPalworldDetailModals = () =>
+  import("../features/public-palworld/components/PalworldDetailModals");
+const PalDetailModal = lazyNamed(loadPalworldDetailModals, "PalDetailModal");
+const ItemDetailModal = lazyNamed(loadPalworldDetailModals, "ItemDetailModal");
+const SkillDetailModal = lazyNamed(loadPalworldDeferredPages, "SkillDetailModal");
 
 const EMPTY_TWITCH_STATUS: PublicTwitchViewerStatus = {
   connected: false,
@@ -479,12 +495,20 @@ export function PublicPalworldPage({
         </Suspense>
       ) : null}
       {selectedSkillId ? (
-        <SkillDetailModal
-          locale={locale}
-          onClose={closeDetail}
-          onOpenPal={openPalPage}
-          skillId={selectedSkillId}
-        />
+        <Suspense fallback={(
+          <SkeletonCard
+            data-ko={palworldI18n.ko.loading}
+            data-ja={palworldI18n.ja.loading}
+            loadingLabel={text.loading}
+          />
+        )}>
+          <SkillDetailModal
+            locale={locale}
+            onClose={closeDetail}
+            onOpenPal={openPalPage}
+            skillId={selectedSkillId}
+          />
+        </Suspense>
       ) : null}
       <ToastProvider position="bottom-right">
         <ToastViewport>

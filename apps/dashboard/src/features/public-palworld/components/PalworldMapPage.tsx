@@ -90,14 +90,7 @@ import {
   type PalworldMapLocalizedLabel,
 } from "./PalworldMapExplorerTypes";
 import { PalworldMapFilterPanel } from "./PalworldMapFilterPanel";
-import {
-  PalworldMapLocationIcon,
-  PalworldMapLocationLayer,
-} from "./PalworldMapLocationLayer";
-import {
-  PalworldMapLegend,
-  PalworldMapLegendSheet,
-} from "./PalworldMapLegend";
+import { PalworldMapLocationLayer } from "./PalworldMapLocationLayer";
 import { PalworldMapMarkerPopover } from "./PalworldMapMarkerPopover";
 import { PalworldMapMobileFilters } from "./PalworldMapMobileFilters";
 import { isLocalPalworldImageUrl, PalworldMedia } from "./PalworldMedia";
@@ -485,14 +478,11 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
   const [focusedPal, setFocusedPal] = useState<PalworldPalReference | PalworldPalSummary | null>(null);
   const [filtersCollapsed, setFiltersCollapsed] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const [legendExpanded, setLegendExpanded] = useState(false);
-  const [mobileLegendOpen, setMobileLegendOpen] = useState(false);
   const [collapsedFilterGroups, setCollapsedFilterGroups] = useState<ReadonlySet<string>>(
     () => new Set(),
   );
   const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
   const mobileFilterButtonRef = useRef<HTMLButtonElement | HTMLAnchorElement>(null);
-  const mobileLegendButtonRef = useRef<HTMLButtonElement | HTMLAnchorElement>(null);
   const selectedMarkerTriggerRef = useRef<HTMLElement | null>(null);
   const restoredViewKeyRef = useRef<string>();
   const appliedFocusMarkerRef = useRef<string>();
@@ -509,7 +499,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
     viewRef,
     viewportRef,
     zoomAt,
-  } = usePalworldMapViewport(loadState === "ready");
+  } = usePalworldMapViewport(loadState === "ready", "map");
   const bossLayerSelected = mapQuery.layers.includes("boss");
   const spawnLayerSelected = mapQuery.layers.includes("spawn") && Boolean(activeFocusPalId);
   const selectedLocationLayers = useMemo(
@@ -620,11 +610,6 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
     ? text.palWildSpawnMapSummary
       .replace("{areas}", spawnSummary.areas.toLocaleString(localeTag))
       .replace("{placements}", spawnSummary.placements.toLocaleString(localeTag))
-    : "";
-  const spawnLevelSummary = spawnSummary
-    ? text.palWildSpawnLevelRange
-      .replace("{minimum}", String(spawnSummary.minimumLevel))
-      .replace("{maximum}", String(spawnSummary.maximumLevel))
     : "";
   const zoomPercent = Math.round(view.zoom * 100);
   const mapStyle = {
@@ -1620,87 +1605,6 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
       title={mapLocationLabel(selectedMapLocation)}
     />
   ) : null;
-  const legendAvailable =
-    spawnLayerSelected
-    || visibleBossMarkers.length > 0
-    || visibleMapLocations.length > 0;
-
-  function renderLegendContent() {
-    return (
-      <ul>
-        {spawnLayerSelected ? (
-          <li>
-            <span aria-hidden="true" className="palworld-map-legend-spawn" />
-            <span>
-              <strong>{text.palWildSpawnAreas}</strong>
-              {spawnSummary ? (
-                <>
-                  <small>{spawnMapSummary} · {spawnLevelSummary}</small>
-                  <span className="palworld-map-legend-periods">
-                    {spawnSummary.daytime ? <Badge size="sm" tone="neutral">{text.palWildSpawnDay}</Badge> : null}
-                    {spawnSummary.nighttime ? <Badge size="sm" tone="neutral">{text.palWildSpawnNight}</Badge> : null}
-                  </span>
-                  <small>{text.palWildSpawnDensity}</small>
-                </>
-              ) : null}
-            </span>
-          </li>
-        ) : null}
-        {bossLayerSelected && markerState === "ready" ? (
-          <li>
-            <span aria-hidden="true" className="palworld-map-legend-boss" />
-            <span>
-              <strong>{text.mapBossMarker}</strong>
-              <small>{visibleBossMarkers.length}</small>
-            </span>
-          </li>
-        ) : null}
-        {selectedLocationLayers
-          .filter((category) =>
-            category !== "egg"
-            && category !== "lifmunk"
-            && category !== "resource"
-          )
-          .map((category) => {
-            const count = locationCounts.get(category) ?? 0;
-            if (count === 0) return null;
-            return (
-              <li key={category}>
-                <PalworldMapLocationIcon
-                  asset={PALWORLD_MAP_LAYER_ICONS[category]}
-                  className="palworld-map-legend-location-icon"
-                  fallbackSymbol={PALWORLD_MAP_LOCATION_FALLBACKS[category]}
-                />
-                <span>
-                  <strong>{PALWORLD_MAP_LOCATION_LABELS[category][locale]}</strong>
-                  <small>{count.toLocaleString(localeTag)}</small>
-                </span>
-              </li>
-            );
-          })}
-        {selectedCollectibleTypes.map((typeId) => {
-          const category = palworldMapCollectibleCategory(typeId);
-          if (!mapQuery.layers.includes(category)) return null;
-          const count = collectibleTypeCounts.get(typeId) ?? 0;
-          if (count === 0) return null;
-          return (
-            <li key={typeId}>
-              <PalworldMapLocationIcon
-                asset={PALWORLD_MAP_LAYER_ICONS[typeId]}
-                className="palworld-map-legend-location-icon"
-                fallbackSymbol={category === "egg" ? "●" : category === "resource" ? "◆" : "✦"}
-              />
-              <span>
-                <strong>{PALWORLD_MAP_COLLECTIBLE_TYPE_LABELS[typeId][locale]}</strong>
-                <small>{count.toLocaleString(localeTag)}</small>
-              </span>
-            </li>
-          );
-        })}
-      </ul>
-    );
-  }
-
   return (
     <section className="palworld-page-section palworld-map-page" aria-labelledby="palworld-map-title">
       <h1
@@ -1747,17 +1651,6 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
         >
           {renderFilterControls("palworld-map-mobile-pal-picker")}
         </PalworldMapMobileFilters>
-        <PalworldMapLegendSheet
-          closeLabel={mapLabel(palworldI18n.ko.close, palworldI18n.ja.close)}
-          locale={locale}
-          onClose={() => setMobileLegendOpen(false)}
-          open={mobileLegendOpen}
-          returnFocusRef={mobileLegendButtonRef}
-          title={mapLabel(palworldI18n.ko.mapLayerLegend, palworldI18n.ja.mapLayerLegend)}
-        >
-          {renderLegendContent()}
-        </PalworldMapLegendSheet>
-
         <div className="palworld-map-explorer-main">
           <div className="palworld-map-mobile-command-bar">
             <Button
@@ -1773,20 +1666,6 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
             >
               {mobileFilterButtonCopy[locale]}
             </Button>
-            {legendAvailable ? (
-              <Button
-                aria-expanded={mobileLegendOpen}
-                aria-haspopup="dialog"
-                data-ja={palworldI18n.ja.mapLayerLegend}
-                data-ko={palworldI18n.ko.mapLayerLegend}
-                onClick={() => setMobileLegendOpen(true)}
-                ref={mobileLegendButtonRef}
-                size="sm"
-                variant="secondary"
-              >
-                {text.mapLayerLegend}
-              </Button>
-            ) : null}
             {focusedPal ? (
               <Badge tone="info">{resolvePalworldName(focusedPal, locale).text}</Badge>
             ) : null}
@@ -1901,89 +1780,6 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
               </div>
             </div>
 
-            {legendAvailable ? (
-              <PalworldMapLegend
-                expanded={legendExpanded}
-                locale={locale}
-                onExpandedChange={setLegendExpanded}
-                title={mapLabel(palworldI18n.ko.mapLayerLegend, palworldI18n.ja.mapLayerLegend)}
-              >
-                <ul>
-                  {spawnLayerSelected ? (
-                    <li>
-                      <span aria-hidden="true" className="palworld-map-legend-spawn" />
-                      <span>
-                        <strong>{text.palWildSpawnAreas}</strong>
-                        {spawnSummary ? (
-                          <>
-                            <small>{spawnMapSummary} · {spawnLevelSummary}</small>
-                            <span className="palworld-map-legend-periods">
-                              {spawnSummary.daytime ? <Badge size="sm" tone="neutral">{text.palWildSpawnDay}</Badge> : null}
-                              {spawnSummary.nighttime ? <Badge size="sm" tone="neutral">{text.palWildSpawnNight}</Badge> : null}
-                            </span>
-                            <small>{text.palWildSpawnDensity}</small>
-                          </>
-                        ) : null}
-                      </span>
-                    </li>
-                  ) : null}
-                  {bossLayerSelected && markerState === "ready" ? (
-                    <li>
-                      <span aria-hidden="true" className="palworld-map-legend-boss" />
-                      <span>
-                        <strong>{text.mapBossMarker}</strong>
-                        <small>{visibleBossMarkers.length}</small>
-                      </span>
-                    </li>
-                  ) : null}
-                  {selectedLocationLayers
-                    .filter((category) =>
-                      category !== "egg"
-                      && category !== "lifmunk"
-                      && category !== "resource"
-                    )
-                    .map((category) => {
-                    const count = locationCounts.get(category) ?? 0;
-                    if (count === 0) return null;
-                    return (
-                      <li key={category}>
-                        <PalworldMapLocationIcon
-                          asset={PALWORLD_MAP_LAYER_ICONS[category]}
-                          className="palworld-map-legend-location-icon"
-                          fallbackSymbol={PALWORLD_MAP_LOCATION_FALLBACKS[category]}
-                        />
-                        <span>
-                          <strong>{PALWORLD_MAP_LOCATION_LABELS[category][locale]}</strong>
-                          <small>{count.toLocaleString(localeTag)}</small>
-                        </span>
-                      </li>
-                    );
-                  })}
-                  {selectedCollectibleTypes.map((typeId) => {
-                    const category = palworldMapCollectibleCategory(typeId);
-                    if (!mapQuery.layers.includes(category)) return null;
-                    const count = collectibleTypeCounts.get(typeId) ?? 0;
-                    if (count === 0) return null;
-                    return (
-                      <li key={typeId}>
-                        <PalworldMapLocationIcon
-                          asset={PALWORLD_MAP_LAYER_ICONS[typeId]}
-                          className="palworld-map-legend-location-icon"
-                          fallbackSymbol={category === "egg" ? "●" : category === "resource" ? "◆" : "✦"}
-                        />
-                        <span>
-                          <strong>
-                            {PALWORLD_MAP_COLLECTIBLE_TYPE_LABELS[typeId][locale]}
-                          </strong>
-                          <small>{count.toLocaleString(localeTag)}</small>
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </PalworldMapLegend>
-            ) : null}
-
             <div className="palworld-map-canvas-shell">
               <figure className="palworld-map-figure">
                 <div
@@ -1992,6 +1788,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
                 className="palworld-map-viewport"
                 data-testid="palworld-map-viewport"
                 data-panning={isPanning ? "true" : undefined}
+                data-touch-mode="map"
                 data-zoomed={view.zoom > PALWORLD_MAP_MIN_ZOOM + PALWORLD_MAP_ZOOM_EPSILON ? "true" : undefined}
                 onClick={(event) => {
                   const target = event.target;

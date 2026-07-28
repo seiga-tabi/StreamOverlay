@@ -311,7 +311,6 @@ function PalworldHomePrimaryFeatureCard({
         <span className="palworld-home-primary-card__image" aria-hidden="true">
           <PrimaryFeatureImage assetId={assetId} fallback={<PalworldHomeIcon kind={assetId} />} />
         </span>
-        <span className="palworld-home-primary-card__arrow" aria-hidden="true">›</span>
       </span>
       {metric ? (
         <span className="palworld-home-primary-card__metric">

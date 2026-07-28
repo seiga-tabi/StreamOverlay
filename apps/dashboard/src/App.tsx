@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import {
   checkDashboardAuthToken,
   getDashboardAuthStatus,
@@ -30,22 +30,32 @@ import {
 } from "./routing/dashboard-routes";
 import { isPalworldPath } from "./features/public-palworld/utils/routes";
 import { PalworldPageErrorBoundary } from "./features/public-palworld/components/PalworldPageErrorBoundary";
+import { lazyNamed } from "./shared/lazyNamed";
 
-const PublicLolPage = lazy(async () => ({ default: (await import("./pages/PublicLolPage")).PublicLolPage }));
-const PublicPalworldPage = lazy(async () => ({ default: (await import("./pages/PublicPalworldPage")).PublicPalworldPage }));
-const DashboardPage = lazy(async () => ({ default: (await import("./pages/DashboardPage")).DashboardPage }));
-const EventsPage = lazy(async () => ({ default: (await import("./pages/EventsPage")).EventsPage }));
-const LolOperationsPage = lazy(async () => ({ default: (await import("./pages/LolOperationsPage")).LolOperationsPage }));
-const TournamentsPage = lazy(async () => ({ default: (await import("./pages/TournamentsPage")).TournamentsPage }));
-const StreamerRiotRequestsPage = lazy(async () => ({ default: (await import("./pages/StreamerRiotRequestsPage")).StreamerRiotRequestsPage }));
-const SettingsPage = lazy(async () => ({ default: (await import("./pages/SettingsPage")).SettingsPage }));
-const TwitchConnectionPage = lazy(async () => ({ default: (await import("./pages/TwitchConnectionPage")).TwitchConnectionPage }));
-const OverlayOpsPage = lazy(async () => ({ default: (await import("./pages/OverlayOpsPage")).OverlayOpsPage }));
-const FollowersPage = lazy(async () => ({ default: (await import("./pages/FollowersPage")).FollowersPage }));
-const SupportInboxPage = lazy(async () => ({ default: (await import("./pages/SupportInboxPage")).SupportInboxPage }));
-const ServerStatusPage = lazy(async () => ({ default: (await import("./pages/ServerStatusPage")).ServerStatusPage }));
-const PalworldServerPage = lazy(async () => ({ default: (await import("./pages/PalworldServerPage")).PalworldServerPage }));
-const CommunityModerationPage = lazy(async () => ({ default: (await import("./pages/CommunityModerationPage")).CommunityModerationPage }));
+const PublicLolPage = lazyNamed(() => import("./pages/PublicLolPage"), "PublicLolPage");
+const PublicPalworldPage = lazyNamed(() => import("./pages/PublicPalworldPage"), "PublicPalworldPage");
+const DashboardPage = lazyNamed(() => import("./pages/DashboardPage"), "DashboardPage");
+const EventsPage = lazyNamed(() => import("./pages/EventsPage"), "EventsPage");
+const LolOperationsPage = lazyNamed(() => import("./pages/LolOperationsPage"), "LolOperationsPage");
+const TournamentsPage = lazyNamed(() => import("./pages/TournamentsPage"), "TournamentsPage");
+const StreamerRiotRequestsPage = lazyNamed(
+  () => import("./pages/StreamerRiotRequestsPage"),
+  "StreamerRiotRequestsPage",
+);
+const SettingsPage = lazyNamed(() => import("./pages/SettingsPage"), "SettingsPage");
+const TwitchConnectionPage = lazyNamed(
+  () => import("./pages/TwitchConnectionPage"),
+  "TwitchConnectionPage",
+);
+const OverlayOpsPage = lazyNamed(() => import("./pages/OverlayOpsPage"), "OverlayOpsPage");
+const FollowersPage = lazyNamed(() => import("./pages/FollowersPage"), "FollowersPage");
+const SupportInboxPage = lazyNamed(() => import("./pages/SupportInboxPage"), "SupportInboxPage");
+const ServerStatusPage = lazyNamed(() => import("./pages/ServerStatusPage"), "ServerStatusPage");
+const PalworldServerPage = lazyNamed(() => import("./pages/PalworldServerPage"), "PalworldServerPage");
+const CommunityModerationPage = lazyNamed(
+  () => import("./pages/CommunityModerationPage"),
+  "CommunityModerationPage",
+);
 
 const initialSnapshot = {
   status: { server: "offline", twitch: "disabled", stream: "unknown", bridge: "disconnected", obs: "unknown", participation: "closed" },

@@ -417,11 +417,6 @@ function identifierAliases(id: string): string[] {
   ])];
 }
 
-function matchScore(term: string, fields: Array<string | number>): number | undefined {
-  const normalizedFields = searchFields(fields);
-  return matchNormalizedSearchFields(term, normalizedFields);
-}
-
 function matchNormalizedSearchFields(term: string, normalizedFields: readonly string[]): number | undefined {
   if (normalizedFields.some((field) => field === term)) return 0;
   if (normalizedFields.some((field) => field.startsWith(term))) return 1;
@@ -702,6 +697,7 @@ export class PalworldDataService {
   private readonly palSearchFields: ReadonlyMap<string, readonly string[]>;
   private readonly itemSearchFields: ReadonlyMap<string, readonly string[]>;
   private readonly skillSearchFields: ReadonlyMap<string, readonly string[]>;
+  private readonly palListCache = new Map<string, readonly PalworldPalDetail[]>();
   private readonly itemListCache = new Map<string, readonly PalworldItemDetail[]>();
   private readonly skillListCache = new Map<string, readonly PalworldSkillDetail[]>();
   private readonly searchCache = new Map<string, PalworldSearchResult>();
@@ -977,16 +973,24 @@ export class PalworldDataService {
 
   listPals(query: PalworldPalListQuery): PalworldPalListResponse {
     const term = query.q ? normalizePalworldSearchTerm(query.q) : undefined;
-    const filtered = this.snapshot.pals
-      .filter((pal) => term === undefined || matchScore(term, [
-        ...identifierAliases(pal.id),
-        this.sourceInternalIds[pal.id] ?? "",
-        pal.number,
-        `#${pal.number}`,
-        pal.nameKo,
-        pal.nameJa,
-        pal.nameEn ?? ""
-      ]) !== undefined)
+    const cacheKey = JSON.stringify([
+      term ?? "",
+      query.element ?? "",
+      query.work ?? "",
+      query.rarity ?? "",
+      query.variant ?? "",
+      query.sort,
+      query.order,
+      query.locale ?? "ko"
+    ]);
+    const filtered = this.cachedList(this.palListCache, cacheKey, () => this.snapshot.pals
+      .filter((pal) =>
+        term === undefined
+        || matchNormalizedSearchFields(
+          term,
+          this.palSearchFields.get(pal.id) ?? []
+        ) !== undefined
+      )
       .filter((pal) => query.element === undefined || pal.elements.includes(query.element))
       .filter((pal) => query.work === undefined || pal.workSuitabilities.some((work) => work.type === query.work))
       .filter((pal) => query.rarity === undefined || pal.rarity === query.rarity)
@@ -1000,7 +1004,7 @@ export class PalworldDataService {
               || left.number - right.number
               || compareCanonicalId(left, right);
         return direction(result, query.order);
-      });
+      }));
     const pageInfo = pagination(query.page, query.limit, filtered.length);
     return {
       items: pageItems(filtered, pageInfo.page, query.limit).map(palSummary),

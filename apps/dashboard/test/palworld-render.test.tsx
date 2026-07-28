@@ -707,6 +707,7 @@ test("Palworld 홈은 실제 경로의 기능 대시보드와 로그인 CTA가 �
   assert.match(html, /href="\/palworld\/breeding"/u);
   assert.match(html, /href="\/palworld\/map"/u);
   assert.match(html, /href="\/palworld\/technology"/u);
+  assert.doesNotMatch(html, /palworld-home-primary-card__arrow/u);
   assert.match(html, /팔로우 중인 LIVE 스트리머/u);
   assert.match(html, /Twitch 로그인 후 팔로우 중인 스트리머의 방송 상태를 확인할 수 있습니다/u);
   assert.match(html, /data-testid="public-live-streamer-rail"/u);
@@ -1806,6 +1807,8 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   assert.match(korean, /class="palworld-map-zoom-output"/u);
   assert.match(korean, /class="[^"]*palworld-map-control is-zoom-reset[^"]*"/u);
   assert.match(korean, /aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight \+ - Home"/u);
+  assert.match(korean, /data-touch-mode="map"/u);
+  assert.doesNotMatch(korean, /palworld-map-layer-legend|palworld-map-legend-sheet/u);
   assert.match(
     korean,
     /class="palworld-map-stage palworld-map-stage-layout-zoom"[^>]*data-testid="palworld-map-stage"/u,
@@ -1908,6 +1911,10 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   assert.match(
     css,
     /\.palworld-map-desktop-filter \.palworld-map-filter-content\s*\{[\s\S]*?block-size:\s*auto;[\s\S]*?max-block-size:\s*calc\(100dvh/u,
+  );
+  assert.match(
+    css,
+    /\.palworld-map-viewport\[data-touch-mode="map"\],[\s\S]*?touch-action:\s*none;/u,
   );
   const layoutZoomRule = css.match(
     /\.palworld-map-stage-layout-zoom\s*\{[\s\S]*?\n\}/u,

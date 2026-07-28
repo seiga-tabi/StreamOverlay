@@ -21,6 +21,12 @@ qa
 .vite
 **/.vite
 
+# Palworld 운영 빌드는 active release만 사용합니다.
+# candidate와 과거 import 원본은 로컬 검증·테스트 전용이며 runtime build context에 포함하지 않습니다.
+apps/server/data/palworld/candidates
+apps/server/data/palworld/_imports
+apps/server/test
+
 .env
 **/.env
 .env.*

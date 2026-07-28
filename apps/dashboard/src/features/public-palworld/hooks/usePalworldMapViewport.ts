@@ -24,6 +24,8 @@ export type PalworldMapViewState = PalworldMapPoint & {
   zoom: number;
 };
 
+export type PalworldMapTouchMode = "map" | "page-scroll";
+
 type PalworldMapGesture =
   | {
       kind: "drag";
@@ -106,7 +108,10 @@ function isMapControlTarget(target: EventTarget | null): boolean {
     && Boolean(target.closest("button, a, input, select, textarea, [data-map-interactive='true']"));
 }
 
-export function usePalworldMapViewport(enabled: boolean) {
+export function usePalworldMapViewport(
+  enabled: boolean,
+  touchMode: PalworldMapTouchMode = "page-scroll",
+) {
   const [view, setView] = useState<PalworldMapViewState>({
     x: 0,
     y: 0,
@@ -234,11 +239,12 @@ export function usePalworldMapViewport(enabled: boolean) {
 
     if (
       event.pointerType === "touch"
+      && touchMode === "page-scroll"
       && viewRef.current.zoom <= PALWORLD_MAP_MIN_ZOOM + PALWORLD_MAP_ZOOM_EPSILON
       && pointersRef.current.size === 0
     ) {
       if (passiveTouchRef.current.size === 0) {
-        // 1배율의 한 손가락 스와이프는 Modal 세로 스크롤에 양보합니다.
+        // 상세 미니맵은 1배율의 한 손가락 스와이프를 Modal 세로 스크롤에 양보합니다.
         passiveTouchRef.current.set(event.pointerId, point);
         return;
       }
@@ -255,7 +261,12 @@ export function usePalworldMapViewport(enabled: boolean) {
 
     event.preventDefault();
     event.currentTarget.focus({ preventScroll: true });
-    event.currentTarget.setPointerCapture(event.pointerId);
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {
+      // 브라우저가 취소한 pointer는 다음 move 이벤트에서 안전하게 무시합니다.
+      return;
+    }
     pointersRef.current.set(event.pointerId, point);
     setIsPanning(true);
     if (pointersRef.current.size >= 2) {
