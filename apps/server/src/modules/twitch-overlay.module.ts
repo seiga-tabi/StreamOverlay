@@ -11,7 +11,6 @@ import { sanitizeDisplayName, sanitizeViewerInput } from "../core/safe-text.js";
 import { loadAlertOverlayConfig, type AlertOverlayConfig, type AlertOverlayKey, type AlertOverlayPreset } from "../services/alert-overlay-config.js";
 
 const DISPLAY_COMMENT_MAX_LENGTH = 160;
-const SPEECH_COMMENT_MAX_LENGTH = 80;
 
 function cleanPreset(preset: AlertOverlayPreset | undefined): AlertOverlayPreset {
   if (!preset || preset.enabled === false) return {};
@@ -36,7 +35,6 @@ function withPreset(
     message: preset.message ?? action.message,
     variant: preset.variant ?? action.variant,
     durationMs: preset.durationMs ?? defaults.durationMs ?? action.durationMs,
-    speechText: preset.speechText ?? action.speechText ?? defaults.speechText,
     source: action.source
   };
 }
@@ -50,33 +48,16 @@ function subscriptionTierLabel(tier: string): string {
   return normalized ? tier : "Tier 1";
 }
 
-function subscriptionTierSpeech(tier: string): string {
-  const normalized = tier.trim().toLowerCase();
-  if (normalized === "prime") return "プライム";
-  if (normalized === "1000") return "ティア1";
-  if (normalized === "2000") return "ティア2";
-  if (normalized === "3000") return "ティア3";
-  return normalized ? tier : "ティア1";
-}
-
 function appendCommentForDisplay(base: string, comment: string): string {
   return comment ? `${base}\nコメント: ${comment}` : base;
-}
-
-function appendCommentForSpeech(base: string, comment: string): string {
-  return comment ? `${base}コメント、${comment}` : base;
 }
 
 function subscriptionMessage(event: TwitchSubscriptionInternalEvent): BotAction[] {
   const user = sanitizeDisplayName(event.userName);
   const tier = subscriptionTierLabel(event.tier);
-  const tierSpeech = subscriptionTierSpeech(event.tier);
   const message = event.isGift
     ? `${user}さん、${tier}ギフトサブありがとうございます。`
     : `${user}さん、${tier}サブスクありがとうございます。`;
-  const speechText = event.isGift
-    ? `${user}さん、${tierSpeech}のギフトサブありがとうございます。`
-    : `${user}さん、${tierSpeech}のサブスクありがとうございます。`;
   const config = loadAlertOverlayConfig();
   return [withPreset(config, "subscription", {
     type: "overlay.banner",
@@ -86,10 +67,7 @@ function subscriptionMessage(event: TwitchSubscriptionInternalEvent): BotAction[
     variant: event.isGift ? "success" : "info",
     durationMs: 5000,
     source: "twitch.subscription",
-    eventKind: "subscription",
-    speechEnabled: true,
-    speechText,
-    speechLanguage: "ja-JP"
+    eventKind: "subscription"
   })];
 }
 
@@ -97,9 +75,7 @@ function resubscriptionMessage(event: TwitchSubscriptionMessageInternalEvent): B
   const user = sanitizeDisplayName(event.userName);
   const months = Math.max(1, Math.trunc(event.cumulativeMonths || 1));
   const displayComment = sanitizeViewerInput(event.message ?? "", DISPLAY_COMMENT_MAX_LENGTH);
-  const speechComment = sanitizeViewerInput(event.message ?? "", SPEECH_COMMENT_MAX_LENGTH);
   const baseMessage = `${user}さん、${months}か月のサブスクありがとうございます。`;
-  const baseSpeech = `${user}さん、${months}か月のサブスクありがとうございます。`;
   const config = loadAlertOverlayConfig();
   return [withPreset(config, "subscriptionMessage", {
     type: "overlay.banner",
@@ -109,10 +85,7 @@ function resubscriptionMessage(event: TwitchSubscriptionMessageInternalEvent): B
     variant: "success",
     durationMs: 5500,
     source: "twitch.subscription_message",
-    eventKind: "subscription_message",
-    speechEnabled: true,
-    speechText: appendCommentForSpeech(baseSpeech, speechComment),
-    speechLanguage: "ja-JP"
+    eventKind: "subscription_message"
   })];
 }
 
@@ -120,10 +93,8 @@ function cheerMessage(event: TwitchCheerInternalEvent): BotAction[] {
   const user = event.isAnonymous ? "匿名" : sanitizeDisplayName(event.userName, "viewer");
   const bits = Math.max(0, Math.trunc(event.bits));
   const displayComment = sanitizeViewerInput(event.message ?? "", DISPLAY_COMMENT_MAX_LENGTH);
-  const speechComment = sanitizeViewerInput(event.message ?? "", SPEECH_COMMENT_MAX_LENGTH);
   const variant = bits >= 1000 ? "danger" : bits >= 300 ? "warning" : "success";
   const baseMessage = `${user}さん、${bits} Bitsありがとうございます。`;
-  const baseSpeech = `${user}さん、${bits}ビッツありがとうございます。`;
   const config = loadAlertOverlayConfig();
   return [withPreset(config, "cheer", {
     type: "overlay.banner",
@@ -133,10 +104,7 @@ function cheerMessage(event: TwitchCheerInternalEvent): BotAction[] {
     variant,
     durationMs: bits >= 1000 ? 7000 : 5000,
     source: "twitch.cheer",
-    eventKind: "cheer",
-    speechEnabled: true,
-    speechText: appendCommentForSpeech(baseSpeech, speechComment),
-    speechLanguage: "ja-JP"
+    eventKind: "cheer"
   })];
 }
 
@@ -152,9 +120,7 @@ function raidMessage(event: TwitchRaidInternalEvent): BotAction[] {
     variant: "success",
     durationMs: 7000,
     source: "twitch.raid",
-    eventKind: "raid",
-    speechEnabled: true,
-    speechLanguage: "ja-JP"
+    eventKind: "raid"
   })];
 }
 
@@ -169,9 +135,7 @@ function followMessage(event: TwitchFollowInternalEvent): BotAction[] {
     variant: "info",
     durationMs: 5000,
     source: "twitch.follow",
-    eventKind: "follow",
-    speechEnabled: true,
-    speechLanguage: "ja-JP"
+    eventKind: "follow"
   })];
 }
 

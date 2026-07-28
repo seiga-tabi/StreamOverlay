@@ -17,12 +17,6 @@ export type AlertOverlayPreset = {
   mediaAlt?: string;
   soundUrl?: string;
   soundVolume?: number;
-  speechEnabled?: boolean;
-  speechText?: string;
-  speechLanguage?: "ja-JP" | "ko-KR";
-  speechRate?: number;
-  speechPitch?: number;
-  speechVolume?: number;
 };
 
 export type AlertOverlayConfig = {
@@ -57,6 +51,42 @@ function readJsonFile<T>(filePath: string): T | undefined {
   }
 }
 
+function sanitizePreset(value: unknown): AlertOverlayPreset | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const source = value as Record<string, unknown>;
+  const preset: AlertOverlayPreset = {};
+  for (const key of [
+    "enabled",
+    "title",
+    "subtitle",
+    "message",
+    "variant",
+    "durationMs",
+    "mediaUrl",
+    "mediaAlt",
+    "soundUrl",
+    "soundVolume"
+  ] as const) {
+    if (source[key] !== undefined) {
+      (preset as Record<string, unknown>)[key] = source[key];
+    }
+  }
+  return preset;
+}
+
+function sanitizeConfig(value: unknown): AlertOverlayConfig {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const source = value as Record<string, unknown>;
+  const config: AlertOverlayConfig = {};
+  const defaults = sanitizePreset(source.defaults);
+  if (defaults) config.defaults = defaults;
+  for (const key of ALERT_OVERLAY_KEYS) {
+    const preset = sanitizePreset(source[key]);
+    if (preset) config[key] = preset;
+  }
+  return config;
+}
+
 function mergeConfig(base: AlertOverlayConfig, runtime: AlertOverlayConfig): AlertOverlayConfig {
   const merged: AlertOverlayConfig = { ...base };
   if (base.defaults || runtime.defaults) merged.defaults = { ...base.defaults, ...runtime.defaults };
@@ -67,13 +97,13 @@ function mergeConfig(base: AlertOverlayConfig, runtime: AlertOverlayConfig): Ale
 }
 
 export function loadAlertOverlayConfig(): AlertOverlayConfig {
-  const base = readJsonFile<AlertOverlayConfig>(baseConfigPath()) ?? {};
-  const runtime = readJsonFile<AlertOverlayConfig>(runtimeConfigPath()) ?? {};
+  const base = sanitizeConfig(readJsonFile<unknown>(baseConfigPath()));
+  const runtime = sanitizeConfig(readJsonFile<unknown>(runtimeConfigPath()));
   return mergeConfig(base, runtime);
 }
 
 export async function saveAlertOverlayPreset(key: AlertOverlayKey, patch: AlertOverlayPreset): Promise<AlertOverlayConfig> {
-  const current = readJsonFile<AlertOverlayConfig>(runtimeConfigPath()) ?? {};
+  const current = sanitizeConfig(readJsonFile<unknown>(runtimeConfigPath()));
   const next: AlertOverlayConfig = {
     ...current,
     [key]: {

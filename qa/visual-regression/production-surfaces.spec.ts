@@ -146,9 +146,31 @@ async function installDashboardApiFixtures(page: Page): Promise<void> {
           twitchDisplayName: "YORO Visual",
           riotGameName: "YORO QA",
           riotTagLine: "JP1",
+          dashboardEnabled: true,
           dashboardSlug: "yoro_visual",
           dashboardKey: "sdk_visual_dashboard_fixture",
           dashboardPath: "/dashboard/yoro_visual/sdk_visual_dashboard_fixture"
+        }
+      });
+      return;
+    }
+    if (url.pathname === "/api/followers") {
+      await json(route, {
+        summary: {
+          knownFollowers: 0,
+          activeFollowers: 0,
+          unfollowed: 0,
+          newFollowers7d: 0,
+          observedGenreFollowers: 0
+        },
+        followers: [],
+        recentFollowers: [],
+        recentUnfollowers: [],
+        topObservedGenres: [],
+        dataNotes: [],
+        oauth: {
+          state: "disconnected",
+          missingScopes: []
         }
       });
       return;
@@ -285,7 +307,8 @@ test("LoL 공개 하위 페이지는 화면 중앙에 배치된다", async ({ pa
 test("Dashboard", async ({ page }) => {
   const errors = collectRuntimeErrors(page);
   await page.goto("/dashboard");
-  await expect(page.locator(".dashboard-shared-shell")).toBeVisible();
+  await expect(page.locator(".app-shell-followers")).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "대시보드 메뉴" }).locator("button.nav-item")).toHaveCount(2);
   await assertStableSurface(page, errors, "dashboard.png");
 });
 

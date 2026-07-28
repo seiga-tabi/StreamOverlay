@@ -23,7 +23,6 @@ import { LocalJsonRiotApiKeyStore } from "./services/riot-api-key-store.js";
 import { DataDragonService } from "./services/data-dragon.js";
 import { LolProfileEnrichmentService } from "./services/lol-profile-enrichment.js";
 import { LocalJsonLolProfileRepository } from "./services/lol-profile-store.js";
-import { LocalTtsService } from "./services/local-tts-service.js";
 import { SupportMailboxStore } from "./services/support-mailbox-store.js";
 import { loadPalworldDataService, type PalworldDataService } from "./services/palworld-data.js";
 import { PalworldPaldexValidationError } from "./data/palworld-paldex-artifact.js";
@@ -429,8 +428,7 @@ logger.event({ type: "riot.config", ...riot.routingStatus() });
 const dataDragon = new DataDragonService();
 const lolProfileRepository = new LocalJsonLolProfileRepository(`${appConfig.paths.state}/lol-profiles.json`);
 const lolProfileEnrichment = new LolProfileEnrichmentService(riot, dataDragon, lolProfileRepository, logger);
-const localTts = new LocalTtsService(logger);
-const actions = new ActionDispatcher(bridge, twitchChat, overlay, store, logger, () => dashboard.broadcastSnapshot(), localTts);
+const actions = new ActionDispatcher(bridge, twitchChat, overlay, store, logger, () => dashboard.broadcastSnapshot());
 const loggedMissingFollowerScopes = new Set<string>();
 
 const moduleContext = { events, actions, logger, store, overlay, dashboard, twitch, riot, lolProfileEnrichment };

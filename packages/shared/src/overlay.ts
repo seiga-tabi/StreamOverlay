@@ -3,7 +3,6 @@ import type { LolChampionSummary, LolMainRole, LolProfileStatus, LolRankedStats,
 export const OVERLAY_CHANNELS = ["events", "chat", "subtitles", "questions", "mission", "participation", "solo-rank", "all"] as const;
 export const OVERLAY_VARIANTS = ["info", "success", "warning", "danger"] as const;
 export const OVERLAY_BANNER_EVENT_KINDS = ["follow", "cheer", "subscription", "subscription_message", "raid", "reward", "stream", "test", "custom"] as const;
-export const OVERLAY_SPEECH_LANGUAGES = ["ja-JP", "ko-KR"] as const;
 export const PARTICIPATION_PHASES = ["recruiting", "closed", "in_game", "game_ended"] as const;
 export const MAX_CHAMPION_MASTERY_LEVEL = 1000;
 export const MAX_RECENT_MATCH_CHAMPIONS = 10;
@@ -12,7 +11,6 @@ export const MAX_RANK_HISTORY_POINTS = 64;
 export type OverlayChannel = (typeof OVERLAY_CHANNELS)[number];
 export type OverlayVariant = (typeof OVERLAY_VARIANTS)[number];
 export type OverlayBannerEventKind = (typeof OVERLAY_BANNER_EVENT_KINDS)[number];
-export type OverlaySpeechLanguage = (typeof OVERLAY_SPEECH_LANGUAGES)[number];
 export type ParticipationPhase = (typeof PARTICIPATION_PHASES)[number];
 
 export type OverlayMessageBase = {
@@ -32,13 +30,6 @@ export type OverlayBannerMessage = OverlayMessageBase & {
   mediaAlt?: string;
   soundUrl?: string;
   soundVolume?: number;
-  speechEnabled?: boolean;
-  speechText?: string;
-  speechAudioUrl?: string;
-  speechLanguage?: OverlaySpeechLanguage;
-  speechRate?: number;
-  speechPitch?: number;
-  speechVolume?: number;
 };
 
 export type SubtitleUpdateMessage = OverlayMessageBase & {
@@ -306,7 +297,7 @@ function optionalOverlayAssetUrl(value: unknown, maxLength: number, fieldName: s
   if (value === undefined) return ok();
   if (!stringWithin(value, maxLength)) return fail(`${fieldName}은 ${maxLength}자 이하 문자열이어야 합니다.`);
   if (value.length === 0) return ok();
-  if (value.startsWith("/alerts/") || value.startsWith("/tts/")) {
+  if (value.startsWith("/alerts/")) {
     try {
       const decoded = decodeURIComponent(value);
       if (!decoded.includes("..") && !decoded.includes("\\") && !decoded.includes("\0")) return ok();
@@ -316,9 +307,9 @@ function optionalOverlayAssetUrl(value: unknown, maxLength: number, fieldName: s
   }
   try {
     const parsed = new URL(value);
-    return parsed.protocol === "https:" ? ok() : fail(`${fieldName}은 https URL, /alerts/... 또는 /tts/... 경로여야 합니다.`);
+    return parsed.protocol === "https:" ? ok() : fail(`${fieldName}은 https URL 또는 /alerts/... 경로여야 합니다.`);
   } catch {
-    return fail(`${fieldName}은 올바른 URL, /alerts/... 또는 /tts/... 경로여야 합니다.`);
+    return fail(`${fieldName}은 올바른 URL 또는 /alerts/... 경로여야 합니다.`);
   }
 }
 
@@ -795,14 +786,7 @@ export function validateOverlayMessage(message: unknown): OverlayValidationResul
         "mediaUrl",
         "mediaAlt",
         "soundUrl",
-        "soundVolume",
-        "speechEnabled",
-        "speechText",
-        "speechAudioUrl",
-        "speechLanguage",
-        "speechRate",
-        "speechPitch",
-        "speechVolume"
+        "soundVolume"
       ]);
       if (!keys.ok) return keys;
       const title = optionalString(message.title, MAX_SHORT_TEXT_LENGTH, "title");
@@ -820,19 +804,7 @@ export function validateOverlayMessage(message: unknown): OverlayValidationResul
       if (!soundUrl.ok) return soundUrl;
       const soundVolume = optionalUnitNumber(message.soundVolume, "soundVolume");
       if (!soundVolume.ok) return soundVolume;
-      const speechEnabled = optionalBoolean(message.speechEnabled, "speechEnabled");
-      if (!speechEnabled.ok) return speechEnabled;
-      const speechText = optionalString(message.speechText, MAX_MESSAGE_LENGTH, "speechText");
-      if (!speechText.ok) return speechText;
-      const speechAudioUrl = optionalOverlayAssetUrl(message.speechAudioUrl, MAX_MESSAGE_LENGTH, "speechAudioUrl");
-      if (!speechAudioUrl.ok) return speechAudioUrl;
-      const speechLanguage = optionalExactString(message.speechLanguage, OVERLAY_SPEECH_LANGUAGES, "speechLanguage");
-      if (!speechLanguage.ok) return speechLanguage;
-      const speechRate = optionalNumberInRange(message.speechRate, 0.5, 1.5, "speechRate");
-      if (!speechRate.ok) return speechRate;
-      const speechPitch = optionalNumberInRange(message.speechPitch, 0.5, 1.5, "speechPitch");
-      if (!speechPitch.ok) return speechPitch;
-      return optionalUnitNumber(message.speechVolume, "speechVolume");
+      return ok();
     }
     case "subtitle.update": {
       const keys = validateKeys(message, ["sourceLanguage", "targetLanguage", "original", "translated", "isFinal"]);

@@ -24,7 +24,7 @@ function oauthStatus(state: FollowerOAuthStatus["state"]): FollowerOAuthStatus {
   };
 }
 
-test("스트리머 메뉴에 팔로워 관리가 활성 페이지로 표시된다", () => {
+test("스트리머 메뉴에는 팔로워 관리와 Riot ID만 표시된다", () => {
   const html = renderToStaticMarkup(
     <Layout
       locale="ko"
@@ -38,6 +38,12 @@ test("스트리머 메뉴에 팔로워 관리가 활성 페이지로 표시된�
   );
 
   assert.match(html, /class="nav-item active"[^>]*data-ko="팔로워 관리"/);
+  assert.match(html, /class="nav-item "[^>]*data-ko="내 Riot ID"/);
+  assert.equal((html.match(/class="nav-item /g) ?? []).length, 2);
+  assert.doesNotMatch(html, /data-ko="운영 현황"/);
+  assert.doesNotMatch(html, /data-ko="Overlay 연결"/);
+  assert.doesNotMatch(html, /data-ko="LoL 방송 운영"/);
+  assert.doesNotMatch(html, /data-ko="Palworld 서버 상태"/);
   assert.match(html, /팔로워 본문/);
 });
 

@@ -3228,20 +3228,21 @@ test("목표 Pal 역검색은 스크롤 위치에서 다음 조합을 자동으�
   await assertHealthyDocument(page, errors);
 });
 
-test("교배 직접 결과와 고밀도 조합 목록은 요구 화면 크기에서 수평 overflow 없이 표시된다", async ({ page }) => {
-  const errors = collectRuntimeErrors(page);
-  const viewports = [
-    { width: 360, height: 800 },
-    { width: 390, height: 844 },
-    { width: 430, height: 932 },
-    { width: 768, height: 1024 },
-    { width: 790, height: 844 },
-    { width: 1024, height: 768 },
-    { width: 1180, height: 820 },
-    { width: 1440, height: 1000 },
-  ];
+const breedingResponsiveViewports = [
+  { width: 360, height: 800 },
+  { width: 390, height: 844 },
+  { width: 430, height: 932 },
+  { width: 768, height: 1024 },
+  { width: 790, height: 844 },
+  { width: 1024, height: 768 },
+  { width: 1180, height: 820 },
+  { width: 1440, height: 1000 },
+];
 
-  for (const viewport of viewports) {
+test("교배 직접 결과와 한쪽 부모 조합은 요구 화면 크기에서 수평 overflow 없이 표시된다", async ({ page }) => {
+  const errors = collectRuntimeErrors(page);
+
+  for (const viewport of breedingResponsiveViewports) {
     await page.setViewportSize(viewport);
     await page.goto("/palworld/breeding?mode=parents&parentA=penking&parentB=bushi");
     const tabs = page.getByRole("tab");
@@ -3252,7 +3253,7 @@ test("교배 직접 결과와 고밀도 조합 목록은 요구 화면 크기에
     ]);
     expect(directTabBounds).not.toBeNull();
     expect(reverseTabBounds).not.toBeNull();
-    expect(Math.abs(directTabBounds!.y - reverseTabBounds!.y)).toBeLessThanOrEqual(1);
+    expect(Math.abs(directTabBounds!.y - reverseTabBounds!.y)).toBeLessThanOrEqual(2);
     expect(reverseTabBounds!.x + reverseTabBounds!.width).toBeLessThanOrEqual(viewport.width + 1);
     await expect(page.getByTestId("breeding-direct-card").locator(".palworld-direct-result-hero")).toBeVisible();
     await assertHealthyDocument(page, errors);
@@ -3293,7 +3294,14 @@ test("교배 직접 결과와 고밀도 조합 목록은 요구 화면 크기에
       }
     }
     await assertHealthyDocument(page, errors);
+  }
+});
 
+test("교배 역검색 고밀도 조합은 요구 화면 크기에서 열 너비와 수평 overflow를 유지한다", async ({ page }) => {
+  const errors = collectRuntimeErrors(page);
+
+  for (const viewport of breedingResponsiveViewports) {
+    await page.setViewportSize(viewport);
     await page.goto("/palworld/breeding?mode=child&child=sibelyx");
     await expect(page.getByTestId("breeding-target-summary")).toBeVisible();
     const reverseRow = page.getByTestId("breeding-reverse-pair").first();

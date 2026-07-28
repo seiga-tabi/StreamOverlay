@@ -1,18 +1,5 @@
 export const DASHBOARD_PAGES = [
-  "dashboard",
-  "twitch",
-  "overlayStatus",
-  "overlayTest",
-  "overlayRewards",
-  "overlayAlerts",
-  "lolAccount",
-  "lolAutomation",
-  "lolParticipation",
-  "palworldServer",
   "myRiotAccount",
-  "soloRank",
-  "participation",
-  "serverStatus",
   "tournaments",
   "streamerRiotRequests",
   "followers",
@@ -24,14 +11,12 @@ export const DASHBOARD_PAGES = [
 
 export type Page = (typeof DASHBOARD_PAGES)[number];
 export type DashboardRole = "admin" | "streamer";
-export type LolOperationsPage = "lolAccount" | "lolAutomation" | "lolParticipation";
 export type StreamerDashboardTenant = {
   streamerSlug: string;
   dashboardKey: string;
 };
 
 export const ADMIN_ALLOWED_PAGES: Page[] = [
-  "serverStatus",
   "tournaments",
   "streamerRiotRequests",
   "communityModeration",
@@ -41,17 +26,11 @@ export const ADMIN_ALLOWED_PAGES: Page[] = [
 ];
 
 export const STREAMER_ALLOWED_PAGES: Page[] = [
-  "dashboard",
-  "overlayStatus",
-  "lolAccount",
-  "lolAutomation",
-  "lolParticipation",
-  "palworldServer",
   "followers",
+  "myRiotAccount",
 ];
 
 const ADMIN_PAGE_PATHS: Partial<Record<Page, string>> = {
-  serverStatus: "/admin",
   tournaments: "/admin/tournaments",
   streamerRiotRequests: "/admin/riot-id-requests",
   communityModeration: "/admin/community",
@@ -61,27 +40,22 @@ const ADMIN_PAGE_PATHS: Partial<Record<Page, string>> = {
 };
 
 const STREAMER_PAGE_PATHS: Partial<Record<Page, string>> = {
-  dashboard: "/dashboard",
-  overlayStatus: "/dashboard/overlay",
-  overlayAlerts: "/dashboard/alerts",
-  lolAccount: "/dashboard/lol/account",
-  lolAutomation: "/dashboard/lol/automation",
-  lolParticipation: "/dashboard/lol/participation",
-  palworldServer: "/dashboard/palworld/server",
   followers: "/dashboard/followers",
+  myRiotAccount: "/dashboard/riot-id",
 };
 
 const LEGACY_STREAMER_PAGE_PATHS: Record<string, Page> = {
-  "/dashboard/lol": "lolAccount",
-  "/dashboard/riot-account": "lolAccount",
-  "/dashboard/solo-rank": "lolAutomation",
-  "/dashboard/participation": "lolParticipation",
-};
-
-const LEGACY_STREAMER_PAGE_ALIASES: Partial<Record<Page, Page>> = {
-  myRiotAccount: "lolAccount",
-  soloRank: "lolAutomation",
-  participation: "lolParticipation",
+  "/dashboard": "followers",
+  "/dashboard/overlay": "followers",
+  "/dashboard/alerts": "followers",
+  "/dashboard/lol": "myRiotAccount",
+  "/dashboard/lol/account": "myRiotAccount",
+  "/dashboard/lol/automation": "followers",
+  "/dashboard/lol/participation": "followers",
+  "/dashboard/palworld/server": "followers",
+  "/dashboard/solo-rank": "followers",
+  "/dashboard/participation": "followers",
+  "/dashboard/riot-account": "myRiotAccount",
 };
 
 function normalizedPath(pathname: string): string {
@@ -149,17 +123,12 @@ export function pageAllowedForRole(page: Page, role: DashboardRole): boolean {
 }
 
 export function defaultPageForRole(role: DashboardRole): Page {
-  return role === "admin" ? "serverStatus" : "dashboard";
-}
-
-export function isLolOperationsPage(page: Page): page is LolOperationsPage {
-  return page === "lolAccount" || page === "lolAutomation" || page === "lolParticipation";
+  return role === "admin" ? "streamerRiotRequests" : "followers";
 }
 
 export function dashboardPathForPage(page: Page, role: DashboardRole, tenant?: StreamerDashboardTenant): string {
   const paths = role === "admin" ? ADMIN_PAGE_PATHS : STREAMER_PAGE_PATHS;
-  const canonicalPage = role === "streamer" ? LEGACY_STREAMER_PAGE_ALIASES[page] ?? page : page;
-  const path = paths[canonicalPage] ?? paths[defaultPageForRole(role)] ?? (role === "admin" ? "/admin" : "/dashboard");
+  const path = paths[page] ?? paths[defaultPageForRole(role)] ?? (role === "admin" ? "/admin/riot-id-requests" : "/dashboard/followers");
   if (role !== "streamer" || !tenant) return path;
   return path.replace("/dashboard", streamerDashboardBasePath(tenant));
 }
@@ -180,7 +149,7 @@ export function setDashboardPath(
   tenant?: StreamerDashboardTenant
 ): void {
   const nextPath = dashboardPathForPage(page, role, tenant);
-  if (window.location.pathname === nextPath) return;
+  if (window.location.pathname === nextPath && !window.location.search && !window.location.hash) return;
   if (replace) {
     window.history.replaceState({}, "", nextPath);
     return;

@@ -70,14 +70,7 @@ test("정상 allowlist action은 통과한다", () => {
       eventKind: "subscription",
       mediaUrl: "/alerts/subscription.gif",
       soundUrl: "https://example.com/subscription.mp3",
-      soundVolume: 0.5,
-      speechEnabled: true,
-      speechText: "サブスクありがとうございます。",
-      speechAudioUrl: "/tts/subscription.wav",
-      speechLanguage: "ja-JP",
-      speechRate: 1,
-      speechPitch: 1,
-      speechVolume: 0.8
+      soundVolume: 0.5
     }
   ];
 
@@ -87,14 +80,15 @@ test("정상 allowlist action은 통과한다", () => {
   }
 });
 
-test("overlay.banner action은 안전하지 않은 speech 설정을 거부한다", () => {
-  const result = validateBotAction({
-    type: "overlay.banner",
-    message: "通知",
-    speechEnabled: true,
-    speechLanguage: "en-US"
-  });
-  assert.equal(result.ok, false);
+test("overlay.banner action은 제거된 음성 합성 필드를 거부한다", () => {
+  for (const field of ["speechEnabled", "speechText", "speechAudioUrl"]) {
+    const result = validateBotAction({
+      type: "overlay.banner",
+      message: "通知",
+      [field]: field === "speechEnabled" ? true : "legacy"
+    });
+    assert.equal(result.ok, false, field);
+  }
 });
 
 test("overlay.banner action은 안전하지 않은 alert asset URL을 거부한다", () => {

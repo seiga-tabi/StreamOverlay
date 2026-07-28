@@ -4,10 +4,8 @@ import {
   MAX_RANK_HISTORY_POINTS,
   MAX_RECENT_MATCH_CHAMPIONS,
   OVERLAY_BANNER_EVENT_KINDS,
-  OVERLAY_SPEECH_LANGUAGES,
   validateOverlayMessage,
   type OverlayBannerEventKind,
-  type OverlaySpeechLanguage,
   type ParticipationPhase,
   type ParticipationQueueEntry,
   type ParticipationSnapshotStatus
@@ -137,13 +135,6 @@ export type OverlayBannerAction = {
   mediaAlt?: string;
   soundUrl?: string;
   soundVolume?: number;
-  speechEnabled?: boolean;
-  speechText?: string;
-  speechAudioUrl?: string;
-  speechLanguage?: OverlaySpeechLanguage;
-  speechRate?: number;
-  speechPitch?: number;
-  speechVolume?: number;
 };
 
 export type OverlaySubtitleAction = {
@@ -467,7 +458,7 @@ function optionalOverlayAssetUrl(value: unknown, maxLength: number, fieldName: s
   if (value === undefined) return ok();
   if (!stringWithin(value, maxLength)) return fail(`${fieldName}은 ${maxLength}자 이하 문자열이어야 합니다.`);
   if (value.length === 0) return ok();
-  if (value.startsWith("/alerts/") || value.startsWith("/tts/")) {
+  if (value.startsWith("/alerts/")) {
     try {
       const decoded = decodeURIComponent(value);
       if (!decoded.includes("..") && !decoded.includes("\\") && !decoded.includes("\0")) return ok();
@@ -477,9 +468,9 @@ function optionalOverlayAssetUrl(value: unknown, maxLength: number, fieldName: s
   }
   try {
     const parsed = new URL(value);
-    return parsed.protocol === "https:" ? ok() : fail(`${fieldName}은 https URL, /alerts/... 또는 /tts/... 경로여야 합니다.`);
+    return parsed.protocol === "https:" ? ok() : fail(`${fieldName}은 https URL 또는 /alerts/... 경로여야 합니다.`);
   } catch {
-    return fail(`${fieldName}은 올바른 URL, /alerts/... 또는 /tts/... 경로여야 합니다.`);
+    return fail(`${fieldName}은 올바른 URL 또는 /alerts/... 경로여야 합니다.`);
   }
 }
 
@@ -956,14 +947,7 @@ export function validateBotAction(action: unknown, options: ValidateBotActionOpt
         "mediaUrl",
         "mediaAlt",
         "soundUrl",
-        "soundVolume",
-        "speechEnabled",
-        "speechText",
-        "speechAudioUrl",
-        "speechLanguage",
-        "speechRate",
-        "speechPitch",
-        "speechVolume"
+        "soundVolume"
       ], options);
       if (!keyResult.ok) return keyResult;
       const common = validateOverlayCommonFields(candidate);
@@ -983,20 +967,6 @@ export function validateBotAction(action: unknown, options: ValidateBotActionOpt
       if (!soundUrl.ok) return soundUrl;
       const soundVolume = optionalUnitNumber(candidate.soundVolume, "soundVolume");
       if (!soundVolume.ok) return soundVolume;
-      const speechEnabled = optionalBoolean(candidate.speechEnabled, "speechEnabled");
-      if (!speechEnabled.ok) return speechEnabled;
-      const speechText = optionalString(candidate.speechText, MAX_CHAT_LENGTH, "speechText");
-      if (!speechText.ok) return speechText;
-      const speechAudioUrl = optionalOverlayAssetUrl(candidate.speechAudioUrl, MAX_CHAT_LENGTH, "speechAudioUrl");
-      if (!speechAudioUrl.ok) return speechAudioUrl;
-      const speechLanguage = optionalExactString(candidate.speechLanguage, OVERLAY_SPEECH_LANGUAGES, "speechLanguage");
-      if (!speechLanguage.ok) return speechLanguage;
-      const speechRate = optionalNumberInRange(candidate.speechRate, 0.5, 1.5, "speechRate");
-      if (!speechRate.ok) return speechRate;
-      const speechPitch = optionalNumberInRange(candidate.speechPitch, 0.5, 1.5, "speechPitch");
-      if (!speechPitch.ok) return speechPitch;
-      const speechVolume = optionalUnitNumber(candidate.speechVolume, "speechVolume");
-      if (!speechVolume.ok) return speechVolume;
       return ok();
     }
     case "overlay.subtitle": {

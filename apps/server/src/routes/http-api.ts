@@ -1924,27 +1924,6 @@ async function sendCommunityAsset(req: IncomingMessage, res: ServerResponse, pat
   return true;
 }
 
-async function sendLocalTtsAsset(req: IncomingMessage, res: ServerResponse, pathname: string): Promise<boolean> {
-  const configuredPath = appConfig.localTts.publicPath.trim().replace(/\/+$/, "") || "/tts";
-  const publicPath = configuredPath.startsWith("/") ? configuredPath : `/${configuredPath}`;
-  if (pathname !== publicPath && !pathname.startsWith(`${publicPath}/`)) return false;
-  const relative = decodeUrlPathSegment(pathname.slice(publicPath.length + 1));
-  if (relative === undefined) {
-    sendInvalidStaticPath(req, res);
-    return true;
-  }
-  const normalized = path.normalize(relative).replace(/^(\.\.(\/|\\|$))+/, "");
-  const root = path.resolve(appConfig.localTts.cacheDir);
-  const candidate = path.resolve(root, normalized);
-  if (candidate !== root && !candidate.startsWith(`${root}${path.sep}`)) {
-    res.writeHead(403, { "Content-Type": "application/json; charset=utf-8", ...SECURITY_HEADERS });
-    res.end(JSON.stringify({ error: "forbidden" }));
-    return true;
-  }
-  await sendStaticFile(req, res, candidate);
-  return true;
-}
-
 function sendSafeOAuthHtml(res: ServerResponse, status: number, title: string, message: string): void {
   const dashboardUrl = escapeHtml(appConfig.dashboardBaseUrl);
   const safeTitle = escapeHtml(title);
@@ -5687,7 +5666,6 @@ export function createHttpHandler(input: HttpHandlerInput) {
       }
       if ((req.method === "GET" || req.method === "HEAD") && await sendOverlayAlertAsset(req, res, url.pathname)) return;
       if ((req.method === "GET" || req.method === "HEAD") && await sendCommunityAsset(req, res, url.pathname)) return;
-      if ((req.method === "GET" || req.method === "HEAD") && await sendLocalTtsAsset(req, res, url.pathname)) return;
       if (
         (req.method === "GET" || req.method === "HEAD") &&
         await sendRankedEmblemAsset(req, res, url.pathname, input.logger)

@@ -5,13 +5,10 @@ import type { TwitchChatService } from "../services/twitch-chat-service.js";
 import type { OverlayHub } from "../services/overlay-hub.js";
 import type { ActionRecord, Store } from "../services/store.js";
 import type { JsonlLogger } from "../logging/jsonl-logger.js";
-import type { LocalTtsService } from "../services/local-tts-service.js";
-import { appConfig } from "../config.js";
 import { renderObjectTemplates, type TemplateContext } from "./template.js";
 
 const TEMPLATE_PATTERN = /\{([a-zA-Z0-9_]+)\}/;
 const OVERLAY_COOLDOWN_MS = 1500;
-const DEFAULT_OVERLAY_TTS_BROADCAST_WAIT_MS = 15_000;
 
 function hasTemplate(value: unknown): boolean {
   if (typeof value === "string") return TEMPLATE_PATTERN.test(value);
@@ -39,8 +36,7 @@ export class ActionDispatcher {
     private readonly overlay: OverlayHub,
     private readonly store: Store,
     private readonly logger: JsonlLogger,
-    private readonly onActionRecorded?: () => void,
-    private readonly localTts?: LocalTtsService
+    private readonly onActionRecorded?: () => void
   ) {}
 
   async dispatch(actions: BotAction[], ctx: TemplateContext = {}, reason?: string): Promise<void> {
@@ -96,16 +92,8 @@ export class ActionDispatcher {
             mediaUrl: action.mediaUrl,
             mediaAlt: action.mediaAlt,
             soundUrl: action.soundUrl,
-            soundVolume: action.soundVolume,
-            speechEnabled: action.speechEnabled,
-            speechText: action.speechText,
-            speechAudioUrl: action.speechAudioUrl,
-            speechLanguage: action.speechLanguage,
-            speechRate: action.speechRate,
-            speechPitch: action.speechPitch,
-            speechVolume: action.speechVolume
+            soundVolume: action.soundVolume
           };
-          await this.attachOverlaySpeech(message);
           actionStatus = this.broadcastOverlay(message);
           break;
         }
@@ -303,38 +291,6 @@ export class ActionDispatcher {
     return typeof ctx.streamerId === "string" && ctx.streamerId.trim()
       ? ctx.streamerId.trim()
       : undefined;
-  }
-
-  private async attachOverlaySpeech(message: OverlayBannerMessage): Promise<void> {
-    if (!this.localTts || !appConfig.localTts.enabled || message.speechEnabled !== true || message.speechAudioUrl) return;
-
-    const waitMs = Math.min(15_000, Math.max(500, appConfig.localTts.broadcastWaitMs ?? DEFAULT_OVERLAY_TTS_BROADCAST_WAIT_MS));
-    let timedOut = false;
-    const timeout = new Promise<undefined>((resolve) => {
-      setTimeout(() => {
-        timedOut = true;
-        resolve(undefined);
-      }, waitMs);
-    });
-    const speechAudioUrl = await Promise.race([
-      this.localTts.synthesizeOverlaySpeech(message),
-      timeout
-    ]);
-
-    if (speechAudioUrl) {
-      message.speechAudioUrl = speechAudioUrl;
-      return;
-    }
-
-    if (timedOut) {
-      this.logger.error({
-        type: "local_tts.overlay_generation_timeout",
-        messageType: message.type,
-        source: message.source,
-        timeoutMs: waitMs,
-        fallback: "browser_speech"
-      });
-    }
   }
 
   private broadcastOverlay(message: OverlayMessage): ActionRecord["status"] {

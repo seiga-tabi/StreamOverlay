@@ -15,9 +15,7 @@
       "variant": "info",
       "durationMs": 3500,
       "source": "chat.clip",
-      "eventKind": "custom",
-      "speechEnabled": true,
-      "speechLanguage": "ja-JP"
+      "eventKind": "custom"
     }
   ],
   "!질문": [
@@ -43,9 +41,7 @@
       "message": "緊急モードのテストです。実際のモデレーション処罰は実行しません。",
       "variant": "warning",
       "durationMs": 5000,
-      "eventKind": "test",
-      "speechEnabled": true,
-      "speechLanguage": "ja-JP"
+      "eventKind": "test"
     }
   ]
 }

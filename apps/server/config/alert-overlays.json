@@ -1,12 +1,7 @@
 {
   "defaults": {
     "durationMs": 5200,
-    "soundVolume": 0.65,
-    "speechEnabled": true,
-    "speechLanguage": "ja-JP",
-    "speechRate": 1,
-    "speechPitch": 1,
-    "speechVolume": 0.9
+    "soundVolume": 0.65
   },
   "follow": {
     "enabled": true,

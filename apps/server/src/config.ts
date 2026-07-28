@@ -155,17 +155,6 @@ export const appConfig = {
     cacheTtlMs: intEnv("CHAT_TRANSLATION_CACHE_TTL_MS", 10 * 60 * 1000),
     maxTranslationsPerMinute: intEnv("CHAT_TRANSLATION_MAX_PER_MINUTE", 30)
   },
-  localTts: {
-    enabled: boolEnv("LOCAL_TTS_ENABLED", false),
-    provider: env("LOCAL_TTS_PROVIDER", "voicevox"),
-    baseUrl: env("LOCAL_TTS_BASE_URL", "http://127.0.0.1:50021"),
-    speaker: intEnv("LOCAL_TTS_SPEAKER", 3),
-    broadcastWaitMs: intEnv("LOCAL_TTS_BROADCAST_WAIT_MS", 15_000),
-    timeoutMs: intEnv("LOCAL_TTS_TIMEOUT_MS", 15_000),
-    maxTextLength: intEnv("LOCAL_TTS_MAX_TEXT_LENGTH", 300),
-    cacheDir: env("LOCAL_TTS_CACHE_DIR", path.resolve(defaultStateDir, "tts-cache")),
-    publicPath: env("LOCAL_TTS_PUBLIC_PATH", "/tts")
-  },
   paths: {
     logs: env("STREAMOPS_LOGS_DIR", path.resolve(projectRoot, "logs")),
     state: defaultStateDir,

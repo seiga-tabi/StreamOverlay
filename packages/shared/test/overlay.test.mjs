@@ -38,14 +38,7 @@ test("overlay message schema는 유효한 banner를 허용한다", () => {
     mediaUrl: "/alerts/follow.gif",
     mediaAlt: "follow alert",
     soundUrl: "https://example.com/follow.mp3",
-    soundVolume: 0.6,
-    speechEnabled: true,
-    speechText: "フォローありがとうございます。",
-    speechAudioUrl: "/tts/follow.wav",
-    speechLanguage: "ja-JP",
-    speechRate: 1,
-    speechPitch: 1,
-    speechVolume: 0.9
+    soundVolume: 0.6
   });
   assert.equal(result.ok, true);
 });
@@ -65,23 +58,28 @@ test("overlay 공통 streamerId는 비어 있지 않은 문자열만 허용한�
   }).ok, false);
 });
 
-test("overlay banner speech 설정은 언어와 수치 범위를 검증한다", () => {
-  const language = validateOverlayMessage({
-    type: "overlay.banner",
-    message: "通知",
-    speechEnabled: true,
-    speechLanguage: "en-US"
-  });
-  assert.equal(language.ok, false);
+test("overlay banner는 제거된 음성 합성 필드를 unknown field로 거부한다", () => {
+  for (const field of ["speechEnabled", "speechText", "speechAudioUrl"]) {
+    const result = validateOverlayMessage({
+      type: "overlay.banner",
+      message: "通知",
+      [field]: field === "speechEnabled" ? true : "legacy"
+    });
+    assert.equal(result.ok, false, field);
+  }
+});
 
-  const rate = validateOverlayMessage({
+test("overlay banner asset URL은 기존 alerts 경로를 허용하고 tts 경로를 거부한다", () => {
+  assert.equal(validateOverlayMessage({
     type: "overlay.banner",
-    message: "通知",
-    speechEnabled: true,
-    speechLanguage: "ja-JP",
-    speechRate: 3
-  });
-  assert.equal(rate.ok, false);
+    message: "알림",
+    soundUrl: "/alerts/follow.wav"
+  }).ok, true);
+  assert.equal(validateOverlayMessage({
+    type: "overlay.banner",
+    message: "알림",
+    soundUrl: "/tts/follow.wav"
+  }).ok, false);
 });
 
 test("overlay banner media와 sound URL은 안전한 경로만 허용한다", () => {

@@ -68,9 +68,7 @@ function safeActions() {
         variant: "info",
         durationMs: 3000,
         source: "dashboard.test",
-        eventKind: "test",
-        speechEnabled: true,
-        speechLanguage: "ja-JP"
+        eventKind: "test"
       }
     },
     {

@@ -1,8 +1,6 @@
 import { getDashboardCsrfToken, runtimeConfig, setDashboardCsrfToken } from "../runtime-config";
 import type {
   CommunityModerationSnapshot,
-  LolAutomationSettings,
-  LolOperationsState,
   StreamerTournament,
   TournamentUpsertInput,
 } from "@streamops/shared";
@@ -188,33 +186,9 @@ export async function logoutDashboardSession(surface: DashboardAuthSurface = das
   });
 }
 
-export async function updateStreamerProfileLink(body: {
-  profileLinkUrl?: string;
-  profileLinkLabel?: string;
-  profileLinks?: Array<{
-    id?: string;
-    url: string;
-    label?: string;
-    platform?: string;
-  }>;
-}): Promise<DashboardStreamerInfo> {
-  const result = await apiPost<{ streamer: DashboardStreamerInfo }>("/api/participation/streamer-profile-link", body);
-  return result.streamer;
-}
-
 export async function updateStreamerRiotId(riotId: string): Promise<DashboardStreamerInfo> {
   const result = await apiPost<{ streamer: DashboardStreamerInfo }>("/api/participation/streamer-riot-id", { riotId });
   return result.streamer;
-}
-
-export async function getLolOperationsState(): Promise<LolOperationsState> {
-  return apiGet<LolOperationsState>("/api/lol-operations");
-}
-
-export async function updateLolAutomationSettings(
-  patch: Pick<LolAutomationSettings, "enabled" | "autoSelectNextAfterGame" | "announceInChat">
-): Promise<{ settings: LolAutomationSettings; state: LolOperationsState }> {
-  return apiPost<{ settings: LolAutomationSettings; state: LolOperationsState }>("/api/lol-operations/automation", patch);
 }
 
 export async function getDashboardTournaments(): Promise<StreamerTournament[]> {

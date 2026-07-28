@@ -1289,6 +1289,51 @@ test("알림 GIF 업로드 API는 파일을 state에 저장하고 overlay URL로
   }
 });
 
+test("기존 알림 runtime 설정의 TTS 필드는 원본을 덮어쓰지 않고 응답에서 제외한다", async () => {
+  const previousConfigDir = appConfig.paths.config;
+  const previousStateDir = appConfig.paths.state;
+  const configDir = mkdtempSync(path.join(tmpdir(), "streamops-alert-legacy-config-"));
+  const stateDir = mkdtempSync(path.join(tmpdir(), "streamops-alert-legacy-state-"));
+  const runtimePath = path.join(stateDir, "alert-overlays.runtime.json");
+  const runtime = {
+    follow: {
+      enabled: true,
+      title: "팔로우",
+      soundUrl: "/alerts/follow.wav",
+      speechEnabled: true,
+      speechText: "legacy voice"
+    }
+  };
+  try {
+    appConfig.paths.config = configDir;
+    appConfig.paths.state = stateDir;
+    writeFileSync(path.join(configDir, "alert-overlays.json"), "{}\n");
+    writeFileSync(runtimePath, `${JSON.stringify(runtime, null, 2)}\n`);
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      actions: {}
+    });
+
+    const req = createRequest("GET", "/api/alerts/config");
+    const res = createResponse();
+    await handler(req, res);
+
+    assert.equal(res.statusCode, 200);
+    const response = JSON.parse(res.body);
+    assert.equal(response.config.follow.title, "팔로우");
+    assert.equal(response.config.follow.soundUrl, "/alerts/follow.wav");
+    assert.equal("speechEnabled" in response.config.follow, false);
+    assert.equal("speechText" in response.config.follow, false);
+    assert.deepEqual(JSON.parse(readFileSync(runtimePath, "utf8")), runtime);
+  } finally {
+    appConfig.paths.config = previousConfigDir;
+    appConfig.paths.state = previousStateDir;
+    rmSync(configDir, { recursive: true, force: true });
+    rmSync(stateDir, { recursive: true, force: true });
+  }
+});
+
 test("알림 asset 업로드 API는 GIF가 아닌 파일을 거부한다", async () => {
   const previousStateDir = appConfig.paths.state;
   const stateDir = mkdtempSync(path.join(tmpdir(), "streamops-alert-invalid-state-"));
@@ -1351,52 +1396,34 @@ test("정적 asset은 ETag 재검증 시 body 없이 304로 응답한다", async
   }
 });
 
-test("/tts 경로는 로컬 TTS 캐시 WAV를 서빙한다", async () => {
-  const previousCacheDir = appConfig.localTts.cacheDir;
-  const previousPublicPath = appConfig.localTts.publicPath;
-  const dir = mkdtempSync(path.join(tmpdir(), "streamops-tts-"));
-  try {
-    writeFileSync(path.join(dir, "voice.wav"), Buffer.from("RIFF"));
-    appConfig.localTts.cacheDir = dir;
-    appConfig.localTts.publicPath = "/tts";
-    const handler = createHttpHandler({
-      store: {},
-      twitchAuth: {},
-      actions: {}
-    });
+test("/tts 경로는 제거되어 안전한 404로 응답한다", async () => {
+  const handler = createHttpHandler({
+    store: {},
+    twitchAuth: {},
+    actions: {}
+  });
 
-    const req = createRequest("GET", "/tts/voice.wav");
-    const res = createResponse();
-    await handler(req, res);
+  const req = createRequest("GET", "/tts/voice.wav");
+  const res = createResponse();
+  await handler(req, res);
 
-    assert.equal(res.statusCode, 200);
-    assert.equal(res.headers["Content-Type"], "audio/wav");
-  } finally {
-    appConfig.localTts.cacheDir = previousCacheDir;
-    appConfig.localTts.publicPath = previousPublicPath;
-    rmSync(dir, { recursive: true, force: true });
-  }
+  assert.equal(res.statusCode, 404);
+  assert.doesNotMatch(res.body, /<html|stack|\.streamops/i);
 });
 
 test("정적 파일 경로의 잘못된 URL 인코딩은 400으로 응답한다", async () => {
-  const previousPublicPath = appConfig.localTts.publicPath;
-  try {
-    appConfig.localTts.publicPath = "/tts";
-    const handler = createHttpHandler({
-      store: {},
-      twitchAuth: {},
-      actions: {}
-    });
+  const handler = createHttpHandler({
+    store: {},
+    twitchAuth: {},
+    actions: {}
+  });
 
-    for (const target of ["/dashboard/%E0%A4%A", "/alerts/%E0%A4%A", "/tts/%E0%A4%A"]) {
-      const req = createRequest("GET", target);
-      const res = createResponse();
-      await handler(req, res);
+  for (const target of ["/dashboard/%E0%A4%A", "/alerts/%E0%A4%A"]) {
+    const req = createRequest("GET", target);
+    const res = createResponse();
+    await handler(req, res);
 
-      assert.equal(res.statusCode, 400, target);
-      assert.equal(JSON.parse(res.body).error, "잘못된 정적 파일 경로입니다.");
-    }
-  } finally {
-    appConfig.localTts.publicPath = previousPublicPath;
+    assert.equal(res.statusCode, 400, target);
+    assert.equal(JSON.parse(res.body).error, "잘못된 정적 파일 경로입니다.");
   }
 });

@@ -95,13 +95,7 @@ function validateDefaultOverlayBanner(scope: string, value: unknown): void {
     "mediaUrl",
     "mediaAlt",
     "soundUrl",
-    "soundVolume",
-    "speechEnabled",
-    "speechText",
-    "speechLanguage",
-    "speechRate",
-    "speechPitch",
-    "speechVolume"
+    "soundVolume"
   ]);
   for (const key of Object.keys(value)) {
     if (!allowedKeys.has(key)) fail(scope, `defaultOverlayBanner에 허용되지 않는 필드입니다: ${key}`);
@@ -111,11 +105,6 @@ function validateDefaultOverlayBanner(scope: string, value: unknown): void {
   if (value.subtitle !== undefined && typeof value.subtitle !== "string") fail(scope, "defaultOverlayBanner.subtitle은 문자열이어야 합니다.");
   if (value.message !== undefined && typeof value.message !== "string") fail(scope, "defaultOverlayBanner.message는 문자열이어야 합니다.");
   if (value.mediaAlt !== undefined && typeof value.mediaAlt !== "string") fail(scope, "defaultOverlayBanner.mediaAlt는 문자열이어야 합니다.");
-  if (value.speechText !== undefined && typeof value.speechText !== "string") fail(scope, "defaultOverlayBanner.speechText는 문자열이어야 합니다.");
-  if (value.speechLanguage !== undefined && !["ja-JP", "ko-KR"].includes(String(value.speechLanguage))) {
-    fail(scope, "defaultOverlayBanner.speechLanguage 값이 허용 목록에 없습니다.");
-  }
-  if (value.speechEnabled !== undefined && typeof value.speechEnabled !== "boolean") fail(scope, "defaultOverlayBanner.speechEnabled는 boolean이어야 합니다.");
   if (value.variant !== undefined && !["info", "success", "warning", "danger"].includes(String(value.variant))) {
     fail(scope, "defaultOverlayBanner.variant 값이 허용 목록에 없습니다.");
   }
@@ -125,15 +114,7 @@ function validateDefaultOverlayBanner(scope: string, value: unknown): void {
   if (value.soundVolume !== undefined && (typeof value.soundVolume !== "number" || value.soundVolume < 0 || value.soundVolume > 1)) {
     fail(scope, "defaultOverlayBanner.soundVolume은 0 이상 1 이하 숫자여야 합니다.");
   }
-  for (const field of ["speechRate", "speechPitch"] as const) {
-    if (value[field] !== undefined && (typeof value[field] !== "number" || value[field] < 0.5 || value[field] > 1.5)) {
-      fail(scope, `defaultOverlayBanner.${field}은 0.5 이상 1.5 이하 숫자여야 합니다.`);
-    }
-  }
-  if (value.speechVolume !== undefined && (typeof value.speechVolume !== "number" || value.speechVolume < 0 || value.speechVolume > 1)) {
-    fail(scope, "defaultOverlayBanner.speechVolume은 0 이상 1 이하 숫자여야 합니다.");
-  }
-  for (const field of ["subtitle", "mediaUrl", "mediaAlt", "soundUrl", "speechText"] as const) {
+  for (const field of ["subtitle", "mediaUrl", "mediaAlt", "soundUrl"] as const) {
     if (typeof value[field] === "string" && hasTemplate(value[field])) {
       fail(scope, `defaultOverlayBanner.${field}에는 viewer 템플릿을 사용할 수 없습니다.`);
     }
@@ -147,7 +128,7 @@ function validateOverlayAssetUrl(scope: string, record: Record<string, unknown>,
     fail(scope, `${fieldName}은 문자열이어야 합니다.`);
     return;
   }
-  if (value.startsWith("/alerts/") || value.startsWith("/tts/")) {
+  if (value.startsWith("/alerts/")) {
     try {
       const decoded = decodeURIComponent(value);
       if (!decoded.includes("..") && !decoded.includes("\\") && !decoded.includes("\0")) return;
@@ -162,7 +143,7 @@ function validateOverlayAssetUrl(scope: string, record: Record<string, unknown>,
   } catch {
     // 아래 공통 오류로 처리합니다.
   }
-  fail(scope, `${fieldName}은 https URL, /alerts/... 또는 /tts/... 경로여야 합니다.`);
+  fail(scope, `${fieldName}은 https URL 또는 /alerts/... 경로여야 합니다.`);
 }
 
 function validateAlertOverlayPreset(scope: string, value: unknown): void {
@@ -182,13 +163,7 @@ function validateAlertOverlayPreset(scope: string, value: unknown): void {
     "mediaUrl",
     "mediaAlt",
     "soundUrl",
-    "soundVolume",
-    "speechEnabled",
-    "speechText",
-    "speechLanguage",
-    "speechRate",
-    "speechPitch",
-    "speechVolume"
+    "soundVolume"
   ]);
   for (const key of Object.keys(value)) {
     if (!allowedKeys.has(key)) fail(scope, `허용되지 않는 필드입니다: ${key}`);
@@ -205,19 +180,6 @@ function validateAlertOverlayPreset(scope: string, value: unknown): void {
   validateOverlayAssetUrl(scope, value, "soundUrl");
   if (value.soundVolume !== undefined && (typeof value.soundVolume !== "number" || value.soundVolume < 0 || value.soundVolume > 1)) {
     fail(scope, "soundVolume은 0 이상 1 이하 숫자여야 합니다.");
-  }
-  if (value.speechEnabled !== undefined && typeof value.speechEnabled !== "boolean") fail(scope, "speechEnabled는 boolean이어야 합니다.");
-  if (value.speechText !== undefined && typeof value.speechText !== "string") fail(scope, "speechText는 문자열이어야 합니다.");
-  if (value.speechLanguage !== undefined && !["ja-JP", "ko-KR"].includes(String(value.speechLanguage))) {
-    fail(scope, "speechLanguage 값이 허용 목록에 없습니다.");
-  }
-  for (const field of ["speechRate", "speechPitch"] as const) {
-    if (value[field] !== undefined && (typeof value[field] !== "number" || value[field] < 0.5 || value[field] > 1.5)) {
-      fail(scope, `${field}은 0.5 이상 1.5 이하 숫자여야 합니다.`);
-    }
-  }
-  if (value.speechVolume !== undefined && (typeof value.speechVolume !== "number" || value.speechVolume < 0 || value.speechVolume > 1)) {
-    fail(scope, "speechVolume은 0 이상 1 이하 숫자여야 합니다.");
   }
 }
 

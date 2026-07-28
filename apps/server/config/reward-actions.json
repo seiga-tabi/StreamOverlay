@@ -8,9 +8,7 @@
       "subtitle": "画面揺らし / 화면 흔들기",
       "message": "{user}さんが画面揺らしを発動しました。",
       "variant": "success",
-      "durationMs": 4000,
-      "speechEnabled": true,
-      "speechLanguage": "ja-JP"
+      "durationMs": 4000
     },
     "actions": [
       {
@@ -30,9 +28,7 @@
       "subtitle": "クリップリクエスト / 클립 요청",
       "message": "{user}さんのクリップリクエストを記録しました。",
       "variant": "info",
-      "durationMs": 3500,
-      "speechEnabled": true,
-      "speechLanguage": "ja-JP"
+      "durationMs": 3500
     },
     "actions": [
       {
@@ -57,9 +53,7 @@
         "durationMs": 3000,
         "variant": "info",
         "eventKind": "reward",
-        "source": "reward.subtitle_boost",
-        "speechEnabled": true,
-        "speechLanguage": "ja-JP"
+        "source": "reward.subtitle_boost"
       }
     ]
   }

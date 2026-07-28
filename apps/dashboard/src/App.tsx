@@ -19,7 +19,6 @@ import {
   dashboardPageFromPath,
   dashboardPathForPage,
   defaultPageForRole,
-  isLolOperationsPage,
   pageAllowedForRole,
   setDashboardPath,
   streamerDashboardTenantFromPath,
@@ -34,24 +33,16 @@ import { lazyNamed } from "./shared/lazyNamed";
 
 const PublicLolPage = lazyNamed(() => import("./pages/PublicLolPage"), "PublicLolPage");
 const PublicPalworldPage = lazyNamed(() => import("./pages/PublicPalworldPage"), "PublicPalworldPage");
-const DashboardPage = lazyNamed(() => import("./pages/DashboardPage"), "DashboardPage");
 const EventsPage = lazyNamed(() => import("./pages/EventsPage"), "EventsPage");
-const LolOperationsPage = lazyNamed(() => import("./pages/LolOperationsPage"), "LolOperationsPage");
 const TournamentsPage = lazyNamed(() => import("./pages/TournamentsPage"), "TournamentsPage");
 const StreamerRiotRequestsPage = lazyNamed(
   () => import("./pages/StreamerRiotRequestsPage"),
   "StreamerRiotRequestsPage",
 );
 const SettingsPage = lazyNamed(() => import("./pages/SettingsPage"), "SettingsPage");
-const TwitchConnectionPage = lazyNamed(
-  () => import("./pages/TwitchConnectionPage"),
-  "TwitchConnectionPage",
-);
-const OverlayOpsPage = lazyNamed(() => import("./pages/OverlayOpsPage"), "OverlayOpsPage");
 const FollowersPage = lazyNamed(() => import("./pages/FollowersPage"), "FollowersPage");
+const MyRiotAccountPage = lazyNamed(() => import("./pages/MyRiotAccountPage"), "MyRiotAccountPage");
 const SupportInboxPage = lazyNamed(() => import("./pages/SupportInboxPage"), "SupportInboxPage");
-const ServerStatusPage = lazyNamed(() => import("./pages/ServerStatusPage"), "ServerStatusPage");
-const PalworldServerPage = lazyNamed(() => import("./pages/PalworldServerPage"), "PalworldServerPage");
 const CommunityModerationPage = lazyNamed(
   () => import("./pages/CommunityModerationPage"),
   "CommunityModerationPage",
@@ -174,7 +165,6 @@ export default function App() {
   const [dashboardStreamer, setDashboardStreamer] = useState<DashboardStreamerInfo | undefined>();
   const [dashboardTenant, setDashboardTenant] = useState<StreamerDashboardTenant | undefined>(() => streamerDashboardTenantFromPath(window.location.pathname));
   const [snapshot, setSnapshot] = useState<any>(initialSnapshot);
-  const [socketConnected, setSocketConnected] = useState(false);
   const [authState, setAuthState] = useState<AuthState>(() => isManagedSurface(surfaceForLocation()) ? "checking" : "login");
   const [authErrorKey, setAuthErrorKey] = useState<AuthErrorKey>("");
   const [loginDisabled, setLoginDisabled] = useState(false);
@@ -227,7 +217,6 @@ export default function App() {
         setAuthState("checking");
       }
       if (nextSurface === "public") {
-        setSocketConnected(false);
         setDashboardTenant(undefined);
         setDashboardTenantContext(undefined);
         clearDashboardCsrfToken();
@@ -315,7 +304,10 @@ export default function App() {
             const nextPage = pageAllowedForRole(requestedPage, "streamer") ? requestedPage : defaultPageForRole("streamer");
             setPage(nextPage);
             const canonicalPath = dashboardPathForPage(nextPage, "streamer", authenticatedTenant);
-            if (!streamerDashboardTenantMatches(requestedTenant, authenticatedTenant) || window.location.pathname !== canonicalPath) {
+            const canonicalLocation = window.location.pathname === canonicalPath
+              && !window.location.search
+              && !window.location.hash;
+            if (!streamerDashboardTenantMatches(requestedTenant, authenticatedTenant) || !canonicalLocation) {
               setDashboardPath(nextPage, "streamer", true, authenticatedTenant);
             }
           }
@@ -355,11 +347,11 @@ export default function App() {
   }, [surface, routeRevision]);
 
   useEffect(() => {
-    if (!isManagedSurface(surface) || authState !== "authenticated") return undefined;
+    if (surface !== "admin" || authState !== "authenticated") return undefined;
     return connectDashboardSocket((message) => {
       if (message.type === "dashboard.snapshot") setSnapshot(message);
-    }, setSocketConnected, authSurfaceFor(surface), surface === "streamer" ? dashboardTenant : undefined);
-  }, [surface, authState, dashboardTenant]);
+    }, undefined, "admin");
+  }, [surface, authState]);
 
   useEffect(() => {
     if (authState !== "authenticated") return;
@@ -380,7 +372,7 @@ export default function App() {
 
   function startStreamerTwitchLogin(): void {
     const base = runtimeConfig().apiBase ?? import.meta.env.VITE_API_BASE ?? "http://localhost:3000";
-    const returnPath = streamerDashboardTenantFromPath(window.location.pathname) ? window.location.pathname : "/dashboard";
+    const returnPath = streamerDashboardTenantFromPath(window.location.pathname) ? window.location.pathname : "/dashboard/followers";
     const params = new URLSearchParams({ return_to: returnPath });
     window.location.href = `${base}/api/public/twitch/auth/start?${params.toString()}`;
   }
@@ -410,7 +402,6 @@ export default function App() {
   function logout(): void {
     void logoutDashboardSession(authSurfaceFor(surface));
     clearDashboardCsrfToken();
-    setSocketConnected(false);
     setSnapshot(initialSnapshot);
     setDashboardRole("admin");
     setDashboardStreamer(undefined);
@@ -430,7 +421,7 @@ export default function App() {
 
   function openStreamerDashboard(): void {
     syncDashboardLocalePreference();
-    const nextPath = dashboardTenant ? dashboardPathForPage("dashboard", "streamer", dashboardTenant) : "/dashboard";
+    const nextPath = dashboardTenant ? dashboardPathForPage("followers", "streamer", dashboardTenant) : "/dashboard/followers";
     if (window.location.pathname !== nextPath) window.history.pushState({}, "", nextPath);
     setSurface("streamer");
     setAuthState("checking");
@@ -438,7 +429,6 @@ export default function App() {
 
   function openPublic(): void {
     if (surfaceForLocation() !== "public") window.history.pushState({}, "", "/");
-    setSocketConnected(false);
     setDashboardTenant(undefined);
     setDashboardTenantContext(undefined);
     setSurface("public");
@@ -481,26 +471,11 @@ export default function App() {
   return (
     <Layout page={page} setPage={changeDashboardPage} role={dashboardRole} locale={dashboardLocale} onLocaleChange={changeDashboardLocale} onLogout={authRequired ? logout : undefined} onPublicHome={openPublic}>
       <Suspense fallback={<div className="card loading-card" data-ko={dashboardI18n.ko.app.loading} data-ja={dashboardI18n.ja.app.loading}>{currentText.app.loading}</div>}>
-        {page === "serverStatus" && dashboardRole === "admin" ? <ServerStatusPage /> : null}
-        {page === "palworldServer" && dashboardRole === "streamer" ? <PalworldServerPage /> : null}
-        {page === "dashboard" ? <DashboardPage snapshot={snapshot} socketConnected={socketConnected} role={dashboardRole} returnPath={dashboardPathForPage("dashboard", dashboardRole, dashboardTenant)} /> : null}
-        {page === "twitch" && dashboardRole === "admin" ? <TwitchConnectionPage /> : null}
-        {page === "overlayStatus" ? <OverlayOpsPage view="status" streamer={dashboardStreamer} /> : null}
-        {page === "overlayTest" && dashboardRole === "admin" ? <OverlayOpsPage view="test" /> : null}
-        {page === "overlayRewards" && dashboardRole === "admin" ? <OverlayOpsPage view="rewards" /> : null}
-        {page === "overlayAlerts" ? <OverlayOpsPage view="alerts" /> : null}
-        {page === "followers" ? <FollowersPage /> : null}
-        {page === "events" && dashboardRole === "admin" ? <EventsPage snapshot={snapshot} /> : null}
-        {isLolOperationsPage(page) ? (
-          <LolOperationsPage
-            activePage={page}
-            onPageChange={changeDashboardPage}
-            snapshot={snapshot}
-            socketConnected={socketConnected}
-            streamer={dashboardStreamer}
-            onStreamerChange={setDashboardStreamer}
-          />
+        {page === "followers" && dashboardRole === "streamer" ? <FollowersPage /> : null}
+        {page === "myRiotAccount" && dashboardRole === "streamer" ? (
+          <MyRiotAccountPage streamer={dashboardStreamer} onStreamerChange={setDashboardStreamer} />
         ) : null}
+        {page === "events" && dashboardRole === "admin" ? <EventsPage snapshot={snapshot} /> : null}
         {page === "tournaments" && dashboardRole === "admin" ? <TournamentsPage /> : null}
         {page === "streamerRiotRequests" && dashboardRole === "admin" ? <StreamerRiotRequestsPage snapshot={snapshot} /> : null}
         {page === "communityModeration" && dashboardRole === "admin" ? <CommunityModerationPage /> : null}

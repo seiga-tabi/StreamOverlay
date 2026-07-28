@@ -45,12 +45,3 @@ services:
       LEGAL_PROCESSORS_JA: ${LEGAL_PROCESSORS_JA:?LEGAL_PROCESSORS_JA is required}
       LEGAL_CROSS_BORDER_TRANSFER_KO: ${LEGAL_CROSS_BORDER_TRANSFER_KO:?LEGAL_CROSS_BORDER_TRANSFER_KO is required}
       LEGAL_CROSS_BORDER_TRANSFER_JA: ${LEGAL_CROSS_BORDER_TRANSFER_JA:?LEGAL_CROSS_BORDER_TRANSFER_JA is required}
-
-  tts-engine:
-    read_only: true
-    tmpfs:
-      - /tmp
-    cap_drop:
-      - ALL
-    security_opt:
-      - no-new-privileges:true

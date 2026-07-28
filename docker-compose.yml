@@ -51,15 +51,6 @@ services:
       RIOT_RATE_LIMIT_PER_TWO_MINUTES: ${RIOT_RATE_LIMIT_PER_TWO_MINUTES:-100}
       RIOT_RATE_LIMIT_QUEUE_MAX: ${RIOT_RATE_LIMIT_QUEUE_MAX:-500}
       RIOT_API_TIMEOUT_MS: ${RIOT_API_TIMEOUT_MS:-10000}
-      LOCAL_TTS_ENABLED: ${LOCAL_TTS_ENABLED:-true}
-      LOCAL_TTS_PROVIDER: ${LOCAL_TTS_PROVIDER:-seoya}
-      LOCAL_TTS_BASE_URL: ${LOCAL_TTS_BASE_URL:-http://tts-engine:8787}
-      LOCAL_TTS_SPEAKER: ${LOCAL_TTS_SPEAKER:-3}
-      LOCAL_TTS_BROADCAST_WAIT_MS: ${LOCAL_TTS_BROADCAST_WAIT_MS:-15000}
-      LOCAL_TTS_TIMEOUT_MS: ${LOCAL_TTS_TIMEOUT_MS:-15000}
-      LOCAL_TTS_MAX_TEXT_LENGTH: ${LOCAL_TTS_MAX_TEXT_LENGTH:-300}
-      LOCAL_TTS_CACHE_DIR: ${LOCAL_TTS_CACHE_DIR:-/app/.streamops/tts-cache}
-      LOCAL_TTS_PUBLIC_PATH: ${LOCAL_TTS_PUBLIC_PATH:-/tts}
       STREAMOPS_LOGS_DIR: /app/logs
       LOG_MAX_BYTES: ${LOG_MAX_BYTES:-10485760}
       LOG_MAX_FILES: ${LOG_MAX_FILES:-5}
@@ -126,54 +117,6 @@ services:
         max-size: "10m"
         max-file: "5"
 
-  tts-engine:
-    build:
-      context: ./apps/tts-engine
-      dockerfile: Dockerfile
-    container_name: streamops-tts-engine
-    restart: unless-stopped
-    environment:
-      VOICEVOX_BASE_URL: ${VOICEVOX_BASE_URL:-http://voicevox:50021}
-      SEOYA_DEFAULT_SPEAKER_ID: ${SEOYA_DEFAULT_SPEAKER_ID:-3}
-      SEOYA_SERVER_HOST: 0.0.0.0
-      SEOYA_SERVER_PORT: 8787
-      SE0YA_DEFAULT_SPEAKER_ID: ${SE0YA_DEFAULT_SPEAKER_ID:-3}
-      SE0YA_SERVER_HOST: 0.0.0.0
-      SE0YA_SERVER_PORT: 8787
-    ports:
-      - "${SE0YA_TTS_BIND:-127.0.0.1}:${SE0YA_TTS_HOST_PORT:-8787}:8787"
-    volumes:
-      - ./apps/tts-engine/config.json:/app/config.json:ro
-      - ./apps/tts-engine/templates.json:/app/templates.json:ro
-      - ./apps/tts-engine/sfx:/app/sfx:ro
-      - streamops_tts_output:/app/output
-    depends_on:
-      voicevox:
-        condition: service_started
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8787/health', timeout=5)"]
-      interval: 30s
-      timeout: 8s
-      retries: 5
-      start_period: 60s
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-  voicevox:
-    image: ${VOICEVOX_IMAGE:-voicevox/voicevox_engine:cpu-ubuntu20.04-latest}
-    container_name: streamops-voicevox
-    restart: unless-stopped
-    expose:
-      - "50021"
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-
   cloudflared:
     image: cloudflare/cloudflared:latest
     container_name: streamops-cloudflared
@@ -192,4 +135,3 @@ services:
 
 volumes:
   streamops_state:
-  streamops_tts_output:

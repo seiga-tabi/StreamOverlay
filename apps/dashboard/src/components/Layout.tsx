@@ -1,15 +1,13 @@
 import { useState, type ReactNode } from "react";
 import { dashboardI18n, type DashboardLocale } from "../i18n";
-import { isLolOperationsPage, pageAllowedForRole, type DashboardRole, type Page } from "../routing/dashboard-routes";
+import { pageAllowedForRole, type DashboardRole, type Page } from "../routing/dashboard-routes";
 
 export type { DashboardRole, Page } from "../routing/dashboard-routes";
 
 const navSections: Array<{ key: keyof typeof dashboardI18n.ko.app.navGroups; items: Page[] }> = [
-  { key: "operations", items: ["serverStatus", "dashboard", "twitch"] },
-  { key: "overlay", items: ["overlayStatus", "overlayTest", "overlayRewards", "overlayAlerts"] },
-  { key: "lol", items: ["lolAccount", "tournaments", "streamerRiotRequests"] },
-  { key: "palworld", items: ["palworldServer"] },
-  { key: "community", items: ["followers", "communityModeration", "events"] },
+  { key: "account", items: ["followers", "myRiotAccount"] },
+  { key: "lol", items: ["tournaments", "streamerRiotRequests"] },
+  { key: "community", items: ["communityModeration", "events"] },
   { key: "system", items: ["supportInbox", "settings"] }
 ];
 
@@ -89,6 +87,8 @@ export function Layout({
   children: ReactNode;
 }) {
   const uiText = dashboardI18n[locale];
+  const workspaceLabel = role === "streamer" ? uiText.app.streamerWorkspaceLabel : uiText.app.workspaceLabel;
+  const workspaceDescription = role === "streamer" ? uiText.app.streamerWorkspaceDescription : uiText.app.workspaceDescription;
   const visibleNavSections = navSections
     .map((section) => ({
       ...section,
@@ -112,8 +112,18 @@ export function Layout({
         </div>
         <div className="sidebar-profile">
           <span data-ko={dashboardI18n.ko.app.workspaceKicker} data-ja={dashboardI18n.ja.app.workspaceKicker}>{uiText.app.workspaceKicker}</span>
-          <strong data-ko={dashboardI18n.ko.app.workspaceLabel} data-ja={dashboardI18n.ja.app.workspaceLabel}>{uiText.app.workspaceLabel}</strong>
-          <p data-ko={dashboardI18n.ko.app.workspaceDescription} data-ja={dashboardI18n.ja.app.workspaceDescription}>{uiText.app.workspaceDescription}</p>
+          <strong
+            data-ko={role === "streamer" ? dashboardI18n.ko.app.streamerWorkspaceLabel : dashboardI18n.ko.app.workspaceLabel}
+            data-ja={role === "streamer" ? dashboardI18n.ja.app.streamerWorkspaceLabel : dashboardI18n.ja.app.workspaceLabel}
+          >
+            {workspaceLabel}
+          </strong>
+          <p
+            data-ko={role === "streamer" ? dashboardI18n.ko.app.streamerWorkspaceDescription : dashboardI18n.ko.app.workspaceDescription}
+            data-ja={role === "streamer" ? dashboardI18n.ja.app.streamerWorkspaceDescription : dashboardI18n.ja.app.workspaceDescription}
+          >
+            {workspaceDescription}
+          </p>
         </div>
         <nav aria-label={uiText.app.navLabel}>
           {visibleNavSections.map((section) => (
@@ -129,7 +139,8 @@ export function Layout({
                 {section.items.map((item) => (
                   <button
                     key={item}
-                    className={`nav-item ${page === item || (item === "lolAccount" && isLolOperationsPage(page)) ? "active" : ""}`}
+                    className={`nav-item ${page === item ? "active" : ""}`}
+                    aria-current={page === item ? "page" : undefined}
                     data-ko={dashboardI18n.ko.pages[item].label}
                     data-ja={dashboardI18n.ja.pages[item].label}
                     onClick={() => setPage(item)}

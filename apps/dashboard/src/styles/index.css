@@ -4,14 +4,12 @@
 @import "./legacy/03-product-gray.css";
 @import "./pages/dashboard/04-followers.css";
 @import "./pages/public-lol/05-overrides.css";
-@import "./pages/dashboard/06-overrides.css";
 @import "./pages/public-lol/07-late-overrides.css";
 @import "./pages/dashboard/08-shell.css";
 @import "./pages/overlay/09-overrides.css";
 @import "./pages/public-lol/10-final-overrides.css";
 @import "./pages/dashboard/11-participation.css";
 @import "./pages/overlay/12-final-overrides.css";
-@import "./pages/dashboard/13-lol-operations.css";
 @import "./pages/public-palworld/14-palworld.css";
 @import "./shared/public-game-chrome.css";
 @import "./shared/public-game-home.css";

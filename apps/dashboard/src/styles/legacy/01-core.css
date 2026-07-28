@@ -2197,36 +2197,8 @@ code {
   grid-column: 1 / -1;
 }
 
-.my-riot-overlay-detail {
+.my-riot-id-form {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.my-riot-overlay-detail div {
-  display: grid;
-  gap: 6px;
-  min-width: 0;
-  padding: 12px;
-  border: 1px solid #e3eaf5;
-  border-radius: 8px;
-  background: #f8fbff;
-}
-
-.my-riot-overlay-detail code {
-  display: block;
-  min-width: 0;
-  overflow: hidden;
-  color: #1d2a44;
-  font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.my-riot-id-form,
-.my-riot-profile-link-form {
-  display: grid;
-  grid-template-columns: minmax(220px, 1fr) minmax(180px, .65fr) auto;
   gap: 10px;
   align-items: end;
 }
@@ -2235,27 +2207,19 @@ code {
   grid-template-columns: minmax(220px, 1fr) auto;
 }
 
-.my-riot-profile-link-form {
-  grid-template-columns: minmax(0, 1fr);
-  align-items: stretch;
-}
-
-.my-riot-id-form label,
-.my-riot-profile-link-form label {
+.my-riot-id-form label {
   display: grid;
   gap: 6px;
   min-width: 0;
 }
 
-.my-riot-id-form label span,
-.my-riot-profile-link-form label span {
+.my-riot-id-form label span {
   color: #697995;
   font-size: 12px;
   font-weight: 850;
 }
 
-.my-riot-id-form input,
-.my-riot-profile-link-form input {
+.my-riot-id-form input {
   min-height: 38px;
   min-width: 0;
   padding: 0 12px;
@@ -2267,57 +2231,9 @@ code {
   font-weight: 800;
 }
 
-.my-riot-id-form input:focus,
-.my-riot-profile-link-form input:focus {
+.my-riot-id-form input:focus {
   border-color: #4d7dff;
   outline: 3px solid rgba(77, 125, 255, .16);
-}
-
-.my-riot-profile-link-list {
-  display: grid;
-  gap: 10px;
-}
-
-.my-riot-profile-link-row {
-  display: grid;
-  grid-template-columns: auto minmax(240px, 1fr) minmax(180px, .55fr) auto;
-  gap: 10px;
-  align-items: end;
-  min-width: 0;
-  padding: 12px;
-  border: 1px solid #e4ebf7;
-  border-radius: 8px;
-  background: #f8fbff;
-}
-
-.my-riot-profile-link-preview {
-  align-self: end;
-  margin-bottom: 2px;
-}
-
-.my-riot-profile-link-add {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 42px;
-  width: fit-content;
-  padding: 0 16px;
-  border: 1px dashed #6d8cff;
-  border-radius: 8px;
-  background: #eef4ff;
-  color: #315ee8;
-  font-size: 13px;
-  font-weight: 950;
-}
-
-.my-riot-profile-link-add:hover:not(:disabled) {
-  border-style: solid;
-  background: #e3edff;
-}
-
-.my-riot-profile-link-add:disabled {
-  cursor: not-allowed;
-  opacity: .55;
 }
 
 .settings-shared-shell.yoro-app-shell {
@@ -2535,37 +2451,6 @@ code {
   background: var(--yoro-color-surface);
 }
 
-.settings-shared-shell .my-riot-profile-link-list {
-  display: grid;
-  gap: var(--yoro-space-3);
-  min-width: 0;
-}
-
-.settings-shared-shell .my-riot-profile-link-row.yoro-card {
-  display: grid;
-  grid-template-columns: auto minmax(calc(var(--yoro-space-12) * 3), 1fr) minmax(calc(var(--yoro-space-12) * 2), .7fr) auto;
-  gap: var(--yoro-space-3);
-  align-items: end;
-  min-width: 0;
-}
-
-.settings-shared-shell .my-riot-profile-link-preview {
-  align-self: center;
-  margin: var(--yoro-space-0);
-}
-
-.settings-shared-shell .my-riot-profile-link-add.yoro-button {
-  justify-self: start;
-  width: fit-content;
-}
-
-.settings-shared-shell .my-riot-overlay-detail.yoro-card__content,
-.settings-shared-shell .my-riot-overlay-detail {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--yoro-space-3);
-}
-
 @media (max-width: 64rem) {
   .settings-shared-shell.yoro-app-shell {
     grid-template-areas:
@@ -2586,19 +2471,8 @@ code {
   }
 
   .settings-shared-grid--two,
-  .settings-shared-scope-grid,
-  .settings-shared-shell .my-riot-overlay-detail.yoro-card__content,
-  .settings-shared-shell .my-riot-overlay-detail {
+  .settings-shared-scope-grid {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .settings-shared-shell .my-riot-profile-link-row.yoro-card {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  .settings-shared-shell .my-riot-profile-link-row .yoro-button {
-    grid-column: 1 / -1;
-    justify-self: stretch;
   }
 }
 
@@ -2628,14 +2502,9 @@ code {
   }
 
   .settings-shared-actions .yoro-button,
-  .settings-shared-shell .my-riot-account-profile.yoro-card .yoro-button,
-  .settings-shared-shell .my-riot-profile-link-add.yoro-button {
+  .settings-shared-shell .my-riot-account-profile.yoro-card .yoro-button {
     width: 100%;
     justify-content: center;
-  }
-
-  .settings-shared-shell .my-riot-profile-link-row.yoro-card {
-    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -6740,24 +6609,8 @@ code {
   }
 
   .my-riot-account-grid,
-  .my-riot-overlay-detail,
-  .my-riot-id-form,
-  .my-riot-profile-link-form {
+  .my-riot-id-form {
     grid-template-columns: 1fr;
-  }
-
-  .my-riot-profile-link-row {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  .my-riot-profile-link-row label,
-  .my-riot-profile-link-row button {
-    grid-column: 1 / -1;
-  }
-
-  .my-riot-profile-link-preview {
-    align-self: start;
-    margin-bottom: 0;
   }
 }
 

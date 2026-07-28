@@ -16,12 +16,6 @@ type DefaultOverlayBannerConfig = boolean | {
   mediaAlt?: string;
   soundUrl?: string;
   soundVolume?: number;
-  speechEnabled?: boolean;
-  speechText?: string;
-  speechLanguage?: "ja-JP" | "ko-KR";
-  speechRate?: number;
-  speechPitch?: number;
-  speechVolume?: number;
 };
 
 type RewardConfig = {
@@ -88,13 +82,7 @@ function makeDefaultOverlayBanner(rewardConfig: RewardConfig, event: TwitchRewar
     mediaUrl: typeof option === "object" ? option.mediaUrl : undefined,
     mediaAlt: typeof option === "object" ? option.mediaAlt : undefined,
     soundUrl: typeof option === "object" ? option.soundUrl : undefined,
-    soundVolume: typeof option === "object" ? option.soundVolume : undefined,
-    speechEnabled: typeof option === "object" ? option.speechEnabled : undefined,
-    speechText: typeof option === "object" ? option.speechText : undefined,
-    speechLanguage: typeof option === "object" ? option.speechLanguage : undefined,
-    speechRate: typeof option === "object" ? option.speechRate : undefined,
-    speechPitch: typeof option === "object" ? option.speechPitch : undefined,
-    speechVolume: typeof option === "object" ? option.speechVolume : undefined
+    soundVolume: typeof option === "object" ? option.soundVolume : undefined
   };
 }
 

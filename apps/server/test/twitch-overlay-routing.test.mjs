@@ -23,7 +23,6 @@ const { twitchOverlayModule } = await import("../dist/modules/twitch-overlay.mod
 const { OverlayHub } = await import("../dist/services/overlay-hub.js");
 const { DashboardHub } = await import("../dist/services/dashboard-hub.js");
 const { Store } = await import("../dist/services/store.js");
-const { appConfig } = await import("../dist/config.js");
 
 class FakeSocket extends EventEmitter {
   OPEN = 1;
@@ -64,7 +63,7 @@ function createHarness(options = {}) {
       return { status: "sent" };
     }
   };
-  const actions = new ActionDispatcher(bridge, twitchChat, overlay, store, logger, undefined, options.localTts);
+  const actions = new ActionDispatcher(bridge, twitchChat, overlay, store, logger);
   const events = new EventBus();
   const socket = new FakeSocket();
   overlay.add(socket, "all", options.legacyOverlay ? undefined : TEST_BROADCASTER_ID);
@@ -111,8 +110,9 @@ test("channel point redemption은 reward config를 거쳐 overlay.banner를 표�
   assert.ok(banner);
   assert.equal(banner.title, "画面揺らし！");
   assert.match(banner.message, /ViewerTestさんが画面揺らしを発動しました/);
-  assert.equal(banner.speechEnabled, true);
-  assert.equal(banner.speechLanguage, "ja-JP");
+  assert.equal("speechEnabled" in banner, false);
+  assert.equal("speechText" in banner, false);
+  assert.equal("speechAudioUrl" in banner, false);
   assert.doesNotMatch(banner.message, /[<>]/);
 });
 
@@ -466,12 +466,12 @@ test("twitch.follow 이벤트는 팔로우 알림 배너로 전달된다", async
   assert.ok(banner);
   assert.equal(banner.eventKind, "follow");
   assert.match(banner.message, /FollowViewerさんがフォローしました/);
-  assert.equal(banner.speechEnabled, true);
-  assert.equal(banner.speechLanguage, "ja-JP");
+  assert.equal("speechEnabled" in banner, false);
+  assert.equal("speechAudioUrl" in banner, false);
   assert.doesNotMatch(banner.message, /[<>]/);
 });
 
-test("twitch.cheer 이벤트는 비트 수, 닉네임, 댓글을 배너와 TTS 문장에 반영한다", async () => {
+test("twitch.cheer 이벤트는 비트 수, 닉네임, 댓글을 시각적 배너에 반영한다", async () => {
   const { events, socket, ctx } = createHarness();
   twitchOverlayModule.setup(ctx);
 
@@ -494,13 +494,12 @@ test("twitch.cheer 이벤트는 비트 수, 닉네임, 댓글을 배너와 TTS �
   assert.equal(banner.title, "1500 Bits");
   assert.match(banner.message, /BitViewerさん、1500 Bitsありがとうございます/);
   assert.match(banner.message, /좋은 방송입니다!/);
-  assert.equal(banner.speechText, "BitViewerさん、1500ビッツありがとうございます。コメント、좋은 방송입니다!");
-  assert.equal(banner.speechEnabled, true);
-  assert.equal(banner.speechLanguage, "ja-JP");
+  assert.equal("speechText" in banner, false);
+  assert.equal("speechEnabled" in banner, false);
   assert.doesNotMatch(banner.message, /[<>]/);
 });
 
-test("twitch.subscription 이벤트는 구독 tier와 닉네임을 TTS 문장에 반영한다", async () => {
+test("twitch.subscription 이벤트는 구독 tier와 닉네임을 시각적 배너에 반영한다", async () => {
   const { events, socket, ctx } = createHarness();
   twitchOverlayModule.setup(ctx);
 
@@ -520,13 +519,12 @@ test("twitch.subscription 이벤트는 구독 tier와 닉네임을 TTS 문장에
   assert.ok(banner);
   assert.equal(banner.eventKind, "subscription");
   assert.match(banner.message, /SubViewerさん、Tier 2サブスクありがとうございます/);
-  assert.equal(banner.speechText, "SubViewerさん、ティア2のサブスクありがとうございます。");
-  assert.equal(banner.speechEnabled, true);
-  assert.equal(banner.speechLanguage, "ja-JP");
+  assert.equal("speechText" in banner, false);
+  assert.equal("speechEnabled" in banner, false);
   assert.doesNotMatch(banner.message, /[<>]/);
 });
 
-test("twitch.subscriptionMessage 이벤트는 누적 개월과 댓글을 TTS 문장에 반영한다", async () => {
+test("twitch.subscriptionMessage 이벤트는 누적 개월과 댓글을 시각적 배너에 반영한다", async () => {
   const { events, socket, ctx } = createHarness();
   twitchOverlayModule.setup(ctx);
 
@@ -549,9 +547,8 @@ test("twitch.subscriptionMessage 이벤트는 누적 개월과 댓글을 TTS 문
   assert.equal(banner.eventKind, "subscription_message");
   assert.match(banner.message, /ResubViewerさん、7か月のサブスクありがとうございます/);
   assert.match(banner.message, /이번 달도 잘 볼게요!/);
-  assert.equal(banner.speechText, "ResubViewerさん、7か月のサブスクありがとうございます。コメント、이번 달도 잘 볼게요!");
-  assert.equal(banner.speechEnabled, true);
-  assert.equal(banner.speechLanguage, "ja-JP");
+  assert.equal("speechText" in banner, false);
+  assert.equal("speechEnabled" in banner, false);
   assert.doesNotMatch(banner.message, /[<>]/);
 });
 
@@ -676,71 +673,24 @@ test("시참 snapshot은 cooldown 안에서도 최신 revision을 모두 전달�
   assert.deepEqual(sent.map((message) => message.revision), [1, 2]);
 });
 
-test("overlay.banner는 로컬 TTS 생성이 지연되어도 배너 전송을 오래 막지 않는다", async () => {
-  const previousLocalTts = { ...appConfig.localTts };
-  try {
-    appConfig.localTts.enabled = true;
-    appConfig.localTts.broadcastWaitMs = 500;
-    const { actions, socket } = createHarness({
-      legacyOverlay: true,
-      localTts: {
-        async synthesizeOverlaySpeech() {
-          return new Promise(() => {});
-        }
-      }
-    });
-    const startedAt = Date.now();
+test("overlay.banner는 음성 합성 의존성 없이 즉시 배너를 전송한다", async () => {
+  const { actions, socket } = createHarness({ legacyOverlay: true });
+  const startedAt = Date.now();
 
-    await actions.dispatchOne({
-      type: "overlay.banner",
-      message: "TTS timeout test",
-      speechEnabled: true,
-      speechLanguage: "ja-JP",
-      source: "test.tts_timeout"
-    }, {}, "test.tts_timeout");
+  await actions.dispatchOne({
+    type: "overlay.banner",
+    message: "배너 즉시 전송 테스트",
+    soundUrl: "/alerts/follow.wav",
+    source: "test.banner_without_tts"
+  }, {}, "test.banner_without_tts");
 
-    const elapsedMs = Date.now() - startedAt;
-    const banner = socket.sent.find((message) => message.type === "overlay.banner" && message.source === "test.tts_timeout");
-    assert.ok(elapsedMs < 4000, `dispatch took ${elapsedMs}ms`);
-    assert.ok(banner);
-    assert.equal(banner.speechAudioUrl, undefined);
-    assert.equal(banner.speechEnabled, true);
-    assert.equal(banner.speechLanguage, "ja-JP");
-  } finally {
-    Object.assign(appConfig.localTts, previousLocalTts);
-  }
-});
-
-test("overlay.banner는 설정된 대기 시간 안에 생성된 로컬 TTS URL을 배너에 포함한다", async () => {
-  const previousLocalTts = { ...appConfig.localTts };
-  try {
-    appConfig.localTts.enabled = true;
-    appConfig.localTts.broadcastWaitMs = 1000;
-    const { actions, socket } = createHarness({
-      legacyOverlay: true,
-      localTts: {
-        async synthesizeOverlaySpeech() {
-          await new Promise((resolve) => setTimeout(resolve, 20));
-          return "/tts/generated-follow.wav";
-        }
-      }
-    });
-
-    await actions.dispatchOne({
-      type: "overlay.banner",
-      message: "TTS generated test",
-      speechEnabled: true,
-      speechLanguage: "ja-JP",
-      source: "test.tts_generated"
-    }, {}, "test.tts_generated");
-
-    const banner = socket.sent.find((message) => message.type === "overlay.banner" && message.source === "test.tts_generated");
-    assert.ok(banner);
-    assert.equal(banner.speechEnabled, true);
-    assert.equal(banner.speechAudioUrl, "/tts/generated-follow.wav");
-  } finally {
-    Object.assign(appConfig.localTts, previousLocalTts);
-  }
+  const elapsedMs = Date.now() - startedAt;
+  const banner = socket.sent.find((message) => message.type === "overlay.banner" && message.source === "test.banner_without_tts");
+  assert.ok(elapsedMs < 1000, `dispatch took ${elapsedMs}ms`);
+  assert.ok(banner);
+  assert.equal(banner.soundUrl, "/alerts/follow.wav");
+  assert.equal("speechEnabled" in banner, false);
+  assert.equal("speechAudioUrl" in banner, false);
 });
 
 test("!시참 신청은 Riot 프로필 분석 결과를 안전한 overlay queue로 전달한다", async () => {

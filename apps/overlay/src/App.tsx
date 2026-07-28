@@ -241,9 +241,7 @@ const mockMessages: OverlayMessage[] = [
     source: "mock",
     eventKind: "follow",
     mediaUrl: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdDAzdXF4M3Mxd2h0cGRpOTVwOHUzYWkwdjlqZHdmZ2YxdDN2dzRtaCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3oriO0OEd9QIDdllqo/giphy.gif",
-    mediaAlt: "follow alert",
-    speechEnabled: true,
-    speechLanguage: "ja-JP"
+    mediaAlt: "follow alert"
   },
   {
     type: "overlay.banner",
@@ -253,9 +251,7 @@ const mockMessages: OverlayMessage[] = [
     variant: "danger",
     durationMs: 6500,
     source: "mock",
-    eventKind: "cheer",
-    speechEnabled: true,
-    speechLanguage: "ja-JP"
+    eventKind: "cheer"
   },
   { type: "subtitle.update", sourceLanguage: "ko", targetLanguage: "ja", original: "오늘은 롤 시참을 해볼게요.", translated: "今日はLoL参加型配信をやってみます。", isFinal: true, durationMs: 8000, source: "mock" },
   { type: "question.show", userName: "ViewerTest", question: "다음 판은 어떤 챔피언을 할 예정인가요?", translatedQuestion: "次の試合ではどのチャンピオンを使う予定ですか？", durationMs: 10_000, source: "mock" },
@@ -312,10 +308,7 @@ function withPreviewDuration(message: OverlayMessage): OverlayMessage {
     return {
       ...message,
       durationMs: 60_000,
-      soundUrl: undefined,
-      speechEnabled: false,
-      speechAudioUrl: undefined,
-      speechText: undefined
+      soundUrl: undefined
     };
   }
   if ("durationMs" in message) return { ...message, durationMs: 60_000 } as OverlayMessage;

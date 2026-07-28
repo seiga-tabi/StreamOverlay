@@ -75,9 +75,7 @@ const testActions: OverlayTestItem[] = [
       variant: "info",
       durationMs: 3000,
       source: "dashboard.overlay_ops",
-      eventKind: "test",
-      speechEnabled: true,
-      speechLanguage: "ja-JP"
+      eventKind: "test"
     }
   },
   {
@@ -94,9 +92,7 @@ const testActions: OverlayTestItem[] = [
       mediaUrl: "",
       mediaAlt: "follow alert",
       soundUrl: "",
-      soundVolume: 0.65,
-      speechEnabled: true,
-      speechLanguage: "ja-JP"
+      soundVolume: 0.65
     }
   },
   {
@@ -113,9 +109,7 @@ const testActions: OverlayTestItem[] = [
       mediaUrl: "",
       mediaAlt: "bits alert",
       soundUrl: "",
-      soundVolume: 0.7,
-      speechEnabled: true,
-      speechLanguage: "ja-JP"
+      soundVolume: 0.7
     }
   },
   {
@@ -132,9 +126,7 @@ const testActions: OverlayTestItem[] = [
       mediaUrl: "",
       mediaAlt: "subscription alert",
       soundUrl: "",
-      soundVolume: 0.75,
-      speechEnabled: true,
-      speechLanguage: "ja-JP"
+      soundVolume: 0.75
     }
   },
   {

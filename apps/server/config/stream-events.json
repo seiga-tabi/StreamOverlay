@@ -8,9 +8,7 @@
       "variant": "success",
       "durationMs": 5000,
       "eventKind": "stream",
-      "source": "stream.online",
-      "speechEnabled": true,
-      "speechLanguage": "ja-JP"
+      "source": "stream.online"
     }
   ],
   "stream.offline": [
@@ -22,9 +20,7 @@
       "variant": "info",
       "durationMs": 5000,
       "eventKind": "stream",
-      "source": "stream.offline",
-      "speechEnabled": true,
-      "speechLanguage": "ja-JP"
+      "source": "stream.offline"
     }
   ]
 }
