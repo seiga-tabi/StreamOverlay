@@ -5985,7 +5985,10 @@ export function createHttpHandler(input: HttpHandlerInput) {
         const discordApplicationConfigured = isDiscordSnowflake(
           appConfig.discordBotInternal.applicationId
         );
-        if (req.method === "GET" && url.pathname === "/api/discord/status") {
+        if (
+          (req.method === "GET" || req.method === "HEAD")
+          && url.pathname === "/api/discord/status"
+        ) {
           if (url.search) {
             return sendJson(req, res, 400, { error: "query는 허용되지 않습니다." });
           }
@@ -6003,7 +6006,10 @@ export function createHttpHandler(input: HttpHandlerInput) {
             gatewayConfigured: appConfig.discordBotInternal.enabled
           }, noStoreHeaders());
         }
-        if (req.method === "GET" && url.pathname === "/api/discord/bot/install") {
+        if (
+          (req.method === "GET" || req.method === "HEAD")
+          && url.pathname === "/api/discord/bot/install"
+        ) {
           if (url.search || !discordApplicationConfigured) {
             return sendJson(req, res, 404, { error: "not found" });
           }

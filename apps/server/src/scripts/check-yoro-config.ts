@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import path from "node:path";
 import {
   loadFixedSecret,
@@ -14,6 +15,22 @@ const requestedPath = process.env.YORO_CONFIG_FILE?.trim();
 const configPath = requestedPath
   ? path.isAbsolute(requestedPath) ? requestedPath : path.resolve(projectRoot, requestedPath)
   : path.resolve(projectRoot, "config", "runtime.development.json");
+
+if (!requestedPath && !fs.existsSync(configPath)) {
+  if (command === "explain") {
+    const enabled = (name: string): boolean =>
+      process.env[name]?.trim().toLowerCase() === "true";
+    console.log(`environment: ${process.env.NODE_ENV === "production" ? "production" : "development"}`);
+    console.log("configuration: legacy_environment");
+    console.log(`database: ${enabled("DATABASE_ENABLED") ? "enabled" : "disabled"}`);
+    console.log(`discordSaas: ${enabled("DISCORD_SAAS_ENABLED") ? "enabled" : "disabled"}`);
+    console.log(`discordBot: ${enabled("DISCORD_BOT_INTERNAL_API_ENABLED") ? "enabled" : "disabled"}`);
+    console.log(`discordBotManagement: ${enabled("DISCORD_BOT_MANAGEMENT_ENABLED") ? "enabled" : "disabled"}`);
+    console.log(`agentIngestion: ${enabled("AGENT_INGESTION_ENABLED") ? "enabled" : "disabled"}`);
+    process.exit(0);
+  }
+  throw new Error("runtime_config_not_configured");
+}
 const runtime = loadYoroRuntimeConfig(configPath);
 
 const requirements: Array<{

@@ -147,6 +147,11 @@ test("Bot 설치 route는 고정 Discord origin·scope·permission과 no-store�
     assert.equal(response.headers["Cache-Control"], "no-store");
     assert.equal(response.headers["Referrer-Policy"], "no-referrer");
 
+    const head = await request(handler, "HEAD", "/api/discord/bot/install");
+    assert.equal(head.statusCode, 302);
+    assert.equal(new URL(head.headers.Location).origin, "https://discord.com");
+    assert.equal(head.body, "");
+
     const query = await request(
       handler,
       "GET",
@@ -173,6 +178,9 @@ test("Discord 공개 상태는 secret 없이 설치·OAuth·관리 준비 상태
       response.body,
       /secret|token|databaseUrl|clientId|applicationId|host/u
     );
+    const head = await request(handler, "HEAD", "/api/discord/status");
+    assert.equal(head.statusCode, 200);
+    assert.equal(head.body, "");
 
     appConfig.database.enabled = false;
     const unavailable = await request(handler, "GET", "/api/discord/status");

@@ -228,8 +228,10 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
   if (method === "GET" && (pathname === "/api/discord/oauth/start" || pathname === "/api/discord/oauth/callback")) {
     return "OAUTH_CALLBACK";
   }
-  if (method === "GET" && pathname === "/api/discord/bot/install") return "PUBLIC";
-  if (method === "GET" && pathname === "/api/discord/status") return "PUBLIC";
+  if (
+    (method === "GET" || method === "HEAD")
+    && (pathname === "/api/discord/bot/install" || pathname === "/api/discord/status")
+  ) return "PUBLIC";
   if (
     method === "GET"
     && (
