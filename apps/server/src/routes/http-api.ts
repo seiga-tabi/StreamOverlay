@@ -20,6 +20,7 @@ import {
   parseDiscordSetupSessionRequest,
   parseAgentRegistrationInput,
   parsePalworldAgentStatusPayload,
+  isDiscordSnowflake,
   toSafeErrorMessage,
   validatePalworldServerConnectionInput,
   validatePalworldServerDashboardResponse,
@@ -5981,17 +5982,38 @@ export function createHttpHandler(input: HttpHandlerInput) {
       }
 
       if (url.pathname.startsWith("/api/discord/")) {
-        if (!appConfig.discordSaas.enabled) {
-          return sendJson(req, res, 404, { error: "not found" });
+        const discordApplicationConfigured = isDiscordSnowflake(
+          appConfig.discordBotInternal.applicationId
+        );
+        if (req.method === "GET" && url.pathname === "/api/discord/status") {
+          if (url.search) {
+            return sendJson(req, res, 400, { error: "query는 허용되지 않습니다." });
+          }
+          const databaseReady = appConfig.database.enabled
+            && input.discordDatabaseReady?.() === true;
+          return sendJson(req, res, 200, {
+            installAvailable: discordApplicationConfigured,
+            oauthAvailable: appConfig.discordSaas.enabled
+              && databaseReady
+              && Boolean(input.discordOnboarding),
+            managementAvailable: appConfig.discordSaas.enabled
+              && appConfig.discordBotManagement.enabled
+              && databaseReady
+              && Boolean(input.discordManagement),
+            gatewayConfigured: appConfig.discordBotInternal.enabled
+          }, noStoreHeaders());
         }
         if (req.method === "GET" && url.pathname === "/api/discord/bot/install") {
-          if (url.search || !appConfig.discordBotInternal.enabled) {
+          if (url.search || !discordApplicationConfigured) {
             return sendJson(req, res, 404, { error: "not found" });
           }
           return sendRedirect(res, discordBotInstallUrl(), {
             "Cache-Control": "no-store",
             "Referrer-Policy": "no-referrer"
           });
+        }
+        if (!appConfig.discordSaas.enabled) {
+          return sendJson(req, res, 404, { error: "not found" });
         }
         if (
           !appConfig.database.enabled

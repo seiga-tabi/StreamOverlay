@@ -23,6 +23,7 @@ Object.defineProperty(globalThis, "navigator", {
 Object.defineProperty(globalThis, "window", {
   configurable: true,
   value: {
+    __STREAMOPS_CONFIG__: { apiBase: "" },
     localStorage: {
       getItem: () => null,
       setItem: () => undefined

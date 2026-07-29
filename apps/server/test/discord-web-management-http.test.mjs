@@ -157,6 +157,34 @@ test("Bot 설치 route는 고정 Discord origin·scope·permission과 no-store�
   });
 });
 
+test("Discord 공개 상태는 secret 없이 설치·OAuth·관리 준비 상태를 구분한다", async () => {
+  await withDiscordConfig(async () => {
+    const { handler } = createDiscordHandler();
+    const response = await request(handler, "GET", "/api/discord/status");
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(JSON.parse(response.body), {
+      installAvailable: true,
+      oauthAvailable: true,
+      managementAvailable: true,
+      gatewayConfigured: true
+    });
+    assert.equal(response.headers["Cache-Control"], "no-store");
+    assert.doesNotMatch(
+      response.body,
+      /secret|token|databaseUrl|clientId|applicationId|host/u
+    );
+
+    appConfig.database.enabled = false;
+    const unavailable = await request(handler, "GET", "/api/discord/status");
+    assert.deepEqual(JSON.parse(unavailable.body), {
+      installAvailable: true,
+      oauthAvailable: false,
+      managementAvailable: false,
+      gatewayConfigured: true
+    });
+  });
+});
+
 test("웹 management OAuth 시작은 query를 거부하고 setup·Organization 정보를 URL에 노출하지 않는다", async () => {
   await withDiscordConfig(async () => {
     const { handler, calls } = createDiscordHandler();
@@ -259,7 +287,7 @@ test("Discord feature·Database·Gateway 비활성 상태는 다른 상태로 fa
     const { handler } = createDiscordHandler();
     appConfig.discordSaas.enabled = false;
     const featureDisabled = await request(handler, "GET", "/api/discord/bot/install");
-    assert.equal(featureDisabled.statusCode, 404);
+    assert.equal(featureDisabled.statusCode, 302);
 
     appConfig.discordSaas.enabled = true;
     appConfig.database.enabled = false;

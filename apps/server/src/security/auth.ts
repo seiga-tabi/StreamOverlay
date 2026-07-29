@@ -229,6 +229,7 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
     return "OAUTH_CALLBACK";
   }
   if (method === "GET" && pathname === "/api/discord/bot/install") return "PUBLIC";
+  if (method === "GET" && pathname === "/api/discord/status") return "PUBLIC";
   if (
     method === "GET"
     && (

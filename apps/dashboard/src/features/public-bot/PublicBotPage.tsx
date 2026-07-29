@@ -19,6 +19,7 @@ import {
 } from "../public-lol/i18n/public-lol-i18n";
 import type { PublicMainPage } from "../public-lol/types/public-lol";
 import { setPublicPath } from "../public-lol/utils/routes";
+import { botInstallUrl } from "../bot-management/api";
 
 const noLocalePreference = async (): Promise<PublicLocale | undefined> => undefined;
 
@@ -326,7 +327,7 @@ export function PublicBotPage() {
               <span className="is-pending"><span aria-hidden="true" />{text.gatewayPending}</span>
             </div>
             <div className="public-bot-actions">
-              <a className="public-bot-button is-primary" href="/api/discord/bot/install">{text.addBot}</a>
+              <a className="public-bot-button is-primary" href={botInstallUrl()}>{text.addBot}</a>
               <a className="public-bot-button" href="/bot/manage">{text.dashboardLogin}</a>
             </div>
           </div>
