@@ -2,8 +2,16 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import type { StreamerRiotIdRequest } from "@streamops/shared";
 import { PublicGameHeaderFrame } from "../../../shared/PublicGameChrome";
 import { PublicMobileMenuSheet } from "../../../shared/PublicMobileMenuSheet";
-import { PublicTwitchAccountChip, type PublicTwitchAccountMenuAction } from "../../../shared/PublicTwitchAccountChip";
+import {
+  PublicTwitchAccountChip,
+  type PublicTwitchAccountMenuAction,
+  type PublicTwitchAccountUser
+} from "../../../shared/PublicTwitchAccountChip";
 import { accountOAuthUrl } from "../../yoro-account/api";
+import {
+  authenticatedYoroIdentity,
+  useYoroAccountSession
+} from "../../yoro-account/useYoroAccountSession";
 import { publicI18n, t, type PublicLocale } from "../i18n/public-lol-i18n";
 import type { PublicMainPage, PublicNavTarget, PublicTwitchViewerStatus } from "../types/public-lol";
 import { PublicGameSelector } from "./PublicGameSelector";
@@ -60,6 +68,7 @@ export function PublicAppHeader({
   const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [twitchMenuOpen, setTwitchMenuOpen] = useState(false);
+  const yoroAccount = useYoroAccountSession();
   const headerRef = useRef<HTMLDivElement>(null);
   const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
   const registeredStreamerRequest = isRegisteredStreamerRequest(twitchStatus.streamerRiotRequest)
@@ -68,6 +77,21 @@ export function PublicAppHeader({
   const canRegisterStreamer = twitchStatus.streamerRiotRequest?.status !== "approved"
     && twitchStatus.streamerRiotRequest?.status !== "pending";
   const canOpenStreamerDashboard = registeredStreamerRequest?.dashboardEnabled === true;
+  const yoroIdentity = authenticatedYoroIdentity(yoroAccount.session);
+  const yoroConnected = yoroAccount.session?.authenticated === true;
+  const accountConnected = yoroConnected || twitchStatus.connected;
+  const accountUser: PublicTwitchAccountUser | undefined = yoroIdentity
+    ? {
+      displayName: yoroIdentity.displayName,
+      provider: yoroIdentity.provider,
+      ...(yoroIdentity.provider === "twitch" && twitchStatus.user
+        ? {
+          login: twitchStatus.user.login,
+          profileImageUrl: twitchStatus.user.profileImageUrl
+        }
+        : {})
+    }
+    : twitchStatus.user;
   const handleDiscordLogin = () => {
     const returnPath = `${window.location.pathname}${window.location.search}`;
     window.location.assign(accountOAuthUrl("discord", "login", returnPath));
@@ -75,6 +99,16 @@ export function PublicAppHeader({
   const handleTwitchAccountLogin = () => {
     const returnPath = `${window.location.pathname}${window.location.search}`;
     window.location.assign(accountOAuthUrl("twitch", "login", returnPath));
+  };
+  const handleAccountLogout = () => {
+    void (async () => {
+      try {
+        if (yoroConnected) await yoroAccount.logout();
+        if (twitchStatus.connected) onTwitchLogout();
+      } catch {
+        // 로그아웃 요청이 실패하면 연결 표시를 유지해 사용자가 다시 시도할 수 있게 합니다.
+      }
+    })();
   };
 
   const closeMenus = useCallback(() => {
@@ -159,21 +193,21 @@ export function PublicAppHeader({
       />
       <PublicTwitchAccountChip
         configured={twitchStatus.configured}
-        connected={twitchStatus.connected}
+        connected={accountConnected}
         discordLoginLabel={t().discordLogin}
         loginLabel={t().accountLogin}
         loginLabelJa={publicI18n.ja.accountLogin}
         loginLabelKo={publicI18n.ko.accountLogin}
         loginMenuLabel={t().accountLoginMenu}
         loginTitle={t().accountLoginTitle}
-        logoutLabel={t().twitchViewerLogout}
-        logoutLabelJa={publicI18n.ja.twitchViewerLogout}
-        logoutLabelKo={publicI18n.ko.twitchViewerLogout}
+        logoutLabel={t().accountLogout}
+        logoutLabelJa={publicI18n.ja.accountLogout}
+        logoutLabelKo={publicI18n.ko.accountLogout}
         menuActions={twitchMenuActions}
-        menuLabel={t().twitchProfileMenu}
+        menuLabel={t().accountMenu}
         onDiscordLogin={handleDiscordLogin}
         onLogin={handleTwitchAccountLogin}
-        onLogout={onTwitchLogout}
+        onLogout={handleAccountLogout}
         onOpenChange={(open) => {
           setTwitchMenuOpen(open);
           if (open) {
@@ -185,7 +219,7 @@ export function PublicAppHeader({
         }}
         open={twitchMenuOpen}
         twitchLoginLabel={t().twitchLoginChoice}
-        user={twitchStatus.user}
+        user={accountUser}
       />
     </>
   );
@@ -278,6 +312,8 @@ export function PublicAppHeader({
         )}
         mobileMenu={(
           <PublicMobileMenuSheet
+            accountConnected={accountConnected}
+            accountUser={accountUser}
             activePage={activePage}
             id="lol-mobile-menu"
             labels={{
@@ -287,7 +323,7 @@ export function PublicAppHeader({
               language: t().language,
               login: t().accountLogin,
               loginLoading: t().twitchLoginLoading,
-              logout: t().twitchViewerLogout,
+              logout: t().accountLogout,
               title: t().mobileMenu,
               twitch: t().account,
               twitchLogin: t().twitchLoginChoice,
@@ -300,6 +336,7 @@ export function PublicAppHeader({
             onDiscordLogin={handleDiscordLogin}
             onTwitchLogin={handleTwitchAccountLogin}
             onTwitchLogout={onTwitchLogout}
+            onAccountLogout={handleAccountLogout}
             open={mobileMenuOpen}
             returnFocusRef={mobileMenuTriggerRef}
             twitchActions={twitchMenuActions}

@@ -92,6 +92,33 @@ test("공통 Twitch account chip이 프로필과 접근 가능한 메뉴 action�
   assert.match(html, />Twitch 로그아웃</);
 });
 
+test("PC account chip은 Discord 인증 제공자와 표시명을 로그인 상태로 구분해 보여준다", () => {
+  const html = renderToStaticMarkup(
+    <PublicTwitchAccountChip
+      configured
+      connected
+      loginLabel="로그인"
+      loginTitle="로그인이 필요합니다."
+      logoutLabel="로그아웃"
+      menuLabel="계정 메뉴"
+      onLogin={() => undefined}
+      onLogout={() => undefined}
+      onOpenChange={() => undefined}
+      open
+      user={{
+        displayName: "YORO Discord 사용자",
+        provider: "discord"
+      }}
+    />
+  );
+
+  assert.match(html, /public-twitch-login-chip connected/u);
+  assert.match(html, />YORO Discord 사용자</u);
+  assert.match(html, />Discord</u);
+  assert.match(html, new RegExp(`src="${DISCORD_SYMBOL_ICON_SRC}"`, "u"));
+  assert.doesNotMatch(html, new RegExp(`src="${TWITCH_GLITCH_ICON_URL}"`, "u"));
+});
+
 test("공통 account chip이 미로그인 상태에서 Discord·Twitch 로그인 메뉴를 노출한다", () => {
   const html = renderToStaticMarkup(
     <PublicTwitchAccountChip
@@ -228,6 +255,50 @@ test("모바일 통합 메뉴는 게임·언어·계정 로그인을 중첩 팝�
     /\.public-bottom-sheet\[data-sheet-state="open"\] \.public-bottom-sheet__surface/u,
   );
   assert.match(css, /overflow-anchor:\s*none/u);
+});
+
+test("모바일 통합 메뉴는 YORO 계정의 Twitch 로그인 상태를 표시한다", () => {
+  const html = renderToStaticMarkup(
+    <PublicMobileMenuSheet
+      accountConnected
+      accountUser={{
+        displayName: "YORO Twitch 사용자",
+        provider: "twitch"
+      }}
+      activePage="search"
+      id="test-mobile-account-menu"
+      labels={{
+        close: "메뉴 닫기",
+        discordLogin: "Discord 로그인",
+        game: "게임 선택",
+        language: "언어",
+        login: "로그인",
+        loginLoading: "로그인 중…",
+        logout: "로그아웃",
+        title: "메뉴",
+        twitch: "계정",
+        twitchLogin: "Twitch 로그인",
+        twitchUnavailable: "현재 Twitch 로그인을 사용할 수 없습니다.",
+      }}
+      locale="ko"
+      onAccountLogout={() => undefined}
+      onClose={() => undefined}
+      onDiscordLogin={() => undefined}
+      onGamePage={() => undefined}
+      onLocale={() => undefined}
+      onTwitchLogin={() => undefined}
+      onTwitchLogout={() => undefined}
+      open
+      twitchConfigured
+      twitchConnected={false}
+    />
+  );
+
+  assert.match(html, />YORO Twitch 사용자</u);
+  assert.match(html, />Twitch</u);
+  assert.match(html, new RegExp(`src="${TWITCH_GLITCH_ICON_URL}"`, "u"));
+  assert.match(html, />로그아웃</u);
+  assert.doesNotMatch(html, />Discord 로그인</u);
 });
 
 test("모바일 Twitch inline 패널은 로그인 계정과 기존 action을 일반 버튼으로 제공한다", () => {

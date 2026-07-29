@@ -5968,6 +5968,13 @@ export function createHttpHandler(input: HttpHandlerInput) {
               error: "setup session 요청 형식이 올바르지 않습니다."
             });
           }
+          // 명령 interaction 자체가 현재 Guild에 Bot이 설치되어 있다는 증거입니다.
+          // GUILD_CREATE 관찰 저장보다 setup 명령이 먼저 도착하는 경쟁 상태를
+          // 같은 서명 요청 안에서 복구합니다.
+          await input.discordOnboarding.observeBotInstallation({
+            applicationId: setup.applicationId,
+            guildId: setup.guildId
+          });
           const issued = await input.discordOnboarding.issueSetupSession({
             applicationId: setup.applicationId,
             guildId: setup.guildId,

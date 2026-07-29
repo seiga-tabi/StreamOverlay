@@ -1,11 +1,19 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { PublicGameHeaderFrame, PublicHorizontalNav } from "../../../shared/PublicGameChrome";
 import { PublicMobileMenuSheet } from "../../../shared/PublicMobileMenuSheet";
-import { PublicTwitchAccountChip, type PublicTwitchAccountMenuAction } from "../../../shared/PublicTwitchAccountChip";
+import {
+  PublicTwitchAccountChip,
+  type PublicTwitchAccountMenuAction,
+  type PublicTwitchAccountUser
+} from "../../../shared/PublicTwitchAccountChip";
 import { PublicGameSelector } from "../../public-lol/components/PublicGameSelector";
 import { PublicLocaleSelector } from "../../public-lol/components/PublicLocaleSelector";
 import type { PublicMainPage, PublicTwitchViewerStatus } from "../../public-lol/types/public-lol";
 import { accountOAuthUrl } from "../../yoro-account/api";
+import {
+  authenticatedYoroIdentity,
+  useYoroAccountSession
+} from "../../yoro-account/useYoroAccountSession";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import { palworldPathForPage, setPalworldUrl, type PalworldPage } from "../utils/routes";
 
@@ -63,9 +71,25 @@ export function PalworldHeader({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
   const [twitchMenuOpen, setTwitchMenuOpen] = useState(false);
+  const yoroAccount = useYoroAccountSession();
   const headerRef = useRef<HTMLDivElement>(null);
   const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
   const text = palworldI18n[locale];
+  const yoroIdentity = authenticatedYoroIdentity(yoroAccount.session);
+  const yoroConnected = yoroAccount.session?.authenticated === true;
+  const accountConnected = yoroConnected || twitchStatus.connected;
+  const accountUser: PublicTwitchAccountUser | undefined = yoroIdentity
+    ? {
+      displayName: yoroIdentity.displayName,
+      provider: yoroIdentity.provider,
+      ...(yoroIdentity.provider === "twitch" && twitchStatus.user
+        ? {
+          login: twitchStatus.user.login,
+          profileImageUrl: twitchStatus.user.profileImageUrl
+        }
+        : {})
+    }
+    : twitchStatus.user;
   const handleDiscordLogin = () => {
     const returnPath = `${window.location.pathname}${window.location.search}`;
     window.location.assign(accountOAuthUrl("discord", "login", returnPath));
@@ -73,6 +97,16 @@ export function PalworldHeader({
   const handleTwitchAccountLogin = () => {
     const returnPath = `${window.location.pathname}${window.location.search}`;
     window.location.assign(accountOAuthUrl("twitch", "login", returnPath));
+  };
+  const handleAccountLogout = () => {
+    void (async () => {
+      try {
+        if (yoroConnected) await yoroAccount.logout();
+        if (twitchStatus.connected) onTwitchLogout();
+      } catch {
+        // 로그아웃 요청이 실패하면 연결 표시를 유지해 사용자가 다시 시도할 수 있게 합니다.
+      }
+    })();
   };
 
   const closeMenus = useCallback(() => {
@@ -181,21 +215,21 @@ export function PalworldHeader({
             />
             <PublicTwitchAccountChip
               configured={twitchStatus.configured}
-              connected={twitchStatus.connected}
+              connected={accountConnected}
               discordLoginLabel={text.discordLogin}
               loginLabel={text.accountLogin}
               loginLabelJa={palworldI18n.ja.accountLogin}
               loginLabelKo={palworldI18n.ko.accountLogin}
               loginMenuLabel={text.accountLoginMenu}
               loginTitle={text.accountLoginTitle}
-              logoutLabel={text.twitchLogout}
-              logoutLabelJa={palworldI18n.ja.twitchLogout}
-              logoutLabelKo={palworldI18n.ko.twitchLogout}
+              logoutLabel={text.accountLogout}
+              logoutLabelJa={palworldI18n.ja.accountLogout}
+              logoutLabelKo={palworldI18n.ko.accountLogout}
               menuActions={twitchMenuActions}
-              menuLabel={text.twitchProfileMenu}
+              menuLabel={text.accountMenu}
               onDiscordLogin={handleDiscordLogin}
               onLogin={handleTwitchAccountLogin}
-              onLogout={onTwitchLogout}
+              onLogout={handleAccountLogout}
               onOpenChange={(open) => {
                 setTwitchMenuOpen(open);
                 if (open) {
@@ -206,7 +240,7 @@ export function PalworldHeader({
               }}
               open={twitchMenuOpen}
               twitchLoginLabel={text.twitchLoginChoice}
-              user={twitchStatus.user}
+              user={accountUser}
             />
           </>
         )}
@@ -272,6 +306,8 @@ export function PalworldHeader({
         )}
         mobileMenu={(
           <PublicMobileMenuSheet
+            accountConnected={accountConnected}
+            accountUser={accountUser}
             activePage="palworld"
             id="palworld-mobile-menu"
             labels={{
@@ -281,7 +317,7 @@ export function PalworldHeader({
               language: text.languageSection,
               login: text.accountLogin,
               loginLoading: text.twitchLoginLoading,
-              logout: text.twitchLogout,
+              logout: text.accountLogout,
               title: text.mobileMenu,
               twitch: text.account,
               twitchLogin: text.twitchLoginChoice,
@@ -294,6 +330,7 @@ export function PalworldHeader({
             onDiscordLogin={handleDiscordLogin}
             onTwitchLogin={handleTwitchAccountLogin}
             onTwitchLogout={onTwitchLogout}
+            onAccountLogout={handleAccountLogout}
             open={mobileMenuOpen}
             returnFocusRef={mobileMenuTriggerRef}
             twitchActions={twitchMenuActions}

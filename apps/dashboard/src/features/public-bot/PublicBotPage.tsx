@@ -24,8 +24,13 @@ import { DiscordSymbolIcon } from "../../shared/DiscordSymbolIcon";
 import {
   PublicTwitchAccountChip,
   PublicTwitchAccountPanel,
+  type PublicTwitchAccountUser,
 } from "../../shared/PublicTwitchAccountChip";
 import { accountOAuthUrl } from "../yoro-account/api";
+import {
+  authenticatedYoroIdentity,
+  useYoroAccountSession,
+} from "../yoro-account/useYoroAccountSession";
 
 const noLocalePreference = async (): Promise<PublicLocale | undefined> => undefined;
 
@@ -202,7 +207,16 @@ export function PublicBotPage() {
   const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const yoroAccount = useYoroAccountSession();
   const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
+  const accountIdentity = authenticatedYoroIdentity(yoroAccount.session);
+  const accountConnected = yoroAccount.session?.authenticated === true;
+  const accountUser: PublicTwitchAccountUser | undefined = accountIdentity
+    ? {
+      displayName: accountIdentity.displayName,
+      provider: accountIdentity.provider,
+    }
+    : undefined;
   setActivePublicLocale(locale);
 
   useEffect(() => {
@@ -237,6 +251,11 @@ export function PublicBotPage() {
   const startAccountLogin = (provider: "discord" | "twitch") => {
     const returnPath = `${window.location.pathname}${window.location.search}`;
     window.location.assign(accountOAuthUrl(provider, "login", returnPath));
+  };
+  const logoutAccount = () => {
+    void yoroAccount.logout().catch(() => {
+      // 로그아웃 실패 시 연결 상태를 유지해 사용자가 다시 시도할 수 있게 합니다.
+    });
   };
 
   const navigation = (
@@ -287,18 +306,18 @@ export function PublicBotPage() {
               />
               <PublicTwitchAccountChip
                 configured
-                connected={false}
+                connected={accountConnected}
                 discordLoginLabel={publicI18n[locale].discordLogin}
                 loginLabel={publicI18n[locale].accountLogin}
                 loginLabelJa={publicI18n.ja.accountLogin}
                 loginLabelKo={publicI18n.ko.accountLogin}
                 loginMenuLabel={publicI18n[locale].accountLoginMenu}
                 loginTitle={publicI18n[locale].accountLoginTitle}
-                logoutLabel={publicI18n[locale].twitchViewerLogout}
-                menuLabel={publicI18n[locale].accountLoginMenu}
+                logoutLabel={publicI18n[locale].accountLogout}
+                menuLabel={publicI18n[locale].accountMenu}
                 onDiscordLogin={() => startAccountLogin("discord")}
                 onLogin={() => startAccountLogin("twitch")}
-                onLogout={() => undefined}
+                onLogout={logoutAccount}
                 onOpenChange={(open) => {
                   setAccountMenuOpen(open);
                   if (open) {
@@ -309,6 +328,7 @@ export function PublicBotPage() {
                 }}
                 open={accountMenuOpen}
                 twitchLoginLabel={publicI18n[locale].twitchLoginChoice}
+                user={accountUser}
               />
             </>
           )}
@@ -388,17 +408,18 @@ export function PublicBotPage() {
                   <h3>{publicI18n[locale].account}</h3>
                   <PublicTwitchAccountPanel
                     configured
-                    connected={false}
+                    connected={accountConnected}
                     discordLoginLabel={publicI18n[locale].discordLogin}
                     loginLabel={publicI18n[locale].accountLogin}
                     loginLoadingLabel={publicI18n[locale].twitchLoginLoading}
-                    logoutLabel={publicI18n[locale].twitchViewerLogout}
+                    logoutLabel={publicI18n[locale].accountLogout}
                     onAction={() => setMobileMenuOpen(false)}
                     onDiscordLogin={() => startAccountLogin("discord")}
                     onLogin={() => startAccountLogin("twitch")}
-                    onLogout={() => undefined}
+                    onLogout={logoutAccount}
                     twitchLoginLabel={publicI18n[locale].twitchLoginChoice}
                     unavailableLabel={publicI18n[locale].twitchNotConfigured}
+                    user={accountUser}
                   />
                 </section>
               </div>

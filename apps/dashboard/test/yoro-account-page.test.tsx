@@ -58,3 +58,29 @@ test("YORO 계정 페이지는 Discord와 Twitch 연결 상태를 한 화면에�
   assert.match(markup, /Discord와 Twitch는 로그인 수단/u);
   assert.doesNotMatch(markup, /providerSubject/u);
 });
+
+test("공개 헤더용 계정 선택기는 실제 인증에 사용한 Discord·Twitch identity를 우선한다", async () => {
+  const { authenticatedYoroIdentity } = await import(
+    "../src/features/yoro-account/useYoroAccountSession"
+  );
+  const discordIdentity = {
+    provider: "discord" as const,
+    displayName: "Discord 사용자",
+    connectedAt: "2026-07-29T00:00:00.000Z",
+    lastAuthenticatedAt: "2026-07-29T00:00:00.000Z"
+  };
+  const twitchIdentity = {
+    provider: "twitch" as const,
+    displayName: "Twitch 사용자",
+    connectedAt: "2026-07-29T00:00:00.000Z",
+    lastAuthenticatedAt: "2026-07-29T00:00:00.000Z"
+  };
+
+  assert.deepEqual(authenticatedYoroIdentity({
+    authenticated: true,
+    authenticationProvider: "discord",
+    csrfToken: "csrf",
+    identities: [twitchIdentity, discordIdentity]
+  }), discordIdentity);
+  assert.equal(authenticatedYoroIdentity({ authenticated: false }), undefined);
+});

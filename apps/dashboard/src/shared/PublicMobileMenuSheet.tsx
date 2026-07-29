@@ -34,8 +34,11 @@ export function PublicMobileMenuSheet({
   onDiscordLogin,
   onTwitchLogin,
   onTwitchLogout,
+  onAccountLogout,
   open,
   returnFocusRef,
+  accountConnected,
+  accountUser,
   twitchActions,
   twitchConfigured,
   twitchConnected,
@@ -53,8 +56,11 @@ export function PublicMobileMenuSheet({
   onDiscordLogin: () => void;
   onTwitchLogin: () => void;
   onTwitchLogout: () => void;
+  onAccountLogout?: () => void;
   open: boolean;
   returnFocusRef?: RefObject<HTMLElement>;
+  accountConnected?: boolean;
+  accountUser?: PublicTwitchAccountUser;
   twitchActions?: PublicTwitchAccountMenuAction[];
   twitchConfigured: boolean;
   twitchConnected: boolean;
@@ -95,7 +101,7 @@ export function PublicMobileMenuSheet({
           <h3>{labels.twitch}</h3>
           <PublicTwitchAccountPanel
             configured={twitchConfigured}
-            connected={twitchConnected}
+            connected={accountConnected ?? twitchConnected}
             discordLoginLabel={labels.discordLogin}
             loginLabel={labels.login}
             loginLoading={twitchLoginLoading}
@@ -105,10 +111,10 @@ export function PublicMobileMenuSheet({
             onAction={onClose}
             onDiscordLogin={onDiscordLogin}
             onLogin={onTwitchLogin}
-            onLogout={onTwitchLogout}
+            onLogout={onAccountLogout ?? onTwitchLogout}
             twitchLoginLabel={labels.twitchLogin}
             unavailableLabel={labels.twitchUnavailable}
-            user={twitchUser}
+            user={accountUser ?? twitchUser}
           />
         </section>
       </div>

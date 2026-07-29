@@ -9,6 +9,7 @@ import {
 } from "../dist/services/discord-oauth-crypto.js";
 import {
   buildDiscordBotInstallUrl,
+  buildDiscordSetupReturnUrl,
   discordBotInstallUrl,
   parseDiscordManageableGuild
 } from "../dist/services/discord-onboarding-service.js";
@@ -185,6 +186,19 @@ test("Discord Bot 설치 URL은 고정 scope와 최소 permission만 사용한�
   assert.equal(url.searchParams.get("permissions"), "0");
   assert.equal(url.searchParams.has("redirect_uri"), false);
   assert.throws(() => discordBotInstallUrl(), /feature_disabled/u);
+});
+
+test("Discord setup 링크는 Dashboard 개발 origin이 아니라 공개 origin에 고정된다", () => {
+  const setupToken = "abcdefghijklmnopqrstuvwxyzABCDEFGH";
+  const url = new URL(buildDiscordSetupReturnUrl(setupToken, "https://yoro.gg"));
+  assert.equal(url.origin, "https://yoro.gg");
+  assert.equal(url.pathname, "/setup/discord");
+  assert.equal(url.searchParams.get("setup"), setupToken);
+  assert.deepEqual([...url.searchParams.keys()], ["setup"]);
+  assert.throws(
+    () => buildDiscordSetupReturnUrl("../unsafe", "https://yoro.gg"),
+    /setup_session_invalid/u
+  );
 });
 
 test("만료된 setup session은 OAuth token 저장 transaction을 fail-closed 처리한다", async () => {

@@ -656,7 +656,10 @@
 .public-account-login-option .discord-symbol-icon,
 .public-account-login-option .twitch-glitch-icon,
 .public-account-login-menu__option .discord-symbol-icon,
-.public-account-login-menu__option .twitch-glitch-icon {
+.public-account-login-menu__option .twitch-glitch-icon,
+.public-twitch-login-chip .discord-symbol-icon,
+.public-twitch-profile-menu-head .discord-symbol-icon,
+.public-twitch-account-panel__profile .discord-symbol-icon {
   flex: none;
   inline-size: var(--yoro-space-6);
   block-size: var(--yoro-space-6);

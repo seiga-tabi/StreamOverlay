@@ -3,9 +3,10 @@ import { DiscordSymbolIcon } from "./DiscordSymbolIcon";
 import { TwitchGlitchIcon } from "./TwitchGlitchIcon";
 
 export type PublicTwitchAccountUser = {
-  login: string;
+  login?: string;
   displayName: string;
   profileImageUrl?: string;
+  provider?: "discord" | "twitch";
 };
 
 export type PublicTwitchAccountMenuAction = {
@@ -55,6 +56,20 @@ export type PublicTwitchAccountPanelProps = {
   onLogin: () => void;
   onLogout: () => void;
 };
+
+function AccountProviderIcon({
+  provider
+}: {
+  provider: PublicTwitchAccountUser["provider"];
+}) {
+  return provider === "discord" ? <DiscordSymbolIcon /> : <TwitchGlitchIcon />;
+}
+
+function accountProviderLabel(user: PublicTwitchAccountUser | undefined): string | undefined {
+  if (user?.provider === "discord") return "Discord";
+  if (user?.provider === "twitch") return "Twitch";
+  return undefined;
+}
 
 export function PublicTwitchAccountPanel({
   configured,
@@ -145,11 +160,15 @@ export function PublicTwitchAccountPanel({
           />
         ) : null}
         <span aria-hidden="true" hidden={Boolean(user?.profileImageUrl)}>
-          <TwitchGlitchIcon />
+          <AccountProviderIcon provider={user?.provider} />
         </span>
         <div>
           <strong>{displayName}</strong>
-          {user?.login ? <small>@{user.login}</small> : null}
+          {user?.login
+            ? <small>@{user.login}</small>
+            : accountProviderLabel(user)
+              ? <small>{accountProviderLabel(user)}</small>
+              : null}
         </div>
       </div>
       <div className="public-twitch-account-panel__actions">
@@ -318,7 +337,9 @@ export function PublicTwitchAccountChip({
           <img src={user.profileImageUrl} alt="" />
         ) : (
           <span aria-hidden="true">
-            {connected || !unifiedLogin ? (
+            {connected ? (
+              <AccountProviderIcon provider={user?.provider} />
+            ) : !unifiedLogin ? (
               <TwitchGlitchIcon />
             ) : (
               <svg className="public-account-login-icon" fill="none" viewBox="0 0 24 24">
@@ -338,10 +359,16 @@ export function PublicTwitchAccountChip({
       {connected && open ? (
         <div className="public-twitch-profile-menu" id={menuId} role="menu" aria-label={menuLabel}>
           <div className="public-twitch-profile-menu-head" role="presentation">
-            {user?.profileImageUrl ? <img src={user.profileImageUrl} alt="" /> : <span aria-hidden="true"><TwitchGlitchIcon /></span>}
+            {user?.profileImageUrl
+              ? <img src={user.profileImageUrl} alt="" />
+              : <span aria-hidden="true"><AccountProviderIcon provider={user?.provider} /></span>}
             <div>
               <strong>{displayName}</strong>
-              {user?.login ? <small>@{user.login}</small> : null}
+              {user?.login
+                ? <small>@{user.login}</small>
+                : accountProviderLabel(user)
+                  ? <small>{accountProviderLabel(user)}</small>
+                  : null}
             </div>
           </div>
           {menuActions.map((action, index) => (

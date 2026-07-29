@@ -215,6 +215,15 @@ export function discordBotInstallUrl(): string {
   return buildDiscordBotInstallUrl(appConfig.discordBotInternal.applicationId);
 }
 
+export function buildDiscordSetupReturnUrl(
+  setupToken: string,
+  publicBaseUrl = appConfig.publicBaseUrl
+): string {
+  const url = new URL(SETUP_RETURN_PATH, publicBaseUrl);
+  url.searchParams.set("setup", safeSetupToken(setupToken));
+  return url.toString();
+}
+
 export class DiscordOnboardingService {
   private cleanupTimer?: NodeJS.Timeout;
 
@@ -291,10 +300,11 @@ export class DiscordOnboardingService {
       }
       throw error;
     }
-    const url = new URL(SETUP_RETURN_PATH, appConfig.dashboardBaseUrl);
-    url.searchParams.set("setup", token);
     this.logger?.event?.({ type: "discord.setup.issued", expiresAt: expiresAt.toISOString() });
-    return { url: url.toString(), expiresAt: expiresAt.toISOString() };
+    return {
+      url: buildDiscordSetupReturnUrl(token),
+      expiresAt: expiresAt.toISOString()
+    };
   }
 
   async beginWebManagementOAuth(): Promise<{
