@@ -7,7 +7,8 @@ type DiscordSecretPurpose =
   | "pkce_verifier:web_management_connect"
   | "oauth_token"
   | "oauth_token:web_management_connect"
-  | "management_pkce";
+  | "management_pkce"
+  | "yoro_account_pkce";
 
 export type DiscordSecretContext = Readonly<{
   sessionId: string;

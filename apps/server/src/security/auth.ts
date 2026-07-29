@@ -218,6 +218,15 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
     (method === "GET" && (pathname === "/api/public/tournaments" || pathname.startsWith("/api/public/tournaments/")))
   ) return "PUBLIC";
   if (method === "GET" && (pathname === "/api/public/twitch/auth/start" || pathname === "/api/public/twitch/auth/callback")) return "OAUTH_CALLBACK";
+  if (
+    method === "GET"
+    && /^\/api\/account\/oauth\/(?:discord|twitch)\/start$/u.test(pathname)
+  ) return "OAUTH_CALLBACK";
+  if (
+    pathname === "/api/account/session"
+    || pathname === "/api/account/logout"
+    || /^\/api\/account\/connections\/(?:discord|twitch)$/u.test(pathname)
+  ) return "PUBLIC";
   if (method === "GET" && (pathname === "/api/twitch/auth/start" || pathname === "/api/twitch/auth/callback")) return "OAUTH_CALLBACK";
   if (
     pathname === "/api/discord/session"

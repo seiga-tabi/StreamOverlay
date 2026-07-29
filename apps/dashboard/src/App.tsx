@@ -45,6 +45,14 @@ const BotManagementPage = lazyNamed(
   () => import("./features/bot-management/BotManagementPage"),
   "BotManagementPage",
 );
+const YoroLoginPage = lazyNamed(
+  () => import("./features/yoro-account/YoroLoginPage"),
+  "YoroLoginPage",
+);
+const YoroAccountPage = lazyNamed(
+  () => import("./features/yoro-account/YoroAccountPage"),
+  "YoroAccountPage",
+);
 const EventsPage = lazyNamed(() => import("./pages/EventsPage"), "EventsPage");
 const TournamentsPage = lazyNamed(() => import("./pages/TournamentsPage"), "TournamentsPage");
 const StreamerRiotRequestsPage = lazyNamed(
@@ -448,15 +456,33 @@ export default function App() {
   }
 
   if (surface === "public") {
+    const yoroLogin = window.location.pathname === "/login"
+      || window.location.pathname === "/login/";
+    const yoroAccount = window.location.pathname === "/account"
+      || window.location.pathname === "/account/"
+      || window.location.pathname === "/account/connections"
+      || window.location.pathname === "/account/connections/";
     const discordSetup = window.location.pathname === "/setup/discord"
       || window.location.pathname === "/setup/discord/";
     const botManagement = window.location.pathname === "/bot/manage"
       || window.location.pathname === "/bot/manage/";
     const botPublic = window.location.pathname === "/bot"
-      || window.location.pathname === "/bot/";
+      || window.location.pathname === "/bot/"
+      || window.location.pathname === "/bot/features"
+      || window.location.pathname === "/bot/features/"
+      || window.location.pathname === "/bot/connect"
+      || window.location.pathname === "/bot/connect/";
     const palworldPublic = isPalworldPath(window.location.pathname);
     return (
-      botManagement ? (
+      yoroLogin ? (
+        <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>
+          <YoroLoginPage />
+        </Suspense>
+      ) : yoroAccount ? (
+        <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>
+          <YoroAccountPage />
+        </Suspense>
+      ) : botManagement ? (
         <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>
           <BotManagementPage />
         </Suspense>

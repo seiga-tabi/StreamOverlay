@@ -21,6 +21,11 @@ import type { PublicMainPage } from "../public-lol/types/public-lol";
 import { setPublicPath } from "../public-lol/utils/routes";
 import { botInstallUrl } from "../bot-management/api";
 import { DiscordSymbolIcon } from "../../shared/DiscordSymbolIcon";
+import {
+  PublicTwitchAccountChip,
+  PublicTwitchAccountPanel,
+} from "../../shared/PublicTwitchAccountChip";
+import { accountOAuthUrl } from "../yoro-account/api";
 
 const noLocalePreference = async (): Promise<PublicLocale | undefined> => undefined;
 
@@ -36,10 +41,11 @@ const botText = {
     navOverview: "소개",
     navFeatures: "기능",
     navFlow: "연결 과정",
-    navSecurity: "보안",
     eyebrow: "DISCORD SERVER COMPANION",
     title: "게임 서버 운영을 Discord에서 더 간단하게",
     pageTitle: "YORO Bot | Discord 게임 서버 도우미",
+    featuresPageTitle: "기능 | YORO Bot",
+    flowPageTitle: "연결 과정 | YORO Bot",
     description: "YORO Bot은 Organization과 Discord 서버를 안전하게 연결하고, 향후 게임 서버 상태와 알림을 한곳에서 관리하도록 설계된 도우미입니다.",
     foundationReady: "Discord 연결 기반 준비됨",
     gatewayPending: "설정 명령 구현됨 · 운영 활성화 필요",
@@ -95,10 +101,11 @@ const botText = {
     navOverview: "概要",
     navFeatures: "機能",
     navFlow: "連携手順",
-    navSecurity: "セキュリティ",
     eyebrow: "DISCORD SERVER COMPANION",
     title: "ゲームサーバー運用を Discord でもっとシンプルに",
     pageTitle: "YORO Bot | Discordゲームサーバーアシスタント",
+    featuresPageTitle: "機能 | YORO Bot",
+    flowPageTitle: "連携手順 | YORO Bot",
     description: "YORO Bot は Organization と Discord サーバーを安全に連携し、今後ゲームサーバーの状態と通知を一か所で管理するためのアシスタントです。",
     foundationReady: "Discord連携基盤の準備完了",
     gatewayPending: "設定コマンド実装済み・運用有効化が必要",
@@ -145,6 +152,17 @@ const botText = {
   },
 } as const;
 
+export type PublicBotSection = "overview" | "features" | "connect";
+
+export function publicBotSectionFromPath(pathname: string): PublicBotSection {
+  const normalized = pathname.length > 1 && pathname.endsWith("/")
+    ? pathname.slice(0, -1)
+    : pathname;
+  if (normalized === "/bot/features") return "features";
+  if (normalized === "/bot/connect") return "connect";
+  return "overview";
+}
+
 function BotFeatureIcon({ kind }: { kind: "organization" | "oauth" | "status" | "notification" }) {
   const paths = {
     organization: <><circle cx="9" cy="8" r="3" /><circle cx="17" cy="9" r="2" /><path d="M3.5 19c.6-3.2 2.4-5 5.5-5s5 1.8 5.5 5M15 14c2.8 0 4.4 1.5 5 4" /></>,
@@ -174,8 +192,15 @@ function navigateGame(page: PublicMainPage): void {
 export function PublicBotPage() {
   const { locale, changeLocale } = usePublicLocale(noLocalePreference);
   const text = botText[locale];
+  const activeSection = publicBotSectionFromPath(window.location.pathname);
+  const pageMetadata = activeSection === "features"
+    ? { title: text.featuresPageTitle, description: text.currentDescription, path: "/bot/features" }
+    : activeSection === "connect"
+      ? { title: text.flowPageTitle, description: text.flowDescription, path: "/bot/connect" }
+      : { title: text.pageTitle, description: text.description, path: "/bot" };
   const [gameSelectorOpen, setGameSelectorOpen] = useState(false);
   const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
   setActivePublicLocale(locale);
@@ -187,9 +212,9 @@ export function PublicBotPage() {
     const previousDescription = description?.content;
     const previousCanonical = canonical?.href;
 
-    document.title = text.pageTitle;
-    description?.setAttribute("content", text.description);
-    canonical?.setAttribute("href", new URL("/bot", window.location.origin).href);
+    document.title = pageMetadata.title;
+    description?.setAttribute("content", pageMetadata.description);
+    canonical?.setAttribute("href", new URL(pageMetadata.path, window.location.origin).href);
 
     return () => {
       document.title = previousTitle;
@@ -200,23 +225,37 @@ export function PublicBotPage() {
         canonical.setAttribute("href", previousCanonical);
       }
     };
-  }, [text]);
+  }, [pageMetadata.description, pageMetadata.path, pageMetadata.title]);
 
   const closeMenus = useCallback(() => {
     setGameSelectorOpen(false);
     setLocaleMenuOpen(false);
+    setAccountMenuOpen(false);
     setMobileMenuOpen(false);
   }, []);
 
+  const startAccountLogin = (provider: "discord" | "twitch") => {
+    const returnPath = `${window.location.pathname}${window.location.search}`;
+    window.location.assign(accountOAuthUrl(provider, "login", returnPath));
+  };
+
   const navigation = (
     <PublicHorizontalNav ariaLabel={text.menu} testId="bot-secondary-nav">
-      {[
-        ["#bot-overview", text.navOverview],
-        ["#bot-features", text.navFeatures],
-        ["#bot-flow", text.navFlow],
-        ["#bot-security", text.navSecurity],
-      ].map(([href, label], index) => (
-        <a aria-current={index === 0 ? "page" : undefined} className={index === 0 ? "active" : ""} href={href} key={href}>
+      {([
+        ["/bot", text.navOverview, "overview"],
+        ["/bot/features", text.navFeatures, "features"],
+        ["/bot/connect", text.navFlow, "connect"],
+      ] as const).map(([href, label, section]) => (
+        <a
+          aria-current={activeSection === section ? "page" : undefined}
+          className={activeSection === section ? "active" : ""}
+          href={href}
+          key={href}
+          onClick={(event) => {
+            event.preventDefault();
+            setPublicPath(href);
+          }}
+        >
           <strong>{label}</strong>
         </a>
       ))}
@@ -234,15 +273,42 @@ export function PublicBotPage() {
         <PublicGameHeaderFrame
           accountTools={(
             <>
-              <span className="public-bot-header-status">{text.gatewayPending}</span>
               <PublicLocaleSelector
                 locale={locale}
                 onLocale={changeLocale}
                 open={localeMenuOpen}
                 onOpenChange={(open) => {
                   setLocaleMenuOpen(open);
-                  if (open) setGameSelectorOpen(false);
+                  if (open) {
+                    setGameSelectorOpen(false);
+                    setAccountMenuOpen(false);
+                  }
                 }}
+              />
+              <PublicTwitchAccountChip
+                configured
+                connected={false}
+                discordLoginLabel={publicI18n[locale].discordLogin}
+                loginLabel={publicI18n[locale].accountLogin}
+                loginLabelJa={publicI18n.ja.accountLogin}
+                loginLabelKo={publicI18n.ko.accountLogin}
+                loginMenuLabel={publicI18n[locale].accountLoginMenu}
+                loginTitle={publicI18n[locale].accountLoginTitle}
+                logoutLabel={publicI18n[locale].twitchViewerLogout}
+                menuLabel={publicI18n[locale].accountLoginMenu}
+                onDiscordLogin={() => startAccountLogin("discord")}
+                onLogin={() => startAccountLogin("twitch")}
+                onLogout={() => undefined}
+                onOpenChange={(open) => {
+                  setAccountMenuOpen(open);
+                  if (open) {
+                    setGameSelectorOpen(false);
+                    setLocaleMenuOpen(false);
+                    setMobileMenuOpen(false);
+                  }
+                }}
+                open={accountMenuOpen}
+                twitchLoginLabel={publicI18n[locale].twitchLoginChoice}
               />
             </>
           )}
@@ -262,7 +328,10 @@ export function PublicBotPage() {
               open={gameSelectorOpen}
               onOpenChange={(open) => {
                 setGameSelectorOpen(open);
-                if (open) setLocaleMenuOpen(false);
+                if (open) {
+                  setLocaleMenuOpen(false);
+                  setAccountMenuOpen(false);
+                }
               }}
             />
           )}
@@ -274,7 +343,12 @@ export function PublicBotPage() {
               aria-haspopup="dialog"
               aria-label={mobileMenuOpen ? text.closeMenu : text.openMenu}
               className="public-game-header__menu-button"
-              onClick={() => setMobileMenuOpen((open) => !open)}
+              onClick={() => {
+                setMobileMenuOpen((open) => !open);
+                setGameSelectorOpen(false);
+                setLocaleMenuOpen(false);
+                setAccountMenuOpen(false);
+              }}
               ref={mobileMenuTriggerRef}
               type="button"
             >
@@ -310,6 +384,23 @@ export function PublicBotPage() {
                   <h3>{text.language}</h3>
                   <PublicLocaleOptions ariaLabel={text.language} locale={locale} onLocale={changeLocale} />
                 </section>
+                <section className="public-mobile-menu__section">
+                  <h3>{publicI18n[locale].account}</h3>
+                  <PublicTwitchAccountPanel
+                    configured
+                    connected={false}
+                    discordLoginLabel={publicI18n[locale].discordLogin}
+                    loginLabel={publicI18n[locale].accountLogin}
+                    loginLoadingLabel={publicI18n[locale].twitchLoginLoading}
+                    logoutLabel={publicI18n[locale].twitchViewerLogout}
+                    onAction={() => setMobileMenuOpen(false)}
+                    onDiscordLogin={() => startAccountLogin("discord")}
+                    onLogin={() => startAccountLogin("twitch")}
+                    onLogout={() => undefined}
+                    twitchLoginLabel={publicI18n[locale].twitchLoginChoice}
+                    unavailableLabel={publicI18n[locale].twitchNotConfigured}
+                  />
+                </section>
               </div>
             </BottomSheet>
           )}
@@ -318,95 +409,103 @@ export function PublicBotPage() {
       </AppShellHeader>
 
       <AppShellMain className="public-bot-main" id="bot-main">
-        <section className="public-bot-hero" id="bot-overview">
-          <div className="public-bot-hero__copy">
-            <span className="public-bot-eyebrow">{text.eyebrow}</span>
-            <h1>{text.title}</h1>
-            <p>{text.description}</p>
-            <div className="public-bot-status-row" aria-label={text.currentTitle}>
-              <span className="is-ready"><span aria-hidden="true" />{text.foundationReady}</span>
-              <span className="is-pending"><span aria-hidden="true" />{text.gatewayPending}</span>
+        {activeSection === "overview" ? (
+          <>
+            <section className="public-bot-hero" id="bot-overview">
+              <div className="public-bot-hero__copy">
+                <span className="public-bot-eyebrow">{text.eyebrow}</span>
+                <h1>{text.title}</h1>
+                <p>{text.description}</p>
+                <div className="public-bot-status-row" aria-label={text.currentTitle}>
+                  <span className="is-ready"><span aria-hidden="true" />{text.foundationReady}</span>
+                  <span className="is-pending"><span aria-hidden="true" />{text.gatewayPending}</span>
+                </div>
+                <div className="public-bot-actions">
+                  <a className="public-bot-button is-primary" href={botInstallUrl()}>{text.addBot}</a>
+                  <a className="public-bot-button" href="/bot/manage">{text.dashboardLogin}</a>
+                </div>
+              </div>
+              <div className="public-bot-hero__visual" aria-hidden="true">
+                <div className="public-bot-orbit is-outer" />
+                <div className="public-bot-orbit is-inner" />
+                <div className="public-bot-core">Y</div>
+                <span className="public-bot-node is-discord">
+                  <DiscordSymbolIcon />
+                </span>
+                <span className="public-bot-node is-server">S</span>
+                <span className="public-bot-node is-alert">!</span>
+              </div>
+            </section>
+
+            <section className="public-bot-security" id="bot-security">
+              <div>
+                <span className="public-bot-eyebrow">SECURITY BY DEFAULT</span>
+                <h2>{text.securityTitle}</h2>
+                <p>{text.securityDescription}</p>
+              </div>
+              <ul>
+                {[text.securityToken, text.securityTenant, text.securityPermission, text.securitySession].map((item) => (
+                  <li key={item}><span aria-hidden="true">✓</span>{item}</li>
+                ))}
+              </ul>
+            </section>
+
+            <section className="public-bot-next" id="bot-roadmap">
+              <span>{text.planned}</span>
+              <h2>{text.nextTitle}</h2>
+              <p>{text.nextDescription}</p>
+            </section>
+          </>
+        ) : null}
+
+        {activeSection === "features" ? (
+          <section className="public-bot-section public-bot-page-section" id="bot-features">
+            <div className="public-bot-section__heading">
+              <span>{text.available}</span>
+              <h1>{text.currentTitle}</h1>
+              <p>{text.currentDescription}</p>
             </div>
-            <div className="public-bot-actions">
-              <a className="public-bot-button is-primary" href={botInstallUrl()}>{text.addBot}</a>
-              <a className="public-bot-button" href="/bot/manage">{text.dashboardLogin}</a>
+            <div className="public-bot-feature-grid">
+              {([
+                ["organization", text.featureOrganization, text.featureOrganizationDescription, text.available, true],
+                ["oauth", text.featureOAuth, text.featureOAuthDescription, text.available, true],
+                ["status", text.featureStatus, text.featureStatusDescription, text.planned, false],
+                ["notification", text.featureNotification, text.featureNotificationDescription, text.planned, false],
+              ] as const).map(([kind, title, description, status, ready]) => (
+                <article className={`public-bot-feature${ready ? " is-ready" : ""}`} key={kind}>
+                  <div className="public-bot-feature__icon"><BotFeatureIcon kind={kind} /></div>
+                  <span className="public-bot-feature__status">{status}</span>
+                  <h3>{title}</h3>
+                  <p>{description}</p>
+                </article>
+              ))}
             </div>
-          </div>
-          <div className="public-bot-hero__visual" aria-hidden="true">
-            <div className="public-bot-orbit is-outer" />
-            <div className="public-bot-orbit is-inner" />
-            <div className="public-bot-core">Y</div>
-            <span className="public-bot-node is-discord">
-              <DiscordSymbolIcon />
-            </span>
-            <span className="public-bot-node is-server">S</span>
-            <span className="public-bot-node is-alert">!</span>
-          </div>
-        </section>
+          </section>
+        ) : null}
 
-        <section className="public-bot-section" id="bot-features">
-          <div className="public-bot-section__heading">
-            <span>{text.available}</span>
-            <h2>{text.currentTitle}</h2>
-            <p>{text.currentDescription}</p>
-          </div>
-          <div className="public-bot-feature-grid">
-            {([
-              ["organization", text.featureOrganization, text.featureOrganizationDescription, text.available, true],
-              ["oauth", text.featureOAuth, text.featureOAuthDescription, text.available, true],
-              ["status", text.featureStatus, text.featureStatusDescription, text.planned, false],
-              ["notification", text.featureNotification, text.featureNotificationDescription, text.planned, false],
-            ] as const).map(([kind, title, description, status, ready]) => (
-              <article className={`public-bot-feature${ready ? " is-ready" : ""}`} key={kind}>
-                <div className="public-bot-feature__icon"><BotFeatureIcon kind={kind} /></div>
-                <span className="public-bot-feature__status">{status}</span>
-                <h3>{title}</h3>
-                <p>{description}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="public-bot-section public-bot-flow" id="bot-flow">
-          <div className="public-bot-section__heading">
-            <span>ONBOARDING</span>
-            <h2>{text.flowTitle}</h2>
-            <p>{text.flowDescription}</p>
-          </div>
-          <ol className="public-bot-flow__list">
-            {[
-              [text.flowIssue, text.flowIssueDescription],
-              [text.flowLogin, text.flowLoginDescription],
-              [text.flowGuild, text.flowGuildDescription],
-              [text.flowComplete, text.flowCompleteDescription],
-            ].map(([title, description], index) => (
-              <li key={title}>
-                <span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
-                <div><h3>{title}</h3><p>{description}</p></div>
-              </li>
-            ))}
-          </ol>
-          <p className="public-bot-notice" role="note">{text.setupNotice}</p>
-        </section>
-
-        <section className="public-bot-security" id="bot-security">
-          <div>
-            <span className="public-bot-eyebrow">SECURITY BY DEFAULT</span>
-            <h2>{text.securityTitle}</h2>
-            <p>{text.securityDescription}</p>
-          </div>
-          <ul>
-            {[text.securityToken, text.securityTenant, text.securityPermission, text.securitySession].map((item) => (
-              <li key={item}><span aria-hidden="true">✓</span>{item}</li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="public-bot-next" id="bot-roadmap">
-          <span>{text.planned}</span>
-          <h2>{text.nextTitle}</h2>
-          <p>{text.nextDescription}</p>
-        </section>
+        {activeSection === "connect" ? (
+          <section className="public-bot-section public-bot-flow public-bot-page-section" id="bot-flow">
+            <div className="public-bot-section__heading">
+              <span>ONBOARDING</span>
+              <h1>{text.flowTitle}</h1>
+              <p>{text.flowDescription}</p>
+            </div>
+            <ol className="public-bot-flow__list">
+              {[
+                [text.flowIssue, text.flowIssueDescription],
+                [text.flowLogin, text.flowLoginDescription],
+                [text.flowGuild, text.flowGuildDescription],
+                [text.flowComplete, text.flowCompleteDescription],
+              ].map(([title, description], index) => (
+                <li key={title}>
+                  <span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+                  <div><h3>{title}</h3><p>{description}</p></div>
+                </li>
+              ))}
+            </ol>
+            <p className="public-bot-notice" role="note">{text.setupNotice}</p>
+          </section>
+        ) : null}
       </AppShellMain>
 
       <PublicGameFooterFrame

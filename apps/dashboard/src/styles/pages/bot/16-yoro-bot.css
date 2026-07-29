@@ -7,23 +7,6 @@
   color: var(--yoro-color-product-gray-text);
 }
 
-.public-bot-header-status {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--yoro-size-touch-target);
-  padding-inline: var(--yoro-space-3);
-  border: thin solid var(--yoro-color-product-gray-border);
-  border-radius: var(--yoro-radius-sm);
-  color: var(--yoro-color-product-gray-muted);
-  font-size: var(--yoro-font-size-sm);
-  white-space: nowrap;
-}
-
-.public-bot-shell .public-game-selector-mark.is-yoro-bot {
-  background: color-mix(in srgb, var(--bot-accent) 18%, var(--yoro-color-product-gray-surface));
-  color: var(--bot-accent);
-}
-
 .public-bot-main {
   width: min(100% - (var(--yoro-space-5) * 2), 90rem);
   margin-inline: auto;
@@ -51,6 +34,8 @@
   position: relative;
   z-index: 1;
   max-width: 46rem;
+  margin-inline: auto;
+  text-align: center;
 }
 
 .public-bot-eyebrow,
@@ -64,7 +49,7 @@
 
 .public-bot-hero h1 {
   max-width: 15ch;
-  margin: var(--yoro-space-3) 0;
+  margin: var(--yoro-space-3) auto;
   font-size: clamp(2.25rem, 5vw, 4.6rem);
   line-height: 1.08;
   letter-spacing: -.045em;
@@ -82,6 +67,7 @@
 
 .public-bot-hero__copy > p {
   max-width: 42rem;
+  margin-inline: auto;
   font-size: var(--yoro-font-size-lg);
 }
 
@@ -89,6 +75,7 @@
 .public-bot-actions {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: var(--yoro-space-3);
   margin-top: var(--yoro-space-5);
 }
@@ -207,15 +194,22 @@
 
 .public-bot-section__heading {
   max-width: 48rem;
-  margin-bottom: var(--yoro-space-6);
+  margin: 0 auto var(--yoro-space-6);
+  text-align: center;
 }
 
 .public-bot-section__heading h2,
+.public-bot-section__heading h1,
 .public-bot-security h2,
 .public-bot-next h2 {
   margin: var(--yoro-space-2) 0;
   font-size: clamp(1.75rem, 4vw, 2.75rem);
   letter-spacing: -.025em;
+}
+
+.public-bot-page-section {
+  min-height: 33rem;
+  padding-top: clamp(var(--yoro-space-7), 7vw, calc(var(--yoro-space-8) * 1.5));
 }
 
 .public-bot-feature-grid {
@@ -357,10 +351,6 @@
 }
 
 @media (max-width: 48rem) {
-  .public-bot-header-status {
-    display: none;
-  }
-
   .public-bot-main {
     width: min(100% - (var(--yoro-space-3) * 2), 90rem);
     padding-top: var(--yoro-space-4);

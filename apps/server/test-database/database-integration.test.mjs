@@ -14,6 +14,7 @@ import {
 import { EntitlementRepository } from "../dist/database/repositories/entitlement-repository.js";
 import { DiscordOnboardingRepository } from "../dist/database/repositories/discord-onboarding-repository.js";
 import { DiscordManagementRepository } from "../dist/database/repositories/discord-management-repository.js";
+import { YoroAccountRepository } from "../dist/database/repositories/yoro-account-repository.js";
 import { AgentIngestionService, AgentIngestionError } from "../dist/services/agent-ingestion-service.js";
 import { GameServerRepository } from "../dist/database/repositories/game-server-repository.js";
 import { NotificationJobRepository } from "../dist/database/repositories/notification-job-repository.js";
@@ -56,7 +57,7 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
   await t.test("check와 plan 기반 검사는 빈 DB를 변경하지 않는다", async () => {
     const inspection = await inspectMigrationState(pool, manifest);
     assert.equal(inspection.status, "pending");
-    assert.equal(inspection.pending.length, 8);
+    assert.equal(inspection.pending.length, 9);
     const table = await pool.query(
       "SELECT to_regclass('public.schema_migrations')::TEXT AS name"
     );
@@ -845,6 +846,118 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
       sessionHash,
       new Date(Date.now() + 60 * 60_000)
     ), undefined);
+  });
+
+  await t.test("YORO 계정은 provider subject로만 식별하고 session·CSRF 평문을 저장하지 않는다", async () => {
+    const discordSubject = "910000000000000001";
+    const twitchSubject = "920000000000000001";
+    const rawSessionToken = "YORO_SESSION_SENTINEL_never_store_plaintext_0001";
+    const rawCsrfToken = "YORO_CSRF_SENTINEL_never_store_plaintext_0000001";
+    const repository = new YoroAccountRepository(pool);
+
+    const userId = await withTransaction(pool, async (client) =>
+      new YoroAccountRepository(client).resolveUserForLogin({
+        provider: "discord",
+        providerSubject: discordSubject,
+        displayName: "Discord 사용자"
+      })
+    );
+    assert.equal(
+      await withTransaction(pool, async (client) =>
+        new YoroAccountRepository(client).resolveUserForLogin({
+          provider: "discord",
+          providerSubject: discordSubject,
+          displayName: "변경된 표시 이름"
+        })
+      ),
+      userId
+    );
+    const concurrentSubject = "910000000000000003";
+    const concurrentUsers = await Promise.all([
+      withTransaction(pool, async (client) =>
+        new YoroAccountRepository(client).resolveUserForLogin({
+          provider: "discord",
+          providerSubject: concurrentSubject,
+          displayName: "동시 로그인 A"
+        })
+      ),
+      withTransaction(pool, async (client) =>
+        new YoroAccountRepository(client).resolveUserForLogin({
+          provider: "discord",
+          providerSubject: concurrentSubject,
+          displayName: "동시 로그인 B"
+        })
+      )
+    ]);
+    assert.equal(concurrentUsers[0], concurrentUsers[1]);
+    assert.equal(
+      await withTransaction(pool, async (client) =>
+        new YoroAccountRepository(client).linkIdentity({
+          userId,
+          provider: "twitch",
+          providerSubject: twitchSubject,
+          displayName: "Twitch 사용자"
+        })
+      ),
+      "linked"
+    );
+
+    const otherUserId = await withTransaction(pool, async (client) =>
+      new YoroAccountRepository(client).resolveUserForLogin({
+        provider: "discord",
+        providerSubject: "910000000000000002",
+        displayName: "다른 사용자"
+      })
+    );
+    assert.equal(
+      await withTransaction(pool, async (client) =>
+        new YoroAccountRepository(client).linkIdentity({
+          userId: otherUserId,
+          provider: "twitch",
+          providerSubject: twitchSubject,
+          displayName: "Twitch 사용자"
+        })
+      ),
+      "conflict"
+    );
+
+    const sessionId = crypto.randomUUID();
+    await repository.createSession({
+      id: sessionId,
+      userId,
+      sessionTokenHash: crypto.createHash("sha256").update(rawSessionToken).digest(),
+      csrfTokenHash: crypto.createHash("sha256").update(rawCsrfToken).digest(),
+      authenticationProvider: "discord",
+      idleExpiresAt: new Date(Date.now() + 60_000),
+      absoluteExpiresAt: new Date(Date.now() + 120_000)
+    });
+    const stored = await pool.query(
+      `SELECT
+         encode(session_token_hash, 'escape') AS session_hash,
+         encode(csrf_token_hash, 'escape') AS csrf_hash
+       FROM yoro_sessions
+       WHERE id = $1`,
+      [sessionId]
+    );
+    assert.doesNotMatch(stored.rows[0].session_hash, /SENTINEL/u);
+    assert.doesNotMatch(stored.rows[0].csrf_hash, /SENTINEL/u);
+    assert.deepEqual(
+      (await repository.listIdentities(userId)).map((identity) => identity.provider),
+      ["discord", "twitch"]
+    );
+
+    assert.equal(
+      await withTransaction(pool, async (client) =>
+        new YoroAccountRepository(client).revokeIdentity(userId, "twitch")
+      ),
+      true
+    );
+    assert.equal(
+      await withTransaction(pool, async (client) =>
+        new YoroAccountRepository(client).revokeIdentity(userId, "discord")
+      ),
+      false
+    );
   });
 
   await t.test("management OAuth 실패는 소비된 state의 PKCE 암호문을 제약 위반 없이 폐기한다", async () => {

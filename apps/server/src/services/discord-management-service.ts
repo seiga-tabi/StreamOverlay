@@ -17,6 +17,7 @@ import {
   discordSecretHash,
   encryptDiscordSecret
 } from "./discord-oauth-crypto.js";
+import type { YoroAccountService } from "./yoro-account-service.js";
 
 const DISCORD_AUTHORIZE_URL = "https://discord.com/oauth2/authorize";
 const DISCORD_TOKEN_URL = "https://discord.com/api/v10/oauth2/token";
@@ -112,7 +113,8 @@ export class DiscordManagementService {
   constructor(
     private readonly pool: Pool,
     private readonly logger?: AuditLogger,
-    private readonly fetchImpl: FetchLike = fetch
+    private readonly fetchImpl: FetchLike = fetch,
+    private readonly yoroAccounts?: YoroAccountService
   ) {}
 
   startCleanup(): void {
@@ -403,6 +405,7 @@ export class DiscordManagementService {
   async logout(cookieValue?: string): Promise<void> {
     const parsed = this.parseSessionCookie(cookieValue);
     if (!parsed) return;
+    await this.yoroAccounts?.logout(cookieValue);
     await new DiscordManagementRepository(this.pool).revokeSession(
       discordSecretHash(parsed.sessionToken)
     );
@@ -414,6 +417,15 @@ export class DiscordManagementService {
   > {
     const parsed = this.parseSessionCookie(cookieValue);
     if (!parsed) return undefined;
+    const yoroSession = await this.yoroAccounts?.authenticateForManagement(cookieValue);
+    if (yoroSession) {
+      return {
+        id: "yoro-session",
+        userId: yoroSession.userId,
+        csrfTokenHash: yoroSession.csrfTokenHash,
+        csrfToken: yoroSession.csrfToken
+      };
+    }
     const nextIdleExpiry = new Date(
       Date.now() + appConfig.discordBotManagement.idleTtlSeconds * 1_000
     );

@@ -125,8 +125,9 @@ test("게임 선택 메뉴에는 LoL, 펠월드, YORO Bot 세 항목을 표시�
   assert.match(html, /src="\/images\/games\/league-of-legends-f01a628bbea2\.png"/);
   assert.match(html, /src="\/images\/games\/palworld-a88d83f86cfe\.png"/);
   assert.doesNotMatch(html, /src="\/images\/games\/(?:league-of-legends|palworld)\.png"/);
-  assert.equal((html.match(/class="public-game-selector-logo is-(?:league-of-legends|palworld)"[^>]*alt=""[^>]*aria-hidden="true"/g) ?? []).length, 2);
-  assert.match(html, /public-game-selector-mark is-yoro-bot/u);
+  assert.equal((html.match(/class="public-game-selector-logo is-(?:league-of-legends|palworld|yoro-bot)"[^>]*alt=""[^>]*aria-hidden="true"/g) ?? []).length, 3);
+  assert.match(html, /class="public-game-selector-logo is-yoro-bot" src="\/images\/brand\/discord-symbol-blurple\.f6c1a66250d3\.png"/u);
+  assert.doesNotMatch(html, /public-game-selector-mark is-yoro-bot/u);
   assert.doesNotMatch(html, /발로란트|마인크래프트/);
 
   assertPngAsset("league-of-legends-f01a628bbea2.png", 48, 48);

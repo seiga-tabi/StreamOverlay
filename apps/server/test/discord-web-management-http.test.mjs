@@ -193,6 +193,117 @@ test("Discord 공개 상태는 secret 없이 설치·OAuth·관리 준비 상태
   });
 });
 
+test("YORO 계정 route는 통합 OAuth cookie·Origin·CSRF 경계를 유지한다", async () => {
+  await withDiscordConfig(async () => {
+    const calls = [];
+    const yoroAccounts = {
+      async beginOAuth(input) {
+        calls.push({ type: "oauth", input });
+        return {
+          authorizationUrl:
+            "https://discord.com/oauth2/authorize?client_id=987654321098765432&scope=identify",
+          cookieValue: "oauth_binding_abcdefghijklmnopqrstuvwxyz123456"
+        };
+      },
+      async session(cookieValue) {
+        calls.push({ type: "session", cookieValue });
+        return {
+          authenticated: true,
+          csrfToken: "csrf_value_abcdefghijklmnopqrstuvwxyz123456",
+          authenticationProvider: "discord",
+          identities: [{
+            provider: "discord",
+            displayName: "검증 사용자",
+            connectedAt: "2026-07-29T00:00:00.000Z",
+            lastAuthenticatedAt: "2026-07-29T00:00:00.000Z"
+          }]
+        };
+      },
+      async logout(cookieValue) {
+        calls.push({ type: "logout", cookieValue });
+      },
+      async unlinkIdentity(input) {
+        calls.push({ type: "unlink", input });
+      }
+    };
+    const { handler } = createDiscordHandler({
+      handlerInput: { yoroAccounts }
+    });
+
+    const invalid = await request(
+      handler,
+      "GET",
+      "/api/account/oauth/discord/start?redirect=https://evil.example"
+    );
+    assert.equal(invalid.statusCode, 400);
+
+    const started = await request(
+      handler,
+      "GET",
+      "/api/account/oauth/discord/start?purpose=login&return_to=%2Fbot%2Fmanage"
+    );
+    assert.equal(started.statusCode, 302);
+    assert.equal(new URL(started.headers.Location).origin, "https://discord.com");
+    assert.match(String(started.headers["Set-Cookie"]), /HttpOnly/u);
+    assert.doesNotMatch(String(started.headers["Set-Cookie"]), /return_to|bot\/manage/u);
+
+    const cookie =
+      "yoro_session=session_value_abcdefghijklmnopqrstuvwxyz123456.csrf_value_abcdefghijklmnopqrstuvwxyz123456";
+    const session = await request(
+      handler,
+      "GET",
+      "/api/account/session",
+      undefined,
+      { cookie }
+    );
+    assert.equal(session.statusCode, 200);
+    assert.equal(JSON.parse(session.body).authenticated, true);
+    assert.doesNotMatch(session.body, /providerSubject|987654321098765432/u);
+
+    const denied = await request(
+      handler,
+      "POST",
+      "/api/account/logout",
+      undefined,
+      {
+        cookie,
+        origin: "https://evil.example",
+        "x-yoro-csrf": "csrf_value_abcdefghijklmnopqrstuvwxyz123456"
+      }
+    );
+    assert.equal(denied.statusCode, 403);
+
+    const logout = await request(
+      handler,
+      "POST",
+      "/api/account/logout",
+      undefined,
+      {
+        cookie,
+        origin: DASHBOARD_ORIGIN,
+        "x-yoro-csrf": "csrf_value_abcdefghijklmnopqrstuvwxyz123456"
+      }
+    );
+    assert.equal(logout.statusCode, 204);
+    assert.match(String(logout.headers["Set-Cookie"]), /Max-Age=0/u);
+
+    const unlink = await request(
+      handler,
+      "DELETE",
+      "/api/account/connections/twitch",
+      undefined,
+      {
+        cookie,
+        origin: DASHBOARD_ORIGIN,
+        "x-yoro-csrf": "csrf_value_abcdefghijklmnopqrstuvwxyz123456"
+      }
+    );
+    assert.equal(unlink.statusCode, 204);
+    assert.equal(calls.some((call) => call.type === "logout"), true);
+    assert.equal(calls.some((call) => call.type === "unlink"), true);
+  });
+});
+
 test("웹 management OAuth 시작은 query를 거부하고 setup·Organization 정보를 URL에 노출하지 않는다", async () => {
   await withDiscordConfig(async () => {
     const { handler, calls } = createDiscordHandler();

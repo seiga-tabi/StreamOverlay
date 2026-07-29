@@ -1913,16 +1913,42 @@ test("Palworld OAuth marker는 기존 검색 query를 보존해 제거하고 현
   await page.keyboard.press("Escape");
   await expect(palModal).toHaveCount(0);
 
-  const authRequestPromise = page.waitForRequest((request) => new URL(request.url()).pathname === "/api/public/twitch/auth/start");
+  const authRequestPromise = page.waitForRequest(
+    (request) => new URL(request.url()).pathname === "/api/account/oauth/twitch/start"
+  );
   if (usesMobilePublicMenu(page)) {
     const mobileMenu = await openMobilePublicMenu(page);
     await mobileMenu.getByRole("button", { name: "Twitch 로그인" }).click();
   } else {
-    await page.getByRole("button", { name: "Twitch 로그인" }).first().click();
+    await page.getByRole("button", { name: "로그인", exact: true }).click();
+    await page.getByRole("menuitem", { name: "Twitch 로그인" }).click();
   }
   const authRequest = await authRequestPromise;
   const returnTo = new URL(authRequest.url()).searchParams.get("return_to");
   expect(returnTo).toBe(`/palworld/search?q=${encodeURIComponent("아누비스")}`);
+});
+
+test("LoL과 Palworld 상단 로그인은 Discord·Twitch 선택 메뉴를 동일하게 제공한다", async ({ page }) => {
+  for (const path of ["/", "/palworld"]) {
+    await page.goto(path);
+    if (usesMobilePublicMenu(page)) {
+      const mobileMenu = await openMobilePublicMenu(page);
+      await expect(mobileMenu.getByRole("button", { name: "Discord 로그인" })).toBeVisible();
+      await expect(mobileMenu.getByRole("button", { name: "Twitch 로그인" })).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(mobileMenu).toHaveCount(0);
+      continue;
+    }
+
+    const header = page.locator(".public-game-header").first();
+    const loginButton = header.getByRole("button", { name: "로그인", exact: true });
+    await loginButton.click();
+    await expect(header.getByRole("menuitem", { name: "Discord 로그인" })).toBeVisible();
+    await expect(header.getByRole("menuitem", { name: "Twitch 로그인" })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(loginButton).toHaveAttribute("aria-expanded", "false");
+    await expect(loginButton).toBeFocused();
+  }
 });
 
 test("모바일 Pal·아이템·스킬 상세는 핸들 드래그로 복귀하거나 닫힌다", async ({ page }) => {
@@ -2011,16 +2037,17 @@ test("Palworld 로그아웃은 공유 session을 제거해 LoL에서도 미로�
     await page.getByRole("menuitem", { name: "로그아웃" }).click();
   }
   await expect.poll(() => fixture.isConnected()).toBe(false);
-  await expect(page.getByRole("button", { name: "Twitch 로그인" }).first()).toBeVisible();
+  await expect(page.getByRole("button", { name: "로그인", exact: true }).first()).toBeVisible();
 
   await chooseGame(page, "league");
   await expect(page).toHaveURL(/\/$/u);
   if (usesMobilePublicMenu(page)) {
     const mobileMenu = await openMobilePublicMenu(page);
+    await expect(mobileMenu.getByRole("button", { name: "Discord 로그인" })).toBeVisible();
     await expect(mobileMenu.getByRole("button", { name: "Twitch 로그인" })).toBeVisible();
     await page.keyboard.press("Escape");
   } else {
-    await expect(page.getByRole("button", { name: /Twitch/u }).first()).toBeVisible();
+    await expect(page.getByRole("button", { name: "로그인", exact: true }).first()).toBeVisible();
   }
 });
 

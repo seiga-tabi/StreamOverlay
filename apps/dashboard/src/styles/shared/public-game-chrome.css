@@ -623,6 +623,67 @@
   min-inline-size: 0;
 }
 
+.public-account-login-options {
+  display: grid;
+  gap: var(--yoro-space-2);
+  min-inline-size: 0;
+}
+
+.public-account-login-option {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-block-size: var(--yoro-size-touch-target);
+  min-inline-size: 0;
+  gap: var(--yoro-space-3);
+  padding: var(--yoro-space-2) var(--yoro-space-4);
+  border: thin solid var(--yoro-color-product-gray-border);
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-product-gray-surface);
+  color: var(--yoro-color-product-gray-text);
+  text-align: start;
+}
+
+.public-account-login-option:hover {
+  border-color: var(--public-game-accent);
+}
+
+.public-account-login-option:disabled {
+  color: var(--yoro-color-product-gray-muted);
+  cursor: not-allowed;
+}
+
+.public-account-login-option .discord-symbol-icon,
+.public-account-login-option .twitch-glitch-icon,
+.public-account-login-menu__option .discord-symbol-icon,
+.public-account-login-menu__option .twitch-glitch-icon {
+  flex: none;
+  inline-size: var(--yoro-space-6);
+  block-size: var(--yoro-space-6);
+  object-fit: contain;
+}
+
+.public-account-login-menu {
+  min-inline-size: min(17rem, calc(100vw - var(--yoro-space-7)));
+}
+
+.public-twitch-profile-menu .public-account-login-menu__option {
+  display: flex;
+  align-items: center;
+  min-block-size: var(--yoro-size-touch-target);
+  gap: var(--yoro-space-3);
+}
+
+.public-twitch-profile-menu .public-account-login-menu__option:disabled {
+  color: var(--yoro-color-product-gray-muted);
+  cursor: not-allowed;
+}
+
+.public-account-login-icon {
+  inline-size: var(--yoro-space-5);
+  block-size: var(--yoro-space-5);
+}
+
 .twitch-glitch-icon {
   display: block;
   inline-size: 1.1em;

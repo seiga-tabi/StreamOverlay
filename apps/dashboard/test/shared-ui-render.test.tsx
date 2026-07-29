@@ -14,6 +14,7 @@ import { StatusPill } from "../src/shared/ui/Status";
 import { PublicTwitchAccountChip, PublicTwitchAccountPanel } from "../src/shared/PublicTwitchAccountChip";
 import { PublicMobileMenuSheet } from "../src/shared/PublicMobileMenuSheet";
 import { PublicGameHeaderFrame } from "../src/shared/PublicGameChrome";
+import { DISCORD_SYMBOL_ICON_SRC } from "../src/shared/DiscordSymbolIcon";
 import { TWITCH_GLITCH_ICON_URL } from "../src/shared/TwitchGlitchIcon";
 
 test("Shared Button loading 상태가 중복 클릭 방지와 접근성 속성을 함께 출력한다", () => {
@@ -91,26 +92,33 @@ test("공통 Twitch account chip이 프로필과 접근 가능한 메뉴 action�
   assert.match(html, />Twitch 로그아웃</);
 });
 
-test("공통 Twitch account chip이 미로그인 상태에서 token 없이 로그인 동작만 노출한다", () => {
+test("공통 account chip이 미로그인 상태에서 Discord·Twitch 로그인 메뉴를 노출한다", () => {
   const html = renderToStaticMarkup(
     <PublicTwitchAccountChip
       configured
       connected={false}
-      loginLabel="Twitch ログイン"
-      loginTitle="Twitch ログインが必要です。"
+      discordLoginLabel="Discord ログイン"
+      loginLabel="ログイン"
+      loginMenuLabel="ログイン方法"
+      loginTitle="ログイン方法を選択"
       logoutLabel="Twitch ログアウト"
       menuLabel="Twitch プロフィールメニュー"
+      onDiscordLogin={() => undefined}
       onLogin={() => undefined}
       onLogout={() => undefined}
       onOpenChange={() => undefined}
-      open={false}
+      open
+      twitchLoginLabel="Twitch ログイン"
     />
   );
 
-  assert.match(html, /aria-expanded="false"/);
-  assert.match(html, />Twitch ログイン</);
+  assert.match(html, /aria-expanded="true"/);
+  assert.match(html, />ログイン</);
+  assert.match(html, /role="menu" aria-label="ログイン方法"/);
+  assert.equal((html.match(/role="menuitem"/g) ?? []).length, 2);
+  assert.match(html, />Discord ログイン</);
+  assert.match(html, new RegExp(`src="${DISCORD_SYMBOL_ICON_SRC}"`, "u"));
   assert.match(html, new RegExp(`src="${TWITCH_GLITCH_ICON_URL}"`, "u"));
-  assert.doesNotMatch(html, /role="menu"/);
   assert.doesNotMatch(html, /Twitch ログアウト/);
 });
 
@@ -162,26 +170,29 @@ test("LoL PublicAppHeader가 공통 Twitch account chip으로 기존 프로필�
   assert.match(html, /aria-label="주 메뉴"/u);
 });
 
-test("모바일 통합 메뉴는 게임·언어·Twitch를 중첩 팝오버 없이 렌더링한다", () => {
+test("모바일 통합 메뉴는 게임·언어·계정 로그인을 중첩 팝오버 없이 렌더링한다", () => {
   const html = renderToStaticMarkup(
     <PublicMobileMenuSheet
       activePage="search"
       id="test-mobile-menu"
       labels={{
         close: "메뉴 닫기",
+        discordLogin: "Discord 로그인",
         game: "게임 선택",
         language: "언어",
-        login: "Twitch 로그인",
+        login: "로그인",
         loginLoading: "로그인 중…",
         logout: "로그아웃",
         title: "메뉴",
-        twitch: "Twitch 계정",
+        twitch: "계정",
+        twitchLogin: "Twitch 로그인",
         twitchUnavailable: "현재 Twitch 로그인을 사용할 수 없습니다.",
       }}
       locale="ko"
       onClose={() => undefined}
       onGamePage={() => undefined}
       onLocale={() => undefined}
+      onDiscordLogin={() => undefined}
       onTwitchLogin={() => undefined}
       onTwitchLogout={() => undefined}
       open
@@ -191,9 +202,11 @@ test("모바일 통합 메뉴는 게임·언어·Twitch를 중첩 팝오버 없�
   );
 
   assert.match(html, /data-sheet-state="opening"/u);
-  assert.match(html, /<h3>게임 선택<\/h3>[\s\S]*<h3>언어<\/h3>[\s\S]*<h3>Twitch 계정<\/h3>/u);
+  assert.match(html, /<h3>게임 선택<\/h3>[\s\S]*<h3>언어<\/h3>[\s\S]*<h3>계정<\/h3>/u);
   assert.match(html, /role="listbox"/u);
   assert.match(html, /role="radiogroup"/u);
+  assert.match(html, />Discord 로그인</u);
+  assert.match(html, />Twitch 로그인</u);
   assert.match(html, /현재 Twitch 로그인을 사용할 수 없습니다/u);
   assert.doesNotMatch(html, /public-locale-popover/u);
   assert.doesNotMatch(html, /public-twitch-profile-menu/u);

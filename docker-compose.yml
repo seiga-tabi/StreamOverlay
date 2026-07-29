@@ -6,8 +6,8 @@ services:
       dockerfile: apps/server/Dockerfile
       args:
         APP_VERSION: ${APP_VERSION:-0.1.0-dev}
-        GIT_SHA: ${GIT_SHA:-0000000000000000000000000000000000000000}
-        BUILD_TIME: ${BUILD_TIME:-1970-01-01T00:00:00.000Z}
+        GIT_SHA: ${GIT_SHA:-}
+        BUILD_TIME: ${BUILD_TIME:-}
     container_name: streamops-server
     restart: unless-stopped
     environment:
@@ -121,9 +121,6 @@ services:
       LEGAL_PROCESSORS_JA: ${LEGAL_PROCESSORS_JA:-}
       LEGAL_CROSS_BORDER_TRANSFER_KO: ${LEGAL_CROSS_BORDER_TRANSFER_KO:-}
       LEGAL_CROSS_BORDER_TRANSFER_JA: ${LEGAL_CROSS_BORDER_TRANSFER_JA:-}
-      APP_VERSION: ${APP_VERSION:-0.1.0-dev}
-      GIT_SHA: ${GIT_SHA:-0000000000000000000000000000000000000000}
-      BUILD_TIME: ${BUILD_TIME:-1970-01-01T00:00:00.000Z}
     read_only: true
     tmpfs:
       - /tmp
@@ -162,8 +159,8 @@ services:
       dockerfile: apps/discord-bot/Dockerfile
       args:
         APP_VERSION: ${APP_VERSION:-0.1.0-dev}
-        GIT_SHA: ${GIT_SHA:-0000000000000000000000000000000000000000}
-        BUILD_TIME: ${BUILD_TIME:-1970-01-01T00:00:00.000Z}
+        GIT_SHA: ${GIT_SHA:-}
+        BUILD_TIME: ${BUILD_TIME:-}
     profiles:
       - discord-bot
     restart: unless-stopped
@@ -181,9 +178,6 @@ services:
       DISCORD_BOT_PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:3000}
       DISCORD_BOT_HEALTH_PORT: 3100
       DISCORD_BOT_INTERNAL_TIMEOUT_MS: ${DISCORD_BOT_INTERNAL_TIMEOUT_MS:-5000}
-      APP_VERSION: ${APP_VERSION:-0.1.0-dev}
-      GIT_SHA: ${GIT_SHA:-0000000000000000000000000000000000000000}
-      BUILD_TIME: ${BUILD_TIME:-1970-01-01T00:00:00.000Z}
     secrets:
       - source: discord_bot_token
         target: discord_bot_token

@@ -1,0 +1,224 @@
+.yoro-account-page {
+  min-height: 100vh;
+  padding: clamp(1.25rem, 4vw, 3rem);
+  color: var(--yoro-color-product-gray-text);
+  background:
+    radial-gradient(circle at 50% 0%, rgb(88 101 242 / .16), transparent 38rem),
+    var(--yoro-background-product-gray-page);
+}
+
+.yoro-account-brand {
+  display: block;
+  width: fit-content;
+  margin: 0 auto clamp(1.5rem, 5vw, 3.5rem);
+  color: inherit;
+  font-size: 1.5rem;
+  font-weight: 900;
+  font-style: italic;
+  text-decoration: none;
+  letter-spacing: -.06em;
+}
+
+.yoro-account-panel {
+  width: min(100%, 46rem);
+  margin-inline: auto;
+  padding: clamp(1.5rem, 5vw, 3rem);
+  border: 1px solid var(--yoro-color-product-gray-border);
+  border-radius: var(--yoro-radius-xl);
+  background: var(--yoro-color-product-gray-surface-strong);
+  box-shadow: var(--yoro-shadow-panel);
+}
+
+.yoro-account-panel__header {
+  max-width: 38rem;
+  margin: 0 auto var(--yoro-space-6);
+  text-align: center;
+}
+
+.yoro-account-panel__header > span {
+  color: var(--yoro-color-primary);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: 800;
+  letter-spacing: .14em;
+}
+
+.yoro-account-panel__header h1 {
+  margin: var(--yoro-space-3) 0;
+  font-size: clamp(2rem, 6vw, 3.4rem);
+  line-height: 1.08;
+  letter-spacing: -.04em;
+}
+
+.yoro-account-panel__header p,
+.yoro-login-option small,
+.yoro-connection-card p {
+  color: var(--yoro-color-product-gray-muted);
+}
+
+.yoro-login-options,
+.yoro-connections {
+  display: grid;
+  gap: var(--yoro-space-3);
+}
+
+.yoro-login-option,
+.yoro-connection-card {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--yoro-space-4);
+  min-width: 0;
+  padding: var(--yoro-space-4);
+  border: 1px solid var(--yoro-color-product-gray-border);
+  border-radius: var(--yoro-radius-lg);
+  color: inherit;
+  background: var(--yoro-color-product-gray-surface);
+  text-decoration: none;
+}
+
+.yoro-login-option {
+  grid-template-columns: 3rem minmax(0, 1fr);
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.yoro-login-option:hover {
+  border-color: var(--yoro-color-primary);
+  transform: translateY(-1px);
+}
+
+.yoro-login-option__icon {
+  display: grid;
+  width: 3rem;
+  height: 3rem;
+  place-items: center;
+  overflow: hidden;
+  border-radius: var(--yoro-radius-md);
+  color: #fff;
+  background: #5865f2;
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+
+.yoro-login-option__icon svg,
+.yoro-login-option__icon img {
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
+}
+
+.yoro-login-option.is-twitch .yoro-login-option__icon,
+.yoro-login-option__icon.is-twitch {
+  background: #9146ff;
+}
+
+.yoro-login-option strong,
+.yoro-login-option small {
+  display: block;
+}
+
+.yoro-login-option small {
+  margin-top: .3rem;
+  line-height: 1.5;
+}
+
+.yoro-account-primary-action,
+.yoro-account-actions a,
+.yoro-account-actions button,
+.yoro-connection-card a,
+.yoro-connection-card button {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  padding: .7rem 1rem;
+  border: 1px solid var(--yoro-color-product-gray-border-strong);
+  border-radius: var(--yoro-radius-md);
+  color: inherit;
+  background: var(--yoro-color-product-gray-surface);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.yoro-account-primary-action {
+  width: 100%;
+  border-color: transparent;
+  color: #fff;
+  background: var(--yoro-color-primary-strong);
+}
+
+.yoro-account-links,
+.yoro-account-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--yoro-space-3);
+  margin-top: var(--yoro-space-6);
+}
+
+.yoro-account-links a,
+.yoro-account-links button,
+.yoro-account-language {
+  border: 0;
+  color: var(--yoro-color-product-gray-muted);
+  background: transparent;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.yoro-account-language {
+  display: block;
+  margin: var(--yoro-space-5) auto 0;
+}
+
+.yoro-account-error {
+  padding: var(--yoro-space-3);
+  border: 1px solid color-mix(in srgb, var(--yoro-color-danger) 55%, transparent);
+  border-radius: var(--yoro-radius-md);
+  color: var(--yoro-color-danger);
+  text-align: center;
+}
+
+.yoro-connection-card h2,
+.yoro-connection-card p {
+  margin: 0;
+}
+
+.yoro-connection-card strong {
+  display: block;
+  margin: .2rem 0;
+  color: var(--yoro-color-success);
+  font-size: var(--yoro-font-size-sm);
+}
+
+.yoro-account-empty {
+  text-align: center;
+}
+
+@media (max-width: 40rem) {
+  .yoro-account-page {
+    padding: 1rem;
+  }
+
+  .yoro-account-panel {
+    padding: 1.25rem;
+  }
+
+  .yoro-connection-card {
+    grid-template-columns: 3rem minmax(0, 1fr);
+  }
+
+  .yoro-connection-card > a,
+  .yoro-connection-card > button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yoro-login-option {
+    transition: none;
+  }
+}

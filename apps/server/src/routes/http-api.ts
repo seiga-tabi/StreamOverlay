@@ -191,6 +191,15 @@ import {
   type AgentIngestionService
 } from "../services/agent-ingestion-service.js";
 import {
+  clearYoroCookie,
+  YORO_OAUTH_COOKIE,
+  YORO_SESSION_COOKIE,
+  yoroOAuthCookie,
+  yoroSessionCookie,
+  YoroAccountError,
+  type YoroAccountService
+} from "../services/yoro-account-service.js";
+import {
   isManagementOrganizationId,
   parseCreatePalworldGameServerInput
 } from "@streamops/shared";
@@ -1319,6 +1328,12 @@ function discordManagementConnectReturnUrl(status: "select" | "error"): string {
   return target.toString();
 }
 
+function yoroAccountReturnUrl(returnPath: string, errorCode?: string): string {
+  const target = new URL(returnPath, appConfig.dashboardBaseUrl);
+  if (errorCode) target.searchParams.set("account", errorCode);
+  return target.toString();
+}
+
 function discordJsonBodyAllowed(req: IncomingMessage): boolean {
   const contentType = requestHeaderValue(req, "content-type")?.split(";", 1)[0]?.trim().toLowerCase();
   return contentType === "application/json";
@@ -2055,6 +2070,7 @@ type HttpHandlerInput = {
   palworldServerUnavailableCode?: PalworldServerAvailabilityErrorCode;
   discordOnboarding?: DiscordOnboardingService;
   discordManagement?: DiscordManagementService;
+  yoroAccounts?: YoroAccountService;
   discordDatabaseReady?: () => boolean;
   discordInternalAuth?: DiscordInternalAuthVerifier;
   agentIngestion?: AgentIngestionService;
@@ -5768,6 +5784,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
           ? dashboardLoginLimiter
           : url.pathname.startsWith("/api/twitch/auth/")
             || url.pathname.startsWith("/api/public/twitch/auth/")
+            || url.pathname.startsWith("/api/account/oauth/")
             || url.pathname.startsWith("/api/discord/")
             ? oauthLimiter
           : palworldLimitGroup?.list
@@ -5981,6 +5998,101 @@ export function createHttpHandler(input: HttpHandlerInput) {
         return sendJson(req, res, auth.status, { error: auth.message, code: auth.code });
       }
 
+      if (url.pathname.startsWith("/api/account/")) {
+        if (
+          !appConfig.database.enabled
+          || !input.yoroAccounts
+          || input.discordDatabaseReady?.() !== true
+        ) {
+          return sendJson(req, res, 503, {
+            error: "YORO 계정 기능을 사용할 수 없습니다.",
+            code: "feature_unavailable"
+          }, noStoreHeaders());
+        }
+        const sessionCookie = requestCookie(req, YORO_SESSION_COOKIE);
+        if (req.method === "GET" && url.pathname === "/api/account/session") {
+          if (url.search) {
+            return sendJson(req, res, 400, { error: "query는 허용되지 않습니다." });
+          }
+          const session = await input.yoroAccounts.session(sessionCookie);
+          return sendJson(
+            req,
+            res,
+            200,
+            session ?? { authenticated: false },
+            noStoreHeaders()
+          );
+        }
+        const oauthStartMatch = url.pathname.match(
+          /^\/api\/account\/oauth\/(discord|twitch)\/start$/u
+        );
+        if (req.method === "GET" && oauthStartMatch) {
+          if (
+            [...url.searchParams.keys()].some(
+              (key) => key !== "purpose" && key !== "return_to"
+            )
+          ) {
+            return sendJson(req, res, 400, { error: "허용되지 않은 query입니다." });
+          }
+          const purpose = url.searchParams.get("purpose") === "link_identity"
+            ? "link_identity"
+            : "login";
+          const started = await input.yoroAccounts.beginOAuth({
+            provider: oauthStartMatch[1] as "discord" | "twitch",
+            purpose,
+            returnPath: url.searchParams.get("return_to") ?? undefined,
+            sessionCookie
+          });
+          return sendRedirect(res, started.authorizationUrl, {
+            "Set-Cookie": yoroOAuthCookie(started.cookieValue),
+            "Cache-Control": "no-store",
+            "Referrer-Policy": "no-referrer"
+          });
+        }
+        if (req.method === "POST" && url.pathname === "/api/account/logout") {
+          if (!stateChangingRequestHasTrustedOrigin(req)) {
+            return sendJson(req, res, 403, {
+              error: "trusted Origin이 필요합니다.",
+              code: "origin_denied"
+            });
+          }
+          const session = await input.yoroAccounts.session(sessionCookie);
+          const csrfToken = requestHeaderValue(req, "x-yoro-csrf");
+          if (!session || !csrfToken || !tokenMatches(session.csrfToken, csrfToken)) {
+            return sendJson(req, res, 403, {
+              error: "CSRF token이 필요합니다.",
+              code: "csrf_required"
+            });
+          }
+          await input.yoroAccounts.logout(sessionCookie);
+          return sendJson(req, res, 204, {}, {
+            "Set-Cookie": clearYoroCookie(YORO_SESSION_COOKIE),
+            "Cache-Control": "no-store"
+          });
+        }
+        const connectionMatch = url.pathname.match(
+          /^\/api\/account\/connections\/(discord|twitch)$/u
+        );
+        if (req.method === "DELETE" && connectionMatch) {
+          if (!stateChangingRequestHasTrustedOrigin(req)) {
+            return sendJson(req, res, 403, {
+              error: "trusted Origin이 필요합니다.",
+              code: "origin_denied"
+            });
+          }
+          await input.yoroAccounts.unlinkIdentity({
+            provider: connectionMatch[1] as "discord" | "twitch",
+            sessionCookie,
+            csrfToken: requestHeaderValue(req, "x-yoro-csrf")
+          });
+          return sendJson(req, res, 204, {}, {
+            "Set-Cookie": clearYoroCookie(YORO_SESSION_COOKIE),
+            "Cache-Control": "no-store"
+          });
+        }
+        return sendJson(req, res, 404, { error: "not found" });
+      }
+
       if (url.pathname.startsWith("/api/discord/")) {
         const discordApplicationConfigured = isDiscordSnowflake(
           appConfig.discordBotInternal.applicationId
@@ -6047,7 +6159,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
             }, noStoreHeaders());
           }
           const oauthCookie = requestCookie(req, DISCORD_MANAGEMENT_OAUTH_COOKIE);
-          const managementCookie = requestCookie(req, DISCORD_MANAGEMENT_SESSION_COOKIE);
+          const yoroOauthCookieValue = requestCookie(req, YORO_OAUTH_COOKIE);
+          const managementCookie = requestCookie(req, YORO_SESSION_COOKIE)
+            ?? requestCookie(req, DISCORD_MANAGEMENT_SESSION_COOKIE);
           const onboardingCookie = requestCookie(req, DISCORD_ONBOARDING_COOKIE);
           if (
             req.method === "GET"
@@ -6146,12 +6260,41 @@ export function createHttpHandler(input: HttpHandlerInput) {
               [...url.searchParams.keys()].some((key) => !allowed.has(key))
               || url.searchParams.has("error")
             ) {
+              if (yoroOauthCookieValue) {
+                return sendRedirect(
+                  res,
+                  yoroAccountReturnUrl("/login", "oauth_failed"),
+                  {
+                    "Set-Cookie": clearYoroCookie(YORO_OAUTH_COOKIE),
+                    "Cache-Control": "no-store"
+                  }
+                );
+              }
               return sendRedirect(res, discordManagementReturnUrl("error"), {
                 "Set-Cookie": clearDiscordManagementCookie(DISCORD_MANAGEMENT_OAUTH_COOKIE),
                 "Cache-Control": "no-store"
               });
             }
             try {
+              if (yoroOauthCookieValue && input.yoroAccounts) {
+                const completed = await input.yoroAccounts.completeOAuth({
+                  provider: "discord",
+                  state: url.searchParams.get("state") ?? "",
+                  code: url.searchParams.get("code") ?? "",
+                  oauthCookie: yoroOauthCookieValue
+                });
+                return sendRedirect(
+                  res,
+                  yoroAccountReturnUrl(completed.returnPath),
+                  {
+                    "Set-Cookie": [
+                      clearYoroCookie(YORO_OAUTH_COOKIE),
+                      yoroSessionCookie(completed.sessionToken)
+                    ],
+                    "Cache-Control": "no-store"
+                  }
+                );
+              }
               const completed = await input.discordManagement.completeLogin({
                 state: url.searchParams.get("state") ?? "",
                 code: url.searchParams.get("code") ?? "",
@@ -6165,6 +6308,16 @@ export function createHttpHandler(input: HttpHandlerInput) {
                 "Cache-Control": "no-store"
               });
             } catch {
+              if (yoroOauthCookieValue) {
+                return sendRedirect(
+                  res,
+                  yoroAccountReturnUrl("/login", "oauth_failed"),
+                  {
+                    "Set-Cookie": clearYoroCookie(YORO_OAUTH_COOKIE),
+                    "Cache-Control": "no-store"
+                  }
+                );
+              }
               return sendRedirect(res, discordManagementReturnUrl("error"), {
                 "Set-Cookie": clearDiscordManagementCookie(DISCORD_MANAGEMENT_OAUTH_COOKIE),
                 "Cache-Control": "no-store"
@@ -6189,7 +6342,10 @@ export function createHttpHandler(input: HttpHandlerInput) {
             }
             await input.discordManagement.logout(managementCookie);
             return sendJson(req, res, 204, {}, {
-              "Set-Cookie": clearDiscordManagementCookie(DISCORD_MANAGEMENT_SESSION_COOKIE)
+              "Set-Cookie": [
+                clearDiscordManagementCookie(DISCORD_MANAGEMENT_SESSION_COOKIE),
+                clearYoroCookie(YORO_SESSION_COOKIE)
+              ]
             });
           }
           const gameServersMatch = url.pathname.match(
@@ -6875,6 +7031,47 @@ export function createHttpHandler(input: HttpHandlerInput) {
         return sendRedirect(res, input.publicTwitchAuth.createAuthorizationUrl(forceVerify, publicTwitchCallbackUrlForRequest(req), returnUrl));
       }
       if (req.method === "GET" && url.pathname === "/api/public/twitch/auth/callback") {
+        const yoroOauthCookieValue = requestCookie(req, YORO_OAUTH_COOKIE);
+        if (yoroOauthCookieValue && input.yoroAccounts) {
+          if (url.searchParams.has("error")) {
+            return sendRedirect(
+              res,
+              yoroAccountReturnUrl("/login", "oauth_failed"),
+              {
+                "Set-Cookie": clearYoroCookie(YORO_OAUTH_COOKIE),
+                "Cache-Control": "no-store"
+              }
+            );
+          }
+          try {
+            const completed = await input.yoroAccounts.completeOAuth({
+              provider: "twitch",
+              state: url.searchParams.get("state") ?? "",
+              code: url.searchParams.get("code") ?? "",
+              oauthCookie: yoroOauthCookieValue
+            });
+            return sendRedirect(
+              res,
+              yoroAccountReturnUrl(completed.returnPath),
+              {
+                "Set-Cookie": [
+                  clearYoroCookie(YORO_OAUTH_COOKIE),
+                  yoroSessionCookie(completed.sessionToken)
+                ],
+                "Cache-Control": "no-store"
+              }
+            );
+          } catch {
+            return sendRedirect(
+              res,
+              yoroAccountReturnUrl("/login", "oauth_failed"),
+              {
+                "Set-Cookie": clearYoroCookie(YORO_OAUTH_COOKIE),
+                "Cache-Control": "no-store"
+              }
+            );
+          }
+        }
         return handlePublicTwitchAuthCallback(req, res, url);
       }
       if (req.method === "POST" && url.pathname === "/api/public/twitch/logout") {
@@ -7709,6 +7906,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if (error instanceof DiscordManagementError) {
         return sendJson(req, res, error.status, {
           error: "YORO Bot 관리 요청을 처리할 수 없습니다.",
+          code: error.code
+        }, noStoreHeaders());
+      }
+      if (error instanceof YoroAccountError) {
+        return sendJson(req, res, error.status, {
+          error: "YORO 계정 요청을 처리할 수 없습니다.",
           code: error.code
         }, noStoreHeaders());
       }

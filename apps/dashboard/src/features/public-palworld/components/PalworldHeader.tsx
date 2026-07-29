@@ -5,6 +5,7 @@ import { PublicTwitchAccountChip, type PublicTwitchAccountMenuAction } from "../
 import { PublicGameSelector } from "../../public-lol/components/PublicGameSelector";
 import { PublicLocaleSelector } from "../../public-lol/components/PublicLocaleSelector";
 import type { PublicMainPage, PublicTwitchViewerStatus } from "../../public-lol/types/public-lol";
+import { accountOAuthUrl } from "../../yoro-account/api";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import { palworldPathForPage, setPalworldUrl, type PalworldPage } from "../utils/routes";
 
@@ -65,6 +66,14 @@ export function PalworldHeader({
   const headerRef = useRef<HTMLDivElement>(null);
   const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
   const text = palworldI18n[locale];
+  const handleDiscordLogin = () => {
+    const returnPath = `${window.location.pathname}${window.location.search}`;
+    window.location.assign(accountOAuthUrl("discord", "login", returnPath));
+  };
+  const handleTwitchAccountLogin = () => {
+    const returnPath = `${window.location.pathname}${window.location.search}`;
+    window.location.assign(accountOAuthUrl("twitch", "login", returnPath));
+  };
 
   const closeMenus = useCallback(() => {
     setGameSelectorOpen(false);
@@ -84,7 +93,11 @@ export function PalworldHeader({
       if (!headerRef.current?.contains(event.target as Node)) closeMenus();
     };
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closeMenus();
+      if (event.key === "Escape") {
+        setGameSelectorOpen(false);
+        setMobileMenuOpen(false);
+        setLocaleMenuOpen(false);
+      }
     };
     document.addEventListener("pointerdown", handlePointerDown);
     document.addEventListener("keydown", handleKeyDown);
@@ -169,16 +182,19 @@ export function PalworldHeader({
             <PublicTwitchAccountChip
               configured={twitchStatus.configured}
               connected={twitchStatus.connected}
-              loginLabel={text.twitchLogin}
-              loginLabelJa={palworldI18n.ja.twitchLogin}
-              loginLabelKo={palworldI18n.ko.twitchLogin}
-              loginTitle={text.twitchLoginTitle}
+              discordLoginLabel={text.discordLogin}
+              loginLabel={text.accountLogin}
+              loginLabelJa={palworldI18n.ja.accountLogin}
+              loginLabelKo={palworldI18n.ko.accountLogin}
+              loginMenuLabel={text.accountLoginMenu}
+              loginTitle={text.accountLoginTitle}
               logoutLabel={text.twitchLogout}
               logoutLabelJa={palworldI18n.ja.twitchLogout}
               logoutLabelKo={palworldI18n.ko.twitchLogout}
               menuActions={twitchMenuActions}
               menuLabel={text.twitchProfileMenu}
-              onLogin={onTwitchLogin}
+              onDiscordLogin={handleDiscordLogin}
+              onLogin={handleTwitchAccountLogin}
               onLogout={onTwitchLogout}
               onOpenChange={(open) => {
                 setTwitchMenuOpen(open);
@@ -189,6 +205,7 @@ export function PalworldHeader({
                 }
               }}
               open={twitchMenuOpen}
+              twitchLoginLabel={text.twitchLoginChoice}
               user={twitchStatus.user}
             />
           </>
@@ -259,20 +276,23 @@ export function PalworldHeader({
             id="palworld-mobile-menu"
             labels={{
               close: text.closeMobileMenu,
+              discordLogin: text.discordLogin,
               game: text.gameMenu,
               language: text.languageSection,
-              login: text.twitchLogin,
+              login: text.accountLogin,
               loginLoading: text.twitchLoginLoading,
               logout: text.twitchLogout,
               title: text.mobileMenu,
-              twitch: text.twitchAccount,
+              twitch: text.account,
+              twitchLogin: text.twitchLoginChoice,
               twitchUnavailable: text.twitchNotConfiguredDescription,
             }}
             locale={locale}
             onClose={() => setMobileMenuOpen(false)}
             onGamePage={handleGame}
             onLocale={onLocale}
-            onTwitchLogin={onTwitchLogin}
+            onDiscordLogin={handleDiscordLogin}
+            onTwitchLogin={handleTwitchAccountLogin}
             onTwitchLogout={onTwitchLogout}
             open={mobileMenuOpen}
             returnFocusRef={mobileMenuTriggerRef}

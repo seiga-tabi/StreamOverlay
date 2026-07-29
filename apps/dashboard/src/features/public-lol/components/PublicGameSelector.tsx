@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { publicI18n, t } from "../i18n/public-lol-i18n";
 import type { PublicMainPage } from "../types/public-lol";
+import { DISCORD_SYMBOL_ICON_SRC } from "../../../shared/DiscordSymbolIcon";
 
 export type PublicGameId = "league-of-legends" | "palworld" | "yoro-bot";
 
@@ -46,6 +47,7 @@ const games: PublicGameOption[] = [
   {
     id: "yoro-bot",
     page: "bot",
+    logo: DISCORD_SYMBOL_ICON_SRC,
     ko: publicI18n.ko.yoroBot,
     ja: publicI18n.ja.yoroBot,
     subtitleKo: publicI18n.ko.yoroBotSubtitle,

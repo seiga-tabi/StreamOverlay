@@ -51,15 +51,15 @@ test("Bot 관리 화면은 초기 상태와 한국어·일본어 접근성 문�
   assert.doesNotMatch(koMarkup, /docker run|:latest/u);
 });
 
-test("관리 로그인 URL은 고정된 내부 OAuth 시작 경로만 사용한다", async () => {
+test("관리 로그인 URL은 통합 YORO 로그인과 안전한 복귀 경로만 사용한다", async () => {
   const {
     botInstallUrl,
     managementConnectUrl,
     managementLoginUrl
   } = await import("../src/features/bot-management/api");
   const url = new URL(managementLoginUrl(), "https://yoro.gg");
-  assert.equal(url.pathname, "/api/discord/management/oauth/start");
-  assert.equal(url.search, "");
+  assert.equal(url.pathname, "/login");
+  assert.equal(url.searchParams.get("return_to"), "/bot/manage");
   assert.equal(url.hash, "");
   assert.equal(
     new URL(managementConnectUrl(), "https://yoro.gg").pathname,

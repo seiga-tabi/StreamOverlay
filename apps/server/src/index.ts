@@ -71,6 +71,7 @@ import { loadMigrationManifest, type MigrationManifest } from "./database/migrat
 import { closeDatabasePool, databasePool } from "./database/pool.js";
 import { DiscordOnboardingService } from "./services/discord-onboarding-service.js";
 import { DiscordManagementService } from "./services/discord-management-service.js";
+import { YoroAccountService } from "./services/yoro-account-service.js";
 import { AgentIngestionService } from "./services/agent-ingestion-service.js";
 import { DiscordInternalAuthVerifier } from "./security/discord-internal-auth.js";
 import {
@@ -107,8 +108,11 @@ databaseHealth.start();
 const discordOnboarding = appConfig.discordSaas.enabled && postgresPool
   ? new DiscordOnboardingService(postgresPool, logger)
   : undefined;
+const yoroAccounts = appConfig.discordBotManagement.enabled && postgresPool
+  ? new YoroAccountService(postgresPool, logger)
+  : undefined;
 const discordManagement = appConfig.discordBotManagement.enabled && postgresPool
-  ? new DiscordManagementService(postgresPool, logger)
+  ? new DiscordManagementService(postgresPool, logger, fetch, yoroAccounts)
   : undefined;
 const agentIngestion = appConfig.agentIngestion.enabled && postgresPool
   ? new AgentIngestionService(postgresPool, logger)
@@ -117,6 +121,7 @@ const discordInternalAuth = appConfig.discordBotInternal.enabled
   ? new DiscordInternalAuthVerifier(appConfig.discordBotInternal.authKey)
   : undefined;
 discordOnboarding?.startCleanup();
+yoroAccounts?.startCleanup();
 discordManagement?.startCleanup();
 agentIngestion?.startCleanup();
 let palworldDataService: PalworldDataService | undefined;
@@ -533,6 +538,7 @@ const server = http.createServer(createHttpHandler({
   palworldServerUnavailableCode,
   discordOnboarding,
   discordManagement,
+  yoroAccounts,
   discordDatabaseReady: () => databaseHealth.snapshot().ready,
   discordInternalAuth,
   agentIngestion,
@@ -815,6 +821,7 @@ function shutdown(signal: NodeJS.Signals): void {
   palworldServerMonitor?.stop();
   discordOnboarding?.stopCleanup();
   discordManagement?.stopCleanup();
+  yoroAccounts?.stopCleanup();
   agentIngestion?.stopCleanup();
   databaseHealth.stop();
   closeLolGameMonitors();

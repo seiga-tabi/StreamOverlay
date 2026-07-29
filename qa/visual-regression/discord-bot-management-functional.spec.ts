@@ -72,6 +72,32 @@ test.beforeEach(async ({ page }) => {
   await useLocale(page, "ko");
 });
 
+test("Public /bot 헤더는 로그인 선택과 Discord YORO Bot 아이콘만 표시한다", async ({ page }) => {
+  await page.goto("/bot");
+  const header = page.locator(".public-game-header");
+  await expect(header.getByText("설정 명령 구현됨 · 운영 활성화 필요")).toHaveCount(0);
+
+  if ((page.viewportSize()?.width ?? 0) <= 768) {
+    await header.getByRole("button", { name: "메뉴 열기" }).click();
+    const mobileMenu = page.locator(".public-bottom-sheet");
+    await expect(mobileMenu.getByRole("button", { name: "Discord 로그인" })).toBeVisible();
+    await expect(mobileMenu.getByRole("button", { name: "Twitch 로그인" })).toBeVisible();
+    await expect(
+      mobileMenu.locator('.public-game-selector-logo.is-yoro-bot[src*="discord-symbol-blurple"]')
+    ).toBeVisible();
+  } else {
+    const login = header.getByRole("button", { name: "로그인", exact: true });
+    await login.click();
+    await expect(header.getByRole("menuitem", { name: "Discord 로그인" })).toBeVisible();
+    await expect(header.getByRole("menuitem", { name: "Twitch 로그인" })).toBeVisible();
+    await expect(
+      header.locator('.public-game-selector-logo.is-yoro-bot[src*="discord-symbol-blurple"]')
+    ).toBeVisible();
+  }
+
+  await expectNoHorizontalOverflow(page);
+});
+
 test("Public /bot은 최소 권한 Bot 설치와 Dashboard CTA를 제공한다", async ({ page }) => {
   const authorizeUrl = new URL("https://discord.com/oauth2/authorize");
   authorizeUrl.searchParams.set("client_id", "987654321098765432");
@@ -123,6 +149,30 @@ test("Public /bot은 일본어 CTA를 동일한 안전한 내부 경로로 제�
     .toHaveAttribute("href", "/api/discord/bot/install");
   await expect(page.getByRole("link", { name: "Dashboardにログイン" }))
     .toHaveAttribute("href", "/bot/manage");
+  await expectNoHorizontalOverflow(page);
+});
+
+test("/login은 Discord와 Twitch를 하나의 YORO 계정 로그인 수단으로 제공한다", async ({ page }) => {
+  await page.route("**/api/account/session", async (route) => {
+    await json(route, { authenticated: false });
+  });
+  await page.goto("/login?return_to=/bot/manage");
+
+  await expect(page.getByRole("heading", { level: 1, name: "YORO.gg 로그인" }))
+    .toBeVisible();
+  const discordHref = await page.getByRole("link", { name: /Discord로 계속하기/u })
+    .getAttribute("href");
+  const twitchHref = await page.getByRole("link", { name: /Twitch로 계속하기/u })
+    .getAttribute("href");
+  const discordUrl = new URL(discordHref ?? "", page.url());
+  const twitchUrl = new URL(twitchHref ?? "", page.url());
+  expect(discordUrl.pathname).toBe("/api/account/oauth/discord/start");
+  expect(twitchUrl.pathname).toBe("/api/account/oauth/twitch/start");
+  expect(discordUrl.searchParams.get("purpose")).toBe("login");
+  expect(twitchUrl.searchParams.get("purpose")).toBe("login");
+  expect(discordUrl.searchParams.get("return_to")).toBe("/bot/manage");
+  expect(twitchUrl.searchParams.get("return_to")).toBe("/bot/manage");
+  await expect(page.locator('input[type="password"]')).toHaveCount(0);
   await expectNoHorizontalOverflow(page);
 });
 

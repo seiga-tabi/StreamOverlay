@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
+import { DiscordSymbolIcon } from "./DiscordSymbolIcon";
 import { TwitchGlitchIcon } from "./TwitchGlitchIcon";
 
 export type PublicTwitchAccountUser = {
@@ -23,11 +24,15 @@ export type PublicTwitchAccountChipProps = {
   loginLabelJa?: string;
   loginLabelKo?: string;
   loginTitle: string;
+  loginMenuLabel?: string;
+  discordLoginLabel?: string;
+  twitchLoginLabel?: string;
   menuLabel: string;
   logoutLabel: string;
   logoutLabelJa?: string;
   logoutLabelKo?: string;
   menuActions?: PublicTwitchAccountMenuAction[];
+  onDiscordLogin?: () => void;
   onLogin: () => void;
   onLogout: () => void;
   onOpenChange: (open: boolean) => void;
@@ -40,10 +45,13 @@ export type PublicTwitchAccountPanelProps = {
   loginLabel: string;
   loginLoading?: boolean;
   loginLoadingLabel: string;
+  discordLoginLabel?: string;
+  twitchLoginLabel?: string;
   unavailableLabel: string;
   logoutLabel: string;
   menuActions?: PublicTwitchAccountMenuAction[];
   onAction?: () => void;
+  onDiscordLogin?: () => void;
   onLogin: () => void;
   onLogout: () => void;
 };
@@ -55,30 +63,65 @@ export function PublicTwitchAccountPanel({
   loginLabel,
   loginLoading = false,
   loginLoadingLabel,
+  discordLoginLabel,
+  twitchLoginLabel,
   unavailableLabel,
   logoutLabel,
   menuActions = [],
   onAction,
+  onDiscordLogin,
   onLogin,
   onLogout,
 }: PublicTwitchAccountPanelProps) {
   const displayName = user?.displayName || user?.login || loginLabel;
 
   if (!connected) {
+    const unifiedLogin = Boolean(
+      onDiscordLogin && discordLoginLabel && twitchLoginLabel
+    );
     return (
       <div className="public-twitch-account-panel" aria-busy={loginLoading || undefined}>
-        <button
-          className="public-twitch-account-panel__login"
-          disabled={!configured || loginLoading}
-          onClick={() => {
-            onAction?.();
-            onLogin();
-          }}
-          type="button"
-        >
-          <TwitchGlitchIcon />
-          <strong>{loginLoading ? loginLoadingLabel : loginLabel}</strong>
-        </button>
+        {unifiedLogin ? (
+          <div className="public-account-login-options">
+            <button
+              className="public-account-login-option is-discord"
+              disabled={loginLoading}
+              onClick={() => {
+                onAction?.();
+                onDiscordLogin?.();
+              }}
+              type="button"
+            >
+              <DiscordSymbolIcon />
+              <strong>{discordLoginLabel}</strong>
+            </button>
+            <button
+              className="public-account-login-option is-twitch"
+              disabled={!configured || loginLoading}
+              onClick={() => {
+                onAction?.();
+                onLogin();
+              }}
+              type="button"
+            >
+              <TwitchGlitchIcon />
+              <strong>{loginLoading ? loginLoadingLabel : twitchLoginLabel}</strong>
+            </button>
+          </div>
+        ) : (
+          <button
+            className="public-twitch-account-panel__login"
+            disabled={!configured || loginLoading}
+            onClick={() => {
+              onAction?.();
+              onLogin();
+            }}
+            type="button"
+          >
+            <TwitchGlitchIcon />
+            <strong>{loginLoading ? loginLoadingLabel : loginLabel}</strong>
+          </button>
+        )}
         {!configured ? (
           <p className="public-twitch-account-panel__status" role="status">
             {unavailableLabel}
@@ -147,11 +190,15 @@ export function PublicTwitchAccountChip({
   loginLabelJa,
   loginLabelKo,
   loginTitle,
+  loginMenuLabel,
+  discordLoginLabel,
+  twitchLoginLabel,
   menuLabel,
   logoutLabel,
   logoutLabelJa,
   logoutLabelKo,
   menuActions = [],
+  onDiscordLogin,
   onLogin,
   onLogout,
   onOpenChange
@@ -161,6 +208,10 @@ export function PublicTwitchAccountChip({
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuItemRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const closeTimerRef = useRef<number | undefined>(undefined);
+  const unifiedLogin = Boolean(
+    onDiscordLogin && discordLoginLabel && twitchLoginLabel
+  );
+  const menuItemCount = connected ? menuActions.length + 1 : unifiedLogin ? 2 : 0;
 
   function clearCloseTimer(): void {
     if (closeTimerRef.current === undefined) return;
@@ -184,8 +235,8 @@ export function PublicTwitchAccountChip({
   }
 
   function focusMenuItem(index: number): void {
-    const itemCount = menuActions.length + 1;
-    const nextIndex = (index + itemCount) % itemCount;
+    if (menuItemCount < 1) return;
+    const nextIndex = (index + menuItemCount) % menuItemCount;
     menuItemRefs.current[nextIndex]?.focus();
   }
 
@@ -201,7 +252,7 @@ export function PublicTwitchAccountChip({
       focusMenuItem(0);
     } else if (event.key === "End") {
       event.preventDefault();
-      focusMenuItem(menuActions.length);
+      focusMenuItem(menuItemCount - 1);
     } else if (event.key === "Tab") {
       closeMenu();
     }
@@ -226,14 +277,10 @@ export function PublicTwitchAccountChip({
   }, [open, onOpenChange]);
 
   useEffect(() => {
-    if (open && (!configured || !connected)) onOpenChange(false);
-  }, [configured, connected, onOpenChange, open]);
-
-  useEffect(() => {
     if (!open) return undefined;
     const frame = window.requestAnimationFrame(() => focusMenuItem(0));
     return () => window.cancelAnimationFrame(frame);
-  }, [menuActions.length, open]);
+  }, [menuItemCount, open]);
 
   useEffect(() => () => clearCloseTimer(), []);
 
@@ -247,13 +294,17 @@ export function PublicTwitchAccountChip({
       onMouseLeave={scheduleClose}
     >
       <button
-        aria-controls={connected ? menuId : undefined}
-        aria-expanded={connected ? open : false}
-        aria-haspopup={connected ? "menu" : undefined}
+        aria-controls={connected || unifiedLogin ? menuId : undefined}
+        aria-expanded={connected || unifiedLogin ? open : false}
+        aria-haspopup={connected || unifiedLogin ? "menu" : undefined}
         className={`public-twitch-login-chip ${connected ? "connected" : ""}`}
-        disabled={!configured}
+        disabled={!connected && !configured && !unifiedLogin}
         onClick={() => {
           if (!connected) {
+            if (unifiedLogin) {
+              onOpenChange(!open);
+              return;
+            }
             onLogin();
             return;
           }
@@ -263,7 +314,20 @@ export function PublicTwitchAccountChip({
         title={connected ? displayName : loginTitle}
         type="button"
       >
-        {user?.profileImageUrl ? <img src={user.profileImageUrl} alt="" /> : <span aria-hidden="true"><TwitchGlitchIcon /></span>}
+        {user?.profileImageUrl ? (
+          <img src={user.profileImageUrl} alt="" />
+        ) : (
+          <span aria-hidden="true">
+            {connected || !unifiedLogin ? (
+              <TwitchGlitchIcon />
+            ) : (
+              <svg className="public-account-login-icon" fill="none" viewBox="0 0 24 24">
+                <circle cx="12" cy="8" r="3.25" stroke="currentColor" strokeWidth="1.8" />
+                <path d="M5.5 20c.5-4 2.7-6 6.5-6s6 2 6.5 6" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+              </svg>
+            )}
+          </span>
+        )}
         <strong
           data-ja={connected ? undefined : loginLabelJa}
           data-ko={connected ? undefined : loginLabelKo}
@@ -313,6 +377,47 @@ export function PublicTwitchAccountChip({
             }}
           >
             {logoutLabel}
+          </button>
+        </div>
+      ) : !connected && unifiedLogin && open ? (
+        <div
+          className="public-twitch-profile-menu public-account-login-menu"
+          id={menuId}
+          role="menu"
+          aria-label={loginMenuLabel ?? loginTitle}
+        >
+          <button
+            className="public-account-login-menu__option is-discord"
+            onClick={() => {
+              closeMenu();
+              onDiscordLogin?.();
+            }}
+            onKeyDown={(event) => handleMenuItemKeyDown(event, 0)}
+            ref={(node) => {
+              menuItemRefs.current[0] = node;
+            }}
+            role="menuitem"
+            type="button"
+          >
+            <DiscordSymbolIcon />
+            <strong>{discordLoginLabel}</strong>
+          </button>
+          <button
+            className="public-account-login-menu__option is-twitch"
+            disabled={!configured}
+            onClick={() => {
+              closeMenu();
+              onLogin();
+            }}
+            onKeyDown={(event) => handleMenuItemKeyDown(event, 1)}
+            ref={(node) => {
+              menuItemRefs.current[1] = node;
+            }}
+            role="menuitem"
+            type="button"
+          >
+            <TwitchGlitchIcon />
+            <strong>{twitchLoginLabel}</strong>
           </button>
         </div>
       ) : null}

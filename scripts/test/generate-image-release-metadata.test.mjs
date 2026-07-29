@@ -119,3 +119,12 @@ test("유효한 Git commit을 확인할 수 없으면 fail-closed 처리한다",
     execution.cleanup();
   }
 });
+
+test("로컬 Compose는 release identity가 없을 때 Git metadata 자동 감지를 사용한다", () => {
+  const compose = readFileSync(path.join(projectRoot, "docker-compose.yml"), "utf8");
+
+  assert.doesNotMatch(compose, /GIT_SHA: \$\{GIT_SHA:-0{40}\}/u);
+  assert.doesNotMatch(compose, /BUILD_TIME: \$\{BUILD_TIME:-1970-01-01T00:00:00\.000Z\}/u);
+  assert.match(compose, /GIT_SHA: \$\{GIT_SHA:-\}/u);
+  assert.match(compose, /BUILD_TIME: \$\{BUILD_TIME:-\}/u);
+});

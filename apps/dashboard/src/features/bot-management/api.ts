@@ -60,7 +60,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export function managementLoginUrl(): string {
-  return `${apiBase}/api/discord/management/oauth/start`;
+  return "/login?return_to=/bot/manage";
 }
 
 export function managementConnectUrl(): string {
@@ -68,7 +68,7 @@ export function managementConnectUrl(): string {
 }
 
 export function botInstallUrl(): string {
-  return `${apiBase}/api/discord/bot/install`;
+  return "/api/discord/bot/install";
 }
 
 export function getManagementConnectSession(
