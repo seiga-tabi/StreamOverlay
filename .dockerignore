@@ -1,10 +1,16 @@
-.git
+.git/*
+!.git/HEAD
+!.git/packed-refs
+!.git/refs/
+!.git/refs/heads/
+!.git/refs/heads/**
 .gitignore
 .DS_Store
 .github
 .ai
 docs
-scripts
+scripts/*
+!scripts/generate-image-release-metadata.mjs
 *.md
 
 node_modules

@@ -261,9 +261,9 @@ export const appConfig = {
   nodeEnv,
   configurationSource: configuredRuntime ? "runtime_file" : "legacy_environment",
   build: {
-    version: env("APP_VERSION", "0.1.0"),
-    gitSha: env("GIT_SHA", "unknown"),
-    builtAt: env("BUILD_TIME", "unknown")
+    version: env("APP_VERSION", imageBuild?.version ?? "0.1.0"),
+    gitSha: env("GIT_SHA", imageBuild?.gitSha ?? "unknown"),
+    builtAt: env("BUILD_TIME", imageBuild?.builtAt ?? "unknown")
   },
   imageBuild,
   allowInsecureDev: configuredRuntime ? false : boolEnv("ALLOW_INSECURE_DEV", false),

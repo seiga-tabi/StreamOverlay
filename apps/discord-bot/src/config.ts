@@ -54,7 +54,28 @@ function safeBaseUrl(value: string, production: boolean, label: string): string 
   }
 }
 
+function imageReleaseMetadata(): { version: string; gitSha: string; builtAt: string } | undefined {
+  const metadataPath = process.env.IMAGE_RELEASE_METADATA_PATH?.trim();
+  if (!metadataPath) return undefined;
+  try {
+    const parsed = JSON.parse(fs.readFileSync(metadataPath, "utf8")) as Record<string, unknown>;
+    if (
+      typeof parsed.version !== "string"
+      || typeof parsed.gitSha !== "string"
+      || typeof parsed.builtAt !== "string"
+    ) return undefined;
+    return {
+      version: parsed.version,
+      gitSha: parsed.gitSha,
+      builtAt: parsed.builtAt
+    };
+  } catch {
+    return undefined;
+  }
+}
+
 const runtimeConfig = loadBotRuntimeConfig(process.env);
+const imageBuild = imageReleaseMetadata();
 const nodeEnv = runtimeConfig?.environment ?? env("NODE_ENV", "development");
 const production = nodeEnv === "production";
 const enabled = runtimeConfig?.features.discordBot ?? boolEnv("DISCORD_BOT_ENABLED", false);
@@ -91,9 +112,9 @@ export const botConfig = Object.freeze({
   healthPort: runtimeConfig ? 3_100 : intEnv("DISCORD_BOT_HEALTH_PORT", 3_100),
   requestTimeoutMs: runtimeConfig ? 5_000 : intEnv("DISCORD_BOT_INTERNAL_TIMEOUT_MS", 5_000),
   release: {
-    version: env("APP_VERSION", "0.1.0-dev"),
-    gitSha: env("GIT_SHA", "unknown"),
-    builtAt: env("BUILD_TIME", "unknown")
+    version: env("APP_VERSION", imageBuild?.version ?? "0.1.0-dev"),
+    gitSha: env("GIT_SHA", imageBuild?.gitSha ?? "unknown"),
+    builtAt: env("BUILD_TIME", imageBuild?.builtAt ?? "unknown")
   }
 });
 

@@ -1,0 +1,233 @@
+name: yoro-production
+
+x-server-image: &server-image
+  image: yoro-server:production-source
+  build:
+    context: ../..
+    dockerfile: apps/server/Dockerfile
+
+x-server-runtime: &server-runtime
+  NODE_ENV: production
+  YORO_CONFIG_FILE: /etc/yoro/runtime.json
+  PORT: "3000"
+  IMAGE_RELEASE_METADATA_PATH: /app/release.json
+  STREAMOPS_LOGS_DIR: /app/logs
+  STREAMOPS_STATE_DIR: /app/.streamops
+  STREAMOPS_REPORTS_DIR: /app/reports
+  DASHBOARD_STATIC_DIR: /app/apps/dashboard/dist
+  OVERLAY_STATIC_DIR: /app/apps/overlay/dist
+
+x-server-config-mounts: &server-config-mounts
+  - /etc/yoro/runtime.json:/etc/yoro/runtime.json:ro
+  - /etc/yoro/legal.json:/etc/yoro/legal.json:ro
+  - /etc/yoro/secrets/database_url:/run/secrets/database_url:ro
+  - /etc/yoro/secrets/twitch_client_secret:/run/secrets/twitch_client_secret:ro
+  - /etc/yoro/secrets/twitch_token_encryption_key:/run/secrets/twitch_token_encryption_key:ro
+  - /etc/yoro/secrets/riot_api_key:/run/secrets/riot_api_key:ro
+  - /etc/yoro/secrets/discord_client_secret:/run/secrets/discord_client_secret:ro
+  - /etc/yoro/secrets/discord_oauth_encryption_key:/run/secrets/discord_oauth_encryption_key:ro
+  - /etc/yoro/secrets/discord_internal_auth_key_server:/run/secrets/discord_internal_auth_key:ro
+  - /etc/yoro/secrets/bridge_shared_secret:/run/secrets/bridge_shared_secret:ro
+  - /etc/yoro/secrets/dashboard_auth_token:/run/secrets/dashboard_auth_token:ro
+  - /etc/yoro/secrets/overlay_access_token:/run/secrets/overlay_access_token:ro
+
+services:
+  config-check:
+    <<: *server-image
+    restart: "no"
+    environment: *server-runtime
+    command:
+      - node
+      - apps/server/dist/scripts/check-yoro-config.js
+      - secrets
+    volumes: *server-config-mounts
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  postgres:
+    image: postgres:16.6-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: streamops_app
+      POSTGRES_DB: streamops
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    command:
+      - postgres
+      - -c
+      - shared_buffers=256MB
+      - -c
+      - effective_cache_size=1GB
+      - -c
+      - work_mem=4MB
+      - -c
+      - maintenance_work_mem=64MB
+      - -c
+      - max_connections=30
+    volumes:
+      - /etc/yoro/secrets/postgres_password:/run/secrets/postgres_password:ro
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - database_internal
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    shm_size: 128m
+    mem_limit: 768m
+    cpus: 0.75
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  server:
+    <<: *server-image
+    restart: unless-stopped
+    depends_on:
+      config-check:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+    environment: *server-runtime
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - /etc/yoro/runtime.json:/etc/yoro/runtime.json:ro
+      - /etc/yoro/legal.json:/etc/yoro/legal.json:ro
+      - /etc/yoro/secrets/database_url:/run/secrets/database_url:ro
+      - /etc/yoro/secrets/twitch_client_secret:/run/secrets/twitch_client_secret:ro
+      - /etc/yoro/secrets/twitch_token_encryption_key:/run/secrets/twitch_token_encryption_key:ro
+      - /etc/yoro/secrets/riot_api_key:/run/secrets/riot_api_key:ro
+      - /etc/yoro/secrets/discord_client_secret:/run/secrets/discord_client_secret:ro
+      - /etc/yoro/secrets/discord_oauth_encryption_key:/run/secrets/discord_oauth_encryption_key:ro
+      - /etc/yoro/secrets/discord_internal_auth_key_server:/run/secrets/discord_internal_auth_key:ro
+      - /etc/yoro/secrets/bridge_shared_secret:/run/secrets/bridge_shared_secret:ro
+      - /etc/yoro/secrets/dashboard_auth_token:/run/secrets/dashboard_auth_token:ro
+      - /etc/yoro/secrets/overlay_access_token:/run/secrets/overlay_access_token:ro
+      - streamops_logs:/app/logs
+      - streamops_reports:/app/reports
+      - streamops_state:/app/.streamops
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - default
+      - database_internal
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch("http://127.0.0.1:3000/health/ready").then((response)=>process.exit(response.ok?0:1)).catch(()=>process.exit(1))
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    stop_grace_period: 30s
+    mem_limit: 768m
+    cpus: 0.75
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  discord-bot:
+    image: yoro-discord-bot:production-source
+    build:
+      context: ../..
+      dockerfile: apps/discord-bot/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      server:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      YORO_CONFIG_FILE: /etc/yoro/runtime.json
+      IMAGE_RELEASE_METADATA_PATH: /app/release.json
+      DISCORD_BOT_INTERNAL_BASE_URL: http://server:3000
+      DISCORD_BOT_HEALTH_PORT: "3100"
+    volumes:
+      - /etc/yoro/runtime.json:/etc/yoro/runtime.json:ro
+      - /etc/yoro/secrets/discord_bot_token:/run/secrets/discord_bot_token:ro
+      - /etc/yoro/secrets/discord_internal_auth_key_bot:/run/secrets/discord_internal_auth_key:ro
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - default
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch("http://127.0.0.1:3100/health/ready").then((response)=>process.exit(response.ok?0:1)).catch(()=>process.exit(1))
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    mem_limit: 256m
+    cpus: 0.25
+    stop_grace_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  cloudflared:
+    image: cloudflare/cloudflared:2026.7.2
+    restart: unless-stopped
+    depends_on:
+      server:
+        condition: service_healthy
+    command:
+      - tunnel
+      - --no-autoupdate
+      - run
+      - --token-file
+      - /run/secrets/cloudflare_tunnel_token
+    volumes:
+      - /etc/yoro/secrets/cloudflare_tunnel_token:/run/secrets/cloudflare_tunnel_token:ro
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - default
+    mem_limit: 128m
+    cpus: 0.15
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+volumes:
+  postgres_data:
+  streamops_logs:
+  streamops_reports:
+  streamops_state:
+
+networks:
+  database_internal:
+    internal: true

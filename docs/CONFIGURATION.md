@@ -39,6 +39,17 @@ runtime mode에서는 이 파일이 필요합니다.
 └── secrets/
 ```
 
+운영 Git checkout의 `deploy/production` 디렉터리에는 `.env` 없이 build와
+기동을 함께 수행하는 독립 Compose 구성이 있습니다.
+
+```bash
+cd deploy/production
+docker compose up -d --build
+```
+
+루트 `docker-compose.yml`은 로컬 개발 호환용이므로 운영 원클릭 명령은
+반드시 `deploy/production`에서 실행합니다.
+
 일반적인 준비 순서:
 
 1. 예제 파일을 운영 호스트의 임시 경로에 복사합니다.

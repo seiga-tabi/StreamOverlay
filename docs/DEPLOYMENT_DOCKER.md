@@ -1,5 +1,19 @@
 # Docker 운영 배포
 
+## 운영 호스트에서 source build와 기동을 한 번에 수행
+
+Git checkout에서 `/etc/yoro/runtime.json`과 `/etc/yoro/secrets/*` 준비를
+마친 경우 다음 명령을 사용합니다.
+
+```bash
+cd deploy/production
+docker compose up -d --build
+```
+
+이 경로의 Compose는 `.env`를 사용하지 않고 실제 Git commit SHA와 build
+시각을 image의 `/app/release.json`에 자동 기록합니다. PostgreSQL migration은
+자동 적용하지 않습니다.
+
 ## 원칙
 
 - 배포 단위는 Git commit SHA로 고정된 Docker image입니다.

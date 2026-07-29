@@ -25,6 +25,19 @@ discord_bot_token
 discord_internal_auth_key
 ```
 
+일반 Docker Compose의 file bind mount는 `uid`, `gid`, `mode` 설정을
+보장하지 않습니다. 운영 원클릭 Compose는 공유 HMAC key를 다음 두 호스트
+파일로 분리해 각 non-root UID에 귀속합니다.
+
+```text
+discord_internal_auth_key_server
+discord_internal_auth_key_bot
+```
+
+두 파일의 값은 같지만 Server에는 전자만, Discord Bot에는 후자만
+mount합니다. 컨테이너 내부 경로는 두 서비스 모두
+`/run/secrets/discord_internal_auth_key`입니다.
+
 Agent 전용:
 
 ```text

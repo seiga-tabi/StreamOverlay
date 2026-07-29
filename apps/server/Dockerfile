@@ -4,6 +4,8 @@ ARG APP_VERSION
 ARG GIT_SHA
 ARG BUILD_TIME
 COPY package.json package-lock.json* tsconfig.base.json ./
+COPY .git /tmp/yoro-git
+COPY scripts/generate-image-release-metadata.mjs ./scripts/generate-image-release-metadata.mjs
 COPY packages ./packages
 COPY apps/server ./apps/server
 COPY apps/dashboard ./apps/dashboard
@@ -13,6 +15,7 @@ ENV NODE_ENV=production \
     APP_VERSION=${APP_VERSION} \
     GIT_SHA=${GIT_SHA} \
     BUILD_TIME=${BUILD_TIME}
+RUN node scripts/generate-image-release-metadata.mjs /tmp/yoro-release.json /tmp/yoro-git
 RUN npm ci --include=dev
 RUN npm run build:shared
 RUN npm run build:server
@@ -28,17 +31,7 @@ RUN node apps/server/dist/scripts/smoke-palworld-runtime-artifacts.js \
 
 FROM node:20-bookworm-slim AS runtime
 WORKDIR /app
-ARG APP_VERSION=0.1.0
-ARG GIT_SHA=unknown
-ARG BUILD_TIME=unknown
-LABEL org.opencontainers.image.title="YORO.gg StreamOps" \
-      org.opencontainers.image.version="${APP_VERSION}" \
-      org.opencontainers.image.revision="${GIT_SHA}" \
-      org.opencontainers.image.created="${BUILD_TIME}"
 ENV NODE_ENV=production \
-    APP_VERSION=${APP_VERSION} \
-    GIT_SHA=${GIT_SHA} \
-    BUILD_TIME=${BUILD_TIME} \
     IMAGE_RELEASE_METADATA_PATH=/app/release.json \
     PORT=3000 \
     PUBLIC_BASE_URL=http://localhost:3000 \
@@ -49,7 +42,7 @@ ENV NODE_ENV=production \
     STREAMOPS_REPORTS_DIR=/app/reports \
     DASHBOARD_STATIC_DIR=/app/apps/dashboard/dist \
     OVERLAY_STATIC_DIR=/app/apps/overlay/dist
-RUN node -e "const fs=require('node:fs'); const value={version:process.env.APP_VERSION,gitSha:process.env.GIT_SHA,builtAt:process.env.BUILD_TIME}; if(!/^\\d+\\.\\d+\\.\\d+(?:[-+][0-9A-Za-z.-]+)?$/.test(value.version)||!(/^[a-f0-9]{7,40}$/i.test(value.gitSha))||!(/^\\d{4}-\\d{2}-\\d{2}T/.test(value.builtAt))||!Number.isFinite(Date.parse(value.builtAt))) throw new Error('유효한 APP_VERSION, GIT_SHA, BUILD_TIME build args가 필요합니다.'); fs.writeFileSync('/app/release.json', JSON.stringify(value)+'\n', {mode:0o444})"
+COPY --from=build /tmp/yoro-release.json /app/release.json
 COPY package.json package-lock.json* ./
 COPY packages/shared/package.json ./packages/shared/package.json
 COPY apps/bridge/package.json ./apps/bridge/package.json
