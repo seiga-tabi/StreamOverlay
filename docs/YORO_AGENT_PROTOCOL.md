@@ -1,6 +1,6 @@
 # YORO Agent 등록과 상태 Ingestion protocol
 
-이 문서는 Server API와 test client가 구현한 protocol v1을 설명합니다. 실제 Palworld 서버에 연결하는 Agent daemon, RCON, AdminPassword, player name 수집, Notification Worker와 Discord 상태 메시지는 아직 구현하지 않았습니다.
+이 문서는 Server API와 YORO Agent daemon이 사용하는 protocol v1을 설명합니다. Agent는 공식 Palworld REST의 읽기 endpoint에서 집계 상태만 수집합니다. RCON, player 개인정보 수집, Notification Worker와 Discord 상태 메시지는 아직 구현하지 않았습니다.
 
 ## 기능 경계
 
@@ -96,3 +96,4 @@ History에는 allowlist metric만 column으로 저장하며 raw payload, player 
 7. credential 원문이 Database·로그에 없는지 sentinel test로 확인합니다.
 8. 실제 운영 활성화는 Agent daemon과 Notification Worker 작업과 별도 승인으로 진행합니다.
 
+Agent의 credential 저장, loopback REST 정책, retry, health와 로컬 실행 경계는 `docs/YORO_AGENT.md`를 함께 확인합니다.

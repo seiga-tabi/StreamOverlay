@@ -61,3 +61,8 @@ ID만 받는 전역 조회 method는 만들지 않습니다. 조회·수정·삭
 Discord OAuth onboarding은 `0004_discord_oauth_onboarding`부터 이 기반을 사용합니다. OAuth가 생성한 Organization과 Guild 관계도 transaction 안에서 저장되며, setup token·OAuth state는 원문 대신 SHA-256 hash만 저장합니다.
 
 `0007_agent_registration_and_ingestion`부터 Agent 등록과 status 저장 기반을 사용합니다. Agent credential과 nonce는 SHA-256 hash만 저장하고, current·history·online/offline event는 하나의 transaction에서 갱신합니다. 오래된 관측은 current를 덮지 않습니다. 실제 Agent daemon과 Notification Worker는 아직 구현하지 않았습니다.
+# YORO Agent 상태 경계
+
+Agent는 Database에 직접 연결하지 않습니다. bootstrap 등록과 status ingestion은 Server API만 통하며 credential 원문은 Agent의 권한 제한 파일에만 남습니다. Server Database에는 credential hash, current status, allowlist history metric, online/offline event만 저장합니다.
+
+Agent 로컬 offline buffer는 마지막 미전송 payload 한 개만 보존하며 Database JSON fallback으로 사용하지 않습니다. Notification Worker와 Discord 상태 메시지는 별도 후속 단계입니다.

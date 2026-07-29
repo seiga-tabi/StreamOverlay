@@ -44,6 +44,8 @@ const TOKEN_PATTERN = /^[A-Za-z0-9_-]{32,192}$/u;
 const VERSION_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._+-]{0,79}$/u;
 const ISO_TIMESTAMP_PATTERN =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/u;
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 
 function record(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -76,6 +78,73 @@ export function parseAgentRegistrationInput(value: unknown): AgentRegistrationIn
     agentVersion: value.agentVersion,
     platform: value.platform,
     architecture: value.architecture
+  });
+}
+
+export function parseAgentRegistrationResponse(
+  value: unknown,
+  expectedServerOrigin?: string
+): AgentRegistrationResponse | undefined {
+  if (
+    !record(value)
+    || !exactKeys(value, ["installationId", "agentToken", "gameServer", "ingestion"])
+    || typeof value.installationId !== "string"
+    || !UUID_PATTERN.test(value.installationId)
+    || typeof value.agentToken !== "string"
+    || !TOKEN_PATTERN.test(value.agentToken)
+    || !record(value.gameServer)
+    || !exactKeys(value.gameServer, ["id", "gameType"])
+    || typeof value.gameServer.id !== "string"
+    || !UUID_PATTERN.test(value.gameServer.id)
+    || value.gameServer.gameType !== "palworld"
+    || !record(value.ingestion)
+    || !exactKeys(value.ingestion, ["endpoint", "payloadVersion"])
+    || typeof value.ingestion.endpoint !== "string"
+    || value.ingestion.payloadVersion !== YORO_AGENT_PAYLOAD_VERSION
+  ) return undefined;
+  let endpoint: URL;
+  try {
+    endpoint = new URL(value.ingestion.endpoint);
+  } catch {
+    return undefined;
+  }
+  if (
+    endpoint.username
+    || endpoint.password
+    || endpoint.search
+    || endpoint.hash
+    || endpoint.pathname !== "/api/agent/v1/status"
+    || (expectedServerOrigin !== undefined && endpoint.origin !== expectedServerOrigin)
+  ) return undefined;
+  return Object.freeze({
+    installationId: value.installationId,
+    agentToken: value.agentToken,
+    gameServer: Object.freeze({
+      id: value.gameServer.id,
+      gameType: "palworld" as const
+    }),
+    ingestion: Object.freeze({
+      endpoint: endpoint.href,
+      payloadVersion: YORO_AGENT_PAYLOAD_VERSION
+    })
+  });
+}
+
+export function parseAgentIngestionResponse(
+  value: unknown
+): AgentIngestionResponse | undefined {
+  if (
+    !record(value)
+    || !exactKeys(value, ["accepted", "currentUpdated", "duplicate"])
+    || value.accepted !== true
+    || typeof value.currentUpdated !== "boolean"
+    || typeof value.duplicate !== "boolean"
+    || (value.currentUpdated && value.duplicate)
+  ) return undefined;
+  return Object.freeze({
+    accepted: true,
+    currentUpdated: value.currentUpdated,
+    duplicate: value.duplicate
   });
 }
 

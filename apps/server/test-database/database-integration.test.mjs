@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import crypto from "node:crypto";
 import test from "node:test";
 import { Pool } from "pg";
+import { AgentClient } from "../../agent/dist/agent-client.js";
+import { appConfig } from "../dist/config.js";
 import { SafeDatabaseError } from "../dist/database/errors.js";
 import { loadMigrationManifest } from "../dist/database/migration-manifest.js";
 import {
@@ -534,6 +536,99 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
       )).rows[0].count,
       0
     );
+  });
+
+  await t.test("실제 Agent client가 PostgreSQL service와 register·status 왕복한다", async () => {
+    const management = new DiscordManagementRepository(pool);
+    const serverA = (await gameServers.list(contextA))[0];
+    const membershipA = await management.requireMembership(userA, organizationA);
+    const bootstrapToken = crypto.randomBytes(48).toString("base64url");
+    await withTransaction(pool, async (client) => {
+      await new DiscordManagementRepository(client).issueAgentBootstrap({
+        context: membershipA.context,
+        role: membershipA.role,
+        gameServerId: serverA.id,
+        tokenHash: crypto.createHash("sha256").update(bootstrapToken).digest(),
+        expiresAt: new Date(Date.now() + 10 * 60_000)
+      });
+    });
+    const service = new AgentIngestionService(pool, {});
+    const fetchAdapter = async (url, init) => {
+      try {
+        const body = JSON.parse(String(init.body));
+        if (new URL(url).pathname === "/api/agent/v1/register") {
+          return new Response(JSON.stringify(await service.register(body)), {
+            status: 201,
+            headers: { "content-type": "application/json" }
+          });
+        }
+        const authorization = init.headers.Authorization;
+        const result = await service.ingest({
+          agentToken: authorization.slice("Bearer ".length),
+          requestTimestamp: Number(init.headers["X-Yoro-Agent-Timestamp"]),
+          nonce: init.headers["X-Yoro-Agent-Nonce"],
+          payload: body
+        });
+        return new Response(JSON.stringify(result), {
+          status: 202,
+          headers: { "content-type": "application/json" }
+        });
+      } catch (error) {
+        const status = error instanceof AgentIngestionError ? error.status : 500;
+        return new Response(JSON.stringify({ error: "agent_request_rejected" }), {
+          status,
+          headers: { "content-type": "application/json" }
+        });
+      }
+    };
+    const serverOrigin = new URL(appConfig.publicBaseUrl).origin;
+    const client = new AgentClient({
+      serverOrigin,
+      timeoutMs: 1_000,
+      maximumRetryAttempts: 1
+    }, fetchAdapter);
+    const registration = await client.register(
+      bootstrapToken,
+      new AbortController().signal
+    );
+    const payload = {
+      payloadVersion: 1,
+      observedAt: new Date().toISOString(),
+      online: true,
+      players: 3,
+      maxPlayers: 16,
+      gameVersion: "agent-e2e-1"
+    };
+    const accepted = await client.sendStatus({
+      schemaVersion: 1,
+      installationId: registration.installationId,
+      agentToken: registration.agentToken,
+      payloadVersion: 1,
+      serverOrigin,
+      ingestionEndpoint: registration.ingestion.endpoint,
+      createdAt: new Date().toISOString()
+    }, payload, new AbortController().signal);
+    assert.deepEqual(accepted, {
+      accepted: true,
+      currentUpdated: true,
+      duplicate: false
+    });
+    const current = await pool.query(
+      `SELECT players, game_version
+       FROM server_current_status
+       WHERE organization_id = $1 AND game_server_id = $2`,
+      [organizationA, serverA.id]
+    );
+    assert.equal(current.rows[0].players, 3);
+    assert.equal(current.rows[0].game_version, "agent-e2e-1");
+    const persisted = JSON.stringify(await pool.query(
+      `SELECT encode(credential_hash, 'hex') AS credential_hash
+       FROM agent_installations
+       WHERE organization_id = $1 AND game_server_id = $2`,
+      [organizationA, serverA.id]
+    ));
+    assert.doesNotMatch(persisted, new RegExp(registration.agentToken, "u"));
+    assert.doesNotMatch(persisted, new RegExp(bootstrapToken, "u"));
   });
 
   await t.test("management session은 opaque token과 CSRF hash만 저장하고 즉시 폐기된다", async () => {

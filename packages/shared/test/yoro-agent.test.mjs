@@ -1,7 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  parseAgentIngestionResponse,
   parseAgentRegistrationInput,
+  parseAgentRegistrationResponse,
   parsePalworldAgentStatusPayload
 } from "../dist/index.js";
 
@@ -31,6 +33,51 @@ test("Agent 등록 요청은 정확한 allowlist field만 허용한다", () => {
   assert.equal(parseAgentRegistrationInput({ ...value, organizationId: "forged" }), undefined);
   assert.equal(parseAgentRegistrationInput({ ...value, platform: "darwin" }), undefined);
   assert.equal(parseAgentRegistrationInput({ ...value, architecture: "x86" }), undefined);
+});
+
+test("Agent 등록 응답은 Server origin과 고정 ingestion endpoint를 검증한다", () => {
+  const response = {
+    installationId: "10000000-0000-4000-8000-000000000001",
+    agentToken: "b".repeat(64),
+    gameServer: {
+      id: "20000000-0000-4000-8000-000000000001",
+      gameType: "palworld"
+    },
+    ingestion: {
+      endpoint: "https://yoro.example/api/agent/v1/status",
+      payloadVersion: 1
+    }
+  };
+  assert.ok(parseAgentRegistrationResponse(response, "https://yoro.example"));
+  assert.equal(parseAgentRegistrationResponse(response, "https://other.example"), undefined);
+  assert.equal(parseAgentRegistrationResponse({
+    ...response,
+    ingestion: { ...response.ingestion, endpoint: "https://yoro.example/redirect" }
+  }), undefined);
+  assert.equal(parseAgentRegistrationResponse({ ...response, credentialHash: "unsafe" }), undefined);
+});
+
+test("Agent 상태 응답은 exact schema와 모순된 상태를 거부한다", () => {
+  assert.deepEqual(parseAgentIngestionResponse({
+    accepted: true,
+    currentUpdated: true,
+    duplicate: false
+  }), {
+    accepted: true,
+    currentUpdated: true,
+    duplicate: false
+  });
+  assert.equal(parseAgentIngestionResponse({
+    accepted: true,
+    currentUpdated: true,
+    duplicate: true
+  }), undefined);
+  assert.equal(parseAgentIngestionResponse({
+    accepted: true,
+    currentUpdated: false,
+    duplicate: false,
+    raw: "unsafe"
+  }), undefined);
 });
 
 test("Palworld Agent status 정상 payload를 정규화한다", () => {

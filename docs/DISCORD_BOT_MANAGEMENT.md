@@ -11,6 +11,8 @@
 
 관리 기능은 `DISCORD_BOT_MANAGEMENT_ENABLED=false`가 기본값입니다. 활성화하려면 Database와 Discord SaaS가 모두 준비되어야 하며 migration은 Server 시작 과정에서 자동 적용하지 않습니다.
 
+Dashboard가 발급한 bootstrap token을 소비하는 실제 daemon 계약은 `docs/YORO_AGENT.md`와 `docs/YORO_AGENT_PROTOCOL.md`에 분리되어 있습니다. Dashboard나 Discord Bot은 Agent credential 원문을 재표시하지 않습니다.
+
 ## 관리 session
 
 로그인 성공 시 YORO 전용 opaque session token과 CSRF token을 새로 생성합니다.
