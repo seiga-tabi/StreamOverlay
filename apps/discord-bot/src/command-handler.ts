@@ -17,8 +17,8 @@ const messages = {
   ko: {
     dmDenied: "이 명령은 Discord 서버 안에서만 사용할 수 있습니다.",
     permissionDenied: "서버 소유자 또는 서버 관리 권한이 있는 사용자만 실행할 수 있습니다.",
-    setupTitle: "YORO Bot 설정을 시작합니다.",
-    setupBody: "아래 링크는 10분 후 만료되며 한 번만 사용할 수 있습니다.",
+    setupTitle: "YORO Bot 설정은 웹 Dashboard에서 진행할 수 있습니다.",
+    setupBody: "아래 링크에서 Discord 서버 연결을 완료해 주세요. 링크는 10분 후 만료되며 한 번만 사용할 수 있습니다.",
     setupButton: "웹에서 서버 연결하기",
     dashboardTitle: "YORO Bot 관리 화면",
     dashboardButton: "Dashboard 열기",
@@ -26,7 +26,7 @@ const messages = {
     setupActive: "이미 진행 중인 설정 링크가 있습니다. 기존 링크가 만료된 뒤 다시 시도해 주세요.",
     help: [
       "**/yoro setup**",
-      "Discord 서버와 YORO.gg 연결을 시작합니다.",
+      "웹 Dashboard에서 Discord 서버와 YORO.gg 연결을 시작하거나 복구합니다.",
       "",
       "**/yoro help**",
       "현재 사용할 수 있는 명령을 확인합니다.",
@@ -39,8 +39,8 @@ const messages = {
   ja: {
     dmDenied: "このコマンドはDiscordサーバー内でのみ使用できます。",
     permissionDenied: "サーバー所有者またはサーバー管理権限を持つユーザーのみ実行できます。",
-    setupTitle: "YORO Botの設定を開始します。",
-    setupBody: "以下のリンクは10分後に期限切れとなり、一度だけ使用できます。",
+    setupTitle: "YORO Botの設定はWeb Dashboardから行えます。",
+    setupBody: "以下のリンクからDiscordサーバー連携を完了してください。リンクは10分後に期限切れとなり、一度だけ使用できます。",
     setupButton: "Webでサーバーを連携",
     dashboardTitle: "YORO Bot管理画面",
     dashboardButton: "Dashboardを開く",
@@ -48,7 +48,7 @@ const messages = {
     setupActive: "進行中の設定リンクがあります。既存リンクの期限切れ後にもう一度お試しください。",
     help: [
       "**/yoro setup**",
-      "DiscordサーバーとYORO.ggの連携を開始します。",
+      "Web DashboardでDiscordサーバーとYORO.ggの連携を開始または復旧します。",
       "",
       "**/yoro help**",
       "現在利用できるコマンドを確認します。",

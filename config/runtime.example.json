@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "environment": "production",
+  "public": {
+    "baseUrl": "https://yoro.gg",
+    "dashboardOrigin": "https://yoro.gg",
+    "overlayOrigin": "https://yoro.gg"
+  },
+  "features": {
+    "database": true,
+    "discordSaas": true,
+    "discordBot": true,
+    "discordBotManagement": true,
+    "agentIngestion": true,
+    "twitchEventSub": true
+  },
+  "database": {
+    "poolMax": 10,
+    "sslMode": "disable"
+  },
+  "discord": {
+    "clientId": "123456789012345678",
+    "applicationId": "123456789012345678",
+    "oauthRedirectUri": "https://yoro.gg/api/discord/oauth/callback",
+    "managementOauthRedirectUri": "https://yoro.gg/api/discord/management/oauth/callback"
+  },
+  "twitch": {
+    "clientId": "public-twitch-client-id",
+    "redirectUri": "https://yoro.gg/api/twitch/auth/callback",
+    "publicRedirectUri": "https://yoro.gg/api/public/twitch/auth/callback",
+    "eventSubSubscriptions": [
+      "stream.online",
+      "stream.offline",
+      "channel.chat.message",
+      "channel.channel_points_custom_reward_redemption.add"
+    ]
+  },
+  "riot": {
+    "accountRegion": "asia",
+    "lolPlatform": "kr"
+  },
+  "agent": {
+    "statusIntervalSeconds": 300,
+    "requestTimeoutMs": 10000,
+    "maxRetryAttempts": 5,
+    "ingestionCredentialTtlDays": 90
+  }
+}

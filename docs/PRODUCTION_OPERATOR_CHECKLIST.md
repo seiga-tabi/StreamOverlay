@@ -4,15 +4,21 @@
 
 ## Runtime 설정
 
-- [ ] 실제 `LEGAL_*` 운영정보와 Riot/Twitch 자격 증명을 운영 secret 저장소에 입력했다.
+- [ ] `/etc/yoro/runtime.json`에 공개 origin, 공개 client/application ID와 feature flag를 확정했다.
+- [ ] `/etc/yoro/legal.json`에 실제 법적 운영정보를 확정했다.
+- [ ] `/etc/yoro/secrets`는 `0700`, 활성 기능의 secret file은 `0600`이며 symlink가 아니다.
+- [ ] 실제 Riot/Twitch/Discord 자격 증명을 목적별 secret file로 분리했다.
+- [ ] Server, Discord Bot, Agent에 필요한 secret만 각각 mount했다.
 - [ ] image의 `APP_VERSION`, `GIT_SHA`, `BUILD_TIME`이 실제 release와 일치한다.
-- [ ] 다른 secret과 재사용하지 않은 `TWITCH_TOKEN_ENCRYPTION_KEY`를 secret 저장소에 입력했다.
+- [ ] 다른 secret과 재사용하지 않은 Twitch·Discord encryption key를 별도 secret file에 입력했다.
 - [ ] Twitch OAuth token state의 배포 전 backup과 암호화 migration rollback 절차를 확인했다.
 - [ ] backup이 application state directory 외부의 암호화 저장소에 있고 `0700`/`0600` 권한을 사용한다.
 - [ ] staging에서 명시적 token migration 후 첫 번째·두 번째 재시작과 backup 복원 훈련을 통과했다.
-- [ ] `chmod 600 .env`로 환경 파일 권한을 제한했다.
-- [ ] `npm run configure:production -- --domain yoro.gg` dry-run이 통과했다.
-- [ ] `npm run configure:production -- --domain yoro.gg --write` 후 `npm run validate:runtime`이 통과했다.
+- [ ] production 호스트와 Compose에 운영 `.env`가 남아 있지 않다.
+- [ ] `npm run config:check`가 통과했다.
+- [ ] `npm run secrets:check`가 활성 기능의 필수 secret만 검증하고 통과했다.
+- [ ] `npm run config:explain`이 값 없이 기능별 구성 상태만 출력했다.
+- [ ] `npm run validate:runtime`이 통과했다.
 - [ ] 검증 로그에 secret 값이 노출되지 않았음을 확인했다.
 
 ## Edge와 DNS

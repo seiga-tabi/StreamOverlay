@@ -228,6 +228,22 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
   if (method === "GET" && (pathname === "/api/discord/oauth/start" || pathname === "/api/discord/oauth/callback")) {
     return "OAUTH_CALLBACK";
   }
+  if (method === "GET" && pathname === "/api/discord/bot/install") return "PUBLIC";
+  if (
+    method === "GET"
+    && (
+      pathname === "/api/discord/management/connect/start"
+      || pathname === "/api/discord/management/oauth/start"
+      || pathname === "/api/discord/management/oauth/callback"
+    )
+  ) return "OAUTH_CALLBACK";
+  if (
+    pathname === "/api/discord/management/connect/session"
+    || pathname === "/api/discord/management/guilds/claim"
+    || pathname === "/api/discord/management/session"
+    || pathname === "/api/discord/management/logout"
+    || /^\/api\/discord\/management\/organizations\/[^/]+\/game-servers(?:\/[^/]+(?:\/(?:disable|agent-token))?)?$/u.test(pathname)
+  ) return "PUBLIC";
   if (pathname.startsWith("/api/")) return "DASHBOARD_ADMIN";
   return "PUBLIC";
 }

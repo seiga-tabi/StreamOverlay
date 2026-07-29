@@ -236,6 +236,8 @@ test("/yoro setup은 먼저 ephemeral defer하고 일회용 link button으로 �
   assert.equal(calls.deferReply[0].flags, MessageFlags.Ephemeral);
   assert.deepEqual(calls.editReply[0].allowedMentions, { parse: [] });
   assert.equal(calls.editReply[0].components.length, 1);
+  assert.match(calls.editReply[0].content, /웹 Dashboard/u);
+  assert.match(calls.editReply[0].content, /10분 후 만료/u);
 });
 
 test("DM과 일반 member의 setup 요청은 ephemeral로 차단한다", async () => {

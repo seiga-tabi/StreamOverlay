@@ -56,6 +56,14 @@
       "checksumSha256": "94eca9c0bc6ec5aafbd2a5aa20e9891e48b9152a36a68e886ded987b102cb2eb",
       "destructive": false,
       "transaction": true
+    },
+    {
+      "id": "0008_web_management_guild_claim",
+      "file": "0008_web_management_guild_claim.sql",
+      "description": "웹 중심 Discord 관리 OAuth와 설치 Guild claim 진입 기반",
+      "checksumSha256": "b6fb2f3f6771f543f4e873d6711f4006db44b264a1dbe720a67a7322af341fd3",
+      "destructive": false,
+      "transaction": true
     }
   ]
 }

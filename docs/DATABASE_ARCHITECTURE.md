@@ -4,22 +4,29 @@ PostgreSQL은 향후 Discord SaaS와 게임 서버 상태 기능 전용 기반�
 
 ## 활성화
 
-기본값은 `DATABASE_ENABLED=false`입니다. 이 상태에서는 pool 생성, 연결, migration 검사가 모두 생략되며 기존 Server readiness에 영향을 주지 않습니다.
+기본값은 `features.database=false`입니다. 이 상태에서는
+`/run/secrets/database_url`을 읽지 않고 pool 생성, 연결, migration 검사를 모두
+생략하므로 기존 Server readiness에 영향을 주지 않습니다.
 
-활성화 시에는 `DATABASE_URL_FILE`을 우선 사용합니다.
+활성화 설정은 `/etc/yoro/runtime.json`에 둡니다.
 
-```text
-DATABASE_ENABLED=true
-DATABASE_URL_FILE=/run/secrets/database_url
-DATABASE_POOL_MAX=10
-DATABASE_IDLE_TIMEOUT_MS=30000
-DATABASE_CONNECTION_TIMEOUT_MS=5000
-DATABASE_STATEMENT_TIMEOUT_MS=10000
-DATABASE_MIGRATION_MODE=check
-DATABASE_SSL_MODE=disable
+```json
+{
+  "features": {
+    "database": true
+  },
+  "database": {
+    "poolMax": 10,
+    "sslMode": "disable"
+  }
+}
 ```
 
-`DATABASE_URL`과 `DATABASE_URL_FILE`은 동시에 설정할 수 없습니다. production은 기본 계정·약한 password를 거부하고, 공개 hostname에는 `DATABASE_SSL_MODE=verify-full`을 요구합니다. URL과 credential은 로그·health 응답에 포함하지 않습니다.
+연결 URL은 고정 경로 `/run/secrets/database_url`에서만 읽습니다. connection,
+idle, statement timeout과 migration mode는 검증된 TypeScript 기본값을
+사용합니다. production은 기본 계정·약한 password를 거부하고, 공개
+hostname에는 `sslMode=verify-full`을 요구합니다. URL과 credential은
+로그·health 응답에 포함하지 않습니다.
 
 ## Local·staging Compose
 
@@ -29,7 +36,10 @@ PostgreSQL은 `database` profile에만 존재하며 host port를 기본 공개�
 docker compose --env-file /dev/null --profile database up -d postgres
 ```
 
-실제 실행 전 repository 밖 또는 권한이 제한된 `secrets/postgres_password`를 준비하고 `0600` 권한을 적용합니다. Server 연결 URL은 별도 `/run/secrets/database_url` 파일로 제공합니다.
+실제 실행 전 `/etc/yoro/secrets/postgres_password`와
+`/etc/yoro/secrets/database_url`을 준비하고 `0600` 권한을 적용합니다.
+Server 컨테이너에는 연결 URL만, PostgreSQL 컨테이너에는 password 파일만
+제공합니다.
 
 PostgreSQL은 application state와 분리된 `postgres_data` volume과 internal network를 사용합니다. 기본 pool 10개이며 향후 Bot·Worker pool을 포함한 총합은 PostgreSQL `max_connections=30` 안에서 운영합니다. 4GB VPS에서는 Server, Bot, Worker의 pool 합계를 먼저 계산한 뒤 늘립니다.
 
@@ -60,7 +70,9 @@ ID만 받는 전역 조회 method는 만들지 않습니다. 조회·수정·삭
 
 Discord OAuth onboarding은 `0004_discord_oauth_onboarding`부터 이 기반을 사용합니다. OAuth가 생성한 Organization과 Guild 관계도 transaction 안에서 저장되며, setup token·OAuth state는 원문 대신 SHA-256 hash만 저장합니다.
 
-`0007_agent_registration_and_ingestion`부터 Agent 등록과 status 저장 기반을 사용합니다. Agent credential과 nonce는 SHA-256 hash만 저장하고, current·history·online/offline event는 하나의 transaction에서 갱신합니다. 오래된 관측은 current를 덮지 않습니다. 실제 Agent daemon과 Notification Worker는 아직 구현하지 않았습니다.
+`0007_agent_registration_and_ingestion`부터 Agent 등록과 status 저장 기반을 사용합니다. Agent credential과 nonce는 SHA-256 hash만 저장하고, current·history·online/offline event는 하나의 transaction에서 갱신합니다. 오래된 관측은 current를 덮지 않습니다. Agent daemon은 별도 process로 구현되어 있고 Notification Worker는 아직 구현하지 않았습니다.
+
+`0008_web_management_guild_claim`은 기존 setup session에 `web_management` 발급 목적을 additive하게 허용합니다. 웹 claim은 관리 가능한 Discord Guild와 Bot 설치 관찰을 재검증하고 Organization·membership·Guild·installation·management session을 하나의 transaction으로 확정합니다.
 # YORO Agent 상태 경계
 
 Agent는 Database에 직접 연결하지 않습니다. bootstrap 등록과 status ingestion은 Server API만 통하며 credential 원문은 Agent의 권한 제한 파일에만 남습니다. Server Database에는 credential hash, current status, allowlist history metric, online/offline event만 저장합니다.

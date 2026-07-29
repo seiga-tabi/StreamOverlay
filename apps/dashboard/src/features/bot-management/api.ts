@@ -13,6 +13,24 @@ export type BotManagementSession =
       organizations: BotManagementOrganization[];
     };
 
+export type BotManagementGuild = {
+  id: string;
+  name: string;
+  iconUrl?: string;
+  manageable: true;
+  botInstalled: boolean;
+};
+
+export type BotManagementConnectSession =
+  | { authenticated: false }
+  | {
+      authenticated: true;
+      csrfToken: string;
+      installedGuilds: Array<BotManagementGuild & { botInstalled: true }>;
+      missingBotGuilds: Array<BotManagementGuild & { botInstalled: false }>;
+      organizations: Array<{ id: string; displayName: string }>;
+    };
+
 export class BotManagementApiError extends Error {
   constructor(readonly status: number, readonly code?: string) {
     super(code ?? `http_${status}`);
@@ -43,6 +61,42 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export function managementLoginUrl(): string {
   return `${apiBase}/api/discord/management/oauth/start`;
+}
+
+export function managementConnectUrl(): string {
+  return `${apiBase}/api/discord/management/connect/start`;
+}
+
+export function botInstallUrl(): string {
+  return `${apiBase}/api/discord/bot/install`;
+}
+
+export function getManagementConnectSession(
+  signal?: AbortSignal
+): Promise<BotManagementConnectSession> {
+  return request("/api/discord/management/connect/session", { signal });
+}
+
+export function claimManagementGuild(input: {
+  guildId: string;
+  organizationId?: string;
+  csrfToken: string;
+}): Promise<{
+  completed: true;
+  guild: { id: string; name: string };
+  organization: { id: string; displayName: string };
+}> {
+  return request("/api/discord/management/guilds/claim", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Discord-CSRF": input.csrfToken
+    },
+    body: JSON.stringify({
+      guildId: input.guildId,
+      ...(input.organizationId ? { organizationId: input.organizationId } : {})
+    })
+  });
 }
 
 export function getManagementSession(signal?: AbortSignal): Promise<BotManagementSession> {

@@ -2,9 +2,9 @@
 
 Bot 설치와 `/yoro setup` 운영 절차는 `docs/DISCORD_BOT_GATEWAY.md`를 함께 참고합니다.
 
-이 기능은 Discord 사용자 OAuth로 관리 가능한 Guild를 검증하고 Organization에 연결하는 초기 설정 흐름입니다. Bot Gateway와 `/yoro setup`은 별도 프로세스로 추가됐으며, Agent·상태 수집·임의 메시지 전송은 포함하지 않습니다.
+기본 연결 경로는 `/bot`에서 Bot을 설치한 뒤 `/bot/manage`에서 Discord로 로그인하는 웹 중심 흐름입니다. `identify guilds`로 확인한 관리 가능 Guild와 현재 Application ID의 활성 설치 관찰을 교집합으로 계산하고, 선택한 Guild만 Organization에 연결합니다. `/yoro setup`은 Guild·실행자 binding을 유지한 보조·복구 경로로 남습니다.
 
-연결 완료 후 Organization 관리는 별도의 `identify` 전용 management OAuth와 YORO opaque session을 사용합니다. onboarding setup token이나 임시 Discord access token을 관리 로그인으로 재사용하지 않습니다. 자세한 내용은 `docs/DISCORD_BOT_MANAGEMENT.md`를 참고합니다.
+연결 완료 transaction에서 새 YORO opaque management session을 발급하므로 같은 흐름에서 Dashboard로 진입할 수 있습니다. 기존 사용자 로그인은 별도의 `identify` 전용 management OAuth를 사용합니다. setup token, OAuth access token과 management session은 서로 재사용하지 않습니다. 자세한 내용은 `docs/DISCORD_BOT_MANAGEMENT.md`를 참고합니다.
 
 ## Discord Developer Portal
 
@@ -14,11 +14,13 @@ OAuth2 redirect URI에는 운영자가 확정한 단일 callback만 등록합니
 https://서비스-origin/api/discord/oauth/callback
 ```
 
-요청 scope는 `identify guilds`뿐입니다. 사용자 OAuth와 Bot 설치의 `bot`, `applications.commands` scope를 섞지 않습니다.
+Guild 연결 OAuth scope는 `identify guilds`뿐입니다. Bot 설치 URL은 Server의 고정 Application ID와 `bot applications.commands`, permission integer `0`으로 생성하며 브라우저 query를 신뢰하지 않습니다.
 
 ## 활성화 순서
 
-기본값은 `DISCORD_SAAS_ENABLED=false`입니다. Database가 비활성 상태이면 기존 방송 기능은 그대로 동작하고 Discord onboarding API만 `503 database_unavailable`을 반환합니다.
+기본값은 `runtime.json`의 `features.discordSaas=false`입니다. Database가
+비활성 상태이면 기존 방송 기능은 그대로 동작하고 Discord onboarding API만
+`503 database_unavailable`을 반환합니다.
 
 운영 적용은 다음 순서를 따릅니다.
 
@@ -40,11 +42,11 @@ Server 시작 과정에서는 migration을 자동 적용하지 않습니다.
 
 ## Secret
 
-production에서는 다음 `_FILE` 방식을 우선합니다.
+production에서는 환경 변수 경로를 받지 않고 다음 고정 파일만 사용합니다.
 
 ```text
-DISCORD_CLIENT_SECRET_FILE=/run/secrets/discord_client_secret
-DISCORD_OAUTH_TOKEN_ENCRYPTION_KEY_FILE=/run/secrets/discord_oauth_token_encryption_key
+/run/secrets/discord_client_secret
+/run/secrets/discord_oauth_encryption_key
 ```
 
 파일은 regular file, symlink 아님, `0600`이어야 합니다. OAuth encryption key는 강한 32바이트 key이며 Twitch token encryption key와 Dashboard 인증 secret을 재사용할 수 없습니다.
@@ -65,6 +67,12 @@ Guild는 Discord API에서 매번 최신 목록을 조회해 다음 중 하나�
 
 Permission bitfield는 `BigInt`로 처리합니다. Browser가 보낸 Guild 이름·owner·permission은 신뢰하지 않습니다. 하나의 Guild는 한 Organization에만 연결되며 기존 연결을 자동 이동하거나 탈취하지 않습니다.
 
+웹 claim 직전에는 Discord API의 최신 권한, 현재 Application ID의 `discord_bot_installation_observations.status=observed`, Organization membership과 entitlement를 transaction 경계에서 다시 확인합니다. 새 Organization을 선택하면 Organization, owner membership, Free entitlement, Guild, installation, audit log와 management session을 함께 저장합니다. 어느 단계든 실패하면 부분 record를 남기지 않습니다.
+
 ## Rollback
 
-기능 장애 시 `DISCORD_SAAS_ENABLED=false`로 되돌리면 기존 Twitch·Followers·Riot ID·Overlay 기능은 Database onboarding과 독립적으로 동작합니다. 적용한 migration SQL을 수정하거나 자동 down migration하지 않습니다. application rollback이 새 schema와 호환되지 않으면 배포 전 PostgreSQL backup을 별도 승인으로 복원합니다.
+기능 장애 시 `runtime.json`의 `features.discordSaas=false`로 되돌리면 기존
+Twitch·Followers·Riot ID·Overlay 기능은 Database onboarding과 독립적으로
+동작합니다. 적용한 migration SQL을 수정하거나 자동 down migration하지
+않습니다. application rollback이 새 schema와 호환되지 않으면 배포 전
+PostgreSQL backup을 별도 승인으로 복원합니다.

@@ -13,6 +13,8 @@ const PUBLIC_DASHBOARD_EXACT_PATHS = new Set([
   "/setup/discord",
   "/bot",
   "/bot/",
+  "/bot/manage",
+  "/bot/manage/",
   "/setup/discord/",
   "/palworld",
   "/palworld/",

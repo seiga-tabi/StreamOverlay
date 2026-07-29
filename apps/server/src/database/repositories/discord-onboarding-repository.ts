@@ -19,6 +19,11 @@ export type DiscordOAuthStatus =
   | "revoked"
   | "encryption_failed";
 
+export type DiscordSetupIssuedVia =
+  | "bot_command"
+  | "operator_test"
+  | "web_management";
+
 export type DiscordOAuthSessionRecord = Readonly<{
   id: string;
   setupSessionId: string;
@@ -31,7 +36,7 @@ export type DiscordOAuthSessionRecord = Readonly<{
   requestedDiscordGuildId?: string;
   requestedByDiscordUserId?: string;
   requestedApplicationId?: string;
-  issuedVia: "bot_command" | "operator_test";
+  issuedVia: DiscordSetupIssuedVia;
 }>;
 
 export type DiscordAuthenticatedSession = Readonly<{
@@ -46,7 +51,7 @@ export type DiscordAuthenticatedSession = Readonly<{
   requestedDiscordGuildId?: string;
   requestedByDiscordUserId?: string;
   requestedApplicationId?: string;
-  issuedVia: "bot_command" | "operator_test";
+  issuedVia: DiscordSetupIssuedVia;
 }>;
 
 export type DiscordGuildCandidateRecord = Readonly<{
@@ -67,7 +72,7 @@ type OAuthRow = {
   requested_discord_guild_id: string | null;
   requested_by_discord_user_id: string | null;
   requested_application_id: string | null;
-  issued_via: "bot_command" | "operator_test";
+  issued_via: DiscordSetupIssuedVia;
 };
 
 type AuthenticatedRow = {
@@ -82,7 +87,7 @@ type AuthenticatedRow = {
   requested_discord_guild_id: string | null;
   requested_by_discord_user_id: string | null;
   requested_application_id: string | null;
-  issued_via: "bot_command" | "operator_test";
+  issued_via: DiscordSetupIssuedVia;
 };
 
 function oauthRecord(row: OAuthRow): DiscordOAuthSessionRecord {
@@ -118,7 +123,7 @@ export class DiscordOnboardingRepository {
     requestedDiscordGuildId?: string;
     requestedByDiscordUserId?: string;
     requestedApplicationId?: string;
-    issuedVia: "bot_command" | "operator_test";
+    issuedVia: DiscordSetupIssuedVia;
   }): Promise<void> {
     await repositoryQuery(
       this.queryable,
@@ -201,6 +206,23 @@ export class DiscordOnboardingRepository {
       [input.stateHash, input.cookieBindingHash]
     );
     return result.rows[0] ? oauthRecord(result.rows[0]) : undefined;
+  }
+
+  async issuedViaByCookieBinding(
+    cookieBindingHash: Buffer
+  ): Promise<DiscordSetupIssuedVia | undefined> {
+    const result = await repositoryQuery<{ issued_via: DiscordSetupIssuedVia }>(
+      this.queryable,
+      `SELECT setup.issued_via
+       FROM discord_oauth_sessions oauth
+       JOIN discord_setup_sessions setup ON setup.id = oauth.setup_session_id
+       WHERE oauth.cookie_binding_hash = $1
+         AND oauth.status IN ('pending', 'authenticated')
+         AND oauth.expires_at > NOW()
+         AND setup.expires_at > NOW()`,
+      [cookieBindingHash]
+    );
+    return result.rows[0]?.issued_via;
   }
 
   async upsertDiscordIdentity(input: {
@@ -471,6 +493,42 @@ export class DiscordOnboardingRepository {
     }));
   }
 
+  async listGuildCandidatesByInstallation(
+    oauthSessionId: string,
+    applicationId: string
+  ): Promise<{
+    installed: DiscordGuildCandidateRecord[];
+    missing: DiscordGuildCandidateRecord[];
+  }> {
+    const result = await repositoryQuery<{
+      discord_guild_id: string;
+      display_name: string;
+      icon_url: string | null;
+      installed: boolean;
+    }>(
+      this.queryable,
+      `SELECT candidate.discord_guild_id, candidate.display_name, candidate.icon_url,
+         (observation.status = 'observed') AS installed
+       FROM discord_guild_candidates candidate
+       LEFT JOIN discord_bot_installation_observations observation
+         ON observation.discord_guild_id = candidate.discord_guild_id
+        AND observation.application_id = $2
+       WHERE candidate.oauth_session_id = $1
+         AND candidate.manageable = TRUE
+       ORDER BY lower(candidate.display_name), candidate.discord_guild_id`,
+      [requireUuid(oauthSessionId, "oauthSessionId"), applicationId]
+    );
+    const records = result.rows.map((row) => Object.freeze({
+      id: row.discord_guild_id,
+      name: row.display_name,
+      ...(row.icon_url ? { iconUrl: row.icon_url } : {})
+    }));
+    return {
+      installed: records.filter((_record, index) => result.rows[index]?.installed === true),
+      missing: records.filter((_record, index) => result.rows[index]?.installed !== true)
+    };
+  }
+
   async listOwnedOrganizations(userId: string): Promise<Array<{ id: string; displayName: string }>> {
     const result = await repositoryQuery<{ id: string; display_name: string }>(
       this.queryable,
@@ -499,13 +557,43 @@ export class DiscordOnboardingRepository {
     return Boolean(result.rows[0]?.allowed);
   }
 
+  async organizationMembership(
+    userId: string,
+    organizationId: string
+  ): Promise<{ displayName: string; role: "owner" | "manager" | "viewer" } | undefined> {
+    const result = await repositoryQuery<{
+      display_name: string;
+      role: "owner" | "manager" | "viewer";
+    }>(
+      this.queryable,
+      `SELECT organization.display_name, member.role
+       FROM organization_members member
+       JOIN organizations organization ON organization.id = member.organization_id
+       WHERE member.organization_id = $1
+         AND member.user_id = $2
+         AND organization.status = 'active'
+         AND organization.deleted_at IS NULL`,
+      [requireUuid(organizationId, "organizationId"), requireUuid(userId, "userId")]
+    );
+    const row = result.rows[0];
+    return row ? { displayName: row.display_name, role: row.role } : undefined;
+  }
+
   async lockSetupForConnection(
     setupSessionId: string,
     identityId: string
-  ): Promise<DiscordSetupStatus | undefined> {
-    const result = await repositoryQuery<{ status: DiscordSetupStatus }>(
+  ): Promise<{
+    status: DiscordSetupStatus;
+    issuedVia: DiscordSetupIssuedVia;
+    requestedApplicationId?: string;
+  } | undefined> {
+    const result = await repositoryQuery<{
+      status: DiscordSetupStatus;
+      issued_via: DiscordSetupIssuedVia;
+      requested_application_id: string | null;
+    }>(
       this.queryable,
-      `SELECT status
+      `SELECT status, issued_via, requested_application_id
        FROM discord_setup_sessions
        WHERE id = $1
          AND discord_identity_id = $2
@@ -516,7 +604,58 @@ export class DiscordOnboardingRepository {
         requireUuid(identityId, "identityId")
       ]
     );
-    return result.rows[0]?.status;
+    const row = result.rows[0];
+    return row ? {
+      status: row.status,
+      issuedVia: row.issued_via,
+      ...(row.requested_application_id
+        ? { requestedApplicationId: row.requested_application_id }
+        : {})
+    } : undefined;
+  }
+
+  async requireObservedBotInstallation(input: {
+    guildId: string;
+    applicationId: string;
+  }): Promise<void> {
+    const result = await repositoryQuery<{ present: boolean }>(
+      this.queryable,
+      `SELECT TRUE AS present
+       FROM discord_bot_installation_observations
+       WHERE discord_guild_id = $1
+         AND application_id = $2
+         AND status = 'observed'
+       FOR UPDATE`,
+      [input.guildId, input.applicationId]
+    );
+    if (!result.rows[0]?.present) {
+      throw new SafeDatabaseError("DATABASE_REFERENCE_INVALID", false);
+    }
+  }
+
+  async requireDiscordGuildCapacity(organizationId: string): Promise<void> {
+    const entitlement = await repositoryQuery<{ max_discord_guilds: number }>(
+      this.queryable,
+      `SELECT max_discord_guilds
+       FROM entitlements
+       WHERE organization_id = $1
+       FOR UPDATE`,
+      [requireUuid(organizationId, "organizationId")]
+    );
+    const maximum = entitlement.rows[0]?.max_discord_guilds;
+    if (maximum === undefined) {
+      throw new SafeDatabaseError("DATABASE_REFERENCE_INVALID", false);
+    }
+    const count = await repositoryQuery<{ count: string }>(
+      this.queryable,
+      `SELECT COUNT(*)::TEXT AS count
+       FROM discord_guilds
+       WHERE organization_id = $1 AND status = 'active'`,
+      [organizationId]
+    );
+    if (Number(count.rows[0]?.count ?? maximum) >= maximum) {
+      throw new SafeDatabaseError("DATABASE_CONFLICT", false);
+    }
   }
 
   async connectedGuildOrganization(discordGuildId: string): Promise<string | undefined> {
@@ -569,6 +708,13 @@ export class DiscordOnboardingRepository {
     targetHash: Buffer;
     installationId?: string;
     applicationId?: string;
+    managementSession?: {
+      id: string;
+      sessionTokenHash: Buffer;
+      csrfTokenHash: Buffer;
+      idleExpiresAt: Date;
+      absoluteExpiresAt: Date;
+    };
   }): Promise<void> {
     await repositoryQuery(
       this.queryable,
@@ -613,6 +759,12 @@ export class DiscordOnboardingRepository {
         ]
       );
     }
+    if (input.managementSession) {
+      await this.createManagementSession({
+        ...input.managementSession,
+        userId: input.actorUserId
+      });
+    }
     await repositoryQuery(
       this.queryable,
       `UPDATE discord_setup_sessions
@@ -637,7 +789,47 @@ export class DiscordOnboardingRepository {
     setupSessionId: string;
     oauthSessionId: string;
     organizationId: string;
+    userId?: string;
+    discordGuildId?: string;
+    installationId?: string;
+    applicationId?: string;
+    managementSession?: {
+      id: string;
+      sessionTokenHash: Buffer;
+      csrfTokenHash: Buffer;
+      idleExpiresAt: Date;
+      absoluteExpiresAt: Date;
+    };
   }): Promise<void> {
+    if (
+      input.installationId
+      && input.applicationId
+      && input.userId
+      && input.discordGuildId
+    ) {
+      await repositoryQuery(
+        this.queryable,
+        `INSERT INTO discord_installations (
+           id, organization_id, discord_guild_id, application_id,
+           installed_by_user_id, status
+         ) VALUES ($1, $2, $3, $4, $5, 'active')
+         ON CONFLICT (organization_id, discord_guild_id, application_id) DO UPDATE
+         SET status = 'active', revoked_at = NULL`,
+        [
+          requireUuid(input.installationId, "installationId"),
+          requireUuid(input.organizationId, "organizationId"),
+          input.discordGuildId,
+          input.applicationId,
+          requireUuid(input.userId, "userId")
+        ]
+      );
+    }
+    if (input.managementSession && input.userId) {
+      await this.createManagementSession({
+        ...input.managementSession,
+        userId: input.userId
+      });
+    }
     await repositoryQuery(
       this.queryable,
       `UPDATE discord_setup_sessions
@@ -655,6 +847,31 @@ export class DiscordOnboardingRepository {
            updated_at = NOW()
        WHERE id = $1 AND status = 'authenticated'`,
       [requireUuid(input.oauthSessionId, "oauthSessionId")]
+    );
+  }
+
+  private async createManagementSession(input: {
+    id: string;
+    userId: string;
+    sessionTokenHash: Buffer;
+    csrfTokenHash: Buffer;
+    idleExpiresAt: Date;
+    absoluteExpiresAt: Date;
+  }): Promise<void> {
+    await repositoryQuery(
+      this.queryable,
+      `INSERT INTO discord_management_sessions (
+         id, user_id, session_token_hash, csrf_token_hash,
+         idle_expires_at, absolute_expires_at
+       ) VALUES ($1, $2, $3, $4, $5, $6)`,
+      [
+        requireUuid(input.id, "managementSessionId"),
+        requireUuid(input.userId, "userId"),
+        input.sessionTokenHash,
+        input.csrfTokenHash,
+        input.idleExpiresAt,
+        input.absoluteExpiresAt
+      ]
     );
   }
 

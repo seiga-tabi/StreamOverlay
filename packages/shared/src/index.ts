@@ -16,3 +16,4 @@ export * from "./tournament.js";
 export * from "./twitch.js";
 export * from "./utils.js";
 export * from "./yoro-agent.js";
+export * from "./yoro-runtime-config.js";

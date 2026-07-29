@@ -28,7 +28,8 @@ test("migration manifest와 SQL checksum을 strict하게 검증한다", async ()
       "0004_discord_oauth_onboarding",
       "0005_discord_bot_setup_binding",
       "0006_bot_management_and_agent_bootstrap",
-      "0007_agent_registration_and_ingestion"
+      "0007_agent_registration_and_ingestion",
+      "0008_web_management_guild_claim"
     ]
   );
 
@@ -60,7 +61,7 @@ test("migration check는 빈 Database를 변경하지 않고 pending으로 판�
 
   const result = await inspectMigrationState(queryable, manifest);
   assert.equal(result.status, "pending");
-  assert.equal(result.pending.length, 7);
+  assert.equal(result.pending.length, 8);
   assert.equal(queries.length, 1);
   assert.match(queries[0], /^SELECT to_regclass/u);
 });

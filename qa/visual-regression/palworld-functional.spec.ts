@@ -2250,16 +2250,16 @@ test("Pal 도감 검색·facet·chip·초기화·정렬은 URL을 단일 적용 
   await assertHealthyDocument(page, errors);
 });
 
-test("Pal 도감 모바일 필터 Modal은 즉시 적용·focus 복귀·scroll lock과 모든 화면 폭을 지원한다", async ({ page }) => {
-  const errors = collectRuntimeErrors(page);
-  const mobileViewports = [
-    { width: 360, height: 800 },
-    { width: 390, height: 844 },
-    { width: 430, height: 932 },
-    { width: 768, height: 1024 },
-  ];
+const palFilterMobileViewports = [
+  { width: 360, height: 800 },
+  { width: 390, height: 844 },
+  { width: 430, height: 932 },
+  { width: 768, height: 1024 },
+] as const;
 
-  for (const viewport of mobileViewports) {
+for (const viewport of palFilterMobileViewports) {
+  test(`Pal 도감 모바일 필터 Modal은 즉시 적용·focus 복귀·scroll lock을 지원한다 (${viewport.width}×${viewport.height})`, async ({ page }) => {
+    const errors = collectRuntimeErrors(page);
     await page.setViewportSize(viewport);
     await page.goto("/palworld/pals?q=아누비스&element=ground&work=mining&rarity=10&variant=special");
     const search = page.locator(".palworld-pal-search-form").getByRole("searchbox", { name: "이름 검색" });
@@ -2308,17 +2308,20 @@ test("Pal 도감 모바일 필터 Modal은 즉시 적용·focus 복귀·scroll l
       }
     }
     await assertHealthyDocument(page, errors);
-  }
+  });
+}
 
-  const desktopViewports = [
-    { width: 1280, height: 900 },
-    { width: 1366, height: 900 },
-    { width: 1440, height: 1000 },
-    { width: 1535, height: 1000 },
-    { width: 1536, height: 1000 },
-  ];
+const palFilterDesktopViewports = [
+  { width: 1280, height: 900 },
+  { width: 1366, height: 900 },
+  { width: 1440, height: 1000 },
+  { width: 1535, height: 1000 },
+  { width: 1536, height: 1000 },
+] as const;
 
-  for (const viewport of desktopViewports) {
+for (const viewport of palFilterDesktopViewports) {
+  test(`Pal 도감 필터 panel은 desktop 화면 폭과 정렬을 유지한다 (${viewport.width}×${viewport.height})`, async ({ page }) => {
+    const errors = collectRuntimeErrors(page);
     await page.setViewportSize(viewport);
     await page.goto("/palworld/pals");
     const filterPanel = page.locator(".palworld-pal-filter-panel");
@@ -2349,8 +2352,8 @@ test("Pal 도감 모바일 필터 Modal은 즉시 적용·focus 복귀·scroll l
       - Math.min(...filterGroupBoxes.map((bounds) => bounds.width))).toBeLessThanOrEqual(1);
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
     await assertHealthyDocument(page, errors);
-  }
-});
+  });
+}
 
 test("Pal 도감 API 오류는 결과 없음과 구분하고 동일 query로 재시도한다", async ({ page }) => {
   const errors = collectRuntimeErrors(page);
@@ -3239,10 +3242,9 @@ const breedingResponsiveViewports = [
   { width: 1440, height: 1000 },
 ];
 
-test("교배 직접 결과와 한쪽 부모 조합은 요구 화면 크기에서 수평 overflow 없이 표시된다", async ({ page }) => {
-  const errors = collectRuntimeErrors(page);
-
-  for (const viewport of breedingResponsiveViewports) {
+for (const viewport of breedingResponsiveViewports) {
+  test(`교배 직접 결과와 한쪽 부모 조합은 수평 overflow 없이 표시된다 (${viewport.width}×${viewport.height})`, async ({ page }) => {
+    const errors = collectRuntimeErrors(page);
     await page.setViewportSize(viewport);
     await page.goto("/palworld/breeding?mode=parents&parentA=penking&parentB=bushi");
     const tabs = page.getByRole("tab");
@@ -3294,8 +3296,8 @@ test("교배 직접 결과와 한쪽 부모 조합은 요구 화면 크기에서
       }
     }
     await assertHealthyDocument(page, errors);
-  }
-});
+  });
+}
 
 test("교배 역검색 고밀도 조합은 요구 화면 크기에서 열 너비와 수평 overflow를 유지한다", async ({ page }) => {
   const errors = collectRuntimeErrors(page);
@@ -3804,20 +3806,20 @@ test("Palworld 화면은 외부 origin 이미지 요청 없이 카드·자동완
   expect(imageRequests.filter((requestUrl) => new URL(requestUrl).origin !== pageOrigin)).toEqual([]);
 });
 
-test("요구 화면 크기에서 연결 프로필·LIVE rail·스트리머 목록과 메뉴가 페이지 overflow를 만들지 않는다", async ({ page }) => {
-  const errors = collectRuntimeErrors(page);
-  await installConnectedTwitchFixtures(page, { longContent: true });
-  const viewports = [
-    { width: 360, height: 800 },
-    { width: 390, height: 844 },
-    { width: 430, height: 932 },
-    { width: 768, height: 1024 },
-    { width: 1024, height: 768 },
-    { width: 1180, height: 820 },
-    { width: 1440, height: 1000 },
-  ];
+const publicChromeResponsiveViewports = [
+  { width: 360, height: 800 },
+  { width: 390, height: 844 },
+  { width: 430, height: 932 },
+  { width: 768, height: 1024 },
+  { width: 1024, height: 768 },
+  { width: 1180, height: 820 },
+  { width: 1440, height: 1000 },
+] as const;
 
-  for (const viewport of viewports) {
+for (const viewport of publicChromeResponsiveViewports) {
+  test(`연결 프로필·LIVE rail·메뉴가 페이지 overflow를 만들지 않는다 (${viewport.width}×${viewport.height})`, async ({ page }) => {
+    const errors = collectRuntimeErrors(page);
+    await installConnectedTwitchFixtures(page, { longContent: true });
     await page.setViewportSize(viewport);
     await page.goto("/palworld");
     const localeButton = page.locator(".public-locale-button");
@@ -3958,5 +3960,5 @@ test("요구 화면 크기에서 연결 프로필·LIVE rail·스트리머 목�
       document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1
     )).toBe(true);
     await assertHealthyDocument(page, errors);
-  }
-});
+  });
+}

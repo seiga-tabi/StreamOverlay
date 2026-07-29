@@ -7,7 +7,11 @@ import {
   discordSecretHash,
   encryptDiscordSecret
 } from "../dist/services/discord-oauth-crypto.js";
-import { parseDiscordManageableGuild } from "../dist/services/discord-onboarding-service.js";
+import {
+  buildDiscordBotInstallUrl,
+  discordBotInstallUrl,
+  parseDiscordManageableGuild
+} from "../dist/services/discord-onboarding-service.js";
 import { requiredHttpPrincipal } from "../dist/security/auth.js";
 import { DiscordOnboardingRepository } from "../dist/database/repositories/discord-onboarding-repository.js";
 import { SafeDatabaseError } from "../dist/database/errors.js";
@@ -65,6 +69,20 @@ test("Discord OAuth token은 AES-256-GCM과 분리된 AAD로 보호된다", () =
   );
 });
 
+test("웹 관리 OAuth 암호문은 기존 setup 목적과 서로 재사용할 수 없다", () => {
+  const sentinel = "web_management_oauth_SENTINEL";
+  const webContext = {
+    ...context,
+    purpose: "oauth_token:web_management_connect"
+  };
+  const encrypted = encryptDiscordSecret(sentinel, key, 1, webContext);
+  assert.equal(decryptDiscordSecret(encrypted, key, webContext), sentinel);
+  assert.throws(
+    () => decryptDiscordSecret(encrypted, key, context),
+    /DISCORD_DECRYPTION_FAILED/u
+  );
+});
+
 test("Discord Guild 관리 권한은 BigInt bitfield와 owner만 허용한다", () => {
   const owner = parseDiscordManageableGuild({
     id: "123456789012345678",
@@ -118,7 +136,41 @@ test("Discord onboarding route는 OAuth callback과 자체 session 보안을 분
   assert.equal(requiredHttpPrincipal("GET", "/api/discord/session"), "PUBLIC");
   assert.equal(requiredHttpPrincipal("POST", "/api/discord/onboarding/guild"), "PUBLIC");
   assert.equal(requiredHttpPrincipal("POST", "/api/discord/oauth/logout"), "PUBLIC");
+  assert.equal(requiredHttpPrincipal("GET", "/api/discord/bot/install"), "PUBLIC");
+  assert.equal(
+    requiredHttpPrincipal("GET", "/api/discord/management/connect/start"),
+    "OAUTH_CALLBACK"
+  );
+  assert.equal(
+    requiredHttpPrincipal("GET", "/api/discord/management/connect/session"),
+    "PUBLIC"
+  );
+  assert.equal(
+    requiredHttpPrincipal("POST", "/api/discord/management/guilds/claim"),
+    "PUBLIC"
+  );
+  assert.equal(
+    requiredHttpPrincipal(
+      "POST",
+      `/api/discord/management/organizations/${crypto.randomUUID()}/game-servers`
+    ),
+    "PUBLIC"
+  );
   assert.equal(requiredHttpPrincipal("POST", "/api/discord/unknown"), "DASHBOARD_ADMIN");
+});
+
+test("Discord Bot 설치 URL은 고정 scope와 최소 permission만 사용한다", () => {
+  const url = new URL(buildDiscordBotInstallUrl("123456789012345678"));
+  assert.equal(url.origin, "https://discord.com");
+  assert.equal(url.pathname, "/oauth2/authorize");
+  assert.equal(url.searchParams.get("client_id"), "123456789012345678");
+  assert.deepEqual(
+    new Set((url.searchParams.get("scope") ?? "").split(" ")),
+    new Set(["bot", "applications.commands"])
+  );
+  assert.equal(url.searchParams.get("permissions"), "0");
+  assert.equal(url.searchParams.has("redirect_uri"), false);
+  assert.throws(() => discordBotInstallUrl(), /feature_disabled/u);
 });
 
 test("만료된 setup session은 OAuth token 저장 transaction을 fail-closed 처리한다", async () => {

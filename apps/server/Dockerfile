@@ -59,7 +59,8 @@ COPY apps/overlay/package.json ./apps/overlay/package.json
 RUN npm ci --omit=dev --include-workspace-root=false --workspace @streamops/shared --workspace @streamops/server
 COPY --from=build /app/packages/shared/dist ./packages/shared/dist
 COPY --from=build /app/apps/server/dist ./apps/server/dist
-RUN find /app/packages/shared/dist -maxdepth 1 -type f \( -name '*.d.ts' -o -name '*.d.ts.map' \) -delete
+RUN find /app/node_modules /app/packages/shared/dist /app/apps/server/dist -type f \
+  \( -name '*.map' -o -name '*.d.ts' -o -path '*/test/*' -o -path '*/tests/*' \) -delete
 COPY --from=build /app/apps/server/config ./apps/server/config
 COPY --from=build /app/apps/server/migrations ./apps/server/migrations
 COPY --from=build /app/.palworld-runtime-bundle/apps/server/data/palworld ./apps/server/data/palworld

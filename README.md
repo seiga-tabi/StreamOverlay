@@ -39,27 +39,28 @@ packages/shared        # 공통 타입과 validation
 
 ```bash
 npm install
-cp apps/server/.env.example apps/server/.env
 cp apps/bridge/.env.example apps/bridge/.env
 npm run build
-npm run dev:server
+YORO_CONFIG_FILE=./config/runtime.development.json npm run dev:server
 npm run dev:bridge
 npm run dev:dashboard
 npm run dev:overlay
 ```
 
+Server의 일반 설정은 `config/runtime.development.json`을 사용합니다. 실제
+secret이 필요한 기능을 로컬에서 켤 때도 `.env`에 값을 넣지 않고 권한을
+제한한 `/run/secrets/*` 파일을 사용합니다. 기존 env 방식은 전환 기간의
+로컬 호환 경로로만 남아 있습니다.
+
 ## Docker/Linux 배포
 
 서버 운영 배포는 Docker Compose 단일 서버 컨테이너를 기준으로 합니다. 이 컨테이너가 API, WebSocket, Dashboard 정적 파일, Overlay 정적 파일을 함께 제공합니다.
 
-```bash
-cp .env.example .env
-docker compose config
-docker compose build
-docker compose up -d
-```
-
-로컬에서 이미 `3000` 포트를 쓰고 있다면 `.env`의 `HOST_PORT`를 `3001` 같은 빈 포트로 바꾸고 `PUBLIC_BASE_URL` 계열 URL도 같은 포트로 맞추세요.
+로컬 Compose는 기존 env 호환을 유지하지만, production은
+`docker-compose.production.yml`을 함께 사용해 `/etc/yoro/runtime.json`과
+서비스별 `/run/secrets/*`만 주입합니다. 운영 `.env`는 만들지 않습니다.
+구체적인 파일 권한과 검증 순서는 [운영 설정](docs/CONFIGURATION.md)과
+[secret 운영](docs/SECRETS.md)을 확인하세요.
 
 운영 URL 기본 구조:
 

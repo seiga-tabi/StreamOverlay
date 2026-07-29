@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "environment": "development",
+  "public": {
+    "baseUrl": "http://localhost:3000",
+    "dashboardOrigin": "http://localhost:3000",
+    "overlayOrigin": "http://localhost:3000"
+  },
+  "features": {
+    "database": false,
+    "discordSaas": false,
+    "discordBot": false,
+    "discordBotManagement": false,
+    "agentIngestion": false,
+    "twitchEventSub": false
+  },
+  "database": {
+    "poolMax": 10,
+    "sslMode": "disable"
+  },
+  "riot": {
+    "accountRegion": "asia",
+    "lolPlatform": "kr"
+  },
+  "agent": {
+    "enabled": false,
+    "serverOrigin": "http://127.0.0.1:3000",
+    "palworldOrigin": "http://127.0.0.1:8212",
+    "statusIntervalSeconds": 300
+  }
+}

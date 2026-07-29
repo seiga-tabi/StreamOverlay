@@ -56,7 +56,7 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
   await t.test("check와 plan 기반 검사는 빈 DB를 변경하지 않는다", async () => {
     const inspection = await inspectMigrationState(pool, manifest);
     assert.equal(inspection.status, "pending");
-    assert.equal(inspection.pending.length, 7);
+    assert.equal(inspection.pending.length, 8);
     const table = await pool.query(
       "SELECT to_regclass('public.schema_migrations')::TEXT AS name"
     );
@@ -233,6 +233,188 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
       }),
       (error) => error instanceof SafeDatabaseError
         && error.code === "DATABASE_CONFLICT"
+    );
+  });
+
+  await t.test("웹 management setup 목적은 기존 Bot setup과 함께 허용된다", async () => {
+    const setupId = crypto.randomUUID();
+    await new DiscordOnboardingRepository(pool).issueSetupSession({
+      id: setupId,
+      tokenHash: crypto.randomBytes(32),
+      expiresAt: new Date(Date.now() + 10 * 60_000),
+      requestedApplicationId: "100000000000000001",
+      issuedVia: "web_management"
+    });
+    const stored = await pool.query(
+      `SELECT issued_via, requested_application_id
+       FROM discord_setup_sessions
+       WHERE id = $1`,
+      [setupId]
+    );
+    assert.deepEqual(stored.rows[0], {
+      issued_via: "web_management",
+      requested_application_id: "100000000000000001"
+    });
+  });
+
+  await t.test("웹 Guild claim은 Organization·설치·management session을 원자적으로 확정한다", async () => {
+    const repository = new DiscordOnboardingRepository(pool);
+    const setupSessionId = crypto.randomUUID();
+    const oauthSessionId = crypto.randomUUID();
+    const discordIdentityId = crypto.randomUUID();
+    const userId = crypto.randomUUID();
+    const organizationId = crypto.randomUUID();
+    const applicationId = "100000000000000011";
+    const discordGuildId = "100000000000000012";
+    const expiresAt = new Date(Date.now() + 10 * 60_000);
+    const stateHash = crypto.randomBytes(32);
+    const cookieBindingHash = crypto.randomBytes(32);
+    const csrfTokenHash = crypto.randomBytes(32);
+
+    await repository.issueSetupSession({
+      id: setupSessionId,
+      tokenHash: crypto.randomBytes(32),
+      expiresAt,
+      requestedApplicationId: applicationId,
+      issuedVia: "web_management"
+    });
+    await withTransaction(pool, async (client) =>
+      new DiscordOnboardingRepository(client).beginOAuthSession({
+        setupTokenHash: (await client.query(
+          "SELECT token_hash FROM discord_setup_sessions WHERE id = $1",
+          [setupSessionId]
+        )).rows[0].token_hash,
+        oauthSessionId,
+        stateHash,
+        cookieBindingHash,
+        csrfTokenHash,
+        encryptedPkceVerifier: crypto.randomBytes(64),
+        expiresAt
+      })
+    );
+    await withTransaction(pool, async (client) => {
+      const transactional = new DiscordOnboardingRepository(client);
+      assert.ok(await transactional.consumeOAuthState({ stateHash, cookieBindingHash }));
+      const identity = await transactional.upsertDiscordIdentity({
+        identityId: discordIdentityId,
+        userId,
+        discordUserId: "100000000000000013",
+        displayName: "Web Owner"
+      });
+      await transactional.authenticateOAuthSession({
+        oauthSessionId,
+        setupSessionId,
+        identityId: identity.identityId,
+        encryptedTokenRecord: crypto.randomBytes(64),
+        tokenExpiresAt: expiresAt
+      });
+      await transactional.replaceGuildCandidates(oauthSessionId, [{
+        id: discordGuildId,
+        name: "Web Guild"
+      }]);
+      await transactional.observeBotInstallation({ applicationId, guildId: discordGuildId });
+    });
+
+    const managementSessionId = crypto.randomUUID();
+    const rawManagementToken = "MANAGEMENT_SENTINEL_must_not_be_stored";
+    const rawCsrfToken = "CSRF_SENTINEL_must_not_be_stored";
+    await withTransaction(pool, async (client) => {
+      const transactional = new DiscordOnboardingRepository(client);
+      const locked = await transactional.lockSetupForConnection(
+        setupSessionId,
+        discordIdentityId
+      );
+      assert.equal(locked?.issuedVia, "web_management");
+      await transactional.requireObservedBotInstallation({
+        applicationId,
+        guildId: discordGuildId
+      });
+      await transactional.createOrganizationForGuild({
+        organizationId,
+        userId,
+        displayName: "Web Guild"
+      });
+      await transactional.connectGuild({
+        guildRecordId: crypto.randomUUID(),
+        organizationId,
+        discordGuildId,
+        displayName: "Web Guild",
+        setupSessionId,
+        oauthSessionId,
+        actorUserId: userId,
+        auditId: crypto.randomUUID(),
+        targetHash: crypto.randomBytes(32),
+        installationId: crypto.randomUUID(),
+        applicationId,
+        managementSession: {
+          id: managementSessionId,
+          sessionTokenHash: crypto.createHash("sha256").update(rawManagementToken).digest(),
+          csrfTokenHash: crypto.createHash("sha256").update(rawCsrfToken).digest(),
+          idleExpiresAt: expiresAt,
+          absoluteExpiresAt: new Date(Date.now() + 60 * 60_000)
+        }
+      });
+    });
+
+    const connected = await pool.query(
+      `SELECT
+         setup.status AS setup_status,
+         oauth.status AS oauth_status,
+         oauth.encrypted_token_record,
+         guild.organization_id,
+         installation.status AS installation_status,
+         session.session_token_hash,
+         session.csrf_token_hash,
+         member.role,
+         entitlement.max_discord_guilds
+       FROM discord_setup_sessions setup
+       JOIN discord_oauth_sessions oauth ON oauth.setup_session_id = setup.id
+       JOIN discord_guilds guild ON guild.discord_guild_id = $2
+       JOIN discord_installations installation
+         ON installation.organization_id = guild.organization_id
+        AND installation.discord_guild_id = guild.discord_guild_id
+       JOIN discord_management_sessions session ON session.id = $3
+       JOIN organization_members member
+         ON member.organization_id = guild.organization_id
+        AND member.user_id = $4
+       JOIN entitlements entitlement ON entitlement.organization_id = guild.organization_id
+       WHERE setup.id = $1`,
+      [setupSessionId, discordGuildId, managementSessionId, userId]
+    );
+    assert.equal(connected.rows.length, 1);
+    assert.equal(connected.rows[0].setup_status, "completed");
+    assert.equal(connected.rows[0].oauth_status, "consumed");
+    assert.equal(connected.rows[0].encrypted_token_record, null);
+    assert.equal(connected.rows[0].organization_id, organizationId);
+    assert.equal(connected.rows[0].installation_status, "active");
+    assert.equal(connected.rows[0].role, "owner");
+    assert.equal(connected.rows[0].max_discord_guilds, 1);
+    assert.notEqual(
+      connected.rows[0].session_token_hash.toString("utf8"),
+      rawManagementToken
+    );
+    assert.notEqual(connected.rows[0].csrf_token_hash.toString("utf8"), rawCsrfToken);
+
+    await assert.rejects(
+      withTransaction(pool, async (client) => {
+        const transactional = new DiscordOnboardingRepository(client);
+        assert.equal(
+          (await transactional.lockSetupForConnection(
+            setupSessionId,
+            discordIdentityId
+          ))?.status,
+          "completed"
+        );
+        throw new SafeDatabaseError("DATABASE_CONFLICT", false);
+      }),
+      (error) => error instanceof SafeDatabaseError
+    );
+    assert.equal(
+      (await pool.query(
+        "SELECT COUNT(*)::INTEGER AS count FROM discord_guilds WHERE discord_guild_id = $1",
+        [discordGuildId]
+      )).rows[0].count,
+      1
     );
   });
 

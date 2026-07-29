@@ -1,0 +1,17 @@
+{
+  "operatorName": "확정된 운영자 이름",
+  "contactAddress": "확정된 운영자 주소",
+  "privacyOfficerName": "확정된 개인정보 보호책임자",
+  "contactEmail": "support@yoro.gg",
+  "contactPhone": "",
+  "effectiveDate": "2026-01-01",
+  "minimumAge": 14,
+  "governingLawKo": "확정된 준거법 문구",
+  "governingLawJa": "確定した準拠法の文言",
+  "disputeVenueKo": "확정된 관할 문구",
+  "disputeVenueJa": "確定した管轄の文言",
+  "processorsKo": "확정된 처리위탁 문구",
+  "processorsJa": "確定した処理委託の文言",
+  "crossBorderTransferKo": "확정된 국외이전 문구",
+  "crossBorderTransferJa": "確定した国外移転の文言"
+}

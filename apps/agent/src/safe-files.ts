@@ -40,7 +40,7 @@ export function readSecretFile(filePath: string, production: boolean): string {
     if (!stat.isFile() || stat.isSymbolicLink()) throw new Error("invalid");
     if (stat.size < 1 || stat.size > 4_096) throw new Error("size");
     if (production && (stat.mode & 0o077) !== 0) throw new Error("permission");
-    const value = fs.readFileSync(filePath, "utf8").trim();
+    const value = fs.readFileSync(filePath, "utf8").replace(/(?:\r\n|\n|\r)$/u, "");
     if (!value || /[\u0000-\u001f\u007f]/u.test(value)) throw new Error("content");
     return value;
   } catch {

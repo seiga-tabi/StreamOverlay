@@ -8,6 +8,8 @@ test("공개 페이지 URL을 Dashboard SPA 진입 경로로 허용한다", () =
     "/lol",
     "/bot",
     "/bot/",
+    "/bot/manage",
+    "/bot/manage/",
     "/lol/summoners/jp/test-JP1",
     "/follow",
     "/participation",

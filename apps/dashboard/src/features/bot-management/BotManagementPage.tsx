@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   BotManagementGameServer,
   BotManagementOrganization,
@@ -20,13 +20,18 @@ import {
 } from "../../shared/ui";
 import {
   BotManagementApiError,
+  botInstallUrl,
+  claimManagementGuild,
   createManagementGameServer,
   disableManagementGameServer,
+  getManagementConnectSession,
   getManagementSession,
   issueAgentBootstrapToken,
   listManagementGameServers,
+  managementConnectUrl,
   managementLoginUrl,
   revokeAgentBootstrapToken,
+  type BotManagementConnectSession,
   type BotManagementSession
 } from "./api";
 
@@ -40,7 +45,26 @@ const copy = {
     login: "Discord로 관리 로그인",
     organization: "Organization 선택",
     noOrganization: "연결된 Organization이 없습니다.",
-    noOrganizationDescription: "`/yoro setup`으로 Discord 서버 연결을 먼저 완료해 주세요.",
+    noOrganizationDescription: "Discord로 로그인하여 Bot이 설치된 서버를 연결해 주세요.",
+    connectTitle: "Discord 서버 연결",
+    connectDescription: "관리 권한이 있고 YORO Bot이 설치된 서버만 연결할 수 있습니다.",
+    connectLogin: "Discord로 로그인하고 서버 선택",
+    existingLogin: "기존 Organization 로그인",
+    installBot: "Discord 서버에 YORO Bot 추가",
+    installedGuilds: "연결 가능한 Discord 서버",
+    missingGuilds: "Bot 설치가 필요한 서버",
+    installationPending: "Bot 설치 확인 중",
+    installationConfirmed: "Bot 설치 확인됨",
+    gatewayUnavailable: "Bot Gateway가 비활성 상태라 설치 여부를 확인할 수 없습니다.",
+    refreshInstallation: "설치 여부 다시 확인",
+    noManageableGuilds: "관리 가능한 Discord 서버가 없습니다.",
+    createNewOrganization: "선택한 서버로 새 Organization 생성",
+    claim: "선택한 Discord 서버 연결",
+    claiming: "연결 중",
+    claimCompleted: "Discord 서버 연결이 완료되었습니다.",
+    alreadyConnected: "이 Discord 서버는 이미 다른 Organization에 연결되어 있습니다.",
+    guildPermissionRequired: "이 Discord 서버를 관리할 권한이 없습니다.",
+    setupExpired: "Discord 연결 session이 만료되었습니다. 다시 로그인해 주세요.",
     servers: "Palworld 게임 서버",
     noServers: "등록된 게임 서버가 없습니다.",
     createTitle: "Palworld 게임 서버 등록",
@@ -55,7 +79,7 @@ const copy = {
     copy: "설치 토큰 복사",
     copied: "설치 토큰을 복사했습니다.",
     tokenNotice: "이 설치 토큰은 한 번만 표시되며 10분 후 만료됩니다. 토큰을 채팅, 로그 또는 공개 저장소에 공유하지 마세요.",
-    agentPending: "Agent 패키지는 다음 단계에서 제공됩니다. 아직 실행 명령은 제공하지 않습니다.",
+    agentPending: "Agent daemon은 구현되어 있으며 staging 활성화 전에는 검증된 운영 설치 명령을 제공하지 않습니다.",
     expires: "만료",
     expired: "설치 토큰이 만료되었습니다.",
     entitlement: "무료 Organization은 활성 게임 서버 1개까지 등록할 수 있습니다.",
@@ -81,7 +105,26 @@ const copy = {
     login: "Discordで管理ログイン",
     organization: "Organizationを選択",
     noOrganization: "連携済みのOrganizationがありません。",
-    noOrganizationDescription: "先に `/yoro setup` でDiscordサーバー連携を完了してください。",
+    noOrganizationDescription: "Discordでログインし、Botが導入済みのサーバーを連携してください。",
+    connectTitle: "Discordサーバー連携",
+    connectDescription: "管理権限があり、YORO Botが導入済みのサーバーのみ連携できます。",
+    connectLogin: "Discordでログインしてサーバーを選択",
+    existingLogin: "既存Organizationにログイン",
+    installBot: "DiscordサーバーにYORO Botを追加",
+    installedGuilds: "連携可能なDiscordサーバー",
+    missingGuilds: "Botの導入が必要なサーバー",
+    installationPending: "Botの導入を確認中",
+    installationConfirmed: "Botの導入を確認済み",
+    gatewayUnavailable: "Bot Gatewayが無効なため、導入状態を確認できません。",
+    refreshInstallation: "導入状態を再確認",
+    noManageableGuilds: "管理可能なDiscordサーバーがありません。",
+    createNewOrganization: "選択したサーバーで新しいOrganizationを作成",
+    claim: "選択したDiscordサーバーを連携",
+    claiming: "連携中",
+    claimCompleted: "Discordサーバーの連携が完了しました。",
+    alreadyConnected: "このDiscordサーバーは別のOrganizationに連携済みです。",
+    guildPermissionRequired: "このDiscordサーバーを管理する権限がありません。",
+    setupExpired: "Discord連携sessionの有効期限が切れました。もう一度ログインしてください。",
     servers: "Palworldゲームサーバー",
     noServers: "登録済みゲームサーバーはありません。",
     createTitle: "Palworldゲームサーバー登録",
@@ -96,7 +139,7 @@ const copy = {
     copy: "導入トークンをコピー",
     copied: "導入トークンをコピーしました。",
     tokenNotice: "この導入トークンは一度だけ表示され、10分後に期限切れとなります。チャット、ログ、公開リポジトリで共有しないでください。",
-    agentPending: "Agentパッケージは次の段階で提供します。現時点では実行コマンドを提供しません。",
+    agentPending: "Agent daemonは実装済みですが、staging有効化前は検証済みの運用導入コマンドを提供しません。",
     expires: "期限",
     expired: "導入トークンの有効期限が切れました。",
     entitlement: "無料Organizationは有効なゲームサーバーを1台まで登録できます。",
@@ -134,6 +177,19 @@ function messageFor(error: unknown, locale: DashboardLocale): string {
   if (!(error instanceof BotManagementApiError)) return text.unavailable;
   if (error.code === "entitlement_exceeded") return text.entitlement;
   if (error.code === "permission_required") return text.permission;
+  if (error.code === "guild_already_connected") return text.alreadyConnected;
+  if (
+    error.code === "guild_permission_required"
+    || error.code === "organization_permission_required"
+    || error.code === "permission_required"
+  ) return text.guildPermissionRequired;
+  if (
+    error.code === "setup_session_expired"
+    || error.code === "setup_session_consumed"
+    || error.code === "discord_session_unavailable"
+  ) return text.setupExpired;
+  if (error.code === "bot_installation_required") return text.installationPending;
+  if (error.code === "bot_gateway_unavailable") return text.gatewayUnavailable;
   return text.unavailable;
 }
 
@@ -141,6 +197,9 @@ export function BotManagementPage() {
   const [locale] = useState<DashboardLocale>(() => detectDashboardLocale());
   const text = copy[locale];
   const [session, setSession] = useState<BotManagementSession>();
+  const [connectSession, setConnectSession] = useState<BotManagementConnectSession>();
+  const [selectedGuildId, setSelectedGuildId] = useState("");
+  const [claimOrganizationId, setClaimOrganizationId] = useState("");
   const [organizationId, setOrganizationId] = useState("");
   const [servers, setServers] = useState<readonly BotManagementGameServer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -150,6 +209,7 @@ export function BotManagementPage() {
   const [region, setRegion] = useState<PalworldServerRegion>("asia");
   const [issued, setIssued] = useState<IssuedToken>();
   const [announcement, setAnnouncement] = useState("");
+  const headingRef = useRef<HTMLHeadingElement>(null);
 
   const selectedOrganization = useMemo(
     () => session?.authenticated
@@ -165,10 +225,17 @@ export function BotManagementPage() {
       const next = await getManagementSession(signal);
       setSession(next);
       if (next.authenticated) {
+        setConnectSession(undefined);
         const nextOrganization = organizationId || next.organizations[0]?.id || "";
         setOrganizationId(nextOrganization);
         if (nextOrganization) {
           setServers(await listManagementGameServers(nextOrganization, signal));
+        }
+      } else {
+        const connecting = await getManagementConnectSession(signal);
+        setConnectSession(connecting);
+        if (connecting.authenticated) {
+          setSelectedGuildId(connecting.installedGuilds[0]?.id ?? "");
         }
       }
     } catch (loadError) {
@@ -183,6 +250,73 @@ export function BotManagementPage() {
     void loadSession(controller.signal);
     return () => controller.abort();
   }, []);
+
+  useEffect(() => {
+    if (
+      !connectSession?.authenticated
+      || connectSession.installedGuilds.length > 0
+      || connectSession.missingBotGuilds.length === 0
+    ) return undefined;
+    let attempt = 0;
+    const controller = new AbortController();
+    const timer = window.setInterval(() => {
+      attempt += 1;
+      void getManagementConnectSession(controller.signal)
+        .then((next) => {
+          setConnectSession(next);
+          if (next.authenticated && next.installedGuilds.length > 0) {
+            setSelectedGuildId(next.installedGuilds[0]?.id ?? "");
+            window.clearInterval(timer);
+          }
+        })
+        .catch(() => undefined);
+      if (attempt >= 5) window.clearInterval(timer);
+    }, 2_000);
+    return () => {
+      controller.abort();
+      window.clearInterval(timer);
+    };
+  }, [connectSession]);
+
+  async function refreshGuilds(): Promise<void> {
+    setLoading(true);
+    setError("");
+    try {
+      const next = await getManagementConnectSession();
+      setConnectSession(next);
+      if (next.authenticated) {
+        setSelectedGuildId(next.installedGuilds[0]?.id ?? "");
+      }
+    } catch (refreshError) {
+      setError(messageFor(refreshError, locale));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function claimGuild(): Promise<void> {
+    if (
+      !connectSession?.authenticated
+      || !selectedGuildId
+      || submitting
+    ) return;
+    setSubmitting(true);
+    setError("");
+    try {
+      await claimManagementGuild({
+        guildId: selectedGuildId,
+        ...(claimOrganizationId ? { organizationId: claimOrganizationId } : {}),
+        csrfToken: connectSession.csrfToken
+      });
+      setAnnouncement(text.claimCompleted);
+      await loadSession();
+      headingRef.current?.focus();
+    } catch (claimError) {
+      setError(messageFor(claimError, locale));
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   useEffect(() => {
     if (!issued) return undefined;
@@ -254,18 +388,125 @@ export function BotManagementPage() {
     <main className="bot-management-page" aria-busy={loading}>
       <header className="bot-management-header">
         <span className="eyebrow">{text.eyebrow}</span>
-        <h1>{text.title}</h1>
+        <h1 ref={headingRef} tabIndex={-1}>{text.title}</h1>
         <p>{text.description}</p>
       </header>
       {loading && !session ? <SkeletonCard role="status" loadingLabel={text.loading} /> : null}
-      {!loading && session && !session.authenticated ? (
+      {!loading && session && !session.authenticated && !connectSession?.authenticated ? (
         <EmptyState>
           <EmptyStateTitle>{text.loginTitle}</EmptyStateTitle>
           <EmptyStateDescription>{text.loginDescription}</EmptyStateDescription>
-          <Button type="button" onClick={() => window.location.assign(managementLoginUrl())}>
-            {text.login}
-          </Button>
+          <div className="bot-management-actions">
+            <Button type="button" onClick={() => window.location.assign(managementConnectUrl())}>
+              {text.connectLogin}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => window.location.assign(botInstallUrl())}
+            >
+              {text.installBot}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => window.location.assign(managementLoginUrl())}
+            >
+              {text.existingLogin}
+            </Button>
+          </div>
         </EmptyState>
+      ) : null}
+      {connectSession?.authenticated ? (
+        <Card>
+          <CardHeader>
+            <CardTitle as="h2">{text.connectTitle}</CardTitle>
+            <CardDescription>{text.connectDescription}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {connectSession.installedGuilds.length > 0 ? (
+              <>
+                <fieldset className="discord-guild-list">
+                  <legend>{text.installedGuilds}</legend>
+                  {connectSession.installedGuilds.map((guild) => (
+                    <label className="discord-guild-option" key={guild.id} title={guild.name}>
+                      <input
+                        checked={selectedGuildId === guild.id}
+                        name="management-discord-guild"
+                        onChange={() => setSelectedGuildId(guild.id)}
+                        type="radio"
+                        value={guild.id}
+                      />
+                      {guild.iconUrl
+                        ? <img alt="" height="40" src={guild.iconUrl} width="40" />
+                        : (
+                            <span aria-hidden="true" className="discord-guild-fallback">
+                              {guild.name.slice(0, 1)}
+                            </span>
+                          )}
+                      <span className="bot-management-guild-summary">
+                        <span className="discord-guild-name">{guild.name}</span>
+                        <strong>{text.installationConfirmed}</strong>
+                      </span>
+                    </label>
+                  ))}
+                </fieldset>
+                <label className="bot-management-field">
+                  <span>{text.organization}</span>
+                  <select
+                    value={claimOrganizationId}
+                    onChange={(event) => setClaimOrganizationId(event.target.value)}
+                  >
+                    <option value="">{text.createNewOrganization}</option>
+                    {connectSession.organizations.map((organization) => (
+                      <option key={organization.id} value={organization.id}>
+                        {organization.displayName}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <Button
+                  disabled={!selectedGuildId}
+                  loading={submitting}
+                  loadingLabel={text.claiming}
+                  onClick={() => void claimGuild()}
+                  type="button"
+                >
+                  {text.claim}
+                </Button>
+              </>
+            ) : null}
+            {connectSession.missingBotGuilds.length > 0 ? (
+              <section aria-busy={loading}>
+                <h3>{text.missingGuilds}</h3>
+                <ul>
+                  {connectSession.missingBotGuilds.map((guild) => (
+                    <li key={guild.id} title={guild.name}>{guild.name}</li>
+                  ))}
+                </ul>
+                <p role="status">{text.installationPending}</p>
+                <div className="bot-management-actions">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => window.location.assign(botInstallUrl())}
+                  >
+                    {text.installBot}
+                  </Button>
+                  <Button type="button" variant="secondary" onClick={() => void refreshGuilds()}>
+                    {text.refreshInstallation}
+                  </Button>
+                </div>
+              </section>
+            ) : null}
+            {connectSession.installedGuilds.length === 0
+              && connectSession.missingBotGuilds.length === 0 ? (
+                <EmptyState>
+                  <EmptyStateTitle>{text.noManageableGuilds}</EmptyStateTitle>
+                </EmptyState>
+              ) : null}
+          </CardContent>
+        </Card>
       ) : null}
       {session?.authenticated && session.organizations.length === 0 ? (
         <EmptyState>

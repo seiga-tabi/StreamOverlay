@@ -25,6 +25,8 @@ RUN npm ci --omit=dev --include-workspace-root=false \
   --workspace @streamops/discord-bot
 COPY --from=build /app/packages/shared/dist ./packages/shared/dist
 COPY --from=build /app/apps/discord-bot/dist ./apps/discord-bot/dist
+RUN find /app/node_modules /app/packages/shared/dist /app/apps/discord-bot/dist -type f \
+  \( -name '*.map' -o -name '*.d.ts' -o -path '*/test/*' -o -path '*/tests/*' \) -delete
 RUN groupadd --gid 10002 discordbot \
   && useradd --uid 10002 --gid discordbot --home-dir /app --shell /usr/sbin/nologin --no-create-home discordbot
 USER discordbot

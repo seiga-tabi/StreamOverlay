@@ -52,9 +52,21 @@ test("Bot 관리 화면은 초기 상태와 한국어·일본어 접근성 문�
 });
 
 test("관리 로그인 URL은 고정된 내부 OAuth 시작 경로만 사용한다", async () => {
-  const { managementLoginUrl } = await import("../src/features/bot-management/api");
+  const {
+    botInstallUrl,
+    managementConnectUrl,
+    managementLoginUrl
+  } = await import("../src/features/bot-management/api");
   const url = new URL(managementLoginUrl(), "https://yoro.gg");
   assert.equal(url.pathname, "/api/discord/management/oauth/start");
   assert.equal(url.search, "");
   assert.equal(url.hash, "");
+  assert.equal(
+    new URL(managementConnectUrl(), "https://yoro.gg").pathname,
+    "/api/discord/management/connect/start"
+  );
+  assert.equal(
+    new URL(botInstallUrl(), "https://yoro.gg").pathname,
+    "/api/discord/bot/install"
+  );
 });

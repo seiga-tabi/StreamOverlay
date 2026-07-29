@@ -23,24 +23,24 @@ Agent, 상태 수집, Notification Worker, RCON과 임의 메시지 전송은 �
 
 ## Secret
 
-운영에서는 다음 secret을 권한 `0400`인 regular file로 제공한다.
+운영에서는 다음 고정 경로에 권한 `0400` 또는 `0600`인 regular file을
+제공한다.
 
-- `DISCORD_BOT_TOKEN_SOURCE_FILE`: 호스트의 Bot token 원본 파일
-- `DISCORD_BOT_INTERNAL_AUTH_KEY_SOURCE_FILE`: 호스트의 내부 인증키 원본 파일
-- `DISCORD_BOT_TOKEN_FILE`: Bot 컨테이너 내부의 `/run/secrets/discord_bot_token`
-- `DISCORD_BOT_INTERNAL_AUTH_KEY_FILE`: Bot과 Server 컨테이너 내부의 `/run/secrets/discord_bot_internal_auth_key`
+- Bot token: `/run/secrets/discord_bot_token` (`discord-bot` 전용)
+- 내부 인증 key: `/run/secrets/discord_internal_auth_key` (Bot·Server 공유)
 
 Internal key는 Discord OAuth encryption key, Twitch key, Dashboard·Bridge secret과 다른 값을 사용한다. 실제 값, 일부 마스킹 값과 길이는 로그에 기록하지 않는다.
-Compose는 Bot UID/GID `10002`에 두 secret을 `0400`으로 mount한다. 호스트 원본 경로 변수와 컨테이너 `_FILE` 변수를 같은 값으로 재사용하지 않는다.
-Bot token 원본의 기본 위치인 `./discord-bot-secrets`는 Server의 `./secrets:/run/secrets` bind mount와 Docker build context에서 제외된다. 따라서 Bot token은 `discord-bot` 컨테이너에만 mount된다.
+Compose는 Bot UID/GID `10002`가 읽을 수 있도록 두 secret을 read-only로
+mount한다. Bot token은 Server에 mount하지 않고, Server의 Database·Twitch·
+Riot secret은 Bot에 mount하지 않는다.
 
 ## 활성화와 command 등록
 
 1. PostgreSQL backup 생성·검증
 2. migration `check`, `plan`
 3. 0005와 0006 검토 후 별도 승인으로 apply
-4. Server에 `DISCORD_BOT_INTERNAL_API_ENABLED=true`
-5. Bot은 `DISCORD_BOT_ENABLED=false` 상태로 image와 health 검증
+4. `runtime.json`의 `features.discordBot=true` 적용 전 secret과 내부 경로 검증
+5. Bot feature 비활성 상태로 image와 health 검증
 6. staging Guild에서 `commands:plan`
 7. 승인 후 `commands:apply -- --apply`
 8. staging OAuth와 Guild·사용자 binding 검증

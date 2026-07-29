@@ -1,5 +1,6 @@
 import path from "node:path";
 import { safeSecret } from "./safe-files.js";
+import { fixedAgentSecret, loadAgentRuntimeConfig } from "./runtime-files.js";
 
 export type AgentAdapterKind = "rest" | "mock";
 
@@ -97,14 +98,20 @@ function releaseIdentity(environment: NodeJS.ProcessEnv, production: boolean) {
 export function loadAgentConfig(
   environment: NodeJS.ProcessEnv = process.env
 ): AgentConfig {
-  const nodeEnv = environment.NODE_ENV ?? "development";
+  const runtimeConfig = loadAgentRuntimeConfig(environment);
+  const nodeEnv = runtimeConfig?.environment ?? environment.NODE_ENV ?? "development";
   const production = nodeEnv === "production";
-  const enabled = boolValue(environment.YORO_AGENT_ENABLED, false);
-  const stateDirectory = path.resolve(environment.YORO_AGENT_STATE_DIR ?? "./state/agent");
-  const credentialFile = path.resolve(
-    environment.YORO_AGENT_CREDENTIAL_FILE ?? path.join(stateDirectory, "credential.json")
+  const enabled = runtimeConfig?.agent?.enabled
+    ?? (runtimeConfig ? false : boolValue(environment.YORO_AGENT_ENABLED, false));
+  const stateDirectory = path.resolve(
+    runtimeConfig ? "./state/agent" : environment.YORO_AGENT_STATE_DIR ?? "./state/agent"
   );
-  const adapter = (environment.PALWORLD_STATUS_ADAPTER ?? "rest") as AgentAdapterKind;
+  const credentialFile = path.resolve(
+    runtimeConfig
+      ? path.join(stateDirectory, "credential.json")
+      : environment.YORO_AGENT_CREDENTIAL_FILE ?? path.join(stateDirectory, "credential.json")
+  );
+  const adapter = (runtimeConfig ? "rest" : environment.PALWORLD_STATUS_ADAPTER ?? "rest") as AgentAdapterKind;
   if (adapter !== "rest" && adapter !== "mock") throw new Error("adapter_invalid");
   if (production && adapter === "mock") throw new Error("mock_adapter_production_forbidden");
   const mockState = (environment.YORO_AGENT_MOCK_STATE ?? "online") as AgentConfig["mockState"];
@@ -112,23 +119,30 @@ export function loadAgentConfig(
     throw new Error("mock_state_invalid");
   }
   const bootstrapToken = enabled
-    ? safeSecret({
-        name: "bootstrap_token",
-        direct: environment.YORO_AGENT_BOOTSTRAP_TOKEN,
-        file: environment.YORO_AGENT_BOOTSTRAP_TOKEN_FILE,
-        production
-      })
+    ? runtimeConfig
+      ? fixedAgentSecret("yoro_agent_bootstrap_token", production, false)
+      : safeSecret({
+          name: "bootstrap_token",
+          direct: environment.YORO_AGENT_BOOTSTRAP_TOKEN,
+          file: environment.YORO_AGENT_BOOTSTRAP_TOKEN_FILE,
+          production
+        })
     : undefined;
   const adminPassword = enabled && adapter === "rest"
-    ? safeSecret({
-        name: "palworld_admin_password",
-        direct: environment.PALWORLD_ADMIN_PASSWORD,
-        file: environment.PALWORLD_ADMIN_PASSWORD_FILE,
-        production,
-        required: true
-      })
+    ? runtimeConfig
+      ? fixedAgentSecret("palworld_admin_password", production, true)
+      : safeSecret({
+          name: "palworld_admin_password",
+          direct: environment.PALWORLD_ADMIN_PASSWORD,
+          file: environment.PALWORLD_ADMIN_PASSWORD_FILE,
+          production,
+          required: true
+        })
     : undefined;
-  const healthHost = environment.YORO_AGENT_HEALTH_HOST ?? "127.0.0.1";
+  if (bootstrapToken && adminPassword && bootstrapToken === adminPassword) {
+    throw new Error("agent_secret_reuse_forbidden");
+  }
+  const healthHost = runtimeConfig ? "127.0.0.1" : environment.YORO_AGENT_HEALTH_HOST ?? "127.0.0.1";
   if (healthHost !== "127.0.0.1" && healthHost !== "::1") {
     throw new Error("health_host_not_loopback");
   }
@@ -137,32 +151,59 @@ export function loadAgentConfig(
     production,
     enabled,
     serverOrigin: normalizeServerOrigin(
-      environment.YORO_AGENT_SERVER_ORIGIN ?? "http://127.0.0.1:3000",
+      runtimeConfig?.agent?.serverOrigin
+        ?? environment.YORO_AGENT_SERVER_ORIGIN
+        ?? "http://127.0.0.1:3000",
       production && enabled
     ),
     stateDirectory,
     credentialFile,
     ...(bootstrapToken ? { bootstrapToken } : {}),
     pushIntervalSeconds: integerValue(
-      environment.YORO_AGENT_PUSH_INTERVAL_SECONDS, 300, 60, 3_600, "push_interval"
+      runtimeConfig?.agent?.statusIntervalSeconds?.toString()
+        ?? environment.YORO_AGENT_PUSH_INTERVAL_SECONDS,
+      300,
+      60,
+      3_600,
+      "push_interval"
     ),
     requestTimeoutMs: integerValue(
-      environment.YORO_AGENT_REQUEST_TIMEOUT_MS, 10_000, 500, 30_000, "request_timeout"
+      runtimeConfig?.agent?.requestTimeoutMs?.toString()
+        ?? environment.YORO_AGENT_REQUEST_TIMEOUT_MS,
+      10_000,
+      500,
+      30_000,
+      "request_timeout"
     ),
     maxRetryAttempts: integerValue(
-      environment.YORO_AGENT_MAX_RETRY_ATTEMPTS, 5, 0, 5, "retry_attempts"
+      runtimeConfig?.agent?.maxRetryAttempts?.toString()
+        ?? environment.YORO_AGENT_MAX_RETRY_ATTEMPTS,
+      5,
+      0,
+      5,
+      "retry_attempts"
     ),
     healthHost,
     healthPort: integerValue(
-      environment.YORO_AGENT_HEALTH_PORT, 3_200, 0, 65_535, "health_port"
+      runtimeConfig ? undefined : environment.YORO_AGENT_HEALTH_PORT,
+      3_200,
+      0,
+      65_535,
+      "health_port"
     ),
     adapter,
     palworldOrigin: normalizePalworldOrigin(
-      environment.PALWORLD_REST_ORIGIN ?? "http://127.0.0.1:8212"
+      runtimeConfig?.agent?.palworldOrigin
+        ?? environment.PALWORLD_REST_ORIGIN
+        ?? "http://127.0.0.1:8212"
     ),
     ...(adminPassword ? { adminPassword } : {}),
     palworldTimeoutMs: integerValue(
-      environment.PALWORLD_REQUEST_TIMEOUT_MS, 5_000, 500, 30_000, "palworld_timeout"
+      runtimeConfig ? undefined : environment.PALWORLD_REQUEST_TIMEOUT_MS,
+      5_000,
+      500,
+      30_000,
+      "palworld_timeout"
     ),
     mockState,
     release: releaseIdentity(environment, production)

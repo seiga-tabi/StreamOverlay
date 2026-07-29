@@ -2,7 +2,12 @@ import crypto from "node:crypto";
 
 const ENVELOPE_VERSION = 1;
 
-type DiscordSecretPurpose = "pkce_verifier" | "oauth_token" | "management_pkce";
+type DiscordSecretPurpose =
+  | "pkce_verifier"
+  | "pkce_verifier:web_management_connect"
+  | "oauth_token"
+  | "oauth_token:web_management_connect"
+  | "management_pkce";
 
 export type DiscordSecretContext = Readonly<{
   sessionId: string;

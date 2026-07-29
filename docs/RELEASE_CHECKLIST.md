@@ -32,7 +32,9 @@ git tag -a "rollback/v${VERSION}" "${PREVIOUS_GOOD_GIT_SHA}" -m "Rollback point 
 
 ## 3. 운영 환경
 
-- [ ] production `.env` 또는 secret file 권한이 `0600`이다.
+- [ ] production에 `.env`가 없고 `/etc/yoro/runtime.json`과 `/etc/yoro/legal.json`이 승인된 내용이다.
+- [ ] `/etc/yoro/secrets`는 `0700`, 활성 기능의 secret file은 `0600`이며 symlink가 아니다.
+- [ ] `npm run config:check`, `npm run secrets:check`, `npm run config:explain`이 secret 값을 출력하지 않고 통과했다.
 - [ ] HTTP redirect, HSTS, CSP, CORS와 runtime config `no-store`를 확인했다.
 - [ ] origin 포트가 공용 인터페이스에 노출되지 않는다.
 - [ ] liveness/readiness가 각각 정상이며 의존성 실패 시 readiness가 503을 반환한다.

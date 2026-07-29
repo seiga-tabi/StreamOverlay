@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { loadBotRuntimeConfig, loadBotSecret } from "./runtime-files.js";
 
 function env(name: string, fallback = ""): string {
   return process.env[name] ?? fallback;
@@ -53,32 +54,42 @@ function safeBaseUrl(value: string, production: boolean, label: string): string 
   }
 }
 
-const nodeEnv = env("NODE_ENV", "development");
+const runtimeConfig = loadBotRuntimeConfig(process.env);
+const nodeEnv = runtimeConfig?.environment ?? env("NODE_ENV", "development");
 const production = nodeEnv === "production";
-const enabled = boolEnv("DISCORD_BOT_ENABLED", false);
-const token = enabled ? secret("DISCORD_BOT_TOKEN", production) : "";
-const internalAuthKey = enabled ? secret("DISCORD_BOT_INTERNAL_AUTH_KEY", production) : "";
+const enabled = runtimeConfig?.features.discordBot ?? boolEnv("DISCORD_BOT_ENABLED", false);
+const token = enabled
+  ? runtimeConfig
+    ? loadBotSecret("discord_bot_token", true)
+    : secret("DISCORD_BOT_TOKEN", production)
+  : "";
+const internalAuthKey = enabled
+  ? runtimeConfig
+    ? loadBotSecret("discord_internal_auth_key", true)
+    : secret("DISCORD_BOT_INTERNAL_AUTH_KEY", production)
+  : "";
 
 export const botConfig = Object.freeze({
   nodeEnv,
   production,
+  configurationSource: runtimeConfig ? "runtime_file" : "legacy_environment",
   enabled,
   token,
   internalAuthKey,
-  applicationId: env("DISCORD_APPLICATION_ID").trim(),
-  testGuildId: env("DISCORD_TEST_GUILD_ID").trim(),
+  applicationId: runtimeConfig?.discord?.applicationId ?? env("DISCORD_APPLICATION_ID").trim(),
+  testGuildId: runtimeConfig ? "" : env("DISCORD_TEST_GUILD_ID").trim(),
   internalBaseUrl: safeBaseUrl(
-    env("DISCORD_BOT_INTERNAL_BASE_URL", "http://server:3000"),
+    runtimeConfig ? "http://server:3000" : env("DISCORD_BOT_INTERNAL_BASE_URL", "http://server:3000"),
     production,
     "internal"
   ),
   publicBaseUrl: safeBaseUrl(
-    env("DISCORD_BOT_PUBLIC_BASE_URL", "http://localhost:3000"),
+    runtimeConfig?.public.baseUrl ?? env("DISCORD_BOT_PUBLIC_BASE_URL", "http://localhost:3000"),
     production && enabled,
     "public"
   ),
-  healthPort: intEnv("DISCORD_BOT_HEALTH_PORT", 3100),
-  requestTimeoutMs: intEnv("DISCORD_BOT_INTERNAL_TIMEOUT_MS", 5_000),
+  healthPort: runtimeConfig ? 3_100 : intEnv("DISCORD_BOT_HEALTH_PORT", 3_100),
+  requestTimeoutMs: runtimeConfig ? 5_000 : intEnv("DISCORD_BOT_INTERNAL_TIMEOUT_MS", 5_000),
   release: {
     version: env("APP_VERSION", "0.1.0-dev"),
     gitSha: env("GIT_SHA", "unknown"),

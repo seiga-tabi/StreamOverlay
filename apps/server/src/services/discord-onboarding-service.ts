@@ -6,7 +6,8 @@ import { SafeDatabaseError } from "../database/errors.js";
 import {
   DiscordOnboardingRepository,
   type DiscordAuthenticatedSession,
-  type DiscordGuildCandidateRecord
+  type DiscordGuildCandidateRecord,
+  type DiscordSetupIssuedVia
 } from "../database/repositories/discord-onboarding-repository.js";
 import {
   decryptDiscordSecret,
@@ -20,6 +21,7 @@ import { isDiscordSnowflake } from "@streamops/shared";
 const DISCORD_API_BASE = "https://discord.com/api/v10";
 const DISCORD_AUTHORIZE_URL = "https://discord.com/oauth2/authorize";
 const DISCORD_TOKEN_URL = "https://discord.com/api/oauth2/token";
+const DISCORD_BOT_PERMISSIONS = "0";
 const ADMINISTRATOR = 1n << 3n;
 const MANAGE_GUILD = 1n << 5n;
 const SETUP_RETURN_PATH = "/setup/discord";
@@ -42,6 +44,7 @@ export type DiscordOnboardingErrorCode =
   | "bot_installation_required"
   | "setup_session_active"
   | "organization_permission_required"
+  | "entitlement_exceeded"
   | "csrf_required";
 
 export class DiscordOnboardingError extends Error {
@@ -94,6 +97,14 @@ export type DiscordOnboardingSessionView = Readonly<{
   authenticated: true;
   csrfToken: string;
   guilds: readonly DiscordManageableGuild[];
+  organizations: readonly { id: string; displayName: string }[];
+}>;
+
+export type DiscordWebManagementSessionView = Readonly<{
+  authenticated: true;
+  csrfToken: string;
+  installedGuilds: readonly (DiscordManageableGuild & { botInstalled: true })[];
+  missingBotGuilds: readonly (DiscordManageableGuild & { botInstalled: false })[];
   organizations: readonly { id: string; displayName: string }[];
 }>;
 
@@ -189,6 +200,21 @@ export function clearDiscordOnboardingCookie(): string {
   ].filter(Boolean).join("; ");
 }
 
+export function buildDiscordBotInstallUrl(applicationId: string): string {
+  if (!isDiscordSnowflake(applicationId)) {
+    throw new DiscordOnboardingError("feature_disabled", 404);
+  }
+  const target = new URL(DISCORD_AUTHORIZE_URL);
+  target.searchParams.set("client_id", applicationId);
+  target.searchParams.set("scope", "applications.commands bot");
+  target.searchParams.set("permissions", DISCORD_BOT_PERMISSIONS);
+  return target.toString();
+}
+
+export function discordBotInstallUrl(): string {
+  return buildDiscordBotInstallUrl(appConfig.discordBotInternal.applicationId);
+}
+
 export class DiscordOnboardingService {
   private cleanupTimer?: NodeJS.Timeout;
 
@@ -215,7 +241,7 @@ export class DiscordOnboardingService {
     applicationId?: string;
     guildId?: string;
     userId?: string;
-    issuedVia?: "bot_command" | "operator_test";
+    issuedVia?: DiscordSetupIssuedVia;
   } = {}): Promise<{ url: string; expiresAt: string }> {
     const issuedVia = input.issuedVia ?? "operator_test";
     const repository = new DiscordOnboardingRepository(this.pool);
@@ -237,6 +263,12 @@ export class DiscordOnboardingService {
         throw new DiscordOnboardingError("bot_installation_required", 409);
       }
     }
+    if (
+      issuedVia === "web_management"
+      && input.applicationId !== appConfig.discordBotInternal.applicationId
+    ) {
+      throw new DiscordOnboardingError("setup_session_invalid", 404);
+    }
     const token = discordSafeToken();
     const expiresAt = new Date(Date.now() + appConfig.discordSaas.setupLinkTtlSeconds * 1_000);
     try {
@@ -246,10 +278,12 @@ export class DiscordOnboardingService {
         expiresAt,
         issuedVia,
         ...(issuedVia === "bot_command" ? {
-          requestedApplicationId: input.applicationId,
           requestedDiscordGuildId: input.guildId,
           requestedByDiscordUserId: input.userId
-        } : {})
+        } : {}),
+        ...(issuedVia === "bot_command" || issuedVia === "web_management"
+          ? { requestedApplicationId: input.applicationId }
+          : {})
       });
     } catch (error) {
       if (error instanceof SafeDatabaseError && error.code === "DATABASE_CONFLICT") {
@@ -261,6 +295,29 @@ export class DiscordOnboardingService {
     url.searchParams.set("setup", token);
     this.logger?.event?.({ type: "discord.setup.issued", expiresAt: expiresAt.toISOString() });
     return { url: url.toString(), expiresAt: expiresAt.toISOString() };
+  }
+
+  async beginWebManagementOAuth(): Promise<{
+    authorizationUrl: string;
+    cookieValue: string;
+  }> {
+    const issued = await this.issueSetupSession({
+      issuedVia: "web_management",
+      applicationId: appConfig.discordBotInternal.applicationId
+    });
+    const setupToken = new URL(issued.url).searchParams.get("setup");
+    if (!setupToken) {
+      throw new DiscordOnboardingError("discord_session_unavailable", 503);
+    }
+    return this.beginOAuth(setupToken, "web_management_connect");
+  }
+
+  async isWebManagementCookie(cookieValue?: string): Promise<boolean> {
+    const cookie = parseCookieBinding(cookieValue);
+    if (!cookie) return false;
+    const issuedVia = await new DiscordOnboardingRepository(this.pool)
+      .issuedViaByCookieBinding(discordSecretHash(cookie.binding));
+    return issuedVia === "web_management";
   }
 
   async observeBotInstallation(input: {
@@ -293,7 +350,10 @@ export class DiscordOnboardingService {
     this.logger?.event?.({ type: "discord.installation.revoked" });
   }
 
-  async beginOAuth(setupToken: string): Promise<{
+  async beginOAuth(
+    setupToken: string,
+    purpose: "setup" | "web_management_connect" = "setup"
+  ): Promise<{
     authorizationUrl: string;
     cookieValue: string;
   }> {
@@ -310,7 +370,7 @@ export class DiscordOnboardingService {
       {
         sessionId: oauthSessionId,
         discordUserId: "pending",
-        purpose: "pkce_verifier"
+        purpose: purpose === "setup" ? "pkce_verifier" : "pkce_verifier:web_management_connect"
       }
     );
     const created = await withTransaction(this.pool, async (client) =>
@@ -347,7 +407,7 @@ export class DiscordOnboardingService {
     state: string;
     code: string;
     cookieValue?: string;
-  }): Promise<void> {
+  }): Promise<DiscordSetupIssuedVia> {
     const cookie = parseCookieBinding(input.cookieValue);
     if (
       !cookie
@@ -373,7 +433,9 @@ export class DiscordOnboardingService {
         {
           sessionId: oauth.id,
           discordUserId: "pending",
-          purpose: "pkce_verifier"
+          purpose: oauth.issuedVia === "web_management"
+            ? "pkce_verifier:web_management_connect"
+            : "pkce_verifier"
         }
       );
     } catch {
@@ -421,7 +483,9 @@ export class DiscordOnboardingService {
           {
             sessionId: oauth.id,
             discordUserId: profile.id,
-            purpose: "oauth_token"
+            purpose: oauth.issuedVia === "web_management"
+              ? "oauth_token:web_management_connect"
+              : "oauth_token"
           }
         );
         await repository.authenticateOAuthSession({
@@ -437,7 +501,20 @@ export class DiscordOnboardingService {
         type: "discord.oauth.completed",
         correlationId: oauth.id
       });
+      return oauth.issuedVia;
     } catch (error) {
+      try {
+        await new DiscordOnboardingRepository(this.pool).revokeBoundSession({
+          oauthSessionId: oauth.id,
+          setupSessionId: oauth.setupSessionId
+        });
+      } catch {
+        this.logger?.error?.({
+          type: "discord.oauth.discard_failed",
+          correlationId: oauth.id,
+          errorCode: "discord_session_unavailable"
+        });
+      }
       this.logger?.error?.({
         type: "discord.oauth.failed",
         correlationId: oauth.id,
@@ -469,12 +546,56 @@ export class DiscordOnboardingService {
     });
   }
 
+  async webManagementSession(
+    cookieValue?: string
+  ): Promise<DiscordWebManagementSessionView | undefined> {
+    const cookie = parseCookieBinding(cookieValue);
+    if (!cookie) return undefined;
+    const repository = new DiscordOnboardingRepository(this.pool);
+    const session = await repository.findAuthenticatedByCookie(discordSecretHash(cookie.binding));
+    if (
+      !session
+      || session.issuedVia !== "web_management"
+      || session.requestedApplicationId !== appConfig.discordBotInternal.applicationId
+      || !crypto.timingSafeEqual(session.csrfTokenHash, discordSecretHash(cookie.csrfToken))
+    ) {
+      return undefined;
+    }
+    await this.decryptToken(session);
+    const [guilds, organizations] = await Promise.all([
+      repository.listGuildCandidatesByInstallation(
+        session.oauthSessionId,
+        appConfig.discordBotInternal.applicationId
+      ),
+      repository.listOwnedOrganizations(session.internalUserId)
+    ]);
+    return Object.freeze({
+      authenticated: true as const,
+      csrfToken: cookie.csrfToken,
+      installedGuilds: guilds.installed.map((guild) => ({
+        ...guild,
+        manageable: true as const,
+        botInstalled: true as const
+      })),
+      missingBotGuilds: guilds.missing.map((guild) => ({
+        ...guild,
+        manageable: true as const,
+        botInstalled: false as const
+      })),
+      organizations
+    });
+  }
+
   async connectGuild(input: {
     cookieValue?: string;
     csrfToken?: string;
     guildId: string;
     organizationId?: string;
-  }): Promise<{ guild: { id: string; name: string }; organization: { id: string; displayName: string } }> {
+  }): Promise<{
+    guild: { id: string; name: string };
+    organization: { id: string; displayName: string };
+    managementSessionToken?: string;
+  }> {
     const cookie = parseCookieBinding(input.cookieValue);
     if (!cookie || !input.csrfToken || input.csrfToken !== cookie.csrfToken) {
       throw new DiscordOnboardingError("csrf_required", 403);
@@ -484,19 +605,34 @@ export class DiscordOnboardingService {
     if (!session || !crypto.timingSafeEqual(session.csrfTokenHash, discordSecretHash(input.csrfToken))) {
       throw new DiscordOnboardingError("discord_session_unavailable", 401);
     }
+    const discardWebManagementSession = async (): Promise<void> => {
+      if (session.issuedVia !== "web_management") return;
+      try {
+        await repository.revokeByCookie(discordSecretHash(cookie.binding));
+      } catch {
+        this.logger?.error?.({
+          type: "discord.oauth.discard_failed",
+          correlationId: session.oauthSessionId,
+          errorCode: "discord_session_unavailable"
+        });
+      }
+    };
     if (!validSnowflake(input.guildId)) {
+      await discardWebManagementSession();
       throw new DiscordOnboardingError("guild_permission_required", 403);
     }
     if (
       session.requestedDiscordGuildId
       && session.requestedDiscordGuildId !== input.guildId
     ) {
+      await discardWebManagementSession();
       throw new DiscordOnboardingError("guild_binding_mismatch", 403);
     }
     if (
       session.requestedByDiscordUserId
       && session.requestedByDiscordUserId !== session.discordUserId
     ) {
+      await discardWebManagementSession();
       throw new DiscordOnboardingError("discord_identity_mismatch", 403);
     }
     const token = await this.decryptToken(session);
@@ -507,20 +643,93 @@ export class DiscordOnboardingService {
         type: "discord.guild.connection_rejected",
         errorCode: "guild_permission_required"
       });
+      await discardWebManagementSession();
       throw new DiscordOnboardingError("guild_permission_required", 403);
     }
 
-    const result = await withTransaction(this.pool, async (client) => {
-      const transactional = new DiscordOnboardingRepository(client);
-      const setupStatus = await transactional.lockSetupForConnection(
+    const managementSessionToken = session.issuedVia === "web_management"
+      ? discordSafeToken()
+      : undefined;
+    const managementCsrfToken = session.issuedVia === "web_management"
+      ? discordSafeToken()
+      : undefined;
+    const now = Date.now();
+    const managementSession = managementSessionToken && managementCsrfToken
+      ? {
+          id: crypto.randomUUID(),
+          sessionTokenHash: discordSecretHash(managementSessionToken),
+          csrfTokenHash: discordSecretHash(managementCsrfToken),
+          idleExpiresAt: new Date(
+            now + appConfig.discordBotManagement.idleTtlSeconds * 1_000
+          ),
+          absoluteExpiresAt: new Date(
+            now + appConfig.discordBotManagement.absoluteTtlSeconds * 1_000
+          )
+        }
+      : undefined;
+    let result: {
+      guild: { id: string; name: string };
+      organization: { id: string; displayName: string };
+    };
+    try {
+      result = await withTransaction(this.pool, async (client) => {
+        const transactional = new DiscordOnboardingRepository(client);
+      const lockedSetup = await transactional.lockSetupForConnection(
         session.setupSessionId,
         session.discordIdentityId
       );
-      if (setupStatus === "completed") {
+      if (lockedSetup?.status === "completed") {
         throw new DiscordOnboardingError("setup_session_consumed", 409);
       }
-      if (setupStatus !== "authenticated" && setupStatus !== "guild_selected") {
+      if (
+        !lockedSetup
+        || (lockedSetup.status !== "authenticated" && lockedSetup.status !== "guild_selected")
+        || lockedSetup.issuedVia !== session.issuedVia
+      ) {
         throw new DiscordOnboardingError("setup_session_expired", 409);
+      }
+      if (lockedSetup.requestedApplicationId) {
+        try {
+          await transactional.requireObservedBotInstallation({
+            guildId: verifiedGuild.id,
+            applicationId: lockedSetup.requestedApplicationId
+          });
+        } catch {
+          throw new DiscordOnboardingError("bot_installation_required", 409);
+        }
+      }
+      const connectedOrganization = await transactional.connectedGuildOrganization(verifiedGuild.id);
+      if (connectedOrganization) {
+        if (input.organizationId && connectedOrganization !== input.organizationId) {
+          throw new DiscordOnboardingError("guild_already_connected", 409);
+        }
+        const membership = await transactional.organizationMembership(
+          session.internalUserId,
+          connectedOrganization
+        );
+        if (!membership) {
+          throw new DiscordOnboardingError("guild_already_connected", 409);
+        }
+        await transactional.completeExistingGuild({
+          setupSessionId: session.setupSessionId,
+          oauthSessionId: session.oauthSessionId,
+          organizationId: connectedOrganization,
+          discordGuildId: verifiedGuild.id,
+          installationId: crypto.randomUUID(),
+          ...(lockedSetup.requestedApplicationId
+            ? { applicationId: lockedSetup.requestedApplicationId }
+            : {}),
+          ...(managementSession
+            ? { userId: session.internalUserId, managementSession }
+            : {})
+        });
+        return {
+          guild: { id: verifiedGuild.id, name: verifiedGuild.name },
+          organization: {
+            id: connectedOrganization,
+            displayName: membership.displayName
+          }
+        };
       }
       let organizationId = input.organizationId;
       let organizationDisplayName = verifiedGuild.name;
@@ -540,20 +749,15 @@ export class DiscordOnboardingService {
           displayName: verifiedGuild.name
         });
       }
-      const connectedOrganization = await transactional.connectedGuildOrganization(verifiedGuild.id);
-      if (connectedOrganization) {
-        if (connectedOrganization !== organizationId) {
-          throw new DiscordOnboardingError("guild_already_connected", 409);
+      if (input.organizationId) {
+        try {
+          await transactional.requireDiscordGuildCapacity(organizationId);
+        } catch (error) {
+          if (error instanceof SafeDatabaseError && error.code === "DATABASE_CONFLICT") {
+            throw new DiscordOnboardingError("entitlement_exceeded", 409);
+          }
+          throw error;
         }
-        await transactional.completeExistingGuild({
-          setupSessionId: session.setupSessionId,
-          oauthSessionId: session.oauthSessionId,
-          organizationId
-        });
-        return {
-          guild: { id: verifiedGuild.id, name: verifiedGuild.name },
-          organization: { id: organizationId, displayName: organizationDisplayName }
-        };
       }
       await transactional.connectGuild({
         guildRecordId: crypto.randomUUID(),
@@ -568,19 +772,29 @@ export class DiscordOnboardingService {
         ...(session.requestedApplicationId ? {
           installationId: crypto.randomUUID(),
           applicationId: session.requestedApplicationId
-        } : {})
+        } : {}),
+        ...(managementSession ? { managementSession } : {})
       });
-      return {
-        guild: { id: verifiedGuild.id, name: verifiedGuild.name },
-        organization: { id: organizationId, displayName: organizationDisplayName }
-      };
-    });
+        return {
+          guild: { id: verifiedGuild.id, name: verifiedGuild.name },
+          organization: { id: organizationId, displayName: organizationDisplayName }
+        };
+      });
+    } catch (error) {
+      await discardWebManagementSession();
+      throw error;
+    }
     this.logger?.event?.({
       type: "discord.guild.connected",
       organizationId: result.organization.id,
       guildId: result.guild.id
     });
-    return result;
+    return {
+      ...result,
+      ...(managementSessionToken && managementCsrfToken
+        ? { managementSessionToken: `${managementSessionToken}.${managementCsrfToken}` }
+        : {})
+    };
   }
 
   async logout(cookieValue?: string): Promise<void> {
@@ -606,7 +820,9 @@ export class DiscordOnboardingService {
         {
           sessionId: session.oauthSessionId,
           discordUserId: session.discordUserId,
-          purpose: "oauth_token"
+          purpose: session.issuedVia === "web_management"
+            ? "oauth_token:web_management_connect"
+            : "oauth_token"
         }
       );
     } catch {

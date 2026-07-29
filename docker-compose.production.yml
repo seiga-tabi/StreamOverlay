@@ -1,85 +1,67 @@
 services:
   server:
-    build:
-      args:
-        APP_VERSION: ${APP_VERSION:?APP_VERSION is required}
-        GIT_SHA: ${GIT_SHA:?GIT_SHA is required}
-        BUILD_TIME: ${BUILD_TIME:?BUILD_TIME is required}
-    environment:
+    image: ${YORO_SERVER_IMAGE:?immutable YORO_SERVER_IMAGE is required}
+    build: !reset null
+    environment: !override
       NODE_ENV: production
-      APP_VERSION: ${APP_VERSION:?APP_VERSION is required}
-      GIT_SHA: ${GIT_SHA:?GIT_SHA is required}
-      BUILD_TIME: ${BUILD_TIME:?BUILD_TIME is required}
-      STREAMOPS_LOCAL_NO_AUTH: "false"
-      TRUST_PROXY: ${PRODUCTION_TRUST_PROXY:-true}
-      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:?PUBLIC_BASE_URL is required}
-      DASHBOARD_BASE_URL: ${DASHBOARD_BASE_URL:?DASHBOARD_BASE_URL is required}
-      OVERLAY_BASE_URL: ${OVERLAY_BASE_URL:?OVERLAY_BASE_URL is required}
-      TWITCH_REDIRECT_URI: ${TWITCH_REDIRECT_URI:?TWITCH_REDIRECT_URI is required}
-      TWITCH_PUBLIC_REDIRECT_URI: ${TWITCH_PUBLIC_REDIRECT_URI:?TWITCH_PUBLIC_REDIRECT_URI is required}
-      TWITCH_TOKEN_ENCRYPTION_KEY: ${TWITCH_TOKEN_ENCRYPTION_KEY:-}
-      TWITCH_TOKEN_ENCRYPTION_KEY_FILE: ${TWITCH_TOKEN_ENCRYPTION_KEY_FILE:-}
-      CORS_ORIGINS: ${CORS_ORIGINS:?CORS_ORIGINS is required}
-      DASHBOARD_AUTH_TOKEN: ${DASHBOARD_AUTH_TOKEN:-}
-      DASHBOARD_AUTH_TOKEN_FILE: ${DASHBOARD_AUTH_TOKEN_FILE:-}
-      OVERLAY_ACCESS_TOKEN: ${OVERLAY_ACCESS_TOKEN:-}
-      OVERLAY_ACCESS_TOKEN_FILE: ${OVERLAY_ACCESS_TOKEN_FILE:-}
-      BRIDGE_SHARED_SECRET: ${BRIDGE_SHARED_SECRET:-}
-      BRIDGE_SHARED_SECRET_FILE: ${BRIDGE_SHARED_SECRET_FILE:-}
-      DATABASE_ENABLED: ${DATABASE_ENABLED:-false}
-      DATABASE_URL: ${DATABASE_URL:-}
-      DATABASE_URL_FILE: ${DATABASE_URL_FILE:-}
-      DATABASE_POOL_MAX: ${DATABASE_POOL_MAX:-10}
-      DATABASE_IDLE_TIMEOUT_MS: ${DATABASE_IDLE_TIMEOUT_MS:-30000}
-      DATABASE_CONNECTION_TIMEOUT_MS: ${DATABASE_CONNECTION_TIMEOUT_MS:-5000}
-      DATABASE_STATEMENT_TIMEOUT_MS: ${DATABASE_STATEMENT_TIMEOUT_MS:-10000}
-      DATABASE_MIGRATION_MODE: ${DATABASE_MIGRATION_MODE:-check}
-      DATABASE_SSL_MODE: ${DATABASE_SSL_MODE:-disable}
-      DISCORD_BOT_INTERNAL_API_ENABLED: ${DISCORD_BOT_INTERNAL_API_ENABLED:-false}
-      DISCORD_BOT_INTERNAL_AUTH_KEY: ${DISCORD_BOT_INTERNAL_AUTH_KEY:-}
-      DISCORD_BOT_INTERNAL_AUTH_KEY_FILE: ${DISCORD_BOT_INTERNAL_AUTH_KEY_FILE:-/run/secrets/discord_bot_internal_auth_key}
-      DISCORD_APPLICATION_ID: ${DISCORD_APPLICATION_ID:-}
-      DISCORD_BOT_MANAGEMENT_ENABLED: ${DISCORD_BOT_MANAGEMENT_ENABLED:-false}
-      DISCORD_MANAGEMENT_OAUTH_REDIRECT_URI: ${DISCORD_MANAGEMENT_OAUTH_REDIRECT_URI:-}
-      DISCORD_MANAGEMENT_OAUTH_TTL_SECONDS: ${DISCORD_MANAGEMENT_OAUTH_TTL_SECONDS:-600}
-      DISCORD_MANAGEMENT_IDLE_TTL_SECONDS: ${DISCORD_MANAGEMENT_IDLE_TTL_SECONDS:-28800}
-      DISCORD_MANAGEMENT_ABSOLUTE_TTL_SECONDS: ${DISCORD_MANAGEMENT_ABSOLUTE_TTL_SECONDS:-86400}
-      AGENT_BOOTSTRAP_TTL_SECONDS: ${AGENT_BOOTSTRAP_TTL_SECONDS:-600}
-      SUPPORT_MAILBOX_ENABLED: ${SUPPORT_MAILBOX_ENABLED:-false}
-      SUPPORT_MAILBOX_ADDRESS: ${SUPPORT_MAILBOX_ADDRESS:-support@yoro.gg}
-      SUPPORT_MAILBOX_WEBHOOK_SECRET: ${SUPPORT_MAILBOX_WEBHOOK_SECRET:-}
-      SUPPORT_MAILBOX_WEBHOOK_SECRET_FILE: ${SUPPORT_MAILBOX_WEBHOOK_SECRET_FILE:-}
-      SUPPORT_MAILBOX_ENCRYPTION_KEY: ${SUPPORT_MAILBOX_ENCRYPTION_KEY:-}
-      SUPPORT_MAILBOX_ENCRYPTION_KEY_FILE: ${SUPPORT_MAILBOX_ENCRYPTION_KEY_FILE:-}
-      LEGAL_OPERATOR_NAME: ${LEGAL_OPERATOR_NAME:?LEGAL_OPERATOR_NAME is required}
-      LEGAL_CONTACT_ADDRESS: ${LEGAL_CONTACT_ADDRESS:?LEGAL_CONTACT_ADDRESS is required}
-      LEGAL_PRIVACY_OFFICER_NAME: ${LEGAL_PRIVACY_OFFICER_NAME:?LEGAL_PRIVACY_OFFICER_NAME is required}
-      LEGAL_CONTACT_EMAIL: ${LEGAL_CONTACT_EMAIL:?LEGAL_CONTACT_EMAIL is required}
-      LEGAL_EFFECTIVE_DATE: ${LEGAL_EFFECTIVE_DATE:?LEGAL_EFFECTIVE_DATE is required}
-      LEGAL_GOVERNING_LAW_KO: ${LEGAL_GOVERNING_LAW_KO:?LEGAL_GOVERNING_LAW_KO is required}
-      LEGAL_GOVERNING_LAW_JA: ${LEGAL_GOVERNING_LAW_JA:?LEGAL_GOVERNING_LAW_JA is required}
-      LEGAL_DISPUTE_VENUE_KO: ${LEGAL_DISPUTE_VENUE_KO:?LEGAL_DISPUTE_VENUE_KO is required}
-      LEGAL_DISPUTE_VENUE_JA: ${LEGAL_DISPUTE_VENUE_JA:?LEGAL_DISPUTE_VENUE_JA is required}
-      LEGAL_PROCESSORS_KO: ${LEGAL_PROCESSORS_KO:?LEGAL_PROCESSORS_KO is required}
-      LEGAL_PROCESSORS_JA: ${LEGAL_PROCESSORS_JA:?LEGAL_PROCESSORS_JA is required}
-      LEGAL_CROSS_BORDER_TRANSFER_KO: ${LEGAL_CROSS_BORDER_TRANSFER_KO:?LEGAL_CROSS_BORDER_TRANSFER_KO is required}
-      LEGAL_CROSS_BORDER_TRANSFER_JA: ${LEGAL_CROSS_BORDER_TRANSFER_JA:?LEGAL_CROSS_BORDER_TRANSFER_JA is required}
+      YORO_CONFIG_FILE: /etc/yoro/runtime.json
+      PORT: "3000"
+      IMAGE_RELEASE_METADATA_PATH: /app/release.json
+      STREAMOPS_LOGS_DIR: /app/logs
+      STREAMOPS_STATE_DIR: /app/.streamops
+      STREAMOPS_REPORTS_DIR: /app/reports
+      DASHBOARD_STATIC_DIR: /app/apps/dashboard/dist
+      OVERLAY_STATIC_DIR: /app/apps/overlay/dist
+    volumes: !override
+      - /etc/yoro/runtime.json:/etc/yoro/runtime.json:ro
+      - /etc/yoro/legal.json:/etc/yoro/legal.json:ro
+      - /etc/yoro/secrets/database_url:/run/secrets/database_url:ro
+      - /etc/yoro/secrets/twitch_client_secret:/run/secrets/twitch_client_secret:ro
+      - /etc/yoro/secrets/twitch_token_encryption_key:/run/secrets/twitch_token_encryption_key:ro
+      - /etc/yoro/secrets/riot_api_key:/run/secrets/riot_api_key:ro
+      - /etc/yoro/secrets/discord_client_secret:/run/secrets/discord_client_secret:ro
+      - /etc/yoro/secrets/discord_oauth_encryption_key:/run/secrets/discord_oauth_encryption_key:ro
+      - /etc/yoro/secrets/discord_internal_auth_key:/run/secrets/discord_internal_auth_key:ro
+      - /etc/yoro/secrets/bridge_shared_secret:/run/secrets/bridge_shared_secret:ro
+      - /etc/yoro/secrets/dashboard_auth_token:/run/secrets/dashboard_auth_token:ro
+      - /etc/yoro/secrets/overlay_access_token:/run/secrets/overlay_access_token:ro
+      - ./logs:/app/logs
+      - ./reports:/app/reports
+      - streamops_state:/app/.streamops
 
   postgres:
     image: ${POSTGRES_IMAGE:-postgres:16.6-bookworm}
+    environment: !override
+      POSTGRES_USER: streamops_app
+      POSTGRES_DB: streamops
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets: !override
+      - postgres_password
 
   discord-bot:
-    build:
-      args:
-        APP_VERSION: ${APP_VERSION:?APP_VERSION is required}
-        GIT_SHA: ${GIT_SHA:?GIT_SHA is required}
-        BUILD_TIME: ${BUILD_TIME:?BUILD_TIME is required}
-    environment:
+    image: ${YORO_DISCORD_BOT_IMAGE:?immutable YORO_DISCORD_BOT_IMAGE is required}
+    build: !reset null
+    environment: !override
       NODE_ENV: production
-      DISCORD_BOT_ENABLED: ${DISCORD_BOT_ENABLED:-false}
-      DISCORD_APPLICATION_ID: ${DISCORD_APPLICATION_ID:-}
-      DISCORD_TEST_GUILD_ID: ""
-      DISCORD_BOT_PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:?PUBLIC_BASE_URL is required}
-      APP_VERSION: ${APP_VERSION:?APP_VERSION is required}
-      GIT_SHA: ${GIT_SHA:?GIT_SHA is required}
-      BUILD_TIME: ${BUILD_TIME:?BUILD_TIME is required}
+      YORO_CONFIG_FILE: /etc/yoro/runtime.json
+      DISCORD_BOT_INTERNAL_BASE_URL: http://server:3000
+      DISCORD_BOT_HEALTH_PORT: "3100"
+    volumes: !override
+      - /etc/yoro/runtime.json:/etc/yoro/runtime.json:ro
+      - /etc/yoro/secrets/discord_bot_token:/run/secrets/discord_bot_token:ro
+      - /etc/yoro/secrets/discord_internal_auth_key:/run/secrets/discord_internal_auth_key:ro
+
+  cloudflared:
+    image: ${CLOUDFLARED_IMAGE:?immutable CLOUDFLARED_IMAGE is required}
+    command:
+      - tunnel
+      - --no-autoupdate
+      - run
+      - --token-file
+      - /run/secrets/cloudflare_tunnel_token
+    volumes:
+      - /etc/yoro/secrets/cloudflare_tunnel_token:/run/secrets/cloudflare_tunnel_token:ro
+
+secrets:
+  postgres_password:
+    file: /etc/yoro/secrets/postgres_password

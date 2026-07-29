@@ -169,6 +169,7 @@ import type { PalworldMapLocationsProvider } from "../data/palworld-map-location
 import {
   clearDiscordOnboardingCookie,
   DISCORD_ONBOARDING_COOKIE,
+  discordBotInstallUrl,
   discordOnboardingCookie,
   DiscordOnboardingError,
   type DiscordOnboardingService
@@ -1308,6 +1309,12 @@ function requestCookie(req: IncomingMessage, name: string): string | undefined {
 function discordSetupReturnUrl(status: "connected" | "error"): string {
   const target = new URL("/setup/discord", appConfig.dashboardBaseUrl);
   target.searchParams.set("discord", status);
+  return target.toString();
+}
+
+function discordManagementConnectReturnUrl(status: "select" | "error"): string {
+  const target = new URL("/bot/manage", appConfig.dashboardBaseUrl);
+  target.searchParams.set("connect", status);
   return target.toString();
 }
 
@@ -5977,6 +5984,15 @@ export function createHttpHandler(input: HttpHandlerInput) {
         if (!appConfig.discordSaas.enabled) {
           return sendJson(req, res, 404, { error: "not found" });
         }
+        if (req.method === "GET" && url.pathname === "/api/discord/bot/install") {
+          if (url.search || !appConfig.discordBotInternal.enabled) {
+            return sendJson(req, res, 404, { error: "not found" });
+          }
+          return sendRedirect(res, discordBotInstallUrl(), {
+            "Cache-Control": "no-store",
+            "Referrer-Policy": "no-referrer"
+          });
+        }
         if (
           !appConfig.database.enabled
           || !input.discordOnboarding
@@ -5991,8 +6007,101 @@ export function createHttpHandler(input: HttpHandlerInput) {
           if (!appConfig.discordBotManagement.enabled || !input.discordManagement) {
             return sendJson(req, res, 404, { error: "not found" });
           }
+          const webGuildConnectionRequest = (
+            url.pathname === "/api/discord/management/connect/start"
+            || url.pathname === "/api/discord/management/connect/session"
+            || url.pathname === "/api/discord/management/guilds/claim"
+          );
+          if (webGuildConnectionRequest && !appConfig.discordBotInternal.enabled) {
+            return sendJson(req, res, 503, {
+              error: "Discord Bot 설치 관찰 기능을 사용할 수 없습니다.",
+              code: "bot_gateway_unavailable"
+            }, noStoreHeaders());
+          }
           const oauthCookie = requestCookie(req, DISCORD_MANAGEMENT_OAUTH_COOKIE);
           const managementCookie = requestCookie(req, DISCORD_MANAGEMENT_SESSION_COOKIE);
+          const onboardingCookie = requestCookie(req, DISCORD_ONBOARDING_COOKIE);
+          if (
+            req.method === "GET"
+            && url.pathname === "/api/discord/management/connect/start"
+          ) {
+            if (url.search) {
+              return sendJson(req, res, 400, { error: "query는 허용되지 않습니다." });
+            }
+            const started = await input.discordOnboarding.beginWebManagementOAuth();
+            return sendRedirect(res, started.authorizationUrl, {
+              "Set-Cookie": discordOnboardingCookie(started.cookieValue),
+              "Cache-Control": "no-store"
+            });
+          }
+          if (
+            req.method === "GET"
+            && url.pathname === "/api/discord/management/connect/session"
+          ) {
+            if (url.search) {
+              return sendJson(req, res, 400, { error: "query는 허용되지 않습니다." });
+            }
+            const session = await input.discordOnboarding.webManagementSession(onboardingCookie);
+            return sendJson(
+              req,
+              res,
+              200,
+              session ?? { authenticated: false },
+              noStoreHeaders()
+            );
+          }
+          if (
+            req.method === "POST"
+            && url.pathname === "/api/discord/management/guilds/claim"
+          ) {
+            if (!stateChangingRequestHasTrustedOrigin(req)) {
+              return sendJson(req, res, 403, {
+                error: "trusted Origin이 필요합니다.",
+                code: "origin_denied"
+              });
+            }
+            if (!discordJsonBodyAllowed(req)) {
+              return sendJson(req, res, 415, {
+                error: "application/json Content-Type이 필요합니다."
+              });
+            }
+            const body = await readJsonBody<Record<string, unknown>>(req);
+            if (
+              Object.keys(body).some((key) => !["guildId", "organizationId"].includes(key))
+              || typeof body.guildId !== "string"
+              || (body.organizationId !== undefined && typeof body.organizationId !== "string")
+            ) {
+              return sendJson(req, res, 400, {
+                error: "Guild 연결 요청 형식이 올바르지 않습니다.",
+                code: "invalid_input"
+              });
+            }
+            const connected = await input.discordOnboarding.connectGuild({
+              cookieValue: onboardingCookie,
+              csrfToken: requestHeaderValue(req, "x-discord-csrf"),
+              guildId: body.guildId,
+              ...(typeof body.organizationId === "string"
+                ? { organizationId: body.organizationId }
+                : {})
+            });
+            if (!connected.managementSessionToken) {
+              return sendJson(req, res, 409, {
+                error: "웹 관리 session을 발급할 수 없습니다.",
+                code: "session_required"
+              });
+            }
+            return sendJson(req, res, 200, {
+              completed: true,
+              guild: connected.guild,
+              organization: connected.organization
+            }, {
+              "Set-Cookie": [
+                clearDiscordOnboardingCookie(),
+                discordManagementSessionCookie(connected.managementSessionToken)
+              ],
+              "Cache-Control": "no-store"
+            });
+          }
           if (req.method === "GET" && url.pathname === "/api/discord/management/oauth/start") {
             if (url.search) {
               return sendJson(req, res, 400, { error: "query는 허용되지 않습니다." });
@@ -6149,25 +6258,44 @@ export function createHttpHandler(input: HttpHandlerInput) {
         if (req.method === "GET" && url.pathname === "/api/discord/oauth/callback") {
           const allowed = new Set(["code", "state", "error", "error_description"]);
           if ([...url.searchParams.keys()].some((key) => !allowed.has(key))) {
+            await input.discordOnboarding.logout(onboardingCookie);
             return sendRedirect(res, discordSetupReturnUrl("error"), {
               "Set-Cookie": clearDiscordOnboardingCookie(),
               "Cache-Control": "no-store"
             });
           }
           if (url.searchParams.has("error")) {
-            return sendRedirect(res, discordSetupReturnUrl("error"), {
+            const webManagement = await input.discordOnboarding
+              .isWebManagementCookie(onboardingCookie);
+            await input.discordOnboarding.logout(onboardingCookie);
+            return sendRedirect(
+              res,
+              webManagement
+                ? discordManagementConnectReturnUrl("error")
+                : discordSetupReturnUrl("error"),
+              {
               "Set-Cookie": clearDiscordOnboardingCookie(),
               "Cache-Control": "no-store"
-            });
+              }
+            );
           }
+          const webManagement = await input.discordOnboarding
+            .isWebManagementCookie(onboardingCookie);
           try {
-            await input.discordOnboarding.completeOAuth({
+            const issuedVia = await input.discordOnboarding.completeOAuth({
               state: url.searchParams.get("state") ?? "",
               code: url.searchParams.get("code") ?? "",
               cookieValue: onboardingCookie
             });
+            if (issuedVia === "web_management") {
+              return sendRedirect(res, discordManagementConnectReturnUrl("select"), {
+                "Cache-Control": "no-store"
+              });
+            }
           } catch {
-            return sendRedirect(res, discordSetupReturnUrl("error"), {
+            return sendRedirect(res, webManagement
+              ? discordManagementConnectReturnUrl("error")
+              : discordSetupReturnUrl("error"), {
               "Set-Cookie": clearDiscordOnboardingCookie(),
               "Cache-Control": "no-store"
             });

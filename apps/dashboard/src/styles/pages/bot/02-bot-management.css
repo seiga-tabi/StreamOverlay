@@ -53,6 +53,17 @@
   overflow-wrap: anywhere;
 }
 
+.bot-management-guild-summary {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-1);
+}
+
+.bot-management-guild-summary strong {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
 .bot-management-error {
   color: var(--danger);
 }

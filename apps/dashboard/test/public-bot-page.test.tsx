@@ -37,7 +37,11 @@ test("YORO Bot 페이지는 구현 완료 기능과 준비 중 기능을 구분�
   assert.match(markup, /게임 서버 운영을 Discord에서 더 간단하게/u);
   assert.match(markup, /Discord 연결 기반 준비됨/u);
   assert.match(markup, /설정 명령 구현됨 · 운영 활성화 필요/u);
-  assert.match(markup, /ephemeral 명령 응답/u);
+  assert.match(markup, /Discord 서버에 YORO Bot 추가/u);
+  assert.match(markup, /href="\/api\/discord\/bot\/install"/u);
+  assert.match(markup, /href="\/bot\/manage"/u);
+  assert.match(markup, /복구용 일회성 링크/u);
+  assert.match(markup, /Agent daemon과 상태 Ingestion 기반이 구현/u);
   assert.match(markup, /Organization 관리/u);
   assert.match(markup, /OAuth token 평문 미저장/u);
   assert.match(markup, /aria-label="YORO Bot 홈"/u);

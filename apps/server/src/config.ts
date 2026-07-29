@@ -4,6 +4,12 @@ import fs from "node:fs";
 import net from "node:net";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  loadConfiguredRuntime,
+  loadFixedSecret,
+  loadYoroLegalConfig,
+  YORO_SECRET_FILES
+} from "./runtime-configuration.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,12 +17,18 @@ const __dirname = path.dirname(__filename);
 export const serverRoot = path.resolve(__dirname, "..");
 export const projectRoot = path.resolve(serverRoot, "..", "..");
 
-const explicitDotenvPath = process.env.DOTENV_CONFIG_PATH;
-const dotenvPaths = explicitDotenvPath
-  ? [path.resolve(explicitDotenvPath)]
-  : [path.resolve(projectRoot, ".env"), path.resolve(serverRoot, ".env")];
-for (const dotenvPath of dotenvPaths) {
-  dotenv.config({ path: dotenvPath });
+const configuredRuntime = loadConfiguredRuntime();
+const legacyEnvironmentMode = configuredRuntime === undefined;
+const dotenvPaths: string[] = [];
+
+if (legacyEnvironmentMode) {
+  const explicitDotenvPath = process.env.DOTENV_CONFIG_PATH;
+  dotenvPaths.push(...(explicitDotenvPath
+    ? [path.resolve(explicitDotenvPath)]
+    : [path.resolve(projectRoot, ".env"), path.resolve(serverRoot, ".env")]));
+  for (const dotenvPath of dotenvPaths) {
+    dotenv.config({ path: dotenvPath });
+  }
 }
 
 function env(name: string, fallback = ""): string {
@@ -109,63 +121,209 @@ const DEFAULT_EVENTSUB_SUBSCRIPTIONS = [
   "channel.channel_points_custom_reward_redemption.add"
 ].join(" ");
 
-const defaultStateDir = env("STREAMOPS_STATE_DIR", path.resolve(projectRoot, ".streamops"));
-const nodeEnv = env("NODE_ENV", "development");
-const localNoAuthRequested = boolEnv("STREAMOPS_LOCAL_NO_AUTH", false);
+const DEFAULTS = Object.freeze({
+  port: 3_000,
+  twitch: Object.freeze({
+    chatThrottleMs: 1_500,
+    chatCooldownMs: 10_000,
+    chatMaxQueue: 20,
+    chatMaxLength: 500,
+    chatTemplateValueMaxLength: 120,
+    apiTimeoutMs: 10_000
+  }),
+  database: Object.freeze({
+    poolMax: 10,
+    idleTimeoutMs: 30_000,
+    connectionTimeoutMs: 5_000,
+    statementTimeoutMs: 10_000,
+    migrationMode: "check",
+    sslMode: "disable"
+  }),
+  discord: Object.freeze({
+    setupLinkTtlSeconds: 600,
+    oauthSessionTtlSeconds: 900,
+    apiTimeoutMs: 10_000,
+    managementOauthTtlSeconds: 600,
+    managementIdleTtlSeconds: 28_800,
+    managementAbsoluteTtlSeconds: 86_400,
+    agentBootstrapTtlSeconds: 600
+  }),
+  agent: Object.freeze({
+    credentialTtlDays: 90,
+    clockSkewSeconds: 300,
+    nonceTtlSeconds: 600,
+    maximumBodyBytes: 16 * 1_024,
+    rateLimitPerMinute: 120
+  }),
+  riot: Object.freeze({
+    accountRegion: "asia",
+    lolPlatform: "kr",
+    apiTimeoutMs: 10_000,
+    rateLimitPerSecond: 20,
+    rateLimitPerTwoMinutes: 100,
+    rateLimitQueueMax: 500
+  }),
+  translation: Object.freeze({
+    maxInputLength: 180,
+    cacheTtlMs: 10 * 60 * 1_000,
+    maxTranslationsPerMinute: 30
+  }),
+  logging: Object.freeze({
+    maxBytes: 10 * 1_024 * 1_024,
+    maxFiles: 5
+  }),
+  dashboardSessionTtlMs: 8 * 60 * 60 * 1_000
+});
+
+const nodeEnv = configuredRuntime?.environment ?? env("NODE_ENV", "development");
+const runtimePath = (productionPath: string, developmentPath: string): string => (
+  configuredRuntime && nodeEnv === "production" ? productionPath : developmentPath
+);
+const defaultStateDir = configuredRuntime
+  ? runtimePath("/app/.streamops", path.resolve(projectRoot, ".streamops"))
+  : env("STREAMOPS_STATE_DIR", path.resolve(projectRoot, ".streamops"));
+const localNoAuthRequested = configuredRuntime
+  ? false
+  : boolEnv("STREAMOPS_LOCAL_NO_AUTH", false);
 const localNoAuth = localNoAuthRequested && nodeEnv !== "production";
-const dashboardAuthToken = localNoAuth ? "" : envOrFile("DASHBOARD_AUTH_TOKEN");
-const overlayAccessToken = localNoAuth ? "" : envOrFile("OVERLAY_ACCESS_TOKEN");
-const bridgeSharedSecret = envOrFile("BRIDGE_SHARED_SECRET", "dev-secret-change-me");
+const dashboardAuthToken = localNoAuth
+  ? ""
+  : configuredRuntime
+    ? loadFixedSecret(YORO_SECRET_FILES.dashboardAuthToken, { required: nodeEnv === "production" })
+    : envOrFile("DASHBOARD_AUTH_TOKEN");
+const overlayAccessToken = localNoAuth
+  ? ""
+  : configuredRuntime
+    ? loadFixedSecret(YORO_SECRET_FILES.overlayAccessToken, { required: nodeEnv === "production" })
+    : envOrFile("OVERLAY_ACCESS_TOKEN");
+const bridgeSharedSecret = configuredRuntime
+  ? loadFixedSecret(YORO_SECRET_FILES.bridgeSharedSecret, { required: nodeEnv === "production" })
+  : envOrFile("BRIDGE_SHARED_SECRET", "dev-secret-change-me");
 const imageBuild = imageReleaseMetadata();
-const databaseEnabled = boolEnv("DATABASE_ENABLED", false);
-if (process.env.DATABASE_URL && process.env.DATABASE_URL_FILE) {
+const databaseEnabled = configuredRuntime?.features.database ?? boolEnv("DATABASE_ENABLED", false);
+if (legacyEnvironmentMode && process.env.DATABASE_URL && process.env.DATABASE_URL_FILE) {
   throw new Error("DATABASE_URL과 DATABASE_URL_FILE은 동시에 설정할 수 없습니다.");
 }
-const databaseUrl = databaseEnabled ? envOrFile("DATABASE_URL") : "";
-const discordSaasEnabled = boolEnv("DISCORD_SAAS_ENABLED", false);
-const discordClientSecret = secretEnvOrFile("DISCORD_CLIENT_SECRET");
-const discordTokenEncryptionKey = secretEnvOrFile("DISCORD_OAUTH_TOKEN_ENCRYPTION_KEY");
-const discordBotInternalApiEnabled = boolEnv("DISCORD_BOT_INTERNAL_API_ENABLED", false);
-const discordBotInternalAuthKey = discordBotInternalApiEnabled
-  ? secretEnvOrFile("DISCORD_BOT_INTERNAL_AUTH_KEY")
+const databaseUrl = databaseEnabled
+  ? configuredRuntime
+    ? loadFixedSecret(YORO_SECRET_FILES.databaseUrl, { required: true })
+    : envOrFile("DATABASE_URL")
   : "";
-const discordBotManagementEnabled = boolEnv("DISCORD_BOT_MANAGEMENT_ENABLED", false);
-const agentIngestionEnabled = boolEnv("AGENT_INGESTION_ENABLED", false);
+const discordSaasEnabled = configuredRuntime?.features.discordSaas
+  ?? boolEnv("DISCORD_SAAS_ENABLED", false);
+const discordClientSecret = discordSaasEnabled
+  ? configuredRuntime
+    ? loadFixedSecret(YORO_SECRET_FILES.discordClientSecret, { required: true })
+    : secretEnvOrFile("DISCORD_CLIENT_SECRET")
+  : "";
+const discordTokenEncryptionKey = discordSaasEnabled
+  ? configuredRuntime
+    ? loadFixedSecret(YORO_SECRET_FILES.discordOAuthEncryptionKey, { required: true })
+    : secretEnvOrFile("DISCORD_OAUTH_TOKEN_ENCRYPTION_KEY")
+  : "";
+const discordBotInternalApiEnabled = configuredRuntime?.features.discordBot
+  ?? boolEnv("DISCORD_BOT_INTERNAL_API_ENABLED", false);
+const discordBotInternalAuthKey = discordBotInternalApiEnabled
+  ? configuredRuntime
+    ? loadFixedSecret(YORO_SECRET_FILES.discordInternalAuthKey, { required: true })
+    : secretEnvOrFile("DISCORD_BOT_INTERNAL_AUTH_KEY")
+  : "";
+const discordBotManagementEnabled = configuredRuntime?.features.discordBotManagement
+  ?? boolEnv("DISCORD_BOT_MANAGEMENT_ENABLED", false);
+const agentIngestionEnabled = configuredRuntime?.features.agentIngestion
+  ?? boolEnv("AGENT_INGESTION_ENABLED", false);
+const twitchEventSubEnabled = configuredRuntime?.features.twitchEventSub
+  ?? boolEnv("TWITCH_ENABLE_EVENTSUB", false);
+const twitchClientSecret = twitchEventSubEnabled
+  ? configuredRuntime
+    ? loadFixedSecret(YORO_SECRET_FILES.twitchClientSecret, { required: true })
+    : envOrFile("TWITCH_CLIENT_SECRET")
+  : configuredRuntime
+    ? configuredRuntime.twitch
+      ? loadFixedSecret(YORO_SECRET_FILES.twitchClientSecret)
+      : ""
+    : envOrFile("TWITCH_CLIENT_SECRET");
+const twitchTokenEncryptionKey = configuredRuntime
+  ? configuredRuntime.twitch
+    ? loadFixedSecret(YORO_SECRET_FILES.twitchTokenEncryptionKey, {
+        required: nodeEnv === "production"
+      })
+    : ""
+  : envOrFile("TWITCH_TOKEN_ENCRYPTION_KEY");
+const riotApiKey = configuredRuntime?.riot
+  ? loadFixedSecret(YORO_SECRET_FILES.riotApiKey)
+  : configuredRuntime ? "" : envOrFile("RIOT_API_KEY");
+const legalFileConfig = configuredRuntime && nodeEnv === "production"
+  ? loadYoroLegalConfig()
+  : undefined;
 
 export const appConfig = {
   nodeEnv,
+  configurationSource: configuredRuntime ? "runtime_file" : "legacy_environment",
   build: {
     version: env("APP_VERSION", "0.1.0"),
     gitSha: env("GIT_SHA", "unknown"),
     builtAt: env("BUILD_TIME", "unknown")
   },
   imageBuild,
-  allowInsecureDev: boolEnv("ALLOW_INSECURE_DEV", false),
-  port: Number(env("PORT", "3000")),
-  publicBaseUrl: env("PUBLIC_BASE_URL", "http://localhost:3000"),
-  dashboardBaseUrl: env("DASHBOARD_BASE_URL", "http://localhost:5173"),
-  overlayBaseUrl: env("OVERLAY_BASE_URL", "http://localhost:5174"),
+  allowInsecureDev: configuredRuntime ? false : boolEnv("ALLOW_INSECURE_DEV", false),
+  port: configuredRuntime ? DEFAULTS.port : Number(env("PORT", String(DEFAULTS.port))),
+  publicBaseUrl: configuredRuntime?.public.baseUrl ?? env("PUBLIC_BASE_URL", "http://localhost:3000"),
+  dashboardBaseUrl: configuredRuntime?.public.dashboardOrigin
+    ?? env("DASHBOARD_BASE_URL", "http://localhost:5173"),
+  overlayBaseUrl: configuredRuntime?.public.overlayOrigin
+    ?? env("OVERLAY_BASE_URL", "http://localhost:5174"),
   twitch: {
-    enableEventSub: boolEnv("TWITCH_ENABLE_EVENTSUB", false),
-    eventSubSubscriptions: listEnv("TWITCH_EVENTSUB_SUBSCRIPTIONS", DEFAULT_EVENTSUB_SUBSCRIPTIONS),
-    clientId: env("TWITCH_CLIENT_ID"),
-    clientSecret: env("TWITCH_CLIENT_SECRET"),
-    redirectUri: env("TWITCH_REDIRECT_URI", `${env("PUBLIC_BASE_URL", "http://localhost:3000")}/api/twitch/auth/callback`),
-    publicRedirectUri: env("TWITCH_PUBLIC_REDIRECT_URI", `${env("PUBLIC_BASE_URL", "http://localhost:3000")}/api/public/twitch/auth/callback`),
-    extraScopes: listEnv("TWITCH_EXTRA_SCOPES"),
-    tokenStorePath: env("TWITCH_TOKEN_STORE_PATH", path.resolve(projectRoot, ".streamops", "twitch-token.json")),
-    tokenEncryptionKey: envOrFile("TWITCH_TOKEN_ENCRYPTION_KEY"),
-    userAccessToken: env("TWITCH_USER_ACCESS_TOKEN"),
-    broadcasterId: env("TWITCH_BROADCASTER_ID"),
-    botUserId: env("TWITCH_BOT_USER_ID"),
-    chatSenderId: env("TWITCH_CHAT_SENDER_ID", env("TWITCH_BOT_USER_ID")),
-    chatMode: env("TWITCH_CHAT_MODE", "broadcaster"),
-    chatThrottleMs: intEnv("TWITCH_CHAT_THROTTLE_MS", 1500),
-    chatCooldownMs: intEnv("TWITCH_CHAT_COOLDOWN_MS", 10_000),
-    chatMaxQueue: intEnv("TWITCH_CHAT_MAX_QUEUE", 20),
-    chatMaxLength: intEnv("TWITCH_CHAT_MAX_LENGTH", 500),
-    chatTemplateValueMaxLength: intEnv("TWITCH_CHAT_TEMPLATE_VALUE_MAX_LENGTH", 120),
-    apiTimeoutMs: Math.max(1000, intEnv("TWITCH_API_TIMEOUT_MS", 10_000))
+    enableEventSub: twitchEventSubEnabled,
+    eventSubSubscriptions: configuredRuntime?.twitch?.eventSubSubscriptions
+      ? [...configuredRuntime.twitch.eventSubSubscriptions]
+      : configuredRuntime
+        ? DEFAULT_EVENTSUB_SUBSCRIPTIONS.split(" ")
+        : listEnv("TWITCH_EVENTSUB_SUBSCRIPTIONS", DEFAULT_EVENTSUB_SUBSCRIPTIONS),
+    clientId: configuredRuntime?.twitch?.clientId ?? env("TWITCH_CLIENT_ID"),
+    clientSecret: twitchClientSecret,
+    redirectUri: configuredRuntime?.twitch?.redirectUri
+      ?? env(
+        "TWITCH_REDIRECT_URI",
+        `${configuredRuntime?.public.baseUrl ?? env("PUBLIC_BASE_URL", "http://localhost:3000")}/api/twitch/auth/callback`
+      ),
+    publicRedirectUri: configuredRuntime?.twitch?.publicRedirectUri
+      ?? env(
+        "TWITCH_PUBLIC_REDIRECT_URI",
+        `${configuredRuntime?.public.baseUrl ?? env("PUBLIC_BASE_URL", "http://localhost:3000")}/api/public/twitch/auth/callback`
+      ),
+    extraScopes: configuredRuntime?.twitch?.extraScopes
+      ? [...configuredRuntime.twitch.extraScopes]
+      : configuredRuntime ? [] : listEnv("TWITCH_EXTRA_SCOPES"),
+    tokenStorePath: configuredRuntime
+      ? path.resolve(defaultStateDir, "twitch-token.json")
+      : env("TWITCH_TOKEN_STORE_PATH", path.resolve(projectRoot, ".streamops", "twitch-token.json")),
+    tokenEncryptionKey: twitchTokenEncryptionKey,
+    userAccessToken: configuredRuntime ? "" : env("TWITCH_USER_ACCESS_TOKEN"),
+    broadcasterId: configuredRuntime?.twitch?.broadcasterId ?? env("TWITCH_BROADCASTER_ID"),
+    botUserId: configuredRuntime?.twitch?.botUserId ?? env("TWITCH_BOT_USER_ID"),
+    chatSenderId: configuredRuntime?.twitch?.chatSenderId
+      ?? configuredRuntime?.twitch?.botUserId
+      ?? env("TWITCH_CHAT_SENDER_ID", env("TWITCH_BOT_USER_ID")),
+    chatMode: configuredRuntime?.twitch?.chatMode ?? env("TWITCH_CHAT_MODE", "broadcaster"),
+    chatThrottleMs: configuredRuntime
+      ? DEFAULTS.twitch.chatThrottleMs
+      : intEnv("TWITCH_CHAT_THROTTLE_MS", DEFAULTS.twitch.chatThrottleMs),
+    chatCooldownMs: configuredRuntime
+      ? DEFAULTS.twitch.chatCooldownMs
+      : intEnv("TWITCH_CHAT_COOLDOWN_MS", DEFAULTS.twitch.chatCooldownMs),
+    chatMaxQueue: configuredRuntime
+      ? DEFAULTS.twitch.chatMaxQueue
+      : intEnv("TWITCH_CHAT_MAX_QUEUE", DEFAULTS.twitch.chatMaxQueue),
+    chatMaxLength: configuredRuntime
+      ? DEFAULTS.twitch.chatMaxLength
+      : intEnv("TWITCH_CHAT_MAX_LENGTH", DEFAULTS.twitch.chatMaxLength),
+    chatTemplateValueMaxLength: configuredRuntime
+      ? DEFAULTS.twitch.chatTemplateValueMaxLength
+      : intEnv("TWITCH_CHAT_TEMPLATE_VALUE_MAX_LENGTH", DEFAULTS.twitch.chatTemplateValueMaxLength),
+    apiTimeoutMs: configuredRuntime
+      ? DEFAULTS.twitch.apiTimeoutMs
+      : Math.max(1_000, intEnv("TWITCH_API_TIMEOUT_MS", DEFAULTS.twitch.apiTimeoutMs))
   },
   bridge: {
     sharedSecret: bridgeSharedSecret
@@ -173,118 +331,204 @@ export const appConfig = {
   database: {
     enabled: databaseEnabled,
     url: databaseUrl,
-    poolMax: intEnv("DATABASE_POOL_MAX", 10),
-    idleTimeoutMs: intEnv("DATABASE_IDLE_TIMEOUT_MS", 30_000),
-    connectionTimeoutMs: intEnv("DATABASE_CONNECTION_TIMEOUT_MS", 5_000),
-    statementTimeoutMs: intEnv("DATABASE_STATEMENT_TIMEOUT_MS", 10_000),
-    migrationMode: env("DATABASE_MIGRATION_MODE", "check"),
-    sslMode: env("DATABASE_SSL_MODE", "disable")
+    poolMax: configuredRuntime?.database?.poolMax
+      ?? (configuredRuntime ? DEFAULTS.database.poolMax : intEnv("DATABASE_POOL_MAX", DEFAULTS.database.poolMax)),
+    idleTimeoutMs: configuredRuntime
+      ? DEFAULTS.database.idleTimeoutMs
+      : intEnv("DATABASE_IDLE_TIMEOUT_MS", DEFAULTS.database.idleTimeoutMs),
+    connectionTimeoutMs: configuredRuntime
+      ? DEFAULTS.database.connectionTimeoutMs
+      : intEnv("DATABASE_CONNECTION_TIMEOUT_MS", DEFAULTS.database.connectionTimeoutMs),
+    statementTimeoutMs: configuredRuntime
+      ? DEFAULTS.database.statementTimeoutMs
+      : intEnv("DATABASE_STATEMENT_TIMEOUT_MS", DEFAULTS.database.statementTimeoutMs),
+    migrationMode: configuredRuntime
+      ? DEFAULTS.database.migrationMode
+      : env("DATABASE_MIGRATION_MODE", DEFAULTS.database.migrationMode),
+    sslMode: configuredRuntime?.database?.sslMode
+      ?? (configuredRuntime ? DEFAULTS.database.sslMode : env("DATABASE_SSL_MODE", DEFAULTS.database.sslMode))
   },
   discordSaas: {
     enabled: discordSaasEnabled,
-    clientId: env("DISCORD_CLIENT_ID").trim(),
+    clientId: configuredRuntime?.discord?.clientId ?? env("DISCORD_CLIENT_ID").trim(),
     clientSecret: discordClientSecret,
-    redirectUri: env(
-      "DISCORD_OAUTH_REDIRECT_URI",
-      `${env("PUBLIC_BASE_URL", "http://localhost:3000")}/api/discord/oauth/callback`
-    ).trim(),
+    redirectUri: configuredRuntime?.discord?.oauthRedirectUri
+      ?? env(
+        "DISCORD_OAUTH_REDIRECT_URI",
+        `${configuredRuntime?.public.baseUrl ?? env("PUBLIC_BASE_URL", "http://localhost:3000")}/api/discord/oauth/callback`
+      ).trim(),
     tokenEncryptionKey: discordTokenEncryptionKey,
     tokenEncryptionKeyVersion: 1,
-    setupLinkTtlSeconds: intEnv("DISCORD_SETUP_LINK_TTL_SECONDS", 600),
-    oauthSessionTtlSeconds: intEnv("DISCORD_OAUTH_SESSION_TTL_SECONDS", 900),
-    apiTimeoutMs: intEnv("DISCORD_API_TIMEOUT_MS", 10_000)
+    setupLinkTtlSeconds: configuredRuntime
+      ? DEFAULTS.discord.setupLinkTtlSeconds
+      : intEnv("DISCORD_SETUP_LINK_TTL_SECONDS", DEFAULTS.discord.setupLinkTtlSeconds),
+    oauthSessionTtlSeconds: configuredRuntime
+      ? DEFAULTS.discord.oauthSessionTtlSeconds
+      : intEnv("DISCORD_OAUTH_SESSION_TTL_SECONDS", DEFAULTS.discord.oauthSessionTtlSeconds),
+    apiTimeoutMs: configuredRuntime
+      ? DEFAULTS.discord.apiTimeoutMs
+      : intEnv("DISCORD_API_TIMEOUT_MS", DEFAULTS.discord.apiTimeoutMs)
   },
   discordBotInternal: {
     enabled: discordBotInternalApiEnabled,
     authKey: discordBotInternalAuthKey,
-    applicationId: env("DISCORD_APPLICATION_ID").trim()
+    applicationId: configuredRuntime?.discord?.applicationId
+      ?? env("DISCORD_APPLICATION_ID").trim()
   },
   discordBotManagement: {
     enabled: discordBotManagementEnabled,
-    redirectUri: env(
-      "DISCORD_MANAGEMENT_OAUTH_REDIRECT_URI",
-      `${env("PUBLIC_BASE_URL", "http://localhost:3000")}/api/discord/management/oauth/callback`
-    ).trim(),
-    oauthTtlSeconds: intEnv("DISCORD_MANAGEMENT_OAUTH_TTL_SECONDS", 600),
-    idleTtlSeconds: intEnv("DISCORD_MANAGEMENT_IDLE_TTL_SECONDS", 28_800),
-    absoluteTtlSeconds: intEnv("DISCORD_MANAGEMENT_ABSOLUTE_TTL_SECONDS", 86_400),
-    agentTokenTtlSeconds: intEnv("AGENT_BOOTSTRAP_TTL_SECONDS", 600)
+    redirectUri: configuredRuntime?.discord?.managementOauthRedirectUri
+      ?? env(
+        "DISCORD_MANAGEMENT_OAUTH_REDIRECT_URI",
+        `${configuredRuntime?.public.baseUrl ?? env("PUBLIC_BASE_URL", "http://localhost:3000")}/api/discord/management/oauth/callback`
+      ).trim(),
+    oauthTtlSeconds: configuredRuntime
+      ? DEFAULTS.discord.managementOauthTtlSeconds
+      : intEnv("DISCORD_MANAGEMENT_OAUTH_TTL_SECONDS", DEFAULTS.discord.managementOauthTtlSeconds),
+    idleTtlSeconds: configuredRuntime
+      ? DEFAULTS.discord.managementIdleTtlSeconds
+      : intEnv("DISCORD_MANAGEMENT_IDLE_TTL_SECONDS", DEFAULTS.discord.managementIdleTtlSeconds),
+    absoluteTtlSeconds: configuredRuntime
+      ? DEFAULTS.discord.managementAbsoluteTtlSeconds
+      : intEnv("DISCORD_MANAGEMENT_ABSOLUTE_TTL_SECONDS", DEFAULTS.discord.managementAbsoluteTtlSeconds),
+    agentTokenTtlSeconds: configuredRuntime
+      ? DEFAULTS.discord.agentBootstrapTtlSeconds
+      : intEnv("AGENT_BOOTSTRAP_TTL_SECONDS", DEFAULTS.discord.agentBootstrapTtlSeconds)
   },
   agentIngestion: {
     enabled: agentIngestionEnabled,
-    credentialTtlDays: intEnv("AGENT_CREDENTIAL_TTL_DAYS", 90),
-    clockSkewSeconds: intEnv("AGENT_CLOCK_SKEW_SECONDS", 300),
-    nonceTtlSeconds: intEnv("AGENT_NONCE_TTL_SECONDS", 600),
-    maximumBodyBytes: intEnv("AGENT_MAXIMUM_BODY_BYTES", 16 * 1024),
-    rateLimitPerMinute: intEnv("AGENT_RATE_LIMIT_PER_MINUTE", 120)
+    credentialTtlDays: configuredRuntime?.agent?.ingestionCredentialTtlDays
+      ?? (configuredRuntime
+        ? DEFAULTS.agent.credentialTtlDays
+        : intEnv("AGENT_CREDENTIAL_TTL_DAYS", DEFAULTS.agent.credentialTtlDays)),
+    clockSkewSeconds: configuredRuntime
+      ? DEFAULTS.agent.clockSkewSeconds
+      : intEnv("AGENT_CLOCK_SKEW_SECONDS", DEFAULTS.agent.clockSkewSeconds),
+    nonceTtlSeconds: configuredRuntime
+      ? DEFAULTS.agent.nonceTtlSeconds
+      : intEnv("AGENT_NONCE_TTL_SECONDS", DEFAULTS.agent.nonceTtlSeconds),
+    maximumBodyBytes: configuredRuntime
+      ? DEFAULTS.agent.maximumBodyBytes
+      : intEnv("AGENT_MAXIMUM_BODY_BYTES", DEFAULTS.agent.maximumBodyBytes),
+    rateLimitPerMinute: configuredRuntime
+      ? DEFAULTS.agent.rateLimitPerMinute
+      : intEnv("AGENT_RATE_LIMIT_PER_MINUTE", DEFAULTS.agent.rateLimitPerMinute)
   },
   riot: {
-    apiKey: env("RIOT_API_KEY"),
-    accountRegion: env("RIOT_ACCOUNT_REGION", "asia"),
-    lolPlatform: env("RIOT_LOL_PLATFORM", "jp1"),
-    apiTimeoutMs: Math.max(1000, intEnv("RIOT_API_TIMEOUT_MS", 10_000)),
+    apiKey: riotApiKey,
+    accountRegion: configuredRuntime?.riot?.accountRegion
+      ?? (configuredRuntime ? DEFAULTS.riot.accountRegion : env("RIOT_ACCOUNT_REGION", DEFAULTS.riot.accountRegion)),
+    lolPlatform: configuredRuntime?.riot?.lolPlatform
+      ?? (configuredRuntime ? DEFAULTS.riot.lolPlatform : env("RIOT_LOL_PLATFORM", "jp1")),
+    apiTimeoutMs: configuredRuntime
+      ? DEFAULTS.riot.apiTimeoutMs
+      : Math.max(1_000, intEnv("RIOT_API_TIMEOUT_MS", DEFAULTS.riot.apiTimeoutMs)),
     rateLimit: {
-      enabled: boolEnv("RIOT_RATE_LIMIT_ENABLED", true),
-      perSecond: Math.max(1, intEnv("RIOT_RATE_LIMIT_PER_SECOND", 20)),
-      perTwoMinutes: Math.max(1, intEnv("RIOT_RATE_LIMIT_PER_TWO_MINUTES", 100)),
-      queueMax: Math.max(1, intEnv("RIOT_RATE_LIMIT_QUEUE_MAX", 500))
+      enabled: configuredRuntime ? true : boolEnv("RIOT_RATE_LIMIT_ENABLED", true),
+      perSecond: configuredRuntime
+        ? DEFAULTS.riot.rateLimitPerSecond
+        : Math.max(1, intEnv("RIOT_RATE_LIMIT_PER_SECOND", DEFAULTS.riot.rateLimitPerSecond)),
+      perTwoMinutes: configuredRuntime
+        ? DEFAULTS.riot.rateLimitPerTwoMinutes
+        : Math.max(1, intEnv("RIOT_RATE_LIMIT_PER_TWO_MINUTES", DEFAULTS.riot.rateLimitPerTwoMinutes)),
+      queueMax: configuredRuntime
+        ? DEFAULTS.riot.rateLimitQueueMax
+        : Math.max(1, intEnv("RIOT_RATE_LIMIT_QUEUE_MAX", DEFAULTS.riot.rateLimitQueueMax))
     }
   },
   translation: {
-    chatEnabled: boolEnv("CHAT_TRANSLATION_ENABLED", false),
-    provider: env("CHAT_TRANSLATION_PROVIDER", "mock"),
-    maxInputLength: intEnv("CHAT_TRANSLATION_MAX_INPUT_LENGTH", 180),
-    cacheTtlMs: intEnv("CHAT_TRANSLATION_CACHE_TTL_MS", 10 * 60 * 1000),
-    maxTranslationsPerMinute: intEnv("CHAT_TRANSLATION_MAX_PER_MINUTE", 30)
+    chatEnabled: configuredRuntime ? false : boolEnv("CHAT_TRANSLATION_ENABLED", false),
+    provider: configuredRuntime ? "mock" : env("CHAT_TRANSLATION_PROVIDER", "mock"),
+    maxInputLength: configuredRuntime
+      ? DEFAULTS.translation.maxInputLength
+      : intEnv("CHAT_TRANSLATION_MAX_INPUT_LENGTH", DEFAULTS.translation.maxInputLength),
+    cacheTtlMs: configuredRuntime
+      ? DEFAULTS.translation.cacheTtlMs
+      : intEnv("CHAT_TRANSLATION_CACHE_TTL_MS", DEFAULTS.translation.cacheTtlMs),
+    maxTranslationsPerMinute: configuredRuntime
+      ? DEFAULTS.translation.maxTranslationsPerMinute
+      : intEnv("CHAT_TRANSLATION_MAX_PER_MINUTE", DEFAULTS.translation.maxTranslationsPerMinute)
   },
   paths: {
-    logs: env("STREAMOPS_LOGS_DIR", path.resolve(projectRoot, "logs")),
+    logs: configuredRuntime
+      ? runtimePath("/app/logs", path.resolve(projectRoot, "logs"))
+      : env("STREAMOPS_LOGS_DIR", path.resolve(projectRoot, "logs")),
     state: defaultStateDir,
-    reports: env("STREAMOPS_REPORTS_DIR", path.resolve(projectRoot, "reports")),
+    reports: configuredRuntime
+      ? runtimePath("/app/reports", path.resolve(projectRoot, "reports"))
+      : env("STREAMOPS_REPORTS_DIR", path.resolve(projectRoot, "reports")),
     prompts: path.resolve(projectRoot, "prompts"),
     config: path.resolve(serverRoot, "config"),
-    dashboardStatic: env("DASHBOARD_STATIC_DIR", path.resolve(projectRoot, "apps", "dashboard", "dist")),
-    overlayStatic: env("OVERLAY_STATIC_DIR", path.resolve(projectRoot, "apps", "overlay", "dist"))
+    dashboardStatic: configuredRuntime
+      ? runtimePath("/app/apps/dashboard/dist", path.resolve(projectRoot, "apps", "dashboard", "dist"))
+      : env("DASHBOARD_STATIC_DIR", path.resolve(projectRoot, "apps", "dashboard", "dist")),
+    overlayStatic: configuredRuntime
+      ? runtimePath("/app/apps/overlay/dist", path.resolve(projectRoot, "apps", "overlay", "dist"))
+      : env("OVERLAY_STATIC_DIR", path.resolve(projectRoot, "apps", "overlay", "dist"))
   },
   logging: {
-    maxBytes: Math.max(64 * 1024, intEnv("LOG_MAX_BYTES", 10 * 1024 * 1024)),
-    maxFiles: Math.max(1, Math.min(20, intEnv("LOG_MAX_FILES", 5)))
+    maxBytes: configuredRuntime
+      ? DEFAULTS.logging.maxBytes
+      : Math.max(64 * 1_024, intEnv("LOG_MAX_BYTES", DEFAULTS.logging.maxBytes)),
+    maxFiles: configuredRuntime
+      ? DEFAULTS.logging.maxFiles
+      : Math.max(1, Math.min(20, intEnv("LOG_MAX_FILES", DEFAULTS.logging.maxFiles)))
   },
   supportMailbox: {
-    enabled: boolEnv("SUPPORT_MAILBOX_ENABLED", false),
-    address: env("SUPPORT_MAILBOX_ADDRESS", "support@yoro.gg").trim().toLowerCase(),
-    webhookSecret: envOrFile("SUPPORT_MAILBOX_WEBHOOK_SECRET"),
-    encryptionKey: envOrFile("SUPPORT_MAILBOX_ENCRYPTION_KEY"),
-    statePath: env("SUPPORT_MAILBOX_STATE_PATH", path.resolve(defaultStateDir, "support-mailbox.json.enc")),
-    retentionDays: Math.max(1, intEnv("SUPPORT_MAILBOX_RETENTION_DAYS", 90)),
-    maxMessages: Math.max(1, intEnv("SUPPORT_MAILBOX_MAX_MESSAGES", 1000))
+    enabled: configuredRuntime ? false : boolEnv("SUPPORT_MAILBOX_ENABLED", false),
+    address: configuredRuntime ? "support@yoro.gg" : env("SUPPORT_MAILBOX_ADDRESS", "support@yoro.gg").trim().toLowerCase(),
+    webhookSecret: configuredRuntime ? "" : envOrFile("SUPPORT_MAILBOX_WEBHOOK_SECRET"),
+    encryptionKey: configuredRuntime ? "" : envOrFile("SUPPORT_MAILBOX_ENCRYPTION_KEY"),
+    statePath: configuredRuntime
+      ? path.resolve(defaultStateDir, "support-mailbox.json.enc")
+      : env("SUPPORT_MAILBOX_STATE_PATH", path.resolve(defaultStateDir, "support-mailbox.json.enc")),
+    retentionDays: configuredRuntime ? 90 : Math.max(1, intEnv("SUPPORT_MAILBOX_RETENTION_DAYS", 90)),
+    maxMessages: configuredRuntime ? 1_000 : Math.max(1, intEnv("SUPPORT_MAILBOX_MAX_MESSAGES", 1_000))
   },
   legal: {
-    operatorName: env("LEGAL_OPERATOR_NAME").trim(),
-    contactAddress: env("LEGAL_CONTACT_ADDRESS").trim(),
-    privacyOfficerName: env("LEGAL_PRIVACY_OFFICER_NAME").trim(),
-    contactEmail: env("LEGAL_CONTACT_EMAIL", env("SUPPORT_MAILBOX_ADDRESS", "support@yoro.gg")).trim().toLowerCase(),
-    contactPhone: env("LEGAL_CONTACT_PHONE").trim(),
-    effectiveDate: env("LEGAL_EFFECTIVE_DATE").trim(),
-    minimumAge: Math.max(14, intEnv("LEGAL_MINIMUM_AGE", 14)),
-    governingLawKo: env("LEGAL_GOVERNING_LAW_KO").trim(),
-    governingLawJa: env("LEGAL_GOVERNING_LAW_JA").trim(),
-    disputeVenueKo: env("LEGAL_DISPUTE_VENUE_KO").trim(),
-    disputeVenueJa: env("LEGAL_DISPUTE_VENUE_JA").trim(),
-    processorsKo: env("LEGAL_PROCESSORS_KO").trim(),
-    processorsJa: env("LEGAL_PROCESSORS_JA").trim(),
-    crossBorderTransferKo: env("LEGAL_CROSS_BORDER_TRANSFER_KO").trim(),
-    crossBorderTransferJa: env("LEGAL_CROSS_BORDER_TRANSFER_JA").trim()
+    operatorName: legalFileConfig?.operatorName ?? (configuredRuntime ? "" : env("LEGAL_OPERATOR_NAME").trim()),
+    contactAddress: legalFileConfig?.contactAddress ?? (configuredRuntime ? "" : env("LEGAL_CONTACT_ADDRESS").trim()),
+    privacyOfficerName: legalFileConfig?.privacyOfficerName
+      ?? (configuredRuntime ? "" : env("LEGAL_PRIVACY_OFFICER_NAME").trim()),
+    contactEmail: (
+      legalFileConfig?.contactEmail
+      ?? (configuredRuntime
+        ? "support@yoro.gg"
+        : env("LEGAL_CONTACT_EMAIL", env("SUPPORT_MAILBOX_ADDRESS", "support@yoro.gg")))
+    ).trim().toLowerCase(),
+    contactPhone: legalFileConfig?.contactPhone ?? (configuredRuntime ? "" : env("LEGAL_CONTACT_PHONE").trim()),
+    effectiveDate: legalFileConfig?.effectiveDate ?? (configuredRuntime ? "" : env("LEGAL_EFFECTIVE_DATE").trim()),
+    minimumAge: legalFileConfig?.minimumAge ?? (configuredRuntime ? 14 : Math.max(14, intEnv("LEGAL_MINIMUM_AGE", 14))),
+    governingLawKo: legalFileConfig?.governingLawKo ?? (configuredRuntime ? "" : env("LEGAL_GOVERNING_LAW_KO").trim()),
+    governingLawJa: legalFileConfig?.governingLawJa ?? (configuredRuntime ? "" : env("LEGAL_GOVERNING_LAW_JA").trim()),
+    disputeVenueKo: legalFileConfig?.disputeVenueKo ?? (configuredRuntime ? "" : env("LEGAL_DISPUTE_VENUE_KO").trim()),
+    disputeVenueJa: legalFileConfig?.disputeVenueJa ?? (configuredRuntime ? "" : env("LEGAL_DISPUTE_VENUE_JA").trim()),
+    processorsKo: legalFileConfig?.processorsKo ?? (configuredRuntime ? "" : env("LEGAL_PROCESSORS_KO").trim()),
+    processorsJa: legalFileConfig?.processorsJa ?? (configuredRuntime ? "" : env("LEGAL_PROCESSORS_JA").trim()),
+    crossBorderTransferKo: legalFileConfig?.crossBorderTransferKo
+      ?? (configuredRuntime ? "" : env("LEGAL_CROSS_BORDER_TRANSFER_KO").trim()),
+    crossBorderTransferJa: legalFileConfig?.crossBorderTransferJa
+      ?? (configuredRuntime ? "" : env("LEGAL_CROSS_BORDER_TRANSFER_JA").trim())
   },
   security: {
     localNoAuth,
     localNoAuthRequested,
-    corsOrigins: listEnv("CORS_ORIGINS", "http://localhost:3000 http://localhost:5173 http://localhost:5174"),
+    corsOrigins: configuredRuntime
+      ? Array.from(new Set([
+          configuredRuntime.public.baseUrl,
+          configuredRuntime.public.dashboardOrigin,
+          configuredRuntime.public.overlayOrigin
+        ].filter((value): value is string => Boolean(value))))
+      : listEnv("CORS_ORIGINS", "http://localhost:3000 http://localhost:5173 http://localhost:5174"),
     dashboardAuthToken,
     overlayAccessToken,
-    dashboardSessionTtlMs: intEnv("DASHBOARD_SESSION_TTL_MS", 8 * 60 * 60 * 1000),
-    trustProxy: boolEnv("TRUST_PROXY", false),
-    allowLegacyWsQueryAuth: boolEnv("ALLOW_LEGACY_WS_QUERY_AUTH", false)
+    dashboardSessionTtlMs: configuredRuntime
+      ? DEFAULTS.dashboardSessionTtlMs
+      : intEnv("DASHBOARD_SESSION_TTL_MS", DEFAULTS.dashboardSessionTtlMs),
+    trustProxy: configuredRuntime ? nodeEnv === "production" : boolEnv("TRUST_PROXY", false),
+    allowLegacyWsQueryAuth: configuredRuntime
+      ? false
+      : boolEnv("ALLOW_LEGACY_WS_QUERY_AUTH", false)
   }
 };
 

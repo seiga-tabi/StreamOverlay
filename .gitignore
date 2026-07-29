@@ -20,6 +20,8 @@ coverage/
 *.wav.tmp
 secrets/
 discord-bot-secrets/
+config/runtime.json
+config/legal.json
 .vscode/
 .idea/
 __pycache__/
