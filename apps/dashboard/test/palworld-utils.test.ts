@@ -176,7 +176,7 @@ test("지도 자원 source subtype은 이름 추측 없이 12개 공개 필터�
     ["pal-crystal-small", "resource-pal-crystal"],
     ["coal", "resource-coal"],
     ["copper-ore", "resource-copper-ore"],
-    ["iron-ore", "resource-iron-ore"],
+    ["manganese-ore", "resource-manganese-ore"],
     ["quartz", "resource-quartz"],
     ["stone", "resource-stone"],
     ["stone-18", "resource-stone"],

@@ -51438,7 +51438,7 @@
           "sourceActorExportIndex": 211,
           "sourceInstanceId": "FC1A3D41-4CB01868-1B33BAAF-DE608748",
           "category": "resource",
-          "subtype": "iron-ore",
+          "subtype": "manganese-ore",
           "normalizedX": 0.717122032,
           "normalizedY": 0.187687224
         },
@@ -60474,7 +60474,7 @@
           "sourceActorExportIndex": 212,
           "sourceInstanceId": "B7346D79-4E5C412C-17D361A0-CFF69B54",
           "category": "resource",
-          "subtype": "iron-ore",
+          "subtype": "manganese-ore",
           "normalizedX": 0.749047211,
           "normalizedY": 0.18782792
         },
@@ -104790,7 +104790,7 @@
           "sourceActorExportIndex": 211,
           "sourceInstanceId": "FC1A3D41-4CB01868-1B33BAAF-DE608748",
           "category": "resource",
-          "subtype": "iron-ore",
+          "subtype": "manganese-ore",
           "normalizedX": 0.74897598,
           "normalizedY": 0.187687224
         },
@@ -108378,7 +108378,7 @@
           "sourceActorExportIndex": 212,
           "sourceInstanceId": "B7346D79-4E5C412C-17D361A0-CFF69B54",
           "category": "resource",
-          "subtype": "iron-ore",
+          "subtype": "manganese-ore",
           "normalizedX": 0.717193263,
           "normalizedY": 0.18782792
         },
@@ -187194,7 +187194,7 @@
           "sourceActorExportIndex": 210,
           "sourceInstanceId": "4F9A4EA6-4920D661-E6671593-FB0C8B13",
           "category": "resource",
-          "subtype": "iron-ore",
+          "subtype": "manganese-ore",
           "normalizedX": 0.749125248,
           "normalizedY": 0.18770675
         },
@@ -190830,7 +190830,7 @@
           "sourceActorExportIndex": 209,
           "sourceInstanceId": "8F79D81F-48EBCE5E-CEEA19AA-ECB52229",
           "category": "resource",
-          "subtype": "iron-ore",
+          "subtype": "manganese-ore",
           "normalizedX": 0.717061016,
           "normalizedY": 0.187735367
         },
@@ -193614,7 +193614,7 @@
           "sourceActorExportIndex": 210,
           "sourceInstanceId": "4F9A4EA6-4920D661-E6671593-FB0C8B13",
           "category": "resource",
-          "subtype": "iron-ore",
+          "subtype": "manganese-ore",
           "normalizedX": 0.7172713,
           "normalizedY": 0.18770675
         },
@@ -202086,7 +202086,7 @@
           "sourceActorExportIndex": 209,
           "sourceInstanceId": "8F79D81F-48EBCE5E-CEEA19AA-ECB52229",
           "category": "resource",
-          "subtype": "iron-ore",
+          "subtype": "manganese-ore",
           "normalizedX": 0.748914964,
           "normalizedY": 0.187735367
         },

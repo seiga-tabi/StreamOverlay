@@ -333,7 +333,7 @@
     {
       "sourceClass": "BP_PalMapObjectSpawner_RockIron_C",
       "category": "resource",
-      "subtype": "iron-ore"
+      "subtype": "manganese-ore"
     },
     {
       "sourceClass": "BP_PalMapObjectSpawner_RockQuartz_C",

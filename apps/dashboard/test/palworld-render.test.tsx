@@ -1851,6 +1851,7 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   assert.match(korean, /밤별 모래/u);
   assert.match(korean, /팰지움 파편/u);
   assert.match(korean, /금속 광석/u);
+  assert.match(korean, /코랄리움 광석/u);
   assert.match(korean, /팰키사이트/u);
   assert.match(korean, /data-layer="fast-travel"[\s\S]*<input disabled=""/u);
   assert.equal(
@@ -1883,7 +1884,7 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   );
   assert.match(
     korean,
-    /data-layer="resource-iron-ore"[\s\S]*?palworld-map-filter-layer-icon-fallback[^>]*>◆</u,
+    /data-layer="resource-manganese-ore"[\s\S]*?src="\/images\/palworld\/1\.0\.1\/items\/[a-f0-9]{64}\.webp"/u,
   );
   assert.doesNotMatch(
     korean,
@@ -1901,6 +1902,7 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   assert.match(japanese, /収集品/u);
   assert.match(japanese, /鉱物・鉱石/u);
   assert.match(japanese, /金属鉱石/u);
+  assert.match(japanese, /コラルム鉱石/u);
   assert.match(japanese, /パルキサイト/u);
   assert.match(japanese, /クルリス像/u);
   assert.match(japanese, /モコロン像/u);
@@ -2058,6 +2060,7 @@ test("지도 필터는 검증된 게임 WebP만 활성화하고 동상·지역 �
     "resource-coal",
     "resource-copper-ore",
     "resource-hexolite-quartz",
+    "resource-manganese-ore",
     "resource-night-stone",
     "resource-pal-crystal",
     "resource-quartz",
@@ -2086,7 +2089,7 @@ test("지도 필터는 검증된 게임 WebP만 활성화하고 동상·지역 �
     Object.keys(PALWORLD_MAP_LAYER_ICONS).sort(),
     [...ids].sort(),
   );
-  assert.equal(PALWORLD_MAP_LAYER_ICONS["resource-iron-ore"], undefined);
+  assert.ok(PALWORLD_MAP_LAYER_ICONS["resource-manganese-ore"]);
 
   const resourceSources = new Map(
     generatedMapLayerIcons.entries.map((entry) => [
@@ -2103,6 +2106,7 @@ test("지도 필터는 검증된 게임 WebP만 활성화하고 동상·지역 �
       "resource-coal": "Coal",
       "resource-copper-ore": "CopperOre",
       "resource-hexolite-quartz": "RainbowCrystal",
+      "resource-manganese-ore": "ManganeseOre",
       "resource-night-stone": "NightStone",
       "resource-pal-crystal": "Pal_crystal_S",
       "resource-quartz": "Quartz",

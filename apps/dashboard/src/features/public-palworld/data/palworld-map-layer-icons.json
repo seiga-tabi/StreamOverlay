@@ -192,6 +192,15 @@
       "height": 256
     },
     {
+      "id": "resource-manganese-ore",
+      "kind": "item",
+      "mappingStatus": "representative_runtime_asset",
+      "sourceReference": "ManganeseOre",
+      "imageUrl": "/images/palworld/1.0.1/items/d5b7a23627a3bbe64f2e045141939fe4aab0f8c488c5a39662d9dd7b6b544ba3.webp",
+      "width": 256,
+      "height": 256
+    },
+    {
       "id": "resource-night-stone",
       "kind": "item",
       "mappingStatus": "representative_runtime_asset",

@@ -8,8 +8,8 @@
   "sourceArchiveSha256": "344628b020ffc8ee4642188e356013fc3e955f2ec8addf5ae384786c494f6186",
   "indexMemberSha256": "0f3b811f079e1fbb24b745a55d7e0d77dc4ac3b0574f6d9d4df7b7ae4a39a661",
   "memberInventorySha256": "6b6a85b984df3f933a452ec9a420e541ba7d1eb9ea199a7670cbfc6d0be0b406",
-  "mapLocationsArtifactSha256": "2d6b0ebe03b8600b2c2e9e20d551e93f50395bbd43e09f514e616402f082fd9d",
-  "mapLocationsManifestSha256": "80c951d322bbe08cf44c9b36a3de43b04adb99844dfb9e87ee6cf220e81c7436",
+  "mapLocationsArtifactSha256": "a8eecfaf6671e458b4b8074449b93ce9ce8661b9d858d9b4449719022f254965",
+  "mapLocationsManifestSha256": "c362f2c149f6ae0990dac2cfe4271e748d9d0c3cb6f7fcbd09fb960191bdb321",
   "selectedMemberCount": 7487,
   "totalLocations": 19834,
   "categoryCounts": {
@@ -43,12 +43,12 @@
     "coordinateUnresolved": 0,
     "outOfBoundsExcluded": 0,
     "exactDuplicates": 23,
-    "taxonomyMappingSha256": "b77426935144226ad5c2a202df6826a09383fa81ceca4ea4c7f228eaacb45342",
+    "taxonomyMappingSha256": "4f2ee11124be89a14e7f6603a6eea0d0d8e4d04ee7700fe64e15f73ada102655",
     "transformMappingSha256": "82fdaea95a4ffb2408575ffad0135aabad902db65c82a83de4d142f90bf26bb4"
   },
   "reviewedAt": "2026-07-26T00:00:00.000Z",
   "reviewer": "streamoverlay-data-maintenance",
   "rightsVerified": false,
   "usageBasis": "operator_reference_use",
-  "evidenceChecksum": "46ade55bcbe325d21f6dc7373879d0716a34d17c4ade4ee72f024cb70535801c"
+  "evidenceChecksum": "5af1dac97b66e4670fe67afc7d157472e369cc289e110525c35db744fc486cea"
 }

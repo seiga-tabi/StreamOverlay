@@ -61,6 +61,7 @@ const MAP_LAYER_REPRESENTATIVE_ICON_IDS = [
   "resource-hexolite-quartz",
   "resource-coal",
   "resource-copper-ore",
+  "resource-manganese-ore",
   "resource-night-stone",
   "resource-pal-crystal",
   "resource-quartz",

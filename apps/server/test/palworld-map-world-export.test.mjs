@@ -230,7 +230,7 @@ test("생성된 위치 artifact는 raw 19,857건을 MainMap과 세계수 지도�
       "pal-crystal",
       "coal",
       "copper-ore",
-      "iron-ore",
+      "manganese-ore",
       "quartz",
       "stone",
       "sky-island-ore",

@@ -298,9 +298,9 @@ const PALWORLD_MAP_COLLECTIBLE_TYPE_LABELS: Readonly<
     palworldI18n.ko.mapResourceCopperOre,
     palworldI18n.ja.mapResourceCopperOre,
   ),
-  "resource-iron-ore": mapLabel(
-    palworldI18n.ko.mapResourceIronOre,
-    palworldI18n.ja.mapResourceIronOre,
+  "resource-manganese-ore": mapLabel(
+    palworldI18n.ko.mapResourceManganeseOre,
+    palworldI18n.ja.mapResourceManganeseOre,
   ),
   "resource-quartz": mapLabel(
     palworldI18n.ko.mapResourceQuartz,
@@ -1346,32 +1346,41 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
     const importedLocationState = layerDisplayState(locationState);
     const locationLayer = (
       id: PalworldMapLocationCategory,
-    ): PalworldMapLayerGroup["layers"][number] => ({
-      id,
-      label: PALWORLD_MAP_LOCATION_LABELS[id],
-      statusLabel: layerStatusLabel(importedLocationState),
-      count: importedLocationState === "ready" ? locationCounts.get(id) : undefined,
-      iconAsset: PALWORLD_MAP_LAYER_ICONS[id],
-      iconFallback: PALWORLD_MAP_LOCATION_FALLBACKS[id],
-      selected: mapQuery.layers.includes(id),
-      state: importedLocationState,
-    });
+    ): PalworldMapLayerGroup["layers"][number] => {
+      const count = importedLocationState === "ready"
+        ? locationCounts.get(id) ?? 0
+        : undefined;
+      const state = count === 0 ? "confirmed_empty" : importedLocationState;
+      return {
+        id,
+        label: PALWORLD_MAP_LOCATION_LABELS[id],
+        statusLabel: layerStatusLabel(state),
+        count,
+        iconAsset: PALWORLD_MAP_LAYER_ICONS[id],
+        iconFallback: PALWORLD_MAP_LOCATION_FALLBACKS[id],
+        selected: state === "ready" && mapQuery.layers.includes(id),
+        state,
+      };
+    };
     const collectibleTypeLayer = (
       id: PalworldMapCollectibleTypeId,
     ): PalworldMapLayerGroup["layers"][number] => {
       const category = palworldMapCollectibleCategory(id);
+      const count = importedLocationState === "ready"
+        ? collectibleTypeCounts.get(id) ?? 0
+        : undefined;
+      const state = count === 0 ? "confirmed_empty" : importedLocationState;
       return {
         id,
         label: PALWORLD_MAP_COLLECTIBLE_TYPE_LABELS[id],
-        statusLabel: layerStatusLabel(importedLocationState),
-        count: importedLocationState === "ready"
-          ? collectibleTypeCounts.get(id)
-          : undefined,
+        statusLabel: layerStatusLabel(state),
+        count,
         iconAsset: PALWORLD_MAP_LAYER_ICONS[id],
         iconFallback: category === "egg" ? "●" : category === "resource" ? "◆" : "✦",
-        selected: mapQuery.layers.includes(category)
+        selected: state === "ready"
+          && mapQuery.layers.includes(category)
           && mapQuery.types.includes(id),
-        state: importedLocationState,
+        state,
       };
     };
     const unavailableStatus = layerStatusLabel("data_unavailable");
