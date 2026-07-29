@@ -192,6 +192,11 @@
 }
 
 .public-bot-node.is-discord { top: 1%; left: 44%; }
+.public-bot-node.is-discord .discord-symbol-icon {
+  display: block;
+  width: 68%;
+  height: auto;
+}
 .public-bot-node.is-server { right: 1%; bottom: 25%; }
 .public-bot-node.is-alert { bottom: 4%; left: 16%; }
 

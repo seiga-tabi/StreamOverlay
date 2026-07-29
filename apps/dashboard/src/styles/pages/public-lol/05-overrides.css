@@ -289,6 +289,12 @@
   filter: none !important;
 }
 
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-profile-link-icon .discord-symbol-icon {
+  width: 27px !important;
+  height: auto !important;
+  filter: none !important;
+}
+
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-profile-link-icon.youtube {
   color: #ff3b30 !important;
   --profile-link-youtube-play: #ffffff;

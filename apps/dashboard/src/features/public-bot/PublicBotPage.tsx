@@ -20,6 +20,7 @@ import {
 import type { PublicMainPage } from "../public-lol/types/public-lol";
 import { setPublicPath } from "../public-lol/utils/routes";
 import { botInstallUrl } from "../bot-management/api";
+import { DiscordSymbolIcon } from "../../shared/DiscordSymbolIcon";
 
 const noLocalePreference = async (): Promise<PublicLocale | undefined> => undefined;
 
@@ -335,7 +336,9 @@ export function PublicBotPage() {
             <div className="public-bot-orbit is-outer" />
             <div className="public-bot-orbit is-inner" />
             <div className="public-bot-core">Y</div>
-            <span className="public-bot-node is-discord">D</span>
+            <span className="public-bot-node is-discord">
+              <DiscordSymbolIcon />
+            </span>
             <span className="public-bot-node is-server">S</span>
             <span className="public-bot-node is-alert">!</span>
           </div>

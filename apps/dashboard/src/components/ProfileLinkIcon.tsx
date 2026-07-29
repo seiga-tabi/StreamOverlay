@@ -1,4 +1,5 @@
 import { TwitchGlitchIcon } from "../shared/TwitchGlitchIcon";
+import { DiscordSymbolIcon } from "../shared/DiscordSymbolIcon";
 
 type ProfileLinkIconProps = {
   platform?: string;
@@ -42,11 +43,7 @@ function ProfileLinkIconGlyph({ platform }: { platform: string }) {
     case "twitch":
       return <TwitchGlitchIcon />;
     case "discord":
-      return (
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M8.2 7.2c1.1-.5 2.1-.8 3-.9l.4.8c1-.1 1.9-.1 2.8 0l.4-.8c1 .1 2 .4 3 .9 1.5 2.2 2.2 4.6 2 7-.9.7-1.9 1.2-3 1.5l-.7-1.1c.4-.1.8-.3 1.2-.6-.4.2-1.7.8-5.3.8s-4.9-.6-5.3-.8c.4.3.8.5 1.2.6l-.7 1.1c-1.1-.3-2.1-.8-3-1.5-.2-2.4.5-4.8 2-7Zm1.8 5.4c.7 0 1.2-.6 1.2-1.3S10.7 10 10 10s-1.2.6-1.2 1.3.5 1.3 1.2 1.3Zm4 0c.7 0 1.2-.6 1.2-1.3S14.7 10 14 10s-1.2.6-1.2 1.3.5 1.3 1.2 1.3Z" fill="currentColor" />
-        </svg>
-      );
+      return <DiscordSymbolIcon />;
     case "x":
       return (
         <svg viewBox="0 0 48 48" aria-hidden="true">

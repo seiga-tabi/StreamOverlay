@@ -18,6 +18,7 @@ import {
   EmptyStateTitle,
   SkeletonCard
 } from "../../shared/ui";
+import { DiscordSymbolIcon } from "../../shared/DiscordSymbolIcon";
 import {
   BotManagementApiError,
   botInstallUrl,
@@ -441,7 +442,7 @@ export function BotManagementPage() {
                         ? <img alt="" height="40" src={guild.iconUrl} width="40" />
                         : (
                             <span aria-hidden="true" className="discord-guild-fallback">
-                              {guild.name.slice(0, 1)}
+                              <DiscordSymbolIcon />
                             </span>
                           )}
                       <span className="bot-management-guild-summary">

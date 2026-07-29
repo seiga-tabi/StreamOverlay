@@ -7481,6 +7481,15 @@ code {
   filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .3));
 }
 
+.public-profile-link-icon .discord-symbol-icon {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 26px;
+  height: auto;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .18));
+}
+
 .public-profile-link-icon:hover {
   transform: translateY(-1px) scale(1.02);
   filter: brightness(1.06);
@@ -7515,8 +7524,8 @@ code {
 }
 
 .public-profile-link-icon.discord {
-  --profile-link-bg: linear-gradient(160deg, #7380ff 0%, #5865f2 58%, #3f46c8 100%);
-  --profile-link-border: rgba(255, 255, 255, .18);
+  --profile-link-bg: linear-gradient(180deg, #ffffff 0%, #f2f3ff 100%);
+  --profile-link-border: rgba(88, 101, 242, .25);
   --profile-link-glow: rgba(88, 101, 242, .34);
 }
 
@@ -15083,8 +15092,8 @@ code {
 }
 
 .public-dashboard-shell.theme-dark .public-profile-link-icon.discord {
-  --profile-link-bg: linear-gradient(160deg, #7380ff 0%, #5865f2 58%, #3f46c8 100%);
-  --profile-link-border: rgba(255, 255, 255, .18);
+  --profile-link-bg: linear-gradient(180deg, #ffffff 0%, #e8eaff 100%);
+  --profile-link-border: rgba(88, 101, 242, .3);
   --profile-link-glow: rgba(88, 101, 242, .34);
 }
 

@@ -4,6 +4,7 @@ import { Button } from "../../shared/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../shared/ui/Card";
 import { EmptyState, EmptyStateDescription, EmptyStateTitle } from "../../shared/ui/EmptyState";
 import { SkeletonCard } from "../../shared/ui/Skeleton";
+import { DiscordSymbolIcon } from "../../shared/DiscordSymbolIcon";
 import {
   connectDiscordGuild,
   discordOAuthStartUrl,
@@ -240,7 +241,9 @@ export function DiscordSetupPage() {
                         {guild.iconUrl ? (
                           <img src={guild.iconUrl} alt="" width="48" height="48" loading="lazy" />
                         ) : (
-                          <span className="discord-guild-fallback" aria-hidden="true">D</span>
+                          <span className="discord-guild-fallback" aria-hidden="true">
+                            <DiscordSymbolIcon />
+                          </span>
                         )}
                         <span className="discord-guild-name">{guild.name}</span>
                       </label>

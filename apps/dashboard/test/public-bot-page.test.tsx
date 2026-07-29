@@ -46,5 +46,7 @@ test("YORO Bot 페이지는 구현 완료 기능과 준비 중 기능을 구분�
   assert.match(markup, /Organization 관리/u);
   assert.match(markup, /OAuth token 평문 미저장/u);
   assert.match(markup, /aria-label="YORO Bot 홈"/u);
+  assert.match(markup, /discord-symbol-blurple\.f6c1a66250d3\.png/u);
+  assert.doesNotMatch(markup, /class="public-bot-node is-discord">D</u);
   assert.doesNotMatch(markup, /accessToken|refreshToken|clientSecret|setupToken/u);
 });

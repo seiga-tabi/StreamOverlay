@@ -68,7 +68,12 @@
   display: grid;
   place-items: center;
   background: var(--surface-muted);
-  font-weight: 800;
+}
+
+.discord-guild-fallback .discord-symbol-icon {
+  display: block;
+  width: 72%;
+  height: auto;
 }
 
 .discord-guild-name {
