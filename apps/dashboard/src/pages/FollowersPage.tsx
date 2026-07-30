@@ -263,10 +263,10 @@ export function FollowersPage({ dataSource }: { dataSource?: FollowersDataSource
   const oauthConnected = state?.oauth.state === "connected";
 
   return (
-    <>
-      <header className="page-header">
+    <section className="followers-page" aria-labelledby="followers-page-title">
+      <header className="page-header followers-page-header">
         <div>
-          <h1>{t.title}</h1>
+          <h1 id="followers-page-title">{t.title}</h1>
           <p className="muted">{t.description}</p>
         </div>
         <div className="button-row">
@@ -322,17 +322,17 @@ export function FollowersPage({ dataSource }: { dataSource?: FollowersDataSource
             </StatusPill>
           ) : null}
 
-          <section className="participation-summary">
+          <section className="participation-summary followers-metrics" aria-label={t.title}>
             {metrics.map((metric) => (
-              <div key={metric.label}>
+              <article key={metric.label}>
                 <span>{metric.label}</span>
                 <strong>{metric.value}</strong>
-              </div>
+              </article>
             ))}
           </section>
 
-          <section className="grid two">
-            <div className="card">
+          <section className="grid two followers-grid">
+            <div className="card followers-card">
               <div className="card-title-row">
                 <h2>{t.sections.recentFollowers}</h2>
                 <span className="count-badge">{state.recentFollowers.length}</span>
@@ -340,7 +340,7 @@ export function FollowersPage({ dataSource }: { dataSource?: FollowersDataSource
               <FollowerMiniList items={state.recentFollowers} empty={t.empty.followers} />
             </div>
 
-            <div className="card">
+            <div className="card followers-card">
               <div className="card-title-row">
                 <h2>{t.sections.recentUnfollowers}</h2>
                 <span className="count-badge">{state.recentUnfollowers.length}</span>
@@ -349,8 +349,8 @@ export function FollowersPage({ dataSource }: { dataSource?: FollowersDataSource
             </div>
           </section>
 
-          <section className="grid two">
-            <div className="card">
+          <section className="grid two followers-grid">
+            <div className="card followers-card">
               <div className="card-title-row">
                 <h2>{t.sections.topGenres}</h2>
                 <span className="count-badge">{state.topObservedGenres.length}</span>
@@ -369,7 +369,7 @@ export function FollowersPage({ dataSource }: { dataSource?: FollowersDataSource
               )}
             </div>
 
-            <div className="card">
+            <div className="card followers-card">
               <h2>{t.sections.notes}</h2>
               <div className="ops-note">
                 <span>{t.snapshot}: {formatDate(state.lastSnapshotAt)}</span>
@@ -386,7 +386,7 @@ export function FollowersPage({ dataSource }: { dataSource?: FollowersDataSource
             </div>
           </section>
 
-          <section className="card">
+          <section className="card followers-card followers-directory">
             <div className="card-title-row">
               <h2>{t.sections.allFollowers}</h2>
               <span className="count-badge">{state.followers.length}</span>
@@ -418,6 +418,6 @@ export function FollowersPage({ dataSource }: { dataSource?: FollowersDataSource
           </section>
         </>
       ) : null}
-    </>
+    </section>
   );
 }

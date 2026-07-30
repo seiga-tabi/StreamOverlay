@@ -278,6 +278,130 @@ test("/dashboard는 모든 YORO 로그인 사용자에게 계정·Organization·
   await expectNoHorizontalOverflow(page);
 });
 
+test("팔로워 관리는 통합 Dashboard의 어두운 카드와 반응형 레이아웃을 사용한다", async ({ page }) => {
+  await page.route("**/api/account/session", async (route) => {
+    await json(route, {
+      authenticated: true,
+      csrfToken: "yoro-csrf",
+      authenticationProvider: "twitch",
+      identities: [{
+        provider: "twitch",
+        displayName: "팔로워 화면 검증 사용자",
+        connectedAt: "2026-07-30T00:00:00.000Z",
+        lastAuthenticatedAt: "2026-07-30T00:00:00.000Z",
+      }],
+      preferences: {
+        locale: "ko",
+        defaultDashboardPage: "overview",
+        reducedMotion: false,
+      },
+    });
+  });
+  await page.route("**/api/discord/management/session", async (route) => {
+    await json(route, {
+      authenticated: true,
+      csrfToken: "management-csrf",
+      organizations: [],
+    });
+  });
+  await page.route("**/api/account/streamer", async (route) => {
+    await json(route, {
+      twitchConnected: true,
+      twitchPermissionReady: true,
+      approval: {
+        status: "approved",
+        enabled: true,
+      },
+      followerPermission: {
+        state: "connected",
+        missingScopes: [],
+      },
+      profile: {
+        twitchLogin: "followers_test",
+        twitchDisplayName: "팔로워 화면 검증 사용자",
+      },
+      summary: {
+        activeFollowers: 2,
+        knownFollowers: 2,
+        lastSnapshotAt: "2026-07-30T00:00:00.000Z",
+      },
+    });
+  });
+  const follower = (id: string, name: string) => ({
+    userId: id,
+    userLogin: name.toLowerCase(),
+    userName: name,
+    followedAt: "2026-07-29T00:00:00.000Z",
+    firstSeenAt: "2026-07-29T00:00:00.000Z",
+    lastSeenAt: "2026-07-30T00:00:00.000Z",
+    status: "following",
+    source: "snapshot",
+    activity: {
+      chatMessages: 1,
+      participationEntries: 0,
+      total: 1,
+      genres: { "채팅 참여": 1 },
+    },
+  });
+  await page.route("**/api/account/streamer/followers", async (route) => {
+    const followers = [
+      follower("1001", "Follower One"),
+      follower("1002", "Follower Two"),
+    ];
+    await json(route, {
+      oauth: {
+        state: "connected",
+        missingScopes: [],
+      },
+      summary: {
+        activeFollowers: 2,
+        knownFollowers: 2,
+        unfollowed: 0,
+        newFollowers7d: 2,
+        observedGenreFollowers: 2,
+      },
+      followers,
+      recentFollowers: followers,
+      recentUnfollowers: [],
+      topObservedGenres: [{ name: "채팅 참여", count: 2 }],
+      lastSnapshotAt: "2026-07-30T00:00:00.000Z",
+      lastSnapshotTotal: 2,
+      lastSnapshotTruncated: false,
+      dataNotes: ["팔로우 취소는 관측된 snapshot 차이로 추정합니다."],
+    });
+  });
+
+  await page.goto("/dashboard/streaming/followers");
+  await expect(page.getByRole("heading", { level: 1, name: "팔로워 관리" }))
+    .toBeVisible();
+  await expect(page.locator(".followers-metrics > article")).toHaveCount(5);
+  await expect(page.locator(".followers-card strong", {
+    hasText: "Follower One",
+  }).first()).toBeVisible();
+  await expect(page.getByText("팔로우 취소로 추정된 사용자가 없습니다."))
+    .toBeVisible();
+
+  const presentation = await page.locator(".followers-card").first().evaluate((card) => {
+    const style = window.getComputedStyle(card);
+    return {
+      backgroundImage: style.backgroundImage,
+      color: style.color,
+      borderColor: style.borderColor,
+    };
+  });
+  expect(presentation.backgroundImage).toContain("linear-gradient");
+  expect(presentation.color).toBe("rgb(244, 246, 251)");
+  expect(presentation.borderColor).not.toBe("rgb(255, 255, 255)");
+
+  const recentCards = page.locator(".followers-grid").first().locator(".followers-card");
+  const cardHeights = await recentCards.evaluateAll((cards) => (
+    cards.map((card) => Math.round(card.getBoundingClientRect().height))
+  ));
+  expect(cardHeights).toHaveLength(2);
+  expect(cardHeights[1]).toBeLessThan(360);
+  await expectNoHorizontalOverflow(page);
+});
+
 test("/dashboard는 session이 없으면 token 없는 통합 로그인 링크만 제공한다", async ({ page }) => {
   await page.route("**/api/account/session", async (route) => {
     await json(route, { authenticated: false });

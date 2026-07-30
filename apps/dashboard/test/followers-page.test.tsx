@@ -28,6 +28,8 @@ test("팔로워 페이지 초기 로딩은 Skeleton을 표시하고 새로고침
   setDashboardLocale("ko");
   const html = renderToStaticMarkup(<FollowersPage />);
 
+  assert.match(html, /class="followers-page"/);
+  assert.match(html, /aria-labelledby="followers-page-title"/);
   assert.match(html, /aria-label="팔로워 정보를 불러오는 중입니다\."/);
   assert.match(html, /disabled=""/);
   assert.match(html, /팔로워 목록 새로고침/);
