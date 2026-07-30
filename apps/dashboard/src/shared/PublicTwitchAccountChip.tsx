@@ -7,6 +7,7 @@ export type PublicTwitchAccountUser = {
   displayName: string;
   profileImageUrl?: string;
   provider?: "discord" | "twitch";
+  linkedProviders?: Array<"discord" | "twitch">;
 };
 
 export type PublicTwitchAccountMenuAction = {
@@ -79,6 +80,14 @@ function accountProviderLabel(user: PublicTwitchAccountUser | undefined): string
   return undefined;
 }
 
+function linkedAccountProviders(
+  user: PublicTwitchAccountUser | undefined
+): Array<"twitch" | "discord"> {
+  const providers = new Set(user?.linkedProviders ?? []);
+  if (user?.provider) providers.add(user.provider);
+  return (["twitch", "discord"] as const).filter((provider) => providers.has(provider));
+}
+
 function accountMenuActions(
   menuActions: PublicTwitchAccountMenuAction[],
   dashboardLabel: string | undefined,
@@ -124,6 +133,7 @@ export function PublicTwitchAccountPanel({
   onLogout,
 }: PublicTwitchAccountPanelProps) {
   const displayName = user?.displayName || user?.login || loginLabel;
+  const linkedProviders = linkedAccountProviders(user);
   const resolvedMenuActions = accountMenuActions(
     menuActions,
     dashboardLabel,
@@ -206,11 +216,22 @@ export function PublicTwitchAccountPanel({
         </span>
         <div>
           <strong>{displayName}</strong>
-          {user?.login
-            ? <small>@{user.login}</small>
-            : accountProviderLabel(user)
-              ? <small>{accountProviderLabel(user)}</small>
-              : null}
+          {linkedProviders.length > 1 ? (
+            <span
+              aria-label={linkedProviders.join(", ")}
+              className="public-twitch-account-panel__providers"
+            >
+              {linkedProviders.map((provider) => (
+                <span aria-label={provider === "twitch" ? "Twitch" : "Discord"} key={provider}>
+                  <AccountProviderIcon provider={provider} />
+                </span>
+              ))}
+            </span>
+          ) : user?.login ? (
+            <small>@{user.login}</small>
+          ) : accountProviderLabel(user) ? (
+            <small>{accountProviderLabel(user)}</small>
+          ) : null}
         </div>
       </div>
       <div className="public-twitch-account-panel__actions">

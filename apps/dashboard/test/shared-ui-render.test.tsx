@@ -336,6 +336,40 @@ test("모바일 Twitch inline 패널은 로그인 계정과 기존 action을 일
   assert.doesNotMatch(html, /role="menu"/u);
 });
 
+test("모바일 계정 패널은 Twitch를 대표 프로필로 두고 연결된 provider 아이콘을 함께 표시한다", () => {
+  const html = renderToStaticMarkup(
+    <PublicTwitchAccountPanel
+      configured
+      connected
+      dashboardLabel="YORO Dashboard"
+      loginLabel="로그인"
+      loginLoadingLabel="로그인 중…"
+      logoutLabel="로그아웃"
+      onDashboard={() => undefined}
+      onLogin={() => undefined}
+      onLogout={() => undefined}
+      unavailableLabel="사용할 수 없습니다."
+      user={{
+        displayName: "Twitch 사용자",
+        linkedProviders: ["discord", "twitch"],
+        profileImageUrl: "https://static-cdn.jtvnw.net/avatar.png",
+        provider: "twitch"
+      }}
+    />
+  );
+
+  assert.match(html, />Twitch 사용자</u);
+  assert.match(html, /aria-label="twitch, discord"/u);
+  assert.match(
+    html,
+    new RegExp(
+      `public-twitch-account-panel__providers[\\s\\S]*src="${TWITCH_GLITCH_ICON_URL}"[\\s\\S]*src="${DISCORD_SYMBOL_ICON_SRC}"`,
+      "u"
+    )
+  );
+  assert.match(html, /src="https:\/\/static-cdn\.jtvnw\.net\/avatar\.png"/u);
+});
+
 test("공개 게임 Header frame은 1행 product·search·tools와 2행 navigation 구조를 유지한다", () => {
   const html = renderToStaticMarkup(
     <PublicGameHeaderFrame

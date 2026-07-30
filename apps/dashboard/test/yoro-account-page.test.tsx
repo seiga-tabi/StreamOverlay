@@ -64,7 +64,7 @@ test("YORO 계정 페이지는 Discord와 Twitch 연결 상태를 한 화면에�
   assert.doesNotMatch(markup, /providerSubject/u);
 });
 
-test("공개 헤더용 계정 선택기는 실제 인증에 사용한 Discord·Twitch identity를 우선한다", async () => {
+test("공개 헤더용 계정 선택기는 두 계정 연결 시 Twitch identity를 우선한다", async () => {
   const { authenticatedYoroIdentity } = await import(
     "../src/features/yoro-account/useYoroAccountSession"
   );
@@ -92,6 +92,6 @@ test("공개 헤더용 계정 선택기는 실제 인증에 사용한 Discord·T
       defaultDashboardPage: "overview",
       reducedMotion: false
     }
-  }), discordIdentity);
+  }), twitchIdentity);
   assert.equal(authenticatedYoroIdentity({ authenticated: false }), undefined);
 });

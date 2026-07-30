@@ -84,6 +84,9 @@ export function PublicAppHeader({
     ? {
       displayName: yoroIdentity.displayName,
       provider: yoroIdentity.provider,
+      linkedProviders: yoroAccount.session?.authenticated
+        ? yoroAccount.session.identities.map((identity) => identity.provider)
+        : [yoroIdentity.provider],
       ...(yoroIdentity.avatarUrl ? { profileImageUrl: yoroIdentity.avatarUrl } : {}),
       ...(yoroIdentity.provider === "twitch" && twitchStatus.user
         ? {
@@ -94,7 +97,9 @@ export function PublicAppHeader({
         }
         : {})
     }
-    : twitchStatus.user;
+    : twitchStatus.user
+      ? { ...twitchStatus.user, linkedProviders: ["twitch"] }
+      : undefined;
   const handleDiscordLogin = () => {
     const returnPath = `${window.location.pathname}${window.location.search}`;
     window.location.assign(accountOAuthUrl("discord", "login", returnPath));

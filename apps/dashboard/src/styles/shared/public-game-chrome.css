@@ -770,9 +770,34 @@
   color: var(--yoro-color-text-on-dark-strong);
 }
 
+.public-twitch-account-panel__profile > span[hidden],
+.public-twitch-profile-menu-head > span[hidden] {
+  display: none;
+}
+
 .public-twitch-account-panel__profile > div {
   display: grid;
   min-inline-size: 0;
+}
+
+.public-twitch-account-panel__providers {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--yoro-space-2);
+  margin-block-start: var(--yoro-space-1);
+}
+
+.public-twitch-account-panel__providers > span {
+  display: grid;
+  place-items: center;
+  inline-size: var(--yoro-space-6);
+  block-size: var(--yoro-space-6);
+}
+
+.public-twitch-account-panel__providers .discord-symbol-icon,
+.public-twitch-account-panel__providers .twitch-glitch-icon {
+  inline-size: var(--yoro-space-5);
+  block-size: var(--yoro-space-5);
 }
 
 .public-twitch-account-panel__profile strong,

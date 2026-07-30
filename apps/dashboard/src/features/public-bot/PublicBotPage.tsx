@@ -217,6 +217,9 @@ export function PublicBotPage() {
     ? {
       displayName: accountIdentity.displayName,
       provider: accountIdentity.provider,
+      linkedProviders: yoroAccount.session?.authenticated
+        ? yoroAccount.session.identities.map((identity) => identity.provider)
+        : [accountIdentity.provider],
       ...(accountIdentity.avatarUrl ? { profileImageUrl: accountIdentity.avatarUrl } : {}),
     }
     : undefined;

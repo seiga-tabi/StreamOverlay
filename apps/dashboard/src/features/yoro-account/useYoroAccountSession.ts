@@ -7,6 +7,10 @@ import {
 
 export function authenticatedYoroIdentity(session: YoroAccountSession | undefined) {
   if (!session?.authenticated) return undefined;
+  const twitchIdentity = session.identities.find(
+    (identity) => identity.provider === "twitch"
+  );
+  if (twitchIdentity) return twitchIdentity;
   return session.identities.find(
     (identity) => identity.provider === session.authenticationProvider
   ) ?? session.identities[0];
