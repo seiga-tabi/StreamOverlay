@@ -84,6 +84,12 @@ Dashboard 응답은 다음 exact `registrationPolicy` metadata만 스트리머 U
 4. Palworld 전용 서버 설정의 `AdminPassword`를 입력해 연결 테스트를 실행합니다. 게임 참가 비밀번호와 Dashboard 로그인 비밀번호는 입력하지 않습니다.
 5. `/v1/api/info`와 `/v1/api/metrics` 검증이 모두 성공한 경우에만 연결 정보를 저장합니다. 입력한 `AdminPassword`는 성공·실패 후 브라우저 입력 상태에서 비워지며 다시 표시되지 않습니다.
 
+`/v1/api/metrics`는 공식 필드만 허용합니다. 다만 Palworld REST 구현체가 base camp가 없는
+응답에서 `basecampnum`을 생략하는 호환 사례는 `0`으로 정규화합니다. `/info`만 성공하고
+`/metrics`가 실패하면 전체 연결 실패로 숨기지 않고 `degraded` 상태와 안전한 원인
+코드(시간 초과, HTTP 상태, 응답 형식)를 Dashboard에 표시합니다. 원문 REST 응답과
+`AdminPassword`는 표시하거나 로그에 기록하지 않습니다.
+
 `AdminPassword`, Dashboard 로그인 비밀번호, Dashboard 자격 증명 암호화용 AES key는 서로 다른 값입니다. 스트리머는 `AdminPassword`만 연결 입력란에 넣습니다. AES key는 운영자가 서버에 한 번 준비하며 Dashboard UI에 입력하거나 표시하지 않습니다.
 
 ## 암호화 키 자동 초기화와 보존

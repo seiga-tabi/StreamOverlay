@@ -136,7 +136,7 @@ test("공식 /info 응답은 1.0.0 exact schema만 허용한다", () => {
   assert.throws(() => assertPalworldRestInfoResponse({ ...rawInfo, version: "" }), /version/);
 });
 
-test("공식 /metrics 응답은 exact schema와 유한한 숫자 범위를 검증한다", () => {
+test("공식 /metrics 응답은 허용 필드와 유한한 숫자 범위를 검증한다", () => {
   const rawMetrics = {
     serverfps: 57,
     currentplayernum: 10,
@@ -154,6 +154,20 @@ test("공식 /metrics 응답은 exact schema와 유한한 숫자 범위를 검�
   assert.equal(validatePalworldRestMetricsResponse({ ...rawMetrics, currentplayernum: 33 }).ok, false);
   assert.equal(validatePalworldRestMetricsResponse({ ...rawMetrics, serverfps: 57.5 }).ok, false);
   assert.equal(validatePalworldRestMetricsResponse({ ...rawMetrics, averagefps: 55 }).ok, false);
+});
+
+test("Palworld REST가 basecampnum을 생략하면 0으로 안전하게 정규화한다", () => {
+  const legacyMetrics = {
+    serverfps: 57,
+    currentplayernum: 0,
+    serverframetime: 16.7671,
+    maxplayernum: 32,
+    uptime: 3_600,
+    days: 42
+  };
+  const result = validatePalworldRestMetricsResponse(legacyMetrics);
+  assert.equal(result.ok, true);
+  assert.equal(result.ok && result.data.basecampnum, 0);
 });
 
 test("정규화된 metrics는 camelCase 필드와 숫자 무결성을 검증한다", () => {

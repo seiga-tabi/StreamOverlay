@@ -182,7 +182,11 @@ test("Palworld REST 저장 API는 Organization 경로·CSRF·credentials와 Shar
 });
 
 test("Palworld REST 서버 상태는 등록과 실제 연결을 구분해 표시한다", async () => {
-  const { botManagementConnectionStatusPresentation } = await import(
+  const {
+    botManagementConnectionStatusPresentation,
+    restConnectionStatusPresentation,
+    restResultMessage
+  } = await import(
     "../src/features/bot-management/BotManagementPage"
   );
   assert.deepEqual(
@@ -208,6 +212,59 @@ test("Palworld REST 서버 상태는 등록과 실제 연결을 구분해 표시
   assert.equal(
     botManagementConnectionStatusPresentation("revoked", "ko").label,
     "비활성화됨"
+  );
+  const degradedStatus = {
+    state: "degraded" as const,
+    errorCode: "invalid_schema" as const,
+    checkedAt: "2026-07-30T00:00:00.000Z",
+    latencyMs: 1343.29,
+    consecutiveFailures: 1,
+    info: {
+      serverName: "Default Palworld Server",
+      version: "v1.0.2.100933"
+    },
+    diagnostics: [
+      "url_policy",
+      "dns_tcp",
+      "tls",
+      "basic_auth",
+      "info",
+      "metrics",
+      "schema"
+    ].map((key) => ({
+      key,
+      state: key === "metrics" || key === "schema" ? "failed" as const : "passed" as const,
+      ...(key === "metrics" || key === "schema"
+        ? { errorCode: "invalid_schema" as const }
+        : {})
+    }))
+  };
+  assert.deepEqual(
+    restConnectionStatusPresentation({
+      enabled: true,
+      pollIntervalSeconds: 30,
+      registrationPolicy: {
+        publicHttpsSelfService: true,
+        publicHttpsPort: 443,
+        privateNetworkRequiresOperatorApproval: true
+      },
+      connection: {
+        configured: true,
+        baseUrl: "https://pal.example.com",
+        passwordConfigured: true,
+        updatedAt: "2026-07-30T00:00:00.000Z"
+      },
+      status: degradedStatus
+    }, "ko"),
+    {
+      label: "REST 일부 연결됨",
+      description: "서버 인증과 기본 정보는 확인됐지만 상태 지표 조회가 완료되지 않았습니다.",
+      tone: "warning"
+    }
+  );
+  assert.equal(
+    restResultMessage(degradedStatus, "ko", "성공"),
+    "서버 인증과 기본 정보는 확인됐지만 상태 지표 응답 형식이 호환되지 않습니다."
   );
 });
 

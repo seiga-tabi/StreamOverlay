@@ -373,14 +373,26 @@ function validateRestMetricsAt(
   if (!maxPlayers.ok) return maxPlayers;
   const uptime = integerAt(record.data.uptime, `${path}.uptime`, 0, MAX_UPTIME_SECONDS);
   if (!uptime.ok) return uptime;
-  const baseCampCount = integerAt(record.data.basecampnum, `${path}.basecampnum`, 0, MAX_BASE_CAMP_COUNT);
+  // Palworld REST 구현체 중 일부는 base camp가 없을 때 basecampnum 자체를 생략합니다.
+  // 상태 판정에 필요한 핵심 지표는 유지하면서 누락된 값만 0으로 정규화합니다.
+  const baseCampCount = record.data.basecampnum === undefined
+    ? valid(0)
+    : integerAt(record.data.basecampnum, `${path}.basecampnum`, 0, MAX_BASE_CAMP_COUNT);
   if (!baseCampCount.ok) return baseCampCount;
   const days = integerAt(record.data.days, `${path}.days`, 0, MAX_GAME_DAYS);
   if (!days.ok) return days;
   if (currentPlayers.data > maxPlayers.data) {
     return invalid(`${path}.currentplayernum`, "maxplayernum보다 클 수 없습니다.");
   }
-  return valid(record.data as PalworldRestMetricsResponse);
+  return valid({
+    serverfps: serverFps.data,
+    currentplayernum: currentPlayers.data,
+    serverframetime: frameTime.data,
+    maxplayernum: maxPlayers.data,
+    uptime: uptime.data,
+    basecampnum: baseCampCount.data,
+    days: days.data
+  });
 }
 
 function validateInfoAt(value: unknown, path: string): PalworldServerValidationResult<PalworldServerInfo> {

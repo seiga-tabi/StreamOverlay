@@ -103,6 +103,8 @@ const copy = {
     connectionPendingDescription: "YORO Server가 Palworld REST 연결을 확인하고 있습니다.",
     connectionReady: "REST 연결됨",
     connectionReadyDescription: "Palworld REST 인증과 서버 정보 조회가 정상입니다.",
+    connectionDegraded: "REST 일부 연결됨",
+    connectionDegradedDescription: "서버 인증과 기본 정보는 확인됐지만 상태 지표 조회가 완료되지 않았습니다.",
     connectionUnavailable: "REST 연결 불가",
     connectionUnavailableDescription: "REST 주소, AdminPassword 또는 Palworld REST 설정을 확인하세요.",
     connectionRevoked: "비활성화됨",
@@ -127,6 +129,10 @@ const copy = {
     restRemoved: "REST 연결을 삭제했습니다.",
     restAuthFailed: "Palworld AdminPassword 인증에 실패했습니다. 전용 서버 설정 값을 확인해 주세요.",
     restTlsFailed: "HTTPS 인증서 또는 hostname 검증에 실패했습니다.",
+    restMetricsTimeout: "서버 인증과 기본 정보는 확인됐지만 상태 지표 응답 시간이 초과되었습니다. 잠시 후 다시 시도해 주세요.",
+    restMetricsInvalid: "서버 인증과 기본 정보는 확인됐지만 상태 지표 응답 형식이 호환되지 않습니다.",
+    restMetricsStatus: "서버 인증과 기본 정보는 확인됐지만 상태 지표 endpoint가 정상 HTTP 상태를 반환하지 않았습니다.",
+    restMetricsUnavailable: "서버 인증과 기본 정보는 확인됐지만 상태 지표를 가져오지 못했습니다.",
     restConnectionFailed: "Palworld REST 서버에 연결할 수 없습니다. REST 활성화와 외부 접속 경로를 확인해 주세요.",
     restServerInfo: "서버 정보",
     restPlayers: "접속 인원",
@@ -205,6 +211,8 @@ const copy = {
     connectionPendingDescription: "YORO ServerがPalworld REST接続を確認しています。",
     connectionReady: "REST接続済み",
     connectionReadyDescription: "Palworld REST認証とサーバー情報の取得が正常です。",
+    connectionDegraded: "REST一部接続済み",
+    connectionDegradedDescription: "サーバー認証と基本情報は確認できましたが、状態指標の取得が完了していません。",
     connectionUnavailable: "REST接続不可",
     connectionUnavailableDescription: "RESTアドレス、AdminPassword、またはPalworld REST設定を確認してください。",
     connectionRevoked: "無効化済み",
@@ -229,6 +237,10 @@ const copy = {
     restRemoved: "REST接続を削除しました。",
     restAuthFailed: "Palworld AdminPassword認証に失敗しました。専用サーバー設定の値を確認してください。",
     restTlsFailed: "HTTPS証明書またはhostnameの検証に失敗しました。",
+    restMetricsTimeout: "サーバー認証と基本情報は確認できましたが、状態指標の応答がタイムアウトしました。しばらくしてからもう一度お試しください。",
+    restMetricsInvalid: "サーバー認証と基本情報は確認できましたが、状態指標の応答形式に互換性がありません。",
+    restMetricsStatus: "サーバー認証と基本情報は確認できましたが、状態指標endpointが正常なHTTP状態を返しませんでした。",
+    restMetricsUnavailable: "サーバー認証と基本情報は確認できましたが、状態指標を取得できませんでした。",
     restConnectionFailed: "Palworld RESTサーバーに接続できません。RESTの有効化と外部接続経路を確認してください。",
     restServerInfo: "サーバー情報",
     restPlayers: "接続人数",
@@ -299,7 +311,7 @@ export function botManagementConnectionStatusPresentation(
   };
 }
 
-function restConnectionStatusPresentation(
+export function restConnectionStatusPresentation(
   response: PalworldServerDashboardResponse | undefined,
   locale: DashboardLocale
 ): Readonly<{ label: string; description: string; tone: StatusTone }> {
@@ -333,6 +345,13 @@ function restConnectionStatusPresentation(
     return {
       label: text.connectionPending,
       description: text.connectionPendingDescription,
+      tone: "warning"
+    };
+  }
+  if (state === "degraded") {
+    return {
+      label: text.connectionDegraded,
+      description: text.connectionDegradedDescription,
       tone: "warning"
     };
   }
@@ -383,7 +402,7 @@ function messageFor(error: unknown, locale: DashboardLocale): string {
   return text.unavailable;
 }
 
-function restResultMessage(
+export function restResultMessage(
   status: PalworldServerStatus,
   locale: DashboardLocale,
   successMessage: string
@@ -400,6 +419,19 @@ function restResultMessage(
   ) return text.restPolicyPrivate;
   if (status.state === "tls_failed" || status.errorCode === "tls_failed") {
     return text.restTlsFailed;
+  }
+  if (status.info && status.state === "degraded") {
+    if (status.errorCode === "request_timeout") return text.restMetricsTimeout;
+    if (
+      status.errorCode === "invalid_content_type"
+      || status.errorCode === "invalid_json"
+      || status.errorCode === "invalid_schema"
+    ) return text.restMetricsInvalid;
+    if (
+      status.errorCode === "unexpected_status"
+      || status.errorCode === "redirect_blocked"
+    ) return text.restMetricsStatus;
+    return text.restMetricsUnavailable;
   }
   return text.restConnectionFailed;
 }
