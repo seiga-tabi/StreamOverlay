@@ -26,7 +26,7 @@ import {
   PublicTwitchAccountPanel,
   type PublicTwitchAccountUser,
 } from "../../shared/PublicTwitchAccountChip";
-import { accountOAuthUrl } from "../yoro-account/api";
+import { accountOAuthUrl, openYoroDashboard } from "../yoro-account/api";
 import {
   authenticatedYoroIdentity,
   useYoroAccountSession,
@@ -58,6 +58,7 @@ const botText = {
     setupGuide: "연결 과정 확인",
     addBot: "Discord 서버에 YORO Bot 추가",
     dashboardLogin: "Dashboard 로그인",
+    dashboardOpen: "YORO Dashboard",
     currentTitle: "현재 사용할 수 있는 기반",
     currentDescription: "OAuth 로그인, Organization 관리, Palworld 서버 등록과 10분 Agent 설치 토큰 발급 기반이 준비되어 있습니다.",
     featureOrganization: "Organization 관리",
@@ -118,6 +119,7 @@ const botText = {
     setupGuide: "連携手順を確認",
     addBot: "DiscordサーバーにYORO Botを追加",
     dashboardLogin: "Dashboardにログイン",
+    dashboardOpen: "YORO Dashboard",
     currentTitle: "現在利用できる基盤",
     currentDescription: "OAuthログイン、Organization管理、Palworldサーバー登録、10分間のAgent導入トークン発行基盤が準備されています。",
     featureOrganization: "Organization管理",
@@ -308,6 +310,9 @@ export function PublicBotPage() {
               <PublicTwitchAccountChip
                 configured
                 connected={accountConnected}
+                dashboardLabel={text.dashboardOpen}
+                dashboardLabelJa={botText.ja.dashboardOpen}
+                dashboardLabelKo={botText.ko.dashboardOpen}
                 discordLoginLabel={publicI18n[locale].discordLogin}
                 loginLabel={publicI18n[locale].accountLogin}
                 loginLabelJa={publicI18n.ja.accountLogin}
@@ -316,6 +321,7 @@ export function PublicBotPage() {
                 loginTitle={publicI18n[locale].accountLoginTitle}
                 logoutLabel={publicI18n[locale].accountLogout}
                 menuLabel={publicI18n[locale].accountMenu}
+                onDashboard={openYoroDashboard}
                 onDiscordLogin={() => startAccountLogin("discord")}
                 onLogin={() => startAccountLogin("twitch")}
                 onLogout={logoutAccount}
@@ -410,11 +416,15 @@ export function PublicBotPage() {
                   <PublicTwitchAccountPanel
                     configured
                     connected={accountConnected}
+                    dashboardLabel={text.dashboardOpen}
+                    dashboardLabelJa={botText.ja.dashboardOpen}
+                    dashboardLabelKo={botText.ko.dashboardOpen}
                     discordLoginLabel={publicI18n[locale].discordLogin}
                     loginLabel={publicI18n[locale].accountLogin}
                     loginLoadingLabel={publicI18n[locale].twitchLoginLoading}
                     logoutLabel={publicI18n[locale].accountLogout}
                     onAction={() => setMobileMenuOpen(false)}
+                    onDashboard={openYoroDashboard}
                     onDiscordLogin={() => startAccountLogin("discord")}
                     onLogin={() => startAccountLogin("twitch")}
                     onLogout={logoutAccount}

@@ -21,6 +21,9 @@ export type PublicTwitchAccountChipProps = {
   connected: boolean;
   user?: PublicTwitchAccountUser;
   open: boolean;
+  dashboardLabel?: string;
+  dashboardLabelJa?: string;
+  dashboardLabelKo?: string;
   loginLabel: string;
   loginLabelJa?: string;
   loginLabelKo?: string;
@@ -33,6 +36,7 @@ export type PublicTwitchAccountChipProps = {
   logoutLabelJa?: string;
   logoutLabelKo?: string;
   menuActions?: PublicTwitchAccountMenuAction[];
+  onDashboard?: () => void;
   onDiscordLogin?: () => void;
   onLogin: () => void;
   onLogout: () => void;
@@ -43,6 +47,9 @@ export type PublicTwitchAccountPanelProps = {
   configured: boolean;
   connected: boolean;
   user?: PublicTwitchAccountUser;
+  dashboardLabel?: string;
+  dashboardLabelJa?: string;
+  dashboardLabelKo?: string;
   loginLabel: string;
   loginLoading?: boolean;
   loginLoadingLabel: string;
@@ -52,6 +59,7 @@ export type PublicTwitchAccountPanelProps = {
   logoutLabel: string;
   menuActions?: PublicTwitchAccountMenuAction[];
   onAction?: () => void;
+  onDashboard?: () => void;
   onDiscordLogin?: () => void;
   onLogin: () => void;
   onLogout: () => void;
@@ -71,10 +79,36 @@ function accountProviderLabel(user: PublicTwitchAccountUser | undefined): string
   return undefined;
 }
 
+function accountMenuActions(
+  menuActions: PublicTwitchAccountMenuAction[],
+  dashboardLabel: string | undefined,
+  dashboardLabelKo: string | undefined,
+  dashboardLabelJa: string | undefined,
+  onDashboard: (() => void) | undefined
+): PublicTwitchAccountMenuAction[] {
+  if (!dashboardLabel || !onDashboard) return menuActions;
+  return [
+    {
+      id: "yoro-dashboard",
+      label: (
+        <span data-ko={dashboardLabelKo} data-ja={dashboardLabelJa}>
+          {dashboardLabel}
+        </span>
+      ),
+      onSelect: onDashboard,
+      variant: "dashboard"
+    },
+    ...menuActions.filter((action) => action.id !== "yoro-dashboard")
+  ];
+}
+
 export function PublicTwitchAccountPanel({
   configured,
   connected,
   user,
+  dashboardLabel,
+  dashboardLabelJa,
+  dashboardLabelKo,
   loginLabel,
   loginLoading = false,
   loginLoadingLabel,
@@ -84,11 +118,19 @@ export function PublicTwitchAccountPanel({
   logoutLabel,
   menuActions = [],
   onAction,
+  onDashboard,
   onDiscordLogin,
   onLogin,
   onLogout,
 }: PublicTwitchAccountPanelProps) {
   const displayName = user?.displayName || user?.login || loginLabel;
+  const resolvedMenuActions = accountMenuActions(
+    menuActions,
+    dashboardLabel,
+    dashboardLabelKo,
+    dashboardLabelJa,
+    onDashboard
+  );
 
   if (!connected) {
     const unifiedLogin = Boolean(
@@ -172,7 +214,7 @@ export function PublicTwitchAccountPanel({
         </div>
       </div>
       <div className="public-twitch-account-panel__actions">
-        {menuActions.map((action) => (
+        {resolvedMenuActions.map((action) => (
           <button
             className={action.variant === "dashboard" ? "dashboard" : undefined}
             key={action.id}
@@ -205,6 +247,9 @@ export function PublicTwitchAccountChip({
   connected,
   user,
   open,
+  dashboardLabel,
+  dashboardLabelJa,
+  dashboardLabelKo,
   loginLabel,
   loginLabelJa,
   loginLabelKo,
@@ -217,6 +262,7 @@ export function PublicTwitchAccountChip({
   logoutLabelJa,
   logoutLabelKo,
   menuActions = [],
+  onDashboard,
   onDiscordLogin,
   onLogin,
   onLogout,
@@ -230,7 +276,14 @@ export function PublicTwitchAccountChip({
   const unifiedLogin = Boolean(
     onDiscordLogin && discordLoginLabel && twitchLoginLabel
   );
-  const menuItemCount = connected ? menuActions.length + 1 : unifiedLogin ? 2 : 0;
+  const resolvedMenuActions = accountMenuActions(
+    menuActions,
+    dashboardLabel,
+    dashboardLabelKo,
+    dashboardLabelJa,
+    onDashboard
+  );
+  const menuItemCount = connected ? resolvedMenuActions.length + 1 : unifiedLogin ? 2 : 0;
 
   function clearCloseTimer(): void {
     if (closeTimerRef.current === undefined) return;
@@ -371,7 +424,7 @@ export function PublicTwitchAccountChip({
                   : null}
             </div>
           </div>
-          {menuActions.map((action, index) => (
+          {resolvedMenuActions.map((action, index) => (
             <button
               className={action.variant === "dashboard" ? "dashboard" : undefined}
               key={action.id}
@@ -394,9 +447,9 @@ export function PublicTwitchAccountChip({
             data-ko={logoutLabelKo}
             type="button"
             role="menuitem"
-            onKeyDown={(event) => handleMenuItemKeyDown(event, menuActions.length)}
+            onKeyDown={(event) => handleMenuItemKeyDown(event, resolvedMenuActions.length)}
             ref={(node) => {
-              menuItemRefs.current[menuActions.length] = node;
+              menuItemRefs.current[resolvedMenuActions.length] = node;
             }}
             onClick={() => {
               closeMenu();

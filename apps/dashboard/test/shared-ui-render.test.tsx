@@ -60,16 +60,14 @@ test("공통 Twitch account chip이 프로필과 접근 가능한 메뉴 action�
     <PublicTwitchAccountChip
       configured
       connected
+      dashboardLabel="YORO Dashboard"
+      dashboardLabelJa="YORO Dashboard"
+      dashboardLabelKo="YORO Dashboard"
       loginLabel="Twitch 로그인"
       loginTitle="Twitch 로그인이 필요합니다."
       logoutLabel="Twitch 로그아웃"
-      menuActions={[{
-        id: "dashboard",
-        label: "대시보드 열기",
-        onSelect: () => undefined,
-        variant: "dashboard"
-      }]}
       menuLabel="Twitch 프로필 메뉴"
+      onDashboard={() => undefined}
       onLogin={() => undefined}
       onLogout={() => undefined}
       onOpenChange={() => undefined}
@@ -89,6 +87,7 @@ test("공통 Twitch account chip이 프로필과 접근 가능한 메뉴 action�
   assert.match(html, /src="https:\/\/example\.com\/avatar\.png"/);
   assert.match(html, />YORO</);
   assert.match(html, /class="dashboard"/);
+  assert.match(html, /data-ko="YORO Dashboard" data-ja="YORO Dashboard"/u);
   assert.match(html, />Twitch 로그아웃</);
 });
 
@@ -210,6 +209,7 @@ test("모바일 통합 메뉴는 게임·언어·계정 로그인을 중첩 팝�
       id="test-mobile-menu"
       labels={{
         close: "메뉴 닫기",
+        dashboard: "YORO Dashboard",
         discordLogin: "Discord 로그인",
         game: "게임 선택",
         language: "언어",
@@ -226,6 +226,7 @@ test("모바일 통합 메뉴는 게임·언어·계정 로그인을 중첩 팝�
       onGamePage={() => undefined}
       onLocale={() => undefined}
       onDiscordLogin={() => undefined}
+      onDashboard={() => undefined}
       onTwitchLogin={() => undefined}
       onTwitchLogout={() => undefined}
       open
@@ -275,6 +276,7 @@ test("모바일 통합 메뉴는 YORO 계정의 Twitch 로그인 상태를 표�
       id="test-mobile-account-menu"
       labels={{
         close: "메뉴 닫기",
+        dashboard: "YORO Dashboard",
         discordLogin: "Discord 로그인",
         game: "게임 선택",
         language: "언어",
@@ -290,6 +292,7 @@ test("모바일 통합 메뉴는 YORO 계정의 Twitch 로그인 상태를 표�
       onAccountLogout={() => undefined}
       onClose={() => undefined}
       onDiscordLogin={() => undefined}
+      onDashboard={() => undefined}
       onGamePage={() => undefined}
       onLocale={() => undefined}
       onTwitchLogin={() => undefined}
@@ -302,6 +305,7 @@ test("모바일 통합 메뉴는 YORO 계정의 Twitch 로그인 상태를 표�
 
   assert.match(html, />YORO Twitch 사용자</u);
   assert.match(html, />Twitch</u);
+  assert.match(html, />YORO Dashboard</u);
   assert.match(html, new RegExp(`src="${TWITCH_GLITCH_ICON_URL}"`, "u"));
   assert.match(html, />로그아웃</u);
   assert.doesNotMatch(html, />Discord 로그인</u);
@@ -312,15 +316,11 @@ test("모바일 Twitch inline 패널은 로그인 계정과 기존 action을 일
     <PublicTwitchAccountPanel
       configured
       connected
+      dashboardLabel="YORO Dashboard"
       loginLabel="Twitch 로그인"
       loginLoadingLabel="로그인 중…"
       logoutLabel="로그아웃"
-      menuActions={[{
-        id: "dashboard",
-        label: "대시보드",
-        onSelect: () => undefined,
-        variant: "dashboard",
-      }]}
+      onDashboard={() => undefined}
       onLogin={() => undefined}
       onLogout={() => undefined}
       unavailableLabel="사용할 수 없습니다."
@@ -331,7 +331,7 @@ test("모바일 Twitch inline 패널은 로그인 계정과 기존 action을 일
   assert.match(html, />YORO</u);
   assert.match(html, />@yoro</u);
   assert.match(html, new RegExp(`src="${TWITCH_GLITCH_ICON_URL}"`, "u"));
-  assert.match(html, />대시보드</u);
+  assert.match(html, />YORO Dashboard</u);
   assert.match(html, />로그아웃</u);
   assert.doesNotMatch(html, /role="menu"/u);
 });

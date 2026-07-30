@@ -2,6 +2,8 @@ import { runtimeConfig } from "../../runtime-config";
 
 export type YoroIdentityProvider = "discord" | "twitch";
 
+export const YORO_DASHBOARD_PATH = "/dashboard";
+
 export type YoroAccountIdentity = {
   provider: YoroIdentityProvider;
   displayName: string;
@@ -35,6 +37,10 @@ export type YoroAccountSession =
 function accountApiBase(): string {
   const configuredBase = typeof window === "undefined" ? undefined : runtimeConfig().apiBase;
   return configuredBase ?? import.meta.env?.VITE_API_BASE ?? "http://localhost:3000";
+}
+
+export function openYoroDashboard(): void {
+  window.location.assign(YORO_DASHBOARD_PATH);
 }
 
 export function accountOAuthUrl(

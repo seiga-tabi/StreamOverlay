@@ -7,7 +7,7 @@ import {
   type PublicTwitchAccountMenuAction,
   type PublicTwitchAccountUser
 } from "../../../shared/PublicTwitchAccountChip";
-import { accountOAuthUrl } from "../../yoro-account/api";
+import { accountOAuthUrl, openYoroDashboard } from "../../yoro-account/api";
 import {
   authenticatedYoroIdentity,
   useYoroAccountSession
@@ -197,6 +197,9 @@ export function PublicAppHeader({
       <PublicTwitchAccountChip
         configured={twitchStatus.configured}
         connected={accountConnected}
+        dashboardLabel={t().yoroDashboardOpen}
+        dashboardLabelJa={publicI18n.ja.yoroDashboardOpen}
+        dashboardLabelKo={publicI18n.ko.yoroDashboardOpen}
         discordLoginLabel={t().discordLogin}
         loginLabel={t().accountLogin}
         loginLabelJa={publicI18n.ja.accountLogin}
@@ -208,6 +211,7 @@ export function PublicAppHeader({
         logoutLabelKo={publicI18n.ko.accountLogout}
         menuActions={twitchMenuActions}
         menuLabel={t().accountMenu}
+        onDashboard={openYoroDashboard}
         onDiscordLogin={handleDiscordLogin}
         onLogin={handleTwitchAccountLogin}
         onLogout={handleAccountLogout}
@@ -321,6 +325,7 @@ export function PublicAppHeader({
             id="lol-mobile-menu"
             labels={{
               close: t().closeMobileMenu,
+              dashboard: t().yoroDashboardOpen,
               discordLogin: t().discordLogin,
               game: t().gameMenu,
               language: t().language,
@@ -337,6 +342,7 @@ export function PublicAppHeader({
             onGamePage={handleMenuPage}
             onLocale={onLocale}
             onDiscordLogin={handleDiscordLogin}
+            onDashboard={openYoroDashboard}
             onTwitchLogin={handleTwitchAccountLogin}
             onTwitchLogout={onTwitchLogout}
             onAccountLogout={handleAccountLogout}

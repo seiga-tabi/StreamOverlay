@@ -9,7 +9,7 @@ import {
 import { PublicGameSelector } from "../../public-lol/components/PublicGameSelector";
 import { PublicLocaleSelector } from "../../public-lol/components/PublicLocaleSelector";
 import type { PublicMainPage, PublicTwitchViewerStatus } from "../../public-lol/types/public-lol";
-import { accountOAuthUrl } from "../../yoro-account/api";
+import { accountOAuthUrl, openYoroDashboard } from "../../yoro-account/api";
 import {
   authenticatedYoroIdentity,
   useYoroAccountSession
@@ -219,6 +219,9 @@ export function PalworldHeader({
             <PublicTwitchAccountChip
               configured={twitchStatus.configured}
               connected={accountConnected}
+              dashboardLabel={text.yoroDashboardOpen}
+              dashboardLabelJa={palworldI18n.ja.yoroDashboardOpen}
+              dashboardLabelKo={palworldI18n.ko.yoroDashboardOpen}
               discordLoginLabel={text.discordLogin}
               loginLabel={text.accountLogin}
               loginLabelJa={palworldI18n.ja.accountLogin}
@@ -230,6 +233,7 @@ export function PalworldHeader({
               logoutLabelKo={palworldI18n.ko.accountLogout}
               menuActions={twitchMenuActions}
               menuLabel={text.accountMenu}
+              onDashboard={openYoroDashboard}
               onDiscordLogin={handleDiscordLogin}
               onLogin={handleTwitchAccountLogin}
               onLogout={handleAccountLogout}
@@ -315,6 +319,7 @@ export function PalworldHeader({
             id="palworld-mobile-menu"
             labels={{
               close: text.closeMobileMenu,
+              dashboard: text.yoroDashboardOpen,
               discordLogin: text.discordLogin,
               game: text.gameMenu,
               language: text.languageSection,
@@ -331,6 +336,7 @@ export function PalworldHeader({
             onGamePage={handleGame}
             onLocale={onLocale}
             onDiscordLogin={handleDiscordLogin}
+            onDashboard={openYoroDashboard}
             onTwitchLogin={handleTwitchAccountLogin}
             onTwitchLogout={onTwitchLogout}
             onAccountLogout={handleAccountLogout}

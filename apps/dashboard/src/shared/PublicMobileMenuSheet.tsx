@@ -11,6 +11,7 @@ import {
 import { BottomSheet } from "./ui/BottomSheet";
 
 export type PublicMobileMenuLabels = {
+  dashboard: string;
   discordLogin: string;
   close: string;
   game: string;
@@ -32,6 +33,7 @@ export function PublicMobileMenuSheet({
   onGamePage,
   onLocale,
   onDiscordLogin,
+  onDashboard,
   onTwitchLogin,
   onTwitchLogout,
   onAccountLogout,
@@ -54,6 +56,7 @@ export function PublicMobileMenuSheet({
   onGamePage: (page: PublicMainPage) => void;
   onLocale: (locale: PublicLocale) => void;
   onDiscordLogin: () => void;
+  onDashboard: () => void;
   onTwitchLogin: () => void;
   onTwitchLogout: () => void;
   onAccountLogout?: () => void;
@@ -102,6 +105,7 @@ export function PublicMobileMenuSheet({
           <PublicTwitchAccountPanel
             configured={twitchConfigured}
             connected={accountConnected ?? twitchConnected}
+            dashboardLabel={labels.dashboard}
             discordLoginLabel={labels.discordLogin}
             loginLabel={labels.login}
             loginLoading={twitchLoginLoading}
@@ -109,6 +113,7 @@ export function PublicMobileMenuSheet({
             logoutLabel={labels.logout}
             menuActions={twitchActions}
             onAction={onClose}
+            onDashboard={onDashboard}
             onDiscordLogin={onDiscordLogin}
             onLogin={onTwitchLogin}
             onLogout={onAccountLogout ?? onTwitchLogout}

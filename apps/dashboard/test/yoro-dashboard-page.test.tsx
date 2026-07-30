@@ -69,9 +69,14 @@ test("공통 YORO Dashboard는 로그인 사용자용 진입점과 KO·JA 문구
 });
 
 test("공통 Dashboard 경로는 기존 방송 운영 하위 경로와 겹치지 않는다", async () => {
+  const { YORO_DASHBOARD_PATH } = await import(
+    "../src/features/yoro-account/api"
+  );
   const { yoroDashboardPageFromPath } = await import(
     "../src/features/yoro-dashboard/YoroDashboardPage"
   );
+  assert.equal(YORO_DASHBOARD_PATH, "/dashboard");
+  assert.doesNotMatch(YORO_DASHBOARD_PATH, /[?#]|user|discord|twitch|token/iu);
   assert.equal(yoroDashboardPageFromPath("/dashboard"), "overview");
   assert.equal(yoroDashboardPageFromPath("/dashboard/account"), "account");
   assert.equal(
