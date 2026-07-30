@@ -300,6 +300,50 @@ export class DiscordManagementService {
     }
   }
 
+  async authorizeGameServerRestConnection(input: {
+    cookieValue?: string;
+    csrfToken?: string;
+    organizationId: string;
+    gameServerId: string;
+    mutation: boolean;
+  }): Promise<string> {
+    const authenticated = input.mutation
+      ? await this.requireMutationSession(input.cookieValue, input.csrfToken)
+      : await this.requireSession(input.cookieValue);
+    try {
+      const repository = new DiscordManagementRepository(this.pool);
+      const membership = await repository.requireMembership(
+        authenticated.userId,
+        input.organizationId
+      );
+      if (
+        input.mutation
+        && membership.role !== "owner"
+        && membership.role !== "manager"
+      ) {
+        throw new DiscordManagementError("permission_required", 403);
+      }
+      const servers = await repository.listGameServers(
+        membership.context,
+        membership.role
+      );
+      const server = servers.find((candidate) =>
+        candidate.id === input.gameServerId && candidate.isEnabled
+      );
+      if (!server) throw new DiscordManagementError("not_found", 404);
+      return `organization:${input.organizationId}:server:${input.gameServerId}`;
+    } catch (error) {
+      if (error instanceof DiscordManagementError) throw error;
+      if (
+        error instanceof SafeDatabaseError
+        && error.code === "DATABASE_REFERENCE_INVALID"
+      ) {
+        throw new DiscordManagementError("permission_required", 403);
+      }
+      throw error;
+    }
+  }
+
   async disableGameServer(input: {
     cookieValue?: string;
     csrfToken?: string;

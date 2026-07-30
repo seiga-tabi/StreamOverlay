@@ -6552,6 +6552,129 @@ export function createHttpHandler(input: HttpHandlerInput) {
               return sendJson(req, res, 204, {}, noStoreHeaders());
             }
           }
+          const gameServerRestMatch = url.pathname.match(
+            /^\/api\/discord\/management\/organizations\/([^/]+)\/game-servers\/([^/]+)\/palworld-rest(?:\/(test|save|refresh|remove))?$/u
+          );
+          if (gameServerRestMatch) {
+            const organizationId = requireManagementOrganizationId(
+              gameServerRestMatch[1] ?? ""
+            );
+            const gameServerId = gameServerRestMatch[2] ?? "";
+            const action = gameServerRestMatch[3];
+            if (!isManagementOrganizationId(gameServerId) || url.search) {
+              return sendJson(req, res, 404, { error: "not found" });
+            }
+            const expectedMethod = action ? "POST" : "GET";
+            if (req.method !== expectedMethod) {
+              return sendJson(req, res, 404, { error: "not found" });
+            }
+            if (
+              action
+              && !stateChangingRequestHasTrustedOrigin(req)
+            ) {
+              return sendJson(req, res, 403, {
+                error: "trusted Origin이 필요합니다.",
+                code: "origin_denied"
+              });
+            }
+            const ownerId = await input.discordManagement
+              .authorizeGameServerRestConnection({
+                cookieValue: managementCookie,
+                csrfToken: requestHeaderValue(req, "x-discord-csrf"),
+                organizationId,
+                gameServerId,
+                mutation: Boolean(action)
+              });
+            try {
+              if (!action) {
+                const response = input.palworldServerMonitor
+                  ?.getDashboardResponse(ownerId)
+                  ?? disabledPalworldServerDashboardResponse(
+                    input.palworldServerUnavailableCode
+                  );
+                return sendJson(
+                  req,
+                  res,
+                  200,
+                  validatedPalworldServerDashboardResponse(response),
+                  noStoreHeaders()
+                );
+              }
+              if (!input.palworldServerMonitor) {
+                throw new PalworldServerMonitorInputError(
+                  input.palworldServerUnavailableCode ?? "disabled",
+                  "Palworld 서버 상태 기능을 사용할 수 없습니다."
+                );
+              }
+              if (action === "test" || action === "save") {
+                if (!discordJsonBodyAllowed(req)) {
+                  return sendJson(req, res, 415, {
+                    error: "application/json Content-Type이 필요합니다."
+                  });
+                }
+                const connection = await readPalworldServerConnectionInput(req);
+                const response = action === "test"
+                  ? await input.palworldServerMonitor.testConnection(ownerId, connection)
+                  : await input.palworldServerMonitor.saveConnection(ownerId, connection);
+                return sendJson(
+                  req,
+                  res,
+                  200,
+                  action === "test"
+                    ? validatedPalworldServerTestResponse(response)
+                    : validatedPalworldServerDashboardResponse(response),
+                  noStoreHeaders()
+                );
+              }
+              await requireEmptyPalworldServerBody(req);
+              const response = action === "refresh"
+                ? await input.palworldServerMonitor.refresh(ownerId)
+                : await input.palworldServerMonitor.removeConnection(ownerId);
+              return sendJson(
+                req,
+                res,
+                200,
+                validatedPalworldServerDashboardResponse(response),
+                noStoreHeaders()
+              );
+            } catch (restError) {
+              if (restError instanceof HttpRequestError) throw restError;
+              if (restError instanceof PalworldServerMonitorRateLimitError) {
+                const retryAfterSeconds = Number.isSafeInteger(
+                  restError.retryAfterSeconds
+                ) && restError.retryAfterSeconds > 0
+                  ? restError.retryAfterSeconds
+                  : 1;
+                return sendJson(req, res, 429, {
+                  error: "Palworld 서버 상태 확인 요청이 너무 많습니다.",
+                  code: "rate_limited"
+                }, {
+                  ...noStoreHeaders(),
+                  "Retry-After": String(retryAfterSeconds)
+                });
+              }
+              if (restError instanceof PalworldServerMonitorInputError) {
+                const statusCode = (
+                  PALWORLD_SERVER_AVAILABILITY_ERROR_CODES as readonly string[]
+                ).includes(restError.code)
+                  ? 503
+                  : 400;
+                return sendJson(req, res, statusCode, {
+                  error: palworldServerInputErrorMessage(restError.code),
+                  code: restError.code
+                }, noStoreHeaders());
+              }
+              input.logger?.error({
+                type: "palworld_server.organization_http_failed",
+                action: action ?? "status",
+                errorCode: "internal_error"
+              });
+              return sendJson(req, res, 500, {
+                error: "서버 내부 오류",
+                code: "internal_error"
+              }, noStoreHeaders());
+            }
+          }
         }
         const onboardingCookie = requestCookie(req, DISCORD_ONBOARDING_COOKIE);
         if (req.method === "GET" && url.pathname === "/api/discord/oauth/start") {

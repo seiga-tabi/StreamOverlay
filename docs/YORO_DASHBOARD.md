@@ -11,7 +11,7 @@ Dashboard입니다. 별도 이메일·비밀번호 계정을 만들지 않고, p
 
 - `/dashboard`: 계정 연결과 Organization 설정 진행 상태
 - `/dashboard/account`: Discord·Twitch identity 연결 및 해제
-- `/dashboard/organizations`: Discord Guild, Organization, Palworld 게임 서버와 Agent 설정
+- `/dashboard/organizations`: Discord Guild, Organization, Palworld 게임 서버와 REST 연결 설정
 - `/dashboard/settings`: 언어, 기본 화면, reduced motion 설정
 - `/setup/discord`, `/bot/manage`: 별도 화면을 제공하지 않고 `/dashboard/organizations`로 redirect하는 legacy URL
 

@@ -1,6 +1,6 @@
-# YORO Bot Organization 관리와 Agent 연결
+# YORO Bot Organization 관리와 Palworld REST 연결
 
-`/dashboard/organizations`는 통합 YORO 로그인, Bot이 설치된 Guild claim, Organization과 Palworld 게임 서버 관리, 10분 일회용 Agent 설치 토큰 발급을 제공하는 유일한 관리 화면입니다. 기존 `/bot/manage` 요청은 query를 allowlist로 정리한 뒤 이 경로로 redirect하며 별도 화면을 제공하지 않습니다. YORO 계정과 Discord·Twitch identity의 관계는 `YORO_ACCOUNT.md`에 정의되어 있습니다. Agent daemon과 Server의 등록·상태 Ingestion protocol은 구현되어 있으며 `YORO_AGENT.md`, `YORO_AGENT_PROTOCOL.md`에 정의되어 있습니다. staging 실연동과 Notification Worker, Discord 상태 Embed, 서버 제어 기능은 이 단계에 포함하지 않습니다.
+`/dashboard/organizations`는 통합 YORO 로그인, Bot이 설치된 Guild claim, Organization과 Palworld 게임 서버 관리, Palworld REST 직접 연결을 제공하는 유일한 관리 화면입니다. 기존 `/bot/manage` 요청은 query를 allowlist로 정리한 뒤 이 경로로 redirect하며 별도 화면을 제공하지 않습니다. YORO 계정과 Discord·Twitch identity의 관계는 `YORO_ACCOUNT.md`에 정의되어 있습니다. 기존 Agent protocol은 배포 호환 경로로 남지만 Dashboard의 기본 등록 흐름에서는 사용하지 않습니다. Notification Worker, Discord 상태 Embed, 서버 제어 기능은 이 단계에 포함하지 않습니다.
 
 ## Onboarding OAuth와 관리 OAuth
 
@@ -37,28 +37,28 @@ Guild claim 완료 시 새로운 management session을 같은 transaction에서 
 | Organization·게임 서버 조회 | 가능 | 가능 | 가능 |
 | Palworld 게임 서버 생성 | 가능 | 가능 | 불가 |
 | 게임 서버 비활성화 | 가능 | 불가 | 불가 |
-| Agent 설치 토큰 발급·폐기 | 가능 | 가능 | 불가 |
+| Palworld REST 테스트·저장·새로고침·삭제 | 가능 | 가능 | 조회만 |
 
 다른 Organization의 ID를 알고 있어도 같은 `not_found` 또는 권한 오류 경계 밖의 정보를 받을 수 없습니다.
 
 ## Free entitlement와 게임 서버
 
-현재 생성 가능한 유형은 `palworld`, 연결 방식은 `agent`뿐입니다. RCON password, AdminPassword, 내부 주소는 받지 않습니다.
+현재 생성 가능한 유형은 `palworld`, 새 연결 방식은 `rest`입니다. 스트리머는 자신의 REST 주소와 Palworld 전용 서버 설정의 `AdminPassword`를 직접 입력합니다. 브라우저는 Palworld 서버에 직접 접속하지 않으며, YORO Server가 URL·DNS·TLS 정책을 먼저 검증한 뒤 고정된 REST endpoint만 호출합니다.
 
 Free 기본값은 활성 게임 서버 1개입니다. 생성 transaction에서 entitlement row를 lock하고 활성 서버 수를 확인한 뒤 insert하므로 동시 요청으로 한도를 초과하지 않습니다. entitlement 조회가 없거나 실패하면 무제한으로 완화하지 않고 fail-closed 처리합니다.
 
-## Agent bootstrap token
+## Palworld REST와 자격 증명
 
-- token 원문은 발급 응답 한 번에서만 반환합니다.
-- Database와 audit log에는 SHA-256 hash만 저장합니다.
-- 기본 만료는 10분입니다.
-- Organization, game server와 발급 사용자에 귀속됩니다.
-- 한 game server에는 활성 token 하나만 허용합니다.
-- 새 token 발급은 같은 transaction에서 이전 활성 token을 폐기합니다.
-- UI는 token을 `localStorage`, URL, analytics 또는 오류 payload에 저장하지 않습니다.
-- staging 검증 전에는 존재하지 않거나 검증되지 않은 `docker run`, mutable `latest` image 또는 download URL을 제공하지 않습니다.
+- 공개 HTTPS 443 hostname은 `publicHttpsSelfService`가 활성화된 배포에서 직접 등록할 수 있습니다.
+- HTTP, 별도 포트, LAN, VPN, 사설 IP는 운영자의 명시적인 outbound 정책 승인이 필요합니다.
+- localhost, loopback, link-local, metadata 주소와 redirect는 allowlist로도 우회할 수 없습니다.
+- DNS 검증 결과와 실제 연결 주소를 고정하고 poll마다 주소 정책을 다시 검증합니다.
+- `AdminPassword`는 응답, 로그, URL, DOM 저장소에 반환하지 않습니다.
+- 실제 `/v1/api/info` 인증과 schema 검증이 성공한 경우에만 공통 AES-256-GCM 저장소에 암호화해 저장합니다.
+- 연결 테스트만으로 저장소를 변경하지 않습니다.
+- 공통 암호화 key는 플랫폼 운영자가 한 번 준비하며 스트리머가 입력하거나 다운로드하지 않습니다.
 
-유출이 의심되면 관리 화면에서 즉시 폐기하고 새 token을 발급합니다. bootstrap은 `/api/agent/v1/register`에서 한 번 소비되며, 반환된 Agent credential 원문은 응답 한 번에서만 확인할 수 있습니다.
+기존 Agent bootstrap·Ingestion API는 이미 배포된 설치의 호환성을 위해 유지합니다. 신규 Dashboard UI는 Agent 설치 토큰을 발급하지 않습니다.
 
 ## Migration과 staging 검증
 
@@ -66,7 +66,7 @@ Free 기본값은 활성 게임 서버 1개입니다. 생성 transaction에서 e
 2. migration `check`, `plan`으로 `0006_bot_management_and_agent_bootstrap`, `0007_agent_registration_and_ingestion`, `0008_web_management_guild_claim`을 확인합니다.
 3. 별도 운영 승인 후에만 `apply`합니다.
 4. feature가 비활성인 image로 먼저 배포하고 기존 방송 기능과 health를 확인합니다.
-5. staging Discord identity·Organization으로 Bot 설치 관찰, web claim, management login, role, tenant A/B, entitlement와 token 폐기를 검증합니다.
+5. staging Discord identity·Organization으로 Bot 설치 관찰, web claim, management login, role, tenant A/B, entitlement와 Palworld REST 연결 격리를 검증합니다.
 6. 승인 후 feature flag를 활성화합니다.
 
 Session key는 기존 OAuth encryption key와 역할이 다릅니다. 현재 opaque session은 별도 암호화 key가 필요하지 않으며 hash만 저장합니다. Discord client secret이나 OAuth encryption key를 회전하면 진행 중 OAuth state를 폐기하고 새 로그인을 시작합니다.

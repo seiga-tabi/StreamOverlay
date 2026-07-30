@@ -57,16 +57,17 @@ const botText = {
     explore: "기능 살펴보기",
     setupGuide: "연결 과정 확인",
     addBot: "Discord 서버에 YORO Bot 추가",
+    addBotNewTab: "Discord 서버에 YORO Bot 추가 (새 탭에서 열림)",
     dashboardLogin: "Dashboard 로그인",
     dashboardOpen: "YORO Dashboard",
     currentTitle: "현재 사용할 수 있는 기반",
-    currentDescription: "OAuth 로그인, Organization 관리, Palworld 서버 등록과 10분 Agent 설치 토큰 발급 기반이 준비되어 있습니다.",
+    currentDescription: "OAuth 로그인, Organization 관리와 Palworld REST 직접 연결 기반이 준비되어 있습니다.",
     featureOrganization: "Organization 관리",
     featureOrganizationDescription: "여러 설정을 Discord Guild 소유권과 분리된 Organization 단위로 안전하게 관리합니다.",
     featureOAuth: "안전한 Discord 연결",
     featureOAuthDescription: "최소 OAuth scope와 PKCE, 일회용 설정 링크, 서버 측 Guild 권한 재검증을 사용합니다.",
     featureStatus: "게임 서버 상태",
-    featureStatusDescription: "Palworld 서버 등록, Agent daemon과 상태 Ingestion 기반이 구현되어 있으며 staging 활성화를 준비하고 있습니다.",
+    featureStatusDescription: "Palworld 서버 등록과 REST 인증·상태 조회 기반이 구현되어 있으며 운영 연결을 준비하고 있습니다.",
     featureNotification: "상태 알림",
     featureNotificationDescription: "중복 방지와 tenant 격리를 적용한 알림 Worker를 후속 단계에서 연결합니다.",
     available: "기반 완료",
@@ -89,11 +90,11 @@ const botText = {
     securityPermission: "Guild 권한 서버 재검증",
     securitySession: "10분 만료·일회용 설정 session",
     nextTitle: "다음 구현 단계",
-    nextDescription: "Agent daemon과 상태 Ingestion 기반은 구현됐으며 staging 실연동 후 알림 Worker와 Discord 상태 Embed를 연결합니다.",
+    nextDescription: "Palworld REST 직접 연결 기반은 구현됐으며 실연동 검증 후 알림 Worker와 Discord 상태 Embed를 연결합니다.",
     privacy: "개인정보 처리방침",
     terms: "이용약관",
     contact: "문의",
-    disclaimer: "Agent daemon과 상태 Ingestion 기반은 구현됐지만 staging 실연동과 운영 활성화, Discord 상태 알림은 아직 준비 중입니다.",
+    disclaimer: "Palworld REST 직접 연결 기반은 구현됐지만 운영 실연동과 Discord 상태 알림은 아직 준비 중입니다.",
     copyright: "Copyright © 2026 YORO.gg",
   },
   ja: {
@@ -118,16 +119,17 @@ const botText = {
     explore: "機能を見る",
     setupGuide: "連携手順を確認",
     addBot: "DiscordサーバーにYORO Botを追加",
+    addBotNewTab: "DiscordサーバーにYORO Botを追加（新しいタブで開きます）",
     dashboardLogin: "Dashboardにログイン",
     dashboardOpen: "YORO Dashboard",
     currentTitle: "現在利用できる基盤",
-    currentDescription: "OAuthログイン、Organization管理、Palworldサーバー登録、10分間のAgent導入トークン発行基盤が準備されています。",
+    currentDescription: "OAuthログイン、Organization管理、Palworld REST直接接続基盤が準備されています。",
     featureOrganization: "Organization管理",
     featureOrganizationDescription: "各種設定をDiscord Guildの所有権から分離し、Organization単位で安全に管理します。",
     featureOAuth: "安全なDiscord連携",
     featureOAuthDescription: "最小OAuth scope、PKCE、ワンタイム設定リンク、サーバー側のGuild権限再検証を使用します。",
     featureStatus: "ゲームサーバー状態",
-    featureStatusDescription: "Palworldサーバー登録、Agent daemon、状態Ingestion基盤を実装済みで、stagingでの有効化を準備しています。",
+    featureStatusDescription: "Palworldサーバー登録とREST認証・状態取得基盤を実装済みで、運用接続を準備しています。",
     featureNotification: "状態通知",
     featureNotificationDescription: "重複防止とtenant分離を適用した通知Workerを後続段階で連携します。",
     available: "基盤完了",
@@ -150,11 +152,11 @@ const botText = {
     securityPermission: "Guild権限をサーバーで再検証",
     securitySession: "10分期限・ワンタイム設定session",
     nextTitle: "次の実装段階",
-    nextDescription: "Agent daemonと状態Ingestion基盤は実装済みで、staging実連携後に通知WorkerとDiscord状態Embedを連携します。",
+    nextDescription: "Palworld REST直接接続基盤は実装済みで、実連携検証後に通知WorkerとDiscord状態Embedを連携します。",
     privacy: "プライバシーポリシー",
     terms: "利用規約",
     contact: "お問い合わせ",
-    disclaimer: "Agent daemonと状態Ingestion基盤は実装済みですが、staging実連携、運用有効化、Discord状態通知は準備中です。",
+    disclaimer: "Palworld REST直接接続基盤は実装済みですが、運用実連携とDiscord状態通知は準備中です。",
     copyright: "Copyright © 2026 YORO.gg",
   },
 } as const;
@@ -456,7 +458,15 @@ export function PublicBotPage() {
                   <span className="is-pending"><span aria-hidden="true" />{text.gatewayPending}</span>
                 </div>
                 <div className="public-bot-actions">
-                  <a className="public-bot-button is-primary" href={botInstallUrl()}>{text.addBot}</a>
+                  <a
+                    aria-label={text.addBotNewTab}
+                    className="public-bot-button is-primary"
+                    href={botInstallUrl()}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    {text.addBot}
+                  </a>
                   <a className="public-bot-button" href="/dashboard/organizations">
                     {text.dashboardLogin}
                   </a>

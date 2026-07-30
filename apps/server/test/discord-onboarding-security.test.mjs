@@ -171,6 +171,13 @@ test("Discord onboarding route는 OAuth callback과 자체 session 보안을 분
     ),
     "PUBLIC"
   );
+  assert.equal(
+    requiredHttpPrincipal(
+      "POST",
+      `/api/discord/management/organizations/${crypto.randomUUID()}/game-servers/${crypto.randomUUID()}/palworld-rest/save`
+    ),
+    "PUBLIC"
+  );
   assert.equal(requiredHttpPrincipal("POST", "/api/discord/unknown"), "DASHBOARD_ADMIN");
 });
 

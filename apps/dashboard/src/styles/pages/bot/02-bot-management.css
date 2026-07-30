@@ -29,6 +29,12 @@
   gap: var(--space-2);
 }
 
+.bot-management-field small,
+.bot-management-connection-description,
+.bot-management-last-seen {
+  color: var(--text-muted);
+}
+
 .bot-management-field input,
 .bot-management-field select {
   box-sizing: border-box;
@@ -47,10 +53,101 @@
   min-width: 0;
 }
 
-.bot-management-token {
+.bot-management-section-heading,
+.bot-management-server-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  gap: var(--space-3);
+}
+
+.bot-management-section-heading h2,
+.bot-management-connection-description,
+.bot-management-last-seen,
+.bot-management-credential-notice p {
+  margin: 0;
+}
+
+.bot-management-server-heading {
+  display: grid;
+  justify-content: initial;
+  gap: var(--space-1);
+  overflow-wrap: anywhere;
+}
+
+.bot-management-servers .yoro-status {
+  flex-shrink: 0;
+}
+
+.bot-management-credential-notice {
+  flex-basis: 100%;
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+}
+
+.bot-management-rest {
   display: grid;
   gap: var(--space-3);
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
   overflow-wrap: anywhere;
+}
+
+.bot-management-rest h3,
+.bot-management-rest > p {
+  margin: 0;
+}
+
+.bot-management-rest-feedback {
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.bot-management-rest-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.bot-management-rest-policy {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding-inline-start: var(--space-5);
+  color: var(--text-muted);
+}
+
+.bot-management-rest-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.bot-management-rest-summary div {
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+}
+
+.bot-management-rest-summary dt {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.bot-management-rest-summary dd {
+  margin: var(--space-1) 0 0;
+  overflow-wrap: anywhere;
+  font-weight: 700;
 }
 
 .bot-management-guild-summary {
@@ -78,5 +175,19 @@
   .bot-management-actions {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .bot-management-section-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .bot-management-servers .yoro-card__header {
+    flex-direction: column;
+  }
+
+  .bot-management-rest-fields,
+  .bot-management-rest-summary {
+    grid-template-columns: 1fr;
   }
 }

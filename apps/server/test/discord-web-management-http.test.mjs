@@ -613,3 +613,158 @@ test("Guild claim은 oversized JSON과 지원하지 않는 method를 안전하�
     assert.equal(wrongMethod.statusCode, 404);
   });
 });
+
+test("Organization Palworld REST 연결은 tenant 권한 검증 후에만 비밀번호를 전달한다", async () => {
+  await withDiscordConfig(async () => {
+    const organizationId = "11111111-1111-4111-8111-111111111111";
+    const gameServerId = "33333333-3333-4333-8333-333333333333";
+    const ownerId = `organization:${organizationId}:server:${gameServerId}`;
+    const calls = [];
+    const diagnostics = [
+      "url_policy",
+      "dns_tcp",
+      "tls",
+      "basic_auth",
+      "info",
+      "metrics",
+      "schema"
+    ].map((key) => ({ key, state: "passed" }));
+    const dashboardResponse = {
+      enabled: true,
+      pollIntervalSeconds: 30,
+      registrationPolicy: {
+        publicHttpsSelfService: true,
+        publicHttpsPort: 443,
+        privateNetworkRequiresOperatorApproval: true
+      },
+      connection: {
+        configured: true,
+        baseUrl: "https://pal.example.com",
+        passwordConfigured: true,
+        updatedAt: "2026-07-30T00:00:00.000Z"
+      },
+      status: {
+        state: "online",
+        checkedAt: "2026-07-30T00:00:00.000Z",
+        lastSuccessAt: "2026-07-30T00:00:00.000Z",
+        latencyMs: 20,
+        consecutiveFailures: 0,
+        info: { serverName: "테스트 서버", version: "v0.6.6" },
+        metrics: {
+          serverFps: 60,
+          currentPlayers: 2,
+          maxPlayers: 32,
+          frameTimeMs: 16.67,
+          uptimeSeconds: 3600,
+          baseCampCount: 3,
+          gameDays: 40
+        },
+        diagnostics
+      }
+    };
+    const discordManagement = {
+      async authorizeGameServerRestConnection(input) {
+        calls.push({ type: "authorize", input });
+        return ownerId;
+      }
+    };
+    const palworldServerMonitor = {
+      getDashboardResponse(receivedOwnerId) {
+        calls.push({ type: "get", ownerId: receivedOwnerId });
+        return dashboardResponse;
+      },
+      async saveConnection(receivedOwnerId, value) {
+        calls.push({ type: "save", ownerId: receivedOwnerId, value });
+        return dashboardResponse;
+      }
+    };
+    const { handler } = createDiscordHandler({
+      handlerInput: { discordManagement, palworldServerMonitor }
+    });
+    const path =
+      `/api/discord/management/organizations/${organizationId}/game-servers/${gameServerId}/palworld-rest`;
+    const cookie =
+      "yoro_session=session_value_abcdefghijklmnopqrstuvwxyz123456.csrf_value_abcdefghijklmnopqrstuvwxyz123456";
+
+    const status = await request(handler, "GET", path, undefined, { cookie });
+    assert.equal(status.statusCode, 200, status.body);
+    assert.equal(status.headers["Cache-Control"], "no-store");
+    assert.equal(JSON.parse(status.body).status.state, "online");
+
+    const saved = await request(
+      handler,
+      "POST",
+      `${path}/save`,
+      {
+        baseUrl: "https://pal.example.com",
+        adminPassword: "palworld-admin-password"
+      },
+      {
+        "content-type": "application/json",
+        origin: DASHBOARD_ORIGIN,
+        cookie,
+        "x-discord-csrf": "csrf_value_abcdefghijklmnopqrstuvwxyz123456"
+      }
+    );
+    assert.equal(saved.statusCode, 200);
+    assert.equal(saved.headers["Cache-Control"], "no-store");
+    assert.doesNotMatch(saved.body, /palworld-admin-password/u);
+    const saveCall = calls.find((call) => call.type === "save");
+    assert.deepEqual(saveCall, {
+      type: "save",
+      ownerId,
+      value: {
+        baseUrl: "https://pal.example.com",
+        adminPassword: "palworld-admin-password"
+      }
+    });
+    assert.equal(
+      calls.filter((call) => call.type === "authorize").every((call) =>
+        call.input.organizationId === organizationId
+        && call.input.gameServerId === gameServerId
+      ),
+      true
+    );
+    assert.equal(
+      calls.find((call) => call.type === "authorize" && call.input.mutation === true)
+        ?.input.csrfToken,
+      "csrf_value_abcdefghijklmnopqrstuvwxyz123456"
+    );
+  });
+});
+
+test("Organization Palworld REST 변경 요청은 신뢰할 수 없는 Origin을 먼저 거부한다", async () => {
+  await withDiscordConfig(async () => {
+    let authorized = false;
+    const organizationId = "11111111-1111-4111-8111-111111111111";
+    const gameServerId = "33333333-3333-4333-8333-333333333333";
+    const { handler } = createDiscordHandler({
+      handlerInput: {
+        discordManagement: {
+          async authorizeGameServerRestConnection() {
+            authorized = true;
+            return "unreachable";
+          }
+        },
+        palworldServerMonitor: {}
+      }
+    });
+    const response = await request(
+      handler,
+      "POST",
+      `/api/discord/management/organizations/${organizationId}/game-servers/${gameServerId}/palworld-rest/save`,
+      { baseUrl: "https://pal.example.com", adminPassword: "secret" },
+      {
+        "content-type": "application/json",
+        origin: "https://evil.example",
+        cookie:
+          "yoro_session=session_value_abcdefghijklmnopqrstuvwxyz123456.csrf_value_abcdefghijklmnopqrstuvwxyz123456",
+        "x-discord-csrf": "csrf_value_abcdefghijklmnopqrstuvwxyz123456"
+      }
+    );
+    assert.equal(response.statusCode, 403);
+    assert.equal(JSON.parse(response.body).code, "origin_denied");
+    assert.equal(authorized, false);
+    assert.doesNotMatch(response.body, /secret|pal\\.example/u);
+  });
+});

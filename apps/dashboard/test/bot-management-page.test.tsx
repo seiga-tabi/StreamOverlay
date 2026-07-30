@@ -100,3 +100,113 @@ test("Organization이 없는 인증 session만 Discord Guild 연결이 필요하
     false
   );
 });
+
+test("Palworld REST 저장 API는 Organization 경로·CSRF·credentials와 Shared 응답 검증을 유지한다", async () => {
+  const {
+    saveManagementPalworldRestConnection
+  } = await import("../src/features/bot-management/api");
+  const originalFetch = globalThis.fetch;
+  const requests: Array<{ input: string; init?: RequestInit }> = [];
+  globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
+    requests.push({ input: String(input), init });
+    return new Response(JSON.stringify({
+      enabled: true,
+      pollIntervalSeconds: 30,
+      registrationPolicy: {
+        publicHttpsSelfService: true,
+        publicHttpsPort: 443,
+        privateNetworkRequiresOperatorApproval: true
+      },
+      connection: {
+        configured: true,
+        baseUrl: "https://pal.example.com",
+        passwordConfigured: true,
+        updatedAt: "2026-07-30T00:00:00.000Z"
+      },
+      status: {
+        state: "online",
+        checkedAt: "2026-07-30T00:00:00.000Z",
+        lastSuccessAt: "2026-07-30T00:00:00.000Z",
+        latencyMs: 20,
+        consecutiveFailures: 0,
+        info: { serverName: "검증 서버", version: "v0.6.6" },
+        metrics: {
+          serverFps: 60,
+          currentPlayers: 1,
+          maxPlayers: 32,
+          frameTimeMs: 16.67,
+          uptimeSeconds: 3600,
+          baseCampCount: 2,
+          gameDays: 20
+        },
+        diagnostics: [
+          "url_policy",
+          "dns_tcp",
+          "tls",
+          "basic_auth",
+          "info",
+          "metrics",
+          "schema"
+        ].map((key) => ({ key, state: "passed" }))
+      }
+    }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    });
+  }) as typeof fetch;
+  try {
+    const response = await saveManagementPalworldRestConnection({
+      organizationId: "11111111-1111-4111-8111-111111111111",
+      gameServerId: "33333333-3333-4333-8333-333333333333",
+      csrfToken: "csrf_value_abcdefghijklmnopqrstuvwxyz123456",
+      value: {
+        baseUrl: "https://pal.example.com",
+        adminPassword: "palworld-admin-password"
+      }
+    });
+    assert.equal(response.status.state, "online");
+    assert.match(requests[0]?.input ?? "", /\/palworld-rest\/save$/u);
+    assert.equal(requests[0]?.init?.credentials, "include");
+    assert.equal(
+      (requests[0]?.init?.headers as Record<string, string>)["X-Discord-CSRF"],
+      "csrf_value_abcdefghijklmnopqrstuvwxyz123456"
+    );
+    assert.deepEqual(JSON.parse(String(requests[0]?.init?.body)), {
+      baseUrl: "https://pal.example.com",
+      adminPassword: "palworld-admin-password"
+    });
+    assert.doesNotMatch(JSON.stringify(response), /palworld-admin-password/u);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("Palworld REST 서버 상태는 등록과 실제 연결을 구분해 표시한다", async () => {
+  const { botManagementConnectionStatusPresentation } = await import(
+    "../src/features/bot-management/BotManagementPage"
+  );
+  assert.deepEqual(
+    botManagementConnectionStatusPresentation("not_configured", "ko"),
+    {
+      label: "REST 미설정",
+      description: "REST 주소와 AdminPassword가 아직 저장되지 않았습니다.",
+      tone: "info"
+    }
+  );
+  assert.equal(
+    botManagementConnectionStatusPresentation("pending", "ja").label,
+    "接続確認中"
+  );
+  assert.equal(
+    botManagementConnectionStatusPresentation("ready", "ko").label,
+    "REST 연결됨"
+  );
+  assert.equal(
+    botManagementConnectionStatusPresentation("unavailable", "ja").tone,
+    "danger"
+  );
+  assert.equal(
+    botManagementConnectionStatusPresentation("revoked", "ko").label,
+    "비활성화됨"
+  );
+});

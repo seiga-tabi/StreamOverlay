@@ -1,7 +1,14 @@
 import type {
   BotManagementGameServer,
   BotManagementOrganization,
-  CreatePalworldGameServerInput
+  CreatePalworldGameServerInput,
+  PalworldServerConnectionInput,
+  PalworldServerDashboardResponse,
+  PalworldServerTestResponse
+} from "@streamops/shared";
+import {
+  validatePalworldServerDashboardResponse,
+  validatePalworldServerTestResponse
 } from "@streamops/shared";
 import { apiBase } from "../../api/client";
 
@@ -150,24 +157,103 @@ export function disableManagementGameServer(input: {
   );
 }
 
-export function issueAgentBootstrapToken(input: {
-  organizationId: string;
-  gameServerId: string;
-  csrfToken: string;
-}): Promise<{ installToken: string; expiresAt: string; gameServerId: string }> {
-  return request(
-    `/api/discord/management/organizations/${encodeURIComponent(input.organizationId)}/game-servers/${encodeURIComponent(input.gameServerId)}/agent-token`,
-    { method: "POST", headers: { "X-Discord-CSRF": input.csrfToken } }
-  );
+function restConnectionPath(organizationId: string, gameServerId: string): string {
+  return `/api/discord/management/organizations/${encodeURIComponent(organizationId)}/game-servers/${encodeURIComponent(gameServerId)}/palworld-rest`;
 }
 
-export function revokeAgentBootstrapToken(input: {
+function validatedDashboardResponse(value: unknown): PalworldServerDashboardResponse {
+  const result = validatePalworldServerDashboardResponse(value);
+  if (!result.ok) throw new BotManagementApiError(502, "invalid_response");
+  return result.data;
+}
+
+function validatedTestResponse(value: unknown): PalworldServerTestResponse {
+  const result = validatePalworldServerTestResponse(value);
+  if (!result.ok) throw new BotManagementApiError(502, "invalid_response");
+  return result.data;
+}
+
+export async function getManagementPalworldRestConnection(
+  organizationId: string,
+  gameServerId: string,
+  signal?: AbortSignal
+): Promise<PalworldServerDashboardResponse> {
+  return validatedDashboardResponse(await request(
+    restConnectionPath(organizationId, gameServerId),
+    { signal }
+  ));
+}
+
+export async function testManagementPalworldRestConnection(input: {
   organizationId: string;
   gameServerId: string;
   csrfToken: string;
-}): Promise<void> {
-  return request(
-    `/api/discord/management/organizations/${encodeURIComponent(input.organizationId)}/game-servers/${encodeURIComponent(input.gameServerId)}/agent-token`,
-    { method: "DELETE", headers: { "X-Discord-CSRF": input.csrfToken } }
-  );
+  value: PalworldServerConnectionInput;
+}): Promise<PalworldServerTestResponse> {
+  return validatedTestResponse(await request(
+    `${restConnectionPath(input.organizationId, input.gameServerId)}/test`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Discord-CSRF": input.csrfToken
+      },
+      body: JSON.stringify(input.value)
+    }
+  ));
+}
+
+export async function saveManagementPalworldRestConnection(input: {
+  organizationId: string;
+  gameServerId: string;
+  csrfToken: string;
+  value: PalworldServerConnectionInput;
+}): Promise<PalworldServerDashboardResponse> {
+  return validatedDashboardResponse(await request(
+    `${restConnectionPath(input.organizationId, input.gameServerId)}/save`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Discord-CSRF": input.csrfToken
+      },
+      body: JSON.stringify(input.value)
+    }
+  ));
+}
+
+export async function refreshManagementPalworldRestConnection(input: {
+  organizationId: string;
+  gameServerId: string;
+  csrfToken: string;
+}): Promise<PalworldServerDashboardResponse> {
+  return validatedDashboardResponse(await request(
+    `${restConnectionPath(input.organizationId, input.gameServerId)}/refresh`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Discord-CSRF": input.csrfToken
+      },
+      body: "{}"
+    }
+  ));
+}
+
+export async function removeManagementPalworldRestConnection(input: {
+  organizationId: string;
+  gameServerId: string;
+  csrfToken: string;
+}): Promise<PalworldServerDashboardResponse> {
+  return validatedDashboardResponse(await request(
+    `${restConnectionPath(input.organizationId, input.gameServerId)}/remove`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Discord-CSRF": input.csrfToken
+      },
+      body: "{}"
+    }
+  ));
 }

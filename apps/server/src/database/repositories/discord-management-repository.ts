@@ -33,6 +33,7 @@ type GameServerRow = {
   id: string;
   display_name: string;
   region: PalworldServerRegion;
+  connection_type: BotManagementGameServer["connectionType"];
   connection_status: BotManagementGameServer["connectionStatus"];
   is_enabled: boolean;
   created_at: Date;
@@ -45,7 +46,7 @@ function gameServer(row: GameServerRow): BotManagementGameServer {
     displayName: row.display_name,
     gameType: "palworld" as const,
     region: row.region,
-    connectionType: "agent" as const,
+    connectionType: row.connection_type,
     connectionStatus: row.connection_status,
     isEnabled: row.is_enabled,
     createdAt: row.created_at.toISOString(),
@@ -271,7 +272,7 @@ export class DiscordManagementRepository {
     requireRole(role, ["owner", "manager", "viewer"]);
     const result = await repositoryQuery<GameServerRow>(
       this.queryable,
-      `SELECT id, display_name, region, connection_status,
+      `SELECT id, display_name, region, connection_type, connection_status,
          is_enabled, created_at, updated_at
        FROM game_servers
        WHERE organization_id = $1 AND deleted_at IS NULL
@@ -318,8 +319,8 @@ export class DiscordManagementRepository {
       `INSERT INTO game_servers (
          id, organization_id, game_type, display_name, region,
          connection_type, connection_status
-       ) VALUES ($1, $2, 'palworld', $3, $4, 'agent', 'not_configured')
-       RETURNING id, display_name, region, connection_status,
+       ) VALUES ($1, $2, 'palworld', $3, $4, 'rest', 'not_configured')
+       RETURNING id, display_name, region, connection_type, connection_status,
          is_enabled, created_at, updated_at`,
       [
         crypto.randomUUID(),
