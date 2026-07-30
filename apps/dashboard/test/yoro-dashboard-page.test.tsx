@@ -65,7 +65,19 @@ test("공통 YORO Dashboard는 로그인 사용자용 진입점과 KO·JA 문구
   assert.match(source, /Organization·Bot/u);
   assert.match(source, /Organization・Bot/u);
   assert.match(source, /updateAccountPreferences/u);
+  assert.match(source, /discordIdentity\.displayName/u);
+  assert.match(source, /twitchIdentity\.displayName/u);
+  assert.match(source, /yoro-dashboard-identity-label/u);
   assert.equal(source.includes("localStorage.setItem"), false);
+
+  const css = await readFile(
+    new URL("../src/styles/pages/account/18-yoro-dashboard.css", import.meta.url),
+    "utf8"
+  );
+  assert.match(
+    css,
+    /\.yoro-dashboard-summary-grid li > \.discord-symbol-icon[\s\S]*?width:\s*22px/u
+  );
 });
 
 test("공통 Dashboard 경로는 기존 방송 운영 하위 경로와 겹치지 않는다", async () => {

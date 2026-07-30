@@ -190,6 +190,12 @@ export function YoroDashboardPage() {
     () => new Set(authenticated?.identities.map((item) => item.provider) ?? []),
     [authenticated]
   );
+  const discordIdentity = authenticated?.identities.find(
+    (item) => item.provider === "discord"
+  );
+  const twitchIdentity = authenticated?.identities.find(
+    (item) => item.provider === "twitch"
+  );
 
   async function savePreferences(): Promise<void> {
     if (!authenticated || !draft || saving) return;
@@ -282,13 +288,23 @@ export function YoroDashboardPage() {
                 <ul>
                   <li>
                     <DiscordSymbolIcon />
-                    Discord
-                    <strong>{connectedProviders.has("discord") ? "✓" : "—"}</strong>
+                    <span className="yoro-dashboard-identity-label">
+                      <strong>Discord</strong>
+                      {discordIdentity ? <small>{discordIdentity.displayName}</small> : null}
+                    </span>
+                    <span className="yoro-dashboard-identity-status">
+                      {connectedProviders.has("discord") ? "✓" : "—"}
+                    </span>
                   </li>
                   <li>
                     <TwitchGlitchIcon />
-                    Twitch
-                    <strong>{connectedProviders.has("twitch") ? "✓" : "—"}</strong>
+                    <span className="yoro-dashboard-identity-label">
+                      <strong>Twitch</strong>
+                      {twitchIdentity ? <small>{twitchIdentity.displayName}</small> : null}
+                    </span>
+                    <span className="yoro-dashboard-identity-status">
+                      {connectedProviders.has("twitch") ? "✓" : "—"}
+                    </span>
                   </li>
                 </ul>
                 <button type="button" onClick={() => navigate("account")}>{text.account}</button>

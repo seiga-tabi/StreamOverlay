@@ -172,13 +172,39 @@
   border-bottom: 1px solid rgb(255 255 255 / 8%);
 }
 
-.yoro-dashboard-summary-grid li svg {
+.yoro-dashboard-summary-grid li > svg,
+.yoro-dashboard-summary-grid li > .discord-symbol-icon,
+.yoro-dashboard-summary-grid li > .twitch-glitch-icon {
+  flex: 0 0 22px;
   width: 22px;
   height: 22px;
+  object-fit: contain;
 }
 
 .yoro-dashboard-summary-grid li strong {
   margin-left: auto;
+}
+
+.yoro-dashboard-identity-label {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.yoro-dashboard-identity-label strong {
+  margin-left: 0;
+}
+
+.yoro-dashboard-identity-label small {
+  overflow: hidden;
+  color: #aab4c2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.yoro-dashboard-identity-status {
+  margin-left: auto;
+  font-weight: 800;
 }
 
 .yoro-dashboard-summary-grid button,
