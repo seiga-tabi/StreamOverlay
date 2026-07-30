@@ -103,6 +103,12 @@ export function getManagementSession(signal?: AbortSignal): Promise<BotManagemen
   return request("/api/discord/management/session", { signal });
 }
 
+export function managementSessionNeedsGuildConnection(
+  session: BotManagementSession
+): boolean {
+  return session.authenticated && session.organizations.length === 0;
+}
+
 export async function listManagementGameServers(
   organizationId: string,
   signal?: AbortSignal

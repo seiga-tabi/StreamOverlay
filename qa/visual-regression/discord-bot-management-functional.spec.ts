@@ -253,7 +253,7 @@ test("/dashboard는 session이 없으면 token 없는 통합 로그인 링크만
   await expectNoHorizontalOverflow(page);
 });
 
-test("/bot/manage 웹 claim은 CSRF와 최소 body로 연결한 뒤 Dashboard에 자동 진입한다", async ({ page }) => {
+test("Organization이 없는 YORO 로그인 사용자는 웹 claim 후 Dashboard에 자동 진입한다", async ({ page }) => {
   let claimed = false;
   let claimRequests = 0;
   let releaseClaim: (() => void) | undefined;
@@ -265,7 +265,7 @@ test("/bot/manage 웹 claim은 CSRF와 최소 body로 연결한 뒤 Dashboard에
     if (url.pathname === "/api/discord/management/session") {
       await json(route, claimed
         ? { authenticated: true, csrfToken: "management-csrf", organizations: [organization] }
-        : { authenticated: false });
+        : { authenticated: true, csrfToken: "management-csrf", organizations: [] });
       return;
     }
     if (url.pathname === "/api/discord/management/connect/session") {

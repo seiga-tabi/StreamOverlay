@@ -70,3 +70,33 @@ test("관리 로그인 URL은 통합 YORO 로그인과 안전한 복귀 경로�
     "/api/discord/bot/install"
   );
 });
+
+test("Organization이 없는 인증 session만 Discord Guild 연결이 필요하다", async () => {
+  const { managementSessionNeedsGuildConnection } = await import(
+    "../src/features/bot-management/api"
+  );
+  assert.equal(
+    managementSessionNeedsGuildConnection({
+      authenticated: true,
+      csrfToken: "not-a-real-token",
+      organizations: []
+    }),
+    true
+  );
+  assert.equal(
+    managementSessionNeedsGuildConnection({
+      authenticated: true,
+      csrfToken: "not-a-real-token",
+      organizations: [{
+        id: "organization-1",
+        displayName: "테스트 Organization",
+        role: "owner"
+      }]
+    }),
+    false
+  );
+  assert.equal(
+    managementSessionNeedsGuildConnection({ authenticated: false }),
+    false
+  );
+});

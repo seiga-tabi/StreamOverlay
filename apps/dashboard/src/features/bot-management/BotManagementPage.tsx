@@ -31,6 +31,7 @@ import {
   listManagementGameServers,
   managementConnectUrl,
   managementLoginUrl,
+  managementSessionNeedsGuildConnection,
   revokeAgentBootstrapToken,
   type BotManagementConnectSession,
   type BotManagementSession
@@ -227,11 +228,17 @@ export function BotManagementPage({ embedded = false }: { embedded?: boolean }) 
       const next = await getManagementSession(signal);
       setSession(next);
       if (next.authenticated) {
-        setConnectSession(undefined);
         const nextOrganization = organizationId || next.organizations[0]?.id || "";
         setOrganizationId(nextOrganization);
         if (nextOrganization) {
+          setConnectSession(undefined);
           setServers(await listManagementGameServers(nextOrganization, signal));
+        } else {
+          const connecting = await getManagementConnectSession(signal);
+          setConnectSession(connecting);
+          if (connecting.authenticated) {
+            setSelectedGuildId(connecting.installedGuilds[0]?.id ?? "");
+          }
         }
       } else {
         const connecting = await getManagementConnectSession(signal);
@@ -513,10 +520,24 @@ export function BotManagementPage({ embedded = false }: { embedded?: boolean }) 
           </CardContent>
         </Card>
       ) : null}
-      {session?.authenticated && session.organizations.length === 0 ? (
+      {session
+        && managementSessionNeedsGuildConnection(session)
+        && !connectSession?.authenticated ? (
         <EmptyState>
           <EmptyStateTitle>{text.noOrganization}</EmptyStateTitle>
           <EmptyStateDescription>{text.noOrganizationDescription}</EmptyStateDescription>
+          <div className="bot-management-actions">
+            <Button type="button" onClick={() => window.location.assign(managementConnectUrl())}>
+              {text.connectLogin}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => window.location.assign(botInstallUrl())}
+            >
+              {text.installBot}
+            </Button>
+          </div>
         </EmptyState>
       ) : null}
       {session?.authenticated && session.organizations.length > 0 ? (
