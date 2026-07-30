@@ -226,6 +226,8 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
     pathname === "/api/account/session"
     || pathname === "/api/account/preferences"
     || pathname === "/api/account/logout"
+    || pathname === "/api/account/streamer"
+    || pathname.startsWith("/api/account/streamer/")
     || /^\/api\/account\/connections\/(?:discord|twitch)$/u.test(pathname)
   ) return "PUBLIC";
   if (method === "GET" && (pathname === "/api/twitch/auth/start" || pathname === "/api/twitch/auth/callback")) return "OAUTH_CALLBACK";

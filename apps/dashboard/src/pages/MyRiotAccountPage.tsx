@@ -111,9 +111,13 @@ function apiErrorDetail(error: unknown, fallback: string): string {
 export function MyRiotAccountPage({
   streamer,
   onStreamerChange,
+  onUpdateRiotId = updateStreamerRiotId,
+  registrationHref = "/dashboard/streaming",
 }: {
   streamer?: DashboardStreamerInfo;
   onStreamerChange?: (streamer: DashboardStreamerInfo) => void;
+  onUpdateRiotId?: (riotId: string) => Promise<DashboardStreamerInfo>;
+  registrationHref?: string;
 }) {
   const [riotIdDraft, setRiotIdDraft] = useState(() => currentRiotId(streamer));
   const [riotIdBusy, setRiotIdBusy] = useState(false);
@@ -137,7 +141,7 @@ export function MyRiotAccountPage({
     setRiotIdBusy(true);
     setRiotIdMessage("");
     try {
-      const updated = await updateStreamerRiotId(riotId);
+      const updated = await onUpdateRiotId(riotId);
       onStreamerChange?.(updated);
       setRiotIdDraft(currentRiotId(updated));
       setRiotIdMessage(t.riotIdSaved);
@@ -170,7 +174,7 @@ export function MyRiotAccountPage({
             <EmptyStateTitle as="h2" data-ko={i18n.ko.registrationRequired} data-ja={i18n.ja.registrationRequired}>{t.registrationRequired}</EmptyStateTitle>
             <EmptyStateDescription data-ko={i18n.ko.registrationRequiredBody} data-ja={i18n.ja.registrationRequiredBody}>{t.registrationRequiredBody}</EmptyStateDescription>
             <EmptyStateActions>
-              <Button as="a" href="/" data-ko={i18n.ko.registrationAction} data-ja={i18n.ja.registrationAction}>{t.registrationAction}</Button>
+              <Button as="a" href={registrationHref} data-ko={i18n.ko.registrationAction} data-ja={i18n.ja.registrationAction}>{t.registrationAction}</Button>
             </EmptyStateActions>
           </EmptyState>
         </AppShellMain>

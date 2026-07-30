@@ -82,6 +82,9 @@
 
 .bot-management-credential-notice {
   flex-basis: 100%;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
   display: grid;
   gap: var(--space-2);
   padding: var(--space-3);
@@ -175,6 +178,13 @@
   .bot-management-actions {
     align-items: stretch;
     flex-direction: column;
+    flex-wrap: nowrap;
+  }
+
+  .bot-management-create > * {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
   }
 
   .bot-management-section-heading {

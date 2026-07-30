@@ -90,6 +90,14 @@ const YORO_DASHBOARD_PATHS = new Set([
   "/dashboard/account/",
   "/dashboard/organizations",
   "/dashboard/organizations/",
+  "/dashboard/streaming",
+  "/dashboard/streaming/",
+  "/dashboard/streaming/permissions",
+  "/dashboard/streaming/permissions/",
+  "/dashboard/streaming/followers",
+  "/dashboard/streaming/followers/",
+  "/dashboard/streaming/riot-id",
+  "/dashboard/streaming/riot-id/",
   "/dashboard/settings",
   "/dashboard/settings/"
 ]);

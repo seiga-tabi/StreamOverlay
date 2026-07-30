@@ -50,7 +50,7 @@ test("YORO Bot 소개 페이지는 중앙 Hero와 3개 독립 페이지 메뉴�
   assert.match(markup, /target="_blank"/u);
   assert.match(markup, /rel="noopener noreferrer"/u);
   assert.match(markup, /aria-label="Discord 서버에 YORO Bot 추가 \(새 탭에서 열림\)"/u);
-  assert.match(markup, /href="\/dashboard\/organizations"/u);
+  assert.match(markup, /href="\/dashboard"/u);
   assert.match(markup, /Palworld REST 직접 연결 기반은 구현/u);
   assert.match(markup, /OAuth token 평문 미저장/u);
   assert.match(markup, /aria-label="YORO Bot 홈"/u);

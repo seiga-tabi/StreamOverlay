@@ -70,6 +70,15 @@ test("공통 YORO Dashboard는 로그인 사용자용 진입점과 KO·JA 문구
   assert.match(source, /yoro-dashboard-identity-label/u);
   assert.match(source, /DiscordSetupPage/u);
   assert.match(source, /BotManagementPage/u);
+  assert.match(source, /스트리머 이용 상태/u);
+  assert.match(source, /ストリーマー利用状況/u);
+  assert.match(source, /moderator:read:followers/u);
+  assert.match(source, /applyForStreamer/u);
+  assert.match(source, /FollowersPage dataSource/u);
+  assert.match(source, /MyRiotAccountPage/u);
+  assert.equal(source.includes("방송 자동화"), false);
+  assert.equal(source.includes("配信自動化"), false);
+  assert.equal(source.includes("Overlay 관리"), false);
   assert.equal(source.includes("localStorage.setItem"), false);
 
   const css = await readFile(
@@ -98,12 +107,29 @@ test("공통 Dashboard 경로는 기존 방송 운영 하위 경로와 겹치지
     "organizations"
   );
   assert.equal(yoroDashboardPageFromPath("/dashboard/settings"), "settings");
+  assert.equal(
+    yoroDashboardPageFromPath("/dashboard/streaming"),
+    "streaming"
+  );
+  assert.equal(
+    yoroDashboardPageFromPath("/dashboard/streaming/permissions/"),
+    "streamingPermissions"
+  );
+  assert.equal(
+    yoroDashboardPageFromPath("/dashboard/streaming/followers"),
+    "streamingFollowers"
+  );
+  assert.equal(
+    yoroDashboardPageFromPath("/dashboard/streaming/riot-id"),
+    "streamingRiot"
+  );
 
   const appSource = await readFile(
     new URL("../src/App.tsx", import.meta.url),
     "utf8"
   );
   assert.match(appSource, /YORO_DASHBOARD_PATHS/u);
+  assert.match(appSource, /"\/dashboard\/streaming\/followers"/u);
   assert.equal(
     appSource.includes("!isYoroDashboardPath(window.location.pathname)"),
     true

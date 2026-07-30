@@ -54,6 +54,27 @@ async function installBaseRoutes(page: Page): Promise<void> {
   });
 }
 
+async function installAuthenticatedAccountRoute(page: Page): Promise<void> {
+  await page.route("**/api/account/session", async (route) => {
+    await json(route, {
+      authenticated: true,
+      csrfToken: "yoro-csrf",
+      authenticationProvider: "discord",
+      identities: [{
+        provider: "discord",
+        displayName: "Dashboard 검증 사용자",
+        connectedAt: "2026-07-30T00:00:00.000Z",
+        lastAuthenticatedAt: "2026-07-30T00:00:00.000Z",
+      }],
+      preferences: {
+        locale: "ko",
+        defaultDashboardPage: "overview",
+        reducedMotion: false,
+      },
+    });
+  });
+}
+
 async function useLocale(page: Page, locale: "ko" | "ja"): Promise<void> {
   await page.addInitScript((value) => {
     window.localStorage.setItem("loltrace.locale", value);
@@ -62,9 +83,29 @@ async function useLocale(page: Page, locale: "ko" | "ja"): Promise<void> {
 }
 
 async function expectNoHorizontalOverflow(page: Page): Promise<void> {
-  await expect.poll(() => page.evaluate(() =>
-    document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1
-  )).toBe(true);
+  await expect.poll(() => page.evaluate(() => {
+    const viewportWidth = document.documentElement.clientWidth;
+    if (document.documentElement.scrollWidth <= viewportWidth + 1) return [];
+    return Array.from(document.querySelectorAll<HTMLElement>("body *"))
+      .map((element) => {
+        const style = window.getComputedStyle(element);
+        return {
+          name: element.className || element.tagName,
+          right: Math.round(element.getBoundingClientRect().right),
+          scrollWidth: element.scrollWidth,
+          clientWidth: element.clientWidth,
+          display: style.display,
+          flexDirection: style.flexDirection,
+          flexWrap: style.flexWrap,
+          position: style.position,
+        };
+      })
+      .filter((entry) =>
+        entry.right > viewportWidth + 1
+        || entry.scrollWidth > entry.clientWidth + 1
+      )
+      .slice(0, 8);
+  })).toEqual([]);
 }
 
 test.beforeEach(async ({ page }) => {
@@ -99,46 +140,15 @@ test("Public /bot 헤더는 로그인 선택과 Discord YORO Bot 아이콘만 �
 });
 
 test("Public /bot은 최소 권한 Bot 설치와 Dashboard CTA를 제공한다", async ({ page }) => {
-  const authorizeUrl = new URL("https://discord.com/oauth2/authorize");
-  authorizeUrl.searchParams.set("client_id", "987654321098765432");
-  authorizeUrl.searchParams.set("scope", "applications.commands bot");
-  authorizeUrl.searchParams.set("permissions", "0");
-
-  await page.route("**/api/discord/bot/install", async (route) => {
-    await route.fulfill({
-      status: 302,
-      headers: {
-        Location: authorizeUrl.toString(),
-        "Cache-Control": "no-store",
-        "Referrer-Policy": "no-referrer",
-      },
-    });
-  });
-  await page.route("https://discord.com/oauth2/authorize?*", async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "text/html; charset=utf-8",
-      body: "<title>Discord 설치 검증</title>",
-    });
-  });
-
   await page.goto("/bot");
   const install = page.getByRole("link", { name: "Discord 서버에 YORO Bot 추가" });
   const dashboard = page.getByRole("link", { name: "Dashboard 로그인" });
   await expect(install).toHaveAttribute("href", "/api/discord/bot/install");
+  await expect(install).toHaveAttribute("target", "_blank");
+  await expect(install).toHaveAttribute("rel", /noopener/u);
   await expect(dashboard).toHaveAttribute("href", "/dashboard");
   await install.focus();
   await expect(install).toBeFocused();
-  await install.click();
-
-  await expect(page).toHaveURL(/^https:\/\/discord\.com\/oauth2\/authorize/u);
-  const target = new URL(page.url());
-  expect(target.searchParams.get("client_id")).toBe("987654321098765432");
-  expect(new Set((target.searchParams.get("scope") ?? "").split(" "))).toEqual(
-    new Set(["bot", "applications.commands"])
-  );
-  expect(target.searchParams.get("permissions")).toBe("0");
-  expect(target.searchParams.has("redirect_uri")).toBe(false);
   await expectNoHorizontalOverflow(page);
 });
 
@@ -156,7 +166,7 @@ test("/login은 Discord와 Twitch를 하나의 YORO 계정 로그인 수단으�
   await page.route("**/api/account/session", async (route) => {
     await json(route, { authenticated: false });
   });
-  await page.goto("/login?return_to=/bot/manage");
+  await page.goto("/login?return_to=/dashboard/organizations");
 
   await expect(page.getByRole("heading", { level: 1, name: "YORO.gg 로그인" }))
     .toBeVisible();
@@ -170,8 +180,8 @@ test("/login은 Discord와 Twitch를 하나의 YORO 계정 로그인 수단으�
   expect(twitchUrl.pathname).toBe("/api/account/oauth/twitch/start");
   expect(discordUrl.searchParams.get("purpose")).toBe("login");
   expect(twitchUrl.searchParams.get("purpose")).toBe("login");
-  expect(discordUrl.searchParams.get("return_to")).toBe("/bot/manage");
-  expect(twitchUrl.searchParams.get("return_to")).toBe("/bot/manage");
+  expect(discordUrl.searchParams.get("return_to")).toBe("/dashboard/organizations");
+  expect(twitchUrl.searchParams.get("return_to")).toBe("/dashboard/organizations");
   await expect(page.locator('input[type="password"]')).toHaveCount(0);
   await expectNoHorizontalOverflow(page);
 });
@@ -254,6 +264,7 @@ test("/dashboard는 session이 없으면 token 없는 통합 로그인 링크만
 });
 
 test("Organization이 없는 YORO 로그인 사용자는 웹 claim 후 Dashboard에 자동 진입한다", async ({ page }) => {
+  await installAuthenticatedAccountRoute(page);
   let claimed = false;
   let claimRequests = 0;
   let releaseClaim: (() => void) | undefined;
@@ -302,7 +313,7 @@ test("Organization이 없는 YORO 로그인 사용자는 웹 claim 후 Dashboard
     await json(route, { code: "not_found" }, 404);
   });
 
-  await page.goto("/bot/manage?connect=select");
+  await page.goto("/dashboard/organizations?connect=select");
   const group = page.getByRole("group", { name: "연결 가능한 Discord 서버" });
   const guildOption = group.getByRole("radio");
   await expect(guildOption).toBeChecked();
@@ -318,7 +329,7 @@ test("Organization이 없는 YORO 로그인 사용자는 웹 claim 후 Dashboard
   ).toBeVisible();
   await expect(page.getByText("Discord 서버 연결이 완료되었습니다.")).toHaveCount(1);
   expect(claimRequests).toBe(1);
-  await expect(page).toHaveURL(/\/bot\/manage\?connect=select$/u);
+  await expect(page).toHaveURL(/\/dashboard\/organizations\?connect=select$/u);
   await expectNoHorizontalOverflow(page);
 
   await page.reload();
@@ -335,6 +346,7 @@ test("Organization이 없는 YORO 로그인 사용자는 웹 claim 후 Dashboard
 });
 
 test("Bot 설치 관찰 polling은 설치 확인 후 중단하며 무한 반복하지 않는다", async ({ page }) => {
+  await installAuthenticatedAccountRoute(page);
   let connectRequests = 0;
   await page.clock.install();
   await page.route("**/api/discord/management/**", async (route) => {
@@ -357,7 +369,7 @@ test("Bot 설치 관찰 polling은 설치 확인 후 중단하며 무한 반복�
     await json(route, { code: "not_found" }, 404);
   });
 
-  await page.goto("/bot/manage?connect=select");
+  await page.goto("/dashboard/organizations?connect=select");
   await expect(page.getByText("Bot 설치 확인 중")).toBeVisible();
   expect(connectRequests).toBe(1);
   await page.clock.runFor(4_100);
@@ -369,6 +381,7 @@ test("Bot 설치 관찰 polling은 설치 확인 후 중단하며 무한 반복�
 });
 
 test("Guild claim 오류는 내부 tenant 정보를 노출하지 않고 안전한 한국어 상태로 표시한다", async ({ page }) => {
+  await installAuthenticatedAccountRoute(page);
   let failure: { status: number; code: string } | "network" = {
     status: 409,
     code: "guild_already_connected",
@@ -412,7 +425,7 @@ test("Guild claim 오류는 내부 tenant 정보를 노출하지 않고 안전�
 
   for (const [nextFailure, message] of cases) {
     failure = nextFailure;
-    await page.goto("/bot/manage?connect=select");
+    await page.goto("/dashboard/organizations?connect=select");
     await page.getByRole("button", { name: "선택한 Discord 서버 연결" }).click();
     const alert = page.getByRole("alert");
     await expect(alert).toContainText(message);
@@ -436,7 +449,8 @@ const responsiveViewports = {
   ],
 } as const;
 
-test("/bot과 /bot/manage는 요구 viewport에서 focus와 overflow를 유지한다", async ({ page }, testInfo) => {
+test("/bot과 통합 Organization Dashboard는 요구 viewport에서 focus와 overflow를 유지한다", async ({ page }, testInfo) => {
+  await installAuthenticatedAccountRoute(page);
   await page.route("**/api/discord/management/session", async (route) => {
     await json(route, { authenticated: false });
   });
@@ -452,7 +466,7 @@ test("/bot과 /bot/manage는 요구 viewport에서 focus와 overflow를 유지�
     await page.goto("/bot");
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await expectNoHorizontalOverflow(page);
-    await page.goto("/bot/manage");
+    await page.goto("/dashboard/organizations");
     const login = page.getByRole("button", { name: "Discord로 로그인하고 서버 선택" });
     await expect(login).toBeVisible();
     await login.focus();

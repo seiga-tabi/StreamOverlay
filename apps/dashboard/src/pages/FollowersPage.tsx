@@ -22,6 +22,12 @@ type FollowerRecord = FollowerManagementResponse["followers"][number];
 const TWITCH_OAUTH_HOST = "id.twitch.tv";
 const FOLLOWER_SCOPE = "moderator:read:followers";
 
+export type FollowersDataSource = {
+  load: () => Promise<FollowerManagementResponse>;
+  refresh: () => Promise<FollowerManagementResponse>;
+  startOAuth: () => Promise<{ url: string }>;
+};
+
 function formatDate(value?: string): string {
   if (!value) return "-";
   const date = new Date(value);
@@ -191,7 +197,7 @@ export function FollowerOAuthNotice({
   );
 }
 
-export function FollowersPage() {
+export function FollowersPage({ dataSource }: { dataSource?: FollowersDataSource }) {
   const t = uiText.followersPage;
   const [state, setState] = useState<FollowerManagementResponse>();
   const [loading, setLoading] = useState(true);
@@ -204,7 +210,10 @@ export function FollowersPage() {
     setLoading(true);
     setLoadFailed(false);
     try {
-      setState(await apiGet<FollowerManagementResponse>("/api/followers"));
+      setState(await (
+        dataSource?.load()
+        ?? apiGet<FollowerManagementResponse>("/api/followers")
+      ));
     } catch {
       setLoadFailed(true);
     } finally {
@@ -217,7 +226,10 @@ export function FollowersPage() {
     setRefreshing(true);
     setMessage(undefined);
     try {
-      setState(await apiPost<FollowerManagementResponse>("/api/followers/refresh?limit=5000", {}));
+      setState(await (
+        dataSource?.refresh()
+        ?? apiPost<FollowerManagementResponse>("/api/followers/refresh?limit=5000", {})
+      ));
       setMessage({ tone: "success", text: t.refreshDone });
     } catch {
       setMessage({ tone: "danger", text: t.refreshFailed });
@@ -231,7 +243,10 @@ export function FollowersPage() {
     setConnecting(true);
     setMessage(undefined);
     try {
-      const result = await apiPost<{ url: string }>("/api/followers/oauth/start", {});
+      const result = await (
+        dataSource?.startOAuth()
+        ?? apiPost<{ url: string }>("/api/followers/oauth/start", {})
+      );
       const destination = safeFollowerOAuthUrl(result.url);
       if (!destination) throw new Error("invalid Twitch OAuth URL");
       window.location.assign(destination);
@@ -243,7 +258,7 @@ export function FollowersPage() {
 
   useEffect(() => {
     void load();
-  }, []);
+  }, [dataSource]);
 
   const metrics = state ? [
     { label: t.metrics.activeFollowers, value: state.summary.activeFollowers },

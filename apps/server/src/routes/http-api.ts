@@ -1348,6 +1348,25 @@ function legacyDiscordDashboardReturnUrl(url: URL): string {
   return `${target.pathname}${target.search}`;
 }
 
+function legacyStreamerDashboardReturnPath(pathname: string): string | undefined {
+  const normalized = pathname.length > 1 && pathname.endsWith("/")
+    ? pathname.slice(0, -1)
+    : pathname;
+  const canonicalPaths = new Set([
+    "/dashboard/streaming/permissions",
+    "/dashboard/streaming/followers",
+    "/dashboard/streaming/riot-id"
+  ]);
+  if (canonicalPaths.has(normalized)) return undefined;
+  const matched = normalized.match(
+    /^\/dashboard\/[^/]+\/[^/]+(?:\/(followers|riot-id))?$/u
+  );
+  if (!matched) return undefined;
+  if (matched[1] === "followers") return "/dashboard/streaming/followers";
+  if (matched[1] === "riot-id") return "/dashboard/streaming/riot-id";
+  return "/dashboard/streaming";
+}
+
 function yoroAccountReturnUrl(returnPath: string, errorCode?: string): string {
   const target = new URL(returnPath, appConfig.dashboardBaseUrl);
   if (errorCode) target.searchParams.set("account", errorCode);
@@ -5753,6 +5772,143 @@ export function createHttpHandler(input: HttpHandlerInput) {
     return response;
   }
 
+  async function refreshFollowerManagementForOwner(
+    broadcasterUserId: string,
+    rawLimit: string | null
+  ): Promise<{
+    response: FollowerManagementResponse;
+    headers?: Record<string, string>;
+  }> {
+    if (rawLimit !== null && !/^\d{1,5}$/u.test(rawLimit)) {
+      throw new HttpRequestError(400, {
+        error: "limit은 1 이상 5000 이하의 정수여야 합니다.",
+        code: "INVALID_FOLLOWER_LIMIT"
+      });
+    }
+    const limit = rawLimit === null ? 5000 : Number(rawLimit);
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 5000) {
+      throw new HttpRequestError(400, {
+        error: "limit은 1 이상 5000 이하의 정수여야 합니다.",
+        code: "INVALID_FOLLOWER_LIMIT"
+      });
+    }
+    const runtime = followerRefreshRuntime(broadcasterUserId);
+    if (runtime.inFlight) {
+      if (runtime.lastState) {
+        runtime.lastState = await followerManagementResponse(broadcasterUserId);
+        return {
+          response: runtime.lastState,
+          headers: { "X-StreamOps-Cache": "in-flight" }
+        };
+      }
+      try {
+        return {
+          response: await runtime.inFlight,
+          headers: { "X-StreamOps-Cache": "in-flight" }
+        };
+      } catch (error) {
+        if (error instanceof HttpRequestError) throw error;
+        throw new HttpRequestError(502, {
+          error: "Twitch 팔로워 목록을 갱신하지 못했습니다.",
+          code: "FOLLOWER_REFRESH_FAILED"
+        });
+      }
+    }
+    if (runtime.lastState && Date.now() < runtime.availableAt) {
+      runtime.lastState = await followerManagementResponse(broadcasterUserId);
+      return {
+        response: runtime.lastState,
+        headers: {
+          "X-StreamOps-Cache": "cooldown",
+          "Retry-After": retryAfterSeconds(runtime.availableAt)
+        }
+      };
+    }
+    const refresh = refreshFollowerSnapshot(broadcasterUserId, limit, runtime);
+    runtime.inFlight = refresh;
+    try {
+      return { response: await refresh };
+    } catch (error) {
+      if (error instanceof HttpRequestError) throw error;
+      throw new HttpRequestError(502, {
+        error: "Twitch 팔로워 목록을 갱신하지 못했습니다.",
+        code: "FOLLOWER_REFRESH_FAILED"
+      });
+    } finally {
+      runtime.inFlight = undefined;
+    }
+  }
+
+  async function yoroStreamerContext(
+    req: IncomingMessage,
+    mutation = false
+  ): Promise<{
+    csrfToken: string;
+    account: NonNullable<Awaited<ReturnType<YoroAccountService["session"]>>>;
+    twitch?: NonNullable<Awaited<ReturnType<YoroAccountService["getTwitchAccessContext"]>>>;
+  }> {
+    if (!input.yoroAccounts) {
+      throw new HttpRequestError(503, {
+        error: "YORO 계정 기능을 사용할 수 없습니다.",
+        code: "feature_unavailable"
+      });
+    }
+    const sessionCookie = requestCookie(req, YORO_SESSION_COOKIE);
+    const [authenticated, account, twitch] = await Promise.all([
+      input.yoroAccounts.authenticateForManagement(sessionCookie),
+      input.yoroAccounts.session(sessionCookie),
+      input.yoroAccounts.getTwitchAccessContext(sessionCookie)
+    ]);
+    if (!authenticated || !account) {
+      throw new HttpRequestError(401, {
+        error: "YORO Dashboard 로그인이 필요합니다.",
+        code: "session_required"
+      });
+    }
+    if (mutation) {
+      if (!stateChangingRequestHasTrustedOrigin(req)) {
+        throw new HttpRequestError(403, {
+          error: "trusted Origin이 필요합니다.",
+          code: "origin_denied"
+        });
+      }
+      const csrfToken = requestHeaderValue(req, "x-yoro-csrf");
+      if (!csrfToken || !tokenMatches(authenticated.csrfToken, csrfToken)) {
+        throw new HttpRequestError(403, {
+          error: "CSRF token이 필요합니다.",
+          code: "csrf_required"
+        });
+      }
+    }
+    return {
+      csrfToken: authenticated.csrfToken,
+      account,
+      ...(twitch ? { twitch } : {})
+    };
+  }
+
+  function requireApprovedYoroStreamer(
+    context: Awaited<ReturnType<typeof yoroStreamerContext>>
+  ): {
+    twitch: NonNullable<typeof context.twitch>;
+    streamer: StreamerRiotIdRequest;
+  } {
+    if (!context.twitch) {
+      throw new HttpRequestError(409, {
+        error: "연결된 Twitch 계정의 기본 권한을 다시 승인해주세요.",
+        code: "TWITCH_PERMISSION_REQUIRED"
+      });
+    }
+    const streamer = approvedStreamerRiotIdForTwitchUser(context.twitch.userId);
+    if (!streamer) {
+      throw new HttpRequestError(403, {
+        error: "승인된 스트리머만 이 기능을 사용할 수 있습니다.",
+        code: "STREAMER_APPROVAL_REQUIRED"
+      });
+    }
+    return { twitch: context.twitch, streamer };
+  }
+
   async function loadFreshSkinOptions(): Promise<SkinOptionsResponse> {
     const settings = loadLolParticipationProfileSettings();
     const monitor = loadGameMonitorConfig();
@@ -5839,6 +5995,15 @@ export function createHttpHandler(input: HttpHandlerInput) {
           || url.pathname === "/bot/manage/"
         ) {
           return sendRedirect(res, legacyDiscordDashboardReturnUrl(url), {
+            "Cache-Control": "no-store",
+            "Referrer-Policy": "no-referrer"
+          });
+        }
+        const unifiedStreamerPath = legacyStreamerDashboardReturnPath(
+          url.pathname
+        );
+        if (unifiedStreamerPath) {
+          return sendRedirect(res, unifiedStreamerPath, {
             "Cache-Control": "no-store",
             "Referrer-Policy": "no-referrer"
           });
@@ -6133,6 +6298,216 @@ export function createHttpHandler(input: HttpHandlerInput) {
             session ?? { authenticated: false },
             noStoreHeaders()
           );
+        }
+        if (req.method === "GET" && url.pathname === "/api/account/streamer") {
+          if (url.search) {
+            return sendJson(req, res, 400, { error: "query는 허용되지 않습니다." });
+          }
+          const context = await yoroStreamerContext(req);
+          const request = context.twitch
+            ? currentStreamerRiotIdRequestForTwitchUser(context.twitch.userId)
+            : undefined;
+          const enabled = request?.status === "approved";
+          const followerPermission = enabled
+            ? await requireStreamerFollowerAuth()
+                .getStatus(context.twitch?.userId ?? "")
+                .catch(() => ({
+                  state: "disconnected" as const,
+                  missingScopes: ["moderator:read:followers"]
+                }))
+            : {
+                state: "disconnected" as const,
+                missingScopes: ["moderator:read:followers"]
+              };
+          const followerState = enabled && context.twitch
+            ? input.store.getFollowerManagementState(context.twitch.userId)
+            : undefined;
+          return sendJson(req, res, 200, {
+            twitchConnected: context.account.identities.some(
+              (identity) => identity.provider === "twitch"
+            ),
+            twitchPermissionReady: Boolean(context.twitch),
+            approval: {
+              status: request?.status ?? "not_requested",
+              enabled,
+              ...(request?.requestedAt ? { requestedAt: request.requestedAt } : {}),
+              ...(request?.reviewedAt ? { reviewedAt: request.reviewedAt } : {})
+            },
+            followerPermission,
+            ...(context.twitch ? {
+              profile: {
+                twitchLogin: context.twitch.user.login,
+                twitchDisplayName: context.twitch.user.displayName,
+                ...(context.twitch.user.profileImageUrl
+                  ? { twitchProfileImageUrl: context.twitch.user.profileImageUrl }
+                  : {}),
+                ...(request ? {
+                  riotGameName: request.riotGameName,
+                  riotTagLine: request.riotTagLine
+                } : {})
+              }
+            } : {}),
+            ...(followerState ? {
+              summary: {
+                activeFollowers: followerState.summary.activeFollowers,
+                knownFollowers: followerState.summary.knownFollowers,
+                ...(followerState.lastSnapshotAt
+                  ? { lastSnapshotAt: followerState.lastSnapshotAt }
+                  : {})
+              }
+            } : {})
+          }, noStoreHeaders());
+        }
+        if (req.method === "POST" && url.pathname === "/api/account/streamer/apply") {
+          const context = await yoroStreamerContext(req, true);
+          if (!context.twitch) {
+            return sendJson(req, res, 409, {
+              error: "연결된 Twitch 계정의 기본 권한을 다시 승인해주세요.",
+              code: "TWITCH_PERMISSION_REQUIRED"
+            }, noStoreHeaders());
+          }
+          const existingRequest = currentStreamerRiotIdRequestForTwitchUser(
+            context.twitch.userId
+          );
+          if (existingRequest?.status === "approved") {
+            return sendJson(req, res, 409, {
+              error: "이미 승인된 스트리머입니다. Riot ID 관리 화면을 이용해주세요.",
+              code: "STREAMER_ALREADY_APPROVED"
+            }, noStoreHeaders());
+          }
+          if (existingRequest?.status === "pending") {
+            return sendJson(req, res, 409, {
+              error: "이미 검토 중인 스트리머 신청이 있습니다.",
+              code: "STREAMER_APPLICATION_PENDING"
+            }, noStoreHeaders());
+          }
+          const body = await readJsonBody<Record<string, unknown>>(req);
+          if (
+            Object.keys(body).length !== 1
+            || typeof body.riotId !== "string"
+          ) {
+            return sendJson(req, res, 400, {
+              error: "riotId 입력이 올바르지 않습니다.",
+              code: "invalid_input"
+            }, noStoreHeaders());
+          }
+          const parsed = parseRiotIdDetailed(body.riotId);
+          if (!parsed.ok) {
+            return sendJson(req, res, 400, {
+              error: parsed.message,
+              code: "invalid_input"
+            }, noStoreHeaders());
+          }
+          const request = upsertStreamerRiotIdRequest({
+            twitchUserId: context.twitch.userId,
+            twitchLogin: context.twitch.user.login,
+            twitchDisplayName: context.twitch.user.displayName,
+            twitchProfileImageUrl: context.twitch.user.profileImageUrl,
+            riotGameName: parsed.gameName,
+            riotTagLine: parsed.tagLine
+          });
+          return sendJson(req, res, 200, {
+            approval: {
+              status: request.status,
+              enabled: request.status === "approved",
+              requestedAt: request.requestedAt,
+              ...(request.reviewedAt ? { reviewedAt: request.reviewedAt } : {})
+            },
+            profile: {
+              twitchLogin: request.twitchLogin,
+              twitchDisplayName: request.twitchDisplayName,
+              ...(request.twitchProfileImageUrl
+                ? { twitchProfileImageUrl: request.twitchProfileImageUrl }
+                : {}),
+              riotGameName: request.riotGameName,
+              riotTagLine: request.riotTagLine
+            }
+          }, noStoreHeaders());
+        }
+        if (
+          req.method === "POST"
+          && url.pathname === "/api/account/streamer/permissions/start"
+        ) {
+          const context = await yoroStreamerContext(req, true);
+          const { twitch } = requireApprovedYoroStreamer(context);
+          try {
+            const authorizationUrl = requireStreamerFollowerAuth().createAuthorizationUrl(
+              twitch.userId,
+              {
+                redirectUri: twitchCallbackUrlForRequest(req),
+                returnUrl: dashboardReturnUrlForRequest(
+                  req,
+                  "/dashboard/streaming/permissions"
+                ),
+                forceVerify: true
+              }
+            );
+            return sendJson(req, res, 200, { url: authorizationUrl }, noStoreHeaders());
+          } catch (error) {
+            throw followerAuthHttpError(error);
+          }
+        }
+        if (
+          req.method === "GET"
+          && url.pathname === "/api/account/streamer/followers"
+        ) {
+          if (url.search) {
+            return sendJson(req, res, 400, { error: "query는 허용되지 않습니다." });
+          }
+          const context = await yoroStreamerContext(req);
+          const { twitch } = requireApprovedYoroStreamer(context);
+          return sendJson(
+            req,
+            res,
+            200,
+            await followerManagementResponse(twitch.userId),
+            noStoreHeaders()
+          );
+        }
+        if (
+          req.method === "POST"
+          && url.pathname === "/api/account/streamer/followers/refresh"
+        ) {
+          const context = await yoroStreamerContext(req, true);
+          const { twitch } = requireApprovedYoroStreamer(context);
+          const refreshed = await refreshFollowerManagementForOwner(
+            twitch.userId,
+            url.searchParams.get("limit")
+          );
+          return sendJson(req, res, 200, refreshed.response, {
+            ...noStoreHeaders(),
+            ...refreshed.headers
+          });
+        }
+        if (
+          req.method === "POST"
+          && url.pathname === "/api/account/streamer/riot-id"
+        ) {
+          const context = await yoroStreamerContext(req, true);
+          const { twitch } = requireApprovedYoroStreamer(context);
+          const body = await readJsonBody<Record<string, unknown>>(req);
+          if (
+            Object.keys(body).length !== 1
+            || typeof body.riotId !== "string"
+          ) {
+            return sendJson(req, res, 400, {
+              error: "riotId 입력이 올바르지 않습니다.",
+              code: "invalid_input"
+            }, noStoreHeaders());
+          }
+          const result = await updateStreamerRiotIdentityForOwner(
+            twitch.userId,
+            body.riotId
+          );
+          return sendJson(req, res, 200, {
+            twitchLogin: result.request.twitchLogin,
+            twitchDisplayName: result.request.twitchDisplayName,
+            ...(result.request.twitchProfileImageUrl
+              ? { twitchProfileImageUrl: result.request.twitchProfileImageUrl }
+              : {}),
+            riotGameName: result.request.riotGameName,
+            riotTagLine: result.request.riotTagLine
+          }, noStoreHeaders());
         }
         if (req.method === "PATCH" && url.pathname === "/api/account/preferences") {
           if (!stateChangingRequestHasTrustedOrigin(req)) {
@@ -8077,44 +8452,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
 
       if (req.method === "POST" && url.pathname === "/api/followers/refresh") {
         const broadcasterUserId = requireAuthenticatedStreamerOwner(auth.principal);
-        const rawLimit = url.searchParams.get("limit");
-        if (rawLimit !== null && !/^\d{1,5}$/.test(rawLimit)) {
-          return sendJson(req, res, 400, { error: "limit은 1 이상 5000 이하의 정수여야 합니다.", code: "INVALID_FOLLOWER_LIMIT" });
-        }
-        const limit = rawLimit === null ? 5000 : Number(rawLimit);
-        if (!Number.isSafeInteger(limit) || limit < 1 || limit > 5000) {
-          return sendJson(req, res, 400, { error: "limit은 1 이상 5000 이하의 정수여야 합니다.", code: "INVALID_FOLLOWER_LIMIT" });
-        }
-        const runtime = followerRefreshRuntime(broadcasterUserId);
-        if (runtime.inFlight) {
-          if (runtime.lastState) {
-            runtime.lastState = await followerManagementResponse(broadcasterUserId);
-            return sendJson(req, res, 200, runtime.lastState, { "X-StreamOps-Cache": "in-flight" });
-          }
-          try {
-            return sendJson(req, res, 200, await runtime.inFlight, { "X-StreamOps-Cache": "in-flight" });
-          } catch (error) {
-            if (error instanceof HttpRequestError) throw error;
-            throw new HttpRequestError(502, { error: "Twitch 팔로워 목록을 갱신하지 못했습니다.", code: "FOLLOWER_REFRESH_FAILED" });
-          }
-        }
-        if (runtime.lastState && Date.now() < runtime.availableAt) {
-          runtime.lastState = await followerManagementResponse(broadcasterUserId);
-          return sendJson(req, res, 200, runtime.lastState, {
-            "X-StreamOps-Cache": "cooldown",
-            "Retry-After": retryAfterSeconds(runtime.availableAt)
-          });
-        }
-        const refresh = refreshFollowerSnapshot(broadcasterUserId, limit, runtime);
-        runtime.inFlight = refresh;
-        try {
-          return sendJson(req, res, 200, await refresh);
-        } catch (error) {
-          if (error instanceof HttpRequestError) throw error;
-          throw new HttpRequestError(502, { error: "Twitch 팔로워 목록을 갱신하지 못했습니다.", code: "FOLLOWER_REFRESH_FAILED" });
-        } finally {
-          if (runtime.inFlight === refresh) runtime.inFlight = undefined;
-        }
+        const refreshed = await refreshFollowerManagementForOwner(
+          broadcasterUserId,
+          url.searchParams.get("limit")
+        );
+        return sendJson(req, res, 200, refreshed.response, refreshed.headers);
       }
 
       if (req.method === "POST" && url.pathname === "/api/riot/api-key") {

@@ -727,6 +727,119 @@ test("공개 Twitch 팔로우 전적 API는 Riot ID가 없는 채널도 유지�
   });
 });
 
+test("통합 스트리머 API는 YORO session을 사용하고 mutation에 Origin과 CSRF를 요구한다", async () => {
+  await withAuthConfig(async () => {
+    const previousDatabaseEnabled = appConfig.database.enabled;
+    appConfig.database.enabled = true;
+    const csrfToken = "csrf_value_for_unified_streamer_dashboard_123456";
+    const accountSession = {
+      authenticated: true,
+      csrfToken,
+      authenticationProvider: "twitch",
+      identities: [{
+        provider: "twitch",
+        displayName: "Streamer",
+        connectedAt: "2026-07-30T00:00:00.000Z",
+        lastAuthenticatedAt: "2026-07-30T00:00:00.000Z"
+      }],
+      preferences: {
+        locale: "ko",
+        defaultDashboardPage: "overview",
+        reducedMotion: false
+      }
+    };
+    const handler = createHttpHandler({
+      store: {
+        listStreamerRiotIdRequests() {
+          return [];
+        }
+      },
+      twitchAuth: {},
+      actions: { async dispatchOne() {} },
+      sessions: new DashboardSessionStore(),
+      discordDatabaseReady: () => true,
+      yoroAccounts: {
+        async authenticateForManagement(cookieValue) {
+          assert.equal(cookieValue, "yoro-session");
+          return {
+            userId: "11111111-1111-4111-8111-111111111111",
+            csrfToken,
+            csrfTokenHash: Buffer.alloc(32)
+          };
+        },
+        async session(cookieValue) {
+          assert.equal(cookieValue, "yoro-session");
+          return accountSession;
+        },
+        async getTwitchAccessContext(cookieValue) {
+          assert.equal(cookieValue, "yoro-session");
+          return {
+            clientId: "client-id",
+            accessToken: "access-token",
+            userId: "12345",
+            scopes: ["user:read:follows", "user:read:subscriptions"],
+            user: {
+              id: "12345",
+              login: "streamer",
+              displayName: "Streamer"
+            },
+            tokenExpiresAt: "2026-08-01T00:00:00.000Z"
+          };
+        }
+      }
+    });
+    try {
+      const statusReq = createRequest(
+        "GET",
+        "/api/account/streamer",
+        undefined,
+        { cookie: "yoro_session=yoro-session" }
+      );
+      const statusRes = createResponse();
+      await handler(statusReq, statusRes);
+
+      assert.equal(statusRes.statusCode, 200);
+      const status = JSON.parse(statusRes.body);
+      assert.equal(status.twitchConnected, true);
+      assert.equal(status.approval.status, "not_requested");
+      assert.equal("dashboardKey" in status, false);
+      assert.equal("overlayKey" in status, false);
+      assert.equal(status.profile.twitchLogin, "streamer");
+
+      const missingOriginReq = createRequest(
+        "POST",
+        "/api/account/streamer/apply",
+        { riotId: "Seiga#JP1" },
+        {
+          cookie: "yoro_session=yoro-session",
+          "x-yoro-csrf": csrfToken
+        }
+      );
+      const missingOriginRes = createResponse();
+      await handler(missingOriginReq, missingOriginRes);
+      assert.equal(missingOriginRes.statusCode, 403);
+      assert.equal(JSON.parse(missingOriginRes.body).code, "origin_denied");
+
+      const wrongCsrfReq = createRequest(
+        "POST",
+        "/api/account/streamer/apply",
+        { riotId: "Seiga#JP1" },
+        {
+          cookie: "yoro_session=yoro-session",
+          origin: DASHBOARD_ORIGIN,
+          "x-yoro-csrf": "wrong-csrf-token"
+        }
+      );
+      const wrongCsrfRes = createResponse();
+      await handler(wrongCsrfReq, wrongCsrfRes);
+      assert.equal(wrongCsrfRes.statusCode, 403);
+      assert.equal(JSON.parse(wrongCsrfRes.body).code, "csrf_required");
+    } finally {
+      appConfig.database.enabled = previousDatabaseEnabled;
+    }
+  });
+});
+
 test("관리자는 승인된 스트리머의 대시보드 사용 권한을 별도로 변경할 수 있다", async () => {
   await withAuthConfig(async () => {
     const sessions = new DashboardSessionStore();

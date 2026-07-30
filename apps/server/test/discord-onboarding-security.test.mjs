@@ -140,6 +140,24 @@ test("Discord onboarding route는 OAuth callback과 자체 session 보안을 분
   assert.equal(requiredHttpPrincipal("GET", "/api/discord/bot/install"), "PUBLIC");
   assert.equal(requiredHttpPrincipal("GET", "/api/account/session"), "PUBLIC");
   assert.equal(requiredHttpPrincipal("POST", "/api/account/logout"), "PUBLIC");
+  assert.equal(requiredHttpPrincipal("GET", "/api/account/streamer"), "PUBLIC");
+  assert.equal(requiredHttpPrincipal("POST", "/api/account/streamer/apply"), "PUBLIC");
+  assert.equal(
+    requiredHttpPrincipal("POST", "/api/account/streamer/permissions/start"),
+    "PUBLIC"
+  );
+  assert.equal(
+    requiredHttpPrincipal("GET", "/api/account/streamer/followers"),
+    "PUBLIC"
+  );
+  assert.equal(
+    requiredHttpPrincipal("POST", "/api/account/streamer/followers/refresh"),
+    "PUBLIC"
+  );
+  assert.equal(
+    requiredHttpPrincipal("POST", "/api/account/streamer/riot-id"),
+    "PUBLIC"
+  );
   assert.equal(
     requiredHttpPrincipal("GET", "/api/account/oauth/discord/start"),
     "OAUTH_CALLBACK"

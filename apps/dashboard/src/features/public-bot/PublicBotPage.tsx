@@ -467,7 +467,7 @@ export function PublicBotPage() {
                   >
                     {text.addBot}
                   </a>
-                  <a className="public-bot-button" href="/dashboard/organizations">
+                  <a className="public-bot-button" href="/dashboard">
                     {text.dashboardLogin}
                   </a>
                 </div>

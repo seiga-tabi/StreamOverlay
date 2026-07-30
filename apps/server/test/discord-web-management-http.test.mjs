@@ -206,6 +206,39 @@ test("기존 Discord 설정·관리 URL은 별도 화면 없이 통합 Dashboard
   });
 });
 
+test("기존 스트리머 전용 URL은 key를 제거하고 통합 Dashboard로 이동한다", async () => {
+  await withDiscordConfig(async () => {
+    const { handler } = createDiscordHandler();
+    const legacyBase = await request(
+      handler,
+      "GET",
+      "/dashboard/legacy-streamer/private-dashboard-key?token=unsafe"
+    );
+    assert.equal(legacyBase.statusCode, 302);
+    assert.equal(legacyBase.headers.Location, "/dashboard/streaming");
+    assert.doesNotMatch(legacyBase.headers.Location, /private|token|key/iu);
+    assert.equal(legacyBase.headers["Cache-Control"], "no-store");
+    assert.equal(legacyBase.headers["Referrer-Policy"], "no-referrer");
+
+    const legacyFollowers = await request(
+      handler,
+      "GET",
+      "/dashboard/legacy-streamer/private-dashboard-key/followers"
+    );
+    assert.equal(
+      legacyFollowers.headers.Location,
+      "/dashboard/streaming/followers"
+    );
+
+    const canonicalFollowers = await request(
+      handler,
+      "GET",
+      "/dashboard/streaming/followers"
+    );
+    assert.notEqual(canonicalFollowers.statusCode, 302);
+  });
+});
+
 test("Discord 공개 상태는 secret 없이 설치·OAuth·관리 준비 상태를 구분한다", async () => {
   await withDiscordConfig(async () => {
     const { handler } = createDiscordHandler();
