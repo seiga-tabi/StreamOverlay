@@ -5,7 +5,7 @@ Discord Bot, Cloudflared를 build·기동하기 위한 독립 Compose 프로젝�
 
 ```bash
 cd deploy/production
-docker compose up -d --build
+docker compose up -d --build --force-recreate --wait
 ```
 
 루트의 `docker-compose.yml`은 로컬 개발 호환용입니다. 운영에서는 반드시 이
@@ -33,6 +33,16 @@ docker compose up -d --build
 /etc/yoro/secrets/overlay_access_token
 /etc/yoro/secrets/cloudflare_tunnel_token
 ```
+
+Palworld REST 연결용 AES key는 위 목록에 포함되지 않습니다. Compose의
+`palworld-credentials-init`가 최초 실행에만 별도
+`palworld_credentials` named volume에 생성하고, 이후 배포에서는 같은 bytes를
+검증해 재사용합니다. 운영자가 key 파일·UID·권한을 직접 준비할 필요가
+없습니다.
+
+기존 Palworld 암호문이 있는데 key volume만 유실된 경우에는 새로운 key로
+덮어쓰지 않고 초기화 단계가 실패합니다. `docker compose down -v`와
+`docker volume rm yoro-production_palworld_credentials`는 사용하지 않습니다.
 
 `discord_internal_auth_key_server`와 `discord_internal_auth_key_bot`은 동일한
 값이지만 각각 Server UID `10001`, Bot UID `10002`만 읽을 수 있는 별도
@@ -63,7 +73,7 @@ git status --short
 
 ```bash
 docker compose ps
-docker compose logs --tail=100 config-check server discord-bot cloudflared
+docker compose logs --tail=100 palworld-credentials-init config-check server discord-bot cloudflared
 curl -fsS http://127.0.0.1:3000/health/live
 curl -fsS http://127.0.0.1:3000/health/ready
 ```

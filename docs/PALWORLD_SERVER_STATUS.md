@@ -8,7 +8,14 @@ Palworld 서버 상태 기능은 Dashboard 브라우저가 전용 서버에 직�
 - 컨테이너 secret: `/run/secrets/palworld-server-credentials-encryption-key`
 - 암호화 state: `/app/.streamops/palworld-server-connections.json.enc`
 
-Docker Compose의 기존 `./apps/server/config:/app/apps/server/config:ro`, `./secrets:/run/secrets:ro`, `streamops_state:/app/.streamops` 마운트를 그대로 사용합니다. Palworld 전용 환경 변수나 Dashboard 입력으로 경로를 바꿀 수 없습니다. Compose 밖에서 실행할 때 state의 상위 디렉터리는 기존 공통 `STREAMOPS_STATE_DIR` 설정을 따르지만, 파일명은 항상 `palworld-server-connections.json.enc`로 고정됩니다.
+운영 Compose는 `palworld_credentials`와 `streamops_state` named volume을
+사용합니다. `palworld-credentials-init` 서비스가 server보다 먼저 실행되어
+key를 최초 1회만 생성하고 디렉터리·파일 권한을 보정합니다. 이후 배포에서는
+기존 key bytes를 그대로 검증해 재사용하며 새 key로 교체하지 않습니다.
+Palworld 전용 환경 변수나 Dashboard 입력으로 경로를 바꿀 수 없습니다.
+Compose 밖에서 실행할 때 state의 상위 디렉터리는 기존 공통
+`STREAMOPS_STATE_DIR` 설정을 따르지만, 파일명은 항상
+`palworld-server-connections.json.enc`로 고정됩니다.
 
 `STREAMOPS_STATE_DIR`는 StreamOps 프로세스 전용 디렉터리여야 하며 leaf 이름도 `.streamops`, `streamops`, `streamops-*` 또는 `streamops_*` 형식이어야 합니다. filesystem root, home, 임시 디렉터리 자체, `/app` 같은 broad 경로, 다른 서비스와 공유하는 디렉터리 또는 symlink가 포함된 경로는 사용할 수 없습니다. 저장소는 이 조건을 확인한 뒤에만 디렉터리 `0700`과 파일 `0600`을 적용합니다.
 
@@ -17,17 +24,21 @@ Docker Compose의 기존 `./apps/server/config:/app/apps/server/config:ro`, `./s
 1. `apps/server/config/palworld-server-status.json`의 `enabled`를 `true`로 변경합니다.
 2. 공개 인터넷 서버는 신뢰할 수 있는 인증서가 적용된 HTTPS endpoint로 준비합니다. `publicHttpsSelfService: true`일 때만 HTTPS 443이 직접 등록 대상이며, 별도 포트는 exact `allowedOrigins` 승인이 필요합니다. 공개 HTTP endpoint는 허용하지 않습니다.
 3. LAN·VPN 등 사설망 endpoint는 스트리머가 직접 승인할 수 없습니다. 운영자가 대상 exact origin을 `allowedOrigins`에, 해당 사설 주소 범위를 `allowedCidrs`에 함께 등록합니다. wildcard, 경로, query, fragment, URL 사용자 정보는 허용되지 않습니다.
-4. 아래 절차로 전용 암호화 키 파일을 준비합니다.
-5. `npm run validate:config`와 production runtime 검증을 통과시킨 뒤 서버를 재시작합니다.
+4. 운영 checkout의 `deploy/production`에서 아래 원클릭 배포 명령을
+   실행합니다. 전용 암호화 key 생성과 권한 보정은 Compose가 처리합니다.
+
+   ```bash
+   docker compose up -d --build --force-recreate --wait
+   ```
+
+5. `palworld-credentials-init`, `config-check`, `server` 순서가 성공했는지
+   `docker compose ps`로 확인합니다.
 
 운영자는 공통 저장소와 outbound 정책만 준비하며, 각 스트리머의 서버 URL이나 `AdminPassword`를 대신 입력하지 않습니다.
 
-고정 secret을 `10001:10001`, `0400`으로 준비한 뒤에는 실제 컨테이너 UID로 읽기 권한까지 검증합니다.
-
-```bash
-npm run validate:config
-docker compose -f docker-compose.yml -f docker-compose.production.yml run --rm --no-deps -e NODE_ENV=production server node apps/server/dist/scripts/validate-runtime-config.js
-```
+초기화 서비스는 network를 사용하지 않고 root filesystem을 read-only로
+유지합니다. key volume과 state volume에만 쓰며, 생성한 key는 UID/GID
+`10001:10001`, mode `0400`, state 디렉터리는 `0700`으로 제한합니다.
 
 설정 schema v2는 다음 일곱 필드만 허용합니다.
 
@@ -75,33 +86,54 @@ Dashboard 응답은 다음 exact `registrationPolicy` metadata만 스트리머 U
 
 `AdminPassword`, Dashboard 로그인 비밀번호, Dashboard 자격 증명 암호화용 AES key는 서로 다른 값입니다. 스트리머는 `AdminPassword`만 연결 입력란에 넣습니다. AES key는 운영자가 서버에 한 번 준비하며 Dashboard UI에 입력하거나 표시하지 않습니다.
 
-## 암호화 키 생성과 권한
+## 암호화 키 자동 초기화와 보존
 
 키는 Dashboard에 저장되는 Palworld `AdminPassword`를 보호하기 위한 전용 AES key입니다. Dashboard 로그인 비밀번호나 Palworld `AdminPassword` 자체가 아닙니다. 정확히 32바이트인 base64 또는 64자리 hex 형식이어야 하며 Dashboard, Overlay, Bridge, Twitch, Riot, 지원 메일함, Cloudflare 등 다른 서비스 secret과 재사용하지 않습니다. 실제 키를 명령 출력, 로그, 문서, Git 또는 채팅에 남기지 않습니다.
 
-운영 호스트에서 다음과 같이 생성합니다.
+최초 배포에서 암호화 state가 없을 때만 `palworld-credentials-init`가
+`crypto.randomBytes(32)`로 key를 생성합니다. 반복 실행, image 재빌드,
+`--force-recreate`, 일반 `docker compose down` 이후에는 named volume의 기존
+key를 그대로 재사용합니다.
 
-```bash
-umask 077
-install -d -m 0700 secrets
-openssl rand -base64 32 > secrets/palworld-server-credentials-encryption-key
-chmod 0400 secrets/palworld-server-credentials-encryption-key
-sudo chown 10001:10001 secrets secrets/palworld-server-credentials-encryption-key
-sudo chmod 0700 secrets
-sudo chmod 0400 secrets/palworld-server-credentials-encryption-key
-```
+다음 상황에서는 자동 복구하거나 새 key를 만들지 않고 fail-closed합니다.
 
-`secrets` 디렉터리까지 UID `10001` 소유 `0700`이어야 bind mount 안의 파일을 탐색할 수 있습니다. 키 파일은 UID `10001` 소유 `0400`인 regular file이어야 하며 symlink와 group/other 권한은 허용되지 않습니다. 동일 디렉터리의 다른 secret도 서버 컨테이너 UID가 읽는 구조이므로, 운영자는 secret 변경 시 `sudo` 또는 동등한 secret 배포 도구를 사용합니다. production 서버는 누락되거나 손상된 키를 자동 생성하지 않습니다.
+- 기존 암호문이 있는데 key가 없음
+- 기존 key 형식이 손상됨
+- key 또는 state가 symlink·비정규 파일임
+- 기존 암호문을 key로 인증할 수 없음
+- volume 권한을 안전하게 보정할 수 없음
+
+`docker compose down -v`, `docker volume rm
+yoro-production_palworld_credentials`, `docker system prune --volumes`는 key를
+삭제할 수 있으므로 사용하지 않습니다. key와 ciphertext backup은 서로
+분리된 암호화 backup에 보관합니다.
 
 ## 기존 암호문 마이그레이션
 
 기존 기본 state 경로, AES-256-GCM envelope와 AAD는 유지되므로 기존 암호화 파일은 재암호화할 필요가 없습니다.
 
-1. 서버를 중지하고 persistent volume의 암호화 파일을 backup합니다.
-2. 기존 Palworld AES 키와 정확히 같은 값을 운영 secret 관리 절차로 고정 secret 파일에 기록합니다. 값을 stdout이나 shell history에 출력하지 않습니다.
-3. 기본 state 경로를 사용했다면 암호화 파일을 그대로 둡니다.
-4. 과거 custom state 경로를 사용했다면 서버가 중지된 동안 backup을 확인하고 암호화 파일 자체를 기본 state 경로로 복사합니다. online migration은 지원하지 않습니다. 복사할 때 파일 내용을 변환하거나 새 키로 재암호화하지 않습니다.
-5. named volume 안의 state 디렉터리는 UID `10001` 소유 `0700`, 암호화 파일은 UID `10001` 소유 `0600`으로 맞춥니다. custom 경로에서 복사할 때는 다음처럼 root로 실행되는 일회성 offline helper에 backup 디렉터리를 read-only mount합니다. `/absolute/backup/directory`는 실제 backup 디렉터리의 절대 경로로 바꿉니다.
+1. 서버를 중지하고 persistent volume의 암호화 파일과 기존 Palworld AES
+   key를 서로 분리된 암호화 저장소에 backup합니다.
+2. 기본 `streamops_state` volume을 계속 사용하고 암호문이 아직 없다면 별도
+   migration 없이 원클릭 배포를 실행합니다.
+3. 기존 암호문이 있다면 신규 key를 생성하지 않습니다. 기존 암호문을 만들
+   때 사용한 key를 `palworld_credentials` volume에 먼저 복원해야 합니다.
+   `/absolute/key-backup`은 key backup 파일이 있는 디렉터리로 바꿉니다.
+
+   ```bash
+   docker compose run --rm --no-deps --user 0 \
+     -v /absolute/key-backup:/restore:ro \
+     palworld-credentials-init sh -c \
+     'install -o 10001 -g 10001 -m 0400 /restore/palworld-server-credentials-encryption-key /run/secrets/palworld-server-credentials-encryption-key'
+   ```
+
+   이 명령은 key 값을 stdout이나 shell history에 출력하지 않습니다.
+4. 과거 custom state 경로를 사용했다면 서버가 중지된 동안 backup을 확인하고
+   암호화 파일 자체를 기본 state volume으로 복사합니다. online migration은
+   지원하지 않으며 파일 내용을 변환하거나 새 key로 재암호화하지 않습니다.
+5. custom state 복사에는 root로 실행되는 일회성 offline helper를 사용합니다.
+   `/absolute/backup/directory`는 실제 backup 디렉터리의 절대 경로로
+   바꿉니다.
 
    ```bash
    docker compose run --rm --no-deps --user 0 \
@@ -110,18 +142,12 @@ sudo chmod 0400 secrets/palworld-server-credentials-encryption-key
      server sh -c 'install -d -o 10001 -g 10001 -m 0700 /app/.streamops && install -o 10001 -g 10001 -m 0600 /migration/palworld-server-connections.json.enc /app/.streamops/palworld-server-connections.json.enc'
    ```
 
-   기본 state 경로를 그대로 쓰던 설치도 배포 전에 다음 명령으로 owner와 mode를 보정합니다.
+   기본 state volume의 UID와 mode 보정은 `palworld-credentials-init`가
+   자동으로 수행합니다. 이 capability는 network가 차단된 일회성 초기화
+   서비스에만 있으며 상시 `server` 서비스에는 추가하지 않습니다.
 
-   ```bash
-   docker compose run --rm --no-deps --user 0 \
-     --cap-add CHOWN --cap-add FOWNER --cap-add DAC_OVERRIDE \
-     server sh -c 'chown 10001:10001 /app/.streamops /app/.streamops/palworld-server-connections.json.enc && chmod 0700 /app/.streamops && chmod 0600 /app/.streamops/palworld-server-connections.json.enc'
-   ```
-
-   이 capability는 서버가 완전히 중지된 일회성 migration helper에만 추가하며 상시 `server` 서비스에는 추가하지 않습니다.
-
-6. secret과 state 권한을 확인하고 production compose overlay를 적용한 runtime 검증을 실행합니다.
-7. 복호화 검증이 끝난 뒤 서버를 시작합니다.
+6. 원클릭 배포 명령을 실행합니다. 초기화 서비스가 기존 key로 암호문 인증까지
+   통과해야 server가 시작됩니다.
 
 다른 키를 사용하면 subsystem은 fail-closed하며 기존 ciphertext를 초기화하거나 덮어쓰지 않습니다. 키를 분실한 경우 기존 연결 설정은 복구할 수 없으므로 암호문 backup과 키 backup을 서로 분리해 관리합니다.
 

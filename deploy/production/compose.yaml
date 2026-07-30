@@ -18,6 +18,7 @@ x-server-runtime: &server-runtime
   OVERLAY_STATIC_DIR: /app/apps/overlay/dist
 
 x-server-config-mounts: &server-config-mounts
+  - palworld_credentials:/run/secrets:ro
   - /etc/yoro/runtime.json:/etc/yoro/runtime.json:ro
   - /etc/yoro/legal.json:/etc/yoro/legal.json:ro
   - /etc/yoro/secrets/database_url:/run/secrets/database_url:ro
@@ -32,9 +33,35 @@ x-server-config-mounts: &server-config-mounts
   - /etc/yoro/secrets/overlay_access_token:/run/secrets/overlay_access_token:ro
 
 services:
+  palworld-credentials-init:
+    <<: *server-image
+    user: "0:0"
+    restart: "no"
+    command:
+      - node
+      - apps/server/dist/scripts/bootstrap-palworld-server-credentials.js
+    volumes:
+      - palworld_credentials:/run/secrets
+      - streamops_state:/app/.streamops
+    read_only: true
+    tmpfs:
+      - /tmp
+    network_mode: none
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - FOWNER
+      - DAC_OVERRIDE
+    security_opt:
+      - no-new-privileges:true
+
   config-check:
     <<: *server-image
     restart: "no"
+    depends_on:
+      palworld-credentials-init:
+        condition: service_completed_successfully
     environment: *server-runtime
     command:
       - node
@@ -102,6 +129,7 @@ services:
     ports:
       - "127.0.0.1:3000:3000"
     volumes:
+      - palworld_credentials:/run/secrets:ro
       - /etc/yoro/runtime.json:/etc/yoro/runtime.json:ro
       - /etc/yoro/legal.json:/etc/yoro/legal.json:ro
       - /etc/yoro/secrets/database_url:/run/secrets/database_url:ro
@@ -223,6 +251,7 @@ services:
         max-file: "5"
 
 volumes:
+  palworld_credentials:
   postgres_data:
   streamops_logs:
   streamops_reports:

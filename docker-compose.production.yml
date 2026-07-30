@@ -1,4 +1,28 @@
 services:
+  palworld-credentials-init:
+    image: ${YORO_SERVER_IMAGE:?immutable YORO_SERVER_IMAGE is required}
+    build: !reset null
+    user: "0:0"
+    restart: "no"
+    command:
+      - node
+      - apps/server/dist/scripts/bootstrap-palworld-server-credentials.js
+    volumes:
+      - palworld_credentials:/run/secrets
+      - streamops_state:/app/.streamops
+    read_only: true
+    tmpfs:
+      - /tmp
+    network_mode: none
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - FOWNER
+      - DAC_OVERRIDE
+    security_opt:
+      - no-new-privileges:true
+
   server:
     image: ${YORO_SERVER_IMAGE:?immutable YORO_SERVER_IMAGE is required}
     build: !reset null
@@ -12,7 +36,11 @@ services:
       STREAMOPS_REPORTS_DIR: /app/reports
       DASHBOARD_STATIC_DIR: /app/apps/dashboard/dist
       OVERLAY_STATIC_DIR: /app/apps/overlay/dist
+    depends_on:
+      palworld-credentials-init:
+        condition: service_completed_successfully
     volumes: !override
+      - palworld_credentials:/run/secrets:ro
       - /etc/yoro/runtime.json:/etc/yoro/runtime.json:ro
       - /etc/yoro/legal.json:/etc/yoro/legal.json:ro
       - /etc/yoro/secrets/database_url:/run/secrets/database_url:ro
@@ -65,3 +93,6 @@ services:
 secrets:
   postgres_password:
     file: /etc/yoro/secrets/postgres_password
+
+volumes:
+  palworld_credentials:

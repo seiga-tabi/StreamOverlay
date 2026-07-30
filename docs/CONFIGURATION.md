@@ -44,7 +44,7 @@ runtime mode에서는 이 파일이 필요합니다.
 
 ```bash
 cd deploy/production
-docker compose up -d --build
+docker compose up -d --build --force-recreate --wait
 ```
 
 루트 `docker-compose.yml`은 로컬 개발 호환용이므로 운영 원클릭 명령은

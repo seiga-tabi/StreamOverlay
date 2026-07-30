@@ -7,12 +7,14 @@ Git checkout에서 `/etc/yoro/runtime.json`과 `/etc/yoro/secrets/*` 준비를
 
 ```bash
 cd deploy/production
-docker compose up -d --build
+docker compose up -d --build --force-recreate --wait
 ```
 
 이 경로의 Compose는 `.env`를 사용하지 않고 실제 Git commit SHA와 build
 시각을 image의 `/app/release.json`에 자동 기록합니다. PostgreSQL migration은
-자동 적용하지 않습니다.
+자동 적용하지 않습니다. Palworld REST 연결용 별도 AES key와 저장소 권한은
+`palworld-credentials-init` 일회성 서비스가 named volume에서 멱등적으로
+준비합니다.
 
 ## 원칙
 
@@ -132,7 +134,7 @@ docker compose config
 ## 배포 확인
 
 ```bash
-docker compose up -d --no-build
+docker compose up -d --no-build --force-recreate --wait
 docker compose ps
 docker compose logs --tail=200 server
 curl -fsS https://yoro.gg/health/live
