@@ -8,7 +8,7 @@ services:
       - node
       - apps/server/dist/scripts/bootstrap-palworld-server-credentials.js
     volumes:
-      - palworld_credentials:/run/secrets
+      - palworld_credentials:/run/palworld-credentials
       - streamops_state:/app/.streamops
     read_only: true
     tmpfs:
@@ -40,7 +40,7 @@ services:
       palworld-credentials-init:
         condition: service_completed_successfully
     volumes: !override
-      - palworld_credentials:/run/secrets:ro
+      - palworld_credentials:/run/palworld-credentials:ro
       - /etc/yoro/runtime.json:/etc/yoro/runtime.json:ro
       - /etc/yoro/legal.json:/etc/yoro/legal.json:ro
       - /etc/yoro/secrets/database_url:/run/secrets/database_url:ro

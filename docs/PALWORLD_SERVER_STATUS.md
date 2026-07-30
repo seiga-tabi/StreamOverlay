@@ -5,7 +5,7 @@ Palworld 서버 상태 기능은 Dashboard 브라우저가 전용 서버에 직�
 ## 고정 경로
 
 - 비밀이 아닌 설정: `/app/apps/server/config/palworld-server-status.json`
-- 컨테이너 secret: `/run/secrets/palworld-server-credentials-encryption-key`
+- 컨테이너 secret: `/run/palworld-credentials/palworld-server-credentials-encryption-key`
 - 암호화 state: `/app/.streamops/palworld-server-connections.json.enc`
 
 운영 Compose는 `palworld_credentials`와 `streamops_state` named volume을
@@ -124,7 +124,7 @@ yoro-production_palworld_credentials`, `docker system prune --volumes`는 key를
    docker compose run --rm --no-deps --user 0 \
      -v /absolute/key-backup:/restore:ro \
      palworld-credentials-init sh -c \
-     'install -o 10001 -g 10001 -m 0400 /restore/palworld-server-credentials-encryption-key /run/secrets/palworld-server-credentials-encryption-key'
+     'install -o 10001 -g 10001 -m 0400 /restore/palworld-server-credentials-encryption-key /run/palworld-credentials/palworld-server-credentials-encryption-key'
    ```
 
    이 명령은 key 값을 stdout이나 shell history에 출력하지 않습니다.

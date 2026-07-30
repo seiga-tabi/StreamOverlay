@@ -18,7 +18,7 @@ x-server-runtime: &server-runtime
   OVERLAY_STATIC_DIR: /app/apps/overlay/dist
 
 x-server-config-mounts: &server-config-mounts
-  - palworld_credentials:/run/secrets:ro
+  - palworld_credentials:/run/palworld-credentials:ro
   - /etc/yoro/runtime.json:/etc/yoro/runtime.json:ro
   - /etc/yoro/legal.json:/etc/yoro/legal.json:ro
   - /etc/yoro/secrets/database_url:/run/secrets/database_url:ro
@@ -41,7 +41,7 @@ services:
       - node
       - apps/server/dist/scripts/bootstrap-palworld-server-credentials.js
     volumes:
-      - palworld_credentials:/run/secrets
+      - palworld_credentials:/run/palworld-credentials
       - streamops_state:/app/.streamops
     read_only: true
     tmpfs:
@@ -129,7 +129,7 @@ services:
     ports:
       - "127.0.0.1:3000:3000"
     volumes:
-      - palworld_credentials:/run/secrets:ro
+      - palworld_credentials:/run/palworld-credentials:ro
       - /etc/yoro/runtime.json:/etc/yoro/runtime.json:ro
       - /etc/yoro/legal.json:/etc/yoro/legal.json:ro
       - /etc/yoro/secrets/database_url:/run/secrets/database_url:ro

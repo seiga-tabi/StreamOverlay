@@ -6,7 +6,7 @@ import path from "node:path";
 
 export const PALWORLD_SERVER_STATUS_CONFIG_FILE = "palworld-server-status.json";
 export const PALWORLD_SERVER_CONNECTIONS_STATE_FILE = "palworld-server-connections.json.enc";
-export const PALWORLD_SERVER_CREDENTIALS_SECRET_PATH = "/run/secrets/palworld-server-credentials-encryption-key";
+export const PALWORLD_SERVER_CREDENTIALS_SECRET_PATH = "/run/palworld-credentials/palworld-server-credentials-encryption-key";
 
 export type PalworldServerStatusFileConfig = {
   version: 1 | 2;

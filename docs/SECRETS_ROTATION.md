@@ -24,4 +24,4 @@
 
 지원되는 경우 환경변수 대신 `_FILE` 방식과 권한 `0600`의 secret file을 사용합니다. rotation 중 실제 값은 출력하지 않고 변수명, 변경 version, 검증 결과만 기록합니다.
 
-Palworld 연결 정보 암호화 key는 환경 변수가 아니라 `/run/secrets/palworld-server-credentials-encryption-key` 고정 파일만 사용합니다. 기존 ciphertext가 있으면 일반 rotation으로 키만 바꾸지 말고 [Palworld 서버 상태 운영 설정](PALWORLD_SERVER_STATUS.md)의 오프라인 마이그레이션 절차를 따릅니다.
+Palworld 연결 정보 암호화 key는 환경 변수가 아니라 `/run/palworld-credentials/palworld-server-credentials-encryption-key` 고정 파일만 사용합니다. 기존 ciphertext가 있으면 일반 rotation으로 키만 바꾸지 말고 [Palworld 서버 상태 운영 설정](PALWORLD_SERVER_STATUS.md)의 오프라인 마이그레이션 절차를 따릅니다.
