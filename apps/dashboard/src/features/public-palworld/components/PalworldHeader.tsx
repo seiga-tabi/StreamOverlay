@@ -54,7 +54,6 @@ export function PalworldHeader({
   page,
   searchContent,
   twitchStatus = { connected: false, configured: false, requiredScopes: [], missingScopes: [] },
-  onStreamerDashboard = () => undefined,
   onTwitchLogin = () => undefined,
   onTwitchLogout = () => undefined,
 }: {
@@ -63,7 +62,6 @@ export function PalworldHeader({
   page: PalworldPage;
   searchContent?: ReactNode;
   twitchStatus?: PublicTwitchViewerStatus;
-  onStreamerDashboard?: () => void;
   onTwitchLogin?: () => void;
   onTwitchLogout?: () => void;
 }) {
@@ -149,22 +147,7 @@ export function PalworldHeader({
     };
   }, [closeMenus]);
 
-  const twitchMenuActions: PublicTwitchAccountMenuAction[] = twitchStatus.streamerRiotRequest?.status === "approved"
-    && twitchStatus.streamerRiotRequest.dashboardEnabled === true
-    ? [{
-      id: "dashboard",
-      label: (
-        <span
-          data-ko={palworldI18n.ko.streamerDashboardOpen}
-          data-ja={palworldI18n.ja.streamerDashboardOpen}
-        >
-          {text.streamerDashboardOpen}
-        </span>
-      ),
-      onSelect: onStreamerDashboard,
-      variant: "dashboard",
-    }]
-    : [];
+  const twitchMenuActions: PublicTwitchAccountMenuAction[] = [];
 
   function handleGame(nextPage: PublicMainPage): void {
     closeMenus();

@@ -16,10 +16,7 @@ export const dashboardI18n = {
       workspaceKicker: "Streamer Profile",
       workspaceLabel: "방송 운영 허브",
       workspaceDescription: "Twitch 연결, 커뮤니티 반응, OBS overlay를 한 흐름에서 관리합니다.",
-      streamerWorkspaceLabel: "스트리머 계정",
-      streamerWorkspaceDescription: "팔로워와 방송에 사용할 Riot ID를 관리합니다.",
       navGroups: {
-        account: "계정",
         operations: "운영",
         overlay: "Overlay",
         lol: "LoL 방송",
@@ -45,8 +42,6 @@ export const dashboardI18n = {
       backToPublic: "전적 검색으로 돌아가기"
     },
     pages: {
-      myRiotAccount: { label: "내 Riot ID", short: "내 Riot ID" },
-      followers: { label: "팔로워 관리", short: "팔로워" },
       events: { label: "이벤트 로그", short: "이벤트" },
       tournaments: { label: "대회 관리", short: "대회" },
       streamerRiotRequests: { label: "Riot ID 승인", short: "Riot ID" },
@@ -292,10 +287,7 @@ export const dashboardI18n = {
       workspaceKicker: "Streamer Profile",
       workspaceLabel: "配信運用ハブ",
       workspaceDescription: "Twitch 接続、コミュニティ反応、OBS overlay を一つの流れで管理します。",
-      streamerWorkspaceLabel: "配信者アカウント",
-      streamerWorkspaceDescription: "フォロワーと配信で使用する Riot ID を管理します。",
       navGroups: {
-        account: "アカウント",
         operations: "運用",
         overlay: "Overlay",
         lol: "LoL 配信",
@@ -321,8 +313,6 @@ export const dashboardI18n = {
       backToPublic: "戦績検索に戻る"
     },
     pages: {
-      myRiotAccount: { label: "自分の Riot ID", short: "Riot ID" },
-      followers: { label: "フォロワー管理", short: "フォロワー" },
       events: { label: "イベントログ", short: "イベント" },
       tournaments: { label: "大会管理", short: "大会" },
       streamerRiotRequests: { label: "Riot ID 承認", short: "Riot ID" },

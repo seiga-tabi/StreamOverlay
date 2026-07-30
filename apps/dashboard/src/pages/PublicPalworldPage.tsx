@@ -82,11 +82,7 @@ const EMPTY_TWITCH_STATUS: PublicTwitchViewerStatus = {
   missingScopes: [],
 };
 
-export function PublicPalworldPage({
-  onOpenStreamerDashboard = () => undefined,
-}: {
-  onOpenStreamerDashboard?: () => void;
-}) {
+export function PublicPalworldPage() {
   const { locale, changeLocale } = usePublicLocale(noServerLocalePreference);
   const { theme } = usePublicTheme();
   const { page, params } = usePalworldRoute();
@@ -420,7 +416,6 @@ export function PublicPalworldPage({
         <PalworldHeader
           locale={locale}
           onLocale={handleLocale}
-          onStreamerDashboard={onOpenStreamerDashboard}
           onTwitchLogin={startTwitchLogin}
           onTwitchLogout={() => void disconnectTwitch()}
           page={page}

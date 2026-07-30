@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import type { FollowerManagementResponse, FollowerOAuthStatus } from "@streamops/shared";
-import { apiGet, apiPost } from "../api/client";
 import { dashboardLocale, uiText } from "../i18n";
 import {
   Badge,
@@ -210,10 +209,8 @@ export function FollowersPage({ dataSource }: { dataSource?: FollowersDataSource
     setLoading(true);
     setLoadFailed(false);
     try {
-      setState(await (
-        dataSource?.load()
-        ?? apiGet<FollowerManagementResponse>("/api/followers")
-      ));
+      if (!dataSource) throw new Error("followers_data_source_missing");
+      setState(await dataSource.load());
     } catch {
       setLoadFailed(true);
     } finally {
@@ -226,10 +223,8 @@ export function FollowersPage({ dataSource }: { dataSource?: FollowersDataSource
     setRefreshing(true);
     setMessage(undefined);
     try {
-      setState(await (
-        dataSource?.refresh()
-        ?? apiPost<FollowerManagementResponse>("/api/followers/refresh?limit=5000", {})
-      ));
+      if (!dataSource) throw new Error("followers_data_source_missing");
+      setState(await dataSource.refresh());
       setMessage({ tone: "success", text: t.refreshDone });
     } catch {
       setMessage({ tone: "danger", text: t.refreshFailed });
@@ -243,10 +238,8 @@ export function FollowersPage({ dataSource }: { dataSource?: FollowersDataSource
     setConnecting(true);
     setMessage(undefined);
     try {
-      const result = await (
-        dataSource?.startOAuth()
-        ?? apiPost<{ url: string }>("/api/followers/oauth/start", {})
-      );
+      if (!dataSource) throw new Error("followers_data_source_missing");
+      const result = await dataSource.startOAuth();
       const destination = safeFollowerOAuthUrl(result.url);
       if (!destination) throw new Error("invalid Twitch OAuth URL");
       window.location.assign(destination);

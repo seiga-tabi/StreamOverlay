@@ -133,57 +133,6 @@ async function installDashboardApiFixtures(page: Page): Promise<void> {
       await json(route, profileFixture);
       return;
     }
-    if (url.pathname === "/api/dashboard/auth/status") {
-      await json(route, {
-        required: true,
-        configured: true,
-        authenticated: true,
-        role: "streamer",
-        csrfToken: "visual-fixture",
-        streamer: {
-          twitchUserId: "visual-streamer",
-          twitchLogin: "yoro_visual",
-          twitchDisplayName: "YORO Visual",
-          riotGameName: "YORO QA",
-          riotTagLine: "JP1",
-          dashboardEnabled: true,
-          dashboardSlug: "yoro_visual",
-          dashboardKey: "sdk_visual_dashboard_fixture",
-          dashboardPath: "/dashboard/yoro_visual/sdk_visual_dashboard_fixture"
-        }
-      });
-      return;
-    }
-    if (url.pathname === "/api/followers") {
-      await json(route, {
-        summary: {
-          knownFollowers: 0,
-          activeFollowers: 0,
-          unfollowed: 0,
-          newFollowers7d: 0,
-          observedGenreFollowers: 0
-        },
-        followers: [],
-        recentFollowers: [],
-        recentUnfollowers: [],
-        topObservedGenres: [],
-        dataNotes: [],
-        oauth: {
-          state: "disconnected",
-          missingScopes: []
-        }
-      });
-      return;
-    }
-    if (url.pathname === "/api/twitch/status") {
-      await json(route, {
-        configured: true,
-        connected: true,
-        state: "connected",
-        eventSub: { websocket: "connected" }
-      });
-      return;
-    }
     await json(route, {});
   });
 
@@ -304,12 +253,16 @@ test("LoL 공개 하위 페이지는 화면 중앙에 배치된다", async ({ pa
   }
 });
 
-test("Dashboard", async ({ page }) => {
+test("기존 스트리머 Dashboard 경로는 통합 Dashboard로 정리된다", async ({ page }) => {
   const errors = collectRuntimeErrors(page);
-  await page.goto("/dashboard/followers");
-  await expect(page.locator(".app-shell-followers")).toBeVisible();
-  await expect(page.getByRole("navigation", { name: "대시보드 메뉴" }).locator("button.nav-item")).toHaveCount(2);
-  await assertStableSurface(page, errors, "dashboard.png");
+  await page.goto(
+    "/dashboard/legacy_user/sdk_0123456789abcdefghijklmnopqrstuv/followers"
+      + "?dashboardKey=복제금지#legacy"
+  );
+  await expect(page).toHaveURL(/\/dashboard\/streaming\/followers$/u);
+  await expect(page.getByText("YORO DASHBOARD", { exact: true })).toBeVisible();
+  await expect(page.locator(".app-shell-followers")).toHaveCount(0);
+  expect(errors, "console 또는 page runtime 오류가 없어야 합니다.").toEqual([]);
 });
 
 test("Overlay", async ({ page }) => {

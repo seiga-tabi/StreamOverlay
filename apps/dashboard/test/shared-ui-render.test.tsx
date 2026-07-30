@@ -165,7 +165,6 @@ test("LoL PublicAppHeader가 공통 Twitch account chip으로 기존 프로필�
       onHome={() => undefined}
       onLocale={() => undefined}
       onPage={() => undefined}
-      onStreamerDashboard={() => undefined}
       onStreamerRecord={() => undefined}
       onStreamerRegister={() => undefined}
       onTwitchLogin={() => undefined}

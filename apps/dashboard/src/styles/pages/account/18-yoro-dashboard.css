@@ -1,31 +1,53 @@
 .yoro-dashboard-shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 248px minmax(0, 1fr);
+  grid-template-columns: 288px minmax(0, 1fr);
+  overflow-x: clip;
   background:
     radial-gradient(circle at 72% 6%, rgb(92 66 190 / 12%), transparent 32rem),
     var(--color-background, #0f141b);
   color: var(--color-text, #f5f7fb);
 }
 
+.yoro-dashboard-mobile-bar,
+.yoro-dashboard-backdrop {
+  display: none;
+}
+
 .yoro-dashboard-sidebar {
   position: sticky;
   top: 0;
   height: 100vh;
-  padding: 28px 20px;
+  padding: 30px 24px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 26px;
   border-right: 1px solid rgb(255 255 255 / 10%);
   background:
     linear-gradient(180deg, rgb(13 20 42 / 98%), rgb(12 18 35 / 98%));
 }
 
+.yoro-dashboard-sidebar-heading {
+  min-width: 0;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.yoro-dashboard-sidebar-close {
+  display: none;
+}
+
 .yoro-dashboard-brand {
+  min-width: 0;
+  overflow: hidden;
   color: inherit;
-  font-size: 20px;
+  font-size: 21px;
   font-weight: 900;
   text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .yoro-dashboard-profile {
@@ -74,7 +96,7 @@
 
 .yoro-dashboard-sidebar nav {
   display: grid;
-  gap: 6px;
+  gap: 8px;
 }
 
 .yoro-dashboard-nav-label {
@@ -88,8 +110,8 @@
 .yoro-dashboard-sidebar nav button,
 .yoro-dashboard-sidebar-actions button,
 .yoro-dashboard-sidebar-actions a {
-  min-height: 44px;
-  padding: 0 14px;
+  min-height: 48px;
+  padding: 0 16px;
   border: 0;
   border-radius: 10px;
   color: inherit;
@@ -121,8 +143,8 @@
 
 .yoro-dashboard-main {
   min-width: 0;
-  width: 100%;
-  max-width: 1480px;
+  width: min(100%, 1440px);
+  margin-inline: auto;
   padding: 48px clamp(24px, 5vw, 72px);
 }
 
@@ -507,27 +529,142 @@
   animation-duration: .01ms !important;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 1100px) and (min-width: 801px) {
   .yoro-dashboard-shell {
-    grid-template-columns: 1fr;
+    grid-template-columns: 264px minmax(0, 1fr);
   }
 
   .yoro-dashboard-sidebar {
-    position: static;
-    width: 100%;
-    height: auto;
-    padding: 18px;
-  }
-
-  .yoro-dashboard-sidebar nav {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .yoro-dashboard-sidebar-actions {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding-inline: 20px;
   }
 
   .yoro-dashboard-main {
+    padding-inline: 32px;
+  }
+}
+
+@media (max-width: 800px) {
+  .yoro-dashboard-shell {
+    display: block;
+  }
+
+  .yoro-dashboard-mobile-bar {
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    min-height: 64px;
+    padding: 10px 16px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgb(255 255 255 / 10%);
+    background: rgb(12 18 35 / 94%);
+    box-shadow: 0 12px 28px rgb(0 0 0 / 18%);
+    backdrop-filter: blur(16px);
+  }
+
+  .yoro-dashboard-mobile-bar .yoro-dashboard-brand {
+    font-size: 17px;
+  }
+
+  .yoro-dashboard-menu-button,
+  .yoro-dashboard-sidebar-close {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid rgb(255 255 255 / 13%);
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    background: rgb(255 255 255 / 7%);
+    cursor: pointer;
+  }
+
+  .yoro-dashboard-menu-button {
+    align-content: center;
+    gap: 5px;
+  }
+
+  .yoro-dashboard-menu-button > span {
+    width: 20px;
+    height: 2px;
+    border-radius: 999px;
+    display: block;
+    background: currentcolor;
+  }
+
+  .yoro-dashboard-sidebar-close {
+    font-size: 28px;
+    line-height: 1;
+  }
+
+  .yoro-dashboard-menu-button:focus-visible,
+  .yoro-dashboard-sidebar-close:focus-visible {
+    outline: 3px solid rgb(151 120 255 / 55%);
+    outline-offset: 2px;
+  }
+
+  .yoro-dashboard-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    display: block;
+    visibility: hidden;
+    background: rgb(2 6 16 / 70%);
+    opacity: 0;
+    cursor: default;
+    transition:
+      opacity .24s ease,
+      visibility 0s linear .24s;
+  }
+
+  .yoro-dashboard-backdrop.is-open {
+    visibility: visible;
+    opacity: 1;
+    transition-delay: 0s;
+  }
+
+  .yoro-dashboard-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 80;
+    width: min(86vw, 336px);
+    height: 100dvh;
+    padding: 24px 20px;
+    visibility: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    box-shadow: 24px 0 54px rgb(0 0 0 / 36%);
+    transform: translateX(-102%);
+    transition:
+      transform .28s cubic-bezier(.22, 1, .36, 1),
+      visibility 0s linear .28s;
+  }
+
+  .yoro-dashboard-sidebar.is-open {
+    visibility: visible;
+    transform: translateX(0);
+    transition-delay: 0s;
+  }
+
+  .yoro-dashboard-sidebar nav {
+    grid-template-columns: 1fr;
+  }
+
+  .yoro-dashboard-sidebar-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .yoro-dashboard-main {
+    width: min(100%, 760px);
+    margin-inline: auto;
     padding: 28px 16px 48px;
   }
 
@@ -552,10 +689,6 @@
 }
 
 @media (max-width: 520px) {
-  .yoro-dashboard-sidebar nav {
-    grid-template-columns: 1fr;
-  }
-
   .yoro-dashboard-metrics,
   .yoro-dashboard-streamer-grid {
     grid-template-columns: 1fr;
@@ -579,5 +712,12 @@
     left: 21px;
     width: 1px;
     height: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yoro-dashboard-backdrop,
+  .yoro-dashboard-sidebar {
+    transition-duration: .01ms;
   }
 }

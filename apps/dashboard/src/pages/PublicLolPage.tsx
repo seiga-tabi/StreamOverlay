@@ -1993,7 +1993,6 @@ function PublicAppHeader({
   onAutoLocale,
   onTwitchLogin,
   onStreamerRegister,
-  onStreamerDashboard,
   onStreamerRecord,
   onTwitchLogout,
   onFilters,
@@ -2024,7 +2023,6 @@ function PublicAppHeader({
   onAutoLocale: () => void;
   onTwitchLogin: () => void;
   onStreamerRegister: () => void;
-  onStreamerDashboard: () => void;
   onStreamerRecord: () => void;
   onTwitchLogout: () => void;
   onFilters: (filters: PublicMatchFilters) => void;
@@ -2060,7 +2058,6 @@ function PublicAppHeader({
       onAutoLocale={onAutoLocale}
       onTwitchLogin={onTwitchLogin}
       onStreamerRegister={onStreamerRegister}
-      onStreamerDashboard={onStreamerDashboard}
       onStreamerRecord={onStreamerRecord}
       onTwitchLogout={onTwitchLogout}
     />
@@ -6605,11 +6602,9 @@ function PublicMobileNav({ onNavigate }: { onNavigate: (target: PublicNavTarget)
 }
 
 export function PublicLolPage({
-  onOpenAdmin,
-  onOpenStreamerDashboard
+  onOpenAdmin
 }: {
   onOpenAdmin: () => void;
-  onOpenStreamerDashboard: () => void;
 }) {
   const { locale, changeLocale, autoDetectLocale } = usePublicLocale(loadPublicLocalePreference);
   setActivePublicLocale(locale);
@@ -7598,7 +7593,6 @@ export function PublicLolPage({
             onAutoLocale={autoDetectLocale}
             onTwitchLogin={startTwitchLogin}
             onStreamerRegister={openStreamerRegisterScreen}
-            onStreamerDashboard={onOpenStreamerDashboard}
             onStreamerRecord={openStreamerRecord}
             onTwitchLogout={() => void disconnectTwitchViewer()}
             onFilters={setFilters}
@@ -7657,7 +7651,6 @@ export function PublicLolPage({
             onAutoLocale={autoDetectLocale}
             onTwitchLogin={startTwitchLogin}
             onStreamerRegister={openStreamerRegisterScreen}
-            onStreamerDashboard={onOpenStreamerDashboard}
             onStreamerRecord={openStreamerRecord}
             onTwitchLogout={() => void disconnectTwitchViewer()}
             onFilters={setFilters}
@@ -7731,7 +7724,6 @@ export function PublicLolPage({
             onAutoLocale={autoDetectLocale}
             onTwitchLogin={startTwitchLogin}
             onStreamerRegister={openStreamerRegisterScreen}
-            onStreamerDashboard={onOpenStreamerDashboard}
             onStreamerRecord={openStreamerRecord}
             onTwitchLogout={() => void disconnectTwitchViewer()}
             onFilters={setFilters}
@@ -7791,7 +7783,6 @@ export function PublicLolPage({
           onAutoLocale={autoDetectLocale}
           onTwitchLogin={startTwitchLogin}
           onStreamerRegister={openStreamerRegisterScreen}
-          onStreamerDashboard={onOpenStreamerDashboard}
           onStreamerRecord={openStreamerRecord}
           onTwitchLogout={() => void disconnectTwitchViewer()}
           onFilters={setFilters}

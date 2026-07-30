@@ -1702,7 +1702,8 @@ test("LoL의 공개 Twitch session은 Palworld 프로필과 홈 LIVE 목록에 �
   if (usesMobilePublicMenu(page)) {
     const mobileMenu = await openMobilePublicMenu(page);
     await expect(mobileMenu.getByText("Pal Viewer", { exact: true })).toBeVisible();
-    await expect(mobileMenu.getByRole("button", { name: "대시보드 열기" })).toBeVisible();
+    await expect(mobileMenu.getByRole("button", { name: "YORO Dashboard" })).toBeVisible();
+    await expect(mobileMenu.getByRole("button", { name: "대시보드 열기" })).toHaveCount(0);
     await expect(mobileMenu.getByRole("button", { name: "로그아웃" })).toBeVisible();
     await expect(mobileMenu.getByText(/Riot ID|내 전적/u)).toHaveCount(0);
     await page.keyboard.press("Escape");
@@ -1711,10 +1712,11 @@ test("LoL의 공개 Twitch session은 Palworld 프로필과 홈 LIVE 목록에 �
     const accountButton = page.getByRole("button", { name: "Pal Viewer" });
     await expect(accountButton).toBeVisible();
     await accountButton.click();
-    await expect(page.getByRole("menu", { name: "Twitch 프로필 메뉴" })).toBeVisible();
-    const dashboardMenuItem = page.getByRole("menuitem", { name: "대시보드 열기" });
+    await expect(page.getByRole("menu", { name: "계정 메뉴" })).toBeVisible();
+    const dashboardMenuItem = page.getByRole("menuitem", { name: "YORO Dashboard" });
     const logoutMenuItem = page.getByRole("menuitem", { name: "로그아웃" });
     await expect(dashboardMenuItem).toBeVisible();
+    await expect(page.getByRole("menuitem", { name: "대시보드 열기" })).toHaveCount(0);
     await expect(dashboardMenuItem).toBeFocused();
     await page.keyboard.press("ArrowDown");
     await expect(logoutMenuItem).toBeFocused();
@@ -1722,10 +1724,10 @@ test("LoL의 공개 Twitch session은 Palworld 프로필과 홈 LIVE 목록에 �
     await expect(dashboardMenuItem).toBeFocused();
     await expect(page.getByRole("menu").getByText(/Riot ID|내 전적/u)).toHaveCount(0);
     await page.keyboard.press("Escape");
-    await expect(page.getByRole("menu", { name: "Twitch 프로필 메뉴" })).toHaveCount(0);
+    await expect(page.getByRole("menu", { name: "계정 메뉴" })).toHaveCount(0);
     await accountButton.click();
     await page.keyboard.press("Escape");
-    await expect(page.getByRole("menu", { name: "Twitch 프로필 메뉴" })).toHaveCount(0);
+    await expect(page.getByRole("menu", { name: "계정 메뉴" })).toHaveCount(0);
   }
   await expect(page.getByTestId("public-live-streamer-rail").getByText("Live Pal", { exact: true })).toBeVisible();
   await expect(page.getByTestId("public-live-streamer-rail").getByText("Offline Pal", { exact: true })).toHaveCount(0);
@@ -3862,7 +3864,7 @@ for (const viewport of publicChromeResponsiveViewports) {
       const mobileMenu = page.getByRole("dialog", { name: "메뉴" });
       await expect(mobileMenu.getByRole("heading", { name: "게임 선택" })).toBeVisible();
       await expect(mobileMenu.getByRole("heading", { name: "언어" })).toBeVisible();
-      await expect(mobileMenu.getByRole("heading", { name: "Twitch 계정" })).toBeVisible();
+      await expect(mobileMenu.getByRole("heading", { name: "계정" })).toBeVisible();
       await expect(mobileMenu.getByText("아주 긴 Twitch 프로필 표시 이름")).toBeVisible();
       await page.keyboard.press("Escape");
       await expect(mobileMenu).toBeHidden();

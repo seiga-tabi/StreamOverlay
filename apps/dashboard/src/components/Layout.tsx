@@ -1,11 +1,10 @@
 import { useState, type ReactNode } from "react";
 import { dashboardI18n, type DashboardLocale } from "../i18n";
-import { pageAllowedForRole, type DashboardRole, type Page } from "../routing/dashboard-routes";
+import { pageAllowed, type Page } from "../routing/dashboard-routes";
 
-export type { DashboardRole, Page } from "../routing/dashboard-routes";
+export type { Page } from "../routing/dashboard-routes";
 
 const navSections: Array<{ key: keyof typeof dashboardI18n.ko.app.navGroups; items: Page[] }> = [
-  { key: "account", items: ["followers", "myRiotAccount"] },
   { key: "lol", items: ["tournaments", "streamerRiotRequests"] },
   { key: "community", items: ["communityModeration", "events"] },
   { key: "system", items: ["supportInbox", "settings"] }
@@ -70,7 +69,6 @@ function DashboardLocaleSelector({
 export function Layout({
   page,
   setPage,
-  role = "admin",
   locale,
   onLocaleChange,
   onLogout,
@@ -79,7 +77,6 @@ export function Layout({
 }: {
   page: Page;
   setPage: (page: Page) => void;
-  role?: DashboardRole;
   locale: DashboardLocale;
   onLocaleChange: (locale: DashboardLocale) => void;
   onLogout?: () => void;
@@ -87,12 +84,10 @@ export function Layout({
   children: ReactNode;
 }) {
   const uiText = dashboardI18n[locale];
-  const workspaceLabel = role === "streamer" ? uiText.app.streamerWorkspaceLabel : uiText.app.workspaceLabel;
-  const workspaceDescription = role === "streamer" ? uiText.app.streamerWorkspaceDescription : uiText.app.workspaceDescription;
   const visibleNavSections = navSections
     .map((section) => ({
       ...section,
-      items: section.items.filter((item) => pageAllowedForRole(item, role))
+      items: section.items.filter(pageAllowed)
     }))
     .filter((section) => section.items.length > 0);
   const topActions = (
@@ -113,16 +108,16 @@ export function Layout({
         <div className="sidebar-profile">
           <span data-ko={dashboardI18n.ko.app.workspaceKicker} data-ja={dashboardI18n.ja.app.workspaceKicker}>{uiText.app.workspaceKicker}</span>
           <strong
-            data-ko={role === "streamer" ? dashboardI18n.ko.app.streamerWorkspaceLabel : dashboardI18n.ko.app.workspaceLabel}
-            data-ja={role === "streamer" ? dashboardI18n.ja.app.streamerWorkspaceLabel : dashboardI18n.ja.app.workspaceLabel}
+            data-ko={dashboardI18n.ko.app.workspaceLabel}
+            data-ja={dashboardI18n.ja.app.workspaceLabel}
           >
-            {workspaceLabel}
+            {uiText.app.workspaceLabel}
           </strong>
           <p
-            data-ko={role === "streamer" ? dashboardI18n.ko.app.streamerWorkspaceDescription : dashboardI18n.ko.app.workspaceDescription}
-            data-ja={role === "streamer" ? dashboardI18n.ja.app.streamerWorkspaceDescription : dashboardI18n.ja.app.workspaceDescription}
+            data-ko={dashboardI18n.ko.app.workspaceDescription}
+            data-ja={dashboardI18n.ja.app.workspaceDescription}
           >
-            {workspaceDescription}
+            {uiText.app.workspaceDescription}
           </p>
         </div>
         <nav aria-label={uiText.app.navLabel}>

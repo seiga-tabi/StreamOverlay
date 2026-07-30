@@ -8,13 +8,9 @@ import { parseFavorites, parseRecentSearches } from "../src/features/public-lol/
 import { publicPageRouteFromPath, publicPathForPage } from "../src/features/public-lol/utils/routes";
 import {
   DASHBOARD_PAGES,
-  STREAMER_ALLOWED_PAGES,
   dashboardPageFromPath,
   dashboardPathForPage,
-  pageAllowedForRole,
-  streamerDashboardBasePath,
-  streamerDashboardTenantFromPath,
-  streamerDashboardTenantMatches
+  pageAllowed
 } from "../src/routing/dashboard-routes";
 import type { PublicLolProfile, PublicLolRecentMatch, SearchSuggestion } from "../src/features/public-lol/types/public-lol";
 
@@ -45,60 +41,14 @@ test("공개 페이지 경로를 페이지 상태와 왕복 변환한다", () =>
   assert.equal(publicPathForPage("followJoin"), "/participation");
 });
 
-test("Dashboard 역할별 경로를 페이지 상태와 왕복 변환한다", () => {
-  const tenant = {
-    streamerSlug: "streamer_name",
-    dashboardKey: "sdk_0123456789abcdefghijklmnopqrstuv"
-  };
-  assert.equal(dashboardPathForPage("followers", "streamer"), "/dashboard/followers");
-  assert.equal(dashboardPathForPage("myRiotAccount", "streamer"), "/dashboard/riot-id");
-  assert.equal(dashboardPageFromPath("/dashboard/overlay/", "streamer"), "followers");
-  assert.equal(dashboardPageFromPath("/dashboard/lol/account", "streamer"), "myRiotAccount");
-  assert.equal(dashboardPageFromPath("/dashboard/riot-account", "streamer"), "myRiotAccount");
-  assert.equal(dashboardPageFromPath("/dashboard/lol/automation", "streamer"), "followers");
-  assert.equal(dashboardPageFromPath("/dashboard/lol/participation", "streamer"), "followers");
-  assert.equal(dashboardPageFromPath("/dashboard/palworld/server", "streamer"), "followers");
-  assert.equal(dashboardPageFromPath("/dashboard/solo-rank", "streamer"), "followers");
-  assert.equal(dashboardPageFromPath("/dashboard/participation", "streamer"), "followers");
-  assert.equal(dashboardPathForPage("supportInbox", "admin"), "/admin/support");
-  assert.equal(dashboardPageFromPath("/admin/support", "admin"), "supportInbox");
-  assert.equal(dashboardPageFromPath("/admin/community", "admin"), "communityModeration");
-  assert.equal(dashboardPageFromPath("/admin", "admin"), "streamerRiotRequests");
-  assert.equal(dashboardPageFromPath("/admin/unknown", "admin"), "streamerRiotRequests");
-  assert.equal(streamerDashboardBasePath(tenant), `/dashboard/${tenant.streamerSlug}/${tenant.dashboardKey}`);
-  assert.equal(
-    dashboardPathForPage("followers", "streamer", tenant),
-    `/dashboard/${tenant.streamerSlug}/${tenant.dashboardKey}/followers`
-  );
-  assert.equal(
-    dashboardPathForPage("myRiotAccount", "streamer", tenant),
-    `/dashboard/${tenant.streamerSlug}/${tenant.dashboardKey}/riot-id`
-  );
-  assert.equal(
-    dashboardPageFromPath(`/dashboard/${tenant.streamerSlug}/${tenant.dashboardKey}/lol/automation`, "streamer"),
-    "followers"
-  );
-  assert.equal(
-    dashboardPageFromPath(`/dashboard/${tenant.streamerSlug}/${tenant.dashboardKey}/followers`, "streamer"),
-    "followers"
-  );
-  assert.equal(
-    dashboardPageFromPath(`/dashboard/${tenant.streamerSlug}/${tenant.dashboardKey}/palworld/server`, "streamer"),
-    "followers"
-  );
-  assert.equal(
-    dashboardPageFromPath(`/dashboard/${tenant.streamerSlug}/${tenant.dashboardKey}/riot-id`, "streamer"),
-    "myRiotAccount"
-  );
-  assert.deepEqual(streamerDashboardTenantFromPath(`/dashboard/${tenant.streamerSlug}/${tenant.dashboardKey}/alerts`), tenant);
-  assert.equal(streamerDashboardTenantMatches(streamerDashboardTenantFromPath(`/dashboard/${tenant.streamerSlug}/${tenant.dashboardKey}`), tenant), true);
-  assert.equal(streamerDashboardTenantFromPath("/dashboard/streamer_name/not-a-dashboard-key"), undefined);
-  assert.equal(streamerDashboardTenantFromPath("/dashboard/lol/account"), undefined);
-  assert.deepEqual(STREAMER_ALLOWED_PAGES, ["followers", "myRiotAccount"]);
-  assert.equal(DASHBOARD_PAGES.includes("followers"), true);
-  assert.equal(DASHBOARD_PAGES.includes("myRiotAccount"), true);
-  assert.equal(pageAllowedForRole("followers", "streamer"), true);
-  assert.equal(pageAllowedForRole("myRiotAccount", "streamer"), true);
+test("관리자 Dashboard 경로를 페이지 상태와 왕복 변환한다", () => {
+  assert.equal(dashboardPathForPage("supportInbox"), "/admin/support");
+  assert.equal(dashboardPageFromPath("/admin/support"), "supportInbox");
+  assert.equal(dashboardPageFromPath("/admin/community"), "communityModeration");
+  assert.equal(dashboardPageFromPath("/admin"), "streamerRiotRequests");
+  assert.equal(dashboardPageFromPath("/admin/unknown"), "streamerRiotRequests");
+  assert.equal(DASHBOARD_PAGES.includes("streamerRiotRequests"), true);
+  assert.equal(pageAllowed("supportInbox"), true);
 });
 
 test("검색 제안은 중복을 제거하고 최대 6개로 제한한다", () => {

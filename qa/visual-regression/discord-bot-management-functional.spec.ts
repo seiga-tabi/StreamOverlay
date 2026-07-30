@@ -229,6 +229,37 @@ test("/dashboard는 모든 YORO 로그인 사용자에게 계정·Organization·
   const dashboardNavigation = page.getByRole("navigation", {
     name: "YORO.gg Dashboard",
   });
+  const mobile = (page.viewportSize()?.width ?? 0) <= 800;
+  if (mobile) {
+    const menuButton = page.getByRole("button", {
+      name: "Dashboard 메뉴 열기",
+    });
+    await expect(dashboardNavigation).not.toBeVisible();
+    await menuButton.click();
+    await expect(dashboardNavigation).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(dashboardNavigation).not.toBeVisible();
+    await expect(menuButton).toBeFocused();
+    await menuButton.click();
+  } else {
+    const geometry = await page.locator(".yoro-dashboard-shell").evaluate((shell) => {
+      const sidebar = shell.querySelector<HTMLElement>(".yoro-dashboard-sidebar");
+      const main = shell.querySelector<HTMLElement>(".yoro-dashboard-main");
+      if (!sidebar || !main) return undefined;
+      const sidebarBounds = sidebar.getBoundingClientRect();
+      const mainBounds = main.getBoundingClientRect();
+      const availableCenter = sidebarBounds.right
+        + (document.documentElement.clientWidth - sidebarBounds.right) / 2;
+      return {
+        sidebarWidth: sidebarBounds.width,
+        mainCenterDelta: Math.abs(
+          mainBounds.left + mainBounds.width / 2 - availableCenter
+        ),
+      };
+    });
+    expect(geometry?.sidebarWidth).toBeGreaterThanOrEqual(280);
+    expect(geometry?.mainCenterDelta).toBeLessThanOrEqual(1);
+  }
   await expect(
     dashboardNavigation.getByRole("button", { name: "연결 계정" })
   ).toBeVisible();

@@ -3,7 +3,6 @@ import test from "node:test";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { FollowerOAuthStatus } from "@streamops/shared";
-import { Layout } from "../src/components/Layout";
 import { setDashboardLocale, uiText } from "../src/i18n";
 
 Object.defineProperty(globalThis, "window", {
@@ -23,29 +22,6 @@ function oauthStatus(state: FollowerOAuthStatus["state"]): FollowerOAuthStatus {
     missingScopes: state === "missing_scopes" ? ["moderator:read:followers"] : [],
   };
 }
-
-test("스트리머 메뉴에는 팔로워 관리와 Riot ID만 표시된다", () => {
-  const html = renderToStaticMarkup(
-    <Layout
-      locale="ko"
-      onLocaleChange={() => undefined}
-      page="followers"
-      role="streamer"
-      setPage={() => undefined}
-    >
-      <div>팔로워 본문</div>
-    </Layout>
-  );
-
-  assert.match(html, /class="nav-item active"[^>]*data-ko="팔로워 관리"/);
-  assert.match(html, /class="nav-item "[^>]*data-ko="내 Riot ID"/);
-  assert.equal((html.match(/class="nav-item /g) ?? []).length, 2);
-  assert.doesNotMatch(html, /data-ko="운영 현황"/);
-  assert.doesNotMatch(html, /data-ko="Overlay 연결"/);
-  assert.doesNotMatch(html, /data-ko="LoL 방송 운영"/);
-  assert.doesNotMatch(html, /data-ko="Palworld 서버 상태"/);
-  assert.match(html, /팔로워 본문/);
-});
 
 test("팔로워 페이지 초기 로딩은 Skeleton을 표시하고 새로고침을 비활성화한다", async () => {
   const { FollowersPage } = await import("../src/pages/FollowersPage");

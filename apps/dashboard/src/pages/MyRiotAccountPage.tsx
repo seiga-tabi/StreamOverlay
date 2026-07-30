@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { updateStreamerRiotId, type DashboardStreamerInfo } from "../api/client";
+import type { DashboardStreamerInfo } from "../api/client";
 import { createDashboardLocaleProxy } from "../i18n";
 import { AppShell, AppShellHeader, AppShellMain } from "../shared/ui/AppShell";
 import { Button } from "../shared/ui/Button";
@@ -111,7 +111,7 @@ function apiErrorDetail(error: unknown, fallback: string): string {
 export function MyRiotAccountPage({
   streamer,
   onStreamerChange,
-  onUpdateRiotId = updateStreamerRiotId,
+  onUpdateRiotId,
   registrationHref = "/dashboard/streaming",
 }: {
   streamer?: DashboardStreamerInfo;
@@ -141,6 +141,7 @@ export function MyRiotAccountPage({
     setRiotIdBusy(true);
     setRiotIdMessage("");
     try {
+      if (!onUpdateRiotId) throw new Error("riot_id_update_unavailable");
       const updated = await onUpdateRiotId(riotId);
       onStreamerChange?.(updated);
       setRiotIdDraft(currentRiotId(updated));

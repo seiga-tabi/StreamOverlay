@@ -24,6 +24,12 @@ Dashboard입니다. 별도 이메일·비밀번호 계정을 만들지 않고, p
 경로로 redirect합니다. Followers와 Riot ID는 별도 Dashboard session이나 URL key를
 사용하지 않고 공통 YORO session에서 인증합니다.
 
+Frontend에서는 기존 스트리머 전용 진입 화면과
+`X-StreamOps-Streamer-Slug`·`X-StreamOps-Dashboard-Key` 전송을 제거했습니다.
+과거 링크로 접근하면 브라우저 주소를 즉시 key가 없는 통합 경로로 교체합니다.
+Server의 기존 방송 운영 API 호환 계층은 운영 전환과 rollback을 위해 이번 정리
+범위에서 유지하며, 사용량을 확인한 뒤 별도 migration 없이 단계적으로 제거합니다.
+
 ## 인증과 권한
 
 - `/dashboard` 화면 자체는 유효한 opaque `yoro_session`이 있으면 이용할 수 있습니다.

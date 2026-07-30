@@ -38,7 +38,6 @@ export type PublicAppHeaderProps = {
   onAutoLocale: () => void;
   onTwitchLogin: () => void;
   onStreamerRegister: () => void;
-  onStreamerDashboard: () => void;
   onStreamerRecord: () => void;
   onTwitchLogout: () => void;
 };
@@ -59,7 +58,6 @@ export function PublicAppHeader({
   onAutoLocale,
   onTwitchLogin,
   onStreamerRegister,
-  onStreamerDashboard,
   onStreamerRecord,
   onTwitchLogout,
 }: PublicAppHeaderProps) {
@@ -76,7 +74,6 @@ export function PublicAppHeader({
     : undefined;
   const canRegisterStreamer = twitchStatus.streamerRiotRequest?.status !== "approved"
     && twitchStatus.streamerRiotRequest?.status !== "pending";
-  const canOpenStreamerDashboard = registeredStreamerRequest?.dashboardEnabled === true;
   const yoroIdentity = authenticatedYoroIdentity(yoroAccount.session);
   const yoroConnected = yoroAccount.session?.authenticated === true;
   const accountConnected = yoroConnected || twitchStatus.connected;
@@ -169,14 +166,6 @@ export function PublicAppHeader({
   const twitchMenuActions: PublicTwitchAccountMenuAction[] = [];
   if (canRegisterStreamer) {
     twitchMenuActions.push({ id: "register", label: t().streamerRiotRegister, onSelect: onStreamerRegister });
-  }
-  if (canOpenStreamerDashboard) {
-    twitchMenuActions.push({
-      id: "dashboard",
-      label: t().streamerDashboardOpen,
-      onSelect: onStreamerDashboard,
-      variant: "dashboard",
-    });
   }
   if (registeredStreamerRequest) {
     twitchMenuActions.push({ id: "record", label: t().streamerRecordOpen, onSelect: onStreamerRecord });

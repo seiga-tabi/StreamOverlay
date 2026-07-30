@@ -27,9 +27,6 @@ export type DashboardStreamerInfo = {
   profileLinkLabel?: string;
   profileLinks?: DashboardStreamerProfileLink[];
   dashboardEnabled?: boolean;
-  dashboardSlug?: string;
-  dashboardKey?: string;
-  dashboardPath?: string;
 };
 
 export type DashboardAuthStatus = {
@@ -41,15 +38,6 @@ export type DashboardAuthStatus = {
   expiresAt?: string;
   streamer?: DashboardStreamerInfo;
 };
-
-export type DashboardAuthSurface = "admin" | "streamer";
-export type DashboardTenantContext = {
-  streamerSlug: string;
-  dashboardKey: string;
-};
-
-let dashboardAuthSurface: DashboardAuthSurface = "admin";
-let dashboardTenantContext: DashboardTenantContext | undefined;
 
 export class DashboardApiError extends Error {
   readonly name = "DashboardApiError";
@@ -63,21 +51,8 @@ export class DashboardApiError extends Error {
   }
 }
 
-export function setDashboardAuthSurface(surface: DashboardAuthSurface): void {
-  dashboardAuthSurface = surface;
-}
-
-export function setDashboardTenantContext(context: DashboardTenantContext | undefined): void {
-  dashboardTenantContext = context;
-}
-
-function surfaceHeaders(surface: DashboardAuthSurface = dashboardAuthSurface): Record<string, string> {
-  const headers: Record<string, string> = { "X-StreamOps-Dashboard-Surface": surface };
-  if (surface === "streamer" && dashboardTenantContext) {
-    headers["X-StreamOps-Streamer-Slug"] = dashboardTenantContext.streamerSlug;
-    headers["X-StreamOps-Dashboard-Key"] = dashboardTenantContext.dashboardKey;
-  }
-  return headers;
+function surfaceHeaders(): Record<string, string> {
+  return { "X-StreamOps-Dashboard-Surface": "admin" };
 }
 
 function csrfHeaders(): Record<string, string> {
@@ -134,27 +109,11 @@ export async function apiDelete<T>(path: string): Promise<T> {
   return (await response.json()) as T;
 }
 
-export async function apiPostForm<T>(path: string, body: FormData): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, {
-    method: "POST",
-    credentials: "include",
-    headers: { ...surfaceHeaders(), ...csrfHeaders() },
-    body
-  });
-  if (!response.ok) throw await responseError(path, response);
-  return (await response.json()) as T;
-}
-
-export async function getDashboardAuthStatus(
-  surface: DashboardAuthSurface = dashboardAuthSurface,
-  tenantContext?: DashboardTenantContext
-): Promise<DashboardAuthStatus> {
-  setDashboardAuthSurface(surface);
-  setDashboardTenantContext(surface === "streamer" ? tenantContext : undefined);
-  const query = new URLSearchParams({ surface });
+export async function getDashboardAuthStatus(): Promise<DashboardAuthStatus> {
+  const query = new URLSearchParams({ surface: "admin" });
   const response = await fetch(`${API_BASE}/api/dashboard/auth/status?${query.toString()}`, {
     credentials: "include",
-    headers: { ...surfaceHeaders(surface) }
+    headers: { ...surfaceHeaders() }
   });
   if (!response.ok) throw await responseError("/api/dashboard/auth/status", response);
   const status = (await response.json()) as DashboardAuthStatus;
@@ -163,11 +122,10 @@ export async function getDashboardAuthStatus(
 }
 
 export async function checkDashboardAuthToken(token: string): Promise<DashboardAuthStatus> {
-  setDashboardAuthSurface("admin");
   const response = await fetch(`${API_BASE}/api/dashboard/auth/check`, {
     method: "POST",
     credentials: "include",
-    headers: { "Content-Type": "application/json", ...surfaceHeaders("admin") },
+    headers: { "Content-Type": "application/json", ...surfaceHeaders() },
     body: JSON.stringify({ token })
   });
   if (!response.ok) throw await responseError("/api/dashboard/auth/check", response);
@@ -176,19 +134,14 @@ export async function checkDashboardAuthToken(token: string): Promise<DashboardA
   return status;
 }
 
-export async function logoutDashboardSession(surface: DashboardAuthSurface = dashboardAuthSurface): Promise<void> {
-  const query = new URLSearchParams({ surface });
+export async function logoutDashboardSession(): Promise<void> {
+  const query = new URLSearchParams({ surface: "admin" });
   await fetch(`${API_BASE}/api/dashboard/auth/logout?${query.toString()}`, {
     method: "POST",
     credentials: "include",
-    headers: { "Content-Type": "application/json", ...surfaceHeaders(surface), ...csrfHeaders() },
+    headers: { "Content-Type": "application/json", ...surfaceHeaders(), ...csrfHeaders() },
     body: "{}"
   });
-}
-
-export async function updateStreamerRiotId(riotId: string): Promise<DashboardStreamerInfo> {
-  const result = await apiPost<{ streamer: DashboardStreamerInfo }>("/api/participation/streamer-riot-id", { riotId });
-  return result.streamer;
 }
 
 export async function getDashboardTournaments(): Promise<StreamerTournament[]> {

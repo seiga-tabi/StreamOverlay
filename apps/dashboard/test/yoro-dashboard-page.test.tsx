@@ -72,6 +72,9 @@ test("공통 YORO Dashboard는 로그인 사용자용 진입점과 KO·JA 문구
   assert.match(source, /BotManagementPage/u);
   assert.match(source, /스트리머 이용 상태/u);
   assert.match(source, /ストリーマー利用状況/u);
+  assert.match(source, /Dashboard 메뉴 열기/u);
+  assert.match(source, /Dashboardメニューを開く/u);
+  assert.match(source, /aria-controls="yoro-dashboard-navigation"/u);
   assert.match(source, /moderator:read:followers/u);
   assert.match(source, /applyForStreamer/u);
   assert.match(source, /FollowersPage dataSource/u);
@@ -89,13 +92,26 @@ test("공통 YORO Dashboard는 로그인 사용자용 진입점과 KO·JA 문구
     css,
     /\.yoro-dashboard-summary-grid li > \.discord-symbol-icon[\s\S]*?width:\s*22px/u
   );
+  assert.match(css, /grid-template-columns:\s*288px minmax\(0, 1fr\)/u);
+  assert.match(
+    css,
+    /\.yoro-dashboard-main[\s\S]*?margin-inline:\s*auto/u
+  );
+  assert.match(
+    css,
+    /\.yoro-dashboard-sidebar\.is-open[\s\S]*?transform:\s*translateX\(0\)/u
+  );
+  assert.match(css, /@media \(prefers-reduced-motion:\s*reduce\)/u);
 });
 
 test("공통 Dashboard 경로는 기존 방송 운영 하위 경로와 겹치지 않는다", async () => {
   const { YORO_DASHBOARD_PATH } = await import(
     "../src/features/yoro-account/api"
   );
-  const { yoroDashboardPageFromPath } = await import(
+  const {
+    canonicalYoroDashboardPath,
+    yoroDashboardPageFromPath
+  } = await import(
     "../src/features/yoro-dashboard/YoroDashboardPage"
   );
   assert.equal(YORO_DASHBOARD_PATH, "/dashboard");
@@ -123,19 +139,53 @@ test("공통 Dashboard 경로는 기존 방송 운영 하위 경로와 겹치지
     yoroDashboardPageFromPath("/dashboard/streaming/riot-id"),
     "streamingRiot"
   );
+  assert.equal(
+    canonicalYoroDashboardPath("/dashboard/followers"),
+    "/dashboard/streaming/followers"
+  );
+  assert.equal(
+    canonicalYoroDashboardPath(
+      "/dashboard/legacy_user/sdk_0123456789abcdefghijklmnopqrstuv/riot-id"
+    ),
+    "/dashboard/streaming/riot-id"
+  );
+  assert.equal(
+    canonicalYoroDashboardPath(
+      "/dashboard/legacy_user/sdk_0123456789abcdefghijklmnopqrstuv/alerts"
+    ),
+    "/dashboard/streaming"
+  );
 
   const appSource = await readFile(
     new URL("../src/App.tsx", import.meta.url),
     "utf8"
   );
-  assert.match(appSource, /YORO_DASHBOARD_PATHS/u);
-  assert.match(appSource, /"\/dashboard\/streaming\/followers"/u);
+  const clientSource = await readFile(
+    new URL("../src/api/client.ts", import.meta.url),
+    "utf8"
+  );
+  const socketSource = await readFile(
+    new URL("../src/api/socket.ts", import.meta.url),
+    "utf8"
+  );
+  const dashboardSource = await readFile(
+    new URL("../src/features/yoro-dashboard/YoroDashboardPage.tsx", import.meta.url),
+    "utf8"
+  );
+  assert.equal(appSource.includes("StreamerDashboardEntryPage"), false);
+  assert.equal(appSource.includes("streamerAccess"), false);
+  assert.equal(clientSource.includes("X-StreamOps-Dashboard-Key"), false);
+  assert.equal(clientSource.includes("X-StreamOps-Streamer-Slug"), false);
+  assert.equal(socketSource.includes("dashboardKey"), false);
+  assert.equal(socketSource.includes("streamerSlug"), false);
   assert.equal(
-    appSource.includes("!isYoroDashboardPath(window.location.pathname)"),
-    true
+    dashboardSource.includes(
+      "${canonicalPath}${window.location.search}${window.location.hash}"
+    ),
+    false
   );
   assert.equal(
-    appSource.includes('window.location.pathname.startsWith("/dashboard/")'),
+    appSource.includes('pathname.startsWith("/dashboard/")'),
     true
   );
   assert.equal(appSource.includes('"/setup/discord"'), false);

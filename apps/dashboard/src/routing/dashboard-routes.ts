@@ -1,8 +1,6 @@
 export const DASHBOARD_PAGES = [
-  "myRiotAccount",
   "tournaments",
   "streamerRiotRequests",
-  "followers",
   "communityModeration",
   "events",
   "supportInbox",
@@ -10,11 +8,6 @@ export const DASHBOARD_PAGES = [
 ] as const;
 
 export type Page = (typeof DASHBOARD_PAGES)[number];
-export type DashboardRole = "admin" | "streamer";
-export type StreamerDashboardTenant = {
-  streamerSlug: string;
-  dashboardKey: string;
-};
 
 export const ADMIN_ALLOWED_PAGES: Page[] = [
   "tournaments",
@@ -23,11 +16,6 @@ export const ADMIN_ALLOWED_PAGES: Page[] = [
   "events",
   "supportInbox",
   "settings",
-];
-
-export const STREAMER_ALLOWED_PAGES: Page[] = [
-  "followers",
-  "myRiotAccount",
 ];
 
 const ADMIN_PAGE_PATHS: Partial<Record<Page, string>> = {
@@ -39,116 +27,36 @@ const ADMIN_PAGE_PATHS: Partial<Record<Page, string>> = {
   settings: "/admin/settings",
 };
 
-const STREAMER_PAGE_PATHS: Partial<Record<Page, string>> = {
-  followers: "/dashboard/followers",
-  myRiotAccount: "/dashboard/riot-id",
-};
-
-const LEGACY_STREAMER_PAGE_PATHS: Record<string, Page> = {
-  "/dashboard": "followers",
-  "/dashboard/overlay": "followers",
-  "/dashboard/alerts": "followers",
-  "/dashboard/lol": "myRiotAccount",
-  "/dashboard/lol/account": "myRiotAccount",
-  "/dashboard/lol/automation": "followers",
-  "/dashboard/lol/participation": "followers",
-  "/dashboard/palworld/server": "followers",
-  "/dashboard/solo-rank": "followers",
-  "/dashboard/participation": "followers",
-  "/dashboard/riot-account": "myRiotAccount",
-};
-
 function normalizedPath(pathname: string): string {
   if (!pathname || pathname === "/") return "/";
   return pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
 }
 
-function validStreamerSlug(value: string): boolean {
-  return /^[a-zA-Z0-9_-]{1,64}$/.test(value);
+export function pageAllowed(page: Page): boolean {
+  return ADMIN_ALLOWED_PAGES.includes(page);
 }
 
-function validDashboardKey(value: string): boolean {
-  return /^sdk_[a-zA-Z0-9_-]{8,128}$/.test(value);
+export function defaultDashboardPage(): Page {
+  return "streamerRiotRequests";
 }
 
-function decodedPathSegment(value: string): string | undefined {
-  try {
-    const decoded = decodeURIComponent(value);
-    return decoded && !decoded.includes("/") && !decoded.includes("\\") ? decoded : undefined;
-  } catch {
-    return undefined;
-  }
+export function dashboardPathForPage(page: Page): string {
+  return ADMIN_PAGE_PATHS[page]
+    ?? ADMIN_PAGE_PATHS[defaultDashboardPage()]
+    ?? "/admin/riot-id-requests";
 }
 
-function parsedStreamerPath(pathname: string): {
-  routePath: string;
-  tenant?: StreamerDashboardTenant;
-} {
+export function dashboardPageFromPath(pathname: string): Page {
   const normalized = normalizedPath(pathname);
-  const segments = normalized.split("/");
-  if (segments[1] !== "dashboard" || segments.length < 4) return { routePath: normalized };
-
-  const streamerSlug = decodedPathSegment(segments[2] ?? "");
-  const dashboardKey = decodedPathSegment(segments[3] ?? "");
-  if (!streamerSlug || !dashboardKey || !validStreamerSlug(streamerSlug) || !validDashboardKey(dashboardKey)) {
-    return { routePath: normalized };
-  }
-
-  const suffix = segments.slice(4).join("/");
-  return {
-    routePath: suffix ? `/dashboard/${suffix}` : "/dashboard",
-    tenant: { streamerSlug, dashboardKey }
-  };
-}
-
-export function streamerDashboardTenantFromPath(pathname: string): StreamerDashboardTenant | undefined {
-  return parsedStreamerPath(pathname).tenant;
-}
-
-export function streamerDashboardTenantMatches(
-  left: StreamerDashboardTenant | undefined,
-  right: StreamerDashboardTenant | undefined
-): boolean {
-  if (!left || !right) return false;
-  return left.streamerSlug === right.streamerSlug && left.dashboardKey === right.dashboardKey;
-}
-
-export function streamerDashboardBasePath(tenant: StreamerDashboardTenant): string {
-  return `/dashboard/${encodeURIComponent(tenant.streamerSlug)}/${encodeURIComponent(tenant.dashboardKey)}`;
-}
-
-export function pageAllowedForRole(page: Page, role: DashboardRole): boolean {
-  const allowedPages = role === "admin" ? ADMIN_ALLOWED_PAGES : STREAMER_ALLOWED_PAGES;
-  return allowedPages.includes(page);
-}
-
-export function defaultPageForRole(role: DashboardRole): Page {
-  return role === "admin" ? "streamerRiotRequests" : "followers";
-}
-
-export function dashboardPathForPage(page: Page, role: DashboardRole, tenant?: StreamerDashboardTenant): string {
-  const paths = role === "admin" ? ADMIN_PAGE_PATHS : STREAMER_PAGE_PATHS;
-  const path = paths[page] ?? paths[defaultPageForRole(role)] ?? (role === "admin" ? "/admin/riot-id-requests" : "/dashboard/followers");
-  if (role !== "streamer" || !tenant) return path;
-  return path.replace("/dashboard", streamerDashboardBasePath(tenant));
-}
-
-export function dashboardPageFromPath(pathname: string, role: DashboardRole): Page {
-  const normalized = role === "streamer" ? parsedStreamerPath(pathname).routePath : normalizedPath(pathname);
-  if (role === "streamer" && LEGACY_STREAMER_PAGE_PATHS[normalized]) {
-    return LEGACY_STREAMER_PAGE_PATHS[normalized];
-  }
-  const entries = Object.entries(role === "admin" ? ADMIN_PAGE_PATHS : STREAMER_PAGE_PATHS) as Array<[Page, string]>;
-  return entries.find(([, path]) => path === normalized)?.[0] ?? defaultPageForRole(role);
+  const entries = Object.entries(ADMIN_PAGE_PATHS) as Array<[Page, string]>;
+  return entries.find(([, path]) => path === normalized)?.[0] ?? defaultDashboardPage();
 }
 
 export function setDashboardPath(
   page: Page,
-  role: DashboardRole,
-  replace = false,
-  tenant?: StreamerDashboardTenant
+  replace = false
 ): void {
-  const nextPath = dashboardPathForPage(page, role, tenant);
+  const nextPath = dashboardPathForPage(page);
   if (window.location.pathname === nextPath && !window.location.search && !window.location.hash) return;
   if (replace) {
     window.history.replaceState({}, "", nextPath);
