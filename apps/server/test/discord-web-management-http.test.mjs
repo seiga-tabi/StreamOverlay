@@ -212,7 +212,7 @@ test("기존 스트리머 전용 URL은 key를 제거하고 통합 Dashboard로 
     const legacyBase = await request(
       handler,
       "GET",
-      "/dashboard/legacy-streamer/private-dashboard-key?token=unsafe"
+      "/dashboard/legacy-streamer/sdk_abcdefghijklmnopqrstuvwxyz?token=unsafe"
     );
     assert.equal(legacyBase.statusCode, 302);
     assert.equal(legacyBase.headers.Location, "/dashboard/streaming");
@@ -223,7 +223,7 @@ test("기존 스트리머 전용 URL은 key를 제거하고 통합 Dashboard로 
     const legacyFollowers = await request(
       handler,
       "GET",
-      "/dashboard/legacy-streamer/private-dashboard-key/followers"
+      "/dashboard/legacy-streamer/sdk_abcdefghijklmnopqrstuvwxyz/followers"
     );
     assert.equal(
       legacyFollowers.headers.Location,
@@ -236,6 +236,20 @@ test("기존 스트리머 전용 URL은 key를 제거하고 통합 Dashboard로 
       "/dashboard/streaming/followers"
     );
     assert.notEqual(canonicalFollowers.statusCode, 302);
+
+    const dashboardScript = await request(
+      handler,
+      "GET",
+      "/dashboard/assets/index-deadbeef.js"
+    );
+    assert.notEqual(dashboardScript.statusCode, 302);
+
+    const dashboardStylesheet = await request(
+      handler,
+      "GET",
+      "/dashboard/assets/index-deadbeef.css"
+    );
+    assert.notEqual(dashboardStylesheet.statusCode, 302);
   });
 });
 

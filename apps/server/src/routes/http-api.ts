@@ -1359,7 +1359,7 @@ function legacyStreamerDashboardReturnPath(pathname: string): string | undefined
   ]);
   if (canonicalPaths.has(normalized)) return undefined;
   const matched = normalized.match(
-    /^\/dashboard\/[^/]+\/[^/]+(?:\/(followers|riot-id))?$/u
+    /^\/dashboard\/[a-zA-Z0-9_-]{1,64}\/sdk_[a-zA-Z0-9_-]{8,128}(?:\/(followers|riot-id))?$/u
   );
   if (!matched) return undefined;
   if (matched[1] === "followers") return "/dashboard/streaming/followers";
