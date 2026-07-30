@@ -210,3 +210,59 @@ test("Palworld REST 서버 상태는 등록과 실제 연결을 구분해 표시
     "비활성화됨"
   );
 });
+
+test("Organization에는 활성 Palworld 서버 한 개만 표시한다", async () => {
+  const { registeredManagementServers } = await import(
+    "../src/features/bot-management/BotManagementPage"
+  );
+  const server = (id: string, isEnabled: boolean) => ({
+    id,
+    displayName: `서버 ${id}`,
+    gameType: "palworld" as const,
+    region: "asia" as const,
+    connectionType: "rest" as const,
+    connectionStatus: isEnabled ? "not_configured" as const : "revoked" as const,
+    isEnabled,
+    createdAt: "2026-07-30T00:00:00.000Z",
+    updatedAt: "2026-07-30T00:00:00.000Z"
+  });
+  assert.deepEqual(
+    registeredManagementServers([
+      server("disabled", false),
+      server("active-first", true),
+      server("active-second", true)
+    ]).map((item) => item.id),
+    ["active-first"]
+  );
+});
+
+test("Palworld 서버 삭제 API는 detail DELETE와 CSRF cookie 인증을 사용한다", async () => {
+  const { deleteManagementGameServer } = await import(
+    "../src/features/bot-management/api"
+  );
+  const originalFetch = globalThis.fetch;
+  const requests: Array<{ input: string; init?: RequestInit }> = [];
+  globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
+    requests.push({ input: String(input), init });
+    return new Response(null, { status: 204 });
+  }) as typeof fetch;
+  try {
+    await deleteManagementGameServer({
+      organizationId: "11111111-1111-4111-8111-111111111111",
+      gameServerId: "33333333-3333-4333-8333-333333333333",
+      csrfToken: "csrf_value_abcdefghijklmnopqrstuvwxyz123456"
+    });
+    assert.match(
+      requests[0]?.input ?? "",
+      /\/organizations\/11111111-1111-4111-8111-111111111111\/game-servers\/33333333-3333-4333-8333-333333333333$/u
+    );
+    assert.equal(requests[0]?.init?.method, "DELETE");
+    assert.equal(requests[0]?.init?.credentials, "include");
+    assert.equal(
+      (requests[0]?.init?.headers as Record<string, string>)["X-Discord-CSRF"],
+      "csrf_value_abcdefghijklmnopqrstuvwxyz123456"
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

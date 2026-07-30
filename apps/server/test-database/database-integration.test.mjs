@@ -63,7 +63,7 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
   await t.test("check와 plan 기반 검사는 빈 DB를 변경하지 않는다", async () => {
     const inspection = await inspectMigrationState(pool, manifest);
     assert.equal(inspection.status, "pending");
-    assert.equal(inspection.pending.length, 11);
+    assert.equal(inspection.pending.length, 12);
     const table = await pool.query(
       "SELECT to_regclass('public.schema_migrations')::TEXT AS name"
     );
@@ -71,7 +71,14 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
   });
 
   await t.test("빈 DB 적용과 두 번째 no-op 및 checksum 기록", async () => {
-    const applied = await applyPendingMigrations(pool, manifest);
+    await assert.rejects(
+      applyPendingMigrations(pool, manifest),
+      (error) => error instanceof SafeDatabaseError
+        && error.code === "DATABASE_INVALID_INPUT"
+    );
+    const applied = await applyPendingMigrations(pool, manifest, {
+      allowDestructive: true
+    });
     assert.deepEqual(applied, manifest.migrations.map((migration) => migration.id));
     assert.deepEqual(await applyPendingMigrations(pool, manifest), []);
     const inspection = await inspectMigrationState(pool, manifest);
@@ -1291,10 +1298,124 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
     assert.equal(results.filter((result) => result.status === "rejected").length, 1);
     const count = await pool.query(
       `SELECT COUNT(*)::INTEGER AS count FROM game_servers
-       WHERE organization_id = $1 AND is_enabled = TRUE`,
+       WHERE organization_id = $1 AND deleted_at IS NULL`,
       [organization]
     );
     assert.equal(count.rows[0].count, 1);
+
+    const current = await pool.query(
+      `SELECT id, display_name FROM game_servers
+       WHERE organization_id = $1 AND deleted_at IS NULL`,
+      [organization]
+    );
+    await pool.query(
+      `INSERT INTO agent_bootstrap_sessions (
+         id, organization_id, game_server_id, issued_by_user_id,
+         token_hash, expires_at
+       ) VALUES ($1, $2, $3, $4, $5, NOW() + INTERVAL '10 minutes')`,
+      [
+        crypto.randomUUID(),
+        organization,
+        current.rows[0].id,
+        user,
+        crypto.randomBytes(32)
+      ]
+    );
+    await pool.query(
+      `INSERT INTO agent_installations (
+         id, organization_id, game_server_id, status,
+         credential_hash, credential_version
+       ) VALUES ($1, $2, $3, 'pending', $4, 1)`,
+      [
+        crypto.randomUUID(),
+        organization,
+        current.rows[0].id,
+        crypto.randomBytes(32)
+      ]
+    );
+    await pool.query(
+      `INSERT INTO server_connections (
+         id, organization_id, game_server_id, connection_type,
+         encrypted_config, encryption_key_version, schema_version
+       ) VALUES ($1, $2, $3, 'rest', $4, 1, 1)`,
+      [
+        crypto.randomUUID(),
+        organization,
+        current.rows[0].id,
+        crypto.randomBytes(32)
+      ]
+    );
+    await assert.rejects(
+      withTransaction(pool, async (client) =>
+        new DiscordManagementRepository(client).deleteGameServer({
+          context,
+          role: "manager",
+          gameServerId: current.rows[0].id
+        })
+      ),
+      (error) => error instanceof SafeDatabaseError
+        && error.code === "DATABASE_REFERENCE_INVALID"
+    );
+    const deleted = await withTransaction(pool, async (client) =>
+      new DiscordManagementRepository(client).deleteGameServer({
+        context,
+        role: "owner",
+        gameServerId: current.rows[0].id
+      })
+    );
+    assert.equal(deleted, true);
+    assert.deepEqual(
+      await new DiscordManagementRepository(pool).listGameServers(context, "owner"),
+      []
+    );
+
+    const replacement = await create(current.rows[0].display_name);
+    assert.equal(replacement.displayName, current.rows[0].display_name);
+    const lifecycle = await pool.query(
+      `SELECT
+         COUNT(*) FILTER (WHERE deleted_at IS NULL)::INTEGER AS registered_count,
+         COUNT(*) FILTER (WHERE deleted_at IS NOT NULL)::INTEGER AS deleted_count
+       FROM game_servers
+       WHERE organization_id = $1`,
+      [organization]
+    );
+    assert.deepEqual(lifecycle.rows[0], {
+      registered_count: 1,
+      deleted_count: 1
+    });
+    const revokedCredentials = await pool.query(
+      `SELECT
+         (SELECT status FROM agent_bootstrap_sessions
+          WHERE organization_id = $1 AND game_server_id = $2) AS bootstrap_status,
+         (SELECT status FROM agent_installations
+          WHERE organization_id = $1 AND game_server_id = $2) AS installation_status,
+         (SELECT COUNT(*)::INTEGER FROM server_connections
+          WHERE organization_id = $1 AND game_server_id = $2) AS connection_count`,
+      [organization, current.rows[0].id]
+    );
+    assert.deepEqual(revokedCredentials.rows[0], {
+      bootstrap_status: "revoked",
+      installation_status: "revoked",
+      connection_count: 0
+    });
+    await assert.rejects(
+      pool.query(
+        `INSERT INTO game_servers (
+           id, organization_id, game_type, display_name, region,
+           connection_type, connection_status
+         ) VALUES ($1, $2, 'palworld', 'Constraint Probe', 'asia', 'rest', 'not_configured')`,
+        [crypto.randomUUID(), organization]
+      ),
+      (error) => error?.code === "23505"
+    );
+    const audits = await pool.query(
+      `SELECT action
+       FROM audit_logs
+       WHERE organization_id = $1
+         AND action = 'organization.game_server.deleted'`,
+      [organization]
+    );
+    assert.equal(audits.rowCount, 1);
   });
 
   await t.test("상태·history·notification index가 tenant 선두 key를 사용한다", async () => {
@@ -1349,7 +1470,8 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
       );
       await client.query(
         `INSERT INTO game_servers (
-           id, organization_id, game_type, display_name, region, connection_type
+           id, organization_id, game_type, display_name, region, connection_type,
+           connection_status, is_enabled, deleted_at
          )
          SELECT
            ('20000000-0000-4000-8000-' || LPAD(series::TEXT, 12, '0'))::UUID,
@@ -1360,7 +1482,10 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
            'palworld',
            'Load Server ' || series,
            'test',
-           'agent'
+           'agent',
+           CASE WHEN series <= 100 THEN 'not_configured' ELSE 'revoked' END,
+           series <= 100,
+           CASE WHEN series <= 100 THEN NULL ELSE NOW() END
          FROM generate_series(1, 1000) AS series`
       );
       await client.query(

@@ -6924,8 +6924,41 @@ export function createHttpHandler(input: HttpHandlerInput) {
               return sendJson(req, res, 201, { server }, noStoreHeaders());
             }
           }
+          const gameServerDetailMatch = url.pathname.match(
+            /^\/api\/discord\/management\/organizations\/([^/]+)\/game-servers\/([^/]+)$/u
+          );
+          if (gameServerDetailMatch && req.method === "DELETE") {
+            const organizationId = requireManagementOrganizationId(
+              gameServerDetailMatch[1] ?? ""
+            );
+            const gameServerId = gameServerDetailMatch[2] ?? "";
+            if (!isManagementOrganizationId(gameServerId) || url.search) {
+              return sendJson(req, res, 404, { error: "not found" });
+            }
+            if (!stateChangingRequestHasTrustedOrigin(req)) {
+              return sendJson(req, res, 403, {
+                error: "trusted Origin이 필요합니다.",
+                code: "origin_denied"
+              });
+            }
+            const csrfToken = requestHeaderValue(req, "x-discord-csrf");
+            await input.discordManagement.deleteGameServer({
+              cookieValue: managementCookie,
+              csrfToken,
+              organizationId,
+              gameServerId,
+              ...(input.palworldServerMonitor
+                ? {
+                    beforeDelete: async (ownerId: string) => {
+                      await input.palworldServerMonitor!.removeConnection(ownerId);
+                    }
+                  }
+                : {})
+            });
+            return sendJson(req, res, 204, {}, noStoreHeaders());
+          }
           const gameServerActionMatch = url.pathname.match(
-            /^\/api\/discord\/management\/organizations\/([^/]+)\/game-servers\/([^/]+)\/(disable|agent-token)$/u
+            /^\/api\/discord\/management\/organizations\/([^/]+)\/game-servers\/([^/]+)\/(agent-token)$/u
           );
           if (gameServerActionMatch) {
             const organizationId = requireManagementOrganizationId(gameServerActionMatch[1] ?? "");
@@ -6938,15 +6971,6 @@ export function createHttpHandler(input: HttpHandlerInput) {
               return sendJson(req, res, 403, { error: "trusted Origin이 필요합니다.", code: "origin_denied" });
             }
             const csrfToken = requestHeaderValue(req, "x-discord-csrf");
-            if (req.method === "POST" && action === "disable") {
-              await input.discordManagement.disableGameServer({
-                cookieValue: managementCookie,
-                csrfToken,
-                organizationId,
-                gameServerId
-              });
-              return sendJson(req, res, 204, {}, noStoreHeaders());
-            }
             if (req.method === "POST" && action === "agent-token") {
               const issued = await input.discordManagement.issueAgentToken({
                 cookieValue: managementCookie,

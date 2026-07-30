@@ -28,7 +28,7 @@ import {
   botInstallUrl,
   claimManagementGuild,
   createManagementGameServer,
-  disableManagementGameServer,
+  deleteManagementGameServer,
   getManagementConnectSession,
   getManagementPalworldRestConnection,
   getManagementSession,
@@ -59,6 +59,7 @@ const copy = {
     connectDescription: "관리 권한이 있고 YORO Bot이 설치된 서버만 연결할 수 있습니다.",
     connectLogin: "Discord로 로그인하고 서버 선택",
     existingLogin: "기존 Organization 로그인",
+    organizationField: "관리할 Organization",
     installBot: "Discord 서버에 YORO Bot 추가",
     installBotHint: "Bot 추가 화면은 새 탭에서 열립니다. 설치 후 이 탭으로 돌아오면 상태를 자동으로 확인합니다.",
     installedGuilds: "연결 가능한 Discord 서버",
@@ -84,8 +85,13 @@ const copy = {
     region: "지역",
     create: "서버 등록",
     creating: "등록 중",
+    deleting: "삭제 중",
     createCompleted: "서버 항목을 등록했습니다. 아래에서 REST 주소와 AdminPassword로 연결을 확인해 주세요.",
-    disable: "서버 비활성화",
+    deleteServer: "서버 삭제",
+    deleteConfirm: "이 서버 설정을 삭제할까요? 저장된 REST 연결과 Agent 자격 증명도 폐기됩니다.",
+    deleteCancel: "취소",
+    deleteAction: "삭제 확인",
+    deleteCompleted: "Palworld 게임 서버를 삭제했습니다.",
     credentialTitle: "REST 직접 연결 안내",
     credentialDescription: "브라우저가 Palworld 서버로 직접 요청하지 않습니다. YORO Server가 고정된 REST endpoint만 검증하며, AdminPassword는 공통 암호화 저장소에 암호화해 보관합니다.",
     connectionStatus: "REST 연결 상태",
@@ -127,7 +133,7 @@ const copy = {
     restLatency: "응답 시간",
     restStorageUnavailableTitle: "YORO의 자격 증명 저장소가 준비되지 않았습니다.",
     restStorageUnavailableDescription: "입력한 Palworld AdminPassword의 문제가 아닙니다. 서비스 운영자가 공통 암호화 저장소를 준비한 뒤 직접 등록할 수 있습니다.",
-    entitlement: "무료 Organization은 활성 게임 서버 1개까지 등록할 수 있습니다.",
+    entitlement: "Organization마다 Palworld 게임 서버는 1개만 등록할 수 있습니다.",
     permission: "이 작업을 수행할 Organization 권한이 없습니다.",
     unavailable: "관리 기능을 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.",
     retry: "다시 시도",
@@ -155,6 +161,7 @@ const copy = {
     connectDescription: "管理権限があり、YORO Botが導入済みのサーバーのみ連携できます。",
     connectLogin: "Discordでログインしてサーバーを選択",
     existingLogin: "既存Organizationにログイン",
+    organizationField: "管理するOrganization",
     installBot: "DiscordサーバーにYORO Botを追加",
     installBotHint: "Bot追加画面は新しいタブで開きます。導入後にこのタブへ戻ると、状態を自動で確認します。",
     installedGuilds: "連携可能なDiscordサーバー",
@@ -180,8 +187,13 @@ const copy = {
     region: "地域",
     create: "サーバー登録",
     creating: "登録中",
+    deleting: "削除中",
     createCompleted: "サーバー項目を登録しました。下でRESTアドレスとAdminPasswordを使用して接続を確認してください。",
-    disable: "サーバーを無効化",
+    deleteServer: "サーバーを削除",
+    deleteConfirm: "このサーバー設定を削除しますか？保存済みREST接続とAgent認証情報も失効します。",
+    deleteCancel: "キャンセル",
+    deleteAction: "削除を確認",
+    deleteCompleted: "Palworldゲームサーバーを削除しました。",
     credentialTitle: "REST直接接続のご案内",
     credentialDescription: "ブラウザからPalworldサーバーへ直接リクエストしません。YORO Serverが固定REST endpointのみを検証し、AdminPasswordは共通暗号化ストレージへ暗号化して保存します。",
     connectionStatus: "REST接続状態",
@@ -223,7 +235,7 @@ const copy = {
     restLatency: "応答時間",
     restStorageUnavailableTitle: "YOROの認証情報ストレージが準備されていません。",
     restStorageUnavailableDescription: "入力したPalworld AdminPasswordの問題ではありません。サービス運営者が共通暗号化ストレージを準備した後、ご自身で登録できます。",
-    entitlement: "無料Organizationは有効なゲームサーバーを1台まで登録できます。",
+    entitlement: "OrganizationごとにPalworldゲームサーバーは1台のみ登録できます。",
     permission: "この操作に必要なOrganization権限がありません。",
     unavailable: "管理機能を利用できません。しばらくしてからもう一度お試しください。",
     retry: "再試行",
@@ -392,6 +404,12 @@ function restResultMessage(
   return text.restConnectionFailed;
 }
 
+export function registeredManagementServers(
+  servers: readonly BotManagementGameServer[]
+): readonly BotManagementGameServer[] {
+  return servers.filter((server) => server.isEnabled).slice(0, 1);
+}
+
 export function BotManagementPage({ embedded = false }: { embedded?: boolean }) {
   const [locale] = useState<DashboardLocale>(() => detectDashboardLocale());
   const text = copy[locale];
@@ -414,6 +432,7 @@ export function BotManagementPage({ embedded = false }: { embedded?: boolean }) 
   >({});
   const [restBusy, setRestBusy] = useState(false);
   const [restFeedback, setRestFeedback] = useState("");
+  const [deleteServerId, setDeleteServerId] = useState("");
   const [announcement, setAnnouncement] = useState("");
   const headingRef = useRef<HTMLHeadingElement>(null);
   const installRefreshInFlightRef = useRef(false);
@@ -440,7 +459,9 @@ export function BotManagementPage({ embedded = false }: { embedded?: boolean }) 
         setOrganizationId(nextOrganization);
         if (nextOrganization) {
           setConnectSession(undefined);
-          const nextServers = await listManagementGameServers(nextOrganization, signal);
+          const nextServers = registeredManagementServers(
+            await listManagementGameServers(nextOrganization, signal)
+          );
           setServers(nextServers);
           const firstServer = nextServers.find((server) => server.isEnabled);
           if (firstServer) {
@@ -594,6 +615,7 @@ export function BotManagementPage({ embedded = false }: { embedded?: boolean }) 
 
   async function selectOrganization(id: string): Promise<void> {
     setOrganizationId(id);
+    setDeleteServerId("");
     setRestServerId("");
     setRestBaseUrl("");
     setRestPassword("");
@@ -602,7 +624,9 @@ export function BotManagementPage({ embedded = false }: { embedded?: boolean }) 
     setLoading(true);
     setError("");
     try {
-      const nextServers = await listManagementGameServers(id);
+      const nextServers = registeredManagementServers(
+        await listManagementGameServers(id)
+      );
       setServers(nextServers);
       const firstServer = nextServers.find((server) => server.isEnabled);
       if (firstServer) {
@@ -628,7 +652,7 @@ export function BotManagementPage({ embedded = false }: { embedded?: boolean }) 
         csrfToken: session.csrfToken,
         value: { displayName, region }
       });
-      setServers((current) => [...current, server]);
+      setServers([server]);
       setRestServerId(server.id);
       setRestBaseUrl("");
       setRestPassword("");
@@ -647,7 +671,9 @@ export function BotManagementPage({ embedded = false }: { embedded?: boolean }) 
     setLoading(true);
     setError("");
     try {
-      setServers(await listManagementGameServers(organizationId));
+      setServers(registeredManagementServers(
+        await listManagementGameServers(organizationId)
+      ));
     } catch (refreshError) {
       setError(messageFor(refreshError, locale));
     } finally {
@@ -769,6 +795,31 @@ export function BotManagementPage({ embedded = false }: { embedded?: boolean }) 
       setError(messageFor(restError, locale));
     } finally {
       setRestBusy(false);
+    }
+  }
+
+  async function deleteServer(server: BotManagementGameServer): Promise<void> {
+    if (!session?.authenticated || submitting) return;
+    setSubmitting(true);
+    setError("");
+    try {
+      await deleteManagementGameServer({
+        organizationId,
+        gameServerId: server.id,
+        csrfToken: session.csrfToken
+      });
+      setServers([]);
+      setDeleteServerId("");
+      setRestServerId("");
+      setRestBaseUrl("");
+      setRestPassword("");
+      setRestResponses({});
+      setRestFeedback("");
+      setAnnouncement(text.deleteCompleted);
+    } catch (deleteError) {
+      setError(messageFor(deleteError, locale));
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -934,13 +985,21 @@ export function BotManagementPage({ embedded = false }: { embedded?: boolean }) 
       ) : null}
       {session?.authenticated && session.organizations.length > 0 ? (
         <>
-          <Card>
+          <Card className="bot-management-organization-card">
             <CardHeader>
-              <CardTitle as="h2">{text.organization}</CardTitle>
+              <div>
+                <CardTitle as="h2">{text.organization}</CardTitle>
+                {selectedOrganization ? (
+                  <CardDescription>{selectedOrganization.displayName}</CardDescription>
+                ) : null}
+              </div>
+              {selectedOrganization ? (
+                <Badge>{text[selectedOrganization.role]}</Badge>
+              ) : null}
             </CardHeader>
-            <CardContent>
+            <CardContent className="bot-management-organization-content">
               <label className="bot-management-field">
-                <span>{text.organization}</span>
+                <span>{text.organizationField}</span>
                 <select
                   value={organizationId}
                   onChange={(event) => void selectOrganization(event.target.value)}
@@ -952,14 +1011,13 @@ export function BotManagementPage({ embedded = false }: { embedded?: boolean }) 
                   ))}
                 </select>
               </label>
-              {selectedOrganization ? (
-                <Badge>{text[selectedOrganization.role]}</Badge>
-              ) : null}
             </CardContent>
           </Card>
 
-          {selectedOrganization?.role !== "viewer" ? (
-            <Card>
+          {!loading
+            && selectedOrganization?.role !== "viewer"
+            && servers.length === 0 ? (
+            <Card className="bot-management-create-card">
               <CardHeader>
                 <CardTitle as="h2">{text.createTitle}</CardTitle>
                 <CardDescription>{text.createDescription} {text.entitlement}</CardDescription>
@@ -1020,19 +1078,19 @@ export function BotManagementPage({ embedded = false }: { embedded?: boolean }) 
                 {text.connectionRefresh}
               </Button>
             </div>
-            {!loading && servers.length === 0 ? (
+            {!loading
+              && servers.length === 0
+              && selectedOrganization?.role === "viewer" ? (
               <EmptyState>
                 <EmptyStateTitle>{text.noServers}</EmptyStateTitle>
               </EmptyState>
             ) : null}
             {servers.map((server) => {
               const restResponse = restResponses[server.id];
-              const connection = server.isEnabled
-                ? restConnectionStatusPresentation(restResponse, locale)
-                : botManagementConnectionStatusPresentation("revoked", locale);
+              const connection = restConnectionStatusPresentation(restResponse, locale);
               const restOpen = restServerId === server.id;
               return (
-                <Card key={server.id}>
+                <Card className="bot-management-server-card" key={server.id}>
                   <CardHeader>
                     <div className="bot-management-server-heading">
                       <CardTitle>{server.displayName}</CardTitle>
@@ -1060,8 +1118,8 @@ export function BotManagementPage({ embedded = false }: { embedded?: boolean }) 
                         </time>
                       </p>
                     ) : null}
-                  <div className="bot-management-actions">
-                    {selectedOrganization?.role !== "viewer" && server.isEnabled ? (
+                    <div className="bot-management-actions">
+                    {selectedOrganization?.role !== "viewer" && !deleteServerId ? (
                       <Button
                         aria-expanded={restOpen}
                         type="button"
@@ -1071,37 +1129,48 @@ export function BotManagementPage({ embedded = false }: { embedded?: boolean }) 
                         {restOpen ? text.restClose : text.restOpen}
                       </Button>
                     ) : null}
-                    {selectedOrganization?.role === "owner" && server.isEnabled ? (
+                    {selectedOrganization?.role === "owner" && !deleteServerId ? (
                       <Button
                         type="button"
                         variant="danger"
-                        onClick={async () => {
-                          if (!session.authenticated) return;
-                          setSubmitting(true);
-                          setError("");
-                          try {
-                            await disableManagementGameServer({
-                              organizationId,
-                              gameServerId: server.id,
-                              csrfToken: session.csrfToken
-                            });
-                            setServers((current) => current.map((item) =>
-                              item.id === server.id
-                                ? { ...item, isEnabled: false, connectionStatus: "revoked" }
-                                : item
-                            ));
-                          } catch (disableError) {
-                            setError(messageFor(disableError, locale));
-                          } finally {
-                            setSubmitting(false);
-                          }
+                        onClick={() => {
+                          setDeleteServerId(server.id);
+                          setRestServerId("");
+                          setRestPassword("");
+                          setRestFeedback("");
                         }}
                       >
-                        {text.disable}
+                        {text.deleteServer}
                       </Button>
                     ) : null}
                   </div>
-                  {restOpen && selectedOrganization?.role !== "viewer" ? (
+                  {deleteServerId === server.id ? (
+                    <div className="bot-management-delete-confirmation" role="alert">
+                      <p>{text.deleteConfirm}</p>
+                      <div className="bot-management-actions">
+                        <Button
+                          disabled={submitting}
+                          type="button"
+                          variant="secondary"
+                          onClick={() => setDeleteServerId("")}
+                        >
+                          {text.deleteCancel}
+                        </Button>
+                        <Button
+                          loading={submitting}
+                          loadingLabel={text.deleting}
+                          type="button"
+                          variant="danger"
+                          onClick={() => void deleteServer(server)}
+                        >
+                          {text.deleteAction}
+                        </Button>
+                      </div>
+                    </div>
+                  ) : null}
+                  {restOpen
+                    && deleteServerId !== server.id
+                    && selectedOrganization?.role !== "viewer" ? (
                     <section
                       aria-busy={restBusy}
                       aria-labelledby={`rest-${server.id}`}

@@ -88,6 +88,14 @@
       "checksumSha256": "b57463ab18846bfe1f6a6689a418054bcbccbc305ae87bb84032a7cf1dcb1667",
       "destructive": false,
       "transaction": true
+    },
+    {
+      "id": "0012_single_palworld_server",
+      "file": "0012_single_palworld_server.sql",
+      "description": "Organization당 Palworld 서버 1개 제한과 비활성 항목 정리",
+      "checksumSha256": "c369346a1cb1c65dd587af05eaeeae9aa6f1c1950b73fb2fc29bc994a6d360a7",
+      "destructive": true,
+      "transaction": true
     }
   ]
 }

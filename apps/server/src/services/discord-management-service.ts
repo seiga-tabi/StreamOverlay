@@ -344,23 +344,53 @@ export class DiscordManagementService {
     }
   }
 
-  async disableGameServer(input: {
+  async deleteGameServer(input: {
     cookieValue?: string;
     csrfToken?: string;
     organizationId: string;
     gameServerId: string;
+    beforeDelete?: (ownerId: string) => Promise<void>;
   }): Promise<void> {
     const authenticated = await this.requireMutationSession(
       input.cookieValue,
       input.csrfToken
     );
-    const disabled = await withTransaction(this.pool, async (client) => {
+    try {
+      const authorizationRepository = new DiscordManagementRepository(this.pool);
+      const membership = await authorizationRepository.requireMembership(
+        authenticated.userId,
+        input.organizationId
+      );
+      if (membership.role !== "owner") {
+        throw new DiscordManagementError("permission_required", 403);
+      }
+      const servers = await authorizationRepository.listGameServers(
+        membership.context,
+        membership.role
+      );
+      if (!servers.some((server) => server.id === input.gameServerId)) {
+        throw new DiscordManagementError("not_found", 404);
+      }
+      await input.beforeDelete?.(
+        `organization:${input.organizationId}:server:${input.gameServerId}`
+      );
+    } catch (error) {
+      if (error instanceof DiscordManagementError) throw error;
+      if (
+        error instanceof SafeDatabaseError
+        && error.code === "DATABASE_REFERENCE_INVALID"
+      ) {
+        throw new DiscordManagementError("permission_required", 403);
+      }
+      throw error;
+    }
+    const deleted = await withTransaction(this.pool, async (client) => {
       const repository = new DiscordManagementRepository(client);
       const membership = await repository.requireMembership(
         authenticated.userId,
         input.organizationId
       );
-      return repository.disableGameServer({
+      return repository.deleteGameServer({
         context: membership.context,
         role: membership.role,
         gameServerId: input.gameServerId
@@ -371,7 +401,7 @@ export class DiscordManagementService {
       }
       throw error;
     });
-    if (!disabled) throw new DiscordManagementError("not_found", 404);
+    if (!deleted) throw new DiscordManagementError("not_found", 404);
   }
 
   async issueAgentToken(input: {

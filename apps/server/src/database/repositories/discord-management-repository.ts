@@ -275,9 +275,11 @@ export class DiscordManagementRepository {
       `SELECT id, display_name, region, connection_type, connection_status,
          is_enabled, created_at, updated_at
        FROM game_servers
-       WHERE organization_id = $1 AND deleted_at IS NULL
+       WHERE organization_id = $1
+         AND deleted_at IS NULL
+         AND is_enabled = TRUE
        ORDER BY created_at ASC, id ASC
-       LIMIT 100`,
+       LIMIT 1`,
       [context.organizationId]
     );
     return Object.freeze(result.rows.map(gameServer));
@@ -307,11 +309,11 @@ export class DiscordManagementRepository {
       `SELECT COUNT(*)::TEXT AS count
        FROM game_servers
        WHERE organization_id = $1
-         AND deleted_at IS NULL
-         AND is_enabled = TRUE`,
+         AND deleted_at IS NULL`,
       [input.context.organizationId]
     );
-    if (Number(count.rows[0]?.count ?? maximum) >= maximum) {
+    const allowedMaximum = Math.min(maximum, 1);
+    if (Number(count.rows[0]?.count ?? allowedMaximum) >= allowedMaximum) {
       throw new SafeDatabaseError("DATABASE_CONFLICT", false);
     }
     const result = await repositoryQuery<GameServerRow>(
@@ -333,17 +335,56 @@ export class DiscordManagementRepository {
     return gameServer(result.rows[0]!);
   }
 
-  async disableGameServer(input: {
+  async deleteGameServer(input: {
     context: TenantContext;
     role: BotManagementRole;
     gameServerId: string;
   }): Promise<boolean> {
     requireRole(input.role, ["owner"]);
     const id = requireUuid(input.gameServerId, "gameServerId");
+    const server = await repositoryQuery<{ id: string }>(
+      this.queryable,
+      `SELECT id
+       FROM game_servers
+       WHERE organization_id = $1
+         AND id = $2
+         AND deleted_at IS NULL
+         AND is_enabled = TRUE
+       FOR UPDATE`,
+      [input.context.organizationId, id]
+    );
+    if (!server.rows[0]) return false;
+    await repositoryQuery(
+      this.queryable,
+      `UPDATE agent_bootstrap_sessions
+       SET status = 'revoked', revoked_at = NOW()
+       WHERE organization_id = $1
+         AND game_server_id = $2
+         AND status = 'issued'`,
+      [input.context.organizationId, id]
+    );
+    await repositoryQuery(
+      this.queryable,
+      `UPDATE agent_installations
+       SET status = 'revoked', revoked_at = COALESCE(revoked_at, NOW())
+       WHERE organization_id = $1
+         AND game_server_id = $2
+         AND status <> 'revoked'`,
+      [input.context.organizationId, id]
+    );
+    await repositoryQuery(
+      this.queryable,
+      `DELETE FROM server_connections
+       WHERE organization_id = $1 AND game_server_id = $2`,
+      [input.context.organizationId, id]
+    );
     const result = await repositoryQuery(
       this.queryable,
       `UPDATE game_servers
-       SET is_enabled = FALSE, connection_status = 'revoked', updated_at = NOW()
+       SET is_enabled = FALSE,
+           connection_status = 'revoked',
+           deleted_at = NOW(),
+           updated_at = NOW()
        WHERE organization_id = $1
          AND id = $2
          AND deleted_at IS NULL
@@ -351,7 +392,7 @@ export class DiscordManagementRepository {
       [input.context.organizationId, id]
     );
     if (result.rowCount === 1) {
-      await this.audit(input.context, "organization.game_server.disabled", "game_server", id);
+      await this.audit(input.context, "organization.game_server.deleted", "game_server", id);
     }
     return result.rowCount === 1;
   }

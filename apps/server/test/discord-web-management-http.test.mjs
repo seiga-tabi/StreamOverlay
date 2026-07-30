@@ -815,3 +815,48 @@ test("Organization Palworld REST 변경 요청은 신뢰할 수 없는 Origin을
     assert.doesNotMatch(response.body, /secret|pal\\.example/u);
   });
 });
+
+test("Organization 소유자의 게임 서버 삭제는 REST 자격 증명 제거와 DB 삭제를 한 요청으로 연결한다", async () => {
+  await withDiscordConfig(async () => {
+    const organizationId = "11111111-1111-4111-8111-111111111111";
+    const gameServerId = "33333333-3333-4333-8333-333333333333";
+    const ownerId = `organization:${organizationId}:server:${gameServerId}`;
+    const calls = [];
+    const { handler } = createDiscordHandler({
+      handlerInput: {
+        discordManagement: {
+          async deleteGameServer(input) {
+            calls.push({ type: "delete", input });
+            await input.beforeDelete(ownerId);
+          }
+        },
+        palworldServerMonitor: {
+          async removeConnection(receivedOwnerId) {
+            calls.push({ type: "remove", ownerId: receivedOwnerId });
+          }
+        }
+      }
+    });
+    const response = await request(
+      handler,
+      "DELETE",
+      `/api/discord/management/organizations/${organizationId}/game-servers/${gameServerId}`,
+      undefined,
+      {
+        origin: DASHBOARD_ORIGIN,
+        cookie:
+          "yoro_session=session_value_abcdefghijklmnopqrstuvwxyz123456.csrf_value_abcdefghijklmnopqrstuvwxyz123456",
+        "x-discord-csrf": "csrf_value_abcdefghijklmnopqrstuvwxyz123456"
+      }
+    );
+    assert.equal(response.statusCode, 204);
+    assert.equal(calls[0]?.type, "delete");
+    assert.deepEqual(calls[1], { type: "remove", ownerId });
+    assert.equal(
+      calls[0]?.input.csrfToken,
+      "csrf_value_abcdefghijklmnopqrstuvwxyz123456"
+    );
+    assert.equal(calls[0]?.input.organizationId, organizationId);
+    assert.equal(calls[0]?.input.gameServerId, gameServerId);
+  });
+});

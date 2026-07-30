@@ -146,14 +146,14 @@ export async function createManagementGameServer(input: {
   return body.server;
 }
 
-export function disableManagementGameServer(input: {
+export function deleteManagementGameServer(input: {
   organizationId: string;
   gameServerId: string;
   csrfToken: string;
 }): Promise<void> {
   return request(
-    `/api/discord/management/organizations/${encodeURIComponent(input.organizationId)}/game-servers/${encodeURIComponent(input.gameServerId)}/disable`,
-    { method: "POST", headers: { "X-Discord-CSRF": input.csrfToken } }
+    `/api/discord/management/organizations/${encodeURIComponent(input.organizationId)}/game-servers/${encodeURIComponent(input.gameServerId)}`,
+    { method: "DELETE", headers: { "X-Discord-CSRF": input.csrfToken } }
   );
 }
 

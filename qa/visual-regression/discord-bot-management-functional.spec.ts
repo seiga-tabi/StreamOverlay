@@ -448,7 +448,7 @@ test("Guild claim 오류는 내부 tenant 정보를 노출하지 않고 안전�
     [{ status: 409, code: "guild_already_connected" }, "이미 다른 Organization에 연결"],
     [{ status: 403, code: "guild_permission_required" }, "관리할 권한이 없습니다"],
     [{ status: 409, code: "bot_installation_required" }, "Bot 설치 확인 중"],
-    [{ status: 409, code: "entitlement_exceeded" }, "활성 게임 서버 1개"],
+    [{ status: 409, code: "entitlement_exceeded" }, "게임 서버는 1개만"],
     [{ status: 409, code: "setup_session_expired" }, "연결 session이 만료"],
     [{ status: 503, code: "database_unavailable" }, "관리 기능을 사용할 수 없습니다"],
     ["network", "관리 기능을 사용할 수 없습니다"],
@@ -465,6 +465,121 @@ test("Guild claim 오류는 내부 tenant 정보를 노출하지 않고 안전�
     );
     await expect(alert).not.toContainText("owner");
   }
+});
+
+test("Organization 관리는 어두운 카드와 Palworld 서버 한 개·삭제 흐름만 표시한다", async ({ page }) => {
+  await installAuthenticatedAccountRoute(page);
+  const activeServer = {
+    id: "33333333-3333-4333-8333-333333333333",
+    displayName: "운영 Palworld 서버",
+    gameType: "palworld",
+    region: "asia",
+    connectionType: "rest",
+    connectionStatus: "not_configured",
+    isEnabled: true,
+    createdAt: "2026-07-30T00:00:00.000Z",
+    updatedAt: "2026-07-30T00:00:00.000Z",
+  };
+  const disabledServer = {
+    ...activeServer,
+    id: "44444444-4444-4444-8444-444444444444",
+    displayName: "과거 비활성 서버",
+    connectionStatus: "revoked",
+    isEnabled: false,
+  };
+  let deleted = false;
+  await page.route("**/api/discord/management/**", async (route) => {
+    const url = new URL(route.request().url());
+    if (url.pathname === "/api/discord/management/session") {
+      await json(route, {
+        authenticated: true,
+        csrfToken: "management-csrf",
+        organizations: [organization],
+      });
+      return;
+    }
+    const listPath =
+      `/api/discord/management/organizations/${organization.id}/game-servers`;
+    if (url.pathname === listPath) {
+      await json(route, { items: [disabledServer, activeServer] });
+      return;
+    }
+    if (url.pathname === `${listPath}/${activeServer.id}/palworld-rest`) {
+      await json(route, {
+        enabled: true,
+        pollIntervalSeconds: 30,
+        registrationPolicy: {
+          publicHttpsSelfService: true,
+          publicHttpsPort: 443,
+          privateNetworkRequiresOperatorApproval: true,
+        },
+        connection: {
+          configured: true,
+          baseUrl: "https://pal.example.com",
+          passwordConfigured: true,
+          updatedAt: "2026-07-30T00:00:00.000Z",
+        },
+        status: {
+          state: "online",
+          checkedAt: "2026-07-30T00:00:00.000Z",
+          lastSuccessAt: "2026-07-30T00:00:00.000Z",
+          latencyMs: 20,
+          consecutiveFailures: 0,
+          info: { serverName: "검증 서버", version: "v0.6.6" },
+          metrics: {
+            serverFps: 60,
+            currentPlayers: 1,
+            maxPlayers: 32,
+            frameTimeMs: 16.67,
+            uptimeSeconds: 3600,
+            baseCampCount: 2,
+            gameDays: 20,
+          },
+          diagnostics: [
+            "url_policy",
+            "dns_tcp",
+            "tls",
+            "basic_auth",
+            "info",
+            "metrics",
+            "schema",
+          ].map((key) => ({ key, state: "skipped" })),
+        },
+      });
+      return;
+    }
+    if (
+      url.pathname === `${listPath}/${activeServer.id}`
+      && route.request().method() === "DELETE"
+    ) {
+      expect(route.request().headers()["x-discord-csrf"]).toBe("management-csrf");
+      deleted = true;
+      await route.fulfill({ status: 204 });
+      return;
+    }
+    await json(route, { code: "not_found" }, 404);
+  });
+
+  await page.goto("/dashboard/organizations");
+  await expect(page.getByRole("heading", { name: "Organization 관리" })).toBeVisible();
+  await expect(page.getByText(activeServer.displayName)).toBeVisible();
+  await expect(page.getByText(disabledServer.displayName)).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Palworld REST 서버 등록" })).toHaveCount(0);
+  const organizationCard = page.locator(".bot-management-organization-card");
+  await expect(organizationCard).toBeVisible();
+  await expect.poll(() => organizationCard.evaluate((element) =>
+    getComputedStyle(element).backgroundImage
+  )).toContain("gradient");
+
+  await page.getByRole("button", { name: "서버 삭제" }).click();
+  await expect(page.locator(".bot-management-delete-confirmation")).toContainText(
+    "저장된 REST 연결과 Agent 자격 증명도 폐기"
+  );
+  await page.getByRole("button", { name: "삭제 확인" }).click();
+  await expect.poll(() => deleted).toBe(true);
+  await expect(page.getByText(activeServer.displayName)).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Palworld REST 서버 등록" })).toBeVisible();
+  await expectNoHorizontalOverflow(page);
 });
 
 const responsiveViewports = {

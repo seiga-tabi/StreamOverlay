@@ -36,7 +36,7 @@ Guild claim 완료 시 새로운 management session을 같은 transaction에서 
 |---|---:|---:|---:|
 | Organization·게임 서버 조회 | 가능 | 가능 | 가능 |
 | Palworld 게임 서버 생성 | 가능 | 가능 | 불가 |
-| 게임 서버 비활성화 | 가능 | 불가 | 불가 |
+| 게임 서버 삭제 | 가능 | 불가 | 불가 |
 | Palworld REST 테스트·저장·새로고침·삭제 | 가능 | 가능 | 조회만 |
 
 다른 Organization의 ID를 알고 있어도 같은 `not_found` 또는 권한 오류 경계 밖의 정보를 받을 수 없습니다.
@@ -45,7 +45,7 @@ Guild claim 완료 시 새로운 management session을 같은 transaction에서 
 
 현재 생성 가능한 유형은 `palworld`, 새 연결 방식은 `rest`입니다. 스트리머는 자신의 REST 주소와 Palworld 전용 서버 설정의 `AdminPassword`를 직접 입력합니다. 브라우저는 Palworld 서버에 직접 접속하지 않으며, YORO Server가 URL·DNS·TLS 정책을 먼저 검증한 뒤 고정된 REST endpoint만 호출합니다.
 
-Free 기본값은 활성 게임 서버 1개입니다. 생성 transaction에서 entitlement row를 lock하고 활성 서버 수를 확인한 뒤 insert하므로 동시 요청으로 한도를 초과하지 않습니다. entitlement 조회가 없거나 실패하면 무제한으로 완화하지 않고 fail-closed 처리합니다.
+Organization에는 삭제되지 않은 Palworld 게임 서버를 정확히 1개만 등록할 수 있습니다. 생성 transaction에서 entitlement row를 lock하고 등록 서버 수를 확인한 뒤 insert하며, Database unique index도 같은 제한을 강제하므로 동시 요청으로 한도를 초과하지 않습니다. 서버 삭제는 REST 연결과 Agent bootstrap·credential을 폐기하고 soft delete로 이력을 보존합니다. entitlement 조회가 없거나 실패하면 무제한으로 완화하지 않고 fail-closed 처리합니다.
 
 ## Palworld REST와 자격 증명
 

@@ -1,18 +1,76 @@
 .bot-management-page {
+  --yoro-color-surface: #171f2c;
+  --yoro-color-surface-muted: #121a27;
+  --yoro-color-surface-strong: #1c2636;
+  --yoro-color-text: #dce4f1;
+  --yoro-color-text-strong: #f8faff;
+  --yoro-color-text-muted: #9daabd;
+  --yoro-color-border: rgb(164 181 209 / 14%);
+  --yoro-color-border-strong: rgb(154 126 255 / 34%);
+  --surface: #101826;
+  --text: #f4f7fc;
+  --text-muted: #9daabd;
+  --line: rgb(164 181 209 / 16%);
+
   display: grid;
-  gap: var(--space-5);
-  width: min(100% - (var(--space-4) * 2), 72rem);
+  gap: 1.25rem;
+  width: min(100% - (var(--space-4) * 2), 76rem);
   margin-inline: auto;
   padding-block: var(--space-6);
+  color: var(--yoro-color-text);
 }
 
 .bot-management-header {
   min-width: 0;
+  padding-bottom: .25rem;
 }
 
-.bot-management-header h1,
+.bot-management-header h1 {
+  margin: .45rem 0 0;
+  color: var(--yoro-color-text-strong);
+  font-size: clamp(1.8rem, 4vw, 2.65rem);
+  line-height: 1.12;
+}
+
 .bot-management-header p {
-  margin-block: var(--space-2);
+  max-width: 48rem;
+  margin: .7rem 0 0;
+  color: var(--yoro-color-text-muted);
+  line-height: 1.65;
+}
+
+.bot-management-page .yoro-card {
+  padding: clamp(1.1rem, 2vw, 1.5rem);
+  border-color: var(--yoro-color-border);
+  border-radius: 1rem;
+  background:
+    linear-gradient(145deg, rgb(28 38 57 / 98%), rgb(20 29 43 / 98%));
+  color: var(--yoro-color-text);
+  box-shadow: 0 18px 46px rgb(0 0 0 / 14%);
+}
+
+.bot-management-page .yoro-card__title {
+  color: var(--yoro-color-text-strong);
+}
+
+.bot-management-page .yoro-card__description {
+  color: var(--yoro-color-text-muted);
+}
+
+.bot-management-organization-card {
+  border-color: rgb(137 104 255 / 32%);
+  background:
+    radial-gradient(circle at 92% 8%, rgb(113 74 219 / 20%), transparent 18rem),
+    linear-gradient(145deg, rgb(28 38 61 / 98%), rgb(19 28 43 / 98%));
+}
+
+.bot-management-organization-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.bot-management-organization-card .bot-management-field {
+  max-width: 34rem;
 }
 
 .bot-management-create,
@@ -29,6 +87,11 @@
   gap: var(--space-2);
 }
 
+.bot-management-field > span {
+  color: var(--yoro-color-text-strong);
+  font-weight: 750;
+}
+
 .bot-management-field small,
 .bot-management-connection-description,
 .bot-management-last-seen {
@@ -39,12 +102,24 @@
 .bot-management-field select {
   box-sizing: border-box;
   width: 100%;
-  min-height: 2.75rem;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--surface);
-  color: var(--text);
+  min-height: 3rem;
   padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: .75rem;
+  background: #0f1724;
+  color: var(--text);
+}
+
+.bot-management-field input:hover,
+.bot-management-field select:hover {
+  border-color: rgb(154 126 255 / 42%);
+}
+
+.bot-management-field input:focus-visible,
+.bot-management-field select:focus-visible {
+  border-color: #8f70f8;
+  outline: 3px solid rgb(143 112 248 / 22%);
+  outline-offset: 1px;
 }
 
 .bot-management-servers {
@@ -69,6 +144,15 @@
   margin: 0;
 }
 
+.bot-management-section-heading {
+  margin-top: .35rem;
+}
+
+.bot-management-section-heading h2 {
+  color: var(--yoro-color-text-strong);
+  font-size: clamp(1.35rem, 3vw, 1.75rem);
+}
+
 .bot-management-server-heading {
   display: grid;
   justify-content: initial;
@@ -88,9 +172,23 @@
   display: grid;
   gap: var(--space-2);
   padding: var(--space-3);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
+  border: 1px solid rgb(109 154 255 / 22%);
+  border-radius: .8rem;
+  background: rgb(74 112 197 / 8%);
   color: var(--text-muted);
+}
+
+.bot-management-credential-notice strong {
+  color: #b9ccff;
+}
+
+.bot-management-server-card {
+  border-color: rgb(126 105 218 / 26%);
+}
+
+.bot-management-server-card .yoro-card__content {
+  display: grid;
+  gap: .9rem;
 }
 
 .bot-management-rest {
@@ -98,7 +196,10 @@
   gap: var(--space-3);
   margin-top: var(--space-3);
   padding-top: var(--space-3);
-  border-top: 1px solid var(--line);
+  padding: 1.1rem;
+  border: 1px solid rgb(164 181 209 / 14%);
+  border-radius: .9rem;
+  background: rgb(8 14 25 / 42%);
   overflow-wrap: anywhere;
 }
 
@@ -111,7 +212,7 @@
   padding: var(--space-3);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  background: var(--surface);
+  background: #0f1724;
 }
 
 .bot-management-rest-fields {
@@ -140,6 +241,7 @@
   padding: var(--space-3);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
+  background: rgb(255 255 255 / 3%);
 }
 
 .bot-management-rest-summary dt {
@@ -166,6 +268,21 @@
 
 .bot-management-error {
   color: var(--danger);
+}
+
+.bot-management-delete-confirmation {
+  padding: 1rem;
+  border: 1px solid rgb(244 83 112 / 36%);
+  border-radius: .8rem;
+  display: grid;
+  gap: .8rem;
+  background: rgb(107 25 45 / 18%);
+}
+
+.bot-management-delete-confirmation p {
+  margin: 0;
+  color: #ffc1ce;
+  line-height: 1.55;
 }
 
 @media (max-width: 48rem) {
