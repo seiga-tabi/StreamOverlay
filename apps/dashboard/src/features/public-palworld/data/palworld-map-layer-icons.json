@@ -3,15 +3,6 @@
   "release": "1.0.1",
   "entries": [
     {
-      "id": "ancient-ruin",
-      "kind": "item",
-      "mappingStatus": "representative_game_asset",
-      "sourceReference": "AncientTechnologyBook_G1",
-      "imageUrl": "/images/palworld/1.0.1/items/09ab0135998945fd2211f784c32ad995236eb2e3a34c5dacb4e757812ec06283.webp",
-      "width": 256,
-      "height": 256
-    },
-    {
       "id": "boss",
       "kind": "map",
       "mappingStatus": "verified_game_ui",
@@ -201,15 +192,6 @@
       "height": 256
     },
     {
-      "id": "resource-night-stone",
-      "kind": "item",
-      "mappingStatus": "representative_runtime_asset",
-      "sourceReference": "NightStone",
-      "imageUrl": "/images/palworld/1.0.1/items/984d2df24e74b469e1483d49d8ddc90d273d66fdfe461394d5cfad226f666650.webp",
-      "width": 256,
-      "height": 256
-    },
-    {
       "id": "resource-pal-crystal",
       "kind": "item",
       "mappingStatus": "representative_runtime_asset",
@@ -228,7 +210,7 @@
       "height": 256
     },
     {
-      "id": "resource-sky-island-ore",
+      "id": "resource-solarlite",
       "kind": "item",
       "mappingStatus": "representative_runtime_asset",
       "sourceReference": "SkyIslandOre",

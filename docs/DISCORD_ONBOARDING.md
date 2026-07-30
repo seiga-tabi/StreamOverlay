@@ -2,7 +2,7 @@
 
 Bot 설치와 `/yoro setup` 운영 절차는 `docs/DISCORD_BOT_GATEWAY.md`를 함께 참고합니다.
 
-기본 연결 경로는 `/bot`에서 Bot을 설치한 뒤 `/bot/manage`에서 Discord로 로그인하는 웹 중심 흐름입니다. `identify guilds`로 확인한 관리 가능 Guild와 현재 Application ID의 활성 설치 관찰을 교집합으로 계산하고, 선택한 Guild만 Organization에 연결합니다. `/yoro setup`은 Guild·실행자 binding을 유지한 보조·복구 경로로 남습니다.
+기본 연결 경로는 `/bot`에서 Bot을 설치한 뒤 `/dashboard`에서 로그인하고 `/dashboard/organizations`에서 Discord Guild를 연결하는 웹 중심 흐름입니다. 기존 `/bot/manage`는 호환 경로로 유지합니다. `identify guilds`로 확인한 관리 가능 Guild와 현재 Application ID의 활성 설치 관찰을 교집합으로 계산하고, 선택한 Guild만 Organization에 연결합니다. `/yoro setup`은 Guild·실행자 binding을 유지한 보조·복구 경로로 남습니다.
 
 연결 완료 transaction에서 새 YORO opaque management session을 발급하므로 같은 흐름에서 Dashboard로 진입할 수 있습니다. 기존 사용자 로그인은 별도의 `identify` 전용 management OAuth를 사용합니다. setup token, OAuth access token과 management session은 서로 재사용하지 않습니다. 자세한 내용은 `docs/DISCORD_BOT_MANAGEMENT.md`를 참고합니다.
 

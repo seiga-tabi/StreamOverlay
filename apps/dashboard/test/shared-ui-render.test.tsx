@@ -107,6 +107,8 @@ test("PC account chip은 Discord 인증 제공자와 표시명을 로그인 상�
       open
       user={{
         displayName: "YORO Discord 사용자",
+        profileImageUrl:
+          "https://cdn.discordapp.com/avatars/987654321098765432/avatar.png?size=64",
         provider: "discord"
       }}
     />
@@ -115,7 +117,11 @@ test("PC account chip은 Discord 인증 제공자와 표시명을 로그인 상�
   assert.match(html, /public-twitch-login-chip connected/u);
   assert.match(html, />YORO Discord 사용자</u);
   assert.match(html, />Discord</u);
-  assert.match(html, new RegExp(`src="${DISCORD_SYMBOL_ICON_SRC}"`, "u"));
+  assert.match(
+    html,
+    /src="https:\/\/cdn\.discordapp\.com\/avatars\/987654321098765432\/avatar\.png\?size=64"/u
+  );
+  assert.doesNotMatch(html, new RegExp(`src="${DISCORD_SYMBOL_ICON_SRC}"`, "u"));
   assert.doesNotMatch(html, new RegExp(`src="${TWITCH_GLITCH_ICON_URL}"`, "u"));
 });
 

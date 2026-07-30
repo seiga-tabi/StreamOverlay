@@ -83,13 +83,13 @@ test("/yoro dashboard는 token 없는 고정 canonical URL을 ephemeral로 제�
     IDS.application,
     { async issueSetupSession() { throw new Error("호출되면 안 됩니다."); } },
     Date.now,
-    "https://yoro.gg/bot/manage"
+    "https://yoro.gg/dashboard"
   );
   await handler.handle(value);
   assert.equal(calls.reply[0].flags, MessageFlags.Ephemeral);
   assert.deepEqual(calls.reply[0].allowedMentions, { parse: [] });
   const component = calls.reply[0].components[0].toJSON();
-  assert.equal(component.components[0].url, "https://yoro.gg/bot/manage");
+  assert.equal(component.components[0].url, "https://yoro.gg/dashboard");
   assert.equal(new URL(component.components[0].url).search, "");
 });
 

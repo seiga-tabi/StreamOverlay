@@ -59,7 +59,7 @@ test("관리 로그인 URL은 통합 YORO 로그인과 안전한 복귀 경로�
   } = await import("../src/features/bot-management/api");
   const url = new URL(managementLoginUrl(), "https://yoro.gg");
   assert.equal(url.pathname, "/login");
-  assert.equal(url.searchParams.get("return_to"), "/bot/manage");
+  assert.equal(url.searchParams.get("return_to"), "/dashboard/organizations");
   assert.equal(url.hash, "");
   assert.equal(
     new URL(managementConnectUrl(), "https://yoro.gg").pathname,

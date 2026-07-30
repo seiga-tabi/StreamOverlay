@@ -419,8 +419,8 @@ export function assertPalworldMapLocationClassMapping(
       "revision"
     ]
   );
-  if (!Array.isArray(root.classes) || root.classes.length === 0 || root.classes.length > 100) {
-    fail("locationMapping.classes", "1~100개 배열이어야 합니다.");
+  if (!Array.isArray(root.classes) || root.classes.length === 0 || root.classes.length > 256) {
+    fail("locationMapping.classes", "1~256개 배열이어야 합니다.");
   }
   const classes = root.classes.map((entry, index) => {
     const record = exactRecordAt(entry, `locationMapping.classes[${index}]`, [

@@ -8,7 +8,7 @@
 
 - `/yoro setup`: Guild와 실행자에게 귀속된 10분 일회용 설정 링크 발급
 - `/yoro help`: 현재 제공되는 명령 안내
-- `/yoro dashboard`: token이나 Organization ID가 없는 고정 `/bot/manage` 링크를 ephemeral로 제공
+- `/yoro dashboard`: token이나 Organization ID가 없는 고정 `/dashboard` 링크를 ephemeral로 제공
 
 Agent, 상태 수집, Notification Worker, RCON과 임의 메시지 전송은 포함하지 않는다.
 

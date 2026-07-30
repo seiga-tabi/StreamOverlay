@@ -5,8 +5,21 @@ export type YoroIdentityProvider = "discord" | "twitch";
 export type YoroAccountIdentity = {
   provider: YoroIdentityProvider;
   displayName: string;
+  avatarUrl?: string;
   connectedAt: string;
   lastAuthenticatedAt: string;
+};
+
+export type YoroDashboardPage =
+  | "overview"
+  | "account"
+  | "organizations"
+  | "settings";
+
+export type YoroUserPreferences = {
+  locale: "ko" | "ja";
+  defaultDashboardPage: YoroDashboardPage;
+  reducedMotion: boolean;
 };
 
 export type YoroAccountSession =
@@ -16,6 +29,7 @@ export type YoroAccountSession =
       csrfToken: string;
       authenticationProvider: YoroIdentityProvider;
       identities: YoroAccountIdentity[];
+      preferences: YoroUserPreferences;
     };
 
 function accountApiBase(): string {
@@ -48,6 +62,24 @@ export async function logoutAccount(csrfToken: string): Promise<void> {
     headers: { "X-Yoro-CSRF": csrfToken }
   });
   if (!response.ok) throw new Error(`account_logout_${response.status}`);
+}
+
+export async function updateAccountPreferences(
+  preferences: YoroUserPreferences,
+  csrfToken: string
+): Promise<YoroUserPreferences> {
+  const response = await fetch(`${accountApiBase()}/api/account/preferences`, {
+    method: "PATCH",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Yoro-CSRF": csrfToken
+    },
+    body: JSON.stringify(preferences)
+  });
+  if (!response.ok) throw new Error(`account_preferences_${response.status}`);
+  const body = await response.json() as { preferences: YoroUserPreferences };
+  return body.preferences;
 }
 
 export async function unlinkAccountIdentity(

@@ -8,20 +8,22 @@
   "sourceArchiveSha256": "344628b020ffc8ee4642188e356013fc3e955f2ec8addf5ae384786c494f6186",
   "indexMemberSha256": "0f3b811f079e1fbb24b745a55d7e0d77dc4ac3b0574f6d9d4df7b7ae4a39a661",
   "memberInventorySha256": "6b6a85b984df3f933a452ec9a420e541ba7d1eb9ea199a7670cbfc6d0be0b406",
-  "mapLocationsArtifactSha256": "a8eecfaf6671e458b4b8074449b93ce9ce8661b9d858d9b4449719022f254965",
-  "mapLocationsManifestSha256": "c362f2c149f6ae0990dac2cfe4271e748d9d0c3cb6f7fcbd09fb960191bdb321",
+  "mapLocationsArtifactSha256": "2e7af138bb4a84c6f810159832dcdf865f0f458e5fca5a0e26984296558e23b7",
+  "mapLocationsManifestSha256": "b3b7426ee596194ec17143c2b0f9b5b15a9ca688d3268a545bfc63f1cc8d9d52",
   "selectedMemberCount": 7487,
-  "totalLocations": 19834,
+  "totalLocations": 21032,
   "categoryCounts": {
     "fast-travel": 152,
-    "dungeon": 170,
+    "dungeon": 188,
     "npc": 8,
     "egg": 1816,
     "skill-fruit": 47,
     "treasure": 1511,
     "lifmunk": 407,
     "journal": 64,
-    "resource": 15659
+    "resource": 16323,
+    "enemy": 165,
+    "location": 351
   },
   "worlds": [
     {
@@ -36,19 +38,19 @@
     }
   ],
   "importAudit": {
-    "sourceRawExact": 19857,
-    "mainIncluded": 19603,
-    "treeIncluded": 231,
+    "sourceRawExact": 21055,
+    "mainIncluded": 20786,
+    "treeIncluded": 246,
     "treeExcluded": 0,
     "coordinateUnresolved": 0,
     "outOfBoundsExcluded": 0,
     "exactDuplicates": 23,
-    "taxonomyMappingSha256": "4f2ee11124be89a14e7f6603a6eea0d0d8e4d04ee7700fe64e15f73ada102655",
+    "taxonomyMappingSha256": "584c454d2902aa7cde7df4318d4b431d053d5d231a173641e6a1d6f4b130d1c5",
     "transformMappingSha256": "82fdaea95a4ffb2408575ffad0135aabad902db65c82a83de4d142f90bf26bb4"
   },
   "reviewedAt": "2026-07-26T00:00:00.000Z",
   "reviewer": "streamoverlay-data-maintenance",
   "rightsVerified": false,
   "usageBasis": "operator_reference_use",
-  "evidenceChecksum": "5af1dac97b66e4670fe67afc7d157472e369cc289e110525c35db744fc486cea"
+  "evidenceChecksum": "fe6979cde9465317c7520e49a6d202052b3d28779516c1b36d85c2197d843ec8"
 }

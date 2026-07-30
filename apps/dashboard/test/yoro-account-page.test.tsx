@@ -4,6 +4,11 @@ import test from "node:test";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
+Object.defineProperty(globalThis, "React", {
+  configurable: true,
+  value: React
+});
+
 Object.defineProperty(globalThis, "navigator", {
   configurable: true,
   value: { language: "ko-KR" }
@@ -66,6 +71,7 @@ test("공개 헤더용 계정 선택기는 실제 인증에 사용한 Discord·T
   const discordIdentity = {
     provider: "discord" as const,
     displayName: "Discord 사용자",
+    avatarUrl: "https://cdn.discordapp.com/avatars/1/avatar.png?size=64",
     connectedAt: "2026-07-29T00:00:00.000Z",
     lastAuthenticatedAt: "2026-07-29T00:00:00.000Z"
   };
@@ -80,7 +86,12 @@ test("공개 헤더용 계정 선택기는 실제 인증에 사용한 Discord·T
     authenticated: true,
     authenticationProvider: "discord",
     csrfToken: "csrf",
-    identities: [twitchIdentity, discordIdentity]
+    identities: [twitchIdentity, discordIdentity],
+    preferences: {
+      locale: "ko",
+      defaultDashboardPage: "overview",
+      reducedMotion: false
+    }
   }), discordIdentity);
   assert.equal(authenticatedYoroIdentity({ authenticated: false }), undefined);
 });

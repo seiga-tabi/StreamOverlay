@@ -22,7 +22,9 @@ export const PALWORLD_MAP_LOCATION_CATEGORIES = [
   "treasure",
   "lifmunk",
   "journal",
-  "resource"
+  "resource",
+  "enemy",
+  "location"
 ] as const;
 export const PALWORLD_MAP_LOCATION_STATES = [
   "ready",

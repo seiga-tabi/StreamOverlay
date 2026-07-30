@@ -82,7 +82,7 @@ export class YoroCommandHandler {
     private readonly applicationId: string,
     private readonly internalApi: Pick<DiscordInternalApiClient, "issueSetupSession">,
     private readonly now: () => number = Date.now,
-    private readonly dashboardUrl = "http://localhost:3000/bot/manage"
+    private readonly dashboardUrl = "http://localhost:3000/dashboard"
   ) {}
 
   async handle(interaction: ChatInputCommandInteraction): Promise<void> {

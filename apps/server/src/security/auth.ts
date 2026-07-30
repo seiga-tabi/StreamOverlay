@@ -224,6 +224,7 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
   ) return "OAUTH_CALLBACK";
   if (
     pathname === "/api/account/session"
+    || pathname === "/api/account/preferences"
     || pathname === "/api/account/logout"
     || /^\/api\/account\/connections\/(?:discord|twitch)$/u.test(pathname)
   ) return "PUBLIC";

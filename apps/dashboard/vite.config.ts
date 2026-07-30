@@ -52,7 +52,6 @@ const MAP_LAYER_DIRECT_ICON_IDS = [
   "treasure"
 ] as const;
 const MAP_LAYER_REPRESENTATIVE_ICON_IDS = [
-  "ancient-ruin",
   "journal",
   "resource",
   "resource-ancient-beast-bone",
@@ -62,10 +61,9 @@ const MAP_LAYER_REPRESENTATIVE_ICON_IDS = [
   "resource-coal",
   "resource-copper-ore",
   "resource-manganese-ore",
-  "resource-night-stone",
   "resource-pal-crystal",
   "resource-quartz",
-  "resource-sky-island-ore",
+  "resource-solarlite",
   "resource-stone",
   "resource-sulfur",
   "resource-world-tree-ore",

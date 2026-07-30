@@ -4,6 +4,7 @@ import { appConfig } from "../config.js";
 import { withTransaction } from "../database/transaction.js";
 import {
   type YoroExternalIdentity,
+  type YoroUserPreferences,
   type YoroIdentityProvider,
   type YoroOAuthPurpose,
   YoroAccountRepository
@@ -23,6 +24,7 @@ const TWITCH_AUTHORIZE_URL = "https://id.twitch.tv/oauth2/authorize";
 const TWITCH_TOKEN_URL = "https://id.twitch.tv/oauth2/token";
 const TWITCH_PROFILE_URL = "https://api.twitch.tv/helix/users";
 const RECENT_AUTHENTICATION_MS = 15 * 60 * 1_000;
+const TWITCH_AVATAR_HOST = "static-cdn.jtvnw.net";
 
 export const YORO_OAUTH_COOKIE = "yoro_oauth";
 export const YORO_SESSION_COOKIE = "yoro_session";
@@ -38,6 +40,22 @@ type ProviderProfile = {
   providerSubject: string;
   displayName: string;
   avatarReference?: string;
+};
+
+export type PublicYoroIdentity = {
+  provider: YoroIdentityProvider;
+  displayName: string;
+  avatarUrl?: string;
+  connectedAt: string;
+  lastAuthenticatedAt: string;
+};
+
+export type PublicYoroAccountSession = {
+  authenticated: true;
+  csrfToken: string;
+  authenticationProvider: YoroIdentityProvider;
+  identities: readonly PublicYoroIdentity[];
+  preferences: YoroUserPreferences;
 };
 
 type AuthenticatedSession = {
@@ -95,6 +113,49 @@ function safeReturnPath(value: string | undefined): string {
   return allowed.some((prefix) => value === prefix || value.startsWith(`${prefix}/`))
     ? value
     : "/account/connections";
+}
+
+function safeTwitchAvatarUrl(value: unknown): string | undefined {
+  if (typeof value !== "string" || value.length > 512) return undefined;
+  try {
+    const url = new URL(value);
+    if (
+      url.protocol !== "https:"
+      || url.hostname !== TWITCH_AVATAR_HOST
+      || url.username
+      || url.password
+    ) {
+      return undefined;
+    }
+    return url.toString();
+  } catch {
+    return undefined;
+  }
+}
+
+function publicAvatarUrl(identity: YoroExternalIdentity): string | undefined {
+  if (!identity.avatarReference) return undefined;
+  if (identity.provider === "twitch") {
+    return safeTwitchAvatarUrl(identity.avatarReference);
+  }
+  if (
+    !/^[0-9]{1,32}$/u.test(identity.providerSubject)
+    || !/^[a-f0-9_]{1,128}$/u.test(identity.avatarReference)
+  ) {
+    return undefined;
+  }
+  return `https://cdn.discordapp.com/avatars/${identity.providerSubject}/${identity.avatarReference}.png?size=64`;
+}
+
+export function publicYoroIdentity(identity: YoroExternalIdentity): PublicYoroIdentity {
+  const avatarUrl = publicAvatarUrl(identity);
+  return {
+    provider: identity.provider,
+    displayName: identity.displayName,
+    ...(avatarUrl ? { avatarUrl } : {}),
+    connectedAt: identity.connectedAt,
+    lastAuthenticatedAt: identity.lastAuthenticatedAt
+  };
 }
 
 function cookie(name: string, value: string, maxAge: number): string {
@@ -295,29 +356,39 @@ export class YoroAccountService {
     }
   }
 
-  async session(cookieValue?: string): Promise<{
-    authenticated: true;
-    csrfToken: string;
-    authenticationProvider: YoroIdentityProvider;
-    identities: readonly Omit<YoroExternalIdentity, "providerSubject">[];
-  } | undefined> {
+  async session(cookieValue?: string): Promise<PublicYoroAccountSession | undefined> {
     const authenticated = await this.authenticate(cookieValue);
     if (!authenticated) return undefined;
-    const identities = await new YoroAccountRepository(this.pool)
-      .listIdentities(authenticated.userId);
-    const safeIdentities = identities.map((identity) => ({
-      provider: identity.provider,
-      displayName: identity.displayName,
-      ...(identity.avatarReference ? { avatarReference: identity.avatarReference } : {}),
-      connectedAt: identity.connectedAt,
-      lastAuthenticatedAt: identity.lastAuthenticatedAt
-    }));
+    const repository = new YoroAccountRepository(this.pool);
+    const [identities, preferences] = await Promise.all([
+      repository.listIdentities(authenticated.userId),
+      repository.getUserPreferences(authenticated.userId)
+    ]);
+    const safeIdentities = identities.map(publicYoroIdentity);
     return {
       authenticated: true,
       csrfToken: authenticated.csrfToken,
       authenticationProvider: authenticated.authenticationProvider,
-      identities: safeIdentities
+      identities: safeIdentities,
+      preferences
     };
+  }
+
+  async updatePreferences(input: {
+    sessionCookie?: string;
+    csrfToken?: string;
+    preferences: YoroUserPreferences;
+  }): Promise<YoroUserPreferences> {
+    const authenticated = await this.requireMutationSession(
+      input.sessionCookie,
+      input.csrfToken
+    );
+    const preferences = await new YoroAccountRepository(this.pool).saveUserPreferences(
+      authenticated.userId,
+      input.preferences
+    );
+    this.logger?.event?.({ type: "yoro.account.preferences_updated" });
+    return preferences;
   }
 
   async authenticateForManagement(cookieValue?: string): Promise<{
@@ -522,7 +593,12 @@ export class YoroAccountService {
     });
     if (!profile.ok) throw new YoroAccountError("oauth_failed", 401);
     const value = await profile.json() as {
-      data?: Array<{ id?: unknown; login?: unknown; display_name?: unknown }>;
+      data?: Array<{
+        id?: unknown;
+        login?: unknown;
+        display_name?: unknown;
+        profile_image_url?: unknown;
+      }>;
     };
     const user = value.data?.[0];
     if (!user || typeof user.id !== "string" || !/^[0-9]{1,64}$/u.test(user.id)) {
@@ -533,9 +609,11 @@ export class YoroAccountService {
       : typeof user.login === "string"
         ? user.login
         : user.id;
+    const avatarReference = safeTwitchAvatarUrl(user.profile_image_url);
     return {
       providerSubject: user.id,
-      displayName: displayName.slice(0, 80)
+      displayName: displayName.slice(0, 80),
+      ...(avatarReference ? { avatarReference } : {})
     };
   }
 }

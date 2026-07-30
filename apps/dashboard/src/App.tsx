@@ -53,6 +53,10 @@ const YoroAccountPage = lazyNamed(
   () => import("./features/yoro-account/YoroAccountPage"),
   "YoroAccountPage",
 );
+const YoroDashboardPage = lazyNamed(
+  () => import("./features/yoro-dashboard/YoroDashboardPage"),
+  "YoroDashboardPage",
+);
 const EventsPage = lazyNamed(() => import("./pages/EventsPage"), "EventsPage");
 const TournamentsPage = lazyNamed(() => import("./pages/TournamentsPage"), "TournamentsPage");
 const StreamerRiotRequestsPage = lazyNamed(
@@ -85,6 +89,21 @@ type AppSurface = "public" | "admin" | "streamer";
 type AuthState = "checking" | "authenticated" | "login" | "streamerAccess";
 type AuthErrorKey = "" | "invalid" | "unavailable" | "notConfigured" | "adminOnly";
 
+const YORO_DASHBOARD_PATHS = new Set([
+  "/dashboard",
+  "/dashboard/",
+  "/dashboard/account",
+  "/dashboard/account/",
+  "/dashboard/organizations",
+  "/dashboard/organizations/",
+  "/dashboard/settings",
+  "/dashboard/settings/"
+]);
+
+function isYoroDashboardPath(pathname: string): boolean {
+  return YORO_DASHBOARD_PATHS.has(pathname);
+}
+
 const streamerEntryI18n = {
   ko: {
     eyebrow: "스트리머 대시보드",
@@ -112,7 +131,10 @@ const streamerEntryI18n = {
 
 function surfaceForLocation(): AppSurface {
   if (window.location.pathname === "/admin" || window.location.pathname.startsWith("/admin/")) return "admin";
-  if (window.location.pathname === "/dashboard" || window.location.pathname.startsWith("/dashboard/")) return "streamer";
+  if (
+    !isYoroDashboardPath(window.location.pathname)
+    && window.location.pathname.startsWith("/dashboard/")
+  ) return "streamer";
   return "public";
 }
 
@@ -456,6 +478,7 @@ export default function App() {
   }
 
   if (surface === "public") {
+    const yoroDashboard = isYoroDashboardPath(window.location.pathname);
     const yoroLogin = window.location.pathname === "/login"
       || window.location.pathname === "/login/";
     const yoroAccount = window.location.pathname === "/account"
@@ -474,7 +497,11 @@ export default function App() {
       || window.location.pathname === "/bot/connect/";
     const palworldPublic = isPalworldPath(window.location.pathname);
     return (
-      yoroLogin ? (
+      yoroDashboard ? (
+        <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>
+          <YoroDashboardPage />
+        </Suspense>
+      ) : yoroLogin ? (
         <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>
           <YoroLoginPage />
         </Suspense>

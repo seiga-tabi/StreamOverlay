@@ -57,7 +57,7 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
   await t.test("check와 plan 기반 검사는 빈 DB를 변경하지 않는다", async () => {
     const inspection = await inspectMigrationState(pool, manifest);
     assert.equal(inspection.status, "pending");
-    assert.equal(inspection.pending.length, 9);
+    assert.equal(inspection.pending.length, 10);
     const table = await pool.query(
       "SELECT to_regclass('public.schema_migrations')::TEXT AS name"
     );
@@ -945,6 +945,33 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
       (await repository.listIdentities(userId)).map((identity) => identity.provider),
       ["discord", "twitch"]
     );
+    assert.deepEqual(await repository.getUserPreferences(userId), {
+      locale: "ko",
+      defaultDashboardPage: "overview",
+      reducedMotion: false
+    });
+    assert.deepEqual(
+      await repository.saveUserPreferences(userId, {
+        locale: "ja",
+        defaultDashboardPage: "organizations",
+        reducedMotion: true
+      }),
+      {
+        locale: "ja",
+        defaultDashboardPage: "organizations",
+        reducedMotion: true
+      }
+    );
+    assert.deepEqual(await repository.getUserPreferences(userId), {
+      locale: "ja",
+      defaultDashboardPage: "organizations",
+      reducedMotion: true
+    });
+    assert.deepEqual(await repository.getUserPreferences(otherUserId), {
+      locale: "ko",
+      defaultDashboardPage: "overview",
+      reducedMotion: false
+    });
 
     assert.equal(
       await withTransaction(pool, async (client) =>

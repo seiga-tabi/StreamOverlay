@@ -25,6 +25,14 @@ export type PalworldMapViewState = PalworldMapPoint & {
 };
 
 export type PalworldMapTouchMode = "map" | "page-scroll";
+export type PalworldMapWheelMode = "always" | "modifier";
+
+export function shouldZoomPalworldMapFromWheel(
+  wheelMode: PalworldMapWheelMode,
+  modifiers: Readonly<{ ctrlKey: boolean; metaKey: boolean }>,
+): boolean {
+  return wheelMode === "always" || modifiers.ctrlKey || modifiers.metaKey;
+}
 
 type PalworldMapGesture =
   | {
@@ -111,6 +119,7 @@ function isMapControlTarget(target: EventTarget | null): boolean {
 export function usePalworldMapViewport(
   enabled: boolean,
   touchMode: PalworldMapTouchMode = "page-scroll",
+  wheelMode: PalworldMapWheelMode = "always",
 ) {
   const [view, setView] = useState<PalworldMapViewState>({
     x: 0,
@@ -347,7 +356,10 @@ export function usePalworldMapViewport(
   }
 
   function handleWheel(event: WheelEvent<HTMLDivElement>): void {
-    if (!enabled) {
+    if (
+      !enabled
+      || !shouldZoomPalworldMapFromWheel(wheelMode, event)
+    ) {
       return;
     }
     event.preventDefault();

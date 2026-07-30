@@ -72,6 +72,14 @@
       "checksumSha256": "4626f08d08bfcdd888f3298863294ba97db79c7f6fdeaa547dd4ec6601cc0e6f",
       "destructive": false,
       "transaction": true
+    },
+    {
+      "id": "0010_yoro_dashboard_preferences",
+      "file": "0010_yoro_dashboard_preferences.sql",
+      "description": "로그인 사용자 공통 Dashboard 개인 설정 기반",
+      "checksumSha256": "9b6e3bc7b132d3c3373d8052e01a29bfcf30a3bb57bddb834b3731e137d41009",
+      "destructive": false,
+      "transaction": true
     }
   ]
 }

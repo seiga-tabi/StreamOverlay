@@ -194,7 +194,7 @@ function messageFor(error: unknown, locale: DashboardLocale): string {
   return text.unavailable;
 }
 
-export function BotManagementPage() {
+export function BotManagementPage({ embedded = false }: { embedded?: boolean }) {
   const [locale] = useState<DashboardLocale>(() => detectDashboardLocale());
   const text = copy[locale];
   const [session, setSession] = useState<BotManagementSession>();
@@ -211,6 +211,7 @@ export function BotManagementPage() {
   const [issued, setIssued] = useState<IssuedToken>();
   const [announcement, setAnnouncement] = useState("");
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const Root = embedded ? "div" : "main";
 
   const selectedOrganization = useMemo(
     () => session?.authenticated
@@ -386,7 +387,10 @@ export function BotManagementPage() {
   }
 
   return (
-    <main className="bot-management-page" aria-busy={loading}>
+    <Root
+      className={`bot-management-page ${embedded ? "is-embedded" : ""}`}
+      aria-busy={loading}
+    >
       <header className="bot-management-header">
         <span className="eyebrow">{text.eyebrow}</span>
         <h1 ref={headingRef} tabIndex={-1}>{text.title}</h1>
@@ -699,6 +703,6 @@ export function BotManagementPage() {
       ) : null}
       {error ? <p className="bot-management-error" role="alert">{error}</p> : null}
       <p className="sr-only" aria-live="polite">{announcement}</p>
-    </main>
+    </Root>
   );
 }

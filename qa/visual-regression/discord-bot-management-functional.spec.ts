@@ -126,7 +126,7 @@ test("Public /bot은 최소 권한 Bot 설치와 Dashboard CTA를 제공한다",
   const install = page.getByRole("link", { name: "Discord 서버에 YORO Bot 추가" });
   const dashboard = page.getByRole("link", { name: "Dashboard 로그인" });
   await expect(install).toHaveAttribute("href", "/api/discord/bot/install");
-  await expect(dashboard).toHaveAttribute("href", "/bot/manage");
+  await expect(dashboard).toHaveAttribute("href", "/dashboard");
   await install.focus();
   await expect(install).toBeFocused();
   await install.click();
@@ -148,7 +148,7 @@ test("Public /bot은 일본어 CTA를 동일한 안전한 내부 경로로 제�
   await expect(page.getByRole("link", { name: "DiscordサーバーにYORO Botを追加" }))
     .toHaveAttribute("href", "/api/discord/bot/install");
   await expect(page.getByRole("link", { name: "Dashboardにログイン" }))
-    .toHaveAttribute("href", "/bot/manage");
+    .toHaveAttribute("href", "/dashboard");
   await expectNoHorizontalOverflow(page);
 });
 
@@ -173,6 +173,83 @@ test("/login은 Discord와 Twitch를 하나의 YORO 계정 로그인 수단으�
   expect(discordUrl.searchParams.get("return_to")).toBe("/bot/manage");
   expect(twitchUrl.searchParams.get("return_to")).toBe("/bot/manage");
   await expect(page.locator('input[type="password"]')).toHaveCount(0);
+  await expectNoHorizontalOverflow(page);
+});
+
+test("/dashboard는 모든 YORO 로그인 사용자에게 계정·Organization·개인 설정을 제공한다", async ({ page }) => {
+  let savedPreferences: unknown;
+  await page.route("**/api/account/session", async (route) => {
+    await json(route, {
+      authenticated: true,
+      csrfToken: "yoro-csrf",
+      authenticationProvider: "discord",
+      identities: [{
+        provider: "discord",
+        displayName: "Dashboard 검증 사용자",
+        avatarUrl:
+          "https://cdn.discordapp.com/avatars/987654321098765432/0123456789abcdef.png?size=64",
+        connectedAt: "2026-07-30T00:00:00.000Z",
+        lastAuthenticatedAt: "2026-07-30T00:00:00.000Z",
+      }],
+      preferences: {
+        locale: "ko",
+        defaultDashboardPage: "overview",
+        reducedMotion: false,
+      },
+    });
+  });
+  await page.route("**/api/discord/management/session", async (route) => {
+    await json(route, {
+      authenticated: true,
+      csrfToken: "management-csrf",
+      organizations: [organization],
+    });
+  });
+  await page.route("**/api/account/preferences", async (route) => {
+    savedPreferences = route.request().postDataJSON();
+    expect(route.request().headers()["x-yoro-csrf"]).toBe("yoro-csrf");
+    await json(route, { preferences: savedPreferences });
+  });
+
+  await page.goto("/dashboard");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(
+    "Dashboard 검증 사용자"
+  );
+  await expect(page.getByText("YORO 검증 Organization")).toBeVisible();
+  const dashboardNavigation = page.getByRole("navigation", {
+    name: "YORO.gg Dashboard",
+  });
+  await expect(
+    dashboardNavigation.getByRole("button", { name: "연결 계정" })
+  ).toBeVisible();
+  await dashboardNavigation.getByRole("button", { name: "개인 설정" }).click();
+  await expect(page).toHaveURL(/\/dashboard\/settings$/u);
+  await page.getByLabel("기본 Dashboard 화면").selectOption("account");
+  await page.getByLabel("화면 전환 효과 줄이기").check();
+  await page.getByLabel("표시 언어").selectOption("ja");
+  await page.getByRole("button", { name: "設定を保存" }).click();
+  await expect.poll(() => savedPreferences).toEqual({
+    locale: "ja",
+    defaultDashboardPage: "account",
+    reducedMotion: true,
+  });
+  await expect(page.getByText("個人設定を保存しました。")).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+});
+
+test("/dashboard는 session이 없으면 token 없는 통합 로그인 링크만 제공한다", async ({ page }) => {
+  await page.route("**/api/account/session", async (route) => {
+    await json(route, { authenticated: false });
+  });
+  await page.goto("/dashboard");
+
+  await expect(page.getByRole("heading", {
+    level: 1,
+    name: "YORO.gg 로그인이 필요합니다.",
+  })).toBeVisible();
+  const login = page.getByRole("link", { name: "로그인", exact: true });
+  await expect(login).toHaveAttribute("href", "/login?return_to=/dashboard");
+  expect((await login.getAttribute("href")) ?? "").not.toMatch(/token|organizationId/u);
   await expectNoHorizontalOverflow(page);
 });
 

@@ -6030,6 +6030,51 @@ export function createHttpHandler(input: HttpHandlerInput) {
             noStoreHeaders()
           );
         }
+        if (req.method === "PATCH" && url.pathname === "/api/account/preferences") {
+          if (!stateChangingRequestHasTrustedOrigin(req)) {
+            return sendJson(req, res, 403, {
+              error: "trusted Origin이 필요합니다.",
+              code: "origin_denied"
+            });
+          }
+          const body = await readJsonBody<Record<string, unknown>>(req);
+          const allowedKeys = new Set([
+            "locale",
+            "defaultDashboardPage",
+            "reducedMotion"
+          ]);
+          if (
+            Object.keys(body).length !== allowedKeys.size
+            || Object.keys(body).some((key) => !allowedKeys.has(key))
+            || (body.locale !== "ko" && body.locale !== "ja")
+            || ![
+              "overview",
+              "account",
+              "organizations",
+              "settings"
+            ].includes(String(body.defaultDashboardPage))
+            || typeof body.reducedMotion !== "boolean"
+          ) {
+            return sendJson(req, res, 400, {
+              error: "개인 설정 입력이 올바르지 않습니다.",
+              code: "invalid_input"
+            });
+          }
+          const preferences = await input.yoroAccounts.updatePreferences({
+            sessionCookie,
+            csrfToken: requestHeaderValue(req, "x-yoro-csrf"),
+            preferences: {
+              locale: body.locale,
+              defaultDashboardPage: body.defaultDashboardPage as
+                | "overview"
+                | "account"
+                | "organizations"
+                | "settings",
+              reducedMotion: body.reducedMotion
+            }
+          });
+          return sendJson(req, res, 200, { preferences }, noStoreHeaders());
+        }
         const oauthStartMatch = url.pathname.match(
           /^\/api\/account\/oauth\/(discord|twitch)\/start$/u
         );

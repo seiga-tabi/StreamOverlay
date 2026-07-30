@@ -76,6 +76,121 @@
       "subtype": "yakushima"
     },
     {
+      "sourceClass": "BP_DungeonFixedEntrance_forest_1_C",
+      "category": "dungeon",
+      "subtype": "fixed-entrance"
+    },
+    {
+      "sourceClass": "BP_DungeonFixedEntrance_forest_2_C",
+      "category": "dungeon",
+      "subtype": "fixed-entrance"
+    },
+    {
+      "sourceClass": "BP_DungeonFixedEntrance_forest_3_C",
+      "category": "dungeon",
+      "subtype": "fixed-entrance"
+    },
+    {
+      "sourceClass": "BP_DungeonFixedEntrance_forest_4_C",
+      "category": "dungeon",
+      "subtype": "fixed-entrance"
+    },
+    {
+      "sourceClass": "BP_DungeonFixedEntrance_forest_5_C",
+      "category": "dungeon",
+      "subtype": "fixed-entrance"
+    },
+    {
+      "sourceClass": "BP_DungeonFixedEntrance_grass_1_C",
+      "category": "dungeon",
+      "subtype": "fixed-entrance"
+    },
+    {
+      "sourceClass": "BP_DungeonFixedEntrance_grass_2_C",
+      "category": "dungeon",
+      "subtype": "fixed-entrance"
+    },
+    {
+      "sourceClass": "BP_DungeonFixedEntrance_grass_3_C",
+      "category": "dungeon",
+      "subtype": "fixed-entrance"
+    },
+    {
+      "sourceClass": "BP_DungeonFixedEntrance_grass_4_C",
+      "category": "dungeon",
+      "subtype": "fixed-entrance"
+    },
+    {
+      "sourceClass": "BP_DungeonFixedEntrance_grass_5_C",
+      "category": "dungeon",
+      "subtype": "fixed-entrance"
+    },
+    {
+      "sourceClass": "BP_DungeonFixedEntrance_grass_6_C",
+      "category": "dungeon",
+      "subtype": "fixed-entrance"
+    },
+    {
+      "sourceClass": "BP_DungeonFixedEntrance_grass_7_C",
+      "category": "dungeon",
+      "subtype": "fixed-entrance"
+    },
+    {
+      "sourceClass": "BP_BaseCampPopularArea_C",
+      "category": "location",
+      "subtype": "home"
+    },
+    {
+      "sourceClass": "BP_LevelObject_StaticRespawnPoint_C",
+      "category": "location",
+      "subtype": "respawn"
+    },
+    {
+      "sourceClass": "BP_LevelObject_SkylandWarpAlter_C",
+      "category": "location",
+      "subtype": "warp-altar"
+    },
+    {
+      "sourceClass": "BP_LevelObject_UnlockMapPoint_C",
+      "category": "location",
+      "subtype": "observation-tower"
+    },
+    {
+      "sourceClass": "BP_PalRegionTriggerBox_C",
+      "category": "location",
+      "subtype": "region-name"
+    },
+    {
+      "sourceClass": "BP_LevelObject_TreasureMapPoint_C",
+      "category": "location",
+      "subtype": "treasure-map"
+    },
+    {
+      "sourceClass": "BP_LevelObject_ItemPickupTower_C",
+      "category": "location",
+      "subtype": "ancient-ruin"
+    },
+    {
+      "sourceClass": "BP_PalBossTower_C",
+      "category": "enemy",
+      "subtype": "boss-tower"
+    },
+    {
+      "sourceClass": "BP_PalBossTower_KingWhale_C",
+      "category": "enemy",
+      "subtype": "boss-tower"
+    },
+    {
+      "sourceClass": "BP_PalBossTower_LastBoss_C",
+      "category": "enemy",
+      "subtype": "boss-tower"
+    },
+    {
+      "sourceClass": "BP_PalBossTower_MiddleBoss_C",
+      "category": "enemy",
+      "subtype": "boss-tower"
+    },
+    {
       "sourceClass": "BP_LevelObject_Note_C",
       "category": "journal",
       "subtype": "note"
@@ -169,6 +284,251 @@
       "sourceClass": "BP_MonoNPCSpawnerBossBase_Male_Trader03_C",
       "category": "npc",
       "subtype": "merchant-3"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_Believer_01_02_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_Believer_01_03_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_Believer_02_01_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_Desert_Hunter_01_03_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_Desert_Hunter_02_01_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_Desert_Hunter_02_02_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_DLC2_1_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_FireCult_01_01_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_FireCult_02_01_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_FireCult_02_02_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_Forest1_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_Grass_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_Grass_TypeC_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_Grass2_2_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_Grass2_3_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_Grass2_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_Hunter_SeaBase_01_01_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_Hunter_SeaBase_01_02_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_Hunter_SeaBase_01_04_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_Hunter_SeaBase_02_01_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_Hunter_SeaBase_02_02_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_Hunter_SeaBase_02_03_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_Ninja_01_01_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_Ninja_01_02_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_Ninja_02_01_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_Ninja_02_02_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_Scientist_01_01_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_NPCCampSpawner_Scientist_02_03_C",
+      "category": "enemy",
+      "subtype": "enemy-camp"
+    },
+    {
+      "sourceClass": "BP_PalRandomIncidentSpawner_C",
+      "category": "enemy",
+      "subtype": "incident"
+    },
+    {
+      "sourceClass": "BP_PalRandomIncidentSpawner_DarkIsland_DarkArea_C",
+      "category": "enemy",
+      "subtype": "incident"
+    },
+    {
+      "sourceClass": "BP_PalRandomIncidentSpawner_DarkIsland_RedArea_Desert_C",
+      "category": "enemy",
+      "subtype": "incident"
+    },
+    {
+      "sourceClass": "BP_PalRandomIncidentSpawner_DarkIsland_RedArea_Magma_C",
+      "category": "enemy",
+      "subtype": "incident"
+    },
+    {
+      "sourceClass": "BP_PalRandomIncidentSpawner_DarkIsland_RedArea_North_C",
+      "category": "enemy",
+      "subtype": "incident"
+    },
+    {
+      "sourceClass": "BP_PalRandomIncidentSpawner_DarkIsland_RedArea_South_C",
+      "category": "enemy",
+      "subtype": "incident"
+    },
+    {
+      "sourceClass": "BP_PalRandomIncidentSpawner_DarkIsland_YellowArea_C",
+      "category": "enemy",
+      "subtype": "incident"
+    },
+    {
+      "sourceClass": "BP_PalRandomIncidentSpawner_Desert_C",
+      "category": "enemy",
+      "subtype": "incident"
+    },
+    {
+      "sourceClass": "BP_PalRandomIncidentSpawner_DesertIsland3_C",
+      "category": "enemy",
+      "subtype": "incident"
+    },
+    {
+      "sourceClass": "BP_PalRandomIncidentSpawner_Forest_B_C",
+      "category": "enemy",
+      "subtype": "incident"
+    },
+    {
+      "sourceClass": "BP_PalRandomIncidentSpawner_Forest_C",
+      "category": "enemy",
+      "subtype": "incident"
+    },
+    {
+      "sourceClass": "BP_PalRandomIncidentSpawner_Forest_Frost_C",
+      "category": "enemy",
+      "subtype": "incident"
+    },
+    {
+      "sourceClass": "BP_PalRandomIncidentSpawner_grass_B_C",
+      "category": "enemy",
+      "subtype": "incident"
+    },
+    {
+      "sourceClass": "BP_PalRandomIncidentSpawner_grass_C",
+      "category": "enemy",
+      "subtype": "incident"
+    },
+    {
+      "sourceClass": "BP_PalRandomIncidentSpawner_grass_desert_C",
+      "category": "enemy",
+      "subtype": "incident"
+    },
+    {
+      "sourceClass": "BP_PalRandomIncidentSpawner_Sakurajima_B_C",
+      "category": "enemy",
+      "subtype": "incident"
+    },
+    {
+      "sourceClass": "BP_PalRandomIncidentSpawner_Sakurajima_C",
+      "category": "enemy",
+      "subtype": "incident"
+    },
+    {
+      "sourceClass": "BP_PalRandomIncidentSpawner_SkyIsland_A_C",
+      "category": "enemy",
+      "subtype": "incident"
+    },
+    {
+      "sourceClass": "BP_PalRandomIncidentSpawner_Snow_C",
+      "category": "enemy",
+      "subtype": "incident"
+    },
+    {
+      "sourceClass": "BP_PalRandomIncidentSpawner_Volcano_C",
+      "category": "enemy",
+      "subtype": "incident"
+    },
+    {
+      "sourceClass": "BP_PalRandomIncidentSpawner_WorldTree_C",
+      "category": "enemy",
+      "subtype": "incident"
     },
     {
       "sourceClass": "BP_PalMapObjectSpawner_SkillFruits_DarkIsland_C",
@@ -308,7 +668,12 @@
     {
       "sourceClass": "BP_PalMapObjectSpawner_NightStone_C",
       "category": "resource",
-      "subtype": "night-stone"
+      "subtype": "chromite"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_Crystal_C",
+      "category": "resource",
+      "subtype": "hexolite-quartz"
     },
     {
       "sourceClass": "BP_PalMapObjectSpawner_PalCrystal_C",
@@ -383,7 +748,7 @@
     {
       "sourceClass": "BP_PalMapObjectSpawner_SkyIslandOre_C",
       "category": "resource",
-      "subtype": "sky-island-ore"
+      "subtype": "solarlite"
     },
     {
       "sourceClass": "BP_PalMapObjectSpawner_Sulfur_C",
@@ -399,6 +764,16 @@
       "sourceClass": "BP_PalMapObjectSpawner_bone_C",
       "category": "resource",
       "subtype": "ancient-beast-bone"
+    },
+    {
+      "sourceClass": "BP_PalMapObjectSpawner_DamagableRock0022_C",
+      "category": "resource",
+      "subtype": "ancient-dragon-fragment"
+    },
+    {
+      "sourceClass": "BP_BoxPlacementTool_Quartz_C",
+      "category": "resource",
+      "subtype": "quartz-cluster"
     },
     {
       "sourceClass": "bp_palmapobjectspawner_palegg_Sakurajima_grade_01_C",
@@ -473,14 +848,16 @@
   ],
   "expectedSourceCounts": {
     "fast-travel": 152,
-    "dungeon": 170,
+    "dungeon": 188,
     "npc": 8,
     "egg": 1816,
     "skill-fruit": 47,
     "treasure": 1511,
     "lifmunk": 407,
     "journal": 64,
-    "resource": 15682
+    "resource": 16346,
+    "enemy": 165,
+    "location": 351
   },
   "candidateFamilies": [
     {

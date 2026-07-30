@@ -1,0 +1,300 @@
+.yoro-dashboard-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  background: var(--color-background, #0f141b);
+  color: var(--color-text, #f5f7fb);
+}
+
+.yoro-dashboard-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  border-right: 1px solid rgb(255 255 255 / 10%);
+  background: #171d25;
+}
+
+.yoro-dashboard-brand {
+  color: inherit;
+  font-size: 20px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.yoro-dashboard-profile {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+}
+
+.yoro-dashboard-profile > img,
+.yoro-dashboard-profile > span {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: rgb(255 255 255 / 8%);
+}
+
+.yoro-dashboard-profile svg {
+  width: 24px;
+  height: 24px;
+}
+
+.yoro-dashboard-profile div {
+  min-width: 0;
+}
+
+.yoro-dashboard-profile strong,
+.yoro-dashboard-profile small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.yoro-dashboard-profile small {
+  margin-top: 3px;
+  color: #aab4c2;
+}
+
+.yoro-dashboard-sidebar nav {
+  display: grid;
+  gap: 6px;
+}
+
+.yoro-dashboard-sidebar nav button,
+.yoro-dashboard-sidebar-actions button,
+.yoro-dashboard-sidebar-actions a {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 10px;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.yoro-dashboard-sidebar nav button:hover,
+.yoro-dashboard-sidebar nav button:focus-visible,
+.yoro-dashboard-sidebar nav button.active {
+  background: rgb(98 139 255 / 16%);
+  color: #8eb1ff;
+}
+
+.yoro-dashboard-sidebar-actions {
+  margin-top: auto;
+  display: grid;
+  gap: 4px;
+}
+
+.yoro-dashboard-sidebar-actions a {
+  display: flex;
+  align-items: center;
+}
+
+.yoro-dashboard-main {
+  min-width: 0;
+  width: 100%;
+  max-width: 1240px;
+  padding: 48px clamp(24px, 5vw, 72px);
+}
+
+.yoro-dashboard-overview,
+.yoro-dashboard-settings {
+  display: grid;
+  gap: 28px;
+}
+
+.yoro-dashboard-overview > header span {
+  color: #7ba4ff;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .12em;
+}
+
+.yoro-dashboard-overview h1,
+.yoro-dashboard-settings h1 {
+  margin: 8px 0;
+  font-size: clamp(30px, 4vw, 48px);
+}
+
+.yoro-dashboard-overview header p,
+.yoro-dashboard-settings header p,
+.yoro-dashboard-summary-grid article p {
+  color: #b8c1ce;
+}
+
+.yoro-dashboard-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.yoro-dashboard-summary-grid article,
+.yoro-dashboard-next,
+.yoro-dashboard-settings {
+  padding: 24px;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 16px;
+  background: #1c232d;
+}
+
+.yoro-dashboard-summary-grid h2,
+.yoro-dashboard-next h2 {
+  margin-top: 0;
+}
+
+.yoro-dashboard-summary-grid ul {
+  padding: 0;
+  list-style: none;
+}
+
+.yoro-dashboard-summary-grid li {
+  min-width: 0;
+  padding: 10px 0;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  border-bottom: 1px solid rgb(255 255 255 / 8%);
+}
+
+.yoro-dashboard-summary-grid li svg {
+  width: 22px;
+  height: 22px;
+}
+
+.yoro-dashboard-summary-grid li strong {
+  margin-left: auto;
+}
+
+.yoro-dashboard-summary-grid button,
+.yoro-dashboard-settings > button,
+.yoro-dashboard-entry a {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: #5d84f4;
+  font: inherit;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.yoro-dashboard-next ol {
+  margin: 0;
+  padding-left: 24px;
+}
+
+.yoro-dashboard-next li {
+  padding: 8px;
+}
+
+.yoro-dashboard-next li.complete {
+  color: #65d6a6;
+  text-decoration: line-through;
+}
+
+.yoro-dashboard-settings {
+  max-width: 720px;
+}
+
+.yoro-dashboard-settings > label:not(.yoro-dashboard-checkbox) {
+  display: grid;
+  gap: 8px;
+}
+
+.yoro-dashboard-settings select {
+  min-height: 46px;
+  padding: 0 12px;
+  border: 1px solid rgb(255 255 255 / 16%);
+  border-radius: 10px;
+  color: inherit;
+  background: #121821;
+}
+
+.yoro-dashboard-checkbox {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.yoro-dashboard-entry {
+  min-height: 100vh;
+  padding: 24px;
+  display: grid;
+  place-items: center;
+  background: #0f141b;
+  color: #f5f7fb;
+}
+
+.yoro-dashboard-entry section {
+  width: min(100%, 560px);
+  padding: 32px;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 18px;
+  background: #1c232d;
+  text-align: center;
+}
+
+.yoro-account-page.is-embedded,
+.bot-management-page.is-embedded {
+  min-height: auto;
+  padding: 0;
+  background: transparent;
+}
+
+[data-reduced-motion="true"] *,
+[data-reduced-motion="true"] *::before,
+[data-reduced-motion="true"] *::after {
+  scroll-behavior: auto !important;
+  transition-duration: .01ms !important;
+  animation-duration: .01ms !important;
+}
+
+@media (max-width: 800px) {
+  .yoro-dashboard-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .yoro-dashboard-sidebar {
+    position: static;
+    width: 100%;
+    height: auto;
+    padding: 18px;
+  }
+
+  .yoro-dashboard-sidebar nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .yoro-dashboard-sidebar-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .yoro-dashboard-main {
+    padding: 28px 16px 48px;
+  }
+
+  .yoro-dashboard-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}

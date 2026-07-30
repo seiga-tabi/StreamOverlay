@@ -160,8 +160,8 @@ test("일반 스폰 요약과 시각 강도는 cluster 수치만 제한된 범�
   assert.deepEqual(filterPalworldBossMarkers([], "anubis"), []);
 });
 
-test("지도 자원 source subtype은 이름 추측 없이 12개 공개 필터로 exact 정규화한다", () => {
-  assert.equal(PALWORLD_MAP_RESOURCE_TYPE_IDS.length, 12);
+test("지도 자원 source subtype은 이름 추측 없이 15개 공개 필터로 exact 정규화한다", () => {
+  assert.equal(PALWORLD_MAP_RESOURCE_TYPE_IDS.length, 15);
   assert.deepEqual(
     palworldMapCollectibleTypesForCategory("resource"),
     PALWORLD_MAP_RESOURCE_TYPE_IDS,
@@ -170,14 +170,17 @@ test("지도 자원 source subtype은 이름 추측 없이 12개 공개 필터�
 
   const expected = new Map([
     ["ancient-beast-bone", "resource-ancient-beast-bone"],
+    ["ancient-dragon-fragment", "resource-ancient-dragon-fragment"],
     ["ancient-tree-bark", "resource-ancient-tree-bark"],
-    ["night-stone", "resource-night-stone"],
+    ["chromite", "resource-chromite"],
     ["pal-crystal", "resource-pal-crystal"],
     ["pal-crystal-small", "resource-pal-crystal"],
     ["coal", "resource-coal"],
     ["copper-ore", "resource-copper-ore"],
+    ["hexolite-quartz", "resource-hexolite-quartz"],
     ["manganese-ore", "resource-manganese-ore"],
     ["quartz", "resource-quartz"],
+    ["quartz-cluster", "resource-quartz-cluster"],
     ["stone", "resource-stone"],
     ["stone-18", "resource-stone"],
     ["stone-2", "resource-stone"],
@@ -186,7 +189,7 @@ test("지도 자원 source subtype은 이름 추측 없이 12개 공개 필터�
     ["stone-5", "resource-stone"],
     ["stone-6", "resource-stone"],
     ["stone-7", "resource-stone"],
-    ["sky-island-ore", "resource-sky-island-ore"],
+    ["solarlite", "resource-solarlite"],
     ["sulfur", "resource-sulfur"],
     ["world-tree-ore", "resource-world-tree-ore"],
   ] as const);

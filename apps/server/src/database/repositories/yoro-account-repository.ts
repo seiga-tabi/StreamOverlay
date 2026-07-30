@@ -31,6 +31,18 @@ export type YoroExternalIdentity = Readonly<{
   lastAuthenticatedAt: string;
 }>;
 
+export type YoroDashboardPage =
+  | "overview"
+  | "account"
+  | "organizations"
+  | "settings";
+
+export type YoroUserPreferences = Readonly<{
+  locale: "ko" | "ja";
+  defaultDashboardPage: YoroDashboardPage;
+  reducedMotion: boolean;
+}>;
+
 type ExternalIdentityRow = {
   user_id: string;
   provider: YoroIdentityProvider;
@@ -332,6 +344,67 @@ export class YoroAccountRepository {
       connectedAt: row.connected_at.toISOString(),
       lastAuthenticatedAt: row.last_authenticated_at.toISOString()
     })));
+  }
+
+  async getUserPreferences(userId: string): Promise<YoroUserPreferences> {
+    const result = await repositoryQuery<{
+      locale: "ko" | "ja";
+      default_dashboard_page: YoroDashboardPage;
+      reduced_motion: boolean;
+    }>(
+      this.queryable,
+      `SELECT locale, default_dashboard_page, reduced_motion
+       FROM yoro_user_preferences
+       WHERE user_id = $1`,
+      [requireUuid(userId, "userId")]
+    );
+    const row = result.rows[0];
+    return Object.freeze(row
+      ? {
+          locale: row.locale,
+          defaultDashboardPage: row.default_dashboard_page,
+          reducedMotion: row.reduced_motion
+        }
+      : {
+          locale: "ko",
+          defaultDashboardPage: "overview",
+          reducedMotion: false
+        });
+  }
+
+  async saveUserPreferences(
+    userId: string,
+    preferences: YoroUserPreferences
+  ): Promise<YoroUserPreferences> {
+    const result = await repositoryQuery<{
+      locale: "ko" | "ja";
+      default_dashboard_page: YoroDashboardPage;
+      reduced_motion: boolean;
+    }>(
+      this.queryable,
+      `INSERT INTO yoro_user_preferences (
+         user_id, locale, default_dashboard_page, reduced_motion
+       ) VALUES ($1, $2, $3, $4)
+       ON CONFLICT (user_id) DO UPDATE
+       SET locale = EXCLUDED.locale,
+           default_dashboard_page = EXCLUDED.default_dashboard_page,
+           reduced_motion = EXCLUDED.reduced_motion,
+           updated_at = NOW()
+       RETURNING locale, default_dashboard_page, reduced_motion`,
+      [
+        requireUuid(userId, "userId"),
+        preferences.locale,
+        preferences.defaultDashboardPage,
+        preferences.reducedMotion
+      ]
+    );
+    const row = result.rows[0];
+    if (!row) throw new Error("yoro_preferences_save_failed");
+    return Object.freeze({
+      locale: row.locale,
+      defaultDashboardPage: row.default_dashboard_page,
+      reducedMotion: row.reduced_motion
+    });
   }
 
   async revokeIdentity(userId: string, provider: YoroIdentityProvider): Promise<boolean> {

@@ -40,16 +40,18 @@ test("Maps.zip 위치 taxonomy는 exact actor class와 고정 원본 수량을 �
   assert.equal(mapping.sourceArchiveSha256, PALWORLD_MAP_WORLD_EXPORT_SHA256);
   assert.deepEqual(mapping.expectedSourceCounts, {
     "fast-travel": 152,
-    dungeon: 170,
+    dungeon: 188,
     npc: 8,
     egg: 1816,
     "skill-fruit": 47,
     treasure: 1511,
     lifmunk: 407,
     journal: 64,
-    resource: 15682
+    resource: 16346,
+    enemy: 165,
+    location: 351
   });
-  assert.equal(mapping.classes.length, 90);
+  assert.equal(mapping.classes.length, 165);
   assert.equal(
     mapping.classes.filter((entry) => entry.category === "npc").length,
     5
@@ -60,7 +62,15 @@ test("Maps.zip 위치 taxonomy는 exact actor class와 고정 원본 수량을 �
   );
   assert.equal(
     mapping.classes.filter((entry) => entry.category === "resource").length,
-    20
+    23
+  );
+  assert.equal(
+    mapping.classes.filter((entry) => entry.category === "enemy").length,
+    53
+  );
+  assert.equal(
+    mapping.classes.filter((entry) => entry.category === "location").length,
+    7
   );
   assert.equal(
     mapping.candidateFamilies.some((entry) => entry.id === "resource"),
@@ -129,7 +139,7 @@ test("세계수 transform evidence는 map image manifest의 source·output hash�
   );
 });
 
-test("생성된 위치 artifact는 raw 19,857건을 MainMap과 세계수 지도에 정확히 분리한다", async () => {
+test("생성된 위치 artifact는 raw 21,055건을 MainMap과 세계수 지도에 정확히 분리한다", async () => {
   const [artifactBytes, manifest, report] = await Promise.all([
     readFile(path.join(releaseRoot, "map-locations.json")),
     readFile(path.join(releaseRoot, "map-locations-manifest.json"), "utf8")
@@ -138,23 +148,25 @@ test("생성된 위치 artifact는 raw 19,857건을 MainMap과 세계수 지도�
       .then(JSON.parse)
   ]);
   const artifact = await loadPalworldMapLocationsArtifact(releaseRoot);
-  assert.equal(artifact.totalLocations, 19834);
+  assert.equal(artifact.totalLocations, 21032);
   assert.equal(artifact.worlds.length, 2);
   assert.equal(artifact.worlds[0].world, "main");
-  assert.equal(artifact.worlds[0].locationCount, 19603);
+  assert.equal(artifact.worlds[0].locationCount, 20786);
   assert.deepEqual(artifact.worlds[0].categoryCounts, {
     "fast-travel": 137,
-    dungeon: 170,
+    dungeon: 188,
     npc: 8,
     egg: 1786,
     "skill-fruit": 35,
     treasure: 1473,
     lifmunk: 360,
     journal: 55,
-    resource: 15579
+    resource: 16243,
+    enemy: 152,
+    location: 349
   });
   assert.equal(artifact.worlds[1].world, "tree");
-  assert.equal(artifact.worlds[1].locationCount, 231);
+  assert.equal(artifact.worlds[1].locationCount, 246);
   assert.deepEqual(artifact.worlds[1].categoryCounts, {
     "fast-travel": 15,
     dungeon: 0,
@@ -164,9 +176,11 @@ test("생성된 위치 artifact는 raw 19,857건을 MainMap과 세계수 지도�
     treasure: 38,
     lifmunk: 47,
     journal: 9,
-    resource: 80
+    resource: 80,
+    enemy: 13,
+    location: 2
   });
-  assert.equal(report.counts.sourceActors, 19857);
+  assert.equal(report.counts.sourceActors, 21055);
   assert.equal(report.excludedByReason.tree_world_without_active_map, 0);
   assert.equal(report.excludedByReason.attached_parent_coordinate_unresolved, 0);
   assert.equal(report.counts.exactDuplicates, 23);
@@ -174,15 +188,15 @@ test("생성된 위치 artifact는 raw 19,857건을 MainMap과 세계수 지도�
     report.excludedByReason.outside_verified_main_and_tree_bounds,
     0
   );
-  assert.equal(report.integrityAudit.exactCoordinateCollisions, 23);
-  assert.equal(report.integrityAudit.reusedLevelObjectInstanceIds, 2126);
+  assert.equal(report.integrityAudit.exactCoordinateCollisions, 32);
+  assert.equal(report.integrityAudit.reusedLevelObjectInstanceIds, 2375);
   assert.equal(
     report.counts.byCategory.resource.included
       + report.counts.byCategory.resource.treeIncluded
       + report.counts.byCategory.resource.coordinateUnresolved
       + report.counts.byCategory.resource.outOfBoundsExcluded
       + report.counts.byCategory.resource.exactDuplicates,
-    15682
+    16346
   );
   assert.equal(
     report.counts.byCategory.npc.included
@@ -215,7 +229,18 @@ test("생성된 위치 artifact는 raw 19,857건을 MainMap과 세계수 지도�
   assert.equal(subtypeCounts.get("statue-relaxaurus"), 4);
   assert.equal(subtypeCounts.get("statue-yakumo"), 4);
   assert.equal(subtypeCounts.get("ancient-beast-bone"), 10);
+  assert.equal(subtypeCounts.get("ancient-dragon-fragment"), 10);
   assert.equal(subtypeCounts.get("ancient-tree-bark"), 10);
+  assert.equal(subtypeCounts.get("boss-tower"), 13);
+  assert.equal(subtypeCounts.get("enemy-camp"), 55);
+  assert.equal(subtypeCounts.get("incident"), 97);
+  assert.equal(subtypeCounts.get("ancient-ruin"), 106);
+  assert.equal(subtypeCounts.get("home"), 32);
+  assert.equal(subtypeCounts.get("observation-tower"), 22);
+  assert.equal(subtypeCounts.get("region-name"), 121);
+  assert.equal(subtypeCounts.get("respawn"), 8);
+  assert.equal(subtypeCounts.get("treasure-map"), 42);
+  assert.equal(subtypeCounts.get("warp-altar"), 20);
   assert.deepEqual(
     new Set(
       artifact.worlds
@@ -225,15 +250,18 @@ test("생성된 위치 artifact는 raw 19,857건을 MainMap과 세계수 지도�
     ),
     new Set([
       "ancient-beast-bone",
+      "ancient-dragon-fragment",
       "ancient-tree-bark",
-      "night-stone",
+      "chromite",
       "pal-crystal",
       "coal",
       "copper-ore",
+      "hexolite-quartz",
       "manganese-ore",
       "quartz",
+      "quartz-cluster",
       "stone",
-      "sky-island-ore",
+      "solarlite",
       "sulfur",
       "world-tree-ore"
     ])
@@ -319,10 +347,10 @@ test("candidate는 exact-checksum compatibility authorization으로만 provider�
     artifact,
     compatibilityAuthorization: authorization
   });
-  assert.equal(provider.diagnostics().total, 19834);
-  assert.equal(authorization.approval.importAudit.sourceRawExact, 19857);
-  assert.equal(authorization.approval.importAudit.mainIncluded, 19603);
-  assert.equal(authorization.approval.importAudit.treeIncluded, 231);
+  assert.equal(provider.diagnostics().total, 21032);
+  assert.equal(authorization.approval.importAudit.sourceRawExact, 21055);
+  assert.equal(authorization.approval.importAudit.mainIncluded, 20786);
+  assert.equal(authorization.approval.importAudit.treeIncluded, 246);
   assert.equal(authorization.approval.importAudit.treeExcluded, 0);
   assert.equal(authorization.approval.importAudit.coordinateUnresolved, 0);
   assert.equal(authorization.approval.importAudit.exactDuplicates, 23);

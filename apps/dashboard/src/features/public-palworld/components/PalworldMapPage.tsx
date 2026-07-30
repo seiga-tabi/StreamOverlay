@@ -66,7 +66,10 @@ import {
 import { resolvePalworldName } from "../utils/localization";
 import {
   PALWORLD_MAP_COLLECTIBLE_TYPE_IDS,
+  PALWORLD_MAP_ENEMY_TYPE_IDS,
   PALWORLD_MAP_EGG_TYPE_IDS,
+  PALWORLD_MAP_LOCATION_TYPE_IDS,
+  PALWORLD_MAP_NPC_TYPE_IDS,
   PALWORLD_MAP_RESOURCE_TYPE_IDS,
   PALWORLD_MAP_STATUE_TYPE_IDS,
   isPalworldMapCollectibleTypeId,
@@ -90,7 +93,6 @@ import {
   type PalworldMapLayerGroup,
   type PalworldMapLocalizedLabel,
 } from "./PalworldMapExplorerTypes";
-import { PalworldMapCoordinateControl } from "./PalworldMapCoordinateControl";
 import { PalworldMapFilterPanel } from "./PalworldMapFilterPanel";
 import { PalworldMapLocationLayer } from "./PalworldMapLocationLayer";
 import { PalworldMapMarkerPopover } from "./PalworldMapMarkerPopover";
@@ -183,6 +185,11 @@ const PALWORLD_MAP_LOCATION_LABELS: Readonly<
   treasure: mapLabel(palworldI18n.ko.mapTreasures, palworldI18n.ja.mapTreasures),
   journal: mapLabel(palworldI18n.ko.mapJournals, palworldI18n.ja.mapJournals),
   resource: mapLabel(palworldI18n.ko.mapResources, palworldI18n.ja.mapResources),
+  enemy: mapLabel(palworldI18n.ko.mapEnemyLayers, palworldI18n.ja.mapEnemyLayers),
+  location: mapLabel(
+    palworldI18n.ko.mapLocationLayers,
+    palworldI18n.ja.mapLocationLayers,
+  ),
 };
 const PALWORLD_MAP_LOCATION_FALLBACKS: Readonly<
   Record<PalworldMapLocationCategory, string>
@@ -196,6 +203,8 @@ const PALWORLD_MAP_LOCATION_FALLBACKS: Readonly<
   treasure: "◇",
   journal: "▤",
   resource: "◆",
+  enemy: "⚔",
+  location: "⌖",
 };
 const PALWORLD_MAP_COLLECTIBLE_TYPE_LABELS: Readonly<
   Record<PalworldMapCollectibleTypeId, PalworldMapLocalizedLabel>
@@ -278,13 +287,13 @@ const PALWORLD_MAP_COLLECTIBLE_TYPE_LABELS: Readonly<
     palworldI18n.ko.mapResourceAncientBeastBone,
     palworldI18n.ja.mapResourceAncientBeastBone,
   ),
+  "resource-ancient-dragon-fragment": mapLabel(
+    palworldI18n.ko.mapResourceAncientDragonFragment,
+    palworldI18n.ja.mapResourceAncientDragonFragment,
+  ),
   "resource-ancient-tree-bark": mapLabel(
     palworldI18n.ko.mapResourceAncientTreeBark,
     palworldI18n.ja.mapResourceAncientTreeBark,
-  ),
-  "resource-night-stone": mapLabel(
-    palworldI18n.ko.mapResourceNightStone,
-    palworldI18n.ja.mapResourceNightStone,
   ),
   "resource-pal-crystal": mapLabel(
     palworldI18n.ko.mapResourcePalCrystal,
@@ -293,6 +302,14 @@ const PALWORLD_MAP_COLLECTIBLE_TYPE_LABELS: Readonly<
   "resource-coal": mapLabel(
     palworldI18n.ko.mapResourceCoal,
     palworldI18n.ja.mapResourceCoal,
+  ),
+  "resource-chromite": mapLabel(
+    palworldI18n.ko.mapResourceChromite,
+    palworldI18n.ja.mapResourceChromite,
+  ),
+  "resource-hexolite-quartz": mapLabel(
+    palworldI18n.ko.mapResourceHexoliteQuartz,
+    palworldI18n.ja.mapResourceHexoliteQuartz,
   ),
   "resource-copper-ore": mapLabel(
     palworldI18n.ko.mapResourceCopperOre,
@@ -306,11 +323,15 @@ const PALWORLD_MAP_COLLECTIBLE_TYPE_LABELS: Readonly<
     palworldI18n.ko.mapResourceQuartz,
     palworldI18n.ja.mapResourceQuartz,
   ),
+  "resource-quartz-cluster": mapLabel(
+    palworldI18n.ko.mapResourceQuartzCluster,
+    palworldI18n.ja.mapResourceQuartzCluster,
+  ),
   "resource-stone": mapLabel(
     palworldI18n.ko.mapResourceStone,
     palworldI18n.ja.mapResourceStone,
   ),
-  "resource-sky-island-ore": mapLabel(
+  "resource-solarlite": mapLabel(
     palworldI18n.ko.mapResourceSkyIslandOre,
     palworldI18n.ja.mapResourceSkyIslandOre,
   ),
@@ -321,6 +342,58 @@ const PALWORLD_MAP_COLLECTIBLE_TYPE_LABELS: Readonly<
   "resource-world-tree-ore": mapLabel(
     palworldI18n.ko.mapResourceWorldTreeOre,
     palworldI18n.ja.mapResourceWorldTreeOre,
+  ),
+  "npc-wandering-merchant": mapLabel(
+    palworldI18n.ko.mapNpcWanderingMerchant,
+    palworldI18n.ja.mapNpcWanderingMerchant,
+  ),
+  "npc-dark-trader": mapLabel(
+    palworldI18n.ko.mapNpcDarkTrader,
+    palworldI18n.ja.mapNpcDarkTrader,
+  ),
+  "npc-medal-trader": mapLabel(
+    palworldI18n.ko.mapNpcMedalTrader,
+    palworldI18n.ja.mapNpcMedalTrader,
+  ),
+  "enemy-boss-tower": mapLabel(
+    palworldI18n.ko.mapEnemyBossTower,
+    palworldI18n.ja.mapEnemyBossTower,
+  ),
+  "enemy-camp": mapLabel(
+    palworldI18n.ko.mapEnemyCamp,
+    palworldI18n.ja.mapEnemyCamp,
+  ),
+  "enemy-incident": mapLabel(
+    palworldI18n.ko.mapEnemyIncident,
+    palworldI18n.ja.mapEnemyIncident,
+  ),
+  "location-respawn": mapLabel(
+    palworldI18n.ko.mapLocationRespawn,
+    palworldI18n.ja.mapLocationRespawn,
+  ),
+  "location-warp-altar": mapLabel(
+    palworldI18n.ko.mapLocationWarpAltar,
+    palworldI18n.ja.mapLocationWarpAltar,
+  ),
+  "location-home": mapLabel(
+    palworldI18n.ko.mapLocationHome,
+    palworldI18n.ja.mapLocationHome,
+  ),
+  "location-observation-tower": mapLabel(
+    palworldI18n.ko.mapLocationObservationTower,
+    palworldI18n.ja.mapLocationObservationTower,
+  ),
+  "location-region-name": mapLabel(
+    palworldI18n.ko.mapLocationRegionName,
+    palworldI18n.ja.mapLocationRegionName,
+  ),
+  "location-treasure-map": mapLabel(
+    palworldI18n.ko.mapLocationTreasureMap,
+    palworldI18n.ja.mapLocationTreasureMap,
+  ),
+  "location-ancient-ruin": mapLabel(
+    palworldI18n.ko.mapAncientRuins,
+    palworldI18n.ja.mapAncientRuins,
   ),
 };
 
@@ -509,7 +582,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
     viewRef,
     viewportRef,
     zoomAt,
-  } = usePalworldMapViewport(loadState === "ready", "map");
+  } = usePalworldMapViewport(loadState === "ready", "map", "modifier");
   const bossLayerSelected = mapQuery.layers.includes("boss");
   const spawnLayerSelected = mapQuery.layers.includes("spawn") && Boolean(activeFocusPalId);
   const selectedLocationLayers = useMemo(
@@ -1199,7 +1272,14 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
       if (selected) nextTypes.add(typeId);
       else nextTypes.delete(typeId);
     }
-    for (const category of ["egg", "lifmunk", "resource"] as const) {
+    for (const category of [
+      "egg",
+      "lifmunk",
+      "resource",
+      "npc",
+      "enemy",
+      "location",
+    ] as const) {
       const categoryTypes = palworldMapCollectibleTypesForCategory(category);
       if (!collectibleTypeIds.some((typeId) =>
         palworldMapCollectibleCategory(typeId) === category
@@ -1375,37 +1455,40 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
         label: PALWORLD_MAP_COLLECTIBLE_TYPE_LABELS[id],
         statusLabel: layerStatusLabel(state),
         count,
-        iconAsset: PALWORLD_MAP_LAYER_ICONS[id],
-        iconFallback: category === "egg" ? "●" : category === "resource" ? "◆" : "✦",
+        iconAsset: PALWORLD_MAP_LAYER_ICONS[id]
+          ?? (
+            id === "resource-quartz-cluster"
+                ? PALWORLD_MAP_LAYER_ICONS["resource-quartz"]
+                : category === "enemy"
+                  ? PALWORLD_MAP_LAYER_ICONS.boss
+                  : category === "location"
+                    ? PALWORLD_MAP_LAYER_ICONS["fast-travel"]
+                    : category === "npc"
+                      ? PALWORLD_MAP_LAYER_ICONS.npc
+                      : PALWORLD_MAP_LAYER_ICONS[category]
+          ),
+        iconFallback: category === "egg"
+          ? "●"
+          : category === "resource"
+            ? "◆"
+            : category === "enemy"
+              ? "⚔"
+              : category === "location"
+                ? "⌖"
+                : category === "npc"
+                  ? "♙"
+                  : "✦",
         selected: state === "ready"
           && mapQuery.layers.includes(category)
           && mapQuery.types.includes(id),
         state,
       };
     };
-    const unavailableStatus = layerStatusLabel("data_unavailable");
-    const unavailableDescription = mapLabel(
-      palworldI18n.ko.mapCoordinateExportRequired,
-      palworldI18n.ja.mapCoordinateExportRequired,
-    );
-    const fixedLocationUnavailableDescription = mapLabel(
-      palworldI18n.ko.mapFixedLocationUnavailable,
-      palworldI18n.ja.mapFixedLocationUnavailable,
-    );
     return [{
       id: "pal",
       label: mapLabel(palworldI18n.ko.mapPalLayers, palworldI18n.ja.mapPalLayers),
       collapsed: collapsedFilterGroups.has("pal"),
       layers: [{
-        id: "boss",
-        label: mapLabel(palworldI18n.ko.mapBossMarkers, palworldI18n.ja.mapBossMarkers),
-        statusLabel: layerStatusLabel(markerState),
-        count: markerResponse?.markers.length,
-        iconAsset: PALWORLD_MAP_LAYER_ICONS.boss,
-        iconFallback: "◆",
-        selected: bossLayerSelected,
-        state: layerDisplayState(markerState),
-      }, {
         id: "spawn",
         label: mapLabel(palworldI18n.ko.palWildSpawnAreas, palworldI18n.ja.palWildSpawnAreas),
         description: activeFocusPalId
@@ -1423,13 +1506,38 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
       }],
     }, {
       id: "places",
-      label: mapLabel(palworldI18n.ko.mapPlaceLayers, palworldI18n.ja.mapPlaceLayers),
+      label: mapLabel(
+        palworldI18n.ko.mapLocationLayers,
+        palworldI18n.ja.mapLocationLayers,
+      ),
       collapsed: collapsedFilterGroups.has("places"),
       layers: [
         locationLayer("fast-travel"),
         locationLayer("dungeon"),
-        locationLayer("npc"),
+        ...PALWORLD_MAP_LOCATION_TYPE_IDS.map(collectibleTypeLayer),
       ],
+    }, {
+      id: "npcs",
+      label: mapLabel(palworldI18n.ko.mapNpcLayers, palworldI18n.ja.mapNpcLayers),
+      collapsed: collapsedFilterGroups.has("npcs"),
+      layers: PALWORLD_MAP_NPC_TYPE_IDS.map(collectibleTypeLayer),
+    }, {
+      id: "enemies",
+      label: mapLabel(
+        palworldI18n.ko.mapEnemyLayers,
+        palworldI18n.ja.mapEnemyLayers,
+      ),
+      collapsed: collapsedFilterGroups.has("enemies"),
+      layers: [{
+        id: "boss",
+        label: mapLabel(palworldI18n.ko.mapBossMarkers, palworldI18n.ja.mapBossMarkers),
+        statusLabel: layerStatusLabel(markerState),
+        count: markerResponse?.markers.length,
+        iconAsset: PALWORLD_MAP_LAYER_ICONS.boss,
+        iconFallback: "◆",
+        selected: bossLayerSelected,
+        state: layerDisplayState(markerState),
+      }, ...PALWORLD_MAP_ENEMY_TYPE_IDS.map(collectibleTypeLayer)],
     }, {
       id: "statues",
       label: mapLabel(
@@ -1455,32 +1563,6 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
       collapsed: collapsedFilterGroups.has("resources"),
       layers: [
         ...PALWORLD_MAP_RESOURCE_TYPE_IDS.map(collectibleTypeLayer),
-        {
-          id: "resource-chromite",
-          label: mapLabel(
-            palworldI18n.ko.mapResourceChromite,
-            palworldI18n.ja.mapResourceChromite,
-          ),
-          description: fixedLocationUnavailableDescription,
-          statusLabel: unavailableStatus,
-          iconAsset: PALWORLD_MAP_LAYER_ICONS["resource-chromite"],
-          iconFallback: "◆",
-          selected: false,
-          state: "data_unavailable",
-        },
-        {
-          id: "resource-hexolite-quartz",
-          label: mapLabel(
-            palworldI18n.ko.mapResourceHexoliteQuartz,
-            palworldI18n.ja.mapResourceHexoliteQuartz,
-          ),
-          description: fixedLocationUnavailableDescription,
-          statusLabel: unavailableStatus,
-          iconAsset: PALWORLD_MAP_LAYER_ICONS["resource-hexolite-quartz"],
-          iconFallback: "◆",
-          selected: false,
-          state: "data_unavailable",
-        },
       ],
     }, {
       id: "collectibles",
@@ -1493,16 +1575,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
         locationLayer("skill-fruit"),
         locationLayer("treasure"),
         locationLayer("journal"),
-        {
-        id: "ancient-ruin",
-        label: mapLabel(palworldI18n.ko.mapAncientRuins, palworldI18n.ja.mapAncientRuins),
-        description: unavailableDescription,
-        statusLabel: unavailableStatus,
-        iconAsset: PALWORLD_MAP_LAYER_ICONS["ancient-ruin"],
-        iconFallback: "⌂",
-        selected: false,
-        state: "data_unavailable",
-      }],
+      ],
     }];
   }, [
     activeFocusPalId,
@@ -1533,7 +1606,12 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
   const activeLayerCount = Number(bossLayerSelected)
     + Number(spawnLayerSelected)
     + selectedLocationLayers.filter((category) =>
-      category !== "egg" && category !== "lifmunk" && category !== "resource"
+      category !== "egg"
+      && category !== "lifmunk"
+      && category !== "resource"
+      && category !== "npc"
+      && category !== "enemy"
+      && category !== "location"
     ).length
     + selectedCollectibleTypes.filter((typeId) =>
       mapQuery.layers.includes(palworldMapCollectibleCategory(typeId))
@@ -1548,26 +1626,6 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
       activeLayerCount.toLocaleString("ja-JP"),
     ),
   );
-
-  function locateMapCoordinate(coordinate: { x: number; y: number }): void {
-    const viewport = viewportRef.current;
-    if (!viewport) return;
-    const nextView = focusPalworldMapViewAt(
-      {
-        normalizedX: coordinate.x,
-        normalizedY: coordinate.y,
-      },
-      viewport.clientWidth,
-      viewport.clientHeight,
-      Math.max(3, viewRef.current.zoom),
-    );
-    commitView(nextView);
-    pushQuery({
-      center: coordinate,
-      marker: null,
-      zoom: nextView.zoom,
-    });
-  }
 
   function worldPositionDetail(coordinate: {
     normalizedX: number;
@@ -2025,13 +2083,15 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
                     {text.mapZoomReset}
                   </Button>
                 </div>
-                {coordinateTransform ? (
-                  <PalworldMapCoordinateControl
-                    locale={locale}
-                    onLocate={locateMapCoordinate}
-                    transform={coordinateTransform}
-                  />
-                ) : null}
+                <div
+                  aria-label={text.mapWheelZoomHint}
+                  className="palworld-map-wheel-hint"
+                  data-map-interactive="true"
+                  role="note"
+                >
+                  <kbd>{text.mapWheelZoomShortcut}</kbd>
+                  <span>{text.mapWheelZoomHint}</span>
+                </div>
                 <span aria-live="polite" className="yoro-u-sr-only">
                   {copyState === "copied"
                     ? text.mapLinkCopied

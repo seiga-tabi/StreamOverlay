@@ -257,7 +257,9 @@ test("지도 위치 query는 world·레이어·offset·limit allowlist만 허용
         "treasure",
         "lifmunk",
         "journal",
-        "resource"
+        "resource",
+        "enemy",
+        "location"
       ],
       offset: 0,
       limit: 5000

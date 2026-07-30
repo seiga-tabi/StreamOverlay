@@ -84,10 +84,13 @@ export function PublicAppHeader({
     ? {
       displayName: yoroIdentity.displayName,
       provider: yoroIdentity.provider,
+      ...(yoroIdentity.avatarUrl ? { profileImageUrl: yoroIdentity.avatarUrl } : {}),
       ...(yoroIdentity.provider === "twitch" && twitchStatus.user
         ? {
           login: twitchStatus.user.login,
-          profileImageUrl: twitchStatus.user.profileImageUrl
+          ...(yoroIdentity.avatarUrl
+            ? {}
+            : { profileImageUrl: twitchStatus.user.profileImageUrl })
         }
         : {})
     }

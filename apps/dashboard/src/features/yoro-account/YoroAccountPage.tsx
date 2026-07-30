@@ -53,12 +53,13 @@ const text = {
   }
 } as const;
 
-export function YoroAccountPage() {
+export function YoroAccountPage({ embedded = false }: { embedded?: boolean }) {
   const [locale, setLocale] = useState<DashboardLocale>(() => detectDashboardLocale());
   const [session, setSession] = useState<YoroAccountSession>();
   const [error, setError] = useState("");
   const [busyProvider, setBusyProvider] = useState<YoroIdentityProvider>();
   const copy = text[locale];
+  const Root = embedded ? "div" : "main";
 
   useEffect(() => {
     const controller = new AbortController();
@@ -94,8 +95,10 @@ export function YoroAccountPage() {
   }
 
   return (
-    <main className="yoro-account-page">
-      <a className="yoro-account-brand" href="/bot" aria-label="YORO.gg">YORO.gg</a>
+    <Root className={`yoro-account-page ${embedded ? "is-embedded" : ""}`}>
+      {!embedded ? (
+        <a className="yoro-account-brand" href="/bot" aria-label="YORO.gg">YORO.gg</a>
+      ) : null}
       <section className="yoro-account-panel">
         <div className="yoro-account-panel__header">
           <span>{copy.eyebrow}</span>
@@ -145,7 +148,7 @@ export function YoroAccountPage() {
               })}
             </div>
             <div className="yoro-account-actions">
-              <a href="/bot/manage">{copy.dashboard}</a>
+              <a href="/dashboard/organizations">{copy.dashboard}</a>
               <button
                 type="button"
                 onClick={() => void logoutAccount(session.csrfToken).then(() => {
@@ -165,6 +168,6 @@ export function YoroAccountPage() {
           {copy.language}
         </button>
       </section>
-    </main>
+    </Root>
   );
 }

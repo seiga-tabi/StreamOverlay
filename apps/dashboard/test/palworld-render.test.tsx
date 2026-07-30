@@ -31,7 +31,6 @@ import { ItemCard, PalCard } from "../src/features/public-palworld/components/Pa
 import { PalworldItemReferenceButton } from "../src/features/public-palworld/components/PalworldItemReferenceButton";
 import { PalworldMapFilterPanel } from "../src/features/public-palworld/components/PalworldMapFilterPanel";
 import { PalworldMapLocationLayer } from "../src/features/public-palworld/components/PalworldMapLocationLayer";
-import { PalworldMapCoordinateControl } from "../src/features/public-palworld/components/PalworldMapCoordinateControl";
 import { PalworldMapMarkerPopover } from "../src/features/public-palworld/components/PalworldMapMarkerPopover";
 import { isLocalPalworldImageUrl, PalworldMedia } from "../src/features/public-palworld/components/PalworldMedia";
 import { PalworldMobileDismissHandle } from "../src/features/public-palworld/components/PalworldMobileDismissHandle";
@@ -86,6 +85,7 @@ import {
 import {
   clampPalworldMapView as clampSharedPalworldMapView,
   focusPalworldMapViewAt as focusSharedPalworldMapViewAt,
+  shouldZoomPalworldMapFromWheel,
   zoomPalworldMapViewAt as zoomSharedPalworldMapViewAt,
 } from "../src/features/public-palworld/hooks/usePalworldMapViewport";
 import { PalworldWorkSuitabilityBadge } from "../src/features/public-palworld/components/PalworldWorkSuitabilityBadge";
@@ -1811,6 +1811,10 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   assert.match(korean, /class="[^"]*palworld-map-control is-zoom-out[^"]*"/u);
   assert.match(korean, /class="palworld-map-zoom-output"/u);
   assert.match(korean, /class="[^"]*palworld-map-control is-zoom-reset[^"]*"/u);
+  assert.match(korean, /<kbd>Ctrl\/⌘ \+ Wheel<\/kbd>/u);
+  assert.match(korean, />확대·축소</u);
+  assert.match(japanese, />拡大・縮小</u);
+  assert.doesNotMatch(korean, /게임 내 좌표로 이동/u);
   assert.match(korean, /aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight \+ - Home"/u);
   assert.match(korean, /data-touch-mode="map"/u);
   assert.doesNotMatch(korean, /palworld-map-layer-legend|palworld-map-legend-sheet/u);
@@ -1825,7 +1829,7 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   assert.match(korean, /role="tablist"/u);
   assert.match(korean, /팰파고스섬/u);
   assert.match(korean, /세계수/u);
-  assert.match(korean, /이동·장소/u);
+  assert.match(korean, />위치</u);
   assert.match(korean, /빠른 이동 지점/u);
   assert.match(korean, /수집품/u);
   assert.match(korean, /쿠룰리스 상/u);
@@ -1838,8 +1842,8 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   assert.match(korean, /고대 짐승뼈/u);
   assert.match(korean, /고대나무껍질/u);
   assert.match(korean, /크로마이트/u);
-  assert.match(korean, /헥소 석영/u);
-  assert.match(korean, /수수한 석영 클러스터/u);
+  assert.match(korean, /헥솔라이트/u);
+  assert.match(korean, /순수한 석영 클러스터/u);
   assert.match(
     korean,
     /data-layer="resource-chromite"[\s\S]*<input disabled=""/u,
@@ -1848,7 +1852,6 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
     korean,
     /data-layer="resource-hexolite-quartz"[\s\S]*<input disabled=""/u,
   );
-  assert.match(korean, /밤별 모래/u);
   assert.match(korean, /팰지움 파편/u);
   assert.match(korean, /금속 광석/u);
   assert.match(korean, /코랄리움 광석/u);
@@ -1856,7 +1859,7 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   assert.match(korean, /data-layer="fast-travel"[\s\S]*<input disabled=""/u);
   assert.equal(
     (korean.match(/class="palworld-map-filter-layer-icon"/gu) ?? []).length,
-    43,
+    55,
   );
   assert.match(
     korean,
@@ -1898,7 +1901,7 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   assert.doesNotMatch(korean, /게임 월드에서 검증된 위치를 표시합니다/u);
   assert.match(japanese, /Palworld ワールドマップ/u);
   assert.match(japanese, />フィルター 1件</u);
-  assert.match(japanese, /移動・場所/u);
+  assert.match(japanese, />場所</u);
   assert.match(japanese, /収集品/u);
   assert.match(japanese, /鉱物・鉱石/u);
   assert.match(japanese, /金属鉱石/u);
@@ -2012,46 +2015,6 @@ test("월드 지도 필터와 마커 상세는 검증된 레이어만 선택하�
   assert.match(popover, />아누비스</u);
 });
 
-test("지도 좌표 이동 컨트롤은 한국어·일본어 입력과 검증 범위를 제공한다", () => {
-  const transform = {
-    status: "verified" as const,
-    revision: "main-map-transform-v1",
-    horizontalAxis: "world_y" as const,
-    verticalAxis: "world_x" as const,
-    invertHorizontal: false,
-    invertVertical: true,
-    sourceBounds: {
-      minX: -1_099_400,
-      maxX: 349_400,
-      minY: -724_400,
-      maxY: 724_400,
-    },
-  };
-  const korean = renderToStaticMarkup(
-    <PalworldMapCoordinateControl
-      locale="ko"
-      onLocate={() => undefined}
-      transform={transform}
-    />,
-  );
-  const japanese = renderToStaticMarkup(
-    <PalworldMapCoordinateControl
-      locale="ja"
-      onLocate={() => undefined}
-      transform={transform}
-    />,
-  );
-
-  assert.match(korean, /게임 내 좌표로 이동/u);
-  assert.match(korean, /X 좌표/u);
-  assert.match(korean, /Y 좌표/u);
-  assert.match(korean, /min="-1099400"/u);
-  assert.match(korean, /max="724400"/u);
-  assert.match(korean, /지도에서 찾기/u);
-  assert.match(japanese, /ゲーム内座標へ移動/u);
-  assert.match(japanese, /マップで探す/u);
-});
-
 test("지도 필터는 검증된 게임 WebP만 활성화하고 동상·지역 알 subtype을 완전하게 제공한다", () => {
   const resourceIconIds = [
     "resource-ancient-beast-bone",
@@ -2061,30 +2024,14 @@ test("지도 필터는 검증된 게임 WebP만 활성화하고 동상·지역 �
     "resource-copper-ore",
     "resource-hexolite-quartz",
     "resource-manganese-ore",
-    "resource-night-stone",
     "resource-pal-crystal",
     "resource-quartz",
-    "resource-sky-island-ore",
+    "resource-solarlite",
     "resource-stone",
     "resource-sulfur",
     "resource-world-tree-ore",
   ] as const;
-  const ids = [
-    "ancient-ruin",
-    "boss",
-    "dungeon",
-    "fast-travel",
-    "journal",
-    "npc",
-    "resource",
-    ...resourceIconIds,
-    "skill-fruit",
-    "spawn",
-    "treasure",
-    ...PALWORLD_MAP_COLLECTIBLE_TYPE_IDS.filter((id) =>
-      !id.startsWith("resource-")
-    ),
-  ] as const;
+  const ids = generatedMapLayerIcons.entries.map((entry) => entry.id);
   assert.deepEqual(
     Object.keys(PALWORLD_MAP_LAYER_ICONS).sort(),
     [...ids].sort(),
@@ -2107,10 +2054,9 @@ test("지도 필터는 검증된 게임 WebP만 활성화하고 동상·지역 �
       "resource-copper-ore": "CopperOre",
       "resource-hexolite-quartz": "RainbowCrystal",
       "resource-manganese-ore": "ManganeseOre",
-      "resource-night-stone": "NightStone",
       "resource-pal-crystal": "Pal_crystal_S",
       "resource-quartz": "Quartz",
-      "resource-sky-island-ore": "SkyIslandOre",
+      "resource-solarlite": "SkyIslandOre",
       "resource-stone": "Stone",
       "resource-sulfur": "Sulfur",
       "resource-world-tree-ore": "WorldTreeOre",
@@ -2143,6 +2089,22 @@ test("월드 지도 이동과 기준점 확대는 지도 경계를 벗어나지 
   assert.equal(clampPalworldMapView, clampSharedPalworldMapView);
   assert.equal(zoomPalworldMapViewAt, zoomSharedPalworldMapViewAt);
   assert.equal(focusPalworldMapViewAt, focusSharedPalworldMapViewAt);
+  assert.equal(
+    shouldZoomPalworldMapFromWheel("modifier", { ctrlKey: false, metaKey: false }),
+    false,
+  );
+  assert.equal(
+    shouldZoomPalworldMapFromWheel("modifier", { ctrlKey: true, metaKey: false }),
+    true,
+  );
+  assert.equal(
+    shouldZoomPalworldMapFromWheel("modifier", { ctrlKey: false, metaKey: true }),
+    true,
+  );
+  assert.equal(
+    shouldZoomPalworldMapFromWheel("always", { ctrlKey: false, metaKey: false }),
+    true,
+  );
   assert.deepEqual(
     clampPalworldMapView({ x: 120, y: -1_000, zoom: 2 }, 1_000, 800),
     { x: 0, y: -800, zoom: 2 },

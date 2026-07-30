@@ -26,6 +26,8 @@ export const PALWORLD_MAP_LAYERS = [
   "treasure",
   "journal",
   "resource",
+  "enemy",
+  "location",
 ] as const;
 export const PALWORLD_MAP_WORLDS = ["main", "tree"] as const;
 export const PALWORLD_MAP_PERIODS = ["all", "day", "night"] as const;

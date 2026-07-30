@@ -215,6 +215,7 @@ export function PublicBotPage() {
     ? {
       displayName: accountIdentity.displayName,
       provider: accountIdentity.provider,
+      ...(accountIdentity.avatarUrl ? { profileImageUrl: accountIdentity.avatarUrl } : {}),
     }
     : undefined;
   setActivePublicLocale(locale);
@@ -443,7 +444,7 @@ export function PublicBotPage() {
                 </div>
                 <div className="public-bot-actions">
                   <a className="public-bot-button is-primary" href={botInstallUrl()}>{text.addBot}</a>
-                  <a className="public-bot-button" href="/bot/manage">{text.dashboardLogin}</a>
+                  <a className="public-bot-button" href="/dashboard">{text.dashboardLogin}</a>
                 </div>
               </div>
               <div className="public-bot-hero__visual" aria-hidden="true">

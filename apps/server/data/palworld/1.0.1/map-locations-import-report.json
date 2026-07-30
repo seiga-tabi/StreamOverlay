@@ -11,7 +11,7 @@
     "selectedMemberCount": 7487
   },
   "checksums": {
-    "mappingSha256": "4f2ee11124be89a14e7f6603a6eea0d0d8e4d04ee7700fe64e15f73ada102655",
+    "mappingSha256": "584c454d2902aa7cde7df4318d4b431d053d5d231a173641e6a1d6f4b130d1c5",
     "transformMappingSha256": "82fdaea95a4ffb2408575ffad0135aabad902db65c82a83de4d142f90bf26bb4",
     "transformSha256": "4f209e0f1438ae2dda38d1240bc3b232d07099dd3e0a7b766f23fc4aa25f576d",
     "targetMapAssetSha256": "3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003",
@@ -20,9 +20,9 @@
   "counts": {
     "selectedMembers": 7487,
     "actorsScanned": 791613,
-    "sourceActors": 19857,
-    "included": 19603,
-    "treeIncluded": 231,
+    "sourceActors": 21055,
+    "included": 20786,
+    "treeIncluded": 246,
     "treeExcluded": 0,
     "coordinateUnresolved": 0,
     "outOfBoundsExcluded": 0,
@@ -38,8 +38,8 @@
         "exactDuplicates": 0
       },
       "dungeon": {
-        "sourceActors": 170,
-        "included": 170,
+        "sourceActors": 188,
+        "included": 188,
         "treeIncluded": 0,
         "treeExcluded": 0,
         "coordinateUnresolved": 0,
@@ -101,13 +101,31 @@
         "exactDuplicates": 0
       },
       "resource": {
-        "sourceActors": 15682,
-        "included": 15579,
+        "sourceActors": 16346,
+        "included": 16243,
         "treeIncluded": 80,
         "treeExcluded": 0,
         "coordinateUnresolved": 0,
         "outOfBoundsExcluded": 0,
         "exactDuplicates": 23
+      },
+      "enemy": {
+        "sourceActors": 165,
+        "included": 152,
+        "treeIncluded": 13,
+        "treeExcluded": 0,
+        "coordinateUnresolved": 0,
+        "outOfBoundsExcluded": 0,
+        "exactDuplicates": 0
+      },
+      "location": {
+        "sourceActors": 351,
+        "included": 349,
+        "treeIncluded": 2,
+        "treeExcluded": 0,
+        "coordinateUnresolved": 0,
+        "outOfBoundsExcluded": 0,
+        "exactDuplicates": 0
       }
     }
   },
@@ -596,7 +614,7 @@
     },
     {
       "family": "npc",
-      "actors": 255,
+      "actors": 200,
       "sourceClasses": [
         {
           "sourceClass": "BP_MonoNPCSpawner_C",
@@ -741,130 +759,14 @@
         {
           "sourceClass": "BP_MonoNPCSpawnerBossBase_BOSS_Police_Rifle_C",
           "actors": 1
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_Believer_01_02_C",
-          "actors": 2
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_Believer_01_03_C",
-          "actors": 1
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_Believer_02_01_C",
-          "actors": 1
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_Desert_Hunter_01_03_C",
-          "actors": 2
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_Desert_Hunter_02_01_C",
-          "actors": 1
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_Desert_Hunter_02_02_C",
-          "actors": 1
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_DLC2_1_C",
-          "actors": 11
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_FireCult_01_01_C",
-          "actors": 1
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_FireCult_02_01_C",
-          "actors": 1
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_FireCult_02_02_C",
-          "actors": 1
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_Forest1_C",
-          "actors": 2
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_Grass_C",
-          "actors": 6
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_Grass_TypeC_C",
-          "actors": 1
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_Grass2_2_C",
-          "actors": 2
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_Grass2_3_C",
-          "actors": 3
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_Grass2_C",
-          "actors": 2
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_Hunter_SeaBase_01_01_C",
-          "actors": 2
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_Hunter_SeaBase_01_02_C",
-          "actors": 1
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_Hunter_SeaBase_01_04_C",
-          "actors": 2
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_Hunter_SeaBase_02_01_C",
-          "actors": 2
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_Hunter_SeaBase_02_02_C",
-          "actors": 2
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_Hunter_SeaBase_02_03_C",
-          "actors": 1
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_Ninja_01_01_C",
-          "actors": 1
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_Ninja_01_02_C",
-          "actors": 1
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_Ninja_02_01_C",
-          "actors": 1
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_Ninja_02_02_C",
-          "actors": 1
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_Scientist_01_01_C",
-          "actors": 2
-        },
-        {
-          "sourceClass": "BP_NPCCampSpawner_Scientist_02_03_C",
-          "actors": 1
         }
       ],
       "reason": "semantic_mapping_not_verified"
     },
     {
       "family": "treasure",
-      "actors": 8497,
+      "actors": 8455,
       "sourceClasses": [
-        {
-          "sourceClass": "BP_LevelObject_TreasureMapPoint_C",
-          "actors": 42
-        },
         {
           "sourceClass": "BP_PalMapObjectSpawner_Treasure_Ruins_Grade_01_C",
           "actors": 48
@@ -928,8 +830,8 @@
     "attached_parent_coordinate_unresolved": 0
   },
   "integrityAudit": {
-    "exactCoordinateCollisions": 23,
-    "reusedLevelObjectInstanceIds": 2126,
+    "exactCoordinateCollisions": 32,
+    "reusedLevelObjectInstanceIds": 2375,
     "fastTravelPointIds": 152,
     "noteRowNames": 64
   },

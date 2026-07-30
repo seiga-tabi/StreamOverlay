@@ -350,7 +350,9 @@ const emptyLocationCounts = {
   treasure: 0,
   lifmunk: 0,
   journal: 0,
-  resource: 0
+  resource: 0,
+  enemy: 0,
+  location: 0
 };
 
 const locationArtifact = {

@@ -60,7 +60,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export function managementLoginUrl(): string {
-  return "/login?return_to=/bot/manage";
+  return "/login?return_to=/dashboard/organizations";
 }
 
 export function managementConnectUrl(): string {

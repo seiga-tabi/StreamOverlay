@@ -216,8 +216,17 @@ test("YORO 계정 route는 통합 OAuth cookie·Origin·CSRF 경계를 유지한
             displayName: "검증 사용자",
             connectedAt: "2026-07-29T00:00:00.000Z",
             lastAuthenticatedAt: "2026-07-29T00:00:00.000Z"
-          }]
+          }],
+          preferences: {
+            locale: "ko",
+            defaultDashboardPage: "overview",
+            reducedMotion: false
+          }
         };
+      },
+      async updatePreferences(input) {
+        calls.push({ type: "preferences", input });
+        return input.preferences;
       },
       async logout(cookieValue) {
         calls.push({ type: "logout", cookieValue });
@@ -259,6 +268,84 @@ test("YORO 계정 route는 통합 OAuth cookie·Origin·CSRF 경계를 유지한
     assert.equal(session.statusCode, 200);
     assert.equal(JSON.parse(session.body).authenticated, true);
     assert.doesNotMatch(session.body, /providerSubject|987654321098765432/u);
+
+    const preferences = await request(
+      handler,
+      "PATCH",
+      "/api/account/preferences",
+      {
+        locale: "ja",
+        defaultDashboardPage: "organizations",
+        reducedMotion: true
+      },
+      {
+        cookie,
+        origin: DASHBOARD_ORIGIN,
+        "content-type": "application/json",
+        "x-yoro-csrf": "csrf_value_abcdefghijklmnopqrstuvwxyz123456"
+      }
+    );
+    assert.equal(preferences.statusCode, 200);
+    assert.deepEqual(JSON.parse(preferences.body), {
+      preferences: {
+        locale: "ja",
+        defaultDashboardPage: "organizations",
+        reducedMotion: true
+      }
+    });
+    assert.equal(preferences.headers["Cache-Control"], "no-store");
+    assert.deepEqual(
+      calls.find((call) => call.type === "preferences")?.input,
+      {
+        sessionCookie:
+          "session_value_abcdefghijklmnopqrstuvwxyz123456.csrf_value_abcdefghijklmnopqrstuvwxyz123456",
+        csrfToken: "csrf_value_abcdefghijklmnopqrstuvwxyz123456",
+        preferences: {
+          locale: "ja",
+          defaultDashboardPage: "organizations",
+          reducedMotion: true
+        }
+      }
+    );
+
+    const invalidPreferences = await request(
+      handler,
+      "PATCH",
+      "/api/account/preferences",
+      {
+        locale: "ko",
+        defaultDashboardPage: "overview",
+        reducedMotion: false,
+        userId: "11111111-1111-4111-8111-111111111111"
+      },
+      {
+        cookie,
+        origin: DASHBOARD_ORIGIN,
+        "content-type": "application/json",
+        "x-yoro-csrf": "csrf_value_abcdefghijklmnopqrstuvwxyz123456"
+      }
+    );
+    assert.equal(invalidPreferences.statusCode, 400);
+    assert.equal(JSON.parse(invalidPreferences.body).code, "invalid_input");
+
+    const untrustedPreferences = await request(
+      handler,
+      "PATCH",
+      "/api/account/preferences",
+      {
+        locale: "ko",
+        defaultDashboardPage: "overview",
+        reducedMotion: false
+      },
+      {
+        cookie,
+        origin: "https://evil.example",
+        "content-type": "application/json",
+        "x-yoro-csrf": "csrf_value_abcdefghijklmnopqrstuvwxyz123456"
+      }
+    );
+    assert.equal(untrustedPreferences.statusCode, 403);
+    assert.equal(JSON.parse(untrustedPreferences.body).code, "origin_denied");
 
     const denied = await request(
       handler,
