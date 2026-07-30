@@ -139,6 +139,7 @@ test("공식 /info 응답은 1.0.0 exact schema만 허용한다", () => {
 test("공식 /metrics 응답은 허용 필드와 유한한 숫자 범위를 검증한다", () => {
   const rawMetrics = {
     serverfps: 57,
+    serverfpsaverage: 56.8125,
     currentplayernum: 10,
     serverframetime: 16.7671,
     maxplayernum: 32,
@@ -153,7 +154,25 @@ test("공식 /metrics 응답은 허용 필드와 유한한 숫자 범위를 검�
   assert.equal(validatePalworldRestMetricsResponse({ ...rawMetrics, uptime: -1 }).ok, false);
   assert.equal(validatePalworldRestMetricsResponse({ ...rawMetrics, currentplayernum: 33 }).ok, false);
   assert.equal(validatePalworldRestMetricsResponse({ ...rawMetrics, serverfps: 57.5 }).ok, false);
+  assert.equal(validatePalworldRestMetricsResponse({ ...rawMetrics, serverfpsaverage: Number.NaN }).ok, false);
+  assert.equal(validatePalworldRestMetricsResponse({ ...rawMetrics, serverfpsaverage: -1 }).ok, false);
   assert.equal(validatePalworldRestMetricsResponse({ ...rawMetrics, averagefps: 55 }).ok, false);
+});
+
+test("Palworld 1.0.2의 serverfpsaverage metrics 필드를 명시적으로 허용한다", () => {
+  const currentMetrics = {
+    currentplayernum: 0,
+    serverfps: 60,
+    serverfpsaverage: 59.875,
+    serverframetime: 16.6667,
+    days: 42,
+    maxplayernum: 32,
+    basecampnum: 0,
+    uptime: 3_600
+  };
+  const result = validatePalworldRestMetricsResponse(currentMetrics);
+  assert.equal(result.ok, true);
+  assert.equal(result.ok && result.data.serverfpsaverage, 59.875);
 });
 
 test("Palworld REST가 basecampnum을 생략하면 0으로 안전하게 정규화한다", () => {

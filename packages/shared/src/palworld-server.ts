@@ -93,6 +93,7 @@ export type PalworldRestInfoResponse = {
 
 export type PalworldRestMetricsResponse = {
   serverfps: number;
+  serverfpsaverage?: number;
   currentplayernum: number;
   serverframetime: number;
   maxplayernum: number;
@@ -355,6 +356,7 @@ function validateRestMetricsAt(
 ): PalworldServerValidationResult<PalworldRestMetricsResponse> {
   const record = recordAt(value, path, [
     "serverfps",
+    "serverfpsaverage",
     "currentplayernum",
     "serverframetime",
     "maxplayernum",
@@ -365,6 +367,10 @@ function validateRestMetricsAt(
   if (!record.ok) return record;
   const serverFps = integerAt(record.data.serverfps, `${path}.serverfps`, 0, MAX_SERVER_FPS);
   if (!serverFps.ok) return serverFps;
+  const serverFpsAverage = record.data.serverfpsaverage === undefined
+    ? valid(undefined)
+    : finiteNumberAt(record.data.serverfpsaverage, `${path}.serverfpsaverage`, 0, MAX_SERVER_FPS);
+  if (!serverFpsAverage.ok) return serverFpsAverage;
   const currentPlayers = integerAt(record.data.currentplayernum, `${path}.currentplayernum`, 0, MAX_PLAYER_COUNT);
   if (!currentPlayers.ok) return currentPlayers;
   const frameTime = finiteNumberAt(record.data.serverframetime, `${path}.serverframetime`, 0, MAX_FRAME_TIME_MS);
@@ -386,6 +392,7 @@ function validateRestMetricsAt(
   }
   return valid({
     serverfps: serverFps.data,
+    ...(serverFpsAverage.data === undefined ? {} : { serverfpsaverage: serverFpsAverage.data }),
     currentplayernum: currentPlayers.data,
     serverframetime: frameTime.data,
     maxplayernum: maxPlayers.data,

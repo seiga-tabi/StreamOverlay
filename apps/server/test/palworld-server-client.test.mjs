@@ -24,6 +24,7 @@ const VALID_INFO = {
 
 const VALID_METRICS = {
   serverfps: 57,
+  serverfpsaverage: 56.8125,
   currentplayernum: 10,
   serverframetime: 16.7671,
   maxplayernum: 32,
@@ -661,6 +662,20 @@ test("PalworldServerClient는 basecampnum이 생략된 metrics도 호환 응답�
   });
   assert.equal(result.state, "online");
   assert.equal(result.metrics?.baseCampCount, 0);
+});
+
+test("PalworldServerClient는 serverfpsaverage가 포함된 현재 metrics 응답을 처리한다", async () => {
+  const { client } = createHttpsClient({
+    requestPinned: async (request) => request.url.pathname === "/v1/api/info"
+      ? jsonResponse(VALID_INFO)
+      : jsonResponse(VALID_METRICS)
+  });
+  const result = await client.probe({
+    baseUrl: "https://pal.example:8212",
+    adminPassword: "secret-password"
+  });
+  assert.equal(result.state, "online");
+  assert.equal(result.metrics?.serverFps, 57);
 });
 
 test("metrics 연결에서 발생한 TLS 인증서 오류도 tls_failed로 즉시 판정한다", async () => {
