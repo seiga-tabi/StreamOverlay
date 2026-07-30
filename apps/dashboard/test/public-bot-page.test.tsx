@@ -35,7 +35,7 @@ Object.defineProperty(globalThis, "window", {
   }
 });
 
-test("YORO Bot 소개 페이지는 중앙 Hero와 3개 독립 페이지 메뉴를 제공한다", async () => {
+test("YORO Bot 소개 페이지는 중앙 Hero와 4개 독립 페이지 메뉴를 제공한다", async () => {
   const { PublicBotPage } = await import("../src/features/public-bot/PublicBotPage");
   window.location.pathname = "/bot";
   const markup = renderToStaticMarkup(<PublicBotPage />);
@@ -56,6 +56,7 @@ test("YORO Bot 소개 페이지는 중앙 Hero와 3개 독립 페이지 메뉴�
   assert.match(markup, /aria-label="YORO Bot 홈"/u);
   assert.match(markup, /href="\/bot\/features"/u);
   assert.match(markup, /href="\/bot\/connect"/u);
+  assert.match(markup, /href="\/bot\/dedicated-server"/u);
   assert.doesNotMatch(markup, /href="#bot-(?:overview|features|flow|security)"/u);
   assert.match(markup, /discord-symbol-blurple\.f6c1a66250d3\.png/u);
   assert.doesNotMatch(markup, /class="public-bot-node is-discord">D</u);
@@ -71,6 +72,7 @@ test("YORO Bot 기능과 연결 과정은 URL별 독립 콘텐츠로 렌더링�
   assert.equal(publicBotSectionFromPath("/bot"), "overview");
   assert.equal(publicBotSectionFromPath("/bot/features/"), "features");
   assert.equal(publicBotSectionFromPath("/bot/connect"), "connect");
+  assert.equal(publicBotSectionFromPath("/bot/dedicated-server/"), "dedicatedServer");
 
   window.location.pathname = "/bot/features";
   const featureMarkup = renderToStaticMarkup(<PublicBotPage />);
@@ -89,4 +91,15 @@ test("YORO Bot 기능과 연결 과정은 URL별 독립 콘텐츠로 렌더링�
   assert.match(connectMarkup, /복구용 일회성 링크/u);
   assert.match(connectMarkup, /aria-current="page"[^>]*href="\/bot\/connect"/u);
   assert.doesNotMatch(connectMarkup, /Organization 관리/u);
+
+  window.location.pathname = "/bot/dedicated-server";
+  const dedicatedServerMarkup = renderToStaticMarkup(<PublicBotPage />);
+  assert.match(dedicatedServerMarkup, /전용 서버 설정 만들기/u);
+  assert.match(dedicatedServerMarkup, /PalWorldSettings\.ini/u);
+  assert.match(dedicatedServerMarkup, /입력값은 YORO 서버로 전송하거나 계정에 저장하지 않습니다/u);
+  assert.match(dedicatedServerMarkup, /aria-current="page"[^>]*href="\/bot\/dedicated-server"/u);
+  assert.match(dedicatedServerMarkup, /type="password"/u);
+  assert.match(dedicatedServerMarkup, /REST API/u);
+  assert.match(dedicatedServerMarkup, /RCON/u);
+  assert.doesNotMatch(dedicatedServerMarkup, /accessToken|refreshToken|clientSecret|setupToken/u);
 });

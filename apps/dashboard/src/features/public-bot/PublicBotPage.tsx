@@ -31,6 +31,7 @@ import {
   authenticatedYoroIdentity,
   useYoroAccountSession,
 } from "../yoro-account/useYoroAccountSession";
+import { PalworldDedicatedServerSettings } from "./PalworldDedicatedServerSettings";
 
 const noLocalePreference = async (): Promise<PublicLocale | undefined> => undefined;
 
@@ -46,11 +47,14 @@ const botText = {
     navOverview: "소개",
     navFeatures: "기능",
     navFlow: "연결 과정",
+    navDedicatedServer: "전용 서버",
     eyebrow: "DISCORD SERVER COMPANION",
     title: "게임 서버 운영을 Discord에서 더 간단하게",
     pageTitle: "YORO Bot | Discord 게임 서버 도우미",
     featuresPageTitle: "기능 | YORO Bot",
     flowPageTitle: "연결 과정 | YORO Bot",
+    dedicatedServerPageTitle: "Palworld 전용 서버 설정 | YORO Bot",
+    dedicatedServerPageDescription: "브라우저에서 안전하게 PalWorldSettings.ini 설정을 만들고 다운로드합니다.",
     description: "YORO Bot은 Organization과 Discord 서버를 안전하게 연결하고, 향후 게임 서버 상태와 알림을 한곳에서 관리하도록 설계된 도우미입니다.",
     foundationReady: "Discord 연결 기반 준비됨",
     gatewayPending: "설정 명령 구현됨 · 운영 활성화 필요",
@@ -108,11 +112,14 @@ const botText = {
     navOverview: "概要",
     navFeatures: "機能",
     navFlow: "連携手順",
+    navDedicatedServer: "専用サーバー",
     eyebrow: "DISCORD SERVER COMPANION",
     title: "ゲームサーバー運用を Discord でもっとシンプルに",
     pageTitle: "YORO Bot | Discordゲームサーバーアシスタント",
     featuresPageTitle: "機能 | YORO Bot",
     flowPageTitle: "連携手順 | YORO Bot",
+    dedicatedServerPageTitle: "Palworld専用サーバー設定 | YORO Bot",
+    dedicatedServerPageDescription: "ブラウザ内で安全にPalWorldSettings.iniを作成してダウンロードできます。",
     description: "YORO Bot は Organization と Discord サーバーを安全に連携し、今後ゲームサーバーの状態と通知を一か所で管理するためのアシスタントです。",
     foundationReady: "Discord連携基盤の準備完了",
     gatewayPending: "設定コマンド実装済み・運用有効化が必要",
@@ -161,7 +168,7 @@ const botText = {
   },
 } as const;
 
-export type PublicBotSection = "overview" | "features" | "connect";
+export type PublicBotSection = "overview" | "features" | "connect" | "dedicatedServer";
 
 export function publicBotSectionFromPath(pathname: string): PublicBotSection {
   const normalized = pathname.length > 1 && pathname.endsWith("/")
@@ -169,6 +176,7 @@ export function publicBotSectionFromPath(pathname: string): PublicBotSection {
     : pathname;
   if (normalized === "/bot/features") return "features";
   if (normalized === "/bot/connect") return "connect";
+  if (normalized === "/bot/dedicated-server") return "dedicatedServer";
   return "overview";
 }
 
@@ -206,6 +214,12 @@ export function PublicBotPage() {
     ? { title: text.featuresPageTitle, description: text.currentDescription, path: "/bot/features" }
     : activeSection === "connect"
       ? { title: text.flowPageTitle, description: text.flowDescription, path: "/bot/connect" }
+      : activeSection === "dedicatedServer"
+        ? {
+          title: text.dedicatedServerPageTitle,
+          description: text.dedicatedServerPageDescription,
+          path: "/bot/dedicated-server",
+        }
       : { title: text.pageTitle, description: text.description, path: "/bot" };
   const [gameSelectorOpen, setGameSelectorOpen] = useState(false);
   const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
@@ -249,6 +263,21 @@ export function PublicBotPage() {
     };
   }, [pageMetadata.description, pageMetadata.path, pageMetadata.title]);
 
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      const activeLink = document.querySelector<HTMLElement>(
+        '[data-testid="bot-secondary-nav"] [aria-current="page"]',
+      );
+      const scroller = activeLink?.closest<HTMLElement>(".public-horizontal-nav");
+      if (!activeLink || !scroller || scroller.scrollWidth <= scroller.clientWidth) return;
+      scroller.scrollLeft = Math.max(
+        0,
+        activeLink.offsetLeft - ((scroller.clientWidth - activeLink.clientWidth) / 2),
+      );
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [activeSection]);
+
   const closeMenus = useCallback(() => {
     setGameSelectorOpen(false);
     setLocaleMenuOpen(false);
@@ -272,6 +301,7 @@ export function PublicBotPage() {
         ["/bot", text.navOverview, "overview"],
         ["/bot/features", text.navFeatures, "features"],
         ["/bot/connect", text.navFlow, "connect"],
+        ["/bot/dedicated-server", text.navDedicatedServer, "dedicatedServer"],
       ] as const).map(([href, label, section]) => (
         <a
           aria-current={activeSection === section ? "page" : undefined}
@@ -552,6 +582,10 @@ export function PublicBotPage() {
             </ol>
             <p className="public-bot-notice" role="note">{text.setupNotice}</p>
           </section>
+        ) : null}
+
+        {activeSection === "dedicatedServer" ? (
+          <PalworldDedicatedServerSettings locale={locale} />
         ) : null}
       </AppShellMain>
 

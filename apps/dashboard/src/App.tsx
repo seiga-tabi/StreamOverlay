@@ -282,7 +282,9 @@ export default function App() {
       || window.location.pathname === "/bot/features"
       || window.location.pathname === "/bot/features/"
       || window.location.pathname === "/bot/connect"
-      || window.location.pathname === "/bot/connect/";
+      || window.location.pathname === "/bot/connect/"
+      || window.location.pathname === "/bot/dedicated-server"
+      || window.location.pathname === "/bot/dedicated-server/";
     const palworldPublic = isPalworldPath(window.location.pathname);
     return (
       yoroDashboard ? (

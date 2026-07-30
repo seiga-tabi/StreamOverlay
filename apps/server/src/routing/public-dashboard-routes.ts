@@ -22,6 +22,8 @@ const PUBLIC_DASHBOARD_EXACT_PATHS = new Set([
   "/bot/features/",
   "/bot/connect",
   "/bot/connect/",
+  "/bot/dedicated-server",
+  "/bot/dedicated-server/",
   "/palworld",
   "/palworld/",
   "/palworld/pals",
