@@ -1,6 +1,6 @@
 # PostgreSQL 기반 구조
 
-PostgreSQL은 향후 Discord SaaS와 게임 서버 상태 기능 전용 기반입니다. 기존 Twitch token, Followers, Riot ID, session, Overlay, Community, Palworld runtime은 현재 JSON·파일 저장소를 그대로 사용하며 PostgreSQL로 복제하거나 dual-write하지 않습니다.
+PostgreSQL은 Discord SaaS, YORO 통합 계정과 게임 서버 상태 기능의 기반입니다. 방송 운영용 Twitch token, Followers, Riot ID, Overlay, Community, Palworld runtime은 기존 JSON·파일 저장소를 그대로 사용하며 PostgreSQL로 복제하거나 dual-write하지 않습니다. YORO 로그인 사용자의 공개 LIVE 조회용 Twitch credential만 별도 목적과 수명으로 암호화 저장합니다.
 
 ## 활성화
 
@@ -61,7 +61,7 @@ ID만 받는 전역 조회 method는 만들지 않습니다. 조회·수정·삭
 ## 상태와 보안
 
 - Discord·Twitch token 원문 column을 만들지 않습니다.
-- 연결 credential은 `encrypted_config`와 key version만 저장할 준비를 하며, 암호화 저장 API는 이번 단계에 포함하지 않습니다.
+- YORO 공개 LIVE 조회용 Twitch credential은 `TWITCH_TOKEN_ENCRYPTION_KEY`와 사용자별 AAD로 AES-256-GCM 암호화하며, 계정 연결 해제 시 암호문도 즉시 폐기합니다.
 - Agent credential은 원문이 아니라 hash만 저장합니다.
 - Agent 전체 payload를 history에 저장하지 않고 필요한 metric만 column으로 저장합니다.
 - `/health/live`는 Database 장애와 독립적입니다.
@@ -73,6 +73,8 @@ Discord OAuth onboarding은 `0004_discord_oauth_onboarding`부터 이 기반을 
 `0007_agent_registration_and_ingestion`부터 Agent 등록과 status 저장 기반을 사용합니다. Agent credential과 nonce는 SHA-256 hash만 저장하고, current·history·online/offline event는 하나의 transaction에서 갱신합니다. 오래된 관측은 current를 덮지 않습니다. Agent daemon은 별도 process로 구현되어 있고 Notification Worker는 아직 구현하지 않았습니다.
 
 `0008_web_management_guild_claim`은 기존 setup session에 `web_management` 발급 목적을 additive하게 허용합니다. 웹 claim은 관리 가능한 Discord Guild와 Bot 설치 관찰을 재검증하고 Organization·membership·Guild·installation·management session을 하나의 transaction으로 확정합니다.
+
+`0011_yoro_twitch_viewer_credentials`는 YORO 계정의 Twitch LIVE 조회 credential을 사용자 identity에 귀속합니다. OAuth access·refresh token 원문은 저장하지 않고 암호문과 access token 만료 시각만 저장하며, LIVE API는 YORO session의 user ID를 다시 확인한 뒤에만 복호화합니다.
 # YORO Agent 상태 경계
 
 Agent는 Database에 직접 연결하지 않습니다. bootstrap 등록과 status ingestion은 Server API만 통하며 credential 원문은 Agent의 권한 제한 파일에만 남습니다. Server Database에는 credential hash, current status, allowlist history metric, online/offline event만 저장합니다.

@@ -13,7 +13,7 @@ Dashboard입니다. 별도 이메일·비밀번호 계정을 만들지 않고, p
 - `/dashboard/account`: Discord·Twitch identity 연결 및 해제
 - `/dashboard/organizations`: Discord Guild, Organization, Palworld 게임 서버와 Agent 설정
 - `/dashboard/settings`: 언어, 기본 화면, reduced motion 설정
-- `/bot/manage`: 기존 링크를 위한 호환 관리 화면
+- `/setup/discord`, `/bot/manage`: 별도 화면을 제공하지 않고 `/dashboard/organizations`로 redirect하는 legacy URL
 
 기존 Twitch 방송 운영 Dashboard의 `/dashboard/followers`,
 `/dashboard/riot-id`, `/dashboard/{streamerSlug}/{dashboardKey}/...` 경로와 인증

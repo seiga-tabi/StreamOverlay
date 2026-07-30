@@ -9,6 +9,7 @@ import {
   type DiscordGuildCandidateRecord,
   type DiscordSetupIssuedVia
 } from "../database/repositories/discord-onboarding-repository.js";
+import { YoroAccountRepository } from "../database/repositories/yoro-account-repository.js";
 import {
   decryptDiscordSecret,
   discordPkceChallenge,
@@ -24,7 +25,7 @@ const DISCORD_TOKEN_URL = "https://discord.com/api/oauth2/token";
 const DISCORD_BOT_PERMISSIONS = "0";
 const ADMINISTRATOR = 1n << 3n;
 const MANAGE_GUILD = 1n << 5n;
-const SETUP_RETURN_PATH = "/setup/discord";
+const SETUP_RETURN_PATH = "/dashboard/organizations";
 
 export const DISCORD_ONBOARDING_COOKIE = "yoro_discord_onboarding";
 
@@ -417,6 +418,7 @@ export class DiscordOnboardingService {
     state: string;
     code: string;
     cookieValue?: string;
+    targetUserId?: string;
   }): Promise<DiscordSetupIssuedVia> {
     const cookie = parseCookieBinding(input.cookieValue);
     if (
@@ -457,6 +459,9 @@ export class DiscordOnboardingService {
       const token = await this.exchangeCode(input.code, verifier);
       const profile = await this.fetchProfile(token.accessToken);
       const manageableGuilds = await this.fetchManageableGuilds(token.accessToken);
+      if (oauth.issuedVia === "web_management" && !input.targetUserId) {
+        throw new DiscordOnboardingError("discord_session_unavailable", 401);
+      }
       if (
         oauth.issuedVia === "bot_command"
         && oauth.requestedByDiscordUserId !== profile.id
@@ -481,7 +486,12 @@ export class DiscordOnboardingService {
         const repository = new DiscordOnboardingRepository(client);
         const identity = await repository.upsertDiscordIdentity({
           identityId: crypto.randomUUID(),
-          userId: crypto.randomUUID(),
+          userId: oauth.issuedVia === "web_management"
+            ? input.targetUserId!
+            : crypto.randomUUID(),
+          ...(oauth.issuedVia === "web_management"
+            ? { requiredUserId: input.targetUserId! }
+            : {}),
           discordUserId: profile.id,
           displayName: profile.displayName,
           ...(profile.avatarReference ? { avatarReference: profile.avatarReference } : {})
@@ -531,6 +541,9 @@ export class DiscordOnboardingService {
         errorCode: error instanceof DiscordOnboardingError ? error.code : "discord_oauth_failed"
       });
       if (error instanceof DiscordOnboardingError) throw error;
+      if (error instanceof SafeDatabaseError && error.code === "DATABASE_CONFLICT") {
+        throw new DiscordOnboardingError("discord_identity_mismatch", 403);
+      }
       throw new DiscordOnboardingError("discord_oauth_failed", 503);
     }
   }
@@ -605,6 +618,7 @@ export class DiscordOnboardingService {
     guild: { id: string; name: string };
     organization: { id: string; displayName: string };
     managementSessionToken?: string;
+    yoroSessionToken: string;
   }> {
     const cookie = parseCookieBinding(input.cookieValue);
     if (!cookie || !input.csrfToken || input.csrfToken !== cookie.csrfToken) {
@@ -677,6 +691,21 @@ export class DiscordOnboardingService {
           )
         }
       : undefined;
+    const yoroSessionToken = discordSafeToken();
+    const yoroCsrfToken = discordSafeToken();
+    const yoroSession = {
+      id: crypto.randomUUID(),
+      userId: session.internalUserId,
+      sessionTokenHash: discordSecretHash(yoroSessionToken),
+      csrfTokenHash: discordSecretHash(yoroCsrfToken),
+      authenticationProvider: "discord" as const,
+      idleExpiresAt: new Date(
+        now + appConfig.discordBotManagement.idleTtlSeconds * 1_000
+      ),
+      absoluteExpiresAt: new Date(
+        now + appConfig.discordBotManagement.absoluteTtlSeconds * 1_000
+      )
+    };
     let result: {
       guild: { id: string; name: string };
       organization: { id: string; displayName: string };
@@ -733,6 +762,7 @@ export class DiscordOnboardingService {
             ? { userId: session.internalUserId, managementSession }
             : {})
         });
+        await new YoroAccountRepository(client).createSession(yoroSession);
         return {
           guild: { id: verifiedGuild.id, name: verifiedGuild.name },
           organization: {
@@ -785,6 +815,7 @@ export class DiscordOnboardingService {
         } : {}),
         ...(managementSession ? { managementSession } : {})
       });
+        await new YoroAccountRepository(client).createSession(yoroSession);
         return {
           guild: { id: verifiedGuild.id, name: verifiedGuild.name },
           organization: { id: organizationId, displayName: organizationDisplayName }
@@ -803,7 +834,8 @@ export class DiscordOnboardingService {
       ...result,
       ...(managementSessionToken && managementCsrfToken
         ? { managementSessionToken: `${managementSessionToken}.${managementCsrfToken}` }
-        : {})
+        : {}),
+      yoroSessionToken: `${yoroSessionToken}.${yoroCsrfToken}`
     };
   }
 

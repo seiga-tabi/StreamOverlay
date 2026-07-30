@@ -192,7 +192,7 @@ test("Discord setup 링크는 Dashboard 개발 origin이 아니라 공개 origin
   const setupToken = "abcdefghijklmnopqrstuvwxyzABCDEFGH";
   const url = new URL(buildDiscordSetupReturnUrl(setupToken, "https://yoro.gg"));
   assert.equal(url.origin, "https://yoro.gg");
-  assert.equal(url.pathname, "/setup/discord");
+  assert.equal(url.pathname, "/dashboard/organizations");
   assert.equal(url.searchParams.get("setup"), setupToken);
   assert.deepEqual([...url.searchParams.keys()], ["setup"]);
   assert.throws(

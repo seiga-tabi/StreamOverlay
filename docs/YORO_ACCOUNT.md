@@ -53,7 +53,7 @@ YORO session으로 재사용하거나 영구 저장하지 않습니다.
 ## 기존 인증과 단계적 전환
 
 기존 Discord onboarding·Guild claim과 Twitch 공개 session은 회귀 방지를 위해 당분간
-유지합니다. `/dashboard/organizations`와 호환 경로 `/bot/manage`는 YORO session을 우선 인증하고 기존 Discord management
+유지합니다. `/dashboard/organizations`는 YORO session을 인증해 Organization과 Discord Bot 관리를 제공하고 기존 Discord management
 session을 호환 경로로 허용합니다. 신규 로그인 진입은 `/login`으로 통합합니다.
 
 Twitch EventSub·팔로워처럼 장기 provider authorization이 필요한 기능은 로그인 identity와

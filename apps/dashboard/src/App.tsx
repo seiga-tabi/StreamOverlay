@@ -37,14 +37,6 @@ const PublicBotPage = lazyNamed(
   () => import("./features/public-bot/PublicBotPage"),
   "PublicBotPage",
 );
-const DiscordSetupPage = lazyNamed(
-  () => import("./features/discord-onboarding/DiscordSetupPage"),
-  "DiscordSetupPage",
-);
-const BotManagementPage = lazyNamed(
-  () => import("./features/bot-management/BotManagementPage"),
-  "BotManagementPage",
-);
 const YoroLoginPage = lazyNamed(
   () => import("./features/yoro-account/YoroLoginPage"),
   "YoroLoginPage",
@@ -485,10 +477,6 @@ export default function App() {
       || window.location.pathname === "/account/"
       || window.location.pathname === "/account/connections"
       || window.location.pathname === "/account/connections/";
-    const discordSetup = window.location.pathname === "/setup/discord"
-      || window.location.pathname === "/setup/discord/";
-    const botManagement = window.location.pathname === "/bot/manage"
-      || window.location.pathname === "/bot/manage/";
     const botPublic = window.location.pathname === "/bot"
       || window.location.pathname === "/bot/"
       || window.location.pathname === "/bot/features"
@@ -508,14 +496,6 @@ export default function App() {
       ) : yoroAccount ? (
         <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>
           <YoroAccountPage />
-        </Suspense>
-      ) : botManagement ? (
-        <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>
-          <BotManagementPage />
-        </Suspense>
-      ) : discordSetup ? (
-        <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>
-          <DiscordSetupPage />
         </Suspense>
       ) : botPublic ? (
         <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>

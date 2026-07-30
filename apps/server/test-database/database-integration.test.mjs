@@ -16,6 +16,12 @@ import { DiscordOnboardingRepository } from "../dist/database/repositories/disco
 import { DiscordManagementRepository } from "../dist/database/repositories/discord-management-repository.js";
 import { YoroAccountRepository } from "../dist/database/repositories/yoro-account-repository.js";
 import { AgentIngestionService, AgentIngestionError } from "../dist/services/agent-ingestion-service.js";
+import { DiscordManagementService } from "../dist/services/discord-management-service.js";
+import { YoroAccountService } from "../dist/services/yoro-account-service.js";
+import {
+  decryptTwitchTokenDocument,
+  encryptTwitchTokenDocument
+} from "../dist/services/twitch-token-encryption.js";
 import { GameServerRepository } from "../dist/database/repositories/game-server-repository.js";
 import { NotificationJobRepository } from "../dist/database/repositories/notification-job-repository.js";
 import { OrganizationRepository } from "../dist/database/repositories/organization-repository.js";
@@ -57,7 +63,7 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
   await t.test("check와 plan 기반 검사는 빈 DB를 변경하지 않는다", async () => {
     const inspection = await inspectMigrationState(pool, manifest);
     assert.equal(inspection.status, "pending");
-    assert.equal(inspection.pending.length, 10);
+    assert.equal(inspection.pending.length, 11);
     const table = await pool.query(
       "SELECT to_regclass('public.schema_migrations')::TEXT AS name"
     );
@@ -383,6 +389,24 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
       [setupSessionId, discordGuildId, managementSessionId, userId]
     );
     assert.equal(connected.rows.length, 1);
+    const unifiedManagement = new DiscordManagementService(
+      pool,
+      undefined,
+      fetch,
+      {
+        authenticateForManagement: async () => ({
+          userId,
+          csrfToken: rawCsrfToken,
+          csrfTokenHash: crypto.createHash("sha256").update(rawCsrfToken).digest()
+        })
+      }
+    );
+    const dashboardSession = await unifiedManagement.session(
+      `${rawManagementToken}.${rawCsrfToken}`
+    );
+    assert.equal(dashboardSession?.authenticated, true);
+    assert.equal(dashboardSession?.organizations.length, 1);
+    assert.equal(dashboardSession?.organizations[0]?.id, organizationId);
     assert.equal(connected.rows[0].setup_status, "completed");
     assert.equal(connected.rows[0].oauth_status, "consumed");
     assert.equal(connected.rows[0].encrypted_token_record, null);
@@ -848,6 +872,79 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
     ), undefined);
   });
 
+  await t.test("Discord onboarding과 YORO 로그인은 동일한 provider subject를 같은 사용자로 통합한다", async () => {
+    const loginFirstSubject = "909000000000000001";
+    const loginFirstUser = await withTransaction(pool, async (client) =>
+      new YoroAccountRepository(client).resolveUserForLogin({
+        provider: "discord",
+        providerSubject: loginFirstSubject,
+        displayName: "Dashboard 우선 사용자"
+      })
+    );
+    const loginFirstIdentity = await withTransaction(pool, async (client) =>
+      new DiscordOnboardingRepository(client).upsertDiscordIdentity({
+        identityId: crypto.randomUUID(),
+        userId: crypto.randomUUID(),
+        requiredUserId: loginFirstUser,
+        discordUserId: loginFirstSubject,
+        displayName: "Dashboard 우선 사용자"
+      })
+    );
+    assert.equal(loginFirstIdentity.userId, loginFirstUser);
+    await assert.rejects(
+      withTransaction(pool, async (client) =>
+        new DiscordOnboardingRepository(client).upsertDiscordIdentity({
+          identityId: crypto.randomUUID(),
+          userId: crypto.randomUUID(),
+          requiredUserId: crypto.randomUUID(),
+          discordUserId: loginFirstSubject,
+          displayName: "다른 로그인 사용자"
+        })
+      ),
+      (error) => error instanceof SafeDatabaseError
+        && error.code === "DATABASE_CONFLICT"
+    );
+
+    const onboardingFirstSubject = "909000000000000002";
+    const onboardingFirstUser = crypto.randomUUID();
+    const onboardingFirstIdentity = await withTransaction(pool, async (client) =>
+      new DiscordOnboardingRepository(client).upsertDiscordIdentity({
+        identityId: crypto.randomUUID(),
+        userId: onboardingFirstUser,
+        discordUserId: onboardingFirstSubject,
+        displayName: "Bot 설정 우선 사용자"
+      })
+    );
+    assert.equal(onboardingFirstIdentity.userId, onboardingFirstUser);
+    assert.equal(
+      await withTransaction(pool, async (client) =>
+        new YoroAccountRepository(client).resolveUserForLogin({
+          provider: "discord",
+          providerSubject: onboardingFirstSubject,
+          displayName: "Bot 설정 우선 사용자"
+        })
+      ),
+      onboardingFirstUser
+    );
+
+    const synchronized = await pool.query(
+      `SELECT identity.discord_user_id, identity.user_id AS onboarding_user_id,
+         external.user_id AS yoro_user_id
+       FROM discord_identities identity
+       JOIN external_identities external
+         ON external.provider = 'discord'
+        AND external.provider_subject = identity.discord_user_id
+       WHERE identity.discord_user_id = ANY($1::TEXT[])
+       ORDER BY identity.discord_user_id`,
+      [[loginFirstSubject, onboardingFirstSubject]]
+    );
+    assert.equal(synchronized.rowCount, 2);
+    assert.equal(
+      synchronized.rows.every((row) => row.onboarding_user_id === row.yoro_user_id),
+      true
+    );
+  });
+
   await t.test("YORO 계정은 provider subject로만 식별하고 session·CSRF 평문을 저장하지 않는다", async () => {
     const discordSubject = "910000000000000001";
     const twitchSubject = "920000000000000001";
@@ -973,18 +1070,161 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
       reducedMotion: false
     });
 
-    assert.equal(
-      await withTransaction(pool, async (client) =>
-        new YoroAccountRepository(client).revokeIdentity(userId, "twitch")
+    const twitchCredentialSentinel = "YORO_TWITCH_ACCESS_SENTINEL_never_store_plaintext";
+    const twitchCredentialKey = crypto.randomBytes(32);
+    const twitchCredentialAad = `yoro-twitch-viewer:${userId}`;
+    const encryptedCredential = Buffer.from(
+      encryptTwitchTokenDocument(
+        JSON.stringify({
+          accessToken: twitchCredentialSentinel,
+          refreshToken: "YORO_TWITCH_REFRESH_SENTINEL_never_store_plaintext",
+          scopes: ["user:read:follows", "user:read:subscriptions"]
+        }),
+        twitchCredentialKey,
+        twitchCredentialAad
       ),
+      "utf8"
+    );
+    await repository.upsertTwitchCredential({
+      userId,
+      encryptedTokenRecord: encryptedCredential,
+      tokenExpiresAt: new Date(Date.now() + 60_000)
+    });
+    const credentialRow = await pool.query(
+      `SELECT encode(encrypted_token_record, 'escape') AS encrypted_text,
+         status, revoked_at
+       FROM yoro_twitch_viewer_credentials
+       WHERE user_id = $1`,
+      [userId]
+    );
+    assert.doesNotMatch(credentialRow.rows[0].encrypted_text, /YORO_TWITCH/u);
+    assert.equal(credentialRow.rows[0].status, "active");
+    const lockedCredential = await withTransaction(pool, async (client) =>
+      new YoroAccountRepository(client).lockTwitchCredential(userId)
+    );
+    assert.ok(lockedCredential);
+    assert.equal(
+      JSON.parse(
+        decryptTwitchTokenDocument(
+          lockedCredential.encrypted_token_record.toString("utf8"),
+          twitchCredentialKey,
+          twitchCredentialAad
+        ).plaintext
+      ).accessToken,
+      twitchCredentialSentinel
+    );
+
+    assert.equal(
+      await withTransaction(pool, async (client) => {
+        const transactionRepository = new YoroAccountRepository(client);
+        const revoked = await transactionRepository.revokeIdentity(userId, "twitch");
+        await transactionRepository.revokeTwitchCredential(userId);
+        return revoked;
+      }),
       true
     );
+    const revokedCredential = await pool.query(
+      `SELECT encrypted_token_record, status, revoked_at
+       FROM yoro_twitch_viewer_credentials
+       WHERE user_id = $1`,
+      [userId]
+    );
+    assert.equal(revokedCredential.rows[0].encrypted_token_record, null);
+    assert.equal(revokedCredential.rows[0].status, "revoked");
+    assert.ok(revokedCredential.rows[0].revoked_at);
     assert.equal(
       await withTransaction(pool, async (client) =>
         new YoroAccountRepository(client).revokeIdentity(userId, "discord")
       ),
       false
     );
+  });
+
+  await t.test("YORO Twitch 로그인은 LIVE scope와 암호화 credential을 session에 연결한다", async () => {
+    const previousConfig = {
+      clientId: appConfig.twitch.clientId,
+      clientSecret: appConfig.twitch.clientSecret,
+      publicRedirectUri: appConfig.twitch.publicRedirectUri,
+      tokenEncryptionKey: appConfig.twitch.tokenEncryptionKey
+    };
+    appConfig.twitch.clientId = "yoro-twitch-client";
+    appConfig.twitch.clientSecret = "yoro-twitch-client-secret";
+    appConfig.twitch.publicRedirectUri = "http://localhost:3000/api/public/twitch/auth/callback";
+    appConfig.twitch.tokenEncryptionKey = crypto.randomBytes(32).toString("base64");
+    const rawAccessToken = "YORO_TWITCH_ACCESS_SENTINEL_service_never_store_plaintext";
+    const rawRefreshToken = "YORO_TWITCH_REFRESH_SENTINEL_service_never_store_plaintext";
+    const twitchUserId = "930000000000000001";
+    const fetchImpl = async (url) => {
+      if (url === "https://id.twitch.tv/oauth2/token") {
+        return new Response(JSON.stringify({
+          access_token: rawAccessToken,
+          refresh_token: rawRefreshToken,
+          expires_in: 3600,
+          scope: ["user:read:follows", "user:read:subscriptions"],
+          token_type: "bearer"
+        }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" }
+        });
+      }
+      if (url === "https://api.twitch.tv/helix/users") {
+        return new Response(JSON.stringify({
+          data: [{
+            id: twitchUserId,
+            login: "yoro_viewer",
+            display_name: "YORO Viewer",
+            profile_image_url: "https://static-cdn.jtvnw.net/jtv_user_pictures/yoro-viewer.png"
+          }]
+        }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" }
+        });
+      }
+      throw new Error(`예상하지 못한 Twitch URL: ${url}`);
+    };
+
+    try {
+      const service = new YoroAccountService(pool, undefined, fetchImpl);
+      const started = await service.beginOAuth({
+        provider: "twitch",
+        purpose: "login",
+        returnPath: "/lol"
+      });
+      const authorizationUrl = new URL(started.authorizationUrl);
+      assert.deepEqual(
+        authorizationUrl.searchParams.get("scope")?.split(" ").sort(),
+        ["user:read:follows", "user:read:subscriptions"]
+      );
+      const completed = await service.completeOAuth({
+        provider: "twitch",
+        state: authorizationUrl.searchParams.get("state"),
+        code: "oauth-code",
+        oauthCookie: started.cookieValue
+      });
+      assert.equal(completed.returnPath, "/lol");
+      const context = await service.getTwitchAccessContext(completed.sessionToken);
+      assert.ok(context);
+      assert.equal(context.userId, twitchUserId);
+      assert.equal(context.accessToken, rawAccessToken);
+      assert.equal(context.user.displayName, "YORO Viewer");
+
+      const stored = await pool.query(
+        `SELECT encode(credential.encrypted_token_record, 'escape') AS encrypted_text,
+           credential.status, identity.provider_subject
+         FROM yoro_twitch_viewer_credentials credential
+         JOIN external_identities identity ON identity.user_id = credential.user_id
+         WHERE identity.provider = 'twitch' AND identity.provider_subject = $1`,
+        [twitchUserId]
+      );
+      assert.equal(stored.rows[0].status, "active");
+      assert.equal(stored.rows[0].provider_subject, twitchUserId);
+      assert.doesNotMatch(stored.rows[0].encrypted_text, /YORO_TWITCH/u);
+    } finally {
+      appConfig.twitch.clientId = previousConfig.clientId;
+      appConfig.twitch.clientSecret = previousConfig.clientSecret;
+      appConfig.twitch.publicRedirectUri = previousConfig.publicRedirectUri;
+      appConfig.twitch.tokenEncryptionKey = previousConfig.tokenEncryptionKey;
+    }
   });
 
   await t.test("management OAuth 실패는 소비된 state의 PKCE 암호문을 제약 위반 없이 폐기한다", async () => {

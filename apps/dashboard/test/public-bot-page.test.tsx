@@ -47,7 +47,7 @@ test("YORO Bot 소개 페이지는 중앙 Hero와 3개 독립 페이지 메뉴�
   assert.match(markup, /public-twitch-login-chip[\s\S]*?>로그인<\/strong>/u);
   assert.match(markup, /Discord 서버에 YORO Bot 추가/u);
   assert.match(markup, /href="\/api\/discord\/bot\/install"/u);
-  assert.match(markup, /href="\/dashboard"/u);
+  assert.match(markup, /href="\/dashboard\/organizations"/u);
   assert.match(markup, /Agent daemon과 상태 Ingestion 기반은 구현/u);
   assert.match(markup, /OAuth token 평문 미저장/u);
   assert.match(markup, /aria-label="YORO Bot 홈"/u);

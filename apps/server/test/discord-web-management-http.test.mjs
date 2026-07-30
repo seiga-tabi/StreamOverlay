@@ -70,7 +70,9 @@ function createDiscordHandler(overrides = {}) {
           displayName: "검증 Organization"
         },
         managementSessionToken:
-          "management_value_abcdefghijklmnopqrstuvwxyz123456.csrf_management_abcdefghijklmnopqrstuvwxyz123456"
+          "management_value_abcdefghijklmnopqrstuvwxyz123456.csrf_management_abcdefghijklmnopqrstuvwxyz123456",
+        yoroSessionToken:
+          "yoro_value_abcdefghijklmnopqrstuvwxyz123456.csrf_yoro_abcdefghijklmnopqrstuvwxyz123456"
       };
     },
     ...overrides.discordOnboarding
@@ -85,6 +87,17 @@ function createDiscordHandler(overrides = {}) {
       discordDatabaseReady: () => true,
       discordOnboarding,
       discordManagement: {},
+      yoroAccounts: {
+        async authenticateForManagement(cookieValue) {
+          return cookieValue
+            ? {
+                userId: "22222222-2222-4222-8222-222222222222",
+                csrfToken: "csrf_value_abcdefghijklmnopqrstuvwxyz123456",
+                csrfTokenHash: Buffer.alloc(32)
+              }
+            : undefined;
+        }
+      },
       ...overrides.handlerInput
     })
   };
@@ -159,6 +172,37 @@ test("Bot 설치 route는 고정 Discord origin·scope·permission과 no-store�
     );
     assert.equal(query.statusCode, 404);
     assert.doesNotMatch(query.body, /987654321098765432|permissions/u);
+  });
+});
+
+test("기존 Discord 설정·관리 URL은 별도 화면 없이 통합 Dashboard로만 이동한다", async () => {
+  await withDiscordConfig(async () => {
+    const { handler } = createDiscordHandler();
+    const setupToken = "abcdefghijklmnopqrstuvwxyzABCDEFGH";
+    const setup = await request(
+      handler,
+      "GET",
+      `/setup/discord?setup=${setupToken}&returnTo=https://evil.example`
+    );
+    assert.equal(setup.statusCode, 302);
+    assert.equal(
+      setup.headers.Location,
+      `/dashboard/organizations?setup=${setupToken}`
+    );
+    assert.equal(setup.headers["Cache-Control"], "no-store");
+    assert.equal(setup.headers["Referrer-Policy"], "no-referrer");
+
+    const management = await request(
+      handler,
+      "GET",
+      "/bot/manage?connect=select&organizationId=secret"
+    );
+    assert.equal(management.statusCode, 302);
+    assert.equal(
+      management.headers.Location,
+      "/dashboard/organizations?connect=select"
+    );
+    assert.doesNotMatch(management.headers.Location, /organizationId|secret/u);
   });
 });
 
@@ -402,7 +446,23 @@ test("웹 management OAuth 시작은 query를 거부하고 setup·Organization �
     assert.equal(invalid.statusCode, 400);
     assert.equal(calls.length, 0);
 
-    const response = await request(handler, "GET", "/api/discord/management/connect/start");
+    const unauthenticated = await request(
+      handler,
+      "GET",
+      "/api/discord/management/connect/start"
+    );
+    assert.equal(unauthenticated.statusCode, 401);
+
+    const response = await request(
+      handler,
+      "GET",
+      "/api/discord/management/connect/start",
+      undefined,
+      {
+        cookie:
+          "yoro_session=session_value_abcdefghijklmnopqrstuvwxyz123456.csrf_value_abcdefghijklmnopqrstuvwxyz123456"
+      }
+    );
     assert.equal(response.statusCode, 302);
     const location = new URL(response.headers.Location);
     assert.equal(location.origin, "https://discord.com");
@@ -485,6 +545,7 @@ test("웹 management session과 claim은 cookie·Origin·CSRF·strict body 경�
       guildId: "123456789012345678"
     });
     assert.equal(Array.isArray(success.headers["Set-Cookie"]), true);
+    assert.match(String(success.headers["Set-Cookie"]), /yoro_session=/u);
   });
 });
 

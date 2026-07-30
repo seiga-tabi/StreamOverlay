@@ -68,6 +68,8 @@ test("공통 YORO Dashboard는 로그인 사용자용 진입점과 KO·JA 문구
   assert.match(source, /discordIdentity\.displayName/u);
   assert.match(source, /twitchIdentity\.displayName/u);
   assert.match(source, /yoro-dashboard-identity-label/u);
+  assert.match(source, /DiscordSetupPage/u);
+  assert.match(source, /BotManagementPage/u);
   assert.equal(source.includes("localStorage.setItem"), false);
 
   const css = await readFile(
@@ -110,4 +112,6 @@ test("공통 Dashboard 경로는 기존 방송 운영 하위 경로와 겹치지
     appSource.includes('window.location.pathname.startsWith("/dashboard/")'),
     true
   );
+  assert.equal(appSource.includes('"/setup/discord"'), false);
+  assert.equal(appSource.includes('"/bot/manage"'), false);
 });

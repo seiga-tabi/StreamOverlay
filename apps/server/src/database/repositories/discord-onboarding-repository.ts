@@ -228,50 +228,112 @@ export class DiscordOnboardingRepository {
   async upsertDiscordIdentity(input: {
     identityId: string;
     userId: string;
+    requiredUserId?: string;
     discordUserId: string;
     displayName: string;
     avatarReference?: string;
   }): Promise<{ identityId: string; userId: string }> {
     const discordUserId = input.discordUserId.trim();
+    const displayName = requireBoundedText(input.displayName, "displayName", 80);
+    const requiredUserId = input.requiredUserId
+      ? requireUuid(input.requiredUserId, "requiredUserId")
+      : undefined;
+    await repositoryQuery(
+      this.queryable,
+      "SELECT pg_advisory_xact_lock(hashtextextended($1, 0))",
+      [`discord:${discordUserId}`]
+    );
     const existing = await repositoryQuery<{ id: string; user_id: string }>(
       this.queryable,
       `SELECT id, user_id FROM discord_identities WHERE discord_user_id = $1 FOR UPDATE`,
       [discordUserId]
     );
-    if (existing.rows[0]) {
+    const external = await repositoryQuery<{ user_id: string }>(
+      this.queryable,
+      `SELECT user_id
+       FROM external_identities
+       WHERE provider = 'discord' AND provider_subject = $1
+       FOR UPDATE`,
+      [discordUserId]
+    );
+    if (
+      existing.rows[0]
+      && external.rows[0]
+      && existing.rows[0].user_id !== external.rows[0].user_id
+    ) {
+      throw new SafeDatabaseError("DATABASE_CONFLICT", false);
+    }
+
+    let userId = existing.rows[0]?.user_id ?? external.rows[0]?.user_id;
+    if (!userId) {
+      const account = await repositoryQuery<{ id: string }>(
+        this.queryable,
+        "SELECT id FROM users WHERE discord_user_id = $1 FOR UPDATE",
+        [discordUserId]
+      );
+      userId = account.rows[0]?.id;
+    }
+    if (requiredUserId && userId && userId !== requiredUserId) {
+      throw new SafeDatabaseError("DATABASE_CONFLICT", false);
+    }
+    userId = requiredUserId ?? userId;
+    if (!userId) {
+      userId = requireUuid(input.userId, "userId");
+      await repositoryQuery(
+        this.queryable,
+        `INSERT INTO users (id, discord_user_id) VALUES ($1, $2)`,
+        [userId, discordUserId]
+      );
+    } else {
+      const account = await repositoryQuery<{ id: string }>(
+        this.queryable,
+        `UPDATE users
+         SET discord_user_id = COALESCE(discord_user_id, $2), updated_at = NOW()
+         WHERE id = $1
+           AND (discord_user_id IS NULL OR discord_user_id = $2)
+         RETURNING id`,
+        [requireUuid(userId, "userId"), discordUserId]
+      );
+      if (!account.rows[0]) throw new SafeDatabaseError("DATABASE_CONFLICT", false);
+    }
+
+    let identityId = existing.rows[0]?.id;
+    if (identityId) {
       await repositoryQuery(
         this.queryable,
         `UPDATE discord_identities
          SET display_name = $2, avatar_reference = $3, updated_at = NOW()
          WHERE id = $1`,
-        [
-          existing.rows[0].id,
-          requireBoundedText(input.displayName, "displayName", 80),
-          input.avatarReference ?? null
-        ]
+        [identityId, displayName, input.avatarReference ?? null]
       );
-      return { identityId: existing.rows[0].id, userId: existing.rows[0].user_id };
+    } else {
+      identityId = requireUuid(input.identityId, "identityId");
+      await repositoryQuery(
+        this.queryable,
+        `INSERT INTO discord_identities (
+           id, user_id, discord_user_id, display_name, avatar_reference
+         ) VALUES ($1, $2, $3, $4, $5)`,
+        [identityId, userId, discordUserId, displayName, input.avatarReference ?? null]
+      );
     }
-    const userId = requireUuid(input.userId, "userId");
-    await repositoryQuery(
+    const synchronized = await repositoryQuery<{ user_id: string }>(
       this.queryable,
-      `INSERT INTO users (id, discord_user_id) VALUES ($1, $2)`,
-      [userId, discordUserId]
+      `INSERT INTO external_identities (
+         id, user_id, provider, provider_subject, display_name, avatar_reference
+       ) VALUES (gen_random_uuid(), $1, 'discord', $2, $3, $4)
+       ON CONFLICT (provider, provider_subject) DO UPDATE
+       SET display_name = EXCLUDED.display_name,
+           avatar_reference = EXCLUDED.avatar_reference,
+           revoked_at = NULL,
+           last_authenticated_at = NOW(),
+           updated_at = NOW()
+       WHERE external_identities.user_id = EXCLUDED.user_id
+       RETURNING user_id`,
+      [userId, discordUserId, displayName, input.avatarReference ?? null]
     );
-    const identityId = requireUuid(input.identityId, "identityId");
-    await repositoryQuery(
-      this.queryable,
-      `INSERT INTO discord_identities (
-         id, user_id, discord_user_id, display_name, avatar_reference
-       ) VALUES ($1, $2, $3, $4, $5)`,
-      [
-        identityId,
-        userId,
-        discordUserId,
-        requireBoundedText(input.displayName, "displayName", 80),
-        input.avatarReference ?? null
-      ]
-    );
+    if (synchronized.rowCount !== 1) {
+      throw new SafeDatabaseError("DATABASE_CONFLICT", false);
+    }
     return { identityId, userId };
   }
 

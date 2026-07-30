@@ -83,13 +83,13 @@ test("/yoro dashboard는 token 없는 고정 canonical URL을 ephemeral로 제�
     IDS.application,
     { async issueSetupSession() { throw new Error("호출되면 안 됩니다."); } },
     Date.now,
-    "https://yoro.gg/dashboard"
+    "https://yoro.gg/dashboard/organizations"
   );
   await handler.handle(value);
   assert.equal(calls.reply[0].flags, MessageFlags.Ephemeral);
   assert.deepEqual(calls.reply[0].allowedMentions, { parse: [] });
   const component = calls.reply[0].components[0].toJSON();
-  assert.equal(component.components[0].url, "https://yoro.gg/dashboard");
+  assert.equal(component.components[0].url, "https://yoro.gg/dashboard/organizations");
   assert.equal(new URL(component.components[0].url).search, "");
 });
 
@@ -221,7 +221,7 @@ test("/yoro setup은 먼저 ephemeral defer하고 일회용 link button으로 �
     async issueSetupSession(input) {
       issued = input;
       return {
-        url: "https://yoro.gg/setup/discord?setup=abcdefghijklmnopqrstuvwxyzABCDEFGH",
+        url: "https://yoro.gg/dashboard/organizations?setup=abcdefghijklmnopqrstuvwxyzABCDEFGH",
         expiresAt: "2026-07-29T00:10:00.000Z"
       };
     }
@@ -263,7 +263,7 @@ test("같은 interaction 재전달은 setup session을 중복 생성하지 않�
     async issueSetupSession() {
       calls += 1;
       return {
-        url: "https://yoro.gg/setup/discord?setup=abcdefghijklmnopqrstuvwxyzABCDEFGH",
+        url: "https://yoro.gg/dashboard/organizations?setup=abcdefghijklmnopqrstuvwxyzABCDEFGH",
         expiresAt: "2026-07-29T00:10:00.000Z"
       };
     }
@@ -285,7 +285,7 @@ test("내부 API client는 body·method·path에 귀속된 HMAC을 전송한다"
     fetchImpl: async (url, init) => {
       requests.push({ url: String(url), init });
       return new Response(JSON.stringify({
-        url: "https://yoro.gg/setup/discord?setup=abcdefghijklmnopqrstuvwxyzABCDEFGH",
+        url: "https://yoro.gg/dashboard/organizations?setup=abcdefghijklmnopqrstuvwxyzABCDEFGH",
         expiresAt: "2027-01-15T08:10:00.000Z"
       }), { status: 201, headers: { "Content-Type": "application/json" } });
     }
@@ -312,7 +312,7 @@ test("내부 API client는 다른 origin이나 비정상 setup URL을 거부한�
     publicBaseUrl: "https://yoro.gg",
     timeoutMs: 1000,
     fetchImpl: async () => new Response(JSON.stringify({
-      url: "https://evil.example/setup/discord?setup=abcdefghijklmnopqrstuvwxyzABCDEFGH",
+      url: "https://evil.example/dashboard/organizations?setup=abcdefghijklmnopqrstuvwxyzABCDEFGH",
       expiresAt: "2027-01-15T08:10:00.000Z"
     }), { status: 201 })
   });

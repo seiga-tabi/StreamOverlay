@@ -8,6 +8,7 @@ import { publishParticipationSnapshot as publishAtomicParticipationSnapshot } fr
 import type { ActionDispatcher } from "../core/action-dispatcher.js";
 import {
   OVERLAY_CHANNELS,
+  TWITCH_PUBLIC_VIEWER_SCOPES,
   PALWORLD_SERVER_AVAILABILITY_ERROR_CODES,
   PALWORLD_SERVER_DIAGNOSTIC_KEYS,
   PALWORLD_SERVER_SAFE_REGISTRATION_POLICY,
@@ -1317,15 +1318,32 @@ function requestCookie(req: IncomingMessage, name: string): string | undefined {
 }
 
 function discordSetupReturnUrl(status: "connected" | "error"): string {
-  const target = new URL("/setup/discord", appConfig.dashboardBaseUrl);
+  const target = new URL("/dashboard/organizations", appConfig.dashboardBaseUrl);
   target.searchParams.set("discord", status);
   return target.toString();
 }
 
 function discordManagementConnectReturnUrl(status: "select" | "error"): string {
-  const target = new URL("/bot/manage", appConfig.dashboardBaseUrl);
+  const target = new URL("/dashboard/organizations", appConfig.dashboardBaseUrl);
   target.searchParams.set("connect", status);
   return target.toString();
+}
+
+function legacyDiscordDashboardReturnUrl(url: URL): string {
+  const target = new URL("/dashboard/organizations", appConfig.dashboardBaseUrl);
+  const setup = url.searchParams.get("setup");
+  const discord = url.searchParams.get("discord");
+  const connect = url.searchParams.get("connect");
+  if (setup && /^[A-Za-z0-9_-]{32,128}$/u.test(setup)) {
+    target.searchParams.set("setup", setup);
+  }
+  if (discord === "connected" || discord === "error") {
+    target.searchParams.set("discord", discord);
+  }
+  if (connect === "select" || connect === "error") {
+    target.searchParams.set("connect", connect);
+  }
+  return `${target.pathname}${target.search}`;
 }
 
 function yoroAccountReturnUrl(returnPath: string, errorCode?: string): string {
@@ -4027,11 +4045,18 @@ export function createHttpHandler(input: HttpHandlerInput) {
   }
 
   async function getPublicTwitchFollowedLol(limit: number, req: IncomingMessage): Promise<PublicTwitchFollowedLolResponse> {
-    if (!input.publicTwitchAuth) {
-      return { connected: false, truncated: false, matchedCount: 0, subscriptionScopeGranted: false, subscriptions: [], channels: [] };
-    }
-    const sessionId = publicTwitchViewerSessionIdFromRequest(req);
-    const context = await input.publicTwitchAuth.getAccessContext(sessionId);
+    const yoroContext = input.yoroAccounts
+      ? await input.yoroAccounts
+          .getTwitchAccessContext(requestCookie(req, YORO_SESSION_COOKIE))
+          .catch(() => undefined)
+      : undefined;
+    const context = yoroContext ?? (
+      input.publicTwitchAuth
+        ? await input.publicTwitchAuth.getAccessContext(
+            publicTwitchViewerSessionIdFromRequest(req)
+          )
+        : undefined
+    );
     if (!context) {
       return { connected: false, truncated: false, matchedCount: 0, subscriptionScopeGranted: false, subscriptions: [], channels: [] };
     }
@@ -4719,12 +4744,31 @@ export function createHttpHandler(input: HttpHandlerInput) {
   }
 
   async function getPublicTwitchViewerStatus(req: IncomingMessage): Promise<PublicTwitchViewerStatusResponse> {
+    const yoroContext = input.yoroAccounts
+      ? await input.yoroAccounts
+          .getTwitchAccessContext(requestCookie(req, YORO_SESSION_COOKIE))
+          .catch(() => undefined)
+      : undefined;
+    if (yoroContext) {
+      const status = {
+        connected: true,
+        configured: true,
+        requiredScopes: [...TWITCH_PUBLIC_VIEWER_SCOPES],
+        missingScopes: [],
+        user: yoroContext.user,
+        tokenExpiresAt: yoroContext.tokenExpiresAt
+      };
+      const streamerRiotRequest = currentStreamerRiotIdRequestForTwitchUser(
+        yoroContext.user.id
+      );
+      return streamerRiotRequest ? { ...status, streamerRiotRequest } : status;
+    }
     if (!input.publicTwitchAuth) {
       return {
         connected: false,
         configured: false,
-        requiredScopes: ["user:read:follows", "user:read:subscriptions"],
-        missingScopes: ["user:read:follows", "user:read:subscriptions"]
+        requiredScopes: [...TWITCH_PUBLIC_VIEWER_SCOPES],
+        missingScopes: [...TWITCH_PUBLIC_VIEWER_SCOPES]
       };
     }
     const status = await input.publicTwitchAuth.getStatus(publicTwitchViewerSessionIdFromRequest(req));
@@ -4746,6 +4790,16 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (!code) return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", "OAuth callback에 필요한 code가 없습니다.");
     try {
       const session = await input.publicTwitchAuth.connectWithCode(code, state.redirectUri ?? publicTwitchCallbackUrlForRequest(req));
+      if (input.yoroAccounts) {
+        await input.yoroAccounts.adoptTwitchViewerSession(
+          requestCookie(req, YORO_SESSION_COOKIE),
+          session
+        ).catch(() => {
+          input.logger?.error?.({
+            type: "yoro.account.twitch_credential_adoption_failed"
+          });
+        });
+      }
       return sendRedirect(res, state.returnUrl || publicLolReturnUrlForRequest(req), { "Set-Cookie": publicTwitchViewerSessionCookie(session) });
     } catch {
       return sendSafeOAuthHtml(res, 400, "Twitch 연결 실패", "Twitch token 교환 또는 사용자 정보 조회에 실패했습니다. 서버 설정을 확인한 뒤 다시 시도해주세요.");
@@ -5739,6 +5793,17 @@ export function createHttpHandler(input: HttpHandlerInput) {
     try {
       if (req.method === "GET" || req.method === "HEAD") {
         if (url.pathname === "/dashborad" || url.pathname === "/dashborad/") return sendRedirect(res, "/");
+        if (
+          url.pathname === "/setup/discord"
+          || url.pathname === "/setup/discord/"
+          || url.pathname === "/bot/manage"
+          || url.pathname === "/bot/manage/"
+        ) {
+          return sendRedirect(res, legacyDiscordDashboardReturnUrl(url), {
+            "Cache-Control": "no-store",
+            "Referrer-Policy": "no-referrer"
+          });
+        }
         if (await sendPublicDashboardAsset(req, res, url.pathname)) return;
         if (url.pathname === "/" || isPublicDashboardAppRoute(url.pathname)) {
           const legalDraftHeaders = url.pathname === "/privacy" || url.pathname === "/terms"
@@ -6222,6 +6287,15 @@ export function createHttpHandler(input: HttpHandlerInput) {
             if (url.search) {
               return sendJson(req, res, 400, { error: "query는 허용되지 않습니다." });
             }
+            const yoroSession = await input.yoroAccounts?.authenticateForManagement(
+              requestCookie(req, YORO_SESSION_COOKIE)
+            );
+            if (!yoroSession) {
+              return sendJson(req, res, 401, {
+                error: "YORO Dashboard 로그인이 필요합니다.",
+                code: "session_required"
+              }, noStoreHeaders());
+            }
             const started = await input.discordOnboarding.beginWebManagementOAuth();
             return sendRedirect(res, started.authorizationUrl, {
               "Set-Cookie": discordOnboardingCookie(started.cookieValue),
@@ -6278,9 +6352,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
                 ? { organizationId: body.organizationId }
                 : {})
             });
-            if (!connected.managementSessionToken) {
+            if (!connected.yoroSessionToken) {
               return sendJson(req, res, 409, {
-                error: "웹 관리 session을 발급할 수 없습니다.",
+                error: "YORO Dashboard session을 발급할 수 없습니다.",
                 code: "session_required"
               });
             }
@@ -6291,7 +6365,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
             }, {
               "Set-Cookie": [
                 clearDiscordOnboardingCookie(),
-                discordManagementSessionCookie(connected.managementSessionToken)
+                clearDiscordManagementCookie(DISCORD_MANAGEMENT_SESSION_COOKIE),
+                yoroSessionCookie(connected.yoroSessionToken)
               ],
               "Cache-Control": "no-store"
             });
@@ -6518,10 +6593,16 @@ export function createHttpHandler(input: HttpHandlerInput) {
           const webManagement = await input.discordOnboarding
             .isWebManagementCookie(onboardingCookie);
           try {
+            const targetUser = webManagement
+              ? await input.yoroAccounts?.authenticateForManagement(
+                  requestCookie(req, YORO_SESSION_COOKIE)
+                )
+              : undefined;
             const issuedVia = await input.discordOnboarding.completeOAuth({
               state: url.searchParams.get("state") ?? "",
               code: url.searchParams.get("code") ?? "",
-              cookieValue: onboardingCookie
+              cookieValue: onboardingCookie,
+              ...(targetUser ? { targetUserId: targetUser.userId } : {})
             });
             if (issuedVia === "web_management") {
               return sendRedirect(res, discordManagementConnectReturnUrl("select"), {
@@ -6573,7 +6654,13 @@ export function createHttpHandler(input: HttpHandlerInput) {
             completed: true,
             guild: connected.guild,
             organization: connected.organization
-          }, { "Set-Cookie": clearDiscordOnboardingCookie() });
+          }, {
+            "Set-Cookie": [
+              clearDiscordOnboardingCookie(),
+              clearDiscordManagementCookie(DISCORD_MANAGEMENT_SESSION_COOKIE),
+              yoroSessionCookie(connected.yoroSessionToken)
+            ]
+          });
         }
         if (req.method === "POST" && url.pathname === "/api/discord/oauth/logout") {
           if (!stateChangingRequestHasTrustedOrigin(req)) {

@@ -22,6 +22,12 @@ export type YoroSessionRow = {
   authenticated_at: Date;
 };
 
+export type YoroTwitchCredentialRow = {
+  user_id: string;
+  encrypted_token_record: Buffer;
+  token_expires_at: Date;
+};
+
 export type YoroExternalIdentity = Readonly<{
   provider: YoroIdentityProvider;
   providerSubject: string;
@@ -177,6 +183,31 @@ export class YoroAccountRepository {
         ]
       );
       return revoked.rows[0].user_id;
+    }
+
+    const legacyAccount = await repositoryQuery<{ id: string }>(
+      this.queryable,
+      input.provider === "discord"
+        ? "SELECT id FROM users WHERE discord_user_id = $1 FOR UPDATE"
+        : "SELECT id FROM users WHERE twitch_user_id = $1 FOR UPDATE",
+      [input.providerSubject]
+    );
+    if (legacyAccount.rows[0]) {
+      await repositoryQuery(
+        this.queryable,
+        `INSERT INTO external_identities (
+           id, user_id, provider, provider_subject, display_name, avatar_reference
+         ) VALUES ($1, $2, $3, $4, $5, $6)`,
+        [
+          crypto.randomUUID(),
+          legacyAccount.rows[0].id,
+          input.provider,
+          input.providerSubject,
+          requireBoundedText(input.displayName, "displayName", 80),
+          input.avatarReference ?? null
+        ]
+      );
+      return legacyAccount.rows[0].id;
     }
 
     const userId = crypto.randomUUID();
@@ -344,6 +375,60 @@ export class YoroAccountRepository {
       connectedAt: row.connected_at.toISOString(),
       lastAuthenticatedAt: row.last_authenticated_at.toISOString()
     })));
+  }
+
+  async upsertTwitchCredential(input: {
+    userId: string;
+    encryptedTokenRecord: Buffer;
+    tokenExpiresAt: Date;
+  }): Promise<void> {
+    await repositoryQuery(
+      this.queryable,
+      `INSERT INTO yoro_twitch_viewer_credentials (
+         user_id, encrypted_token_record, token_expires_at
+       ) VALUES ($1, $2, $3)
+       ON CONFLICT (user_id) DO UPDATE
+       SET encrypted_token_record = EXCLUDED.encrypted_token_record,
+           token_expires_at = EXCLUDED.token_expires_at,
+           status = 'active',
+           revoked_at = NULL,
+           updated_at = NOW()`,
+      [
+        requireUuid(input.userId, "userId"),
+        input.encryptedTokenRecord,
+        input.tokenExpiresAt
+      ]
+    );
+  }
+
+  async lockTwitchCredential(
+    userId: string
+  ): Promise<YoroTwitchCredentialRow | undefined> {
+    const result = await repositoryQuery<YoroTwitchCredentialRow>(
+      this.queryable,
+      `SELECT user_id, encrypted_token_record, token_expires_at
+       FROM yoro_twitch_viewer_credentials
+       WHERE user_id = $1 AND status = 'active'
+       FOR UPDATE`,
+      [requireUuid(userId, "userId")]
+    );
+    return result.rows[0];
+  }
+
+  async revokeTwitchCredential(
+    userId: string,
+    status: "revoked" | "security_failed" = "revoked"
+  ): Promise<void> {
+    await repositoryQuery(
+      this.queryable,
+      `UPDATE yoro_twitch_viewer_credentials
+       SET encrypted_token_record = NULL,
+           status = $2,
+           revoked_at = NOW(),
+           updated_at = NOW()
+       WHERE user_id = $1 AND status = 'active'`,
+      [requireUuid(userId, "userId"), status]
+    );
   }
 
   async getUserPreferences(userId: string): Promise<YoroUserPreferences> {

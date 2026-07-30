@@ -457,7 +457,9 @@ export function PublicBotPage() {
                 </div>
                 <div className="public-bot-actions">
                   <a className="public-bot-button is-primary" href={botInstallUrl()}>{text.addBot}</a>
-                  <a className="public-bot-button" href="/dashboard">{text.dashboardLogin}</a>
+                  <a className="public-bot-button" href="/dashboard/organizations">
+                    {text.dashboardLogin}
+                  </a>
                 </div>
               </div>
               <div className="public-bot-hero__visual" aria-hidden="true">

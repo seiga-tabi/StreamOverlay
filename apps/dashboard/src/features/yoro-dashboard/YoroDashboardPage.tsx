@@ -3,6 +3,7 @@ import { DiscordSymbolIcon } from "../../shared/DiscordSymbolIcon";
 import { TwitchGlitchIcon } from "../../shared/TwitchGlitchIcon";
 import { setDashboardLocale } from "../../i18n";
 import { BotManagementPage } from "../bot-management/BotManagementPage";
+import { DiscordSetupPage } from "../discord-onboarding/DiscordSetupPage";
 import {
   getManagementSession,
   type BotManagementSession
@@ -148,6 +149,14 @@ export function YoroDashboardPage() {
   const [announcement, setAnnouncement] = useState("");
   const [draft, setDraft] = useState<YoroUserPreferences>();
   const page = yoroDashboardPageFromPath(window.location.pathname);
+  const search = new URLSearchParams(window.location.search);
+  const setupToken = search.get("setup") ?? "";
+  const discordStatus = search.get("discord");
+  const discordSetupActive = page === "organizations" && (
+    /^[A-Za-z0-9_-]{32,128}$/u.test(setupToken)
+    || discordStatus === "connected"
+    || discordStatus === "error"
+  );
   const authenticated = account.session?.authenticated === true
     ? account.session
     : undefined;
@@ -218,6 +227,17 @@ export function YoroDashboardPage() {
 
   if (account.loading) {
     return <main className="yoro-dashboard-entry" role="status">{text.loading}</main>;
+  }
+
+  if (!authenticated && discordSetupActive) {
+    return (
+      <main className="yoro-dashboard-entry yoro-dashboard-discord-setup">
+        <DiscordSetupPage
+          embedded
+          onCompleted={() => window.location.replace("/dashboard/organizations")}
+        />
+      </main>
+    );
   }
 
   if (!authenticated) {
@@ -351,7 +371,16 @@ export function YoroDashboardPage() {
           </div>
         ) : null}
         {page === "account" ? <YoroAccountPage embedded /> : null}
-        {page === "organizations" ? <BotManagementPage embedded /> : null}
+        {page === "organizations" ? (
+          discordSetupActive
+            ? (
+                <DiscordSetupPage
+                  embedded
+                  onCompleted={() => window.location.replace("/dashboard/organizations")}
+                />
+              )
+            : <BotManagementPage embedded />
+        ) : null}
         {page === "settings" && draft ? (
           <section className="yoro-dashboard-settings">
             <header>

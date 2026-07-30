@@ -1,13 +1,14 @@
 # YORO Bot Organization 관리와 Agent 연결
 
-`/dashboard/organizations`는 통합 YORO 로그인, Bot이 설치된 Guild claim, Organization과 Palworld 게임 서버 관리, 10분 일회용 Agent 설치 토큰 발급을 제공합니다. 기존 `/bot/manage`는 호환 경로로 유지합니다. YORO 계정과 Discord·Twitch identity의 관계는 `YORO_ACCOUNT.md`에 정의되어 있습니다. Agent daemon과 Server의 등록·상태 Ingestion protocol은 구현되어 있으며 `YORO_AGENT.md`, `YORO_AGENT_PROTOCOL.md`에 정의되어 있습니다. staging 실연동과 Notification Worker, Discord 상태 Embed, 서버 제어 기능은 이 단계에 포함하지 않습니다.
+`/dashboard/organizations`는 통합 YORO 로그인, Bot이 설치된 Guild claim, Organization과 Palworld 게임 서버 관리, 10분 일회용 Agent 설치 토큰 발급을 제공하는 유일한 관리 화면입니다. 기존 `/bot/manage` 요청은 query를 allowlist로 정리한 뒤 이 경로로 redirect하며 별도 화면을 제공하지 않습니다. YORO 계정과 Discord·Twitch identity의 관계는 `YORO_ACCOUNT.md`에 정의되어 있습니다. Agent daemon과 Server의 등록·상태 Ingestion protocol은 구현되어 있으며 `YORO_AGENT.md`, `YORO_AGENT_PROTOCOL.md`에 정의되어 있습니다. staging 실연동과 Notification Worker, Discord 상태 Embed, 서버 제어 기능은 이 단계에 포함하지 않습니다.
 
 ## Onboarding OAuth와 관리 OAuth
 
 - web management connect는 `identify guilds` scope로 Guild 권한과 Bot 설치를 검증하고 Organization을 처음 연결합니다.
 - `/yoro setup` onboarding은 같은 검증을 Guild·실행자에게 귀속된 일회용 링크로 수행하는 복구 경로입니다.
 - management login은 `identify` scope만 사용해 기존 `discord_identity`를 정확히 확인합니다.
-- `/login`은 Discord 또는 Twitch identity로 동일한 YORO session을 발급하며, `/dashboard/organizations`와 호환 경로 `/bot/manage`는 이 session을 우선 사용합니다.
+- `/login`은 Discord 또는 Twitch identity로 동일한 YORO session을 발급하며 `/dashboard/organizations`가 이 session만으로 Organization과 Bot 설정을 제공합니다.
+- Dashboard에서 시작한 Discord Guild 연결은 현재 YORO session의 내부 user ID에 binding됩니다. `/yoro setup`에서 시작한 연결은 완료 transaction에서 YORO session을 새로 발급합니다.
 - 기존 Discord management session은 단계적 전환을 위한 호환 경로로만 유지합니다.
 - 연결과 기존 사용자 로그인 흐름의 state, PKCE AAD와 cookie는 목적별로 분리됩니다.
 - management callback은 access token을 Database에 저장하지 않고 사용자 확인이 끝난 뒤 폐기합니다. refresh token은 영구 저장하지 않습니다.

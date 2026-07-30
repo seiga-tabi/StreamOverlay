@@ -80,6 +80,14 @@
       "checksumSha256": "9b6e3bc7b132d3c3373d8052e01a29bfcf30a3bb57bddb834b3731e137d41009",
       "destructive": false,
       "transaction": true
+    },
+    {
+      "id": "0011_yoro_twitch_viewer_credentials",
+      "file": "0011_yoro_twitch_viewer_credentials.sql",
+      "description": "YORO 계정별 Twitch LIVE 조회 credential 암호화 저장 기반",
+      "checksumSha256": "b57463ab18846bfe1f6a6689a418054bcbccbc305ae87bb84032a7cf1dcb1667",
+      "destructive": false,
+      "transaction": true
     }
   ]
 }

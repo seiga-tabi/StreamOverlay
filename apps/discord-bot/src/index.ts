@@ -31,7 +31,7 @@ if (botConfig.enabled) {
       botConfig.applicationId,
       internalApi,
       Date.now,
-      new URL("/dashboard", botConfig.publicBaseUrl).toString()
+      new URL("/dashboard/organizations", botConfig.publicBaseUrl).toString()
     ),
     health,
     internalApi

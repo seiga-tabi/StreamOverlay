@@ -42,7 +42,7 @@ export class DiscordInternalApiClient {
     }
     if (
       url.origin !== this.options.publicBaseUrl
-      || url.pathname !== "/setup/discord"
+      || url.pathname !== "/dashboard/organizations"
       || [...url.searchParams.keys()].some((key) => key !== "setup")
       || !/^[A-Za-z0-9_-]{32,128}$/u.test(url.searchParams.get("setup") ?? "")
       || !Number.isFinite(Date.parse(record.expiresAt))

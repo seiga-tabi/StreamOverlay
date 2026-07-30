@@ -92,7 +92,13 @@ function errorMessage(
   return current.network;
 }
 
-export function DiscordSetupPage() {
+export function DiscordSetupPage({
+  embedded = false,
+  onCompleted
+}: {
+  embedded?: boolean;
+  onCompleted?: () => void;
+}) {
   const [locale] = useState<DashboardLocale>(() => detectDashboardLocale());
   const current = text[locale];
   const [view, setView] = useState<ViewState>("loading");
@@ -104,6 +110,7 @@ export function DiscordSetupPage() {
   const [submitting, setSubmitting] = useState(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const setupToken = setupTokenFromLocation();
+  const Root = embedded ? "div" : "main";
 
   async function load(signal?: AbortSignal): Promise<void> {
     setError("");
@@ -150,6 +157,7 @@ export function DiscordSetupPage() {
         organizationName: connected.organization.displayName
       });
       setView("completed");
+      onCompleted?.();
     } catch (submitError) {
       const message = errorMessage(submitError, locale);
       setError(message);
@@ -169,7 +177,7 @@ export function DiscordSetupPage() {
     : [];
 
   return (
-    <main className="discord-setup-shell">
+    <Root className={`discord-setup-shell${embedded ? " is-embedded" : ""}`}>
       <Card className="discord-setup-card" aria-busy={view === "loading"}>
         <CardHeader>
           <span className="eyebrow" data-ko={text.ko.eyebrow} data-ja={text.ja.eyebrow}>
@@ -311,6 +319,6 @@ export function DiscordSetupPage() {
           ) : null}
         </CardContent>
       </Card>
-    </main>
+    </Root>
   );
 }

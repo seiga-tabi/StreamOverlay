@@ -1,5 +1,9 @@
 import crypto from "node:crypto";
 import type { Pool } from "pg";
+import {
+  TWITCH_PUBLIC_VIEWER_SCOPES,
+  type TwitchBroadcasterInfo
+} from "@streamops/shared";
 import { appConfig } from "../config.js";
 import { withTransaction } from "../database/transaction.js";
 import {
@@ -16,6 +20,15 @@ import {
   discordSecretHash,
   encryptDiscordSecret
 } from "./discord-oauth-crypto.js";
+import {
+  decodeTwitchTokenEncryptionKey,
+  decryptTwitchTokenDocument,
+  encryptTwitchTokenDocument
+} from "./twitch-token-encryption.js";
+import type {
+  PublicTwitchAccessContext,
+  PublicTwitchViewerSession
+} from "./public-twitch-auth.js";
 
 const DISCORD_AUTHORIZE_URL = "https://discord.com/oauth2/authorize";
 const DISCORD_TOKEN_URL = "https://discord.com/api/v10/oauth2/token";
@@ -25,6 +38,8 @@ const TWITCH_TOKEN_URL = "https://id.twitch.tv/oauth2/token";
 const TWITCH_PROFILE_URL = "https://api.twitch.tv/helix/users";
 const RECENT_AUTHENTICATION_MS = 15 * 60 * 1_000;
 const TWITCH_AVATAR_HOST = "static-cdn.jtvnw.net";
+const TWITCH_TOKEN_REFRESH_SKEW_MS = 60 * 1_000;
+const TWITCH_CREDENTIAL_VERSION = 1;
 
 export const YORO_OAUTH_COOKIE = "yoro_oauth";
 export const YORO_SESSION_COOKIE = "yoro_session";
@@ -41,6 +56,27 @@ type ProviderProfile = {
   displayName: string;
   avatarReference?: string;
 };
+
+type YoroTwitchCredential = {
+  version: typeof TWITCH_CREDENTIAL_VERSION;
+  accessToken: string;
+  refreshToken: string;
+  scopes: string[];
+  expiresAt: string;
+  user: TwitchBroadcasterInfo;
+};
+
+type TwitchProviderCompletion = {
+  profile: ProviderProfile;
+  credential: YoroTwitchCredential;
+};
+
+class YoroTwitchCredentialError extends Error {
+  constructor(readonly status: "revoked" | "security_failed") {
+    super("yoro_twitch_credential_invalid");
+    this.name = "YoroTwitchCredentialError";
+  }
+}
 
 export type PublicYoroIdentity = {
   provider: YoroIdentityProvider;
@@ -91,6 +127,101 @@ function validToken(value: string | undefined): value is string {
   return typeof value === "string" && /^[A-Za-z0-9_-]{32,128}$/u.test(value);
 }
 
+function validOAuthToken(value: unknown): value is string {
+  return typeof value === "string"
+    && value.length >= 1
+    && value.length <= 4096
+    && !/[\u0000-\u001f\u007f]/u.test(value);
+}
+
+function validTwitchUserId(value: unknown): value is string {
+  return typeof value === "string" && /^[0-9]{1,64}$/u.test(value);
+}
+
+function validTwitchLogin(value: unknown): value is string {
+  return typeof value === "string" && /^[A-Za-z0-9_]{1,64}$/u.test(value);
+}
+
+function normalizeScopes(value: unknown): string[] {
+  if (!Array.isArray(value) || value.length > 32) {
+    throw new YoroAccountError("oauth_failed", 401);
+  }
+  const scopes = value.map((scope) => {
+    if (
+      typeof scope !== "string"
+      || scope.length < 1
+      || scope.length > 128
+      || !/^[a-z0-9:_-]+$/u.test(scope)
+    ) {
+      throw new YoroAccountError("oauth_failed", 401);
+    }
+    return scope;
+  });
+  return [...new Set(scopes)];
+}
+
+function parseStoredTwitchCredential(value: string): YoroTwitchCredential {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(value);
+  } catch {
+    throw new YoroTwitchCredentialError("security_failed");
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new YoroTwitchCredentialError("security_failed");
+  }
+  const record = parsed as Record<string, unknown>;
+  const expectedKeys = ["accessToken", "expiresAt", "refreshToken", "scopes", "user", "version"];
+  if (
+    Object.keys(record).sort().join(",") !== expectedKeys.sort().join(",")
+    || record.version !== TWITCH_CREDENTIAL_VERSION
+    || !validOAuthToken(record.accessToken)
+    || !validOAuthToken(record.refreshToken)
+    || typeof record.expiresAt !== "string"
+    || !Number.isFinite(Date.parse(record.expiresAt))
+  ) {
+    throw new YoroTwitchCredentialError("security_failed");
+  }
+  let scopes: string[];
+  try {
+    scopes = normalizeScopes(record.scopes);
+  } catch {
+    throw new YoroTwitchCredentialError("security_failed");
+  }
+  if (!record.user || typeof record.user !== "object" || Array.isArray(record.user)) {
+    throw new YoroTwitchCredentialError("security_failed");
+  }
+  const user = record.user as Record<string, unknown>;
+  const userKeys = Object.keys(user).sort().join(",");
+  if (
+    (userKeys !== "displayName,id,login" && userKeys !== "displayName,id,login,profileImageUrl")
+    || !validTwitchUserId(user.id)
+    || !validTwitchLogin(user.login)
+    || typeof user.displayName !== "string"
+    || user.displayName.length < 1
+    || user.displayName.length > 80
+  ) {
+    throw new YoroTwitchCredentialError("security_failed");
+  }
+  const profileImageUrl = safeTwitchAvatarUrl(user.profileImageUrl);
+  if (user.profileImageUrl !== undefined && !profileImageUrl) {
+    throw new YoroTwitchCredentialError("security_failed");
+  }
+  return {
+    version: TWITCH_CREDENTIAL_VERSION,
+    accessToken: record.accessToken,
+    refreshToken: record.refreshToken,
+    scopes,
+    expiresAt: record.expiresAt,
+    user: {
+      id: user.id,
+      login: user.login,
+      displayName: user.displayName,
+      ...(profileImageUrl ? { profileImageUrl } : {})
+    }
+  };
+}
+
 function safeReturnPath(value: string | undefined): string {
   if (!value || value.length > 256 || !value.startsWith("/") || value.startsWith("//")) {
     return "/account/connections";
@@ -101,7 +232,6 @@ function safeReturnPath(value: string | undefined): string {
   const allowed = [
     "/",
     "/bot",
-    "/bot/manage",
     "/account",
     "/account/connections",
     "/lol",
@@ -292,8 +422,14 @@ export class YoroAccountService {
     if (!oauth) throw new YoroAccountError("oauth_failed", 401);
 
     try {
-      const profile = input.provider === "discord"
-        ? await this.completeDiscordProvider(oauth.id, oauth.pkce_verifier_encrypted, input.code)
+      const providerResult = input.provider === "discord"
+        ? {
+            profile: await this.completeDiscordProvider(
+              oauth.id,
+              oauth.pkce_verifier_encrypted,
+              input.code
+            )
+          }
         : await this.completeTwitchProvider(input.code);
       const sessionToken = discordSafeToken();
       const csrfToken = discordSafeToken();
@@ -306,7 +442,7 @@ export class YoroAccountService {
           const linked = await transactionRepository.linkIdentity({
             userId: oauth.target_user_id,
             provider: input.provider,
-            ...profile
+            ...providerResult.profile
           });
           if (linked === "conflict") {
             throw new YoroAccountError("identity_conflict", 409);
@@ -316,7 +452,17 @@ export class YoroAccountService {
         } else {
           userId = await transactionRepository.resolveUserForLogin({
             provider: input.provider,
-            ...profile
+            ...providerResult.profile
+          });
+        }
+        if ("credential" in providerResult) {
+          await transactionRepository.upsertTwitchCredential({
+            userId,
+            encryptedTokenRecord: this.encryptTwitchCredential(
+              userId,
+              providerResult.credential
+            ),
+            tokenExpiresAt: new Date(providerResult.credential.expiresAt)
           });
         }
         await transactionRepository.createSession({
@@ -406,6 +552,102 @@ export class YoroAccountService {
       : undefined;
   }
 
+  async getTwitchAccessContext(
+    sessionCookie?: string
+  ): Promise<(PublicTwitchAccessContext & {
+    user: TwitchBroadcasterInfo;
+    tokenExpiresAt: string;
+  }) | undefined> {
+    const session = await this.authenticate(sessionCookie);
+    if (!session) return undefined;
+    try {
+      return await withTransaction(this.pool, async (client) => {
+        const repository = new YoroAccountRepository(client);
+        const row = await repository.lockTwitchCredential(session.userId);
+        if (!row) return undefined;
+        let credential = this.decryptTwitchCredential(
+          session.userId,
+          row.encrypted_token_record
+        );
+        const identities = await repository.listIdentities(session.userId);
+        if (
+          !identities.some((identity) => (
+            identity.provider === "twitch"
+            && identity.providerSubject === credential.user.id
+          ))
+        ) {
+          throw new YoroTwitchCredentialError("security_failed");
+        }
+        if (Date.parse(credential.expiresAt) <= Date.now() + TWITCH_TOKEN_REFRESH_SKEW_MS) {
+          credential = await this.refreshTwitchCredential(credential);
+          await repository.upsertTwitchCredential({
+            userId: session.userId,
+            encryptedTokenRecord: this.encryptTwitchCredential(session.userId, credential),
+            tokenExpiresAt: new Date(credential.expiresAt)
+          });
+        }
+        if (
+          TWITCH_PUBLIC_VIEWER_SCOPES.some(
+            (requiredScope) => !credential.scopes.includes(requiredScope)
+          )
+        ) {
+          return undefined;
+        }
+        return {
+          clientId: appConfig.twitch.clientId,
+          accessToken: credential.accessToken,
+          userId: credential.user.id,
+          scopes: [...credential.scopes],
+          user: { ...credential.user },
+          tokenExpiresAt: credential.expiresAt
+        };
+      });
+    } catch (error) {
+      if (!(error instanceof YoroTwitchCredentialError)) throw error;
+      await new YoroAccountRepository(this.pool)
+        .revokeTwitchCredential(session.userId, error.status)
+        .catch(() => undefined);
+      this.logger?.error?.({
+        type: "yoro.account.twitch_credential_rejected",
+        errorCode: error.status
+      });
+      return undefined;
+    }
+  }
+
+  async adoptTwitchViewerSession(
+    sessionCookie: string | undefined,
+    viewerSession: PublicTwitchViewerSession
+  ): Promise<void> {
+    const session = await this.authenticate(sessionCookie);
+    if (!session) return;
+    const credential: YoroTwitchCredential = {
+      version: TWITCH_CREDENTIAL_VERSION,
+      accessToken: viewerSession.accessToken,
+      refreshToken: viewerSession.refreshToken,
+      scopes: [...viewerSession.scopes],
+      expiresAt: viewerSession.expiresAt,
+      user: { ...viewerSession.user }
+    };
+    await withTransaction(this.pool, async (client) => {
+      const repository = new YoroAccountRepository(client);
+      const identities = await repository.listIdentities(session.userId);
+      if (
+        !identities.some((identity) => (
+          identity.provider === "twitch"
+          && identity.providerSubject === credential.user.id
+        ))
+      ) {
+        return;
+      }
+      await repository.upsertTwitchCredential({
+        userId: session.userId,
+        encryptedTokenRecord: this.encryptTwitchCredential(session.userId, credential),
+        tokenExpiresAt: new Date(credential.expiresAt)
+      });
+    });
+  }
+
   async unlinkIdentity(input: {
     provider: YoroIdentityProvider;
     sessionCookie?: string;
@@ -419,6 +661,9 @@ export class YoroAccountService {
       const repository = new YoroAccountRepository(client);
       if (!await repository.revokeIdentity(session.userId, input.provider)) {
         throw new YoroAccountError("last_identity_required", 409);
+      }
+      if (input.provider === "twitch") {
+        await repository.revokeTwitchCredential(session.userId);
       }
       await repository.revokeUserSessions(session.userId);
     });
@@ -509,6 +754,7 @@ export class YoroAccountService {
     url.searchParams.set("response_type", "code");
     url.searchParams.set("client_id", appConfig.twitch.clientId);
     url.searchParams.set("redirect_uri", appConfig.twitch.publicRedirectUri);
+    url.searchParams.set("scope", TWITCH_PUBLIC_VIEWER_SCOPES.join(" "));
     url.searchParams.set("state", state);
     return url.toString();
   }
@@ -566,7 +812,7 @@ export class YoroAccountService {
     };
   }
 
-  private async completeTwitchProvider(code: string): Promise<ProviderProfile> {
+  private async completeTwitchProvider(code: string): Promise<TwitchProviderCompletion> {
     const token = await this.fetchImpl(TWITCH_TOKEN_URL, {
       method: "POST",
       signal: AbortSignal.timeout(appConfig.twitch.apiTimeoutMs),
@@ -580,10 +826,23 @@ export class YoroAccountService {
       })
     });
     if (!token.ok) throw new YoroAccountError("oauth_failed", 401);
-    const tokenBody = await token.json() as { access_token?: unknown };
-    if (typeof tokenBody.access_token !== "string") {
+    const tokenBody = await token.json() as {
+      access_token?: unknown;
+      refresh_token?: unknown;
+      expires_in?: unknown;
+      scope?: unknown;
+    };
+    if (
+      !validOAuthToken(tokenBody.access_token)
+      || !validOAuthToken(tokenBody.refresh_token)
+      || typeof tokenBody.expires_in !== "number"
+      || !Number.isFinite(tokenBody.expires_in)
+      || tokenBody.expires_in <= 0
+      || tokenBody.expires_in > 365 * 24 * 60 * 60
+    ) {
       throw new YoroAccountError("oauth_failed", 401);
     }
+    const scopes = normalizeScopes(tokenBody.scope);
     const profile = await this.fetchImpl(TWITCH_PROFILE_URL, {
       signal: AbortSignal.timeout(appConfig.twitch.apiTimeoutMs),
       headers: {
@@ -601,7 +860,11 @@ export class YoroAccountService {
       }>;
     };
     const user = value.data?.[0];
-    if (!user || typeof user.id !== "string" || !/^[0-9]{1,64}$/u.test(user.id)) {
+    if (
+      !user
+      || !validTwitchUserId(user.id)
+      || !validTwitchLogin(user.login)
+    ) {
       throw new YoroAccountError("oauth_failed", 401);
     }
     const displayName = typeof user.display_name === "string" && user.display_name.trim()
@@ -610,10 +873,119 @@ export class YoroAccountService {
         ? user.login
         : user.id;
     const avatarReference = safeTwitchAvatarUrl(user.profile_image_url);
+    const safeDisplayName = displayName.slice(0, 80);
     return {
-      providerSubject: user.id,
-      displayName: displayName.slice(0, 80),
-      ...(avatarReference ? { avatarReference } : {})
+      profile: {
+        providerSubject: user.id,
+        displayName: safeDisplayName,
+        ...(avatarReference ? { avatarReference } : {})
+      },
+      credential: {
+        version: TWITCH_CREDENTIAL_VERSION,
+        accessToken: tokenBody.access_token,
+        refreshToken: tokenBody.refresh_token,
+        scopes,
+        expiresAt: new Date(Date.now() + tokenBody.expires_in * 1_000).toISOString(),
+        user: {
+          id: user.id,
+          login: user.login,
+          displayName: safeDisplayName,
+          ...(avatarReference ? { profileImageUrl: avatarReference } : {})
+        }
+      }
+    };
+  }
+
+  private twitchCredentialEncryptionKey(): Buffer {
+    const key = decodeTwitchTokenEncryptionKey(appConfig.twitch.tokenEncryptionKey);
+    if (!key) throw new YoroTwitchCredentialError("security_failed");
+    return key;
+  }
+
+  private twitchCredentialAad(userId: string): string {
+    return `yoro-twitch-viewer:${userId}`;
+  }
+
+  private encryptTwitchCredential(
+    userId: string,
+    credential: YoroTwitchCredential
+  ): Buffer {
+    const encrypted = encryptTwitchTokenDocument(
+      JSON.stringify(credential),
+      this.twitchCredentialEncryptionKey(),
+      this.twitchCredentialAad(userId)
+    );
+    return Buffer.from(encrypted, "utf8");
+  }
+
+  private decryptTwitchCredential(
+    userId: string,
+    encryptedRecord: Buffer
+  ): YoroTwitchCredential {
+    try {
+      const decrypted = decryptTwitchTokenDocument(
+        encryptedRecord.toString("utf8"),
+        this.twitchCredentialEncryptionKey(),
+        this.twitchCredentialAad(userId)
+      );
+      if (decrypted.legacyPlaintext) {
+        throw new YoroTwitchCredentialError("security_failed");
+      }
+      return parseStoredTwitchCredential(decrypted.plaintext);
+    } catch (error) {
+      if (error instanceof YoroTwitchCredentialError) throw error;
+      throw new YoroTwitchCredentialError("security_failed");
+    }
+  }
+
+  private async refreshTwitchCredential(
+    credential: YoroTwitchCredential
+  ): Promise<YoroTwitchCredential> {
+    const response = await this.fetchImpl(TWITCH_TOKEN_URL, {
+      method: "POST",
+      signal: AbortSignal.timeout(appConfig.twitch.apiTimeoutMs),
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        client_id: appConfig.twitch.clientId,
+        client_secret: appConfig.twitch.clientSecret,
+        grant_type: "refresh_token",
+        refresh_token: credential.refreshToken
+      })
+    }).catch(() => {
+      throw new YoroTwitchCredentialError("revoked");
+    });
+    if (!response.ok) throw new YoroTwitchCredentialError("revoked");
+    const body = await response.json().catch(() => undefined) as {
+      access_token?: unknown;
+      refresh_token?: unknown;
+      expires_in?: unknown;
+      scope?: unknown;
+    } | undefined;
+    if (
+      !body
+      || !validOAuthToken(body.access_token)
+      || (body.refresh_token !== undefined && !validOAuthToken(body.refresh_token))
+      || typeof body.expires_in !== "number"
+      || !Number.isFinite(body.expires_in)
+      || body.expires_in <= 0
+      || body.expires_in > 365 * 24 * 60 * 60
+    ) {
+      throw new YoroTwitchCredentialError("security_failed");
+    }
+    let scopes = credential.scopes;
+    if (body.scope !== undefined) {
+      try {
+        scopes = normalizeScopes(body.scope);
+      } catch {
+        throw new YoroTwitchCredentialError("security_failed");
+      }
+    }
+    return {
+      ...credential,
+      accessToken: body.access_token,
+      refreshToken: body.refresh_token ?? credential.refreshToken,
+      scopes,
+      expiresAt: new Date(Date.now() + body.expires_in * 1_000).toISOString()
     };
   }
 }

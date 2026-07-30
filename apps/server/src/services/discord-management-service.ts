@@ -22,7 +22,7 @@ import type { YoroAccountService } from "./yoro-account-service.js";
 const DISCORD_AUTHORIZE_URL = "https://discord.com/oauth2/authorize";
 const DISCORD_TOKEN_URL = "https://discord.com/api/v10/oauth2/token";
 const DISCORD_PROFILE_URL = "https://discord.com/api/v10/users/@me";
-const MANAGEMENT_RETURN_PATH = "/bot/manage";
+const MANAGEMENT_RETURN_PATH = "/dashboard/organizations";
 
 export const DISCORD_MANAGEMENT_OAUTH_COOKIE = "yoro_discord_management_oauth";
 export const DISCORD_MANAGEMENT_SESSION_COOKIE = "yoro_discord_management";

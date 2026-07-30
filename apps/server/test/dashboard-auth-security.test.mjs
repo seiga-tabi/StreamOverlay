@@ -544,6 +544,7 @@ test("공개 Twitch callback은 Palworld query와 연결 표시를 보존하고 
 
 test("공개 Twitch 팔로우 전적 API는 Riot ID가 없는 채널도 유지하고 매칭 정보만 선택적으로 더한다", async () => {
   await withAuthConfig(async () => {
+    let yoroContextReads = 0;
     const handler = createHttpHandler({
       store: {
         getParticipationQueue() {
@@ -565,15 +566,30 @@ test("공개 Twitch 팔로우 전적 API는 Riot ID가 없는 채널도 유지�
           return { connected: false };
         }
       },
-      publicTwitchAuth: {
-        async getAccessContext(sessionId) {
-          assert.equal(sessionId, "viewer-session");
+      yoroAccounts: {
+        async getTwitchAccessContext(sessionCookie) {
+          assert.equal(sessionCookie, "yoro-session");
+          yoroContextReads += 1;
           return {
             clientId: "client-id",
-            accessToken: "viewer-access",
+            accessToken: "yoro-viewer-access",
             userId: "999",
-            scopes: ["user:read:follows", "user:read:subscriptions"]
+            scopes: ["user:read:follows", "user:read:subscriptions"],
+            user: {
+              id: "999",
+              login: "viewer",
+              displayName: "Viewer"
+            },
+            tokenExpiresAt: "2026-07-31T00:00:00.000Z"
           };
+        }
+      },
+      publicTwitchAuth: {
+        async getAccessContext() {
+          assert.fail("YORO Twitch credential이 있으면 레거시 세션을 조회하지 않아야 합니다.");
+        },
+        async getStatus() {
+          assert.fail("YORO Twitch credential이 있으면 레거시 상태를 조회하지 않아야 합니다.");
         }
       },
       twitch: {
@@ -630,9 +646,29 @@ test("공개 Twitch 팔로우 전적 API는 Riot ID가 없는 채널도 유지�
       },
       sessions: new DashboardSessionStore()
     });
+    const statusReq = createRequest("GET", "/api/public/twitch/status", undefined, {
+      origin: DASHBOARD_ORIGIN,
+      cookie: "yoro_session=yoro-session"
+    });
+    const statusRes = createResponse();
+    await handler(statusReq, statusRes);
+    assert.equal(statusRes.statusCode, 200);
+    assert.deepEqual(JSON.parse(statusRes.body), {
+      connected: true,
+      configured: true,
+      requiredScopes: ["user:read:follows", "user:read:subscriptions"],
+      missingScopes: [],
+      user: {
+        id: "999",
+        login: "viewer",
+        displayName: "Viewer"
+      },
+      tokenExpiresAt: "2026-07-31T00:00:00.000Z"
+    });
+
     const req = createRequest("GET", "/api/public/twitch/followed-lol", undefined, {
       origin: DASHBOARD_ORIGIN,
-      cookie: `${PUBLIC_TWITCH_VIEWER_SESSION_COOKIE}=viewer-session`
+      cookie: `yoro_session=yoro-session; ${PUBLIC_TWITCH_VIEWER_SESSION_COOKIE}=viewer-session`
     });
     const res = createResponse();
 
@@ -654,6 +690,7 @@ test("공개 Twitch 팔로우 전적 API는 Riot ID가 없는 채널도 유지�
     assert.equal(body.subscriptionScopeGranted, true);
     assert.equal(body.subscriptions[0].twitchUserId, "55");
     assert.equal(body.subscriptions[0].tierLabel, "Tier 1");
+    assert.equal(yoroContextReads, 2);
   });
 });
 
