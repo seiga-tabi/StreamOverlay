@@ -10,6 +10,14 @@ import {
   updatePublicCommunityPost,
   type CommunityPostSubmitInput
 } from "../features/public-lol/api/community";
+import {
+  getPublicTwitchFollowedChannels,
+  getPublicTwitchStatus,
+  invalidatePublicTwitchClientCache,
+  logoutPublicTwitch,
+  peekPublicTwitchFollowedChannels,
+  peekPublicTwitchStatus,
+} from "../features/public-twitch/api";
 import { ProfileLinkIcon, profileLinkPlatformFromUrl, profileLinkPlatformClass } from "../components/ProfileLinkIcon";
 import { AppShell, AppShellHeader, AppShellMain, AppShellSidebar } from "../shared/ui/AppShell";
 import { Button } from "../shared/ui/Button";
@@ -457,22 +465,6 @@ const objectiveLabels: Record<PublicLocale, Record<string, string>> = {
   }
 };
 
-async function getPublicTwitchStatus(): Promise<PublicTwitchViewerStatus> {
-  const response = await fetch(`${apiBase}/api/public/twitch/status`, {
-    credentials: "include"
-  });
-  if (!response.ok) throw new Error(await readErrorMessage(response));
-  return (await response.json()) as PublicTwitchViewerStatus;
-}
-
-async function getPublicTwitchFollowedLol(): Promise<PublicTwitchFollowedLolResponse> {
-  const response = await fetch(`${apiBase}/api/public/twitch/followed-lol?limit=100`, {
-    credentials: "include"
-  });
-  if (!response.ok) throw new Error(await readErrorMessage(response));
-  return (await response.json()) as PublicTwitchFollowedLolResponse;
-}
-
 async function getPublicParticipationState(streamerId?: string): Promise<PublicParticipationStateResponse> {
   const query = streamerId ? `?streamerId=${encodeURIComponent(streamerId)}` : "";
   const response = await fetch(`${apiBase}/api/public/participation/state${query}`, {
@@ -551,13 +543,6 @@ async function requestPublicStreamerRiotId(riotId: string): Promise<StreamerRiot
   const body = await response.json() as { request?: StreamerRiotIdRequest };
   if (!body.request) throw new Error(t().searchFailed);
   return body.request;
-}
-
-async function logoutPublicTwitch(): Promise<void> {
-  await fetch(`${apiBase}/api/public/twitch/logout`, {
-    method: "POST",
-    credentials: "include"
-  });
 }
 
 function suggestionSourceLabel(suggestion: SearchSuggestion): string {
@@ -6647,16 +6632,25 @@ export function PublicLolPage({
   const [premiumOpen, setPremiumOpen] = useState(false);
   const [streamerRegisterOpen, setStreamerRegisterOpen] = useState(false);
   const [nowTick, setNowTick] = useState(() => Date.now());
-  const [twitchStatus, setTwitchStatus] = useState<PublicTwitchViewerStatus>({
-    connected: false,
-    configured: false,
-    requiredScopes: [],
-    missingScopes: []
-  });
-  const [followedLol, setFollowedLol] = useState<PublicTwitchFollowedLolResponse | null>(null);
-  const [followedLoading, setFollowedLoading] = useState(false);
+  const [twitchStatus, setTwitchStatus] = useState<PublicTwitchViewerStatus>(() => (
+    peekPublicTwitchStatus() ?? {
+      connected: false,
+      configured: false,
+      requiredScopes: [],
+      missingScopes: []
+    }
+  ));
+  const [followedLol, setFollowedLol] = useState<PublicTwitchFollowedLolResponse | null>(
+    () => peekPublicTwitchFollowedChannels() ?? null,
+  );
+  const [followedLoading, setFollowedLoading] = useState(
+    () => Boolean(peekPublicTwitchStatus()?.connected && !peekPublicTwitchFollowedChannels()),
+  );
   const [followedError, setFollowedError] = useState("");
-  const followedLolRequestRef = useRef<Promise<void> | null>(null);
+  const followedLolRequestRef = useRef<{
+    includeSubscriptions: boolean;
+    promise: Promise<void>;
+  } | null>(null);
   const [publicParticipation, setPublicParticipation] = useState<PublicParticipationStateResponse | null>(null);
   const [publicParticipationLoading, setPublicParticipationLoading] = useState(false);
   const [publicParticipationError, setPublicParticipationError] = useState("");
@@ -6736,11 +6730,12 @@ export function PublicLolPage({
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const viewerConnected = params.get("viewer_twitch") === "connected";
-    void loadTwitchViewer();
+    if (viewerConnected) invalidatePublicTwitchClientCache();
+    void loadTwitchViewer(viewerConnected);
     let retryTimer: number | undefined;
     if (viewerConnected) {
       retryTimer = window.setTimeout(() => {
-        void loadTwitchViewer();
+        void loadTwitchViewer(true);
       }, 350);
       params.delete("viewer_twitch");
       const nextQuery = params.toString();
@@ -6760,6 +6755,11 @@ export function PublicLolPage({
     if (!twitchStatus.connected || followedLol || followedLoading) return;
     void loadFollowedLol();
   }, [twitchStatus.connected, followedLol, followedLoading]);
+
+  useEffect(() => {
+    if (activeMainPage !== "subscriptions" || !twitchStatus.connected) return;
+    void loadFollowedLol(false, true);
+  }, [activeMainPage, twitchStatus.connected]);
 
   useEffect(() => {
     if (activeMainPage !== "followJoin") return undefined;
@@ -6878,13 +6878,13 @@ export function PublicLolPage({
     };
   }, [query, profile?.riotId]);
 
-  async function loadTwitchViewer(): Promise<void> {
+  async function loadTwitchViewer(force = false): Promise<void> {
     setFollowedError("");
     try {
-      const status = await getPublicTwitchStatus();
+      const status = await getPublicTwitchStatus(undefined, { force });
       setTwitchStatus(status);
       if (status.connected) {
-        await loadFollowedLol();
+        await loadFollowedLol(force);
       } else {
         setFollowedLol(null);
         setPublicParticipation(null);
@@ -6895,13 +6895,20 @@ export function PublicLolPage({
     }
   }
 
-  async function loadFollowedLol(): Promise<void> {
-    if (followedLolRequestRef.current) return followedLolRequestRef.current;
+  async function loadFollowedLol(force = false, includeSubscriptions = false): Promise<void> {
+    const pending = followedLolRequestRef.current;
+    if (pending) {
+      await pending.promise;
+      if (!includeSubscriptions || pending.includeSubscriptions) return;
+    }
     const request = (async () => {
     setFollowedLoading(true);
     setFollowedError("");
     try {
-      const response = await getPublicTwitchFollowedLol();
+      const response = await getPublicTwitchFollowedChannels(undefined, {
+        force,
+        includeSubscriptions,
+      });
       setFollowedLol(response);
       if (!response.connected) {
         setTwitchStatus((current) => ({ ...current, connected: false }));
@@ -6912,11 +6919,11 @@ export function PublicLolPage({
       setFollowedLoading(false);
     }
     })();
-    followedLolRequestRef.current = request;
+    followedLolRequestRef.current = { includeSubscriptions, promise: request };
     try {
       await request;
     } finally {
-      if (followedLolRequestRef.current === request) followedLolRequestRef.current = null;
+      if (followedLolRequestRef.current?.promise === request) followedLolRequestRef.current = null;
     }
   }
 
@@ -7423,7 +7430,7 @@ export function PublicLolPage({
           loading={followedLoading}
           error={followedError}
           onLogin={startTwitchLogin}
-          onRefresh={() => void loadFollowedLol()}
+          onRefresh={() => void loadFollowedLol(true, true)}
           onSearch={searchFollowedRiotId}
         />
       );
@@ -7605,7 +7612,7 @@ export function PublicLolPage({
             onBack={() => setStreamerRegisterOpen(false)}
             onSubmitted={(request) => {
               setTwitchStatus((current) => ({ ...current, streamerRiotRequest: request }));
-              void loadFollowedLol();
+              void loadFollowedLol(true);
             }}
           />
         </AppShellMain>

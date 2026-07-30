@@ -238,6 +238,31 @@ test("TwitchApiClient는 로그인 사용자의 구독 중인 팔로우 채널�
   assert.deepEqual(calls.map((call) => call.authorization), ["Bearer viewer-access-token", "Bearer viewer-access-token"]);
 });
 
+test("TwitchApiClient는 구독 확인을 제한된 동시성으로 처리한다", async () => {
+  let activeRequests = 0;
+  let maxActiveRequests = 0;
+  globalThis.fetch = async () => {
+    activeRequests += 1;
+    maxActiveRequests = Math.max(maxActiveRequests, activeRequests);
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    activeRequests -= 1;
+    return jsonResponse({ data: [] }, 404);
+  };
+
+  const client = new TwitchApiClient(createAuth());
+  const broadcasterIds = Array.from({ length: 12 }, (_, index) => String(100 + index));
+  const result = await client.checkUserSubscriptions({
+    clientId: "client-id",
+    accessToken: "viewer-access-token",
+    scopes: ["user:read:subscriptions"],
+    userId: "999"
+  }, broadcasterIds);
+
+  assert.equal(result.size, 0);
+  assert.equal(maxActiveRequests > 1, true);
+  assert.equal(maxActiveRequests <= 5, true);
+});
+
 test("TwitchApiClient는 팔로우 조회 scope가 없으면 followed channel 조회를 거부한다", async () => {
   const client = new TwitchApiClient(createAuth());
 

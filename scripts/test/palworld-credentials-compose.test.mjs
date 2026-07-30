@@ -29,3 +29,13 @@ test("Palworld key volume은 기존 /run/secrets bind mount와 겹치지 않는�
     /PALWORLD_SERVER_CREDENTIALS_SECRET_PATH = "\/run\/palworld-credentials\/palworld-server-credentials-encryption-key"/u
   );
 });
+
+test("Cloudflared는 기본 Palworld REST 배포를 막지 않는 선택 profile이다", () => {
+  const standaloneCompose = source("deploy/production/compose.yaml");
+  const productionOverlay = source("docker-compose.production.yml");
+
+  for (const compose of [standaloneCompose, productionOverlay]) {
+    const cloudflared = compose.slice(compose.indexOf("  cloudflared:"));
+    assert.match(cloudflared, /profiles:\n\s+- edge/u);
+  }
+});

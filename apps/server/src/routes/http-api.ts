@@ -246,6 +246,8 @@ const PUBLIC_LOL_MATCH_CACHE_MAX = 1000;
 const TWITCH_STREAM_EVENTSUB_LIVE_FALLBACK_MAX_AGE_MS = 5 * 60_000;
 const SERVER_PROCESS_STARTED_AT = new Date(Date.now() - process.uptime() * 1000).toISOString();
 const PUBLIC_TWITCH_SUBSCRIPTION_CHECK_LIMIT = 30;
+const PUBLIC_TWITCH_FOLLOWED_CACHE_TTL_MS = 15_000;
+const PUBLIC_TWITCH_FOLLOWED_CACHE_MAX = 500;
 const SAFE_CHAT_URL_PROTOCOLS = new Set(["http", "https"]);
 const PARTICIPATION_INVITE_TARGET_STATUSES = new Set(["verified", "waitlisted", "selected", "checked_in", "invited"]);
 const PARTICIPATION_MANUAL_ACTIONS = new Set(["open", "show_queue", "mark_in_game", "finish_game", "close"]);
@@ -3056,6 +3058,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
   const publicLolMatchBuildInFlight = new Map<string, Promise<PublicLolMatchBuildResponse>>();
   const publicLolMatchDetailCache = new Map<string, { expiresAt: number; match: RiotMatch }>();
   const publicLolMatchDetailInFlight = new Map<string, Promise<RiotMatch | null>>();
+  const publicTwitchFollowedCache = new Map<string, {
+    expiresAt: number;
+    response: PublicTwitchFollowedLolResponse;
+  }>();
+  const publicTwitchFollowedInFlight = new Map<string, Promise<PublicTwitchFollowedLolResponse>>();
 
   async function getTwitchStatus() {
     const status = await input.twitchAuth.getStatus();
@@ -4044,7 +4051,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
     return profiles;
   }
 
-  async function getPublicTwitchFollowedLol(limit: number, req: IncomingMessage): Promise<PublicTwitchFollowedLolResponse> {
+  async function getPublicTwitchFollowedLol(
+    limit: number,
+    req: IncomingMessage,
+    includeSubscriptions = true
+  ): Promise<PublicTwitchFollowedLolResponse> {
     const yoroContext = input.yoroAccounts
       ? await input.yoroAccounts
           .getTwitchAccessContext(requestCookie(req, YORO_SESSION_COOKIE))
@@ -4060,35 +4071,48 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (!context) {
       return { connected: false, truncated: false, matchedCount: 0, subscriptionScopeGranted: false, subscriptions: [], channels: [] };
     }
-    if (!input.twitch) throw new HttpRequestError(503, { error: "Twitch API client를 사용할 수 없습니다." });
+    const twitch = input.twitch;
+    if (!twitch) throw new HttpRequestError(503, { error: "Twitch API client를 사용할 수 없습니다." });
 
     const safeLimit = Number.isFinite(limit) ? Math.max(1, Math.min(Math.trunc(limit), 100)) : 100;
-    const followed = await input.twitch.getFollowedChannels({
+    const cacheKey = `${context.userId}:${safeLimit}:${includeSubscriptions ? "subscriptions" : "channels"}`;
+    const cached = publicTwitchFollowedCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) return cached.response;
+    const pending = publicTwitchFollowedInFlight.get(cacheKey);
+    if (pending) return pending;
+
+    const request = (async (): Promise<PublicTwitchFollowedLolResponse> => {
+      const followed = await twitch.getFollowedChannels({
       clientId: context.clientId,
       accessToken: context.accessToken,
       scopes: context.scopes,
       userId: context.userId
-    }, safeLimit);
-    const participationProfiles = participationRiotProfilesByTwitchId();
-    const approvedProfiles = approvedStreamerRiotProfilesByTwitchId();
-    const connectedStreamer = await connectedStreamerRiotProfile();
-    const streams = await input.twitch.getStreamsByUserIds({
-      clientId: context.clientId,
-      accessToken: context.accessToken,
-      scopes: context.scopes
-    }, followed.channels.map((channel) => channel.broadcasterId)).catch(() => new Map<string, TwitchStreamStatus>());
-    const subscriptionScopeGranted = context.scopes.includes("user:read:subscriptions");
-    const subscriptionCheckChannels = followed.channels.slice(0, PUBLIC_TWITCH_SUBSCRIPTION_CHECK_LIMIT);
-    const subscriptionsByBroadcasterId = subscriptionScopeGranted
-      ? await input.twitch.checkUserSubscriptions({
+      }, safeLimit);
+      const participationProfiles = participationRiotProfilesByTwitchId();
+      const approvedProfiles = approvedStreamerRiotProfilesByTwitchId();
+      const connectedStreamerRequest = connectedStreamerRiotProfile();
+      const streamsRequest = twitch.getStreamsByUserIds({
         clientId: context.clientId,
         accessToken: context.accessToken,
-        scopes: context.scopes,
-        userId: context.userId
-      }, subscriptionCheckChannels.map((channel) => channel.broadcasterId)).catch(() => new Map())
-      : new Map();
+        scopes: context.scopes
+      }, followed.channels.map((channel) => channel.broadcasterId)).catch(() => new Map<string, TwitchStreamStatus>());
+      const subscriptionScopeGranted = context.scopes.includes("user:read:subscriptions");
+      const subscriptionCheckChannels = followed.channels.slice(0, PUBLIC_TWITCH_SUBSCRIPTION_CHECK_LIMIT);
+      const subscriptionsRequest = subscriptionScopeGranted && includeSubscriptions
+        ? twitch.checkUserSubscriptions({
+          clientId: context.clientId,
+          accessToken: context.accessToken,
+          scopes: context.scopes,
+          userId: context.userId
+          }, subscriptionCheckChannels.map((channel) => channel.broadcasterId)).catch(() => new Map())
+        : Promise.resolve(new Map());
+      const [connectedStreamer, streams, subscriptionsByBroadcasterId] = await Promise.all([
+        connectedStreamerRequest,
+        streamsRequest,
+        subscriptionsRequest,
+      ]);
 
-    const channels = followed.channels.map((channel): PublicTwitchFollowedLolChannel => {
+      const channels = followed.channels.map((channel): PublicTwitchFollowedLolChannel => {
       const connectedProfile = connectedStreamer?.twitchUserId === channel.broadcasterId ? connectedStreamer : undefined;
       const participationProfile = participationProfiles.get(channel.broadcasterId);
       const approvedProfile = approvedProfiles.get(channel.broadcasterId);
@@ -4121,8 +4145,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if (liveScore !== 0) return liveScore;
       return Date.parse(b.followedAt) - Date.parse(a.followedAt);
     });
-    const channelById = new Map(followed.channels.map((channel) => [channel.broadcasterId, channel]));
-    const subscriptions = [...subscriptionsByBroadcasterId.values()]
+      const channelById = new Map(followed.channels.map((channel) => [channel.broadcasterId, channel]));
+      const subscriptions = [...subscriptionsByBroadcasterId.values()]
       .map((subscription): PublicTwitchSubscriptionChannel => {
         const followedChannel = channelById.get(subscription.broadcasterId);
         return {
@@ -4139,15 +4163,30 @@ export function createHttpHandler(input: HttpHandlerInput) {
       })
       .sort((a, b) => a.twitchDisplayName.localeCompare(b.twitchDisplayName));
 
-    return {
-      connected: true,
-      total: followed.total,
-      truncated: followed.truncated,
-      matchedCount: channels.filter((channel) => Boolean(channel.riotId)).length,
-      subscriptionScopeGranted,
-      subscriptions,
-      channels
-    };
+      return {
+        connected: true,
+        total: followed.total,
+        truncated: followed.truncated,
+        matchedCount: channels.filter((channel) => Boolean(channel.riotId)).length,
+        subscriptionScopeGranted,
+        subscriptions,
+        channels
+      };
+    })();
+    publicTwitchFollowedInFlight.set(cacheKey, request);
+    try {
+      const response = await request;
+      publicTwitchFollowedCache.set(cacheKey, {
+        expiresAt: Date.now() + PUBLIC_TWITCH_FOLLOWED_CACHE_TTL_MS,
+        response,
+      });
+      pruneMapToMax(publicTwitchFollowedCache, PUBLIC_TWITCH_FOLLOWED_CACHE_MAX);
+      return response;
+    } finally {
+      if (publicTwitchFollowedInFlight.get(cacheKey) === request) {
+        publicTwitchFollowedInFlight.delete(cacheKey);
+      }
+    }
   }
 
   function publicParticipationQueueItem(
@@ -7281,7 +7320,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
       }
       if (req.method === "GET" && url.pathname === "/api/public/twitch/followed-lol") {
         const limit = Number(url.searchParams.get("limit") ?? "100");
-        return sendJson(req, res, 200, await getPublicTwitchFollowedLol(limit, req));
+        const includeSubscriptions = url.searchParams.get("includeSubscriptions") !== "0";
+        return sendJson(req, res, 200, await getPublicTwitchFollowedLol(limit, req, includeSubscriptions));
       }
       if (req.method === "POST" && url.pathname === "/api/public/twitch/riot-id-request") {
         return sendJson(req, res, 200, { request: await createPublicStreamerRiotIdRequest(req) });

@@ -160,6 +160,7 @@ const STREAM_STATUS_OFFLINE_CACHE_TTL_MS = 30 * 1000;
 const DEFAULT_RATE_LIMIT_BACKOFF_MS = 60_000;
 const APP_ACCESS_TOKEN_REFRESH_MARGIN_MS = 60_000;
 const TWITCH_MEMORY_CACHE_MAX = 2000;
+const TWITCH_SUBSCRIPTION_LOOKUP_CONCURRENCY = 5;
 
 function sleepMs(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -619,14 +620,27 @@ export class TwitchApiClient {
       missingBroadcasterIds.push(broadcasterId);
     }
 
-    for (const broadcasterId of missingBroadcasterIds) {
-      const subscription = await this.fetchUserSubscription(context, safeUserId, broadcasterId);
-      this.userSubscriptionCache.set(`${safeUserId}:${broadcasterId}`, {
-        subscription,
-        expiresAt: this.now() + USER_SUBSCRIPTION_CACHE_TTL_MS
-      });
-      if (subscription) subscriptions.set(broadcasterId, subscription);
-    }
+    let nextIndex = 0;
+    const worker = async () => {
+      while (nextIndex < missingBroadcasterIds.length) {
+        const index = nextIndex;
+        nextIndex += 1;
+        const broadcasterId = missingBroadcasterIds[index];
+        if (!broadcasterId) continue;
+        const subscription = await this.fetchUserSubscription(context, safeUserId, broadcasterId);
+        this.userSubscriptionCache.set(`${safeUserId}:${broadcasterId}`, {
+          subscription,
+          expiresAt: this.now() + USER_SUBSCRIPTION_CACHE_TTL_MS
+        });
+        if (subscription) subscriptions.set(broadcasterId, subscription);
+      }
+    };
+    await Promise.all(
+      Array.from(
+        { length: Math.min(TWITCH_SUBSCRIPTION_LOOKUP_CONCURRENCY, missingBroadcasterIds.length) },
+        () => worker()
+      )
+    );
 
     this.pruneCache(this.userSubscriptionCache);
     return subscriptions;

@@ -49,7 +49,10 @@ import { applyPalworldSeo } from "../features/public-palworld/utils/seo";
 import {
   getPublicTwitchFollowedChannels,
   getPublicTwitchStatus,
+  invalidatePublicTwitchClientCache,
   logoutPublicTwitch,
+  peekPublicTwitchFollowedChannels,
+  peekPublicTwitchStatus,
   publicTwitchLoginUrl,
 } from "../features/public-twitch/api";
 
@@ -90,13 +93,19 @@ export function PublicPalworldPage({
   const knownPage = isKnownPalworldPagePath(window.location.pathname);
   const text = palworldI18n[locale];
   const [versionMismatch, setVersionMismatch] = useState(false);
-  const [twitchStatus, setTwitchStatus] = useState<PublicTwitchViewerStatus>(EMPTY_TWITCH_STATUS);
-  const [followedChannels, setFollowedChannels] = useState<PublicTwitchFollowedLolResponse | null>(null);
-  const [twitchStatusLoading, setTwitchStatusLoading] = useState(true);
+  const [twitchStatus, setTwitchStatus] = useState<PublicTwitchViewerStatus>(
+    () => peekPublicTwitchStatus() ?? EMPTY_TWITCH_STATUS,
+  );
+  const [followedChannels, setFollowedChannels] = useState<PublicTwitchFollowedLolResponse | null>(
+    () => peekPublicTwitchFollowedChannels() ?? null,
+  );
+  const [twitchStatusLoading, setTwitchStatusLoading] = useState(
+    () => peekPublicTwitchStatus() === undefined,
+  );
   const [followedLoading, setFollowedLoading] = useState(false);
   const [twitchStatusError, setTwitchStatusError] = useState(false);
   const [followedError, setFollowedError] = useState(false);
-  const twitchStatusRef = useRef<PublicTwitchViewerStatus>(EMPTY_TWITCH_STATUS);
+  const twitchStatusRef = useRef<PublicTwitchViewerStatus>(twitchStatus);
   const statusRequestRef = useRef<Promise<void> | null>(null);
   const statusAbortRef = useRef<AbortController | null>(null);
   const followedRequestRef = useRef<Promise<void> | null>(null);
@@ -137,7 +146,7 @@ export function PublicPalworldPage({
     setPalworldUrl(`${window.location.pathname}${canonicalQuery ? `?${canonicalQuery}` : ""}`, true);
   }, [detailRoute, routeQuery]);
 
-  const refreshTwitchStatus = useCallback(async (): Promise<void> => {
+  const refreshTwitchStatus = useCallback(async (force = false): Promise<void> => {
     if (logoutInFlightRef.current) return;
     if (statusRequestRef.current) return statusRequestRef.current;
     const controller = new AbortController();
@@ -147,7 +156,7 @@ export function PublicPalworldPage({
     setTwitchStatusError(false);
     const request = (async () => {
       try {
-        const status = await getPublicTwitchStatus(controller.signal);
+        const status = await getPublicTwitchStatus(controller.signal, { force });
         if (!mountedRef.current || controller.signal.aborted) return;
         twitchStatusRef.current = status;
         setTwitchStatus(status);
@@ -221,9 +230,10 @@ export function PublicPalworldPage({
       const nextQuery = query.toString();
       window.history.replaceState({}, "", `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`);
     }
-    void refreshTwitchStatus().finally(() => {
+    if (viewerConnected) invalidatePublicTwitchClientCache();
+    void refreshTwitchStatus(viewerConnected).finally(() => {
       if (viewerConnected && !disposed) {
-        retryTimer = window.setTimeout(() => void refreshTwitchStatus(), 350);
+        retryTimer = window.setTimeout(() => void refreshTwitchStatus(true), 350);
       }
     });
     return () => {

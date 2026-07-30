@@ -31,8 +31,10 @@ import { isPalworldPath } from "./features/public-palworld/utils/routes";
 import { PalworldPageErrorBoundary } from "./features/public-palworld/components/PalworldPageErrorBoundary";
 import { lazyNamed } from "./shared/lazyNamed";
 
-const PublicLolPage = lazyNamed(() => import("./pages/PublicLolPage"), "PublicLolPage");
-const PublicPalworldPage = lazyNamed(() => import("./pages/PublicPalworldPage"), "PublicPalworldPage");
+const loadPublicLolPage = () => import("./pages/PublicLolPage");
+const loadPublicPalworldPage = () => import("./pages/PublicPalworldPage");
+const PublicLolPage = lazyNamed(loadPublicLolPage, "PublicLolPage");
+const PublicPalworldPage = lazyNamed(loadPublicPalworldPage, "PublicPalworldPage");
 const PublicBotPage = lazyNamed(
   () => import("./features/public-bot/PublicBotPage"),
   "PublicBotPage",
@@ -230,6 +232,22 @@ export default function App() {
     observer.observe(document.body, { childList: true, subtree: true });
     return () => observer.disconnect();
   }, [dashboardLocale, surface]);
+
+  useEffect(() => {
+    if (surface !== "public") return undefined;
+    const connection = (navigator as Navigator & {
+      connection?: { saveData?: boolean };
+    }).connection;
+    if (connection?.saveData) return undefined;
+    const preload = window.setTimeout(() => {
+      if (isPalworldPath(window.location.pathname)) {
+        void loadPublicLolPage();
+      } else {
+        void loadPublicPalworldPage();
+      }
+    }, 1_500);
+    return () => window.clearTimeout(preload);
+  }, [routeRevision, surface]);
 
   function changeDashboardLocale(locale: DashboardLocale): void {
     saveDashboardLocale(locale);

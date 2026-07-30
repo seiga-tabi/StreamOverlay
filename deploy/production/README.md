@@ -1,7 +1,7 @@
 # 운영 원클릭 Compose
 
 이 디렉터리는 운영 호스트에서 다음 명령 하나로 YORO Server, PostgreSQL,
-Discord Bot, Cloudflared를 build·기동하기 위한 독립 Compose 프로젝트입니다.
+Discord Bot을 build·기동하기 위한 독립 Compose 프로젝트입니다.
 
 ```bash
 cd deploy/production
@@ -31,7 +31,14 @@ docker compose up -d --build --force-recreate --wait
 /etc/yoro/secrets/bridge_shared_secret
 /etc/yoro/secrets/dashboard_auth_token
 /etc/yoro/secrets/overlay_access_token
-/etc/yoro/secrets/cloudflare_tunnel_token
+```
+
+Cloudflare Tunnel은 기본 배포의 필수 항목이 아닙니다. 외부 Tunnel이 필요한
+운영자만 `/etc/yoro/secrets/cloudflare_tunnel_token`을 준비하고 아래
+`edge` profile을 사용합니다.
+
+```bash
+docker compose --profile edge up -d --build --force-recreate --wait
 ```
 
 Palworld REST 연결용 AES key는 위 목록에 포함되지 않습니다. Compose의
@@ -73,9 +80,17 @@ git status --short
 
 ```bash
 docker compose ps
-docker compose logs --tail=100 palworld-credentials-init config-check server discord-bot cloudflared
+docker compose logs --tail=100 palworld-credentials-init config-check server discord-bot
 curl -fsS http://127.0.0.1:3000/health/live
 curl -fsS http://127.0.0.1:3000/health/ready
+```
+
+이전 배포에서 Cloudflared가 이미 실행 중이고 더 이상 사용하지 않는다면 한
+번만 다음 명령으로 중지합니다. Database와 Palworld 연결 volume에는 영향을
+주지 않습니다.
+
+```bash
+docker compose --profile edge stop cloudflared
 ```
 
 PostgreSQL migration은 자동 적용하지 않습니다. pending migration이 있으면

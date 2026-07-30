@@ -76,7 +76,14 @@ import {
   summarizePalworldSpawnPoints,
 } from "../src/features/public-palworld/utils/spawns";
 import { palworldHomeLiveStreamerCards } from "../src/features/public-palworld/utils/streamers";
-import { getPublicTwitchFollowedChannels, getPublicTwitchStatus, logoutPublicTwitch, publicTwitchLoginUrl } from "../src/features/public-twitch/api";
+import {
+  getPublicTwitchFollowedChannels,
+  getPublicTwitchStatus,
+  invalidatePublicTwitchClientCache,
+  logoutPublicTwitch,
+  peekPublicTwitchStatus,
+  publicTwitchLoginUrl,
+} from "../src/features/public-twitch/api";
 import { applyPalworldCondensationStage } from "../src/features/public-palworld/components/PalworldPalCondensation";
 import { buildPalworldPalStatRows } from "../src/features/public-palworld/components/PalworldPalStatsGraph";
 import {
@@ -582,6 +589,7 @@ test("Palworld LIVE 목록은 Twitch user ID로 중복 제거하고 LIVE만 최�
 test("공개 Twitch 상태·팔로우·로그아웃 요청은 공유 session cookie를 포함한다", async () => {
   const originalFetch = globalThis.fetch;
   const requests: Array<{ url: string; init?: RequestInit }> = [];
+  invalidatePublicTwitchClientCache();
   Object.assign(globalThis, {
     fetch: async (url: string | URL | Request, init?: RequestInit) => {
       requests.push({ url: String(url), init });
@@ -596,8 +604,45 @@ test("공개 Twitch 상태·팔로우·로그아웃 요청은 공유 session coo
     await logoutPublicTwitch();
     assert.deepEqual(requests.map((request) => request.init?.credentials), ["include", "include", "include"]);
     assert.equal(requests[2]?.init?.method, "POST");
-    assert.match(requests[1]?.url ?? "", /followed-lol\?limit=100$/u);
+    assert.match(requests[1]?.url ?? "", /followed-lol\?limit=100&includeSubscriptions=0$/u);
   } finally {
+    invalidatePublicTwitchClientCache();
+    Object.assign(globalThis, { fetch: originalFetch });
+  }
+});
+
+test("공개 Twitch 상태 요청은 페이지 사이에서 캐시하고 동시 요청을 하나로 병합한다", async () => {
+  const originalFetch = globalThis.fetch;
+  let fetchCount = 0;
+  let finishRequest: ((response: Response) => void) | undefined;
+  invalidatePublicTwitchClientCache();
+  Object.assign(globalThis, {
+    fetch: async () => {
+      fetchCount += 1;
+      return new Promise<Response>((resolve) => {
+        finishRequest = resolve;
+      });
+    },
+  });
+  try {
+    const first = getPublicTwitchStatus();
+    const second = getPublicTwitchStatus();
+    assert.equal(fetchCount, 1);
+    finishRequest?.(new Response(JSON.stringify({
+      connected: true,
+      configured: true,
+      requiredScopes: [],
+      missingScopes: [],
+      user: { id: "viewer", login: "viewer", displayName: "Viewer" },
+    }), { status: 200 }));
+    const [firstStatus, secondStatus] = await Promise.all([first, second]);
+    assert.equal(firstStatus.connected, true);
+    assert.equal(secondStatus.connected, true);
+    assert.equal(peekPublicTwitchStatus()?.user?.id, "viewer");
+    assert.equal((await getPublicTwitchStatus()).connected, true);
+    assert.equal(fetchCount, 1);
+  } finally {
+    invalidatePublicTwitchClientCache();
     Object.assign(globalThis, { fetch: originalFetch });
   }
 });
@@ -605,6 +650,7 @@ test("공개 Twitch 상태·팔로우·로그아웃 요청은 공유 session coo
 test("손상된 Twitch 성공 응답은 렌더 데이터로 전달하지 않고 안전하게 거부한다", async () => {
   const originalFetch = globalThis.fetch;
   let responseKind: "status" | "followed" = "status";
+  invalidatePublicTwitchClientCache();
   Object.assign(globalThis, {
     fetch: async () => new Response(JSON.stringify(responseKind === "status" ? {
       connected: true,
@@ -626,6 +672,7 @@ test("손상된 Twitch 성공 응답은 렌더 데이터로 전달하지 않고 
     responseKind = "followed";
     await assert.rejects(getPublicTwitchFollowedChannels(), /팔로우 채널 응답 형식/u);
   } finally {
+    invalidatePublicTwitchClientCache();
     Object.assign(globalThis, { fetch: originalFetch });
   }
 });

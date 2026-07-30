@@ -81,6 +81,8 @@ services:
 
   cloudflared:
     image: ${CLOUDFLARED_IMAGE:?immutable CLOUDFLARED_IMAGE is required}
+    profiles:
+      - edge
     command:
       - tunnel
       - --no-autoupdate

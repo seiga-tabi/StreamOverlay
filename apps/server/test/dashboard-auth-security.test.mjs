@@ -545,6 +545,9 @@ test("공개 Twitch callback은 Palworld query와 연결 표시를 보존하고 
 test("공개 Twitch 팔로우 전적 API는 Riot ID가 없는 채널도 유지하고 매칭 정보만 선택적으로 더한다", async () => {
   await withAuthConfig(async () => {
     let yoroContextReads = 0;
+    let followedReads = 0;
+    let streamReads = 0;
+    let subscriptionReads = 0;
     const handler = createHttpHandler({
       store: {
         getParticipationQueue() {
@@ -594,6 +597,7 @@ test("공개 Twitch 팔로우 전적 API는 Riot ID가 없는 채널도 유지�
       },
       twitch: {
         async getFollowedChannels(context, limit) {
+          followedReads += 1;
           assert.equal(context.userId, "999");
           assert.equal(limit, 100);
           return {
@@ -618,6 +622,7 @@ test("공개 Twitch 팔로우 전적 API는 Riot ID가 없는 채널도 유지�
           };
         },
         async getStreamsByUserIds(_context, userIds) {
+          streamReads += 1;
           assert.deepEqual(userIds, ["55", "77"]);
           return new Map([["55", {
             userId: "55",
@@ -630,6 +635,7 @@ test("공개 Twitch 팔로우 전적 API는 Riot ID가 없는 채널도 유지�
           }]]);
         },
         async checkUserSubscriptions(context, broadcasterIds) {
+          subscriptionReads += 1;
           assert.equal(context.userId, "999");
           assert.deepEqual(broadcasterIds, ["55", "77"]);
           return new Map([["55", {
@@ -690,7 +696,34 @@ test("공개 Twitch 팔로우 전적 API는 Riot ID가 없는 채널도 유지�
     assert.equal(body.subscriptionScopeGranted, true);
     assert.equal(body.subscriptions[0].twitchUserId, "55");
     assert.equal(body.subscriptions[0].tierLabel, "Tier 1");
-    assert.equal(yoroContextReads, 2);
+    const cachedReq = createRequest("GET", "/api/public/twitch/followed-lol", undefined, {
+      origin: DASHBOARD_ORIGIN,
+      cookie: "yoro_session=yoro-session"
+    });
+    const cachedRes = createResponse();
+    await handler(cachedReq, cachedRes);
+    assert.deepEqual(JSON.parse(cachedRes.body), body);
+    assert.equal(followedReads, 1);
+    assert.equal(streamReads, 1);
+    assert.equal(subscriptionReads, 1);
+    const channelsOnlyReq = createRequest(
+      "GET",
+      "/api/public/twitch/followed-lol?limit=100&includeSubscriptions=0",
+      undefined,
+      {
+        origin: DASHBOARD_ORIGIN,
+        cookie: "yoro_session=yoro-session"
+      }
+    );
+    const channelsOnlyRes = createResponse();
+    await handler(channelsOnlyReq, channelsOnlyRes);
+    const channelsOnlyBody = JSON.parse(channelsOnlyRes.body);
+    assert.equal(channelsOnlyBody.channels.length, 2);
+    assert.deepEqual(channelsOnlyBody.subscriptions, []);
+    assert.equal(followedReads, 2);
+    assert.equal(streamReads, 2);
+    assert.equal(subscriptionReads, 1);
+    assert.equal(yoroContextReads, 4);
   });
 });
 
