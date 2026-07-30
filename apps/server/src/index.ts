@@ -74,6 +74,8 @@ import { DiscordManagementService } from "./services/discord-management-service.
 import { YoroAccountService } from "./services/yoro-account-service.js";
 import { AgentIngestionService } from "./services/agent-ingestion-service.js";
 import { DiscordInternalAuthVerifier } from "./security/discord-internal-auth.js";
+import { GameServerStatusReadRepository } from "./database/repositories/game-server-status-read-repository.js";
+import { GameServerStatusReadService } from "./services/game-server-status-read-service.js";
 import {
   PALWORLD_SERVER_SAFE_REGISTRATION_POLICY,
   newId,
@@ -432,6 +434,12 @@ try {
     publicStatus: palworldServerUnavailableCode
   });
 }
+const gameServerStatusRead = appConfig.discordBotInternal.enabled && postgresPool
+  ? new GameServerStatusReadService(
+      new GameServerStatusReadRepository(postgresPool),
+      palworldServerMonitor
+    )
+  : undefined;
 const store = new Store({
   followerStatePath: `${appConfig.paths.state}/followers.json`,
   streamerRiotIdStatePath: `${appConfig.paths.state}/streamer-riot-ids.json`,
@@ -541,6 +549,7 @@ const server = http.createServer(createHttpHandler({
   yoroAccounts,
   discordDatabaseReady: () => databaseHealth.snapshot().ready,
   discordInternalAuth,
+  gameServerStatusRead,
   agentIngestion,
   agentDatabaseReady: () => databaseHealth.snapshot().ready,
   readiness: () => {

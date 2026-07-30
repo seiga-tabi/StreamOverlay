@@ -142,6 +142,59 @@ async function withDiscordConfig(run) {
   }
 }
 
+test("서명된 Bot 내부 상태 API는 Guild 귀속 요청만 상태 서비스에 전달한다", async () => {
+  await withDiscordConfig(async () => {
+    const statusCalls = [];
+    const { handler } = createDiscordHandler({
+      handlerInput: {
+        discordInternalAuth: {
+          verify() {
+            return { ok: true };
+          }
+        },
+        gameServerStatusRead: {
+          async read(input) {
+            statusCalls.push(input);
+            return {
+              connected: true,
+              server: {
+                displayName: "Palworld",
+                status: "online",
+                source: "agent",
+                players: { current: 1, max: 32 }
+              }
+            };
+          }
+        }
+      }
+    });
+    const response = await request(
+      handler,
+      "POST",
+      "/internal/discord/game-server-status",
+      {
+        applicationId: APPLICATION_ID,
+        guildId: "123456789012345678"
+      },
+      { "content-type": "application/json" }
+    );
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(statusCalls, [{
+      applicationId: APPLICATION_ID,
+      guildId: "123456789012345678"
+    }]);
+    assert.deepEqual(JSON.parse(response.body), {
+      connected: true,
+      server: {
+        displayName: "Palworld",
+        status: "online",
+        source: "agent",
+        players: { current: 1, max: 32 }
+      }
+    });
+  });
+});
+
 test("Bot 설치 route는 고정 Discord origin·scope·permission과 no-store만 반환한다", async () => {
   await withDiscordConfig(async () => {
     const { handler } = createDiscordHandler();
@@ -324,6 +377,14 @@ test("YORO 계정 route는 통합 OAuth cookie·Origin·CSRF 경계를 유지한
       },
       async unlinkIdentity(input) {
         calls.push({ type: "unlink", input });
+      },
+      async completeOAuth(input) {
+        calls.push({ type: "oauth_complete", input });
+        return {
+          returnPath: "/palworld",
+          sessionToken:
+            "session_value_abcdefghijklmnopqrstuvwxyz123456.csrf_value_abcdefghijklmnopqrstuvwxyz123456"
+        };
       }
     };
     const { handler } = createDiscordHandler({
@@ -479,6 +540,19 @@ test("YORO 계정 route는 통합 OAuth cookie·Origin·CSRF 경계를 유지한
     assert.equal(unlink.statusCode, 204);
     assert.equal(calls.some((call) => call.type === "logout"), true);
     assert.equal(calls.some((call) => call.type === "unlink"), true);
+
+    const callback = await request(
+      handler,
+      "GET",
+      "/api/public/twitch/auth/callback?code=oauth-code&state=abcdefghijklmnopqrstuvwxyzABCDEFGH",
+      undefined,
+      { cookie: "yoro_oauth=oauth_binding_abcdefghijklmnopqrstuvwxyz123456" }
+    );
+    assert.equal(callback.statusCode, 302);
+    const callbackLocation = new URL(callback.headers.Location);
+    assert.equal(callbackLocation.pathname, "/palworld");
+    assert.equal(callbackLocation.searchParams.get("account"), "twitch_connected");
+    assert.match(String(callback.headers["Set-Cookie"]), /yoro_session=/u);
   });
 });
 

@@ -95,3 +95,16 @@ test("공개 헤더용 계정 선택기는 두 계정 연결 시 Twitch identity
   }), twitchIdentity);
   assert.equal(authenticatedYoroIdentity({ authenticated: false }), undefined);
 });
+
+test("Twitch 계정 OAuth 완료 표시는 성공 handoff만 식별한다", async () => {
+  const { isTwitchAccountOAuthReturn } = await import(
+    "../src/features/yoro-account/api"
+  );
+
+  assert.equal(
+    isTwitchAccountOAuthReturn("?account=twitch_connected&pal=cattiva"),
+    true
+  );
+  assert.equal(isTwitchAccountOAuthReturn("?account=oauth_failed"), false);
+  assert.equal(isTwitchAccountOAuthReturn("?viewer_twitch=connected"), false);
+});

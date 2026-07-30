@@ -34,6 +34,14 @@ const messages = {
       "**/yoro dashboard**",
       "YORO Bot 관리 화면을 엽니다."
     ].join("\n"),
+    prefixHelp: [
+      "",
+      "**!yoro 상태**",
+      "이 Discord 서버에 연결된 Palworld 서버 상태를 확인합니다.",
+      "",
+      "**!yoro 가이드**",
+      "Palworld 전용 서버 설정 가이드를 엽니다."
+    ].join("\n"),
     unknown: "지원하지 않는 YORO Bot 명령입니다."
   },
   ja: {
@@ -55,6 +63,14 @@ const messages = {
       "",
       "**/yoro dashboard**",
       "YORO Bot管理画面を開きます。"
+    ].join("\n"),
+    prefixHelp: [
+      "",
+      "**!yoro ステータス**",
+      "このDiscordサーバーに連携されたPalworldサーバー状態を確認します。",
+      "",
+      "**!yoro ガイド**",
+      "Palworld専用サーバー設定ガイドを開きます。"
     ].join("\n"),
     unknown: "未対応のYORO Botコマンドです。"
   }
@@ -82,7 +98,8 @@ export class YoroCommandHandler {
     private readonly applicationId: string,
     private readonly internalApi: Pick<DiscordInternalApiClient, "issueSetupSession">,
     private readonly now: () => number = Date.now,
-    private readonly dashboardUrl = "http://localhost:3000/dashboard/organizations"
+    private readonly dashboardUrl = "http://localhost:3000/dashboard/organizations",
+    private readonly prefixCommandsEnabled = false
   ) {}
 
   async handle(interaction: ChatInputCommandInteraction): Promise<void> {
@@ -101,7 +118,7 @@ export class YoroCommandHandler {
 
     if (subcommand === "help") {
       await interaction.reply({
-        content: text.help,
+        content: `${text.help}${this.prefixCommandsEnabled ? text.prefixHelp : ""}`,
         flags: MessageFlags.Ephemeral,
         allowedMentions: { parse: [] }
       });

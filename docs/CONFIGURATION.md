@@ -22,6 +22,22 @@ TypeScript 기본값
 `runtime.json`은 strict schema입니다. 알 수 없는 필드는 거부하며 password,
 API key, token, encryption key, HMAC key를 넣을 수 없습니다.
 
+Discord 일반 사용자 prefix 명령은 다음 공개 설정으로만 제어합니다.
+
+```json
+{
+  "discord": {
+    "prefixCommandsEnabled": false
+  }
+}
+```
+
+기본값은 `false`입니다. 활성화하면 Discord Bot이 `GUILD_MESSAGES`와
+privileged `MESSAGE_CONTENT` intent를 추가하고 설치 URL이 `View Channels`,
+`Send Messages`, `Embed Links` 권한만 요청합니다. Server와 Discord Bot은
+반드시 같은 runtime 파일을 읽어야 합니다. token이나 secret을 이 설정에
+추가하지 않습니다.
+
 runtime 파일 모드에서는 legacy 일반 환경 변수와 `*_FILE` 경로 override를
 적용하지 않습니다. 컨테이너 실행에 필요한 `NODE_ENV`,
 `YORO_CONFIG_FILE`, image release metadata와 내부 filesystem 경로만 배포

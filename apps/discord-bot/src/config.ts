@@ -98,6 +98,8 @@ export const botConfig = Object.freeze({
   token,
   internalAuthKey,
   applicationId: runtimeConfig?.discord?.applicationId ?? env("DISCORD_APPLICATION_ID").trim(),
+  prefixCommandsEnabled: runtimeConfig?.discord?.prefixCommandsEnabled
+    ?? boolEnv("DISCORD_BOT_PREFIX_COMMANDS_ENABLED", false),
   testGuildId: runtimeConfig ? "" : env("DISCORD_TEST_GUILD_ID").trim(),
   internalBaseUrl: safeBaseUrl(
     runtimeConfig ? "http://server:3000" : env("DISCORD_BOT_INTERNAL_BASE_URL", "http://server:3000"),

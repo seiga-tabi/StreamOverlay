@@ -3,6 +3,7 @@ import { runtimeConfig } from "../../runtime-config";
 export type YoroIdentityProvider = "discord" | "twitch";
 
 export const YORO_DASHBOARD_PATH = "/dashboard";
+export const TWITCH_ACCOUNT_CONNECTED_RESULT = "twitch_connected";
 
 export type YoroAccountIdentity = {
   provider: YoroIdentityProvider;
@@ -50,6 +51,10 @@ export function accountOAuthUrl(
 ): string {
   const query = new URLSearchParams({ purpose, return_to: returnTo });
   return `${accountApiBase()}/api/account/oauth/${provider}/start?${query.toString()}`;
+}
+
+export function isTwitchAccountOAuthReturn(search: string): boolean {
+  return new URLSearchParams(search).get("account") === TWITCH_ACCOUNT_CONNECTED_RESULT;
 }
 
 export async function getAccountSession(signal?: AbortSignal): Promise<YoroAccountSession> {

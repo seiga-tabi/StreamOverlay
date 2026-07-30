@@ -2,6 +2,9 @@ import crypto from "node:crypto";
 import {
   DISCORD_INTERNAL_AUTH_VERSION,
   discordInternalCanonicalRequest,
+  parseDiscordGameServerStatusResponse,
+  type DiscordGameServerStatusRequest,
+  type DiscordGameServerStatusResponse,
   type DiscordInstallationObservationRequest,
   type DiscordSetupSessionRequest
 } from "@streamops/shared";
@@ -58,6 +61,16 @@ export class DiscordInternalApiClient {
 
   async revokeInstallation(body: DiscordInstallationObservationRequest): Promise<void> {
     await this.request("/internal/discord/installations/revoked", body);
+  }
+
+  async gameServerStatus(
+    body: DiscordGameServerStatusRequest
+  ): Promise<DiscordGameServerStatusResponse> {
+    const result = parseDiscordGameServerStatusResponse(
+      await this.request("/internal/discord/game-server-status", body)
+    );
+    if (!result) throw new DiscordInternalApiError("invalid_response");
+    return result;
   }
 
   private async request(path: string, payload: unknown): Promise<unknown> {

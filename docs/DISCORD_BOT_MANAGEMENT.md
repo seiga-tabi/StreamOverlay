@@ -60,6 +60,25 @@ Organization에는 삭제되지 않은 Palworld 게임 서버를 정확히 1개�
 
 기존 Agent bootstrap·Ingestion API는 이미 배포된 설치의 호환성을 위해 유지합니다. 신규 Dashboard UI는 Agent 설치 토큰을 발급하지 않습니다.
 
+## Discord 일반 사용자 상태 명령
+
+`runtime.json`의 `discord.prefixCommandsEnabled=true`인 경우 일반 사용자는
+Discord 공개 채널에서 `!yoro 상태`, `!yoro 가이드`, `!yoro 도움말`을 사용할
+수 있습니다. 관리와 인증이 필요한 `/yoro setup`, `/yoro dashboard`는 기존
+slash command로 유지합니다.
+
+`!yoro 상태` 요청은 Discord Application과 Guild의 활성 설치를 Server에서
+다시 확인하고, 해당 Organization의 활성 Palworld 서버 한 개만 tenant-bound로
+조회합니다. 응답에는 온라인 상태, 접속 인원, 게임 버전, 응답 시간과 마지막
+확인 시각 중 안전한 값만 포함합니다. REST URL, 게임 접속 주소,
+`AdminPassword`, token, credential, Organization ID와 내부 오류는 포함하지
+않습니다.
+
+prefix 응답은 ephemeral이 아닌 공개 메시지입니다. 따라서 민감한 설정 변경,
+관리자 작업과 사용자별 정보 조회에는 prefix 명령을 추가하지 않습니다. 상태
+이력 명령은 이력의 source·retention 정책과 Database schema를 별도 확정한 뒤
+additive migration과 함께 구현합니다.
+
 ## Migration과 staging 검증
 
 1. PostgreSQL backup과 checksum을 검증합니다.

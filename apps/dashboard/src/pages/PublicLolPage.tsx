@@ -18,6 +18,7 @@ import {
   peekPublicTwitchFollowedChannels,
   peekPublicTwitchStatus,
 } from "../features/public-twitch/api";
+import { isTwitchAccountOAuthReturn } from "../features/yoro-account/api";
 import { ProfileLinkIcon, profileLinkPlatformFromUrl, profileLinkPlatformClass } from "../components/ProfileLinkIcon";
 import { AppShell, AppShellHeader, AppShellMain, AppShellSidebar } from "../shared/ui/AppShell";
 import { Button } from "../shared/ui/Button";
@@ -6642,6 +6643,13 @@ export function PublicLolPage({
     () => Boolean(peekPublicTwitchStatus()?.connected && !peekPublicTwitchFollowedChannels()),
   );
   const [followedError, setFollowedError] = useState("");
+  const twitchOAuthReturnRef = useRef(
+    isTwitchAccountOAuthReturn(window.location.search)
+      || new URLSearchParams(window.location.search).get("viewer_twitch") === "connected"
+  );
+  const [twitchOAuthSettling, setTwitchOAuthSettling] = useState(
+    twitchOAuthReturnRef.current
+  );
   const followedLolRequestRef = useRef<{
     includeSubscriptions: boolean;
     promise: Promise<void>;
@@ -6724,20 +6732,28 @@ export function PublicLolPage({
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const viewerConnected = params.get("viewer_twitch") === "connected";
+    const viewerConnected = twitchOAuthReturnRef.current;
     if (viewerConnected) invalidatePublicTwitchClientCache();
-    void loadTwitchViewer(viewerConnected);
+    const initialRequest = loadTwitchViewer(viewerConnected);
+    let disposed = false;
     let retryTimer: number | undefined;
     if (viewerConnected) {
-      retryTimer = window.setTimeout(() => {
-        void loadTwitchViewer(true);
-      }, 350);
       params.delete("viewer_twitch");
+      params.delete("account");
       const nextQuery = params.toString();
       const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`;
       window.history.replaceState({}, "", nextUrl);
+      void initialRequest.finally(() => {
+        if (disposed) return;
+        retryTimer = window.setTimeout(() => {
+          void loadTwitchViewer(true).finally(() => {
+            if (!disposed) setTwitchOAuthSettling(false);
+          });
+        }, 350);
+      });
     }
     return () => {
+      disposed = true;
       if (retryTimer !== undefined) window.clearTimeout(retryTimer);
     };
   }, []);
@@ -7422,8 +7438,8 @@ export function PublicLolPage({
         <PublicSubscriptionsPage
           twitchStatus={twitchStatus}
           followed={followedLol}
-          loading={followedLoading}
-          error={followedError}
+          loading={followedLoading || twitchOAuthSettling}
+          error={twitchOAuthSettling ? "" : followedError}
           onLogin={startTwitchLogin}
           onRefresh={() => void loadFollowedLol(true, true)}
           onSearch={searchFollowedRiotId}
@@ -7660,7 +7676,7 @@ export function PublicLolPage({
         <AppShellMain className="public-home-shared-main" id="public-search-main">
           <PublicHomeSearchPanel
             error={error}
-            liveLoading={followedLoading}
+            liveLoading={followedLoading || twitchOAuthSettling}
             liveStreamers={homeLiveStreamers}
             loading={loading}
             onPage={changeMainPage}

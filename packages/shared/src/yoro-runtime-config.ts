@@ -25,6 +25,7 @@ export type YoroRuntimeConfig = Readonly<{
     applicationId: string;
     oauthRedirectUri: string;
     managementOauthRedirectUri: string;
+    prefixCommandsEnabled?: boolean;
   }>;
   twitch?: Readonly<{
     clientId: string;
@@ -229,7 +230,8 @@ export function parseYoroRuntimeConfig(value: unknown): YoroRuntimeConfig {
       "clientId",
       "applicationId",
       "oauthRedirectUri",
-      "managementOauthRedirectUri"
+      "managementOauthRedirectUri",
+      "prefixCommandsEnabled"
     ], "runtime_discord");
     const clientId = text(item.clientId, "runtime_discord_client_id", 32);
     const applicationId = text(item.applicationId, "runtime_discord_application_id", 32);
@@ -250,7 +252,15 @@ export function parseYoroRuntimeConfig(value: unknown): YoroRuntimeConfig {
         "runtime_discord_management_redirect_uri",
         "/api/discord/management/oauth/callback",
         environment
-      )
+      ),
+      ...(item.prefixCommandsEnabled === undefined
+        ? {}
+        : {
+            prefixCommandsEnabled: bool(
+              item.prefixCommandsEnabled,
+              "runtime_discord_prefix_commands_enabled"
+            )
+          })
     };
   }
 

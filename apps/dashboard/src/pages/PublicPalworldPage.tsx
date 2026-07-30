@@ -55,6 +55,7 @@ import {
   peekPublicTwitchStatus,
   publicTwitchLoginUrl,
 } from "../features/public-twitch/api";
+import { isTwitchAccountOAuthReturn } from "../features/yoro-account/api";
 
 const noServerLocalePreference = async (): Promise<PalworldLocale | undefined> => undefined;
 const loadPalworldDeferredPages = () =>
@@ -101,6 +102,10 @@ export function PublicPalworldPage() {
   const [followedLoading, setFollowedLoading] = useState(false);
   const [twitchStatusError, setTwitchStatusError] = useState(false);
   const [followedError, setFollowedError] = useState(false);
+  const [twitchOAuthSettling, setTwitchOAuthSettling] = useState(() =>
+    isTwitchAccountOAuthReturn(window.location.search)
+      || new URLSearchParams(window.location.search).get("viewer_twitch") === "connected"
+  );
   const twitchStatusRef = useRef<PublicTwitchViewerStatus>(twitchStatus);
   const statusRequestRef = useRef<Promise<void> | null>(null);
   const statusAbortRef = useRef<AbortController | null>(null);
@@ -109,9 +114,11 @@ export function PublicPalworldPage() {
   const logoutInFlightRef = useRef(false);
   const mountedRef = useRef(true);
   const viewerTwitchConnectedRef = useRef(
-    new URLSearchParams(window.location.search).get("viewer_twitch") === "connected",
+    isTwitchAccountOAuthReturn(window.location.search)
+      || new URLSearchParams(window.location.search).get("viewer_twitch") === "connected",
   );
   const needsFollowedChannels = page === "home";
+  const needsFollowedChannelsOnOAuthReturnRef = useRef(needsFollowedChannels);
   const focusPalId = page === "map" ? palworldFocusPalFromParams(params) : undefined;
   const routeQuery = params.toString();
   const detailRoute = useMemo(
@@ -223,13 +230,25 @@ export function PublicPalworldPage() {
     const viewerConnected = viewerTwitchConnectedRef.current;
     if (viewerConnected) {
       query.delete("viewer_twitch");
+      query.delete("account");
       const nextQuery = query.toString();
       window.history.replaceState({}, "", `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`);
     }
     if (viewerConnected) invalidatePublicTwitchClientCache();
     void refreshTwitchStatus(viewerConnected).finally(() => {
       if (viewerConnected && !disposed) {
-        retryTimer = window.setTimeout(() => void refreshTwitchStatus(true), 350);
+        retryTimer = window.setTimeout(() => {
+          void (async () => {
+            await refreshTwitchStatus(true);
+            if (
+              needsFollowedChannelsOnOAuthReturnRef.current
+              && twitchStatusRef.current.connected
+            ) {
+              await refreshFollowedChannels();
+            }
+            if (!disposed) setTwitchOAuthSettling(false);
+          })();
+        }, 350);
       }
     });
     return () => {
@@ -243,7 +262,7 @@ export function PublicPalworldPage() {
       followedRequestRef.current = null;
       if (retryTimer !== undefined) window.clearTimeout(retryTimer);
     };
-  }, [refreshTwitchStatus]);
+  }, [refreshFollowedChannels, refreshTwitchStatus]);
 
   useEffect(() => {
     if (!needsFollowedChannels) {
@@ -307,8 +326,9 @@ export function PublicPalworldPage() {
 
   const twitchLoading = twitchStatusLoading
     || (needsFollowedChannels && twitchStatus.connected && !followedChannels && !followedError)
-    || followedLoading;
-  const twitchError = twitchStatusError || followedError;
+    || followedLoading
+    || twitchOAuthSettling;
+  const twitchError = !twitchOAuthSettling && (twitchStatusError || followedError);
   const retryTwitch = useCallback(() => {
     if (twitchStatusError || !twitchStatusRef.current.connected) return refreshTwitchStatus();
     return refreshFollowedChannels();

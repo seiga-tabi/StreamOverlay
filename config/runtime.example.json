@@ -22,7 +22,8 @@
     "clientId": "123456789012345678",
     "applicationId": "123456789012345678",
     "oauthRedirectUri": "https://yoro.gg/api/discord/oauth/callback",
-    "managementOauthRedirectUri": "https://yoro.gg/api/discord/management/oauth/callback"
+    "managementOauthRedirectUri": "https://yoro.gg/api/discord/management/oauth/callback",
+    "prefixCommandsEnabled": false
   },
   "twitch": {
     "clientId": "public-twitch-client-id",

@@ -23,6 +23,10 @@ import {
   DiscordInternalApiClient,
   DiscordInternalApiError
 } from "../dist/internal-api-client.js";
+import {
+  parseYoroPrefixCommand,
+  YoroPrefixCommandHandler
+} from "../dist/prefix-command-handler.js";
 
 const IDS = {
   application: "100000000000000001",
@@ -93,12 +97,23 @@ test("/yoro dashboard는 token 없는 고정 canonical URL을 ephemeral로 제�
   assert.equal(new URL(component.components[0].url).search, "");
 });
 
-test("Gateway client는 privileged intent 없이 GUILDS만 요청한다", () => {
+test("Gateway client는 prefix 기능이 꺼지면 GUILDS만 요청한다", () => {
   const client = createDiscordClient();
   assert.equal(client.options.intents.has(GatewayIntentBits.Guilds), true);
+  assert.equal(client.options.intents.has(GatewayIntentBits.GuildMessages), false);
   assert.equal(client.options.intents.has(GatewayIntentBits.GuildMembers), false);
   assert.equal(client.options.intents.has(GatewayIntentBits.GuildPresences), false);
   assert.equal(client.options.intents.has(GatewayIntentBits.MessageContent), false);
+  client.destroy();
+});
+
+test("Gateway client는 prefix 기능을 명시적으로 켠 경우에만 메시지 intent를 요청한다", () => {
+  const client = createDiscordClient(true);
+  assert.equal(client.options.intents.has(GatewayIntentBits.Guilds), true);
+  assert.equal(client.options.intents.has(GatewayIntentBits.GuildMessages), true);
+  assert.equal(client.options.intents.has(GatewayIntentBits.MessageContent), true);
+  assert.equal(client.options.intents.has(GatewayIntentBits.GuildMembers), false);
+  assert.equal(client.options.intents.has(GatewayIntentBits.GuildPresences), false);
   client.destroy();
 });
 
@@ -322,6 +337,118 @@ test("내부 API client는 다른 origin이나 비정상 setup URL을 거부한�
       guildId: IDS.guild,
       interactionId: IDS.interaction,
       userId: IDS.user
+    }),
+    (error) => error instanceof DiscordInternalApiError
+      && error.code === "invalid_response"
+  );
+});
+
+test("!yoro parser는 exact allowlist와 100자 상한을 적용한다", () => {
+  assert.equal(parseYoroPrefixCommand("!yoro"), "help");
+  assert.equal(parseYoroPrefixCommand("!yoro 상태"), "status");
+  assert.equal(parseYoroPrefixCommand("!YORO ガイド"), "guide");
+  assert.equal(parseYoroPrefixCommand("!yoro history"), undefined);
+  assert.equal(parseYoroPrefixCommand("!yoro 상태 extra"), undefined);
+  assert.equal(parseYoroPrefixCommand(`!yoro ${"a".repeat(101)}`), undefined);
+});
+
+test("!yoro 상태는 Guild에 귀속된 안전한 공개 Embed만 응답한다", async () => {
+  const replies = [];
+  const message = {
+    content: "!yoro 상태",
+    guildId: IDS.guild,
+    guild: { preferredLocale: "ko" },
+    author: { id: IDS.user, bot: false },
+    webhookId: null,
+    system: false,
+    async reply(payload) {
+      replies.push(payload);
+    }
+  };
+  const handler = new YoroPrefixCommandHandler(
+    IDS.application,
+    {
+      async gameServerStatus(input) {
+        assert.deepEqual(input, {
+          applicationId: IDS.application,
+          guildId: IDS.guild
+        });
+        return {
+          connected: true,
+          server: {
+            displayName: "@everyone **Palworld**",
+            status: "online",
+            source: "agent",
+            players: { current: 4, max: 32 },
+            version: "v1.0",
+            latencyMs: 21,
+            observedAt: "2026-07-30T00:00:00.000Z"
+          }
+        };
+      }
+    },
+    "https://yoro.gg",
+    () => 1_800_000_000_000
+  );
+  await handler.handle(message);
+  assert.equal(replies.length, 1);
+  assert.deepEqual(replies[0].allowedMentions, {
+    parse: [],
+    repliedUser: false
+  });
+  const embed = replies[0].embeds[0].toJSON();
+  assert.doesNotMatch(embed.description, /@everyone/u);
+  assert.match(embed.description, /＠everyone/u);
+  assert.equal(embed.fields[0].value, "온라인");
+  assert.equal(embed.fields[1].value, "4 / 32");
+  assert.equal(
+    replies[0].components[0].toJSON().components[0].url,
+    "https://yoro.gg/dashboard/organizations"
+  );
+});
+
+test("!yoro는 Bot·Webhook·DM 메시지를 처리하지 않는다", async () => {
+  let calls = 0;
+  const handler = new YoroPrefixCommandHandler(
+    IDS.application,
+    { async gameServerStatus() { calls += 1; return { connected: false }; } },
+    "https://yoro.gg"
+  );
+  for (const candidate of [
+    { guildId: null, guild: null, author: { id: IDS.user, bot: false }, webhookId: null },
+    { guildId: IDS.guild, guild: {}, author: { id: IDS.user, bot: true }, webhookId: null },
+    { guildId: IDS.guild, guild: {}, author: { id: IDS.user, bot: false }, webhookId: "1" }
+  ]) {
+    await handler.handle({
+      content: "!yoro 상태",
+      system: false,
+      async reply() { calls += 1; },
+      ...candidate
+    });
+  }
+  assert.equal(calls, 0);
+});
+
+test("내부 API client는 게임 서버 상태 응답의 unknown field를 거부한다", async () => {
+  const client = new DiscordInternalApiClient({
+    authKey: "i".repeat(64),
+    baseUrl: "http://server:3000",
+    publicBaseUrl: "https://yoro.gg",
+    timeoutMs: 1000,
+    fetchImpl: async () => new Response(JSON.stringify({
+      connected: true,
+      server: {
+        displayName: "Palworld",
+        status: "online",
+        source: "agent",
+        secret: "노출되면 안 됨"
+      }
+    }), { status: 200 })
+  });
+  await assert.rejects(
+    () => client.gameServerStatus({
+      applicationId: IDS.application,
+      guildId: IDS.guild
     }),
     (error) => error instanceof DiscordInternalApiError
       && error.code === "invalid_response"

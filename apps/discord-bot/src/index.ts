@@ -4,6 +4,7 @@ import { DiscordGateway, createDiscordClient } from "./gateway.js";
 import { DiscordBotHealth, startHealthServer } from "./health.js";
 import { DiscordInternalApiClient } from "./internal-api-client.js";
 import { auditEvent } from "./logger.js";
+import { YoroPrefixCommandHandler } from "./prefix-command-handler.js";
 
 assertBotConfig();
 
@@ -23,7 +24,7 @@ if (botConfig.enabled) {
     publicBaseUrl: botConfig.publicBaseUrl,
     timeoutMs: botConfig.requestTimeoutMs
   });
-  const client = createDiscordClient();
+  const client = createDiscordClient(botConfig.prefixCommandsEnabled);
   gateway = new DiscordGateway({
     applicationId: botConfig.applicationId,
     client,
@@ -31,8 +32,18 @@ if (botConfig.enabled) {
       botConfig.applicationId,
       internalApi,
       Date.now,
-      new URL("/dashboard/organizations", botConfig.publicBaseUrl).toString()
+      new URL("/dashboard/organizations", botConfig.publicBaseUrl).toString(),
+      botConfig.prefixCommandsEnabled
     ),
+    ...(botConfig.prefixCommandsEnabled
+      ? {
+          prefixCommandHandler: new YoroPrefixCommandHandler(
+            botConfig.applicationId,
+            internalApi,
+            botConfig.publicBaseUrl
+          )
+        }
+      : {}),
     health,
     internalApi
   });

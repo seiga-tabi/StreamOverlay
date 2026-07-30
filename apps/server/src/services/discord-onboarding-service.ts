@@ -22,7 +22,9 @@ import { isDiscordSnowflake } from "@streamops/shared";
 const DISCORD_API_BASE = "https://discord.com/api/v10";
 const DISCORD_AUTHORIZE_URL = "https://discord.com/oauth2/authorize";
 const DISCORD_TOKEN_URL = "https://discord.com/api/oauth2/token";
-const DISCORD_BOT_PERMISSIONS = "0";
+const DISCORD_BOT_INTERACTION_PERMISSIONS = "0";
+// ViewChannel(1024) + SendMessages(2048) + EmbedLinks(16384)
+const DISCORD_BOT_PREFIX_PERMISSIONS = "19456";
 const ADMINISTRATOR = 1n << 3n;
 const MANAGE_GUILD = 1n << 5n;
 const SETUP_RETURN_PATH = "/dashboard/organizations";
@@ -201,19 +203,30 @@ export function clearDiscordOnboardingCookie(): string {
   ].filter(Boolean).join("; ");
 }
 
-export function buildDiscordBotInstallUrl(applicationId: string): string {
+export function buildDiscordBotInstallUrl(
+  applicationId: string,
+  prefixCommandsEnabled = false
+): string {
   if (!isDiscordSnowflake(applicationId)) {
     throw new DiscordOnboardingError("feature_disabled", 404);
   }
   const target = new URL(DISCORD_AUTHORIZE_URL);
   target.searchParams.set("client_id", applicationId);
   target.searchParams.set("scope", "applications.commands bot");
-  target.searchParams.set("permissions", DISCORD_BOT_PERMISSIONS);
+  target.searchParams.set(
+    "permissions",
+    prefixCommandsEnabled
+      ? DISCORD_BOT_PREFIX_PERMISSIONS
+      : DISCORD_BOT_INTERACTION_PERMISSIONS
+  );
   return target.toString();
 }
 
 export function discordBotInstallUrl(): string {
-  return buildDiscordBotInstallUrl(appConfig.discordBotInternal.applicationId);
+  return buildDiscordBotInstallUrl(
+    appConfig.discordBotInternal.applicationId,
+    appConfig.discordBotInternal.prefixCommandsEnabled
+  );
 }
 
 export function buildDiscordSetupReturnUrl(

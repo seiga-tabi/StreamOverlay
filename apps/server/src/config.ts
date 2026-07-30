@@ -373,7 +373,9 @@ export const appConfig = {
     enabled: discordBotInternalApiEnabled,
     authKey: discordBotInternalAuthKey,
     applicationId: configuredRuntime?.discord?.applicationId
-      ?? env("DISCORD_APPLICATION_ID").trim()
+      ?? env("DISCORD_APPLICATION_ID").trim(),
+    prefixCommandsEnabled: configuredRuntime?.discord?.prefixCommandsEnabled
+      ?? boolEnv("DISCORD_BOT_PREFIX_COMMANDS_ENABLED", false)
   },
   discordBotManagement: {
     enabled: discordBotManagementEnabled,

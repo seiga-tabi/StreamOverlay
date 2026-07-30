@@ -18,6 +18,7 @@ import {
   normalizeLolRole,
   parseRiotIdDetailed,
   parseDiscordInstallationObservationRequest,
+  parseDiscordGameServerStatusRequest,
   parseDiscordSetupSessionRequest,
   parseAgentRegistrationInput,
   parsePalworldAgentStatusPayload,
@@ -191,6 +192,7 @@ import {
   AgentIngestionError,
   type AgentIngestionService
 } from "../services/agent-ingestion-service.js";
+import type { GameServerStatusReadService } from "../services/game-server-status-read-service.js";
 import {
   clearYoroCookie,
   YORO_OAUTH_COOKIE,
@@ -1367,9 +1369,16 @@ function legacyStreamerDashboardReturnPath(pathname: string): string | undefined
   return "/dashboard/streaming";
 }
 
-function yoroAccountReturnUrl(returnPath: string, errorCode?: string): string {
+function yoroAccountReturnUrl(
+  returnPath: string,
+  errorCode?: string,
+  connectedProvider?: "twitch"
+): string {
   const target = new URL(returnPath, appConfig.dashboardBaseUrl);
   if (errorCode) target.searchParams.set("account", errorCode);
+  if (!errorCode && connectedProvider) {
+    target.searchParams.set("account", `${connectedProvider}_connected`);
+  }
   return target.toString();
 }
 
@@ -2112,6 +2121,7 @@ type HttpHandlerInput = {
   yoroAccounts?: YoroAccountService;
   discordDatabaseReady?: () => boolean;
   discordInternalAuth?: DiscordInternalAuthVerifier;
+  gameServerStatusRead?: GameServerStatusReadService;
   agentIngestion?: AgentIngestionService;
   agentDatabaseReady?: () => boolean;
 };
@@ -6179,7 +6189,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
         const internalPaths = new Set([
           "/internal/discord/setup-sessions",
           "/internal/discord/installations/upsert",
-          "/internal/discord/installations/revoked"
+          "/internal/discord/installations/revoked",
+          "/internal/discord/game-server-status"
         ]);
         if (!internalPaths.has(url.pathname) || req.method !== "POST") {
           return sendJson(req, res, 404, { error: "not found" });
@@ -6251,6 +6262,30 @@ export function createHttpHandler(input: HttpHandlerInput) {
             issuedVia: "bot_command"
           });
           return sendJson(req, res, 201, issued, noStoreHeaders());
+        }
+        if (url.pathname === "/internal/discord/game-server-status") {
+          const statusRequest = parseDiscordGameServerStatusRequest(body);
+          if (
+            !statusRequest
+            || statusRequest.applicationId !== appConfig.discordBotInternal.applicationId
+          ) {
+            return sendJson(req, res, 400, {
+              error: "게임 서버 상태 요청 형식이 올바르지 않습니다."
+            }, noStoreHeaders());
+          }
+          if (!input.gameServerStatusRead) {
+            return sendJson(req, res, 503, {
+              error: "게임 서버 상태 기능을 사용할 수 없습니다.",
+              code: "feature_unavailable"
+            }, noStoreHeaders());
+          }
+          return sendJson(
+            req,
+            res,
+            200,
+            await input.gameServerStatusRead.read(statusRequest),
+            noStoreHeaders()
+          );
         }
         const observation = parseDiscordInstallationObservationRequest(body);
         if (
@@ -7753,7 +7788,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
             });
             return sendRedirect(
               res,
-              yoroAccountReturnUrl(completed.returnPath),
+              yoroAccountReturnUrl(completed.returnPath, undefined, "twitch"),
               {
                 "Set-Cookie": [
                   clearYoroCookie(YORO_OAUTH_COOKIE),

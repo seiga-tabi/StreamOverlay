@@ -2,16 +2,23 @@ import {
   Client,
   Events,
   GatewayIntentBits,
-  type ChatInputCommandInteraction
+  type ChatInputCommandInteraction,
+  type Message
 } from "discord.js";
 import type { YoroCommandHandler } from "./command-handler.js";
+import type { YoroPrefixCommandHandler } from "./prefix-command-handler.js";
 import type { DiscordInternalApiClient } from "./internal-api-client.js";
 import type { DiscordBotHealth } from "./health.js";
 import { auditEvent, safeReference } from "./logger.js";
 
-export function createDiscordClient(): Client {
+export function createDiscordClient(prefixCommandsEnabled = false): Client {
   return new Client({
-    intents: [GatewayIntentBits.Guilds],
+    intents: [
+      GatewayIntentBits.Guilds,
+      ...(prefixCommandsEnabled
+        ? [GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
+        : [])
+    ],
     allowedMentions: { parse: [] }
   });
 }
@@ -25,6 +32,7 @@ export class DiscordGateway {
       applicationId: string;
       client: Client;
       commandHandler: YoroCommandHandler;
+      prefixCommandHandler?: YoroPrefixCommandHandler;
       health: DiscordBotHealth;
       internalApi: Pick<
         DiscordInternalApiClient,
@@ -55,7 +63,14 @@ export class DiscordGateway {
   }
 
   private registerEvents(): void {
-    const { client, health, internalApi, commandHandler, applicationId } = this.options;
+    const {
+      client,
+      health,
+      internalApi,
+      commandHandler,
+      prefixCommandHandler,
+      applicationId
+    } = this.options;
     client.once(Events.ClientReady, () => {
       health.setState("ready");
       auditEvent("discord.bot.ready");
@@ -108,6 +123,13 @@ export class DiscordGateway {
         auditEvent("discord.command.denied", { result: "handler_failed" });
       });
     });
+    if (prefixCommandHandler) {
+      client.on(Events.MessageCreate, (message) => {
+        void prefixCommandHandler.handle(message as Message).catch(() => {
+          auditEvent("discord.prefix_command.denied", { result: "handler_failed" });
+        });
+      });
+    }
   }
 
   private observeInstallation(guildId: string): void {
