@@ -41,6 +41,7 @@ test("Discord 게임 서버 상태 계약은 허용된 안전 필드만 통과�
     server: {
       displayName: "Palworld 서버",
       status: "online",
+      reason: "partial_data",
       source: "agent",
       players: { current: 3, max: 32 },
       version: "v1.0",
@@ -53,6 +54,13 @@ test("Discord 게임 서버 상태 계약은 허용된 안전 필드만 통과�
     parseDiscordGameServerStatusResponse({
       ...response,
       server: { ...response.server, restUrl: "https://private.example" }
+    }),
+    undefined
+  );
+  assert.equal(
+    parseDiscordGameServerStatusResponse({
+      ...response,
+      server: { ...response.server, reason: "database_password_missing" }
     }),
     undefined
   );

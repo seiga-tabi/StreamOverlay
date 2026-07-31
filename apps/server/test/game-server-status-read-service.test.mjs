@@ -74,7 +74,7 @@ test("Agent 상태는 current를 사용하고 오래된 관측을 stale로 변�
   assert.equal((await stale.read({
     applicationId: "100000000000000001",
     guildId: "100000000000000002"
-  })).server.status, "stale");
+  })).server.reason, "stale_data");
 });
 
 test("REST 상태는 설정된 source만 읽고 내부 진단을 DTO에 포함하지 않는다", async () => {
@@ -135,6 +135,7 @@ test("REST 상태는 설정된 source만 읽고 내부 진단을 DTO에 포함�
   assert.deepEqual(result.server, {
     displayName: "REST Palworld",
     status: "degraded",
+    reason: "partial_data",
     source: "rest",
     players: { current: 2, max: 32 },
     version: "v1.0",
@@ -143,4 +144,29 @@ test("REST 상태는 설정된 source만 읽고 내부 진단을 DTO에 포함�
   });
   assert.equal(JSON.stringify(result).includes("basic_auth"), false);
   assert.equal(JSON.stringify(result).includes("private"), false);
+});
+
+test("REST subsystem 비활성은 자격 증명 오류와 구분된 공개 사유를 반환한다", async () => {
+  const server = {
+    id: "20000000-0000-4000-8000-000000000003",
+    displayName: "REST Palworld",
+    connectionType: "rest",
+    connectionStatus: "ready"
+  };
+  const service = new GameServerStatusReadService(
+    repository(server),
+    undefined,
+    Date.now,
+    undefined,
+    "disabled"
+  );
+  assert.deepEqual((await service.read({
+    applicationId: "100000000000000001",
+    guildId: "100000000000000002"
+  })).server, {
+    displayName: "REST Palworld",
+    status: "unavailable",
+    reason: "status_feature_disabled",
+    source: "rest"
+  });
 });

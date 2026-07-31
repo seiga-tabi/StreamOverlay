@@ -75,6 +75,12 @@ slash command로 유지합니다.
 `AdminPassword`, token, credential, Organization ID와 내부 오류는 포함하지
 않습니다.
 
+사용자 문구는 Shared의 한국어·일본어 catalog를 Bot과 Dashboard가 함께
+사용합니다. 등록 미완료, 운영 기능 비활성, 자격 증명 저장소 준비 실패,
+Palworld 인증 실패, 연결 정책 차단, upstream 실패, stale과 부분 응답을
+서로 다른 공개 사유로 표시합니다. 정상 응답에는 불필요한 Dashboard 버튼을
+붙이지 않고 관리 작업이 필요한 경우에만 고정 관리 링크를 제공합니다.
+
 prefix 응답은 ephemeral이 아닌 공개 메시지입니다. 따라서 민감한 설정 변경,
 관리자 작업과 사용자별 정보 조회에는 prefix 명령을 추가하지 않습니다. 상태
 이력 명령은 이력의 source·retention 정책과 Database schema를 별도 확정한 뒤
@@ -104,6 +110,7 @@ Organization 관리 화면은 활성 Discord 설치가 확인된 경우 `Discord
 - `!yoro 상태`, `!yoro 가이드` 개별 사용 여부
 - 응답 언어 자동 감지·한국어·일본어
 - 상태 응답의 접속 인원·게임 버전·응답 시간·마지막 확인 시각 표시 여부
+- 현재 언어와 표시 항목을 적용한 Discord 상태 응답 미리보기
 
 설정 row가 아직 없으면 기존 명령과의 호환을 위해 안전한 기본 설정을
 읽기 전용으로 계산하며 GET만으로 Database row를 생성하지 않습니다.
@@ -122,6 +129,11 @@ Discord 사용자 표시 이름과 request body 전체는 audit metadata에 기�
 mention, 사용자 작성 URL·Embed와 임의 Discord API action을 포함하지
 않습니다. 후속 module은 Shared schema, 실행 allowlist, 권한·rate limit,
 audit·revision과 테스트를 각각 갖춘 뒤 code-owned registry에 추가합니다.
+
+`!yoro 도움말`과 `/yoro help`는 저장된 명령 설정을 다시 조회하여 활성
+명령만 표시합니다. 설정에서 비활성화된 명령을 실행하면 조용히 무시하지
+않고 비활성 설치·module·command 중 공개 가능한 수준의 짧은 안내만
+반환합니다.
 
 ## Migration과 staging 검증
 

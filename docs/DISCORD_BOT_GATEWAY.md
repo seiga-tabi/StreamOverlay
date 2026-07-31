@@ -103,14 +103,25 @@ Bot은 Docker internal network를 통해 `/internal/discord/*`를 호출한다. 
 정책을 먼저 조회한 뒤, 허용된 경우에만
 `POST /internal/discord/game-server-status`를 호출한다. 정책 응답은 설정
 revision, 응답 locale과 표시 가능한 상태 field allowlist만 포함한다.
-정책 조회 실패, 잘못된 응답, 비활성 설치·module·명령은 fail-closed 처리하며
-Guild의 다른 서비스나 Server readiness에는 영향을 주지 않는다.
+정책 응답은 `help`, `status`, `guide`별 현재 사용 가능 여부도 포함합니다.
+`!yoro 도움말`과 `/yoro help`는 이 capability를 사용해 실제 활성화된 일반
+사용자 명령만 표시합니다. 정책 조회 실패와 잘못된 응답은 fail-closed
+처리하고, 비활성 설치·module·명령에는 내부 정보가 없는 짧은 안내를
+응답합니다. 이 실패는 Guild의 다른 서비스나 Server readiness에는 영향을
+주지 않습니다.
 
 Server는 요청의
 Application ID와 Guild ID로 활성 설치와 Organization을 다시 결정한 뒤
 tenant-bound 조회를 수행한다. 메시지나 URL에서 받은 Organization ID와 게임
 서버 ID를 신뢰하지 않는다. REST 연결과 Agent 연결은 각각의 현재 상태
 source만 읽으며 서로의 값을 섞지 않는다.
+
+상태 응답은 상태값과 공개 가능한 `reason`을 분리합니다. `reason`은 상태
+연결 미완료, 운영 기능 비활성, 자격 증명 저장소 준비 실패, 인증 실패,
+네트워크 정책 차단, upstream 실패, stale, 부분 응답만 구분합니다. REST URL,
+비밀번호, 내부 오류 code, 진단 단계와 Database 정보는 Bot으로 전달하지
+않습니다. 정상 상태에는 Dashboard 버튼을 반복 표시하지 않고 관리 작업이
+필요한 상태에만 고정 canonical Dashboard 링크를 제공합니다.
 
 Dashboard는 Bot token을 보유하거나 Discord Gateway에 직접 연결하지 않는다.
 설정 변경은 Server의 Organization 관리 API로만 수행하고 Gateway는 서명된

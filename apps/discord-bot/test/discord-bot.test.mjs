@@ -97,6 +97,48 @@ test("/yoro dashboard는 token 없는 고정 canonical URL을 ephemeral로 제�
   assert.equal(new URL(component.components[0].url).search, "");
 });
 
+test("/yoro help는 Organization에서 실제 활성화된 일반 사용자 명령만 표시한다", async () => {
+  const { value, calls } = interaction({ subcommand: "help" });
+  const handler = new YoroCommandHandler(
+    IDS.application,
+    {
+      async issueSetupSession() {
+        throw new Error("호출되면 안 됩니다.");
+      },
+      async commandPolicy(input) {
+        assert.deepEqual(input, {
+          applicationId: IDS.application,
+          guildId: IDS.guild,
+          command: "help"
+        });
+        return {
+          allowed: true,
+          commands: {
+            help: true,
+            status: true,
+            guide: false
+          },
+          preferredLocale: "ko",
+          statusFields: {
+            players: true,
+            version: true,
+            latency: true,
+            observedAt: true
+          },
+          revision: 1
+        };
+      }
+    },
+    Date.now,
+    "https://yoro.gg/dashboard/organizations",
+    true
+  );
+  await handler.handle(value);
+  assert.match(calls.reply[0].content, /!yoro 상태/u);
+  assert.doesNotMatch(calls.reply[0].content, /!yoro 가이드/u);
+  assert.equal(calls.reply[0].flags, MessageFlags.Ephemeral);
+});
+
 test("Gateway client는 prefix 기능이 꺼지면 GUILDS만 요청한다", () => {
   const client = createDiscordClient();
   assert.equal(client.options.intents.has(GatewayIntentBits.Guilds), true);
@@ -376,6 +418,11 @@ test("!yoro 상태는 Guild에 귀속된 안전한 공개 Embed만 응답한다"
         });
         return {
           allowed: true,
+          commands: {
+            help: true,
+            status: true,
+            guide: true
+          },
           preferredLocale: "auto",
           statusFields: {
             players: true,
@@ -420,13 +467,10 @@ test("!yoro 상태는 Guild에 귀속된 안전한 공개 Embed만 응답한다"
   assert.equal(embed.fields[0].value, "온라인");
   assert.equal(embed.fields[1].value, "4 / 32");
   assert.equal(embed.fields.some((field) => field.name === "게임 버전"), false);
-  assert.equal(
-    replies[0].components[0].toJSON().components[0].url,
-    "https://yoro.gg/dashboard/organizations"
-  );
+  assert.deepEqual(replies[0].components, []);
 });
 
-test("!yoro는 Organization 정책에서 비활성화된 명령에 응답하지 않는다", async () => {
+test("!yoro는 Organization 정책에서 비활성화된 명령의 안전한 사유를 응답한다", async () => {
   let statusCalls = 0;
   const replies = [];
   const handler = new YoroPrefixCommandHandler(
@@ -435,6 +479,11 @@ test("!yoro는 Organization 정책에서 비활성화된 명령에 응답하지 
       async commandPolicy() {
         return {
           allowed: false,
+          commands: {
+            help: true,
+            status: false,
+            guide: true
+          },
           preferredLocale: "auto",
           statusFields: {
             players: true,
@@ -465,7 +514,68 @@ test("!yoro는 Organization 정책에서 비활성화된 명령에 응답하지 
     }
   });
   assert.equal(statusCalls, 0);
-  assert.deepEqual(replies, []);
+  assert.equal(replies.length, 1);
+  assert.equal(replies[0].content, "이 명령은 서버 관리자가 비활성화했습니다.");
+});
+
+test("!yoro 상태는 공개 사유와 필요한 경우에만 Dashboard 동작을 표시한다", async () => {
+  const replies = [];
+  const handler = new YoroPrefixCommandHandler(
+    IDS.application,
+    {
+      async commandPolicy() {
+        return {
+          allowed: true,
+          commands: {
+            help: true,
+            status: true,
+            guide: true
+          },
+          preferredLocale: "ko",
+          statusFields: {
+            players: true,
+            version: true,
+            latency: true,
+            observedAt: true
+          },
+          revision: 1
+        };
+      },
+      async gameServerStatus() {
+        return {
+          connected: true,
+          server: {
+            displayName: "Palworld",
+            status: "unavailable",
+            reason: "status_feature_disabled",
+            source: "rest"
+          }
+        };
+      }
+    },
+    "https://yoro.gg"
+  );
+  await handler.handle({
+    content: "!yoro 상태",
+    guildId: IDS.guild,
+    guild: { preferredLocale: "ko" },
+    author: { id: IDS.user, bot: false },
+    webhookId: null,
+    system: false,
+    async reply(payload) {
+      replies.push(payload);
+    }
+  });
+  const embed = replies[0].embeds[0].toJSON();
+  assert.equal(embed.fields[0].value, "현재 상태 확인 불가");
+  assert.equal(
+    embed.fields[1].value,
+    "Palworld 상태 조회가 현재 운영 설정에서 비활성화되어 있습니다."
+  );
+  assert.equal(
+    replies[0].components[0].toJSON().components[0].url,
+    "https://yoro.gg/dashboard/organizations"
+  );
 });
 
 test("!yoro는 Bot·Webhook·DM 메시지를 처리하지 않는다", async () => {
@@ -477,6 +587,11 @@ test("!yoro는 Bot·Webhook·DM 메시지를 처리하지 않는다", async () =
         calls += 1;
         return {
           allowed: true,
+          commands: {
+            help: true,
+            status: true,
+            guide: true
+          },
           preferredLocale: "auto",
           statusFields: {
             players: true,

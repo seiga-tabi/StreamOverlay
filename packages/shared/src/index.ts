@@ -2,6 +2,7 @@ export * from "./actions.js";
 export * from "./community.js";
 export * from "./discord-internal.js";
 export * from "./discord-bot-control.js";
+export * from "./discord-bot-messages.js";
 export * from "./bot-management.js";
 export * from "./events.js";
 export * from "./followers.js";

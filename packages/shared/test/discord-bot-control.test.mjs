@@ -58,6 +58,11 @@ test("Discord Bot 내부 명령 정책 요청은 Guild와 Application binding을
 test("Discord Bot 명령 정책 응답은 허용 여부와 사유의 모순을 거부한다", () => {
   const allowed = {
     allowed: true,
+    commands: {
+      help: true,
+      status: true,
+      guide: false
+    },
     preferredLocale: "auto",
     statusFields: DEFAULT_DISCORD_BOT_CONTROL_SETTINGS.statusFields,
     revision: 0
@@ -75,5 +80,9 @@ test("Discord Bot 명령 정책 응답은 허용 여부와 사유의 모순을 �
   assert.equal(parseDiscordBotCommandPolicyResponse({
     ...allowed,
     allowed: false
+  }), undefined);
+  assert.equal(parseDiscordBotCommandPolicyResponse({
+    ...allowed,
+    commands: { help: true, status: true }
   }), undefined);
 });

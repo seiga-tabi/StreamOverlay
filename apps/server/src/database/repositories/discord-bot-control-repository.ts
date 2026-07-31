@@ -307,6 +307,11 @@ export class DiscordBotControlRepository {
     if (!result.rows[0]?.present) {
       return Object.freeze({
         allowed: false,
+        commands: Object.freeze({
+          help: false,
+          status: false,
+          guide: false
+        }),
         preferredLocale: "auto",
         statusFields: DEFAULT_DISCORD_BOT_CONTROL_SETTINGS.statusFields,
         revision: 0,
@@ -314,19 +319,26 @@ export class DiscordBotControlRepository {
       });
     }
     const current = settings(result.rows[0]);
-    const moduleRequired = input.command === "status" || input.command === "guide";
-    const commandEnabled = input.command === "help"
-      ? true
-      : input.command === "status"
-        ? current.statusCommandEnabled
-        : current.guideCommandEnabled;
-    const reason = !current.publicCommandsEnabled || !commandEnabled
+    const commands = Object.freeze({
+      help: current.publicCommandsEnabled,
+      status: current.publicCommandsEnabled
+        && current.palworldStatusEnabled
+        && current.statusCommandEnabled,
+      guide: current.publicCommandsEnabled
+        && current.palworldStatusEnabled
+        && current.guideCommandEnabled
+    });
+    const moduleRequired = input.command !== "help";
+    const reason = !current.publicCommandsEnabled
       ? "command_disabled" as const
       : moduleRequired && !current.palworldStatusEnabled
         ? "module_disabled" as const
+        : !commands[input.command]
+          ? "command_disabled" as const
         : undefined;
     return Object.freeze({
       allowed: reason === undefined,
+      commands,
       preferredLocale: current.preferredLocale,
       statusFields: current.statusFields,
       revision: current.revision,

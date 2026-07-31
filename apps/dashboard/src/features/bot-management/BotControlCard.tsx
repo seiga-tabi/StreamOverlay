@@ -4,6 +4,7 @@ import type {
   DiscordBotControlOverview,
   DiscordBotControlSettings
 } from "@streamops/shared";
+import { DISCORD_BOT_MESSAGES } from "@streamops/shared";
 import { detectDashboardLocale } from "../../i18n";
 import {
   Badge,
@@ -59,7 +60,14 @@ const copy = {
     readOnly: "조회 권한으로 접속했습니다. owner 또는 manager가 설정을 변경할 수 있습니다.",
     revision: "설정 revision",
     conflict: "다른 관리자가 설정을 먼저 변경했습니다. 최신 설정을 다시 불러왔습니다.",
-    unavailable: "Discord Bot 설정을 불러오거나 저장할 수 없습니다."
+    unavailable: "Discord Bot 설정을 불러오거나 저장할 수 없습니다.",
+    previewTitle: "Discord 응답 미리보기",
+    previewDescription: "현재 언어와 표시 항목을 기준으로 `!yoro 상태` 응답을 미리 확인합니다.",
+    previewServer: "YORO Palworld Server",
+    previewCommandStatus: "상태 명령",
+    previewCommandGuide: "가이드 명령",
+    enabled: "사용",
+    disabled: "사용 안 함"
   },
   ja: {
     title: "Discord Bot コントロール",
@@ -93,7 +101,14 @@ const copy = {
     readOnly: "閲覧権限でアクセスしています。ownerまたはmanagerが設定を変更できます。",
     revision: "設定revision",
     conflict: "別の管理者が先に設定を変更しました。最新設定を再読み込みしました。",
-    unavailable: "Discord Bot設定を読み込みまたは保存できません。"
+    unavailable: "Discord Bot設定を読み込みまたは保存できません。",
+    previewTitle: "Discord応答プレビュー",
+    previewDescription: "現在の言語と表示項目を基準に`!yoro ステータス`の応答を確認します。",
+    previewServer: "YORO Palworld Server",
+    previewCommandStatus: "ステータスコマンド",
+    previewCommandGuide: "ガイドコマンド",
+    enabled: "使用",
+    disabled: "使用しない"
   }
 } as const;
 
@@ -208,6 +223,10 @@ export function BotControlCard(props: {
   }
 
   const disabled = !writable || saving;
+  const previewLocale = draft.preferredLocale === "auto"
+    ? locale
+    : draft.preferredLocale;
+  const preview = DISCORD_BOT_MESSAGES[previewLocale].prefix;
   return (
     <Card className="bot-control-card">
       <CardHeader>
@@ -320,6 +339,71 @@ export function BotControlCard(props: {
             ))}
           </fieldset>
         </fieldset>
+        <section
+          className="bot-control-preview"
+          aria-labelledby="bot-control-preview-title"
+        >
+          <div className="bot-control-preview__header">
+            <div>
+              <h3 id="bot-control-preview-title">{text.previewTitle}</h3>
+              <p>{text.previewDescription}</p>
+            </div>
+            <div className="bot-control-preview__commands">
+              <Badge>
+                {text.previewCommandStatus}: {
+                  draft.publicCommandsEnabled
+                  && draft.palworldStatusEnabled
+                  && draft.statusCommandEnabled
+                    ? text.enabled
+                    : text.disabled
+                }
+              </Badge>
+              <Badge>
+                {text.previewCommandGuide}: {
+                  draft.publicCommandsEnabled
+                  && draft.palworldStatusEnabled
+                  && draft.guideCommandEnabled
+                    ? text.enabled
+                    : text.disabled
+                }
+              </Badge>
+            </div>
+          </div>
+          <div className="bot-control-preview__embed">
+            <strong>{preview.statusTitle}</strong>
+            <span>{text.previewServer}</span>
+            <dl>
+              <div>
+                <dt>{preview.fields.status}</dt>
+                <dd>{preview.states.online}</dd>
+              </div>
+              {draft.statusFields.players ? (
+                <div>
+                  <dt>{preview.fields.players}</dt>
+                  <dd>4 / 32</dd>
+                </div>
+              ) : null}
+              {draft.statusFields.version ? (
+                <div>
+                  <dt>{preview.fields.version}</dt>
+                  <dd>v1.0.2</dd>
+                </div>
+              ) : null}
+              {draft.statusFields.latency ? (
+                <div>
+                  <dt>{preview.fields.latency}</dt>
+                  <dd>42ms</dd>
+                </div>
+              ) : null}
+              {draft.statusFields.observedAt ? (
+                <div>
+                  <dt>{preview.fields.observedAt}</dt>
+                  <dd>{previewLocale === "ja" ? "たった今" : "방금 전"}</dd>
+                </div>
+              ) : null}
+            </dl>
+          </div>
+        </section>
         {!writable ? <p className="bot-control-read-only">{text.readOnly}</p> : null}
         <div className="bot-control-footer">
           <small>{text.revision}: {overview.settings.revision}</small>

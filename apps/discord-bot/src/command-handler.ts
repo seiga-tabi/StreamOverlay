@@ -6,79 +6,17 @@ import {
   PermissionFlagsBits,
   type ChatInputCommandInteraction
 } from "discord.js";
+import {
+  DISCORD_BOT_MESSAGES,
+  discordBotHelpBody,
+  discordBotMessageLocale
+} from "@streamops/shared";
 import type { DiscordInternalApiClient } from "./internal-api-client.js";
 import { DiscordInternalApiError } from "./internal-api-client.js";
 import { auditEvent, safeReference } from "./logger.js";
 
 const INTERACTION_TTL_MS = 15 * 60 * 1_000;
 const MAX_INTERACTIONS = 10_000;
-
-const messages = {
-  ko: {
-    dmDenied: "이 명령은 Discord 서버 안에서만 사용할 수 있습니다.",
-    permissionDenied: "서버 소유자 또는 서버 관리 권한이 있는 사용자만 실행할 수 있습니다.",
-    setupTitle: "YORO Bot 설정은 웹 Dashboard에서 진행할 수 있습니다.",
-    setupBody: "아래 링크에서 Discord 서버 연결을 완료해 주세요. 링크는 10분 후 만료되며 한 번만 사용할 수 있습니다.",
-    setupButton: "웹에서 서버 연결하기",
-    dashboardTitle: "YORO Bot 관리 화면",
-    dashboardButton: "Dashboard 열기",
-    setupUnavailable: "설정 링크를 발급할 수 없습니다. 잠시 후 다시 시도해 주세요.",
-    setupActive: "이미 진행 중인 설정 링크가 있습니다. 기존 링크가 만료된 뒤 다시 시도해 주세요.",
-    help: [
-      "**/yoro setup**",
-      "웹 Dashboard에서 Discord 서버와 YORO.gg 연결을 시작하거나 복구합니다.",
-      "",
-      "**/yoro help**",
-      "현재 사용할 수 있는 명령을 확인합니다.",
-      "",
-      "**/yoro dashboard**",
-      "YORO Bot 관리 화면을 엽니다."
-    ].join("\n"),
-    prefixHelp: [
-      "",
-      "**!yoro 상태**",
-      "이 Discord 서버에 연결된 Palworld 서버 상태를 확인합니다.",
-      "",
-      "**!yoro 가이드**",
-      "Palworld 전용 서버 설정 가이드를 엽니다."
-    ].join("\n"),
-    unknown: "지원하지 않는 YORO Bot 명령입니다."
-  },
-  ja: {
-    dmDenied: "このコマンドはDiscordサーバー内でのみ使用できます。",
-    permissionDenied: "サーバー所有者またはサーバー管理権限を持つユーザーのみ実行できます。",
-    setupTitle: "YORO Botの設定はWeb Dashboardから行えます。",
-    setupBody: "以下のリンクからDiscordサーバー連携を完了してください。リンクは10分後に期限切れとなり、一度だけ使用できます。",
-    setupButton: "Webでサーバーを連携",
-    dashboardTitle: "YORO Bot管理画面",
-    dashboardButton: "Dashboardを開く",
-    setupUnavailable: "設定リンクを発行できません。しばらくしてからもう一度お試しください。",
-    setupActive: "進行中の設定リンクがあります。既存リンクの期限切れ後にもう一度お試しください。",
-    help: [
-      "**/yoro setup**",
-      "Web DashboardでDiscordサーバーとYORO.ggの連携を開始または復旧します。",
-      "",
-      "**/yoro help**",
-      "現在利用できるコマンドを確認します。",
-      "",
-      "**/yoro dashboard**",
-      "YORO Bot管理画面を開きます。"
-    ].join("\n"),
-    prefixHelp: [
-      "",
-      "**!yoro ステータス**",
-      "このDiscordサーバーに連携されたPalworldサーバー状態を確認します。",
-      "",
-      "**!yoro ガイド**",
-      "Palworld専用サーバー設定ガイドを開きます。"
-    ].join("\n"),
-    unknown: "未対応のYORO Botコマンドです。"
-  }
-} as const;
-
-function localeFor(value: string): keyof typeof messages {
-  return value.toLowerCase().startsWith("ja") ? "ja" : "ko";
-}
 
 export function hasSetupPermission(interaction: Pick<
   ChatInputCommandInteraction,
@@ -96,7 +34,10 @@ export class YoroCommandHandler {
 
   constructor(
     private readonly applicationId: string,
-    private readonly internalApi: Pick<DiscordInternalApiClient, "issueSetupSession">,
+    private readonly internalApi: Pick<
+      DiscordInternalApiClient,
+      "issueSetupSession" | "commandPolicy"
+    >,
     private readonly now: () => number = Date.now,
     private readonly dashboardUrl = "http://localhost:3000/dashboard/organizations",
     private readonly prefixCommandsEnabled = false
@@ -106,8 +47,8 @@ export class YoroCommandHandler {
     if (interaction.commandName !== "yoro") return;
     if (this.seen(interaction.id)) return;
     this.remember(interaction.id);
-    const locale = localeFor(interaction.locale);
-    const text = messages[locale];
+    const locale = discordBotMessageLocale(interaction.locale);
+    const text = DISCORD_BOT_MESSAGES[locale].slash;
     const subcommand = interaction.options.getSubcommand(false);
     auditEvent("discord.command.received", {
       command: subcommand ?? "unknown",
@@ -117,8 +58,31 @@ export class YoroCommandHandler {
     });
 
     if (subcommand === "help") {
+      let prefixHelp = "";
+      if (this.prefixCommandsEnabled && interaction.guildId) {
+        try {
+          const policy = await this.internalApi.commandPolicy({
+            applicationId: this.applicationId,
+            guildId: interaction.guildId,
+            command: "help"
+          });
+          if (policy.allowed) {
+            const policyLocale = policy.preferredLocale === "auto"
+              ? locale
+              : policy.preferredLocale;
+            const policyText = DISCORD_BOT_MESSAGES[policyLocale].slash;
+            prefixHelp = [
+              "",
+              policyText.prefixHelpTitle,
+              discordBotHelpBody(policyLocale, policy.commands)
+            ].join("\n");
+          }
+        } catch {
+          // 내부 정책 조회 실패 시 안전하게 slash 명령 도움말만 표시합니다.
+        }
+      }
       await interaction.reply({
-        content: `${text.help}${this.prefixCommandsEnabled ? text.prefixHelp : ""}`,
+        content: `${text.help}${prefixHelp}`,
         flags: MessageFlags.Ephemeral,
         allowedMentions: { parse: [] }
       });

@@ -438,7 +438,10 @@ try {
 const gameServerStatusRead = appConfig.discordBotInternal.enabled && postgresPool
   ? new GameServerStatusReadService(
       new GameServerStatusReadRepository(postgresPool),
-      palworldServerMonitor
+      palworldServerMonitor,
+      undefined,
+      undefined,
+      palworldServerUnavailableCode
     )
   : undefined;
 const discordBotCommandPolicy = appConfig.discordBotInternal.enabled && postgresPool

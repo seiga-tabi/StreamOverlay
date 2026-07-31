@@ -632,6 +632,11 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
       command: "status"
     }), {
       allowed: false,
+      commands: {
+        help: true,
+        status: false,
+        guide: true
+      },
       preferredLocale: "ja",
       statusFields: {
         players: true,

@@ -210,6 +210,11 @@ test("서명된 Bot 내부 명령 정책 API는 exact Guild·command만 전달�
             policyCalls.push(input);
             return {
               allowed: true,
+              commands: {
+                help: true,
+                status: true,
+                guide: true
+              },
               preferredLocale: "auto",
               statusFields: {
                 players: true,

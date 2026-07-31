@@ -213,6 +213,32 @@ test("Palworld REST 서버 상태는 등록과 실제 연결을 구분해 표시
     botManagementConnectionStatusPresentation("revoked", "ko").label,
     "비활성화됨"
   );
+  assert.deepEqual(
+    restConnectionStatusPresentation({
+      enabled: false,
+      pollIntervalSeconds: 30,
+      registrationPolicy: {
+        publicHttpsSelfService: false,
+        publicHttpsPort: 443,
+        privateNetworkRequiresOperatorApproval: true
+      },
+      connection: {
+        configured: false,
+        passwordConfigured: false
+      },
+      status: {
+        state: "not_configured",
+        errorCode: "disabled",
+        consecutiveFailures: 0,
+        diagnostics: []
+      }
+    }, "ko"),
+    {
+      label: "Palworld 상태 조회가 비활성화되어 있습니다.",
+      description: "서비스 운영 설정에서 Palworld 상태 조회를 활성화한 뒤 다시 확인해 주세요.",
+      tone: "warning"
+    }
+  );
   const degradedStatus = {
     state: "degraded" as const,
     errorCode: "invalid_schema" as const,

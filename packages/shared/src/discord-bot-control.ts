@@ -13,6 +13,10 @@ export const DISCORD_BOT_CONTROL_COMMANDS = [
 export type DiscordBotControlCommand =
   (typeof DISCORD_BOT_CONTROL_COMMANDS)[number];
 
+export type DiscordBotCommandCapabilities = Readonly<
+  Record<DiscordBotControlCommand, boolean>
+>;
+
 export type DiscordBotControlLocale = "auto" | "ko" | "ja";
 
 export type DiscordBotStatusFields = Readonly<{
@@ -74,6 +78,7 @@ export const DISCORD_BOT_COMMAND_POLICY_REASONS = [
 
 export type DiscordBotCommandPolicyResponse = Readonly<{
   allowed: boolean;
+  commands: DiscordBotCommandCapabilities;
   preferredLocale: DiscordBotControlLocale;
   statusFields: DiscordBotStatusFields;
   revision: number;
@@ -127,6 +132,23 @@ function parseStatusFields(value: unknown): DiscordBotStatusFields | undefined {
     version: record.version,
     latency: record.latency,
     observedAt: record.observedAt
+  });
+}
+
+function parseCommandCapabilities(
+  value: unknown
+): DiscordBotCommandCapabilities | undefined {
+  const record = exactRecord(value, DISCORD_BOT_CONTROL_COMMANDS);
+  if (
+    !record
+    || typeof record.help !== "boolean"
+    || typeof record.status !== "boolean"
+    || typeof record.guide !== "boolean"
+  ) return undefined;
+  return Object.freeze({
+    help: record.help,
+    status: record.status,
+    guide: record.guide
   });
 }
 
@@ -191,15 +213,18 @@ export function parseDiscordBotCommandPolicyResponse(
   const record = value as Record<string, unknown>;
   const allowedKeys = [
     "allowed",
+    "commands",
     "preferredLocale",
     "statusFields",
     "revision",
     "reason"
   ];
   const statusFields = parseStatusFields(record.statusFields);
+  const commands = parseCommandCapabilities(record.commands);
   if (
     Object.keys(record).some((key) => !allowedKeys.includes(key))
     || typeof record.allowed !== "boolean"
+    || !commands
     || !["auto", "ko", "ja"].includes(String(record.preferredLocale))
     || !Number.isSafeInteger(record.revision)
     || (record.revision as number) < 0
@@ -215,6 +240,7 @@ export function parseDiscordBotCommandPolicyResponse(
   ) return undefined;
   return Object.freeze({
     allowed: record.allowed,
+    commands,
     preferredLocale: record.preferredLocale as DiscordBotControlLocale,
     statusFields,
     revision: record.revision as number,

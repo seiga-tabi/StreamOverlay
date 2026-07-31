@@ -5,14 +5,18 @@ import {
   EmbedBuilder,
   type Message
 } from "discord.js";
-import type {
+import {
+  DISCORD_BOT_MESSAGES,
+  discordBotHelpBody,
+  discordBotMessageLocale,
+  type DiscordBotMessageLocale,
   DiscordBotCommandPolicyResponse,
   DiscordBotStatusFields,
-  DiscordGameServerStatusResponse,
-  DiscordGameServerStatusState
+  DiscordGameServerStatusResponse
 } from "@streamops/shared";
 import type { DiscordInternalApiClient } from "./internal-api-client.js";
 import { auditEvent, safeReference } from "./logger.js";
+import { presentGameServerStatus } from "./status-message-presenter.js";
 
 const MAX_MESSAGE_LENGTH = 100;
 const USER_COOLDOWN_MS = 10_000;
@@ -33,111 +37,6 @@ const aliases = new Map<string, YoroPrefixCommand>([
   ["guide", "guide"],
   ["ガイド", "guide"]
 ]);
-
-const text = {
-  ko: {
-    helpTitle: "YORO Bot 일반 사용자 명령",
-    helpBody: [
-      "`!yoro 상태` Palworld 서버 상태 확인",
-      "`!yoro 가이드` Palworld 전용 서버 설정 안내",
-      "`!yoro 도움말` 현재 사용할 수 있는 명령 확인"
-    ].join("\n"),
-    guideTitle: "Palworld 전용 서버 설정",
-    guideBody: "YORO와 연결할 Palworld 전용 서버 설정 방법을 확인할 수 있습니다.",
-    guideButton: "설정 가이드 열기",
-    dashboardButton: "Dashboard 열기",
-    statusTitle: "YORO Palworld 서버",
-    guildNotConnected: "이 Discord 서버가 YORO Organization과 연결되지 않았습니다.",
-    serverNotConfigured: "아직 Palworld 게임 서버가 등록되지 않았습니다.",
-    unavailable: "현재 서버 상태를 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.",
-    fields: {
-      status: "상태",
-      players: "접속 인원",
-      version: "게임 버전",
-      latency: "응답 시간",
-      observedAt: "마지막 확인"
-    },
-    states: {
-      not_configured: "아직 게임 서버가 연결되지 않음",
-      checking: "서버 상태 확인 중",
-      online: "온라인",
-      degraded: "응답 지연",
-      offline: "오프라인",
-      stale: "최신 상태 확인 중",
-      auth_failed: "관리자가 연결 설정을 확인 중",
-      blocked_by_policy: "상태 기능을 사용할 수 없음",
-      unavailable: "현재 상태를 불러올 수 없음"
-    }
-  },
-  ja: {
-    helpTitle: "YORO Bot一般ユーザーコマンド",
-    helpBody: [
-      "`!yoro ステータス` Palworldサーバー状態を確認",
-      "`!yoro ガイド` Palworld専用サーバー設定ガイド",
-      "`!yoro ヘルプ` 利用可能なコマンドを確認"
-    ].join("\n"),
-    guideTitle: "Palworld専用サーバー設定",
-    guideBody: "YOROと連携するPalworld専用サーバーの設定方法を確認できます。",
-    guideButton: "設定ガイドを開く",
-    dashboardButton: "Dashboardを開く",
-    statusTitle: "YORO Palworldサーバー",
-    guildNotConnected: "このDiscordサーバーはYORO Organizationと連携されていません。",
-    serverNotConfigured: "Palworldゲームサーバーはまだ登録されていません。",
-    unavailable: "現在サーバー状態を取得できません。しばらくしてからお試しください。",
-    fields: {
-      status: "状態",
-      players: "接続人数",
-      version: "ゲームバージョン",
-      latency: "応答時間",
-      observedAt: "最終確認"
-    },
-    states: {
-      not_configured: "ゲームサーバー未連携",
-      checking: "サーバー状態を確認中",
-      online: "オンライン",
-      degraded: "応答遅延",
-      offline: "オフライン",
-      stale: "最新状態を確認中",
-      auth_failed: "管理者が接続設定を確認中",
-      blocked_by_policy: "状態機能を利用できません",
-      unavailable: "現在状態を取得できません"
-    }
-  }
-} as const;
-
-function localeFor(value: string | undefined): keyof typeof text {
-  return value?.toLowerCase().startsWith("ja") ? "ja" : "ko";
-}
-
-function safeDiscordText(value: string): string {
-  return value
-    .replace(/\\/gu, "\\\\")
-    .replace(/([`*_~|>])/gu, "\\$1")
-    .replace(/@/gu, "＠")
-    .slice(0, 120);
-}
-
-function statusColor(status: DiscordGameServerStatusState): number {
-  switch (status) {
-    case "online":
-      return 0x22c55e;
-    case "degraded":
-      return 0xeab308;
-    case "offline":
-      return 0xef4444;
-    case "auth_failed":
-      return 0xf97316;
-    default:
-      return 0x6b7280;
-  }
-}
-
-function discordTimestamp(value: string): string | undefined {
-  const timestamp = Date.parse(value);
-  return Number.isFinite(timestamp)
-    ? `<t:${Math.trunc(timestamp / 1_000)}:R>`
-    : undefined;
-}
 
 export function parseYoroPrefixCommand(content: string): YoroPrefixCommand | undefined {
   if (content.length > MAX_MESSAGE_LENGTH) return undefined;
@@ -214,7 +113,7 @@ export class YoroPrefixCommandHandler {
       });
       return;
     }
-    const fallbackLocale = localeFor(message.guild.preferredLocale);
+    const fallbackLocale = discordBotMessageLocale(message.guild.preferredLocale);
     let policy: DiscordBotCommandPolicyResponse;
     try {
       policy = await this.internalApi.commandPolicy({
@@ -224,24 +123,34 @@ export class YoroPrefixCommandHandler {
       });
     } catch {
       await message.reply({
-        content: text[fallbackLocale].unavailable,
+        content: DISCORD_BOT_MESSAGES[fallbackLocale].prefix.unavailable,
         allowedMentions: { parse: [], repliedUser: false },
         failIfNotExists: true
       });
       return;
     }
     if (!policy.allowed) {
+      const deniedLocale = policy.preferredLocale === "auto"
+        ? fallbackLocale
+        : policy.preferredLocale;
       auditEvent("discord.prefix_command.denied", {
         command,
         guild: safeReference(message.guildId),
         reason: policy.reason
+      });
+      await message.reply({
+        content: DISCORD_BOT_MESSAGES[deniedLocale].prefix.policyDenied[
+          policy.reason ?? "command_disabled"
+        ],
+        allowedMentions: { parse: [], repliedUser: false },
+        failIfNotExists: true
       });
       return;
     }
     const locale = policy.preferredLocale === "auto"
       ? fallbackLocale
       : policy.preferredLocale;
-    const messages = text[locale];
+    const messages = DISCORD_BOT_MESSAGES[locale].prefix;
     auditEvent("discord.prefix_command.received", {
       command,
       guild: safeReference(message.guildId),
@@ -253,7 +162,7 @@ export class YoroPrefixCommandHandler {
           new EmbedBuilder()
             .setColor(0x5865f2)
             .setTitle(messages.helpTitle)
-            .setDescription(messages.helpBody)
+            .setDescription(discordBotHelpBody(locale, policy.commands))
         ],
         allowedMentions: { parse: [], repliedUser: false },
         failIfNotExists: true
@@ -282,14 +191,15 @@ export class YoroPrefixCommandHandler {
       });
       return;
     }
-    await this.replyStatus(message, messages, policy.statusFields);
+    await this.replyStatus(message, locale, policy.statusFields);
   }
 
   private async replyStatus(
     message: Message,
-    messages: (typeof text)[keyof typeof text],
+    locale: DiscordBotMessageLocale,
     statusFields: DiscordBotStatusFields
   ): Promise<void> {
+    const messages = DISCORD_BOT_MESSAGES[locale].prefix;
     let result: DiscordGameServerStatusResponse;
     try {
       result = await this.internalApi.gameServerStatus({
@@ -323,49 +233,10 @@ export class YoroPrefixCommandHandler {
       return;
     }
     const server = result.server;
-    const observedAt = server.observedAt
-      ? discordTimestamp(server.observedAt)
-      : undefined;
-    const embed = new EmbedBuilder()
-      .setColor(statusColor(server.status))
-      .setTitle(messages.statusTitle)
-      .setDescription(safeDiscordText(server.displayName))
-      .addFields({
-        name: messages.fields.status,
-        value: messages.states[server.status],
-        inline: true
-      });
-    if (statusFields.players && server.players) {
-      embed.addFields({
-        name: messages.fields.players,
-        value: `${server.players.current} / ${server.players.max}`,
-        inline: true
-      });
-    }
-    if (statusFields.version && server.version) {
-      embed.addFields({
-        name: messages.fields.version,
-        value: safeDiscordText(server.version),
-        inline: true
-      });
-    }
-    if (statusFields.latency && server.latencyMs !== undefined) {
-      embed.addFields({
-        name: messages.fields.latency,
-        value: `${server.latencyMs}ms`,
-        inline: true
-      });
-    }
-    if (statusFields.observedAt && observedAt) {
-      embed.addFields({
-        name: messages.fields.observedAt,
-        value: observedAt,
-        inline: true
-      });
-    }
+    const presentation = presentGameServerStatus({ locale, server, statusFields });
     await message.reply({
-      embeds: [embed],
-      components: [row],
+      embeds: [presentation.embed],
+      components: presentation.needsDashboardAction ? [row] : [],
       allowedMentions: { parse: [], repliedUser: false },
       failIfNotExists: true
     });

@@ -31,6 +31,20 @@ export const DISCORD_GAME_SERVER_STATUS_STATES = [
 export type DiscordGameServerStatusState =
   (typeof DISCORD_GAME_SERVER_STATUS_STATES)[number];
 
+export const DISCORD_GAME_SERVER_STATUS_REASONS = [
+  "status_not_configured",
+  "status_feature_disabled",
+  "credentials_unavailable",
+  "auth_failed",
+  "network_policy_blocked",
+  "upstream_unavailable",
+  "stale_data",
+  "partial_data"
+] as const;
+
+export type DiscordGameServerStatusReason =
+  (typeof DISCORD_GAME_SERVER_STATUS_REASONS)[number];
+
 export type DiscordGameServerStatusRequest = Readonly<{
   applicationId: string;
   guildId: string;
@@ -41,6 +55,7 @@ export type DiscordGameServerStatusResponse = Readonly<{
   server?: Readonly<{
     displayName: string;
     status: DiscordGameServerStatusState;
+    reason?: DiscordGameServerStatusReason;
     source: "agent" | "rest";
     players?: Readonly<{
       current: number;
@@ -153,6 +168,7 @@ export function parseDiscordGameServerStatusResponse(
   const allowedServerKeys = [
     "displayName",
     "status",
+    "reason",
     "source",
     "players",
     "version",
@@ -167,6 +183,12 @@ export function parseDiscordGameServerStatusResponse(
     || /[\u0000-\u001f\u007f]/u.test(server.displayName)
     || !DISCORD_GAME_SERVER_STATUS_STATES.includes(
       server.status as DiscordGameServerStatusState
+    )
+    || (
+      server.reason !== undefined
+      && !DISCORD_GAME_SERVER_STATUS_REASONS.includes(
+        server.reason as DiscordGameServerStatusReason
+      )
     )
     || (server.source !== "agent" && server.source !== "rest")
   ) return undefined;
@@ -212,6 +234,9 @@ export function parseDiscordGameServerStatusResponse(
     server: Object.freeze({
       displayName: server.displayName,
       status: server.status as DiscordGameServerStatusState,
+      ...(server.reason === undefined
+        ? {}
+        : { reason: server.reason as DiscordGameServerStatusReason }),
       source: server.source,
       ...(players ? { players: Object.freeze(players) } : {}),
       ...(server.version === undefined ? {} : { version: server.version }),

@@ -138,6 +138,8 @@ const copy = {
     restServerInfo: "서버 정보",
     restPlayers: "접속 인원",
     restLatency: "응답 시간",
+    restFeatureDisabledTitle: "Palworld 상태 조회가 비활성화되어 있습니다.",
+    restFeatureDisabledDescription: "서비스 운영 설정에서 Palworld 상태 조회를 활성화한 뒤 다시 확인해 주세요.",
     restStorageUnavailableTitle: "YORO의 자격 증명 저장소가 준비되지 않았습니다.",
     restStorageUnavailableDescription: "입력한 Palworld AdminPassword의 문제가 아닙니다. 서비스 운영자가 공통 암호화 저장소를 준비한 뒤 직접 등록할 수 있습니다.",
     entitlement: "Organization마다 Palworld 게임 서버는 1개만 등록할 수 있습니다.",
@@ -246,6 +248,8 @@ const copy = {
     restServerInfo: "サーバー情報",
     restPlayers: "接続人数",
     restLatency: "応答時間",
+    restFeatureDisabledTitle: "Palworld状態取得が無効化されています。",
+    restFeatureDisabledDescription: "サービスの運用設定でPalworld状態取得を有効化してから、もう一度確認してください。",
     restStorageUnavailableTitle: "YOROの認証情報ストレージが準備されていません。",
     restStorageUnavailableDescription: "入力したPalworld AdminPasswordの問題ではありません。サービス運営者が共通暗号化ストレージを準備した後、ご自身で登録できます。",
     entitlement: "OrganizationごとにPalworldゲームサーバーは1台のみ登録できます。",
@@ -317,11 +321,17 @@ export function restConnectionStatusPresentation(
   locale: DashboardLocale
 ): Readonly<{ label: string; description: string; tone: StatusTone }> {
   const text = copy[locale];
+  if (response && !response.enabled) {
+    return {
+      label: text.restFeatureDisabledTitle,
+      description: text.restFeatureDisabledDescription,
+      tone: "warning"
+    };
+  }
   if (
     response
     && (
-      !response.enabled
-      || response.status.errorCode === "key_missing"
+      response.status.errorCode === "key_missing"
       || response.status.errorCode === "key_invalid"
       || response.status.errorCode === "key_permission_denied"
       || response.status.errorCode === "key_mismatch"
