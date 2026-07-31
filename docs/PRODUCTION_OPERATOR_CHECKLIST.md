@@ -8,7 +8,7 @@
 - [ ] `/etc/yoro/legal.json`에 실제 법적 운영정보를 확정했다.
 - [ ] `/etc/yoro/secrets`는 `0700`, 활성 기능의 secret file은 `0600`이며 symlink가 아니다.
 - [ ] 실제 Riot/Twitch/Discord 자격 증명을 목적별 secret file로 분리했다.
-- [ ] Server, Discord Bot, Agent에 필요한 secret만 각각 mount했다.
+- [ ] Server와 Discord Bot에 필요한 secret만 각각 mount했다.
 - [ ] image의 `APP_VERSION`, `GIT_SHA`, `BUILD_TIME`이 실제 release와 일치한다.
 - [ ] 다른 secret과 재사용하지 않은 Twitch·Discord encryption key를 별도 secret file에 입력했다.
 - [ ] Twitch OAuth token state의 배포 전 backup과 암호화 migration rollback 절차를 확인했다.

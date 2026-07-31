@@ -26,7 +26,6 @@ if (!requestedPath && !fs.existsSync(configPath)) {
     console.log(`discordSaas: ${enabled("DISCORD_SAAS_ENABLED") ? "enabled" : "disabled"}`);
     console.log(`discordBot: ${enabled("DISCORD_BOT_INTERNAL_API_ENABLED") ? "enabled" : "disabled"}`);
     console.log(`discordBotManagement: ${enabled("DISCORD_BOT_MANAGEMENT_ENABLED") ? "enabled" : "disabled"}`);
-    console.log(`agentIngestion: ${enabled("AGENT_INGESTION_ENABLED") ? "enabled" : "disabled"}`);
     process.exit(0);
   }
   throw new Error("runtime_config_not_configured");
@@ -115,7 +114,6 @@ if (command === "check") {
   console.log(`discordBot: ${runtime.features.discordBot ? "enabled" : "disabled"}, ${configured.get("discordInternalAuth") ? "configured" : "not configured"}`);
   console.log(`twitchEventSub: ${runtime.features.twitchEventSub ? "enabled" : "disabled"}, ${configured.get("twitchClientSecret") ? "configured" : "not configured"}`);
   console.log(`riotApi: ${runtime.riot ? (configured.get("riotApi") ? "configured" : "not configured") : "disabled"}`);
-  console.log(`agentIngestion: ${runtime.features.agentIngestion ? "enabled" : "disabled"}`);
 } else if (command === "secrets") {
   for (const item of requirements.filter((entry) => entry.required)) {
     loadFixedSecret(item.path, { required: true });

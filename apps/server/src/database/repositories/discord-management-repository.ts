@@ -33,7 +33,7 @@ type GameServerRow = {
   id: string;
   display_name: string;
   region: PalworldServerRegion;
-  connection_type: BotManagementGameServer["connectionType"];
+  connection_type: "agent" | "rest";
   connection_status: BotManagementGameServer["connectionStatus"];
   is_enabled: boolean;
   created_at: Date;
@@ -46,7 +46,8 @@ function gameServer(row: GameServerRow): BotManagementGameServer {
     displayName: row.display_name,
     gameType: "palworld" as const,
     region: row.region,
-    connectionType: row.connection_type,
+    // Agent 기능 제거 전 생성된 레코드도 같은 REST 관리 흐름으로 복구한다.
+    connectionType: "rest",
     connectionStatus: row.connection_status,
     isEnabled: row.is_enabled,
     createdAt: row.created_at.toISOString(),
@@ -354,6 +355,8 @@ export class DiscordManagementRepository {
       [input.context.organizationId, id]
     );
     if (!server.rows[0]) return false;
+    // 이미 배포된 Agent 레코드는 새 기능에서 사용하지 않지만 서버 삭제 시에는
+    // 과거 자격 증명이 다시 활성화될 여지를 없애기 위해 함께 폐기한다.
     await repositoryQuery(
       this.queryable,
       `UPDATE agent_bootstrap_sessions
@@ -366,7 +369,7 @@ export class DiscordManagementRepository {
     await repositoryQuery(
       this.queryable,
       `UPDATE agent_installations
-       SET status = 'revoked', revoked_at = COALESCE(revoked_at, NOW())
+       SET status = 'revoked', revoked_at = NOW(), updated_at = NOW()
        WHERE organization_id = $1
          AND game_server_id = $2
          AND status <> 'revoked'`,
@@ -397,76 +400,6 @@ export class DiscordManagementRepository {
     return result.rowCount === 1;
   }
 
-  async issueAgentBootstrap(input: {
-    context: TenantContext;
-    role: BotManagementRole;
-    gameServerId: string;
-    tokenHash: Buffer;
-    expiresAt: Date;
-  }): Promise<void> {
-    requireRole(input.role, ["owner", "manager"]);
-    const gameServerId = requireUuid(input.gameServerId, "gameServerId");
-    const server = await repositoryQuery<{ id: string }>(
-      this.queryable,
-      `SELECT id
-       FROM game_servers
-       WHERE organization_id = $1
-         AND id = $2
-         AND deleted_at IS NULL
-         AND is_enabled = TRUE
-       FOR UPDATE`,
-      [input.context.organizationId, gameServerId]
-    );
-    if (!server.rows[0]) throw new SafeDatabaseError("DATABASE_REFERENCE_INVALID", false);
-    await repositoryQuery(
-      this.queryable,
-      `UPDATE agent_bootstrap_sessions
-       SET status = 'revoked', revoked_at = NOW()
-       WHERE organization_id = $1
-         AND game_server_id = $2
-         AND status = 'issued'`,
-      [input.context.organizationId, gameServerId]
-    );
-    await repositoryQuery(
-      this.queryable,
-      `INSERT INTO agent_bootstrap_sessions (
-         id, organization_id, game_server_id, issued_by_user_id,
-         token_hash, expires_at
-       ) VALUES ($1, $2, $3, $4, $5, $6)`,
-      [
-        crypto.randomUUID(),
-        input.context.organizationId,
-        gameServerId,
-        input.context.actorUserId,
-        input.tokenHash,
-        input.expiresAt
-      ]
-    );
-    await this.audit(input.context, "agent.bootstrap.issued", "game_server", gameServerId);
-  }
-
-  async revokeAgentBootstrap(input: {
-    context: TenantContext;
-    role: BotManagementRole;
-    gameServerId: string;
-  }): Promise<boolean> {
-    requireRole(input.role, ["owner", "manager"]);
-    const gameServerId = requireUuid(input.gameServerId, "gameServerId");
-    const result = await repositoryQuery(
-      this.queryable,
-      `UPDATE agent_bootstrap_sessions
-       SET status = 'revoked', revoked_at = NOW()
-       WHERE organization_id = $1
-         AND game_server_id = $2
-         AND status = 'issued'`,
-      [input.context.organizationId, gameServerId]
-    );
-    if ((result.rowCount ?? 0) > 0) {
-      await this.audit(input.context, "agent.bootstrap.revoked", "game_server", gameServerId);
-    }
-    return (result.rowCount ?? 0) > 0;
-  }
-
   async expireSessions(): Promise<void> {
     await repositoryQuery(
       this.queryable,
@@ -483,13 +416,6 @@ export class DiscordManagementRepository {
        SET status = 'expired'
        WHERE status = 'active'
          AND (idle_expires_at <= NOW() OR absolute_expires_at <= NOW())`,
-      []
-    );
-    await repositoryQuery(
-      this.queryable,
-      `UPDATE agent_bootstrap_sessions
-       SET status = 'expired'
-       WHERE status = 'issued' AND expires_at <= NOW()`,
       []
     );
   }

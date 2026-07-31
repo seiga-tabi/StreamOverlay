@@ -97,6 +97,9 @@
 .yoro-dashboard-sidebar nav {
   display: grid;
   gap: 8px;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .yoro-dashboard-nav-label {

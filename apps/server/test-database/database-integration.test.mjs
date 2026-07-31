@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import crypto from "node:crypto";
 import test from "node:test";
 import { Pool } from "pg";
-import { AgentClient } from "../../agent/dist/agent-client.js";
 import { appConfig } from "../dist/config.js";
 import { SafeDatabaseError } from "../dist/database/errors.js";
 import { loadMigrationManifest } from "../dist/database/migration-manifest.js";
@@ -16,7 +15,6 @@ import { DiscordOnboardingRepository } from "../dist/database/repositories/disco
 import { DiscordManagementRepository } from "../dist/database/repositories/discord-management-repository.js";
 import { DiscordBotControlRepository } from "../dist/database/repositories/discord-bot-control-repository.js";
 import { YoroAccountRepository } from "../dist/database/repositories/yoro-account-repository.js";
-import { AgentIngestionService, AgentIngestionError } from "../dist/services/agent-ingestion-service.js";
 import { DiscordManagementService } from "../dist/services/discord-management-service.js";
 import { YoroAccountService } from "../dist/services/yoro-account-service.js";
 import {
@@ -480,12 +478,12 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
     const serverA = await gameServers.create(contextA, {
       displayName: "Palworld Main",
       region: "asia-northeast",
-      connectionType: "agent"
+      connectionType: "rest"
     });
     const serverB = await gameServers.create(contextB, {
       displayName: "Palworld Main",
       region: "asia-northeast",
-      connectionType: "agent"
+      connectionType: "rest"
     });
     assert.equal((await gameServers.find(contextA, serverB.id)), undefined);
     assert.equal((await gameServers.rename(contextA, serverB.id, "침범 시도")), undefined);
@@ -729,299 +727,6 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
       audit_count: 1
     });
   });
-
-  await t.test("Agent bootstrap token은 tenant에 귀속되고 hash만 저장된다", async () => {
-    const management = new DiscordManagementRepository(pool);
-    const serverA = (await gameServers.list(contextA))[0];
-    const serverB = (await gameServers.list(contextB))[0];
-    const membershipA = await management.requireMembership(userA, organizationA);
-    const rawToken = "AGENT_SENTINEL_token_must_never_be_stored_plaintext";
-    await withTransaction(pool, async (client) => {
-      await new DiscordManagementRepository(client).issueAgentBootstrap({
-        context: membershipA.context,
-        role: membershipA.role,
-        gameServerId: serverA.id,
-        tokenHash: crypto.createHash("sha256").update(rawToken).digest(),
-        expiresAt: new Date(Date.now() + 10 * 60_000)
-      });
-    });
-    const stored = await pool.query(
-      `SELECT encode(token_hash, 'escape') AS token_text, status
-       FROM agent_bootstrap_sessions
-       WHERE organization_id = $1 AND game_server_id = $2`,
-      [organizationA, serverA.id]
-    );
-    assert.equal(stored.rows[0].status, "issued");
-    assert.doesNotMatch(stored.rows[0].token_text, /SENTINEL/u);
-    await assert.rejects(
-      withTransaction(pool, async (client) => {
-        await new DiscordManagementRepository(client).issueAgentBootstrap({
-          context: membershipA.context,
-          role: membershipA.role,
-          gameServerId: serverB.id,
-          tokenHash: crypto.randomBytes(32),
-          expiresAt: new Date(Date.now() + 10 * 60_000)
-        });
-      }),
-      (error) => error instanceof SafeDatabaseError
-        && error.code === "DATABASE_REFERENCE_INVALID"
-    );
-  });
-
-  await t.test("Agent 등록·nonce·stale·event 저장은 원자적이고 tenant binding을 유지한다", async () => {
-    const management = new DiscordManagementRepository(pool);
-    const serverA = (await gameServers.list(contextA))[0];
-    const membershipA = await management.requireMembership(userA, organizationA);
-    const bootstrapToken = crypto.randomBytes(48).toString("base64url");
-    await withTransaction(pool, async (client) => {
-      await new DiscordManagementRepository(client).issueAgentBootstrap({
-        context: membershipA.context,
-        role: membershipA.role,
-        gameServerId: serverA.id,
-        tokenHash: crypto.createHash("sha256").update(bootstrapToken).digest(),
-        expiresAt: new Date(Date.now() + 10 * 60_000)
-      });
-    });
-    const logEntries = [];
-    const service = new AgentIngestionService(pool, {
-      event(entry) {
-        logEntries.push(entry);
-      },
-      error(entry) {
-        logEntries.push(entry);
-      }
-    });
-    const register = () => service.register({
-      bootstrapToken,
-      agentVersion: "1.0.0-test",
-      platform: "linux",
-      architecture: "x64"
-    });
-    const registrations = await Promise.allSettled([register(), register()]);
-    assert.equal(registrations.filter((result) => result.status === "fulfilled").length, 1);
-    const registration = registrations.find((result) => result.status === "fulfilled").value;
-    assert.equal(registration.gameServer.id, serverA.id);
-    assert.equal(registration.gameServer.gameType, "palworld");
-
-    const storedCredential = await pool.query(
-      `SELECT encode(credential_hash, 'hex') AS credential_hash, status
-       FROM agent_installations
-       WHERE organization_id = $1 AND game_server_id = $2`,
-      [organizationA, serverA.id]
-    );
-    assert.equal(storedCredential.rows[0].status, "active");
-    assert.notEqual(storedCredential.rows[0].credential_hash, registration.agentToken);
-    assert.doesNotMatch(JSON.stringify(logEntries), new RegExp(registration.agentToken, "u"));
-    const bootstrap = await pool.query(
-      `SELECT status, consumed_at FROM agent_bootstrap_sessions
-       WHERE organization_id = $1 AND game_server_id = $2
-       ORDER BY created_at DESC LIMIT 1`,
-      [organizationA, serverA.id]
-    );
-    assert.equal(bootstrap.rows[0].status, "consumed");
-    assert.ok(bootstrap.rows[0].consumed_at);
-
-    const baseSeconds = Math.floor(Date.now() / 1_000);
-    const firstPayload = {
-      payloadVersion: 1,
-      observedAt: new Date((baseSeconds - 3) * 1_000).toISOString(),
-      online: true,
-      players: 2,
-      maxPlayers: 16,
-      gameVersion: "test-1"
-    };
-    const first = await service.ingest({
-      agentToken: registration.agentToken,
-      requestTimestamp: baseSeconds,
-      nonce: crypto.randomBytes(24).toString("base64url"),
-      payload: firstPayload
-    });
-    assert.deepEqual(first, { accepted: true, currentUpdated: true, duplicate: false });
-    assert.equal(
-      (await pool.query(
-        "SELECT COUNT(*)::INTEGER AS count FROM server_events WHERE organization_id = $1",
-        [organizationA]
-      )).rows[0].count,
-      0
-    );
-
-    const replayNonce = crypto.randomBytes(24).toString("base64url");
-    const secondPayload = {
-      ...firstPayload,
-      observedAt: new Date((baseSeconds - 2) * 1_000).toISOString(),
-      online: false,
-      players: 0
-    };
-    await service.ingest({
-      agentToken: registration.agentToken,
-      requestTimestamp: baseSeconds,
-      nonce: replayNonce,
-      payload: secondPayload
-    });
-    await assert.rejects(
-      service.ingest({
-        agentToken: registration.agentToken,
-        requestTimestamp: baseSeconds,
-        nonce: replayNonce,
-        payload: secondPayload
-      }),
-      (error) => error instanceof AgentIngestionError
-        && error.code === "agent_request_replayed"
-    );
-
-    const duplicate = await service.ingest({
-      agentToken: registration.agentToken,
-      requestTimestamp: baseSeconds,
-      nonce: crypto.randomBytes(24).toString("base64url"),
-      payload: secondPayload
-    });
-    assert.equal(duplicate.duplicate, true);
-    const stale = await service.ingest({
-      agentToken: registration.agentToken,
-      requestTimestamp: baseSeconds,
-      nonce: crypto.randomBytes(24).toString("base64url"),
-      payload: {
-        ...firstPayload,
-        observedAt: new Date((baseSeconds - 4) * 1_000).toISOString()
-      }
-    });
-    assert.equal(stale.currentUpdated, false);
-    assert.equal(stale.duplicate, false);
-
-    const current = await pool.query(
-      `SELECT online, players, observed_at FROM server_current_status
-       WHERE organization_id = $1 AND game_server_id = $2`,
-      [organizationA, serverA.id]
-    );
-    assert.equal(current.rows[0].online, false);
-    assert.equal(current.rows[0].players, 0);
-    const event = await pool.query(
-      `SELECT event_type, safe_metadata FROM server_events
-       WHERE organization_id = $1 AND game_server_id = $2`,
-      [organizationA, serverA.id]
-    );
-    assert.equal(event.rows.length, 1);
-    assert.equal(event.rows[0].event_type, "server.offline");
-    assert.deepEqual(event.rows[0].safe_metadata, {
-      previousOnline: true,
-      online: false
-    });
-
-    const conflictNonce = crypto.randomBytes(24).toString("base64url");
-    await assert.rejects(
-      service.ingest({
-        agentToken: registration.agentToken,
-        requestTimestamp: baseSeconds,
-        nonce: conflictNonce,
-        payload: { ...secondPayload, players: 1 }
-      }),
-      (error) => error instanceof AgentIngestionError
-        && error.code === "agent_payload_conflict"
-    );
-    const conflictNonceHash = crypto.createHash("sha256").update(conflictNonce).digest();
-    assert.equal(
-      (await pool.query(
-        `SELECT COUNT(*)::INTEGER AS count FROM agent_request_nonces
-         WHERE agent_installation_id = $1 AND nonce_hash = $2`,
-        [registration.installationId, conflictNonceHash]
-      )).rows[0].count,
-      0
-    );
-  });
-
-  await t.test("실제 Agent client가 PostgreSQL service와 register·status 왕복한다", async () => {
-    const management = new DiscordManagementRepository(pool);
-    const serverA = (await gameServers.list(contextA))[0];
-    const membershipA = await management.requireMembership(userA, organizationA);
-    const bootstrapToken = crypto.randomBytes(48).toString("base64url");
-    await withTransaction(pool, async (client) => {
-      await new DiscordManagementRepository(client).issueAgentBootstrap({
-        context: membershipA.context,
-        role: membershipA.role,
-        gameServerId: serverA.id,
-        tokenHash: crypto.createHash("sha256").update(bootstrapToken).digest(),
-        expiresAt: new Date(Date.now() + 10 * 60_000)
-      });
-    });
-    const service = new AgentIngestionService(pool, {});
-    const fetchAdapter = async (url, init) => {
-      try {
-        const body = JSON.parse(String(init.body));
-        if (new URL(url).pathname === "/api/agent/v1/register") {
-          return new Response(JSON.stringify(await service.register(body)), {
-            status: 201,
-            headers: { "content-type": "application/json" }
-          });
-        }
-        const authorization = init.headers.Authorization;
-        const result = await service.ingest({
-          agentToken: authorization.slice("Bearer ".length),
-          requestTimestamp: Number(init.headers["X-Yoro-Agent-Timestamp"]),
-          nonce: init.headers["X-Yoro-Agent-Nonce"],
-          payload: body
-        });
-        return new Response(JSON.stringify(result), {
-          status: 202,
-          headers: { "content-type": "application/json" }
-        });
-      } catch (error) {
-        const status = error instanceof AgentIngestionError ? error.status : 500;
-        return new Response(JSON.stringify({ error: "agent_request_rejected" }), {
-          status,
-          headers: { "content-type": "application/json" }
-        });
-      }
-    };
-    const serverOrigin = new URL(appConfig.publicBaseUrl).origin;
-    const client = new AgentClient({
-      serverOrigin,
-      timeoutMs: 1_000,
-      maximumRetryAttempts: 1
-    }, fetchAdapter);
-    const registration = await client.register(
-      bootstrapToken,
-      new AbortController().signal
-    );
-    const payload = {
-      payloadVersion: 1,
-      observedAt: new Date().toISOString(),
-      online: true,
-      players: 3,
-      maxPlayers: 16,
-      gameVersion: "agent-e2e-1"
-    };
-    const accepted = await client.sendStatus({
-      schemaVersion: 1,
-      installationId: registration.installationId,
-      agentToken: registration.agentToken,
-      payloadVersion: 1,
-      serverOrigin,
-      ingestionEndpoint: registration.ingestion.endpoint,
-      createdAt: new Date().toISOString()
-    }, payload, new AbortController().signal);
-    assert.deepEqual(accepted, {
-      accepted: true,
-      currentUpdated: true,
-      duplicate: false
-    });
-    const current = await pool.query(
-      `SELECT players, game_version
-       FROM server_current_status
-       WHERE organization_id = $1 AND game_server_id = $2`,
-      [organizationA, serverA.id]
-    );
-    assert.equal(current.rows[0].players, 3);
-    assert.equal(current.rows[0].game_version, "agent-e2e-1");
-    const persisted = JSON.stringify(await pool.query(
-      `SELECT encode(credential_hash, 'hex') AS credential_hash
-       FROM agent_installations
-       WHERE organization_id = $1 AND game_server_id = $2`,
-      [organizationA, serverA.id]
-    ));
-    assert.doesNotMatch(persisted, new RegExp(registration.agentToken, "u"));
-    assert.doesNotMatch(persisted, new RegExp(bootstrapToken, "u"));
-  });
-
   await t.test("management session은 opaque token과 CSRF hash만 저장하고 즉시 폐기된다", async () => {
     const repository = new DiscordManagementRepository(pool);
     const rawSession = "MANAGEMENT_SESSION_SENTINEL_plaintext_forbidden";

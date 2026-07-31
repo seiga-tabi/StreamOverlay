@@ -29,7 +29,6 @@ test("runtime config는 strict schema로 읽는다", () => {
       discordSaas: false,
       discordBot: false,
       discordBotManagement: false,
-      agentIngestion: false,
       twitchEventSub: false
     }
   }), { mode: 0o644 });
@@ -103,7 +102,6 @@ test("runtime config가 있으면 legacy env feature override를 무시한다", 
       discordSaas: false,
       discordBot: false,
       discordBotManagement: false,
-      agentIngestion: false,
       twitchEventSub: false
     }
   }), { mode: 0o644 });
@@ -118,7 +116,6 @@ test("runtime config가 있으면 legacy env feature override를 무시한다", 
         "database:appConfig.database.enabled,",
         "databaseTimeout:appConfig.database.connectionTimeoutMs,",
         "discordTtl:appConfig.discordSaas.setupLinkTtlSeconds,",
-        "agentNonceTtl:appConfig.agentIngestion.nonceTtlSeconds,",
         "logFiles:appConfig.logging.maxFiles",
         "})))"
       ].join("")
@@ -133,7 +130,6 @@ test("runtime config가 있으면 legacy env feature override를 무시한다", 
         DATABASE_URL_FILE: "/존재하지-않는-경로",
         DATABASE_CONNECTION_TIMEOUT_MS: "29999",
         DISCORD_SETUP_LINK_TTL_SECONDS: "1799",
-        AGENT_NONCE_TTL_SECONDS: "599",
         LOG_MAX_FILES: "19"
       }
     }
@@ -144,7 +140,6 @@ test("runtime config가 있으면 legacy env feature override를 무시한다", 
     database: false,
     databaseTimeout: 5_000,
     discordTtl: 600,
-    agentNonceTtl: 600,
     logFiles: 5
   });
   fs.rmSync(directory, { recursive: true });

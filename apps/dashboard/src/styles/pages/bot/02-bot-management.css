@@ -73,6 +73,23 @@
   max-width: 34rem;
 }
 
+.bot-management-destinations {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.bot-management-destinations .yoro-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.bot-management-destinations .yoro-card__content {
+  margin-top: auto;
+}
+
 .bot-management-create,
 .bot-management-actions {
   display: flex;
@@ -468,6 +485,10 @@
     align-items: stretch;
     flex-direction: column;
     flex-wrap: nowrap;
+  }
+
+  .bot-management-destinations {
+    grid-template-columns: 1fr;
   }
 
   .bot-management-create > * {

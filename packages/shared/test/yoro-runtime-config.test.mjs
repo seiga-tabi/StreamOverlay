@@ -73,13 +73,14 @@ test("활성 Discord 기능은 공개 ID와 callback 설정을 요구한다", ()
   );
 });
 
-test("정상 runtime config를 정규화한다", () => {
+test("정상 runtime config를 정규화하고 제거된 Agent 설정은 활성화하지 않는다", () => {
   const value = validRuntime();
   value.discord.prefixCommandsEnabled = true;
   const parsed = parseYoroRuntimeConfig(value);
   assert.equal(parsed.environment, "production");
   assert.equal(parsed.public.baseUrl, "https://yoro.gg");
-  assert.equal(parsed.features.agentIngestion, true);
+  assert.equal(Object.hasOwn(parsed.features, "agentIngestion"), false);
+  assert.equal(Object.hasOwn(parsed, "agent"), false);
   assert.equal(parsed.database?.poolMax, 10);
   assert.equal(parsed.discord?.prefixCommandsEnabled, true);
 });

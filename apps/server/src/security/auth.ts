@@ -258,7 +258,7 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
     || pathname === "/api/discord/management/session"
     || pathname === "/api/discord/management/logout"
     || /^\/api\/discord\/management\/organizations\/[^/]+\/bot-control$/u.test(pathname)
-    || /^\/api\/discord\/management\/organizations\/[^/]+\/game-servers(?:\/[^/]+(?:\/(?:agent-token|palworld-rest(?:\/(?:test|save|refresh|remove))?))?)?$/u.test(pathname)
+    || /^\/api\/discord\/management\/organizations\/[^/]+\/game-servers(?:\/[^/]+(?:\/palworld-rest(?:\/(?:test|save|refresh|remove))?)?)?$/u.test(pathname)
   ) return "PUBLIC";
   if (pathname.startsWith("/api/")) return "DASHBOARD_ADMIN";
   return "PUBLIC";

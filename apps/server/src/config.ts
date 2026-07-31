@@ -145,15 +145,7 @@ const DEFAULTS = Object.freeze({
     apiTimeoutMs: 10_000,
     managementOauthTtlSeconds: 600,
     managementIdleTtlSeconds: 28_800,
-    managementAbsoluteTtlSeconds: 86_400,
-    agentBootstrapTtlSeconds: 600
-  }),
-  agent: Object.freeze({
-    credentialTtlDays: 90,
-    clockSkewSeconds: 300,
-    nonceTtlSeconds: 600,
-    maximumBodyBytes: 16 * 1_024,
-    rateLimitPerMinute: 120
+    managementAbsoluteTtlSeconds: 86_400
   }),
   riot: Object.freeze({
     accountRegion: "asia",
@@ -230,8 +222,6 @@ const discordBotInternalAuthKey = discordBotInternalApiEnabled
   : "";
 const discordBotManagementEnabled = configuredRuntime?.features.discordBotManagement
   ?? boolEnv("DISCORD_BOT_MANAGEMENT_ENABLED", false);
-const agentIngestionEnabled = configuredRuntime?.features.agentIngestion
-  ?? boolEnv("AGENT_INGESTION_ENABLED", false);
 const twitchEventSubEnabled = configuredRuntime?.features.twitchEventSub
   ?? boolEnv("TWITCH_ENABLE_EVENTSUB", false);
 const twitchClientSecret = twitchEventSubEnabled
@@ -392,29 +382,7 @@ export const appConfig = {
       : intEnv("DISCORD_MANAGEMENT_IDLE_TTL_SECONDS", DEFAULTS.discord.managementIdleTtlSeconds),
     absoluteTtlSeconds: configuredRuntime
       ? DEFAULTS.discord.managementAbsoluteTtlSeconds
-      : intEnv("DISCORD_MANAGEMENT_ABSOLUTE_TTL_SECONDS", DEFAULTS.discord.managementAbsoluteTtlSeconds),
-    agentTokenTtlSeconds: configuredRuntime
-      ? DEFAULTS.discord.agentBootstrapTtlSeconds
-      : intEnv("AGENT_BOOTSTRAP_TTL_SECONDS", DEFAULTS.discord.agentBootstrapTtlSeconds)
-  },
-  agentIngestion: {
-    enabled: agentIngestionEnabled,
-    credentialTtlDays: configuredRuntime?.agent?.ingestionCredentialTtlDays
-      ?? (configuredRuntime
-        ? DEFAULTS.agent.credentialTtlDays
-        : intEnv("AGENT_CREDENTIAL_TTL_DAYS", DEFAULTS.agent.credentialTtlDays)),
-    clockSkewSeconds: configuredRuntime
-      ? DEFAULTS.agent.clockSkewSeconds
-      : intEnv("AGENT_CLOCK_SKEW_SECONDS", DEFAULTS.agent.clockSkewSeconds),
-    nonceTtlSeconds: configuredRuntime
-      ? DEFAULTS.agent.nonceTtlSeconds
-      : intEnv("AGENT_NONCE_TTL_SECONDS", DEFAULTS.agent.nonceTtlSeconds),
-    maximumBodyBytes: configuredRuntime
-      ? DEFAULTS.agent.maximumBodyBytes
-      : intEnv("AGENT_MAXIMUM_BODY_BYTES", DEFAULTS.agent.maximumBodyBytes),
-    rateLimitPerMinute: configuredRuntime
-      ? DEFAULTS.agent.rateLimitPerMinute
-      : intEnv("AGENT_RATE_LIMIT_PER_MINUTE", DEFAULTS.agent.rateLimitPerMinute)
+      : intEnv("DISCORD_MANAGEMENT_ABSOLUTE_TTL_SECONDS", DEFAULTS.discord.managementAbsoluteTtlSeconds)
   },
   riot: {
     apiKey: riotApiKey,
@@ -798,29 +766,6 @@ function validateDiscordBotManagementConfig(errors: string[]): void {
   ) {
     errors.push("DISCORD_MANAGEMENT_ABSOLUTE_TTL_SECONDS는 idle 이상 86400 이하여야 합니다.");
   }
-  if (config.agentTokenTtlSeconds < 60 || config.agentTokenTtlSeconds > 1_800) {
-    errors.push("AGENT_BOOTSTRAP_TTL_SECONDS는 60에서 1800 사이여야 합니다.");
-  }
-}
-
-function validateAgentIngestionConfig(errors: string[]): void {
-  const config = appConfig.agentIngestion;
-  if (!config.enabled) return;
-  if (config.credentialTtlDays < 1 || config.credentialTtlDays > 365) {
-    errors.push("AGENT_CREDENTIAL_TTL_DAYS는 1에서 365 사이여야 합니다.");
-  }
-  if (config.clockSkewSeconds < 30 || config.clockSkewSeconds > 900) {
-    errors.push("AGENT_CLOCK_SKEW_SECONDS는 30에서 900 사이여야 합니다.");
-  }
-  if (config.nonceTtlSeconds < config.clockSkewSeconds || config.nonceTtlSeconds > 3_600) {
-    errors.push("AGENT_NONCE_TTL_SECONDS는 clock skew 이상 3600 이하여야 합니다.");
-  }
-  if (config.maximumBodyBytes < 1_024 || config.maximumBodyBytes > 65_536) {
-    errors.push("AGENT_MAXIMUM_BODY_BYTES는 1024에서 65536 사이여야 합니다.");
-  }
-  if (config.rateLimitPerMinute < 1 || config.rateLimitPerMinute > 600) {
-    errors.push("AGENT_RATE_LIMIT_PER_MINUTE는 1에서 600 사이여야 합니다.");
-  }
 }
 
 function validateCorsOrigins(errors: string[]): void {
@@ -970,7 +915,6 @@ export function validateRuntimeConfig(): RuntimeConfigValidationResult {
   validateDiscordSaasConfig(errors);
   validateDiscordBotInternalConfig(errors);
   validateDiscordBotManagementConfig(errors);
-  validateAgentIngestionConfig(errors);
   if (isProduction()) {
     validateBuildMetadata(errors);
     if (appConfig.allowInsecureDev) errors.push("ALLOW_INSECURE_DEV는 production에서 사용할 수 없습니다.");

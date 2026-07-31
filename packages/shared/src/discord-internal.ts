@@ -56,7 +56,7 @@ export type DiscordGameServerStatusResponse = Readonly<{
     displayName: string;
     status: DiscordGameServerStatusState;
     reason?: DiscordGameServerStatusReason;
-    source: "agent" | "rest";
+    source: "rest";
     players?: Readonly<{
       current: number;
       max: number;
@@ -76,7 +76,6 @@ export type DiscordPalworldPlayerLookupRequest = Readonly<{
 export const DISCORD_PALWORLD_PLAYER_LOOKUP_REASONS = [
   "server_not_configured",
   "rest_not_configured",
-  "agent_not_supported",
   "upstream_unavailable"
 ] as const;
 
@@ -264,7 +263,7 @@ export function parseDiscordGameServerStatusResponse(
         server.reason as DiscordGameServerStatusReason
       )
     )
-    || (server.source !== "agent" && server.source !== "rest")
+    || server.source !== "rest"
   ) return undefined;
   let players: { current: number; max: number } | undefined;
   if (server.players !== undefined) {

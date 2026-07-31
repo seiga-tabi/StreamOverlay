@@ -43,12 +43,53 @@ test("Bot 관리 화면은 초기 상태와 한국어·일본어 접근성 문�
   const koMarkup = renderToStaticMarkup(<BotManagementPage />);
   storedLocale = "ja";
   const jaMarkup = renderToStaticMarkup(<BotManagementPage />);
-  assert.match(koMarkup, /Organization 관리/u);
-  assert.match(jaMarkup, /Organization 管理/u);
+  assert.match(koMarkup, /Organization 개요/u);
+  assert.match(jaMarkup, /Organization概要/u);
   assert.match(koMarkup, /aria-busy="true"/u);
   assert.match(koMarkup, /Organization 관리 정보를 불러오는 중입니다/u);
   assert.doesNotMatch(koMarkup, /installToken|csrfToken|accessToken|refreshToken/u);
   assert.doesNotMatch(koMarkup, /docker run|:latest/u);
+});
+
+test("Organization 관리는 개요·Bot 제어·Palworld 서버 화면을 분리한다", async () => {
+  const {
+    BotManagementPage,
+    botManagementViewRequiresServerData,
+    organizationIdFromSearch,
+    organizationManagementHref
+  } = await import("../src/features/bot-management/BotManagementPage");
+  storedLocale = "ko";
+  const overview = renderToStaticMarkup(<BotManagementPage view="overview" />);
+  const bot = renderToStaticMarkup(<BotManagementPage view="bot" />);
+  const servers = renderToStaticMarkup(<BotManagementPage view="servers" />);
+
+  assert.match(overview, /Organization 개요/u);
+  assert.match(bot, /Discord Bot 제어/u);
+  assert.match(servers, /Palworld 서버 관리/u);
+  assert.equal(botManagementViewRequiresServerData("overview"), false);
+  assert.equal(botManagementViewRequiresServerData("bot"), false);
+  assert.equal(botManagementViewRequiresServerData("servers"), true);
+  assert.equal(
+    organizationIdFromSearch(
+      "?organization=11111111-1111-4111-8111-111111111111"
+    ),
+    "11111111-1111-4111-8111-111111111111"
+  );
+  assert.equal(organizationIdFromSearch("?organization=not-authorized"), "");
+  assert.equal(
+    organizationManagementHref(
+      "bot",
+      "11111111-1111-4111-8111-111111111111"
+    ),
+    "/dashboard/organizations/bot?organization=11111111-1111-4111-8111-111111111111"
+  );
+  assert.equal(
+    organizationManagementHref(
+      "servers",
+      "11111111-1111-4111-8111-111111111111"
+    ),
+    "/dashboard/organizations/servers?organization=11111111-1111-4111-8111-111111111111"
+  );
 });
 
 test("관리 로그인 URL은 통합 YORO 로그인과 안전한 복귀 경로만 사용한다", async () => {

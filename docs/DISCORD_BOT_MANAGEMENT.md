@@ -1,6 +1,6 @@
 # YORO Bot Organization 관리와 Palworld REST 연결
 
-`/dashboard/organizations`는 통합 YORO 로그인, Bot이 설치된 Guild claim, Organization과 Palworld 게임 서버 관리, Palworld REST 직접 연결을 제공하는 유일한 관리 화면입니다. 기존 `/bot/manage` 요청은 query를 allowlist로 정리한 뒤 이 경로로 redirect하며 별도 화면을 제공하지 않습니다. YORO 계정과 Discord·Twitch identity의 관계는 `YORO_ACCOUNT.md`에 정의되어 있습니다. 기존 Agent protocol은 배포 호환 경로로 남지만 Dashboard의 기본 등록 흐름에서는 사용하지 않습니다. Notification Worker, Discord 상태 Embed, 서버 제어 기능은 이 단계에 포함하지 않습니다.
+`/dashboard/organizations`는 통합 YORO 로그인, Bot이 설치된 Guild claim, Organization과 Palworld 게임 서버 관리, Palworld REST 직접 연결을 제공하는 유일한 관리 화면입니다. 기존 `/bot/manage` 요청은 query를 allowlist로 정리한 뒤 이 경로로 redirect하며 별도 화면을 제공하지 않습니다. YORO 계정과 Discord·Twitch identity의 관계는 `YORO_ACCOUNT.md`에 정의되어 있습니다. Palworld 상태 조회는 저장된 REST 연결만 사용합니다. Notification Worker, Discord 상태 Embed, 서버 제어 기능은 이 단계에 포함하지 않습니다.
 
 ## Onboarding OAuth와 관리 OAuth
 
@@ -46,7 +46,7 @@ Guild claim 완료 시 새로운 management session을 같은 transaction에서 
 
 현재 생성 가능한 유형은 `palworld`, 새 연결 방식은 `rest`입니다. 스트리머는 자신의 REST 주소와 Palworld 전용 서버 설정의 `AdminPassword`를 직접 입력합니다. 브라우저는 Palworld 서버에 직접 접속하지 않으며, YORO Server가 URL·DNS·TLS 정책을 먼저 검증한 뒤 고정된 REST endpoint만 호출합니다.
 
-Organization에는 삭제되지 않은 Palworld 게임 서버를 정확히 1개만 등록할 수 있습니다. 생성 transaction에서 entitlement row를 lock하고 등록 서버 수를 확인한 뒤 insert하며, Database unique index도 같은 제한을 강제하므로 동시 요청으로 한도를 초과하지 않습니다. 서버 삭제는 REST 연결과 Agent bootstrap·credential을 폐기하고 soft delete로 이력을 보존합니다. entitlement 조회가 없거나 실패하면 무제한으로 완화하지 않고 fail-closed 처리합니다.
+Organization에는 삭제되지 않은 Palworld 게임 서버를 정확히 1개만 등록할 수 있습니다. 생성 transaction에서 entitlement row를 lock하고 등록 서버 수를 확인한 뒤 insert하며, Database unique index도 같은 제한을 강제하므로 동시 요청으로 한도를 초과하지 않습니다. 서버 삭제는 REST 연결을 제거하고 서버를 soft delete하여 이력을 보존합니다. entitlement 조회가 없거나 실패하면 무제한으로 완화하지 않고 fail-closed 처리합니다.
 
 ## Palworld REST와 자격 증명
 
@@ -59,7 +59,7 @@ Organization에는 삭제되지 않은 Palworld 게임 서버를 정확히 1개�
 - 연결 테스트만으로 저장소를 변경하지 않습니다.
 - 공통 암호화 key는 플랫폼 운영자가 한 번 준비하며 스트리머가 입력하거나 다운로드하지 않습니다.
 
-기존 Agent bootstrap·Ingestion API는 이미 배포된 설치의 호환성을 위해 유지합니다. 신규 Dashboard UI는 Agent 설치 토큰을 발급하지 않습니다.
+기존 Agent bootstrap·Ingestion API는 제거되었습니다. 이미 저장된 legacy 연결 유형은 runtime에서 REST로만 정규화하므로 별도 DB migration 없이 기존 REST 자격 증명을 계속 사용합니다.
 
 ## Discord 일반 사용자 상태 명령
 

@@ -48,8 +48,18 @@ import { BotControlCard } from "./BotControlCard";
 const copy = {
   ko: {
     eyebrow: "YORO BOT MANAGEMENT",
-    title: "Organization 관리",
-    description: "Discord Organization과 Palworld REST API 연결을 관리합니다.",
+    overviewTitle: "Organization 개요",
+    overviewDescription: "연결된 Organization을 선택하고 Discord Bot과 Palworld 서버 관리 화면으로 이동합니다.",
+    botTitle: "Discord Bot 제어",
+    botDescription: "공개 명령, 응답 언어와 Palworld 상태 모듈을 Organization별로 관리합니다.",
+    serversTitle: "Palworld 서버 관리",
+    serversDescription: "Palworld REST 서버 등록, 인증과 연결 상태를 Organization별로 관리합니다.",
+    botDestination: "Discord Bot 설정",
+    botDestinationDescription: "일반 사용자 명령, Palworld 모듈과 Discord 응답 표시 항목을 설정합니다.",
+    botDestinationAction: "Bot 제어 열기",
+    serverDestination: "Palworld 서버",
+    serverDestinationDescription: "REST 주소와 AdminPassword를 검증하고 서버 연결 상태를 확인합니다.",
+    serverDestinationAction: "서버 관리 열기",
     loginTitle: "Discord 관리 로그인이 필요합니다.",
     loginDescription: "Discord OAuth는 사용자 확인에만 사용하고, 로그인 후 즉시 폐기합니다.",
     login: "Discord로 관리 로그인",
@@ -89,7 +99,7 @@ const copy = {
     deleting: "삭제 중",
     createCompleted: "서버 항목을 등록했습니다. 아래에서 REST 주소와 AdminPassword로 연결을 확인해 주세요.",
     deleteServer: "서버 삭제",
-    deleteConfirm: "이 서버 설정을 삭제할까요? 저장된 REST 연결과 Agent 자격 증명도 폐기됩니다.",
+    deleteConfirm: "이 서버 설정을 삭제할까요? 저장된 REST 연결도 함께 삭제됩니다.",
     deleteCancel: "취소",
     deleteAction: "삭제 확인",
     deleteCompleted: "Palworld 게임 서버를 삭제했습니다.",
@@ -158,8 +168,18 @@ const copy = {
   },
   ja: {
     eyebrow: "YORO BOT MANAGEMENT",
-    title: "Organization 管理",
-    description: "Discord OrganizationとPalworld REST API接続を管理します。",
+    overviewTitle: "Organization概要",
+    overviewDescription: "連携済みOrganizationを選択し、Discord BotとPalworldサーバーの管理画面へ移動します。",
+    botTitle: "Discord Bot コントロール",
+    botDescription: "公開コマンド、応答言語、Palworld状態モジュールをOrganizationごとに管理します。",
+    serversTitle: "Palworldサーバー管理",
+    serversDescription: "Palworld RESTサーバーの登録、認証、接続状態をOrganizationごとに管理します。",
+    botDestination: "Discord Bot設定",
+    botDestinationDescription: "一般ユーザーコマンド、Palworldモジュール、Discord応答の表示項目を設定します。",
+    botDestinationAction: "Botコントロールを開く",
+    serverDestination: "Palworldサーバー",
+    serverDestinationDescription: "RESTアドレスとAdminPasswordを検証し、サーバー接続状態を確認します。",
+    serverDestinationAction: "サーバー管理を開く",
     loginTitle: "Discord管理ログインが必要です。",
     loginDescription: "Discord OAuthは本人確認のみに使用し、ログイン完了後すぐに破棄します。",
     login: "Discordで管理ログイン",
@@ -199,7 +219,7 @@ const copy = {
     deleting: "削除中",
     createCompleted: "サーバー項目を登録しました。下でRESTアドレスとAdminPasswordを使用して接続を確認してください。",
     deleteServer: "サーバーを削除",
-    deleteConfirm: "このサーバー設定を削除しますか？保存済みREST接続とAgent認証情報も失効します。",
+    deleteConfirm: "このサーバー設定を削除しますか？保存済みREST連携も削除されます。",
     deleteCancel: "キャンセル",
     deleteAction: "削除を確認",
     deleteCompleted: "Palworldゲームサーバーを削除しました。",
@@ -453,7 +473,47 @@ export function registeredManagementServers(
   return servers.filter((server) => server.isEnabled).slice(0, 1);
 }
 
-export function BotManagementPage({ embedded = false }: { embedded?: boolean }) {
+export type BotManagementView = "overview" | "bot" | "servers";
+
+export function botManagementViewRequiresServerData(
+  view: BotManagementView
+): boolean {
+  return view === "servers";
+}
+
+export function organizationIdFromSearch(search: string): string {
+  const value = new URLSearchParams(search).get("organization") ?? "";
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(value)
+    ? value
+    : "";
+}
+
+export function organizationManagementHref(
+  view: Exclude<BotManagementView, "overview">,
+  organizationId: string
+): string {
+  const path = view === "bot"
+    ? "/dashboard/organizations/bot"
+    : "/dashboard/organizations/servers";
+  return organizationId
+    ? `${path}?organization=${encodeURIComponent(organizationId)}`
+    : path;
+}
+
+function replaceOrganizationSearch(organizationId: string): void {
+  if (typeof window === "undefined" || !organizationId) return;
+  const query = `?organization=${encodeURIComponent(organizationId)}`;
+  if (window.location.search === query) return;
+  window.history.replaceState({}, "", `${window.location.pathname}${query}`);
+}
+
+export function BotManagementPage({
+  embedded = false,
+  view = "overview"
+}: {
+  embedded?: boolean;
+  view?: BotManagementView;
+}) {
   const [locale] = useState<DashboardLocale>(() => detectDashboardLocale());
   const text = copy[locale];
   const [session, setSession] = useState<BotManagementSession>();
@@ -491,6 +551,32 @@ export function BotManagementPage({ embedded = false }: { embedded?: boolean }) 
     [organizationId, session]
   );
 
+  const pageHeading = view === "bot"
+    ? { title: text.botTitle, description: text.botDescription }
+    : view === "servers"
+      ? { title: text.serversTitle, description: text.serversDescription }
+      : { title: text.overviewTitle, description: text.overviewDescription };
+
+  async function loadServersForOrganization(
+    id: string,
+    signal?: AbortSignal
+  ): Promise<void> {
+    const nextServers = registeredManagementServers(
+      await listManagementGameServers(id, signal)
+    );
+    setServers(nextServers);
+    const firstServer = nextServers.find((server) => server.isEnabled);
+    if (!firstServer) return;
+    setRestServerId(firstServer.id);
+    const response = await getManagementPalworldRestConnection(
+      id,
+      firstServer.id,
+      signal
+    );
+    setRestResponses({ [firstServer.id]: response });
+    setRestBaseUrl(response.connection.baseUrl ?? "");
+  }
+
   async function loadSession(signal?: AbortSignal): Promise<void> {
     setLoading(true);
     setError("");
@@ -498,24 +584,18 @@ export function BotManagementPage({ embedded = false }: { embedded?: boolean }) 
       const next = await getManagementSession(signal);
       setSession(next);
       if (next.authenticated) {
-        const nextOrganization = organizationId || next.organizations[0]?.id || "";
+        const requestedOrganization = organizationIdFromSearch(window.location.search);
+        const nextOrganization = next.organizations.some(
+          (organization) => organization.id === requestedOrganization
+        )
+          ? requestedOrganization
+          : next.organizations[0]?.id ?? "";
         setOrganizationId(nextOrganization);
         if (nextOrganization) {
+          replaceOrganizationSearch(nextOrganization);
           setConnectSession(undefined);
-          const nextServers = registeredManagementServers(
-            await listManagementGameServers(nextOrganization, signal)
-          );
-          setServers(nextServers);
-          const firstServer = nextServers.find((server) => server.isEnabled);
-          if (firstServer) {
-            setRestServerId(firstServer.id);
-            const response = await getManagementPalworldRestConnection(
-              nextOrganization,
-              firstServer.id,
-              signal
-            );
-            setRestResponses({ [firstServer.id]: response });
-            setRestBaseUrl(response.connection.baseUrl ?? "");
+          if (botManagementViewRequiresServerData(view)) {
+            await loadServersForOrganization(nextOrganization, signal);
           }
         } else {
           const connecting = await getManagementConnectSession(signal);
@@ -658,26 +738,18 @@ export function BotManagementPage({ embedded = false }: { embedded?: boolean }) 
 
   async function selectOrganization(id: string): Promise<void> {
     setOrganizationId(id);
+    replaceOrganizationSearch(id);
     setDeleteServerId("");
     setRestServerId("");
     setRestBaseUrl("");
     setRestPassword("");
     setRestResponses({});
     setRestFeedback("");
+    if (!botManagementViewRequiresServerData(view)) return;
     setLoading(true);
     setError("");
     try {
-      const nextServers = registeredManagementServers(
-        await listManagementGameServers(id)
-      );
-      setServers(nextServers);
-      const firstServer = nextServers.find((server) => server.isEnabled);
-      if (firstServer) {
-        setRestServerId(firstServer.id);
-        const response = await getManagementPalworldRestConnection(id, firstServer.id);
-        setRestResponses({ [firstServer.id]: response });
-        setRestBaseUrl(response.connection.baseUrl ?? "");
-      }
+      await loadServersForOrganization(id);
     } catch (loadError) {
       setError(messageFor(loadError, locale));
     } finally {
@@ -873,8 +945,8 @@ export function BotManagementPage({ embedded = false }: { embedded?: boolean }) 
     >
       <header className="bot-management-header">
         <span className="eyebrow">{text.eyebrow}</span>
-        <h1 ref={headingRef} tabIndex={-1}>{text.title}</h1>
-        <p>{text.description}</p>
+        <h1 ref={headingRef} tabIndex={-1}>{pageHeading.title}</h1>
+        <p>{pageHeading.description}</p>
       </header>
       {loading && !session ? <SkeletonCard role="status" loadingLabel={text.loading} /> : null}
       {!loading && session && !session.authenticated && !connectSession?.authenticated ? (
@@ -1057,7 +1129,43 @@ export function BotManagementPage({ embedded = false }: { embedded?: boolean }) 
             </CardContent>
           </Card>
 
-          {selectedOrganization ? (
+          {view === "overview" && selectedOrganization ? (
+            <section
+              aria-label={text.overviewTitle}
+              className="bot-management-destinations"
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle as="h2">{text.botDestination}</CardTitle>
+                  <CardDescription>{text.botDestinationDescription}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button
+                    as="a"
+                    href={organizationManagementHref("bot", selectedOrganization.id)}
+                  >
+                    {text.botDestinationAction}
+                  </Button>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle as="h2">{text.serverDestination}</CardTitle>
+                  <CardDescription>{text.serverDestinationDescription}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button
+                    as="a"
+                    href={organizationManagementHref("servers", selectedOrganization.id)}
+                  >
+                    {text.serverDestinationAction}
+                  </Button>
+                </CardContent>
+              </Card>
+            </section>
+          ) : null}
+
+          {view === "bot" && selectedOrganization ? (
             <BotControlCard
               csrfToken={session.csrfToken}
               organizationId={selectedOrganization.id}
@@ -1065,10 +1173,12 @@ export function BotManagementPage({ embedded = false }: { embedded?: boolean }) 
             />
           ) : null}
 
-          {!loading
-            && selectedOrganization?.role !== "viewer"
-            && servers.length === 0 ? (
-            <Card className="bot-management-create-card">
+          {view === "servers" ? (
+            <>
+              {!loading
+                && selectedOrganization?.role !== "viewer"
+                && servers.length === 0 ? (
+                <Card className="bot-management-create-card">
               <CardHeader>
                 <CardTitle as="h2">{text.createTitle}</CardTitle>
                 <CardDescription>{text.createDescription} {text.entitlement}</CardDescription>
@@ -1111,10 +1221,10 @@ export function BotManagementPage({ embedded = false }: { embedded?: boolean }) 
                   <p>{text.credentialDescription}</p>
                 </aside>
               </CardContent>
-            </Card>
-          ) : null}
+                </Card>
+              ) : null}
 
-          <section className="bot-management-servers" aria-labelledby="bot-management-servers-title">
+              <section className="bot-management-servers" aria-labelledby="bot-management-servers-title">
             <div className="bot-management-section-heading">
               <h2 id="bot-management-servers-title">{text.servers}</h2>
               <Button
@@ -1345,7 +1455,9 @@ export function BotManagementPage({ embedded = false }: { embedded?: boolean }) 
                 </Card>
               );
             })}
-          </section>
+              </section>
+            </>
+          ) : null}
         </>
       ) : null}
       {error ? <p className="bot-management-error" role="alert">{error}</p> : null}

@@ -20,7 +20,7 @@ export type GameServerRecord = Readonly<{
   displayName: string;
   gameType: "palworld";
   region: string;
-  connectionType: "agent" | "rest";
+  connectionType: "rest";
   connectionStatus: GameServerRow["connection_status"];
   isEnabled: boolean;
   createdAt: string;
@@ -33,7 +33,8 @@ function mapGameServer(row: GameServerRow): GameServerRecord {
     displayName: row.display_name,
     gameType: "palworld",
     region: row.region,
-    connectionType: row.connection_type,
+    // 적용 이력이 있는 DB의 legacy 값도 공개 계약에서는 REST로만 정규화한다.
+    connectionType: "rest",
     connectionStatus: row.connection_status,
     isEnabled: row.is_enabled,
     createdAt: row.created_at.toISOString(),
@@ -41,8 +42,8 @@ function mapGameServer(row: GameServerRow): GameServerRecord {
   });
 }
 
-function requireConnectionType(value: unknown): "agent" | "rest" {
-  if (value === "agent" || value === "rest") return value;
+function requireConnectionType(value: unknown): "rest" {
+  if (value === "rest") return value;
   throw new SafeDatabaseError("DATABASE_INVALID_INPUT", false);
 }
 
@@ -54,7 +55,7 @@ export class GameServerRepository {
     input: {
       displayName: string;
       region: string;
-      connectionType: "agent" | "rest";
+      connectionType: "rest";
     }
   ): Promise<GameServerRecord> {
     const result = await repositoryQuery<GameServerRow>(

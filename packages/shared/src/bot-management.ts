@@ -26,7 +26,7 @@ export type BotManagementGameServer = Readonly<{
   displayName: string;
   gameType: "palworld";
   region: PalworldServerRegion;
-  connectionType: "agent" | "rest";
+  connectionType: "rest";
   connectionStatus: "not_configured" | "pending" | "ready" | "unavailable" | "revoked";
   isEnabled: boolean;
   createdAt: string;

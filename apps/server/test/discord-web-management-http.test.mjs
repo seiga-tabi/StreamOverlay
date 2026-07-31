@@ -160,7 +160,7 @@ test("서명된 Bot 내부 상태 API는 Guild 귀속 요청만 상태 서비스
               server: {
                 displayName: "Palworld",
                 status: "online",
-                source: "agent",
+                source: "rest",
                 players: { current: 1, max: 32 }
               }
             };
@@ -188,7 +188,7 @@ test("서명된 Bot 내부 상태 API는 Guild 귀속 요청만 상태 서비스
       server: {
         displayName: "Palworld",
         status: "online",
-        source: "agent",
+        source: "rest",
         players: { current: 1, max: 32 }
       }
     });

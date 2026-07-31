@@ -22,8 +22,6 @@ type RestStatusReader = Readonly<{
   ): Promise<readonly PalworldOnlinePlayer[]>;
 }>;
 
-const DEFAULT_AGENT_STALE_AFTER_MS = 15 * 60 * 1_000;
-
 function restState(state: PalworldServerStatus["state"]): DiscordGameServerStatusState {
   switch (state) {
     case "not_configured":
@@ -127,57 +125,10 @@ function restServer(
   });
 }
 
-function agentServer(
-  server: GameServerStatusReadRecord,
-  now: number,
-  staleAfterMs: number
-): NonNullable<DiscordGameServerStatusResponse["server"]> {
-  const current = server.current;
-  let status: DiscordGameServerStatusState;
-  let reason: DiscordGameServerStatusReason | undefined;
-  if (server.connectionStatus === "not_configured") {
-    status = "not_configured";
-    reason = "status_not_configured";
-  } else if (server.connectionStatus === "unavailable"
-    || server.connectionStatus === "revoked") {
-    status = "unavailable";
-    reason = "upstream_unavailable";
-  } else if (!current) {
-    status = "checking";
-  } else {
-    const observedAt = Date.parse(current.observedAt);
-    status = Number.isFinite(observedAt) && now - observedAt > staleAfterMs
-      ? "stale"
-      : current.online
-        ? "online"
-        : "offline";
-    if (status === "stale") reason = "stale_data";
-  }
-  return Object.freeze({
-    displayName: server.displayName,
-    status,
-    ...(reason ? { reason } : {}),
-    source: "agent" as const,
-    ...(current
-      ? {
-          players: Object.freeze({
-            current: current.players,
-            max: current.maxPlayers
-          }),
-          ...(current.version ? { version: current.version } : {}),
-          ...(current.latencyMs === undefined ? {} : { latencyMs: current.latencyMs }),
-          observedAt: current.observedAt
-        }
-      : {})
-  });
-}
-
 export class GameServerStatusReadService {
   constructor(
     private readonly repository: GameServerStatusReadRepositoryContract,
     private readonly restStatusReader?: RestStatusReader,
-    private readonly now: () => number = Date.now,
-    private readonly agentStaleAfterMs = DEFAULT_AGENT_STALE_AFTER_MS,
     private readonly restUnavailableCode?: PalworldServerAvailabilityErrorCode
   ) {}
 
@@ -192,16 +143,6 @@ export class GameServerStatusReadService {
     if (!context) return Object.freeze({ connected: false });
     const server = await this.repository.findPalworldServer(context);
     if (!server) return Object.freeze({ connected: true });
-    if (server.connectionType === "agent") {
-      return Object.freeze({
-        connected: true,
-        server: agentServer(
-          server,
-          this.now(),
-          Math.max(60_000, this.agentStaleAfterMs)
-        )
-      });
-    }
     if (!this.restStatusReader) {
       return Object.freeze({
         connected: true,
@@ -242,14 +183,6 @@ export class GameServerStatusReadService {
         connected: true,
         serverConfigured: false,
         reason: "server_not_configured"
-      });
-    }
-    if (server.connectionType === "agent") {
-      return Object.freeze({
-        connected: true,
-        serverConfigured: true,
-        displayName: server.displayName,
-        reason: "agent_not_supported"
       });
     }
     if (!this.restStatusReader) {

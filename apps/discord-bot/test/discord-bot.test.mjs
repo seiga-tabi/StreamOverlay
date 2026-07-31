@@ -450,7 +450,7 @@ test("!yoro 상태는 Guild에 귀속된 안전한 공개 Embed만 응답한다"
           server: {
             displayName: "@everyone **Palworld**",
             status: "online",
-            source: "agent",
+            source: "rest",
             players: { current: 4, max: 32 },
             version: "v1.0",
             latencyMs: 21,
@@ -739,7 +739,7 @@ test("내부 API client는 게임 서버 상태 응답의 unknown field를 거�
       server: {
         displayName: "Palworld",
         status: "online",
-        source: "agent",
+        source: "rest",
         secret: "노출되면 안 됨"
       }
     }), { status: 200 })

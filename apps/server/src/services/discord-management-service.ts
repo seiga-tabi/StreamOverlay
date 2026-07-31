@@ -112,7 +112,6 @@ export function clearDiscordManagementCookie(name: string): string {
 
 export class DiscordManagementService {
   private cleanupTimer?: NodeJS.Timeout;
-  private readonly issueLimits = new Map<string, { count: number; resetAt: number }>();
 
   constructor(
     private readonly pool: Pool,
@@ -474,78 +473,6 @@ export class DiscordManagementService {
     if (!deleted) throw new DiscordManagementError("not_found", 404);
   }
 
-  async issueAgentToken(input: {
-    cookieValue?: string;
-    csrfToken?: string;
-    organizationId: string;
-    gameServerId: string;
-  }): Promise<{ installToken: string; expiresAt: string; gameServerId: string }> {
-    const authenticated = await this.requireMutationSession(
-      input.cookieValue,
-      input.csrfToken
-    );
-    this.consumeIssueLimit(
-      `${authenticated.userId}:${input.organizationId}:${input.gameServerId}`
-    );
-    const installToken = discordSafeToken(36);
-    const expiresAt = new Date(
-      Date.now() + appConfig.discordBotManagement.agentTokenTtlSeconds * 1_000
-    );
-    await withTransaction(this.pool, async (client) => {
-      const repository = new DiscordManagementRepository(client);
-      const membership = await repository.requireMembership(
-        authenticated.userId,
-        input.organizationId
-      );
-      await repository.issueAgentBootstrap({
-        context: membership.context,
-        role: membership.role,
-        gameServerId: input.gameServerId,
-        tokenHash: discordSecretHash(installToken),
-        expiresAt
-      });
-    }).catch((error: unknown) => {
-      if (error instanceof SafeDatabaseError && error.code === "DATABASE_REFERENCE_INVALID") {
-        throw new DiscordManagementError("permission_required", 403);
-      }
-      throw error;
-    });
-    return {
-      installToken,
-      expiresAt: expiresAt.toISOString(),
-      gameServerId: input.gameServerId
-    };
-  }
-
-  async revokeAgentToken(input: {
-    cookieValue?: string;
-    csrfToken?: string;
-    organizationId: string;
-    gameServerId: string;
-  }): Promise<void> {
-    const authenticated = await this.requireMutationSession(
-      input.cookieValue,
-      input.csrfToken
-    );
-    await withTransaction(this.pool, async (client) => {
-      const repository = new DiscordManagementRepository(client);
-      const membership = await repository.requireMembership(
-        authenticated.userId,
-        input.organizationId
-      );
-      await repository.revokeAgentBootstrap({
-        context: membership.context,
-        role: membership.role,
-        gameServerId: input.gameServerId
-      });
-    }).catch((error: unknown) => {
-      if (error instanceof SafeDatabaseError && error.code === "DATABASE_REFERENCE_INVALID") {
-        throw new DiscordManagementError("permission_required", 403);
-      }
-      throw error;
-    });
-  }
-
   async logout(cookieValue?: string): Promise<void> {
     const parsed = this.parseSessionCookie(cookieValue);
     if (!parsed) return;
@@ -665,22 +592,6 @@ export class DiscordManagementService {
     return body.id;
   }
 
-  private consumeIssueLimit(key: string): void {
-    const now = Date.now();
-    const hashed = crypto.createHash("sha256").update(key).digest("hex");
-    const current = this.issueLimits.get(hashed);
-    if (!current || current.resetAt <= now) {
-      this.issueLimits.set(hashed, { count: 1, resetAt: now + 60_000 });
-      return;
-    }
-    if (current.count >= 5) throw new DiscordManagementError("rate_limited", 429);
-    current.count += 1;
-    if (this.issueLimits.size > 10_000) {
-      for (const [entry, value] of this.issueLimits) {
-        if (value.resetAt <= now) this.issueLimits.delete(entry);
-      }
-    }
-  }
 }
 
 export function discordManagementReturnUrl(status?: "error"): string {

@@ -58,7 +58,6 @@ export const DISCORD_BOT_MESSAGES = {
       playerUnavailable: {
         server_not_configured: "아직 Palworld 게임 서버가 등록되지 않았습니다.",
         rest_not_configured: "Palworld REST 연결 설정이 완료되지 않았습니다.",
-        agent_not_supported: "현재 YORO Agent 연결에서는 플레이어 목록 조회를 지원하지 않습니다.",
         upstream_unavailable: "현재 Palworld 플레이어 목록을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요."
       },
       guildNotConnected: "이 Discord 서버가 YORO Organization과 연결되지 않았습니다.",
@@ -89,7 +88,7 @@ export const DISCORD_BOT_MESSAGES = {
         unavailable: "현재 상태 확인 불가"
       },
       reasons: {
-        status_not_configured: "서버는 등록되어 있지만 REST 또는 YORO Agent 상태 연결이 완료되지 않았습니다.",
+        status_not_configured: "서버는 등록되어 있지만 REST 상태 연결이 완료되지 않았습니다.",
         status_feature_disabled: "Palworld 상태 조회가 현재 운영 설정에서 비활성화되어 있습니다.",
         credentials_unavailable: "서비스 운영자가 상태 연결용 자격 증명 저장소를 확인해야 합니다.",
         auth_failed: "Palworld 서버 인증 설정을 확인해야 합니다.",
@@ -152,7 +151,6 @@ export const DISCORD_BOT_MESSAGES = {
       playerUnavailable: {
         server_not_configured: "Palworldゲームサーバーはまだ登録されていません。",
         rest_not_configured: "Palworld REST連携設定が完了していません。",
-        agent_not_supported: "現在のYORO Agent連携ではプレイヤー一覧の取得に対応していません。",
         upstream_unavailable: "現在Palworldプレイヤー一覧を取得できません。しばらくしてからお試しください。"
       },
       guildNotConnected: "このDiscordサーバーはYORO Organizationと連携されていません。",
@@ -183,7 +181,7 @@ export const DISCORD_BOT_MESSAGES = {
         unavailable: "現在状態を確認できません"
       },
       reasons: {
-        status_not_configured: "サーバーは登録されていますが、RESTまたはYORO Agentの状態連携が完了していません。",
+        status_not_configured: "サーバーは登録されていますが、REST状態連携が完了していません。",
         status_feature_disabled: "Palworld状態取得は現在の運用設定で無効化されています。",
         credentials_unavailable: "サービス運営者が状態連携用の認証情報ストレージを確認する必要があります。",
         auth_failed: "Palworldサーバーの認証設定を確認してください。",

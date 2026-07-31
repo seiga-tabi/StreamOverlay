@@ -480,21 +480,25 @@ test("Organization이 없는 YORO 로그인 사용자는 웹 claim 후 Dashboard
   await expect(claim).toBeDisabled();
   releaseClaim?.();
   await expect(
-    page.getByRole("heading", { name: "Palworld 게임 서버", exact: true })
+    page.getByRole("heading", { name: "Organization 개요", exact: true })
   ).toBeVisible();
+  await expect(page.getByRole("link", { name: "Bot 제어 열기" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "서버 관리 열기" })).toBeVisible();
   await expect(page.getByText("Discord 서버 연결이 완료되었습니다.")).toHaveCount(1);
   expect(claimRequests).toBe(1);
-  await expect(page).toHaveURL(/\/dashboard\/organizations\?connect=select$/u);
+  await expect(page).toHaveURL(
+    `/dashboard/organizations?organization=${organization.id}`
+  );
   await expectNoHorizontalOverflow(page);
 
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: "Palworld 게임 서버", exact: true })
+    page.getByRole("heading", { name: "Organization 개요", exact: true })
   ).toBeVisible();
   await page.goto("/bot");
   await page.goBack();
   await expect(
-    page.getByRole("heading", { name: "Palworld 게임 서버", exact: true })
+    page.getByRole("heading", { name: "Organization 개요", exact: true })
   ).toBeVisible();
   await page.goForward();
   await expect(page).toHaveURL(/\/bot$/u);
@@ -591,7 +595,7 @@ test("Guild claim 오류는 내부 tenant 정보를 노출하지 않고 안전�
   }
 });
 
-test("Organization 관리는 어두운 카드와 Palworld 서버 한 개·삭제 흐름만 표시한다", async ({ page }) => {
+test("Palworld 서버 관리는 활성 서버 한 개와 삭제 흐름만 표시한다", async ({ page }) => {
   await installAuthenticatedAccountRoute(page);
   const activeServer = {
     id: "33333333-3333-4333-8333-333333333333",
@@ -684,8 +688,12 @@ test("Organization 관리는 어두운 카드와 Palworld 서버 한 개·삭제
     await json(route, { code: "not_found" }, 404);
   });
 
-  await page.goto("/dashboard/organizations");
-  await expect(page.getByRole("heading", { name: "Organization 관리" })).toBeVisible();
+  await page.goto(
+    `/dashboard/organizations/servers?organization=${organization.id}`
+  );
+  await expect(
+    page.getByRole("heading", { name: "Palworld 서버 관리" })
+  ).toBeVisible();
   await expect(page.getByText(activeServer.displayName)).toBeVisible();
   await expect(page.getByText(disabledServer.displayName)).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Palworld REST 서버 등록" })).toHaveCount(0);
@@ -697,7 +705,7 @@ test("Organization 관리는 어두운 카드와 Palworld 서버 한 개·삭제
 
   await page.getByRole("button", { name: "서버 삭제" }).click();
   await expect(page.locator(".bot-management-delete-confirmation")).toContainText(
-    "저장된 REST 연결과 Agent 자격 증명도 폐기"
+    "저장된 REST 연결도 함께 삭제"
   );
   await page.getByRole("button", { name: "삭제 확인" }).click();
   await expect.poll(() => deleted).toBe(true);

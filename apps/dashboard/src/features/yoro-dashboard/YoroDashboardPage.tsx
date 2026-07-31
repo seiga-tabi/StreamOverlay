@@ -41,6 +41,8 @@ import {
 
 type UnifiedDashboardPage =
   | YoroDashboardPage
+  | "organizationBot"
+  | "organizationServers"
   | "streaming"
   | "streamingPermissions"
   | "streamingFollowers"
@@ -51,7 +53,10 @@ const copy = {
     brand: "YORO.gg Dashboard",
     overview: "홈",
     account: "연결 계정",
-    organizations: "Organization·Bot",
+    organizationGroup: "Organization",
+    organizations: "개요",
+    organizationBot: "Discord Bot 제어",
+    organizationServers: "Palworld 서버",
     streamingGroup: "스트리머",
     streaming: "이용 상태",
     streamingPermissions: "Twitch 권한",
@@ -80,7 +85,7 @@ const copy = {
     nextTitle: "다음 작업",
     nextConnectDiscord: "Discord 계정 연결",
     nextConnectOrganization: "Discord 서버와 Organization 연결",
-    nextManage: "게임 서버와 Agent 설정 관리",
+    nextManage: "게임 서버 REST 연결 관리",
     connectedAccounts: "연결된 계정",
     streamerState: "스트리머 상태",
     streamerNotRequested: "미신청",
@@ -138,7 +143,10 @@ const copy = {
     brand: "YORO.gg Dashboard",
     overview: "ホーム",
     account: "連携アカウント",
-    organizations: "Organization・Bot",
+    organizationGroup: "Organization",
+    organizations: "概要",
+    organizationBot: "Discord Bot コントロール",
+    organizationServers: "Palworldサーバー",
     streamingGroup: "ストリーマー",
     streaming: "利用状況",
     streamingPermissions: "Twitch権限",
@@ -167,7 +175,7 @@ const copy = {
     nextTitle: "次の操作",
     nextConnectDiscord: "Discordアカウントを連携",
     nextConnectOrganization: "DiscordサーバーとOrganizationを連携",
-    nextManage: "ゲームサーバーとAgent設定を管理",
+    nextManage: "ゲームサーバーのREST接続を管理",
     connectedAccounts: "連携アカウント",
     streamerState: "ストリーマー状態",
     streamerNotRequested: "未申請",
@@ -232,6 +240,8 @@ const paths: Record<YoroDashboardPage, string> = {
 
 const unifiedPaths: Record<UnifiedDashboardPage, string> = {
   ...paths,
+  organizationBot: "/dashboard/organizations/bot",
+  organizationServers: "/dashboard/organizations/servers",
   streaming: "/dashboard/streaming",
   streamingPermissions: "/dashboard/streaming/permissions",
   streamingFollowers: "/dashboard/streaming/followers",
@@ -296,11 +306,32 @@ export function yoroDashboardPageFromPath(pathname: string): UnifiedDashboardPag
   return "overview";
 }
 
-function navigate(page: UnifiedDashboardPage, replace = false): void {
+const organizationPages = new Set<UnifiedDashboardPage>([
+  "organizations",
+  "organizationBot",
+  "organizationServers"
+]);
+
+function organizationSearch(search: string): string {
+  const organizationId = new URLSearchParams(search).get("organization");
+  return organizationId
+    && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(organizationId)
+    ? `?organization=${encodeURIComponent(organizationId)}`
+    : "";
+}
+
+function dashboardUrl(page: UnifiedDashboardPage): string {
   const path = unifiedPaths[page];
-  if (window.location.pathname === path) return;
-  if (replace) window.history.replaceState({}, "", path);
-  else window.history.pushState({}, "", path);
+  return organizationPages.has(page)
+    ? `${path}${organizationSearch(window.location.search)}`
+    : path;
+}
+
+function navigate(page: UnifiedDashboardPage, replace = false): void {
+  const destination = dashboardUrl(page);
+  if (`${window.location.pathname}${window.location.search}` === destination) return;
+  if (replace) window.history.replaceState({}, "", destination);
+  else window.history.pushState({}, "", destination);
   window.dispatchEvent(new CustomEvent("publicroutechange"));
   window.scrollTo({
     top: 0,
@@ -386,7 +417,7 @@ export function YoroDashboardPage() {
     window.history.replaceState(
       {},
       "",
-      canonicalPath
+      `${canonicalPath}${organizationSearch(window.location.search)}`
     );
   }, []);
 
@@ -439,7 +470,7 @@ export function YoroDashboardPage() {
   }, [mobileMenuOpen]);
 
   useEffect(() => {
-    if (!authenticated) return undefined;
+    if (!authenticated || page !== "overview") return undefined;
     const controller = new AbortController();
     void getManagementSession(controller.signal)
       .then((session) => {
@@ -448,7 +479,7 @@ export function YoroDashboardPage() {
       })
       .catch(() => setManagementFailed(true));
     return () => controller.abort();
-  }, [authenticated]);
+  }, [authenticated, page]);
 
   useEffect(() => {
     if (!authenticated) return undefined;
@@ -651,7 +682,23 @@ export function YoroDashboardPage() {
           </div>
         </div>
         <nav aria-label={text.brand}>
-          {(["overview", "account", "organizations"] as UnifiedDashboardPage[]).map((item) => (
+          {(["overview", "account"] as UnifiedDashboardPage[]).map((item) => (
+            <button
+              aria-current={page === item ? "page" : undefined}
+              className={page === item ? "active" : ""}
+              key={item}
+              onClick={() => selectDashboardPage(item)}
+              type="button"
+            >
+              {text[item]}
+            </button>
+          ))}
+          <span className="yoro-dashboard-nav-label">{text.organizationGroup}</span>
+          {([
+            "organizations",
+            "organizationBot",
+            "organizationServers"
+          ] as UnifiedDashboardPage[]).map((item) => (
             <button
               aria-current={page === item ? "page" : undefined}
               className={page === item ? "active" : ""}
@@ -852,7 +899,13 @@ export function YoroDashboardPage() {
                   onCompleted={() => window.location.replace("/dashboard/organizations")}
                 />
               )
-            : <BotManagementPage embedded />
+            : <BotManagementPage embedded key="organization-overview" view="overview" />
+        ) : null}
+        {page === "organizationBot" ? (
+          <BotManagementPage embedded key="organization-bot" view="bot" />
+        ) : null}
+        {page === "organizationServers" ? (
+          <BotManagementPage embedded key="organization-servers" view="servers" />
         ) : null}
         {page === "streaming" ? (
           <section className="yoro-dashboard-streaming">

@@ -13,7 +13,6 @@ export type YoroRuntimeConfig = Readonly<{
     discordSaas: boolean;
     discordBot: boolean;
     discordBotManagement: boolean;
-    agentIngestion: boolean;
     twitchEventSub: boolean;
   }>;
   database?: Readonly<{
@@ -41,15 +40,6 @@ export type YoroRuntimeConfig = Readonly<{
   riot?: Readonly<{
     accountRegion?: string;
     lolPlatform?: string;
-  }>;
-  agent?: Readonly<{
-    enabled?: boolean;
-    serverOrigin?: string;
-    palworldOrigin?: string;
-    statusIntervalSeconds?: number;
-    requestTimeoutMs?: number;
-    maxRetryAttempts?: number;
-    ingestionCredentialTtlDays?: number;
   }>;
 }>;
 
@@ -192,9 +182,13 @@ export function parseYoroRuntimeConfig(value: unknown): YoroRuntimeConfig {
     "discordSaas",
     "discordBot",
     "discordBotManagement",
+    // schema v1 운영 파일의 하위 호환을 위해 읽기만 허용하고 기능에는 반영하지 않습니다.
     "agentIngestion",
     "twitchEventSub"
   ], "runtime_features");
+  if (features.agentIngestion !== undefined) {
+    bool(features.agentIngestion, "runtime_features_agent_ingestion");
+  }
   const featureConfig = {
     database: bool(features.database, "runtime_features_database"),
     discordSaas: bool(features.discordSaas, "runtime_features_discord_saas"),
@@ -203,7 +197,6 @@ export function parseYoroRuntimeConfig(value: unknown): YoroRuntimeConfig {
       features.discordBotManagement,
       "runtime_features_discord_bot_management"
     ),
-    agentIngestion: bool(features.agentIngestion, "runtime_features_agent_ingestion"),
     twitchEventSub: bool(features.twitchEventSub, "runtime_features_twitch_eventsub")
   };
 
@@ -353,7 +346,8 @@ export function parseYoroRuntimeConfig(value: unknown): YoroRuntimeConfig {
     };
   }
 
-  let agent: YoroRuntimeConfig["agent"];
+  // 제거된 Agent 설정은 기존 production runtime.json을 깨지 않도록 schema v1에서만
+  // 엄격히 검증한 뒤 무시합니다.
   if (root.agent !== undefined) {
     const item = record(root.agent, "runtime_agent");
     exactKeys(item, [
@@ -365,40 +359,17 @@ export function parseYoroRuntimeConfig(value: unknown): YoroRuntimeConfig {
       "maxRetryAttempts",
       "ingestionCredentialTtlDays"
     ], "runtime_agent");
-    agent = {
-      ...(item.enabled !== undefined
-        ? { enabled: bool(item.enabled, "runtime_agent_enabled") }
-        : {}),
-      ...(item.serverOrigin !== undefined
-        ? { serverOrigin: origin(item.serverOrigin, "runtime_agent_server_origin", environment) }
-        : {}),
-      ...(item.palworldOrigin !== undefined
-        ? {
-            palworldOrigin: origin(
-              item.palworldOrigin,
-              "runtime_agent_palworld_origin",
-              "development"
-            )
-          }
-        : {}),
-      ...(optionalInteger(item.statusIntervalSeconds, "runtime_agent_interval", 60, 3_600) !== undefined
-        ? { statusIntervalSeconds: item.statusIntervalSeconds as number }
-        : {}),
-      ...(optionalInteger(item.requestTimeoutMs, "runtime_agent_timeout", 500, 30_000) !== undefined
-        ? { requestTimeoutMs: item.requestTimeoutMs as number }
-        : {}),
-      ...(optionalInteger(item.maxRetryAttempts, "runtime_agent_retries", 0, 5) !== undefined
-        ? { maxRetryAttempts: item.maxRetryAttempts as number }
-        : {}),
-      ...(optionalInteger(
-        item.ingestionCredentialTtlDays,
-        "runtime_agent_credential_ttl",
-        1,
-        365
-      ) !== undefined
-        ? { ingestionCredentialTtlDays: item.ingestionCredentialTtlDays as number }
-        : {})
-    };
+    if (item.enabled !== undefined) bool(item.enabled, "runtime_agent_enabled");
+    if (item.serverOrigin !== undefined) {
+      origin(item.serverOrigin, "runtime_agent_server_origin", environment);
+    }
+    if (item.palworldOrigin !== undefined) {
+      origin(item.palworldOrigin, "runtime_agent_palworld_origin", "development");
+    }
+    optionalInteger(item.statusIntervalSeconds, "runtime_agent_interval", 60, 3_600);
+    optionalInteger(item.requestTimeoutMs, "runtime_agent_timeout", 500, 30_000);
+    optionalInteger(item.maxRetryAttempts, "runtime_agent_retries", 0, 5);
+    optionalInteger(item.ingestionCredentialTtlDays, "runtime_agent_credential_ttl", 1, 365);
   }
 
   if ((featureConfig.discordSaas || featureConfig.discordBot) && !discord) {
@@ -407,8 +378,7 @@ export function parseYoroRuntimeConfig(value: unknown): YoroRuntimeConfig {
   if (
     (featureConfig.discordSaas
       || featureConfig.discordBot
-      || featureConfig.discordBotManagement
-      || featureConfig.agentIngestion)
+      || featureConfig.discordBotManagement)
     && !featureConfig.database
   ) {
     throw new YoroRuntimeConfigError("runtime_database_feature_dependency");
@@ -435,7 +405,6 @@ export function parseYoroRuntimeConfig(value: unknown): YoroRuntimeConfig {
     ...(database ? { database: Object.freeze(database) } : {}),
     ...(discord ? { discord: Object.freeze(discord) } : {}),
     ...(twitch ? { twitch: Object.freeze(twitch) } : {}),
-    ...(riot ? { riot: Object.freeze(riot) } : {}),
-    ...(agent ? { agent: Object.freeze(agent) } : {})
+    ...(riot ? { riot: Object.freeze(riot) } : {})
   });
 }

@@ -72,7 +72,6 @@ import { closeDatabasePool, databasePool } from "./database/pool.js";
 import { DiscordOnboardingService } from "./services/discord-onboarding-service.js";
 import { DiscordManagementService } from "./services/discord-management-service.js";
 import { YoroAccountService } from "./services/yoro-account-service.js";
-import { AgentIngestionService } from "./services/agent-ingestion-service.js";
 import { DiscordInternalAuthVerifier } from "./security/discord-internal-auth.js";
 import { GameServerStatusReadRepository } from "./database/repositories/game-server-status-read-repository.js";
 import { GameServerStatusReadService } from "./services/game-server-status-read-service.js";
@@ -117,16 +116,12 @@ const yoroAccounts = appConfig.discordBotManagement.enabled && postgresPool
 const discordManagement = appConfig.discordBotManagement.enabled && postgresPool
   ? new DiscordManagementService(postgresPool, logger, fetch, yoroAccounts)
   : undefined;
-const agentIngestion = appConfig.agentIngestion.enabled && postgresPool
-  ? new AgentIngestionService(postgresPool, logger)
-  : undefined;
 const discordInternalAuth = appConfig.discordBotInternal.enabled
   ? new DiscordInternalAuthVerifier(appConfig.discordBotInternal.authKey)
   : undefined;
 discordOnboarding?.startCleanup();
 yoroAccounts?.startCleanup();
 discordManagement?.startCleanup();
-agentIngestion?.startCleanup();
 let palworldDataService: PalworldDataService | undefined;
 let palworldMapMarkerProvider: PalworldMapMarkerProvider | undefined;
 let palworldSpawnProvider: PalworldSpawnProvider | undefined;
@@ -439,8 +434,6 @@ const gameServerStatusRead = appConfig.discordBotInternal.enabled && postgresPoo
   ? new GameServerStatusReadService(
       new GameServerStatusReadRepository(postgresPool),
       palworldServerMonitor,
-      undefined,
-      undefined,
       palworldServerUnavailableCode
     )
   : undefined;
@@ -558,8 +551,6 @@ const server = http.createServer(createHttpHandler({
   discordInternalAuth,
   gameServerStatusRead,
   discordBotCommandPolicy,
-  agentIngestion,
-  agentDatabaseReady: () => databaseHealth.snapshot().ready,
   readiness: () => {
     const storeReadiness = store.getReadiness();
     const database = databaseHealth.snapshot();
@@ -839,7 +830,6 @@ function shutdown(signal: NodeJS.Signals): void {
   discordOnboarding?.stopCleanup();
   discordManagement?.stopCleanup();
   yoroAccounts?.stopCleanup();
-  agentIngestion?.stopCleanup();
   databaseHealth.stop();
   closeLolGameMonitors();
   closeWebSocketServer(bridgeWss);

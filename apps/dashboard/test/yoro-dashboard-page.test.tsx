@@ -62,8 +62,10 @@ test("공통 YORO Dashboard는 로그인 사용자용 진입점과 KO·JA 문구
   assert.match(markup, /Dashboard를 불러오는 중입니다/u);
   assert.match(source, /연결 계정/u);
   assert.match(source, /連携アカウント/u);
-  assert.match(source, /Organization·Bot/u);
-  assert.match(source, /Organization・Bot/u);
+  assert.match(source, /Discord Bot 제어/u);
+  assert.match(source, /Discord Bot コントロール/u);
+  assert.match(source, /Palworld 서버/u);
+  assert.match(source, /Palworldサーバー/u);
   assert.match(source, /updateAccountPreferences/u);
   assert.match(source, /discordIdentity\.displayName/u);
   assert.match(source, /twitchIdentity\.displayName/u);
@@ -121,6 +123,18 @@ test("공통 Dashboard 경로는 기존 방송 운영 하위 경로와 겹치지
   assert.equal(
     yoroDashboardPageFromPath("/dashboard/organizations/"),
     "organizations"
+  );
+  assert.equal(
+    yoroDashboardPageFromPath("/dashboard/organizations/bot"),
+    "organizationBot"
+  );
+  assert.equal(
+    yoroDashboardPageFromPath("/dashboard/organizations/servers/"),
+    "organizationServers"
+  );
+  assert.equal(
+    canonicalYoroDashboardPath("/dashboard/organizations/bot/"),
+    "/dashboard/organizations/bot"
   );
   assert.equal(yoroDashboardPageFromPath("/dashboard/settings"), "settings");
   assert.equal(

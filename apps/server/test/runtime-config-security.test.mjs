@@ -353,37 +353,12 @@ test("Discord Bot 관리 기능은 Database·Discord SaaS와 정확한 callback�
     ...base,
     DISCORD_MANAGEMENT_OAUTH_REDIRECT_URI:
       "https://attacker.example/api/discord/management/oauth/callback?next=external",
-    DISCORD_MANAGEMENT_IDLE_TTL_SECONDS: "28801",
-    AGENT_BOOTSTRAP_TTL_SECONDS: "1801"
+    DISCORD_MANAGEMENT_IDLE_TTL_SECONDS: "28801"
   });
   assert.equal(unsafeCallback.status, 2);
   assert.match(unsafeCallback.stdout, /정확한 관리 callback URL/u);
   assert.match(unsafeCallback.stdout, /DISCORD_MANAGEMENT_IDLE_TTL_SECONDS/u);
-  assert.match(unsafeCallback.stdout, /AGENT_BOOTSTRAP_TTL_SECONDS/u);
   assert.doesNotMatch(unsafeCallback.stdout, /attacker\.example/u);
-});
-
-test("Agent Ingestion은 기본 비활성이고 활성화 시 안전한 범위만 허용한다", () => {
-  const disabledDatabase = runConfigValidation({
-    AGENT_INGESTION_ENABLED: "true",
-    DATABASE_ENABLED: "false"
-  });
-  assert.equal(disabledDatabase.status, 0, disabledDatabase.stderr || disabledDatabase.stdout);
-
-  const invalid = runConfigValidation({
-    AGENT_INGESTION_ENABLED: "true",
-    AGENT_CREDENTIAL_TTL_DAYS: "0",
-    AGENT_CLOCK_SKEW_SECONDS: "10",
-    AGENT_NONCE_TTL_SECONDS: "5",
-    AGENT_MAXIMUM_BODY_BYTES: "999",
-    AGENT_RATE_LIMIT_PER_MINUTE: "601"
-  });
-  assert.equal(invalid.status, 2);
-  assert.match(invalid.stdout, /AGENT_CREDENTIAL_TTL_DAYS/u);
-  assert.match(invalid.stdout, /AGENT_CLOCK_SKEW_SECONDS/u);
-  assert.match(invalid.stdout, /AGENT_NONCE_TTL_SECONDS/u);
-  assert.match(invalid.stdout, /AGENT_MAXIMUM_BODY_BYTES/u);
-  assert.match(invalid.stdout, /AGENT_RATE_LIMIT_PER_MINUTE/u);
 });
 
 test("production 설정은 약한 secret, http URL, wildcard CORS를 거부하고 secret 값을 출력하지 않는다", () => {

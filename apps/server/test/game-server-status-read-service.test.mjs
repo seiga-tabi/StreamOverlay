@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { GameServerStatusReadRepository } from "../dist/database/repositories/game-server-status-read-repository.js";
 import { GameServerStatusReadService } from "../dist/services/game-server-status-read-service.js";
 
 const context = Object.freeze({
@@ -33,55 +34,31 @@ test("상태 조회는 연결되지 않은 Guild와 서버 미등록을 구분�
   }), { connected: true });
 });
 
-test("Agent 상태는 current를 사용하고 오래된 관측을 stale로 변환한다", async () => {
-  const base = {
-    id: "20000000-0000-4000-8000-000000000001",
-    displayName: "Seiga Palworld",
-    connectionType: "agent",
-    connectionStatus: "ready",
-    current: {
-      online: true,
-      players: 4,
-      maxPlayers: 32,
-      version: "v1.0",
-      latencyMs: 22,
-      observedAt: "2026-07-30T00:00:00.000Z"
+test("기존 Agent 유형 레코드도 REST 상태 조회 대상으로 복구한다", async () => {
+  const queries = [];
+  const repository = new GameServerStatusReadRepository({
+    async query(text, values) {
+      queries.push({ text, values });
+      return {
+        rows: [{
+          id: "20000000-0000-4000-8000-000000000009",
+          display_name: "기존 Palworld 서버",
+          connection_status: "ready"
+        }],
+        rowCount: 1
+      };
     }
-  };
-  const recent = new GameServerStatusReadService(
-    repository(base),
-    undefined,
-    () => Date.parse("2026-07-30T00:05:00.000Z")
-  );
-  assert.deepEqual((await recent.read({
-    applicationId: "100000000000000001",
-    guildId: "100000000000000002"
-  })).server, {
-    displayName: "Seiga Palworld",
-    status: "online",
-    source: "agent",
-    players: { current: 4, max: 32 },
-    version: "v1.0",
-    latencyMs: 22,
-    observedAt: "2026-07-30T00:00:00.000Z"
   });
-
-  const stale = new GameServerStatusReadService(
-    repository(base),
-    undefined,
-    () => Date.parse("2026-07-30T00:20:00.000Z")
-  );
-  assert.equal((await stale.read({
-    applicationId: "100000000000000001",
-    guildId: "100000000000000002"
-  })).server.reason, "stale_data");
+  const server = await repository.findPalworldServer(context);
+  assert.equal(server?.displayName, "기존 Palworld 서버");
+  assert.doesNotMatch(queries[0].text, /connection_type\s*=\s*'rest'/u);
+  assert.deepEqual(queries[0].values, [context.organizationId]);
 });
 
 test("REST 상태는 설정된 source만 읽고 내부 진단을 DTO에 포함하지 않는다", async () => {
   const server = {
     id: "20000000-0000-4000-8000-000000000002",
     displayName: "REST Palworld",
-    connectionType: "rest",
     connectionStatus: "ready"
   };
   let ownerId;
@@ -150,13 +127,10 @@ test("REST subsystem 비활성은 자격 증명 오류와 구분된 공개 사�
   const server = {
     id: "20000000-0000-4000-8000-000000000003",
     displayName: "REST Palworld",
-    connectionType: "rest",
     connectionStatus: "ready"
   };
   const service = new GameServerStatusReadService(
     repository(server),
-    undefined,
-    Date.now,
     undefined,
     "disabled"
   );
@@ -175,7 +149,6 @@ test("플레이어 조회는 닉네임 목록과 정확히 일치하는 안전�
   const server = {
     id: "20000000-0000-4000-8000-000000000004",
     displayName: "REST Palworld",
-    connectionType: "rest",
     connectionStatus: "ready"
   };
   const service = new GameServerStatusReadService(repository(server), {
@@ -229,28 +202,14 @@ test("플레이어 조회는 닉네임 목록과 정확히 일치하는 안전�
   });
 });
 
-test("플레이어 조회는 Agent 미지원과 REST 미설정을 안전한 사유로 구분한다", async () => {
+test("플레이어 조회는 REST 미설정을 안전한 사유로 반환한다", async () => {
   const base = {
     applicationId: "100000000000000001",
     guildId: "100000000000000002"
   };
-  const agent = new GameServerStatusReadService(repository({
-    id: "20000000-0000-4000-8000-000000000005",
-    displayName: "Agent Palworld",
-    connectionType: "agent",
-    connectionStatus: "ready"
-  }));
-  assert.deepEqual(await agent.readPlayers(base), {
-    connected: true,
-    serverConfigured: true,
-    displayName: "Agent Palworld",
-    reason: "agent_not_supported"
-  });
-
   const rest = new GameServerStatusReadService(repository({
     id: "20000000-0000-4000-8000-000000000006",
     displayName: "REST Palworld",
-    connectionType: "rest",
     connectionStatus: "ready"
   }), {
     getDashboardResponse() {

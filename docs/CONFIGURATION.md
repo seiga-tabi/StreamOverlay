@@ -8,7 +8,7 @@ TypeScript 기본값
 → test 전용 override
 ```
 
-`YORO_CONFIG_FILE`이 설정되면 Server, Discord Bot, Agent는 legacy `.env` 설정을
+`YORO_CONFIG_FILE`이 설정되면 Server와 Discord Bot은 legacy `.env` 설정을
 우선순위에 섞지 않습니다. 운영 Compose는 이 값을
 `/etc/yoro/runtime.json`으로 고정합니다. 설정 파일이 없을 때만 로컬 개발
 호환을 위해 기존 env parser를 사용합니다.

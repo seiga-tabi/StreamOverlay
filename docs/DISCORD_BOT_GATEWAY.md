@@ -23,10 +23,10 @@
 `status`, `player`, `players`, `guide`, `help`를 exact allowlist로 지원한다.
 플레이어 명령만 최대 80자의 닉네임 인수를 받으며 나머지 자유 형식 문장은
 받지 않는다. prefix 응답은 Discord의 일반 채널 메시지이며
-ephemeral이 아니다. 서버 주소, REST URL, `AdminPassword`, Agent credential,
+ephemeral이 아니다. 서버 주소, REST URL, `AdminPassword`, REST credential,
 Organization ID와 내부 오류 정보는 표시하지 않는다.
 
-Agent 등록·상태 수집 기반은 재사용하지만 Notification Worker, RCON, 서버
+Palworld REST 상태 수집 기반은 재사용하지만 Notification Worker, RCON, 서버
 제어와 임의 메시지 전송은 포함하지 않는다. 상태 이력 저장 기준을 확정하기
 전까지 `!yoro 기록`은 제공하지 않는다.
 
@@ -123,7 +123,7 @@ revision, 응답 locale과 표시 가능한 상태 field allowlist만 포함한�
 Server는 요청의
 Application ID와 Guild ID로 활성 설치와 Organization을 다시 결정한 뒤
 tenant-bound 조회를 수행한다. 메시지나 URL에서 받은 Organization ID와 게임
-서버 ID를 신뢰하지 않는다. REST 연결과 Agent 연결은 각각의 현재 상태
+서버 ID를 신뢰하지 않는다. REST 연결의 현재 상태
 source만 읽으며 서로의 값을 섞지 않는다.
 
 상태 응답은 상태값과 공개 가능한 `reason`을 분리합니다. `reason`은 상태

@@ -163,4 +163,4 @@ yoro-production_palworld_credentials`, `docker system prune --volumes`는 key를
 
 설정 파일 누락·schema 오류, allowlist 정책 누락, secret 누락·손상 또는 원격 Palworld 서버 장애는 Palworld subsystem에만 반영됩니다. LoL, Overlay, Followers, OBS Bridge와 `/health/ready`는 해당 오류 때문에 실패하지 않습니다. Dashboard에는 내부 경로나 원시 오류 대신 안전한 한국어·일본어 운영 안내만 표시됩니다.
 
-Palworld의 평문 HTTP 서버까지 완전한 자가 등록이 필요해지더라도 중앙 서버의 public HTTP 또는 사설망 정책을 완화하지 않습니다. 그 요구는 스트리머 네트워크 안에서 outbound 연결을 만드는 로컬 agent 또는 인증된 relay 방식의 별도 설계 대상으로 다룹니다.
+Palworld의 평문 HTTP 서버까지 완전한 자가 등록이 필요해지더라도 중앙 서버의 public HTTP 또는 사설망 정책을 완화하지 않습니다. 해당 서버는 운영자가 승인한 exact origin과 CIDR 정책을 통해서만 연결합니다.

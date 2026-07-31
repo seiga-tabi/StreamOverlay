@@ -38,13 +38,6 @@ discord_internal_auth_key_bot
 mount합니다. 컨테이너 내부 경로는 두 서비스 모두
 `/run/secrets/discord_internal_auth_key`입니다.
 
-Agent 전용:
-
-```text
-yoro_agent_bootstrap_token
-palworld_admin_password
-```
-
 Cloudflare 전용:
 
 ```text

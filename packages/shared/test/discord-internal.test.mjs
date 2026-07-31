@@ -81,7 +81,7 @@ test("Discord 게임 서버 상태 계약은 허용된 안전 필드만 통과�
       displayName: "Palworld 서버",
       status: "online",
       reason: "partial_data",
-      source: "agent",
+      source: "rest",
       players: { current: 3, max: 32 },
       version: "v1.0",
       latencyMs: 24,
