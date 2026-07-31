@@ -2393,31 +2393,6 @@
   color: var(--bot-text);
 }
 
-.public-bot-onboarding__hero {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(16rem, .75fr);
-  align-items: center;
-  gap: clamp(2rem, 6vw, 5rem);
-  min-height: 24rem;
-  padding: clamp(2rem, 5vw, 4rem);
-  overflow: hidden;
-  border: 1px solid var(--bot-border);
-  border-radius: 1.25rem;
-  background:
-    radial-gradient(circle at 82% 20%, color-mix(in srgb, var(--bot-violet) 24%, transparent), transparent 19rem),
-    linear-gradient(135deg, color-mix(in srgb, var(--bot-blue) 8%, transparent), transparent 52%),
-    var(--bot-card-subtle);
-  box-shadow: 0 1.5rem 5rem rgba(0, 0, 0, .24);
-}
-
-.public-bot-onboarding__hero > div:first-child {
-  position: relative;
-  z-index: 1;
-  max-width: 45rem;
-}
-
-.public-bot-onboarding__hero > div:first-child > span,
 .public-bot-onboarding__preview > span {
   color: var(--bot-blue);
   font-size: .75rem;
@@ -2425,105 +2400,17 @@
   letter-spacing: .14em;
 }
 
-.public-bot-onboarding__hero h1 {
-  max-width: 14ch;
-  margin: .75rem 0 1.1rem;
-  font-size: clamp(2.5rem, 5.5vw, 4.25rem);
-  line-height: 1.08;
-  letter-spacing: -.05em;
-  word-break: keep-all;
-}
-
-.public-bot-onboarding__hero p,
 .public-bot-onboarding__preview > p {
+  min-width: 0;
   margin: 0;
   color: var(--bot-muted);
   font-size: 1.03rem;
   line-height: 1.75;
-}
-
-.public-bot-onboarding__hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 1rem;
-  margin-top: 1.75rem;
-}
-
-.public-bot-onboarding__hero-actions > span {
-  color: var(--bot-muted);
-  font-size: .85rem;
-}
-
-.public-bot-onboarding__hero-mark {
-  position: relative;
-  display: grid;
-  grid-template-columns: 4rem 2.5rem 4rem;
-  align-items: center;
-  justify-content: center;
-  gap: .5rem;
-  min-height: 15rem;
-}
-
-.public-bot-onboarding__hero-mark::before {
-  position: absolute;
-  inset: 50% 12% auto;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--bot-blue), var(--bot-violet), transparent);
-  content: "";
-}
-
-.public-bot-onboarding__hero-mark > .discord-symbol-icon {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: 4.25rem;
-  padding: .85rem;
-  border: 1px solid var(--bot-border-strong);
-  border-radius: 50%;
-  background: var(--bot-card);
-  box-shadow: 0 0 2rem color-mix(in srgb, var(--bot-violet) 25%, transparent);
-  transform: translateX(-50%);
-}
-
-.public-bot-onboarding__hero-mark > span {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  width: 4rem;
-  height: 4rem;
-  place-items: center;
-  border: 1px solid var(--bot-border-strong);
-  border-radius: 50%;
-  background: var(--bot-card-raised);
-  font-weight: 800;
-}
-
-.public-bot-onboarding__hero-mark > strong {
-  position: relative;
-  z-index: 1;
-  color: var(--bot-blue);
-  font-size: 1.4rem;
-  text-align: center;
-}
-
-.public-bot-onboarding__hero-mark > em {
-  position: absolute;
-  bottom: .35rem;
-  left: 50%;
-  padding: .45rem .8rem;
-  border: 1px solid color-mix(in srgb, var(--bot-violet) 50%, var(--bot-border));
-  border-radius: 99rem;
-  background: color-mix(in srgb, var(--bot-violet) 15%, var(--bot-card));
-  color: var(--bot-text);
-  font-size: .75rem;
-  font-style: normal;
-  font-weight: 800;
-  transform: translateX(-50%);
+  overflow-wrap: anywhere;
 }
 
 .public-bot-onboarding__progress {
-  margin-block: 1.25rem clamp(3rem, 7vw, 5.5rem);
+  margin-block: 0 clamp(3rem, 7vw, 5.5rem);
   padding: 1.25rem;
   overflow: hidden;
   border: 1px solid var(--bot-border);
@@ -2764,6 +2651,7 @@
 .public-bot-onboarding__preview {
   position: sticky;
   top: 8rem;
+  min-width: 0;
   padding: clamp(1.35rem, 3vw, 2rem);
   border: 1px solid color-mix(in srgb, var(--bot-violet) 38%, var(--bot-border));
   border-radius: 1rem;
@@ -2773,10 +2661,12 @@
 }
 
 .public-bot-onboarding__preview h2 {
+  max-width: 100%;
   margin: .5rem 0 .75rem;
   font-size: clamp(1.5rem, 3vw, 2rem);
   line-height: 1.2;
-  word-break: keep-all;
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 
 .public-bot-onboarding__preview .public-bot-discord-preview {
@@ -2788,10 +2678,6 @@
 }
 
 @media (max-width: 62rem) {
-  .public-bot-onboarding__hero {
-    grid-template-columns: minmax(0, 1fr) minmax(13rem, .55fr);
-  }
-
   .public-bot-onboarding__layout {
     grid-template-columns: 1fr;
   }
@@ -2804,30 +2690,6 @@
 }
 
 @media (max-width: 44rem) {
-  .public-bot-onboarding__hero {
-    grid-template-columns: 1fr;
-    min-height: auto;
-    padding: 2rem 1.25rem;
-    text-align: center;
-  }
-
-  .public-bot-onboarding__hero > div:first-child {
-    margin-inline: auto;
-  }
-
-  .public-bot-onboarding__hero h1 {
-    margin-inline: auto;
-    font-size: clamp(2.15rem, 10vw, 3rem);
-  }
-
-  .public-bot-onboarding__hero-actions {
-    justify-content: center;
-  }
-
-  .public-bot-onboarding__hero-mark {
-    min-height: 12rem;
-  }
-
   .public-bot-onboarding__progress {
     padding-inline: .75rem;
     overflow-x: auto;

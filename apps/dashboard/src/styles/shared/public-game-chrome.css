@@ -386,14 +386,31 @@
 }
 
 .public-game-header .public-app-locale-menu .public-locale-popover {
+  display: grid;
+  inline-size: 12rem;
+  min-inline-size: 12rem;
+  max-inline-size: calc(100vw - (var(--yoro-space-4) * 2));
+  gap: var(--yoro-space-1);
+  padding: var(--yoro-space-2);
   border: thin solid var(--public-game-chrome-border-strong) !important;
+  border-radius: var(--yoro-radius-md);
   background: var(--public-game-chrome-surface) !important;
   color: var(--public-game-chrome-text) !important;
   box-shadow: var(--yoro-shadow-panel);
 }
 
 .public-game-header .public-app-locale-menu .public-locale-popover button {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto var(--yoro-space-4);
+  align-items: center;
+  inline-size: 100%;
+  min-block-size: var(--yoro-size-touch-target);
+  gap: var(--yoro-space-2);
+  padding: var(--yoro-space-2) var(--yoro-space-3);
+  border-radius: var(--yoro-radius-sm);
   color: var(--public-game-chrome-text-muted) !important;
+  cursor: pointer;
+  text-align: start;
 }
 
 .public-game-header .public-app-locale-menu .public-locale-popover button:hover,
@@ -409,11 +426,40 @@
 }
 
 .public-game-header .public-app-locale-menu .public-locale-option-code {
+  display: grid;
+  min-inline-size: 2.25rem;
+  min-block-size: 1.75rem;
+  place-items: center;
+  padding-inline: var(--yoro-space-2);
+  overflow: visible;
+  border-radius: 999px;
   background: var(--public-game-chrome-surface-muted);
   color: inherit;
+  font-size: var(--yoro-font-size-xs);
+  line-height: 1;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+.public-game-header .public-app-locale-menu .public-locale-option-label {
+  display: block;
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow: hidden;
+  border-radius: 0;
+  background: transparent !important;
+  color: inherit;
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-bold);
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .public-game-header .public-app-locale-menu .public-locale-option-check {
+  display: grid;
+  inline-size: var(--yoro-space-4);
+  place-items: center;
   color: var(--public-game-accent);
 }
 

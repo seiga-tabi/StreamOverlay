@@ -119,8 +119,8 @@ test("YORO Bot 사용방법·명령어·게임파일은 canonical URL별 독립 
 
   window.location.pathname = "/bot/getting-started";
   const connectMarkup = renderToStaticMarkup(<PublicBotPage />);
-  assert.match(connectMarkup, /연결 과정/u);
-  assert.match(connectMarkup, /5분 안에 Discord와 게임 서버를 연결하세요/u);
+  assert.doesNotMatch(connectMarkup, /public-bot-onboarding__hero/u);
+  assert.doesNotMatch(connectMarkup, /5분 안에 Discord와 게임 서버를 연결하세요/u);
   assert.match(connectMarkup, /YORO Bot 추가/u);
   assert.match(connectMarkup, /로그인 및 Organization 연결/u);
   assert.match(connectMarkup, /Palworld REST 연결/u);
@@ -145,7 +145,8 @@ test("YORO Bot 사용방법·명령어·게임파일은 canonical URL별 독립 
 
   window.location.pathname = "/ja/bot/getting-started";
   const japaneseConnectMarkup = renderToStaticMarkup(<PublicBotPage />);
-  assert.match(japaneseConnectMarkup, /5分でDiscordとゲームサーバーを連携しましょう/u);
+  assert.doesNotMatch(japaneseConnectMarkup, /public-bot-onboarding__hero/u);
+  assert.doesNotMatch(japaneseConnectMarkup, /5分でDiscordとゲームサーバーを連携しましょう/u);
   assert.match(japaneseConnectMarkup, /ログインとOrganization連携/u);
   assert.match(japaneseConnectMarkup, /完了結果/u);
   assert.match(japaneseConnectMarkup, /連携完了後はこのように表示されます/u);

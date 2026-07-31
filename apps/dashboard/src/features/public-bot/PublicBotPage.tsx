@@ -118,10 +118,7 @@ const botText = {
     featureNotificationDescription: "중복 방지와 tenant 격리를 적용한 알림 Worker를 후속 단계에서 연결합니다.",
     available: "기반 완료",
     planned: "준비 중",
-    flowTitle: "연결 과정",
-    flowHeroTitle: "5분 안에 Discord와 게임 서버를 연결하세요",
     flowDescription: "Bot 추가부터 첫 상태 확인까지, 다음에 해야 할 작업과 완료 결과를 순서대로 안내합니다.",
-    flowDuration: "5단계 · 약 5분",
     flowProgressLabel: "YORO Bot 5단계 연결 순서",
     flowStep: "STEP",
     flowResult: "완료 결과",
@@ -279,10 +276,7 @@ const botText = {
     featureNotificationDescription: "重複防止とtenant分離を適用した通知Workerを後続段階で連携します。",
     available: "基盤完了",
     planned: "準備中",
-    flowTitle: "連携手順",
-    flowHeroTitle: "5分でDiscordとゲームサーバーを連携しましょう",
     flowDescription: "Bot追加から最初の状態確認まで、次に行う作業と完了結果を順番に案内します。",
-    flowDuration: "5ステップ・約5分",
     flowProgressLabel: "YORO Bot 5ステップ連携手順",
     flowStep: "STEP",
     flowResult: "完了結果",
@@ -1310,34 +1304,6 @@ export function PublicBotPage() {
           ] as const;
           return (
             <section className="public-bot-onboarding public-bot-page-section" id="bot-flow">
-              <header className="public-bot-onboarding__hero">
-                <div>
-                  <span>ONBOARDING · {text.flowTitle}</span>
-                  <h1>{text.flowHeroTitle}</h1>
-                  <p>{text.flowDescription}</p>
-                  <div className="public-bot-onboarding__hero-actions">
-                    <a
-                      aria-label={text.addBotNewTab}
-                      className="public-bot-button is-primary"
-                      href={botInstallUrl()}
-                      rel="noopener noreferrer"
-                      target="_blank"
-                    >
-                      <DiscordSymbolIcon />
-                      {text.flowAddBotAction}
-                    </a>
-                    <span>{text.flowDuration}</span>
-                  </div>
-                </div>
-                <div className="public-bot-onboarding__hero-mark" aria-hidden="true">
-                  <DiscordSymbolIcon />
-                  <span>01</span>
-                  <strong>→</strong>
-                  <span>05</span>
-                  <em>YORO</em>
-                </div>
-              </header>
-
               <nav aria-label={text.flowProgressLabel} className="public-bot-onboarding__progress">
                 <ol>
                   {steps.map((step, index) => (
