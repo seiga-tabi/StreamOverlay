@@ -16,7 +16,12 @@ import {
 } from "@streamops/shared";
 
 export class DiscordInternalApiError extends Error {
-  constructor(readonly code: "unavailable" | "rejected" | "invalid_response") {
+  constructor(readonly code:
+    | "authentication_failed"
+    | "unavailable"
+    | "rejected"
+    | "invalid_response"
+  ) {
     super(code);
     this.name = "DiscordInternalApiError";
   }
@@ -137,6 +142,9 @@ export class DiscordInternalApiClient {
       throw new DiscordInternalApiError("unavailable");
     }
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new DiscordInternalApiError("authentication_failed");
+      }
       throw new DiscordInternalApiError(response.status >= 500 ? "unavailable" : "rejected");
     }
     if (response.status === 204) return {};

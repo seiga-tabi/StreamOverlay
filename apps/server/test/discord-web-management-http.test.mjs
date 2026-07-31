@@ -195,6 +195,52 @@ test("서명된 Bot 내부 상태 API는 Guild 귀속 요청만 상태 서비스
   });
 });
 
+test("Bot 내부 상태 조회 실패는 no-store 503과 안전한 진단 코드만 반환한다", async () => {
+  await withDiscordConfig(async () => {
+    const errors = [];
+    const { handler } = createDiscordHandler({
+      handlerInput: {
+        logger: {
+          error(value) {
+            errors.push(value);
+          }
+        },
+        discordInternalAuth: {
+          verify() {
+            return { ok: true };
+          }
+        },
+        gameServerStatusRead: {
+          async read() {
+            throw new Error("/private/internal/database-path");
+          }
+        }
+      }
+    });
+    const response = await request(
+      handler,
+      "POST",
+      "/internal/discord/game-server-status",
+      {
+        applicationId: APPLICATION_ID,
+        guildId: "123456789012345678"
+      },
+      { "content-type": "application/json" }
+    );
+    assert.equal(response.statusCode, 503);
+    assert.equal(response.headers["Cache-Control"], "no-store");
+    assert.deepEqual(JSON.parse(response.body), {
+      error: "게임 서버 상태를 확인할 수 없습니다.",
+      code: "status_read_failed"
+    });
+    assert.deepEqual(errors, [{
+      type: "discord.internal.game_server_status_failed",
+      errorCode: "STATUS_READ_FAILED"
+    }]);
+    assert.equal(response.body.includes("/private/"), false);
+  });
+});
+
 test("서명된 Bot 내부 플레이어 API는 닉네임 검색만 상태 서비스에 전달한다", async () => {
   await withDiscordConfig(async () => {
     const playerCalls = [];

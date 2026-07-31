@@ -386,6 +386,27 @@ test("내부 API client는 다른 origin이나 비정상 setup URL을 거부한�
   );
 });
 
+test("내부 API client는 HMAC 인증 실패를 일반 장애와 구분한다", async () => {
+  const client = new DiscordInternalApiClient({
+    authKey: "i".repeat(64),
+    baseUrl: "http://server:3000",
+    publicBaseUrl: "https://yoro.gg",
+    timeoutMs: 1000,
+    fetchImpl: async () => new Response(JSON.stringify({
+      error: "내부 인증에 실패했습니다.",
+      code: "INTERNAL_AUTH_REQUIRED"
+    }), { status: 401 })
+  });
+  await assert.rejects(
+    () => client.gameServerStatus({
+      applicationId: IDS.application,
+      guildId: IDS.guild
+    }),
+    (error) => error instanceof DiscordInternalApiError
+      && error.code === "authentication_failed"
+  );
+});
+
 test("!yoro parser는 exact allowlist와 100자 상한을 적용한다", () => {
   assert.deepEqual(parseYoroPrefixCommand("!yoro"), { command: "help" });
   assert.deepEqual(parseYoroPrefixCommand("!yoro 상태"), { command: "status" });
@@ -678,6 +699,53 @@ test("!yoro 상태는 공개 사유와 필요한 경우에만 Dashboard 동작�
   assert.equal(
     replies[0].components[0].toJSON().components[0].url,
     "https://yoro.gg/dashboard/organizations"
+  );
+});
+
+test("!yoro 상태는 내부 HMAC 인증 실패를 운영 가능한 안내로 구분한다", async () => {
+  const replies = [];
+  const handler = new YoroPrefixCommandHandler(
+    IDS.application,
+    {
+      async commandPolicy() {
+        return {
+          allowed: true,
+          commands: {
+            help: true,
+            status: true,
+            player: true,
+            guide: true
+          },
+          preferredLocale: "ko",
+          statusFields: {
+            players: true,
+            version: true,
+            latency: true,
+            observedAt: true
+          },
+          revision: 1
+        };
+      },
+      async gameServerStatus() {
+        throw new DiscordInternalApiError("authentication_failed");
+      }
+    },
+    "https://yoro.gg"
+  );
+  await handler.handle({
+    content: "!yoro 상태",
+    guildId: IDS.guild,
+    guild: { preferredLocale: "ko" },
+    author: { id: IDS.user, bot: false },
+    webhookId: null,
+    system: false,
+    async reply(payload) {
+      replies.push(payload);
+    }
+  });
+  assert.equal(
+    replies[0].content,
+    "YORO Bot과 서버의 내부 연결 인증을 확인해야 합니다. 서비스 운영자에게 문의해 주세요."
   );
 });
 

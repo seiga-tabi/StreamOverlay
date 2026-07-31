@@ -55,12 +55,14 @@ Guild 관리자는 prefix 명령을 사용할 채널에서 Bot의 채널 보기,
 제공한다.
 
 - Bot token: `/run/secrets/discord_bot_token` (`discord-bot` 전용)
-- 내부 인증 key: `/run/secrets/discord_internal_auth_key` (Bot·Server 공유)
+- 내부 인증 key: `/run/discord-internal-auth/server_key` 또는
+  `/run/discord-internal-auth/bot_key` (Compose가 동일 값으로 자동 생성)
 
 Internal key는 Discord OAuth encryption key, Twitch key, Dashboard·Bridge secret과 다른 값을 사용한다. 실제 값, 일부 마스킹 값과 길이는 로그에 기록하지 않는다.
-Compose는 Bot UID/GID `10002`가 읽을 수 있도록 두 secret을 read-only로
-mount한다. Bot token은 Server에 mount하지 않고, Server의 Database·Twitch·
-Riot secret은 Bot에 mount하지 않는다.
+Compose는 Server UID/GID `10001`과 Bot UID/GID `10002`가 각각 자신의 key
+사본만 읽을 수 있도록 named volume을 read-only로 mount한다. Bot token은
+Server에 mount하지 않고, Server의 Database·Twitch·Riot secret은 Bot에
+mount하지 않는다.
 
 ## 활성화와 command 등록
 

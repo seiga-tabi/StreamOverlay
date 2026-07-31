@@ -12,7 +12,6 @@ twitch_token_encryption_key
 riot_api_key
 discord_client_secret
 discord_oauth_encryption_key
-discord_internal_auth_key
 bridge_shared_secret
 dashboard_auth_token
 overlay_access_token
@@ -22,21 +21,20 @@ Discord Bot 전용:
 
 ```text
 discord_bot_token
-discord_internal_auth_key
 ```
 
-일반 Docker Compose의 file bind mount는 `uid`, `gid`, `mode` 설정을
-보장하지 않습니다. 운영 원클릭 Compose는 공유 HMAC key를 다음 두 호스트
-파일로 분리해 각 non-root UID에 귀속합니다.
+Discord Bot과 Server가 공유하는 내부 HMAC key는 일반 secret bind mount로
+관리하지 않습니다. 운영 원클릭 Compose의 `discord-internal-auth-init`가
+named volume 안에 동일 값의 UID별 파일을 생성합니다.
 
 ```text
-discord_internal_auth_key_server
-discord_internal_auth_key_bot
+/run/discord-internal-auth/server_key  # Server UID 10001
+/run/discord-internal-auth/bot_key     # Discord Bot UID 10002
 ```
 
-두 파일의 값은 같지만 Server에는 전자만, Discord Bot에는 후자만
-mount합니다. 컨테이너 내부 경로는 두 서비스 모두
-`/run/secrets/discord_internal_auth_key`입니다.
+각 서비스는 자신의 파일만 읽을 수 있으며 초기화 단계에서 두 파일의 값이
+다르면 fail-closed로 기동을 중단합니다. `docker compose up -d --build
+--force-recreate --wait`만으로 최초 생성과 이후 재사용 검증이 수행됩니다.
 
 Cloudflare 전용:
 

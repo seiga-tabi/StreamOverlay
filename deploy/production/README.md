@@ -26,8 +26,6 @@ docker compose up -d --build --force-recreate --wait
 /etc/yoro/secrets/discord_client_secret
 /etc/yoro/secrets/discord_oauth_encryption_key
 /etc/yoro/secrets/discord_bot_token
-/etc/yoro/secrets/discord_internal_auth_key_server
-/etc/yoro/secrets/discord_internal_auth_key_bot
 /etc/yoro/secrets/bridge_shared_secret
 /etc/yoro/secrets/dashboard_auth_token
 /etc/yoro/secrets/overlay_access_token
@@ -51,10 +49,16 @@ Palworld REST 연결용 AES key는 위 목록에 포함되지 않습니다. Comp
 덮어쓰지 않고 초기화 단계가 실패합니다. `docker compose down -v`와
 `docker volume rm yoro-production_palworld_credentials`는 사용하지 않습니다.
 
-`discord_internal_auth_key_server`와 `discord_internal_auth_key_bot`은 동일한
-값이지만 각각 Server UID `10001`, Bot UID `10002`만 읽을 수 있는 별도
-파일이어야 합니다. 컨테이너 안에서는 둘 다 고정 경로
-`/run/secrets/discord_internal_auth_key`로 보입니다.
+Discord Bot과 Server 사이의 HMAC key도 호스트에서 두 파일로 수동 복제하지
+않습니다. `discord-internal-auth-init`가 `discord_internal_auth` named volume에
+동일한 key의 UID별 읽기 전용 사본을 최초 한 번 생성하고 이후 배포에서
+검증해 재사용합니다. 따라서 두 secret 파일 값이 달라 Bot 명령이 401로
+거부되는 상태가 발생하지 않습니다.
+
+이 key는 외부 서비스 credential이 아니라 컨테이너 사이의 요청 인증에만
+사용됩니다. `docker compose down`은 volume을 유지하지만 `docker compose
+down -v` 또는 `docker volume rm yoro-production_discord_internal_auth`는
+실행하지 않습니다.
 
 예제 runtime처럼 모든 기능을 켠 구성이므로 활성 기능에 필요한 secret이
 하나라도 없으면 `config-check`가 실제 서비스를 시작하기 전에 실패합니다.
@@ -80,7 +84,7 @@ git status --short
 
 ```bash
 docker compose ps
-docker compose logs --tail=100 palworld-credentials-init config-check server discord-bot
+docker compose logs --tail=100 discord-internal-auth-init palworld-credentials-init config-check server discord-bot
 curl -fsS http://127.0.0.1:3000/health/live
 curl -fsS http://127.0.0.1:3000/health/ready
 ```

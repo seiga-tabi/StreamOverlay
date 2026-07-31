@@ -1,4 +1,27 @@
 services:
+  discord-internal-auth-init:
+    image: ${YORO_SERVER_IMAGE:?immutable YORO_SERVER_IMAGE is required}
+    build: !reset null
+    user: "0:0"
+    restart: "no"
+    command:
+      - node
+      - apps/server/dist/scripts/bootstrap-discord-internal-auth.js
+    volumes:
+      - discord_internal_auth:/run/discord-internal-auth
+    read_only: true
+    tmpfs:
+      - /tmp
+    network_mode: none
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - FOWNER
+      - DAC_OVERRIDE
+    security_opt:
+      - no-new-privileges:true
+
   palworld-credentials-init:
     image: ${YORO_SERVER_IMAGE:?immutable YORO_SERVER_IMAGE is required}
     build: !reset null
@@ -37,10 +60,13 @@ services:
       DASHBOARD_STATIC_DIR: /app/apps/dashboard/dist
       OVERLAY_STATIC_DIR: /app/apps/overlay/dist
     depends_on:
+      discord-internal-auth-init:
+        condition: service_completed_successfully
       palworld-credentials-init:
         condition: service_completed_successfully
     volumes: !override
       - palworld_credentials:/run/palworld-credentials:ro
+      - discord_internal_auth:/run/discord-internal-auth:ro
       - /etc/yoro/runtime.json:/etc/yoro/runtime.json:ro
       - /etc/yoro/legal.json:/etc/yoro/legal.json:ro
       - /etc/yoro/secrets/database_url:/run/secrets/database_url:ro
@@ -49,7 +75,6 @@ services:
       - /etc/yoro/secrets/riot_api_key:/run/secrets/riot_api_key:ro
       - /etc/yoro/secrets/discord_client_secret:/run/secrets/discord_client_secret:ro
       - /etc/yoro/secrets/discord_oauth_encryption_key:/run/secrets/discord_oauth_encryption_key:ro
-      - /etc/yoro/secrets/discord_internal_auth_key:/run/secrets/discord_internal_auth_key:ro
       - /etc/yoro/secrets/bridge_shared_secret:/run/secrets/bridge_shared_secret:ro
       - /etc/yoro/secrets/dashboard_auth_token:/run/secrets/dashboard_auth_token:ro
       - /etc/yoro/secrets/overlay_access_token:/run/secrets/overlay_access_token:ro
@@ -77,7 +102,7 @@ services:
     volumes: !override
       - /etc/yoro/runtime.json:/etc/yoro/runtime.json:ro
       - /etc/yoro/secrets/discord_bot_token:/run/secrets/discord_bot_token:ro
-      - /etc/yoro/secrets/discord_internal_auth_key:/run/secrets/discord_internal_auth_key:ro
+      - discord_internal_auth:/run/discord-internal-auth:ro
 
   cloudflared:
     image: ${CLOUDFLARED_IMAGE:?immutable CLOUDFLARED_IMAGE is required}
@@ -97,4 +122,5 @@ secrets:
     file: /etc/yoro/secrets/postgres_password
 
 volumes:
+  discord_internal_auth:
   palworld_credentials:

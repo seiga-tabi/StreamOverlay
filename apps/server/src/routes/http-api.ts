@@ -105,6 +105,7 @@ import {
 import { loadLolParticipationProfileSettings, saveLolParticipationProfileSettings, type LolParticipationProfileSettings } from "../modules/lol-profile-enrichment.module.js";
 import { buildRankHistory, inferMainRoleFromMatches, performanceStatsFromMatches } from "../services/lol-profile-enrichment.js";
 import type { JsonlLogger } from "../logging/jsonl-logger.js";
+import { SafeDatabaseError } from "../database/errors.js";
 import type { SupportMailboxFilter, SupportMailboxStore } from "../services/support-mailbox-store.js";
 import {
   ALERT_OVERLAY_KEYS,
@@ -6179,13 +6180,26 @@ export function createHttpHandler(input: HttpHandlerInput) {
               code: "feature_unavailable"
             }, noStoreHeaders());
           }
-          return sendJson(
-            req,
-            res,
-            200,
-            await input.gameServerStatusRead.read(statusRequest),
-            noStoreHeaders()
-          );
+          try {
+            return sendJson(
+              req,
+              res,
+              200,
+              await input.gameServerStatusRead.read(statusRequest),
+              noStoreHeaders()
+            );
+          } catch (error) {
+            input.logger?.error({
+              type: "discord.internal.game_server_status_failed",
+              errorCode: error instanceof SafeDatabaseError
+                ? error.code
+                : "STATUS_READ_FAILED"
+            });
+            return sendJson(req, res, 503, {
+              error: "게임 서버 상태를 확인할 수 없습니다.",
+              code: "status_read_failed"
+            }, noStoreHeaders());
+          }
         }
         if (url.pathname === "/internal/discord/palworld-players") {
           const playerRequest = parseDiscordPalworldPlayerLookupRequest(body);
@@ -6204,13 +6218,26 @@ export function createHttpHandler(input: HttpHandlerInput) {
               code: "feature_unavailable"
             }, noStoreHeaders());
           }
-          return sendJson(
-            req,
-            res,
-            200,
-            await input.gameServerStatusRead.readPlayers(playerRequest),
-            noStoreHeaders()
-          );
+          try {
+            return sendJson(
+              req,
+              res,
+              200,
+              await input.gameServerStatusRead.readPlayers(playerRequest),
+              noStoreHeaders()
+            );
+          } catch (error) {
+            input.logger?.error({
+              type: "discord.internal.palworld_players_failed",
+              errorCode: error instanceof SafeDatabaseError
+                ? error.code
+                : "PLAYER_READ_FAILED"
+            });
+            return sendJson(req, res, 503, {
+              error: "Palworld 플레이어를 확인할 수 없습니다.",
+              code: "player_read_failed"
+            }, noStoreHeaders());
+          }
         }
         if (url.pathname === "/internal/discord/command-policy") {
           const policyRequest = parseDiscordBotCommandPolicyRequest(body);
@@ -6229,13 +6256,26 @@ export function createHttpHandler(input: HttpHandlerInput) {
               code: "feature_unavailable"
             }, noStoreHeaders());
           }
-          return sendJson(
-            req,
-            res,
-            200,
-            await input.discordBotCommandPolicy.resolve(policyRequest),
-            noStoreHeaders()
-          );
+          try {
+            return sendJson(
+              req,
+              res,
+              200,
+              await input.discordBotCommandPolicy.resolve(policyRequest),
+              noStoreHeaders()
+            );
+          } catch (error) {
+            input.logger?.error({
+              type: "discord.internal.command_policy_failed",
+              errorCode: error instanceof SafeDatabaseError
+                ? error.code
+                : "COMMAND_POLICY_FAILED"
+            });
+            return sendJson(req, res, 503, {
+              error: "Discord Bot 명령 정책을 확인할 수 없습니다.",
+              code: "command_policy_failed"
+            }, noStoreHeaders());
+          }
         }
         const observation = parseDiscordInstallationObservationRequest(body);
         if (

@@ -63,6 +63,13 @@ export const DISCORD_BOT_MESSAGES = {
       guildNotConnected: "이 Discord 서버가 YORO Organization과 연결되지 않았습니다.",
       serverNotConfigured: "아직 Palworld 게임 서버가 등록되지 않았습니다.",
       unavailable: "현재 서버 상태를 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.",
+      internalFailure: {
+        authentication_failed: "YORO Bot과 서버의 내부 연결 인증을 확인해야 합니다. 서비스 운영자에게 문의해 주세요.",
+        unavailable: "현재 YORO 서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.",
+        rejected: "현재 서버 상태 요청을 처리할 수 없습니다. 서비스 운영자에게 문의해 주세요.",
+        invalid_response: "서버 상태 응답을 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.",
+        unexpected: "현재 서버 상태를 불러올 수 없습니다. 잠시 후 다시 시도해 주세요."
+      },
       policyDenied: {
         installation_inactive: "이 Discord 서버는 YORO Organization과 연결되어 있지 않습니다.",
         module_disabled: "이 서버에서는 Palworld 상태 기능을 사용하지 않도록 설정했습니다.",
@@ -156,6 +163,13 @@ export const DISCORD_BOT_MESSAGES = {
       guildNotConnected: "このDiscordサーバーはYORO Organizationと連携されていません。",
       serverNotConfigured: "Palworldゲームサーバーはまだ登録されていません。",
       unavailable: "現在サーバー状態を取得できません。しばらくしてからお試しください。",
+      internalFailure: {
+        authentication_failed: "YORO Botとサーバー間の内部接続認証を確認する必要があります。サービス運営者へお問い合わせください。",
+        unavailable: "現在YOROサーバーへ接続できません。しばらくしてからもう一度お試しください。",
+        rejected: "現在サーバー状態リクエストを処理できません。サービス運営者へお問い合わせください。",
+        invalid_response: "サーバー状態の応答を確認できません。しばらくしてからもう一度お試しください。",
+        unexpected: "現在サーバー状態を取得できません。しばらくしてからお試しください。"
+      },
       policyDenied: {
         installation_inactive: "このDiscordサーバーはYORO Organizationと連携されていません。",
         module_disabled: "このサーバーではPalworld状態機能が無効に設定されています。",

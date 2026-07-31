@@ -16,7 +16,10 @@ import {
   DiscordGameServerStatusResponse,
   DiscordPalworldPlayerLookupResponse
 } from "@streamops/shared";
-import type { DiscordInternalApiClient } from "./internal-api-client.js";
+import {
+  DiscordInternalApiError,
+  type DiscordInternalApiClient
+} from "./internal-api-client.js";
 import { auditEvent, safeReference } from "./logger.js";
 import { presentGameServerStatus } from "./status-message-presenter.js";
 
@@ -25,6 +28,23 @@ const USER_COOLDOWN_MS = 10_000;
 const GUILD_WINDOW_MS = 5_000;
 const GUILD_WINDOW_MAX = 5;
 const MAX_RATE_LIMIT_KEYS = 10_000;
+
+type InternalFailureCode =
+  | DiscordInternalApiError["code"]
+  | "unexpected";
+
+function internalFailureCode(error: unknown): InternalFailureCode {
+  return error instanceof DiscordInternalApiError ? error.code : "unexpected";
+}
+
+function internalFailureMessage(
+  locale: DiscordBotMessageLocale,
+  error: unknown
+): string {
+  return DISCORD_BOT_MESSAGES[locale].prefix.internalFailure[
+    internalFailureCode(error)
+  ];
+}
 
 export type YoroPrefixCommand = "help" | "status" | "player" | "guide";
 
@@ -150,9 +170,15 @@ export class YoroPrefixCommandHandler {
         guildId: message.guildId,
         command
       });
-    } catch {
+    } catch (error) {
+      auditEvent("discord.prefix_command.internal_api_failed", {
+        command,
+        stage: "policy",
+        errorCode: internalFailureCode(error),
+        guild: safeReference(message.guildId)
+      });
       await message.reply({
-        content: DISCORD_BOT_MESSAGES[fallbackLocale].prefix.unavailable,
+        content: internalFailureMessage(fallbackLocale, error),
         allowedMentions: { parse: [], repliedUser: false },
         failIfNotExists: true
       });
@@ -240,9 +266,15 @@ export class YoroPrefixCommandHandler {
         guildId: message.guildId!,
         ...(nickname ? { nickname } : {})
       });
-    } catch {
+    } catch (error) {
+      auditEvent("discord.prefix_command.internal_api_failed", {
+        command: "player",
+        stage: "status",
+        errorCode: internalFailureCode(error),
+        guild: safeReference(message.guildId!)
+      });
       await message.reply({
-        content: messages.unavailable,
+        content: internalFailureMessage(locale, error),
         allowedMentions: { parse: [], repliedUser: false },
         failIfNotExists: true
       });
@@ -356,9 +388,15 @@ export class YoroPrefixCommandHandler {
         applicationId: this.applicationId,
         guildId: message.guildId!
       });
-    } catch {
+    } catch (error) {
+      auditEvent("discord.prefix_command.internal_api_failed", {
+        command: "status",
+        stage: "status",
+        errorCode: internalFailureCode(error),
+        guild: safeReference(message.guildId!)
+      });
       await message.reply({
-        content: messages.unavailable,
+        content: internalFailureMessage(locale, error),
         allowedMentions: { parse: [], repliedUser: false },
         failIfNotExists: true
       });

@@ -46,7 +46,9 @@ export function loadBotRuntimeConfig(
 }
 
 export function loadBotSecret(fileName: string, required: boolean): string {
-  const filePath = `/run/secrets/${fileName}`;
+  const filePath = fileName === "discord_internal_auth_key"
+    ? "/run/discord-internal-auth/bot_key"
+    : `/run/secrets/${fileName}`;
   try {
     if (!fs.existsSync(filePath)) {
       if (required) throw new Error("missing");

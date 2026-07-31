@@ -19,6 +19,7 @@ x-server-runtime: &server-runtime
 
 x-server-config-mounts: &server-config-mounts
   - palworld_credentials:/run/palworld-credentials:ro
+  - discord_internal_auth:/run/discord-internal-auth:ro
   - /etc/yoro/runtime.json:/etc/yoro/runtime.json:ro
   - /etc/yoro/legal.json:/etc/yoro/legal.json:ro
   - /etc/yoro/secrets/database_url:/run/secrets/database_url:ro
@@ -27,12 +28,33 @@ x-server-config-mounts: &server-config-mounts
   - /etc/yoro/secrets/riot_api_key:/run/secrets/riot_api_key:ro
   - /etc/yoro/secrets/discord_client_secret:/run/secrets/discord_client_secret:ro
   - /etc/yoro/secrets/discord_oauth_encryption_key:/run/secrets/discord_oauth_encryption_key:ro
-  - /etc/yoro/secrets/discord_internal_auth_key_server:/run/secrets/discord_internal_auth_key:ro
   - /etc/yoro/secrets/bridge_shared_secret:/run/secrets/bridge_shared_secret:ro
   - /etc/yoro/secrets/dashboard_auth_token:/run/secrets/dashboard_auth_token:ro
   - /etc/yoro/secrets/overlay_access_token:/run/secrets/overlay_access_token:ro
 
 services:
+  discord-internal-auth-init:
+    <<: *server-image
+    user: "0:0"
+    restart: "no"
+    command:
+      - node
+      - apps/server/dist/scripts/bootstrap-discord-internal-auth.js
+    volumes:
+      - discord_internal_auth:/run/discord-internal-auth
+    read_only: true
+    tmpfs:
+      - /tmp
+    network_mode: none
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - FOWNER
+      - DAC_OVERRIDE
+    security_opt:
+      - no-new-privileges:true
+
   palworld-credentials-init:
     <<: *server-image
     user: "0:0"
@@ -60,6 +82,8 @@ services:
     <<: *server-image
     restart: "no"
     depends_on:
+      discord-internal-auth-init:
+        condition: service_completed_successfully
       palworld-credentials-init:
         condition: service_completed_successfully
     environment: *server-runtime
@@ -130,6 +154,7 @@ services:
       - "127.0.0.1:3000:3000"
     volumes:
       - palworld_credentials:/run/palworld-credentials:ro
+      - discord_internal_auth:/run/discord-internal-auth:ro
       - /etc/yoro/runtime.json:/etc/yoro/runtime.json:ro
       - /etc/yoro/legal.json:/etc/yoro/legal.json:ro
       - /etc/yoro/secrets/database_url:/run/secrets/database_url:ro
@@ -138,7 +163,6 @@ services:
       - /etc/yoro/secrets/riot_api_key:/run/secrets/riot_api_key:ro
       - /etc/yoro/secrets/discord_client_secret:/run/secrets/discord_client_secret:ro
       - /etc/yoro/secrets/discord_oauth_encryption_key:/run/secrets/discord_oauth_encryption_key:ro
-      - /etc/yoro/secrets/discord_internal_auth_key_server:/run/secrets/discord_internal_auth_key:ro
       - /etc/yoro/secrets/bridge_shared_secret:/run/secrets/bridge_shared_secret:ro
       - /etc/yoro/secrets/dashboard_auth_token:/run/secrets/dashboard_auth_token:ro
       - /etc/yoro/secrets/overlay_access_token:/run/secrets/overlay_access_token:ro
@@ -183,6 +207,8 @@ services:
     depends_on:
       server:
         condition: service_healthy
+      discord-internal-auth-init:
+        condition: service_completed_successfully
     environment:
       NODE_ENV: production
       YORO_CONFIG_FILE: /etc/yoro/runtime.json
@@ -192,7 +218,7 @@ services:
     volumes:
       - /etc/yoro/runtime.json:/etc/yoro/runtime.json:ro
       - /etc/yoro/secrets/discord_bot_token:/run/secrets/discord_bot_token:ro
-      - /etc/yoro/secrets/discord_internal_auth_key_bot:/run/secrets/discord_internal_auth_key:ro
+      - discord_internal_auth:/run/discord-internal-auth:ro
     read_only: true
     tmpfs:
       - /tmp
@@ -253,6 +279,7 @@ services:
         max-file: "5"
 
 volumes:
+  discord_internal_auth:
   palworld_credentials:
   postgres_data:
   streamops_logs:
