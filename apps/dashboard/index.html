@@ -28,6 +28,19 @@
       (() => {
         const consentKey = "yoro.ads.consent";
         const scriptSelector = "script[data-yoro-adsense]";
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = window.gtag || function () {
+          window.dataLayer.push(arguments);
+        };
+        window.gtag("consent", "default", {
+          ad_storage: "denied",
+          ad_user_data: "denied",
+          ad_personalization: "denied",
+          analytics_storage: "denied",
+          wait_for_update: 500
+        });
+        window.__yoroGoogleConsentInitialized = true;
+        window.gtag("set", "ads_data_redaction", true);
         const publicExactPaths = new Set([
           "/",
           "/lol",
@@ -37,6 +50,10 @@
           "/privacy",
           "/terms",
           "/contact",
+          "/bot",
+          "/bot/features",
+          "/bot/connect",
+          "/bot/dedicated-server",
           "/palworld",
           "/palworld/pals",
           "/palworld/breeding",
@@ -55,7 +72,8 @@
           "/community/posts/"
         ];
         const isAdEligiblePath = () => {
-          const pathname = window.location.pathname.replace(/\/+$/, "") || "/";
+          const localizedPath = window.location.pathname.replace(/^\/(?:ko|ja)(?=\/|$)/, "") || "/";
+          const pathname = localizedPath.replace(/\/+$/, "") || "/";
           return publicExactPaths.has(pathname)
             || publicPathPrefixes.some((prefix) => pathname.startsWith(prefix));
         };
@@ -69,21 +87,34 @@
           script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7880271953912430";
           document.head.append(script);
         };
-        const loadAdsenseWhenConsented = () => {
+        const applyStoredAdConsent = () => {
           try {
-            if (window.localStorage.getItem(consentKey) === "granted") loadAdsense();
+            if (window.localStorage.getItem(consentKey) !== "granted") return;
+            window.gtag("consent", "update", {
+              ad_storage: "granted",
+              ad_user_data: "granted",
+              ad_personalization: "granted"
+            });
           } catch {
-            // 저장소 접근이 차단된 환경에서는 동의 전 상태를 유지합니다.
+            // 저장소 접근이 차단된 환경에서는 기본 거부 상태를 유지합니다.
           }
         };
 
-        loadAdsenseWhenConsented();
+        applyStoredAdConsent();
+        loadAdsense();
         window.addEventListener("yoro:ads-consent", (event) => {
-          if (event instanceof CustomEvent && event.detail?.granted === true) loadAdsense();
+          if (!(event instanceof CustomEvent)) return;
+          const granted = event.detail?.granted === true;
+          window.gtag("consent", "update", {
+            ad_storage: granted ? "granted" : "denied",
+            ad_user_data: granted ? "granted" : "denied",
+            ad_personalization: granted ? "granted" : "denied"
+          });
+          if (granted) loadAdsense();
         });
-        window.addEventListener("publicroutechange", loadAdsenseWhenConsented);
-        window.addEventListener("palworldroutechange", loadAdsenseWhenConsented);
-        window.addEventListener("popstate", loadAdsenseWhenConsented);
+        window.addEventListener("publicroutechange", loadAdsense);
+        window.addEventListener("palworldroutechange", loadAdsense);
+        window.addEventListener("popstate", loadAdsense);
       })();
     </script>
     <title>YORO.gg</title>

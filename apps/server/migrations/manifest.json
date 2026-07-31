@@ -112,6 +112,14 @@
       "checksumSha256": "bf139ba0cac226b49f4f1d368da1d9eef67c3a198a9e6ae2bd7db237012cb1dd",
       "destructive": false,
       "transaction": true
+    },
+    {
+      "id": "0015_discord_command_message_cleanup",
+      "file": "0015_discord_command_message_cleanup.sql",
+      "description": "Organization별 Discord 명령 메시지 응답 후 삭제 설정",
+      "checksumSha256": "55130039e316c9e097c7c341cde43b469133a05807b41bac8569ec066c5fef7a",
+      "destructive": false,
+      "transaction": true
     }
   ]
 }

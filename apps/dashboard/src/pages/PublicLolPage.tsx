@@ -17,6 +17,7 @@ import {
   logoutPublicTwitch,
   peekPublicTwitchFollowedChannels,
   peekPublicTwitchStatus,
+  publicTwitchLoginUrl,
 } from "../features/public-twitch/api";
 import { isTwitchAccountOAuthReturn } from "../features/yoro-account/api";
 import { ProfileLinkIcon, profileLinkPlatformFromUrl, profileLinkPlatformClass } from "../components/ProfileLinkIcon";
@@ -181,6 +182,11 @@ import { formatCooldown, formatDecimal, formatDuration, formatNumber, formatPerc
 import {
   isPublicLocale,
 } from "../features/public-lol/utils/locale";
+import {
+  isLocalizablePublicPath,
+  localizedPublicUrl,
+  stripPublicLocalePrefix,
+} from "../features/public-lol/utils/public-locale-path";
 import {
   PUBLIC_TOURNAMENT_CALENDAR_PATH,
   PUBLIC_TOURNAMENT_LIST_PATH,
@@ -6731,6 +6737,18 @@ export function PublicLolPage({
   }, [profile]);
 
   useEffect(() => {
+    const unprefixedPath = stripPublicLocalePrefix(window.location.pathname);
+    const canonicalPath = isLocalizablePublicPath(unprefixedPath)
+      ? localizedPublicUrl(unprefixedPath, locale)
+      : localizedPublicUrl("/", locale);
+    const canonicalUrl = new URL(canonicalPath, window.location.origin).href;
+    const canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    const openGraphUrl = document.querySelector<HTMLMetaElement>('meta[property="og:url"]');
+    canonical?.setAttribute("href", canonicalUrl);
+    openGraphUrl?.setAttribute("content", canonicalUrl);
+  }, [activeMainPage, locale, profile?.riotId, publicTournamentSlug, selectedCommunityPostId]);
+
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const viewerConnected = twitchOAuthReturnRef.current;
     if (viewerConnected) invalidatePublicTwitchClientCache();
@@ -7158,7 +7176,11 @@ export function PublicLolPage({
   }
 
   function startTwitchLogin(): void {
-    window.location.href = `${apiBase}/api/public/twitch/auth/start`;
+    const params = new URLSearchParams(window.location.search);
+    params.delete("viewer_twitch");
+    const query = params.toString();
+    const returnTo = `${window.location.pathname}${query ? `?${query}` : ""}`;
+    window.location.href = publicTwitchLoginUrl(returnTo);
   }
 
   function openStreamerRegisterScreen(): void {

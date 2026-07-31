@@ -33,6 +33,41 @@ export const yoroCommand = new SlashCommandBuilder()
       .setDescriptionLocalizations({
         ko: "YORO Bot 관리 화면을 엽니다.",
         ja: "YORO Bot管理画面を開きます。"
+      }))
+  .addSubcommand((command) =>
+    command
+      .setName("status")
+      .setDescription("Palworld 서버 상태를 비공개로 확인합니다.")
+      .setDescriptionLocalizations({
+        ko: "Palworld 서버 상태를 비공개로 확인합니다.",
+        ja: "Palworldサーバー状態を非公開で確認します。"
+      }))
+  .addSubcommand((command) =>
+    command
+      .setName("player")
+      .setDescription("접속 플레이어 또는 프로필을 비공개로 확인합니다.")
+      .setDescriptionLocalizations({
+        ko: "접속 플레이어 또는 프로필을 비공개로 확인합니다.",
+        ja: "接続プレイヤーまたはプロフィールを非公開で確認します。"
+      })
+      .addStringOption((option) =>
+        option
+          .setName("nickname")
+          .setDescription("조회할 게임 내 닉네임")
+          .setDescriptionLocalizations({
+            ko: "조회할 게임 내 닉네임",
+            ja: "検索するゲーム内ニックネーム"
+          })
+          .setMinLength(1)
+          .setMaxLength(80)
+          .setRequired(false)))
+  .addSubcommand((command) =>
+    command
+      .setName("guide")
+      .setDescription("Palworld 전용 서버 설정 안내를 비공개로 확인합니다.")
+      .setDescriptionLocalizations({
+        ko: "Palworld 전용 서버 설정 안내를 비공개로 확인합니다.",
+        ja: "Palworld専用サーバー設定ガイドを非公開で確認します。"
       }));
 
 export const yoroCommandJson = Object.freeze(yoroCommand.toJSON());

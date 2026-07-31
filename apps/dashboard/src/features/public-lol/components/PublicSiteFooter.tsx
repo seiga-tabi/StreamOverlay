@@ -1,5 +1,6 @@
 import type { MouseEvent } from "react";
 import { PublicGameFooterFrame } from "../../../shared/PublicGameChrome";
+import { localizedPublicUrlForCurrentLocale } from "../utils/public-locale-path";
 
 export type PublicSiteFooterPage = "privacy" | "terms" | "contact";
 
@@ -51,7 +52,7 @@ export function PublicSiteFooter({
           <a
             data-ja={text.privacy.ja}
             data-ko={text.privacy.ko}
-            href="/privacy"
+            href={localizedPublicUrlForCurrentLocale("/privacy")}
             onClick={(event) => navigate(event, "privacy")}
           >
             {text.privacy.label}
@@ -59,7 +60,7 @@ export function PublicSiteFooter({
           <a
             data-ja={text.terms.ja}
             data-ko={text.terms.ko}
-            href="/terms"
+            href={localizedPublicUrlForCurrentLocale("/terms")}
             onClick={(event) => navigate(event, "terms")}
           >
             {text.terms.label}
@@ -67,7 +68,7 @@ export function PublicSiteFooter({
           <a
             data-ja={text.contact.ja}
             data-ko={text.contact.ko}
-            href="/contact"
+            href={localizedPublicUrlForCurrentLocale("/contact")}
             onClick={(event) => navigate(event, "contact")}
           >
             {text.contact.label}

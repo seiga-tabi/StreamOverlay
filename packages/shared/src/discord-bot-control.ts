@@ -6,7 +6,7 @@ import {
 
 export const DISCORD_BOT_CONTROL_MODULE_ID = "palworld.status" as const;
 export const DISCORD_BOT_CONTROL_MODULE_VERSION = 1 as const;
-export const DISCORD_BOT_CONTROL_SCHEMA_VERSION = 2 as const;
+export const DISCORD_BOT_CONTROL_SCHEMA_VERSION = 3 as const;
 
 export const DISCORD_BOT_CONTROL_COMMANDS = [
   "help",
@@ -37,6 +37,7 @@ export type DiscordBotControlSettings = Readonly<{
   statusCommandEnabled: boolean;
   playerCommandEnabled: boolean;
   guideCommandEnabled: boolean;
+  deleteInvocationAfterReply: boolean;
   preferredLocale: DiscordBotControlLocale;
   statusFields: DiscordBotStatusFields;
   revision: number;
@@ -66,6 +67,7 @@ export type UpdateDiscordBotControlInput = Readonly<{
   statusCommandEnabled: boolean;
   playerCommandEnabled: boolean;
   guideCommandEnabled: boolean;
+  deleteInvocationAfterReply: boolean;
   preferredLocale: DiscordBotControlLocale;
   statusFields: DiscordBotStatusFields;
   expectedRevision: number;
@@ -86,6 +88,7 @@ export const DISCORD_BOT_COMMAND_POLICY_REASONS = [
 export type DiscordBotCommandPolicyResponse = Readonly<{
   allowed: boolean;
   commands: DiscordBotCommandCapabilities;
+  deleteInvocationAfterReply: boolean;
   preferredLocale: DiscordBotControlLocale;
   statusFields: DiscordBotStatusFields;
   revision: number;
@@ -107,6 +110,7 @@ export const DEFAULT_DISCORD_BOT_CONTROL_SETTINGS: DiscordBotControlSettings =
     statusCommandEnabled: true,
     playerCommandEnabled: true,
     guideCommandEnabled: true,
+    deleteInvocationAfterReply: false,
     preferredLocale: "auto",
     statusFields: DEFAULT_DISCORD_BOT_STATUS_FIELDS,
     revision: 0
@@ -152,6 +156,7 @@ function parseControlSettings(
     "statusCommandEnabled",
     "playerCommandEnabled",
     "guideCommandEnabled",
+    "deleteInvocationAfterReply",
     "preferredLocale",
     "statusFields",
     "revision"
@@ -164,6 +169,7 @@ function parseControlSettings(
     || typeof record.statusCommandEnabled !== "boolean"
     || typeof record.playerCommandEnabled !== "boolean"
     || typeof record.guideCommandEnabled !== "boolean"
+    || typeof record.deleteInvocationAfterReply !== "boolean"
     || !["auto", "ko", "ja"].includes(String(record.preferredLocale))
     || !Number.isSafeInteger(record.revision)
     || (record.revision as number) < 0
@@ -175,6 +181,7 @@ function parseControlSettings(
     statusCommandEnabled: record.statusCommandEnabled,
     playerCommandEnabled: record.playerCommandEnabled,
     guideCommandEnabled: record.guideCommandEnabled,
+    deleteInvocationAfterReply: record.deleteInvocationAfterReply,
     preferredLocale: record.preferredLocale as DiscordBotControlLocale,
     statusFields,
     revision: record.revision as number
@@ -293,6 +300,7 @@ export function parseUpdateDiscordBotControlInput(
     "statusCommandEnabled",
     "playerCommandEnabled",
     "guideCommandEnabled",
+    "deleteInvocationAfterReply",
     "preferredLocale",
     "statusFields",
     "expectedRevision"
@@ -305,6 +313,7 @@ export function parseUpdateDiscordBotControlInput(
     || typeof record.statusCommandEnabled !== "boolean"
     || typeof record.playerCommandEnabled !== "boolean"
     || typeof record.guideCommandEnabled !== "boolean"
+    || typeof record.deleteInvocationAfterReply !== "boolean"
     || !["auto", "ko", "ja"].includes(String(record.preferredLocale))
     || !Number.isSafeInteger(record.expectedRevision)
     || (record.expectedRevision as number) < 0
@@ -316,6 +325,7 @@ export function parseUpdateDiscordBotControlInput(
     statusCommandEnabled: record.statusCommandEnabled,
     playerCommandEnabled: record.playerCommandEnabled,
     guideCommandEnabled: record.guideCommandEnabled,
+    deleteInvocationAfterReply: record.deleteInvocationAfterReply,
     preferredLocale: record.preferredLocale as DiscordBotControlLocale,
     statusFields,
     expectedRevision: record.expectedRevision as number
@@ -349,6 +359,7 @@ export function parseDiscordBotCommandPolicyResponse(
   const allowedKeys = [
     "allowed",
     "commands",
+    "deleteInvocationAfterReply",
     "preferredLocale",
     "statusFields",
     "revision",
@@ -360,6 +371,7 @@ export function parseDiscordBotCommandPolicyResponse(
     Object.keys(record).some((key) => !allowedKeys.includes(key))
     || typeof record.allowed !== "boolean"
     || !commands
+    || typeof record.deleteInvocationAfterReply !== "boolean"
     || !["auto", "ko", "ja"].includes(String(record.preferredLocale))
     || !Number.isSafeInteger(record.revision)
     || (record.revision as number) < 0
@@ -376,6 +388,7 @@ export function parseDiscordBotCommandPolicyResponse(
   return Object.freeze({
     allowed: record.allowed,
     commands,
+    deleteInvocationAfterReply: record.deleteInvocationAfterReply,
     preferredLocale: record.preferredLocale as DiscordBotControlLocale,
     statusFields,
     revision: record.revision as number,

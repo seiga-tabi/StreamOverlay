@@ -43,6 +43,15 @@ const PUBLIC_DASHBOARD_EXACT_PATHS = new Set([
   "/lol/tournaments"
 ]);
 
+const NON_LOCALIZED_PUBLIC_PATHS = new Set([
+  "/login",
+  "/login/",
+  "/account",
+  "/account/",
+  "/account/connections",
+  "/account/connections/",
+]);
+
 const PUBLIC_DASHBOARD_PATH_PREFIXES = [
   "/lol/summoners/",
   "/lol/tournaments/",
@@ -51,7 +60,30 @@ const PUBLIC_DASHBOARD_PATH_PREFIXES = [
   "/community/posts/"
 ];
 
-export function isPublicDashboardAppRoute(pathname: string): boolean {
+export type PublicUrlLocale = "ko" | "ja";
+
+export function publicUrlLocaleFromPathname(pathname: string): PublicUrlLocale | undefined {
+  const locale = pathname.match(/^\/(ko|ja)(?:\/|$)/u)?.[1];
+  return locale === "ko" || locale === "ja" ? locale : undefined;
+}
+
+export function stripPublicUrlLocalePrefix(pathname: string): string {
+  const locale = publicUrlLocaleFromPathname(pathname);
+  if (!locale) return pathname;
+  const stripped = pathname.slice(locale.length + 1);
+  return stripped ? (stripped.startsWith("/") ? stripped : `/${stripped}`) : "/";
+}
+
+export function isLocalizablePublicDashboardRoute(pathname: string): boolean {
+  if (pathname === "/") return true;
+  if (NON_LOCALIZED_PUBLIC_PATHS.has(pathname)) return false;
   if (PUBLIC_DASHBOARD_EXACT_PATHS.has(pathname)) return true;
   return PUBLIC_DASHBOARD_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
+
+export function isPublicDashboardAppRoute(pathname: string): boolean {
+  if (PUBLIC_DASHBOARD_EXACT_PATHS.has(pathname)) return true;
+  if (PUBLIC_DASHBOARD_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return true;
+  if (!publicUrlLocaleFromPathname(pathname)) return false;
+  return isLocalizablePublicDashboardRoute(stripPublicUrlLocalePrefix(pathname));
 }

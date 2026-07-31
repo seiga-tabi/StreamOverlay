@@ -29,6 +29,11 @@ import type {
   PublicTwitchAccessContext,
   PublicTwitchViewerSession
 } from "./public-twitch-auth.js";
+import {
+  isLocalizablePublicDashboardRoute,
+  publicUrlLocaleFromPathname,
+  stripPublicUrlLocalePrefix
+} from "../routing/public-dashboard-routes.js";
 
 const DISCORD_AUTHORIZE_URL = "https://discord.com/oauth2/authorize";
 const DISCORD_TOKEN_URL = "https://discord.com/api/v10/oauth2/token";
@@ -226,8 +231,30 @@ function safeReturnPath(value: string | undefined): string {
   if (!value || value.length > 256 || !value.startsWith("/") || value.startsWith("//")) {
     return "/account/connections";
   }
-  if (value.includes("\\") || /[\u0000-\u001f\u007f]/u.test(value)) {
+  if (value.includes("\\") || value.includes("#") || /[\u0000-\u001f\u007f]/u.test(value)) {
     return "/account/connections";
+  }
+  let returnUrl: URL;
+  try {
+    returnUrl = new URL(value, "https://yoro.invalid");
+  } catch {
+    return "/account/connections";
+  }
+  const rawPathname = value.split(/[?#]/u, 1)[0];
+  if (
+    returnUrl.origin !== "https://yoro.invalid"
+    || returnUrl.username
+    || returnUrl.password
+    || rawPathname !== returnUrl.pathname
+  ) {
+    return "/account/connections";
+  }
+  const pathname = returnUrl.pathname;
+  if (
+    publicUrlLocaleFromPathname(pathname)
+    && isLocalizablePublicDashboardRoute(stripPublicUrlLocalePrefix(pathname))
+  ) {
+    return `${pathname}${returnUrl.search}`;
   }
   const allowed = [
     "/",
@@ -240,8 +267,8 @@ function safeReturnPath(value: string | undefined): string {
     "/community",
     "/dashboard"
   ];
-  return allowed.some((prefix) => value === prefix || value.startsWith(`${prefix}/`))
-    ? value
+  return allowed.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))
+    ? `${pathname}${returnUrl.search}`
     : "/account/connections";
 }
 

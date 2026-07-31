@@ -23,8 +23,8 @@ const DISCORD_API_BASE = "https://discord.com/api/v10";
 const DISCORD_AUTHORIZE_URL = "https://discord.com/oauth2/authorize";
 const DISCORD_TOKEN_URL = "https://discord.com/api/oauth2/token";
 const DISCORD_BOT_INTERACTION_PERMISSIONS = "0";
-// ViewChannel(1024) + SendMessages(2048) + EmbedLinks(16384)
-const DISCORD_BOT_PREFIX_PERMISSIONS = "19456";
+// ViewChannel(1024) + SendMessages(2048) + ManageMessages(8192) + EmbedLinks(16384)
+const DISCORD_BOT_PREFIX_PERMISSIONS = "27648";
 const ADMINISTRATOR = 1n << 3n;
 const MANAGE_GUILD = 1n << 5n;
 const SETUP_RETURN_PATH = "/dashboard/organizations";

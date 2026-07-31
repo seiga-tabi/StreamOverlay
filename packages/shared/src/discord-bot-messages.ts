@@ -27,6 +27,13 @@ export const DISCORD_BOT_MESSAGES = {
         "**/yoro dashboard**",
         "YORO Bot 관리 화면을 엽니다."
       ].join("\n"),
+      privateHelpTitle: "**작성자에게만 보이는 명령**",
+      privateCommands: {
+        status: "`/yoro status` Palworld 서버 상태 확인",
+        player: "`/yoro player` 접속 닉네임 목록 · `nickname` 입력 시 게임 내 프로필 검색",
+        guide: "`/yoro guide` Palworld 전용 서버 설정 안내"
+      },
+      playerSearchHint: "`/yoro player`에서 `nickname`을 입력해 검색할 수 있습니다.",
       prefixHelpTitle: "**일반 사용자 명령**",
       unknown: "지원하지 않는 YORO Bot 명령입니다."
     },
@@ -87,6 +94,16 @@ export const DISCORD_BOT_MESSAGES = {
         latency: "응답 시간",
         observedAt: "마지막 확인"
       },
+      charts: {
+        occupancy: "서버 정원 사용률",
+        responseQuality: "연결 응답 품질",
+        excellent: "매우 빠름",
+        good: "양호",
+        delayed: "지연됨",
+        slow: "느림",
+        footer: "YORO · Palworld 안전한 읽기 전용 상태",
+        playerFooter: "YORO · Palworld 접속 플레이어 조회"
+      },
       states: {
         not_configured: "상태 연결 필요",
         checking: "첫 상태 확인 중",
@@ -131,6 +148,13 @@ export const DISCORD_BOT_MESSAGES = {
         "**/yoro dashboard**",
         "YORO Bot管理画面を開きます。"
       ].join("\n"),
+      privateHelpTitle: "**実行者だけに表示されるコマンド**",
+      privateCommands: {
+        status: "`/yoro status` Palworldサーバー状態を確認",
+        player: "`/yoro player` 接続中のニックネーム一覧 · `nickname`入力時はゲーム内プロフィールを検索",
+        guide: "`/yoro guide` Palworld専用サーバー設定ガイド"
+      },
+      playerSearchHint: "`/yoro player`で`nickname`を入力して検索できます。",
       prefixHelpTitle: "**一般ユーザーコマンド**",
       unknown: "未対応のYORO Botコマンドです。"
     },
@@ -191,6 +215,16 @@ export const DISCORD_BOT_MESSAGES = {
         latency: "応答時間",
         observedAt: "最終確認"
       },
+      charts: {
+        occupancy: "サーバー定員使用率",
+        responseQuality: "接続応答品質",
+        excellent: "非常に高速",
+        good: "良好",
+        delayed: "遅延あり",
+        slow: "低速",
+        footer: "YORO · Palworld安全な読み取り専用状態",
+        playerFooter: "YORO · Palworld接続プレイヤー取得"
+      },
       states: {
         not_configured: "状態連携が必要",
         checking: "初回状態を確認中",
@@ -228,6 +262,17 @@ export function discordBotHelpBody(
 ): string {
   const copy = DISCORD_BOT_MESSAGES[locale].prefix.commands;
   return (["status", "player", "guide", "help"] as const satisfies readonly DiscordBotControlCommand[])
+    .filter((command) => commands[command])
+    .map((command) => copy[command])
+    .join("\n");
+}
+
+export function discordBotPrivateHelpBody(
+  locale: DiscordBotMessageLocale,
+  commands: DiscordBotCommandCapabilities
+): string {
+  const copy = DISCORD_BOT_MESSAGES[locale].slash.privateCommands;
+  return (["status", "player", "guide"] as const)
     .filter((command) => commands[command])
     .map((command) => copy[command])
     .join("\n");

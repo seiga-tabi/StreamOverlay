@@ -9,6 +9,9 @@
 - `/yoro setup`: Guild와 실행자에게 귀속된 10분 일회용 설정 링크 발급
 - `/yoro help`: 현재 제공되는 명령 안내
 - `/yoro dashboard`: token이나 Organization ID가 없는 고정 `/dashboard` 링크를 ephemeral로 제공
+- `/yoro status`: Palworld 서버 상태를 실행자에게만 ephemeral로 제공
+- `/yoro player [nickname]`: 접속 플레이어 목록 또는 프로필을 실행자에게만 ephemeral로 제공
+- `/yoro guide`: 전용 서버 설정 안내를 실행자에게만 ephemeral로 제공
 
 일반 사용자가 공개 채널에서 사용할 수 있는 prefix 명령은 별도 feature flag를
 켰을 때만 제공한다.
@@ -23,7 +26,9 @@
 `status`, `player`, `players`, `guide`, `help`를 exact allowlist로 지원한다.
 플레이어 명령만 최대 80자의 닉네임 인수를 받으며 나머지 자유 형식 문장은
 받지 않는다. prefix 응답은 Discord의 일반 채널 메시지이며
-ephemeral이 아니다. 서버 주소, REST URL, `AdminPassword`, REST credential,
+ephemeral이 아니다. 일반 메시지는 작성자 전용으로 바꿀 수 없으므로 비공개
+조회에는 같은 정책을 적용하는 `/yoro status`, `/yoro player`,
+`/yoro guide`를 사용한다. 서버 주소, REST URL, `AdminPassword`, REST credential,
 Organization ID와 내부 오류 정보는 표시하지 않는다.
 
 Palworld REST 상태 수집 기반은 재사용하지만 Notification Worker, RCON, 서버
@@ -41,13 +46,17 @@ Palworld REST 상태 수집 기반은 재사용하지만 Notification Worker, RC
 5. OAuth redirect URI는 정확한 `/api/discord/oauth/callback` HTTPS URL만 등록한다.
 6. 설치 URL scope는 `bot`, `applications.commands`만 사용한다.
 7. prefix 명령이 꺼지면 Bot permission은 `0`이다. 켜면
-   `View Channels`, `Send Messages`, `Embed Links`만 요청한다.
-   `Administrator`, `Manage Guild`, `Manage Messages`, `Mention Everyone`은
-   요청하지 않는다.
+   `View Channels`, `Send Messages`, `Embed Links`, `Manage Messages`를
+   요청한다. `Manage Messages`는 Organization 관리자가 “Bot 응답 후 사용한
+   명령어 삭제”를 켠 경우, 응답을 완료한 뒤 해당 `!yoro` 원본 메시지만
+   삭제하는 데 사용한다. `Administrator`, `Manage Guild`,
+   `Mention Everyone`은 요청하지 않는다.
 
 Guild 관리자는 prefix 명령을 사용할 채널에서 Bot의 채널 보기, 메시지 보내기,
-링크 임베드 권한을 허용해야 한다. Bot은 사용자·역할 mention을 생성하지
-않으며 사용자별 10초 cooldown과 Guild별 단기 제한을 적용한다.
+링크 임베드 권한을 허용해야 한다. 명령 메시지 삭제 설정을 사용할 채널에는
+메시지 관리 권한도 허용해야 한다. 삭제 권한이 없거나 Discord 삭제 요청이
+실패해도 Bot 응답은 유지된다. Bot은 사용자·역할 mention을 생성하지 않으며
+사용자별 10초 cooldown과 Guild별 단기 제한을 적용한다.
 
 ## Secret
 
@@ -128,12 +137,16 @@ tenant-bound 조회를 수행한다. 메시지나 URL에서 받은 Organization 
 서버 ID를 신뢰하지 않는다. REST 연결의 현재 상태
 source만 읽으며 서로의 값을 섞지 않는다.
 
-상태 응답은 상태값과 공개 가능한 `reason`을 분리합니다. `reason`은 상태
+상태 응답은 상태값과 공개 가능한 `reason`을 분리합니다. Discord native
+Embed의 고정 폭 텍스트 게이지로 접속률과 응답 품질을 시각화하고, 접근성과
+정확성을 위해 현재/최대 인원·백분율·응답 시간 숫자를 함께 제공합니다.
+외부 chart URL이나 동적 이미지 렌더러는 사용하지 않습니다. `reason`은 상태
 연결 미완료, 운영 기능 비활성, 자격 증명 저장소 준비 실패, 인증 실패,
 네트워크 정책 차단, upstream 실패, stale, 부분 응답만 구분합니다. REST URL,
 비밀번호, 내부 오류 code, 진단 단계와 Database 정보는 Bot으로 전달하지
-않습니다. 정상 상태에는 Dashboard 버튼을 반복 표시하지 않고 관리 작업이
-필요한 상태에만 고정 canonical Dashboard 링크를 제공합니다.
+않습니다. 도움말·가이드·상태에는 YORO의 고정 canonical Dashboard 및 가이드
+URL만 link button으로 제공합니다. 사용자 입력으로 URL이나 custom action을
+생성하지 않습니다.
 
 Dashboard는 Bot token을 보유하거나 Discord Gateway에 직접 연결하지 않는다.
 설정 변경은 Server의 Organization 관리 API로만 수행하고 Gateway는 서명된

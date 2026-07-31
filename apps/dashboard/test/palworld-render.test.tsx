@@ -708,10 +708,10 @@ test("Palworld 홈은 실제 경로의 기능 대시보드와 로그인 CTA가 �
   />);
   assert.doesNotMatch(html, /palworld-hero-meta|palworld-shortcuts|palworld-summary/u);
   assert.match(html, /PALWORLD DATABASE/u);
-  assert.match(html, /href="\/palworld\/pals"/u);
-  assert.match(html, /href="\/palworld\/breeding"/u);
-  assert.match(html, /href="\/palworld\/map"/u);
-  assert.match(html, /href="\/palworld\/technology"/u);
+  assert.match(html, /href="\/ko\/palworld\/pals"/u);
+  assert.match(html, /href="\/ko\/palworld\/breeding"/u);
+  assert.match(html, /href="\/ko\/palworld\/map"/u);
+  assert.match(html, /href="\/ko\/palworld\/technology"/u);
   assert.doesNotMatch(html, /palworld-home-primary-card__arrow/u);
   assert.match(html, /팔로우 중인 LIVE 스트리머/u);
   assert.match(html, /Twitch 로그인 후 팔로우 중인 스트리머의 방송 상태를 확인할 수 있습니다/u);
@@ -2526,7 +2526,7 @@ test("홈 Hero 제목은 표시하고 하위 페이지 소개 문구와 Pal 표�
   assert.doesNotMatch(`${cardAndDetail}\n${localizedLevelSource}`, /Lv\.\$\{/u);
 });
 
-test("sitemap은 query 없는 Palworld 공개 base 경로를 모두 포함한다", () => {
+test("sitemap은 query 없는 한국어·일본어 Palworld 공개 base 경로를 모두 포함한다", () => {
   const sitemap = readFileSync(new URL("../public/sitemap.xml", import.meta.url), "utf8");
   for (const path of [
     "/palworld",
@@ -2537,7 +2537,8 @@ test("sitemap은 query 없는 Palworld 공개 base 경로를 모두 포함한다
     "/palworld/breeding",
     "/palworld/map",
   ]) {
-    assert.match(sitemap, new RegExp(`<loc>https://yoro\\.gg${path}</loc>`, "u"), path);
+    assert.match(sitemap, new RegExp(`<loc>https://yoro\\.gg/ko${path}</loc>`, "u"), `ko${path}`);
+    assert.match(sitemap, new RegExp(`<loc>https://yoro\\.gg/ja${path}</loc>`, "u"), `ja${path}`);
   }
   assert.doesNotMatch(sitemap, /<loc>[^<]*\?/u);
   assert.doesNotMatch(sitemap, /\/palworld\/streamers/u);

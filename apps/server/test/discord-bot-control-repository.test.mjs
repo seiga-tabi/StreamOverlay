@@ -24,6 +24,7 @@ test("저장된 Discord Bot 설정은 플레이어 명령 상태까지 다시 �
             status_command_enabled: true,
             player_command_enabled: false,
             guide_command_enabled: true,
+            delete_invocation_after_reply: true,
             preferred_locale: "ko",
             show_players: true,
             show_version: true,
@@ -48,6 +49,8 @@ test("저장된 Discord Bot 설정은 플레이어 명령 상태까지 다시 �
   });
 
   assert.match(controlQuery, /\bplayer_command_enabled\b/u);
+  assert.match(controlQuery, /\bdelete_invocation_after_reply\b/u);
   assert.equal(overview.settings.playerCommandEnabled, false);
+  assert.equal(overview.settings.deleteInvocationAfterReply, true);
   assert.equal(overview.settings.revision, 3);
 });

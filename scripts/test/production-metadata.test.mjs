@@ -24,16 +24,27 @@ test("공개 SEO 메타데이터는 운영 도메인 yoro.gg를 사용한다", a
   assert.doesNotMatch(`${html}\n${robots}\n${sitemap}\n${ads}`, /gg\.seigatabi\.com/);
 });
 
-test("AdSense는 명시적 광고 동의 후 모든 공개 페이지에서 한 번만 로드된다", async () => {
+test("AdSense는 Consent Mode를 적용해 모든 공개 페이지에서 한 번만 로드된다", async () => {
   const html = await readFile(path.join(projectRoot, "apps/dashboard/index.html"), "utf8");
 
   assert.doesNotMatch(html, /<script[^>]+src="https:\/\/pagead2\.googlesyndication\.com/i);
   assert.match(html, /yoro\.ads\.consent/);
   assert.match(html, /yoro:ads-consent/);
+  assert.match(html, /window\.gtag\("consent", "default"/);
+  assert.match(html, /ad_storage: "denied"/);
+  assert.match(html, /ad_user_data: "denied"/);
+  assert.match(html, /ad_personalization: "denied"/);
+  assert.match(html, /analytics_storage: "denied"/);
+  assert.match(html, /window\.__yoroGoogleConsentInitialized = true/);
+  assert.match(html, /window\.gtag\("set", "ads_data_redaction", true\)/);
   assert.match(html, /event\.detail\?\.granted === true/);
   assert.match(html, /script\.async = true/);
   assert.match(html, /script\.crossOrigin = "anonymous"/);
   assert.match(html, /adsbygoogle\.js\?client=ca-pub-7880271953912430/);
+  assert.match(html, /"\/bot"/);
+  assert.match(html, /"\/bot\/features"/);
+  assert.match(html, /"\/bot\/connect"/);
+  assert.match(html, /"\/bot\/dedicated-server"/);
   assert.match(html, /"\/palworld\/pals"/);
   assert.match(html, /"\/palworld\/breeding"/);
   assert.match(html, /"\/palworld\/items"/);
@@ -42,8 +53,9 @@ test("AdSense는 명시적 광고 동의 후 모든 공개 페이지에서 한 �
   assert.match(html, /"\/palworld\/map"/);
   assert.match(html, /"\/lol\/summoners\/"/);
   assert.match(html, /"\/community\/posts\/"/);
-  assert.match(html, /window\.addEventListener\("publicroutechange", loadAdsenseWhenConsented\)/);
-  assert.match(html, /window\.addEventListener\("palworldroutechange", loadAdsenseWhenConsented\)/);
+  assert.match(html, /applyStoredAdConsent\(\);\s+loadAdsense\(\)/);
+  assert.match(html, /window\.addEventListener\("publicroutechange", loadAdsense\)/);
+  assert.match(html, /window\.addEventListener\("palworldroutechange", loadAdsense\)/);
   assert.doesNotMatch(html, /"\/(?:admin|dashboard|streamer)"/);
   assert.match(html, /document\.querySelector\(scriptSelector\)/);
 });

@@ -416,6 +416,7 @@ test("Discord Bot 설정 API는 Organization 경로와 revision·CSRF를 함께 
         statusCommandEnabled: true,
         playerCommandEnabled: true,
         guideCommandEnabled: false,
+        deleteInvocationAfterReply: true,
         preferredLocale: "ko",
         statusFields: {
           players: true,
@@ -437,6 +438,7 @@ test("Discord Bot 설정 API는 Organization 경로와 revision·CSRF를 함께 
       statusCommandEnabled: true,
       playerCommandEnabled: true,
       guideCommandEnabled: false,
+      deleteInvocationAfterReply: true,
       preferredLocale: "ko" as const,
       statusFields: {
         players: true,

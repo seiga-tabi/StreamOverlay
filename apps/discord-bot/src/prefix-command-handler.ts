@@ -1,9 +1,5 @@
 import {
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
   EmbedBuilder,
-  escapeMarkdown,
   type Message
 } from "discord.js";
 import {
@@ -21,7 +17,12 @@ import {
   type DiscordInternalApiClient
 } from "./internal-api-client.js";
 import { auditEvent, safeReference } from "./logger.js";
-import { presentGameServerStatus } from "./status-message-presenter.js";
+import { discordResourceLinks } from "./message-actions.js";
+import { presentPalworldPlayers } from "./player-message-presenter.js";
+import {
+  presentGameServerNotice,
+  presentGameServerStatus
+} from "./status-message-presenter.js";
 
 const MAX_MESSAGE_LENGTH = 100;
 const USER_COOLDOWN_MS = 10_000;
@@ -50,23 +51,29 @@ export type YoroPrefixCommand = "help" | "status" | "player" | "guide";
 
 export type ParsedYoroPrefixCommand = Readonly<{
   command: YoroPrefixCommand;
+  localeHint?: DiscordBotMessageLocale;
   nickname?: string;
 }>;
 
-const aliases = new Map<string, YoroPrefixCommand>([
-  ["도움말", "help"],
-  ["help", "help"],
-  ["ヘルプ", "help"],
-  ["상태", "status"],
-  ["status", "status"],
-  ["ステータス", "status"],
-  ["플레이어", "player"],
-  ["player", "player"],
-  ["players", "player"],
-  ["プレイヤー", "player"],
-  ["가이드", "guide"],
-  ["guide", "guide"],
-  ["ガイド", "guide"]
+type YoroPrefixAlias = Readonly<{
+  command: YoroPrefixCommand;
+  localeHint?: DiscordBotMessageLocale;
+}>;
+
+const aliases = new Map<string, YoroPrefixAlias>([
+  ["도움말", { command: "help", localeHint: "ko" }],
+  ["help", { command: "help" }],
+  ["ヘルプ", { command: "help", localeHint: "ja" }],
+  ["상태", { command: "status", localeHint: "ko" }],
+  ["status", { command: "status" }],
+  ["ステータス", { command: "status", localeHint: "ja" }],
+  ["플레이어", { command: "player", localeHint: "ko" }],
+  ["player", { command: "player" }],
+  ["players", { command: "player" }],
+  ["プレイヤー", { command: "player", localeHint: "ja" }],
+  ["가이드", { command: "guide", localeHint: "ko" }],
+  ["guide", { command: "guide" }],
+  ["ガイド", { command: "guide", localeHint: "ja" }]
 ]);
 
 export function parseYoroPrefixCommand(
@@ -76,22 +83,35 @@ export function parseYoroPrefixCommand(
   const match = /^!yoro(?:\s+(\S+)(?:\s+(.+?))?)?\s*$/iu.exec(content);
   if (!match) return undefined;
   const token = match[1];
-  const command = token ? aliases.get(token.toLowerCase()) : "help";
-  if (!command) return undefined;
+  const alias = token
+    ? aliases.get(token.toLowerCase())
+    : { command: "help" as const };
+  if (!alias) return undefined;
   const nickname = match[2]?.trim();
   if (
     nickname !== undefined
     && (
-      command !== "player"
+      alias.command !== "player"
       || nickname.length < 1
       || nickname.length > 80
       || /[\u0000-\u001f\u007f]/u.test(nickname)
     )
   ) return undefined;
   return Object.freeze({
-    command,
+    command: alias.command,
+    ...(alias.localeHint === undefined ? {} : { localeHint: alias.localeHint }),
     ...(nickname === undefined ? {} : { nickname })
   });
+}
+
+function commandResponseLocale(
+  parsed: ParsedYoroPrefixCommand,
+  preferredLocale: "auto" | DiscordBotMessageLocale,
+  fallbackLocale: DiscordBotMessageLocale
+): DiscordBotMessageLocale {
+  return preferredLocale === "auto"
+    ? parsed.localeHint ?? fallbackLocale
+    : preferredLocale;
 }
 
 class PrefixRateLimiter {
@@ -178,16 +198,21 @@ export class YoroPrefixCommandHandler {
         guild: safeReference(message.guildId)
       });
       await message.reply({
-        content: internalFailureMessage(fallbackLocale, error),
+        content: internalFailureMessage(
+          parsed.localeHint ?? fallbackLocale,
+          error
+        ),
         allowedMentions: { parse: [], repliedUser: false },
         failIfNotExists: true
       });
       return;
     }
     if (!policy.allowed) {
-      const deniedLocale = policy.preferredLocale === "auto"
-        ? fallbackLocale
-        : policy.preferredLocale;
+      const deniedLocale = commandResponseLocale(
+        parsed,
+        policy.preferredLocale,
+        fallbackLocale
+      );
       auditEvent("discord.prefix_command.denied", {
         command,
         guild: safeReference(message.guildId),
@@ -200,12 +225,32 @@ export class YoroPrefixCommandHandler {
         allowedMentions: { parse: [], repliedUser: false },
         failIfNotExists: true
       });
+      await this.deleteInvocationAfterReply(
+        message,
+        policy.deleteInvocationAfterReply
+      );
       return;
     }
-    const locale = policy.preferredLocale === "auto"
-      ? fallbackLocale
-      : policy.preferredLocale;
+    const locale = commandResponseLocale(
+      parsed,
+      policy.preferredLocale,
+      fallbackLocale
+    );
     const messages = DISCORD_BOT_MESSAGES[locale].prefix;
+    const dashboardUrl = new URL(
+      "/dashboard/organizations",
+      this.publicBaseUrl
+    ).toString();
+    const guideUrl = new URL(
+      "/bot/dedicated-server",
+      this.publicBaseUrl
+    ).toString();
+    const resources = discordResourceLinks({
+      dashboardUrl,
+      dashboardLabel: messages.dashboardButton,
+      guideUrl,
+      guideLabel: messages.guideButton
+    });
     auditEvent("discord.prefix_command.received", {
       command,
       guild: safeReference(message.guildId),
@@ -216,41 +261,76 @@ export class YoroPrefixCommandHandler {
         embeds: [
           new EmbedBuilder()
             .setColor(0x5865f2)
-            .setTitle(messages.helpTitle)
+            .setTitle(`🤖 ${messages.helpTitle}`)
             .setDescription(discordBotHelpBody(locale, policy.commands))
+            .setFooter({ text: messages.charts.footer })
         ],
+        components: [resources],
         allowedMentions: { parse: [], repliedUser: false },
         failIfNotExists: true
       });
+      await this.deleteInvocationAfterReply(
+        message,
+        policy.deleteInvocationAfterReply
+      );
       return;
     }
     if (command === "guide") {
-      const guideUrl = new URL("/bot/dedicated-server", this.publicBaseUrl).toString();
       await message.reply({
         embeds: [
           new EmbedBuilder()
             .setColor(0x5865f2)
-            .setTitle(messages.guideTitle)
+            .setTitle(`📘 ${messages.guideTitle}`)
             .setDescription(messages.guideBody)
+            .setFooter({ text: messages.charts.footer })
         ],
-        components: [
-          new ActionRowBuilder<ButtonBuilder>().addComponents(
-            new ButtonBuilder()
-              .setStyle(ButtonStyle.Link)
-              .setLabel(messages.guideButton)
-              .setURL(guideUrl)
-          )
-        ],
+        components: [resources],
         allowedMentions: { parse: [], repliedUser: false },
         failIfNotExists: true
       });
+      await this.deleteInvocationAfterReply(
+        message,
+        policy.deleteInvocationAfterReply
+      );
       return;
     }
     if (command === "player") {
       await this.replyPlayers(message, locale, parsed.nickname);
+      await this.deleteInvocationAfterReply(
+        message,
+        policy.deleteInvocationAfterReply
+      );
       return;
     }
     await this.replyStatus(message, locale, policy.statusFields);
+    await this.deleteInvocationAfterReply(
+      message,
+      policy.deleteInvocationAfterReply
+    );
+  }
+
+  private async deleteInvocationAfterReply(
+    message: Message,
+    enabled: boolean
+  ): Promise<void> {
+    if (!enabled) return;
+    if (!message.deletable) {
+      auditEvent("discord.prefix_command.delete_skipped", {
+        guild: safeReference(message.guildId!),
+        reason: "permission_required"
+      });
+      return;
+    }
+    try {
+      await message.delete();
+      auditEvent("discord.prefix_command.deleted", {
+        guild: safeReference(message.guildId!)
+      });
+    } catch {
+      auditEvent("discord.prefix_command.delete_failed", {
+        guild: safeReference(message.guildId!)
+      });
+    }
   }
 
   private async replyPlayers(
@@ -280,99 +360,13 @@ export class YoroPrefixCommandHandler {
       });
       return;
     }
-    if (!response.connected) {
-      await message.reply({
-        content: messages.guildNotConnected,
-        allowedMentions: { parse: [], repliedUser: false },
-        failIfNotExists: true
-      });
-      return;
-    }
-    if (response.reason) {
-      await message.reply({
-        content: messages.playerUnavailable[response.reason],
-        allowedMentions: { parse: [], repliedUser: false },
-        failIfNotExists: true
-      });
-      return;
-    }
-    if (!response.result) {
-      await message.reply({
-        content: messages.unavailable,
-        allowedMentions: { parse: [], repliedUser: false },
-        failIfNotExists: true
-      });
-      return;
-    }
-    if (response.result.kind === "list") {
-      const names = response.result.nicknames
-        .map((name) => `• ${escapeMarkdown(name)}`)
-        .join("\n");
-      const description = names || messages.playerEmpty;
-      const footer = response.result.total > response.result.nicknames.length
-        ? messages.playerListTruncated
-          .replace("{total}", String(response.result.total))
-          .replace("{shown}", String(response.result.nicknames.length))
-        : messages.playerSearchHint;
-      await message.reply({
-        embeds: [
-          new EmbedBuilder()
-            .setColor(0x5865f2)
-            .setTitle(messages.playerListTitle)
-            .setDescription(description)
-            .setFooter({ text: footer })
-        ],
-        allowedMentions: { parse: [], repliedUser: false },
-        failIfNotExists: true
-      });
-      return;
-    }
-    if (response.result.kind === "not_found") {
-      const suggestions = response.result.suggestions.length
-        ? `\n\n**${messages.playerSuggestions}**\n${
-          response.result.suggestions
-            .map((name) => `• ${escapeMarkdown(name)}`)
-            .join("\n")
-        }`
-        : "";
-      await message.reply({
-        embeds: [
-          new EmbedBuilder()
-            .setColor(0xf0b232)
-            .setTitle(messages.playerProfileTitle)
-            .setDescription(`${messages.playerNotFound}${suggestions}`)
-        ],
-        allowedMentions: { parse: [], repliedUser: false },
-        failIfNotExists: true
-      });
-      return;
-    }
-    const player = response.result.player;
-    const profileFields = [
-      {
-        name: messages.playerFields.nickname,
-        value: escapeMarkdown(player.nickname),
-        inline: false
-      },
-      {
-        name: messages.playerFields.level,
-        value: String(player.level),
-        inline: true
-      },
-      ...(player.buildingCount === undefined
-        ? []
-        : [{
-            name: messages.playerFields.buildingCount,
-            value: String(player.buildingCount),
-            inline: true
-          }])
-    ];
     await message.reply({
       embeds: [
-        new EmbedBuilder()
-          .setColor(0x5865f2)
-          .setTitle(messages.playerProfileTitle)
-          .addFields(profileFields)
+        presentPalworldPlayers({
+          locale,
+          response,
+          searchHint: messages.playerSearchHint
+        })
       ],
       allowedMentions: { parse: [], repliedUser: false },
       failIfNotExists: true
@@ -405,18 +399,28 @@ export class YoroPrefixCommandHandler {
       });
       return;
     }
-    const dashboardUrl = new URL("/dashboard/organizations", this.publicBaseUrl).toString();
-    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-      new ButtonBuilder()
-        .setStyle(ButtonStyle.Link)
-        .setLabel(messages.dashboardButton)
-        .setURL(dashboardUrl)
-    );
+    const row = discordResourceLinks({
+      dashboardUrl: new URL(
+        "/dashboard/organizations",
+        this.publicBaseUrl
+      ).toString(),
+      dashboardLabel: messages.dashboardButton,
+      guideUrl: new URL(
+        "/bot/dedicated-server",
+        this.publicBaseUrl
+      ).toString(),
+      guideLabel: messages.guideButton
+    });
     if (!result.connected || !result.server) {
       await message.reply({
-        content: result.connected
-          ? messages.serverNotConfigured
-          : messages.guildNotConnected,
+        embeds: [
+          presentGameServerNotice({
+            locale,
+            description: result.connected
+              ? messages.serverNotConfigured
+              : messages.guildNotConnected
+          })
+        ],
         components: [row],
         allowedMentions: { parse: [], repliedUser: false },
         failIfNotExists: true
@@ -426,8 +430,8 @@ export class YoroPrefixCommandHandler {
     const server = result.server;
     const presentation = presentGameServerStatus({ locale, server, statusFields });
     await message.reply({
-      embeds: [presentation.embed],
-      components: presentation.needsDashboardAction ? [row] : [],
+      embeds: [presentation],
+      components: [row],
       allowedMentions: { parse: [], repliedUser: false },
       failIfNotExists: true
     });

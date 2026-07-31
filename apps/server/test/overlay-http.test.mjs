@@ -256,7 +256,7 @@ test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => 
     assert.equal(res.headers["Cache-Control"], "no-store");
     assert.equal(res.headers.ETag, undefined);
     assert.match(res.body, /<title>LoL 소환사 전적 \| YORO\.gg<\/title>/);
-    assert.match(res.body, /<link rel="canonical" href="https:\/\/yoro\.gg\/lol\/summoners\/jp\/%E3%81%9B%E3%81%84%E3%81%8C-sei">/);
+    assert.match(res.body, /<link rel="canonical" href="https:\/\/yoro\.gg\/ko\/lol\/summoners\/jp\/%E3%81%9B%E3%81%84%E3%81%8C-sei">/);
     const nonce = /script-src 'nonce-([^']+)'/.exec(res.headers["Content-Security-Policy"])?.[1];
     assert.ok(nonce);
     assert.match(res.headers["Content-Security-Policy"], /'strict-dynamic'/);
@@ -267,15 +267,21 @@ test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => 
     await handler(createRequest("GET", "/lol/tournaments"), tournamentRes);
     assert.equal(tournamentRes.statusCode, 200);
     assert.match(tournamentRes.body, /<title>LoL 대회 정보 \| YORO\.gg<\/title>/);
-    assert.match(tournamentRes.body, /<link rel="canonical" href="https:\/\/yoro\.gg\/lol\/tournaments">/);
-    assert.match(tournamentRes.body, /<meta property="og:url" content="https:\/\/yoro\.gg\/lol\/tournaments">/);
+    assert.match(tournamentRes.body, /<link rel="canonical" href="https:\/\/yoro\.gg\/ko\/lol\/tournaments">/);
+    assert.match(tournamentRes.body, /<meta property="og:url" content="https:\/\/yoro\.gg\/ko\/lol\/tournaments">/);
 
     const legalRes = createResponse();
     await handler(createRequest("GET", "/privacy"), legalRes);
     assert.equal(legalRes.statusCode, 200);
     assert.equal(legalRes.headers["X-Robots-Tag"], "noindex, nofollow");
     assert.match(legalRes.body, /<title>개인정보 처리방침 \| YORO\.gg<\/title>/);
-    assert.match(legalRes.body, /<link rel="canonical" href="https:\/\/yoro\.gg\/privacy">/);
+    assert.match(legalRes.body, /<link rel="canonical" href="https:\/\/yoro\.gg\/ko\/privacy">/);
+
+    const japanesePalworldRes = createResponse();
+    await handler(createRequest("GET", "/ja/palworld/pals"), japanesePalworldRes);
+    assert.equal(japanesePalworldRes.statusCode, 200);
+    assert.match(japanesePalworldRes.body, /<title>パル図鑑 \| YORO\.gg<\/title>/);
+    assert.match(japanesePalworldRes.body, /<link rel="canonical" href="https:\/\/yoro\.gg\/ja\/palworld\/pals">/);
 
     const unknownPalworldRes = createResponse();
     await handler(createRequest("GET", "/palworld/not-a-real-page"), unknownPalworldRes);

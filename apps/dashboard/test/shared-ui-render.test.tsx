@@ -48,9 +48,9 @@ test("공개 footer의 법적 고지와 문의는 crawler와 키보드가 접근
     />
   );
 
-  assert.match(html, /<a[^>]+href="\/privacy"[^>]*>개인정보 처리 방침<\/a>/u);
-  assert.match(html, /<a[^>]+href="\/terms"[^>]*>이용약관<\/a>/u);
-  assert.match(html, /<a[^>]+href="\/contact"[^>]*>문의<\/a>/u);
+  assert.match(html, /<a[^>]+href="\/ko\/privacy"[^>]*>개인정보 처리 방침<\/a>/u);
+  assert.match(html, /<a[^>]+href="\/ko\/terms"[^>]*>이용약관<\/a>/u);
+  assert.match(html, /<a[^>]+href="\/ko\/contact"[^>]*>문의<\/a>/u);
   assert.match(html, /data-ja="プライバシーポリシー"/u);
   assert.doesNotMatch(html, /<button/u);
 });

@@ -1,4 +1,9 @@
 import type { PublicMainPage } from "../types/public-lol";
+import {
+  localizedPublicUrlForCurrentLocale,
+  notifyPublicRouteChange,
+  stripPublicLocalePrefix,
+} from "./public-locale-path";
 
 const PUBLIC_TOURNAMENT_ROUTE_PREFIX = "/lol/tournaments/";
 export const PUBLIC_TOURNAMENT_LIST_PATH = "/lol/tournaments";
@@ -37,6 +42,7 @@ export type PublicPageRoute = {
 };
 
 function normalizedPublicPath(pathname: string): string {
+  pathname = stripPublicLocalePrefix(pathname);
   if (!pathname || pathname === "/") return "/";
   return pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
 }
@@ -59,6 +65,7 @@ export function publicPathForPage(page: PublicMainPage, options: { postId?: stri
 }
 
 export function tournamentRouteFromPublicPath(pathname: string = window.location.pathname): PublicTournamentRoute | undefined {
+  pathname = stripPublicLocalePrefix(pathname);
   if (pathname === PUBLIC_TOURNAMENT_LIST_PATH || pathname === `${PUBLIC_TOURNAMENT_LIST_PATH}/`) return { page: "tournamentList" };
   if (pathname === PUBLIC_TOURNAMENT_CALENDAR_PATH || pathname === `${PUBLIC_TOURNAMENT_CALENDAR_PATH}/`) return { page: "tournamentCalendar" };
   if (!pathname.startsWith(PUBLIC_TOURNAMENT_ROUTE_PREFIX)) return undefined;
@@ -73,6 +80,7 @@ export function tournamentRouteFromPublicPath(pathname: string = window.location
 }
 
 export function legalPageFromPublicPath(pathname: string = window.location.pathname): PublicLegalPageKey | undefined {
+  pathname = stripPublicLocalePrefix(pathname);
   const normalized = pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
   if (normalized === PUBLIC_PRIVACY_PATH) return "privacy";
   if (normalized === PUBLIC_TERMS_PATH) return "terms";
@@ -97,13 +105,14 @@ export function publicTournamentDetailPath(slug: string, page: PublicMainPage = 
 }
 
 export function setPublicPath(pathname: string, replace = false): void {
-  const nextPath = pathname || "/";
-  if (window.location.pathname === nextPath) return;
+  const nextPath = localizedPublicUrlForCurrentLocale(pathname || "/");
+  const currentPath = `${window.location.pathname}${window.location.search ?? ""}${window.location.hash ?? ""}`;
+  if (currentPath === nextPath) return;
   if (replace) {
     window.history.replaceState({}, "", nextPath);
-    window.dispatchEvent(new CustomEvent("publicroutechange"));
+    notifyPublicRouteChange();
     return;
   }
   window.history.pushState({}, "", nextPath);
-  window.dispatchEvent(new CustomEvent("publicroutechange"));
+  notifyPublicRouteChange();
 }

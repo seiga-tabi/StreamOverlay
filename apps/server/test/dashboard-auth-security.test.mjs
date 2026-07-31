@@ -366,6 +366,10 @@ test("공개 Twitch OAuth는 Palworld 허용 경로와 안전한 query를 복귀
       "/palworld/skills",
       "/palworld/map",
       "/palworld/search?q=%ED%8C%94%20100%25&pal=pal-1",
+      "/ko/",
+      "/ja/lol/tournaments",
+      "/ko/community",
+      "/ja/palworld/search?q=%E3%83%91%E3%83%AB",
       "/dashboard",
       "/dashboard/seiga/key"
     ];
@@ -458,8 +462,7 @@ test("공개 Twitch OAuth는 외부·정규화·userinfo 우회 복귀 경로를
       "/palworld\u000astreamers",
       "/palworld/../dashboard",
       "/palworld/search?q=%250a",
-      "/palworld#streamers",
-      "/community"
+      "/palworld#streamers"
     ];
 
     for (const returnTo of rejectedPaths) {

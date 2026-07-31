@@ -2,6 +2,7 @@ import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  EmbedBuilder,
   MessageFlags,
   PermissionFlagsBits,
   type ChatInputCommandInteraction
@@ -9,14 +10,38 @@ import {
 import {
   DISCORD_BOT_MESSAGES,
   discordBotHelpBody,
+  discordBotPrivateHelpBody,
   discordBotMessageLocale
+} from "@streamops/shared";
+import type {
+  DiscordBotControlCommand,
+  DiscordBotMessageLocale,
+  DiscordBotCommandPolicyResponse,
+  DiscordGameServerStatusResponse,
+  DiscordPalworldPlayerLookupResponse
 } from "@streamops/shared";
 import type { DiscordInternalApiClient } from "./internal-api-client.js";
 import { DiscordInternalApiError } from "./internal-api-client.js";
 import { auditEvent, safeReference } from "./logger.js";
+import { discordResourceLinks } from "./message-actions.js";
+import { presentPalworldPlayers } from "./player-message-presenter.js";
+import {
+  presentGameServerNotice,
+  presentGameServerStatus
+} from "./status-message-presenter.js";
 
 const INTERACTION_TTL_MS = 15 * 60 * 1_000;
 const MAX_INTERACTIONS = 10_000;
+
+function privateCommandFailureMessage(
+  locale: DiscordBotMessageLocale,
+  error: unknown
+): string {
+  const code = error instanceof DiscordInternalApiError
+    ? error.code
+    : "unexpected";
+  return DISCORD_BOT_MESSAGES[locale].prefix.internalFailure[code];
+}
 
 export function hasSetupPermission(interaction: Pick<
   ChatInputCommandInteraction,
@@ -36,7 +61,10 @@ export class YoroCommandHandler {
     private readonly applicationId: string,
     private readonly internalApi: Pick<
       DiscordInternalApiClient,
-      "issueSetupSession" | "commandPolicy"
+      | "issueSetupSession"
+      | "commandPolicy"
+      | "gameServerStatus"
+      | "palworldPlayers"
     >,
     private readonly now: () => number = Date.now,
     private readonly dashboardUrl = "http://localhost:3000/dashboard/organizations",
@@ -58,8 +86,9 @@ export class YoroCommandHandler {
     });
 
     if (subcommand === "help") {
+      let privateHelp = "";
       let prefixHelp = "";
-      if (this.prefixCommandsEnabled && interaction.guildId) {
+      if (interaction.guildId) {
         try {
           const policy = await this.internalApi.commandPolicy({
             applicationId: this.applicationId,
@@ -71,21 +100,59 @@ export class YoroCommandHandler {
               ? locale
               : policy.preferredLocale;
             const policyText = DISCORD_BOT_MESSAGES[policyLocale].slash;
-            prefixHelp = [
+            const privateBody = discordBotPrivateHelpBody(
+              policyLocale,
+              policy.commands
+            );
+            privateHelp = privateBody
+              ? [
+                  "",
+                  policyText.privateHelpTitle,
+                  privateBody
+                ].join("\n")
+              : "";
+            prefixHelp = this.prefixCommandsEnabled
+              ? [
               "",
               policyText.prefixHelpTitle,
               discordBotHelpBody(policyLocale, policy.commands)
-            ].join("\n");
+                ].join("\n")
+              : "";
           }
         } catch {
           // 내부 정책 조회 실패 시 안전하게 slash 명령 도움말만 표시합니다.
         }
       }
+      const prefixMessages = DISCORD_BOT_MESSAGES[locale].prefix;
+      const resources = discordResourceLinks({
+        dashboardUrl: this.dashboardUrl,
+        dashboardLabel: prefixMessages.dashboardButton,
+        guideUrl: new URL(
+          "/bot/dedicated-server",
+          this.dashboardUrl
+        ).toString(),
+        guideLabel: prefixMessages.guideButton
+      });
       await interaction.reply({
-        content: `${text.help}${prefixHelp}`,
+        embeds: [
+          new EmbedBuilder()
+            .setColor(0x5865f2)
+            .setTitle(`🤖 ${prefixMessages.helpTitle}`)
+            .setDescription(`${text.help}${privateHelp}${prefixHelp}`)
+            .setFooter({ text: prefixMessages.charts.footer })
+        ],
+        components: [resources],
         flags: MessageFlags.Ephemeral,
         allowedMentions: { parse: [] }
       });
+      return;
+    }
+    if (
+      subcommand === "status"
+      || subcommand === "player"
+      || subcommand === "guide"
+    ) {
+      await this.handlePrivateCommand(interaction, subcommand, locale);
       return;
     }
     if (subcommand === "dashboard") {
@@ -165,6 +232,192 @@ export class YoroCommandHandler {
         result: active ? "setup_active" : "service_unavailable"
       });
     }
+  }
+
+  private async handlePrivateCommand(
+    interaction: ChatInputCommandInteraction,
+    command: Extract<DiscordBotControlCommand, "status" | "player" | "guide">,
+    fallbackLocale: DiscordBotMessageLocale
+  ): Promise<void> {
+    if (!interaction.inGuild() || !interaction.guildId) {
+      await interaction.reply({
+        content: DISCORD_BOT_MESSAGES[fallbackLocale].slash.dmDenied,
+        flags: MessageFlags.Ephemeral,
+        allowedMentions: { parse: [] }
+      });
+      return;
+    }
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    let policy: DiscordBotCommandPolicyResponse;
+    try {
+      policy = await this.internalApi.commandPolicy({
+        applicationId: this.applicationId,
+        guildId: interaction.guildId,
+        command
+      });
+    } catch (error) {
+      auditEvent("discord.command.private_failed", {
+        command,
+        stage: "policy",
+        guild: safeReference(interaction.guildId)
+      });
+      await interaction.editReply({
+        content: privateCommandFailureMessage(fallbackLocale, error),
+        allowedMentions: { parse: [] }
+      });
+      return;
+    }
+    const locale = policy.preferredLocale === "auto"
+      ? fallbackLocale
+      : policy.preferredLocale;
+    const messages = DISCORD_BOT_MESSAGES[locale].prefix;
+    if (!policy.allowed) {
+      await interaction.editReply({
+        content: messages.policyDenied[
+          policy.reason ?? "command_disabled"
+        ],
+        allowedMentions: { parse: [] }
+      });
+      return;
+    }
+    if (command === "guide") {
+      const row = discordResourceLinks({
+        dashboardUrl: this.dashboardUrl,
+        dashboardLabel: messages.dashboardButton,
+        guideUrl: new URL(
+          "/bot/dedicated-server",
+          this.dashboardUrl
+        ).toString(),
+        guideLabel: messages.guideButton
+      });
+      await interaction.editReply({
+        embeds: [
+          new EmbedBuilder()
+            .setColor(0x5865f2)
+            .setTitle(`📘 ${messages.guideTitle}`)
+            .setDescription(messages.guideBody)
+            .setFooter({ text: messages.charts.footer })
+        ],
+        components: [row],
+        allowedMentions: { parse: [] }
+      });
+      return;
+    }
+    if (command === "player") {
+      await this.replyPrivatePlayers(interaction, locale);
+      return;
+    }
+    await this.replyPrivateStatus(interaction, locale, policy);
+  }
+
+  private async replyPrivatePlayers(
+    interaction: ChatInputCommandInteraction,
+    locale: DiscordBotMessageLocale
+  ): Promise<void> {
+    const nickname = interaction.options.getString("nickname")?.trim();
+    if (
+      nickname !== undefined
+      && (
+        nickname.length < 1
+        || nickname.length > 80
+        || /[\u0000-\u001f\u007f]/u.test(nickname)
+      )
+    ) {
+      await interaction.editReply({
+        content: DISCORD_BOT_MESSAGES[locale].slash.unknown,
+        allowedMentions: { parse: [] }
+      });
+      return;
+    }
+    let response: DiscordPalworldPlayerLookupResponse;
+    try {
+      response = await this.internalApi.palworldPlayers({
+        applicationId: this.applicationId,
+        guildId: interaction.guildId!,
+        ...(nickname ? { nickname } : {})
+      });
+    } catch (error) {
+      auditEvent("discord.command.private_failed", {
+        command: "player",
+        stage: "status",
+        guild: safeReference(interaction.guildId!)
+      });
+      await interaction.editReply({
+        content: privateCommandFailureMessage(locale, error),
+        allowedMentions: { parse: [] }
+      });
+      return;
+    }
+    await interaction.editReply({
+      embeds: [
+        presentPalworldPlayers({
+          locale,
+          response,
+          searchHint: DISCORD_BOT_MESSAGES[locale].slash.playerSearchHint
+        })
+      ],
+      allowedMentions: { parse: [] }
+    });
+  }
+
+  private async replyPrivateStatus(
+    interaction: ChatInputCommandInteraction,
+    locale: DiscordBotMessageLocale,
+    policy: DiscordBotCommandPolicyResponse
+  ): Promise<void> {
+    const messages = DISCORD_BOT_MESSAGES[locale].prefix;
+    let result: DiscordGameServerStatusResponse;
+    try {
+      result = await this.internalApi.gameServerStatus({
+        applicationId: this.applicationId,
+        guildId: interaction.guildId!
+      });
+    } catch (error) {
+      auditEvent("discord.command.private_failed", {
+        command: "status",
+        stage: "status",
+        guild: safeReference(interaction.guildId!)
+      });
+      await interaction.editReply({
+        content: privateCommandFailureMessage(locale, error),
+        allowedMentions: { parse: [] }
+      });
+      return;
+    }
+    const row = discordResourceLinks({
+      dashboardUrl: this.dashboardUrl,
+      dashboardLabel: messages.dashboardButton,
+      guideUrl: new URL(
+        "/bot/dedicated-server",
+        this.dashboardUrl
+      ).toString(),
+      guideLabel: messages.guideButton
+    });
+    if (!result.connected || !result.server) {
+      await interaction.editReply({
+        embeds: [
+          presentGameServerNotice({
+            locale,
+            description: result.connected
+              ? messages.serverNotConfigured
+              : messages.guildNotConnected
+          })
+        ],
+        components: [row],
+        allowedMentions: { parse: [] }
+      });
+      return;
+    }
+    const presentation = presentGameServerStatus({
+      locale,
+      server: result.server,
+      statusFields: policy.statusFields
+    });
+    await interaction.editReply({
+      embeds: [presentation],
+      components: [row],
+      allowedMentions: { parse: [] }
+    });
   }
 
   private seen(id: string): boolean {

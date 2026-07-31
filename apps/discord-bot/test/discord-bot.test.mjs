@@ -27,6 +27,7 @@ import {
   parseYoroPrefixCommand,
   YoroPrefixCommandHandler
 } from "../dist/prefix-command-handler.js";
+import { discordProgressGauge } from "../dist/status-message-presenter.js";
 
 const IDS = {
   application: "100000000000000001",
@@ -61,7 +62,10 @@ function interaction(input = {}) {
     guild: { ownerId: "different" },
     user: { id: IDS.user },
     memberPermissions: { bitfield: PermissionFlagsBits.ManageGuild },
-    options: { getSubcommand: () => input.subcommand ?? "setup" },
+    options: {
+      getSubcommand: () => input.subcommand ?? "setup",
+      getString: (name) => name === "nickname" ? input.nickname ?? null : null
+    },
     inGuild: () => inGuild,
     reply: async (payload) => calls.reply.push(payload),
     deferReply: async (payload) => calls.deferReply.push(payload),
@@ -71,14 +75,87 @@ function interaction(input = {}) {
   return { value, calls };
 }
 
-test("command manifest는 실제 제공하는 setup, help, dashboard만 등록한다", () => {
+test("command manifest는 관리 명령과 작성자 전용 Palworld 조회 명령만 등록한다", () => {
   assert.equal(yoroCommandJson.name, "yoro");
   assert.deepEqual(
     yoroCommandJson.options?.map((option) => option.name),
-    ["setup", "help", "dashboard"]
+    ["setup", "help", "dashboard", "status", "player", "guide"]
   );
+  const player = yoroCommandJson.options?.find(
+    (option) => option.name === "player"
+  );
+  assert.deepEqual(player?.options?.map((option) => option.name), ["nickname"]);
+  assert.equal(player?.options?.[0]?.max_length, 80);
   assert.equal(yoroCommandJson.dm_permission, false);
   assert.equal(yoroCommandJson.default_member_permissions, undefined);
+});
+
+test("/yoro status는 Organization 정책을 적용한 응답을 작성자에게만 표시한다", async () => {
+  const { value, calls } = interaction({ subcommand: "status" });
+  const handler = new YoroCommandHandler(
+    IDS.application,
+    {
+      async issueSetupSession() {
+        throw new Error("호출되면 안 됩니다.");
+      },
+      async commandPolicy(input) {
+        assert.deepEqual(input, {
+          applicationId: IDS.application,
+          guildId: IDS.guild,
+          command: "status"
+        });
+        return {
+          allowed: true,
+          commands: {
+            help: true,
+            status: true,
+            player: true,
+            guide: true
+          },
+          deleteInvocationAfterReply: false,
+          preferredLocale: "ko",
+          statusFields: {
+            players: true,
+            version: true,
+            latency: false,
+            observedAt: false
+          },
+          revision: 1
+        };
+      },
+      async gameServerStatus() {
+        return {
+          connected: true,
+          server: {
+            displayName: "검증 Palworld 서버",
+            status: "online",
+            source: "rest",
+            players: { current: 2, max: 32 },
+            version: "v1.0.2"
+          }
+        };
+      },
+      async palworldPlayers() {
+        throw new Error("호출되면 안 됩니다.");
+      }
+    },
+    Date.now,
+    "https://yoro.gg/dashboard/organizations"
+  );
+  await handler.handle(value);
+  assert.equal(calls.reply.length, 0);
+  assert.equal(calls.deferReply[0].flags, MessageFlags.Ephemeral);
+  assert.equal(calls.editReply.length, 1);
+  const embed = calls.editReply[0].embeds[0].toJSON();
+  assert.equal(embed.title, "🟢 YORO Palworld 서버");
+  assert.equal(
+    embed.fields.some((field) => field.value.includes("2 / 32")),
+    true
+  );
+  assert.equal(
+    embed.fields.some((field) => field.value.includes("▰")),
+    true
+  );
 });
 
 test("/yoro dashboard는 token 없는 고정 canonical URL을 ephemeral로 제공한다", async () => {
@@ -119,6 +196,7 @@ test("/yoro help는 Organization에서 실제 활성화된 일반 사용자 명�
             player: true,
             guide: false
           },
+          deleteInvocationAfterReply: false,
           preferredLocale: "ko",
           statusFields: {
             players: true,
@@ -135,9 +213,20 @@ test("/yoro help는 Organization에서 실제 활성화된 일반 사용자 명�
     true
   );
   await handler.handle(value);
-  assert.match(calls.reply[0].content, /!yoro 상태/u);
-  assert.doesNotMatch(calls.reply[0].content, /!yoro 가이드/u);
+  const helpEmbed = calls.reply[0].embeds[0].toJSON();
+  assert.match(helpEmbed.description, /!yoro 상태/u);
+  assert.doesNotMatch(helpEmbed.description, /!yoro 가이드/u);
+  assert.match(helpEmbed.description, /\/yoro status/u);
+  assert.doesNotMatch(helpEmbed.description, /\/yoro guide/u);
+  assert.equal(calls.reply[0].components[0].toJSON().components.length, 2);
   assert.equal(calls.reply[0].flags, MessageFlags.Ephemeral);
+});
+
+test("상태 게이지는 범위를 안전하게 제한하고 고정 너비로 표시한다", () => {
+  assert.equal(discordProgressGauge(0, 32, 8), "▱▱▱▱▱▱▱▱");
+  assert.equal(discordProgressGauge(16, 32, 8), "▰▰▰▰▱▱▱▱");
+  assert.equal(discordProgressGauge(99, 32, 8), "▰▰▰▰▰▰▰▰");
+  assert.equal(discordProgressGauge(-1, 32, 8), "▱▱▱▱▱▱▱▱");
 });
 
 test("Gateway client는 prefix 기능이 꺼지면 GUILDS만 요청한다", () => {
@@ -409,12 +498,28 @@ test("내부 API client는 HMAC 인증 실패를 일반 장애와 구분한다",
 
 test("!yoro parser는 exact allowlist와 100자 상한을 적용한다", () => {
   assert.deepEqual(parseYoroPrefixCommand("!yoro"), { command: "help" });
-  assert.deepEqual(parseYoroPrefixCommand("!yoro 상태"), { command: "status" });
-  assert.deepEqual(parseYoroPrefixCommand("!YORO ガイド"), { command: "guide" });
-  assert.deepEqual(parseYoroPrefixCommand("!yoro 플레이어"), { command: "player" });
+  assert.deepEqual(parseYoroPrefixCommand("!yoro help"), { command: "help" });
+  assert.deepEqual(parseYoroPrefixCommand("!yoro 상태"), {
+    command: "status",
+    localeHint: "ko"
+  });
+  assert.deepEqual(parseYoroPrefixCommand("!YORO ガイド"), {
+    command: "guide",
+    localeHint: "ja"
+  });
+  assert.deepEqual(parseYoroPrefixCommand("!yoro 플레이어"), {
+    command: "player",
+    localeHint: "ko"
+  });
   assert.deepEqual(parseYoroPrefixCommand("!yoro 플레이어 세이가"), {
     command: "player",
+    localeHint: "ko",
     nickname: "세이가"
+  });
+  assert.deepEqual(parseYoroPrefixCommand("!yoro プレイヤー player-one"), {
+    command: "player",
+    localeHint: "ja",
+    nickname: "player-one"
   });
   assert.equal(parseYoroPrefixCommand("!yoro history"), undefined);
   assert.equal(parseYoroPrefixCommand("!yoro 상태 extra"), undefined);
@@ -451,6 +556,7 @@ test("!yoro 상태는 Guild에 귀속된 안전한 공개 Embed만 응답한다"
             player: true,
             guide: true
           },
+          deleteInvocationAfterReply: false,
           preferredLocale: "auto",
           statusFields: {
             players: true,
@@ -492,10 +598,165 @@ test("!yoro 상태는 Guild에 귀속된 안전한 공개 Embed만 응답한다"
   const embed = replies[0].embeds[0].toJSON();
   assert.doesNotMatch(embed.description, /@everyone/u);
   assert.match(embed.description, /＠everyone/u);
-  assert.equal(embed.fields[0].value, "온라인");
-  assert.equal(embed.fields[1].value, "4 / 32");
-  assert.equal(embed.fields.some((field) => field.name === "게임 버전"), false);
-  assert.deepEqual(replies[0].components, []);
+  assert.match(embed.description, /온라인/u);
+  assert.equal(
+    embed.fields.some((field) => field.value.includes("4 / 32")),
+    true
+  );
+  assert.equal(
+    embed.fields.some((field) => field.name.includes("게임 버전")),
+    false
+  );
+  const statusActions = replies[0].components[0].toJSON().components;
+  assert.deepEqual(
+    statusActions.map((component) => component.url),
+    [
+      "https://yoro.gg/dashboard/organizations",
+      "https://yoro.gg/bot/dedicated-server"
+    ]
+  );
+});
+
+test("!yoro 명령 메시지는 설정이 켜진 경우 응답 성공 후에만 삭제한다", async () => {
+  async function run({
+    enabled,
+    deletable = true,
+    deleteFails = false
+  }) {
+    const events = [];
+    const handler = new YoroPrefixCommandHandler(
+      IDS.application,
+      {
+        async commandPolicy() {
+          return {
+            allowed: true,
+            commands: {
+              help: true,
+              status: true,
+              player: true,
+              guide: true
+            },
+            deleteInvocationAfterReply: enabled,
+            preferredLocale: "ko",
+            statusFields: {
+              players: true,
+              version: true,
+              latency: true,
+              observedAt: true
+            },
+            revision: 1
+          };
+        }
+      },
+      "https://yoro.gg"
+    );
+    await handler.handle({
+      content: "!yoro 도움말",
+      guildId: IDS.guild,
+      guild: { preferredLocale: "ko" },
+      author: { id: IDS.user, bot: false },
+      webhookId: null,
+      system: false,
+      deletable,
+      async reply() {
+        events.push("reply");
+      },
+      async delete() {
+        events.push("delete");
+        if (deleteFails) {
+          throw new Error("missing_permissions");
+        }
+      }
+    });
+    return events;
+  }
+
+  assert.deepEqual(await run({ enabled: true }), ["reply", "delete"]);
+  assert.deepEqual(await run({ enabled: false }), ["reply"]);
+  assert.deepEqual(await run({ enabled: true, deletable: false }), ["reply"]);
+  assert.deepEqual(
+    await run({ enabled: true, deleteFails: true }),
+    ["reply", "delete"]
+  );
+});
+
+test("!yoro 응답 언어는 auto에서 명령어 언어를 따르고 강제 설정을 우선한다", async () => {
+  async function responseTitle({
+    content,
+    guildLocale,
+    preferredLocale
+  }) {
+    const replies = [];
+    const handler = new YoroPrefixCommandHandler(
+      IDS.application,
+      {
+        async commandPolicy() {
+          return {
+            allowed: true,
+            commands: {
+              help: true,
+              status: true,
+              player: true,
+              guide: true
+            },
+            deleteInvocationAfterReply: false,
+            preferredLocale,
+            statusFields: {
+              players: true,
+              version: true,
+              latency: true,
+              observedAt: true
+            },
+            revision: 1
+          };
+        },
+        async gameServerStatus() {
+          return {
+            connected: true,
+            server: {
+              displayName: "Palworld",
+              status: "online",
+              source: "rest"
+            }
+          };
+        }
+      },
+      "https://yoro.gg"
+    );
+    await handler.handle({
+      content,
+      guildId: IDS.guild,
+      guild: { preferredLocale: guildLocale },
+      author: { id: IDS.user, bot: false },
+      webhookId: null,
+      system: false,
+      async reply(payload) {
+        replies.push(payload);
+      }
+    });
+    return replies[0].embeds[0].toJSON().title;
+  }
+
+  assert.equal(await responseTitle({
+    content: "!yoro ステータス",
+    guildLocale: "ko",
+    preferredLocale: "auto"
+  }), "🟢 YORO Palworldサーバー");
+  assert.equal(await responseTitle({
+    content: "!yoro 상태",
+    guildLocale: "ja",
+    preferredLocale: "auto"
+  }), "🟢 YORO Palworld 서버");
+  assert.equal(await responseTitle({
+    content: "!yoro status",
+    guildLocale: "ja",
+    preferredLocale: "auto"
+  }), "🟢 YORO Palworldサーバー");
+  assert.equal(await responseTitle({
+    content: "!yoro ステータス",
+    guildLocale: "ja",
+    preferredLocale: "ko"
+  }), "🟢 YORO Palworld 서버");
 });
 
 test("!yoro 플레이어는 목록과 게임 내 프로필만 안전하게 표시한다", async () => {
@@ -514,6 +775,7 @@ test("!yoro 플레이어는 목록과 게임 내 프로필만 안전하게 표�
             player: true,
             guide: true
           },
+          deleteInvocationAfterReply: false,
           preferredLocale: "ko",
           statusFields: {
             players: true,
@@ -585,7 +847,8 @@ test("!yoro 플레이어는 목록과 게임 내 프로필만 안전하게 표�
   assert.equal(replies.length, 2);
   assert.match(replies[0].embeds[0].toJSON().description, /\\\*\\\*세이가/u);
   const profile = replies[1].embeds[0].toJSON();
-  assert.equal(profile.fields[0].value.includes("\\*\\*세이가"), true);
+  assert.equal(profile.description.includes("\\*\\*세이가"), true);
+  assert.equal(profile.fields.some((field) => field.value === "42"), true);
   assert.deepEqual(replies[1].allowedMentions, {
     parse: [],
     repliedUser: false
@@ -607,6 +870,7 @@ test("!yoro는 Organization 정책에서 비활성화된 명령의 안전한 사
             player: true,
             guide: true
           },
+          deleteInvocationAfterReply: false,
           preferredLocale: "auto",
           statusFields: {
             players: true,
@@ -641,7 +905,7 @@ test("!yoro는 Organization 정책에서 비활성화된 명령의 안전한 사
   assert.equal(replies[0].content, "이 명령은 서버 관리자가 비활성화했습니다.");
 });
 
-test("!yoro 상태는 공개 사유와 필요한 경우에만 Dashboard 동작을 표시한다", async () => {
+test("!yoro 상태는 공개 사유와 고정된 안전한 관리 동작을 표시한다", async () => {
   const replies = [];
   const handler = new YoroPrefixCommandHandler(
     IDS.application,
@@ -655,6 +919,7 @@ test("!yoro 상태는 공개 사유와 필요한 경우에만 Dashboard 동작�
             player: true,
             guide: true
           },
+          deleteInvocationAfterReply: false,
           preferredLocale: "ko",
           statusFields: {
             players: true,
@@ -691,9 +956,9 @@ test("!yoro 상태는 공개 사유와 필요한 경우에만 Dashboard 동작�
     }
   });
   const embed = replies[0].embeds[0].toJSON();
-  assert.equal(embed.fields[0].value, "현재 상태 확인 불가");
+  assert.match(embed.description, /현재 상태 확인 불가/u);
   assert.equal(
-    embed.fields[1].value,
+    embed.fields[0].value,
     "Palworld 상태 조회가 현재 운영 설정에서 비활성화되어 있습니다."
   );
   assert.equal(
@@ -716,6 +981,7 @@ test("!yoro 상태는 내부 HMAC 인증 실패를 운영 가능한 안내로 �
             player: true,
             guide: true
           },
+          deleteInvocationAfterReply: false,
           preferredLocale: "ko",
           statusFields: {
             players: true,
@@ -764,6 +1030,7 @@ test("!yoro는 Bot·Webhook·DM 메시지를 처리하지 않는다", async () =
             player: true,
             guide: true
           },
+          deleteInvocationAfterReply: false,
           preferredLocale: "auto",
           statusFields: {
             players: true,

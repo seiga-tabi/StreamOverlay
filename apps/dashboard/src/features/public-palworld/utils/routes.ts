@@ -1,4 +1,11 @@
 import type { PalworldCondensationStars } from "@streamops/shared";
+import {
+  localizedPublicUrl,
+  localizedPublicUrlForCurrentLocale,
+  notifyPublicRouteChange,
+  publicLocaleFromPathname,
+  stripPublicLocalePrefix,
+} from "../../public-lol/utils/public-locale-path";
 
 export const PALWORLD_ROUTE_EVENT = "palworldroutechange";
 const PALWORLD_PUBLIC_ID_PATTERN = /^[a-z0-9][a-z0-9_-]{0,79}$/u;
@@ -24,6 +31,7 @@ const PAGE_PATHS: Record<PalworldPage, string> = {
 };
 
 function normalizePath(pathname: string): string {
+  pathname = stripPublicLocalePrefix(pathname);
   if (!pathname) return "/palworld";
   return pathname.length > 1 && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
 }
@@ -116,20 +124,25 @@ export function palworldDetailSelectionFromParams(params: URLSearchParams): {
 }
 
 export function palworldTwitchReturnTo(pathname: string, search = ""): string {
+  const locale = publicLocaleFromPathname(pathname);
   const path = normalizePath(pathname);
-  if (!Object.values(PAGE_PATHS).includes(path)) return PAGE_PATHS.home;
+  if (!Object.values(PAGE_PATHS).includes(path)) {
+    return locale ? localizedPublicUrl(PAGE_PATHS.home, locale) : PAGE_PATHS.home;
+  }
   const params = new URLSearchParams(search);
   params.delete("viewer_twitch");
   const query = params.toString();
-  return `${path}${query ? `?${query}` : ""}`;
+  const returnTo = `${path}${query ? `?${query}` : ""}`;
+  return locale ? localizedPublicUrl(returnTo, locale) : returnTo;
 }
 
 export function setPalworldUrl(url: string, replace = false): void {
+  url = localizedPublicUrlForCurrentLocale(url);
   const current = `${window.location.pathname}${window.location.search}`;
   if (current === url) return;
   if (replace) window.history.replaceState({}, "", url);
   else window.history.pushState({}, "", url);
-  window.dispatchEvent(new CustomEvent(PALWORLD_ROUTE_EVENT));
+  notifyPublicRouteChange();
 }
 
 export function withQueryParam(url: string, key: string, value?: string): string {

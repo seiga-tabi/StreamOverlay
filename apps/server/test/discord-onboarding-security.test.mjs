@@ -219,7 +219,7 @@ test("Discord Bot 설치 URL은 고정 scope와 최소 permission만 사용한�
   assert.equal(
     new URL(buildDiscordBotInstallUrl("123456789012345678", true))
       .searchParams.get("permissions"),
-    "19456"
+    "27648"
   );
   assert.equal(url.searchParams.has("redirect_uri"), false);
   assert.throws(() => discordBotInstallUrl(), /feature_disabled/u);

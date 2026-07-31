@@ -21,6 +21,7 @@ import {
 import { isPalworldPath } from "./features/public-palworld/utils/routes";
 import { PalworldPageErrorBoundary } from "./features/public-palworld/components/PalworldPageErrorBoundary";
 import { lazyNamed } from "./shared/lazyNamed";
+import { stripPublicLocalePrefix } from "./features/public-lol/utils/public-locale-path";
 
 const loadPublicLolPage = () => import("./pages/PublicLolPage");
 const loadPublicPalworldPage = () => import("./pages/PublicPalworldPage");
@@ -270,6 +271,7 @@ export default function App() {
   }
 
   if (surface === "public") {
+    const publicPathname = stripPublicLocalePrefix(window.location.pathname);
     const yoroDashboard = isYoroDashboardPath(window.location.pathname);
     const yoroLogin = window.location.pathname === "/login"
       || window.location.pathname === "/login/";
@@ -277,15 +279,15 @@ export default function App() {
       || window.location.pathname === "/account/"
       || window.location.pathname === "/account/connections"
       || window.location.pathname === "/account/connections/";
-    const botPublic = window.location.pathname === "/bot"
-      || window.location.pathname === "/bot/"
-      || window.location.pathname === "/bot/features"
-      || window.location.pathname === "/bot/features/"
-      || window.location.pathname === "/bot/connect"
-      || window.location.pathname === "/bot/connect/"
-      || window.location.pathname === "/bot/dedicated-server"
-      || window.location.pathname === "/bot/dedicated-server/";
-    const palworldPublic = isPalworldPath(window.location.pathname);
+    const botPublic = publicPathname === "/bot"
+      || publicPathname === "/bot/"
+      || publicPathname === "/bot/features"
+      || publicPathname === "/bot/features/"
+      || publicPathname === "/bot/connect"
+      || publicPathname === "/bot/connect/"
+      || publicPathname === "/bot/dedicated-server"
+      || publicPathname === "/bot/dedicated-server/";
+    const palworldPublic = isPalworldPath(publicPathname);
     return (
       yoroDashboard ? (
         <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>

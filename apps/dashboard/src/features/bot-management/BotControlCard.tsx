@@ -41,11 +41,15 @@ const copy = {
     guild: "연결된 Discord 서버",
     module: "Palworld 서버 상태",
     moduleDescription: "`!yoro 상태`, 접속 플레이어 프로필 조회와 전용 서버 가이드를 제공하는 안전한 읽기 전용 모듈입니다.",
+    privateCommandNotice: "작성자에게만 보이는 응답은 Discord의 제한상 `!` 메시지가 아니라 `/yoro status`, `/yoro player`, `/yoro guide`로 제공합니다.",
     publicCommands: "일반 사용자 명령 사용",
     moduleEnabled: "Palworld 상태 모듈 사용",
     statusCommand: "`!yoro 상태` 사용",
     playerCommand: "`!yoro 플레이어` 사용",
     guideCommand: "`!yoro 가이드` 사용",
+    deleteInvocation: "Bot 응답 후 사용한 명령어 삭제",
+    deleteInvocationDescription: "인식된 `!yoro` 명령에 응답한 뒤 원본 메시지만 삭제합니다. Bot에 메시지 관리 권한이 필요하며, 삭제 실패는 응답에 영향을 주지 않습니다.",
+    authorizeDeletePermission: "메시지 관리 권한 승인",
     locale: "Bot 응답 언어",
     localeAuto: "Discord 서버 언어 자동 감지",
     localeKo: "한국어",
@@ -89,11 +93,15 @@ const copy = {
     guild: "連携済みDiscordサーバー",
     module: "Palworldサーバー状態",
     moduleDescription: "`!yoro ステータス`、接続プレイヤーのプロフィール取得と専用サーバーガイドを提供する安全な読み取り専用モジュールです。",
+    privateCommandNotice: "実行者だけに表示される応答はDiscordの制限により`!`メッセージではなく、`/yoro status`、`/yoro player`、`/yoro guide`で提供します。",
     publicCommands: "一般ユーザーコマンドを使用",
     moduleEnabled: "Palworld状態モジュールを使用",
     statusCommand: "`!yoro ステータス`を使用",
     playerCommand: "`!yoro プレイヤー`を使用",
     guideCommand: "`!yoro ガイド`を使用",
+    deleteInvocation: "Bot応答後に使用したコマンドを削除",
+    deleteInvocationDescription: "認識された`!yoro`コマンドに応答した後、元のメッセージのみ削除します。Botにメッセージ管理権限が必要で、削除失敗は応答に影響しません。",
+    authorizeDeletePermission: "メッセージ管理権限を承認",
     locale: "Bot応答言語",
     localeAuto: "Discordサーバー言語を自動検出",
     localeKo: "한국어",
@@ -300,6 +308,9 @@ export function BotControlCard(props: {
         <fieldset className="bot-control-settings" disabled={disabled}>
           <legend>{text.module}</legend>
           <p>{text.moduleDescription}</p>
+          <p className="bot-control-warning" role="note">
+            {text.privateCommandNotice}
+          </p>
           <label className="bot-control-toggle">
             <input
               checked={draft.publicCommandsEnabled}
@@ -357,6 +368,31 @@ export function BotControlCard(props: {
               <span>{text.playerCommand}</span>
             </label>
           </div>
+          <label className="bot-control-toggle">
+            <input
+              checked={draft.deleteInvocationAfterReply}
+              type="checkbox"
+              onChange={(event) => setDraft({
+                ...draft,
+                deleteInvocationAfterReply: event.target.checked
+              })}
+            />
+            <span>{text.deleteInvocation}</span>
+          </label>
+          <p className="bot-control-warning">
+            {text.deleteInvocationDescription}
+          </p>
+          {draft.deleteInvocationAfterReply ? (
+            <Button
+              as="a"
+              href={botInstallUrl()}
+              rel="noopener noreferrer"
+              target="_blank"
+              variant="secondary"
+            >
+              {text.authorizeDeletePermission}
+            </Button>
+          ) : null}
           <label className="bot-management-field bot-control-locale">
             <span>{text.locale}</span>
             <select

@@ -612,6 +612,7 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
           statusCommandEnabled: false,
           playerCommandEnabled: true,
           guideCommandEnabled: true,
+          deleteInvocationAfterReply: true,
           preferredLocale: "ja",
           statusFields: {
             players: true,
@@ -638,6 +639,7 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
         player: true,
         guide: true
       },
+      deleteInvocationAfterReply: true,
       preferredLocale: "ja",
       statusFields: {
         players: true,
@@ -669,6 +671,7 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
             statusCommandEnabled: true,
             playerCommandEnabled: true,
             guideCommandEnabled: true,
+            deleteInvocationAfterReply: false,
             preferredLocale: "auto",
             statusFields: {
               players: true,
@@ -695,6 +698,7 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
           statusCommandEnabled: true,
           playerCommandEnabled: true,
           guideCommandEnabled: true,
+          deleteInvocationAfterReply: false,
           preferredLocale: "auto",
           statusFields: {
             players: true,

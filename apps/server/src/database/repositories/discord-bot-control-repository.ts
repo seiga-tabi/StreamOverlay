@@ -30,6 +30,7 @@ type ControlRow = {
   status_command_enabled: boolean;
   player_command_enabled: boolean;
   guide_command_enabled: boolean;
+  delete_invocation_after_reply: boolean;
   preferred_locale: "auto" | "ko" | "ja";
   show_players: boolean;
   show_version: boolean;
@@ -50,6 +51,7 @@ function settings(row?: ControlRow): DiscordBotControlSettings {
     statusCommandEnabled: row.status_command_enabled,
     playerCommandEnabled: row.player_command_enabled,
     guideCommandEnabled: row.guide_command_enabled,
+    deleteInvocationAfterReply: row.delete_invocation_after_reply,
     preferredLocale: row.preferred_locale,
     statusFields: Object.freeze({
       players: row.show_players,
@@ -154,7 +156,8 @@ export class DiscordBotControlRepository {
       this.queryable,
       `SELECT public_commands_enabled, palworld_status_enabled,
          status_command_enabled, player_command_enabled,
-         guide_command_enabled, preferred_locale,
+         guide_command_enabled, delete_invocation_after_reply,
+         preferred_locale,
          show_players, show_version, show_latency, show_observed_at,
          revision::TEXT AS revision
        FROM discord_bot_control_configs
@@ -180,6 +183,7 @@ export class DiscordBotControlRepository {
       input.value.statusCommandEnabled,
       input.value.playerCommandEnabled,
       input.value.guideCommandEnabled,
+      input.value.deleteInvocationAfterReply,
       input.value.preferredLocale,
       input.value.statusFields.players,
       input.value.statusFields.version,
@@ -192,11 +196,12 @@ export class DiscordBotControlRepository {
          organization_id, discord_guild_id, application_id,
          public_commands_enabled, palworld_status_enabled,
          status_command_enabled, player_command_enabled,
-         guide_command_enabled, preferred_locale,
+         guide_command_enabled, delete_invocation_after_reply,
+         preferred_locale,
          show_players, show_version, show_latency, show_observed_at,
          revision, updated_by_user_id
        ) VALUES (
-         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
+         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
        )
        ON CONFLICT (organization_id, discord_guild_id, application_id)
        DO UPDATE SET
@@ -205,6 +210,7 @@ export class DiscordBotControlRepository {
          status_command_enabled = EXCLUDED.status_command_enabled,
          player_command_enabled = EXCLUDED.player_command_enabled,
          guide_command_enabled = EXCLUDED.guide_command_enabled,
+         delete_invocation_after_reply = EXCLUDED.delete_invocation_after_reply,
          preferred_locale = EXCLUDED.preferred_locale,
          show_players = EXCLUDED.show_players,
          show_version = EXCLUDED.show_version,
@@ -230,6 +236,7 @@ export class DiscordBotControlRepository {
       statusCommandEnabled: input.value.statusCommandEnabled,
       playerCommandEnabled: input.value.playerCommandEnabled,
       guideCommandEnabled: input.value.guideCommandEnabled,
+      deleteInvocationAfterReply: input.value.deleteInvocationAfterReply,
       preferredLocale: input.value.preferredLocale,
       statusFields: input.value.statusFields
     };
@@ -291,6 +298,8 @@ export class DiscordBotControlRepository {
            AS player_command_enabled,
          COALESCE(config.guide_command_enabled, TRUE)
            AS guide_command_enabled,
+         COALESCE(config.delete_invocation_after_reply, FALSE)
+           AS delete_invocation_after_reply,
          COALESCE(config.preferred_locale, 'auto')
            AS preferred_locale,
          COALESCE(config.show_players, TRUE) AS show_players,
@@ -322,6 +331,7 @@ export class DiscordBotControlRepository {
           player: false,
           guide: false
         }),
+        deleteInvocationAfterReply: false,
         preferredLocale: "auto",
         statusFields: DEFAULT_DISCORD_BOT_CONTROL_SETTINGS.statusFields,
         revision: 0,
@@ -352,6 +362,7 @@ export class DiscordBotControlRepository {
     return Object.freeze({
       allowed: reason === undefined,
       commands,
+      deleteInvocationAfterReply: current.deleteInvocationAfterReply,
       preferredLocale: current.preferredLocale,
       statusFields: current.statusFields,
       revision: current.revision,
@@ -392,7 +403,8 @@ export class DiscordBotControlRepository {
       this.queryable,
       `SELECT public_commands_enabled, palworld_status_enabled,
          status_command_enabled, player_command_enabled,
-         guide_command_enabled, preferred_locale,
+         guide_command_enabled, delete_invocation_after_reply,
+         preferred_locale,
          show_players, show_version, show_latency, show_observed_at,
          revision::TEXT AS revision
        FROM discord_bot_control_configs

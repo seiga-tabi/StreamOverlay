@@ -3,19 +3,9 @@ import {
   DISCORD_BOT_MESSAGES,
   type DiscordBotMessageLocale,
   type DiscordBotStatusFields,
-  type DiscordGameServerStatusReason,
   type DiscordGameServerStatusResponse,
   type DiscordGameServerStatusState
 } from "@streamops/shared";
-
-const DASHBOARD_ACTION_REASONS = new Set<DiscordGameServerStatusReason>([
-  "status_not_configured",
-  "status_feature_disabled",
-  "credentials_unavailable",
-  "auth_failed",
-  "network_policy_blocked",
-  "upstream_unavailable"
-]);
 
 function safeDiscordText(value: string): string {
   return value
@@ -42,6 +32,55 @@ function statusColor(status: DiscordGameServerStatusState): number {
   }
 }
 
+function statusIcon(status: DiscordGameServerStatusState): string {
+  switch (status) {
+    case "online":
+      return "🟢";
+    case "checking":
+      return "🔵";
+    case "degraded":
+    case "stale":
+      return "🟡";
+    case "offline":
+      return "🔴";
+    case "auth_failed":
+    case "blocked_by_policy":
+      return "🟠";
+    default:
+      return "⚪";
+  }
+}
+
+export function discordProgressGauge(
+  value: number,
+  maximum: number,
+  segments = 12
+): string {
+  const safeSegments = Math.max(1, Math.min(20, Math.trunc(segments)));
+  const ratio = maximum > 0
+    ? Math.max(0, Math.min(1, value / maximum))
+    : 0;
+  const filled = Math.round(ratio * safeSegments);
+  return `${"▰".repeat(filled)}${"▱".repeat(safeSegments - filled)}`;
+}
+
+function latencyPresentation(
+  locale: DiscordBotMessageLocale,
+  latencyMs: number
+): Readonly<{ gauge: string; quality: string; icon: string }> {
+  const charts = DISCORD_BOT_MESSAGES[locale].prefix.charts;
+  if (latencyMs <= 80) {
+    return { gauge: discordProgressGauge(4, 4), quality: charts.excellent, icon: "🟢" };
+  }
+  if (latencyMs <= 160) {
+    return { gauge: discordProgressGauge(3, 4), quality: charts.good, icon: "🔵" };
+  }
+  if (latencyMs <= 300) {
+    return { gauge: discordProgressGauge(2, 4), quality: charts.delayed, icon: "🟡" };
+  }
+  return { gauge: discordProgressGauge(1, 4), quality: charts.slow, icon: "🔴" };
+}
+
 function discordTimestamp(value: string): string | undefined {
   const timestamp = Date.parse(value);
   return Number.isFinite(timestamp)
@@ -53,63 +92,83 @@ export function presentGameServerStatus(input: {
   locale: DiscordBotMessageLocale;
   server: NonNullable<DiscordGameServerStatusResponse["server"]>;
   statusFields: DiscordBotStatusFields;
-}): Readonly<{ embed: EmbedBuilder; needsDashboardAction: boolean }> {
+}): EmbedBuilder {
   const messages = DISCORD_BOT_MESSAGES[input.locale].prefix;
   const server = input.server;
   const observedAt = server.observedAt
     ? discordTimestamp(server.observedAt)
     : undefined;
+  const icon = statusIcon(server.status);
   const embed = new EmbedBuilder()
     .setColor(statusColor(server.status))
-    .setTitle(messages.statusTitle)
-    .setDescription(safeDiscordText(server.displayName))
-    .addFields({
-      name: messages.fields.status,
-      value: messages.states[server.status],
-      inline: true
-    });
+    .setTitle(`${icon} ${messages.statusTitle}`)
+    .setDescription([
+      `**${safeDiscordText(server.displayName)}**`,
+      `${icon} ${messages.states[server.status]}`
+    ].join("\n"))
+    .setFooter({ text: messages.charts.footer });
   if (server.reason) {
     embed.addFields({
-      name: messages.fields.notice,
+      name: `ℹ️ ${messages.fields.notice}`,
       value: messages.reasons[server.reason],
       inline: false
     });
   }
   if (input.statusFields.players && server.players) {
+    const percentage = server.players.max > 0
+      ? Math.round(Math.max(
+          0,
+          Math.min(1, server.players.current / server.players.max)
+        ) * 100)
+      : 0;
     embed.addFields({
-      name: messages.fields.players,
-      value: `${server.players.current} / ${server.players.max}`,
-      inline: true
+      name: `👥 ${messages.charts.occupancy}`,
+      value: [
+        `\`${discordProgressGauge(server.players.current, server.players.max)}\``,
+        `**${server.players.current} / ${server.players.max}** · ${percentage}%`
+      ].join("\n"),
+      inline: false
     });
   }
   if (input.statusFields.version && server.version) {
     embed.addFields({
-      name: messages.fields.version,
+      name: `🎮 ${messages.fields.version}`,
       value: safeDiscordText(server.version),
       inline: true
     });
   }
   if (input.statusFields.latency && server.latencyMs !== undefined) {
+    const latency = latencyPresentation(input.locale, server.latencyMs);
     const formatted = Math.round(server.latencyMs).toLocaleString(
       input.locale === "ja" ? "ja-JP" : "ko-KR"
     );
     embed.addFields({
-      name: messages.fields.latency,
-      value: `${formatted}ms`,
-      inline: true
+      name: `📶 ${messages.charts.responseQuality}`,
+      value: [
+        `\`${latency.gauge}\``,
+        `${latency.icon} **${latency.quality}** · ${formatted}ms`
+      ].join("\n"),
+      inline: false
     });
   }
   if (input.statusFields.observedAt && observedAt) {
     embed.addFields({
-      name: messages.fields.observedAt,
+      name: `🕒 ${messages.fields.observedAt}`,
       value: observedAt,
       inline: true
     });
   }
-  return Object.freeze({
-    embed,
-    needsDashboardAction: Boolean(
-      server.reason && DASHBOARD_ACTION_REASONS.has(server.reason)
-    )
-  });
+  return embed;
+}
+
+export function presentGameServerNotice(input: {
+  locale: DiscordBotMessageLocale;
+  description: string;
+}): EmbedBuilder {
+  const messages = DISCORD_BOT_MESSAGES[input.locale].prefix;
+  return new EmbedBuilder()
+    .setColor(0xf97316)
+    .setTitle(`🟠 ${messages.statusTitle}`)
+    .setDescription(input.description)
+    .setFooter({ text: messages.charts.footer });
 }

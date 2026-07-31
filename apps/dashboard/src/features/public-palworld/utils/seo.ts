@@ -1,5 +1,6 @@
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import { palworldPathForPage, type PalworldPage } from "./routes";
+import { localizedPublicUrl } from "../../public-lol/utils/public-locale-path";
 
 const PUBLIC_ORIGIN = "https://yoro.gg";
 
@@ -24,7 +25,7 @@ export function palworldSeoMetadata(page: PalworldPage, locale: PalworldLocale):
   };
   const selected = values[route];
   return {
-    canonicalUrl: new URL(palworldPathForPage(route), PUBLIC_ORIGIN).href,
+    canonicalUrl: new URL(localizedPublicUrl(palworldPathForPage(route), locale), PUBLIC_ORIGIN).href,
     description: selected.description,
     title: `${selected.title} | YORO.gg`,
   };

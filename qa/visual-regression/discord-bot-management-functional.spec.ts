@@ -714,10 +714,11 @@ test("Palworld 서버 관리는 활성 서버 한 개와 삭제 흐름만 표시
   await expectNoHorizontalOverflow(page);
 });
 
-test("Discord Bot 제어는 저장된 플레이어 명령을 불러오고 revision과 함께 저장한다", async ({ page }) => {
+test("Discord Bot 제어는 플레이어 명령과 응답 후 삭제 설정을 revision과 함께 저장한다", async ({ page }) => {
   await installAuthenticatedAccountRoute(page);
   let revision = 3;
   let playerCommandEnabled = false;
+  let deleteInvocationAfterReply = false;
   let updateRequests = 0;
   await page.route("**/api/discord/management/**", async (route) => {
     const url = new URL(route.request().url());
@@ -739,6 +740,7 @@ test("Discord Bot 제어는 저장된 플레이어 명령을 불러오고 revisi
         const body = route.request().postDataJSON();
         expect(body.expectedRevision).toBe(revision);
         playerCommandEnabled = body.playerCommandEnabled;
+        deleteInvocationAfterReply = body.deleteInvocationAfterReply;
         revision += 1;
       }
       await json(route, {
@@ -762,6 +764,7 @@ test("Discord Bot 제어는 저장된 플레이어 명령을 불러오고 revisi
           statusCommandEnabled: true,
           playerCommandEnabled,
           guideCommandEnabled: true,
+          deleteInvocationAfterReply,
           preferredLocale: "ko",
           statusFields: {
             players: true,
@@ -783,12 +786,24 @@ test("Discord Bot 제어는 저장된 플레이어 명령을 불러오고 revisi
   await expect(
     page.getByRole("heading", { level: 1, name: "Discord Bot 제어" })
   ).toBeVisible();
+  await expect(page.getByText(
+    /작성자에게만 보이는 응답은 Discord의 제한상/u
+  )).toBeVisible();
   const playerCommand = page.getByRole("checkbox", { name: /플레이어/u });
+  const deleteInvocation = page.getByRole("checkbox", {
+    name: "Bot 응답 후 사용한 명령어 삭제"
+  });
   await expect(playerCommand).not.toBeChecked();
+  await expect(deleteInvocation).not.toBeChecked();
   await playerCommand.check();
+  await deleteInvocation.check();
+  await expect(
+    page.getByRole("link", { name: "메시지 관리 권한 승인" })
+  ).toHaveAttribute("target", "_blank");
   await page.getByRole("button", { name: "Bot 설정 저장" }).click();
   await expect(page.getByText("Discord Bot 설정을 저장했습니다.")).toBeVisible();
   await expect(page.getByText("설정 revision: 4")).toBeVisible();
+  await expect(deleteInvocation).toBeChecked();
   expect(updateRequests).toBe(1);
   await expectNoHorizontalOverflow(page);
 });

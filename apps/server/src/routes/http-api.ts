@@ -139,7 +139,13 @@ import {
   publicPalworldApiLimiter,
   publicPalworldListApiLimiter
 } from "../security/rate-limit.js";
-import { isPublicDashboardAppRoute } from "../routing/public-dashboard-routes.js";
+import {
+  isPublicDashboardAppRoute,
+  isLocalizablePublicDashboardRoute,
+  publicUrlLocaleFromPathname,
+  stripPublicUrlLocalePrefix,
+  type PublicUrlLocale,
+} from "../routing/public-dashboard-routes.js";
 import {
   buildLivenessResponse,
   buildReadinessResponse,
@@ -1143,7 +1149,14 @@ function publicTwitchReturnUrlForRequest(req: IncomingMessage, requestedPath: st
     return fallback;
   }
   const dashboardPath = returnUrl.pathname === "/dashboard" || returnUrl.pathname.startsWith("/dashboard/");
-  if (!dashboardPath && !PUBLIC_TWITCH_PALWORLD_RETURN_PATHS.has(returnUrl.pathname)) return fallback;
+  const publicPath = stripPublicUrlLocalePrefix(returnUrl.pathname);
+  if (
+    !dashboardPath
+    && !PUBLIC_TWITCH_PALWORLD_RETURN_PATHS.has(returnUrl.pathname)
+    && !isLocalizablePublicDashboardRoute(publicPath)
+  ) {
+    return fallback;
+  }
   returnUrl.searchParams.set("viewer_twitch", "connected");
   return returnUrl.toString();
 }
@@ -1738,16 +1751,21 @@ function isNotModified(req: IncomingMessage, etag: string, mtime: Date): boolean
 type PublicSeoMetadata = {
   canonicalUrl: string;
   description: string;
+  locale: PublicUrlLocale;
   title: string;
 };
 
 function publicSeoMetadataForPath(pathname: string): PublicSeoMetadata {
-  const normalizedPath = pathname !== "/" && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
-  const defaultMetadata: Omit<PublicSeoMetadata, "canonicalUrl"> = {
+  const locale = publicUrlLocaleFromPathname(pathname) ?? "ko";
+  const unprefixedPath = stripPublicUrlLocalePrefix(pathname);
+  const normalizedPath = unprefixedPath !== "/" && unprefixedPath.endsWith("/")
+    ? unprefixedPath.slice(0, -1)
+    : unprefixedPath;
+  const defaultMetadata: Omit<PublicSeoMetadata, "canonicalUrl" | "locale"> = {
     title: "YORO.gg",
     description: "YORO.gg에서 League of Legends 전적 검색, 스트리머 방송 상태, 팔로우와 시청자 참여 기능을 확인하세요."
   };
-  const palworldMetadata: Record<string, Omit<PublicSeoMetadata, "canonicalUrl">> = {
+  const palworldMetadata: Record<string, Omit<PublicSeoMetadata, "canonicalUrl" | "locale">> = {
     "/palworld": {
       title: "펠월드 데이터베이스 | YORO.gg",
       description: "Pal, 아이템, 스킬과 교배 정보를 한곳에서 확인하세요."
@@ -1781,7 +1799,7 @@ function publicSeoMetadataForPath(pathname: string): PublicSeoMetadata {
       description: "Palworld Pal과 아이템을 한국어·일본어 이름으로 검색하세요."
     }
   };
-  const exactMetadata: Record<string, Omit<PublicSeoMetadata, "canonicalUrl">> = {
+  const exactMetadata: Record<string, Omit<PublicSeoMetadata, "canonicalUrl" | "locale">> = {
     "/": defaultMetadata,
     "/lol": {
       title: "LoL 전적 검색 | YORO.gg",
@@ -1798,6 +1816,22 @@ function publicSeoMetadataForPath(pathname: string): PublicSeoMetadata {
     "/participation": {
       title: "시청자 참여 | YORO.gg",
       description: "YORO.gg 스트리머 방송의 시청자 참여 기능을 이용하세요."
+    },
+    "/bot": {
+      title: "YORO Bot | Discord 게임 서버 도우미",
+      description: "Discord 서버와 게임 서버 운영 기능을 안전하게 연결하는 YORO Bot을 확인하세요."
+    },
+    "/bot/features": {
+      title: "기능 | YORO Bot",
+      description: "YORO Bot의 Organization, Discord 연결과 게임 서버 상태 기능을 확인하세요."
+    },
+    "/bot/connect": {
+      title: "연결 과정 | YORO Bot",
+      description: "YORO Bot을 Discord 서버와 Organization에 연결하는 과정을 확인하세요."
+    },
+    "/bot/dedicated-server": {
+      title: "Palworld 전용 서버 설정 | YORO Bot",
+      description: "브라우저에서 안전하게 PalWorldSettings.ini 설정을 만들고 다운로드하세요."
     },
     "/privacy": {
       title: "개인정보 처리방침 | YORO.gg",
@@ -1830,9 +1864,111 @@ function publicSeoMetadataForPath(pathname: string): PublicSeoMetadata {
               description: "YORO.gg League of Legends 커뮤니티 게시물을 확인하세요."
             }
           : defaultMetadata);
+  const japaneseMetadata: Record<string, Omit<PublicSeoMetadata, "canonicalUrl" | "locale">> = {
+    "/": {
+      title: "YORO.gg",
+      description: "YORO.ggでLeague of Legendsの戦績検索、配信者のLIVE状況、フォロー、視聴者参加機能を確認できます。"
+    },
+    "/lol": {
+      title: "LoL戦績検索 | YORO.gg",
+      description: "League of Legendsの戦績と最近のゲーム情報を検索できます。"
+    },
+    "/lol/tournaments": {
+      title: "LoL大会情報 | YORO.gg",
+      description: "League of Legendsの大会日程と参加情報を確認できます。"
+    },
+    "/follow": {
+      title: "フォロー中の配信者 | YORO.gg",
+      description: "Twitchでフォロー中の配信者のLIVE状況を確認できます。"
+    },
+    "/participation": {
+      title: "視聴者参加 | YORO.gg",
+      description: "YORO.gg配信者の視聴者参加機能を利用できます。"
+    },
+    "/bot": {
+      title: "YORO Bot | Discordゲームサーバーアシスタント",
+      description: "Discordサーバーとゲームサーバー運用機能を安全に連携するYORO Botを確認できます。"
+    },
+    "/bot/features": {
+      title: "機能 | YORO Bot",
+      description: "YORO BotのOrganization、Discord連携、ゲームサーバー状態機能を確認できます。"
+    },
+    "/bot/connect": {
+      title: "連携手順 | YORO Bot",
+      description: "YORO BotをDiscordサーバーとOrganizationに連携する手順を確認できます。"
+    },
+    "/bot/dedicated-server": {
+      title: "Palworld専用サーバー設定 | YORO Bot",
+      description: "ブラウザ内で安全にPalWorldSettings.iniを作成してダウンロードできます。"
+    },
+    "/privacy": {
+      title: "プライバシーポリシー | YORO.gg",
+      description: "YORO.ggのプライバシーポリシーを確認できます。"
+    },
+    "/terms": {
+      title: "利用規約 | YORO.gg",
+      description: "YORO.ggのサービス利用規約を確認できます。"
+    },
+    "/contact": {
+      title: "お問い合わせ | YORO.gg",
+      description: "YORO.ggの運営者へお問い合わせいただけます。"
+    },
+    "/palworld": {
+      title: "パルワールドデータベース | YORO.gg",
+      description: "パル、アイテム、スキル、配合情報をまとめて確認できます。"
+    },
+    "/palworld/pals": {
+      title: "パル図鑑 | YORO.gg",
+      description: "パルの属性、ステータス、作業適性、詳細情報を確認できます。"
+    },
+    "/palworld/breeding": {
+      title: "配合組み合わせ | YORO.gg",
+      description: "パルワールドの通常・特殊配合結果と親の組み合わせを確認できます。"
+    },
+    "/palworld/items": {
+      title: "アイテム | YORO.gg",
+      description: "パルワールドのアイテム分類、製作素材、詳細情報を確認できます。"
+    },
+    "/palworld/technology": {
+      title: "テクノロジー解放 | YORO.gg",
+      description: "テクノロジーレベルごとに解放されるアイテムを確認できます。"
+    },
+    "/palworld/skills": {
+      title: "パルワールドスキル | YORO.gg",
+      description: "アクティブ・パートナー・パッシブスキルの効果と関連パルを確認できます。"
+    },
+    "/palworld/map": {
+      title: "パルワールドワールドマップ | YORO.gg",
+      description: "フィールドボス、野生スポーン、移動・収集地点をレイヤー別に探索できます。"
+    },
+    "/palworld/search": {
+      title: "パルワールド統合検索 | YORO.gg",
+      description: "パルとアイテムを韓国語・日本語の名前で検索できます。"
+    }
+  };
+  const japaneseFallback = normalizedPath.startsWith("/lol/summoners/")
+    ? {
+        title: "LoLサモナー戦績 | YORO.gg",
+        description: "League of Legendsサモナーの戦績と最近のゲーム情報を確認できます。"
+      }
+    : normalizedPath.startsWith("/lol/tournaments/")
+      ? japaneseMetadata["/lol/tournaments"]
+      : normalizedPath.startsWith("/community/")
+        ? {
+            title: "LoLコミュニティ | YORO.gg",
+            description: "YORO.ggのLeague of Legendsコミュニティ投稿を確認できます。"
+          }
+        : japaneseMetadata["/"];
+  const localized = locale === "ja"
+    ? japaneseMetadata[normalizedPath] ?? japaneseFallback ?? selected
+    : selected;
+  const localizedPath = normalizedPath === "/"
+    ? `/${locale}/`
+    : `/${locale}${normalizedPath}`;
   return {
-    ...selected,
-    canonicalUrl: new URL(normalizedPath || "/", "https://yoro.gg").href
+    ...localized,
+    canonicalUrl: new URL(localizedPath, "https://yoro.gg").href,
+    locale,
   };
 }
 
@@ -1850,6 +1986,7 @@ function applyPublicSeoMetadata(html: string, metadata: PublicSeoMetadata): stri
     /<title>[^<]*<\/title>/u,
     `<title>${escapeHtml(metadata.title)}</title>`
   );
+  nextHtml = nextHtml.replace(/<html\s+lang="[^"]*"/u, `<html lang="${metadata.locale}"`);
   for (const [pattern, value] of replacements) {
     nextHtml = nextHtml.replace(pattern, (_match, prefix: string, suffix: string) => (
       `${prefix}${escapeHtml(value)}${suffix}`
@@ -6018,7 +6155,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
         }
         if (await sendPublicDashboardAsset(req, res, url.pathname)) return;
         if (url.pathname === "/" || isPublicDashboardAppRoute(url.pathname)) {
-          const legalDraftHeaders = url.pathname === "/privacy" || url.pathname === "/terms"
+          const publicPathname = stripPublicUrlLocalePrefix(url.pathname);
+          const legalDraftHeaders = publicPathname === "/privacy" || publicPathname === "/terms"
             ? { "X-Robots-Tag": "noindex, nofollow" }
             : undefined;
           await sendStaticFile(

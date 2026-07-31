@@ -25,6 +25,7 @@ const validOverview = {
     statusCommandEnabled: true,
     playerCommandEnabled: false,
     guideCommandEnabled: true,
+    deleteInvocationAfterReply: false,
     preferredLocale: "ko",
     statusFields: {
       players: true,
@@ -42,6 +43,7 @@ const validUpdate = {
   statusCommandEnabled: true,
   playerCommandEnabled: true,
   guideCommandEnabled: false,
+  deleteInvocationAfterReply: true,
   preferredLocale: "ko",
   statusFields: {
     players: true,
@@ -113,6 +115,7 @@ test("Discord Bot 명령 정책 응답은 허용 여부와 사유의 모순을 �
       player: true,
       guide: false
     },
+    deleteInvocationAfterReply: false,
     preferredLocale: "auto",
     statusFields: DEFAULT_DISCORD_BOT_CONTROL_SETTINGS.statusFields,
     revision: 0

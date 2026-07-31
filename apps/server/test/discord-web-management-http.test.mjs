@@ -327,6 +327,7 @@ test("서명된 Bot 내부 명령 정책 API는 exact Guild·command만 전달�
                 player: true,
                 guide: true
               },
+              deleteInvocationAfterReply: false,
               preferredLocale: "auto",
               statusFields: {
                 players: true,
@@ -385,6 +386,7 @@ test("Organization Bot 제어 API는 session·Origin·CSRF와 strict body를 유
       statusCommandEnabled: true,
       playerCommandEnabled: true,
       guideCommandEnabled: true,
+      deleteInvocationAfterReply: false,
       preferredLocale: "auto",
       statusFields: {
         players: true,

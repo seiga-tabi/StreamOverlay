@@ -19,6 +19,10 @@ import {
 } from "../public-lol/i18n/public-lol-i18n";
 import type { PublicMainPage } from "../public-lol/types/public-lol";
 import { setPublicPath } from "../public-lol/utils/routes";
+import {
+  localizedPublicUrl,
+  stripPublicLocalePrefix,
+} from "../public-lol/utils/public-locale-path";
 import { botInstallUrl } from "../bot-management/api";
 import { DiscordSymbolIcon } from "../../shared/DiscordSymbolIcon";
 import {
@@ -171,6 +175,7 @@ const botText = {
 export type PublicBotSection = "overview" | "features" | "connect" | "dedicatedServer";
 
 export function publicBotSectionFromPath(pathname: string): PublicBotSection {
+  pathname = stripPublicLocalePrefix(pathname);
   const normalized = pathname.length > 1 && pathname.endsWith("/")
     ? pathname.slice(0, -1)
     : pathname;
@@ -250,7 +255,10 @@ export function PublicBotPage() {
 
     document.title = pageMetadata.title;
     description?.setAttribute("content", pageMetadata.description);
-    canonical?.setAttribute("href", new URL(pageMetadata.path, window.location.origin).href);
+    canonical?.setAttribute(
+      "href",
+      new URL(localizedPublicUrl(pageMetadata.path, locale), window.location.origin).href,
+    );
 
     return () => {
       document.title = previousTitle;
@@ -261,7 +269,7 @@ export function PublicBotPage() {
         canonical.setAttribute("href", previousCanonical);
       }
     };
-  }, [pageMetadata.description, pageMetadata.path, pageMetadata.title]);
+  }, [locale, pageMetadata.description, pageMetadata.path, pageMetadata.title]);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -306,7 +314,7 @@ export function PublicBotPage() {
         <a
           aria-current={activeSection === section ? "page" : undefined}
           className={activeSection === section ? "active" : ""}
-          href={href}
+          href={localizedPublicUrl(href, locale)}
           key={href}
           onClick={(event) => {
             event.preventDefault();
@@ -594,9 +602,9 @@ export function PublicBotPage() {
         className="public-site-footer public-bot-footer"
         legalNavigation={(
           <nav aria-label={`${text.privacy} · ${text.terms} · ${text.contact}`}>
-            <a href="/privacy">{text.privacy}</a>
-            <a href="/terms">{text.terms}</a>
-            <a href="/contact">{text.contact}</a>
+            <a href={localizedPublicUrl("/privacy", locale)}>{text.privacy}</a>
+            <a href={localizedPublicUrl("/terms", locale)}>{text.terms}</a>
+            <a href={localizedPublicUrl("/contact", locale)}>{text.contact}</a>
           </nav>
         )}
         disclaimer={<p>{text.disclaimer}</p>}

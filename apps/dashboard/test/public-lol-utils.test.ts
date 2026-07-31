@@ -7,6 +7,12 @@ import { buildSuggestions, jpRiotIdQuery, publicSummonerPath, riotIdFromPublicSu
 import { parseFavorites, parseRecentSearches } from "../src/features/public-lol/utils/storage";
 import { publicPageRouteFromPath, publicPathForPage } from "../src/features/public-lol/utils/routes";
 import {
+  isLocalizablePublicPath,
+  localizedPublicUrl,
+  publicLocaleFromPathname,
+  stripPublicLocalePrefix,
+} from "../src/features/public-lol/utils/public-locale-path";
+import {
   DASHBOARD_PAGES,
   dashboardPageFromPath,
   dashboardPathForPage,
@@ -39,6 +45,25 @@ test("공개 페이지 경로를 페이지 상태와 왕복 변환한다", () =>
   assert.equal(publicPathForPage("palworld"), "/palworld");
   assert.equal(publicPathForPage("bot"), "/bot");
   assert.equal(publicPathForPage("followJoin"), "/participation");
+  assert.equal(publicPageRouteFromPath("/ko/community/server")?.page, "patch");
+  assert.equal(publicPageRouteFromPath("/ja/community/posts/post%201")?.postId, "post 1");
+});
+
+test("공개 언어 URL은 경로·query·hash를 보존하고 비공개 경로에는 적용하지 않는다", () => {
+  assert.equal(publicLocaleFromPathname("/ko/"), "ko");
+  assert.equal(publicLocaleFromPathname("/ja/palworld/items"), "ja");
+  assert.equal(publicLocaleFromPathname("/japanese"), undefined);
+  assert.equal(stripPublicLocalePrefix("/ko/palworld/items"), "/palworld/items");
+  assert.equal(stripPublicLocalePrefix("/ja"), "/");
+  assert.equal(localizedPublicUrl("/", "ko"), "/ko/");
+  assert.equal(
+    localizedPublicUrl("/ko/palworld/items?q=스피어#result", "ja"),
+    "/ja/palworld/items?q=스피어#result",
+  );
+  assert.equal(localizedPublicUrl("/dashboard", "ja"), "/dashboard");
+  assert.equal(localizedPublicUrl("/api/palworld/meta", "ko"), "/api/palworld/meta");
+  assert.equal(isLocalizablePublicPath("/ja/bot/features"), true);
+  assert.equal(isLocalizablePublicPath("/ja/dashboard"), false);
 });
 
 test("관리자 Dashboard 경로를 페이지 상태와 왕복 변환한다", () => {

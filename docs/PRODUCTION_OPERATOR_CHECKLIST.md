@@ -55,7 +55,10 @@
 - [ ] Search Console의 `yoro.gg` 도메인 속성 소유권을 확인하고 `https://yoro.gg/sitemap.xml`을 제출했다.
 - [ ] sitemap URL의 title, canonical과 실제 최종 URL이 일치한다.
 - [ ] `www.yoro.gg`와 HTTP 변형이 `https://yoro.gg`로 영구 redirect된다.
-- [ ] AdSense는 동의 전 요청이 없고 동의 후에만 로드된다.
+- [ ] Tag Assistant에서 `G-SEG94KMT1H`를 감지하고 GA4 실시간 `page_view`를 확인했다.
+- [ ] Analytics 요청에 query, OAuth token, setup token이 포함되지 않는다.
+- [ ] GA4 Enhanced Measurement의 history page view와 앱 수동 page view가 중복되지 않는다.
+- [ ] AdSense는 공개 페이지에서 한 번만 로드되고, 동의 전에는 Consent Mode의 광고 저장·사용 상태가 `denied`다.
 - [ ] 필요한 지역에서는 Google 인증 CMP를 연결하고 동의 철회를 제공한다.
 
 ## 복구 훈련

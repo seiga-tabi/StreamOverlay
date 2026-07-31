@@ -224,6 +224,8 @@ test("펠월드 공개 경로를 페이지 상태로 안정적으로 변환한�
   assert.equal(palworldPageFromPath("/palworld/skills"), "skills");
   assert.equal(palworldPageFromPath("/palworld/map"), "map");
   assert.equal(palworldPageFromPath("/palworld/search"), "search");
+  assert.equal(palworldPageFromPath("/ko/palworld/pals"), "pals");
+  assert.equal(palworldPageFromPath("/ja/palworld/breeding/"), "breeding");
   assert.equal(palworldPathForPage("pals"), "/palworld/pals");
   assert.equal(palworldPathForPage("technology"), "/palworld/technology");
   assert.equal(palworldPathForPage("map"), "/palworld/map");
@@ -231,6 +233,7 @@ test("펠월드 공개 경로를 페이지 상태로 안정적으로 변환한�
   assert.equal(palworldUrl("search", new URLSearchParams({ q: "아누비스" })), "/palworld/search?q=%EC%95%84%EB%88%84%EB%B9%84%EC%8A%A4");
   assert.equal(palworldUrl("map", new URLSearchParams({ focusPal: "anubis" })), "/palworld/map?focusPal=anubis");
   assert.equal(isPalworldPath("/palworld/items"), true);
+  assert.equal(isPalworldPath("/ja/palworld/items"), true);
   assert.equal(isPalworldPath("/lol/summoners/jp/test-JP1"), false);
   assert.equal(isKnownPalworldPagePath("/palworld/breeding"), true);
   assert.equal(isKnownPalworldPagePath("/palworld/breeding/"), true);
@@ -329,6 +332,8 @@ test("Palworld Twitch 복귀 경로는 허용된 현재 경로와 기존 query�
   assert.equal(palworldTwitchReturnTo("/palworld/map", ""), "/palworld/map");
   assert.equal(palworldTwitchReturnTo("/palworld/skills", "?type=active"), "/palworld/skills?type=active");
   assert.equal(palworldTwitchReturnTo("/palworld/search", "?q=%EC%95%84%EB%88%84%EB%B9%84%EC%8A%A4&viewer_twitch=connected"), "/palworld/search?q=%EC%95%84%EB%88%84%EB%B9%84%EC%8A%A4");
+  assert.equal(palworldTwitchReturnTo("/ko/palworld/items", "?q=스피어"), "/ko/palworld/items?q=%EC%8A%A4%ED%94%BC%EC%96%B4");
+  assert.equal(palworldTwitchReturnTo("/ja/palworld/breeding", ""), "/ja/palworld/breeding");
   assert.equal(palworldTwitchReturnTo("//evil.example", "?q=x"), "/palworld");
   assert.equal(palworldTwitchReturnTo("/palworld\\technology", ""), "/palworld");
   assert.match(publicTwitchLoginUrl("/palworld/search?q=Pal"), /\/api\/public\/twitch\/auth\/start\?return_to=%2Fpalworld%2Fsearch%3Fq%3DPal$/u);
@@ -926,15 +931,15 @@ test("Palworld SEO metadata는 locale과 route를 반영하고 상세 query 대�
   const japaneseBreeding = palworldSeoMetadata("breeding", "ja");
   const technology = palworldSeoMetadata("technology", "ko");
   const search = palworldSeoMetadata("search", "ko");
-  assert.equal(koreanHome.canonicalUrl, "https://yoro.gg/palworld");
+  assert.equal(koreanHome.canonicalUrl, "https://yoro.gg/ko/palworld");
   assert.match(koreanHome.title, /펠월드 데이터베이스/u);
   assert.match(koreanHome.description, /Pal/u);
-  assert.equal(japaneseBreeding.canonicalUrl, "https://yoro.gg/palworld/breeding");
+  assert.equal(japaneseBreeding.canonicalUrl, "https://yoro.gg/ja/palworld/breeding");
   assert.match(japaneseBreeding.title, /配合組み合わせ/u);
   assert.match(japaneseBreeding.description, /親/u);
-  assert.equal(technology.canonicalUrl, "https://yoro.gg/palworld/technology");
+  assert.equal(technology.canonicalUrl, "https://yoro.gg/ko/palworld/technology");
   assert.match(technology.title, /기술 해금/u);
-  assert.equal(search.canonicalUrl, "https://yoro.gg/palworld/search");
+  assert.equal(search.canonicalUrl, "https://yoro.gg/ko/palworld/search");
   assert.doesNotMatch(search.canonicalUrl, /\?/u);
 });
 
@@ -1436,7 +1441,11 @@ test("LoL 게임 메뉴의 펠월드 경로 변경은 App 재평가 이벤트를
   let pathname = "/";
   const events: string[] = [];
   const fakeWindow = {
-    location: { get pathname() { return pathname; } },
+    location: {
+      get pathname() { return pathname; },
+      search: "",
+      hash: "",
+    },
     history: {
       pushState: (_state: unknown, _unused: string, url: string | URL | null) => { pathname = String(url); },
       replaceState: (_state: unknown, _unused: string, url: string | URL | null) => { pathname = String(url); },
@@ -1446,8 +1455,8 @@ test("LoL 게임 메뉴의 펠월드 경로 변경은 App 재평가 이벤트를
   Object.assign(globalThis, { window: fakeWindow });
   try {
     setPublicPath("/palworld");
-    assert.equal(pathname, "/palworld");
-    assert.deepEqual(events, ["publicroutechange"]);
+    assert.equal(pathname, "/ko/palworld");
+    assert.deepEqual(events, ["publicroutechange", "palworldroutechange"]);
   } finally {
     Object.assign(globalThis, { window: originalWindow });
   }
