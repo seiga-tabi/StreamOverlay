@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppShell, AppShellHeader, AppShellMain } from "../../shared/ui/AppShell";
 import { BottomSheet } from "../../shared/ui/BottomSheet";
 import {
@@ -325,6 +325,179 @@ export type PublicBotSection = "overview" | "gettingStarted" | "commands" | "gam
 
 type BotText = (typeof botText)[PublicLocale];
 
+const commandPageText = {
+  ko: {
+    eyebrow: "COMMAND GUIDE",
+    title: "Discord 명령어",
+    description: "YORO Bot에서 실제로 사용할 수 있는 명령을 권한과 응답 방식까지 한 화면에서 확인하세요.",
+    addBot: "Discord에 YORO Bot 추가",
+    syntaxNotice: "공개 !yoro 명령과 실행자에게만 보이는 /yoro 명령을 구분해 안내합니다.",
+    searchLabel: "명령어 검색",
+    searchPlaceholder: "상태, 플레이어, setup 검색",
+    audienceLabel: "사용 권한",
+    audienceAll: "전체",
+    audiencePublic: "일반 사용자",
+    audiencePrivate: "개인 명령",
+    audienceAdmin: "서버 관리자",
+    categoryLabel: "명령 분류",
+    categoryAll: "전체",
+    categoryServer: "서버",
+    categoryPlayer: "플레이어",
+    categoryGuide: "안내",
+    categoryManagement: "관리",
+    commandList: "명령 목록",
+    detailEyebrow: "COMMAND DETAIL",
+    publicResponse: "채널 공개 응답",
+    privateResponse: "실행자 전용 응답",
+    adminOnly: "관리 권한 필요",
+    publicAlternative: "공개 명령",
+    privateAlternative: "비공개 명령",
+    example: "사용 예시",
+    permission: "필요 권한",
+    activation: "활성화 조건",
+    response: "응답에 포함되는 정보",
+    aliases: "언어별 별칭",
+    aliasesSummary: "별칭과 세부 조건 보기",
+    noResults: "조건에 맞는 명령어가 없습니다. 검색어나 필터를 바꿔보세요.",
+    previewTitle: "Discord 응답 미리보기",
+    previewExample: "예시 화면",
+    previewNotice: "표시 값은 문서용 예시이며 실제 서버의 REST 응답에 따라 달라집니다.",
+    previewPrivate: "나에게만 표시됩니다.",
+    statusTitle: "서버 상태 확인",
+    statusDescription: "Palworld 서버의 온라인 상태와 핵심 지표를 확인합니다.",
+    statusPermission: "모든 서버 구성원",
+    statusActivation: "Organization 연결 · 공개 명령 및 상태 명령 활성화 · Palworld REST 연결",
+    statusResponses: ["온라인 상태", "현재·최대 접속 인원", "서버 버전", "REST 응답 시간"],
+    playerTitle: "플레이어 확인",
+    playerDescription: "현재 접속자 목록을 보거나 게임 내 닉네임으로 공개 프로필을 검색합니다.",
+    playerPermission: "모든 서버 구성원",
+    playerActivation: "Organization 연결 · 공개 명령 및 플레이어 명령 활성화 · Palworld REST 연결",
+    playerResponses: ["현재 접속 인원", "접속자 목록", "완전 일치 프로필", "부분 일치 연관 검색어"],
+    guideTitle: "서버 연결 가이드",
+    guideDescription: "Palworld 전용 서버의 REST 설정과 YORO 연결 순서를 확인합니다.",
+    guidePermission: "모든 서버 구성원",
+    guideActivation: "Organization 연결 · 공개 명령 및 가이드 명령 활성화",
+    guideResponses: ["REST 활성화 안내", "Dashboard 연결 순서", "AdminPassword 보안 안내"],
+    setupTitle: "Organization 연결 시작",
+    setupDescription: "Discord 서버와 YORO Organization을 연결하는 일회용 설정 흐름을 시작합니다.",
+    setupPermission: "서버 소유자 · Administrator · Manage Guild",
+    setupActivation: "Slash command 등록 · Discord 관리 기능 활성화",
+    setupResponses: ["10분 만료 설정 링크", "현재 Guild 권한 재검증", "실행자 전용 안내"],
+    dashboardTitle: "Dashboard 열기",
+    dashboardDescription: "고정된 YORO Dashboard 주소를 실행자에게만 제공합니다.",
+    dashboardPermission: "모든 서버 구성원",
+    dashboardActivation: "Slash command 등록",
+    dashboardResponses: ["고정 Dashboard 링크", "URL에 token 미포함", "실행자 전용 응답"],
+    helpTitle: "사용 가능한 명령 보기",
+    helpDescription: "현재 Dashboard에서 활성화된 명령만 언어에 맞춰 보여줍니다.",
+    helpPermission: "모든 서버 구성원",
+    helpActivation: "Organization 연결 · 공개 명령 활성화",
+    helpResponses: ["활성 명령 목록", "입력 언어 우선 안내", "안전한 사용 예시"],
+    previewStatusBody: "서버가 정상적으로 운영 중입니다.",
+    previewPlayerBody: "현재 접속 중인 플레이어를 확인했습니다.",
+    previewGuideBody: "Palworld REST 연결은 Dashboard에서 안전하게 완료하세요.",
+    previewSetupBody: "Guild 권한 확인 후 일회용 설정 링크를 발급했습니다.",
+    previewDashboardBody: "YORO Dashboard에서 Organization과 Bot 설정을 관리하세요.",
+    previewHelpBody: "현재 사용할 수 있는 명령만 표시합니다.",
+  },
+  ja: {
+    eyebrow: "COMMAND GUIDE",
+    title: "Discordコマンド",
+    description: "YORO Botで実際に利用できるコマンドを、権限と応答方式まで一つの画面で確認できます。",
+    addBot: "DiscordにYORO Botを追加",
+    syntaxNotice: "公開の!yoroコマンドと実行者だけに表示される/yoroコマンドを分けて案内します。",
+    searchLabel: "コマンド検索",
+    searchPlaceholder: "状態、プレイヤー、setupを検索",
+    audienceLabel: "利用権限",
+    audienceAll: "すべて",
+    audiencePublic: "一般ユーザー",
+    audiencePrivate: "個人コマンド",
+    audienceAdmin: "サーバー管理者",
+    categoryLabel: "コマンド分類",
+    categoryAll: "すべて",
+    categoryServer: "サーバー",
+    categoryPlayer: "プレイヤー",
+    categoryGuide: "ガイド",
+    categoryManagement: "管理",
+    commandList: "コマンド一覧",
+    detailEyebrow: "COMMAND DETAIL",
+    publicResponse: "チャンネル公開応答",
+    privateResponse: "実行者のみの応答",
+    adminOnly: "管理権限が必要",
+    publicAlternative: "公開コマンド",
+    privateAlternative: "非公開コマンド",
+    example: "使用例",
+    permission: "必要権限",
+    activation: "有効化条件",
+    response: "応答に含まれる情報",
+    aliases: "言語別の別名",
+    aliasesSummary: "別名と詳細条件を見る",
+    noResults: "条件に一致するコマンドがありません。検索語またはフィルターを変更してください。",
+    previewTitle: "Discord応答プレビュー",
+    previewExample: "サンプル画面",
+    previewNotice: "表示値はドキュメント用の例で、実際のサーバーREST応答により変わります。",
+    previewPrivate: "自分だけに表示されます。",
+    statusTitle: "サーバー状態を確認",
+    statusDescription: "Palworldサーバーのオンライン状態と主要指標を確認します。",
+    statusPermission: "すべてのサーバーメンバー",
+    statusActivation: "Organization連携・公開コマンドと状態コマンド有効・Palworld REST連携",
+    statusResponses: ["オンライン状態", "現在・最大接続人数", "サーバーバージョン", "REST応答時間"],
+    playerTitle: "プレイヤーを確認",
+    playerDescription: "現在の接続者一覧を確認し、ゲーム内ニックネームから公開プロフィールを検索します。",
+    playerPermission: "すべてのサーバーメンバー",
+    playerActivation: "Organization連携・公開コマンドとプレイヤーコマンド有効・Palworld REST連携",
+    playerResponses: ["現在の接続人数", "接続者一覧", "完全一致プロフィール", "部分一致の関連候補"],
+    guideTitle: "サーバー連携ガイド",
+    guideDescription: "Palworld専用サーバーのREST設定とYORO連携手順を確認します。",
+    guidePermission: "すべてのサーバーメンバー",
+    guideActivation: "Organization連携・公開コマンドとガイドコマンド有効",
+    guideResponses: ["REST有効化案内", "Dashboard連携手順", "AdminPasswordの安全案内"],
+    setupTitle: "Organization連携を開始",
+    setupDescription: "DiscordサーバーとYORO Organizationを連携するワンタイム設定を開始します。",
+    setupPermission: "サーバー所有者・Administrator・Manage Guild",
+    setupActivation: "Slash command登録・Discord管理機能有効",
+    setupResponses: ["10分期限の設定リンク", "現在のGuild権限再検証", "実行者のみの案内"],
+    dashboardTitle: "Dashboardを開く",
+    dashboardDescription: "固定されたYORO Dashboardアドレスを実行者だけに提供します。",
+    dashboardPermission: "すべてのサーバーメンバー",
+    dashboardActivation: "Slash command登録",
+    dashboardResponses: ["固定Dashboardリンク", "URLにtokenを含まない", "実行者のみの応答"],
+    helpTitle: "利用可能なコマンドを見る",
+    helpDescription: "Dashboardで現在有効なコマンドだけを言語に合わせて表示します。",
+    helpPermission: "すべてのサーバーメンバー",
+    helpActivation: "Organization連携・公開コマンド有効",
+    helpResponses: ["有効なコマンド一覧", "入力言語を優先する案内", "安全な使用例"],
+    previewStatusBody: "サーバーは正常に稼働しています。",
+    previewPlayerBody: "現在接続中のプレイヤーを確認しました。",
+    previewGuideBody: "Palworld REST連携はDashboardから安全に完了してください。",
+    previewSetupBody: "Guild権限を確認し、ワンタイム設定リンクを発行しました。",
+    previewDashboardBody: "YORO DashboardでOrganizationとBot設定を管理してください。",
+    previewHelpBody: "現在利用できるコマンドだけを表示します。",
+  },
+} as const;
+
+type CommandPageText = (typeof commandPageText)[PublicLocale];
+
+type CommandAudience = "public" | "private" | "admin";
+type CommandAudienceFilter = CommandAudience | "all";
+type CommandCategory = "server" | "player" | "guide" | "management";
+type CommandCategoryFilter = CommandCategory | "all";
+type CommandDocId = "status" | "player" | "guide" | "setup" | "dashboard" | "help";
+
+type CommandDoc = Readonly<{
+  id: CommandDocId;
+  primaryCommand: string;
+  alternativeCommand?: string;
+  category: CommandCategory;
+  audiences: readonly CommandAudience[];
+  title: string;
+  description: string;
+  permission: string;
+  activation: string;
+  responses: readonly string[];
+  aliases: readonly string[];
+}>;
+
 function BotFeatureIcon({ kind }: Readonly<{ kind: "status" | "player" | "dashboard" | "lock" | "tenant" | "permission" | "session" }>) {
   const paths = {
     status: <><path d="M4 16l4-5 4 3 6-8 2 2" /><path d="M4 20h16" /></>,
@@ -382,6 +555,56 @@ function DiscordStatusPreview({ compact, text }: Readonly<{ compact?: boolean; t
   );
 }
 
+function DiscordCommandPreview({
+  command,
+  privateResponse,
+  text,
+}: Readonly<{
+  command: CommandDoc;
+  privateResponse: boolean;
+  text: CommandPageText;
+}>) {
+  const bodyByCommand: Readonly<Record<CommandDocId, string>> = {
+    status: text.previewStatusBody,
+    player: text.previewPlayerBody,
+    guide: text.previewGuideBody,
+    setup: text.previewSetupBody,
+    dashboard: text.previewDashboardBody,
+    help: text.previewHelpBody,
+  };
+  return (
+    <figure className="public-bot-command-response-preview">
+      <div className="public-bot-command-response-preview__header">
+        <strong>{text.previewTitle}</strong>
+        <span>{text.previewExample}</span>
+      </div>
+      {privateResponse ? (
+        <p className="public-bot-command-response-preview__private">
+          <span aria-hidden="true">◉</span> {text.previewPrivate}
+        </p>
+      ) : null}
+      <div className="public-bot-command-response-preview__message">
+        <span className="public-bot-command-response-preview__avatar" aria-hidden="true">
+          <DiscordSymbolIcon />
+        </span>
+        <div>
+          <p className="public-bot-command-response-preview__meta">
+            <strong>YORO Bot</strong><span>BOT</span><small>16:42</small>
+          </p>
+          <div className="public-bot-command-response-preview__embed">
+            <strong>{command.title}</strong>
+            <p>{bodyByCommand[command.id]}</p>
+            <ul>
+              {command.responses.slice(0, 4).map((response) => <li key={response}>{response}</li>)}
+            </ul>
+          </div>
+        </div>
+      </div>
+      <figcaption>{text.previewNotice}</figcaption>
+    </figure>
+  );
+}
+
 export function publicBotSectionFromPath(pathname: string): PublicBotSection {
   pathname = stripPublicLocalePrefix(pathname);
   const normalized = pathname.length > 1 && pathname.endsWith("/")
@@ -414,6 +637,7 @@ function navigateGame(page: PublicMainPage): void {
 export function PublicBotPage() {
   const { locale, changeLocale } = usePublicLocale(noLocalePreference);
   const text = botText[locale];
+  const commandText = commandPageText[locale];
   const activeSection = publicBotSectionFromPath(window.location.pathname);
   const pageMetadata = activeSection === "commands"
     ? { title: text.commandsPageTitle, description: text.commandsDescription, path: "/bot/commands" }
@@ -430,6 +654,10 @@ export function PublicBotPage() {
   const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [commandQuery, setCommandQuery] = useState("");
+  const [commandAudience, setCommandAudience] = useState<CommandAudienceFilter>("all");
+  const [commandCategory, setCommandCategory] = useState<CommandCategoryFilter>("all");
+  const [selectedCommandId, setSelectedCommandId] = useState<CommandDocId>("status");
   const yoroAccount = useYoroAccountSession();
   const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
   const accountIdentity = authenticatedYoroIdentity(yoroAccount.session);
@@ -443,6 +671,120 @@ export function PublicBotPage() {
         : [accountIdentity.provider],
       ...(accountIdentity.avatarUrl ? { profileImageUrl: accountIdentity.avatarUrl } : {}),
     }
+    : undefined;
+  const commandDocs = useMemo<readonly CommandDoc[]>(() => {
+    const prefixAliases = (command: "help" | "status" | "player" | "guide") => {
+      const definition = DISCORD_BOT_PREFIX_COMMAND_MANIFEST.find((entry) => entry.command === command);
+      if (!definition) return [];
+      return (["ko", "ja", "en"] as const).flatMap((aliasLocale) =>
+        definition.aliases[aliasLocale].map((alias) => alias ? `!yoro ${alias}` : "!yoro"),
+      );
+    };
+    const prefixCommand = (ko: string, ja: string) => `!yoro ${locale === "ja" ? ja : ko}`;
+
+    return [
+      {
+        id: "status",
+        primaryCommand: "/yoro status",
+        alternativeCommand: prefixCommand("상태", "状態"),
+        category: "server",
+        audiences: ["public", "private"],
+        title: commandText.statusTitle,
+        description: commandText.statusDescription,
+        permission: commandText.statusPermission,
+        activation: commandText.statusActivation,
+        responses: commandText.statusResponses,
+        aliases: prefixAliases("status"),
+      },
+      {
+        id: "player",
+        primaryCommand: "/yoro player",
+        alternativeCommand: prefixCommand("플레이어 {닉네임}", "プレイヤー {ニックネーム}"),
+        category: "player",
+        audiences: ["public", "private"],
+        title: commandText.playerTitle,
+        description: commandText.playerDescription,
+        permission: commandText.playerPermission,
+        activation: commandText.playerActivation,
+        responses: commandText.playerResponses,
+        aliases: prefixAliases("player"),
+      },
+      {
+        id: "guide",
+        primaryCommand: "/yoro guide",
+        alternativeCommand: prefixCommand("가이드", "ガイド"),
+        category: "guide",
+        audiences: ["public", "private"],
+        title: commandText.guideTitle,
+        description: commandText.guideDescription,
+        permission: commandText.guidePermission,
+        activation: commandText.guideActivation,
+        responses: commandText.guideResponses,
+        aliases: prefixAliases("guide"),
+      },
+      {
+        id: "setup",
+        primaryCommand: "/yoro setup",
+        category: "management",
+        audiences: ["admin"],
+        title: commandText.setupTitle,
+        description: commandText.setupDescription,
+        permission: commandText.setupPermission,
+        activation: commandText.setupActivation,
+        responses: commandText.setupResponses,
+        aliases: [],
+      },
+      {
+        id: "dashboard",
+        primaryCommand: "/yoro dashboard",
+        category: "management",
+        audiences: ["private"],
+        title: commandText.dashboardTitle,
+        description: commandText.dashboardDescription,
+        permission: commandText.dashboardPermission,
+        activation: commandText.dashboardActivation,
+        responses: commandText.dashboardResponses,
+        aliases: [],
+      },
+      {
+        id: "help",
+        primaryCommand: "/yoro help",
+        alternativeCommand: "!yoro",
+        category: "guide",
+        audiences: ["public", "private"],
+        title: commandText.helpTitle,
+        description: commandText.helpDescription,
+        permission: commandText.helpPermission,
+        activation: commandText.helpActivation,
+        responses: commandText.helpResponses,
+        aliases: prefixAliases("help"),
+      },
+    ];
+  }, [commandText, locale]);
+  const filteredCommandDocs = useMemo(() => {
+    const query = commandQuery.trim().toLocaleLowerCase(locale === "ja" ? "ja-JP" : "ko-KR");
+    return commandDocs.filter((command) => {
+      if (commandAudience !== "all" && !command.audiences.includes(commandAudience)) return false;
+      if (commandCategory !== "all" && command.category !== commandCategory) return false;
+      if (!query) return true;
+      return [
+        command.primaryCommand,
+        command.alternativeCommand ?? "",
+        command.title,
+        command.description,
+        ...command.aliases,
+      ].join(" ").toLocaleLowerCase(locale === "ja" ? "ja-JP" : "ko-KR").includes(query);
+    });
+  }, [commandAudience, commandCategory, commandDocs, commandQuery, locale]);
+  const selectedCommand = filteredCommandDocs.find((command) => command.id === selectedCommandId)
+    ?? filteredCommandDocs[0];
+  const selectedCommandSyntax = commandAudience === "public" && selectedCommand?.alternativeCommand
+    ? selectedCommand.alternativeCommand
+    : selectedCommand?.primaryCommand;
+  const selectedAlternativeSyntax = selectedCommand?.alternativeCommand
+    ? selectedCommandSyntax === selectedCommand.primaryCommand
+      ? selectedCommand.alternativeCommand
+      : selectedCommand.primaryCommand
     : undefined;
   setActivePublicLocale(locale);
 
@@ -920,47 +1262,167 @@ export function PublicBotPage() {
         ) : null}
 
         {activeSection === "commands" ? (
-          <section className="public-bot-section public-bot-page-section" id="bot-commands">
-            <div className="public-bot-section__heading">
-              <span>COMMAND MANIFEST</span>
-              <h1>{text.commandsTitle}</h1>
-              <p>{text.commandsDescription}</p>
-            </div>
-            <section aria-labelledby="bot-public-commands">
-              <h2 id="bot-public-commands">{text.publicCommands}</h2>
-              <div className="public-bot-feature-grid public-bot-command-grid">
-                {DISCORD_BOT_PREFIX_COMMAND_MANIFEST.map((definition) => {
-                  const aliases = (["ko", "ja", "en"] as const).flatMap((aliasLocale) =>
-                    definition.aliases[aliasLocale].map((alias) => ({
-                      command: alias ? `!yoro ${alias}` : "!yoro",
-                      locale: aliasLocale,
-                    })),
-                  );
-                  return (
-                    <article className="public-bot-feature is-ready" key={definition.command}>
-                      <span className="public-bot-feature__status">{definition.command}</span>
-                      <h3><code>{aliases[0]?.command}</code></h3>
-                      <p>
-                        <strong>{text.aliases}:</strong>{" "}
-                        {aliases.map((alias) => `${alias.locale.toUpperCase()} ${alias.command}`).join(" · ")}
-                      </p>
-                      {definition.acceptsNickname ? <p><code>{`${aliases[0]?.command} {nickname}`}</code></p> : null}
-                      <p><strong>{text.condition}:</strong> {text.publicCondition}</p>
-                    </article>
-                  );
-                })}
+          <section className="public-bot-command-docs public-bot-page-section" id="bot-commands">
+            <header className="public-bot-command-docs__hero">
+              <div>
+                <span>{commandText.eyebrow}</span>
+                <h1>{commandText.title}</h1>
+                <p>{commandText.description}</p>
+                <small>{commandText.syntaxNotice}</small>
               </div>
-              <p className="public-bot-notice" role="note">{text.playerMatchNotice}</p>
-            </section>
-            <div className="public-bot-feature-grid public-bot-command-access-grid">
-              <section className="public-bot-feature is-ready">
-                <h2>{text.slashCommands}</h2>
-                <p>{text.slashDescription}</p>
-              </section>
-              <section className="public-bot-feature is-ready">
-                <h2>{text.adminCommands}</h2>
-                <p>{text.adminDescription}</p>
-              </section>
+              <a
+                className="public-bot-button is-primary"
+                href={botInstallUrl()}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <DiscordSymbolIcon />
+                {commandText.addBot}
+              </a>
+            </header>
+
+            <div className="public-bot-command-docs__tools">
+              <label className="public-bot-command-search">
+                <span>{commandText.searchLabel}</span>
+                <span className="public-bot-command-search__field">
+                  <span aria-hidden="true">⌕</span>
+                  <input
+                    onChange={(event) => setCommandQuery(event.target.value)}
+                    placeholder={commandText.searchPlaceholder}
+                    type="search"
+                    value={commandQuery}
+                  />
+                </span>
+              </label>
+              <div className="public-bot-command-filter" role="group" aria-label={commandText.audienceLabel}>
+                <strong>{commandText.audienceLabel}</strong>
+                <div>
+                  {([
+                    ["all", commandText.audienceAll],
+                    ["public", commandText.audiencePublic],
+                    ["private", commandText.audiencePrivate],
+                    ["admin", commandText.audienceAdmin],
+                  ] as const).map(([value, label]) => (
+                    <button
+                      aria-pressed={commandAudience === value}
+                      key={value}
+                      onClick={() => setCommandAudience(value)}
+                      type="button"
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="public-bot-command-filter" role="group" aria-label={commandText.categoryLabel}>
+                <strong>{commandText.categoryLabel}</strong>
+                <div>
+                  {([
+                    ["all", commandText.categoryAll],
+                    ["server", commandText.categoryServer],
+                    ["player", commandText.categoryPlayer],
+                    ["guide", commandText.categoryGuide],
+                    ["management", commandText.categoryManagement],
+                  ] as const).map(([value, label]) => (
+                    <button
+                      aria-pressed={commandCategory === value}
+                      key={value}
+                      onClick={() => setCommandCategory(value)}
+                      type="button"
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="public-bot-command-docs__layout">
+              <nav className="public-bot-command-index" aria-label={commandText.commandList}>
+                <h2>{commandText.commandList}</h2>
+                {filteredCommandDocs.length > 0 ? (
+                  <ul>
+                    {filteredCommandDocs.map((command) => (
+                      <li key={command.id}>
+                        <button
+                          aria-current={selectedCommand?.id === command.id ? "true" : undefined}
+                          onClick={() => setSelectedCommandId(command.id)}
+                          type="button"
+                        >
+                          <code>{commandAudience === "public" && command.alternativeCommand
+                            ? command.alternativeCommand
+                            : command.primaryCommand}</code>
+                          <span>{command.title}</span>
+                          <small>
+                            {command.audiences.includes("admin")
+                              ? commandText.adminOnly
+                              : commandAudience === "public" && command.alternativeCommand
+                                ? commandText.publicResponse
+                                : command.primaryCommand.startsWith("/")
+                                  ? commandText.privateResponse
+                                  : commandText.publicResponse}
+                          </small>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : <p className="public-bot-command-index__empty" role="status">{commandText.noResults}</p>}
+              </nav>
+
+              {selectedCommand ? (
+                <article className="public-bot-command-detail" id="bot-command-detail">
+                  <div className="public-bot-command-detail__copy">
+                    <span className="public-bot-command-detail__eyebrow">{commandText.detailEyebrow}</span>
+                    <div className="public-bot-command-detail__badges">
+                      {selectedCommand.audiences.includes("public") ? <span>{commandText.publicResponse}</span> : null}
+                      {selectedCommand.audiences.includes("private") ? <span>{commandText.privateResponse}</span> : null}
+                      {selectedCommand.audiences.includes("admin") ? <span className="is-admin">{commandText.adminOnly}</span> : null}
+                    </div>
+                    <code className="public-bot-command-detail__command">{selectedCommandSyntax}</code>
+                    <h2>{selectedCommand.title}</h2>
+                    <p className="public-bot-command-detail__description">{selectedCommand.description}</p>
+                    {selectedAlternativeSyntax ? (
+                      <div className="public-bot-command-detail__alternative">
+                        <span>{selectedAlternativeSyntax.startsWith("!")
+                          ? commandText.publicAlternative
+                          : commandText.privateAlternative}</span>
+                        <code>{selectedAlternativeSyntax}</code>
+                      </div>
+                    ) : null}
+                    <section className="public-bot-command-detail__example" aria-labelledby="command-example-title">
+                      <h3 id="command-example-title">{commandText.example}</h3>
+                      <code>{selectedCommandSyntax}</code>
+                    </section>
+                    <dl className="public-bot-command-detail__facts">
+                      <div><dt>{commandText.permission}</dt><dd>{selectedCommand.permission}</dd></div>
+                      <div><dt>{commandText.activation}</dt><dd>{selectedCommand.activation}</dd></div>
+                    </dl>
+                    <section className="public-bot-command-detail__response" aria-labelledby="command-response-title">
+                      <h3 id="command-response-title">{commandText.response}</h3>
+                      <ul>{selectedCommand.responses.map((response) => <li key={response}>{response}</li>)}</ul>
+                    </section>
+                    <details className="public-bot-command-detail__more">
+                      <summary>{commandText.aliasesSummary}</summary>
+                      {selectedCommand.aliases.length > 0 ? (
+                        <div>
+                          <strong>{commandText.aliases}</strong>
+                          <p>{selectedCommand.aliases.join(" · ")}</p>
+                        </div>
+                      ) : null}
+                      <div>
+                        <strong>{commandText.activation}</strong>
+                        <p>{selectedCommand.activation}</p>
+                      </div>
+                      {selectedCommand.id === "player" ? <p>{text.playerMatchNotice}</p> : null}
+                    </details>
+                  </div>
+                  <DiscordCommandPreview
+                    command={selectedCommand}
+                    privateResponse={selectedCommandSyntax?.startsWith("/") ?? false}
+                    text={commandText}
+                  />
+                </article>
+              ) : null}
             </div>
           </section>
         ) : null}
