@@ -480,7 +480,7 @@ test("Bot 설치 route는 고정 Discord origin·scope·permission과 no-store�
       new Set((location.searchParams.get("scope") ?? "").split(" ")),
       new Set(["bot", "applications.commands"])
     );
-    assert.equal(location.searchParams.get("permissions"), "0");
+    assert.equal(location.searchParams.get("permissions"), "8");
     assert.equal(location.searchParams.has("redirect_uri"), false);
     assert.equal(response.headers["Cache-Control"], "no-store");
     assert.equal(response.headers["Referrer-Policy"], "no-referrer");

@@ -206,7 +206,7 @@ test("Discord onboarding route는 OAuth callback과 자체 session 보안을 분
   assert.equal(requiredHttpPrincipal("POST", "/api/discord/unknown"), "DASHBOARD_ADMIN");
 });
 
-test("Discord Bot 설치 URL은 고정 scope와 최소 permission만 사용한다", () => {
+test("Discord Bot 설치 URL은 고정 scope와 Administrator permission을 사용한다", () => {
   const url = new URL(buildDiscordBotInstallUrl("123456789012345678"));
   assert.equal(url.origin, "https://discord.com");
   assert.equal(url.pathname, "/oauth2/authorize");
@@ -215,12 +215,7 @@ test("Discord Bot 설치 URL은 고정 scope와 최소 permission만 사용한�
     new Set((url.searchParams.get("scope") ?? "").split(" ")),
     new Set(["bot", "applications.commands"])
   );
-  assert.equal(url.searchParams.get("permissions"), "0");
-  assert.equal(
-    new URL(buildDiscordBotInstallUrl("123456789012345678", true))
-      .searchParams.get("permissions"),
-    "27648"
-  );
+  assert.equal(url.searchParams.get("permissions"), "8");
   assert.equal(url.searchParams.has("redirect_uri"), false);
   assert.throws(() => discordBotInstallUrl(), /feature_disabled/u);
 });

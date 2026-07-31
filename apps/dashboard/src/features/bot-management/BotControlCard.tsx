@@ -48,8 +48,7 @@ const copy = {
     playerCommand: "`!yoro 플레이어` 사용",
     guideCommand: "`!yoro 가이드` 사용",
     deleteInvocation: "Bot 응답 후 사용한 명령어 삭제",
-    deleteInvocationDescription: "인식된 `!yoro` 명령에 응답한 뒤 원본 메시지만 삭제합니다. Bot에 메시지 관리 권한이 필요하며, 삭제 실패는 응답에 영향을 주지 않습니다.",
-    authorizeDeletePermission: "메시지 관리 권한 승인",
+    deleteInvocationDescription: "인식된 `!yoro` 명령에 응답한 뒤 원본 메시지만 삭제합니다. 삭제 실패는 Bot 응답에 영향을 주지 않습니다.",
     locale: "Bot 응답 언어",
     localeAuto: "Discord 서버 언어 자동 감지",
     localeKo: "한국어",
@@ -100,8 +99,7 @@ const copy = {
     playerCommand: "`!yoro プレイヤー`を使用",
     guideCommand: "`!yoro ガイド`を使用",
     deleteInvocation: "Bot応答後に使用したコマンドを削除",
-    deleteInvocationDescription: "認識された`!yoro`コマンドに応答した後、元のメッセージのみ削除します。Botにメッセージ管理権限が必要で、削除失敗は応答に影響しません。",
-    authorizeDeletePermission: "メッセージ管理権限を承認",
+    deleteInvocationDescription: "認識された`!yoro`コマンドに応答した後、元のメッセージのみ削除します。削除失敗はBot応答に影響しません。",
     locale: "Bot応答言語",
     localeAuto: "Discordサーバー言語を自動検出",
     localeKo: "한국어",
@@ -382,17 +380,6 @@ export function BotControlCard(props: {
           <p className="bot-control-warning">
             {text.deleteInvocationDescription}
           </p>
-          {draft.deleteInvocationAfterReply ? (
-            <Button
-              as="a"
-              href={botInstallUrl()}
-              rel="noopener noreferrer"
-              target="_blank"
-              variant="secondary"
-            >
-              {text.authorizeDeletePermission}
-            </Button>
-          ) : null}
           <label className="bot-management-field bot-control-locale">
             <span>{text.locale}</span>
             <select
