@@ -391,7 +391,8 @@ export class DiscordBotControlRepository {
     const result = await repositoryQuery<ControlRow>(
       this.queryable,
       `SELECT public_commands_enabled, palworld_status_enabled,
-         status_command_enabled, guide_command_enabled, preferred_locale,
+         status_command_enabled, player_command_enabled,
+         guide_command_enabled, preferred_locale,
          show_players, show_version, show_latency, show_observed_at,
          revision::TEXT AS revision
        FROM discord_bot_control_configs

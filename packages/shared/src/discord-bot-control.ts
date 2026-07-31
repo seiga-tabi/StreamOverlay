@@ -1,4 +1,8 @@
 import { isDiscordSnowflake } from "./discord-internal.js";
+import {
+  isBotManagementRole,
+  isManagementOrganizationId
+} from "./bot-management.js";
 
 export const DISCORD_BOT_CONTROL_MODULE_ID = "palworld.status" as const;
 export const DISCORD_BOT_CONTROL_MODULE_VERSION = 1 as const;
@@ -136,6 +140,128 @@ function parseStatusFields(value: unknown): DiscordBotStatusFields | undefined {
     version: record.version,
     latency: record.latency,
     observedAt: record.observedAt
+  });
+}
+
+function parseControlSettings(
+  value: unknown
+): DiscordBotControlSettings | undefined {
+  const record = exactRecord(value, [
+    "publicCommandsEnabled",
+    "palworldStatusEnabled",
+    "statusCommandEnabled",
+    "playerCommandEnabled",
+    "guideCommandEnabled",
+    "preferredLocale",
+    "statusFields",
+    "revision"
+  ]);
+  const statusFields = record ? parseStatusFields(record.statusFields) : undefined;
+  if (
+    !record
+    || typeof record.publicCommandsEnabled !== "boolean"
+    || typeof record.palworldStatusEnabled !== "boolean"
+    || typeof record.statusCommandEnabled !== "boolean"
+    || typeof record.playerCommandEnabled !== "boolean"
+    || typeof record.guideCommandEnabled !== "boolean"
+    || !["auto", "ko", "ja"].includes(String(record.preferredLocale))
+    || !Number.isSafeInteger(record.revision)
+    || (record.revision as number) < 0
+    || !statusFields
+  ) return undefined;
+  return Object.freeze({
+    publicCommandsEnabled: record.publicCommandsEnabled,
+    palworldStatusEnabled: record.palworldStatusEnabled,
+    statusCommandEnabled: record.statusCommandEnabled,
+    playerCommandEnabled: record.playerCommandEnabled,
+    guideCommandEnabled: record.guideCommandEnabled,
+    preferredLocale: record.preferredLocale as DiscordBotControlLocale,
+    statusFields,
+    revision: record.revision as number
+  });
+}
+
+export function parseDiscordBotControlOverview(
+  value: unknown
+): DiscordBotControlOverview | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const source = value as Record<string, unknown>;
+  const keys = source.installation === undefined
+    ? [
+        "organizationId",
+        "role",
+        "globalPrefixCommandsEnabled",
+        "modules",
+        "settings"
+      ]
+    : [
+        "organizationId",
+        "role",
+        "globalPrefixCommandsEnabled",
+        "installation",
+        "modules",
+        "settings"
+      ];
+  const record = exactRecord(source, keys);
+  const settings = record ? parseControlSettings(record.settings) : undefined;
+  if (
+    !record
+    || !isManagementOrganizationId(record.organizationId)
+    || !isBotManagementRole(record.role)
+    || typeof record.globalPrefixCommandsEnabled !== "boolean"
+    || !Array.isArray(record.modules)
+    || record.modules.length !== 1
+    || !settings
+  ) return undefined;
+
+  const module = exactRecord(record.modules[0], ["id", "version", "enabled"]);
+  if (
+    !module
+    || module.id !== DISCORD_BOT_CONTROL_MODULE_ID
+    || module.version !== DISCORD_BOT_CONTROL_MODULE_VERSION
+    || typeof module.enabled !== "boolean"
+    || module.enabled !== settings.palworldStatusEnabled
+  ) return undefined;
+
+  let installation: DiscordBotControlOverview["installation"];
+  if (record.installation !== undefined) {
+    const candidate = exactRecord(record.installation, [
+      "guildId",
+      "guildDisplayName",
+      "applicationId",
+      "status"
+    ]);
+    if (
+      !candidate
+      || !isDiscordSnowflake(candidate.guildId)
+      || !isDiscordSnowflake(candidate.applicationId)
+      || typeof candidate.guildDisplayName !== "string"
+      || candidate.guildDisplayName.length < 1
+      || candidate.guildDisplayName.length > 100
+      || /[\u0000-\u001f\u007f]/u.test(candidate.guildDisplayName)
+      || candidate.status !== "active"
+    ) return undefined;
+    installation = Object.freeze({
+      guildId: candidate.guildId,
+      guildDisplayName: candidate.guildDisplayName,
+      applicationId: candidate.applicationId,
+      status: "active"
+    });
+  }
+
+  return Object.freeze({
+    organizationId: record.organizationId,
+    role: record.role,
+    globalPrefixCommandsEnabled: record.globalPrefixCommandsEnabled,
+    ...(installation ? { installation } : {}),
+    modules: Object.freeze([
+      Object.freeze({
+        id: DISCORD_BOT_CONTROL_MODULE_ID,
+        version: DISCORD_BOT_CONTROL_MODULE_VERSION,
+        enabled: module.enabled
+      })
+    ]),
+    settings
   });
 }
 

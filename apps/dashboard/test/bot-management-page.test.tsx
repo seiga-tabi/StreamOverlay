@@ -467,3 +467,61 @@ test("Discord Bot 설정 API는 Organization 경로와 revision·CSRF를 함께 
     globalThis.fetch = originalFetch;
   }
 });
+
+test("Discord Bot 설정은 손상된 응답과 안전한 오류 상태를 구분한다", async () => {
+  const {
+    BotManagementApiError,
+    getManagementBotControl
+  } = await import("../src/features/bot-management/api");
+  const { botControlErrorMessage } = await import(
+    "../src/features/bot-management/BotControlCard"
+  );
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () => new Response(JSON.stringify({
+    organizationId: "11111111-1111-4111-8111-111111111111",
+    role: "owner",
+    globalPrefixCommandsEnabled: true,
+    modules: [{ id: "palworld.status", version: 1, enabled: true }],
+    settings: {
+      publicCommandsEnabled: true,
+      palworldStatusEnabled: true,
+      statusCommandEnabled: true,
+      guideCommandEnabled: true,
+      preferredLocale: "ko",
+      statusFields: {
+        players: true,
+        version: true,
+        latency: true,
+        observedAt: true
+      },
+      revision: 1
+    }
+  }), {
+    status: 200,
+    headers: { "Content-Type": "application/json" }
+  })) as typeof fetch;
+  try {
+    await assert.rejects(
+      getManagementBotControl("11111111-1111-4111-8111-111111111111"),
+      (error) => error instanceof BotManagementApiError
+        && error.code === "invalid_response"
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+
+  assert.match(
+    botControlErrorMessage(
+      new BotManagementApiError(401, "session_required"),
+      "ko"
+    ),
+    /다시 로그인/u
+  );
+  assert.match(
+    botControlErrorMessage(
+      new BotManagementApiError(503, "database_unavailable"),
+      "ja"
+    ),
+    /ストレージ/u
+  );
+});

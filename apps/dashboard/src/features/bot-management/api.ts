@@ -9,6 +9,7 @@ import type {
   PalworldServerTestResponse
 } from "@streamops/shared";
 import {
+  parseDiscordBotControlOverview,
   validatePalworldServerDashboardResponse,
   validatePalworldServerTestResponse
 } from "@streamops/shared";
@@ -156,7 +157,8 @@ export function getManagementBotControl(
   organizationId: string,
   signal?: AbortSignal
 ): Promise<DiscordBotControlOverview> {
-  return request(botControlPath(organizationId), { signal });
+  return request<unknown>(botControlPath(organizationId), { signal })
+    .then(validatedBotControlOverview);
 }
 
 export function updateManagementBotControl(input: {
@@ -164,14 +166,20 @@ export function updateManagementBotControl(input: {
   csrfToken: string;
   value: UpdateDiscordBotControlInput;
 }): Promise<DiscordBotControlOverview> {
-  return request(botControlPath(input.organizationId), {
+  return request<unknown>(botControlPath(input.organizationId), {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
       "X-Discord-CSRF": input.csrfToken
     },
     body: JSON.stringify(input.value)
-  });
+  }).then(validatedBotControlOverview);
+}
+
+function validatedBotControlOverview(value: unknown): DiscordBotControlOverview {
+  const parsed = parseDiscordBotControlOverview(value);
+  if (!parsed) throw new BotManagementApiError(502, "invalid_response");
+  return parsed;
 }
 
 export function deleteManagementGameServer(input: {

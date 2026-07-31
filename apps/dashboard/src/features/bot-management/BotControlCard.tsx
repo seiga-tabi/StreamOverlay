@@ -62,6 +62,11 @@ const copy = {
     revision: "설정 revision",
     conflict: "다른 관리자가 설정을 먼저 변경했습니다. 최신 설정을 다시 불러왔습니다.",
     unavailable: "Discord Bot 설정을 불러오거나 저장할 수 없습니다.",
+    sessionExpired: "관리 로그인 세션이 만료되었습니다. 다시 로그인해 주세요.",
+    permissionDenied: "이 Organization의 Discord Bot 설정을 관리할 권한이 없습니다.",
+    storageUnavailable: "Discord Bot 설정 저장소를 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.",
+    invalidResponse: "Discord Bot 설정 응답을 확인할 수 없습니다. 페이지를 새로고침해 주세요.",
+    retry: "설정 다시 불러오기",
     previewTitle: "Discord 응답 미리보기",
     previewDescription: "현재 언어와 표시 항목을 기준으로 `!yoro 상태` 응답을 미리 확인합니다.",
     previewServer: "YORO Palworld Server",
@@ -105,6 +110,11 @@ const copy = {
     revision: "設定revision",
     conflict: "別の管理者が先に設定を変更しました。最新設定を再読み込みしました。",
     unavailable: "Discord Bot設定を読み込みまたは保存できません。",
+    sessionExpired: "管理ログインセッションの有効期限が切れました。もう一度ログインしてください。",
+    permissionDenied: "このOrganizationのDiscord Bot設定を管理する権限がありません。",
+    storageUnavailable: "Discord Bot設定ストレージを利用できません。しばらくしてからもう一度お試しください。",
+    invalidResponse: "Discord Bot設定の応答を確認できません。ページを再読み込みしてください。",
+    retry: "設定を再読み込み",
     previewTitle: "Discord応答プレビュー",
     previewDescription: "現在の言語と表示項目を基準に`!yoro ステータス`の応答を確認します。",
     previewServer: "YORO Palworld Server",
@@ -121,6 +131,25 @@ type Draft = Omit<DiscordBotControlSettings, "revision">;
 function draftFrom(overview: DiscordBotControlOverview): Draft {
   const { revision: _revision, ...draft } = overview.settings;
   return draft;
+}
+
+export function botControlErrorMessage(
+  error: unknown,
+  locale: "ko" | "ja"
+): string {
+  const text = copy[locale];
+  if (!(error instanceof BotManagementApiError)) return text.unavailable;
+  if (error.status === 401 || error.code === "session_required") {
+    return text.sessionExpired;
+  }
+  if (error.status === 403 || error.code === "permission_required") {
+    return text.permissionDenied;
+  }
+  if (error.status === 503 || error.code === "database_unavailable") {
+    return text.storageUnavailable;
+  }
+  if (error.code === "invalid_response") return text.invalidResponse;
+  return text.unavailable;
 }
 
 export function BotControlCard(props: {
@@ -147,7 +176,7 @@ export function BotControlCard(props: {
       setDraft(draftFrom(next));
     } catch (loadError) {
       if (!(loadError instanceof DOMException && loadError.name === "AbortError")) {
-        setError(text.unavailable);
+        setError(botControlErrorMessage(loadError, locale));
       }
     } finally {
       setLoading(false);
@@ -186,7 +215,7 @@ export function BotControlCard(props: {
         setError(text.conflict);
         await load();
       } else {
-        setError(text.unavailable);
+        setError(botControlErrorMessage(saveError, locale));
       }
     } finally {
       setSaving(false);
@@ -198,7 +227,20 @@ export function BotControlCard(props: {
   }
 
   if (!overview || !draft) {
-    return <p className="bot-management-error" role="alert">{error}</p>;
+    return (
+      <Card className="bot-control-card">
+        <CardHeader>
+          <CardTitle as="h2">{text.title}</CardTitle>
+          <CardDescription>{text.description}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="bot-management-error" role="alert">{error}</p>
+          <Button type="button" variant="secondary" onClick={() => void load()}>
+            {text.retry}
+          </Button>
+        </CardContent>
+      </Card>
+    );
   }
 
   if (!overview.installation) {

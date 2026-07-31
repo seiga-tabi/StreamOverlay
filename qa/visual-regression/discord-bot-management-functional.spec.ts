@@ -714,6 +714,85 @@ test("Palworld 서버 관리는 활성 서버 한 개와 삭제 흐름만 표시
   await expectNoHorizontalOverflow(page);
 });
 
+test("Discord Bot 제어는 저장된 플레이어 명령을 불러오고 revision과 함께 저장한다", async ({ page }) => {
+  await installAuthenticatedAccountRoute(page);
+  let revision = 3;
+  let playerCommandEnabled = false;
+  let updateRequests = 0;
+  await page.route("**/api/discord/management/**", async (route) => {
+    const url = new URL(route.request().url());
+    if (url.pathname === "/api/discord/management/session") {
+      await json(route, {
+        authenticated: true,
+        csrfToken: "management-csrf",
+        organizations: [organization]
+      });
+      return;
+    }
+    if (
+      url.pathname
+      === `/api/discord/management/organizations/${organization.id}/bot-control`
+    ) {
+      if (route.request().method() === "PATCH") {
+        updateRequests += 1;
+        expect(route.request().headers()["x-discord-csrf"]).toBe("management-csrf");
+        const body = route.request().postDataJSON();
+        expect(body.expectedRevision).toBe(revision);
+        playerCommandEnabled = body.playerCommandEnabled;
+        revision += 1;
+      }
+      await json(route, {
+        organizationId: organization.id,
+        role: "owner",
+        globalPrefixCommandsEnabled: true,
+        installation: {
+          guildId: "123456789012345678",
+          guildDisplayName: "검증 Discord 서버",
+          applicationId: "234567890123456789",
+          status: "active"
+        },
+        modules: [{
+          id: "palworld.status",
+          version: 1,
+          enabled: true
+        }],
+        settings: {
+          publicCommandsEnabled: true,
+          palworldStatusEnabled: true,
+          statusCommandEnabled: true,
+          playerCommandEnabled,
+          guideCommandEnabled: true,
+          preferredLocale: "ko",
+          statusFields: {
+            players: true,
+            version: true,
+            latency: true,
+            observedAt: true
+          },
+          revision
+        }
+      });
+      return;
+    }
+    await json(route, { code: "not_found" }, 404);
+  });
+
+  await page.goto(
+    `/dashboard/organizations/bot?organization=${organization.id}`
+  );
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Discord Bot 제어" })
+  ).toBeVisible();
+  const playerCommand = page.getByRole("checkbox", { name: /플레이어/u });
+  await expect(playerCommand).not.toBeChecked();
+  await playerCommand.check();
+  await page.getByRole("button", { name: "Bot 설정 저장" }).click();
+  await expect(page.getByText("Discord Bot 설정을 저장했습니다.")).toBeVisible();
+  await expect(page.getByText("설정 revision: 4")).toBeVisible();
+  expect(updateRequests).toBe(1);
+  await expectNoHorizontalOverflow(page);
+});
+
 const responsiveViewports = {
   "desktop-chromium": [
     { width: 768, height: 1024 },

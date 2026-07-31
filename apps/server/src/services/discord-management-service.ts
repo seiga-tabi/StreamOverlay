@@ -293,6 +293,9 @@ export class DiscordManagementService {
       ) {
         throw new DiscordManagementError("permission_required", 403);
       }
+      if (error instanceof SafeDatabaseError) {
+        throw new DiscordManagementError("database_unavailable", 503);
+      }
       throw error;
     }
   }
@@ -329,6 +332,9 @@ export class DiscordManagementService {
         && error.code === "DATABASE_REFERENCE_INVALID"
       ) {
         throw new DiscordManagementError("permission_required", 403);
+      }
+      if (error instanceof SafeDatabaseError) {
+        throw new DiscordManagementError("database_unavailable", 503);
       }
       throw error;
     }

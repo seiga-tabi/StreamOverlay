@@ -625,6 +625,7 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
     );
     assert.equal(updatedA.settings.revision, 1);
     assert.equal(updatedA.settings.statusCommandEnabled, false);
+    assert.equal(updatedA.settings.playerCommandEnabled, true);
     assert.deepEqual(await repository.commandPolicy({
       applicationId,
       guildId: guildA,
