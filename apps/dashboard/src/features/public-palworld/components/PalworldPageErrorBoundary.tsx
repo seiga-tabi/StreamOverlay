@@ -7,6 +7,7 @@ import {
   EmptyStateIcon,
   EmptyStateTitle
 } from "../../../shared/ui/EmptyState";
+import { localizedPublicUrlForCurrentLocale } from "../../public-lol/utils/public-locale-path";
 
 const text = {
   ko: {
@@ -74,7 +75,7 @@ export class PalworldPageErrorBoundary extends Component<
             </Button>
             <Button
               variant="ghost"
-              onClick={() => window.location.assign("/palworld")}
+              onClick={() => window.location.assign(localizedPublicUrlForCurrentLocale("/palworld"))}
               data-ko={text.ko.home}
               data-ja={text.ja.home}
             >

@@ -9,6 +9,7 @@ import {
 import { PublicGameSelector } from "../../public-lol/components/PublicGameSelector";
 import { PublicLocaleSelector } from "../../public-lol/components/PublicLocaleSelector";
 import type { PublicMainPage, PublicTwitchViewerStatus } from "../../public-lol/types/public-lol";
+import { setPublicPath } from "../../public-lol/utils/routes";
 import { accountOAuthUrl, openYoroDashboard } from "../../yoro-account/api";
 import {
   authenticatedYoroIdentity,
@@ -156,12 +157,10 @@ export function PalworldHeader({
       return;
     }
     if (nextPage === "bot") {
-      window.history.pushState({}, "", "/bot");
-      window.dispatchEvent(new CustomEvent("publicroutechange"));
+      setPublicPath("/bot");
       return;
     }
-    window.history.pushState({}, "", "/");
-    window.dispatchEvent(new CustomEvent("publicroutechange"));
+    setPublicPath("/");
   }
 
   const navigation = (

@@ -40,6 +40,7 @@ import { PALWORLD_MAP_IMAGES } from "../utils/element-images";
 import { PALWORLD_HOME_FEATURE_ASSETS } from "../utils/home-feature-assets";
 import { resolvePalworldName } from "../utils/localization";
 import { workSuitabilityIconUrl } from "../utils/work-suitability-icons";
+import { localizedPublicUrl } from "../../public-lol/utils/public-locale-path";
 
 export type HomeResource<T> =
   | { state: "loading" }
@@ -173,9 +174,13 @@ function PalworldHomeIcon({
 
 function navigateAnchor(
   href: string,
+  locale: PalworldLocale,
   onNavigate: (href: string) => void,
 ): { href: string; onClick: () => void } {
-  return { href, onClick: () => onNavigate(href) };
+  return {
+    href: localizedPublicUrl(href, locale),
+    onClick: () => onNavigate(href),
+  };
 }
 
 export function PalworldHomeQuickSearch({
@@ -292,7 +297,7 @@ function PalworldHomePrimaryFeatureCard({
   return (
     <a
       className={`palworld-home-primary-card palworld-home-primary-card--${assetId}`}
-      href={href}
+      href={localizedPublicUrl(href, locale)}
       onClick={(event) => {
         if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
         event.preventDefault();
@@ -404,7 +409,7 @@ export function PalworldHomeQuickExplore({
       title={localizedText(locale, "homeQuickExplore")}
     >
       <PublicHomeFeatureCard
-        {...navigateAnchor(`/palworld/pals${element ? `?element=${encodeURIComponent(element)}` : ""}`, onNavigate)}
+        {...navigateAnchor(`/palworld/pals${element ? `?element=${encodeURIComponent(element)}` : ""}`, locale, onNavigate)}
         description={{
           ...localizedText(locale, "homeAttributePalsDescription"),
           label: elementFacets.length > 0
@@ -417,7 +422,7 @@ export function PalworldHomeQuickExplore({
           : <PalworldHomeIcon kind="pals" />}</QuickExploreVisual>}
       />
       <PublicHomeFeatureCard
-        {...navigateAnchor(`/palworld/pals${work ? `?work=${encodeURIComponent(work)}` : ""}`, onNavigate)}
+        {...navigateAnchor(`/palworld/pals${work ? `?work=${encodeURIComponent(work)}` : ""}`, locale, onNavigate)}
         description={{
           ...localizedText(locale, "homeWorkPalsDescription"),
           label: workFacets.length > 0
@@ -430,7 +435,7 @@ export function PalworldHomeQuickExplore({
           : <PalworldHomeIcon kind="technology" />}</QuickExploreVisual>}
       />
       <PublicHomeFeatureCard
-        {...navigateAnchor(`/palworld/items${itemFilter ? `?${itemFilter.key}=${encodeURIComponent(itemFilter.value)}` : ""}`, onNavigate)}
+        {...navigateAnchor(`/palworld/items${itemFilter ? `?${itemFilter.key}=${encodeURIComponent(itemFilter.value)}` : ""}`, locale, onNavigate)}
         description={{
           ...localizedText(locale, "homeItemTypesDescription"),
           label: palworldI18n[locale].homeSupportedCount.replace(
@@ -442,7 +447,7 @@ export function PalworldHomeQuickExplore({
         visual={<PalworldHomeIcon kind="items" />}
       />
       <PublicHomeFeatureCard
-        {...navigateAnchor(`/palworld/skills${skillType ? `?type=${encodeURIComponent(skillType)}` : ""}`, onNavigate)}
+        {...navigateAnchor(`/palworld/skills${skillType ? `?type=${encodeURIComponent(skillType)}` : ""}`, locale, onNavigate)}
         description={{
           ...localizedText(locale, "homeSkillTypesDescription"),
           label: skillFacets.length > 0
@@ -452,7 +457,7 @@ export function PalworldHomeQuickExplore({
         title={localizedText(locale, "homeSkillTypes")}
         visual={<PalworldHomeIcon kind="skills" />}
       />
-      <a className="palworld-home-quick-explore__all" href="/palworld/pals" onClick={(event) => {
+      <a className="palworld-home-quick-explore__all" href={localizedPublicUrl("/palworld/pals", locale)} onClick={(event) => {
         if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
         event.preventDefault();
         onNavigate("/palworld/pals");
@@ -634,25 +639,25 @@ export function PalworldHomeMoreFeatures({
       title={localizedText(locale, "homeMoreFeatures")}
     >
       <PublicHomeFeatureCard
-        {...navigateAnchor("/palworld/items", onNavigate)}
+        {...navigateAnchor("/palworld/items", locale, onNavigate)}
         description={localizedText(locale, "homeItemsDescription")}
         title={localizedText(locale, "items")}
         visual={<PalworldHomeIcon kind="items" />}
       />
       <PublicHomeFeatureCard
-        {...navigateAnchor("/palworld/technology", onNavigate)}
+        {...navigateAnchor("/palworld/technology", locale, onNavigate)}
         description={localizedText(locale, "homeTechnologyDescription")}
         title={localizedText(locale, "technology")}
         visual={<PalworldHomeIcon kind="technology" />}
       />
       <PublicHomeFeatureCard
-        {...navigateAnchor("/palworld/skills", onNavigate)}
+        {...navigateAnchor("/palworld/skills", locale, onNavigate)}
         description={localizedText(locale, "homeSkillsDescription")}
         title={localizedText(locale, "skills")}
         visual={<PalworldHomeIcon kind="skills" />}
       />
       <PublicHomeFeatureCard
-        {...navigateAnchor("/palworld/map", onNavigate)}
+        {...navigateAnchor("/palworld/map", locale, onNavigate)}
         description={localizedText(locale, "homeMapDescription")}
         title={localizedText(locale, "map")}
         visual={<PalworldHomeIcon kind="map" />}
