@@ -119,21 +119,43 @@ const botText = {
     available: "기반 완료",
     planned: "준비 중",
     flowTitle: "연결 과정",
-    flowDescription: "Bot을 추가한 뒤 웹 Dashboard에서 다음 순서로 Discord 서버를 Organization에 연결합니다.",
+    flowHeroTitle: "5분 안에 Discord와 게임 서버를 연결하세요",
+    flowDescription: "Bot 추가부터 첫 상태 확인까지, 다음에 해야 할 작업과 완료 결과를 순서대로 안내합니다.",
+    flowDuration: "5단계 · 약 5분",
+    flowProgressLabel: "YORO Bot 5단계 연결 순서",
+    flowStep: "STEP",
+    flowResult: "완료 결과",
     flowIssue: "YORO Bot 추가",
-    flowIssueDescription: "최소 권한으로 YORO Bot과 slash command를 Discord 서버에 추가합니다.",
+    flowIssueDescription: "YORO Bot을 관리할 Discord 서버에 초대합니다.",
+    flowIssuePoints: ["Bot 초대 승인", "요청 권한 확인"],
+    flowIssueResult: "Bot과 slash command가 Discord 서버에 추가됩니다.",
     flowLogin: "Discord 로그인",
     flowLoginDescription: "`identify`, `guilds` 최소 권한으로 로그인하고 OAuth session을 확인합니다.",
     flowGuild: "관리 서버 선택",
     flowGuildDescription: "소유자, 관리자 또는 서버 관리 권한이 있는 Guild만 선택할 수 있습니다.",
-    flowComplete: "Organization 연결",
-    flowCompleteDescription: "권한을 다시 확인한 뒤 Organization과 Guild를 하나의 transaction으로 연결합니다.",
-    flowRest: "Palworld REST 등록",
-    flowRestDescription: "Dashboard에서 REST 주소와 AdminPassword를 검증하고 암호화 저장합니다. 비밀번호는 Discord 응답에 표시하지 않습니다.",
-    flowControl: "Discord Bot 제어",
-    flowControlDescription: "공개 명령과 상태·플레이어·가이드 명령의 활성화 여부를 Dashboard에서 선택합니다.",
-    flowUse: "명령어 사용",
-    flowUseDescription: "일반 사용자는 영어 !yoro 명령을, 작성자와 관리자는 영어 /yoro 명령을 사용합니다.",
+    flowComplete: "로그인 및 Organization 연결",
+    flowCompleteDescription: "Discord로 로그인하고 관리할 서버를 Organization에 연결합니다.",
+    flowCompletePoints: ["Discord OAuth 로그인", "관리 서버 선택", "Organization 연결"],
+    flowCompleteResult: "Guild 권한이 재검증되고 Organization 관리가 시작됩니다.",
+    flowRest: "Palworld REST 연결",
+    flowRestDescription: "Dashboard에서 게임 서버의 읽기 전용 REST 연결을 확인합니다.",
+    flowRestPoints: ["REST 주소 입력", "AdminPassword 검증", "암호화 저장"],
+    flowRestResult: "서버 상태와 접속 플레이어를 안전하게 조회할 수 있습니다.",
+    flowControl: "사용할 명령 활성화",
+    flowControlDescription: "Discord Bot 제어에서 서버 구성원에게 제공할 명령을 선택합니다.",
+    flowControlPoints: ["Status 상태 조회", "Player 플레이어 조회", "Guide 연결 안내"],
+    flowControlResult: "활성화한 명령만 실행과 도움말 목록에 표시됩니다.",
+    flowUse: "Discord에서 사용 시작",
+    flowUseDescription: "영어 명령을 입력해 첫 서버 상태를 확인합니다.",
+    flowUsePoints: ["!yoro status 공개 조회", "/yoro status 비공개 조회"],
+    flowUseResult: "Discord에서 온라인 상태, 인원, 버전과 응답 시간을 확인합니다.",
+    flowAddBotAction: "Bot 추가",
+    flowLoginAction: "Discord 로그인",
+    flowDashboardAction: "Dashboard 열기",
+    flowCommandsAction: "명령어 보기",
+    flowPreviewEyebrow: "COMPLETE",
+    flowPreviewTitle: "연결이 끝나면 이렇게 보입니다",
+    flowPreviewDescription: "등록된 Palworld 서버의 실제 REST 응답이 Discord Embed에 표시됩니다.",
     commandsTitle: "Discord 명령어 목록",
     commandsDescription: "모든 명령은 영어로 입력하며, Dashboard에서 비활성화한 명령은 실행과 도움말에서 모두 제외됩니다. 응답 문구는 서버의 표시 언어를 따릅니다.",
     publicCommands: "일반 사용자 · 공개 응답",
@@ -258,21 +280,43 @@ const botText = {
     available: "基盤完了",
     planned: "準備中",
     flowTitle: "連携手順",
-    flowDescription: "Botを追加した後、Web Dashboardから次の順序でDiscordサーバーをOrganizationに連携します。",
+    flowHeroTitle: "5分でDiscordとゲームサーバーを連携しましょう",
+    flowDescription: "Bot追加から最初の状態確認まで、次に行う作業と完了結果を順番に案内します。",
+    flowDuration: "5ステップ・約5分",
+    flowProgressLabel: "YORO Bot 5ステップ連携手順",
+    flowStep: "STEP",
+    flowResult: "完了結果",
     flowIssue: "YORO Botを追加",
-    flowIssueDescription: "最小権限でYORO Botとslash commandをDiscordサーバーに追加します。",
+    flowIssueDescription: "YORO Botを管理するDiscordサーバーへ招待します。",
+    flowIssuePoints: ["Bot招待を承認", "リクエスト権限を確認"],
+    flowIssueResult: "Botとslash commandがDiscordサーバーに追加されます。",
     flowLogin: "Discordログイン",
     flowLoginDescription: "`identify`、`guilds`の最小権限でログインし、OAuth sessionを確認します。",
     flowGuild: "管理サーバー選択",
     flowGuildDescription: "所有者、管理者、またはサーバー管理権限を持つGuildのみ選択できます。",
-    flowComplete: "Organization連携",
-    flowCompleteDescription: "権限を再確認した後、OrganizationとGuildを一つのtransactionで連携します。",
-    flowRest: "Palworld REST登録",
-    flowRestDescription: "DashboardでRESTアドレスとAdminPasswordを検証し、暗号化して保存します。パスワードはDiscord応答に表示しません。",
-    flowControl: "Discord Bot制御",
-    flowControlDescription: "公開コマンドと状態・プレイヤー・ガイドの有効化をDashboardで選択します。",
-    flowUse: "コマンド利用",
-    flowUseDescription: "一般ユーザーは英語の!yoro、実行者と管理者は英語の/yoroコマンドを利用します。",
+    flowComplete: "ログインとOrganization連携",
+    flowCompleteDescription: "Discordでログインし、管理するサーバーをOrganizationへ連携します。",
+    flowCompletePoints: ["Discord OAuthログイン", "管理サーバーを選択", "Organization連携"],
+    flowCompleteResult: "Guild権限が再検証され、Organization管理を開始できます。",
+    flowRest: "Palworld REST連携",
+    flowRestDescription: "Dashboardでゲームサーバーの読み取り専用REST接続を確認します。",
+    flowRestPoints: ["RESTアドレスを入力", "AdminPasswordを検証", "暗号化して保存"],
+    flowRestResult: "サーバー状態と接続プレイヤーを安全に取得できます。",
+    flowControl: "利用コマンドを有効化",
+    flowControlDescription: "Discord Bot制御からサーバーメンバーに提供するコマンドを選択します。",
+    flowControlPoints: ["Status 状態確認", "Player プレイヤー確認", "Guide 連携ガイド"],
+    flowControlResult: "有効にしたコマンドだけが実行とヘルプ一覧に表示されます。",
+    flowUse: "Discordで利用開始",
+    flowUseDescription: "英語コマンドを入力して最初のサーバー状態を確認します。",
+    flowUsePoints: ["!yoro status 公開確認", "/yoro status 非公開確認"],
+    flowUseResult: "Discordでオンライン状態、人数、バージョン、応答時間を確認できます。",
+    flowAddBotAction: "Botを追加",
+    flowLoginAction: "Discordでログイン",
+    flowDashboardAction: "Dashboardを開く",
+    flowCommandsAction: "コマンドを見る",
+    flowPreviewEyebrow: "COMPLETE",
+    flowPreviewTitle: "連携完了後はこのように表示されます",
+    flowPreviewDescription: "登録済みPalworldサーバーの実際のREST応答がDiscord Embedに表示されます。",
     commandsTitle: "Discordコマンド一覧",
     commandsDescription: "すべてのコマンドは英語で入力します。Dashboardで無効にしたコマンドは実行とヘルプの両方から除外され、応答文はサーバーの表示言語に従います。",
     publicCommands: "一般ユーザー・公開応答",
@@ -1221,30 +1265,186 @@ export function PublicBotPage() {
           </>
         ) : null}
 
-        {activeSection === "gettingStarted" ? (
-          <section className="public-bot-section public-bot-flow public-bot-page-section" id="bot-flow">
-            <div className="public-bot-section__heading">
-              <span>ONBOARDING</span>
-              <h1>{text.flowTitle}</h1>
-              <p>{text.flowDescription}</p>
-            </div>
-            <ol className="public-bot-flow__list">
-              {[
-                [text.flowIssue, text.flowIssueDescription],
-                [text.flowComplete, text.flowCompleteDescription],
-                [text.flowRest, text.flowRestDescription],
-                [text.flowControl, text.flowControlDescription],
-                [text.flowUse, text.flowUseDescription],
-              ].map(([title, description], index) => (
-                <li key={title}>
-                  <span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
-                  <div><h3>{title}</h3><p>{description}</p></div>
-                </li>
-              ))}
-            </ol>
-            <p className="public-bot-notice" role="note">{text.setupNotice}</p>
-          </section>
-        ) : null}
+        {activeSection === "gettingStarted" ? (() => {
+          const steps = [
+            {
+              action: "install",
+              description: text.flowIssueDescription,
+              icon: "discord",
+              points: text.flowIssuePoints,
+              result: text.flowIssueResult,
+              title: text.flowIssue,
+            },
+            {
+              action: "login",
+              description: text.flowCompleteDescription,
+              icon: "permission",
+              points: text.flowCompletePoints,
+              result: text.flowCompleteResult,
+              title: text.flowComplete,
+            },
+            {
+              action: "dashboard",
+              description: text.flowRestDescription,
+              icon: "status",
+              points: text.flowRestPoints,
+              result: text.flowRestResult,
+              title: text.flowRest,
+            },
+            {
+              action: "dashboard",
+              description: text.flowControlDescription,
+              icon: "dashboard",
+              points: text.flowControlPoints,
+              result: text.flowControlResult,
+              title: text.flowControl,
+            },
+            {
+              action: "commands",
+              description: text.flowUseDescription,
+              icon: "session",
+              points: text.flowUsePoints,
+              result: text.flowUseResult,
+              title: text.flowUse,
+            },
+          ] as const;
+          return (
+            <section className="public-bot-onboarding public-bot-page-section" id="bot-flow">
+              <header className="public-bot-onboarding__hero">
+                <div>
+                  <span>ONBOARDING · {text.flowTitle}</span>
+                  <h1>{text.flowHeroTitle}</h1>
+                  <p>{text.flowDescription}</p>
+                  <div className="public-bot-onboarding__hero-actions">
+                    <a
+                      aria-label={text.addBotNewTab}
+                      className="public-bot-button is-primary"
+                      href={botInstallUrl()}
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      <DiscordSymbolIcon />
+                      {text.flowAddBotAction}
+                    </a>
+                    <span>{text.flowDuration}</span>
+                  </div>
+                </div>
+                <div className="public-bot-onboarding__hero-mark" aria-hidden="true">
+                  <DiscordSymbolIcon />
+                  <span>01</span>
+                  <strong>→</strong>
+                  <span>05</span>
+                  <em>YORO</em>
+                </div>
+              </header>
+
+              <nav aria-label={text.flowProgressLabel} className="public-bot-onboarding__progress">
+                <ol>
+                  {steps.map((step, index) => (
+                    <li key={step.title}>
+                      <span>{index + 1}</span>
+                      <strong>{step.title}</strong>
+                    </li>
+                  ))}
+                </ol>
+              </nav>
+
+              <div className="public-bot-onboarding__layout">
+                <ol className="public-bot-onboarding__timeline">
+                  {steps.map((step, index) => (
+                    <li key={step.title}>
+                      <span className="public-bot-onboarding__marker" aria-hidden="true">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <article>
+                        <div className="public-bot-onboarding__step-icon" aria-hidden="true">
+                          {step.icon === "discord"
+                            ? <DiscordSymbolIcon />
+                            : <BotFeatureIcon kind={step.icon} />}
+                        </div>
+                        <div className="public-bot-onboarding__step-copy">
+                          <span>{text.flowStep} {index + 1}</span>
+                          <h2>{step.title}</h2>
+                          <p>{step.description}</p>
+                          <ul>
+                            {step.points.map((point) => (
+                              <li key={point}><span aria-hidden="true">✓</span>{point}</li>
+                            ))}
+                          </ul>
+                          <div className="public-bot-onboarding__result">
+                            <span>{text.flowResult}</span>
+                            <strong>{step.result}</strong>
+                          </div>
+                          {step.action === "install" ? (
+                            <a
+                              aria-label={text.addBotNewTab}
+                              className="public-bot-button is-primary"
+                              href={botInstallUrl()}
+                              rel="noopener noreferrer"
+                              target="_blank"
+                            >
+                              <DiscordSymbolIcon />
+                              {text.flowAddBotAction}
+                            </a>
+                          ) : step.action === "login" ? (
+                            <button
+                              className="public-bot-button is-secondary"
+                              onClick={() => startAccountLogin("discord")}
+                              type="button"
+                            >
+                              <DiscordSymbolIcon />
+                              {text.flowLoginAction}
+                            </button>
+                          ) : step.action === "dashboard" ? (
+                            <button
+                              className="public-bot-button is-secondary"
+                              onClick={openYoroDashboard}
+                              type="button"
+                            >
+                              <BotFeatureIcon kind="dashboard" />
+                              {text.flowDashboardAction}
+                            </button>
+                          ) : (
+                            <a
+                              className="public-bot-button is-secondary"
+                              href={localizedPublicUrl("/bot/commands", locale)}
+                              onClick={(event) => {
+                                event.preventDefault();
+                                setPublicPath("/bot/commands");
+                              }}
+                            >
+                              {text.flowCommandsAction}
+                              <span aria-hidden="true">→</span>
+                            </a>
+                          )}
+                        </div>
+                      </article>
+                    </li>
+                  ))}
+                </ol>
+
+                <aside className="public-bot-onboarding__preview">
+                  <span>{text.flowPreviewEyebrow}</span>
+                  <h2>{text.flowPreviewTitle}</h2>
+                  <p>{text.flowPreviewDescription}</p>
+                  <DiscordStatusPreview compact text={text} />
+                  <a
+                    className="public-bot-button is-secondary"
+                    href={localizedPublicUrl("/bot/commands", locale)}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      setPublicPath("/bot/commands");
+                    }}
+                  >
+                    {text.flowCommandsAction}
+                    <span aria-hidden="true">→</span>
+                  </a>
+                </aside>
+              </div>
+              <p className="public-bot-notice" role="note">{text.setupNotice}</p>
+            </section>
+          );
+        })() : null}
 
         {activeSection === "commands" ? (
           <section className="public-bot-command-docs public-bot-page-section" id="bot-commands">
