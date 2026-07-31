@@ -93,12 +93,13 @@ test("YORO Bot 사용방법·명령어·게임파일은 canonical URL별 독립 
   assert.match(commandMarkup, /서버 관리자/u);
   assert.match(commandMarkup, /COMMAND DETAIL/u);
   assert.match(commandMarkup, /\/yoro status/u);
-  assert.match(commandMarkup, /!yoro 상태/u);
+  assert.match(commandMarkup, /!yoro status/u);
+  assert.doesNotMatch(commandMarkup, /!yoro 상태/u);
   assert.match(commandMarkup, /\/yoro player/u);
   assert.match(commandMarkup, /\/yoro setup/u);
   assert.match(commandMarkup, /Discord 응답 미리보기/u);
   assert.match(commandMarkup, /표시 값은 문서용 예시/u);
-  assert.match(commandMarkup, /별칭과 세부 조건 보기/u);
+  assert.match(commandMarkup, /지원 명령과 세부 조건 보기/u);
   assert.doesNotMatch(commandMarkup, /\/yoro server status/u);
   assert.match(commandMarkup, /aria-current="page"[^>]*href="\/ko\/bot\/commands"/u);
   assert.doesNotMatch(commandMarkup, /게임 서버 운영을 Discord에서 더 간단하게/u);
@@ -107,7 +108,8 @@ test("YORO Bot 사용방법·명령어·게임파일은 canonical URL별 독립 
   const japaneseCommandMarkup = renderToStaticMarkup(<PublicBotPage />);
   assert.match(japaneseCommandMarkup, /Discordコマンド/u);
   assert.match(japaneseCommandMarkup, /コマンド検索/u);
-  assert.match(japaneseCommandMarkup, /!yoro 状態/u);
+  assert.match(japaneseCommandMarkup, /!yoro status/u);
+  assert.doesNotMatch(japaneseCommandMarkup, /!yoro 状態/u);
   assert.match(japaneseCommandMarkup, /Discord応答プレビュー/u);
 
   window.location.pathname = "/bot/getting-started";

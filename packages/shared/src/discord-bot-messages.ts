@@ -40,10 +40,10 @@ export const DISCORD_BOT_MESSAGES = {
     prefix: {
       helpTitle: "YORO Bot 일반 사용자 명령",
       commands: {
-        help: "`!yoro 도움말` 현재 사용할 수 있는 명령 확인",
-        status: "`!yoro 상태` Palworld 서버 상태 확인",
-        player: "`!yoro 플레이어` 접속 중인 닉네임 목록 · `!yoro 플레이어 {닉네임}` 게임 내 프로필 검색",
-        guide: "`!yoro 가이드` Palworld 전용 서버 설정 안내"
+        help: "`!yoro help` 현재 사용할 수 있는 명령 확인",
+        status: "`!yoro status` Palworld 서버 상태 확인",
+        player: "`!yoro player` 접속 중인 닉네임 목록 · `!yoro player {nickname}` 게임 내 프로필 검색",
+        guide: "`!yoro guide` Palworld 전용 서버 설정 안내"
       },
       guideTitle: "Palworld 전용 서버 설정",
       guideBody: "YORO와 연결할 Palworld 전용 서버 설정 방법을 확인할 수 있습니다.",
@@ -56,7 +56,7 @@ export const DISCORD_BOT_MESSAGES = {
       playerListTruncated: "전체 {total}명 중 {shown}명만 표시합니다.",
       playerNotFound: "일치하는 닉네임을 찾지 못했습니다.",
       playerSuggestions: "연관 검색어",
-      playerSearchHint: "`!yoro 플레이어 {닉네임}` 형식으로 검색해 주세요.",
+      playerSearchHint: "`!yoro player {nickname}` 형식으로 검색해 주세요.",
       playerFields: {
         nickname: "닉네임",
         level: "레벨",
@@ -161,10 +161,10 @@ export const DISCORD_BOT_MESSAGES = {
     prefix: {
       helpTitle: "YORO Bot一般ユーザーコマンド",
       commands: {
-        help: "`!yoro ヘルプ` 利用可能なコマンドを確認",
-        status: "`!yoro ステータス` Palworldサーバー状態を確認",
-        player: "`!yoro プレイヤー` 接続中のニックネーム一覧 · `!yoro プレイヤー {ニックネーム}` ゲーム内プロフィール検索",
-        guide: "`!yoro ガイド` Palworld専用サーバー設定ガイド"
+        help: "`!yoro help` 利用可能なコマンドを確認",
+        status: "`!yoro status` Palworldサーバー状態を確認",
+        player: "`!yoro player` 接続中のニックネーム一覧 · `!yoro player {nickname}` ゲーム内プロフィール検索",
+        guide: "`!yoro guide` Palworld専用サーバー設定ガイド"
       },
       guideTitle: "Palworld専用サーバー設定",
       guideBody: "YOROと連携するPalworld専用サーバーの設定方法を確認できます。",
@@ -177,7 +177,7 @@ export const DISCORD_BOT_MESSAGES = {
       playerListTruncated: "全{total}名のうち{shown}名のみ表示しています。",
       playerNotFound: "一致するニックネームが見つかりませんでした。",
       playerSuggestions: "関連する検索候補",
-      playerSearchHint: "`!yoro プレイヤー {ニックネーム}`の形式で検索してください。",
+      playerSearchHint: "`!yoro player {nickname}`の形式で検索してください。",
       playerFields: {
         nickname: "ニックネーム",
         level: "レベル",

@@ -9,7 +9,7 @@ import {
   parseUpdateDiscordBotControlInput
 } from "../dist/index.js";
 
-test("Discord Bot 공개 명령 manifest는 한국어·일본어·영어 alias와 지연 특성을 함께 정의한다", () => {
+test("Discord Bot 공개 명령 manifest는 영어 단일 문법과 지연 특성을 함께 정의한다", () => {
   assert.deepEqual(
     DISCORD_BOT_PREFIX_COMMAND_MANIFEST.map((entry) => entry.command),
     ["help", "status", "player", "guide"]
@@ -17,9 +17,9 @@ test("Discord Bot 공개 명령 manifest는 한국어·일본어·영어 alias�
   const help = DISCORD_BOT_PREFIX_COMMAND_MANIFEST[0];
   const status = DISCORD_BOT_PREFIX_COMMAND_MANIFEST[1];
   const player = DISCORD_BOT_PREFIX_COMMAND_MANIFEST[2];
-  assert.ok(help.aliases.ko.includes(""));
-  assert.ok(help.aliases.ja.includes("ヘルプ"));
-  assert.ok(help.aliases.en.includes("help"));
+  assert.deepEqual(help.aliases, ["", "help"]);
+  assert.deepEqual(status.aliases, ["status"]);
+  assert.deepEqual(player.aliases, ["player"]);
   assert.equal(help.showTyping, false);
   assert.equal(status.requiresPalworldRest, true);
   assert.equal(status.showTyping, true);

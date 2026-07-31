@@ -16,14 +16,15 @@
 일반 사용자가 공개 채널에서 사용할 수 있는 prefix 명령은 별도 feature flag를
 켰을 때만 제공한다.
 
-- `!yoro 상태`: 현재 Guild에 연결된 Palworld 서버의 안전한 상태 요약
-- `!yoro 플레이어`: 현재 접속 중인 게임 내 닉네임 목록
-- `!yoro 플레이어 {닉네임}`: 접속 중인 게임 내 닉네임의 안전한 프로필
-- `!yoro 가이드`: Palworld 전용 서버 설정 페이지
-- `!yoro 도움말`: 현재 제공되는 일반 사용자 명령
+- `!yoro status`: 현재 Guild에 연결된 Palworld 서버의 안전한 상태 요약
+- `!yoro player`: 현재 접속 중인 게임 내 닉네임 목록
+- `!yoro player {nickname}`: 접속 중인 게임 내 닉네임의 안전한 프로필
+- `!yoro guide`: Palworld 전용 서버 설정 페이지
+- `!yoro help`: 현재 제공되는 일반 사용자 명령
 
-한국어 명령 외에 일본어 `ステータス`, `プレイヤー`, `ガイド`, `ヘルプ`와 영문
-`status`, `player`, `players`, `guide`, `help`를 exact allowlist로 지원한다.
+명령 입력은 영어 `status`, `player`, `guide`, `help`만 exact allowlist로
+지원한다. 한국어·일본어는 명령 별칭이 아니라 Dashboard 설정 또는 Guild
+locale에 따른 응답 언어로만 사용한다.
 플레이어 명령만 최대 80자의 닉네임 인수를 받으며 나머지 자유 형식 문장은
 받지 않는다. prefix 응답은 Discord의 일반 채널 메시지이며
 ephemeral이 아니다. 일반 메시지는 작성자 전용으로 바꿀 수 없으므로 비공개
@@ -112,13 +113,13 @@ Server 시작이나 Gateway reconnect는 command를 자동 등록하지 않는�
 
 Bot은 Docker internal network를 통해 `/internal/discord/*`를 호출한다. reverse proxy와 Cloudflare에서는 `/internal/`을 공개 route로 전달하지 않는다.
 
-`!yoro 상태`는 서명된
+`!yoro status`는 서명된
 `POST /internal/discord/command-policy`로 현재 Organization의 module·명령
 정책을 먼저 조회한 뒤, 허용된 경우에만
 `POST /internal/discord/game-server-status`를 호출한다. 정책 응답은 설정
 revision, 응답 locale과 표시 가능한 상태 field allowlist만 포함한다.
 정책 응답은 `help`, `status`, `player`, `guide`별 현재 사용 가능 여부도 포함합니다.
-`!yoro 도움말`과 `/yoro help`는 이 capability를 사용해 실제 활성화된 일반
+`!yoro help`와 `/yoro help`는 이 capability를 사용해 실제 활성화된 일반
 사용자 명령만 표시합니다. 정책 조회 실패와 잘못된 응답은 fail-closed
 처리하고, 비활성 설치·module·명령에는 내부 정보가 없는 짧은 안내를
 응답합니다. 이 실패는 Guild의 다른 서비스나 Server readiness에는 영향을

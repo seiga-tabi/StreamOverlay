@@ -64,17 +64,20 @@ Organization에는 삭제되지 않은 Palworld 게임 서버를 정확히 1개�
 ## Discord 일반 사용자 상태 명령
 
 `runtime.json`의 `discord.prefixCommandsEnabled=true`인 경우 일반 사용자는
-Discord 공개 채널에서 `!yoro 상태`, `!yoro 플레이어`,
-`!yoro 플레이어 {닉네임}`, `!yoro 가이드`, `!yoro 도움말`을 사용할
+Discord 공개 채널에서 `!yoro status`, `!yoro player`,
+`!yoro player {nickname}`, `!yoro guide`, `!yoro help`를 사용할
 수 있습니다. 관리와 인증이 필요한 `/yoro setup`, `/yoro dashboard`는 기존
 slash command로 유지합니다.
+
+명령 입력은 영어 단일 문법만 지원합니다. Bot 응답은 Dashboard 설정 또는
+Discord Guild locale에 따라 한국어·일본어로 표시합니다.
 
 Discord의 일반 `!` 메시지는 작성자 전용 표시를 지원하지 않습니다. 상태,
 플레이어와 가이드를 작성자에게만 보여야 할 때는 `/yoro status`,
 `/yoro player`, `/yoro guide`를 사용하며 모든 응답은 ephemeral입니다.
 이 명령도 아래 Organization별 enable 정책과 응답 언어를 동일하게 적용합니다.
 
-`!yoro 상태` 요청은 Discord Application과 Guild의 활성 설치를 Server에서
+`!yoro status` 요청은 Discord Application과 Guild의 활성 설치를 Server에서
 다시 확인하고, 해당 Organization의 활성 Palworld 서버 한 개만 tenant-bound로
 조회합니다. 응답에는 온라인 상태, 접속 인원, 게임 버전, 응답 시간과 마지막
 확인 시각 중 안전한 값만 포함합니다. REST URL, 게임 접속 주소,
@@ -115,7 +118,7 @@ Organization 관리 화면은 활성 Discord 설치가 확인된 경우 `Discord
 
 - 공개 prefix 명령 전체 사용 여부
 - Palworld 상태 module 사용 여부
-- `!yoro 상태`, `!yoro 플레이어`, `!yoro 가이드` 개별 사용 여부
+- `!yoro status`, `!yoro player`, `!yoro guide` 개별 사용 여부
 - Bot 응답 성공 후 인식된 `!yoro` 원본 명령 메시지 삭제 여부
 - 응답 언어 자동 감지·한국어·일본어
 - 상태 응답의 접속 인원·게임 버전·응답 시간·마지막 확인 시각 표시 여부
@@ -139,7 +142,7 @@ mention, 사용자 작성 URL·Embed와 임의 Discord API action을 포함하�
 않습니다. 후속 module은 Shared schema, 실행 allowlist, 권한·rate limit,
 audit·revision과 테스트를 각각 갖춘 뒤 code-owned registry에 추가합니다.
 
-`!yoro 도움말`과 `/yoro help`는 저장된 명령 설정을 다시 조회하여 활성
+`!yoro help`와 `/yoro help`는 저장된 명령 설정을 다시 조회하여 활성
 명령만 표시합니다. 설정에서 비활성화된 명령을 실행하면 조용히 무시하지
 않고 비활성 설치·module·command 중 공개 가능한 수준의 짧은 안내만
 반환합니다.

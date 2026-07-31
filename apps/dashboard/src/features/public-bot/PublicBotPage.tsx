@@ -133,9 +133,9 @@ const botText = {
     flowControl: "Discord Bot 제어",
     flowControlDescription: "공개 명령과 상태·플레이어·가이드 명령의 활성화 여부를 Dashboard에서 선택합니다.",
     flowUse: "명령어 사용",
-    flowUseDescription: "일반 사용자는 !yoro 명령을, 작성자와 관리자는 필요한 /yoro 명령을 사용합니다.",
+    flowUseDescription: "일반 사용자는 영어 !yoro 명령을, 작성자와 관리자는 영어 /yoro 명령을 사용합니다.",
     commandsTitle: "Discord 명령어 목록",
-    commandsDescription: "명령어 입력 언어가 응답 언어보다 우선하며, Dashboard에서 비활성화한 명령은 실행과 도움말에서 모두 제외됩니다.",
+    commandsDescription: "모든 명령은 영어로 입력하며, Dashboard에서 비활성화한 명령은 실행과 도움말에서 모두 제외됩니다. 응답 문구는 서버의 표시 언어를 따릅니다.",
     publicCommands: "일반 사용자 · 공개 응답",
     slashCommands: "작성자 전용 · 비공개 응답",
     adminCommands: "관리자 전용",
@@ -169,7 +169,7 @@ const botText = {
     roadmapPlannedItems: ["장애·복구 자동 알림", "고정 상태 패널", "Minecraft 서버 연동"],
     commandPreviewEyebrow: "COMMAND PREVIEW",
     commandPreviewTitle: "설치 후 바로 사용할 명령어",
-    commandPreviewDescription: "일반 사용자는 !yoro 명령을, 서버 관리자는 권한이 필요한 /yoro 명령을 사용합니다.",
+    commandPreviewDescription: "명령 입력은 영어로 통일하며, 응답 안내는 서버의 한국어·일본어 설정을 따릅니다.",
     commandPreviewLink: "모든 명령어 보기",
     finalCtaTitle: "게임 서버 운영을 Discord와 연결하세요",
     finalCtaDescription: "최소 권한으로 Bot을 추가하고 YORO Dashboard에서 연결을 마무리할 수 있습니다.",
@@ -272,9 +272,9 @@ const botText = {
     flowControl: "Discord Bot制御",
     flowControlDescription: "公開コマンドと状態・プレイヤー・ガイドの有効化をDashboardで選択します。",
     flowUse: "コマンド利用",
-    flowUseDescription: "一般ユーザーは!yoro、実行者と管理者は必要な/yoroコマンドを利用します。",
+    flowUseDescription: "一般ユーザーは英語の!yoro、実行者と管理者は英語の/yoroコマンドを利用します。",
     commandsTitle: "Discordコマンド一覧",
-    commandsDescription: "入力したコマンドの言語を応答言語より優先し、Dashboardで無効にしたコマンドは実行とヘルプの両方から除外します。",
+    commandsDescription: "すべてのコマンドは英語で入力します。Dashboardで無効にしたコマンドは実行とヘルプの両方から除外され、応答文はサーバーの表示言語に従います。",
     publicCommands: "一般ユーザー・公開応答",
     slashCommands: "実行者のみ・非公開応答",
     adminCommands: "管理者専用",
@@ -308,7 +308,7 @@ const botText = {
     roadmapPlannedItems: ["障害・復旧の自動通知", "固定ステータスパネル", "Minecraftサーバー連携"],
     commandPreviewEyebrow: "COMMAND PREVIEW",
     commandPreviewTitle: "導入後すぐに使えるコマンド",
-    commandPreviewDescription: "一般ユーザーは!yoro、サーバー管理者は権限が必要な/yoroコマンドを使用します。",
+    commandPreviewDescription: "コマンド入力は英語に統一し、応答案内はサーバーの韓国語・日本語設定に従います。",
     commandPreviewLink: "すべてのコマンドを見る",
     finalCtaTitle: "ゲームサーバー運用をDiscordと連携しましょう",
     finalCtaDescription: "最小権限でBotを追加し、YORO Dashboardから連携を完了できます。",
@@ -331,9 +331,9 @@ const commandPageText = {
     title: "Discord 명령어",
     description: "YORO Bot에서 실제로 사용할 수 있는 명령을 권한과 응답 방식까지 한 화면에서 확인하세요.",
     addBot: "Discord에 YORO Bot 추가",
-    syntaxNotice: "공개 !yoro 명령과 실행자에게만 보이는 /yoro 명령을 구분해 안내합니다.",
+    syntaxNotice: "명령은 영어로만 입력합니다. 응답 문구는 Dashboard 또는 Discord Guild의 표시 언어를 따릅니다.",
     searchLabel: "명령어 검색",
-    searchPlaceholder: "상태, 플레이어, setup 검색",
+    searchPlaceholder: "status, player, setup 검색",
     audienceLabel: "사용 권한",
     audienceAll: "전체",
     audiencePublic: "일반 사용자",
@@ -356,8 +356,8 @@ const commandPageText = {
     permission: "필요 권한",
     activation: "활성화 조건",
     response: "응답에 포함되는 정보",
-    aliases: "언어별 별칭",
-    aliasesSummary: "별칭과 세부 조건 보기",
+    aliases: "지원하는 공개 명령",
+    aliasesSummary: "지원 명령과 세부 조건 보기",
     noResults: "조건에 맞는 명령어가 없습니다. 검색어나 필터를 바꿔보세요.",
     previewTitle: "Discord 응답 미리보기",
     previewExample: "예시 화면",
@@ -405,9 +405,9 @@ const commandPageText = {
     title: "Discordコマンド",
     description: "YORO Botで実際に利用できるコマンドを、権限と応答方式まで一つの画面で確認できます。",
     addBot: "DiscordにYORO Botを追加",
-    syntaxNotice: "公開の!yoroコマンドと実行者だけに表示される/yoroコマンドを分けて案内します。",
+    syntaxNotice: "コマンドは英語のみで入力します。応答文はDashboardまたはDiscord Guildの表示言語に従います。",
     searchLabel: "コマンド検索",
-    searchPlaceholder: "状態、プレイヤー、setupを検索",
+    searchPlaceholder: "status、player、setupを検索",
     audienceLabel: "利用権限",
     audienceAll: "すべて",
     audiencePublic: "一般ユーザー",
@@ -430,8 +430,8 @@ const commandPageText = {
     permission: "必要権限",
     activation: "有効化条件",
     response: "応答に含まれる情報",
-    aliases: "言語別の別名",
-    aliasesSummary: "別名と詳細条件を見る",
+    aliases: "対応する公開コマンド",
+    aliasesSummary: "対応コマンドと詳細条件を見る",
     noResults: "条件に一致するコマンドがありません。検索語またはフィルターを変更してください。",
     previewTitle: "Discord応答プレビュー",
     previewExample: "サンプル画面",
@@ -676,17 +676,15 @@ export function PublicBotPage() {
     const prefixAliases = (command: "help" | "status" | "player" | "guide") => {
       const definition = DISCORD_BOT_PREFIX_COMMAND_MANIFEST.find((entry) => entry.command === command);
       if (!definition) return [];
-      return (["ko", "ja", "en"] as const).flatMap((aliasLocale) =>
-        definition.aliases[aliasLocale].map((alias) => alias ? `!yoro ${alias}` : "!yoro"),
-      );
+      return definition.aliases.map((alias) => alias ? `!yoro ${alias}` : "!yoro");
     };
-    const prefixCommand = (ko: string, ja: string) => `!yoro ${locale === "ja" ? ja : ko}`;
+    const prefixCommand = (command: string) => `!yoro ${command}`;
 
     return [
       {
         id: "status",
         primaryCommand: "/yoro status",
-        alternativeCommand: prefixCommand("상태", "状態"),
+        alternativeCommand: prefixCommand("status"),
         category: "server",
         audiences: ["public", "private"],
         title: commandText.statusTitle,
@@ -699,7 +697,7 @@ export function PublicBotPage() {
       {
         id: "player",
         primaryCommand: "/yoro player",
-        alternativeCommand: prefixCommand("플레이어 {닉네임}", "プレイヤー {ニックネーム}"),
+        alternativeCommand: prefixCommand("player {nickname}"),
         category: "player",
         audiences: ["public", "private"],
         title: commandText.playerTitle,
@@ -712,7 +710,7 @@ export function PublicBotPage() {
       {
         id: "guide",
         primaryCommand: "/yoro guide",
-        alternativeCommand: prefixCommand("가이드", "ガイド"),
+        alternativeCommand: prefixCommand("guide"),
         category: "guide",
         audiences: ["public", "private"],
         title: commandText.guideTitle,
@@ -760,7 +758,7 @@ export function PublicBotPage() {
         aliases: prefixAliases("help"),
       },
     ];
-  }, [commandText, locale]);
+  }, [commandText]);
   const filteredCommandDocs = useMemo(() => {
     const query = commandQuery.trim().toLocaleLowerCase(locale === "ja" ? "ja-JP" : "ko-KR");
     return commandDocs.filter((command) => {
@@ -1198,7 +1196,7 @@ export function PublicBotPage() {
                 </a>
               </div>
               <div className="public-bot-command-preview__list">
-                {["!yoro 상태", "!yoro 플레이어", "!yoro 가이드", "/yoro setup", "/yoro dashboard", "/yoro help"].map((command) => (
+                {["!yoro status", "!yoro player", "!yoro guide", "/yoro setup", "/yoro dashboard", "/yoro help"].map((command) => (
                   <code key={command}>{command}</code>
                 ))}
               </div>

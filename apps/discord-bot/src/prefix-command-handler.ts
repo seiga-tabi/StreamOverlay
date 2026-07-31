@@ -53,25 +53,14 @@ export type YoroPrefixCommand = "help" | "status" | "player" | "guide";
 
 export type ParsedYoroPrefixCommand = Readonly<{
   command: YoroPrefixCommand;
-  localeHint?: DiscordBotMessageLocale;
   nickname?: string;
 }>;
 
-type YoroPrefixAlias = Readonly<{
-  command: YoroPrefixCommand;
-  localeHint?: DiscordBotMessageLocale;
-}>;
-
-const aliases = new Map<string, YoroPrefixAlias>();
+const aliases = new Map<string, YoroPrefixCommand>();
 for (const definition of DISCORD_BOT_PREFIX_COMMAND_MANIFEST) {
-  for (const locale of ["ko", "ja", "en"] as const) {
-    for (const alias of definition.aliases[locale]) {
-      if (!alias) continue;
-      aliases.set(alias.toLowerCase(), {
-        command: definition.command,
-        ...(locale === "en" ? {} : { localeHint: locale })
-      });
-    }
+  for (const alias of definition.aliases) {
+    if (!alias) continue;
+    aliases.set(alias, definition.command);
   }
 }
 
@@ -82,33 +71,30 @@ export function parseYoroPrefixCommand(
   const match = /^!yoro(?:\s+(\S+)(?:\s+(.+?))?)?\s*$/iu.exec(content);
   if (!match) return undefined;
   const token = match[1];
-  const alias = token
+  const command = token
     ? aliases.get(token.toLowerCase())
-    : { command: "help" as const };
-  if (!alias) return undefined;
+    : "help";
+  if (!command) return undefined;
   const nickname = match[2]?.trim();
   if (
     nickname !== undefined
     && (
-      alias.command !== "player"
+      command !== "player"
       || nickname.length < 1
       || nickname.length > 80
       || /[\u0000-\u001f\u007f]/u.test(nickname)
     )
   ) return undefined;
   return Object.freeze({
-    command: alias.command,
-    ...(alias.localeHint === undefined ? {} : { localeHint: alias.localeHint }),
+    command,
     ...(nickname === undefined ? {} : { nickname })
   });
 }
 
 function commandResponseLocale(
-  parsed: ParsedYoroPrefixCommand,
   preferredLocale: "auto" | DiscordBotMessageLocale,
   fallbackLocale: DiscordBotMessageLocale
 ): DiscordBotMessageLocale {
-  if (parsed.localeHint) return parsed.localeHint;
   return preferredLocale === "auto" ? fallbackLocale : preferredLocale;
 }
 
@@ -246,7 +232,7 @@ export class YoroPrefixCommandHandler {
       });
       await message.reply({
         content: internalFailureMessage(
-          parsed.localeHint ?? fallbackLocale,
+          fallbackLocale,
           error
         ),
         allowedMentions: { parse: [], repliedUser: false },
@@ -256,7 +242,6 @@ export class YoroPrefixCommandHandler {
     }
     if (!policy.allowed) {
       const deniedLocale = commandResponseLocale(
-        parsed,
         policy.preferredLocale,
         fallbackLocale
       );
@@ -279,7 +264,6 @@ export class YoroPrefixCommandHandler {
       return;
     }
     const locale = commandResponseLocale(
-      parsed,
       policy.preferredLocale,
       fallbackLocale
     );
