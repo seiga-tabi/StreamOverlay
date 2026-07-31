@@ -130,7 +130,8 @@ export class PalworldServerClientError extends Error {
     readonly code: PalworldServerErrorCode,
     readonly stage: PalworldServerDiagnosticKey,
     readonly diagnostics: PalworldServerDiagnostic[],
-    readonly policyReason?: PalworldUrlPolicyFailureReason | PalworldNetworkPolicyFailureReason
+    readonly policyReason?: PalworldUrlPolicyFailureReason | PalworldNetworkPolicyFailureReason,
+    readonly schemaIssue?: string
   ) {
     super(SAFE_ERROR_MESSAGES[code]);
     this.name = "PalworldServerClientError";
@@ -252,11 +253,27 @@ function clientError(
   code: PalworldServerErrorCode,
   stage: PalworldServerDiagnosticKey,
   diagnostics: PalworldServerDiagnostic[],
-  policyReason?: PalworldUrlPolicyFailureReason | PalworldNetworkPolicyFailureReason
+  policyReason?: PalworldUrlPolicyFailureReason | PalworldNetworkPolicyFailureReason,
+  schemaIssue?: string
 ): PalworldServerClientError {
   updateDiagnostic(diagnostics, stage, "failed", code);
   skipPendingDiagnostics(diagnostics);
-  return new PalworldServerClientError(code, stage, copyDiagnostics(diagnostics), policyReason);
+  return new PalworldServerClientError(
+    code,
+    stage,
+    copyDiagnostics(diagnostics),
+    policyReason,
+    schemaIssue
+  );
+}
+
+function safeSchemaIssue(error: string): string {
+  const separator = error.indexOf(":");
+  const rawPath = (separator < 0 ? error : error.slice(0, separator))
+    .replace(/\[\d+\]/gu, "[]");
+  return /^[A-Za-z0-9_.\[\]]{1,160}$/u.test(rawPath)
+    ? rawPath
+    : "unknown";
 }
 
 function isFiniteIntegerInRange(value: number, min: number, max: number): boolean {
@@ -979,7 +996,13 @@ export class PalworldServerClient {
     const result = validate(value);
     if (!result.ok) {
       updateDiagnostic(diagnostics, stage, "failed", "invalid_schema");
-      throw clientError("invalid_schema", "schema", diagnostics);
+      throw clientError(
+        "invalid_schema",
+        "schema",
+        diagnostics,
+        undefined,
+        safeSchemaIssue(result.error)
+      );
     }
     if (this.#remainingMs(deadline) <= 0) {
       updateDiagnostic(diagnostics, stage, "failed", "request_timeout");

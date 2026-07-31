@@ -246,6 +246,9 @@ test("플레이어 조회 실패는 안전한 사유와 진단 코드로 구분�
       async listOnlinePlayers() {
         const error = new Error("브라우저에 노출하면 안 되는 내부 상세");
         error.code = code;
+        if (code === "invalid_schema") {
+          error.schemaIssue = "restPlayers.players[].ping";
+        }
         throw error;
       }
     },
@@ -262,5 +265,6 @@ test("플레이어 조회 실패는 안전한 사유와 진단 코드로 구분�
     "invalid_schema",
     "connection_failed"
   ]);
+  assert.equal(failures[2].schemaIssue, "restPlayers.players[].ping");
   assert.equal(JSON.stringify(failures).includes("내부 상세"), false);
 });

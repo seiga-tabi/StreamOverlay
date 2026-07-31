@@ -71,6 +71,33 @@ test("Palworld 플레이어 응답은 플랫폼별 선택 필드 누락을 안�
   });
 });
 
+test("Palworld 플레이어 응답은 접속 직후의 미계산 숫자 sentinel을 누락값으로 정규화한다", () => {
+  assert.deepEqual(validatePalworldRestPlayersResponse({
+    players: [{
+      name: "접속 중인 플레이어",
+      ping: -1,
+      level: 1,
+      building_count: -1
+    }]
+  }), {
+    ok: true,
+    data: {
+      players: [{
+        name: "접속 중인 플레이어",
+        ping: -1,
+        level: 1
+      }]
+    }
+  });
+  assert.equal(validatePalworldRestPlayersResponse({
+    players: [{
+      name: "범위를 벗어난 플레이어",
+      ping: -2,
+      level: 1
+    }]
+  }).ok, false);
+});
+
 const diagnostics = PALWORLD_SERVER_DIAGNOSTIC_KEYS.map((key) => ({
   key,
   state: "passed"

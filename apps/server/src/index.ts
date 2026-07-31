@@ -439,7 +439,10 @@ const gameServerStatusRead = appConfig.discordBotInternal.enabled && postgresPoo
         logger.error({
           type: "discord.palworld_player_read_failed",
           operation: failure.operation,
-          errorCode: failure.errorCode
+          errorCode: failure.errorCode,
+          ...(failure.schemaIssue === undefined
+            ? {}
+            : { schemaIssue: failure.schemaIssue })
         });
       }
     )

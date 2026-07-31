@@ -236,6 +236,51 @@ test("Palworld 플레이어 조회는 플랫폼 선택 필드가 없어도 닉�
   }]);
 });
 
+test("Palworld 플레이어 조회는 접속 직후 미계산 숫자 sentinel 때문에 목록 전체를 버리지 않는다", async () => {
+  const { client } = createHttpsClient({
+    requestPinned: async () => jsonResponse({
+      players: [{
+        name: "접속 중인 플레이어",
+        accountName: "",
+        ping: -1,
+        level: 1,
+        building_count: -1
+      }]
+    })
+  });
+  assert.deepEqual(await client.listOnlinePlayers({
+    baseUrl: "https://pal.example:8212",
+    adminPassword: "secret-password"
+  }), [{
+    nickname: "접속 중인 플레이어",
+    level: 1
+  }]);
+});
+
+test("Palworld 플레이어 응답 검증 실패는 값 대신 안전한 필드 경로만 진단한다", async () => {
+  const { client } = createHttpsClient({
+    requestPinned: async () => jsonResponse({
+      players: [{
+        name: "플레이어",
+        level: 1,
+        password: "로그에 남으면 안 되는 값"
+      }]
+    })
+  });
+  await assert.rejects(
+    () => client.listOnlinePlayers({
+      baseUrl: "https://pal.example:8212",
+      adminPassword: "secret-password"
+    }),
+    (error) => {
+      assertClientError(error, "invalid_schema", "schema");
+      assert.equal(error.schemaIssue, "restPlayers.players[].password");
+      assert.equal(JSON.stringify(error).includes("로그에 남으면 안 되는 값"), false);
+      return true;
+    }
+  );
+});
+
 test("공개 HTTPS 자가 등록은 HTTP·custom port·IP literal·비정상 hostname을 거부한다", () => {
   const { client } = createHttpsClient({
     allowedOrigins: [],

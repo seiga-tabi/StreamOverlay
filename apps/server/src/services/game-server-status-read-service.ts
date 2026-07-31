@@ -27,6 +27,7 @@ type RestStatusReader = Readonly<{
 type StatusReadFailure = Readonly<{
   operation: "players";
   errorCode: PalworldServerErrorCode | "unknown";
+  schemaIssue?: string;
 }>;
 
 function safeErrorCode(error: unknown): PalworldServerErrorCode | "unknown" {
@@ -35,6 +36,13 @@ function safeErrorCode(error: unknown): PalworldServerErrorCode | "unknown" {
     && (PALWORLD_SERVER_ERROR_CODES as readonly string[]).includes(code)
     ? code as PalworldServerErrorCode
     : "unknown";
+}
+
+function safeSchemaIssue(error: unknown): string | undefined {
+  const issue = (error as { schemaIssue?: unknown } | undefined)?.schemaIssue;
+  return typeof issue === "string" && /^[A-Za-z0-9_.\[\]]{1,160}$/u.test(issue)
+    ? issue
+    : undefined;
 }
 
 function playerLookupReason(
@@ -237,7 +245,12 @@ export class GameServerStatusReadService {
       players = await this.restStatusReader.listOnlinePlayers(ownerId);
     } catch (error) {
       const errorCode = safeErrorCode(error);
-      this.onFailure?.({ operation: "players", errorCode });
+      const schemaIssue = safeSchemaIssue(error);
+      this.onFailure?.({
+        operation: "players",
+        errorCode,
+        ...(schemaIssue === undefined ? {} : { schemaIssue })
+      });
       return Object.freeze({
         connected: true,
         serverConfigured: true,

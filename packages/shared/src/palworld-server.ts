@@ -484,7 +484,10 @@ function validateRestPlayerAt(
   if (!userId.ok) return userId;
   const ip = optionalString("ip", MAX_PLAYER_IP_LENGTH);
   if (!ip.ok) return ip;
-  const ping = optionalNumber("ping", 0, MAX_PLAYER_PING_MS);
+  // Palworld REST는 접속 직후 아직 계산되지 않은 값을 -1 sentinel로 반환할 수 있습니다.
+  // Discord 경계에서는 ping을 사용하지 않지만, 유효한 플레이어 목록 전체가 거부되지 않도록
+  // 공식 number 필드의 유한성·상한을 유지하면서 sentinel만 허용합니다.
+  const ping = optionalNumber("ping", -1, MAX_PLAYER_PING_MS);
   if (!ping.ok) return ping;
   const locationX = optionalNumber("location_x", -1_000_000_000, 1_000_000_000);
   if (!locationX.ok) return locationX;
@@ -498,7 +501,7 @@ function validateRestPlayerAt(
     : integerAt(
         record.data.building_count,
         `${path}.building_count`,
-        0,
+        -1,
         MAX_PLAYER_BUILDING_COUNT
       );
   if (!buildingCount.ok) return buildingCount;
@@ -512,7 +515,7 @@ function validateRestPlayerAt(
     ...(locationX.data === undefined ? {} : { location_x: locationX.data }),
     ...(locationY.data === undefined ? {} : { location_y: locationY.data }),
     level: level.data,
-    ...(buildingCount.data === undefined
+    ...(buildingCount.data === undefined || buildingCount.data < 0
       ? {}
       : { building_count: buildingCount.data })
   });
