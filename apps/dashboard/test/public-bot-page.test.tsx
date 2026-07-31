@@ -35,14 +35,22 @@ Object.defineProperty(globalThis, "window", {
   }
 });
 
-test("YORO Bot 소개 페이지는 중앙 Hero와 4개 독립 페이지 메뉴를 제공한다", async () => {
+test("YORO Bot 소개 페이지는 서비스형 Hero와 4개 독립 페이지 메뉴를 제공한다", async () => {
   const { PublicBotPage } = await import("../src/features/public-bot/PublicBotPage");
   window.location.pathname = "/bot";
   const markup = renderToStaticMarkup(<PublicBotPage />);
 
-  assert.match(markup, /게임 서버 운영을 Discord에서 더 간단하게/u);
-  assert.match(markup, /Discord 연결 기반 준비됨/u);
-  assert.match(markup, /설정 명령 구현됨 · 운영 활성화 필요/u);
+  assert.match(markup, /Discord 안에서/u);
+  assert.match(markup, /게임 서버 운영을/u);
+  assert.match(markup, /더 간단하게/u);
+  assert.match(markup, /YORO Bot으로 할 수 있는 것/u);
+  assert.match(markup, /Discord에서 보이는 화면/u);
+  assert.match(markup, /예시 데이터/u);
+  assert.match(markup, /실제 값은 등록된 서버의 REST 응답에 따라 달라집니다/u);
+  assert.match(markup, /보안 중심 설계/u);
+  assert.match(markup, /현재 제공하는 기능과 준비 중인 기능/u);
+  assert.match(markup, /Minecraft 서버 연동/u);
+  assert.doesNotMatch(markup, /다음 구현 단계/u);
   assert.doesNotMatch(markup, /public-bot-header-status/u);
   assert.match(markup, /public-twitch-login-chip[\s\S]*?>로그인<\/strong>/u);
   assert.match(markup, /Discord 서버에 YORO Bot 추가/u);
@@ -51,7 +59,7 @@ test("YORO Bot 소개 페이지는 중앙 Hero와 4개 독립 페이지 메뉴�
   assert.match(markup, /rel="noopener noreferrer"/u);
   assert.match(markup, /aria-label="Discord 서버에 YORO Bot 추가 \(새 탭에서 열림\)"/u);
   assert.match(markup, /href="\/dashboard"/u);
-  assert.match(markup, /Palworld REST 직접 연결 기반은 구현/u);
+  assert.match(markup, /Palworld REST 상태·플레이어 조회/u);
   assert.match(markup, /OAuth token 평문 미저장/u);
   assert.match(markup, /aria-label="YORO Bot 홈"/u);
   assert.match(markup, /href="\/ko\/bot\/getting-started"/u);

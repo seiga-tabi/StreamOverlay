@@ -54,7 +54,17 @@ const botText = {
     navCommands: "명령어 목록",
     navGameFiles: "게임파일",
     eyebrow: "DISCORD SERVER COMPANION",
-    title: "게임 서버 운영을 Discord에서 더 간단하게",
+    title: "Discord 안에서 게임 서버 운영을 더 간단하게",
+    heroLead: "Discord 안에서",
+    heroAccent: "게임 서버 운영을",
+    heroTail: "더 간단하게",
+    heroDescription: "Palworld 서버 상태와 플레이어 정보를 Discord에서 확인하고, Organization과 Bot 설정을 웹 Dashboard에서 관리하세요.",
+    heroTagStatus: "서버 상태 조회",
+    heroTagPlayer: "플레이어 조회",
+    heroTagDashboard: "웹 Dashboard",
+    trustFree: "무료로 시작",
+    trustPermission: "Bot 추가 시 관리자 권한 요청 없음",
+    trustSetup: "Dashboard에서 간편 설정",
     pageTitle: "YORO Bot | Discord 게임 서버 도우미",
     gettingStartedPageTitle: "사용방법 | YORO Bot",
     commandsPageTitle: "명령어 목록 | YORO Bot",
@@ -69,6 +79,33 @@ const botText = {
     addBotNewTab: "Discord 서버에 YORO Bot 추가 (새 탭에서 열림)",
     dashboardLogin: "Dashboard 로그인",
     dashboardOpen: "YORO Dashboard",
+    dashboardView: "대시보드 보기",
+    coreEyebrow: "CORE FEATURES",
+    coreTitle: "YORO Bot으로 할 수 있는 것",
+    coreDescription: "Discord에서 필요한 서버 정보는 빠르게 확인하고, 민감한 설정은 웹 Dashboard에서 분리해 관리합니다.",
+    featureRealtime: "서버 상태 조회",
+    featureRealtimeDescription: "현재 접속 인원, 게임 버전, 응답 시간과 온라인 상태를 Discord 명령으로 확인합니다.",
+    featurePlayers: "플레이어 조회",
+    featurePlayersDescription: "접속자 목록과 정확히 일치하는 닉네임의 공개 게임 프로필을 안전하게 조회합니다.",
+    featureDashboard: "웹 Dashboard",
+    featureDashboardDescription: "Guild, Organization, Palworld REST 연결과 공개 명령 활성화 여부를 한곳에서 관리합니다.",
+    previewEyebrow: "DISCORD MESSAGE PREVIEW",
+    previewSectionTitle: "Discord에서 보이는 화면",
+    previewSectionDescription: "서버 상태를 읽기 쉬운 Embed로 정리합니다. 아래 값은 레이아웃을 설명하기 위한 예시 데이터입니다.",
+    previewChannel: "server-status",
+    previewExample: "예시 데이터",
+    previewBotName: "YORO Bot",
+    previewTime: "오늘 16:42",
+    previewServerTitle: "YORO Palworld 서버",
+    previewServerDescription: "서버가 정상적으로 운영 중입니다.",
+    previewStatus: "상태",
+    previewOnline: "온라인",
+    previewPlayers: "접속 인원",
+    previewLatency: "응답 시간",
+    previewVersion: "서버 버전",
+    previewDashboard: "대시보드 열기",
+    previewRefresh: "새로고침",
+    previewDisclaimer: "실제 값은 등록된 서버의 REST 응답에 따라 달라집니다.",
     currentTitle: "현재 사용할 수 있는 기반",
     currentDescription: "OAuth 로그인, Organization 관리와 Palworld REST 직접 연결 기반이 준비되어 있습니다.",
     featureOrganization: "Organization 관리",
@@ -109,14 +146,34 @@ const botText = {
     adminDescription: "/yoro setup은 서버 소유자·Administrator·Manage Guild 권한이 있는 사용자만 사용할 수 있으며, /yoro dashboard는 고정 Dashboard 링크를 비공개로 제공합니다.",
     playerMatchNotice: "플레이어 프로필은 닉네임 완전 일치일 때만 확정합니다. 부분 일치와 제한된 오타는 연관 검색어로만 표시합니다.",
     setupNotice: "웹 Dashboard가 기본 연결 경로이며 `/yoro setup`은 복구용 일회성 링크로 유지됩니다. 운영 command 등록과 feature flag 활성화는 별도 단계입니다.",
-    securityTitle: "연결 정보는 짧게, 권한은 정확하게",
+    securityEyebrow: "SECURITY BY DEFAULT",
+    securityTitle: "보안 중심 설계",
     securityDescription: "OAuth token은 AES-256-GCM으로 암호화하고 연결 완료 또는 만료 시 폐기합니다. 다른 Organization의 Guild 정보는 조회하거나 변경할 수 없습니다.",
     securityToken: "OAuth token 평문 미저장",
+    securityTokenDescription: "Discord OAuth token과 민감한 연결 정보는 암호화해 저장합니다.",
     securityTenant: "Organization tenant 격리",
+    securityTenantDescription: "Organization 경계를 기준으로 Guild와 게임 서버 데이터 접근을 분리합니다.",
     securityPermission: "Guild 권한 서버 재검증",
+    securityPermissionDescription: "연결 직전에 소유자·Administrator·Manage Guild 권한을 다시 확인합니다.",
     securitySession: "10분 만료·일회용 설정 session",
-    nextTitle: "다음 구현 단계",
-    nextDescription: "Palworld REST 직접 연결 기반은 구현됐으며 실연동 검증 후 알림 Worker와 Discord 상태 Embed를 연결합니다.",
+    securitySessionDescription: "설정 session은 짧게 유지하고 사용 완료 또는 만료 시 재사용할 수 없습니다.",
+    installEyebrow: "GETTING STARTED",
+    installTitle: "Discord에서 서버를 확인하는 방법",
+    installDescription: "Bot 추가부터 첫 상태 확인까지 Dashboard가 단계별로 안내합니다.",
+    roadmapEyebrow: "SERVICE STATUS",
+    nextTitle: "현재 제공하는 기능과 준비 중인 기능",
+    nextDescription: "구현 상태를 명확히 구분해 아직 제공하지 않는 기능을 완료된 것처럼 안내하지 않습니다.",
+    roadmapCurrent: "현재 제공",
+    roadmapPlanned: "준비 중",
+    roadmapCurrentItems: ["Discord 서버 연결", "Palworld REST 상태·플레이어 조회", "Dashboard Bot 제어"],
+    roadmapPlannedItems: ["장애·복구 자동 알림", "고정 상태 패널", "Minecraft 서버 연동"],
+    commandPreviewEyebrow: "COMMAND PREVIEW",
+    commandPreviewTitle: "설치 후 바로 사용할 명령어",
+    commandPreviewDescription: "일반 사용자는 !yoro 명령을, 서버 관리자는 권한이 필요한 /yoro 명령을 사용합니다.",
+    commandPreviewLink: "모든 명령어 보기",
+    finalCtaTitle: "게임 서버 운영을 Discord와 연결하세요",
+    finalCtaDescription: "최소 권한으로 Bot을 추가하고 YORO Dashboard에서 연결을 마무리할 수 있습니다.",
+    finalCtaGuide: "설정 가이드 보기",
     privacy: "개인정보 처리방침",
     terms: "이용약관",
     contact: "문의",
@@ -136,7 +193,17 @@ const botText = {
     navCommands: "コマンド一覧",
     navGameFiles: "ゲームファイル",
     eyebrow: "DISCORD SERVER COMPANION",
-    title: "ゲームサーバー運用を Discord でもっとシンプルに",
+    title: "Discordでゲームサーバー運用をもっとシンプルに",
+    heroLead: "Discordで",
+    heroAccent: "ゲームサーバー運用を",
+    heroTail: "もっとシンプルに",
+    heroDescription: "Palworldサーバーの状態とプレイヤー情報をDiscordで確認し、OrganizationとBot設定をWeb Dashboardで管理できます。",
+    heroTagStatus: "サーバー状態確認",
+    heroTagPlayer: "プレイヤー確認",
+    heroTagDashboard: "Web Dashboard",
+    trustFree: "無料で開始",
+    trustPermission: "Bot追加時に管理者権限を要求しない",
+    trustSetup: "Dashboardで簡単設定",
     pageTitle: "YORO Bot | Discordゲームサーバーアシスタント",
     gettingStartedPageTitle: "使い方 | YORO Bot",
     commandsPageTitle: "コマンド一覧 | YORO Bot",
@@ -151,6 +218,33 @@ const botText = {
     addBotNewTab: "DiscordサーバーにYORO Botを追加（新しいタブで開きます）",
     dashboardLogin: "Dashboardにログイン",
     dashboardOpen: "YORO Dashboard",
+    dashboardView: "Dashboardを見る",
+    coreEyebrow: "CORE FEATURES",
+    coreTitle: "YORO Botでできること",
+    coreDescription: "Discordで必要なサーバー情報を素早く確認し、機密設定はWeb Dashboardに分離して管理します。",
+    featureRealtime: "サーバー状態確認",
+    featureRealtimeDescription: "現在の接続人数、ゲームバージョン、応答時間、オンライン状態をDiscordコマンドで確認します。",
+    featurePlayers: "プレイヤー確認",
+    featurePlayersDescription: "接続者一覧と、完全一致したニックネームの公開ゲームプロフィールを安全に確認します。",
+    featureDashboard: "Web Dashboard",
+    featureDashboardDescription: "Guild、Organization、Palworld REST接続、公開コマンドの有効化を一か所で管理します。",
+    previewEyebrow: "DISCORD MESSAGE PREVIEW",
+    previewSectionTitle: "Discordでの表示",
+    previewSectionDescription: "サーバー状態を読みやすいEmbedに整理します。以下の値はレイアウト説明用のサンプルデータです。",
+    previewChannel: "server-status",
+    previewExample: "サンプルデータ",
+    previewBotName: "YORO Bot",
+    previewTime: "今日 16:42",
+    previewServerTitle: "YORO Palworldサーバー",
+    previewServerDescription: "サーバーは正常に稼働しています。",
+    previewStatus: "状態",
+    previewOnline: "オンライン",
+    previewPlayers: "接続人数",
+    previewLatency: "応答時間",
+    previewVersion: "サーバーバージョン",
+    previewDashboard: "Dashboardを開く",
+    previewRefresh: "更新",
+    previewDisclaimer: "実際の値は登録済みサーバーのREST応答によって異なります。",
     currentTitle: "現在利用できる基盤",
     currentDescription: "OAuthログイン、Organization管理、Palworld REST直接接続基盤が準備されています。",
     featureOrganization: "Organization管理",
@@ -191,14 +285,34 @@ const botText = {
     adminDescription: "/yoro setupはサーバー所有者・Administrator・Manage Guild権限を持つユーザーだけが利用でき、/yoro dashboardは固定Dashboardリンクを非公開で提供します。",
     playerMatchNotice: "プレイヤープロフィールはニックネームが完全一致した場合のみ確定します。部分一致と限定的な入力ミスは関連候補としてのみ表示します。",
     setupNotice: "Web Dashboardが基本の連携経路で、`/yoro setup` は復旧用ワンタイムリンクとして維持されます。運用command登録とfeature flag有効化は別の段階です。",
-    securityTitle: "連携情報は短く、権限は正確に",
+    securityEyebrow: "SECURITY BY DEFAULT",
+    securityTitle: "セキュリティ中心設計",
     securityDescription: "OAuth tokenはAES-256-GCMで暗号化し、連携完了または期限切れ時に破棄します。他のOrganizationのGuild情報は参照・変更できません。",
     securityToken: "OAuth tokenを平文保存しない",
+    securityTokenDescription: "Discord OAuth tokenと機密接続情報を暗号化して保存します。",
     securityTenant: "Organization tenant分離",
+    securityTenantDescription: "Organization境界を基準にGuildとゲームサーバーデータへのアクセスを分離します。",
     securityPermission: "Guild権限をサーバーで再検証",
+    securityPermissionDescription: "連携直前に所有者・Administrator・Manage Guild権限を再確認します。",
     securitySession: "10分期限・ワンタイム設定session",
-    nextTitle: "次の実装段階",
-    nextDescription: "Palworld REST直接接続基盤は実装済みで、実連携検証後に通知WorkerとDiscord状態Embedを連携します。",
+    securitySessionDescription: "設定sessionを短期間だけ保持し、利用完了または期限切れ後は再利用できません。",
+    installEyebrow: "GETTING STARTED",
+    installTitle: "Discordでサーバーを確認する方法",
+    installDescription: "Bot追加から最初の状態確認までDashboardが段階的に案内します。",
+    roadmapEyebrow: "SERVICE STATUS",
+    nextTitle: "現在提供中の機能と準備中の機能",
+    nextDescription: "実装状態を明確に分け、未提供の機能を完了済みのように案内しません。",
+    roadmapCurrent: "現在提供",
+    roadmapPlanned: "準備中",
+    roadmapCurrentItems: ["Discordサーバー連携", "Palworld REST状態・プレイヤー確認", "Dashboard Bot制御"],
+    roadmapPlannedItems: ["障害・復旧の自動通知", "固定ステータスパネル", "Minecraftサーバー連携"],
+    commandPreviewEyebrow: "COMMAND PREVIEW",
+    commandPreviewTitle: "導入後すぐに使えるコマンド",
+    commandPreviewDescription: "一般ユーザーは!yoro、サーバー管理者は権限が必要な/yoroコマンドを使用します。",
+    commandPreviewLink: "すべてのコマンドを見る",
+    finalCtaTitle: "ゲームサーバー運用をDiscordと連携しましょう",
+    finalCtaDescription: "最小権限でBotを追加し、YORO Dashboardから連携を完了できます。",
+    finalCtaGuide: "設定ガイドを見る",
     privacy: "プライバシーポリシー",
     terms: "利用規約",
     contact: "お問い合わせ",
@@ -208,6 +322,65 @@ const botText = {
 } as const;
 
 export type PublicBotSection = "overview" | "gettingStarted" | "commands" | "gameFiles";
+
+type BotText = (typeof botText)[PublicLocale];
+
+function BotFeatureIcon({ kind }: Readonly<{ kind: "status" | "player" | "dashboard" | "lock" | "tenant" | "permission" | "session" }>) {
+  const paths = {
+    status: <><path d="M4 16l4-5 4 3 6-8 2 2" /><path d="M4 20h16" /></>,
+    player: <><circle cx="9" cy="8" r="3" /><path d="M3.5 19c.7-4 2.5-6 5.5-6s4.8 2 5.5 6" /><path d="M16 7h5M18.5 4.5v5" /></>,
+    dashboard: <><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 9h18M9 9v11" /></>,
+    lock: <><rect x="5" y="10" width="14" height="10" rx="2" /><path d="M8 10V7a4 4 0 018 0v3M12 14v2" /></>,
+    tenant: <><circle cx="8" cy="8" r="3" /><circle cx="17" cy="9" r="2.5" /><path d="M2.5 20c.6-4 2.4-6 5.5-6s4.9 2 5.5 6M14 14c3.7-.6 6 1.4 6.8 5" /></>,
+    permission: <><path d="M12 3l8 3v5c0 5-3.3 8.5-8 10-4.7-1.5-8-5-8-10V6l8-3z" /><path d="M9 12l2 2 4-5" /></>,
+    session: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
+  } as const;
+  return (
+    <svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8">
+      {paths[kind]}
+    </svg>
+  );
+}
+
+function DiscordStatusPreview({ compact, text }: Readonly<{ compact?: boolean; text: BotText }>) {
+  return (
+    <figure className={`public-bot-discord-preview${compact ? " is-compact" : ""}`}>
+      <div className="public-bot-discord-preview__channel">
+        <span aria-hidden="true">#</span>
+        <strong>{text.previewChannel}</strong>
+        <span>{text.previewExample}</span>
+      </div>
+      <div className="public-bot-discord-preview__message">
+        <span className="public-bot-discord-preview__avatar" aria-hidden="true"><DiscordSymbolIcon /></span>
+        <div className="public-bot-discord-preview__body">
+          <div className="public-bot-discord-preview__meta">
+            <strong>{text.previewBotName}</strong>
+            <span>BOT</span>
+            <small>{text.previewTime}</small>
+          </div>
+          <div className="public-bot-discord-embed">
+            <div className="public-bot-discord-embed__title">
+              <span aria-hidden="true" />
+              <strong>{text.previewServerTitle}</strong>
+            </div>
+            <p>{text.previewServerDescription}</p>
+            <dl>
+              <div><dt>{text.previewStatus}</dt><dd className="is-online">{text.previewOnline}</dd></div>
+              <div><dt>{text.previewPlayers}</dt><dd>4 / 32</dd></div>
+              <div><dt>{text.previewLatency}</dt><dd>42ms</dd></div>
+              <div><dt>{text.previewVersion}</dt><dd>v1.0.2</dd></div>
+            </dl>
+            <div className="public-bot-discord-embed__actions" aria-hidden="true">
+              <span>{text.previewDashboard}</span>
+              <span>{text.previewRefresh}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <figcaption>{text.previewDisclaimer}</figcaption>
+    </figure>
+  );
+}
 
 export function publicBotSectionFromPath(pathname: string): PublicBotSection {
   pathname = stripPublicLocalePrefix(pathname);
@@ -396,6 +569,16 @@ export function PublicBotPage() {
         <PublicGameHeaderFrame
           accountTools={(
             <>
+              <a
+                aria-label={text.addBotNewTab}
+                className="public-bot-header-cta"
+                href={botInstallUrl()}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <DiscordSymbolIcon />
+                <strong>{text.addBot}</strong>
+              </a>
               <PublicLocaleSelector
                 locale={locale}
                 onLocale={changeLocale}
@@ -547,11 +730,16 @@ export function PublicBotPage() {
             <section className="public-bot-hero" id="bot-overview">
               <div className="public-bot-hero__copy">
                 <span className="public-bot-eyebrow">{text.eyebrow}</span>
-                <h1>{text.title}</h1>
-                <p>{text.description}</p>
-                <div className="public-bot-status-row" aria-label={text.currentTitle}>
-                  <span className="is-ready"><span aria-hidden="true" />{text.foundationReady}</span>
-                  <span className="is-pending"><span aria-hidden="true" />{text.gatewayPending}</span>
+                <h1 className={locale === "ja" ? "is-ja" : undefined}>
+                  <span>{text.heroLead}</span>
+                  <strong>{text.heroAccent}</strong>
+                  <span>{text.heroTail}</span>
+                </h1>
+                <p>{text.heroDescription}</p>
+                <div className="public-bot-capabilities" aria-label={text.coreTitle}>
+                  {[text.heroTagStatus, text.heroTagPlayer, text.heroTagDashboard].map((item) => (
+                    <span key={item}><span aria-hidden="true">✓</span>{item}</span>
+                  ))}
                 </div>
                 <div className="public-bot-actions">
                   <a
@@ -563,40 +751,145 @@ export function PublicBotPage() {
                   >
                     {text.addBot}
                   </a>
-                  <a className="public-bot-button" href="/dashboard">
-                    {text.dashboardLogin}
+                  <a className="public-bot-button is-secondary" href="/dashboard">
+                    {text.dashboardView}<span aria-hidden="true">→</span>
                   </a>
                 </div>
+                <div className="public-bot-trust-row">
+                  {[text.trustFree, text.trustPermission, text.trustSetup].map((item) => (
+                    <span key={item}><span aria-hidden="true">✓</span>{item}</span>
+                  ))}
+                </div>
               </div>
-              <div className="public-bot-hero__visual" aria-hidden="true">
-                <div className="public-bot-orbit is-outer" />
-                <div className="public-bot-orbit is-inner" />
-                <div className="public-bot-core">Y</div>
-                <span className="public-bot-node is-discord">
-                  <DiscordSymbolIcon />
-                </span>
-                <span className="public-bot-node is-server">S</span>
-                <span className="public-bot-node is-alert">!</span>
+              <div className="public-bot-hero__visual">
+                <DiscordStatusPreview compact text={text} />
+                <div className="public-bot-connection-map" aria-hidden="true">
+                  <span>PALWORLD</span><strong>Y</strong><span>DASHBOARD</span>
+                </div>
               </div>
             </section>
 
-            <section className="public-bot-security" id="bot-security">
-              <div>
-                <span className="public-bot-eyebrow">SECURITY BY DEFAULT</span>
+            <section className="public-bot-section public-bot-overview-section" id="bot-features">
+              <div className="public-bot-section__heading">
+                <span>{text.coreEyebrow}</span>
+                <h2>{text.coreTitle}</h2>
+                <p>{text.coreDescription}</p>
+              </div>
+              <div className="public-bot-feature-grid public-bot-core-feature-grid">
+                {([
+                  ["status", text.featureRealtime, text.featureRealtimeDescription],
+                  ["player", text.featurePlayers, text.featurePlayersDescription],
+                  ["dashboard", text.featureDashboard, text.featureDashboardDescription],
+                ] as const).map(([icon, title, description]) => (
+                  <article className="public-bot-feature is-ready" key={title}>
+                    <span className="public-bot-feature__icon"><BotFeatureIcon kind={icon} /></span>
+                    <span className="public-bot-feature__status">{text.available}</span>
+                    <h3>{title}</h3>
+                    <p>{description}</p>
+                  </article>
+                ))}
+              </div>
+            </section>
+
+            <section className="public-bot-message-showcase" id="bot-message-preview">
+              <div className="public-bot-message-showcase__copy">
+                <span className="public-bot-eyebrow">{text.previewEyebrow}</span>
+                <h2>{text.previewSectionTitle}</h2>
+                <p>{text.previewSectionDescription}</p>
+                <a className="public-bot-text-link" href={localizedPublicUrl("/bot/commands", locale)} onClick={(event) => { event.preventDefault(); setPublicPath("/bot/commands"); }}>
+                  {text.commandPreviewLink}<span aria-hidden="true">→</span>
+                </a>
+              </div>
+              <DiscordStatusPreview text={text} />
+            </section>
+
+            <section className="public-bot-section public-bot-security" id="bot-security">
+              <div className="public-bot-section__heading">
+                <span>{text.securityEyebrow}</span>
                 <h2>{text.securityTitle}</h2>
                 <p>{text.securityDescription}</p>
               </div>
-              <ul>
-                {[text.securityToken, text.securityTenant, text.securityPermission, text.securitySession].map((item) => (
-                  <li key={item}><span aria-hidden="true">✓</span>{item}</li>
+              <div className="public-bot-security__grid">
+                {([
+                  ["lock", text.securityToken, text.securityTokenDescription],
+                  ["tenant", text.securityTenant, text.securityTenantDescription],
+                  ["permission", text.securityPermission, text.securityPermissionDescription],
+                  ["session", text.securitySession, text.securitySessionDescription],
+                ] as const).map(([icon, title, description]) => (
+                  <article key={title}>
+                    <span><BotFeatureIcon kind={icon} /></span>
+                    <div><h3>{title}</h3><p>{description}</p></div>
+                  </article>
                 ))}
-              </ul>
+              </div>
+            </section>
+
+            <section className="public-bot-section public-bot-install" id="bot-install">
+              <div className="public-bot-section__heading">
+                <span>{text.installEyebrow}</span>
+                <h2>{text.installTitle}</h2>
+                <p>{text.installDescription}</p>
+              </div>
+              <ol>
+                {[
+                  text.flowIssue,
+                  text.flowLogin,
+                  text.flowComplete,
+                  text.flowRest,
+                  text.flowUse,
+                ].map((title, index) => (
+                  <li key={title}><span>{index + 1}</span><strong>{title}</strong></li>
+                ))}
+              </ol>
+              <a className="public-bot-text-link" href={localizedPublicUrl("/bot/getting-started", locale)} onClick={(event) => { event.preventDefault(); setPublicPath("/bot/getting-started"); }}>
+                {text.setupGuide}<span aria-hidden="true">→</span>
+              </a>
+            </section>
+
+            <section className="public-bot-section public-bot-command-preview" id="bot-command-preview">
+              <div className="public-bot-command-preview__copy">
+                <span className="public-bot-eyebrow">{text.commandPreviewEyebrow}</span>
+                <h2>{text.commandPreviewTitle}</h2>
+                <p>{text.commandPreviewDescription}</p>
+                <a className="public-bot-text-link" href={localizedPublicUrl("/bot/commands", locale)} onClick={(event) => { event.preventDefault(); setPublicPath("/bot/commands"); }}>
+                  {text.commandPreviewLink}<span aria-hidden="true">→</span>
+                </a>
+              </div>
+              <div className="public-bot-command-preview__list">
+                {["!yoro 상태", "!yoro 플레이어", "!yoro 가이드", "/yoro setup", "/yoro dashboard", "/yoro help"].map((command) => (
+                  <code key={command}>{command}</code>
+                ))}
+              </div>
             </section>
 
             <section className="public-bot-next" id="bot-roadmap">
-              <span>{text.planned}</span>
-              <h2>{text.nextTitle}</h2>
-              <p>{text.nextDescription}</p>
+              <div className="public-bot-section__heading">
+                <span>{text.roadmapEyebrow}</span>
+                <h2>{text.nextTitle}</h2>
+                <p>{text.nextDescription}</p>
+              </div>
+              <div className="public-bot-roadmap-grid">
+                <article className="is-current">
+                  <h3>{text.roadmapCurrent}</h3>
+                  <ul>{text.roadmapCurrentItems.map((item) => <li key={item}><span aria-hidden="true">✓</span>{item}</li>)}</ul>
+                </article>
+                <article>
+                  <h3>{text.roadmapPlanned}</h3>
+                  <ul>{text.roadmapPlannedItems.map((item) => <li key={item}><span aria-hidden="true">○</span>{item}</li>)}</ul>
+                </article>
+              </div>
+            </section>
+
+            <section className="public-bot-final-cta">
+              <div><h2>{text.finalCtaTitle}</h2><p>{text.finalCtaDescription}</p></div>
+              <div>
+                <a aria-label={text.addBotNewTab} className="public-bot-button is-primary" href={botInstallUrl()} rel="noopener noreferrer" target="_blank">
+                  <DiscordSymbolIcon />{text.addBot}
+                </a>
+                <a className="public-bot-button is-secondary" href={localizedPublicUrl("/bot/getting-started", locale)} onClick={(event) => { event.preventDefault(); setPublicPath("/bot/getting-started"); }}>
+                  {text.finalCtaGuide}<span aria-hidden="true">→</span>
+                </a>
+              </div>
             </section>
           </>
         ) : null}
