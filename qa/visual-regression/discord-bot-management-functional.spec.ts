@@ -616,6 +616,7 @@ test("Palworld 서버 관리는 활성 서버 한 개와 삭제 흐름만 표시
     isEnabled: false,
   };
   let deleted = false;
+  let refreshed = 0;
   await page.route("**/api/discord/management/**", async (route) => {
     const url = new URL(route.request().url());
     if (url.pathname === "/api/discord/management/session") {
@@ -632,7 +633,11 @@ test("Palworld 서버 관리는 활성 서버 한 개와 삭제 흐름만 표시
       await json(route, { items: [disabledServer, activeServer] });
       return;
     }
-    if (url.pathname === `${listPath}/${activeServer.id}/palworld-rest`) {
+    if (
+      url.pathname === `${listPath}/${activeServer.id}/palworld-rest`
+      || url.pathname === `${listPath}/${activeServer.id}/palworld-rest/refresh`
+    ) {
+      if (url.pathname.endsWith("/refresh")) refreshed += 1;
       await json(route, {
         enabled: true,
         pollIntervalSeconds: 30,
@@ -697,11 +702,11 @@ test("Palworld 서버 관리는 활성 서버 한 개와 삭제 흐름만 표시
   await expect(page.getByText(activeServer.displayName)).toBeVisible();
   await expect(page.getByText(disabledServer.displayName)).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Palworld REST 서버 등록" })).toHaveCount(0);
-  const organizationCard = page.locator(".bot-management-organization-card");
-  await expect(organizationCard).toBeVisible();
-  await expect.poll(() => organizationCard.evaluate((element) =>
-    getComputedStyle(element).backgroundImage
-  )).toContain("gradient");
+  await expect(page.locator(".bot-management-organization-card")).toHaveCount(0);
+  const refreshButton = page.getByRole("button", { name: "상태 새로고침" });
+  await expect(refreshButton).toHaveCount(1);
+  await refreshButton.click();
+  await expect.poll(() => refreshed).toBe(1);
 
   await page.getByRole("button", { name: "서버 삭제" }).click();
   await expect(page.locator(".bot-management-delete-confirmation")).toContainText(
@@ -799,7 +804,7 @@ test("Discord Bot 제어는 플레이어 명령과 응답 후 삭제 설정을 r
   await deleteInvocation.check();
   await expect(
     page.getByRole("link", { name: "메시지 관리 권한 승인" })
-  ).toHaveAttribute("target", "_blank");
+  ).toHaveCount(0);
   await page.getByRole("button", { name: "Bot 설정 저장" }).click();
   await expect(page.getByText("Discord Bot 설정을 저장했습니다.")).toBeVisible();
   await expect(page.getByText("설정 revision: 4")).toBeVisible();

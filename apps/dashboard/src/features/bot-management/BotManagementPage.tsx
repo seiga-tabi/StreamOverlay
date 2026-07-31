@@ -53,7 +53,7 @@ const copy = {
     botTitle: "Discord Bot 제어",
     botDescription: "공개 명령, 응답 언어와 Palworld 상태 모듈을 Organization별로 관리합니다.",
     serversTitle: "Palworld 서버 관리",
-    serversDescription: "Palworld REST 서버 등록, 인증과 연결 상태를 Organization별로 관리합니다.",
+    serversDescription: "Palworld REST 서버 등록, 인증과 연결 상태를 관리합니다.",
     botDestination: "Discord Bot 설정",
     botDestinationDescription: "일반 사용자 명령, Palworld 모듈과 Discord 응답 표시 항목을 설정합니다.",
     botDestinationAction: "Bot 제어 열기",
@@ -106,7 +106,6 @@ const copy = {
     credentialTitle: "REST 직접 연결 안내",
     credentialDescription: "브라우저가 Palworld 서버로 직접 요청하지 않습니다. YORO Server가 고정된 REST endpoint만 검증하며, AdminPassword는 공통 암호화 저장소에 암호화해 보관합니다.",
     connectionStatus: "REST 연결 상태",
-    connectionRefresh: "연결 상태 새로고침",
     connectionRefreshing: "연결 상태 확인 중",
     connectionNotConfigured: "REST 미설정",
     connectionNotConfiguredDescription: "REST 주소와 AdminPassword가 아직 저장되지 않았습니다.",
@@ -173,7 +172,7 @@ const copy = {
     botTitle: "Discord Bot コントロール",
     botDescription: "公開コマンド、応答言語、Palworld状態モジュールをOrganizationごとに管理します。",
     serversTitle: "Palworldサーバー管理",
-    serversDescription: "Palworld RESTサーバーの登録、認証、接続状態をOrganizationごとに管理します。",
+    serversDescription: "Palworld RESTサーバーの登録、認証、接続状態を管理します。",
     botDestination: "Discord Bot設定",
     botDestinationDescription: "一般ユーザーコマンド、Palworldモジュール、Discord応答の表示項目を設定します。",
     botDestinationAction: "Botコントロールを開く",
@@ -226,7 +225,6 @@ const copy = {
     credentialTitle: "REST直接接続のご案内",
     credentialDescription: "ブラウザからPalworldサーバーへ直接リクエストしません。YORO Serverが固定REST endpointのみを検証し、AdminPasswordは共通暗号化ストレージへ暗号化して保存します。",
     connectionStatus: "REST接続状態",
-    connectionRefresh: "接続状態を更新",
     connectionRefreshing: "接続状態を確認中",
     connectionNotConfigured: "REST未設定",
     connectionNotConfiguredDescription: "RESTアドレスとAdminPasswordはまだ保存されていません。",
@@ -479,6 +477,12 @@ export function botManagementViewRequiresServerData(
   view: BotManagementView
 ): boolean {
   return view === "servers";
+}
+
+export function botManagementViewShowsOrganizationSelector(
+  view: BotManagementView
+): boolean {
+  return view !== "servers";
 }
 
 export function organizationIdFromSearch(search: string): string {
@@ -778,21 +782,6 @@ export function BotManagementPage({
       setError(messageFor(createError, locale));
     } finally {
       setSubmitting(false);
-    }
-  }
-
-  async function refreshServers(): Promise<void> {
-    if (!organizationId || loading) return;
-    setLoading(true);
-    setError("");
-    try {
-      setServers(registeredManagementServers(
-        await listManagementGameServers(organizationId)
-      ));
-    } catch (refreshError) {
-      setError(messageFor(refreshError, locale));
-    } finally {
-      setLoading(false);
     }
   }
 
@@ -1100,34 +1089,36 @@ export function BotManagementPage({
       ) : null}
       {session?.authenticated && session.organizations.length > 0 ? (
         <>
-          <Card className="bot-management-organization-card">
-            <CardHeader>
-              <div>
-                <CardTitle as="h2">{text.organization}</CardTitle>
+          {botManagementViewShowsOrganizationSelector(view) ? (
+            <Card className="bot-management-organization-card">
+              <CardHeader>
+                <div>
+                  <CardTitle as="h2">{text.organization}</CardTitle>
+                  {selectedOrganization ? (
+                    <CardDescription>{selectedOrganization.displayName}</CardDescription>
+                  ) : null}
+                </div>
                 {selectedOrganization ? (
-                  <CardDescription>{selectedOrganization.displayName}</CardDescription>
+                  <Badge>{text[selectedOrganization.role]}</Badge>
                 ) : null}
-              </div>
-              {selectedOrganization ? (
-                <Badge>{text[selectedOrganization.role]}</Badge>
-              ) : null}
-            </CardHeader>
-            <CardContent className="bot-management-organization-content">
-              <label className="bot-management-field">
-                <span>{text.organizationField}</span>
-                <select
-                  value={organizationId}
-                  onChange={(event) => void selectOrganization(event.target.value)}
-                >
-                  {session.organizations.map((organization: BotManagementOrganization) => (
-                    <option key={organization.id} value={organization.id}>
-                      {organization.displayName}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </CardContent>
-          </Card>
+              </CardHeader>
+              <CardContent className="bot-management-organization-content">
+                <label className="bot-management-field">
+                  <span>{text.organizationField}</span>
+                  <select
+                    value={organizationId}
+                    onChange={(event) => void selectOrganization(event.target.value)}
+                  >
+                    {session.organizations.map((organization: BotManagementOrganization) => (
+                      <option key={organization.id} value={organization.id}>
+                        {organization.displayName}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </CardContent>
+            </Card>
+          ) : null}
 
           {view === "overview" && selectedOrganization ? (
             <section
@@ -1227,17 +1218,19 @@ export function BotManagementPage({
               <section className="bot-management-servers" aria-labelledby="bot-management-servers-title">
             <div className="bot-management-section-heading">
               <h2 id="bot-management-servers-title">{text.servers}</h2>
-              <Button
-                disabled={!organizationId}
-                loading={loading}
-                loadingLabel={text.connectionRefreshing}
-                onClick={() => void refreshServers()}
-                size="sm"
-                type="button"
-                variant="secondary"
-              >
-                {text.connectionRefresh}
-              </Button>
+              {servers[0] && selectedOrganization?.role !== "viewer" ? (
+                <Button
+                  disabled={restBusy}
+                  loading={restBusy}
+                  loadingLabel={text.connectionRefreshing}
+                  onClick={() => void refreshRestConnection(servers[0]!)}
+                  size="sm"
+                  type="button"
+                  variant="secondary"
+                >
+                  {text.restRefresh}
+                </Button>
+              ) : null}
             </div>
             {!loading
               && servers.length === 0
@@ -1430,14 +1423,6 @@ export function BotManagementPage({
                         </Button>
                         {restResponse?.connection.configured ? (
                           <>
-                            <Button
-                              disabled={restBusy}
-                              type="button"
-                              variant="secondary"
-                              onClick={() => void refreshRestConnection(server)}
-                            >
-                              {text.restRefresh}
-                            </Button>
                             <Button
                               disabled={restBusy}
                               type="button"

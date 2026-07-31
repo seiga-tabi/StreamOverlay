@@ -54,6 +54,7 @@ test("Bot 관리 화면은 초기 상태와 한국어·일본어 접근성 문�
 test("Organization 관리는 개요·Bot 제어·Palworld 서버 화면을 분리한다", async () => {
   const {
     BotManagementPage,
+    botManagementViewShowsOrganizationSelector,
     botManagementViewRequiresServerData,
     organizationIdFromSearch,
     organizationManagementHref
@@ -69,6 +70,9 @@ test("Organization 관리는 개요·Bot 제어·Palworld 서버 화면을 분�
   assert.equal(botManagementViewRequiresServerData("overview"), false);
   assert.equal(botManagementViewRequiresServerData("bot"), false);
   assert.equal(botManagementViewRequiresServerData("servers"), true);
+  assert.equal(botManagementViewShowsOrganizationSelector("overview"), true);
+  assert.equal(botManagementViewShowsOrganizationSelector("bot"), true);
+  assert.equal(botManagementViewShowsOrganizationSelector("servers"), false);
   assert.equal(
     organizationIdFromSearch(
       "?organization=11111111-1111-4111-8111-111111111111"

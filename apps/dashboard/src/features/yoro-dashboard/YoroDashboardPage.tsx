@@ -44,7 +44,6 @@ type UnifiedDashboardPage =
   | "organizationBot"
   | "organizationServers"
   | "streaming"
-  | "streamingPermissions"
   | "streamingFollowers"
   | "streamingRiot";
 
@@ -59,7 +58,6 @@ const copy = {
     organizationServers: "Palworld 서버",
     streamingGroup: "스트리머",
     streaming: "이용 상태",
-    streamingPermissions: "Twitch 권한",
     streamingFollowers: "Followers",
     streamingRiot: "Riot ID",
     settings: "개인 설정",
@@ -118,11 +116,11 @@ const copy = {
     pendingDescription: "관리자 검토가 끝나면 스트리머 메뉴를 사용할 수 있습니다.",
     approvedDescription: "스트리머 기능을 사용할 수 있습니다. Followers 조회는 별도 최소 권한 승인이 필요합니다.",
     rejectedDescription: "Riot ID를 확인한 뒤 다시 신청해주세요.",
-    permissionTitle: "Twitch Followers 권한",
     permissionDescription: "Followers 조회에 필요한 moderator:read:followers 권한만 별도로 승인합니다.",
     permissionConnected: "권한 승인 완료",
     permissionRequired: "권한 승인 필요",
     permissionAction: "Twitch 권한 승인",
+    permissionRenew: "Twitch 권한 다시 승인",
     permissionOpening: "Twitch로 이동 중",
     permissionFailed: "Twitch 권한 승인 화면을 열지 못했습니다.",
     approvalRequired: "스트리머 승인 후 사용할 수 있습니다.",
@@ -149,7 +147,6 @@ const copy = {
     organizationServers: "Palworldサーバー",
     streamingGroup: "ストリーマー",
     streaming: "利用状況",
-    streamingPermissions: "Twitch権限",
     streamingFollowers: "Followers",
     streamingRiot: "Riot ID",
     settings: "個人設定",
@@ -208,11 +205,11 @@ const copy = {
     pendingDescription: "管理者の確認が完了するとストリーマーメニューを利用できます。",
     approvedDescription: "ストリーマー機能を利用できます。Followersの参照には別途最小権限の承認が必要です。",
     rejectedDescription: "Riot IDを確認して再度申請してください。",
-    permissionTitle: "Twitch Followers権限",
     permissionDescription: "Followers参照に必要なmoderator:read:followers権限のみを別途承認します。",
     permissionConnected: "権限承認済み",
     permissionRequired: "権限承認が必要",
     permissionAction: "Twitch権限を承認",
+    permissionRenew: "Twitch権限を再承認",
     permissionOpening: "Twitchへ移動中",
     permissionFailed: "Twitch権限承認画面を開けませんでした。",
     approvalRequired: "ストリーマー承認後に利用できます。",
@@ -243,12 +240,12 @@ const unifiedPaths: Record<UnifiedDashboardPage, string> = {
   organizationBot: "/dashboard/organizations/bot",
   organizationServers: "/dashboard/organizations/servers",
   streaming: "/dashboard/streaming",
-  streamingPermissions: "/dashboard/streaming/permissions",
   streamingFollowers: "/dashboard/streaming/followers",
   streamingRiot: "/dashboard/streaming/riot-id"
 };
 
 const legacyDashboardPaths: Record<string, UnifiedDashboardPage> = {
+  "/dashboard/streaming/permissions": "streaming",
   "/dashboard/followers": "streamingFollowers",
   "/dashboard/riot-id": "streamingRiot",
   "/dashboard/riot-account": "streamingRiot",
@@ -712,7 +709,6 @@ export function YoroDashboardPage() {
           <span className="yoro-dashboard-nav-label">{text.streamingGroup}</span>
           {([
             "streaming",
-            "streamingPermissions",
             "streamingFollowers",
             "streamingRiot"
           ] as UnifiedDashboardPage[]).map((item) => (
@@ -984,12 +980,23 @@ export function YoroDashboardPage() {
                     <div>
                       <h2>{text.streamerApproved}</h2>
                       <p>{text.approvedDescription}</p>
+                      <p>{text.permissionDescription}</p>
+                      <strong className="yoro-dashboard-status">
+                        {streamer.followerPermission.state === "connected"
+                          ? text.permissionConnected
+                          : text.permissionRequired}
+                      </strong>
                     </div>
                     <button
-                      onClick={() => navigate("streamingPermissions")}
+                      disabled={permissionOpening}
+                      onClick={() => void openFollowerPermission()}
                       type="button"
                     >
-                      {text.streamingPermissions}
+                      {permissionOpening
+                        ? text.permissionOpening
+                        : streamer.followerPermission.state === "connected"
+                          ? text.permissionRenew
+                          : text.permissionAction}
                     </button>
                   </article>
                 ) : null}
@@ -1031,50 +1038,6 @@ export function YoroDashboardPage() {
                 aria-live="polite"
                 className="yoro-dashboard-announcement"
               >
-                {announcement}
-              </p>
-            ) : null}
-          </section>
-        ) : null}
-        {page === "streamingPermissions" ? (
-          <section className="yoro-dashboard-streaming">
-            <header>
-              <span>TWITCH</span>
-              <h1>{text.permissionTitle}</h1>
-              <p>{text.permissionDescription}</p>
-            </header>
-            <div className="yoro-dashboard-state-card">
-              <TwitchGlitchIcon />
-              <div>
-                <h2>
-                  {streamer?.followerPermission.state === "connected"
-                    ? text.permissionConnected
-                    : text.permissionRequired}
-                </h2>
-                <p>
-                  {streamer?.approval.enabled
-                    ? text.permissionDescription
-                    : text.approvalRequired}
-                </p>
-              </div>
-              {streamer?.approval.enabled ? (
-                <button
-                  disabled={permissionOpening}
-                  onClick={() => void openFollowerPermission()}
-                  type="button"
-                >
-                  {permissionOpening
-                    ? text.permissionOpening
-                    : text.permissionAction}
-                </button>
-              ) : (
-                <button onClick={() => navigate("streaming")} type="button">
-                  {text.streaming}
-                </button>
-              )}
-            </div>
-            {announcement ? (
-              <p aria-live="polite" className="yoro-dashboard-announcement">
                 {announcement}
               </p>
             ) : null}

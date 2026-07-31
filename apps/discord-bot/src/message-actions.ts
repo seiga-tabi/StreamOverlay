@@ -5,17 +5,18 @@ import {
 } from "discord.js";
 
 export function discordResourceLinks(input: {
-  dashboardUrl: string;
-  dashboardLabel: string;
+  primaryUrl: string;
+  primaryLabel: string;
+  primaryEmoji?: string;
   guideUrl: string;
   guideLabel: string;
 }): ActionRowBuilder<ButtonBuilder> {
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setStyle(ButtonStyle.Link)
-      .setEmoji("⚙️")
-      .setLabel(input.dashboardLabel)
-      .setURL(input.dashboardUrl),
+      .setEmoji(input.primaryEmoji ?? "⚙️")
+      .setLabel(input.primaryLabel)
+      .setURL(input.primaryUrl),
     new ButtonBuilder()
       .setStyle(ButtonStyle.Link)
       .setEmoji("📘")

@@ -49,10 +49,11 @@ const copy = {
     guideCommand: "`!yoro 가이드` 사용",
     deleteInvocation: "Bot 응답 후 사용한 명령어 삭제",
     deleteInvocationDescription: "인식된 `!yoro` 명령에 응답한 뒤 원본 메시지만 삭제합니다. 삭제 실패는 Bot 응답에 영향을 주지 않습니다.",
-    locale: "Bot 응답 언어",
+    locale: "영어 명령의 기본 응답 언어",
     localeAuto: "Discord 서버 언어 자동 감지",
     localeKo: "한국어",
     localeJa: "日本語",
+    localeDescription: "한국어·일본어로 입력한 `!yoro` 명령은 입력 언어로 응답합니다. 이 설정은 `!yoro status` 같은 영어 명령과 `/yoro` 명령의 기본 언어에 적용됩니다.",
     fields: "상태 메시지 표시 항목",
     players: "접속 인원",
     version: "게임 버전",
@@ -100,10 +101,11 @@ const copy = {
     guideCommand: "`!yoro ガイド`を使用",
     deleteInvocation: "Bot応答後に使用したコマンドを削除",
     deleteInvocationDescription: "認識された`!yoro`コマンドに応答した後、元のメッセージのみ削除します。削除失敗はBot応答に影響しません。",
-    locale: "Bot応答言語",
+    locale: "英語コマンドの既定応答言語",
     localeAuto: "Discordサーバー言語を自動検出",
     localeKo: "한국어",
     localeJa: "日本語",
+    localeDescription: "韓国語・日本語で入力した`!yoro`コマンドには入力言語で応答します。この設定は`!yoro status`などの英語コマンドと`/yoro`コマンドの既定言語に適用されます。",
     fields: "状態メッセージの表示項目",
     players: "接続人数",
     version: "ゲームバージョン",
@@ -429,6 +431,9 @@ export function BotControlCard(props: {
               <option value="ja">{text.localeJa}</option>
             </select>
           </label>
+          <p className="bot-control-warning">
+            {text.localeDescription}
+          </p>
           <fieldset className="bot-control-fields">
             <legend>{text.fields}</legend>
             {([

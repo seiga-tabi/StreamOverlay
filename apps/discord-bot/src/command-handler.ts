@@ -125,8 +125,8 @@ export class YoroCommandHandler {
       }
       const prefixMessages = DISCORD_BOT_MESSAGES[locale].prefix;
       const resources = discordResourceLinks({
-        dashboardUrl: this.dashboardUrl,
-        dashboardLabel: prefixMessages.dashboardButton,
+        primaryUrl: this.dashboardUrl,
+        primaryLabel: text.dashboardButton,
         guideUrl: new URL(
           "/bot/dedicated-server",
           this.dashboardUrl
@@ -282,8 +282,8 @@ export class YoroCommandHandler {
     }
     if (command === "guide") {
       const row = discordResourceLinks({
-        dashboardUrl: this.dashboardUrl,
-        dashboardLabel: messages.dashboardButton,
+        primaryUrl: this.dashboardUrl,
+        primaryLabel: DISCORD_BOT_MESSAGES[locale].slash.dashboardButton,
         guideUrl: new URL(
           "/bot/dedicated-server",
           this.dashboardUrl
@@ -385,8 +385,8 @@ export class YoroCommandHandler {
       return;
     }
     const row = discordResourceLinks({
-      dashboardUrl: this.dashboardUrl,
-      dashboardLabel: messages.dashboardButton,
+      primaryUrl: this.dashboardUrl,
+      primaryLabel: DISCORD_BOT_MESSAGES[locale].slash.dashboardButton,
       guideUrl: new URL(
         "/bot/dedicated-server",
         this.dashboardUrl

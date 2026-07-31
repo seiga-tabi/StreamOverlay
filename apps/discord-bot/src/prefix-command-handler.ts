@@ -61,19 +61,29 @@ type YoroPrefixAlias = Readonly<{
 }>;
 
 const aliases = new Map<string, YoroPrefixAlias>([
+  ["명령어", { command: "help", localeHint: "ko" }],
   ["도움말", { command: "help", localeHint: "ko" }],
+  ["도움", { command: "help", localeHint: "ko" }],
   ["help", { command: "help" }],
+  ["コマンド", { command: "help", localeHint: "ja" }],
   ["ヘルプ", { command: "help", localeHint: "ja" }],
   ["상태", { command: "status", localeHint: "ko" }],
+  ["서버상태", { command: "status", localeHint: "ko" }],
   ["status", { command: "status" }],
   ["ステータス", { command: "status", localeHint: "ja" }],
+  ["状態", { command: "status", localeHint: "ja" }],
+  ["サーバー状態", { command: "status", localeHint: "ja" }],
   ["플레이어", { command: "player", localeHint: "ko" }],
+  ["접속자", { command: "player", localeHint: "ko" }],
   ["player", { command: "player" }],
   ["players", { command: "player" }],
   ["プレイヤー", { command: "player", localeHint: "ja" }],
+  ["プレーヤー", { command: "player", localeHint: "ja" }],
   ["가이드", { command: "guide", localeHint: "ko" }],
+  ["안내", { command: "guide", localeHint: "ko" }],
   ["guide", { command: "guide" }],
-  ["ガイド", { command: "guide", localeHint: "ja" }]
+  ["ガイド", { command: "guide", localeHint: "ja" }],
+  ["案内", { command: "guide", localeHint: "ja" }]
 ]);
 
 export function parseYoroPrefixCommand(
@@ -109,9 +119,16 @@ function commandResponseLocale(
   preferredLocale: "auto" | DiscordBotMessageLocale,
   fallbackLocale: DiscordBotMessageLocale
 ): DiscordBotMessageLocale {
-  return preferredLocale === "auto"
-    ? parsed.localeHint ?? fallbackLocale
-    : preferredLocale;
+  if (parsed.localeHint) return parsed.localeHint;
+  return preferredLocale === "auto" ? fallbackLocale : preferredLocale;
+}
+
+export function localizedPublicResourceUrl(
+  publicBaseUrl: string,
+  locale: DiscordBotMessageLocale,
+  pathname: "/palworld" | "/bot/dedicated-server"
+): string {
+  return new URL(`/${locale}${pathname}`, publicBaseUrl).toString();
 }
 
 class PrefixRateLimiter {
@@ -237,17 +254,20 @@ export class YoroPrefixCommandHandler {
       fallbackLocale
     );
     const messages = DISCORD_BOT_MESSAGES[locale].prefix;
-    const dashboardUrl = new URL(
-      "/dashboard/organizations",
-      this.publicBaseUrl
-    ).toString();
-    const guideUrl = new URL(
-      "/bot/dedicated-server",
-      this.publicBaseUrl
-    ).toString();
+    const palworldHomeUrl = localizedPublicResourceUrl(
+      this.publicBaseUrl,
+      locale,
+      "/palworld"
+    );
+    const guideUrl = localizedPublicResourceUrl(
+      this.publicBaseUrl,
+      locale,
+      "/bot/dedicated-server"
+    );
     const resources = discordResourceLinks({
-      dashboardUrl,
-      dashboardLabel: messages.dashboardButton,
+      primaryUrl: palworldHomeUrl,
+      primaryLabel: messages.palworldHomeButton,
+      primaryEmoji: "🏠",
       guideUrl,
       guideLabel: messages.guideButton
     });
@@ -400,15 +420,18 @@ export class YoroPrefixCommandHandler {
       return;
     }
     const row = discordResourceLinks({
-      dashboardUrl: new URL(
-        "/dashboard/organizations",
-        this.publicBaseUrl
-      ).toString(),
-      dashboardLabel: messages.dashboardButton,
-      guideUrl: new URL(
-        "/bot/dedicated-server",
-        this.publicBaseUrl
-      ).toString(),
+      primaryUrl: localizedPublicResourceUrl(
+        this.publicBaseUrl,
+        locale,
+        "/palworld"
+      ),
+      primaryLabel: messages.palworldHomeButton,
+      primaryEmoji: "🏠",
+      guideUrl: localizedPublicResourceUrl(
+        this.publicBaseUrl,
+        locale,
+        "/bot/dedicated-server"
+      ),
       guideLabel: messages.guideButton
     });
     if (!result.connected || !result.server) {

@@ -24,6 +24,7 @@ import {
   DiscordInternalApiError
 } from "../dist/internal-api-client.js";
 import {
+  localizedPublicResourceUrl,
   parseYoroPrefixCommand,
   YoroPrefixCommandHandler
 } from "../dist/prefix-command-handler.js";
@@ -499,7 +500,23 @@ test("내부 API client는 HMAC 인증 실패를 일반 장애와 구분한다",
 test("!yoro parser는 exact allowlist와 100자 상한을 적용한다", () => {
   assert.deepEqual(parseYoroPrefixCommand("!yoro"), { command: "help" });
   assert.deepEqual(parseYoroPrefixCommand("!yoro help"), { command: "help" });
+  assert.deepEqual(parseYoroPrefixCommand("!yoro 명령어"), {
+    command: "help",
+    localeHint: "ko"
+  });
+  assert.deepEqual(parseYoroPrefixCommand("!yoro コマンド"), {
+    command: "help",
+    localeHint: "ja"
+  });
   assert.deepEqual(parseYoroPrefixCommand("!yoro 상태"), {
+    command: "status",
+    localeHint: "ko"
+  });
+  assert.deepEqual(parseYoroPrefixCommand("!yoro 状態"), {
+    command: "status",
+    localeHint: "ja"
+  });
+  assert.deepEqual(parseYoroPrefixCommand("!yoro 서버상태"), {
     command: "status",
     localeHint: "ko"
   });
@@ -521,9 +538,72 @@ test("!yoro parser는 exact allowlist와 100자 상한을 적용한다", () => {
     localeHint: "ja",
     nickname: "player-one"
   });
+  assert.deepEqual(parseYoroPrefixCommand("!yoro プレーヤー player-two"), {
+    command: "player",
+    localeHint: "ja",
+    nickname: "player-two"
+  });
   assert.equal(parseYoroPrefixCommand("!yoro history"), undefined);
   assert.equal(parseYoroPrefixCommand("!yoro 상태 extra"), undefined);
   assert.equal(parseYoroPrefixCommand(`!yoro ${"a".repeat(101)}`), undefined);
+});
+
+test("!yoro 단독 입력은 현재 사용할 수 있는 느낌표 명령 목록을 응답한다", async () => {
+  const replies = [];
+  const handler = new YoroPrefixCommandHandler(
+    IDS.application,
+    {
+      async commandPolicy(input) {
+        assert.deepEqual(input, {
+          applicationId: IDS.application,
+          guildId: IDS.guild,
+          command: "help"
+        });
+        return {
+          allowed: true,
+          commands: {
+            help: true,
+            status: true,
+            player: false,
+            guide: true
+          },
+          deleteInvocationAfterReply: false,
+          preferredLocale: "auto",
+          statusFields: {
+            players: true,
+            version: true,
+            latency: true,
+            observedAt: true
+          },
+          revision: 1
+        };
+      }
+    },
+    "https://yoro.gg"
+  );
+  await handler.handle({
+    content: "!yoro",
+    guildId: IDS.guild,
+    guild: { preferredLocale: "ko" },
+    author: { id: IDS.user, bot: false },
+    webhookId: null,
+    system: false,
+    async reply(payload) {
+      replies.push(payload);
+    }
+  });
+
+  assert.equal(replies.length, 1);
+  const embed = replies[0].embeds[0].toJSON();
+  assert.equal(embed.title, "🤖 YORO Bot 일반 사용자 명령");
+  assert.match(embed.description, /!yoro 상태/u);
+  assert.match(embed.description, /!yoro 가이드/u);
+  assert.match(embed.description, /!yoro 도움말/u);
+  assert.doesNotMatch(embed.description, /!yoro 플레이어/u);
+  assert.deepEqual(replies[0].allowedMentions, {
+    parse: [],
+    repliedUser: false
+  });
 });
 
 test("!yoro 상태는 Guild에 귀속된 안전한 공개 Embed만 응답한다", async () => {
@@ -611,10 +691,11 @@ test("!yoro 상태는 Guild에 귀속된 안전한 공개 Embed만 응답한다"
   assert.deepEqual(
     statusActions.map((component) => component.url),
     [
-      "https://yoro.gg/dashboard/organizations",
-      "https://yoro.gg/bot/dedicated-server"
+      "https://yoro.gg/ko/palworld",
+      "https://yoro.gg/ko/bot/dedicated-server"
     ]
   );
+  assert.equal(statusActions[0].label, "Palworld 홈 열기");
 });
 
 test("!yoro 명령 메시지는 설정이 켜진 경우 응답 성공 후에만 삭제한다", async () => {
@@ -680,7 +761,7 @@ test("!yoro 명령 메시지는 설정이 켜진 경우 응답 성공 후에만 
   );
 });
 
-test("!yoro 응답 언어는 auto에서 명령어 언어를 따르고 강제 설정을 우선한다", async () => {
+test("!yoro 응답 언어는 명시적인 명령어 언어를 우선하고 영어 명령에 설정을 적용한다", async () => {
   async function responseTitle({
     content,
     guildLocale,
@@ -756,7 +837,17 @@ test("!yoro 응답 언어는 auto에서 명령어 언어를 따르고 강제 설
     content: "!yoro ステータス",
     guildLocale: "ja",
     preferredLocale: "ko"
+  }), "🟢 YORO Palworldサーバー");
+  assert.equal(await responseTitle({
+    content: "!yoro 상태",
+    guildLocale: "ko",
+    preferredLocale: "ja"
   }), "🟢 YORO Palworld 서버");
+  assert.equal(await responseTitle({
+    content: "!yoro status",
+    guildLocale: "ko",
+    preferredLocale: "ja"
+  }), "🟢 YORO Palworldサーバー");
 });
 
 test("!yoro 플레이어는 목록과 게임 내 프로필만 안전하게 표시한다", async () => {
@@ -963,7 +1054,26 @@ test("!yoro 상태는 공개 사유와 고정된 안전한 관리 동작을 표�
   );
   assert.equal(
     replies[0].components[0].toJSON().components[0].url,
-    "https://yoro.gg/dashboard/organizations"
+    "https://yoro.gg/ko/palworld"
+  );
+});
+
+test("!yoro 공개 링크는 응답 언어에 맞는 Palworld 경로만 사용한다", () => {
+  assert.equal(
+    localizedPublicResourceUrl("https://yoro.gg", "ko", "/palworld"),
+    "https://yoro.gg/ko/palworld"
+  );
+  assert.equal(
+    localizedPublicResourceUrl("https://yoro.gg", "ja", "/palworld"),
+    "https://yoro.gg/ja/palworld"
+  );
+  assert.equal(
+    localizedPublicResourceUrl(
+      "https://yoro.gg",
+      "ja",
+      "/bot/dedicated-server"
+    ),
+    "https://yoro.gg/ja/bot/dedicated-server"
   );
 });
 

@@ -78,6 +78,8 @@ test("공통 YORO Dashboard는 로그인 사용자용 진입점과 KO·JA 문구
   assert.match(source, /Dashboardメニューを開く/u);
   assert.match(source, /aria-controls="yoro-dashboard-navigation"/u);
   assert.match(source, /moderator:read:followers/u);
+  assert.doesNotMatch(source, /streamingPermissions/u);
+  assert.match(source, /onClick=\{\(\) => void openFollowerPermission\(\)\}/u);
   assert.match(source, /applyForStreamer/u);
   assert.match(source, /FollowersPage dataSource/u);
   assert.match(source, /MyRiotAccountPage/u);
@@ -143,7 +145,11 @@ test("공통 Dashboard 경로는 기존 방송 운영 하위 경로와 겹치지
   );
   assert.equal(
     yoroDashboardPageFromPath("/dashboard/streaming/permissions/"),
-    "streamingPermissions"
+    "streaming"
+  );
+  assert.equal(
+    canonicalYoroDashboardPath("/dashboard/streaming/permissions/"),
+    "/dashboard/streaming"
   );
   assert.equal(
     yoroDashboardPageFromPath("/dashboard/streaming/followers"),
