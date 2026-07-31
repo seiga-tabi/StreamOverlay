@@ -71,7 +71,7 @@ test("Organization 관리는 개요·Bot 제어·Palworld 서버 화면을 분�
   assert.equal(botManagementViewRequiresServerData("bot"), false);
   assert.equal(botManagementViewRequiresServerData("servers"), true);
   assert.equal(botManagementViewShowsOrganizationSelector("overview"), true);
-  assert.equal(botManagementViewShowsOrganizationSelector("bot"), true);
+  assert.equal(botManagementViewShowsOrganizationSelector("bot"), false);
   assert.equal(botManagementViewShowsOrganizationSelector("servers"), false);
   assert.equal(
     organizationIdFromSearch(
@@ -94,6 +94,39 @@ test("Organization 관리는 개요·Bot 제어·Palworld 서버 화면을 분�
     ),
     "/dashboard/organizations/servers?organization=11111111-1111-4111-8111-111111111111"
   );
+});
+
+test("Discord Bot 운영 콘솔은 활성 명령 수와 저장 전 변경 상태를 정확히 계산한다", async () => {
+  const {
+    botControlActiveCommandCount,
+    botControlDraftChanged
+  } = await import("../src/features/bot-management/bot-control-view");
+  const saved = {
+    publicCommandsEnabled: true,
+    palworldStatusEnabled: true,
+    statusCommandEnabled: true,
+    playerCommandEnabled: false,
+    guideCommandEnabled: true,
+    deleteInvocationAfterReply: false,
+    preferredLocale: "ja" as const,
+    statusFields: {
+      players: true,
+      version: true,
+      latency: true,
+      observedAt: false
+    }
+  };
+
+  assert.equal(botControlActiveCommandCount(saved), 2);
+  assert.equal(botControlDraftChanged(saved, saved), false);
+  assert.equal(botControlDraftChanged({
+    ...saved,
+    statusFields: { ...saved.statusFields, observedAt: true }
+  }, saved), true);
+  assert.equal(botControlDraftChanged({
+    ...saved,
+    preferredLocale: "ko"
+  }, saved), true);
 });
 
 test("관리 로그인 URL은 통합 YORO 로그인과 안전한 복귀 경로만 사용한다", async () => {

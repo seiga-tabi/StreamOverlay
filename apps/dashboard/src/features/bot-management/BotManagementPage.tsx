@@ -482,7 +482,7 @@ export function botManagementViewRequiresServerData(
 export function botManagementViewShowsOrganizationSelector(
   view: BotManagementView
 ): boolean {
-  return view !== "servers";
+  return view === "overview";
 }
 
 export function organizationIdFromSearch(search: string): string {
