@@ -139,9 +139,13 @@ export class DiscordBotControlRepository {
        JOIN discord_guilds guild
          ON guild.organization_id = installation.organization_id
         AND guild.discord_guild_id = installation.discord_guild_id
+       JOIN discord_bot_installation_observations observation
+         ON observation.discord_guild_id = installation.discord_guild_id
+        AND observation.application_id = installation.application_id
        WHERE installation.organization_id = $1
          AND installation.application_id = $2
          AND installation.status = 'active'
+         AND observation.status = 'observed'
          AND guild.status = 'active'
        ORDER BY installation.installed_at DESC, installation.id DESC
        LIMIT 1
@@ -311,6 +315,9 @@ export class DiscordBotControlRepository {
        JOIN discord_guilds guild
          ON guild.organization_id = installation.organization_id
         AND guild.discord_guild_id = installation.discord_guild_id
+       JOIN discord_bot_installation_observations observation
+         ON observation.discord_guild_id = installation.discord_guild_id
+        AND observation.application_id = installation.application_id
        LEFT JOIN discord_bot_control_configs config
          ON config.organization_id = installation.organization_id
         AND config.discord_guild_id = installation.discord_guild_id
@@ -318,6 +325,7 @@ export class DiscordBotControlRepository {
        WHERE installation.application_id = $1
          AND installation.discord_guild_id = $2
          AND installation.status = 'active'
+         AND observation.status = 'observed'
          AND guild.status = 'active'
       LIMIT 1`,
       [input.applicationId, input.guildId]
@@ -383,9 +391,13 @@ export class DiscordBotControlRepository {
        JOIN discord_guilds guild
          ON guild.organization_id = installation.organization_id
         AND guild.discord_guild_id = installation.discord_guild_id
+       JOIN discord_bot_installation_observations observation
+         ON observation.discord_guild_id = installation.discord_guild_id
+        AND observation.application_id = installation.application_id
        WHERE installation.organization_id = $1
          AND installation.application_id = $2
          AND installation.status = 'active'
+         AND observation.status = 'observed'
          AND guild.status = 'active'
        ORDER BY installation.installed_at DESC, installation.id DESC
        LIMIT 1`,

@@ -426,6 +426,42 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
     );
     assert.notEqual(connected.rows[0].csrf_token_hash.toString("utf8"), rawCsrfToken);
 
+    await repository.revokeBotInstallation({ applicationId, guildId: discordGuildId });
+    const revoked = await pool.query(
+      `SELECT installation.status AS installation_status,
+         observation.status AS observation_status
+       FROM discord_installations installation
+       JOIN discord_bot_installation_observations observation
+         ON observation.discord_guild_id = installation.discord_guild_id
+        AND observation.application_id = installation.application_id
+       WHERE installation.organization_id = $1
+         AND installation.discord_guild_id = $2
+         AND installation.application_id = $3`,
+      [organizationId, discordGuildId, applicationId]
+    );
+    assert.deepEqual(revoked.rows[0], {
+      installation_status: "revoked",
+      observation_status: "revoked"
+    });
+
+    await repository.observeBotInstallation({ applicationId, guildId: discordGuildId });
+    const restored = await pool.query(
+      `SELECT installation.status AS installation_status,
+         observation.status AS observation_status
+       FROM discord_installations installation
+       JOIN discord_bot_installation_observations observation
+         ON observation.discord_guild_id = installation.discord_guild_id
+        AND observation.application_id = installation.application_id
+       WHERE installation.organization_id = $1
+         AND installation.discord_guild_id = $2
+         AND installation.application_id = $3`,
+      [organizationId, discordGuildId, applicationId]
+    );
+    assert.deepEqual(restored.rows[0], {
+      installation_status: "active",
+      observation_status: "observed"
+    });
+
     await assert.rejects(
       withTransaction(pool, async (client) => {
         const transactional = new DiscordOnboardingRepository(client);

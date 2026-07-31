@@ -39,10 +39,14 @@ implements GameServerStatusReadRepositoryContract {
        JOIN discord_installations installation
          ON installation.organization_id = guild.organization_id
         AND installation.discord_guild_id = guild.discord_guild_id
+       JOIN discord_bot_installation_observations observation
+         ON observation.discord_guild_id = installation.discord_guild_id
+        AND observation.application_id = installation.application_id
        WHERE guild.discord_guild_id = $1
          AND guild.status = 'active'
          AND installation.application_id = $2
          AND installation.status = 'active'
+         AND observation.status = 'observed'
        LIMIT 1`,
       [guildId, applicationId]
     );

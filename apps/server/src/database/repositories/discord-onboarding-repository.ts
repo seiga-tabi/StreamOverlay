@@ -495,13 +495,22 @@ export class DiscordOnboardingRepository {
   }): Promise<void> {
     await repositoryQuery(
       this.queryable,
-      `INSERT INTO discord_bot_installation_observations (
-         discord_guild_id, application_id
-       ) VALUES ($1, $2)
-       ON CONFLICT (discord_guild_id, application_id) DO UPDATE
-       SET status = 'observed',
-           last_observed_at = NOW(),
-           revoked_at = NULL`,
+      `WITH observed AS (
+         INSERT INTO discord_bot_installation_observations (
+           discord_guild_id, application_id
+         ) VALUES ($1, $2)
+         ON CONFLICT (discord_guild_id, application_id) DO UPDATE
+         SET status = 'observed',
+             last_observed_at = NOW(),
+             revoked_at = NULL
+         RETURNING discord_guild_id
+       )
+       UPDATE discord_installations
+       SET status = 'active', revoked_at = NULL
+       WHERE discord_guild_id = $1
+         AND application_id = $2
+         AND status = 'revoked'
+         AND EXISTS (SELECT 1 FROM observed)`,
       [input.guildId, input.applicationId]
     );
   }
@@ -512,9 +521,22 @@ export class DiscordOnboardingRepository {
   }): Promise<void> {
     await repositoryQuery(
       this.queryable,
-      `UPDATE discord_bot_installation_observations
-       SET status = 'revoked', revoked_at = NOW(), last_observed_at = NOW()
-       WHERE discord_guild_id = $1 AND application_id = $2`,
+      `WITH revoked AS (
+         INSERT INTO discord_bot_installation_observations (
+           discord_guild_id, application_id, status, revoked_at
+         ) VALUES ($1, $2, 'revoked', NOW())
+         ON CONFLICT (discord_guild_id, application_id) DO UPDATE
+         SET status = 'revoked',
+             revoked_at = NOW(),
+             last_observed_at = NOW()
+         RETURNING discord_guild_id
+       )
+       UPDATE discord_installations
+       SET status = 'revoked', revoked_at = NOW()
+       WHERE discord_guild_id = $1
+         AND application_id = $2
+         AND status = 'active'
+         AND EXISTS (SELECT 1 FROM revoked)`,
       [input.guildId, input.applicationId]
     );
   }

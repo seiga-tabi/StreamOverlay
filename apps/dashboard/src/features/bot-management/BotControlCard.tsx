@@ -33,7 +33,7 @@ const copy = {
     description: "Organization에 연결된 Discord 서버의 공개 명령과 Palworld 상태 모듈을 관리합니다.",
     loading: "Discord Bot 설정을 불러오는 중입니다.",
     noInstallation: "활성 Bot 연결이 없습니다.",
-    noInstallationDescription: "YORO Bot을 Discord 서버에 추가하고 Organization 연결을 완료해 주세요.",
+    noInstallationDescription: "Bot이 제거되었거나 설치되지 않았습니다. 같은 Discord 서버에 다시 추가하면 기존 Organization 연결과 저장된 설정이 자동으로 복구됩니다.",
     install: "YORO Bot 추가",
     globalDisabledLabel: "전역 명령 비활성",
     globalDisabled: "운영 전역 설정에서 일반 사용자 명령이 비활성화되어 있습니다. 저장한 설정은 보존되지만 Bot에는 적용되지 않습니다.",
@@ -84,7 +84,7 @@ const copy = {
     description: "Organizationに連携されたDiscordサーバーの公開コマンドとPalworld状態モジュールを管理します。",
     loading: "Discord Bot設定を読み込んでいます。",
     noInstallation: "有効なBot連携がありません。",
-    noInstallationDescription: "YORO BotをDiscordサーバーに追加し、Organization連携を完了してください。",
+    noInstallationDescription: "Botが削除されたか、導入されていません。同じDiscordサーバーに再度追加すると、既存のOrganization連携と保存済み設定が自動的に復元されます。",
     install: "YORO Botを追加",
     globalDisabledLabel: "全体コマンド無効",
     globalDisabled: "運用全体の設定で一般ユーザーコマンドが無効です。保存した設定は保持されますが、Botには適用されません。",
@@ -196,6 +196,41 @@ export function BotControlCard(props: {
     void load(controller.signal);
     return () => controller.abort();
   }, [props.organizationId]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let refreshInFlight = false;
+    const refreshInstallation = () => {
+      if (
+        document.visibilityState !== "visible"
+        || refreshInFlight
+        || saving
+      ) return;
+      refreshInFlight = true;
+      void getManagementBotControl(props.organizationId, controller.signal)
+        .then((next) => {
+          const currentGuildId = overview?.installation?.guildId;
+          const nextGuildId = next.installation?.guildId;
+          if (currentGuildId === nextGuildId) return;
+          setOverview(next);
+          setDraft(draftFrom(next));
+        })
+        // 백그라운드 설치 확인 실패는 현재 편집 상태를 유지합니다.
+        .catch(() => undefined)
+        .finally(() => {
+          refreshInFlight = false;
+        });
+    };
+    const timer = window.setInterval(refreshInstallation, 15_000);
+    window.addEventListener("focus", refreshInstallation);
+    document.addEventListener("visibilitychange", refreshInstallation);
+    return () => {
+      controller.abort();
+      window.clearInterval(timer);
+      window.removeEventListener("focus", refreshInstallation);
+      document.removeEventListener("visibilitychange", refreshInstallation);
+    };
+  }, [overview?.installation?.guildId, props.organizationId, saving]);
 
   async function save(): Promise<void> {
     if (!overview || !draft || !writable || saving) return;

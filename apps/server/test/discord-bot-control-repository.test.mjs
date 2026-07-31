@@ -3,10 +3,12 @@ import assert from "node:assert/strict";
 import { DiscordBotControlRepository } from "../dist/database/repositories/discord-bot-control-repository.js";
 
 test("저장된 Discord Bot 설정은 플레이어 명령 상태까지 다시 조회한다", async () => {
+  let installationQuery = "";
   let controlQuery = "";
   const queryable = {
     async query(text) {
       if (text.includes("FROM discord_installations installation")) {
+        installationQuery = text;
         return {
           rows: [{
             discord_guild_id: "123456789012345678",
@@ -48,6 +50,8 @@ test("저장된 Discord Bot 설정은 플레이어 명령 상태까지 다시 �
     globalPrefixCommandsEnabled: true
   });
 
+  assert.match(installationQuery, /discord_bot_installation_observations/u);
+  assert.match(installationQuery, /observation\.status = 'observed'/u);
   assert.match(controlQuery, /\bplayer_command_enabled\b/u);
   assert.match(controlQuery, /\bdelete_invocation_after_reply\b/u);
   assert.equal(overview.settings.playerCommandEnabled, false);
