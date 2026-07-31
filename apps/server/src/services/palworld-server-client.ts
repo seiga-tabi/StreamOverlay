@@ -734,7 +734,9 @@ export class PalworldServerClient {
     return Object.freeze(response.players.map((player) => Object.freeze({
       nickname: player.name.trim(),
       level: player.level,
-      buildingCount: player.building_count
+      ...(player.building_count === undefined
+        ? {}
+        : { buildingCount: player.building_count })
     })));
   }
 

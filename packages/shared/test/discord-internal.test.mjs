@@ -35,6 +35,31 @@ test("Palworld 플레이어 내부 계약은 닉네임 외 검색 식별자를 �
     }
   };
   assert.deepEqual(parseDiscordPalworldPlayerLookupResponse(response), response);
+  const withoutBuildingCount = {
+    ...response,
+    result: {
+      kind: "profile",
+      player: {
+        nickname: "세이가",
+        level: 42
+      }
+    }
+  };
+  assert.deepEqual(
+    parseDiscordPalworldPlayerLookupResponse(withoutBuildingCount),
+    withoutBuildingCount
+  );
+  assert.deepEqual(parseDiscordPalworldPlayerLookupResponse({
+    connected: true,
+    serverConfigured: true,
+    displayName: "Palworld",
+    reason: "rest_invalid_response"
+  }), {
+    connected: true,
+    serverConfigured: true,
+    displayName: "Palworld",
+    reason: "rest_invalid_response"
+  });
   assert.equal(parseDiscordPalworldPlayerLookupResponse({
     ...response,
     result: {

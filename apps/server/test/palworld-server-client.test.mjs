@@ -210,6 +210,32 @@ test("Palworld 플레이어 조회는 민감 필드를 REST 경계에서 제거�
   assert.equal(JSON.stringify(players).includes("platform-user-id"), false);
 });
 
+test("Palworld 플레이어 조회는 플랫폼 선택 필드가 없어도 닉네임 목록을 유지한다", async () => {
+  const { client } = createHttpsClient({
+    requestPinned: async () => jsonResponse({
+      players: [{
+        name: "せいが",
+        accountName: null,
+        playerId: null,
+        userId: null,
+        ip: null,
+        ping: null,
+        location_x: null,
+        location_y: null,
+        level: 65,
+        building_count: null
+      }]
+    })
+  });
+  assert.deepEqual(await client.listOnlinePlayers({
+    baseUrl: "https://pal.example:8212",
+    adminPassword: "secret-password"
+  }), [{
+    nickname: "せいが",
+    level: 65
+  }]);
+});
+
 test("공개 HTTPS 자가 등록은 HTTP·custom port·IP literal·비정상 hostname을 거부한다", () => {
   const { client } = createHttpsClient({
     allowedOrigins: [],

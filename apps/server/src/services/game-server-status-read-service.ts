@@ -1,14 +1,16 @@
-import type {
-  DiscordGameServerStatusResponse,
-  DiscordGameServerStatusReason,
-  DiscordGameServerStatusState,
-  DiscordPalworldPlayerLookupRequest,
-  DiscordPalworldPlayerLookupResponse,
-  PalworldOnlinePlayer,
-  PalworldServerAvailabilityErrorCode,
-  PalworldServerDashboardResponse,
-  PalworldServerErrorCode,
-  PalworldServerStatus
+import {
+  PALWORLD_SERVER_ERROR_CODES,
+  type DiscordGameServerStatusResponse,
+  type DiscordGameServerStatusReason,
+  type DiscordGameServerStatusState,
+  type DiscordPalworldPlayerLookupReason,
+  type DiscordPalworldPlayerLookupRequest,
+  type DiscordPalworldPlayerLookupResponse,
+  type PalworldOnlinePlayer,
+  type PalworldServerAvailabilityErrorCode,
+  type PalworldServerDashboardResponse,
+  type PalworldServerErrorCode,
+  type PalworldServerStatus
 } from "@streamops/shared";
 import type {
   GameServerStatusReadRecord,
@@ -21,6 +23,41 @@ type RestStatusReader = Readonly<{
     ownerId: string
   ): Promise<readonly PalworldOnlinePlayer[]>;
 }>;
+
+type StatusReadFailure = Readonly<{
+  operation: "players";
+  errorCode: PalworldServerErrorCode | "unknown";
+}>;
+
+function safeErrorCode(error: unknown): PalworldServerErrorCode | "unknown" {
+  const code = (error as { code?: unknown } | undefined)?.code;
+  return typeof code === "string"
+    && (PALWORLD_SERVER_ERROR_CODES as readonly string[]).includes(code)
+    ? code as PalworldServerErrorCode
+    : "unknown";
+}
+
+function playerLookupReason(
+  errorCode: PalworldServerErrorCode | "unknown"
+): DiscordPalworldPlayerLookupReason {
+  if (errorCode === "not_configured") return "rest_not_configured";
+  if (errorCode === "auth_failed" || errorCode === "password_required") {
+    return "rest_auth_failed";
+  }
+  if (errorCode === "request_timeout") return "rest_timeout";
+  if ([
+    "invalid_content_type",
+    "response_too_large",
+    "invalid_json",
+    "invalid_schema"
+  ].includes(errorCode)) return "rest_invalid_response";
+  if ([
+    "dns_failed",
+    "connection_failed",
+    "tls_failed"
+  ].includes(errorCode)) return "rest_unreachable";
+  return "upstream_unavailable";
+}
 
 function restState(state: PalworldServerStatus["state"]): DiscordGameServerStatusState {
   switch (state) {
@@ -119,7 +156,7 @@ function restServer(
       ? { version: response.status.info.version.slice(0, 80) }
       : {}),
     ...(exposeCachedDetails && response.status.latencyMs !== undefined
-      ? { latencyMs: response.status.latencyMs }
+      ? { latencyMs: Math.round(response.status.latencyMs) }
       : {}),
     ...(response.status.checkedAt ? { observedAt: response.status.checkedAt } : {})
   });
@@ -129,7 +166,8 @@ export class GameServerStatusReadService {
   constructor(
     private readonly repository: GameServerStatusReadRepositoryContract,
     private readonly restStatusReader?: RestStatusReader,
-    private readonly restUnavailableCode?: PalworldServerAvailabilityErrorCode
+    private readonly restUnavailableCode?: PalworldServerAvailabilityErrorCode,
+    private readonly onFailure?: (failure: StatusReadFailure) => void
   ) {}
 
   async read(input: {
@@ -198,14 +236,13 @@ export class GameServerStatusReadService {
     try {
       players = await this.restStatusReader.listOnlinePlayers(ownerId);
     } catch (error) {
-      const code = (error as { code?: unknown } | undefined)?.code;
+      const errorCode = safeErrorCode(error);
+      this.onFailure?.({ operation: "players", errorCode });
       return Object.freeze({
         connected: true,
         serverConfigured: true,
         displayName: server.displayName,
-        reason: code === "not_configured"
-          ? "rest_not_configured"
-          : "upstream_unavailable"
+        reason: playerLookupReason(errorCode)
       });
     }
     const sorted = [...players].sort((left, right) =>
@@ -240,7 +277,9 @@ export class GameServerStatusReadService {
           player: Object.freeze({
             nickname: exact.nickname,
             level: exact.level,
-            buildingCount: exact.buildingCount
+            ...(exact.buildingCount === undefined
+              ? {}
+              : { buildingCount: exact.buildingCount })
           })
         })
       });

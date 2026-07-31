@@ -104,15 +104,15 @@ export type PalworldRestMetricsResponse = {
 
 export type PalworldRestPlayerResponse = {
   name: string;
-  accountName: string;
-  playerId: string;
-  userId: string;
-  ip: string;
-  ping: number;
-  location_x: number;
-  location_y: number;
+  accountName?: string;
+  playerId?: string;
+  userId?: string;
+  ip?: string;
+  ping?: number;
+  location_x?: number;
+  location_y?: number;
   level: number;
-  building_count: number;
+  building_count?: number;
 };
 
 export type PalworldRestPlayersResponse = {
@@ -126,7 +126,7 @@ export type PalworldRestPlayersResponse = {
 export type PalworldOnlinePlayer = Readonly<{
   nickname: string;
   level: number;
-  buildingCount: number;
+  buildingCount?: number;
 }>;
 
 export type PalworldServerInfo = {
@@ -457,54 +457,65 @@ function validateRestPlayerAt(
   if (/[\u0000-\u001f\u007f]/u.test(name.data)) {
     return invalid(`${path}.name`, "제어 문자를 포함할 수 없습니다.");
   }
-  const accountName = stringAt(
-    record.data.accountName,
-    `${path}.accountName`,
-    MAX_PLAYER_IDENTIFIER_LENGTH,
-    true
-  );
+  const optionalString = (
+    key: "accountName" | "playerId" | "userId" | "ip",
+    maxLength: number
+  ): PalworldServerValidationResult<string | undefined> => {
+    const candidate = record.data[key];
+    return candidate === undefined || candidate === null
+      ? valid(undefined)
+      : stringAt(candidate, `${path}.${key}`, maxLength, true);
+  };
+  const optionalNumber = (
+    key: "ping" | "location_x" | "location_y",
+    min: number,
+    max: number
+  ): PalworldServerValidationResult<number | undefined> => {
+    const candidate = record.data[key];
+    return candidate === undefined || candidate === null
+      ? valid(undefined)
+      : finiteNumberAt(candidate, `${path}.${key}`, min, max);
+  };
+  const accountName = optionalString("accountName", MAX_PLAYER_IDENTIFIER_LENGTH);
   if (!accountName.ok) return accountName;
-  const playerId = stringAt(
-    record.data.playerId,
-    `${path}.playerId`,
-    MAX_PLAYER_IDENTIFIER_LENGTH
-  );
+  const playerId = optionalString("playerId", MAX_PLAYER_IDENTIFIER_LENGTH);
   if (!playerId.ok) return playerId;
-  const userId = stringAt(
-    record.data.userId,
-    `${path}.userId`,
-    MAX_PLAYER_IDENTIFIER_LENGTH
-  );
+  const userId = optionalString("userId", MAX_PLAYER_IDENTIFIER_LENGTH);
   if (!userId.ok) return userId;
-  const ip = stringAt(record.data.ip, `${path}.ip`, MAX_PLAYER_IP_LENGTH);
+  const ip = optionalString("ip", MAX_PLAYER_IP_LENGTH);
   if (!ip.ok) return ip;
-  const ping = finiteNumberAt(record.data.ping, `${path}.ping`, 0, MAX_PLAYER_PING_MS);
+  const ping = optionalNumber("ping", 0, MAX_PLAYER_PING_MS);
   if (!ping.ok) return ping;
-  const locationX = finiteNumberAt(
-    record.data.location_x,
-    `${path}.location_x`,
-    -1_000_000_000,
-    1_000_000_000
-  );
+  const locationX = optionalNumber("location_x", -1_000_000_000, 1_000_000_000);
   if (!locationX.ok) return locationX;
-  const locationY = finiteNumberAt(
-    record.data.location_y,
-    `${path}.location_y`,
-    -1_000_000_000,
-    1_000_000_000
-  );
+  const locationY = optionalNumber("location_y", -1_000_000_000, 1_000_000_000);
   if (!locationY.ok) return locationY;
   const level = integerAt(record.data.level, `${path}.level`, 0, MAX_PLAYER_LEVEL);
   if (!level.ok) return level;
-  const buildingCount = integerAt(
-    record.data.building_count,
-    `${path}.building_count`,
-    0,
-    MAX_PLAYER_BUILDING_COUNT
-  );
-  return buildingCount.ok
-    ? valid(record.data as PalworldRestPlayerResponse)
-    : buildingCount;
+  const buildingCount = record.data.building_count === undefined
+    || record.data.building_count === null
+    ? valid<number | undefined>(undefined)
+    : integerAt(
+        record.data.building_count,
+        `${path}.building_count`,
+        0,
+        MAX_PLAYER_BUILDING_COUNT
+      );
+  if (!buildingCount.ok) return buildingCount;
+  return valid({
+    name: name.data,
+    ...(accountName.data === undefined ? {} : { accountName: accountName.data }),
+    ...(playerId.data === undefined ? {} : { playerId: playerId.data }),
+    ...(userId.data === undefined ? {} : { userId: userId.data }),
+    ...(ip.data === undefined ? {} : { ip: ip.data }),
+    ...(ping.data === undefined ? {} : { ping: ping.data }),
+    ...(locationX.data === undefined ? {} : { location_x: locationX.data }),
+    ...(locationY.data === undefined ? {} : { location_y: locationY.data }),
+    level: level.data,
+    ...(buildingCount.data === undefined
+      ? {}
+      : { building_count: buildingCount.data })
+  });
 }
 
 function validateRestPlayersAt(

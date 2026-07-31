@@ -76,6 +76,10 @@ export type DiscordPalworldPlayerLookupRequest = Readonly<{
 export const DISCORD_PALWORLD_PLAYER_LOOKUP_REASONS = [
   "server_not_configured",
   "rest_not_configured",
+  "rest_auth_failed",
+  "rest_timeout",
+  "rest_invalid_response",
+  "rest_unreachable",
   "upstream_unavailable"
 ] as const;
 
@@ -85,7 +89,7 @@ export type DiscordPalworldPlayerLookupReason =
 export type DiscordPalworldPlayerProfile = Readonly<{
   nickname: string;
   level: number;
-  buildingCount: number;
+  buildingCount?: number;
 }>;
 
 export type DiscordPalworldPlayerLookupResponse = Readonly<{
@@ -336,19 +340,30 @@ function parsePlayerProfile(
   const record = value as Record<string, unknown>;
   const nickname = parseSafePlayerNickname(record.nickname);
   if (
-    Object.keys(record).sort().join(",") !== "buildingCount,level,nickname"
+    Object.keys(record).some(
+      (key) => !["buildingCount", "level", "nickname"].includes(key)
+    )
+    || !Object.hasOwn(record, "level")
+    || !Object.hasOwn(record, "nickname")
     || !nickname
     || !Number.isSafeInteger(record.level)
     || (record.level as number) < 0
     || (record.level as number) > 1_000
-    || !Number.isSafeInteger(record.buildingCount)
-    || (record.buildingCount as number) < 0
-    || (record.buildingCount as number) > 100_000_000
+    || (
+      record.buildingCount !== undefined
+      && (
+        !Number.isSafeInteger(record.buildingCount)
+        || (record.buildingCount as number) < 0
+        || (record.buildingCount as number) > 100_000_000
+      )
+    )
   ) return undefined;
   return Object.freeze({
     nickname,
     level: record.level as number,
-    buildingCount: record.buildingCount as number
+    ...(record.buildingCount === undefined
+      ? {}
+      : { buildingCount: record.buildingCount as number })
   });
 }
 

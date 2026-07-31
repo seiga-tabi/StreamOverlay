@@ -58,6 +58,10 @@ export const DISCORD_BOT_MESSAGES = {
       playerUnavailable: {
         server_not_configured: "아직 Palworld 게임 서버가 등록되지 않았습니다.",
         rest_not_configured: "Palworld REST 연결 설정이 완료되지 않았습니다.",
+        rest_auth_failed: "Palworld REST 인증에 실패했습니다. Dashboard에서 AdminPassword를 다시 확인해 주세요.",
+        rest_timeout: "Palworld 플레이어 조회 시간이 초과되었습니다. 잠시 후 다시 시도해 주세요.",
+        rest_invalid_response: "Palworld 서버의 플레이어 응답 형식을 확인할 수 없습니다. 서비스 운영자에게 문의해 주세요.",
+        rest_unreachable: "Palworld REST 플레이어 endpoint에 연결할 수 없습니다. 서버와 중계 설정을 확인해 주세요.",
         upstream_unavailable: "현재 Palworld 플레이어 목록을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요."
       },
       guildNotConnected: "이 Discord 서버가 YORO Organization과 연결되지 않았습니다.",
@@ -158,6 +162,10 @@ export const DISCORD_BOT_MESSAGES = {
       playerUnavailable: {
         server_not_configured: "Palworldゲームサーバーはまだ登録されていません。",
         rest_not_configured: "Palworld REST連携設定が完了していません。",
+        rest_auth_failed: "Palworld REST認証に失敗しました。DashboardでAdminPasswordをもう一度確認してください。",
+        rest_timeout: "Palworldプレイヤー取得がタイムアウトしました。しばらくしてからもう一度お試しください。",
+        rest_invalid_response: "Palworldサーバーのプレイヤー応答形式を確認できません。サービス運営者へお問い合わせください。",
+        rest_unreachable: "Palworld RESTのプレイヤーendpointへ接続できません。サーバーと中継設定を確認してください。",
         upstream_unavailable: "現在Palworldプレイヤー一覧を取得できません。しばらくしてからお試しください。"
       },
       guildNotConnected: "このDiscordサーバーはYORO Organizationと連携されていません。",

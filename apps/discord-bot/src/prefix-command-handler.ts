@@ -348,28 +348,31 @@ export class YoroPrefixCommandHandler {
       return;
     }
     const player = response.result.player;
+    const profileFields = [
+      {
+        name: messages.playerFields.nickname,
+        value: escapeMarkdown(player.nickname),
+        inline: false
+      },
+      {
+        name: messages.playerFields.level,
+        value: String(player.level),
+        inline: true
+      },
+      ...(player.buildingCount === undefined
+        ? []
+        : [{
+            name: messages.playerFields.buildingCount,
+            value: String(player.buildingCount),
+            inline: true
+          }])
+    ];
     await message.reply({
       embeds: [
         new EmbedBuilder()
           .setColor(0x5865f2)
           .setTitle(messages.playerProfileTitle)
-          .addFields(
-            {
-              name: messages.playerFields.nickname,
-              value: escapeMarkdown(player.nickname),
-              inline: false
-            },
-            {
-              name: messages.playerFields.level,
-              value: String(player.level),
-              inline: true
-            },
-            {
-              name: messages.playerFields.buildingCount,
-              value: String(player.buildingCount),
-              inline: true
-            }
-          )
+          .addFields(profileFields)
       ],
       allowedMentions: { parse: [], repliedUser: false },
       failIfNotExists: true

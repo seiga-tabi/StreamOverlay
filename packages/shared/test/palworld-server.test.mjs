@@ -19,7 +19,7 @@ import {
   validatePalworldServerTestResponse
 } from "../dist/index.js";
 
-test("Palworld 플레이어 응답은 공식 필드를 엄격히 검증한다", () => {
+test("Palworld 플레이어 응답은 공식 필드 allowlist를 엄격히 검증한다", () => {
   const response = {
     players: [{
       name: "세이가",
@@ -44,6 +44,31 @@ test("Palworld 플레이어 응답은 공식 필드를 엄격히 검증한다", 
   assert.equal(validatePalworldRestPlayersResponse({
     players: [{ ...response.players[0], name: "위험\u0000닉네임" }]
   }).ok, false);
+});
+
+test("Palworld 플레이어 응답은 플랫폼별 선택 필드 누락을 안전하게 정규화한다", () => {
+  assert.deepEqual(validatePalworldRestPlayersResponse({
+    players: [{
+      name: "せいが",
+      accountName: null,
+      playerId: null,
+      userId: null,
+      ip: null,
+      ping: null,
+      location_x: null,
+      location_y: null,
+      level: 65,
+      building_count: null
+    }]
+  }), {
+    ok: true,
+    data: {
+      players: [{
+        name: "せいが",
+        level: 65
+      }]
+    }
+  });
 });
 
 const diagnostics = PALWORLD_SERVER_DIAGNOSTIC_KEYS.map((key) => ({

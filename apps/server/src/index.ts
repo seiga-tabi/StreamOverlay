@@ -434,7 +434,14 @@ const gameServerStatusRead = appConfig.discordBotInternal.enabled && postgresPoo
   ? new GameServerStatusReadService(
       new GameServerStatusReadRepository(postgresPool),
       palworldServerMonitor,
-      palworldServerUnavailableCode
+      palworldServerUnavailableCode,
+      (failure) => {
+        logger.error({
+          type: "discord.palworld_player_read_failed",
+          operation: failure.operation,
+          errorCode: failure.errorCode
+        });
+      }
     )
   : undefined;
 const discordBotCommandPolicy = appConfig.discordBotInternal.enabled && postgresPool

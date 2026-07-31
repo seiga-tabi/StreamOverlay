@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { parseDiscordGameServerStatusResponse } from "@streamops/shared";
 import { GameServerStatusReadRepository } from "../dist/database/repositories/game-server-status-read-repository.js";
 import { GameServerStatusReadService } from "../dist/services/game-server-status-read-service.js";
 
@@ -80,7 +81,7 @@ test("REST 상태는 설정된 source만 읽고 내부 진단을 DTO에 포함�
         status: {
           state: "degraded",
           checkedAt: "2026-07-30T00:00:00.000Z",
-          latencyMs: 300,
+          latencyMs: 1_482.96,
           consecutiveFailures: 1,
           info: { serverName: "private", version: "v1.0" },
           metrics: {
@@ -116,9 +117,10 @@ test("REST 상태는 설정된 source만 읽고 내부 진단을 DTO에 포함�
     source: "rest",
     players: { current: 2, max: 32 },
     version: "v1.0",
-    latencyMs: 300,
+    latencyMs: 1_483,
     observedAt: "2026-07-30T00:00:00.000Z"
   });
+  assert.deepEqual(parseDiscordGameServerStatusResponse(result), result);
   assert.equal(JSON.stringify(result).includes("basic_auth"), false);
   assert.equal(JSON.stringify(result).includes("private"), false);
 });
@@ -222,4 +224,43 @@ test("플레이어 조회는 REST 미설정을 안전한 사유로 반환한다"
     }
   });
   assert.equal((await rest.readPlayers(base)).reason, "rest_not_configured");
+});
+
+test("플레이어 조회 실패는 안전한 사유와 진단 코드로 구분한다", async () => {
+  const failures = [];
+  const base = {
+    applicationId: "100000000000000001",
+    guildId: "100000000000000002"
+  };
+  const server = {
+    id: "20000000-0000-4000-8000-000000000007",
+    displayName: "REST Palworld",
+    connectionStatus: "ready"
+  };
+  const createService = (code) => new GameServerStatusReadService(
+    repository(server),
+    {
+      getDashboardResponse() {
+        throw new Error("플레이어 조회에서는 상태 cache를 읽지 않아야 합니다.");
+      },
+      async listOnlinePlayers() {
+        const error = new Error("브라우저에 노출하면 안 되는 내부 상세");
+        error.code = code;
+        throw error;
+      }
+    },
+    undefined,
+    (failure) => failures.push(failure)
+  );
+  assert.equal((await createService("auth_failed").readPlayers(base)).reason, "rest_auth_failed");
+  assert.equal((await createService("request_timeout").readPlayers(base)).reason, "rest_timeout");
+  assert.equal((await createService("invalid_schema").readPlayers(base)).reason, "rest_invalid_response");
+  assert.equal((await createService("connection_failed").readPlayers(base)).reason, "rest_unreachable");
+  assert.deepEqual(failures.map((failure) => failure.errorCode), [
+    "auth_failed",
+    "request_timeout",
+    "invalid_schema",
+    "connection_failed"
+  ]);
+  assert.equal(JSON.stringify(failures).includes("내부 상세"), false);
 });
