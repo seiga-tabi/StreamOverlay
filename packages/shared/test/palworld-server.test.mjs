@@ -9,6 +9,7 @@ import {
   assertPalworldRestMetricsResponse,
   validatePalworldRestInfoResponse,
   validatePalworldRestMetricsResponse,
+  validatePalworldRestPlayersResponse,
   validatePalworldServerConnectionInput,
   validatePalworldServerConnectionSummary,
   validatePalworldServerDashboardResponse,
@@ -17,6 +18,33 @@ import {
   validatePalworldServerStatus,
   validatePalworldServerTestResponse
 } from "../dist/index.js";
+
+test("Palworld 플레이어 응답은 공식 필드를 엄격히 검증한다", () => {
+  const response = {
+    players: [{
+      name: "세이가",
+      accountName: "account",
+      playerId: "player-id",
+      userId: "platform-id",
+      ip: "203.0.113.10",
+      ping: 18.5,
+      location_x: 123.4,
+      location_y: -567.8,
+      level: 42,
+      building_count: 7
+    }]
+  };
+  assert.deepEqual(validatePalworldRestPlayersResponse(response), {
+    ok: true,
+    data: response
+  });
+  assert.equal(validatePalworldRestPlayersResponse({
+    players: [{ ...response.players[0], password: "노출 금지" }]
+  }).ok, false);
+  assert.equal(validatePalworldRestPlayersResponse({
+    players: [{ ...response.players[0], name: "위험\u0000닉네임" }]
+  }).ok, false);
+});
 
 const diagnostics = PALWORLD_SERVER_DIAGNOSTIC_KEYS.map((key) => ({
   key,

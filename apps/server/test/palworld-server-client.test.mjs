@@ -174,6 +174,42 @@ test("공개 HTTPS 자가 등록은 비 allowlist hostname의 기본 443 origin�
   ]);
 });
 
+test("Palworld 플레이어 조회는 민감 필드를 REST 경계에서 제거한다", async () => {
+  const { client, calls } = createHttpsClient({
+    requestPinned: async (request) => {
+      calls.push(request);
+      if (request.url.pathname !== "/v1/api/players") {
+        throw new Error("허용되지 않은 테스트 경로입니다.");
+      }
+      return jsonResponse({
+        players: [{
+          name: "세이가",
+          accountName: "account-name",
+          playerId: "player-id",
+          userId: "platform-user-id",
+          ip: "203.0.113.10",
+          ping: 18.5,
+          location_x: 123.4,
+          location_y: -567.8,
+          level: 42,
+          building_count: 7
+        }]
+      });
+    }
+  });
+  const players = await client.listOnlinePlayers({
+    baseUrl: "https://pal.example:8212",
+    adminPassword: "secret-password"
+  });
+  assert.deepEqual(players, [{
+    nickname: "세이가",
+    level: 42,
+    buildingCount: 7
+  }]);
+  assert.equal(JSON.stringify(players).includes("203.0.113.10"), false);
+  assert.equal(JSON.stringify(players).includes("platform-user-id"), false);
+});
+
 test("공개 HTTPS 자가 등록은 HTTP·custom port·IP literal·비정상 hostname을 거부한다", () => {
   const { client } = createHttpsClient({
     allowedOrigins: [],

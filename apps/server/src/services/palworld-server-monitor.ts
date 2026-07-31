@@ -14,6 +14,7 @@ import {
   type PalworldServerErrorCode,
   type PalworldServerInfo,
   type PalworldServerMetrics,
+  type PalworldOnlinePlayer,
   type PalworldServerRegistrationPolicy,
   type PalworldServerStatus,
   type PalworldServerTestResponse
@@ -41,6 +42,10 @@ export type PalworldServerMonitorClient = {
     baseUrl: string;
     adminPassword: string;
   }): Promise<PalworldServerClientProbeResult>;
+  listOnlinePlayers?(input: {
+    baseUrl: string;
+    adminPassword: string;
+  }): Promise<readonly PalworldOnlinePlayer[]>;
 };
 
 export type PalworldServerMonitorStore = Pick<
@@ -385,6 +390,30 @@ export class PalworldServerMonitor {
       connection: this.connectionSummary(connection),
       status: this.currentStatus(ownerId, connection)
     };
+  }
+
+  async listOnlinePlayers(
+    ownerIdInput: string
+  ): Promise<readonly PalworldOnlinePlayer[]> {
+    this.ensureEnabled();
+    const ownerId = normalizedOwnerId(ownerIdInput);
+    const connection = this.options.store.get(ownerId);
+    if (!connection) {
+      throw new PalworldServerMonitorInputError(
+        "not_configured",
+        "Palworld REST 연결이 설정되지 않았습니다."
+      );
+    }
+    if (!this.options.client.listOnlinePlayers) {
+      throw new PalworldServerMonitorInputError(
+        "disabled",
+        "Palworld 플레이어 조회 기능을 사용할 수 없습니다."
+      );
+    }
+    return this.options.client.listOnlinePlayers({
+      baseUrl: connection.baseUrl,
+      adminPassword: connection.adminPassword
+    });
   }
 
   private ensureEnabled(): void {

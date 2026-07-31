@@ -28,6 +28,7 @@ type ControlRow = {
   public_commands_enabled: boolean;
   palworld_status_enabled: boolean;
   status_command_enabled: boolean;
+  player_command_enabled: boolean;
   guide_command_enabled: boolean;
   preferred_locale: "auto" | "ko" | "ja";
   show_players: boolean;
@@ -47,6 +48,7 @@ function settings(row?: ControlRow): DiscordBotControlSettings {
     publicCommandsEnabled: row.public_commands_enabled,
     palworldStatusEnabled: row.palworld_status_enabled,
     statusCommandEnabled: row.status_command_enabled,
+    playerCommandEnabled: row.player_command_enabled,
     guideCommandEnabled: row.guide_command_enabled,
     preferredLocale: row.preferred_locale,
     statusFields: Object.freeze({
@@ -151,7 +153,8 @@ export class DiscordBotControlRepository {
     const existingResult = await repositoryQuery<ControlRow>(
       this.queryable,
       `SELECT public_commands_enabled, palworld_status_enabled,
-         status_command_enabled, guide_command_enabled, preferred_locale,
+         status_command_enabled, player_command_enabled,
+         guide_command_enabled, preferred_locale,
          show_players, show_version, show_latency, show_observed_at,
          revision::TEXT AS revision
        FROM discord_bot_control_configs
@@ -175,6 +178,7 @@ export class DiscordBotControlRepository {
       input.value.publicCommandsEnabled,
       input.value.palworldStatusEnabled,
       input.value.statusCommandEnabled,
+      input.value.playerCommandEnabled,
       input.value.guideCommandEnabled,
       input.value.preferredLocale,
       input.value.statusFields.players,
@@ -187,17 +191,19 @@ export class DiscordBotControlRepository {
       `INSERT INTO discord_bot_control_configs (
          organization_id, discord_guild_id, application_id,
          public_commands_enabled, palworld_status_enabled,
-         status_command_enabled, guide_command_enabled, preferred_locale,
+         status_command_enabled, player_command_enabled,
+         guide_command_enabled, preferred_locale,
          show_players, show_version, show_latency, show_observed_at,
          revision, updated_by_user_id
        ) VALUES (
-         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
+         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
        )
        ON CONFLICT (organization_id, discord_guild_id, application_id)
        DO UPDATE SET
          public_commands_enabled = EXCLUDED.public_commands_enabled,
          palworld_status_enabled = EXCLUDED.palworld_status_enabled,
          status_command_enabled = EXCLUDED.status_command_enabled,
+         player_command_enabled = EXCLUDED.player_command_enabled,
          guide_command_enabled = EXCLUDED.guide_command_enabled,
          preferred_locale = EXCLUDED.preferred_locale,
          show_players = EXCLUDED.show_players,
@@ -222,6 +228,7 @@ export class DiscordBotControlRepository {
       publicCommandsEnabled: input.value.publicCommandsEnabled,
       palworldStatusEnabled: input.value.palworldStatusEnabled,
       statusCommandEnabled: input.value.statusCommandEnabled,
+      playerCommandEnabled: input.value.playerCommandEnabled,
       guideCommandEnabled: input.value.guideCommandEnabled,
       preferredLocale: input.value.preferredLocale,
       statusFields: input.value.statusFields
@@ -280,6 +287,8 @@ export class DiscordBotControlRepository {
            AS palworld_status_enabled,
          COALESCE(config.status_command_enabled, TRUE)
            AS status_command_enabled,
+         COALESCE(config.player_command_enabled, TRUE)
+           AS player_command_enabled,
          COALESCE(config.guide_command_enabled, TRUE)
            AS guide_command_enabled,
          COALESCE(config.preferred_locale, 'auto')
@@ -310,6 +319,7 @@ export class DiscordBotControlRepository {
         commands: Object.freeze({
           help: false,
           status: false,
+          player: false,
           guide: false
         }),
         preferredLocale: "auto",
@@ -324,6 +334,9 @@ export class DiscordBotControlRepository {
       status: current.publicCommandsEnabled
         && current.palworldStatusEnabled
         && current.statusCommandEnabled,
+      player: current.publicCommandsEnabled
+        && current.palworldStatusEnabled
+        && current.playerCommandEnabled,
       guide: current.publicCommandsEnabled
         && current.palworldStatusEnabled
         && current.guideCommandEnabled

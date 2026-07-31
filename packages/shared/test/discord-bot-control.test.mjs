@@ -11,6 +11,7 @@ const validUpdate = {
   publicCommandsEnabled: true,
   palworldStatusEnabled: true,
   statusCommandEnabled: true,
+  playerCommandEnabled: true,
   guideCommandEnabled: false,
   preferredLocale: "ko",
   statusFields: {
@@ -61,6 +62,7 @@ test("Discord Bot 명령 정책 응답은 허용 여부와 사유의 모순을 �
     commands: {
       help: true,
       status: true,
+      player: true,
       guide: false
     },
     preferredLocale: "auto",
@@ -83,6 +85,6 @@ test("Discord Bot 명령 정책 응답은 허용 여부와 사유의 모순을 �
   }), undefined);
   assert.equal(parseDiscordBotCommandPolicyResponse({
     ...allowed,
-    commands: { help: true, status: true }
+    commands: { help: true, status: true, player: true }
   }), undefined);
 });

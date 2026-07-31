@@ -34,7 +34,8 @@ test("migration manifest와 SQL checksum을 strict하게 검증한다", async ()
       "0010_yoro_dashboard_preferences",
       "0011_yoro_twitch_viewer_credentials",
       "0012_single_palworld_server",
-      "0013_discord_bot_control_plane"
+      "0013_discord_bot_control_plane",
+      "0014_discord_palworld_player_command"
     ]
   );
 
@@ -66,7 +67,7 @@ test("migration check는 빈 Database를 변경하지 않고 pending으로 판�
 
   const result = await inspectMigrationState(queryable, manifest);
   assert.equal(result.status, "pending");
-  assert.equal(result.pending.length, 13);
+  assert.equal(result.pending.length, 14);
   assert.equal(queries.length, 1);
   assert.match(queries[0], /^SELECT to_regclass/u);
 });

@@ -102,6 +102,33 @@ export type PalworldRestMetricsResponse = {
   days: number;
 };
 
+export type PalworldRestPlayerResponse = {
+  name: string;
+  accountName: string;
+  playerId: string;
+  userId: string;
+  ip: string;
+  ping: number;
+  location_x: number;
+  location_y: number;
+  level: number;
+  building_count: number;
+};
+
+export type PalworldRestPlayersResponse = {
+  players: PalworldRestPlayerResponse[];
+};
+
+/**
+ * Discord 등 외부 경계로 전달할 수 있는 최소 플레이어 정보입니다.
+ * Palworld REST 원문의 IP·좌표·계정·플랫폼 식별자는 포함하지 않습니다.
+ */
+export type PalworldOnlinePlayer = Readonly<{
+  nickname: string;
+  level: number;
+  buildingCount: number;
+}>;
+
 export type PalworldServerInfo = {
   serverName: string;
   version: string;
@@ -170,6 +197,12 @@ const MAX_DESCRIPTION_LENGTH = 4_000;
 const MAX_WORLD_GUID_LENGTH = 128;
 const MAX_SERVER_FPS = 10_000;
 const MAX_PLAYER_COUNT = 1_000_000;
+const MAX_PLAYER_NAME_LENGTH = 80;
+const MAX_PLAYER_IDENTIFIER_LENGTH = 256;
+const MAX_PLAYER_IP_LENGTH = 128;
+const MAX_PLAYER_LEVEL = 1_000;
+const MAX_PLAYER_BUILDING_COUNT = 100_000_000;
+const MAX_PLAYER_PING_MS = 300_000;
 const MAX_FRAME_TIME_MS = 60_000;
 const MAX_UPTIME_SECONDS = 10_000_000_000;
 const MAX_BASE_CAMP_COUNT = 100_000_000;
@@ -402,6 +435,99 @@ function validateRestMetricsAt(
   });
 }
 
+function validateRestPlayerAt(
+  value: unknown,
+  path: string
+): PalworldServerValidationResult<PalworldRestPlayerResponse> {
+  const record = recordAt(value, path, [
+    "name",
+    "accountName",
+    "playerId",
+    "userId",
+    "ip",
+    "ping",
+    "location_x",
+    "location_y",
+    "level",
+    "building_count"
+  ]);
+  if (!record.ok) return record;
+  const name = stringAt(record.data.name, `${path}.name`, MAX_PLAYER_NAME_LENGTH);
+  if (!name.ok) return name;
+  if (/[\u0000-\u001f\u007f]/u.test(name.data)) {
+    return invalid(`${path}.name`, "제어 문자를 포함할 수 없습니다.");
+  }
+  const accountName = stringAt(
+    record.data.accountName,
+    `${path}.accountName`,
+    MAX_PLAYER_IDENTIFIER_LENGTH,
+    true
+  );
+  if (!accountName.ok) return accountName;
+  const playerId = stringAt(
+    record.data.playerId,
+    `${path}.playerId`,
+    MAX_PLAYER_IDENTIFIER_LENGTH
+  );
+  if (!playerId.ok) return playerId;
+  const userId = stringAt(
+    record.data.userId,
+    `${path}.userId`,
+    MAX_PLAYER_IDENTIFIER_LENGTH
+  );
+  if (!userId.ok) return userId;
+  const ip = stringAt(record.data.ip, `${path}.ip`, MAX_PLAYER_IP_LENGTH);
+  if (!ip.ok) return ip;
+  const ping = finiteNumberAt(record.data.ping, `${path}.ping`, 0, MAX_PLAYER_PING_MS);
+  if (!ping.ok) return ping;
+  const locationX = finiteNumberAt(
+    record.data.location_x,
+    `${path}.location_x`,
+    -1_000_000_000,
+    1_000_000_000
+  );
+  if (!locationX.ok) return locationX;
+  const locationY = finiteNumberAt(
+    record.data.location_y,
+    `${path}.location_y`,
+    -1_000_000_000,
+    1_000_000_000
+  );
+  if (!locationY.ok) return locationY;
+  const level = integerAt(record.data.level, `${path}.level`, 0, MAX_PLAYER_LEVEL);
+  if (!level.ok) return level;
+  const buildingCount = integerAt(
+    record.data.building_count,
+    `${path}.building_count`,
+    0,
+    MAX_PLAYER_BUILDING_COUNT
+  );
+  return buildingCount.ok
+    ? valid(record.data as PalworldRestPlayerResponse)
+    : buildingCount;
+}
+
+function validateRestPlayersAt(
+  value: unknown,
+  path: string
+): PalworldServerValidationResult<PalworldRestPlayersResponse> {
+  const record = recordAt(value, path, ["players"]);
+  if (!record.ok) return record;
+  if (!Array.isArray(record.data.players)) {
+    return invalid(`${path}.players`, "배열이어야 합니다.");
+  }
+  if (record.data.players.length > MAX_PLAYER_COUNT) {
+    return invalid(`${path}.players`, `${MAX_PLAYER_COUNT}개 이하여야 합니다.`);
+  }
+  const players: PalworldRestPlayerResponse[] = [];
+  for (const [index, entry] of record.data.players.entries()) {
+    const player = validateRestPlayerAt(entry, `${path}.players[${index}]`);
+    if (!player.ok) return player;
+    players.push(player.data);
+  }
+  return valid({ players });
+}
+
 function validateInfoAt(value: unknown, path: string): PalworldServerValidationResult<PalworldServerInfo> {
   const record = recordAt(value, path, ["serverName", "version"]);
   if (!record.ok) return record;
@@ -615,6 +741,12 @@ export function validatePalworldRestMetricsResponse(
   value: unknown
 ): PalworldServerValidationResult<PalworldRestMetricsResponse> {
   return validateRestMetricsAt(value, "restMetrics");
+}
+
+export function validatePalworldRestPlayersResponse(
+  value: unknown
+): PalworldServerValidationResult<PalworldRestPlayersResponse> {
+  return validateRestPlayersAt(value, "restPlayers");
 }
 
 export function validatePalworldServerInfo(value: unknown): PalworldServerValidationResult<PalworldServerInfo> {

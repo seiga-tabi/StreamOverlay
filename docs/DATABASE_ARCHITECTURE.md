@@ -84,6 +84,12 @@ binding된 Bot 설정과 append-only revision을 저장합니다. 설정 조회�
 ID만으로 조회할 수 없습니다. 저장 가능한 값은 code-owned module과 boolean,
 locale, 안전한 상태 field allowlist뿐이며 token, 임의 URL, 사용자 작성 action
 payload와 Discord 표시 이름은 저장하지 않습니다.
+
+`0014_discord_palworld_player_command`는 기존 Bot 제어 설정에 플레이어
+명령 사용 여부를 additive column으로 추가하고 새 revision snapshot을
+schema v2로 기록합니다. 플레이어 목록과 프로필은 명령 시점의 Palworld
+REST 응답에서만 계산하며 Database에 저장하지 않습니다.
+
 # YORO Agent 상태 경계
 
 Agent는 Database에 직접 연결하지 않습니다. bootstrap 등록과 status ingestion은 Server API만 통하며 credential 원문은 Agent의 권한 제한 파일에만 남습니다. Server Database에는 credential hash, current status, allowlist history metric, online/offline event만 저장합니다.

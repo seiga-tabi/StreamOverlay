@@ -64,7 +64,8 @@ Organization에는 삭제되지 않은 Palworld 게임 서버를 정확히 1개�
 ## Discord 일반 사용자 상태 명령
 
 `runtime.json`의 `discord.prefixCommandsEnabled=true`인 경우 일반 사용자는
-Discord 공개 채널에서 `!yoro 상태`, `!yoro 가이드`, `!yoro 도움말`을 사용할
+Discord 공개 채널에서 `!yoro 상태`, `!yoro 플레이어`,
+`!yoro 플레이어 {닉네임}`, `!yoro 가이드`, `!yoro 도움말`을 사용할
 수 있습니다. 관리와 인증이 필요한 `/yoro setup`, `/yoro dashboard`는 기존
 slash command로 유지합니다.
 
@@ -81,8 +82,10 @@ Palworld 인증 실패, 연결 정책 차단, upstream 실패, stale과 부분 �
 서로 다른 공개 사유로 표시합니다. 정상 응답에는 불필요한 Dashboard 버튼을
 붙이지 않고 관리 작업이 필요한 경우에만 고정 관리 링크를 제공합니다.
 
-prefix 응답은 ephemeral이 아닌 공개 메시지입니다. 따라서 민감한 설정 변경,
-관리자 작업과 사용자별 정보 조회에는 prefix 명령을 추가하지 않습니다. 상태
+prefix 응답은 ephemeral이 아닌 공개 메시지입니다. 따라서 민감한 설정 변경과
+관리자 작업에는 prefix 명령을 추가하지 않습니다. 플레이어 조회는 현재 접속
+중인 게임 내 닉네임을 대상으로 하며 YORO·Discord 계정 identity와 결합하지
+않습니다. REST 원문의 IP·좌표·플랫폼 식별자는 파싱 직후 폐기합니다. 상태
 이력 명령은 이력의 source·retention 정책과 Database schema를 별도 확정한 뒤
 additive migration과 함께 구현합니다.
 
@@ -107,7 +110,7 @@ Organization 관리 화면은 활성 Discord 설치가 확인된 경우 `Discord
 
 - 공개 prefix 명령 전체 사용 여부
 - Palworld 상태 module 사용 여부
-- `!yoro 상태`, `!yoro 가이드` 개별 사용 여부
+- `!yoro 상태`, `!yoro 플레이어`, `!yoro 가이드` 개별 사용 여부
 - 응답 언어 자동 감지·한국어·일본어
 - 상태 응답의 접속 인원·게임 버전·응답 시간·마지막 확인 시각 표시 여부
 - 현재 언어와 표시 항목을 적용한 Discord 상태 응답 미리보기
@@ -138,7 +141,7 @@ audit·revision과 테스트를 각각 갖춘 뒤 code-owned registry에 추가�
 ## Migration과 staging 검증
 
 1. PostgreSQL backup과 checksum을 검증합니다.
-2. migration `check`, `plan`으로 `0006_bot_management_and_agent_bootstrap`부터 `0013_discord_bot_control_plane`까지 순서와 checksum을 확인합니다.
+2. migration `check`, `plan`으로 `0006_bot_management_and_agent_bootstrap`부터 `0014_discord_palworld_player_command`까지 순서와 checksum을 확인합니다.
 3. 별도 운영 승인 후에만 `apply`합니다.
 4. feature가 비활성인 image로 먼저 배포하고 기존 방송 기능과 health를 확인합니다.
 5. staging Discord identity·Organization으로 Bot 설치 관찰, web claim, management login, role, tenant A/B, entitlement와 Palworld REST 연결 격리를 검증합니다.

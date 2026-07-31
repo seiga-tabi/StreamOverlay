@@ -64,7 +64,7 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
   await t.test("check와 plan 기반 검사는 빈 DB를 변경하지 않는다", async () => {
     const inspection = await inspectMigrationState(pool, manifest);
     assert.equal(inspection.status, "pending");
-    assert.equal(inspection.pending.length, 13);
+    assert.equal(inspection.pending.length, 14);
     const table = await pool.query(
       "SELECT to_regclass('public.schema_migrations')::TEXT AS name"
     );
@@ -612,6 +612,7 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
           publicCommandsEnabled: true,
           palworldStatusEnabled: true,
           statusCommandEnabled: false,
+          playerCommandEnabled: true,
           guideCommandEnabled: true,
           preferredLocale: "ja",
           statusFields: {
@@ -635,6 +636,7 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
       commands: {
         help: true,
         status: false,
+        player: true,
         guide: true
       },
       preferredLocale: "ja",
@@ -666,6 +668,7 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
             publicCommandsEnabled: true,
             palworldStatusEnabled: true,
             statusCommandEnabled: true,
+            playerCommandEnabled: true,
             guideCommandEnabled: true,
             preferredLocale: "auto",
             statusFields: {
@@ -691,6 +694,7 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
           publicCommandsEnabled: true,
           palworldStatusEnabled: true,
           statusCommandEnabled: true,
+          playerCommandEnabled: true,
           guideCommandEnabled: true,
           preferredLocale: "auto",
           statusFields: {

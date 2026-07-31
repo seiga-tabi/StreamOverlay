@@ -6,8 +6,11 @@ import { performance } from "node:perf_hooks";
 import {
   validatePalworldRestInfoResponse,
   validatePalworldRestMetricsResponse,
+  validatePalworldRestPlayersResponse,
+  type PalworldOnlinePlayer,
   type PalworldRestInfoResponse,
   type PalworldRestMetricsResponse,
+  type PalworldRestPlayersResponse,
   type PalworldServerDiagnostic,
   type PalworldServerDiagnosticKey,
   type PalworldServerErrorCode,
@@ -17,6 +20,7 @@ import {
 
 const PALWORLD_INFO_PATH = "/v1/api/info";
 const PALWORLD_METRICS_PATH = "/v1/api/metrics";
+const PALWORLD_PLAYERS_PATH = "/v1/api/players";
 const DEFAULT_TIMEOUT_MS = 5_000;
 const DEFAULT_MAX_RESPONSE_BYTES = 64 * 1_024;
 const DEFAULT_MAX_URL_LENGTH = 2_048;
@@ -76,6 +80,8 @@ export type PalworldServerProbeInput = {
   baseUrl: string;
   adminPassword: string;
 };
+
+export type PalworldServerPlayersInput = PalworldServerProbeInput;
 
 export type PalworldServerProbeResult = {
   baseUrl: string;
@@ -701,6 +707,37 @@ export class PalworldServerClient {
     }
   }
 
+  async listOnlinePlayers(
+    input: PalworldServerPlayersInput
+  ): Promise<readonly PalworldOnlinePlayer[]> {
+    const diagnostics = createDiagnostics();
+    const start = this.#monotonicNow();
+    const deadline = start + this.#timeoutMs;
+    const normalizedTarget = this.#normalizeBaseUrl(input.baseUrl, diagnostics);
+    if (typeof input.adminPassword !== "string"
+      || input.adminPassword.trim().length === 0
+      || input.adminPassword.length > MAX_PASSWORD_LENGTH) {
+      throw clientError("password_required", "basic_auth", diagnostics);
+    }
+    const target = await this.#prepareTarget(normalizedTarget, diagnostics, deadline);
+    const authorization = `Basic ${Buffer.from(`admin:${input.adminPassword}`, "utf8").toString("base64")}`;
+    const response = await this.#requestEndpoint(
+      target,
+      PALWORLD_PLAYERS_PATH,
+      authorization,
+      "info",
+      diagnostics,
+      deadline,
+      validatePalworldRestPlayersResponse
+    );
+    // REST 원문의 IP·좌표·계정·플랫폼 식별자는 이 경계 밖으로 전달하지 않습니다.
+    return Object.freeze(response.players.map((player) => Object.freeze({
+      nickname: player.name.trim(),
+      level: player.level,
+      buildingCount: player.building_count
+    })));
+  }
+
   #normalizeBaseUrl(
     input: string,
     diagnostics: PalworldServerDiagnostic[]
@@ -871,9 +908,14 @@ export class PalworldServerClient {
       : { ok: false, errorCode: "dns_failed", reason: "no_addresses" };
   }
 
-  async #requestEndpoint<T extends PalworldRestInfoResponse | PalworldRestMetricsResponse>(
+  async #requestEndpoint<
+    T extends PalworldRestInfoResponse | PalworldRestMetricsResponse | PalworldRestPlayersResponse
+  >(
     target: PreparedTarget,
-    path: typeof PALWORLD_INFO_PATH | typeof PALWORLD_METRICS_PATH,
+    path:
+      | typeof PALWORLD_INFO_PATH
+      | typeof PALWORLD_METRICS_PATH
+      | typeof PALWORLD_PLAYERS_PATH,
     authorization: string,
     stage: "info" | "metrics",
     diagnostics: PalworldServerDiagnostic[],

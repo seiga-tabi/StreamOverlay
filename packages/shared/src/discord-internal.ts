@@ -67,6 +67,49 @@ export type DiscordGameServerStatusResponse = Readonly<{
   }>;
 }>;
 
+export type DiscordPalworldPlayerLookupRequest = Readonly<{
+  applicationId: string;
+  guildId: string;
+  nickname?: string;
+}>;
+
+export const DISCORD_PALWORLD_PLAYER_LOOKUP_REASONS = [
+  "server_not_configured",
+  "rest_not_configured",
+  "agent_not_supported",
+  "upstream_unavailable"
+] as const;
+
+export type DiscordPalworldPlayerLookupReason =
+  (typeof DISCORD_PALWORLD_PLAYER_LOOKUP_REASONS)[number];
+
+export type DiscordPalworldPlayerProfile = Readonly<{
+  nickname: string;
+  level: number;
+  buildingCount: number;
+}>;
+
+export type DiscordPalworldPlayerLookupResponse = Readonly<{
+  connected: boolean;
+  serverConfigured: boolean;
+  displayName?: string;
+  reason?: DiscordPalworldPlayerLookupReason;
+  result?:
+    | Readonly<{
+        kind: "list";
+        nicknames: readonly string[];
+        total: number;
+      }>
+    | Readonly<{
+        kind: "profile";
+        player: DiscordPalworldPlayerProfile;
+      }>
+    | Readonly<{
+        kind: "not_found";
+        suggestions: readonly string[];
+      }>;
+}>;
+
 export function isDiscordSnowflake(value: unknown): value is string {
   return typeof value === "string" && SNOWFLAKE_PATTERN.test(value);
 }
@@ -147,6 +190,37 @@ export function parseDiscordInstallationObservationRequest(
 
 export const parseDiscordGameServerStatusRequest =
   parseDiscordInstallationObservationRequest;
+
+export function parseDiscordPalworldPlayerLookupRequest(
+  value: unknown
+): DiscordPalworldPlayerLookupRequest | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const record = value as Record<string, unknown>;
+  if (
+    Object.keys(record).some(
+      (key) => !["applicationId", "guildId", "nickname"].includes(key)
+    )
+    || !Object.hasOwn(record, "applicationId")
+    || !Object.hasOwn(record, "guildId")
+    || !isDiscordSnowflake(record.applicationId)
+    || !isDiscordSnowflake(record.guildId)
+    || (
+      record.nickname !== undefined
+      && (
+        typeof record.nickname !== "string"
+        || record.nickname.length < 1
+        || record.nickname.length > 80
+        || record.nickname !== record.nickname.trim()
+        || /[\u0000-\u001f\u007f]/u.test(record.nickname)
+      )
+    )
+  ) return undefined;
+  return Object.freeze({
+    applicationId: record.applicationId,
+    guildId: record.guildId,
+    ...(record.nickname === undefined ? {} : { nickname: record.nickname })
+  });
+}
 
 export function parseDiscordGameServerStatusResponse(
   value: unknown
@@ -243,5 +317,143 @@ export function parseDiscordGameServerStatusResponse(
       ...(server.latencyMs === undefined ? {} : { latencyMs: server.latencyMs as number }),
       ...(server.observedAt === undefined ? {} : { observedAt: server.observedAt })
     })
+  });
+}
+
+function parseSafePlayerNickname(value: unknown): string | undefined {
+  return typeof value === "string"
+    && value.length >= 1
+    && value.length <= 80
+    && value === value.trim()
+    && !/[\u0000-\u001f\u007f]/u.test(value)
+    ? value
+    : undefined;
+}
+
+function parsePlayerProfile(
+  value: unknown
+): DiscordPalworldPlayerProfile | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const record = value as Record<string, unknown>;
+  const nickname = parseSafePlayerNickname(record.nickname);
+  if (
+    Object.keys(record).sort().join(",") !== "buildingCount,level,nickname"
+    || !nickname
+    || !Number.isSafeInteger(record.level)
+    || (record.level as number) < 0
+    || (record.level as number) > 1_000
+    || !Number.isSafeInteger(record.buildingCount)
+    || (record.buildingCount as number) < 0
+    || (record.buildingCount as number) > 100_000_000
+  ) return undefined;
+  return Object.freeze({
+    nickname,
+    level: record.level as number,
+    buildingCount: record.buildingCount as number
+  });
+}
+
+function parseNicknameList(
+  value: unknown,
+  maxItems: number
+): readonly string[] | undefined {
+  if (!Array.isArray(value) || value.length > maxItems) return undefined;
+  const result: string[] = [];
+  for (const entry of value) {
+    const nickname = parseSafePlayerNickname(entry);
+    if (!nickname) return undefined;
+    result.push(nickname);
+  }
+  return Object.freeze(result);
+}
+
+export function parseDiscordPalworldPlayerLookupResponse(
+  value: unknown
+): DiscordPalworldPlayerLookupResponse | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const record = value as Record<string, unknown>;
+  if (
+    Object.keys(record).some(
+      (key) => ![
+        "connected",
+        "serverConfigured",
+        "displayName",
+        "reason",
+        "result"
+      ].includes(key)
+    )
+    || typeof record.connected !== "boolean"
+    || typeof record.serverConfigured !== "boolean"
+    || (
+      record.displayName !== undefined
+      && (
+        typeof record.displayName !== "string"
+        || record.displayName.length < 1
+        || record.displayName.length > 120
+        || /[\u0000-\u001f\u007f]/u.test(record.displayName)
+      )
+    )
+    || (
+      record.reason !== undefined
+      && !DISCORD_PALWORLD_PLAYER_LOOKUP_REASONS.includes(
+        record.reason as DiscordPalworldPlayerLookupReason
+      )
+    )
+  ) return undefined;
+  if (!record.connected && (record.serverConfigured || record.displayName !== undefined)) {
+    return undefined;
+  }
+  if (record.serverConfigured && record.displayName === undefined) return undefined;
+  if (record.reason !== undefined && record.result !== undefined) return undefined;
+  if (!record.serverConfigured && record.result !== undefined) return undefined;
+
+  let result: DiscordPalworldPlayerLookupResponse["result"];
+  if (record.result !== undefined) {
+    if (!record.result || typeof record.result !== "object" || Array.isArray(record.result)) {
+      return undefined;
+    }
+    const candidate = record.result as Record<string, unknown>;
+    if (candidate.kind === "list") {
+      const nicknames = parseNicknameList(candidate.nicknames, 64);
+      if (
+        Object.keys(candidate).sort().join(",") !== "kind,nicknames,total"
+        || !nicknames
+        || !Number.isSafeInteger(candidate.total)
+        || (candidate.total as number) < nicknames.length
+        || (candidate.total as number) > 1_000_000
+      ) return undefined;
+      result = Object.freeze({
+        kind: "list",
+        nicknames,
+        total: candidate.total as number
+      });
+    } else if (candidate.kind === "profile") {
+      const player = parsePlayerProfile(candidate.player);
+      if (
+        Object.keys(candidate).sort().join(",") !== "kind,player"
+        || !player
+      ) return undefined;
+      result = Object.freeze({ kind: "profile", player });
+    } else if (candidate.kind === "not_found") {
+      const suggestions = parseNicknameList(candidate.suggestions, 5);
+      if (
+        Object.keys(candidate).sort().join(",") !== "kind,suggestions"
+        || !suggestions
+      ) return undefined;
+      result = Object.freeze({ kind: "not_found", suggestions });
+    } else {
+      return undefined;
+    }
+  }
+  return Object.freeze({
+    connected: record.connected,
+    serverConfigured: record.serverConfigured,
+    ...(record.displayName === undefined
+      ? {}
+      : { displayName: record.displayName as string }),
+    ...(record.reason === undefined
+      ? {}
+      : { reason: record.reason as DiscordPalworldPlayerLookupReason }),
+    ...(result ? { result } : {})
   });
 }

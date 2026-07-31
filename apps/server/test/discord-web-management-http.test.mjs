@@ -195,6 +195,71 @@ test("서명된 Bot 내부 상태 API는 Guild 귀속 요청만 상태 서비스
   });
 });
 
+test("서명된 Bot 내부 플레이어 API는 닉네임 검색만 상태 서비스에 전달한다", async () => {
+  await withDiscordConfig(async () => {
+    const playerCalls = [];
+    const { handler } = createDiscordHandler({
+      handlerInput: {
+        discordInternalAuth: {
+          verify() {
+            return { ok: true };
+          }
+        },
+        gameServerStatusRead: {
+          async readPlayers(input) {
+            playerCalls.push(input);
+            return {
+              connected: true,
+              serverConfigured: true,
+              displayName: "Palworld",
+              result: {
+                kind: "profile",
+                player: {
+                  nickname: "세이가",
+                  level: 42,
+                  buildingCount: 7
+                }
+              }
+            };
+          }
+        }
+      }
+    });
+    const response = await request(
+      handler,
+      "POST",
+      "/internal/discord/palworld-players",
+      {
+        applicationId: APPLICATION_ID,
+        guildId: "123456789012345678",
+        nickname: "세이가"
+      },
+      { "content-type": "application/json" }
+    );
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(playerCalls, [{
+      applicationId: APPLICATION_ID,
+      guildId: "123456789012345678",
+      nickname: "세이가"
+    }]);
+
+    const forged = await request(
+      handler,
+      "POST",
+      "/internal/discord/palworld-players",
+      {
+        applicationId: APPLICATION_ID,
+        guildId: "123456789012345678",
+        nickname: "세이가",
+        userId: "999999999999999999"
+      },
+      { "content-type": "application/json" }
+    );
+    assert.equal(forged.statusCode, 400);
+    assert.equal(playerCalls.length, 1);
+  });
+});
+
 test("서명된 Bot 내부 명령 정책 API는 exact Guild·command만 전달한다", async () => {
   await withDiscordConfig(async () => {
     const policyCalls = [];
@@ -213,6 +278,7 @@ test("서명된 Bot 내부 명령 정책 API는 exact Guild·command만 전달�
               commands: {
                 help: true,
                 status: true,
+                player: true,
                 guide: true
               },
               preferredLocale: "auto",
@@ -271,6 +337,7 @@ test("Organization Bot 제어 API는 session·Origin·CSRF와 strict body를 유
       publicCommandsEnabled: true,
       palworldStatusEnabled: true,
       statusCommandEnabled: true,
+      playerCommandEnabled: true,
       guideCommandEnabled: true,
       preferredLocale: "auto",
       statusFields: {

@@ -104,6 +104,14 @@
       "checksumSha256": "7fbd174de966f94aa43d5b737c157cb1a2b3a5bec7a82cc523dc59f75de48560",
       "destructive": false,
       "transaction": true
+    },
+    {
+      "id": "0014_discord_palworld_player_command",
+      "file": "0014_discord_palworld_player_command.sql",
+      "description": "Discord Palworld 플레이어 목록·프로필 명령 제어 기반",
+      "checksumSha256": "bf139ba0cac226b49f4f1d368da1d9eef67c3a198a9e6ae2bd7db237012cb1dd",
+      "destructive": false,
+      "transaction": true
     }
   ]
 }

@@ -2,6 +2,9 @@ import type {
   DiscordGameServerStatusResponse,
   DiscordGameServerStatusReason,
   DiscordGameServerStatusState,
+  DiscordPalworldPlayerLookupRequest,
+  DiscordPalworldPlayerLookupResponse,
+  PalworldOnlinePlayer,
   PalworldServerAvailabilityErrorCode,
   PalworldServerDashboardResponse,
   PalworldServerErrorCode,
@@ -14,6 +17,9 @@ import type {
 
 type RestStatusReader = Readonly<{
   getDashboardResponse(ownerId: string): PalworldServerDashboardResponse;
+  listOnlinePlayers(
+    ownerId: string
+  ): Promise<readonly PalworldOnlinePlayer[]>;
 }>;
 
 const DEFAULT_AGENT_STALE_AFTER_MS = 15 * 60 * 1_000;
@@ -214,6 +220,120 @@ export class GameServerStatusReadService {
         server,
         this.restStatusReader.getDashboardResponse(ownerId)
       )
+    });
+  }
+
+  async readPlayers(
+    input: DiscordPalworldPlayerLookupRequest
+  ): Promise<DiscordPalworldPlayerLookupResponse> {
+    const context = await this.repository.resolveGuild(
+      input.applicationId,
+      input.guildId
+    );
+    if (!context) {
+      return Object.freeze({
+        connected: false,
+        serverConfigured: false
+      });
+    }
+    const server = await this.repository.findPalworldServer(context);
+    if (!server) {
+      return Object.freeze({
+        connected: true,
+        serverConfigured: false,
+        reason: "server_not_configured"
+      });
+    }
+    if (server.connectionType === "agent") {
+      return Object.freeze({
+        connected: true,
+        serverConfigured: true,
+        displayName: server.displayName,
+        reason: "agent_not_supported"
+      });
+    }
+    if (!this.restStatusReader) {
+      return Object.freeze({
+        connected: true,
+        serverConfigured: true,
+        displayName: server.displayName,
+        reason: "rest_not_configured"
+      });
+    }
+    const ownerId = `organization:${context.organizationId}:server:${server.id}`;
+    let players: readonly PalworldOnlinePlayer[];
+    try {
+      players = await this.restStatusReader.listOnlinePlayers(ownerId);
+    } catch (error) {
+      const code = (error as { code?: unknown } | undefined)?.code;
+      return Object.freeze({
+        connected: true,
+        serverConfigured: true,
+        displayName: server.displayName,
+        reason: code === "not_configured"
+          ? "rest_not_configured"
+          : "upstream_unavailable"
+      });
+    }
+    const sorted = [...players].sort((left, right) =>
+      left.nickname.localeCompare(right.nickname, "ko")
+    );
+    if (!input.nickname) {
+      return Object.freeze({
+        connected: true,
+        serverConfigured: true,
+        displayName: server.displayName,
+        result: Object.freeze({
+          kind: "list",
+          nicknames: Object.freeze(
+            sorted.slice(0, 64).map((player) => player.nickname)
+          ),
+          total: sorted.length
+        })
+      });
+    }
+    const query = input.nickname.normalize("NFKC").toLocaleLowerCase("ko");
+    const exact = sorted.find(
+      (player) =>
+        player.nickname.normalize("NFKC").toLocaleLowerCase("ko") === query
+    );
+    if (exact) {
+      return Object.freeze({
+        connected: true,
+        serverConfigured: true,
+        displayName: server.displayName,
+        result: Object.freeze({
+          kind: "profile",
+          player: Object.freeze({
+            nickname: exact.nickname,
+            level: exact.level,
+            buildingCount: exact.buildingCount
+          })
+        })
+      });
+    }
+    const suggestions = sorted
+      .map((player) => ({
+        nickname: player.nickname,
+        normalized: player.nickname.normalize("NFKC").toLocaleLowerCase("ko")
+      }))
+      .filter((player) => player.normalized.includes(query))
+      .sort((left, right) => {
+        const leftPrefix = left.normalized.startsWith(query) ? 0 : 1;
+        const rightPrefix = right.normalized.startsWith(query) ? 0 : 1;
+        return leftPrefix - rightPrefix
+          || left.nickname.localeCompare(right.nickname, "ko");
+      })
+      .slice(0, 5)
+      .map((player) => player.nickname);
+    return Object.freeze({
+      connected: true,
+      serverConfigured: true,
+      displayName: server.displayName,
+      result: Object.freeze({
+        kind: "not_found",
+        suggestions: Object.freeze(suggestions)
+      })
     });
   }
 }

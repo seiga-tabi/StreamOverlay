@@ -373,6 +373,7 @@ test("Discord Bot 설정 API는 Organization 경로와 revision·CSRF를 함께 
         publicCommandsEnabled: true,
         palworldStatusEnabled: true,
         statusCommandEnabled: true,
+        playerCommandEnabled: true,
         guideCommandEnabled: false,
         preferredLocale: "ko",
         statusFields: {
@@ -393,6 +394,7 @@ test("Discord Bot 설정 API는 Organization 경로와 revision·CSRF를 함께 
       publicCommandsEnabled: true,
       palworldStatusEnabled: true,
       statusCommandEnabled: true,
+      playerCommandEnabled: true,
       guideCommandEnabled: false,
       preferredLocale: "ko" as const,
       statusFields: {

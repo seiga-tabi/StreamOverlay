@@ -14,12 +14,15 @@
 켰을 때만 제공한다.
 
 - `!yoro 상태`: 현재 Guild에 연결된 Palworld 서버의 안전한 상태 요약
+- `!yoro 플레이어`: 현재 접속 중인 게임 내 닉네임 목록
+- `!yoro 플레이어 {닉네임}`: 접속 중인 게임 내 닉네임의 안전한 프로필
 - `!yoro 가이드`: Palworld 전용 서버 설정 페이지
 - `!yoro 도움말`: 현재 제공되는 일반 사용자 명령
 
-한국어 명령 외에 일본어 `ステータス`, `ガイド`, `ヘルプ`와 영문
-`status`, `guide`, `help`를 exact allowlist로 지원한다. 인수와 자유 형식
-문장은 받지 않는다. prefix 응답은 Discord의 일반 채널 메시지이며
+한국어 명령 외에 일본어 `ステータス`, `プレイヤー`, `ガイド`, `ヘルプ`와 영문
+`status`, `player`, `players`, `guide`, `help`를 exact allowlist로 지원한다.
+플레이어 명령만 최대 80자의 닉네임 인수를 받으며 나머지 자유 형식 문장은
+받지 않는다. prefix 응답은 Discord의 일반 채널 메시지이며
 ephemeral이 아니다. 서버 주소, REST URL, `AdminPassword`, Agent credential,
 Organization ID와 내부 오류 정보는 표시하지 않는다.
 
@@ -103,12 +106,19 @@ Bot은 Docker internal network를 통해 `/internal/discord/*`를 호출한다. 
 정책을 먼저 조회한 뒤, 허용된 경우에만
 `POST /internal/discord/game-server-status`를 호출한다. 정책 응답은 설정
 revision, 응답 locale과 표시 가능한 상태 field allowlist만 포함한다.
-정책 응답은 `help`, `status`, `guide`별 현재 사용 가능 여부도 포함합니다.
+정책 응답은 `help`, `status`, `player`, `guide`별 현재 사용 가능 여부도 포함합니다.
 `!yoro 도움말`과 `/yoro help`는 이 capability를 사용해 실제 활성화된 일반
 사용자 명령만 표시합니다. 정책 조회 실패와 잘못된 응답은 fail-closed
 처리하고, 비활성 설치·module·명령에는 내부 정보가 없는 짧은 안내를
 응답합니다. 이 실패는 Guild의 다른 서비스나 Server readiness에는 영향을
 주지 않습니다.
+
+플레이어 명령은 서명된 `POST /internal/discord/palworld-players`를 통해
+등록된 REST 연결의 `/v1/api/players`를 명령 실행 시점에만 조회합니다.
+목록에는 접속 중인 닉네임만 표시하고, 검색 결과에는 닉네임·레벨·건축물
+수만 표시합니다. REST 원문의 IP, 좌표, `playerId`, `userId`,
+`accountName`, ping과 raw payload는 Bot 응답·DB·audit·일반 로그에
+전달하거나 저장하지 않습니다.
 
 Server는 요청의
 Application ID와 Guild ID로 활성 설치와 Organization을 다시 결정한 뒤

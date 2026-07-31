@@ -2,11 +2,12 @@ import { isDiscordSnowflake } from "./discord-internal.js";
 
 export const DISCORD_BOT_CONTROL_MODULE_ID = "palworld.status" as const;
 export const DISCORD_BOT_CONTROL_MODULE_VERSION = 1 as const;
-export const DISCORD_BOT_CONTROL_SCHEMA_VERSION = 1 as const;
+export const DISCORD_BOT_CONTROL_SCHEMA_VERSION = 2 as const;
 
 export const DISCORD_BOT_CONTROL_COMMANDS = [
   "help",
   "status",
+  "player",
   "guide"
 ] as const;
 
@@ -30,6 +31,7 @@ export type DiscordBotControlSettings = Readonly<{
   publicCommandsEnabled: boolean;
   palworldStatusEnabled: boolean;
   statusCommandEnabled: boolean;
+  playerCommandEnabled: boolean;
   guideCommandEnabled: boolean;
   preferredLocale: DiscordBotControlLocale;
   statusFields: DiscordBotStatusFields;
@@ -58,6 +60,7 @@ export type UpdateDiscordBotControlInput = Readonly<{
   publicCommandsEnabled: boolean;
   palworldStatusEnabled: boolean;
   statusCommandEnabled: boolean;
+  playerCommandEnabled: boolean;
   guideCommandEnabled: boolean;
   preferredLocale: DiscordBotControlLocale;
   statusFields: DiscordBotStatusFields;
@@ -98,6 +101,7 @@ export const DEFAULT_DISCORD_BOT_CONTROL_SETTINGS: DiscordBotControlSettings =
     publicCommandsEnabled: true,
     palworldStatusEnabled: true,
     statusCommandEnabled: true,
+    playerCommandEnabled: true,
     guideCommandEnabled: true,
     preferredLocale: "auto",
     statusFields: DEFAULT_DISCORD_BOT_STATUS_FIELDS,
@@ -143,11 +147,13 @@ function parseCommandCapabilities(
     !record
     || typeof record.help !== "boolean"
     || typeof record.status !== "boolean"
+    || typeof record.player !== "boolean"
     || typeof record.guide !== "boolean"
   ) return undefined;
   return Object.freeze({
     help: record.help,
     status: record.status,
+    player: record.player,
     guide: record.guide
   });
 }
@@ -159,6 +165,7 @@ export function parseUpdateDiscordBotControlInput(
     "publicCommandsEnabled",
     "palworldStatusEnabled",
     "statusCommandEnabled",
+    "playerCommandEnabled",
     "guideCommandEnabled",
     "preferredLocale",
     "statusFields",
@@ -170,6 +177,7 @@ export function parseUpdateDiscordBotControlInput(
     || typeof record.publicCommandsEnabled !== "boolean"
     || typeof record.palworldStatusEnabled !== "boolean"
     || typeof record.statusCommandEnabled !== "boolean"
+    || typeof record.playerCommandEnabled !== "boolean"
     || typeof record.guideCommandEnabled !== "boolean"
     || !["auto", "ko", "ja"].includes(String(record.preferredLocale))
     || !Number.isSafeInteger(record.expectedRevision)
@@ -180,6 +188,7 @@ export function parseUpdateDiscordBotControlInput(
     publicCommandsEnabled: record.publicCommandsEnabled,
     palworldStatusEnabled: record.palworldStatusEnabled,
     statusCommandEnabled: record.statusCommandEnabled,
+    playerCommandEnabled: record.playerCommandEnabled,
     guideCommandEnabled: record.guideCommandEnabled,
     preferredLocale: record.preferredLocale as DiscordBotControlLocale,
     statusFields,

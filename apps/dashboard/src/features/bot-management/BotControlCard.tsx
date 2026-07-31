@@ -40,10 +40,11 @@ const copy = {
     globalEnabled: "일반 사용자 명령 운영 가능",
     guild: "연결된 Discord 서버",
     module: "Palworld 서버 상태",
-    moduleDescription: "`!yoro 상태`와 전용 서버 가이드 기능을 제공하는 안전한 읽기 전용 모듈입니다.",
+    moduleDescription: "`!yoro 상태`, 접속 플레이어 프로필 조회와 전용 서버 가이드를 제공하는 안전한 읽기 전용 모듈입니다.",
     publicCommands: "일반 사용자 명령 사용",
     moduleEnabled: "Palworld 상태 모듈 사용",
     statusCommand: "`!yoro 상태` 사용",
+    playerCommand: "`!yoro 플레이어` 사용",
     guideCommand: "`!yoro 가이드` 사용",
     locale: "Bot 응답 언어",
     localeAuto: "Discord 서버 언어 자동 감지",
@@ -65,6 +66,7 @@ const copy = {
     previewDescription: "현재 언어와 표시 항목을 기준으로 `!yoro 상태` 응답을 미리 확인합니다.",
     previewServer: "YORO Palworld Server",
     previewCommandStatus: "상태 명령",
+    previewCommandPlayer: "플레이어 명령",
     previewCommandGuide: "가이드 명령",
     enabled: "사용",
     disabled: "사용 안 함"
@@ -81,10 +83,11 @@ const copy = {
     globalEnabled: "一般ユーザーコマンドを運用可能",
     guild: "連携済みDiscordサーバー",
     module: "Palworldサーバー状態",
-    moduleDescription: "`!yoro ステータス`と専用サーバーガイドを提供する安全な読み取り専用モジュールです。",
+    moduleDescription: "`!yoro ステータス`、接続プレイヤーのプロフィール取得と専用サーバーガイドを提供する安全な読み取り専用モジュールです。",
     publicCommands: "一般ユーザーコマンドを使用",
     moduleEnabled: "Palworld状態モジュールを使用",
     statusCommand: "`!yoro ステータス`を使用",
+    playerCommand: "`!yoro プレイヤー`を使用",
     guideCommand: "`!yoro ガイド`を使用",
     locale: "Bot応答言語",
     localeAuto: "Discordサーバー言語を自動検出",
@@ -106,6 +109,7 @@ const copy = {
     previewDescription: "現在の言語と表示項目を基準に`!yoro ステータス`の応答を確認します。",
     previewServer: "YORO Palworld Server",
     previewCommandStatus: "ステータスコマンド",
+    previewCommandPlayer: "プレイヤーコマンド",
     previewCommandGuide: "ガイドコマンド",
     enabled: "使用",
     disabled: "使用しない"
@@ -299,6 +303,17 @@ export function BotControlCard(props: {
               />
               <span>{text.guideCommand}</span>
             </label>
+            <label className="bot-control-toggle">
+              <input
+                checked={draft.playerCommandEnabled}
+                type="checkbox"
+                onChange={(event) => setDraft({
+                  ...draft,
+                  playerCommandEnabled: event.target.checked
+                })}
+              />
+              <span>{text.playerCommand}</span>
+            </label>
           </div>
           <label className="bot-management-field bot-control-locale">
             <span>{text.locale}</span>
@@ -363,6 +378,15 @@ export function BotControlCard(props: {
                   draft.publicCommandsEnabled
                   && draft.palworldStatusEnabled
                   && draft.guideCommandEnabled
+                    ? text.enabled
+                    : text.disabled
+                }
+              </Badge>
+              <Badge>
+                {text.previewCommandPlayer}: {
+                  draft.publicCommandsEnabled
+                  && draft.palworldStatusEnabled
+                  && draft.playerCommandEnabled
                     ? text.enabled
                     : text.disabled
                 }

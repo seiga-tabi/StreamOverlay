@@ -3,6 +3,7 @@ import {
   ButtonBuilder,
   ButtonStyle,
   EmbedBuilder,
+  escapeMarkdown,
   type Message
 } from "discord.js";
 import {
@@ -12,7 +13,8 @@ import {
   type DiscordBotMessageLocale,
   DiscordBotCommandPolicyResponse,
   DiscordBotStatusFields,
-  DiscordGameServerStatusResponse
+  DiscordGameServerStatusResponse,
+  DiscordPalworldPlayerLookupResponse
 } from "@streamops/shared";
 import type { DiscordInternalApiClient } from "./internal-api-client.js";
 import { auditEvent, safeReference } from "./logger.js";
@@ -24,7 +26,12 @@ const GUILD_WINDOW_MS = 5_000;
 const GUILD_WINDOW_MAX = 5;
 const MAX_RATE_LIMIT_KEYS = 10_000;
 
-export type YoroPrefixCommand = "help" | "status" | "guide";
+export type YoroPrefixCommand = "help" | "status" | "player" | "guide";
+
+export type ParsedYoroPrefixCommand = Readonly<{
+  command: YoroPrefixCommand;
+  nickname?: string;
+}>;
 
 const aliases = new Map<string, YoroPrefixCommand>([
   ["도움말", "help"],
@@ -33,17 +40,38 @@ const aliases = new Map<string, YoroPrefixCommand>([
   ["상태", "status"],
   ["status", "status"],
   ["ステータス", "status"],
+  ["플레이어", "player"],
+  ["player", "player"],
+  ["players", "player"],
+  ["プレイヤー", "player"],
   ["가이드", "guide"],
   ["guide", "guide"],
   ["ガイド", "guide"]
 ]);
 
-export function parseYoroPrefixCommand(content: string): YoroPrefixCommand | undefined {
+export function parseYoroPrefixCommand(
+  content: string
+): ParsedYoroPrefixCommand | undefined {
   if (content.length > MAX_MESSAGE_LENGTH) return undefined;
-  const match = /^!yoro(?:\s+(\S+))?\s*$/iu.exec(content);
+  const match = /^!yoro(?:\s+(\S+)(?:\s+(.+?))?)?\s*$/iu.exec(content);
   if (!match) return undefined;
   const token = match[1];
-  return token ? aliases.get(token.toLowerCase()) : "help";
+  const command = token ? aliases.get(token.toLowerCase()) : "help";
+  if (!command) return undefined;
+  const nickname = match[2]?.trim();
+  if (
+    nickname !== undefined
+    && (
+      command !== "player"
+      || nickname.length < 1
+      || nickname.length > 80
+      || /[\u0000-\u001f\u007f]/u.test(nickname)
+    )
+  ) return undefined;
+  return Object.freeze({
+    command,
+    ...(nickname === undefined ? {} : { nickname })
+  });
 }
 
 class PrefixRateLimiter {
@@ -90,7 +118,7 @@ export class YoroPrefixCommandHandler {
     private readonly applicationId: string,
     private readonly internalApi: Pick<
       DiscordInternalApiClient,
-      "commandPolicy" | "gameServerStatus"
+      "commandPolicy" | "gameServerStatus" | "palworldPlayers"
     >,
     private readonly publicBaseUrl: string,
     private readonly now: () => number = Date.now
@@ -104,8 +132,9 @@ export class YoroPrefixCommandHandler {
       || message.webhookId
       || message.system
     ) return;
-    const command = parseYoroPrefixCommand(message.content);
-    if (!command) return;
+    const parsed = parseYoroPrefixCommand(message.content);
+    if (!parsed) return;
+    const { command } = parsed;
     if (!this.limiter.allow(message.guildId, message.author.id, this.now())) {
       auditEvent("discord.prefix_command.rate_limited", {
         guild: safeReference(message.guildId),
@@ -191,7 +220,128 @@ export class YoroPrefixCommandHandler {
       });
       return;
     }
+    if (command === "player") {
+      await this.replyPlayers(message, locale, parsed.nickname);
+      return;
+    }
     await this.replyStatus(message, locale, policy.statusFields);
+  }
+
+  private async replyPlayers(
+    message: Message,
+    locale: DiscordBotMessageLocale,
+    nickname?: string
+  ): Promise<void> {
+    const messages = DISCORD_BOT_MESSAGES[locale].prefix;
+    let response: DiscordPalworldPlayerLookupResponse;
+    try {
+      response = await this.internalApi.palworldPlayers({
+        applicationId: this.applicationId,
+        guildId: message.guildId!,
+        ...(nickname ? { nickname } : {})
+      });
+    } catch {
+      await message.reply({
+        content: messages.unavailable,
+        allowedMentions: { parse: [], repliedUser: false },
+        failIfNotExists: true
+      });
+      return;
+    }
+    if (!response.connected) {
+      await message.reply({
+        content: messages.guildNotConnected,
+        allowedMentions: { parse: [], repliedUser: false },
+        failIfNotExists: true
+      });
+      return;
+    }
+    if (response.reason) {
+      await message.reply({
+        content: messages.playerUnavailable[response.reason],
+        allowedMentions: { parse: [], repliedUser: false },
+        failIfNotExists: true
+      });
+      return;
+    }
+    if (!response.result) {
+      await message.reply({
+        content: messages.unavailable,
+        allowedMentions: { parse: [], repliedUser: false },
+        failIfNotExists: true
+      });
+      return;
+    }
+    if (response.result.kind === "list") {
+      const names = response.result.nicknames
+        .map((name) => `• ${escapeMarkdown(name)}`)
+        .join("\n");
+      const description = names || messages.playerEmpty;
+      const footer = response.result.total > response.result.nicknames.length
+        ? messages.playerListTruncated
+          .replace("{total}", String(response.result.total))
+          .replace("{shown}", String(response.result.nicknames.length))
+        : messages.playerSearchHint;
+      await message.reply({
+        embeds: [
+          new EmbedBuilder()
+            .setColor(0x5865f2)
+            .setTitle(messages.playerListTitle)
+            .setDescription(description)
+            .setFooter({ text: footer })
+        ],
+        allowedMentions: { parse: [], repliedUser: false },
+        failIfNotExists: true
+      });
+      return;
+    }
+    if (response.result.kind === "not_found") {
+      const suggestions = response.result.suggestions.length
+        ? `\n\n**${messages.playerSuggestions}**\n${
+          response.result.suggestions
+            .map((name) => `• ${escapeMarkdown(name)}`)
+            .join("\n")
+        }`
+        : "";
+      await message.reply({
+        embeds: [
+          new EmbedBuilder()
+            .setColor(0xf0b232)
+            .setTitle(messages.playerProfileTitle)
+            .setDescription(`${messages.playerNotFound}${suggestions}`)
+        ],
+        allowedMentions: { parse: [], repliedUser: false },
+        failIfNotExists: true
+      });
+      return;
+    }
+    const player = response.result.player;
+    await message.reply({
+      embeds: [
+        new EmbedBuilder()
+          .setColor(0x5865f2)
+          .setTitle(messages.playerProfileTitle)
+          .addFields(
+            {
+              name: messages.playerFields.nickname,
+              value: escapeMarkdown(player.nickname),
+              inline: false
+            },
+            {
+              name: messages.playerFields.level,
+              value: String(player.level),
+              inline: true
+            },
+            {
+              name: messages.playerFields.buildingCount,
+              value: String(player.buildingCount),
+              inline: true
+            }
+          )
+      ],
+      allowedMentions: { parse: [], repliedUser: false },
+      failIfNotExists: true
+    });
   }
 
   private async replyStatus(

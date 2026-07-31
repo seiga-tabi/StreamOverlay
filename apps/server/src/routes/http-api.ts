@@ -19,6 +19,7 @@ import {
   parseRiotIdDetailed,
   parseDiscordInstallationObservationRequest,
   parseDiscordGameServerStatusRequest,
+  parseDiscordPalworldPlayerLookupRequest,
   parseDiscordBotCommandPolicyRequest,
   parseUpdateDiscordBotControlInput,
   parseDiscordSetupSessionRequest,
@@ -6195,6 +6196,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
           "/internal/discord/installations/upsert",
           "/internal/discord/installations/revoked",
           "/internal/discord/game-server-status",
+          "/internal/discord/palworld-players",
           "/internal/discord/command-policy"
         ]);
         if (!internalPaths.has(url.pathname) || req.method !== "POST") {
@@ -6289,6 +6291,31 @@ export function createHttpHandler(input: HttpHandlerInput) {
             res,
             200,
             await input.gameServerStatusRead.read(statusRequest),
+            noStoreHeaders()
+          );
+        }
+        if (url.pathname === "/internal/discord/palworld-players") {
+          const playerRequest = parseDiscordPalworldPlayerLookupRequest(body);
+          if (
+            !playerRequest
+            || playerRequest.applicationId
+              !== appConfig.discordBotInternal.applicationId
+          ) {
+            return sendJson(req, res, 400, {
+              error: "Palworld 플레이어 조회 요청 형식이 올바르지 않습니다."
+            }, noStoreHeaders());
+          }
+          if (!input.gameServerStatusRead) {
+            return sendJson(req, res, 503, {
+              error: "Palworld 플레이어 조회 기능을 사용할 수 없습니다.",
+              code: "feature_unavailable"
+            }, noStoreHeaders());
+          }
+          return sendJson(
+            req,
+            res,
+            200,
+            await input.gameServerStatusRead.readPlayers(playerRequest),
             noStoreHeaders()
           );
         }

@@ -4,9 +4,48 @@ import {
   discordInternalCanonicalRequest,
   parseDiscordGameServerStatusRequest,
   parseDiscordGameServerStatusResponse,
+  parseDiscordPalworldPlayerLookupRequest,
+  parseDiscordPalworldPlayerLookupResponse,
   parseDiscordInstallationObservationRequest,
   parseDiscordSetupSessionRequest
 } from "../dist/discord-internal.js";
+
+test("Palworld 플레이어 내부 계약은 닉네임 외 검색 식별자를 받지 않는다", () => {
+  const request = {
+    applicationId: "123456789012345678",
+    guildId: "223456789012345678",
+    nickname: "세이가"
+  };
+  assert.deepEqual(parseDiscordPalworldPlayerLookupRequest(request), request);
+  assert.equal(parseDiscordPalworldPlayerLookupRequest({
+    ...request,
+    organizationId: "tenant-a"
+  }), undefined);
+  const response = {
+    connected: true,
+    serverConfigured: true,
+    displayName: "Palworld",
+    result: {
+      kind: "profile",
+      player: {
+        nickname: "세이가",
+        level: 42,
+        buildingCount: 7
+      }
+    }
+  };
+  assert.deepEqual(parseDiscordPalworldPlayerLookupResponse(response), response);
+  assert.equal(parseDiscordPalworldPlayerLookupResponse({
+    ...response,
+    result: {
+      kind: "profile",
+      player: {
+        ...response.result.player,
+        ip: "203.0.113.10"
+      }
+    }
+  }), undefined);
+});
 
 const setup = {
   applicationId: "100000000000000001",

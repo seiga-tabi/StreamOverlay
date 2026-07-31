@@ -35,6 +35,7 @@ export const DISCORD_BOT_MESSAGES = {
       commands: {
         help: "`!yoro 도움말` 현재 사용할 수 있는 명령 확인",
         status: "`!yoro 상태` Palworld 서버 상태 확인",
+        player: "`!yoro 플레이어` 접속 중인 닉네임 목록 · `!yoro 플레이어 {닉네임}` 게임 내 프로필 검색",
         guide: "`!yoro 가이드` Palworld 전용 서버 설정 안내"
       },
       guideTitle: "Palworld 전용 서버 설정",
@@ -42,6 +43,24 @@ export const DISCORD_BOT_MESSAGES = {
       guideButton: "설정 가이드 열기",
       dashboardButton: "Dashboard 열기",
       statusTitle: "YORO Palworld 서버",
+      playerListTitle: "현재 접속 중인 Palworld 플레이어",
+      playerProfileTitle: "Palworld 게임 내 프로필",
+      playerEmpty: "현재 접속 중인 플레이어가 없습니다.",
+      playerListTruncated: "전체 {total}명 중 {shown}명만 표시합니다.",
+      playerNotFound: "일치하는 닉네임을 찾지 못했습니다.",
+      playerSuggestions: "비슷한 닉네임",
+      playerSearchHint: "`!yoro 플레이어 {닉네임}` 형식으로 검색해 주세요.",
+      playerFields: {
+        nickname: "닉네임",
+        level: "레벨",
+        buildingCount: "건축물 수"
+      },
+      playerUnavailable: {
+        server_not_configured: "아직 Palworld 게임 서버가 등록되지 않았습니다.",
+        rest_not_configured: "Palworld REST 연결 설정이 완료되지 않았습니다.",
+        agent_not_supported: "현재 YORO Agent 연결에서는 플레이어 목록 조회를 지원하지 않습니다.",
+        upstream_unavailable: "현재 Palworld 플레이어 목록을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요."
+      },
       guildNotConnected: "이 Discord 서버가 YORO Organization과 연결되지 않았습니다.",
       serverNotConfigured: "아직 Palworld 게임 서버가 등록되지 않았습니다.",
       unavailable: "현재 서버 상태를 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.",
@@ -110,6 +129,7 @@ export const DISCORD_BOT_MESSAGES = {
       commands: {
         help: "`!yoro ヘルプ` 利用可能なコマンドを確認",
         status: "`!yoro ステータス` Palworldサーバー状態を確認",
+        player: "`!yoro プレイヤー` 接続中のニックネーム一覧 · `!yoro プレイヤー {ニックネーム}` ゲーム内プロフィール検索",
         guide: "`!yoro ガイド` Palworld専用サーバー設定ガイド"
       },
       guideTitle: "Palworld専用サーバー設定",
@@ -117,6 +137,24 @@ export const DISCORD_BOT_MESSAGES = {
       guideButton: "設定ガイドを開く",
       dashboardButton: "Dashboardを開く",
       statusTitle: "YORO Palworldサーバー",
+      playerListTitle: "現在接続中のPalworldプレイヤー",
+      playerProfileTitle: "Palworldゲーム内プロフィール",
+      playerEmpty: "現在接続中のプレイヤーはいません。",
+      playerListTruncated: "全{total}名のうち{shown}名のみ表示しています。",
+      playerNotFound: "一致するニックネームが見つかりませんでした。",
+      playerSuggestions: "類似するニックネーム",
+      playerSearchHint: "`!yoro プレイヤー {ニックネーム}`の形式で検索してください。",
+      playerFields: {
+        nickname: "ニックネーム",
+        level: "レベル",
+        buildingCount: "建築物数"
+      },
+      playerUnavailable: {
+        server_not_configured: "Palworldゲームサーバーはまだ登録されていません。",
+        rest_not_configured: "Palworld REST連携設定が完了していません。",
+        agent_not_supported: "現在のYORO Agent連携ではプレイヤー一覧の取得に対応していません。",
+        upstream_unavailable: "現在Palworldプレイヤー一覧を取得できません。しばらくしてからお試しください。"
+      },
       guildNotConnected: "このDiscordサーバーはYORO Organizationと連携されていません。",
       serverNotConfigured: "Palworldゲームサーバーはまだ登録されていません。",
       unavailable: "現在サーバー状態を取得できません。しばらくしてからお試しください。",
@@ -169,7 +207,7 @@ export function discordBotHelpBody(
   commands: DiscordBotCommandCapabilities
 ): string {
   const copy = DISCORD_BOT_MESSAGES[locale].prefix.commands;
-  return (["status", "guide", "help"] as const satisfies readonly DiscordBotControlCommand[])
+  return (["status", "player", "guide", "help"] as const satisfies readonly DiscordBotControlCommand[])
     .filter((command) => commands[command])
     .map((command) => copy[command])
     .join("\n");

@@ -170,3 +170,97 @@ test("REST subsystem 비활성은 자격 증명 오류와 구분된 공개 사�
     source: "rest"
   });
 });
+
+test("플레이어 조회는 닉네임 목록과 정확히 일치하는 안전한 프로필만 반환한다", async () => {
+  const server = {
+    id: "20000000-0000-4000-8000-000000000004",
+    displayName: "REST Palworld",
+    connectionType: "rest",
+    connectionStatus: "ready"
+  };
+  const service = new GameServerStatusReadService(repository(server), {
+    getDashboardResponse() {
+      throw new Error("플레이어 조회에서는 상태 cache를 읽지 않아야 합니다.");
+    },
+    async listOnlinePlayers() {
+      return [
+        { nickname: "세이가", level: 42, buildingCount: 7 },
+        { nickname: "SeigaTwo", level: 20, buildingCount: 2 }
+      ];
+    }
+  });
+  const base = {
+    applicationId: "100000000000000001",
+    guildId: "100000000000000002"
+  };
+  assert.deepEqual(await service.readPlayers(base), {
+    connected: true,
+    serverConfigured: true,
+    displayName: "REST Palworld",
+    result: {
+      kind: "list",
+      nicknames: ["세이가", "SeigaTwo"],
+      total: 2
+    }
+  });
+  assert.deepEqual(await service.readPlayers({
+    ...base,
+    nickname: "세이가"
+  }), {
+    connected: true,
+    serverConfigured: true,
+    displayName: "REST Palworld",
+    result: {
+      kind: "profile",
+      player: { nickname: "세이가", level: 42, buildingCount: 7 }
+    }
+  });
+  assert.deepEqual(await service.readPlayers({
+    ...base,
+    nickname: "seiga"
+  }), {
+    connected: true,
+    serverConfigured: true,
+    displayName: "REST Palworld",
+    result: {
+      kind: "not_found",
+      suggestions: ["SeigaTwo"]
+    }
+  });
+});
+
+test("플레이어 조회는 Agent 미지원과 REST 미설정을 안전한 사유로 구분한다", async () => {
+  const base = {
+    applicationId: "100000000000000001",
+    guildId: "100000000000000002"
+  };
+  const agent = new GameServerStatusReadService(repository({
+    id: "20000000-0000-4000-8000-000000000005",
+    displayName: "Agent Palworld",
+    connectionType: "agent",
+    connectionStatus: "ready"
+  }));
+  assert.deepEqual(await agent.readPlayers(base), {
+    connected: true,
+    serverConfigured: true,
+    displayName: "Agent Palworld",
+    reason: "agent_not_supported"
+  });
+
+  const rest = new GameServerStatusReadService(repository({
+    id: "20000000-0000-4000-8000-000000000006",
+    displayName: "REST Palworld",
+    connectionType: "rest",
+    connectionStatus: "ready"
+  }), {
+    getDashboardResponse() {
+      throw new Error("호출되면 안 됩니다.");
+    },
+    async listOnlinePlayers() {
+      const error = new Error("민감한 내부 상세");
+      error.code = "not_configured";
+      throw error;
+    }
+  });
+  assert.equal((await rest.readPlayers(base)).reason, "rest_not_configured");
+});

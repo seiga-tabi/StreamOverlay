@@ -4,11 +4,14 @@ import {
   discordInternalCanonicalRequest,
   parseDiscordBotCommandPolicyResponse,
   parseDiscordGameServerStatusResponse,
+  parseDiscordPalworldPlayerLookupResponse,
   type DiscordBotCommandPolicyRequest,
   type DiscordBotCommandPolicyResponse,
   type DiscordGameServerStatusRequest,
   type DiscordGameServerStatusResponse,
   type DiscordInstallationObservationRequest,
+  type DiscordPalworldPlayerLookupRequest,
+  type DiscordPalworldPlayerLookupResponse,
   type DiscordSetupSessionRequest
 } from "@streamops/shared";
 
@@ -81,6 +84,16 @@ export class DiscordInternalApiClient {
   ): Promise<DiscordBotCommandPolicyResponse> {
     const result = parseDiscordBotCommandPolicyResponse(
       await this.request("/internal/discord/command-policy", body)
+    );
+    if (!result) throw new DiscordInternalApiError("invalid_response");
+    return result;
+  }
+
+  async palworldPlayers(
+    body: DiscordPalworldPlayerLookupRequest
+  ): Promise<DiscordPalworldPlayerLookupResponse> {
+    const result = parseDiscordPalworldPlayerLookupResponse(
+      await this.request("/internal/discord/palworld-players", body)
     );
     if (!result) throw new DiscordInternalApiError("invalid_response");
     return result;
