@@ -71,6 +71,33 @@ test("Palworld 플레이어 응답은 플랫폼별 선택 필드 누락을 안�
   });
 });
 
+test("Palworld v1.0.2의 iP casing은 canonical ip로 정규화하고 충돌은 거부한다", () => {
+  assert.deepEqual(validatePalworldRestPlayersResponse({
+    players: [{
+      name: "현재 플레이어",
+      iP: "203.0.113.10",
+      level: 65
+    }]
+  }), {
+    ok: true,
+    data: {
+      players: [{
+        name: "현재 플레이어",
+        ip: "203.0.113.10",
+        level: 65
+      }]
+    }
+  });
+  assert.equal(validatePalworldRestPlayersResponse({
+    players: [{
+      name: "충돌 플레이어",
+      ip: "203.0.113.10",
+      iP: "203.0.113.11",
+      level: 65
+    }]
+  }).ok, false);
+});
+
 test("Palworld 플레이어 응답은 접속 직후의 미계산 숫자 sentinel을 누락값으로 정규화한다", () => {
   assert.deepEqual(validatePalworldRestPlayersResponse({
     players: [{

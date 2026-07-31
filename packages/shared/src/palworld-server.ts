@@ -445,6 +445,7 @@ function validateRestPlayerAt(
     "playerId",
     "userId",
     "ip",
+    "iP",
     "ping",
     "location_x",
     "location_y",
@@ -484,6 +485,16 @@ function validateRestPlayerAt(
   if (!userId.ok) return userId;
   const ip = optionalString("ip", MAX_PLAYER_IP_LENGTH);
   if (!ip.ok) return ip;
+  // Palworld v1.0.2 Linux 전용 서버는 공식 문서의 `ip`와 다른 `iP` casing을 반환합니다.
+  // 검증된 이 변형만 호환 alias로 받아 내부 canonical 필드인 `ip`로 정규화합니다.
+  const alternateIp = record.data.iP === undefined || record.data.iP === null
+    ? valid<string | undefined>(undefined)
+    : stringAt(record.data.iP, `${path}.iP`, MAX_PLAYER_IP_LENGTH, true);
+  if (!alternateIp.ok) return alternateIp;
+  if (ip.data !== undefined && alternateIp.data !== undefined && ip.data !== alternateIp.data) {
+    return invalid(`${path}.iP`, "ip 필드와 값이 일치해야 합니다.");
+  }
+  const normalizedIp = ip.data ?? alternateIp.data;
   // Palworld REST는 접속 직후 아직 계산되지 않은 값을 -1 sentinel로 반환할 수 있습니다.
   // Discord 경계에서는 ping을 사용하지 않지만, 유효한 플레이어 목록 전체가 거부되지 않도록
   // 공식 number 필드의 유한성·상한을 유지하면서 sentinel만 허용합니다.
@@ -510,7 +521,7 @@ function validateRestPlayerAt(
     ...(accountName.data === undefined ? {} : { accountName: accountName.data }),
     ...(playerId.data === undefined ? {} : { playerId: playerId.data }),
     ...(userId.data === undefined ? {} : { userId: userId.data }),
-    ...(ip.data === undefined ? {} : { ip: ip.data }),
+    ...(normalizedIp === undefined ? {} : { ip: normalizedIp }),
     ...(ping.data === undefined ? {} : { ping: ping.data }),
     ...(locationX.data === undefined ? {} : { location_x: locationX.data }),
     ...(locationY.data === undefined ? {} : { location_y: locationY.data }),

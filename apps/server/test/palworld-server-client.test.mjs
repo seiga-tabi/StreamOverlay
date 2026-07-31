@@ -236,6 +236,27 @@ test("Palworld 플레이어 조회는 플랫폼 선택 필드가 없어도 닉�
   }]);
 });
 
+test("Palworld v1.0.2의 iP casing은 허용하되 Discord 경계 밖으로 전달하지 않는다", async () => {
+  const { client } = createHttpsClient({
+    requestPinned: async () => jsonResponse({
+      players: [{
+        name: "현재 플레이어",
+        iP: "203.0.113.10",
+        level: 65
+      }]
+    })
+  });
+  const players = await client.listOnlinePlayers({
+    baseUrl: "https://pal.example:8212",
+    adminPassword: "secret-password"
+  });
+  assert.deepEqual(players, [{
+    nickname: "현재 플레이어",
+    level: 65
+  }]);
+  assert.equal(JSON.stringify(players).includes("203.0.113.10"), false);
+});
+
 test("Palworld 플레이어 조회는 접속 직후 미계산 숫자 sentinel 때문에 목록 전체를 버리지 않는다", async () => {
   const { client } = createHttpsClient({
     requestPinned: async () => jsonResponse({
