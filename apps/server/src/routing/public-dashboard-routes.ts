@@ -18,6 +18,13 @@ const PUBLIC_DASHBOARD_EXACT_PATHS = new Set([
   "/account/connections/",
   "/bot",
   "/bot/",
+  "/bot/getting-started",
+  "/bot/getting-started/",
+  "/bot/commands",
+  "/bot/commands/",
+  "/bot/game-files",
+  "/bot/game-files/",
+  // 기존 공개 링크는 HTTP 계층에서 canonical 경로로 redirect합니다.
   "/bot/features",
   "/bot/features/",
   "/bot/connect",

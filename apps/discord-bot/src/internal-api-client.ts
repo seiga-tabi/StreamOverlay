@@ -28,6 +28,15 @@ export class DiscordInternalApiError extends Error {
 }
 
 export class DiscordInternalApiClient {
+  private readonly policyCache = new Map<
+    string,
+    { expiresAt: number; value: DiscordBotCommandPolicyResponse }
+  >();
+  private readonly policyInFlight = new Map<
+    string,
+    Promise<DiscordBotCommandPolicyResponse>
+  >();
+
   constructor(
     private readonly options: {
       authKey: string;
@@ -85,6 +94,34 @@ export class DiscordInternalApiClient {
   }
 
   async commandPolicy(
+    body: DiscordBotCommandPolicyRequest
+  ): Promise<DiscordBotCommandPolicyResponse> {
+    const key = `${body.applicationId}:${body.guildId}:${body.command}`;
+    const now = this.options.now?.() ?? Date.now();
+    const cached = this.policyCache.get(key);
+    if (cached && cached.expiresAt > now) return cached.value;
+    if (cached) this.policyCache.delete(key);
+    const active = this.policyInFlight.get(key);
+    if (active) return active;
+
+    const request = this.loadCommandPolicy(body)
+      .then((value) => {
+        this.policyCache.set(key, { expiresAt: now + 3_000, value });
+        while (this.policyCache.size > 5_000) {
+          const oldest = this.policyCache.keys().next().value as string | undefined;
+          if (!oldest) break;
+          this.policyCache.delete(oldest);
+        }
+        return value;
+      })
+      .finally(() => {
+        this.policyInFlight.delete(key);
+      });
+    this.policyInFlight.set(key, request);
+    return request;
+  }
+
+  private async loadCommandPolicy(
     body: DiscordBotCommandPolicyRequest
   ): Promise<DiscordBotCommandPolicyResponse> {
     const result = parseDiscordBotCommandPolicyResponse(

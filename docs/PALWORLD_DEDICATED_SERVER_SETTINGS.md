@@ -1,6 +1,6 @@
 # Palworld 전용 서버 설정 생성기
 
-YORO Bot 공개 페이지의 `/bot/dedicated-server`는 Palworld 전용 서버용
+YORO Bot 공개 페이지의 `/bot/game-files`는 Palworld 전용 서버용
 `PalWorldSettings.ini`를 브라우저에서 생성하는 도구다.
 
 ## 설계 기준

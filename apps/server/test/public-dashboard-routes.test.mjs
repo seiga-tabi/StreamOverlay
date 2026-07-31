@@ -12,6 +12,12 @@ test("공개 페이지 URL을 Dashboard SPA 진입 경로로 허용한다", () =
     "/lol",
     "/bot",
     "/bot/",
+    "/bot/getting-started",
+    "/bot/getting-started/",
+    "/bot/commands",
+    "/bot/commands/",
+    "/bot/game-files",
+    "/bot/game-files/",
     "/bot/features",
     "/bot/features/",
     "/bot/connect",
@@ -53,7 +59,7 @@ test("한국어·일본어 공개 URL만 언어 prefix 아래에서 SPA 경로�
     "/ko/",
     "/ja/",
     "/ko/lol/summoners/jp/test-JP1",
-    "/ja/bot/features",
+    "/ja/bot/commands",
     "/ko/palworld/items",
     "/ja/privacy"
   ]) {

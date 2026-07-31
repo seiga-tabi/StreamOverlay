@@ -10,7 +10,7 @@ test("Google Analytics 측정 ID와 공개 페이지 범위를 고정한다", ()
   assert.equal(GOOGLE_ANALYTICS_MEASUREMENT_ID, "G-SEG94KMT1H");
   assert.equal(isGoogleAnalyticsPublicPath("/"), true);
   assert.equal(isGoogleAnalyticsPublicPath("/palworld/pals"), true);
-  assert.equal(isGoogleAnalyticsPublicPath("/bot/features"), true);
+  assert.equal(isGoogleAnalyticsPublicPath("/bot/commands"), true);
   assert.equal(isGoogleAnalyticsPublicPath("/dashboard"), false);
   assert.equal(isGoogleAnalyticsPublicPath("/dashboard/organizations"), false);
   assert.equal(isGoogleAnalyticsPublicPath("/admin/settings"), false);

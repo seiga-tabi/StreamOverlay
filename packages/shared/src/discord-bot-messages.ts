@@ -55,7 +55,7 @@ export const DISCORD_BOT_MESSAGES = {
       playerEmpty: "현재 접속 중인 플레이어가 없습니다.",
       playerListTruncated: "전체 {total}명 중 {shown}명만 표시합니다.",
       playerNotFound: "일치하는 닉네임을 찾지 못했습니다.",
-      playerSuggestions: "비슷한 닉네임",
+      playerSuggestions: "연관 검색어",
       playerSearchHint: "`!yoro 플레이어 {닉네임}` 형식으로 검색해 주세요.",
       playerFields: {
         nickname: "닉네임",
@@ -176,7 +176,7 @@ export const DISCORD_BOT_MESSAGES = {
       playerEmpty: "現在接続中のプレイヤーはいません。",
       playerListTruncated: "全{total}名のうち{shown}名のみ表示しています。",
       playerNotFound: "一致するニックネームが見つかりませんでした。",
-      playerSuggestions: "類似するニックネーム",
+      playerSuggestions: "関連する検索候補",
       playerSearchHint: "`!yoro プレイヤー {ニックネーム}`の形式で検索してください。",
       playerFields: {
         nickname: "ニックネーム",

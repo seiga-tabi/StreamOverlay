@@ -5,6 +5,7 @@
     radial-gradient(circle at 78% 12%, color-mix(in srgb, var(--bot-accent) 18%, transparent), transparent 32rem),
     var(--yoro-color-product-gray-canvas);
   color: var(--yoro-color-product-gray-text);
+  overflow-x: clip;
 }
 
 .public-bot-main {
@@ -258,11 +259,30 @@
 
 .public-bot-flow__list {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
   gap: var(--yoro-space-4);
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.public-bot-command-grid {
+  margin-bottom: var(--yoro-space-6);
+}
+
+.public-bot-command-grid code {
+  overflow-wrap: anywhere;
+  color: var(--yoro-color-product-gray-text);
+}
+
+.public-bot-command-access-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: var(--yoro-space-6);
+}
+
+.public-bot-command-access-grid h2,
+#bot-public-commands {
+  font-size: var(--yoro-font-size-xl);
 }
 
 .public-bot-flow__list li {

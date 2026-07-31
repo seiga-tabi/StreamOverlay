@@ -160,7 +160,9 @@ test("플레이어 조회는 닉네임 목록과 정확히 일치하는 안전�
     async listOnlinePlayers() {
       return [
         { nickname: "세이가", level: 42, buildingCount: 7 },
-        { nickname: "SeigaTwo", level: 20, buildingCount: 2 }
+        { nickname: "SeigaTwo", level: 20, buildingCount: 2 },
+        { nickname: "SeigaThree", level: 18, buildingCount: 1 },
+        { nickname: "セイガ", level: 16 }
       ];
     }
   });
@@ -174,8 +176,8 @@ test("플레이어 조회는 닉네임 목록과 정확히 일치하는 안전�
     displayName: "REST Palworld",
     result: {
       kind: "list",
-      nicknames: ["세이가", "SeigaTwo"],
-      total: 2
+      nicknames: ["세이가", "SeigaThree", "SeigaTwo", "セイガ"],
+      total: 4
     }
   });
   assert.deepEqual(await service.readPlayers({
@@ -199,7 +201,31 @@ test("플레이어 조회는 닉네임 목록과 정확히 일치하는 안전�
     displayName: "REST Palworld",
     result: {
       kind: "not_found",
+      suggestions: ["SeigaTwo", "SeigaThree"]
+    }
+  });
+  assert.deepEqual(await service.readPlayers({
+    ...base,
+    nickname: "SeigaTwp"
+  }), {
+    connected: true,
+    serverConfigured: true,
+    displayName: "REST Palworld",
+    result: {
+      kind: "not_found",
       suggestions: ["SeigaTwo"]
+    }
+  });
+  assert.deepEqual(await service.readPlayers({
+    ...base,
+    nickname: "セイ"
+  }), {
+    connected: true,
+    serverConfigured: true,
+    displayName: "REST Palworld",
+    result: {
+      kind: "not_found",
+      suggestions: ["セイガ"]
     }
   });
 });

@@ -1,12 +1,30 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  DISCORD_BOT_PREFIX_COMMAND_MANIFEST,
   DEFAULT_DISCORD_BOT_CONTROL_SETTINGS,
   parseDiscordBotControlOverview,
   parseDiscordBotCommandPolicyRequest,
   parseDiscordBotCommandPolicyResponse,
   parseUpdateDiscordBotControlInput
 } from "../dist/index.js";
+
+test("Discord Bot 공개 명령 manifest는 한국어·일본어·영어 alias와 지연 특성을 함께 정의한다", () => {
+  assert.deepEqual(
+    DISCORD_BOT_PREFIX_COMMAND_MANIFEST.map((entry) => entry.command),
+    ["help", "status", "player", "guide"]
+  );
+  const help = DISCORD_BOT_PREFIX_COMMAND_MANIFEST[0];
+  const status = DISCORD_BOT_PREFIX_COMMAND_MANIFEST[1];
+  const player = DISCORD_BOT_PREFIX_COMMAND_MANIFEST[2];
+  assert.ok(help.aliases.ko.includes(""));
+  assert.ok(help.aliases.ja.includes("ヘルプ"));
+  assert.ok(help.aliases.en.includes("help"));
+  assert.equal(help.showTyping, false);
+  assert.equal(status.requiresPalworldRest, true);
+  assert.equal(status.showTyping, true);
+  assert.equal(player.acceptsNickname, true);
+});
 
 const validOverview = {
   organizationId: "11111111-1111-4111-8111-111111111111",

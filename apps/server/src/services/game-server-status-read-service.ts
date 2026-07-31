@@ -67,6 +67,97 @@ function playerLookupReason(
   return "upstream_unavailable";
 }
 
+function normalizedNickname(value: string): string {
+  return value.normalize("NFKC").toLowerCase();
+}
+
+function boundedEditDistance(
+  leftValue: string,
+  rightValue: string,
+  maximum: number
+): number | undefined {
+  const left = Array.from(leftValue);
+  const right = Array.from(rightValue);
+  if (Math.abs(left.length - right.length) > maximum) return undefined;
+  let previous = right.map((_, index) => index + 1);
+  previous.unshift(0);
+  for (let leftIndex = 1; leftIndex <= left.length; leftIndex += 1) {
+    const current = [leftIndex];
+    let rowMinimum = current[0]!;
+    for (let rightIndex = 1; rightIndex <= right.length; rightIndex += 1) {
+      const substitution = previous[rightIndex - 1]!
+        + (left[leftIndex - 1] === right[rightIndex - 1] ? 0 : 1);
+      const distance = Math.min(
+        previous[rightIndex]! + 1,
+        current[rightIndex - 1]! + 1,
+        substitution
+      );
+      current.push(distance);
+      rowMinimum = Math.min(rowMinimum, distance);
+    }
+    if (rowMinimum > maximum) return undefined;
+    previous = current;
+  }
+  const distance = previous[right.length]!;
+  return distance <= maximum ? distance : undefined;
+}
+
+function relatedPlayerNicknames(
+  players: readonly PalworldOnlinePlayer[],
+  query: string
+): readonly string[] {
+  const queryLength = Array.from(query).length;
+  const maximumDistance = queryLength < 2
+    ? 0
+    : queryLength <= 4
+      ? 1
+      : queryLength <= 8
+        ? 2
+        : 3;
+  const seen = new Set<string>();
+  return players
+    .map((player) => {
+      const normalized = normalizedNickname(player.nickname);
+      const prefix = normalized.startsWith(query);
+      const includes = normalized.includes(query);
+      const reverseIncludes = query.includes(normalized);
+      const editDistance = prefix || includes || reverseIncludes || maximumDistance === 0
+        ? undefined
+        : boundedEditDistance(normalized, query, maximumDistance);
+      const rank = prefix
+        ? 0
+        : includes
+          ? 1
+          : reverseIncludes
+            ? 2
+            : editDistance === undefined
+              ? undefined
+              : 3;
+      return {
+        nickname: player.nickname,
+        normalized,
+        rank,
+        distance: editDistance ?? Math.abs(
+          Array.from(normalized).length - queryLength
+        )
+      };
+    })
+    .filter((candidate) => {
+      if (candidate.rank === undefined || seen.has(candidate.normalized)) {
+        return false;
+      }
+      seen.add(candidate.normalized);
+      return true;
+    })
+    .sort((left, right) =>
+      left.rank! - right.rank!
+      || left.distance - right.distance
+      || left.nickname.localeCompare(right.nickname, "ko")
+    )
+    .slice(0, 5)
+    .map((candidate) => candidate.nickname);
+}
+
 function restState(state: PalworldServerStatus["state"]): DiscordGameServerStatusState {
   switch (state) {
     case "not_configured":
@@ -275,10 +366,10 @@ export class GameServerStatusReadService {
         })
       });
     }
-    const query = input.nickname.normalize("NFKC").toLocaleLowerCase("ko");
+    const query = normalizedNickname(input.nickname);
     const exact = sorted.find(
       (player) =>
-        player.nickname.normalize("NFKC").toLocaleLowerCase("ko") === query
+        normalizedNickname(player.nickname) === query
     );
     if (exact) {
       return Object.freeze({
@@ -297,20 +388,7 @@ export class GameServerStatusReadService {
         })
       });
     }
-    const suggestions = sorted
-      .map((player) => ({
-        nickname: player.nickname,
-        normalized: player.nickname.normalize("NFKC").toLocaleLowerCase("ko")
-      }))
-      .filter((player) => player.normalized.includes(query))
-      .sort((left, right) => {
-        const leftPrefix = left.normalized.startsWith(query) ? 0 : 1;
-        const rightPrefix = right.normalized.startsWith(query) ? 0 : 1;
-        return leftPrefix - rightPrefix
-          || left.nickname.localeCompare(right.nickname, "ko");
-      })
-      .slice(0, 5)
-      .map((player) => player.nickname);
+    const suggestions = relatedPlayerNicknames(sorted, query);
     return Object.freeze({
       connected: true,
       serverConfigured: true,

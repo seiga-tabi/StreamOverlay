@@ -54,52 +54,52 @@ test("YORO Bot 소개 페이지는 중앙 Hero와 4개 독립 페이지 메뉴�
   assert.match(markup, /Palworld REST 직접 연결 기반은 구현/u);
   assert.match(markup, /OAuth token 평문 미저장/u);
   assert.match(markup, /aria-label="YORO Bot 홈"/u);
-  assert.match(markup, /href="\/ko\/bot\/features"/u);
-  assert.match(markup, /href="\/ko\/bot\/connect"/u);
-  assert.match(markup, /href="\/ko\/bot\/dedicated-server"/u);
+  assert.match(markup, /href="\/ko\/bot\/getting-started"/u);
+  assert.match(markup, /href="\/ko\/bot\/commands"/u);
+  assert.match(markup, /href="\/ko\/bot\/game-files"/u);
   assert.doesNotMatch(markup, /href="#bot-(?:overview|features|flow|security)"/u);
   assert.match(markup, /discord-symbol-blurple\.f6c1a66250d3\.png/u);
   assert.doesNotMatch(markup, /class="public-bot-node is-discord">D</u);
   assert.doesNotMatch(markup, /accessToken|refreshToken|clientSecret|setupToken/u);
 });
 
-test("YORO Bot 기능과 연결 과정은 URL별 독립 콘텐츠로 렌더링된다", async () => {
+test("YORO Bot 사용방법·명령어·게임파일은 canonical URL별 독립 콘텐츠로 렌더링된다", async () => {
   const {
     PublicBotPage,
     publicBotSectionFromPath
   } = await import("../src/features/public-bot/PublicBotPage");
 
   assert.equal(publicBotSectionFromPath("/bot"), "overview");
-  assert.equal(publicBotSectionFromPath("/bot/features/"), "features");
-  assert.equal(publicBotSectionFromPath("/bot/connect"), "connect");
-  assert.equal(publicBotSectionFromPath("/bot/dedicated-server/"), "dedicatedServer");
-  assert.equal(publicBotSectionFromPath("/ko/bot/features"), "features");
-  assert.equal(publicBotSectionFromPath("/ja/bot/dedicated-server"), "dedicatedServer");
+  assert.equal(publicBotSectionFromPath("/bot/getting-started/"), "gettingStarted");
+  assert.equal(publicBotSectionFromPath("/bot/commands"), "commands");
+  assert.equal(publicBotSectionFromPath("/bot/game-files/"), "gameFiles");
+  assert.equal(publicBotSectionFromPath("/ko/bot/features"), "commands");
+  assert.equal(publicBotSectionFromPath("/ja/bot/dedicated-server"), "gameFiles");
 
-  window.location.pathname = "/bot/features";
-  const featureMarkup = renderToStaticMarkup(<PublicBotPage />);
-  assert.match(featureMarkup, /현재 사용할 수 있는 기반/u);
-  assert.match(featureMarkup, /Organization 관리/u);
-  assert.match(featureMarkup, /안전한 Discord 연결/u);
-  assert.match(featureMarkup, /aria-current="page"[^>]*href="\/ko\/bot\/features"/u);
-  assert.doesNotMatch(featureMarkup, /게임 서버 운영을 Discord에서 더 간단하게/u);
-  assert.doesNotMatch(featureMarkup, /복구용 일회성 링크/u);
+  window.location.pathname = "/bot/commands";
+  const commandMarkup = renderToStaticMarkup(<PublicBotPage />);
+  assert.match(commandMarkup, /Discord 명령어 목록/u);
+  assert.match(commandMarkup, /!yoro 상태/u);
+  assert.match(commandMarkup, /!yoro 플레이어 \{nickname\}/u);
+  assert.match(commandMarkup, /\/yoro setup/u);
+  assert.match(commandMarkup, /aria-current="page"[^>]*href="\/ko\/bot\/commands"/u);
+  assert.doesNotMatch(commandMarkup, /게임 서버 운영을 Discord에서 더 간단하게/u);
 
-  window.location.pathname = "/bot/connect";
+  window.location.pathname = "/bot/getting-started";
   const connectMarkup = renderToStaticMarkup(<PublicBotPage />);
   assert.match(connectMarkup, /연결 과정/u);
   assert.match(connectMarkup, /YORO Bot 추가/u);
-  assert.match(connectMarkup, /Discord 로그인/u);
+  assert.match(connectMarkup, /Palworld REST 등록/u);
+  assert.match(connectMarkup, /Discord Bot 제어/u);
   assert.match(connectMarkup, /복구용 일회성 링크/u);
-  assert.match(connectMarkup, /aria-current="page"[^>]*href="\/ko\/bot\/connect"/u);
-  assert.doesNotMatch(connectMarkup, /Organization 관리/u);
+  assert.match(connectMarkup, /aria-current="page"[^>]*href="\/ko\/bot\/getting-started"/u);
 
-  window.location.pathname = "/bot/dedicated-server";
+  window.location.pathname = "/bot/game-files";
   const dedicatedServerMarkup = renderToStaticMarkup(<PublicBotPage />);
   assert.match(dedicatedServerMarkup, /전용 서버 설정 만들기/u);
   assert.match(dedicatedServerMarkup, /PalWorldSettings\.ini/u);
   assert.match(dedicatedServerMarkup, /입력값은 YORO 서버로 전송하거나 계정에 저장하지 않습니다/u);
-  assert.match(dedicatedServerMarkup, /aria-current="page"[^>]*href="\/ko\/bot\/dedicated-server"/u);
+  assert.match(dedicatedServerMarkup, /aria-current="page"[^>]*href="\/ko\/bot\/game-files"/u);
   assert.match(dedicatedServerMarkup, /type="password"/u);
   assert.match(dedicatedServerMarkup, /REST API/u);
   assert.match(dedicatedServerMarkup, /RCON/u);

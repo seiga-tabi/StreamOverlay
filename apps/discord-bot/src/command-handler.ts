@@ -128,7 +128,7 @@ export class YoroCommandHandler {
         primaryUrl: this.dashboardUrl,
         primaryLabel: text.dashboardButton,
         guideUrl: new URL(
-          "/bot/dedicated-server",
+          "/bot/game-files",
           this.dashboardUrl
         ).toString(),
         guideLabel: prefixMessages.guideButton
@@ -285,7 +285,7 @@ export class YoroCommandHandler {
         primaryUrl: this.dashboardUrl,
         primaryLabel: DISCORD_BOT_MESSAGES[locale].slash.dashboardButton,
         guideUrl: new URL(
-          "/bot/dedicated-server",
+          "/bot/game-files",
           this.dashboardUrl
         ).toString(),
         guideLabel: messages.guideButton
@@ -388,7 +388,7 @@ export class YoroCommandHandler {
       primaryUrl: this.dashboardUrl,
       primaryLabel: DISCORD_BOT_MESSAGES[locale].slash.dashboardButton,
       guideUrl: new URL(
-        "/bot/dedicated-server",
+        "/bot/game-files",
         this.dashboardUrl
       ).toString(),
       guideLabel: messages.guideButton

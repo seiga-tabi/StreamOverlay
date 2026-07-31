@@ -53,6 +53,7 @@
     "start:bridge": "npm --workspace apps/bridge run start",
     "start:discord-bot": "npm --workspace apps/discord-bot run start",
     "backup:state": "node scripts/backup-state.mjs",
+    "cleanup:generated": "node scripts/cleanup-generated-artifacts.mjs --dry-run",
     "restore:state": "node scripts/restore-state.mjs",
     "backup:postgres": "node scripts/backup-postgres.mjs",
     "verify:postgres-backup": "node scripts/verify-postgres-backup.mjs",

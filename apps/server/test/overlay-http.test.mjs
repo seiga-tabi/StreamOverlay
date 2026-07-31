@@ -283,6 +283,23 @@ test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => 
     assert.match(japanesePalworldRes.body, /<title>パル図鑑 \| YORO\.gg<\/title>/);
     assert.match(japanesePalworldRes.body, /<link rel="canonical" href="https:\/\/yoro\.gg\/ja\/palworld\/pals">/);
 
+    const botCommandsRes = createResponse();
+    await handler(createRequest("GET", "/ja/bot/commands"), botCommandsRes);
+    assert.equal(botCommandsRes.statusCode, 200);
+    assert.match(botCommandsRes.body, /<title>コマンド一覧 \| YORO Bot<\/title>/);
+    assert.match(botCommandsRes.body, /<link rel="canonical" href="https:\/\/yoro\.gg\/ja\/bot\/commands">/);
+
+    const legacyBotRes = createResponse();
+    await handler(
+      createRequest("GET", "/ja/bot/features?source=legacy&next=%2Fsafe"),
+      legacyBotRes
+    );
+    assert.equal(legacyBotRes.statusCode, 308);
+    assert.equal(
+      legacyBotRes.headers.Location,
+      "/ja/bot/commands?source=legacy&next=%2Fsafe"
+    );
+
     const unknownPalworldRes = createResponse();
     await handler(createRequest("GET", "/palworld/not-a-real-page"), unknownPalworldRes);
     assert.equal(unknownPalworldRes.statusCode, 404);

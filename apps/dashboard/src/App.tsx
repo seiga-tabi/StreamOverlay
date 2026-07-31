@@ -281,6 +281,12 @@ export default function App() {
       || window.location.pathname === "/account/connections/";
     const botPublic = publicPathname === "/bot"
       || publicPathname === "/bot/"
+      || publicPathname === "/bot/getting-started"
+      || publicPathname === "/bot/getting-started/"
+      || publicPathname === "/bot/commands"
+      || publicPathname === "/bot/commands/"
+      || publicPathname === "/bot/game-files"
+      || publicPathname === "/bot/game-files/"
       || publicPathname === "/bot/features"
       || publicPathname === "/bot/features/"
       || publicPathname === "/bot/connect"

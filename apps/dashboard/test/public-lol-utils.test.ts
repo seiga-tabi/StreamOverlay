@@ -62,7 +62,7 @@ test("공개 언어 URL은 경로·query·hash를 보존하고 비공개 경로�
   );
   assert.equal(localizedPublicUrl("/dashboard", "ja"), "/dashboard");
   assert.equal(localizedPublicUrl("/api/palworld/meta", "ko"), "/api/palworld/meta");
-  assert.equal(isLocalizablePublicPath("/ja/bot/features"), true);
+  assert.equal(isLocalizablePublicPath("/ja/bot/commands"), true);
   assert.equal(isLocalizablePublicPath("/ja/dashboard"), false);
 });
 

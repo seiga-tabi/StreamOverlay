@@ -18,6 +18,76 @@ export const DISCORD_BOT_CONTROL_COMMANDS = [
 export type DiscordBotControlCommand =
   (typeof DISCORD_BOT_CONTROL_COMMANDS)[number];
 
+export type DiscordBotCommandLocale = "ko" | "ja" | "en";
+
+export type DiscordBotPrefixCommandManifestEntry = Readonly<{
+  command: DiscordBotControlCommand;
+  aliases: Readonly<Record<DiscordBotCommandLocale, readonly string[]>>;
+  acceptsNickname: boolean;
+  requiresPalworldRest: boolean;
+  showTyping: boolean;
+}>;
+
+/**
+ * Prefix parser, 공개 문서와 Dashboard가 함께 사용하는 단일 명령 정의입니다.
+ * 빈 문자열은 `!yoro` 단독 입력을 뜻하며 help 항목에만 허용합니다.
+ */
+export const DISCORD_BOT_PREFIX_COMMAND_MANIFEST:
+readonly DiscordBotPrefixCommandManifestEntry[] = Object.freeze([
+  Object.freeze({
+    command: "help",
+    aliases: Object.freeze({
+      ko: Object.freeze(["", "명령어", "도움말", "도움"]),
+      ja: Object.freeze(["コマンド", "ヘルプ"]),
+      en: Object.freeze(["help"])
+    }),
+    acceptsNickname: false,
+    requiresPalworldRest: false,
+    showTyping: false
+  }),
+  Object.freeze({
+    command: "status",
+    aliases: Object.freeze({
+      ko: Object.freeze(["상태", "서버상태"]),
+      ja: Object.freeze(["状態", "ステータス", "サーバー状態"]),
+      en: Object.freeze(["status"])
+    }),
+    acceptsNickname: false,
+    requiresPalworldRest: true,
+    showTyping: true
+  }),
+  Object.freeze({
+    command: "player",
+    aliases: Object.freeze({
+      ko: Object.freeze(["플레이어", "접속자"]),
+      ja: Object.freeze(["プレイヤー", "プレーヤー"]),
+      en: Object.freeze(["player", "players"])
+    }),
+    acceptsNickname: true,
+    requiresPalworldRest: true,
+    showTyping: true
+  }),
+  Object.freeze({
+    command: "guide",
+    aliases: Object.freeze({
+      ko: Object.freeze(["가이드", "안내"]),
+      ja: Object.freeze(["ガイド", "案内"]),
+      en: Object.freeze(["guide"])
+    }),
+    acceptsNickname: false,
+    requiresPalworldRest: false,
+    showTyping: false
+  })
+]);
+
+export function discordBotPrefixCommandDefinition(
+  command: DiscordBotControlCommand
+): DiscordBotPrefixCommandManifestEntry {
+  return DISCORD_BOT_PREFIX_COMMAND_MANIFEST.find(
+    (entry) => entry.command === command
+  )!;
+}
+
 export type DiscordBotCommandCapabilities = Readonly<
   Record<DiscordBotControlCommand, boolean>
 >;

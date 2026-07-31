@@ -36,6 +36,7 @@ import {
   useYoroAccountSession,
 } from "../yoro-account/useYoroAccountSession";
 import { PalworldDedicatedServerSettings } from "./PalworldDedicatedServerSettings";
+import { DISCORD_BOT_PREFIX_COMMAND_MANIFEST } from "@streamops/shared";
 
 const noLocalePreference = async (): Promise<PublicLocale | undefined> => undefined;
 
@@ -49,17 +50,17 @@ const botText = {
     game: "서비스 선택",
     language: "언어",
     navOverview: "소개",
-    navFeatures: "기능",
-    navFlow: "연결 과정",
-    navDedicatedServer: "전용 서버",
+    navGettingStarted: "사용방법",
+    navCommands: "명령어 목록",
+    navGameFiles: "게임파일",
     eyebrow: "DISCORD SERVER COMPANION",
     title: "게임 서버 운영을 Discord에서 더 간단하게",
     pageTitle: "YORO Bot | Discord 게임 서버 도우미",
-    featuresPageTitle: "기능 | YORO Bot",
-    flowPageTitle: "연결 과정 | YORO Bot",
-    dedicatedServerPageTitle: "Palworld 전용 서버 설정 | YORO Bot",
-    dedicatedServerPageDescription: "브라우저에서 안전하게 PalWorldSettings.ini 설정을 만들고 다운로드합니다.",
-    description: "YORO Bot은 Organization과 Discord 서버를 안전하게 연결하고, 향후 게임 서버 상태와 알림을 한곳에서 관리하도록 설계된 도우미입니다.",
+    gettingStartedPageTitle: "사용방법 | YORO Bot",
+    commandsPageTitle: "명령어 목록 | YORO Bot",
+    gameFilesPageTitle: "Palworld 게임파일 | YORO Bot",
+    gameFilesPageDescription: "검증된 PalWorldSettings.ini 설정을 브라우저에서 만들고 안전하게 설치하는 방법을 안내합니다.",
+    description: "YORO Bot은 Palworld REST API를 읽기 전용으로 조회해 Discord에 서버 상태를 보여주며, 개인정보와 AdminPassword를 Discord에 노출하지 않습니다.",
     foundationReady: "Discord 연결 기반 준비됨",
     gatewayPending: "설정 명령 구현됨 · 운영 활성화 필요",
     explore: "기능 살펴보기",
@@ -90,6 +91,23 @@ const botText = {
     flowGuildDescription: "소유자, 관리자 또는 서버 관리 권한이 있는 Guild만 선택할 수 있습니다.",
     flowComplete: "Organization 연결",
     flowCompleteDescription: "권한을 다시 확인한 뒤 Organization과 Guild를 하나의 transaction으로 연결합니다.",
+    flowRest: "Palworld REST 등록",
+    flowRestDescription: "Dashboard에서 REST 주소와 AdminPassword를 검증하고 암호화 저장합니다. 비밀번호는 Discord 응답에 표시하지 않습니다.",
+    flowControl: "Discord Bot 제어",
+    flowControlDescription: "공개 명령과 상태·플레이어·가이드 명령의 활성화 여부를 Dashboard에서 선택합니다.",
+    flowUse: "명령어 사용",
+    flowUseDescription: "일반 사용자는 !yoro 명령을, 작성자와 관리자는 필요한 /yoro 명령을 사용합니다.",
+    commandsTitle: "Discord 명령어 목록",
+    commandsDescription: "명령어 입력 언어가 응답 언어보다 우선하며, Dashboard에서 비활성화한 명령은 실행과 도움말에서 모두 제외됩니다.",
+    publicCommands: "일반 사용자 · 공개 응답",
+    slashCommands: "작성자 전용 · 비공개 응답",
+    adminCommands: "관리자 전용",
+    aliases: "별칭",
+    condition: "활성화 조건",
+    publicCondition: "Organization 연결 · 공개 명령 활성화 · 해당 명령 활성화",
+    slashDescription: "/yoro status, /yoro player, /yoro guide는 실행자에게만 보이는 응답을 사용합니다.",
+    adminDescription: "/yoro setup은 서버 소유자·Administrator·Manage Guild 권한이 있는 사용자만 사용할 수 있으며, /yoro dashboard는 고정 Dashboard 링크를 비공개로 제공합니다.",
+    playerMatchNotice: "플레이어 프로필은 닉네임 완전 일치일 때만 확정합니다. 부분 일치와 제한된 오타는 연관 검색어로만 표시합니다.",
     setupNotice: "웹 Dashboard가 기본 연결 경로이며 `/yoro setup`은 복구용 일회성 링크로 유지됩니다. 운영 command 등록과 feature flag 활성화는 별도 단계입니다.",
     securityTitle: "연결 정보는 짧게, 권한은 정확하게",
     securityDescription: "OAuth token은 AES-256-GCM으로 암호화하고 연결 완료 또는 만료 시 폐기합니다. 다른 Organization의 Guild 정보는 조회하거나 변경할 수 없습니다.",
@@ -113,18 +131,18 @@ const botText = {
     closeMenu: "メニューを閉じる",
     game: "サービス選択",
     language: "言語",
-    navOverview: "概要",
-    navFeatures: "機能",
-    navFlow: "連携手順",
-    navDedicatedServer: "専用サーバー",
+    navOverview: "紹介",
+    navGettingStarted: "使い方",
+    navCommands: "コマンド一覧",
+    navGameFiles: "ゲームファイル",
     eyebrow: "DISCORD SERVER COMPANION",
     title: "ゲームサーバー運用を Discord でもっとシンプルに",
     pageTitle: "YORO Bot | Discordゲームサーバーアシスタント",
-    featuresPageTitle: "機能 | YORO Bot",
-    flowPageTitle: "連携手順 | YORO Bot",
-    dedicatedServerPageTitle: "Palworld専用サーバー設定 | YORO Bot",
-    dedicatedServerPageDescription: "ブラウザ内で安全にPalWorldSettings.iniを作成してダウンロードできます。",
-    description: "YORO Bot は Organization と Discord サーバーを安全に連携し、今後ゲームサーバーの状態と通知を一か所で管理するためのアシスタントです。",
+    gettingStartedPageTitle: "使い方 | YORO Bot",
+    commandsPageTitle: "コマンド一覧 | YORO Bot",
+    gameFilesPageTitle: "Palworldゲームファイル | YORO Bot",
+    gameFilesPageDescription: "検証済みのPalWorldSettings.iniをブラウザで作成し、安全に設置する方法を案内します。",
+    description: "YORO BotはPalworld REST APIを読み取り専用で参照してDiscordにサーバー状態を表示し、個人情報やAdminPasswordをDiscordへ公開しません。",
     foundationReady: "Discord連携基盤の準備完了",
     gatewayPending: "設定コマンド実装済み・運用有効化が必要",
     explore: "機能を見る",
@@ -155,6 +173,23 @@ const botText = {
     flowGuildDescription: "所有者、管理者、またはサーバー管理権限を持つGuildのみ選択できます。",
     flowComplete: "Organization連携",
     flowCompleteDescription: "権限を再確認した後、OrganizationとGuildを一つのtransactionで連携します。",
+    flowRest: "Palworld REST登録",
+    flowRestDescription: "DashboardでRESTアドレスとAdminPasswordを検証し、暗号化して保存します。パスワードはDiscord応答に表示しません。",
+    flowControl: "Discord Bot制御",
+    flowControlDescription: "公開コマンドと状態・プレイヤー・ガイドの有効化をDashboardで選択します。",
+    flowUse: "コマンド利用",
+    flowUseDescription: "一般ユーザーは!yoro、実行者と管理者は必要な/yoroコマンドを利用します。",
+    commandsTitle: "Discordコマンド一覧",
+    commandsDescription: "入力したコマンドの言語を応答言語より優先し、Dashboardで無効にしたコマンドは実行とヘルプの両方から除外します。",
+    publicCommands: "一般ユーザー・公開応答",
+    slashCommands: "実行者のみ・非公開応答",
+    adminCommands: "管理者専用",
+    aliases: "別名",
+    condition: "有効化条件",
+    publicCondition: "Organization連携・公開コマンド有効・該当コマンド有効",
+    slashDescription: "/yoro status、/yoro player、/yoro guideは実行者だけに表示される応答を使用します。",
+    adminDescription: "/yoro setupはサーバー所有者・Administrator・Manage Guild権限を持つユーザーだけが利用でき、/yoro dashboardは固定Dashboardリンクを非公開で提供します。",
+    playerMatchNotice: "プレイヤープロフィールはニックネームが完全一致した場合のみ確定します。部分一致と限定的な入力ミスは関連候補としてのみ表示します。",
     setupNotice: "Web Dashboardが基本の連携経路で、`/yoro setup` は復旧用ワンタイムリンクとして維持されます。運用command登録とfeature flag有効化は別の段階です。",
     securityTitle: "連携情報は短く、権限は正確に",
     securityDescription: "OAuth tokenはAES-256-GCMで暗号化し、連携完了または期限切れ時に破棄します。他のOrganizationのGuild情報は参照・変更できません。",
@@ -172,31 +207,23 @@ const botText = {
   },
 } as const;
 
-export type PublicBotSection = "overview" | "features" | "connect" | "dedicatedServer";
+export type PublicBotSection = "overview" | "gettingStarted" | "commands" | "gameFiles";
 
 export function publicBotSectionFromPath(pathname: string): PublicBotSection {
   pathname = stripPublicLocalePrefix(pathname);
   const normalized = pathname.length > 1 && pathname.endsWith("/")
     ? pathname.slice(0, -1)
     : pathname;
-  if (normalized === "/bot/features") return "features";
-  if (normalized === "/bot/connect") return "connect";
-  if (normalized === "/bot/dedicated-server") return "dedicatedServer";
+  if (normalized === "/bot/getting-started" || normalized === "/bot/connect") {
+    return "gettingStarted";
+  }
+  if (normalized === "/bot/commands" || normalized === "/bot/features") {
+    return "commands";
+  }
+  if (normalized === "/bot/game-files" || normalized === "/bot/dedicated-server") {
+    return "gameFiles";
+  }
   return "overview";
-}
-
-function BotFeatureIcon({ kind }: { kind: "organization" | "oauth" | "status" | "notification" }) {
-  const paths = {
-    organization: <><circle cx="9" cy="8" r="3" /><circle cx="17" cy="9" r="2" /><path d="M3.5 19c.6-3.2 2.4-5 5.5-5s5 1.8 5.5 5M15 14c2.8 0 4.4 1.5 5 4" /></>,
-    oauth: <><rect x="4" y="10" width="16" height="11" rx="3" /><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 4v3" /></>,
-    status: <><path d="M4 18h16M6 15l3-4 3 2 5-7 2 3" /><circle cx="6" cy="15" r="1" /></>,
-    notification: <><path d="M6 17h12l-2-3V9a4 4 0 0 0-8 0v5l-2 3Zm4 3h4" /></>,
-  };
-  return (
-    <svg aria-hidden="true" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" viewBox="0 0 24 24">
-      {paths[kind]}
-    </svg>
-  );
 }
 
 function navigateGame(page: PublicMainPage): void {
@@ -215,15 +242,15 @@ export function PublicBotPage() {
   const { locale, changeLocale } = usePublicLocale(noLocalePreference);
   const text = botText[locale];
   const activeSection = publicBotSectionFromPath(window.location.pathname);
-  const pageMetadata = activeSection === "features"
-    ? { title: text.featuresPageTitle, description: text.currentDescription, path: "/bot/features" }
-    : activeSection === "connect"
-      ? { title: text.flowPageTitle, description: text.flowDescription, path: "/bot/connect" }
-      : activeSection === "dedicatedServer"
+  const pageMetadata = activeSection === "commands"
+    ? { title: text.commandsPageTitle, description: text.commandsDescription, path: "/bot/commands" }
+    : activeSection === "gettingStarted"
+      ? { title: text.gettingStartedPageTitle, description: text.flowDescription, path: "/bot/getting-started" }
+      : activeSection === "gameFiles"
         ? {
-          title: text.dedicatedServerPageTitle,
-          description: text.dedicatedServerPageDescription,
-          path: "/bot/dedicated-server",
+          title: text.gameFilesPageTitle,
+          description: text.gameFilesPageDescription,
+          path: "/bot/game-files",
         }
       : { title: text.pageTitle, description: text.description, path: "/bot" };
   const [gameSelectorOpen, setGameSelectorOpen] = useState(false);
@@ -247,18 +274,45 @@ export function PublicBotPage() {
   setActivePublicLocale(locale);
 
   useEffect(() => {
+    const unprefixed = stripPublicLocalePrefix(window.location.pathname);
+    const normalized = unprefixed.length > 1 && unprefixed.endsWith("/")
+      ? unprefixed.slice(0, -1)
+      : unprefixed;
+    if (!["/bot/features", "/bot/connect", "/bot/dedicated-server"].includes(normalized)) {
+      return;
+    }
+    const suffix = `${window.location.search}${window.location.hash}`;
+    const target = localizedPublicUrl(`${pageMetadata.path}${suffix}`, locale);
+    window.history.replaceState({}, "", target);
+  }, [locale, pageMetadata.path]);
+
+  useEffect(() => {
     const previousTitle = document.title;
     const description = document.querySelector<HTMLMetaElement>('meta[name="description"]');
     const canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    const socialTags = [
+      document.querySelector<HTMLMetaElement>('meta[property="og:title"]'),
+      document.querySelector<HTMLMetaElement>('meta[property="og:description"]'),
+      document.querySelector<HTMLMetaElement>('meta[property="og:url"]'),
+      document.querySelector<HTMLMetaElement>('meta[name="twitter:title"]'),
+      document.querySelector<HTMLMetaElement>('meta[name="twitter:description"]'),
+    ];
     const previousDescription = description?.content;
     const previousCanonical = canonical?.href;
+    const previousSocialContent = socialTags.map((tag) => tag?.content);
+    const canonicalUrl = new URL(
+      localizedPublicUrl(pageMetadata.path, locale),
+      window.location.origin,
+    ).href;
 
     document.title = pageMetadata.title;
     description?.setAttribute("content", pageMetadata.description);
-    canonical?.setAttribute(
-      "href",
-      new URL(localizedPublicUrl(pageMetadata.path, locale), window.location.origin).href,
-    );
+    canonical?.setAttribute("href", canonicalUrl);
+    socialTags[0]?.setAttribute("content", pageMetadata.title);
+    socialTags[1]?.setAttribute("content", pageMetadata.description);
+    socialTags[2]?.setAttribute("content", canonicalUrl);
+    socialTags[3]?.setAttribute("content", pageMetadata.title);
+    socialTags[4]?.setAttribute("content", pageMetadata.description);
 
     return () => {
       document.title = previousTitle;
@@ -268,6 +322,10 @@ export function PublicBotPage() {
       if (canonical && previousCanonical !== undefined) {
         canonical.setAttribute("href", previousCanonical);
       }
+      socialTags.forEach((tag, index) => {
+        const content = previousSocialContent[index];
+        if (tag && content !== undefined) tag.setAttribute("content", content);
+      });
     };
   }, [locale, pageMetadata.description, pageMetadata.path, pageMetadata.title]);
 
@@ -307,9 +365,9 @@ export function PublicBotPage() {
     <PublicHorizontalNav ariaLabel={text.menu} testId="bot-secondary-nav">
       {([
         ["/bot", text.navOverview, "overview"],
-        ["/bot/features", text.navFeatures, "features"],
-        ["/bot/connect", text.navFlow, "connect"],
-        ["/bot/dedicated-server", text.navDedicatedServer, "dedicatedServer"],
+        ["/bot/getting-started", text.navGettingStarted, "gettingStarted"],
+        ["/bot/commands", text.navCommands, "commands"],
+        ["/bot/game-files", text.navGameFiles, "gameFiles"],
       ] as const).map(([href, label, section]) => (
         <a
           aria-current={activeSection === section ? "page" : undefined}
@@ -543,32 +601,7 @@ export function PublicBotPage() {
           </>
         ) : null}
 
-        {activeSection === "features" ? (
-          <section className="public-bot-section public-bot-page-section" id="bot-features">
-            <div className="public-bot-section__heading">
-              <span>{text.available}</span>
-              <h1>{text.currentTitle}</h1>
-              <p>{text.currentDescription}</p>
-            </div>
-            <div className="public-bot-feature-grid">
-              {([
-                ["organization", text.featureOrganization, text.featureOrganizationDescription, text.available, true],
-                ["oauth", text.featureOAuth, text.featureOAuthDescription, text.available, true],
-                ["status", text.featureStatus, text.featureStatusDescription, text.planned, false],
-                ["notification", text.featureNotification, text.featureNotificationDescription, text.planned, false],
-              ] as const).map(([kind, title, description, status, ready]) => (
-                <article className={`public-bot-feature${ready ? " is-ready" : ""}`} key={kind}>
-                  <div className="public-bot-feature__icon"><BotFeatureIcon kind={kind} /></div>
-                  <span className="public-bot-feature__status">{status}</span>
-                  <h3>{title}</h3>
-                  <p>{description}</p>
-                </article>
-              ))}
-            </div>
-          </section>
-        ) : null}
-
-        {activeSection === "connect" ? (
+        {activeSection === "gettingStarted" ? (
           <section className="public-bot-section public-bot-flow public-bot-page-section" id="bot-flow">
             <div className="public-bot-section__heading">
               <span>ONBOARDING</span>
@@ -578,9 +611,10 @@ export function PublicBotPage() {
             <ol className="public-bot-flow__list">
               {[
                 [text.flowIssue, text.flowIssueDescription],
-                [text.flowLogin, text.flowLoginDescription],
-                [text.flowGuild, text.flowGuildDescription],
                 [text.flowComplete, text.flowCompleteDescription],
+                [text.flowRest, text.flowRestDescription],
+                [text.flowControl, text.flowControlDescription],
+                [text.flowUse, text.flowUseDescription],
               ].map(([title, description], index) => (
                 <li key={title}>
                   <span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
@@ -592,7 +626,53 @@ export function PublicBotPage() {
           </section>
         ) : null}
 
-        {activeSection === "dedicatedServer" ? (
+        {activeSection === "commands" ? (
+          <section className="public-bot-section public-bot-page-section" id="bot-commands">
+            <div className="public-bot-section__heading">
+              <span>COMMAND MANIFEST</span>
+              <h1>{text.commandsTitle}</h1>
+              <p>{text.commandsDescription}</p>
+            </div>
+            <section aria-labelledby="bot-public-commands">
+              <h2 id="bot-public-commands">{text.publicCommands}</h2>
+              <div className="public-bot-feature-grid public-bot-command-grid">
+                {DISCORD_BOT_PREFIX_COMMAND_MANIFEST.map((definition) => {
+                  const aliases = (["ko", "ja", "en"] as const).flatMap((aliasLocale) =>
+                    definition.aliases[aliasLocale].map((alias) => ({
+                      command: alias ? `!yoro ${alias}` : "!yoro",
+                      locale: aliasLocale,
+                    })),
+                  );
+                  return (
+                    <article className="public-bot-feature is-ready" key={definition.command}>
+                      <span className="public-bot-feature__status">{definition.command}</span>
+                      <h3><code>{aliases[0]?.command}</code></h3>
+                      <p>
+                        <strong>{text.aliases}:</strong>{" "}
+                        {aliases.map((alias) => `${alias.locale.toUpperCase()} ${alias.command}`).join(" · ")}
+                      </p>
+                      {definition.acceptsNickname ? <p><code>{`${aliases[0]?.command} {nickname}`}</code></p> : null}
+                      <p><strong>{text.condition}:</strong> {text.publicCondition}</p>
+                    </article>
+                  );
+                })}
+              </div>
+              <p className="public-bot-notice" role="note">{text.playerMatchNotice}</p>
+            </section>
+            <div className="public-bot-feature-grid public-bot-command-access-grid">
+              <section className="public-bot-feature is-ready">
+                <h2>{text.slashCommands}</h2>
+                <p>{text.slashDescription}</p>
+              </section>
+              <section className="public-bot-feature is-ready">
+                <h2>{text.adminCommands}</h2>
+                <p>{text.adminDescription}</p>
+              </section>
+            </div>
+          </section>
+        ) : null}
+
+        {activeSection === "gameFiles" ? (
           <PalworldDedicatedServerSettings locale={locale} />
         ) : null}
       </AppShellMain>

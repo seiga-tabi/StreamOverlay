@@ -3,7 +3,9 @@ import {
   type Message
 } from "discord.js";
 import {
+  DISCORD_BOT_PREFIX_COMMAND_MANIFEST,
   DISCORD_BOT_MESSAGES,
+  discordBotPrefixCommandDefinition,
   discordBotHelpBody,
   discordBotMessageLocale,
   type DiscordBotMessageLocale,
@@ -60,31 +62,18 @@ type YoroPrefixAlias = Readonly<{
   localeHint?: DiscordBotMessageLocale;
 }>;
 
-const aliases = new Map<string, YoroPrefixAlias>([
-  ["명령어", { command: "help", localeHint: "ko" }],
-  ["도움말", { command: "help", localeHint: "ko" }],
-  ["도움", { command: "help", localeHint: "ko" }],
-  ["help", { command: "help" }],
-  ["コマンド", { command: "help", localeHint: "ja" }],
-  ["ヘルプ", { command: "help", localeHint: "ja" }],
-  ["상태", { command: "status", localeHint: "ko" }],
-  ["서버상태", { command: "status", localeHint: "ko" }],
-  ["status", { command: "status" }],
-  ["ステータス", { command: "status", localeHint: "ja" }],
-  ["状態", { command: "status", localeHint: "ja" }],
-  ["サーバー状態", { command: "status", localeHint: "ja" }],
-  ["플레이어", { command: "player", localeHint: "ko" }],
-  ["접속자", { command: "player", localeHint: "ko" }],
-  ["player", { command: "player" }],
-  ["players", { command: "player" }],
-  ["プレイヤー", { command: "player", localeHint: "ja" }],
-  ["プレーヤー", { command: "player", localeHint: "ja" }],
-  ["가이드", { command: "guide", localeHint: "ko" }],
-  ["안내", { command: "guide", localeHint: "ko" }],
-  ["guide", { command: "guide" }],
-  ["ガイド", { command: "guide", localeHint: "ja" }],
-  ["案内", { command: "guide", localeHint: "ja" }]
-]);
+const aliases = new Map<string, YoroPrefixAlias>();
+for (const definition of DISCORD_BOT_PREFIX_COMMAND_MANIFEST) {
+  for (const locale of ["ko", "ja", "en"] as const) {
+    for (const alias of definition.aliases[locale]) {
+      if (!alias) continue;
+      aliases.set(alias.toLowerCase(), {
+        command: definition.command,
+        ...(locale === "en" ? {} : { localeHint: locale })
+      });
+    }
+  }
+}
 
 export function parseYoroPrefixCommand(
   content: string
@@ -126,7 +115,7 @@ function commandResponseLocale(
 export function localizedPublicResourceUrl(
   publicBaseUrl: string,
   locale: DiscordBotMessageLocale,
-  pathname: "/palworld" | "/bot/dedicated-server"
+  pathname: "/palworld" | "/bot/game-files"
 ): string {
   return new URL(`/${locale}${pathname}`, publicBaseUrl).toString();
 }
@@ -170,6 +159,7 @@ class PrefixRateLimiter {
 
 export class YoroPrefixCommandHandler {
   private readonly limiter = new PrefixRateLimiter();
+  private readonly inFlight = new Set<string>();
 
   constructor(
     private readonly applicationId: string,
@@ -191,28 +181,68 @@ export class YoroPrefixCommandHandler {
     ) return;
     const parsed = parseYoroPrefixCommand(message.content);
     if (!parsed) return;
-    const { command } = parsed;
-    if (!this.limiter.allow(message.guildId, message.author.id, this.now())) {
-      auditEvent("discord.prefix_command.rate_limited", {
+    const inFlightKey = `${message.guildId}:${message.author.id}:${parsed.command}`;
+    if (this.inFlight.has(inFlightKey)) {
+      auditEvent("discord.prefix_command.duplicate_in_flight", {
+        command: parsed.command,
         guild: safeReference(message.guildId),
         user: safeReference(message.author.id)
       });
       return;
     }
-    const fallbackLocale = discordBotMessageLocale(message.guild.preferredLocale);
+    this.inFlight.add(inFlightKey);
+    const startedAt = Date.now();
+    this.auditTiming(message, parsed.command, "gateway_received", startedAt);
+    try {
+      const task = () => this.handleParsed(message, parsed);
+      if (discordBotPrefixCommandDefinition(parsed.command).showTyping) {
+        await this.withTyping(message, task);
+      } else {
+        await task();
+      }
+    } finally {
+      this.auditTiming(message, parsed.command, "handler_complete", startedAt);
+      this.inFlight.delete(inFlightKey);
+    }
+  }
+
+  private async handleParsed(
+    message: Message,
+    parsed: ParsedYoroPrefixCommand
+  ): Promise<void> {
+    const { command } = parsed;
+    const guildId = message.guildId!;
+    const guild = message.guild!;
+    if (!this.limiter.allow(guildId, message.author.id, this.now())) {
+      auditEvent("discord.prefix_command.rate_limited", {
+        guild: safeReference(guildId),
+        user: safeReference(message.author.id)
+      });
+      return;
+    }
+    const fallbackLocale = discordBotMessageLocale(guild.preferredLocale);
     let policy: DiscordBotCommandPolicyResponse;
+    const policyStartedAt = Date.now();
     try {
       policy = await this.internalApi.commandPolicy({
         applicationId: this.applicationId,
-        guildId: message.guildId,
+        guildId,
         command
       });
+      this.auditTiming(message, command, "command_policy", policyStartedAt);
     } catch (error) {
+      this.auditTiming(
+        message,
+        command,
+        "command_policy",
+        policyStartedAt,
+        internalFailureCode(error)
+      );
       auditEvent("discord.prefix_command.internal_api_failed", {
         command,
         stage: "policy",
         errorCode: internalFailureCode(error),
-        guild: safeReference(message.guildId)
+        guild: safeReference(guildId)
       });
       await message.reply({
         content: internalFailureMessage(
@@ -232,7 +262,7 @@ export class YoroPrefixCommandHandler {
       );
       auditEvent("discord.prefix_command.denied", {
         command,
-        guild: safeReference(message.guildId),
+        guild: safeReference(guildId),
         reason: policy.reason
       });
       await message.reply({
@@ -262,7 +292,7 @@ export class YoroPrefixCommandHandler {
     const guideUrl = localizedPublicResourceUrl(
       this.publicBaseUrl,
       locale,
-      "/bot/dedicated-server"
+      "/bot/game-files"
     );
     const resources = discordResourceLinks({
       primaryUrl: palworldHomeUrl,
@@ -273,7 +303,7 @@ export class YoroPrefixCommandHandler {
     });
     auditEvent("discord.prefix_command.received", {
       command,
-      guild: safeReference(message.guildId),
+      guild: safeReference(guildId),
       user: safeReference(message.author.id)
     });
     if (command === "help") {
@@ -329,6 +359,54 @@ export class YoroPrefixCommandHandler {
     );
   }
 
+  private auditTiming(
+    message: Message,
+    command: YoroPrefixCommand,
+    stage: string,
+    startedAt: number,
+    errorCode?: InternalFailureCode
+  ): void {
+    auditEvent("discord.command.timing", {
+      command,
+      guild: safeReference(message.guildId!),
+      user: safeReference(message.author.id),
+      stage,
+      durationMs: Math.max(0, Date.now() - startedAt),
+      ...(errorCode ? { errorCode } : {})
+    });
+  }
+
+  private async withTyping<T>(
+    message: Message,
+    task: () => Promise<T>
+  ): Promise<T> {
+    const channel = message.channel;
+    if (!channel) return task();
+    const sendTyping = "sendTyping" in channel && typeof channel.sendTyping === "function"
+      ? () => channel.sendTyping()
+      : undefined;
+    if (!sendTyping) return task();
+    const send = async () => {
+      try {
+        await sendTyping();
+      } catch {
+        auditEvent("discord.prefix_command.typing_failed", {
+          guild: safeReference(message.guildId!)
+        });
+      }
+    };
+    await send();
+    const timer = setInterval(() => {
+      void send();
+    }, 8_000);
+    timer.unref?.();
+    try {
+      return await task();
+    } finally {
+      clearInterval(timer);
+    }
+  }
+
   private async deleteInvocationAfterReply(
     message: Message,
     enabled: boolean
@@ -360,13 +438,22 @@ export class YoroPrefixCommandHandler {
   ): Promise<void> {
     const messages = DISCORD_BOT_MESSAGES[locale].prefix;
     let response: DiscordPalworldPlayerLookupResponse;
+    const requestStartedAt = Date.now();
     try {
       response = await this.internalApi.palworldPlayers({
         applicationId: this.applicationId,
         guildId: message.guildId!,
         ...(nickname ? { nickname } : {})
       });
+      this.auditTiming(message, "player", "palworld_rest", requestStartedAt);
     } catch (error) {
+      this.auditTiming(
+        message,
+        "player",
+        "palworld_rest",
+        requestStartedAt,
+        internalFailureCode(error)
+      );
       auditEvent("discord.prefix_command.internal_api_failed", {
         command: "player",
         stage: "status",
@@ -380,17 +467,22 @@ export class YoroPrefixCommandHandler {
       });
       return;
     }
+    const embedStartedAt = Date.now();
+    const embed = presentPalworldPlayers({
+      locale,
+      response,
+      searchHint: messages.playerSearchHint
+    });
+    this.auditTiming(message, "player", "embed_build", embedStartedAt);
+    const replyStartedAt = Date.now();
     await message.reply({
       embeds: [
-        presentPalworldPlayers({
-          locale,
-          response,
-          searchHint: messages.playerSearchHint
-        })
+        embed
       ],
       allowedMentions: { parse: [], repliedUser: false },
       failIfNotExists: true
     });
+    this.auditTiming(message, "player", "discord_reply", replyStartedAt);
   }
 
   private async replyStatus(
@@ -400,12 +492,21 @@ export class YoroPrefixCommandHandler {
   ): Promise<void> {
     const messages = DISCORD_BOT_MESSAGES[locale].prefix;
     let result: DiscordGameServerStatusResponse;
+    const requestStartedAt = Date.now();
     try {
       result = await this.internalApi.gameServerStatus({
         applicationId: this.applicationId,
         guildId: message.guildId!
       });
+      this.auditTiming(message, "status", "palworld_rest", requestStartedAt);
     } catch (error) {
+      this.auditTiming(
+        message,
+        "status",
+        "palworld_rest",
+        requestStartedAt,
+        internalFailureCode(error)
+      );
       auditEvent("discord.prefix_command.internal_api_failed", {
         command: "status",
         stage: "status",
@@ -430,7 +531,7 @@ export class YoroPrefixCommandHandler {
       guideUrl: localizedPublicResourceUrl(
         this.publicBaseUrl,
         locale,
-        "/bot/dedicated-server"
+        "/bot/game-files"
       ),
       guideLabel: messages.guideButton
     });

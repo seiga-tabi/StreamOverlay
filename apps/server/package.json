@@ -16,6 +16,7 @@
     "db:migrate:check": "tsx src/scripts/database-migrate.ts check",
     "db:migrate:plan": "tsx src/scripts/database-migrate.ts plan",
     "db:migrate:apply": "tsx src/scripts/database-migrate.ts apply",
+    "db:audit": "tsx src/scripts/database-audit.ts",
     "test:database": "node --test test-database/database-integration.test.mjs",
     "migrate:twitch-token-encryption": "tsx src/scripts/migrate-twitch-token-encryption.ts",
     "migrate:remove-tts-config": "tsx src/scripts/migrate-remove-tts-config.ts",

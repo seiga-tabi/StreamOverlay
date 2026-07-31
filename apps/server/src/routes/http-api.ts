@@ -900,6 +900,15 @@ function sendRedirect(res: ServerResponse, location: string, headers: Record<str
   res.end();
 }
 
+function sendPermanentRedirect(
+  res: ServerResponse,
+  location: string,
+  headers: Record<string, string | string[]> = {}
+): void {
+  res.writeHead(308, { ...SECURITY_HEADERS, Location: location, ...headers });
+  res.end();
+}
+
 function dashboardAuthSurface(value: string | null | undefined): DashboardRole {
   return value === "streamer" ? "streamer" : "admin";
 }
@@ -1362,6 +1371,21 @@ function legacyDiscordDashboardReturnUrl(url: URL): string {
   return `${target.pathname}${target.search}`;
 }
 
+function legacyBotPublicReturnPath(url: URL): string | undefined {
+  const locale = publicUrlLocaleFromPathname(url.pathname);
+  const unprefixed = stripPublicUrlLocalePrefix(url.pathname);
+  const normalized = unprefixed.length > 1 && unprefixed.endsWith("/")
+    ? unprefixed.slice(0, -1)
+    : unprefixed;
+  const canonical = new Map([
+    ["/bot/features", "/bot/commands"],
+    ["/bot/connect", "/bot/getting-started"],
+    ["/bot/dedicated-server", "/bot/game-files"]
+  ]).get(normalized);
+  if (!canonical) return undefined;
+  return `${locale ? `/${locale}` : ""}${canonical}${url.search}`;
+}
+
 function legacyStreamerDashboardReturnPath(pathname: string): string | undefined {
   const normalized = pathname.length > 1 && pathname.endsWith("/")
     ? pathname.slice(0, -1)
@@ -1821,17 +1845,17 @@ function publicSeoMetadataForPath(pathname: string): PublicSeoMetadata {
       title: "YORO Bot | Discord 게임 서버 도우미",
       description: "Discord 서버와 게임 서버 운영 기능을 안전하게 연결하는 YORO Bot을 확인하세요."
     },
-    "/bot/features": {
-      title: "기능 | YORO Bot",
-      description: "YORO Bot의 Organization, Discord 연결과 게임 서버 상태 기능을 확인하세요."
+    "/bot/getting-started": {
+      title: "사용방법 | YORO Bot",
+      description: "Bot 초대부터 Organization, Palworld REST와 Discord Bot 제어 연결까지 순서대로 확인하세요."
     },
-    "/bot/connect": {
-      title: "연결 과정 | YORO Bot",
-      description: "YORO Bot을 Discord 서버와 Organization에 연결하는 과정을 확인하세요."
+    "/bot/commands": {
+      title: "명령어 목록 | YORO Bot",
+      description: "YORO Bot의 일반 사용자, 작성자와 관리자 명령 및 활성화 조건을 확인하세요."
     },
-    "/bot/dedicated-server": {
-      title: "Palworld 전용 서버 설정 | YORO Bot",
-      description: "브라우저에서 안전하게 PalWorldSettings.ini 설정을 만들고 다운로드하세요."
+    "/bot/game-files": {
+      title: "Palworld 게임파일 | YORO Bot",
+      description: "검증된 PalWorldSettings.ini를 브라우저에서 만들고 안전하게 설치하는 방법을 확인하세요."
     },
     "/privacy": {
       title: "개인정보 처리방침 | YORO.gg",
@@ -1889,17 +1913,17 @@ function publicSeoMetadataForPath(pathname: string): PublicSeoMetadata {
       title: "YORO Bot | Discordゲームサーバーアシスタント",
       description: "Discordサーバーとゲームサーバー運用機能を安全に連携するYORO Botを確認できます。"
     },
-    "/bot/features": {
-      title: "機能 | YORO Bot",
-      description: "YORO BotのOrganization、Discord連携、ゲームサーバー状態機能を確認できます。"
+    "/bot/getting-started": {
+      title: "使い方 | YORO Bot",
+      description: "Bot招待からOrganization、Palworld REST、Discord Bot制御の連携まで順番に確認できます。"
     },
-    "/bot/connect": {
-      title: "連携手順 | YORO Bot",
-      description: "YORO BotをDiscordサーバーとOrganizationに連携する手順を確認できます。"
+    "/bot/commands": {
+      title: "コマンド一覧 | YORO Bot",
+      description: "YORO Botの一般ユーザー、実行者、管理者コマンドと有効化条件を確認できます。"
     },
-    "/bot/dedicated-server": {
-      title: "Palworld専用サーバー設定 | YORO Bot",
-      description: "ブラウザ内で安全にPalWorldSettings.iniを作成してダウンロードできます。"
+    "/bot/game-files": {
+      title: "Palworldゲームファイル | YORO Bot",
+      description: "検証済みPalWorldSettings.iniをブラウザで作成し、安全に設置する方法を確認できます。"
     },
     "/privacy": {
       title: "プライバシーポリシー | YORO.gg",
@@ -6133,6 +6157,13 @@ export function createHttpHandler(input: HttpHandlerInput) {
     try {
       if (req.method === "GET" || req.method === "HEAD") {
         if (url.pathname === "/dashborad" || url.pathname === "/dashborad/") return sendRedirect(res, "/");
+        const canonicalBotPath = legacyBotPublicReturnPath(url);
+        if (canonicalBotPath) {
+          return sendPermanentRedirect(res, canonicalBotPath, {
+            "Cache-Control": "public, max-age=3600",
+            "Referrer-Policy": "no-referrer"
+          });
+        }
         if (
           url.pathname === "/setup/discord"
           || url.pathname === "/setup/discord/"
