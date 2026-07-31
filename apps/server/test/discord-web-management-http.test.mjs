@@ -195,6 +195,158 @@ test("서명된 Bot 내부 상태 API는 Guild 귀속 요청만 상태 서비스
   });
 });
 
+test("서명된 Bot 내부 명령 정책 API는 exact Guild·command만 전달한다", async () => {
+  await withDiscordConfig(async () => {
+    const policyCalls = [];
+    const { handler } = createDiscordHandler({
+      handlerInput: {
+        discordInternalAuth: {
+          verify() {
+            return { ok: true };
+          }
+        },
+        discordBotCommandPolicy: {
+          async resolve(input) {
+            policyCalls.push(input);
+            return {
+              allowed: true,
+              preferredLocale: "auto",
+              statusFields: {
+                players: true,
+                version: true,
+                latency: false,
+                observedAt: true
+              },
+              revision: 2
+            };
+          }
+        }
+      }
+    });
+    const response = await request(
+      handler,
+      "POST",
+      "/internal/discord/command-policy",
+      {
+        applicationId: APPLICATION_ID,
+        guildId: "123456789012345678",
+        command: "status"
+      },
+      { "content-type": "application/json" }
+    );
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(policyCalls, [{
+      applicationId: APPLICATION_ID,
+      guildId: "123456789012345678",
+      command: "status"
+    }]);
+
+    const forged = await request(
+      handler,
+      "POST",
+      "/internal/discord/command-policy",
+      {
+        applicationId: APPLICATION_ID,
+        guildId: "123456789012345678",
+        command: "ban",
+        organizationId: "forged"
+      },
+      { "content-type": "application/json" }
+    );
+    assert.equal(forged.statusCode, 400);
+    assert.equal(policyCalls.length, 1);
+  });
+});
+
+test("Organization Bot 제어 API는 session·Origin·CSRF와 strict body를 유지한다", async () => {
+  await withDiscordConfig(async () => {
+    const calls = [];
+    const organizationId = "11111111-1111-4111-8111-111111111111";
+    const settings = {
+      publicCommandsEnabled: true,
+      palworldStatusEnabled: true,
+      statusCommandEnabled: true,
+      guideCommandEnabled: true,
+      preferredLocale: "auto",
+      statusFields: {
+        players: true,
+        version: true,
+        latency: true,
+        observedAt: true
+      },
+      revision: 0
+    };
+    const { handler } = createDiscordHandler({
+      handlerInput: {
+        discordManagement: {
+          async botControl(input) {
+            calls.push({ type: "read", input });
+            return {
+              organizationId,
+              role: "owner",
+              globalPrefixCommandsEnabled: true,
+              modules: [{ id: "palworld.status", version: 1, enabled: true }],
+              settings
+            };
+          },
+          async updateBotControl(input) {
+            calls.push({ type: "update", input });
+            return {
+              organizationId,
+              role: "owner",
+              globalPrefixCommandsEnabled: true,
+              modules: [{ id: "palworld.status", version: 1, enabled: true }],
+              settings: { ...settings, revision: 1 }
+            };
+          }
+        }
+      }
+    });
+    const path =
+      `/api/discord/management/organizations/${organizationId}/bot-control`;
+    const read = await request(handler, "GET", path, undefined, {
+      cookie: "yoro_session=session.csrf"
+    });
+    assert.equal(read.statusCode, 200);
+    assert.equal(calls[0].input.organizationId, organizationId);
+
+    const value = {
+      ...settings,
+      expectedRevision: settings.revision
+    };
+    delete value.revision;
+    const denied = await request(handler, "PATCH", path, value, {
+      "content-type": "application/json",
+      cookie: "yoro_session=session.csrf",
+      "x-discord-csrf": "csrf_value_abcdefghijklmnopqrstuvwxyz123456",
+      origin: "https://evil.example"
+    });
+    assert.equal(denied.statusCode, 403);
+
+    const updated = await request(handler, "PATCH", path, value, {
+      "content-type": "application/json",
+      cookie: "yoro_session=session.csrf",
+      "x-discord-csrf": "csrf_value_abcdefghijklmnopqrstuvwxyz123456",
+      origin: DASHBOARD_ORIGIN
+    });
+    assert.equal(updated.statusCode, 200);
+    assert.equal(calls[1].type, "update");
+    assert.equal(calls[1].input.csrfToken, "csrf_value_abcdefghijklmnopqrstuvwxyz123456");
+
+    const forged = await request(handler, "PATCH", path, {
+      ...value,
+      userId: "forged"
+    }, {
+      "content-type": "application/json",
+      cookie: "yoro_session=session.csrf",
+      "x-discord-csrf": "csrf_value_abcdefghijklmnopqrstuvwxyz123456",
+      origin: DASHBOARD_ORIGIN
+    });
+    assert.equal(forged.statusCode, 400);
+    assert.equal(calls.length, 2);
+  });
+});
+
 test("Bot 설치 route는 고정 Discord origin·scope·permission과 no-store만 반환한다", async () => {
   await withDiscordConfig(async () => {
     const { handler } = createDiscordHandler();

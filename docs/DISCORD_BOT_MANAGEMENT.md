@@ -38,6 +38,7 @@ Guild claim 완료 시 새로운 management session을 같은 transaction에서 
 | Palworld 게임 서버 생성 | 가능 | 가능 | 불가 |
 | 게임 서버 삭제 | 가능 | 불가 | 불가 |
 | Palworld REST 테스트·저장·새로고침·삭제 | 가능 | 가능 | 조회만 |
+| Discord Bot 공개 명령 설정 | 가능 | 가능 | 조회만 |
 
 다른 Organization의 ID를 알고 있어도 같은 `not_found` 또는 권한 오류 경계 밖의 정보를 받을 수 없습니다.
 
@@ -79,10 +80,53 @@ prefix 응답은 ephemeral이 아닌 공개 메시지입니다. 따라서 민감
 이력 명령은 이력의 source·retention 정책과 Database schema를 별도 확정한 뒤
 additive migration과 함께 구현합니다.
 
+## Discord Bot Control Plane 1단계
+
+Organization 관리 화면은 활성 Discord 설치가 확인된 경우 `Discord Bot 제어`
+카드를 표시합니다. 현재 code-owned module registry에는
+`palworld.status` version `1`만 존재하며 웹에서 임의 module, endpoint,
+실행 action 또는 메시지 template을 등록할 수 없습니다.
+
+관리 API:
+
+- `GET /api/discord/management/organizations/:organizationId/bot-control`
+- `PATCH /api/discord/management/organizations/:organizationId/bot-control`
+
+모든 요청은 YORO session의 user ID와 Organization membership을 다시
+검증합니다. `owner`와 `manager`만 설정을 변경할 수 있고 `viewer`는 조회만
+가능합니다. mutation은 Origin과 session-bound CSRF를 검증하며 클라이언트가
+보낸 user ID, role, Guild ID와 Application ID는 받거나 신뢰하지 않습니다.
+
+설정 가능한 범위:
+
+- 공개 prefix 명령 전체 사용 여부
+- Palworld 상태 module 사용 여부
+- `!yoro 상태`, `!yoro 가이드` 개별 사용 여부
+- 응답 언어 자동 감지·한국어·일본어
+- 상태 응답의 접속 인원·게임 버전·응답 시간·마지막 확인 시각 표시 여부
+
+설정 row가 아직 없으면 기존 명령과의 호환을 위해 안전한 기본 설정을
+읽기 전용으로 계산하며 GET만으로 Database row를 생성하지 않습니다.
+`discord.prefixCommandsEnabled=false`는 Organization 설정보다 우선하는 운영
+전역 kill switch입니다.
+
+PATCH는 현재 revision을 `expectedRevision`으로 요구합니다. 같은 설정을 여러
+관리자가 동시에 변경하면 먼저 commit한 요청만 성공하고 나머지는
+`revision_conflict`로 최신 설정을 다시 조회합니다. 성공한 변경은
+`discord_bot_control_revisions`에 안전한 설정 snapshot으로 append되고
+`discord.bot.settings.updated` audit를 남깁니다. Guild 이름, raw token,
+Discord 사용자 표시 이름과 request body 전체는 audit metadata에 기록하지
+않습니다.
+
+이 단계에는 임의 자동화 Builder, 예약 Job, moderation, role 지급, webhook,
+mention, 사용자 작성 URL·Embed와 임의 Discord API action을 포함하지
+않습니다. 후속 module은 Shared schema, 실행 allowlist, 권한·rate limit,
+audit·revision과 테스트를 각각 갖춘 뒤 code-owned registry에 추가합니다.
+
 ## Migration과 staging 검증
 
 1. PostgreSQL backup과 checksum을 검증합니다.
-2. migration `check`, `plan`으로 `0006_bot_management_and_agent_bootstrap`, `0007_agent_registration_and_ingestion`, `0008_web_management_guild_claim`을 확인합니다.
+2. migration `check`, `plan`으로 `0006_bot_management_and_agent_bootstrap`부터 `0013_discord_bot_control_plane`까지 순서와 checksum을 확인합니다.
 3. 별도 운영 승인 후에만 `apply`합니다.
 4. feature가 비활성인 image로 먼저 배포하고 기존 방송 기능과 health를 확인합니다.
 5. staging Discord identity·Organization으로 Bot 설치 관찰, web claim, management login, role, tenant A/B, entitlement와 Palworld REST 연결 격리를 검증합니다.

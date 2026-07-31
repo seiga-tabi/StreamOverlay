@@ -19,6 +19,8 @@ import {
   parseRiotIdDetailed,
   parseDiscordInstallationObservationRequest,
   parseDiscordGameServerStatusRequest,
+  parseDiscordBotCommandPolicyRequest,
+  parseUpdateDiscordBotControlInput,
   parseDiscordSetupSessionRequest,
   parseAgentRegistrationInput,
   parsePalworldAgentStatusPayload,
@@ -193,6 +195,7 @@ import {
   type AgentIngestionService
 } from "../services/agent-ingestion-service.js";
 import type { GameServerStatusReadService } from "../services/game-server-status-read-service.js";
+import type { DiscordBotCommandPolicyService } from "../services/discord-bot-command-policy-service.js";
 import {
   clearYoroCookie,
   YORO_OAUTH_COOKIE,
@@ -2122,6 +2125,7 @@ type HttpHandlerInput = {
   discordDatabaseReady?: () => boolean;
   discordInternalAuth?: DiscordInternalAuthVerifier;
   gameServerStatusRead?: GameServerStatusReadService;
+  discordBotCommandPolicy?: DiscordBotCommandPolicyService;
   agentIngestion?: AgentIngestionService;
   agentDatabaseReady?: () => boolean;
 };
@@ -6190,7 +6194,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
           "/internal/discord/setup-sessions",
           "/internal/discord/installations/upsert",
           "/internal/discord/installations/revoked",
-          "/internal/discord/game-server-status"
+          "/internal/discord/game-server-status",
+          "/internal/discord/command-policy"
         ]);
         if (!internalPaths.has(url.pathname) || req.method !== "POST") {
           return sendJson(req, res, 404, { error: "not found" });
@@ -6284,6 +6289,31 @@ export function createHttpHandler(input: HttpHandlerInput) {
             res,
             200,
             await input.gameServerStatusRead.read(statusRequest),
+            noStoreHeaders()
+          );
+        }
+        if (url.pathname === "/internal/discord/command-policy") {
+          const policyRequest = parseDiscordBotCommandPolicyRequest(body);
+          if (
+            !policyRequest
+            || policyRequest.applicationId
+              !== appConfig.discordBotInternal.applicationId
+          ) {
+            return sendJson(req, res, 400, {
+              error: "Discord Bot 명령 정책 요청 형식이 올바르지 않습니다."
+            }, noStoreHeaders());
+          }
+          if (!input.discordBotCommandPolicy) {
+            return sendJson(req, res, 503, {
+              error: "Discord Bot 명령 정책 기능을 사용할 수 없습니다.",
+              code: "feature_unavailable"
+            }, noStoreHeaders());
+          }
+          return sendJson(
+            req,
+            res,
+            200,
+            await input.discordBotCommandPolicy.resolve(policyRequest),
             noStoreHeaders()
           );
         }
@@ -6957,6 +6987,65 @@ export function createHttpHandler(input: HttpHandlerInput) {
                 value
               });
               return sendJson(req, res, 201, { server }, noStoreHeaders());
+            }
+          }
+          const botControlMatch = url.pathname.match(
+            /^\/api\/discord\/management\/organizations\/([^/]+)\/bot-control$/u
+          );
+          if (botControlMatch) {
+            const organizationId = requireManagementOrganizationId(
+              botControlMatch[1] ?? ""
+            );
+            if (url.search) {
+              return sendJson(req, res, 400, {
+                error: "query는 허용되지 않습니다."
+              });
+            }
+            if (req.method === "GET") {
+              return sendJson(
+                req,
+                res,
+                200,
+                await input.discordManagement.botControl({
+                  cookieValue: managementCookie,
+                  organizationId
+                }),
+                noStoreHeaders()
+              );
+            }
+            if (req.method === "PATCH") {
+              if (!stateChangingRequestHasTrustedOrigin(req)) {
+                return sendJson(req, res, 403, {
+                  error: "trusted Origin이 필요합니다.",
+                  code: "origin_denied"
+                });
+              }
+              if (!discordJsonBodyAllowed(req)) {
+                return sendJson(req, res, 415, {
+                  error: "application/json Content-Type이 필요합니다."
+                });
+              }
+              const value = parseUpdateDiscordBotControlInput(
+                await readJsonBody<unknown>(req)
+              );
+              if (!value) {
+                return sendJson(req, res, 400, {
+                  error: "Discord Bot 설정 요청 형식이 올바르지 않습니다.",
+                  code: "invalid_input"
+                });
+              }
+              return sendJson(
+                req,
+                res,
+                200,
+                await input.discordManagement.updateBotControl({
+                  cookieValue: managementCookie,
+                  csrfToken: requestHeaderValue(req, "x-discord-csrf"),
+                  organizationId,
+                  value
+                }),
+                noStoreHeaders()
+              );
             }
           }
           const gameServerDetailMatch = url.pathname.match(

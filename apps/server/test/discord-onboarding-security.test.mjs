@@ -191,6 +191,13 @@ test("Discord onboarding route는 OAuth callback과 자체 session 보안을 분
   );
   assert.equal(
     requiredHttpPrincipal(
+      "PATCH",
+      `/api/discord/management/organizations/${crypto.randomUUID()}/bot-control`
+    ),
+    "PUBLIC"
+  );
+  assert.equal(
+    requiredHttpPrincipal(
       "POST",
       `/api/discord/management/organizations/${crypto.randomUUID()}/game-servers/${crypto.randomUUID()}/palworld-rest/save`
     ),

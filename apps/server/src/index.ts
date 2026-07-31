@@ -76,6 +76,7 @@ import { AgentIngestionService } from "./services/agent-ingestion-service.js";
 import { DiscordInternalAuthVerifier } from "./security/discord-internal-auth.js";
 import { GameServerStatusReadRepository } from "./database/repositories/game-server-status-read-repository.js";
 import { GameServerStatusReadService } from "./services/game-server-status-read-service.js";
+import { DiscordBotCommandPolicyService } from "./services/discord-bot-command-policy-service.js";
 import {
   PALWORLD_SERVER_SAFE_REGISTRATION_POLICY,
   newId,
@@ -440,6 +441,9 @@ const gameServerStatusRead = appConfig.discordBotInternal.enabled && postgresPoo
       palworldServerMonitor
     )
   : undefined;
+const discordBotCommandPolicy = appConfig.discordBotInternal.enabled && postgresPool
+  ? new DiscordBotCommandPolicyService(postgresPool)
+  : undefined;
 const store = new Store({
   followerStatePath: `${appConfig.paths.state}/followers.json`,
   streamerRiotIdStatePath: `${appConfig.paths.state}/streamer-riot-ids.json`,
@@ -550,6 +554,7 @@ const server = http.createServer(createHttpHandler({
   discordDatabaseReady: () => databaseHealth.snapshot().ready,
   discordInternalAuth,
   gameServerStatusRead,
+  discordBotCommandPolicy,
   agentIngestion,
   agentDatabaseReady: () => databaseHealth.snapshot().ready,
   readiness: () => {

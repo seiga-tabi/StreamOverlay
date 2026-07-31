@@ -6,6 +6,8 @@ import {
   type Message
 } from "discord.js";
 import type {
+  DiscordBotCommandPolicyResponse,
+  DiscordBotStatusFields,
   DiscordGameServerStatusResponse,
   DiscordGameServerStatusState
 } from "@streamops/shared";
@@ -187,7 +189,10 @@ export class YoroPrefixCommandHandler {
 
   constructor(
     private readonly applicationId: string,
-    private readonly internalApi: Pick<DiscordInternalApiClient, "gameServerStatus">,
+    private readonly internalApi: Pick<
+      DiscordInternalApiClient,
+      "commandPolicy" | "gameServerStatus"
+    >,
     private readonly publicBaseUrl: string,
     private readonly now: () => number = Date.now
   ) {}
@@ -209,7 +214,33 @@ export class YoroPrefixCommandHandler {
       });
       return;
     }
-    const locale = localeFor(message.guild.preferredLocale);
+    const fallbackLocale = localeFor(message.guild.preferredLocale);
+    let policy: DiscordBotCommandPolicyResponse;
+    try {
+      policy = await this.internalApi.commandPolicy({
+        applicationId: this.applicationId,
+        guildId: message.guildId,
+        command
+      });
+    } catch {
+      await message.reply({
+        content: text[fallbackLocale].unavailable,
+        allowedMentions: { parse: [], repliedUser: false },
+        failIfNotExists: true
+      });
+      return;
+    }
+    if (!policy.allowed) {
+      auditEvent("discord.prefix_command.denied", {
+        command,
+        guild: safeReference(message.guildId),
+        reason: policy.reason
+      });
+      return;
+    }
+    const locale = policy.preferredLocale === "auto"
+      ? fallbackLocale
+      : policy.preferredLocale;
     const messages = text[locale];
     auditEvent("discord.prefix_command.received", {
       command,
@@ -251,12 +282,13 @@ export class YoroPrefixCommandHandler {
       });
       return;
     }
-    await this.replyStatus(message, messages);
+    await this.replyStatus(message, messages, policy.statusFields);
   }
 
   private async replyStatus(
     message: Message,
-    messages: (typeof text)[keyof typeof text]
+    messages: (typeof text)[keyof typeof text],
+    statusFields: DiscordBotStatusFields
   ): Promise<void> {
     let result: DiscordGameServerStatusResponse;
     try {
@@ -303,28 +335,28 @@ export class YoroPrefixCommandHandler {
         value: messages.states[server.status],
         inline: true
       });
-    if (server.players) {
+    if (statusFields.players && server.players) {
       embed.addFields({
         name: messages.fields.players,
         value: `${server.players.current} / ${server.players.max}`,
         inline: true
       });
     }
-    if (server.version) {
+    if (statusFields.version && server.version) {
       embed.addFields({
         name: messages.fields.version,
         value: safeDiscordText(server.version),
         inline: true
       });
     }
-    if (server.latencyMs !== undefined) {
+    if (statusFields.latency && server.latencyMs !== undefined) {
       embed.addFields({
         name: messages.fields.latency,
         value: `${server.latencyMs}ms`,
         inline: true
       });
     }
-    if (observedAt) {
+    if (statusFields.observedAt && observedAt) {
       embed.addFields({
         name: messages.fields.observedAt,
         value: observedAt,

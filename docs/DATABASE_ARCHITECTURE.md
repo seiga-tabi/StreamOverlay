@@ -77,6 +77,13 @@ Discord OAuth onboarding은 `0004_discord_oauth_onboarding`부터 이 기반을 
 `0011_yoro_twitch_viewer_credentials`는 YORO 계정의 Twitch LIVE 조회 credential을 사용자 identity에 귀속합니다. OAuth access·refresh token 원문은 저장하지 않고 암호문과 access token 만료 시각만 저장하며, LIVE API는 YORO session의 user ID를 다시 확인한 뒤에만 복호화합니다.
 
 `0012_single_palworld_server`는 기존 비활성 Palworld 서버를 soft delete하고 관련 Agent bootstrap·installation과 server connection을 폐기합니다. 이후 Organization별 삭제되지 않은 게임 서버 한 개만 허용하는 partial unique index로 Dashboard와 Database의 제한을 일치시킵니다.
+
+`0013_discord_bot_control_plane`은 Organization·Guild·Discord Application에
+binding된 Bot 설정과 append-only revision을 저장합니다. 설정 조회와 변경은
+매번 membership과 활성 설치를 다시 검증하며, 다른 tenant의 Guild나 설정을
+ID만으로 조회할 수 없습니다. 저장 가능한 값은 code-owned module과 boolean,
+locale, 안전한 상태 field allowlist뿐이며 token, 임의 URL, 사용자 작성 action
+payload와 Discord 표시 이름은 저장하지 않습니다.
 # YORO Agent 상태 경계
 
 Agent는 Database에 직접 연결하지 않습니다. bootstrap 등록과 status ingestion은 Server API만 통하며 credential 원문은 Agent의 권한 제한 파일에만 남습니다. Server Database에는 credential hash, current status, allowlist history metric, online/offline event만 저장합니다.

@@ -4,12 +4,15 @@ import {
   isManagementOrganizationId,
   type BotManagementGameServer,
   type BotManagementOrganization,
-  type CreatePalworldGameServerInput
+  type CreatePalworldGameServerInput,
+  type DiscordBotControlOverview,
+  type UpdateDiscordBotControlInput
 } from "@streamops/shared";
 import { appConfig } from "../config.js";
 import { SafeDatabaseError } from "../database/errors.js";
 import { withTransaction } from "../database/transaction.js";
 import { DiscordManagementRepository } from "../database/repositories/discord-management-repository.js";
+import { DiscordBotControlRepository } from "../database/repositories/discord-bot-control-repository.js";
 import {
   decryptDiscordSecret,
   discordPkceChallenge,
@@ -38,6 +41,7 @@ export type DiscordManagementErrorCode =
   | "permission_required"
   | "not_found"
   | "entitlement_exceeded"
+  | "revision_conflict"
   | "rate_limited"
   | "invalid_input";
 
@@ -263,6 +267,72 @@ export class DiscordManagementService {
       input.organizationId
     );
     return repository.listGameServers(membership.context, membership.role);
+  }
+
+  async botControl(input: {
+    cookieValue?: string;
+    organizationId: string;
+  }): Promise<DiscordBotControlOverview> {
+    const authenticated = await this.requireSession(input.cookieValue);
+    try {
+      const membershipRepository = new DiscordManagementRepository(this.pool);
+      const membership = await membershipRepository.requireMembership(
+        authenticated.userId,
+        input.organizationId
+      );
+      return new DiscordBotControlRepository(this.pool).overview({
+        context: membership.context,
+        role: membership.role,
+        applicationId: appConfig.discordBotInternal.applicationId,
+        globalPrefixCommandsEnabled:
+          appConfig.discordBotInternal.prefixCommandsEnabled
+      });
+    } catch (error) {
+      if (
+        error instanceof SafeDatabaseError
+        && error.code === "DATABASE_REFERENCE_INVALID"
+      ) {
+        throw new DiscordManagementError("permission_required", 403);
+      }
+      throw error;
+    }
+  }
+
+  async updateBotControl(input: {
+    cookieValue?: string;
+    csrfToken?: string;
+    organizationId: string;
+    value: UpdateDiscordBotControlInput;
+  }): Promise<DiscordBotControlOverview> {
+    const authenticated = await this.requireMutationSession(
+      input.cookieValue,
+      input.csrfToken
+    );
+    try {
+      return await withTransaction(this.pool, async (client) => {
+        const membership = await new DiscordManagementRepository(client)
+          .requireMembership(authenticated.userId, input.organizationId);
+        return new DiscordBotControlRepository(client).update({
+          context: membership.context,
+          role: membership.role,
+          applicationId: appConfig.discordBotInternal.applicationId,
+          globalPrefixCommandsEnabled:
+            appConfig.discordBotInternal.prefixCommandsEnabled,
+          value: input.value
+        });
+      });
+    } catch (error) {
+      if (error instanceof SafeDatabaseError && error.code === "DATABASE_CONFLICT") {
+        throw new DiscordManagementError("revision_conflict", 409);
+      }
+      if (
+        error instanceof SafeDatabaseError
+        && error.code === "DATABASE_REFERENCE_INVALID"
+      ) {
+        throw new DiscordManagementError("permission_required", 403);
+      }
+      throw error;
+    }
   }
 
   async createGameServer(input: {

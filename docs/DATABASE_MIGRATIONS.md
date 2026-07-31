@@ -36,7 +36,7 @@ Server의 `DATABASE_MIGRATION_MODE`는 `check`만 허용합니다. Server 시작
 
 `schema_migrations`에는 migration ID, SHA-256, 적용 시각, 실행 시간, application version, dirty 상태를 저장합니다. SQL·parameter·Database URL은 로그나 public API에 노출하지 않습니다.
 
-현재 Discord·YORO 기반 migration은 onboarding `0004`, Bot binding `0005`, Organization 관리 session과 Agent bootstrap `0006`, Agent credential·nonce·status idempotency 기반 `0007`, 웹 management Guild claim 목적 기반 `0008`, YORO 통합 계정·외부 identity·범용 session 기반 `0009`, 사용자별 Dashboard 개인 설정 기반 `0010`, YORO Twitch LIVE 조회 credential 암호화 저장 기반 `0011`, Organization당 Palworld 서버 1개 제한과 기존 비활성 항목 정리 `0012`입니다. 기존에 적용한 `0001`~`0011` SQL은 수정하지 않았습니다. staging에서 `check`와 `plan`을 확인한 뒤 별도 승인으로 pending migration을 적용합니다. `0012`는 기존 비활성 항목을 soft delete하므로 backup 확인 후 `--allow-destructive` 승인이 추가로 필요합니다.
+현재 Discord·YORO 기반 migration은 onboarding `0004`, Bot binding `0005`, Organization 관리 session과 Agent bootstrap `0006`, Agent credential·nonce·status idempotency 기반 `0007`, 웹 management Guild claim 목적 기반 `0008`, YORO 통합 계정·외부 identity·범용 session 기반 `0009`, 사용자별 Dashboard 개인 설정 기반 `0010`, YORO Twitch LIVE 조회 credential 암호화 저장 기반 `0011`, Organization당 Palworld 서버 1개 제한과 기존 비활성 항목 정리 `0012`, Organization별 Discord Bot module·명령 설정과 append-only revision 기반 `0013`입니다. 기존에 적용한 `0001`~`0012` SQL은 수정하지 않았습니다. staging에서 `check`와 `plan`을 확인한 뒤 별도 승인으로 pending migration을 적용합니다. `0012`는 기존 비활성 항목을 soft delete하므로 backup 확인 후 `--allow-destructive` 승인이 추가로 필요합니다. `0013`은 additive·transaction migration이며 실행 전에도 backup과 checksum 검증을 생략하지 않습니다.
 
 ## Rollback
 

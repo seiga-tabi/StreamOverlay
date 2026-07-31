@@ -14,6 +14,7 @@ import {
 import { EntitlementRepository } from "../dist/database/repositories/entitlement-repository.js";
 import { DiscordOnboardingRepository } from "../dist/database/repositories/discord-onboarding-repository.js";
 import { DiscordManagementRepository } from "../dist/database/repositories/discord-management-repository.js";
+import { DiscordBotControlRepository } from "../dist/database/repositories/discord-bot-control-repository.js";
 import { YoroAccountRepository } from "../dist/database/repositories/yoro-account-repository.js";
 import { AgentIngestionService, AgentIngestionError } from "../dist/services/agent-ingestion-service.js";
 import { DiscordManagementService } from "../dist/services/discord-management-service.js";
@@ -63,7 +64,7 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
   await t.test("check와 plan 기반 검사는 빈 DB를 변경하지 않는다", async () => {
     const inspection = await inspectMigrationState(pool, manifest);
     assert.equal(inspection.status, "pending");
-    assert.equal(inspection.pending.length, 12);
+    assert.equal(inspection.pending.length, 13);
     const table = await pool.query(
       "SELECT to_regclass('public.schema_migrations')::TEXT AS name"
     );
@@ -551,6 +552,173 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
     assert.equal((await organizations.find(contextA)).displayName, "Organization A");
     assert.ok(pool.totalCount >= before);
     assert.equal(pool.waitingCount, 0);
+  });
+
+  await t.test("Discord Bot 제어 설정은 tenant·role·revision을 강제한다", async () => {
+    const applicationId = "900000000000000001";
+    const guildA = "900000000000000002";
+    const guildB = "900000000000000003";
+    await pool.query(
+      `INSERT INTO discord_guilds (
+         id, organization_id, discord_guild_id, display_name
+       ) VALUES
+         ($1, $2, $3, 'Control Guild A'),
+         ($4, $5, $6, 'Control Guild B')`,
+      [
+        crypto.randomUUID(),
+        organizationA,
+        guildA,
+        crypto.randomUUID(),
+        organizationB,
+        guildB
+      ]
+    );
+    await pool.query(
+      `INSERT INTO discord_installations (
+         id, organization_id, discord_guild_id, application_id,
+         installed_by_user_id, status
+       ) VALUES
+         ($1, $2, $3, $4, $5, 'active'),
+         ($6, $7, $8, $4, $9, 'active')`,
+      [
+        crypto.randomUUID(),
+        organizationA,
+        guildA,
+        applicationId,
+        userA,
+        crypto.randomUUID(),
+        organizationB,
+        guildB,
+        userB
+      ]
+    );
+    const repository = new DiscordBotControlRepository(pool);
+    const initialA = await repository.overview({
+      context: contextA,
+      role: "owner",
+      applicationId,
+      globalPrefixCommandsEnabled: true
+    });
+    assert.equal(initialA.installation.guildId, guildA);
+    assert.equal(initialA.settings.revision, 0);
+
+    const updatedA = await withTransaction(pool, async (client) =>
+      new DiscordBotControlRepository(client).update({
+        context: contextA,
+        role: "owner",
+        applicationId,
+        globalPrefixCommandsEnabled: true,
+        value: {
+          publicCommandsEnabled: true,
+          palworldStatusEnabled: true,
+          statusCommandEnabled: false,
+          guideCommandEnabled: true,
+          preferredLocale: "ja",
+          statusFields: {
+            players: true,
+            version: false,
+            latency: false,
+            observedAt: true
+          },
+          expectedRevision: 0
+        }
+      })
+    );
+    assert.equal(updatedA.settings.revision, 1);
+    assert.equal(updatedA.settings.statusCommandEnabled, false);
+    assert.deepEqual(await repository.commandPolicy({
+      applicationId,
+      guildId: guildA,
+      command: "status"
+    }), {
+      allowed: false,
+      preferredLocale: "ja",
+      statusFields: {
+        players: true,
+        version: false,
+        latency: false,
+        observedAt: true
+      },
+      revision: 1,
+      reason: "command_disabled"
+    });
+    const defaultB = await repository.commandPolicy({
+      applicationId,
+      guildId: guildB,
+      command: "status"
+    });
+    assert.equal(defaultB.allowed, true);
+    assert.equal(defaultB.revision, 0);
+
+    await assert.rejects(
+      withTransaction(pool, async (client) =>
+        new DiscordBotControlRepository(client).update({
+          context: contextA,
+          role: "owner",
+          applicationId,
+          globalPrefixCommandsEnabled: true,
+          value: {
+            publicCommandsEnabled: true,
+            palworldStatusEnabled: true,
+            statusCommandEnabled: true,
+            guideCommandEnabled: true,
+            preferredLocale: "auto",
+            statusFields: {
+              players: true,
+              version: true,
+              latency: true,
+              observedAt: true
+            },
+            expectedRevision: 0
+          }
+        })
+      ),
+      (error) => error instanceof SafeDatabaseError
+        && error.code === "DATABASE_CONFLICT"
+    );
+    await assert.rejects(
+      repository.update({
+        context: contextA,
+        role: "viewer",
+        applicationId,
+        globalPrefixCommandsEnabled: true,
+        value: {
+          publicCommandsEnabled: true,
+          palworldStatusEnabled: true,
+          statusCommandEnabled: true,
+          guideCommandEnabled: true,
+          preferredLocale: "auto",
+          statusFields: {
+            players: true,
+            version: true,
+            latency: true,
+            observedAt: true
+          },
+          expectedRevision: 1
+        }
+      }),
+      (error) => error instanceof SafeDatabaseError
+        && error.code === "DATABASE_REFERENCE_INVALID"
+    );
+    const records = await pool.query(
+      `SELECT
+         (SELECT COUNT(*)::INTEGER FROM discord_bot_control_configs
+          WHERE organization_id = $1) AS config_count,
+         (SELECT COUNT(*)::INTEGER FROM discord_bot_control_configs
+          WHERE organization_id = $2) AS other_config_count,
+         (SELECT COUNT(*)::INTEGER FROM discord_bot_control_revisions
+          WHERE organization_id = $1) AS revision_count,
+         (SELECT COUNT(*)::INTEGER FROM audit_logs
+          WHERE organization_id = $1
+            AND action = 'discord.bot.settings.updated') AS audit_count`,
+      [organizationA, organizationB]
+    );
+    assert.deepEqual(records.rows[0], {
+      config_count: 1,
+      other_config_count: 0,
+      revision_count: 1,
+      audit_count: 1
+    });
   });
 
   await t.test("Agent bootstrap token은 tenant에 귀속되고 hash만 저장된다", async () => {

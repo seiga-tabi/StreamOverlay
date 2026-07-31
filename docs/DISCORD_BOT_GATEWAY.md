@@ -99,11 +99,23 @@ Server 시작이나 Gateway reconnect는 command를 자동 등록하지 않는�
 Bot은 Docker internal network를 통해 `/internal/discord/*`를 호출한다. reverse proxy와 Cloudflare에서는 `/internal/`을 공개 route로 전달하지 않는다.
 
 `!yoro 상태`는 서명된
-`POST /internal/discord/game-server-status`를 호출한다. Server는 요청의
+`POST /internal/discord/command-policy`로 현재 Organization의 module·명령
+정책을 먼저 조회한 뒤, 허용된 경우에만
+`POST /internal/discord/game-server-status`를 호출한다. 정책 응답은 설정
+revision, 응답 locale과 표시 가능한 상태 field allowlist만 포함한다.
+정책 조회 실패, 잘못된 응답, 비활성 설치·module·명령은 fail-closed 처리하며
+Guild의 다른 서비스나 Server readiness에는 영향을 주지 않는다.
+
+Server는 요청의
 Application ID와 Guild ID로 활성 설치와 Organization을 다시 결정한 뒤
 tenant-bound 조회를 수행한다. 메시지나 URL에서 받은 Organization ID와 게임
 서버 ID를 신뢰하지 않는다. REST 연결과 Agent 연결은 각각의 현재 상태
 source만 읽으며 서로의 값을 섞지 않는다.
+
+Dashboard는 Bot token을 보유하거나 Discord Gateway에 직접 연결하지 않는다.
+설정 변경은 Server의 Organization 관리 API로만 수행하고 Gateway는 서명된
+내부 정책을 실행 시점에 조회한다. Server에서 Gateway로 임의 action을
+push하는 inbound 관리 endpoint는 제공하지 않는다.
 
 서명 입력:
 

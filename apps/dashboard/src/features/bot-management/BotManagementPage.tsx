@@ -43,6 +43,7 @@ import {
   type BotManagementConnectSession,
   type BotManagementSession
 } from "./api";
+import { BotControlCard } from "./BotControlCard";
 
 const copy = {
   ko: {
@@ -1045,6 +1046,14 @@ export function BotManagementPage({ embedded = false }: { embedded?: boolean }) 
               </label>
             </CardContent>
           </Card>
+
+          {selectedOrganization ? (
+            <BotControlCard
+              csrfToken={session.csrfToken}
+              organizationId={selectedOrganization.id}
+              role={selectedOrganization.role}
+            />
+          ) : null}
 
           {!loading
             && selectedOrganization?.role !== "viewer"

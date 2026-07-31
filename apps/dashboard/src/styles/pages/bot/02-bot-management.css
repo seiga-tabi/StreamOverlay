@@ -186,6 +186,107 @@
   border-color: rgb(126 105 218 / 26%);
 }
 
+.bot-control-card {
+  border-color: rgb(126 105 218 / 34%);
+}
+
+.bot-control-card .yoro-card__header {
+  align-items: flex-start;
+}
+
+.bot-control-content,
+.bot-control-settings,
+.bot-control-fields {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.bot-control-warning,
+.bot-control-read-only {
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid rgb(245 185 66 / 30%);
+  border-radius: .75rem;
+  background: rgb(245 185 66 / 9%);
+  color: #f6d58b;
+  line-height: 1.55;
+}
+
+.bot-control-guild {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr) max-content;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: .8rem;
+  background: rgb(255 255 255 / 3%);
+}
+
+.bot-control-guild span,
+.bot-control-footer small {
+  color: var(--text-muted);
+}
+
+.bot-control-guild strong {
+  overflow: hidden;
+  color: var(--text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bot-control-settings,
+.bot-control-fields {
+  min-width: 0;
+  margin: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: .9rem;
+}
+
+.bot-control-settings > legend,
+.bot-control-fields > legend {
+  padding-inline: var(--space-2);
+  color: var(--text);
+  font-weight: 800;
+}
+
+.bot-control-settings > p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.bot-control-toggle {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  gap: var(--space-3);
+  cursor: pointer;
+}
+
+.bot-control-toggle input {
+  width: 1.2rem;
+  height: 1.2rem;
+  margin: 0;
+  accent-color: #8f70f8;
+}
+
+.bot-control-grid,
+.bot-control-fields {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.bot-control-locale {
+  max-width: 28rem;
+}
+
+.bot-control-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
 .bot-management-server-card .yoro-card__content {
   display: grid;
   gap: .9rem;
@@ -314,7 +415,23 @@
   }
 
   .bot-management-rest-fields,
-  .bot-management-rest-summary {
+  .bot-management-rest-summary,
+  .bot-control-grid,
+  .bot-control-fields {
     grid-template-columns: 1fr;
+  }
+
+  .bot-control-card .yoro-card__header,
+  .bot-control-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .bot-control-guild {
+    grid-template-columns: minmax(0, 1fr) max-content;
+  }
+
+  .bot-control-guild > span {
+    grid-column: 1 / -1;
   }
 }

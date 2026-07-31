@@ -2,6 +2,8 @@ import type {
   BotManagementGameServer,
   BotManagementOrganization,
   CreatePalworldGameServerInput,
+  DiscordBotControlOverview,
+  UpdateDiscordBotControlInput,
   PalworldServerConnectionInput,
   PalworldServerDashboardResponse,
   PalworldServerTestResponse
@@ -144,6 +146,32 @@ export async function createManagementGameServer(input: {
     }
   );
   return body.server;
+}
+
+function botControlPath(organizationId: string): string {
+  return `/api/discord/management/organizations/${encodeURIComponent(organizationId)}/bot-control`;
+}
+
+export function getManagementBotControl(
+  organizationId: string,
+  signal?: AbortSignal
+): Promise<DiscordBotControlOverview> {
+  return request(botControlPath(organizationId), { signal });
+}
+
+export function updateManagementBotControl(input: {
+  organizationId: string;
+  csrfToken: string;
+  value: UpdateDiscordBotControlInput;
+}): Promise<DiscordBotControlOverview> {
+  return request(botControlPath(input.organizationId), {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Discord-CSRF": input.csrfToken
+    },
+    body: JSON.stringify(input.value)
+  });
 }
 
 export function deleteManagementGameServer(input: {

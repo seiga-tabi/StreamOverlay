@@ -323,3 +323,78 @@ test("Palworld 서버 삭제 API는 detail DELETE와 CSRF cookie 인증을 사�
     globalThis.fetch = originalFetch;
   }
 });
+
+test("Discord Bot 설정 API는 Organization 경로와 revision·CSRF를 함께 전송한다", async () => {
+  const { updateManagementBotControl } = await import(
+    "../src/features/bot-management/api"
+  );
+  const originalFetch = globalThis.fetch;
+  const requests: Array<{ input: string; init?: RequestInit }> = [];
+  globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
+    requests.push({ input: String(input), init });
+    return new Response(JSON.stringify({
+      organizationId: "11111111-1111-4111-8111-111111111111",
+      role: "manager",
+      globalPrefixCommandsEnabled: true,
+      installation: {
+        guildId: "123456789012345678",
+        guildDisplayName: "검증 Discord 서버",
+        applicationId: "234567890123456789",
+        status: "active"
+      },
+      modules: [{ id: "palworld.status", version: 1, enabled: true }],
+      settings: {
+        publicCommandsEnabled: true,
+        palworldStatusEnabled: true,
+        statusCommandEnabled: true,
+        guideCommandEnabled: false,
+        preferredLocale: "ko",
+        statusFields: {
+          players: true,
+          version: false,
+          latency: true,
+          observedAt: true
+        },
+        revision: 8
+      }
+    }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    });
+  }) as typeof fetch;
+  try {
+    const value = {
+      publicCommandsEnabled: true,
+      palworldStatusEnabled: true,
+      statusCommandEnabled: true,
+      guideCommandEnabled: false,
+      preferredLocale: "ko" as const,
+      statusFields: {
+        players: true,
+        version: false,
+        latency: true,
+        observedAt: true
+      },
+      expectedRevision: 7
+    };
+    const response = await updateManagementBotControl({
+      organizationId: "11111111-1111-4111-8111-111111111111",
+      csrfToken: "csrf_value_abcdefghijklmnopqrstuvwxyz123456",
+      value
+    });
+    assert.equal(response.settings.revision, 8);
+    assert.match(
+      requests[0]?.input ?? "",
+      /\/organizations\/11111111-1111-4111-8111-111111111111\/bot-control$/u
+    );
+    assert.equal(requests[0]?.init?.method, "PATCH");
+    assert.equal(requests[0]?.init?.credentials, "include");
+    assert.equal(
+      (requests[0]?.init?.headers as Record<string, string>)["X-Discord-CSRF"],
+      "csrf_value_abcdefghijklmnopqrstuvwxyz123456"
+    );
+    assert.deepEqual(JSON.parse(String(requests[0]?.init?.body)), value);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

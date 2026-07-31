@@ -368,6 +368,24 @@ test("!yoro 상태는 Guild에 귀속된 안전한 공개 Embed만 응답한다"
   const handler = new YoroPrefixCommandHandler(
     IDS.application,
     {
+      async commandPolicy(input) {
+        assert.deepEqual(input, {
+          applicationId: IDS.application,
+          guildId: IDS.guild,
+          command: "status"
+        });
+        return {
+          allowed: true,
+          preferredLocale: "auto",
+          statusFields: {
+            players: true,
+            version: false,
+            latency: true,
+            observedAt: true
+          },
+          revision: 1
+        };
+      },
       async gameServerStatus(input) {
         assert.deepEqual(input, {
           applicationId: IDS.application,
@@ -401,17 +419,79 @@ test("!yoro 상태는 Guild에 귀속된 안전한 공개 Embed만 응답한다"
   assert.match(embed.description, /＠everyone/u);
   assert.equal(embed.fields[0].value, "온라인");
   assert.equal(embed.fields[1].value, "4 / 32");
+  assert.equal(embed.fields.some((field) => field.name === "게임 버전"), false);
   assert.equal(
     replies[0].components[0].toJSON().components[0].url,
     "https://yoro.gg/dashboard/organizations"
   );
 });
 
+test("!yoro는 Organization 정책에서 비활성화된 명령에 응답하지 않는다", async () => {
+  let statusCalls = 0;
+  const replies = [];
+  const handler = new YoroPrefixCommandHandler(
+    IDS.application,
+    {
+      async commandPolicy() {
+        return {
+          allowed: false,
+          preferredLocale: "auto",
+          statusFields: {
+            players: true,
+            version: true,
+            latency: true,
+            observedAt: true
+          },
+          revision: 4,
+          reason: "command_disabled"
+        };
+      },
+      async gameServerStatus() {
+        statusCalls += 1;
+        return { connected: true };
+      }
+    },
+    "https://yoro.gg"
+  );
+  await handler.handle({
+    content: "!yoro 상태",
+    guildId: IDS.guild,
+    guild: { preferredLocale: "ko" },
+    author: { id: IDS.user, bot: false },
+    webhookId: null,
+    system: false,
+    async reply(payload) {
+      replies.push(payload);
+    }
+  });
+  assert.equal(statusCalls, 0);
+  assert.deepEqual(replies, []);
+});
+
 test("!yoro는 Bot·Webhook·DM 메시지를 처리하지 않는다", async () => {
   let calls = 0;
   const handler = new YoroPrefixCommandHandler(
     IDS.application,
-    { async gameServerStatus() { calls += 1; return { connected: false }; } },
+    {
+      async commandPolicy() {
+        calls += 1;
+        return {
+          allowed: true,
+          preferredLocale: "auto",
+          statusFields: {
+            players: true,
+            version: true,
+            latency: true,
+            observedAt: true
+          },
+          revision: 0
+        };
+      },
+      async gameServerStatus() {
+        calls += 1;
+        return { connected: false };
+      }
+    },
     "https://yoro.gg"
   );
   for (const candidate of [

@@ -2,7 +2,10 @@ import crypto from "node:crypto";
 import {
   DISCORD_INTERNAL_AUTH_VERSION,
   discordInternalCanonicalRequest,
+  parseDiscordBotCommandPolicyResponse,
   parseDiscordGameServerStatusResponse,
+  type DiscordBotCommandPolicyRequest,
+  type DiscordBotCommandPolicyResponse,
   type DiscordGameServerStatusRequest,
   type DiscordGameServerStatusResponse,
   type DiscordInstallationObservationRequest,
@@ -68,6 +71,16 @@ export class DiscordInternalApiClient {
   ): Promise<DiscordGameServerStatusResponse> {
     const result = parseDiscordGameServerStatusResponse(
       await this.request("/internal/discord/game-server-status", body)
+    );
+    if (!result) throw new DiscordInternalApiError("invalid_response");
+    return result;
+  }
+
+  async commandPolicy(
+    body: DiscordBotCommandPolicyRequest
+  ): Promise<DiscordBotCommandPolicyResponse> {
+    const result = parseDiscordBotCommandPolicyResponse(
+      await this.request("/internal/discord/command-policy", body)
     );
     if (!result) throw new DiscordInternalApiError("invalid_response");
     return result;
