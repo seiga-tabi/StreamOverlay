@@ -4,26 +4,9 @@ import {
   Routes,
   type RESTGetAPIApplicationCommandsResult
 } from "discord.js";
+import { comparableDiscordCommand } from "./command-registration-comparison.js";
 import { assertBotConfig, botConfig } from "./config.js";
 import { yoroCommandJson } from "./commands.js";
-
-function comparable(command: {
-  name: string;
-  description?: string;
-  description_localizations?: unknown;
-  options?: unknown;
-  default_member_permissions?: string | null;
-  dm_permission?: boolean | null;
-}) {
-  return {
-    name: command.name,
-    description: command.description,
-    description_localizations: command.description_localizations ?? null,
-    options: command.options ?? [],
-    default_member_permissions: command.default_member_permissions ?? null,
-    dm_permission: command.dm_permission ?? null
-  };
-}
 
 assertBotConfig();
 const operation = process.argv[2] ?? "plan";
@@ -52,8 +35,8 @@ const current = existing.find((command) =>
   && command.name === yoroCommandJson.name
 );
 const changed = !current
-  || JSON.stringify(comparable(current))
-    !== JSON.stringify(comparable(yoroCommandJson));
+  || JSON.stringify(comparableDiscordCommand(current))
+    !== JSON.stringify(comparableDiscordCommand(yoroCommandJson));
 
 process.stdout.write(`${JSON.stringify({
   command: "yoro",

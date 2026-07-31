@@ -12,6 +12,7 @@ import {
   MessageFlags,
   PermissionFlagsBits
 } from "discord.js";
+import { comparableDiscordCommand } from "../dist/command-registration-comparison.js";
 import { yoroCommandJson } from "../dist/commands.js";
 import {
   hasSetupPermission,
@@ -94,6 +95,45 @@ test("command manifest는 관리 명령과 작성자 전용 Palworld 조회 명�
   assert.equal(player?.options?.[0]?.max_length, 80);
   assert.equal(yoroCommandJson.dm_permission, false);
   assert.equal(yoroCommandJson.default_member_permissions, undefined);
+});
+
+test("command 등록 비교는 Discord REST의 null·기본값 보충을 변경으로 오판하지 않는다", () => {
+  const discordResponse = structuredClone(yoroCommandJson);
+  discordResponse.description_localizations = {
+    ja: discordResponse.description_localizations.ja,
+    ko: discordResponse.description_localizations.ko
+  };
+  discordResponse.options = discordResponse.options.map((option) => {
+    const normalized = {
+      ...option,
+      name_localizations: null
+    };
+    if (option.options.length === 0) {
+      delete normalized.options;
+      return normalized;
+    }
+    normalized.options = option.options.map((child) => ({
+      ...child,
+      name_localizations: null,
+      autocomplete: false,
+      choices: child.choices?.map((choice) => ({
+        ...choice,
+        name_localizations: null
+      }))
+    }));
+    return normalized;
+  });
+
+  assert.deepEqual(
+    comparableDiscordCommand(discordResponse),
+    comparableDiscordCommand(yoroCommandJson)
+  );
+
+  discordResponse.options[3].description = "Changed description";
+  assert.notDeepEqual(
+    comparableDiscordCommand(discordResponse),
+    comparableDiscordCommand(yoroCommandJson)
+  );
 });
 
 test("/yoro language는 관리자 권한과 Guild binding으로 응답 언어를 저장한다", async () => {
