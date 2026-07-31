@@ -140,7 +140,11 @@ export function presentGameServerStatus(input: {
   if (input.statusFields.latency && server.latencyMs !== undefined) {
     const latency = latencyPresentation(input.locale, server.latencyMs);
     const formatted = Math.round(server.latencyMs).toLocaleString(
-      input.locale === "ja" ? "ja-JP" : "ko-KR"
+      input.locale === "ja"
+        ? "ja-JP"
+        : input.locale === "en"
+          ? "en-US"
+          : "ko-KR"
     );
     embed.addFields({
       name: `📶 ${messages.charts.responseQuality}`,

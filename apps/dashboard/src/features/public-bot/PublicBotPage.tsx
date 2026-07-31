@@ -143,7 +143,7 @@ const botText = {
     condition: "활성화 조건",
     publicCondition: "Organization 연결 · 공개 명령 활성화 · 해당 명령 활성화",
     slashDescription: "/yoro status, /yoro player, /yoro guide는 실행자에게만 보이는 응답을 사용합니다.",
-    adminDescription: "/yoro setup은 서버 소유자·Administrator·Manage Guild 권한이 있는 사용자만 사용할 수 있으며, /yoro dashboard는 고정 Dashboard 링크를 비공개로 제공합니다.",
+    adminDescription: "/yoro setup과 /yoro language는 서버 소유자·Administrator·Manage Guild 권한이 있는 사용자만 사용할 수 있으며, 언어 변경은 연결된 Organization의 owner·manager만 저장할 수 있습니다. /yoro dashboard는 고정 Dashboard 링크를 비공개로 제공합니다.",
     playerMatchNotice: "플레이어 프로필은 닉네임 완전 일치일 때만 확정합니다. 부분 일치와 제한된 오타는 연관 검색어로만 표시합니다.",
     setupNotice: "웹 Dashboard가 기본 연결 경로이며 `/yoro setup`은 복구용 일회성 링크로 유지됩니다. 운영 command 등록과 feature flag 활성화는 별도 단계입니다.",
     securityEyebrow: "SECURITY BY DEFAULT",
@@ -169,7 +169,7 @@ const botText = {
     roadmapPlannedItems: ["장애·복구 자동 알림", "고정 상태 패널", "Minecraft 서버 연동"],
     commandPreviewEyebrow: "COMMAND PREVIEW",
     commandPreviewTitle: "설치 후 바로 사용할 명령어",
-    commandPreviewDescription: "명령 입력은 영어로 통일하며, 응답 안내는 서버의 한국어·일본어 설정을 따릅니다.",
+    commandPreviewDescription: "명령 입력은 영어로 통일하며, 응답 안내는 서버의 한국어·일본어·영어 설정을 따릅니다.",
     commandPreviewLink: "모든 명령어 보기",
     finalCtaTitle: "게임 서버 운영을 Discord와 연결하세요",
     finalCtaDescription: "최소 권한으로 Bot을 추가하고 YORO Dashboard에서 연결을 마무리할 수 있습니다.",
@@ -282,7 +282,7 @@ const botText = {
     condition: "有効化条件",
     publicCondition: "Organization連携・公開コマンド有効・該当コマンド有効",
     slashDescription: "/yoro status、/yoro player、/yoro guideは実行者だけに表示される応答を使用します。",
-    adminDescription: "/yoro setupはサーバー所有者・Administrator・Manage Guild権限を持つユーザーだけが利用でき、/yoro dashboardは固定Dashboardリンクを非公開で提供します。",
+    adminDescription: "/yoro setupと/yoro languageはサーバー所有者・Administrator・Manage Guild権限を持つユーザーだけが利用でき、言語変更は連携済みOrganizationのowner・managerだけが保存できます。/yoro dashboardは固定Dashboardリンクを非公開で提供します。",
     playerMatchNotice: "プレイヤープロフィールはニックネームが完全一致した場合のみ確定します。部分一致と限定的な入力ミスは関連候補としてのみ表示します。",
     setupNotice: "Web Dashboardが基本の連携経路で、`/yoro setup` は復旧用ワンタイムリンクとして維持されます。運用command登録とfeature flag有効化は別の段階です。",
     securityEyebrow: "SECURITY BY DEFAULT",
@@ -308,7 +308,7 @@ const botText = {
     roadmapPlannedItems: ["障害・復旧の自動通知", "固定ステータスパネル", "Minecraftサーバー連携"],
     commandPreviewEyebrow: "COMMAND PREVIEW",
     commandPreviewTitle: "導入後すぐに使えるコマンド",
-    commandPreviewDescription: "コマンド入力は英語に統一し、応答案内はサーバーの韓国語・日本語設定に従います。",
+    commandPreviewDescription: "コマンド入力は英語に統一し、応答案内はサーバーの韓国語・日本語・英語設定に従います。",
     commandPreviewLink: "すべてのコマンドを見る",
     finalCtaTitle: "ゲームサーバー運用をDiscordと連携しましょう",
     finalCtaDescription: "最小権限でBotを追加し、YORO Dashboardから連携を完了できます。",
@@ -1196,7 +1196,7 @@ export function PublicBotPage() {
                 </a>
               </div>
               <div className="public-bot-command-preview__list">
-                {["!yoro status", "!yoro player", "!yoro guide", "/yoro setup", "/yoro dashboard", "/yoro help"].map((command) => (
+                {["!yoro status", "!yoro player", "!yoro guide", "/yoro setup", "/yoro language", "/yoro dashboard", "/yoro help"].map((command) => (
                   <code key={command}>{command}</code>
                 ))}
               </div>

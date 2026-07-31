@@ -9,6 +9,7 @@
 - `/yoro setup`: Guild와 실행자에게 귀속된 10분 일회용 설정 링크 발급
 - `/yoro help`: 현재 제공되는 명령 안내
 - `/yoro dashboard`: token이나 Organization ID가 없는 고정 `/dashboard` 링크를 ephemeral로 제공
+- `/yoro language locale:<auto|ko|ja|en>`: 관리자 권한과 Organization membership을 확인한 뒤 응답 언어를 저장
 - `/yoro status`: Palworld 서버 상태를 실행자에게만 ephemeral로 제공
 - `/yoro player [nickname]`: 접속 플레이어 목록 또는 프로필을 실행자에게만 ephemeral로 제공
 - `/yoro guide`: 전용 서버 설정 안내를 실행자에게만 ephemeral로 제공
@@ -23,8 +24,8 @@
 - `!yoro help`: 현재 제공되는 일반 사용자 명령
 
 명령 입력은 영어 `status`, `player`, `guide`, `help`만 exact allowlist로
-지원한다. 한국어·일본어는 명령 별칭이 아니라 Dashboard 설정 또는 Guild
-locale에 따른 응답 언어로만 사용한다.
+지원한다. 한국어·일본어·영어는 명령 별칭이 아니라 Dashboard 설정,
+`/yoro language` 또는 Guild locale에 따른 응답 언어로만 사용한다.
 플레이어 명령만 최대 80자의 닉네임 인수를 받으며 나머지 자유 형식 문장은
 받지 않는다. prefix 응답은 Discord의 일반 채널 메시지이며
 ephemeral이 아니다. 일반 메시지는 작성자 전용으로 바꿀 수 없으므로 비공개

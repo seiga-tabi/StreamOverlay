@@ -36,7 +36,7 @@ Server의 `DATABASE_MIGRATION_MODE`는 `check`만 허용합니다. Server 시작
 
 `schema_migrations`에는 migration ID, SHA-256, 적용 시각, 실행 시간, application version, dirty 상태를 저장합니다. SQL·parameter·Database URL은 로그나 public API에 노출하지 않습니다.
 
-현재 Discord·YORO 기반 migration은 onboarding `0004`, Bot binding `0005`, legacy Organization 관리·Agent schema `0006`~`0007`, 웹 management Guild claim `0008`, YORO 통합 계정·외부 identity·범용 session `0009`, 사용자별 Dashboard 개인 설정 `0010`, YORO Twitch LIVE credential 저장 `0011`, Organization당 Palworld 서버 1개 제한 `0012`, Discord Bot control plane `0013`, Palworld 플레이어 명령 `0014`입니다. 이미 적용한 SQL은 checksum 이력을 위해 수정하지 않습니다. staging에서 `check`와 `plan`을 확인한 뒤 별도 승인으로 pending migration을 적용합니다. `0012`는 기존 레코드를 변경하므로 backup 확인 후 `--allow-destructive` 승인이 필요합니다.
+현재 Discord·YORO 기반 migration은 onboarding `0004`, Bot binding `0005`, legacy Organization 관리·Agent schema `0006`~`0007`, 웹 management Guild claim `0008`, YORO 통합 계정·외부 identity·범용 session `0009`, 사용자별 Dashboard 개인 설정 `0010`, YORO Twitch LIVE credential 저장 `0011`, Organization당 Palworld 서버 1개 제한 `0012`, Discord Bot control plane `0013`, Palworld 플레이어 명령 `0014`, 명령 원문 삭제 설정 `0015`, 영어 응답 언어 저장 지원 `0016`입니다. 이미 적용한 SQL은 checksum 이력을 위해 수정하지 않습니다. staging에서 `check`와 `plan`을 확인한 뒤 별도 승인으로 pending migration을 적용합니다. `0012`는 기존 레코드를 변경하므로 backup 확인 후 `--allow-destructive` 승인이 필요합니다.
 
 ## Rollback
 

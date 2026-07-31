@@ -21,6 +21,7 @@ import {
   parseDiscordGameServerStatusRequest,
   parseDiscordPalworldPlayerLookupRequest,
   parseDiscordBotCommandPolicyRequest,
+  parseDiscordBotResponseLocaleUpdateRequest,
   parseUpdateDiscordBotControlInput,
   parseDiscordSetupSessionRequest,
   isDiscordSnowflake,
@@ -6260,7 +6261,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
           "/internal/discord/installations/revoked",
           "/internal/discord/game-server-status",
           "/internal/discord/palworld-players",
-          "/internal/discord/command-policy"
+          "/internal/discord/command-policy",
+          "/internal/discord/response-locale"
         ]);
         if (!internalPaths.has(url.pathname) || req.method !== "POST") {
           return sendJson(req, res, 404, { error: "not found" });
@@ -6443,6 +6445,50 @@ export function createHttpHandler(input: HttpHandlerInput) {
             return sendJson(req, res, 503, {
               error: "Discord Bot 명령 정책을 확인할 수 없습니다.",
               code: "command_policy_failed"
+            }, noStoreHeaders());
+          }
+        }
+        if (url.pathname === "/internal/discord/response-locale") {
+          const localeRequest = parseDiscordBotResponseLocaleUpdateRequest(body);
+          if (
+            !localeRequest
+            || localeRequest.applicationId
+              !== appConfig.discordBotInternal.applicationId
+          ) {
+            return sendJson(req, res, 400, {
+              error: "Discord Bot 응답 언어 요청 형식이 올바르지 않습니다."
+            }, noStoreHeaders());
+          }
+          if (!input.discordBotCommandPolicy) {
+            return sendJson(req, res, 503, {
+              error: "Discord Bot 응답 언어 기능을 사용할 수 없습니다.",
+              code: "feature_unavailable"
+            }, noStoreHeaders());
+          }
+          try {
+            return sendJson(
+              req,
+              res,
+              200,
+              await input.discordBotCommandPolicy.updateResponseLocale(
+                localeRequest
+              ),
+              noStoreHeaders()
+            );
+          } catch (error) {
+            const denied = error instanceof SafeDatabaseError
+              && error.code === "DATABASE_REFERENCE_INVALID";
+            input.logger?.error({
+              type: "discord.internal.response_locale_failed",
+              errorCode: error instanceof SafeDatabaseError
+                ? error.code
+                : "RESPONSE_LOCALE_FAILED"
+            });
+            return sendJson(req, res, denied ? 403 : 503, {
+              error: denied
+                ? "Discord Bot 응답 언어를 변경할 권한이 없습니다."
+                : "Discord Bot 응답 언어를 변경할 수 없습니다.",
+              code: denied ? "permission_required" : "response_locale_failed"
             }, noStoreHeaders());
           }
         }

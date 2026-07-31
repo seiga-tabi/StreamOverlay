@@ -62,7 +62,7 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
   await t.test("check와 plan 기반 검사는 빈 DB를 변경하지 않는다", async () => {
     const inspection = await inspectMigrationState(pool, manifest);
     assert.equal(inspection.status, "pending");
-    assert.equal(inspection.pending.length, 14);
+    assert.equal(inspection.pending.length, 16);
     const table = await pool.query(
       "SELECT to_regclass('public.schema_migrations')::TEXT AS name"
     );
@@ -592,6 +592,8 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
     const applicationId = "900000000000000001";
     const guildA = "900000000000000002";
     const guildB = "900000000000000003";
+    const discordUserA = "900000000000000004";
+    const discordUserB = "900000000000000005";
     await pool.query(
       `INSERT INTO discord_guilds (
          id, organization_id, discord_guild_id, display_name
@@ -624,6 +626,27 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
         organizationB,
         guildB,
         userB
+      ]
+    );
+    await pool.query(
+      `INSERT INTO discord_bot_installation_observations (
+         discord_guild_id, application_id, status
+       ) VALUES ($1, $3, 'observed'), ($2, $3, 'observed')`,
+      [guildA, guildB, applicationId]
+    );
+    await pool.query(
+      `INSERT INTO external_identities (
+         id, user_id, provider, provider_subject, display_name
+       ) VALUES
+         ($1, $2, 'discord', $3, 'Control User A'),
+         ($4, $5, 'discord', $6, 'Control User B')`,
+      [
+        crypto.randomUUID(),
+        userA,
+        discordUserA,
+        crypto.randomUUID(),
+        userB,
+        discordUserB
       ]
     );
     const repository = new DiscordBotControlRepository(pool);
@@ -694,6 +717,36 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
     assert.equal(defaultB.allowed, true);
     assert.equal(defaultB.revision, 0);
 
+    const localeUpdate = await withTransaction(pool, async (client) =>
+      new DiscordBotControlRepository(client).updateResponseLocale({
+        applicationId,
+        guildId: guildA,
+        userId: discordUserA,
+        preferredLocale: "en"
+      })
+    );
+    assert.deepEqual(localeUpdate, { preferredLocale: "en", revision: 2 });
+    const englishPolicy = await repository.commandPolicy({
+      applicationId,
+      guildId: guildA,
+      command: "status"
+    });
+    assert.equal(englishPolicy.preferredLocale, "en");
+    assert.equal(englishPolicy.commands.status, false);
+    assert.equal(englishPolicy.revision, 2);
+    await assert.rejects(
+      withTransaction(pool, async (client) =>
+        new DiscordBotControlRepository(client).updateResponseLocale({
+          applicationId,
+          guildId: guildA,
+          userId: discordUserB,
+          preferredLocale: "ko"
+        })
+      ),
+      (error) => error instanceof SafeDatabaseError
+        && error.code === "DATABASE_REFERENCE_INVALID"
+    );
+
     await assert.rejects(
       withTransaction(pool, async (client) =>
         new DiscordBotControlRepository(client).update({
@@ -715,7 +768,7 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
               latency: true,
               observedAt: true
             },
-            expectedRevision: 0
+            expectedRevision: 1
           }
         })
       ),
@@ -764,7 +817,7 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
     assert.deepEqual(records.rows[0], {
       config_count: 1,
       other_config_count: 0,
-      revision_count: 1,
+      revision_count: 2,
       audit_count: 1
     });
   });

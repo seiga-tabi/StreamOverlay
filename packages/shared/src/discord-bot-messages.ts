@@ -3,7 +3,7 @@ import type {
   DiscordBotControlCommand
 } from "./discord-bot-control.js";
 
-export type DiscordBotMessageLocale = "ko" | "ja";
+export type DiscordBotMessageLocale = "ko" | "ja" | "en";
 
 export const DISCORD_BOT_MESSAGES = {
   ko: {
@@ -17,6 +17,9 @@ export const DISCORD_BOT_MESSAGES = {
       dashboardButton: "Dashboard 열기",
       setupUnavailable: "설정 링크를 발급할 수 없습니다. 잠시 후 다시 시도해 주세요.",
       setupActive: "이미 진행 중인 설정 링크가 있습니다. 기존 링크가 만료된 뒤 다시 시도해 주세요.",
+      languageUpdated: "YORO Bot 메시지 언어를 한국어로 변경했습니다.",
+      languageAutoUpdated: "YORO Bot 메시지 언어를 Discord 서버 언어 자동 감지로 변경했습니다.",
+      languageUnavailable: "메시지 언어를 변경할 수 없습니다. YORO 계정과 Organization 관리 권한을 확인해 주세요.",
       help: [
         "**/yoro setup**",
         "웹 Dashboard에서 Discord 서버와 YORO.gg 연결을 시작하거나 복구합니다.",
@@ -25,7 +28,10 @@ export const DISCORD_BOT_MESSAGES = {
         "현재 사용할 수 있는 명령을 확인합니다.",
         "",
         "**/yoro dashboard**",
-        "YORO Bot 관리 화면을 엽니다."
+        "YORO Bot 관리 화면을 엽니다.",
+        "",
+        "**/yoro language**",
+        "서버 관리자가 YORO Bot 메시지 언어를 변경합니다."
       ].join("\n"),
       privateHelpTitle: "**작성자에게만 보이는 명령**",
       privateCommands: {
@@ -138,6 +144,9 @@ export const DISCORD_BOT_MESSAGES = {
       dashboardButton: "Dashboardを開く",
       setupUnavailable: "設定リンクを発行できません。しばらくしてからもう一度お試しください。",
       setupActive: "進行中の設定リンクがあります。既存リンクの期限切れ後にもう一度お試しください。",
+      languageUpdated: "YORO Botのメッセージ言語を日本語に変更しました。",
+      languageAutoUpdated: "YORO Botのメッセージ言語をDiscordサーバー言語の自動検出に変更しました。",
+      languageUnavailable: "メッセージ言語を変更できません。YOROアカウントとOrganization管理権限を確認してください。",
       help: [
         "**/yoro setup**",
         "Web DashboardでDiscordサーバーとYORO.ggの連携を開始または復旧します。",
@@ -146,7 +155,10 @@ export const DISCORD_BOT_MESSAGES = {
         "現在利用できるコマンドを確認します。",
         "",
         "**/yoro dashboard**",
-        "YORO Bot管理画面を開きます。"
+        "YORO Bot管理画面を開きます。",
+        "",
+        "**/yoro language**",
+        "サーバー管理者がYORO Botのメッセージ言語を変更します。"
       ].join("\n"),
       privateHelpTitle: "**実行者だけに表示されるコマンド**",
       privateCommands: {
@@ -247,13 +259,143 @@ export const DISCORD_BOT_MESSAGES = {
         partial_data: "サーバー基本情報は確認できましたが、一部の状態を取得できませんでした。"
       }
     }
+  },
+  en: {
+    slash: {
+      dmDenied: "This command can only be used in a Discord server.",
+      permissionDenied: "Only the server owner or a member with server management permission can run this command.",
+      setupTitle: "You can configure YORO Bot in the web Dashboard.",
+      setupBody: "Use the link below to connect this Discord server. The link expires in 10 minutes and can only be used once.",
+      setupButton: "Connect server on the web",
+      dashboardTitle: "YORO Bot management",
+      dashboardButton: "Open Dashboard",
+      setupUnavailable: "A setup link could not be created. Please try again later.",
+      setupActive: "A setup link is already active. Try again after the existing link expires.",
+      languageUpdated: "YORO Bot message language has been changed to English.",
+      languageAutoUpdated: "YORO Bot message language now follows the Discord server locale automatically.",
+      languageUnavailable: "The message language could not be changed. Check your YORO account and Organization management permission.",
+      help: [
+        "**/yoro setup**",
+        "Start or recover the connection between this Discord server and YORO.gg in the web Dashboard.",
+        "",
+        "**/yoro help**",
+        "Show the commands that are currently available.",
+        "",
+        "**/yoro dashboard**",
+        "Open YORO Bot management.",
+        "",
+        "**/yoro language**",
+        "Let a server manager change the language used in YORO Bot messages."
+      ].join("\n"),
+      privateHelpTitle: "**Commands visible only to you**",
+      privateCommands: {
+        status: "`/yoro status` Check the Palworld server status",
+        player: "`/yoro player` List connected nicknames · enter `nickname` to search an in-game profile",
+        guide: "`/yoro guide` Open the Palworld dedicated server guide"
+      },
+      playerSearchHint: "Enter `nickname` in `/yoro player` to search.",
+      prefixHelpTitle: "**Public user commands**",
+      unknown: "This YORO Bot command is not supported."
+    },
+    prefix: {
+      helpTitle: "YORO Bot public commands",
+      commands: {
+        help: "`!yoro help` Show available commands",
+        status: "`!yoro status` Check the Palworld server status",
+        player: "`!yoro player` List connected nicknames · `!yoro player {nickname}` search an in-game profile",
+        guide: "`!yoro guide` Open the Palworld dedicated server guide"
+      },
+      guideTitle: "Palworld dedicated server setup",
+      guideBody: "Learn how to configure a Palworld dedicated server for YORO.",
+      guideButton: "Open setup guide",
+      palworldHomeButton: "Open Palworld home",
+      statusTitle: "YORO Palworld Server",
+      playerListTitle: "Players currently connected to Palworld",
+      playerProfileTitle: "Palworld in-game profile",
+      playerEmpty: "No players are currently connected.",
+      playerListTruncated: "Showing {shown} of {total} players.",
+      playerNotFound: "No exact nickname match was found.",
+      playerSuggestions: "Related searches",
+      playerSearchHint: "Search with `!yoro player {nickname}`.",
+      playerFields: {
+        nickname: "Nickname",
+        level: "Level",
+        buildingCount: "Buildings"
+      },
+      playerUnavailable: {
+        server_not_configured: "A Palworld game server has not been registered yet.",
+        rest_not_configured: "The Palworld REST connection is not configured.",
+        rest_auth_failed: "Palworld REST authentication failed. Check the AdminPassword in the Dashboard.",
+        rest_timeout: "The Palworld player request timed out. Please try again later.",
+        rest_invalid_response: "The Palworld player response format could not be verified. Contact the service operator.",
+        rest_unreachable: "The Palworld REST player endpoint could not be reached. Check the server and proxy configuration.",
+        upstream_unavailable: "The Palworld player list is currently unavailable. Please try again later."
+      },
+      guildNotConnected: "This Discord server is not connected to a YORO Organization.",
+      serverNotConfigured: "A Palworld game server has not been registered yet.",
+      unavailable: "The server status is currently unavailable. Please try again later.",
+      internalFailure: {
+        authentication_failed: "The internal connection between YORO Bot and the server requires attention. Contact the service operator.",
+        unavailable: "The YORO server is currently unavailable. Please try again later.",
+        rejected: "The server status request could not be processed. Contact the service operator.",
+        invalid_response: "The server status response could not be verified. Please try again later.",
+        unexpected: "The server status is currently unavailable. Please try again later."
+      },
+      policyDenied: {
+        installation_inactive: "This Discord server is not connected to a YORO Organization.",
+        module_disabled: "The Palworld status module is disabled for this server.",
+        command_disabled: "This command has been disabled by a server manager."
+      },
+      fields: {
+        status: "Status",
+        notice: "Notice",
+        players: "Players",
+        version: "Game version",
+        latency: "Response time",
+        observedAt: "Last checked"
+      },
+      charts: {
+        occupancy: "Server capacity",
+        responseQuality: "Connection quality",
+        excellent: "Excellent",
+        good: "Good",
+        delayed: "Delayed",
+        slow: "Slow",
+        footer: "YORO · Safe read-only Palworld status",
+        playerFooter: "YORO · Palworld connected player lookup"
+      },
+      states: {
+        not_configured: "Status connection required",
+        checking: "Running the first status check",
+        online: "Online",
+        degraded: "Partially available",
+        offline: "Offline",
+        stale: "Last status is stale",
+        auth_failed: "Server authentication requires attention",
+        blocked_by_policy: "Connection policy requires attention",
+        unavailable: "Status unavailable"
+      },
+      reasons: {
+        status_not_configured: "The server is registered, but its REST status connection is not configured.",
+        status_feature_disabled: "Palworld status checks are disabled in the current service configuration.",
+        credentials_unavailable: "The service operator must check the credential store used for status connections.",
+        auth_failed: "Check the Palworld server authentication settings.",
+        network_policy_blocked: "The registered REST address is not permitted by the current connection policy.",
+        upstream_unavailable: "The Palworld server status is currently unavailable.",
+        stale_data: "The displayed status may no longer be current.",
+        partial_data: "Basic server information was verified, but some status data could not be loaded."
+      }
+    }
   }
 } as const;
 
 export function discordBotMessageLocale(
   value: string | undefined
 ): DiscordBotMessageLocale {
-  return value?.toLowerCase().startsWith("ja") ? "ja" : "ko";
+  const normalized = value?.toLowerCase();
+  if (normalized?.startsWith("ja")) return "ja";
+  if (normalized?.startsWith("ko")) return "ko";
+  return "en";
 }
 
 export function discordBotHelpBody(

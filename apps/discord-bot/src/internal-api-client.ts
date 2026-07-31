@@ -3,10 +3,13 @@ import {
   DISCORD_INTERNAL_AUTH_VERSION,
   discordInternalCanonicalRequest,
   parseDiscordBotCommandPolicyResponse,
+  parseDiscordBotResponseLocaleUpdateResponse,
   parseDiscordGameServerStatusResponse,
   parseDiscordPalworldPlayerLookupResponse,
   type DiscordBotCommandPolicyRequest,
   type DiscordBotCommandPolicyResponse,
+  type DiscordBotResponseLocaleUpdateRequest,
+  type DiscordBotResponseLocaleUpdateResponse,
   type DiscordGameServerStatusRequest,
   type DiscordGameServerStatusResponse,
   type DiscordInstallationObservationRequest,
@@ -119,6 +122,20 @@ export class DiscordInternalApiClient {
       });
     this.policyInFlight.set(key, request);
     return request;
+  }
+
+  async updateResponseLocale(
+    body: DiscordBotResponseLocaleUpdateRequest
+  ): Promise<DiscordBotResponseLocaleUpdateResponse> {
+    const result = parseDiscordBotResponseLocaleUpdateResponse(
+      await this.request("/internal/discord/response-locale", body)
+    );
+    if (!result) throw new DiscordInternalApiError("invalid_response");
+    const prefix = `${body.applicationId}:${body.guildId}:`;
+    for (const key of this.policyCache.keys()) {
+      if (key.startsWith(prefix)) this.policyCache.delete(key);
+    }
+    return result;
   }
 
   private async loadCommandPolicy(

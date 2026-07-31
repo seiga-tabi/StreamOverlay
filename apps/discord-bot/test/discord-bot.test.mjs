@@ -66,7 +66,11 @@ function interaction(input = {}) {
     memberPermissions: { bitfield: PermissionFlagsBits.ManageGuild },
     options: {
       getSubcommand: () => input.subcommand ?? "setup",
-      getString: (name) => name === "nickname" ? input.nickname ?? null : null
+      getString: (name) => name === "nickname"
+        ? input.nickname ?? null
+        : name === "locale"
+          ? input.preferredLocale ?? null
+          : null
     },
     inGuild: () => inGuild,
     reply: async (payload) => calls.reply.push(payload),
@@ -81,7 +85,7 @@ test("command manifest는 관리 명령과 작성자 전용 Palworld 조회 명�
   assert.equal(yoroCommandJson.name, "yoro");
   assert.deepEqual(
     yoroCommandJson.options?.map((option) => option.name),
-    ["setup", "help", "dashboard", "status", "player", "guide"]
+    ["setup", "help", "dashboard", "language", "status", "player", "guide"]
   );
   const player = yoroCommandJson.options?.find(
     (option) => option.name === "player"
@@ -90,6 +94,58 @@ test("command manifest는 관리 명령과 작성자 전용 Palworld 조회 명�
   assert.equal(player?.options?.[0]?.max_length, 80);
   assert.equal(yoroCommandJson.dm_permission, false);
   assert.equal(yoroCommandJson.default_member_permissions, undefined);
+});
+
+test("/yoro language는 관리자 권한과 Guild binding으로 응답 언어를 저장한다", async () => {
+  const updates = [];
+  const { value, calls } = interaction({
+    subcommand: "language",
+    preferredLocale: "en",
+    locale: "ko"
+  });
+  const handler = new YoroCommandHandler(
+    IDS.application,
+    {
+      async updateResponseLocale(input) {
+        updates.push(input);
+        return { preferredLocale: "en", revision: 2 };
+      }
+    }
+  );
+  await handler.handle(value);
+  assert.deepEqual(updates, [{
+    applicationId: IDS.application,
+    guildId: IDS.guild,
+    userId: IDS.user,
+    preferredLocale: "en"
+  }]);
+  assert.equal(calls.deferReply[0].flags, MessageFlags.Ephemeral);
+  assert.equal(
+    calls.editReply[0].content,
+    "YORO Bot message language has been changed to English."
+  );
+});
+
+test("/yoro language는 일반 member의 설정 변경을 내부 API 호출 전에 차단한다", async () => {
+  let called = false;
+  const { value, calls } = interaction({
+    subcommand: "language",
+    preferredLocale: "ja",
+    memberPermissions: { bitfield: 0n }
+  });
+  const handler = new YoroCommandHandler(
+    IDS.application,
+    {
+      async updateResponseLocale() {
+        called = true;
+        return { preferredLocale: "ja", revision: 2 };
+      }
+    }
+  );
+  await handler.handle(value);
+  assert.equal(called, false);
+  assert.match(calls.reply[0].content, /서버 관리 권한/u);
+  assert.equal(calls.reply[0].flags, MessageFlags.Ephemeral);
 });
 
 test("/yoro status는 Organization 정책을 적용한 응답을 작성자에게만 표시한다", async () => {
@@ -533,6 +589,55 @@ test("내부 API client는 짧은 TTL 동안 동일 command policy 요청을 병
   assert.deepEqual(second, third);
 });
 
+test("내부 API client는 응답 언어 저장 후 같은 Guild의 정책 cache를 폐기한다", async () => {
+  const paths = [];
+  let revision = 1;
+  const client = new DiscordInternalApiClient({
+    authKey: "p".repeat(64),
+    baseUrl: "http://server:3000",
+    publicBaseUrl: "https://yoro.gg",
+    timeoutMs: 1000,
+    now: () => 1_800_000_000_000,
+    fetchImpl: async (url) => {
+      const pathname = new URL(url).pathname;
+      paths.push(pathname);
+      if (pathname === "/internal/discord/response-locale") {
+        revision = 2;
+        return new Response(JSON.stringify({
+          preferredLocale: "en",
+          revision
+        }), { status: 200, headers: { "Content-Type": "application/json" } });
+      }
+      return new Response(JSON.stringify({
+        allowed: true,
+        commands: { help: true, status: true, player: true, guide: true },
+        deleteInvocationAfterReply: false,
+        preferredLocale: revision === 1 ? "auto" : "en",
+        statusFields: { players: true, version: true, latency: true, observedAt: true },
+        revision
+      }), { status: 200, headers: { "Content-Type": "application/json" } });
+    }
+  });
+  const policy = {
+    applicationId: IDS.application,
+    guildId: IDS.guild,
+    command: "help"
+  };
+  assert.equal((await client.commandPolicy(policy)).preferredLocale, "auto");
+  await client.updateResponseLocale({
+    applicationId: IDS.application,
+    guildId: IDS.guild,
+    userId: IDS.user,
+    preferredLocale: "en"
+  });
+  assert.equal((await client.commandPolicy(policy)).preferredLocale, "en");
+  assert.deepEqual(paths, [
+    "/internal/discord/command-policy",
+    "/internal/discord/response-locale",
+    "/internal/discord/command-policy"
+  ]);
+});
+
 test("!yoro parser는 exact allowlist와 100자 상한을 적용한다", () => {
   assert.deepEqual(parseYoroPrefixCommand("!yoro"), { command: "help" });
   assert.deepEqual(parseYoroPrefixCommand("!yoro help"), { command: "help" });
@@ -927,6 +1032,16 @@ test("!yoro 영어 명령의 응답 언어는 Dashboard 설정과 Guild locale�
     guildLocale: "ko",
     preferredLocale: "ja"
   }), "🟢 YORO Palworldサーバー");
+  assert.equal(await responseTitle({
+    content: "!yoro status",
+    guildLocale: "en-US",
+    preferredLocale: "auto"
+  }), "🟢 YORO Palworld Server");
+  assert.equal(await responseTitle({
+    content: "!yoro status",
+    guildLocale: "ko",
+    preferredLocale: "en"
+  }), "🟢 YORO Palworld Server");
 });
 
 test("!yoro player는 목록과 게임 내 프로필만 안전하게 표시한다", async () => {
@@ -1189,6 +1304,10 @@ test("!yoro 공개 링크는 응답 언어에 맞는 Palworld 경로만 사용�
       "/bot/game-files"
     ),
     "https://yoro.gg/ja/bot/game-files"
+  );
+  assert.equal(
+    localizedPublicResourceUrl("https://yoro.gg", "en", "/palworld"),
+    "https://yoro.gg/palworld"
   );
 });
 

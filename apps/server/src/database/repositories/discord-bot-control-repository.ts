@@ -6,8 +6,11 @@ import {
   DISCORD_BOT_CONTROL_SCHEMA_VERSION,
   type DiscordBotCommandPolicyRequest,
   type DiscordBotCommandPolicyResponse,
+  type DiscordBotControlLocale,
   type DiscordBotControlOverview,
   type DiscordBotControlSettings,
+  type DiscordBotResponseLocaleUpdateRequest,
+  type DiscordBotResponseLocaleUpdateResponse,
   type UpdateDiscordBotControlInput
 } from "@streamops/shared";
 import type { TenantContext } from "../tenant-context.js";
@@ -24,6 +27,11 @@ type InstallationRow = {
   application_id: string;
 };
 
+type ActorInstallationRow = InstallationRow & {
+  organization_id: string;
+  actor_user_id: string;
+};
+
 type ControlRow = {
   public_commands_enabled: boolean;
   palworld_status_enabled: boolean;
@@ -31,7 +39,7 @@ type ControlRow = {
   player_command_enabled: boolean;
   guide_command_enabled: boolean;
   delete_invocation_after_reply: boolean;
-  preferred_locale: "auto" | "ko" | "ja";
+  preferred_locale: DiscordBotControlLocale;
   show_players: boolean;
   show_version: boolean;
   show_latency: boolean;
@@ -375,6 +383,167 @@ export class DiscordBotControlRepository {
       statusFields: current.statusFields,
       revision: current.revision,
       ...(reason ? { reason } : {})
+    });
+  }
+
+  async updateResponseLocale(
+    input: DiscordBotResponseLocaleUpdateRequest
+  ): Promise<DiscordBotResponseLocaleUpdateResponse> {
+    const installationResult = await repositoryQuery<ActorInstallationRow>(
+      this.queryable,
+      `SELECT installation.organization_id,
+         installation.discord_guild_id,
+         guild.display_name AS guild_display_name,
+         installation.application_id,
+         member.user_id AS actor_user_id
+       FROM discord_installations installation
+       JOIN discord_guilds guild
+         ON guild.organization_id = installation.organization_id
+        AND guild.discord_guild_id = installation.discord_guild_id
+       JOIN discord_bot_installation_observations observation
+         ON observation.discord_guild_id = installation.discord_guild_id
+        AND observation.application_id = installation.application_id
+       JOIN external_identities identity
+         ON identity.provider = 'discord'
+        AND identity.provider_subject = $3
+        AND identity.revoked_at IS NULL
+       JOIN users account
+         ON account.id = identity.user_id
+        AND account.status = 'active'
+       JOIN organization_members member
+         ON member.organization_id = installation.organization_id
+        AND member.user_id = account.id
+        AND member.role IN ('owner', 'manager')
+       WHERE installation.application_id = $1
+         AND installation.discord_guild_id = $2
+         AND installation.status = 'active'
+         AND observation.status = 'observed'
+         AND guild.status = 'active'
+       LIMIT 1
+       FOR UPDATE OF installation, member`,
+      [input.applicationId, input.guildId, input.userId]
+    );
+    const installation = installationResult.rows[0];
+    if (!installation) {
+      throw new SafeDatabaseError("DATABASE_REFERENCE_INVALID", false);
+    }
+    const existingResult = await repositoryQuery<ControlRow>(
+      this.queryable,
+      `SELECT public_commands_enabled, palworld_status_enabled,
+         status_command_enabled, player_command_enabled,
+         guide_command_enabled, delete_invocation_after_reply,
+         preferred_locale,
+         show_players, show_version, show_latency, show_observed_at,
+         revision::TEXT AS revision
+       FROM discord_bot_control_configs
+       WHERE organization_id = $1
+         AND discord_guild_id = $2
+         AND application_id = $3
+       FOR UPDATE`,
+      [
+        installation.organization_id,
+        installation.discord_guild_id,
+        installation.application_id
+      ]
+    );
+    const current = settings(existingResult.rows[0]);
+    const nextRevision = current.revision + 1;
+    const next = Object.freeze({
+      ...current,
+      preferredLocale: input.preferredLocale,
+      revision: nextRevision
+    });
+    await repositoryQuery(
+      this.queryable,
+      `INSERT INTO discord_bot_control_configs (
+         organization_id, discord_guild_id, application_id,
+         public_commands_enabled, palworld_status_enabled,
+         status_command_enabled, player_command_enabled,
+         guide_command_enabled, delete_invocation_after_reply,
+         preferred_locale,
+         show_players, show_version, show_latency, show_observed_at,
+         revision, updated_by_user_id
+       ) VALUES (
+         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
+       )
+       ON CONFLICT (organization_id, discord_guild_id, application_id)
+       DO UPDATE SET
+         preferred_locale = EXCLUDED.preferred_locale,
+         revision = EXCLUDED.revision,
+         updated_by_user_id = EXCLUDED.updated_by_user_id,
+         updated_at = NOW()`,
+      [
+        installation.organization_id,
+        installation.discord_guild_id,
+        installation.application_id,
+        next.publicCommandsEnabled,
+        next.palworldStatusEnabled,
+        next.statusCommandEnabled,
+        next.playerCommandEnabled,
+        next.guideCommandEnabled,
+        next.deleteInvocationAfterReply,
+        next.preferredLocale,
+        next.statusFields.players,
+        next.statusFields.version,
+        next.statusFields.latency,
+        next.statusFields.observedAt,
+        nextRevision,
+        installation.actor_user_id
+      ]
+    );
+    const snapshot = {
+      schemaVersion: DISCORD_BOT_CONTROL_SCHEMA_VERSION,
+      moduleId: DISCORD_BOT_CONTROL_MODULE_ID,
+      publicCommandsEnabled: next.publicCommandsEnabled,
+      palworldStatusEnabled: next.palworldStatusEnabled,
+      statusCommandEnabled: next.statusCommandEnabled,
+      playerCommandEnabled: next.playerCommandEnabled,
+      guideCommandEnabled: next.guideCommandEnabled,
+      deleteInvocationAfterReply: next.deleteInvocationAfterReply,
+      preferredLocale: next.preferredLocale,
+      statusFields: next.statusFields
+    };
+    await repositoryQuery(
+      this.queryable,
+      `INSERT INTO discord_bot_control_revisions (
+         id, organization_id, discord_guild_id, application_id,
+         revision, schema_version, safe_snapshot, actor_user_id
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7::JSONB, $8)`,
+      [
+        crypto.randomUUID(),
+        installation.organization_id,
+        installation.discord_guild_id,
+        installation.application_id,
+        nextRevision,
+        DISCORD_BOT_CONTROL_SCHEMA_VERSION,
+        JSON.stringify(snapshot),
+        installation.actor_user_id
+      ]
+    );
+    await repositoryQuery(
+      this.queryable,
+      `INSERT INTO audit_logs (
+         id, organization_id, actor_user_id, action, target_type,
+         target_reference_hash, safe_metadata
+       ) VALUES ($1, $2, $3, 'discord.bot.response_locale.updated',
+         'discord_bot_control', $4, $5::JSONB)`,
+      [
+        crypto.randomUUID(),
+        installation.organization_id,
+        installation.actor_user_id,
+        crypto.createHash("sha256")
+          .update(`${installation.application_id}:${installation.discord_guild_id}`)
+          .digest(),
+        JSON.stringify({
+          revision: nextRevision,
+          preferredLocale: next.preferredLocale,
+          source: "discord_command"
+        })
+      ]
+    );
+    return Object.freeze({
+      preferredLocale: next.preferredLocale,
+      revision: nextRevision
     });
   }
 

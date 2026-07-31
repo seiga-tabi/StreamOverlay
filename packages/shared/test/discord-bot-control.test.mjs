@@ -2,10 +2,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   DISCORD_BOT_PREFIX_COMMAND_MANIFEST,
+  DISCORD_BOT_MESSAGES,
   DEFAULT_DISCORD_BOT_CONTROL_SETTINGS,
+  discordBotMessageLocale,
   parseDiscordBotControlOverview,
   parseDiscordBotCommandPolicyRequest,
   parseDiscordBotCommandPolicyResponse,
+  parseDiscordBotResponseLocaleUpdateRequest,
+  parseDiscordBotResponseLocaleUpdateResponse,
   parseUpdateDiscordBotControlInput
 } from "../dist/index.js";
 
@@ -24,6 +28,15 @@ test("Discord Bot 공개 명령 manifest는 영어 단일 문법과 지연 특�
   assert.equal(status.requiresPalworldRest, true);
   assert.equal(status.showTyping, true);
   assert.equal(player.acceptsNickname, true);
+});
+
+test("Discord Bot 메시지 catalog는 한국어·일본어·영어와 영어 fallback을 제공한다", () => {
+  assert.deepEqual(Object.keys(DISCORD_BOT_MESSAGES), ["ko", "ja", "en"]);
+  assert.equal(discordBotMessageLocale("ko"), "ko");
+  assert.equal(discordBotMessageLocale("ja-JP"), "ja");
+  assert.equal(discordBotMessageLocale("en-US"), "en");
+  assert.equal(discordBotMessageLocale("fr"), "en");
+  assert.match(DISCORD_BOT_MESSAGES.en.prefix.statusTitle, /Palworld Server/u);
 });
 
 const validOverview = {
@@ -78,6 +91,11 @@ test("Discord Bot 제어 입력은 exact schema와 revision을 검증한다", ()
     ...validUpdate,
     organizationId: "위조된 tenant"
   }), undefined);
+  assert.equal(
+    parseUpdateDiscordBotControlInput({ ...validUpdate, preferredLocale: "en" })
+      ?.preferredLocale,
+    "en"
+  );
   assert.equal(parseUpdateDiscordBotControlInput({
     ...validUpdate,
     expectedRevision: -1
@@ -85,6 +103,32 @@ test("Discord Bot 제어 입력은 exact schema와 revision을 검증한다", ()
   assert.equal(parseUpdateDiscordBotControlInput({
     ...validUpdate,
     statusFields: { ...validUpdate.statusFields, players: "yes" }
+  }), undefined);
+});
+
+test("Discord Bot 응답 언어 변경 계약은 Guild·사용자 binding과 영어를 검증한다", () => {
+  const request = {
+    applicationId: "123456789012345678",
+    guildId: "223456789012345678",
+    userId: "323456789012345678",
+    preferredLocale: "en"
+  };
+  assert.deepEqual(parseDiscordBotResponseLocaleUpdateRequest(request), request);
+  assert.equal(parseDiscordBotResponseLocaleUpdateRequest({
+    ...request,
+    preferredLocale: "fr"
+  }), undefined);
+  assert.equal(parseDiscordBotResponseLocaleUpdateRequest({
+    ...request,
+    organizationId: "forged"
+  }), undefined);
+  assert.deepEqual(parseDiscordBotResponseLocaleUpdateResponse({
+    preferredLocale: "en",
+    revision: 4
+  }), { preferredLocale: "en", revision: 4 });
+  assert.equal(parseDiscordBotResponseLocaleUpdateResponse({
+    preferredLocale: "en",
+    revision: 0
   }), undefined);
 });
 

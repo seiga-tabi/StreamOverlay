@@ -53,7 +53,8 @@ const copy = {
     localeAuto: "Discord 서버 언어 자동 감지",
     localeKo: "한국어",
     localeJa: "日本語",
-    localeDescription: "명령 입력은 영어만 지원합니다. 이 설정은 `!yoro`와 `/yoro` 명령의 한국어·일본어 응답 언어에 적용됩니다.",
+    localeEn: "English",
+    localeDescription: "명령 입력은 영어만 지원합니다. 이 설정은 `!yoro`와 `/yoro` 명령의 한국어·일본어·영어 응답에 적용되며, Discord에서는 `/yoro language`로도 변경할 수 있습니다.",
     fields: "상태 메시지 표시 항목",
     players: "접속 인원",
     version: "게임 버전",
@@ -105,7 +106,8 @@ const copy = {
     localeAuto: "Discordサーバー言語を自動検出",
     localeKo: "한국어",
     localeJa: "日本語",
-    localeDescription: "コマンド入力は英語のみ対応します。この設定は`!yoro`と`/yoro`コマンドの韓国語・日本語応答言語に適用されます。",
+    localeEn: "English",
+    localeDescription: "コマンド入力は英語のみ対応します。この設定は`!yoro`と`/yoro`コマンドの韓国語・日本語・英語応答に適用され、Discordでは`/yoro language`からも変更できます。",
     fields: "状態メッセージの表示項目",
     players: "接続人数",
     version: "ゲームバージョン",
@@ -429,6 +431,7 @@ export function BotControlCard(props: {
               <option value="auto">{text.localeAuto}</option>
               <option value="ko">{text.localeKo}</option>
               <option value="ja">{text.localeJa}</option>
+              <option value="en">{text.localeEn}</option>
             </select>
           </label>
           <p className="bot-control-warning">
@@ -527,7 +530,11 @@ export function BotControlCard(props: {
               {draft.statusFields.observedAt ? (
                 <div>
                   <dt>{preview.fields.observedAt}</dt>
-                  <dd>{previewLocale === "ja" ? "たった今" : "방금 전"}</dd>
+                  <dd>{previewLocale === "ja"
+                    ? "たった今"
+                    : previewLocale === "en"
+                      ? "Just now"
+                      : "방금 전"}</dd>
                 </div>
               ) : null}
             </dl>

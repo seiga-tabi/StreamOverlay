@@ -103,7 +103,10 @@ export function localizedPublicResourceUrl(
   locale: DiscordBotMessageLocale,
   pathname: "/palworld" | "/bot/game-files"
 ): string {
-  return new URL(`/${locale}${pathname}`, publicBaseUrl).toString();
+  return new URL(
+    locale === "en" ? pathname : `/${locale}${pathname}`,
+    publicBaseUrl
+  ).toString();
 }
 
 class PrefixRateLimiter {

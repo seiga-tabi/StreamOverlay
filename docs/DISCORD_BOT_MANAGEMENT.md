@@ -66,11 +66,12 @@ Organization에는 삭제되지 않은 Palworld 게임 서버를 정확히 1개�
 `runtime.json`의 `discord.prefixCommandsEnabled=true`인 경우 일반 사용자는
 Discord 공개 채널에서 `!yoro status`, `!yoro player`,
 `!yoro player {nickname}`, `!yoro guide`, `!yoro help`를 사용할
-수 있습니다. 관리와 인증이 필요한 `/yoro setup`, `/yoro dashboard`는 기존
-slash command로 유지합니다.
+수 있습니다. 관리와 인증이 필요한 `/yoro setup`, `/yoro language`,
+`/yoro dashboard`는 slash command로 유지합니다.
 
 명령 입력은 영어 단일 문법만 지원합니다. Bot 응답은 Dashboard 설정 또는
-Discord Guild locale에 따라 한국어·일본어로 표시합니다.
+Discord Guild locale에 따라 한국어·일본어·영어로 표시합니다. `auto`는
+Guild locale을 사용하며 지원 언어가 아니면 영어로 안전하게 fallback합니다.
 
 Discord의 일반 `!` 메시지는 작성자 전용 표시를 지원하지 않습니다. 상태,
 플레이어와 가이드를 작성자에게만 보여야 할 때는 `/yoro status`,
@@ -84,7 +85,7 @@ Discord의 일반 `!` 메시지는 작성자 전용 표시를 지원하지 않�
 `AdminPassword`, token, credential, Organization ID와 내부 오류는 포함하지
 않습니다.
 
-사용자 문구는 Shared의 한국어·일본어 catalog를 Bot과 Dashboard가 함께
+사용자 문구는 Shared의 한국어·일본어·영어 catalog를 Bot과 Dashboard가 함께
 사용합니다. 등록 미완료, 운영 기능 비활성, 자격 증명 저장소 준비 실패,
 Palworld 인증 실패, 연결 정책 차단, upstream 실패, stale과 부분 응답을
 서로 다른 공개 사유로 표시합니다. 정상 응답에는 불필요한 Dashboard 버튼을
@@ -120,7 +121,7 @@ Organization 관리 화면은 활성 Discord 설치가 확인된 경우 `Discord
 - Palworld 상태 module 사용 여부
 - `!yoro status`, `!yoro player`, `!yoro guide` 개별 사용 여부
 - Bot 응답 성공 후 인식된 `!yoro` 원본 명령 메시지 삭제 여부
-- 응답 언어 자동 감지·한국어·일본어
+- 응답 언어 자동 감지·한국어·일본어·영어
 - 상태 응답의 접속 인원·게임 버전·응답 시간·마지막 확인 시각 표시 여부
 - 현재 언어와 표시 항목을 적용한 Discord 상태 응답 미리보기
 
@@ -136,6 +137,11 @@ PATCH는 현재 revision을 `expectedRevision`으로 요구합니다. 같은 설
 `discord.bot.settings.updated` audit를 남깁니다. Guild 이름, raw token,
 Discord 사용자 표시 이름과 request body 전체는 audit metadata에 기록하지
 않습니다.
+
+Discord에서는 `/yoro language locale:<auto|ko|ja|en>`으로 같은 설정을
+변경할 수 있습니다. Discord 서버 소유자·`Administrator`·`Manage Guild`
+권한과 연결된 YORO Organization의 `owner`·`manager` membership을 모두
+검증하며, 변경은 동일 revision과 audit log에 기록됩니다.
 
 이 단계에는 임의 자동화 Builder, 예약 Job, moderation, role 지급, webhook,
 mention, 사용자 작성 URL·Embed와 임의 Discord API action을 포함하지

@@ -376,6 +376,56 @@ test("서명된 Bot 내부 명령 정책 API는 exact Guild·command만 전달�
   });
 });
 
+test("서명된 Bot 응답 언어 API는 Guild·Discord 사용자·locale binding을 유지한다", async () => {
+  await withDiscordConfig(async () => {
+    const calls = [];
+    const { handler } = createDiscordHandler({
+      handlerInput: {
+        discordInternalAuth: {
+          verify() {
+            return { ok: true };
+          }
+        },
+        discordBotCommandPolicy: {
+          async updateResponseLocale(input) {
+            calls.push(input);
+            return { preferredLocale: input.preferredLocale, revision: 3 };
+          }
+        }
+      }
+    });
+    const value = {
+      applicationId: APPLICATION_ID,
+      guildId: "123456789012345678",
+      userId: "223456789012345678",
+      preferredLocale: "en"
+    };
+    const response = await request(
+      handler,
+      "POST",
+      "/internal/discord/response-locale",
+      value,
+      { "content-type": "application/json" }
+    );
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(JSON.parse(response.body), {
+      preferredLocale: "en",
+      revision: 3
+    });
+    assert.deepEqual(calls, [value]);
+
+    const forged = await request(
+      handler,
+      "POST",
+      "/internal/discord/response-locale",
+      { ...value, preferredLocale: "fr", organizationId: "forged" },
+      { "content-type": "application/json" }
+    );
+    assert.equal(forged.statusCode, 400);
+    assert.equal(calls.length, 1);
+  });
+});
+
 test("Organization Bot 제어 API는 session·Origin·CSRF와 strict body를 유지한다", async () => {
   await withDiscordConfig(async () => {
     const calls = [];

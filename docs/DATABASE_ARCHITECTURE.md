@@ -89,6 +89,11 @@ payload와 Discord 표시 이름은 저장하지 않습니다.
 schema v2로 기록합니다. 플레이어 목록과 프로필은 명령 시점의 Palworld
 REST 응답에서만 계산하며 Database에 저장하지 않습니다.
 
+`0016_discord_bot_english_response_locale`는 기존 `preferred_locale` 제약을
+확장해 `auto`, `ko`, `ja`, `en`만 저장하도록 합니다. Discord의
+`/yoro language` 변경도 Dashboard PATCH와 같은 설정 row, revision과 audit
+기록을 사용합니다.
+
 # Palworld REST 상태 경계
 
 Palworld 상태 조회는 Server의 고정 REST client만 사용합니다. Dashboard에서 검증한 Organization·server 조합으로 생성한 canonical owner ID를 사용하며, 브라우저가 입력 서버에 직접 요청하거나 다른 tenant의 owner ID를 선택할 수 없습니다.

@@ -9,12 +9,14 @@ import {
 } from "discord.js";
 import {
   DISCORD_BOT_MESSAGES,
+  DISCORD_BOT_CONTROL_LOCALES,
   discordBotHelpBody,
   discordBotPrivateHelpBody,
   discordBotMessageLocale
 } from "@streamops/shared";
 import type {
   DiscordBotControlCommand,
+  DiscordBotControlLocale,
   DiscordBotMessageLocale,
   DiscordBotCommandPolicyResponse,
   DiscordGameServerStatusResponse,
@@ -65,6 +67,7 @@ export class YoroCommandHandler {
       | "commandPolicy"
       | "gameServerStatus"
       | "palworldPlayers"
+      | "updateResponseLocale"
     >,
     private readonly now: () => number = Date.now,
     private readonly dashboardUrl = "http://localhost:3000/dashboard/organizations",
@@ -75,7 +78,9 @@ export class YoroCommandHandler {
     if (interaction.commandName !== "yoro") return;
     if (this.seen(interaction.id)) return;
     this.remember(interaction.id);
-    const locale = discordBotMessageLocale(interaction.locale);
+    const locale = discordBotMessageLocale(
+      interaction.guildLocale ?? interaction.locale
+    );
     const text = DISCORD_BOT_MESSAGES[locale].slash;
     const subcommand = interaction.options.getSubcommand(false);
     auditEvent("discord.command.received", {
@@ -155,6 +160,10 @@ export class YoroCommandHandler {
       await this.handlePrivateCommand(interaction, subcommand, locale);
       return;
     }
+    if (subcommand === "language") {
+      await this.handleLanguageCommand(interaction, locale);
+      return;
+    }
     if (subcommand === "dashboard") {
       const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder()
@@ -230,6 +239,85 @@ export class YoroCommandHandler {
       auditEvent("discord.command.denied", {
         command: "setup",
         result: active ? "setup_active" : "service_unavailable"
+      });
+    }
+  }
+
+  private async handleLanguageCommand(
+    interaction: ChatInputCommandInteraction,
+    fallbackLocale: DiscordBotMessageLocale
+  ): Promise<void> {
+    const fallbackText = DISCORD_BOT_MESSAGES[fallbackLocale].slash;
+    if (!interaction.inGuild() || !interaction.guildId) {
+      await interaction.reply({
+        content: fallbackText.dmDenied,
+        flags: MessageFlags.Ephemeral,
+        allowedMentions: { parse: [] }
+      });
+      return;
+    }
+    if (!hasSetupPermission(interaction)) {
+      auditEvent("discord.command.denied", {
+        command: "language",
+        result: "permission_required",
+        guild: safeReference(interaction.guildId),
+        user: safeReference(interaction.user.id)
+      });
+      await interaction.reply({
+        content: fallbackText.permissionDenied,
+        flags: MessageFlags.Ephemeral,
+        allowedMentions: { parse: [] }
+      });
+      return;
+    }
+    const requested = interaction.options.getString("locale", true);
+    if (!DISCORD_BOT_CONTROL_LOCALES.includes(
+      requested as DiscordBotControlLocale
+    )) {
+      await interaction.reply({
+        content: fallbackText.unknown,
+        flags: MessageFlags.Ephemeral,
+        allowedMentions: { parse: [] }
+      });
+      return;
+    }
+    const preferredLocale = requested as DiscordBotControlLocale;
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    try {
+      await this.internalApi.updateResponseLocale({
+        applicationId: this.applicationId,
+        guildId: interaction.guildId,
+        userId: interaction.user.id,
+        preferredLocale
+      });
+      const responseLocale = preferredLocale === "auto"
+        ? discordBotMessageLocale(interaction.guildLocale ?? interaction.locale)
+        : preferredLocale;
+      const responseText = DISCORD_BOT_MESSAGES[responseLocale].slash;
+      await interaction.editReply({
+        content: preferredLocale === "auto"
+          ? responseText.languageAutoUpdated
+          : responseText.languageUpdated,
+        allowedMentions: { parse: [] }
+      });
+      auditEvent("discord.command.language_updated", {
+        command: "language",
+        guild: safeReference(interaction.guildId),
+        user: safeReference(interaction.user.id),
+        locale: preferredLocale
+      });
+    } catch (error) {
+      await interaction.editReply({
+        content: fallbackText.languageUnavailable,
+        allowedMentions: { parse: [] }
+      });
+      auditEvent("discord.command.language_failed", {
+        command: "language",
+        guild: safeReference(interaction.guildId),
+        user: safeReference(interaction.user.id),
+        errorCode: error instanceof DiscordInternalApiError
+          ? error.code
+          : "unexpected"
       });
     }
   }

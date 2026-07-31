@@ -74,7 +74,10 @@ export type DiscordBotCommandCapabilities = Readonly<
   Record<DiscordBotControlCommand, boolean>
 >;
 
-export type DiscordBotControlLocale = "auto" | "ko" | "ja";
+export const DISCORD_BOT_CONTROL_LOCALES = ["auto", "ko", "ja", "en"] as const;
+
+export type DiscordBotControlLocale =
+  (typeof DISCORD_BOT_CONTROL_LOCALES)[number];
 
 export type DiscordBotStatusFields = Readonly<{
   players: boolean;
@@ -129,6 +132,18 @@ export type DiscordBotCommandPolicyRequest = Readonly<{
   applicationId: string;
   guildId: string;
   command: DiscordBotControlCommand;
+}>;
+
+export type DiscordBotResponseLocaleUpdateRequest = Readonly<{
+  applicationId: string;
+  guildId: string;
+  userId: string;
+  preferredLocale: DiscordBotControlLocale;
+}>;
+
+export type DiscordBotResponseLocaleUpdateResponse = Readonly<{
+  preferredLocale: DiscordBotControlLocale;
+  revision: number;
 }>;
 
 export const DISCORD_BOT_COMMAND_POLICY_REASONS = [
@@ -222,7 +237,9 @@ function parseControlSettings(
     || typeof record.playerCommandEnabled !== "boolean"
     || typeof record.guideCommandEnabled !== "boolean"
     || typeof record.deleteInvocationAfterReply !== "boolean"
-    || !["auto", "ko", "ja"].includes(String(record.preferredLocale))
+    || !DISCORD_BOT_CONTROL_LOCALES.includes(
+      record.preferredLocale as DiscordBotControlLocale
+    )
     || !Number.isSafeInteger(record.revision)
     || (record.revision as number) < 0
     || !statusFields
@@ -366,7 +383,9 @@ export function parseUpdateDiscordBotControlInput(
     || typeof record.playerCommandEnabled !== "boolean"
     || typeof record.guideCommandEnabled !== "boolean"
     || typeof record.deleteInvocationAfterReply !== "boolean"
-    || !["auto", "ko", "ja"].includes(String(record.preferredLocale))
+    || !DISCORD_BOT_CONTROL_LOCALES.includes(
+      record.preferredLocale as DiscordBotControlLocale
+    )
     || !Number.isSafeInteger(record.expectedRevision)
     || (record.expectedRevision as number) < 0
     || !statusFields
@@ -403,6 +422,50 @@ export function parseDiscordBotCommandPolicyRequest(
   });
 }
 
+export function parseDiscordBotResponseLocaleUpdateRequest(
+  value: unknown
+): DiscordBotResponseLocaleUpdateRequest | undefined {
+  const record = exactRecord(value, [
+    "applicationId",
+    "guildId",
+    "userId",
+    "preferredLocale"
+  ]);
+  if (
+    !record
+    || !isDiscordSnowflake(record.applicationId)
+    || !isDiscordSnowflake(record.guildId)
+    || !isDiscordSnowflake(record.userId)
+    || !DISCORD_BOT_CONTROL_LOCALES.includes(
+      record.preferredLocale as DiscordBotControlLocale
+    )
+  ) return undefined;
+  return Object.freeze({
+    applicationId: record.applicationId,
+    guildId: record.guildId,
+    userId: record.userId,
+    preferredLocale: record.preferredLocale as DiscordBotControlLocale
+  });
+}
+
+export function parseDiscordBotResponseLocaleUpdateResponse(
+  value: unknown
+): DiscordBotResponseLocaleUpdateResponse | undefined {
+  const record = exactRecord(value, ["preferredLocale", "revision"]);
+  if (
+    !record
+    || !DISCORD_BOT_CONTROL_LOCALES.includes(
+      record.preferredLocale as DiscordBotControlLocale
+    )
+    || !Number.isSafeInteger(record.revision)
+    || (record.revision as number) < 1
+  ) return undefined;
+  return Object.freeze({
+    preferredLocale: record.preferredLocale as DiscordBotControlLocale,
+    revision: record.revision as number
+  });
+}
+
 export function parseDiscordBotCommandPolicyResponse(
   value: unknown
 ): DiscordBotCommandPolicyResponse | undefined {
@@ -424,7 +487,9 @@ export function parseDiscordBotCommandPolicyResponse(
     || typeof record.allowed !== "boolean"
     || !commands
     || typeof record.deleteInvocationAfterReply !== "boolean"
-    || !["auto", "ko", "ja"].includes(String(record.preferredLocale))
+    || !DISCORD_BOT_CONTROL_LOCALES.includes(
+      record.preferredLocale as DiscordBotControlLocale
+    )
     || !Number.isSafeInteger(record.revision)
     || (record.revision as number) < 0
     || !statusFields

@@ -120,6 +120,14 @@
       "checksumSha256": "55130039e316c9e097c7c341cde43b469133a05807b41bac8569ec066c5fef7a",
       "destructive": false,
       "transaction": true
+    },
+    {
+      "id": "0016_discord_bot_english_response_locale",
+      "file": "0016_discord_bot_english_response_locale.sql",
+      "description": "Discord Bot 응답 언어 영어 저장 지원",
+      "checksumSha256": "20e4867be541182f67bfc9017922383996acc9da3b35ad98cbc7f710b5b15585",
+      "destructive": false,
+      "transaction": true
     }
   ]
 }
