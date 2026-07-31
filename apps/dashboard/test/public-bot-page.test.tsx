@@ -74,6 +74,7 @@ test("YORO Bot 소개 페이지는 서비스형 Hero와 4개 독립 페이지 �
 test("YORO Bot 사용방법·명령어·게임파일은 canonical URL별 독립 콘텐츠로 렌더링된다", async () => {
   const {
     PublicBotPage,
+    publicBotCommandIdsByTab,
     publicBotSectionFromPath
   } = await import("../src/features/public-bot/PublicBotPage");
 
@@ -87,16 +88,18 @@ test("YORO Bot 사용방법·명령어·게임파일은 canonical URL별 독립 
   window.location.pathname = "/bot/commands";
   const commandMarkup = renderToStaticMarkup(<PublicBotPage />);
   assert.match(commandMarkup, /Discord 명령어/u);
-  assert.match(commandMarkup, /명령어 검색/u);
-  assert.match(commandMarkup, /일반 사용자/u);
-  assert.match(commandMarkup, /개인 명령/u);
-  assert.match(commandMarkup, /서버 관리자/u);
+  assert.match(commandMarkup, /role="tablist"/u);
+  assert.match(commandMarkup, /유저 명령어/u);
+  assert.match(commandMarkup, /관리자 명령어/u);
+  assert.doesNotMatch(commandMarkup, /명령어 검색/u);
+  assert.deepEqual(publicBotCommandIdsByTab.user, ["status", "player", "guide", "dashboard", "help"]);
+  assert.deepEqual(publicBotCommandIdsByTab.admin, ["setup", "language"]);
   assert.match(commandMarkup, /COMMAND DETAIL/u);
   assert.match(commandMarkup, /\/yoro status/u);
   assert.match(commandMarkup, /!yoro status/u);
   assert.doesNotMatch(commandMarkup, /!yoro 상태/u);
   assert.match(commandMarkup, /\/yoro player/u);
-  assert.match(commandMarkup, /\/yoro setup/u);
+  assert.doesNotMatch(commandMarkup, /\/yoro setup/u);
   assert.match(commandMarkup, /Discord 응답 미리보기/u);
   assert.match(commandMarkup, /표시 값은 문서용 예시/u);
   assert.match(commandMarkup, /지원 명령과 세부 조건 보기/u);
@@ -107,7 +110,9 @@ test("YORO Bot 사용방법·명령어·게임파일은 canonical URL별 독립 
   window.location.pathname = "/ja/bot/commands";
   const japaneseCommandMarkup = renderToStaticMarkup(<PublicBotPage />);
   assert.match(japaneseCommandMarkup, /Discordコマンド/u);
-  assert.match(japaneseCommandMarkup, /コマンド検索/u);
+  assert.match(japaneseCommandMarkup, /ユーザーコマンド/u);
+  assert.match(japaneseCommandMarkup, /管理者コマンド/u);
+  assert.doesNotMatch(japaneseCommandMarkup, /コマンド検索/u);
   assert.match(japaneseCommandMarkup, /!yoro status/u);
   assert.doesNotMatch(japaneseCommandMarkup, /!yoro 状態/u);
   assert.match(japaneseCommandMarkup, /Discord応答プレビュー/u);

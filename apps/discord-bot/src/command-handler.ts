@@ -26,7 +26,10 @@ import type { DiscordInternalApiClient } from "./internal-api-client.js";
 import { DiscordInternalApiError } from "./internal-api-client.js";
 import { auditEvent, safeReference } from "./logger.js";
 import { discordResourceLinks } from "./message-actions.js";
-import { presentPalworldPlayers } from "./player-message-presenter.js";
+import {
+  presentPalworldPlayerActions,
+  presentPalworldPlayers
+} from "./player-message-presenter.js";
 import {
   presentGameServerNotice,
   presentGameServerStatus
@@ -436,6 +439,11 @@ export class YoroCommandHandler {
       });
       return;
     }
+    const actions = presentPalworldPlayerActions({
+      locale,
+      response,
+      publicBaseUrl: this.dashboardUrl
+    });
     await interaction.editReply({
       embeds: [
         presentPalworldPlayers({
@@ -444,6 +452,7 @@ export class YoroCommandHandler {
           searchHint: DISCORD_BOT_MESSAGES[locale].slash.playerSearchHint
         })
       ],
+      ...(actions ? { components: [actions] } : {}),
       allowedMentions: { parse: [] }
     });
   }

@@ -20,7 +20,10 @@ import {
 } from "./internal-api-client.js";
 import { auditEvent, safeReference } from "./logger.js";
 import { discordResourceLinks } from "./message-actions.js";
-import { presentPalworldPlayers } from "./player-message-presenter.js";
+import {
+  presentPalworldPlayerActions,
+  presentPalworldPlayers
+} from "./player-message-presenter.js";
 import {
   presentGameServerNotice,
   presentGameServerStatus
@@ -460,12 +463,18 @@ export class YoroPrefixCommandHandler {
       response,
       searchHint: messages.playerSearchHint
     });
+    const actions = presentPalworldPlayerActions({
+      locale,
+      response,
+      publicBaseUrl: this.publicBaseUrl
+    });
     this.auditTiming(message, "player", "embed_build", embedStartedAt);
     const replyStartedAt = Date.now();
     await message.reply({
       embeds: [
         embed
       ],
+      ...(actions ? { components: [actions] } : {}),
       allowedMentions: { parse: [], repliedUser: false },
       failIfNotExists: true
     });

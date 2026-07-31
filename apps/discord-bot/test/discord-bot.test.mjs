@@ -29,7 +29,10 @@ import {
   parseYoroPrefixCommand,
   YoroPrefixCommandHandler
 } from "../dist/prefix-command-handler.js";
-import { presentPalworldPlayers } from "../dist/player-message-presenter.js";
+import {
+  presentPalworldPlayerActions,
+  presentPalworldPlayers
+} from "../dist/player-message-presenter.js";
 import { discordProgressGauge } from "../dist/status-message-presenter.js";
 
 const IDS = {
@@ -254,6 +257,64 @@ test("/yoro status는 Organization 정책을 적용한 응답을 작성자에게
     embed.fields.some((field) => field.value.includes("▰")),
     true
   );
+});
+
+test("/yoro player 프로필은 게임 카드와 공유 버튼을 작성자에게만 표시한다", async () => {
+  const { value, calls } = interaction({
+    subcommand: "player",
+    nickname: "tata"
+  });
+  const handler = new YoroCommandHandler(
+    IDS.application,
+    {
+      async commandPolicy() {
+        return {
+          allowed: true,
+          commands: {
+            help: true,
+            status: true,
+            player: true,
+            guide: true
+          },
+          deleteInvocationAfterReply: false,
+          preferredLocale: "ja",
+          statusFields: {
+            players: true,
+            version: true,
+            latency: true,
+            observedAt: true
+          },
+          revision: 1
+        };
+      },
+      async palworldPlayers(input) {
+        assert.equal(input.nickname, "tata");
+        return {
+          connected: true,
+          serverConfigured: true,
+          displayName: "JP-01",
+          result: {
+            kind: "profile",
+            player: { nickname: "tata", level: 80 }
+          }
+        };
+      }
+    },
+    Date.now,
+    "https://yoro.gg/dashboard/organizations"
+  );
+  await handler.handle(value);
+  assert.equal(calls.deferReply[0].flags, MessageFlags.Ephemeral);
+  const reply = calls.editReply[0];
+  const embed = reply.embeds[0].toJSON();
+  assert.equal(embed.title, "🧭 YOROプレイヤーカード");
+  assert.match(embed.description, /tata/u);
+  assert.equal(embed.fields.some((field) => field.value === "**Lv. 80**"), true);
+  assert.equal(embed.fields.some((field) => field.value === "JP-01"), true);
+  const buttons = reply.components[0].toJSON().components;
+  assert.equal(buttons[0].label, "Xで共有");
+  assert.equal(buttons[1].url, "https://yoro.gg/ja/palworld");
+  assert.deepEqual(reply.allowedMentions, { parse: [] });
 });
 
 test("/yoro dashboard는 token 없는 고정 canonical URL을 ephemeral로 제공한다", async () => {
@@ -1173,11 +1234,62 @@ test("!yoro player는 목록과 게임 내 프로필만 안전하게 표시한�
   assert.match(replies[0].embeds[0].toJSON().description, /\\\*\\\*세이가/u);
   const profile = replies[1].embeds[0].toJSON();
   assert.equal(profile.description.includes("\\*\\*세이가"), true);
-  assert.equal(profile.fields.some((field) => field.value === "42"), true);
+  assert.equal(profile.title, "🧭 YORO 플레이어 카드");
+  assert.equal(profile.fields.some((field) => field.value === "**Lv. 42**"), true);
+  assert.equal(profile.fields.some((field) => field.value === "**온라인**"), true);
+  assert.equal(profile.fields.some((field) => field.value === "Palworld"), true);
+  const buttons = replies[1].components[0].toJSON().components;
+  assert.deepEqual(buttons.map((button) => button.label), [
+    "X에 공유",
+    "YORO.GG Palworld"
+  ]);
+  assert.equal(buttons[1].url, "https://yoro.gg/ko/palworld");
+  const shareUrl = new URL(buttons[0].url);
+  assert.equal(shareUrl.origin, "https://x.com");
+  assert.equal(shareUrl.pathname, "/intent/post");
+  assert.equal(shareUrl.searchParams.get("url"), "https://yoro.gg/ko/palworld");
+  assert.doesNotMatch(shareUrl.searchParams.get("text"), /@everyone/u);
+  assert.match(shareUrl.searchParams.get("text"), /＠everyone/u);
   assert.deepEqual(replies[1].allowedMentions, {
     parse: [],
     repliedUser: false
   });
+});
+
+test("플레이어 카드 버튼은 확정 프로필에만 표시하고 locale별 공개 URL을 사용한다", () => {
+  const response = {
+    connected: true,
+    serverConfigured: true,
+    displayName: "Palworld",
+    result: {
+      kind: "profile",
+      player: {
+        nickname: "tata",
+        level: 80
+      }
+    }
+  };
+  const ja = presentPalworldPlayerActions({
+    locale: "ja",
+    response,
+    publicBaseUrl: "https://yoro.gg/dashboard/organizations"
+  }).toJSON().components;
+  assert.deepEqual(ja.map((button) => button.label), [
+    "Xで共有",
+    "YORO.GG Palworld"
+  ]);
+  assert.equal(ja[1].url, "https://yoro.gg/ja/palworld");
+
+  const listActions = presentPalworldPlayerActions({
+    locale: "ko",
+    response: {
+      connected: true,
+      serverConfigured: true,
+      result: { kind: "list", nicknames: ["tata"], total: 1 }
+    },
+    publicBaseUrl: "https://yoro.gg"
+  });
+  assert.equal(listActions, undefined);
 });
 
 test("!yoro player 연관 검색어는 locale별 제목과 안전한 닉네임만 표시한다", () => {

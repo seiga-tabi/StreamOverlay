@@ -58,6 +58,8 @@ export const DISCORD_BOT_MESSAGES = {
       statusTitle: "YORO Palworld 서버",
       playerListTitle: "현재 접속 중인 Palworld 플레이어",
       playerProfileTitle: "Palworld 게임 내 프로필",
+      playerCardTitle: "YORO 플레이어 카드",
+      playerCardSubtitle: "현재 접속 중인 Palworld 플레이어",
       playerEmpty: "현재 접속 중인 플레이어가 없습니다.",
       playerListTruncated: "전체 {total}명 중 {shown}명만 표시합니다.",
       playerNotFound: "일치하는 닉네임을 찾지 못했습니다.",
@@ -66,8 +68,14 @@ export const DISCORD_BOT_MESSAGES = {
       playerFields: {
         nickname: "닉네임",
         level: "레벨",
-        buildingCount: "건축물 수"
+        buildingCount: "건축물 수",
+        server: "게임 서버",
+        status: "접속 상태"
       },
+      playerOnline: "온라인",
+      playerShareButton: "X에 공유",
+      playerPalworldButton: "YORO.GG Palworld",
+      playerShareText: "{nickname} · Palworld Lv.{level} 플레이어 카드를 확인해 보세요.",
       playerUnavailable: {
         server_not_configured: "아직 Palworld 게임 서버가 등록되지 않았습니다.",
         rest_not_configured: "Palworld REST 연결 설정이 완료되지 않았습니다.",
@@ -185,6 +193,8 @@ export const DISCORD_BOT_MESSAGES = {
       statusTitle: "YORO Palworldサーバー",
       playerListTitle: "現在接続中のPalworldプレイヤー",
       playerProfileTitle: "Palworldゲーム内プロフィール",
+      playerCardTitle: "YOROプレイヤーカード",
+      playerCardSubtitle: "現在接続中のPalworldプレイヤー",
       playerEmpty: "現在接続中のプレイヤーはいません。",
       playerListTruncated: "全{total}名のうち{shown}名のみ表示しています。",
       playerNotFound: "一致するニックネームが見つかりませんでした。",
@@ -193,8 +203,14 @@ export const DISCORD_BOT_MESSAGES = {
       playerFields: {
         nickname: "ニックネーム",
         level: "レベル",
-        buildingCount: "建築物数"
+        buildingCount: "建築物数",
+        server: "ゲームサーバー",
+        status: "接続状態"
       },
+      playerOnline: "オンライン",
+      playerShareButton: "Xで共有",
+      playerPalworldButton: "YORO.GG Palworld",
+      playerShareText: "{nickname} · Palworld Lv.{level}のプレイヤーカードをチェックしてください。",
       playerUnavailable: {
         server_not_configured: "Palworldゲームサーバーはまだ登録されていません。",
         rest_not_configured: "Palworld REST連携設定が完了していません。",
@@ -312,6 +328,8 @@ export const DISCORD_BOT_MESSAGES = {
       statusTitle: "YORO Palworld Server",
       playerListTitle: "Players currently connected to Palworld",
       playerProfileTitle: "Palworld in-game profile",
+      playerCardTitle: "YORO Player Card",
+      playerCardSubtitle: "Currently connected Palworld player",
       playerEmpty: "No players are currently connected.",
       playerListTruncated: "Showing {shown} of {total} players.",
       playerNotFound: "No exact nickname match was found.",
@@ -320,8 +338,14 @@ export const DISCORD_BOT_MESSAGES = {
       playerFields: {
         nickname: "Nickname",
         level: "Level",
-        buildingCount: "Buildings"
+        buildingCount: "Buildings",
+        server: "Game server",
+        status: "Connection status"
       },
+      playerOnline: "Online",
+      playerShareButton: "Share on X",
+      playerPalworldButton: "YORO.GG Palworld",
+      playerShareText: "Check out {nickname}'s Palworld Lv.{level} player card.",
       playerUnavailable: {
         server_not_configured: "A Palworld game server has not been registered yet.",
         rest_not_configured: "The Palworld REST connection is not configured.",

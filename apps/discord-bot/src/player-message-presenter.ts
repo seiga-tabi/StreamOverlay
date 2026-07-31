@@ -1,4 +1,10 @@
-import { EmbedBuilder, escapeMarkdown } from "discord.js";
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  EmbedBuilder,
+  escapeMarkdown
+} from "discord.js";
 import {
   DISCORD_BOT_MESSAGES,
   type DiscordBotMessageLocale,
@@ -7,6 +13,48 @@ import {
 
 function safePlayerName(value: string): string {
   return escapeMarkdown(value.replaceAll("@", "＠")).slice(0, 80);
+}
+
+function safeShareValue(value: string): string {
+  return value
+    .replace(/[\u0000-\u001f\u007f]/gu, "")
+    .replaceAll("@", "＠")
+    .replace(/\s+/gu, " ")
+    .trim()
+    .slice(0, 80);
+}
+
+export function presentPalworldPlayerActions(input: {
+  locale: DiscordBotMessageLocale;
+  response: DiscordPalworldPlayerLookupResponse;
+  publicBaseUrl: string;
+}): ActionRowBuilder<ButtonBuilder> | undefined {
+  if (input.response.result?.kind !== "profile") return undefined;
+  const messages = DISCORD_BOT_MESSAGES[input.locale].prefix;
+  const player = input.response.result.player;
+  const palworldUrl = new URL(
+    input.locale === "en" ? "/palworld" : `/${input.locale}/palworld`,
+    input.publicBaseUrl
+  ).toString();
+  const shareText = messages.playerShareText
+    .replace("{nickname}", safeShareValue(player.nickname))
+    .replace("{level}", String(player.level));
+  const shareUrl = new URL("https://x.com/intent/post");
+  shareUrl.searchParams.set("text", shareText);
+  shareUrl.searchParams.set("url", palworldUrl);
+
+  return new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
+      .setStyle(ButtonStyle.Link)
+      .setEmoji("↗️")
+      .setLabel(messages.playerShareButton)
+      .setURL(shareUrl.toString()),
+    new ButtonBuilder()
+      .setStyle(ButtonStyle.Link)
+      .setEmoji("🌐")
+      .setLabel(messages.playerPalworldButton)
+      .setURL(palworldUrl)
+  );
 }
 
 export function presentPalworldPlayers(input: {
@@ -71,23 +119,39 @@ export function presentPalworldPlayers(input: {
       .setFooter({ text: footer });
   }
   const player = input.response.result.player;
+  const serverName = input.response.displayName?.trim();
   return new EmbedBuilder()
-    .setColor(0x5865f2)
-    .setTitle(`🧭 ${messages.playerProfileTitle}`)
-    .setDescription(`**${safePlayerName(player.nickname)}**`)
+    .setColor(0x7c5cff)
+    .setTitle(`🧭 ${messages.playerCardTitle}`)
+    .setDescription([
+      `## 👤 ${safePlayerName(player.nickname)}`,
+      messages.playerCardSubtitle
+    ].join("\n"))
     .addFields([
       {
         name: `⭐ ${messages.playerFields.level}`,
-        value: String(player.level),
+        value: `**Lv. ${player.level}**`,
+        inline: true
+      },
+      {
+        name: `🟢 ${messages.playerFields.status}`,
+        value: `**${messages.playerOnline}**`,
         inline: true
       },
       ...(player.buildingCount === undefined
         ? []
-        : [{
+          : [{
             name: `🏠 ${messages.playerFields.buildingCount}`,
             value: String(player.buildingCount),
             inline: true
-          }])
+          }]),
+      ...(serverName
+        ? [{
+            name: `🌐 ${messages.playerFields.server}`,
+            value: safePlayerName(serverName),
+            inline: false
+          }]
+        : [])
     ])
     .setFooter({ text: footer });
 }
