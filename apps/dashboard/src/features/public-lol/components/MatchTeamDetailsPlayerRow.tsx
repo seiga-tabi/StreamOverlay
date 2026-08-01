@@ -80,12 +80,12 @@ export function MatchTeamDetailsPlayerRow({
           </div>
         </div>
       </div>
-      {player.itemBuild}
       <div className="public-team-stat kda">
         <strong>{player.kda.score}</strong>
         <span>{player.kda.metric}</span>
       </div>
       <PublicTeamMetricStat viewModel={player.stats.damage} />
+      {player.itemBuild}
       <PublicTeamMetricStat viewModel={player.stats.cs} />
       <PublicTeamMetricStat viewModel={player.stats.vision} />
     </article>

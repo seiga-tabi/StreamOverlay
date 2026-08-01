@@ -24,6 +24,18 @@ export type ProfileTopPanelText = {
   recentMatches: ProfileTopPanelLocalizedText;
 };
 
+export type ProfileTopStreamerSpotlight = {
+  isLive: boolean;
+  eyebrow: string;
+  displayName: string;
+  statusLabel: string;
+  title?: string;
+  viewerLabel?: string;
+  channelUrl?: string;
+  channelActionLabel: string;
+  participationActionLabel: string;
+};
+
 export type ProfileTopPanelProps = {
   gameName: string;
   tagLine: string;
@@ -49,8 +61,10 @@ export type ProfileTopPanelProps = {
   favoriteActionLabel: string;
   metricStrip: ReactNode;
   searchForm: ReactNode;
+  streamerSpotlight?: ProfileTopStreamerSpotlight;
   text: ProfileTopPanelText;
   onRefresh: () => void;
+  onOpenParticipation?: () => void;
   onToggleFavorite: () => void;
 };
 
@@ -107,6 +121,7 @@ export function ProfileTopPanel({
   masteryChampionArt,
   metricStrip,
   onRefresh,
+  onOpenParticipation,
   onToggleFavorite,
   primaryRankLabel,
   primaryRankClassName,
@@ -121,6 +136,7 @@ export function ProfileTopPanel({
   refreshTitle,
   searchForm,
   seasonBadges,
+  streamerSpotlight,
   tagLine,
   text,
 }: ProfileTopPanelProps) {
@@ -180,6 +196,34 @@ export function ProfileTopPanel({
             serverLabel: text.serverLabel,
           }}
         />
+        {streamerSpotlight ? (
+          <aside className={`public-profile-streamer-spotlight ${streamerSpotlight.isLive ? "is-live" : "is-offline"}`}>
+            <div className="public-profile-streamer-spotlight__status">
+              <span className="public-profile-streamer-spotlight__eyebrow">
+                <i aria-hidden="true" />
+                {streamerSpotlight.eyebrow}
+              </span>
+              <strong>{streamerSpotlight.displayName}</strong>
+              <span>{streamerSpotlight.statusLabel}</span>
+            </div>
+            <div className="public-profile-streamer-spotlight__copy">
+              {streamerSpotlight.title ? <strong>{streamerSpotlight.title}</strong> : null}
+              {streamerSpotlight.viewerLabel ? <span>{streamerSpotlight.viewerLabel}</span> : null}
+            </div>
+            <div className="public-profile-streamer-spotlight__actions">
+              {streamerSpotlight.channelUrl ? (
+                <a href={streamerSpotlight.channelUrl} target="_blank" rel="noreferrer">
+                  {streamerSpotlight.channelActionLabel}
+                </a>
+              ) : null}
+              {onOpenParticipation ? (
+                <button type="button" onClick={onOpenParticipation}>
+                  {streamerSpotlight.participationActionLabel}
+                </button>
+              ) : null}
+            </div>
+          </aside>
+        ) : null}
         <div className="public-profile-summary-controls">
           <Button type="button" size="sm" variant="tertiary" aria-expanded={detailsOpen} onClick={() => setDetailsOpen((open) => !open)}>
             <span  >

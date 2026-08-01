@@ -8,6 +8,7 @@ import { PublicAppHeader } from "../src/features/public-lol/components/PublicApp
 import { PublicHomeSearchPanel, type PublicHomeSearchPanelText } from "../src/features/public-lol/components/PublicHomeSearchPanel";
 import { PublicSiteFooter } from "../src/features/public-lol/components/PublicSiteFooter";
 import { ProfileTopPanel } from "../src/features/public-lol/components/ProfileTopPanel";
+import { MatchTeamCompare } from "../src/features/public-lol/components/MatchTeamCompare";
 import { RecentMatchRow } from "../src/features/public-lol/components/RecentMatchRow";
 import { Button } from "../src/shared/ui/Button";
 import { StatusPill } from "../src/shared/ui/Status";
@@ -473,6 +474,7 @@ test("Profile 상단은 상세 정보를 접고 최근 경기 바로가기를 �
       gameName="YORO"
       loading={false}
       metricStrip={<div id="metric-strip">상세 지표</div>}
+      onOpenParticipation={() => undefined}
       onRefresh={() => undefined}
       onToggleFavorite={() => undefined}
       primaryRankLabel="Platinum I"
@@ -485,6 +487,17 @@ test("Profile 상단은 상세 정보를 접고 최근 경기 바로가기를 �
       refreshTitle="전적 갱신"
       searchForm={<div>검색</div>}
       seasonBadges={<div>시즌</div>}
+      streamerSpotlight={{
+        isLive: true,
+        eyebrow: "스트리머 전적",
+        displayName: "YORO Live",
+        statusLabel: "LIVE NOW",
+        title: "랭크 방송 중",
+        viewerLabel: "125 시청자",
+        channelUrl: "https://www.twitch.tv/yoro",
+        channelActionLabel: "Twitch에서 보기",
+        participationActionLabel: "참여 신청"
+      }}
       tagLine="JP1"
       text={{
         ranking: "랭킹",
@@ -503,6 +516,9 @@ test("Profile 상단은 상세 정보를 접고 최근 경기 바로가기를 �
   assert.match(html, /details-collapsed/);
   assert.match(html, /aria-expanded="false"/);
   assert.match(html, /최근 경기/);
+  assert.match(html, /public-profile-streamer-spotlight is-live/u);
+  assert.match(html, /href="https:\/\/www\.twitch\.tv\/yoro"/u);
+  assert.match(html, />참여 신청</u);
   assert.doesNotMatch(html, /id="metric-strip"/);
 });
 
@@ -520,6 +536,7 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
       csPerMinuteMetric="7.8 CS/분"
       expanded={false}
       expandAriaLabel="경기 상세 펼치기"
+      featuredLabel={{ label: "MVP", ko: "MVP", ja: "MVP" }}
       highlightClass="highlight-mvp"
       itemSlots={Array.from({ length: 6 }, (_, index) => ({ key: `item-${index}`, content: `아이템${index}` }))}
       itemsLabel="아이템"
@@ -544,4 +561,45 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
   assert.equal((html.match(/로드아웃\d/g) ?? []).length, 4);
   assert.equal((html.match(/아이템\d/g) ?? []).length, 6);
   assert.match(html, /class="deaths">0/);
+  assert.match(html, /public-match-featured-label highlight-mvp/u);
+});
+
+test("경기 상세 팀 비교는 피해량·시야·골드·오브젝트를 전환 탭으로 제공한다", () => {
+  const team = (side: "left" | "right", label: string) => ({
+    side,
+    label,
+    resultSummary: "승리 · 20/10/30",
+    objectivesAriaLabel: `${label} 오브젝트`,
+    objectives: [{
+      key: `${side}:dragon`,
+      className: "public-team-compare-objective dragon",
+      title: "드래곤",
+      shortLabel: "용",
+      value: 3
+    }]
+  });
+  const metric = (key: string, label: string) => ({
+    key,
+    label,
+    leftValueLabel: "40,000",
+    rightValueLabel: "35,000",
+    leftWidth: 54,
+    rightWidth: 46
+  });
+  const html = renderToStaticMarkup(
+    <MatchTeamCompare
+      viewModel={{
+        ariaLabel: "팀 상세",
+        tabsLabel: "팀 지표 선택",
+        objectivesLabel: "오브젝트",
+        leftTeam: team("left", "상대 팀"),
+        rightTeam: team("right", "아군 팀"),
+        metrics: [metric("damage", "피해량"), metric("vision", "시야"), metric("gold", "골드")]
+      }}
+    />
+  );
+
+  assert.match(html, /role="tablist" aria-label="팀 지표 선택"/u);
+  assert.equal((html.match(/role="tab"/gu) ?? []).length, 4);
+  assert.match(html, /aria-selected="true"[^>]*>피해량</u);
 });

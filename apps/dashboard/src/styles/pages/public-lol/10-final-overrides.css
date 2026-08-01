@@ -2120,3 +2120,292 @@
     padding: var(--yoro-space-0) !important;
   }
 }
+
+/* 스트리머 프로필은 전적과 방송 참여 동선을 하나의 실제 상태 카드로 연결합니다. */
+.public-profile-shared-shell .public-profile-streamer-spotlight {
+  position: relative;
+  z-index: var(--yoro-z-base);
+  display: grid;
+  grid-template-columns: minmax(var(--yoro-space-0), .8fr) minmax(var(--yoro-space-0), 1.4fr) auto;
+  align-items: center;
+  gap: var(--yoro-space-4);
+  min-width: var(--yoro-space-0);
+  padding: var(--yoro-space-4);
+  border: var(--yoro-size-sr-only) solid var(--yoro-color-border-on-dark);
+  border-radius: var(--yoro-radius-lg);
+  background: var(--public-gray-surface-strong);
+  box-shadow: var(--yoro-shadow-soft);
+}
+
+.public-profile-shared-shell .public-profile-streamer-spotlight.is-live {
+  border-color: var(--yoro-color-match-score-good);
+  background: color-mix(in srgb, var(--yoro-color-match-score-good) 10%, var(--public-gray-surface-strong));
+}
+
+.public-profile-shared-shell .public-profile-streamer-spotlight__status,
+.public-profile-shared-shell .public-profile-streamer-spotlight__copy {
+  display: grid;
+  gap: var(--yoro-space-1);
+  min-width: var(--yoro-space-0);
+}
+
+.public-profile-shared-shell .public-profile-streamer-spotlight__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--yoro-space-2);
+  color: var(--yoro-color-text-on-dark-muted);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-black);
+  letter-spacing: .08em;
+}
+
+.public-profile-shared-shell .public-profile-streamer-spotlight__eyebrow i {
+  width: var(--yoro-space-2);
+  height: var(--yoro-space-2);
+  border-radius: var(--yoro-radius-pill);
+  background: var(--yoro-color-text-on-dark-muted);
+}
+
+.public-profile-shared-shell .public-profile-streamer-spotlight.is-live .public-profile-streamer-spotlight__eyebrow i {
+  background: var(--yoro-color-match-score-good);
+  box-shadow: 0 0 0 var(--yoro-space-1) color-mix(in srgb, var(--yoro-color-match-score-good) 16%, transparent);
+}
+
+.public-profile-shared-shell .public-profile-streamer-spotlight__status strong,
+.public-profile-shared-shell .public-profile-streamer-spotlight__copy strong {
+  overflow: hidden;
+  color: var(--yoro-color-text-on-dark);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-profile-shared-shell .public-profile-streamer-spotlight__status > span:last-child {
+  color: var(--yoro-color-text-on-dark-muted);
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.public-profile-shared-shell .public-profile-streamer-spotlight.is-live .public-profile-streamer-spotlight__status > span:last-child {
+  color: var(--yoro-color-match-score-good);
+}
+
+.public-profile-shared-shell .public-profile-streamer-spotlight__copy span {
+  color: var(--yoro-color-text-on-dark-muted);
+  font-size: var(--yoro-font-size-xs);
+}
+
+.public-profile-shared-shell .public-profile-streamer-spotlight__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--yoro-space-2);
+  flex-wrap: wrap;
+}
+
+.public-profile-shared-shell .public-profile-streamer-spotlight__actions :is(a, button) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--yoro-size-touch-target);
+  padding-inline: var(--yoro-space-4);
+  border: var(--yoro-size-sr-only) solid var(--yoro-color-border-on-dark-strong);
+  border-radius: var(--yoro-radius-md);
+  background: var(--public-gray-surface);
+  color: var(--yoro-color-text-on-dark);
+  font: inherit;
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-black);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.public-profile-shared-shell .public-profile-streamer-spotlight__actions button {
+  border-color: var(--yoro-color-primary);
+  background: var(--yoro-color-primary);
+}
+
+.public-profile-shared-shell .public-profile-streamer-spotlight__actions :is(a, button):focus-visible {
+  outline: var(--yoro-focus-ring-width) solid var(--yoro-color-focus-ring);
+  outline-offset: var(--yoro-focus-ring-offset);
+}
+
+/* 접힌 경기 카드에서도 경기 내 평가와 핵심 수치를 먼저 읽을 수 있게 합니다. */
+.public-profile-shared-shell .public-matches-panel .public-result {
+  gap: var(--yoro-space-1) !important;
+}
+
+.public-profile-shared-shell .public-matches-panel .public-match-featured-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  min-height: var(--yoro-space-5);
+  padding-inline: var(--yoro-space-2);
+  border: var(--yoro-size-sr-only) solid var(--yoro-color-border-on-dark-strong);
+  border-radius: var(--yoro-radius-pill);
+  background: var(--public-gray-surface);
+  color: var(--yoro-color-text-on-dark-strong) !important;
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-black);
+  line-height: var(--yoro-line-height-tight);
+}
+
+.public-profile-shared-shell .public-matches-panel .public-match-featured-label.highlight-mvp {
+  border-color: var(--yoro-color-match-score-best);
+  background: var(--yoro-theme-match-score-mvp-background);
+  color: var(--yoro-color-match-score-on-bright) !important;
+}
+
+.public-profile-shared-shell .public-matches-panel .public-match-featured-label.highlight-ace {
+  border-color: var(--yoro-color-match-score-bad);
+  background: var(--yoro-theme-match-score-ace-background);
+}
+
+.public-profile-shared-shell .public-matches-panel .public-match-meta {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(var(--yoro-space-0), 1fr));
+  gap: var(--yoro-space-1) var(--yoro-space-2) !important;
+  align-content: center;
+  padding: var(--yoro-space-2) !important;
+  border: var(--yoro-size-sr-only) solid var(--yoro-color-border-on-dark);
+  border-radius: var(--yoro-radius-sm);
+  background: color-mix(in srgb, var(--public-gray-surface-strong) 72%, transparent);
+}
+
+.public-profile-shared-shell .public-matches-panel .public-match-meta span {
+  overflow: hidden;
+  color: var(--yoro-color-text-on-dark-muted) !important;
+  font-size: var(--yoro-font-size-xs) !important;
+  font-weight: var(--yoro-font-weight-bold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-profile-shared-shell .public-matches-panel .public-match-meta span:first-child,
+.public-profile-shared-shell .public-matches-panel .public-match-meta span:last-child {
+  color: var(--yoro-color-text-on-dark) !important;
+}
+
+/* 상세 팀 비교는 한 번에 한 지표만 보여 시선 이동을 줄입니다. */
+.public-profile-shared-shell .public-team-compare {
+  grid-template-areas:
+    "tabs tabs tabs"
+    "leftLabel bars rightLabel"
+    "leftObjectives bars rightObjectives";
+}
+
+.public-profile-shared-shell .public-team-compare-tabs {
+  grid-area: tabs;
+  grid-column: 1 / -1;
+  display: flex;
+  gap: var(--yoro-space-1);
+  min-width: var(--yoro-space-0);
+  padding: var(--yoro-space-1);
+  overflow-x: auto;
+  border: var(--yoro-size-sr-only) solid var(--yoro-color-border-on-dark);
+  border-radius: var(--yoro-radius-md);
+  background: var(--public-gray-surface);
+  scrollbar-width: thin;
+}
+
+.public-profile-shared-shell .public-team-compare-tabs button {
+  min-height: calc(var(--yoro-size-touch-target) - var(--yoro-space-2));
+  padding-inline: var(--yoro-space-3);
+  border: var(--yoro-size-sr-only) solid transparent;
+  border-radius: var(--yoro-radius-sm);
+  background: transparent;
+  color: var(--yoro-color-text-on-dark-muted);
+  font: inherit;
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-black);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.public-profile-shared-shell .public-team-compare-tabs button[aria-selected="true"] {
+  border-color: var(--yoro-color-primary);
+  background: color-mix(in srgb, var(--yoro-color-primary) 22%, var(--public-gray-surface-strong));
+  color: var(--yoro-color-text-on-dark);
+}
+
+.public-profile-shared-shell .public-team-compare-tabs button:focus-visible {
+  outline: var(--yoro-focus-ring-width) solid var(--yoro-color-focus-ring);
+  outline-offset: var(--yoro-focus-ring-offset);
+}
+
+@media (max-width: 64rem) {
+  .public-profile-shared-shell .public-profile-streamer-spotlight {
+    grid-template-columns: minmax(var(--yoro-space-0), 1fr) auto;
+  }
+
+  .public-profile-shared-shell .public-profile-streamer-spotlight__copy {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
+@media (max-width: 56.25rem) {
+  .public-profile-shared-shell .public-team-compare {
+    grid-template-columns: minmax(var(--yoro-space-0), 1fr);
+    grid-template-areas:
+      "tabs"
+      "leftLabel"
+      "bars"
+      "leftObjectives"
+      "rightObjectives"
+      "rightLabel";
+  }
+}
+
+@media (max-width: 48rem) {
+  .public-profile-shared-shell .public-profile-streamer-spotlight {
+    grid-template-columns: minmax(var(--yoro-space-0), 1fr);
+    gap: var(--yoro-space-3);
+    padding: var(--yoro-space-3);
+  }
+
+  .public-profile-shared-shell .public-profile-streamer-spotlight__copy {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .public-profile-shared-shell .public-profile-streamer-spotlight__actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(var(--yoro-space-0), 1fr));
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-match-featured-label {
+    margin-inline-start: auto;
+  }
+
+  .public-profile-shared-shell .public-matches-panel .public-match-meta {
+    display: none !important;
+  }
+
+  .public-profile-shared-shell .public-team-compare-tabs {
+    margin-inline: calc(var(--yoro-space-2) * -1);
+    padding-inline: var(--yoro-space-2);
+    border-inline: var(--yoro-space-0);
+    border-radius: var(--yoro-space-0);
+  }
+
+  .public-profile-shared-shell .public-team-compare {
+    grid-template-columns: repeat(2, minmax(var(--yoro-space-0), 1fr));
+    grid-template-areas:
+      "tabs tabs"
+      "leftLabel rightLabel"
+      "bars bars";
+  }
+
+  .public-profile-shared-shell .public-team-compare.objectives-active {
+    grid-template-areas:
+      "tabs tabs"
+      "leftLabel rightLabel"
+      "leftObjectives leftObjectives"
+      "rightObjectives rightObjectives"
+      "bars bars";
+  }
+
+  .public-profile-shared-shell .public-team-compare.objectives-active .public-team-compare-objectives {
+    display: grid;
+  }
+}

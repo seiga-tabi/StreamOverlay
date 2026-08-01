@@ -18,6 +18,7 @@ export type RecentMatchRowProps = {
   expanded: boolean;
   resultLabel: ReactNode;
   queueLabel: ReactNode;
+  featuredLabel?: RecentMatchRowLocalizedText;
   startedAtLabel: ReactNode;
   resultDurationLabel: ReactNode;
   relativeLabel: ReactNode;
@@ -49,6 +50,7 @@ export function RecentMatchRow({
   expanded,
   resultLabel,
   queueLabel,
+  featuredLabel,
   startedAtLabel,
   resultDurationLabel,
   relativeLabel,
@@ -79,6 +81,11 @@ export function RecentMatchRow({
         <div className="public-result">
           <b className={`public-match-result-pill ${result}`}>{resultLabel}</b>
           <strong>{queueLabel}</strong>
+          {featuredLabel ? (
+            <span className={`public-match-featured-label ${highlightClass}`} data-ko={featuredLabel.ko} data-ja={featuredLabel.ja}>
+              {featuredLabel.label}
+            </span>
+          ) : null}
           <span className="public-match-started">{startedAtLabel}</span>
           <small>{resultDurationLabel}</small>
           <em className="public-match-relative">{relativeLabel}</em>

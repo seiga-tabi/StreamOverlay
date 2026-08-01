@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { MatchTeamMetricRow, type MatchTeamMetricRowViewModel } from "./MatchTeamMetricRow";
 import { MatchTeamObjectiveRow, type MatchTeamObjectiveRowViewModel } from "./MatchTeamObjectiveRow";
 
@@ -15,6 +16,8 @@ export type MatchTeamCompareMetricViewModel = MatchTeamMetricRowViewModel;
 
 export type MatchTeamCompareViewModel = {
   ariaLabel: string;
+  tabsLabel: string;
+  objectivesLabel: string;
   leftTeam: MatchTeamCompareTeamViewModel;
   rightTeam: MatchTeamCompareTeamViewModel;
   metrics: MatchTeamCompareMetricViewModel[];
@@ -25,8 +28,33 @@ export type MatchTeamCompareProps = {
 };
 
 export function MatchTeamCompare({ viewModel }: MatchTeamCompareProps) {
+  const [activeMetricKey, setActiveMetricKey] = useState(viewModel.metrics[0]?.key ?? "objectives");
+  const activeMetric = viewModel.metrics.find((metric) => metric.key === activeMetricKey);
+  const objectivesActive = activeMetricKey === "objectives";
+
   return (
-    <section className="public-team-compare" aria-label={viewModel.ariaLabel}>
+    <section className={`public-team-compare ${objectivesActive ? "objectives-active" : "metric-active"}`} aria-label={viewModel.ariaLabel}>
+      <div className="public-team-compare-tabs" role="tablist" aria-label={viewModel.tabsLabel}>
+        {viewModel.metrics.map((metric) => (
+          <button
+            aria-selected={activeMetricKey === metric.key}
+            key={metric.key}
+            role="tab"
+            type="button"
+            onClick={() => setActiveMetricKey(metric.key)}
+          >
+            {metric.label}
+          </button>
+        ))}
+        <button
+          aria-selected={objectivesActive}
+          role="tab"
+          type="button"
+          onClick={() => setActiveMetricKey("objectives")}
+        >
+          {viewModel.objectivesLabel}
+        </button>
+      </div>
       <div className="public-team-compare-label left">
         <strong>{viewModel.leftTeam.label}</strong>
         <span>{viewModel.leftTeam.resultSummary}</span>
@@ -35,13 +63,11 @@ export function MatchTeamCompare({ viewModel }: MatchTeamCompareProps) {
         <strong>{viewModel.rightTeam.label}</strong>
         <span>{viewModel.rightTeam.resultSummary}</span>
       </div>
-      <MatchTeamCompareObjectiveList team={viewModel.leftTeam} />
-      <div className="public-team-compare-bars">
-        {viewModel.metrics.map((metric) => (
-          <MatchTeamMetricRow key={metric.key} viewModel={metric} />
-        ))}
+      {objectivesActive ? <MatchTeamCompareObjectiveList team={viewModel.leftTeam} /> : <div />}
+      <div className="public-team-compare-bars" role="tabpanel">
+        {activeMetric ? <MatchTeamMetricRow key={activeMetric.key} viewModel={activeMetric} /> : null}
       </div>
-      <MatchTeamCompareObjectiveList team={viewModel.rightTeam} />
+      {objectivesActive ? <MatchTeamCompareObjectiveList team={viewModel.rightTeam} /> : <div />}
     </section>
   );
 }

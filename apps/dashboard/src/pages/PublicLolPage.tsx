@@ -1510,6 +1510,8 @@ function ProfileTopPanel({
   onQuery,
   onRefresh,
   onSubmit,
+  onOpenParticipation,
+  participationOpen,
   onToggleFavorite
 }: {
   profile: PublicLolProfile;
@@ -1525,6 +1527,8 @@ function ProfileTopPanel({
   onQuery: (value: string) => void;
   onRefresh: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onOpenParticipation: () => void;
+  participationOpen: boolean;
   onToggleFavorite: () => void;
 }) {
   const refreshDisabled = loading || refreshRemaining > 0;
@@ -1539,6 +1543,19 @@ function ProfileTopPanel({
   const primaryRankClassName = `tier-${primaryRank?.tier ? primaryRank.tier.toLocaleLowerCase() : "unranked"}`;
   const fetchedAtText = `${t().fetchedAt} ${formatDate(profile.fetchedAt)}`;
   const streamerProfileIconUrl = assetUrl(registeredStreamerStream?.profileImageUrl);
+  const streamerSpotlight = registeredStreamerStream ? {
+    isLive: registeredStreamerStream.isLive,
+    eyebrow: t().streamerRecordSpotlight,
+    displayName: registeredStreamerStream.twitchDisplayName,
+    statusLabel: registeredStreamerStream.isLive ? t().streamerLiveNow : t().streamerOfflineNow,
+    title: registeredStreamerStream.title,
+    viewerLabel: registeredStreamerStream.isLive && registeredStreamerStream.viewerCount !== undefined
+      ? `${formatNumber(registeredStreamerStream.viewerCount)} ${t().twitchViewers}`
+      : undefined,
+    channelUrl: registeredStreamerStream.channelUrl,
+    channelActionLabel: t().streamerWatch,
+    participationActionLabel: participationOpen ? t().streamerParticipationApply : t().streamerParticipationView
+  } : undefined;
   return (
     <FeatureProfileTopPanel
       displayName={profile.gameName}
@@ -1580,8 +1597,10 @@ function ProfileTopPanel({
         />
       )}
       seasonBadges={null}
+      streamerSpotlight={streamerSpotlight}
       tagLine={profile.tagLine}
       text={profileTopPanelText()}
+      onOpenParticipation={registeredStreamerStream ? onOpenParticipation : undefined}
     />
   );
 }
@@ -5825,11 +5844,19 @@ function matchTeamCompareViewModel(match: PublicLolRecentMatch): MatchTeamCompar
   const [leftTeam, rightTeam] = teams;
   return {
     ariaLabel: t().teamDetails,
+    tabsLabel: t().teamComparisonTabs,
+    objectivesLabel: t().objectives,
     leftTeam: matchTeamCompareObjectivesViewModel(leftTeam, "left"),
     rightTeam: matchTeamCompareObjectivesViewModel(rightTeam, "right"),
     metrics: [
-      matchTeamCompareMetricViewModel("kills", t().totalKill, leftTeam.kills, rightTeam.kills),
-      matchTeamCompareMetricViewModel("damage", t().totalDamage, leftTeam.damageDealtToChampions, rightTeam.damageDealtToChampions)
+      matchTeamCompareMetricViewModel("damage", t().totalDamage, leftTeam.damageDealtToChampions, rightTeam.damageDealtToChampions),
+      matchTeamCompareMetricViewModel(
+        "vision",
+        t().vision,
+        leftTeam.players.reduce((sum, player) => sum + (player.visionScore ?? 0), 0),
+        rightTeam.players.reduce((sum, player) => sum + (player.visionScore ?? 0), 0)
+      ),
+      matchTeamCompareMetricViewModel("gold", t().totalGold, leftTeam.goldEarned, rightTeam.goldEarned)
     ]
   };
 }
@@ -6248,6 +6275,7 @@ function RecentMatches({
               content: <img src={rune.iconUrl} alt="" />
             }));
           const placementLabel = matchPlacementLabel(match.badges);
+          const hasPlacementLabel = placementLabel !== t().aiScore;
           const inlineItemSlots: RecentMatchRowMediaItem[] = recentItemSlots.map((item, index) => ({
             key: `${match.matchId}:inline:${index}:${item?.itemId ?? "empty"}`,
             className: item ? "" : "empty",
@@ -6318,6 +6346,11 @@ function RecentMatches({
               expanded={expanded}
               expandedPanel={expandedPanel}
               expandAriaLabel={expanded ? t().collapseMatch : t().expandMatch}
+              featuredLabel={hasPlacementLabel ? {
+                label: placementLabel,
+                ko: matchPlacementLabel(match.badges, "ko"),
+                ja: matchPlacementLabel(match.badges, "ja")
+              } : undefined}
               highlightClass={highlightClass}
               itemSlots={inlineItemSlots}
               itemsLabel={t().items}
@@ -7847,6 +7880,11 @@ export function PublicLolPage({
                     onQuery={setQuery}
                     onRefresh={() => void runSearch(profile.riotId, { refresh: true })}
                     onSubmit={(event) => void submit(event)}
+                    onOpenParticipation={() => changeMainPage("followJoin")}
+                    participationOpen={Boolean(publicParticipation?.streamers.some((streamer) => (
+                      streamer.isOpen
+                      && streamer.twitchUserId === activeProfile.twitchStream?.twitchUserId
+                    )))}
                     onToggleFavorite={toggleFavorite}
                   />
                   <PublicProfileErrorState error={error} />
