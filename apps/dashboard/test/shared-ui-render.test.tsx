@@ -496,7 +496,13 @@ test("Profile 상단은 상세 정보를 접고 최근 경기 바로가기를 �
         viewerLabel: "125 시청자",
         channelUrl: "https://www.twitch.tv/yoro",
         channelActionLabel: "Twitch에서 보기",
-        participationActionLabel: "참여 신청"
+        participationActionLabel: "참여 신청",
+        metrics: [
+          { id: "game", label: "현재 게임", value: "League of Legends", tone: "live" },
+          { id: "rank", label: "솔로 랭크", value: "Platinum I", tone: "accent" },
+          { id: "viewers", label: "시청자", value: "125", tone: "live" },
+          { id: "participation", label: "참여", value: "참여 대기열 열림", tone: "live" }
+        ]
       }}
       tagLine="JP1"
       text={{
@@ -519,6 +525,10 @@ test("Profile 상단은 상세 정보를 접고 최근 경기 바로가기를 �
   assert.match(html, /public-profile-streamer-spotlight is-live/u);
   assert.match(html, /href="https:\/\/www\.twitch\.tv\/yoro"/u);
   assert.match(html, />참여 신청</u);
+  assert.match(html, /public-profile-streamer-spotlight__metrics/u);
+  assert.match(html, />League of Legends</u);
+  assert.match(html, />Platinum I</u);
+  assert.match(html, />참여 대기열 열림</u);
   assert.doesNotMatch(html, /id="metric-strip"/);
 });
 

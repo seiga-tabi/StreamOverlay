@@ -2127,6 +2127,9 @@
   z-index: var(--yoro-z-base);
   display: grid;
   grid-template-columns: minmax(var(--yoro-space-0), .8fr) minmax(var(--yoro-space-0), 1.4fr) auto;
+  grid-template-areas:
+    "status copy actions"
+    "metrics metrics metrics";
   align-items: center;
   gap: var(--yoro-space-4);
   min-width: var(--yoro-space-0);
@@ -2135,6 +2138,14 @@
   border-radius: var(--yoro-radius-lg);
   background: var(--public-gray-surface-strong);
   box-shadow: var(--yoro-shadow-soft);
+}
+
+.public-profile-shared-shell .public-profile-streamer-spotlight__status {
+  grid-area: status;
+}
+
+.public-profile-shared-shell .public-profile-streamer-spotlight__copy {
+  grid-area: copy;
 }
 
 .public-profile-shared-shell .public-profile-streamer-spotlight.is-live {
@@ -2195,10 +2206,56 @@
 }
 
 .public-profile-shared-shell .public-profile-streamer-spotlight__actions {
+  grid-area: actions;
   display: flex;
   justify-content: flex-end;
   gap: var(--yoro-space-2);
   flex-wrap: wrap;
+}
+
+.public-profile-shared-shell .public-profile-streamer-spotlight__metrics {
+  grid-area: metrics;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(var(--yoro-space-0), 1fr));
+  gap: var(--yoro-space-2);
+  margin: var(--yoro-space-0);
+}
+
+.public-profile-shared-shell .public-profile-streamer-spotlight__metrics > div {
+  display: grid;
+  gap: var(--yoro-space-1);
+  min-width: var(--yoro-space-0);
+  padding: var(--yoro-space-3);
+  border: var(--yoro-size-sr-only) solid var(--yoro-color-border-on-dark);
+  border-radius: var(--yoro-radius-md);
+  background: color-mix(in srgb, var(--public-gray-surface) 84%, transparent);
+}
+
+.public-profile-shared-shell .public-profile-streamer-spotlight__metrics dt {
+  overflow: hidden;
+  color: var(--yoro-color-text-on-dark-muted);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-bold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-profile-shared-shell .public-profile-streamer-spotlight__metrics dd {
+  overflow: hidden;
+  margin: var(--yoro-space-0);
+  color: var(--yoro-color-text-on-dark);
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-black);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-profile-shared-shell .public-profile-streamer-spotlight__metrics .is-live dd {
+  color: var(--yoro-color-match-score-good);
+}
+
+.public-profile-shared-shell .public-profile-streamer-spotlight__metrics .is-accent dd {
+  color: var(--yoro-color-primary);
 }
 
 .public-profile-shared-shell .public-profile-streamer-spotlight__actions :is(a, button) {
@@ -2335,11 +2392,15 @@
 @media (max-width: 64rem) {
   .public-profile-shared-shell .public-profile-streamer-spotlight {
     grid-template-columns: minmax(var(--yoro-space-0), 1fr) auto;
+    grid-template-areas:
+      "status actions"
+      "copy copy"
+      "metrics metrics";
   }
 
   .public-profile-shared-shell .public-profile-streamer-spotlight__copy {
-    grid-column: 1 / -1;
-    grid-row: 2;
+    grid-column: auto;
+    grid-row: auto;
   }
 }
 
@@ -2359,6 +2420,11 @@
 @media (max-width: 48rem) {
   .public-profile-shared-shell .public-profile-streamer-spotlight {
     grid-template-columns: minmax(var(--yoro-space-0), 1fr);
+    grid-template-areas:
+      "status"
+      "copy"
+      "metrics"
+      "actions";
     gap: var(--yoro-space-3);
     padding: var(--yoro-space-3);
   }
@@ -2370,6 +2436,10 @@
 
   .public-profile-shared-shell .public-profile-streamer-spotlight__actions {
     display: grid;
+    grid-template-columns: repeat(2, minmax(var(--yoro-space-0), 1fr));
+  }
+
+  .public-profile-shared-shell .public-profile-streamer-spotlight__metrics {
     grid-template-columns: repeat(2, minmax(var(--yoro-space-0), 1fr));
   }
 
@@ -2407,5 +2477,80 @@
 
   .public-profile-shared-shell .public-team-compare.objectives-active .public-team-compare-objectives {
     display: grid;
+  }
+}
+
+/* 랭크별 시각적 위계를 분리하고 미배치 큐는 의도적으로 낮은 강조로 표시합니다. */
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-profile-metric-card.blue.is-ranked {
+  border-color: color-mix(in srgb, var(--yoro-color-primary) 54%, var(--yoro-color-border-on-dark)) !important;
+  background: color-mix(in srgb, var(--yoro-color-primary) 14%, var(--public-gray-surface-strong)) !important;
+}
+
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-profile-metric-card.green.is-ranked {
+  border-color: color-mix(in srgb, var(--yoro-color-match-score-good) 52%, var(--yoro-color-border-on-dark)) !important;
+  background: color-mix(in srgb, var(--yoro-color-match-score-good) 12%, var(--public-gray-surface-strong)) !important;
+}
+
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-profile-metric-card.purple.is-ranked {
+  border-color: color-mix(in srgb, var(--yoro-color-focus-ring) 48%, var(--yoro-color-border-on-dark)) !important;
+  background: color-mix(in srgb, var(--yoro-color-focus-ring) 12%, var(--public-gray-surface-strong)) !important;
+}
+
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-profile-metric-card.is-unranked {
+  border-style: dashed !important;
+  background: color-mix(in srgb, var(--public-gray-surface) 72%, transparent) !important;
+  box-shadow: none !important;
+  opacity: .78;
+}
+
+/* 종합 성과는 등급·승률 뒤에 평균 KDA와 주 챔피언까지 같은 시선 축으로 제공합니다. */
+.public-profile-shared-shell .public-aggregate-card {
+  background: color-mix(in srgb, var(--public-gray-surface-strong) 92%, var(--yoro-color-primary)) !important;
+}
+
+.public-profile-shared-shell .public-aggregate-insights {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(var(--yoro-space-0), 1fr));
+  gap: var(--yoro-space-2);
+  margin-block-start: var(--yoro-space-3);
+  padding-block-start: var(--yoro-space-3);
+  border-top: var(--yoro-size-sr-only) solid var(--yoro-color-border-on-dark);
+}
+
+.public-profile-shared-shell .public-aggregate-insights > div {
+  display: grid;
+  grid-template-columns: minmax(var(--yoro-space-0), 1fr) auto;
+  gap: var(--yoro-space-1) var(--yoro-space-2);
+  align-items: baseline;
+  min-width: var(--yoro-space-0);
+  padding: var(--yoro-space-2) var(--yoro-space-3);
+  border: var(--yoro-size-sr-only) solid var(--yoro-color-border-on-dark);
+  border-radius: var(--yoro-radius-md);
+  background: color-mix(in srgb, var(--public-gray-surface) 82%, transparent);
+}
+
+.public-profile-shared-shell .public-aggregate-insights span,
+.public-profile-shared-shell .public-aggregate-insights small {
+  color: var(--yoro-color-text-on-dark-muted);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.public-profile-shared-shell .public-aggregate-insights strong {
+  overflow: hidden;
+  color: var(--yoro-color-text-on-dark);
+  font-size: var(--yoro-font-size-md);
+  font-weight: var(--yoro-font-weight-black);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-profile-shared-shell .public-aggregate-insights small {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 30rem) {
+  .public-profile-shared-shell .public-aggregate-insights {
+    grid-template-columns: minmax(var(--yoro-space-0), 1fr);
   }
 }

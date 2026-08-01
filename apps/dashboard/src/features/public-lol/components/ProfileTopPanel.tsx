@@ -34,6 +34,12 @@ export type ProfileTopStreamerSpotlight = {
   channelUrl?: string;
   channelActionLabel: string;
   participationActionLabel: string;
+  metrics?: Array<{
+    id: string;
+    label: string;
+    value: string;
+    tone?: "live" | "accent" | "neutral";
+  }>;
 };
 
 export type ProfileTopPanelProps = {
@@ -210,6 +216,16 @@ export function ProfileTopPanel({
               {streamerSpotlight.title ? <strong>{streamerSpotlight.title}</strong> : null}
               {streamerSpotlight.viewerLabel ? <span>{streamerSpotlight.viewerLabel}</span> : null}
             </div>
+            {streamerSpotlight.metrics?.length ? (
+              <dl className="public-profile-streamer-spotlight__metrics">
+                {streamerSpotlight.metrics.map((metric) => (
+                  <div className={metric.tone ? `is-${metric.tone}` : undefined} key={metric.id}>
+                    <dt>{metric.label}</dt>
+                    <dd>{metric.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            ) : null}
             <div className="public-profile-streamer-spotlight__actions">
               {streamerSpotlight.channelUrl ? (
                 <a href={streamerSpotlight.channelUrl} target="_blank" rel="noreferrer">

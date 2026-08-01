@@ -1411,7 +1411,7 @@ function ProfileMetricStrip({ profile }: { profile: PublicLolProfile }) {
     const unranked = !stats || stats.tier === "UNRANKED";
     return {
       key,
-      tone,
+      tone: `${tone} ${unranked ? "is-unranked" : "is-ranked"}`,
       icon,
       imageUrl: assetUrl(stats?.tierIconUrl),
       imageFallbackLabel: unranked ? "U" : stats?.tier.slice(0, 1) ?? icon,
@@ -1549,12 +1549,37 @@ function ProfileTopPanel({
     displayName: registeredStreamerStream.twitchDisplayName,
     statusLabel: registeredStreamerStream.isLive ? t().streamerLiveNow : t().streamerOfflineNow,
     title: registeredStreamerStream.title,
-    viewerLabel: registeredStreamerStream.isLive && registeredStreamerStream.viewerCount !== undefined
-      ? `${formatNumber(registeredStreamerStream.viewerCount)} ${t().twitchViewers}`
-      : undefined,
     channelUrl: registeredStreamerStream.channelUrl,
     channelActionLabel: t().streamerWatch,
-    participationActionLabel: participationOpen ? t().streamerParticipationApply : t().streamerParticipationView
+    participationActionLabel: participationOpen ? t().streamerParticipationApply : t().streamerParticipationView,
+    metrics: [
+      {
+        id: "game",
+        label: t().liveGame,
+        value: registeredStreamerStream.gameName?.trim() || "League of Legends",
+        tone: registeredStreamerStream.isLive ? "live" as const : "neutral" as const
+      },
+      {
+        id: "rank",
+        label: t().soloRank,
+        value: rankLabel(primaryRank),
+        tone: primaryRank ? "accent" as const : "neutral" as const
+      },
+      {
+        id: "viewers",
+        label: t().twitchViewers,
+        value: registeredStreamerStream.isLive && registeredStreamerStream.viewerCount !== undefined
+          ? formatNumber(registeredStreamerStream.viewerCount)
+          : "-",
+        tone: registeredStreamerStream.isLive ? "live" as const : "neutral" as const
+      },
+      {
+        id: "participation",
+        label: t().participationHeaderNav,
+        value: participationOpen ? t().participationOpen : t().participationClosed,
+        tone: participationOpen ? "live" as const : "neutral" as const
+      }
+    ]
   } : undefined;
   return (
     <FeatureProfileTopPanel
@@ -1718,6 +1743,7 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
   const aggregateGrade = aggregatePerformanceGrade(profile);
   const aggregateScore = aggregatePerformanceScore(profile);
   const winRate = Math.max(0, Math.min(100, aggregateSummary.recentWinRate));
+  const mostPlayedChampion = recentChampionSummaries(profile.recentMatches)[0];
   return (
     <section id="public-stats" className="public-overview-dashboard-panel">
       <Card as="article" className="public-panel public-aggregate-card public-profile-shared-card" padding="md" variant="elevated">
@@ -1750,6 +1776,20 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
               <span>{t().winRate}</span>
               <strong className={metricToneClass(percentTone(winRate))}>{formatPercent(winRate)}</strong>
             </div>
+          </div>
+        </div>
+        <div className="public-aggregate-insights">
+          <div>
+            <span>{t().kda}</span>
+            <strong className={metricToneClass(kdaTone(aggregateSummary.averageKda))}>
+              {formatDecimal(aggregateSummary.averageKda)}
+            </strong>
+            <small>{t().average}</small>
+          </div>
+          <div>
+            <span>{t().recentChampionsTitle}</span>
+            <strong>{mostPlayedChampion ? championName(mostPlayedChampion.champion) : t().noData}</strong>
+            <small>{mostPlayedChampion ? gamesText(mostPlayedChampion.games) : t().noData}</small>
           </div>
         </div>
       </Card>
