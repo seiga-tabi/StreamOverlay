@@ -1275,6 +1275,78 @@ test("공개 LoL 전적 더보기 API는 start offset으로 이전 20게임을 �
   });
 });
 
+test("공개 LoL 첫 검색은 최근 10게임만 상세 조회하고 다음 페이지 위치를 반환한다", async () => {
+  await withAuthConfig(async () => {
+    let matchLookups = 0;
+    const matchIds = Array.from({ length: 20 }, (_, index) => `JP1_${index + 1}`);
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      actions: {
+        async dispatchOne() {}
+      },
+      sessions: new DashboardSessionStore(),
+      riot: {
+        isConfigured() {
+          return true;
+        },
+        routingStatus() {
+          return { configured: true, source: "runtime", accountRegion: "asia", lolPlatform: "jp1" };
+        },
+        async getAccountByRiotId(gameName, tagLine) {
+          return { puuid: "initial-page-puuid", gameName, tagLine };
+        },
+        async getRankedStatsByPuuid() {
+          return undefined;
+        },
+        async getChampionMasteryTopByPuuid() {
+          return [];
+        },
+        async getRecentMatchIdsByPuuid(_puuid, count, queueIds, start) {
+          assert.equal(count, 20);
+          assert.deepEqual(queueIds ?? [], []);
+          assert.equal(start, 0);
+          return matchIds;
+        },
+        async getMatch(matchId) {
+          matchLookups += 1;
+          return {
+            metadata: { matchId, participants: ["initial-page-puuid"] },
+            info: {
+              gameCreation: 1760000000000 + Number(matchId.slice("JP1_".length)),
+              gameDuration: 1800,
+              queueId: 420,
+              teams: [{ teamId: 100, win: true, objectives: {} }],
+              participants: [{
+                puuid: "initial-page-puuid",
+                teamId: 100,
+                championId: 103,
+                championName: "Ahri",
+                individualPosition: "MIDDLE",
+                kills: 3,
+                deaths: 1,
+                assists: 4,
+                win: true
+              }]
+            }
+          };
+        }
+      }
+    });
+    const req = createRequest("GET", "/api/lol/profile?riotId=HideOnBush%23KR1", undefined, { origin: DASHBOARD_ORIGIN });
+    const res = createResponse();
+
+    await handler(req, res);
+
+    assert.equal(res.statusCode, 200, res.body);
+    const body = JSON.parse(res.body);
+    assert.equal(matchLookups, 10);
+    assert.equal(body.recentMatches.length, 10);
+    assert.equal(body.nextRecentMatchStart, 10);
+    assert.equal(body.hasMoreRecentMatches, true);
+  });
+});
+
 test("공개 LoL 전적 API는 현재 게임 중 상태를 응답하고 PUUID를 노출하지 않는다", async () => {
   await withAuthConfig(async () => {
     const handler = createHttpHandler({
@@ -1380,7 +1452,7 @@ test("공개 LoL 전적 API는 현재 게임 중 상태를 응답하고 PUUID를
   });
 });
 
-test("공개 LoL 전적 캐시는 인게임 상태만 짧게 다시 조회한다", async () => {
+test("공개 LoL 전적 캐시는 즉시 반환하고 인게임 상태는 경량 API에서 갱신한다", async () => {
   await withAuthConfig(async () => {
     const originalDateNow = Date.now;
     let now = 1_000_000;
@@ -1455,10 +1527,16 @@ test("공개 LoL 전적 캐시는 인게임 상태만 짧게 다시 조회한다
       const secondRes = createResponse();
       await handler(secondReq, secondRes);
 
+      const dynamicReq = createRequest("GET", "/api/lol/profile-state?riotId=hideonbush%23kr1", undefined, { origin: DASHBOARD_ORIGIN });
+      const dynamicRes = createResponse();
+      await handler(dynamicReq, dynamicRes);
+
       assert.equal(firstRes.statusCode, 200);
       assert.equal(secondRes.statusCode, 200);
+      assert.equal(dynamicRes.statusCode, 200);
       assert.equal(JSON.parse(firstRes.body).liveGame.status, "not_found");
-      assert.equal(JSON.parse(secondRes.body).liveGame.status, "live");
+      assert.equal(JSON.parse(secondRes.body).liveGame.status, "not_found");
+      assert.equal(JSON.parse(dynamicRes.body).liveGame.status, "live");
       assert.equal(accountLookups, 1);
       assert.equal(currentGameLookups, 2);
     } finally {
@@ -1982,7 +2060,7 @@ test("공개 LoL 전적 API는 승인 스트리머가 방송관리 연결 계정
   });
 });
 
-test("공개 LoL 전적 캐시는 Twitch 방송 상태를 매 요청마다 갱신한다", async () => {
+test("공개 LoL 전적 캐시는 즉시 반환하고 Twitch 상태는 경량 API에서 갱신한다", async () => {
   await withAuthConfig(async () => {
     let accountLookups = 0;
     let streamLookups = 0;
@@ -2073,8 +2151,14 @@ test("공개 LoL 전적 캐시는 Twitch 방송 상태를 매 요청마다 갱�
     const secondRes = createResponse();
     await handler(secondReq, secondRes);
 
+    const dynamicReq = createRequest("GET", "/api/lol/profile-state?riotId=seiga%23SEI", undefined, { origin: DASHBOARD_ORIGIN });
+    const dynamicRes = createResponse();
+    await handler(dynamicReq, dynamicRes);
+
     assert.equal(secondRes.statusCode, 200, secondRes.body);
-    const body = JSON.parse(secondRes.body);
+    assert.equal(dynamicRes.statusCode, 200, dynamicRes.body);
+    assert.equal(JSON.parse(secondRes.body).twitchStream.isLive, false);
+    const body = JSON.parse(dynamicRes.body);
     assert.equal(body.twitchStream.isLive, true);
     assert.equal(body.twitchStream.viewerCount, 45);
     assert.equal(accountLookups, 1);

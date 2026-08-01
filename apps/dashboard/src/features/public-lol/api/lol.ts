@@ -5,6 +5,7 @@ import type {
   PublicLolMatchPageResponse,
   PublicLolMatchRankResponse,
   PublicLolProfile,
+  PublicLolProfileDynamicState,
   SearchSuggestion,
 } from "../types/public-lol";
 
@@ -21,15 +22,29 @@ export async function readPublicApiErrorMessage(response: Response): Promise<str
 
 export async function searchProfile(
   riotId: string,
-  options: { refresh?: boolean } = {}
+  options: { refresh?: boolean; signal?: AbortSignal } = {}
 ): Promise<PublicLolProfile> {
   const params = new URLSearchParams({ riotId });
   if (options.refresh) params.set("refresh", "1");
   const response = await fetch(`${apiBase}/api/lol/profile?${params.toString()}`, {
-    credentials: "include"
+    credentials: "include",
+    signal: options.signal
   });
   if (!response.ok) throw new Error(await readPublicApiErrorMessage(response));
   return (await response.json()) as PublicLolProfile;
+}
+
+export async function getPublicLolProfileDynamicState(
+  riotId: string,
+  signal?: AbortSignal
+): Promise<PublicLolProfileDynamicState> {
+  const params = new URLSearchParams({ riotId });
+  const response = await fetch(`${apiBase}/api/lol/profile-state?${params.toString()}`, {
+    credentials: "include",
+    signal
+  });
+  if (!response.ok) throw new Error(await readPublicApiErrorMessage(response));
+  return (await response.json()) as PublicLolProfileDynamicState;
 }
 
 export async function getPublicLolMatchPage(

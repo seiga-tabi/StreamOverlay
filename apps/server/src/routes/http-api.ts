@@ -230,6 +230,7 @@ const MAX_TWITCH_CHAT_MESSAGE_LENGTH = 500;
 const PROFILE_REFRESH_COOLDOWN_MS = 60_000;
 const SKIN_OPTIONS_CACHE_TTL_MS = 10 * 60_000;
 const FOLLOWER_REFRESH_COOLDOWN_MS = 5 * 60_000;
+const PUBLIC_LOL_PROFILE_INITIAL_MATCH_COUNT = 10;
 const PUBLIC_LOL_PROFILE_MATCH_COUNT = 20;
 const PUBLIC_LOL_PROFILE_MATCH_LOOKUP_COUNT = 20;
 const PUBLIC_LOL_PROFILE_MAX_MATCH_START = 200;
@@ -648,6 +649,14 @@ type PublicLolProfileResponse = {
   rolePerformance: PublicLolRolePerformance[];
   fetchedAt: string;
   refreshAvailableAt?: string;
+};
+
+type PublicLolProfileDynamicResponse = {
+  status: "ready";
+  riotId: string;
+  twitchStream?: PublicLolTwitchStream;
+  liveGame: PublicLolCurrentGame;
+  fetchedAt: string;
 };
 
 type PublicLolRankedQueues = {
@@ -5196,7 +5205,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
   async function buildPublicLolMatchPageForAccount(
     account: { puuid: string },
     matchStart: number,
-    dataDragonVersion: string | undefined
+    dataDragonVersion: string | undefined,
+    matchCount = PUBLIC_LOL_PROFILE_MATCH_COUNT
   ): Promise<{
     rawMatches: RiotMatch[];
     recentMatches: PublicLolRecentMatch[];
@@ -5208,12 +5218,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
     const safeStart = publicLolMatchStart(matchStart);
     const matchIds = await input.riot.getRecentMatchIdsByPuuid(account.puuid, PUBLIC_LOL_PROFILE_MATCH_LOOKUP_COUNT, [], safeStart).catch(() => []);
     const rawMatches = (await Promise.all(
-      matchIds.slice(0, PUBLIC_LOL_PROFILE_MATCH_LOOKUP_COUNT).map((matchId) => getPublicLolMatchDetail(matchId).catch(() => null))
+      matchIds.slice(0, matchCount).map((matchId) => getPublicLolMatchDetail(matchId).catch(() => null))
     ))
       .filter((match): match is RiotMatch => Boolean(match))
       .filter(isPublicLolQueue)
       .sort((a, b) => publicLolMatchSortTime(b) - publicLolMatchSortTime(a))
-      .slice(0, PUBLIC_LOL_PROFILE_MATCH_COUNT);
+      .slice(0, matchCount);
     const streamerByRiotId = await buildApprovedStreamerStreamsByRiotId(rawMatches.flatMap((match) => match.info.participants.map((participant) => participantRiotId(participant))));
     const recentMatches = (await Promise.all(
       rawMatches.map(async (match) => publicLolRecentMatchFromRiotMatch(
@@ -5223,12 +5233,13 @@ export function createHttpHandler(input: HttpHandlerInput) {
         streamerByRiotId
       ))
     )).filter((match): match is PublicLolRecentMatch => Boolean(match));
-    const hasMoreRecentMatches = matchIds.length >= PUBLIC_LOL_PROFILE_MATCH_LOOKUP_COUNT;
+    const hasMoreRecentMatches = matchIds.length > matchCount
+      || (matchCount >= PUBLIC_LOL_PROFILE_MATCH_LOOKUP_COUNT && matchIds.length >= PUBLIC_LOL_PROFILE_MATCH_LOOKUP_COUNT);
     return {
       rawMatches,
       recentMatches,
       recentMatchStart: safeStart,
-      nextRecentMatchStart: hasMoreRecentMatches ? safeStart + PUBLIC_LOL_PROFILE_MATCH_COUNT : undefined,
+      nextRecentMatchStart: hasMoreRecentMatches ? safeStart + matchCount : undefined,
       hasMoreRecentMatches
     };
   }
@@ -5375,6 +5386,28 @@ export function createHttpHandler(input: HttpHandlerInput) {
     return { ...response, liveGame, twitchStream };
   }
 
+  async function getPublicLolProfileDynamicState(rawRiotId: string): Promise<PublicLolProfileDynamicResponse> {
+    const parsed = parseRiotIdDetailed(rawRiotId);
+    if (!parsed.ok) throw new HttpRequestError(400, { error: parsed.message, code: parsed.code });
+    const key = publicLolProfileCacheKey(parsed.gameName, parsed.tagLine);
+    const cached = publicLolProfileCache.get(key);
+    if (!cached) {
+      throw new HttpRequestError(404, {
+        error: "먼저 전적을 검색해 주세요.",
+        code: "LOL_PROFILE_NOT_CACHED"
+      });
+    }
+    const response = await withFreshPublicLolDynamicState(cached.response, key);
+    cached.response = response;
+    return {
+      status: "ready",
+      riotId: response.riotId,
+      twitchStream: response.twitchStream,
+      liveGame: response.liveGame,
+      fetchedAt: new Date().toISOString()
+    };
+  }
+
   async function buildPublicLolProfile(rawRiotId: string): Promise<PublicLolProfileResponse> {
     const parsed = parseRiotIdDetailed(rawRiotId);
     if (!parsed.ok) throw new HttpRequestError(400, { error: parsed.message, code: parsed.code });
@@ -5401,23 +5434,31 @@ export function createHttpHandler(input: HttpHandlerInput) {
         ranked5v5: stats?.queueType === "RANKED_TEAM_5x5" ? stats : undefined,
         primary: stats
       })).catch((): PublicLolRankedQueues => ({}));
-    const [rankedQueues, mastery] = await Promise.all([
+    const dataDragonVersionRequest = dataDragonLatestVersion(input.dataDragon);
+    const liveGameRequest = getPublicLolCurrentGame(requestedCacheKey, account.puuid);
+    const twitchStreamRequest = buildPublicLolTwitchStream(
+      account.gameName || parsed.gameName,
+      account.tagLine || parsed.tagLine
+    );
+    const [rankedQueues, mastery, dataDragonVersion] = await Promise.all([
       rankedQueuesRequest,
-      input.riot.getChampionMasteryTopByPuuid(account.puuid, PUBLIC_LOL_PROFILE_TOP_CHAMPION_COUNT).catch(() => [])
+      input.riot.getChampionMasteryTopByPuuid(account.puuid, PUBLIC_LOL_PROFILE_TOP_CHAMPION_COUNT).catch(() => []),
+      dataDragonVersionRequest
     ]);
     const rankedStats = rankedQueues.primary;
-    const dataDragonVersion = await dataDragonLatestVersion(input.dataDragon);
-    const [matchPage, liveGame] = await Promise.all([
-      buildPublicLolMatchPageForAccount(account, 0, dataDragonVersion),
-      getPublicLolCurrentGame(requestedCacheKey, account.puuid)
-    ]);
-    const matches = matchPage.rawMatches;
-
-    const topChampions = await Promise.all(mastery.slice(0, PUBLIC_LOL_PROFILE_TOP_CHAMPION_COUNT).map((champion) => mapChampionSummary(input.dataDragon, {
+    const topChampionsRequest = Promise.all(mastery.slice(0, PUBLIC_LOL_PROFILE_TOP_CHAMPION_COUNT).map((champion) => mapChampionSummary(input.dataDragon, {
       championId: champion.championId,
       masteryLevel: champion.championLevel,
       masteryPoints: champion.championPoints
     })));
+    const [matchPage, liveGame, twitchStream, topChampions, resolvedProfileIconUrl] = await Promise.all([
+      buildPublicLolMatchPageForAccount(account, 0, dataDragonVersion, PUBLIC_LOL_PROFILE_INITIAL_MATCH_COUNT),
+      liveGameRequest,
+      twitchStreamRequest,
+      topChampionsRequest,
+      profileIconUrl(input.dataDragon, rankedStats?.profileIconId)
+    ]);
+    const matches = matchPage.rawMatches;
 
     const visibleRecentMatches = matchPage.recentMatches;
     const recentWins = visibleRecentMatches.filter((match) => match.result === "win").length;
@@ -5427,7 +5468,6 @@ export function createHttpHandler(input: HttpHandlerInput) {
 
     const fetchedAt = new Date().toISOString();
     const rankHistory = buildRankHistory(existingProfile?.rankHistory, rankedStats, fetchedAt);
-    const twitchStream = await buildPublicLolTwitchStream(account.gameName || parsed.gameName, account.tagLine || parsed.tagLine);
     const response: PublicLolProfileResponse = {
       status: "ready",
       riotId: `${account.gameName || parsed.gameName}#${account.tagLine || parsed.tagLine}`,
@@ -5435,7 +5475,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       tagLine: account.tagLine || parsed.tagLine,
       accountRegion: routing.accountRegion,
       lolPlatform: routing.lolPlatform,
-      profileIconUrl: await profileIconUrl(input.dataDragon, rankedStats?.profileIconId),
+      profileIconUrl: resolvedProfileIconUrl,
       summonerLevel: rankedStats?.summonerLevel,
       ladderRank: existingProfile?.ladderRank,
       rankedStats,
@@ -5530,7 +5570,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
     }
     const cached = publicLolProfileCache.get(key);
     if (!options.refresh && cached && cached.expiresAt > Date.now()) {
-      return withPublicLolRefreshState(await withFreshPublicLolDynamicState(cached.response, key), key);
+      return withPublicLolRefreshState(cached.response, key);
     }
     if (cached) publicLolProfileCache.delete(key);
 
@@ -7916,6 +7956,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if (req.method === "GET" && url.pathname === "/api/lol/profile") {
         const refresh = url.searchParams.get("refresh") === "1" || url.searchParams.get("refresh") === "true";
         return sendJson(req, res, 200, await getPublicLolProfile(url.searchParams.get("riotId") ?? "", { refresh }));
+      }
+      if (req.method === "GET" && url.pathname === "/api/lol/profile-state") {
+        return sendJson(req, res, 200, await getPublicLolProfileDynamicState(url.searchParams.get("riotId") ?? ""));
       }
       if (req.method === "GET" && url.pathname === "/api/lol/matches") {
         return sendJson(req, res, 200, await getPublicLolMatchPage(

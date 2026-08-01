@@ -2,6 +2,7 @@ export {
   getPublicLolMatchBuild,
   getPublicLolMatchPage,
   getPublicLolMatchRanks,
+  getPublicLolProfileDynamicState,
   readPublicApiErrorMessage,
   searchProfile,
   searchSuggestions,

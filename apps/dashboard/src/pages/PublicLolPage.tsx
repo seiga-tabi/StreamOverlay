@@ -53,6 +53,7 @@ import {
   getPublicLolMatchBuild,
   getPublicLolMatchPage,
   getPublicLolMatchRanks,
+  getPublicLolProfileDynamicState,
   PublicHomeSearchPanel,
   PublicAppHeader as FeaturePublicAppHeader,
   PublicLocaleSelector,
@@ -6694,6 +6695,8 @@ export function PublicLolPage({
   const [loadingMoreMatches, setLoadingMoreMatches] = useState(false);
   const [moreMatchesError, setMoreMatchesError] = useState("");
   const [error, setError] = useState("");
+  const profileSearchAbortRef = useRef<AbortController | undefined>(undefined);
+  const profileSearchSequenceRef = useRef(0);
   const [recentSearches, setRecentSearches] = useState<SearchSuggestion[]>(() => readRecentSearches());
   const [favorites, setFavorites] = useState<PublicFavorite[]>(() => readFavorites());
   const { theme, toggleTheme } = usePublicTheme();
@@ -6809,6 +6812,10 @@ export function PublicLolPage({
     return [...unique.values()].sort((a, b) => championName(a).localeCompare(championName(b)));
   }, [profile]);
 
+  useEffect(() => () => {
+    profileSearchAbortRef.current?.abort();
+  }, []);
+
   useEffect(() => {
     const unprefixedPath = stripPublicLocalePrefix(window.location.pathname);
     const canonicalPath = isLocalizablePublicPath(unprefixedPath)
@@ -6891,25 +6898,25 @@ export function PublicLolPage({
   }, [profile?.refreshAvailableAt]);
 
   useEffect(() => {
-    if (!profile?.twitchStream?.twitchUserId) return undefined;
-    let cancelled = false;
+    if (!profile?.riotId) return undefined;
+    const controller = new AbortController();
     const syncStreamerStatus = async () => {
       try {
-        const next = await searchProfile(profile.riotId);
-        if (cancelled) return;
+        const next = await getPublicLolProfileDynamicState(profile.riotId, controller.signal);
+        if (controller.signal.aborted) return;
         setProfile((current) => current ? profileWithDynamicState(current, next) : current);
       } catch {
-        // Twitch 상태 갱신 실패는 전적 화면 사용을 막지 않습니다.
+        // 실시간 상태 갱신 실패는 전적 화면 사용을 막지 않습니다.
       }
     };
     const timer = window.setInterval(() => {
       void syncStreamerStatus();
     }, 30_000);
     return () => {
-      cancelled = true;
+      controller.abort();
       window.clearInterval(timer);
     };
-  }, [profile?.riotId, profile?.twitchStream?.twitchUserId]);
+  }, [profile?.riotId]);
 
   useEffect(() => {
     const loadFromPath = (replaceUrl = true) => {
@@ -7393,18 +7400,24 @@ export function PublicLolPage({
     setFavorites(next);
   }
 
-	  async function runSearch(
-	    value: string,
-	    options: { updateUrl?: boolean; replaceUrl?: boolean; refresh?: boolean } = {}
-	  ): Promise<void> {
+  async function runSearch(
+    value: string,
+    options: { updateUrl?: boolean; replaceUrl?: boolean; refresh?: boolean } = {}
+  ): Promise<void> {
     const riotId = jpRiotIdQuery(value);
     if (!riotId) return;
     const updateUrl = options.updateUrl !== false;
-	    setLoading(true);
-	    setError("");
+    profileSearchAbortRef.current?.abort();
+    const controller = new AbortController();
+    const requestSequence = profileSearchSequenceRef.current + 1;
+    profileSearchAbortRef.current = controller;
+    profileSearchSequenceRef.current = requestSequence;
+    setLoading(true);
+    setError("");
     setMoreMatchesError("");
-	    try {
-      const result = await searchProfile(riotId, { refresh: options.refresh });
+    try {
+      const result = await searchProfile(riotId, { refresh: options.refresh, signal: controller.signal });
+      if (requestSequence !== profileSearchSequenceRef.current) return;
       setProfile(result);
       setNowTick(Date.now());
       setProfileTab("overview");
@@ -7424,12 +7437,16 @@ export function PublicLolPage({
         return next;
       });
     } catch (requestError) {
+      if (controller.signal.aborted || requestSequence !== profileSearchSequenceRef.current) return;
       if (!options.refresh) setProfile(null);
       setError(requestError instanceof Error ? requestError.message : t().searchFailed);
     } finally {
-      setLoading(false);
-	    }
-	  }
+      if (requestSequence === profileSearchSequenceRef.current) {
+        profileSearchAbortRef.current = undefined;
+        setLoading(false);
+      }
+    }
+  }
 
   async function loadMoreRecentMatches(): Promise<void> {
     if (!profile || loadingMoreMatches || !profile.hasMoreRecentMatches) return;

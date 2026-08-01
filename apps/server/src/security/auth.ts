@@ -197,6 +197,7 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
   if (method === "GET" && pathname.startsWith("/api/palworld/")) return "PUBLIC";
   if (method === "GET" && (
     pathname === "/api/lol/profile" ||
+    pathname === "/api/lol/profile-state" ||
     pathname === "/api/lol/suggestions" ||
     pathname === "/api/lol/matches" ||
     pathname === "/api/lol/match-ranks" ||

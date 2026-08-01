@@ -492,6 +492,14 @@ export type PublicLolProfile = {
   refreshAvailableAt?: string;
 };
 
+export type PublicLolProfileDynamicState = {
+  status: "ready";
+  riotId: string;
+  twitchStream?: PublicLolTwitchStream;
+  liveGame: PublicLolCurrentGame;
+  fetchedAt: string;
+};
+
 export type TournamentPlayerProfileState = {
   status: "loading" | "ready" | "error";
   profile?: PublicLolProfile;

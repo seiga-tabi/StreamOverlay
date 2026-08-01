@@ -204,13 +204,18 @@ export function profileWithAdditionalMatchPage(profile: PublicLolProfile, page: 
   }, [...matches.values()]);
 }
 
-export function profileWithDynamicState(profile: PublicLolProfile, next: PublicLolProfile): PublicLolProfile {
+export function profileWithDynamicState(
+  profile: PublicLolProfile,
+  next: Pick<PublicLolProfile, "riotId" | "twitchStream" | "liveGame" | "refreshAvailableAt">
+): PublicLolProfile {
   if (profile.riotId !== next.riotId) return profile;
   return {
     ...profile,
     twitchStream: next.twitchStream,
     liveGame: next.liveGame,
-    refreshAvailableAt: next.refreshAvailableAt
+    ...(Object.prototype.hasOwnProperty.call(next, "refreshAvailableAt")
+      ? { refreshAvailableAt: next.refreshAvailableAt }
+      : {})
   };
 }
 
