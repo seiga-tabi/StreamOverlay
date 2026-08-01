@@ -123,7 +123,20 @@ const copy = {
     pendingState: "저장되지 않은 변경 사항이 있습니다.",
     readOnlyState: "조회 전용",
     organizationStatus: "Organization",
-    organizationConnected: "연결됨"
+    organizationConnected: "연결됨",
+    managementApiStatus: "관리 API",
+    managementApiHealthy: "정상",
+    healthTitle: "Health Overview",
+    healthDescription: "현재 Bot 운영 상태와 적용 중인 설정을 확인합니다.",
+    globalCommandStatus: "전역 명령",
+    configRevisionStatus: "설정 동기화",
+    commandColumn: "명령어",
+    descriptionColumn: "설명",
+    permissionColumn: "사용 권한",
+    stateColumn: "상태",
+    serverMemberPermission: "서버 구성원",
+    enabledState: "활성화",
+    disabledState: "비활성화"
   },
   ja: {
     title: "Discord Bot コントロール",
@@ -216,7 +229,20 @@ const copy = {
     pendingState: "保存されていない変更があります。",
     readOnlyState: "閲覧専用",
     organizationStatus: "Organization",
-    organizationConnected: "連携済み"
+    organizationConnected: "連携済み",
+    managementApiStatus: "管理API",
+    managementApiHealthy: "正常",
+    healthTitle: "Health Overview",
+    healthDescription: "現在のBot運用状態と適用中の設定を確認します。",
+    globalCommandStatus: "全体コマンド",
+    configRevisionStatus: "設定同期",
+    commandColumn: "コマンド",
+    descriptionColumn: "説明",
+    permissionColumn: "利用権限",
+    stateColumn: "状態",
+    serverMemberPermission: "サーバーメンバー",
+    enabledState: "有効",
+    disabledState: "無効"
   }
 } as const;
 
@@ -458,29 +484,6 @@ export function BotControlCard(props: {
             <StatusPill tone={operational ? "success" : "warning"}>
               {operational ? text.statusActive : text.statusLimited}
             </StatusPill>
-            {writable ? (
-              <>
-                <Button
-                  disabled={!hasChanges || saving}
-                  size="sm"
-                  type="button"
-                  variant="secondary"
-                  onClick={resetDraft}
-                >
-                  {text.reset}
-                </Button>
-                <Button
-                  disabled={!hasChanges}
-                  loading={saving}
-                  loadingLabel={text.saving}
-                  size="sm"
-                  type="button"
-                  onClick={() => void save()}
-                >
-                  {text.save}
-                </Button>
-              </>
-            ) : null}
           </div>
           <dl className="bot-control-hero__details">
             <div>
@@ -497,6 +500,10 @@ export function BotControlCard(props: {
               <dt>{text.installationStatus}</dt>
               <dd>{text.active}</dd>
             </div>
+            <div>
+              <dt>{text.managementApiStatus}</dt>
+              <dd className="is-healthy">{text.managementApiHealthy}</dd>
+            </div>
           </dl>
         </header>
 
@@ -504,12 +511,20 @@ export function BotControlCard(props: {
           <p className="bot-control-warning" role="status">{text.globalDisabled}</p>
         ) : null}
 
-        <section className="bot-control-summary" aria-label={text.title}>
+        <div className="bot-control-section-heading">
+          <div>
+            <h3>{text.healthTitle}</h3>
+            <p>{text.healthDescription}</p>
+          </div>
+        </div>
+        <section className="bot-control-summary" aria-label={text.healthTitle}>
           {([
             [text.installationStatus, text.active, "installation"],
+            [text.globalCommandStatus, overview.globalPrefixCommandsEnabled ? text.enabled : text.paused, "global"],
             [text.moduleStatus, draft.palworldStatusEnabled ? text.enabled : text.paused, "module"],
             [text.commandStatus, `${effectiveActiveCommandCount}${text.activeCount}`, "commands"],
-            [text.languageStatus, languageLabel, "language"]
+            [text.languageStatus, languageLabel, "language"],
+            [text.configRevisionStatus, `revision ${overview.settings.revision}`, "revision"]
           ] as const).map(([label, value, icon]) => (
             <article className="bot-control-summary__item" key={icon}>
               <span aria-hidden="true" className={`bot-control-summary__icon is-${icon}`} />
@@ -562,15 +577,20 @@ export function BotControlCard(props: {
                       <strong>{title}</strong>
                       <small>{description}</small>
                     </span>
-                    <input
-                      checked={checked}
-                      type="checkbox"
-                      onChange={(event) => setDraft({
-                        ...draft,
-                        [key === "public" ? "publicCommandsEnabled" : "palworldStatusEnabled"]:
-                          event.target.checked
-                      })}
-                    />
+                    <span className="bot-control-switch-card__control">
+                      <span className={checked ? "is-enabled" : undefined}>
+                        {checked ? text.enabledState : text.disabledState}
+                      </span>
+                      <input
+                        checked={checked}
+                        type="checkbox"
+                        onChange={(event) => setDraft({
+                          ...draft,
+                          [key === "public" ? "publicCommandsEnabled" : "palworldStatusEnabled"]:
+                            event.target.checked
+                        })}
+                      />
+                    </span>
                   </label>
                 ))}
               </div>
@@ -623,25 +643,43 @@ export function BotControlCard(props: {
               <Badge>{effectiveActiveCommandCount}{text.activeCount}</Badge>
             </div>
             <fieldset className="bot-control-panel__fieldset" disabled={disabled}>
-              <div className="bot-control-command-grid">
-                {([
-                  ["statusCommandEnabled", "!yoro status", text.statusCommandDescription],
-                  ["guideCommandEnabled", "!yoro guide", text.guideCommandDescription],
-                  ["playerCommandEnabled", "!yoro player", text.playerCommandDescription]
-                ] as const).map(([key, command, description]) => (
-                  <label className={`bot-control-command-card${draft[key] ? " is-enabled" : ""}`} key={key}>
-                    <div className="bot-control-command-card__topline">
-                      <code>{command}</code>
-                      <input
-                        checked={draft[key]}
-                        type="checkbox"
-                        onChange={(event) => setDraft({ ...draft, [key]: event.target.checked })}
-                      />
-                    </div>
-                    <strong>{draft[key] ? text.enabled : text.disabled}</strong>
-                    <p>{description}</p>
-                  </label>
-                ))}
+              <div className="bot-control-command-table-wrap">
+                <table className="bot-control-command-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">{text.commandColumn}</th>
+                      <th scope="col">{text.descriptionColumn}</th>
+                      <th scope="col">{text.permissionColumn}</th>
+                      <th scope="col">{text.stateColumn}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {([
+                      ["statusCommandEnabled", "!yoro status", text.statusCommandDescription],
+                      ["guideCommandEnabled", "!yoro guide", text.guideCommandDescription],
+                      ["playerCommandEnabled", "!yoro player", text.playerCommandDescription]
+                    ] as const).map(([key, command, description]) => (
+                      <tr className={draft[key] ? "is-enabled" : undefined} key={key}>
+                        <th data-label={text.commandColumn} scope="row"><code>{command}</code></th>
+                        <td data-label={text.descriptionColumn}>{description}</td>
+                        <td data-label={text.permissionColumn}><Badge>{text.serverMemberPermission}</Badge></td>
+                        <td data-label={text.stateColumn}>
+                          <label className="bot-control-command-toggle">
+                            <span className={draft[key] ? "is-enabled" : undefined}>
+                              {draft[key] ? text.enabledState : text.disabledState}
+                            </span>
+                            <input
+                              aria-label={`${command}: ${draft[key] ? text.enabledState : text.disabledState}`}
+                              checked={draft[key]}
+                              type="checkbox"
+                              onChange={(event) => setDraft({ ...draft, [key]: event.target.checked })}
+                            />
+                          </label>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </fieldset>
             <p className="bot-control-note" role="note">{text.privateCommandNotice}</p>
@@ -779,21 +817,29 @@ export function BotControlCard(props: {
                   <strong>{text.deleteInvocation}</strong>
                   <small>{text.deleteInvocationDescription}</small>
                 </span>
-                <input
-                  checked={draft.deleteInvocationAfterReply}
-                  type="checkbox"
-                  onChange={(event) => setDraft({
-                    ...draft,
-                    deleteInvocationAfterReply: event.target.checked
-                  })}
-                />
+                <span className="bot-control-switch-card__control">
+                  <span className={draft.deleteInvocationAfterReply ? "is-enabled" : undefined}>
+                    {draft.deleteInvocationAfterReply ? text.enabledState : text.disabledState}
+                  </span>
+                  <input
+                    checked={draft.deleteInvocationAfterReply}
+                    type="checkbox"
+                    onChange={(event) => setDraft({
+                      ...draft,
+                      deleteInvocationAfterReply: event.target.checked
+                    })}
+                  />
+                </span>
               </label>
             </fieldset>
           </section>
         ) : null}
 
         {!writable ? <p className="bot-control-read-only">{text.readOnly}</p> : null}
-        <div className="bot-control-footer">
+        <div
+          aria-live="polite"
+          className={`bot-control-footer${hasChanges ? " is-pending" : ""}`}
+        >
           <div>
             <small>{text.revision}: {overview.settings.revision}</small>
             <strong className={hasChanges ? "is-pending" : undefined}>
