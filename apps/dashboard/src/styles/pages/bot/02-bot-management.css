@@ -200,7 +200,12 @@
 }
 
 .bot-management-server-card {
-  border-color: rgb(126 105 218 / 26%);
+  overflow: hidden;
+  padding: 0 !important;
+  border-color: rgb(126 105 218 / 32%);
+  background:
+    radial-gradient(circle at 92% 0%, rgb(105 73 207 / 14%), transparent 30rem),
+    linear-gradient(145deg, rgb(25 35 53 / 99%), rgb(16 24 37 / 99%)) !important;
 }
 
 .bot-control-card {
@@ -940,32 +945,176 @@
 }
 
 .bot-management-server-card .yoro-card__content {
+  margin: 0;
+}
+
+.bot-management-server-console {
   display: grid;
-  gap: .9rem;
+  gap: clamp(1rem, 2vw, 1.5rem);
+  padding: clamp(1rem, 3vw, 2rem);
+}
+
+.bot-management-server-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  min-width: 0;
+  gap: 1rem;
+}
+
+.bot-management-server-identity {
+  display: grid;
+  min-width: 0;
+  gap: .35rem;
+}
+
+.bot-management-server-eyebrow {
+  color: #79a8ff;
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .13em;
+}
+
+.bot-management-server-identity h3,
+.bot-management-server-identity p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.bot-management-server-identity h3 {
+  color: var(--yoro-color-text-strong);
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  line-height: 1.15;
+}
+
+.bot-management-server-identity p {
+  color: var(--text-muted);
+}
+
+.bot-management-server-hero-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: .65rem;
+}
+
+.bot-management-server-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .75rem;
+  margin: 0;
+}
+
+.bot-management-server-kpis > div {
+  display: grid;
+  min-width: 0;
+  gap: .4rem;
+  padding: 1rem;
+  border: 1px solid rgb(164 181 209 / 13%);
+  border-radius: .85rem;
+  background: rgb(7 13 24 / 45%);
+}
+
+.bot-management-server-kpis dt {
+  color: var(--text-muted);
+  font-size: .78rem;
+  font-weight: 750;
+}
+
+.bot-management-server-kpis dd {
+  margin: 0;
+  color: var(--yoro-color-text-strong);
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-weight: 850;
+  overflow-wrap: anywhere;
+}
+
+.bot-management-server-kpis dd[data-tone="success"] {
+  color: #70d8ae;
+}
+
+.bot-management-server-kpis dd[data-tone="warning"] {
+  color: #f0c66d;
+}
+
+.bot-management-server-kpis dd[data-tone="danger"] {
+  color: #ff91a8;
+}
+
+.bot-management-rest-diagnostics {
+  display: grid;
+  gap: .55rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgb(164 181 209 / 14%);
+  border-inline-start: 3px solid #709fff;
+  border-radius: .8rem;
+  background: rgb(8 14 25 / 42%);
+}
+
+.bot-management-rest-diagnostics[data-tone="success"] {
+  border-inline-start-color: #56cf9d;
+}
+
+.bot-management-rest-diagnostics[data-tone="warning"] {
+  border-inline-start-color: #efbd5f;
+}
+
+.bot-management-rest-diagnostics[data-tone="danger"] {
+  border-inline-start-color: #f45370;
+}
+
+.bot-management-rest-diagnostics > div {
+  display: grid;
+  gap: .25rem;
+}
+
+.bot-management-rest-diagnostics span {
+  color: #9abaff;
+  font-size: .76rem;
+  font-weight: 850;
+}
+
+.bot-management-rest-diagnostics strong {
+  color: var(--yoro-color-text-strong);
+  line-height: 1.5;
+}
+
+.bot-management-rest-diagnostics p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: .84rem;
+  line-height: 1.55;
 }
 
 .bot-management-rest {
   display: grid;
-  gap: var(--space-3);
-  margin-top: var(--space-3);
-  padding-top: var(--space-3);
-  padding: 1.1rem;
+  gap: 1rem;
+  padding: clamp(1rem, 2vw, 1.35rem);
   border: 1px solid rgb(164 181 209 / 14%);
-  border-radius: .9rem;
-  background: rgb(8 14 25 / 42%);
+  border-radius: 1rem;
+  background: rgb(8 14 25 / 58%);
   overflow-wrap: anywhere;
 }
 
-.bot-management-rest h3,
-.bot-management-rest > p {
+.bot-management-rest-heading {
+  display: grid;
+  gap: .35rem;
+}
+
+.bot-management-rest-heading h3,
+.bot-management-rest-heading p {
   margin: 0;
 }
 
-.bot-management-rest-feedback {
-  padding: var(--space-3);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: #0f1724;
+.bot-management-rest-heading h3 {
+  color: var(--yoro-color-text-strong);
+  font-size: 1.05rem;
+}
+
+.bot-management-rest-heading p {
+  color: var(--text-muted);
+  font-size: .88rem;
 }
 
 .bot-management-rest-fields {
@@ -982,30 +1131,49 @@
   color: var(--text-muted);
 }
 
-.bot-management-rest-summary {
+.bot-management-rest-help {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-3);
+  gap: .8rem;
+  padding: .8rem .9rem;
+  border: 1px solid rgb(164 181 209 / 12%);
+  border-radius: .75rem;
+  background: rgb(255 255 255 / 2%);
+}
+
+.bot-management-rest-help summary {
+  cursor: pointer;
+  color: #b9ccff;
+  font-size: .85rem;
+  font-weight: 800;
+}
+
+.bot-management-rest-help p {
   margin: 0;
-}
-
-.bot-management-rest-summary div {
-  min-width: 0;
-  padding: var(--space-3);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: rgb(255 255 255 / 3%);
-}
-
-.bot-management-rest-summary dt {
   color: var(--text-muted);
-  font-size: var(--font-size-sm);
+  font-size: .84rem;
+  line-height: 1.6;
 }
 
-.bot-management-rest-summary dd {
-  margin: var(--space-1) 0 0;
-  overflow-wrap: anywhere;
-  font-weight: 700;
+.bot-management-rest-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: .7rem;
+}
+
+.bot-management-server-danger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgb(244 83 112 / 16%);
+}
+
+.bot-management-server-danger span {
+  color: #e59bac;
+  font-size: .82rem;
+  font-weight: 800;
 }
 
 .bot-management-guild-summary {
@@ -1039,6 +1207,10 @@
 }
 
 @media (max-width: 64rem) {
+  .bot-management-server-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .bot-control-summary,
   .bot-control-language__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1078,13 +1250,28 @@
     flex-direction: column;
   }
 
-  .bot-management-servers .yoro-card__header {
+  .bot-management-server-hero {
+    align-items: stretch;
     flex-direction: column;
   }
 
-  .bot-management-rest-fields,
-  .bot-management-rest-summary {
+  .bot-management-server-hero-actions {
+    justify-content: space-between;
+  }
+
+  .bot-management-rest-fields {
     grid-template-columns: 1fr;
+  }
+
+  .bot-management-rest-actions,
+  .bot-management-server-danger {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .bot-management-rest-actions > *,
+  .bot-management-server-danger > .yoro-button {
+    width: 100%;
   }
 
   .bot-control-hero {
@@ -1133,6 +1320,17 @@
 
   .bot-control-preview__embed dl {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 30rem) {
+  .bot-management-server-kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .bot-management-server-hero-actions {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
 

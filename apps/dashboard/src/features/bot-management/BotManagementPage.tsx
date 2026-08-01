@@ -37,7 +37,6 @@ import {
   managementLoginUrl,
   managementSessionNeedsGuildConnection,
   refreshManagementPalworldRestConnection,
-  removeManagementPalworldRestConnection,
   saveManagementPalworldRestConnection,
   testManagementPalworldRestConnection,
   type BotManagementConnectSession,
@@ -121,9 +120,12 @@ const copy = {
     connectionRevokedDescription: "이 서버 항목이 비활성화되었습니다.",
     lastStatusReceived: "최근 연결 확인",
     restSettings: "REST 연결 설정",
+    restSettingsHint: "REST API 주소와 AdminPassword를 입력한 뒤 연결을 확인하고 저장합니다.",
     restBaseUrl: "Palworld REST API 주소",
+    restBaseUrlShortHint: "유효한 인증서가 있는 HTTPS 443 REST 주소를 입력하세요.",
     restBaseUrlHint: "게임 접속 포트가 아니라 REST 주소입니다. 공개 자가 등록은 유효한 인증서가 있는 HTTPS 443 주소만 지원합니다.",
     restPassword: "Palworld AdminPassword",
+    restPasswordShortHint: "저장된 비밀번호를 유지하려면 비워 두세요.",
     restPasswordHint: "Palworld 전용 서버 설정의 AdminPassword입니다. YORO 또는 Discord 비밀번호가 아닙니다. 저장된 연결은 비워 두면 기존 값을 사용합니다.",
     restPolicyPublic: "공개 HTTPS 443 주소는 직접 등록할 수 있습니다.",
     restPolicyPrivate: "LAN, VPN, 사설 IP, HTTP 또는 별도 포트는 운영자의 접속 정책 승인이 필요합니다.",
@@ -147,6 +149,13 @@ const copy = {
     restServerInfo: "서버 정보",
     restPlayers: "접속 인원",
     restLatency: "응답 시간",
+    restVersion: "게임 버전",
+    restState: "REST 상태",
+    restUnknown: "확인 전",
+    restDiagnostics: "연결 진단",
+    restDiagnosticsHint: "최근 REST 연결 검사 결과와 동기화 시각을 확인합니다.",
+    restPolicySummary: "연결 및 보안 안내",
+    restDangerZone: "서버 삭제",
     restFeatureDisabledTitle: "Palworld 상태 조회가 비활성화되어 있습니다.",
     restFeatureDisabledDescription: "서비스 운영 설정에서 Palworld 상태 조회를 활성화한 뒤 다시 확인해 주세요.",
     restStorageUnavailableTitle: "YORO의 자격 증명 저장소가 준비되지 않았습니다.",
@@ -240,9 +249,12 @@ const copy = {
     connectionRevokedDescription: "このサーバー項目は無効化されています。",
     lastStatusReceived: "最新の接続確認",
     restSettings: "REST接続設定",
+    restSettingsHint: "REST APIアドレスとAdminPasswordを入力し、接続確認後に保存します。",
     restBaseUrl: "Palworld REST APIアドレス",
+    restBaseUrlShortHint: "有効な証明書を持つHTTPS 443のRESTアドレスを入力してください。",
     restBaseUrlHint: "ゲーム接続ポートではなくRESTアドレスです。公開セルフ登録は有効な証明書を持つHTTPS 443アドレスのみ対応します。",
     restPassword: "Palworld AdminPassword",
+    restPasswordShortHint: "保存済みパスワードを維持する場合は空欄にしてください。",
     restPasswordHint: "Palworld専用サーバー設定のAdminPasswordです。YOROやDiscordのパスワードではありません。保存済み接続では空欄のまま既存値を使用できます。",
     restPolicyPublic: "公開HTTPS 443アドレスは直接登録できます。",
     restPolicyPrivate: "LAN、VPN、プライベートIP、HTTP、別ポートは運営者による接続ポリシーの承認が必要です。",
@@ -266,6 +278,13 @@ const copy = {
     restServerInfo: "サーバー情報",
     restPlayers: "接続人数",
     restLatency: "応答時間",
+    restVersion: "ゲームバージョン",
+    restState: "REST状態",
+    restUnknown: "未確認",
+    restDiagnostics: "接続診断",
+    restDiagnosticsHint: "最新のREST接続テスト結果と同期時刻を確認します。",
+    restPolicySummary: "接続とセキュリティの案内",
+    restDangerZone: "サーバー削除",
     restFeatureDisabledTitle: "Palworld状態取得が無効化されています。",
     restFeatureDisabledDescription: "サービスの運用設定でPalworld状態取得を有効化してから、もう一度確認してください。",
     restStorageUnavailableTitle: "YOROの認証情報ストレージが準備されていません。",
@@ -785,35 +804,6 @@ export function BotManagementPage({
     }
   }
 
-  async function openRestSettings(server: BotManagementGameServer): Promise<void> {
-    if (!organizationId || restBusy) return;
-    if (restServerId === server.id) {
-      setRestServerId("");
-      setRestBaseUrl("");
-      setRestPassword("");
-      setRestFeedback("");
-      return;
-    }
-    setRestServerId(server.id);
-    setRestBaseUrl("");
-    setRestPassword("");
-    setRestFeedback("");
-    setRestBusy(true);
-    setError("");
-    try {
-      const response = await getManagementPalworldRestConnection(
-        organizationId,
-        server.id
-      );
-      setRestResponses((current) => ({ ...current, [server.id]: response }));
-      setRestBaseUrl(response.connection.baseUrl ?? "");
-    } catch (restError) {
-      setError(messageFor(restError, locale));
-    } finally {
-      setRestBusy(false);
-    }
-  }
-
   async function submitRestConnection(
     server: BotManagementGameServer,
     mode: "test" | "save"
@@ -873,28 +863,6 @@ export function BotManagementPage({
         csrfToken: session.csrfToken
       });
       setRestResponses((current) => ({ ...current, [server.id]: response }));
-    } catch (restError) {
-      setError(messageFor(restError, locale));
-    } finally {
-      setRestBusy(false);
-    }
-  }
-
-  async function removeRestConnection(server: BotManagementGameServer): Promise<void> {
-    if (!session?.authenticated || restBusy) return;
-    setRestBusy(true);
-    setError("");
-    try {
-      const response = await removeManagementPalworldRestConnection({
-        organizationId,
-        gameServerId: server.id,
-        csrfToken: session.csrfToken
-      });
-      setRestResponses((current) => ({ ...current, [server.id]: response }));
-      setRestBaseUrl("");
-      setRestPassword("");
-      setRestFeedback(text.restRemoved);
-      setAnnouncement(text.restRemoved);
     } catch (restError) {
       setError(messageFor(restError, locale));
     } finally {
@@ -1218,19 +1186,6 @@ export function BotManagementPage({
               <section className="bot-management-servers" aria-labelledby="bot-management-servers-title">
             <div className="bot-management-section-heading">
               <h2 id="bot-management-servers-title">{text.servers}</h2>
-              {servers[0] && selectedOrganization?.role !== "viewer" ? (
-                <Button
-                  disabled={restBusy}
-                  loading={restBusy}
-                  loadingLabel={text.connectionRefreshing}
-                  onClick={() => void refreshRestConnection(servers[0]!)}
-                  size="sm"
-                  type="button"
-                  variant="secondary"
-                >
-                  {text.restRefresh}
-                </Button>
-              ) : null}
             </div>
             {!loading
               && servers.length === 0
@@ -1243,61 +1198,158 @@ export function BotManagementPage({
               const restResponse = restResponses[server.id];
               const connection = restConnectionStatusPresentation(restResponse, locale);
               const restOpen = restServerId === server.id;
+              const regionLabel = text[`region${server.region.split("_").map((part) => `${part[0]?.toUpperCase()}${part.slice(1)}`).join("")}` as keyof typeof text];
+              const metrics = restResponse?.status.metrics;
+              const info = restResponse?.status.info;
+              const checkedAt = restResponse?.status.checkedAt;
               return (
                 <Card className="bot-management-server-card" key={server.id}>
-                  <CardHeader>
-                    <div className="bot-management-server-heading">
-                      <CardTitle>{server.displayName}</CardTitle>
-                      <CardDescription>{text[`region${server.region.split("_").map((part) => `${part[0]?.toUpperCase()}${part.slice(1)}`).join("")}` as keyof typeof text]}</CardDescription>
-                    </div>
-                    <StatusPill
-                      aria-label={`${text.connectionStatus}: ${connection.label}`}
-                      tone={connection.tone}
-                    >
-                      {connection.label}
-                    </StatusPill>
-                  </CardHeader>
                   <CardContent>
-                    <p className="bot-management-connection-description">
-                      {connection.description}
-                    </p>
-                    {restResponse?.status.checkedAt ? (
-                      <p className="bot-management-last-seen">
-                        {text.lastStatusReceived}:{" "}
-                        <time dateTime={restResponse.status.checkedAt}>
-                          {new Intl.DateTimeFormat(locale === "ja" ? "ja-JP" : "ko-KR", {
-                            dateStyle: "medium",
-                            timeStyle: "short"
-                          }).format(new Date(restResponse.status.checkedAt))}
-                        </time>
-                      </p>
-                    ) : null}
-                    <div className="bot-management-actions">
-                    {selectedOrganization?.role !== "viewer" && !deleteServerId ? (
-                      <Button
-                        aria-expanded={restOpen}
-                        type="button"
-                        variant="secondary"
-                        onClick={() => void openRestSettings(server)}
-                      >
-                        {restOpen ? text.restClose : text.restOpen}
-                      </Button>
-                    ) : null}
-                    {selectedOrganization?.role === "owner" && !deleteServerId ? (
-                      <Button
-                        type="button"
-                        variant="danger"
-                        onClick={() => {
-                          setDeleteServerId(server.id);
-                          setRestServerId("");
-                          setRestPassword("");
-                          setRestFeedback("");
-                        }}
-                      >
-                        {text.deleteServer}
-                      </Button>
-                    ) : null}
-                  </div>
+                    <div className="bot-management-server-console">
+                      <header className="bot-management-server-hero">
+                        <div className="bot-management-server-identity">
+                          <span className="bot-management-server-eyebrow">PALWORLD SERVER</span>
+                          <h3>{server.displayName}</h3>
+                          <p>{regionLabel}</p>
+                        </div>
+                        <div className="bot-management-server-hero-actions">
+                          <StatusPill
+                            aria-label={`${text.connectionStatus}: ${connection.label}`}
+                            tone={connection.tone}
+                          >
+                            {connection.label}
+                          </StatusPill>
+                          {selectedOrganization?.role !== "viewer" ? (
+                            <Button
+                              disabled={restBusy}
+                              loading={restBusy}
+                              loadingLabel={text.connectionRefreshing}
+                              onClick={() => void refreshRestConnection(server)}
+                              size="sm"
+                              type="button"
+                              variant="secondary"
+                            >
+                              {text.restRefresh}
+                            </Button>
+                          ) : null}
+                        </div>
+                      </header>
+
+                      <dl className="bot-management-server-kpis">
+                        <div>
+                          <dt>{text.restPlayers}</dt>
+                          <dd>{metrics ? `${metrics.currentPlayers} / ${metrics.maxPlayers}` : text.restUnknown}</dd>
+                        </div>
+                        <div>
+                          <dt>{text.restLatency}</dt>
+                          <dd>{restResponse?.status.latencyMs !== undefined ? `${restResponse.status.latencyMs}ms` : text.restUnknown}</dd>
+                        </div>
+                        <div>
+                          <dt>{text.restVersion}</dt>
+                          <dd>{info?.version ?? text.restUnknown}</dd>
+                        </div>
+                        <div>
+                          <dt>{text.restState}</dt>
+                          <dd data-tone={connection.tone}>{connection.label}</dd>
+                        </div>
+                      </dl>
+
+                      <section className="bot-management-rest-diagnostics" data-tone={connection.tone}>
+                        <div>
+                          <span>{text.restDiagnostics}</span>
+                          <strong>{restFeedback || connection.description}</strong>
+                        </div>
+                        <p>{text.restDiagnosticsHint}</p>
+                        {checkedAt ? (
+                          <p className="bot-management-last-seen">
+                            {text.lastStatusReceived}:{" "}
+                            <time dateTime={checkedAt}>
+                              {new Intl.DateTimeFormat(locale === "ja" ? "ja-JP" : "ko-KR", {
+                                dateStyle: "medium",
+                                timeStyle: "short"
+                              }).format(new Date(checkedAt))}
+                            </time>
+                          </p>
+                        ) : null}
+                      </section>
+
+                  {restOpen
+                    && deleteServerId !== server.id
+                    && selectedOrganization?.role !== "viewer" ? (
+                    <section
+                      aria-busy={restBusy}
+                      aria-labelledby={`rest-${server.id}`}
+                      className="bot-management-rest"
+                    >
+                      <div className="bot-management-rest-heading">
+                        <h3 id={`rest-${server.id}`}>{text.restSettings}</h3>
+                        <p>{text.restSettingsHint}</p>
+                      </div>
+                      <div className="bot-management-rest-fields">
+                        <label className="bot-management-field">
+                          <span>{text.restBaseUrl}</span>
+                          <input
+                            aria-describedby={`rest-url-hint-${server.id}`}
+                            autoCapitalize="none"
+                            autoComplete="url"
+                            inputMode="url"
+                            maxLength={2048}
+                            placeholder="https://pal.example.com"
+                            spellCheck={false}
+                            type="url"
+                            value={restBaseUrl}
+                            onChange={(event) => setRestBaseUrl(event.target.value)}
+                          />
+                          <small id={`rest-url-hint-${server.id}`}>
+                            {text.restBaseUrlShortHint}
+                          </small>
+                        </label>
+                        <label className="bot-management-field">
+                          <span>{text.restPassword}</span>
+                          <input
+                            aria-describedby={`rest-password-hint-${server.id}`}
+                            autoComplete="new-password"
+                            maxLength={256}
+                            type="password"
+                            value={restPassword}
+                            onChange={(event) => setRestPassword(event.target.value)}
+                          />
+                          <small id={`rest-password-hint-${server.id}`}>
+                            {text.restPasswordShortHint}
+                          </small>
+                        </label>
+                      </div>
+                      <details className="bot-management-rest-help">
+                        <summary>{text.restPolicySummary}</summary>
+                        <p>{text.credentialDescription}</p>
+                        <ul className="bot-management-rest-policy">
+                          <li>{text.restPolicyPublic}</li>
+                          <li>{text.restPolicyPrivate}</li>
+                        </ul>
+                      </details>
+                      <div className="bot-management-rest-actions">
+                        <Button
+                          disabled={!restBaseUrl.trim()}
+                          loading={restBusy}
+                          loadingLabel={text.restTesting}
+                          type="button"
+                          variant="secondary"
+                          onClick={() => void submitRestConnection(server, "test")}
+                        >
+                          {text.restTest}
+                        </Button>
+                        <Button
+                          disabled={!restBaseUrl.trim()}
+                          loading={restBusy}
+                          loadingLabel={text.restTesting}
+                          type="button"
+                          onClick={() => void submitRestConnection(server, "save")}
+                        >
+                          {text.restSave}
+                        </Button>
+                      </div>
+                    </section>
+                  ) : null}
                   {deleteServerId === server.id ? (
                     <div className="bot-management-delete-confirmation" role="alert">
                       <p>{text.deleteConfirm}</p>
@@ -1321,121 +1373,23 @@ export function BotManagementPage({
                         </Button>
                       </div>
                     </div>
+                  ) : selectedOrganization?.role === "owner" ? (
+                    <footer className="bot-management-server-danger">
+                      <span>{text.restDangerZone}</span>
+                      <Button
+                        type="button"
+                        variant="danger"
+                        onClick={() => {
+                          setDeleteServerId(server.id);
+                          setRestPassword("");
+                          setRestFeedback("");
+                        }}
+                      >
+                        {text.deleteServer}
+                      </Button>
+                    </footer>
                   ) : null}
-                  {restOpen
-                    && deleteServerId !== server.id
-                    && selectedOrganization?.role !== "viewer" ? (
-                    <section
-                      aria-busy={restBusy}
-                      aria-labelledby={`rest-${server.id}`}
-                      className="bot-management-rest"
-                    >
-                      <h3 id={`rest-${server.id}`}>{text.restSettings}</h3>
-                      <p>{text.credentialDescription}</p>
-                      <ul className="bot-management-rest-policy">
-                        <li>{text.restPolicyPublic}</li>
-                        <li>{text.restPolicyPrivate}</li>
-                      </ul>
-                      <div className="bot-management-rest-fields">
-                        <label className="bot-management-field">
-                          <span>{text.restBaseUrl}</span>
-                          <input
-                            aria-describedby={`rest-url-hint-${server.id}`}
-                            autoCapitalize="none"
-                            autoComplete="url"
-                            inputMode="url"
-                            maxLength={2048}
-                            placeholder="https://pal.example.com"
-                            spellCheck={false}
-                            type="url"
-                            value={restBaseUrl}
-                            onChange={(event) => setRestBaseUrl(event.target.value)}
-                          />
-                          <small id={`rest-url-hint-${server.id}`}>
-                            {text.restBaseUrlHint}
-                          </small>
-                        </label>
-                        <label className="bot-management-field">
-                          <span>{text.restPassword}</span>
-                          <input
-                            aria-describedby={`rest-password-hint-${server.id}`}
-                            autoComplete="new-password"
-                            maxLength={256}
-                            type="password"
-                            value={restPassword}
-                            onChange={(event) => setRestPassword(event.target.value)}
-                          />
-                          <small id={`rest-password-hint-${server.id}`}>
-                            {text.restPasswordHint}
-                          </small>
-                        </label>
-                      </div>
-                      {restResponse?.status.info ? (
-                        <dl className="bot-management-rest-summary">
-                          <div>
-                            <dt>{text.restServerInfo}</dt>
-                            <dd>
-                              {restResponse.status.info.serverName} ·{" "}
-                              {restResponse.status.info.version}
-                            </dd>
-                          </div>
-                          {restResponse.status.metrics ? (
-                            <div>
-                              <dt>{text.restPlayers}</dt>
-                              <dd>
-                                {restResponse.status.metrics.currentPlayers}
-                                /{restResponse.status.metrics.maxPlayers}
-                              </dd>
-                            </div>
-                          ) : null}
-                          {restResponse.status.latencyMs !== undefined ? (
-                            <div>
-                              <dt>{text.restLatency}</dt>
-                              <dd>{restResponse.status.latencyMs}ms</dd>
-                            </div>
-                          ) : null}
-                        </dl>
-                      ) : null}
-                      {restFeedback ? (
-                        <p className="bot-management-rest-feedback" role="status">
-                          {restFeedback}
-                        </p>
-                      ) : null}
-                      <div className="bot-management-actions">
-                        <Button
-                          disabled={!restBaseUrl.trim()}
-                          loading={restBusy}
-                          loadingLabel={text.restTesting}
-                          type="button"
-                          variant="secondary"
-                          onClick={() => void submitRestConnection(server, "test")}
-                        >
-                          {text.restTest}
-                        </Button>
-                        <Button
-                          disabled={!restBaseUrl.trim()}
-                          loading={restBusy}
-                          loadingLabel={text.restTesting}
-                          type="button"
-                          onClick={() => void submitRestConnection(server, "save")}
-                        >
-                          {text.restSave}
-                        </Button>
-                        {restResponse?.connection.configured ? (
-                          <>
-                            <Button
-                              disabled={restBusy}
-                              type="button"
-                              variant="danger"
-                              onClick={() => void removeRestConnection(server)}
-                            >
-                              {text.restRemove}
-                            </Button>
-                          </>
-                        ) : null}
-                      </div>
-                    </section>
-                  ) : null}
+                    </div>
                   </CardContent>
                 </Card>
               );
