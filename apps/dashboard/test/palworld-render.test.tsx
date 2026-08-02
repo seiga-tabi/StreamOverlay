@@ -1326,7 +1326,11 @@ test("교배 UI는 결과 Pal을 강조하고 역검색 카드에서 목표 Pal 
   );
   assert.match(
     breedingCss,
-    /\.palworld-breeding-combination-scroll\s*\{[\s\S]*?block-size:\s*clamp\([^;]+;[\s\S]*?overflow-y:\s*auto;/u,
+    /\.palworld-breeding-combination-scroll\s*\{[\s\S]*?block-size:\s*clamp\([^;]+;[\s\S]*?overflow-y:\s*auto;[\s\S]*?contain:\s*layout paint;[\s\S]*?overflow-anchor:\s*none;/u,
+  );
+  assert.doesNotMatch(
+    breedingCss,
+    /\.palworld-breeding-combination-row\s*\{[\s\S]*?content-visibility:\s*auto;/u,
   );
   assert.match(
     breedingCss,

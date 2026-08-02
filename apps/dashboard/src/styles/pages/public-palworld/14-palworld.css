@@ -3689,6 +3689,8 @@
   block-size: clamp(28rem, 62dvh, 42rem);
   min-inline-size: 0;
   overflow-y: auto;
+  contain: layout paint;
+  overflow-anchor: none;
   overscroll-behavior-block: contain;
   border: thin solid var(--yoro-color-border);
   border-radius: var(--yoro-radius-xl);
@@ -3786,8 +3788,6 @@
   border-radius: var(--yoro-radius-xl);
   background: var(--yoro-color-surface-strong);
   box-shadow: var(--yoro-shadow-sm);
-  content-visibility: auto;
-  contain-intrinsic-block-size: 7rem;
   transition:
     background-color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
     border-color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard);
@@ -3932,10 +3932,6 @@
   margin: var(--yoro-space-3) var(--yoro-space-4);
   border-radius: var(--yoro-radius-md);
   background: var(--yoro-color-surface-strong);
-}
-
-.palworld-breeding-combination-row.is-appending {
-  content-visibility: visible;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -6275,7 +6271,6 @@
     min-block-size: 0;
     padding: var(--yoro-space-3);
     gap: var(--yoro-space-2);
-    contain-intrinsic-block-size: 22rem;
   }
 
   .palworld-breeding-combination-row > .palworld-breeding-combination-cell.is-pal {
