@@ -3149,6 +3149,9 @@
 
 .palworld-breeding-input-card {
   min-inline-size: 0;
+  border-color: var(--yoro-color-border-strong);
+  background: var(--yoro-color-surface);
+  box-shadow: var(--yoro-shadow-soft);
 }
 
 .palworld-breeding-pickers {
@@ -3219,6 +3222,28 @@
   border: thin solid var(--palworld-accent);
   border-radius: var(--yoro-radius-md);
   background: var(--palworld-accent-soft);
+}
+
+.palworld-breeding-input-card .palworld-selected-pal {
+  min-block-size: 5.25rem;
+  padding: var(--yoro-space-3);
+  border-color: color-mix(in srgb, var(--palworld-accent) 72%, transparent);
+  background:
+    linear-gradient(135deg, var(--palworld-accent-soft), transparent 72%),
+    var(--yoro-color-surface-strong);
+}
+
+.palworld-breeding-input-card .palworld-selected-media {
+  inline-size: 3.75rem;
+  block-size: 3.75rem;
+  border: thin solid var(--yoro-color-border-strong);
+  border-radius: var(--yoro-radius-lg);
+  background: var(--yoro-color-surface);
+}
+
+.palworld-breeding-input-card .palworld-selected-pal strong {
+  color: var(--yoro-color-text-strong);
+  font-size: var(--yoro-font-size-lg);
 }
 
 .palworld-selected-pal-button {
@@ -3347,6 +3372,90 @@
   color: var(--yoro-color-text);
 }
 
+.palworld-breeding-empty-guide {
+  display: grid;
+  justify-items: center;
+  min-block-size: 19rem;
+  padding: clamp(var(--yoro-space-6), 6vw, var(--yoro-space-10));
+  border: thin solid var(--yoro-color-border-strong);
+  border-radius: var(--yoro-radius-xl);
+  background:
+    radial-gradient(circle at 50% 0%, var(--palworld-accent-soft), transparent 48%),
+    var(--yoro-color-surface);
+  box-shadow: var(--yoro-shadow-soft);
+  text-align: center;
+}
+
+.palworld-breeding-empty-icon {
+  display: grid;
+  place-items: center;
+  inline-size: 4.5rem;
+  block-size: 4.5rem;
+  margin-block-end: var(--yoro-space-3);
+  border: thin solid color-mix(in srgb, var(--palworld-accent) 56%, transparent);
+  border-radius: 50%;
+  background: var(--palworld-accent-soft);
+  font-size: var(--yoro-font-size-2xl);
+}
+
+.palworld-breeding-empty-kicker {
+  margin: var(--yoro-space-0);
+  color: var(--palworld-accent);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-black);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.palworld-breeding-empty-guide h3 {
+  margin: var(--yoro-space-2) var(--yoro-space-0) var(--yoro-space-1);
+  color: var(--yoro-color-text-strong);
+  font-size: clamp(var(--yoro-font-size-xl), 3vw, var(--yoro-font-size-2xl));
+}
+
+.palworld-breeding-empty-description {
+  margin: var(--yoro-space-0);
+  color: var(--yoro-color-text-muted);
+}
+
+.palworld-breeding-empty-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  inline-size: min(100%, 48rem);
+  margin: var(--yoro-space-6) var(--yoro-space-0) var(--yoro-space-0);
+  padding: var(--yoro-space-0);
+  gap: var(--yoro-space-3);
+  list-style: none;
+}
+
+.palworld-breeding-empty-steps li {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: var(--yoro-space-2);
+  min-inline-size: 0;
+  padding: var(--yoro-space-4) var(--yoro-space-3);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-lg);
+  background: var(--yoro-color-surface-strong);
+}
+
+.palworld-breeding-empty-steps li > span {
+  display: grid;
+  place-items: center;
+  inline-size: 2rem;
+  block-size: 2rem;
+  border-radius: 50%;
+  background: var(--palworld-accent-soft);
+  color: var(--palworld-accent);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-black);
+}
+
+.palworld-breeding-empty-steps strong {
+  overflow-wrap: anywhere;
+}
+
 .palworld-breeding-result > .palworld-section-title {
   padding-block-start: var(--yoro-space-4);
 }
@@ -3402,6 +3511,13 @@
   gap: var(--yoro-space-3);
 }
 
+.palworld-direct-parent-summary {
+  padding: var(--yoro-space-4);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-xl);
+  background: var(--yoro-color-surface-strong);
+}
+
 .palworld-direct-parent-summary > span,
 .palworld-reverse-parents > span,
 .palworld-direct-result-connector {
@@ -3409,6 +3525,17 @@
   font-size: var(--yoro-font-size-xl);
   font-weight: var(--yoro-font-weight-black);
   text-align: center;
+}
+
+.palworld-direct-result-connector {
+  display: grid;
+  place-items: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  margin-inline: auto;
+  border: thin solid color-mix(in srgb, var(--palworld-accent) 48%, transparent);
+  border-radius: 50%;
+  background: var(--palworld-accent-soft);
 }
 
 .palworld-breeding-pal-button {
@@ -3531,7 +3658,12 @@
 }
 
 .palworld-reverse-target-counts strong {
-  color: var(--yoro-color-text-strong);
+  justify-self: end;
+  padding: var(--yoro-space-2) var(--yoro-space-3);
+  border-radius: var(--yoro-radius-pill);
+  background: var(--palworld-accent);
+  color: var(--yoro-color-text-on-dark);
+  font-size: var(--yoro-font-size-lg);
 }
 
 .palworld-breeding-combination-summary {
@@ -3545,7 +3677,12 @@
 }
 
 .palworld-breeding-combination-summary strong {
-  color: var(--yoro-color-text-strong);
+  padding: var(--yoro-space-2) var(--yoro-space-3);
+  border: thin solid color-mix(in srgb, var(--palworld-accent) 48%, transparent);
+  border-radius: var(--yoro-radius-pill);
+  background: var(--palworld-accent-soft);
+  color: var(--palworld-accent);
+  font-size: var(--yoro-font-size-lg);
 }
 
 .palworld-breeding-combination-scroll {
@@ -3587,13 +3724,18 @@
   background: transparent;
 }
 
+.palworld-breeding-combination-list > [role="rowgroup"]:last-child {
+  display: grid;
+  padding: var(--yoro-space-3);
+  gap: var(--yoro-space-3);
+}
+
 .palworld-breeding-combination-scroll > .palworld-auto-load {
   border-block-start: thin solid var(--yoro-color-border);
   background: var(--yoro-color-surface);
 }
 
-.palworld-breeding-combination-header > div,
-.palworld-breeding-combination-row {
+.palworld-breeding-combination-header > div {
   display: grid;
   grid-template-columns:
     minmax(0, 1fr)
@@ -3602,8 +3744,7 @@
   min-inline-size: 0;
 }
 
-.palworld-breeding-combination-list.is-reverse-results .palworld-breeding-combination-header > div,
-.palworld-breeding-combination-list.is-reverse-results .palworld-breeding-combination-row {
+.palworld-breeding-combination-list.is-reverse-results .palworld-breeding-combination-header > div {
   grid-template-columns:
     minmax(0, 1fr)
     minmax(0, 1fr)
@@ -3611,19 +3752,16 @@
 }
 
 .palworld-breeding-combination-header {
-  background: var(--yoro-color-surface-strong);
-  color: var(--yoro-color-text-strong);
-  font-size: var(--yoro-font-size-sm);
-  font-weight: var(--yoro-font-weight-bold);
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .palworld-breeding-combination-scroll .palworld-breeding-combination-header {
-  position: sticky;
-  inset-block-start: 0;
-  z-index: var(--yoro-z-raised);
-  border-block-end: thin solid var(--yoro-color-border-strong);
-  background: var(--yoro-color-bg);
-  box-shadow: var(--yoro-shadow-sm);
+  position: absolute;
 }
 
 .palworld-breeding-combination-header [role="columnheader"],
@@ -3633,13 +3771,39 @@
 }
 
 .palworld-breeding-combination-row {
-  min-block-size: 5rem;
-  border-block-start: thin solid var(--yoro-color-border);
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    2rem
+    minmax(0, 1fr)
+    2.25rem
+    minmax(0, 1.15fr);
+  align-items: center;
+  min-block-size: 7rem;
+  min-inline-size: 0;
+  padding: var(--yoro-space-3);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-xl);
+  background: var(--yoro-color-surface-strong);
+  box-shadow: var(--yoro-shadow-sm);
   content-visibility: auto;
-  contain-intrinsic-block-size: 5rem;
+  contain-intrinsic-block-size: 7rem;
   transition:
     background-color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
     border-color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard);
+}
+
+.palworld-breeding-combination-list.is-reverse-results .palworld-breeding-combination-row {
+  grid-template-columns:
+    minmax(0, 1fr)
+    2rem
+    minmax(0, 1fr)
+    minmax(7rem, 9rem);
+}
+
+.palworld-breeding-combination-row.is-appending,
+.palworld-breeding-combination-list.is-loading .palworld-breeding-combination-row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .palworld-breeding-combination-row:focus-within {
@@ -3668,8 +3832,8 @@
 }
 
 .palworld-breeding-combination-media {
-  inline-size: 3rem;
-  block-size: 3rem;
+  inline-size: 3.5rem;
+  block-size: 3.5rem;
   overflow: hidden;
   border-radius: var(--yoro-radius-md);
 }
@@ -3742,7 +3906,14 @@
   gap: var(--yoro-space-1);
 }
 
-.palworld-breeding-combination-symbol,
+.palworld-breeding-combination-symbol {
+  display: grid;
+  place-items: center;
+  color: var(--palworld-accent);
+  font-size: var(--yoro-font-size-xl);
+  font-weight: var(--yoro-font-weight-black);
+}
+
 .palworld-breeding-combination-mobile-label {
   display: none;
 }
@@ -4008,7 +4179,6 @@
 }
 
 .palworld-pal-location-heading {
-  gap: var(--yoro-space-1);
 }
 
 .palworld-pal-location-toolbar,
@@ -4023,10 +4193,8 @@
 
 .palworld-pal-location-toolbar {
   justify-content: space-between;
-  padding: var(--yoro-space-3);
   border: thin solid var(--yoro-color-border);
   border-radius: var(--yoro-radius-lg);
-  background: var(--yoro-color-surface-muted);
 }
 
 .palworld-pal-location-periods {
@@ -4062,11 +4230,9 @@
   inline-size: 100%;
   min-inline-size: 0;
   justify-self: center;
-  aspect-ratio: 1;
   overflow: hidden;
   border: thin solid var(--yoro-color-border);
   border-radius: var(--yoro-radius-xl);
-  background: var(--yoro-color-surface-strong);
 }
 
 .palworld-pal-location-loading > .yoro-skeleton,
@@ -4090,7 +4256,6 @@
   display: block;
   inline-size: 100%;
   block-size: 100%;
-  object-fit: contain;
   pointer-events: none;
   user-select: none;
 }
@@ -4110,28 +4275,10 @@
   pointer-events: none;
 }
 
-.palworld-pal-location-spawn-layer {
-  position: absolute;
-  inset: 0;
-  inline-size: 100%;
-  block-size: 100%;
-  overflow: visible;
-  pointer-events: none;
-}
-
-.palworld-pal-location-spawn-point {
-  fill: color-mix(in srgb, var(--palworld-sky) 52%, var(--yoro-color-text-on-dark));
-  stroke: var(--yoro-color-text-strong);
-  stroke-width: 0.006;
-  paint-order: stroke fill;
-}
-
 .palworld-pal-location-marker {
   position: absolute;
   display: grid;
   place-items: center;
-  inline-size: var(--yoro-size-touch-target);
-  block-size: var(--yoro-size-touch-target);
   padding: var(--yoro-space-1);
   transform:
     translate(-50%, -50%)
@@ -4140,8 +4287,6 @@
 }
 
 .palworld-pal-location-marker .palworld-map-boss-marker-media {
-  inline-size: 100%;
-  block-size: 100%;
 }
 
 .palworld-pal-location-image-error {
@@ -4208,9 +4353,6 @@
 }
 
 .palworld-pal-location-legend-dot {
-  inline-size: var(--yoro-space-3);
-  block-size: var(--yoro-space-3);
-  border: medium solid var(--yoro-color-text-strong);
   border-radius: 50%;
   background: color-mix(in srgb, var(--palworld-sky) 52%, var(--yoro-color-text-on-dark));
 }
@@ -4247,6 +4389,443 @@
   border: thin solid var(--yoro-color-border);
   border-radius: var(--yoro-radius-lg);
   background: var(--yoro-color-surface-muted);
+}
+
+/* Pal 상세의 출현 위치는 전체 지도와 분리된 빠른 Preview 카드입니다. */
+.palworld-pal-location-section {
+  gap: var(--yoro-space-4);
+  padding: clamp(var(--yoro-space-4), 2vw, var(--yoro-space-6));
+  border: thin solid var(--yoro-color-border-strong);
+  border-radius: var(--yoro-radius-xl);
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--palworld-accent) 8%, transparent), transparent 42%),
+    var(--yoro-color-surface);
+  box-shadow: var(--yoro-shadow-soft);
+}
+
+.palworld-pal-location-heading {
+  gap: var(--yoro-space-1);
+}
+
+.palworld-pal-location-heading h4 {
+  color: var(--yoro-color-text-strong);
+  font-size: clamp(var(--yoro-font-size-xl), 3vw, var(--yoro-font-size-2xl));
+}
+
+.palworld-pal-location-kicker {
+  color: var(--palworld-accent);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-black);
+  letter-spacing: .08em;
+}
+
+.palworld-pal-location-figure {
+  gap: var(--yoro-space-3);
+}
+
+.palworld-pal-location-toolbar {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: var(--yoro-space-2);
+  border-color: var(--yoro-color-border-strong);
+  background: color-mix(in srgb, var(--yoro-color-surface-strong) 86%, transparent);
+  box-shadow: var(--yoro-shadow-sm);
+}
+
+.palworld-pal-location-periods,
+.palworld-pal-location-types {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  min-inline-size: 0;
+  gap: var(--yoro-space-1);
+  padding: var(--yoro-space-1);
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-surface-muted);
+}
+
+.palworld-pal-location-periods .yoro-button,
+.palworld-pal-location-types .yoro-button {
+  min-inline-size: 0;
+  inline-size: 100%;
+  min-block-size: var(--yoro-size-touch-target);
+}
+
+.palworld-pal-location-loading,
+.palworld-pal-location-preview {
+  block-size: clamp(32.5rem, 48vw, 37.5rem);
+  min-block-size: 32.5rem;
+  aspect-ratio: auto;
+  border-color: color-mix(in srgb, var(--palworld-accent) 26%, var(--yoro-color-border));
+  background: var(--yoro-color-surface-strong);
+  box-shadow: var(--yoro-shadow-lg);
+}
+
+.palworld-pal-location-preview > .palworld-map-stage,
+.palworld-pal-location-map-image {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.palworld-pal-location-map-image {
+  object-fit: fill;
+}
+
+.palworld-pal-location-spawn-canvas,
+.palworld-pal-location-spawn-markers,
+.palworld-pal-location-marker-layer {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  pointer-events: none;
+}
+
+.palworld-pal-location-spawn-marker,
+.palworld-pal-location-marker {
+  position: absolute;
+  z-index: var(--yoro-z-base);
+  display: grid;
+  place-items: center;
+  inline-size: var(--yoro-size-touch-target);
+  block-size: var(--yoro-size-touch-target);
+  padding: var(--yoro-space-1);
+  border: 0;
+  background: transparent;
+  color: var(--yoro-color-text-on-dark);
+  cursor: pointer;
+  pointer-events: auto;
+  transform:
+    translate(-50%, -50%)
+    scale(var(--palworld-map-marker-scale, 1));
+  transform-origin: center;
+}
+
+.palworld-pal-location-spawn-marker-core {
+  position: relative;
+  z-index: var(--yoro-z-base);
+  display: grid;
+  place-items: center;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  border: medium solid var(--yoro-color-text-on-dark);
+  border-radius: 50%;
+  background: var(--palworld-accent);
+  box-shadow:
+    0 0 0 var(--yoro-space-1) color-mix(in srgb, var(--palworld-accent) 24%, transparent),
+    0 0 1rem color-mix(in srgb, var(--palworld-accent) 68%, transparent);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-black);
+}
+
+.palworld-pal-location-spawn-marker[data-clustered="true"] .palworld-pal-location-spawn-marker-core {
+  inline-size: 2rem;
+  block-size: 2rem;
+}
+
+.palworld-pal-location-spawn-marker[data-current-pal="true"]::before {
+  position: absolute;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  border: thin solid color-mix(in srgb, var(--palworld-accent) 72%, transparent);
+  border-radius: 50%;
+  content: "";
+  animation: palworld-location-pulse 2.2s ease-out infinite;
+}
+
+.palworld-pal-location-marker {
+  inline-size: 3.25rem;
+  block-size: 3.25rem;
+  border: medium solid var(--yoro-color-danger);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--yoro-color-danger) 38%, var(--yoro-color-surface-strong));
+  box-shadow:
+    0 0 0 var(--yoro-space-1) color-mix(in srgb, var(--palworld-accent) 38%, transparent),
+    0 0 1rem color-mix(in srgb, var(--yoro-color-danger) 58%, transparent);
+}
+
+.palworld-pal-location-marker .palworld-map-boss-marker-media {
+  inline-size: 100%;
+  block-size: 100%;
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+.palworld-pal-location-spawn-marker[data-selected="true"],
+.palworld-pal-location-marker[data-selected="true"] {
+  z-index: var(--yoro-z-raised);
+  animation: palworld-location-selected .52s var(--yoro-motion-ease-emphasized) both;
+}
+
+.palworld-pal-location-marker-tooltip {
+  position: absolute;
+  inset-block-end: calc(100% + var(--yoro-space-2));
+  inset-inline-start: 50%;
+  z-index: var(--yoro-z-popover);
+  display: grid;
+  inline-size: max-content;
+  max-inline-size: min(15rem, 72vw);
+  gap: var(--yoro-space-1);
+  padding: var(--yoro-space-3);
+  border: thin solid var(--yoro-color-border-strong);
+  border-radius: var(--yoro-radius-md);
+  background: color-mix(in srgb, var(--yoro-color-surface-strong) 94%, transparent);
+  box-shadow: var(--yoro-shadow-lg);
+  color: var(--yoro-color-text);
+  opacity: 0;
+  pointer-events: none;
+  text-align: start;
+  transform: translate(-50%, var(--yoro-space-2));
+  transition:
+    opacity var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
+    transform var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard);
+}
+
+.palworld-pal-location-marker-tooltip strong {
+  color: var(--yoro-color-text-strong);
+}
+
+.palworld-pal-location-marker-tooltip small,
+.palworld-pal-location-marker-tooltip > span {
+  color: var(--yoro-color-text-muted);
+}
+
+.palworld-pal-location-spawn-marker:is(:hover, :focus-visible, [data-selected="true"]) .palworld-pal-location-marker-tooltip,
+.palworld-pal-location-marker:is(:hover, :focus-visible, [data-selected="true"]) .palworld-pal-location-marker-tooltip {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.palworld-pal-location-overview {
+  position: absolute;
+  inset-block-start: var(--yoro-space-4);
+  inset-inline-end: var(--yoro-space-4);
+  z-index: var(--yoro-z-raised);
+  display: grid;
+  grid-template-columns: 2.75rem minmax(5.5rem, 9rem) auto;
+  align-items: center;
+  inline-size: min(25rem, calc(100% - (var(--yoro-space-8))));
+  gap: var(--yoro-space-2);
+  padding: var(--yoro-space-2);
+  border: thin solid color-mix(in srgb, var(--palworld-accent) 36%, var(--yoro-color-border));
+  border-radius: var(--yoro-radius-lg);
+  background: color-mix(in srgb, var(--yoro-color-surface-strong) 88%, transparent);
+  box-shadow: var(--yoro-shadow-lg);
+  backdrop-filter: blur(.75rem);
+}
+
+.palworld-pal-location-overview-media {
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  overflow: hidden;
+  border: thin solid var(--yoro-color-border-strong);
+  border-radius: var(--yoro-radius-md);
+  background: var(--palworld-accent-soft);
+}
+
+.palworld-pal-location-overview-media .palworld-media {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.palworld-pal-location-overview-copy {
+  display: grid;
+  min-inline-size: 0;
+  line-height: 1.2;
+}
+
+.palworld-pal-location-overview-copy small,
+.palworld-pal-location-overview-copy > span {
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-xs);
+}
+
+.palworld-pal-location-overview-copy strong {
+  overflow: hidden;
+  color: var(--yoro-color-text-strong);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.palworld-pal-location-overview > .yoro-button {
+  min-inline-size: 0;
+  inline-size: auto;
+  padding-inline: var(--yoro-space-3);
+  white-space: nowrap;
+}
+
+.palworld-pal-location-preview > .palworld-pal-location-controls {
+  position: absolute;
+  inset-inline-end: var(--yoro-space-4);
+  inset-block-end: var(--yoro-space-4);
+  z-index: var(--yoro-z-raised);
+  display: grid;
+  grid-template-columns: repeat(2, var(--yoro-size-touch-target));
+  gap: var(--yoro-space-1);
+  padding: var(--yoro-space-1);
+  border: thin solid var(--yoro-color-border-strong);
+  border-radius: var(--yoro-radius-md);
+  background: color-mix(in srgb, var(--yoro-color-surface-strong) 90%, transparent);
+  box-shadow: var(--yoro-shadow-md);
+  backdrop-filter: blur(.5rem);
+}
+
+.palworld-pal-location-preview > .palworld-pal-location-controls .yoro-button {
+  min-inline-size: 0;
+  inline-size: var(--yoro-size-touch-target);
+  min-block-size: var(--yoro-size-touch-target);
+  padding: var(--yoro-space-1);
+}
+
+.palworld-pal-location-preview > .palworld-pal-location-controls .yoro-button:nth-of-type(3) {
+  grid-column: 1 / -1;
+  inline-size: 100%;
+}
+
+.palworld-pal-location-caption {
+  gap: var(--yoro-space-3);
+  padding: var(--yoro-space-4);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-lg);
+  background: var(--yoro-color-surface-muted);
+}
+
+.palworld-pal-location-legend {
+  gap: var(--yoro-space-4);
+}
+
+.palworld-pal-location-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--yoro-space-2);
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.palworld-pal-location-legend-dot {
+  inline-size: .75rem;
+  block-size: .75rem;
+  border: medium solid var(--yoro-color-text-on-dark);
+}
+
+.palworld-pal-location-legend-dot.is-wild {
+  background: var(--palworld-accent);
+  box-shadow: 0 0 .75rem color-mix(in srgb, var(--palworld-accent) 72%, transparent);
+}
+
+.palworld-pal-location-legend-dot.is-boss {
+  background: var(--yoro-color-danger);
+  box-shadow: 0 0 .75rem color-mix(in srgb, var(--yoro-color-danger) 68%, transparent);
+}
+
+.palworld-pal-location-quick-info {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--yoro-space-2);
+}
+
+.palworld-pal-location-quick-info > div {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-1);
+  padding: var(--yoro-space-3);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-surface-strong);
+}
+
+.palworld-pal-location-quick-info span {
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-xs);
+}
+
+.palworld-pal-location-quick-info strong {
+  overflow-wrap: anywhere;
+  color: var(--yoro-color-text-strong);
+}
+
+.palworld-pal-location-footer {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--yoro-space-2);
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-sm);
+}
+
+.palworld-pal-location-footer p {
+  margin: 0;
+}
+
+.palworld-pal-location-footer details {
+  max-inline-size: 28rem;
+}
+
+.palworld-pal-location-footer summary {
+  color: var(--palworld-accent);
+  cursor: pointer;
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.palworld-pal-location-status {
+  display: grid;
+  justify-items: center;
+  min-block-size: 16rem;
+  place-content: center;
+  gap: var(--yoro-space-2);
+  text-align: center;
+}
+
+.palworld-pal-location-status > span {
+  display: grid;
+  place-items: center;
+  inline-size: 3.5rem;
+  block-size: 3.5rem;
+  border: thin solid var(--yoro-color-border-strong);
+  border-radius: 50%;
+  background: var(--yoro-color-surface-strong);
+  color: var(--palworld-accent);
+  font-size: var(--yoro-font-size-xl);
+}
+
+.palworld-pal-location-status strong {
+  color: var(--yoro-color-text-strong);
+  font-size: var(--yoro-font-size-lg);
+}
+
+@keyframes palworld-location-pulse {
+  0% { opacity: .85; transform: scale(.72); }
+  75%, 100% { opacity: 0; transform: scale(1.35); }
+}
+
+@keyframes palworld-location-selected {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(var(--palworld-map-marker-scale, 1));
+  }
+  48% {
+    transform: translate(-50%, calc(-50% - .75rem)) scale(calc(var(--palworld-map-marker-scale, 1) * 1.18));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .palworld-pal-location-spawn-marker[data-current-pal="true"]::before,
+  .palworld-pal-location-spawn-marker[data-selected="true"],
+  .palworld-pal-location-marker[data-selected="true"] {
+    animation: none;
+  }
+}
+
+@media (max-width: 48rem) {
+  .palworld-pal-location-loading,
+  .palworld-pal-location-preview {
+    block-size: clamp(20rem, 74vw, 23.75rem);
+    min-block-size: 20rem;
+  }
+
+  .palworld-pal-location-quick-info {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 32rem) {
@@ -4312,12 +4891,11 @@
   }
 
   .palworld-pal-location-toolbar {
-    align-items: stretch;
-    flex-direction: column;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .palworld-pal-location-periods,
-  .palworld-pal-location-controls {
+  .palworld-pal-location-types {
     display: grid;
     inline-size: 100%;
   }
@@ -4326,19 +4904,15 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .palworld-pal-location-controls {
+  .palworld-pal-location-types {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .palworld-pal-location-periods .yoro-button,
-  .palworld-pal-location-controls .yoro-button {
+  .palworld-pal-location-types .yoro-button {
     min-inline-size: 0;
     inline-size: 100%;
     white-space: normal;
-  }
-
-  .palworld-pal-location-controls > :last-child {
-    grid-column: 1 / -1;
   }
 
   .palworld-pal-location-caption li {
@@ -4353,6 +4927,43 @@
   .palworld-pal-location-spawn-details {
     justify-content: flex-start;
     text-align: start;
+  }
+
+  .palworld-pal-location-loading,
+  .palworld-pal-location-preview {
+    block-size: clamp(20rem, 92vw, 23.75rem);
+    min-block-size: 20rem;
+  }
+
+  .palworld-pal-location-overview {
+    inset-block-start: var(--yoro-space-2);
+    inset-inline: var(--yoro-space-2);
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    inline-size: auto;
+    padding: var(--yoro-space-2);
+  }
+
+  .palworld-pal-location-overview-media {
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+  }
+
+  .palworld-pal-location-overview > .yoro-button {
+    grid-column: auto;
+    inline-size: auto;
+  }
+
+  .palworld-pal-location-preview > .palworld-pal-location-controls {
+    inset-inline-end: var(--yoro-space-2);
+    inset-block-end: var(--yoro-space-2);
+  }
+
+  .palworld-pal-location-quick-info {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .palworld-pal-location-marker-tooltip {
+    max-inline-size: min(13rem, 68vw);
   }
 }
 
@@ -5640,46 +6251,42 @@
     scrollbar-gutter: auto;
   }
 
-  .palworld-breeding-combination-header,
-  .palworld-breeding-combination-scroll .palworld-breeding-combination-header {
-    position: absolute;
-    inline-size: 1px;
-    block-size: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
+  .palworld-breeding-empty-guide {
+    min-block-size: 0;
+    padding: var(--yoro-space-6) var(--yoro-space-4);
   }
 
-  .palworld-breeding-combination-row {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    align-items: start;
+  .palworld-breeding-empty-steps {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--yoro-space-2);
+  }
+
+  .palworld-breeding-empty-steps li {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    justify-items: start;
+    text-align: start;
+  }
+
+  .palworld-breeding-combination-row,
+  .palworld-breeding-combination-list.is-reverse-results .palworld-breeding-combination-row {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
     min-block-size: 0;
     padding: var(--yoro-space-3);
-    gap: var(--yoro-space-1);
-    contain-intrinsic-block-size: 11rem;
-  }
-
-  .palworld-breeding-combination-list.is-reverse-results .palworld-breeding-combination-row {
-    grid-template-columns:
-      minmax(0, 1fr)
-      minmax(0, 1fr)
-      minmax(4.75rem, 6rem);
+    gap: var(--yoro-space-2);
+    contain-intrinsic-block-size: 22rem;
   }
 
   .palworld-breeding-combination-row > .palworld-breeding-combination-cell.is-pal {
+    grid-column: 1;
     padding: var(--yoro-space-0);
   }
 
-  .palworld-breeding-combination-row > .palworld-breeding-combination-cell.is-pal:first-child {
-    grid-column: 1;
-  }
-
-  .palworld-breeding-combination-row > .palworld-breeding-combination-cell.is-pal:nth-of-type(2) {
-    grid-column: 2;
-  }
-
   .palworld-breeding-combination-symbol {
-    display: none;
+    display: grid;
+    grid-column: 1;
+    min-block-size: 1.5rem;
   }
 
   .palworld-breeding-combination-mobile-label {
@@ -5695,18 +6302,20 @@
   }
 
   .palworld-breeding-combination-pal {
-    grid-template-columns: 2.25rem minmax(0, 1fr);
-    gap: var(--yoro-space-1);
+    grid-template-columns: 3.5rem minmax(0, 1fr);
+    gap: var(--yoro-space-3);
+    padding: var(--yoro-space-2);
+    background: color-mix(in srgb, var(--yoro-color-surface) 72%, transparent);
   }
 
   .palworld-breeding-combination-media {
-    inline-size: 2.25rem;
-    block-size: 2.25rem;
+    inline-size: 3.5rem;
+    block-size: 3.5rem;
   }
 
   .palworld-breeding-combination-result,
   .palworld-breeding-combination-row > .palworld-breeding-combination-cell.is-action {
-    grid-column: 3;
+    grid-column: 1;
     inline-size: 100%;
     padding: var(--yoro-space-0);
     border-block-start: 0;

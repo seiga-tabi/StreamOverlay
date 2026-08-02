@@ -69,7 +69,9 @@ import { formatPalNumber, matchesPalworldItem, matchesPalworldPal, normalizePalw
 import { resolvePalworldDescription, resolvePalworldLocalizedText, resolvePalworldName } from "../src/features/public-palworld/utils/localization";
 import { palworldSeoMetadata } from "../src/features/public-palworld/utils/seo";
 import {
+  clusterPalworldPreviewSpawnPoints,
   filterPalworldBossMarkers,
+  filterPalworldPreviewClustersInViewport,
   filterPalworldSpawnPointsByPeriod,
   palworldSpawnPointOpacity,
   palworldSpawnPointRadius,
@@ -165,6 +167,35 @@ test("일반 스폰 요약과 시각 강도는 cluster 수치만 제한된 범�
   );
   assert.equal(filterPalworldSpawnPointsByPeriod(points, "all").length, 2);
   assert.deepEqual(filterPalworldBossMarkers([], "anubis"), []);
+
+  const clusters = clusterPalworldPreviewSpawnPoints(points, 1);
+  assert.equal(clusters.length, 1);
+  assert.equal(clusters[0]?.pointCount, 2);
+  assert.equal(clusters[0]?.placementCount, 10);
+  assert.equal(clusters[0]?.minimumLevel, 10);
+  assert.equal(clusters[0]?.maximumLevel, 24);
+  assert.equal(clusters[0]?.daytime, true);
+  assert.equal(clusters[0]?.nighttime, true);
+  assert.equal(
+    filterPalworldPreviewClustersInViewport(
+      clusters,
+      { x: 0, y: 0, zoom: 2 },
+      1000,
+      600,
+      0,
+    ).length,
+    1,
+  );
+  assert.equal(
+    filterPalworldPreviewClustersInViewport(
+      clusters,
+      { x: -500, y: -300, zoom: 2 },
+      1000,
+      600,
+      0,
+    ).length,
+    0,
+  );
 });
 
 test("지도 자원 source subtype은 이름 추측 없이 15개 공개 필터로 exact 정규화한다", () => {

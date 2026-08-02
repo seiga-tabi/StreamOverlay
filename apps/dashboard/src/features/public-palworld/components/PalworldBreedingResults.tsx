@@ -21,6 +21,34 @@ function formatTemplate(template: string, values: Record<string, string | number
   );
 }
 
+export function BreedingEmptyGuide({
+  locale,
+  mode,
+}: {
+  locale: PalworldLocale;
+  mode: "parents" | "child";
+}) {
+  const text = palworldI18n[locale];
+  const title = mode === "parents" ? text.selectAtLeastOneParent : text.selectTarget;
+  const description = mode === "parents" ? text.autoCalculateHint : text.reverseAutoCalculateHint;
+  const steps = mode === "parents"
+    ? [text.breedingStepParentA, text.breedingStepParentB, text.breedingStepResult]
+    : [text.breedingStepTarget, text.breedingStepFilter, text.breedingStepParents];
+
+  return <div className="palworld-breeding-empty-guide" data-testid={`breeding-${mode}-empty`}>
+    <div aria-hidden="true" className="palworld-breeding-empty-icon">🧬</div>
+    <p className="palworld-breeding-empty-kicker">{text.breedingGuideKicker}</p>
+    <h3>{title}</h3>
+    <p className="palworld-breeding-empty-description">{description}</p>
+    <ol className="palworld-breeding-empty-steps">
+      {steps.map((step, index) => <li key={step}>
+        <span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+        <strong>{step}</strong>
+      </li>)}
+    </ol>
+  </div>;
+}
+
 function BreedingPalButton({
   emphasis = "compact",
   locale,

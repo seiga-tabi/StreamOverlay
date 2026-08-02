@@ -34,6 +34,7 @@ import { BreedingGenderControls, BreedingModeTabs } from "./PalworldBreedingCont
 import {
   BreedingCombinationList,
   BreedingCombinationListSkeleton,
+  BreedingEmptyGuide,
   BreedingGenderAlternativeCard,
   BreedingRequestStatus,
   DirectBreedingResult,
@@ -552,7 +553,7 @@ export function PalworldBreedingPage({
           <BreedingRequestStatus message={directAnnouncement} />
           <BreedingRequestStatus message={partnerAnnouncement} />
           <h2 className="yoro-u-sr-only">{text.breedingResult}</h2>
-          {!query.parentA && !query.parentB ? <PalworldEmpty description={text.autoCalculateHint} includeDefaultDescription={false} locale={locale} title={text.selectAtLeastOneParent} /> : null}
+          {!query.parentA && !query.parentB ? <BreedingEmptyGuide locale={locale} mode="parents" /> : null}
           {singleParentId ? <section className="palworld-breeding-result" data-testid="breeding-partner-results">
             <h3
               className="yoro-u-sr-only"
@@ -657,7 +658,7 @@ export function PalworldBreedingPage({
         <section className="palworld-breeding-result" data-testid="breeding-parent-results" aria-busy={reverseLoading || reverseLoadMoreLoading}>
           <BreedingRequestStatus message={reverseAnnouncement} />
           <div className="palworld-section-title"><h2 id="palworld-breeding-reverse-list-title">{text.childToParents}</h2></div>
-          {!query.child ? <PalworldEmpty includeDefaultDescription={false} locale={locale} title={text.selectTarget} /> : null}
+          {!query.child ? <BreedingEmptyGuide locale={locale} mode="child" /> : null}
           {reverseLoading ? <BreedingCombinationListSkeleton locale={locale} variant="reverse-results" /> : null}
           {query.child && target ? <ReverseBreedingTargetSummary child={target} loadedCount={reverse.data?.items.length} locale={locale} onOpenPal={onOpenPal} pagination={reverse.data?.pagination} /> : null}
           {reverse.status === "error" ? <PalworldError error={reverse.error} locale={locale} onRetry={() => setReverseRevision((value) => value + 1)} /> : null}

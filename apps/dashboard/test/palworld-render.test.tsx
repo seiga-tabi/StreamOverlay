@@ -63,6 +63,7 @@ import { PalworldPalPicker } from "../src/features/public-palworld/components/Pa
 import { BreedingModeTabs } from "../src/features/public-palworld/components/PalworldBreedingControls";
 import {
   BreedingCombinationList,
+  BreedingEmptyGuide,
   BreedingGenderAlternativeCard,
   BreedingPartnerPairCard,
   BreedingRequestStatus,
@@ -75,7 +76,6 @@ import { PalworldPageErrorBoundary } from "../src/features/public-palworld/compo
 import {
   filterPalworldBossMarkers,
   PALWORLD_PAL_DETAIL_INITIAL_ZOOM,
-  PALWORLD_PAL_DETAIL_MIN_SPAWN_OPACITY,
   PalworldPalLocationMap,
 } from "../src/features/public-palworld/components/PalworldPalLocationMap";
 import {
@@ -1241,6 +1241,8 @@ test("교배 UI는 결과 Pal을 강조하고 역검색 카드에서 목표 Pal 
   const direct = renderToStaticMarkup(<DirectBreedingResult locale="ko" onCopy={() => undefined} onOpenPal={() => undefined} onViewParents={() => undefined} pair={pair} />);
   const reverse = renderToStaticMarkup(<ReverseBreedingPairCard locale="ko" onOpenPal={() => undefined} pair={pair} />);
   const partner = renderToStaticMarkup(<BreedingPartnerPairCard locale="ko" onOpenPal={() => undefined} pair={pair} selectedParentId="penking" />);
+  const emptyParents = renderToStaticMarkup(<BreedingEmptyGuide locale="ko" mode="parents" />);
+  const emptyChild = renderToStaticMarkup(<BreedingEmptyGuide locale="ja" mode="child" />);
   const partnerList = renderToStaticMarkup(<BreedingCombinationList
     labelledBy="partner-list-title"
     locale="ko"
@@ -1292,6 +1294,10 @@ test("교배 UI는 결과 Pal을 강조하고 역검색 카드에서 목표 Pal 
   assert.match(partner, /data-testid="breeding-partner-pair"/u);
   assert.match(partner, /펭킹[\s\S]*불무사[\s\S]*실키누/u);
   assert.doesNotMatch(partner, /계산기에 넣기/u);
+  assert.match(emptyParents, /data-testid="breeding-parents-empty"/u);
+  assert.match(emptyParents, /3단계 자동 계산[\s\S]*첫 번째 부모 선택[\s\S]*두 번째 부모 선택[\s\S]*교배 결과 확인/u);
+  assert.match(emptyChild, /data-testid="breeding-child-empty"/u);
+  assert.match(emptyChild, /3ステップ自動計算[\s\S]*目標パルを選択[\s\S]*配合種類を選択[\s\S]*親の組み合わせを確認/u);
   assert.match(partnerList, /role="table"/u);
   assert.match(partnerList, /aria-rowcount="288"/u);
   assert.match(partnerList, /가능한 조합 287개/u);
@@ -1332,7 +1338,11 @@ test("교배 UI는 결과 Pal을 강조하고 역검색 카드에서 목표 Pal 
   );
   assert.match(
     breedingCss,
-    /\.palworld-breeding-combination-scroll \.palworld-breeding-combination-header\s*\{[\s\S]*?position:\s*sticky;[\s\S]*?inset-block-start:\s*0;[\s\S]*?border-block-end:\s*thin solid var\(--yoro-color-border-strong\);/u,
+    /\.palworld-breeding-combination-header\s*\{[\s\S]*?position:\s*absolute;[\s\S]*?clip-path:\s*inset\(50%\);/u,
+  );
+  assert.match(
+    breedingCss,
+    /\.palworld-breeding-combination-row\s*\{[\s\S]*?grid-template-columns:[\s\S]*?2rem[\s\S]*?2\.25rem[\s\S]*?border-radius:\s*var\(--yoro-radius-xl\);/u,
   );
   assert.equal(palworldI18n.ko.partnerPairSuggestions, "선택한 부모의 교배 조합");
   assert.equal(palworldI18n.ja.partnerPairSuggestions, "選択した親パルの配合組み合わせ");
@@ -2350,7 +2360,6 @@ test("월드 지도 subtype cluster는 접근성 위치 수를 유지하고 지�
 
 test("Pal 상세 위치는 일반 스폰과 필드 보스를 분리 조회하고 한국어·일본어 i18n을 연결한다", () => {
   assert.equal(PALWORLD_PAL_DETAIL_INITIAL_ZOOM, 1.5);
-  assert.equal(PALWORLD_PAL_DETAIL_MIN_SPAWN_OPACITY, 0.96);
   const anubisMarker: PalworldMapMarker = {
     id: "main-anubis-001",
     sourceRowId: "Boss_Anubis",
@@ -2440,24 +2449,23 @@ test("Pal 상세 위치는 일반 스폰과 필드 보스를 분리 조회하고
   assert.match(componentSource, /filterPalworldBossMarkers\(response\.markers, palId\)/u);
   assert.match(componentSource, /setBossRevision/u);
   assert.match(componentSource, /setSpawnRevision/u);
-  assert.match(componentSource, /palWildSpawnLevelRange/u);
-  assert.match(componentSource, /usePalworldMapViewport\(imageState === "ready"\)/u);
+  assert.match(componentSource, /usePalworldMapViewport\(imageState === "ready", "page-scroll", "modifier"\)/u);
   assert.match(
     componentSource,
     /period === "all"[\s\S]*period === "day" \? point\.daytime : point\.nighttime/u,
   );
   assert.match(componentSource, /aria-pressed=\{period === value\}/u);
   assert.match(componentSource, /onClick=\{\(\) => onPeriodChange\(value\)\}/u);
-  assert.match(componentSource, /<SpawnAreaLayer points=\{visibleSpawnPoints\} zoom=\{view\.zoom\}/u);
-  assert.match(
-    componentSource,
-    /Math\.max\([\s\S]*PALWORLD_PAL_DETAIL_MIN_SPAWN_OPACITY[\s\S]*palworldSpawnPointOpacity/u,
-  );
+  assert.match(componentSource, /clusterPalworldPreviewSpawnPoints\(visibleSpawnPoints, view\.zoom\)/u);
+  assert.match(componentSource, /filterPalworldPreviewClustersInViewport/u);
+  assert.match(componentSource, /<SpawnPreviewCanvas clusters=\{visibleSpawnClusters\} zoom=\{view\.zoom\}/u);
+  assert.match(componentSource, /data-current-pal="true"/u);
+  assert.match(componentSource, /focusPalworldMapViewAt/u);
   assert.match(
     componentSource,
     /imageState !== "ready" \|\| !hasLocations[\s\S]*resetView\(\);[\s\S]*zoomAt\(PALWORLD_PAL_DETAIL_INITIAL_ZOOM\)/u,
   );
-  assert.match(componentSource, /spawnSummary\(visibleSpawnPoints, locale\)/u);
+  assert.match(componentSource, /summarizePalworldSpawnPoints\(visibleSpawnPoints\)/u);
   assert.match(componentSource, /data-testid="pal-detail-map-viewport"[\s\S]*role="region"/u);
   assert.match(
     componentSource,
@@ -2467,21 +2475,25 @@ test("Pal 상세 위치는 일반 스폰과 필드 보스를 분리 조회하고
   assert.match(componentSource, /aria-label=\{text\.mapZoomIn\}/u);
   assert.match(componentSource, /onClick=\{resetView\}/u);
   assert.match(componentSource, /onClick=\{\(\) => onOpenFullMap\(palId\)\}/u);
-  assert.match(detailSource, /<PalworldPalLocationMap[\s\S]*onOpenFullMap=\{onOpenMap\}[\s\S]*palId=\{detail\.id\}/u);
+  assert.match(detailSource, /<PalworldPalLocationMap[\s\S]*onOpenFullMap=\{onOpenMap\}[\s\S]*pal=\{detail\}[\s\S]*palId=\{detail\.id\}/u);
   assert.match(detailSource, /onPeriodChange=\{onSpawnPeriodChange\}/u);
   assert.match(detailSource, /period=\{spawnPeriod\}/u);
   assert.match(
     css,
     /\.palworld-pal-location-loading,[\s\S]*?\.palworld-pal-location-preview\s*\{[\s\S]*?inline-size:\s*100%;[\s\S]*?justify-self:\s*center;/u,
   );
+  assert.match(css, /\.palworld-pal-location-preview\s*\{[\s\S]*?block-size:\s*clamp\(32\.5rem, 48vw, 37\.5rem\);/u);
+  assert.match(css, /\.palworld-pal-location-spawn-canvas,/u);
+  assert.match(css, /@keyframes palworld-location-pulse/u);
   assert.match(
     css,
-    /\.palworld-pal-location-spawn-point\s*\{[\s\S]*?fill:\s*color-mix\(in srgb, var\(--palworld-sky\) 52%, var\(--yoro-color-text-on-dark\)\);[\s\S]*?stroke:\s*var\(--yoro-color-text-strong\);[\s\S]*?stroke-width:\s*0\.006;[\s\S]*?paint-order:\s*stroke fill;/u,
+    /\.palworld-pal-location-overview\s*\{[\s\S]*?grid-template-columns:\s*2\.75rem minmax\(5\.5rem, 9rem\) auto;[\s\S]*?inline-size:\s*min\(25rem,/u,
   );
   assert.match(
     css,
-    /\.palworld-pal-location-legend-dot\s*\{[\s\S]*?border:\s*medium solid var\(--yoro-color-text-strong\);[\s\S]*?background:\s*color-mix\(in srgb, var\(--palworld-sky\) 52%, var\(--yoro-color-text-on-dark\)\);/u,
+    /\.palworld-pal-location-overview > \.yoro-button\s*\{[\s\S]*?inline-size:\s*auto;[\s\S]*?white-space:\s*nowrap;/u,
   );
+  assert.match(css, /\.palworld-pal-location-quick-info\s*\{[\s\S]*?grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\);/u);
 });
 
 test("홈 Hero 제목은 표시하고 하위 페이지 소개 문구와 Pal 표기는 한국어·일본어 i18n을 통해 제공한다", () => {

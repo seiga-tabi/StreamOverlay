@@ -534,6 +534,7 @@ export function PalDetailModal({
               locale={locale}
               onOpenFullMap={onOpenMap}
               onPeriodChange={onSpawnPeriodChange}
+              pal={detail}
               palId={detail.id}
               period={spawnPeriod}
             />
