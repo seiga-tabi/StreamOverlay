@@ -42,11 +42,28 @@ const i18n = {
   ko: {
     title: "내 Riot ID",
     description: "방송에 사용할 Riot ID를 확인하고 안전하게 변경합니다.",
-    studio: "Riot Account",
+    studio: "Riot 계정",
     status: "등록 상태",
     approved: "승인 완료",
     current: "현재",
     twitchAccount: "Twitch 계정",
+    riotAccount: "Riot 계정",
+    connected: "연결됨",
+    verified: "확인됨",
+    accountOverview: "계정 상태",
+    connectedServices: "연결 서비스",
+    connectedServicesValue: "2개",
+    connectedServicesDescription: "Twitch · Riot",
+    approvalState: "방송인 승인",
+    profileVisibility: "공개 전적",
+    publicAvailable: "공개 가능",
+    connectedAccountsTitle: "연결된 계정",
+    connectedAccountsDescription: "방송과 전적 검색에 사용되는 계정을 확인합니다.",
+    previewTitle: "검색 결과 미리보기",
+    previewDescription: "저장한 Riot ID는 공개 전적 검색과 스트리머 프로필에 표시됩니다.",
+    previewEyebrow: "Riot 플레이어",
+    pendingPreview: "저장 전 미리보기",
+    savedPreview: "현재 공개 정보",
     currentRiotId: "현재 Riot ID",
     riotIdChange: "Riot ID 변경",
     riotIdDescription: "게임명과 태그를 변경했다면 새로운 Riot ID를 게임명#태그 형식으로 입력하세요.",
@@ -66,11 +83,28 @@ const i18n = {
   ja: {
     title: "自分の Riot ID",
     description: "配信で使用する Riot ID を確認し、安全に変更します。",
-    studio: "Riot Account",
+    studio: "Riot アカウント",
     status: "登録状態",
     approved: "承認済み",
     current: "現在",
     twitchAccount: "Twitch アカウント",
+    riotAccount: "Riot アカウント",
+    connected: "連携済み",
+    verified: "確認済み",
+    accountOverview: "アカウント状態",
+    connectedServices: "連携サービス",
+    connectedServicesValue: "2件",
+    connectedServicesDescription: "Twitch・Riot",
+    approvalState: "配信者承認",
+    profileVisibility: "公開戦績",
+    publicAvailable: "公開可能",
+    connectedAccountsTitle: "連携アカウント",
+    connectedAccountsDescription: "配信と戦績検索に使用するアカウントを確認します。",
+    previewTitle: "検索結果プレビュー",
+    previewDescription: "保存した Riot ID は公開戦績検索と配信者プロフィールに表示されます。",
+    previewEyebrow: "Riot プレイヤー",
+    pendingPreview: "保存前プレビュー",
+    savedPreview: "現在の公開情報",
     currentRiotId: "現在の Riot ID",
     riotIdChange: "Riot ID 変更",
     riotIdDescription: "ゲーム名またはタグを変更した場合は、新しい Riot ID をゲーム名#タグ形式で入力してください。",
@@ -185,6 +219,8 @@ export function MyRiotAccountPage({
 
   const savedRiotId = currentRiotId(streamer);
   const normalizedDraft = riotIdDraft.normalize("NFKC").trim();
+  const draftChanged = Boolean(normalizedDraft && normalizedDraft !== savedRiotId);
+  const previewRiotId = normalizedDraft || savedRiotId;
   const saveDisabled = riotIdBusy || !normalizedDraft || normalizedDraft === savedRiotId;
 
   return (
@@ -196,7 +232,7 @@ export function MyRiotAccountPage({
         skipLinkLabel={t.title}
         variant="streamer"
       >
-        <AppShellHeader className="settings-shared-header">
+        <AppShellHeader className="settings-shared-header my-riot-account-hero">
           <PageHeader className="settings-shared-page-header" layout="split">
             <PageHeaderEyebrow>{t.studio}</PageHeaderEyebrow>
             <PageHeaderTitle data-ko={i18n.ko.title} data-ja={i18n.ja.title}>{t.title}</PageHeaderTitle>
@@ -211,28 +247,94 @@ export function MyRiotAccountPage({
         </AppShellHeader>
 
         <AppShellMain className="settings-shared-main" id="my-riot-account-main">
+          <section aria-label={t.accountOverview} className="my-riot-account-metrics">
+            <Metric
+              description={t.connectedServicesDescription}
+              label={t.connectedServices}
+              size="lg"
+              status={<StatusPill tone="success" size="sm">{t.connected}</StatusPill>}
+              tone="info"
+              value={t.connectedServicesValue}
+            />
+            <Metric
+              description={t.status}
+              label={t.approvalState}
+              size="lg"
+              status={<StatusPill tone="success" size="sm">{t.verified}</StatusPill>}
+              tone="success"
+              value={t.approved}
+            />
+            <Metric
+              description={savedRiotId}
+              label={t.profileVisibility}
+              size="lg"
+              status={<StatusPill tone="info" size="sm">{t.current}</StatusPill>}
+              tone="streamer"
+              value={t.publicAvailable}
+            />
+          </section>
+
           <div className="settings-shared-grid my-riot-account-grid">
-            <Card as="section" className="settings-shared-card my-riot-account-profile" id="my-riot-account-profile" padding="lg" variant="glass">
-              <span className="my-riot-avatar">
-                {streamer.twitchProfileImageUrl ? (
-                  <img src={streamer.twitchProfileImageUrl} alt={streamer.twitchDisplayName} />
-                ) : streamer.twitchDisplayName.slice(0, 1).toUpperCase()}
-              </span>
-              <div className="my-riot-account-profile-copy">
-                <StatusPill tone="success" size="sm" data-ko={i18n.ko.twitchAccount} data-ja={i18n.ja.twitchAccount}>{t.twitchAccount}</StatusPill>
-                <strong>{streamer.twitchDisplayName}</strong>
-                <small>@{streamer.twitchLogin}</small>
-              </div>
-              <Button as="a" href={twitchChannelUrl(streamer)} target="_blank" rel="noreferrer" variant="secondary" size="sm" data-ko={i18n.ko.openTwitch} data-ja={i18n.ja.openTwitch}>
-                {t.openTwitch}
-              </Button>
+            <Card as="section" className="settings-shared-card my-riot-connected-card" id="my-riot-account-profile" padding="lg" variant="glass">
+              <CardHeader className="settings-shared-card-header">
+                <div>
+                  <CardTitle as="h2">{t.connectedAccountsTitle}</CardTitle>
+                  <CardDescription>{t.connectedAccountsDescription}</CardDescription>
+                </div>
+                <StatusPill tone="success" size="sm">{t.connectedServicesValue}</StatusPill>
+              </CardHeader>
+              <CardContent className="my-riot-connected-list">
+                <article className="my-riot-connected-row">
+                  <span className="my-riot-avatar">
+                    {streamer.twitchProfileImageUrl ? (
+                      <img src={streamer.twitchProfileImageUrl} alt={streamer.twitchDisplayName} />
+                    ) : streamer.twitchDisplayName.slice(0, 1).toUpperCase()}
+                  </span>
+                  <div>
+                    <small>{t.twitchAccount}</small>
+                    <strong>{streamer.twitchDisplayName}</strong>
+                    <span>@{streamer.twitchLogin}</span>
+                  </div>
+                  <StatusPill tone="success" size="sm">{t.connected}</StatusPill>
+                  <Button as="a" href={twitchChannelUrl(streamer)} target="_blank" rel="noreferrer" variant="secondary" size="sm" data-ko={i18n.ko.openTwitch} data-ja={i18n.ja.openTwitch}>
+                    {t.openTwitch}
+                  </Button>
+                </article>
+                <article className="my-riot-connected-row">
+                  <span aria-hidden="true" className="my-riot-provider-mark">R</span>
+                  <div>
+                    <small>{t.riotAccount}</small>
+                    <strong>{savedRiotId}</strong>
+                    <span>{t.publicAvailable}</span>
+                  </div>
+                  <StatusPill tone="info" size="sm">{t.verified}</StatusPill>
+                </article>
+              </CardContent>
             </Card>
 
-            <Card as="section" className="settings-shared-card my-riot-account-card my-riot-account-status-card" padding="lg" variant="elevated">
-              <Metric label={t.status} value={t.approved} tone="success" status={<StatusPill tone="success" size="sm">{t.approved}</StatusPill>} />
+            <Card as="section" className="settings-shared-card my-riot-preview-card" padding="lg" variant="elevated">
+              <CardHeader className="settings-shared-card-header">
+                <div>
+                  <CardTitle as="h2">{t.previewTitle}</CardTitle>
+                  <CardDescription>{t.previewDescription}</CardDescription>
+                </div>
+                <StatusPill tone={draftChanged ? "warning" : "success"} size="sm">
+                  {draftChanged ? t.pendingPreview : t.savedPreview}
+                </StatusPill>
+              </CardHeader>
+              <CardContent className="my-riot-preview-content">
+                <span aria-hidden="true" className="my-riot-preview-mark">R</span>
+                <div>
+                  <small>{t.previewEyebrow}</small>
+                  <strong>{previewRiotId}</strong>
+                  <StatusPill tone={draftChanged ? "warning" : "success"} size="sm">
+                    {draftChanged ? t.pendingPreview : t.verified}
+                  </StatusPill>
+                </div>
+              </CardContent>
             </Card>
 
-            <Card as="section" className="settings-shared-card my-riot-account-card featured wide" id="my-riot-account-riot" padding="lg" variant="glass">
+            <Card as="section" className="settings-shared-card my-riot-account-card featured wide my-riot-settings-card" id="my-riot-account-riot" padding="lg" variant="glass">
               <CardHeader className="settings-shared-card-header">
                 <div>
                   <CardTitle as="h2" data-ko={i18n.ko.riotIdChange} data-ja={i18n.ja.riotIdChange}>{t.riotIdChange}</CardTitle>

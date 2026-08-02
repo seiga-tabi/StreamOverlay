@@ -35,12 +35,29 @@ test("Riot ID 전용 페이지는 Overlay와 프로필 링크 정보를 DOM에 �
   const html = renderToStaticMarkup(<MyRiotAccountPage streamer={streamer} />);
 
   assert.match(html, /내 Riot ID/);
+  assert.match(html, /계정 상태/);
+  assert.match(html, /연결된 계정/);
+  assert.match(html, /검색 결과 미리보기/);
+  assert.match(html, /Twitch · Riot/);
   assert.match(html, /게임이름#KR1/);
   assert.match(html, /새 Riot ID/);
   assert.match(html, /Riot ID 저장/);
   assert.doesNotMatch(html, /should-not-render/);
   assert.doesNotMatch(html, /secret-overlay-key/);
   assert.doesNotMatch(html, /Overlay 접근|프로필 링크/);
+});
+
+test("Riot ID 계정 상태와 검색 미리보기는 일본어 UI 구조를 함께 제공한다", async () => {
+  const { MyRiotAccountPage } = await import("../src/pages/MyRiotAccountPage");
+  setDashboardLocale("ja");
+  const html = renderToStaticMarkup(<MyRiotAccountPage streamer={streamer} />);
+
+  assert.match(html, /アカウント状態/);
+  assert.match(html, /連携アカウント/);
+  assert.match(html, /検索結果プレビュー/);
+  assert.match(html, /Twitch・Riot/);
+  assert.match(html, /게임이름#KR1/);
+  setDashboardLocale("ko");
 });
 
 test("미등록 방송인은 등록 안내 EmptyState를 한국어와 일본어로 표시한다", async () => {

@@ -524,6 +524,209 @@
   background: transparent;
 }
 
+/* Riot ID 관리는 통합 Dashboard 안에서 상태 → 계정 → 미리보기 → 변경 순서로 읽힌다. */
+.yoro-dashboard-shell[data-page="streamingRiot"] .my-riot-account-shell.yoro-app-shell {
+  grid-template-areas:
+    "header"
+    "main";
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  min-height: 0;
+  overflow: clip;
+  border-color: color-mix(in srgb, var(--yoro-color-secondary) 24%, var(--yoro-color-border));
+  background: var(--yoro-color-surface-muted);
+}
+
+.yoro-dashboard-shell[data-page="streamingRiot"] .my-riot-account-hero {
+  background:
+    radial-gradient(circle at 88% 12%, color-mix(in srgb, var(--yoro-color-secondary) 20%, transparent), transparent 22rem),
+    linear-gradient(135deg, var(--yoro-color-surface-strong), var(--yoro-color-surface));
+}
+
+.yoro-dashboard-shell[data-page="streamingRiot"] .my-riot-account-hero .yoro-page-header {
+  padding: clamp(var(--yoro-space-6), 3vw, var(--yoro-space-10));
+}
+
+.yoro-dashboard-shell[data-page="streamingRiot"] .settings-shared-main.yoro-app-shell__main {
+  display: grid;
+  gap: var(--yoro-space-6);
+  padding: clamp(var(--yoro-space-5), 3vw, var(--yoro-space-8));
+}
+
+.my-riot-account-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--yoro-space-4);
+  min-inline-size: 0;
+}
+
+.my-riot-account-metrics .yoro-metric {
+  min-block-size: calc(var(--yoro-space-12) * 3);
+  align-content: center;
+  background: var(--yoro-color-surface-strong);
+  box-shadow: var(--yoro-shadow-sm);
+}
+
+.yoro-dashboard-shell[data-page="streamingRiot"] .my-riot-account-grid {
+  grid-template-columns: minmax(0, 1.15fr) minmax(20rem, .85fr);
+  gap: var(--yoro-space-6);
+}
+
+.my-riot-connected-card,
+.my-riot-preview-card,
+.my-riot-settings-card {
+  min-inline-size: 0;
+}
+
+.my-riot-connected-card .yoro-card__content {
+  padding-block-start: var(--yoro-space-2);
+}
+
+.my-riot-connected-list {
+  display: grid;
+  gap: var(--yoro-space-3);
+}
+
+.my-riot-connected-row {
+  display: grid;
+  grid-template-columns: var(--yoro-space-12) minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--yoro-space-3);
+  min-inline-size: 0;
+  padding: var(--yoro-space-4);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-lg);
+  background: var(--yoro-color-surface-muted);
+}
+
+.my-riot-connected-row > div {
+  display: grid;
+  gap: var(--yoro-space-1);
+  min-inline-size: 0;
+}
+
+.my-riot-connected-row small,
+.my-riot-connected-row span:not(.yoro-status, .yoro-status__label),
+.my-riot-preview-content small {
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.my-riot-connected-row strong,
+.my-riot-preview-content strong {
+  min-inline-size: 0;
+  color: var(--yoro-color-text-strong);
+  font-size: var(--yoro-font-size-xl);
+  font-weight: var(--yoro-font-weight-black);
+  line-height: var(--yoro-line-height-tight);
+  overflow-wrap: anywhere;
+}
+
+.my-riot-provider-mark,
+.my-riot-preview-mark {
+  display: grid;
+  place-items: center;
+  inline-size: var(--yoro-space-12);
+  block-size: var(--yoro-space-12);
+  border: thin solid color-mix(in srgb, var(--yoro-color-secondary) 46%, transparent);
+  border-radius: var(--yoro-radius-circle);
+  background: color-mix(in srgb, var(--yoro-color-secondary) 18%, var(--yoro-color-surface));
+  color: var(--yoro-color-secondary-strong);
+  font-size: var(--yoro-font-size-xl);
+  font-weight: var(--yoro-font-weight-black);
+}
+
+.my-riot-preview-card.yoro-card {
+  border-color: color-mix(in srgb, var(--yoro-color-secondary) 38%, var(--yoro-color-border));
+  background:
+    radial-gradient(circle at 82% 22%, color-mix(in srgb, var(--yoro-color-secondary) 18%, transparent), transparent 15rem),
+    var(--yoro-color-surface-strong);
+}
+
+.my-riot-preview-content {
+  display: grid;
+  grid-template-columns: calc(var(--yoro-space-12) * 1.35) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--yoro-space-5);
+  min-block-size: calc(var(--yoro-space-12) * 4);
+  margin: var(--yoro-space-2) var(--yoro-space-5) var(--yoro-space-5);
+  padding: var(--yoro-space-6);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-xl);
+  background: color-mix(in srgb, var(--yoro-color-bg) 72%, transparent);
+  box-shadow: var(--yoro-shadow-panel);
+}
+
+.my-riot-preview-content > div {
+  display: grid;
+  justify-items: start;
+  gap: var(--yoro-space-3);
+  min-inline-size: 0;
+}
+
+.my-riot-preview-content .my-riot-preview-mark {
+  inline-size: calc(var(--yoro-space-12) * 1.35);
+  block-size: calc(var(--yoro-space-12) * 1.35);
+  font-size: var(--yoro-font-size-2xl);
+}
+
+.my-riot-settings-card {
+  margin-block-start: var(--yoro-space-2);
+}
+
+.my-riot-settings-card .yoro-card__content {
+  gap: var(--yoro-space-5);
+}
+
+.my-riot-settings-card .my-riot-id-form {
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--yoro-space-4);
+}
+
+.my-riot-settings-card .settings-shared-actions {
+  justify-content: flex-end;
+}
+
+@media (max-width: 70rem) {
+  .my-riot-account-metrics,
+  .yoro-dashboard-shell[data-page="streamingRiot"] .my-riot-account-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 48rem) {
+  .my-riot-account-metrics {
+    gap: var(--yoro-space-3);
+  }
+
+  .my-riot-account-metrics .yoro-metric {
+    min-block-size: 0;
+  }
+
+  .my-riot-connected-row {
+    grid-template-columns: var(--yoro-space-12) minmax(0, 1fr);
+  }
+
+  .my-riot-connected-row > .yoro-status,
+  .my-riot-connected-row > .yoro-button {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+  }
+
+  .my-riot-preview-content {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    margin: var(--yoro-space-2) var(--yoro-space-3) var(--yoro-space-3);
+    padding: var(--yoro-space-5);
+    text-align: center;
+  }
+
+  .my-riot-preview-content > div {
+    justify-items: center;
+  }
+}
+
 [data-reduced-motion="true"] *,
 [data-reduced-motion="true"] *::before,
 [data-reduced-motion="true"] *::after {
