@@ -83,6 +83,13 @@ test("공통 YORO Dashboard는 로그인 사용자용 진입점과 KO·JA 문구
   assert.match(source, /applyForStreamer/u);
   assert.match(source, /FollowersPage dataSource/u);
   assert.match(source, /MyRiotAccountPage/u);
+  assert.match(source, /현재 설정 미리보기/u);
+  assert.match(source, /現在の設定プレビュー/u);
+  assert.match(source, /yoro-dashboard-settings-layout/u);
+  assert.match(source, /yoro-dashboard-settings-preview/u);
+  assert.match(source, /yoro-dashboard-toggle-track/u);
+  assert.match(source, /settingsChanged/u);
+  assert.match(source, /cancelPreferenceChanges/u);
   assert.equal(source.includes("방송 자동화"), false);
   assert.equal(source.includes("配信自動化"), false);
   assert.equal(source.includes("Overlay 관리"), false);
@@ -106,6 +113,18 @@ test("공통 YORO Dashboard는 로그인 사용자용 진입점과 KO·JA 문구
     /\.yoro-dashboard-sidebar\.is-open[\s\S]*?transform:\s*translateX\(0\)/u
   );
   assert.match(css, /@media \(prefers-reduced-motion:\s*reduce\)/u);
+  assert.match(
+    css,
+    /\.yoro-dashboard-settings\s*\{[\s\S]*?max-width:\s*1240px/u
+  );
+  assert.match(
+    css,
+    /\.yoro-dashboard-settings-layout[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\) minmax\(300px, \.42fr\)/u
+  );
+  assert.match(
+    css,
+    /\.yoro-dashboard-settings-actions[\s\S]*?position:\s*sticky/u
+  );
 });
 
 test("공통 Dashboard 경로는 기존 방송 운영 하위 경로와 겹치지 않는다", async () => {

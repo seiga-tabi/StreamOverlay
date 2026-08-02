@@ -285,8 +285,7 @@
 }
 
 .yoro-dashboard-summary-grid article,
-.yoro-dashboard-next,
-.yoro-dashboard-settings {
+.yoro-dashboard-next {
   padding: 24px;
   border: 1px solid rgb(255 255 255 / 10%);
   border-radius: 16px;
@@ -476,27 +475,383 @@
 }
 
 .yoro-dashboard-settings {
-  max-width: 720px;
+  width: 100%;
+  max-width: 1240px;
+  margin-inline: auto;
 }
 
-.yoro-dashboard-settings > label:not(.yoro-dashboard-checkbox) {
+.yoro-dashboard-settings-hero {
+  position: relative;
+  isolation: isolate;
+  min-width: 0;
+  padding: clamp(26px, 3vw, 42px);
+  border: 1px solid rgb(142 123 255 / 22%);
+  border-radius: 22px;
   display: grid;
-  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) minmax(420px, .9fr);
+  gap: 32px;
+  align-items: end;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 88% 18%, rgb(111 74 215 / 25%), transparent 24rem),
+    linear-gradient(135deg, #1b2436, #171d2a 58%, #171a29);
+  box-shadow: 0 24px 64px rgb(0 0 0 / 20%);
 }
 
-.yoro-dashboard-settings select {
+.yoro-dashboard-settings-hero::after {
+  position: absolute;
+  z-index: -1;
+  inset: auto -80px -130px auto;
+  width: 320px;
+  height: 320px;
+  border: 1px solid rgb(151 120 255 / 14%);
+  border-radius: 50%;
+  content: "";
+}
+
+.yoro-dashboard-settings-eyebrow {
+  color: #8fb0ff;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .13em;
+}
+
+.yoro-dashboard-settings-hero h1 {
+  margin: 10px 0 8px;
+}
+
+.yoro-dashboard-settings-hero p {
+  max-width: 640px;
+  margin: 0;
+  line-height: 1.7;
+}
+
+.yoro-dashboard-settings-hero-summary {
+  min-width: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.yoro-dashboard-settings-hero-summary > div {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 14px;
+  display: grid;
+  gap: 7px;
+  background: rgb(8 13 24 / 34%);
+  backdrop-filter: blur(12px);
+}
+
+.yoro-dashboard-settings-hero-summary dt,
+.yoro-dashboard-settings-hero-summary dd {
+  margin: 0;
+}
+
+.yoro-dashboard-settings-hero-summary dt {
+  color: #98a5b8;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.yoro-dashboard-settings-hero-summary dd {
+  overflow: hidden;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.yoro-dashboard-settings-layout {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, .42fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.yoro-dashboard-settings-groups {
+  min-width: 0;
+  display: grid;
+  gap: 16px;
+}
+
+.yoro-dashboard-settings-group,
+.yoro-dashboard-settings-preview {
+  min-width: 0;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 18px;
+  background: #171e28;
+  box-shadow: 0 16px 38px rgb(0 0 0 / 13%);
+}
+
+.yoro-dashboard-settings-group {
+  padding: 22px;
+}
+
+.yoro-dashboard-settings-group > header {
+  margin-bottom: 18px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.yoro-dashboard-settings-group h2,
+.yoro-dashboard-settings-preview h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.yoro-dashboard-settings-group header p,
+.yoro-dashboard-settings-preview > p {
+  margin: 5px 0 0;
+  color: #9da9ba;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.yoro-dashboard-settings-icon,
+.yoro-dashboard-settings-preview-mark {
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgb(151 120 255 / 35%);
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgb(112 73 213 / 16%);
+  color: #bdaaff;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.yoro-dashboard-setting-row {
+  min-width: 0;
+  min-height: 86px;
+  padding: 16px 18px;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 14px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(210px, 260px);
+  gap: 24px;
+  align-items: center;
+  background: #111821;
+}
+
+.yoro-dashboard-setting-row > span:first-child {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.yoro-dashboard-setting-row strong {
+  color: #f7f8fb;
+}
+
+.yoro-dashboard-setting-row small {
+  color: #929fb1;
+  line-height: 1.55;
+}
+
+.yoro-dashboard-setting-row select {
+  width: 100%;
   min-height: 46px;
-  padding: 0 12px;
-  border: 1px solid rgb(255 255 255 / 16%);
-  border-radius: 10px;
+  padding: 0 38px 0 12px;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 11px;
   color: inherit;
-  background: #121821;
+  background: #0d141d;
+  font: inherit;
+  font-weight: 750;
 }
 
-.yoro-dashboard-checkbox {
+.yoro-dashboard-setting-row select:focus-visible,
+.yoro-dashboard-toggle-control input:focus-visible + .yoro-dashboard-toggle-track {
+  outline: 3px solid rgb(151 120 255 / 45%);
+  outline-offset: 2px;
+}
+
+.yoro-dashboard-toggle-control {
+  position: relative;
+  justify-self: end;
   display: flex;
   gap: 10px;
   align-items: center;
+}
+
+.yoro-dashboard-toggle-status {
+  color: #a9b4c4;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.yoro-dashboard-toggle-control input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.yoro-dashboard-toggle-track {
+  position: relative;
+  width: 50px;
+  height: 28px;
+  border: 1px solid rgb(255 255 255 / 15%);
+  border-radius: 999px;
+  background: #2b3442;
+  cursor: pointer;
+  transition: background .2s ease, border-color .2s ease;
+}
+
+.yoro-dashboard-toggle-track::after {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #f8f9fc;
+  box-shadow: 0 3px 8px rgb(0 0 0 / 24%);
+  content: "";
+  transition: transform .2s ease;
+}
+
+.yoro-dashboard-toggle-control input:checked + .yoro-dashboard-toggle-track {
+  border-color: rgb(151 120 255 / 55%);
+  background: #7657df;
+}
+
+.yoro-dashboard-toggle-control input:checked + .yoro-dashboard-toggle-track::after {
+  transform: translateX(22px);
+}
+
+.yoro-dashboard-settings-preview {
+  position: sticky;
+  top: 24px;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 90% 10%, rgb(113 76 219 / 20%), transparent 13rem),
+    #141b25;
+}
+
+.yoro-dashboard-settings-preview-mark {
+  width: 54px;
+  height: 54px;
+  margin-bottom: 18px;
+  border-radius: 16px;
+  font-size: 22px;
+}
+
+.yoro-dashboard-settings-preview dl {
+  margin: 24px 0;
+  display: grid;
+}
+
+.yoro-dashboard-settings-preview dl > div {
+  min-width: 0;
+  padding: 15px 0;
+  border-bottom: 1px solid rgb(255 255 255 / 8%);
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.yoro-dashboard-settings-preview dt,
+.yoro-dashboard-settings-preview dd {
+  margin: 0;
+}
+
+.yoro-dashboard-settings-preview dt {
+  color: #98a5b8;
+  font-size: 13px;
+}
+
+.yoro-dashboard-settings-preview dd {
+  overflow: hidden;
+  color: #f7f8fb;
+  font-weight: 850;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.yoro-dashboard-settings-sync-note {
+  padding: 16px;
+  border: 1px solid rgb(101 214 166 / 20%);
+  border-radius: 13px;
+  display: grid;
+  gap: 5px;
+  background: rgb(42 141 101 / 10%);
+}
+
+.yoro-dashboard-settings-sync-note strong {
+  color: #70dbad;
+}
+
+.yoro-dashboard-settings-sync-note span {
+  color: #a4b2c0;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.yoro-dashboard-settings-actions {
+  position: sticky;
+  bottom: 16px;
+  z-index: 10;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 15px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+  background: rgb(16 22 31 / 91%);
+  box-shadow: 0 18px 44px rgb(0 0 0 / 30%);
+  backdrop-filter: blur(18px);
+}
+
+.yoro-dashboard-settings-actions > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.yoro-dashboard-settings-actions > div strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.yoro-dashboard-settings-actions > div span {
+  color: #70dbad;
+  font-size: 13px;
+}
+
+.yoro-dashboard-settings-actions button {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 11px;
+  color: #dce3ee;
+  background: #202a37;
+  font: inherit;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.yoro-dashboard-settings-actions button.is-primary {
+  border-color: transparent;
+  color: #fff;
+  background: linear-gradient(135deg, #6389f5, #7957e6);
+}
+
+.yoro-dashboard-settings-actions button:disabled {
+  opacity: .48;
+  cursor: not-allowed;
 }
 
 .yoro-dashboard-entry {
@@ -747,6 +1102,15 @@
   .yoro-dashboard-main {
     padding-inline: 32px;
   }
+
+  .yoro-dashboard-settings-hero,
+  .yoro-dashboard-settings-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .yoro-dashboard-settings-preview {
+    position: static;
+  }
 }
 
 @media (max-width: 800px) {
@@ -872,6 +1236,55 @@
     width: min(100%, 760px);
     margin-inline: auto;
     padding: 28px 16px 48px;
+  }
+
+  .yoro-dashboard-settings {
+    gap: 18px;
+  }
+
+  .yoro-dashboard-settings-hero,
+  .yoro-dashboard-settings-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .yoro-dashboard-settings-hero {
+    padding: 24px 20px;
+    gap: 24px;
+  }
+
+  .yoro-dashboard-settings-hero-summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .yoro-dashboard-settings-group,
+  .yoro-dashboard-settings-preview {
+    padding: 18px;
+  }
+
+  .yoro-dashboard-setting-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .yoro-dashboard-toggle-control {
+    justify-self: start;
+  }
+
+  .yoro-dashboard-settings-preview {
+    position: static;
+  }
+
+  .yoro-dashboard-settings-actions {
+    bottom: 8px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .yoro-dashboard-settings-actions > div {
+    grid-column: 1 / -1;
+  }
+
+  .yoro-dashboard-settings-actions button {
+    width: 100%;
   }
 
   .yoro-dashboard-summary-grid {

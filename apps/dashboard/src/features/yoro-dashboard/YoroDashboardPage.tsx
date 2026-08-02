@@ -125,13 +125,38 @@ const copy = {
     permissionFailed: "Twitch 권한 승인 화면을 열지 못했습니다.",
     approvalRequired: "스트리머 승인 후 사용할 수 있습니다.",
     streamerLoadFailed: "스트리머 이용 상태를 불러오지 못했습니다.",
+    settingsEyebrow: "계정 환경설정",
     settingsTitle: "개인 설정",
     settingsDescription: "이 설정은 YORO 계정에 저장되어 다른 기기에서도 적용됩니다.",
+    settingsAccount: "현재 계정",
+    settingsSynced: "계정 동기화",
+    settingsSyncedDescription: "저장한 설정은 로그인한 모든 기기에 안전하게 적용됩니다.",
+    generalSettings: "일반 설정",
+    generalSettingsDescription: "Dashboard에서 사용할 기본 표시 언어를 선택합니다.",
+    dashboardSettings: "Dashboard 설정",
+    dashboardSettingsDescription: "로그인 직후 처음 표시할 화면을 지정합니다.",
+    accessibilitySettings: "접근성",
+    accessibilitySettingsDescription: "화면 움직임을 줄여 더 편안하게 이용할 수 있습니다.",
     language: "표시 언어",
+    languageDescription: "Dashboard 메뉴와 안내 문구에 적용됩니다.",
     languageKo: "한국어",
     languageJa: "日本語",
     startPage: "기본 Dashboard 화면",
+    startPageDescription: "Dashboard 로그인 후 가장 먼저 열리는 페이지입니다.",
     reduceMotion: "화면 전환 효과 줄이기",
+    reduceMotionDescription: "슬라이드와 화면 전환 애니메이션을 최소화합니다.",
+    enabled: "사용",
+    disabled: "사용 안 함",
+    settingsPreview: "현재 설정 미리보기",
+    settingsPreviewDescription: "저장하면 아래 구성으로 계정에 적용됩니다.",
+    previewLanguage: "언어",
+    previewStartPage: "시작 화면",
+    previewMotion: "화면 전환 효과",
+    motionReduced: "최소화",
+    motionStandard: "기본",
+    changesPending: "저장되지 않은 변경사항이 있습니다.",
+    allChangesSaved: "모든 변경사항이 저장되어 있습니다.",
+    cancelChanges: "변경 취소",
     save: "설정 저장",
     saving: "저장 중",
     saved: "개인 설정을 저장했습니다.",
@@ -214,13 +239,38 @@ const copy = {
     permissionFailed: "Twitch権限承認画面を開けませんでした。",
     approvalRequired: "ストリーマー承認後に利用できます。",
     streamerLoadFailed: "ストリーマー利用状況を読み込めませんでした。",
+    settingsEyebrow: "アカウント設定",
     settingsTitle: "個人設定",
     settingsDescription: "この設定はYOROアカウントに保存され、別の端末にも適用されます。",
+    settingsAccount: "現在のアカウント",
+    settingsSynced: "アカウント同期",
+    settingsSyncedDescription: "保存した設定はログイン中のすべての端末に安全に反映されます。",
+    generalSettings: "一般設定",
+    generalSettingsDescription: "Dashboardで使用する表示言語を選択します。",
+    dashboardSettings: "Dashboard設定",
+    dashboardSettingsDescription: "ログイン直後に最初に表示する画面を指定します。",
+    accessibilitySettings: "アクセシビリティ",
+    accessibilitySettingsDescription: "画面の動きを抑え、より快適に利用できます。",
     language: "表示言語",
+    languageDescription: "Dashboardのメニューと案内文に適用されます。",
     languageKo: "한국어",
     languageJa: "日本語",
     startPage: "既定のDashboard画面",
+    startPageDescription: "Dashboardへのログイン後、最初に開くページです。",
     reduceMotion: "画面切り替え効果を減らす",
+    reduceMotionDescription: "スライドと画面切り替えアニメーションを最小限にします。",
+    enabled: "使用",
+    disabled: "使用しない",
+    settingsPreview: "現在の設定プレビュー",
+    settingsPreviewDescription: "保存すると、以下の構成でアカウントに適用されます。",
+    previewLanguage: "言語",
+    previewStartPage: "開始画面",
+    previewMotion: "画面切り替え効果",
+    motionReduced: "最小限",
+    motionStandard: "標準",
+    changesPending: "保存されていない変更があります。",
+    allChangesSaved: "すべての変更が保存されています。",
+    cancelChanges: "変更を取り消す",
     save: "設定を保存",
     saving: "保存中",
     saved: "個人設定を保存しました。",
@@ -407,6 +457,11 @@ export function YoroDashboardPage() {
   const locale = draft?.locale ?? preferences?.locale ?? "ko";
   const text = copy[locale];
   const identity = authenticatedYoroIdentity(account.session);
+  const settingsChanged = Boolean(draft && preferences && (
+    draft.locale !== preferences.locale
+    || draft.defaultDashboardPage !== preferences.defaultDashboardPage
+    || draft.reducedMotion !== preferences.reducedMotion
+  ));
 
   useEffect(() => {
     const canonicalPath = canonicalYoroDashboardPath(window.location.pathname);
@@ -525,6 +580,7 @@ export function YoroDashboardPage() {
       document.documentElement.lang = saved.locale;
       document.documentElement.dataset.reducedMotion =
         saved.reducedMotion ? "true" : "false";
+      setDraft(saved);
       await account.refresh();
       setAnnouncement(copy[saved.locale].saved);
     } catch {
@@ -532,6 +588,21 @@ export function YoroDashboardPage() {
     } finally {
       setSaving(false);
     }
+  }
+
+  function changePreferences(patch: Partial<YoroUserPreferences>): void {
+    setDraft((current) => current ? { ...current, ...patch } : current);
+    setAnnouncement("");
+  }
+
+  function cancelPreferenceChanges(): void {
+    if (!preferences) return;
+    setDraft({ ...preferences });
+    setDashboardLocale(preferences.locale);
+    document.documentElement.lang = preferences.locale;
+    document.documentElement.dataset.reducedMotion =
+      preferences.reducedMotion ? "true" : "false";
+    setAnnouncement("");
   }
 
   async function submitStreamerApplication(
@@ -1070,52 +1141,158 @@ export function YoroDashboardPage() {
         ) : null}
         {page === "settings" && draft ? (
           <section className="yoro-dashboard-settings">
-            <header>
-              <h1>{text.settingsTitle}</h1>
-              <p>{text.settingsDescription}</p>
+            <header className="yoro-dashboard-settings-hero">
+              <div>
+                <span className="yoro-dashboard-settings-eyebrow">
+                  {text.settingsEyebrow}
+                </span>
+                <h1>{text.settingsTitle}</h1>
+                <p>{text.settingsDescription}</p>
+              </div>
+              <dl className="yoro-dashboard-settings-hero-summary">
+                <div>
+                  <dt>{text.settingsAccount}</dt>
+                  <dd>{identity?.displayName ?? text.unavailable}</dd>
+                </div>
+                <div>
+                  <dt>{text.language}</dt>
+                  <dd>{draft.locale === "ko" ? text.languageKo : text.languageJa}</dd>
+                </div>
+                <div>
+                  <dt>{text.settingsSynced}</dt>
+                  <dd>{settingsChanged ? text.changesPending : text.allChangesSaved}</dd>
+                </div>
+              </dl>
             </header>
-            <label>
-              <span>{text.language}</span>
-              <select
-                value={draft.locale}
-                onChange={(event) => setDraft({
-                  ...draft,
-                  locale: event.target.value as "ko" | "ja"
-                })}
+            <div className="yoro-dashboard-settings-layout">
+              <div className="yoro-dashboard-settings-groups">
+                <section className="yoro-dashboard-settings-group">
+                  <header>
+                    <span aria-hidden="true" className="yoro-dashboard-settings-icon">文</span>
+                    <div>
+                      <h2>{text.generalSettings}</h2>
+                      <p>{text.generalSettingsDescription}</p>
+                    </div>
+                  </header>
+                  <label className="yoro-dashboard-setting-row">
+                    <span>
+                      <strong>{text.language}</strong>
+                      <small>{text.languageDescription}</small>
+                    </span>
+                    <select
+                      value={draft.locale}
+                      onChange={(event) => changePreferences({
+                        locale: event.target.value as "ko" | "ja"
+                      })}
+                    >
+                      <option value="ko">{text.languageKo}</option>
+                      <option value="ja">{text.languageJa}</option>
+                    </select>
+                  </label>
+                </section>
+
+                <section className="yoro-dashboard-settings-group">
+                  <header>
+                    <span aria-hidden="true" className="yoro-dashboard-settings-icon">⌂</span>
+                    <div>
+                      <h2>{text.dashboardSettings}</h2>
+                      <p>{text.dashboardSettingsDescription}</p>
+                    </div>
+                  </header>
+                  <label className="yoro-dashboard-setting-row">
+                    <span>
+                      <strong>{text.startPage}</strong>
+                      <small>{text.startPageDescription}</small>
+                    </span>
+                    <select
+                      value={draft.defaultDashboardPage}
+                      onChange={(event) => changePreferences({
+                        defaultDashboardPage: event.target.value as YoroDashboardPage
+                      })}
+                    >
+                      {(Object.keys(paths) as YoroDashboardPage[]).map((item) => (
+                        <option key={item} value={item}>{text[item]}</option>
+                      ))}
+                    </select>
+                  </label>
+                </section>
+
+                <section className="yoro-dashboard-settings-group">
+                  <header>
+                    <span aria-hidden="true" className="yoro-dashboard-settings-icon">Aa</span>
+                    <div>
+                      <h2>{text.accessibilitySettings}</h2>
+                      <p>{text.accessibilitySettingsDescription}</p>
+                    </div>
+                  </header>
+                  <label className="yoro-dashboard-setting-row yoro-dashboard-setting-toggle">
+                    <span>
+                      <strong>{text.reduceMotion}</strong>
+                      <small>{text.reduceMotionDescription}</small>
+                    </span>
+                    <span className="yoro-dashboard-toggle-control">
+                      <span className="yoro-dashboard-toggle-status">
+                        {draft.reducedMotion ? text.enabled : text.disabled}
+                      </span>
+                      <input
+                        checked={draft.reducedMotion}
+                        onChange={(event) => changePreferences({
+                          reducedMotion: event.target.checked
+                        })}
+                        type="checkbox"
+                      />
+                      <span aria-hidden="true" className="yoro-dashboard-toggle-track" />
+                    </span>
+                  </label>
+                </section>
+              </div>
+
+              <aside className="yoro-dashboard-settings-preview">
+                <span className="yoro-dashboard-settings-preview-mark" aria-hidden="true">Y</span>
+                <h2>{text.settingsPreview}</h2>
+                <p>{text.settingsPreviewDescription}</p>
+                <dl>
+                  <div>
+                    <dt>{text.previewLanguage}</dt>
+                    <dd>{draft.locale === "ko" ? text.languageKo : text.languageJa}</dd>
+                  </div>
+                  <div>
+                    <dt>{text.previewStartPage}</dt>
+                    <dd>{text[draft.defaultDashboardPage]}</dd>
+                  </div>
+                  <div>
+                    <dt>{text.previewMotion}</dt>
+                    <dd>{draft.reducedMotion ? text.motionReduced : text.motionStandard}</dd>
+                  </div>
+                </dl>
+                <div className="yoro-dashboard-settings-sync-note">
+                  <strong>{text.settingsSynced}</strong>
+                  <span>{text.settingsSyncedDescription}</span>
+                </div>
+              </aside>
+            </div>
+
+            <footer className="yoro-dashboard-settings-actions">
+              <div>
+                <strong>{settingsChanged ? text.changesPending : text.allChangesSaved}</strong>
+                {announcement ? <span aria-live="polite">{announcement}</span> : null}
+              </div>
+              <button
+                disabled={!settingsChanged || saving}
+                onClick={cancelPreferenceChanges}
+                type="button"
               >
-                <option value="ko">{text.languageKo}</option>
-                <option value="ja">{text.languageJa}</option>
-              </select>
-            </label>
-            <label>
-              <span>{text.startPage}</span>
-              <select
-                value={draft.defaultDashboardPage}
-                onChange={(event) => setDraft({
-                  ...draft,
-                  defaultDashboardPage: event.target.value as YoroDashboardPage
-                })}
+                {text.cancelChanges}
+              </button>
+              <button
+                className="is-primary"
+                disabled={!settingsChanged || saving}
+                onClick={() => void savePreferences()}
+                type="button"
               >
-                {(Object.keys(paths) as YoroDashboardPage[]).map((item) => (
-                  <option key={item} value={item}>{text[item]}</option>
-                ))}
-              </select>
-            </label>
-            <label className="yoro-dashboard-checkbox">
-              <input
-                checked={draft.reducedMotion}
-                onChange={(event) => setDraft({
-                  ...draft,
-                  reducedMotion: event.target.checked
-                })}
-                type="checkbox"
-              />
-              <span>{text.reduceMotion}</span>
-            </label>
-            <button disabled={saving} onClick={() => void savePreferences()} type="button">
-              {saving ? text.saving : text.save}
-            </button>
-            {announcement ? <p aria-live="polite">{announcement}</p> : null}
+                {saving ? text.saving : text.save}
+              </button>
+            </footer>
           </section>
         ) : null}
       </main>
