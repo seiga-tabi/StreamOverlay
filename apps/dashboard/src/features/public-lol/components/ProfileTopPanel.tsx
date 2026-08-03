@@ -1,4 +1,4 @@
-import { isValidElement, useState, type ReactElement, type ReactNode } from "react";
+import { isValidElement, type ReactElement, type ReactNode } from "react";
 import { Button } from "../../../shared/ui/Button";
 import { Card } from "../../../shared/ui/Card";
 import { type StatusTone } from "../../../shared/ui/Status";
@@ -19,8 +19,6 @@ export type ProfileTopPanelText = {
   profileLinksLabel?: ProfileTopPanelLocalizedText;
   serverLabel: string;
   searching: string;
-  showDetails: ProfileTopPanelLocalizedText;
-  hideDetails: ProfileTopPanelLocalizedText;
   recentMatches: ProfileTopPanelLocalizedText;
 };
 
@@ -66,7 +64,6 @@ export type ProfileTopPanelProps = {
   favoriteActive: boolean;
   favoriteAriaLabel: string;
   favoriteActionLabel: string;
-  metricStrip: ReactNode;
   searchForm: ReactNode;
   streamerSpotlight?: ProfileTopStreamerSpotlight;
   text: ProfileTopPanelText;
@@ -126,7 +123,6 @@ export function ProfileTopPanel({
   displayTagLabel,
   loading,
   masteryChampionArt,
-  metricStrip,
   onRefresh,
   onOpenParticipation,
   onToggleFavorite,
@@ -147,7 +143,6 @@ export function ProfileTopPanel({
   tagLine,
   text,
 }: ProfileTopPanelProps) {
-  const [detailsOpen, setDetailsOpen] = useState(false);
   const actionProfileLinks = profileTopActionLinksFromNode(profileLinks);
   const renderSeasonBadges = profileTopSeasonBadgesRendererFromNode(seasonBadges);
   const renderSearchForm = profileTopSearchRendererFromNode(searchForm);
@@ -174,7 +169,7 @@ export function ProfileTopPanel({
   );
 
   return (
-    <Card as="section" id="public-ranking" className={`public-profile-top-grid public-profile-shared-top public-profile-platform-hero ${detailsOpen ? "details-open" : "details-collapsed"} ${masteryChampionArt ? "has-mastery-art" : ""}`} padding="none" variant="glass">
+    <Card as="section" id="public-ranking" className={`public-profile-top-grid public-profile-shared-top public-profile-platform-hero ${masteryChampionArt ? "has-mastery-art" : ""}`} padding="none" variant="glass">
       {masteryChampionArt ? <img className="public-profile-mastery-art" src={masteryChampionArt} alt="" aria-hidden="true" /> : null}
       <div className="public-profile-top-main">
         <ProfileTopIdentity
@@ -249,11 +244,6 @@ export function ProfileTopPanel({
           </aside>
         ) : null}
         <div className="public-profile-summary-controls">
-          <Button className="public-profile-details-toggle" type="button" size="sm" variant="tertiary" aria-controls="public-profile-rank-summary" aria-expanded={detailsOpen} onClick={() => setDetailsOpen((open) => !open)}>
-            <span  >
-              {detailsOpen ? text.hideDetails.label : text.showDetails.label}
-            </span>
-          </Button>
           <Button
             type="button"
             size="sm"
@@ -263,9 +253,6 @@ export function ProfileTopPanel({
             <span  >{text.recentMatches.label}</span>
           </Button>
         </div>
-      </div>
-      <div id="public-profile-rank-summary" className={`public-profile-rank-summary ${detailsOpen ? "is-open" : "is-collapsed"}`}>
-        {metricStrip}
       </div>
     </Card>
   );

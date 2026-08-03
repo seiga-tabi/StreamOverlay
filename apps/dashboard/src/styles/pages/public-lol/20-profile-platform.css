@@ -162,30 +162,34 @@
   box-shadow: var(--yoro-shadow-soft);
 }
 
-.public-profile-platform-v2 .public-profile-rank-summary {
-  position: relative;
-  z-index: var(--yoro-z-base);
-  border-block-start: var(--yoro-size-sr-only) solid var(--yoro-color-border-on-dark);
-  background: color-mix(in srgb, var(--public-gray-surface) 92%, transparent);
+.public-profile-platform-v2 .public-profile-rank-section {
+  min-inline-size: 0;
+  overflow: hidden;
+  border-color: var(--yoro-color-border-on-dark-strong);
+  border-radius: var(--yoro-radius-lg);
+  background: color-mix(in srgb, var(--public-gray-surface-strong) 94%, transparent);
+  box-shadow: var(--yoro-shadow-panel);
 }
 
-.public-profile-platform-v2 .public-profile-details-toggle {
-  display: inline-flex;
+.public-profile-platform-v2 .public-profile-rank-section__header {
+  margin-block-end: var(--yoro-space-3);
 }
 
-.public-profile-platform-v2 .public-profile-rank-summary.is-collapsed {
-  display: none;
+.public-profile-platform-v2 .public-profile-rank-section__header h2 {
+  color: var(--yoro-color-text-on-dark-strong);
+  font-size: var(--yoro-font-size-lg);
 }
 
-.public-profile-platform-v2 .public-profile-rank-summary .public-profile-metric-strip {
-  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+.public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-profile-rank-section .public-profile-metric-strip {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--yoro-space-3);
-  padding: var(--yoro-space-4);
-  background: transparent;
+  padding: 0 !important;
+  border-block-start: 0 !important;
+  background: transparent !important;
 }
 
-.public-profile-platform-v2 .public-profile-rank-summary .public-profile-metric-card {
-  min-height: 7.5rem;
+.public-profile-platform-v2 .public-profile-rank-section .public-profile-metric-card {
+  min-height: 10rem;
   padding: var(--yoro-space-4);
   transition:
     transform var(--yoro-motion-duration-base) var(--yoro-motion-ease-standard),
@@ -193,7 +197,7 @@
     box-shadow var(--yoro-motion-duration-base) var(--yoro-motion-ease-standard);
 }
 
-.public-profile-platform-v2 .public-profile-rank-summary .public-profile-metric-card:hover {
+.public-profile-platform-v2 .public-profile-rank-section .public-profile-metric-card:hover {
   transform: translateY(calc(var(--yoro-size-sr-only) * -2));
   border-color: var(--yoro-color-focus-ring);
   box-shadow: var(--yoro-shadow-soft);
@@ -477,9 +481,17 @@
     inline-size: 100%;
   }
 
-  .public-profile-platform-v2 .public-profile-rank-summary .public-profile-metric-strip {
-    grid-template-columns: minmax(0, 1fr);
-    padding: var(--yoro-space-3);
+  .public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-profile-rank-section .public-profile-metric-strip {
+    grid-template-columns: repeat(3, minmax(12rem, 1fr));
+    padding-block-end: var(--yoro-space-2) !important;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: inline proximity;
+    scrollbar-width: thin;
+  }
+
+  .public-profile-platform-v2 .public-profile-rank-section .public-profile-metric-card {
+    scroll-snap-align: start;
   }
 
   .public-profile-platform-v2 .public-profile-tabs {
@@ -552,7 +564,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .public-profile-platform-v2 .public-profile-platform-hero,
-  .public-profile-platform-v2 .public-profile-rank-summary .public-profile-metric-card,
+  .public-profile-platform-v2 .public-profile-rank-section .public-profile-metric-card,
   .public-profile-platform-v2 .public-profile-streamer-spotlight__actions :is(a, button),
   .public-profile-platform-v2 .public-match-row,
   .public-profile-platform-v2 .public-match-expanded {

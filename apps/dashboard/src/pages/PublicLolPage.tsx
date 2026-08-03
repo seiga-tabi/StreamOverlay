@@ -63,7 +63,6 @@ import {
   PlayerLoadoutBuild as FeaturePlayerLoadoutBuild,
   PublicMatchFilterBar as FeaturePublicMatchFilterBar,
   ProfileMetricStrip as FeatureProfileMetricStrip,
-  ProfileRecentChampionsCard as FeatureProfileRecentChampionsCard,
   ProfileTopPanel as FeatureProfileTopPanel,
   MatchTeamCompare as FeatureMatchTeamCompare,
   MatchTeamDetails as FeatureMatchTeamDetails,
@@ -78,10 +77,6 @@ import {
   searchSuggestions,
   readPublicApiErrorMessage as readErrorMessage,
   type PublicMatchFilterBarText,
-  type ProfileRecentChampionItem,
-  type ProfileRecentChampionsCardText,
-  type ProfileRecentChampionsStreamInfo,
-  type ProfileRecentChampionsStreamStatus,
   type ProfileTopPanelText,
   type PublicHomeLiveStreamer,
   type PublicHomeSearchPanelText,
@@ -1386,67 +1381,7 @@ function SummaryCards({ profile }: { profile: PublicLolProfile }) {
   );
 }
 
-function ProfileRecentChampionsCard({ champions, stream }: { champions: PublicRecentChampionSummary[]; stream?: PublicLolTwitchStream }) {
-  const winLabel = activePublicLocale === "ja" ? "勝" : "승";
-  const lossLabel = activePublicLocale === "ja" ? "敗" : "패";
-  const visibleStream = visibleStreamerStream(stream);
-  const streamStatus: ProfileRecentChampionsStreamStatus | undefined = visibleStream ? {
-    label: visibleStream.isLive ? t().twitchLive : t().twitchOfflineShort,
-    ko: visibleStream.isLive ? publicI18n.ko.twitchLive : publicI18n.ko.twitchOfflineShort,
-    ja: visibleStream.isLive ? publicI18n.ja.twitchLive : publicI18n.ja.twitchOfflineShort,
-    tone: visibleStream.isLive ? "live" : "neutral",
-    title: `${visibleStream.twitchDisplayName} · ${visibleStream.isLive ? t().twitchLive : t().twitchOfflineShort}`
-  } : undefined;
-  const streamInfo: ProfileRecentChampionsStreamInfo | undefined = visibleStream && streamStatus ? {
-    isLive: visibleStream.isLive,
-    displayName: visibleStream.twitchDisplayName,
-    login: visibleStream.twitchLogin,
-    avatarUrl: assetUrl(visibleStream.profileImageUrl),
-    avatarFallback: visibleStream.twitchDisplayName.slice(0, 1),
-    title: visibleStream.title,
-    gameName: visibleStream.gameName,
-    viewerLabel: visibleStream.isLive && visibleStream.viewerCount !== undefined ? `${formatNumber(visibleStream.viewerCount)} ${t().twitchViewers}` : undefined,
-    status: streamStatus
-  } : undefined;
-  const championItems: ProfileRecentChampionItem[] = champions.map((item) => {
-    const name = championName(item.champion);
-    const iconUrl = assetUrl(item.champion.iconUrl);
-    return {
-      key: item.champion.championId,
-      name,
-      iconUrl,
-      fallbackLabel: name.slice(0, 1),
-      recordLabel: `${formatPercent(item.winRate)} (${item.wins}${winLabel} / ${item.losses}${lossLabel})`,
-      score: formatDecimal(item.averageKda),
-      scoreClassName: metricToneClass(kdaTone(item.averageKda)),
-      ratingLabel: `${t().kda} ${t().rating}`
-    };
-  });
-  const text: ProfileRecentChampionsCardText = {
-    title: {
-      label: streamInfo ? (activePublicLocale === "ja" ? "配信情報" : "방송 정보") : t().recentChampionsTitle,
-      ko: streamInfo ? "방송 정보" : publicI18n.ko.recentChampionsTitle,
-      ja: streamInfo ? "配信情報" : publicI18n.ja.recentChampionsTitle
-    },
-    period: t().recentChampionsPeriod,
-    emptyTitle: {
-      label: t().noData,
-      ko: publicI18n.ko.noData,
-      ja: publicI18n.ja.noData
-    },
-    emptyDescription: {
-      label: t().recentChampionsEmpty,
-      ko: publicI18n.ko.recentChampionsEmpty,
-      ja: publicI18n.ja.recentChampionsEmpty
-    }
-  };
-  return (
-    <FeatureProfileRecentChampionsCard champions={championItems} streamInfo={streamInfo} streamStatus={streamStatus} text={text} />
-  );
-}
-
-function ProfileMetricStrip({ profile }: { profile: PublicLolProfile }) {
-  const recentChampions = recentChampionSummaries(profile.recentMatches);
+function ProfileRankSection({ profile }: { profile: PublicLolProfile }) {
   const rankMetricCard = ({
     key,
     tone,
@@ -1484,11 +1419,12 @@ function ProfileMetricStrip({ profile }: { profile: PublicLolProfile }) {
   const metricCards = rankedQueues.map(rankMetricCard);
 
   return (
-    <FeatureProfileMetricStrip
-      ariaLabel={t().profileSummary}
-      cards={metricCards}
-      recentChampionsCard={<ProfileRecentChampionsCard champions={recentChampions} stream={profile.twitchStream} />}
-    />
+    <Card as="section" className="public-profile-rank-section" padding="md" variant="elevated" aria-labelledby="public-profile-rank-title">
+      <CardHeader className="public-profile-rank-section__header">
+        <CardTitle as="h2" id="public-profile-rank-title">{t().rankSummary}</CardTitle>
+      </CardHeader>
+      <FeatureProfileMetricStrip ariaLabel={t().rankSummary} cards={metricCards} />
+    </Card>
   );
 }
 
@@ -1543,8 +1479,6 @@ function profileTopPanelText(): ProfileTopPanelText {
     },
     serverLabel: t().jpServer,
     searching: t().searching,
-    showDetails: { label: t().details, ko: publicI18n.ko.details, ja: publicI18n.ja.details },
-    hideDetails: { label: t().folded, ko: publicI18n.ko.folded, ja: publicI18n.ja.folded },
     recentMatches: { label: t().recentGames, ko: publicI18n.ko.recentGames, ja: publicI18n.ja.recentGames }
   };
 }
@@ -1642,7 +1576,6 @@ function ProfileTopPanel({
       gameName={profile.gameName}
       loading={loading}
       masteryChampionArt={masteryChampionArt}
-      metricStrip={<ProfileMetricStrip profile={profile} />}
       onRefresh={onRefresh}
       onToggleFavorite={onToggleFavorite}
       primaryRankClassName={primaryRankClassName}
@@ -8143,10 +8076,12 @@ export function PublicLolPage({
                   <PublicProfileErrorState error={error} />
                   <PublicProfileTabs activeTab={profileTab} onChange={setProfileTab} onParticipation={() => changeMainPage("followJoin")} />
 
-	                {profileTab === "overview" ? (
-	                  <div className="public-overview-search-layout">
-	                    <OverviewMetricPanel profile={activeProfile} />
-		                <RecentMatches
+                  {profileTab === "overview" ? (
+                    <>
+                      <ProfileRankSection profile={activeProfile} />
+                      <div className="public-overview-search-layout">
+                        <OverviewMetricPanel profile={activeProfile} />
+                        <RecentMatches
                           profile={activeProfile}
                           filters={filters}
                           champions={availableChampions}
@@ -8157,8 +8092,9 @@ export function PublicLolPage({
                           loadingMore={loadingMoreMatches}
                           moreError={moreMatchesError}
                         />
-	                  </div>
-	                ) : null}
+                      </div>
+                    </>
+                  ) : null}
 
                   {profileTab === "champions" ? (
                     <>

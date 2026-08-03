@@ -240,10 +240,22 @@ test("LoL 프로필 플랫폼은 주요 viewport에서 내부 탐색과 문서 �
     await page.goto("/lol/summoners/jp/YORO%20QA-JP1");
     const profile = page.locator(".public-profile-platform-v2");
     const tabs = page.locator(".public-profile-tabs");
-    const rankSummary = page.locator("#public-profile-rank-summary");
-    const detailsToggle = page.locator(".public-profile-details-toggle");
+    const rankSection = page.locator(".public-profile-rank-section");
+    const rankStrip = rankSection.locator(".public-profile-metric-strip");
+    const recentMatches = page.locator("#public-recent-matches");
     await expect(profile).toBeVisible();
     await expect(tabs.getByRole("button")).toHaveCount(5);
+    await expect(rankSection).toBeVisible();
+    await expect(rankSection.getByRole("heading", { name: "랭크 티어" })).toBeVisible();
+    await expect(rankStrip.locator(".public-profile-metric-card")).toHaveCount(3);
+    await expect(page.locator(".public-profile-details-toggle")).toHaveCount(0);
+
+    const rankPrecedesMatches = await page.evaluate(() => {
+      const rank = document.querySelector(".public-profile-rank-section");
+      const matches = document.querySelector("#public-recent-matches");
+      return Boolean(rank && matches && (rank.compareDocumentPosition(matches) & Node.DOCUMENT_POSITION_FOLLOWING));
+    });
+    expect(rankPrecedesMatches, "티어 영역은 최근 경기보다 앞에 배치되어야 합니다.").toBe(true);
 
     const diagnostics = await page.evaluate(() => ({
       clientWidth: document.documentElement.clientWidth,
@@ -254,13 +266,9 @@ test("LoL 프로필 플랫폼은 주요 viewport에서 내부 탐색과 문서 �
 
     await tabs.getByRole("button").last().scrollIntoViewIfNeeded();
     await expect(tabs.getByRole("button").last()).toBeVisible();
-    await expect(detailsToggle).toBeVisible();
-    await expect(rankSummary).toHaveCSS("display", "none");
-    await detailsToggle.click();
-    await expect(rankSummary).toHaveCSS("display", "block");
-    await expect(rankSummary.getByText("5v5 랭크", { exact: true })).toBeVisible();
-    await detailsToggle.click();
-    await expect(rankSummary).toHaveCSS("display", "none");
+    await rankSection.getByText("5v5 랭크", { exact: true }).scrollIntoViewIfNeeded();
+    await expect(rankSection.getByText("5v5 랭크", { exact: true })).toBeVisible();
+    await expect(recentMatches).toBeVisible();
   }
 
   expect(errors, "viewport 전환 중 runtime 오류가 없어야 합니다.").toEqual([]);

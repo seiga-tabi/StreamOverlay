@@ -7,6 +7,7 @@ import { ChampionFilterSelect } from "../src/features/public-lol/components/Cham
 import { PublicAppHeader } from "../src/features/public-lol/components/PublicAppHeader";
 import { PublicHomeSearchPanel, type PublicHomeSearchPanelText } from "../src/features/public-lol/components/PublicHomeSearchPanel";
 import { PublicSiteFooter } from "../src/features/public-lol/components/PublicSiteFooter";
+import { ProfileMetricStrip } from "../src/features/public-lol/components/ProfileMetricStrip";
 import { ProfileTopIdentity } from "../src/features/public-lol/components/ProfileTopIdentity";
 import { ProfileTopPanel } from "../src/features/public-lol/components/ProfileTopPanel";
 import { MatchTeamCompare } from "../src/features/public-lol/components/MatchTeamCompare";
@@ -465,7 +466,7 @@ test("챔피언 필터가 선택된 챔피언 이미지와 목록형 선택 접�
   assert.match(html, />아트록스</);
 });
 
-test("Profile 상단은 상세 정보를 접고 최근 경기 바로가기를 먼저 제공한다", () => {
+test("Profile 상단은 티어 카드를 분리하고 최근 경기 바로가기를 제공한다", () => {
   const html = renderToStaticMarkup(
     <ProfileTopPanel
       favoriteActionLabel="즐겨찾기"
@@ -474,7 +475,6 @@ test("Profile 상단은 상세 정보를 접고 최근 경기 바로가기를 �
       fetchedAtText="방금 전"
       gameName="YORO"
       loading={false}
-      metricStrip={<div id="metric-strip">상세 지표</div>}
       onOpenParticipation={() => undefined}
       onRefresh={() => undefined}
       onToggleFavorite={() => undefined}
@@ -520,15 +520,11 @@ test("Profile 상단은 상세 정보를 접고 최근 경기 바로가기를 �
         profileLinksLabel: { label: "프로필 링크", ko: "프로필 링크", ja: "プロフィールリンク" },
         serverLabel: "JP",
         searching: "검색 중",
-        showDetails: { label: "상세 보기", ko: "상세 보기", ja: "詳細を見る" },
-        hideDetails: { label: "상세 접기", ko: "상세 접기", ja: "詳細を閉じる" },
         recentMatches: { label: "최근 경기", ko: "최근 경기", ja: "最近の試合" },
       }}
     />
   );
 
-  assert.match(html, /details-collapsed/);
-  assert.match(html, /aria-controls="public-profile-rank-summary" aria-expanded="false"/);
   assert.match(html, /최근 경기/);
   assert.match(html, /public-profile-streamer-spotlight is-live/u);
   assert.match(html, /public-avatar square is-streamer is-live/u);
@@ -541,8 +537,26 @@ test("Profile 상단은 상세 정보를 접고 최근 경기 바로가기를 �
   assert.match(html, />League of Legends</u);
   assert.match(html, />Platinum I</u);
   assert.match(html, />참여 대기열 열림</u);
-  assert.match(html, /id="public-profile-rank-summary" class="public-profile-rank-summary is-collapsed"/u);
-  assert.match(html, /id="metric-strip"/);
+  assert.doesNotMatch(html, /public-profile-rank-summary|public-profile-details-toggle/u);
+});
+
+test("Profile 티어 영역은 솔로·자유·5v5 랭크만 독립적으로 렌더링한다", () => {
+  const html = renderToStaticMarkup(
+    <ProfileMetricStrip
+      ariaLabel="랭크 티어"
+      cards={[
+        { key: "solo", tone: "blue", icon: "S", title: "솔로랭크", value: "Platinum II 99 LP", valueTone: "good", detail: "37게임", rank: "승률 51%", statusTone: "success" },
+        { key: "flex", tone: "green", icon: "F", title: "자유랭크", value: "Emerald III 32 LP", valueTone: "good", detail: "10게임", rank: "승률 50%", statusTone: "success" },
+        { key: "ranked-5v5", tone: "purple", icon: "5", title: "5v5 랭크", value: "언랭크", valueTone: "neutral", detail: "표시할 데이터가 없습니다.", statusTone: "neutral" },
+      ]}
+    />
+  );
+
+  assert.match(html, /aria-label="랭크 티어"/u);
+  assert.match(html, />솔로랭크</u);
+  assert.match(html, />자유랭크</u);
+  assert.match(html, />5v5 랭크</u);
+  assert.equal((html.match(/public-profile-metric-card/g) ?? []).length, 3);
 });
 
 test("스트리머 프로필 이미지는 방송 상태를 테두리 class와 접근성 문구로 구분한다", () => {
