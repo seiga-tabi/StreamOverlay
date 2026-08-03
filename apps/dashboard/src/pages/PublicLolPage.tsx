@@ -6291,6 +6291,7 @@ function RecentMatches({
   loadingMore?: boolean;
   moreError?: string;
 }) {
+  const matchRankPreloadKey = profile.recentMatches.map((match) => match.matchId).join("|");
   const [expandedMatchId, setExpandedMatchId] = useState<string | null>(null);
   const [expandedMatchViews, setExpandedMatchViews] = useState<Record<string, PublicExpandedMatchView>>({});
   const [matchRanks, setMatchRanks] = useState<Record<string, PublicLolMatchRankResponse>>({});
@@ -6312,6 +6313,37 @@ function RecentMatches({
     setSelectedBuildParticipantKeys({});
     setHiddenRiotIdMatches({});
   }, [profile.riotId, profile.refreshAvailableAt]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let active = true;
+    const matchIds = matchRankPreloadKey.split("|").filter(Boolean);
+
+    async function preloadMatchRanks(): Promise<void> {
+      const concurrency = 1;
+      for (let offset = 0; offset < matchIds.length && active; offset += concurrency) {
+        const batch = matchIds.slice(offset, offset + concurrency);
+        await Promise.all(batch.map(async (matchId) => {
+          setMatchRankLoading((current) => ({ ...current, [matchId]: true }));
+          try {
+            const response = await getPublicLolMatchRanks(matchId, controller.signal);
+            if (active) setMatchRanks((current) => ({ ...current, [matchId]: response }));
+          } catch (error) {
+            if (error instanceof DOMException && error.name === "AbortError") return;
+            // 개별 경기 티어 조회 실패는 다른 경기와 전적 목록을 숨기지 않습니다.
+          } finally {
+            if (active) setMatchRankLoading((current) => ({ ...current, [matchId]: false }));
+          }
+        }));
+      }
+    }
+
+    void preloadMatchRanks();
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [matchRankPreloadKey, profile.refreshAvailableAt, profile.riotId]);
 
   async function ensureMatchRanks(matchId: string): Promise<void> {
     if (matchRanks[matchId] || matchRankLoading[matchId]) return;
@@ -6349,7 +6381,7 @@ function RecentMatches({
           const expandedView = expandedMatchViews[match.matchId] ?? "record";
           const highlightClass = matchHighlightClass(match.badges);
           const rankDetail = matchRanks[match.matchId];
-          const rankLoading = Boolean(matchRankLoading[match.matchId]);
+          const rankLoading = matchRankLoading[match.matchId] ?? !rankDetail;
           const build = matchBuilds[match.matchId];
           const buildLoading = Boolean(matchBuildLoading[match.matchId]);
           const buildError = matchBuildErrors[match.matchId] ?? "";
@@ -6381,7 +6413,7 @@ function RecentMatches({
               : `${t().averageTier} ${t().tierUnavailable}`;
           const inlineItemSlots: RecentMatchRowMediaItem[] = recentItemSlots.map((item, index) => ({
             key: `${match.matchId}:inline:${index}:${item?.itemId ?? "empty"}`,
-            className: item ? "" : "empty",
+            className: [item ? "" : "empty", index === 6 ? "ward" : ""].filter(Boolean).join(" "),
             content: item ? item.iconUrl ? <img src={item.iconUrl} alt="" /> : item.itemId : null
           }));
           const expandedPanelText: RecentMatchExpandedPanelText = {

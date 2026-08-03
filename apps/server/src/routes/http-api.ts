@@ -5980,7 +5980,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
     return request;
   }
 
-	  async function buildPublicLolMatchRanks(matchId: string): Promise<PublicLolMatchRankResponse> {
+  async function buildPublicLolMatchRanks(matchId: string): Promise<PublicLolMatchRankResponse> {
     if (!input.riot) throw new HttpRequestError(503, { error: "Riot API client를 사용할 수 없습니다." });
     if (!input.riot.isConfigured()) throw new HttpRequestError(503, { error: "Riot API key가 설정되어 있지 않습니다." });
 
@@ -5990,7 +5990,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (!match) throw new HttpRequestError(404, { error: "경기 상세 정보를 찾지 못했습니다." });
 
     const fetchedAt = new Date().toISOString();
-    const participants = await Promise.all(match.info.participants.map(async (participant): Promise<PublicLolMatchRankParticipant> => {
+    async function rankedParticipant(participant: RiotMatchParticipant): Promise<PublicLolMatchRankParticipant> {
       const riotId = participantRiotId(participant);
       let rankedStats = await input.riot?.getRankedStatsByPuuid(participant.puuid).catch(() => undefined);
       if (!rankedStats && riotId) {
@@ -6005,7 +6005,15 @@ export function createHttpHandler(input: HttpHandlerInput) {
         position: participant.individualPosition || participant.teamPosition,
         rankedStats: rankedStats ? { ...rankedStats } : undefined
       };
-    }));
+    }
+
+    const participants: PublicLolMatchRankParticipant[] = [];
+    const participantConcurrency = 2;
+    for (let offset = 0; offset < match.info.participants.length; offset += participantConcurrency) {
+      participants.push(...await Promise.all(
+        match.info.participants.slice(offset, offset + participantConcurrency).map(rankedParticipant)
+      ));
+    }
 
     return {
       status: "ready",

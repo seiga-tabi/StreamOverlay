@@ -105,9 +105,16 @@ export function RecentMatchRow({
               ))}
             </div>
           ) : null}
-          <div>
+          <div className="public-champion-copy">
             <strong>{championName}</strong>
             <small>{championRoleLevel}</small>
+          </div>
+          <div className="public-match-inline-items" aria-label={itemsLabel}>
+            {itemSlots.map((item) => (
+              <span className={item.className ?? ""} key={item.key}>
+                {item.content}
+              </span>
+            ))}
           </div>
         </div>
         <div className="public-kda">
@@ -125,13 +132,6 @@ export function RecentMatchRow({
           <span>{killParticipationMetric}</span>
           <span className="public-match-cs-metric">{csLabel}<small>{csPerMinuteMetric}</small></span>
           <span>{averageTierMetric}</span>
-        </div>
-        <div className="public-match-inline-items" aria-label={itemsLabel}>
-          {itemSlots.map((item) => (
-            <span className={item.className ?? ""} key={item.key}>
-              {item.content}
-            </span>
-          ))}
         </div>
         <div aria-label={scoreAriaLabel} className={`public-match-impact ${result} ${scoreClassName}`}>
           <strong>{aiScore}</strong>

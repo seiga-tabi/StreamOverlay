@@ -59,9 +59,13 @@ export async function getPublicLolMatchPage(
   return (await response.json()) as PublicLolMatchPageResponse;
 }
 
-export async function getPublicLolMatchRanks(matchId: string): Promise<PublicLolMatchRankResponse> {
+export async function getPublicLolMatchRanks(
+  matchId: string,
+  signal?: AbortSignal
+): Promise<PublicLolMatchRankResponse> {
   const response = await fetch(`${apiBase}/api/lol/match-ranks?matchId=${encodeURIComponent(matchId)}`, {
-    credentials: "include"
+    credentials: "include",
+    signal
   });
   if (!response.ok) throw new Error(await readPublicApiErrorMessage(response));
   return (await response.json()) as PublicLolMatchRankResponse;

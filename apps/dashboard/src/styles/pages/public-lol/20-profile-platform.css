@@ -585,10 +585,9 @@
 .public-profile-platform-v2 .public-matches-panel .public-match-summary {
   grid-template-columns:
     minmax(7rem, .55fr)
-    minmax(10rem, .9fr)
+    minmax(13rem, 1fr)
     minmax(8rem, .65fr)
     minmax(5rem, .4fr)
-    minmax(7rem, .55fr)
     minmax(8.5rem, .7fr)
     var(--yoro-size-touch-target) !important;
   grid-template-rows: minmax(7rem, auto) !important;
@@ -625,6 +624,24 @@
 .public-profile-platform-v2 .public-matches-panel .public-champion-cell {
   grid-column: 2 !important;
   grid-row: 1 !important;
+  display: grid !important;
+  grid-template-columns: 3.5rem minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-content: center;
+  gap: var(--yoro-space-2) var(--yoro-space-3) !important;
+  min-width: 0;
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-champion-cell > :is(img, span) {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-champion-copy {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: center;
+  min-width: 0;
 }
 
 .public-profile-platform-v2 .public-matches-panel .public-kda {
@@ -657,16 +674,13 @@
 }
 
 .public-profile-platform-v2 .public-matches-panel .public-match-inline-items {
-  grid-column: 5 !important;
-  grid-row: 1 !important;
+  grid-column: 1 / -1 !important;
+  grid-row: 2 !important;
   display: grid !important;
-  grid-template-columns: repeat(4, var(--yoro-space-6)) !important;
+  grid-template-columns: repeat(7, var(--yoro-space-6)) !important;
   gap: var(--yoro-space-1) !important;
   align-content: center;
-  width: calc(
-    var(--yoro-space-6) + var(--yoro-space-6) + var(--yoro-space-6) + var(--yoro-space-6) +
-    var(--yoro-space-1) + var(--yoro-space-1) + var(--yoro-space-1)
-  ) !important;
+  width: max-content !important;
 }
 
 .public-profile-platform-v2 .public-matches-panel .public-match-inline-items > span,
@@ -677,7 +691,7 @@
 }
 
 .public-profile-platform-v2 .public-matches-panel .public-match-meta {
-  grid-column: 6 !important;
+  grid-column: 5 !important;
   grid-row: 1 !important;
   display: grid !important;
   grid-template-columns: minmax(0, 1fr) !important;
@@ -705,7 +719,7 @@
 }
 
 .public-profile-platform-v2 .public-matches-panel .public-match-expand {
-  grid-column: 7 !important;
+  grid-column: 6 !important;
   grid-row: 1 !important;
   width: var(--yoro-size-touch-target) !important;
 }
@@ -713,11 +727,10 @@
 @media (max-width: 48rem) {
   .public-profile-platform-v2 .public-matches-panel .public-match-summary {
     grid-template-columns:
-      minmax(5rem, .8fr)
-      minmax(6rem, 1fr)
-      minmax(7rem, auto)
+      minmax(8rem, 1fr)
+      minmax(6rem, auto)
       var(--yoro-size-touch-target) !important;
-    grid-template-rows: auto minmax(5.5rem, auto) auto !important;
+    grid-template-rows: auto minmax(7rem, auto) auto !important;
     gap: var(--yoro-space-2) !important;
     min-height: 0;
     padding: var(--yoro-space-2) !important;
@@ -741,6 +754,9 @@
   .public-profile-platform-v2 .public-matches-panel .public-champion-cell {
     grid-column: 1 !important;
     grid-row: 2 !important;
+    grid-template-columns: var(--yoro-space-12) minmax(0, 1fr);
+    align-self: center !important;
+    height: auto !important;
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-kda {
@@ -754,19 +770,16 @@
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-match-inline-items {
-    grid-column: 3 !important;
+    grid-column: 1 / -1 !important;
     grid-row: 2 !important;
-    grid-template-columns: repeat(4, var(--yoro-space-5)) !important;
-    width: calc(
-      var(--yoro-space-5) + var(--yoro-space-5) + var(--yoro-space-5) + var(--yoro-space-5) +
-      var(--yoro-space-1) + var(--yoro-space-1) + var(--yoro-space-1)
-    ) !important;
+    grid-template-columns: repeat(7, var(--yoro-space-4)) !important;
+    width: max-content !important;
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-match-inline-items > span,
   .public-profile-platform-v2 .public-matches-panel .public-match-inline-items > span:nth-child(n + 7) {
-    width: var(--yoro-space-5) !important;
-    height: var(--yoro-space-5) !important;
+    width: var(--yoro-space-4) !important;
+    height: var(--yoro-space-4) !important;
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-match-meta {
@@ -780,14 +793,14 @@
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-match-expand {
-    grid-column: 4 !important;
+    grid-column: 3 !important;
     grid-row: 2 !important;
   }
 }
 
 @media (max-width: 26.875rem) {
   .public-profile-platform-v2 .public-matches-panel .public-match-summary {
-    grid-template-columns: minmax(4.5rem, .75fr) minmax(5rem, 1fr) minmax(5rem, auto) var(--yoro-size-touch-target) !important;
+    grid-template-columns: minmax(7rem, 1fr) minmax(5rem, auto) var(--yoro-size-touch-target) !important;
     gap: var(--yoro-space-1) !important;
   }
 
@@ -800,17 +813,14 @@
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-match-inline-items {
-    grid-template-columns: repeat(4, var(--yoro-space-4)) !important;
-    width: calc(
-      var(--yoro-space-4) + var(--yoro-space-4) + var(--yoro-space-4) + var(--yoro-space-4) +
-      var(--yoro-space-1) + var(--yoro-space-1) + var(--yoro-space-1)
-    ) !important;
+    grid-template-columns: repeat(7, var(--yoro-space-3)) !important;
+    width: max-content !important;
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-match-inline-items > span,
   .public-profile-platform-v2 .public-matches-panel .public-match-inline-items > span:nth-child(n + 7) {
-    width: var(--yoro-space-4) !important;
-    height: var(--yoro-space-4) !important;
+    width: var(--yoro-space-3) !important;
+    height: var(--yoro-space-3) !important;
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-match-meta {

@@ -626,6 +626,11 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
   assert.match(html, /data-ko="MVP" data-ja="MVP"/);
   assert.equal((html.match(/로드아웃\d/g) ?? []).length, 4);
   assert.equal((html.match(/아이템\d/g) ?? []).length, 7);
+  const championCellStart = html.indexOf("public-champion-cell");
+  const itemRowStart = html.indexOf("public-match-inline-items");
+  const kdaStart = html.indexOf("public-kda");
+  assert.ok(championCellStart >= 0 && itemRowStart > championCellStart && itemRowStart < kdaStart);
+  assert.match(html, /아이템0.*아이템1.*아이템2.*아이템3.*아이템4.*아이템5.*아이템6/u);
   assert.match(html, /class="deaths">0/);
   assert.doesNotMatch(html, /public-match-featured-label/u);
   assert.match(html, /public-kda-summary/u);
