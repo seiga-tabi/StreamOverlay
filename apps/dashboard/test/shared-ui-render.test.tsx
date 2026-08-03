@@ -588,6 +588,7 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
     <RecentMatchRow
       aiScore={91}
       aiScoreText={{ label: "점수", ko: "점수", ja: "スコア" }}
+      scoreDescription={{ label: "YORO 경기 점수 설명", ko: "YORO 경기 점수 설명", ja: "YORO試合スコアの説明" }}
       badges={<span>MVP</span>}
       championFallback="제"
       championIconUrl="https://example.com/champion.png"
@@ -596,7 +597,7 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
       expanded={false}
       expandAriaLabel="경기 상세 펼치기"
       highlightClass="highlight-mvp"
-      itemSlots={Array.from({ length: 7 }, (_, index) => ({ key: `item-${index}`, label: `아이템 ${index + 1}`, content: `아이템${index}` }))}
+      itemSlots={Array.from({ length: 7 }, (_, index) => ({ key: `item-${index}`, label: `아이템 ${index + 1}`, focusable: true, content: `아이템${index}` }))}
       itemsLabel="아이템"
       kdaMetric="Perfect"
       kdaScore={<><span>9</span><i>/</i><span className="deaths">0</span><i>/</i><span>6</span></>}
@@ -634,6 +635,7 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
   assert.ok(statsStart > itemRowStart && timeStart > statsStart);
   assert.match(html, /아이템0.*아이템1.*아이템2.*아이템3.*아이템4.*아이템5.*아이템6/u);
   assert.match(html, /title="아이템 1"/u);
+  assert.match(html, /tabindex="0" title="아이템 1"/u);
   assert.match(html, /class="deaths">0/);
   assert.doesNotMatch(html, /public-match-featured-label/u);
   assert.match(html, /public-kda-summary/u);
@@ -642,6 +644,7 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
   assert.match(html, /public-match-expand-label" role="tooltip">경기 상세 펼치기/u);
   assert.match(html, /aria-label="승리 · 제드 · 9\/0\/6"/u);
   assert.equal((html.match(/aria-label="점수 91"/gu) ?? []).length, 1);
+  assert.match(html, /public-match-score-description.*YORO 경기 점수 설명/u);
 });
 
 test("경기 상세 팀 비교는 피해량·시야·골드·오브젝트를 전환 탭으로 제공한다", () => {

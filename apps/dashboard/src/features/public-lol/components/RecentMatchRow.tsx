@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 
 export type RecentMatchRowLocalizedText = {
   label: ReactNode;
@@ -10,6 +10,7 @@ export type RecentMatchRowMediaItem = {
   key: string;
   className?: string;
   label?: string;
+  focusable?: boolean;
   content: ReactNode;
 };
 
@@ -40,6 +41,7 @@ export type RecentMatchRowProps = {
   badges: ReactNode;
   scoreClassName: string;
   aiScoreText: RecentMatchRowLocalizedText;
+  scoreDescription: RecentMatchRowLocalizedText;
   aiScore: number;
   scoreAriaLabel: string;
   metrics: RecentMatchRowMetric[];
@@ -81,6 +83,7 @@ export function RecentMatchRow({
   badges,
   scoreClassName,
   aiScoreText,
+  scoreDescription,
   aiScore,
   scoreAriaLabel,
   metrics,
@@ -91,6 +94,7 @@ export function RecentMatchRow({
   onToggleExpand
 }: RecentMatchRowProps) {
   const grade = scoreGrade(aiScore);
+  const scoreDescriptionId = useId();
 
   return (
     <article
@@ -132,16 +136,31 @@ export function RecentMatchRow({
               className={item.className ?? ""}
               data-tooltip={item.label}
               key={item.key}
+              tabIndex={item.focusable ? 0 : undefined}
               title={item.label}
             >
               {item.content}
             </span>
           ))}
         </div>
-        <div aria-label={scoreAriaLabel} className={`public-match-score ${scoreClassName}`}>
+        <div
+          aria-describedby={scoreDescriptionId}
+          aria-label={scoreAriaLabel}
+          className={`public-match-score ${scoreClassName}`}
+          tabIndex={0}
+        >
           <strong>{aiScore}</strong>
           <b>{grade}</b>
           <small data-ko={aiScoreText.ko} data-ja={aiScoreText.ja}>{aiScoreText.label}</small>
+          <span
+            className="public-match-score-description"
+            data-ko={scoreDescription.ko}
+            data-ja={scoreDescription.ja}
+            id={scoreDescriptionId}
+            role="tooltip"
+          >
+            {scoreDescription.label}
+          </span>
         </div>
         <div className="public-match-meta">
           {metrics.map((metric) => (

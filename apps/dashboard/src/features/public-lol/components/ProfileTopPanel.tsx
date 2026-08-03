@@ -222,6 +222,15 @@ export function ProfileTopPanel({
                   {streamerSpotlight.channelActionLabel}
                 </a>
               ) : null}
+              <button
+                className="is-ghost is-recent-matches"
+                data-ja={text.recentMatches.ja}
+                data-ko={text.recentMatches.ko}
+                type="button"
+                onClick={() => document.getElementById("public-recent-matches")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+              >
+                {text.recentMatches.label}
+              </button>
               {streamerSpotlight.supportingLinks?.map((link, index) => (
                 <a className="is-ghost" href={link.url} target="_blank" rel="noreferrer" key={`${link.id ?? link.url}:${index}`}>
                   {link.label}

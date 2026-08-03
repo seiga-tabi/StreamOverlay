@@ -6385,6 +6385,7 @@ function RecentMatches({
           const inlineItemSlots: RecentMatchRowMediaItem[] = recentItemSlots.map((item, index) => ({
             key: `${match.matchId}:inline:${index}:${item?.itemId ?? "empty"}`,
             className: [item ? "" : "empty", index === 6 ? "ward" : ""].filter(Boolean).join(" "),
+            focusable: Boolean(item),
             label: `${t().items} ${index + 1}${item ? ` · ID ${item.itemId}` : ""}`,
             content: item ? item.iconUrl ? <img src={item.iconUrl} alt="" /> : item.itemId : null
           }));
@@ -6442,6 +6443,11 @@ function RecentMatches({
                 label: t().aiScore,
                 ko: publicI18n.ko.aiScore,
                 ja: publicI18n.ja.aiScore
+              }}
+              scoreDescription={{
+                label: t().aiScoreDescription,
+                ko: publicI18n.ko.aiScoreDescription,
+                ja: publicI18n.ja.aiScoreDescription
               }}
               badges={<MatchBadges badges={match.badges} compact />}
               championFallback={championName(match.champion).slice(0, 1)}
@@ -8068,13 +8074,13 @@ export function PublicLolPage({
                     onToggleFavorite={toggleFavorite}
                   />
                   <PublicProfileErrorState error={error} />
-                  <ProfileRankSection profile={activeProfile} />
                   <PublicProfileTabs activeTab={profileTab} onChange={setProfileTab} onParticipation={() => changeMainPage("followJoin")} />
 
                   {profileTab === "overview" ? (
                     <div className="public-overview-search-layout">
                       <OverviewMetricPanel profile={activeProfile} />
                       <div className="public-overview-results-column">
+                        <ProfileRankSection profile={activeProfile} />
                         <RecentMatches
                           profile={activeProfile}
                           filters={filters}

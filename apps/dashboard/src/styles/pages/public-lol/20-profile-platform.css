@@ -51,6 +51,20 @@
   animation: public-profile-platform-enter var(--yoro-motion-duration-slow) var(--yoro-motion-ease-standard) both;
 }
 
+/* 오래된 고대비 회색 override보다 뒤에서 스트리머 Hero의 원래 색과 명암을 복원합니다. */
+.public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell)
+  .public-profile-shared-top.yoro-card.public-profile-platform-hero {
+  background:
+    linear-gradient(
+      100deg,
+      color-mix(in srgb, var(--yoro-color-text-strong) 96%, var(--yoro-color-public-primary)) 0%,
+      color-mix(in srgb, var(--yoro-color-text-strong) 90%, var(--yoro-color-public-primary)) 54%,
+      color-mix(in srgb, var(--yoro-color-text-strong) 78%, var(--yoro-color-primary)) 100%
+    ) !important;
+  color: var(--yoro-color-text-on-dark-strong) !important;
+  filter: none !important;
+}
+
 .public-profile-platform-v2.public-profile-shared-shell .public-profile-platform-hero.has-mastery-art::after {
   background:
     linear-gradient(
@@ -64,6 +78,23 @@
       180deg,
       color-mix(in srgb, var(--yoro-color-public-primary) 8%, transparent),
       color-mix(in srgb, var(--yoro-color-text-strong) 28%, transparent)
+    ) !important;
+}
+
+.public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell)
+  .public-profile-platform-hero.has-mastery-art::after {
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--yoro-color-text-strong) 94%, transparent) 0%,
+      color-mix(in srgb, var(--yoro-color-text-strong) 72%, transparent) 38%,
+      color-mix(in srgb, var(--yoro-color-text-strong) 28%, transparent) 72%,
+      color-mix(in srgb, var(--yoro-color-text-strong) 58%, transparent) 100%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--yoro-color-public-primary) 10%, transparent),
+      color-mix(in srgb, var(--yoro-color-text-strong) 40%, transparent)
     ) !important;
 }
 
@@ -85,6 +116,9 @@
 .public-profile-platform-v2 .public-profile-platform-hero .public-profile-top-content {
   align-self: center;
   max-inline-size: none;
+  color: var(--yoro-color-text-on-dark-strong);
+  opacity: 1 !important;
+  filter: none !important;
 }
 
 .public-profile-platform-v2 .public-profile-platform-hero .public-profile-mastery-art {
@@ -166,6 +200,19 @@
     box-shadow var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard);
 }
 
+.public-profile-platform-v2 .public-profile-streamer-spotlight__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--yoro-space-2);
+}
+
+.public-profile-platform-v2 .public-profile-streamer-spotlight__actions .is-recent-matches {
+  grid-column: 1 / -1;
+  min-height: var(--yoro-size-touch-target);
+  border-color: var(--yoro-color-border-on-dark);
+  color: var(--yoro-color-text-on-dark);
+}
+
 .public-profile-platform-v2 .public-profile-streamer-spotlight + .public-profile-summary-controls {
   display: none;
 }
@@ -209,6 +256,38 @@
     transform var(--yoro-motion-duration-base) var(--yoro-motion-ease-standard),
     border-color var(--yoro-motion-duration-base) var(--yoro-motion-ease-standard),
     box-shadow var(--yoro-motion-duration-base) var(--yoro-motion-ease-standard);
+}
+
+.public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell)
+  .public-profile-rank-section .public-profile-metric-card.public-profile-shared-metric-card {
+  min-height: 7rem !important;
+  padding: var(--yoro-space-3) !important;
+}
+
+.public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell)
+  .public-profile-rank-section .public-profile-metric-card.public-profile-shared-metric-card
+  .public-profile-shared-metric.yoro-metric {
+  gap: var(--yoro-space-1) !important;
+}
+
+.public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell)
+  .public-profile-rank-section .public-profile-metric-card.public-profile-shared-metric-card
+  .public-profile-rank-tier-icon {
+  width: 3.5rem !important;
+  height: 3.5rem !important;
+}
+
+.public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell)
+  .public-profile-rank-section .public-profile-metric-card.public-profile-shared-metric-card
+  .public-profile-rank-tier-icon img {
+  width: 3.25rem !important;
+  height: 3.25rem !important;
+}
+
+.public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell)
+  .public-profile-rank-section .public-profile-metric-card.public-profile-shared-metric-card
+  .yoro-metric__value {
+  font-size: var(--yoro-font-size-lg) !important;
 }
 
 .public-profile-platform-v2 .public-profile-rank-section .public-profile-metric-card:hover {
@@ -294,11 +373,18 @@
 }
 
 .public-profile-platform-v2 .public-match-filter-bar {
+  position: sticky;
+  z-index: var(--yoro-z-sticky);
+  top: calc(var(--public-game-header-total-height, var(--yoro-space-12)) + var(--yoro-size-touch-target) + var(--yoro-space-2));
   grid-template-columns: minmax(7rem, auto) repeat(3, minmax(9rem, 1fr)) auto;
   gap: var(--yoro-space-2);
   margin-block-end: var(--yoro-space-3);
   padding: var(--yoro-space-2);
+  border: 1px solid var(--yoro-color-border-on-dark);
+  border-radius: var(--yoro-radius-md);
+  background: color-mix(in srgb, var(--public-gray-surface-strong) 92%, transparent);
   box-shadow: var(--yoro-shadow-none) !important;
+  backdrop-filter: blur(var(--yoro-space-2));
 }
 
 .public-profile-platform-v2 .public-match-filter-bar label,
@@ -614,10 +700,10 @@
     minmax(10rem, 1fr)
     minmax(4rem, .48fr)
     var(--yoro-size-touch-target) !important;
-  grid-template-rows: minmax(6.5rem, auto) !important;
+  grid-template-rows: minmax(5.25rem, auto) !important;
   gap: var(--yoro-space-2) !important;
-  min-height: 6.5rem;
-  padding: var(--yoro-space-3) var(--yoro-space-4) !important;
+  min-height: 5.25rem;
+  padding: var(--yoro-space-2) var(--yoro-space-3) !important;
 }
 
 .public-profile-platform-v2 .public-matches-panel .public-match-outcome {
@@ -735,15 +821,53 @@
   border-radius: var(--yoro-radius-sm);
 }
 
+.public-profile-platform-v2 .public-matches-panel .public-match-inline-items > span[data-tooltip] {
+  position: relative;
+  overflow: visible !important;
+  outline: none;
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-match-inline-items > span[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  inset-block-end: 100%;
+  inset-inline-start: 50%;
+  z-index: calc(var(--yoro-z-modal) + 1);
+  width: max-content;
+  max-width: 14rem;
+  padding: var(--yoro-space-1) var(--yoro-space-2);
+  border: 1px solid var(--yoro-color-border-on-dark);
+  border-radius: var(--yoro-radius-sm);
+  background: var(--public-gray-surface-strong);
+  box-shadow: var(--yoro-shadow-sm);
+  color: var(--yoro-color-text-on-dark);
+  font-size: var(--yoro-font-size-xs);
+  line-height: var(--yoro-line-height-normal);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, calc(var(--yoro-space-2) * -1));
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-match-inline-items > span[data-tooltip]:is(:hover, :focus-visible)::after {
+  opacity: 1;
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-match-inline-items > span[data-tooltip]:focus-visible {
+  outline: var(--yoro-focus-ring-width) solid var(--yoro-color-focus-ring);
+  outline-offset: var(--yoro-focus-ring-offset);
+}
+
 .public-profile-platform-v2 .public-matches-panel .public-match-inline-items img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: contain !important;
   object-position: center;
+  border-radius: inherit;
 }
 
 .public-profile-platform-v2 .public-matches-panel .public-match-score {
+  position: relative;
   grid-column: 5 !important;
   grid-row: 1 !important;
   display: grid !important;
@@ -755,6 +879,12 @@
   border: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-match-score:focus-visible {
+  border-radius: var(--yoro-radius-sm);
+  outline: var(--yoro-focus-ring-width) solid var(--yoro-color-focus-ring);
+  outline-offset: var(--yoro-focus-ring-offset);
 }
 
 .public-profile-platform-v2 .public-matches-panel .public-match-score > strong {
@@ -772,6 +902,33 @@
 
 .public-profile-platform-v2 .public-matches-panel .public-match-score > small {
   color: var(--yoro-color-text-on-dark-muted);
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-match-score-description {
+  position: absolute;
+  inset-block-end: calc(100% + var(--yoro-space-2));
+  inset-inline-start: 50%;
+  z-index: calc(var(--yoro-z-sticky) + 1);
+  display: block;
+  width: max-content;
+  max-width: min(18rem, 72vw);
+  padding: var(--yoro-space-2) var(--yoro-space-3);
+  border: 1px solid var(--yoro-color-border-on-dark);
+  border-radius: var(--yoro-radius-sm);
+  background: var(--public-gray-surface-strong);
+  box-shadow: var(--yoro-shadow-sm);
+  color: var(--yoro-color-text-on-dark);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-regular);
+  line-height: var(--yoro-line-height-normal);
+  opacity: 0;
+  pointer-events: none;
+  text-align: start;
+  transform: translateX(-50%);
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-match-score:is(:hover, :focus-visible) .public-match-score-description {
+  opacity: 1;
 }
 
 .public-profile-platform-v2 .public-matches-panel .public-match-meta {
@@ -962,7 +1119,7 @@
   z-index: 1;
 }
 
-@media (max-width: 72rem) and (min-width: 48.0625rem) {
+@media (max-width: 72rem) and (min-width: 40.0625rem) {
   .public-profile-platform-v2 .public-matches-panel .public-match-summary {
     grid-template-columns:
       minmax(5.5rem, .45fr)
@@ -979,8 +1136,36 @@
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-champion-cell {
+    position: relative;
     grid-column: 2 !important;
     grid-row: 1 !important;
+  }
+
+  .public-profile-platform-v2.public-profile-shared-shell .public-matches-panel
+    .public-champion-cell > .public-champion-copy {
+    display: grid !important;
+    gap: var(--yoro-space-1);
+    overflow: hidden;
+    width: 100% !important;
+  }
+
+  .public-profile-platform-v2.public-profile-shared-shell .public-matches-panel
+    .public-champion-cell .public-match-mobile-spells {
+    top: auto !important;
+    bottom: 0 !important;
+    left: calc(3.5rem - var(--yoro-space-6)) !important;
+    z-index: 2;
+    grid-template-columns: repeat(2, var(--yoro-space-3)) !important;
+    gap: var(--yoro-size-sr-only) !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  .public-profile-platform-v2.public-profile-shared-shell .public-matches-panel
+    .public-match-mobile-spells span {
+    width: var(--yoro-space-3) !important;
+    height: var(--yoro-space-3) !important;
+    border: 0 !important;
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-kda {
@@ -1022,7 +1207,20 @@
   }
 }
 
-@media (max-width: 48rem) {
+@media (max-width: 40rem) {
+  .public-profile-platform-v2 .public-match-filter-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: end;
+  }
+
+  .public-profile-platform-v2 .public-match-filter-title {
+    grid-column: 1 / -1;
+  }
+
+  .public-profile-platform-v2 .public-match-filter-bar button {
+    width: 100%;
+  }
+
   .public-profile-platform-v2 .public-matches-panel .public-match-summary {
     grid-template-columns:
       minmax(7.25rem, 1.5fr)
@@ -1057,6 +1255,7 @@
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-champion-cell {
+    position: relative;
     grid-column: 1 !important;
     grid-row: 2 !important;
     grid-template-columns: var(--yoro-space-12) minmax(0, 1fr) !important;
@@ -1066,10 +1265,30 @@
 
   .public-profile-platform-v2.public-profile-shared-shell .public-matches-panel
     .public-champion-cell > .public-champion-copy {
-    display: block !important;
+    display: grid !important;
+    gap: var(--yoro-space-1);
     overflow: hidden;
     width: 100% !important;
     max-width: 100%;
+  }
+
+  .public-profile-platform-v2.public-profile-shared-shell .public-matches-panel
+    .public-champion-cell .public-match-mobile-spells {
+    top: auto !important;
+    bottom: 0 !important;
+    left: calc(var(--yoro-space-12) - var(--yoro-space-6)) !important;
+    z-index: 2;
+    grid-template-columns: repeat(2, var(--yoro-space-3)) !important;
+    gap: var(--yoro-size-sr-only) !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  .public-profile-platform-v2.public-profile-shared-shell .public-matches-panel
+    .public-match-mobile-spells span {
+    width: var(--yoro-space-3) !important;
+    height: var(--yoro-space-3) !important;
+    border: 0 !important;
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-kda {
@@ -1110,7 +1329,7 @@
   .public-profile-platform-v2 .public-matches-panel .public-match-meta {
     grid-column: 1 / -1 !important;
     grid-row: 3 !important;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     align-content: center;
     gap: var(--yoro-space-2) !important;
     padding: var(--yoro-space-2) 0 !important;
@@ -1122,6 +1341,7 @@
 
   .public-profile-platform-v2 .public-matches-panel .public-match-meta > span {
     display: grid;
+    align-content: center;
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-match-expand {
@@ -1141,6 +1361,35 @@
 
   .public-profile-platform-v2 .public-matches-panel .public-match-expand-label {
     display: none;
+  }
+}
+
+@media (min-width: 48.0625rem) and (max-width: 64rem) {
+  .public-profile-platform-v2 .public-match-filter-bar {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+    align-items: end;
+  }
+
+  .public-profile-platform-v2 .public-match-filter-title {
+    grid-column: 1 / -1;
+  }
+
+  .public-profile-platform-v2 .public-match-filter-bar button {
+    width: auto;
+  }
+}
+
+@media (min-width: 40.0625rem) and (max-width: 48rem) {
+  .public-profile-platform-v2 .public-match-filter-bar {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  }
+
+  .public-profile-platform-v2 .public-match-filter-title {
+    grid-column: 1 / -1;
+  }
+
+  .public-profile-platform-v2 .public-match-filter-bar button {
+    width: auto;
   }
 }
 
