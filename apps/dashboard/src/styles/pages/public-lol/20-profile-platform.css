@@ -1,4 +1,26 @@
 /* LoL 프로필을 스트리머 상태와 전적 탐색이 연결된 하나의 플랫폼 화면으로 구성합니다. */
+.public-profile-platform-v2 {
+  --public-gray-page: color-mix(in srgb, var(--yoro-color-text-strong) 94%, var(--yoro-color-primary));
+  --public-gray-page-deep: var(--yoro-color-text-strong);
+  --public-gray-surface: color-mix(in srgb, var(--yoro-color-text-strong) 86%, var(--yoro-color-primary));
+  --public-gray-surface-strong: color-mix(in srgb, var(--yoro-color-text-strong) 94%, var(--yoro-color-primary));
+  --public-gray-border: var(--yoro-color-border-on-dark);
+  --public-gray-border-strong: var(--yoro-color-border-on-dark-strong);
+  --public-gray-text: var(--yoro-color-text-on-dark);
+  --public-gray-muted: var(--yoro-color-text-on-dark-muted);
+  background:
+    radial-gradient(
+      circle at 50% 0,
+      color-mix(in srgb, var(--yoro-color-public-primary) 18%, transparent),
+      transparent 34rem
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--yoro-color-text-strong) 92%, var(--yoro-color-primary)),
+      var(--yoro-color-text-strong)
+    ) !important;
+}
+
 .public-profile-platform-v2 .public-profile-shared-main.yoro-app-shell__main {
   padding-inline: clamp(var(--yoro-space-4), 3vw, var(--yoro-space-8));
   opacity: 1;
@@ -24,7 +46,7 @@
   grid-template-columns: minmax(0, 1fr);
   overflow: clip;
   border-color: var(--yoro-color-border-on-dark-strong);
-  background: var(--yoro-color-product-gray-surface-strong) !important;
+  background: color-mix(in srgb, var(--yoro-color-text-strong) 90%, var(--yoro-color-public-primary)) !important;
   box-shadow: var(--yoro-shadow-panel);
   animation: public-profile-platform-enter var(--yoro-motion-duration-slow) var(--yoro-motion-ease-standard) both;
 }
@@ -33,15 +55,15 @@
   background:
     linear-gradient(
       90deg,
-      color-mix(in srgb, var(--yoro-color-product-gray-surface-strong) 92%, transparent) 0%,
-      color-mix(in srgb, var(--yoro-color-product-gray-surface-strong) 68%, transparent) 34%,
-      color-mix(in srgb, var(--yoro-color-product-gray-surface-strong) 22%, transparent) 68%,
-      color-mix(in srgb, var(--yoro-color-product-gray-surface-strong) 52%, transparent) 100%
+      color-mix(in srgb, var(--yoro-color-text-strong) 90%, transparent) 0%,
+      color-mix(in srgb, var(--yoro-color-text-strong) 62%, transparent) 34%,
+      color-mix(in srgb, var(--yoro-color-text-strong) 12%, transparent) 68%,
+      color-mix(in srgb, var(--yoro-color-text-strong) 44%, transparent) 100%
     ),
     linear-gradient(
       180deg,
       color-mix(in srgb, var(--yoro-color-public-primary) 8%, transparent),
-      color-mix(in srgb, var(--yoro-color-product-gray-surface-strong) 34%, transparent)
+      color-mix(in srgb, var(--yoro-color-text-strong) 28%, transparent)
     ) !important;
 }
 
@@ -59,8 +81,29 @@
 }
 
 .public-profile-platform-v2 .public-profile-platform-hero .public-profile-mastery-art {
-  opacity: .68 !important;
-  filter: saturate(1.12) contrast(1.08) brightness(1.02) !important;
+  opacity: .82 !important;
+  filter: saturate(1.24) contrast(1.14) brightness(1.04) !important;
+}
+
+.public-profile-platform-v2 .public-profile-platform-hero .public-avatar.square {
+  border-color: var(--yoro-color-primary) !important;
+  box-shadow:
+    0 0 0 var(--yoro-space-1) color-mix(in srgb, var(--yoro-color-primary) 18%, transparent),
+    var(--yoro-shadow-panel) !important;
+}
+
+.public-profile-platform-v2 .public-profile-platform-hero .public-avatar.square.is-streamer.is-offline {
+  border-color: var(--yoro-color-product-gray-muted) !important;
+  box-shadow:
+    0 0 0 var(--yoro-space-1) color-mix(in srgb, var(--yoro-color-product-gray-muted) 18%, transparent),
+    var(--yoro-shadow-panel) !important;
+}
+
+.public-profile-platform-v2 .public-profile-platform-hero .public-avatar.square.is-streamer.is-live {
+  border-color: var(--yoro-color-match-loss-accent) !important;
+  box-shadow:
+    0 0 0 var(--yoro-space-1) color-mix(in srgb, var(--yoro-color-match-loss-accent) 24%, transparent),
+    var(--yoro-shadow-panel) !important;
 }
 
 .public-profile-platform-v2 .public-profile-platform-hero .public-profile-title-row {
@@ -517,5 +560,242 @@
     scroll-behavior: auto;
     transition: none;
     transform: none;
+  }
+}
+
+/* 전적 요약 행: 7개 아이템과 핵심 지표를 고정된 읽기 순서로 배치합니다. */
+.public-profile-platform-v2 .public-matches-panel .public-match-summary {
+  grid-template-columns:
+    minmax(7rem, .55fr)
+    minmax(10rem, .9fr)
+    minmax(8rem, .65fr)
+    minmax(5rem, .4fr)
+    minmax(7rem, .55fr)
+    minmax(8.5rem, .7fr)
+    var(--yoro-size-touch-target) !important;
+  grid-template-rows: minmax(7rem, auto) !important;
+  min-height: 7rem;
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-result {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  display: flex !important;
+  flex-direction: column;
+  align-items: flex-start !important;
+  justify-content: center;
+  gap: var(--yoro-space-1) !important;
+  min-width: 0;
+  height: auto !important;
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-result > :is(strong, small, span) {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-match-started {
+  display: grid !important;
+  gap: 0;
+  color: var(--yoro-color-text-on-dark-muted) !important;
+  font-size: var(--yoro-font-size-xs);
+  line-height: var(--yoro-line-height-tight);
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-champion-cell {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-kda {
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  min-width: 0;
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-kda-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--yoro-space-2);
+  min-width: 0;
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-kda-summary > span {
+  color: var(--yoro-color-text-on-dark-muted) !important;
+  font-size: var(--yoro-font-size-xs);
+  white-space: nowrap;
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-kda-summary .public-match-badges.compact {
+  display: flex !important;
+  min-width: 0;
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-match-score {
+  grid-column: 4 !important;
+  grid-row: 1 !important;
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-match-inline-items {
+  grid-column: 5 !important;
+  grid-row: 1 !important;
+  display: grid !important;
+  grid-template-columns: repeat(4, var(--yoro-space-6)) !important;
+  gap: var(--yoro-space-1) !important;
+  align-content: center;
+  width: calc(
+    var(--yoro-space-6) + var(--yoro-space-6) + var(--yoro-space-6) + var(--yoro-space-6) +
+    var(--yoro-space-1) + var(--yoro-space-1) + var(--yoro-space-1)
+  ) !important;
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-match-inline-items > span,
+.public-profile-platform-v2 .public-matches-panel .public-match-inline-items > span:nth-child(n + 7) {
+  display: block !important;
+  width: var(--yoro-space-6) !important;
+  height: var(--yoro-space-6) !important;
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-match-meta {
+  grid-column: 6 !important;
+  grid-row: 1 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: var(--yoro-space-1) !important;
+  align-content: center;
+  min-width: 0;
+  padding: var(--yoro-space-2) !important;
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-match-meta > span {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--yoro-space-2);
+  min-width: 0;
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-match-cs-metric small {
+  color: var(--yoro-color-text-on-dark-muted) !important;
+  font-size: inherit;
+  white-space: nowrap;
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-match-impact {
+  display: none !important;
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-match-expand {
+  grid-column: 7 !important;
+  grid-row: 1 !important;
+  width: var(--yoro-size-touch-target) !important;
+}
+
+@media (max-width: 48rem) {
+  .public-profile-platform-v2 .public-matches-panel .public-match-summary {
+    grid-template-columns:
+      minmax(5rem, .8fr)
+      minmax(6rem, 1fr)
+      minmax(7rem, auto)
+      var(--yoro-size-touch-target) !important;
+    grid-template-rows: auto minmax(5.5rem, auto) auto !important;
+    gap: var(--yoro-space-2) !important;
+    min-height: 0;
+    padding: var(--yoro-space-2) !important;
+  }
+
+  .public-profile-platform-v2 .public-matches-panel .public-result {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 !important;
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    align-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  .public-profile-platform-v2 .public-matches-panel .public-match-started {
+    justify-self: end;
+  }
+
+  .public-profile-platform-v2 .public-matches-panel .public-champion-cell {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+  }
+
+  .public-profile-platform-v2 .public-matches-panel .public-kda {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    justify-items: start !important;
+  }
+
+  .public-profile-platform-v2 .public-matches-panel .public-match-score {
+    display: none !important;
+  }
+
+  .public-profile-platform-v2 .public-matches-panel .public-match-inline-items {
+    grid-column: 3 !important;
+    grid-row: 2 !important;
+    grid-template-columns: repeat(4, var(--yoro-space-5)) !important;
+    width: calc(
+      var(--yoro-space-5) + var(--yoro-space-5) + var(--yoro-space-5) + var(--yoro-space-5) +
+      var(--yoro-space-1) + var(--yoro-space-1) + var(--yoro-space-1)
+    ) !important;
+  }
+
+  .public-profile-platform-v2 .public-matches-panel .public-match-inline-items > span,
+  .public-profile-platform-v2 .public-matches-panel .public-match-inline-items > span:nth-child(n + 7) {
+    width: var(--yoro-space-5) !important;
+    height: var(--yoro-space-5) !important;
+  }
+
+  .public-profile-platform-v2 .public-matches-panel .public-match-meta {
+    grid-column: 1 / -1 !important;
+    grid-row: 3 !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .public-profile-platform-v2 .public-matches-panel .public-match-meta > span {
+    justify-content: center;
+  }
+
+  .public-profile-platform-v2 .public-matches-panel .public-match-expand {
+    grid-column: 4 !important;
+    grid-row: 2 !important;
+  }
+}
+
+@media (max-width: 26.875rem) {
+  .public-profile-platform-v2 .public-matches-panel .public-match-summary {
+    grid-template-columns: minmax(4.5rem, .75fr) minmax(5rem, 1fr) minmax(5rem, auto) var(--yoro-size-touch-target) !important;
+    gap: var(--yoro-space-1) !important;
+  }
+
+  .public-profile-platform-v2 .public-matches-panel .public-result {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .public-profile-platform-v2 .public-matches-panel .public-result small {
+    display: none !important;
+  }
+
+  .public-profile-platform-v2 .public-matches-panel .public-match-inline-items {
+    grid-template-columns: repeat(4, var(--yoro-space-4)) !important;
+    width: calc(
+      var(--yoro-space-4) + var(--yoro-space-4) + var(--yoro-space-4) + var(--yoro-space-4) +
+      var(--yoro-space-1) + var(--yoro-space-1) + var(--yoro-space-1)
+    ) !important;
+  }
+
+  .public-profile-platform-v2 .public-matches-panel .public-match-inline-items > span,
+  .public-profile-platform-v2 .public-matches-panel .public-match-inline-items > span:nth-child(n + 7) {
+    width: var(--yoro-space-4) !important;
+    height: var(--yoro-space-4) !important;
+  }
+
+  .public-profile-platform-v2 .public-matches-panel .public-match-meta {
+    grid-template-columns: minmax(0, 1fr) !important;
   }
 }

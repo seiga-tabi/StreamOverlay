@@ -7,6 +7,7 @@ import { ChampionFilterSelect } from "../src/features/public-lol/components/Cham
 import { PublicAppHeader } from "../src/features/public-lol/components/PublicAppHeader";
 import { PublicHomeSearchPanel, type PublicHomeSearchPanelText } from "../src/features/public-lol/components/PublicHomeSearchPanel";
 import { PublicSiteFooter } from "../src/features/public-lol/components/PublicSiteFooter";
+import { ProfileTopIdentity } from "../src/features/public-lol/components/ProfileTopIdentity";
 import { ProfileTopPanel } from "../src/features/public-lol/components/ProfileTopPanel";
 import { MatchTeamCompare } from "../src/features/public-lol/components/MatchTeamCompare";
 import { RecentMatchRow } from "../src/features/public-lol/components/RecentMatchRow";
@@ -479,6 +480,7 @@ test("Profile 상단은 상세 정보를 접고 최근 경기 바로가기를 �
       onToggleFavorite={() => undefined}
       primaryRankLabel="Platinum I"
       primaryRankTone="info"
+      profileIconUrl="https://static-cdn.jtvnw.net/jtv_user_pictures/yoro-profile_image.png"
       profileLinks={<div />}
       refreshButtonLabel="전적 갱신"
       refreshCooldownLabel=""
@@ -529,6 +531,8 @@ test("Profile 상단은 상세 정보를 접고 최근 경기 바로가기를 �
   assert.match(html, /aria-controls="public-profile-rank-summary" aria-expanded="false"/);
   assert.match(html, /최근 경기/);
   assert.match(html, /public-profile-streamer-spotlight is-live/u);
+  assert.match(html, /public-avatar square is-streamer is-live/u);
+  assert.match(html, /<span class="sr-only">LIVE NOW<\/span>/u);
   assert.match(html, /href="https:\/\/www\.twitch\.tv\/yoro"/u);
   assert.match(html, /href="https:\/\/discord\.gg\/yoro"/u);
   assert.match(html, />참여 신청</u);
@@ -541,11 +545,39 @@ test("Profile 상단은 상세 정보를 접고 최근 경기 바로가기를 �
   assert.match(html, /id="metric-strip"/);
 });
 
+test("스트리머 프로필 이미지는 방송 상태를 테두리 class와 접근성 문구로 구분한다", () => {
+  const renderIdentity = (streamerStatus: "live" | "offline", streamerStatusLabel: string) => renderToStaticMarkup(
+    <ProfileTopIdentity
+      identity={{
+        avatarFallbackLabel: "Y",
+        fetchedAtText: "방금 전",
+        gameName: "YORO",
+        primaryRankLabel: "Platinum I",
+        primaryRankTone: "info",
+        profileIconUrl: "https://static-cdn.jtvnw.net/jtv_user_pictures/yoro-profile_image.png",
+        streamerStatus,
+        streamerStatusLabel,
+        tagLine: "JP1",
+      }}
+      renderActions={() => <div />}
+      renderSeasonBadges={() => null}
+    />
+  );
+
+  const liveHtml = renderIdentity("live", "방송 중");
+  const offlineHtml = renderIdentity("offline", "오프라인");
+  assert.match(liveHtml, /public-avatar square is-streamer is-live/u);
+  assert.match(liveHtml, /<span class="sr-only">방송 중<\/span>/u);
+  assert.match(offlineHtml, /public-avatar square is-streamer is-offline/u);
+  assert.match(offlineHtml, /<span class="sr-only">오프라인<\/span>/u);
+});
+
 test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로드아웃을 유지한다", () => {
   const html = renderToStaticMarkup(
     <RecentMatchRow
       aiScore={91}
       aiScoreText={{ label: "MVP", ko: "MVP", ja: "MVP" }}
+      averageTierMetric="평균 티어 Platinum II"
       badges={<span>MVP</span>}
       championFallback="제"
       championIconUrl="https://example.com/champion.png"
@@ -555,9 +587,8 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
       csPerMinuteMetric="7.8 CS/분"
       expanded={false}
       expandAriaLabel="경기 상세 펼치기"
-      featuredLabel={{ label: "MVP", ko: "MVP", ja: "MVP" }}
       highlightClass="highlight-mvp"
-      itemSlots={Array.from({ length: 6 }, (_, index) => ({ key: `item-${index}`, content: `아이템${index}` }))}
+      itemSlots={Array.from({ length: 7 }, (_, index) => ({ key: `item-${index}`, content: `아이템${index}` }))}
       itemsLabel="아이템"
       kdaMetric="Perfect"
       kdaScore={<><span>9</span><i>/</i><span className="deaths">0</span><i>/</i><span>6</span></>}
@@ -565,7 +596,6 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
       matchAriaLabel="승리 · 제드 · 9/0/6"
       onToggleExpand={() => undefined}
       queueLabel="솔로랭크"
-      relativeLabel="13시간 전"
       result="win"
       resultDurationLabel="26:50"
       resultLabel="승리"
@@ -573,6 +603,7 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
       scoreClassName="metric-tone-excellent"
       spellItems={Array.from({ length: 4 }, (_, index) => ({ key: `loadout-${index}`, content: `로드아웃${index}` }))}
       startedAtLabel="2026. 7. 14."
+      startedAtTimeLabel="오후 1:20"
       summonerSpellsLabel="소환사 주문과 룬"
     />
   );
@@ -580,10 +611,12 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
   assert.match(html, /public-match-row win highlight-mvp/);
   assert.match(html, /data-ko="MVP" data-ja="MVP"/);
   assert.equal((html.match(/로드아웃\d/g) ?? []).length, 4);
-  assert.equal((html.match(/아이템\d/g) ?? []).length, 6);
+  assert.equal((html.match(/아이템\d/g) ?? []).length, 7);
   assert.match(html, /class="deaths">0/);
-  assert.match(html, /public-match-featured-label highlight-mvp/u);
-  assert.match(html, /public-match-expand-label">경기 상세 펼치기</u);
+  assert.doesNotMatch(html, /public-match-featured-label/u);
+  assert.match(html, /public-kda-summary/u);
+  assert.match(html, /킬 관여 70%.*CS 210.*7\.8 CS\/분.*평균 티어 Platinum II/u);
+  assert.doesNotMatch(html, /public-match-expand-label/u);
   assert.match(html, /aria-label="승리 · 제드 · 9\/0\/6"/u);
   assert.equal((html.match(/aria-label="MVP 91"/gu) ?? []).length, 2);
 });

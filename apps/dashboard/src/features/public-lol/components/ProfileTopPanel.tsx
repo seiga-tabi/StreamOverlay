@@ -189,6 +189,8 @@ export function ProfileTopPanel({
             primaryRankTone,
             profileMetaLabel,
             profileIconUrl,
+            streamerStatus: streamerSpotlight ? (streamerSpotlight.isLive ? "live" : "offline") : undefined,
+            streamerStatusLabel: streamerSpotlight?.statusLabel,
             tagLine,
           }}
           renderActions={renderActions}

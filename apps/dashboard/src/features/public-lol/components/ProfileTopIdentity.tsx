@@ -16,6 +16,8 @@ export type ProfileTopIdentityViewModel = {
   primaryRankLabel: string;
   primaryRankClassName?: string;
   primaryRankTone: StatusTone;
+  streamerStatus?: "live" | "offline";
+  streamerStatusLabel?: string;
 };
 
 export type ProfileTopIdentityProps = {
@@ -35,8 +37,9 @@ export function ProfileTopIdentity({
 
   return (
     <div className="public-profile-top-content">
-      <div className="public-avatar square">
+      <div className={`public-avatar square${identity.streamerStatus ? ` is-streamer is-${identity.streamerStatus}` : ""}`}>
         {identity.profileIconUrl ? <img src={identity.profileIconUrl} alt="" /> : <span>{identity.avatarFallbackLabel}</span>}
+        {identity.streamerStatusLabel ? <span className="sr-only">{identity.streamerStatusLabel}</span> : null}
       </div>
       <div className="public-profile-top-copy">
         <PageHeader as="div" className="public-profile-shared-page-header" layout="compact">

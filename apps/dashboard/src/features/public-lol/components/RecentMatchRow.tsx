@@ -19,10 +19,9 @@ export type RecentMatchRowProps = {
   expanded: boolean;
   resultLabel: ReactNode;
   queueLabel: ReactNode;
-  featuredLabel?: RecentMatchRowLocalizedText;
   startedAtLabel: ReactNode;
+  startedAtTimeLabel: ReactNode;
   resultDurationLabel: ReactNode;
-  relativeLabel: ReactNode;
   championIconUrl?: string;
   championFallback: ReactNode;
   championName: ReactNode;
@@ -39,6 +38,7 @@ export type RecentMatchRowProps = {
   csLabel: ReactNode;
   csPerMinuteMetric: ReactNode;
   killParticipationMetric: ReactNode;
+  averageTierMetric: ReactNode;
   itemSlots: RecentMatchRowMediaItem[];
   itemsLabel: string;
   expandAriaLabel: string;
@@ -53,10 +53,9 @@ export function RecentMatchRow({
   expanded,
   resultLabel,
   queueLabel,
-  featuredLabel,
   startedAtLabel,
+  startedAtTimeLabel,
   resultDurationLabel,
-  relativeLabel,
   championIconUrl,
   championFallback,
   championName,
@@ -73,6 +72,7 @@ export function RecentMatchRow({
   csLabel,
   csPerMinuteMetric,
   killParticipationMetric,
+  averageTierMetric,
   itemSlots,
   itemsLabel,
   expandAriaLabel,
@@ -88,14 +88,11 @@ export function RecentMatchRow({
         <div className="public-result">
           <b className={`public-match-result-pill ${result}`}>{resultLabel}</b>
           <strong>{queueLabel}</strong>
-          {featuredLabel ? (
-            <span className={`public-match-featured-label ${highlightClass}`} data-ko={featuredLabel.ko} data-ja={featuredLabel.ja}>
-              {featuredLabel.label}
-            </span>
-          ) : null}
-          <span className="public-match-started">{startedAtLabel}</span>
+          <span className="public-match-started">
+            <span>{startedAtLabel}</span>
+            <span>{startedAtTimeLabel}</span>
+          </span>
           <small>{resultDurationLabel}</small>
-          <em className="public-match-relative">{relativeLabel}</em>
         </div>
         <div className={`public-champion-cell ${highlightClass}`}>
           {championIconUrl ? <img src={championIconUrl} alt="" /> : <span>{championFallback}</span>}
@@ -115,17 +112,19 @@ export function RecentMatchRow({
         </div>
         <div className="public-kda">
           <strong>{kdaScore}</strong>
-          <span>{kdaMetric}</span>
-          {badges}
+          <div className="public-kda-summary">
+            <span>{kdaMetric}</span>
+            {badges}
+          </div>
         </div>
         <div aria-label={scoreAriaLabel} className={`public-match-score ${scoreClassName}`}>
           <span data-ko={aiScoreText.ko} data-ja={aiScoreText.ja}>{aiScoreText.label}</span>
           <strong>{aiScore}</strong>
         </div>
         <div className="public-match-meta">
-          <span>{csLabel}</span>
-          <span>{csPerMinuteMetric}</span>
           <span>{killParticipationMetric}</span>
+          <span className="public-match-cs-metric">{csLabel}<small>{csPerMinuteMetric}</small></span>
+          <span>{averageTierMetric}</span>
         </div>
         <div className="public-match-inline-items" aria-label={itemsLabel}>
           {itemSlots.map((item) => (
@@ -145,7 +144,6 @@ export function RecentMatchRow({
           aria-label={expandAriaLabel}
           onClick={onToggleExpand}
         >
-          <span className="public-match-expand-label">{expandAriaLabel}</span>
           <span aria-hidden="true" />
         </button>
       </div>

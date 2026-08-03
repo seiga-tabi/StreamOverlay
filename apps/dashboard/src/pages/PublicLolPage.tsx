@@ -639,6 +639,27 @@ function formatDate(value: string | undefined): string {
   return new Intl.DateTimeFormat(activePublicLocale === "ja" ? "ja-JP" : "ko-KR", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).format(date);
 }
 
+function formatMatchDate(value: string | undefined): string {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return "-";
+  return new Intl.DateTimeFormat(activePublicLocale === "ja" ? "ja-JP" : "ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(date);
+}
+
+function formatMatchTime(value: string | undefined): string {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return "-";
+  return new Intl.DateTimeFormat(activePublicLocale === "ja" ? "ja-JP" : "ko-KR", {
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(date);
+}
+
 function formatRelativeDate(value: string | undefined): string {
   if (!value) return "-";
   const date = new Date(value);
@@ -5335,7 +5356,7 @@ function summonerSpellIconUrl(spellId: number, version?: string): string | undef
   return spellFile && version ? `https://ddragon.leagueoflegends.com/cdn/${version}/img/spell/${spellFile}.png` : undefined;
 }
 
-function fixedRecentItemSlots(items: PublicLolRecentMatch["items"], count = 6): Array<PublicLolRecentMatch["items"][number] | undefined> {
+function fixedRecentItemSlots(items: PublicLolRecentMatch["items"], count = 7): Array<PublicLolRecentMatch["items"][number] | undefined> {
   const slots = Array<PublicLolRecentMatch["items"][number] | undefined>(count).fill(undefined);
   items.forEach((item, index) => {
     const slot = item.slot >= 0 && item.slot < count ? item.slot : index;
@@ -6401,7 +6422,7 @@ function RecentMatches({
           const buildError = matchBuildErrors[match.matchId] ?? "";
           const hideRiotIds = Boolean(hiddenRiotIdMatches[match.matchId]);
           const dataDragonVersion = recentMatchDataDragonVersion(match);
-          const recentItemSlots = fixedRecentItemSlots(match.items, 6);
+          const recentItemSlots = fixedRecentItemSlots(match.items, 7);
           const aiScore = matchAiScore(match);
           const targetRunes = match.teams.flatMap((team) => team.players).find((player) => player.isTarget)?.runes ?? [];
           const spellItems: RecentMatchRowMediaItem[] = match.summonerSpells.slice(0, 2).map((spellId) => {
@@ -6420,7 +6441,11 @@ function RecentMatches({
               content: <img src={rune.iconUrl} alt="" />
             }));
           const placementLabel = matchPlacementLabel(match.badges);
-          const hasPlacementLabel = placementLabel !== t().aiScore;
+          const matchAverageTier = rankLoading
+            ? `${t().averageTier} ${t().tierLoading}`
+            : rankDetail
+              ? `${t().averageTier} ${averageTierLabel(rankDetail.participants.map((participant) => participant.rankedStats))}`
+              : `${t().averageTier} ${t().tierUnavailable}`;
           const inlineItemSlots: RecentMatchRowMediaItem[] = recentItemSlots.map((item, index) => ({
             key: `${match.matchId}:inline:${index}:${item?.itemId ?? "empty"}`,
             className: item ? "" : "empty",
@@ -6482,6 +6507,7 @@ function RecentMatches({
                 ja: matchPlacementLabel(match.badges, "ja")
               }}
               badges={<MatchBadges badges={match.badges} compact />}
+              averageTierMetric={matchAverageTier}
               championFallback={championName(match.champion).slice(0, 1)}
               championIconUrl={match.champion.iconUrl}
               championName={championName(match.champion)}
@@ -6491,11 +6517,6 @@ function RecentMatches({
               expanded={expanded}
               expandedPanel={expandedPanel}
               expandAriaLabel={expanded ? t().collapseMatch : t().expandMatch}
-              featuredLabel={hasPlacementLabel ? {
-                label: placementLabel,
-                ko: matchPlacementLabel(match.badges, "ko"),
-                ja: matchPlacementLabel(match.badges, "ja")
-              } : undefined}
               highlightClass={highlightClass}
               itemSlots={inlineItemSlots}
               itemsLabel={t().items}
@@ -6517,14 +6538,14 @@ function RecentMatches({
                 }
               }}
               queueLabel={match.queueId ? queueLabels[activePublicLocale][match.queueId] ?? `${t().queue} ${match.queueId}` : "-"}
-              relativeLabel={formatRelativeDate(match.startedAt)}
               result={match.result}
               resultDurationLabel={formatDuration(match.durationSeconds)}
               resultLabel={resultLabel(match.result)}
               scoreAriaLabel={`${placementLabel} ${aiScore}`}
               scoreClassName={metricToneClass(scoreTone(aiScore))}
               spellItems={spellItems}
-              startedAtLabel={formatDate(match.startedAt)}
+              startedAtLabel={formatMatchDate(match.startedAt)}
+              startedAtTimeLabel={formatMatchTime(match.startedAt)}
               summonerSpellsLabel={t().summonerSpells}
             />
 	          );
@@ -7634,7 +7655,8 @@ export function PublicLolPage({
   }
 
 	  function searchRiotId(riotId: string): void {
-    window.open(publicSummonerPath(riotId), "_blank", "noopener,noreferrer");
+    setQuery(riotId);
+    void runSearch(riotId);
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {

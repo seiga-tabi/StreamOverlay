@@ -30,6 +30,9 @@ test("공개 소환사 경로를 동일한 Riot ID로 왕복 변환한다", () =
   const path = publicSummonerPath("せいが#sei");
   assert.equal(path, "/lol/summoners/jp/%E3%81%9B%E3%81%84%E3%81%8C-SEI");
   assert.equal(riotIdFromPublicSummonerPath(path), "せいが#SEI");
+  assert.equal(riotIdFromPublicSummonerPath(`/ko${path}`), "せいが#SEI");
+  assert.equal(riotIdFromPublicSummonerPath(`/ja${path}`), "せいが#SEI");
+  assert.equal(riotIdFromPublicSummonerPath("/ko/lol/summoners/jp/%E0%A4%A"), undefined);
 });
 
 test("공개 페이지 경로를 페이지 상태와 왕복 변환한다", () => {

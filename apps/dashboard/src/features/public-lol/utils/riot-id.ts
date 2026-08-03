@@ -1,4 +1,5 @@
 import type { SearchSuggestion } from "../types/public-lol";
+import { stripPublicLocalePrefix } from "./public-locale-path";
 
 const PUBLIC_SUMMONER_ROUTE_PREFIX = "/lol/summoners/jp/";
 const MAX_SEARCH_SUGGESTIONS = 6;
@@ -49,10 +50,16 @@ export function publicSummonerPath(riotId: string): string {
 }
 
 export function riotIdFromPublicSummonerPath(pathname: string = window.location.pathname): string | undefined {
+  pathname = stripPublicLocalePrefix(pathname);
   if (!pathname.startsWith(PUBLIC_SUMMONER_ROUTE_PREFIX)) return undefined;
   const slug = pathname.slice(PUBLIC_SUMMONER_ROUTE_PREFIX.length).split("/")[0];
   if (!slug) return undefined;
-  const decoded = decodeURIComponent(slug).trim().normalize("NFKC").replace(/＃/g, "#");
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(slug).trim().normalize("NFKC").replace(/＃/g, "#");
+  } catch {
+    return undefined;
+  }
   if (decoded.includes("#")) return jpRiotIdQuery(decoded);
   const separatorIndex = decoded.lastIndexOf("-");
   if (separatorIndex <= 0 || separatorIndex === decoded.length - 1) return undefined;
