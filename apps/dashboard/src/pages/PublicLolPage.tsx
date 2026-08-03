@@ -8077,10 +8077,10 @@ export function PublicLolPage({
                   <PublicProfileTabs activeTab={profileTab} onChange={setProfileTab} onParticipation={() => changeMainPage("followJoin")} />
 
                   {profileTab === "overview" ? (
-                    <>
-                      <ProfileRankSection profile={activeProfile} />
-                      <div className="public-overview-search-layout">
-                        <OverviewMetricPanel profile={activeProfile} />
+                    <div className="public-overview-search-layout">
+                      <OverviewMetricPanel profile={activeProfile} />
+                      <div className="public-overview-results-column">
+                        <ProfileRankSection profile={activeProfile} />
                         <RecentMatches
                           profile={activeProfile}
                           filters={filters}
@@ -8093,7 +8093,7 @@ export function PublicLolPage({
                           moreError={moreMatchesError}
                         />
                       </div>
-                    </>
+                    </div>
                   ) : null}
 
                   {profileTab === "champions" ? (

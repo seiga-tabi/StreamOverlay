@@ -243,11 +243,16 @@ test("LoL 프로필 플랫폼은 주요 viewport에서 내부 탐색과 문서 �
     const rankSection = page.locator(".public-profile-rank-section");
     const rankStrip = rankSection.locator(".public-profile-metric-strip");
     const recentMatches = page.locator("#public-recent-matches");
+    const resultsColumn = page.locator(".public-overview-results-column");
+    const aggregatePanel = page.locator(".public-overview-dashboard-panel");
     await expect(profile).toBeVisible();
     await expect(tabs.getByRole("button")).toHaveCount(5);
     await expect(rankSection).toBeVisible();
     await expect(rankSection.getByRole("heading", { name: "랭크 티어" })).toBeVisible();
     await expect(rankStrip.locator(".public-profile-metric-card")).toHaveCount(3);
+    await expect(resultsColumn.locator(".public-profile-rank-section")).toHaveCount(1);
+    await expect(resultsColumn.locator("#public-recent-matches")).toHaveCount(1);
+    await expect(aggregatePanel).toHaveCount(1);
     await expect(page.locator(".public-profile-details-toggle")).toHaveCount(0);
 
     const rankPrecedesMatches = await page.evaluate(() => {
@@ -256,6 +261,21 @@ test("LoL 프로필 플랫폼은 주요 viewport에서 내부 탐색과 문서 �
       return Boolean(rank && matches && (rank.compareDocumentPosition(matches) & Node.DOCUMENT_POSITION_FOLLOWING));
     });
     expect(rankPrecedesMatches, "티어 영역은 최근 경기보다 앞에 배치되어야 합니다.").toBe(true);
+
+    const [rankBox, matchesBox, aggregateBox] = await Promise.all([
+      rankSection.boundingBox(),
+      recentMatches.boundingBox(),
+      aggregatePanel.boundingBox(),
+    ]);
+    expect(rankBox).not.toBeNull();
+    expect(matchesBox).not.toBeNull();
+    expect(Math.abs((rankBox?.width ?? 0) - (matchesBox?.width ?? 0)), "티어와 최근 경기 폭이 같아야 합니다.")
+      .toBeLessThanOrEqual(1);
+    if (viewport.width > 1152) {
+      expect(aggregateBox).not.toBeNull();
+      expect(Math.abs((aggregateBox?.y ?? 0) - (rankBox?.y ?? 0)), "종합 성과와 티어 영역의 시작 높이가 같아야 합니다.")
+        .toBeLessThanOrEqual(1);
+    }
 
     const diagnostics = await page.evaluate(() => ({
       clientWidth: document.documentElement.clientWidth,

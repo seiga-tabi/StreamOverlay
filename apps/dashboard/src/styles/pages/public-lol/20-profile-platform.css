@@ -243,6 +243,12 @@
   gap: var(--yoro-space-4);
 }
 
+.public-profile-platform-v2 .public-overview-results-column {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-4);
+}
+
 .public-profile-platform-v2 .public-overview-dashboard-panel {
   position: sticky;
   top: calc(var(--public-game-header-total-height, var(--yoro-space-12)) + var(--yoro-space-10));
