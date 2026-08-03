@@ -6078,6 +6078,7 @@ function currentGameQueueLabel(liveGame: PublicLolCurrentGame): string {
 function IngamePanel({ profile, onSearchRiotId }: { profile: PublicLolProfile; onSearchRiotId: (riotId: string) => void }) {
   const liveGame = profile.liveGame;
   const isLive = liveGame?.isLive === true;
+  const isChecking = liveGame?.status === "checking";
   const isUnavailable = liveGame?.status === "unavailable";
   const participants = liveGame?.participants ?? [];
   const teamIds = [...new Set(participants.map((participant) => participant.teamId))].sort((a, b) => a - b);
@@ -6085,13 +6086,13 @@ function IngamePanel({ profile, onSearchRiotId }: { profile: PublicLolProfile; o
   const averageTier = averageTierLabel(participants.map((participant) => participant.rankedStats));
   const expectedParticipants = Math.max(10, participants.length);
   return (
-    <section id="public-ingame" className={`public-panel public-ingame-panel ${isLive ? "live" : isUnavailable ? "unavailable" : "offline"}`}>
+    <section id="public-ingame" className={`public-panel public-ingame-panel ${isLive ? "live" : isChecking ? "checking" : isUnavailable ? "unavailable" : "offline"}`} aria-busy={isChecking}>
       <div className="public-ingame-status-head">
         <div>
           <h2  >{t().currentGameStatus}</h2>
-          <span className={`public-ingame-live-state ${isLive ? "live" : isUnavailable ? "unavailable" : "offline"}`}>
+          <span className={`public-ingame-live-state ${isLive ? "live" : isChecking ? "checking" : isUnavailable ? "unavailable" : "offline"}`} role={isChecking ? "status" : undefined}>
             <i />
-            {isLive ? t().currentlyInGame : isUnavailable ? t().currentGameUnavailable : t().notInGame}
+            {isLive ? t().currentlyInGame : isChecking ? t().currentGameChecking : isUnavailable ? t().currentGameUnavailable : t().notInGame}
           </span>
         </div>
         <small>{t().currentGameUpdated} {formatRelativeDate(liveGame?.fetchedAt)}</small>
@@ -6099,8 +6100,9 @@ function IngamePanel({ profile, onSearchRiotId }: { profile: PublicLolProfile; o
       {!isLive ? (
         <div className="public-ingame-empty">
           <strong  >
-            {isUnavailable ? t().currentGameUnavailable : t().notInGame}
+            {isChecking ? t().currentGameChecking : isUnavailable ? t().currentGameUnavailable : t().notInGame}
           </strong>
+          {isChecking ? <small>{t().currentGameCheckingDetail}</small> : null}
           {isUnavailable ? <small>{t().currentGameUnavailableDetail}</small> : null}
           <small>{t().currentGamePlatform} {liveGame?.lolPlatform ?? profile.lolPlatform}</small>
           <small>{t().fetchedAt} {formatDate(liveGame?.fetchedAt)}</small>
@@ -6224,7 +6226,6 @@ function RecentMatches({
   loadingMore?: boolean;
   moreError?: string;
 }) {
-  const matchRankPreloadKey = profile.recentMatches.map((match) => match.matchId).join("|");
   const [expandedMatchId, setExpandedMatchId] = useState<string | null>(null);
   const [expandedMatchViews, setExpandedMatchViews] = useState<Record<string, PublicExpandedMatchView>>({});
   const [matchRanks, setMatchRanks] = useState<Record<string, PublicLolMatchRankResponse>>({});
@@ -6246,37 +6247,6 @@ function RecentMatches({
     setSelectedBuildParticipantKeys({});
     setHiddenRiotIdMatches({});
   }, [profile.riotId, profile.refreshAvailableAt]);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    let active = true;
-    const matchIds = matchRankPreloadKey.split("|").filter(Boolean);
-
-    async function preloadMatchRanks(): Promise<void> {
-      const concurrency = 1;
-      for (let offset = 0; offset < matchIds.length && active; offset += concurrency) {
-        const batch = matchIds.slice(offset, offset + concurrency);
-        await Promise.all(batch.map(async (matchId) => {
-          setMatchRankLoading((current) => ({ ...current, [matchId]: true }));
-          try {
-            const response = await getPublicLolMatchRanks(matchId, controller.signal);
-            if (active) setMatchRanks((current) => ({ ...current, [matchId]: response }));
-          } catch (error) {
-            if (error instanceof DOMException && error.name === "AbortError") return;
-            // 개별 경기 티어 조회 실패는 다른 경기와 전적 목록을 숨기지 않습니다.
-          } finally {
-            if (active) setMatchRankLoading((current) => ({ ...current, [matchId]: false }));
-          }
-        }));
-      }
-    }
-
-    void preloadMatchRanks();
-    return () => {
-      active = false;
-      controller.abort();
-    };
-  }, [matchRankPreloadKey, profile.refreshAvailableAt, profile.riotId]);
 
   async function ensureMatchRanks(matchId: string): Promise<void> {
     if (matchRanks[matchId] || matchRankLoading[matchId]) return;
@@ -6314,7 +6284,7 @@ function RecentMatches({
           const expandedView = expandedMatchViews[match.matchId] ?? "record";
           const highlightClass = matchHighlightClass(match.badges);
           const rankDetail = matchRanks[match.matchId];
-          const rankLoading = matchRankLoading[match.matchId] ?? !rankDetail;
+          const rankLoading = Boolean(matchRankLoading[match.matchId]);
           const build = matchBuilds[match.matchId];
           const buildLoading = Boolean(matchBuildLoading[match.matchId]);
           const buildError = matchBuildErrors[match.matchId] ?? "";
@@ -6345,7 +6315,7 @@ function RecentMatches({
             ? t().tierLoading
             : rankDetail
               ? averageTierLabel(rankDetail.participants.map((participant) => participant.rankedStats))
-              : t().tierUnavailable;
+              : t().tierOnDetail;
           const matchMetrics: RecentMatchRowMetric[] = [
             {
               key: "kill-participation",
@@ -6987,6 +6957,7 @@ export function PublicLolPage({
     const timer = window.setInterval(() => {
       void syncStreamerStatus();
     }, 30_000);
+    void syncStreamerStatus();
     return () => {
       controller.abort();
       window.clearInterval(timer);

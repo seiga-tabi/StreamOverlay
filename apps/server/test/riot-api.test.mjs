@@ -67,6 +67,29 @@ test("RiotApiClient는 Riot ID와 랭크 전적을 조회한다", async () => {
   assert.ok(calls.every((call) => call.token === "riot-test-key"));
 });
 
+test("RiotApiClient의 경기 티어 조회는 소환사 정보 없이 리그 API 한 건만 사용한다", async () => {
+  const calls = [];
+  globalThis.fetch = async (url) => {
+    const target = String(url);
+    calls.push(target);
+    if (target.includes("/lol/league/v4/entries/by-puuid/")) {
+      return jsonResponse([
+        { queueType: "RANKED_SOLO_5x5", tier: "PLATINUM", rank: "I", leaguePoints: 72, wins: 50, losses: 40 }
+      ]);
+    }
+    return jsonResponse({ status: { message: "not found" } }, 404);
+  };
+
+  const client = new RiotApiClient();
+  const stats = await client.getRankedStatsByPuuidWithoutSummoner("match-player-puuid");
+
+  assert.equal(stats?.tier, "PLATINUM");
+  assert.equal(stats?.summonerLevel, undefined);
+  assert.equal(calls.length, 1);
+  assert.ok(calls[0].includes("/lol/league/v4/entries/by-puuid/"));
+  assert.equal(calls.some((url) => url.includes("/lol/summoner/v4/")), false);
+});
+
 test("RiotApiClient는 솔로랭크, 자유랭크, 5v5 랭크를 각각 반환한다", async () => {
   globalThis.fetch = async (url) => {
     const target = String(url);

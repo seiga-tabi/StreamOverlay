@@ -1660,7 +1660,12 @@ test("공개 LoL 전적 API는 현재 게임 중 상태를 응답하고 PUUID를
     await handler(req, res);
 
     assert.equal(res.statusCode, 200);
-    const body = JSON.parse(res.body);
+    assert.equal(JSON.parse(res.body).liveGame.status, "checking");
+    const dynamicReq = createRequest("GET", "/api/lol/profile-state?riotId=HideOnBush%23KR1", undefined, { origin: DASHBOARD_ORIGIN });
+    const dynamicRes = createResponse();
+    await handler(dynamicReq, dynamicRes);
+    assert.equal(dynamicRes.statusCode, 200);
+    const body = JSON.parse(dynamicRes.body);
     assert.equal(body.liveGame.isLive, true);
     assert.equal(body.liveGame.status, "live");
     assert.equal(body.liveGame.lolPlatform, "jp1");
@@ -1743,22 +1748,28 @@ test("공개 LoL 전적 캐시는 즉시 반환하고 인게임 상태는 경량
       const firstRes = createResponse();
       await handler(firstReq, firstRes);
 
+      const firstDynamicReq = createRequest("GET", "/api/lol/profile-state?riotId=hideonbush%23kr1", undefined, { origin: DASHBOARD_ORIGIN });
+      const firstDynamicRes = createResponse();
+      await handler(firstDynamicReq, firstDynamicRes);
+
       now += 6_000;
 
       const secondReq = createRequest("GET", "/api/lol/profile?riotId=hideonbush%23kr1", undefined, { origin: DASHBOARD_ORIGIN });
       const secondRes = createResponse();
       await handler(secondReq, secondRes);
 
-      const dynamicReq = createRequest("GET", "/api/lol/profile-state?riotId=hideonbush%23kr1", undefined, { origin: DASHBOARD_ORIGIN });
-      const dynamicRes = createResponse();
-      await handler(dynamicReq, dynamicRes);
+      const secondDynamicReq = createRequest("GET", "/api/lol/profile-state?riotId=hideonbush%23kr1", undefined, { origin: DASHBOARD_ORIGIN });
+      const secondDynamicRes = createResponse();
+      await handler(secondDynamicReq, secondDynamicRes);
 
       assert.equal(firstRes.statusCode, 200);
       assert.equal(secondRes.statusCode, 200);
-      assert.equal(dynamicRes.statusCode, 200);
-      assert.equal(JSON.parse(firstRes.body).liveGame.status, "not_found");
+      assert.equal(firstDynamicRes.statusCode, 200);
+      assert.equal(secondDynamicRes.statusCode, 200);
+      assert.equal(JSON.parse(firstRes.body).liveGame.status, "checking");
+      assert.equal(JSON.parse(firstDynamicRes.body).liveGame.status, "not_found");
       assert.equal(JSON.parse(secondRes.body).liveGame.status, "not_found");
-      assert.equal(JSON.parse(dynamicRes.body).liveGame.status, "live");
+      assert.equal(JSON.parse(secondDynamicRes.body).liveGame.status, "live");
       assert.equal(accountLookups, 1);
       assert.equal(currentGameLookups, 2);
     } finally {
@@ -2146,7 +2157,12 @@ test("공개 LoL 전적 API는 시참 기록과 Riot ID가 일치하면 Twitch �
     await handler(req, res);
 
     assert.equal(res.statusCode, 200);
-    const body = JSON.parse(res.body);
+    assert.equal(JSON.parse(res.body).twitchStream, undefined);
+    const dynamicReq = createRequest("GET", "/api/lol/profile-state?riotId=HideOnBush%23KR1", undefined, { origin: DASHBOARD_ORIGIN });
+    const dynamicRes = createResponse();
+    await handler(dynamicReq, dynamicRes);
+    assert.equal(dynamicRes.statusCode, 200);
+    const body = JSON.parse(dynamicRes.body);
     assert.equal(body.twitchStream.isLive, true);
     assert.equal(body.twitchStream.source, "participation");
     assert.equal(body.twitchStream.twitchDisplayName, "Hide on bush");
@@ -2267,7 +2283,12 @@ test("공개 LoL 전적 API는 승인 스트리머가 방송관리 연결 계정
       await handler(req, res);
 
       assert.equal(res.statusCode, 200);
-      const body = JSON.parse(res.body);
+      assert.equal(JSON.parse(res.body).twitchStream, undefined);
+      const dynamicReq = createRequest("GET", "/api/lol/profile-state?riotId=Seiga%23sei", undefined, { origin: DASHBOARD_ORIGIN });
+      const dynamicRes = createResponse();
+      await handler(dynamicReq, dynamicRes);
+      assert.equal(dynamicRes.statusCode, 200);
+      const body = JSON.parse(dynamicRes.body);
       assert.equal(body.twitchStream.isLive, true);
       assert.equal(body.twitchStream.source, "approved_streamer");
       assert.equal(body.twitchStream.profileLinkUrl, "https://www.youtube.com/@seiga");
@@ -2366,7 +2387,13 @@ test("공개 LoL 전적 캐시는 즉시 반환하고 Twitch 상태는 경량 AP
     const firstRes = createResponse();
     await handler(firstReq, firstRes);
     assert.equal(firstRes.statusCode, 200, `${firstRes.body} ${JSON.stringify(errors)}`);
-    assert.equal(JSON.parse(firstRes.body).twitchStream.isLive, false);
+    assert.equal(JSON.parse(firstRes.body).twitchStream, undefined);
+
+    const firstDynamicReq = createRequest("GET", "/api/lol/profile-state?riotId=seiga%23SEI", undefined, { origin: DASHBOARD_ORIGIN });
+    const firstDynamicRes = createResponse();
+    await handler(firstDynamicReq, firstDynamicRes);
+    assert.equal(firstDynamicRes.statusCode, 200, firstDynamicRes.body);
+    assert.equal(JSON.parse(firstDynamicRes.body).twitchStream.isLive, false);
 
     live = true;
     const secondReq = createRequest("GET", "/api/lol/profile?riotId=seiga%23SEI", undefined, { origin: DASHBOARD_ORIGIN });
@@ -2485,7 +2512,12 @@ test("공개 LoL 전적 API는 내부 방송 상태가 online이어도 Twitch �
     await handler(req, res);
 
     assert.equal(res.statusCode, 200, res.body);
-    const body = JSON.parse(res.body);
+    assert.equal(JSON.parse(res.body).twitchStream, undefined);
+    const dynamicReq = createRequest("GET", "/api/lol/profile-state?riotId=Seiga%23sei", undefined, { origin: DASHBOARD_ORIGIN });
+    const dynamicRes = createResponse();
+    await handler(dynamicReq, dynamicRes);
+    assert.equal(dynamicRes.statusCode, 200, dynamicRes.body);
+    const body = JSON.parse(dynamicRes.body);
     assert.equal(body.twitchStream.isLive, false);
     assert.equal(rememberedLiveStatus.isLive, false);
     assert.equal(streamLookups, 1);
@@ -2595,8 +2627,18 @@ test("공개 LoL 전적 API는 같은 Riot ID 요청을 캐시하고 최근 경�
     const secondRes = createResponse();
     await handler(secondReq, secondRes);
 
+    const conditionalReq = createRequest("GET", "/api/lol/profile?riotId=hideonbush%23kr1", undefined, {
+      origin: DASHBOARD_ORIGIN,
+      "if-none-match": firstRes.headers.ETag
+    });
+    const conditionalRes = createResponse();
+    await handler(conditionalReq, conditionalRes);
+
     assert.equal(firstRes.statusCode, 200);
     assert.equal(secondRes.statusCode, 200);
+    assert.equal(firstRes.headers["Cache-Control"], "private, max-age=30, stale-while-revalidate=120");
+    assert.match(firstRes.headers.ETag, /^"lol-profile-[a-f0-9]{24}"$/);
+    assert.equal(conditionalRes.statusCode, 304);
     assert.equal(accountLookups, 1);
     assert.equal(matchLookups, 3);
     const body = JSON.parse(firstRes.body);

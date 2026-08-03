@@ -490,6 +490,18 @@ const riotApiKeyStore = new LocalJsonRiotApiKeyStore();
 const riot = new RiotApiClient(riotApiKeyStore);
 logger.event({ type: "riot.config", ...riot.routingStatus() });
 const dataDragon = new DataDragonService();
+void dataDragon.getLatestVersion()
+  .then(async (version) => {
+    await Promise.all([
+      dataDragon.getChampionMap(version),
+      dataDragon.getRuneMap(version),
+      dataDragon.getItemMap(version)
+    ]);
+    logger.event({ type: "public_lol.data_dragon_prewarmed", version });
+  })
+  .catch((error) => {
+    logger.error({ type: "public_lol.data_dragon_prewarm_failed", error: toSafeErrorMessage(error) });
+  });
 const lolProfileRepository = new LocalJsonLolProfileRepository(`${appConfig.paths.state}/lol-profiles.json`);
 const lolProfileEnrichment = new LolProfileEnrichmentService(riot, dataDragon, lolProfileRepository, logger);
 const actions = new ActionDispatcher(bridge, twitchChat, overlay, store, logger, () => dashboard.broadcastSnapshot());

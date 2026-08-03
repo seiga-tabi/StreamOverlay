@@ -754,6 +754,18 @@ export class RiotApiClient {
     return rankedStatsFromEntry(rankedEntry, summoner);
   }
 
+  async getRankedStatsByPuuidWithoutSummoner(
+    puuid: string,
+    queuePriority: readonly RiotRankedQueueType[] = RANKED_QUEUE_PRIORITY
+  ): Promise<LolRankedStats | undefined> {
+    if (!this.isConfigured()) return undefined;
+    const entries = await this.getLeagueEntriesByPuuid(puuid);
+    const rankedEntry = queuePriority
+      .map((queueType) => entries.find((entry) => entry.queueType === queueType))
+      .find(Boolean);
+    return rankedEntry ? rankedStatsFromEntry(rankedEntry, null) : undefined;
+  }
+
   async getRankedQueueStatsByPuuid(puuid: string): Promise<{ solo?: LolRankedStats; flex?: LolRankedStats; ranked5v5?: LolRankedStats; primary?: LolRankedStats }> {
     if (!this.isConfigured()) return {};
     const [summoner, entries] = await Promise.all([

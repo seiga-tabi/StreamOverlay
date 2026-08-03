@@ -385,7 +385,7 @@ export type PublicLolCurrentGameParticipant = {
 
 export type PublicLolCurrentGame = {
   isLive: boolean;
-  status: "live" | "not_found" | "unavailable";
+  status: "checking" | "live" | "not_found" | "unavailable";
   message?: string;
   errorCode?: string;
   lolPlatform?: string;
