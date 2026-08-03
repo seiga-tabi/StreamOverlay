@@ -599,7 +599,7 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
       expanded={false}
       expandAriaLabel="경기 상세 펼치기"
       highlightClass="highlight-mvp"
-      itemSlots={Array.from({ length: 7 }, (_, index) => ({ key: `item-${index}`, content: `아이템${index}` }))}
+      itemSlots={Array.from({ length: 7 }, (_, index) => ({ key: `item-${index}`, label: `아이템 ${index + 1}`, content: `아이템${index}` }))}
       itemsLabel="아이템"
       kdaMetric="Perfect"
       kdaScore={<><span>9</span><i>/</i><span className="deaths">0</span><i>/</i><span>6</span></>}
@@ -626,15 +626,20 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
   const championCellStart = html.indexOf("public-champion-cell");
   const itemRowStart = html.indexOf("public-match-inline-items");
   const kdaStart = html.indexOf("public-kda");
-  assert.ok(championCellStart >= 0 && itemRowStart > championCellStart && itemRowStart < kdaStart);
+  const statsStart = html.indexOf("public-match-meta");
+  const timeStart = html.indexOf("public-match-time");
+  assert.ok(championCellStart >= 0 && kdaStart > championCellStart && itemRowStart > kdaStart);
+  assert.ok(statsStart > itemRowStart && timeStart > statsStart);
   assert.match(html, /아이템0.*아이템1.*아이템2.*아이템3.*아이템4.*아이템5.*아이템6/u);
+  assert.match(html, /title="아이템 1"/u);
   assert.match(html, /class="deaths">0/);
   assert.doesNotMatch(html, /public-match-featured-label/u);
   assert.match(html, /public-kda-summary/u);
+  assert.match(html, /public-match-score-stars" aria-hidden="true">★★★★★/u);
   assert.match(html, /킬 관여 70%.*CS 210.*7\.8 CS\/분.*평균 티어 Platinum II/u);
-  assert.doesNotMatch(html, /public-match-expand-label/u);
+  assert.match(html, /public-match-expand-label" role="tooltip">경기 상세 펼치기/u);
   assert.match(html, /aria-label="승리 · 제드 · 9\/0\/6"/u);
-  assert.equal((html.match(/aria-label="MVP 91"/gu) ?? []).length, 2);
+  assert.equal((html.match(/aria-label="MVP 91"/gu) ?? []).length, 1);
 });
 
 test("경기 상세 팀 비교는 피해량·시야·골드·오브젝트를 전환 탭으로 제공한다", () => {

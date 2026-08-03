@@ -6351,6 +6351,7 @@ function RecentMatches({
             const iconUrl = summonerSpellIconUrl(spellId, dataDragonVersion);
             return {
               key: `${match.matchId}:spell:${spellId}`,
+              label: `${t().summonerSpells} ${spellId}`,
               content: iconUrl ? <img src={iconUrl} alt="" /> : spellId
             };
           });
@@ -6360,6 +6361,7 @@ function RecentMatches({
             .forEach((rune) => spellItems.push({
               key: `${match.matchId}:rune:${rune.runeId}`,
               className: "rune",
+              label: `${t().runes} ${rune.runeId}`,
               content: <img src={rune.iconUrl} alt="" />
             }));
           const placementLabel = matchPlacementLabel(match.badges);
@@ -6371,6 +6373,7 @@ function RecentMatches({
           const inlineItemSlots: RecentMatchRowMediaItem[] = recentItemSlots.map((item, index) => ({
             key: `${match.matchId}:inline:${index}:${item?.itemId ?? "empty"}`,
             className: [item ? "" : "empty", index === 6 ? "ward" : ""].filter(Boolean).join(" "),
+            label: `${t().items} ${index + 1}${item ? ` · ID ${item.itemId}` : ""}`,
             content: item ? item.iconUrl ? <img src={item.iconUrl} alt="" /> : item.itemId : null
           }));
           const expandedPanelText: RecentMatchExpandedPanelText = {
@@ -6466,7 +6469,7 @@ function RecentMatches({
               scoreAriaLabel={`${placementLabel} ${aiScore}`}
               scoreClassName={metricToneClass(scoreTone(aiScore))}
               spellItems={spellItems}
-              startedAtLabel={formatMatchDate(match.startedAt)}
+              startedAtLabel={formatRelativeDate(match.startedAt)}
               startedAtTimeLabel={formatMatchTime(match.startedAt)}
               summonerSpellsLabel={t().summonerSpells}
             />
