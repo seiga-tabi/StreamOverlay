@@ -1480,7 +1480,7 @@ function ProfileMetricStrip({ profile }: { profile: PublicLolProfile }) {
     { key: "solo-rank", tone: "blue", icon: "S", title: t().soloRank, stats: soloRankStats(profile) },
     { key: "flex-rank", tone: "green", icon: "F", title: t().flexRank, stats: flexRankStats(profile) },
     { key: "ranked-5v5", tone: "purple", icon: "5", title: t().ranked5v5, stats: ranked5v5Stats(profile) }
-  ].filter((queue) => queue.stats && queue.stats.tier !== "UNRANKED");
+  ];
   const metricCards = rankedQueues.map(rankMetricCard);
 
   return (

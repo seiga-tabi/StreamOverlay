@@ -258,6 +258,7 @@ test("LoL 프로필 플랫폼은 주요 viewport에서 내부 탐색과 문서 �
     await expect(rankSummary).toHaveCSS("display", "none");
     await detailsToggle.click();
     await expect(rankSummary).toHaveCSS("display", "block");
+    await expect(rankSummary.getByText("5v5 랭크", { exact: true })).toBeVisible();
     await detailsToggle.click();
     await expect(rankSummary).toHaveCSS("display", "none");
   }
