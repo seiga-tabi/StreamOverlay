@@ -110,6 +110,36 @@ test("DataDragonService는 동시 챔피언 매핑에서 Data Dragon 조회를 �
   assert.equal(calls.filter((url) => url.includes("/ja_JP/champion.json")).length, 1);
 });
 
+test("DataDragonService는 전적 아이템 ID를 공식 한국어·일본어 이름으로 매핑한다", async () => {
+  const fetchImpl = async (url) => {
+    const target = String(url);
+    if (target.endsWith("/api/versions.json")) return new Response(JSON.stringify(["16.12.1"]), { status: 200 });
+    if (target.includes("/ko_KR/item.json")) {
+      return new Response(JSON.stringify({
+        data: {
+          "3157": { name: "존야의 모래시계", image: { full: "3157.png" } }
+        }
+      }), { status: 200 });
+    }
+    if (target.includes("/ja_JP/item.json")) {
+      return new Response(JSON.stringify({
+        data: {
+          "3157": { name: "ゾーニャの砂時計", image: { full: "3157.png" } }
+        }
+      }), { status: 200 });
+    }
+    return new Response("not found", { status: 404 });
+  };
+
+  const service = new DataDragonService(fetchImpl);
+  const [item, unknown] = await service.mapItemSummaries([3157, 999999]);
+
+  assert.equal(item.nameKo, "존야의 모래시계");
+  assert.equal(item.nameJa, "ゾーニャの砂時計");
+  assert.equal(item.iconUrl, "https://ddragon.leagueoflegends.com/cdn/16.12.1/img/item/3157.png");
+  assert.deepEqual(unknown, { itemId: 999999 });
+});
+
 test("DataDragonService는 locale별 이름을 합치더라도 이미지 URL은 championKey 기반 neutral asset으로 고정한다", async () => {
   const fetchImpl = async (url) => {
     const target = String(url);

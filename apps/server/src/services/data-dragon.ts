@@ -30,6 +30,17 @@ type ChampionDataResponse = {
   data: Record<string, DataDragonChampion>;
 };
 
+type DataDragonItem = {
+  name?: string;
+  image?: {
+    full?: string;
+  };
+};
+
+type ItemDataResponse = {
+  data: Record<string, DataDragonItem>;
+};
+
 type DataDragonRune = {
   id: number;
   key?: string;
@@ -69,6 +80,13 @@ type ChampionSkinEntry = {
 
 export type LolRuneSummary = {
   runeId: number;
+  nameKo?: string;
+  nameJa?: string;
+  iconUrl?: string;
+};
+
+export type LolItemSummary = {
+  itemId: number;
   nameKo?: string;
   nameJa?: string;
   iconUrl?: string;
@@ -152,6 +170,8 @@ export class DataDragonService {
   private championDetailRequests = new Map<string, Promise<DataDragonChampion | undefined>>();
   private runeCache = new Map<string, Map<number, LolRuneSummary>>();
   private runeMapRequests = new Map<string, Promise<Map<number, LolRuneSummary>>>();
+  private itemCache = new Map<string, Map<number, LolItemSummary>>();
+  private itemMapRequests = new Map<string, Promise<Map<number, LolItemSummary>>>();
 
   constructor(private readonly fetchImpl: typeof fetch = fetch) {}
 
@@ -277,6 +297,47 @@ export class DataDragonService {
     return runeIds.map((runeId) => map.get(runeId) ?? { runeId });
   }
 
+  async getItemMap(version?: string): Promise<Map<number, LolItemSummary>> {
+    const resolvedVersion = version ?? await this.getLatestVersion();
+    const cached = this.itemCache.get(resolvedVersion);
+    if (cached) return cached;
+    const running = this.itemMapRequests.get(resolvedVersion);
+    if (running) return running;
+
+    const request = (async () => {
+      const [ko, ja] = await Promise.all([
+        this.fetchItemData(resolvedVersion, "ko_KR"),
+        this.fetchItemData(resolvedVersion, "ja_JP").catch(() => undefined)
+      ]);
+      const jaById = new Map(Object.entries(ja?.data ?? {}).map(([itemId, item]) => [itemId, item]));
+      const map = new Map<number, LolItemSummary>();
+
+      for (const [rawItemId, item] of Object.entries(ko.data)) {
+        const itemId = Number(rawItemId);
+        if (!Number.isInteger(itemId) || itemId <= 0) continue;
+        const imageName = item.image?.full?.endsWith(".png") ? item.image.full : `${itemId}.png`;
+        map.set(itemId, {
+          itemId,
+          nameKo: item.name,
+          nameJa: jaById.get(rawItemId)?.name,
+          iconUrl: `${DATA_DRAGON_BASE}/cdn/${resolvedVersion}/img/item/${imageName}`
+        });
+      }
+
+      this.itemCache.set(resolvedVersion, map);
+      return map;
+    })().finally(() => {
+      this.itemMapRequests.delete(resolvedVersion);
+    });
+    this.itemMapRequests.set(resolvedVersion, request);
+    return request;
+  }
+
+  async mapItemSummaries(itemIds: number[], version?: string): Promise<LolItemSummary[]> {
+    const map = await this.getItemMap(version);
+    return itemIds.map((itemId) => map.get(itemId) ?? { itemId });
+  }
+
   async getChampionAbilities(championId: number, version?: string): Promise<LolChampionAbilitySummary[]> {
     const resolvedVersion = version ?? await this.getLatestVersion();
     const map = await this.getChampionMap(resolvedVersion);
@@ -385,6 +446,12 @@ export class DataDragonService {
     const response = await this.fetchImpl(`${DATA_DRAGON_BASE}/cdn/${version}/data/${language}/runesReforged.json`);
     if (!response.ok) throw new Error(`Data Dragon rune lookup failed: ${response.status}`);
     return (await response.json()) as DataDragonRuneStyle[];
+  }
+
+  private async fetchItemData(version: string, language: "ko_KR" | "ja_JP"): Promise<ItemDataResponse> {
+    const response = await this.fetchImpl(`${DATA_DRAGON_BASE}/cdn/${version}/data/${language}/item.json`);
+    if (!response.ok) throw new Error(`Data Dragon item lookup failed: ${response.status}`);
+    return (await response.json()) as ItemDataResponse;
   }
 
   private async getSkinEntry(version: string, championKey: string, skinNum: number): Promise<ChampionSkinEntry | undefined> {

@@ -6382,13 +6382,18 @@ function RecentMatches({
               value: matchAverageTier
             }
           ];
-          const inlineItemSlots: RecentMatchRowMediaItem[] = recentItemSlots.map((item, index) => ({
-            key: `${match.matchId}:inline:${index}:${item?.itemId ?? "empty"}`,
-            className: [item ? "" : "empty", index === 6 ? "ward" : ""].filter(Boolean).join(" "),
-            focusable: Boolean(item),
-            label: `${t().items} ${index + 1}${item ? ` · ID ${item.itemId}` : ""}`,
-            content: item ? item.iconUrl ? <img src={item.iconUrl} alt="" /> : item.itemId : null
-          }));
+          const inlineItemSlots: RecentMatchRowMediaItem[] = recentItemSlots.map((item, index) => {
+            const itemName = activePublicLocale === "ja"
+              ? item?.nameJa ?? item?.nameKo
+              : item?.nameKo ?? item?.nameJa;
+            return {
+              key: `${match.matchId}:inline:${index}:${item?.itemId ?? "empty"}`,
+              className: [item ? "" : "empty", index === 6 ? "ward" : ""].filter(Boolean).join(" "),
+              focusable: Boolean(item),
+              label: itemName ?? (item ? t().unknownItem : `${t().items} ${index + 1}`),
+              content: item ? item.iconUrl ? <img src={item.iconUrl} alt="" /> : itemName ?? t().unknownItem : null
+            };
+          });
           const expandedPanelText: RecentMatchExpandedPanelText = {
             matchDetails: t().matchDetails,
             recordTab: {

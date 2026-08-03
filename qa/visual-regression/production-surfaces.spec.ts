@@ -223,6 +223,97 @@ test("Public Profile", async ({ page }) => {
   await assertStableSurface(page, errors, "public-profile.png");
 });
 
+test("전적 아이템·점수·상세 Tooltip은 이름과 안정적인 레이어를 유지한다", async ({ page }) => {
+  await page.route("**/api/lol/match-ranks**", async (route) => {
+    await json(route, {
+      status: "ready",
+      matchId: "JP1_1001",
+      participants: [],
+      fetchedAt: "2026-07-15T00:00:00.000Z",
+    });
+  });
+  await page.route("**/api/lol/profile**", async (route) => {
+    await json(route, {
+      ...profileFixture,
+      recentMatches: [{
+        matchId: "JP1_1001",
+        champion: { championId: 238, championKey: "Zed", nameKo: "제드", nameJa: "ゼド" },
+        queueId: 420,
+        startedAt: "2026-07-14T04:20:00.000Z",
+        durationSeconds: 1_610,
+        result: "win",
+        kills: 9,
+        deaths: 0,
+        assists: 6,
+        kda: 15,
+        championLevel: 18,
+        cs: 210,
+        csPerMinute: 7.8,
+        killParticipation: 70,
+        position: "MIDDLE",
+        items: [{
+          slot: 0,
+          itemId: 3157,
+          iconUrl: "https://example.com/3157.png",
+          nameKo: "존야의 모래시계",
+          nameJa: "ゾーニャの砂時計",
+        }],
+        summonerSpells: [],
+        badges: [],
+        teams: [],
+      }],
+      summary: {
+        recentGames: 1,
+        recentWins: 1,
+        recentWinRate: 100,
+        totalKills: 9,
+        totalDeaths: 0,
+        totalAssists: 6,
+      },
+    });
+  });
+
+  await page.goto("/lol/summoners/jp/YORO%20QA-JP1");
+  await expect(page.locator(".public-profile-shared-shell")).toBeVisible({ timeout: 15_000 });
+  const viewportWidth = page.viewportSize()?.width ?? 1440;
+
+  const row = page.locator(".public-match-row").first();
+  const item = row.locator(".public-match-inline-items > span").first();
+  const score = row.locator(".public-match-score");
+  const scoreTooltip = row.locator(".public-match-score-description");
+  const expand = row.locator(".public-match-expand");
+  const expandTooltip = row.locator(".public-match-expand-label");
+
+  await expect(item).toHaveAttribute("data-tooltip", "존야의 모래시계");
+  await expect(item).not.toHaveAttribute("data-tooltip", /3157|ID/u);
+
+  await score.hover();
+  await expect(scoreTooltip).toBeVisible();
+  const scoreTooltipBox = await scoreTooltip.boundingBox();
+  expect(scoreTooltipBox).not.toBeNull();
+  expect(scoreTooltipBox?.x ?? -1).toBeGreaterThanOrEqual(0);
+  expect((scoreTooltipBox?.x ?? 0) + (scoreTooltipBox?.width ?? 0)).toBeLessThanOrEqual(viewportWidth);
+
+  const expandBefore = await expand.boundingBox();
+  await expand.hover();
+  if (viewportWidth > 768) {
+    await expect(expandTooltip).toBeVisible();
+    const expandTooltipBox = await expandTooltip.boundingBox();
+    expect(expandTooltipBox).not.toBeNull();
+    expect(expandTooltipBox?.x ?? -1).toBeGreaterThanOrEqual(0);
+  } else {
+    await expect(expandTooltip).toBeHidden();
+  }
+
+  await expand.click();
+  await expect(row.locator(".public-match-expanded")).toBeVisible();
+  const expandAfter = await expand.boundingBox();
+  expect(expandBefore).not.toBeNull();
+  expect(expandAfter).not.toBeNull();
+  expect(Math.abs((expandAfter?.x ?? 0) - (expandBefore?.x ?? 0))).toBeLessThanOrEqual(1);
+  expect(Math.abs((expandAfter?.width ?? 0) - (expandBefore?.width ?? 0))).toBeLessThanOrEqual(1);
+});
+
 test("전적 직접 URL은 홈을 먼저 표시하지 않고 프로필 로딩 화면으로 진입한다", async ({ page }) => {
   let releaseProfileRequest: (() => void) | undefined;
   let markProfileRequestStarted: (() => void) | undefined;
@@ -321,6 +412,93 @@ test("LoL 프로필 플랫폼은 주요 viewport에서 내부 탐색과 문서 �
   }
 
   expect(errors, "viewport 전환 중 runtime 오류가 없어야 합니다.").toEqual([]);
+});
+
+test("스트리머 프로필은 정보 전경을 선명하게 유지하고 일러스트와 상태 패널만 분리한다", async ({ page }) => {
+  await page.route("**/api/lol/profile**", async (route) => {
+    await json(route, {
+      ...profileFixture,
+      profileIconUrl: "https://example.com/profile.png",
+      rankedStats: {
+        queueType: "RANKED_SOLO_5x5",
+        tier: "PLATINUM",
+        rank: "II",
+        leaguePoints: 99,
+        wins: 37,
+        losses: 35,
+        rankScore: 2_499,
+      },
+      topChampions: [{
+        championId: 238,
+        championKey: "Zed",
+        nameKo: "제드",
+        splashUrl: "https://example.com/zed-splash.png",
+      }],
+      twitchStream: {
+        matched: true,
+        isLive: false,
+        twitchUserId: "streamer-1",
+        twitchLogin: "yoro",
+        twitchDisplayName: "YORO Streamer",
+        profileImageUrl: "https://example.com/streamer.png",
+        channelUrl: "https://www.twitch.tv/yoro",
+        source: "approved_streamer",
+      },
+    });
+  });
+
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/lol/summoners/jp/YORO%20QA-JP1");
+
+  const hero = page.locator(".public-profile-platform-hero");
+  const main = hero.locator(".public-profile-top-main");
+  const identity = hero.locator(".public-profile-top-content");
+  const artwork = hero.locator(".public-profile-mastery-art");
+  const spotlight = hero.locator(".public-profile-streamer-spotlight");
+
+  await expect(identity.getByText("YORO QA", { exact: true })).toBeVisible();
+  await expect(identity.getByText("#JP1", { exact: true })).toBeVisible();
+  await expect(identity.getByRole("button", { name: "전적 갱신" })).toBeVisible();
+  await expect(identity.getByRole("button", { name: "즐겨찾기 추가" })).toBeVisible();
+
+  const foreground = await hero.evaluate((element) => {
+    const mainElement = element.querySelector<HTMLElement>(".public-profile-top-main");
+    const contentElement = element.querySelector<HTMLElement>(".public-profile-top-content");
+    const artworkElement = element.querySelector<HTMLElement>(".public-profile-mastery-art");
+    return {
+      overlayZ: Number.parseInt(getComputedStyle(element, "::after").zIndex, 10),
+      mainZ: Number.parseInt(getComputedStyle(mainElement!).zIndex, 10),
+      contentOpacity: getComputedStyle(contentElement!).opacity,
+      contentFilter: getComputedStyle(contentElement!).filter,
+      artworkFilter: getComputedStyle(artworkElement!).filter,
+    };
+  });
+  expect(foreground.mainZ).toBeGreaterThan(foreground.overlayZ);
+  expect(foreground.contentOpacity).toBe("1");
+  expect(foreground.contentFilter).toBe("none");
+  expect(foreground.artworkFilter).toContain("blur(");
+
+  const [identityBox, spotlightBox, mainBox] = await Promise.all([
+    identity.boundingBox(),
+    spotlight.boundingBox(),
+    main.boundingBox(),
+  ]);
+  expect(identityBox).not.toBeNull();
+  expect(spotlightBox).not.toBeNull();
+  expect(mainBox).not.toBeNull();
+  expect(spotlightBox!.x).toBeGreaterThan(identityBox!.x + identityBox!.width);
+  expect(spotlightBox!.width).toBeLessThanOrEqual(352);
+  expect(Math.abs((spotlightBox!.x + spotlightBox!.width) - (mainBox!.x + mainBox!.width))).toBeLessThanOrEqual(24);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  const [mobileIdentityBox, mobileSpotlightBox] = await Promise.all([
+    identity.boundingBox(),
+    spotlight.boundingBox(),
+  ]);
+  expect(mobileIdentityBox).not.toBeNull();
+  expect(mobileSpotlightBox).not.toBeNull();
+  expect(mobileSpotlightBox!.y).toBeGreaterThanOrEqual(mobileIdentityBox!.y + mobileIdentityBox!.height);
+  expect(Math.abs(mobileSpotlightBox!.width - mobileIdentityBox!.width)).toBeLessThanOrEqual(1);
 });
 
 test("LoL 공개 하위 페이지는 화면 중앙에 배치된다", async ({ page }) => {

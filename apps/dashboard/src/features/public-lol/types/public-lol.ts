@@ -1,5 +1,13 @@
 import type { LolChampionSummary, LolPerformanceStats, LolRankHistoryPoint, LolRankedStats, LolRole, LolRoleAnalysis, ParticipationStatus, StreamerRiotIdRequest } from "@streamops/shared";
 
+export type PublicLolMatchItem = {
+  slot: number;
+  itemId: number;
+  iconUrl?: string;
+  nameKo?: string;
+  nameJa?: string;
+};
+
 export type PublicLolMatchParticipant = {
   participantId?: number;
   riotId?: string;
@@ -25,7 +33,7 @@ export type PublicLolMatchParticipant = {
   damageTakenShare?: number;
   visionScore?: number;
   visionScorePerMinute?: number;
-  items: Array<{ slot: number; itemId: number; iconUrl?: string }>;
+  items: PublicLolMatchItem[];
   summonerSpells: number[];
   runes: Array<{
     runeId: number;
@@ -90,7 +98,7 @@ export type PublicLolMatchBuildParticipant = {
   result: "win" | "loss" | "unknown";
   champion: LolChampionSummary;
   score: number;
-  items: Array<{ slot: number; itemId: number; iconUrl?: string }>;
+  items: PublicLolMatchItem[];
   itemEvents: PublicLolMatchBuildItemEvent[];
   skillOrder: PublicLolMatchBuildSkillEvent[];
   runes: PublicLolMatchParticipant["runes"];
@@ -150,7 +158,7 @@ export type PublicLolRecentMatch = {
   objectivesStolen?: number;
   totalTimeSpentDead?: number;
   position?: string;
-  items: Array<{ slot: number; itemId: number; iconUrl?: string }>;
+  items: PublicLolMatchItem[];
   summonerSpells: number[];
   badges?: PublicLolMatchBadge[];
   team?: {

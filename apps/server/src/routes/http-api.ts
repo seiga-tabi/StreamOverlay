@@ -386,6 +386,14 @@ type PublicLocalePreference = {
   country?: string;
 };
 
+type PublicLolMatchItem = {
+  slot: number;
+  itemId: number;
+  iconUrl?: string;
+  nameKo?: string;
+  nameJa?: string;
+};
+
 type PublicLolMatchParticipant = {
   participantId?: number;
   riotId?: string;
@@ -411,7 +419,7 @@ type PublicLolMatchParticipant = {
   damageTakenShare?: number;
   visionScore?: number;
   visionScorePerMinute?: number;
-  items: Array<{ slot: number; itemId: number; iconUrl?: string }>;
+  items: PublicLolMatchItem[];
   summonerSpells: number[];
   runes: PublicLolMatchRune[];
   badges?: PublicLolMatchBadge[];
@@ -469,7 +477,7 @@ type PublicLolMatchBuildParticipant = {
   result: "win" | "loss" | "unknown";
   champion: LolChampionSummary;
   score: number;
-  items: Array<{ slot: number; itemId: number; iconUrl?: string }>;
+  items: PublicLolMatchItem[];
   itemEvents: PublicLolMatchBuildItemEvent[];
   skillOrder: PublicLolMatchBuildSkillEvent[];
   runes: PublicLolMatchRune[];
@@ -521,7 +529,7 @@ type PublicLolRecentMatch = {
   objectivesStolen?: number;
   totalTimeSpentDead?: number;
   position?: string;
-  items: Array<{ slot: number; itemId: number; iconUrl?: string }>;
+  items: PublicLolMatchItem[];
   summonerSpells: number[];
   badges: PublicLolMatchBadge[];
   team?: {
@@ -2553,11 +2561,33 @@ function itemIconUrl(version: string | undefined, itemId: number): string | unde
   return version ? `https://ddragon.leagueoflegends.com/cdn/${version}/img/item/${itemId}.png` : undefined;
 }
 
-function participantItems(participant: RiotMatchParticipant, version: string | undefined): Array<{ slot: number; itemId: number; iconUrl?: string }> {
-  return [participant.item0, participant.item1, participant.item2, participant.item3, participant.item4, participant.item5, participant.item6]
+async function participantItems(
+  dataDragon: DataDragonService | undefined,
+  participant: RiotMatchParticipant,
+  version: string | undefined
+): Promise<PublicLolMatchItem[]> {
+  const items = [participant.item0, participant.item1, participant.item2, participant.item3, participant.item4, participant.item5, participant.item6]
     .map((value, slot) => ({ slot, itemId: safeMatchStat(value) }))
     .filter((item) => item.itemId > 0)
     .map((item) => ({ ...item, iconUrl: itemIconUrl(version, item.itemId) }));
+  if (!dataDragon || typeof dataDragon.mapItemSummaries !== "function") return items;
+
+  try {
+    const summaries = await dataDragon.mapItemSummaries(items.map((item) => item.itemId), version);
+    const summaryById = new Map(summaries.map((summary) => [summary.itemId, summary]));
+    return items.map((item) => {
+      const summary = summaryById.get(item.itemId);
+      return {
+        ...item,
+        iconUrl: summary?.iconUrl ?? item.iconUrl,
+        nameKo: summary?.nameKo,
+        nameJa: summary?.nameJa
+      };
+    });
+  } catch {
+    // 아이템 이름 조회 실패가 전적 조회 전체를 중단시키지 않도록 기존 아이콘 정보는 유지합니다.
+    return items;
+  }
 }
 
 function participantSummonerSpells(participant: RiotMatchParticipant): number[] {
@@ -2915,7 +2945,7 @@ async function publicLolMatchParticipantDetail(
     damageTakenShare: statShare(damageTaken, teamStats.damageTaken),
     visionScore,
     visionScorePerMinute: averageDefined([participant.challenges?.visionScorePerMinute], 2) ?? (visionScore !== undefined && durationMinutes ? roundTo(visionScore / durationMinutes, 2) : undefined),
-    items: participantItems(participant, dataDragonVersion),
+    items: await participantItems(dataDragon, participant, dataDragonVersion),
     summonerSpells: participantSummonerSpells(participant),
     runes: await participantRunes(dataDragon, dataDragonVersion, participant),
     badges: publicLolMatchBadges(match, participant)
@@ -5478,7 +5508,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       objectivesStolen: safeOptionalStat(participant.objectivesStolen),
       totalTimeSpentDead: safeOptionalStat(participant.totalTimeSpentDead),
       position: participant.individualPosition || participant.teamPosition,
-      items: participantItems(participant, dataDragonVersion),
+      items: await participantItems(input.dataDragon, participant, dataDragonVersion),
       summonerSpells: participantSummonerSpells(participant),
       badges: publicLolMatchBadges(match, participant),
       team: participantTeamSummary(match, participant),
@@ -6109,7 +6139,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         result: participant.win === true ? "win" : participant.win === false ? "loss" : "unknown",
         champion,
         score: participantImpactScore(match, participant),
-        items: participantItems(participant, dataDragonVersion),
+        items: await participantItems(input.dataDragon, participant, dataDragonVersion),
         itemEvents: publicLolBuildItemEvents(timeline, participantId, dataDragonVersion),
         skillOrder: publicLolBuildSkillOrder(timeline, participantId, abilities),
         runes: await participantRunes(input.dataDragon, dataDragonVersion, participant),
