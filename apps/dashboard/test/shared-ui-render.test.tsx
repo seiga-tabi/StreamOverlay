@@ -587,15 +587,12 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
   const html = renderToStaticMarkup(
     <RecentMatchRow
       aiScore={91}
-      aiScoreText={{ label: "MVP", ko: "MVP", ja: "MVP" }}
-      averageTierMetric="평균 티어 Platinum II"
+      aiScoreText={{ label: "점수", ko: "점수", ja: "スコア" }}
       badges={<span>MVP</span>}
       championFallback="제"
       championIconUrl="https://example.com/champion.png"
       championName="제드"
       championRoleLevel="미드 · Lv.18"
-      csLabel="CS 210"
-      csPerMinuteMetric="7.8 CS/분"
       expanded={false}
       expandAriaLabel="경기 상세 펼치기"
       highlightClass="highlight-mvp"
@@ -603,14 +600,19 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
       itemsLabel="아이템"
       kdaMetric="Perfect"
       kdaScore={<><span>9</span><i>/</i><span className="deaths">0</span><i>/</i><span>6</span></>}
-      killParticipationMetric="킬 관여 70%"
       matchAriaLabel="승리 · 제드 · 9/0/6"
+      metrics={[
+        { key: "kill-participation", label: "킬 관여율", value: "70%" },
+        { key: "cs", label: "CS", value: "210" },
+        { key: "cs-per-minute", label: "분당 CS", value: "7.8" },
+        { key: "average-tier", label: "평균 티어", value: "Platinum II" }
+      ]}
       onToggleExpand={() => undefined}
       queueLabel="솔로랭크"
       result="win"
       resultDurationLabel="26:50"
       resultLabel="승리"
-      scoreAriaLabel="MVP 91"
+      scoreAriaLabel="점수 91"
       scoreClassName="metric-tone-excellent"
       spellItems={Array.from({ length: 4 }, (_, index) => ({ key: `loadout-${index}`, content: `로드아웃${index}` }))}
       startedAtLabel="2026. 7. 14."
@@ -620,7 +622,7 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
   );
 
   assert.match(html, /public-match-row win highlight-mvp/);
-  assert.match(html, /data-ko="MVP" data-ja="MVP"/);
+  assert.match(html, /data-ko="점수" data-ja="スコア"/u);
   assert.equal((html.match(/로드아웃\d/g) ?? []).length, 4);
   assert.equal((html.match(/아이템\d/g) ?? []).length, 7);
   const championCellStart = html.indexOf("public-champion-cell");
@@ -635,11 +637,11 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
   assert.match(html, /class="deaths">0/);
   assert.doesNotMatch(html, /public-match-featured-label/u);
   assert.match(html, /public-kda-summary/u);
-  assert.match(html, /public-match-score-stars" aria-hidden="true">★★★★★/u);
-  assert.match(html, /킬 관여 70%.*CS 210.*7\.8 CS\/분.*평균 티어 Platinum II/u);
+  assert.doesNotMatch(html, /public-match-score-stars/u);
+  assert.match(html, /<strong>70%<\/strong><small>킬 관여율<\/small>.*<strong>210<\/strong><small>CS<\/small>.*<strong>7\.8<\/strong><small>분당 CS<\/small>.*<strong>Platinum II<\/strong><small>평균 티어<\/small>/u);
   assert.match(html, /public-match-expand-label" role="tooltip">경기 상세 펼치기/u);
   assert.match(html, /aria-label="승리 · 제드 · 9\/0\/6"/u);
-  assert.equal((html.match(/aria-label="MVP 91"/gu) ?? []).length, 1);
+  assert.equal((html.match(/aria-label="점수 91"/gu) ?? []).length, 1);
 });
 
 test("경기 상세 팀 비교는 피해량·시야·골드·오브젝트를 전환 탭으로 제공한다", () => {

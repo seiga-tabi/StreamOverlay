@@ -223,6 +223,35 @@ test("Public Profile", async ({ page }) => {
   await assertStableSurface(page, errors, "public-profile.png");
 });
 
+test("전적 직접 URL은 홈을 먼저 표시하지 않고 프로필 로딩 화면으로 진입한다", async ({ page }) => {
+  let releaseProfileRequest: (() => void) | undefined;
+  let markProfileRequestStarted: (() => void) | undefined;
+  const profileRequestStarted = new Promise<void>((resolve) => {
+    markProfileRequestStarted = resolve;
+  });
+  const profileRequestGate = new Promise<void>((resolve) => {
+    releaseProfileRequest = resolve;
+  });
+
+  await page.route("**/api/lol/profile**", async (route) => {
+    markProfileRequestStarted?.();
+    await profileRequestGate;
+    await json(route, profileFixture);
+  });
+
+  await page.goto("/ko/lol/summoners/jp/YORO%20QA-JP1");
+  await profileRequestStarted;
+  try {
+    await expect(page.locator(".public-home-shared-shell")).toHaveCount(0);
+    await expect(page.getByRole("status", { name: "검색 중" })).toBeVisible();
+  } finally {
+    releaseProfileRequest?.();
+  }
+
+  await expect(page.locator(".public-profile-shared-shell")).toBeVisible();
+  await expect(page).toHaveURL(/\/ko\/lol\/summoners\/jp\/YORO%20QA-JP1$/u);
+});
+
 test("LoL 프로필 플랫폼은 주요 viewport에서 내부 탐색과 문서 폭을 유지한다", async ({ page }) => {
   const errors = collectRuntimeErrors(page);
   const viewports = [

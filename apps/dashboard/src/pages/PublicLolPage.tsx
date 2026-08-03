@@ -97,6 +97,7 @@ import {
   type RecentMatchBuildRuneSlot,
   type RecentMatchBuildViewModel,
   type RecentMatchExpandedPanelText,
+  type RecentMatchRowMetric,
   type RecentMatchRowMediaItem,
   type RecentMatchesPanelText,
   type SearchFormProps,
@@ -680,16 +681,6 @@ function KdaMetricText({ value, digits = 2 }: { value: number | undefined; digit
       <span className={metricToneClass(kdaTone(value))}>{formatDecimal(value, digits)}</span> KDA
     </>
   );
-}
-
-function CsPerMinuteMetricText({ value }: { value: number | undefined }) {
-  const metric = <span className={metricToneClass(csTone(value))}>{formatDecimal(value, 1)}</span>;
-  return activePublicLocale === "ja" ? <>分あたりCS {metric}</> : <>분당 CS {metric}</>;
-}
-
-function KillParticipationMetricText({ value }: { value: number | undefined }) {
-  const metric = <span className={metricToneClass(percentTone(value))}>{formatPercent(value)}</span>;
-  return activePublicLocale === "ja" ? <>キル関与 {metric}</> : <>킬 관여 {metric}</>;
 }
 
 type MetricTone = "excellent" | "good" | "neutral" | "warning" | "bad";
@@ -6364,12 +6355,33 @@ function RecentMatches({
               label: `${t().runes} ${rune.runeId}`,
               content: <img src={rune.iconUrl} alt="" />
             }));
-          const placementLabel = matchPlacementLabel(match.badges);
           const matchAverageTier = rankLoading
-            ? `${t().averageTier} ${t().tierLoading}`
+            ? t().tierLoading
             : rankDetail
-              ? `${t().averageTier} ${averageTierLabel(rankDetail.participants.map((participant) => participant.rankedStats))}`
-              : `${t().averageTier} ${t().tierUnavailable}`;
+              ? averageTierLabel(rankDetail.participants.map((participant) => participant.rankedStats))
+              : t().tierUnavailable;
+          const matchMetrics: RecentMatchRowMetric[] = [
+            {
+              key: "kill-participation",
+              label: t().killParticipation,
+              value: <span className={metricToneClass(percentTone(match.killParticipation))}>{formatPercent(match.killParticipation)}</span>
+            },
+            {
+              key: "cs",
+              label: "CS",
+              value: formatNumber(match.cs)
+            },
+            {
+              key: "cs-per-minute",
+              label: t().perMinuteCs,
+              value: <span className={metricToneClass(csTone(match.csPerMinute))}>{formatDecimal(match.csPerMinute, 1)}</span>
+            },
+            {
+              key: "average-tier",
+              label: t().averageTier,
+              value: matchAverageTier
+            }
+          ];
           const inlineItemSlots: RecentMatchRowMediaItem[] = recentItemSlots.map((item, index) => ({
             key: `${match.matchId}:inline:${index}:${item?.itemId ?? "empty"}`,
             className: [item ? "" : "empty", index === 6 ? "ward" : ""].filter(Boolean).join(" "),
@@ -6427,18 +6439,15 @@ function RecentMatches({
             <FeatureRecentMatchRow
               aiScore={aiScore}
               aiScoreText={{
-                label: placementLabel,
-                ko: matchPlacementLabel(match.badges, "ko"),
-                ja: matchPlacementLabel(match.badges, "ja")
+                label: t().aiScore,
+                ko: publicI18n.ko.aiScore,
+                ja: publicI18n.ja.aiScore
               }}
               badges={<MatchBadges badges={match.badges} compact />}
-              averageTierMetric={matchAverageTier}
               championFallback={championName(match.champion).slice(0, 1)}
               championIconUrl={match.champion.iconUrl}
               championName={championName(match.champion)}
               championRoleLevel={`${mainRoleLabel(match.position)} · Lv.${formatNumber(match.championLevel)}`}
-              csLabel={`CS ${formatNumber(match.cs)}`}
-              csPerMinuteMetric={<CsPerMinuteMetricText value={match.csPerMinute} />}
               expanded={expanded}
               expandedPanel={expandedPanel}
               expandAriaLabel={expanded ? t().collapseMatch : t().expandMatch}
@@ -6452,8 +6461,8 @@ function RecentMatches({
                 </>
               )}
               key={match.matchId}
-              killParticipationMetric={<KillParticipationMetricText value={match.killParticipation} />}
               matchAriaLabel={`${resultLabel(match.result)} · ${championName(match.champion)} · ${match.kills}/${match.deaths}/${match.assists}`}
+              metrics={matchMetrics}
               onToggleExpand={() => {
                 const opening = expandedMatchId !== match.matchId;
                 setExpandedMatchId(opening ? match.matchId : null);
@@ -6466,7 +6475,7 @@ function RecentMatches({
               result={match.result}
               resultDurationLabel={formatDuration(match.durationSeconds)}
               resultLabel={resultLabel(match.result)}
-              scoreAriaLabel={`${placementLabel} ${aiScore}`}
+              scoreAriaLabel={`${t().aiScore} ${aiScore}`}
               scoreClassName={metricToneClass(scoreTone(aiScore))}
               spellItems={spellItems}
               startedAtLabel={formatRelativeDate(match.startedAt)}
@@ -6739,11 +6748,12 @@ export function PublicLolPage({
 }: {
   onOpenAdmin: () => void;
 }) {
+  const initialRouteRiotId = riotIdFromPublicSummonerPath();
   const { locale, changeLocale, autoDetectLocale } = usePublicLocale(loadPublicLocalePreference);
   setActivePublicLocale(locale);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(() => initialRouteRiotId ?? "");
   const [profile, setProfile] = useState<PublicLolProfile | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(() => Boolean(initialRouteRiotId));
   const [loadingMoreMatches, setLoadingMoreMatches] = useState(false);
   const [moreMatchesError, setMoreMatchesError] = useState("");
   const [error, setError] = useState("");
@@ -7865,7 +7875,7 @@ export function PublicLolPage({
     );
   }
 
-  if (!profile && activeMainPage === "search") {
+  if (!profile && activeMainPage === "search" && !loading) {
     return (
       <AppShell
         className={`public-lol-shell public-dashboard-shell public-home-shell public-home-shared-shell theme-${theme}`}

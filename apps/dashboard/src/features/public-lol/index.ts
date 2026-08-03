@@ -219,6 +219,7 @@ export type {
 } from "./components/RecentMatchExpandedToolbar";
 export type {
   RecentMatchRowLocalizedText,
+  RecentMatchRowMetric,
   RecentMatchRowMediaItem,
   RecentMatchRowProps,
 } from "./components/RecentMatchRow";

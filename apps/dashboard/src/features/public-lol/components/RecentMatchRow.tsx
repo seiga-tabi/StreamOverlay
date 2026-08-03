@@ -13,6 +13,12 @@ export type RecentMatchRowMediaItem = {
   content: ReactNode;
 };
 
+export type RecentMatchRowMetric = {
+  key: string;
+  label: ReactNode;
+  value: ReactNode;
+};
+
 export type RecentMatchRowProps = {
   matchAriaLabel: string;
   result: string;
@@ -36,10 +42,7 @@ export type RecentMatchRowProps = {
   aiScoreText: RecentMatchRowLocalizedText;
   aiScore: number;
   scoreAriaLabel: string;
-  csLabel: ReactNode;
-  csPerMinuteMetric: ReactNode;
-  killParticipationMetric: ReactNode;
-  averageTierMetric: ReactNode;
+  metrics: RecentMatchRowMetric[];
   itemSlots: RecentMatchRowMediaItem[];
   itemsLabel: string;
   expandAriaLabel: string;
@@ -55,14 +58,6 @@ function scoreGrade(score: number): string {
   if (score >= 55) return "B";
   if (score >= 40) return "C";
   return "D";
-}
-
-function scoreStars(score: number): number {
-  if (score >= 90) return 5;
-  if (score >= 75) return 4;
-  if (score >= 60) return 3;
-  if (score >= 45) return 2;
-  return 1;
 }
 
 export function RecentMatchRow({
@@ -88,10 +83,7 @@ export function RecentMatchRow({
   aiScoreText,
   aiScore,
   scoreAriaLabel,
-  csLabel,
-  csPerMinuteMetric,
-  killParticipationMetric,
-  averageTierMetric,
+  metrics,
   itemSlots,
   itemsLabel,
   expandAriaLabel,
@@ -99,7 +91,6 @@ export function RecentMatchRow({
   onToggleExpand
 }: RecentMatchRowProps) {
   const grade = scoreGrade(aiScore);
-  const stars = scoreStars(aiScore);
 
   return (
     <article
@@ -150,15 +141,15 @@ export function RecentMatchRow({
         <div aria-label={scoreAriaLabel} className={`public-match-score ${scoreClassName}`}>
           <strong>{aiScore}</strong>
           <b>{grade}</b>
-          <span className="public-match-score-stars" aria-hidden="true">
-            {Array.from({ length: 5 }, (_, index) => index < stars ? "★" : "☆").join("")}
-          </span>
           <small data-ko={aiScoreText.ko} data-ja={aiScoreText.ja}>{aiScoreText.label}</small>
         </div>
         <div className="public-match-meta">
-          <span>{killParticipationMetric}</span>
-          <span className="public-match-cs-metric">{csLabel}<small>{csPerMinuteMetric}</small></span>
-          <span>{averageTierMetric}</span>
+          {metrics.map((metric) => (
+            <span key={metric.key}>
+              <strong>{metric.value}</strong>
+              <small>{metric.label}</small>
+            </span>
+          ))}
         </div>
         <div className="public-match-time">
           <span>{startedAtLabel}</span>
