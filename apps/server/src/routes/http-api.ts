@@ -4,6 +4,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { URL } from "node:url";
 import type { Store } from "../services/store.js";
+import { storeParticipationRepository } from "../services/participation-repository.js";
 import { publishParticipationSnapshot as publishAtomicParticipationSnapshot } from "../services/participation-snapshot.js";
 import type { ActionDispatcher } from "../core/action-dispatcher.js";
 import {
@@ -50,6 +51,8 @@ import {
   type LolRoleAnalysis,
   type ParticipationEntry,
   type ParticipationPhase,
+  type ParticipationSession,
+  type ParticipationState,
   type ParticipationStreamerProfile,
   type ParticipationStatus,
   type PalworldServerAvailabilityErrorCode,
@@ -259,7 +262,15 @@ const PUBLIC_TWITCH_FOLLOWED_CACHE_TTL_MS = 15_000;
 const PUBLIC_TWITCH_FOLLOWED_CACHE_MAX = 500;
 const SAFE_CHAT_URL_PROTOCOLS = new Set(["http", "https"]);
 const PARTICIPATION_INVITE_TARGET_STATUSES = new Set(["verified", "waitlisted", "selected", "checked_in", "invited"]);
-const PARTICIPATION_MANUAL_ACTIONS = new Set(["open", "show_queue", "mark_in_game", "finish_game", "close"]);
+const PARTICIPATION_MANUAL_ACTIONS = new Set(["open", "show_queue", "select_next", "mark_in_game", "finish_game", "close"]);
+const PARTICIPATION_SESSION_ACTIONS = new Set(["start", "finish", ...PARTICIPATION_MANUAL_ACTIONS]);
+const PARTICIPATION_DASHBOARD_ENTRY_STATUSES = new Set<ParticipationStatus>([
+  "checked_in",
+  "in_game",
+  "played",
+  "skipped",
+  "no_show"
+]);
 const PARTICIPATION_ENTRY_STATUSES = new Set<ParticipationStatus>([
   "pending",
   "verified",
@@ -759,6 +770,7 @@ type PublicParticipationQueueItem = {
 type PublicParticipationViewerEntry = PublicParticipationQueueItem & {
   riotId: string;
   source: ParticipationEntry["source"];
+  checkInExpiresAt?: string;
 };
 
 type PublicParticipationStreamer = {
@@ -770,9 +782,25 @@ type PublicParticipationStreamer = {
   riotId?: string;
   riotGameName?: string;
   riotTagLine?: string;
+  isLive?: boolean;
   isOpen: boolean;
   queueSize: number;
+  maxQueueSize?: number;
+  publicSessionId?: string;
+  sessionStatus?: ParticipationSession["status"];
   updatedAt: string;
+};
+
+type PublicParticipationDiscoveryResponse = {
+  connected: boolean;
+  configured: boolean;
+  followedRecruiting: PublicParticipationStreamer[];
+  followedLiveButClosed: PublicParticipationStreamer[];
+  followedOfflineRecruiting: PublicParticipationStreamer[];
+  metadata: {
+    fetchedAt: string;
+    revision: number;
+  };
 };
 
 type PublicParticipationStateResponse = {
@@ -782,6 +810,8 @@ type PublicParticipationStateResponse = {
   summary: ReturnType<Store["getParticipationState"]>["summary"];
   streamers: PublicParticipationStreamer[];
   selectedStreamerId?: string;
+  publicSessionId?: string;
+  revision: number;
   queue: PublicParticipationQueueItem[];
   viewerEntry?: PublicParticipationViewerEntry;
   maxQueueSize: number;
@@ -1718,11 +1748,28 @@ async function applyManualParticipationAction(input: {
   switch (action) {
     case "open":
       input.store.setParticipationOpen(true, streamerId);
+      if (streamerId && input.store.getParticipationSession(streamerId)) {
+        input.store.updateParticipationSessionStatus(streamerId, "recruiting");
+      }
       await broadcastParticipationSnapshot(input, "recruiting", "dashboard.participation_manual.open", streamerId);
       return "recruiting";
     case "show_queue": {
       const phase = input.store.getParticipationState(streamerId).isOpen ? "recruiting" : "closed";
       await broadcastParticipationSnapshot(input, phase, "dashboard.participation_manual.show_queue", streamerId);
+      return phase;
+    }
+    case "select_next": {
+      const state = input.store.getParticipationState(streamerId);
+      if (!state.session || state.session.status !== "recruiting") {
+        throw new HttpRequestError(409, {
+          error: "모집 중인 시청자 참여 세션이 필요합니다.",
+          code: "SESSION_NOT_RECRUITING"
+        });
+      }
+      const checkInSeconds = state.session?.checkInSeconds ?? 60;
+      input.store.selectNextParticipant(checkInSeconds, streamerId);
+      const phase = state.isOpen ? "recruiting" : "closed";
+      await broadcastParticipationSnapshot(input, phase, "dashboard.participation_manual.select_next", streamerId);
       return phase;
     }
     case "mark_in_game":
@@ -1737,6 +1784,9 @@ async function applyManualParticipationAction(input: {
       return "game_ended";
     case "close":
       input.store.setParticipationOpen(false, streamerId);
+      if (streamerId && input.store.getParticipationSession(streamerId)) {
+        input.store.updateParticipationSessionStatus(streamerId, "closed");
+      }
       await broadcastParticipationSnapshot(input, "closed", "dashboard.participation_manual.close", streamerId);
       return "closed";
     default:
@@ -2390,6 +2440,24 @@ async function requireEmptyPalworldServerBody(req: IncomingMessage): Promise<voi
       code: "invalid_request"
     });
   }
+}
+
+function strictJsonObject(value: unknown, allowedFields: readonly string[]): Record<string, unknown> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new HttpRequestError(400, {
+      error: "요청 body가 올바르지 않습니다.",
+      code: "INVALID_REQUEST"
+    });
+  }
+  const body = value as Record<string, unknown>;
+  const allowed = new Set(allowedFields);
+  if (Object.keys(body).some((key) => !allowed.has(key))) {
+    throw new HttpRequestError(400, {
+      error: "요청 body에 지원하지 않는 필드가 있습니다.",
+      code: "INVALID_REQUEST"
+    });
+  }
+  return body;
 }
 
 function validatedPalworldServerDashboardResponse(value: unknown): PalworldServerDashboardResponse {
@@ -3231,6 +3299,7 @@ function publicLolTwitchStreamFromCandidate(
 export function createHttpHandler(input: HttpHandlerInput) {
   const sessions = input.sessions ?? new DashboardSessionStore();
   const communityModeration = new CommunityModerationService(input.store);
+  const participationRepository = storeParticipationRepository(input.store);
   const followerRefreshByBroadcaster = new Map<string, FollowerRefreshRuntime>();
   let streamerProfileRefreshInFlight: Promise<ParticipationStreamerProfile | undefined> | undefined;
   let streamerProfileRefreshAvailableAt = 0;
@@ -3884,7 +3953,10 @@ export function createHttpHandler(input: HttpHandlerInput) {
     };
   }
 
-  function startParticipationSessionForOwner(streamerId: string) {
+  function startParticipationSessionForOwner(
+    streamerId: string,
+    options: { maxQueueSize?: number; allowRejoin?: boolean; checkInSeconds?: number } = {}
+  ) {
     const identity = approvedStreamerIdentityForOwner(streamerId);
     if (!identity) {
       throw new HttpRequestError(409, { error: "승인된 Riot ID가 있어야 시참 모집을 시작할 수 있습니다." });
@@ -3895,7 +3967,100 @@ export function createHttpHandler(input: HttpHandlerInput) {
       normalizedRiotId: identity.normalizedRiotId,
       profile: input.store.getParticipationStreamerProfile(streamerId),
       capturedAt: new Date().toISOString()
-    });
+    }, options);
+  }
+
+  function participationSessionMutationBody(value: unknown): {
+    action: string;
+    maxQueueSize?: number;
+    allowRejoin?: boolean;
+    checkInSeconds?: number;
+  } {
+    const body = strictJsonObject(value, ["action", "maxQueueSize", "allowRejoin", "checkInSeconds"]);
+    if (typeof body.action !== "string" || !PARTICIPATION_SESSION_ACTIONS.has(body.action)) {
+      throw new HttpRequestError(400, { error: "허용되지 않은 시청자 참여 세션 조작입니다.", code: "INVALID_ACTION" });
+    }
+    if (body.action !== "start" && Object.keys(body).length !== 1) {
+      throw new HttpRequestError(400, { error: "세션 생성 설정은 start 동작에서만 사용할 수 있습니다.", code: "INVALID_REQUEST" });
+    }
+    if (body.maxQueueSize !== undefined && (
+      typeof body.maxQueueSize !== "number"
+      || !Number.isInteger(body.maxQueueSize)
+      || body.maxQueueSize < 1
+      || body.maxQueueSize > 500
+    )) {
+      throw new HttpRequestError(400, { error: "최대 대기 인원은 1명 이상 500명 이하여야 합니다.", code: "INVALID_QUEUE_SIZE" });
+    }
+    if (body.checkInSeconds !== undefined && (
+      typeof body.checkInSeconds !== "number"
+      || !Number.isInteger(body.checkInSeconds)
+      || body.checkInSeconds < 15
+      || body.checkInSeconds > 600
+    )) {
+      throw new HttpRequestError(400, { error: "체크인 시간은 15초 이상 600초 이하여야 합니다.", code: "INVALID_CHECK_IN_SECONDS" });
+    }
+    if (body.allowRejoin !== undefined && typeof body.allowRejoin !== "boolean") {
+      throw new HttpRequestError(400, { error: "재참여 허용 값이 올바르지 않습니다.", code: "INVALID_ALLOW_REJOIN" });
+    }
+    return {
+      action: body.action,
+      ...(typeof body.maxQueueSize === "number" ? { maxQueueSize: body.maxQueueSize } : {}),
+      ...(typeof body.allowRejoin === "boolean" ? { allowRejoin: body.allowRejoin } : {}),
+      ...(typeof body.checkInSeconds === "number" ? { checkInSeconds: body.checkInSeconds } : {})
+    };
+  }
+
+  async function mutateParticipationSessionForOwner(
+    streamerId: string,
+    bodyValue: unknown
+  ): Promise<{ ok: true; action: string; state: LolOperationsState }> {
+    const body = participationSessionMutationBody(bodyValue);
+    if (body.action === "start") {
+      const currentSession = input.store.getParticipationSession(streamerId);
+      if (currentSession && currentSession.status !== "completed") {
+        throw new HttpRequestError(409, {
+          error: "이미 진행 중인 시청자 참여 세션이 있습니다.",
+          code: "SESSION_ALREADY_ACTIVE"
+        });
+      }
+      startParticipationSessionForOwner(streamerId, {
+        ...(body.maxQueueSize !== undefined ? { maxQueueSize: body.maxQueueSize } : {}),
+        ...(body.allowRejoin !== undefined ? { allowRejoin: body.allowRejoin } : {}),
+        ...(body.checkInSeconds !== undefined ? { checkInSeconds: body.checkInSeconds } : {})
+      });
+      await broadcastParticipationSnapshot(input, "recruiting", "dashboard.lol_operations.session_start", streamerId);
+    } else if (body.action === "finish") {
+      if (!input.store.getParticipationSession(streamerId)) {
+        throw new HttpRequestError(409, { error: "종료할 시청자 참여 세션이 없습니다.", code: "SESSION_NOT_ACTIVE" });
+      }
+      input.store.setParticipationOpen(false, streamerId);
+      input.store.endParticipationSession(streamerId);
+      await broadcastParticipationSnapshot(input, "closed", "dashboard.lol_operations.session_finish", streamerId);
+    } else {
+      if (body.action === "open" && !input.store.getParticipationSession(streamerId)) {
+        startParticipationSessionForOwner(streamerId);
+      }
+      await applyManualParticipationAction(input, body.action, streamerId);
+    }
+    return { ok: true, action: body.action, state: lolOperationsStateForOwner(streamerId) };
+  }
+
+  async function mutateParticipationEntryForOwner(
+    streamerId: string,
+    bodyValue: unknown,
+    allowedStatuses: ReadonlySet<ParticipationStatus> = PARTICIPATION_DASHBOARD_ENTRY_STATUSES
+  ): Promise<ParticipationState> {
+    const body = strictJsonObject(bodyValue, ["entryId", "status"]);
+    if (typeof body.entryId !== "string" || !body.entryId.trim()) {
+      throw new HttpRequestError(400, { error: "entryId가 필요합니다.", code: "INVALID_ENTRY_ID" });
+    }
+    if (typeof body.status !== "string" || !allowedStatuses.has(body.status as ParticipationStatus)) {
+      throw new HttpRequestError(400, { error: "허용되지 않은 참가자 상태입니다.", code: "INVALID_ENTRY_STATUS" });
+    }
+    const updated = input.store.markParticipant(body.entryId.trim(), body.status as ParticipationStatus, streamerId);
+    if (!updated) throw new HttpRequestError(404, { error: "시청자 참여 항목을 찾을 수 없습니다.", code: "ENTRY_NOT_FOUND" });
+    await broadcastParticipationQueue(input, "dashboard.lol_operations.entry_status", streamerId);
+    return input.store.getParticipationState(streamerId);
   }
 
   function legacyGameMonitorConfigForOwner(streamerId: string): LolGameMonitorConfig {
@@ -4411,12 +4576,14 @@ export function createHttpHandler(input: HttpHandlerInput) {
     return {
       ...publicParticipationQueueItem(entry, position, entry.twitchUserId),
       riotId: formatRiotId(entry.riotGameName, entry.riotTagLine),
-      source: entry.source
+      source: entry.source,
+      ...(entry.checkInExpiresAt ? { checkInExpiresAt: entry.checkInExpiresAt } : {})
     };
   }
 
   async function publicParticipationStreamers(
-    selectedStreamerId?: string
+    selectedStreamerId?: string,
+    allowOfflineSelected = false
   ): Promise<{
     streamers: PublicParticipationStreamer[];
     selectedStreamerId?: string;
@@ -4425,10 +4592,18 @@ export function createHttpHandler(input: HttpHandlerInput) {
     const approvedStreamers = listApprovedStreamerRiotIds();
     const approvedByOwner = new Map(approvedStreamers.map((request) => [request.twitchUserId, request]));
     const activeSessions = input.store.listParticipationSessions()
-      .filter((session) => session.status === "recruiting" || session.status === "in_game");
+      .filter((session) => (
+        session.status === "recruiting"
+        || session.status === "in_game"
+        || (allowOfflineSelected && selectedStreamerId === session.streamerId)
+      ));
     if (activeSessions.length > 0) {
       const streamers = (await Promise.all(activeSessions.map(async (session) => {
-        if (!await isPublicParticipationStreamerLive(session.streamerId)) return undefined;
+        const isLive = await isPublicParticipationStreamerLive(session.streamerId);
+        if (
+          !(allowOfflineSelected && selectedStreamerId === session.streamerId)
+          && !isLive
+        ) return undefined;
         const participationState = input.store.getParticipationState(session.streamerId);
         const approved = approvedByOwner.get(session.streamerId);
         const snapshot = session.profileSnapshot;
@@ -4444,8 +4619,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
           ...(riotGameName ? { riotGameName } : {}),
           ...(riotTagLine ? { riotTagLine } : {}),
           ...(riotGameName ? { riotId: formatRiotId(riotGameName, riotTagLine || "JP1") } : {}),
+          isLive,
           isOpen: participationState.isOpen,
           queueSize: participationState.summary.active,
+          maxQueueSize: session.maxQueueSize ?? PUBLIC_PARTICIPATION_MAX_QUEUE_SIZE,
+          publicSessionId: session.publicSessionId,
+          sessionStatus: session.status,
           updatedAt: session.updatedAt
         };
       }))).filter((streamer): streamer is NonNullable<typeof streamer> => streamer !== undefined);
@@ -4490,8 +4669,14 @@ export function createHttpHandler(input: HttpHandlerInput) {
       ...(riotGameName ? { riotGameName } : {}),
       ...(riotTagLine ? { riotTagLine } : {}),
       ...(riotGameName ? { riotId: formatRiotId(riotGameName, riotTagLine || "JP1") } : {}),
+      isLive: true,
       isOpen: true,
       queueSize: participationState.summary.active,
+      maxQueueSize: participationState.session?.maxQueueSize ?? PUBLIC_PARTICIPATION_MAX_QUEUE_SIZE,
+      ...(participationState.session?.publicSessionId
+        ? { publicSessionId: participationState.session.publicSessionId }
+        : {}),
+      sessionStatus: participationState.session?.status ?? "recruiting",
       updatedAt: now
     };
     const streamers = [streamer];
@@ -4503,16 +4688,86 @@ export function createHttpHandler(input: HttpHandlerInput) {
       : { streamers };
   }
 
+  async function getPublicParticipationDiscovery(req: IncomingMessage): Promise<PublicParticipationDiscoveryResponse> {
+    const status = await getPublicTwitchViewerStatus(req);
+    if (!status.connected) {
+      return {
+        connected: false,
+        configured: status.configured,
+        followedRecruiting: [],
+        followedLiveButClosed: [],
+        followedOfflineRecruiting: [],
+        metadata: { fetchedAt: new Date().toISOString(), revision: 0 }
+      };
+    }
+    const followed = await getPublicTwitchFollowedLol(100, req, false);
+    const approvedByOwner = new Map(listApprovedStreamerRiotIds().map((request) => [request.twitchUserId, request]));
+    const recruitingByOwner = new Map(
+      participationRepository.listSessions()
+        .filter((session) => session.status === "recruiting")
+        .map((session) => [session.streamerId, session])
+    );
+    const toStreamer = (channel: PublicTwitchFollowedLolChannel, session?: ParticipationSession): PublicParticipationStreamer => {
+      const approved = approvedByOwner.get(channel.twitchUserId);
+      const state = session ? participationRepository.getState(session.streamerId) : undefined;
+      return {
+        id: channel.twitchUserId,
+        twitchUserId: channel.twitchUserId,
+        twitchLogin: channel.twitchLogin,
+        twitchDisplayName: channel.twitchDisplayName,
+        ...(channel.profileImageUrl ? { twitchProfileImageUrl: channel.profileImageUrl } : {}),
+        ...(approved ? { riotGameName: approved.riotGameName, riotTagLine: approved.riotTagLine, riotId: formatRiotId(approved.riotGameName, approved.riotTagLine) } : {}),
+        isLive: channel.isLive,
+        isOpen: Boolean(session && state?.isOpen),
+        queueSize: state?.summary.active ?? 0,
+        ...(session ? { maxQueueSize: session.maxQueueSize ?? PUBLIC_PARTICIPATION_MAX_QUEUE_SIZE } : {}),
+        ...(session ? { publicSessionId: session.publicSessionId, sessionStatus: session.status } : {}),
+        updatedAt: session?.updatedAt ?? channel.followedAt
+      };
+    };
+    const approvedFollowed = followed.channels.filter((channel) => approvedByOwner.has(channel.twitchUserId));
+    const followedRecruiting: PublicParticipationStreamer[] = [];
+    const followedOfflineRecruiting: PublicParticipationStreamer[] = [];
+    const followedLiveButClosed: PublicParticipationStreamer[] = [];
+    for (const channel of approvedFollowed) {
+      const session = recruitingByOwner.get(channel.twitchUserId);
+      if (session) {
+        (channel.isLive ? followedRecruiting : followedOfflineRecruiting).push(toStreamer(channel, session));
+      } else if (channel.isLive) {
+        followedLiveButClosed.push(toStreamer(channel));
+      }
+    }
+    const revision = Math.max(0, ...[...recruitingByOwner.keys()].map((streamerId) => participationRepository.getState(streamerId).revision ?? 0));
+    return {
+      connected: true,
+      configured: status.configured,
+      followedRecruiting,
+      followedLiveButClosed,
+      followedOfflineRecruiting,
+      metadata: { fetchedAt: new Date().toISOString(), revision }
+    };
+  }
+
   async function getPublicParticipationState(
     req: IncomingMessage,
     knownStatus?: PublicTwitchViewerStatusResponse,
-    selectedStreamerIdOverride?: string
+    selectedStreamerIdOverride?: string,
+    publicSessionIdOverride?: string
   ): Promise<PublicParticipationStateResponse> {
     const status = knownStatus ?? await getPublicTwitchViewerStatus(req);
     const viewerId = status.connected ? status.user?.id : undefined;
     const url = new URL(req.url ?? "/", "http://localhost");
-    const requestedStreamerId = selectedStreamerIdOverride ?? (url.searchParams.get("streamerId")?.trim() || undefined);
-    const streamerState = await publicParticipationStreamers(requestedStreamerId);
+    const requestedPublicSessionId = publicSessionIdOverride ?? (url.searchParams.get("session")?.trim() || undefined);
+    const publicSession = requestedPublicSessionId
+      ? participationRepository.getSession(requestedPublicSessionId)
+      : undefined;
+    if (requestedPublicSessionId && !publicSession) {
+      throw new HttpRequestError(404, { error: "참여 세션을 찾을 수 없습니다.", code: "SESSION_NOT_FOUND" });
+    }
+    const requestedStreamerId = publicSession?.streamerId
+      ?? selectedStreamerIdOverride
+      ?? (url.searchParams.get("streamerId")?.trim() || undefined);
+    const streamerState = await publicParticipationStreamers(requestedStreamerId, Boolean(publicSession));
     const selectedScopeStreamerId = streamerState.scopeStreamerId;
     const participationState = selectedScopeStreamerId
       ? input.store.getParticipationState(selectedScopeStreamerId)
@@ -4522,7 +4777,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       : [];
     const queue = participationState?.isOpen
       ? activeEntries
-        .slice(0, PUBLIC_PARTICIPATION_MAX_QUEUE_SIZE)
+        .slice(0, participationState.session?.maxQueueSize ?? PUBLIC_PARTICIPATION_MAX_QUEUE_SIZE)
         .map((entry, index) => publicParticipationQueueItem(entry, index + 1, viewerId))
       : [];
     const viewerIndex = viewerId ? activeEntries.findIndex((entry) => entry.twitchUserId === viewerId) : -1;
@@ -4553,32 +4808,43 @@ export function createHttpHandler(input: HttpHandlerInput) {
       },
       streamers: streamerState.streamers,
       ...(streamerState.selectedStreamerId ? { selectedStreamerId: streamerState.selectedStreamerId } : {}),
+      ...(participationState?.session?.publicSessionId ? { publicSessionId: participationState.session.publicSessionId } : {}),
+      revision: participationState?.revision ?? 0,
       queue,
       ...(viewerEntry ? { viewerEntry } : {}),
-      maxQueueSize: PUBLIC_PARTICIPATION_MAX_QUEUE_SIZE,
+      maxQueueSize: participationState?.session?.maxQueueSize ?? PUBLIC_PARTICIPATION_MAX_QUEUE_SIZE,
       updatedAt: new Date().toISOString()
     };
   }
 
-  async function joinPublicParticipation(req: IncomingMessage): Promise<PublicParticipationJoinResponse> {
-    if (!input.publicTwitchAuth) {
-      throw new HttpRequestError(503, { error: "Twitch 공개 로그인을 사용할 수 없습니다." });
-    }
+  async function joinPublicParticipation(
+    req: IncomingMessage,
+    publicSessionId?: string,
+    rejoinOnly = false
+  ): Promise<PublicParticipationJoinResponse> {
     const status = await getPublicTwitchViewerStatus(req);
     if (!status.connected || !status.user) {
       throw new HttpRequestError(401, { error: "Twitch 로그인 후 참여 등록을 할 수 있습니다." });
     }
-    const body = await readJsonBody<{ riotId?: unknown; role?: unknown; streamerId?: unknown }>(req);
-    const requestedStreamerId = typeof body.streamerId === "string" ? body.streamerId.trim() : "";
+    const body = strictJsonObject(
+      await readJsonBody<unknown>(req),
+      publicSessionId ? ["riotId", "role"] : ["riotId", "role", "streamerId"]
+    );
+    const selectedSession = publicSessionId ? participationRepository.getSession(publicSessionId) : undefined;
+    if (publicSessionId && !selectedSession) {
+      throw new HttpRequestError(404, { error: "참여 세션을 찾을 수 없습니다.", code: "SESSION_NOT_FOUND" });
+    }
+    const requestedStreamerId = selectedSession?.streamerId
+      ?? (typeof body.streamerId === "string" ? body.streamerId.trim() : "");
     if (!requestedStreamerId) {
       throw new HttpRequestError(400, { error: "참여할 방송인을 선택해주세요." });
     }
-    const streamerState = await publicParticipationStreamers(requestedStreamerId);
+    const streamerState = await publicParticipationStreamers(requestedStreamerId, Boolean(selectedSession));
     if (!streamerState.streamers.some((streamer) => streamer.id === requestedStreamerId)) {
       throw new HttpRequestError(404, { error: "선택한 방송인의 참여 대기열을 찾을 수 없습니다." });
     }
     if (!streamerState.selectedStreamerId || !input.store.getParticipationState(streamerState.scopeStreamerId).isOpen) {
-      throw new HttpRequestError(409, { error: "현재 시청자 참여 대기열이 닫혀 있습니다." });
+      throw new HttpRequestError(409, { error: "현재 시청자 참여 대기열이 닫혀 있습니다.", code: "SESSION_CLOSED" });
     }
     if (typeof body.riotId !== "string") {
       throw new HttpRequestError(400, { error: "Riot ID를 입력해주세요." });
@@ -4589,13 +4855,22 @@ export function createHttpHandler(input: HttpHandlerInput) {
     }
     const normalizedRole = normalizeLolRole(typeof body.role === "string" ? body.role : undefined);
     const role: LolRole = normalizedRole === "unknown" ? "fill" : normalizedRole;
+    const previousViewerEntry = input.store.getParticipationQueue(streamerState.scopeStreamerId)
+      .filter((entry) => entry.twitchUserId === status.user!.id)
+      .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))[0];
+    if (rejoinOnly && previousViewerEntry?.status !== "played") {
+      throw new HttpRequestError(409, { error: "참여 완료 후에만 재참여할 수 있습니다.", code: "REJOIN_NOT_ALLOWED" });
+    }
+    if (rejoinOnly && selectedSession?.allowRejoin === false) {
+      throw new HttpRequestError(409, { error: "이 참여 세션은 재참여를 허용하지 않습니다.", code: "REJOIN_NOT_ALLOWED" });
+    }
     const duplicateBefore = input.store.findParticipationDuplicate({
       twitchUserId: status.user.id,
       riotGameName: parsed.gameName,
       riotTagLine: parsed.tagLine
     }, streamerState.scopeStreamerId);
     if (duplicateBefore) {
-      const state = await getPublicParticipationState(req, status, streamerState.selectedStreamerId);
+      const state = await getPublicParticipationState(req, status, streamerState.selectedStreamerId, selectedSession?.publicSessionId);
       return {
         ok: true,
         alreadyJoined: true,
@@ -4604,8 +4879,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
         ...(state.viewerEntry ? { entry: state.viewerEntry } : {})
       };
     }
-    if (input.store.getActiveParticipationCount(streamerState.scopeStreamerId) >= PUBLIC_PARTICIPATION_MAX_QUEUE_SIZE) {
-      throw new HttpRequestError(409, { error: "참여 대기열이 가득 찼습니다." });
+    const maxQueueSize = selectedSession?.maxQueueSize ?? PUBLIC_PARTICIPATION_MAX_QUEUE_SIZE;
+    if (input.store.getActiveParticipationCount(streamerState.scopeStreamerId) >= maxQueueSize) {
+      throw new HttpRequestError(409, { error: "참여 대기열이 가득 찼습니다.", code: "QUEUE_FULL" });
     }
 
     const previousProfile = input.store.findReusableParticipationProfile({
@@ -4630,8 +4906,37 @@ export function createHttpHandler(input: HttpHandlerInput) {
       ...(previousProfile?.topChampions?.length ? { topChampions: previousProfile.topChampions.map((champion) => ({ ...champion })) } : {}),
       ...(previousProfile?.profileAnalyzedAt ? { profileAnalyzedAt: previousProfile.profileAnalyzedAt } : {}),
       status: profileReady ? "verified" : "waitlisted",
-      source: "dashboard"
+      source: "dashboard",
+      joinedFrom: "public_web"
     });
+    const latestSession = participationRepository.getSession(
+      selectedSession?.publicSessionId ?? input.store.getParticipationState(streamerState.scopeStreamerId).session?.publicSessionId ?? ""
+    );
+    if (
+      !latestSession
+      || !["recruiting", "in_game"].includes(latestSession.status)
+      || !input.store.getParticipationState(streamerState.scopeStreamerId).isOpen
+    ) {
+      throw new HttpRequestError(409, { error: "현재 시청자 참여 대기열이 닫혀 있습니다.", code: "SESSION_CLOSED" });
+    }
+    const duplicateImmediatelyBeforeSave = input.store.findParticipationDuplicate({
+      twitchUserId: status.user.id,
+      riotGameName: parsed.gameName,
+      riotTagLine: parsed.tagLine
+    }, streamerState.scopeStreamerId);
+    if (duplicateImmediatelyBeforeSave) {
+      const state = await getPublicParticipationState(req, status, streamerState.selectedStreamerId, latestSession.publicSessionId);
+      return {
+        ok: true,
+        alreadyJoined: true,
+        reused: false,
+        state,
+        ...(state.viewerEntry ? { entry: state.viewerEntry } : {})
+      };
+    }
+    if (input.store.getActiveParticipationCount(streamerState.scopeStreamerId) >= (latestSession.maxQueueSize ?? PUBLIC_PARTICIPATION_MAX_QUEUE_SIZE)) {
+      throw new HttpRequestError(409, { error: "참여 대기열이 가득 찼습니다.", code: "QUEUE_FULL" });
+    }
     const saved = input.store.reactivateReusableParticipation(entry, streamerState.scopeStreamerId);
     await broadcastParticipationQueue(
       { store: input.store, actions: input.actions },
@@ -4642,7 +4947,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (input.refreshLolProfile && saved.entry.profileStatus !== "ready") {
       void input.refreshLolProfile(saved.entry.id, streamerState.scopeStreamerId).catch(() => undefined);
     }
-    const state = await getPublicParticipationState(req, status, streamerState.selectedStreamerId);
+    const state = await getPublicParticipationState(req, status, streamerState.selectedStreamerId, selectedSession?.publicSessionId);
     return {
       ok: true,
       alreadyJoined: false,
@@ -4652,31 +4957,32 @@ export function createHttpHandler(input: HttpHandlerInput) {
     };
   }
 
-  async function cancelPublicParticipation(req: IncomingMessage): Promise<PublicParticipationCancelResponse> {
-    if (!input.publicTwitchAuth) {
-      throw new HttpRequestError(503, { error: "Twitch 공개 로그인을 사용할 수 없습니다." });
-    }
+  async function cancelPublicParticipation(req: IncomingMessage, publicSessionId?: string): Promise<PublicParticipationCancelResponse> {
     const status = await getPublicTwitchViewerStatus(req);
     if (!status.connected || !status.user) {
       throw new HttpRequestError(401, { error: "Twitch 로그인 후 참여 취소를 할 수 있습니다." });
     }
-    const body = await readJsonBody<{ streamerId?: unknown }>(req);
-    const requestedStreamerId = typeof body.streamerId === "string" ? body.streamerId.trim() : "";
+    const body = strictJsonObject(
+      await readJsonBody<unknown>(req),
+      publicSessionId ? [] : ["streamerId"]
+    );
+    const selectedSession = publicSessionId ? participationRepository.getSession(publicSessionId) : undefined;
+    if (publicSessionId && !selectedSession) {
+      throw new HttpRequestError(404, { error: "참여 세션을 찾을 수 없습니다.", code: "SESSION_NOT_FOUND" });
+    }
+    const requestedStreamerId = selectedSession?.streamerId
+      ?? (typeof body.streamerId === "string" ? body.streamerId.trim() : "");
     if (!requestedStreamerId) {
       throw new HttpRequestError(400, { error: "참여할 방송인을 선택해주세요." });
     }
-    const streamerState = await publicParticipationStreamers(requestedStreamerId);
+    const streamerState = await publicParticipationStreamers(requestedStreamerId, Boolean(selectedSession));
     if (!streamerState.streamers.some((streamer) => streamer.id === requestedStreamerId)) {
       throw new HttpRequestError(404, { error: "선택한 방송인의 참여 대기열을 찾을 수 없습니다." });
     }
     if (!streamerState.selectedStreamerId) {
       throw new HttpRequestError(404, { error: "선택한 방송인의 참여 대기열을 찾을 수 없습니다." });
     }
-    const result = input.store.cancelParticipationByUser(
-      status.user.id,
-      "시청자가 웹 참여 화면에서 참가를 취소했습니다.",
-      streamerState.scopeStreamerId
-    );
+    const result = participationRepository.cancel(status.user.id, streamerState.scopeStreamerId!);
     if (!result.ok) {
       const error = result.reason === "in_game"
         ? "이미 게임 진행 상태라 참여 취소를 할 수 없습니다."
@@ -4691,8 +4997,29 @@ export function createHttpHandler(input: HttpHandlerInput) {
       .catch(() => undefined);
     return {
       ok: true,
-      state: await getPublicParticipationState(req, status, streamerState.selectedStreamerId)
+      state: await getPublicParticipationState(req, status, streamerState.selectedStreamerId, selectedSession?.publicSessionId)
     };
+  }
+
+  async function checkInPublicParticipation(req: IncomingMessage, publicSessionId: string): Promise<PublicParticipationStateResponse> {
+    const status = await getPublicTwitchViewerStatus(req);
+    if (!status.connected || !status.user) {
+      throw new HttpRequestError(401, { error: "Twitch 로그인 후 참여 확인을 할 수 있습니다.", code: "LOGIN_REQUIRED" });
+    }
+    const session = participationRepository.getSession(publicSessionId);
+    if (!session) throw new HttpRequestError(404, { error: "참여 세션을 찾을 수 없습니다.", code: "SESSION_NOT_FOUND" });
+    strictJsonObject(await readJsonBody<unknown>(req), []);
+    const result = participationRepository.checkIn(status.user.id, session.streamerId);
+    if (!result.ok) {
+      const code = result.reason === "expired" ? "CHECK_IN_EXPIRED" : "CHECK_IN_NOT_AVAILABLE";
+      throw new HttpRequestError(409, { error: result.reason === "expired" ? "참여 확인 시간이 만료되었습니다." : "참여 확인 대상이 아닙니다.", code });
+    }
+    await broadcastParticipationQueue(
+      { store: input.store, actions: input.actions },
+      "public.participation_check_in",
+      session.streamerId
+    ).catch(() => undefined);
+    return getPublicParticipationState(req, status, session.streamerId, session.publicSessionId);
   }
 
   async function createPublicStreamerRiotIdRequest(req: IncomingMessage): Promise<StreamerRiotIdRequest> {
@@ -6789,6 +7116,41 @@ export function createHttpHandler(input: HttpHandlerInput) {
             riotTagLine: result.request.riotTagLine
           }, noStoreHeaders());
         }
+        if (
+          req.method === "GET"
+          && url.pathname === "/api/account/streamer/participation"
+        ) {
+          if (url.search) {
+            return sendJson(req, res, 400, { error: "query는 허용되지 않습니다.", code: "invalid_request" });
+          }
+          const context = await yoroStreamerContext(req);
+          const { twitch } = requireApprovedYoroStreamer(context);
+          return sendJson(req, res, 200, input.store.getParticipationState(twitch.userId), noStoreHeaders());
+        }
+        if (
+          req.method === "POST"
+          && url.pathname === "/api/account/streamer/participation/session"
+        ) {
+          const context = await yoroStreamerContext(req, true);
+          const { twitch } = requireApprovedYoroStreamer(context);
+          const result = await mutateParticipationSessionForOwner(
+            twitch.userId,
+            await readJsonBody<unknown>(req)
+          );
+          return sendJson(req, res, 200, result, noStoreHeaders());
+        }
+        if (
+          req.method === "POST"
+          && url.pathname === "/api/account/streamer/participation/entry-status"
+        ) {
+          const context = await yoroStreamerContext(req, true);
+          const { twitch } = requireApprovedYoroStreamer(context);
+          const state = await mutateParticipationEntryForOwner(
+            twitch.userId,
+            await readJsonBody<unknown>(req)
+          );
+          return sendJson(req, res, 200, state, noStoreHeaders());
+        }
         if (req.method === "PATCH" && url.pathname === "/api/account/preferences") {
           if (!stateChangingRequestHasTrustedOrigin(req)) {
             return sendJson(req, res, 403, {
@@ -8017,10 +8379,51 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if (req.method === "GET" && url.pathname === "/api/public/participation/state") {
         return sendJson(req, res, 200, await getPublicParticipationState(req));
       }
+      if (req.method === "GET" && url.pathname === "/api/public/participation/discovery") {
+        if ((url.searchParams.get("scope") ?? "followed") !== "followed") {
+          return sendJson(req, res, 400, { error: "지원하지 않는 참여 탐색 범위입니다.", code: "INVALID_SCOPE" });
+        }
+        return sendJson(req, res, 200, await getPublicParticipationDiscovery(req));
+      }
+      const publicParticipationSessionMatch = url.pathname.match(
+        /^\/api\/public\/participation\/sessions\/([^/]+)(?:\/(join|cancel|check-in|rejoin))?$/u
+      );
+      if (publicParticipationSessionMatch) {
+        let publicSessionId = "";
+        try {
+          publicSessionId = decodeURIComponent(publicParticipationSessionMatch[1] ?? "");
+        } catch {
+          return sendJson(req, res, 400, { error: "참여 세션 주소가 올바르지 않습니다.", code: "INVALID_SESSION_ID" });
+        }
+        const action = publicParticipationSessionMatch[2];
+        const session = participationRepository.getSession(publicSessionId);
+        if (!session) {
+          return sendJson(req, res, 404, { error: "참여 세션을 찾을 수 없습니다.", code: "SESSION_NOT_FOUND" });
+        }
+        if (req.method === "GET" && !action) {
+          return sendJson(req, res, 200, await getPublicParticipationState(req, undefined, session.streamerId, session.publicSessionId));
+        }
+        if (req.method === "POST" && action) {
+          if (!stateChangingRequestHasTrustedOrigin(req)) {
+            return sendJson(req, res, 403, { error: "trusted Origin이 필요합니다.", code: "origin_denied" });
+          }
+          if (action === "join") return sendJson(req, res, 200, await joinPublicParticipation(req, session.publicSessionId));
+          if (action === "rejoin") return sendJson(req, res, 200, await joinPublicParticipation(req, session.publicSessionId, true));
+          if (action === "cancel") return sendJson(req, res, 200, await cancelPublicParticipation(req, session.publicSessionId));
+          if (action === "check-in") return sendJson(req, res, 200, { ok: true, state: await checkInPublicParticipation(req, session.publicSessionId) });
+        }
+        return sendJson(req, res, 405, { error: "method not allowed" });
+      }
       if (req.method === "POST" && url.pathname === "/api/public/participation/join") {
+        if (!stateChangingRequestHasTrustedOrigin(req)) {
+          return sendJson(req, res, 403, { error: "trusted Origin이 필요합니다.", code: "origin_denied" });
+        }
         return sendJson(req, res, 200, await joinPublicParticipation(req));
       }
       if (req.method === "POST" && url.pathname === "/api/public/participation/cancel") {
+        if (!stateChangingRequestHasTrustedOrigin(req)) {
+          return sendJson(req, res, 403, { error: "trusted Origin이 필요합니다.", code: "origin_denied" });
+        }
         return sendJson(req, res, 200, await cancelPublicParticipation(req));
       }
       if (req.method === "GET" && url.pathname === "/api/public/twitch/status") {
@@ -8425,40 +8828,25 @@ export function createHttpHandler(input: HttpHandlerInput) {
       }
       if (req.method === "POST" && url.pathname === "/api/lol-operations/participation/session") {
         const streamerId = requireAuthenticatedStreamerOwner(auth.principal);
-        const body = await readJsonBody<{ action?: unknown }>(req);
-        if (typeof body.action !== "string") return sendJson(req, res, 400, { error: "action이 필요합니다." });
-        if (body.action === "start") {
-          startParticipationSessionForOwner(streamerId);
-          await broadcastParticipationSnapshot(input, "recruiting", "dashboard.lol_operations.session_start", streamerId);
-        } else if (body.action === "finish") {
-          input.store.setParticipationOpen(false, streamerId);
-          input.store.endParticipationSession(streamerId);
-          await broadcastParticipationSnapshot(input, "closed", "dashboard.lol_operations.session_finish", streamerId);
-        } else if (PARTICIPATION_MANUAL_ACTIONS.has(body.action)) {
-          if (body.action === "open" && !input.store.getParticipationSession(streamerId)) {
-            startParticipationSessionForOwner(streamerId);
-          }
-          await applyManualParticipationAction(input, body.action, streamerId);
-        } else {
-          return sendJson(req, res, 400, { error: "허용되지 않은 시참 세션 조작입니다." });
-        }
-        return sendJson(req, res, 200, {
-          ok: true,
-          action: body.action,
-          state: lolOperationsStateForOwner(streamerId)
-        });
+        return sendJson(
+          req,
+          res,
+          200,
+          await mutateParticipationSessionForOwner(streamerId, await readJsonBody<unknown>(req))
+        );
       }
       if (req.method === "POST" && url.pathname === "/api/lol-operations/participation/entry-status") {
         const streamerId = requireAuthenticatedStreamerOwner(auth.principal);
-        const body = await readJsonBody<{ entryId?: unknown; status?: unknown }>(req);
-        if (typeof body.entryId !== "string" || !body.entryId.trim()) return sendJson(req, res, 400, { error: "entryId가 필요합니다." });
-        if (typeof body.status !== "string" || !PARTICIPATION_ENTRY_STATUSES.has(body.status as ParticipationStatus)) {
-          return sendJson(req, res, 400, { error: "허용되지 않은 참가자 상태입니다." });
-        }
-        const updated = input.store.markParticipant(body.entryId.trim(), body.status as ParticipationStatus, streamerId);
-        if (!updated) return sendJson(req, res, 404, { error: "시참 entry를 찾을 수 없습니다." });
-        await broadcastParticipationQueue(input, "dashboard.lol_operations.entry_status", streamerId);
-        return sendJson(req, res, 200, input.store.getParticipationState(streamerId));
+        return sendJson(
+          req,
+          res,
+          200,
+          await mutateParticipationEntryForOwner(
+            streamerId,
+            await readJsonBody<unknown>(req),
+            PARTICIPATION_ENTRY_STATUSES
+          )
+        );
       }
 
       const compatibilityStreamerId = authenticatedStreamerOwnerId(auth.principal);

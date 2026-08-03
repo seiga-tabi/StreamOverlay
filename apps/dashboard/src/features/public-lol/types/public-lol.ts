@@ -298,6 +298,7 @@ export type PublicParticipationQueueItem = {
 export type PublicParticipationViewerEntry = PublicParticipationQueueItem & {
   riotId: string;
   source: string;
+  checkInExpiresAt?: string;
 };
 
 export type PublicParticipationStreamer = {
@@ -309,9 +310,22 @@ export type PublicParticipationStreamer = {
   riotId?: string;
   riotGameName?: string;
   riotTagLine?: string;
+  isLive?: boolean;
   isOpen: boolean;
   queueSize: number;
+  maxQueueSize?: number;
+  publicSessionId?: string;
+  sessionStatus?: "closed" | "recruiting" | "in_game" | "completed";
   updatedAt: string;
+};
+
+export type PublicParticipationDiscoveryResponse = {
+  connected: boolean;
+  configured: boolean;
+  followedRecruiting: PublicParticipationStreamer[];
+  followedLiveButClosed: PublicParticipationStreamer[];
+  followedOfflineRecruiting: PublicParticipationStreamer[];
+  metadata: { fetchedAt: string; revision: number };
 };
 
 export type PublicParticipationStateResponse = {
@@ -329,6 +343,8 @@ export type PublicParticipationStateResponse = {
   };
   streamers: PublicParticipationStreamer[];
   selectedStreamerId?: string;
+  publicSessionId?: string;
+  revision: number;
   queue: PublicParticipationQueueItem[];
   viewerEntry?: PublicParticipationViewerEntry;
   maxQueueSize: number;

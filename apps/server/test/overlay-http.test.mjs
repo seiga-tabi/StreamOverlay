@@ -725,7 +725,8 @@ test("게임 중 공개 참가 신청은 오버레이 상태를 모집 중으로
     riotId: "ViewerOne#JP1",
     role: "mid"
   }, {
-    cookie: `${PUBLIC_TWITCH_VIEWER_SESSION_COOKIE}=viewer-session`
+    cookie: `${PUBLIC_TWITCH_VIEWER_SESSION_COOKIE}=viewer-session`,
+    origin: "http://localhost:3000"
   });
   const res = createResponse();
   await handler(req, res);
@@ -792,7 +793,8 @@ test("완료된 공개 참가자는 상태 조회 후 기존 항목으로 재참
     }
   });
   const headers = {
-    cookie: `${PUBLIC_TWITCH_VIEWER_SESSION_COOKIE}=viewer-rejoin-session`
+    cookie: `${PUBLIC_TWITCH_VIEWER_SESSION_COOKIE}=viewer-rejoin-session`,
+    origin: "http://localhost:3000"
   };
 
   const stateReq = createRequest("GET", `/api/public/participation/state?streamerId=${streamerId}`, undefined, headers);
@@ -821,6 +823,208 @@ test("완료된 공개 참가자는 상태 조회 후 기존 항목으로 재참
   assert.equal(store.getParticipationQueue(streamerId).length, 1);
   assert.equal(store.getParticipationQueue(streamerId)[0]?.id, completed.id);
   assert.equal(store.getParticipationQueue(streamerId)[0]?.requestedRole, "top");
+});
+
+test("공개 session URL은 참가·체크인·취소를 같은 참여 대기열에 반영한다", async () => {
+  const store = new Store();
+  const streamerId = "public-session-streamer";
+  const session = store.startParticipationSession(streamerId, {
+    riotGameName: "Streamer",
+    riotTagLine: "JP1",
+    capturedAt: new Date().toISOString()
+  }, { maxQueueSize: 5, allowRejoin: true, checkInSeconds: 60 });
+  const publicTwitchAuth = {
+    async getStatus() {
+      return {
+        connected: true,
+        configured: true,
+        requiredScopes: ["user:read:follows"],
+        missingScopes: [],
+        user: { id: "public-viewer", login: "public-viewer", displayName: "PublicViewer" }
+      };
+    }
+  };
+  const handler = createHttpHandler({
+    store,
+    twitchAuth: {},
+    publicTwitchAuth,
+    actions: { async dispatchOne() {} }
+  });
+  const headers = {
+    cookie: `${PUBLIC_TWITCH_VIEWER_SESSION_COOKIE}=public-session-cookie`,
+    origin: "http://localhost:3000"
+  };
+
+  const detailReq = createRequest("GET", `/api/public/participation/sessions/${encodeURIComponent(session.publicSessionId)}`, undefined, headers);
+  const detailRes = createResponse();
+  await handler(detailReq, detailRes);
+  assert.equal(detailRes.statusCode, 200);
+  assert.equal(JSON.parse(detailRes.body).publicSessionId, session.publicSessionId);
+
+  const invalidJoinReq = createRequest("POST", `/api/public/participation/sessions/${encodeURIComponent(session.publicSessionId)}/join`, {
+    riotId: "PublicViewer#JP1",
+    role: "support",
+    streamerId: "spoofed-streamer"
+  }, headers);
+  const invalidJoinRes = createResponse();
+  await handler(invalidJoinReq, invalidJoinRes);
+  assert.equal(invalidJoinRes.statusCode, 400);
+  assert.equal(store.getParticipationQueue(streamerId).length, 0);
+
+  const joinReq = createRequest("POST", `/api/public/participation/sessions/${encodeURIComponent(session.publicSessionId)}/join`, {
+    riotId: "PublicViewer#JP1",
+    role: "support"
+  }, headers);
+  const joinRes = createResponse();
+  await handler(joinReq, joinRes);
+  assert.equal(joinRes.statusCode, 200);
+  assert.equal(store.getParticipationQueue(streamerId)[0]?.joinedFrom, "public_web");
+  assert.equal(store.getParticipationQueue(streamerId)[0]?.attemptNumber, 1);
+
+  store.selectNextParticipant(60, streamerId);
+  const selectedReq = createRequest("GET", `/api/public/participation/sessions/${encodeURIComponent(session.publicSessionId)}`, undefined, headers);
+  const selectedRes = createResponse();
+  await handler(selectedReq, selectedRes);
+  assert.equal(selectedRes.statusCode, 200);
+  assert.match(JSON.parse(selectedRes.body).viewerEntry?.checkInExpiresAt ?? "", /^\d{4}-\d{2}-\d{2}T/u);
+
+  const invalidCheckInReq = createRequest("POST", `/api/public/participation/sessions/${encodeURIComponent(session.publicSessionId)}/check-in`, {
+    unexpected: true
+  }, headers);
+  const invalidCheckInRes = createResponse();
+  await handler(invalidCheckInReq, invalidCheckInRes);
+  assert.equal(invalidCheckInRes.statusCode, 400);
+  assert.equal(store.getParticipationQueue(streamerId)[0]?.status, "selected");
+
+  const checkInReq = createRequest("POST", `/api/public/participation/sessions/${encodeURIComponent(session.publicSessionId)}/check-in`, {}, headers);
+  const checkInRes = createResponse();
+  await handler(checkInReq, checkInRes);
+  assert.equal(checkInRes.statusCode, 200);
+  assert.equal(store.getParticipationQueue(streamerId)[0]?.status, "checked_in");
+
+  const cancelReq = createRequest("POST", `/api/public/participation/sessions/${encodeURIComponent(session.publicSessionId)}/cancel`, {}, headers);
+  const cancelRes = createResponse();
+  await handler(cancelReq, cancelRes);
+  assert.equal(cancelRes.statusCode, 200);
+  assert.equal(store.getParticipationQueue(streamerId)[0]?.status, "cancelled");
+});
+
+test("팔로우 참여 탐색은 Twitch user ID를 exact join하고 모집 상태를 구분한다", async () => {
+  const store = new Store();
+  for (const twitchUserId of ["followed-live", "followed-closed", "followed-offline", "not-followed"]) {
+    const request = store.upsertStreamerRiotIdRequest({
+      twitchUserId,
+      twitchLogin: twitchUserId,
+      twitchDisplayName: twitchUserId,
+      riotGameName: `Riot${twitchUserId}`,
+      riotTagLine: "JP1"
+    });
+    store.resolveStreamerRiotIdRequest({ requestId: request.id, decision: "approved", reviewer: "test" });
+  }
+  const liveSession = store.startParticipationSession("followed-live");
+  const offlineSession = store.startParticipationSession("followed-offline");
+  store.startParticipationSession("not-followed");
+  const publicTwitchAuth = {
+    async getStatus() {
+      return {
+        connected: true,
+        configured: true,
+        requiredScopes: ["user:read:follows"],
+        missingScopes: [],
+        user: { id: "viewer", login: "viewer", displayName: "Viewer" }
+      };
+    },
+    async getAccessContext() {
+      return {
+        clientId: "client-id",
+        accessToken: "access-token",
+        userId: "viewer",
+        scopes: ["user:read:follows"],
+        user: { id: "viewer", login: "viewer", displayName: "Viewer" }
+      };
+    }
+  };
+  const followedAt = "2026-07-20T00:00:00.000Z";
+  const followedChannels = ["followed-live", "followed-closed", "followed-offline"].map((id) => ({
+    broadcasterId: id,
+    broadcasterLogin: id,
+    broadcasterName: id,
+    followedAt
+  }));
+  const handler = createHttpHandler({
+    store,
+    twitchAuth: {},
+    publicTwitchAuth,
+    twitch: {
+      async getFollowedChannels() {
+        return { total: followedChannels.length, truncated: false, channels: followedChannels };
+      },
+      async getStreamsByUserIds() {
+        return new Map([
+          ["followed-live", { userId: "followed-live", userLogin: "followed-live", userName: "followed-live", title: "LIVE", gameName: "League of Legends", viewerCount: 1, startedAt: followedAt }],
+          ["followed-closed", { userId: "followed-closed", userLogin: "followed-closed", userName: "followed-closed", title: "LIVE", gameName: "League of Legends", viewerCount: 1, startedAt: followedAt }]
+        ]);
+      }
+    },
+    actions: { async dispatchOne() {} }
+  });
+  const req = createRequest("GET", "/api/public/participation/discovery?scope=followed", undefined, {
+    cookie: `${PUBLIC_TWITCH_VIEWER_SESSION_COOKIE}=viewer-session`
+  });
+  const res = createResponse();
+  await handler(req, res);
+  assert.equal(res.statusCode, 200);
+  const body = JSON.parse(res.body);
+  assert.deepEqual(body.followedRecruiting.map((streamer) => streamer.id), ["followed-live"]);
+  assert.deepEqual(body.followedLiveButClosed.map((streamer) => streamer.id), ["followed-closed"]);
+  assert.deepEqual(body.followedOfflineRecruiting.map((streamer) => streamer.id), ["followed-offline"]);
+  assert.equal(body.followedRecruiting[0].publicSessionId, liveSession.publicSessionId);
+  assert.equal(body.followedOfflineRecruiting[0].publicSessionId, offlineSession.publicSessionId);
+  assert.equal(JSON.stringify(body).includes("not-followed"), false);
+});
+
+test("공개 참여 세션은 동시 신청에서도 최대 정원을 초과하지 않는다", async () => {
+  const store = new Store();
+  const streamerId = "capacity-streamer";
+  const session = store.startParticipationSession(streamerId, undefined, { maxQueueSize: 1 });
+  const handler = createHttpHandler({
+    store,
+    twitchAuth: {},
+    publicTwitchAuth: {
+      async getStatus(sessionId) {
+        const viewerId = sessionId === "capacity-a" ? "capacity-viewer-a" : "capacity-viewer-b";
+        return {
+          connected: true,
+          configured: true,
+          requiredScopes: ["user:read:follows"],
+          missingScopes: [],
+          user: { id: viewerId, login: viewerId, displayName: viewerId }
+        };
+      }
+    },
+    actions: { async dispatchOne() {} }
+  });
+  const request = (viewer, riotId) => createRequest(
+    "POST",
+    `/api/public/participation/sessions/${encodeURIComponent(session.publicSessionId)}/join`,
+    { riotId, role: "fill" },
+    {
+      cookie: `${PUBLIC_TWITCH_VIEWER_SESSION_COOKIE}=${viewer}`,
+      origin: "http://localhost:3000"
+    }
+  );
+  const responseA = createResponse();
+  const responseB = createResponse();
+
+  await Promise.all([
+    handler(request("capacity-a", "CapacityA#JP1"), responseA),
+    handler(request("capacity-b", "CapacityB#JP1"), responseB)
+  ]);
+
+  assert.deepEqual([responseA.statusCode, responseB.statusCode].sort((a, b) => a - b), [200, 409]);
+  const rejected = responseA.statusCode === 409 ? JSON.parse(responseA.body) : JSON.parse(responseB.body);
+  assert.equal(rejected.code, "QUEUE_FULL");
+  assert.equal(store.getActiveParticipationCount(streamerId), 1);
 });
 
 test("공개 참여 상태는 라이브 방송인만 노출하고 명시 선택 전 대기열을 숨긴다", async () => {

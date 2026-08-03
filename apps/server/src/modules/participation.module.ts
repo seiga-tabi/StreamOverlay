@@ -473,6 +473,7 @@ async function applyFromText(ctx: ModuleContext, settings: ParticipationSettings
     profileAnalyzedAt: reusedProfile.profileAnalyzedAt,
     status: resolvedRiotPuuid ? "verified" : requiresRiotVerification ? "pending" : "waitlisted",
     source: input.source,
+    joinedFrom: "twitch_chat",
     redemptionId: input.redemptionId
   });
 

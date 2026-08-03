@@ -147,6 +147,15 @@ test("Store는 같은 트위치 유저의 이전 비활성 참가 기록을 다�
     topChampions: [{ championId: 103, nameKo: "아리" }],
     playedAt: "2026-06-26T00:00:00.000Z"
   }));
+  store.addParticipation(store.makeParticipationEntry({
+    twitchUserId: "viewer-2",
+    twitchUserName: "Viewer2",
+    riotGameName: "SecondViewer",
+    riotTagLine: "KR1",
+    preferredRole: "top",
+    status: "waitlisted",
+    source: "dashboard"
+  }));
 
   const result = store.reactivateReusableParticipation(store.makeParticipationEntry({
     twitchUserId: "viewer-1",
@@ -163,6 +172,8 @@ test("Store는 같은 트위치 유저의 이전 비활성 참가 기록을 다�
   assert.equal(result.reused, true);
   assert.equal(result.entry.id, previous.id);
   assert.equal(result.entry.createdAt, previous.createdAt);
+  assert.equal(result.entry.attemptNumber, 2);
+  assert.ok(result.entry.lastRequeuedAt);
   assert.equal(result.entry.twitchUserName, "ViewerRenamed");
   assert.equal(result.entry.status, "verified");
   assert.equal(result.entry.preferredRole, "jungle");
@@ -170,8 +181,8 @@ test("Store는 같은 트위치 유저의 이전 비활성 참가 기록을 다�
   assert.equal(result.entry.profileStatus, "ready");
   assert.equal(result.entry.mainRole, "MIDDLE");
   assert.equal(result.entry.topChampions?.[0]?.nameKo, "아리");
-  assert.equal(store.getParticipationQueue().length, 1);
-  assert.deepEqual(store.getParticipationOverlayQueue().map((entry) => entry.twitchUserName), ["ViewerRenamed"]);
+  assert.equal(store.getParticipationQueue().length, 2);
+  assert.deepEqual(store.getParticipationOverlayQueue().map((entry) => entry.twitchUserName), ["Viewer2", "ViewerRenamed"]);
 });
 
 test("Store는 참여 운영 상태를 atomic JSON 파일에서 복원한다", async () => {
@@ -289,6 +300,8 @@ test("Store는 스트리머별 참여 session과 설정을 재시작 후 복원�
     const restartedStore = new Store({ runtimeStatePath: filePath });
     assert.equal(restartedStore.getParticipationState(streamerId).isOpen, true);
     assert.equal(restartedStore.getParticipationState(streamerId).session?.sessionId, session.sessionId);
+    assert.equal(restartedStore.getParticipationState(streamerId).session?.publicSessionId, session.publicSessionId);
+    assert.match(session.publicSessionId, /^ps_[A-Za-z0-9_-]{32}$/);
     assert.equal(restartedStore.getParticipationQueue(streamerId)[0]?.sessionId, session.sessionId);
     assert.equal(restartedStore.getLolAutomationSettings(streamerId).announceInChat, false);
     assert.equal(restartedStore.getParticipationState(streamerId).revision, 2);

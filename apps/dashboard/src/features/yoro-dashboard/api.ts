@@ -1,6 +1,9 @@
 import type {
   FollowerManagementResponse,
-  FollowerOAuthStatus
+  FollowerOAuthStatus,
+  LolOperationsState,
+  ParticipationState,
+  ParticipationStatus
 } from "@streamops/shared";
 import { runtimeConfig } from "../../runtime-config";
 import type { DashboardStreamerInfo } from "../../api/client";
@@ -128,4 +131,45 @@ export async function updateYoroRiotId(
     ...profile,
     dashboardEnabled: true
   };
+}
+
+export type ParticipationSessionAction =
+  | "start"
+  | "finish"
+  | "open"
+  | "close"
+  | "show_queue"
+  | "select_next"
+  | "finish_game";
+
+export function getYoroParticipation(signal?: AbortSignal): Promise<ParticipationState> {
+  return request("/api/account/streamer/participation", { signal });
+}
+
+export function updateYoroParticipationSession(
+  input: {
+    action: ParticipationSessionAction;
+    maxQueueSize?: number;
+    allowRejoin?: boolean;
+    checkInSeconds?: number;
+  },
+  csrfToken: string
+): Promise<{ ok: true; action: ParticipationSessionAction; state: LolOperationsState }> {
+  return request("/api/account/streamer/participation/session", {
+    method: "POST",
+    headers: mutationHeaders(csrfToken),
+    body: JSON.stringify(input)
+  });
+}
+
+export function updateYoroParticipationEntry(
+  entryId: string,
+  status: Extract<ParticipationStatus, "checked_in" | "in_game" | "played" | "skipped" | "no_show">,
+  csrfToken: string
+): Promise<ParticipationState> {
+  return request("/api/account/streamer/participation/entry-status", {
+    method: "POST",
+    headers: mutationHeaders(csrfToken),
+    body: JSON.stringify({ entryId, status })
+  });
 }

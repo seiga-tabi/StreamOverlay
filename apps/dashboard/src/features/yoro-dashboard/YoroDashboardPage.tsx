@@ -38,12 +38,14 @@ import {
   updateYoroRiotId,
   type YoroStreamerStatus
 } from "./api";
+import { ParticipationManagementPage } from "./ParticipationManagementPage";
 
 type UnifiedDashboardPage =
   | YoroDashboardPage
   | "organizationBot"
   | "organizationServers"
   | "streaming"
+  | "streamingParticipation"
   | "streamingFollowers"
   | "streamingRiot";
 
@@ -58,6 +60,7 @@ const copy = {
     organizationServers: "Palworld 서버",
     streamingGroup: "스트리머",
     streaming: "이용 상태",
+    streamingParticipation: "시청자 참여",
     streamingFollowers: "Followers",
     streamingRiot: "Riot ID",
     settings: "개인 설정",
@@ -172,6 +175,7 @@ const copy = {
     organizationServers: "Palworldサーバー",
     streamingGroup: "ストリーマー",
     streaming: "利用状況",
+    streamingParticipation: "視聴者参加",
     streamingFollowers: "Followers",
     streamingRiot: "Riot ID",
     settings: "個人設定",
@@ -290,6 +294,7 @@ const unifiedPaths: Record<UnifiedDashboardPage, string> = {
   organizationBot: "/dashboard/organizations/bot",
   organizationServers: "/dashboard/organizations/servers",
   streaming: "/dashboard/streaming",
+  streamingParticipation: "/dashboard/streaming/participation",
   streamingFollowers: "/dashboard/streaming/followers",
   streamingRiot: "/dashboard/streaming/riot-id"
 };
@@ -304,10 +309,10 @@ const legacyDashboardPaths: Record<string, UnifiedDashboardPage> = {
   "/dashboard/alerts": "streaming",
   "/dashboard/lol": "streaming",
   "/dashboard/lol/automation": "streaming",
-  "/dashboard/lol/participation": "streaming",
+  "/dashboard/lol/participation": "streamingParticipation",
   "/dashboard/palworld/server": "streaming",
   "/dashboard/solo-rank": "streaming",
-  "/dashboard/participation": "streaming"
+  "/dashboard/participation": "streamingParticipation"
 };
 
 function normalizedDashboardPath(pathname: string): string {
@@ -324,6 +329,9 @@ function legacyTenantDashboardPage(pathname: string): UnifiedDashboardPage | und
     || !/^sdk_[A-Za-z0-9_-]{8,128}$/u.test(segments[3] ?? "")
   ) return undefined;
   const suffix = segments.slice(4).join("/");
+  if (suffix === "participation" || suffix === "lol/participation") {
+    return "streamingParticipation";
+  }
   if (suffix === "followers") return "streamingFollowers";
   if (
     suffix === "riot-id"
@@ -780,6 +788,7 @@ export function YoroDashboardPage() {
           <span className="yoro-dashboard-nav-label">{text.streamingGroup}</span>
           {([
             "streaming",
+            "streamingParticipation",
             "streamingFollowers",
             "streamingRiot"
           ] as UnifiedDashboardPage[]).map((item) => (
@@ -1121,6 +1130,26 @@ export function YoroDashboardPage() {
                 <section className="yoro-dashboard-streaming">
                   <header>
                     <h1>{text.streamingFollowers}</h1>
+                    <p>{text.approvalRequired}</p>
+                  </header>
+                  <button onClick={() => navigate("streaming")} type="button">
+                    {text.streaming}
+                  </button>
+                </section>
+              )
+        ) : null}
+        {page === "streamingParticipation" ? (
+          streamer?.approval.enabled
+            ? (
+                <ParticipationManagementPage
+                  csrfToken={authenticated.csrfToken}
+                  locale={locale}
+                />
+              )
+            : (
+                <section className="yoro-dashboard-streaming">
+                  <header>
+                    <h1>{text.streamingParticipation}</h1>
                     <p>{text.approvalRequired}</p>
                   </header>
                   <button onClick={() => navigate("streaming")} type="button">

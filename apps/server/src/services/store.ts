@@ -271,6 +271,16 @@ function normalizedParticipationEntry(value: unknown): ParticipationEntry | unde
     riotTagLine,
     status,
     source,
+    joinedFrom: input?.joinedFrom === "public_web"
+      || input?.joinedFrom === "discord_announcement"
+      || input?.joinedFrom === "twitch_chat"
+      || input?.joinedFrom === "dashboard"
+      ? input.joinedFrom
+      : source === "chat_command" || source === "channel_point"
+        ? "twitch_chat"
+        : "dashboard",
+    attemptNumber: Math.max(1, optionalInteger(input?.attemptNumber) ?? 1),
+    lastRequeuedAt: optionalString(input?.lastRequeuedAt),
     preferredRole,
     createdAt,
     updatedAt,
@@ -324,12 +334,22 @@ function normalizedParticipationSession(value: unknown, streamerId: string): Par
   return {
     streamerId,
     sessionId,
+    publicSessionId: /^ps_[A-Za-z0-9_-]{32}$/u.test(optionalString(input?.publicSessionId) ?? "")
+      ? optionalString(input?.publicSessionId)!
+      : publicParticipationSessionIdFromInternal(sessionId),
     status,
+    maxQueueSize: Math.max(1, optionalInteger(input?.maxQueueSize) ?? 100),
+    allowRejoin: input?.allowRejoin !== false,
+    checkInSeconds: Math.max(1, optionalInteger(input?.checkInSeconds) ?? 60),
     profileSnapshot,
     createdAt,
     updatedAt,
     endedAt: optionalString(input?.endedAt)
   };
+}
+
+function publicParticipationSessionIdFromInternal(sessionId: string): string {
+  return `ps_${crypto.createHash("sha256").update(`public:${sessionId}`).digest("base64url").slice(0, 32)}`;
 }
 
 function cloneParticipationSession(session: ParticipationSession | undefined): ParticipationSession | undefined {
@@ -2703,6 +2723,7 @@ export class Store {
     }
 
     const previous = reusable.candidate;
+    const requeuedAt = nowIso();
     const sameRiotIdentity = Boolean(entry.riotPuuid && previous.riotPuuid && entry.riotPuuid === previous.riotPuuid)
       || normalizeRiotIdKey(previous.riotGameName, previous.riotTagLine) === normalizeRiotIdKey(entry.riotGameName, entry.riotTagLine);
     const profileFallback = sameRiotIdentity ? previous : undefined;
@@ -2711,6 +2732,8 @@ export class Store {
       ...ownedEntry,
       id: previous.id,
       createdAt: previous.createdAt,
+      attemptNumber: Math.max(1, previous.attemptNumber ?? 1) + 1,
+      lastRequeuedAt: requeuedAt,
       riotPuuid: ownedEntry.riotPuuid ?? profileFallback?.riotPuuid,
       verifiedRank: ownedEntry.verifiedRank ?? profileFallback?.verifiedRank,
       rankedStats: ownedEntry.rankedStats ?? profileFallback?.rankedStats,
@@ -2723,9 +2746,10 @@ export class Store {
       selectedAt: undefined,
       checkInExpiresAt: undefined,
       playedAt: undefined,
-      updatedAt: nowIso()
+      updatedAt: requeuedAt
     };
-    queue[reusable.index] = reactivated;
+    queue.splice(reusable.index, 1);
+    queue.push(reactivated);
     this.persistRuntimeState();
     return { entry: reactivated, reused: true };
   }
@@ -2759,10 +2783,15 @@ export class Store {
       runtime.isOpen = open;
       if (open && !runtime.session) {
         const timestamp = nowIso();
+        const sessionId = newId("partsession");
         runtime.session = {
           streamerId,
-          sessionId: newId("partsession"),
+          sessionId,
+          publicSessionId: publicParticipationSessionIdFromInternal(sessionId),
           status: "recruiting",
+          maxQueueSize: 100,
+          allowRejoin: true,
+          checkInSeconds: 60,
           createdAt: timestamp,
           updatedAt: timestamp
         };
@@ -2812,6 +2841,12 @@ export class Store {
     return cloneParticipationSession(this.scopedParticipationRuntime(streamerId, false)?.session);
   }
 
+  getParticipationSessionByPublicId(publicSessionId: string): ParticipationSession | undefined {
+    const normalized = publicSessionId.trim();
+    if (!/^ps_[A-Za-z0-9_-]{32}$/u.test(normalized)) return undefined;
+    return this.listParticipationSessions().find((session) => session.publicSessionId === normalized);
+  }
+
   listParticipationSessions(): ParticipationSession[] {
     this.assertPersistenceAvailable("runtime");
     return [...this.participationByStreamer.values()]
@@ -2819,7 +2854,11 @@ export class Store {
       .filter((session): session is ParticipationSession => Boolean(session));
   }
 
-  startParticipationSession(streamerId: string, profileSnapshot?: StreamerProfileSnapshot): ParticipationSession {
+  startParticipationSession(
+    streamerId: string,
+    profileSnapshot?: StreamerProfileSnapshot,
+    options: { maxQueueSize?: number; allowRejoin?: boolean; checkInSeconds?: number } = {}
+  ): ParticipationSession {
     const normalizedStreamerId = streamerId.trim();
     if (!normalizedStreamerId) throw new Error("스트리머 식별자가 필요합니다.");
     const runtime = this.scopedParticipationRuntime(normalizedStreamerId);
@@ -2829,10 +2868,15 @@ export class Store {
       ...profileSnapshot,
       profile: cloneParticipationStreamerProfile(profileSnapshot.profile)
     } : undefined;
+    const sessionId = newId("partsession");
     runtime.session = {
       streamerId: normalizedStreamerId,
-      sessionId: newId("partsession"),
+      sessionId,
+      publicSessionId: publicParticipationSessionIdFromInternal(sessionId),
       status: "recruiting",
+      maxQueueSize: Math.max(1, Math.trunc(options.maxQueueSize ?? 100)),
+      allowRejoin: options.allowRejoin !== false,
+      checkInSeconds: Math.max(1, Math.trunc(options.checkInSeconds ?? 60)),
       profileSnapshot: snapshot,
       createdAt: timestamp,
       updatedAt: timestamp
@@ -2850,7 +2894,10 @@ export class Store {
     if (!runtime?.session) return undefined;
     runtime.session.status = status;
     runtime.session.updatedAt = nowIso();
-    if (status === "recruiting") runtime.isOpen = true;
+    if (status === "recruiting") {
+      runtime.isOpen = true;
+      runtime.session.endedAt = undefined;
+    }
     if (status === "closed" || status === "completed") {
       runtime.isOpen = false;
       runtime.session.endedAt = nowIso();
@@ -3048,7 +3095,8 @@ export class Store {
       id: newId("part"),
       createdAt: nowIso(),
       updatedAt: nowIso(),
-      ...input
+      ...input,
+      attemptNumber: Math.max(1, input.attemptNumber ?? 1)
     };
   }
 }

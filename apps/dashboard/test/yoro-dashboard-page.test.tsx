@@ -74,6 +74,9 @@ test("공통 YORO Dashboard는 로그인 사용자용 진입점과 KO·JA 문구
   assert.match(source, /BotManagementPage/u);
   assert.match(source, /스트리머 이용 상태/u);
   assert.match(source, /ストリーマー利用状況/u);
+  assert.match(source, /시청자 참여/u);
+  assert.match(source, /視聴者参加/u);
+  assert.match(source, /ParticipationManagementPage/u);
   assert.match(source, /Dashboard 메뉴 열기/u);
   assert.match(source, /Dashboardメニューを開く/u);
   assert.match(source, /aria-controls="yoro-dashboard-navigation"/u);
@@ -175,12 +178,30 @@ test("공통 Dashboard 경로는 기존 방송 운영 하위 경로와 겹치지
     "streamingFollowers"
   );
   assert.equal(
+    yoroDashboardPageFromPath("/dashboard/streaming/participation"),
+    "streamingParticipation"
+  );
+  assert.equal(
     yoroDashboardPageFromPath("/dashboard/streaming/riot-id"),
     "streamingRiot"
   );
   assert.equal(
     canonicalYoroDashboardPath("/dashboard/followers"),
     "/dashboard/streaming/followers"
+  );
+  assert.equal(
+    canonicalYoroDashboardPath("/dashboard/lol/participation"),
+    "/dashboard/streaming/participation"
+  );
+  assert.equal(
+    canonicalYoroDashboardPath("/dashboard/participation"),
+    "/dashboard/streaming/participation"
+  );
+  assert.equal(
+    canonicalYoroDashboardPath(
+      "/dashboard/legacy_user/sdk_0123456789abcdefghijklmnopqrstuv/participation"
+    ),
+    "/dashboard/streaming/participation"
   );
   assert.equal(
     canonicalYoroDashboardPath(
@@ -229,4 +250,43 @@ test("공통 Dashboard 경로는 기존 방송 운영 하위 경로와 겹치지
   );
   assert.equal(appSource.includes('"/setup/discord"'), false);
   assert.equal(appSource.includes('"/bot/manage"'), false);
+});
+
+test("시청자 참여 관리 화면은 KO·JA와 세션·대기열 관리 계약을 제공한다", async () => {
+  const { ParticipationManagementPage } = await import(
+    "../src/features/yoro-dashboard/ParticipationManagementPage"
+  );
+  const source = await readFile(
+    new URL(
+      "../src/features/yoro-dashboard/ParticipationManagementPage.tsx",
+      import.meta.url
+    ),
+    "utf8"
+  );
+  const css = await readFile(
+    new URL(
+      "../src/styles/pages/account/19-participation-management.css",
+      import.meta.url
+    ),
+    "utf8"
+  );
+  const koMarkup = renderToStaticMarkup(
+    <ParticipationManagementPage csrfToken="csrf-test" locale="ko" />
+  );
+  const jaMarkup = renderToStaticMarkup(
+    <ParticipationManagementPage csrfToken="csrf-test" locale="ja" />
+  );
+
+  assert.match(koMarkup, /시청자 참여 상태를 불러오는 중입니다/u);
+  assert.match(jaMarkup, /視聴者参加の状態を読み込んでいます/u);
+  assert.match(source, /새 참여 세션/u);
+  assert.match(source, /新しい参加セッション/u);
+  assert.match(source, /다음 참가자 선정/u);
+  assert.match(source, /次の参加者を選出/u);
+  assert.match(source, /\/participation/u);
+  assert.match(source, /updateYoroParticipationEntry/u);
+  assert.match(css, /overflow-x:\s*auto/u);
+  assert.match(css, /@media \(max-width:\s*48rem\)/u);
+  assert.match(css, /var\(--surface\)/u);
+  assert.doesNotMatch(css, /#[0-9a-f]{3,8}/iu);
 });

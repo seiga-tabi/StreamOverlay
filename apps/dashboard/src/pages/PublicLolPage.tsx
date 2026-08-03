@@ -145,6 +145,7 @@ import type {
   PublicParticipationQueueItem,
   PublicParticipationViewerEntry,
   PublicParticipationStreamer,
+  PublicParticipationDiscoveryResponse,
   PublicParticipationStateResponse,
   PublicParticipationJoinResponse,
   PublicParticipationCancelResponse,
@@ -473,8 +474,11 @@ const objectiveLabels: Record<PublicLocale, Record<string, string>> = {
   }
 };
 
-async function getPublicParticipationState(streamerId?: string): Promise<PublicParticipationStateResponse> {
-  const query = streamerId ? `?streamerId=${encodeURIComponent(streamerId)}` : "";
+async function getPublicParticipationState(streamerId?: string, publicSessionId?: string): Promise<PublicParticipationStateResponse> {
+  const params = new URLSearchParams();
+  if (publicSessionId) params.set("session", publicSessionId);
+  else if (streamerId) params.set("streamerId", streamerId);
+  const query = params.size ? `?${params.toString()}` : "";
   const response = await fetch(`${apiBase}/api/public/participation/state${query}`, {
     credentials: "include"
   });
@@ -482,26 +486,52 @@ async function getPublicParticipationState(streamerId?: string): Promise<PublicP
   return (await response.json()) as PublicParticipationStateResponse;
 }
 
-async function postPublicParticipationJoin(input: { riotId: string; role: LolRole; streamerId?: string }): Promise<PublicParticipationJoinResponse> {
-  const response = await fetch(`${apiBase}/api/public/participation/join`, {
+async function getPublicParticipationDiscovery(): Promise<PublicParticipationDiscoveryResponse> {
+  const response = await fetch(`${apiBase}/api/public/participation/discovery?scope=followed`, {
+    credentials: "include"
+  });
+  if (!response.ok) throw new Error(await readErrorMessage(response));
+  return (await response.json()) as PublicParticipationDiscoveryResponse;
+}
+
+async function postPublicParticipationJoin(input: { riotId: string; role: LolRole; streamerId?: string; publicSessionId?: string; rejoin?: boolean }): Promise<PublicParticipationJoinResponse> {
+  const endpoint = input.publicSessionId
+    ? `/api/public/participation/sessions/${encodeURIComponent(input.publicSessionId)}/${input.rejoin ? "rejoin" : "join"}`
+    : "/api/public/participation/join";
+  const response = await fetch(`${apiBase}${endpoint}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify(input)
+    body: JSON.stringify({ riotId: input.riotId, role: input.role, ...(input.publicSessionId ? {} : { streamerId: input.streamerId }) })
   });
   if (!response.ok) throw new Error(await readErrorMessage(response));
   return (await response.json()) as PublicParticipationJoinResponse;
 }
 
-async function postPublicParticipationCancel(input: { streamerId?: string }): Promise<PublicParticipationCancelResponse> {
-  const response = await fetch(`${apiBase}/api/public/participation/cancel`, {
+async function postPublicParticipationCancel(input: { streamerId?: string; publicSessionId?: string }): Promise<PublicParticipationCancelResponse> {
+  const endpoint = input.publicSessionId
+    ? `/api/public/participation/sessions/${encodeURIComponent(input.publicSessionId)}/cancel`
+    : "/api/public/participation/cancel";
+  const response = await fetch(`${apiBase}${endpoint}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify(input)
+    body: JSON.stringify(input.publicSessionId ? {} : { streamerId: input.streamerId })
   });
   if (!response.ok) throw new Error(await readErrorMessage(response));
   return (await response.json()) as PublicParticipationCancelResponse;
+}
+
+async function postPublicParticipationCheckIn(publicSessionId: string): Promise<PublicParticipationStateResponse> {
+  const response = await fetch(`${apiBase}/api/public/participation/sessions/${encodeURIComponent(publicSessionId)}/check-in`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: "{}"
+  });
+  if (!response.ok) throw new Error(await readErrorMessage(response));
+  const body = await response.json() as { state: PublicParticipationStateResponse };
+  return body.state;
 }
 
 async function getPublicTournaments(): Promise<StreamerTournament[]> {
@@ -2282,43 +2312,61 @@ type PublicParticipationConfirmAction = "join" | "cancel";
 function PublicParticipationJoinPage({
   status,
   participation,
+  discovery,
   loading,
   error,
   riotId,
   role,
   joining,
   cancelling,
+  checkingIn,
   message,
   selectedStreamerId,
   onRefresh,
+  onLogin,
   onStreamerSelect,
   onRiotIdChange,
   onRoleChange,
   onSubmit,
-  onCancel
+  onCancel,
+  onCheckIn
 }: {
   status: PublicTwitchViewerStatus;
   participation: PublicParticipationStateResponse | null;
+  discovery: PublicParticipationDiscoveryResponse | null;
   loading: boolean;
   error: string;
   riotId: string;
   role: LolRole;
   joining: boolean;
   cancelling: boolean;
+  checkingIn: boolean;
   message: string;
   selectedStreamerId: string;
   onRefresh: () => void;
-  onStreamerSelect: (streamerId: string) => void;
+  onLogin: () => void;
+  onStreamerSelect: (streamer: PublicParticipationStreamer) => void;
   onRiotIdChange: (value: string) => void;
   onRoleChange: (value: LolRole) => void;
   onSubmit: () => void;
   onCancel: () => void;
+  onCheckIn: () => void;
 }) {
   const feedbackKey = error || message;
   const [pendingAction, setPendingAction] = useState<PublicParticipationConfirmAction | null>(null);
   const [dismissedFeedbackKey, setDismissedFeedbackKey] = useState("");
-  const previousViewerEntryRef = useRef<PublicParticipationViewerEntry | null>(null);
-  const streamers = participation?.streamers ?? [];
+  const [checkInClockMs, setCheckInClockMs] = useState(() => Date.now());
+  const streamers = useMemo(() => {
+    const candidates = status.connected && discovery
+      ? [...discovery.followedRecruiting, ...discovery.followedOfflineRecruiting]
+      : [];
+    const directlySelected = participation?.streamers.find((streamer) => (
+      streamer.publicSessionId === participation.publicSessionId
+      || streamer.id === participation.selectedStreamerId
+    ));
+    if (directlySelected) candidates.push(directlySelected);
+    return [...new Map(candidates.map((streamer) => [streamer.publicSessionId ?? streamer.id, streamer])).values()];
+  }, [discovery, participation, status.connected]);
   const selectedStreamer = selectedStreamerId
     ? streamers.find((streamer) => streamer.id === selectedStreamerId)
     : undefined;
@@ -2340,20 +2388,25 @@ function PublicParticipationJoinPage({
   const isQueueLoading = loading && queue.length === 0;
   const confirmTitle = pendingAction === "join" ? t().participationJoinConfirmTitle : t().participationCancelConfirmTitle;
   const confirmDescription = pendingAction === "join" ? t().participationJoinConfirmDescription : t().participationCancelConfirmDescription;
-  const canRejoin = status.connected && canJoin && !activeViewerEntry && Boolean(previousViewerEntryRef.current || viewerEntry);
+  const canRejoin = status.connected && canJoin && viewerEntry?.status === "played";
   const submitLabel = canRejoin ? t().participationRejoin : t().participationSubmit;
+  const checkInRemainingSeconds = activeViewerEntry?.checkInExpiresAt
+    ? Math.max(0, Math.ceil((Date.parse(activeViewerEntry.checkInExpiresAt) - checkInClockMs) / 1000))
+    : undefined;
 
   useEffect(() => {
     if (feedbackKey) setDismissedFeedbackKey("");
   }, [feedbackKey]);
 
   useEffect(() => {
-    previousViewerEntryRef.current = null;
-  }, [effectiveSelectedStreamerId]);
+    if (activeViewerEntry?.status !== "selected" || !activeViewerEntry.checkInExpiresAt) return undefined;
+    setCheckInClockMs(Date.now());
+    const timer = window.setInterval(() => setCheckInClockMs(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [activeViewerEntry?.checkInExpiresAt, activeViewerEntry?.status]);
 
   useEffect(() => {
     if (!viewerEntry) return;
-    previousViewerEntryRef.current = viewerEntry;
     if (!riotId.trim()) onRiotIdChange(viewerEntry.riotId);
     const nextRole = viewerEntry.preferredRole ?? viewerEntry.requestedRole;
     if (nextRole && role !== nextRole) onRoleChange(nextRole as LolRole);
@@ -2388,6 +2441,16 @@ function PublicParticipationJoinPage({
           <EmptyStateTitle as="h3"  >{t().twitchNotConfigured}</EmptyStateTitle>
         </EmptyState>
       ) : null}
+      {status.configured && !status.connected ? (
+        <EmptyState className="public-participation-shared-empty" variant="streamer">
+          <EmptyStateIcon><TwitchGlitchIcon /></EmptyStateIcon>
+          <EmptyStateTitle as="h3">{t().participationLoginDiscoveryTitle}</EmptyStateTitle>
+          <EmptyStateDescription>{t().participationLoginDiscoveryDescription}</EmptyStateDescription>
+          <EmptyStateActions>
+            <Button type="button" onClick={onLogin}>{t().twitchViewerLogin}</Button>
+          </EmptyStateActions>
+        </EmptyState>
+      ) : null}
       <section className="public-participation-streamer-select public-participation-shared-select" aria-busy={isStreamerSelectionLoading ? true : undefined}>
         <div className="public-participation-streamer-head">
           <div>
@@ -2407,10 +2470,10 @@ function PublicParticipationJoinPage({
             ))
           ) : streamers.map((streamer) => (
             <Card
-              key={streamer.id}
+              key={streamer.publicSessionId ?? streamer.id}
               aria-pressed={streamer.id === effectiveSelectedStreamerId}
               className={`public-participation-streamer-card public-participation-shared-streamer-card ${streamer.id === effectiveSelectedStreamerId ? "active" : ""}`}
-              onClick={() => onStreamerSelect(streamer.id)}
+              onClick={() => onStreamerSelect(streamer)}
               padding="md"
               renderRoot={({ children, className, ...rootProps }) => (
                 <button {...rootProps} className={className} type="button">
@@ -2431,10 +2494,12 @@ function PublicParticipationJoinPage({
                 <small>{streamer.riotId ?? t().participationRankPending}</small>
               </span>
               <span className="public-participation-streamer-meta">
-                <StatusPill size="sm" tone={streamer.isOpen ? "success" : "warning"}>{t().participationStreamerOpen}</StatusPill>
+                <StatusPill size="sm" tone={streamer.isOpen ? "success" : "warning"}>
+                  {streamer.isLive === false ? t().participationOfflineRecruiting : t().participationStreamerOpen}
+                </StatusPill>
                 <Metric
                   label={t().participationQueueTitle}
-                  value={`${formatNumber(streamer.queueSize)} / ${formatNumber(participation?.maxQueueSize ?? 0)}`}
+                  value={`${formatNumber(streamer.queueSize)} / ${formatNumber(streamer.maxQueueSize ?? participation?.maxQueueSize ?? 0)}`}
                   tone={streamer.queueSize > 0 ? "info" : "neutral"}
                   size="sm"
                 />
@@ -2448,6 +2513,26 @@ function PublicParticipationJoinPage({
             </EmptyState>
           ) : null}
         </div>
+        {status.connected && (discovery?.followedLiveButClosed.length ?? 0) > 0 ? (
+          <div className="public-participation-closed-list" aria-label={t().participationFollowedLiveClosedTitle}>
+            <strong>{t().participationFollowedLiveClosedTitle}</strong>
+            <p>{t().participationFollowedLiveClosedDescription}</p>
+            <div className="public-participation-streamer-list">
+              {discovery?.followedLiveButClosed.map((streamer) => (
+                <Card as="article" className="public-participation-streamer-card public-participation-shared-streamer-card public-participation-closed-card" key={streamer.id} padding="md">
+                  <span className="public-participation-streamer-avatar">
+                    {streamer.twitchProfileImageUrl ? <img src={assetUrl(streamer.twitchProfileImageUrl)} alt="" /> : streamer.twitchDisplayName.slice(0, 1)}
+                  </span>
+                  <span className="public-participation-streamer-info">
+                    <strong>{streamer.twitchDisplayName}</strong>
+                    <small>{streamer.riotId ?? t().participationRankPending}</small>
+                  </span>
+                  <StatusPill size="sm" tone="neutral">{t().participationClosed}</StatusPill>
+                </Card>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </section>
 
       {error ? (
@@ -2474,7 +2559,18 @@ function PublicParticipationJoinPage({
             <div className="public-participation-current">
               <Badge tone="streamer">{t().participationViewerBadge}</Badge>
               <strong>{activeViewerEntry.riotId}</strong>
+              <StatusPill size="sm" tone={publicParticipationStatusTone(activeViewerEntry.status)}>
+                {publicParticipationStatusLabel(activeViewerEntry.status)}
+              </StatusPill>
               <small>{t().participationPosition} {formatNumber(activeViewerEntry.position)} · {publicParticipationRoleLabel(activeViewerEntry.preferredRole ?? activeViewerEntry.requestedRole)}</small>
+              {typeof checkInRemainingSeconds === "number" ? (
+                <small role="status">{t().participationCheckInRemaining} · {formatNumber(checkInRemainingSeconds)}{t().participationSecondsUnit}</small>
+              ) : null}
+              {activeViewerEntry.status === "selected" && participation?.publicSessionId ? (
+                <Button variant="primary" type="button" onClick={onCheckIn} loading={checkingIn} disabled={checkingIn}>
+                  {checkingIn ? t().participationCheckingIn : t().participationCheckIn}
+                </Button>
+              ) : null}
               <Button variant="danger" type="button" onClick={() => setPendingAction("cancel")} loading={cancelling} disabled={cancelling}>
                 {cancelling ? t().participationCancelling : t().participationCancel}
               </Button>
@@ -6737,14 +6833,19 @@ export function PublicLolPage({
     promise: Promise<void>;
   } | null>(null);
   const [publicParticipation, setPublicParticipation] = useState<PublicParticipationStateResponse | null>(null);
+  const [publicParticipationDiscovery, setPublicParticipationDiscovery] = useState<PublicParticipationDiscoveryResponse | null>(null);
   const [publicParticipationLoading, setPublicParticipationLoading] = useState(false);
   const [publicParticipationError, setPublicParticipationError] = useState("");
   const [publicParticipationJoinRiotId, setPublicParticipationJoinRiotId] = useState("");
   const [publicParticipationJoinRole, setPublicParticipationJoinRole] = useState<LolRole>("fill");
   const [publicParticipationJoining, setPublicParticipationJoining] = useState(false);
   const [publicParticipationCancelling, setPublicParticipationCancelling] = useState(false);
+  const [publicParticipationCheckingIn, setPublicParticipationCheckingIn] = useState(false);
   const [publicParticipationMessage, setPublicParticipationMessage] = useState("");
   const [publicParticipationStreamerId, setPublicParticipationStreamerId] = useState("");
+  const [publicParticipationSessionId, setPublicParticipationSessionId] = useState(
+    () => new URLSearchParams(window.location.search).get("session")?.trim() ?? ""
+  );
   const [publicTournaments, setPublicTournaments] = useState<StreamerTournament[]>([]);
   const [publicTournamentSlug, setPublicTournamentSlug] = useState<string | undefined>(() => tournamentRouteFromPublicPath()?.slug);
   const [publicTournamentLoading, setPublicTournamentLoading] = useState(false);
@@ -6874,10 +6975,21 @@ export function PublicLolPage({
     if (activeMainPage !== "followJoin") return undefined;
     void loadPublicParticipationState();
     const timer = window.setInterval(() => {
-      void loadPublicParticipationState(true);
+      if (document.visibilityState === "visible") {
+        void loadPublicParticipationState(true);
+      }
     }, 15_000);
-    return () => window.clearInterval(timer);
-  }, [activeMainPage, twitchStatus.connected, publicParticipationStreamerId]);
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") {
+        void loadPublicParticipationState(true);
+      }
+    };
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+    };
+  }, [activeMainPage, twitchStatus.connected, publicParticipationStreamerId, publicParticipationSessionId]);
 
   useEffect(() => {
     if (!activeMainPage.startsWith("tournament")) return;
@@ -6927,6 +7039,9 @@ export function PublicLolPage({
         setActiveMainPage(route.page);
         setActiveNav(route.page === "palworld" || route.page === "privacy" || route.page === "terms" || route.page === "contact" ? "search" : "community");
         setStreamerRegisterOpen(false);
+        if (route.page === "followJoin") {
+          setPublicParticipationSessionId(new URLSearchParams(window.location.search).get("session")?.trim() ?? "");
+        }
         if (route.slug || route.page.startsWith("tournament")) {
           setPublicTournamentSlug(route.slug);
           void loadPublicTournaments(route.slug);
@@ -6997,6 +7112,7 @@ export function PublicLolPage({
       } else {
         setFollowedLol(null);
         setPublicParticipation(null);
+        setPublicParticipationDiscovery(null);
         setPublicParticipationMessage("");
       }
     } catch (requestError) {
@@ -7040,11 +7156,21 @@ export function PublicLolPage({
     if (!silent) setPublicParticipationLoading(true);
     setPublicParticipationError("");
     try {
-      const response = await getPublicParticipationState(publicParticipationStreamerId || undefined);
+      const discoveryRequest = getPublicParticipationDiscovery().catch(() => null);
+      const response = await getPublicParticipationState(
+        publicParticipationStreamerId || undefined,
+        publicParticipationSessionId || undefined
+      );
+      const discovery = await discoveryRequest;
       setPublicParticipation(response);
-      setPublicParticipationStreamerId((current) => (
-        current && !response.streamers.some((streamer) => streamer.id === current) ? "" : current
-      ));
+      setPublicParticipationDiscovery(discovery);
+      if (response.publicSessionId && response.publicSessionId !== publicParticipationSessionId) {
+        setPublicParticipationSessionId(response.publicSessionId);
+      }
+      setPublicParticipationStreamerId((current) => {
+        if (response.selectedStreamerId) return response.selectedStreamerId;
+        return current && !response.streamers.some((streamer) => streamer.id === current) ? "" : current;
+      });
       setTwitchStatus((current) => current.connected === response.connected ? current : { ...current, connected: response.connected });
     } catch (requestError) {
       if (!silent) {
@@ -7067,7 +7193,9 @@ export function PublicLolPage({
       const response = await postPublicParticipationJoin({
         riotId: publicParticipationJoinRiotId,
         role: publicParticipationJoinRole,
-        streamerId: publicParticipationStreamerId
+        streamerId: publicParticipationStreamerId,
+        publicSessionId: (publicParticipation?.publicSessionId ?? publicParticipationSessionId) || undefined,
+        rejoin: publicParticipation?.viewerEntry?.status === "played"
       });
       setPublicParticipation(response.state);
       if (response.state.selectedStreamerId) setPublicParticipationStreamerId(response.state.selectedStreamerId);
@@ -7089,7 +7217,8 @@ export function PublicLolPage({
     setPublicParticipationMessage("");
     try {
       const response = await postPublicParticipationCancel({
-        streamerId: publicParticipationStreamerId
+        streamerId: publicParticipationStreamerId,
+        publicSessionId: (publicParticipation?.publicSessionId ?? publicParticipationSessionId) || undefined
       });
       setPublicParticipation(response.state);
       if (response.state.selectedStreamerId) setPublicParticipationStreamerId(response.state.selectedStreamerId);
@@ -7099,6 +7228,37 @@ export function PublicLolPage({
     } finally {
       setPublicParticipationCancelling(false);
     }
+  }
+
+  async function checkInPublicParticipation(): Promise<void> {
+    const publicSessionId = publicParticipation?.publicSessionId ?? publicParticipationSessionId;
+    if (!publicSessionId) {
+      setPublicParticipationError(t().participationSelectStreamerTitle);
+      return;
+    }
+    setPublicParticipationCheckingIn(true);
+    setPublicParticipationError("");
+    setPublicParticipationMessage("");
+    try {
+      const response = await postPublicParticipationCheckIn(publicSessionId);
+      setPublicParticipation(response);
+      setPublicParticipationMessage(t().participationCheckInComplete);
+    } catch (requestError) {
+      setPublicParticipationError(requestError instanceof Error ? requestError.message : t().participationCheckInFailed);
+    } finally {
+      setPublicParticipationCheckingIn(false);
+    }
+  }
+
+  function selectPublicParticipationStreamer(streamer: PublicParticipationStreamer): void {
+    setPublicParticipationStreamerId(streamer.id);
+    const publicSessionId = streamer.publicSessionId ?? "";
+    setPublicParticipationSessionId(publicSessionId);
+    const url = new URL(window.location.href);
+    if (publicSessionId) url.searchParams.set("session", publicSessionId);
+    else url.searchParams.delete("session");
+    url.searchParams.delete("streamerId");
+    window.history.pushState({}, "", `${url.pathname}${url.search}${url.hash}`);
   }
 
   async function loadPublicTournaments(preferredSlug?: string): Promise<void> {
@@ -7563,20 +7723,24 @@ export function PublicLolPage({
         <PublicParticipationJoinPage
           status={twitchStatus}
           participation={publicParticipation}
+          discovery={publicParticipationDiscovery}
           loading={publicParticipationLoading}
           error={publicParticipationError}
           riotId={publicParticipationJoinRiotId}
           role={publicParticipationJoinRole}
           joining={publicParticipationJoining}
           cancelling={publicParticipationCancelling}
+          checkingIn={publicParticipationCheckingIn}
           message={publicParticipationMessage}
           selectedStreamerId={publicParticipationStreamerId}
           onRefresh={() => void loadPublicParticipationState()}
-          onStreamerSelect={setPublicParticipationStreamerId}
+          onLogin={startTwitchLogin}
+          onStreamerSelect={selectPublicParticipationStreamer}
           onRiotIdChange={setPublicParticipationJoinRiotId}
           onRoleChange={setPublicParticipationJoinRole}
           onSubmit={submitPublicParticipation}
           onCancel={() => void cancelPublicParticipation()}
+          onCheckIn={() => void checkInPublicParticipation()}
         />
       );
     }

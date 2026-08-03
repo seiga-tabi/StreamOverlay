@@ -1,0 +1,310 @@
+.participation-management-page {
+  min-inline-size: 0;
+  display: grid;
+  gap: var(--space-6);
+  color: var(--text);
+}
+
+.participation-management-hero > span {
+  color: var(--info);
+  font-size: .75rem;
+  font-weight: 900;
+  letter-spacing: .12em;
+}
+
+.participation-management-hero h1 {
+  margin: var(--space-2) 0;
+  color: var(--text-strong);
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.participation-management-hero p,
+.participation-management-create header p,
+.participation-management-queue header p,
+.participation-management-session header p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.participation-management-create,
+.participation-management-session,
+.participation-management-queue {
+  min-inline-size: 0;
+  padding: var(--space-6);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.participation-management-create,
+.participation-management-session {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.participation-management-create h2,
+.participation-management-session h2,
+.participation-management-queue h2 {
+  margin: 0 0 var(--space-2);
+  color: var(--text-strong);
+}
+
+.participation-management-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+  align-items: end;
+}
+
+.participation-management-form-grid label:not(.participation-management-checkbox) {
+  min-inline-size: 0;
+  display: grid;
+  gap: var(--space-2);
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.participation-management-form-grid input[type="number"],
+.participation-management-url input {
+  min-inline-size: 0;
+  min-block-size: var(--yoro-size-touch-target);
+  padding-inline: var(--space-4);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  color: var(--text-strong);
+  background: var(--surface-strong);
+  font: inherit;
+}
+
+.participation-management-checkbox {
+  min-block-size: var(--yoro-size-touch-target);
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.participation-management-checkbox input {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  accent-color: var(--brand);
+}
+
+.participation-management-page button,
+.participation-management-page a {
+  min-block-size: var(--yoro-size-touch-target);
+  padding-inline: var(--space-4);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-strong);
+  background: var(--surface-strong);
+  font: inherit;
+  font-weight: 800;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.participation-management-create > button {
+  justify-self: start;
+  border-color: var(--brand);
+  background: var(--brand-strong);
+}
+
+.participation-management-page button:hover:not(:disabled),
+.participation-management-page a:hover {
+  border-color: var(--brand);
+}
+
+.participation-management-page button:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.participation-management-page .is-danger {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.participation-management-alert {
+  margin: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  background: var(--info-bg);
+}
+
+.participation-management-alert.is-error {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  justify-content: space-between;
+  border-color: var(--danger);
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.participation-management-session > header,
+.participation-management-queue > header {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.participation-management-session > header > strong,
+.participation-management-queue > header > span,
+.participation-management-status {
+  flex: 0 0 auto;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--yoro-radius-pill);
+  color: var(--text-strong);
+  background: var(--surface-muted);
+  font-size: .8125rem;
+  font-weight: 800;
+}
+
+.participation-management-session > header > strong[data-status="recruiting"] {
+  border-color: var(--success);
+  color: var(--success);
+  background: var(--success-bg);
+}
+
+.participation-management-url {
+  min-inline-size: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content max-content;
+  gap: var(--space-2);
+}
+
+.participation-management-metrics {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.participation-management-metrics > div {
+  min-inline-size: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-muted);
+}
+
+.participation-management-metrics dt {
+  color: var(--muted);
+  font-size: .8125rem;
+}
+
+.participation-management-metrics dd {
+  margin: var(--space-2) 0 0;
+  overflow-wrap: anywhere;
+  color: var(--text-strong);
+  font-size: 1.125rem;
+  font-weight: 900;
+}
+
+.participation-management-session-actions,
+.participation-management-entry-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.participation-management-queue {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.participation-management-table-wrap {
+  min-inline-size: 0;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+}
+
+.participation-management-table-wrap table {
+  inline-size: 100%;
+  min-inline-size: 56rem;
+  border-collapse: collapse;
+}
+
+.participation-management-table-wrap th,
+.participation-management-table-wrap td {
+  padding: var(--space-3);
+  border-block-end: 1px solid var(--line);
+  color: var(--text);
+  text-align: start;
+  vertical-align: middle;
+}
+
+.participation-management-table-wrap th {
+  color: var(--muted);
+  font-size: .8125rem;
+}
+
+.participation-management-entry-actions button {
+  min-block-size: 2.25rem;
+  padding-inline: var(--space-3);
+  font-size: .8125rem;
+}
+
+.participation-management-empty {
+  margin: 0;
+  padding: var(--space-8) var(--space-4);
+  color: var(--muted);
+  text-align: center;
+}
+
+@media (max-width: 64rem) {
+  .participation-management-form-grid,
+  .participation-management-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 48rem) {
+  .participation-management-create,
+  .participation-management-session,
+  .participation-management-queue {
+    padding: var(--space-4);
+  }
+
+  .participation-management-form-grid,
+  .participation-management-metrics,
+  .participation-management-url {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .participation-management-create > button,
+  .participation-management-url button,
+  .participation-management-url a,
+  .participation-management-session-actions button {
+    inline-size: 100%;
+  }
+
+  .participation-management-session > header,
+  .participation-management-queue > header,
+  .participation-management-alert.is-error {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .participation-management-session > header > strong,
+  .participation-management-queue > header > span {
+    align-self: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .participation-management-table-wrap {
+    scroll-behavior: auto;
+  }
+}

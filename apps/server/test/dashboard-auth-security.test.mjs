@@ -10,6 +10,7 @@ const { appConfig } = await import("../dist/config.js");
 const { DashboardSessionStore, ADMIN_DASHBOARD_SESSION_COOKIE, STREAMER_DASHBOARD_SESSION_COOKIE, DASHBOARD_SESSION_COOKIE, authorizeHttpRequest } = await import("../dist/security/auth.js");
 const { PUBLIC_TWITCH_VIEWER_SESSION_COOKIE } = await import("../dist/services/public-twitch-auth.js");
 const { resetSecurityRateLimiters } = await import("../dist/security/rate-limit.js");
+const { Store } = await import("../dist/services/store.js");
 
 const DASHBOARD_ORIGIN = "http://localhost:3000";
 const AUTH_TOKEN = "dashboard_auth_token_for_security_tests_1234567890";
@@ -837,6 +838,227 @@ test("통합 스트리머 API는 YORO session을 사용하고 mutation에 Origin
       await handler(wrongCsrfReq, wrongCsrfRes);
       assert.equal(wrongCsrfRes.statusCode, 403);
       assert.equal(JSON.parse(wrongCsrfRes.body).code, "csrf_required");
+    } finally {
+      appConfig.database.enabled = previousDatabaseEnabled;
+    }
+  });
+});
+
+test("승인된 방송인은 YORO Dashboard 세션으로 참여 세션과 자신의 대기열만 관리한다", async () => {
+  await withAuthConfig(async () => {
+    const previousDatabaseEnabled = appConfig.database.enabled;
+    appConfig.database.enabled = true;
+    const csrfToken = "csrf_value_for_participation_management_123456";
+    const store = new Store();
+    const approval = store.upsertStreamerRiotIdRequest({
+      twitchUserId: "12345",
+      twitchLogin: "streamer",
+      twitchDisplayName: "Streamer",
+      riotGameName: "Seiga",
+      riotTagLine: "JP1"
+    });
+    store.resolveStreamerRiotIdRequest({
+      requestId: approval.id,
+      decision: "approved",
+      reviewer: "test"
+    });
+    const otherApproval = store.upsertStreamerRiotIdRequest({
+      twitchUserId: "other-streamer",
+      twitchLogin: "other",
+      twitchDisplayName: "Other",
+      riotGameName: "Other",
+      riotTagLine: "JP1"
+    });
+    store.resolveStreamerRiotIdRequest({
+      requestId: otherApproval.id,
+      decision: "approved",
+      reviewer: "test"
+    });
+    const yoroAccounts = {
+      async authenticateForManagement(cookieValue) {
+        assert.equal(cookieValue, "yoro-session");
+        return {
+          userId: "11111111-1111-4111-8111-111111111111",
+          csrfToken,
+          csrfTokenHash: Buffer.alloc(32)
+        };
+      },
+      async session(cookieValue) {
+        assert.equal(cookieValue, "yoro-session");
+        return {
+          authenticated: true,
+          csrfToken,
+          authenticationProvider: "twitch",
+          identities: [],
+          preferences: {
+            locale: "ko",
+            defaultDashboardPage: "overview",
+            reducedMotion: false
+          }
+        };
+      },
+      async getTwitchAccessContext(cookieValue) {
+        assert.equal(cookieValue, "yoro-session");
+        return {
+          clientId: "client-id",
+          accessToken: "access-token",
+          userId: "12345",
+          scopes: [],
+          user: { id: "12345", login: "streamer", displayName: "Streamer" },
+          tokenExpiresAt: "2026-08-10T00:00:00.000Z"
+        };
+      }
+    };
+    const handler = createHttpHandler({
+      store,
+      twitchAuth: {},
+      actions: { async dispatchOne() {} },
+      sessions: new DashboardSessionStore(),
+      discordDatabaseReady: () => true,
+      yoroAccounts
+    });
+    const headers = {
+      cookie: "yoro_session=yoro-session",
+      origin: DASHBOARD_ORIGIN,
+      "x-yoro-csrf": csrfToken
+    };
+    try {
+      const initialReq = createRequest(
+        "GET",
+        "/api/account/streamer/participation",
+        undefined,
+        { cookie: headers.cookie }
+      );
+      const initialRes = createResponse();
+      await handler(initialReq, initialRes);
+      assert.equal(initialRes.statusCode, 200);
+      assert.equal(JSON.parse(initialRes.body).session, undefined);
+
+      const startReq = createRequest(
+        "POST",
+        "/api/account/streamer/participation/session",
+        { action: "start", maxQueueSize: 25, checkInSeconds: 45, allowRejoin: false },
+        headers
+      );
+      const startRes = createResponse();
+      await handler(startReq, startRes);
+      assert.equal(startRes.statusCode, 200);
+      const started = JSON.parse(startRes.body).state.participation;
+      assert.equal(started.session.maxQueueSize, 25);
+      assert.equal(started.session.checkInSeconds, 45);
+      assert.equal(started.session.allowRejoin, false);
+      assert.match(started.session.publicSessionId, /^ps_[A-Za-z0-9_-]{32}$/u);
+
+      const duplicateReq = createRequest(
+        "POST",
+        "/api/account/streamer/participation/session",
+        { action: "start" },
+        headers
+      );
+      const duplicateRes = createResponse();
+      await handler(duplicateReq, duplicateRes);
+      assert.equal(duplicateRes.statusCode, 409);
+      assert.equal(JSON.parse(duplicateRes.body).code, "SESSION_ALREADY_ACTIVE");
+
+      const entry = store.addParticipation(store.makeParticipationEntry({
+        twitchUserId: "viewer-1",
+        twitchUserName: "Viewer",
+        riotGameName: "Viewer",
+        riotTagLine: "JP1",
+        preferredRole: "fill",
+        status: "waitlisted",
+        source: "dashboard"
+      }), "12345");
+      const selectNextReq = createRequest(
+        "POST",
+        "/api/account/streamer/participation/session",
+        { action: "select_next" },
+        headers
+      );
+      const selectNextRes = createResponse();
+      await handler(selectNextReq, selectNextRes);
+      assert.equal(selectNextRes.statusCode, 200);
+      assert.equal(
+        JSON.parse(selectNextRes.body).state.participation.queue[0].status,
+        "selected"
+      );
+
+      const closeReq = createRequest(
+        "POST",
+        "/api/account/streamer/participation/session",
+        { action: "close" },
+        headers
+      );
+      const closeRes = createResponse();
+      await handler(closeReq, closeRes);
+      assert.equal(closeRes.statusCode, 200);
+      assert.equal(JSON.parse(closeRes.body).state.participation.isOpen, false);
+
+      const reopenReq = createRequest(
+        "POST",
+        "/api/account/streamer/participation/session",
+        { action: "open" },
+        headers
+      );
+      const reopenRes = createResponse();
+      await handler(reopenReq, reopenRes);
+      assert.equal(reopenRes.statusCode, 200);
+      assert.equal(JSON.parse(reopenRes.body).state.participation.session.status, "recruiting");
+
+      const entryReq = createRequest(
+        "POST",
+        "/api/account/streamer/participation/entry-status",
+        { entryId: entry.id, status: "skipped" },
+        headers
+      );
+      const entryRes = createResponse();
+      await handler(entryReq, entryRes);
+      assert.equal(entryRes.statusCode, 200);
+      assert.equal(JSON.parse(entryRes.body).queue[0].status, "skipped");
+
+      const otherEntry = store.addParticipation(store.makeParticipationEntry({
+        twitchUserId: "viewer-2",
+        twitchUserName: "OtherViewer",
+        riotGameName: "OtherViewer",
+        riotTagLine: "JP1",
+        preferredRole: "fill",
+        status: "waitlisted",
+        source: "dashboard"
+      }), "other-streamer");
+      const crossTenantReq = createRequest(
+        "POST",
+        "/api/account/streamer/participation/entry-status",
+        { entryId: otherEntry.id, status: "skipped" },
+        headers
+      );
+      const crossTenantRes = createResponse();
+      await handler(crossTenantReq, crossTenantRes);
+      assert.equal(crossTenantRes.statusCode, 404);
+      assert.equal(
+        store.getParticipationQueue("other-streamer")[0].status,
+        "waitlisted"
+      );
+
+      const spoofedReq = createRequest(
+        "POST",
+        "/api/account/streamer/participation/session",
+        { action: "close", streamerId: "another-streamer" },
+        headers
+      );
+      const spoofedRes = createResponse();
+      await handler(spoofedReq, spoofedRes);
+      assert.equal(spoofedRes.statusCode, 400);
+
+      const finishReq = createRequest(
+        "POST",
+        "/api/account/streamer/participation/session",
+        { action: "finish" },
+        headers
+      );
+      const finishRes = createResponse();
+      await handler(finishReq, finishRes);
+      assert.equal(finishRes.statusCode, 200);
+      assert.equal(JSON.parse(finishRes.body).state.participation.session.status, "completed");
     } finally {
       appConfig.database.enabled = previousDatabaseEnabled;
     }

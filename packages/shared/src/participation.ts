@@ -126,6 +126,8 @@ export type ParticipationStatus =
   | "rejected"
   | "blocked";
 
+export type ParticipationJoinSource = "public_web" | "discord_announcement" | "twitch_chat" | "dashboard";
+
 export type ParticipationEntry = {
   id: string;
   streamerId?: string;
@@ -149,6 +151,9 @@ export type ParticipationEntry = {
   profileAnalyzedAt?: string;
   status: ParticipationStatus;
   source: "chat_command" | "channel_point" | "dashboard";
+  joinedFrom?: ParticipationJoinSource;
+  attemptNumber?: number;
+  lastRequeuedAt?: string;
   redemptionId?: string;
   checkInExpiresAt?: string;
   selectedAt?: string;
@@ -212,7 +217,11 @@ export type StreamerProfileSnapshot = {
 export type ParticipationSession = {
   streamerId: string;
   sessionId: string;
+  publicSessionId: string;
   status: ParticipationSessionStatus;
+  maxQueueSize?: number;
+  allowRejoin?: boolean;
+  checkInSeconds?: number;
   profileSnapshot?: StreamerProfileSnapshot;
   createdAt: string;
   updatedAt: string;
