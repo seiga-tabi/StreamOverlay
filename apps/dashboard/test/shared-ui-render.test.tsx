@@ -466,7 +466,7 @@ test("챔피언 필터가 선택된 챔피언 이미지와 목록형 선택 접�
   assert.match(html, />아트록스</);
 });
 
-test("Profile 상단은 티어 카드를 분리하고 최근 경기 바로가기를 제공한다", () => {
+test("Profile 상단은 중복 검색을 제거하고 스트리머 CTA 우선순위를 유지한다", () => {
   const html = renderToStaticMarkup(
     <ProfileTopPanel
       favoriteActionLabel="즐겨찾기"
@@ -487,7 +487,6 @@ test("Profile 상단은 티어 카드를 분리하고 최근 경기 바로가기
       refreshCoolingDown={false}
       refreshDisabled={false}
       refreshTitle="전적 갱신"
-      searchForm={<div>검색</div>}
       seasonBadges={<div>시즌</div>}
       streamerSpotlight={{
         isLive: true,
@@ -514,11 +513,7 @@ test("Profile 상단은 티어 카드를 분리하고 최근 경기 바로가기
       }}
       tagLine="JP1"
       text={{
-        ranking: "랭킹",
-        cachedRanking: { label: "캐시", ko: "캐시", ja: "キャッシュ" },
-        liveDataNotice: { label: "실시간", ko: "실시간", ja: "リアルタイム" },
         profileLinksLabel: { label: "프로필 링크", ko: "프로필 링크", ja: "プロフィールリンク" },
-        serverLabel: "JP",
         searching: "검색 중",
         recentMatches: { label: "최근 경기", ko: "최근 경기", ja: "最近の試合" },
       }}
@@ -527,12 +522,14 @@ test("Profile 상단은 티어 카드를 분리하고 최근 경기 바로가기
 
   assert.match(html, /최근 경기/);
   assert.match(html, /public-profile-streamer-spotlight is-live/u);
+  assert.match(html, /public-profile-platform-hero has-streamer/u);
   assert.match(html, /public-avatar square is-streamer is-live/u);
   assert.match(html, /<span class="sr-only">LIVE NOW<\/span>/u);
   assert.match(html, /href="https:\/\/www\.twitch\.tv\/yoro"/u);
   assert.match(html, /href="https:\/\/discord\.gg\/yoro"/u);
   assert.match(html, />참여 신청</u);
   assert.ok(html.indexOf("참여 신청") < html.indexOf("Twitch에서 보기"));
+  assert.doesNotMatch(html, /public-ranking-shared-toolbar/u);
   assert.match(html, /public-profile-streamer-spotlight__metrics/u);
   assert.match(html, />League of Legends</u);
   assert.match(html, />Platinum I</u);

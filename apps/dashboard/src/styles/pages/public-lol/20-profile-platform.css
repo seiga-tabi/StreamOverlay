@@ -32,14 +32,14 @@
 .public-profile-platform-v2 .public-dashboard-center {
   box-sizing: border-box;
   inline-size: 100%;
-  max-inline-size: 88rem;
+  max-inline-size: 76rem;
   min-inline-size: 0;
   margin-inline: auto;
 }
 
 .public-profile-platform-v2 .public-dashboard-center {
   display: grid;
-  gap: var(--yoro-space-5);
+  gap: var(--yoro-space-4);
 }
 
 .public-profile-platform-v2 .public-profile-shared-top.yoro-card.public-profile-platform-hero {
@@ -71,13 +71,20 @@
   position: relative;
   z-index: var(--yoro-z-base);
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
   gap: var(--yoro-space-4);
   min-height: 0 !important;
   padding: clamp(var(--yoro-space-4), 2.5vw, var(--yoro-space-6)) !important;
 }
 
+.public-profile-platform-v2 .public-profile-platform-hero.has-streamer .public-profile-top-main {
+  grid-template-columns: minmax(0, 1.45fr) minmax(18rem, .75fr);
+}
+
 .public-profile-platform-v2 .public-profile-platform-hero .public-profile-top-content {
-  max-inline-size: 56rem;
+  align-self: center;
+  max-inline-size: none;
 }
 
 .public-profile-platform-v2 .public-profile-platform-hero .public-profile-mastery-art {
@@ -111,10 +118,12 @@
 }
 
 .public-profile-platform-v2 .public-profile-streamer-spotlight {
-  grid-template-columns: minmax(11rem, .7fr) minmax(14rem, 1.4fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
-    "status copy actions"
-    "metrics metrics metrics";
+    "status"
+    "copy"
+    "metrics"
+    "actions";
   gap: var(--yoro-space-3);
   padding: var(--yoro-space-3);
   border-color: color-mix(in srgb, var(--yoro-color-primary) 42%, var(--yoro-color-border-on-dark));
@@ -123,7 +132,7 @@
 }
 
 .public-profile-platform-v2 .public-profile-streamer-spotlight__metrics {
-  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .public-profile-platform-v2 .public-profile-streamer-spotlight__metrics > div {
@@ -150,10 +159,15 @@
 }
 
 .public-profile-platform-v2 .public-profile-streamer-spotlight__actions :is(a, button) {
+  inline-size: 100%;
   transition:
     transform var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
     border-color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
     box-shadow var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard);
+}
+
+.public-profile-platform-v2 .public-profile-streamer-spotlight + .public-profile-summary-controls {
+  display: none;
 }
 
 .public-profile-platform-v2 .public-profile-streamer-spotlight__actions :is(a, button):hover {
@@ -166,18 +180,18 @@
   min-inline-size: 0;
   overflow: hidden;
   border-color: var(--yoro-color-border-on-dark-strong);
-  border-radius: var(--yoro-radius-lg);
+  border-radius: var(--yoro-radius-md);
   background: color-mix(in srgb, var(--public-gray-surface-strong) 94%, transparent);
   box-shadow: var(--yoro-shadow-panel);
 }
 
 .public-profile-platform-v2 .public-profile-rank-section__header {
-  margin-block-end: var(--yoro-space-3);
+  margin-block-end: var(--yoro-space-2);
 }
 
 .public-profile-platform-v2 .public-profile-rank-section__header h2 {
   color: var(--yoro-color-text-on-dark-strong);
-  font-size: var(--yoro-font-size-lg);
+  font-size: var(--yoro-font-size-md);
 }
 
 .public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-profile-rank-section .public-profile-metric-strip {
@@ -189,8 +203,8 @@
 }
 
 .public-profile-platform-v2 .public-profile-rank-section .public-profile-metric-card {
-  min-height: 10rem;
-  padding: var(--yoro-space-4);
+  min-height: 7.5rem;
+  padding: var(--yoro-space-3);
   transition:
     transform var(--yoro-motion-duration-base) var(--yoro-motion-ease-standard),
     border-color var(--yoro-motion-duration-base) var(--yoro-motion-ease-standard),
@@ -215,7 +229,7 @@
   padding: var(--yoro-space-1);
   overflow-x: auto;
   border: var(--yoro-size-sr-only) solid var(--yoro-color-border-on-dark);
-  border-radius: var(--yoro-radius-lg);
+  border-radius: var(--yoro-radius-md);
   background: var(--public-gray-surface-strong);
   box-shadow: var(--yoro-shadow-soft);
   scrollbar-width: none;
@@ -238,7 +252,7 @@
 }
 
 .public-profile-platform-v2 .public-overview-search-layout {
-  grid-template-columns: minmax(16rem, 17.5rem) minmax(0, 1fr);
+  grid-template-columns: minmax(13.5rem, 15rem) minmax(0, 1fr);
   align-items: start;
   gap: var(--yoro-space-4);
 }
@@ -259,7 +273,7 @@
 .public-profile-platform-v2 .public-overview-dashboard-panel .public-panel,
 .public-profile-platform-v2 .public-matches-panel {
   border-color: var(--yoro-color-border-on-dark);
-  border-radius: var(--yoro-radius-lg);
+  border-radius: var(--yoro-radius-md);
 }
 
 .public-profile-platform-v2 .public-aggregate-insights > div {
@@ -275,15 +289,15 @@
 
 .public-profile-platform-v2 .public-matches-panel {
   min-inline-size: 0;
-  padding: var(--yoro-space-4);
+  padding: var(--yoro-space-3);
   background: color-mix(in srgb, var(--public-gray-surface-strong) 94%, transparent);
 }
 
 .public-profile-platform-v2 .public-match-filter-bar {
   grid-template-columns: minmax(7rem, auto) repeat(3, minmax(9rem, 1fr)) auto;
   gap: var(--yoro-space-2);
-  margin-block-end: var(--yoro-space-4);
-  padding: var(--yoro-space-3);
+  margin-block-end: var(--yoro-space-3);
+  padding: var(--yoro-space-2);
   box-shadow: var(--yoro-shadow-none) !important;
 }
 
@@ -297,7 +311,7 @@
 }
 
 .public-profile-platform-v2 .public-match-list {
-  gap: var(--yoro-space-3);
+  gap: var(--yoro-space-2);
 }
 
 .public-profile-platform-v2 .public-match-row {
@@ -426,6 +440,10 @@
 }
 
 @media (max-width: 64rem) {
+  .public-profile-platform-v2 .public-profile-platform-hero.has-streamer .public-profile-top-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .public-profile-platform-v2 .public-profile-streamer-spotlight {
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:

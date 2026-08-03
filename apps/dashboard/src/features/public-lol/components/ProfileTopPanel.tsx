@@ -4,7 +4,6 @@ import { Card } from "../../../shared/ui/Card";
 import { type StatusTone } from "../../../shared/ui/Status";
 import { ProfileTopActions, type ProfileTopActionLink } from "./ProfileTopActions";
 import { ProfileTopIdentity, type ProfileTopIdentitySeasonBadgesRenderer } from "./ProfileTopIdentity";
-import { ProfileTopSearchToolbar, type ProfileTopSearchToolbarSearchRenderer } from "./ProfileTopSearchToolbar";
 
 export type ProfileTopPanelLocalizedText = {
   label: string;
@@ -13,11 +12,7 @@ export type ProfileTopPanelLocalizedText = {
 };
 
 export type ProfileTopPanelText = {
-  ranking: string;
-  cachedRanking: ProfileTopPanelLocalizedText;
-  liveDataNotice: ProfileTopPanelLocalizedText;
   profileLinksLabel?: ProfileTopPanelLocalizedText;
-  serverLabel: string;
   searching: string;
   recentMatches: ProfileTopPanelLocalizedText;
 };
@@ -64,7 +59,6 @@ export type ProfileTopPanelProps = {
   favoriteActive: boolean;
   favoriteAriaLabel: string;
   favoriteActionLabel: string;
-  searchForm: ReactNode;
   streamerSpotlight?: ProfileTopStreamerSpotlight;
   text: ProfileTopPanelText;
   onRefresh: () => void;
@@ -102,12 +96,6 @@ function profileTopSeasonBadgesRendererFromNode(seasonBadges: ReactNode): Profil
   return () => seasonBadgesElement;
 }
 
-function profileTopSearchRendererFromNode(searchForm: ReactNode): ProfileTopSearchToolbarSearchRenderer {
-  if (!isValidElement(searchForm)) return () => null;
-  const searchFormElement = searchForm as ReactElement;
-  return () => searchFormElement;
-}
-
 function defaultProfileLinksLabel(): string {
   const lang = typeof document === "undefined" ? "" : document.documentElement.lang || navigator.language || "";
   return lang.toLocaleLowerCase().startsWith("ja") ? "プロフィールリンク" : "프로필 링크";
@@ -137,7 +125,6 @@ export function ProfileTopPanel({
   refreshCoolingDown,
   refreshDisabled,
   refreshTitle,
-  searchForm,
   seasonBadges,
   streamerSpotlight,
   tagLine,
@@ -145,7 +132,6 @@ export function ProfileTopPanel({
 }: ProfileTopPanelProps) {
   const actionProfileLinks = profileTopActionLinksFromNode(profileLinks);
   const renderSeasonBadges = profileTopSeasonBadgesRendererFromNode(seasonBadges);
-  const renderSearchForm = profileTopSearchRendererFromNode(searchForm);
   const renderActions = () => (
     <ProfileTopActions
       actions={{
@@ -169,7 +155,17 @@ export function ProfileTopPanel({
   );
 
   return (
-    <Card as="section" id="public-ranking" className={`public-profile-top-grid public-profile-shared-top public-profile-platform-hero ${masteryChampionArt ? "has-mastery-art" : ""}`} padding="none" variant="glass">
+    <Card
+      as="section"
+      id="public-ranking"
+      className={[
+        "public-profile-top-grid public-profile-shared-top public-profile-platform-hero",
+        masteryChampionArt ? "has-mastery-art" : "",
+        streamerSpotlight ? "has-streamer" : ""
+      ].filter(Boolean).join(" ")}
+      padding="none"
+      variant="glass"
+    >
       {masteryChampionArt ? <img className="public-profile-mastery-art" src={masteryChampionArt} alt="" aria-hidden="true" /> : null}
       <div className="public-profile-top-main">
         <ProfileTopIdentity
@@ -190,15 +186,6 @@ export function ProfileTopPanel({
           }}
           renderActions={renderActions}
           renderSeasonBadges={renderSeasonBadges}
-        />
-        <ProfileTopSearchToolbar
-          toolbar={{
-            ariaLabel: text.ranking,
-            cachedRanking: text.cachedRanking,
-            liveDataNotice: text.liveDataNotice,
-            renderSearchForm,
-            serverLabel: text.serverLabel,
-          }}
         />
         {streamerSpotlight ? (
           <aside className={`public-profile-streamer-spotlight ${streamerSpotlight.isLive ? "is-live" : "is-offline"}`}>

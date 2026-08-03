@@ -1466,18 +1466,6 @@ function ProfileLinkIcons({ links }: { links: PublicProfileLink[] }) {
 
 function profileTopPanelText(): ProfileTopPanelText {
   return {
-    ranking: t().ranking,
-    cachedRanking: {
-      label: t().cachedRanking,
-      ko: publicI18n.ko.cachedRanking,
-      ja: publicI18n.ja.cachedRanking
-    },
-    liveDataNotice: {
-      label: t().liveDataNotice,
-      ko: publicI18n.ko.liveDataNotice,
-      ja: publicI18n.ja.liveDataNotice
-    },
-    serverLabel: t().jpServer,
     searching: t().searching,
     recentMatches: { label: t().recentGames, ko: publicI18n.ko.recentGames, ja: publicI18n.ja.recentGames }
   };
@@ -1487,16 +1475,8 @@ function ProfileTopPanel({
   profile,
   loading,
   favoriteActive,
-  query,
-  suggestions,
-  recentSearches = [],
-  favorites = [],
   refreshRemaining,
-  onClear,
-  onPickSuggestion,
-  onQuery,
   onRefresh,
-  onSubmit,
   onOpenParticipation,
   participationOpen,
   onToggleFavorite
@@ -1504,16 +1484,8 @@ function ProfileTopPanel({
   profile: PublicLolProfile;
   loading: boolean;
   favoriteActive: boolean;
-  query: string;
-  suggestions: SearchSuggestion[];
-  recentSearches?: SearchSuggestion[];
-  favorites?: PublicFavorite[];
   refreshRemaining: number;
-  onClear: () => void;
-  onPickSuggestion: (suggestion: SearchSuggestion) => void;
-  onQuery: (value: string) => void;
   onRefresh: () => void;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onOpenParticipation: () => void;
   participationOpen: boolean;
   onToggleFavorite: () => void;
@@ -1589,21 +1561,6 @@ function ProfileTopPanel({
       refreshCoolingDown={refreshCoolingDown}
       refreshDisabled={refreshDisabled}
       refreshTitle={refreshCoolingDown ? `${formatCooldown(refreshRemaining)} ${t().refreshAvailableIn}` : t().refreshProfile}
-      searchForm={(
-        <SearchForm
-          controlId="public-ranking-search-input"
-          loading={loading}
-          onClear={onClear}
-          onPickSuggestion={onPickSuggestion}
-          onQuery={onQuery}
-          onSubmit={onSubmit}
-          query={query}
-          suggestions={suggestions}
-          recentSearches={recentSearches}
-          favorites={favorites}
-          variant="rankingShared"
-        />
-      )}
       seasonBadges={null}
       streamerSpotlight={streamerSpotlight}
       tagLine={profile.tagLine}
@@ -8088,16 +8045,8 @@ export function PublicLolPage({
                     profile={activeProfile}
                     loading={loading}
                     favoriteActive={favoriteActive}
-                    query={query}
-                    suggestions={visibleSuggestions}
-                    recentSearches={recentSearches}
-                    favorites={favorites}
                     refreshRemaining={refreshRemaining}
-                    onClear={clearSearch}
-                    onPickSuggestion={pickSuggestion}
-                    onQuery={setQuery}
                     onRefresh={() => void runSearch(profile.riotId, { refresh: true })}
-                    onSubmit={(event) => void submit(event)}
                     onOpenParticipation={() => changeMainPage("followJoin")}
                     participationOpen={Boolean(publicParticipation?.streamers.some((streamer) => (
                       streamer.isOpen
@@ -8106,13 +8055,13 @@ export function PublicLolPage({
                     onToggleFavorite={toggleFavorite}
                   />
                   <PublicProfileErrorState error={error} />
+                  <ProfileRankSection profile={activeProfile} />
                   <PublicProfileTabs activeTab={profileTab} onChange={setProfileTab} onParticipation={() => changeMainPage("followJoin")} />
 
                   {profileTab === "overview" ? (
                     <div className="public-overview-search-layout">
                       <OverviewMetricPanel profile={activeProfile} />
                       <div className="public-overview-results-column">
-                        <ProfileRankSection profile={activeProfile} />
                         <RecentMatches
                           profile={activeProfile}
                           filters={filters}
