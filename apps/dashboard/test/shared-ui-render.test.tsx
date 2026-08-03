@@ -497,6 +497,12 @@ test("Profile 상단은 상세 정보를 접고 최근 경기 바로가기를 �
         channelUrl: "https://www.twitch.tv/yoro",
         channelActionLabel: "Twitch에서 보기",
         participationActionLabel: "참여 신청",
+        supportingLinks: [{
+          id: "discord",
+          label: "Discord",
+          url: "https://discord.gg/yoro",
+          platform: "discord",
+        }],
         metrics: [
           { id: "game", label: "현재 게임", value: "League of Legends", tone: "live" },
           { id: "rank", label: "솔로 랭크", value: "Platinum I", tone: "accent" },
@@ -520,16 +526,19 @@ test("Profile 상단은 상세 정보를 접고 최근 경기 바로가기를 �
   );
 
   assert.match(html, /details-collapsed/);
-  assert.match(html, /aria-expanded="false"/);
+  assert.match(html, /aria-controls="public-profile-rank-summary" aria-expanded="false"/);
   assert.match(html, /최근 경기/);
   assert.match(html, /public-profile-streamer-spotlight is-live/u);
   assert.match(html, /href="https:\/\/www\.twitch\.tv\/yoro"/u);
+  assert.match(html, /href="https:\/\/discord\.gg\/yoro"/u);
   assert.match(html, />참여 신청</u);
+  assert.ok(html.indexOf("참여 신청") < html.indexOf("Twitch에서 보기"));
   assert.match(html, /public-profile-streamer-spotlight__metrics/u);
   assert.match(html, />League of Legends</u);
   assert.match(html, />Platinum I</u);
   assert.match(html, />참여 대기열 열림</u);
-  assert.doesNotMatch(html, /id="metric-strip"/);
+  assert.match(html, /id="public-profile-rank-summary" class="public-profile-rank-summary is-collapsed"/u);
+  assert.match(html, /id="metric-strip"/);
 });
 
 test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로드아웃을 유지한다", () => {
@@ -572,6 +581,7 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
   assert.equal((html.match(/아이템\d/g) ?? []).length, 6);
   assert.match(html, /class="deaths">0/);
   assert.match(html, /public-match-featured-label highlight-mvp/u);
+  assert.match(html, /public-match-expand-label">경기 상세 펼치기</u);
 });
 
 test("경기 상세 팀 비교는 피해량·시야·골드·오브젝트를 전환 탭으로 제공한다", () => {

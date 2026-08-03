@@ -223,6 +223,42 @@ test("Public Profile", async ({ page }) => {
   await assertStableSurface(page, errors, "public-profile.png");
 });
 
+test("LoL 프로필 플랫폼은 주요 viewport에서 내부 탐색과 문서 폭을 유지한다", async ({ page }) => {
+  const errors = collectRuntimeErrors(page);
+  const viewports = [
+    { width: 360, height: 800 },
+    { width: 390, height: 844 },
+    { width: 430, height: 932 },
+    { width: 768, height: 1024 },
+    { width: 1024, height: 768 },
+    { width: 1280, height: 900 },
+    { width: 1440, height: 1000 },
+  ];
+
+  for (const viewport of viewports) {
+    await page.setViewportSize(viewport);
+    await page.goto("/lol/summoners/jp/YORO%20QA-JP1");
+    const profile = page.locator(".public-profile-platform-v2");
+    const tabs = page.locator(".public-profile-tabs");
+    const rankSummary = page.locator("#public-profile-rank-summary");
+    await expect(profile).toBeVisible();
+    await expect(tabs.getByRole("button")).toHaveCount(5);
+
+    const diagnostics = await page.evaluate(() => ({
+      clientWidth: document.documentElement.clientWidth,
+      scrollWidth: document.documentElement.scrollWidth,
+    }));
+    expect(diagnostics.scrollWidth, `${viewport.width}px에서 문서 수평 overflow가 없어야 합니다.`)
+      .toBeLessThanOrEqual(diagnostics.clientWidth);
+
+    await tabs.getByRole("button").last().scrollIntoViewIfNeeded();
+    await expect(tabs.getByRole("button").last()).toBeVisible();
+    await expect(rankSummary).toHaveCSS("display", viewport.width <= 768 ? "none" : "block");
+  }
+
+  expect(errors, "viewport 전환 중 runtime 오류가 없어야 합니다.").toEqual([]);
+});
+
 test("LoL 공개 하위 페이지는 화면 중앙에 배치된다", async ({ page }) => {
   const paths = [
     "/follow",

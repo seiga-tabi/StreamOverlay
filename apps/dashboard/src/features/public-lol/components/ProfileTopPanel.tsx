@@ -34,6 +34,7 @@ export type ProfileTopStreamerSpotlight = {
   channelUrl?: string;
   channelActionLabel: string;
   participationActionLabel: string;
+  supportingLinks?: ProfileTopActionLink[];
   metrics?: Array<{
     id: string;
     label: string;
@@ -158,7 +159,7 @@ export function ProfileTopPanel({
         favoriteAriaLabel,
         fetchedAtText,
         loading,
-        profileLinks: actionProfileLinks,
+        profileLinks: streamerSpotlight ? [] : actionProfileLinks,
         profileLinksLabel: text.profileLinksLabel?.label ?? defaultProfileLinksLabel(),
         refreshButtonLabel,
         refreshCooldownLabel,
@@ -173,7 +174,7 @@ export function ProfileTopPanel({
   );
 
   return (
-    <Card as="section" id="public-ranking" className={`public-profile-top-grid public-profile-shared-top ${detailsOpen ? "details-open" : "details-collapsed"} ${masteryChampionArt ? "has-mastery-art" : ""}`} padding="none" variant="glass">
+    <Card as="section" id="public-ranking" className={`public-profile-top-grid public-profile-shared-top public-profile-platform-hero ${detailsOpen ? "details-open" : "details-collapsed"} ${masteryChampionArt ? "has-mastery-art" : ""}`} padding="none" variant="glass">
       {masteryChampionArt ? <img className="public-profile-mastery-art" src={masteryChampionArt} alt="" aria-hidden="true" /> : null}
       <div className="public-profile-top-main">
         <ProfileTopIdentity
@@ -227,21 +228,26 @@ export function ProfileTopPanel({
               </dl>
             ) : null}
             <div className="public-profile-streamer-spotlight__actions">
-              {streamerSpotlight.channelUrl ? (
-                <a href={streamerSpotlight.channelUrl} target="_blank" rel="noreferrer">
-                  {streamerSpotlight.channelActionLabel}
-                </a>
-              ) : null}
               {onOpenParticipation ? (
-                <button type="button" onClick={onOpenParticipation}>
+                <button className="is-primary" type="button" onClick={onOpenParticipation}>
                   {streamerSpotlight.participationActionLabel}
                 </button>
               ) : null}
+              {streamerSpotlight.channelUrl ? (
+                <a className="is-secondary" href={streamerSpotlight.channelUrl} target="_blank" rel="noreferrer">
+                  {streamerSpotlight.channelActionLabel}
+                </a>
+              ) : null}
+              {streamerSpotlight.supportingLinks?.map((link, index) => (
+                <a className="is-ghost" href={link.url} target="_blank" rel="noreferrer" key={`${link.id ?? link.url}:${index}`}>
+                  {link.label}
+                </a>
+              ))}
             </div>
           </aside>
         ) : null}
         <div className="public-profile-summary-controls">
-          <Button type="button" size="sm" variant="tertiary" aria-expanded={detailsOpen} onClick={() => setDetailsOpen((open) => !open)}>
+          <Button className="public-profile-details-toggle" type="button" size="sm" variant="tertiary" aria-controls="public-profile-rank-summary" aria-expanded={detailsOpen} onClick={() => setDetailsOpen((open) => !open)}>
             <span  >
               {detailsOpen ? text.hideDetails.label : text.showDetails.label}
             </span>
@@ -256,7 +262,9 @@ export function ProfileTopPanel({
           </Button>
         </div>
       </div>
-      {detailsOpen ? metricStrip : null}
+      <div id="public-profile-rank-summary" className={`public-profile-rank-summary ${detailsOpen ? "is-open" : "is-collapsed"}`}>
+        {metricStrip}
+      </div>
     </Card>
   );
 }

@@ -1570,6 +1570,10 @@ function ProfileTopPanel({
   const masteryChampionArt = assetUrl(profile.topChampions[0]?.splashUrl ?? profile.topChampions[0]?.loadingUrl);
   const registeredStreamerStream = visibleStreamerStream(profile.twitchStream);
   const profileLinks = profileLinksFromStream(registeredStreamerStream);
+  const supportingProfileLinks = profileLinks.filter((link) => (
+    link.url !== registeredStreamerStream?.channelUrl
+    && profileLinkPlatformClass(link.platform, link.url) !== "twitch"
+  ));
   const primaryRank = soloStats ?? flexStats ?? rank5v5Stats ?? profile.rankedStats;
   const primaryRankClassName = `tier-${primaryRank?.tier ? primaryRank.tier.toLocaleLowerCase() : "unranked"}`;
   const fetchedAtText = `${t().fetchedAt} ${formatDate(profile.fetchedAt)}`;
@@ -1583,12 +1587,19 @@ function ProfileTopPanel({
     channelUrl: registeredStreamerStream.channelUrl,
     channelActionLabel: t().streamerWatch,
     participationActionLabel: participationOpen ? t().streamerParticipationApply : t().streamerParticipationView,
+    supportingLinks: supportingProfileLinks,
     metrics: [
       {
         id: "game",
         label: t().liveGame,
         value: registeredStreamerStream.gameName?.trim() || "League of Legends",
         tone: registeredStreamerStream.isLive ? "live" as const : "neutral" as const
+      },
+      {
+        id: "current-game",
+        label: t().ingame,
+        value: profile.liveGame.isLive ? t().currentlyInGame : t().notInGame,
+        tone: profile.liveGame.isLive ? "live" as const : "neutral" as const
       },
       {
         id: "rank",
@@ -1603,6 +1614,12 @@ function ProfileTopPanel({
           ? formatNumber(registeredStreamerStream.viewerCount)
           : "-",
         tone: registeredStreamerStream.isLive ? "live" as const : "neutral" as const
+      },
+      {
+        id: "recent-form",
+        label: t().recentForm,
+        value: `${profile.summary.recentWins} ${t().win} ${Math.max(0, profile.summary.recentGames - profile.summary.recentWins)} ${t().loss}`,
+        tone: profile.summary.recentWinRate >= 55 ? "live" as const : "neutral" as const
       },
       {
         id: "participation",
@@ -1692,16 +1709,27 @@ function PublicMoreFeatures() {
 
 function PublicProfileTabs({
   activeTab,
-  onChange
+  onChange,
+  onParticipation
 }: {
   activeTab: PublicProfileTab;
   onChange: (tab: PublicProfileTab) => void;
+  onParticipation: () => void;
 }) {
+  const openStats = () => {
+    onChange("overview");
+    window.requestAnimationFrame(() => {
+      const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+      document.getElementById("public-stats")?.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
+    });
+  };
   return (
     <nav className="public-profile-tabs" aria-label={t().profileSummary}>
-      <Button type="button" className={activeTab === "overview" ? "active" : ""} onClick={() => onChange("overview")}   size="md" variant={activeTab === "overview" ? "secondary" : "ghost"}>{t().overview}</Button>
-      <Button type="button" className={activeTab === "champions" ? "active" : ""} onClick={() => onChange("champions")}   size="md" variant={activeTab === "champions" ? "secondary" : "ghost"}>{t().championAnalysis}</Button>
-      <Button type="button" className={activeTab === "ingame" ? "active" : ""} onClick={() => onChange("ingame")}   size="md" variant={activeTab === "ingame" ? "secondary" : "ghost"}>{t().ingame}</Button>
+      <Button type="button" aria-current={activeTab === "overview" ? "page" : undefined} className={activeTab === "overview" ? "active" : ""} onClick={() => onChange("overview")} size="md" variant={activeTab === "overview" ? "secondary" : "ghost"}>{t().matchHistoryTab}</Button>
+      <Button type="button" aria-current={activeTab === "champions" ? "page" : undefined} className={activeTab === "champions" ? "active" : ""} onClick={() => onChange("champions")} size="md" variant={activeTab === "champions" ? "secondary" : "ghost"}>{t().championAnalysis}</Button>
+      <Button type="button" aria-current={activeTab === "ingame" ? "page" : undefined} className={activeTab === "ingame" ? "active" : ""} onClick={() => onChange("ingame")} size="md" variant={activeTab === "ingame" ? "secondary" : "ghost"}>{t().ingame}</Button>
+      <Button type="button" onClick={onParticipation} size="md" variant="ghost">{t().participationHeaderNav}</Button>
+      <Button type="button" onClick={openStats} size="md" variant="ghost">{t().stats}</Button>
     </nav>
   );
 }
@@ -8044,7 +8072,7 @@ export function PublicLolPage({
 
   return (
     <AppShell
-      className={`public-lol-shell public-dashboard-shell public-profile-shared-shell theme-${theme}`}
+      className={`public-lol-shell public-dashboard-shell public-profile-shared-shell ${activeProfile ? "public-profile-platform-v2" : ""} theme-${theme}`}
       mainId="public-profile-main"
       skipLinkLabel={t().skipToContent}
       variant="public"
@@ -8109,7 +8137,7 @@ export function PublicLolPage({
                     onToggleFavorite={toggleFavorite}
                   />
                   <PublicProfileErrorState error={error} />
-                  <PublicProfileTabs activeTab={profileTab} onChange={setProfileTab} />
+                  <PublicProfileTabs activeTab={profileTab} onChange={setProfileTab} onParticipation={() => changeMainPage("followJoin")} />
 
 	                {profileTab === "overview" ? (
 	                  <div className="public-overview-search-layout">
