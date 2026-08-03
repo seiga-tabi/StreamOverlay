@@ -562,12 +562,14 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
       kdaMetric="Perfect"
       kdaScore={<><span>9</span><i>/</i><span className="deaths">0</span><i>/</i><span>6</span></>}
       killParticipationMetric="킬 관여 70%"
+      matchAriaLabel="승리 · 제드 · 9/0/6"
       onToggleExpand={() => undefined}
       queueLabel="솔로랭크"
       relativeLabel="13시간 전"
       result="win"
       resultDurationLabel="26:50"
       resultLabel="승리"
+      scoreAriaLabel="MVP 91"
       scoreClassName="metric-tone-excellent"
       spellItems={Array.from({ length: 4 }, (_, index) => ({ key: `loadout-${index}`, content: `로드아웃${index}` }))}
       startedAtLabel="2026. 7. 14."
@@ -582,6 +584,8 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
   assert.match(html, /class="deaths">0/);
   assert.match(html, /public-match-featured-label highlight-mvp/u);
   assert.match(html, /public-match-expand-label">경기 상세 펼치기</u);
+  assert.match(html, /aria-label="승리 · 제드 · 9\/0\/6"/u);
+  assert.equal((html.match(/aria-label="MVP 91"/gu) ?? []).length, 2);
 });
 
 test("경기 상세 팀 비교는 피해량·시야·골드·오브젝트를 전환 탭으로 제공한다", () => {

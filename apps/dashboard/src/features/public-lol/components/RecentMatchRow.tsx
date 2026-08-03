@@ -13,6 +13,7 @@ export type RecentMatchRowMediaItem = {
 };
 
 export type RecentMatchRowProps = {
+  matchAriaLabel: string;
   result: string;
   highlightClass: string;
   expanded: boolean;
@@ -34,6 +35,7 @@ export type RecentMatchRowProps = {
   scoreClassName: string;
   aiScoreText: RecentMatchRowLocalizedText;
   aiScore: ReactNode;
+  scoreAriaLabel: string;
   csLabel: ReactNode;
   csPerMinuteMetric: ReactNode;
   killParticipationMetric: ReactNode;
@@ -45,6 +47,7 @@ export type RecentMatchRowProps = {
 };
 
 export function RecentMatchRow({
+  matchAriaLabel,
   result,
   highlightClass,
   expanded,
@@ -66,6 +69,7 @@ export function RecentMatchRow({
   scoreClassName,
   aiScoreText,
   aiScore,
+  scoreAriaLabel,
   csLabel,
   csPerMinuteMetric,
   killParticipationMetric,
@@ -76,7 +80,10 @@ export function RecentMatchRow({
   onToggleExpand
 }: RecentMatchRowProps) {
   return (
-    <article className={`public-match-row ${result} ${highlightClass} ${expanded ? "expanded" : ""}`}>
+    <article
+      aria-label={matchAriaLabel}
+      className={`public-match-row ${result} ${highlightClass} ${expanded ? "expanded" : ""}`}
+    >
       <div className="public-match-summary">
         <div className="public-result">
           <b className={`public-match-result-pill ${result}`}>{resultLabel}</b>
@@ -111,7 +118,7 @@ export function RecentMatchRow({
           <span>{kdaMetric}</span>
           {badges}
         </div>
-        <div className={`public-match-score ${scoreClassName}`}>
+        <div aria-label={scoreAriaLabel} className={`public-match-score ${scoreClassName}`}>
           <span data-ko={aiScoreText.ko} data-ja={aiScoreText.ja}>{aiScoreText.label}</span>
           <strong>{aiScore}</strong>
         </div>
@@ -127,7 +134,7 @@ export function RecentMatchRow({
             </span>
           ))}
         </div>
-        <div className={`public-match-impact ${result} ${scoreClassName}`}>
+        <div aria-label={scoreAriaLabel} className={`public-match-impact ${result} ${scoreClassName}`}>
           <strong>{aiScore}</strong>
           <span>{aiScoreText.label}</span>
         </div>

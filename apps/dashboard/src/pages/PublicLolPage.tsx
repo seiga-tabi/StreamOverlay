@@ -1455,11 +1455,12 @@ function ProfileMetricStrip({ profile }: { profile: PublicLolProfile }) {
     };
   };
 
-  const metricCards = [
-    rankMetricCard({ key: "solo-rank", tone: "blue", icon: "S", title: t().soloRank, stats: soloRankStats(profile) }),
-    rankMetricCard({ key: "flex-rank", tone: "green", icon: "F", title: t().flexRank, stats: flexRankStats(profile) }),
-    rankMetricCard({ key: "ranked-5v5", tone: "purple", icon: "5", title: t().ranked5v5, stats: ranked5v5Stats(profile) })
-  ];
+  const rankedQueues = [
+    { key: "solo-rank", tone: "blue", icon: "S", title: t().soloRank, stats: soloRankStats(profile) },
+    { key: "flex-rank", tone: "green", icon: "F", title: t().flexRank, stats: flexRankStats(profile) },
+    { key: "ranked-5v5", tone: "purple", icon: "5", title: t().ranked5v5, stats: ranked5v5Stats(profile) }
+  ].filter((queue) => queue.stats && queue.stats.tier !== "UNRANKED");
+  const metricCards = rankedQueues.map(rankMetricCard);
 
   return (
     <FeatureProfileMetricStrip
@@ -1590,37 +1591,17 @@ function ProfileTopPanel({
     supportingLinks: supportingProfileLinks,
     metrics: [
       {
-        id: "game",
-        label: t().liveGame,
-        value: registeredStreamerStream.gameName?.trim() || "League of Legends",
-        tone: registeredStreamerStream.isLive ? "live" as const : "neutral" as const
-      },
-      {
         id: "current-game",
         label: t().ingame,
         value: profile.liveGame.isLive ? t().currentlyInGame : t().notInGame,
         tone: profile.liveGame.isLive ? "live" as const : "neutral" as const
       },
-      {
-        id: "rank",
-        label: t().soloRank,
-        value: rankLabel(primaryRank),
-        tone: primaryRank ? "accent" as const : "neutral" as const
-      },
-      {
+      ...(registeredStreamerStream.isLive && registeredStreamerStream.viewerCount !== undefined ? [{
         id: "viewers",
         label: t().twitchViewers,
-        value: registeredStreamerStream.isLive && registeredStreamerStream.viewerCount !== undefined
-          ? formatNumber(registeredStreamerStream.viewerCount)
-          : "-",
-        tone: registeredStreamerStream.isLive ? "live" as const : "neutral" as const
-      },
-      {
-        id: "recent-form",
-        label: t().recentForm,
-        value: `${profile.summary.recentWins} ${t().win} ${Math.max(0, profile.summary.recentGames - profile.summary.recentWins)} ${t().loss}`,
-        tone: profile.summary.recentWinRate >= 55 ? "live" as const : "neutral" as const
-      },
+        value: formatNumber(registeredStreamerStream.viewerCount),
+        tone: "live" as const
+      }] : []),
       {
         id: "participation",
         label: t().participationHeaderNav,
@@ -5244,21 +5225,20 @@ function PublicPremiumDialog({
   onClose: () => void;
   onOpenAdmin: () => void;
 }) {
-  if (!open) return null;
   return (
-    <div className="public-dialog-backdrop" role="presentation" onMouseDown={onClose}>
-      <section className="public-dialog" role="dialog" aria-modal="true" aria-labelledby="public-premium-title" onMouseDown={(event) => event.stopPropagation()}>
-        <div className="public-section-head">
-          <h2 id="public-premium-title"  >{t().premiumNoticeTitle}</h2>
-          <button type="button" onClick={onClose} aria-label={t().clearSearch}>×</button>
-        </div>
-        <p  >{t().premiumNoticeBody}</p>
-        <div className="public-dialog-actions">
-          <button type="button" onClick={onOpenAdmin}  >{t().openStreamerLogin}</button>
-          <button type="button" onClick={onClose}  >{t().folded}</button>
-        </div>
-      </section>
-    </div>
+    <Modal className="public-premium-dialog" open={open} onClose={onClose} size="sm">
+      <ModalHeader>
+        <ModalTitle>{t().premiumNoticeTitle}</ModalTitle>
+        <ModalCloseButton aria-label={t().clearSearch} onClick={onClose}>×</ModalCloseButton>
+      </ModalHeader>
+      <ModalContent>
+        <ModalDescription>{t().premiumNoticeBody}</ModalDescription>
+      </ModalContent>
+      <ModalFooter>
+        <Button type="button" onClick={onClose} size="md" variant="tertiary">{t().folded}</Button>
+        <Button type="button" onClick={onOpenAdmin} size="md" variant="primary">{t().openStreamerLogin}</Button>
+      </ModalFooter>
+    </Modal>
   );
 }
 
@@ -6527,6 +6507,7 @@ function RecentMatches({
               )}
               key={match.matchId}
               killParticipationMetric={<KillParticipationMetricText value={match.killParticipation} />}
+              matchAriaLabel={`${resultLabel(match.result)} · ${championName(match.champion)} · ${match.kills}/${match.deaths}/${match.assists}`}
               onToggleExpand={() => {
                 const opening = expandedMatchId !== match.matchId;
                 setExpandedMatchId(opening ? match.matchId : null);
@@ -6540,6 +6521,7 @@ function RecentMatches({
               result={match.result}
               resultDurationLabel={formatDuration(match.durationSeconds)}
               resultLabel={resultLabel(match.result)}
+              scoreAriaLabel={`${placementLabel} ${aiScore}`}
               scoreClassName={metricToneClass(scoreTone(aiScore))}
               spellItems={spellItems}
               startedAtLabel={formatDate(match.startedAt)}

@@ -241,6 +241,7 @@ test("LoL 프로필 플랫폼은 주요 viewport에서 내부 탐색과 문서 �
     const profile = page.locator(".public-profile-platform-v2");
     const tabs = page.locator(".public-profile-tabs");
     const rankSummary = page.locator("#public-profile-rank-summary");
+    const detailsToggle = page.locator(".public-profile-details-toggle");
     await expect(profile).toBeVisible();
     await expect(tabs.getByRole("button")).toHaveCount(5);
 
@@ -253,7 +254,12 @@ test("LoL 프로필 플랫폼은 주요 viewport에서 내부 탐색과 문서 �
 
     await tabs.getByRole("button").last().scrollIntoViewIfNeeded();
     await expect(tabs.getByRole("button").last()).toBeVisible();
-    await expect(rankSummary).toHaveCSS("display", viewport.width <= 768 ? "none" : "block");
+    await expect(detailsToggle).toBeVisible();
+    await expect(rankSummary).toHaveCSS("display", "none");
+    await detailsToggle.click();
+    await expect(rankSummary).toHaveCSS("display", "block");
+    await detailsToggle.click();
+    await expect(rankSummary).toHaveCSS("display", "none");
   }
 
   expect(errors, "viewport 전환 중 runtime 오류가 없어야 합니다.").toEqual([]);
