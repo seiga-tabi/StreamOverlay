@@ -14462,65 +14462,6 @@ code {
 
 }
 
-.public-dialog-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 120;
-  display: grid;
-  place-items: center;
-  padding: 20px;
-  background: rgba(15, 23, 42, .36);
-  backdrop-filter: blur(8px);
-}
-
-.public-dialog {
-  display: grid;
-  gap: 16px;
-  width: min(100%, 460px);
-  padding: 20px;
-  border: 1px solid #dbe5f2;
-  border-radius: 8px;
-  background: #fff;
-  box-shadow: 0 28px 70px rgba(15, 23, 42, .24);
-}
-
-.public-dialog .public-section-head button {
-  width: 32px;
-  height: 32px;
-  border: 1px solid #d9e3f2;
-  border-radius: 8px;
-  background: #f8fbff;
-  color: #4b5d78;
-}
-
-.public-dialog p {
-  margin: 0;
-  color: #5e6e88;
-  line-height: 1.6;
-}
-
-.public-dialog-actions {
-  display: flex;
-  gap: 8px;
-  justify-content: end;
-}
-
-.public-dialog-actions button {
-  min-height: 38px;
-  padding: 0 14px;
-  border: 1px solid #d9e3f2;
-  border-radius: 8px;
-  background: #f8fbff;
-  color: #33435f;
-  font-weight: 900;
-}
-
-.public-dialog-actions button:first-child {
-  border-color: #4d7dff;
-  background: #4d7dff;
-  color: #fff;
-}
-
 .public-dashboard-shell.theme-dark {
   background: linear-gradient(180deg, #111827 0, #0f1724 100%);
   color: #dbe6f7;
@@ -14543,7 +14484,6 @@ code {
 .public-dashboard-shell.theme-dark .public-sidebar-footer,
 .public-dashboard-shell.theme-dark .public-sidebar-favorites,
 .public-dashboard-shell.theme-dark .public-popover,
-.public-dashboard-shell.theme-dark .public-dialog,
 .public-dashboard-shell.theme-dark .public-subscriptions-card,
 .public-dashboard-shell.theme-dark .public-twitch-followed-summary,
 .public-dashboard-shell.theme-dark .public-twitch-followed-list article {
@@ -15017,7 +14957,6 @@ code {
 .public-dashboard-shell.theme-dark .public-subscription-row strong small,
 .public-dashboard-shell.theme-dark .public-subscription-row > small,
 .public-dashboard-shell.theme-dark .public-patch-placeholder p,
-.public-dashboard-shell.theme-dark .public-dialog p,
 .public-dashboard-shell.theme-dark .public-twitch-stream-badge small,
 .public-dashboard-shell.theme-dark .public-twitch-stream-badge em {
   color: #9fb0c8;

@@ -24,9 +24,25 @@
   grid-template-columns: minmax(0, 1fr);
   overflow: clip;
   border-color: var(--yoro-color-border-on-dark-strong);
-  background: var(--public-gray-surface-strong);
+  background: var(--yoro-color-product-gray-surface-strong) !important;
   box-shadow: var(--yoro-shadow-panel);
   animation: public-profile-platform-enter var(--yoro-motion-duration-slow) var(--yoro-motion-ease-standard) both;
+}
+
+.public-profile-platform-v2.public-profile-shared-shell .public-profile-platform-hero.has-mastery-art::after {
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--yoro-color-product-gray-surface-strong) 92%, transparent) 0%,
+      color-mix(in srgb, var(--yoro-color-product-gray-surface-strong) 68%, transparent) 34%,
+      color-mix(in srgb, var(--yoro-color-product-gray-surface-strong) 22%, transparent) 68%,
+      color-mix(in srgb, var(--yoro-color-product-gray-surface-strong) 52%, transparent) 100%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--yoro-color-public-primary) 8%, transparent),
+      color-mix(in srgb, var(--yoro-color-product-gray-surface-strong) 34%, transparent)
+    ) !important;
 }
 
 .public-profile-platform-v2 .public-profile-platform-hero .public-profile-top-main {
@@ -43,7 +59,8 @@
 }
 
 .public-profile-platform-v2 .public-profile-platform-hero .public-profile-mastery-art {
-  opacity: .22 !important;
+  opacity: .68 !important;
+  filter: saturate(1.12) contrast(1.08) brightness(1.02) !important;
 }
 
 .public-profile-platform-v2 .public-profile-platform-hero .public-profile-title-row {
@@ -391,7 +408,7 @@
   }
 
   .public-profile-platform-v2 .public-profile-platform-hero .public-profile-mastery-art {
-    opacity: .14 !important;
+    opacity: .52 !important;
   }
 
   .public-profile-platform-v2 .public-profile-streamer-spotlight {

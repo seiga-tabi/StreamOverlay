@@ -33,7 +33,6 @@
 .public-dashboard-shell:not(.public-home-shell) .public-profile-metric-strip,
 .public-dashboard-shell:not(.public-home-shell) .public-dashboard-empty-card,
 .public-dashboard-shell:not(.public-home-shell) .public-popover,
-.public-dashboard-shell:not(.public-home-shell) .public-dialog,
 .public-dashboard-shell:not(.public-home-shell) .public-twitch-profile-menu,
 .public-dashboard-shell:not(.public-home-shell) .public-subscriptions-card,
 .public-dashboard-shell:not(.public-home-shell) .public-twitch-followed-summary,
@@ -121,7 +120,6 @@
 .public-dashboard-shell:not(.public-home-shell) .public-twitch-channel-main strong,
 .public-dashboard-shell:not(.public-home-shell) .public-twitch-channel-meta span,
 .public-dashboard-shell:not(.public-home-shell) .public-patch-placeholder strong,
-.public-dashboard-shell:not(.public-home-shell) .public-dialog h2,
 .public-dashboard-shell:not(.public-home-shell) .public-popover-head strong,
 .public-dashboard-shell:not(.public-home-shell) .public-twitch-profile-menu-head strong,
 .public-dashboard-shell:not(.public-home-shell) .public-ingame-empty strong,
@@ -179,7 +177,6 @@
 .public-dashboard-shell:not(.public-home-shell) .public-community-record-main em,
 .public-dashboard-shell:not(.public-home-shell) .public-community-record-stats small,
 .public-dashboard-shell:not(.public-home-shell) .public-community-record-stats em,
-.public-dashboard-shell:not(.public-home-shell) .public-dialog p,
 .public-dashboard-shell:not(.public-home-shell) .public-ingame-summary span,
 .public-dashboard-shell:not(.public-home-shell) .public-ingame-summary small,
 .public-dashboard-shell:not(.public-home-shell) .public-ingame-status-head small,
@@ -349,7 +346,6 @@
 .public-dashboard-shell:not(.public-home-shell) .public-match-filter-bar select,
 .public-dashboard-shell:not(.public-home-shell) .public-match-filter-bar button,
 .public-dashboard-shell:not(.public-home-shell) .public-server-menu,
-.public-dashboard-shell:not(.public-home-shell) .public-dialog-actions button,
 .public-dashboard-shell:not(.public-home-shell) .public-favorite-button,
 .public-dashboard-shell:not(.public-home-shell) .public-secondary-action,
 .public-dashboard-shell:not(.public-home-shell) .public-back-button,
@@ -420,7 +416,6 @@
 }
 
 .public-dashboard-shell:not(.public-home-shell) .public-refresh-button,
-.public-dashboard-shell:not(.public-home-shell) .public-dialog-actions button:first-child,
 .public-dashboard-shell:not(.public-home-shell) .public-match-more button {
   border-color: rgba(96, 165, 250, .5);
   background: linear-gradient(135deg, #625bff, #2563eb);
@@ -1905,8 +1900,7 @@
 .public-dashboard-shell .public-header-submenu,
 .public-dashboard-shell .public-twitch-profile-menu,
 .public-dashboard-shell.theme-dark .public-twitch-profile-menu,
-.public-dashboard-shell .public-popover,
-.public-dashboard-shell .public-dialog {
+.public-dashboard-shell .public-popover {
   border-color: var(--seiga-pastel-border) !important;
   background: rgba(255, 255, 255, .96) !important;
   color: var(--seiga-pastel-text) !important;

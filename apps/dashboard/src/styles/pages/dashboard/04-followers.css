@@ -410,8 +410,7 @@
 .public-dashboard-shell .public-header-submenu,
 .public-dashboard-shell .public-twitch-profile-menu,
 .public-dashboard-shell .public-locale-popover,
-.public-dashboard-shell .public-popover,
-.public-dashboard-shell .public-dialog {
+.public-dashboard-shell .public-popover {
   border-color: var(--public-gray-border) !important;
   background: rgba(73, 80, 87, .96) !important;
   color: var(--public-gray-text) !important;
