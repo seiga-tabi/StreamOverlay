@@ -6476,7 +6476,7 @@ function RecentMatches({
               spellItems={spellItems}
               startedAtLabel={formatRelativeDate(match.startedAt)}
               startedAtTimeLabel={formatMatchTime(match.startedAt)}
-              summonerSpellsLabel={t().summonerSpells}
+              summonerSpellsLabel={`${t().summonerSpells} / ${t().runes}`}
             />
 	          );
 	        });

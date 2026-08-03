@@ -182,7 +182,7 @@ export function RecentMatchRow({
           aria-label={expandAriaLabel}
           onClick={onToggleExpand}
         >
-          <span aria-hidden="true" />
+          <span aria-hidden="true" className="public-match-expand-icon" />
           <span className="public-match-expand-label" role="tooltip">{expandAriaLabel}</span>
         </button>
       </div>

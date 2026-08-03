@@ -984,7 +984,8 @@
 
 .public-profile-platform-v2 .public-matches-panel .public-match-score-description {
   position: absolute;
-  inset-block-end: calc(100% + var(--yoro-space-2));
+  inset-block-start: calc(100% + var(--yoro-space-2));
+  inset-block-end: auto;
   inset-inline-start: 50%;
   z-index: calc(var(--yoro-z-modal) + 1);
   display: block;
@@ -1079,10 +1080,11 @@
 
 .public-profile-platform-v2 .public-matches-panel .public-match-expand-label {
   position: absolute;
-  inset-block-start: 50%;
-  inset-inline-end: calc(100% + var(--yoro-space-2));
+  inset-block-start: calc(100% + var(--yoro-space-2));
+  inset-inline-end: 0;
   z-index: calc(var(--yoro-z-modal) + 1);
-  width: max-content;
+  width: max-content !important;
+  height: auto !important;
   max-width: none;
   overflow: visible;
   padding: var(--yoro-space-1) var(--yoro-space-2);
@@ -1092,10 +1094,15 @@
   box-shadow: var(--yoro-shadow-sm);
   color: var(--yoro-color-text-on-dark);
   font-size: var(--yoro-font-size-xs);
+  line-height: var(--yoro-line-height-normal);
   opacity: 0;
   pointer-events: none;
-  transform: translateY(-50%);
+  rotate: none !important;
+  text-orientation: mixed;
+  transform: none !important;
   visibility: hidden;
+  white-space: nowrap;
+  writing-mode: horizontal-tb;
   transition:
     opacity var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
     visibility var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard);
@@ -1105,6 +1112,20 @@
   max-width: none;
   opacity: 1;
   visibility: visible;
+}
+
+/* 화살표 회전 규칙은 아이콘에만 적용하고 Tooltip 문구에는 전파하지 않습니다. */
+.public-profile-platform-v2 .public-matches-panel .public-match-expand > .public-match-expand-icon {
+  width: var(--yoro-space-3);
+  height: var(--yoro-space-3);
+  border-right: var(--yoro-space-1) solid currentcolor;
+  border-bottom: var(--yoro-space-1) solid currentcolor;
+  transform: rotate(45deg) translateY(calc(var(--yoro-size-sr-only) * -2));
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-match-row.expanded
+  .public-match-expand > .public-match-expand-icon {
+  transform: rotate(225deg) translateY(calc(var(--yoro-size-sr-only) * -2));
 }
 
 .public-profile-platform-v2 .public-matches-panel .public-match-row {
@@ -1338,11 +1359,11 @@
 
   .public-profile-platform-v2 .public-matches-panel .public-match-summary {
     grid-template-columns:
-      minmax(7.25rem, 1.5fr)
-      minmax(3.75rem, .7fr)
-      minmax(2.8rem, .35fr)
+      minmax(7rem, 1.35fr)
+      minmax(5.25rem, .85fr)
+      minmax(var(--yoro-space-10), .35fr)
       var(--yoro-size-touch-target) !important;
-    grid-template-rows: auto auto auto auto !important;
+    grid-template-rows: auto auto auto !important;
     gap: var(--yoro-space-2) !important;
     min-height: 0;
     padding: var(--yoro-space-2) !important;
@@ -1373,13 +1394,25 @@
     position: relative;
     grid-column: 1 !important;
     grid-row: 2 !important;
-    grid-template-columns: var(--yoro-space-12) minmax(0, 1fr) !important;
+    grid-template-columns: var(--yoro-space-12) var(--yoro-space-12) !important;
+    grid-template-rows: var(--yoro-space-12) auto !important;
+    gap: var(--yoro-space-1) var(--yoro-space-2) !important;
     align-self: center !important;
     height: auto !important;
   }
 
+  .public-profile-platform-v2 .public-matches-panel
+    .public-champion-cell > :is(img, span) {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    width: var(--yoro-space-12) !important;
+    height: var(--yoro-space-12) !important;
+  }
+
   .public-profile-platform-v2.public-profile-shared-shell .public-matches-panel
     .public-champion-cell > .public-champion-copy {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
     display: grid !important;
     gap: var(--yoro-space-1);
     overflow: hidden;
@@ -1389,27 +1422,53 @@
 
   .public-profile-platform-v2.public-profile-shared-shell .public-matches-panel
     .public-champion-cell .public-match-mobile-spells {
+    position: static !important;
     top: auto !important;
-    bottom: 0 !important;
-    left: calc(var(--yoro-space-12) - var(--yoro-space-6)) !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
     z-index: 2;
-    grid-template-columns: repeat(2, var(--yoro-space-3)) !important;
-    gap: var(--yoro-size-sr-only) !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    grid-template-columns: repeat(2, var(--yoro-space-6)) !important;
+    grid-template-rows: repeat(2, var(--yoro-space-6)) !important;
+    gap: 0 !important;
+    align-self: start;
+    width: var(--yoro-space-12);
+    height: var(--yoro-space-12);
     padding: 0 !important;
     background: transparent !important;
+    box-shadow: none !important;
   }
 
   .public-profile-platform-v2.public-profile-shared-shell .public-matches-panel
     .public-match-mobile-spells span {
-    width: var(--yoro-space-3) !important;
-    height: var(--yoro-space-3) !important;
-    border: 0 !important;
+    width: var(--yoro-space-6) !important;
+    height: var(--yoro-space-6) !important;
+    border: var(--yoro-size-sr-only) solid var(--yoro-color-border-on-dark) !important;
+    border-radius: var(--yoro-radius-sm) !important;
+  }
+
+  .public-profile-platform-v2.public-profile-shared-shell .public-matches-panel
+    .public-match-mobile-spells img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-kda {
     grid-column: 2 !important;
     grid-row: 2 !important;
-    justify-items: start !important;
+    align-self: center;
+    justify-items: center !important;
+    text-align: center;
+  }
+
+  .public-profile-platform-v2 .public-matches-panel .public-kda-summary {
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--yoro-space-1);
+    text-align: center;
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-kda > strong,
@@ -1430,7 +1489,7 @@
 
   .public-profile-platform-v2 .public-matches-panel .public-match-inline-items {
     grid-column: 1 / -1 !important;
-    grid-row: 4 !important;
+    grid-row: 3 !important;
     grid-template-columns: repeat(7, var(--yoro-space-8)) !important;
     width: max-content !important;
   }
@@ -1442,21 +1501,7 @@
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-match-meta {
-    grid-column: 1 / -1 !important;
-    grid-row: 3 !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    align-content: center;
-    gap: var(--yoro-space-2) !important;
-    padding: var(--yoro-space-2) 0 !important;
-    border: 0 !important;
-    border-block: 1px solid var(--yoro-color-border-on-dark) !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-  }
-
-  .public-profile-platform-v2 .public-matches-panel .public-match-meta > span {
-    display: grid;
-    align-content: center;
+    display: none !important;
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-match-expand {

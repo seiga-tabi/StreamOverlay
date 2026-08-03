@@ -258,7 +258,7 @@ test("전적 아이템·점수·상세 Tooltip은 이름과 안정적인 레이�
           nameKo: "존야의 모래시계",
           nameJa: "ゾーニャの砂時計",
         }],
-        summonerSpells: [],
+        summonerSpells: [4, 14],
         badges: [],
         teams: [],
       }],
@@ -284,6 +284,24 @@ test("전적 아이템·점수·상세 Tooltip은 이름과 안정적인 레이�
   const expand = row.locator(".public-match-expand");
   const expandTooltip = row.locator(".public-match-expand-label");
 
+  if (viewportWidth <= 768) {
+    const championMedia = row.locator(".public-champion-cell > :is(img, span)").first();
+    const mobileLoadout = row.locator(".public-match-mobile-spells");
+    const mobileLoadoutItems = mobileLoadout.locator(":scope > span");
+    await expect(row.locator(".public-match-meta")).toBeHidden();
+    await expect(mobileLoadoutItems).toHaveCount(2);
+
+    const championBox = await championMedia.boundingBox();
+    const loadoutBox = await mobileLoadout.boundingBox();
+    const loadoutItemBox = await mobileLoadoutItems.first().boundingBox();
+    expect(championBox).not.toBeNull();
+    expect(loadoutBox).not.toBeNull();
+    expect(loadoutItemBox).not.toBeNull();
+    expect(loadoutBox?.x ?? -1).toBeGreaterThanOrEqual((championBox?.x ?? 0) + (championBox?.width ?? 0));
+    expect(Math.abs((loadoutItemBox?.width ?? 0) * 2 - (championBox?.width ?? 0))).toBeLessThanOrEqual(1);
+    await expect(row.locator(".public-kda")).toHaveCSS("text-align", "center");
+  }
+
   const kdaFontSizes = await row.locator(".public-kda > strong").evaluate((element) => ({
     number: getComputedStyle(element.querySelector("span")!).fontSize,
     separator: getComputedStyle(element.querySelector("i")!).fontSize,
@@ -295,10 +313,13 @@ test("전적 아이템·점수·상세 Tooltip은 이름과 안정적인 레이�
 
   await score.hover();
   await expect(scoreTooltip).toBeVisible();
+  const scoreBox = await score.boundingBox();
   const scoreTooltipBox = await scoreTooltip.boundingBox();
+  expect(scoreBox).not.toBeNull();
   expect(scoreTooltipBox).not.toBeNull();
   expect(scoreTooltipBox?.x ?? -1).toBeGreaterThanOrEqual(0);
   expect((scoreTooltipBox?.x ?? 0) + (scoreTooltipBox?.width ?? 0)).toBeLessThanOrEqual(viewportWidth);
+  expect(scoreTooltipBox?.y ?? -1).toBeGreaterThanOrEqual((scoreBox?.y ?? 0) + (scoreBox?.height ?? 0));
 
   const expandBefore = await expand.boundingBox();
   await expand.hover();
@@ -307,12 +328,18 @@ test("전적 아이템·점수·상세 Tooltip은 이름과 안정적인 레이�
     const expandTooltipBox = await expandTooltip.boundingBox();
     expect(expandTooltipBox).not.toBeNull();
     expect(expandTooltipBox?.x ?? -1).toBeGreaterThanOrEqual(0);
+    expect((expandTooltipBox?.x ?? 0) + (expandTooltipBox?.width ?? 0)).toBeLessThanOrEqual(viewportWidth);
+    expect(expandTooltipBox?.width ?? 0).toBeGreaterThan(expandTooltipBox?.height ?? 0);
+    await expect(expandTooltip).toHaveCSS("transform", "none");
   } else {
     await expect(expandTooltip).toBeHidden();
   }
 
   await expand.click();
   await expect(row.locator(".public-match-expanded")).toBeVisible();
+  if (viewportWidth > 768) {
+    await expect(expandTooltip).toHaveCSS("transform", "none");
+  }
   const expandAfter = await expand.boundingBox();
   expect(expandBefore).not.toBeNull();
   expect(expandAfter).not.toBeNull();
