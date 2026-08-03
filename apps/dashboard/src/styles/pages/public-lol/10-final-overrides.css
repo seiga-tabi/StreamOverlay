@@ -2503,54 +2503,7 @@
   opacity: .78;
 }
 
-/* 종합 성과는 등급·승률 뒤에 평균 KDA와 주 챔피언까지 같은 시선 축으로 제공합니다. */
+/* 종합 성과는 등급·승패·승률만 남겨 좁은 보조 열에서도 빠르게 읽히도록 합니다. */
 .public-profile-shared-shell .public-aggregate-card {
   background: color-mix(in srgb, var(--public-gray-surface-strong) 92%, var(--yoro-color-primary)) !important;
-}
-
-.public-profile-shared-shell .public-aggregate-insights {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(var(--yoro-space-0), 1fr));
-  gap: var(--yoro-space-2);
-  margin-block-start: var(--yoro-space-3);
-  padding-block-start: var(--yoro-space-3);
-  border-top: var(--yoro-size-sr-only) solid var(--yoro-color-border-on-dark);
-}
-
-.public-profile-shared-shell .public-aggregate-insights > div {
-  display: grid;
-  grid-template-columns: minmax(var(--yoro-space-0), 1fr) auto;
-  gap: var(--yoro-space-1) var(--yoro-space-2);
-  align-items: baseline;
-  min-width: var(--yoro-space-0);
-  padding: var(--yoro-space-2) var(--yoro-space-3);
-  border: var(--yoro-size-sr-only) solid var(--yoro-color-border-on-dark);
-  border-radius: var(--yoro-radius-md);
-  background: color-mix(in srgb, var(--public-gray-surface) 82%, transparent);
-}
-
-.public-profile-shared-shell .public-aggregate-insights span,
-.public-profile-shared-shell .public-aggregate-insights small {
-  color: var(--yoro-color-text-on-dark-muted);
-  font-size: var(--yoro-font-size-xs);
-  font-weight: var(--yoro-font-weight-bold);
-}
-
-.public-profile-shared-shell .public-aggregate-insights strong {
-  overflow: hidden;
-  color: var(--yoro-color-text-on-dark);
-  font-size: var(--yoro-font-size-md);
-  font-weight: var(--yoro-font-weight-black);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.public-profile-shared-shell .public-aggregate-insights small {
-  grid-column: 1 / -1;
-}
-
-@media (max-width: 30rem) {
-  .public-profile-shared-shell .public-aggregate-insights {
-    grid-template-columns: minmax(var(--yoro-space-0), 1fr);
-  }
 }

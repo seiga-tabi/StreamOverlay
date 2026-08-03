@@ -284,6 +284,12 @@ test("전적 아이템·점수·상세 Tooltip은 이름과 안정적인 레이�
   const expand = row.locator(".public-match-expand");
   const expandTooltip = row.locator(".public-match-expand-label");
 
+  const kdaFontSizes = await row.locator(".public-kda > strong").evaluate((element) => ({
+    number: getComputedStyle(element.querySelector("span")!).fontSize,
+    separator: getComputedStyle(element.querySelector("i")!).fontSize,
+  }));
+  expect(kdaFontSizes.number).toBe(kdaFontSizes.separator);
+
   await expect(item).toHaveAttribute("data-tooltip", "존야의 모래시계");
   await expect(item).not.toHaveAttribute("data-tooltip", /3157|ID/u);
 
@@ -365,6 +371,7 @@ test("LoL 프로필 플랫폼은 주요 viewport에서 내부 탐색과 문서 �
     const recentMatches = page.locator("#public-recent-matches");
     const resultsColumn = page.locator(".public-overview-results-column");
     const aggregatePanel = page.locator(".public-overview-dashboard-panel");
+    const aggregateCard = aggregatePanel.locator(".public-aggregate-card");
     await expect(profile).toBeVisible();
     await expect(tabs.getByRole("button")).toHaveCount(5);
     await expect(rankSection).toBeVisible();
@@ -373,6 +380,7 @@ test("LoL 프로필 플랫폼은 주요 viewport에서 내부 탐색과 문서 �
     await expect(resultsColumn.locator(".public-profile-rank-section")).toHaveCount(1);
     await expect(resultsColumn.locator("#public-recent-matches")).toHaveCount(1);
     await expect(aggregatePanel).toHaveCount(1);
+    await expect(aggregateCard.locator(".public-aggregate-insights")).toHaveCount(0);
     await expect(page.locator(".public-profile-details-toggle")).toHaveCount(0);
 
     const rankPrecedesMatches = await page.evaluate(() => {
@@ -396,6 +404,13 @@ test("LoL 프로필 플랫폼은 주요 viewport에서 내부 탐색과 문서 �
       expect(Math.abs((aggregateBox?.y ?? 0) - (rankBox?.y ?? 0)), "종합 성과와 티어 영역의 시작 높이가 같아야 합니다.")
         .toBeLessThanOrEqual(1);
     }
+
+    const aggregateOverflow = await aggregateCard.locator(".public-aggregate-hero").evaluate((element) => ({
+      clientWidth: element.clientWidth,
+      scrollWidth: element.scrollWidth,
+    }));
+    expect(aggregateOverflow.scrollWidth, `${viewport.width}px에서 종합 성과 내부가 잘리지 않아야 합니다.`)
+      .toBeLessThanOrEqual(aggregateOverflow.clientWidth + 1);
 
     const diagnostics = await page.evaluate(() => ({
       clientWidth: document.documentElement.clientWidth,

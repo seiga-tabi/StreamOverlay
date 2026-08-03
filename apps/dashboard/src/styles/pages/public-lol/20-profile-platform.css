@@ -376,15 +376,51 @@
   border-radius: var(--yoro-radius-md);
 }
 
-.public-profile-platform-v2 .public-aggregate-insights > div {
-  grid-template-columns: minmax(0, 1fr);
-  align-content: start;
+.public-profile-platform-v2 .public-aggregate-card,
+.public-profile-platform-v2 .public-aggregate-hero,
+.public-profile-platform-v2 .public-aggregate-hero > * {
+  min-inline-size: 0;
 }
 
-.public-profile-platform-v2 .public-aggregate-insights strong,
-.public-profile-platform-v2 .public-aggregate-insights small {
-  min-inline-size: 0;
-  overflow-wrap: anywhere;
+.public-profile-platform-v2 .public-aggregate-hero {
+  max-inline-size: 100%;
+}
+
+@media (min-width: 72.0625rem) {
+  .public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell)
+    .public-aggregate-hero {
+    grid-template-columns:
+      var(--yoro-space-12)
+      minmax(0, 1fr)
+      calc(var(--yoro-space-12) + var(--yoro-space-2)) !important;
+    gap: var(--yoro-space-2) !important;
+    min-height: 0 !important;
+    padding: var(--yoro-space-2) !important;
+  }
+
+  .public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell)
+    .public-aggregate-emblem {
+    width: var(--yoro-space-12) !important;
+    height: var(--yoro-space-12) !important;
+  }
+
+  .public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell)
+    .public-aggregate-emblem img {
+    width: var(--yoro-space-10) !important;
+    height: var(--yoro-space-10) !important;
+  }
+
+  .public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell)
+    .public-aggregate-grade > strong {
+    font-size: var(--yoro-font-size-xl) !important;
+  }
+
+  .public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell)
+    .public-aggregate-winrate {
+    width: calc(var(--yoro-space-12) + var(--yoro-space-2)) !important;
+    min-width: calc(var(--yoro-space-12) + var(--yoro-space-2)) !important;
+    height: calc(var(--yoro-space-12) + var(--yoro-space-2)) !important;
+  }
 }
 
 .public-profile-platform-v2 .public-matches-panel {
@@ -818,6 +854,11 @@
   font-weight: var(--yoro-font-weight-black) !important;
   line-height: var(--yoro-line-height-tight) !important;
   white-space: nowrap;
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-kda > strong > :is(span, i) {
+  font-size: 1em !important;
+  line-height: inherit !important;
 }
 
 .public-profile-platform-v2 .public-matches-panel .public-kda-summary {

@@ -1685,7 +1685,6 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
   const aggregateGrade = aggregatePerformanceGrade(profile);
   const aggregateScore = aggregatePerformanceScore(profile);
   const winRate = Math.max(0, Math.min(100, aggregateSummary.recentWinRate));
-  const mostPlayedChampion = recentChampionSummaries(profile.recentMatches)[0];
   return (
     <section id="public-stats" className="public-overview-dashboard-panel">
       <Card as="article" className="public-panel public-aggregate-card public-profile-shared-card" padding="md" variant="elevated">
@@ -1718,20 +1717,6 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
               <span>{t().winRate}</span>
               <strong className={metricToneClass(percentTone(winRate))}>{formatPercent(winRate)}</strong>
             </div>
-          </div>
-        </div>
-        <div className="public-aggregate-insights">
-          <div>
-            <span>{t().kda}</span>
-            <strong className={metricToneClass(kdaTone(aggregateSummary.averageKda))}>
-              {formatDecimal(aggregateSummary.averageKda)}
-            </strong>
-            <small>{t().average}</small>
-          </div>
-          <div>
-            <span>{t().recentChampionsTitle}</span>
-            <strong>{mostPlayedChampion ? championName(mostPlayedChampion.champion) : t().noData}</strong>
-            <small>{mostPlayedChampion ? gamesText(mostPlayedChampion.games) : t().noData}</small>
           </div>
         </div>
       </Card>
