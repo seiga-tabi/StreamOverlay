@@ -146,6 +146,59 @@ test("공개 LoL 전적 API는 dashboard 세션 없이 접근할 수 있다", as
   });
 });
 
+test("공개 LoL 전적 API는 재시작 뒤 정상 snapshot을 먼저 반환한다", async () => {
+  await withAuthConfig(async () => {
+    let loadedKey = "";
+    const fetchedAt = new Date().toISOString();
+    const snapshotProfile = {
+      status: "ready",
+      riotId: "HideOnBush#JP1",
+      gameName: "HideOnBush",
+      tagLine: "JP1",
+      accountRegion: "asia",
+      lolPlatform: "jp1",
+      topChampions: [],
+      recentMatches: [],
+      liveGame: { isLive: false, status: "checking", participants: [], fetchedAt },
+      recentMatchStart: 0,
+      hasMoreRecentMatches: false,
+      summary: {
+        recentGames: 0,
+        recentWins: 0,
+        recentWinRate: 0,
+        totalKills: 0,
+        totalDeaths: 0,
+        totalAssists: 0
+      },
+      championPerformance: [],
+      rolePerformance: [],
+      fetchedAt
+    };
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      actions: { async dispatchOne() {} },
+      publicLolSnapshotStore: {
+        async load(key) {
+          loadedKey = key;
+          return { puuid: "cached-puuid", fetchedAt, payload: snapshotProfile };
+        },
+        async save() {
+          assert.fail("복원된 fresh snapshot은 다시 저장하지 않아야 합니다.");
+        }
+      }
+    });
+    const req = createRequest("GET", "/api/lol/profile?riotId=HideOnBush%23JP1", undefined, { origin: DASHBOARD_ORIGIN });
+    const res = createResponse();
+
+    await handler(req, res);
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(loadedKey, "hideonbush#jp1");
+    assert.equal(JSON.parse(res.body).riotId, "HideOnBush#JP1");
+  });
+});
+
 test("Cloudflare inbound email webhook은 유효한 HMAC 서명만 허용한다", async () => {
   await withAuthConfig(async () => {
     const previous = { ...appConfig.supportMailbox };
@@ -2073,14 +2126,38 @@ test("공개 LoL 전적 API는 실제 경기 상세 지표를 응답한다", asy
 	    assert.equal(body.recentMatches[0].team.objectives.dragon, 3);
 	    assert.equal(body.recentMatches[0].opponent.riotId, "EnemyMid#JP1");
 	    assert.deepEqual(body.recentMatches[0].badges.map((badge) => badge.code), ["mvp", "unstoppable", "tenacity", "damage_carry"]);
-    assert.equal(body.recentMatches[0].teams[0].players.length, 2);
-    assert.equal(body.recentMatches[0].teams[0].players[0].isTarget, true);
-    assert.equal(body.recentMatches[0].teams[0].players[0].badges[0].code, "mvp");
-    assert.equal(body.recentMatches[0].teams[0].players[0].twitchStream.source, "approved_streamer");
-    assert.equal(body.recentMatches[0].teams[0].players[0].twitchStream.isLive, true);
-    assert.deepEqual(body.recentMatches[0].teams[1].players[0].badges.map((badge) => badge.code), []);
-    assert.equal(body.recentMatches[0].teams[0].players[0].damageObjectiveShare, 81.8);
-    assert.equal(body.recentMatches[0].teams[0].damageDealtToObjectives, 6600);
+    assert.deepEqual(body.recentMatches[0].teams, []);
+
+    const detailReq = createRequest(
+      "GET",
+      "/api/lol/match-detail?matchId=JP1_100&riotId=HideOnBush%23KR1",
+      undefined,
+      { origin: DASHBOARD_ORIGIN }
+    );
+    const detailRes = createResponse();
+    await handler(detailReq, detailRes);
+    assert.equal(detailRes.statusCode, 200);
+    assert.equal(detailRes.headers["Cache-Control"], "public, max-age=300, stale-while-revalidate=1800");
+    assert.match(detailRes.headers.ETag, /^"lol-match-detail-[a-f0-9]{24}"$/);
+    const detailBody = JSON.parse(detailRes.body);
+    assert.equal(detailBody.teams[0].players.length, 2);
+    assert.equal(detailBody.teams[0].players[0].isTarget, true);
+    assert.equal(detailBody.teams[0].players[0].badges[0].code, "mvp");
+    assert.equal(detailBody.teams[0].players[0].twitchStream.source, "approved_streamer");
+    assert.equal(detailBody.teams[0].players[0].twitchStream.isLive, true);
+    assert.deepEqual(detailBody.teams[1].players[0].badges.map((badge) => badge.code), []);
+    assert.equal(detailBody.teams[0].players[0].damageObjectiveShare, 81.8);
+    assert.equal(detailBody.teams[0].damageDealtToObjectives, 6600);
+
+    const conditionalDetailReq = createRequest(
+      "GET",
+      "/api/lol/match-detail?matchId=JP1_100&riotId=HideOnBush%23KR1",
+      undefined,
+      { origin: DASHBOARD_ORIGIN, "if-none-match": detailRes.headers.ETag }
+    );
+    const conditionalDetailRes = createResponse();
+    await handler(conditionalDetailReq, conditionalDetailRes);
+    assert.equal(conditionalDetailRes.statusCode, 304);
   });
 });
 
@@ -2636,7 +2713,7 @@ test("공개 LoL 전적 API는 같은 Riot ID 요청을 캐시하고 최근 경�
 
     assert.equal(firstRes.statusCode, 200);
     assert.equal(secondRes.statusCode, 200);
-    assert.equal(firstRes.headers["Cache-Control"], "private, max-age=30, stale-while-revalidate=120");
+    assert.equal(firstRes.headers["Cache-Control"], "public, max-age=30, stale-while-revalidate=120");
     assert.match(firstRes.headers.ETag, /^"lol-profile-[a-f0-9]{24}"$/);
     assert.equal(conditionalRes.statusCode, 304);
     assert.equal(accountLookups, 1);

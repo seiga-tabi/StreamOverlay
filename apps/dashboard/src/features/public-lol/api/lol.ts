@@ -2,6 +2,7 @@ import { apiBase } from "../../../api/client";
 import { t } from "../i18n/public-lol-i18n";
 import type {
   PublicLolMatchBuildResponse,
+  PublicLolMatchTeamsResponse,
   PublicLolMatchPageResponse,
   PublicLolMatchRankResponse,
   PublicLolProfile,
@@ -77,6 +78,20 @@ export async function getPublicLolMatchBuild(matchId: string): Promise<PublicLol
   });
   if (!response.ok) throw new Error(await readPublicApiErrorMessage(response));
   return (await response.json()) as PublicLolMatchBuildResponse;
+}
+
+export async function getPublicLolMatchDetail(
+  matchId: string,
+  riotId: string,
+  signal?: AbortSignal
+): Promise<PublicLolMatchTeamsResponse> {
+  const params = new URLSearchParams({ matchId, riotId });
+  const response = await fetch(`${apiBase}/api/lol/match-detail?${params.toString()}`, {
+    credentials: "include",
+    signal
+  });
+  if (!response.ok) throw new Error(await readPublicApiErrorMessage(response));
+  return (await response.json()) as PublicLolMatchTeamsResponse;
 }
 
 export async function searchSuggestions(query: string, signal: AbortSignal): Promise<SearchSuggestion[]> {

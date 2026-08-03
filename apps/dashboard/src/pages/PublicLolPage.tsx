@@ -51,6 +51,7 @@ import {
 } from "../shared/ui/Toast";
 import {
   getPublicLolMatchBuild,
+  getPublicLolMatchDetail,
   getPublicLolMatchPage,
   getPublicLolMatchRanks,
   getPublicLolProfileDynamicState,
@@ -127,6 +128,7 @@ import type {
   PublicLolMatchBuildSkillEvent,
   PublicLolMatchBuildParticipant,
   PublicLolMatchBuildResponse,
+  PublicLolMatchTeamsResponse,
   PublicLolMatchBadgeCode,
   PublicLolMatchBadge,
   PublicLolRecentMatch,
@@ -5237,10 +5239,17 @@ function buildParticipantKey(participant: Pick<PublicLolMatchBuildParticipant, "
     : `${participant.riotId ?? "unknown"}:${participant.champion.championId}`;
 }
 
-function defaultBuildParticipantKey(match: PublicLolRecentMatch, build: PublicLolMatchBuildResponse | undefined): string | undefined {
+function defaultBuildParticipantKey(
+  match: PublicLolRecentMatch,
+  build: PublicLolMatchBuildResponse | undefined,
+  targetRiotId?: string
+): string | undefined {
   const target = match.teams.flatMap((team) => team.players).find((player) => player.isTarget);
   if (target?.participantId !== undefined) return `participant:${target.participantId}`;
-  const targetBuild = build?.participants.find((participant) => participant.riotId && target?.riotId && normalizeRiotId(participant.riotId) === normalizeRiotId(target.riotId));
+  const normalizedTargetRiotId = normalizeRiotId(target?.riotId ?? targetRiotId ?? "");
+  const targetBuild = build?.participants.find((participant) => (
+    participant.riotId && normalizedTargetRiotId && normalizeRiotId(participant.riotId) === normalizedTargetRiotId
+  ));
   return targetBuild ? buildParticipantKey(targetBuild) : build?.participants[0] ? buildParticipantKey(build.participants[0]) : undefined;
 }
 
@@ -6230,6 +6239,10 @@ function RecentMatches({
   const [expandedMatchViews, setExpandedMatchViews] = useState<Record<string, PublicExpandedMatchView>>({});
   const [matchRanks, setMatchRanks] = useState<Record<string, PublicLolMatchRankResponse>>({});
   const [matchRankLoading, setMatchRankLoading] = useState<Record<string, boolean>>({});
+  const [matchDetails, setMatchDetails] = useState<Record<string, PublicLolMatchTeamsResponse>>({});
+  const [matchDetailLoading, setMatchDetailLoading] = useState<Record<string, boolean>>({});
+  const [matchDetailErrors, setMatchDetailErrors] = useState<Record<string, string>>({});
+  const matchDetailControllers = useRef(new Map<string, AbortController>());
   const [matchBuilds, setMatchBuilds] = useState<Record<string, PublicLolMatchBuildResponse>>({});
   const [matchBuildLoading, setMatchBuildLoading] = useState<Record<string, boolean>>({});
   const [matchBuildErrors, setMatchBuildErrors] = useState<Record<string, string>>({});
@@ -6241,12 +6254,47 @@ function RecentMatches({
     setExpandedMatchViews({});
     setMatchRanks({});
     setMatchRankLoading({});
+    matchDetailControllers.current.forEach((controller) => controller.abort());
+    matchDetailControllers.current.clear();
+    setMatchDetails({});
+    setMatchDetailLoading({});
+    setMatchDetailErrors({});
     setMatchBuilds({});
     setMatchBuildLoading({});
     setMatchBuildErrors({});
     setSelectedBuildParticipantKeys({});
     setHiddenRiotIdMatches({});
+    return () => {
+      matchDetailControllers.current.forEach((controller) => controller.abort());
+      matchDetailControllers.current.clear();
+    };
   }, [profile.riotId, profile.refreshAvailableAt]);
+
+  async function ensureMatchDetail(match: PublicLolRecentMatch): Promise<void> {
+    if (
+      match.teams.length > 0
+      || matchDetails[match.matchId]
+      || matchDetailLoading[match.matchId]
+      || matchDetailControllers.current.has(match.matchId)
+    ) return;
+    const controller = new AbortController();
+    matchDetailControllers.current.set(match.matchId, controller);
+    setMatchDetailLoading((current) => ({ ...current, [match.matchId]: true }));
+    setMatchDetailErrors((current) => ({ ...current, [match.matchId]: "" }));
+    try {
+      const response = await getPublicLolMatchDetail(match.matchId, profile.riotId, controller.signal);
+      setMatchDetails((current) => ({ ...current, [match.matchId]: response }));
+    } catch (error) {
+      if (controller.signal.aborted) return;
+      const message = error instanceof Error && error.message ? error.message : t().matchDetailLoadFailed;
+      setMatchDetailErrors((current) => ({ ...current, [match.matchId]: message }));
+    } finally {
+      if (matchDetailControllers.current.get(match.matchId) === controller) {
+        matchDetailControllers.current.delete(match.matchId);
+        setMatchDetailLoading((current) => ({ ...current, [match.matchId]: false }));
+      }
+    }
+  }
 
   async function ensureMatchRanks(matchId: string): Promise<void> {
     if (matchRanks[matchId] || matchRankLoading[matchId]) return;
@@ -6270,7 +6318,7 @@ function RecentMatches({
       setMatchBuilds((current) => ({ ...current, [match.matchId]: response }));
       setSelectedBuildParticipantKeys((current) => current[match.matchId]
         ? current
-        : { ...current, [match.matchId]: defaultBuildParticipantKey(match, response) ?? "" });
+        : { ...current, [match.matchId]: defaultBuildParticipantKey(match, response, profile.riotId) ?? "" });
     } catch (error) {
       const message = error instanceof Error && error.message ? error.message : t().buildLoadFailed;
       setMatchBuildErrors((current) => ({ ...current, [match.matchId]: message }));
@@ -6285,6 +6333,10 @@ function RecentMatches({
           const highlightClass = matchHighlightClass(match.badges);
           const rankDetail = matchRanks[match.matchId];
           const rankLoading = Boolean(matchRankLoading[match.matchId]);
+          const matchDetail = matchDetails[match.matchId];
+          const detailLoading = Boolean(matchDetailLoading[match.matchId]);
+          const detailError = matchDetailErrors[match.matchId] ?? "";
+          const hydratedMatch = matchDetail ? { ...match, teams: matchDetail.teams } : match;
           const build = matchBuilds[match.matchId];
           const buildLoading = Boolean(matchBuildLoading[match.matchId]);
           const buildError = matchBuildErrors[match.matchId] ?? "";
@@ -6292,7 +6344,7 @@ function RecentMatches({
           const dataDragonVersion = recentMatchDataDragonVersion(match);
           const recentItemSlots = fixedRecentItemSlots(match.items, 7);
           const aiScore = matchAiScore(match);
-          const targetRunes = match.teams.flatMap((team) => team.players).find((player) => player.isTarget)?.runes ?? [];
+          const targetRunes = match.runes ?? [];
           const spellItems: RecentMatchRowMediaItem[] = match.summonerSpells.slice(0, 2).map((spellId) => {
             const iconUrl = summonerSpellIconUrl(spellId, dataDragonVersion);
             return {
@@ -6368,12 +6420,28 @@ function RecentMatches({
               ja: hideRiotIds ? publicI18n.ja.riotIdMaskOn : publicI18n.ja.riotIdMaskOff
             }
           };
+          const recordContent = hydratedMatch.teams.length > 0 ? (
+            <MatchTeamDetails match={hydratedMatch} rankDetail={rankDetail} rankLoading={rankLoading} hideRiotIds={hideRiotIds} onSearchRiotId={onSearchRiotId} />
+          ) : detailLoading ? (
+            <SkeletonCard loadingLabel={t().matchDetailLoading} size="md">
+              <SkeletonText lines={4} />
+            </SkeletonCard>
+          ) : detailError ? (
+            <EmptyState as="div" variant="error">
+              <EmptyStateIcon>!</EmptyStateIcon>
+              <EmptyStateTitle as="h3">{t().matchDetailLoadFailed}</EmptyStateTitle>
+              <EmptyStateDescription>{detailError}</EmptyStateDescription>
+              <EmptyStateActions>
+                <Button type="button" variant="secondary" onClick={() => void ensureMatchDetail(match)}>
+                  {t().retryMatchDetail}
+                </Button>
+              </EmptyStateActions>
+            </EmptyState>
+          ) : null;
           const expandedPanel = expanded ? (
             <FeatureRecentMatchExpandedPanel
               activeView={expandedView}
-              content={expandedView === "record" ? (
-                <MatchTeamDetails match={match} rankDetail={rankDetail} rankLoading={rankLoading} hideRiotIds={hideRiotIds} onSearchRiotId={onSearchRiotId} />
-              ) : (
+              content={expandedView === "record" ? recordContent : (
                 <RecentMatchBuildPanel
                   match={match}
                   build={build}
@@ -6391,6 +6459,7 @@ function RecentMatches({
               }}
               onRecord={() => {
                 setExpandedMatchViews((current) => ({ ...current, [match.matchId]: "record" }));
+                void ensureMatchDetail(match);
                 void ensureMatchRanks(match.matchId);
               }}
               onToggleMask={() => setHiddenRiotIdMatches((current) => ({ ...current, [match.matchId]: !current[match.matchId] }))}
@@ -6435,6 +6504,7 @@ function RecentMatches({
                 setExpandedMatchId(opening ? match.matchId : null);
                 if (opening) {
                   setExpandedMatchViews((current) => ({ ...current, [match.matchId]: "record" }));
+                  void ensureMatchDetail(match);
                   void ensureMatchRanks(match.matchId);
                 }
               }}

@@ -61,6 +61,7 @@ import {
 } from "./services/palworld-server-status-config.js";
 import { recordFollowerManagementEvent } from "./services/follower-event-recorder.js";
 import { createHttpHandler } from "./routes/http-api.js";
+import { LocalPublicLolSnapshotStore } from "./services/public-lol-snapshot-store.js";
 import { DashboardSessionStore, authenticateDashboardRequest, clientIp, tokenMatches, type DashboardRole } from "./security/auth.js";
 import { websocketLimiter } from "./security/rate-limit.js";
 import { getEnabledModules } from "./modules/index.js";
@@ -503,6 +504,7 @@ void dataDragon.getLatestVersion()
     logger.error({ type: "public_lol.data_dragon_prewarm_failed", error: toSafeErrorMessage(error) });
   });
 const lolProfileRepository = new LocalJsonLolProfileRepository(`${appConfig.paths.state}/lol-profiles.json`);
+const publicLolSnapshotStore = new LocalPublicLolSnapshotStore(`${appConfig.paths.state}/lol-public-profile-snapshots`);
 const lolProfileEnrichment = new LolProfileEnrichmentService(riot, dataDragon, lolProfileRepository, logger);
 const actions = new ActionDispatcher(bridge, twitchChat, overlay, store, logger, () => dashboard.broadcastSnapshot());
 const loggedMissingFollowerScopes = new Set<string>();
@@ -550,6 +552,7 @@ const server = http.createServer(createHttpHandler({
   riot,
   dataDragon,
   profileRepository: lolProfileRepository,
+  publicLolSnapshotStore,
   twitchAuth,
   streamerFollowerAuth,
   publicTwitchAuth,

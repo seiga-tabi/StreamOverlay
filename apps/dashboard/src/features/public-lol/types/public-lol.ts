@@ -114,6 +114,13 @@ export type PublicLolMatchBuildResponse = {
   fetchedAt: string;
 };
 
+export type PublicLolMatchTeamsResponse = {
+  status: "ready";
+  matchId: string;
+  teams: PublicLolMatchTeamDetail[];
+  fetchedAt: string;
+};
+
 export type PublicLolMatchBadgeCode = "mvp" | "ace" | "unstoppable" | "tenacity" | "damage_carry" | "objective" | "vision";
 
 export type PublicLolMatchBadge = {
@@ -160,6 +167,7 @@ export type PublicLolRecentMatch = {
   position?: string;
   items: PublicLolMatchItem[];
   summonerSpells: number[];
+  runes: PublicLolMatchParticipant["runes"];
   badges?: PublicLolMatchBadge[];
   team?: {
     teamId: number;

@@ -1,5 +1,6 @@
 export {
   getPublicLolMatchBuild,
+  getPublicLolMatchDetail,
   getPublicLolMatchPage,
   getPublicLolMatchRanks,
   getPublicLolProfileDynamicState,

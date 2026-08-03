@@ -93,6 +93,7 @@ import {
 } from "../services/palworld-server-monitor.js";
 import type { DataDragonService, LolChampionAbilitySummary, LolRuneSummary } from "../services/data-dragon.js";
 import type { LolProfileCacheEntry, LolProfileRepository } from "../services/lol-profile-store.js";
+import type { PublicLolSnapshotStore } from "../services/public-lol-snapshot-store.js";
 import { appConfig, legalRuntimeConfigReady } from "../config.js";
 import type { TwitchEventSubClient } from "../services/twitch-eventsub-client.js";
 import { rankedEmblemAssetPath } from "../services/ranked-emblems.js";
@@ -243,6 +244,7 @@ const STREAMER_PROFILE_LINK_URL_MAX = 2048;
 const PUBLIC_LOL_PROFILE_TOP_CHAMPION_COUNT = 5;
 const PUBLIC_LOL_PROFILE_QUEUES = [420, 440, 42, 6, 430, 400, 450];
 const PUBLIC_LOL_PROFILE_CACHE_TTL_MS = 10 * 60_000;
+const PUBLIC_LOL_PROFILE_STALE_TTL_MS = 24 * 60 * 60_000;
 const PUBLIC_LOL_PROFILE_REFRESH_COOLDOWN_MS = 10 * 60_000;
 const PUBLIC_PARTICIPATION_MAX_QUEUE_SIZE = 100;
 const PUBLIC_LOL_CURRENT_GAME_LIVE_CACHE_TTL_MS = 20_000;
@@ -252,6 +254,7 @@ const PUBLIC_LOL_MATCH_RANK_CACHE_TTL_MS = 30 * 60_000;
 const PUBLIC_LOL_PARTICIPANT_RANK_CACHE_TTL_MS = 30 * 60_000;
 const PUBLIC_LOL_MATCH_BUILD_CACHE_TTL_MS = 30 * 60_000;
 const PUBLIC_LOL_MATCH_DETAIL_CACHE_TTL_MS = 30 * 60_000;
+const PUBLIC_LOL_MATCH_TEAMS_CACHE_TTL_MS = 30 * 60_000;
 const PUBLIC_LOL_MATCH_DETAIL_CACHE_MAX = 1000;
 const PUBLIC_LOL_PROFILE_CACHE_MAX = 500;
 const PUBLIC_LOL_CURRENT_GAME_CACHE_MAX = 500;
@@ -301,14 +304,22 @@ const PALWORLD_DATA_UNAVAILABLE_RESPONSE = {
 
 function publicLolProfileCacheHeaders(payload: PublicLolProfileResponse, refresh: boolean): Record<string, string> {
   if (refresh) return noStoreHeaders();
+  return publicLolCacheHeaders("profile", payload, "public, max-age=30, stale-while-revalidate=120");
+}
+
+function publicLolCacheHeaders(
+  scope: string,
+  payload: unknown,
+  cacheControl = "public, max-age=30, stale-while-revalidate=120"
+): Record<string, string> {
   const etag = crypto
     .createHash("sha256")
     .update(JSON.stringify(payload))
     .digest("hex")
     .slice(0, 24);
   return {
-    "Cache-Control": "private, max-age=30, stale-while-revalidate=120",
-    ETag: `"lol-profile-${etag}"`
+    "Cache-Control": cacheControl,
+    ETag: `"lol-${scope}-${etag}"`
   };
 }
 
@@ -507,6 +518,13 @@ type PublicLolMatchBuildResponse = {
   fetchedAt: string;
 };
 
+type PublicLolMatchTeamsResponse = {
+  status: "ready";
+  matchId: string;
+  teams: PublicLolMatchTeamDetail[];
+  fetchedAt: string;
+};
+
 type PublicLolRecentMatch = {
   matchId: string;
   champion: LolChampionSummary;
@@ -545,6 +563,7 @@ type PublicLolRecentMatch = {
   position?: string;
   items: PublicLolMatchItem[];
   summonerSpells: number[];
+  runes: PublicLolMatchRune[];
   badges: PublicLolMatchBadge[];
   team?: {
     teamId: number;
@@ -691,6 +710,30 @@ type PublicLolProfileDynamicResponse = {
   liveGame: PublicLolCurrentGame;
   fetchedAt: string;
 };
+
+function isPublicLolProfileSnapshot(value: unknown): value is PublicLolProfileResponse {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const record = value as Record<string, unknown>;
+  if (record.status !== "ready") return false;
+  if (["riotId", "gameName", "tagLine", "accountRegion", "lolPlatform", "fetchedAt"].some((key) => typeof record[key] !== "string")) return false;
+  if (!Number.isFinite(Date.parse(record.fetchedAt as string))) return false;
+  if (!Array.isArray(record.topChampions) || !Array.isArray(record.recentMatches)) return false;
+  if (!Array.isArray(record.championPerformance) || !Array.isArray(record.rolePerformance)) return false;
+  if (!record.summary || typeof record.summary !== "object" || Array.isArray(record.summary)) return false;
+  if (!record.liveGame || typeof record.liveGame !== "object" || Array.isArray(record.liveGame)) return false;
+  return record.recentMatches.every((match) => {
+    if (!match || typeof match !== "object" || Array.isArray(match)) return false;
+    const item = match as Record<string, unknown>;
+    return typeof item.matchId === "string"
+      && typeof item.kills === "number"
+      && typeof item.deaths === "number"
+      && typeof item.assists === "number"
+      && Array.isArray(item.items)
+      && Array.isArray(item.summonerSpells)
+      && Array.isArray(item.runes)
+      && Array.isArray(item.teams);
+  });
+}
 
 type PublicLolRankedQueues = {
   solo?: LolRankedStats;
@@ -2339,6 +2382,7 @@ type HttpHandlerInput = {
   riot?: RiotApiClient;
   dataDragon?: DataDragonService;
   profileRepository?: LolProfileRepository;
+  publicLolSnapshotStore?: PublicLolSnapshotStore;
   twitchAuth: TwitchAuthService;
   streamerFollowerAuth?: StreamerFollowerAuthService;
   publicTwitchAuth?: PublicTwitchAuthService;
@@ -3354,7 +3398,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
   const skinOptionsCache = new Map<string, { expiresAt: number; response: SkinOptionsResponse }>();
   const skinOptionsInFlight = new Map<string, Promise<SkinOptionsResponse>>();
   const publicLolSuggestionCache = new Map<string, PublicLolSuggestion>();
-  const publicLolProfileCache = new Map<string, { expiresAt: number; response: PublicLolProfileResponse }>();
+  const publicLolProfileCache = new Map<string, {
+    expiresAt: number;
+    staleUntil: number;
+    response: PublicLolProfileResponse;
+  }>();
   const publicLolProfileInFlight = new Map<string, Promise<PublicLolProfileResponse>>();
   const publicLolProfileRefreshAvailableAt = new Map<string, number>();
   const publicLolProfileCacheGeneration = new Map<string, number>();
@@ -3368,6 +3416,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
   const publicLolMatchRankInFlight = new Map<string, Promise<PublicLolMatchRankResponse>>();
   const publicLolMatchBuildCache = new Map<string, { expiresAt: number; response: PublicLolMatchBuildResponse }>();
   const publicLolMatchBuildInFlight = new Map<string, Promise<PublicLolMatchBuildResponse>>();
+  const publicLolMatchTeamsCache = new Map<string, { expiresAt: number; response: PublicLolMatchTeamsResponse }>();
+  const publicLolMatchTeamsInFlight = new Map<string, Promise<PublicLolMatchTeamsResponse>>();
   const publicLolMatchDetailCache = new Map<string, { expiresAt: number; match: RiotMatch }>();
   const publicLolMatchDetailInFlight = new Map<string, Promise<RiotMatch | null>>();
   const publicTwitchFollowedCache = new Map<string, {
@@ -3510,6 +3560,21 @@ export function createHttpHandler(input: HttpHandlerInput) {
 
   function rememberPublicLolProfile(profile: PublicLolProfileResponse, accountPuuid: string): void {
     rememberPublicLolSuggestion(profile);
+    const snapshotKey = publicLolProfileCacheKey(profile.gameName, profile.tagLine);
+    if (input.publicLolSnapshotStore) {
+      void input.publicLolSnapshotStore.save({
+        key: snapshotKey,
+        puuid: accountPuuid,
+        fetchedAt: profile.fetchedAt,
+        payload: profile
+      }).catch((error) => {
+        input.logger?.error({
+          type: "public_lol.snapshot_save_failed",
+          riotIdKey: snapshotKey,
+          error: toSafeErrorMessage(error)
+        });
+      });
+    }
     const repository = input.profileRepository;
     if (!repository) return;
     const existing = repository.getByPuuid(accountPuuid) ?? repository.getByRiotId(profile.gameName, profile.tagLine);
@@ -5485,8 +5550,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
   async function publicLolRecentMatchFromRiotMatch(
     match: RiotMatch,
     targetPuuid: string,
-    dataDragonVersion: string | undefined,
-    streamerByRiotId: Map<string, PublicLolTwitchStream>
+    dataDragonVersion: string | undefined
   ): Promise<PublicLolRecentMatch | undefined> {
     const participant = match.info.participants.find((item) => item.puuid === targetPuuid);
     if (!participant) return undefined;
@@ -5543,6 +5607,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       position: participant.individualPosition || participant.teamPosition,
       items: await participantItems(input.dataDragon, participant, dataDragonVersion),
       summonerSpells: participantSummonerSpells(participant),
+      runes: await participantRunes(input.dataDragon, dataDragonVersion, participant),
       badges: publicLolMatchBadges(match, participant),
       team: participantTeamSummary(match, participant),
       opponent: opponent && opponentChampion ? {
@@ -5553,7 +5618,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         assists: safeMatchStat(opponent.assists),
         kda: participantKda(opponent)
       } : undefined,
-      teams: await publicLolMatchTeams(input.dataDragon, dataDragonVersion, match, targetPuuid, streamerByRiotId)
+      teams: []
     };
   }
 
@@ -5614,13 +5679,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
       .filter(isPublicLolQueue)
       .sort((a, b) => publicLolMatchSortTime(b) - publicLolMatchSortTime(a))
       .slice(0, matchCount);
-    const streamerByRiotId = await buildApprovedStreamerStreamsByRiotId(rawMatches.flatMap((match) => match.info.participants.map((participant) => participantRiotId(participant))));
     const recentMatches = (await Promise.all(
       rawMatches.map(async (match) => publicLolRecentMatchFromRiotMatch(
         match,
         account.puuid,
-        await dataDragonVersionForMatch(input.dataDragon, match, dataDragonVersion),
-        streamerByRiotId
+        await dataDragonVersionForMatch(input.dataDragon, match, dataDragonVersion)
       ))
     )).filter((match): match is PublicLolRecentMatch => Boolean(match));
     const hasMoreRecentMatches = matchIds.length > matchCount
@@ -5914,6 +5977,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       type: "public_lol.profile_built",
       riotIdKey: responseCacheKey,
       matchCount: visibleRecentMatches.length,
+      responseBytes: Buffer.byteLength(JSON.stringify(response), "utf8"),
       accountMs: accountResolvedAt - startedAt,
       coreDataMs: coreDataResolvedAt - accountResolvedAt,
       matchContentMs: matchContentResolvedAt - coreDataResolvedAt,
@@ -5949,11 +6013,37 @@ export function createHttpHandler(input: HttpHandlerInput) {
     publicLolParticipantRankCacheInvalidatedAt = Date.now();
     publicLolMatchBuildCache.clear();
     publicLolMatchBuildInFlight.clear();
+    publicLolMatchTeamsCache.clear();
+    publicLolMatchTeamsInFlight.clear();
   }
 
   function invalidatePublicLolProfileCachesForStreamer(request: StreamerRiotIdRequest | undefined): void {
     if (!request?.riotGameName || !request.riotTagLine) return;
     invalidatePublicLolProfileCaches(publicLolProfileCacheKey(request.riotGameName, request.riotTagLine));
+  }
+
+  function startPublicLolProfileBuild(key: string, riotId: string): Promise<PublicLolProfileResponse> {
+    const running = publicLolProfileInFlight.get(key);
+    if (running) return running;
+    const cacheGeneration = publicLolProfileCacheGeneration.get(key) ?? 0;
+    const request = buildPublicLolProfile(riotId)
+      .then((response) => {
+        if ((publicLolProfileCacheGeneration.get(key) ?? 0) === cacheGeneration) {
+          const now = Date.now();
+          publicLolProfileCache.set(key, {
+            response,
+            expiresAt: now + PUBLIC_LOL_PROFILE_CACHE_TTL_MS,
+            staleUntil: now + PUBLIC_LOL_PROFILE_STALE_TTL_MS
+          });
+          pruneMapToMax(publicLolProfileCache, PUBLIC_LOL_PROFILE_CACHE_MAX);
+        }
+        return response;
+      })
+      .finally(() => {
+        publicLolProfileInFlight.delete(key);
+      });
+    publicLolProfileInFlight.set(key, request);
+    return request;
   }
 
   async function getPublicLolProfile(rawRiotId: string, options: { refresh?: boolean } = {}): Promise<PublicLolProfileResponse> {
@@ -5975,33 +6065,56 @@ export function createHttpHandler(input: HttpHandlerInput) {
       pruneMapToMax(publicLolProfileRefreshAvailableAt, PUBLIC_LOL_PROFILE_CACHE_MAX * 2);
       invalidatePublicLolProfileCaches(key);
     }
-    const cached = publicLolProfileCache.get(key);
-    if (!options.refresh && cached && cached.expiresAt > Date.now()) {
+    let cached = publicLolProfileCache.get(key);
+    if (!options.refresh && !cached && input.publicLolSnapshotStore) {
+      const snapshot = await input.publicLolSnapshotStore.load(key).catch((error) => {
+        input.logger?.error({
+          type: "public_lol.snapshot_load_failed",
+          riotIdKey: key,
+          error: toSafeErrorMessage(error)
+        });
+        return undefined;
+      });
+      if (snapshot && isPublicLolProfileSnapshot(snapshot.payload) && snapshot.payload.fetchedAt === snapshot.fetchedAt) {
+        const fetchedAtMs = Date.parse(snapshot.fetchedAt);
+        const ageMs = Date.now() - fetchedAtMs;
+        if (ageMs >= -5 * 60_000 && ageMs < PUBLIC_LOL_PROFILE_STALE_TTL_MS) {
+          cached = {
+            response: snapshot.payload,
+            expiresAt: fetchedAtMs + PUBLIC_LOL_PROFILE_CACHE_TTL_MS,
+            staleUntil: fetchedAtMs + PUBLIC_LOL_PROFILE_STALE_TTL_MS
+          };
+          publicLolProfileCache.set(key, cached);
+          publicLolProfilePuuidCache.set(key, snapshot.puuid);
+          pruneMapToMax(publicLolProfileCache, PUBLIC_LOL_PROFILE_CACHE_MAX);
+          pruneMapToMax(publicLolProfilePuuidCache, PUBLIC_LOL_PROFILE_CACHE_MAX * 2);
+          input.logger?.event?.({
+            type: "public_lol.snapshot_restored",
+            riotIdKey: key,
+            stale: cached.expiresAt <= Date.now()
+          });
+        }
+      }
+    }
+    const now = Date.now();
+    if (!options.refresh && cached && cached.expiresAt > now) {
+      return withPublicLolRefreshState(cached.response, key);
+    }
+    const riotId = `${parsed.gameName}#${parsed.tagLine}`;
+    if (!options.refresh && cached && cached.staleUntil > now) {
+      const refresh = startPublicLolProfileBuild(key, riotId);
+      void refresh.catch((error) => {
+        input.logger?.error({
+          type: "public_lol.profile_background_refresh_failed",
+          riotIdKey: key,
+          error: toSafeErrorMessage(error)
+        });
+      });
       return withPublicLolRefreshState(cached.response, key);
     }
     if (cached) publicLolProfileCache.delete(key);
-
-    const running = publicLolProfileInFlight.get(key);
-    if (running) return withPublicLolRefreshState(await running, key);
-
-    const cacheGeneration = publicLolProfileCacheGeneration.get(key) ?? 0;
-    const request = buildPublicLolProfile(`${parsed.gameName}#${parsed.tagLine}`)
-      .then((response) => {
-        if ((publicLolProfileCacheGeneration.get(key) ?? 0) === cacheGeneration) {
-          publicLolProfileCache.set(key, {
-            response,
-            expiresAt: Date.now() + PUBLIC_LOL_PROFILE_CACHE_TTL_MS
-          });
-          pruneMapToMax(publicLolProfileCache, PUBLIC_LOL_PROFILE_CACHE_MAX);
-        }
-        return response;
-      })
-      .finally(() => {
-        publicLolProfileInFlight.delete(key);
-      });
-    publicLolProfileInFlight.set(key, request);
-	    return withPublicLolRefreshState(await request, key);
-	  }
+    return withPublicLolRefreshState(await startPublicLolProfileBuild(key, riotId), key);
+  }
 
   async function buildPublicLolMatchPage(rawRiotId: string, start: number): Promise<PublicLolMatchPageResponse> {
     const parsed = parseRiotIdDetailed(rawRiotId);
@@ -6219,8 +6332,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
   }
 
   async function getPublicLolMatchBuild(rawMatchId: string): Promise<PublicLolMatchBuildResponse> {
-    const matchId = rawMatchId.trim();
-    if (!matchId) throw new HttpRequestError(400, { error: "matchId가 필요합니다." });
+    const matchId = validPublicLolMatchId(rawMatchId);
     const cacheKey = matchId.toUpperCase();
     const cached = publicLolMatchBuildCache.get(cacheKey);
     if (cached && cached.expiresAt > Date.now()) return cached.response;
@@ -6245,11 +6357,70 @@ export function createHttpHandler(input: HttpHandlerInput) {
     return request;
   }
 
-  async function getPublicLolMatchRanks(rawMatchId: string): Promise<PublicLolMatchRankResponse> {
+  function validPublicLolMatchId(rawMatchId: string): string {
     const matchId = rawMatchId.trim();
     if (!matchId || matchId.length > 96 || !/^[A-Z0-9_]+$/i.test(matchId)) {
       throw new HttpRequestError(400, { error: "올바르지 않은 match id입니다.", code: "INVALID_MATCH_ID" });
     }
+    return matchId;
+  }
+
+  async function buildPublicLolMatchTeams(rawMatchId: string, rawRiotId: string): Promise<PublicLolMatchTeamsResponse> {
+    if (!input.riot) throw new HttpRequestError(503, { error: "Riot API client를 사용할 수 없습니다." });
+    if (!input.riot.isConfigured()) throw new HttpRequestError(503, { error: "Riot API key가 설정되어 있지 않습니다." });
+
+    const matchId = validPublicLolMatchId(rawMatchId);
+    const parsedRiotId = parseRiotIdDetailed(rawRiotId);
+    if (!parsedRiotId.ok) {
+      throw new HttpRequestError(400, { error: "올바르지 않은 Riot ID입니다.", code: "INVALID_RIOT_ID" });
+    }
+    const targetRiotIdKey = normalizeRiotIdKey(parsedRiotId.gameName, parsedRiotId.tagLine);
+    const cacheKey = `${matchId.toUpperCase()}:${targetRiotIdKey}`;
+    const cached = publicLolMatchTeamsCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) return cached.response;
+    if (cached) publicLolMatchTeamsCache.delete(cacheKey);
+    const running = publicLolMatchTeamsInFlight.get(cacheKey);
+    if (running) return running;
+
+    const request = (async (): Promise<PublicLolMatchTeamsResponse> => {
+      const match = await getPublicLolMatchDetail(matchId).catch((error) => {
+        throw new HttpRequestError(502, { error: publicLolErrorMessage(error) });
+      });
+      if (!match) throw new HttpRequestError(404, { error: "경기 상세 정보를 찾지 못했습니다." });
+      const target = match.info.participants.find((participant) => {
+        const riotId = participantRiotId(participant);
+        if (!riotId) return false;
+        const parsed = parseRiotIdDetailed(riotId);
+        return parsed.ok && normalizeRiotIdKey(parsed.gameName, parsed.tagLine) === targetRiotIdKey;
+      });
+      if (!target) throw new HttpRequestError(404, { error: "경기에서 플레이어를 찾지 못했습니다." });
+
+      const streamerByRiotId = await buildApprovedStreamerStreamsByRiotId(
+        match.info.participants.map((participant) => participantRiotId(participant))
+      );
+      const fallbackDataDragonVersion = await dataDragonLatestVersion(input.dataDragon);
+      const dataDragonVersion = await dataDragonVersionForMatch(input.dataDragon, match, fallbackDataDragonVersion);
+      const response: PublicLolMatchTeamsResponse = {
+        status: "ready",
+        matchId: match.metadata.matchId || matchId,
+        teams: await publicLolMatchTeams(input.dataDragon, dataDragonVersion, match, target.puuid, streamerByRiotId),
+        fetchedAt: new Date().toISOString()
+      };
+      publicLolMatchTeamsCache.set(cacheKey, {
+        response,
+        expiresAt: Date.now() + PUBLIC_LOL_MATCH_TEAMS_CACHE_TTL_MS
+      });
+      pruneMapToMax(publicLolMatchTeamsCache, PUBLIC_LOL_MATCH_CACHE_MAX);
+      return response;
+    })().finally(() => {
+      publicLolMatchTeamsInFlight.delete(cacheKey);
+    });
+    publicLolMatchTeamsInFlight.set(cacheKey, request);
+    return request;
+  }
+
+  async function getPublicLolMatchRanks(rawMatchId: string): Promise<PublicLolMatchRankResponse> {
+    const matchId = validPublicLolMatchId(rawMatchId);
 
     const cacheKey = matchId.toUpperCase();
     const cached = publicLolMatchRankCache.get(cacheKey);
@@ -8423,16 +8594,26 @@ export function createHttpHandler(input: HttpHandlerInput) {
         return sendJson(req, res, 200, await getPublicLolProfileDynamicState(url.searchParams.get("riotId") ?? ""));
       }
       if (req.method === "GET" && url.pathname === "/api/lol/matches") {
-        return sendJson(req, res, 200, await getPublicLolMatchPage(
+        const page = await getPublicLolMatchPage(
           url.searchParams.get("riotId") ?? "",
           publicLolMatchStart(url.searchParams.get("start"))
-        ));
+        );
+        return sendJson(req, res, 200, page, publicLolCacheHeaders("matches", page));
       }
       if (req.method === "GET" && url.pathname === "/api/lol/match-ranks") {
-        return sendJson(req, res, 200, await getPublicLolMatchRanks(url.searchParams.get("matchId") ?? ""));
+        const ranks = await getPublicLolMatchRanks(url.searchParams.get("matchId") ?? "");
+        return sendJson(req, res, 200, ranks, publicLolCacheHeaders("match-ranks", ranks, "public, max-age=300, stale-while-revalidate=1800"));
       }
       if (req.method === "GET" && url.pathname === "/api/lol/match-build") {
-        return sendJson(req, res, 200, await getPublicLolMatchBuild(url.searchParams.get("matchId") ?? ""));
+        const build = await getPublicLolMatchBuild(url.searchParams.get("matchId") ?? "");
+        return sendJson(req, res, 200, build, publicLolCacheHeaders("match-build", build, "public, max-age=3600, stale-while-revalidate=86400"));
+      }
+      if (req.method === "GET" && url.pathname === "/api/lol/match-detail") {
+        const detail = await buildPublicLolMatchTeams(
+          url.searchParams.get("matchId") ?? "",
+          url.searchParams.get("riotId") ?? ""
+        );
+        return sendJson(req, res, 200, detail, publicLolCacheHeaders("match-detail", detail, "public, max-age=300, stale-while-revalidate=1800"));
       }
       if (req.method === "GET" && url.pathname === "/api/lol/suggestions") {
         return sendJson(req, res, 200, { suggestions: await buildPublicLolSuggestions(url.searchParams.get("q") ?? "") });
