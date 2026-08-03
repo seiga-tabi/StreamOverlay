@@ -95,6 +95,14 @@ export function RecentMatchRow({
 }: RecentMatchRowProps) {
   const grade = scoreGrade(aiScore);
   const scoreDescriptionId = useId();
+  const summonerSpellItems = spellItems.filter((item) => item.className !== "rune");
+  const runeItems = spellItems.filter((item) => item.className === "rune");
+
+  const renderLoadoutItems = (items: RecentMatchRowMediaItem[]) => items.map((item) => (
+    <span className={item.className} key={item.key} title={item.label}>
+      {item.content}
+    </span>
+  ));
 
   return (
     <article
@@ -110,11 +118,12 @@ export function RecentMatchRow({
           {championIconUrl ? <img src={championIconUrl} alt="" /> : <span>{championFallback}</span>}
           {spellItems.length > 0 ? (
             <div className="public-match-mobile-spells" aria-label={summonerSpellsLabel}>
-              {spellItems.map((spell) => (
-                <span key={spell.key}>
-                  {spell.content}
-                </span>
-              ))}
+              <div className="public-match-loadout-column spells">
+                {renderLoadoutItems(summonerSpellItems)}
+              </div>
+              <div className="public-match-loadout-column runes">
+                {renderLoadoutItems(runeItems)}
+              </div>
             </div>
           ) : null}
           <div className="public-champion-copy">

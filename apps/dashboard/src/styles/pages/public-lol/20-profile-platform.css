@@ -1359,12 +1359,12 @@
 
   .public-profile-platform-v2 .public-matches-panel .public-match-summary {
     grid-template-columns:
-      minmax(7rem, 1.35fr)
+      minmax(8.75rem, 1.45fr)
       minmax(5.25rem, .85fr)
       minmax(var(--yoro-space-10), .35fr)
       var(--yoro-size-touch-target) !important;
     grid-template-rows: auto auto auto !important;
-    gap: var(--yoro-space-2) !important;
+    gap: var(--yoro-space-1) !important;
     min-height: 0;
     padding: var(--yoro-space-2) !important;
   }
@@ -1394,9 +1394,9 @@
     position: relative;
     grid-column: 1 !important;
     grid-row: 2 !important;
-    grid-template-columns: var(--yoro-space-12) var(--yoro-space-12) !important;
-    grid-template-rows: var(--yoro-space-12) auto !important;
-    gap: var(--yoro-space-1) var(--yoro-space-2) !important;
+    grid-template-columns: var(--yoro-space-12) var(--yoro-space-12) minmax(0, 1fr) !important;
+    grid-template-rows: var(--yoro-space-12) !important;
+    gap: var(--yoro-space-1) !important;
     align-self: center !important;
     height: auto !important;
   }
@@ -1411,8 +1411,9 @@
 
   .public-profile-platform-v2.public-profile-shared-shell .public-matches-panel
     .public-champion-cell > .public-champion-copy {
-    grid-column: 1 / -1 !important;
-    grid-row: 2 !important;
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+    align-self: center;
     display: grid !important;
     gap: var(--yoro-space-1);
     overflow: hidden;
@@ -1431,7 +1432,6 @@
     grid-column: 2 !important;
     grid-row: 1 !important;
     grid-template-columns: repeat(2, var(--yoro-space-6)) !important;
-    grid-template-rows: repeat(2, var(--yoro-space-6)) !important;
     gap: 0 !important;
     align-self: start;
     width: var(--yoro-space-12);
@@ -1442,7 +1442,17 @@
   }
 
   .public-profile-platform-v2.public-profile-shared-shell .public-matches-panel
-    .public-match-mobile-spells span {
+    .public-match-loadout-column {
+    display: grid;
+    grid-template-rows: repeat(2, var(--yoro-space-6));
+    width: var(--yoro-space-6);
+    height: var(--yoro-space-12);
+  }
+
+  .public-profile-platform-v2.public-profile-shared-shell .public-matches-panel
+    .public-match-loadout-column > span {
+    display: grid;
+    place-items: center;
     width: var(--yoro-space-6) !important;
     height: var(--yoro-space-6) !important;
     border: var(--yoro-size-sr-only) solid var(--yoro-color-border-on-dark) !important;

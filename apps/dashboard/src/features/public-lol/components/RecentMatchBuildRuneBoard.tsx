@@ -55,7 +55,7 @@ export function RecentMatchBuildRuneBoard({
               <strong className={column.titleClassName}>
                 {column.titleIcon ? (
                   <span className={column.titleIcon.className} title={column.titleIcon.title}>
-                    {column.titleIcon.iconUrl ? <img src={column.titleIcon.iconUrl} alt="" /> : <i>{column.titleIcon.fallbackLabel}</i>}
+                    {column.titleIcon.iconUrl ? <img src={column.titleIcon.iconUrl} alt="" draggable={false} /> : <i>{column.titleIcon.fallbackLabel}</i>}
                   </span>
                 ) : null}
                 <em>{column.title}</em>
@@ -64,7 +64,7 @@ export function RecentMatchBuildRuneBoard({
                 <div className={row.className} key={row.key}>
                   {row.slots.map((slot) => (
                     <span className={slot.className} title={slot.title} key={slot.key}>
-                      {slot.iconUrl ? <img src={slot.iconUrl} alt="" /> : <i>{slot.fallbackLabel}</i>}
+                      {slot.iconUrl ? <img src={slot.iconUrl} alt="" draggable={false} /> : <i>{slot.fallbackLabel}</i>}
                     </span>
                   ))}
                 </div>

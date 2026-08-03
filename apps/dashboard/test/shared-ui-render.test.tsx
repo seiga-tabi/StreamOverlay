@@ -11,6 +11,7 @@ import { ProfileMetricStrip } from "../src/features/public-lol/components/Profil
 import { ProfileTopIdentity } from "../src/features/public-lol/components/ProfileTopIdentity";
 import { ProfileTopPanel } from "../src/features/public-lol/components/ProfileTopPanel";
 import { MatchTeamCompare } from "../src/features/public-lol/components/MatchTeamCompare";
+import { RecentMatchBuildRuneBoard } from "../src/features/public-lol/components/RecentMatchBuildRuneBoard";
 import { RecentMatchRow } from "../src/features/public-lol/components/RecentMatchRow";
 import { Button } from "../src/shared/ui/Button";
 import { StatusPill } from "../src/shared/ui/Status";
@@ -615,7 +616,11 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
       resultLabel="승리"
       scoreAriaLabel="점수 91"
       scoreClassName="metric-tone-excellent"
-      spellItems={Array.from({ length: 4 }, (_, index) => ({ key: `loadout-${index}`, content: `로드아웃${index}` }))}
+      spellItems={Array.from({ length: 4 }, (_, index) => ({
+        key: `loadout-${index}`,
+        className: index < 2 ? "spell" : "rune",
+        content: `로드아웃${index}`
+      }))}
       startedAtLabel="2026. 7. 14."
       startedAtTimeLabel="오후 1:20"
       summonerSpellsLabel="소환사 주문과 룬"
@@ -625,6 +630,8 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
   assert.match(html, /public-match-row win highlight-mvp/);
   assert.match(html, /data-ko="점수" data-ja="スコア"/u);
   assert.equal((html.match(/로드아웃\d/g) ?? []).length, 4);
+  assert.match(html, /public-match-loadout-column spells/u);
+  assert.match(html, /public-match-loadout-column runes/u);
   assert.equal((html.match(/아이템\d/g) ?? []).length, 7);
   const championCellStart = html.indexOf("public-champion-cell");
   const itemRowStart = html.indexOf("public-match-inline-items");
@@ -645,6 +652,40 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
   assert.match(html, /aria-label="승리 · 제드 · 9\/0\/6"/u);
   assert.equal((html.match(/aria-label="점수 91"/gu) ?? []).length, 1);
   assert.match(html, /public-match-score-description.*YORO 경기 점수 설명/u);
+});
+
+test("전적 상세 룬 보드는 읽기 전용 이미지의 선택과 드래그를 막는다", () => {
+  const html = renderToStaticMarkup(
+    <RecentMatchBuildRuneBoard
+      label={{ label: "룬", ko: "룬", ja: "ルーン" }}
+      noDataLabel="룬 정보 없음"
+      runeColumns={[{
+        key: "primary",
+        className: "public-match-rune-column primary",
+        titleClassName: "public-match-rune-title",
+        title: "지배",
+        titleIcon: {
+          className: "public-match-rune-style selected",
+          title: "지배",
+          iconUrl: "https://example.com/domination.png",
+          fallbackLabel: "지"
+        },
+        rows: [{
+          key: "keystone",
+          className: "public-match-rune-row",
+          slots: [{
+            key: "electrocute",
+            className: "selected",
+            title: "감전",
+            iconUrl: "https://example.com/electrocute.png",
+            fallbackLabel: "감"
+          }]
+        }]
+      }]}
+    />
+  );
+
+  assert.equal((html.match(/draggable="false"/g) ?? []).length, 2);
 });
 
 test("경기 상세 팀 비교는 피해량·시야·골드·오브젝트를 전환 탭으로 제공한다", () => {

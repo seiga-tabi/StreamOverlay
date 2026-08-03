@@ -286,19 +286,33 @@ test("전적 아이템·점수·상세 Tooltip은 이름과 안정적인 레이�
 
   if (viewportWidth <= 768) {
     const championMedia = row.locator(".public-champion-cell > :is(img, span)").first();
+    const championCopy = row.locator(".public-champion-copy");
     const mobileLoadout = row.locator(".public-match-mobile-spells");
-    const mobileLoadoutItems = mobileLoadout.locator(":scope > span");
+    const spellColumn = mobileLoadout.locator(".public-match-loadout-column.spells");
+    const runeColumn = mobileLoadout.locator(".public-match-loadout-column.runes");
+    const mobileLoadoutItems = mobileLoadout.locator(".public-match-loadout-column > span");
     await expect(row.locator(".public-match-meta")).toBeHidden();
     await expect(mobileLoadoutItems).toHaveCount(2);
 
     const championBox = await championMedia.boundingBox();
+    const championCopyBox = await championCopy.boundingBox();
     const loadoutBox = await mobileLoadout.boundingBox();
     const loadoutItemBox = await mobileLoadoutItems.first().boundingBox();
+    const spellItemBoxes = await spellColumn.locator(":scope > span").evaluateAll((elements) => elements.map((element) => {
+      const rect = element.getBoundingClientRect();
+      return { x: rect.x, y: rect.y };
+    }));
     expect(championBox).not.toBeNull();
+    expect(championCopyBox).not.toBeNull();
     expect(loadoutBox).not.toBeNull();
     expect(loadoutItemBox).not.toBeNull();
     expect(loadoutBox?.x ?? -1).toBeGreaterThanOrEqual((championBox?.x ?? 0) + (championBox?.width ?? 0));
+    expect(championCopyBox?.x ?? -1).toBeGreaterThanOrEqual((loadoutBox?.x ?? 0) + (loadoutBox?.width ?? 0));
     expect(Math.abs((loadoutItemBox?.width ?? 0) * 2 - (championBox?.width ?? 0))).toBeLessThanOrEqual(1);
+    expect(spellItemBoxes[1]?.x).toBe(spellItemBoxes[0]?.x);
+    expect(spellItemBoxes[1]?.y ?? 0).toBeGreaterThan(spellItemBoxes[0]?.y ?? 0);
+    await expect(spellColumn).toHaveCSS("grid-template-rows", "24px 24px");
+    await expect(runeColumn).toHaveCSS("grid-template-rows", "24px 24px");
     await expect(row.locator(".public-kda")).toHaveCSS("text-align", "center");
   }
 

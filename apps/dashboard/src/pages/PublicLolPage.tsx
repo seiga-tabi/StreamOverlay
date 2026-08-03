@@ -6327,6 +6327,7 @@ function RecentMatches({
             const iconUrl = summonerSpellIconUrl(spellId, dataDragonVersion);
             return {
               key: `${match.matchId}:spell:${spellId}`,
+              className: "spell",
               label: `${t().summonerSpells} ${spellId}`,
               content: iconUrl ? <img src={iconUrl} alt="" /> : spellId
             };
