@@ -219,7 +219,7 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
     (method === "PATCH" && /^\/api\/public\/community\/posts\/[^/]+$/.test(pathname)) ||
     (method === "POST" && /^\/api\/public\/community\/posts\/[^/]+\/comments$/.test(pathname)) ||
     (method === "POST" && /^\/api\/public\/community\/posts\/[^/]+\/reports$/.test(pathname)) ||
-    (method === "GET" && (pathname === "/api/public/tournaments" || pathname.startsWith("/api/public/tournaments/")))
+    (method === "GET" && pathname === "/api/public/aram/augments")
   ) return "PUBLIC";
   if (method === "GET" && (pathname === "/api/public/twitch/auth/start" || pathname === "/api/public/twitch/auth/callback")) return "OAUTH_CALLBACK";
   if (

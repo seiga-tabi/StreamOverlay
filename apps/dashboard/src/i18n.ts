@@ -43,7 +43,6 @@ export const dashboardI18n = {
     },
     pages: {
       events: { label: "이벤트 로그", short: "이벤트" },
-      tournaments: { label: "대회 관리", short: "대회" },
       streamerRiotRequests: { label: "Riot ID 승인", short: "Riot ID" },
       communityModeration: { label: "커뮤니티 관리", short: "커뮤니티" },
       supportInbox: { label: "문의 메일", short: "메일" },
@@ -314,7 +313,6 @@ export const dashboardI18n = {
     },
     pages: {
       events: { label: "イベントログ", short: "イベント" },
-      tournaments: { label: "大会管理", short: "大会" },
       streamerRiotRequests: { label: "Riot ID 承認", short: "Riot ID" },
       communityModeration: { label: "コミュニティ管理", short: "コミュニティ" },
       supportInbox: { label: "お問い合わせメール", short: "メール" },

@@ -47,7 +47,8 @@ const PUBLIC_DASHBOARD_EXACT_PATHS = new Set([
   "/palworld/map/",
   "/palworld/search",
   "/palworld/search/",
-  "/lol/tournaments"
+  "/lol/aram",
+  "/lol/aram/"
 ]);
 
 const NON_LOCALIZED_PUBLIC_PATHS = new Set([
@@ -61,7 +62,6 @@ const NON_LOCALIZED_PUBLIC_PATHS = new Set([
 
 const PUBLIC_DASHBOARD_PATH_PREFIXES = [
   "/lol/summoners/",
-  "/lol/tournaments/",
   "/community/server",
   "/community/party",
   "/community/posts/"

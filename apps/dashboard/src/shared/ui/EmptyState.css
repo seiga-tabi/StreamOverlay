@@ -36,12 +36,6 @@
   --yoro-empty-state-accent: var(--yoro-color-secondary-strong);
 }
 
-.yoro-empty-state[data-variant="tournament"] {
-  --yoro-empty-state-background: var(--yoro-color-surface-strong);
-  --yoro-empty-state-border: var(--yoro-color-accent-gold);
-  --yoro-empty-state-accent: var(--yoro-color-accent-gold);
-}
-
 .yoro-empty-state[data-variant="error"] {
   --yoro-empty-state-background: var(--yoro-color-danger-bg);
   --yoro-empty-state-border: var(--yoro-color-danger);

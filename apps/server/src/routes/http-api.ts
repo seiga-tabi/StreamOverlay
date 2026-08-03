@@ -4,6 +4,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { URL } from "node:url";
 import type { Store } from "../services/store.js";
+import { loadAramAugmentCatalog } from "../services/aram-augment-catalog.js";
 import { storeParticipationRepository } from "../services/participation-repository.js";
 import { publishParticipationSnapshot as publishAtomicParticipationSnapshot } from "../services/participation-snapshot.js";
 import type { ActionDispatcher } from "../core/action-dispatcher.js";
@@ -69,9 +70,7 @@ import {
   type StreamerRiotIdentity,
   type StreamerRiotIdRequest,
   type SupportMailAttachmentSummary,
-  type SupportMailInboundPayload,
-  type StreamerTournament,
-  type TournamentUpsertInput
+  type SupportMailInboundPayload
 } from "@streamops/shared";
 import type { TwitchAuthService } from "../services/twitch-auth.js";
 import { TwitchFollowerLookupError, type TwitchApiClient, type TwitchStreamStatus } from "../services/twitch-api.js";
@@ -1954,9 +1953,9 @@ function publicSeoMetadataForPath(pathname: string): PublicSeoMetadata {
       title: "LoL 전적 검색 | YORO.gg",
       description: "League of Legends 전적과 최근 게임 정보를 검색하세요."
     },
-    "/lol/tournaments": {
-      title: "LoL 대회 정보 | YORO.gg",
-      description: "League of Legends 대회 일정과 참가 정보를 확인하세요."
+    "/lol/aram": {
+      title: "증강 칼바람 | YORO.gg",
+      description: "증강 칼바람의 증강 정보와 조합 데이터를 확인하세요."
     },
     "/follow": {
       title: "팔로우 중인 스트리머 | YORO.gg",
@@ -2002,12 +2001,7 @@ function publicSeoMetadataForPath(pathname: string): PublicSeoMetadata {
           title: "LoL 소환사 전적 | YORO.gg",
           description: "League of Legends 소환사의 전적과 최근 게임 정보를 확인하세요."
         }
-      : normalizedPath.startsWith("/lol/tournaments/")
-        ? {
-            title: "LoL 대회 정보 | YORO.gg",
-            description: "League of Legends 대회 일정과 참가 정보를 확인하세요."
-          }
-        : normalizedPath.startsWith("/community/")
+      : normalizedPath.startsWith("/community/")
           ? {
               title: "LoL 커뮤니티 | YORO.gg",
               description: "YORO.gg League of Legends 커뮤니티 게시물을 확인하세요."
@@ -2022,9 +2016,9 @@ function publicSeoMetadataForPath(pathname: string): PublicSeoMetadata {
       title: "LoL戦績検索 | YORO.gg",
       description: "League of Legendsの戦績と最近のゲーム情報を検索できます。"
     },
-    "/lol/tournaments": {
-      title: "LoL大会情報 | YORO.gg",
-      description: "League of Legendsの大会日程と参加情報を確認できます。"
+    "/lol/aram": {
+      title: "オーグメントARAM | YORO.gg",
+      description: "オーグメントARAMのオーグメント情報と組み合わせデータを確認できます。"
     },
     "/follow": {
       title: "フォロー中の配信者 | YORO.gg",
@@ -2100,9 +2094,7 @@ function publicSeoMetadataForPath(pathname: string): PublicSeoMetadata {
         title: "LoLサモナー戦績 | YORO.gg",
         description: "League of Legendsサモナーの戦績と最近のゲーム情報を確認できます。"
       }
-    : normalizedPath.startsWith("/lol/tournaments/")
-      ? japaneseMetadata["/lol/tournaments"]
-      : normalizedPath.startsWith("/community/")
+    : normalizedPath.startsWith("/community/")
         ? {
             title: "LoLコミュニティ | YORO.gg",
             description: "YORO.ggのLeague of Legendsコミュニティ投稿を確認できます。"
@@ -3386,6 +3378,12 @@ function publicLolTwitchStreamFromCandidate(
 
 export function createHttpHandler(input: HttpHandlerInput) {
   const sessions = input.sessions ?? new DashboardSessionStore();
+  let aramAugmentCatalog: ReturnType<typeof loadAramAugmentCatalog> | undefined;
+  try {
+    aramAugmentCatalog = loadAramAugmentCatalog();
+  } catch {
+    input.logger?.error?.({ type: "aram.augment_catalog_unavailable", errorCode: "invalid_catalog" });
+  }
   const communityModeration = new CommunityModerationService(input.store);
   const participationRepository = storeParticipationRepository(input.store);
   const followerRefreshByBroadcaster = new Map<string, FollowerRefreshRuntime>();
@@ -4242,13 +4240,6 @@ export function createHttpHandler(input: HttpHandlerInput) {
     };
   }
 
-  function listPublicTournaments(): StreamerTournament[] {
-    const storeWithTournaments = input.store as Store & { listPublicTournaments?: () => StreamerTournament[] };
-    return typeof storeWithTournaments.listPublicTournaments === "function"
-      ? storeWithTournaments.listPublicTournaments()
-      : [];
-  }
-
   function communityText(value: unknown, maxLength: number): string {
     if (typeof value !== "string") return "";
     return value
@@ -4407,42 +4398,6 @@ export function createHttpHandler(input: HttpHandlerInput) {
     const post = storeWithCommunity.addCommunityPostComment(postId, inputBody);
     if (!post) throw new HttpRequestError(404, { error: "댓글을 작성할 파티모집 글을 찾을 수 없습니다." });
     return post;
-  }
-
-  function getPublicTournamentBySlug(slug: string): StreamerTournament | undefined {
-    const storeWithTournaments = input.store as Store & { getPublicTournamentBySlug?: (slug: string) => StreamerTournament | undefined };
-    return typeof storeWithTournaments.getPublicTournamentBySlug === "function"
-      ? storeWithTournaments.getPublicTournamentBySlug(slug)
-      : undefined;
-  }
-
-  function listDashboardTournaments(role: "admin" | "streamer", twitchUserId?: string): StreamerTournament[] {
-    const storeWithTournaments = input.store as Store & {
-      listDashboardTournaments?: (request: { role: "admin" | "streamer"; twitchUserId?: string }) => StreamerTournament[];
-    };
-    return typeof storeWithTournaments.listDashboardTournaments === "function"
-      ? storeWithTournaments.listDashboardTournaments({ role, twitchUserId })
-      : [];
-  }
-
-  function upsertStreamerTournament(body: TournamentUpsertInput, owner: StreamerRiotIdRequest): StreamerTournament | undefined {
-    const storeWithTournaments = input.store as Store & {
-      upsertStreamerTournament?: (body: TournamentUpsertInput, owner: StreamerRiotIdRequest) => StreamerTournament | undefined;
-    };
-    if (typeof storeWithTournaments.upsertStreamerTournament !== "function") {
-      throw new HttpRequestError(503, { error: "대회 저장소를 사용할 수 없습니다." });
-    }
-    return storeWithTournaments.upsertStreamerTournament(body, owner);
-  }
-
-  function deleteStreamerTournament(id: string, owner: StreamerRiotIdRequest): boolean {
-    const storeWithTournaments = input.store as Store & {
-      deleteStreamerTournament?: (id: string, owner: StreamerRiotIdRequest) => boolean;
-    };
-    if (typeof storeWithTournaments.deleteStreamerTournament !== "function") {
-      throw new HttpRequestError(503, { error: "대회 저장소를 사용할 수 없습니다." });
-    }
-    return storeWithTournaments.deleteStreamerTournament(id, owner);
   }
 
   function rememberPublicLolParticipantRank(riotId: string | undefined, rankedStats: LolRankedStats | undefined, fetchedAt: string): void {
@@ -6875,7 +6830,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
             ? publicPalworldListApiLimiter
             : palworldLimitGroup
               ? publicPalworldApiLimiter
-          : url.pathname.startsWith("/api/lol/") || url.pathname.startsWith("/api/public/twitch/") || url.pathname.startsWith("/api/public/tournaments") || url.pathname.startsWith("/api/public/community/") || url.pathname.startsWith("/api/public/participation/") || url.pathname === "/api/public/locale"
+          : url.pathname.startsWith("/api/lol/") || url.pathname.startsWith("/api/public/twitch/") || url.pathname.startsWith("/api/public/aram/") || url.pathname.startsWith("/api/public/community/") || url.pathname.startsWith("/api/public/participation/") || url.pathname === "/api/public/locale"
               ? publicLolApiLimiter
               : dashboardApiLimiter;
         const limited = limiter.check(limitKey);
@@ -8621,14 +8576,18 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if (req.method === "GET" && url.pathname === "/api/public/locale") {
         return sendJson(req, res, 200, publicLocalePreference(req));
       }
-      if (req.method === "GET" && url.pathname === "/api/public/tournaments") {
-        return sendJson(req, res, 200, { tournaments: listPublicTournaments() });
-      }
-      if (req.method === "GET" && url.pathname.startsWith("/api/public/tournaments/")) {
-        const slug = decodeURIComponent(url.pathname.slice("/api/public/tournaments/".length)).trim();
-        const tournament = slug ? getPublicTournamentBySlug(slug) : undefined;
-        if (!tournament) return sendJson(req, res, 404, { error: "공개 대회를 찾을 수 없습니다." });
-        return sendJson(req, res, 200, { tournament });
+      if (req.method === "GET" && url.pathname === "/api/public/aram/augments") {
+        if (!aramAugmentCatalog) {
+          return sendJson(req, res, 503, {
+            error: "ARAM_DATA_UNAVAILABLE",
+            message: "칼바람 데이터를 사용할 수 없습니다."
+          }, { "Cache-Control": "no-store" });
+        }
+        return sendJson(req, res, 200, aramAugmentCatalog, {
+          "Cache-Control": aramAugmentCatalog.status === "ready"
+            ? "public, max-age=300, stale-while-revalidate=3600"
+            : "no-store"
+        });
       }
       if (req.method === "GET" && url.pathname === "/api/public/community/posts") {
         const limit = Math.max(1, Math.min(100, Math.trunc(Number(url.searchParams.get("limit")) || 50)));
@@ -9005,37 +8964,6 @@ export function createHttpHandler(input: HttpHandlerInput) {
         if (body.active && !sanction) return sendJson(req, res, 400, { error: "제재를 적용하지 못했습니다." });
         input.logger?.event?.({ type: "community.user.sanction_changed", twitchUserId, active: body.active });
         return sendJson(req, res, 200, { sanction, ...communityModeration.snapshot() });
-      }
-      if (req.method === "GET" && url.pathname === "/api/tournaments") {
-        if (auth.principal.type !== "DASHBOARD_ADMIN") return sendJson(req, res, 403, { error: "대시보드 인증이 필요합니다." });
-        if (auth.principal.role === "streamer" && !dashboardEnabledStreamerRiotIdForTwitchUser(auth.principal.twitchUserId)) {
-          return sendJson(req, res, 403, { error: "스트리머 대시보드 사용 권한이 필요합니다." });
-        }
-        return sendJson(req, res, 200, {
-          tournaments: listDashboardTournaments(auth.principal.role, auth.principal.twitchUserId)
-        });
-      }
-      if (req.method === "POST" && url.pathname === "/api/tournaments") {
-        if (auth.principal.type !== "DASHBOARD_ADMIN" || !auth.principal.twitchUserId) {
-          return sendJson(req, res, 403, { error: "승인된 스트리머 세션이 필요합니다." });
-        }
-        const owner = dashboardEnabledStreamerRiotIdForTwitchUser(auth.principal.twitchUserId);
-        if (!owner) return sendJson(req, res, 403, { error: "스트리머 대시보드 사용 권한이 필요합니다." });
-        const body = await readJsonBody<TournamentUpsertInput>(req);
-        const tournament = upsertStreamerTournament(body, owner);
-        if (!tournament) return sendJson(req, res, 400, { error: "대회 제목과 올바른 입력값이 필요합니다." });
-        return sendJson(req, res, 200, { tournament, tournaments: listDashboardTournaments(auth.principal.role, auth.principal.twitchUserId) });
-      }
-      if (req.method === "DELETE" && url.pathname.startsWith("/api/tournaments/")) {
-        if (auth.principal.type !== "DASHBOARD_ADMIN" || !auth.principal.twitchUserId) {
-          return sendJson(req, res, 403, { error: "승인된 스트리머 세션이 필요합니다." });
-        }
-        const owner = dashboardEnabledStreamerRiotIdForTwitchUser(auth.principal.twitchUserId);
-        if (!owner) return sendJson(req, res, 403, { error: "스트리머 대시보드 사용 권한이 필요합니다." });
-        const tournamentId = decodeURIComponent(url.pathname.slice("/api/tournaments/".length)).trim();
-        if (!tournamentId) return sendJson(req, res, 400, { error: "대회 ID가 필요합니다." });
-        if (!deleteStreamerTournament(tournamentId, owner)) return sendJson(req, res, 404, { error: "삭제할 대회를 찾을 수 없습니다." });
-        return sendJson(req, res, 200, { tournaments: listDashboardTournaments(auth.principal.role, auth.principal.twitchUserId) });
       }
       if (req.method === "GET" && url.pathname === "/api/riot/settings") {
         if (!input.riot) return sendJson(req, res, 503, { error: "Riot API client를 사용할 수 없습니다." });

@@ -532,12 +532,6 @@ export type PublicLolProfileDynamicState = {
   fetchedAt: string;
 };
 
-export type TournamentPlayerProfileState = {
-  status: "loading" | "ready" | "error";
-  profile?: PublicLolProfile;
-  error?: string;
-};
-
 export type CommunityPostProfileState = {
   riotId?: string;
   status: "idle" | "loading" | "ready" | "error";
@@ -558,7 +552,7 @@ export type SearchSuggestion = {
 
 export type PublicNavTarget = "search" | "ranking" | "champion" | "stats" | "ingame" | "promotion" | "community";
 
-export type PublicMainPage = "search" | "palworld" | "bot" | "subscriptions" | "followJoin" | "patch" | "communityParty" | "communityServerWrite" | "communityPartyWrite" | "communityDetail" | "tournamentCalendar" | "tournamentList" | "tournamentNews" | "tournamentTeams" | "tournamentBracket" | "tournamentSchedule" | "privacy" | "terms" | "contact";
+export type PublicMainPage = "search" | "palworld" | "bot" | "subscriptions" | "followJoin" | "aram" | "patch" | "communityParty" | "communityServerWrite" | "communityPartyWrite" | "communityDetail" | "privacy" | "terms" | "contact";
 
 export type PublicProfileTab = "overview" | "champions" | "ingame";
 

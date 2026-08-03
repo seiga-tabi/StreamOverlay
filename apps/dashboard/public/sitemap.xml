@@ -2,8 +2,8 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://yoro.gg/ko/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
   <url><loc>https://yoro.gg/ja/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
-  <url><loc>https://yoro.gg/ko/lol/tournaments</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
-  <url><loc>https://yoro.gg/ja/lol/tournaments</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://yoro.gg/ko/lol/aram</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://yoro.gg/ja/lol/aram</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://yoro.gg/ko/bot</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://yoro.gg/ja/bot</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://yoro.gg/ko/bot/getting-started</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>

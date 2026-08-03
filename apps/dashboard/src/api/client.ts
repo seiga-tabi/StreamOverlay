@@ -1,9 +1,5 @@
 import { getDashboardCsrfToken, runtimeConfig, setDashboardCsrfToken } from "../runtime-config";
-import type {
-  CommunityModerationSnapshot,
-  StreamerTournament,
-  TournamentUpsertInput,
-} from "@streamops/shared";
+import type { CommunityModerationSnapshot } from "@streamops/shared";
 
 const API_BASE = runtimeConfig().apiBase ?? import.meta.env.VITE_API_BASE ?? "http://localhost:3000";
 
@@ -142,21 +138,6 @@ export async function logoutDashboardSession(): Promise<void> {
     headers: { "Content-Type": "application/json", ...surfaceHeaders(), ...csrfHeaders() },
     body: "{}"
   });
-}
-
-export async function getDashboardTournaments(): Promise<StreamerTournament[]> {
-  const result = await apiGet<{ tournaments: StreamerTournament[] }>("/api/tournaments");
-  return result.tournaments;
-}
-
-export async function saveDashboardTournament(body: TournamentUpsertInput): Promise<StreamerTournament[]> {
-  const result = await apiPost<{ tournament: StreamerTournament; tournaments: StreamerTournament[] }>("/api/tournaments", body);
-  return result.tournaments;
-}
-
-export async function deleteDashboardTournament(id: string): Promise<StreamerTournament[]> {
-  const result = await apiDelete<{ tournaments: StreamerTournament[] }>(`/api/tournaments/${encodeURIComponent(id)}`);
-  return result.tournaments;
 }
 
 export async function getCommunityModeration(): Promise<CommunityModerationSnapshot> {

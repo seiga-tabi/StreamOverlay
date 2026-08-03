@@ -156,10 +156,11 @@ export function RecentMatchRow({
           aria-describedby={scoreDescriptionId}
           aria-label={scoreAriaLabel}
           className={`public-match-score ${scoreClassName}`}
+          data-grade={grade}
           tabIndex={0}
         >
-          <strong>{aiScore}</strong>
           <b>{grade}</b>
+          <strong>{aiScore}</strong>
           <small data-ko={aiScoreText.ko} data-ja={aiScoreText.ja}>{aiScoreText.label}</small>
           <span
             className="public-match-score-description"

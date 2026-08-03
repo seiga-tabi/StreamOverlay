@@ -5,7 +5,7 @@ import { pageAllowed, type Page } from "../routing/dashboard-routes";
 export type { Page } from "../routing/dashboard-routes";
 
 const navSections: Array<{ key: keyof typeof dashboardI18n.ko.app.navGroups; items: Page[] }> = [
-  { key: "lol", items: ["tournaments", "streamerRiotRequests"] },
+  { key: "lol", items: ["streamerRiotRequests"] },
   { key: "community", items: ["communityModeration", "events"] },
   { key: "system", items: ["supportInbox", "settings"] }
 ];

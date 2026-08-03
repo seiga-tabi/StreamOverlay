@@ -680,7 +680,7 @@ export default defineConfig(({ command }) => ({
           if (/\/(?:CommunityModeration|EventLog|Events|ServerStatus|StreamerRiotRequests|SupportInbox)Page\.tsx$/.test(id)) {
             return "dashboard-admin-pages";
           }
-          if (/\/(?:Followers|Settings|Tournaments|TwitchConnection)Page\.tsx$/.test(id)) {
+          if (/\/(?:Followers|Settings|TwitchConnection)Page\.tsx$/.test(id)) {
             return "dashboard-settings-pages";
           }
           if (/\/(?:Dashboard|LolOperations|OverlayOps)Page\.tsx$/.test(id)) {

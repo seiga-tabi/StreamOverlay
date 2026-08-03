@@ -1296,8 +1296,15 @@ async function installApiFixtures(page: Page): Promise<void> {
       await route.fulfill({ status: 204 });
       return;
     }
-    if (url.pathname === "/api/public/tournaments") {
-      await json(route, { tournaments: [] });
+    if (url.pathname === "/api/public/aram/augments") {
+      await json(route, {
+        schemaVersion: 1,
+        mode: "aram_augments",
+        status: "preparing",
+        dataVersion: "candidate",
+        sourceRevision: "not_imported",
+        augments: [],
+      });
       return;
     }
     if (url.pathname === "/api/public/community/posts") {

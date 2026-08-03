@@ -518,10 +518,7 @@
 .public-dashboard-shell .public-community-shared-detail-article.yoro-card,
 .public-dashboard-shell .public-community-shared-record-card.yoro-card,
 .public-dashboard-shell .public-community-shared-comments.yoro-card,
-.public-dashboard-shell .public-community-comment.yoro-card,
-.public-dashboard-shell .public-tournament-list-card,
-.public-dashboard-shell .public-tournament-calendar-card,
-.public-dashboard-shell .public-tournament-upcoming-card {
+.public-dashboard-shell .public-community-comment.yoro-card {
   border-color: var(--public-gray-border) !important;
   background: var(--public-gray-surface) !important;
   color: var(--public-gray-text) !important;

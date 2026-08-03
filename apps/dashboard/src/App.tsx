@@ -44,7 +44,6 @@ const YoroDashboardPage = lazyNamed(
   "YoroDashboardPage",
 );
 const EventsPage = lazyNamed(() => import("./pages/EventsPage"), "EventsPage");
-const TournamentsPage = lazyNamed(() => import("./pages/TournamentsPage"), "TournamentsPage");
 const StreamerRiotRequestsPage = lazyNamed(
   () => import("./pages/StreamerRiotRequestsPage"),
   "StreamerRiotRequestsPage",
@@ -341,7 +340,6 @@ export default function App() {
     <Layout page={page} setPage={changeDashboardPage} locale={dashboardLocale} onLocaleChange={changeDashboardLocale} onLogout={authRequired ? logout : undefined} onPublicHome={openPublic}>
       <Suspense fallback={<div className="card loading-card" data-ko={dashboardI18n.ko.app.loading} data-ja={dashboardI18n.ja.app.loading}>{currentText.app.loading}</div>}>
         {page === "events" ? <EventsPage snapshot={snapshot} /> : null}
-        {page === "tournaments" ? <TournamentsPage /> : null}
         {page === "streamerRiotRequests" ? <StreamerRiotRequestsPage snapshot={snapshot} /> : null}
         {page === "communityModeration" ? <CommunityModerationPage /> : null}
         {page === "supportInbox" ? <SupportInboxPage /> : null}

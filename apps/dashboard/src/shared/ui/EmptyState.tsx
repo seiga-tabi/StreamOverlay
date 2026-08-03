@@ -6,7 +6,6 @@ export type EmptyStateVariant =
   | "search"
   | "community"
   | "streamer"
-  | "tournament"
   | "error";
 
 export type EmptyStateElement = "section" | "div" | "article";

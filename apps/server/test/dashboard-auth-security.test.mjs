@@ -421,7 +421,7 @@ test("공개 Twitch OAuth는 Palworld 허용 경로와 안전한 query를 복귀
       "/palworld/map",
       "/palworld/search?q=%ED%8C%94%20100%25&pal=pal-1",
       "/ko/",
-      "/ja/lol/tournaments",
+      "/ja/lol/aram",
       "/ko/community",
       "/ja/palworld/search?q=%E3%83%91%E3%83%AB",
       "/dashboard",
@@ -3238,7 +3238,6 @@ test("스트리머 dashboard 세션은 허용된 운영 API만 사용할 수 있
     for (const pathname of [
       "/api/events/recent",
       "/api/questions",
-      "/api/tournaments",
       "/api/support-mailbox",
       "/api/dashboard/server-status",
       "/api/status",

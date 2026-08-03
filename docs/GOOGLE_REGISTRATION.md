@@ -36,7 +36,7 @@ Enhanced Measurement에서 browser history 기반 page view를 별도로 켜지
 1. Search Console에서 `yoro.gg` **도메인 속성**을 추가합니다.
 2. DNS TXT 소유권 확인을 완료합니다. 도메인 속성은 HTTP/HTTPS와 `www`를 함께 포함하므로 기본 등록 방식으로 사용합니다.
 3. **Sitemaps**에서 `https://yoro.gg/sitemap.xml`을 제출합니다.
-4. URL 검사에서 `/`, `/lol/tournaments`, `/palworld`, `/palworld/pals`를 각각 검사합니다.
+4. URL 검사에서 `/`, `/lol/aram`, `/palworld`, `/palworld/pals`를 각각 검사합니다.
 5. `www.yoro.gg`와 HTTP 요청은 edge에서 `https://yoro.gg`로 영구 redirect되는지 확인합니다.
 
 DNS 방식을 사용하는 동안 `google-site-verification` 메타 태그나 `google*.html` 파일은 필요하지 않습니다. HTML 검증 방식으로 바꾸려면 Google이 발급한 파일명과 본문을 그대로 추가해야 하며, 임의 토큰이나 placeholder를 배포하지 않습니다.
@@ -73,7 +73,7 @@ AdSense Auto ads를 활성화할 때도 콘솔의 URL 제외 규칙에 `/login`,
 curl -fsS https://yoro.gg/ads.txt
 curl -I https://yoro.gg/robots.txt
 curl -I https://yoro.gg/sitemap.xml
-curl -I https://yoro.gg/lol/tournaments
+curl -I https://yoro.gg/lol/aram
 curl -I https://www.yoro.gg/
 ```
 

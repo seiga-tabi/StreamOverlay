@@ -311,18 +311,16 @@ test("Store는 스트리머별 참여 session과 설정을 재시작 후 복원�
   }
 });
 
-test("Store는 잘못된 대회와 커뮤니티 상태 경로를 load 단계에서 차단하고 readiness에 노출한다", () => {
+test("Store는 잘못된 커뮤니티 상태 경로를 load 단계에서 차단하고 readiness에 노출한다", () => {
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-persistence-failure-"));
   const failures = [];
   try {
     const store = new Store({
-      tournamentStatePath: dir,
       communityStatePath: dir,
       onPersistenceError: (failure) => failures.push(failure)
     });
     store.flush();
 
-    assert.ok(failures.some((failure) => failure.scope === "tournaments" && failure.operation === "load"));
     assert.ok(failures.some((failure) => failure.scope === "community" && failure.operation === "load"));
     assert.equal(store.getReadiness().ok, false);
   } finally {
@@ -452,72 +450,6 @@ test("Store는 기존 승인 스트리머의 dashboard tenant key를 한 번만 
     const secondStore = new Store({ streamerRiotIdStatePath: filePath });
     const second = secondStore.listApprovedStreamerRiotIds()[0];
     assert.equal(second.dashboardKey, first.dashboardKey);
-  } finally {
-    rmSync(dir, { recursive: true, force: true });
-  }
-});
-
-test("Store는 승인 스트리머 대회를 저장하고 공개 목록만 노출한다", () => {
-  const dir = mkdtempSync(path.join(tmpdir(), "streamops-tournaments-"));
-  const riotPath = path.join(dir, "streamer-riot-ids.json");
-  const tournamentPath = path.join(dir, "tournaments.json");
-  try {
-    const store = new Store({ streamerRiotIdStatePath: riotPath, tournamentStatePath: tournamentPath });
-    const request = store.upsertStreamerRiotIdRequest({
-      twitchUserId: "twitch-1",
-      twitchLogin: "seiga",
-      twitchDisplayName: "Seiga",
-      twitchProfileImageUrl: "https://example.test/avatar.png",
-      riotGameName: "Seiga",
-      riotTagLine: "JP1"
-    });
-    const owner = store.resolveStreamerRiotIdRequest({ requestId: request.id, decision: "approved", reviewer: "dashboard" });
-
-    const draft = store.upsertStreamerTournament({
-      title: "비공개 스크림",
-      visibility: "draft",
-      teams: [{ id: "team-a", name: "A팀" }]
-    }, owner);
-    const publicTournament = store.upsertStreamerTournament({
-      title: "SEIGA CUP",
-      description: "스트리머 롤 대회",
-      startsAt: "2026-07-10T19:00",
-      endsAt: "2026-07-20T22:00",
-      formatLabel: "16강 BO3 · 결승 BO5",
-      prizeLabel: "1,000,000원",
-      visibility: "public",
-      teams: [
-        { id: "team-1", name: "세이가팀", seed: 1 },
-        { id: "team-2", name: "하루팀", seed: 16 }
-      ],
-      matches: [
-        {
-          id: "match-1",
-          round: "16강",
-          teamAId: "team-1",
-          teamBId: "team-2",
-          scheduledAt: "2026-07-10T19:00",
-          format: "BO3",
-          status: "scheduled"
-        }
-      ],
-      news: [{ id: "news-1", title: "대진 공개", body: "16강 대진이 공개되었습니다.", publishedAt: "2026-07-02T00:00:00.000Z" }]
-    }, owner);
-
-    assert.equal(draft?.visibility, "draft");
-    assert.equal(publicTournament?.visibility, "public");
-    assert.equal(store.listDashboardTournaments({ role: "streamer", twitchUserId: "twitch-1" }).length, 2);
-    assert.deepEqual(store.listDashboardTournaments({ role: "streamer", twitchUserId: "other" }), []);
-    assert.deepEqual(store.listPublicTournaments().map((tournament) => tournament.title), ["SEIGA CUP"]);
-    assert.equal(store.getPublicTournamentBySlug(publicTournament.slug)?.matches[0].teamAId, "team-1");
-    assert.equal(store.deleteStreamerTournament(draft.id, { ...owner, twitchUserId: "other" }), false);
-
-    const restartedStore = new Store({ streamerRiotIdStatePath: riotPath, tournamentStatePath: tournamentPath });
-    assert.equal(restartedStore.listPublicTournaments()[0].title, "SEIGA CUP");
-    assert.equal(restartedStore.listPublicTournaments()[0].ownerTwitchLogin, "seiga");
-    assert.equal(restartedStore.listPublicTournaments()[0].news[0].title, "대진 공개");
-    assert.equal(restartedStore.deleteStreamerTournament(draft.id, owner), true);
-    assert.deepEqual(restartedStore.listDashboardTournaments({ role: "streamer", twitchUserId: "twitch-1" }).map((tournament) => tournament.title), ["SEIGA CUP"]);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -939,12 +871,11 @@ test("Store는 손상되거나 미래 버전인 follower 상태 파일을 덮어
   }
 });
 
-test("Store는 손상된 tenant·대회·커뮤니티·runtime 상태 파일을 후속 변경으로 덮어쓰지 않는다", async () => {
+test("Store는 손상된 tenant·커뮤니티·runtime 상태 파일을 후속 변경으로 덮어쓰지 않는다", async () => {
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-domain-state-invalid-"));
   const original = "{ invalid json\n";
   const paths = {
     streamer: path.join(dir, "streamer-riot-ids.json"),
-    tournaments: path.join(dir, "tournaments.json"),
     community: path.join(dir, "community.json"),
     runtime: path.join(dir, "runtime-state.json")
   };
@@ -955,7 +886,6 @@ test("Store는 손상된 tenant·대회·커뮤니티·runtime 상태 파일을 
     const failures = [];
     const store = new Store({
       streamerRiotIdStatePath: paths.streamer,
-      tournamentStatePath: paths.tournaments,
       communityStatePath: paths.community,
       runtimeStatePath: paths.runtime,
       onPersistenceError(failure) {
@@ -979,7 +909,6 @@ test("Store는 손상된 tenant·대회·커뮤니티·runtime 상태 파일을 
       authorDisplayName: "Streamer"
     }), /STATE_UNAVAILABLE:community:corrupted/u);
     assert.throws(() => store.setParticipationOpen(true, "1001"), /STATE_UNAVAILABLE:runtime:corrupted/u);
-    assert.throws(() => store.listPublicTournaments(), /STATE_UNAVAILABLE:tournaments:corrupted/u);
     await store.closeAsync();
 
     for (const filePath of Object.values(paths)) {
@@ -990,15 +919,13 @@ test("Store는 손상된 tenant·대회·커뮤니티·runtime 상태 파일을 
       [
         ["community", "load"],
         ["runtime", "load"],
-        ["streamer_riot_ids", "load"],
-        ["tournaments", "load"]
+        ["streamer_riot_ids", "load"]
       ]
     );
     assert.equal(store.getReadiness().ok, false);
     assert.deepEqual(store.getReadiness().loadStates, {
       followers: "not_loaded",
       streamer_riot_ids: "corrupted",
-      tournaments: "corrupted",
       community: "corrupted",
       runtime: "corrupted"
     });
@@ -1010,12 +937,10 @@ test("Store는 손상된 tenant·대회·커뮤니티·runtime 상태 파일을 
 test("Store는 빈 파일과 schema 불일치를 손상 상태로 구분하고 정상 domain은 계속 사용할 수 있다", () => {
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-domain-state-schema-"));
   const communityPath = path.join(dir, "community.json");
-  const tournamentPath = path.join(dir, "tournaments.json");
   const streamerPath = path.join(dir, "streamer-riot-ids.json");
   const runtimePath = path.join(dir, "runtime-state.json");
   try {
     writeFileSync(communityPath, "", { mode: 0o600 });
-    writeFileSync(tournamentPath, `${JSON.stringify({ version: 1, tournaments: {} })}\n`, { mode: 0o600 });
     const invalidRuntime = {
       version: 3,
       participation: { isOpen: false, revision: 0, queue: [{ id: "invalid-participant" }] },
@@ -1025,13 +950,11 @@ test("Store는 빈 파일과 schema 불일치를 손상 상태로 구분하고 �
     writeFileSync(runtimePath, `${JSON.stringify(invalidRuntime)}\n`, { mode: 0o600 });
     const store = new Store({
       communityStatePath: communityPath,
-      tournamentStatePath: tournamentPath,
       streamerRiotIdStatePath: streamerPath,
       runtimeStatePath: runtimePath
     });
 
     assert.equal(store.getReadiness().loadStates.community, "corrupted");
-    assert.equal(store.getReadiness().loadStates.tournaments, "corrupted");
     assert.equal(store.getReadiness().loadStates.runtime, "corrupted");
     assert.throws(() => store.createCommunityPost({
       category: "server",
@@ -1041,7 +964,6 @@ test("Store는 빈 파일과 schema 불일치를 손상 상태로 구분하고 �
       authorTwitchLogin: "streamer",
       authorDisplayName: "Streamer"
     }), /STATE_UNAVAILABLE:community:corrupted/u);
-    assert.throws(() => store.listPublicTournaments(), /STATE_UNAVAILABLE:tournaments:corrupted/u);
     assert.throws(() => store.setParticipationOpen(true), /STATE_UNAVAILABLE:runtime:corrupted/u);
 
     const request = store.upsertStreamerRiotIdRequest({
@@ -1054,7 +976,6 @@ test("Store는 빈 파일과 schema 불일치를 손상 상태로 구분하고 �
     assert.equal(request.status, "pending");
     assert.equal(store.listStreamerRiotIdRequests().length, 1);
     assert.equal(readFileSync(communityPath, "utf8"), "");
-    assert.deepEqual(JSON.parse(readFileSync(tournamentPath, "utf8")), { version: 1, tournaments: {} });
     assert.deepEqual(JSON.parse(readFileSync(runtimePath, "utf8")), invalidRuntime);
     store.close();
   } finally {
@@ -1064,13 +985,13 @@ test("Store는 빈 파일과 schema 불일치를 손상 상태로 구분하고 �
 
 test("Store는 읽을 수 없는 state 파일을 unreadable로 구분한다", { skip: process.platform === "win32" }, () => {
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-domain-state-permission-"));
-  const filePath = path.join(dir, "tournaments.json");
+  const filePath = path.join(dir, "community.json");
   try {
-    writeFileSync(filePath, `${JSON.stringify({ version: 1, tournaments: [] })}\n`, { mode: 0o600 });
+    writeFileSync(filePath, `${JSON.stringify({ version: 1, posts: [] })}\n`, { mode: 0o600 });
     chmodSync(filePath, 0o000);
-    const store = new Store({ tournamentStatePath: filePath });
-    assert.equal(store.getReadiness().loadStates.tournaments, "unreadable");
-    assert.throws(() => store.listPublicTournaments(), /STATE_UNAVAILABLE:tournaments:unreadable/u);
+    const store = new Store({ communityStatePath: filePath });
+    assert.equal(store.getReadiness().loadStates.community, "unreadable");
+    assert.throws(() => store.listCommunityPosts(), /STATE_UNAVAILABLE:community:unreadable/u);
     store.close();
   } finally {
     chmodSync(filePath, 0o600);

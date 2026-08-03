@@ -38,8 +38,8 @@ export type PublicHomeSearchPanelText = {
   primaryFeaturesTitle?: PublicHomeSearchPanelLocalizedText;
   participationTitle?: PublicHomeSearchPanelLocalizedText;
   participationDescription?: PublicHomeSearchPanelLocalizedText;
-  tournamentTitle?: PublicHomeSearchPanelLocalizedText;
-  tournamentDescription?: PublicHomeSearchPanelLocalizedText;
+  aramTitle?: PublicHomeSearchPanelLocalizedText;
+  aramDescription?: PublicHomeSearchPanelLocalizedText;
   communityTitle?: PublicHomeSearchPanelLocalizedText;
   communityDescription?: PublicHomeSearchPanelLocalizedText;
   streamerTitle?: PublicHomeSearchPanelLocalizedText;
@@ -118,8 +118,8 @@ export function PublicHomeSearchPanel({
       {text.primaryFeaturesTitle
         && text.participationTitle
         && text.participationDescription
-        && text.tournamentTitle
-        && text.tournamentDescription
+        && text.aramTitle
+        && text.aramDescription
         && text.communityTitle
         && text.communityDescription
         && text.additionalFeaturesTitle
@@ -133,9 +133,9 @@ export function PublicHomeSearchPanel({
             title={text.participationTitle}
           />
           <PublicHomeFeatureCard
-            description={text.tournamentDescription}
-            onClick={() => onPage("tournamentCalendar")}
-            title={text.tournamentTitle}
+            description={text.aramDescription}
+            onClick={() => onPage("aram")}
+            title={text.aramTitle}
           />
           <PublicHomeFeatureCard
             description={text.communityDescription}

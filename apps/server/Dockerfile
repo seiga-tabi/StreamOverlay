@@ -56,6 +56,7 @@ RUN find /app/node_modules /app/packages/shared/dist /app/apps/server/dist -type
   \( -name '*.map' -o -name '*.d.ts' -o -path '*/test/*' -o -path '*/tests/*' \) -delete
 COPY --from=build /app/apps/server/config ./apps/server/config
 COPY --from=build /app/apps/server/migrations ./apps/server/migrations
+COPY --from=build /app/apps/server/data/lol/aram ./apps/server/data/lol/aram
 COPY --from=build /app/.palworld-runtime-bundle/apps/server/data/palworld ./apps/server/data/palworld
 COPY --from=build /app/.palworld-runtime-bundle/apps/server/src/data/palworld-mappings ./apps/server/src/data/palworld-mappings
 COPY --from=build /app/apps/dashboard/dist ./apps/dashboard/dist

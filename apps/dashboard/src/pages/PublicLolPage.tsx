@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useMemo, useRef, useState, type FormEvent, type MouseEvent, type ReactNode } from "react";
-import type { CommunityPost, CommunityPostCategory, CommunityPostReportCreateInput, LolChampionSummary, LolPerformanceStats, LolRankHistoryPoint, LolRankedStats, LolRole, LolRoleAnalysis, ParticipationStatus, StreamerRiotIdRequest, StreamerTournament } from "@streamops/shared";
+import type { CommunityPost, CommunityPostCategory, CommunityPostReportCreateInput, LolChampionSummary, LolPerformanceStats, LolRankHistoryPoint, LolRankedStats, LolRole, LolRoleAnalysis, ParticipationStatus, StreamerRiotIdRequest } from "@streamops/shared";
 import { apiBase } from "../api/client";
 import { publicLegalRuntimeConfig } from "../runtime-config";
 import {
@@ -153,7 +153,6 @@ import type {
   PublicRecentRecord,
   PublicRecentChampionSummary,
   PublicLolProfile,
-  TournamentPlayerProfileState,
   CommunityPostProfileState,
   SearchSuggestion,
   PublicNavTarget,
@@ -188,16 +187,13 @@ import {
   stripPublicLocalePrefix,
 } from "../features/public-lol/utils/public-locale-path";
 import {
-  PUBLIC_TOURNAMENT_CALENDAR_PATH,
-  PUBLIC_TOURNAMENT_LIST_PATH,
   publicLegalPath,
   publicPageRouteFromPath,
   publicPathForPage,
-  publicTournamentDetailPath,
   setPublicPath,
-  tournamentRouteFromPublicPath,
   type PublicLegalPageKey,
 } from "../features/public-lol/utils/routes";
+import { PublicAramPage } from "../features/public-lol/pages/PublicAramPage";
 import {
   favoriteFromProfile,
   isFavoriteProfile,
@@ -238,7 +234,6 @@ import {
 
 const TOURNAMENT_PLAYER_PROFILE_LIMIT = 30;
 const TOURNAMENT_PLAYER_PROFILE_CONCURRENCY = 3;
-const tournamentPlayerProfileCache = new Map<string, TournamentPlayerProfileState>();
 
 const PUBLIC_LEGAL_CONFIG = publicLegalRuntimeConfig();
 const PUBLIC_CONTACT_EMAIL = PUBLIC_LEGAL_CONFIG.contactEmail || "support@yoro.gg";
@@ -530,25 +525,6 @@ async function postPublicParticipationCheckIn(publicSessionId: string): Promise<
   if (!response.ok) throw new Error(await readErrorMessage(response));
   const body = await response.json() as { state: PublicParticipationStateResponse };
   return body.state;
-}
-
-async function getPublicTournaments(): Promise<StreamerTournament[]> {
-  const response = await fetch(`${apiBase}/api/public/tournaments`, {
-    credentials: "include"
-  });
-  if (!response.ok) throw new Error(await readErrorMessage(response));
-  const body = await response.json() as { tournaments?: StreamerTournament[] };
-  return Array.isArray(body.tournaments) ? body.tournaments : [];
-}
-
-async function getPublicTournament(slug: string): Promise<StreamerTournament> {
-  const response = await fetch(`${apiBase}/api/public/tournaments/${encodeURIComponent(slug)}`, {
-    credentials: "include"
-  });
-  if (!response.ok) throw new Error(await readErrorMessage(response));
-  const body = await response.json() as { tournament?: StreamerTournament };
-  if (!body.tournament) throw new Error(t().searchFailed);
-  return body.tournament;
 }
 
 function communityPostRiotId(post: CommunityPost | undefined): string | undefined {
@@ -1291,15 +1267,15 @@ function publicHomeSearchPanelText(): PublicHomeSearchPanelText {
       ko: publicI18n.ko.homeParticipationDescription,
       ja: publicI18n.ja.homeParticipationDescription,
     },
-    tournamentTitle: {
-      label: t().homeTournamentTitle,
-      ko: publicI18n.ko.homeTournamentTitle,
-      ja: publicI18n.ja.homeTournamentTitle,
+    aramTitle: {
+      label: t().homeAramTitle,
+      ko: publicI18n.ko.homeAramTitle,
+      ja: publicI18n.ja.homeAramTitle,
     },
-    tournamentDescription: {
-      label: t().homeTournamentDescription,
-      ko: publicI18n.ko.homeTournamentDescription,
-      ja: publicI18n.ja.homeTournamentDescription,
+    aramDescription: {
+      label: t().homeAramDescription,
+      ko: publicI18n.ko.homeAramDescription,
+      ja: publicI18n.ja.homeAramDescription,
     },
     communityTitle: {
       label: t().homeCommunityTitle,
@@ -2983,10 +2959,10 @@ function PublicCommunityPage({
         </div>
 
         {loading ? (
-          <div className={isParty ? "public-party-post-list" : "public-community-post-grid"} role="status" aria-label={t().tournamentPlayerRecordLoading}>
-            <SkeletonCard loadingLabel={t().tournamentPlayerRecordLoading} />
-            <SkeletonCard loadingLabel={t().tournamentPlayerRecordLoading} />
-            <SkeletonCard loadingLabel={t().tournamentPlayerRecordLoading} />
+          <div className={isParty ? "public-party-post-list" : "public-community-post-grid"} role="status" aria-label={t().searching}>
+            <SkeletonCard loadingLabel={t().searching} />
+            <SkeletonCard loadingLabel={t().searching} />
+            <SkeletonCard loadingLabel={t().searching} />
           </div>
         ) : null}
 
@@ -3567,7 +3543,7 @@ function PublicCommunityDetailPage({
             {t().communityDetailTitle}
           </PageHeaderTitle>
           <PageHeaderDescription>
-            {post ? `${post.authorDisplayName} · ${formatTournamentDateTime(post.createdAt)}` : "YORO.gg"}
+            {post ? `${post.authorDisplayName} · ${formatPublicDateTime(post.createdAt)}` : "YORO.gg"}
           </PageHeaderDescription>
           <PageHeaderStatus>
             <StatusPill tone={isParty ? "streamer" : "info"}>
@@ -3841,27 +3817,7 @@ function PublicCommunityDetailPage({
   );
 }
 
-function formatTournamentDate(value: string | undefined): string {
-  if (!value) return "-";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString(activePublicLocale === "ja" ? "ja-JP" : "ko-KR", {
-    month: "2-digit",
-    day: "2-digit"
-  });
-}
-
-function formatTournamentTime(value: string | undefined): string {
-  if (!value) return "-";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleTimeString(activePublicLocale === "ja" ? "ja-JP" : "ko-KR", {
-    hour: "2-digit",
-    minute: "2-digit"
-  });
-}
-
-function formatTournamentDateTime(value: string | undefined): string {
+function formatPublicDateTime(value: string | undefined): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
@@ -3871,1058 +3827,6 @@ function formatTournamentDateTime(value: string | undefined): string {
     hour: "2-digit",
     minute: "2-digit"
   });
-}
-
-function formatTournamentTeamName(value: string | undefined): string {
-  const name = value?.trim();
-  if (!name || name === "-" || /^tbd$/i.test(name) || name === "미정" || name === "未定") return t().tournamentTbd;
-  return name;
-}
-
-function formatTournamentRoundName(round: string | undefined): string {
-  const value = round?.trim();
-  if (!value) return t().tournamentTbd;
-  const numeric = value.match(/^(\d+)\s*(?:경기|試合|match|Match|MATCH)$/);
-  if (numeric) return activePublicLocale === "ja" ? `${numeric[1]}試合` : `${numeric[1]}경기`;
-  const normalized = value.toLocaleLowerCase();
-  if (["16강", "round of 16", "best 16", "ベスト16"].includes(normalized)) return t().tournamentRound16;
-  if (["8강", "quarterfinal", "quarterfinals", "best 8", "ベスト8"].includes(normalized)) return t().tournamentRound8;
-  if (["4강", "semifinal", "semifinals", "semi finals", "準決勝"].includes(normalized)) return t().tournamentRound4;
-  if (["결승", "final", "finals", "決勝"].includes(normalized)) return t().tournamentFinal;
-  return value;
-}
-
-function tournamentDescriptionText(value: string | undefined, fallback: string): string {
-  const description = value?.trim();
-  if (!description || description === "." || description === "。" || description === "-") return fallback;
-  return description;
-}
-
-function tournamentRoundNames(tournament: StreamerTournament): string[] {
-  const rounds = tournament.matches.map((match) => match.round).filter(Boolean);
-  return [...new Set(rounds)].length ? [...new Set(rounds)] : [t().tournamentRound16];
-}
-
-function firstRoundDate(tournament: StreamerTournament, round: string): string {
-  const match = tournament.matches.find((item) => item.round === round && item.scheduledAt);
-  return formatTournamentDate(match?.scheduledAt);
-}
-
-type PublicTournamentMatch = StreamerTournament["matches"][number];
-
-function isTournamentMatchNumberRound(value: string | undefined): boolean {
-  return /^(\d+)\s*(?:경기|試合|match)$/i.test(value?.trim() ?? "");
-}
-
-function formatTournamentBracketStageName(round: string | undefined, index: number, total: number): string {
-  if (index === total - 1 && total > 1) return t().tournamentFinal;
-  if (isTournamentMatchNumberRound(round)) return activePublicLocale === "ja" ? `${index + 1}ラウンド` : `${index + 1}라운드`;
-  return formatTournamentRoundName(round);
-}
-
-function tournamentBracketRoundPoint(index: number, total: number): number {
-  if (total > 1 && index === total - 1) return 40;
-  return [5, 10, 20][Math.min(Math.max(index, 0), 2)] ?? 5;
-}
-
-function tournamentMatchWinnerTeamId(match: PublicTournamentMatch): string | undefined {
-  if (match.winnerTeamId) return match.winnerTeamId;
-  if (match.status !== "completed" || match.scoreA === undefined || match.scoreB === undefined || match.scoreA === match.scoreB) return undefined;
-  return match.scoreA > match.scoreB ? match.teamAId : match.teamBId;
-}
-
-function tournamentMatchSideClass(teamId: string | undefined, winnerTeamId: string | undefined, hasScore: boolean): string {
-  if (!teamId || !winnerTeamId) return "";
-  if (teamId === winnerTeamId) return "winner";
-  return hasScore ? "loser" : "";
-}
-
-type TournamentTeamRecord = {
-  id: string;
-  team: string;
-  seed: number;
-  win: number;
-  loss: number;
-  point: number;
-};
-
-function buildTournamentTeamRecords(tournament: StreamerTournament | undefined): TournamentTeamRecord[] {
-  if (!tournament) return [];
-  const records = new Map(tournament.teams.map((team) => [team.id, { id: team.id, team: team.name, seed: team.seed ?? 999, win: 0, loss: 0, point: 0 }]));
-  for (const match of tournament.matches) {
-    if (match.status !== "completed" || !match.teamAId || !match.teamBId) continue;
-    const teamA = records.get(match.teamAId);
-    const teamB = records.get(match.teamBId);
-    if (!teamA || !teamB) continue;
-    const scoreA = match.scoreA ?? 0;
-    const scoreB = match.scoreB ?? 0;
-    teamA.point += scoreA - scoreB;
-    teamB.point += scoreB - scoreA;
-    const teamAWon = match.winnerTeamId === match.teamAId || (!match.winnerTeamId && scoreA > scoreB);
-    const teamBWon = match.winnerTeamId === match.teamBId || (!match.winnerTeamId && scoreB > scoreA);
-    if (teamAWon) {
-      teamA.win += 1;
-      teamB.loss += 1;
-    } else if (teamBWon) {
-      teamB.win += 1;
-      teamA.loss += 1;
-    }
-  }
-  return [...records.values()]
-    .sort((a, b) => b.win - a.win || b.point - a.point || a.seed - b.seed);
-}
-
-function buildTournamentStandings(tournament: StreamerTournament | undefined): Array<{ rank: number; team: string; win: number; loss: number; point: string }> {
-  return buildTournamentTeamRecords(tournament)
-    .map((record, index) => ({
-      rank: index + 1,
-      team: record.team,
-      win: record.win,
-      loss: record.loss,
-      point: record.point > 0 ? `+${record.point}` : String(record.point)
-    }));
-}
-
-function buildTournamentTeamGroups(tournament: StreamerTournament | undefined): Array<{ label: string; teams: StreamerTournament["teams"] }> {
-  if (!tournament) return [];
-  const teams = [...tournament.teams].sort((a, b) => (a.seed ?? 999) - (b.seed ?? 999) || a.name.localeCompare(b.name));
-  if (teams.length <= 8) return [{ label: t().tournamentAllTeams, teams }];
-  const midpoint = Math.ceil(teams.length / 2);
-  return [
-    { label: "GROUP A", teams: teams.slice(0, midpoint) },
-    { label: "GROUP B", teams: teams.slice(midpoint) }
-  ].filter((group) => group.teams.length > 0);
-}
-
-function tournamentTeamNextMatch(tournament: StreamerTournament, teamId: string): string {
-  const teamById = new Map(tournament.teams.map((team) => [team.id, team]));
-  const next = [...tournament.matches]
-    .filter((match) => match.status !== "completed" && (match.teamAId === teamId || match.teamBId === teamId))
-    .sort((a, b) => (Date.parse(a.scheduledAt ?? "") || Number.MAX_SAFE_INTEGER) - (Date.parse(b.scheduledAt ?? "") || Number.MAX_SAFE_INTEGER))[0];
-  if (!next) return t().tournamentNoMatch;
-  const opponentId = next.teamAId === teamId ? next.teamBId : next.teamAId;
-  const opponent = opponentId ? teamById.get(opponentId)?.name : undefined;
-  const prefix = opponent ? `${t().tournamentVs} ${opponent}` : formatTournamentRoundName(next.round);
-  return `${prefix} · ${formatTournamentDateTime(next.scheduledAt)}`;
-}
-
-function tournamentPlayerProfileQuery(riotId: string | undefined): string | undefined {
-  if (!riotId) return undefined;
-  const query = jpRiotIdQuery(riotId);
-  return splitRiotIdText(query) ? query : undefined;
-}
-
-function tournamentPlayerProfileKey(riotId: string | undefined): string | undefined {
-  const query = tournamentPlayerProfileQuery(riotId);
-  return query ? normalizeRiotId(query) : undefined;
-}
-
-function tournamentPlayerDisplayName(riotId: string, profile: PublicLolProfile | undefined): { name: string; tag?: string } {
-  if (profile) return { name: profile.gameName, tag: profile.tagLine };
-  const parsed = splitRiotIdText(jpRiotIdQuery(riotId));
-  return parsed ? { name: parsed.gameName, tag: parsed.tagLine } : { name: riotId };
-}
-
-function tournamentBestRankStats(profile: PublicLolProfile | undefined): LolRankedStats | undefined {
-  if (!profile) return undefined;
-  const candidates = [soloRankStats(profile), flexRankStats(profile), ranked5v5Stats(profile), profile.rankedStats]
-    .filter((stats): stats is LolRankedStats => Boolean(stats && stats.tier !== "UNRANKED"));
-  return candidates.sort((a, b) => rankScore(b) - rankScore(a))[0];
-}
-
-function tournamentPrimaryRankStats(profile: PublicLolProfile | undefined): LolRankedStats | undefined {
-  if (!profile) return undefined;
-  return soloRankStats(profile) ?? profile.rankedStats ?? flexRankStats(profile) ?? ranked5v5Stats(profile);
-}
-
-function tournamentPlayerWinSummary(profile: PublicLolProfile | undefined): { wins: number; losses: number; winRate: number } | undefined {
-  if (!profile) return undefined;
-  const ranked = tournamentPrimaryRankStats(profile);
-  if (ranked && totalGames(ranked) > 0) {
-    return { wins: ranked.wins, losses: ranked.losses, winRate: ranked.winRate };
-  }
-  const wins = profile.summary.recentWins;
-  const games = profile.summary.recentGames;
-  return games > 0 ? { wins, losses: Math.max(0, games - wins), winRate: profile.summary.recentWinRate } : undefined;
-}
-
-type TournamentCalendarEvent = {
-  id: string;
-  tournament: StreamerTournament;
-  matchId?: string;
-  title: string;
-  round: string;
-  startsAt: Date;
-  time: string;
-  status: "scheduled" | "live" | "completed";
-};
-
-function tournamentDateKey(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-function tournamentMonthTitle(date: Date): string {
-  return date.toLocaleDateString(activePublicLocale === "ja" ? "ja-JP" : "ko-KR", {
-    year: "numeric",
-    month: "long"
-  });
-}
-
-function tournamentCalendarWeekdays(): string[] {
-  return activePublicLocale === "ja"
-    ? ["日", "月", "火", "水", "木", "金", "土"]
-    : ["일", "월", "화", "수", "목", "금", "토"];
-}
-
-function buildTournamentCalendarEvents(tournaments: StreamerTournament[]): TournamentCalendarEvent[] {
-  const events: TournamentCalendarEvent[] = [];
-  for (const tournament of tournaments) {
-    const teamById = new Map(tournament.teams.map((team) => [team.id, team]));
-    const matches = tournament.matches.filter((match) => match.scheduledAt);
-    for (const match of matches) {
-      const startsAt = new Date(match.scheduledAt ?? "");
-      if (Number.isNaN(startsAt.getTime())) continue;
-      const teamA = match.teamAId ? teamById.get(match.teamAId)?.name : undefined;
-      const teamB = match.teamBId ? teamById.get(match.teamBId)?.name : undefined;
-      const title = teamA || teamB ? `${formatTournamentTeamName(teamA)} ${t().tournamentVs} ${formatTournamentTeamName(teamB)}` : tournament.title;
-      events.push({
-        id: `${tournament.id}:${match.id}`,
-        tournament,
-        matchId: match.id,
-        title,
-        round: formatTournamentRoundName(match.round || tournament.formatLabel || t().tournamentScheduleTitle),
-        startsAt,
-        time: formatTournamentTime(match.scheduledAt),
-        status: match.status
-      });
-    }
-    if (matches.length === 0 && tournament.startsAt) {
-      const startsAt = new Date(tournament.startsAt);
-      if (!Number.isNaN(startsAt.getTime())) {
-        events.push({
-          id: `${tournament.id}:start`,
-          tournament,
-          title: tournament.title,
-          round: tournament.formatLabel || t().tournamentScheduleTitle,
-          startsAt,
-          time: formatTournamentTime(tournament.startsAt),
-          status: "scheduled"
-        });
-      }
-    }
-  }
-  return events.sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
-}
-
-function tournamentCalendarBaseDate(events: TournamentCalendarEvent[]): Date {
-  const now = new Date();
-  const next = events.find((event) => event.startsAt.getTime() >= now.getTime());
-  return next?.startsAt ?? events[0]?.startsAt ?? now;
-}
-
-function buildTournamentCalendarDays(events: TournamentCalendarEvent[], baseDate: Date): Array<{ date: Date; outside: boolean; today: boolean; events: TournamentCalendarEvent[] }> {
-  const monthStart = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
-  const gridStart = new Date(monthStart);
-  gridStart.setDate(monthStart.getDate() - monthStart.getDay());
-  const todayKey = tournamentDateKey(new Date());
-  const eventsByDate = new Map<string, TournamentCalendarEvent[]>();
-  for (const event of events) {
-    const key = tournamentDateKey(event.startsAt);
-    eventsByDate.set(key, [...(eventsByDate.get(key) ?? []), event]);
-  }
-  return Array.from({ length: 42 }, (_, index) => {
-    const date = new Date(gridStart);
-    date.setDate(gridStart.getDate() + index);
-    const key = tournamentDateKey(date);
-    return {
-      date,
-      outside: date.getMonth() !== baseDate.getMonth(),
-      today: key === todayKey,
-      events: eventsByDate.get(key) ?? []
-    };
-  });
-}
-
-function PublicTournamentCalendarPage({
-  tournaments,
-  loading,
-  error,
-  onSelectTournament,
-  onOpenList
-}: {
-  tournaments: StreamerTournament[];
-  loading: boolean;
-  error: string;
-  onSelectTournament: (slug: string) => void;
-  onOpenList: () => void;
-}) {
-  const events = buildTournamentCalendarEvents(tournaments);
-  const baseDate = tournamentCalendarBaseDate(events);
-  const days = buildTournamentCalendarDays(events, baseDate);
-  const upcoming = events.filter((event) => event.status !== "completed").slice(0, 6);
-
-  return (
-    <AppShell
-      as="section"
-      className="public-panel public-menu-page-panel public-tournament-calendar-page public-tournament-shared-shell"
-      mainId="public-tournament-calendar-main"
-      showSkipLink={false}
-      sidebarMode="drawer"
-      variant="public"
-    >
-      <AppShellHeader as="div" className="public-tournament-shared-header">
-        <PageHeader as="div" layout="split">
-          <PageHeaderEyebrow  >
-            {t().contentMenu}
-          </PageHeaderEyebrow>
-          <PageHeaderTitle as="h2"  >
-            {t().tournamentCalendarTitle}
-          </PageHeaderTitle>
-          <PageHeaderDescription  >
-            {t().tournamentCalendarSubtitle}
-          </PageHeaderDescription>
-          <PageHeaderStatus>
-            <Badge tone="info">{events.length} {t().tournamentMatchCount}</Badge>
-          </PageHeaderStatus>
-          <PageHeaderActions>
-            <Button type="button" variant="secondary" onClick={onOpenList}  >
-              {t().tournamentList}
-            </Button>
-          </PageHeaderActions>
-        </PageHeader>
-      </AppShellHeader>
-      <AppShellMain as="div" className="public-tournament-shared-main" id="public-tournament-calendar-main">
-        {loading ? (
-          <div className="public-tournament-shared-loading" role="status" aria-label={t().searching}>
-            <SkeletonCard loadingLabel={t().searching} />
-            <SkeletonCard loadingLabel={t().searching} />
-          </div>
-        ) : null}
-        {!loading && error ? (
-          <EmptyState variant="error" as="div">
-            <EmptyStateIcon>!</EmptyStateIcon>
-            <EmptyStateTitle as="h3">{t().tournamentCalendarTitle}</EmptyStateTitle>
-            <EmptyStateDescription>{error}</EmptyStateDescription>
-            <EmptyStateActions>
-              <Button type="button" variant="secondary" onClick={onOpenList}>{t().tournamentList}</Button>
-            </EmptyStateActions>
-          </EmptyState>
-        ) : null}
-        {!loading && !error && events.length === 0 ? (
-          <EmptyState variant="tournament" as="div">
-            <EmptyStateIcon>+</EmptyStateIcon>
-            <EmptyStateTitle as="h3">{t().tournamentCalendarEmpty}</EmptyStateTitle>
-          </EmptyState>
-        ) : null}
-        {!loading && !error && events.length > 0 ? (
-          <div className="public-tournament-calendar-layout public-tournament-shared-calendar-layout">
-            <Card as="section" className="public-tournament-calendar-card" padding="lg" variant="glass">
-              <CardHeader className="public-tournament-calendar-title">
-                <CardTitle as="h3">{tournamentMonthTitle(baseDate)}</CardTitle>
-                <Badge tone="neutral">{events.length} {t().tournamentMatchCount}</Badge>
-              </CardHeader>
-              <CardContent className="public-tournament-calendar-grid">
-                {tournamentCalendarWeekdays().map((weekday) => <b key={weekday}>{weekday}</b>)}
-                {days.map((day) => (
-                  <div className={`public-tournament-calendar-day ${day.outside ? "outside" : ""} ${day.today ? "today" : ""}`} key={tournamentDateKey(day.date)}>
-                    <strong>{day.date.getDate()}</strong>
-                    <div>
-                      {day.events.slice(0, 3).map((event) => (
-                        <Button
-                          className={event.status}
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onSelectTournament(event.tournament.slug)}
-                          key={event.id}
-                        >
-                          <span>{event.time}</span>
-                          <em>{event.tournament.title}</em>
-                          <small>{event.round}</small>
-                        </Button>
-                      ))}
-                      {day.events.length > 3 ? <i>+{day.events.length - 3}</i> : null}
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-            <Card as="aside" className="public-tournament-upcoming-card" padding="lg" variant="elevated">
-              <CardHeader className="public-tournament-card-head">
-                <CardTitle as="h3"  >
-                  {t().tournamentUpcoming}
-                </CardTitle>
-                <StatusPill tone="info">{upcoming.length}</StatusPill>
-              </CardHeader>
-              <CardContent className="public-tournament-shared-upcoming-list">
-                {upcoming.length === 0 ? (
-                  <EmptyState variant="tournament" as="div">
-                    <EmptyStateTitle as="h3">{t().tournamentCalendarEmpty}</EmptyStateTitle>
-                  </EmptyState>
-                ) : upcoming.map((event) => (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    fullWidth
-                    onClick={() => onSelectTournament(event.tournament.slug)}
-                    key={event.id}
-                  >
-                    <time>{formatTournamentDateTime(event.startsAt.toISOString())}</time>
-                    <strong>{event.title}</strong>
-                    <span>{event.tournament.title} · {event.round}</span>
-                  </Button>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
-        ) : null}
-      </AppShellMain>
-    </AppShell>
-  );
-}
-
-function PublicTournamentListPage({
-  tournaments,
-  loading,
-  error,
-  onSelectTournament,
-  onOpenCalendar
-}: {
-  tournaments: StreamerTournament[];
-  loading: boolean;
-  error: string;
-  onSelectTournament: (slug: string) => void;
-  onOpenCalendar: () => void;
-}) {
-  return (
-    <AppShell
-      as="section"
-      className="public-panel public-menu-page-panel public-tournament-list-page public-tournament-shared-shell"
-      mainId="public-tournament-list-main"
-      showSkipLink={false}
-      sidebarMode="drawer"
-      variant="public"
-    >
-      <AppShellHeader as="div" className="public-tournament-shared-header">
-        <PageHeader as="div" layout="split">
-          <PageHeaderEyebrow  >
-            {t().contentMenu}
-          </PageHeaderEyebrow>
-          <PageHeaderTitle as="h2"  >
-            {t().tournamentListTitle}
-          </PageHeaderTitle>
-          <PageHeaderDescription  >
-            {t().tournamentListSubtitle}
-          </PageHeaderDescription>
-          <PageHeaderStatus>
-            <Badge tone="streamer">{tournaments.length} {t().tournamentTeamUnit}</Badge>
-          </PageHeaderStatus>
-          <PageHeaderActions>
-            <Button type="button" variant="secondary" onClick={onOpenCalendar}  >
-              {t().tournamentCalendar}
-            </Button>
-          </PageHeaderActions>
-        </PageHeader>
-      </AppShellHeader>
-      <AppShellMain as="div" className="public-tournament-shared-main" id="public-tournament-list-main">
-        {loading ? (
-          <div className="public-tournament-list-grid">
-            <SkeletonCard loadingLabel={t().searching} />
-            <SkeletonCard loadingLabel={t().searching} />
-            <SkeletonCard loadingLabel={t().searching} />
-          </div>
-        ) : null}
-        {!loading && error ? (
-          <EmptyState variant="error" as="div">
-            <EmptyStateIcon>!</EmptyStateIcon>
-            <EmptyStateTitle as="h3">{t().tournamentListTitle}</EmptyStateTitle>
-            <EmptyStateDescription>{error}</EmptyStateDescription>
-          </EmptyState>
-        ) : null}
-        {!loading && !error && tournaments.length === 0 ? (
-          <EmptyState variant="tournament" as="div">
-            <EmptyStateIcon>+</EmptyStateIcon>
-            <EmptyStateTitle as="h3">{t().tournamentListEmpty}</EmptyStateTitle>
-            <EmptyStateActions>
-              <Button type="button" variant="secondary" onClick={onOpenCalendar}>{t().tournamentCalendar}</Button>
-            </EmptyStateActions>
-          </EmptyState>
-        ) : null}
-        {!loading && !error && tournaments.length > 0 ? (
-          <div className="public-tournament-list-grid">
-            {tournaments.map((tournament) => {
-              const liveCount = tournament.matches.filter((match) => match.status === "live").length;
-              const completedCount = tournament.matches.filter((match) => match.status === "completed").length;
-              const statusLabel = liveCount > 0 ? t().tournamentLive : completedCount === tournament.matches.length && tournament.matches.length > 0 ? t().tournamentCompleted : t().tournamentUpcoming;
-              const statusTone = liveCount > 0 ? "live" : completedCount === tournament.matches.length && tournament.matches.length > 0 ? "success" : "info";
-              return (
-                <Card className="public-tournament-list-card" key={tournament.id} padding="lg" variant="interactive">
-                  <CardHeader>
-                    <div>
-                      <StatusPill size="sm" tone={statusTone}>{statusLabel}</StatusPill>
-                      <CardTitle as="h3">{tournament.title}</CardTitle>
-                      <CardDescription>{tournamentDescriptionText(tournament.description, t().tournamentSubtitle)}</CardDescription>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="public-tournament-shared-metrics">
-                    <Metric label={t().tournamentPeriod} value={`${formatTournamentDate(tournament.startsAt)} ~ ${formatTournamentDate(tournament.endsAt)}`} tone="neutral" size="sm" />
-                    <Metric label={t().tournamentTeams} value={`${tournament.teams.length} ${t().tournamentTeamUnit}`} tone="streamer" size="sm" />
-                    <Metric label={t().tournamentMatchCount} value={tournament.matches.length} tone="info" size="sm" />
-                  </CardContent>
-                  <Button type="button" onClick={() => onSelectTournament(tournament.slug)}  >
-                    {t().tournamentOpenDetail}
-                  </Button>
-                </Card>
-              );
-            })}
-          </div>
-        ) : null}
-      </AppShellMain>
-    </AppShell>
-  );
-}
-
-function PublicTournamentPage({
-  page,
-  onPage,
-  tournaments,
-  selectedSlug,
-  loading,
-  error,
-  onSelectTournament
-}: {
-  page: Extract<PublicMainPage, "tournamentNews" | "tournamentTeams" | "tournamentBracket" | "tournamentSchedule">;
-  onPage: (page: PublicMainPage) => void;
-  tournaments: StreamerTournament[];
-  selectedSlug?: string;
-  loading: boolean;
-  error: string;
-  onSelectTournament: (slug: string) => void;
-}) {
-  const tabs: Array<{ page: Extract<PublicMainPage, "tournamentNews" | "tournamentTeams" | "tournamentBracket" | "tournamentSchedule">; label: string; ko: string; ja: string }> = [
-    { page: "tournamentNews", label: t().tournamentNews, ko: publicI18n.ko.tournamentNews, ja: publicI18n.ja.tournamentNews },
-    { page: "tournamentTeams", label: t().tournamentTeamGroups, ko: publicI18n.ko.tournamentTeamGroups, ja: publicI18n.ja.tournamentTeamGroups },
-    { page: "tournamentBracket", label: t().tournamentBracket, ko: publicI18n.ko.tournamentBracket, ja: publicI18n.ja.tournamentBracket },
-    { page: "tournamentSchedule", label: t().tournamentScheduleRanking, ko: publicI18n.ko.tournamentScheduleRanking, ja: publicI18n.ja.tournamentScheduleRanking }
-  ];
-  const tournament = tournaments.find((item) => item.slug === selectedSlug) ?? tournaments[0];
-  const teamById = new Map(tournament?.teams.map((team) => [team.id, team]) ?? []);
-  const scheduleItems = (tournament?.matches ?? [])
-    .map((match) => {
-      const teamA = match.teamAId ? teamById.get(match.teamAId) : undefined;
-      const teamB = match.teamBId ? teamById.get(match.teamBId) : undefined;
-      return {
-        id: match.id,
-        teamA: formatTournamentTeamName(teamA?.name),
-        teamB: formatTournamentTeamName(teamB?.name),
-        time: formatTournamentDateTime(match.scheduledAt),
-        round: formatTournamentRoundName(match.round),
-        live: match.status === "live",
-        format: match.format || "BO3",
-        score: match.scoreA !== undefined || match.scoreB !== undefined ? `${match.scoreA ?? 0}:${match.scoreB ?? 0}` : "-",
-        sortKey: Date.parse(match.scheduledAt ?? "") || Number.MAX_SAFE_INTEGER
-      };
-    })
-    .sort((a, b) => a.sortKey - b.sortKey);
-  const notices = (tournament?.news ?? []).map((item) => ({ title: item.title, date: formatTournamentDate(item.publishedAt) }));
-  const news = tournament?.news ?? [];
-  const standings = buildTournamentStandings(tournament);
-  const teamRecords = buildTournamentTeamRecords(tournament);
-  const recordByTeamId = new Map(teamRecords.map((record) => [record.id, record]));
-  const teamGroups = buildTournamentTeamGroups(tournament);
-  const bracketRounds = tournament ? tournamentRoundNames(tournament) : [];
-  const tournamentPlayerQueries = useMemo(() => {
-    if (page !== "tournamentTeams") return [];
-    const unique = new Map<string, string>();
-    for (const team of tournament?.teams ?? []) {
-      for (const player of team.players ?? []) {
-        const query = tournamentPlayerProfileQuery(player.riotId);
-        const key = tournamentPlayerProfileKey(player.riotId);
-        if (query && key && !unique.has(key)) unique.set(key, query);
-      }
-    }
-    return [...unique.entries()]
-      .slice(0, TOURNAMENT_PLAYER_PROFILE_LIMIT)
-      .map(([key, query]) => ({ key, query }));
-  }, [page, tournament]);
-  const tournamentPlayerQueryKey = tournamentPlayerQueries.map((item) => item.key).join("|");
-  const [tournamentPlayerProfiles, setTournamentPlayerProfiles] = useState<Record<string, TournamentPlayerProfileState>>({});
-
-  useEffect(() => {
-    let cancelled = false;
-    const entries = tournamentPlayerQueries;
-    setTournamentPlayerProfiles(() => {
-      const next: Record<string, TournamentPlayerProfileState> = {};
-      for (const entry of entries) {
-        next[entry.key] = tournamentPlayerProfileCache.get(entry.key) ?? { status: "loading" };
-      }
-      return next;
-    });
-    const missing = entries.filter((entry) => !tournamentPlayerProfileCache.has(entry.key));
-    void (async () => {
-      for (let index = 0; index < missing.length; index += TOURNAMENT_PLAYER_PROFILE_CONCURRENCY) {
-        const batch = missing.slice(index, index + TOURNAMENT_PLAYER_PROFILE_CONCURRENCY);
-        await Promise.all(batch.map(async (entry) => {
-          let state: TournamentPlayerProfileState;
-          try {
-            state = { status: "ready", profile: await searchProfile(entry.query) };
-          } catch (error) {
-            state = { status: "error", error: error instanceof Error ? error.message : String(error) };
-          }
-          tournamentPlayerProfileCache.set(entry.key, state);
-          if (!cancelled) {
-            setTournamentPlayerProfiles((current) => ({ ...current, [entry.key]: state }));
-          }
-        }));
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [tournamentPlayerQueryKey]);
-
-  const avatar = (teamName: string) => {
-    const team = tournament?.teams.find((item) => item.name === teamName);
-    return (
-      <span className="public-tournament-avatar" aria-hidden="true">
-        {team?.avatarUrl ? <img src={team.avatarUrl} alt="" /> : teamName.slice(0, 1)}
-      </span>
-    );
-  };
-  const liveMatchCount = tournament?.matches.filter((match) => match.status === "live").length ?? 0;
-  const completedMatchCount = tournament?.matches.filter((match) => match.status === "completed").length ?? 0;
-  const tournamentStatusLabel = liveMatchCount > 0
-    ? t().tournamentLive
-    : tournament && completedMatchCount === tournament.matches.length && tournament.matches.length > 0
-      ? t().tournamentCompleted
-      : t().tournamentUpcoming;
-  const tournamentStatusTone = liveMatchCount > 0
-    ? "live"
-    : tournament && completedMatchCount === tournament.matches.length && tournament.matches.length > 0
-      ? "success"
-      : "info";
-
-  return (
-    <AppShell
-      as="section"
-      className="public-panel public-menu-page-panel public-tournament-page public-tournament-shared-shell"
-      mainId="public-tournament-detail-main"
-      showSkipLink={false}
-      variant="public"
-    >
-      <AppShellHeader as="div" className="public-tournament-shared-header">
-        <PageHeader as="div" layout="split">
-          <PageHeaderEyebrow  >
-            {t().contentMenu}
-          </PageHeaderEyebrow>
-          <PageHeaderTitle as="h2">{tournament?.title ?? t().tournamentTitle}</PageHeaderTitle>
-          <PageHeaderDescription>
-            {tournamentDescriptionText(tournament?.description, t().tournamentSubtitle)}
-          </PageHeaderDescription>
-          <PageHeaderStatus>
-            <StatusPill tone={tournamentStatusTone}>{tournamentStatusLabel}</StatusPill>
-          </PageHeaderStatus>
-          <PageHeaderActions>
-            <FormField className="public-tournament-shared-selector">
-              <FormLabel  >
-                {t().tournamentSelect}
-              </FormLabel>
-              <FormControl>
-                <Select value={tournament?.slug ?? ""} onChange={(event) => onSelectTournament(event.target.value)} disabled={loading || tournaments.length === 0}>
-                  {tournaments.map((item) => <option value={item.slug} key={item.id}>{item.title}</option>)}
-                </Select>
-              </FormControl>
-            </FormField>
-          </PageHeaderActions>
-        </PageHeader>
-      </AppShellHeader>
-
-      <AppShellSidebar as="nav" className="public-tournament-shared-sidebar">
-        <Navigation aria-label={t().contentMenu} variant="public">
-          <NavigationSection title={t().tournamentTitle}>
-            {tabs.map((tab) => (
-              <NavigationItem active={page === tab.page} as="button" onClick={() => onPage(tab.page)} key={tab.page}>
-                <span  >{tab.label}</span>
-              </NavigationItem>
-            ))}
-          </NavigationSection>
-          <NavigationSection title={t().tournamentScheduleTitle}>
-            <NavigationItem as="button" onClick={() => onPage("tournamentSchedule")} badge={<NavigationBadge>{scheduleItems.length}</NavigationBadge>}>
-              {t().tournamentMatchCount}
-            </NavigationItem>
-          </NavigationSection>
-        </Navigation>
-      </AppShellSidebar>
-
-      <AppShellMain as="div" className="public-tournament-shared-main" id="public-tournament-detail-main">
-        {loading ? (
-          <div className="public-tournament-shared-loading" role="status" aria-label={t().searching}>
-            <SkeletonCard loadingLabel={t().searching} />
-            <SkeletonText lines={4} />
-          </div>
-        ) : null}
-        {!loading && error ? (
-          <EmptyState variant="error" as="div">
-            <EmptyStateIcon>!</EmptyStateIcon>
-            <EmptyStateTitle as="h3">{t().tournamentTitle}</EmptyStateTitle>
-            <EmptyStateDescription>{error}</EmptyStateDescription>
-          </EmptyState>
-        ) : null}
-        {!loading && !error && !tournament ? (
-          <EmptyState variant="tournament" as="div"  >
-            <EmptyStateIcon>+</EmptyStateIcon>
-            <EmptyStateTitle as="h3">{t().tournamentEmpty}</EmptyStateTitle>
-          </EmptyState>
-        ) : null}
-
-        {tournament ? (
-          <Card className="public-tournament-hero public-tournament-shared-hero" padding="lg" variant="glass">
-            <CardHeader>
-              <div>
-                <Badge tone="streamer">{t().contentMenu}</Badge>
-                <CardTitle as="h3">{tournament.title}</CardTitle>
-                <CardDescription>{tournamentDescriptionText(tournament.description, t().tournamentSubtitle)}</CardDescription>
-              </div>
-              <StatusPill tone={tournamentStatusTone}>{tournamentStatusLabel}</StatusPill>
-            </CardHeader>
-            <CardContent className="public-tournament-hero-stats public-tournament-shared-metrics">
-              <Metric label={t().tournamentPeriod} value={`${formatTournamentDate(tournament.startsAt)} ~ ${formatTournamentDate(tournament.endsAt)}`} tone="neutral" size="sm" />
-              <Metric label={t().tournamentTeams} value={`${tournament.teams.length} ${t().tournamentTeamUnit}`} tone="streamer" size="sm" />
-              <Metric label={t().tournamentFormat} value={tournament.formatLabel || "-"} tone="info" size="sm" />
-              <Metric label={t().tournamentPrize} value={tournament.prizeLabel || "-"} tone="warning" size="sm" />
-            </CardContent>
-          </Card>
-        ) : null}
-
-      {tournament && page === "tournamentBracket" ? (
-        <div className="public-tournament-layout public-tournament-layout--full">
-          <div className="public-tournament-main">
-            <div className="public-tournament-title-row">
-              <div>
-                <h2  >{t().tournamentBracket}</h2>
-                <p>{tournamentDescriptionText(tournament.description, t().tournamentBracketIntro)}</p>
-              </div>
-            </div>
-            <div className={`public-tournament-bracket rounds-${Math.min(Math.max(bracketRounds.length, 1), 4)}`} aria-label={t().tournamentBracket}>
-              {bracketRounds.map((round, roundIndex) => {
-                const roundMatches = tournament.matches.filter((match) => match.round === round);
-                const isLastRound = roundIndex === bracketRounds.length - 1;
-                const roundPoint = tournamentBracketRoundPoint(roundIndex, bracketRounds.length);
-                return (
-                <div className={`public-tournament-round ${isLastRound ? "final-round" : ""} ${roundIndex > 0 ? `future round-${roundIndex + 1}` : ""}`} key={round}>
-                  <strong>
-                    <span>{formatTournamentBracketStageName(round, roundIndex, bracketRounds.length)}</span>
-                    <small>{roundPoint}{t().tournamentPointPerPick}</small>
-                  </strong>
-                  {roundMatches.map((match, matchIndex) => {
-                    const teamA = match.teamAId ? teamById.get(match.teamAId) : undefined;
-                    const teamB = match.teamBId ? teamById.get(match.teamBId) : undefined;
-                    const teamAName = formatTournamentTeamName(teamA?.name);
-                    const teamBName = formatTournamentTeamName(teamB?.name);
-                    const isTbd = !teamA || !teamB;
-                    const winnerTeamId = tournamentMatchWinnerTeamId(match);
-                    const hasScore = match.scoreA !== undefined || match.scoreB !== undefined || match.status === "completed";
-                    const pairClass = isLastRound
-                      ? "connector-none"
-                      : matchIndex % 2 === 0 && matchIndex + 1 < roundMatches.length
-                        ? "pair-top"
-                        : matchIndex % 2 === 1
-                          ? "pair-bottom"
-                          : "pair-solo";
-                    return (
-                      <article className={`public-tournament-match-card ${isTbd ? "tbd" : ""} ${match.status} ${pairClass} ${winnerTeamId ? "advanced" : ""}`} key={match.id}>
-                        <span className="public-tournament-match-result-label">{t().tournamentFinalResult}</span>
-                        <div className={`public-tournament-match-team ${!teamA ? "pending" : ""} ${tournamentMatchSideClass(match.teamAId, winnerTeamId, hasScore)}`}>
-                          {winnerTeamId === match.teamAId ? <span className="public-tournament-match-point">+{roundPoint}</span> : null}
-                          <b>{teamA?.seed ?? "-"}</b>
-                          {avatar(teamAName)}
-                          <span className="public-tournament-match-name">{teamAName}</span>
-                          {match.status === "live" && winnerTeamId !== match.teamAId ? <span className="public-tournament-match-state">{t().tournamentLiveShort}</span> : null}
-                          {winnerTeamId === match.teamAId ? <span className="public-tournament-match-check">✓</span> : null}
-                          <i>{match.scoreA ?? "-"}</i>
-                        </div>
-                        <small className="public-tournament-match-vs">{t().tournamentVs}</small>
-                        <div className={`public-tournament-match-team ${!teamB ? "pending" : ""} ${tournamentMatchSideClass(match.teamBId, winnerTeamId, hasScore)}`}>
-                          {winnerTeamId === match.teamBId ? <span className="public-tournament-match-point">+{roundPoint}</span> : null}
-                          <b>{teamB?.seed ?? "-"}</b>
-                          {avatar(teamBName)}
-                          <span className="public-tournament-match-name">{teamBName}</span>
-                          {winnerTeamId === match.teamBId ? <span className="public-tournament-match-check">✓</span> : null}
-                          <i>{match.scoreB ?? "-"}</i>
-                        </div>
-                        <time>{formatTournamentTime(match.scheduledAt)}<small>{match.format ?? "BO3"}</small><em>{firstRoundDate(tournament, round)}</em></time>
-                      </article>
-                    );
-                  })}
-                </div>
-              );})}
-              <div className="public-tournament-winner" aria-hidden="true">🏆</div>
-            </div>
-            <div className="public-tournament-info-grid">
-              {[
-                [t().tournamentPeriod, `${formatTournamentDate(tournament.startsAt)} ~ ${formatTournamentDate(tournament.endsAt)}`, "▦"],
-                [t().tournamentTeams, `${tournament.teams.length} ${t().tournamentTeamUnit}`, "●"],
-                [t().tournamentFormat, tournament.formatLabel || "-", "◈"],
-                [t().tournamentPrize, tournament.prizeLabel || "-", "◇"]
-              ].map(([label, value, icon]) => (
-                <article key={label}>
-                  <span aria-hidden="true">{icon}</span>
-                  <small>{label}</small>
-                  <strong>{value}</strong>
-                </article>
-              ))}
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      {tournament && page === "tournamentTeams" ? (
-        <div className="public-tournament-single-column">
-          <TournamentTeamsPanel
-            tournament={tournament}
-            groups={teamGroups}
-            recordByTeamId={recordByTeamId}
-            playerProfiles={tournamentPlayerProfiles}
-            avatar={avatar}
-          />
-        </div>
-      ) : null}
-
-      {tournament && page === "tournamentSchedule" ? (
-        <div className="public-tournament-two-column">
-          <TournamentScheduleCard upcoming={scheduleItems} avatar={avatar} expanded />
-          <Card className="public-tournament-card public-tournament-standings" padding="lg" variant="glass">
-            <CardHeader className="public-tournament-card-head">
-              <CardTitle as="h3"  >{t().tournamentStandingsTitle}</CardTitle>
-              <Badge tone="neutral">{tournament.title}</Badge>
-            </CardHeader>
-            <CardContent>
-            {standings.map((team) => (
-              <div className="public-tournament-standing-row" key={team.team}>
-                <b>{team.rank}</b>
-                {avatar(team.team)}
-                <strong>{team.team}</strong>
-                <span>{team.win}{t().tournamentWin} {team.loss}{t().tournamentLoss}</span>
-                <em>{team.point}</em>
-              </div>
-            ))}
-            </CardContent>
-          </Card>
-        </div>
-      ) : null}
-
-      {tournament && page === "tournamentNews" ? (
-        <div className="public-tournament-news-grid">
-          {news.map((item, index) => (
-            <Card className="public-tournament-news-card" key={item.title} padding="lg" variant="glass">
-              <CardHeader>
-                <Badge tone="info">NEWS {index + 1}</Badge>
-                <time>{formatTournamentDate(item.publishedAt)}</time>
-              </CardHeader>
-              <CardContent>
-                <CardTitle as="h3">{item.title}</CardTitle>
-                <CardDescription>{item.body}</CardDescription>
-              </CardContent>
-            </Card>
-          ))}
-          <TournamentNoticeCard notices={notices} />
-        </div>
-      ) : null}
-      </AppShellMain>
-    </AppShell>
-  );
-}
-
-function TournamentScheduleCard({
-  upcoming,
-  avatar,
-  expanded = false
-}: {
-  upcoming: Array<{ id: string; teamA: string; teamB: string; time: string; round: string; live: boolean; format: string; score: string }>;
-  avatar: (team: string) => ReactNode;
-  expanded?: boolean;
-}) {
-  return (
-    <Card className={`public-tournament-card public-tournament-schedule ${expanded ? "expanded" : ""}`} padding="lg" variant="glass">
-      <CardHeader className="public-tournament-card-head">
-        <CardTitle as="h3"  >{t().tournamentScheduleTitle}</CardTitle>
-        <Button type="button" variant="ghost" size="sm"  >{t().tournamentAllView} ›</Button>
-      </CardHeader>
-      <CardContent>
-      {upcoming.map((match) => (
-        <div className="public-tournament-schedule-row" key={match.id}>
-          <time>{match.time}<small>{match.round} {match.format}</small></time>
-          <div>
-            <span>{avatar(match.teamA)}<strong>{match.teamA}</strong>{match.live ? <em>{t().tournamentLiveShort}</em> : null}</span>
-            <small>{t().tournamentVs}</small>
-            <span>{avatar(match.teamB)}<strong>{match.teamB}</strong></span>
-          </div>
-          <b>{match.score}</b>
-        </div>
-      ))}
-      </CardContent>
-    </Card>
-  );
-}
-
-function TournamentTeamsPanel({
-  tournament,
-  groups,
-  recordByTeamId,
-  playerProfiles,
-  avatar
-}: {
-  tournament: StreamerTournament;
-  groups: Array<{ label: string; teams: StreamerTournament["teams"] }>;
-  recordByTeamId: Map<string, TournamentTeamRecord>;
-  playerProfiles: Record<string, TournamentPlayerProfileState>;
-  avatar: (team: string) => ReactNode;
-}) {
-  return (
-    <Card className="public-tournament-card public-tournament-team-panel" padding="lg" variant="glass">
-      <CardHeader className="public-tournament-card-head">
-        <CardTitle as="h3"  >{t().tournamentTeamGroups}</CardTitle>
-        <StatusPill tone="streamer">{tournament.teams.length} {t().tournamentTeamUnit}</StatusPill>
-      </CardHeader>
-      <CardContent className="public-tournament-team-groups">
-        {groups.map((group) => (
-          <section className="public-tournament-team-group" key={group.label}>
-            <h3>{group.label}</h3>
-            <div className="public-tournament-team-grid">
-              {group.teams.map((team) => {
-                const record = recordByTeamId.get(team.id);
-                return (
-                  <article className="public-tournament-team-card" key={team.id}>
-                    <div className="public-tournament-team-card-head">
-                      {avatar(team.name)}
-                      <div>
-                        <strong>{team.name}</strong>
-                        <small>
-                          {t().tournamentSeed} {team.seed ?? "-"}
-                          {team.twitchLogin ? ` · Twitch @${team.twitchLogin}` : ""}
-                          {team.riotId ? ` · ${team.riotId}` : ""}
-                        </small>
-                      </div>
-                      <b>{record?.win ?? 0}{t().tournamentWin} {record?.loss ?? 0}{t().tournamentLoss}</b>
-                      <em>{t().tournamentPoint} {record?.point && record.point > 0 ? `+${record.point}` : record?.point ?? 0}</em>
-                    </div>
-                    <span>{t().tournamentUpcomingMatch}: {tournamentTeamNextMatch(tournament, team.id)}</span>
-                    <div className="public-tournament-player-table" role="table" aria-label={`${team.name} ${t().tournamentTeamRecord}`}>
-                      <div className="public-tournament-player-table-head" role="row">
-                        <span role="columnheader">#</span>
-                        <span role="columnheader">{t().tournamentPlayerColumn}</span>
-                        <span role="columnheader">{t().tournamentPlayerTier}</span>
-                        <span role="columnheader">{t().tournamentPlayerWinRate}</span>
-                        <span role="columnheader">{t().tournamentPlayerRole}</span>
-                        <span role="columnheader">{t().tournamentPlayerMost}</span>
-                        <span role="columnheader">{t().tournamentPlayerHighTier}</span>
-                        <span role="columnheader">{t().tournamentPlayerScore}</span>
-                      </div>
-                      {(team.players ?? []).length === 0 ? (
-                        <p className="public-tournament-player-empty">{t().tournamentNoPlayers}</p>
-                      ) : (team.players ?? []).map((player) => {
-                        const key = tournamentPlayerProfileKey(player.riotId);
-                        const state = key ? playerProfiles[key] ?? tournamentPlayerProfileCache.get(key) : undefined;
-                        return <TournamentPlayerRecordRow player={player} state={state} key={player.id} />;
-                      })}
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          </section>
-        ))}
-      </CardContent>
-    </Card>
-  );
-}
-
-function TournamentPlayerRecordRow({
-  player,
-  state
-}: {
-  player: NonNullable<StreamerTournament["teams"][number]["players"]>[number];
-  state: TournamentPlayerProfileState | undefined;
-}) {
-  const profile = state?.status === "ready" ? state.profile : undefined;
-  const rank = tournamentPrimaryRankStats(profile);
-  const bestRank = tournamentBestRankStats(profile);
-  const display = tournamentPlayerDisplayName(player.riotId, profile);
-  const winSummary = tournamentPlayerWinSummary(profile);
-  const role = profile?.roleAnalysis?.mainRole ?? player.role;
-  const champions = profile?.topChampions.slice(0, 5) ?? [];
-  const score = profile ? aggregatePerformanceScore(profile) : undefined;
-  const rankLoading = !state || state.status === "loading";
-  const failed = state?.status === "error";
-
-  return (
-    <div className={`public-tournament-player-row ${failed ? "failed" : ""}`} role="row">
-      <span className="public-tournament-player-role" role="cell">{mainRoleLabel(player.role)}</span>
-      <span className="public-tournament-player-main" role="cell">
-        <span className="public-tournament-player-avatar">
-          {profile?.profileIconUrl ? <img src={assetUrl(profile.profileIconUrl)} alt="" /> : display.name.slice(0, 1).toUpperCase()}
-        </span>
-        <span>
-          <strong>{display.name}</strong>
-          <small>{display.tag ? `#${display.tag}` : player.riotId}{player.leader ? <em>{t().tournamentLeader}</em> : null}</small>
-        </span>
-      </span>
-      <span className="public-tournament-player-tier" role="cell">
-        <b
-          className={rankTierClass(rank, rankLoading ? "loading" : rank ? "ready" : "unknown")}
-          title={rankLoading ? t().tournamentPlayerRecordLoading : failed ? t().tournamentPlayerRecordFailed : rankLabel(rank)}
-        >
-          {rankLoading ? "..." : matchRankBadgeLabel(rank)}
-        </b>
-        <small>{rank && rank.tier !== "UNRANKED" ? `${rank.leaguePoints} LP` : failed ? t().tournamentPlayerRecordFailed : ""}</small>
-      </span>
-      <span className="public-tournament-player-winrate" role="cell">
-        {winSummary ? (
-          <>
-            <span><i style={{ width: `${Math.max(8, Math.min(92, winSummary.winRate))}%` }} /></span>
-            <small>{winSummary.wins} / {winSummary.losses} · <b className={metricToneClass(percentTone(winSummary.winRate))}>{formatPercent(winSummary.winRate, 1)}</b></small>
-          </>
-        ) : <small>{rankLoading ? t().tournamentPlayerRecordLoading : "-"}</small>}
-      </span>
-      <span className="public-tournament-player-role-icon" role="cell" title={mainRoleLabel(role)}>
-        <RoleIcon role={role} />
-        <small>{mainRoleLabel(role)}</small>
-      </span>
-      <span className="public-tournament-player-most" role="cell">
-        {champions.length > 0 ? champions.map((champion) => (
-          champion.iconUrl ? <img src={assetUrl(champion.iconUrl)} alt={championName(champion)} title={championName(champion)} key={champion.championId} /> : null
-        )) : <small>{rankLoading ? t().tournamentPlayerRecordLoading : "-"}</small>}
-      </span>
-      <span className="public-tournament-player-high" role="cell">
-        <b className={rankTrendTierClass(bestRank)}>{bestRank ? rankLabel(bestRank).replace(/\s+\d+\s*LP$/i, "") : rankLoading ? "..." : t().unranked}</b>
-      </span>
-      <span className={`public-tournament-player-score ${metricToneClass(scoreTone(score))}`} role="cell">
-        {score !== undefined ? score : rankLoading ? "..." : "-"}
-      </span>
-    </div>
-  );
-}
-
-function TournamentNoticeCard({ notices }: { notices: Array<{ title: string; date: string }> }) {
-  return (
-    <Card className="public-tournament-card public-tournament-notices" padding="lg" variant="glass">
-      <CardHeader className="public-tournament-card-head">
-        <CardTitle as="h3"  >{t().tournamentNotice}</CardTitle>
-        <Button type="button" variant="ghost" size="sm"  >{t().tournamentAllView} ›</Button>
-      </CardHeader>
-      <CardContent>
-      {notices.map((notice) => (
-        <div className="public-tournament-notice-row" key={notice.title}>
-          <span>{notice.title}</span>
-          <time>{notice.date}</time>
-        </div>
-      ))}
-      </CardContent>
-    </Card>
-  );
 }
 
 const PUBLIC_PRIVACY_SECTIONS: Array<{ title: PublicTextKey; body: PublicTextKey }> = [
@@ -6354,13 +5258,12 @@ function RecentMatches({
               content: iconUrl ? <img src={iconUrl} alt="" /> : spellId
             };
           });
-          targetRunes
-            .filter((rune) => rune.kind !== "stat" && rune.iconUrl)
-            .slice(0, 2)
+          playerRuneBuildSlotsViewModel(targetRunes)
+            .filter((rune) => rune.iconUrl)
             .forEach((rune) => spellItems.push({
-              key: `${match.matchId}:rune:${rune.runeId}`,
+              key: `${match.matchId}:rune:${rune.key}`,
               className: "rune",
-              label: `${t().runes} ${rune.runeId}`,
+              label: rune.title ?? t().runes,
               content: <img src={rune.iconUrl} alt="" />
             }));
           const matchAverageTier = rankLoading
@@ -6849,10 +5752,6 @@ export function PublicLolPage({
   const [publicParticipationSessionId, setPublicParticipationSessionId] = useState(
     () => new URLSearchParams(window.location.search).get("session")?.trim() ?? ""
   );
-  const [publicTournaments, setPublicTournaments] = useState<StreamerTournament[]>([]);
-  const [publicTournamentSlug, setPublicTournamentSlug] = useState<string | undefined>(() => tournamentRouteFromPublicPath()?.slug);
-  const [publicTournamentLoading, setPublicTournamentLoading] = useState(false);
-  const [publicTournamentError, setPublicTournamentError] = useState("");
   const [communityPosts, setCommunityPosts] = useState<CommunityPost[]>([]);
   const [communityLoading, setCommunityLoading] = useState(false);
   const [communitySubmitting, setCommunitySubmitting] = useState(false);
@@ -6930,7 +5829,7 @@ export function PublicLolPage({
     const openGraphUrl = document.querySelector<HTMLMetaElement>('meta[property="og:url"]');
     canonical?.setAttribute("href", canonicalUrl);
     openGraphUrl?.setAttribute("content", canonicalUrl);
-  }, [activeMainPage, locale, profile?.riotId, publicTournamentSlug, selectedCommunityPostId]);
+  }, [activeMainPage, locale, profile?.riotId, selectedCommunityPostId]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -6995,13 +5894,6 @@ export function PublicLolPage({
   }, [activeMainPage, twitchStatus.connected, publicParticipationStreamerId, publicParticipationSessionId]);
 
   useEffect(() => {
-    if (!activeMainPage.startsWith("tournament")) return;
-    if (publicTournaments.length > 0 || publicTournamentLoading) return;
-    if (publicTournamentError) return;
-    void loadPublicTournaments();
-  }, [activeMainPage, publicTournaments.length, publicTournamentLoading, publicTournamentError]);
-
-  useEffect(() => {
     if (activeMainPage !== "patch" && activeMainPage !== "communityParty" && activeMainPage !== "communityServerWrite" && activeMainPage !== "communityPartyWrite") return;
     void loadCommunityPosts(communityPageCategory(activeMainPage));
   }, [activeMainPage]);
@@ -7045,10 +5937,6 @@ export function PublicLolPage({
         setStreamerRegisterOpen(false);
         if (route.page === "followJoin") {
           setPublicParticipationSessionId(new URLSearchParams(window.location.search).get("session")?.trim() ?? "");
-        }
-        if (route.slug || route.page.startsWith("tournament")) {
-          setPublicTournamentSlug(route.slug);
-          void loadPublicTournaments(route.slug);
         }
         if (route.postId) {
           setSelectedCommunityPostId(route.postId);
@@ -7265,25 +6153,6 @@ export function PublicLolPage({
     window.history.pushState({}, "", `${url.pathname}${url.search}${url.hash}`);
   }
 
-  async function loadPublicTournaments(preferredSlug?: string): Promise<void> {
-    setPublicTournamentLoading(true);
-    setPublicTournamentError("");
-    try {
-      const list = await getPublicTournaments();
-      let nextList = list;
-      if (preferredSlug && !list.some((item) => item.slug === preferredSlug)) {
-        const detail = await getPublicTournament(preferredSlug);
-        nextList = [detail, ...list.filter((item) => item.id !== detail.id)];
-      }
-      setPublicTournaments(nextList);
-      setPublicTournamentSlug((current) => preferredSlug || current || nextList[0]?.slug);
-    } catch (requestError) {
-      setPublicTournamentError(requestError instanceof Error ? requestError.message : t().searchFailed);
-    } finally {
-      setPublicTournamentLoading(false);
-    }
-  }
-
   async function loadCommunityPosts(category: CommunityPostCategory = communityPageCategory(activeMainPage)): Promise<void> {
     setCommunityLoading(true);
     setCommunityError("");
@@ -7455,16 +6324,6 @@ export function PublicLolPage({
     void runSearch(riotId);
   }
 
-  function openTournamentDetail(slug: string, page: Extract<PublicMainPage, "tournamentNews" | "tournamentTeams" | "tournamentBracket" | "tournamentSchedule"> = "tournamentBracket"): void {
-    setStreamerRegisterOpen(false);
-    setActiveMainPage(page);
-    setActiveNav("community");
-    setPublicTournamentSlug(slug);
-    setPublicPath(publicTournamentDetailPath(slug, page));
-    void loadPublicTournaments(slug);
-    window.setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 0);
-  }
-
   function openCommunityPost(post: CommunityPost): void {
     setStreamerRegisterOpen(false);
     setSelectedCommunityPostId(post.id);
@@ -7522,16 +6381,6 @@ export function PublicLolPage({
     }
     if (legalPath) {
       // 법적 페이지는 공개 정적 성격의 화면이라 별도 데이터 로딩이 필요하지 않습니다.
-    } else if (page.startsWith("tournament")) {
-      const nextSlug = publicTournamentSlug || publicTournaments[0]?.slug;
-      if (page === "tournamentCalendar") {
-        setPublicPath(PUBLIC_TOURNAMENT_CALENDAR_PATH);
-      } else if (page === "tournamentList") {
-        setPublicPath(PUBLIC_TOURNAMENT_LIST_PATH);
-      } else {
-        setPublicPath(nextSlug ? publicTournamentDetailPath(nextSlug, page) : PUBLIC_TOURNAMENT_LIST_PATH);
-      }
-      void loadPublicTournaments(nextSlug);
     }
     window.setTimeout(() => {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -7749,6 +6598,9 @@ export function PublicLolPage({
         />
       );
     }
+    if (activeMainPage === "aram") {
+      return <PublicAramPage />;
+    }
     if (activeMainPage === "patch" || activeMainPage === "communityParty") {
       const category = communityPageCategory(activeMainPage);
       return (
@@ -7804,51 +6656,6 @@ export function PublicLolPage({
           onSubmitComment={submitCommunityComment}
           onSubmitReport={submitCommunityReport}
           onDismissToast={() => setCommunityToast(null)}
-        />
-      );
-    }
-    if (activeMainPage === "tournamentCalendar") {
-      return (
-        <PublicTournamentCalendarPage
-          tournaments={publicTournaments}
-          loading={publicTournamentLoading}
-          error={publicTournamentError}
-          onSelectTournament={(slug) => openTournamentDetail(slug)}
-          onOpenList={() => changeMainPage("tournamentList")}
-        />
-      );
-    }
-    if (activeMainPage === "tournamentList") {
-      return (
-        <PublicTournamentListPage
-          tournaments={publicTournaments}
-          loading={publicTournamentLoading}
-          error={publicTournamentError}
-          onSelectTournament={(slug) => openTournamentDetail(slug)}
-          onOpenCalendar={() => changeMainPage("tournamentCalendar")}
-        />
-      );
-    }
-    if (activeMainPage === "tournamentNews" || activeMainPage === "tournamentTeams" || activeMainPage === "tournamentBracket" || activeMainPage === "tournamentSchedule") {
-      return (
-        <PublicTournamentPage
-          page={activeMainPage}
-          onPage={(page) => {
-            if (page === "tournamentNews" || page === "tournamentTeams" || page === "tournamentBracket" || page === "tournamentSchedule") {
-              const slug = publicTournamentSlug || publicTournaments[0]?.slug;
-              if (slug) openTournamentDetail(slug, page);
-              else changeMainPage("tournamentList");
-            } else {
-              changeMainPage(page);
-            }
-          }}
-          tournaments={publicTournaments}
-          selectedSlug={publicTournamentSlug}
-          loading={publicTournamentLoading}
-          error={publicTournamentError}
-          onSelectTournament={(slug) => {
-            if (slug) openTournamentDetail(slug, activeMainPage);
-          }}
         />
       );
     }

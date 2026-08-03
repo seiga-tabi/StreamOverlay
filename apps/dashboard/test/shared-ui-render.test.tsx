@@ -197,7 +197,7 @@ test("LoL PublicAppHeader가 공통 Twitch account chip으로 기존 프로필�
   assert.match(html, /class="public-game-header__brand-logo" src="\/images\/yorogg-home-logo\.webp" alt="YORO\.gg"/);
   assert.doesNotMatch(html, /src="\/images\/yorogg-mark\.png"/);
   assert.match(html, /data-testid="lol-primary-nav"/u);
-  assert.match(html, /홈[\s\S]*스트리머[\s\S]*참여[\s\S]*대회[\s\S]*커뮤니티/u);
+  assert.match(html, /홈[\s\S]*스트리머[\s\S]*참여[\s\S]*칼바람[\s\S]*커뮤니티/u);
   assert.match(html, /aria-current="page"[^>]*data-ko="홈"/u);
   assert.match(html, /data-ko="메뉴" data-ja="メニュー"/u);
   assert.match(html, /aria-haspopup="dialog"/u);
@@ -651,6 +651,7 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
   assert.match(html, /public-match-expand-label" role="tooltip">경기 상세 펼치기/u);
   assert.match(html, /aria-label="승리 · 제드 · 9\/0\/6"/u);
   assert.equal((html.match(/aria-label="점수 91"/gu) ?? []).length, 1);
+  assert.match(html, /class="public-match-score metric-tone-excellent" data-grade="S\+"[^>]*><b>S\+<\/b><strong>91<\/strong>/u);
   assert.match(html, /public-match-score-description.*YORO 경기 점수 설명/u);
 });
 

@@ -263,12 +263,25 @@ test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => 
     assert.match(res.body, new RegExp(`nonce=\"${nonce}\"`));
     assert.doesNotMatch(res.body, /__STREAMOPS_CSP_NONCE__/);
 
-    const tournamentRes = createResponse();
-    await handler(createRequest("GET", "/lol/tournaments"), tournamentRes);
-    assert.equal(tournamentRes.statusCode, 200);
-    assert.match(tournamentRes.body, /<title>LoL 대회 정보 \| YORO\.gg<\/title>/);
-    assert.match(tournamentRes.body, /<link rel="canonical" href="https:\/\/yoro\.gg\/ko\/lol\/tournaments">/);
-    assert.match(tournamentRes.body, /<meta property="og:url" content="https:\/\/yoro\.gg\/ko\/lol\/tournaments">/);
+    const aramRes = createResponse();
+    await handler(createRequest("GET", "/lol/aram"), aramRes);
+    assert.equal(aramRes.statusCode, 200);
+    assert.match(aramRes.body, /<title>증강 칼바람 \| YORO\.gg<\/title>/);
+    assert.match(aramRes.body, /<link rel="canonical" href="https:\/\/yoro\.gg\/ko\/lol\/aram">/);
+    assert.match(aramRes.body, /<meta property="og:url" content="https:\/\/yoro\.gg\/ko\/lol\/aram">/);
+
+    const aramApiRes = createResponse();
+    await handler(createRequest("GET", "/api/public/aram/augments"), aramApiRes);
+    assert.equal(aramApiRes.statusCode, 200);
+    assert.equal(aramApiRes.headers["Cache-Control"], "no-store");
+    assert.deepEqual(JSON.parse(aramApiRes.body), {
+      schemaVersion: 1,
+      mode: "aram_augments",
+      status: "preparing",
+      dataVersion: "candidate",
+      sourceRevision: "not_imported",
+      augments: []
+    });
 
     const legalRes = createResponse();
     await handler(createRequest("GET", "/privacy"), legalRes);

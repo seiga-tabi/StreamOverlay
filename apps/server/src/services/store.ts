@@ -32,13 +32,6 @@ import type {
   StreamerProfileLink,
   StreamerProfileSnapshot,
   StreamerRiotIdRequest,
-  StreamerTournament,
-  TournamentMatch,
-  TournamentNewsItem,
-  TournamentPlayerRole,
-  TournamentTeam,
-  TournamentTeamPlayer,
-  TournamentUpsertInput,
   TwitchChatSendFailure,
   TwitchChatStatus,
   TwitchEventSubStatus,
@@ -73,7 +66,6 @@ export type ActionRecord = {
 export type StoreOptions = {
   followerStatePath?: string;
   streamerRiotIdStatePath?: string;
-  tournamentStatePath?: string;
   communityStatePath?: string;
   runtimeStatePath?: string;
   onPersistenceError?: (failure: StorePersistenceFailure) => void;
@@ -92,7 +84,7 @@ type UnassignedLegacyFollowerState = ScopedFollowerState & {
 };
 
 export type StorePersistenceFailure = {
-  scope: "followers" | "streamer_riot_ids" | "tournaments" | "community" | "runtime";
+  scope: "followers" | "streamer_riot_ids" | "community" | "runtime";
   operation: "load" | "save" | "readiness";
   filePath: string;
   error: string;
@@ -583,163 +575,6 @@ function optionalInteger(value: unknown): number | undefined {
   return Number.isFinite(number) ? Math.trunc(number) : undefined;
 }
 
-function normalizedTournamentVisibility(value: unknown): "draft" | "public" {
-  return value === "public" ? "public" : "draft";
-}
-
-function normalizedTournamentMatchStatus(value: unknown): "scheduled" | "live" | "completed" {
-  if (value === "live" || value === "completed") return value;
-  return "scheduled";
-}
-
-function normalizedTournamentPlayerRole(value: unknown): TournamentPlayerRole {
-  if (value === "TOP" || value === "JUNGLE" || value === "MID" || value === "ADC" || value === "SUPPORT") return value;
-  return "TOP";
-}
-
-function tournamentSlugPart(value: string): string {
-  const slug = value.trim().toLowerCase().replace(/[^a-z0-9가-힣ぁ-んァ-ヶ一-龯]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
-  return slug || "tournament";
-}
-
-function cloneTournamentTeamPlayer(player: TournamentTeamPlayer): TournamentTeamPlayer {
-  return { ...player };
-}
-
-function cloneTournamentTeam(team: TournamentTeam): TournamentTeam {
-  return {
-    ...team,
-    players: team.players?.map(cloneTournamentTeamPlayer)
-  };
-}
-
-function cloneTournamentMatch(match: TournamentMatch): TournamentMatch {
-  return {
-    ...match,
-    recordMatchIds: match.recordMatchIds ? [...match.recordMatchIds] : undefined
-  };
-}
-
-function cloneTournamentNewsItem(item: TournamentNewsItem): TournamentNewsItem {
-  return { ...item };
-}
-
-function cloneStreamerTournament(tournament: StreamerTournament): StreamerTournament {
-  return {
-    ...tournament,
-    teams: tournament.teams.map(cloneTournamentTeam),
-    matches: tournament.matches.map(cloneTournamentMatch),
-    news: tournament.news.map(cloneTournamentNewsItem)
-  };
-}
-
-function normalizedTournamentTeam(value: unknown, index: number): TournamentTeam | undefined {
-  const input = objectRecord(value);
-  const name = optionalString(input?.name);
-  if (!name) return undefined;
-  const players = Array.isArray(input?.players)
-    ? input.players.map(normalizedTournamentTeamPlayer).filter((player): player is TournamentTeamPlayer => Boolean(player))
-    : undefined;
-  return {
-    id: optionalString(input?.id) || newId("team"),
-    name,
-    seed: optionalInteger(input?.seed) ?? index + 1,
-    avatarUrl: optionalString(input?.avatarUrl),
-    twitchLogin: optionalString(input?.twitchLogin),
-    riotId: optionalString(input?.riotId),
-    players
-  };
-}
-
-function normalizedTournamentTeamPlayer(value: unknown): TournamentTeamPlayer | undefined {
-  const input = objectRecord(value);
-  const riotId = optionalString(input?.riotId);
-  if (!riotId) return undefined;
-  return {
-    id: optionalString(input?.id) || newId("player"),
-    role: normalizedTournamentPlayerRole(input?.role),
-    riotId,
-    leader: input?.leader === true
-  };
-}
-
-function normalizedTournamentMatch(value: unknown): TournamentMatch | undefined {
-  const input = objectRecord(value);
-  const teamAId = optionalString(input?.teamAId);
-  const teamBId = optionalString(input?.teamBId);
-  const round = optionalString(input?.round) || "round";
-  if (!teamAId && !teamBId) return undefined;
-  const recordMatchIds = Array.isArray(input?.recordMatchIds)
-    ? input.recordMatchIds.map(optionalString).filter((id): id is string => Boolean(id))
-    : undefined;
-  return {
-    id: optionalString(input?.id) || newId("match"),
-    round,
-    teamAId,
-    teamBId,
-    scoreA: optionalInteger(input?.scoreA),
-    scoreB: optionalInteger(input?.scoreB),
-    scheduledAt: optionalString(input?.scheduledAt),
-    format: optionalString(input?.format),
-    status: normalizedTournamentMatchStatus(input?.status),
-    winnerTeamId: optionalString(input?.winnerTeamId),
-    recordMatchIds
-  };
-}
-
-function normalizedTournamentNewsItem(value: unknown): TournamentNewsItem | undefined {
-  const input = objectRecord(value);
-  const title = optionalString(input?.title);
-  if (!title) return undefined;
-  return {
-    id: optionalString(input?.id) || newId("tnews"),
-    title,
-    body: optionalString(input?.body) || "",
-    publishedAt: optionalString(input?.publishedAt) || nowIso()
-  };
-}
-
-function normalizedStreamerTournament(value: unknown): StreamerTournament | undefined {
-  const input = objectRecord(value);
-  const id = optionalString(input?.id);
-  const ownerTwitchUserId = optionalString(input?.ownerTwitchUserId);
-  const ownerTwitchLogin = optionalString(input?.ownerTwitchLogin);
-  const ownerDisplayName = optionalString(input?.ownerDisplayName);
-  const title = optionalString(input?.title);
-  if (!id || !ownerTwitchUserId || !ownerTwitchLogin || !ownerDisplayName || !title) return undefined;
-  const createdAt = optionalString(input?.createdAt) || nowIso();
-  const teams = Array.isArray(input?.teams)
-    ? input.teams.map((team, index) => normalizedTournamentTeam(team, index)).filter((team): team is TournamentTeam => Boolean(team))
-    : [];
-  const matches = Array.isArray(input?.matches)
-    ? input.matches.map(normalizedTournamentMatch).filter((match): match is TournamentMatch => Boolean(match))
-    : [];
-  const news = Array.isArray(input?.news)
-    ? input.news.map(normalizedTournamentNewsItem).filter((item): item is TournamentNewsItem => Boolean(item))
-    : [];
-  return {
-    id,
-    slug: optionalString(input?.slug) || tournamentSlugPart(`${title}-${ownerTwitchLogin}`),
-    ownerTwitchUserId,
-    ownerTwitchLogin,
-    ownerDisplayName,
-    ownerProfileImageUrl: optionalString(input?.ownerProfileImageUrl),
-    title,
-    description: optionalString(input?.description) || "",
-    startsAt: optionalString(input?.startsAt),
-    endsAt: optionalString(input?.endsAt),
-    formatLabel: optionalString(input?.formatLabel),
-    prizeLabel: optionalString(input?.prizeLabel),
-    visibility: normalizedTournamentVisibility(input?.visibility),
-    teams,
-    matches,
-    news,
-    createdAt,
-    updatedAt: optionalString(input?.updatedAt) || createdAt,
-    publishedAt: optionalString(input?.publishedAt)
-  };
-}
-
 function cloneCommunityPost(post: CommunityPost): CommunityPost {
   return {
     ...post,
@@ -973,7 +808,6 @@ export class Store {
   private runtimePersistTask?: Promise<void>;
   private runtimePersistLastError?: { generation: number; error: Error };
   private streamerRiotIdRequests: StreamerRiotIdRequest[] = [];
-  private tournaments: StreamerTournament[] = [];
   private communityPosts: CommunityPost[] = [];
   private communityReports: CommunityPostReport[] = [];
   private communitySanctions: CommunitySanction[] = [];
@@ -982,7 +816,6 @@ export class Store {
   private readonly persistenceLoadStates: Record<StorePersistenceFailure["scope"], PersistenceLoadState> = {
     followers: "not_loaded",
     streamer_riot_ids: "not_loaded",
-    tournaments: "not_loaded",
     community: "not_loaded",
     runtime: "not_loaded"
   };
@@ -1021,7 +854,6 @@ export class Store {
   constructor(private readonly options: StoreOptions = {}) {
     this.loadFollowerState();
     this.loadStreamerRiotIdState();
-    this.loadTournamentState();
     this.loadCommunityState();
     this.loadRuntimeState();
     this.cleanupExpiredPartyCommunityPosts();
@@ -1103,7 +935,6 @@ export class Store {
     const paths = [
       ["followers", this.options.followerStatePath],
       ["streamer_riot_ids", this.options.streamerRiotIdStatePath],
-      ["tournaments", this.options.tournamentStatePath],
       ["community", this.options.communityStatePath],
       ["runtime", this.options.runtimeStatePath]
     ].filter((entry): entry is [StorePersistenceFailure["scope"], string] => Boolean(entry[1]));
@@ -1143,7 +974,6 @@ export class Store {
     }
     if (this.persistenceLoadStates.followers === "ready") this.persistFollowerState();
     if (this.persistenceLoadStates.streamer_riot_ids === "ready") this.persistStreamerRiotIdState();
-    if (this.persistenceLoadStates.tournaments === "ready") this.persistTournamentState();
     if (this.persistenceLoadStates.community === "ready") this.persistCommunityState();
     if (this.persistenceLoadStates.runtime === "ready") this.persistRuntimeState();
   }
@@ -1678,51 +1508,6 @@ export class Store {
       this.clearPersistenceFailure("streamer_riot_ids");
     } catch (error) {
       this.reportPersistenceFailure({ scope: "streamer_riot_ids", operation: "save", filePath: this.options.streamerRiotIdStatePath, error: toSafeErrorMessage(error) });
-    }
-  }
-
-  private loadTournamentState(): void {
-    if (!this.options.tournamentStatePath) return;
-    try {
-      const raw = fs.readFileSync(this.options.tournamentStatePath, "utf8");
-      const parsed = objectRecord(JSON.parse(raw));
-      if (parsed?.version !== 1 || !Array.isArray(parsed.tournaments)) {
-        throw new Error("대회 상태 파일 schema가 올바르지 않습니다.");
-      }
-      const tournaments = parsed.tournaments.map(normalizedStreamerTournament);
-      if (tournaments.some((tournament) => !tournament)) {
-        throw new Error("대회 상태 파일에 올바르지 않은 레코드가 있습니다.");
-      }
-      this.tournaments = tournaments as StreamerTournament[];
-      this.clearPersistenceFailure("tournaments");
-    } catch (error) {
-      this.tournaments = [];
-      const missingStateFile = this.isMissingStateFile(error);
-      if (!missingStateFile) {
-        this.markPersistenceLoadFailure("tournaments", error);
-        this.reportPersistenceFailure({ scope: "tournaments", operation: "load", filePath: this.options.tournamentStatePath, error: toSafeErrorMessage(error) });
-      } else {
-        this.clearPersistenceFailure("tournaments");
-      }
-    }
-  }
-
-  private persistTournamentState(): void {
-    if (!this.options.tournamentStatePath) return;
-    this.assertPersistenceAvailable("tournaments");
-    try {
-      const dir = path.dirname(this.options.tournamentStatePath);
-      fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
-      const tmpPath = `${this.options.tournamentStatePath}.${process.pid}.${Date.now()}.tmp`;
-      const payload = {
-        version: 1,
-        tournaments: this.tournaments.map(cloneStreamerTournament)
-      };
-      fs.writeFileSync(tmpPath, `${JSON.stringify(payload, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
-      fs.renameSync(tmpPath, this.options.tournamentStatePath);
-      this.clearPersistenceFailure("tournaments");
-    } catch (error) {
-      this.reportPersistenceFailure({ scope: "tournaments", operation: "save", filePath: this.options.tournamentStatePath, error: toSafeErrorMessage(error) });
     }
   }
 
@@ -2279,98 +2064,6 @@ export class Store {
     this.communityPosts = this.communityPosts.map((item, index) => (index === postIndex ? updatedPost : item));
     this.persistCommunityState();
     return cloneCommunityPost(updatedPost);
-  }
-
-  private uniqueTournamentSlug(base: string, existingId?: string): string {
-    const cleanBase = tournamentSlugPart(base);
-    let slug = cleanBase;
-    let suffix = 2;
-    while (this.tournaments.some((tournament) => tournament.id !== existingId && tournament.slug === slug)) {
-      slug = `${cleanBase}-${suffix}`;
-      suffix += 1;
-    }
-    return slug;
-  }
-
-  listPublicTournaments(): StreamerTournament[] {
-    this.assertPersistenceAvailable("tournaments");
-    return this.tournaments
-      .filter((tournament) => tournament.visibility === "public")
-      .map(cloneStreamerTournament)
-      .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt));
-  }
-
-  getPublicTournamentBySlug(slug: string): StreamerTournament | undefined {
-    this.assertPersistenceAvailable("tournaments");
-    const tournament = this.tournaments.find((candidate) => candidate.visibility === "public" && candidate.slug === slug);
-    return tournament ? cloneStreamerTournament(tournament) : undefined;
-  }
-
-  listDashboardTournaments(input: { role: "admin" | "streamer"; twitchUserId?: string }): StreamerTournament[] {
-    this.assertPersistenceAvailable("tournaments");
-    return this.tournaments
-      .filter((tournament) => input.role === "admin" || tournament.ownerTwitchUserId === input.twitchUserId)
-      .map(cloneStreamerTournament)
-      .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt));
-  }
-
-  upsertStreamerTournament(input: TournamentUpsertInput, owner: StreamerRiotIdRequest): StreamerTournament | undefined {
-    this.assertPersistenceAvailable("tournaments");
-    if (owner.status !== "approved") return undefined;
-    const title = input.title?.trim();
-    if (!title) return undefined;
-    const now = nowIso();
-    const existing = input.id ? this.tournaments.find((candidate) => candidate.id === input.id) : undefined;
-    if (existing && existing.ownerTwitchUserId !== owner.twitchUserId) return undefined;
-    const previous = existing ? cloneStreamerTournament(existing) : undefined;
-    const teams = Array.isArray(input.teams)
-      ? input.teams.map((team, index) => normalizedTournamentTeam(team, index)).filter((team): team is TournamentTeam => Boolean(team))
-      : previous?.teams ?? [];
-    const matches = Array.isArray(input.matches)
-      ? input.matches.map(normalizedTournamentMatch).filter((match): match is TournamentMatch => Boolean(match))
-      : previous?.matches ?? [];
-    const news = Array.isArray(input.news)
-      ? input.news.map(normalizedTournamentNewsItem).filter((item): item is TournamentNewsItem => Boolean(item))
-      : previous?.news ?? [];
-    const visibility = normalizedTournamentVisibility(input.visibility ?? previous?.visibility);
-    const tournament: StreamerTournament = {
-      id: previous?.id ?? newId("tour"),
-      slug: previous?.slug ?? this.uniqueTournamentSlug(`${title}-${owner.twitchLogin}`),
-      ownerTwitchUserId: owner.twitchUserId,
-      ownerTwitchLogin: owner.twitchLogin,
-      ownerDisplayName: owner.twitchDisplayName,
-      ownerProfileImageUrl: owner.twitchProfileImageUrl,
-      title,
-      description: input.description?.trim() ?? previous?.description ?? "",
-      startsAt: input.startsAt?.trim() || undefined,
-      endsAt: input.endsAt?.trim() || undefined,
-      formatLabel: input.formatLabel?.trim() || undefined,
-      prizeLabel: input.prizeLabel?.trim() || undefined,
-      visibility,
-      teams,
-      matches,
-      news,
-      createdAt: previous?.createdAt ?? now,
-      updatedAt: now,
-      publishedAt: visibility === "public" ? previous?.publishedAt ?? now : undefined
-    };
-    if (existing) {
-      Object.assign(existing, tournament);
-    } else {
-      this.tournaments.unshift(tournament);
-    }
-    this.persistTournamentState();
-    return cloneStreamerTournament(tournament);
-  }
-
-  deleteStreamerTournament(id: string, owner: StreamerRiotIdRequest): boolean {
-    this.assertPersistenceAvailable("tournaments");
-    if (owner.status !== "approved") return false;
-    const index = this.tournaments.findIndex((tournament) => tournament.id === id && tournament.ownerTwitchUserId === owner.twitchUserId);
-    if (index < 0) return false;
-    this.tournaments.splice(index, 1);
-    this.persistTournamentState();
-    return true;
   }
 
   listStreamerRiotIdRequests(): StreamerRiotIdRequest[] {

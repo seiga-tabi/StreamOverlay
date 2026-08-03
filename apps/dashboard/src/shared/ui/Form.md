@@ -1,6 +1,6 @@
 # Form API
 
-`Form` foundation은 YORO.gg shared UI에서 label, hint, error, input 상태를 일관되게 연결하기 위한 component set이다. 기존 로그인, 검색, 설정, 대회, 시참 폼에는 아직 적용하지 않는다.
+`Form` foundation은 YORO.gg shared UI에서 label, hint, error, input 상태를 일관되게 연결하기 위한 component set이다. 기존 로그인, 검색, 설정, 시참 폼에는 아직 적용하지 않는다.
 
 ## Import
 

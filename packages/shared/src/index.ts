@@ -1,4 +1,5 @@
 export * from "./actions.js";
+export * from "./aram.js";
 export * from "./community.js";
 export * from "./discord-internal.js";
 export * from "./discord-bot-control.js";
@@ -14,7 +15,6 @@ export * from "./palworld-server.js";
 export * from "./participation.js";
 export * from "./server-status.js";
 export * from "./support-mail.js";
-export * from "./tournament.js";
 export * from "./twitch.js";
 export * from "./utils.js";
 export * from "./yoro-runtime-config.js";

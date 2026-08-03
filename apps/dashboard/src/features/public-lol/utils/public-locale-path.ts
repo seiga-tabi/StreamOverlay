@@ -26,12 +26,11 @@ const LOCALIZABLE_PUBLIC_EXACT_PATHS = new Set([
   "/palworld/skills",
   "/palworld/map",
   "/palworld/search",
-  "/lol/tournaments",
+  "/lol/aram",
 ]);
 
 const LOCALIZABLE_PUBLIC_PATH_PREFIXES = [
   "/lol/summoners/",
-  "/lol/tournaments/",
   "/community/server",
   "/community/party",
   "/community/posts/",

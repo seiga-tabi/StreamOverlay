@@ -966,20 +966,45 @@
 }
 
 .public-profile-platform-v2 .public-matches-panel .public-match-score > strong {
-  color: var(--yoro-color-text-on-dark);
-  font-size: var(--yoro-font-size-xl);
+  color: var(--yoro-color-text-on-dark-muted);
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-bold);
   line-height: var(--yoro-line-height-tight);
 }
 
-.public-profile-platform-v2 .public-matches-panel .public-match-score > b,
-.public-profile-platform-v2 .public-matches-panel .public-match-score > small {
+.public-profile-platform-v2 .public-matches-panel .public-match-score > b {
   color: currentcolor;
-  font-size: var(--yoro-font-size-xs);
+  font-size: var(--yoro-font-size-xl);
+  font-weight: var(--yoro-font-weight-black);
   line-height: var(--yoro-line-height-tight);
 }
 
 .public-profile-platform-v2 .public-matches-panel .public-match-score > small {
   color: var(--yoro-color-text-on-dark-muted);
+  font-size: var(--yoro-font-size-xs);
+  line-height: var(--yoro-line-height-tight);
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-match-score[data-grade="S+"] > :is(b, strong),
+.public-profile-platform-v2 .public-matches-panel .public-match-score[data-grade="S"] > :is(b, strong) {
+  color: var(--yoro-color-match-score-best) !important;
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-match-score[data-grade="A+"] > :is(b, strong),
+.public-profile-platform-v2 .public-matches-panel .public-match-score[data-grade="A"] > :is(b, strong) {
+  color: var(--yoro-color-match-score-good) !important;
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-match-score[data-grade="B"] > :is(b, strong) {
+  color: var(--yoro-color-text-on-dark) !important;
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-match-score[data-grade="C"] > :is(b, strong) {
+  color: var(--yoro-color-accent-rose) !important;
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-match-score[data-grade="D"] > :is(b, strong) {
+  color: var(--yoro-color-match-score-bad) !important;
 }
 
 .public-profile-platform-v2 .public-matches-panel .public-match-score-description {
@@ -1360,8 +1385,8 @@
   .public-profile-platform-v2 .public-matches-panel .public-match-summary {
     grid-template-columns:
       minmax(8.75rem, 1.45fr)
-      minmax(5.25rem, .85fr)
-      minmax(var(--yoro-space-10), .35fr)
+      minmax(5.5rem, .85fr)
+      minmax(var(--yoro-space-12), .35fr)
       var(--yoro-size-touch-target) !important;
     grid-template-rows: auto auto auto !important;
     gap: var(--yoro-space-1) !important;
@@ -1478,7 +1503,23 @@
     flex-direction: column;
     justify-content: center;
     gap: var(--yoro-space-1);
+    overflow: visible;
     text-align: center;
+  }
+
+  .public-profile-platform-v2 .public-matches-panel .public-kda-summary .public-match-badges.compact {
+    flex: none;
+    width: max-content;
+    max-width: none;
+    overflow: visible;
+  }
+
+  .public-profile-platform-v2 .public-matches-panel
+    .public-kda-summary .public-match-badges.compact .public-match-badge:first-child {
+    flex: none;
+    max-width: none !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-kda > strong,
@@ -1500,14 +1541,14 @@
   .public-profile-platform-v2 .public-matches-panel .public-match-inline-items {
     grid-column: 1 / -1 !important;
     grid-row: 3 !important;
-    grid-template-columns: repeat(7, var(--yoro-space-8)) !important;
+    grid-template-columns: repeat(7, calc(var(--yoro-space-8) - var(--yoro-space-1))) !important;
     width: max-content !important;
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-match-inline-items > span,
   .public-profile-platform-v2 .public-matches-panel .public-match-inline-items > span:nth-child(n + 7) {
-    width: var(--yoro-space-8) !important;
-    height: var(--yoro-space-8) !important;
+    width: calc(var(--yoro-space-8) - var(--yoro-space-1)) !important;
+    height: calc(var(--yoro-space-8) - var(--yoro-space-1)) !important;
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-match-meta {
@@ -1567,8 +1608,8 @@
   .public-profile-platform-v2 .public-matches-panel .public-match-summary {
     grid-template-columns:
       minmax(7rem, 1.45fr)
-      minmax(3.5rem, .65fr)
-      minmax(2.75rem, .35fr)
+      minmax(4.75rem, .85fr)
+      minmax(var(--yoro-space-10), .35fr)
       var(--yoro-size-touch-target) !important;
     gap: var(--yoro-space-1) !important;
   }
@@ -1578,14 +1619,14 @@
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-match-inline-items {
-    grid-template-columns: repeat(7, var(--yoro-space-6)) !important;
+    grid-template-columns: repeat(7, calc(var(--yoro-space-8) - var(--yoro-space-1))) !important;
     width: max-content !important;
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-match-inline-items > span,
   .public-profile-platform-v2 .public-matches-panel .public-match-inline-items > span:nth-child(n + 7) {
-    width: var(--yoro-space-6) !important;
-    height: var(--yoro-space-6) !important;
+    width: calc(var(--yoro-space-8) - var(--yoro-space-1)) !important;
+    height: calc(var(--yoro-space-8) - var(--yoro-space-1)) !important;
   }
 
 }

@@ -1,6 +1,6 @@
 # EmptyState
 
-YORO.gg 공통 EmptyState foundation component다. 기존 빈 화면, 검색 결과 없음, 커뮤니티 없음, 대회 없음 UI는 즉시 교체하지 않고 이후 점진 migration에서 사용한다.
+YORO.gg 공통 EmptyState foundation component다. 기존 빈 화면, 검색 결과 없음, 커뮤니티 없음 UI는 즉시 교체하지 않고 이후 점진 migration에서 사용한다.
 
 ## Components
 
@@ -16,7 +16,6 @@ YORO.gg 공통 EmptyState foundation component다. 기존 빈 화면, 검색 결
 - `search`
 - `community`
 - `streamer`
-- `tournament`
 - `error`
 
 ## API

@@ -1,0 +1,64 @@
+.public-aram-page {
+  display: grid;
+  gap: var(--space-6);
+  width: min(100%, 1180px);
+  margin-inline: auto;
+}
+
+.public-aram-loading,
+.public-aram-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: var(--space-4);
+}
+
+.public-aram-toolbar {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.public-aram-rarity {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  padding-block-end: var(--space-1);
+}
+
+.public-aram-rarity > button {
+  flex: 0 0 auto;
+}
+
+.public-aram-card {
+  min-width: 0;
+}
+
+.public-aram-card-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.public-aram-card-heading-copy {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.public-aram-card-icon {
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.public-aram-card .ui-card-title,
+.public-aram-card .ui-card-description {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 767px) {
+  .public-aram-page {
+    gap: var(--space-4);
+  }
+}
