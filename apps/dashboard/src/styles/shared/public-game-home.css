@@ -485,14 +485,14 @@
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto auto auto minmax(0, 1fr) auto;
   align-content: start;
   align-items: center;
   justify-items: stretch;
   inline-size: 100%;
   min-inline-size: 0;
   min-block-size: 0;
-  aspect-ratio: 1;
+  aspect-ratio: 1 / 1.08;
   gap: var(--yoro-space-1);
   padding: var(--yoro-space-3);
   overflow: hidden;
@@ -510,14 +510,14 @@
 
 .public-game-home__live-strip .public-home-live-card--preview {
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto auto auto minmax(0, 1fr) auto;
 }
 
 .public-game-home__live-strip .public-home-live-preview {
   position: relative;
   display: grid;
   grid-column: 1;
-  grid-row: 1;
+  grid-row: 2;
   place-items: center;
   inline-size: 100%;
   aspect-ratio: 16 / 9;
@@ -561,7 +561,7 @@
 .public-game-home__live-strip .public-home-live-avatar {
   display: grid;
   grid-column: 1;
-  grid-row: 1;
+  grid-row: 2;
   justify-self: center;
   place-items: center;
   inline-size: 4.5rem;
@@ -592,16 +592,16 @@
 }
 
 .public-game-home__live-strip .public-home-live-card strong {
-  grid-row: 2;
+  grid-row: 3;
 }
 
 .public-game-home__live-strip .public-home-live-primary-meta {
-  grid-row: 3;
+  grid-row: 4;
   color: var(--yoro-color-text-muted) !important;
 }
 
 .public-game-home__live-strip .public-home-live-secondary-meta {
-  grid-row: 4;
+  grid-row: 5;
   color: var(--yoro-color-text-muted) !important;
 }
 
@@ -610,16 +610,17 @@
 }
 
 .public-game-home__live-strip .public-home-live-pill.yoro-status {
-  position: absolute;
-  inset-block-start: var(--yoro-space-2);
-  inset-inline-start: var(--yoro-space-2);
-  z-index: 1;
+  position: static;
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+  margin: 0 0 var(--yoro-space-1);
 }
 
 .public-game-home__live-strip .public-home-live-card > .public-home-live-action {
   display: inline-flex;
   grid-column: 1;
-  grid-row: 5;
+  grid-row: 6;
   align-items: center;
   justify-content: center;
   inline-size: 100%;

@@ -480,7 +480,8 @@ test("LoL 홈은 공통 LIVE rail로 기존 스트리머 카드와 전체 보기
     "utf8",
   );
   assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-rail\s*\{[\s\S]*?grid-auto-columns:\s*17\.5rem/u);
-  assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-card\s*\{[\s\S]*?aspect-ratio:\s*1/u);
+  assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-card\s*\{[\s\S]*?aspect-ratio:\s*1\s*\/\s*1\.08/u);
+  assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-pill\.yoro-status\s*\{[\s\S]*?position:\s*static;[\s\S]*?grid-row:\s*1/u);
   assert.match(homeCss, /\.public-game-home__hero:has\(\.public-suggestion-panel\)\s*\{[\s\S]*?z-index:\s*var\(--yoro-z-dropdown\)/u);
   assert.match(homeCss, /@media \(max-width:\s*72rem\)\s*\{[\s\S]*?\.public-game-home__hero-grid:not\(\.public-game-home__hero-grid--centered\)/u);
   assert.ok(
@@ -601,6 +602,17 @@ test("Profile 티어 영역은 솔로·자유·5v5 랭크만 독립적으로 렌
   assert.match(html, />자유랭크</u);
   assert.match(html, />5v5 랭크</u);
   assert.equal((html.match(/public-profile-metric-card/g) ?? []).length, 3);
+});
+
+test("모바일 전적 필터는 상단에 고정되지 않고 문서 흐름을 따른다", () => {
+  const profileCss = readFileSync(
+    new URL("../src/styles/pages/public-lol/20-profile-platform.css", import.meta.url),
+    "utf8",
+  );
+  assert.match(
+    profileCss,
+    /@media \(max-width:\s*48rem\)[\s\S]*?\.public-profile-platform-v2 \.public-match-filter-bar\s*\{[\s\S]*?position:\s*static;[\s\S]*?z-index:\s*auto;[\s\S]*?top:\s*auto;/u,
+  );
 });
 
 test("스트리머 프로필 이미지는 방송 상태를 테두리 class와 접근성 문구로 구분한다", () => {

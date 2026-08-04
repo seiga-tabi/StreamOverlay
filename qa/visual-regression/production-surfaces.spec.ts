@@ -410,6 +410,7 @@ test("LoL 프로필 플랫폼은 주요 viewport에서 내부 탐색과 문서 �
     const rankSection = page.locator(".public-profile-rank-section");
     const rankStrip = rankSection.locator(".public-profile-metric-strip");
     const recentMatches = page.locator("#public-recent-matches");
+    const matchFilter = recentMatches.locator(".public-match-filter-bar");
     const resultsColumn = page.locator(".public-overview-results-column");
     const aggregatePanel = page.locator(".public-overview-dashboard-panel");
     const aggregateCard = aggregatePanel.locator(".public-aggregate-card");
@@ -465,6 +466,8 @@ test("LoL 프로필 플랫폼은 주요 viewport에서 내부 탐색과 문서 �
     await rankSection.getByText("5v5 랭크", { exact: true }).scrollIntoViewIfNeeded();
     await expect(rankSection.getByText("5v5 랭크", { exact: true })).toBeVisible();
     await expect(recentMatches).toBeVisible();
+    await expect(matchFilter).toBeVisible();
+    await expect(matchFilter).toHaveCSS("position", viewport.width <= 768 ? "static" : "sticky");
   }
 
   expect(errors, "viewport 전환 중 runtime 오류가 없어야 합니다.").toEqual([]);

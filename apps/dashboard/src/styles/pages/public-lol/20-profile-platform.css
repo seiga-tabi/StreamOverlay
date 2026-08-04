@@ -690,6 +690,9 @@
   }
 
   .public-profile-platform-v2 .public-match-filter-bar {
+    position: static;
+    z-index: auto;
+    top: auto;
     grid-template-columns: minmax(0, 1fr);
   }
 

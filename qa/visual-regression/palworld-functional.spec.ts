@@ -1583,21 +1583,25 @@ test("LoL·Palworld LIVE rail은 PC 이동 버튼·정사각형 LoL 카드·모�
   const lolCardMetrics = await lolRail.evaluate((element) => {
     const firstCard = element.querySelector<HTMLElement>(".public-home-live-card");
     const preview = firstCard?.querySelector<HTMLElement>(".public-home-live-preview");
+    const livePill = firstCard?.querySelector<HTMLElement>(".public-home-live-pill");
     const title = firstCard?.querySelector<HTMLElement>("strong");
     const description = firstCard?.querySelector<HTMLElement>("small");
     return {
       cardWidth: firstCard?.getBoundingClientRect().width ?? 0,
       cardHeight: firstCard?.getBoundingClientRect().height ?? 0,
       contentFits: (firstCard?.scrollHeight ?? 0) <= (firstCard?.clientHeight ?? 0) + 1,
+      livePillClearsPreview: Boolean(livePill && preview && livePill.getBoundingClientRect().bottom <= preview.getBoundingClientRect().top),
       previewRatio: preview ? preview.getBoundingClientRect().width / preview.getBoundingClientRect().height : 0,
       railWidth: element.getBoundingClientRect().width,
       titleColor: title ? getComputedStyle(title).color : "",
       descriptionColor: description ? getComputedStyle(description).color : "",
     };
   });
-  expect(Math.abs(lolCardMetrics.cardWidth - lolCardMetrics.cardHeight)).toBeLessThanOrEqual(2);
+  expect(lolCardMetrics.cardHeight / lolCardMetrics.cardWidth).toBeGreaterThanOrEqual(1.07);
+  expect(lolCardMetrics.cardHeight / lolCardMetrics.cardWidth).toBeLessThanOrEqual(1.09);
   expect(lolCardMetrics.cardWidth).toBeLessThan(lolCardMetrics.railWidth / 2);
   expect(lolCardMetrics.contentFits).toBe(true);
+  expect(lolCardMetrics.livePillClearsPreview).toBe(true);
   expect(Math.abs(lolCardMetrics.previewRatio - (16 / 9))).toBeLessThan(0.02);
   expect(lolCardMetrics.titleColor).not.toBe("rgba(0, 0, 0, 0)");
   expect(lolCardMetrics.descriptionColor).not.toBe("rgba(0, 0, 0, 0)");
