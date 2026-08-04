@@ -5779,7 +5779,7 @@ export function PublicLolPage({
     for (const channel of followedLol?.channels ?? []) {
       if (!channel.isLive) continue;
       const key = channel.twitchUserId || channel.riotId || channel.twitchLogin;
-      if (!key) continue;
+      if (!key || streamers.has(key)) continue;
       streamers.set(key, {
         id: key,
         name: channel.twitchDisplayName,

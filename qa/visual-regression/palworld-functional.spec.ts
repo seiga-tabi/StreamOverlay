@@ -1330,6 +1330,7 @@ async function installConnectedTwitchFixtures(page: Page, { liveCount = 1, longC
     gameName: "Palworld",
     title: `Palworld LIVE ${index + 2}`,
     viewerCount: 100 + index,
+    thumbnailUrl: `https://static-cdn.jtvnw.net/previews-ttv/live_user_live_pal_${index + 2}-{width}x{height}.jpg`,
   }));
   const channels = [
     {
@@ -1343,6 +1344,7 @@ async function installConnectedTwitchFixtures(page: Page, { liveCount = 1, longC
       gameName: longContent ? "Palworld 장시간 협동 탐험과 기지 건설 방송" : "Palworld",
       title: longContent ? "아주 긴 방송 제목도 모바일 페이지 전체 너비를 확장하지 않아야 합니다" : "오늘도 팰 모험",
       viewerCount: 321,
+      thumbnailUrl: "https://static-cdn.jtvnw.net/previews-ttv/live_user_live_pal-{width}x{height}.jpg",
     },
     ...additionalLiveChannels,
     {
@@ -1362,6 +1364,14 @@ async function installConnectedTwitchFixtures(page: Page, { liveCount = 1, longC
       channelUrl: "https://www.twitch.tv/offline_pal",
     },
   ];
+
+  await page.route("https://static-cdn.jtvnw.net/previews-ttv/**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "image/svg+xml",
+      body: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 9"><rect width="16" height="9" fill="#6f55ff"/></svg>',
+    });
+  });
 
   await page.route("**/api/public/twitch/status", async (route) => {
     statusRequests += 1;
@@ -1395,7 +1405,7 @@ async function installConnectedTwitchFixtures(page: Page, { liveCount = 1, longC
       missingScopes: ["user:read:follows", "user:read:subscriptions"],
     });
   });
-  await page.route("**/api/public/twitch/followed-lol?limit=100", async (route) => {
+  await page.route("**/api/public/twitch/followed-lol?*", async (route) => {
     followedRequests += 1;
     await json(route, {
       connected,
@@ -1538,7 +1548,7 @@ test("모바일 통합 메뉴는 전체 시트가 자연스럽게 올라오고 �
   await expect(page.getByRole("button", { name: "메뉴 열기", exact: true })).toBeFocused();
 });
 
-test("LoL·Palworld LIVE rail은 한 화면에 두 카드와 PC 이동 버튼·모바일 터치 스크롤을 제공한다", async ({ page }) => {
+test("LoL·Palworld LIVE rail은 PC 이동 버튼·정사각형 LoL 카드·모바일 터치 스크롤을 제공한다", async ({ page }) => {
   await installConnectedTwitchFixtures(page, { liveCount: 8 });
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/palworld");
@@ -1569,21 +1579,29 @@ test("LoL·Palworld LIVE rail은 한 화면에 두 카드와 PC 이동 버튼·�
   await expect(page).toHaveURL(/\/$/u);
   const lolRail = page.getByTestId("public-live-streamer-rail");
   await expect(lolRail.locator(".public-home-live-card")).toHaveCount(8);
+  await expect(lolRail.locator(".public-home-live-preview")).toHaveCount(8);
   const lolCardMetrics = await lolRail.evaluate((element) => {
     const firstCard = element.querySelector<HTMLElement>(".public-home-live-card");
+    const preview = firstCard?.querySelector<HTMLElement>(".public-home-live-preview");
     const title = firstCard?.querySelector<HTMLElement>("strong");
     const description = firstCard?.querySelector<HTMLElement>("small");
-    const gap = Number.parseFloat(getComputedStyle(element).columnGap);
     return {
       cardWidth: firstCard?.getBoundingClientRect().width ?? 0,
-      expectedWidth: (element.getBoundingClientRect().width - gap) / 2,
+      cardHeight: firstCard?.getBoundingClientRect().height ?? 0,
+      contentFits: (firstCard?.scrollHeight ?? 0) <= (firstCard?.clientHeight ?? 0) + 1,
+      previewRatio: preview ? preview.getBoundingClientRect().width / preview.getBoundingClientRect().height : 0,
+      railWidth: element.getBoundingClientRect().width,
       titleColor: title ? getComputedStyle(title).color : "",
       descriptionColor: description ? getComputedStyle(description).color : "",
     };
   });
-  expect(Math.abs(lolCardMetrics.cardWidth - lolCardMetrics.expectedWidth)).toBeLessThanOrEqual(2);
-  expect(lolCardMetrics.titleColor).toBe("rgb(33, 37, 41)");
-  expect(lolCardMetrics.descriptionColor).toBe("rgb(116, 123, 131)");
+  expect(Math.abs(lolCardMetrics.cardWidth - lolCardMetrics.cardHeight)).toBeLessThanOrEqual(2);
+  expect(lolCardMetrics.cardWidth).toBeLessThan(lolCardMetrics.railWidth / 2);
+  expect(lolCardMetrics.contentFits).toBe(true);
+  expect(Math.abs(lolCardMetrics.previewRatio - (16 / 9))).toBeLessThan(0.02);
+  expect(lolCardMetrics.titleColor).not.toBe("rgba(0, 0, 0, 0)");
+  expect(lolCardMetrics.descriptionColor).not.toBe("rgba(0, 0, 0, 0)");
+  expect(lolCardMetrics.titleColor).not.toBe(lolCardMetrics.descriptionColor);
   const lolNextButton = page.getByRole("button", { name: "다음 LIVE 스트리머 보기" });
   await expect(lolNextButton).toBeVisible();
 
@@ -1607,6 +1625,7 @@ test("LoL·Palworld LIVE rail은 한 화면에 두 카드와 PC 이동 버튼·�
 });
 
 test("LoL 홈 연관 검색은 Hero와 LIVE 영역보다 위에서 포인터 입력을 받는다", async ({ page }) => {
+  await page.setViewportSize({ width: 1120, height: 900 });
   await page.addInitScript(() => {
     window.localStorage.setItem("loltrace.recent.jp", JSON.stringify([{
       gameName: "YoroTester",
@@ -1618,6 +1637,17 @@ test("LoL 홈 연관 검색은 Hero와 LIVE 영역보다 위에서 포인터 입
 
   const search = page.locator(".public-game-home--lol .public-home-shared-input");
   await expect(search).toBeVisible();
+  const heroAlignment = await page.locator(".public-game-home--lol .public-game-home__hero").evaluate((hero) => {
+    const copy = hero.querySelector<HTMLElement>(".public-game-home__copy");
+    const heroRect = hero.getBoundingClientRect();
+    const copyRect = copy?.getBoundingClientRect();
+    return {
+      copyCenter: copyRect ? copyRect.left + (copyRect.width / 2) : Number.NaN,
+      heroCenter: heroRect.left + (heroRect.width / 2),
+    };
+  });
+  expect(Math.abs(heroAlignment.copyCenter - heroAlignment.heroCenter)).toBeLessThanOrEqual(2);
+
   await search.focus();
   const panel = page.locator(".public-game-home--lol .public-suggestion-panel");
   await expect(panel).toBeVisible();
@@ -1629,11 +1659,13 @@ test("LoL 홈 연관 검색은 Hero와 LIVE 영역보다 위에서 포인터 입
     const hit = document.elementFromPoint(x, y);
     return {
       copyZIndex: getComputedStyle(element.closest(".public-game-home__copy") as Element).zIndex,
+      heroZIndex: getComputedStyle(element.closest(".public-game-home__hero") as Element).zIndex,
       hitInsidePanel: hit !== null && element.contains(hit),
       panelZIndex: getComputedStyle(element).zIndex,
     };
   });
   expect(Number(stacking.copyZIndex)).toBeGreaterThanOrEqual(30);
+  expect(Number(stacking.heroZIndex)).toBeGreaterThanOrEqual(30);
   expect(Number(stacking.panelZIndex)).toBeGreaterThanOrEqual(30);
   expect(stacking.hitInsidePanel, "LoL 연관 검색 항목이 다른 Hero 콘텐츠에 가려지면 안 됩니다.").toBe(true);
 });

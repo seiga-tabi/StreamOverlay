@@ -475,6 +475,14 @@ test("LoL 홈은 공통 LIVE rail로 기존 스트리머 카드와 전체 보기
   assert.match(html, /League of Legends/u);
   assert.match(html, /href="https:\/\/www\.twitch\.tv\/lol_streamer"/u);
   assert.match(html, /전체 보기/u);
+  const homeCss = readFileSync(
+    new URL("../src/styles/shared/public-game-home.css", import.meta.url),
+    "utf8",
+  );
+  assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-rail\s*\{[\s\S]*?grid-auto-columns:\s*17\.5rem/u);
+  assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-card\s*\{[\s\S]*?aspect-ratio:\s*1/u);
+  assert.match(homeCss, /\.public-game-home__hero:has\(\.public-suggestion-panel\)\s*\{[\s\S]*?z-index:\s*var\(--yoro-z-dropdown\)/u);
+  assert.match(homeCss, /@media \(max-width:\s*72rem\)\s*\{[\s\S]*?\.public-game-home__hero-grid:not\(\.public-game-home__hero-grid--centered\)/u);
   assert.ok(
     html.indexOf("public-game-home__hero") < html.indexOf("public-game-home__live-strip")
       && html.indexOf("public-game-home__live-strip") < html.indexOf("YORO.gg에서 참여해보세요")
