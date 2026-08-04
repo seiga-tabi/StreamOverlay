@@ -255,6 +255,7 @@ export type {
   SearchFormLocalizedText,
   SearchFormPanelRequest,
   SearchFormPanelTab,
+  SearchFormPlatformOption,
   SearchFormProps,
   SearchFormSuggestion,
   SearchFormText,

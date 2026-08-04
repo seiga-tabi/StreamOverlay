@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
-import type { LolRankedStats } from "@streamops/shared";
+import type { LolPlatformId, LolRankedStats } from "@streamops/shared";
 import { Button } from "../../../shared/ui/Button";
 import { FormControl, FormField, FormLabel, Input } from "../../../shared/ui/Form";
 import { StatusPill } from "../../../shared/ui/Status";
@@ -28,7 +28,6 @@ export type SearchFormLocalizedText = {
 
 export type SearchFormText = {
   searchServer: string;
-  jpServer: SearchFormLocalizedText;
   searchPlaceholder: SearchFormLocalizedText;
   clearSearch: string;
   searching: string;
@@ -39,6 +38,12 @@ export type SearchFormText = {
   noRecentSearches: SearchFormLocalizedText;
   noFavorites: SearchFormLocalizedText;
   relatedSummoners: string;
+};
+
+export type SearchFormPlatformOption = {
+  id: LolPlatformId;
+  code: string;
+  label: SearchFormLocalizedText;
 };
 
 export type SearchFormHelpers<TSuggestion extends SearchFormSuggestion = SearchFormSuggestion> = {
@@ -52,7 +57,10 @@ export type SearchFormHelpers<TSuggestion extends SearchFormSuggestion = SearchF
 export type SearchFormProps<TSuggestion extends SearchFormSuggestion = SearchFormSuggestion> = {
   query: string;
   loading: boolean;
+  platform: LolPlatformId;
+  platformOptions: readonly SearchFormPlatformOption[];
   onQuery: (value: string) => void;
+  onPlatformChange: (platform: LolPlatformId) => void;
   onClear: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   suggestions: TSuggestion[];
@@ -78,7 +86,10 @@ function suggestionTierLabel(stats: LolRankedStats | undefined, fallbackLabel: s
 export function SearchForm<TSuggestion extends SearchFormSuggestion>({
   query,
   loading,
+  platform,
+  platformOptions,
   onQuery,
+  onPlatformChange,
   onClear,
   onSubmit,
   suggestions,
@@ -131,6 +142,7 @@ export function SearchForm<TSuggestion extends SearchFormSuggestion>({
     { key: "recent", label: text.recentSearches, count: recentSearches.length },
     { key: "favorites", label: text.favorites, count: favorites.length }
   ];
+  const selectedPlatform = platformOptions.find((option) => option.id === platform) ?? platformOptions[0];
 
   function submitFromKeyboard(event: KeyboardEvent<HTMLInputElement>): void {
     if (event.key !== "Enter" || event.nativeEvent.isComposing) return;
@@ -153,6 +165,12 @@ export function SearchForm<TSuggestion extends SearchFormSuggestion>({
   function handleClear(): void {
     setSuggestionsOpen(false);
     onClear();
+  }
+
+  function handlePlatformChange(nextPlatform: LolPlatformId): void {
+    setServerMenuOpen(false);
+    setSuggestionsOpen(false);
+    onPlatformChange(nextPlatform);
   }
 
   function handlePickSuggestion(suggestion: TSuggestion): void {
@@ -240,7 +258,7 @@ export function SearchForm<TSuggestion extends SearchFormSuggestion>({
               type="button"
               variant="tertiary"
             >
-              <StatusPill tone="info" size="sm">JP</StatusPill>
+              <StatusPill tone="info" size="sm">{selectedPlatform?.code ?? "JP"}</StatusPill>
             </Button>
           ) : (
             <button
@@ -251,16 +269,24 @@ export function SearchForm<TSuggestion extends SearchFormSuggestion>({
               onClick={() => setServerMenuOpen((open) => !open)}
               disabled={loading}
             >
-              <strong>JP</strong>
+              <strong>{selectedPlatform?.code ?? "JP"}</strong>
               <span aria-hidden="true" />
             </button>
           )}
           {serverMenuOpen ? (
             <div className="public-server-menu" role="listbox" aria-label={text.searchServer}>
-              <button type="button" role="option" aria-selected="true" onClick={() => setServerMenuOpen(false)}>
-                <strong>JP</strong>
-                <span  >{text.jpServer.label}</span>
-              </button>
+              {platformOptions.map((option) => (
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={option.id === platform}
+                  key={option.id}
+                  onClick={() => handlePlatformChange(option.id)}
+                >
+                  <strong>{option.code}</strong>
+                  <span>{option.label.label}</span>
+                </button>
+              ))}
             </div>
           ) : null}
         </div>

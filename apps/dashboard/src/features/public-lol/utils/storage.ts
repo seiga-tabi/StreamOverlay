@@ -1,4 +1,4 @@
-import type { LolRankedStats } from "@streamops/shared";
+import { normalizeLolPlatformId, type LolRankedStats } from "@streamops/shared";
 import type { PublicFavorite, PublicLolProfile, PublicTheme, SearchSuggestion } from "../types/public-lol";
 import { normalizeSuggestionKey, normalizedTagLine } from "./riot-id";
 
@@ -17,7 +17,7 @@ export function parseRecentSearches(raw: string | null): SearchSuggestion[] {
       source: "recent" as const,
       profileIconUrl: typeof item.profileIconUrl === "string" ? item.profileIconUrl : undefined,
       summonerLevel: typeof item.summonerLevel === "number" ? item.summonerLevel : undefined,
-      lolPlatform: typeof item.lolPlatform === "string" ? item.lolPlatform : undefined,
+      lolPlatform: normalizeLolPlatformId(item.lolPlatform) ?? "jp1",
       rankedStats: item.rankedStats && typeof item.rankedStats === "object" ? item.rankedStats as LolRankedStats : undefined,
       lastSeenAt: typeof item.lastSeenAt === "string" ? item.lastSeenAt : undefined
     }))
@@ -77,7 +77,7 @@ export function parseFavorites(raw: string | null): PublicFavorite[] {
       source: "recent" as const,
       profileIconUrl: typeof item.profileIconUrl === "string" ? item.profileIconUrl : undefined,
       summonerLevel: typeof item.summonerLevel === "number" ? item.summonerLevel : undefined,
-      lolPlatform: typeof item.lolPlatform === "string" ? item.lolPlatform : undefined,
+      lolPlatform: normalizeLolPlatformId(item.lolPlatform) ?? "jp1",
       rankedStats: item.rankedStats && typeof item.rankedStats === "object" ? item.rankedStats as LolRankedStats : undefined,
       lastSeenAt: typeof item.lastSeenAt === "string" ? item.lastSeenAt : undefined,
       recentGames: typeof item.recentGames === "number" ? item.recentGames : undefined,

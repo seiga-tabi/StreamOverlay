@@ -1,5 +1,13 @@
 import { appConfig } from "../config.js";
-import type { LolRankedStats, LolRankTier } from "@streamops/shared";
+import {
+  lolRegionalRouteForPlatform,
+  normalizeLolPlatformId,
+  type LolPlatformId,
+  type LolRankedStats,
+  type LolRankTier,
+  type LolRegionalRoute,
+  type LolRoutingContext
+} from "@streamops/shared";
 import { riotApiKeyStatus, type RiotApiKeyProvider, type RiotApiKeyStatus } from "./riot-api-key-store.js";
 
 export type RiotAccount = {
@@ -480,28 +488,11 @@ function listEntryFromRankedEntry(entry: RiotLeagueEntry): RiotLeagueListEntry {
   };
 }
 
-function normalizeRegion(value: string, fallback: string): string {
-  const normalized = value.trim().toLowerCase();
-  return /^[a-z0-9-]+$/.test(normalized) ? normalized : fallback;
-}
-
-function normalizePlatformRouting(value: string, fallback: string): string {
-  const normalized = normalizeRegion(value, fallback);
-  const aliases: Record<string, string> = {
-    br: "br1",
-    eune: "eun1",
-    euw: "euw1",
-    jp: "jp1",
-    japan: "jp1",
-    la: "la1",
-    lan: "la1",
-    las: "la2",
-    na: "na1",
-    oce: "oc1",
-    tr: "tr1",
-    turkey: "tr1"
-  };
-  return aliases[normalized] ?? normalized;
+function normalizeAccountRegion(value: string, fallback: LolRegionalRoute): LolRegionalRoute {
+  const normalized = value.trim().toLocaleLowerCase("en-US");
+  return normalized === "americas" || normalized === "asia" || normalized === "europe" || normalized === "sea"
+    ? normalized
+    : fallback;
 }
 
 async function readErrorBody(response: Response): Promise<string> {
@@ -571,28 +562,34 @@ export class RiotApiClient {
     return Boolean(this.apiKey);
   }
 
-  private get accountRegion(): string {
-    return normalizeRegion(appConfig.riot.accountRegion, "asia");
+  private get defaultRouting(): LolRoutingContext {
+    const lolPlatform: LolPlatformId = normalizeLolPlatformId(appConfig.riot.lolPlatform) ?? "jp1";
+    return {
+      lolPlatform,
+      accountRegion: normalizeAccountRegion(appConfig.riot.accountRegion, lolRegionalRouteForPlatform(lolPlatform))
+    };
   }
 
-  private get lolPlatform(): string {
-    return normalizePlatformRouting(appConfig.riot.lolPlatform, "jp1");
+  private routing(routing?: LolRoutingContext): LolRoutingContext {
+    return routing ?? this.defaultRouting;
   }
 
-  routingStatus(): { configured: boolean; source: "runtime" | "env" | "none"; accountRegion: string; lolPlatform: string } {
+  routingStatus(routing?: LolRoutingContext): { configured: boolean; source: "runtime" | "env" | "none"; accountRegion: string; lolPlatform: string } {
+    const resolved = this.routing(routing);
     return {
       configured: this.isConfigured(),
       source: this.apiKeySource,
-      accountRegion: this.accountRegion,
-      lolPlatform: this.lolPlatform
+      accountRegion: resolved.accountRegion,
+      lolPlatform: resolved.lolPlatform
     };
   }
 
   credentialStatus(): RiotApiKeyStatus & { accountRegion: string; lolPlatform: string } {
+    const routing = this.defaultRouting;
     return {
       ...riotApiKeyStatus(this.apiKey, this.apiKeySource, this.apiKeySource === "runtime" ? this.apiKeyProvider?.getUpdatedAt() : undefined),
-      accountRegion: this.accountRegion,
-      lolPlatform: this.lolPlatform
+      accountRegion: routing.accountRegion,
+      lolPlatform: routing.lolPlatform
     };
   }
 
@@ -632,58 +629,59 @@ export class RiotApiClient {
     return (await response.json()) as T;
   }
 
-  async getAccountByRiotId(gameName: string, tagLine: string): Promise<RiotAccount | null> {
+  async getAccountByRiotId(gameName: string, tagLine: string, routing?: LolRoutingContext): Promise<RiotAccount | null> {
     if (!this.isConfigured()) return null;
-    const url = `https://${this.accountRegion}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`;
+    const url = `https://${this.routing(routing).accountRegion}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`;
     return this.fetchJson<RiotAccount>(url, "account.by_riot_id");
   }
 
-  async getSummonerByPuuid(puuid: string): Promise<RiotSummoner | null> {
+  async getSummonerByPuuid(puuid: string, routing?: LolRoutingContext): Promise<RiotSummoner | null> {
     if (!this.isConfigured()) return null;
-    const url = `https://${this.lolPlatform}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${encodeURIComponent(puuid)}`;
+    const url = `https://${this.routing(routing).lolPlatform}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${encodeURIComponent(puuid)}`;
     return this.fetchJson<RiotSummoner>(url, "summoner.by_puuid");
   }
 
-  async getLeagueEntriesBySummonerId(summonerId: string): Promise<RiotLeagueEntry[]> {
+  async getLeagueEntriesBySummonerId(summonerId: string, routing?: LolRoutingContext): Promise<RiotLeagueEntry[]> {
     if (!this.isConfigured()) return [];
-    const url = `https://${this.lolPlatform}.api.riotgames.com/lol/league/v4/entries/by-summoner/${encodeURIComponent(summonerId)}`;
+    const url = `https://${this.routing(routing).lolPlatform}.api.riotgames.com/lol/league/v4/entries/by-summoner/${encodeURIComponent(summonerId)}`;
     return (await this.fetchJson<RiotLeagueEntry[]>(url, "league.entries")) ?? [];
   }
 
-  async getLeagueEntriesByPuuid(puuid: string): Promise<RiotLeagueEntry[]> {
+  async getLeagueEntriesByPuuid(puuid: string, routing?: LolRoutingContext): Promise<RiotLeagueEntry[]> {
     if (!this.isConfigured()) return [];
-    const url = `https://${this.lolPlatform}.api.riotgames.com/lol/league/v4/entries/by-puuid/${encodeURIComponent(puuid)}`;
+    const url = `https://${this.routing(routing).lolPlatform}.api.riotgames.com/lol/league/v4/entries/by-puuid/${encodeURIComponent(puuid)}`;
     return (await this.fetchJson<RiotLeagueEntry[]>(url, "league.entries_by_puuid")) ?? [];
   }
 
-  async getLeagueById(leagueId: string): Promise<RiotLeagueList | null> {
+  async getLeagueById(leagueId: string, routing?: LolRoutingContext): Promise<RiotLeagueList | null> {
     if (!this.isConfigured()) return null;
-    const url = `https://${this.lolPlatform}.api.riotgames.com/lol/league/v4/leagues/${encodeURIComponent(leagueId)}`;
+    const url = `https://${this.routing(routing).lolPlatform}.api.riotgames.com/lol/league/v4/leagues/${encodeURIComponent(leagueId)}`;
     return this.fetchJson<RiotLeagueList>(url, "league.by_id");
   }
 
-  async getChampionMasteryTopByPuuid(puuid: string, count = 3): Promise<RiotChampionMastery[]> {
+  async getChampionMasteryTopByPuuid(puuid: string, count = 3, routing?: LolRoutingContext): Promise<RiotChampionMastery[]> {
     if (!this.isConfigured()) return [];
     const safeCount = Math.max(1, Math.min(10, Math.trunc(count)));
-    const url = `https://${this.lolPlatform}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${encodeURIComponent(puuid)}/top?count=${safeCount}`;
+    const url = `https://${this.routing(routing).lolPlatform}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${encodeURIComponent(puuid)}/top?count=${safeCount}`;
     return (await this.fetchJson<RiotChampionMastery[]>(url, "champion_mastery.top")) ?? [];
   }
 
-  async getRecentMatchIdsByPuuid(puuid: string, count = 20, queueIds: number[] = [], start = 0): Promise<string[]> {
+  async getRecentMatchIdsByPuuid(puuid: string, count = 20, queueIds: number[] = [], start = 0, routing?: LolRoutingContext): Promise<string[]> {
     if (!this.isConfigured()) return [];
+    const accountRegion = this.routing(routing).accountRegion;
     const safeStart = Math.max(0, Math.min(1000, Math.trunc(start)));
     const safeCount = Math.max(1, Math.min(100, Math.trunc(count)));
     const safeQueueIds = [...new Set(queueIds)]
       .map((queueId) => Math.trunc(queueId))
       .filter((queueId) => queueId > 0);
     if (safeQueueIds.length === 0) {
-      const url = `https://${this.accountRegion}.api.riotgames.com/lol/match/v5/matches/by-puuid/${encodeURIComponent(puuid)}/ids?start=${safeStart}&count=${safeCount}`;
+      const url = `https://${accountRegion}.api.riotgames.com/lol/match/v5/matches/by-puuid/${encodeURIComponent(puuid)}/ids?start=${safeStart}&count=${safeCount}`;
       return (await this.fetchJson<string[]>(url, "match.ids")) ?? [];
     }
 
     const ids = new Set<string>();
     for (const queueId of safeQueueIds) {
-      const url = `https://${this.accountRegion}.api.riotgames.com/lol/match/v5/matches/by-puuid/${encodeURIComponent(puuid)}/ids?start=${safeStart}&count=${safeCount}&queue=${queueId}`;
+      const url = `https://${accountRegion}.api.riotgames.com/lol/match/v5/matches/by-puuid/${encodeURIComponent(puuid)}/ids?start=${safeStart}&count=${safeCount}&queue=${queueId}`;
       for (const matchId of await this.fetchJson<string[]>(url, "match.ids") ?? []) {
         ids.add(matchId);
         if (ids.size >= safeCount) return [...ids];
@@ -692,36 +690,36 @@ export class RiotApiClient {
     return [...ids];
   }
 
-  async getMatch(matchId: string): Promise<RiotMatch | null> {
+  async getMatch(matchId: string, routing?: LolRoutingContext): Promise<RiotMatch | null> {
     if (!this.isConfigured()) return null;
-    const url = `https://${this.accountRegion}.api.riotgames.com/lol/match/v5/matches/${encodeURIComponent(matchId)}`;
+    const url = `https://${this.routing(routing).accountRegion}.api.riotgames.com/lol/match/v5/matches/${encodeURIComponent(matchId)}`;
     return this.fetchJson<RiotMatch>(url, "match.detail");
   }
 
-  async getMatchTimeline(matchId: string): Promise<RiotMatchTimeline | null> {
+  async getMatchTimeline(matchId: string, routing?: LolRoutingContext): Promise<RiotMatchTimeline | null> {
     if (!this.isConfigured()) return null;
-    const url = `https://${this.accountRegion}.api.riotgames.com/lol/match/v5/matches/${encodeURIComponent(matchId)}/timeline`;
+    const url = `https://${this.routing(routing).accountRegion}.api.riotgames.com/lol/match/v5/matches/${encodeURIComponent(matchId)}/timeline`;
     return this.fetchJson<RiotMatchTimeline>(url, "match.timeline");
   }
 
-  async getCurrentGameByPuuid(puuid: string): Promise<RiotCurrentGameInfo | null> {
+  async getCurrentGameByPuuid(puuid: string, routing?: LolRoutingContext): Promise<RiotCurrentGameInfo | null> {
     if (!this.isConfigured()) return null;
-    const url = `https://${this.lolPlatform}.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${encodeURIComponent(puuid)}`;
+    const url = `https://${this.routing(routing).lolPlatform}.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${encodeURIComponent(puuid)}`;
     return this.fetchJson<RiotCurrentGameInfo>(url, "spectator.active_game");
   }
 
-  async getLadderRankByPuuid(puuid: string, queuePriority: readonly RiotRankedQueueType[] = RANKED_QUEUE_PRIORITY): Promise<number | undefined> {
+  async getLadderRankByPuuid(puuid: string, queuePriority: readonly RiotRankedQueueType[] = RANKED_QUEUE_PRIORITY, routing?: LolRoutingContext): Promise<number | undefined> {
     if (!this.isConfigured()) return undefined;
     const [summoner, entries] = await Promise.all([
-      this.getSummonerByPuuid(puuid),
-      this.getLeagueEntriesByPuuid(puuid)
+      this.getSummonerByPuuid(puuid, routing),
+      this.getLeagueEntriesByPuuid(puuid, routing)
     ]);
     const rankedEntry = queuePriority
       .map((queueType) => entries.find((entry) => entry.queueType === queueType))
       .find(Boolean);
     if (!rankedEntry?.leagueId) return undefined;
 
-    const league = await this.getLeagueById(rankedEntry.leagueId);
+    const league = await this.getLeagueById(rankedEntry.leagueId, routing);
     const targetSummonerId = rankedEntry.summonerId ?? summoner?.id;
     const sorted = [...(league?.entries ?? [])].sort(compareLeagueEntries);
     const index = sorted.findIndex((entry) => (
@@ -736,11 +734,11 @@ export class RiotApiClient {
     return higherEntries.length + 1;
   }
 
-  async getRankedStatsByPuuid(puuid: string, queuePriority: readonly RiotRankedQueueType[] = RANKED_QUEUE_PRIORITY): Promise<LolRankedStats | undefined> {
+  async getRankedStatsByPuuid(puuid: string, queuePriority: readonly RiotRankedQueueType[] = RANKED_QUEUE_PRIORITY, routing?: LolRoutingContext): Promise<LolRankedStats | undefined> {
     if (!this.isConfigured()) return undefined;
     const [summoner, entries] = await Promise.all([
-      this.getSummonerByPuuid(puuid),
-      this.getLeagueEntriesByPuuid(puuid)
+      this.getSummonerByPuuid(puuid, routing),
+      this.getLeagueEntriesByPuuid(puuid, routing)
     ]);
 
     const rankedEntry = queuePriority
@@ -756,21 +754,22 @@ export class RiotApiClient {
 
   async getRankedStatsByPuuidWithoutSummoner(
     puuid: string,
-    queuePriority: readonly RiotRankedQueueType[] = RANKED_QUEUE_PRIORITY
+    queuePriority: readonly RiotRankedQueueType[] = RANKED_QUEUE_PRIORITY,
+    routing?: LolRoutingContext
   ): Promise<LolRankedStats | undefined> {
     if (!this.isConfigured()) return undefined;
-    const entries = await this.getLeagueEntriesByPuuid(puuid);
+    const entries = await this.getLeagueEntriesByPuuid(puuid, routing);
     const rankedEntry = queuePriority
       .map((queueType) => entries.find((entry) => entry.queueType === queueType))
       .find(Boolean);
     return rankedEntry ? rankedStatsFromEntry(rankedEntry, null) : undefined;
   }
 
-  async getRankedQueueStatsByPuuid(puuid: string): Promise<{ solo?: LolRankedStats; flex?: LolRankedStats; ranked5v5?: LolRankedStats; primary?: LolRankedStats }> {
+  async getRankedQueueStatsByPuuid(puuid: string, routing?: LolRoutingContext): Promise<{ solo?: LolRankedStats; flex?: LolRankedStats; ranked5v5?: LolRankedStats; primary?: LolRankedStats }> {
     if (!this.isConfigured()) return {};
     const [summoner, entries] = await Promise.all([
-      this.getSummonerByPuuid(puuid),
-      this.getLeagueEntriesByPuuid(puuid)
+      this.getSummonerByPuuid(puuid, routing),
+      this.getLeagueEntriesByPuuid(puuid, routing)
     ]);
     const soloEntry = entries.find((entry) => entry.queueType === "RANKED_SOLO_5x5");
     const flexEntry = entries.find((entry) => entry.queueType === "RANKED_FLEX_SR");

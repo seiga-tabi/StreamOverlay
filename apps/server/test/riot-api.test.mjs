@@ -318,6 +318,28 @@ test("RiotApiClient는 일본 서버 별칭 jp를 jp1 host로 정규화한다", 
   }
 });
 
+test("RiotApiClient는 요청별 routing context를 전역 설정과 섞지 않는다", async () => {
+  const calls = [];
+  globalThis.fetch = async (url) => {
+    calls.push(String(url));
+    if (String(url).includes("/accounts/by-riot-id/")) {
+      return jsonResponse({ puuid: "puuid-multi-region", gameName: "Player", tagLine: "NA1" });
+    }
+    return jsonResponse([]);
+  };
+
+  const client = new RiotApiClient();
+  const routing = { lolPlatform: "na1", accountRegion: "americas" };
+  await client.getAccountByRiotId("Player", "NA1", routing);
+  await client.getLeagueEntriesByPuuid("puuid-multi-region", routing);
+  await client.getRecentMatchIdsByPuuid("puuid-multi-region", 20, [], 0, routing);
+
+  assert.ok(calls[0].startsWith("https://americas.api.riotgames.com/riot/account/v1/"));
+  assert.ok(calls[1].startsWith("https://na1.api.riotgames.com/lol/league/v4/"));
+  assert.ok(calls[2].startsWith("https://americas.api.riotgames.com/lol/match/v5/"));
+  assert.equal(client.routingStatus().lolPlatform, "kr");
+});
+
 test("RiotApiClient는 enabledQueues를 Match-V5 queue query로 전달하고 중복 match id를 제거한다", async () => {
   const calls = [];
   globalThis.fetch = async (url, init) => {

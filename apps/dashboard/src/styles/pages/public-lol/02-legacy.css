@@ -387,6 +387,12 @@
   color: #9fb0c8;
 }
 
+.public-server-menu {
+  max-height: min(420px, 70vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 .public-dashboard-shell:not(.public-home-shell) .public-suggestion-panel {
   border-color: rgba(93, 110, 145, .42);
   background: rgba(10, 17, 31, .98);

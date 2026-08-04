@@ -1,5 +1,19 @@
 import { Fragment, useEffect, useMemo, useRef, useState, type FormEvent, type MouseEvent, type ReactNode } from "react";
-import type { CommunityPost, CommunityPostCategory, CommunityPostReportCreateInput, LolChampionSummary, LolPerformanceStats, LolRankHistoryPoint, LolRankedStats, LolRole, LolRoleAnalysis, ParticipationStatus, StreamerRiotIdRequest } from "@streamops/shared";
+import {
+  normalizeLolPlatformId,
+  type CommunityPost,
+  type CommunityPostCategory,
+  type CommunityPostReportCreateInput,
+  type LolChampionSummary,
+  type LolPerformanceStats,
+  type LolPlatformId,
+  type LolRankHistoryPoint,
+  type LolRankedStats,
+  type LolRole,
+  type LolRoleAnalysis,
+  type ParticipationStatus,
+  type StreamerRiotIdRequest
+} from "@streamops/shared";
 import { apiBase } from "../api/client";
 import { publicLegalRuntimeConfig } from "../runtime-config";
 import {
@@ -104,6 +118,7 @@ import {
   type RecentMatchesPanelText,
   type SearchFormProps,
   type SearchFormPanelRequest,
+  type SearchFormPlatformOption,
   type SearchFormText,
   type SearchableRiotIdBadgeViewModel,
   type SearchableRiotIdViewModel,
@@ -168,12 +183,13 @@ import type {
 } from "../features/public-lol/types/public-lol";
 import {
   buildSuggestions,
-  jpRiotIdQuery,
+  DEFAULT_PUBLIC_LOL_PLATFORM,
   normalizeRiotId,
   normalizeSuggestionKey,
   normalizedTagLine,
   publicSummonerPath,
-  riotIdFromPublicSummonerPath,
+  publicSummonerRouteFromPath,
+  riotIdQuery,
   searchTextForMatch,
   splitRiotIdText,
   suggestionRiotId,
@@ -1086,14 +1102,38 @@ function maskedRiotIdName(riotId: string | undefined, fallback: string): string 
   return "*".repeat(Math.max(1, nameLength));
 }
 
+const PUBLIC_LOL_PLATFORM_OPTIONS: readonly SearchFormPlatformOption[] = [
+  { id: "kr", code: "KR", label: { label: "한국 서버", ko: "한국 서버", ja: "韓国サーバー" } },
+  { id: "jp1", code: "JP", label: { label: "일본 서버", ko: "일본 서버", ja: "日本サーバー" } },
+  { id: "na1", code: "NA", label: { label: "북미 서버", ko: "북미 서버", ja: "北米サーバー" } },
+  { id: "euw1", code: "EUW", label: { label: "유럽 서부", ko: "유럽 서부", ja: "西ヨーロッパ" } },
+  { id: "eun1", code: "EUNE", label: { label: "유럽 북동부", ko: "유럽 북동부", ja: "北東ヨーロッパ" } },
+  { id: "br1", code: "BR", label: { label: "브라질 서버", ko: "브라질 서버", ja: "ブラジルサーバー" } },
+  { id: "la1", code: "LAN", label: { label: "라틴 아메리카 북부", ko: "라틴 아메리카 북부", ja: "北ラテンアメリカ" } },
+  { id: "la2", code: "LAS", label: { label: "라틴 아메리카 남부", ko: "라틴 아메리카 남부", ja: "南ラテンアメリカ" } },
+  { id: "oc1", code: "OCE", label: { label: "오세아니아 서버", ko: "오세아니아 서버", ja: "オセアニアサーバー" } },
+  { id: "tr1", code: "TR", label: { label: "튀르키예 서버", ko: "튀르키예 서버", ja: "トルコサーバー" } },
+  { id: "ru", code: "RU", label: { label: "러시아 서버", ko: "러시아 서버", ja: "ロシアサーバー" } },
+  { id: "ph2", code: "PH", label: { label: "필리핀 서버", ko: "필리핀 서버", ja: "フィリピンサーバー" } },
+  { id: "sg2", code: "SG", label: { label: "싱가포르 서버", ko: "싱가포르 서버", ja: "シンガポールサーバー" } },
+  { id: "th2", code: "TH", label: { label: "태국 서버", ko: "태국 서버", ja: "タイサーバー" } },
+  { id: "tw2", code: "TW", label: { label: "대만 서버", ko: "대만 서버", ja: "台湾サーバー" } },
+  { id: "vn2", code: "VN", label: { label: "베트남 서버", ko: "베트남 서버", ja: "ベトナムサーバー" } }
+];
+
+function localizedPlatformOptions(locale: PublicLocale): readonly SearchFormPlatformOption[] {
+  return PUBLIC_LOL_PLATFORM_OPTIONS.map((option) => ({
+    ...option,
+    label: {
+      ...option.label,
+      label: locale === "ja" ? option.label.ja : option.label.ko
+    }
+  }));
+}
+
 function searchFormText(): SearchFormText {
   return {
     searchServer: t().searchServer,
-    jpServer: {
-      label: t().jpServer,
-      ko: publicI18n.ko.jpServer,
-      ja: publicI18n.ja.jpServer
-    },
     searchPlaceholder: {
       label: t().searchPlaceholder,
       ko: publicI18n.ko.searchPlaceholder,
@@ -1164,7 +1204,12 @@ function SeigaSearchLoader() {
   );
 }
 
-function publicHomeSearchPanelText(): PublicHomeSearchPanelText {
+function publicHomeSearchPanelText(platform: LolPlatformId, locale: PublicLocale): PublicHomeSearchPanelText {
+  const option = PUBLIC_LOL_PLATFORM_OPTIONS.find((candidate) => candidate.id === platform) ?? PUBLIC_LOL_PLATFORM_OPTIONS[0]!;
+  const platformLabel = {
+    ...option.label,
+    label: locale === "ja" ? option.label.ja : option.label.ko
+  };
   return {
     eyebrow: {
       label: "YORO.gg",
@@ -1187,9 +1232,9 @@ function publicHomeSearchPanelText(): PublicHomeSearchPanelText {
       ja: publicI18n.ja.searching,
     },
     readyStatus: {
-      label: t().jpServer,
-      ko: publicI18n.ko.jpServer,
-      ja: publicI18n.ja.jpServer,
+      label: platformLabel.label,
+      ko: platformLabel.ko,
+      ja: platformLabel.ja,
     },
     errorTitle: {
       label: t().searchFailed,
@@ -1949,6 +1994,8 @@ function PublicAppHeader({
   showFilters = true,
   query,
   loading,
+  platform,
+  platformOptions,
   suggestions,
   recentSearches = [],
   favorites = [],
@@ -1957,6 +2004,7 @@ function PublicAppHeader({
   champions,
   onHome,
   onQuery,
+  onPlatformChange,
   onClear,
   onSubmit,
   onPickSuggestion,
@@ -1979,6 +2027,8 @@ function PublicAppHeader({
   showFilters?: boolean;
   query: string;
   loading: boolean;
+  platform: LolPlatformId;
+  platformOptions: readonly SearchFormPlatformOption[];
   suggestions: SearchSuggestion[];
   recentSearches?: SearchSuggestion[];
   favorites?: PublicFavorite[];
@@ -1987,6 +2037,7 @@ function PublicAppHeader({
   champions: LolChampionSummary[];
   onHome: () => void;
   onQuery: (value: string) => void;
+  onPlatformChange: (platform: LolPlatformId) => void;
   onClear: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onPickSuggestion: (suggestion: SearchSuggestion) => void;
@@ -2013,7 +2064,10 @@ function PublicAppHeader({
         <SearchForm
           query={query}
           loading={loading}
+          platform={platform}
+          platformOptions={platformOptions}
           onQuery={onQuery}
+          onPlatformChange={onPlatformChange}
           onClear={onClear}
           onSubmit={onSubmit}
           suggestions={suggestions}
@@ -5689,9 +5743,14 @@ export function PublicLolPage({
 }: {
   onOpenAdmin: () => void;
 }) {
-  const initialRouteRiotId = riotIdFromPublicSummonerPath();
+  const initialSummonerRoute = publicSummonerRouteFromPath();
+  const initialRouteRiotId = initialSummonerRoute?.riotId;
   const { locale, changeLocale, autoDetectLocale } = usePublicLocale(loadPublicLocalePreference);
   setActivePublicLocale(locale);
+  const platformOptions = useMemo(() => localizedPlatformOptions(locale), [locale]);
+  const [selectedLolPlatform, setSelectedLolPlatform] = useState<LolPlatformId>(
+    () => initialSummonerRoute?.lolPlatform ?? DEFAULT_PUBLIC_LOL_PLATFORM
+  );
   const [query, setQuery] = useState(() => initialRouteRiotId ?? "");
   const [profile, setProfile] = useState<PublicLolProfile | null>(null);
   const [loading, setLoading] = useState(() => Boolean(initialRouteRiotId));
@@ -5772,7 +5831,10 @@ export function PublicLolPage({
     }
     return [...unique.values()];
   }, [favorites, recentSearches]);
-  const suggestions = useMemo(() => buildSuggestions(query, storedSuggestions, remoteSuggestions), [query, storedSuggestions, remoteSuggestions]);
+  const suggestions = useMemo(
+    () => buildSuggestions(query, storedSuggestions, remoteSuggestions, selectedLolPlatform),
+    [query, storedSuggestions, remoteSuggestions, selectedLolPlatform]
+  );
   const visibleSuggestions = query.trim() && query.trim() !== profile?.riotId ? suggestions : [];
   const homeLiveStreamers = useMemo<PublicHomeLiveStreamer[]>(() => {
     const streamers = new Map<string, PublicHomeLiveStreamer>();
@@ -5914,7 +5976,8 @@ export function PublicLolPage({
     const controller = new AbortController();
     const syncStreamerStatus = async () => {
       try {
-        const next = await getPublicLolProfileDynamicState(profile.riotId, controller.signal);
+        const platform = normalizeLolPlatformId(profile.lolPlatform) ?? selectedLolPlatform;
+        const next = await getPublicLolProfileDynamicState(profile.riotId, controller.signal, platform);
         if (controller.signal.aborted) return;
         setProfile((current) => current ? profileWithDynamicState(current, next) : current);
       } catch {
@@ -5929,7 +5992,7 @@ export function PublicLolPage({
       controller.abort();
       window.clearInterval(timer);
     };
-  }, [profile?.riotId]);
+  }, [profile?.riotId, profile?.lolPlatform, selectedLolPlatform]);
 
   useEffect(() => {
     const loadFromPath = (replaceUrl = true) => {
@@ -5955,8 +6018,8 @@ export function PublicLolPage({
         }
         return;
       }
-      const riotId = riotIdFromPublicSummonerPath();
-      if (!riotId) {
+      const summonerRoute = publicSummonerRouteFromPath();
+      if (!summonerRoute) {
         setProfile(null);
         setError("");
         setFilters(DEFAULT_MATCH_FILTERS);
@@ -5967,8 +6030,9 @@ export function PublicLolPage({
         setActiveNav("search");
         return;
       }
-      setQuery(riotId);
-      void runSearch(riotId, { replaceUrl });
+      setSelectedLolPlatform(summonerRoute.lolPlatform);
+      setQuery(summonerRoute.riotId);
+      void runSearch(summonerRoute.riotId, { replaceUrl, platform: summonerRoute.lolPlatform });
     };
     loadFromPath(true);
     const handlePopState = () => {
@@ -5986,7 +6050,7 @@ export function PublicLolPage({
     }
     const controller = new AbortController();
     const timer = window.setTimeout(() => {
-      void searchSuggestions(normalizedQuery, controller.signal)
+      void searchSuggestions(normalizedQuery, controller.signal, selectedLolPlatform)
         .then(setRemoteSuggestions)
         .catch((suggestionError) => {
           if (suggestionError instanceof DOMException && suggestionError.name === "AbortError") return;
@@ -5997,7 +6061,7 @@ export function PublicLolPage({
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [query, profile?.riotId]);
+  }, [query, profile?.riotId, selectedLolPlatform]);
 
   async function loadTwitchViewer(force = false): Promise<void> {
     setFollowedError("");
@@ -6420,9 +6484,10 @@ export function PublicLolPage({
 
   async function runSearch(
     value: string,
-    options: { updateUrl?: boolean; replaceUrl?: boolean; refresh?: boolean } = {}
+    options: { updateUrl?: boolean; replaceUrl?: boolean; refresh?: boolean; platform?: LolPlatformId } = {}
   ): Promise<void> {
-    const riotId = jpRiotIdQuery(value);
+    const requestedPlatform = options.platform ?? selectedLolPlatform;
+    const riotId = riotIdQuery(value, requestedPlatform);
     if (!riotId) return;
     const updateUrl = options.updateUrl !== false;
     profileSearchAbortRef.current?.abort();
@@ -6434,7 +6499,11 @@ export function PublicLolPage({
     setError("");
     setMoreMatchesError("");
     try {
-      const result = await searchProfile(riotId, { refresh: options.refresh, signal: controller.signal });
+      const result = await searchProfile(riotId, {
+        refresh: options.refresh,
+        signal: controller.signal,
+        platform: requestedPlatform
+      });
       if (requestSequence !== profileSearchSequenceRef.current) return;
       setProfile(result);
       setNowTick(Date.now());
@@ -6444,7 +6513,9 @@ export function PublicLolPage({
       setActiveMainPage("search");
       setActiveNav("search");
       setQuery(result.riotId);
-      if (updateUrl) setPublicPath(publicSummonerPath(result.riotId), options.replaceUrl);
+      const resultPlatform = normalizeLolPlatformId(result.lolPlatform) ?? requestedPlatform;
+      setSelectedLolPlatform(resultPlatform);
+      if (updateUrl) setPublicPath(publicSummonerPath(result.riotId, resultPlatform), options.replaceUrl);
       saveRecentSearch(result);
       setRecentSearches(readRecentSearches());
       setFavorites((current) => {
@@ -6472,7 +6543,8 @@ export function PublicLolPage({
     setLoadingMoreMatches(true);
     setMoreMatchesError("");
     try {
-      const page = await getPublicLolMatchPage(profile.riotId, nextStart);
+      const platform = normalizeLolPlatformId(profile.lolPlatform) ?? selectedLolPlatform;
+      const page = await getPublicLolMatchPage(profile.riotId, nextStart, platform);
       setProfile((current) => current ? profileWithAdditionalMatchPage(current, page) : current);
     } catch (requestError) {
       setMoreMatchesError(requestError instanceof Error ? requestError.message : t().searchFailed);
@@ -6496,8 +6568,16 @@ export function PublicLolPage({
 
   function pickSuggestion(suggestion: SearchSuggestion): void {
     const riotId = suggestionRiotId(suggestion);
+    const platform = normalizeLolPlatformId(suggestion.lolPlatform) ?? selectedLolPlatform;
+    setSelectedLolPlatform(platform);
     setQuery(riotId);
-    void runSearch(riotId);
+    void runSearch(riotId, { platform });
+  }
+
+  function changeLolPlatform(platform: LolPlatformId): void {
+    setSelectedLolPlatform(platform);
+    setRemoteSuggestions([]);
+    setError("");
   }
 
 	  function clearSearch(): void {
@@ -6687,6 +6767,8 @@ export function PublicLolPage({
             showFilters={false}
             query={query}
             loading={loading}
+            platform={selectedLolPlatform}
+            platformOptions={platformOptions}
             suggestions={visibleSuggestions}
             recentSearches={recentSearches}
             favorites={favorites}
@@ -6694,6 +6776,7 @@ export function PublicLolPage({
             filters={filters}
             champions={availableChampions}
             onQuery={setQuery}
+            onPlatformChange={changeLolPlatform}
             onClear={clearSearch}
             onSubmit={(event) => void submit(event)}
             onPickSuggestion={pickSuggestion}
@@ -6745,6 +6828,8 @@ export function PublicLolPage({
             showFilters={false}
             query={query}
             loading={loading}
+            platform={selectedLolPlatform}
+            platformOptions={platformOptions}
             suggestions={visibleSuggestions}
             recentSearches={recentSearches}
             favorites={favorites}
@@ -6752,6 +6837,7 @@ export function PublicLolPage({
             filters={filters}
             champions={availableChampions}
             onQuery={setQuery}
+            onPlatformChange={changeLolPlatform}
             onClear={clearSearch}
             onSubmit={(event) => void submit(event)}
             onPickSuggestion={pickSuggestion}
@@ -6777,9 +6863,12 @@ export function PublicLolPage({
             searchForm={
               <SearchForm
                 loading={loading}
+                platform={selectedLolPlatform}
+                platformOptions={platformOptions}
                 onClear={clearSearch}
                 onPickSuggestion={pickSuggestion}
                 onQuery={setQuery}
+                onPlatformChange={changeLolPlatform}
                 onSubmit={(event) => void submit(event)}
                 query={query}
                 suggestions={visibleSuggestions}
@@ -6790,7 +6879,7 @@ export function PublicLolPage({
               />
             }
             showEmptyResult={query.trim().length > 0 && !loading && !error && visibleSuggestions.length === 0}
-            text={publicHomeSearchPanelText()}
+            text={publicHomeSearchPanelText(selectedLolPlatform, locale)}
           />
         </AppShellMain>
         <PublicSiteFooter onPage={changeMainPage} text={publicSiteFooterText()} />
@@ -6818,6 +6907,8 @@ export function PublicLolPage({
             showFilters={false}
             query={query}
             loading={loading}
+            platform={selectedLolPlatform}
+            platformOptions={platformOptions}
             suggestions={visibleSuggestions}
             recentSearches={recentSearches}
             favorites={favorites}
@@ -6825,6 +6916,7 @@ export function PublicLolPage({
             filters={filters}
             champions={availableChampions}
             onQuery={setQuery}
+            onPlatformChange={changeLolPlatform}
             onClear={clearSearch}
             onSubmit={(event) => void submit(event)}
             onPickSuggestion={pickSuggestion}
@@ -6877,6 +6969,8 @@ export function PublicLolPage({
           showFilters={false}
           query={query}
           loading={loading}
+          platform={selectedLolPlatform}
+          platformOptions={platformOptions}
           suggestions={visibleSuggestions}
           recentSearches={recentSearches}
           favorites={favorites}
@@ -6884,6 +6978,7 @@ export function PublicLolPage({
           filters={filters}
           champions={availableChampions}
           onQuery={setQuery}
+          onPlatformChange={changeLolPlatform}
           onClear={clearSearch}
           onSubmit={(event) => void submit(event)}
           onPickSuggestion={pickSuggestion}

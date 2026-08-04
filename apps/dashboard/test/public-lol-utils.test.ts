@@ -3,7 +3,14 @@ import test from "node:test";
 import { formatCooldown, formatDecimal, formatDuration, formatPercent } from "../src/features/public-lol/utils/format";
 import { filteredMatches, summarizeMatches } from "../src/features/public-lol/utils/match";
 import { rankScore, rankTrendLine, shortRankLabel } from "../src/features/public-lol/utils/rank";
-import { buildSuggestions, jpRiotIdQuery, publicSummonerPath, riotIdFromPublicSummonerPath } from "../src/features/public-lol/utils/riot-id";
+import {
+  buildSuggestions,
+  jpRiotIdQuery,
+  publicSummonerPath,
+  publicSummonerRouteFromPath,
+  riotIdFromPublicSummonerPath,
+  riotIdQuery
+} from "../src/features/public-lol/utils/riot-id";
 import { parseFavorites, parseRecentSearches } from "../src/features/public-lol/utils/storage";
 import { publicPageRouteFromPath, publicPathForPage } from "../src/features/public-lol/utils/routes";
 import {
@@ -33,6 +40,18 @@ test("공개 소환사 경로를 동일한 Riot ID로 왕복 변환한다", () =
   assert.equal(riotIdFromPublicSummonerPath(`/ko${path}`), "せいが#SEI");
   assert.equal(riotIdFromPublicSummonerPath(`/ja${path}`), "せいが#SEI");
   assert.equal(riotIdFromPublicSummonerPath("/ko/lol/summoners/jp/%E0%A4%A"), undefined);
+  assert.equal(publicSummonerPath("Hide on bush#KR1", "kr"), "/lol/summoners/kr/Hide%20on%20bush-KR1");
+  assert.deepEqual(publicSummonerRouteFromPath("/ko/lol/summoners/kr/Hide%20on%20bush-KR1"), {
+    riotId: "Hide on bush#KR1",
+    lolPlatform: "kr"
+  });
+  assert.equal(publicSummonerRouteFromPath("/lol/summoners/invalid/test-NA1"), undefined);
+});
+
+test("서버별 Riot ID 입력은 명시적인 태그를 보존하고 JP 레거시 입력만 호환한다", () => {
+  assert.equal(riotIdQuery("Hide on bush#KR1", "kr"), "Hide on bush#KR1");
+  assert.equal(riotIdQuery("Hide on bush", "kr"), "Hide on bush");
+  assert.equal(riotIdQuery("せいが", "jp1"), "せいが#JP1");
 });
 
 test("공개 페이지 경로를 페이지 상태와 왕복 변환한다", () => {

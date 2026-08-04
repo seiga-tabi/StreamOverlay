@@ -1,4 +1,5 @@
 import { apiBase } from "../../../api/client";
+import type { LolPlatformId } from "@streamops/shared";
 import { t } from "../i18n/public-lol-i18n";
 import type {
   PublicLolMatchBuildResponse,
@@ -23,9 +24,10 @@ export async function readPublicApiErrorMessage(response: Response): Promise<str
 
 export async function searchProfile(
   riotId: string,
-  options: { refresh?: boolean; signal?: AbortSignal } = {}
+  options: { refresh?: boolean; signal?: AbortSignal; platform?: LolPlatformId } = {}
 ): Promise<PublicLolProfile> {
   const params = new URLSearchParams({ riotId });
+  if (options.platform) params.set("platform", options.platform);
   if (options.refresh) params.set("refresh", "1");
   const response = await fetch(`${apiBase}/api/lol/profile?${params.toString()}`, {
     credentials: "include",
@@ -37,9 +39,11 @@ export async function searchProfile(
 
 export async function getPublicLolProfileDynamicState(
   riotId: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  platform?: LolPlatformId
 ): Promise<PublicLolProfileDynamicState> {
   const params = new URLSearchParams({ riotId });
+  if (platform) params.set("platform", platform);
   const response = await fetch(`${apiBase}/api/lol/profile-state?${params.toString()}`, {
     credentials: "include",
     signal
@@ -50,9 +54,11 @@ export async function getPublicLolProfileDynamicState(
 
 export async function getPublicLolMatchPage(
   riotId: string,
-  start: number
+  start: number,
+  platform?: LolPlatformId
 ): Promise<PublicLolMatchPageResponse> {
   const params = new URLSearchParams({ riotId, start: String(Math.max(0, Math.trunc(start))) });
+  if (platform) params.set("platform", platform);
   const response = await fetch(`${apiBase}/api/lol/matches?${params.toString()}`, {
     credentials: "include"
   });
@@ -94,8 +100,10 @@ export async function getPublicLolMatchDetail(
   return (await response.json()) as PublicLolMatchTeamsResponse;
 }
 
-export async function searchSuggestions(query: string, signal: AbortSignal): Promise<SearchSuggestion[]> {
-  const response = await fetch(`${apiBase}/api/lol/suggestions?q=${encodeURIComponent(query)}`, {
+export async function searchSuggestions(query: string, signal: AbortSignal, platform?: LolPlatformId): Promise<SearchSuggestion[]> {
+  const params = new URLSearchParams({ q: query });
+  if (platform) params.set("platform", platform);
+  const response = await fetch(`${apiBase}/api/lol/suggestions?${params.toString()}`, {
     credentials: "include",
     signal
   });

@@ -146,6 +146,24 @@ test("공개 LoL 전적 API는 dashboard 세션 없이 접근할 수 있다", as
   });
 });
 
+test("공개 LoL 전적 API는 허용 목록 밖의 서버 값을 외부 요청 전에 거부한다", async () => {
+  await withAuthConfig(async () => {
+    const handler = handlerWithSessionStore(new DashboardSessionStore());
+    const req = createRequest(
+      "GET",
+      "/api/lol/profile?riotId=HideOnBush%23KR1&platform=https%3A%2F%2Fevil.example",
+      undefined,
+      { origin: DASHBOARD_ORIGIN }
+    );
+    const res = createResponse();
+
+    await handler(req, res);
+
+    assert.equal(res.statusCode, 400);
+    assert.equal(JSON.parse(res.body).code, "LOL_PLATFORM_INVALID");
+  });
+});
+
 test("공개 LoL 전적 API는 재시작 뒤 정상 snapshot을 먼저 반환한다", async () => {
   await withAuthConfig(async () => {
     let loadedKey = "";
@@ -194,8 +212,54 @@ test("공개 LoL 전적 API는 재시작 뒤 정상 snapshot을 먼저 반환한
     await handler(req, res);
 
     assert.equal(res.statusCode, 200);
-    assert.equal(loadedKey, "hideonbush#jp1");
+    assert.equal(loadedKey, "jp1:hideonbush#jp1");
     assert.equal(JSON.parse(res.body).riotId, "HideOnBush#JP1");
+  });
+});
+
+test("공개 LoL 전적 API는 기존 JP snapshot 키를 안전하게 복원한다", async () => {
+  await withAuthConfig(async () => {
+    const loadedKeys = [];
+    const fetchedAt = new Date().toISOString();
+    const snapshotProfile = {
+      status: "ready",
+      riotId: "Legacy#JP1",
+      gameName: "Legacy",
+      tagLine: "JP1",
+      accountRegion: "asia",
+      lolPlatform: "jp1",
+      topChampions: [],
+      recentMatches: [],
+      liveGame: { isLive: false, status: "checking", participants: [], fetchedAt },
+      recentMatchStart: 0,
+      hasMoreRecentMatches: false,
+      summary: { recentGames: 0, recentWins: 0, recentWinRate: 0, totalKills: 0, totalDeaths: 0, totalAssists: 0 },
+      championPerformance: [],
+      rolePerformance: [],
+      fetchedAt
+    };
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      actions: { async dispatchOne() {} },
+      publicLolSnapshotStore: {
+        async load(key) {
+          loadedKeys.push(key);
+          return key === "legacy#jp1" ? { puuid: "legacy-puuid", fetchedAt, payload: snapshotProfile } : undefined;
+        },
+        async save() {
+          assert.fail("복원된 legacy snapshot은 요청 중 다시 저장하지 않아야 합니다.");
+        }
+      }
+    });
+    const req = createRequest("GET", "/api/lol/profile?riotId=Legacy%23JP1&platform=jp1", undefined, { origin: DASHBOARD_ORIGIN });
+    const res = createResponse();
+
+    await handler(req, res);
+
+    assert.equal(res.statusCode, 200);
+    assert.deepEqual(loadedKeys, ["jp1:legacy#jp1", "legacy#jp1"]);
+    assert.equal(JSON.parse(res.body).riotId, "Legacy#JP1");
   });
 });
 
@@ -1831,7 +1895,7 @@ test("공개 LoL 전적 캐시는 즉시 반환하고 인게임 상태는 경량
   });
 });
 
-test("공개 LoL 연관검색 API는 정확한 Riot ID를 실제 계정으로 확인한다", async () => {
+test("공개 LoL 연관검색 API는 선택 서버의 routing context로 정확한 Riot ID를 확인한다", async () => {
   await withAuthConfig(async () => {
     const handler = createHttpHandler({
       store: {},
@@ -1847,14 +1911,15 @@ test("공개 LoL 연관검색 API는 정확한 Riot ID를 실제 계정으로 �
         routingStatus() {
           return { configured: true, source: "runtime", accountRegion: "asia", lolPlatform: "jp1" };
         },
-        async getAccountByRiotId(gameName, tagLine) {
+        async getAccountByRiotId(gameName, tagLine, routing) {
           assert.equal(gameName, "HideOnBush");
-          assert.equal(tagLine, "KR1");
+          assert.equal(tagLine, "NA1");
+          assert.deepEqual(routing, { lolPlatform: "na1", accountRegion: "americas" });
           return { puuid: "target-puuid", gameName, tagLine };
         }
       }
     });
-    const req = createRequest("GET", "/api/lol/suggestions?q=HideOnBush%23KR1", undefined, { origin: DASHBOARD_ORIGIN });
+    const req = createRequest("GET", "/api/lol/suggestions?q=HideOnBush%23NA1&platform=na1", undefined, { origin: DASHBOARD_ORIGIN });
     const res = createResponse();
 
     await handler(req, res);
@@ -1865,7 +1930,7 @@ test("공개 LoL 연관검색 API는 정확한 Riot ID를 실제 계정으로 �
       source: item.source,
       lolPlatform: item.lolPlatform
     })), [
-      { riotId: "HideOnBush#KR1", source: "verified", lolPlatform: "jp1" }
+      { riotId: "HideOnBush#NA1", source: "verified", lolPlatform: "na1" }
     ]);
   });
 });
