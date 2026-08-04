@@ -496,7 +496,9 @@ async function getPublicParticipationState(streamerId?: string, publicSessionId?
     credentials: "include"
   });
   if (!response.ok) throw new Error(await readErrorMessage(response));
-  return (await response.json()) as PublicParticipationStateResponse;
+  const body: unknown = await response.json();
+  if (!isPublicParticipationStateResponse(body)) throw new Error(t().participationLoadFailed);
+  return body;
 }
 
 async function getPublicParticipationDiscovery(): Promise<PublicParticipationDiscoveryResponse> {
@@ -504,7 +506,40 @@ async function getPublicParticipationDiscovery(): Promise<PublicParticipationDis
     credentials: "include"
   });
   if (!response.ok) throw new Error(await readErrorMessage(response));
-  return (await response.json()) as PublicParticipationDiscoveryResponse;
+  const body: unknown = await response.json();
+  if (!isPublicParticipationDiscoveryResponse(body)) throw new Error(t().participationLoadFailed);
+  return body;
+}
+
+function isObjectRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isPublicParticipationStateResponse(value: unknown): value is PublicParticipationStateResponse {
+  if (!isObjectRecord(value) || !isObjectRecord(value.summary)) return false;
+  return typeof value.connected === "boolean"
+    && typeof value.configured === "boolean"
+    && typeof value.isOpen === "boolean"
+    && Array.isArray(value.streamers)
+    && Array.isArray(value.queue)
+    && typeof value.revision === "number"
+    && Number.isFinite(value.revision)
+    && typeof value.maxQueueSize === "number"
+    && Number.isFinite(value.maxQueueSize)
+    && typeof value.updatedAt === "string";
+}
+
+function isPublicParticipationDiscoveryResponse(value: unknown): value is PublicParticipationDiscoveryResponse {
+  return isObjectRecord(value)
+    && typeof value.connected === "boolean"
+    && typeof value.configured === "boolean"
+    && Array.isArray(value.followedRecruiting)
+    && Array.isArray(value.followedLiveButClosed)
+    && Array.isArray(value.followedOfflineRecruiting)
+    && isObjectRecord(value.metadata)
+    && typeof value.metadata.fetchedAt === "string"
+    && typeof value.metadata.revision === "number"
+    && Number.isFinite(value.metadata.revision);
 }
 
 async function postPublicParticipationJoin(input: { riotId: string; role: LolRole; streamerId?: string; publicSessionId?: string; rejoin?: boolean }): Promise<PublicParticipationJoinResponse> {
@@ -2295,12 +2330,17 @@ function PublicParticipationJoinPage({
   const [checkInClockMs, setCheckInClockMs] = useState(() => Date.now());
   const streamers = useMemo(() => {
     const candidates = status.connected && discovery
-      ? [...discovery.followedRecruiting, ...discovery.followedOfflineRecruiting]
+      ? [
+          ...(Array.isArray(discovery.followedRecruiting) ? discovery.followedRecruiting : []),
+          ...(Array.isArray(discovery.followedOfflineRecruiting) ? discovery.followedOfflineRecruiting : [])
+        ]
       : [];
-    const directlySelected = participation?.streamers.find((streamer) => (
-      streamer.publicSessionId === participation.publicSessionId
-      || streamer.id === participation.selectedStreamerId
-    ));
+    const directlySelected = participation
+      ? (Array.isArray(participation.streamers) ? participation.streamers : []).find((streamer) => (
+          streamer.publicSessionId === participation.publicSessionId
+          || streamer.id === participation.selectedStreamerId
+        ))
+      : undefined;
     if (directlySelected) candidates.push(directlySelected);
     return [...new Map(candidates.map((streamer) => [streamer.publicSessionId ?? streamer.id, streamer])).values()];
   }, [discovery, participation, status.connected]);
@@ -5239,7 +5279,7 @@ function RecentMatches({
 
   async function ensureMatchDetail(match: PublicLolRecentMatch): Promise<void> {
     if (
-      match.teams.length > 0
+      (match.teams?.length ?? 0) > 0
       || matchDetails[match.matchId]
       || matchDetailLoading[match.matchId]
       || matchDetailControllers.current.has(match.matchId)
@@ -5303,7 +5343,9 @@ function RecentMatches({
           const matchDetail = matchDetails[match.matchId];
           const detailLoading = Boolean(matchDetailLoading[match.matchId]);
           const detailError = matchDetailErrors[match.matchId] ?? "";
-          const hydratedMatch = matchDetail ? { ...match, teams: matchDetail.teams } : match;
+          const hydratedMatch = matchDetail && Array.isArray(matchDetail.teams)
+            ? { ...match, teams: matchDetail.teams }
+            : match;
           const build = matchBuilds[match.matchId];
           const buildLoading = Boolean(matchBuildLoading[match.matchId]);
           const buildError = matchBuildErrors[match.matchId] ?? "";
@@ -5386,7 +5428,7 @@ function RecentMatches({
               ja: hideRiotIds ? publicI18n.ja.riotIdMaskOn : publicI18n.ja.riotIdMaskOff
             }
           };
-          const recordContent = hydratedMatch.teams.length > 0 ? (
+          const recordContent = (hydratedMatch.teams?.length ?? 0) > 0 ? (
             <MatchTeamDetails match={hydratedMatch} rankDetail={rankDetail} rankLoading={rankLoading} hideRiotIds={hideRiotIds} onSearchRiotId={onSearchRiotId} />
           ) : detailLoading ? (
             <SkeletonCard loadingLabel={t().matchDetailLoading} size="md">

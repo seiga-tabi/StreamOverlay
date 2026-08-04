@@ -681,6 +681,7 @@
 }
 
 .yoro-dashboard-toggle-status {
+  pointer-events: none;
   color: #a9b4c4;
   font-size: 13px;
   font-weight: 850;
@@ -688,10 +689,13 @@
 
 .yoro-dashboard-toggle-control input {
   position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
+  z-index: 1;
+  right: 0;
+  width: 50px;
+  height: 28px;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
 }
 
 .yoro-dashboard-toggle-track {

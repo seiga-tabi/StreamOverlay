@@ -144,8 +144,8 @@ test("Public /bot 헤더는 로그인 선택과 Discord YORO Bot 아이콘만 �
 
 test("Public /bot은 최소 권한 Bot 설치와 Dashboard CTA를 제공한다", async ({ page }) => {
   await page.goto("/bot");
-  const install = page.getByRole("link", { name: "Discord 서버에 YORO Bot 추가" });
-  const dashboard = page.getByRole("link", { name: "Dashboard 로그인" });
+  const install = page.getByRole("link", { name: "Discord 서버에 YORO Bot 추가" }).first();
+  const dashboard = page.getByRole("link", { name: "대시보드 보기" });
   await expect(install).toHaveAttribute("href", "/api/discord/bot/install");
   await expect(install).toHaveAttribute("target", "_blank");
   await expect(install).toHaveAttribute("rel", /noopener/u);
@@ -158,9 +158,9 @@ test("Public /bot은 최소 권한 Bot 설치와 Dashboard CTA를 제공한다",
 test("Public /bot은 일본어 CTA를 동일한 안전한 내부 경로로 제공한다", async ({ page }) => {
   await useLocale(page, "ja");
   await page.goto("/bot");
-  await expect(page.getByRole("link", { name: "DiscordサーバーにYORO Botを追加" }))
+  await expect(page.getByRole("link", { name: "DiscordサーバーにYORO Botを追加" }).first())
     .toHaveAttribute("href", "/api/discord/bot/install");
-  await expect(page.getByRole("link", { name: "Dashboardにログイン" }))
+  await expect(page.getByRole("link", { name: "Dashboardを見る" }))
     .toHaveAttribute("href", "/dashboard");
   await expectNoHorizontalOverflow(page);
 });
@@ -794,16 +794,18 @@ test("Discord Bot 제어는 플레이어 명령과 응답 후 삭제 설정을 r
   await expect(
     page.getByRole("heading", { level: 1, name: "Discord Bot 제어" })
   ).toBeVisible();
+  await page.getByRole("tab", { name: "명령" }).click();
   await expect(page.getByText(
     /작성자에게만 보이는 응답은 Discord의 제한상/u
   )).toBeVisible();
-  const playerCommand = page.getByRole("checkbox", { name: /플레이어/u });
+  const playerCommand = page.getByRole("checkbox", { name: /!yoro player/u });
+  await expect(playerCommand).not.toBeChecked();
+  await playerCommand.check();
+  await page.getByRole("tab", { name: "고급" }).click();
   const deleteInvocation = page.getByRole("checkbox", {
     name: "Bot 응답 후 사용한 명령어 삭제"
   });
-  await expect(playerCommand).not.toBeChecked();
   await expect(deleteInvocation).not.toBeChecked();
-  await playerCommand.check();
   await deleteInvocation.check();
   await expect(
     page.getByRole("link", { name: "메시지 관리 권한 승인" })

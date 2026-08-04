@@ -98,7 +98,18 @@ export async function getPublicLolMatchDetail(
     signal
   });
   if (!response.ok) throw new Error(await readPublicApiErrorMessage(response));
-  return (await response.json()) as PublicLolMatchTeamsResponse;
+  const body: unknown = await response.json();
+  if (
+    typeof body !== "object"
+    || body === null
+    || (body as { status?: unknown }).status !== "ready"
+    || typeof (body as { matchId?: unknown }).matchId !== "string"
+    || !Array.isArray((body as { teams?: unknown }).teams)
+    || typeof (body as { fetchedAt?: unknown }).fetchedAt !== "string"
+  ) {
+    throw new Error(t().matchDetailLoadFailed);
+  }
+  return body as PublicLolMatchTeamsResponse;
 }
 
 export async function searchSuggestions(query: string, signal: AbortSignal, platform?: LolPlatformId): Promise<SearchSuggestion[]> {

@@ -14,6 +14,9 @@ export default defineConfig({
   // 운영 CI(Linux)와 로컬(macOS)의 글꼴 렌더링 차이를 UI 회귀로 오판하지 않습니다.
   snapshotPathTemplate: `{testDir}/baselines/${snapshotPlatform}/{projectName}/{arg}{ext}`,
   fullyParallel: true,
+  // Palworld 고해상도 asset과 다수의 API mock을 함께 구동하므로 머신 CPU 수를 그대로
+  // worker 수로 사용하면 정상 화면도 초기 loading timeout으로 오판할 수 있습니다.
+  workers: 2,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI

@@ -1264,6 +1264,9 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
   ): void => {
     const runtimeLayerIds = layerIds.filter(isRuntimeMapLayer);
     const collectibleTypeIds = layerIds.filter(isPalworldMapCollectibleTypeId);
+    const affectedCollectibleCategories = new Set(
+      collectibleTypeIds.map(palworldMapCollectibleCategory),
+    );
     const nextTypes = new Set(mapQuery.types);
     const nextLayers = new Set(
       updatePalworldMapLayerSelection(mapQuery.layers, runtimeLayerIds, selected),
@@ -1271,6 +1274,13 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
     for (const typeId of collectibleTypeIds) {
       if (selected) nextTypes.add(typeId);
       else nextTypes.delete(typeId);
+    }
+    if (!selected) {
+      for (const category of affectedCollectibleCategories) {
+        for (const typeId of palworldMapCollectibleTypesForCategory(category)) {
+          nextTypes.delete(typeId);
+        }
+      }
     }
     for (const category of [
       "egg",
@@ -1281,9 +1291,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
       "location",
     ] as const) {
       const categoryTypes = palworldMapCollectibleTypesForCategory(category);
-      if (!collectibleTypeIds.some((typeId) =>
-        palworldMapCollectibleCategory(typeId) === category
-      )) {
+      if (!affectedCollectibleCategories.has(category)) {
         continue;
       }
       if (categoryTypes.some((typeId) => nextTypes.has(typeId))) {

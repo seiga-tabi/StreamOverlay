@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { PalworldPagination } from "@streamops/shared";
+
+const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 type PalworldInfinitePage<T> = {
   items: T[];
@@ -90,11 +92,21 @@ export function usePalworldInfiniteList<T, TResponse extends PalworldInfinitePag
   const loadPreviousRetryBlockedRef = useRef(false);
   const loadMoreRetryTimerRef = useRef<number | null>(null);
   const loadPreviousRetryTimerRef = useRef<number | null>(null);
+  const prependScrollHeightRef = useRef<number | null>(null);
 
   loadPageRef.current = loadPage;
   itemKeyRef.current = itemKey;
   enabledRef.current = enabled;
   pausedRef.current = paused;
+
+  useIsomorphicLayoutEffect(() => {
+    const previousScrollHeight = prependScrollHeightRef.current;
+    if (previousScrollHeight === null || typeof window === "undefined") return;
+    prependScrollHeightRef.current = null;
+    const scrollingElement = document.scrollingElement ?? document.documentElement;
+    const nextScrollHeight = scrollingElement.scrollHeight;
+    window.scrollBy({ top: Math.max(0, nextScrollHeight - previousScrollHeight) });
+  }, [response]);
 
   useEffect(() => {
     if (!paused) return;
@@ -113,6 +125,7 @@ export function usePalworldInfiniteList<T, TResponse extends PalworldInfinitePag
     loadMoreControllerRef.current = null;
     loadMoreInFlightRef.current = false;
     responseRef.current = null;
+    prependScrollHeightRef.current = null;
     setResponse(null);
     setInitialError(null);
     setLoadMoreError(null);
@@ -264,7 +277,7 @@ export function usePalworldInfiniteList<T, TResponse extends PalworldInfinitePag
     setLoadPreviousLoading(true);
     const previousScrollHeight = typeof document === "undefined"
       ? 0
-      : document.documentElement.scrollHeight;
+      : (document.scrollingElement ?? document.documentElement).scrollHeight;
 
     try {
       const previousResponse = await loadPageRef.current(requestedPage, controller.signal);
@@ -300,13 +313,8 @@ export function usePalworldInfiniteList<T, TResponse extends PalworldInfinitePag
       firstLoadedPageRef.current = requestedPage;
       setFirstLoadedPage(requestedPage);
       responseRef.current = merged;
+      prependScrollHeightRef.current = previousScrollHeight > 0 ? previousScrollHeight : null;
       setResponse(merged);
-      if (typeof window !== "undefined" && previousScrollHeight > 0) {
-        window.requestAnimationFrame(() => {
-          const nextScrollHeight = document.documentElement.scrollHeight;
-          window.scrollBy({ top: Math.max(0, nextScrollHeight - previousScrollHeight) });
-        });
-      }
     } catch (error) {
       if (controller.signal.aborted || generationRef.current !== generation || isAbortError(error)) return;
       setLoadPreviousError(error);
