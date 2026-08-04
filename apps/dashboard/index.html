@@ -26,8 +26,10 @@
     <script nonce="__STREAMOPS_CSP_NONCE__" src="/dashboard/config.js"></script>
     <script nonce="__STREAMOPS_CSP_NONCE__">
       (() => {
-        const consentKey = "yoro.ads.consent";
-        const scriptSelector = "script[data-yoro-adsense]";
+        const googleConsentKey = "yoro.google.consent.v1";
+        const legacyAdConsentKey = "yoro.ads.consent";
+        const googleConsentEvent = "yoro:google-consent";
+        const adsenseScriptId = "yoro-google-adsense";
         window.dataLayer = window.dataLayer || [];
         window.gtag = window.gtag || function () {
           window.dataLayer.push(arguments);
@@ -81,29 +83,41 @@
         };
         const loadAdsense = () => {
           if (!isAdEligiblePath()) return;
-          if (document.querySelector(scriptSelector)) return;
+          try {
+            if (window.localStorage.getItem(googleConsentKey) !== "granted") return;
+          } catch {
+            return;
+          }
+          if (document.getElementById(adsenseScriptId)) return;
           const script = document.createElement("script");
+          script.id = adsenseScriptId;
           script.async = true;
           script.crossOrigin = "anonymous";
-          script.dataset.yoroAdsense = "true";
           script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7880271953912430";
           document.head.append(script);
         };
-        const applyStoredAdConsent = () => {
+        const consentState = (choice) => ({
+          ad_storage: choice,
+          ad_user_data: choice,
+          ad_personalization: choice,
+          analytics_storage: choice
+        });
+        const applyStoredGoogleConsent = () => {
           try {
-            if (window.localStorage.getItem(consentKey) !== "granted") return;
-            window.gtag("consent", "update", {
-              ad_storage: "granted",
-              ad_user_data: "granted",
-              ad_personalization: "granted"
-            });
+            const choice = window.localStorage.getItem(googleConsentKey);
+            if (choice !== "granted" && choice !== "denied") return;
+            window.gtag("consent", "update", consentState(choice));
+            if (choice === "granted") loadAdsense();
           } catch {
             // 저장소 접근이 차단된 환경에서는 기본 거부 상태를 유지합니다.
           }
         };
 
-        applyStoredAdConsent();
-        loadAdsense();
+        applyStoredGoogleConsent();
+        window.addEventListener(googleConsentEvent, (event) => {
+          if (!(event instanceof CustomEvent)) return;
+          if (event.detail?.choice === "granted") loadAdsense();
+        });
         window.addEventListener("yoro:ads-consent", (event) => {
           if (!(event instanceof CustomEvent)) return;
           const granted = event.detail?.granted === true;
@@ -112,6 +126,11 @@
             ad_user_data: granted ? "granted" : "denied",
             ad_personalization: granted ? "granted" : "denied"
           });
+          try {
+            window.localStorage.setItem(legacyAdConsentKey, granted ? "granted" : "denied");
+          } catch {
+            // 저장소 접근이 차단되어도 현재 문서의 동의 상태는 갱신합니다.
+          }
           if (granted) loadAdsense();
         });
         window.addEventListener("publicroutechange", loadAdsense);

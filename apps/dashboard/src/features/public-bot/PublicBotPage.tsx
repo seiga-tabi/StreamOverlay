@@ -37,6 +37,7 @@ import {
 } from "../yoro-account/useYoroAccountSession";
 import { PalworldDedicatedServerSettings } from "./PalworldDedicatedServerSettings";
 import { DISCORD_BOT_PREFIX_COMMAND_MANIFEST } from "@streamops/shared";
+import { trackGoogleAnalyticsEvent } from "../../analytics/google-analytics";
 
 const noLocalePreference = async (): Promise<PublicLocale | undefined> => undefined;
 
@@ -669,6 +670,11 @@ function navigateGame(page: PublicMainPage): void {
   setPublicPath("/");
 }
 
+function openTrackedYoroDashboard(): void {
+  trackGoogleAnalyticsEvent("bot_dashboard", { link_context: "public_bot" });
+  openYoroDashboard();
+}
+
 export function PublicBotPage() {
   const { locale, changeLocale } = usePublicLocale(noLocalePreference);
   const text = botText[locale];
@@ -890,6 +896,10 @@ export function PublicBotPage() {
   }, []);
 
   const startAccountLogin = (provider: "discord" | "twitch") => {
+    trackGoogleAnalyticsEvent(
+      provider === "discord" ? "discord_click" : "twitch_click",
+      { link_context: "public_bot_account" },
+    );
     const returnPath = `${window.location.pathname}${window.location.search}`;
     window.location.assign(accountOAuthUrl(provider, "login", returnPath));
   };
@@ -970,7 +980,7 @@ export function PublicBotPage() {
                 loginTitle={publicI18n[locale].accountLoginTitle}
                 logoutLabel={publicI18n[locale].accountLogout}
                 menuLabel={publicI18n[locale].accountMenu}
-                onDashboard={openYoroDashboard}
+                onDashboard={openTrackedYoroDashboard}
                 onDiscordLogin={() => startAccountLogin("discord")}
                 onLogin={() => startAccountLogin("twitch")}
                 onLogout={logoutAccount}
@@ -1073,7 +1083,7 @@ export function PublicBotPage() {
                     loginLoadingLabel={publicI18n[locale].twitchLoginLoading}
                     logoutLabel={publicI18n[locale].accountLogout}
                     onAction={() => setMobileMenuOpen(false)}
-                    onDashboard={openYoroDashboard}
+                    onDashboard={openTrackedYoroDashboard}
                     onDiscordLogin={() => startAccountLogin("discord")}
                     onLogin={() => startAccountLogin("twitch")}
                     onLogout={logoutAccount}
@@ -1364,7 +1374,7 @@ export function PublicBotPage() {
                           ) : step.action === "dashboard" ? (
                             <button
                               className="public-bot-button is-secondary"
-                              onClick={openYoroDashboard}
+                              onClick={openTrackedYoroDashboard}
                               type="button"
                             >
                               <BotFeatureIcon kind="dashboard" />

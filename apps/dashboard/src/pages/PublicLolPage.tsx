@@ -16,6 +16,7 @@ import {
 } from "@streamops/shared";
 import { apiBase } from "../api/client";
 import { publicLegalRuntimeConfig } from "../runtime-config";
+import { trackGoogleAnalyticsEvent } from "../analytics/google-analytics";
 import {
   createPublicCommunityComment,
   createPublicCommunityPost,
@@ -1235,21 +1236,6 @@ function publicHomeSearchPanelText(platform: LolPlatformId, locale: PublicLocale
       label: platformLabel.label,
       ko: platformLabel.ko,
       ja: platformLabel.ja,
-    },
-    errorTitle: {
-      label: t().searchFailed,
-      ko: publicI18n.ko.searchFailed,
-      ja: publicI18n.ja.searchFailed,
-    },
-    emptyTitle: {
-      label: t().noData,
-      ko: publicI18n.ko.noData,
-      ja: publicI18n.ja.noData,
-    },
-    emptyDescription: {
-      label: t().emptyDescription,
-      ko: publicI18n.ko.emptyDescription,
-      ja: publicI18n.ja.emptyDescription,
     },
     guideTitle: {
       label: t().searchNav,
@@ -6161,6 +6147,11 @@ export function PublicLolPage({
       setPublicParticipation(response.state);
       if (response.state.selectedStreamerId) setPublicParticipationStreamerId(response.state.selectedStreamerId);
       setPublicParticipationMessage(response.alreadyJoined ? t().participationAlreadyJoined : t().participationJoinComplete);
+      if (!response.alreadyJoined) {
+        trackGoogleAnalyticsEvent("participation_join", {
+          join_type: publicParticipation?.viewerEntry?.status === "played" ? "rejoin" : "join"
+        });
+      }
     } catch (requestError) {
       setPublicParticipationError(requestError instanceof Error ? requestError.message : t().participationJoinFailed);
     } finally {
@@ -6362,6 +6353,7 @@ export function PublicLolPage({
     params.delete("viewer_twitch");
     const query = params.toString();
     const returnTo = `${window.location.pathname}${query ? `?${query}` : ""}`;
+    trackGoogleAnalyticsEvent("twitch_click", { link_context: "viewer_login" });
     window.location.href = publicTwitchLoginUrl(returnTo);
   }
 
@@ -6480,6 +6472,11 @@ export function PublicLolPage({
       : prependFavorite(favorites, favorite);
     writeFavorites(next);
     setFavorites(next);
+    if (!active) {
+      trackGoogleAnalyticsEvent("streamer_follow", {
+        favorite_type: profile.twitchStream ? "registered_streamer" : "summoner"
+      });
+    }
   }
 
   async function runSearch(
@@ -6854,7 +6851,6 @@ export function PublicLolPage({
         </AppShellHeader>
         <AppShellMain className="public-home-shared-main" id="public-search-main">
           <PublicHomeSearchPanel
-            error={error}
             liveLoading={followedLoading || twitchOAuthSettling}
             liveStreamers={homeLiveStreamers}
             loading={loading}
@@ -6878,7 +6874,6 @@ export function PublicLolPage({
                 variant="homeShared"
               />
             }
-            showEmptyResult={query.trim().length > 0 && !loading && !error && visibleSuggestions.length === 0}
             text={publicHomeSearchPanelText(selectedLolPlatform, locale)}
           />
         </AppShellMain>

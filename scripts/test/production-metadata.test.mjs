@@ -30,6 +30,8 @@ test("AdSense는 Consent Mode를 적용해 모든 공개 페이지에서 한 번
   assert.doesNotMatch(html, /<script[^>]+src="https:\/\/pagead2\.googlesyndication\.com/i);
   assert.match(html, /yoro\.ads\.consent/);
   assert.match(html, /yoro:ads-consent/);
+  assert.match(html, /yoro\.google\.consent\.v1/);
+  assert.match(html, /yoro:google-consent/);
   assert.match(html, /window\.gtag\("consent", "default"/);
   assert.match(html, /ad_storage: "denied"/);
   assert.match(html, /ad_user_data: "denied"/);
@@ -37,9 +39,9 @@ test("AdSense는 Consent Mode를 적용해 모든 공개 페이지에서 한 번
   assert.match(html, /analytics_storage: "denied"/);
   assert.match(html, /window\.__yoroGoogleConsentInitialized = true/);
   assert.match(html, /window\.gtag\("set", "ads_data_redaction", true\)/);
-  assert.match(html, /event\.detail\?\.granted === true/);
   assert.match(html, /script\.async = true/);
   assert.match(html, /script\.crossOrigin = "anonymous"/);
+  assert.match(html, /script\.id = adsenseScriptId/);
   assert.match(html, /adsbygoogle\.js\?client=ca-pub-7880271953912430/);
   assert.match(html, /"\/bot"/);
   assert.match(html, /"\/bot\/features"/);
@@ -53,9 +55,13 @@ test("AdSense는 Consent Mode를 적용해 모든 공개 페이지에서 한 번
   assert.match(html, /"\/palworld\/map"/);
   assert.match(html, /"\/lol\/summoners\/"/);
   assert.match(html, /"\/community\/posts\/"/);
-  assert.match(html, /applyStoredAdConsent\(\);\s+loadAdsense\(\)/);
+  assert.match(html, /applyStoredGoogleConsent\(\);\s+window\.addEventListener/);
+  assert.match(html, /localStorage\.getItem\(googleConsentKey\) !== "granted"/);
+  assert.doesNotMatch(html, /applyStoredGoogleConsent\(\);\s+loadAdsense\(\)/);
+  assert.match(html, /window\.gtag\("consent", "update", consentState\(choice\)\)/);
   assert.match(html, /window\.addEventListener\("publicroutechange", loadAdsense\)/);
   assert.match(html, /window\.addEventListener\("palworldroutechange", loadAdsense\)/);
   assert.doesNotMatch(html, /"\/(?:admin|dashboard|streamer)"/);
-  assert.match(html, /document\.querySelector\(scriptSelector\)/);
+  assert.match(html, /document\.getElementById\(adsenseScriptId\)/);
+  assert.doesNotMatch(html, /script\.dataset\.yoroAdsense/);
 });

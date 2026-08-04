@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { EmptyState, EmptyStateDescription, EmptyStateIcon, EmptyStateTitle } from "../../../shared/ui/EmptyState";
 import {
   PublicLiveStreamerRail,
   type PublicLiveStreamerCard,
@@ -23,9 +22,6 @@ export type PublicHomeSearchPanelText = {
   description: PublicHomeSearchPanelLocalizedText;
   loadingStatus: PublicHomeSearchPanelLocalizedText;
   readyStatus: PublicHomeSearchPanelLocalizedText;
-  errorTitle: PublicHomeSearchPanelLocalizedText;
-  emptyTitle: PublicHomeSearchPanelLocalizedText;
-  emptyDescription: PublicHomeSearchPanelLocalizedText;
   guideTitle: PublicHomeSearchPanelLocalizedText;
   guideDescription: PublicHomeSearchPanelLocalizedText;
   liveTitle: PublicHomeSearchPanelLocalizedText;
@@ -50,23 +46,19 @@ export type PublicHomeSearchPanelText = {
 export type PublicHomeLiveStreamer = PublicLiveStreamerCard;
 
 export function PublicHomeSearchPanel({
-  error,
   liveLoading = false,
   liveStreamers,
   onPage,
   onShowStreamers,
   searchForm,
-  showEmptyResult,
   text,
 }: {
-  error: string;
   liveLoading?: boolean;
   liveStreamers: PublicHomeLiveStreamer[];
   loading: boolean;
   onPage: (page: PublicMainPage) => void;
   onShowStreamers?: () => void;
   searchForm: ReactNode;
-  showEmptyResult: boolean;
   text: PublicHomeSearchPanelText;
 }) {
   const liveContent = (
@@ -93,27 +85,7 @@ export function PublicHomeSearchPanel({
         game="lol"
         search={searchForm}
         title={text.title}
-      >
-        {error ? (
-          <EmptyState className="public-home-shared-empty" variant="error">
-            <EmptyStateIcon>!</EmptyStateIcon>
-            <EmptyStateTitle as="h2"  >
-              {text.errorTitle.label}
-            </EmptyStateTitle>
-            <EmptyStateDescription>{error}</EmptyStateDescription>
-          </EmptyState>
-        ) : showEmptyResult ? (
-          <EmptyState className="public-home-shared-empty" variant="search">
-            <EmptyStateIcon>?</EmptyStateIcon>
-            <EmptyStateTitle as="h2"  >
-              {text.emptyTitle.label}
-            </EmptyStateTitle>
-            <EmptyStateDescription  >
-              {text.emptyDescription.label}
-            </EmptyStateDescription>
-          </EmptyState>
-        ) : null}
-      </PublicGameHomeHero>
+      />
       <div className="public-game-home__live-strip">
         {liveContent}
       </div>

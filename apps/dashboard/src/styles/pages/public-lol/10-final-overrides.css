@@ -2507,3 +2507,61 @@
 .public-profile-shared-shell .public-aggregate-card {
   background: color-mix(in srgb, var(--public-gray-surface-strong) 92%, var(--yoro-color-primary)) !important;
 }
+
+/* 서버 선택은 플랫폼 계열색을 유지하고 메인 검색 폼 밖의 메뉴도 온전히 표시합니다. */
+.public-dashboard-shell .public-server-badge[data-platform] {
+  --public-server-accent: var(--yoro-color-public-primary);
+  --public-server-surface: color-mix(in srgb, var(--public-server-accent) 24%, var(--yoro-color-product-gray-field-text));
+  border-color: color-mix(in srgb, var(--public-server-accent) 72%, var(--yoro-color-border-on-dark)) !important;
+  background: var(--public-server-surface) !important;
+  color: var(--yoro-color-text-on-dark) !important;
+}
+
+.public-dashboard-shell.public-home-shell.public-home-shared-shell
+  .public-home-shared-server.public-server-pill
+  .public-server-badge[data-platform] {
+  padding: var(--yoro-space-1) var(--yoro-space-2) !important;
+  border: thin solid color-mix(in srgb, var(--public-server-accent) 72%, var(--yoro-color-border-on-dark)) !important;
+  background: var(--public-server-surface) !important;
+}
+
+.public-dashboard-shell .public-server-badge[data-platform="kr"],
+.public-dashboard-shell .public-server-badge[data-platform="na1"],
+.public-dashboard-shell .public-server-badge[data-platform="oc1"] {
+  --public-server-accent: var(--yoro-color-info);
+}
+
+.public-dashboard-shell .public-server-badge[data-platform="jp1"],
+.public-dashboard-shell .public-server-badge[data-platform="tr1"],
+.public-dashboard-shell .public-server-badge[data-platform="sg2"],
+.public-dashboard-shell .public-server-badge[data-platform="vn2"] {
+  --public-server-accent: var(--yoro-color-danger);
+}
+
+.public-dashboard-shell .public-server-badge[data-platform="euw1"],
+.public-dashboard-shell .public-server-badge[data-platform="ph2"],
+.public-dashboard-shell .public-server-badge[data-platform="th2"] {
+  --public-server-accent: var(--yoro-color-public-primary);
+}
+
+.public-dashboard-shell .public-server-badge[data-platform="eun1"],
+.public-dashboard-shell .public-server-badge[data-platform="ru"],
+.public-dashboard-shell .public-server-badge[data-platform="tw2"] {
+  --public-server-accent: var(--yoro-color-success);
+}
+
+.public-dashboard-shell .public-server-badge[data-platform="br1"],
+.public-dashboard-shell .public-server-badge[data-platform="la1"],
+.public-dashboard-shell .public-server-badge[data-platform="la2"] {
+  --public-server-accent: var(--yoro-color-accent-gold);
+}
+
+.public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-search.public-search-wrap,
+.public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-search-form .public-search-server:has([aria-expanded="true"]) {
+  z-index: var(--yoro-z-dropdown) !important;
+}
+
+.public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-search-form .public-server-menu {
+  z-index: calc(var(--yoro-z-dropdown) + 1) !important;
+  min-width: 15rem !important;
+}

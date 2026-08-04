@@ -415,9 +415,6 @@ test("LoL 홈은 공통 LIVE rail로 기존 스트리머 카드와 전체 보기
     description: localized("소환사 검색"),
     loadingStatus: localized("불러오는 중"),
     readyStatus: localized("준비 완료"),
-    errorTitle: localized("오류"),
-    emptyTitle: localized("검색 결과 없음"),
-    emptyDescription: localized("다시 검색하세요"),
     guideTitle: localized("검색 안내"),
     guideDescription: localized("Riot ID를 입력하세요"),
     liveTitle: localized("팔로우 중인 LIVE 스트리머"),
@@ -440,7 +437,6 @@ test("LoL 홈은 공통 LIVE rail로 기존 스트리머 카드와 전체 보기
   };
   const html = renderToStaticMarkup(
     <PublicHomeSearchPanel
-      error=""
       liveLoading={false}
       liveStreamers={[{
         id: "streamer-1",
@@ -456,7 +452,6 @@ test("LoL 홈은 공통 LIVE rail로 기존 스트리머 카드와 전체 보기
       onPage={() => undefined}
       onShowStreamers={() => undefined}
       searchForm={<form aria-label="소환사 검색" />}
-      showEmptyResult={false}
       text={text}
     />
   );
@@ -475,6 +470,7 @@ test("LoL 홈은 공통 LIVE rail로 기존 스트리머 카드와 전체 보기
   assert.match(html, /League of Legends/u);
   assert.match(html, /href="https:\/\/www\.twitch\.tv\/lol_streamer"/u);
   assert.match(html, /전체 보기/u);
+  assert.doesNotMatch(html, /검색 실패|표시할 데이터가 없습니다/u);
   const homeCss = readFileSync(
     new URL("../src/styles/shared/public-game-home.css", import.meta.url),
     "utf8",

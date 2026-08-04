@@ -1496,6 +1496,7 @@ async function selectPublicLocale(page: Page, locale: "ko" | "ja"): Promise<void
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     window.localStorage.setItem("loltrace.locale", "ko");
+    window.localStorage.setItem("yoro.google.consent.v1", "denied");
     window.localStorage.removeItem("preferredGame");
   });
   await page.route("**/dashboard/config.js", async (route) => {

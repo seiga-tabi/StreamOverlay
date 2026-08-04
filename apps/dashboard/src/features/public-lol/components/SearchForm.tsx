@@ -251,6 +251,7 @@ export function SearchForm<TSuggestion extends SearchFormSuggestion>({
               aria-expanded={serverMenuOpen}
               aria-label={text.searchServer}
               className={`public-server-pill ${sharedClassPrefix}-server`}
+              data-platform={selectedPlatform?.id ?? platform}
               disabled={loading}
               onClick={() => setServerMenuOpen((open) => !open)}
               rightIcon={<span className={`${sharedClassPrefix}-server-caret`} />}
@@ -258,12 +259,20 @@ export function SearchForm<TSuggestion extends SearchFormSuggestion>({
               type="button"
               variant="tertiary"
             >
-              <StatusPill tone="info" size="sm">{selectedPlatform?.code ?? "JP"}</StatusPill>
+              <StatusPill
+                className="public-server-badge"
+                data-platform={selectedPlatform?.id ?? platform}
+                tone="info"
+                size="sm"
+              >
+                {selectedPlatform?.code ?? "JP"}
+              </StatusPill>
             </Button>
           ) : (
             <button
               type="button"
               className="public-server-pill"
+              data-platform={selectedPlatform?.id ?? platform}
               aria-label={text.searchServer}
               aria-expanded={serverMenuOpen}
               onClick={() => setServerMenuOpen((open) => !open)}
@@ -280,10 +289,11 @@ export function SearchForm<TSuggestion extends SearchFormSuggestion>({
                   type="button"
                   role="option"
                   aria-selected={option.id === platform}
+                  data-platform={option.id}
                   key={option.id}
                   onClick={() => handlePlatformChange(option.id)}
                 >
-                  <strong>{option.code}</strong>
+                  <strong className="public-server-badge" data-platform={option.id}>{option.code}</strong>
                   <span>{option.label.label}</span>
                 </button>
               ))}

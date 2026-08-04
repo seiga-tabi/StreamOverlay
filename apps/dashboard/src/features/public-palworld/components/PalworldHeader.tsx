@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { trackGoogleAnalyticsEvent } from "../../../analytics/google-analytics";
 import { PublicGameHeaderFrame, PublicHorizontalNav } from "../../../shared/PublicGameChrome";
 import { PublicMobileMenuSheet } from "../../../shared/PublicMobileMenuSheet";
 import {
@@ -99,10 +100,12 @@ export function PalworldHeader({
       : undefined;
   const handleDiscordLogin = () => {
     const returnPath = `${window.location.pathname}${window.location.search}`;
+    trackGoogleAnalyticsEvent("discord_click", { link_context: "account_login" });
     window.location.assign(accountOAuthUrl("discord", "login", returnPath));
   };
   const handleTwitchAccountLogin = () => {
     const returnPath = `${window.location.pathname}${window.location.search}`;
+    trackGoogleAnalyticsEvent("twitch_click", { link_context: "account_login" });
     window.location.assign(accountOAuthUrl("twitch", "login", returnPath));
   };
   const handleAccountLogout = () => {

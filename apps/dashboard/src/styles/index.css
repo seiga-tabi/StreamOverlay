@@ -12,6 +12,7 @@
 @import "./pages/public-palworld/14-palworld.css";
 @import "./shared/public-game-chrome.css";
 @import "./shared/public-game-home.css";
+@import "./shared/google-consent.css";
 @import "./pages/discord/15-discord-setup.css";
 @import "./pages/bot/16-yoro-bot.css";
 @import "./pages/bot/02-bot-management.css";

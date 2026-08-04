@@ -204,6 +204,9 @@ async function assertStableSurface(page: Page, errors: string[], screenshotName:
 }
 
 test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    window.localStorage.setItem("yoro.google.consent.v1", "denied");
+  });
   await installStableBrowserEnvironment(page);
   await installDashboardApiFixtures(page);
   await installExternalImageFixture(page);
@@ -214,6 +217,30 @@ test("Public Home", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator(".public-home-shared-shell")).toBeVisible();
   await assertStableSurface(page, errors, "public-home.png");
+});
+
+test("메인 검색바는 서버 목록을 열고 선택한 플랫폼 색상과 값을 반영한다", async ({ page }) => {
+  await page.goto("/ko/");
+
+  const serverButton = page.getByRole("button", { name: "검색 서버" });
+  await expect(serverButton).toBeVisible();
+  const selectedBadge = serverButton.locator(".public-server-badge");
+  const japaneseBadgeColor = await selectedBadge.evaluate((element) => getComputedStyle(element).backgroundColor);
+  await serverButton.click();
+
+  const koreanServer = page.getByRole("option", { name: /KR 한국 서버/u });
+  await expect(koreanServer).toBeVisible();
+  await expect(koreanServer.locator(".public-server-badge")).toHaveAttribute("data-platform", "kr");
+  await koreanServer.click();
+
+  await expect(serverButton).toContainText("KR");
+  await expect(serverButton).toHaveAttribute("data-platform", "kr");
+  const koreanBadgeColor = await selectedBadge.evaluate((element) => getComputedStyle(element).backgroundColor);
+  expect(koreanBadgeColor).not.toBe("rgba(0, 0, 0, 0)");
+  expect(koreanBadgeColor).not.toBe(japaneseBadgeColor);
+  await expect(page.getByRole("option", { name: /KR 한국 서버/u })).toHaveCount(0);
+  await expect(page.getByText("검색 실패", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("표시할 데이터가 없습니다.", { exact: true })).toHaveCount(0);
 });
 
 test("Public Profile", async ({ page }) => {

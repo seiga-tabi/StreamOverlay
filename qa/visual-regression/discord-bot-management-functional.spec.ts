@@ -109,6 +109,9 @@ async function expectNoHorizontalOverflow(page: Page): Promise<void> {
 }
 
 test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    window.localStorage.setItem("yoro.google.consent.v1", "denied");
+  });
   await installBaseRoutes(page);
   await useLocale(page, "ko");
 });
