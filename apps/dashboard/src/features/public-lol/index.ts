@@ -4,6 +4,8 @@ export {
   getPublicLolMatchPage,
   getPublicLolMatchRanks,
   getPublicLolProfileDynamicState,
+  invalidatePublicLolMatchPageCache,
+  prefetchPublicLolMatchPage,
   readPublicApiErrorMessage,
   searchProfile,
   searchSuggestions,

@@ -1622,7 +1622,7 @@ test("공개 LoL 경기 티어 API는 Riot 랭크 조회 실패 시 저장된 �
   });
 });
 
-test("공개 LoL 전적 더보기 API는 start offset으로 이전 20게임을 조회한다", async () => {
+test("공개 LoL 전적 더보기 API는 start offset으로 이전 10게임을 조회한다", async () => {
   await withAuthConfig(async () => {
     const handler = createHttpHandler({
       store: {},
@@ -1655,7 +1655,7 @@ test("공개 LoL 전적 더보기 API는 start offset으로 이전 20게임을 �
         },
         async getRecentMatchIdsByPuuid(puuid, count, queueIds, start) {
           assert.equal(puuid, "target-puuid");
-          assert.equal(count, 20);
+          assert.equal(count, 11);
           assert.deepEqual(queueIds ?? [], []);
           assert.equal(start, 20);
           return ["older-match"];
@@ -1726,7 +1726,7 @@ test("공개 LoL 첫 검색은 최근 10게임만 상세 조회하고 다음 페
           return [];
         },
         async getRecentMatchIdsByPuuid(_puuid, count, queueIds, start) {
-          assert.equal(count, 20);
+          assert.equal(count, 11);
           assert.deepEqual(queueIds ?? [], []);
           assert.equal(start, 0);
           return matchIds;
@@ -2810,7 +2810,7 @@ test("공개 LoL 전적 API는 같은 Riot ID 요청을 캐시하고 최근 경�
           return [];
         },
         async getRecentMatchIdsByPuuid(_puuid, count, queueIds) {
-          assert.equal(count, 20);
+          assert.equal(count, 11);
           assert.deepEqual(queueIds ?? [], []);
           return ["old-match", "new-match", "custom-match"];
         },
@@ -2860,8 +2860,13 @@ test("공개 LoL 전적 API는 같은 Riot ID 요청을 캐시하고 최근 경�
     const conditionalRes = createResponse();
     await handler(conditionalReq, conditionalRes);
 
+    const moreReq = createRequest("GET", "/api/lol/matches?riotId=HideOnBush%23KR1&start=10", undefined, { origin: DASHBOARD_ORIGIN });
+    const moreRes = createResponse();
+    await handler(moreReq, moreRes);
+
     assert.equal(firstRes.statusCode, 200);
     assert.equal(secondRes.statusCode, 200);
+    assert.equal(moreRes.statusCode, 200);
     assert.equal(firstRes.headers["Cache-Control"], "public, max-age=30, stale-while-revalidate=120");
     assert.match(firstRes.headers.ETag, /^"lol-profile-[a-f0-9]{24}"$/);
     assert.equal(conditionalRes.statusCode, 304);

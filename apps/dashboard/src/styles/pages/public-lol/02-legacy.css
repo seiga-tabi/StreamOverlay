@@ -4277,9 +4277,9 @@ html[lang="ja"] .public-dashboard-shell button,
 html[lang="ja"] .public-dashboard-shell input,
 html[lang="ja"] .public-dashboard-shell textarea,
 html[lang="ja"] .public-dashboard-shell select {
-  font-family: -apple-system, BlinkMacSystemFont, "Noto Sans JP", "Hiragino Sans", "Yu Gothic", Meiryo, "Segoe UI", system-ui, sans-serif;
-  font-synthesis-weight: none;
-  text-rendering: geometricPrecision;
+  font-family: var(--yoro-font-family-ja);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
   letter-spacing: 0;
 }
 
@@ -4290,7 +4290,7 @@ html[lang="ja"] .public-dashboard-shell .public-header-submenu button {
   align-items: center;
   font-family: inherit;
   font-size: 13px;
-  font-weight: 760;
+  font-weight: var(--yoro-font-weight-ja-medium);
   line-height: 1;
   letter-spacing: 0;
 }
@@ -4305,7 +4305,7 @@ html[lang="ja"] .public-dashboard-shell .public-header-submenu button strong {
   color: inherit;
   font-family: inherit;
   font-size: 13px;
-  font-weight: 760;
+  font-weight: var(--yoro-font-weight-ja-medium);
   line-height: 1;
   letter-spacing: 0;
 }
@@ -4313,7 +4313,7 @@ html[lang="ja"] .public-dashboard-shell .public-header-submenu button strong {
 html[lang="ja"] .public-dashboard-shell .public-header-nav button.active strong,
 html[lang="ja"] .public-dashboard-shell .public-header-submenu button.active strong {
   font-size: 13px;
-  font-weight: 820;
+  font-weight: var(--yoro-font-weight-ja-bold);
   line-height: 1;
 }
 
@@ -4324,7 +4324,7 @@ html[lang="ja"] .public-dashboard-shell .public-header-submenu button span {
   flex: 0 0 18px;
   width: 18px;
   height: 18px;
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: inherit;
   font-size: 13px;
   line-height: 1;
 }
@@ -4362,7 +4362,7 @@ html[lang="ja"] .public-dashboard-shell :where(
 
 html[lang="ja"] .public-dashboard-shell :where(.public-section-head h2, .public-menu-page-panel h2) {
   font-size: clamp(20px, 2.1vw, 28px);
-  font-weight: 820;
+  font-weight: var(--yoro-font-weight-ja-bold);
 }
 
 html[lang="ja"] .public-dashboard-shell :where(
@@ -4372,7 +4372,7 @@ html[lang="ja"] .public-dashboard-shell :where(
   .public-empty,
   .public-empty-state p
 ) {
-  font-weight: 680;
+  font-weight: var(--yoro-font-weight-ja-medium);
 }
 
 html[lang="ja"] .public-dashboard-shell :where(
@@ -4382,12 +4382,12 @@ html[lang="ja"] .public-dashboard-shell :where(
   .public-subscriptions-card > strong,
   .public-subscription-row strong
 ) {
-  font-weight: 800;
+  font-weight: var(--yoro-font-weight-ja-bold);
 }
 
 html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > span {
   font-size: 13px;
-  font-weight: 760;
+  font-weight: var(--yoro-font-weight-ja-medium);
 }
 
 @media (max-width: 760px) {

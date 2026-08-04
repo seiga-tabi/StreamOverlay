@@ -1,6 +1,7 @@
 :root {
-  --yoro-font-family-base: Inter, Pretendard, "Noto Sans JP", "Noto Sans KR", "Apple SD Gothic Neo", "Hiragino Sans", "Yu Gothic", Meiryo, "Malgun Gothic", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --yoro-font-family-ja: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", Meiryo, Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --yoro-font-family-ko: Inter, Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --yoro-font-family-ja: "Noto Sans JP Variable", "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", Meiryo, system-ui, sans-serif;
+  --yoro-font-family-base: var(--yoro-font-family-ko);
   --yoro-font-size-xs: .75rem;
   --yoro-font-size-sm: .875rem;
   --yoro-font-size-md: 1rem;
@@ -14,4 +15,15 @@
   --yoro-font-weight-medium: 700;
   --yoro-font-weight-bold: 850;
   --yoro-font-weight-black: 900;
+  --yoro-font-weight-ja-medium: 600;
+  --yoro-font-weight-ja-bold: 700;
+  --yoro-font-weight-ja-black: 800;
+}
+
+:root:lang(ko) {
+  --yoro-font-family-base: var(--yoro-font-family-ko);
+}
+
+:root:lang(ja) {
+  --yoro-font-family-base: var(--yoro-font-family-ja);
 }

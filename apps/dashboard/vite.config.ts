@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { readFile, readdir, rm } from "node:fs/promises";
+import { cp, copyFile, mkdir, readFile, readdir, rm } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig, type Plugin } from "vite";
@@ -89,6 +89,37 @@ const MAP_LAYER_SOURCE_TYPES: Readonly<Record<
 };
 const MAP_LAYER_ICON_URL_PATTERN =
   /^\/images\/palworld\/((?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*))\/(map-icons|pals|items)\/([a-f0-9]{64})\.webp$/u;
+
+function notoSansJpStaticAssets(): Plugin {
+  const sourceDirectory = fileURLToPath(new URL(
+    "../../node_modules/@fontsource-variable/noto-sans-jp/",
+    import.meta.url
+  ));
+  let outputDirectory = fileURLToPath(new URL("./dist", import.meta.url));
+
+  return {
+    name: "streamops-noto-sans-jp-static-assets",
+    apply: "build",
+    configResolved(config) {
+      outputDirectory = path.resolve(config.root, config.build.outDir);
+    },
+    async writeBundle() {
+      const targetDirectory = path.join(outputDirectory, "fonts", "noto-sans-jp");
+      await mkdir(targetDirectory, { recursive: true });
+      await Promise.all([
+        copyFile(
+          path.join(sourceDirectory, "wght.css"),
+          path.join(targetDirectory, "wght.css")
+        ),
+        cp(
+          path.join(sourceDirectory, "files"),
+          path.join(targetDirectory, "files"),
+          { recursive: true }
+        )
+      ]);
+    }
+  };
+}
 
 function palworldStaticAssetPolicy(): Plugin {
   let outputDirectory = fileURLToPath(new URL("./dist", import.meta.url));
@@ -691,7 +722,7 @@ export default defineConfig(({ command }) => ({
       }
     }
   },
-  plugins: [react(), palworldStaticAssetPolicy()],
+  plugins: [react(), notoSansJpStaticAssets(), palworldStaticAssetPolicy()],
   server: {
     port: 5173
   }

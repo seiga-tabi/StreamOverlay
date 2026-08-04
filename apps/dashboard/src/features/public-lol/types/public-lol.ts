@@ -449,20 +449,23 @@ export type PublicTrendTierBand = {
   className: string;
 };
 
-export type PublicTrendTierBoundary = {
+export type PublicTrendAxisTick = {
   key: string;
   x1: number;
   x2: number;
   y: number;
+  label: string;
 };
 
 export type PublicTrendLine = {
   points: PublicTrendPoint[];
   tierBands: PublicTrendTierBand[];
-  tierBoundaries: PublicTrendTierBoundary[];
+  axisTicks: PublicTrendAxisTick[];
   linePoints: string;
   areaPath: string;
-  yLabels: string[];
+  change: number;
+  sampleCount: number;
+  latestLabel: string;
   startLabel: string;
   middleLabel: string;
   endLabel: string;

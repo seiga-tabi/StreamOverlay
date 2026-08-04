@@ -4,6 +4,13 @@
 
 body {
   margin: 0;
+  font-family: var(--yoro-font-family-base);
+}
+
+:root:lang(ja) body {
+  font-kerning: normal;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
 }
 
 button,

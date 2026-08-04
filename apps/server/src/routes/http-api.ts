@@ -243,8 +243,8 @@ const PROFILE_REFRESH_COOLDOWN_MS = 60_000;
 const SKIN_OPTIONS_CACHE_TTL_MS = 10 * 60_000;
 const FOLLOWER_REFRESH_COOLDOWN_MS = 5 * 60_000;
 const PUBLIC_LOL_PROFILE_INITIAL_MATCH_COUNT = 10;
-const PUBLIC_LOL_PROFILE_MATCH_COUNT = 20;
-const PUBLIC_LOL_PROFILE_MATCH_LOOKUP_COUNT = 20;
+const PUBLIC_LOL_PROFILE_MATCH_COUNT = 10;
+const PUBLIC_LOL_PROFILE_MATCH_LOOKUP_COUNT = PUBLIC_LOL_PROFILE_MATCH_COUNT + 1;
 const PUBLIC_LOL_PROFILE_MAX_MATCH_START = 200;
 const STREAMER_PROFILE_LINK_MAX = 5;
 const STREAMER_PROFILE_LINK_LABEL_MAX = 40;
@@ -3606,6 +3606,15 @@ export function createHttpHandler(input: HttpHandlerInput) {
   async function resolveCachedPublicLolSocialProfile(
     route: PublicLolProfileRoute,
   ): Promise<PublicLolSocialProfile | undefined> {
+    const withRegisteredStreamerImage = (profile: PublicLolSocialProfile): PublicLolSocialProfile => {
+      const riotIdKey = normalizeRiotIdKey(profile.gameName, profile.tagLine);
+      const matchingStreamers = listApprovedStreamerRiotIds()
+        .filter((request) => request.normalizedRiotId === riotIdKey && request.twitchProfileImageUrl)
+        .filter((request, index, requests) => requests.findIndex((candidate) => candidate.twitchUserId === request.twitchUserId) === index);
+      return matchingStreamers.length === 1 && matchingStreamers[0]?.twitchProfileImageUrl
+        ? { ...profile, streamerProfileImageUrl: matchingStreamers[0].twitchProfileImageUrl }
+        : profile;
+    };
     const key = publicLolProfileCacheKey(route.gameName, route.tagLine, route.lolPlatform);
     const memoryEntry = publicLolProfileCache.get(key);
     if (
@@ -3613,7 +3622,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       && memoryEntry.staleUntil > Date.now()
       && isPublicLolProfileSnapshot(memoryEntry.response)
       && memoryEntry.response.lolPlatform === route.lolPlatform
-    ) return memoryEntry.response;
+    ) return withRegisteredStreamerImage(memoryEntry.response);
 
     if (input.publicLolSnapshotStore) {
       const snapshotKeys = route.lolPlatform === "jp1"
@@ -3640,7 +3649,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
           && Date.now() - Date.parse(snapshot.fetchedAt) < PUBLIC_LOL_PROFILE_STALE_TTL_MS
           && Date.now() - Date.parse(snapshot.fetchedAt) >= -5 * 60_000
         ) {
-          return snapshot.payload;
+          return withRegisteredStreamerImage(snapshot.payload);
         }
       }
     }
@@ -3651,7 +3660,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (!repositoryProfile || repositoryProfile.status !== "ready") return undefined;
     const recentMatches = repositoryProfile.recentMatches ?? [];
     const recentWins = recentMatches.filter((match) => match.won).length;
-    return {
+    return withRegisteredStreamerImage({
       riotId: formatRiotId(repositoryProfile.riotGameName, repositoryProfile.riotTagLine),
       gameName: repositoryProfile.riotGameName,
       tagLine: repositoryProfile.riotTagLine,
@@ -3665,7 +3674,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       },
       recentMatches: recentMatches.map((match) => ({ result: match.won ? "win" : "loss" })),
       fetchedAt: repositoryProfile.analyzedAt ?? repositoryProfile.rankedStats?.fetchedAt ?? new Date(0).toISOString(),
-    };
+    });
   }
 
   async function resolvePublicSeoMetadata(pathname: string): Promise<PublicSeoMetadata> {
@@ -3717,14 +3726,36 @@ export function createHttpHandler(input: HttpHandlerInput) {
         { "Cache-Control": "no-store" },
       );
     };
+    const sendProfileSourceImage = async (profile: PublicLolSocialProfile): Promise<boolean> => {
+      const sourceImage = await publicLolSocialCardRenderer.sourceImage(profile).catch(() => undefined);
+      if (!sourceImage) return false;
+      const etag = `"lol-social-source-${route.revision}"`;
+      const headers = {
+        "Content-Type": "image/png",
+        "Content-Length": String(sourceImage.length),
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "ETag": etag,
+        ...securityHeadersForRequest(req),
+      };
+      if (req.headers["if-none-match"]?.split(",").map((value) => value.trim()).includes(etag)) {
+        res.writeHead(304, headers);
+        res.end();
+        return true;
+      }
+      res.writeHead(200, headers);
+      res.end(req.method === "HEAD" ? undefined : sourceImage);
+      return true;
+    };
+    let profile: PublicLolSocialProfile | undefined;
     try {
-      const profile = await resolveCachedPublicLolSocialProfile(route);
+      profile = await resolveCachedPublicLolSocialProfile(route);
       if (!profile) {
         await sendFallback();
         return true;
       }
       const expected = buildPublicLolSocialSummary(profile, route.locale);
       if (expected.revision !== route.revision) {
+        if (await sendProfileSourceImage(profile)) return true;
         await sendFallback();
         return true;
       }
@@ -3751,6 +3782,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         errorCode: "render_failed",
         error: toSafeErrorMessage(error),
       });
+      if (profile && await sendProfileSourceImage(profile)) return true;
       await sendFallback();
       return true;
     }
@@ -6434,20 +6466,36 @@ export function createHttpHandler(input: HttpHandlerInput) {
   }
 
   async function buildPublicLolMatchPage(rawRiotId: string, start: number, routing: LolRoutingContext): Promise<PublicLolMatchPageResponse> {
+    const startedAt = Date.now();
     const parsed = parseRiotIdDetailed(rawRiotId);
     if (!parsed.ok) throw new HttpRequestError(400, { error: parsed.message, code: parsed.code });
     if (!input.riot) throw new HttpRequestError(503, { error: "Riot API client를 사용할 수 없습니다." });
     if (!input.riot.isConfigured()) throw new HttpRequestError(503, { error: "Riot API key가 설정되어 있지 않습니다." });
 
-    const account = await input.riot.getAccountByRiotId(parsed.gameName, parsed.tagLine, routing).catch((error) => {
-      throw new HttpRequestError(502, { error: publicLolErrorMessage(error) });
-    });
+    const profileKey = publicLolProfileCacheKey(parsed.gameName, parsed.tagLine, routing.lolPlatform);
+    const cachedProfile = publicLolProfileCache.get(profileKey);
+    const cachedPuuid = publicLolProfilePuuidCache.get(profileKey);
+    const canReuseVerifiedIdentity = Boolean(
+      cachedProfile
+      && cachedProfile.staleUntil > Date.now()
+      && cachedProfile.response.lolPlatform === routing.lolPlatform
+      && cachedPuuid
+    );
+    const account = canReuseVerifiedIdentity && cachedProfile && cachedPuuid
+      ? {
+          puuid: cachedPuuid,
+          gameName: cachedProfile.response.gameName,
+          tagLine: cachedProfile.response.tagLine
+        }
+      : await input.riot.getAccountByRiotId(parsed.gameName, parsed.tagLine, routing).catch((error) => {
+          throw new HttpRequestError(502, { error: publicLolErrorMessage(error) });
+        });
     if (!account?.puuid) throw new HttpRequestError(404, { error: "Riot 계정을 찾지 못했습니다." });
-    await requirePublicLolPlatformMembership(account.puuid, routing);
+    if (!canReuseVerifiedIdentity) await requirePublicLolPlatformMembership(account.puuid, routing);
 
     const dataDragonVersion = await dataDragonLatestVersion(input.dataDragon);
     const matchPage = await buildPublicLolMatchPageForAccount(account, start, dataDragonVersion, PUBLIC_LOL_PROFILE_MATCH_COUNT, routing);
-    return {
+    const response: PublicLolMatchPageResponse = {
       status: "ready",
       riotId: `${account.gameName || parsed.gameName}#${account.tagLine || parsed.tagLine}`,
       gameName: account.gameName || parsed.gameName,
@@ -6460,6 +6508,14 @@ export function createHttpHandler(input: HttpHandlerInput) {
       hasMoreRecentMatches: matchPage.hasMoreRecentMatches,
       fetchedAt: new Date().toISOString()
     };
+    input.logger?.event?.({
+      type: "public_lol.match_page_built",
+      recentMatchStart: matchPage.recentMatchStart,
+      matchCount: matchPage.recentMatches.length,
+      identitySource: canReuseVerifiedIdentity ? "profile_cache" : "riot_api",
+      durationMs: Date.now() - startedAt
+    });
+    return response;
   }
 
   async function getPublicLolMatchPage(rawRiotId: string, start: number, routing: LolRoutingContext): Promise<PublicLolMatchPageResponse> {

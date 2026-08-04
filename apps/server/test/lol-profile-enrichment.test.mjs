@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 const { DataDragonService } = await import("../dist/services/data-dragon.js");
-const { inferMainRoleFromMatches, LolProfileEnrichmentService, performanceStatsFromMatches } = await import("../dist/services/lol-profile-enrichment.js");
+const { buildRankHistory, inferMainRoleFromMatches, LolProfileEnrichmentService, performanceStatsFromMatches } = await import("../dist/services/lol-profile-enrichment.js");
 const { LocalJsonLolProfileRepository } = await import("../dist/services/lol-profile-store.js");
 const { RiotApiHttpError } = await import("../dist/services/riot-api.js");
 
@@ -44,6 +44,22 @@ function config(overrides = {}) {
     ...overrides
   };
 }
+
+test("랭크 이력은 저장된 계산값 대신 티어·단계·LP로 점수를 다시 계산한다", () => {
+  const history = buildRankHistory([
+    {
+      date: "2026-06-15T00:00:00.000Z",
+      tier: "PLATINUM",
+      rank: "II",
+      leaguePoints: 55,
+      wins: 30,
+      losses: 25,
+      rankScore: 12
+    }
+  ], undefined, "2026-06-16T00:00:00.000Z");
+
+  assert.equal(history?.[0]?.rankScore, 1855);
+});
 
 test("DataDragonService는 championId를 ko_KR/ja_JP 이름과 챔피언 이미지로 매핑한다", async () => {
   const fetchImpl = async (url) => {

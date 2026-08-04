@@ -11,6 +11,59 @@ import type {
   SearchSuggestion,
 } from "../types/public-lol";
 
+const PUBLIC_LOL_MATCH_PAGE_CLIENT_CACHE_TTL_MS = 2 * 60_000;
+const PUBLIC_LOL_MATCH_PAGE_CLIENT_CACHE_MAX = 40;
+
+type PublicLolMatchPageClientCacheEntry = {
+  expiresAt: number;
+  response: PublicLolMatchPageResponse;
+};
+
+const publicLolMatchPageClientCache = new Map<string, PublicLolMatchPageClientCacheEntry>();
+const publicLolMatchPageClientInFlight = new Map<string, Promise<PublicLolMatchPageResponse>>();
+const publicLolMatchPageClientGeneration = new Map<string, number>();
+
+function publicLolMatchPageProfileKey(riotId: string, platform?: LolPlatformId): string {
+  return `${platform ?? ""}\u0000${riotId.trim().normalize("NFKC").toLocaleLowerCase()}`;
+}
+
+function publicLolMatchPageClientKey(riotId: string, start: number, platform?: LolPlatformId): string {
+  return `${publicLolMatchPageProfileKey(riotId, platform)}\u0000${Math.max(0, Math.trunc(start))}`;
+}
+
+function prunePublicLolMatchPageClientCache(): void {
+  while (publicLolMatchPageClientCache.size > PUBLIC_LOL_MATCH_PAGE_CLIENT_CACHE_MAX) {
+    const oldestKey = publicLolMatchPageClientCache.keys().next().value as string | undefined;
+    if (!oldestKey) return;
+    publicLolMatchPageClientCache.delete(oldestKey);
+  }
+}
+
+function publicLolAbortError(): Error {
+  const error = new Error("요청이 취소되었습니다.");
+  error.name = "AbortError";
+  return error;
+}
+
+function awaitPublicLolMatchPage<T>(request: Promise<T>, signal?: AbortSignal): Promise<T> {
+  if (!signal) return request;
+  if (signal.aborted) return Promise.reject(publicLolAbortError());
+  return new Promise<T>((resolve, reject) => {
+    const onAbort = () => reject(publicLolAbortError());
+    signal.addEventListener("abort", onAbort, { once: true });
+    request.then(
+      (value) => {
+        signal.removeEventListener("abort", onAbort);
+        resolve(value);
+      },
+      (error: unknown) => {
+        signal.removeEventListener("abort", onAbort);
+        reject(error);
+      }
+    );
+  });
+}
+
 export async function readPublicApiErrorMessage(response: Response): Promise<string> {
   try {
     const body = await response.json() as { code?: unknown; error?: unknown; message?: unknown };
@@ -56,15 +109,78 @@ export async function getPublicLolProfileDynamicState(
 export async function getPublicLolMatchPage(
   riotId: string,
   start: number,
-  platform?: LolPlatformId
+  platform?: LolPlatformId,
+  signal?: AbortSignal
 ): Promise<PublicLolMatchPageResponse> {
-  const params = new URLSearchParams({ riotId, start: String(Math.max(0, Math.trunc(start))) });
-  if (platform) params.set("platform", platform);
-  const response = await fetch(`${apiBase}/api/lol/matches?${params.toString()}`, {
-    credentials: "include"
-  });
-  if (!response.ok) throw new Error(await readPublicApiErrorMessage(response));
-  return (await response.json()) as PublicLolMatchPageResponse;
+  const safeStart = Math.max(0, Math.trunc(start));
+  const profileKey = publicLolMatchPageProfileKey(riotId, platform);
+  const cacheKey = publicLolMatchPageClientKey(riotId, safeStart, platform);
+  const cached = publicLolMatchPageClientCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) {
+    publicLolMatchPageClientCache.delete(cacheKey);
+    publicLolMatchPageClientCache.set(cacheKey, cached);
+    return awaitPublicLolMatchPage(Promise.resolve(cached.response), signal);
+  }
+  if (cached) publicLolMatchPageClientCache.delete(cacheKey);
+
+  let request = publicLolMatchPageClientInFlight.get(cacheKey);
+  if (!request) {
+    const generation = publicLolMatchPageClientGeneration.get(profileKey) ?? 0;
+    const params = new URLSearchParams({ riotId, start: String(safeStart) });
+    if (platform) params.set("platform", platform);
+    request = (async () => {
+      const response = await fetch(`${apiBase}/api/lol/matches?${params.toString()}`, {
+        credentials: "include"
+      });
+      if (!response.ok) throw new Error(await readPublicApiErrorMessage(response));
+      const page = (await response.json()) as PublicLolMatchPageResponse;
+      if ((publicLolMatchPageClientGeneration.get(profileKey) ?? 0) === generation) {
+        publicLolMatchPageClientCache.set(cacheKey, {
+          expiresAt: Date.now() + PUBLIC_LOL_MATCH_PAGE_CLIENT_CACHE_TTL_MS,
+          response: page
+        });
+        prunePublicLolMatchPageClientCache();
+      }
+      return page;
+    })();
+    publicLolMatchPageClientInFlight.set(cacheKey, request);
+    void request.then(
+      () => {
+        if (publicLolMatchPageClientInFlight.get(cacheKey) === request) {
+          publicLolMatchPageClientInFlight.delete(cacheKey);
+        }
+      },
+      () => {
+        if (publicLolMatchPageClientInFlight.get(cacheKey) === request) {
+          publicLolMatchPageClientInFlight.delete(cacheKey);
+        }
+      }
+    );
+  }
+  return awaitPublicLolMatchPage(request, signal);
+}
+
+export async function prefetchPublicLolMatchPage(
+  riotId: string,
+  start: number,
+  platform?: LolPlatformId
+): Promise<void> {
+  await getPublicLolMatchPage(riotId, start, platform);
+}
+
+export function invalidatePublicLolMatchPageCache(riotId: string, platform?: LolPlatformId): void {
+  const profileKey = publicLolMatchPageProfileKey(riotId, platform);
+  const keyPrefix = `${profileKey}\u0000`;
+  publicLolMatchPageClientGeneration.set(
+    profileKey,
+    (publicLolMatchPageClientGeneration.get(profileKey) ?? 0) + 1
+  );
+  for (const key of publicLolMatchPageClientCache.keys()) {
+    if (key.startsWith(keyPrefix)) publicLolMatchPageClientCache.delete(key);
+  }
+  for (const key of publicLolMatchPageClientInFlight.keys()) {
+    if (key.startsWith(keyPrefix)) publicLolMatchPageClientInFlight.delete(key);
+  }
 }
 
 export async function getPublicLolMatchRanks(

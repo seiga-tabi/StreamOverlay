@@ -5,8 +5,8 @@ import type {
   PublicLolRecentMatch,
   PublicTrendLine,
   PublicTrendPoint,
+  PublicTrendAxisTick,
   PublicTrendTierBand,
-  PublicTrendTierBoundary,
 } from "../types/public-lol";
 import { roundTo } from "./match";
 
@@ -81,27 +81,43 @@ export function totalGames(stats: LolRankedStats | undefined): number {
   return (stats?.wins ?? 0) + (stats?.losses ?? 0);
 }
 
+const RANK_TIER_SCORE: Record<string, number> = {
+  IRON: 0,
+  BRONZE: 400,
+  SILVER: 800,
+  GOLD: 1200,
+  PLATINUM: 1600,
+  EMERALD: 2000,
+  DIAMOND: 2400,
+  MASTER: 2800,
+  GRANDMASTER: 3200,
+  CHALLENGER: 3600
+};
+
+const RANK_DIVISION_SCORE: Record<string, number> = {
+  IV: 0,
+  III: 100,
+  II: 200,
+  I: 300
+};
+
+function rankScoreFromParts(tier: string, rank: string | undefined, leaguePoints: number): number {
+  if (tier === "UNRANKED") return 0;
+  return (RANK_TIER_SCORE[tier] ?? 0)
+    + (rank ? RANK_DIVISION_SCORE[rank] ?? 0 : 0)
+    + Math.max(0, Math.trunc(leaguePoints));
+}
+
+function normalizedRankHistoryScore(point: NonNullable<PublicLolProfile["rankHistory"]>[number]): number {
+  if (typeof point.tier === "string" && Number.isFinite(point.leaguePoints)) {
+    return rankScoreFromParts(point.tier, point.rank, point.leaguePoints);
+  }
+  return Number.isFinite(point.rankScore) ? Math.max(0, point.rankScore) : 0;
+}
+
 export function rankScore(stats: LolRankedStats | undefined): number {
-  if (!stats || stats.tier === "UNRANKED") return 0;
-  const tierScore: Record<string, number> = {
-    IRON: 0,
-    BRONZE: 400,
-    SILVER: 800,
-    GOLD: 1200,
-    PLATINUM: 1600,
-    EMERALD: 2000,
-    DIAMOND: 2400,
-    MASTER: 2800,
-    GRANDMASTER: 3200,
-    CHALLENGER: 3600
-  };
-  const divisionScore: Record<string, number> = {
-    IV: 0,
-    III: 100,
-    II: 200,
-    I: 300
-  };
-  return (tierScore[stats.tier] ?? 0) + (stats.rank ? divisionScore[stats.rank] ?? 0 : 0) + stats.leaguePoints;
+  if (!stats) return 0;
+  return rankScoreFromParts(stats.tier, stats.rank, stats.leaguePoints);
 }
 
 export function rankLabelFromScore(score: number): string {
@@ -194,15 +210,6 @@ function rankTrendBandClass(score: number): string {
   return `tier-${step.tier.toLocaleLowerCase()}`;
 }
 
-function rankTrendAxisLabels(minScore: number, maxScore: number): string[] {
-  const minTick = Math.floor(minScore / 100) * 100;
-  const maxTick = Math.ceil(maxScore / 100) * 100;
-  const middleTick = Math.round(((minTick + maxTick) / 2) / 100) * 100;
-  return [maxTick, middleTick, minTick]
-    .filter((value, index, values) => values.indexOf(value) === index)
-    .map(rankTrendDivisionLabel);
-}
-
 function recentMatchesWithinWindow(matches: PublicLolRecentMatch[], windowMs: number): PublicLolRecentMatch[] {
   const cutoff = Date.now() - windowMs;
   return matches.filter((match) => {
@@ -220,8 +227,8 @@ export function rankTrendLine(profile: PublicLolProfile): PublicTrendLine | unde
   const storedRankSamples = (profile.rankHistory ?? [])
     .map((point, index) => {
       const startedAtMs = Date.parse(point.date);
-      const value = Number.isFinite(point.rankScore) ? point.rankScore : undefined;
-      if (!Number.isFinite(startedAtMs) || value === undefined) return undefined;
+      const value = normalizedRankHistoryScore(point);
+      if (!Number.isFinite(startedAtMs) || !Number.isFinite(value)) return undefined;
       return {
         key: `${profile.riotId}:rank-history:${point.date}:${index}`,
         value,
@@ -307,10 +314,10 @@ export function rankTrendLine(profile: PublicLolProfile): PublicTrendLine | unde
 
   if (samples.length === 0) return undefined;
   const width = 320;
-  const height = 168;
-  const plotLeft = 36;
-  const plotRight = 20;
-  const padY = 16;
+  const plotLeft = 52;
+  const plotRight = 12;
+  const plotTop = 12;
+  const plotBottom = 140;
   const sampleTimes = samples
     .map((point) => point.startedAtMs)
     .filter((startedAtMs) => Number.isFinite(startedAtMs));
@@ -325,37 +332,44 @@ export function rankTrendLine(profile: PublicLolProfile): PublicTrendLine | unde
   const domainMiddle = domainStart + (domainSpan / 2);
   const rawMin = Math.min(...samples.map((point) => point.value));
   const rawMax = Math.max(...samples.map((point) => point.value));
-  const min = Math.floor(rawMin / 100) * 100;
-  const max = Math.max(min + 100, Math.ceil(rawMax / 100) * 100);
+  const rawRange = Math.max(0, rawMax - rawMin);
+  const scorePadding = Math.max(20, rawRange * .14);
+  let min = Math.max(0, Math.floor((rawMin - scorePadding) / 25) * 25);
+  let max = Math.ceil((rawMax + scorePadding) / 25) * 25;
+  if (max - min < 100) {
+    const center = (rawMin + rawMax) / 2;
+    min = Math.max(0, Math.floor((center - 50) / 25) * 25);
+    max = Math.max(min + 100, Math.ceil((center + 50) / 25) * 25);
+  }
   const range = Math.max(1, max - min);
-  const yForScore = (score: number) => padY + (1 - ((score - min) / range)) * (height - padY * 2);
-  const bandYForScore = (score: number) => (1 - ((score - min) / range)) * height;
+  const yForScore = (score: number) => plotTop + (1 - ((score - min) / range)) * (plotBottom - plotTop);
   const tierBands: PublicTrendTierBand[] = [];
-  for (let start = min; start < max; start += 100) {
-    const end = Math.min(start + 100, max);
-    const top = Math.max(0, bandYForScore(end));
-    const bottom = Math.min(height, bandYForScore(start));
+  for (let start = Math.floor(min / 100) * 100; start < max; start += 100) {
+    const visibleStart = Math.max(start, min);
+    const visibleEnd = Math.min(start + 100, max);
+    const top = yForScore(visibleEnd);
+    const bottom = yForScore(visibleStart);
     if (bottom <= top) continue;
-    const middle = start + ((end - start) / 2);
+    const middle = visibleStart + ((visibleEnd - visibleStart) / 2);
     tierBands.push({
-      key: `${start}:${end}`,
-      x: 0,
+      key: `${visibleStart}:${visibleEnd}`,
+      x: plotLeft,
       y: roundTo(top, 1),
-      width,
+      width: width - plotLeft - plotRight,
       height: roundTo(bottom - top, 1),
       label: rankTrendDivisionLabel(middle),
       className: rankTrendBandClass(middle)
     });
   }
-  const tierBoundaries: PublicTrendTierBoundary[] = [];
-  for (let boundary = min + 100; boundary < max; boundary += 100) {
-    tierBoundaries.push({
-      key: `${boundary}`,
-      x1: 0,
-      x2: width,
-      y: roundTo(bandYForScore(boundary), 1)
-    });
-  }
+  const axisTickScores = [max, Math.round(((min + max) / 2) / 25) * 25, min]
+    .filter((value, index, values) => values.indexOf(value) === index);
+  const axisTicks = axisTickScores.map((score): PublicTrendAxisTick => ({
+    key: `${score}`,
+    x1: plotLeft,
+    x2: width - plotRight,
+    y: roundTo(yForScore(score), 1),
+    label: rankTrendPointLabel(score)
+  }));
   const points = samples.map((point): PublicTrendPoint => {
     const rawTimeRatio = Number.isFinite(point.startedAtMs) ? (point.startedAtMs - domainStart) / domainSpan : .5;
     const timeRatio = samples.length === 1 ? .5 : Math.max(0, Math.min(1, rawTimeRatio));
@@ -371,7 +385,7 @@ export function rankTrendLine(profile: PublicLolProfile): PublicTrendLine | unde
     };
   });
   const linePoints = points.map((point) => `${point.x},${point.y}`).join(" ");
-  const baseY = height - padY;
+  const baseY = plotBottom;
   const areaPath = points.length === 1
     ? `M ${points[0]!.x} ${baseY} L ${points[0]!.x} ${points[0]!.y} L ${points[0]!.x} ${baseY} Z`
     : `M ${points[0]!.x} ${baseY} L ${points.map((point) => `${point.x} ${point.y}`).join(" L ")} L ${points[points.length - 1]!.x} ${baseY} Z`;
@@ -379,10 +393,12 @@ export function rankTrendLine(profile: PublicLolProfile): PublicTrendLine | unde
   return {
     points,
     tierBands,
-    tierBoundaries,
+    axisTicks,
     linePoints,
     areaPath,
-    yLabels: rankTrendAxisLabels(rawMin, rawMax),
+    change: Math.round((points.at(-1)?.value ?? 0) - (points[0]?.value ?? 0)),
+    sampleCount: points.length,
+    latestLabel: rankTrendPointLabel(points.at(-1)?.value ?? 0),
     startLabel: formatShortDate(new Date(domainStart).toISOString()),
     middleLabel: formatShortDate(new Date(domainMiddle).toISOString()),
     endLabel: formatShortDate(new Date(domainEnd).toISOString())

@@ -188,9 +188,13 @@ function rankLabel(stats: LolRankedStats | undefined): string | undefined {
   return `${queue} ${stats.tier}${stats.rank ? ` ${stats.rank}` : ""} ${stats.leaguePoints}LP`;
 }
 
+function rankScoreFromParts(tier: LolRankTier, rank: string | undefined, leaguePoints: number): number {
+  if (tier === "UNRANKED") return 0;
+  return RANK_TIER_SCORE[tier] + (rank ? RANK_DIVISION_SCORE[rank] ?? 0 : 0) + Math.max(0, Math.trunc(leaguePoints));
+}
+
 function rankScore(stats: LolRankedStats): number {
-  if (stats.tier === "UNRANKED") return 0;
-  return RANK_TIER_SCORE[stats.tier] + (stats.rank ? RANK_DIVISION_SCORE[stats.rank] ?? 0 : 0) + Math.max(0, Math.trunc(stats.leaguePoints));
+  return rankScoreFromParts(stats.tier, stats.rank, stats.leaguePoints);
 }
 
 export function buildRankHistory(previous: LolRankHistoryPoint[] | undefined, stats: LolRankedStats | undefined, analyzedAt: string): LolRankHistoryPoint[] | undefined {
@@ -200,7 +204,10 @@ export function buildRankHistory(previous: LolRankHistoryPoint[] | undefined, st
       const time = Date.parse(point.date);
       return Number.isFinite(time);
     })
-    .map((point) => ({ ...point }))
+    .map((point) => ({
+      ...point,
+      rankScore: rankScoreFromParts(point.tier, point.rank, point.leaguePoints)
+    }))
     .sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
   const baseline = previousPoints
     .filter((point) => Date.parse(point.date) < cutoff)

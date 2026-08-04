@@ -71,6 +71,8 @@ import {
   getPublicLolMatchPage,
   getPublicLolMatchRanks,
   getPublicLolProfileDynamicState,
+  invalidatePublicLolMatchPageCache,
+  prefetchPublicLolMatchPage,
   PublicHomeSearchPanel,
   PublicAppHeader as FeaturePublicAppHeader,
   PublicLocaleSelector,
@@ -5229,6 +5231,7 @@ function RecentMatches({
   onFilters,
   onResetFilters,
   onLoadMore,
+  onLoadMoreIntent,
   loadingMore = false,
   moreError = ""
 }: {
@@ -5239,6 +5242,7 @@ function RecentMatches({
   onFilters: (filters: PublicMatchFilters) => void;
   onResetFilters: () => void;
   onLoadMore?: () => void;
+  onLoadMoreIntent?: () => void;
   loadingMore?: boolean;
   moreError?: string;
 }) {
@@ -5563,8 +5567,10 @@ function RecentMatches({
       matchCount={`${profile.summary.recentGames}${t().games}`}
       matchRows={matchRows}
       moreError={moreError}
+      loadMoreKey={`${profile.lolPlatform}:${profile.riotId}:${profile.nextRecentMatchStart ?? profile.recentMatches.length}`}
       onLoadMore={onLoadMore}
-      showNoMore={!canLoadMore && profile.recentMatches.length >= 20}
+      onLoadMoreIntent={onLoadMoreIntent}
+      showNoMore={!canLoadMore && profile.recentMatches.length > 0}
       text={text}
     />
   );
@@ -5809,6 +5815,9 @@ export function PublicLolPage({
   const [error, setError] = useState("");
   const profileSearchAbortRef = useRef<AbortController | undefined>(undefined);
   const profileSearchSequenceRef = useRef(0);
+  const loadMoreAbortRef = useRef<AbortController | undefined>(undefined);
+  const loadMoreSequenceRef = useRef(0);
+  const loadMoreInFlightKeyRef = useRef<string | undefined>(undefined);
   const [recentSearches, setRecentSearches] = useState<SearchSuggestion[]>(() => readRecentSearches());
   const [favorites, setFavorites] = useState<PublicFavorite[]>(() => readFavorites());
   const { theme, toggleTheme } = usePublicTheme();
@@ -5934,6 +5943,7 @@ export function PublicLolPage({
 
   useEffect(() => () => {
     profileSearchAbortRef.current?.abort();
+    loadMoreAbortRef.current?.abort();
   }, []);
 
   useEffect(() => {
@@ -6552,6 +6562,12 @@ export function PublicLolPage({
     if (!riotId) return;
     const updateUrl = options.updateUrl !== false;
     profileSearchAbortRef.current?.abort();
+    loadMoreAbortRef.current?.abort();
+    loadMoreAbortRef.current = undefined;
+    loadMoreInFlightKeyRef.current = undefined;
+    loadMoreSequenceRef.current += 1;
+    setLoadingMoreMatches(false);
+    if (options.refresh) invalidatePublicLolMatchPageCache(riotId, requestedPlatform);
     const controller = new AbortController();
     const requestSequence = profileSearchSequenceRef.current + 1;
     profileSearchAbortRef.current = controller;
@@ -6601,17 +6617,39 @@ export function PublicLolPage({
   async function loadMoreRecentMatches(): Promise<void> {
     if (!profile || loadingMoreMatches || !profile.hasMoreRecentMatches) return;
     const nextStart = profile.nextRecentMatchStart ?? profile.recentMatches.length;
+    const platform = normalizeLolPlatformId(profile.lolPlatform) ?? selectedLolPlatform;
+    const requestKey = `${platform}:${profile.riotId}:${nextStart}`;
+    if (loadMoreInFlightKeyRef.current === requestKey) return;
+    loadMoreAbortRef.current?.abort();
+    const controller = new AbortController();
+    const requestSequence = loadMoreSequenceRef.current + 1;
+    loadMoreAbortRef.current = controller;
+    loadMoreSequenceRef.current = requestSequence;
+    loadMoreInFlightKeyRef.current = requestKey;
     setLoadingMoreMatches(true);
     setMoreMatchesError("");
     try {
-      const platform = normalizeLolPlatformId(profile.lolPlatform) ?? selectedLolPlatform;
-      const page = await getPublicLolMatchPage(profile.riotId, nextStart, platform);
-      setProfile((current) => current ? profileWithAdditionalMatchPage(current, page) : current);
+      const page = await getPublicLolMatchPage(profile.riotId, nextStart, platform, controller.signal);
+      if (controller.signal.aborted || requestSequence !== loadMoreSequenceRef.current) return;
+      setProfile((current) => {
+        if (!current || current.riotId !== profile.riotId || normalizeLolPlatformId(current.lolPlatform) !== platform) return current;
+        return profileWithAdditionalMatchPage(current, page);
+      });
     } catch (requestError) {
+      if (controller.signal.aborted || requestSequence !== loadMoreSequenceRef.current) return;
       setMoreMatchesError(requestError instanceof Error ? requestError.message : t().searchFailed);
     } finally {
-      setLoadingMoreMatches(false);
+      if (loadMoreAbortRef.current === controller) loadMoreAbortRef.current = undefined;
+      if (loadMoreInFlightKeyRef.current === requestKey) loadMoreInFlightKeyRef.current = undefined;
+      if (requestSequence === loadMoreSequenceRef.current) setLoadingMoreMatches(false);
     }
+  }
+
+  function prefetchNextRecentMatches(): void {
+    if (!profile || loadingMoreMatches || !profile.hasMoreRecentMatches) return;
+    const nextStart = profile.nextRecentMatchStart ?? profile.recentMatches.length;
+    const platform = normalizeLolPlatformId(profile.lolPlatform) ?? selectedLolPlatform;
+    void prefetchPublicLolMatchPage(profile.riotId, nextStart, platform).catch(() => undefined);
   }
 
 	  function searchRiotId(riotId: string): void {
@@ -6640,8 +6678,13 @@ export function PublicLolPage({
     profileSearchAbortRef.current?.abort();
     profileSearchAbortRef.current = undefined;
     profileSearchSequenceRef.current += 1;
+    loadMoreAbortRef.current?.abort();
+    loadMoreAbortRef.current = undefined;
+    loadMoreInFlightKeyRef.current = undefined;
+    loadMoreSequenceRef.current += 1;
     setSelectedLolPlatform(platform);
     setLoading(false);
+    setLoadingMoreMatches(false);
     setMoreMatchesError("");
     setRemoteSuggestions([]);
     setError("");
@@ -7098,6 +7141,7 @@ export function PublicLolPage({
                           onFilters={setFilters}
                           onResetFilters={() => setFilters(DEFAULT_MATCH_FILTERS)}
                           onLoadMore={() => void loadMoreRecentMatches()}
+                          onLoadMoreIntent={prefetchNextRecentMatches}
                           loadingMore={loadingMoreMatches}
                           moreError={moreMatchesError}
                         />

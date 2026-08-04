@@ -5,7 +5,9 @@ import sharp from "sharp";
 const {
   PublicLolSocialCardRenderer,
   buildPublicLolSocialSummary,
+  publicLolSocialProfileImageUrls,
   safeDataDragonProfileIconUrl,
+  safeTwitchProfileImageUrl,
 } = await import("../dist/services/public-lol-social-card.js");
 
 function profile(overrides = {}) {
@@ -80,6 +82,28 @@ test("프로필 아이콘은 Data Dragon의 정확한 PNG 경로만 허용한다
   assert.equal(safeDataDragonProfileIconUrl("data:image/png;base64,AAAA"), undefined);
 });
 
+test("등록 스트리머 이미지는 Twitch CDN의 정확한 프로필 PNG만 우선한다", () => {
+  const twitchUrl = "https://static-cdn.jtvnw.net/jtv_user_pictures/seiga-profile_image-300x300.png";
+  const riotUrl = "https://ddragon.leagueoflegends.com/cdn/16.15.1/img/profileicon/29.png";
+  assert.equal(safeTwitchProfileImageUrl(twitchUrl), twitchUrl);
+  assert.equal(safeTwitchProfileImageUrl("https://evil.example/seiga.png"), undefined);
+  assert.equal(safeTwitchProfileImageUrl(`${twitchUrl}?size=600`), undefined);
+  assert.deepEqual(publicLolSocialProfileImageUrls(profile({
+    streamerProfileImageUrl: twitchUrl,
+    profileIconUrl: riotUrl,
+  })), [twitchUrl, riotUrl]);
+});
+
+test("스트리머 이미지가 변경되면 SNS 이미지 revision도 변경된다", () => {
+  const first = buildPublicLolSocialSummary(profile({
+    streamerProfileImageUrl: "https://static-cdn.jtvnw.net/jtv_user_pictures/seiga-profile_image-300x300.png",
+  }), "ko");
+  const second = buildPublicLolSocialSummary(profile({
+    streamerProfileImageUrl: "https://static-cdn.jtvnw.net/jtv_user_pictures/seiga-new-profile_image-300x300.png",
+  }), "ko");
+  assert.notEqual(first.revision, second.revision);
+});
+
 test("공유 이미지 native renderer는 서버 시작 경로에서 즉시 로드하지 않는다", async () => {
   let loaderCalls = 0;
   const renderer = new PublicLolSocialCardRenderer(fetch, async () => {
@@ -136,4 +160,51 @@ test("공유 이미지는 검증된 Data Dragon 프로필 아이콘만 포함하
 
   assert.equal(fetchCalls, 1);
   assert.deepEqual(first.body, second.body);
+});
+
+test("공유 이미지는 등록 스트리머 Twitch 프로필을 우선하고 실패 시 Riot 아이콘으로 낮춘다", async () => {
+  const icon = await sharp({
+    create: { width: 64, height: 64, channels: 4, background: { r: 118, g: 103, b: 255, alpha: 1 } },
+  }).png().toBuffer();
+  const twitchUrl = "https://static-cdn.jtvnw.net/jtv_user_pictures/seiga-profile_image-300x300.png";
+  const riotUrl = "https://ddragon.leagueoflegends.com/cdn/16.15.1/img/profileicon/29.png";
+  const requestedUrls = [];
+  const renderer = new PublicLolSocialCardRenderer(async (url) => {
+    requestedUrls.push(String(url));
+    if (String(url) === twitchUrl) return new Response(null, { status: 404 });
+    return new Response(icon, {
+      status: 200,
+      headers: { "content-type": "image/png", "content-length": String(icon.length) },
+    });
+  });
+
+  const result = await renderer.render(profile({
+    streamerProfileImageUrl: twitchUrl,
+    profileIconUrl: riotUrl,
+  }), "ko");
+  const metadata = await sharp(result.body).metadata();
+
+  assert.deepEqual(requestedUrls, [twitchUrl, riotUrl]);
+  assert.equal(metadata.width, 1200);
+  assert.equal(metadata.height, 630);
+});
+
+test("공유 카드 렌더가 불가능해도 검증된 실제 프로필 PNG를 fallback으로 제공한다", async () => {
+  const icon = await sharp({
+    create: { width: 300, height: 300, channels: 4, background: { r: 28, g: 37, b: 56, alpha: 1 } },
+  }).png().toBuffer();
+  const twitchUrl = "https://static-cdn.jtvnw.net/jtv_user_pictures/seiga-profile_image-300x300.png";
+  const renderer = new PublicLolSocialCardRenderer(async (url) => new Response(
+    String(url) === twitchUrl ? icon : null,
+    {
+      status: String(url) === twitchUrl ? 200 : 404,
+      headers: String(url) === twitchUrl
+        ? { "content-type": "image/png", "content-length": String(icon.length) }
+        : {},
+    },
+  ));
+
+  const sourceImage = await renderer.sourceImage(profile({ streamerProfileImageUrl: twitchUrl }));
+
+  assert.deepEqual(sourceImage, icon);
 });

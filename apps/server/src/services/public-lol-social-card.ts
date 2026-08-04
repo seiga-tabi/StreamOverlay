@@ -9,6 +9,7 @@ export type PublicLolSocialProfile = {
   tagLine: string;
   lolPlatform: string;
   profileIconUrl?: string;
+  streamerProfileImageUrl?: string;
   rankedStats?: LolRankedStats;
   summary?: {
     recentGames?: number;
@@ -159,6 +160,7 @@ export function buildPublicLolSocialSummary(
     platform: safeText(profile.lolPlatform, 16),
     rank,
     profileIconUrl: safeText(profile.profileIconUrl, 300),
+    streamerProfileImageUrl: safeText(profile.streamerProfileImageUrl, 500),
     recent: recent.label,
     riotId,
   });
@@ -193,6 +195,34 @@ export function safeDataDragonProfileIconUrl(value: unknown): string | undefined
   }
 }
 
+export function safeTwitchProfileImageUrl(value: unknown): string | undefined {
+  if (typeof value !== "string" || value.length > 500 || /[%\\\u0000-\u001f\u007f]/u.test(value)) return undefined;
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "https:" || url.hostname !== "static-cdn.jtvnw.net") return undefined;
+    if (url.port || url.username || url.password || url.search || url.hash) return undefined;
+    if (!/^\/jtv_user_pictures\/[A-Za-z0-9_-]+(?:-profile_image-[0-9]+x[0-9]+)?\.png$/u.test(url.pathname)) return undefined;
+    return url.href;
+  } catch {
+    return undefined;
+  }
+}
+
+export function publicLolSocialProfileImageUrls(profile: PublicLolSocialProfile): string[] {
+  const urls = [
+    safeTwitchProfileImageUrl(profile.streamerProfileImageUrl),
+    safeDataDragonProfileIconUrl(profile.profileIconUrl),
+  ].filter((url): url is string => Boolean(url));
+  return [...new Set(urls)];
+}
+
+function isSafePng(body: Buffer): boolean {
+  if (body.length < 24 || !body.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))) return false;
+  const width = body.readUInt32BE(16);
+  const height = body.readUInt32BE(20);
+  return width > 0 && height > 0 && width <= 2048 && height <= 2048;
+}
+
 function touchCache<K, V>(cache: Map<K, V>, key: K, value: V, maxSize: number): V {
   cache.delete(key);
   cache.set(key, value);
@@ -206,6 +236,7 @@ function touchCache<K, V>(cache: Map<K, V>, key: K, value: V, maxSize: number): 
 
 export class PublicLolSocialCardRenderer {
   private readonly cards = new Map<string, Buffer>();
+  private readonly sourceImages = new Map<string, Buffer>();
   private readonly icons = new Map<string, Buffer>();
   private readonly inFlightCards = new Map<string, Promise<Buffer>>();
   private readonly renderWaiters: Array<() => void> = [];
@@ -226,7 +257,7 @@ export class PublicLolSocialCardRenderer {
     const running = this.inFlightCards.get(summary.revision);
     if (running) return { body: await running, summary };
     const task = this.withRenderSlot(async () => {
-      const icon = await this.loadProfileIcon(profile.profileIconUrl);
+      const icon = await this.loadProfileIcon(profile);
       const body = await this.renderPng(summary, locale, icon);
       if (body.length > MAX_CARD_BYTES) throw new Error("공유 이미지 응답 크기 제한을 초과했습니다.");
       return touchCache(this.cards, summary.revision, body, MAX_CARD_CACHE);
@@ -237,6 +268,14 @@ export class PublicLolSocialCardRenderer {
     } finally {
       this.inFlightCards.delete(summary.revision);
     }
+  }
+
+  async sourceImage(profile: PublicLolSocialProfile): Promise<Buffer | undefined> {
+    for (const url of publicLolSocialProfileImageUrls(profile)) {
+      const image = await this.loadSourceImage(url);
+      if (image) return image;
+    }
+    return undefined;
   }
 
   private async withRenderSlot<T>(render: () => Promise<T>): Promise<T> {
@@ -255,11 +294,9 @@ export class PublicLolSocialCardRenderer {
     }
   }
 
-  private async loadProfileIcon(rawUrl: unknown): Promise<Buffer | undefined> {
-    const url = safeDataDragonProfileIconUrl(rawUrl);
-    if (!url) return undefined;
-    const cached = this.icons.get(url);
-    if (cached) return touchCache(this.icons, url, cached, MAX_ICON_CACHE);
+  private async loadSourceImage(url: string): Promise<Buffer | undefined> {
+    const cached = this.sourceImages.get(url);
+    if (cached) return touchCache(this.sourceImages, url, cached, MAX_ICON_CACHE);
     try {
       const response = await this.fetchImpl(url, {
         method: "GET",
@@ -270,20 +307,35 @@ export class PublicLolSocialCardRenderer {
       const declaredLength = Number(response.headers.get("content-length") ?? 0);
       if (declaredLength > MAX_ICON_BYTES) return undefined;
       const body = Buffer.from(await response.arrayBuffer());
-      if (body.length === 0 || body.length > MAX_ICON_BYTES) return undefined;
-      const sharp = await this.sharpFactoryLoader();
-      const metadata = await sharp(body, { limitInputPixels: 1024 * 1024 }).metadata();
-      if (metadata.format !== "png" || !metadata.width || !metadata.height || metadata.width > 1024 || metadata.height > 1024) return undefined;
-      const mask = Buffer.from('<svg width="176" height="176"><circle cx="88" cy="88" r="88" fill="white"/></svg>');
-      const normalized = await sharp(body, { limitInputPixels: 1024 * 1024 })
-        .resize(176, 176, { fit: "cover" })
-        .composite([{ input: mask, blend: "dest-in" }])
-        .png({ compressionLevel: 9 })
-        .toBuffer();
-      return touchCache(this.icons, url, normalized, MAX_ICON_CACHE);
+      if (body.length === 0 || body.length > MAX_ICON_BYTES || !isSafePng(body)) return undefined;
+      return touchCache(this.sourceImages, url, body, MAX_ICON_CACHE);
     } catch {
       return undefined;
     }
+  }
+
+  private async loadProfileIcon(profile: PublicLolSocialProfile): Promise<Buffer | undefined> {
+    for (const url of publicLolSocialProfileImageUrls(profile)) {
+      const cached = this.icons.get(url);
+      if (cached) return touchCache(this.icons, url, cached, MAX_ICON_CACHE);
+      try {
+        const body = await this.loadSourceImage(url);
+        if (!body) continue;
+        const sharp = await this.sharpFactoryLoader();
+        const metadata = await sharp(body, { limitInputPixels: 1024 * 1024 }).metadata();
+        if (metadata.format !== "png" || !metadata.width || !metadata.height || metadata.width > 1024 || metadata.height > 1024) continue;
+        const mask = Buffer.from('<svg width="176" height="176"><circle cx="88" cy="88" r="88" fill="white"/></svg>');
+        const normalized = await sharp(body, { limitInputPixels: 1024 * 1024 })
+          .resize(176, 176, { fit: "cover" })
+          .composite([{ input: mask, blend: "dest-in" }])
+          .png({ compressionLevel: 9 })
+          .toBuffer();
+        return touchCache(this.icons, url, normalized, MAX_ICON_CACHE);
+      } catch {
+        // 등록 스트리머 이미지가 손상됐거나 만료되면 일반 Riot 프로필 이미지 후보를 계속 확인합니다.
+      }
+    }
+    return undefined;
   }
 
   private async renderPng(

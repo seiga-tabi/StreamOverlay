@@ -171,14 +171,33 @@ test("랭크 점수와 추이 좌표가 유효 범위 안에 유지된다", () =
     riotId: "tester#JP1",
     rankedStats,
     rankHistory: [
-      { date: new Date(Date.now() - 2 * 86_400_000).toISOString(), rankScore: 1880 },
-      { date: new Date(Date.now() - 86_400_000).toISOString(), rankScore: 1908 }
+      {
+        date: new Date(Date.now() - 2 * 86_400_000).toISOString(),
+        tier: "PLATINUM",
+        rank: "I",
+        leaguePoints: 80,
+        wins: 9,
+        losses: 8,
+        rankScore: 80
+      },
+      {
+        date: new Date(Date.now() - 86_400_000).toISOString(),
+        tier: "PLATINUM",
+        rank: "I",
+        leaguePoints: 8,
+        wins: 10,
+        losses: 8,
+        rankScore: 8
+      }
     ],
     recentMatches: []
   } as PublicLolProfile;
   const trend = rankTrendLine(profile);
   assert.ok(trend);
   assert.equal(trend.points.length, 2);
-  assert.ok(trend.points.every((point) => point.x >= 36 && point.x <= 300));
-  assert.ok(trend.points.every((point) => point.y >= 16 && point.y <= 152));
+  assert.deepEqual(trend.points.map((point) => point.value), [1980, 1908]);
+  assert.equal(trend.change, -72);
+  assert.ok(trend.axisTicks.length <= 3);
+  assert.ok(trend.points.every((point) => point.x >= 52 && point.x <= 308));
+  assert.ok(trend.points.every((point) => point.y >= 12 && point.y <= 140));
 });
