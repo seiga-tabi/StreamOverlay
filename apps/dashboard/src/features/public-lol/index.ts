@@ -22,6 +22,7 @@ export { ProfileRecentChampionRow } from "./components/ProfileRecentChampionRow"
 export { ProfileSeasonBadgeItem as ProfileSeasonBadgeItemPresenter } from "./components/ProfileSeasonBadgeItem";
 export { ProfileSeasonBadges } from "./components/ProfileSeasonBadges";
 export { ProfileTopActions } from "./components/ProfileTopActions";
+export { PublicProfileShareButton } from "./components/PublicProfileShareButton";
 export { ProfileTopIdentity } from "./components/ProfileTopIdentity";
 export { ProfileTopPanel } from "./components/ProfileTopPanel";
 export { ProfileTopSearchToolbar } from "./components/ProfileTopSearchToolbar";
@@ -86,6 +87,7 @@ export type {
   ProfileTopActionsProps,
   ProfileTopActionsViewModel,
 } from "./components/ProfileTopActions";
+export type { PublicProfileShareButtonProps } from "./components/PublicProfileShareButton";
 export type {
   ProfileTopIdentityProps,
   ProfileTopIdentitySeasonBadgesRenderer,

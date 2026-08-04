@@ -13,7 +13,8 @@ import type {
 
 export async function readPublicApiErrorMessage(response: Response): Promise<string> {
   try {
-    const body = await response.json() as { error?: unknown; message?: unknown };
+    const body = await response.json() as { code?: unknown; error?: unknown; message?: unknown };
+    if (body.code === "LOL_PROFILE_NOT_ON_PLATFORM") return t().summonerNotOnServer;
     if (typeof body.error === "string") return body.error.includes("Riot API key") ? t().riotMissing : body.error;
     if (typeof body.message === "string") return body.message;
   } catch {

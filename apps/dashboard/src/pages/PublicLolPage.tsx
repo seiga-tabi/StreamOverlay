@@ -81,6 +81,7 @@ import {
   PublicMatchFilterBar as FeaturePublicMatchFilterBar,
   ProfileMetricStrip as FeatureProfileMetricStrip,
   ProfileTopPanel as FeatureProfileTopPanel,
+  PublicProfileShareButton,
   MatchTeamCompare as FeatureMatchTeamCompare,
   MatchTeamDetails as FeatureMatchTeamDetails,
   LpTrendLineChart,
@@ -202,6 +203,7 @@ import {
 import {
   isLocalizablePublicPath,
   localizedPublicUrl,
+  localizedPublicUrlForCurrentLocale,
   stripPublicLocalePrefix,
 } from "../features/public-lol/utils/public-locale-path";
 import {
@@ -1538,6 +1540,16 @@ function ProfileTopPanel({
       }
     ]
   } : undefined;
+  const normalizedPlatform = normalizeLolPlatformId(profile.lolPlatform) ?? DEFAULT_PUBLIC_LOL_PLATFORM;
+  const canonicalProfilePath = localizedPublicUrlForCurrentLocale(
+    publicSummonerPath(profile.riotId, normalizedPlatform),
+  );
+  const canonicalProfileUrl = typeof window === "undefined"
+    ? `https://yoro.gg${canonicalProfilePath}`
+    : new URL(canonicalProfilePath, window.location.origin).href;
+  const shareTitle = activePublicLocale === "ja"
+    ? `${profile.riotId} 戦績 | YORO.gg`
+    : `${profile.riotId} 전적 | YORO.gg`;
   return (
     <FeatureProfileTopPanel
       displayName={profile.gameName}
@@ -1563,6 +1575,16 @@ function ProfileTopPanel({
       refreshDisabled={refreshDisabled}
       refreshTitle={refreshCoolingDown ? `${formatCooldown(refreshRemaining)} ${t().refreshAvailableIn}` : t().refreshProfile}
       seasonBadges={null}
+      shareAction={(
+        <PublicProfileShareButton
+          copiedLabel={t().shareRecordCopied}
+          copyFailedLabel={t().shareRecordCopyFailed}
+          label={t().shareRecord}
+          text={`${profile.riotId}${t().shareRecordText}`}
+          title={shareTitle}
+          url={canonicalProfileUrl}
+        />
+      )}
       streamerSpotlight={streamerSpotlight}
       tagLine={profile.tagLine}
       text={profileTopPanelText()}
@@ -6572,9 +6594,20 @@ export function PublicLolPage({
   }
 
   function changeLolPlatform(platform: LolPlatformId): void {
+    if (platform === selectedLolPlatform) return;
+    profileSearchAbortRef.current?.abort();
+    profileSearchAbortRef.current = undefined;
+    profileSearchSequenceRef.current += 1;
     setSelectedLolPlatform(platform);
+    setLoading(false);
+    setMoreMatchesError("");
     setRemoteSuggestions([]);
     setError("");
+    if (profile && normalizeLolPlatformId(profile.lolPlatform) !== platform) {
+      setProfile(null);
+      setFilters(DEFAULT_MATCH_FILTERS);
+      setPublicPath("/", true);
+    }
   }
 
 	  function clearSearch(): void {

@@ -16,7 +16,9 @@ import {
   PALWORLD_SERVER_SAFE_REGISTRATION_POLICY,
   PALWORLD_PAL_SPAWN_GRID_SIZE,
   formatRiotId,
+  lolPlatformSlug,
   lolRoutingContext,
+  normalizeLolPlatformId,
   normalizeRiotIdKey,
   normalizeLolRole,
   parseRiotIdDetailed,
@@ -95,6 +97,11 @@ import {
 import type { DataDragonService, LolChampionAbilitySummary, LolRuneSummary } from "../services/data-dragon.js";
 import type { LolProfileCacheEntry, LolProfileRepository } from "../services/lol-profile-store.js";
 import type { PublicLolSnapshotStore } from "../services/public-lol-snapshot-store.js";
+import {
+  PublicLolSocialCardRenderer,
+  buildPublicLolSocialSummary,
+  type PublicLolSocialProfile,
+} from "../services/public-lol-social-card.js";
 import { appConfig, legalRuntimeConfigReady } from "../config.js";
 import type { TwitchEventSubClient } from "../services/twitch-eventsub-client.js";
 import { rankedEmblemAssetPath } from "../services/ranked-emblems.js";
@@ -247,6 +254,9 @@ const PUBLIC_LOL_PROFILE_QUEUES = [420, 440, 42, 6, 430, 400, 450];
 const PUBLIC_LOL_PROFILE_CACHE_TTL_MS = 10 * 60_000;
 const PUBLIC_LOL_PROFILE_STALE_TTL_MS = 24 * 60 * 60_000;
 const PUBLIC_LOL_PROFILE_REFRESH_COOLDOWN_MS = 10 * 60_000;
+const PUBLIC_LOL_PROFILE_CACHE_KEY_VERSION = "v2";
+const PUBLIC_LOL_PLATFORM_MEMBERSHIP_CACHE_TTL_MS = 6 * 60 * 60_000;
+const PUBLIC_LOL_PLATFORM_MEMBERSHIP_MISS_TTL_MS = 60_000;
 const PUBLIC_PARTICIPATION_MAX_QUEUE_SIZE = 100;
 const PUBLIC_LOL_CURRENT_GAME_LIVE_CACHE_TTL_MS = 20_000;
 const PUBLIC_LOL_CURRENT_GAME_NOT_FOUND_CACHE_TTL_MS = 5_000;
@@ -1901,9 +1911,69 @@ function isNotModified(req: IncomingMessage, etag: string, mtime: Date): boolean
 type PublicSeoMetadata = {
   canonicalUrl: string;
   description: string;
+  imageAlt: string;
+  imageUrl: string;
   locale: PublicUrlLocale;
+  openGraphType: "website" | "profile";
   title: string;
 };
+
+type PublicSeoContent = Pick<PublicSeoMetadata, "description" | "title">;
+
+type PublicLolProfileRoute = {
+  gameName: string;
+  locale: PublicUrlLocale;
+  lolPlatform: string;
+  platformSlug: string;
+  profileSlug: string;
+  tagLine: string;
+};
+
+type PublicLolSocialImageRoute = PublicLolProfileRoute & {
+  revision: string;
+};
+
+function parsePublicLolProfileSlug(value: string): { gameName: string; tagLine: string } | undefined {
+  const decoded = decodeUrlPathSegment(value);
+  if (!decoded || decoded.length > 100 || decoded.includes("/") || decoded.includes("\\")) return undefined;
+  const separator = decoded.lastIndexOf("-");
+  if (separator <= 0 || separator === decoded.length - 1) return undefined;
+  const parsed = parseRiotIdDetailed(`${decoded.slice(0, separator)}#${decoded.slice(separator + 1)}`);
+  return parsed.ok ? { gameName: parsed.gameName, tagLine: parsed.tagLine } : undefined;
+}
+
+function publicLolProfileRouteForPath(pathname: string): PublicLolProfileRoute | undefined {
+  const locale = publicUrlLocaleFromPathname(pathname) ?? "ko";
+  const normalized = stripPublicUrlLocalePrefix(pathname).replace(/\/$/u, "");
+  const match = /^\/lol\/summoners\/([^/]+)\/([^/]+)$/u.exec(normalized);
+  if (!match?.[1] || !match[2]) return undefined;
+  const platform = normalizeLolPlatformId(match[1]);
+  const riotId = parsePublicLolProfileSlug(match[2]);
+  if (!platform || !riotId) return undefined;
+  return {
+    ...riotId,
+    locale,
+    lolPlatform: platform,
+    platformSlug: lolPlatformSlug(platform),
+    profileSlug: match[2],
+  };
+}
+
+function publicLolSocialImageRouteForPath(pathname: string): PublicLolSocialImageRoute | undefined {
+  const match = /^\/social\/lol\/(ko|ja)\/([^/]+)\/([^/]+)\/([a-f0-9]{16})\.png$/u.exec(pathname);
+  if (!match?.[1] || !match[2] || !match[3] || !match[4]) return undefined;
+  const platform = normalizeLolPlatformId(match[2]);
+  const riotId = parsePublicLolProfileSlug(match[3]);
+  if (!platform || !riotId) return undefined;
+  return {
+    ...riotId,
+    locale: match[1] as PublicUrlLocale,
+    lolPlatform: platform,
+    platformSlug: lolPlatformSlug(platform),
+    profileSlug: match[3],
+    revision: match[4],
+  };
+}
 
 function publicSeoMetadataForPath(pathname: string): PublicSeoMetadata {
   const locale = publicUrlLocaleFromPathname(pathname) ?? "ko";
@@ -1911,11 +1981,11 @@ function publicSeoMetadataForPath(pathname: string): PublicSeoMetadata {
   const normalizedPath = unprefixedPath !== "/" && unprefixedPath.endsWith("/")
     ? unprefixedPath.slice(0, -1)
     : unprefixedPath;
-  const defaultMetadata: Omit<PublicSeoMetadata, "canonicalUrl" | "locale"> = {
+  const defaultMetadata: PublicSeoContent = {
     title: "YORO.gg",
     description: "YORO.gg에서 League of Legends 전적 검색, 스트리머 방송 상태, 팔로우와 시청자 참여 기능을 확인하세요."
   };
-  const palworldMetadata: Record<string, Omit<PublicSeoMetadata, "canonicalUrl" | "locale">> = {
+  const palworldMetadata: Record<string, PublicSeoContent> = {
     "/palworld": {
       title: "펠월드 데이터베이스 | YORO.gg",
       description: "Pal, 아이템, 스킬과 교배 정보를 한곳에서 확인하세요."
@@ -1949,7 +2019,7 @@ function publicSeoMetadataForPath(pathname: string): PublicSeoMetadata {
       description: "Palworld Pal과 아이템을 한국어·일본어 이름으로 검색하세요."
     }
   };
-  const exactMetadata: Record<string, Omit<PublicSeoMetadata, "canonicalUrl" | "locale">> = {
+  const exactMetadata: Record<string, PublicSeoContent> = {
     "/": defaultMetadata,
     "/lol": {
       title: "LoL 전적 검색 | YORO.gg",
@@ -2009,7 +2079,7 @@ function publicSeoMetadataForPath(pathname: string): PublicSeoMetadata {
               description: "YORO.gg League of Legends 커뮤니티 게시물을 확인하세요."
             }
           : defaultMetadata);
-  const japaneseMetadata: Record<string, Omit<PublicSeoMetadata, "canonicalUrl" | "locale">> = {
+  const japaneseMetadata: Record<string, PublicSeoContent> = {
     "/": {
       title: "YORO.gg",
       description: "YORO.ggでLeague of Legendsの戦績検索、配信者のLIVE状況、フォロー、視聴者参加機能を確認できます。"
@@ -2111,8 +2181,16 @@ function publicSeoMetadataForPath(pathname: string): PublicSeoMetadata {
   return {
     ...localized,
     canonicalUrl: new URL(localizedPath, "https://yoro.gg").href,
+    imageAlt: locale === "ja" ? "YORO.gg サービスプレビュー" : "YORO.gg 서비스 미리보기",
+    imageUrl: "https://yoro.gg/images/yorogg-og.png",
     locale,
+    openGraphType: "website",
   };
+}
+
+function replaceOrInsertHeadTag(html: string, matcher: RegExp, tag: string): string {
+  if (matcher.test(html)) return html.replace(matcher, tag);
+  return html.replace(/<\/head>/iu, `${tag}</head>`);
 }
 
 function applyPublicSeoMetadata(html: string, metadata: PublicSeoMetadata): string {
@@ -2135,6 +2213,24 @@ function applyPublicSeoMetadata(html: string, metadata: PublicSeoMetadata): stri
       `${prefix}${escapeHtml(value)}${suffix}`
     ));
   }
+  const openGraphLocale = metadata.locale === "ja" ? "ja_JP" : "ko_KR";
+  const alternateLocale = metadata.locale === "ja" ? "ko_KR" : "ja_JP";
+  const additionalTags: Array<[RegExp, string]> = [
+    [/<meta\s+property="og:type"\s+content="[^"]*"\s*\/?>/iu, `<meta property="og:type" content="${metadata.openGraphType}" />`],
+    [/<meta\s+property="og:site_name"\s+content="[^"]*"\s*\/?>/iu, '<meta property="og:site_name" content="YORO.gg" />'],
+    [/<meta\s+property="og:locale"\s+content="[^"]*"\s*\/?>/iu, `<meta property="og:locale" content="${openGraphLocale}" />`],
+    [/<meta\s+property="og:locale:alternate"\s+content="[^"]*"\s*\/?>/iu, `<meta property="og:locale:alternate" content="${alternateLocale}" />`],
+    [/<meta\s+property="og:image"\s+content="[^"]*"\s*\/?>/iu, `<meta property="og:image" content="${escapeHtml(metadata.imageUrl)}" />`],
+    [/<meta\s+property="og:image:secure_url"\s+content="[^"]*"\s*\/?>/iu, `<meta property="og:image:secure_url" content="${escapeHtml(metadata.imageUrl)}" />`],
+    [/<meta\s+property="og:image:alt"\s+content="[^"]*"\s*\/?>/iu, `<meta property="og:image:alt" content="${escapeHtml(metadata.imageAlt)}" />`],
+    [/<meta\s+property="og:image:type"\s+content="[^"]*"\s*\/?>/iu, '<meta property="og:image:type" content="image/png" />'],
+    [/<meta\s+property="og:image:width"\s+content="[^"]*"\s*\/?>/iu, '<meta property="og:image:width" content="1200" />'],
+    [/<meta\s+property="og:image:height"\s+content="[^"]*"\s*\/?>/iu, '<meta property="og:image:height" content="630" />'],
+    [/<meta\s+name="twitter:card"\s+content="[^"]*"\s*\/?>/iu, '<meta name="twitter:card" content="summary_large_image" />'],
+    [/<meta\s+name="twitter:image"\s+content="[^"]*"\s*\/?>/iu, `<meta name="twitter:image" content="${escapeHtml(metadata.imageUrl)}" />`],
+    [/<meta\s+name="twitter:image:alt"\s+content="[^"]*"\s*\/?>/iu, `<meta name="twitter:image:alt" content="${escapeHtml(metadata.imageAlt)}" />`],
+  ];
+  for (const [matcher, tag] of additionalTags) nextHtml = replaceOrInsertHeadTag(nextHtml, matcher, tag);
   return nextHtml;
 }
 
@@ -3179,6 +3275,10 @@ function publicLolSuggestionMatches(query: string, suggestion: PublicLolSuggesti
 }
 
 function publicLolProfileCacheKey(gameName: string, tagLine: string, lolPlatform: string): string {
+  return `${PUBLIC_LOL_PROFILE_CACHE_KEY_VERSION}:${publicLolSuggestionKey(gameName, tagLine, lolPlatform)}`;
+}
+
+function legacyPublicLolProfileCacheKey(gameName: string, tagLine: string, lolPlatform: string): string {
   return publicLolSuggestionKey(gameName, tagLine, lolPlatform);
 }
 
@@ -3430,6 +3530,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
   const publicLolProfileRefreshAvailableAt = new Map<string, number>();
   const publicLolProfileCacheGeneration = new Map<string, number>();
   const publicLolProfilePuuidCache = new Map<string, string>();
+  const publicLolPlatformMembershipCache = new Map<string, { expiresAt: number; verified: boolean }>();
+  const publicLolPlatformMembershipInFlight = new Map<string, Promise<boolean>>();
+  const publicLolSocialCardRenderer = new PublicLolSocialCardRenderer();
   const publicLolCurrentGameCache = new Map<string, { expiresAt: number; response: PublicLolCurrentGame }>();
   const publicLolCurrentGameInFlight = new Map<string, Promise<PublicLolCurrentGame>>();
   let publicLolParticipantRankCacheInvalidatedAt = 0;
@@ -3448,6 +3551,210 @@ export function createHttpHandler(input: HttpHandlerInput) {
     response: PublicTwitchFollowedLolResponse;
   }>();
   const publicTwitchFollowedInFlight = new Map<string, Promise<PublicTwitchFollowedLolResponse>>();
+
+  async function verifyPublicLolPlatformMembership(
+    puuid: string,
+    routing: LolRoutingContext,
+  ): Promise<boolean> {
+    if (!input.riot || typeof input.riot.getSummonerByPuuid !== "function") return true;
+    const key = `${routing.lolPlatform}:${puuid}`;
+    const cached = publicLolPlatformMembershipCache.get(key);
+    if (cached && cached.expiresAt > Date.now()) return cached.verified;
+    if (cached) publicLolPlatformMembershipCache.delete(key);
+    const running = publicLolPlatformMembershipInFlight.get(key);
+    if (running) return running;
+    const request = input.riot.getSummonerByPuuid(puuid, routing)
+      .then((summoner) => {
+        const verified = Boolean(summoner?.puuid || summoner?.id);
+        publicLolPlatformMembershipCache.set(key, {
+          verified,
+          expiresAt: Date.now() + (verified
+            ? PUBLIC_LOL_PLATFORM_MEMBERSHIP_CACHE_TTL_MS
+            : PUBLIC_LOL_PLATFORM_MEMBERSHIP_MISS_TTL_MS),
+        });
+        pruneMapToMax(publicLolPlatformMembershipCache, PUBLIC_LOL_PROFILE_CACHE_MAX * 2);
+        return verified;
+      })
+      .finally(() => {
+        publicLolPlatformMembershipInFlight.delete(key);
+      });
+    publicLolPlatformMembershipInFlight.set(key, request);
+    return request;
+  }
+
+  async function requirePublicLolPlatformMembership(
+    puuid: string,
+    routing: LolRoutingContext,
+  ): Promise<void> {
+    let verified: boolean;
+    try {
+      verified = await verifyPublicLolPlatformMembership(puuid, routing);
+    } catch (error) {
+      throw new HttpRequestError(502, {
+        error: publicLolErrorMessage(error),
+        code: "LOL_PLATFORM_LOOKUP_FAILED",
+      });
+    }
+    if (!verified) {
+      throw new HttpRequestError(404, {
+        error: "선택한 서버에서 해당 소환사를 찾을 수 없습니다.",
+        code: "LOL_PROFILE_NOT_ON_PLATFORM",
+      });
+    }
+  }
+
+  async function resolveCachedPublicLolSocialProfile(
+    route: PublicLolProfileRoute,
+  ): Promise<PublicLolSocialProfile | undefined> {
+    const key = publicLolProfileCacheKey(route.gameName, route.tagLine, route.lolPlatform);
+    const memoryEntry = publicLolProfileCache.get(key);
+    if (
+      memoryEntry
+      && memoryEntry.staleUntil > Date.now()
+      && isPublicLolProfileSnapshot(memoryEntry.response)
+      && memoryEntry.response.lolPlatform === route.lolPlatform
+    ) return memoryEntry.response;
+
+    if (input.publicLolSnapshotStore) {
+      const snapshotKeys = route.lolPlatform === "jp1"
+        ? [
+            key,
+            legacyPublicLolProfileCacheKey(route.gameName, route.tagLine, route.lolPlatform),
+            publicLolSuggestionKey(route.gameName, route.tagLine),
+          ]
+        : [key];
+      for (const snapshotKey of snapshotKeys) {
+        const snapshot = await input.publicLolSnapshotStore.load(snapshotKey).catch((error) => {
+          input.logger?.error({
+            type: "public_lol.social_snapshot_load_failed",
+            riotIdKey: snapshotKey,
+            error: toSafeErrorMessage(error),
+          });
+          return undefined;
+        });
+        if (
+          snapshot
+          && isPublicLolProfileSnapshot(snapshot.payload)
+          && snapshot.payload.fetchedAt === snapshot.fetchedAt
+          && snapshot.payload.lolPlatform === route.lolPlatform
+          && Date.now() - Date.parse(snapshot.fetchedAt) < PUBLIC_LOL_PROFILE_STALE_TTL_MS
+          && Date.now() - Date.parse(snapshot.fetchedAt) >= -5 * 60_000
+        ) {
+          return snapshot.payload;
+        }
+      }
+    }
+
+    const repositoryProfile = route.lolPlatform === "jp1"
+      ? input.profileRepository?.getByRiotId(route.gameName, route.tagLine)
+      : undefined;
+    if (!repositoryProfile || repositoryProfile.status !== "ready") return undefined;
+    const recentMatches = repositoryProfile.recentMatches ?? [];
+    const recentWins = recentMatches.filter((match) => match.won).length;
+    return {
+      riotId: formatRiotId(repositoryProfile.riotGameName, repositoryProfile.riotTagLine),
+      gameName: repositoryProfile.riotGameName,
+      tagLine: repositoryProfile.riotTagLine,
+      lolPlatform: route.lolPlatform,
+      rankedStats: repositoryProfile.rankedStats,
+      summary: {
+        recentGames: recentMatches.length,
+        recentWins,
+        recentWinRate: recentMatches.length > 0 ? Math.round((recentWins / recentMatches.length) * 100) : undefined,
+        averageKda: repositoryProfile.performanceStats?.kda,
+      },
+      recentMatches: recentMatches.map((match) => ({ result: match.won ? "win" : "loss" })),
+      fetchedAt: repositoryProfile.analyzedAt ?? repositoryProfile.rankedStats?.fetchedAt ?? new Date(0).toISOString(),
+    };
+  }
+
+  async function resolvePublicSeoMetadata(pathname: string): Promise<PublicSeoMetadata> {
+    const fallback = publicSeoMetadataForPath(pathname);
+    const route = publicLolProfileRouteForPath(pathname);
+    if (!route) return fallback;
+    try {
+      const profile = await resolveCachedPublicLolSocialProfile(route);
+      if (!profile) return fallback;
+      const summary = buildPublicLolSocialSummary(profile, route.locale);
+      const safeProfileSlug = encodeURIComponent(`${route.gameName}-${route.tagLine}`);
+      return {
+        ...fallback,
+        canonicalUrl: new URL(
+          `/${route.locale}/lol/summoners/${route.platformSlug}/${safeProfileSlug}`,
+          "https://yoro.gg",
+        ).href,
+        description: summary.description,
+        imageAlt: summary.imageAlt,
+        imageUrl: new URL(
+          `/social/lol/${route.locale}/${route.lolPlatform}/${safeProfileSlug}/${summary.revision}.png`,
+          "https://yoro.gg",
+        ).href,
+        openGraphType: "profile",
+        title: summary.title,
+      };
+    } catch (error) {
+      input.logger?.error({
+        type: "public_lol.social_metadata_failed",
+        errorCode: "metadata_unavailable",
+        error: toSafeErrorMessage(error),
+      });
+      return fallback;
+    }
+  }
+
+  async function sendPublicLolSocialImage(
+    req: IncomingMessage,
+    res: ServerResponse,
+    pathname: string,
+  ): Promise<boolean> {
+    const route = publicLolSocialImageRouteForPath(pathname);
+    if (!route) return false;
+    const sendFallback = async () => {
+      await sendStaticFile(
+        req,
+        res,
+        path.resolve(appConfig.paths.dashboardStatic, "images", "yorogg-og.png"),
+        { "Cache-Control": "no-store" },
+      );
+    };
+    try {
+      const profile = await resolveCachedPublicLolSocialProfile(route);
+      if (!profile) {
+        await sendFallback();
+        return true;
+      }
+      const expected = buildPublicLolSocialSummary(profile, route.locale);
+      if (expected.revision !== route.revision) {
+        await sendFallback();
+        return true;
+      }
+      const rendered = await publicLolSocialCardRenderer.render(profile, route.locale);
+      const etag = `"lol-social-${rendered.summary.revision}"`;
+      const headers = {
+        "Content-Type": "image/png",
+        "Content-Length": String(rendered.body.length),
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "ETag": etag,
+        ...securityHeadersForRequest(req),
+      };
+      if (req.headers["if-none-match"]?.split(",").map((value) => value.trim()).includes(etag)) {
+        res.writeHead(304, headers);
+        res.end();
+        return true;
+      }
+      res.writeHead(200, headers);
+      res.end(req.method === "HEAD" ? undefined : rendered.body);
+      return true;
+    } catch (error) {
+      input.logger?.error({
+        type: "public_lol.social_image_failed",
+        errorCode: "render_failed",
+        error: toSafeErrorMessage(error),
+      });
+      await sendFallback();
+      return true;
+    }
+  }
 
   async function getTwitchStatus() {
     const status = await input.twitchAuth.getStatus();
@@ -5500,23 +5807,26 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if (parsed.ok) {
         const account = await input.riot.getAccountByRiotId(parsed.gameName, parsed.tagLine, routing).catch(() => null);
         if (account?.puuid) {
-          const now = new Date().toISOString();
-          const rankedStats = typeof input.riot.getRankedStatsByPuuid === "function"
-            ? await input.riot.getRankedStatsByPuuid(account.puuid, undefined, routing).catch(() => undefined)
-            : undefined;
-          const iconUrl = await profileIconUrl(input.dataDragon, rankedStats?.profileIconId);
-          const key = publicLolSuggestionKey(account.gameName || parsed.gameName, account.tagLine || parsed.tagLine, routing.lolPlatform);
-          unique.set(key, {
-            riotId: `${account.gameName || parsed.gameName}#${account.tagLine || parsed.tagLine}`,
-            gameName: account.gameName || parsed.gameName,
-            tagLine: account.tagLine || parsed.tagLine,
-            source: "verified",
-            profileIconUrl: iconUrl,
-            summonerLevel: rankedStats?.summonerLevel,
-            lolPlatform: routing.lolPlatform,
-            rankedStats: rankedStats ? { ...rankedStats } : undefined,
-            lastSeenAt: now
-          });
+          const verified = await verifyPublicLolPlatformMembership(account.puuid, routing).catch(() => false);
+          if (verified) {
+            const now = new Date().toISOString();
+            const rankedStats = typeof input.riot.getRankedStatsByPuuid === "function"
+              ? await input.riot.getRankedStatsByPuuid(account.puuid, undefined, routing).catch(() => undefined)
+              : undefined;
+            const iconUrl = await profileIconUrl(input.dataDragon, rankedStats?.profileIconId);
+            const key = publicLolSuggestionKey(account.gameName || parsed.gameName, account.tagLine || parsed.tagLine, routing.lolPlatform);
+            unique.set(key, {
+              riotId: `${account.gameName || parsed.gameName}#${account.tagLine || parsed.tagLine}`,
+              gameName: account.gameName || parsed.gameName,
+              tagLine: account.tagLine || parsed.tagLine,
+              source: "verified",
+              profileIconUrl: iconUrl,
+              summonerLevel: rankedStats?.summonerLevel,
+              lolPlatform: routing.lolPlatform,
+              rankedStats: rankedStats ? { ...rankedStats } : undefined,
+              lastSeenAt: now
+            });
+          }
         }
       }
     }
@@ -5867,6 +6177,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       throw new HttpRequestError(502, { error: publicLolErrorMessage(error) });
     });
     if (!account?.puuid) throw new HttpRequestError(404, { error: "Riot 계정을 찾지 못했습니다." });
+    await requirePublicLolPlatformMembership(account.puuid, routing);
     const accountResolvedAt = Date.now();
 
     const existingProfile = input.profileRepository?.getByPuuid(account.puuid) ?? input.profileRepository?.getByRiotId(account.gameName || parsed.gameName, account.tagLine || parsed.tagLine);
@@ -6053,7 +6364,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
     let cached = publicLolProfileCache.get(key);
     if (!options.refresh && !cached && input.publicLolSnapshotStore) {
       const snapshotKeys = routing.lolPlatform === "jp1"
-        ? [key, publicLolSuggestionKey(parsed.gameName, parsed.tagLine)]
+        ? [
+            key,
+            legacyPublicLolProfileCacheKey(parsed.gameName, parsed.tagLine, routing.lolPlatform),
+            publicLolSuggestionKey(parsed.gameName, parsed.tagLine),
+          ]
         : [key];
       let snapshot: Awaited<ReturnType<PublicLolSnapshotStore["load"]>>;
       let restoredSnapshotKey = key;
@@ -6128,6 +6443,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       throw new HttpRequestError(502, { error: publicLolErrorMessage(error) });
     });
     if (!account?.puuid) throw new HttpRequestError(404, { error: "Riot 계정을 찾지 못했습니다." });
+    await requirePublicLolPlatformMembership(account.puuid, routing);
 
     const dataDragonVersion = await dataDragonLatestVersion(input.dataDragon);
     const matchPage = await buildPublicLolMatchPageForAccount(account, start, dataDragonVersion, PUBLIC_LOL_PROFILE_MATCH_COUNT, routing);
@@ -6825,19 +7141,21 @@ export function createHttpHandler(input: HttpHandlerInput) {
             "Referrer-Policy": "no-referrer"
           });
         }
+        if (await sendPublicLolSocialImage(req, res, url.pathname)) return;
         if (await sendPublicDashboardAsset(req, res, url.pathname)) return;
         if (url.pathname === "/" || isPublicDashboardAppRoute(url.pathname)) {
           const publicPathname = stripPublicUrlLocalePrefix(url.pathname);
           const legalDraftHeaders = publicPathname === "/privacy" || publicPathname === "/terms"
             ? { "X-Robots-Tag": "noindex, nofollow" }
             : undefined;
+          const seoMetadata = await resolvePublicSeoMetadata(url.pathname);
           await sendStaticFile(
             req,
             res,
             path.resolve(appConfig.paths.dashboardStatic, "index.html"),
             legalDraftHeaders,
             "/dashboard",
-            (html) => applyPublicSeoMetadata(html, publicSeoMetadataForPath(url.pathname))
+            (html) => applyPublicSeoMetadata(html, seoMetadata)
           );
           return;
         }

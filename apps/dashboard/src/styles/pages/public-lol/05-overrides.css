@@ -459,6 +459,43 @@
   white-space: nowrap !important;
 }
 
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-profile-actions > .public-profile-share-action {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: inherit !important;
+}
+
+.public-profile-share-button .yoro-button__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.public-profile-share-status {
+  position: absolute;
+  z-index: 3;
+  top: calc(100% + 6px);
+  left: 50%;
+  width: max-content;
+  max-width: min(280px, 80vw);
+  transform: translateX(-50%);
+  padding: 6px 9px;
+  border-radius: var(--yoro-radius-sm);
+  background: color-mix(in srgb, var(--yoro-color-text-strong) 92%, var(--yoro-color-primary));
+  color: var(--yoro-color-text-on-dark-strong);
+  box-shadow: var(--yoro-shadow-panel);
+  font-size: var(--yoro-font-size-xs);
+  white-space: normal;
+}
+
+.public-profile-share-status:empty {
+  display: none;
+}
+
 /* 공개 검색 X 버튼 및 연관검색 UX 정리 */
 .public-dashboard-shell .public-search-clear,
 .public-dashboard-shell .public-home-shared-clear.yoro-button,

@@ -212,7 +212,7 @@ test("공개 LoL 전적 API는 재시작 뒤 정상 snapshot을 먼저 반환한
     await handler(req, res);
 
     assert.equal(res.statusCode, 200);
-    assert.equal(loadedKey, "jp1:hideonbush#jp1");
+    assert.equal(loadedKey, "v2:jp1:hideonbush#jp1");
     assert.equal(JSON.parse(res.body).riotId, "HideOnBush#JP1");
   });
 });
@@ -258,8 +258,92 @@ test("공개 LoL 전적 API는 기존 JP snapshot 키를 안전하게 복원한�
     await handler(req, res);
 
     assert.equal(res.statusCode, 200);
-    assert.deepEqual(loadedKeys, ["jp1:legacy#jp1", "legacy#jp1"]);
+    assert.deepEqual(loadedKeys, ["v2:jp1:legacy#jp1", "jp1:legacy#jp1", "legacy#jp1"]);
     assert.equal(JSON.parse(res.body).riotId, "Legacy#JP1");
+  });
+});
+
+test("공개 LoL 전적 API는 같은 Riot ID를 선택한 플랫폼의 실제 소속으로 구분한다", async () => {
+  await withAuthConfig(async () => {
+    const accountRoutings = [];
+    const membershipRoutings = [];
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      actions: { async dispatchOne() {} },
+      sessions: new DashboardSessionStore(),
+      riot: {
+        isConfigured() {
+          return true;
+        },
+        routingStatus() {
+          return { configured: true, source: "runtime", accountRegion: "asia", lolPlatform: "jp1" };
+        },
+        async getAccountByRiotId(gameName, tagLine, routing) {
+          accountRoutings.push(routing);
+          return { puuid: "shared-account-puuid", gameName, tagLine };
+        },
+        async getSummonerByPuuid(puuid, routing) {
+          assert.equal(puuid, "shared-account-puuid");
+          membershipRoutings.push(routing);
+          return routing.lolPlatform === "jp1"
+            ? { puuid, id: "jp-summoner-id" }
+            : null;
+        },
+        async getRankedQueueStatsByPuuid() {
+          return {};
+        },
+        async getChampionMasteryTopByPuuid() {
+          return [];
+        },
+        async getRecentMatchIdsByPuuid() {
+          return [];
+        }
+      }
+    });
+
+    const jpReq = createRequest(
+      "GET",
+      "/api/lol/profile?riotId=SharedName%23TAG&platform=jp1",
+      undefined,
+      { origin: DASHBOARD_ORIGIN }
+    );
+    const jpRes = createResponse();
+    await handler(jpReq, jpRes);
+
+    const krReq = createRequest(
+      "GET",
+      "/api/lol/profile?riotId=SharedName%23TAG&platform=kr",
+      undefined,
+      { origin: DASHBOARD_ORIGIN }
+    );
+    const krRes = createResponse();
+    await handler(krReq, krRes);
+
+    const krSuggestionReq = createRequest(
+      "GET",
+      "/api/lol/suggestions?q=SharedName%23TAG&platform=kr",
+      undefined,
+      { origin: DASHBOARD_ORIGIN }
+    );
+    const krSuggestionRes = createResponse();
+    await handler(krSuggestionReq, krSuggestionRes);
+
+    assert.equal(jpRes.statusCode, 200, jpRes.body);
+    assert.equal(JSON.parse(jpRes.body).lolPlatform, "jp1");
+    assert.equal(krRes.statusCode, 404, krRes.body);
+    assert.equal(JSON.parse(krRes.body).code, "LOL_PROFILE_NOT_ON_PLATFORM");
+    assert.equal(krSuggestionRes.statusCode, 200, krSuggestionRes.body);
+    assert.deepEqual(JSON.parse(krSuggestionRes.body).suggestions, []);
+    assert.deepEqual(accountRoutings, [
+      { lolPlatform: "jp1", accountRegion: "asia" },
+      { lolPlatform: "kr", accountRegion: "asia" },
+      { lolPlatform: "kr", accountRegion: "asia" }
+    ]);
+    assert.deepEqual(membershipRoutings, [
+      { lolPlatform: "jp1", accountRegion: "asia" },
+      { lolPlatform: "kr", accountRegion: "asia" }
+    ]);
   });
 });
 

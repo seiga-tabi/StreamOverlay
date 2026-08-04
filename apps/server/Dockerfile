@@ -49,6 +49,9 @@ COPY apps/bridge/package.json ./apps/bridge/package.json
 COPY apps/server/package.json ./apps/server/package.json
 COPY apps/dashboard/package.json ./apps/dashboard/package.json
 COPY apps/overlay/package.json ./apps/overlay/package.json
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends fonts-noto-cjk \
+  && rm -rf /var/lib/apt/lists/*
 RUN npm ci --omit=dev --include-workspace-root=false --workspace @streamops/shared --workspace @streamops/server
 COPY --from=build /app/packages/shared/dist ./packages/shared/dist
 COPY --from=build /app/apps/server/dist ./apps/server/dist

@@ -485,15 +485,15 @@
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto auto auto auto minmax(0, 1fr) auto;
+  grid-template-rows: repeat(6, auto);
   align-content: start;
   align-items: center;
   justify-items: stretch;
   inline-size: 100%;
   min-inline-size: 0;
   min-block-size: 0;
-  aspect-ratio: 1 / 1.08;
-  gap: var(--yoro-space-2);
+  aspect-ratio: auto;
+  gap: var(--yoro-space-3);
   padding: var(--yoro-space-3);
   overflow: hidden;
   border: thin solid var(--yoro-color-border);
@@ -510,7 +510,7 @@
 
 .public-game-home__live-strip .public-home-live-card--preview {
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto auto auto auto minmax(0, 1fr) auto;
+  grid-template-rows: repeat(6, auto);
 }
 
 .public-game-home__live-strip .public-home-live-preview {
@@ -597,13 +597,13 @@
 
 .public-game-home__live-strip .public-home-live-primary-meta {
   grid-row: 4;
-  padding-block-start: var(--yoro-space-1);
+  padding-block-start: 0;
   color: var(--yoro-color-text-muted) !important;
 }
 
 .public-game-home__live-strip .public-home-live-secondary-meta {
   grid-row: 5;
-  padding-block-end: var(--yoro-space-1);
+  padding-block-end: 0;
   color: var(--yoro-color-text-muted) !important;
 }
 
@@ -616,7 +616,7 @@
   grid-column: 1;
   grid-row: 1;
   justify-self: start;
-  margin: 0 0 var(--yoro-space-1);
+  margin: 0;
 }
 
 .public-game-home__live-strip .public-home-live-card > .public-home-live-action {
@@ -627,7 +627,7 @@
   justify-content: center;
   inline-size: 100%;
   min-block-size: var(--yoro-size-touch-target);
-  margin: var(--yoro-space-1) 0 0;
+  margin: 0;
   padding-inline: var(--yoro-space-3);
   border: thin solid var(--public-home-accent);
   border-radius: var(--yoro-radius-md);

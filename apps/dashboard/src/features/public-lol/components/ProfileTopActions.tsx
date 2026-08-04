@@ -1,3 +1,4 @@
+import { type ReactNode } from "react";
 import { Button } from "../../../shared/ui/Button";
 import { ProfileLinkIcon, profileLinkPlatformClass } from "../../../components/ProfileLinkIcon";
 
@@ -28,15 +29,18 @@ export type ProfileTopActionsProps = {
   actions: ProfileTopActionsViewModel;
   onRefresh: () => void;
   onToggleFavorite: () => void;
+  shareAction?: ReactNode;
 };
 
 export function ProfileTopActions({
   actions,
   onRefresh,
   onToggleFavorite,
+  shareAction,
 }: ProfileTopActionsProps) {
   return (
     <div className="public-profile-actions">
+      {shareAction}
       <div className="public-refresh-stack">
         {actions.profileLinks.length ? (
           <span className="public-profile-link-icons" aria-label={actions.profileLinksLabel}>

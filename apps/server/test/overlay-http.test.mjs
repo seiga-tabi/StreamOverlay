@@ -79,6 +79,21 @@ function createResponse() {
   };
 }
 
+function createBinaryResponse() {
+  return {
+    statusCode: 0,
+    headers: {},
+    body: Buffer.alloc(0),
+    writeHead(statusCode, headers) {
+      this.statusCode = statusCode;
+      this.headers = headers;
+    },
+    end(chunk) {
+      this.body = chunk === undefined ? Buffer.alloc(0) : Buffer.from(chunk);
+    }
+  };
+}
+
 test("dashboard와 overlay runtime config는 동적 config endpoint에서 제공된다", async () => {
   const previousConfig = {
     publicBaseUrl: appConfig.publicBaseUrl,
@@ -257,6 +272,8 @@ test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => 
     assert.equal(res.headers.ETag, undefined);
     assert.match(res.body, /<title>LoL 소환사 전적 \| YORO\.gg<\/title>/);
     assert.match(res.body, /<link rel="canonical" href="https:\/\/yoro\.gg\/ko\/lol\/summoners\/jp\/%E3%81%9B%E3%81%84%E3%81%8C-sei">/);
+    assert.match(res.body, /<meta property="og:image" content="https:\/\/yoro\.gg\/images\/yorogg-og\.png"/);
+    assert.match(res.body, /<meta name="twitter:card" content="summary_large_image"/);
     const nonce = /script-src 'nonce-([^']+)'/.exec(res.headers["Content-Security-Policy"])?.[1];
     assert.ok(nonce);
     assert.match(res.headers["Content-Security-Policy"], /'strict-dynamic'/);
@@ -318,6 +335,135 @@ test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => 
     assert.equal(unknownPalworldRes.statusCode, 404);
     assert.match(unknownPalworldRes.headers["Content-Type"], /application\/json/);
     assert.doesNotMatch(unknownPalworldRes.body, /<!doctype html>/i);
+  } finally {
+    appConfig.paths.dashboardStatic = previousDashboardStatic;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("cache된 소환사 전적은 동적 SNS 메타데이터와 immutable 공유 이미지를 제공한다", async () => {
+  const previousDashboardStatic = appConfig.paths.dashboardStatic;
+  const dir = mkdtempSync(path.join(tmpdir(), "streamops-public-lol-social-"));
+  const fetchedAt = "2026-08-04T00:00:00.000Z";
+  let riotCalls = 0;
+  const profile = {
+    status: "ready",
+    riotId: "Faker#KR1",
+    gameName: "Faker",
+    tagLine: "KR1",
+    accountRegion: "asia",
+    lolPlatform: "kr",
+    rankedStats: {
+      queueType: "RANKED_SOLO_5x5",
+      tier: "CHALLENGER",
+      rank: "I",
+      leaguePoints: 1234,
+      wins: 20,
+      losses: 10,
+      winRate: 67,
+      fetchedAt,
+    },
+    topChampions: [],
+    recentMatches: [{
+      matchId: "KR_1",
+      result: "win",
+      kills: 10,
+      deaths: 2,
+      assists: 8,
+      items: [],
+      summonerSpells: [],
+      runes: [],
+      teams: [],
+    }],
+    liveGame: { isLive: false, status: "not_found", participants: [], fetchedAt },
+    recentMatchStart: 0,
+    hasMoreRecentMatches: false,
+    summary: {
+      recentGames: 10,
+      recentWins: 7,
+      recentWinRate: 70,
+      averageKda: 4.25,
+      totalKills: 10,
+      totalDeaths: 2,
+      totalAssists: 8,
+    },
+    championPerformance: [],
+    rolePerformance: [],
+    fetchedAt,
+  };
+  try {
+    mkdirSync(path.join(dir, "images"), { recursive: true });
+    writeFileSync(path.join(dir, "images", "yorogg-og.png"), Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+    writeFileSync(
+      path.join(dir, "index.html"),
+      "<!doctype html><html lang=\"ko\"><head><meta name=\"description\" content=\"home\"><link rel=\"canonical\" href=\"https://yoro.gg/\"><meta property=\"og:title\" content=\"home\"><meta property=\"og:description\" content=\"home\"><meta property=\"og:url\" content=\"https://yoro.gg/\"><meta name=\"twitter:title\" content=\"home\"><meta name=\"twitter:description\" content=\"home\"><script nonce=\"__STREAMOPS_CSP_NONCE__\" src=\"/dashboard/config.js\"></script><title>YORO.gg</title></head><body><div id=\"root\"></div></body></html>",
+    );
+    appConfig.paths.dashboardStatic = dir;
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      actions: { async dispatchOne() {} },
+      riot: new Proxy({}, {
+        get() {
+          riotCalls += 1;
+          throw new Error("crawler 요청에서 Riot API를 사용하면 안 됩니다.");
+        }
+      }),
+      publicLolSnapshotStore: {
+        async load() { return { puuid: "puuid", fetchedAt, payload: profile }; },
+        async save() {},
+      },
+    });
+
+    const pageRes = createResponse();
+    await handler(createRequest("GET", "/ko/lol/summoners/kr/Faker-KR1"), pageRes);
+    assert.equal(pageRes.statusCode, 200);
+    assert.match(pageRes.body, /<title>Faker#KR1 · Challenger 1,234 LP \| YORO\.gg<\/title>/);
+    assert.match(pageRes.body, /<meta property="og:type" content="profile"/);
+    assert.match(pageRes.body, /<meta property="og:site_name" content="YORO\.gg"/);
+    assert.match(pageRes.body, /<meta property="og:locale" content="ko_KR"/);
+    assert.match(pageRes.body, /<meta property="og:locale:alternate" content="ja_JP"/);
+    assert.match(pageRes.body, /<meta property="og:image:width" content="1200"/);
+    assert.match(pageRes.body, /<meta property="og:image:height" content="630"/);
+    assert.match(pageRes.body, /<meta property="og:image:type" content="image\/png"/);
+    assert.match(pageRes.body, /<meta property="og:image:alt" content="Faker#KR1의 League of Legends 전적 카드"/);
+    assert.match(pageRes.body, /<meta name="twitter:card" content="summary_large_image"/);
+    assert.match(pageRes.body, /<meta name="twitter:image" content="https:\/\/yoro\.gg\/social\/lol\/ko\/kr\/Faker-KR1\/[a-f0-9]{16}\.png"/);
+    assert.match(pageRes.body, /<link rel="canonical" href="https:\/\/yoro\.gg\/ko\/lol\/summoners\/kr\/Faker-KR1"/);
+    assert.match(pageRes.body, /최근 10게임 · 7승 3패 · 승률 70%/);
+    const imageUrl = /<meta property="og:image" content="https:\/\/yoro\.gg([^\"]+)"/.exec(pageRes.body)?.[1];
+    assert.ok(imageUrl);
+
+    const japanesePageRes = createResponse();
+    await handler(createRequest("GET", "/ja/lol/summoners/kr/Faker-KR1"), japanesePageRes);
+    assert.equal(japanesePageRes.statusCode, 200);
+    assert.match(japanesePageRes.body, /<title>Faker#KR1 · Challenger 1,234 LP \| YORO\.gg<\/title>/);
+    assert.match(japanesePageRes.body, /<meta property="og:locale" content="ja_JP"/);
+    assert.match(japanesePageRes.body, /直近10試合 · 7勝 3敗 · 勝率70%/);
+
+    const imageRes = createBinaryResponse();
+    await handler(createRequest("GET", imageUrl), imageRes);
+    assert.equal(imageRes.statusCode, 200);
+    assert.equal(imageRes.headers["Content-Type"], "image/png");
+    assert.equal(imageRes.headers["Cache-Control"], "public, max-age=31536000, immutable");
+    assert.match(imageRes.headers.ETag, /lol-social-[a-f0-9]{16}/);
+    assert.equal(imageRes.body.subarray(1, 4).toString("ascii"), "PNG");
+
+    const headRes = createBinaryResponse();
+    await handler(createRequest("HEAD", imageUrl), headRes);
+    assert.equal(headRes.statusCode, 200);
+    assert.equal(headRes.body.length, 0);
+    assert.equal(headRes.headers["Content-Length"], imageRes.headers["Content-Length"]);
+
+    const staleRevisionRes = createBinaryResponse();
+    await handler(createRequest("GET", imageUrl.replace(/[a-f0-9]{16}\.png$/u, `${"0".repeat(16)}.png`)), staleRevisionRes);
+    assert.equal(staleRevisionRes.statusCode, 200);
+    assert.equal(staleRevisionRes.headers["Cache-Control"], "no-store");
+
+    const notModifiedRes = createBinaryResponse();
+    await handler(createRequest("GET", imageUrl, undefined, { "if-none-match": imageRes.headers.ETag }), notModifiedRes);
+    assert.equal(notModifiedRes.statusCode, 304);
+    assert.equal(riotCalls, 0);
   } finally {
     appConfig.paths.dashboardStatic = previousDashboardStatic;
     rmSync(dir, { recursive: true, force: true });

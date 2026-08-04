@@ -60,6 +60,7 @@ export type ProfileTopPanelProps = {
   favoriteAriaLabel: string;
   favoriteActionLabel: string;
   streamerSpotlight?: ProfileTopStreamerSpotlight;
+  shareAction?: ReactNode;
   text: ProfileTopPanelText;
   onRefresh: () => void;
   onOpenParticipation?: () => void;
@@ -126,6 +127,7 @@ export function ProfileTopPanel({
   refreshDisabled,
   refreshTitle,
   seasonBadges,
+  shareAction,
   streamerSpotlight,
   tagLine,
   text,
@@ -151,6 +153,7 @@ export function ProfileTopPanel({
       }}
       onRefresh={onRefresh}
       onToggleFavorite={onToggleFavorite}
+      shareAction={shareAction}
     />
   );
 

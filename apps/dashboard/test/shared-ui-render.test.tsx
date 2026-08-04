@@ -10,6 +10,7 @@ import { PublicSiteFooter } from "../src/features/public-lol/components/PublicSi
 import { ProfileMetricStrip } from "../src/features/public-lol/components/ProfileMetricStrip";
 import { ProfileTopIdentity } from "../src/features/public-lol/components/ProfileTopIdentity";
 import { ProfileTopPanel } from "../src/features/public-lol/components/ProfileTopPanel";
+import { PublicProfileShareButton } from "../src/features/public-lol/components/PublicProfileShareButton";
 import { MatchTeamCompare } from "../src/features/public-lol/components/MatchTeamCompare";
 import { RecentMatchBuildRuneBoard } from "../src/features/public-lol/components/RecentMatchBuildRuneBoard";
 import { RecentMatchRow } from "../src/features/public-lol/components/RecentMatchRow";
@@ -476,9 +477,10 @@ test("LoL 홈은 공통 LIVE rail로 기존 스트리머 카드와 전체 보기
     "utf8",
   );
   assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-rail\s*\{[\s\S]*?grid-auto-columns:\s*17\.5rem/u);
-  assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-card\s*\{[\s\S]*?aspect-ratio:\s*1\s*\/\s*1\.08/u);
-  assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-card\s*\{[\s\S]*?gap:\s*var\(--yoro-space-2\)/u);
-  assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-card > \.public-home-live-action\s*\{[\s\S]*?margin:\s*var\(--yoro-space-1\) 0 0/u);
+  assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-card\s*\{[\s\S]*?grid-template-rows:\s*repeat\(6,\s*auto\)/u);
+  assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-card\s*\{[\s\S]*?aspect-ratio:\s*auto/u);
+  assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-card\s*\{[\s\S]*?gap:\s*var\(--yoro-space-3\)/u);
+  assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-card > \.public-home-live-action\s*\{[\s\S]*?margin:\s*0/u);
   assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-pill\.yoro-status\s*\{[\s\S]*?position:\s*static;[\s\S]*?grid-row:\s*1/u);
   assert.match(homeCss, /\.public-game-home__hero:has\(\.public-suggestion-panel\)\s*\{[\s\S]*?z-index:\s*var\(--yoro-z-dropdown\)/u);
   assert.match(homeCss, /@media \(max-width:\s*72rem\)\s*\{[\s\S]*?\.public-game-home__hero-grid:not\(\.public-game-home__hero-grid--centered\)/u);
@@ -534,6 +536,16 @@ test("Profile 상단은 중복 검색을 제거하고 스트리머 CTA 우선순
       refreshDisabled={false}
       refreshTitle="전적 갱신"
       seasonBadges={<div>시즌</div>}
+      shareAction={(
+        <PublicProfileShareButton
+          copiedLabel="링크를 복사했습니다."
+          copyFailedLabel="링크를 복사하지 못했습니다."
+          label="전적 공유"
+          text="YORO.gg에서 전적을 확인하세요."
+          title="YORO#JP1 전적 | YORO.gg"
+          url="https://yoro.gg/ko/lol/summoners/jp/YORO-JP1"
+        />
+      )}
       streamerSpotlight={{
         isLive: true,
         eyebrow: "스트리머 전적",
@@ -578,6 +590,9 @@ test("Profile 상단은 중복 검색을 제거하고 스트리머 CTA 우선순
   assert.doesNotMatch(html, /public-ranking-shared-toolbar/u);
   assert.match(html, /public-profile-streamer-spotlight__metrics/u);
   assert.match(html, />League of Legends</u);
+  assert.match(html, />전적 공유</u);
+  assert.match(html, /data-share-url="https:\/\/yoro\.gg\/ko\/lol\/summoners\/jp\/YORO-JP1"/u);
+  assert.doesNotMatch(html, /token=|\?/u);
   assert.match(html, />Platinum I</u);
   assert.match(html, />참여 대기열 열림</u);
   assert.doesNotMatch(html, /public-profile-rank-summary|public-profile-details-toggle/u);
