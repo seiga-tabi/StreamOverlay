@@ -28,6 +28,7 @@
 
 .participation-management-create,
 .participation-management-session,
+.participation-management-current,
 .participation-management-queue {
   min-inline-size: 0;
   padding: var(--space-6);
@@ -40,6 +41,16 @@
 .participation-management-session {
   display: grid;
   gap: var(--space-6);
+}
+
+.participation-management-create > header {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.participation-management-create > header small {
+  color: var(--muted);
+  font-weight: 700;
 }
 
 .participation-management-create h2,
@@ -92,7 +103,8 @@
 }
 
 .participation-management-page button,
-.participation-management-page a {
+.participation-management-page a,
+.participation-management-page summary {
   min-block-size: var(--yoro-size-touch-target);
   padding-inline: var(--space-4);
   border: 1px solid var(--line-strong);
@@ -109,9 +121,23 @@
   cursor: pointer;
 }
 
+.participation-management-page summary {
+  list-style: none;
+}
+
+.participation-management-page summary::-webkit-details-marker {
+  display: none;
+}
+
 .participation-management-create > button {
   justify-self: start;
   border-color: var(--brand);
+  background: var(--brand-strong);
+}
+
+.participation-management-page .is-primary {
+  border-color: var(--brand);
+  color: var(--on-brand, var(--text-strong));
   background: var(--brand-strong);
 }
 
@@ -151,11 +177,16 @@
 }
 
 .participation-management-session > header,
+.participation-management-current > header,
 .participation-management-queue > header {
   display: flex;
   gap: var(--space-4);
   align-items: flex-start;
   justify-content: space-between;
+}
+
+.participation-management-current > header h2 {
+  margin: 0;
 }
 
 .participation-management-session > header > strong,
@@ -213,10 +244,156 @@
 }
 
 .participation-management-session-actions,
+.participation-management-session-toolbar,
 .participation-management-entry-actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
+}
+
+.participation-management-next-action {
+  min-inline-size: 0;
+  padding: var(--space-5);
+  border: 1px solid var(--brand);
+  border-radius: var(--radius-lg);
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  justify-content: space-between;
+  background: var(--brand-soft, var(--surface-muted));
+}
+
+.participation-management-next-action div {
+  min-inline-size: 0;
+}
+
+.participation-management-next-action strong {
+  color: var(--text-strong);
+}
+
+.participation-management-next-action p {
+  margin: var(--space-1) 0 0;
+  color: var(--muted);
+}
+
+.participation-management-session-toolbar {
+  align-items: flex-start;
+}
+
+.participation-management-more,
+.participation-management-row-more {
+  position: relative;
+}
+
+.participation-management-more > div,
+.participation-management-row-more > div {
+  z-index: 2;
+  min-inline-size: 10rem;
+  padding: var(--space-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  display: grid;
+  gap: var(--space-2);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-lg);
+}
+
+.participation-management-more > div {
+  position: absolute;
+  inset-block-start: calc(100% + var(--space-2));
+  inset-inline-end: 0;
+}
+
+.participation-management-public-link,
+.participation-management-advanced,
+.participation-management-history {
+  min-inline-size: 0;
+  border-block-start: 1px solid var(--line);
+  padding-block-start: var(--space-3);
+}
+
+.participation-management-public-link > summary,
+.participation-management-advanced > summary,
+.participation-management-history > summary {
+  inline-size: fit-content;
+  min-block-size: var(--yoro-size-touch-target);
+}
+
+.participation-management-public-link[open] > summary,
+.participation-management-advanced[open] > summary,
+.participation-management-history[open] > summary {
+  margin-block-end: var(--space-4);
+}
+
+.participation-management-current {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.participation-management-participant {
+  min-inline-size: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr) max-content max-content;
+  gap: var(--space-4);
+  align-items: center;
+  background: var(--surface-muted);
+}
+
+.participation-management-participant + .participation-management-participant {
+  margin-block-start: var(--space-2);
+}
+
+.participation-management-position {
+  color: var(--brand);
+  font-size: 1.125rem;
+  font-weight: 900;
+}
+
+.participation-management-participant-main {
+  min-inline-size: 0;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.participation-management-participant-main strong,
+.participation-management-participant-main span,
+.participation-management-participant-main small {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.participation-management-participant-main strong {
+  color: var(--text-strong);
+}
+
+.participation-management-participant-main span,
+.participation-management-participant-main small {
+  color: var(--muted);
+}
+
+.participation-management-group {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.participation-management-group h3 {
+  margin: 0;
+  color: var(--text-strong);
+  font-size: 1rem;
+}
+
+.participation-management-history > summary {
+  display: inline-flex;
+  gap: var(--space-2);
+}
+
+.participation-management-history > summary span {
+  color: var(--muted);
 }
 
 .participation-management-queue {
@@ -273,6 +450,7 @@
 @media (max-width: 48rem) {
   .participation-management-create,
   .participation-management-session,
+  .participation-management-current,
   .participation-management-queue {
     padding: var(--space-4);
   }
@@ -291,6 +469,7 @@
   }
 
   .participation-management-session > header,
+  .participation-management-current > header,
   .participation-management-queue > header,
   .participation-management-alert.is-error {
     align-items: stretch;
@@ -300,6 +479,32 @@
   .participation-management-session > header > strong,
   .participation-management-queue > header > span {
     align-self: flex-start;
+  }
+
+  .participation-management-next-action,
+  .participation-management-participant {
+    align-items: stretch;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .participation-management-next-action {
+    flex-direction: column;
+  }
+
+  .participation-management-next-action > button,
+  .participation-management-session-toolbar > *,
+  .participation-management-entry-actions > * {
+    inline-size: 100%;
+  }
+
+  .participation-management-session-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .participation-management-more > div {
+    position: static;
+    margin-block-start: var(--space-2);
   }
 }
 
