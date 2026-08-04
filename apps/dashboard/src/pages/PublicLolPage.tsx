@@ -19,6 +19,7 @@ import {
   peekPublicTwitchStatus,
   publicTwitchLoginUrl,
 } from "../features/public-twitch/api";
+import { safeTwitchStreamPreviewUrl } from "../features/public-twitch/stream-preview";
 import { isTwitchAccountOAuthReturn } from "../features/yoro-account/api";
 import { ProfileLinkIcon, profileLinkPlatformFromUrl, profileLinkPlatformClass } from "../components/ProfileLinkIcon";
 import { AppShell, AppShellHeader, AppShellMain, AppShellSidebar } from "../shared/ui/AppShell";
@@ -5790,6 +5791,10 @@ export function PublicLolPage({
         server: channel.riotTagLine ? `${channel.riotTagLine} Server` : "JP Server",
         avatarLabel: channel.twitchDisplayName.slice(0, 1),
         avatarUrl: assetUrl(channel.profileImageUrl),
+        previewLabel: locale === "ja"
+          ? `${channel.twitchDisplayName}の配信プレビュー`
+          : `${channel.twitchDisplayName} 방송 미리보기`,
+        previewUrl: safeTwitchStreamPreviewUrl(channel.thumbnailUrl),
         channelUrl: channel.channelUrl ?? (channel.twitchLogin ? `https://www.twitch.tv/${channel.twitchLogin}` : undefined),
         statusLabel: "LIVE",
         statusKo: "LIVE",

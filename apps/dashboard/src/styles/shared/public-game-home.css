@@ -458,7 +458,7 @@
 
 .public-game-home__live-strip .public-home-live-rail {
   display: grid;
-  grid-auto-columns: minmax(17rem, 1fr);
+  grid-auto-columns: minmax(25rem, 1fr);
   grid-auto-flow: column;
   grid-template-columns: none;
   gap: var(--yoro-space-3);
@@ -493,6 +493,60 @@
   box-shadow: var(--yoro-shadow-sm);
   text-align: start;
   scroll-snap-align: start;
+}
+
+.public-home-live-preview {
+  display: none;
+}
+
+.public-game-home__live-strip .public-home-live-card--preview {
+  grid-template-columns: 9rem minmax(0, 1fr) auto;
+  min-block-size: 7.25rem;
+}
+
+.public-game-home__live-strip .public-home-live-preview {
+  position: relative;
+  display: grid;
+  grid-column: 1;
+  grid-row: 1 / 4;
+  place-items: center;
+  inline-size: 9rem;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: thin solid var(--yoro-color-border-strong);
+  border-radius: var(--yoro-radius-sm);
+  background: var(--yoro-color-surface);
+}
+
+.public-game-home__live-strip :is(.public-home-live-preview-fallback, .public-home-live-preview-image) {
+  position: absolute;
+  inset: 0;
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.public-game-home__live-strip .public-home-live-preview-fallback {
+  display: grid;
+  place-items: center;
+  color: var(--yoro-color-text-strong);
+  font-size: var(--yoro-font-size-xl);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.public-game-home__live-strip .public-home-live-preview-fallback img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.public-game-home__live-strip .public-home-live-preview-image {
+  z-index: 1;
+  object-fit: cover;
+}
+
+.public-game-home__live-strip .public-home-live-card--preview > .public-home-live-avatar {
+  display: none;
 }
 
 .public-game-home__live-strip .public-home-live-avatar {
@@ -627,13 +681,21 @@
   }
 
   .public-game-home__live-strip .public-home-live-rail {
-    grid-auto-columns: minmax(16rem, 82vw);
+    grid-auto-columns: minmax(19rem, 86vw);
     scrollbar-width: none;
   }
 
   .public-game-home__live-strip .public-home-live-card {
     grid-template-columns: 3rem minmax(0, 1fr) auto;
     min-block-size: 6rem;
+  }
+
+  .public-game-home__live-strip .public-home-live-card--preview {
+    grid-template-columns: 7.25rem minmax(0, 1fr) auto;
+  }
+
+  .public-game-home__live-strip .public-home-live-preview {
+    inline-size: 7.25rem;
   }
 
   .public-game-home__live-strip .public-home-live-empty.yoro-empty-state {

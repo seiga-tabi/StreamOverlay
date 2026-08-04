@@ -20,6 +20,21 @@ import { PublicMobileMenuSheet } from "../src/shared/PublicMobileMenuSheet";
 import { PublicGameHeaderFrame } from "../src/shared/PublicGameChrome";
 import { DISCORD_SYMBOL_ICON_SRC } from "../src/shared/DiscordSymbolIcon";
 import { TWITCH_GLITCH_ICON_URL } from "../src/shared/TwitchGlitchIcon";
+import { safeTwitchStreamPreviewUrl } from "../src/features/public-twitch/stream-preview";
+
+test("Twitch 방송 미리보기는 공식 CDN의 16:9 썸네일만 허용한다", () => {
+  assert.equal(
+    safeTwitchStreamPreviewUrl("https://static-cdn.jtvnw.net/previews-ttv/live_user_yoro-{width}x{height}.jpg"),
+    "https://static-cdn.jtvnw.net/previews-ttv/live_user_yoro-640x360.jpg"
+  );
+  assert.equal(
+    safeTwitchStreamPreviewUrl("https://static-cdn.jtvnw.net/previews-ttv/live_user_yoro-%7Bwidth%7Dx%7Bheight%7D.jpg"),
+    "https://static-cdn.jtvnw.net/previews-ttv/live_user_yoro-640x360.jpg"
+  );
+  assert.equal(safeTwitchStreamPreviewUrl("http://static-cdn.jtvnw.net/previews-ttv/live_user_yoro.jpg"), undefined);
+  assert.equal(safeTwitchStreamPreviewUrl("https://evil.example/previews-ttv/live_user_yoro.jpg"), undefined);
+  assert.equal(safeTwitchStreamPreviewUrl("https://static-cdn.jtvnw.net/jtv_user_pictures/avatar.png"), undefined);
+});
 
 test("Shared Button loading 상태가 중복 클릭 방지와 접근성 속성을 함께 출력한다", () => {
   const html = renderToStaticMarkup(<Button loading loadingLabel="검색 중">검색</Button>);
@@ -432,6 +447,8 @@ test("LoL 홈은 공통 LIVE rail로 기존 스트리머 카드와 전체 보기
         name: "LoL Streamer",
         primaryMeta: "League of Legends",
         avatarLabel: "L",
+        previewLabel: "LoL Streamer 방송 미리보기",
+        previewUrl: "https://static-cdn.jtvnw.net/previews-ttv/live_user_lol_streamer-640x360.jpg",
         channelUrl: "https://www.twitch.tv/lol_streamer",
         statusLabel: "LIVE",
       }]}
@@ -452,6 +469,9 @@ test("LoL 홈은 공통 LIVE rail로 기존 스트리머 카드와 전체 보기
   assert.match(html, /public-game-home__eyebrow[\s\S]*전적 검색/u);
   assert.match(html, /<h1 id="public-lol-home-title"[\s\S]*YORO\.gg<\/h1>/u);
   assert.match(html, /LoL Streamer/u);
+  assert.match(html, /public-home-live-card--preview/u);
+  assert.match(html, /alt="LoL Streamer 방송 미리보기"/u);
+  assert.match(html, /live_user_lol_streamer-640x360\.jpg/u);
   assert.match(html, /League of Legends/u);
   assert.match(html, /href="https:\/\/www\.twitch\.tv\/lol_streamer"/u);
   assert.match(html, /전체 보기/u);

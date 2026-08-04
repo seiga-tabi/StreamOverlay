@@ -29,6 +29,8 @@ export type PublicLiveStreamerCard = {
   server?: string;
   avatarLabel: string;
   avatarUrl?: string;
+  previewLabel?: string;
+  previewUrl?: string;
   channelUrl?: string;
   statusLabel: string;
   statusKo?: string;
@@ -184,8 +186,26 @@ export function PublicLiveStreamerRail({
             {state === "login-required" && onLogin && loginAction ? <EmptyStateActions><Button size="sm" onClick={onLogin} data-ko={loginAction.ko} data-ja={loginAction.ja}>{loginAction.label}</Button></EmptyStateActions> : null}
           </EmptyState>
         ) : streamers.length > 0 ? streamers.map((streamer) => (
-          <article className="public-home-live-card" key={streamer.id}>
+          <article className={`public-home-live-card${streamer.previewUrl ? " public-home-live-card--preview" : ""}`} key={streamer.id}>
             <StatusPill className="public-home-live-pill" size="sm" tone="live">{streamer.statusLabel}</StatusPill>
+            {streamer.previewUrl ? (
+              <span className="public-home-live-preview">
+                <span className="public-home-live-preview-fallback" aria-hidden="true">
+                  {streamer.avatarUrl ? <img src={streamer.avatarUrl} alt="" /> : streamer.avatarLabel}
+                </span>
+                <img
+                  className="public-home-live-preview-image"
+                  src={streamer.previewUrl}
+                  alt={streamer.previewLabel ?? `${streamer.name} 방송 미리보기`}
+                  loading="lazy"
+                  decoding="async"
+                  referrerPolicy="no-referrer"
+                  onError={(event) => {
+                    event.currentTarget.hidden = true;
+                  }}
+                />
+              </span>
+            ) : null}
             <span className="public-home-live-avatar">
               {streamer.avatarUrl ? <img src={streamer.avatarUrl} alt="" /> : <span aria-hidden="true">{streamer.avatarLabel}</span>}
             </span>
