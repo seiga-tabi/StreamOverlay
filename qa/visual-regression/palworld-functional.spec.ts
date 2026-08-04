@@ -1823,22 +1823,27 @@ test("Twitch 팔로우 API 오류가 발생해도 Palworld 홈 검색은 계속 
   await search.fill("펭킹");
   const option = page.getByTestId("hero-search").getByRole("option", { name: /펭킹/u });
   await expect(option).toBeVisible();
-  if ((page.viewportSize()?.width ?? 1440) <= 600) {
-    const optionReceivesPointer = await option.evaluate((element) => {
-      const hero = element.closest(".public-game-home__hero, .palworld-hero");
-      if (!hero) return false;
-      const optionRect = element.getBoundingClientRect();
-      const heroRect = hero.getBoundingClientRect();
-      const x = optionRect.left + (optionRect.width / 2);
-      const y = Math.min(
-        optionRect.bottom - 2,
-        Math.max(optionRect.top + 2, heroRect.bottom + 8),
-      );
-      const hit = document.elementFromPoint(x, y);
-      return hit !== null && element.contains(hit);
-    });
-    expect(optionReceivesPointer, "Hero 경계 밖의 모바일 검색 제안을 터치할 수 있어야 합니다.").toBe(true);
-  }
+  const autocompleteLayer = await option.evaluate((element) => {
+    const hero = element.closest<HTMLElement>(".public-game-home__hero, .palworld-hero");
+    const autocomplete = element.closest<HTMLElement>(".palworld-autocomplete");
+    if (!hero || !autocomplete) return { hitInsideOption: false, heroZIndex: 0, panelZIndex: 0 };
+    const optionRect = element.getBoundingClientRect();
+    const heroRect = hero.getBoundingClientRect();
+    const x = optionRect.left + (optionRect.width / 2);
+    const y = Math.min(
+      optionRect.bottom - 2,
+      Math.max(optionRect.top + 2, heroRect.bottom + 8),
+    );
+    const hit = document.elementFromPoint(x, y);
+    return {
+      hitInsideOption: hit !== null && element.contains(hit),
+      heroZIndex: Number(getComputedStyle(hero).zIndex),
+      panelZIndex: Number(getComputedStyle(autocomplete).zIndex),
+    };
+  });
+  expect(autocompleteLayer.heroZIndex).toBeGreaterThanOrEqual(30);
+  expect(autocompleteLayer.panelZIndex).toBeGreaterThanOrEqual(30);
+  expect(autocompleteLayer.hitInsideOption, "Palworld 홈 자동완성이 다른 홈 콘텐츠보다 위에서 포인터 입력을 받아야 합니다.").toBe(true);
 });
 
 test("통합 검색 자동완성은 오류를 빈 결과와 구분하고 키보드로 선택할 수 있다", async ({ page }) => {

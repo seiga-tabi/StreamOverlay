@@ -28,7 +28,8 @@
   color: var(--yoro-color-text-on-dark);
 }
 
-.public-game-home__hero:has(.public-suggestion-panel) {
+.public-game-home__hero:has(.public-suggestion-panel),
+.public-game-home__hero:has(.palworld-autocomplete) {
   z-index: var(--yoro-z-dropdown);
 }
 

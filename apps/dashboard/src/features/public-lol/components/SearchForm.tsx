@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import type { LolPlatformId, LolRankedStats } from "@streamops/shared";
 import { Button } from "../../../shared/ui/Button";
 import { FormControl, FormField, FormLabel, Input } from "../../../shared/ui/Form";
@@ -18,6 +18,7 @@ export type SearchFormSuggestion = {
   source: string;
   profileIconUrl?: string;
   rankedStats?: LolRankedStats;
+  lolPlatform?: string;
 };
 
 export type SearchFormLocalizedText = {
@@ -83,6 +84,17 @@ function suggestionTierLabel(stats: LolRankedStats | undefined, fallbackLabel: s
   return `${tierLabel}${stats.rank ? ` ${stats.rank}` : ""}`.trim();
 }
 
+function uniquePanelSuggestions<TSuggestion extends SearchFormSuggestion>(items: readonly TSuggestion[]): TSuggestion[] {
+  const unique = new Map<string, TSuggestion>();
+  for (const item of items) {
+    const platform = item.lolPlatform?.trim().toLocaleLowerCase() ?? "";
+    const riotId = `${item.gameName.trim()}#${item.tagLine.trim()}`.normalize("NFKC").toLocaleLowerCase();
+    const key = `${platform}:${riotId}`;
+    if (!unique.has(key)) unique.set(key, item);
+  }
+  return [...unique.values()];
+}
+
 export function SearchForm<TSuggestion extends SearchFormSuggestion>({
   query,
   loading,
@@ -118,18 +130,21 @@ export function SearchForm<TSuggestion extends SearchFormSuggestion>({
         ja: "Riot ID入力",
       }
     : text.searchPlaceholder;
-  const hasPanelContent = suggestions.length > 0 || recentSearches.length > 0 || favorites.length > 0;
-  const fallbackPanelTab: SearchFormPanelTab = suggestions.length > 0
+  const uniqueSuggestions = useMemo(() => uniquePanelSuggestions(suggestions), [suggestions]);
+  const uniqueRecentSearches = useMemo(() => uniquePanelSuggestions(recentSearches), [recentSearches]);
+  const uniqueFavorites = useMemo(() => uniquePanelSuggestions(favorites), [favorites]);
+  const hasPanelContent = uniqueSuggestions.length > 0 || uniqueRecentSearches.length > 0 || uniqueFavorites.length > 0;
+  const fallbackPanelTab: SearchFormPanelTab = uniqueSuggestions.length > 0
     ? "summoners"
-    : recentSearches.length > 0
+    : uniqueRecentSearches.length > 0
       ? "recent"
       : "favorites";
-  const resolvedPanelTab = activePanelTab === "summoners" && suggestions.length === 0 ? fallbackPanelTab : activePanelTab;
+  const resolvedPanelTab = activePanelTab === "summoners" && uniqueSuggestions.length === 0 ? fallbackPanelTab : activePanelTab;
   const activePanelItems = resolvedPanelTab === "summoners"
-    ? suggestions
+    ? uniqueSuggestions
     : resolvedPanelTab === "recent"
-      ? recentSearches
-      : favorites;
+      ? uniqueRecentSearches
+      : uniqueFavorites;
   const activePanelLabel = resolvedPanelTab === "summoners"
     ? text.summonerResults
     : resolvedPanelTab === "recent"
@@ -138,9 +153,9 @@ export function SearchForm<TSuggestion extends SearchFormSuggestion>({
   const activeEmptyText = resolvedPanelTab === "favorites" ? text.noFavorites : text.noRecentSearches;
   const panelRequested = Boolean(panelRequest && activePanelTab === panelRequest.tab);
   const panelTabs: Array<{ key: SearchFormPanelTab; label: SearchFormLocalizedText; count: number }> = [
-    ...(suggestions.length > 0 ? [{ key: "summoners" as const, label: text.summonerResults, count: suggestions.length }] : []),
-    { key: "recent", label: text.recentSearches, count: recentSearches.length },
-    { key: "favorites", label: text.favorites, count: favorites.length }
+    ...(uniqueSuggestions.length > 0 ? [{ key: "summoners" as const, label: text.summonerResults, count: uniqueSuggestions.length }] : []),
+    { key: "recent", label: text.recentSearches, count: uniqueRecentSearches.length },
+    { key: "favorites", label: text.favorites, count: uniqueFavorites.length }
   ];
   const selectedPlatform = platformOptions.find((option) => option.id === platform) ?? platformOptions[0];
 
@@ -160,7 +175,7 @@ export function SearchForm<TSuggestion extends SearchFormSuggestion>({
   function handleQueryFocus(): void {
     setServerMenuOpen(false);
     if (!hasPanelContent) return;
-    if (!hasQuery) setActivePanelTab(recentSearches.length > 0 ? "recent" : "favorites");
+    if (!hasQuery) setActivePanelTab(uniqueRecentSearches.length > 0 ? "recent" : "favorites");
     setSuggestionsOpen(true);
   }
 
@@ -225,7 +240,7 @@ export function SearchForm<TSuggestion extends SearchFormSuggestion>({
       <button
         type="button"
         role="option"
-        key={`${source}:${riotId}`}
+        key={`${source}:${suggestion.lolPlatform ?? platform}:${riotId}`}
         aria-label={`${riotId} ${sourceLabel}`}
         title={sourceLabel}
         onClick={() => handlePickSuggestion(suggestion)}
@@ -425,7 +440,7 @@ export function SearchForm<TSuggestion extends SearchFormSuggestion>({
             ))}
           </div>
           <div className="public-suggestion-title"  >{activePanelLabel.label}</div>
-          <div className="public-suggestion-list" role="listbox" aria-label={text.relatedSummoners}>
+          <div key={resolvedPanelTab} className="public-suggestion-list" role="listbox" aria-label={text.relatedSummoners}>
             {activePanelItems.length > 0 ? (
               activePanelItems.map((suggestion) => renderSuggestionButton(suggestion, resolvedPanelTab))
             ) : (

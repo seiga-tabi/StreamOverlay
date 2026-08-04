@@ -276,6 +276,11 @@ test("모바일 통합 메뉴는 게임·언어·계정 로그인을 중첩 팝�
     css,
     /\.public-bottom-sheet\[data-sheet-state="open"\] \.yoro-modal__dialog\s*\{[\s\S]*?transform:\s*translate3d\(0,\s*0,\s*0\)/u,
   );
+  assert.match(
+    css,
+    /z-index:\s*calc\([\s\S]*?var\(--yoro-z-toast\)[\s\S]*?var\(--yoro-z-toast\)[\s\S]*?var\(--yoro-z-dropdown\)[\s\S]*?\)/u,
+  );
+  assert.match(css, /isolation:\s*isolate/u);
   assert.doesNotMatch(
     css,
     /\.public-bottom-sheet\[data-sheet-state="open"\] \.public-bottom-sheet__surface/u,
@@ -482,7 +487,7 @@ test("LoL 홈은 공통 LIVE rail로 기존 스트리머 카드와 전체 보기
   assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-card\s*\{[\s\S]*?gap:\s*var\(--yoro-space-3\)/u);
   assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-card > \.public-home-live-action\s*\{[\s\S]*?margin:\s*0/u);
   assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-pill\.yoro-status\s*\{[\s\S]*?position:\s*static;[\s\S]*?grid-row:\s*1/u);
-  assert.match(homeCss, /\.public-game-home__hero:has\(\.public-suggestion-panel\)\s*\{[\s\S]*?z-index:\s*var\(--yoro-z-dropdown\)/u);
+  assert.match(homeCss, /\.public-game-home__hero:has\(\.public-suggestion-panel\),\s*\.public-game-home__hero:has\(\.palworld-autocomplete\)\s*\{[\s\S]*?z-index:\s*var\(--yoro-z-dropdown\)/u);
   assert.match(homeCss, /@media \(max-width:\s*72rem\)\s*\{[\s\S]*?\.public-game-home__hero-grid:not\(\.public-game-home__hero-grid--centered\)/u);
   assert.ok(
     html.indexOf("public-game-home__hero") < html.indexOf("public-game-home__live-strip")

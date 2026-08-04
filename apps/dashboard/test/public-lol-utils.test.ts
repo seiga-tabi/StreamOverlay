@@ -133,6 +133,22 @@ test("최근 검색과 즐겨찾기 저장값을 정규화하고 제한한다", 
   assert.deepEqual(recent[0] && { gameName: recent[0].gameName, tagLine: recent[0].tagLine }, { gameName: "user0", tagLine: "JP1" });
 });
 
+test("최근 검색과 즐겨찾기 저장값의 동일 서버 Riot ID 중복을 읽을 때 제거한다", () => {
+  const raw = JSON.stringify([
+    { gameName: " せいが ", tagLine: " sei ", lolPlatform: "jp1" },
+    { gameName: "せいが", tagLine: "SEI", lolPlatform: "JP1" },
+    { gameName: "せいが", tagLine: "SEI", lolPlatform: "kr" },
+  ]);
+
+  const recent = parseRecentSearches(raw);
+  const favorites = parseFavorites(raw);
+
+  assert.equal(recent.length, 2);
+  assert.equal(favorites.length, 2);
+  assert.deepEqual(recent.map((item) => item.lolPlatform), ["jp1", "kr"]);
+  assert.deepEqual(favorites.map((item) => item.lolPlatform), ["jp1", "kr"]);
+});
+
 function match(partial: Partial<PublicLolRecentMatch>): PublicLolRecentMatch {
   return {
     matchId: partial.matchId ?? "match",

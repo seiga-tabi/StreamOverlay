@@ -8,9 +8,22 @@ const THEME_STORAGE_KEY = "loltrace.theme";
 const MAX_RECENT_SEARCHES = 8;
 const MAX_FAVORITES = 24;
 
+function dedupeStoredSuggestions<T extends SearchSuggestion>(items: T[], limit: number): T[] {
+  const seen = new Set<string>();
+  const unique: T[] = [];
+  for (const item of items) {
+    const key = normalizeSuggestionKey(item);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(item);
+    if (unique.length >= limit) break;
+  }
+  return unique;
+}
+
 export function parseRecentSearches(raw: string | null): SearchSuggestion[] {
   const parsed = JSON.parse(raw ?? "[]") as Array<Partial<SearchSuggestion>>;
-  return parsed
+  const normalized = parsed
     .map((item) => ({
       gameName: typeof item.gameName === "string" ? item.gameName.trim() : "",
       tagLine: typeof item.tagLine === "string" ? normalizedTagLine(item.tagLine) : "JP1",
@@ -21,8 +34,8 @@ export function parseRecentSearches(raw: string | null): SearchSuggestion[] {
       rankedStats: item.rankedStats && typeof item.rankedStats === "object" ? item.rankedStats as LolRankedStats : undefined,
       lastSeenAt: typeof item.lastSeenAt === "string" ? item.lastSeenAt : undefined
     }))
-    .filter((item) => item.gameName && item.tagLine)
-    .slice(0, MAX_RECENT_SEARCHES);
+    .filter((item) => item.gameName && item.tagLine);
+  return dedupeStoredSuggestions(normalized, MAX_RECENT_SEARCHES);
 }
 
 export function readRecentSearches(): SearchSuggestion[] {
@@ -70,7 +83,7 @@ export function saveStoredTheme(theme: PublicTheme): void {
 
 export function parseFavorites(raw: string | null): PublicFavorite[] {
   const parsed = JSON.parse(raw ?? "[]") as Array<Partial<PublicFavorite>>;
-  return parsed
+  const normalized = parsed
     .map((item) => ({
       gameName: typeof item.gameName === "string" ? item.gameName.trim() : "",
       tagLine: typeof item.tagLine === "string" ? normalizedTagLine(item.tagLine) : "JP1",
@@ -85,8 +98,8 @@ export function parseFavorites(raw: string | null): PublicFavorite[] {
       recentWinRate: typeof item.recentWinRate === "number" ? item.recentWinRate : undefined,
       averageKda: typeof item.averageKda === "number" ? item.averageKda : undefined
     }))
-    .filter((item) => item.gameName && item.tagLine)
-    .slice(0, MAX_FAVORITES);
+    .filter((item) => item.gameName && item.tagLine);
+  return dedupeStoredSuggestions(normalized, MAX_FAVORITES);
 }
 
 export function readFavorites(): PublicFavorite[] {
@@ -99,7 +112,10 @@ export function readFavorites(): PublicFavorite[] {
 
 export function writeFavorites(favorites: PublicFavorite[]): void {
   try {
-    window.localStorage.setItem(FAVORITE_STORAGE_KEY, JSON.stringify(favorites.slice(0, MAX_FAVORITES)));
+    window.localStorage.setItem(
+      FAVORITE_STORAGE_KEY,
+      JSON.stringify(dedupeStoredSuggestions(favorites, MAX_FAVORITES)),
+    );
   } catch {
     // 즐겨찾기 저장 실패는 전적 화면 사용을 막지 않습니다.
   }

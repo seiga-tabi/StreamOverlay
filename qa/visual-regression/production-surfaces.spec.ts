@@ -263,6 +263,42 @@ test("메인 검색바는 서버 목록을 열고 선택한 플랫폼 색상과 
   await expect(page.getByText("표시할 데이터가 없습니다.", { exact: true })).toHaveCount(0);
 });
 
+test("최근 검색과 즐겨찾기를 반복 전환해도 동일 소환사는 한 번만 표시한다", async ({ page }) => {
+  await page.addInitScript(() => {
+    const duplicate = {
+      gameName: "せいが",
+      tagLine: "SEI",
+      source: "recent",
+      lolPlatform: "jp1",
+    };
+    window.localStorage.setItem("loltrace.recent.jp", JSON.stringify([
+      duplicate,
+      { ...duplicate, gameName: " せいが ", tagLine: "sei" },
+    ]));
+    window.localStorage.setItem("loltrace.favorites.jp", JSON.stringify([
+      duplicate,
+      { ...duplicate, tagLine: "sei" },
+    ]));
+  });
+  await page.goto("/ko/");
+
+  await page.getByRole("searchbox", { name: "Riot ID 입력" }).focus();
+  const panel = page.locator(".public-suggestion-panel");
+  const recentTab = panel.getByRole("tab", { name: /최근 검색/u });
+  const favoritesTab = panel.getByRole("tab", { name: /즐겨찾기/u });
+  await expect(panel).toHaveCount(1);
+  await expect(panel.getByRole("option")).toHaveCount(1);
+
+  for (let index = 0; index < 3; index += 1) {
+    await favoritesTab.click();
+    await expect(favoritesTab).toHaveAttribute("aria-selected", "true");
+    await expect(panel.getByRole("option")).toHaveCount(1);
+    await recentTab.click();
+    await expect(recentTab).toHaveAttribute("aria-selected", "true");
+    await expect(panel.getByRole("option")).toHaveCount(1);
+  }
+});
+
 test("모바일 메뉴와 LoL 검색 입력은 상단 레이어·자동 확대·입력 폭을 안전하게 유지한다", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 800 });
   await page.goto("/ko/");
@@ -294,6 +330,17 @@ test("모바일 메뉴와 LoL 검색 입력은 상단 레이어·자동 확대·
     expect(metrics?.serverWidth).toBeLessThanOrEqual(56);
     expect(metrics?.inputWidth).toBeGreaterThanOrEqual(150);
     expect(metrics?.documentOverflow).toBeLessThanOrEqual(0);
+
+    const typography = await page.locator("main").evaluate((main) => {
+      const heading = main.querySelector<HTMLElement>("h1");
+      const sectionHeading = main.querySelector<HTMLElement>("h2");
+      return {
+        heading: Number.parseFloat(heading ? window.getComputedStyle(heading).fontSize : "0"),
+        sectionHeading: Number.parseFloat(sectionHeading ? window.getComputedStyle(sectionHeading).fontSize : "0"),
+      };
+    });
+    expect(typography.heading).toBeLessThanOrEqual(24);
+    expect(typography.sectionHeading).toBeLessThanOrEqual(18);
   }
 
   await page.setViewportSize({ width: 390, height: 844 });

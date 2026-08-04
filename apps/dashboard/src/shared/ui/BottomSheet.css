@@ -3,7 +3,12 @@
     calc(var(--yoro-motion-duration-slow) + var(--yoro-motion-duration-instant));
   --public-bottom-sheet-close-duration: var(--yoro-motion-duration-base);
 
-  z-index: calc(var(--yoro-z-modal) + var(--yoro-z-sticky));
+  z-index: calc(
+    var(--yoro-z-toast)
+    + var(--yoro-z-toast)
+    + var(--yoro-z-dropdown)
+  );
+  isolation: isolate;
   place-items: end center;
   padding:
     var(--yoro-space-0)

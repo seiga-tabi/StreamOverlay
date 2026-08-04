@@ -918,6 +918,13 @@
 }
 
 @media (max-width: 48rem) {
+  .public-dashboard-shell {
+    /* 모바일은 본문을 16px 안팎으로 유지하되 제목의 정보 위계는 보존한다. */
+    --yoro-font-size-lg: 1rem;
+    --yoro-font-size-xl: 1.125rem;
+    --yoro-font-size-2xl: 1.5rem;
+  }
+
   .public-game-header__layout {
     grid-template-areas:
       "product toggle"
