@@ -67,7 +67,7 @@ export function PublicGameHomeHero({
   description: PublicGameHomeLocalizedText;
   eyebrow?: PublicGameHomeLocalizedText;
   game: "lol" | "palworld";
-  liveContent: ReactNode;
+  liveContent?: ReactNode;
   search: ReactNode;
   title: PublicGameHomeLocalizedText;
 }) {
@@ -101,7 +101,7 @@ export function PublicGameHomeHero({
           </picture>
         ) : null}
         <div className="public-game-home__image-overlay" aria-hidden="true" />
-        <div className="public-game-home__hero-grid">
+        <div className={`public-game-home__hero-grid ${liveContent ? "" : "public-game-home__hero-grid--centered"}`.trim()}>
           <div className="public-game-home__copy">
             {eyebrow ? (
               <span
@@ -117,7 +117,7 @@ export function PublicGameHomeHero({
             <div className="public-game-home__search">{search}</div>
             {children}
           </div>
-          <div className="public-game-home__live">{liveContent}</div>
+          {liveContent ? <div className="public-game-home__live">{liveContent}</div> : null}
         </div>
       </div>
     </section>

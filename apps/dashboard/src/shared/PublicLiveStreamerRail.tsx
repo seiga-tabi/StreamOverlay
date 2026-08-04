@@ -190,10 +190,10 @@ export function PublicLiveStreamerRail({
               {streamer.avatarUrl ? <img src={streamer.avatarUrl} alt="" /> : <span aria-hidden="true">{streamer.avatarLabel}</span>}
             </span>
             <strong title={streamer.name}>{streamer.name}</strong>
-            {streamer.login ? <small title={`@${streamer.login}`}>@{streamer.login}</small> : null}
-            {streamer.primaryMeta ? <small title={streamer.primaryMeta}>{streamer.primaryMeta}</small> : null}
-            {streamer.secondaryMeta ? <small title={streamer.secondaryMeta}>{streamer.secondaryMeta}</small> : null}
-            {streamer.server ? <em title={streamer.server}>{streamer.server}</em> : null}
+            {streamer.login ? <small className="public-home-live-login" title={`@${streamer.login}`}>@{streamer.login}</small> : null}
+            {streamer.primaryMeta ? <small className="public-home-live-primary-meta" title={streamer.primaryMeta}>{streamer.primaryMeta}</small> : null}
+            {streamer.secondaryMeta ? <small className="public-home-live-secondary-meta" title={streamer.secondaryMeta}>{streamer.secondaryMeta}</small> : null}
+            {streamer.server ? <em className="public-home-live-server" title={streamer.server}>{streamer.server}</em> : null}
             {streamer.channelUrl ? (
               <a className="public-home-live-action" href={streamer.channelUrl} target="_blank" rel="noopener noreferrer" data-ko={watch.ko} data-ja={watch.ja}>
                 {watch.label}

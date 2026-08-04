@@ -91,7 +91,6 @@ export function PublicHomeSearchPanel({
         description={text.description}
         eyebrow={text.eyebrow}
         game="lol"
-        liveContent={liveContent}
         search={searchForm}
         title={text.title}
       >
@@ -115,6 +114,9 @@ export function PublicHomeSearchPanel({
           </EmptyState>
         ) : null}
       </PublicGameHomeHero>
+      <div className="public-game-home__live-strip">
+        {liveContent}
+      </div>
       {text.primaryFeaturesTitle
         && text.participationTitle
         && text.participationDescription

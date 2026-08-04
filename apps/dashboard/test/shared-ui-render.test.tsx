@@ -406,10 +406,22 @@ test("LoL 홈은 공통 LIVE rail로 기존 스트리머 카드와 전체 보기
     guideTitle: localized("검색 안내"),
     guideDescription: localized("Riot ID를 입력하세요"),
     liveTitle: localized("팔로우 중인 LIVE 스트리머"),
+    livePrevious: localized("이전 LIVE 스트리머"),
+    liveNext: localized("다음 LIVE 스트리머"),
     liveViewAll: localized("전체 보기"),
     liveWatch: localized("방송 보기"),
     liveEmptyTitle: localized("LIVE 방송 없음"),
     liveEmptyDescription: localized("방송이 시작되면 표시됩니다"),
+    primaryFeaturesTitle: localized("YORO.gg에서 참여해보세요"),
+    participationTitle: localized("커뮤니티 참여"),
+    participationDescription: localized("참여 방송을 확인하세요"),
+    aramTitle: localized("증강 칼바람"),
+    aramDescription: localized("증강 데이터를 확인하세요"),
+    communityTitle: localized("커뮤니티"),
+    communityDescription: localized("함께 플레이할 팀을 찾으세요"),
+    additionalFeaturesTitle: localized("더 둘러보기"),
+    streamerTitle: localized("스트리머"),
+    streamerDescription: localized("등록된 스트리머를 확인하세요"),
   };
   const html = renderToStaticMarkup(
     <PublicHomeSearchPanel
@@ -433,6 +445,8 @@ test("LoL 홈은 공통 LIVE rail로 기존 스트리머 카드와 전체 보기
   );
 
   assert.match(html, /data-testid="public-live-streamer-rail"/u);
+  assert.match(html, /public-game-home__hero-grid public-game-home__hero-grid--centered/u);
+  assert.match(html, /public-game-home__live-strip/u);
   assert.match(html, /class="public-game-home__picture"/u);
   assert.match(html, /\/images\/public-home\/lol\/mobile\.[a-f0-9]{16}\.avif/u);
   assert.match(html, /public-game-home__eyebrow[\s\S]*전적 검색/u);
@@ -441,6 +455,10 @@ test("LoL 홈은 공통 LIVE rail로 기존 스트리머 카드와 전체 보기
   assert.match(html, /League of Legends/u);
   assert.match(html, /href="https:\/\/www\.twitch\.tv\/lol_streamer"/u);
   assert.match(html, /전체 보기/u);
+  assert.ok(
+    html.indexOf("public-game-home__hero") < html.indexOf("public-game-home__live-strip")
+      && html.indexOf("public-game-home__live-strip") < html.indexOf("YORO.gg에서 참여해보세요")
+  );
 });
 
 test("챔피언 필터가 선택된 챔피언 이미지와 목록형 선택 접근성 정보를 출력한다", () => {
