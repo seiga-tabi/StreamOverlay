@@ -220,6 +220,16 @@ test("Public Home", async ({ page }) => {
 });
 
 test("메인 검색바는 서버 목록을 열고 선택한 플랫폼 색상과 값을 반영한다", async ({ page }) => {
+  await page.route("**/api/lol/suggestions**", async (route) => {
+    await json(route, {
+      suggestions: [{
+        gameName: "YORO QA",
+        tagLine: "KR1",
+        source: "recommended",
+        lolPlatform: "kr",
+      }],
+    });
+  });
   await page.goto("/ko/");
 
   const serverButton = page.getByRole("button", { name: "검색 서버" });
@@ -239,6 +249,16 @@ test("메인 검색바는 서버 목록을 열고 선택한 플랫폼 색상과 
   expect(koreanBadgeColor).not.toBe("rgba(0, 0, 0, 0)");
   expect(koreanBadgeColor).not.toBe(japaneseBadgeColor);
   await expect(page.getByRole("option", { name: /KR 한국 서버/u })).toHaveCount(0);
+
+  const searchInput = page.getByRole("searchbox", { name: "Riot ID 입력" });
+  await searchInput.fill("YORO");
+  await expect(page.locator(".public-suggestion-panel")).toBeVisible();
+  await serverButton.click();
+  await expect(page.locator(".public-server-menu")).toBeVisible();
+  await expect(page.locator(".public-suggestion-panel")).toHaveCount(0);
+  await searchInput.focus();
+  await expect(page.locator(".public-server-menu")).toHaveCount(0);
+  await expect(page.locator(".public-suggestion-panel")).toBeVisible();
   await expect(page.getByText("검색 실패", { exact: true })).toHaveCount(0);
   await expect(page.getByText("표시할 데이터가 없습니다.", { exact: true })).toHaveCount(0);
 });

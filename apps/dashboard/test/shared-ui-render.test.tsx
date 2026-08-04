@@ -477,6 +477,8 @@ test("LoL 홈은 공통 LIVE rail로 기존 스트리머 카드와 전체 보기
   );
   assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-rail\s*\{[\s\S]*?grid-auto-columns:\s*17\.5rem/u);
   assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-card\s*\{[\s\S]*?aspect-ratio:\s*1\s*\/\s*1\.08/u);
+  assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-card\s*\{[\s\S]*?gap:\s*var\(--yoro-space-2\)/u);
+  assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-card > \.public-home-live-action\s*\{[\s\S]*?margin:\s*var\(--yoro-space-1\) 0 0/u);
   assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-pill\.yoro-status\s*\{[\s\S]*?position:\s*static;[\s\S]*?grid-row:\s*1/u);
   assert.match(homeCss, /\.public-game-home__hero:has\(\.public-suggestion-panel\)\s*\{[\s\S]*?z-index:\s*var\(--yoro-z-dropdown\)/u);
   assert.match(homeCss, /@media \(max-width:\s*72rem\)\s*\{[\s\S]*?\.public-game-home__hero-grid:not\(\.public-game-home__hero-grid--centered\)/u);

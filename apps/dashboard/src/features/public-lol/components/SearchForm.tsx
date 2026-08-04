@@ -151,15 +151,25 @@ export function SearchForm<TSuggestion extends SearchFormSuggestion>({
   }
 
   function handleQueryChange(value: string): void {
+    setServerMenuOpen(false);
     setSuggestionsOpen(true);
     setActivePanelTab("summoners");
     onQuery(value);
   }
 
   function handleQueryFocus(): void {
+    setServerMenuOpen(false);
     if (!hasPanelContent) return;
     if (!hasQuery) setActivePanelTab(recentSearches.length > 0 ? "recent" : "favorites");
     setSuggestionsOpen(true);
+  }
+
+  function handleServerMenuToggle(): void {
+    setServerMenuOpen((open) => {
+      const nextOpen = !open;
+      if (nextOpen) setSuggestionsOpen(false);
+      return nextOpen;
+    });
   }
 
   function handleClear(): void {
@@ -193,6 +203,7 @@ export function SearchForm<TSuggestion extends SearchFormSuggestion>({
 
   useEffect(() => {
     if (!panelRequest) return;
+    setServerMenuOpen(false);
     setActivePanelTab(panelRequest.tab);
     setSuggestionsOpen(true);
     window.setTimeout(() => {
@@ -253,7 +264,7 @@ export function SearchForm<TSuggestion extends SearchFormSuggestion>({
               className={`public-server-pill ${sharedClassPrefix}-server`}
               data-platform={selectedPlatform?.id ?? platform}
               disabled={loading}
-              onClick={() => setServerMenuOpen((open) => !open)}
+              onClick={handleServerMenuToggle}
               rightIcon={<span className={`${sharedClassPrefix}-server-caret`} />}
               size="lg"
               type="button"
@@ -275,7 +286,7 @@ export function SearchForm<TSuggestion extends SearchFormSuggestion>({
               data-platform={selectedPlatform?.id ?? platform}
               aria-label={text.searchServer}
               aria-expanded={serverMenuOpen}
-              onClick={() => setServerMenuOpen((open) => !open)}
+              onClick={handleServerMenuToggle}
               disabled={loading}
             >
               <strong>{selectedPlatform?.code ?? "JP"}</strong>
@@ -396,7 +407,7 @@ export function SearchForm<TSuggestion extends SearchFormSuggestion>({
           )}
         </div>
       </form>
-      {!loading && suggestionsOpen && (hasPanelContent || panelRequested) ? (
+      {!loading && !serverMenuOpen && suggestionsOpen && (hasPanelContent || panelRequested) ? (
         <div className="public-suggestion-panel">
           <div className="public-suggestion-tabs" role="tablist" aria-label={text.relatedSummoners}>
             {panelTabs.map((tab) => (

@@ -493,7 +493,7 @@
   min-inline-size: 0;
   min-block-size: 0;
   aspect-ratio: 1 / 1.08;
-  gap: var(--yoro-space-1);
+  gap: var(--yoro-space-2);
   padding: var(--yoro-space-3);
   overflow: hidden;
   border: thin solid var(--yoro-color-border);
@@ -597,11 +597,13 @@
 
 .public-game-home__live-strip .public-home-live-primary-meta {
   grid-row: 4;
+  padding-block-start: var(--yoro-space-1);
   color: var(--yoro-color-text-muted) !important;
 }
 
 .public-game-home__live-strip .public-home-live-secondary-meta {
   grid-row: 5;
+  padding-block-end: var(--yoro-space-1);
   color: var(--yoro-color-text-muted) !important;
 }
 
@@ -625,7 +627,7 @@
   justify-content: center;
   inline-size: 100%;
   min-block-size: var(--yoro-size-touch-target);
-  margin: 0;
+  margin: var(--yoro-space-1) 0 0;
   padding-inline: var(--yoro-space-3);
   border: thin solid var(--public-home-accent);
   border-radius: var(--yoro-radius-md);
