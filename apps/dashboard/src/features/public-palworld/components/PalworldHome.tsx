@@ -85,7 +85,6 @@ export function PalworldHome({
         description={localizedText(locale, "homeHeroDescription")}
         eyebrow={localizedText(locale, "homeEyebrow")}
         game="palworld"
-        liveContent={liveContent}
         search={(
           <PalworldSearchForm
             locale={locale}
@@ -104,6 +103,9 @@ export function PalworldHome({
           onOpenPal={onOpenPal}
         />
       </PublicGameHomeHero>
+      <div className="public-game-home__live-strip">
+        {liveContent}
+      </div>
       <PalworldHomeDashboard
         data={dashboardData}
         locale={locale}

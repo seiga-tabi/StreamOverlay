@@ -109,23 +109,23 @@
 
 @media (max-width: 760px) {
   .public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-search-form.public-search-form {
-    grid-template-columns: 74px minmax(0, 1fr) auto !important;
+    grid-template-columns: 54px minmax(0, 1fr) auto !important;
     min-height: 54px !important;
     border-radius: 22px !important;
   }
 
   .public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-search-form .public-search-server,
   .public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-server.public-server-pill.yoro-button {
-    width: 74px !important;
-    min-width: 74px !important;
+    width: 54px !important;
+    min-width: 54px !important;
     min-height: 54px !important;
-    padding: 0 12px !important;
+    padding: 0 6px !important;
   }
 
   .public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-input.yoro-input {
     min-height: 54px !important;
-    padding: 0 14px !important;
-    font-size: 15px !important;
+    padding: 0 10px !important;
+    font-size: 16px !important;
   }
 
   .public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-submit.yoro-button {

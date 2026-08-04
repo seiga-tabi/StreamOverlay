@@ -612,6 +612,7 @@ test("Palworld LIVE 목록은 Twitch user ID로 중복 제거하고 LIVE만 최�
     gameName: index % 2 === 0 ? "Palworld" : "Just Chatting",
     title: `방송 ${index}`,
     viewerCount: index * 10,
+    thumbnailUrl: `https://static-cdn.jtvnw.net/previews-ttv/live_user_streamer_${index}-{width}x{height}.jpg`,
   }));
   channels.splice(1, 0, { ...channels[0], twitchDisplayName: "중복 채널" });
   const cards = palworldHomeLiveStreamerCards(channels, "ko");
@@ -619,6 +620,11 @@ test("Palworld LIVE 목록은 Twitch user ID로 중복 제거하고 LIVE만 최�
   assert.equal(cards.filter((card) => card.id === "user-0").length, 1);
   assert.equal(cards[0]?.primaryMeta, "Palworld");
   assert.match(cards[0]?.secondaryMeta ?? "", /방송 0 · 0명 시청/u);
+  assert.equal(cards[0]?.previewLabel, "Streamer 0 방송 미리보기");
+  assert.equal(
+    cards[0]?.previewUrl,
+    "https://static-cdn.jtvnw.net/previews-ttv/live_user_streamer_0-640x360.jpg",
+  );
   assert.equal(cards.some((card) => card.id === "user-13"), false);
 });
 

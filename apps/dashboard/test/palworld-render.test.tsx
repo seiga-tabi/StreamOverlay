@@ -716,6 +716,12 @@ test("Palworld 홈은 실제 경로의 기능 대시보드와 로그인 CTA가 �
   assert.match(html, /팔로우 중인 LIVE 스트리머/u);
   assert.match(html, /Twitch 로그인 후 팔로우 중인 스트리머의 방송 상태를 확인할 수 있습니다/u);
   assert.match(html, /data-testid="public-live-streamer-rail"/u);
+  assert.match(html, /public-game-home__hero-grid public-game-home__hero-grid--centered/u);
+  assert.match(html, /public-game-home__live-strip/u);
+  assert.ok(
+    html.indexOf("public-game-home__hero") < html.indexOf("public-game-home__live-strip")
+      && html.indexOf("public-game-home__live-strip") < html.indexOf("palworld-home-dashboard"),
+  );
 });
 
 test("Palworld 홈 데이터 현황과 업데이트는 meta의 실제 수·release·검증일만 표시한다", () => {

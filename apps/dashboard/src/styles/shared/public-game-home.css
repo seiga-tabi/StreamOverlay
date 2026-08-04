@@ -81,7 +81,7 @@
   place-items: center;
 }
 
-.public-game-home--lol .public-game-home__hero-grid--centered .public-game-home__copy {
+.public-game-home__hero-grid--centered .public-game-home__copy {
   align-content: center;
   justify-items: center;
   inline-size: min(100%, 46rem);
@@ -90,10 +90,15 @@
   text-align: center;
 }
 
-.public-game-home--lol .public-game-home__hero-grid--centered .public-game-home__copy > p,
-.public-game-home--lol .public-game-home__hero-grid--centered .public-game-home__search,
-.public-game-home--lol .public-game-home__hero-grid--centered .public-game-home__search > * {
+.public-game-home__hero-grid--centered .public-game-home__copy > p,
+.public-game-home__hero-grid--centered .public-game-home__search,
+.public-game-home__hero-grid--centered .public-game-home__search > * {
   margin-inline: auto;
+}
+
+.public-game-home--palworld .public-game-home__hero-grid--centered .palworld-home-quick-search {
+  justify-content: center;
+  inline-size: 100%;
 }
 
 .public-game-home__copy,

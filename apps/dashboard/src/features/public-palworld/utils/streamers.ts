@@ -2,6 +2,7 @@ import type {
   PublicTwitchFollowedLolChannel,
 } from "../../public-lol/types/public-lol";
 import type { PublicLiveStreamerCard } from "../../../shared/PublicLiveStreamerRail";
+import { safeTwitchStreamPreviewUrl } from "../../public-twitch/stream-preview";
 import type { PalworldLocale } from "../i18n/palworld-i18n";
 
 function safeTwitchChannelUrl(channel: PublicTwitchFollowedLolChannel): string | undefined {
@@ -58,6 +59,10 @@ export function palworldHomeLiveStreamerCards(
         secondaryMeta: secondaryMeta || undefined,
         avatarLabel: channel.twitchDisplayName.slice(0, 1).toUpperCase() || "T",
         avatarUrl: channel.profileImageUrl,
+        previewLabel: locale === "ja"
+          ? `${channel.twitchDisplayName}の配信プレビュー`
+          : `${channel.twitchDisplayName} 방송 미리보기`,
+        previewUrl: safeTwitchStreamPreviewUrl(channel.thumbnailUrl),
         channelUrl: safeTwitchChannelUrl(channel),
         statusLabel: "LIVE",
       };

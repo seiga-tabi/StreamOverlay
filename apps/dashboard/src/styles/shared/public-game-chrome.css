@@ -999,6 +999,11 @@
     grid-area: search;
   }
 
+  .public-game-header__search-slot input,
+  .public-game-header__search-slot input[type="search"] {
+    font-size: 16px !important;
+  }
+
   .public-game-header__page-actions {
     align-self: stretch;
   }
