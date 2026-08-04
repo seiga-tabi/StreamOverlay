@@ -34,6 +34,10 @@ test("스트리머 참여 화면은 빠른 시작·단일 다음 행동·그룹 
     new URL("../src/features/yoro-dashboard/ParticipationManagementPage.tsx", import.meta.url),
     "utf8"
   );
+  const css = await readFile(
+    new URL("../src/styles/pages/account/19-participation-management.css", import.meta.url),
+    "utf8"
+  );
 
   assert.match(source, /getStreamerNextAction/u);
   assert.match(source, /participation-management-next-action/u);
@@ -42,4 +46,21 @@ test("스트리머 참여 화면은 빠른 시작·단일 다음 행동·그룹 
   assert.match(source, /participation-management-history/u);
   assert.match(source, /시청자 참여를 시작하세요/u);
   assert.match(source, /視聴者参加を始めましょう/u);
+  assert.match(css, /grid-template-areas:[\s\S]*?"position participant status"[\s\S]*?"position actions actions"/u);
+  assert.match(css, /color:\s*var\(--yoro-color-text-on-dark-strong\)/u);
+});
+
+test("모바일 공개 검색 결과는 두 항목 이후 목록 내부에서 스크롤한다", async () => {
+  const lolCss = await readFile(
+    new URL("../src/styles/pages/public-lol/05-overrides.css", import.meta.url),
+    "utf8"
+  );
+  const palworldCss = await readFile(
+    new URL("../src/styles/pages/public-palworld/14-palworld.css", import.meta.url),
+    "utf8"
+  );
+
+  assert.match(lolCss, /public-home-shared-search \.public-suggestion-list[\s\S]*?max-height:[\s\S]*?--yoro-size-touch-target[\s\S]*?--yoro-size-touch-target[\s\S]*?overflow-y:\s*auto/u);
+  assert.match(lolCss, /public-search-wrap \.public-suggestion-list[\s\S]*?max-height:[\s\S]*?--yoro-size-touch-target[\s\S]*?--yoro-size-touch-target[\s\S]*?overflow-y:\s*auto/u);
+  assert.match(palworldCss, /\.palworld-autocomplete[\s\S]*?max-block-size:[\s\S]*?--yoro-size-touch-target[\s\S]*?--yoro-size-touch-target[\s\S]*?overflow-y:\s*auto/u);
 });

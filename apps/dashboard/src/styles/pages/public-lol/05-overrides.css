@@ -3001,6 +3001,10 @@ html[lang="ja"] .public-dashboard-shell:not(.public-home-shell) .public-app-head
 
 .public-dashboard-shell:not(.public-home-shell) .public-participation-shared-streamer-card.yoro-card,
 .public-dashboard-shell:not(.public-home-shell) .public-participation-shared-card.yoro-card,
+.public-dashboard-shell:not(.public-home-shell) .public-participation-session-summary.yoro-card,
+.public-dashboard-shell:not(.public-home-shell) .public-participation-my-status.yoro-card,
+.public-dashboard-shell:not(.public-home-shell) .public-participation-timeline-card.yoro-card,
+.public-dashboard-shell:not(.public-home-shell) .public-participation-rules,
 .public-dashboard-shell:not(.public-home-shell) .public-participation-queue-row.yoro-card {
   border-color: rgba(248, 249, 250, .18) !important;
   border-radius: 16px !important;
@@ -3008,6 +3012,65 @@ html[lang="ja"] .public-dashboard-shell:not(.public-home-shell) .public-app-head
     linear-gradient(180deg, rgba(52, 58, 64, .86), rgba(43, 48, 53, .9)) !important;
   color: #f8f9fa !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-participation-page :where(
+  .public-participation-session-summary-metrics .yoro-metric,
+  .public-participation-my-status-metrics > div,
+  .public-participation-rules article
+) {
+  min-width: 0;
+  border-color: var(--yoro-color-product-gray-border) !important;
+  background: var(--yoro-color-product-gray-surface-strong) !important;
+  color: var(--yoro-color-product-gray-text) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-participation-session-summary,
+.public-dashboard-shell:not(.public-home-shell) .public-participation-session-summary-metrics,
+.public-dashboard-shell:not(.public-home-shell) .public-participation-my-status .yoro-card__header,
+.public-dashboard-shell:not(.public-home-shell) .public-participation-my-status-actions {
+  flex-wrap: wrap;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-participation-session-summary-metrics .yoro-metric {
+  flex: 1 1 8rem;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-participation-status-grid,
+.public-dashboard-shell:not(.public-home-shell) .public-participation-layout {
+  align-items: stretch;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-participation-status-grid > .yoro-card,
+.public-dashboard-shell:not(.public-home-shell) .public-participation-layout > .yoro-card {
+  min-width: 0;
+  height: 100%;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-participation-page :where(
+  .yoro-page-header__title,
+  .yoro-page-header__description,
+  .yoro-card__title,
+  .yoro-card__description,
+  .public-participation-my-status-copy span,
+  .public-participation-rules p
+) {
+  overflow-wrap: anywhere;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-participation-page :where(
+  .public-participation-my-status-copy span,
+  .public-participation-timeline li,
+  .public-participation-rules p,
+  .public-participation-my-status-metrics dt
+) {
+  color: var(--yoro-color-text-on-dark-muted) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-participation-check-in-alert {
+  border-color: var(--yoro-color-primary) !important;
+  background: var(--yoro-color-product-gray-surface-strong) !important;
+  color: var(--yoro-color-product-gray-text) !important;
 }
 
 .public-dashboard-shell:not(.public-home-shell) .public-participation-shared-streamer-card.yoro-card.active,
@@ -3343,9 +3406,19 @@ html[lang="ja"] .public-dashboard-shell:not(.public-home-shell) .public-app-head
   .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-list {
     flex: 1 1 auto;
     min-height: var(--yoro-space-0) !important;
-    max-height: none !important;
+    max-height: calc(var(--yoro-size-touch-target) + var(--yoro-space-6) + var(--yoro-size-touch-target) + var(--yoro-space-6)) !important;
     overflow-y: auto !important;
     overscroll-behavior-y: contain;
+    scrollbar-gutter: stable;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .public-home-shared-shell .public-home-shared-search .public-suggestion-list {
+    max-height: calc(var(--yoro-size-touch-target) + var(--yoro-space-6) + var(--yoro-size-touch-target) + var(--yoro-space-6)) !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain;
+    scrollbar-gutter: stable;
     touch-action: pan-y;
     -webkit-overflow-scrolling: touch;
   }

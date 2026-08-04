@@ -255,6 +255,17 @@
   white-space: nowrap;
 }
 
+@media (max-width: 48rem) {
+  .palworld-autocomplete {
+    max-block-size: calc(var(--yoro-size-touch-target) + var(--yoro-size-touch-target));
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scrollbar-gutter: stable;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 .palworld-autocomplete small,
 .palworld-picker-list small,
 .palworld-selected-pal small {

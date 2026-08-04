@@ -386,6 +386,40 @@
   max-inline-size: 100%;
 }
 
+/* 종합 성과의 핵심 시각 요소는 카드 폭에 맞춰 함께 확장합니다. */
+.public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell)
+  .public-aggregate-hero {
+  grid-template-columns:
+    calc(var(--yoro-space-12) + var(--yoro-space-6))
+    minmax(0, 1fr)
+    calc(var(--yoro-space-12) + var(--yoro-space-8)) !important;
+  gap: var(--yoro-space-3) !important;
+}
+
+.public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell)
+  .public-aggregate-emblem {
+  width: calc(var(--yoro-space-12) + var(--yoro-space-6)) !important;
+  height: calc(var(--yoro-space-12) + var(--yoro-space-6)) !important;
+}
+
+.public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell)
+  .public-aggregate-emblem img {
+  width: calc(var(--yoro-space-12) + var(--yoro-space-4)) !important;
+  height: calc(var(--yoro-space-12) + var(--yoro-space-4)) !important;
+}
+
+.public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell)
+  .public-aggregate-winrate {
+  width: calc(var(--yoro-space-12) + var(--yoro-space-8)) !important;
+  min-width: calc(var(--yoro-space-12) + var(--yoro-space-8)) !important;
+  height: calc(var(--yoro-space-12) + var(--yoro-space-8)) !important;
+}
+
+.public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell)
+  .public-aggregate-winrate strong {
+  font-size: var(--yoro-font-size-lg) !important;
+}
+
 @media (min-width: 84.0625rem) {
   .public-profile-platform-v2 .public-aggregate-card,
   .public-profile-platform-v2 .public-profile-rank-section {
@@ -401,9 +435,9 @@
   .public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell)
     .public-aggregate-hero {
     grid-template-columns:
-      var(--yoro-space-12)
+      calc(var(--yoro-space-12) + var(--yoro-space-4))
       minmax(0, 1fr)
-      calc(var(--yoro-space-12) + var(--yoro-space-2)) !important;
+      calc(var(--yoro-space-12) + var(--yoro-space-6)) !important;
     gap: var(--yoro-space-2) !important;
     min-height: 0 !important;
     padding: var(--yoro-space-2) !important;
@@ -411,14 +445,14 @@
 
   .public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell)
     .public-aggregate-emblem {
-    width: var(--yoro-space-12) !important;
-    height: var(--yoro-space-12) !important;
+    width: calc(var(--yoro-space-12) + var(--yoro-space-4)) !important;
+    height: calc(var(--yoro-space-12) + var(--yoro-space-4)) !important;
   }
 
   .public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell)
     .public-aggregate-emblem img {
-    width: var(--yoro-space-10) !important;
-    height: var(--yoro-space-10) !important;
+    width: calc(var(--yoro-space-12) + var(--yoro-space-2)) !important;
+    height: calc(var(--yoro-space-12) + var(--yoro-space-2)) !important;
   }
 
   .public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell)
@@ -428,9 +462,9 @@
 
   .public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell)
     .public-aggregate-winrate {
-    width: calc(var(--yoro-space-12) + var(--yoro-space-2)) !important;
-    min-width: calc(var(--yoro-space-12) + var(--yoro-space-2)) !important;
-    height: calc(var(--yoro-space-12) + var(--yoro-space-2)) !important;
+    width: calc(var(--yoro-space-12) + var(--yoro-space-6)) !important;
+    min-width: calc(var(--yoro-space-12) + var(--yoro-space-6)) !important;
+    height: calc(var(--yoro-space-12) + var(--yoro-space-6)) !important;
   }
 }
 

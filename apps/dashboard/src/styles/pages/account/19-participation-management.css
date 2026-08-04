@@ -1,8 +1,18 @@
 .participation-management-page {
+  --surface: var(--yoro-color-product-gray-surface);
+  --surface-muted: var(--yoro-color-product-gray-surface-strong);
+  --surface-strong: var(--yoro-color-product-gray-surface-strong);
+  --text: var(--yoro-color-product-gray-text);
+  --text-strong: var(--yoro-color-product-gray-text);
+  --muted: var(--yoro-color-product-gray-muted);
+  --line: var(--yoro-color-product-gray-border);
+  --line-strong: var(--yoro-color-product-gray-border-strong);
   min-inline-size: 0;
   display: grid;
   gap: var(--space-6);
   color: var(--text);
+  color-scheme: dark;
+  overflow-wrap: anywhere;
 }
 
 .participation-management-hero > span {
@@ -132,12 +142,13 @@
 .participation-management-create > button {
   justify-self: start;
   border-color: var(--brand);
+  color: var(--yoro-color-text-on-dark-strong);
   background: var(--brand-strong);
 }
 
 .participation-management-page .is-primary {
   border-color: var(--brand);
-  color: var(--on-brand, var(--text-strong));
+  color: var(--yoro-color-text-on-dark-strong);
   background: var(--brand-strong);
 }
 
@@ -153,8 +164,8 @@
 
 .participation-management-page .is-danger {
   border-color: var(--danger);
-  color: var(--danger);
-  background: var(--danger-bg);
+  color: var(--yoro-color-text-on-dark-strong);
+  background: color-mix(in srgb, var(--danger) 24%, var(--surface-strong));
 }
 
 .participation-management-alert {
@@ -162,8 +173,8 @@
   padding: var(--space-4);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  color: var(--text);
-  background: var(--info-bg);
+  color: var(--yoro-color-text-on-dark-strong);
+  background: color-mix(in srgb, var(--info) 24%, var(--surface-strong));
 }
 
 .participation-management-alert.is-error {
@@ -172,17 +183,25 @@
   align-items: center;
   justify-content: space-between;
   border-color: var(--danger);
-  color: var(--danger);
-  background: var(--danger-bg);
+  color: var(--yoro-color-text-on-dark-strong);
+  background: color-mix(in srgb, var(--danger) 24%, var(--surface-strong));
 }
 
 .participation-management-session > header,
 .participation-management-current > header,
 .participation-management-queue > header {
+  min-inline-size: 0;
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-4);
   align-items: flex-start;
   justify-content: space-between;
+}
+
+.participation-management-session > header > div,
+.participation-management-current > header > div,
+.participation-management-queue > header > div {
+  min-inline-size: 0;
 }
 
 .participation-management-current > header h2 {
@@ -204,8 +223,8 @@
 
 .participation-management-session > header > strong[data-status="recruiting"] {
   border-color: var(--success);
-  color: var(--success);
-  background: var(--success-bg);
+  color: var(--yoro-color-text-on-dark-strong);
+  background: color-mix(in srgb, var(--success) 24%, var(--surface-strong));
 }
 
 .participation-management-url {
@@ -265,6 +284,12 @@
 
 .participation-management-next-action div {
   min-inline-size: 0;
+}
+
+.participation-management-next-action > button {
+  flex: 0 0 auto;
+  max-inline-size: 100%;
+  white-space: normal;
 }
 
 .participation-management-next-action strong {
@@ -336,8 +361,11 @@
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   display: grid;
-  grid-template-columns: max-content minmax(0, 1fr) max-content max-content;
-  gap: var(--space-4);
+  grid-template-columns: max-content minmax(0, 1fr) minmax(0, auto);
+  grid-template-areas:
+    "position participant status"
+    "position actions actions";
+  gap: var(--space-3) var(--space-4);
   align-items: center;
   background: var(--surface-muted);
 }
@@ -347,12 +375,15 @@
 }
 
 .participation-management-position {
+  grid-area: position;
+  align-self: start;
   color: var(--brand);
   font-size: 1.125rem;
   font-weight: 900;
 }
 
 .participation-management-participant-main {
+  grid-area: participant;
   min-inline-size: 0;
   display: grid;
   gap: var(--space-1);
@@ -374,6 +405,27 @@
 .participation-management-participant-main span,
 .participation-management-participant-main small {
   color: var(--muted);
+}
+
+.participation-management-participant > .participation-management-status {
+  grid-area: status;
+  max-inline-size: 100%;
+  white-space: normal;
+  text-align: center;
+}
+
+.participation-management-participant > .participation-management-entry-actions,
+.participation-management-participant > .participation-management-row-more {
+  grid-area: actions;
+  min-inline-size: 0;
+  justify-self: end;
+}
+
+.participation-management-entry-actions button,
+.participation-management-row-more summary {
+  max-inline-size: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .participation-management-group {
@@ -445,6 +497,20 @@
   .participation-management-metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .participation-management-participant {
+    grid-template-columns: max-content minmax(0, 1fr);
+    grid-template-areas:
+      "position participant"
+      "status status"
+      "actions actions";
+  }
+
+  .participation-management-participant > .participation-management-status,
+  .participation-management-participant > .participation-management-entry-actions,
+  .participation-management-participant > .participation-management-row-more {
+    justify-self: start;
+  }
 }
 
 @media (max-width: 48rem) {
@@ -485,6 +551,14 @@
   .participation-management-participant {
     align-items: stretch;
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .participation-management-participant {
+    grid-template-areas:
+      "position"
+      "participant"
+      "status"
+      "actions";
   }
 
   .participation-management-next-action {
