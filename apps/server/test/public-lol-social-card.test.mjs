@@ -80,6 +80,21 @@ test("프로필 아이콘은 Data Dragon의 정확한 PNG 경로만 허용한다
   assert.equal(safeDataDragonProfileIconUrl("data:image/png;base64,AAAA"), undefined);
 });
 
+test("공유 이미지 native renderer는 서버 시작 경로에서 즉시 로드하지 않는다", async () => {
+  let loaderCalls = 0;
+  const renderer = new PublicLolSocialCardRenderer(fetch, async () => {
+    loaderCalls += 1;
+    throw new Error("native renderer unavailable");
+  });
+
+  assert.equal(loaderCalls, 0);
+  await assert.rejects(
+    renderer.render(profile(), "ko"),
+    /native renderer unavailable/u,
+  );
+  assert.equal(loaderCalls, 1);
+});
+
 test("공유 이미지는 1200x630 PNG로 결정적으로 렌더링한다", async () => {
   let fetchCalls = 0;
   const renderer = new PublicLolSocialCardRenderer(async () => {

@@ -107,6 +107,22 @@ const databaseHealth = new DatabaseHealthMonitor(
   databaseMigrationManifest
 );
 await databaseHealth.checkNow();
+const databaseStartupState = databaseHealth.snapshot();
+const databaseStartupLog = {
+  type: "database.runtime_state",
+  state: databaseStartupState.state,
+  ready: databaseStartupState.ready,
+  ...(databaseStartupState.errorCode === undefined
+    ? {}
+    : { errorCode: databaseStartupState.errorCode })
+};
+if (databaseStartupState.ready) {
+  logger.event(databaseStartupLog);
+  console.log(JSON.stringify(databaseStartupLog));
+} else {
+  logger.error(databaseStartupLog);
+  console.error(JSON.stringify(databaseStartupLog));
+}
 databaseHealth.start();
 const discordOnboarding = appConfig.discordSaas.enabled && postgresPool
   ? new DiscordOnboardingService(postgresPool, logger)
@@ -465,6 +481,20 @@ const store = new Store({
     });
   }
 });
+const storeStartupState = store.getReadiness();
+const storeStartupLog = {
+  type: "store.runtime_state",
+  ready: storeStartupState.ok,
+  checks: storeStartupState.checks,
+  loadStates: storeStartupState.loadStates
+};
+if (storeStartupState.ok) {
+  logger.event(storeStartupLog);
+  console.log(JSON.stringify(storeStartupLog));
+} else {
+  logger.error(storeStartupLog);
+  console.error(JSON.stringify(storeStartupLog));
+}
 const sessions = new DashboardSessionStore();
 const events = new EventBus();
 const dashboard = new DashboardHub(store);

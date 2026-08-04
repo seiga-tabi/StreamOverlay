@@ -1,5 +1,4 @@
 import crypto from "node:crypto";
-import sharp from "sharp";
 import type { LolRankedStats } from "@streamops/shared";
 
 export type PublicLolSocialLocale = "ko" | "ja";
@@ -48,6 +47,15 @@ const MAX_CARD_BYTES = 2 * 1024 * 1024;
 const MAX_RENDER_CONCURRENCY = 2;
 const MAX_RENDER_WAITERS = 16;
 const RENDER_TIMEOUT_SECONDS = 3;
+
+type SharpFactory = typeof import("sharp")["default"];
+
+let sharpFactoryPromise: Promise<SharpFactory> | undefined;
+
+async function loadSharpFactory(): Promise<SharpFactory> {
+  sharpFactoryPromise ??= import("sharp").then((module) => module.default);
+  return sharpFactoryPromise;
+}
 
 function safeText(value: unknown, maxLength = 80): string {
   if (typeof value !== "string") return "";
@@ -203,7 +211,10 @@ export class PublicLolSocialCardRenderer {
   private readonly renderWaiters: Array<() => void> = [];
   private activeRenders = 0;
 
-  constructor(private readonly fetchImpl: typeof fetch = fetch) {}
+  constructor(
+    private readonly fetchImpl: typeof fetch = fetch,
+    private readonly sharpFactoryLoader: () => Promise<SharpFactory> = loadSharpFactory,
+  ) {}
 
   async render(profile: PublicLolSocialProfile, locale: PublicLolSocialLocale): Promise<{
     body: Buffer;
@@ -260,6 +271,7 @@ export class PublicLolSocialCardRenderer {
       if (declaredLength > MAX_ICON_BYTES) return undefined;
       const body = Buffer.from(await response.arrayBuffer());
       if (body.length === 0 || body.length > MAX_ICON_BYTES) return undefined;
+      const sharp = await this.sharpFactoryLoader();
       const metadata = await sharp(body, { limitInputPixels: 1024 * 1024 }).metadata();
       if (metadata.format !== "png" || !metadata.width || !metadata.height || metadata.width > 1024 || metadata.height > 1024) return undefined;
       const mask = Buffer.from('<svg width="176" height="176"><circle cx="88" cy="88" r="88" fill="white"/></svg>');
@@ -279,6 +291,7 @@ export class PublicLolSocialCardRenderer {
     locale: PublicLolSocialLocale,
     icon: Buffer | undefined,
   ): Promise<Buffer> {
+    const sharp = await this.sharpFactoryLoader();
     const avatarInitial = Array.from(summary.riotId)[0]?.toLocaleUpperCase() ?? "Y";
     const svg = Buffer.from(`
       <svg width="${SOCIAL_CARD_WIDTH}" height="${SOCIAL_CARD_HEIGHT}" viewBox="0 0 ${SOCIAL_CARD_WIDTH} ${SOCIAL_CARD_HEIGHT}" xmlns="http://www.w3.org/2000/svg">
