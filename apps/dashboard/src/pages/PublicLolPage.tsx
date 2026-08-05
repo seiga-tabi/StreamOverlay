@@ -240,6 +240,7 @@ import { usePublicTheme } from "../features/public-lol/hooks/usePublicTheme";
 import {
   championAnalysisMax,
   championAnalysisRows,
+  compactMatchBadgeSelection,
   filteredMatches,
   hasActiveFilters,
   kdaFromTotals,
@@ -4497,12 +4498,13 @@ function RecentRecords({ profile }: { profile: PublicLolProfile }) {
 
 function MatchBadges({ badges, compact = false }: { badges?: PublicLolMatchBadge[]; compact?: boolean }) {
   const allBadges = badges ?? [];
-  const priorityBadge = compact ? allBadges.find((badge) => badge.code === "mvp" || badge.code === "ace") : undefined;
-  const orderedBadges = priorityBadge ? [priorityBadge, ...allBadges.filter((badge) => badge !== priorityBadge)] : allBadges;
-  const maxVisibleBadges = compact ? 1 : 4;
-  const visibleBadges = orderedBadges.slice(0, maxVisibleBadges);
-  const overflowCount = Math.max(0, orderedBadges.length - visibleBadges.length);
-  if (visibleBadges.length === 0) return null;
+  const compactSelection = compact ? compactMatchBadgeSelection(allBadges) : undefined;
+  const visibleBadges = compactSelection?.visibleBadges ?? allBadges.slice(0, 4);
+  const overflowCount = compactSelection?.overflowCount ?? Math.max(0, allBadges.length - visibleBadges.length);
+  const overflowLabel = activePublicLocale === "ja"
+    ? `その他のバッジ${overflowCount}件`
+    : `기타 뱃지 ${overflowCount}개`;
+  if (visibleBadges.length === 0 && overflowCount === 0) return null;
   return (
     <div className={`public-match-badges ${compact ? "compact" : ""}`}>
       {visibleBadges.map((badge) => (
@@ -4515,7 +4517,16 @@ function MatchBadges({ badges, compact = false }: { badges?: PublicLolMatchBadge
           {matchBadgeLabel(badge.code)}
         </span>
       ))}
-      {overflowCount > 0 ? <span className="public-match-badge more" aria-label={`${overflowCount} more`}>...</span> : null}
+      {overflowCount > 0 ? (
+        <span
+          className="public-match-badge more"
+          aria-label={overflowLabel}
+          data-ja={`その他のバッジ${overflowCount}件`}
+          data-ko={`기타 뱃지 ${overflowCount}개`}
+        >
+          ...
+        </span>
+      ) : null}
     </div>
   );
 }
@@ -5664,6 +5675,7 @@ function RecentMatches({
           const dataDragonVersion = recentMatchDataDragonVersion(match);
           const recentItemSlots = fixedRecentItemSlots(match.items, 7);
           const aiScore = matchAiScore(match);
+          const scoreGrade = recentMatchScoreGrade(aiScore);
           const targetRunes = match.runes ?? [];
           const spellItems: RecentMatchRowMediaItem[] = match.summonerSpells.slice(0, 2).map((spellId) => {
             const iconUrl = summonerSpellIconUrl(spellId, dataDragonVersion);
@@ -5787,12 +5799,6 @@ function RecentMatches({
           ) : undefined;
           return (
             <FeatureRecentMatchRow
-              aiScore={aiScore}
-              aiScoreText={{
-                label: t().aiScore,
-                ko: publicI18n.ko.aiScore,
-                ja: publicI18n.ja.aiScore
-              }}
               scoreDescription={{
                 label: t().aiScoreDescription,
                 ko: publicI18n.ko.aiScoreDescription,
@@ -5831,8 +5837,9 @@ function RecentMatches({
               result={match.result}
               resultDurationLabel={formatDuration(match.durationSeconds)}
               resultLabel={resultLabel(match.result)}
-              scoreAriaLabel={`${t().aiScore} ${aiScore}`}
+              scoreAriaLabel={`${t().aggregateGrade} ${scoreGrade}`}
               scoreClassName={metricToneClass(scoreTone(aiScore))}
+              scoreGrade={scoreGrade}
               spellItems={spellItems}
               startedAtLabel={formatRelativeDate(match.startedAt)}
               startedAtTimeLabel={formatMatchTime(match.startedAt)}

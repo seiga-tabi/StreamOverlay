@@ -664,8 +664,6 @@ test("스트리머 프로필 이미지는 방송 상태를 테두리 class와 �
 test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로드아웃을 유지한다", () => {
   const html = renderToStaticMarkup(
     <RecentMatchRow
-      aiScore={91}
-      aiScoreText={{ label: "점수", ko: "점수", ja: "スコア" }}
       scoreDescription={{ label: "YORO 경기 점수 설명", ko: "YORO 경기 점수 설명", ja: "YORO試合スコアの説明" }}
       badges={<span>MVP</span>}
       championFallback="제"
@@ -691,8 +689,9 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
       result="win"
       resultDurationLabel="26:50"
       resultLabel="승리"
-      scoreAriaLabel="점수 91"
+      scoreAriaLabel="종합 등급 S+"
       scoreClassName="metric-tone-excellent"
+      scoreGrade="S+"
       spellItems={Array.from({ length: 4 }, (_, index) => ({
         key: `loadout-${index}`,
         className: index < 2 ? "spell" : "rune",
@@ -707,7 +706,6 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
   assert.match(html, /public-match-row win highlight-mvp/);
   assert.match(html, /public-match-mobile-outcome-meta/u);
   assert.match(html, /public-match-mobile-outcome-meta[\s\S]*2026\. 7\. 14\.[\s\S]*26:50/u);
-  assert.match(html, /data-ko="점수" data-ja="スコア"/u);
   assert.equal((html.match(/로드아웃\d/g) ?? []).length, 4);
   assert.match(html, /public-match-loadout-column spells/u);
   assert.match(html, /public-match-loadout-column runes/u);
@@ -729,8 +727,9 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
   assert.match(html, /<strong>70%<\/strong><small>킬 관여율<\/small>.*<strong>210<\/strong><small>CS<\/small>.*<strong>7\.8<\/strong><small>분당 CS<\/small>.*<strong>Platinum II<\/strong><small>평균 티어<\/small>/u);
   assert.match(html, /public-match-expand-label" role="tooltip">경기 상세 펼치기/u);
   assert.match(html, /aria-label="승리 · 제드 · 9\/0\/6"/u);
-  assert.equal((html.match(/aria-label="점수 91"/gu) ?? []).length, 1);
-  assert.match(html, /class="public-match-score metric-tone-excellent" data-grade="S\+"[^>]*><b>S\+<\/b><strong>91<\/strong>/u);
+  assert.equal((html.match(/aria-label="종합 등급 S\+"/gu) ?? []).length, 1);
+  assert.match(html, /class="public-match-score metric-tone-excellent" data-grade="S\+"[^>]*><b>S\+<\/b>/u);
+  assert.doesNotMatch(html, /<strong>91<\/strong>|data-ko="점수"/u);
   assert.match(html, /public-match-score-description.*YORO 경기 점수 설명/u);
 });
 
@@ -788,15 +787,44 @@ test("최근 전적 공유 기능은 현재 목록을 이미지 저장과 시스
   assert.match(shareSource, /downloadBlob\(blob, file\.name\)/u);
 });
 
-test("모바일 최근 전적은 2행 압축 레이아웃과 360px 공유 액션을 유지한다", () => {
+test("모바일 최근 전적은 고정 열의 2행 레이아웃과 일관된 상세 버튼을 유지한다", () => {
   const profileCss = readFileSync(
     new URL("../src/styles/pages/public-lol/20-profile-platform.css", import.meta.url),
     "utf8",
   );
 
-  assert.match(profileCss, /@media \(max-width:\s*40rem\)[\s\S]*?\.public-profile-platform-v2 \.public-matches-panel \.public-match-summary\s*\{[\s\S]*?grid-template-rows:\s*var\(--yoro-space-10\) var\(--yoro-space-7\)/u);
+  assert.match(profileCss, /@media \(max-width:\s*40rem\)[\s\S]*?\.public-profile-platform-v2 \.public-matches-panel \.public-match-summary\s*\{[\s\S]*?minmax\(0, 1fr\)[\s\S]*?grid-template-rows:\s*var\(--yoro-space-8\) var\(--yoro-space-5\)/u);
   assert.match(profileCss, /\.public-match-inline-items\s*\{[\s\S]*?grid-column:\s*2 \/ 5[\s\S]*?repeat\(7, var\(--yoro-space-5\)\)/u);
+  assert.match(profileCss, /\.public-match-expand\s*\{[\s\S]*?background:\s*var\(--public-gray-surface-strong\) !important/u);
+  assert.match(profileCss, /\.public-match-expand\[aria-expanded="true"\]/u);
+  assert.doesNotMatch(profileCss, /--yoro-space-(?:7|9)\b/u);
   assert.match(profileCss, /@media \(max-width:\s*26\.875rem\)[\s\S]*?\.public-match-share-actions\s*\{[\s\S]*?"copy"[\s\S]*?"buttons"[\s\S]*?"status"/u);
+});
+
+test("전적 행은 중앙 정렬하며 MVP와 ACE를 왼쪽 금색·은색 애니메이션으로 구분한다", () => {
+  const profileCss = readFileSync(
+    new URL("../src/styles/pages/public-lol/20-profile-platform.css", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(profileCss, /\.public-match-summary\s*\{[\s\S]*?align-items:\s*center/u);
+  assert.match(profileCss, /\.public-kda\s*\{[\s\S]*?align-self:\s*center[\s\S]*?align-content:\s*center/u);
+  assert.match(profileCss, /@keyframes public-profile-match-featured-shimmer/u);
+  assert.match(profileCss, /\.public-match-row:is\(\.highlight-mvp, \.highlight-ace\)::after\s*\{[\s\S]*?content:\s*""\s*!important[\s\S]*?inset:\s*0 auto 0 0\s*!important[\s\S]*?animation:\s*public-profile-match-featured-shimmer/u);
+  assert.match(profileCss, /\.public-match-row\.highlight-mvp::after\s*\{[\s\S]*?var\(--yoro-color-warning\)/u);
+  assert.match(profileCss, /\.public-match-row\.highlight-ace::after\s*\{[\s\S]*?var\(--yoro-color-text-on-dark\)/u);
+  assert.match(profileCss, /prefers-reduced-motion:\s*reduce[\s\S]*?\.public-match-row:is\(\.highlight-mvp, \.highlight-ace\)::after\s*\{[\s\S]*?animation:\s*none\s*!important/u);
+});
+
+test("LoL 모바일 상단바는 터치 영역을 유지하면서 탐색과 검색 행의 여백을 줄인다", () => {
+  const profileCss = readFileSync(
+    new URL("../src/styles/pages/public-lol/20-profile-platform.css", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(profileCss, /@media \(max-width:\s*48rem\)[\s\S]*?\.lol-public-game-header \.public-game-header__nav-slot\s*\{[\s\S]*?padding-block:\s*var\(--yoro-space-0\)/u);
+  assert.match(profileCss, /\.lol-public-game-header \.public-game-header__search-slot\s*\{[\s\S]*?padding-block:\s*var\(--yoro-space-1\)/u);
+  assert.match(profileCss, /\.lol-public-game-header \.public-horizontal-nav__content > :is\(button, a\)\s*\{[\s\S]*?min-block-size:\s*var\(--yoro-size-touch-target\)/u);
 });
 
 test("전적 상세 룬 보드는 읽기 전용 이미지의 선택과 드래그를 막는다", () => {

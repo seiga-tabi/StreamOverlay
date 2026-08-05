@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { formatCooldown, formatDecimal, formatDuration, formatPercent } from "../src/features/public-lol/utils/format";
-import { filteredMatches, summarizeMatches } from "../src/features/public-lol/utils/match";
+import { compactMatchBadgeSelection, filteredMatches, summarizeMatches } from "../src/features/public-lol/utils/match";
 import { rankScore, rankTrendLine, shortRankLabel } from "../src/features/public-lol/utils/rank";
 import {
   buildSuggestions,
@@ -31,6 +31,24 @@ test("Riot ID를 기존 JP 검색 규칙으로 정규화한다", () => {
   assert.equal(jpRiotIdQuery(" Hide on bush ＃jp1 "), "Hide on bush#JP1");
   assert.equal(jpRiotIdQuery("Hide on bush"), "Hide on bush#JP1");
   assert.equal(jpRiotIdQuery("せいが"), "せいが#JP1");
+});
+
+test("전적 요약 뱃지는 MVP와 ACE만 직접 노출하고 나머지를 축약한다", () => {
+  assert.deepEqual(compactMatchBadgeSelection([
+    { code: "objective" },
+    { code: "ace" },
+    { code: "vision" }
+  ]), {
+    visibleBadges: [{ code: "ace" }],
+    overflowCount: 2
+  });
+  assert.deepEqual(compactMatchBadgeSelection([
+    { code: "objective" },
+    { code: "vision" }
+  ]), {
+    visibleBadges: [],
+    overflowCount: 2
+  });
 });
 
 test("공개 소환사 경로를 동일한 Riot ID로 왕복 변환한다", () => {

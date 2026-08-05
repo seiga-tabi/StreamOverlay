@@ -40,9 +40,8 @@ export type RecentMatchRowProps = {
   kdaMetric: ReactNode;
   badges: ReactNode;
   scoreClassName: string;
-  aiScoreText: RecentMatchRowLocalizedText;
   scoreDescription: RecentMatchRowLocalizedText;
-  aiScore: number;
+  scoreGrade: string;
   scoreAriaLabel: string;
   metrics: RecentMatchRowMetric[];
   itemSlots: RecentMatchRowMediaItem[];
@@ -82,9 +81,8 @@ export function RecentMatchRow({
   kdaMetric,
   badges,
   scoreClassName,
-  aiScoreText,
   scoreDescription,
-  aiScore,
+  scoreGrade,
   scoreAriaLabel,
   metrics,
   itemSlots,
@@ -93,7 +91,6 @@ export function RecentMatchRow({
   expandedPanel,
   onToggleExpand
 }: RecentMatchRowProps) {
-  const grade = recentMatchScoreGrade(aiScore);
   const scoreDescriptionId = useId();
   const summonerSpellItems = spellItems.filter((item) => item.className !== "rune");
   const runeItems = spellItems.filter((item) => item.className === "rune");
@@ -161,12 +158,10 @@ export function RecentMatchRow({
           aria-describedby={scoreDescriptionId}
           aria-label={scoreAriaLabel}
           className={`public-match-score ${scoreClassName}`}
-          data-grade={grade}
+          data-grade={scoreGrade}
           tabIndex={0}
         >
-          <b>{grade}</b>
-          <strong>{aiScore}</strong>
-          <small data-ko={aiScoreText.ko} data-ja={aiScoreText.ja}>{aiScoreText.label}</small>
+          <b>{scoreGrade}</b>
           <span
             className="public-match-score-description"
             data-ko={scoreDescription.ko}

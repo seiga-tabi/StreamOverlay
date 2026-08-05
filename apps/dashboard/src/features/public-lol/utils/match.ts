@@ -5,11 +5,25 @@ import type {
   PublicChampionAnalysisRow,
   PublicLolChampionPerformance,
   PublicLolMatchPageResponse,
+  PublicLolMatchBadge,
   PublicLolProfile,
   PublicLolRecentMatch,
   PublicLolRolePerformance,
   PublicMatchFilters,
 } from "../types/public-lol";
+
+export function compactMatchBadgeSelection(badges: PublicLolMatchBadge[]): {
+  visibleBadges: PublicLolMatchBadge[];
+  overflowCount: number;
+} {
+  const priorityBadge = badges.find((badge) => badge.code === "mvp")
+    ?? badges.find((badge) => badge.code === "ace");
+  const visibleBadges = priorityBadge ? [priorityBadge] : [];
+  return {
+    visibleBadges,
+    overflowCount: Math.max(0, badges.length - visibleBadges.length)
+  };
+}
 
 export function safeRecordValue(value: number | undefined): number {
   return value !== undefined && Number.isFinite(value) ? value : -1;
