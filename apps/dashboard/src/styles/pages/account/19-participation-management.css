@@ -39,12 +39,42 @@
 .participation-management-create,
 .participation-management-session,
 .participation-management-current,
-.participation-management-queue {
+.participation-management-queue,
+.participation-management-bot {
   min-inline-size: 0;
   padding: var(--space-6);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: var(--surface);
+}
+
+.participation-management-bot {
+  min-inline-size: 0;
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.participation-management-bot > div {
+  min-inline-size: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.participation-management-bot h2,
+.participation-management-bot p {
+  margin: 0;
+}
+
+.participation-management-bot h2 {
+  color: var(--text-strong);
+}
+
+.participation-management-bot p,
+.participation-management-bot small {
+  color: var(--muted);
+  overflow-wrap: anywhere;
 }
 
 .participation-management-create,
@@ -517,7 +547,8 @@
   .participation-management-create,
   .participation-management-session,
   .participation-management-current,
-  .participation-management-queue {
+  .participation-management-queue,
+  .participation-management-bot {
     padding: var(--space-4);
   }
 
@@ -563,6 +594,15 @@
 
   .participation-management-next-action {
     flex-direction: column;
+  }
+
+  .participation-management-bot {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .participation-management-bot > a {
+    inline-size: 100%;
   }
 
   .participation-management-next-action > button,

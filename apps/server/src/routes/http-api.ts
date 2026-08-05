@@ -4465,13 +4465,25 @@ export function createHttpHandler(input: HttpHandlerInput) {
     maxQueueSize?: number;
     allowRejoin?: boolean;
     checkInSeconds?: number;
+    expectedRevision?: number;
   } {
-    const body = strictJsonObject(value, ["action", "maxQueueSize", "allowRejoin", "checkInSeconds"]);
+    const body = strictJsonObject(value, ["action", "maxQueueSize", "allowRejoin", "checkInSeconds", "expectedRevision"]);
     if (typeof body.action !== "string" || !PARTICIPATION_SESSION_ACTIONS.has(body.action)) {
       throw new HttpRequestError(400, { error: "허용되지 않은 시청자 참여 세션 조작입니다.", code: "INVALID_ACTION" });
     }
-    if (body.action !== "start" && Object.keys(body).length !== 1) {
+    if (body.action !== "start" && (
+      body.maxQueueSize !== undefined
+      || body.allowRejoin !== undefined
+      || body.checkInSeconds !== undefined
+    )) {
       throw new HttpRequestError(400, { error: "세션 생성 설정은 start 동작에서만 사용할 수 있습니다.", code: "INVALID_REQUEST" });
+    }
+    if (body.expectedRevision !== undefined && (
+      typeof body.expectedRevision !== "number"
+      || !Number.isSafeInteger(body.expectedRevision)
+      || body.expectedRevision < 0
+    )) {
+      throw new HttpRequestError(400, { error: "참여 상태 revision이 올바르지 않습니다.", code: "INVALID_REVISION" });
     }
     if (body.maxQueueSize !== undefined && (
       typeof body.maxQueueSize !== "number"
@@ -4496,7 +4508,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
       action: body.action,
       ...(typeof body.maxQueueSize === "number" ? { maxQueueSize: body.maxQueueSize } : {}),
       ...(typeof body.allowRejoin === "boolean" ? { allowRejoin: body.allowRejoin } : {}),
-      ...(typeof body.checkInSeconds === "number" ? { checkInSeconds: body.checkInSeconds } : {})
+      ...(typeof body.checkInSeconds === "number" ? { checkInSeconds: body.checkInSeconds } : {}),
+      ...(typeof body.expectedRevision === "number" ? { expectedRevision: body.expectedRevision } : {})
     };
   }
 
@@ -4505,6 +4518,13 @@ export function createHttpHandler(input: HttpHandlerInput) {
     bodyValue: unknown
   ): Promise<{ ok: true; action: string; state: LolOperationsState }> {
     const body = participationSessionMutationBody(bodyValue);
+    const currentRevision = input.store.getParticipationState(streamerId).revision ?? 0;
+    if (body.expectedRevision !== undefined && body.expectedRevision !== currentRevision) {
+      throw new HttpRequestError(409, {
+        error: "다른 화면에서 참여 상태가 변경되었습니다. 최신 상태를 다시 불러왔습니다.",
+        code: "REVISION_CONFLICT"
+      });
+    }
     if (body.action === "start") {
       const currentSession = input.store.getParticipationSession(streamerId);
       if (currentSession && currentSession.status !== "completed") {
@@ -4540,12 +4560,26 @@ export function createHttpHandler(input: HttpHandlerInput) {
     bodyValue: unknown,
     allowedStatuses: ReadonlySet<ParticipationStatus> = PARTICIPATION_DASHBOARD_ENTRY_STATUSES
   ): Promise<ParticipationState> {
-    const body = strictJsonObject(bodyValue, ["entryId", "status"]);
+    const body = strictJsonObject(bodyValue, ["entryId", "status", "expectedRevision"]);
     if (typeof body.entryId !== "string" || !body.entryId.trim()) {
       throw new HttpRequestError(400, { error: "entryId가 필요합니다.", code: "INVALID_ENTRY_ID" });
     }
     if (typeof body.status !== "string" || !allowedStatuses.has(body.status as ParticipationStatus)) {
       throw new HttpRequestError(400, { error: "허용되지 않은 참가자 상태입니다.", code: "INVALID_ENTRY_STATUS" });
+    }
+    if (body.expectedRevision !== undefined && (
+      typeof body.expectedRevision !== "number"
+      || !Number.isSafeInteger(body.expectedRevision)
+      || body.expectedRevision < 0
+    )) {
+      throw new HttpRequestError(400, { error: "참여 상태 revision이 올바르지 않습니다.", code: "INVALID_REVISION" });
+    }
+    const currentRevision = input.store.getParticipationState(streamerId).revision ?? 0;
+    if (body.expectedRevision !== undefined && body.expectedRevision !== currentRevision) {
+      throw new HttpRequestError(409, {
+        error: "다른 화면에서 참여 상태가 변경되었습니다. 최신 상태를 다시 불러왔습니다.",
+        code: "REVISION_CONFLICT"
+      });
     }
     const updated = input.store.markParticipant(body.entryId.trim(), body.status as ParticipationStatus, streamerId);
     if (!updated) throw new HttpRequestError(404, { error: "시청자 참여 항목을 찾을 수 없습니다.", code: "ENTRY_NOT_FOUND" });
@@ -5305,8 +5339,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
     const previousViewerEntry = input.store.getParticipationQueue(streamerState.scopeStreamerId)
       .filter((entry) => entry.twitchUserId === status.user!.id)
       .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))[0];
-    if (rejoinOnly && previousViewerEntry?.status !== "played") {
-      throw new HttpRequestError(409, { error: "참여 완료 후에만 재참여할 수 있습니다.", code: "REJOIN_NOT_ALLOWED" });
+    if (rejoinOnly && !["played", "skipped"].includes(previousViewerEntry?.status ?? "")) {
+      throw new HttpRequestError(409, { error: "참여 완료 또는 순서 건너뛰기 후에만 재참여할 수 있습니다.", code: "REJOIN_NOT_ALLOWED" });
     }
     if (rejoinOnly && selectedSession?.allowRejoin === false) {
       throw new HttpRequestError(409, { error: "이 참여 세션은 재참여를 허용하지 않습니다.", code: "REJOIN_NOT_ALLOWED" });
@@ -5467,6 +5501,32 @@ export function createHttpHandler(input: HttpHandlerInput) {
       session.streamerId
     ).catch(() => undefined);
     return getPublicParticipationState(req, status, session.streamerId, session.publicSessionId);
+  }
+
+  async function skipPublicParticipation(req: IncomingMessage, publicSessionId: string): Promise<PublicParticipationCancelResponse> {
+    const status = await getPublicTwitchViewerStatus(req);
+    if (!status.connected || !status.user) {
+      throw new HttpRequestError(401, { error: "Twitch 로그인 후 이번 순서를 건너뛸 수 있습니다.", code: "LOGIN_REQUIRED" });
+    }
+    const session = participationRepository.getSession(publicSessionId);
+    if (!session) throw new HttpRequestError(404, { error: "참여 세션을 찾을 수 없습니다.", code: "SESSION_NOT_FOUND" });
+    strictJsonObject(await readJsonBody<unknown>(req), []);
+    const result = participationRepository.skip(status.user.id, session.streamerId);
+    if (!result.ok) {
+      throw new HttpRequestError(409, {
+        error: result.reason === "not_selected" ? "현재 체크인 순서가 아닙니다." : "건너뛸 참여 신청을 찾지 못했습니다.",
+        code: result.reason === "not_selected" ? "SKIP_NOT_AVAILABLE" : "PARTICIPATION_NOT_FOUND"
+      });
+    }
+    await broadcastParticipationQueue(
+      { store: input.store, actions: input.actions },
+      "public.participation_skip",
+      session.streamerId
+    ).catch(() => undefined);
+    return {
+      ok: true,
+      state: await getPublicParticipationState(req, status, session.streamerId, session.publicSessionId)
+    };
   }
 
   async function createPublicStreamerRiotIdRequest(req: IncomingMessage): Promise<StreamerRiotIdRequest> {
@@ -9053,7 +9113,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         return sendJson(req, res, 200, await getPublicParticipationDiscovery(req));
       }
       const publicParticipationSessionMatch = url.pathname.match(
-        /^\/api\/public\/participation\/sessions\/([^/]+)(?:\/(join|cancel|check-in|rejoin))?$/u
+        /^\/api\/public\/participation\/sessions\/([^/]+)(?:\/(join|cancel|check-in|rejoin|skip))?$/u
       );
       if (publicParticipationSessionMatch) {
         let publicSessionId = "";
@@ -9078,6 +9138,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
           if (action === "rejoin") return sendJson(req, res, 200, await joinPublicParticipation(req, session.publicSessionId, true));
           if (action === "cancel") return sendJson(req, res, 200, await cancelPublicParticipation(req, session.publicSessionId));
           if (action === "check-in") return sendJson(req, res, 200, { ok: true, state: await checkInPublicParticipation(req, session.publicSessionId) });
+          if (action === "skip") return sendJson(req, res, 200, await skipPublicParticipation(req, session.publicSessionId));
         }
         return sendJson(req, res, 405, { error: "method not allowed" });
       }

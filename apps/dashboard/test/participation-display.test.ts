@@ -78,4 +78,8 @@ test("시청자 행동은 체크인·취소·재참여 조건을 분리한다", 
     getViewerAvailableActions({ status: "played" }, { isOpen: false, status: "closed" }).canRejoin,
     false
   );
+  assert.equal(
+    getViewerAvailableActions({ status: "skipped" }, { isOpen: true, status: "recruiting", allowRejoin: true }).canRejoin,
+    true
+  );
 });

@@ -591,6 +591,17 @@ async function postPublicParticipationCheckIn(publicSessionId: string): Promise<
   return body.state;
 }
 
+async function postPublicParticipationSkip(publicSessionId: string): Promise<PublicParticipationCancelResponse> {
+  const response = await fetch(`${apiBase}/api/public/participation/sessions/${encodeURIComponent(publicSessionId)}/skip`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: "{}"
+  });
+  if (!response.ok) throw new Error(await readErrorMessage(response));
+  return (await response.json()) as PublicParticipationCancelResponse;
+}
+
 function communityPostRiotId(post: CommunityPost | undefined): string | undefined {
   const gameName = post?.riotGameName?.trim();
   const tagLine = post?.riotTagLine?.trim();
@@ -2307,6 +2318,7 @@ function PublicParticipationJoinPage({
   joining,
   cancelling,
   checkingIn,
+  skipping,
   message,
   selectedStreamerId,
   onRefresh,
@@ -2316,7 +2328,8 @@ function PublicParticipationJoinPage({
   onRoleChange,
   onSubmit,
   onCancel,
-  onCheckIn
+  onCheckIn,
+  onSkip
 }: {
   status: PublicTwitchViewerStatus;
   participation: PublicParticipationStateResponse | null;
@@ -2328,6 +2341,7 @@ function PublicParticipationJoinPage({
   joining: boolean;
   cancelling: boolean;
   checkingIn: boolean;
+  skipping: boolean;
   message: string;
   selectedStreamerId: string;
   onRefresh: () => void;
@@ -2338,12 +2352,14 @@ function PublicParticipationJoinPage({
   onSubmit: () => void;
   onCancel: () => void;
   onCheckIn: () => void;
+  onSkip: () => void;
 }) {
   const feedbackKey = error || message;
   const [pendingAction, setPendingAction] = useState<PublicParticipationConfirmAction | null>(null);
   const [dismissedFeedbackKey, setDismissedFeedbackKey] = useState("");
   const [checkInClockMs, setCheckInClockMs] = useState(() => Date.now());
   const [riotIdError, setRiotIdError] = useState("");
+  const [queueExpanded, setQueueExpanded] = useState(false);
   const [checkInAnnouncement, setCheckInAnnouncement] = useState("");
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | "unsupported">(() => (
     typeof window !== "undefined" && "Notification" in window ? Notification.permission : "unsupported"
@@ -2353,12 +2369,15 @@ function PublicParticipationJoinPage({
   const previousPhaseRef = useRef<ParticipationDisplayPhase>();
   const announcedCheckInThresholdRef = useRef<number>();
   const streamers = useMemo(() => {
-    const candidates = status.connected && discovery
-      ? [
+    const candidates = [
+      ...(Array.isArray(participation?.streamers) ? participation.streamers : []),
+      ...(status.connected && discovery
+        ? [
           ...(Array.isArray(discovery.followedRecruiting) ? discovery.followedRecruiting : []),
           ...(Array.isArray(discovery.followedOfflineRecruiting) ? discovery.followedOfflineRecruiting : [])
         ]
-      : [];
+        : [])
+    ];
     const directlySelected = participation
       ? (Array.isArray(participation.streamers) ? participation.streamers : []).find((streamer) => (
           streamer.publicSessionId === participation.publicSessionId
@@ -2401,10 +2420,25 @@ function PublicParticipationJoinPage({
     : undefined;
   const directSessionLink = typeof window !== "undefined"
     && new URLSearchParams(window.location.search).has("session");
+  const visibleQueue = useMemo(() => {
+    if (queueExpanded || queue.length <= 5) return queue;
+    const viewerIndex = queue.findIndex((item) => item.isViewer);
+    if (viewerIndex < 0) return queue.slice(0, 5);
+    const start = Math.min(
+      Math.max(0, viewerIndex - 2),
+      Math.max(0, queue.length - 5)
+    );
+    return queue.slice(start, start + 5);
+  }, [queue, queueExpanded]);
+  const hiddenQueueCount = Math.max(0, queue.length - visibleQueue.length);
 
   useEffect(() => {
     if (feedbackKey) setDismissedFeedbackKey("");
   }, [feedbackKey]);
+
+  useEffect(() => {
+    setQueueExpanded(false);
+  }, [effectiveSelectedStreamerId, participation?.publicSessionId]);
 
   useEffect(() => {
     if (activeViewerEntry?.status !== "selected" || !activeViewerEntry.checkInExpiresAt) return undefined;
@@ -2492,13 +2526,13 @@ function PublicParticipationJoinPage({
         </PageHeaderActions>
       </PageHeader>
 
-      {!status.configured ? (
+      {!error && !status.configured ? (
         <EmptyState className="public-participation-shared-empty" variant="streamer">
           <EmptyStateIcon>!</EmptyStateIcon>
           <EmptyStateTitle as="h3"  >{t().twitchNotConfigured}</EmptyStateTitle>
         </EmptyState>
       ) : null}
-      {status.configured && !status.connected ? (
+      {!error && status.configured && !status.connected ? (
         <EmptyState className="public-participation-shared-empty" variant="streamer">
           <EmptyStateIcon><TwitchGlitchIcon /></EmptyStateIcon>
           <EmptyStateTitle as="h3">{t().participationLoginDiscoveryTitle}</EmptyStateTitle>
@@ -2564,10 +2598,17 @@ function PublicParticipationJoinPage({
               </span>
             </Card>
           ))}
-          {!isStreamerSelectionLoading && streamers.length === 0 ? (
+          {!error && !isStreamerSelectionLoading && streamers.length === 0 ? (
             <EmptyState as="div" className="public-participation-no-streamer public-participation-shared-empty" variant="streamer">
               <EmptyStateIcon>?</EmptyStateIcon>
               <EmptyStateTitle as="h3">{t().participationNoOpenStreamer}</EmptyStateTitle>
+              <EmptyStateDescription>{t().participationNoOpenStreamerDescription}</EmptyStateDescription>
+              <EmptyStateActions>
+                <Button type="button" variant="secondary" onClick={onRefresh}>{t().participationRefresh}</Button>
+                <Button type="button" onClick={() => window.location.assign(localizedPublicUrlForCurrentLocale("/follow"))}>
+                  {t().participationLiveStreamers}
+                </Button>
+              </EmptyStateActions>
             </EmptyState>
           ) : null}
         </div>
@@ -2616,6 +2657,9 @@ function PublicParticipationJoinPage({
           <EmptyStateIcon>!</EmptyStateIcon>
           <EmptyStateTitle as="h3"  >{t().searchFailed}</EmptyStateTitle>
           <EmptyStateDescription>{error}</EmptyStateDescription>
+          <EmptyStateActions>
+            <Button type="button" variant="secondary" onClick={onRefresh}>{t().participationRetry}</Button>
+          </EmptyStateActions>
         </EmptyState>
       ) : null}
       {message ? <StatusPill className="public-participation-message" tone="success">{message}</StatusPill> : null}
@@ -2650,9 +2694,14 @@ function PublicParticipationJoinPage({
                 <span>{t().participationCheckInRemaining}</span>
                 <strong aria-hidden="true">{typeof checkInRemainingSeconds === "number" ? `00:${String(checkInRemainingSeconds).padStart(2, "0")}` : "--:--"}</strong>
                 <span aria-live="assertive" className="sr-only">{checkInAnnouncement}</span>
-                <Button variant="primary" type="button" onClick={onCheckIn} loading={checkingIn} disabled={checkingIn}>
-                  {checkingIn ? t().participationCheckingIn : t().participationCheckIn}
-                </Button>
+                <div className="public-participation-check-in-actions">
+                  <Button variant="primary" type="button" onClick={onCheckIn} loading={checkingIn} disabled={checkingIn || skipping}>
+                    {checkingIn ? t().participationCheckingIn : t().participationCheckIn}
+                  </Button>
+                  <Button variant="secondary" type="button" onClick={onSkip} loading={skipping} disabled={checkingIn || skipping}>
+                    {skipping ? t().participationSkippingTurn : t().participationSkipTurn}
+                  </Button>
+                </div>
               </div>
             ) : null}
             <div className="public-participation-my-status-actions">
@@ -2676,9 +2725,8 @@ function PublicParticipationJoinPage({
       ) : null}
 
       {viewerPhase && viewerPhase !== "ended" ? (
-        <Card as="section" className="public-participation-timeline-card" padding="lg" variant="glass">
-          <CardHeader><CardTitle as="h3">{t().participationJourneyTitle}</CardTitle></CardHeader>
-          <CardContent>
+        <details className="public-participation-timeline-card">
+          <summary>{t().participationJourneyTitle}</summary>
             <ol className="public-participation-timeline">
               {PUBLIC_PARTICIPATION_PHASE_STEPS.map((step, index) => {
                 const currentIndex = PUBLIC_PARTICIPATION_PHASE_STEPS.findIndex((item) => item.phase === viewerPhase);
@@ -2693,8 +2741,7 @@ function PublicParticipationJoinPage({
                 );
               })}
             </ol>
-          </CardContent>
-        </Card>
+        </details>
       ) : null}
       </div>
 
@@ -2712,9 +2759,12 @@ function PublicParticipationJoinPage({
           ) : (
             <form className="public-participation-form" onSubmit={requestJoin}>
               {canRejoin ? (
-                <div className="public-participation-rejoin-note">
-                  <Badge tone="streamer">{t().participationRejoin}</Badge>
-                  <span>{t().participationEndedRejoin}</span>
+                <div className="public-participation-rejoin-note" role="status">
+                  <span aria-hidden="true" className="public-participation-rejoin-icon">↻</span>
+                  <span className="public-participation-rejoin-copy">
+                    <strong>{t().participationRejoin}</strong>
+                    <span>{t().participationEndedRejoin}</span>
+                  </span>
                 </div>
               ) : null}
               <FormField controlId="public-participation-riot-id" disabled={!canJoin || joining} invalid={Boolean(riotIdError)} required>
@@ -2773,9 +2823,9 @@ function PublicParticipationJoinPage({
               <EmptyStateTitle as="h3">{t().participationQueueEmpty}</EmptyStateTitle>
             </EmptyState>
           ) : null}
-          <div className="public-participation-queue-list">
-            {queue.map((item) => (
-              <Card as="article" className={`public-participation-queue-row ${item.isViewer ? "viewer" : ""}`} key={`${item.position}-${item.twitchUserName}`} padding="sm" variant={item.isViewer ? "interactive" : "default"}>
+          <ol className="public-participation-queue-list" aria-label={t().participationQueueTitle}>
+            {visibleQueue.map((item) => (
+              <li className={`public-participation-queue-row ${item.isViewer ? "viewer" : ""}`} key={`${item.position}-${item.twitchUserName}`}>
                 <span
                   aria-label={`${t().participationPosition} ${formatNumber(item.position)}`}
                   className="public-participation-position"
@@ -2783,35 +2833,52 @@ function PublicParticipationJoinPage({
                   #{formatNumber(item.position)}
                 </span>
                 <div className="public-participation-queue-main">
-                  <strong>{item.twitchUserName}</strong>
+                  <div className="public-participation-queue-heading">
+                    <strong>{item.twitchUserName}</strong>
+                    {item.isViewer ? <Badge className="public-participation-queue-viewer" size="sm" tone="streamer">{t().participationViewerBadge}</Badge> : null}
+                  </div>
+                  <span className="public-participation-queue-profile">
+                    {publicParticipationRankText(item)} · {publicParticipationRoleLabel(item.preferredRole ?? item.requestedRole ?? item.mainRole)}
+                  </span>
                   <div className="public-participation-queue-tags">
-                    <StatusPill size="sm" tone={publicParticipationStatusTone(item.status)}>{publicParticipationStatusLabel(item.status)}</StatusPill>
-                    <Badge size="sm" tone={sharedRankTone(item.rankedStats, !item.rankedStats)}>{publicParticipationRankText(item)}</Badge>
-                    <Badge size="sm" tone="info">{publicParticipationRoleLabel(item.preferredRole ?? item.requestedRole ?? item.mainRole)}</Badge>
-                    {item.isViewer ? <Badge className="viewer" size="sm" tone="streamer">{t().participationViewerBadge}</Badge> : null}
+                    <StatusPill className="public-participation-queue-status" size="sm" tone={publicParticipationStatusTone(item.status)}>{publicParticipationStatusLabel(item.status)}</StatusPill>
                   </div>
                 </div>
                 <div className="public-participation-queue-champions" aria-hidden="true">
-                  {(item.topChampions ?? []).slice(0, 3).map((champion) => (
+                  {(item.topChampions ?? []).slice(0, 2).map((champion) => (
                     <img key={champion.championId} src={assetUrl(champion.iconUrl)} alt="" />
                   ))}
+                  {(item.topChampions ?? []).length > 2 ? <em>+{formatNumber((item.topChampions ?? []).length - 2)}</em> : null}
                   {(item.topChampions ?? []).length === 0 ? <em>?</em> : null}
                 </div>
-              </Card>
+              </li>
             ))}
-          </div>
+          </ol>
+          {queue.length > 5 ? (
+            <Button
+              aria-expanded={queueExpanded}
+              className="public-participation-queue-toggle"
+              type="button"
+              variant="secondary"
+              onClick={() => setQueueExpanded((current) => !current)}
+            >
+              {queueExpanded
+                ? t().participationQueueShowLess
+                : `${t().participationQueueShowAll} (${formatNumber(hiddenQueueCount)})`}
+            </Button>
+          ) : null}
           </CardContent>
         </Card>
       </div>
-      <section className="public-participation-rules" aria-labelledby="public-participation-rules-title">
-        <h3 id="public-participation-rules-title">{t().participationRulesTitle}</h3>
+      <details className="public-participation-rules">
+        <summary id="public-participation-rules-title">{t().participationRulesTitle}</summary>
         <div>
           <article><strong>{t().participationRuleAccountTitle}</strong><p>{t().participationRuleAccountBody}</p></article>
           <article><strong>{t().participationRuleRiotTitle}</strong><p>{t().participationRuleRiotBody}</p></article>
           <article><strong>{t().participationRuleCheckInTitle}</strong><p>{t().participationRuleCheckInBody}</p></article>
           <article><strong>{t().participationRuleRejoinTitle}</strong><p>{t().participationRuleRejoinBody}</p></article>
         </div>
-      </section>
+      </details>
       </>
       ) : streamers.length > 0 && !loading ? (
         <EmptyState as="div" className="public-participation-shared-empty" variant="streamer">
@@ -6031,6 +6098,7 @@ export function PublicLolPage({
   const [publicParticipationJoining, setPublicParticipationJoining] = useState(false);
   const [publicParticipationCancelling, setPublicParticipationCancelling] = useState(false);
   const [publicParticipationCheckingIn, setPublicParticipationCheckingIn] = useState(false);
+  const [publicParticipationSkipping, setPublicParticipationSkipping] = useState(false);
   const [publicParticipationMessage, setPublicParticipationMessage] = useState("");
   const [publicParticipationStreamerId, setPublicParticipationStreamerId] = useState("");
   const [publicParticipationSessionId, setPublicParticipationSessionId] = useState(
@@ -6381,14 +6449,14 @@ export function PublicLolPage({
         role: publicParticipationJoinRole,
         streamerId: publicParticipationStreamerId,
         publicSessionId: (publicParticipation?.publicSessionId ?? publicParticipationSessionId) || undefined,
-        rejoin: publicParticipation?.viewerEntry?.status === "played"
+        rejoin: publicParticipation?.viewerEntry?.status === "played" || publicParticipation?.viewerEntry?.status === "skipped"
       });
       setPublicParticipation(response.state);
       if (response.state.selectedStreamerId) setPublicParticipationStreamerId(response.state.selectedStreamerId);
       setPublicParticipationMessage(response.alreadyJoined ? t().participationAlreadyJoined : t().participationJoinComplete);
       if (!response.alreadyJoined) {
         trackGoogleAnalyticsEvent("participation_join", {
-          join_type: publicParticipation?.viewerEntry?.status === "played" ? "rejoin" : "join"
+          join_type: ["played", "skipped"].includes(publicParticipation?.viewerEntry?.status ?? "") ? "rejoin" : "join"
         });
       }
     } catch (requestError) {
@@ -6438,6 +6506,26 @@ export function PublicLolPage({
       setPublicParticipationError(requestError instanceof Error ? requestError.message : t().participationCheckInFailed);
     } finally {
       setPublicParticipationCheckingIn(false);
+    }
+  }
+
+  async function skipPublicParticipation(): Promise<void> {
+    const publicSessionId = publicParticipation?.publicSessionId ?? publicParticipationSessionId;
+    if (!publicSessionId) {
+      setPublicParticipationError(t().participationSelectStreamerTitle);
+      return;
+    }
+    setPublicParticipationSkipping(true);
+    setPublicParticipationError("");
+    setPublicParticipationMessage("");
+    try {
+      const response = await postPublicParticipationSkip(publicSessionId);
+      setPublicParticipation(response.state);
+      setPublicParticipationMessage(t().participationSkipComplete);
+    } catch (requestError) {
+      setPublicParticipationError(requestError instanceof Error ? requestError.message : t().participationSkipFailed);
+    } finally {
+      setPublicParticipationSkipping(false);
     }
   }
 
@@ -6950,6 +7038,7 @@ export function PublicLolPage({
           joining={publicParticipationJoining}
           cancelling={publicParticipationCancelling}
           checkingIn={publicParticipationCheckingIn}
+          skipping={publicParticipationSkipping}
           message={publicParticipationMessage}
           selectedStreamerId={publicParticipationStreamerId}
           onRefresh={() => void loadPublicParticipationState()}
@@ -6960,6 +7049,7 @@ export function PublicLolPage({
           onSubmit={submitPublicParticipation}
           onCancel={() => void cancelPublicParticipation()}
           onCheckIn={() => void checkInPublicParticipation()}
+          onSkip={() => void skipPublicParticipation()}
         />
       );
     }

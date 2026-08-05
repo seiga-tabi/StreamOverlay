@@ -3613,7 +3613,7 @@
   flex-wrap: wrap;
 }
 
-.public-participation-queue-tags span {
+.public-participation-queue-tags > :is(.yoro-status, .yoro-badge) {
   border-radius: 999px;
   background: #e7f4ff;
   color: #376b9d;

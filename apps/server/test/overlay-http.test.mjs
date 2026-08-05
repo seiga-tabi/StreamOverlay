@@ -1055,6 +1055,22 @@ test("공개 session URL은 참가·체크인·취소를 같은 참여 대기열
   assert.equal(invalidCheckInRes.statusCode, 400);
   assert.equal(store.getParticipationQueue(streamerId)[0]?.status, "selected");
 
+  const skipReq = createRequest("POST", `/api/public/participation/sessions/${encodeURIComponent(session.publicSessionId)}/skip`, {}, headers);
+  const skipRes = createResponse();
+  await handler(skipReq, skipRes);
+  assert.equal(skipRes.statusCode, 200);
+  assert.equal(store.getParticipationQueue(streamerId)[0]?.status, "skipped");
+
+  const rejoinReq = createRequest("POST", `/api/public/participation/sessions/${encodeURIComponent(session.publicSessionId)}/rejoin`, {
+    riotId: "PublicViewer#JP1",
+    role: "support"
+  }, headers);
+  const rejoinRes = createResponse();
+  await handler(rejoinReq, rejoinRes);
+  assert.equal(rejoinRes.statusCode, 200);
+  assert.equal(store.getParticipationQueue(streamerId)[0]?.status, "waitlisted");
+  store.selectNextParticipant(60, streamerId);
+
   const checkInReq = createRequest("POST", `/api/public/participation/sessions/${encodeURIComponent(session.publicSessionId)}/check-in`, {}, headers);
   const checkInRes = createResponse();
   await handler(checkInReq, checkInRes);

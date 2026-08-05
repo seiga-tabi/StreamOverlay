@@ -1776,6 +1776,12 @@
   font-size: var(--yoro-font-size-xl);
 }
 
+.public-participation-check-in-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--yoro-space-2);
+}
+
 .public-participation-my-status-actions {
   margin-block-start: var(--yoro-space-4);
   flex-wrap: wrap;
@@ -1914,9 +1920,13 @@
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
-  .public-participation-check-in-alert .yoro-button {
+  .public-participation-check-in-actions {
     grid-column: 1 / -1;
     inline-size: 100%;
+  }
+
+  .public-participation-check-in-actions .yoro-button {
+    flex: 1 1 10rem;
   }
 }
 
@@ -3152,19 +3162,6 @@ html[lang="ja"] .public-dashboard-shell:not(.public-home-shell) .public-app-head
   box-shadow: none !important;
 }
 
-.public-dashboard-shell:not(.public-home-shell) .public-participation-rejoin-note {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  padding: 12px;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-participation-rejoin-note span {
-  color: rgba(248, 249, 250, .78) !important;
-  font-size: 13px;
-  font-weight: 800;
-}
-
 .public-dashboard-shell:not(.public-home-shell) .public-participation-queue-row.viewer {
   border-color: rgba(123, 92, 255, .44) !important;
   background:
@@ -3257,10 +3254,6 @@ html[lang="ja"] .public-dashboard-shell:not(.public-home-shell) .public-app-head
     width: 100%;
   }
 
-  .public-dashboard-shell:not(.public-home-shell) .public-participation-rejoin-note {
-    align-items: flex-start;
-    flex-direction: column;
-  }
 }
 
 /* 전적 상세 MVP/ACE 배지: 반투명 glow 때문에 흐려 보이지 않도록 선명도 우선 보정 */

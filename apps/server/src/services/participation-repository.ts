@@ -12,6 +12,7 @@ export interface ParticipationRepository {
   getActiveQueue(streamerId: string): ParticipationEntry[];
   listSessions(): ParticipationSession[];
   cancel(twitchUserId: string, streamerId: string): ReturnType<Store["cancelParticipationByUser"]>;
+  skip(twitchUserId: string, streamerId: string): ReturnType<Store["skipSelectedParticipationByUser"]>;
   checkIn(twitchUserId: string, streamerId: string): ReturnType<Store["checkInSelectedParticipant"]>;
 }
 
@@ -25,6 +26,11 @@ export function storeParticipationRepository(store: Store): ParticipationReposit
     cancel: (twitchUserId, streamerId) => store.cancelParticipationByUser(
       twitchUserId,
       "시청자가 공개 참여 세션에서 참가를 취소했습니다.",
+      streamerId
+    ),
+    skip: (twitchUserId, streamerId) => store.skipSelectedParticipationByUser(
+      twitchUserId,
+      "시청자가 공개 참여 세션에서 이번 순서를 건너뛰었습니다.",
       streamerId
     ),
     checkIn: (twitchUserId, streamerId) => store.checkInSelectedParticipant(

@@ -182,6 +182,23 @@ export class YoroCommandHandler {
       });
       return;
     }
+    if (subcommand === "participation") {
+      const localePath = locale === "ja" ? "/ja/participation" : "/ko/participation";
+      const participationUrl = new URL(localePath, this.dashboardUrl).toString();
+      const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+          .setLabel(text.participationButton)
+          .setStyle(ButtonStyle.Link)
+          .setURL(participationUrl)
+      );
+      await interaction.reply({
+        content: `${text.participationTitle}\n${text.participationBody}`,
+        components: [row],
+        flags: MessageFlags.Ephemeral,
+        allowedMentions: { parse: [] }
+      });
+      return;
+    }
     if (subcommand !== "setup") {
       await interaction.reply({
         content: text.unknown,

@@ -89,7 +89,7 @@ test("command manifest는 관리 명령과 작성자 전용 Palworld 조회 명�
   assert.equal(yoroCommandJson.name, "yoro");
   assert.deepEqual(
     yoroCommandJson.options?.map((option) => option.name),
-    ["setup", "help", "dashboard", "language", "status", "player", "guide"]
+    ["setup", "help", "dashboard", "participation", "language", "status", "player", "guide"]
   );
   const player = yoroCommandJson.options?.find(
     (option) => option.name === "player"
@@ -98,6 +98,26 @@ test("command manifest는 관리 명령과 작성자 전용 Palworld 조회 명�
   assert.equal(player?.options?.[0]?.max_length, 80);
   assert.equal(yoroCommandJson.dm_permission, false);
   assert.equal(yoroCommandJson.default_member_permissions, undefined);
+});
+
+test("/yoro participation은 locale을 보존한 참여 화면을 작성자에게만 안내한다", async () => {
+  const { value, calls } = interaction({
+    subcommand: "participation",
+    locale: "ja"
+  });
+  const handler = new YoroCommandHandler(
+    IDS.application,
+    {},
+    Date.now,
+    "https://yoro.gg/dashboard/organizations"
+  );
+  await handler.handle(value);
+  assert.equal(calls.reply[0].flags, MessageFlags.Ephemeral);
+  assert.match(calls.reply[0].content, /視聴者参加/u);
+  assert.equal(
+    calls.reply[0].components[0].components[0].data.url,
+    "https://yoro.gg/ja/participation"
+  );
 });
 
 test("command 등록 비교는 Discord REST의 null·기본값 보충을 변경으로 오판하지 않는다", () => {
@@ -109,7 +129,7 @@ test("command 등록 비교는 Discord REST의 null·기본값 보충을 변경�
   discordResponse.options = discordResponse.options.map((option) => {
     const normalized = {
       ...option,
-      name_localizations: null
+      name_localizations: option.name_localizations ?? null
     };
     if (option.options.length === 0) {
       delete normalized.options;
@@ -117,7 +137,7 @@ test("command 등록 비교는 Discord REST의 null·기본값 보충을 변경�
     }
     normalized.options = option.options.map((child) => ({
       ...child,
-      name_localizations: null,
+      name_localizations: child.name_localizations ?? null,
       autocomplete: false,
       choices: child.choices?.map((choice) => ({
         ...choice,

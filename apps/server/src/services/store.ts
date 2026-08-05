@@ -128,6 +128,10 @@ export type ParticipationCancelResult =
   | { ok: true; entry: ParticipationEntry }
   | { ok: false; reason: "missing" | "in_game" };
 
+export type ParticipationSkipResult =
+  | { ok: true; entry: ParticipationEntry }
+  | { ok: false; reason: "missing" | "not_selected" };
+
 const CANCELLABLE_PARTICIPATION_STATUSES = new Set<ParticipationEntry["status"]>([
   "pending",
   "verified",
@@ -2663,6 +2667,21 @@ export class Store {
     if (!entry) return { ok: false, reason: "missing" };
     if (!CANCELLABLE_PARTICIPATION_STATUSES.has(entry.status)) return { ok: false, reason: "in_game" };
     entry.status = "cancelled";
+    entry.checkInExpiresAt = undefined;
+    entry.updatedAt = nowIso();
+    if (note) entry.notes = entry.notes ? `${entry.notes}\n${note}` : note;
+    this.persistRuntimeState();
+    return { ok: true, entry };
+  }
+
+  skipSelectedParticipationByUser(twitchUserId: string, note?: string, streamerId?: string): ParticipationSkipResult {
+    const entry = this.participationQueueFor(streamerId).find((candidate) => (
+      candidate.twitchUserId === twitchUserId && isActiveParticipationStatus(candidate.status)
+    ));
+    if (!entry) return { ok: false, reason: "missing" };
+    if (entry.status !== "selected") return { ok: false, reason: "not_selected" };
+    entry.status = "skipped";
+    entry.selectedAt = undefined;
     entry.checkInExpiresAt = undefined;
     entry.updatedAt = nowIso();
     if (note) entry.notes = entry.notes ? `${entry.notes}\n${note}` : note;

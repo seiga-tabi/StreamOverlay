@@ -36,6 +36,18 @@ export const yoroCommand = new SlashCommandBuilder()
       }))
   .addSubcommand((command) =>
     command
+      .setName("participation")
+      .setNameLocalizations({
+        ko: "참여",
+        ja: "参加"
+      })
+      .setDescription("Open the viewer participation page privately.")
+      .setDescriptionLocalizations({
+        ko: "현재 모집 중인 시청자 참여 방송을 비공개로 확인합니다.",
+        ja: "現在募集中の視聴者参加配信を非公開で確認します。"
+      }))
+  .addSubcommand((command) =>
+    command
       .setName("language")
       .setDescription("Set the language used in YORO Bot messages.")
       .setDescriptionLocalizations({

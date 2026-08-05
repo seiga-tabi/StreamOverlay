@@ -214,7 +214,7 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
     (pathname === "/api/public/participation/discovery" && method === "GET") ||
     (pathname === "/api/public/participation/join" && method === "POST") ||
     (pathname === "/api/public/participation/cancel" && method === "POST") ||
-    /^\/api\/public\/participation\/sessions\/[^/]+(?:\/(?:join|cancel|check-in|rejoin))?$/.test(pathname) ||
+    /^\/api\/public\/participation\/sessions\/[^/]+(?:\/(?:join|cancel|check-in|rejoin|skip))?$/.test(pathname) ||
     (pathname === "/api/public/community/posts" && (method === "GET" || method === "POST")) ||
     (method === "PATCH" && /^\/api\/public\/community\/posts\/[^/]+$/.test(pathname)) ||
     (method === "POST" && /^\/api\/public\/community\/posts\/[^/]+\/comments$/.test(pathname)) ||

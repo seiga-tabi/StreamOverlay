@@ -57,6 +57,52 @@
 }
 
 /* 참가 대기열 목록의 정보 위계와 반응형 배치 보정 */
+.public-dashboard-shell:not(.public-home-shell) .public-participation-rejoin-note {
+  display: grid;
+  grid-template-columns: var(--yoro-space-8) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--yoro-space-3);
+  min-width: var(--yoro-space-0);
+  padding: var(--yoro-space-3) !important;
+  border: var(--yoro-size-sr-only) solid color-mix(in srgb, var(--yoro-color-success) 42%, var(--public-gray-border)) !important;
+  border-radius: var(--yoro-radius-md) !important;
+  background: color-mix(in srgb, var(--public-gray-surface-strong) 88%, var(--yoro-color-success)) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-participation-rejoin-icon {
+  display: grid;
+  place-items: center;
+  width: var(--yoro-space-8);
+  height: var(--yoro-space-8);
+  border-radius: var(--yoro-radius-circle);
+  background: var(--yoro-color-success-bg);
+  color: var(--yoro-color-success) !important;
+  font-size: var(--yoro-font-size-lg) !important;
+  font-weight: var(--yoro-font-weight-black) !important;
+  line-height: var(--yoro-line-height-tight);
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-participation-rejoin-copy {
+  display: grid;
+  gap: var(--yoro-space-1);
+  min-width: var(--yoro-space-0);
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-participation-rejoin-copy strong {
+  color: var(--yoro-color-text-on-dark-strong);
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-black);
+  line-height: var(--yoro-line-height-tight);
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-participation-rejoin-copy > span {
+  color: var(--yoro-color-text-on-dark-muted) !important;
+  font-size: var(--yoro-font-size-sm) !important;
+  font-weight: var(--yoro-font-weight-medium) !important;
+  line-height: var(--yoro-line-height-relaxed);
+  overflow-wrap: anywhere;
+}
+
 .public-dashboard-shell:not(.public-home-shell) .public-participation-queue-list {
   display: grid;
   gap: var(--yoro-space-2);
@@ -133,6 +179,31 @@
   line-height: var(--yoro-line-height-tight);
 }
 
+.public-dashboard-shell:not(.public-home-shell) .public-participation-queue-tags .public-participation-queue-status {
+  border-radius: var(--yoro-radius-pill);
+  border-color: var(--yoro-status-border) !important;
+  background: color-mix(in srgb, var(--yoro-status-background) 76%, var(--public-gray-surface)) !important;
+  color: var(--yoro-status-text) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-participation-queue-tags .public-participation-queue-rank {
+  border-color: color-mix(in srgb, var(--yoro-color-info) 58%, var(--public-gray-border)) !important;
+  background: color-mix(in srgb, var(--public-gray-surface) 78%, var(--yoro-color-info)) !important;
+  color: var(--yoro-color-text-on-dark-strong) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-participation-queue-tags .public-participation-queue-role {
+  border-color: var(--public-gray-border-strong) !important;
+  background: transparent !important;
+  color: var(--yoro-color-text-on-dark-muted) !important;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-participation-queue-tags .public-participation-queue-viewer {
+  border-color: var(--yoro-color-secondary) !important;
+  background: color-mix(in srgb, var(--public-gray-surface) 62%, var(--yoro-color-secondary)) !important;
+  color: var(--yoro-color-text-on-dark-strong) !important;
+}
+
 .public-dashboard-shell:not(.public-home-shell) .public-participation-queue-champions {
   display: flex;
   align-items: center;
@@ -156,7 +227,93 @@
   object-fit: cover;
 }
 
+/* 시청자 참여 최종 정보 위계: 참가자는 중첩 카드가 아닌 접근 가능한 목록 행으로 표시 */
+.public-dashboard-shell:not(.public-home-shell) .public-participation-queue-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-participation-queue-row:not(.yoro-card) {
+  position: relative;
+  min-width: var(--yoro-space-0);
+  padding: var(--yoro-space-3) var(--yoro-space-2);
+  border-block-end: var(--yoro-size-sr-only) solid var(--public-gray-border);
+  display: grid;
+  grid-template-columns: var(--yoro-size-touch-target) minmax(0, 1fr) auto;
+  gap: var(--yoro-space-3);
+  align-items: center;
+  background: transparent;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-participation-queue-row:not(.yoro-card):first-child {
+  border-block-start: var(--yoro-size-sr-only) solid var(--public-gray-border);
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-participation-queue-row:not(.yoro-card).viewer {
+  padding-inline-start: var(--yoro-space-3);
+  border-inline-start: var(--yoro-space-1) solid var(--yoro-color-secondary);
+  background: color-mix(in srgb, var(--public-gray-surface) 88%, var(--yoro-color-secondary));
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-participation-queue-heading {
+  min-width: var(--yoro-space-0);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--yoro-space-2);
+  align-items: center;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-participation-queue-heading strong {
+  min-width: var(--yoro-space-0);
+  overflow: hidden;
+  color: var(--public-gray-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-participation-queue-profile {
+  color: var(--public-gray-muted);
+  font-size: var(--yoro-font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-participation-queue-row:not(.yoro-card) .public-participation-queue-tags {
+  margin-block-start: var(--yoro-space-1);
+}
+
+.public-dashboard-shell:not(.public-home-shell) .public-participation-queue-toggle {
+  inline-size: 100%;
+  margin-block-start: var(--yoro-space-3);
+}
+
+.public-dashboard-shell:not(.public-home-shell) :is(.public-participation-timeline-card, .public-participation-rules) {
+  min-width: var(--yoro-space-0);
+  padding: var(--yoro-space-4);
+  border: var(--yoro-size-sr-only) solid var(--public-gray-border);
+  border-radius: var(--yoro-radius-xl);
+  background: var(--public-gray-surface);
+}
+
+.public-dashboard-shell:not(.public-home-shell) :is(.public-participation-timeline-card, .public-participation-rules) > summary {
+  min-block-size: var(--yoro-size-touch-target);
+  display: flex;
+  align-items: center;
+  color: var(--public-gray-text);
+  font-weight: var(--yoro-font-weight-bold);
+  cursor: pointer;
+}
+
+.public-dashboard-shell:not(.public-home-shell) :is(.public-participation-timeline-card, .public-participation-rules)[open] > summary {
+  margin-block-end: var(--yoro-space-4);
+}
+
 @media (max-width: 48rem) {
+  .public-dashboard-shell:not(.public-home-shell) .public-participation-rejoin-note {
+    grid-template-columns: var(--yoro-space-8) minmax(0, 1fr);
+    align-items: center;
+  }
+
   .public-dashboard-shell:not(.public-home-shell) .public-participation-queue-row.yoro-card {
     grid-template-columns: var(--yoro-size-touch-target) minmax(0, 1fr) !important;
     align-items: start !important;
@@ -166,6 +323,15 @@
   .public-dashboard-shell:not(.public-home-shell) .public-participation-queue-champions {
     grid-column: 2;
     justify-content: flex-start;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-participation-queue-row:not(.yoro-card) {
+    grid-template-columns: var(--yoro-size-touch-target) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-participation-queue-row:not(.yoro-card) .public-participation-queue-champions {
+    grid-column: 2;
   }
 }
 
@@ -2639,4 +2805,80 @@
 .public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-search-form .public-server-menu {
   z-index: calc(var(--yoro-z-dropdown) + 1) !important;
   min-width: 15rem !important;
+}
+
+/* 모바일 연관검색은 이름과 랭크를 한 정보 열에 쌓아 긴 KO/JA ID가 행을 밀어내지 않게 합니다. */
+@media (max-width: 47.5rem) {
+  .public-home-shared-shell .public-home-shared-search .public-suggestion-list,
+  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-list {
+    min-width: var(--yoro-space-0) !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  .public-home-shared-shell .public-home-shared-search .public-suggestion-list button,
+  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-list button {
+    grid-template-columns:
+      var(--yoro-space-10)
+      var(--yoro-space-8)
+      minmax(var(--yoro-space-0), 1fr)
+      var(--yoro-space-6) !important;
+    grid-template-rows: auto auto;
+    grid-template-areas:
+      "avatar tier name mark"
+      "avatar tier rank mark" !important;
+    gap: var(--yoro-space-1) var(--yoro-space-2) !important;
+    box-sizing: border-box;
+    width: 100% !important;
+    min-width: var(--yoro-space-0) !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .public-home-shared-shell .public-home-shared-search .public-suggestion-list button > *,
+  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-list button > * {
+    min-width: var(--yoro-space-0) !important;
+    max-width: 100% !important;
+  }
+
+  .public-home-shared-shell .public-home-shared-search .public-suggestion-name,
+  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-name {
+    align-self: end;
+    overflow: hidden;
+  }
+
+  .public-home-shared-shell .public-home-shared-search .public-suggestion-name span,
+  .public-home-shared-shell .public-home-shared-search .public-suggestion-name strong,
+  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-name span,
+  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-name strong,
+  .public-home-shared-shell .public-home-shared-search .public-suggestion-rank-copy > span,
+  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-rank-copy > span {
+    display: block !important;
+    min-width: var(--yoro-space-0) !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .public-home-shared-shell .public-home-shared-search .public-suggestion-rank-copy,
+  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-rank-copy {
+    display: flex !important;
+    grid-area: rank;
+    align-self: start;
+    align-items: baseline;
+    justify-self: stretch;
+    justify-content: flex-start;
+    gap: var(--yoro-space-1);
+    min-width: var(--yoro-space-0) !important;
+    max-width: 100% !important;
+    overflow: hidden;
+    text-align: start;
+    white-space: nowrap;
+  }
+
+  .public-home-shared-shell .public-home-shared-search .public-suggestion-rank-copy small,
+  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-rank-copy small {
+    flex: 0 0 auto;
+  }
 }

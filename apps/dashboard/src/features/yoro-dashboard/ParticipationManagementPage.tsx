@@ -78,6 +78,10 @@ const copy = {
     queueWaiting: "대기 중",
     queueHistory: "완료·취소",
     queueHistoryEmpty: "완료되거나 취소된 참가 이력이 없습니다.",
+    botIntegrationTitle: "Discord Bot 연동",
+    botIntegrationDescription: "참여 상태는 YORO Server에서 관리되며, Discord 공지와 체크인 알림은 같은 공개 참여 링크를 사용합니다.",
+    botIntegrationAction: "Discord Bot 제어 열기",
+    botIntegrationSafety: "Discord 전송 실패가 참여 신청이나 대기열 상태를 변경하지 않습니다.",
     details: "상세 보기",
     appliedAt: "신청 시각",
     finishConfirm: "현재 참여 세션을 종료할까요? 종료 후에는 다시 열 수 없습니다.",
@@ -162,6 +166,10 @@ const copy = {
     queueWaiting: "待機中",
     queueHistory: "完了・取消",
     queueHistoryEmpty: "完了または取り消された参加履歴はありません。",
+    botIntegrationTitle: "Discord Bot連携",
+    botIntegrationDescription: "参加状態はYORO Serverで管理され、Discordのお知らせとチェックイン通知も同じ公開参加リンクを使用します。",
+    botIntegrationAction: "Discord Bot管理を開く",
+    botIntegrationSafety: "Discord送信の失敗によって、参加申請や待機列の状態が変更されることはありません。",
     details: "詳細を見る",
     appliedAt: "申請時刻",
     finishConfirm: "現在の参加セッションを終了しますか？終了後は再開できません。",
@@ -320,11 +328,16 @@ export function ParticipationManagementPage({
     setError("");
     setMessage("");
     try {
-      const result = await updateYoroParticipationSession({ action, ...options }, csrfToken);
+      const result = await updateYoroParticipationSession({
+        action,
+        ...options,
+        ...(state?.revision === undefined ? {} : { expectedRevision: state.revision })
+      }, csrfToken);
       setState(result.state.participation);
       setMessage(action === "start" ? text.sessionStarted : action === "finish" ? text.sessionFinished : text.sessionUpdated);
     } catch {
       setError(text.updateFailed);
+      void load();
     } finally {
       setBusyKey("");
     }
@@ -341,10 +354,11 @@ export function ParticipationManagementPage({
     setError("");
     setMessage("");
     try {
-      setState(await updateYoroParticipationEntry(entryId, status, csrfToken));
+      setState(await updateYoroParticipationEntry(entryId, status, csrfToken, state?.revision));
       setMessage(text.entryUpdated);
     } catch {
       setError(text.updateFailed);
+      void load();
     } finally {
       setBusyKey("");
     }
@@ -548,6 +562,15 @@ export function ParticipationManagementPage({
               </div>
             </details>
           </section>
+
+          <aside className="participation-management-bot" aria-labelledby="participation-bot-title">
+            <div>
+              <h2 id="participation-bot-title">{text.botIntegrationTitle}</h2>
+              <p>{text.botIntegrationDescription}</p>
+              <small>{text.botIntegrationSafety}</small>
+            </div>
+            <a href="/dashboard/organizations/bot">{text.botIntegrationAction}</a>
+          </aside>
         </>
       )}
     </section>

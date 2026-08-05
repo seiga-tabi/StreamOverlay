@@ -98,7 +98,7 @@ export function getViewerAvailableActions(
   return {
     canCancel: Boolean(status && ACTIVE_VIEWER_STATUSES.includes(status)),
     canCheckIn: status === "selected" && session.status !== "completed",
-    canRejoin: status === "played" && session.isOpen && session.allowRejoin !== false
+    canRejoin: (status === "played" || status === "skipped") && session.isOpen && session.allowRejoin !== false
   };
 }
 

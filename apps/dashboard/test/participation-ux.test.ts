@@ -11,6 +11,14 @@ test("시청자 참여 화면은 직접 세션·내 상태·단계·규칙을 �
     new URL("../src/styles/pages/public-lol/05-overrides.css", import.meta.url),
     "utf8"
   );
+  const legacyCss = await readFile(
+    new URL("../src/styles/pages/public-lol/02-legacy.css", import.meta.url),
+    "utf8"
+  );
+  const finalCss = await readFile(
+    new URL("../src/styles/pages/public-lol/10-final-overrides.css", import.meta.url),
+    "utf8"
+  );
   const i18n = await readFile(
     new URL("../src/features/public-lol/i18n/public-lol-i18n.ts", import.meta.url),
     "utf8"
@@ -18,13 +26,29 @@ test("시청자 참여 화면은 직접 세션·내 상태·단계·규칙을 �
 
   assert.match(source, /directSessionLink/u);
   assert.match(source, /public-participation-my-status/u);
+  assert.match(source, /<details className="public-participation-timeline-card">/u);
   assert.match(source, /<ol className="public-participation-timeline">/u);
   assert.match(source, /aria-current=\{current \? "step"/u);
   assert.match(source, /public-participation-rules-title/u);
+  assert.match(source, /className="public-participation-rejoin-icon"/u);
+  assert.doesNotMatch(source, /className="public-participation-rejoin-note"[^>]*>[\s\S]{0,160}<Badge/u);
+  assert.match(source, /className="public-participation-queue-status"/u);
+  assert.match(source, /<ol className="public-participation-queue-list"/u);
+  assert.match(source, /className="public-participation-queue-profile"/u);
+  assert.match(source, /className="public-participation-queue-viewer"/u);
+  assert.match(source, /queue\.slice\(start, start \+ 5\)/u);
+  assert.match(source, /aria-expanded=\{queueExpanded\}/u);
+  assert.match(source, /<details className="public-participation-rules">/u);
   assert.doesNotMatch(source, /setPendingAction\("join"\)/u);
   assert.match(source, /parseRiotIdDetailed/u);
   assert.match(css, /env\(safe-area-inset-bottom\)/u);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/u);
+  assert.match(finalCss, /public-participation-queue-tags \.public-participation-queue-status/u);
+  assert.match(finalCss, /public-participation-queue-row:not\(\.yoro-card\)/u);
+  assert.match(finalCss, /public-participation-queue-profile/u);
+  assert.match(finalCss, /public-participation-queue-tags \.public-participation-queue-viewer/u);
+  assert.doesNotMatch(legacyCss, /\.public-participation-queue-tags span\s*\{/u);
+  assert.match(legacyCss, /\.public-participation-queue-tags > :is\(\.yoro-status, \.yoro-badge\)/u);
   assert.match(i18n, /Riot ID는 게임이름#태그 형식으로 입력해주세요/u);
   assert.match(i18n, /Riot IDはゲーム名#タグの形式で入力してください/u);
 });
@@ -44,6 +68,8 @@ test("스트리머 참여 화면은 빠른 시작·단일 다음 행동·그룹 
   assert.match(source, /participation-management-advanced/u);
   assert.match(source, /participation-management-current/u);
   assert.match(source, /participation-management-history/u);
+  assert.match(source, /participation-management-bot/u);
+  assert.match(source, /expectedRevision: state\.revision/u);
   assert.match(source, /시청자 참여를 시작하세요/u);
   assert.match(source, /視聴者参加を始めましょう/u);
   assert.match(css, /grid-template-areas:[\s\S]*?"position participant status"[\s\S]*?"position actions actions"/u);

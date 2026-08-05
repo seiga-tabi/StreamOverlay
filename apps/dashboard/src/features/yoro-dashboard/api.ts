@@ -152,6 +152,7 @@ export function updateYoroParticipationSession(
     maxQueueSize?: number;
     allowRejoin?: boolean;
     checkInSeconds?: number;
+    expectedRevision?: number;
   },
   csrfToken: string
 ): Promise<{ ok: true; action: ParticipationSessionAction; state: LolOperationsState }> {
@@ -165,11 +166,12 @@ export function updateYoroParticipationSession(
 export function updateYoroParticipationEntry(
   entryId: string,
   status: Extract<ParticipationStatus, "checked_in" | "in_game" | "played" | "skipped" | "no_show">,
-  csrfToken: string
+  csrfToken: string,
+  expectedRevision?: number
 ): Promise<ParticipationState> {
   return request("/api/account/streamer/participation/entry-status", {
     method: "POST",
     headers: mutationHeaders(csrfToken),
-    body: JSON.stringify({ entryId, status })
+    body: JSON.stringify({ entryId, status, ...(expectedRevision === undefined ? {} : { expectedRevision }) })
   });
 }
