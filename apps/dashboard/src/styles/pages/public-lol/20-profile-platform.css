@@ -1486,9 +1486,6 @@
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-champion-cell {
-    --mobile-match-champion-size: calc(var(--yoro-space-8) - var(--yoro-space-1));
-    --mobile-match-loadout-size: calc(var(--mobile-match-champion-size) / 2);
-
     position: relative;
     height: auto !important;
   }
@@ -1514,47 +1511,11 @@
 
   .public-profile-platform-v2.public-profile-shared-shell .public-matches-panel
     .public-champion-cell .public-match-mobile-spells {
-    position: static !important;
     top: auto !important;
     right: auto !important;
     bottom: auto !important;
     left: auto !important;
     z-index: 2;
-    grid-column: 2 !important;
-    grid-row: 1 !important;
-    grid-template-columns: repeat(2, var(--yoro-space-6)) !important;
-    gap: 0 !important;
-    align-self: start;
-    width: var(--yoro-space-12);
-    height: var(--yoro-space-12);
-    padding: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-  }
-
-  .public-profile-platform-v2.public-profile-shared-shell .public-matches-panel
-    .public-match-loadout-column {
-    display: grid;
-    grid-template-rows: repeat(2, var(--yoro-space-6));
-    width: var(--yoro-space-6);
-    height: var(--yoro-space-12);
-  }
-
-  .public-profile-platform-v2.public-profile-shared-shell .public-matches-panel
-    .public-match-loadout-column > span {
-    display: grid;
-    place-items: center;
-    width: var(--yoro-space-6) !important;
-    height: var(--yoro-space-6) !important;
-    border: var(--yoro-size-sr-only) solid var(--yoro-color-border-on-dark) !important;
-    border-radius: var(--yoro-radius-sm) !important;
-  }
-
-  .public-profile-platform-v2.public-profile-shared-shell .public-matches-panel
-    .public-match-mobile-spells img {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: contain !important;
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-kda-summary {
@@ -1736,14 +1697,19 @@
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-match-summary {
+    --mobile-match-champion-size: calc(var(--yoro-space-8) - var(--yoro-space-1));
+    --mobile-match-loadout-size: calc(var(--mobile-match-champion-size) / 2);
+
     grid-template-columns:
       calc(var(--yoro-space-8) + var(--yoro-space-1))
       minmax(0, 1fr)
-      calc(var(--yoro-space-12) + var(--yoro-space-1))
-      var(--yoro-space-6)
+      calc(var(--yoro-space-12) + var(--yoro-space-3))
+      var(--yoro-space-8)
       var(--yoro-size-touch-target) !important;
-    grid-template-rows: minmax(var(--yoro-size-touch-target), auto) var(--yoro-space-5) !important;
-    gap: var(--yoro-space-1) !important;
+    grid-template-rows:
+      calc(var(--mobile-match-champion-size) + var(--yoro-space-3))
+      var(--yoro-space-4) !important;
+    gap: calc(var(--yoro-space-1) / 2) var(--yoro-space-1) !important;
     min-height: calc(var(--yoro-space-12) + var(--yoro-space-4));
     padding: var(--yoro-space-1) var(--yoro-space-2) !important;
   }
@@ -1829,7 +1795,11 @@
     max-width: 100%;
     width: 100%;
     overflow: hidden;
-    gap: 0;
+    gap: calc(var(--yoro-space-1) / 2);
+  }
+
+  .public-profile-platform-v2 .public-matches-panel .public-champion-name-line > strong {
+    flex: 0 1 auto;
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-match-mobile-highlight {
@@ -1909,7 +1879,7 @@
     align-self: stretch;
     align-content: center;
     justify-items: center !important;
-    justify-content: center;
+    justify-content: start;
     width: 100%;
     font-variant-numeric: tabular-nums;
     text-align: center;
@@ -1941,10 +1911,11 @@
     align-self: center;
     align-content: center;
     justify-content: center;
-    width: var(--yoro-space-6) !important;
-    min-width: var(--yoro-space-6) !important;
-    height: var(--yoro-space-6) !important;
-    min-height: var(--yoro-space-6) !important;
+    justify-self: center;
+    width: var(--yoro-space-8) !important;
+    min-width: var(--yoro-space-8) !important;
+    height: var(--yoro-space-8) !important;
+    min-height: var(--yoro-space-8) !important;
     padding: 0 !important;
   }
 
@@ -1961,7 +1932,7 @@
     grid-row: 2 !important;
     grid-template-columns: repeat(7, var(--yoro-space-4)) !important;
     gap: calc(var(--yoro-space-1) / 2) !important;
-    align-self: center;
+    align-self: start;
     justify-self: start;
     width: max-content !important;
     max-width: 100%;
@@ -2015,11 +1986,39 @@
     padding-block: var(--yoro-space-1);
   }
 
+  .lol-public-game-header :is(
+    .public-game-header__nav-slot,
+    .public-game-header__search-slot
+  ) {
+    max-block-size: calc(var(--yoro-size-touch-target) * 2);
+    /* 펼쳐진 상태에서는 검색 자동완성·메뉴가 행 바깥으로 정상 표시되어야 합니다. */
+    overflow: visible;
+    opacity: 1;
+    transform: translateY(0);
+    transform-origin: top;
+    visibility: visible;
+    transition:
+      max-block-size var(--yoro-motion-duration-base) var(--yoro-motion-ease-standard),
+      padding-block var(--yoro-motion-duration-base) var(--yoro-motion-ease-standard),
+      border-color var(--yoro-motion-duration-base) var(--yoro-motion-ease-standard),
+      opacity var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
+      transform var(--yoro-motion-duration-base) var(--yoro-motion-ease-standard),
+      visibility 0s linear 0s;
+  }
+
   .lol-public-game-header.mobile-chrome-scrolled :is(
     .public-game-header__nav-slot,
     .public-game-header__search-slot
   ) {
-    display: none;
+    max-block-size: var(--yoro-space-0);
+    padding-block: var(--yoro-space-0);
+    overflow: hidden;
+    border-color: transparent;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(calc(var(--yoro-space-6) * -1));
+    visibility: hidden;
+    transition-delay: 0s, 0s, 0s, 0s, 0s, var(--yoro-motion-duration-base);
   }
 
   .lol-public-game-header .public-horizontal-nav__content > :is(button, a) {
@@ -2033,6 +2032,15 @@
   .lol-public-game-header .public-header-menu-icon {
     inline-size: var(--yoro-space-4);
     block-size: var(--yoro-space-4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) and (max-width: 48rem) {
+  .lol-public-game-header :is(
+    .public-game-header__nav-slot,
+    .public-game-header__search-slot
+  ) {
+    transition: none;
   }
 }
 
@@ -2065,7 +2073,7 @@
       var(--yoro-space-10)
       minmax(0, 1fr)
       calc(var(--yoro-space-12) + var(--yoro-space-5))
-      var(--yoro-space-8)
+      calc(var(--yoro-space-8) + var(--yoro-space-2))
       var(--yoro-size-touch-target) !important;
   }
 

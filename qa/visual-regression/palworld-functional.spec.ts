@@ -1549,7 +1549,7 @@ test("모바일 통합 메뉴는 전체 시트가 자연스럽게 올라오고 �
   await expect(page.getByRole("button", { name: "메뉴 열기", exact: true })).toBeFocused();
 });
 
-test("LoL·Palworld LIVE rail은 PC 이동 버튼·콘텐츠 맞춤 LoL 카드·모바일 터치 스크롤을 제공한다", async ({ page }) => {
+test("LoL·Palworld LIVE rail은 PC 다중 카드·이동 버튼·모바일 터치 스크롤을 제공한다", async ({ page }) => {
   await installConnectedTwitchFixtures(page, { liveCount: 8 });
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/palworld");
@@ -1562,12 +1562,12 @@ test("LoL·Palworld LIVE rail은 PC 이동 버튼·콘텐츠 맞춤 LoL 카드·
     const gap = Number.parseFloat(getComputedStyle(element).columnGap);
     return {
       cardWidth: cards[0]?.getBoundingClientRect().width ?? 0,
-      expectedWidth: (railRect.width - gap) / 2,
-      thirdCardStartsOutside: (cards[2]?.getBoundingClientRect().left ?? 0) >= railRect.right - 1,
+      railWidth: railRect.width,
+      thirdCardStartsInside: (cards[2]?.getBoundingClientRect().left ?? railRect.right) < railRect.right - 1,
     };
   });
-  expect(Math.abs(cardMetrics.cardWidth - cardMetrics.expectedWidth)).toBeLessThanOrEqual(2);
-  expect(cardMetrics.thirdCardStartsOutside).toBe(true);
+  expect(cardMetrics.cardWidth).toBeLessThan(cardMetrics.railWidth / 2);
+  expect(cardMetrics.thirdCardStartsInside).toBe(true);
 
   const nextButton = page.getByRole("button", { name: "다음 LIVE 스트리머 보기" });
   await expect(nextButton).toBeVisible();

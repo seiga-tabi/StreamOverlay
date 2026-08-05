@@ -379,6 +379,30 @@ test("Public Profile", async ({ page }) => {
   await assertStableSurface(page, errors, "public-profile.png");
 });
 
+test("모바일 LoL 상단 탐색과 검색은 스크롤 방향에 따라 접히고 다시 펼쳐진다", async ({ page }) => {
+  test.skip((page.viewportSize()?.width ?? 1440) > 768, "모바일 상단바 전용 검증");
+
+  await page.goto("/lol/summoners/jp/YORO%20QA-JP1");
+  await expect(page.locator(".public-profile-shared-shell")).toBeVisible();
+  const header = page.locator(".lol-public-game-header");
+  const nav = header.locator(".public-game-header__nav-slot");
+  const search = header.locator(".public-game-header__search-slot");
+
+  await expect(nav).toBeVisible();
+  await expect(search).toBeVisible();
+  await expect(nav).not.toHaveCSS("transition-duration", "0s");
+
+  await page.evaluate(() => window.scrollTo(0, 240));
+  await expect(header).toHaveClass(/mobile-chrome-scrolled/u);
+  await expect(nav).toHaveCSS("opacity", "0");
+  await expect(search).toHaveCSS("opacity", "0");
+
+  await page.evaluate(() => window.scrollBy(0, -48));
+  await expect(header).not.toHaveClass(/mobile-chrome-scrolled/u);
+  await expect(nav).toHaveCSS("opacity", "1");
+  await expect(search).toHaveCSS("opacity", "1");
+});
+
 test("전적 아이템·점수·상세 Tooltip은 이름과 안정적인 레이어를 유지한다", async ({ page }) => {
   await page.route("**/api/lol/match-ranks**", async (route) => {
     await json(route, {
@@ -467,8 +491,8 @@ test("전적 아이템·점수·상세 Tooltip은 이름과 안정적인 레이�
     expect(Math.abs((loadoutItemBox?.width ?? 0) * 2 - (championBox?.width ?? 0))).toBeLessThanOrEqual(1);
     expect(spellItemBoxes[1]?.x).toBe(spellItemBoxes[0]?.x);
     expect(spellItemBoxes[1]?.y ?? 0).toBeGreaterThan(spellItemBoxes[0]?.y ?? 0);
-    await expect(spellColumn).toHaveCSS("grid-template-rows", "24px 24px");
-    await expect(runeColumn).toHaveCSS("grid-template-rows", "24px 24px");
+    await expect(spellColumn).toHaveCSS("grid-template-rows", "14px 14px");
+    await expect(runeColumn).toHaveCSS("grid-template-rows", "14px 14px");
     await expect(row.locator(".public-kda")).toHaveCSS("text-align", "center");
   }
 
@@ -578,7 +602,7 @@ test("LoL 프로필 플랫폼은 주요 viewport에서 내부 탐색과 문서 �
         position: "MIDDLE",
         items: [],
         summonerSpells: [4, 14],
-        badges: [{ id: "mvp", labelKo: "MVP", labelJa: "MVP" }],
+        badges: [{ code: "mvp", rank: 1 }],
         teams: [],
       }],
       summary: {
@@ -710,6 +734,30 @@ test("LoL 프로필 플랫폼은 주요 viewport에서 내부 탐색과 문서 �
       .toEqual([]);
     expect(matchRowDiagnostics.overlappingChildren, `${viewport.width}px에서 전적 행 항목이 겹치지 않아야 합니다.`)
       .toEqual([]);
+
+    if (viewport.width <= 430) {
+      const championName = matchSummary.locator(".public-champion-name-line > strong");
+      const highlightBadge = matchSummary.locator(".public-match-mobile-highlight");
+      const [championNameBox, highlightBadgeBox, championBox, itemsBox, kdaBox, scoreBox, expandBox] = await Promise.all([
+        championName.boundingBox(),
+        highlightBadge.boundingBox(),
+        matchSummary.locator(".public-champion-cell").boundingBox(),
+        matchSummary.locator(".public-match-inline-items").boundingBox(),
+        matchSummary.locator(".public-kda").boundingBox(),
+        matchSummary.locator(".public-match-score").boundingBox(),
+        matchSummary.locator(".public-match-expand").boundingBox(),
+      ]);
+      expect(championNameBox).not.toBeNull();
+      expect(highlightBadgeBox).not.toBeNull();
+      expect((highlightBadgeBox?.x ?? 0) - ((championNameBox?.x ?? 0) + (championNameBox?.width ?? 0)), "MVP·ACE는 챔피언 이름 바로 옆에 있어야 합니다.")
+        .toBeLessThanOrEqual(4);
+      expect((itemsBox?.y ?? 0) - ((championBox?.y ?? 0) + (championBox?.height ?? 0)), "챔피언 묶음과 아이템 행의 간격이 과도하지 않아야 합니다.")
+        .toBeLessThanOrEqual(10);
+      expect((kdaBox?.x ?? 0) + (kdaBox?.width ?? 0), "KDA는 점수 등급 왼쪽의 독립 열에 있어야 합니다.")
+        .toBeLessThanOrEqual((scoreBox?.x ?? 0) + 1);
+      expect((expandBox?.x ?? 0) - ((scoreBox?.x ?? 0) + (scoreBox?.width ?? 0)), "점수 등급과 상세 버튼 사이에 여백이 있어야 합니다.")
+        .toBeGreaterThanOrEqual(4);
+    }
 
     await tabs.getByRole("button").last().scrollIntoViewIfNeeded();
     await expect(tabs.getByRole("button").last()).toBeVisible();

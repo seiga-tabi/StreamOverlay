@@ -160,7 +160,10 @@ test("누락·symlink·의도하지 않은 중복 이미지를 거부한다", as
   const inspection = inspectPalworldWebp(ONE_BY_ONE_WEBP);
   const entry = readyEntry(inspection);
   const missingRoot = await makeSafeTempDirectory("palworld-image-missing-");
-  await assert.rejects(validatePalworldImageFiles({ manifest: manifest([entry]), imageRoot: missingRoot, overrides: noOverrides }), /ENOENT/);
+  await assert.rejects(
+    validatePalworldImageFiles({ manifest: manifest([entry]), imageRoot: missingRoot, overrides: noOverrides }),
+    /WebP 이미지 파일이 없습니다/u
+  );
 
   const symlinkRoot = await makeSafeTempDirectory("palworld-image-symlink-");
   const target = path.join(symlinkRoot, "target.webp");

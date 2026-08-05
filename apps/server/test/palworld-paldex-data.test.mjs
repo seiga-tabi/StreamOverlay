@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { copyFile, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { copyFile, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -96,7 +96,8 @@ test("고정 v1.0.1 artifact는 287종·일반 203종·변종 84종을 포함한
 });
 
 test("rollback 검증은 손상된 retained 이미지보다 공개 참조 제거를 우선한다", async () => {
-  const imageRoot = await mkdtemp(path.join(tmpdir(), "palworld-rollback-retained-"));
+  // macOS의 /var -> /private/var 별칭에 기대지 않고 Linux CI와 동일한 실제 경로에서 검증한다.
+  const imageRoot = await mkdtemp(path.join(await realpath(tmpdir()), "palworld-rollback-retained-"));
   try {
     await writeFile(path.join(imageRoot, `${"f".repeat(64)}.webp`), "손상된 retained 이미지");
 

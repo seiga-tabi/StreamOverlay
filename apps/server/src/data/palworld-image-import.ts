@@ -260,6 +260,9 @@ async function readRegularFile(filePath: string): Promise<Buffer> {
     }
     return await handle.readFile();
   } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      fail(`WebP 이미지 파일이 없습니다: ${path.basename(filePath)}`);
+    }
     if ((error as NodeJS.ErrnoException).code === "ELOOP") fail(`symlink 파일은 허용되지 않습니다: ${path.basename(filePath)}`);
     throw error;
   } finally {

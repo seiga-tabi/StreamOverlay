@@ -60,10 +60,23 @@ jobs:
       - name: Validate production runtime config
         run: |
           install -m 600 /dev/null /tmp/streamops-ci.env
+          credential_path=/run/palworld-credentials/palworld-server-credentials-encryption-key
+          cleanup_runtime_fixture() {
+            sudo rm -f "$credential_path"
+            sudo rmdir /run/palworld-credentials 2>/dev/null || true
+            rm -f /tmp/streamops-ci.env
+          }
+          trap cleanup_runtime_fixture EXIT
+          sudo install -d -m 700 /run/palworld-credentials
+          openssl rand -hex 32 | sudo tee "$credential_path" > /dev/null
+          sudo chmod 600 "$credential_path"
+          export BUILD_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          export TWITCH_TOKEN_ENCRYPTION_KEY="$(openssl rand -hex 32)"
           npm run validate:runtime
         env:
           DOTENV_CONFIG_PATH: /tmp/streamops-ci.env
           NODE_ENV: production
+          GIT_SHA: ${{ github.sha }}
           STREAMOPS_LOCAL_NO_AUTH: "false"
           PUBLIC_BASE_URL: https://ci.yoro.invalid
           DASHBOARD_BASE_URL: https://ci.yoro.invalid/dashboard

@@ -170,21 +170,49 @@ export function PublicAppHeader({
   useEffect(() => {
     const mobileMedia = window.matchMedia("(max-width: 48rem)");
     let animationFrame = 0;
+    let lastScrollY = window.scrollY;
+    let directionStartY = lastScrollY;
+    let scrollDirection = 0;
+
+    const resetMobileChrome = () => {
+      lastScrollY = window.scrollY;
+      directionStartY = lastScrollY;
+      scrollDirection = 0;
+      setMobileChromeScrolled(false);
+    };
 
     const syncMobileChrome = () => {
       window.cancelAnimationFrame(animationFrame);
       animationFrame = window.requestAnimationFrame(() => {
-        setMobileChromeScrolled(mobileMedia.matches && window.scrollY > 24);
+        const currentScrollY = Math.max(0, window.scrollY);
+        if (!mobileMedia.matches || currentScrollY <= 24) {
+          resetMobileChrome();
+          return;
+        }
+
+        const nextDirection = Math.sign(currentScrollY - lastScrollY);
+        if (nextDirection !== 0 && nextDirection !== scrollDirection) {
+          scrollDirection = nextDirection;
+          directionStartY = lastScrollY;
+        }
+
+        const directionTravel = Math.abs(currentScrollY - directionStartY);
+        if (scrollDirection > 0 && directionTravel >= 20) {
+          setMobileChromeScrolled(true);
+        } else if (scrollDirection < 0 && directionTravel >= 12) {
+          setMobileChromeScrolled(false);
+        }
+        lastScrollY = currentScrollY;
       });
     };
 
-    syncMobileChrome();
+    resetMobileChrome();
     window.addEventListener("scroll", syncMobileChrome, { passive: true });
-    mobileMedia.addEventListener("change", syncMobileChrome);
+    mobileMedia.addEventListener("change", resetMobileChrome);
     return () => {
       window.cancelAnimationFrame(animationFrame);
       window.removeEventListener("scroll", syncMobileChrome);
-      mobileMedia.removeEventListener("change", syncMobileChrome);
+      mobileMedia.removeEventListener("change", resetMobileChrome);
     };
   }, []);
 

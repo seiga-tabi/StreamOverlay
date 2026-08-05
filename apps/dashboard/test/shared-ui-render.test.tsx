@@ -795,13 +795,13 @@ test("최근 전적 공유 기능은 현재 목록을 이미지 저장과 시스
   assert.match(shareSource, /downloadBlob\(blob, file\.name\)/u);
 });
 
-test("모바일 최근 전적은 중앙 정렬 2행과 챔피언 옆 MVP·ACE 위치를 유지한다", () => {
+test("모바일 최근 전적은 압축된 2행과 챔피언 이름 옆 MVP·ACE 위치를 유지한다", () => {
   const profileCss = readFileSync(
     new URL("../src/styles/pages/public-lol/20-profile-platform.css", import.meta.url),
     "utf8",
   );
 
-  assert.match(profileCss, /@media \(max-width:\s*40rem\)[\s\S]*?\.public-profile-platform-v2 \.public-matches-panel \.public-match-summary\s*\{[\s\S]*?minmax\(0, 1fr\)[\s\S]*?grid-template-rows:\s*minmax\(var\(--yoro-size-touch-target\), auto\) var\(--yoro-space-5\)/u);
+  assert.match(profileCss, /@media \(max-width:\s*40rem\)[\s\S]*?\.public-profile-platform-v2 \.public-matches-panel \.public-match-summary\s*\{[\s\S]*?--mobile-match-champion-size:[\s\S]*?minmax\(0, 1fr\)[\s\S]*?grid-template-rows:[\s\S]*?var\(--mobile-match-champion-size\)[\s\S]*?var\(--yoro-space-4\)/u);
   assert.match(profileCss, /\.public-match-mobile-outcome-meta > span:first-child\s*\{[\s\S]*?display:\s*none/u);
   assert.match(profileCss, /\.public-match-mobile-highlight\s*\{[\s\S]*?display:\s*inline-flex/u);
   assert.match(profileCss, /--mobile-match-champion-size:\s*calc\(var\(--yoro-space-8\) - var\(--yoro-space-1\)\)/u);
@@ -809,9 +809,10 @@ test("모바일 최근 전적은 중앙 정렬 2행과 챔피언 옆 MVP·ACE �
   assert.match(profileCss, /\.public-champion-cell \.public-match-mobile-spells\s*\{[\s\S]*?grid-column:\s*2 \/ 4\s*!important[\s\S]*?grid-template-columns:\s*repeat\(2, var\(--mobile-match-loadout-size\)\)/u);
   assert.match(profileCss, /\.public-match-loadout-column\s*\{[\s\S]*?grid-template-rows:\s*repeat\(2, var\(--mobile-match-loadout-size\)\)/u);
   assert.match(profileCss, /\.public-champion-copy strong\s*\{[\s\S]*?flex:\s*1 1 0[\s\S]*?text-overflow:\s*ellipsis/u);
-  assert.match(profileCss, /\.public-kda\s*\{[\s\S]*?grid-row:\s*1 \/ 3\s*!important[\s\S]*?align-self:\s*stretch[\s\S]*?justify-items:\s*center\s*!important[\s\S]*?text-align:\s*center/u);
+  assert.match(profileCss, /\.public-champion-name-line > strong\s*\{[\s\S]*?flex:\s*0 1 auto/u);
+  assert.match(profileCss, /\.public-kda\s*\{[\s\S]*?grid-row:\s*1 \/ 3\s*!important[\s\S]*?align-self:\s*stretch[\s\S]*?justify-content:\s*start[\s\S]*?text-align:\s*center/u);
   assert.match(profileCss, /\.public-match-inline-items\s*\{[\s\S]*?grid-column:\s*2 \/ 3\s*!important[\s\S]*?repeat\(7, var\(--yoro-space-4\)\)[\s\S]*?gap:\s*calc\(var\(--yoro-space-1\) \/ 2\)/u);
-  assert.match(profileCss, /\.public-match-score\s*\{[\s\S]*?grid-row:\s*1 \/ 3\s*!important/u);
+  assert.match(profileCss, /\.public-match-score\s*\{[\s\S]*?grid-row:\s*1 \/ 3\s*!important[\s\S]*?justify-self:\s*center[\s\S]*?width:\s*var\(--yoro-space-8\)\s*!important/u);
   assert.match(profileCss, /\.public-match-score > b\s*\{[\s\S]*?font-size:\s*var\(--yoro-font-size-base\)\s*!important/u);
   assert.match(profileCss, /\.public-match-expand\s*\{[\s\S]*?background:\s*var\(--public-gray-surface-strong\) !important/u);
   assert.match(profileCss, /\.public-match-expand\[aria-expanded="true"\]/u);
@@ -835,7 +836,7 @@ test("전적 행은 중앙 정렬하며 MVP와 ACE를 왼쪽 금색·은색 애�
   assert.match(profileCss, /prefers-reduced-motion:\s*reduce[\s\S]*?\.public-match-row:is\(\.highlight-mvp, \.highlight-ace\)::after\s*\{[\s\S]*?animation:\s*none\s*!important/u);
 });
 
-test("LoL 모바일 상단바는 터치 영역을 유지하고 스크롤 후 탐색·검색 행을 숨긴다", () => {
+test("LoL 모바일 상단바는 스크롤 방향에 따라 탐색·검색 행을 애니메이션으로 전환한다", () => {
   const profileCss = readFileSync(
     new URL("../src/styles/pages/public-lol/20-profile-platform.css", import.meta.url),
     "utf8",
@@ -844,13 +845,20 @@ test("LoL 모바일 상단바는 터치 영역을 유지하고 스크롤 후 탐
   assert.match(profileCss, /@media \(max-width:\s*48rem\)[\s\S]*?\.lol-public-game-header \.public-game-header__nav-slot\s*\{[\s\S]*?padding-block:\s*var\(--yoro-space-0\)/u);
   assert.match(profileCss, /\.lol-public-game-header \.public-game-header__search-slot\s*\{[\s\S]*?padding-block:\s*var\(--yoro-space-1\)/u);
   assert.match(profileCss, /\.lol-public-game-header \.public-horizontal-nav__content > :is\(button, a\)\s*\{[\s\S]*?min-block-size:\s*var\(--yoro-size-touch-target\)/u);
-  assert.match(profileCss, /\.lol-public-game-header\.mobile-chrome-scrolled :is\([\s\S]*?\.public-game-header__nav-slot,[\s\S]*?\.public-game-header__search-slot[\s\S]*?\)\s*\{[\s\S]*?display:\s*none/u);
+  assert.match(profileCss, /\.lol-public-game-header :is\([\s\S]*?\.public-game-header__nav-slot,[\s\S]*?\.public-game-header__search-slot[\s\S]*?\)\s*\{[\s\S]*?max-block-size:[\s\S]*?transition:/u);
+  assert.match(profileCss, /\.lol-public-game-header\.mobile-chrome-scrolled :is\([\s\S]*?\.public-game-header__nav-slot,[\s\S]*?\.public-game-header__search-slot[\s\S]*?\)\s*\{[\s\S]*?max-block-size:\s*var\(--yoro-space-0\)[\s\S]*?transform:\s*translateY/u);
+  const hiddenChromeBlock = profileCss.match(
+    /\.lol-public-game-header\.mobile-chrome-scrolled :is\([\s\S]*?\)\s*\{([^}]*)\}/u,
+  )?.[1] ?? "";
+  assert.doesNotMatch(hiddenChromeBlock, /display:\s*none/u);
 
   const headerSource = readFileSync(
     new URL("../src/features/public-lol/components/PublicAppHeader.tsx", import.meta.url),
     "utf8",
   );
-  assert.match(headerSource, /window\.scrollY > 24/u);
+  assert.match(headerSource, /Math\.sign\(currentScrollY - lastScrollY\)/u);
+  assert.match(headerSource, /scrollDirection > 0 && directionTravel >= 20/u);
+  assert.match(headerSource, /scrollDirection < 0 && directionTravel >= 12/u);
   assert.match(headerSource, /mobileChromeScrolled \? "mobile-chrome-scrolled"/u);
 });
 

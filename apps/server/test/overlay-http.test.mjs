@@ -344,7 +344,8 @@ test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => 
 test("cache된 소환사 전적은 동적 SNS 메타데이터와 immutable 공유 이미지를 제공한다", async () => {
   const previousDashboardStatic = appConfig.paths.dashboardStatic;
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-public-lol-social-"));
-  const fetchedAt = "2026-08-04T00:00:00.000Z";
+  // 운영 캐시의 24시간 stale 정책을 검증하는 fixture가 날짜 경과로 실패하지 않도록 현재 시각에 고정한다.
+  const fetchedAt = new Date().toISOString();
   let riotCalls = 0;
   const profile = {
     status: "ready",
