@@ -2628,6 +2628,24 @@ export class Store {
     return next;
   }
 
+  selectParticipant(entryId: string, checkInSeconds: number, streamerId?: string): ParticipationEntry | undefined {
+    const queue = this.participationQueueFor(streamerId);
+    if (queue.some((entry) => ["selected", "checked_in", "invited", "in_game"].includes(entry.status))) {
+      return undefined;
+    }
+    const entry = queue.find((candidate) => (
+      candidate.id === entryId
+      && (candidate.status === "waitlisted" || candidate.status === "verified")
+    ));
+    if (!entry) return undefined;
+    entry.status = "selected";
+    entry.selectedAt = nowIso();
+    entry.checkInExpiresAt = new Date(Date.now() + checkInSeconds * 1000).toISOString();
+    entry.updatedAt = nowIso();
+    this.persistRuntimeState();
+    return entry;
+  }
+
   getPendingSelectedParticipant(now = new Date(), streamerId?: string): ParticipationEntry | undefined {
     return this.participationQueueFor(streamerId).find((entry) => entry.status === "selected" && !isCheckInExpired(entry, now));
   }

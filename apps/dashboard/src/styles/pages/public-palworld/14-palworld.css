@@ -247,6 +247,14 @@
   gap: var(--yoro-space-1);
 }
 
+.palworld-autocomplete-heading {
+  min-inline-size: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--yoro-space-2);
+  align-items: center;
+}
+
 .palworld-autocomplete strong,
 .palworld-picker-list strong,
 .palworld-selected-pal strong {
@@ -257,12 +265,38 @@
 
 @media (max-width: 48rem) {
   .palworld-autocomplete {
-    max-block-size: calc(var(--yoro-size-touch-target) + var(--yoro-size-touch-target));
+    max-block-size: calc(var(--yoro-size-touch-target) + var(--yoro-space-10) + var(--yoro-size-touch-target) + var(--yoro-space-10) + var(--yoro-space-4));
     overflow-y: auto;
     overscroll-behavior-y: contain;
     scrollbar-gutter: stable;
     touch-action: pan-y;
     -webkit-overflow-scrolling: touch;
+  }
+
+  .palworld-autocomplete > button {
+    min-block-size: calc(var(--yoro-size-touch-target) + var(--yoro-space-10));
+    padding: var(--yoro-space-3);
+    align-items: flex-start;
+  }
+
+  .palworld-autocomplete-copy {
+    align-self: stretch;
+    align-content: center;
+    gap: var(--yoro-space-2) !important;
+    line-height: var(--yoro-line-height-normal);
+  }
+
+  .palworld-autocomplete-heading strong {
+    min-inline-size: 0;
+    overflow: visible;
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
+  .palworld-autocomplete-media {
+    inline-size: calc(var(--yoro-size-touch-target) + var(--yoro-space-3));
+    block-size: calc(var(--yoro-size-touch-target) + var(--yoro-space-3));
   }
 }
 

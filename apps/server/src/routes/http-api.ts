@@ -281,6 +281,7 @@ const PARTICIPATION_INVITE_TARGET_STATUSES = new Set(["verified", "waitlisted", 
 const PARTICIPATION_MANUAL_ACTIONS = new Set(["open", "show_queue", "select_next", "mark_in_game", "finish_game", "close"]);
 const PARTICIPATION_SESSION_ACTIONS = new Set(["start", "finish", ...PARTICIPATION_MANUAL_ACTIONS]);
 const PARTICIPATION_DASHBOARD_ENTRY_STATUSES = new Set<ParticipationStatus>([
+  "selected",
   "checked_in",
   "in_game",
   "played",
@@ -4597,8 +4598,30 @@ export function createHttpHandler(input: HttpHandlerInput) {
         code: "REVISION_CONFLICT"
       });
     }
-    const updated = input.store.markParticipant(body.entryId.trim(), body.status as ParticipationStatus, streamerId);
-    if (!updated) throw new HttpRequestError(404, { error: "시청자 참여 항목을 찾을 수 없습니다.", code: "ENTRY_NOT_FOUND" });
+    const entryId = body.entryId.trim();
+    const currentState = input.store.getParticipationState(streamerId);
+    const targetEntry = currentState.queue.find((entry) => entry.id === entryId);
+    if (!targetEntry) {
+      throw new HttpRequestError(404, { error: "시청자 참여 항목을 찾을 수 없습니다.", code: "ENTRY_NOT_FOUND" });
+    }
+    if (body.status === "selected") {
+      if (!currentState.session || currentState.session.status !== "recruiting" || !currentState.isOpen) {
+        throw new HttpRequestError(409, { error: "모집 중인 참여 세션에서만 참가자를 선정할 수 있습니다.", code: "SESSION_NOT_RECRUITING" });
+      }
+      if (!["verified", "waitlisted"].includes(targetEntry.status)) {
+        throw new HttpRequestError(409, { error: "검증이 완료된 대기 참가자만 선정할 수 있습니다.", code: "ENTRY_NOT_SELECTABLE" });
+      }
+      const selected = input.store.selectParticipant(
+        entryId,
+        currentState.session.checkInSeconds ?? 60,
+        streamerId
+      );
+      if (!selected) {
+        throw new HttpRequestError(409, { error: "현재 참가자 처리가 끝난 뒤 다음 참가자를 선정해 주세요.", code: "CURRENT_PARTICIPANT_ACTIVE" });
+      }
+    } else {
+      input.store.markParticipant(entryId, body.status as ParticipationStatus, streamerId);
+    }
     await broadcastParticipationQueue(input, "dashboard.lol_operations.entry_status", streamerId);
     return input.store.getParticipationState(streamerId);
   }

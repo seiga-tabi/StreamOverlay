@@ -298,7 +298,7 @@
 }
 
 .participation-management-session > header > strong,
-.participation-management-queue > header > span,
+.participation-management-queue-actions > span,
 .participation-management-status {
   flex: 0 0 auto;
   padding: var(--space-2) var(--space-3);
@@ -409,6 +409,32 @@
   background: var(--surface-muted);
 }
 
+.participation-management-participant.is-selectable:has(.participation-management-selection input:checked) {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 1px var(--brand);
+}
+
+.participation-management-selection {
+  grid-area: position;
+  align-self: start;
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+  cursor: pointer;
+}
+
+.participation-management-selection input {
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  margin: 0;
+  accent-color: var(--brand);
+}
+
+.participation-management-selection:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
 .participation-management-participant + .participation-management-participant {
   margin-block-start: var(--space-2);
 }
@@ -490,6 +516,20 @@
 .participation-management-queue {
   display: grid;
   gap: var(--space-4);
+}
+
+.participation-management-queue-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.participation-management-select-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: .875rem;
 }
 
 .participation-management-table-wrap {
@@ -580,8 +620,14 @@
   }
 
   .participation-management-session > header > strong,
-  .participation-management-queue > header > span {
+  .participation-management-queue-actions {
     align-self: flex-start;
+  }
+
+  .participation-management-queue-actions {
+    inline-size: 100%;
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .participation-management-participant {

@@ -97,7 +97,9 @@ import {
   RecentMatchBuildPanel as FeatureRecentMatchBuildPanel,
   RecentMatchExpandedPanel as FeatureRecentMatchExpandedPanel,
   RecentMatchRow as FeatureRecentMatchRow,
+  recentMatchScoreGrade,
   RecentMatchesPanel as FeatureRecentMatchesPanel,
+  RecentMatchesShareActions,
   SearchForm as FeatureSearchForm,
   SearchableRiotId as FeatureSearchableRiotId,
   searchProfile,
@@ -126,6 +128,7 @@ import {
   type RecentMatchExpandedPanelText,
   type RecentMatchRowMetric,
   type RecentMatchRowMediaItem,
+  type RecentMatchShareItem,
   type RecentMatchesPanelText,
   type SearchFormProps,
   type SearchFormPanelRequest,
@@ -2431,6 +2434,36 @@ function PublicParticipationJoinPage({
     return queue.slice(start, start + 5);
   }, [queue, queueExpanded]);
   const hiddenQueueCount = Math.max(0, queue.length - visibleQueue.length);
+  const currentParticipants = queue.filter((item) => item.status === "in_game");
+  const nextParticipant = queue.find((item) => (
+    item.status === "selected"
+    || item.status === "checked_in"
+    || item.status === "invited"
+  )) ?? queue.find((item) => item.status === "verified" || item.status === "waitlisted");
+  const currentParticipantLabel = currentParticipants.length > 0
+    ? `${currentParticipants[0]?.twitchUserName ?? ""}${currentParticipants.length > 1 ? ` +${formatNumber(currentParticipants.length - 1)}` : ""}`
+    : t().participationCurrentPlayerEmpty;
+  const nextParticipantLabel = nextParticipant?.twitchUserName ?? t().participationNextParticipantPending;
+  const viewerQueueAhead = viewerEntry ? Math.max(0, viewerEntry.position - 1) : 0;
+  const viewerCheckInLabel = viewerEntry?.status === "selected"
+    ? t().participationCheckInRequired
+    : viewerEntry && ["checked_in", "invited", "in_game", "played"].includes(viewerEntry.status)
+      ? t().participationCheckInDone
+      : t().participationCheckInNotYet;
+  const sessionStatusLabel = selectedStreamer?.sessionStatus === "in_game"
+    ? t().participationSessionInGame
+    : selectedStreamer?.sessionStatus === "completed"
+      ? t().participationSessionCompleted
+      : isOpen
+        ? t().participationSessionRecruiting
+        : t().participationSessionClosed;
+  const sessionStatusTone = selectedStreamer?.sessionStatus === "in_game"
+    ? "info" as const
+    : selectedStreamer?.sessionStatus === "completed"
+      ? "neutral" as const
+      : isOpen
+        ? "success" as const
+        : "warning" as const;
 
   useEffect(() => {
     if (feedbackKey) setDismissedFeedbackKey("");
@@ -2633,22 +2666,55 @@ function PublicParticipationJoinPage({
           </div>
         ) : null}
       </section>
-      ) : selectedStreamer ? (
+      ) : null}
+
+      {selectedStreamer ? (
         <Card as="section" className="public-participation-session-summary" padding="lg" variant="glass">
-          <div className="public-participation-session-identity">
-            <span className="public-participation-streamer-avatar">
-              {selectedStreamer.twitchProfileImageUrl ? <img src={assetUrl(selectedStreamer.twitchProfileImageUrl)} alt="" /> : selectedStreamer.twitchDisplayName.slice(0, 1)}
-            </span>
-            <div>
-              <span>{t().participationHeroEyebrow}</span>
-              <h3>{selectedStreamer.twitchDisplayName}</h3>
-              <p>{selectedStreamer.riotId ?? t().participationRankPending}</p>
+          <div className="public-participation-session-head">
+            <div className="public-participation-session-identity">
+              <span className="public-participation-streamer-avatar">
+                {selectedStreamer.twitchProfileImageUrl ? <img src={assetUrl(selectedStreamer.twitchProfileImageUrl)} alt="" /> : selectedStreamer.twitchDisplayName.slice(0, 1)}
+              </span>
+              <div>
+                <span>{t().participationHeroEyebrow}</span>
+                <h3>{selectedStreamer.twitchDisplayName}</h3>
+                <p>{selectedStreamer.riotId ?? t().participationRankPending}</p>
+              </div>
+            </div>
+            <div className="public-participation-session-state">
+              <StatusPill tone={selectedStreamer.isLive === true ? "danger" : "neutral"}>
+                {selectedStreamer.isLive === true ? t().streamerLiveNow : t().twitchOfflineShort}
+              </StatusPill>
+              <StatusPill tone={sessionStatusTone}>{sessionStatusLabel}</StatusPill>
             </div>
           </div>
-          <div className="public-participation-session-summary-metrics">
-            <StatusPill tone={isOpen ? "success" : "warning"}>{isOpen ? t().participationSessionRecruiting : t().participationSessionClosed}</StatusPill>
-            <Metric label={t().participationWaitingLabel} value={`${formatNumber(participation?.summary.waiting ?? 0)} / ${formatNumber(participation?.maxQueueSize ?? 0)}`} tone="info" />
+          <div className="public-participation-session-game">
+            <span>{t().participationGameLabel}</span>
+            <strong>{t().participationGameValue}</strong>
+            <small>{t().currentGameUpdated} · {formatPublicDateTime(participation?.updatedAt)}</small>
           </div>
+          <dl className="public-participation-session-summary-metrics">
+            <div className="public-participation-current-player">
+              <dt>{t().participationCurrentPlayerLabel}</dt>
+              <dd>{currentParticipantLabel}</dd>
+              <small>{currentParticipants.length > 0 ? publicParticipationStatusLabel("in_game") : sessionStatusLabel}</small>
+            </div>
+            <div className={nextParticipant?.isViewer ? "is-viewer" : undefined}>
+              <dt>{t().participationNextParticipantLabel}</dt>
+              <dd>{nextParticipantLabel}</dd>
+              <small>{nextParticipant ? publicParticipationRoleLabel(nextParticipant.preferredRole ?? nextParticipant.requestedRole ?? nextParticipant.mainRole) : t().participationWaitingLabel}</small>
+            </div>
+            <div>
+              <dt>{t().participationCapacityLabel}</dt>
+              <dd>{formatNumber(participation?.summary.active ?? 0)} / {formatNumber(participation?.maxQueueSize ?? 0)}</dd>
+              <small>{t().participationWaitingLabel} {formatNumber(participation?.summary.waiting ?? 0)}{t().participationPeopleUnit}</small>
+            </div>
+            <div>
+              <dt>{t().participationSelectedLabel}</dt>
+              <dd>{formatNumber((participation?.summary.selected ?? 0) + (participation?.summary.checkedIn ?? 0))}{t().participationPeopleUnit}</dd>
+              <small>{t().participationCheckedInLabel} {formatNumber(participation?.summary.checkedIn ?? 0)}{t().participationPeopleUnit}</small>
+            </div>
+          </dl>
         </Card>
       ) : null}
 
@@ -2680,10 +2746,10 @@ function PublicParticipationJoinPage({
           </CardHeader>
           <CardContent>
             <dl className="public-participation-my-status-metrics">
-              <div><dt>{t().participationPosition}</dt><dd>{formatNumber(viewerEntry.position)} / {formatNumber(participation?.summary.active ?? queue.length)}</dd></div>
-              <div><dt>{t().participationCurrentStatus}</dt><dd>{publicParticipationStatusLabel(viewerEntry.status)}</dd></div>
+              <div className="is-primary"><dt>{t().participationPosition}</dt><dd>#{formatNumber(viewerEntry.position)}</dd></div>
+              <div className="public-participation-queue-ahead"><dt>{t().participationQueueAhead}</dt><dd>{viewerQueueAhead > 0 ? `${formatNumber(viewerQueueAhead)}${t().participationPeopleUnit}` : t().participationQueueAheadNone}</dd></div>
               <div><dt>{t().participationRoleLabel}</dt><dd>{publicParticipationRoleLabel(viewerEntry.preferredRole ?? viewerEntry.requestedRole)}</dd></div>
-              <div><dt>{t().participationEstimatedWait}</dt><dd>{t().participationEstimatePending}</dd></div>
+              <div className="public-participation-check-in-state"><dt>{t().participationCheckInState}</dt><dd>{viewerCheckInLabel}</dd></div>
             </dl>
             <div className="public-participation-my-status-copy" aria-live="polite">
               <strong>{publicParticipationStatusLabel(viewerEntry.status)}</strong>
@@ -2704,7 +2770,14 @@ function PublicParticipationJoinPage({
                 </div>
               </div>
             ) : null}
-            <div className="public-participation-my-status-actions">
+            <div className="public-participation-notification-callout">
+              <div>
+                <span aria-hidden="true">●</span>
+                <div>
+                  <strong>{t().participationNotificationsTitle}</strong>
+                  <small>{t().participationNotificationsDescription}</small>
+                </div>
+              </div>
               {notificationPermission === "default" ? (
                 <Button variant="secondary" type="button" onClick={() => void enableNotifications()}>{t().participationNotificationsEnable}</Button>
               ) : notificationPermission === "granted" ? (
@@ -2714,6 +2787,8 @@ function PublicParticipationJoinPage({
               ) : notificationPermission === "unsupported" ? (
                 <StatusPill tone="neutral">{t().participationNotificationsUnsupported}</StatusPill>
               ) : null}
+            </div>
+            <div className="public-participation-my-status-actions">
               {viewerActions.canCancel ? (
                 <Button variant="danger" type="button" onClick={() => setPendingAction("cancel")} loading={cancelling} disabled={cancelling}>
                   {cancelling ? t().participationCancelling : t().participationCancel}
@@ -2725,7 +2800,7 @@ function PublicParticipationJoinPage({
       ) : null}
 
       {viewerPhase && viewerPhase !== "ended" ? (
-        <details className="public-participation-timeline-card">
+        <details className="public-participation-timeline-card" open>
           <summary>{t().participationJourneyTitle}</summary>
             <ol className="public-participation-timeline">
               {PUBLIC_PARTICIPATION_PHASE_STEPS.map((step, index) => {
@@ -2825,7 +2900,7 @@ function PublicParticipationJoinPage({
           ) : null}
           <ol className="public-participation-queue-list" aria-label={t().participationQueueTitle}>
             {visibleQueue.map((item) => (
-              <li className={`public-participation-queue-row ${item.isViewer ? "viewer" : ""}`} key={`${item.position}-${item.twitchUserName}`}>
+              <li aria-current={item.isViewer ? "true" : undefined} className={`public-participation-queue-row is-${item.status} ${item.isViewer ? "viewer" : ""}`} key={`${item.position}-${item.twitchUserName}`}>
                 <span
                   aria-label={`${t().participationPosition} ${formatNumber(item.position)}`}
                   className="public-participation-position"
@@ -2837,12 +2912,12 @@ function PublicParticipationJoinPage({
                     <strong>{item.twitchUserName}</strong>
                     {item.isViewer ? <Badge className="public-participation-queue-viewer" size="sm" tone="streamer">{t().participationViewerBadge}</Badge> : null}
                   </div>
-                  <span className="public-participation-queue-profile">
-                    {publicParticipationRankText(item)} · {publicParticipationRoleLabel(item.preferredRole ?? item.requestedRole ?? item.mainRole)}
-                  </span>
                   <div className="public-participation-queue-tags">
                     <StatusPill className="public-participation-queue-status" size="sm" tone={publicParticipationStatusTone(item.status)}>{publicParticipationStatusLabel(item.status)}</StatusPill>
                   </div>
+                  <span className="public-participation-queue-profile">
+                    {publicParticipationRankText(item)} · {publicParticipationRoleLabel(item.preferredRole ?? item.requestedRole ?? item.mainRole)}
+                  </span>
                 </div>
                 <div className="public-participation-queue-champions" aria-hidden="true">
                   {(item.topChampions ?? []).slice(0, 2).map((champion) => (
@@ -5763,8 +5838,27 @@ function RecentMatches({
               startedAtTimeLabel={formatMatchTime(match.startedAt)}
               summonerSpellsLabel={`${t().summonerSpells} / ${t().runes}`}
             />
-	          );
-	        });
+          );
+        });
+  const shareMatches: RecentMatchShareItem[] = profile.recentMatches.slice(0, 8).map((match) => {
+    const aiScore = matchAiScore(match);
+    return {
+      key: match.matchId,
+      result: match.result,
+      resultLabel: resultLabel(match.result),
+      championName: championName(match.champion),
+      championIconUrl: match.champion.iconUrl,
+      queueLabel: match.queueId ? queueLabels[activePublicLocale][match.queueId] ?? `${t().queue} ${match.queueId}` : "-",
+      kda: `${formatNumber(match.kills)} / ${formatNumber(match.deaths)} / ${formatNumber(match.assists)}`,
+      kdaMetric: `${formatDecimal(match.kda, 2)} KDA`,
+      grade: recentMatchScoreGrade(aiScore),
+      score: aiScore,
+      itemIconUrls: fixedRecentItemSlots(match.items, 7)
+        .flatMap((item) => item?.iconUrl ? [item.iconUrl] : []),
+      durationLabel: formatDuration(match.durationSeconds),
+      startedAtLabel: formatRelativeDate(match.startedAt),
+    };
+  });
   const text: RecentMatchesPanelText = {
     title: {
       label: t().recentGames,
@@ -5798,6 +5892,28 @@ function RecentMatches({
       loadingMore={loadingMore}
       matchCount={`${profile.summary.recentGames}${t().games}`}
       matchRows={matchRows}
+      shareAction={(
+        <RecentMatchesShareActions
+          matches={shareMatches}
+          riotId={profile.riotId}
+          text={{
+            title: t().matchShareTitle,
+            description: t().matchShareDescription,
+            download: t().matchShareDownload,
+            share: t().matchShareNative,
+            preparing: t().matchSharePreparing,
+            saved: t().matchShareSaved,
+            shared: t().matchShareShared,
+            failed: t().matchShareFailed,
+            recentMatches: t().matchShareRecentMatches,
+            games: t().games,
+            generatedBy: t().matchShareGeneratedBy,
+            wins: t().matchShareWins,
+            losses: t().matchShareLosses,
+            winRate: t().matchShareWinRate,
+          }}
+        />
+      )}
       moreError={moreError}
       loadMoreKey={`${profile.lolPlatform}:${profile.riotId}:${profile.nextRecentMatchStart ?? profile.recentMatches.length}`}
       onLoadMore={onLoadMore}

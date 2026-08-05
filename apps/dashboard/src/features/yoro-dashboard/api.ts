@@ -167,7 +167,7 @@ export function updateYoroParticipationSession(
 
 export function updateYoroParticipationEntry(
   entryId: string,
-  status: Extract<ParticipationStatus, "checked_in" | "in_game" | "played" | "skipped" | "no_show">,
+  status: Extract<ParticipationStatus, "selected" | "checked_in" | "in_game" | "played" | "skipped" | "no_show">,
   csrfToken: string,
   expectedRevision?: number
 ): Promise<ParticipationState> {

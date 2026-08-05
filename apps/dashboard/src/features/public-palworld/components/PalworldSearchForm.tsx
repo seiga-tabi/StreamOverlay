@@ -228,7 +228,11 @@ export function PalworldSearchForm({
                   key={`pal-${pal.id}`}
                 >
                   <span className="palworld-autocomplete-media"><PalworldMedia kind="pal" imageUrl={pal.imageUrl} alt={name.text} locale={locale} /></span>
-                  <span><strong>{name.text}</strong><PalworldTranslationBadge locale={locale} status={name.status} /><small>{formatPalNumber(pal.number, locale)} · {text.palEntityLabel}</small><span className="palworld-badge-row palworld-compact-element-row">{pal.elements.map((element) => <PalworldElementBadge element={element} locale={locale} key={element} />)}</span></span>
+                  <span className="palworld-autocomplete-copy">
+                    <span className="palworld-autocomplete-heading"><strong>{name.text}</strong><PalworldTranslationBadge locale={locale} status={name.status} /></span>
+                    <small>{formatPalNumber(pal.number, locale)} · {text.palEntityLabel}</small>
+                    <span className="palworld-badge-row palworld-compact-element-row">{pal.elements.map((element) => <PalworldElementBadge element={element} locale={locale} key={element} />)}</span>
+                  </span>
                 </button>
               );
             }
@@ -246,7 +250,10 @@ export function PalworldSearchForm({
                 key={`item-${item.id}`}
               >
                 <span className="palworld-autocomplete-media"><PalworldMedia kind="item" imageUrl={item.imageUrl} alt={name.text} locale={locale} /></span>
-                <span><strong>{name.text}</strong><PalworldTranslationBadge locale={locale} status={name.status} /><small>{item.itemType ? itemTypeLabel(item.itemType, locale) : categoryLabel(item.category, locale)} · {text.items}</small></span>
+                <span className="palworld-autocomplete-copy">
+                  <span className="palworld-autocomplete-heading"><strong>{name.text}</strong><PalworldTranslationBadge locale={locale} status={name.status} /></span>
+                  <small>{item.itemType ? itemTypeLabel(item.itemType, locale) : categoryLabel(item.category, locale)} · {text.items}</small>
+                </span>
               </button>
             );
           })}

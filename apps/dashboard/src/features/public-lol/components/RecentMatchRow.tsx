@@ -52,7 +52,7 @@ export type RecentMatchRowProps = {
   onToggleExpand: () => void;
 };
 
-function scoreGrade(score: number): string {
+export function recentMatchScoreGrade(score: number): string {
   if (score >= 90) return "S+";
   if (score >= 85) return "S";
   if (score >= 75) return "A+";
@@ -93,7 +93,7 @@ export function RecentMatchRow({
   expandedPanel,
   onToggleExpand
 }: RecentMatchRowProps) {
-  const grade = scoreGrade(aiScore);
+  const grade = recentMatchScoreGrade(aiScore);
   const scoreDescriptionId = useId();
   const summonerSpellItems = spellItems.filter((item) => item.className !== "rune");
   const runeItems = spellItems.filter((item) => item.className === "rune");
@@ -113,6 +113,11 @@ export function RecentMatchRow({
         <div className="public-match-outcome">
           <b className={`public-match-result-pill ${result}`}>{resultLabel}</b>
           <strong>{queueLabel}</strong>
+          <small className="public-match-mobile-outcome-meta">
+            <span>{startedAtLabel}</span>
+            <span aria-hidden="true">·</span>
+            <span>{resultDurationLabel}</span>
+          </small>
         </div>
         <div className={`public-champion-cell ${highlightClass}`}>
           {championIconUrl ? <img src={championIconUrl} alt="" /> : <span>{championFallback}</span>}

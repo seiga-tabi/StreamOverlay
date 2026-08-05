@@ -14,6 +14,7 @@ import { PublicProfileShareButton } from "../src/features/public-lol/components/
 import { MatchTeamCompare } from "../src/features/public-lol/components/MatchTeamCompare";
 import { RecentMatchBuildRuneBoard } from "../src/features/public-lol/components/RecentMatchBuildRuneBoard";
 import { RecentMatchRow } from "../src/features/public-lol/components/RecentMatchRow";
+import { RecentMatchesShareActions } from "../src/features/public-lol/components/RecentMatchesShareActions";
 import { Button } from "../src/shared/ui/Button";
 import { StatusPill } from "../src/shared/ui/Status";
 import { PublicTwitchAccountChip, PublicTwitchAccountPanel } from "../src/shared/PublicTwitchAccountChip";
@@ -704,6 +705,8 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
   );
 
   assert.match(html, /public-match-row win highlight-mvp/);
+  assert.match(html, /public-match-mobile-outcome-meta/u);
+  assert.match(html, /public-match-mobile-outcome-meta[\s\S]*2026\. 7\. 14\.[\s\S]*26:50/u);
   assert.match(html, /data-ko="점수" data-ja="スコア"/u);
   assert.equal((html.match(/로드아웃\d/g) ?? []).length, 4);
   assert.match(html, /public-match-loadout-column spells/u);
@@ -729,6 +732,71 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
   assert.equal((html.match(/aria-label="점수 91"/gu) ?? []).length, 1);
   assert.match(html, /class="public-match-score metric-tone-excellent" data-grade="S\+"[^>]*><b>S\+<\/b><strong>91<\/strong>/u);
   assert.match(html, /public-match-score-description.*YORO 경기 점수 설명/u);
+});
+
+test("최근 전적 공유 기능은 현재 목록을 이미지 저장과 시스템 공유로 제공한다", () => {
+  const html = renderToStaticMarkup(
+    <RecentMatchesShareActions
+      riotId="YORO#JP1"
+      matches={[{
+        key: "match-1",
+        result: "win",
+        resultLabel: "승리",
+        championName: "제드",
+        championIconUrl: "https://example.com/champion.png",
+        queueLabel: "솔로랭크",
+        kda: "9 / 2 / 5",
+        kdaMetric: "7.00 KDA",
+        grade: "S+",
+        score: 92,
+        itemIconUrls: ["https://example.com/item.png"],
+        durationLabel: "31:39",
+        startedAtLabel: "15분 전",
+      }]}
+      text={{
+        title: "최근 전적 공유 카드",
+        description: "현재 필터의 최근 최대 8경기를 한 장의 이미지로 정리합니다.",
+        download: "이미지 저장",
+        share: "SNS 공유",
+        preparing: "공유 이미지를 만드는 중입니다.",
+        saved: "전적 이미지를 저장했습니다.",
+        shared: "전적 이미지를 공유했습니다.",
+        failed: "공유 이미지를 만들지 못했습니다.",
+        recentMatches: "최근 전적",
+        games: "경기",
+        generatedBy: "YORO.GG에서 생성",
+        wins: "승",
+        losses: "패",
+        winRate: "승률",
+      }}
+    />
+  );
+
+  assert.match(html, /public-match-share-actions/u);
+  assert.match(html, />최근 전적 공유 카드</u);
+  assert.match(html, />이미지 저장</u);
+  assert.match(html, />SNS 공유</u);
+  assert.match(html, /aria-live="polite"/u);
+
+  const shareSource = readFileSync(
+    new URL("../src/features/public-lol/components/RecentMatchesShareActions.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(shareSource, /slice\(0, SHARE_CARD_MAX_MATCHES\)/u);
+  assert.match(shareSource, /canvas\.toBlob/u);
+  assert.match(shareSource, /navigator\.canShare\(\{ files: \[file\] \}\)/u);
+  assert.match(shareSource, /downloadBlob\(blob, file\.name\)/u);
+});
+
+test("모바일 최근 전적은 2행 압축 레이아웃과 360px 공유 액션을 유지한다", () => {
+  const profileCss = readFileSync(
+    new URL("../src/styles/pages/public-lol/20-profile-platform.css", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(profileCss, /@media \(max-width:\s*40rem\)[\s\S]*?\.public-profile-platform-v2 \.public-matches-panel \.public-match-summary\s*\{[\s\S]*?grid-template-rows:\s*var\(--yoro-space-10\) var\(--yoro-space-7\)/u);
+  assert.match(profileCss, /\.public-match-inline-items\s*\{[\s\S]*?grid-column:\s*2 \/ 5[\s\S]*?repeat\(7, var\(--yoro-space-5\)\)/u);
+  assert.match(profileCss, /@media \(max-width:\s*26\.875rem\)[\s\S]*?\.public-match-share-actions\s*\{[\s\S]*?"copy"[\s\S]*?"buttons"[\s\S]*?"status"/u);
 });
 
 test("전적 상세 룬 보드는 읽기 전용 이미지의 선택과 드래그를 막는다", () => {

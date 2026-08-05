@@ -25,7 +25,7 @@ import {
 type Locale = "ko" | "ja";
 type EntryMutationStatus = Extract<
   ParticipationStatus,
-  "checked_in" | "in_game" | "played" | "skipped" | "no_show"
+  "selected" | "checked_in" | "in_game" | "played" | "skipped" | "no_show"
 >;
 
 const copy = {
@@ -66,6 +66,8 @@ const copy = {
     close: "모집 중지",
     reopen: "모집 재개",
     selectNext: "다음 참가자 선정",
+    selectNextHint: "검증이 완료된 대기자 한 명을 체크한 후 선정하세요.",
+    selectForNext: "다음 참가자로 선택",
     finishGame: "게임 종료 처리",
     finishSession: "세션 종료",
     more: "더보기",
@@ -150,6 +152,8 @@ const copy = {
     close: "受付を停止",
     reopen: "受付を再開",
     selectNext: "次の参加者を選出",
+    selectNextHint: "確認済みの待機者を1人選択してから選出してください。",
+    selectForNext: "次の参加者として選択",
     finishGame: "ゲーム終了処理",
     finishSession: "セッション終了",
     more: "その他",
@@ -264,6 +268,7 @@ export function ParticipationManagementPage({
   const [checkInSeconds, setCheckInSeconds] = useState(60);
   const [allowRejoin, setAllowRejoin] = useState(true);
   const [listingVisibility, setListingVisibility] = useState<ParticipationListingVisibility>("public");
+  const [selectedWaitingEntryId, setSelectedWaitingEntryId] = useState("");
 
   const load = useCallback(async (signal?: AbortSignal) => {
     try {
@@ -309,6 +314,19 @@ export function ParticipationManagementPage({
     () => state?.queue.filter((entry) => ["played", "skipped", "cancelled", "no_show", "rejected", "blocked"].includes(entry.status)) ?? [],
     [state]
   );
+  const selectedWaitingEntry = useMemo(
+    () => waitingEntries.find((entry) => (
+      entry.id === selectedWaitingEntryId
+      && (entry.status === "verified" || entry.status === "waitlisted")
+    )),
+    [selectedWaitingEntryId, waitingEntries]
+  );
+
+  useEffect(() => {
+    if (selectedWaitingEntryId && !waitingEntries.some((entry) => entry.id === selectedWaitingEntryId)) {
+      setSelectedWaitingEntryId("");
+    }
+  }, [selectedWaitingEntryId, waitingEntries]);
 
   async function mutateSession(
     action: ParticipationSessionAction,
@@ -352,6 +370,7 @@ export function ParticipationManagementPage({
     setMessage("");
     try {
       setState(await updateYoroParticipationEntry(entryId, status, csrfToken, state?.revision));
+      if (status === "selected") setSelectedWaitingEntryId("");
       setMessage(text.entryUpdated);
     } catch {
       setError(text.updateFailed);
@@ -362,9 +381,6 @@ export function ParticipationManagementPage({
   }
 
   function renderOperationalActionButton() {
-    if (!currentEntry && state?.isOpen && waitingEntries.length > 0) {
-      return <button className="is-primary" disabled={Boolean(busyKey)} onClick={() => void mutateSession("select_next")} type="button">{text.selectNext}</button>;
-    }
     if (currentEntry?.status === "checked_in" || currentEntry?.status === "invited") {
       return <button className="is-primary" disabled={Boolean(busyKey)} onClick={() => void mutateEntry(currentEntry.id, "in_game")} type="button">{text.markInGame}</button>;
     }
@@ -374,13 +390,25 @@ export function ParticipationManagementPage({
     return null;
   }
 
-  function renderParticipantRow(entry: ParticipationDashboardQueueEntry, compact = false) {
+  function renderParticipantRow(entry: ParticipationDashboardQueueEntry, compact = false, selectable = false) {
     const actions = entryActions(entry);
     const primaryAction = actions[0];
     const secondaryActions = actions.slice(1);
+    const canSelect = entry.status === "verified" || entry.status === "waitlisted";
     return (
-      <article className={`participation-management-participant ${compact ? "is-compact" : ""}`} key={entry.id}>
-        <span className="participation-management-position">#{entry.position}</span>
+      <article className={`participation-management-participant ${compact ? "is-compact" : ""} ${selectable ? "is-selectable" : ""}`} key={entry.id}>
+        {selectable ? (
+          <label className="participation-management-selection">
+            <input
+              aria-label={`${entry.twitchUserName} ${text.selectForNext}`}
+              checked={selectedWaitingEntryId === entry.id}
+              disabled={Boolean(busyKey) || Boolean(currentEntry) || !state?.isOpen || !canSelect}
+              onChange={(event) => setSelectedWaitingEntryId(event.target.checked ? entry.id : "")}
+              type="checkbox"
+            />
+            <span className="participation-management-position">#{entry.position}</span>
+          </label>
+        ) : <span className="participation-management-position">#{entry.position}</span>}
         <div className="participation-management-participant-main">
           <strong>{entry.twitchUserName}</strong>
           <span>{entry.riotId} · {roleLabels[locale][entry.preferredRole ?? "unknown"]}</span>
@@ -520,12 +548,25 @@ export function ParticipationManagementPage({
                 <h2 id="participation-queue-title">{text.queueTitle}</h2>
                 <p>{text.queueDescription}</p>
               </div>
-              <span>{waitingEntries.length}</span>
+              <div className="participation-management-queue-actions">
+                <span>{waitingEntries.length}</span>
+                {!currentEntry && state?.isOpen && waitingEntries.length > 0 ? (
+                  <button
+                    className="is-primary"
+                    disabled={Boolean(busyKey) || !selectedWaitingEntry}
+                    onClick={() => selectedWaitingEntry && void mutateEntry(selectedWaitingEntry.id, "selected")}
+                    type="button"
+                  >
+                    {text.selectNext}
+                  </button>
+                ) : null}
+              </div>
             </header>
+            {!currentEntry && state?.isOpen && waitingEntries.length > 0 ? <p className="participation-management-select-hint">{text.selectNextHint}</p> : null}
             <div className="participation-management-group" aria-labelledby="participation-waiting-title">
               <h3 id="participation-waiting-title">{text.queueWaiting}</h3>
               {waitingEntries.length
-                ? waitingEntries.map((entry) => renderParticipantRow(entry, true))
+                ? waitingEntries.map((entry) => renderParticipantRow(entry, true, true))
                 : <p className="participation-management-empty">{text.queueEmpty}</p>}
             </div>
             <details className="participation-management-history">

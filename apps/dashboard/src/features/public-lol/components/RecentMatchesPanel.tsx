@@ -21,6 +21,7 @@ export type RecentMatchesPanelText = {
 export type RecentMatchesPanelProps = {
   matchCount: ReactNode;
   filterBar: ReactNode;
+  shareAction?: ReactNode;
   isEmpty: boolean;
   matchRows: ReactNode;
   moreError?: ReactNode;
@@ -44,6 +45,7 @@ function allowsPublicLolMatchPrefetch(): boolean {
 export function RecentMatchesPanel({
   matchCount,
   filterBar,
+  shareAction,
   isEmpty,
   matchRows,
   moreError,
@@ -88,6 +90,7 @@ export function RecentMatchesPanel({
         <Badge size="sm" tone="info">{matchCount}</Badge>
       </div>
       {filterBar}
+      {shareAction}
       <div className="public-match-list">
         {isEmpty ? (
           <EmptyState className="public-profile-shared-empty-inline" variant="search">

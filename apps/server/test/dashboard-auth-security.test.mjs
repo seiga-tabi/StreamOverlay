@@ -1184,17 +1184,18 @@ test("승인된 방송인은 YORO Dashboard 세션으로 참여 세션과 자신
       }), "12345");
       const selectNextReq = createRequest(
         "POST",
-        "/api/account/streamer/participation/session",
-        { action: "select_next" },
+        "/api/account/streamer/participation/entry-status",
+        { entryId: entry.id, status: "selected" },
         headers
       );
       const selectNextRes = createResponse();
       await handler(selectNextReq, selectNextRes);
       assert.equal(selectNextRes.statusCode, 200);
       assert.equal(
-        JSON.parse(selectNextRes.body).state.participation.queue[0].status,
+        JSON.parse(selectNextRes.body).queue[0].status,
         "selected"
       );
+      assert.equal(typeof JSON.parse(selectNextRes.body).queue[0].checkInExpiresAt, "string");
 
       const closeReq = createRequest(
         "POST",

@@ -49,8 +49,9 @@ export { RecentMatchBuildSkillGrid } from "./components/RecentMatchBuildSkillGri
 export { RecentMatchBuildSummary as RecentMatchBuildSummaryPresenter } from "./components/RecentMatchBuildSummary";
 export { RecentMatchExpandedPanel } from "./components/RecentMatchExpandedPanel";
 export { RecentMatchExpandedToolbar } from "./components/RecentMatchExpandedToolbar";
-export { RecentMatchRow } from "./components/RecentMatchRow";
+export { RecentMatchRow, recentMatchScoreGrade } from "./components/RecentMatchRow";
 export { RecentMatchesPanel } from "./components/RecentMatchesPanel";
+export { RecentMatchesShareActions } from "./components/RecentMatchesShareActions";
 export { SearchForm } from "./components/SearchForm";
 export { SearchableRiotId } from "./components/SearchableRiotId";
 export { TeamChampionAvatar } from "./components/TeamChampionAvatar";
@@ -254,6 +255,11 @@ export type {
   RecentMatchesPanelProps,
   RecentMatchesPanelText,
 } from "./components/RecentMatchesPanel";
+export type {
+  RecentMatchShareItem,
+  RecentMatchesShareActionsProps,
+  RecentMatchesShareText,
+} from "./components/RecentMatchesShareActions";
 export type {
   SearchFormHelpers,
   SearchFormLocalizedText,

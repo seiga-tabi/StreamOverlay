@@ -2823,16 +2823,18 @@
       var(--yoro-space-8)
       minmax(var(--yoro-space-0), 1fr)
       var(--yoro-space-6) !important;
-    grid-template-rows: auto auto;
+    grid-template-rows: minmax(var(--yoro-space-6), auto) minmax(var(--yoro-space-5), auto);
     grid-template-areas:
       "avatar tier name mark"
       "avatar tier rank mark" !important;
     gap: var(--yoro-space-1) var(--yoro-space-2) !important;
     box-sizing: border-box;
     width: 100% !important;
+    min-height: calc(var(--yoro-size-touch-target) + var(--yoro-space-8)) !important;
     min-width: var(--yoro-space-0) !important;
     max-width: 100% !important;
-    overflow: hidden !important;
+    padding-block: var(--yoro-space-3) !important;
+    overflow: visible !important;
   }
 
   .public-home-shared-shell .public-home-shared-search .public-suggestion-list button > *,
@@ -2843,8 +2845,12 @@
 
   .public-home-shared-shell .public-home-shared-search .public-suggestion-name,
   .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-name {
+    display: flex !important;
     align-self: end;
+    gap: var(--yoro-space-1);
+    align-items: baseline;
     overflow: hidden;
+    line-height: 1.25;
   }
 
   .public-home-shared-shell .public-home-shared-search .public-suggestion-name span,
@@ -2873,6 +2879,7 @@
     min-width: var(--yoro-space-0) !important;
     max-width: 100% !important;
     overflow: hidden;
+    line-height: 1.25;
     text-align: start;
     white-space: nowrap;
   }
