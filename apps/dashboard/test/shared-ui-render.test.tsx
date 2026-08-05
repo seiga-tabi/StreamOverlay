@@ -804,6 +804,11 @@ test("모바일 최근 전적은 중앙 정렬 2행과 챔피언 옆 MVP·ACE �
   assert.match(profileCss, /@media \(max-width:\s*40rem\)[\s\S]*?\.public-profile-platform-v2 \.public-matches-panel \.public-match-summary\s*\{[\s\S]*?minmax\(0, 1fr\)[\s\S]*?grid-template-rows:\s*minmax\(var\(--yoro-size-touch-target\), auto\) var\(--yoro-space-5\)/u);
   assert.match(profileCss, /\.public-match-mobile-outcome-meta > span:first-child\s*\{[\s\S]*?display:\s*none/u);
   assert.match(profileCss, /\.public-match-mobile-highlight\s*\{[\s\S]*?display:\s*inline-flex/u);
+  assert.match(profileCss, /--mobile-match-champion-size:\s*calc\(var\(--yoro-space-8\) - var\(--yoro-space-1\)\)/u);
+  assert.match(profileCss, /--mobile-match-loadout-size:\s*calc\(var\(--mobile-match-champion-size\) \/ 2\)/u);
+  assert.match(profileCss, /\.public-champion-cell \.public-match-mobile-spells\s*\{[\s\S]*?grid-column:\s*2 \/ 4\s*!important[\s\S]*?grid-template-columns:\s*repeat\(2, var\(--mobile-match-loadout-size\)\)/u);
+  assert.match(profileCss, /\.public-match-loadout-column\s*\{[\s\S]*?grid-template-rows:\s*repeat\(2, var\(--mobile-match-loadout-size\)\)/u);
+  assert.match(profileCss, /\.public-champion-copy strong\s*\{[\s\S]*?flex:\s*1 1 0[\s\S]*?text-overflow:\s*ellipsis/u);
   assert.match(profileCss, /\.public-kda\s*\{[\s\S]*?grid-row:\s*1 \/ 3\s*!important[\s\S]*?align-self:\s*stretch[\s\S]*?justify-items:\s*center\s*!important[\s\S]*?text-align:\s*center/u);
   assert.match(profileCss, /\.public-match-inline-items\s*\{[\s\S]*?grid-column:\s*2 \/ 3\s*!important[\s\S]*?repeat\(7, var\(--yoro-space-4\)\)[\s\S]*?gap:\s*calc\(var\(--yoro-space-1\) \/ 2\)/u);
   assert.match(profileCss, /\.public-match-score\s*\{[\s\S]*?grid-row:\s*1 \/ 3\s*!important/u);
@@ -830,7 +835,7 @@ test("전적 행은 중앙 정렬하며 MVP와 ACE를 왼쪽 금색·은색 애�
   assert.match(profileCss, /prefers-reduced-motion:\s*reduce[\s\S]*?\.public-match-row:is\(\.highlight-mvp, \.highlight-ace\)::after\s*\{[\s\S]*?animation:\s*none\s*!important/u);
 });
 
-test("LoL 모바일 상단바는 터치 영역을 유지하면서 탐색과 검색 행의 여백을 줄인다", () => {
+test("LoL 모바일 상단바는 터치 영역을 유지하고 스크롤 후 탐색·검색 행을 숨긴다", () => {
   const profileCss = readFileSync(
     new URL("../src/styles/pages/public-lol/20-profile-platform.css", import.meta.url),
     "utf8",
@@ -839,6 +844,14 @@ test("LoL 모바일 상단바는 터치 영역을 유지하면서 탐색과 검�
   assert.match(profileCss, /@media \(max-width:\s*48rem\)[\s\S]*?\.lol-public-game-header \.public-game-header__nav-slot\s*\{[\s\S]*?padding-block:\s*var\(--yoro-space-0\)/u);
   assert.match(profileCss, /\.lol-public-game-header \.public-game-header__search-slot\s*\{[\s\S]*?padding-block:\s*var\(--yoro-space-1\)/u);
   assert.match(profileCss, /\.lol-public-game-header \.public-horizontal-nav__content > :is\(button, a\)\s*\{[\s\S]*?min-block-size:\s*var\(--yoro-size-touch-target\)/u);
+  assert.match(profileCss, /\.lol-public-game-header\.mobile-chrome-scrolled :is\([\s\S]*?\.public-game-header__nav-slot,[\s\S]*?\.public-game-header__search-slot[\s\S]*?\)\s*\{[\s\S]*?display:\s*none/u);
+
+  const headerSource = readFileSync(
+    new URL("../src/features/public-lol/components/PublicAppHeader.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(headerSource, /window\.scrollY > 24/u);
+  assert.match(headerSource, /mobileChromeScrolled \? "mobile-chrome-scrolled"/u);
 });
 
 test("전적 상세 룬 보드는 읽기 전용 이미지의 선택과 드래그를 막는다", () => {

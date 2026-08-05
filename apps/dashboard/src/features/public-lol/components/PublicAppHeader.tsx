@@ -67,6 +67,7 @@ export function PublicAppHeader({
   const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [twitchMenuOpen, setTwitchMenuOpen] = useState(false);
+  const [mobileChromeScrolled, setMobileChromeScrolled] = useState(false);
   const yoroAccount = useYoroAccountSession();
   const headerRef = useRef<HTMLDivElement>(null);
   const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
@@ -165,6 +166,27 @@ export function PublicAppHeader({
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [closeMenus]);
+
+  useEffect(() => {
+    const mobileMedia = window.matchMedia("(max-width: 48rem)");
+    let animationFrame = 0;
+
+    const syncMobileChrome = () => {
+      window.cancelAnimationFrame(animationFrame);
+      animationFrame = window.requestAnimationFrame(() => {
+        setMobileChromeScrolled(mobileMedia.matches && window.scrollY > 24);
+      });
+    };
+
+    syncMobileChrome();
+    window.addEventListener("scroll", syncMobileChrome, { passive: true });
+    mobileMedia.addEventListener("change", syncMobileChrome);
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      window.removeEventListener("scroll", syncMobileChrome);
+      mobileMedia.removeEventListener("change", syncMobileChrome);
+    };
+  }, []);
 
   const twitchMenuActions: PublicTwitchAccountMenuAction[] = [];
   if (canRegisterStreamer) {
@@ -266,7 +288,7 @@ export function PublicAppHeader({
             />
           </button>
         )}
-        className="lol-public-game-header"
+        className={`lol-public-game-header ${mobileChromeScrolled ? "mobile-chrome-scrolled" : ""}`}
         gameSelector={(
           <PublicGameSelector
             activePage={activePage}
