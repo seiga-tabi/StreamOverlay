@@ -5849,6 +5849,7 @@ function RecentMatches({
         });
   const shareMatches: RecentMatchShareItem[] = profile.recentMatches.slice(0, 8).map((match) => {
     const aiScore = matchAiScore(match);
+    const highlight = matchHighlightBadges(match.badges)[0]?.code;
     return {
       key: match.matchId,
       result: match.result,
@@ -5860,6 +5861,7 @@ function RecentMatches({
       kdaMetric: `${formatDecimal(match.kda, 2)} KDA`,
       grade: recentMatchScoreGrade(aiScore),
       score: aiScore,
+      ...(highlight === "mvp" || highlight === "ace" ? { highlight } : {}),
       itemIconUrls: fixedRecentItemSlots(match.items, 7)
         .flatMap((item) => item?.iconUrl ? [item.iconUrl] : []),
       durationLabel: formatDuration(match.durationSeconds),
@@ -5891,6 +5893,11 @@ function RecentMatches({
     }
   };
   const canLoadMore = Boolean(profile.hasMoreRecentMatches && onLoadMore);
+  const shareStreamer = visibleStreamerStream(profile.twitchStream);
+  const shareProfileImageUrl = assetUrl(shareStreamer?.profileImageUrl) ?? assetUrl(profile.profileIconUrl);
+  const shareMasteryChampionArtUrl = assetUrl(
+    profile.topChampions[0]?.splashUrl ?? profile.topChampions[0]?.loadingUrl,
+  );
   return (
     <FeatureRecentMatchesPanel
       canLoadMore={canLoadMore}
@@ -5902,6 +5909,8 @@ function RecentMatches({
       shareAction={(
         <RecentMatchesShareActions
           matches={shareMatches}
+          masteryChampionArtUrl={shareMasteryChampionArtUrl}
+          profileImageUrl={shareProfileImageUrl}
           riotId={profile.riotId}
           text={{
             title: t().matchShareTitle,

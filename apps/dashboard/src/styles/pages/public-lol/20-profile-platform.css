@@ -886,13 +886,25 @@
   min-width: 0;
 }
 
+.public-profile-platform-v2 .public-matches-panel .public-champion-name-line {
+  display: flex;
+  align-items: center;
+  gap: var(--yoro-space-1);
+  min-width: 0;
+}
+
 .public-profile-platform-v2 .public-matches-panel .public-champion-copy strong {
   display: block;
+  min-width: 0;
   overflow: hidden;
   color: var(--yoro-color-text-on-dark);
   font-size: var(--yoro-font-size-lg) !important;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.public-profile-platform-v2 .public-matches-panel .public-match-mobile-highlight {
+  display: none;
 }
 
 .public-profile-platform-v2 .public-matches-panel .public-kda {
@@ -1287,12 +1299,12 @@
 @keyframes public-profile-match-featured-shimmer {
   0%,
   100% {
-    background-position: 120% 0, 0 0;
+    background-position: -75% 0, 0 0;
     opacity: .52;
   }
 
   50% {
-    background-position: -40% 0, 0 0;
+    background-position: 175% 0, 0 0;
     opacity: .88;
   }
 }
@@ -1301,13 +1313,14 @@
   .public-match-row:is(.highlight-mvp, .highlight-ace)::after {
   content: "" !important;
   position: absolute;
-  inset: 0 auto 0 0 !important;
+  inset: 0 !important;
   z-index: 0 !important;
-  width: min(52%, 32rem);
+  width: 100%;
   padding: 0 !important;
   pointer-events: none;
   border-radius: inherit;
-  background-size: 220% 100%, 100% 100% !important;
+  background-size: 42% 100%, 100% 100% !important;
+  background-position: -75% 0, 0 0;
   background-repeat: no-repeat !important;
   clip-path: inset(0 round var(--yoro-radius-md));
   -webkit-mask: none !important;
@@ -1726,15 +1739,10 @@
       calc(var(--yoro-space-12) + var(--yoro-space-5))
       calc(var(--yoro-space-8) + var(--yoro-space-1))
       var(--yoro-size-touch-target) !important;
-    grid-template-rows: var(--yoro-space-8) var(--yoro-space-5) !important;
+    grid-template-rows: minmax(var(--yoro-size-touch-target), auto) var(--yoro-space-5) !important;
     gap: var(--yoro-space-1) !important;
     min-height: calc(var(--yoro-space-12) + var(--yoro-space-4));
     padding: var(--yoro-space-1) var(--yoro-space-2) !important;
-  }
-
-  .public-profile-platform-v2 .public-matches-panel
-    .public-match-row:is(.highlight-mvp, .highlight-ace)::after {
-    width: 76%;
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-match-outcome {
@@ -1772,6 +1780,11 @@
     display: none;
   }
 
+  /* 모바일에서는 경기 시점보다 한 경기의 실제 플레이 시간을 우선합니다. */
+  .public-profile-platform-v2 .public-match-mobile-outcome-meta > span:first-child {
+    display: none;
+  }
+
   .public-profile-platform-v2 .public-matches-panel .public-champion-cell {
     grid-column: 2 !important;
     grid-row: 1 !important;
@@ -1800,6 +1813,35 @@
     white-space: nowrap;
   }
 
+  .public-profile-platform-v2 .public-matches-panel .public-champion-name-line {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .public-profile-platform-v2 .public-matches-panel .public-match-mobile-highlight {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--yoro-space-5);
+    padding-inline: var(--yoro-space-1);
+    border: var(--yoro-size-sr-only) solid currentcolor;
+    border-radius: var(--yoro-radius-pill);
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-black);
+    line-height: var(--yoro-line-height-tight);
+  }
+
+  .public-profile-platform-v2 .public-matches-panel .public-match-mobile-highlight.mvp {
+    background: color-mix(in srgb, var(--yoro-color-warning) 22%, transparent);
+    color: var(--yoro-color-warning);
+  }
+
+  .public-profile-platform-v2 .public-matches-panel .public-match-mobile-highlight.ace {
+    background: color-mix(in srgb, var(--yoro-color-text-on-dark) 16%, transparent);
+    color: var(--yoro-color-text-on-dark);
+  }
+
   .public-profile-platform-v2 .public-matches-panel .public-champion-copy small,
   .public-profile-platform-v2.public-profile-shared-shell .public-matches-panel .public-match-mobile-spells {
     display: none !important;
@@ -1808,11 +1850,13 @@
   .public-profile-platform-v2 .public-matches-panel .public-kda {
     grid-column: 3 !important;
     grid-row: 1 !important;
-    align-self: center;
-    justify-items: start !important;
+    align-self: stretch;
+    align-content: center;
+    justify-items: center !important;
+    justify-content: center;
     width: 100%;
     font-variant-numeric: tabular-nums;
-    text-align: start;
+    text-align: center;
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-kda > strong,
@@ -1839,6 +1883,8 @@
     grid-column: 4 !important;
     grid-row: 1 !important;
     align-self: center;
+    align-content: center;
+    justify-content: center;
     width: calc(var(--yoro-space-8) + var(--yoro-space-1)) !important;
     min-width: calc(var(--yoro-space-8) + var(--yoro-space-1)) !important;
     height: calc(var(--yoro-space-8) + var(--yoro-space-1)) !important;
@@ -1851,7 +1897,7 @@
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-match-score > b {
-    font-size: var(--yoro-font-size-sm) !important;
+    font-size: var(--yoro-font-size-base) !important;
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-match-inline-items {
@@ -1859,7 +1905,7 @@
     grid-row: 2 !important;
     grid-template-columns: repeat(7, var(--yoro-space-5)) !important;
     gap: var(--yoro-space-1) !important;
-    align-self: end;
+    align-self: center;
     width: max-content !important;
     max-width: 100%;
   }

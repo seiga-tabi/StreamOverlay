@@ -706,6 +706,7 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
   assert.match(html, /public-match-row win highlight-mvp/);
   assert.match(html, /public-match-mobile-outcome-meta/u);
   assert.match(html, /public-match-mobile-outcome-meta[\s\S]*2026\. 7\. 14\.[\s\S]*26:50/u);
+  assert.match(html, /public-champion-name-line[\s\S]*public-match-mobile-highlight mvp[^>]*>MVP</u);
   assert.equal((html.match(/로드아웃\d/g) ?? []).length, 4);
   assert.match(html, /public-match-loadout-column spells/u);
   assert.match(html, /public-match-loadout-column runes/u);
@@ -748,10 +749,13 @@ test("최근 전적 공유 기능은 현재 목록을 이미지 저장과 시스
         kdaMetric: "7.00 KDA",
         grade: "S+",
         score: 92,
+        highlight: "mvp",
         itemIconUrls: ["https://example.com/item.png"],
         durationLabel: "31:39",
         startedAtLabel: "15분 전",
       }]}
+      masteryChampionArtUrl="https://example.com/champion-splash.jpg"
+      profileImageUrl="https://example.com/profile.png"
       text={{
         title: "최근 전적 공유 카드",
         description: "현재 필터의 최근 최대 8경기를 한 장의 이미지로 정리합니다.",
@@ -783,17 +787,25 @@ test("최근 전적 공유 기능은 현재 목록을 이미지 저장과 시스
   );
   assert.match(shareSource, /slice\(0, SHARE_CARD_MAX_MATCHES\)/u);
   assert.match(shareSource, /canvas\.toBlob/u);
+  assert.match(shareSource, /drawProfileAvatar/u);
+  assert.match(shareSource, /drawCoverImage/u);
+  assert.match(shareSource, /drawSpecialRowGlow/u);
+  assert.match(shareSource, /SHARE_CARD_LOGO_URL/u);
   assert.match(shareSource, /navigator\.canShare\(\{ files: \[file\] \}\)/u);
   assert.match(shareSource, /downloadBlob\(blob, file\.name\)/u);
 });
 
-test("모바일 최근 전적은 고정 열의 2행 레이아웃과 일관된 상세 버튼을 유지한다", () => {
+test("모바일 최근 전적은 중앙 정렬 2행과 챔피언 옆 MVP·ACE 위치를 유지한다", () => {
   const profileCss = readFileSync(
     new URL("../src/styles/pages/public-lol/20-profile-platform.css", import.meta.url),
     "utf8",
   );
 
-  assert.match(profileCss, /@media \(max-width:\s*40rem\)[\s\S]*?\.public-profile-platform-v2 \.public-matches-panel \.public-match-summary\s*\{[\s\S]*?minmax\(0, 1fr\)[\s\S]*?grid-template-rows:\s*var\(--yoro-space-8\) var\(--yoro-space-5\)/u);
+  assert.match(profileCss, /@media \(max-width:\s*40rem\)[\s\S]*?\.public-profile-platform-v2 \.public-matches-panel \.public-match-summary\s*\{[\s\S]*?minmax\(0, 1fr\)[\s\S]*?grid-template-rows:\s*minmax\(var\(--yoro-size-touch-target\), auto\) var\(--yoro-space-5\)/u);
+  assert.match(profileCss, /\.public-match-mobile-outcome-meta > span:first-child\s*\{[\s\S]*?display:\s*none/u);
+  assert.match(profileCss, /\.public-match-mobile-highlight\s*\{[\s\S]*?display:\s*inline-flex/u);
+  assert.match(profileCss, /\.public-kda\s*\{[\s\S]*?align-self:\s*stretch[\s\S]*?justify-items:\s*center\s*!important[\s\S]*?text-align:\s*center/u);
+  assert.match(profileCss, /\.public-match-score > b\s*\{[\s\S]*?font-size:\s*var\(--yoro-font-size-base\)\s*!important/u);
   assert.match(profileCss, /\.public-match-inline-items\s*\{[\s\S]*?grid-column:\s*2 \/ 5[\s\S]*?repeat\(7, var\(--yoro-space-5\)\)/u);
   assert.match(profileCss, /\.public-match-expand\s*\{[\s\S]*?background:\s*var\(--public-gray-surface-strong\) !important/u);
   assert.match(profileCss, /\.public-match-expand\[aria-expanded="true"\]/u);
@@ -810,7 +822,8 @@ test("전적 행은 중앙 정렬하며 MVP와 ACE를 왼쪽 금색·은색 애�
   assert.match(profileCss, /\.public-match-summary\s*\{[\s\S]*?align-items:\s*center/u);
   assert.match(profileCss, /\.public-kda\s*\{[\s\S]*?align-self:\s*center[\s\S]*?align-content:\s*center/u);
   assert.match(profileCss, /@keyframes public-profile-match-featured-shimmer/u);
-  assert.match(profileCss, /\.public-match-row:is\(\.highlight-mvp, \.highlight-ace\)::after\s*\{[\s\S]*?content:\s*""\s*!important[\s\S]*?inset:\s*0 auto 0 0\s*!important[\s\S]*?animation:\s*public-profile-match-featured-shimmer/u);
+  assert.match(profileCss, /\.public-match-row:is\(\.highlight-mvp, \.highlight-ace\)::after\s*\{[\s\S]*?content:\s*""\s*!important[\s\S]*?inset:\s*0\s*!important[\s\S]*?width:\s*100%[\s\S]*?background-size:\s*42% 100%, 100% 100%\s*!important[\s\S]*?animation:\s*public-profile-match-featured-shimmer/u);
+  assert.match(profileCss, /@keyframes public-profile-match-featured-shimmer\s*\{[\s\S]*?background-position:\s*-75% 0, 0 0[\s\S]*?background-position:\s*175% 0, 0 0/u);
   assert.match(profileCss, /\.public-match-row\.highlight-mvp::after\s*\{[\s\S]*?var\(--yoro-color-warning\)/u);
   assert.match(profileCss, /\.public-match-row\.highlight-ace::after\s*\{[\s\S]*?var\(--yoro-color-text-on-dark\)/u);
   assert.match(profileCss, /prefers-reduced-motion:\s*reduce[\s\S]*?\.public-match-row:is\(\.highlight-mvp, \.highlight-ace\)::after\s*\{[\s\S]*?animation:\s*none\s*!important/u);

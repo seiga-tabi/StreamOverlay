@@ -94,6 +94,11 @@ export function RecentMatchRow({
   const scoreDescriptionId = useId();
   const summonerSpellItems = spellItems.filter((item) => item.className !== "rune");
   const runeItems = spellItems.filter((item) => item.className === "rune");
+  const mobileHighlight = highlightClass === "highlight-mvp"
+    ? { className: "mvp", label: "MVP" }
+    : highlightClass === "highlight-ace"
+      ? { className: "ace", label: "ACE" }
+      : null;
 
   const renderLoadoutItems = (items: RecentMatchRowMediaItem[]) => items.map((item) => (
     <span className={item.className} key={item.key} title={item.label}>
@@ -129,7 +134,17 @@ export function RecentMatchRow({
             </div>
           ) : null}
           <div className="public-champion-copy">
-            <strong>{championName}</strong>
+            <div className="public-champion-name-line">
+              <strong>{championName}</strong>
+              {mobileHighlight ? (
+                <span
+                  aria-hidden="true"
+                  className={`public-match-mobile-highlight ${mobileHighlight.className}`}
+                >
+                  {mobileHighlight.label}
+                </span>
+              ) : null}
+            </div>
             <small>{championRoleLevel}</small>
           </div>
         </div>
