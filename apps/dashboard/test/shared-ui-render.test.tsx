@@ -804,9 +804,10 @@ test("모바일 최근 전적은 중앙 정렬 2행과 챔피언 옆 MVP·ACE �
   assert.match(profileCss, /@media \(max-width:\s*40rem\)[\s\S]*?\.public-profile-platform-v2 \.public-matches-panel \.public-match-summary\s*\{[\s\S]*?minmax\(0, 1fr\)[\s\S]*?grid-template-rows:\s*minmax\(var\(--yoro-size-touch-target\), auto\) var\(--yoro-space-5\)/u);
   assert.match(profileCss, /\.public-match-mobile-outcome-meta > span:first-child\s*\{[\s\S]*?display:\s*none/u);
   assert.match(profileCss, /\.public-match-mobile-highlight\s*\{[\s\S]*?display:\s*inline-flex/u);
-  assert.match(profileCss, /\.public-kda\s*\{[\s\S]*?align-self:\s*stretch[\s\S]*?justify-items:\s*center\s*!important[\s\S]*?text-align:\s*center/u);
+  assert.match(profileCss, /\.public-kda\s*\{[\s\S]*?grid-row:\s*1 \/ 3\s*!important[\s\S]*?align-self:\s*stretch[\s\S]*?justify-items:\s*center\s*!important[\s\S]*?text-align:\s*center/u);
+  assert.match(profileCss, /\.public-match-inline-items\s*\{[\s\S]*?grid-column:\s*2 \/ 3\s*!important[\s\S]*?repeat\(7, var\(--yoro-space-4\)\)[\s\S]*?gap:\s*calc\(var\(--yoro-space-1\) \/ 2\)/u);
+  assert.match(profileCss, /\.public-match-score\s*\{[\s\S]*?grid-row:\s*1 \/ 3\s*!important/u);
   assert.match(profileCss, /\.public-match-score > b\s*\{[\s\S]*?font-size:\s*var\(--yoro-font-size-base\)\s*!important/u);
-  assert.match(profileCss, /\.public-match-inline-items\s*\{[\s\S]*?grid-column:\s*2 \/ 5[\s\S]*?repeat\(7, var\(--yoro-space-5\)\)/u);
   assert.match(profileCss, /\.public-match-expand\s*\{[\s\S]*?background:\s*var\(--public-gray-surface-strong\) !important/u);
   assert.match(profileCss, /\.public-match-expand\[aria-expanded="true"\]/u);
   assert.doesNotMatch(profileCss, /--yoro-space-(?:7|9)\b/u);
