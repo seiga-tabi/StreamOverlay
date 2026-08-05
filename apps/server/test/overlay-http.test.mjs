@@ -1202,10 +1202,11 @@ test("공개 참여 세션은 동시 신청에서도 최대 정원을 초과하�
   assert.equal(store.getActiveParticipationCount(streamerId), 1);
 });
 
-test("공개 참여 상태는 라이브 방송인만 노출하고 명시 선택 전 대기열을 숨긴다", async () => {
+test("공개 참여 상태는 공개 범위에 따라 목록을 노출하고 명시 선택 전 대기열을 숨긴다", async () => {
   const store = new Store();
   const liveStreamerId = "2001";
   const offlineStreamerId = "2002";
+  const followersStreamerId = "2003";
   for (const streamerId of [liveStreamerId, offlineStreamerId]) {
     store.startParticipationSession(streamerId, {
       riotGameName: `Streamer${streamerId}`,
@@ -1213,6 +1214,11 @@ test("공개 참여 상태는 라이브 방송인만 노출하고 명시 선택 
       capturedAt: new Date().toISOString()
     });
   }
+  const followersSession = store.startParticipationSession(followersStreamerId, {
+    riotGameName: `Streamer${followersStreamerId}`,
+    riotTagLine: "JP1",
+    capturedAt: new Date().toISOString()
+  }, { listingVisibility: "followers" });
   store.setTwitchStreamLiveStatus({
     twitchUserId: liveStreamerId,
     isLive: true,
@@ -1221,6 +1227,11 @@ test("공개 참여 상태는 라이브 방송인만 노출하고 명시 선택 
   store.setTwitchStreamLiveStatus({
     twitchUserId: offlineStreamerId,
     isLive: false,
+    source: "eventsub"
+  });
+  store.setTwitchStreamLiveStatus({
+    twitchUserId: followersStreamerId,
+    isLive: true,
     source: "eventsub"
   });
   store.addParticipation(store.makeParticipationEntry({
@@ -1247,7 +1258,7 @@ test("공개 참여 상태는 라이브 방송인만 노출하고 명시 선택 
 
   assert.equal(unselectedRes.statusCode, 200);
   const unselectedState = JSON.parse(unselectedRes.body);
-  assert.deepEqual(unselectedState.streamers.map((streamer) => streamer.id), [liveStreamerId]);
+  assert.deepEqual(unselectedState.streamers.map((streamer) => streamer.id), [liveStreamerId, offlineStreamerId]);
   assert.equal(unselectedState.selectedStreamerId, undefined);
   assert.equal(unselectedState.isOpen, false);
   assert.equal(unselectedState.summary.active, 0);
@@ -1269,10 +1280,24 @@ test("공개 참여 상태는 라이브 방송인만 노출하고 명시 선택 
 
   assert.equal(offlineRes.statusCode, 200);
   const offlineState = JSON.parse(offlineRes.body);
-  assert.deepEqual(offlineState.streamers.map((streamer) => streamer.id), [liveStreamerId]);
-  assert.equal(offlineState.selectedStreamerId, undefined);
-  assert.equal(offlineState.isOpen, false);
+  assert.deepEqual(offlineState.streamers.map((streamer) => streamer.id), [liveStreamerId, offlineStreamerId]);
+  assert.equal(offlineState.selectedStreamerId, offlineStreamerId);
+  assert.equal(offlineState.isOpen, true);
   assert.deepEqual(offlineState.queue, []);
+
+  const hiddenFollowersReq = createRequest("GET", `/api/public/participation/state?streamerId=${followersStreamerId}`);
+  const hiddenFollowersRes = createResponse();
+  await handler(hiddenFollowersReq, hiddenFollowersRes);
+  assert.equal(hiddenFollowersRes.statusCode, 200);
+  assert.equal(JSON.parse(hiddenFollowersRes.body).selectedStreamerId, undefined);
+
+  const directFollowersReq = createRequest("GET", `/api/public/participation/state?session=${followersSession.publicSessionId}`);
+  const directFollowersRes = createResponse();
+  await handler(directFollowersReq, directFollowersRes);
+  assert.equal(directFollowersRes.statusCode, 200);
+  const directFollowersState = JSON.parse(directFollowersRes.body);
+  assert.equal(directFollowersState.selectedStreamerId, followersStreamerId);
+  assert.equal(directFollowersState.isOpen, true);
 });
 
 test("POST API는 올바르지 않은 JSON body를 400으로 반환한다", async () => {

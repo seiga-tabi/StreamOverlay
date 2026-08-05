@@ -1135,10 +1135,21 @@ test("승인된 방송인은 YORO Dashboard 세션으로 참여 세션과 자신
       assert.equal(initialRes.statusCode, 200);
       assert.equal(JSON.parse(initialRes.body).session, undefined);
 
+      const invalidVisibilityReq = createRequest(
+        "POST",
+        "/api/account/streamer/participation/session",
+        { action: "start", listingVisibility: "private" },
+        headers
+      );
+      const invalidVisibilityRes = createResponse();
+      await handler(invalidVisibilityReq, invalidVisibilityRes);
+      assert.equal(invalidVisibilityRes.statusCode, 400);
+      assert.equal(JSON.parse(invalidVisibilityRes.body).code, "INVALID_LISTING_VISIBILITY");
+
       const startReq = createRequest(
         "POST",
         "/api/account/streamer/participation/session",
-        { action: "start", maxQueueSize: 25, checkInSeconds: 45, allowRejoin: false },
+        { action: "start", maxQueueSize: 25, checkInSeconds: 45, allowRejoin: false, listingVisibility: "followers" },
         headers
       );
       const startRes = createResponse();
@@ -1148,6 +1159,7 @@ test("승인된 방송인은 YORO Dashboard 세션으로 참여 세션과 자신
       assert.equal(started.session.maxQueueSize, 25);
       assert.equal(started.session.checkInSeconds, 45);
       assert.equal(started.session.allowRejoin, false);
+      assert.equal(started.session.listingVisibility, "followers");
       assert.match(started.session.publicSessionId, /^ps_[A-Za-z0-9_-]{32}$/u);
 
       const duplicateReq = createRequest(

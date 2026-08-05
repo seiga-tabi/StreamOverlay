@@ -280,7 +280,7 @@ test("Store는 스트리머별 참여 session과 설정을 재시작 후 복원�
       riotTagLine: "JP1",
       normalizedRiotId: "streamer#jp1",
       capturedAt: "2026-07-14T00:00:00.000Z"
-    });
+    }, { listingVisibility: "followers" });
     firstStore.addParticipation(firstStore.makeParticipationEntry({
       streamerId,
       sessionId: session.sessionId,
@@ -301,6 +301,7 @@ test("Store는 스트리머별 참여 session과 설정을 재시작 후 복원�
     assert.equal(restartedStore.getParticipationState(streamerId).isOpen, true);
     assert.equal(restartedStore.getParticipationState(streamerId).session?.sessionId, session.sessionId);
     assert.equal(restartedStore.getParticipationState(streamerId).session?.publicSessionId, session.publicSessionId);
+    assert.equal(restartedStore.getParticipationState(streamerId).session?.listingVisibility, "followers");
     assert.match(session.publicSessionId, /^ps_[A-Za-z0-9_-]{32}$/);
     assert.equal(restartedStore.getParticipationQueue(streamerId)[0]?.sessionId, session.sessionId);
     assert.equal(restartedStore.getLolAutomationSettings(streamerId).announceInChat, false);

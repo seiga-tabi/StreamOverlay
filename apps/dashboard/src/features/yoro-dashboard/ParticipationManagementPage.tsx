@@ -7,6 +7,7 @@ import {
 } from "react";
 import type {
   ParticipationDashboardQueueEntry,
+  ParticipationListingVisibility,
   ParticipationSessionStatus,
   ParticipationState,
   ParticipationStatus
@@ -18,8 +19,7 @@ import {
   type ParticipationSessionAction
 } from "./api";
 import {
-  getCurrentParticipationEntry,
-  getStreamerNextAction
+  getCurrentParticipationEntry
 } from "../participation/participation-display";
 
 type Locale = "ko" | "ja";
@@ -44,35 +44,31 @@ const copy = {
     maxQueueSize: "최대 대기 인원",
     checkInSeconds: "체크인 제한 시간(초)",
     allowRejoin: "참여 완료 후 재참여 허용",
+    listingVisibility: "참여 페이지 공개 범위",
+    listingPublic: "전체 공개",
+    listingPublicDescription: "방송 상태와 관계없이 참여 페이지의 모집 목록에 표시합니다.",
+    listingFollowers: "시청자 공개",
+    listingFollowersDescription: "Twitch 로그인 후 채널을 팔로우 중인 시청자에게만 모집 목록을 표시합니다.",
+    listingScope: "공개 범위",
     create: "참여 세션 시작",
     creating: "세션 생성 중",
     sessionTitle: "진행 중인 세션",
-    publicUrl: "시청자 공개 URL",
-    copyUrl: "URL 복사",
-    copied: "공개 참여 URL을 복사했습니다.",
     openPublic: "공개 화면 열기",
     status: "세션 상태",
     statusRecruiting: "모집 중",
-    statusClosed: "모집 닫힘",
+    statusClosed: "모집 중지됨",
     statusInGame: "게임 중",
     statusCompleted: "종료됨",
     queueCapacity: "대기 인원",
     selectedCount: "선정·체크인",
     checkedInCount: "체크인",
     playedCount: "참여 완료",
-    close: "모집 닫기",
-    reopen: "모집 다시 열기",
+    close: "모집 중지",
+    reopen: "모집 재개",
     selectNext: "다음 참가자 선정",
     finishGame: "게임 종료 처리",
     finishSession: "세션 종료",
     more: "더보기",
-    nextAction: "다음 행동",
-    waitingForApplicants: "참여 신청을 기다리고 있습니다.",
-    canSelectNext: "다음 참가자를 선택할 수 있습니다.",
-    waitingForCheckIn: "참가자의 체크인을 기다리고 있습니다.",
-    participantReady: "참가자가 준비되었습니다.",
-    gameInProgress: "현재 게임이 진행 중입니다.",
-    recruitingClosed: "새로운 신청을 받지 않습니다.",
     currentParticipant: "현재 참가자",
     noCurrentParticipant: "현재 처리 중인 참가자가 없습니다.",
     queueWaiting: "대기 중",
@@ -132,12 +128,15 @@ const copy = {
     maxQueueSize: "最大待機人数",
     checkInSeconds: "チェックイン制限時間（秒）",
     allowRejoin: "参加完了後の再参加を許可",
+    listingVisibility: "参加ページの公開範囲",
+    listingPublic: "全体公開",
+    listingPublicDescription: "配信状態に関係なく、参加ページの募集一覧に表示します。",
+    listingFollowers: "視聴者に公開",
+    listingFollowersDescription: "Twitchログイン後、このチャンネルをフォロー中の視聴者にのみ募集一覧を表示します。",
+    listingScope: "公開範囲",
     create: "参加セッションを開始",
     creating: "セッション作成中",
     sessionTitle: "進行中のセッション",
-    publicUrl: "視聴者向け公開URL",
-    copyUrl: "URLをコピー",
-    copied: "公開参加URLをコピーしました。",
     openPublic: "公開画面を開く",
     status: "セッション状態",
     statusRecruiting: "受付中",
@@ -154,13 +153,6 @@ const copy = {
     finishGame: "ゲーム終了処理",
     finishSession: "セッション終了",
     more: "その他",
-    nextAction: "次の操作",
-    waitingForApplicants: "参加申請を待っています。",
-    canSelectNext: "次の参加者を選出できます。",
-    waitingForCheckIn: "参加者のチェックインを待っています。",
-    participantReady: "参加者の準備ができました。",
-    gameInProgress: "現在ゲームを進行中です。",
-    recruitingClosed: "新しい申請を受け付けていません。",
     currentParticipant: "現在の参加者",
     noCurrentParticipant: "現在処理中の参加者はいません。",
     queueWaiting: "待機中",
@@ -271,6 +263,7 @@ export function ParticipationManagementPage({
   const [maxQueueSize, setMaxQueueSize] = useState(100);
   const [checkInSeconds, setCheckInSeconds] = useState(60);
   const [allowRejoin, setAllowRejoin] = useState(true);
+  const [listingVisibility, setListingVisibility] = useState<ParticipationListingVisibility>("public");
 
   const load = useCallback(async (signal?: AbortSignal) => {
     try {
@@ -308,7 +301,6 @@ export function ParticipationManagementPage({
     [state]
   );
   const currentEntry = useMemo(() => getCurrentParticipationEntry(state), [state]);
-  const nextAction = useMemo(() => getStreamerNextAction(state), [state]);
   const waitingEntries = useMemo(
     () => state?.queue.filter((entry) => ["pending", "verified", "waitlisted"].includes(entry.status)) ?? [],
     [state]
@@ -320,7 +312,12 @@ export function ParticipationManagementPage({
 
   async function mutateSession(
     action: ParticipationSessionAction,
-    options: { maxQueueSize?: number; checkInSeconds?: number; allowRejoin?: boolean } = {}
+    options: {
+      maxQueueSize?: number;
+      checkInSeconds?: number;
+      allowRejoin?: boolean;
+      listingVisibility?: ParticipationListingVisibility;
+    } = {}
   ): Promise<void> {
     if (busyKey) return;
     if (action === "finish" && !window.confirm(text.finishConfirm)) return;
@@ -345,7 +342,7 @@ export function ParticipationManagementPage({
 
   async function createSession(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
-    await mutateSession("start", { maxQueueSize, checkInSeconds, allowRejoin });
+    await mutateSession("start", { maxQueueSize, checkInSeconds, allowRejoin, listingVisibility });
   }
 
   async function mutateEntry(entryId: string, status: EntryMutationStatus): Promise<void> {
@@ -364,43 +361,17 @@ export function ParticipationManagementPage({
     }
   }
 
-  async function copyPublicUrl(): Promise<void> {
-    if (!publicUrl) return;
-    try {
-      await navigator.clipboard.writeText(publicUrl);
-      setMessage(text.copied);
-      setError("");
-    } catch {
-      setError(text.updateFailed);
-    }
-  }
-
-  function nextActionDescription(): string {
-    if (nextAction.type === "select_next") return text.canSelectNext;
-    if (nextAction.type === "wait_check_in") return text.waitingForCheckIn;
-    if (nextAction.type === "start_game") return text.participantReady;
-    if (nextAction.type === "finish_game") return text.gameInProgress;
-    if (nextAction.type === "reopen") return text.recruitingClosed;
-    return text.waitingForApplicants;
-  }
-
-  function renderNextActionButton() {
-    if (nextAction.type === "select_next") {
+  function renderOperationalActionButton() {
+    if (!currentEntry && state?.isOpen && waitingEntries.length > 0) {
       return <button className="is-primary" disabled={Boolean(busyKey)} onClick={() => void mutateSession("select_next")} type="button">{text.selectNext}</button>;
     }
-    if (nextAction.type === "start_game") {
-      return <button className="is-primary" disabled={Boolean(busyKey)} onClick={() => void mutateEntry(nextAction.entry.id, "in_game")} type="button">{text.markInGame}</button>;
+    if (currentEntry?.status === "checked_in" || currentEntry?.status === "invited") {
+      return <button className="is-primary" disabled={Boolean(busyKey)} onClick={() => void mutateEntry(currentEntry.id, "in_game")} type="button">{text.markInGame}</button>;
     }
-    if (nextAction.type === "finish_game") {
+    if (currentEntry?.status === "in_game") {
       return <button className="is-primary" disabled={Boolean(busyKey)} onClick={() => void mutateSession("finish_game")} type="button">{text.finishGame}</button>;
     }
-    if (nextAction.type === "reopen") {
-      return <button className="is-primary" disabled={Boolean(busyKey)} onClick={() => void mutateSession("open")} type="button">{text.reopen}</button>;
-    }
-    if (nextAction.type === "wait_check_in") {
-      return <button aria-disabled="true" className="is-primary" disabled type="button">{text.waitingForCheckIn}</button>;
-    }
-    return <button className="is-primary" disabled={!publicUrl} onClick={() => void copyPublicUrl()} type="button">{text.copyUrl}</button>;
+    return null;
   }
 
   function renderParticipantRow(entry: ParticipationDashboardQueueEntry, compact = false) {
@@ -484,6 +455,27 @@ export function ParticipationManagementPage({
                 <input checked={allowRejoin} onChange={(event) => setAllowRejoin(event.target.checked)} type="checkbox" />
                 <span>{text.allowRejoin}</span>
               </label>
+              <fieldset className="participation-management-visibility">
+                <legend>{text.listingVisibility}</legend>
+                <label>
+                  <input
+                    checked={listingVisibility === "public"}
+                    name="listingVisibility"
+                    onChange={() => setListingVisibility("public")}
+                    type="radio"
+                  />
+                  <span><strong>{text.listingPublic}</strong><small>{text.listingPublicDescription}</small></span>
+                </label>
+                <label>
+                  <input
+                    checked={listingVisibility === "followers"}
+                    name="listingVisibility"
+                    onChange={() => setListingVisibility("followers")}
+                    type="radio"
+                  />
+                  <span><strong>{text.listingFollowers}</strong><small>{text.listingFollowersDescription}</small></span>
+                </label>
+              </fieldset>
             </div>
           </details>
         </form>
@@ -493,7 +485,7 @@ export function ParticipationManagementPage({
             <header>
               <div>
                 <h2 id="participation-session-title">{text.sessionTitle}</h2>
-                <p>{text.publicUrl}</p>
+                <p>{text.listingScope} · {session?.listingVisibility === "followers" ? text.listingFollowers : text.listingPublic}</p>
               </div>
               <strong data-status={session?.status}>{sessionStatusLabel(session?.status ?? "closed", text)}</strong>
             </header>
@@ -503,33 +495,16 @@ export function ParticipationManagementPage({
               <div><dt>{text.checkedInCount}</dt><dd>{state?.summary.checkedIn ?? 0}</dd></div>
               <div><dt>{text.playedCount}</dt><dd>{state?.summary.played ?? 0}</dd></div>
             </dl>
-            <div className="participation-management-next-action" aria-live="polite">
-              <div>
-                <strong>{text.nextAction}</strong>
-                <p>{nextActionDescription()}</p>
-              </div>
-              {renderNextActionButton()}
-            </div>
             <div className="participation-management-session-toolbar">
               <a href={publicUrl} rel="noopener noreferrer" target="_blank">{text.openPublic}</a>
+              {renderOperationalActionButton()}
               {state?.isOpen ? (
                 <button disabled={Boolean(busyKey)} onClick={() => void mutateSession("close")} type="button">{text.close}</button>
+              ) : session?.status === "closed" ? (
+                <button className="is-primary" disabled={Boolean(busyKey)} onClick={() => void mutateSession("open")} type="button">{text.reopen}</button>
               ) : null}
-              <details className="participation-management-more">
-                <summary>{text.more}</summary>
-                <div>
-                  <button disabled={!publicUrl} onClick={() => void copyPublicUrl()} type="button">{text.copyUrl}</button>
-                  <button className="is-danger" disabled={Boolean(busyKey)} onClick={() => void mutateSession("finish")} type="button">{text.finishSession}</button>
-                </div>
-              </details>
+              <button className="is-danger" disabled={Boolean(busyKey)} onClick={() => void mutateSession("finish")} type="button">{text.finishSession}</button>
             </div>
-            <details className="participation-management-public-link">
-              <summary>{text.publicUrl}</summary>
-              <div className="participation-management-url">
-                <input aria-label={text.publicUrl} readOnly value={publicUrl} />
-                <button disabled={!publicUrl} onClick={() => void copyPublicUrl()} type="button">{text.copyUrl}</button>
-              </div>
-            </details>
           </section>
 
           <section className="participation-management-current" aria-labelledby="participation-current-title">

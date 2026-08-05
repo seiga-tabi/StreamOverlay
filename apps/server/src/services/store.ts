@@ -26,6 +26,7 @@ import type {
   OverlayStatus,
   ParticipationDashboardQueueEntry,
   ParticipationEntry,
+  ParticipationListingVisibility,
   ParticipationPublicQueueEntry,
   ParticipationSession,
   ParticipationState,
@@ -334,6 +335,7 @@ function normalizedParticipationSession(value: unknown, streamerId: string): Par
       ? optionalString(input?.publicSessionId)!
       : publicParticipationSessionIdFromInternal(sessionId),
     status,
+    listingVisibility: input?.listingVisibility === "followers" ? "followers" : "public",
     maxQueueSize: Math.max(1, optionalInteger(input?.maxQueueSize) ?? 100),
     allowRejoin: input?.allowRejoin !== false,
     checkInSeconds: Math.max(1, optionalInteger(input?.checkInSeconds) ?? 60),
@@ -2486,6 +2488,7 @@ export class Store {
           sessionId,
           publicSessionId: publicParticipationSessionIdFromInternal(sessionId),
           status: "recruiting",
+          listingVisibility: "public",
           maxQueueSize: 100,
           allowRejoin: true,
           checkInSeconds: 60,
@@ -2554,7 +2557,12 @@ export class Store {
   startParticipationSession(
     streamerId: string,
     profileSnapshot?: StreamerProfileSnapshot,
-    options: { maxQueueSize?: number; allowRejoin?: boolean; checkInSeconds?: number } = {}
+    options: {
+      maxQueueSize?: number;
+      allowRejoin?: boolean;
+      checkInSeconds?: number;
+      listingVisibility?: ParticipationListingVisibility;
+    } = {}
   ): ParticipationSession {
     const normalizedStreamerId = streamerId.trim();
     if (!normalizedStreamerId) throw new Error("스트리머 식별자가 필요합니다.");
@@ -2571,6 +2579,7 @@ export class Store {
       sessionId,
       publicSessionId: publicParticipationSessionIdFromInternal(sessionId),
       status: "recruiting",
+      listingVisibility: options.listingVisibility === "followers" ? "followers" : "public",
       maxQueueSize: Math.max(1, Math.trunc(options.maxQueueSize ?? 100)),
       allowRejoin: options.allowRejoin !== false,
       checkInSeconds: Math.max(1, Math.trunc(options.checkInSeconds ?? 60)),

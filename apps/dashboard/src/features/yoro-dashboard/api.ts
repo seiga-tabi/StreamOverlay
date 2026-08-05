@@ -2,6 +2,7 @@ import type {
   FollowerManagementResponse,
   FollowerOAuthStatus,
   LolOperationsState,
+  ParticipationListingVisibility,
   ParticipationState,
   ParticipationStatus
 } from "@streamops/shared";
@@ -152,6 +153,7 @@ export function updateYoroParticipationSession(
     maxQueueSize?: number;
     allowRejoin?: boolean;
     checkInSeconds?: number;
+    listingVisibility?: ParticipationListingVisibility;
     expectedRevision?: number;
   },
   csrfToken: string

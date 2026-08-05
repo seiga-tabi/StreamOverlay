@@ -206,6 +206,8 @@ export type LolAutomationSettings = {
 
 export type ParticipationSessionStatus = "closed" | "recruiting" | "in_game" | "completed";
 
+export type ParticipationListingVisibility = "public" | "followers";
+
 export type StreamerProfileSnapshot = {
   riotGameName: string;
   riotTagLine: string;
@@ -219,6 +221,7 @@ export type ParticipationSession = {
   sessionId: string;
   publicSessionId: string;
   status: ParticipationSessionStatus;
+  listingVisibility: ParticipationListingVisibility;
   maxQueueSize?: number;
   allowRejoin?: boolean;
   checkInSeconds?: number;

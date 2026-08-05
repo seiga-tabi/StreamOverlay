@@ -14,16 +14,6 @@ export type ParticipationDisplayPhase =
   | "completed"
   | "ended";
 
-export type StreamerNextAction =
-  | { type: "start_session" }
-  | { type: "copy_public_url" }
-  | { type: "select_next" }
-  | { type: "wait_check_in"; entry: ParticipationDashboardQueueEntry }
-  | { type: "start_game"; entry: ParticipationDashboardQueueEntry }
-  | { type: "finish_game"; entry: ParticipationDashboardQueueEntry }
-  | { type: "reopen" }
-  | { type: "none" };
-
 export type ViewerAvailableActions = {
   canCancel: boolean;
   canCheckIn: boolean;
@@ -61,29 +51,6 @@ export function getCurrentParticipationEntry(
     || entry.status === "invited"
     || entry.status === "in_game"
   ));
-}
-
-export function getStreamerNextAction(
-  state: ParticipationState | undefined
-): StreamerNextAction {
-  const session = state?.session;
-  if (!session || session.status === "completed") return { type: "start_session" };
-  if (session.status === "closed") return { type: "reopen" };
-
-  const currentEntry = getCurrentParticipationEntry(state);
-  if (currentEntry?.status === "in_game" || session.status === "in_game") {
-    return currentEntry
-      ? { type: "finish_game", entry: currentEntry }
-      : { type: "none" };
-  }
-  if (currentEntry?.status === "checked_in" || currentEntry?.status === "invited") {
-    return { type: "start_game", entry: currentEntry };
-  }
-  if (currentEntry?.status === "selected") {
-    return { type: "wait_check_in", entry: currentEntry };
-  }
-  if ((state?.summary.waiting ?? 0) > 0) return { type: "select_next" };
-  return { type: "copy_public_url" };
 }
 
 export function getViewerAvailableActions(

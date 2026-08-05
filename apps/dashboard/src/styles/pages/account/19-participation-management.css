@@ -107,7 +107,7 @@
   align-items: end;
 }
 
-.participation-management-form-grid label:not(.participation-management-checkbox) {
+.participation-management-form-grid > label:not(.participation-management-checkbox) {
   min-inline-size: 0;
   display: grid;
   gap: var(--space-2);
@@ -115,8 +115,7 @@
   font-weight: 700;
 }
 
-.participation-management-form-grid input[type="number"],
-.participation-management-url input {
+.participation-management-form-grid input[type="number"] {
   min-inline-size: 0;
   min-block-size: var(--yoro-size-touch-target);
   padding-inline: var(--space-4);
@@ -140,6 +139,66 @@
   inline-size: 1.25rem;
   block-size: 1.25rem;
   accent-color: var(--brand);
+}
+
+.participation-management-visibility {
+  min-inline-size: 0;
+  margin: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  background: var(--surface-muted);
+}
+
+.participation-management-visibility legend {
+  padding-inline: var(--space-2);
+  color: var(--text-strong);
+  font-weight: 800;
+}
+
+.participation-management-visibility label {
+  min-inline-size: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  color: var(--text);
+  background: var(--surface-strong);
+  cursor: pointer;
+}
+
+.participation-management-visibility label:has(input:checked) {
+  border-color: var(--brand);
+  background: color-mix(in srgb, var(--brand) 14%, var(--surface-strong));
+}
+
+.participation-management-visibility input {
+  flex: 0 0 auto;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  margin: .125rem 0 0;
+  accent-color: var(--brand);
+}
+
+.participation-management-visibility span {
+  min-inline-size: 0;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.participation-management-visibility strong {
+  color: var(--text-strong);
+}
+
+.participation-management-visibility small {
+  color: var(--muted);
+  line-height: 1.5;
 }
 
 .participation-management-page button,
@@ -257,13 +316,6 @@
   background: color-mix(in srgb, var(--success) 24%, var(--surface-strong));
 }
 
-.participation-management-url {
-  min-inline-size: 0;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) max-content max-content;
-  gap: var(--space-2);
-}
-
 .participation-management-metrics {
   margin: 0;
   display: grid;
@@ -292,7 +344,6 @@
   font-weight: 900;
 }
 
-.participation-management-session-actions,
 .participation-management-session-toolbar,
 .participation-management-entry-actions {
   display: flex;
@@ -300,47 +351,14 @@
   gap: var(--space-2);
 }
 
-.participation-management-next-action {
-  min-inline-size: 0;
-  padding: var(--space-5);
-  border: 1px solid var(--brand);
-  border-radius: var(--radius-lg);
-  display: flex;
-  gap: var(--space-4);
-  align-items: center;
-  justify-content: space-between;
-  background: var(--brand-soft, var(--surface-muted));
-}
-
-.participation-management-next-action div {
-  min-inline-size: 0;
-}
-
-.participation-management-next-action > button {
-  flex: 0 0 auto;
-  max-inline-size: 100%;
-  white-space: normal;
-}
-
-.participation-management-next-action strong {
-  color: var(--text-strong);
-}
-
-.participation-management-next-action p {
-  margin: var(--space-1) 0 0;
-  color: var(--muted);
-}
-
 .participation-management-session-toolbar {
   align-items: flex-start;
 }
 
-.participation-management-more,
 .participation-management-row-more {
   position: relative;
 }
 
-.participation-management-more > div,
 .participation-management-row-more > div {
   z-index: 2;
   min-inline-size: 10rem;
@@ -353,13 +371,6 @@
   box-shadow: var(--shadow-lg);
 }
 
-.participation-management-more > div {
-  position: absolute;
-  inset-block-start: calc(100% + var(--space-2));
-  inset-inline-end: 0;
-}
-
-.participation-management-public-link,
 .participation-management-advanced,
 .participation-management-history {
   min-inline-size: 0;
@@ -367,14 +378,12 @@
   padding-block-start: var(--space-3);
 }
 
-.participation-management-public-link > summary,
 .participation-management-advanced > summary,
 .participation-management-history > summary {
   inline-size: fit-content;
   min-block-size: var(--yoro-size-touch-target);
 }
 
-.participation-management-public-link[open] > summary,
 .participation-management-advanced[open] > summary,
 .participation-management-history[open] > summary {
   margin-block-end: var(--space-4);
@@ -554,14 +563,11 @@
 
   .participation-management-form-grid,
   .participation-management-metrics,
-  .participation-management-url {
+  .participation-management-visibility {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .participation-management-create > button,
-  .participation-management-url button,
-  .participation-management-url a,
-  .participation-management-session-actions button {
+  .participation-management-create > button {
     inline-size: 100%;
   }
 
@@ -578,7 +584,6 @@
     align-self: flex-start;
   }
 
-  .participation-management-next-action,
   .participation-management-participant {
     align-items: stretch;
     grid-template-columns: minmax(0, 1fr);
@@ -592,10 +597,6 @@
       "actions";
   }
 
-  .participation-management-next-action {
-    flex-direction: column;
-  }
-
   .participation-management-bot {
     align-items: stretch;
     flex-direction: column;
@@ -605,7 +606,6 @@
     inline-size: 100%;
   }
 
-  .participation-management-next-action > button,
   .participation-management-session-toolbar > *,
   .participation-management-entry-actions > * {
     inline-size: 100%;
@@ -614,11 +614,6 @@
   .participation-management-session-toolbar {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .participation-management-more > div {
-    position: static;
-    margin-block-start: var(--space-2);
   }
 }
 

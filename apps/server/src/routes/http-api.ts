@@ -55,6 +55,7 @@ import {
   type LolRoleAnalysis,
   type LolRoutingContext,
   type ParticipationEntry,
+  type ParticipationListingVisibility,
   type ParticipationPhase,
   type ParticipationSession,
   type ParticipationState,
@@ -864,6 +865,7 @@ type PublicParticipationStreamer = {
   maxQueueSize?: number;
   publicSessionId?: string;
   sessionStatus?: ParticipationSession["status"];
+  listingVisibility?: ParticipationListingVisibility;
   updatedAt: string;
 };
 
@@ -4445,7 +4447,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
 
   function startParticipationSessionForOwner(
     streamerId: string,
-    options: { maxQueueSize?: number; allowRejoin?: boolean; checkInSeconds?: number } = {}
+    options: {
+      maxQueueSize?: number;
+      allowRejoin?: boolean;
+      checkInSeconds?: number;
+      listingVisibility?: ParticipationListingVisibility;
+    } = {}
   ) {
     const identity = approvedStreamerIdentityForOwner(streamerId);
     if (!identity) {
@@ -4465,9 +4472,10 @@ export function createHttpHandler(input: HttpHandlerInput) {
     maxQueueSize?: number;
     allowRejoin?: boolean;
     checkInSeconds?: number;
+    listingVisibility?: ParticipationListingVisibility;
     expectedRevision?: number;
   } {
-    const body = strictJsonObject(value, ["action", "maxQueueSize", "allowRejoin", "checkInSeconds", "expectedRevision"]);
+    const body = strictJsonObject(value, ["action", "maxQueueSize", "allowRejoin", "checkInSeconds", "listingVisibility", "expectedRevision"]);
     if (typeof body.action !== "string" || !PARTICIPATION_SESSION_ACTIONS.has(body.action)) {
       throw new HttpRequestError(400, { error: "허용되지 않은 시청자 참여 세션 조작입니다.", code: "INVALID_ACTION" });
     }
@@ -4475,6 +4483,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       body.maxQueueSize !== undefined
       || body.allowRejoin !== undefined
       || body.checkInSeconds !== undefined
+      || body.listingVisibility !== undefined
     )) {
       throw new HttpRequestError(400, { error: "세션 생성 설정은 start 동작에서만 사용할 수 있습니다.", code: "INVALID_REQUEST" });
     }
@@ -4504,11 +4513,17 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (body.allowRejoin !== undefined && typeof body.allowRejoin !== "boolean") {
       throw new HttpRequestError(400, { error: "재참여 허용 값이 올바르지 않습니다.", code: "INVALID_ALLOW_REJOIN" });
     }
+    if (body.listingVisibility !== undefined && !["public", "followers"].includes(String(body.listingVisibility))) {
+      throw new HttpRequestError(400, { error: "참여 페이지 공개 범위가 올바르지 않습니다.", code: "INVALID_LISTING_VISIBILITY" });
+    }
     return {
       action: body.action,
       ...(typeof body.maxQueueSize === "number" ? { maxQueueSize: body.maxQueueSize } : {}),
       ...(typeof body.allowRejoin === "boolean" ? { allowRejoin: body.allowRejoin } : {}),
       ...(typeof body.checkInSeconds === "number" ? { checkInSeconds: body.checkInSeconds } : {}),
+      ...(body.listingVisibility === "public" || body.listingVisibility === "followers"
+        ? { listingVisibility: body.listingVisibility }
+        : {}),
       ...(typeof body.expectedRevision === "number" ? { expectedRevision: body.expectedRevision } : {})
     };
   }
@@ -4536,7 +4551,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
       startParticipationSessionForOwner(streamerId, {
         ...(body.maxQueueSize !== undefined ? { maxQueueSize: body.maxQueueSize } : {}),
         ...(body.allowRejoin !== undefined ? { allowRejoin: body.allowRejoin } : {}),
-        ...(body.checkInSeconds !== undefined ? { checkInSeconds: body.checkInSeconds } : {})
+        ...(body.checkInSeconds !== undefined ? { checkInSeconds: body.checkInSeconds } : {}),
+        ...(body.listingVisibility !== undefined ? { listingVisibility: body.listingVisibility } : {})
       });
       await broadcastParticipationSnapshot(input, "recruiting", "dashboard.lol_operations.session_start", streamerId);
     } else if (body.action === "finish") {
@@ -5081,10 +5097,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (activeSessions.length > 0) {
       const streamers = (await Promise.all(activeSessions.map(async (session) => {
         const isLive = await isPublicParticipationStreamerLive(session.streamerId);
-        if (
-          !(allowOfflineSelected && selectedStreamerId === session.streamerId)
-          && !isLive
-        ) return undefined;
+        const isDirectlySelected = allowOfflineSelected && selectedStreamerId === session.streamerId;
+        if (!isDirectlySelected && session.listingVisibility !== "public") return undefined;
         const participationState = input.store.getParticipationState(session.streamerId);
         const approved = approvedByOwner.get(session.streamerId);
         const snapshot = session.profileSnapshot;
@@ -5106,6 +5120,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
           maxQueueSize: session.maxQueueSize ?? PUBLIC_PARTICIPATION_MAX_QUEUE_SIZE,
           publicSessionId: session.publicSessionId,
           sessionStatus: session.status,
+          listingVisibility: session.listingVisibility,
           updatedAt: session.updatedAt
         };
       }))).filter((streamer): streamer is NonNullable<typeof streamer> => streamer !== undefined);
@@ -5203,6 +5218,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         queueSize: state?.summary.active ?? 0,
         ...(session ? { maxQueueSize: session.maxQueueSize ?? PUBLIC_PARTICIPATION_MAX_QUEUE_SIZE } : {}),
         ...(session ? { publicSessionId: session.publicSessionId, sessionStatus: session.status } : {}),
+        ...(session ? { listingVisibility: session.listingVisibility } : {}),
         updatedAt: session?.updatedAt ?? channel.followedAt
       };
     };

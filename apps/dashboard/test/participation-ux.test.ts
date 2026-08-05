@@ -53,7 +53,7 @@ test("시청자 참여 화면은 직접 세션·내 상태·단계·규칙을 �
   assert.match(i18n, /Riot IDはゲーム名#タグの形式で入力してください/u);
 });
 
-test("스트리머 참여 화면은 빠른 시작·단일 다음 행동·그룹 대기열을 제공한다", async () => {
+test("스트리머 참여 화면은 공개 범위·직접 동작·그룹 대기열을 제공한다", async () => {
   const source = await readFile(
     new URL("../src/features/yoro-dashboard/ParticipationManagementPage.tsx", import.meta.url),
     "utf8"
@@ -63,15 +63,24 @@ test("스트리머 참여 화면은 빠른 시작·단일 다음 행동·그룹 
     "utf8"
   );
 
-  assert.match(source, /getStreamerNextAction/u);
-  assert.match(source, /participation-management-next-action/u);
+  assert.doesNotMatch(source, /getStreamerNextAction/u);
+  assert.doesNotMatch(source, /participation-management-next-action/u);
+  assert.doesNotMatch(source, /copyPublicUrl/u);
+  assert.doesNotMatch(source, /participation-management-public-link/u);
+  assert.doesNotMatch(source, /participation-management-more/u);
   assert.match(source, /participation-management-advanced/u);
+  assert.match(source, /participation-management-visibility/u);
   assert.match(source, /participation-management-current/u);
   assert.match(source, /participation-management-history/u);
   assert.match(source, /participation-management-bot/u);
   assert.match(source, /expectedRevision: state\.revision/u);
   assert.match(source, /시청자 참여를 시작하세요/u);
   assert.match(source, /視聴者参加を始めましょう/u);
+  assert.match(source, /전체 공개/u);
+  assert.match(source, /視聴者に公開/u);
+  assert.match(source, /모집 중지/u);
+  assert.match(source, /受付を再開/u);
+  assert.match(source, /className="is-danger"[\s\S]*?mutateSession\("finish"\)/u);
   assert.match(css, /grid-template-areas:[\s\S]*?"position participant status"[\s\S]*?"position actions actions"/u);
   assert.match(css, /color:\s*var\(--yoro-color-text-on-dark-strong\)/u);
 });
