@@ -176,6 +176,7 @@ export function queueMatchesFilter(match: PublicLolRecentMatch, queue: MatchQueu
   if (queue === "ranked5v5") return match.queueId === 42 || match.queueId === 6;
   if (queue === "normal") return match.queueId === 400 || match.queueId === 430;
   if (queue === "aram") return match.queueId === 450;
+  if (queue === "aramMayhem") return match.queueId === 2400;
   return true;
 }
 
@@ -216,6 +217,23 @@ export function profileWithAdditionalMatchPage(profile: PublicLolProfile, page: 
     nextRecentMatchStart: page.nextRecentMatchStart,
     hasMoreRecentMatches: page.hasMoreRecentMatches
   }, [...matches.values()]);
+}
+
+export function matchPageWithAdditionalPage(
+  current: PublicLolMatchPageResponse,
+  page: PublicLolMatchPageResponse
+): PublicLolMatchPageResponse {
+  const matches = new Map<string, PublicLolRecentMatch>();
+  for (const match of current.recentMatches) matches.set(match.matchId, match);
+  for (const match of page.recentMatches) matches.set(match.matchId, match);
+  return {
+    ...current,
+    fetchedAt: page.fetchedAt,
+    recentMatches: [...matches.values()],
+    recentMatchStart: 0,
+    nextRecentMatchStart: page.nextRecentMatchStart,
+    hasMoreRecentMatches: page.hasMoreRecentMatches
+  };
 }
 
 export function profileWithDynamicState(

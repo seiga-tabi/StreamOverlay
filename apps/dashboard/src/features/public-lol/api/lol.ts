@@ -2,6 +2,7 @@ import { apiBase } from "../../../api/client";
 import type { LolPlatformId } from "@streamops/shared";
 import { t } from "../i18n/public-lol-i18n";
 import type {
+  MatchQueueFilter,
   PublicLolMatchBuildResponse,
   PublicLolMatchTeamsResponse,
   PublicLolMatchPageResponse,
@@ -27,8 +28,13 @@ function publicLolMatchPageProfileKey(riotId: string, platform?: LolPlatformId):
   return `${platform ?? ""}\u0000${riotId.trim().normalize("NFKC").toLocaleLowerCase()}`;
 }
 
-function publicLolMatchPageClientKey(riotId: string, start: number, platform?: LolPlatformId): string {
-  return `${publicLolMatchPageProfileKey(riotId, platform)}\u0000${Math.max(0, Math.trunc(start))}`;
+function publicLolMatchPageClientKey(
+  riotId: string,
+  start: number,
+  platform?: LolPlatformId,
+  queue: MatchQueueFilter = "all"
+): string {
+  return `${publicLolMatchPageProfileKey(riotId, platform)}\u0000${queue}\u0000${Math.max(0, Math.trunc(start))}`;
 }
 
 function prunePublicLolMatchPageClientCache(): void {
@@ -110,11 +116,12 @@ export async function getPublicLolMatchPage(
   riotId: string,
   start: number,
   platform?: LolPlatformId,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  queue: MatchQueueFilter = "all"
 ): Promise<PublicLolMatchPageResponse> {
   const safeStart = Math.max(0, Math.trunc(start));
   const profileKey = publicLolMatchPageProfileKey(riotId, platform);
-  const cacheKey = publicLolMatchPageClientKey(riotId, safeStart, platform);
+  const cacheKey = publicLolMatchPageClientKey(riotId, safeStart, platform, queue);
   const cached = publicLolMatchPageClientCache.get(cacheKey);
   if (cached && cached.expiresAt > Date.now()) {
     publicLolMatchPageClientCache.delete(cacheKey);
@@ -128,6 +135,7 @@ export async function getPublicLolMatchPage(
     const generation = publicLolMatchPageClientGeneration.get(profileKey) ?? 0;
     const params = new URLSearchParams({ riotId, start: String(safeStart) });
     if (platform) params.set("platform", platform);
+    if (queue !== "all") params.set("queue", queue);
     request = (async () => {
       const response = await fetch(`${apiBase}/api/lol/matches?${params.toString()}`, {
         credentials: "include"
@@ -163,9 +171,10 @@ export async function getPublicLolMatchPage(
 export async function prefetchPublicLolMatchPage(
   riotId: string,
   start: number,
-  platform?: LolPlatformId
+  platform?: LolPlatformId,
+  queue: MatchQueueFilter = "all"
 ): Promise<void> {
-  await getPublicLolMatchPage(riotId, start, platform);
+  await getPublicLolMatchPage(riotId, start, platform, undefined, queue);
 }
 
 export function invalidatePublicLolMatchPageCache(riotId: string, platform?: LolPlatformId): void {

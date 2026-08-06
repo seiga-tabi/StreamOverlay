@@ -23,6 +23,7 @@ export type RecentMatchesPanelProps = {
   filterBar: ReactNode;
   shareAction?: ReactNode;
   isEmpty: boolean;
+  initialLoading?: boolean;
   matchRows: ReactNode;
   moreError?: ReactNode;
   canLoadMore: boolean;
@@ -47,6 +48,7 @@ export function RecentMatchesPanel({
   filterBar,
   shareAction,
   isEmpty,
+  initialLoading = false,
   matchRows,
   moreError,
   canLoadMore,
@@ -91,8 +93,13 @@ export function RecentMatchesPanel({
       </div>
       {filterBar}
       {shareAction}
-      <div className="public-match-list">
-        {isEmpty ? (
+      <div className="public-match-list" aria-busy={initialLoading || undefined}>
+        {initialLoading ? (
+          <div className="public-match-filter-loading" role="status">
+            <span aria-hidden="true" />
+            <strong>{text.loadingMoreMatches}</strong>
+          </div>
+        ) : isEmpty ? (
           <EmptyState className="public-profile-shared-empty-inline" variant="search">
             <EmptyStateIcon>?</EmptyStateIcon>
             <EmptyStateTitle as="h3"  >{text.emptyTitle.label}</EmptyStateTitle>

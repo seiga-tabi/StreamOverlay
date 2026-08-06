@@ -244,6 +244,7 @@ import {
   filteredMatches,
   hasActiveFilters,
   kdaFromTotals,
+  matchPageWithAdditionalPage,
   profileWithAdditionalMatchPage,
   profileWithDynamicState,
   profileWithMatches,
@@ -402,7 +403,8 @@ const queueLabels: Record<PublicLocale, Record<number, string>> = {
     420: "솔로랭크",
     430: "일반",
     440: "자유랭크",
-    450: "칼바람"
+    450: "칼바람",
+    2400: "증강 칼바람"
   },
   ja: {
     6: "5v5 ランク",
@@ -411,7 +413,8 @@ const queueLabels: Record<PublicLocale, Record<number, string>> = {
     420: "ソロランク",
     430: "ノーマル",
     440: "フレックスランク",
-    450: "ARAM"
+    450: "ランダムミッド",
+    2400: "ランダムミッド：メイヘム"
   }
 };
 
@@ -1953,6 +1956,7 @@ function PublicFilterPanel({
           <option value="ranked5v5">{t().ranked5v5}</option>
           <option value="normal">{t().normalQueue}</option>
           <option value="aram">{t().aramQueue}</option>
+          <option value="aramMayhem">{t().aramMayhemQueue}</option>
         </select>
       </label>
       <ChampionFilterSelect
@@ -2032,6 +2036,7 @@ function PublicMatchFilterBar({
     ranked5v5: t().ranked5v5,
     normalQueue: t().normalQueue,
     aramQueue: t().aramQueue,
+    aramMayhemQueue: t().aramMayhemQueue,
     allChampions: t().allChampions,
     periodAll: t().periodAll,
     period7: t().period7,
@@ -5908,6 +5913,7 @@ function RecentMatches({
     <FeatureRecentMatchesPanel
       canLoadMore={canLoadMore}
       filterBar={<PublicMatchFilterBar filters={filters} champions={champions} onChange={onFilters} onReset={onResetFilters} />}
+      initialLoading={loadingMore && profile.recentMatches.length === 0}
       isEmpty={profile.recentMatches.length === 0}
       loadingMore={loadingMore}
       matchCount={`${profile.summary.recentGames}${t().games}`}
@@ -6188,10 +6194,14 @@ export function PublicLolPage({
   const loadMoreAbortRef = useRef<AbortController | undefined>(undefined);
   const loadMoreSequenceRef = useRef(0);
   const loadMoreInFlightKeyRef = useRef<string | undefined>(undefined);
+  const queueFilterAbortRef = useRef<AbortController | undefined>(undefined);
+  const queueFilterSequenceRef = useRef(0);
   const [recentSearches, setRecentSearches] = useState<SearchSuggestion[]>(() => readRecentSearches());
   const [favorites, setFavorites] = useState<PublicFavorite[]>(() => readFavorites());
   const { theme, toggleTheme } = usePublicTheme();
   const [filters, setFilters] = useState<PublicMatchFilters>(DEFAULT_MATCH_FILTERS);
+  const [queueMatchPages, setQueueMatchPages] = useState<Partial<Record<MatchQueueFilter, PublicLolMatchPageResponse>>>({});
+  const [loadingQueueMatches, setLoadingQueueMatches] = useState(false);
   const [remoteSuggestions, setRemoteSuggestions] = useState<SearchSuggestion[]>([]);
   const [searchPanelRequest, setSearchPanelRequest] = useState<SearchFormPanelRequest>();
   const [profileTab, setProfileTab] = useState<PublicProfileTab>("overview");
@@ -6295,10 +6305,23 @@ export function PublicLolPage({
     }
     return [...streamers.values()].slice(0, 12);
   }, [followedLol, locale]);
-  const visibleProfile = useMemo(() => {
+  const matchSourceProfile = useMemo(() => {
     if (!profile) return null;
-    return profileWithMatches(profile, filteredMatches(profile, filters));
-  }, [profile, filters]);
+    const queuePage = filters.queue === "all" ? undefined : queueMatchPages[filters.queue];
+    if (!queuePage) return profile;
+    return {
+      ...profile,
+      recentMatches: queuePage.recentMatches,
+      recentMatchStart: queuePage.recentMatchStart,
+      nextRecentMatchStart: queuePage.nextRecentMatchStart,
+      hasMoreRecentMatches: queuePage.hasMoreRecentMatches,
+      fetchedAt: queuePage.fetchedAt
+    };
+  }, [filters.queue, profile, queueMatchPages]);
+  const visibleProfile = useMemo(() => {
+    if (!matchSourceProfile) return null;
+    return profileWithMatches(matchSourceProfile, filteredMatches(matchSourceProfile, filters));
+  }, [matchSourceProfile, filters]);
   const selectedCommunityPost = useMemo(
     () => communityPosts.find((post) => post.id === selectedCommunityPostId),
     [communityPosts, selectedCommunityPostId]
@@ -6306,16 +6329,57 @@ export function PublicLolPage({
   const refreshRemaining = refreshRemainingMs(profile, nowTick);
   const availableChampions = useMemo(() => {
     const unique = new Map<number, LolChampionSummary>();
-    for (const match of profile?.recentMatches ?? []) {
+    for (const match of matchSourceProfile?.recentMatches ?? []) {
       if (!unique.has(match.champion.championId)) unique.set(match.champion.championId, match.champion);
     }
     return [...unique.values()].sort((a, b) => championName(a).localeCompare(championName(b)));
-  }, [profile]);
+  }, [matchSourceProfile]);
 
   useEffect(() => () => {
     profileSearchAbortRef.current?.abort();
     loadMoreAbortRef.current?.abort();
+    queueFilterAbortRef.current?.abort();
   }, []);
+
+  useEffect(() => {
+    queueFilterAbortRef.current?.abort();
+    queueFilterAbortRef.current = undefined;
+    queueFilterSequenceRef.current += 1;
+    setMoreMatchesError("");
+    if (!profile || filters.queue === "all") {
+      setLoadingQueueMatches(false);
+      return undefined;
+    }
+    const platform = normalizeLolPlatformId(profile.lolPlatform) ?? selectedLolPlatform;
+    const cached = queueMatchPages[filters.queue];
+    if (
+      cached
+      && cached.riotId === profile.riotId
+      && normalizeLolPlatformId(cached.lolPlatform) === platform
+    ) {
+      setLoadingQueueMatches(false);
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    const requestSequence = queueFilterSequenceRef.current;
+    queueFilterAbortRef.current = controller;
+    setLoadingQueueMatches(true);
+    void getPublicLolMatchPage(profile.riotId, 0, platform, controller.signal, filters.queue)
+      .then((page) => {
+        if (controller.signal.aborted || requestSequence !== queueFilterSequenceRef.current) return;
+        setQueueMatchPages((current) => ({ ...current, [filters.queue]: page }));
+      })
+      .catch((requestError: unknown) => {
+        if (controller.signal.aborted || requestSequence !== queueFilterSequenceRef.current) return;
+        setMoreMatchesError(requestError instanceof Error ? requestError.message : t().searchFailed);
+      })
+      .finally(() => {
+        if (queueFilterAbortRef.current === controller) queueFilterAbortRef.current = undefined;
+        if (requestSequence === queueFilterSequenceRef.current) setLoadingQueueMatches(false);
+      });
+    return () => controller.abort();
+  }, [filters.queue, profile?.riotId, profile?.lolPlatform, queueMatchPages, selectedLolPlatform]);
 
   useEffect(() => {
     const unprefixedPath = stripPublicLocalePrefix(window.location.pathname);
@@ -6954,10 +7018,15 @@ export function PublicLolPage({
     const updateUrl = options.updateUrl !== false;
     profileSearchAbortRef.current?.abort();
     loadMoreAbortRef.current?.abort();
+    queueFilterAbortRef.current?.abort();
     loadMoreAbortRef.current = undefined;
+    queueFilterAbortRef.current = undefined;
     loadMoreInFlightKeyRef.current = undefined;
     loadMoreSequenceRef.current += 1;
+    queueFilterSequenceRef.current += 1;
     setLoadingMoreMatches(false);
+    setLoadingQueueMatches(false);
+    setQueueMatchPages({});
     if (options.refresh) invalidatePublicLolMatchPageCache(riotId, requestedPlatform);
     const controller = new AbortController();
     const requestSequence = profileSearchSequenceRef.current + 1;
@@ -7006,10 +7075,15 @@ export function PublicLolPage({
   }
 
   async function loadMoreRecentMatches(): Promise<void> {
-    if (!profile || loadingMoreMatches || !profile.hasMoreRecentMatches) return;
-    const nextStart = profile.nextRecentMatchStart ?? profile.recentMatches.length;
+    if (!profile || loadingMoreMatches || loadingQueueMatches) return;
+    const queue = filters.queue;
+    const activePage = queue === "all" ? undefined : queueMatchPages[queue];
+    const pagination = activePage ?? profile;
+    if (queue !== "all" && !activePage) return;
+    if (!pagination.hasMoreRecentMatches) return;
+    const nextStart = pagination.nextRecentMatchStart ?? pagination.recentMatches.length;
     const platform = normalizeLolPlatformId(profile.lolPlatform) ?? selectedLolPlatform;
-    const requestKey = `${platform}:${profile.riotId}:${nextStart}`;
+    const requestKey = `${platform}:${profile.riotId}:${queue}:${nextStart}`;
     if (loadMoreInFlightKeyRef.current === requestKey) return;
     loadMoreAbortRef.current?.abort();
     const controller = new AbortController();
@@ -7020,12 +7094,21 @@ export function PublicLolPage({
     setLoadingMoreMatches(true);
     setMoreMatchesError("");
     try {
-      const page = await getPublicLolMatchPage(profile.riotId, nextStart, platform, controller.signal);
+      const page = await getPublicLolMatchPage(profile.riotId, nextStart, platform, controller.signal, queue);
       if (controller.signal.aborted || requestSequence !== loadMoreSequenceRef.current) return;
-      setProfile((current) => {
-        if (!current || current.riotId !== profile.riotId || normalizeLolPlatformId(current.lolPlatform) !== platform) return current;
-        return profileWithAdditionalMatchPage(current, page);
-      });
+      if (queue === "all") {
+        setProfile((current) => {
+          if (!current || current.riotId !== profile.riotId || normalizeLolPlatformId(current.lolPlatform) !== platform) return current;
+          return profileWithAdditionalMatchPage(current, page);
+        });
+      } else {
+        setQueueMatchPages((current) => {
+          const currentPage = current[queue];
+          return currentPage
+            ? { ...current, [queue]: matchPageWithAdditionalPage(currentPage, page) }
+            : { ...current, [queue]: page };
+        });
+      }
     } catch (requestError) {
       if (controller.signal.aborted || requestSequence !== loadMoreSequenceRef.current) return;
       setMoreMatchesError(requestError instanceof Error ? requestError.message : t().searchFailed);
@@ -7037,10 +7120,15 @@ export function PublicLolPage({
   }
 
   function prefetchNextRecentMatches(): void {
-    if (!profile || loadingMoreMatches || !profile.hasMoreRecentMatches) return;
-    const nextStart = profile.nextRecentMatchStart ?? profile.recentMatches.length;
+    if (!profile || loadingMoreMatches || loadingQueueMatches) return;
+    const queue = filters.queue;
+    const activePage = queue === "all" ? undefined : queueMatchPages[queue];
+    const pagination = activePage ?? profile;
+    if (queue !== "all" && !activePage) return;
+    if (!pagination.hasMoreRecentMatches) return;
+    const nextStart = pagination.nextRecentMatchStart ?? pagination.recentMatches.length;
     const platform = normalizeLolPlatformId(profile.lolPlatform) ?? selectedLolPlatform;
-    void prefetchPublicLolMatchPage(profile.riotId, nextStart, platform).catch(() => undefined);
+    void prefetchPublicLolMatchPage(profile.riotId, nextStart, platform, queue).catch(() => undefined);
   }
 
 	  function searchRiotId(riotId: string): void {
@@ -7070,12 +7158,17 @@ export function PublicLolPage({
     profileSearchAbortRef.current = undefined;
     profileSearchSequenceRef.current += 1;
     loadMoreAbortRef.current?.abort();
+    queueFilterAbortRef.current?.abort();
     loadMoreAbortRef.current = undefined;
+    queueFilterAbortRef.current = undefined;
     loadMoreInFlightKeyRef.current = undefined;
     loadMoreSequenceRef.current += 1;
+    queueFilterSequenceRef.current += 1;
     setSelectedLolPlatform(platform);
     setLoading(false);
     setLoadingMoreMatches(false);
+    setLoadingQueueMatches(false);
+    setQueueMatchPages({});
     setMoreMatchesError("");
     setRemoteSuggestions([]);
     setError("");
@@ -7097,6 +7190,8 @@ export function PublicLolPage({
 	    setProfile(null);
 	    setError("");
     setMoreMatchesError("");
+    setQueueMatchPages({});
+    setLoadingQueueMatches(false);
     setFilters(DEFAULT_MATCH_FILTERS);
     setStreamerRegisterOpen(false);
     setSelectedCommunityPostId(undefined);
@@ -7535,7 +7630,7 @@ export function PublicLolPage({
                           onResetFilters={() => setFilters(DEFAULT_MATCH_FILTERS)}
                           onLoadMore={() => void loadMoreRecentMatches()}
                           onLoadMoreIntent={prefetchNextRecentMatches}
-                          loadingMore={loadingMoreMatches}
+                          loadingMore={loadingMoreMatches || loadingQueueMatches}
                           moreError={moreMatchesError}
                         />
                       </div>

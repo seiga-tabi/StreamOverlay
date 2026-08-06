@@ -184,16 +184,22 @@ function match(partial: Partial<PublicLolRecentMatch>): PublicLolRecentMatch {
 test("매치 요약과 필터 계산을 기존 규칙으로 유지한다", () => {
   const matches = [
     match({ matchId: "solo", result: "win", queueId: 420, kills: 10, deaths: 2, assists: 8, csPerMinute: 7 }),
-    match({ matchId: "aram", result: "loss", queueId: 450, kills: 2, deaths: 4, assists: 6, csPerMinute: 4 })
+    match({ matchId: "aram", result: "loss", queueId: 450, kills: 2, deaths: 4, assists: 6, csPerMinute: 4 }),
+    match({ matchId: "aram-mayhem", result: "win", queueId: 2400, kills: 8, deaths: 5, assists: 12, csPerMinute: 3 })
   ];
   const summary = summarizeMatches(matches);
-  assert.equal(summary.recentGames, 2);
-  assert.equal(summary.recentWins, 1);
-  assert.equal(summary.recentWinRate, 50);
-  assert.equal(summary.averageKda, 4.33);
+  assert.equal(summary.recentGames, 3);
+  assert.equal(summary.recentWins, 2);
+  assert.equal(summary.recentWinRate, 67);
+  assert.equal(summary.averageKda, 4.18);
 
   const profile = { recentMatches: matches } as PublicLolProfile;
   assert.deepEqual(filteredMatches(profile, { queue: "solo", championId: "all", period: "all" }).map((item) => item.matchId), ["solo"]);
+  assert.deepEqual(filteredMatches(profile, { queue: "aram", championId: "all", period: "all" }).map((item) => item.matchId), ["aram"]);
+  assert.deepEqual(
+    filteredMatches(profile, { queue: "aramMayhem", championId: "all", period: "all" }).map((item) => item.matchId),
+    ["aram-mayhem"]
+  );
 });
 
 test("랭크 점수와 추이 좌표가 유효 범위 안에 유지된다", () => {

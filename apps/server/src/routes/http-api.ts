@@ -251,7 +251,18 @@ const STREAMER_PROFILE_LINK_MAX = 5;
 const STREAMER_PROFILE_LINK_LABEL_MAX = 40;
 const STREAMER_PROFILE_LINK_URL_MAX = 2048;
 const PUBLIC_LOL_PROFILE_TOP_CHAMPION_COUNT = 5;
-const PUBLIC_LOL_PROFILE_QUEUES = [420, 440, 42, 6, 430, 400, 450];
+const PUBLIC_LOL_PROFILE_QUEUES = [420, 440, 42, 6, 430, 400, 450, 2400];
+type PublicLolMatchQueueFilter = "all" | "solo" | "flex" | "ranked5v5" | "normal" | "aram" | "aramMayhem";
+
+const PUBLIC_LOL_MATCH_QUEUE_IDS: Record<PublicLolMatchQueueFilter, readonly number[]> = {
+  all: [],
+  solo: [420],
+  flex: [440],
+  ranked5v5: [42, 6],
+  normal: [400, 430],
+  aram: [450],
+  aramMayhem: [2400]
+};
 const PUBLIC_LOL_PROFILE_CACHE_TTL_MS = 10 * 60_000;
 const PUBLIC_LOL_PROFILE_STALE_TTL_MS = 24 * 60 * 60_000;
 const PUBLIC_LOL_PROFILE_REFRESH_COOLDOWN_MS = 10 * 60_000;
@@ -3339,6 +3350,18 @@ function publicLolMatchStart(value: unknown): number {
   return Math.max(0, Math.min(PUBLIC_LOL_PROFILE_MAX_MATCH_START, Math.trunc(number)));
 }
 
+function publicLolMatchQueueFilter(value: unknown): PublicLolMatchQueueFilter {
+  const normalized = typeof value === "string" ? value.trim() : "";
+  if (!normalized || normalized === "all") return "all";
+  if (Object.prototype.hasOwnProperty.call(PUBLIC_LOL_MATCH_QUEUE_IDS, normalized)) {
+    return normalized as PublicLolMatchQueueFilter;
+  }
+  throw new HttpRequestError(400, {
+    error: "지원하지 않는 전적 큐 필터입니다.",
+    code: "LOL_MATCH_QUEUE_INVALID"
+  });
+}
+
 function isPublicLolQueue(match: RiotMatch): boolean {
   return match.info.queueId === undefined || PUBLIC_LOL_PROFILE_QUEUES.includes(match.info.queueId);
 }
@@ -6113,7 +6136,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
     matchStart: number,
     dataDragonVersion: string | undefined,
     matchCount = PUBLIC_LOL_PROFILE_MATCH_COUNT,
-    routing?: LolRoutingContext
+    routing?: LolRoutingContext,
+    queueFilter: PublicLolMatchQueueFilter = "all"
   ): Promise<{
     rawMatches: RiotMatch[];
     recentMatches: PublicLolRecentMatch[];
@@ -6123,7 +6147,14 @@ export function createHttpHandler(input: HttpHandlerInput) {
   }> {
     if (!input.riot) throw new HttpRequestError(503, { error: "Riot API client를 사용할 수 없습니다." });
     const safeStart = publicLolMatchStart(matchStart);
-    const matchIds = await input.riot.getRecentMatchIdsByPuuid(account.puuid, PUBLIC_LOL_PROFILE_MATCH_LOOKUP_COUNT, [], safeStart, routing).catch(() => []);
+    const queueIds = [...PUBLIC_LOL_MATCH_QUEUE_IDS[queueFilter]];
+    const matchIds = await input.riot.getRecentMatchIdsByPuuid(
+      account.puuid,
+      PUBLIC_LOL_PROFILE_MATCH_LOOKUP_COUNT,
+      queueIds,
+      safeStart,
+      routing
+    ).catch(() => []);
     const rawMatches = (await Promise.all(
       matchIds.slice(0, matchCount).map((matchId) => getPublicLolMatchDetail(matchId, routing).catch(() => null))
     ))
@@ -6591,7 +6622,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
     return withPublicLolRefreshState(await startPublicLolProfileBuild(key, riotId, routing), key);
   }
 
-  async function buildPublicLolMatchPage(rawRiotId: string, start: number, routing: LolRoutingContext): Promise<PublicLolMatchPageResponse> {
+  async function buildPublicLolMatchPage(
+    rawRiotId: string,
+    start: number,
+    routing: LolRoutingContext,
+    queueFilter: PublicLolMatchQueueFilter = "all"
+  ): Promise<PublicLolMatchPageResponse> {
     const startedAt = Date.now();
     const parsed = parseRiotIdDetailed(rawRiotId);
     if (!parsed.ok) throw new HttpRequestError(400, { error: parsed.message, code: parsed.code });
@@ -6620,7 +6656,14 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (!canReuseVerifiedIdentity) await requirePublicLolPlatformMembership(account.puuid, routing);
 
     const dataDragonVersion = await dataDragonLatestVersion(input.dataDragon);
-    const matchPage = await buildPublicLolMatchPageForAccount(account, start, dataDragonVersion, PUBLIC_LOL_PROFILE_MATCH_COUNT, routing);
+    const matchPage = await buildPublicLolMatchPageForAccount(
+      account,
+      start,
+      dataDragonVersion,
+      PUBLIC_LOL_PROFILE_MATCH_COUNT,
+      routing,
+      queueFilter
+    );
     const response: PublicLolMatchPageResponse = {
       status: "ready",
       riotId: `${account.gameName || parsed.gameName}#${account.tagLine || parsed.tagLine}`,
@@ -6636,6 +6679,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
     };
     input.logger?.event?.({
       type: "public_lol.match_page_built",
+      queueFilter,
       recentMatchStart: matchPage.recentMatchStart,
       matchCount: matchPage.recentMatches.length,
       identitySource: canReuseVerifiedIdentity ? "profile_cache" : "riot_api",
@@ -6644,11 +6688,16 @@ export function createHttpHandler(input: HttpHandlerInput) {
     return response;
   }
 
-  async function getPublicLolMatchPage(rawRiotId: string, start: number, routing: LolRoutingContext): Promise<PublicLolMatchPageResponse> {
+  async function getPublicLolMatchPage(
+    rawRiotId: string,
+    start: number,
+    routing: LolRoutingContext,
+    queueFilter: PublicLolMatchQueueFilter = "all"
+  ): Promise<PublicLolMatchPageResponse> {
     const parsed = parseRiotIdDetailed(rawRiotId);
     if (!parsed.ok) throw new HttpRequestError(400, { error: parsed.message, code: parsed.code });
     const safeStart = publicLolMatchStart(start);
-    const cacheKey = `${publicLolProfileCacheKey(parsed.gameName, parsed.tagLine, routing.lolPlatform)}:matches:${safeStart}`;
+    const cacheKey = `${publicLolProfileCacheKey(parsed.gameName, parsed.tagLine, routing.lolPlatform)}:matches:${queueFilter}:${safeStart}`;
     const cached = publicLolMatchPageCache.get(cacheKey);
     if (cached && cached.expiresAt > Date.now()) return cached.response;
     if (cached) publicLolMatchPageCache.delete(cacheKey);
@@ -6656,7 +6705,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
     const running = publicLolMatchPageInFlight.get(cacheKey);
     if (running) return running;
 
-    const request = buildPublicLolMatchPage(`${parsed.gameName}#${parsed.tagLine}`, safeStart, routing)
+    const request = buildPublicLolMatchPage(`${parsed.gameName}#${parsed.tagLine}`, safeStart, routing, queueFilter)
       .then((response) => {
         publicLolMatchPageCache.set(cacheKey, {
           response,
@@ -9100,10 +9149,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
       }
       if (req.method === "GET" && url.pathname === "/api/lol/matches") {
         const routing = publicLolRouting(url.searchParams.get("platform"), input.riot);
+        const queueFilter = publicLolMatchQueueFilter(url.searchParams.get("queue"));
         const page = await getPublicLolMatchPage(
           url.searchParams.get("riotId") ?? "",
           publicLolMatchStart(url.searchParams.get("start")),
-          routing
+          routing,
+          queueFilter
         );
         return sendJson(req, res, 200, page, publicLolCacheHeaders("matches", page));
       }

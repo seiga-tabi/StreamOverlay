@@ -1743,6 +1743,119 @@ test("공개 LoL 전적 더보기 API는 start offset으로 이전 10게임을 �
   });
 });
 
+test("공개 LoL 전적 API는 증강 칼바람을 Riot queue 2400으로 직접 조회한다", async () => {
+  await withAuthConfig(async () => {
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      actions: {
+        async dispatchOne() {}
+      },
+      sessions: new DashboardSessionStore(),
+      dataDragon: {
+        async getLatestVersion() {
+          return "16.11.1";
+        },
+        async mapChampionSummary(input) {
+          return {
+            championId: input.championId,
+            championKey: `Champion${input.championId}`,
+            nameKo: `챔피언 ${input.championId}`
+          };
+        }
+      },
+      riot: {
+        isConfigured() {
+          return true;
+        },
+        routingStatus() {
+          return { configured: true, source: "runtime", accountRegion: "asia", lolPlatform: "jp1" };
+        },
+        async getAccountByRiotId(gameName, tagLine) {
+          return { puuid: "mayhem-puuid", gameName, tagLine };
+        },
+        async getRecentMatchIdsByPuuid(puuid, count, queueIds, start) {
+          assert.equal(puuid, "mayhem-puuid");
+          assert.equal(count, 11);
+          assert.deepEqual(queueIds, [2400]);
+          assert.equal(start, 0);
+          return ["mayhem-match"];
+        },
+        async getMatch(matchId) {
+          return {
+            metadata: { matchId, participants: ["mayhem-puuid"] },
+            info: {
+              gameCreation: 1760000000000,
+              gameDuration: 1800,
+              queueId: 2400,
+              teams: [{ teamId: 100, win: true, objectives: {} }],
+              participants: [{
+                puuid: "mayhem-puuid",
+                teamId: 100,
+                championId: 103,
+                championName: "Ahri",
+                individualPosition: "MIDDLE",
+                kills: 12,
+                deaths: 5,
+                assists: 18,
+                win: true
+              }]
+            }
+          };
+        }
+      }
+    });
+    const req = createRequest(
+      "GET",
+      "/api/lol/matches?riotId=AramPlayer%23JP1&start=0&queue=aramMayhem",
+      undefined,
+      { origin: DASHBOARD_ORIGIN }
+    );
+    const res = createResponse();
+
+    await handler(req, res);
+
+    assert.equal(res.statusCode, 200, res.body);
+    const body = JSON.parse(res.body);
+    assert.equal(body.recentMatches.length, 1);
+    assert.equal(body.recentMatches[0].queueId, 2400);
+  });
+});
+
+test("공개 LoL 전적 API는 allowlist 밖의 큐 필터를 거부한다", async () => {
+  await withAuthConfig(async () => {
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      actions: {
+        async dispatchOne() {}
+      },
+      sessions: new DashboardSessionStore(),
+      riot: {
+        isConfigured() {
+          return true;
+        },
+        routingStatus() {
+          return { configured: true, source: "runtime", accountRegion: "asia", lolPlatform: "jp1" };
+        }
+      }
+    });
+    const req = createRequest(
+      "GET",
+      "/api/lol/matches?riotId=AramPlayer%23JP1&queue=unknown",
+      undefined,
+      { origin: DASHBOARD_ORIGIN }
+    );
+    const res = createResponse();
+
+    await handler(req, res);
+
+    assert.equal(res.statusCode, 400);
+    const body = JSON.parse(res.body);
+    assert.equal(body.code, "LOL_MATCH_QUEUE_INVALID");
+  });
+});
+
 test("공개 LoL 첫 검색은 최근 10게임만 상세 조회하고 다음 페이지 위치를 반환한다", async () => {
   await withAuthConfig(async () => {
     let matchLookups = 0;

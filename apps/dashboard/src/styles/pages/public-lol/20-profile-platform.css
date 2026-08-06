@@ -513,6 +513,34 @@
   gap: var(--yoro-space-2);
 }
 
+.public-profile-platform-v2 .public-match-filter-loading {
+  display: flex;
+  min-block-size: 10rem;
+  align-items: center;
+  justify-content: center;
+  gap: var(--yoro-space-3);
+  color: var(--public-gray-muted);
+}
+
+.public-profile-platform-v2 .public-match-filter-loading span {
+  inline-size: var(--yoro-space-5);
+  block-size: var(--yoro-space-5);
+  border: 2px solid color-mix(in srgb, var(--yoro-color-public-primary) 28%, transparent);
+  border-block-start-color: var(--yoro-color-public-primary);
+  border-radius: 50%;
+  animation: yoro-match-filter-spin .72s linear infinite;
+}
+
+@keyframes yoro-match-filter-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-profile-platform-v2 .public-match-filter-loading span {
+    animation: none;
+  }
+}
+
 .public-profile-platform-v2 .public-match-row {
   min-inline-size: 0;
   border-color: var(--yoro-color-border-on-dark);

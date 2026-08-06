@@ -33,6 +33,7 @@ export type PublicMatchFilterBarText = {
   ranked5v5: ReactNode;
   normalQueue: ReactNode;
   aramQueue: ReactNode;
+  aramMayhemQueue: ReactNode;
   allChampions: ReactNode;
   periodAll: ReactNode;
   period7: ReactNode;
@@ -77,6 +78,7 @@ export function PublicMatchFilterBar({
           <option value="ranked5v5">{text.ranked5v5}</option>
           <option value="normal">{text.normalQueue}</option>
           <option value="aram">{text.aramQueue}</option>
+          <option value="aramMayhem">{text.aramMayhemQueue}</option>
         </select>
       </label>
       <ChampionFilterSelect

@@ -61,3 +61,55 @@ test("LoL 추가 전적 미리 준비와 클릭 요청은 하나의 네트워크
     Object.assign(globalThis, { window: originalWindow });
   }
 });
+
+test("칼바람과 증강 칼바람 전적은 서로 다른 query와 캐시로 조회한다", async () => {
+  const originalWindow = globalThis.window;
+  const originalFetch = globalThis.fetch;
+  Object.assign(globalThis, {
+    window: {
+      __STREAMOPS_CONFIG__: { apiBase: "http://localhost:3000" }
+    } as unknown as Window
+  });
+
+  const requestedUrls: string[] = [];
+  globalThis.fetch = async (input) => {
+    const url = String(input);
+    requestedUrls.push(url);
+    const queue = new URL(url).searchParams.get("queue");
+    return new Response(JSON.stringify({
+      status: "ready",
+      riotId: "AramPlayer#JP1",
+      gameName: "AramPlayer",
+      tagLine: "JP1",
+      accountRegion: "asia",
+      lolPlatform: "jp1",
+      recentMatches: [],
+      recentMatchStart: 0,
+      nextRecentMatchStart: 10,
+      hasMoreRecentMatches: false,
+      fetchedAt: queue === "aram" ? "2026-08-06T00:00:00.000Z" : "2026-08-06T00:01:00.000Z"
+    }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    });
+  };
+
+  try {
+    const { getPublicLolMatchPage, invalidatePublicLolMatchPageCache } = await import("../src/features/public-lol/api/lol");
+    invalidatePublicLolMatchPageCache("AramPlayer#JP1", "jp1");
+
+    const aram = await getPublicLolMatchPage("AramPlayer#JP1", 0, "jp1", undefined, "aram");
+    const mayhem = await getPublicLolMatchPage("AramPlayer#JP1", 0, "jp1", undefined, "aramMayhem");
+    const cachedMayhem = await getPublicLolMatchPage("AramPlayer#JP1", 0, "jp1", undefined, "aramMayhem");
+
+    assert.equal(aram.fetchedAt, "2026-08-06T00:00:00.000Z");
+    assert.equal(mayhem.fetchedAt, "2026-08-06T00:01:00.000Z");
+    assert.equal(cachedMayhem.fetchedAt, mayhem.fetchedAt);
+    assert.equal(requestedUrls.length, 2);
+    assert.equal(new URL(requestedUrls[0]!).searchParams.get("queue"), "aram");
+    assert.equal(new URL(requestedUrls[1]!).searchParams.get("queue"), "aramMayhem");
+  } finally {
+    globalThis.fetch = originalFetch;
+    Object.assign(globalThis, { window: originalWindow });
+  }
+});
