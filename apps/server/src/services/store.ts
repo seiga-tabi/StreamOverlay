@@ -21,9 +21,6 @@ import type {
   FollowerSnapshotInput,
   InternalEvent,
   LolAutomationSettings,
-  OverlayChannel,
-  OverlayMessageLogEntry,
-  OverlayStatus,
   ParticipationDashboardQueueEntry,
   ParticipationEntry,
   ParticipationListingVisibility,
@@ -38,7 +35,7 @@ import type {
   TwitchEventSubStatus,
   TwitchEventSubSubscriptionStatus
 } from "@streamops/shared";
-import { OVERLAY_CHANNELS, formatRiotId, isActiveParticipationStatus, isWaitingParticipationStatus, newId, normalizeRiotIdKey, nowIso, toSafeErrorMessage, type ParticipationStreamerProfile } from "@streamops/shared";
+import { formatRiotId, isActiveParticipationStatus, isWaitingParticipationStatus, newId, normalizeRiotIdKey, nowIso, toSafeErrorMessage, type ParticipationStreamerProfile } from "@streamops/shared";
 
 export type QuestionEntry = {
   id: string;
@@ -147,7 +144,7 @@ const PERSISTED_PARTICIPATION_STATUSES = new Set<ParticipationEntry["status"]>([
 ]);
 const PERSISTED_PARTICIPATION_SOURCES = new Set<ParticipationEntry["source"]>(["chat_command", "channel_point", "dashboard"]);
 const PERSISTED_LOL_ROLES = new Set<ParticipationEntry["preferredRole"]>(["top", "jungle", "mid", "adc", "support", "fill", "unknown"]);
-const PARTICIPATION_OVERLAY_VISIBLE_LIMIT = 4;
+const PARTICIPATION_PUBLIC_VISIBLE_LIMIT = 4;
 const PARTICIPATION_TOP_CHAMPION_LIMIT = 3;
 
 function cloneParticipationTopChampions(
@@ -506,28 +503,18 @@ function cloneStreamerRiotIdRequest(request: StreamerRiotIdRequest): StreamerRio
   return { ...request, profileLinks: cloneStreamerProfileLinks(request.profileLinks) };
 }
 
-function streamerOverlaySlug(twitchLogin: string, twitchUserId?: string): string {
+function streamerDashboardSlug(twitchLogin: string, twitchUserId?: string): string {
   const slug = twitchLogin.trim().toLowerCase().replace(/[^a-z0-9_]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
   return slug || `streamer-${twitchUserId ?? "unknown"}`;
-}
-
-function newStreamerOverlayKey(): string {
-  return `sok_${crypto.randomBytes(24).toString("base64url")}`;
 }
 
 function newStreamerDashboardKey(): string {
   return `sdk_${crypto.randomBytes(24).toString("base64url")}`;
 }
 
-function ensureApprovedStreamerOverlayAccess(request: StreamerRiotIdRequest): void {
-  if (request.status !== "approved") return;
-  request.overlaySlug = request.overlaySlug || streamerOverlaySlug(request.twitchLogin, request.twitchUserId);
-  request.overlayKey = request.overlayKey || newStreamerOverlayKey();
-}
-
 function ensureApprovedStreamerDashboardAccess(request: StreamerRiotIdRequest): void {
   if (request.status !== "approved" || request.dashboardEnabled !== true) return;
-  request.dashboardSlug = request.dashboardSlug || streamerOverlaySlug(request.twitchLogin, request.twitchUserId);
+  request.dashboardSlug = request.dashboardSlug || streamerDashboardSlug(request.twitchLogin, request.twitchUserId);
   request.dashboardKey = request.dashboardKey || newStreamerDashboardKey();
 }
 
@@ -556,8 +543,6 @@ function normalizedStreamerRiotIdRequest(value: unknown): StreamerRiotIdRequest 
     riotGameName,
     riotTagLine,
     normalizedRiotId: normalizeRiotIdKey(riotGameName, riotTagLine),
-    overlaySlug: optionalString(input?.overlaySlug) ?? streamerOverlaySlug(twitchLogin, twitchUserId),
-    overlayKey: optionalString(input?.overlayKey),
     dashboardSlug: optionalString(input?.dashboardSlug),
     dashboardKey: optionalString(input?.dashboardKey),
     profileLinkUrl: primaryProfileLink?.url ?? profileLinkUrl,
@@ -571,7 +556,6 @@ function normalizedStreamerRiotIdRequest(value: unknown): StreamerRiotIdRequest 
     reviewer: optionalString(input?.reviewer),
     note: optionalString(input?.note)
   };
-  ensureApprovedStreamerOverlayAccess(request);
   ensureApprovedStreamerDashboardAccess(request);
   return request;
 }
@@ -826,11 +810,6 @@ export class Store {
     runtime: "not_loaded"
   };
   private readonly twitchStreamLiveStatusByUserId = new Map<string, TwitchStreamLiveStatus>();
-  private overlayStatus: OverlayStatus = {
-    clientCount: 0,
-    clientsByChannel: Object.fromEntries(OVERLAY_CHANNELS.map((channel) => [channel, 0])) as Record<OverlayChannel, number>,
-    recentMessages: []
-  };
   private twitchEventSubStatus: TwitchEventSubStatus = {
     websocket: "disabled",
     activeSubscriptions: 0,
@@ -850,8 +829,6 @@ export class Store {
     server: "online",
     twitch: "disabled",
     stream: "unknown",
-    bridge: "disconnected",
-    obs: "unknown",
     participation: "closed",
     startedAt: nowIso(),
     postStreamReportReady: false
@@ -1123,32 +1100,6 @@ export class Store {
       lastFailureAt: failure.createdAt,
       recentFailures
     });
-  }
-
-  getOverlayStatus(): OverlayStatus {
-    return {
-      clientCount: this.overlayStatus.clientCount,
-      clientsByChannel: { ...this.overlayStatus.clientsByChannel },
-      recentMessages: this.overlayStatus.recentMessages.map((message) => ({ ...message }))
-    };
-  }
-
-  patchOverlayClients(clientsByChannel: Record<OverlayChannel, number>): OverlayStatus {
-    const clientCount = Object.values(clientsByChannel).reduce((sum, count) => sum + count, 0);
-    this.overlayStatus = {
-      ...this.overlayStatus,
-      clientCount,
-      clientsByChannel: { ...clientsByChannel }
-    };
-    return this.getOverlayStatus();
-  }
-
-  addOverlayMessageLog(entry: OverlayMessageLogEntry): OverlayStatus {
-    this.overlayStatus = {
-      ...this.overlayStatus,
-      recentMessages: [entry, ...this.overlayStatus.recentMessages].slice(0, 30)
-    };
-    return this.getOverlayStatus();
   }
 
   addEvent(event: InternalEvent): void {
@@ -2099,10 +2050,8 @@ export class Store {
         twitchLogin: input.twitchLogin,
         twitchDisplayName: input.twitchDisplayName,
         twitchProfileImageUrl: input.twitchProfileImageUrl,
-        overlaySlug: approvedSame.overlaySlug || streamerOverlaySlug(input.twitchLogin, input.twitchUserId),
         updatedAt: now
       });
-      ensureApprovedStreamerOverlayAccess(approvedSame);
       ensureApprovedStreamerDashboardAccess(approvedSame);
       this.persistStreamerRiotIdState();
       return cloneStreamerRiotIdRequest(approvedSame);
@@ -2174,8 +2123,6 @@ export class Store {
         candidate.twitchUserId === request.twitchUserId &&
         candidate.status === "approved"
       );
-      request.overlaySlug = request.overlaySlug || previousApproved?.overlaySlug;
-      request.overlayKey = request.overlayKey || previousApproved?.overlayKey;
       request.dashboardSlug = request.dashboardSlug || previousApproved?.dashboardSlug;
       request.dashboardKey = request.dashboardKey || previousApproved?.dashboardKey;
       request.dashboardEnabled = previousApproved?.dashboardEnabled === true;
@@ -2186,7 +2133,6 @@ export class Store {
       request.profileLinkUrl = request.profileLinkUrl || primaryProfileLink?.url || previousApproved?.profileLinkUrl;
       request.profileLinkLabel = request.profileLinkLabel || primaryProfileLink?.label || previousApproved?.profileLinkLabel;
       request.profileLinks = normalizedStreamerProfileLinks(request.profileLinks, request.profileLinkUrl, request.profileLinkLabel);
-      ensureApprovedStreamerOverlayAccess(request);
       ensureApprovedStreamerDashboardAccess(request);
       for (const candidate of this.streamerRiotIdRequests) {
         if (candidate.id === request.id || candidate.twitchUserId !== request.twitchUserId || candidate.status !== "approved") continue;
@@ -2296,20 +2242,20 @@ export class Store {
     return this.participationQueueFor(streamerId).filter((entry) => isWaitingParticipationStatus(entry.status));
   }
 
-  getParticipationOverlayQueue(limit = PARTICIPATION_OVERLAY_VISIBLE_LIMIT, streamerId?: string): ParticipationPublicQueueEntry[] {
+  getParticipationPublicQueue(limit = PARTICIPATION_PUBLIC_VISIBLE_LIMIT, streamerId?: string): ParticipationPublicQueueEntry[] {
     return this.getWaitingParticipationQueue(streamerId)
       .slice(0, Math.max(0, Math.trunc(limit)))
       .map((entry, index) => toPublicQueueEntry(entry, index + 1));
   }
 
-  getParticipationOverlaySnapshotQueue(limit = PARTICIPATION_OVERLAY_VISIBLE_LIMIT, streamerId?: string): ParticipationPublicQueueEntry[] {
+  getParticipationPublicSnapshotQueue(limit = PARTICIPATION_PUBLIC_VISIBLE_LIMIT, streamerId?: string): ParticipationPublicQueueEntry[] {
     return this.participationQueueFor(streamerId)
       .filter((entry) => entry.status === "pending" || isWaitingParticipationStatus(entry.status))
       .slice(0, Math.max(0, Math.trunc(limit)))
       .map((entry, index) => toPublicQueueEntry(entry, index + 1));
   }
 
-  getNextWaitingParticipationOverlayEntry(streamerId?: string): ParticipationPublicQueueEntry | undefined {
+  getNextWaitingParticipationPublicEntry(streamerId?: string): ParticipationPublicQueueEntry | undefined {
     const entry = this.getWaitingParticipationQueue(streamerId)[0];
     return entry ? toPublicQueueEntry(entry, 1) : undefined;
   }
@@ -2770,12 +2716,12 @@ export class Store {
   }
 
   markVisibleParticipationQueueInGame(
-    input: number | { limit?: number; participantPuuids?: Iterable<string | undefined> } = PARTICIPATION_OVERLAY_VISIBLE_LIMIT,
+    input: number | { limit?: number; participantPuuids?: Iterable<string | undefined> } = PARTICIPATION_PUBLIC_VISIBLE_LIMIT,
     streamerId?: string
   ): ParticipationEntry[] {
     const entries: ParticipationEntry[] = [];
     const seenIds = new Set<string>();
-    const limit = typeof input === "number" ? input : input.limit ?? PARTICIPATION_OVERLAY_VISIBLE_LIMIT;
+    const limit = typeof input === "number" ? input : input.limit ?? PARTICIPATION_PUBLIC_VISIBLE_LIMIT;
     const participantPuuids = typeof input === "number"
       ? undefined
       : new Set(Array.from(input.participantPuuids ?? []).filter((puuid): puuid is string => typeof puuid === "string" && puuid.length > 0));

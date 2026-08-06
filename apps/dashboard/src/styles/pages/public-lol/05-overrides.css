@@ -877,40 +877,44 @@
   background: #ffffff !important;
 }
 
-/* 검색 제안 패널 최근 검색 / 즐겨찾기 탭 */
+/* 검색 제안 패널 소환사 / 최근 검색 / 즐겨찾기 탭
+   .public-profile-tabs(전적·챔피언 분석 등 프로필 탭)와 같은 "밑줄形" 활성 표시를 사용해
+   사이트 전체의 탭 시각 언어와 맞춥니다. 채워진 pill 배경 대신 #7a5cff 밑줄만 사용합니다. */
 .public-suggestion-tabs {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
-  gap: 0;
-  padding: 4px;
+  display: flex;
+  align-items: center;
+  gap: var(--yoro-space-1);
+  padding: 4px 4px 0;
   border-bottom: 1px solid rgba(222, 226, 230, .14);
   background: rgba(33, 37, 41, .34);
+  overflow-x: auto;
 }
 
 .public-suggestion-tabs button {
   display: inline-flex;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  min-width: 0;
   min-height: 34px;
-  padding: 0 10px;
+  padding: 0 var(--yoro-space-2) var(--yoro-space-1);
   border: 0;
-  border-radius: 8px;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
   background: transparent;
-  color: rgba(248, 249, 250, .72);
+  color: rgba(248, 249, 250, .68);
   font-size: 12px;
   font-weight: 800;
+  white-space: nowrap;
 }
 
 .public-suggestion-tabs button:hover,
 .public-suggestion-tabs button:focus-visible {
-  background: rgba(248, 249, 250, .1);
   color: #f8f9fa;
 }
 
 .public-suggestion-tabs button.active {
-  background: rgba(123, 92, 255, .2);
+  border-bottom-color: #7a5cff;
   color: #ffffff;
 }
 
@@ -3664,11 +3668,14 @@ html[lang="ja"] .public-dashboard-shell:not(.public-home-shell) .public-app-head
   width: 100% !important;
 }
 
+/* 16px 800weight는 모바일 54px pill 안에서 KR/JP 두 글자가 서로 붙어 보였습니다.
+   pill 폭에 맞춰 살짝 줄여 두 글자가 분리되어 읽히도록 합니다. */
 .public-home-shared-shell .public-home-shared-server.public-server-pill .yoro-status,
 .public-home-shared-shell .public-home-shared-server.public-server-pill .yoro-status__label {
   color: #f8f9fa !important;
-  font-size: 16px !important;
-  font-weight: 800 !important;
+  font-size: var(--yoro-font-size-sm) !important;
+  font-weight: var(--yoro-font-weight-medium) !important;
+  letter-spacing: .02em !important;
 }
 
 @media (max-width: 760px) {

@@ -4,11 +4,9 @@ import { fileURLToPath } from "node:url";
 
 export const CLEANUP_ALLOWLIST = Object.freeze([
   "apps/agent/dist",
-  "apps/bridge/dist",
   "apps/dashboard/dist",
   "apps/discord-bot/dist",
   "apps/email-worker/dist",
-  "apps/overlay/dist",
   "apps/server/dist",
   "packages/shared/dist",
   "playwright-report",

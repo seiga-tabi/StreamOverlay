@@ -127,11 +127,7 @@ export type ParticipationEntryCreatedInternalEvent = {
 };
 
 export type SystemInternalEvent = {
-  type:
-    | "system.started"
-    | "bridge.connected"
-    | "bridge.disconnected"
-    | "obs.status";
+  type: "system.started";
   id: string;
   createdAt: string;
   payload?: Record<string, unknown>;
@@ -141,8 +137,6 @@ export type BotStatus = {
   server: "online" | "offline";
   twitch: "connected" | "disconnected" | "disabled";
   stream: "online" | "offline" | "unknown";
-  bridge: "connected" | "disconnected";
-  obs: "connected" | "disconnected" | "unknown";
   participation: "open" | "closed";
   startedAt?: string;
   lastStreamOnlineAt?: string;

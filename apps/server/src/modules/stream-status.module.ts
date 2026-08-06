@@ -26,7 +26,6 @@ export const streamStatusModule: BotModule = {
       });
       ctx.store.patchStatus({ stream: "online", lastStreamOnlineAt: nowIso(), postStreamReportReady: false });
       await ctx.actions.dispatch(config["stream.online"] ?? [], { streamerId: event.broadcasterUserId }, "stream.online");
-      ctx.dashboard.broadcastSnapshot();
     });
     ctx.events.on<TwitchStreamStatusInternalEvent>("twitch.streamOffline", async (event) => {
       ctx.twitch.clearStreamStatusCache?.(event.broadcasterUserId);
@@ -39,7 +38,6 @@ export const streamStatusModule: BotModule = {
       ctx.store.patchStatus({ stream: "offline", lastStreamOfflineAt: nowIso(), postStreamReportReady: true });
       await ctx.actions.dispatch(config["stream.offline"] ?? [], { streamerId: event.broadcasterUserId }, "stream.offline");
       ctx.logger.event({ type: "stream.post_stream_report_ready", approved: false });
-      ctx.dashboard.broadcastSnapshot();
     });
   }
 };

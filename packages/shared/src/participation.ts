@@ -165,6 +165,8 @@ export type ParticipationEntry = {
 
 export type ParticipationMode = "normal5" | "custom5v5" | "aram" | "onevone";
 
+export type ParticipationPhase = "recruiting" | "closed" | "in_game" | "game_ended";
+
 export type ParticipationSettings = {
   enabled: boolean;
   openByDefault: boolean;
@@ -172,7 +174,6 @@ export type ParticipationSettings = {
   requiredPlayers: number;
   checkInSeconds: number;
   maxQueueSize: number;
-  showRiotIdOnOverlay: boolean;
 };
 
 export type LolGameMonitorSettings = {
@@ -276,8 +277,6 @@ export type StreamerRiotIdRequest = {
   riotGameName: string;
   riotTagLine: string;
   normalizedRiotId: string;
-  overlaySlug?: string;
-  overlayKey?: string;
   dashboardSlug?: string;
   dashboardKey?: string;
   profileLinkUrl?: string;

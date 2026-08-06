@@ -122,7 +122,6 @@ async function publishState(
 ): Promise<void> {
   await publishParticipationSnapshot({
     store: ctx.store,
-    actions: ctx.actions,
     logger: ctx.logger
   }, {
     message: input.message,
@@ -220,7 +219,6 @@ async function verifyPendingParticipation(
         streamerId,
         trace
       });
-      ctx.dashboard.broadcastSnapshot();
       return;
     }
 
@@ -245,7 +243,6 @@ async function verifyPendingParticipation(
         streamerId,
         trace
       });
-      ctx.dashboard.broadcastSnapshot();
       return;
     }
 
@@ -264,7 +261,6 @@ async function verifyPendingParticipation(
       streamerId,
       trace
     });
-    ctx.dashboard.broadcastSnapshot();
   } catch (error) {
     trace.riotResolvedAt = nowIso();
     ctx.logger.error({
@@ -284,7 +280,6 @@ async function verifyPendingParticipation(
       streamerId,
       trace
     });
-    ctx.dashboard.broadcastSnapshot();
   }
 }
 
@@ -484,7 +479,6 @@ async function applyFromText(ctx: ModuleContext, settings: ParticipationSettings
     streamerId: input.streamerId,
     trace
   });
-  ctx.dashboard.broadcastSnapshot();
 
   ctx.logger.event({
     type: "participation.applied",
@@ -515,7 +509,6 @@ async function handleCheckIn(ctx: ModuleContext, settings: ParticipationSettings
         reason: "participation.checkin_expired",
         streamerId: event.broadcasterUserId
       });
-      ctx.dashboard.broadcastSnapshot();
       return;
     }
 
@@ -527,9 +520,8 @@ async function handleCheckIn(ctx: ModuleContext, settings: ParticipationSettings
     reason: "participation.checked_in",
     streamerId: event.broadcasterUserId
   });
-  ctx.dashboard.broadcastSnapshot();
   void ctx.actions.dispatch([
-    { type: "overlay.banner", message: `${event.chatterUserName}님 참가 확인 완료!`, variant: "success", durationMs: 4000 }
+    { type: "noop", note: `${event.chatterUserName} 참가 확인 완료` }
   ], { streamerId: event.broadcasterUserId }, "participation.checked_in").catch((error) => {
     ctx.logger.error({ type: "participation.banner_failed", error: toSafeErrorMessage(error) });
   });
@@ -550,7 +542,6 @@ async function handleCancel(ctx: ModuleContext, settings: ParticipationSettingsF
     reason: "participation.cancelled",
     streamerId: event.broadcasterUserId
   });
-  ctx.dashboard.broadcastSnapshot();
 }
 
 export const participationModule: BotModule = {
@@ -580,8 +571,6 @@ export const participationModule: BotModule = {
           message: "롤 시참 모집 중",
           reason: "participation.open_by_default",
           streamerId
-        }).then(() => {
-          ctx.dashboard.broadcastSnapshot();
         }).catch((error) => {
           ctx.logger.error({ type: "participation.publish_failed", reason: "open_by_default", error: toSafeErrorMessage(error) });
         });
@@ -630,9 +619,7 @@ export const participationModule: BotModule = {
           reason: "participation.open",
           streamerId: event.broadcasterUserId
         });
-        ctx.dashboard.broadcastSnapshot();
         void ctx.actions.dispatch([
-          { type: "overlay.banner", message: "参加募集を開始しました。", variant: "success", durationMs: 5000 },
           { type: "twitch.chat", message: settings.guideMessage }
         ], { streamerId: event.broadcasterUserId }, "participation.open").catch((error) => {
           ctx.logger.error({ type: "participation.followup_failed", reason: "open", error: toSafeErrorMessage(error) });
@@ -648,7 +635,6 @@ export const participationModule: BotModule = {
           reason: "participation.close",
           streamerId: event.broadcasterUserId
         });
-        ctx.dashboard.broadcastSnapshot();
         return;
       }
 

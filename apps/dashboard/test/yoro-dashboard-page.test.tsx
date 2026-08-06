@@ -209,23 +209,12 @@ test("공통 Dashboard 경로는 기존 방송 운영 하위 경로와 겹치지
     ),
     "/dashboard/streaming/riot-id"
   );
-  assert.equal(
-    canonicalYoroDashboardPath(
-      "/dashboard/legacy_user/sdk_0123456789abcdefghijklmnopqrstuv/alerts"
-    ),
-    "/dashboard/streaming"
-  );
-
   const appSource = await readFile(
     new URL("../src/App.tsx", import.meta.url),
     "utf8"
   );
   const clientSource = await readFile(
     new URL("../src/api/client.ts", import.meta.url),
-    "utf8"
-  );
-  const socketSource = await readFile(
-    new URL("../src/api/socket.ts", import.meta.url),
     "utf8"
   );
   const dashboardSource = await readFile(
@@ -236,8 +225,6 @@ test("공통 Dashboard 경로는 기존 방송 운영 하위 경로와 겹치지
   assert.equal(appSource.includes("streamerAccess"), false);
   assert.equal(clientSource.includes("X-StreamOps-Dashboard-Key"), false);
   assert.equal(clientSource.includes("X-StreamOps-Streamer-Slug"), false);
-  assert.equal(socketSource.includes("dashboardKey"), false);
-  assert.equal(socketSource.includes("streamerSlug"), false);
   assert.equal(
     dashboardSource.includes(
       "${canonicalPath}${window.location.search}${window.location.hash}"

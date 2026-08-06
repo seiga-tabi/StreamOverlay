@@ -28,9 +28,6 @@ const i18n = {
     dashboardAccess: "대시보드 사용",
     dashboardEnabled: "사용 가능",
     dashboardDisabled: "사용 불가",
-    overlayAccess: "오버레이 접근",
-    overlaySlug: "URL",
-    overlayKey: "Key",
     status: "상태",
     requestedAt: "요청 시간",
     reviewedAt: "처리 시간",
@@ -61,9 +58,6 @@ const i18n = {
     dashboardAccess: "ダッシュボード利用",
     dashboardEnabled: "利用可",
     dashboardDisabled: "利用不可",
-    overlayAccess: "オーバーレイ接続",
-    overlaySlug: "URL",
-    overlayKey: "Key",
     status: "状態",
     requestedAt: "申請時間",
     reviewedAt: "処理時間",
@@ -206,15 +200,6 @@ export function StreamerRiotRequestsPage({ snapshot }: { snapshot: DashboardSnap
                   <strong className={request.dashboardEnabled ? "access-enabled" : "access-disabled"}>
                     {request.dashboardEnabled ? t.dashboardEnabled : t.dashboardDisabled}
                   </strong>
-                </div>
-                <div>
-                  <span>{t.overlayAccess}</span>
-                  {request.overlaySlug && request.overlayKey ? (
-                    <>
-                      <strong>{t.overlaySlug}<small>/{request.overlaySlug}</small></strong>
-                      <small>{t.overlayKey}: {request.overlayKey}</small>
-                    </>
-                  ) : <strong>{t.none}</strong>}
                 </div>
                 <div>
                   <span>{t.requestedAt}</span>

@@ -3,8 +3,7 @@
   "environment": "production",
   "public": {
     "baseUrl": "https://yoro.gg",
-    "dashboardOrigin": "https://yoro.gg",
-    "overlayOrigin": "https://yoro.gg"
+    "dashboardOrigin": "https://yoro.gg"
   },
   "features": {
     "database": true,

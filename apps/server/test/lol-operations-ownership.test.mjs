@@ -144,16 +144,16 @@ test("LoL 방송 운영 API는 인증 세션 기준으로 스트리머 데이터
       role: "top"
     });
     assert.equal(roleOverrideRes.statusCode, 200);
-    assert.equal(dispatched.at(-1)?.action.type, "overlay.participationQueue");
-    assert.equal(dispatched.at(-1)?.action.streamerId, "streamer-a");
+    assert.equal(store.getParticipationQueue("streamer-a")[0]?.preferredRole, "top");
+    assert.equal(dispatched.length, 0);
 
     const legacyEntryStatusRes = await request(handler, streamerASession, "POST", "/api/participation/entry-status", {
       entryId: streamerAEntry.id,
       status: "checked_in"
     });
     assert.equal(legacyEntryStatusRes.statusCode, 200);
-    assert.equal(dispatched.at(-1)?.action.type, "overlay.participationQueue");
-    assert.equal(dispatched.at(-1)?.action.streamerId, "streamer-a");
+    assert.equal(store.getParticipationQueue("streamer-a")[0]?.status, "checked_in");
+    assert.equal(dispatched.length, 0);
 
     const updateRes = await request(handler, streamerASession, "POST", "/api/lol-operations/automation", {
       streamerId: "streamer-b",

@@ -23,7 +23,7 @@ import type { NavigationProps, NavigationVariant } from "./shared/ui";
     <NavigationItem as="a" href="/dashboard" active icon={<Icon />}>
       오늘 방송
     </NavigationItem>
-    <NavigationItem as="a" href="/overlay">
+    <NavigationItem as="a" href="/dashboard">
       Overlay
       <NavigationBadge>3</NavigationBadge>
     </NavigationItem>

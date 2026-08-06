@@ -40,7 +40,7 @@ surface.feature.element.state
 예:
 
 ```text
-dashboard.overlay.status.title
+dashboard.twitch.status.title
 public.search.input.placeholder
 community.post.empty.title
 participation.queue.error.full
@@ -67,8 +67,6 @@ participation.queue.error.full
 
 - Riot ID
 - Twitch
-- OBS
-- Overlay
 - Solo Rank
 - LP
 - KDA
@@ -107,4 +105,3 @@ i18n 변경 시 확인:
 - mobile text overflow 없음
 - aria label 번역 존재
 - toast/modal/dropdown text 번역 존재
-

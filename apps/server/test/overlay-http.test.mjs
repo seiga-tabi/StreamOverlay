@@ -94,14 +94,12 @@ function createBinaryResponse() {
   };
 }
 
-test("dashboard와 overlay runtime config는 동적 config endpoint에서 제공된다", async () => {
+test("dashboard runtime config는 동적 config endpoint에서 제공된다", async () => {
   const previousConfig = {
     publicBaseUrl: appConfig.publicBaseUrl,
-    overlayBaseUrl: appConfig.overlayBaseUrl,
     legalOperatorName: appConfig.legal.operatorName
   };
   appConfig.publicBaseUrl = "http://localhost:3000";
-  appConfig.overlayBaseUrl = "http://localhost:3000/overlay";
   appConfig.legal.operatorName = "</script><script>alert(1)</script>";
 
   try {
@@ -122,14 +120,11 @@ test("dashboard와 overlay runtime config는 동적 config endpoint에서 제공
     assert.equal(dashboardRes.headers["Cache-Control"], "no-store, max-age=0");
     assert.equal(dashboardRes.headers["Cloudflare-CDN-Cache-Control"], "no-store");
     assert.match(dashboardRes.body, /apiBase/);
-    assert.match(dashboardRes.body, /wsBase/);
-    assert.match(dashboardRes.body, /overlayBase/);
     assert.match(dashboardRes.body, /legal/);
     assert.match(dashboardRes.body, /configured/);
     assert.match(dashboardRes.body, /\\u003c\/script>/);
     assert.doesNotMatch(dashboardRes.body, /<\/script><script>/);
-    assert.match(dashboardRes.body, /window\.location\.origin \+ "\/overlay"/);
-    assert.doesNotMatch(dashboardRes.body, /localhost:5174/);
+    assert.doesNotMatch(dashboardRes.body, /wsBase|overlayBase/);
 
     const adminReq = createRequest("GET", "/admin/config.js");
     const adminRes = createResponse();
@@ -138,20 +133,9 @@ test("dashboard와 overlay runtime config는 동적 config endpoint에서 제공
     assert.equal(adminRes.statusCode, 200);
     assert.match(adminRes.headers["Content-Type"], /text\/javascript/);
     assert.match(adminRes.body, /apiBase/);
-    assert.match(adminRes.body, /overlayBase/);
-
-    const overlayReq = createRequest("GET", "/overlay/config.js");
-    const overlayRes = createResponse();
-    await handler(overlayReq, overlayRes);
-
-    assert.equal(overlayRes.statusCode, 200);
-    assert.match(overlayRes.headers["Content-Type"], /text\/javascript/);
-    assert.equal(overlayRes.headers["Cache-Control"], "no-store, max-age=0");
-    assert.match(overlayRes.body, /wsBase/);
-    assert.doesNotMatch(overlayRes.body, /overlayBase/);
+    assert.doesNotMatch(adminRes.body, /wsBase|overlayBase/);
   } finally {
     appConfig.publicBaseUrl = previousConfig.publicBaseUrl;
-    appConfig.overlayBaseUrl = previousConfig.overlayBaseUrl;
     appConfig.legal.operatorName = previousConfig.legalOperatorName;
   }
 });
@@ -210,8 +194,6 @@ test("관리자 서버 현황은 민감정보 없이 현재 런타임 상태를 
           server: "online",
           twitch: "connected",
           stream: "offline",
-          bridge: "connected",
-          obs: "connected",
           participation: "closed",
           startedAt: "2026-07-11T00:00:00.000Z"
         };
@@ -221,10 +203,7 @@ test("관리자 서버 현황은 민감정보 없이 현재 런타임 상태를 
     actions: { async dispatchOne() {} },
     readiness: () => ({ ok: true, checks: { persistenceHealthy: true }, errors: [] }),
     connectionStatus: () => ({
-      http: 3,
-      dashboardWebSocket: 2,
-      overlayWebSocket: 4,
-      bridge: true
+      http: 3
     })
   });
   const req = createRequest("GET", "/api/dashboard/server-status");
@@ -236,12 +215,11 @@ test("관리자 서버 현황은 민감정보 없이 현재 런타임 상태를 
   const body = JSON.parse(res.body);
   assert.equal(body.status, "ready");
   assert.equal(body.readiness.checks.persistenceHealthy, true);
-  assert.equal(body.connections.dashboardWebSocket, 2);
-  assert.equal(body.connections.overlayWebSocket, 4);
+  assert.deepEqual(body.connections, { http: 3 });
   assert.equal(body.services.twitch, "connected");
   assert.ok(body.uptimeSeconds >= 0);
   assert.ok(body.memory.rssBytes > 0);
-  assert.doesNotMatch(res.body, /DASHBOARD_AUTH_TOKEN|BRIDGE_SHARED_SECRET|OVERLAY_ACCESS_TOKEN/);
+  assert.doesNotMatch(res.body, /DASHBOARD_AUTH_TOKEN/);
 });
 
 test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => {
@@ -628,7 +606,7 @@ test("스트리머 tenant 중첩 URL을 직접 열어도 dashboard 앱 index를 
   }
 });
 
-test("dashboard overlay test action은 /api/actions/test에서 검증 후 dispatch된다", async () => {
+test("dashboard test action은 /api/actions/test에서 검증 후 dispatch된다", async () => {
   const dispatched = [];
   const handler = createHttpHandler({
     store: {},
@@ -640,12 +618,8 @@ test("dashboard overlay test action은 /api/actions/test에서 검증 후 dispat
     }
   });
   const action = {
-    type: "overlay.banner",
-    title: "Dashboard Test",
-    message: "Dashboard 테스트 배너입니다.",
-    variant: "info",
-    durationMs: 3000,
-    source: "dashboard.test"
+    type: "noop",
+    note: "Dashboard action 검증"
   };
 
   const req = createRequest("POST", "/api/actions/test", { action });
@@ -655,7 +629,7 @@ test("dashboard overlay test action은 /api/actions/test에서 검증 후 dispat
   assert.equal(res.statusCode, 200);
   assert.deepEqual(JSON.parse(res.body), { ok: true });
   assert.equal(dispatched.length, 1);
-  assert.equal(dispatched[0].action.type, "overlay.banner");
+  assert.equal(dispatched[0].action.type, "noop");
   assert.equal(dispatched[0].reason, "dashboard.test");
 });
 
@@ -758,7 +732,7 @@ test("participation invite bulk message API는 전송 가능한 참가자를 한
   assert.equal(dispatched[0].reason, "dashboard.participation_invite_bulk");
 });
 
-test("participation manual control API는 앞 4명을 게임 중으로 전환하고 오버레이를 갱신한다", async () => {
+test("participation manual control API는 앞 4명을 게임 중으로 전환하고 상태를 저장한다", async () => {
   const store = new Store();
   store.setParticipationOpen(true);
   store.setParticipationStreamerProfile({
@@ -800,10 +774,7 @@ test("participation manual control API는 앞 4명을 게임 중으로 전환하
   assert.equal(body.phase, "in_game");
   assert.deepEqual(store.getParticipationQueue().slice(0, 4).map((entry) => entry.status), ["in_game", "in_game", "in_game", "in_game"]);
   assert.equal(store.getParticipationQueue()[4].status, "waitlisted");
-  const statusUpdate = dispatched.find((item) => item.action.type === "overlay.participationStatus" && item.action.phase === "in_game");
-  assert.ok(statusUpdate);
-  assert.deepEqual(statusUpdate.action.streamerProfile.topChampions.map((champion) => champion.championId), [1, 2, 3]);
-  assert.ok(dispatched.some((item) => item.action.type === "overlay.participationQueue" && item.action.queue.length === 1 && item.action.queue[0].twitchUserName === "Viewer5"));
+  assert.equal(dispatched.length, 0);
 });
 
 test("participation entry-status API는 참가자 상태를 수동 변경한다", async () => {
@@ -835,10 +806,10 @@ test("participation entry-status API는 참가자 상태를 수동 변경한다"
 
   assert.equal(res.statusCode, 200);
   assert.equal(store.getParticipationQueue()[0].status, "invited");
-  assert.ok(dispatched.some((item) => item.reason === "dashboard.participation_entry_status"));
+  assert.equal(dispatched.length, 0);
 });
 
-test("게임 중 공개 참가 신청은 오버레이 상태를 모집 중으로 덮어쓰지 않는다", async () => {
+test("게임 중 공개 참가 신청은 세션 상태를 모집 중으로 덮어쓰지 않는다", async () => {
   const store = new Store();
   const streamerId = "1001";
   store.startParticipationSession(streamerId, {
@@ -893,17 +864,7 @@ test("게임 중 공개 참가 신청은 오버레이 상태를 모집 중으로
 
   assert.equal(res.statusCode, 200);
   assert.equal(store.getParticipationSession(streamerId)?.status, "in_game");
-  assert.ok(dispatched.some((item) => (
-    item.action.type === "overlay.participationSnapshot"
-    && item.reason === "public.participation_join"
-    && item.action.streamerId === streamerId
-    && item.action.status.phase === "in_game"
-    && item.action.queue.length === 1
-  )));
-  assert.equal(dispatched.some((item) => (
-    item.action.type === "overlay.participationStatus"
-    && item.action.phase === "recruiting"
-  )), false);
+  assert.equal(dispatched.length, 0);
 });
 
 test("완료된 공개 참가자는 상태 조회 후 기존 항목으로 재참여할 수 있다", async () => {
@@ -1401,7 +1362,7 @@ test("reward mapping API는 token 없이 read-only summary를 반환한다", asy
   const body = JSON.parse(res.body);
   assert.ok(Array.isArray(body));
   assert.ok(body.length > 0);
-  assert.equal(typeof body[0].hasOverlayAction, "boolean");
+  assert.equal("hasOverlayAction" in body[0], false);
   assert.equal("accessToken" in body[0], false);
 });
 
@@ -1621,7 +1582,7 @@ test("participation game monitor API는 잘못된 Riot ID를 거부한다", asyn
   }
 });
 
-test("/alerts 경로는 overlay public asset을 서빙한다", async () => {
+test("제거된 /alerts 정적 경로는 404를 반환한다", async () => {
   const previousOverlayStatic = appConfig.paths.overlayStatic;
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-alerts-"));
   try {
@@ -1639,7 +1600,8 @@ test("/alerts 경로는 overlay public asset을 서빙한다", async () => {
     const res = createResponse();
     await handler(req, res);
 
-    assert.equal(res.statusCode, 200);
+    assert.equal(res.statusCode, 404);
+    return;
     assert.equal(res.headers["Content-Type"], "image/gif");
     assert.equal(res.headers["X-Content-Type-Options"], "nosniff");
 
@@ -1655,7 +1617,7 @@ test("/alerts 경로는 overlay public asset을 서빙한다", async () => {
   }
 });
 
-test("알림 GIF 업로드 API는 파일을 state에 저장하고 overlay URL로 서빙한다", async () => {
+test("제거된 알림 asset 업로드 API는 404를 반환한다", async () => {
   const previousConfigDir = appConfig.paths.config;
   const previousStateDir = appConfig.paths.state;
   const configDir = mkdtempSync(path.join(tmpdir(), "streamops-alert-config-"));
@@ -1681,7 +1643,8 @@ test("알림 GIF 업로드 API는 파일을 state에 저장하고 overlay URL로
     const uploadRes = createResponse();
     await handler(uploadReq, uploadRes);
 
-    assert.equal(uploadRes.statusCode, 200);
+    assert.equal(uploadRes.statusCode, 404);
+    return;
     const uploaded = JSON.parse(uploadRes.body);
     assert.match(uploaded.url, /^\/alerts\/uploads\/follow-\d+-[a-f0-9]+\.gif$/);
     assert.equal(uploaded.size, gif.byteLength);
@@ -1717,7 +1680,7 @@ test("알림 GIF 업로드 API는 파일을 state에 저장하고 overlay URL로
   }
 });
 
-test("기존 알림 runtime 설정의 TTS 필드는 원본을 덮어쓰지 않고 응답에서 제외한다", async () => {
+test("제거된 알림 runtime 설정 API는 404를 반환한다", async () => {
   const previousConfigDir = appConfig.paths.config;
   const previousStateDir = appConfig.paths.state;
   const configDir = mkdtempSync(path.join(tmpdir(), "streamops-alert-legacy-config-"));
@@ -1747,7 +1710,8 @@ test("기존 알림 runtime 설정의 TTS 필드는 원본을 덮어쓰지 않�
     const res = createResponse();
     await handler(req, res);
 
-    assert.equal(res.statusCode, 200);
+    assert.equal(res.statusCode, 404);
+    return;
     const response = JSON.parse(res.body);
     assert.equal(response.config.follow.title, "팔로우");
     assert.equal(response.config.follow.soundUrl, "/alerts/follow.wav");
@@ -1762,7 +1726,7 @@ test("기존 알림 runtime 설정의 TTS 필드는 원본을 덮어쓰지 않�
   }
 });
 
-test("알림 asset 업로드 API는 GIF가 아닌 파일을 거부한다", async () => {
+test("제거된 알림 asset 업로드 API는 파일 형식과 무관하게 404를 반환한다", async () => {
   const previousStateDir = appConfig.paths.state;
   const stateDir = mkdtempSync(path.join(tmpdir(), "streamops-alert-invalid-state-"));
   try {
@@ -1784,7 +1748,8 @@ test("알림 asset 업로드 API는 GIF가 아닌 파일을 거부한다", async
     const res = createResponse();
     await handler(req, res);
 
-    assert.equal(res.statusCode, 400);
+    assert.equal(res.statusCode, 404);
+    return;
     assert.match(JSON.parse(res.body).error, /GIF/);
   } finally {
     appConfig.paths.state = previousStateDir;
@@ -1792,7 +1757,7 @@ test("알림 asset 업로드 API는 GIF가 아닌 파일을 거부한다", async
   }
 });
 
-test("정적 asset은 ETag 재검증 시 body 없이 304로 응답한다", async () => {
+test("제거된 알림 정적 asset은 cache 대상이 아닌 404를 반환한다", async () => {
   const previousOverlayStatic = appConfig.paths.overlayStatic;
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-static-cache-"));
   try {
@@ -1809,7 +1774,8 @@ test("정적 asset은 ETag 재검증 시 body 없이 304로 응답한다", async
     const firstRes = createResponse();
     await handler(firstReq, firstRes);
 
-    assert.equal(firstRes.statusCode, 200);
+    assert.equal(firstRes.statusCode, 404);
+    return;
     assert.equal(typeof firstRes.headers.ETag, "string");
 
     const secondReq = createRequest("GET", "/alerts/test.gif", undefined, { "if-none-match": firstRes.headers.ETag });
@@ -1846,7 +1812,7 @@ test("정적 파일 경로의 잘못된 URL 인코딩은 400으로 응답한다"
     actions: {}
   });
 
-  for (const target of ["/dashboard/%E0%A4%A", "/alerts/%E0%A4%A"]) {
+  for (const target of ["/dashboard/%E0%A4%A"]) {
     const req = createRequest("GET", target);
     const res = createResponse();
     await handler(req, res);

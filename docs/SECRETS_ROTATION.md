@@ -4,8 +4,6 @@
 
 - Twitch client secret, OAuth token, EventSub 관련 secret
 - Riot API key
-- `OVERLAY_ACCESS_TOKEN`
-- `BRIDGE_SHARED_SECRET`
 - session/CSRF secret
 - support mailbox webhook/encryption key
 - Palworld 서버 연결 정보 암호화 key
@@ -17,7 +15,7 @@
 
 1. 노출 범위와 사용처를 확인하고 기존 secret을 revoke합니다.
 2. 각 서비스의 공식 관리 화면 또는 운영 secret manager에서 새 값을 발급합니다.
-3. staging에 주입하고 `validate:runtime`, OAuth, EventSub, Riot 조회, overlay 연결을 검증합니다.
+3. staging에 주입하고 `validate:runtime`, OAuth, EventSub와 Riot 조회를 검증합니다.
 4. production secret version을 갱신하고 rolling restart합니다.
 5. readiness, 오류 로그와 webhook 알림을 확인합니다.
 6. 이전 secret이 더 이상 동작하지 않는지 확인하고 rotation 증적을 남깁니다.

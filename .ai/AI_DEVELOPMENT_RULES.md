@@ -64,7 +64,7 @@ AI는 다음을 임의로 추가할 수 없다.
 - 새 DB model
 - 새 dependency
 - 새 auth/session 정책
-- 새 OBS action type
+- 제거된 OBS/Overlay action type 재도입
 - 새 Twitch/Riot integration
 - 새 디자인 컨셉
 - 새 analytics event taxonomy
@@ -114,7 +114,7 @@ AI는 다음을 임의로 변경할 수 없다.
 - Big Bang Refactor
 - 임의 디자인 redesign
 - 기존 문서와 반대되는 기능 추가
-- unsafe OBS/Twitch action 추가
+- unsafe Twitch action 또는 제거된 OBS/Overlay action 추가
 - secret, token, API key 하드코딩
 - package.json 임의 수정
 - DB schema 임의 수정

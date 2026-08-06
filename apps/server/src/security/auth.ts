@@ -2,14 +2,12 @@ import crypto from "node:crypto";
 import type { IncomingMessage } from "node:http";
 import { appConfig, originAllowed } from "../config.js";
 
-export type PrincipalType = "PUBLIC" | "DASHBOARD_ADMIN" | "OVERLAY_CLIENT" | "BRIDGE_SERVICE" | "OAUTH_CALLBACK";
+export type PrincipalType = "PUBLIC" | "DASHBOARD_ADMIN" | "OAUTH_CALLBACK";
 export type DashboardRole = "admin" | "streamer";
 
 export type AuthPrincipal =
   | { type: "PUBLIC" }
   | { type: "DASHBOARD_ADMIN"; method: "session" | "token"; role: DashboardRole; sessionId?: string; csrfToken?: string; twitchUserId?: string }
-  | { type: "OVERLAY_CLIENT" }
-  | { type: "BRIDGE_SERVICE" }
   | { type: "OAUTH_CALLBACK" };
 
 export type AuthFailureCode =
@@ -312,7 +310,6 @@ const STREAMER_DASHBOARD_API_RULES: StreamerDashboardRule[] = [
   { method: "GET", path: "/api/followers" },
   { method: "POST", path: "/api/followers/refresh" },
   { method: "POST", path: "/api/followers/oauth/start" },
-  { method: "GET", path: "/api/overlay/status" },
   { method: "GET", path: "/api/participation/queue" },
   { method: "GET", path: "/api/participation/state" },
   { method: "GET", path: "/api/participation/game-monitor" },

@@ -10,7 +10,7 @@
 2. 트래픽 전환 또는 배포를 중지합니다.
 3. 운영 secret 저장소의 `YORO_SERVER_IMAGE`를 이전 정상 image digest로 지정합니다.
 4. volume과 상태 디렉터리를 삭제하지 않고 컨테이너만 교체합니다.
-5. liveness, readiness, 핵심 공개 화면, OAuth callback과 OBS overlay를 확인합니다.
+5. liveness, readiness, 핵심 공개 화면과 OAuth callback을 확인합니다.
 
 ```bash
 IMAGE_REPOSITORY="registry.example.invalid/yoro-server"
@@ -33,7 +33,7 @@ curl -fsS https://yoro.gg/health/ready
 - token state를 복원하기 전 현재 암호문을 별도 격리 보존하고 방송이 중지된 승인된 유지보수 시간에만 atomic restore를 수행합니다.
 - encryption key를 분실한 경우 암호문은 복구할 수 없으며, backup이 없으면 Twitch OAuth 재승인이 필요합니다.
 - 분기별 복구 훈련에서 격리 환경에 snapshot을 복원하고 이전 image의 health, tenant별 token metadata, 두 번째 재시작까지 확인합니다.
-- Nginx/Cloudflare 변경은 승인된 이전 설정으로 되돌린 뒤 HTTP redirect, HSTS, CSP, WebSocket을 다시 확인합니다.
+- Nginx/Cloudflare 변경은 승인된 이전 설정으로 되돌린 뒤 HTTP redirect, HSTS와 CSP를 다시 확인합니다.
 
 ## 금지
 

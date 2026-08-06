@@ -45,17 +45,15 @@
 ## 5. State Management 규칙
 
 - page local state를 무분별하게 global context로 승격하지 않는다.
-- auth, locale, surface, socket, overlay runtime 정도만 context 후보로 둔다.
+- auth, locale, surface 정도만 context 후보로 둔다.
 - remote data cache는 feature boundary 안에서 관리한다.
 - localStorage/sessionStorage 사용 시 실패 fallback을 둔다.
-- OBS Browser Source 환경의 storage 제한을 고려한다.
 
 ## 6. Error Handling 규칙
 
 - 사용자에게 보여줄 error message는 i18n 구조를 따른다.
 - log에는 민감정보를 남기지 않는다.
 - API error는 status와 domain code를 구분한다.
-- overlay runtime error는 blank frame으로 이어지지 않도록 degrade한다.
 - catch 후 무시하는 경우 안전한 이유가 있어야 한다.
 
 ## 7. File Naming 규칙
@@ -80,4 +78,3 @@
 - 복잡한 domain decision 또는 security decision에만 짧게 작성한다.
 - 한국어로 작성한다.
 - 코드 문법/identifier는 영어 원문을 유지한다.
-

@@ -1142,7 +1142,7 @@
   grid-column: 6 !important;
   grid-row: 1 !important;
   display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   gap: var(--yoro-space-2) var(--yoro-space-3) !important;
   align-content: center;
   min-width: 0;
@@ -1273,12 +1273,14 @@
   z-index: 3;
 }
 
-/* 오래 보는 목록에서는 결과색을 테두리와 약한 면색으로만 전달해 시각 피로를 줄입니다. */
+/* 오래 보는 목록에서는 결과색을 테두리와 약한 면색으로 전달해 시각 피로를 줄이되,
+   좌측 결과 바는 스크롤 중에도 승/패가 즉시 구분되도록 다른 좌측 테두리보다 굵게 유지합니다. */
 .public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell)
   .public-matches-panel .public-match-row.win {
   border-color: color-mix(in srgb, var(--yoro-color-info) 48%, var(--yoro-color-border-on-dark)) !important;
   border-inline-start-color: var(--yoro-color-info) !important;
-  background: color-mix(in srgb, var(--public-gray-surface) 94%, var(--yoro-color-info)) !important;
+  border-inline-start-width: calc(var(--yoro-space-1) * 1.5) !important;
+  background: color-mix(in srgb, var(--public-gray-surface) 88%, var(--yoro-color-info)) !important;
   box-shadow: var(--yoro-shadow-none) !important;
 }
 
@@ -1286,7 +1288,8 @@
   .public-matches-panel .public-match-row.loss {
   border-color: color-mix(in srgb, var(--yoro-color-danger) 42%, var(--yoro-color-border-on-dark)) !important;
   border-inline-start-color: var(--yoro-color-danger) !important;
-  background: color-mix(in srgb, var(--public-gray-surface) 94%, var(--yoro-color-danger)) !important;
+  border-inline-start-width: calc(var(--yoro-space-1) * 1.5) !important;
+  background: color-mix(in srgb, var(--public-gray-surface) 88%, var(--yoro-color-danger)) !important;
   box-shadow: var(--yoro-shadow-none) !important;
 }
 
@@ -1459,7 +1462,7 @@
   .public-profile-platform-v2 .public-matches-panel .public-match-meta {
     grid-column: 3 / 6 !important;
     grid-row: 2 !important;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   }
 
   .public-profile-platform-v2 .public-matches-panel .public-match-meta > span {
@@ -2025,11 +2028,14 @@
     transform: translateY(0);
     transform-origin: top;
     visibility: visible;
+    /* max-block-size·opacity·transform가 같은 duration으로 동시에 끝나야
+       접히는 동작이 하나의 자연스러운 움직임으로 보입니다(따로 끝나면 내용만 먼저
+       사라지고 빈 박스가 뒤늦게 접히는 것처럼 보입니다). */
     transition:
       max-block-size var(--yoro-motion-duration-base) var(--yoro-motion-ease-standard),
       padding-block var(--yoro-motion-duration-base) var(--yoro-motion-ease-standard),
       border-color var(--yoro-motion-duration-base) var(--yoro-motion-ease-standard),
-      opacity var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
+      opacity var(--yoro-motion-duration-base) var(--yoro-motion-ease-standard),
       transform var(--yoro-motion-duration-base) var(--yoro-motion-ease-standard),
       visibility 0s linear 0s;
   }
@@ -2044,7 +2050,8 @@
     border-color: transparent;
     opacity: 0;
     pointer-events: none;
-    transform: translateY(calc(var(--yoro-space-6) * -1));
+    /* 세로 접힘과 별개로 크게 밀리면 두 움직임이 따로 놀아 보이므로 살짝만 겹칩니다. */
+    transform: translateY(calc(var(--yoro-space-2) * -1));
     visibility: hidden;
     transition-delay: 0s, 0s, 0s, 0s, 0s, var(--yoro-motion-duration-base);
   }

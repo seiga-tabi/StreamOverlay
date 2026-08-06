@@ -23,13 +23,11 @@ const streamer: DashboardStreamerInfo = {
   twitchProfileImageUrl: "https://static-cdn.jtvnw.net/test-profile.png",
   riotGameName: "게임이름",
   riotTagLine: "KR1",
-  overlaySlug: "should-not-render",
-  overlayKey: "secret-overlay-key-should-not-render",
   profileLinkUrl: "https://example.com/should-not-render",
   profileLinkLabel: "비공개 링크",
 };
 
-test("Riot ID 전용 페이지는 Overlay와 프로필 링크 정보를 DOM에 노출하지 않는다", async () => {
+test("Riot ID 전용 페이지는 프로필 링크 정보를 DOM에 노출하지 않는다", async () => {
   const { MyRiotAccountPage } = await import("../src/pages/MyRiotAccountPage");
   setDashboardLocale("ko");
   const html = renderToStaticMarkup(<MyRiotAccountPage streamer={streamer} />);
@@ -43,7 +41,6 @@ test("Riot ID 전용 페이지는 Overlay와 프로필 링크 정보를 DOM에 �
   assert.match(html, /새 Riot ID/);
   assert.match(html, /Riot ID 저장/);
   assert.doesNotMatch(html, /should-not-render/);
-  assert.doesNotMatch(html, /secret-overlay-key/);
   assert.doesNotMatch(html, /Overlay 접근|프로필 링크/);
 });
 

@@ -9,5 +9,7 @@
 - [Secret rotation](SECRETS_ROTATION.md)
 - [Palworld 서버 상태 운영 설정](PALWORLD_SERVER_STATUS.md)
 - [운영자 확인 체크리스트](PRODUCTION_OPERATOR_CHECKLIST.md)
+- [Claude Code·Codex 공동 작업 지침](AI_WORKFLOW.md)
+- [AI 작업 handoff 템플릿](AI_HANDOFF_TEMPLATE.md)
 
 코드로 검증 가능한 항목은 CI에서 차단합니다. 외부 계정, DNS, webhook 수신, 법적 문구와 실제 복구 훈련은 운영자가 별도로 확인하고 증적을 남겨야 합니다.

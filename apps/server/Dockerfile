@@ -9,7 +9,6 @@ COPY scripts/generate-image-release-metadata.mjs ./scripts/generate-image-releas
 COPY packages ./packages
 COPY apps/server ./apps/server
 COPY apps/dashboard ./apps/dashboard
-COPY apps/overlay ./apps/overlay
 COPY apps/email-worker ./apps/email-worker
 ENV NODE_ENV=production \
     APP_VERSION=${APP_VERSION} \
@@ -25,7 +24,6 @@ RUN node apps/server/dist/scripts/validate-palworld-translations.js \
 RUN VITE_BASE_PATH=/dashboard/ npm run build:dashboard
 # active release manifest에 결합되지 않은 비버전 candidate 작업 아이콘은 runtime 정적 경로에서 제외합니다.
 RUN rm -rf /app/apps/dashboard/dist/images/palworld/work
-RUN VITE_BASE_PATH=/overlay/ npm run build:overlay
 RUN node apps/server/dist/scripts/smoke-palworld-runtime-artifacts.js \
   --prepare-runtime-bundle /app/.palworld-runtime-bundle
 
@@ -36,19 +34,15 @@ ENV NODE_ENV=production \
     PORT=3000 \
     PUBLIC_BASE_URL=http://localhost:3000 \
     DASHBOARD_BASE_URL=http://localhost:3000 \
-    OVERLAY_BASE_URL=http://localhost:3000/overlay \
     STREAMOPS_LOGS_DIR=/app/logs \
     STREAMOPS_STATE_DIR=/app/.streamops \
     STREAMOPS_REPORTS_DIR=/app/reports \
-    DASHBOARD_STATIC_DIR=/app/apps/dashboard/dist \
-    OVERLAY_STATIC_DIR=/app/apps/overlay/dist
+    DASHBOARD_STATIC_DIR=/app/apps/dashboard/dist
 COPY --from=build /tmp/yoro-release.json /app/release.json
 COPY package.json package-lock.json* ./
 COPY packages/shared/package.json ./packages/shared/package.json
-COPY apps/bridge/package.json ./apps/bridge/package.json
 COPY apps/server/package.json ./apps/server/package.json
 COPY apps/dashboard/package.json ./apps/dashboard/package.json
-COPY apps/overlay/package.json ./apps/overlay/package.json
 RUN apt-get update \
   && apt-get install -y --no-install-recommends fonts-noto-cjk \
   && rm -rf /var/lib/apt/lists/*
@@ -63,7 +57,6 @@ COPY --from=build /app/apps/server/data/lol/aram ./apps/server/data/lol/aram
 COPY --from=build /app/.palworld-runtime-bundle/apps/server/data/palworld ./apps/server/data/palworld
 COPY --from=build /app/.palworld-runtime-bundle/apps/server/src/data/palworld-mappings ./apps/server/src/data/palworld-mappings
 COPY --from=build /app/apps/dashboard/dist ./apps/dashboard/dist
-COPY --from=build /app/apps/overlay/dist ./apps/overlay/dist
 RUN node apps/server/dist/scripts/smoke-palworld-runtime-artifacts.js
 RUN groupadd --gid 10001 streamops \
   && useradd --uid 10001 --gid streamops --home-dir /app --shell /usr/sbin/nologin --no-create-home streamops \

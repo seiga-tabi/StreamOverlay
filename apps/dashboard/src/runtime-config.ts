@@ -20,8 +20,6 @@ export type PublicLegalRuntimeConfig = {
 
 type StreamOpsRuntimeConfig = {
   apiBase?: string;
-  wsBase?: string;
-  overlayBase?: string;
   dashboardAuthRequired?: boolean;
   legal?: Partial<PublicLegalRuntimeConfig>;
 };

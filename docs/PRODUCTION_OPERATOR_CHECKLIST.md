@@ -27,7 +27,6 @@
 - [ ] HTTPS에 HSTS가 있고 인증서 자동 갱신이 정상이다.
 - [ ] `/dashboard/config.js`가 `no-store`이며 Cloudflare cache에 남지 않는다.
 - [ ] origin application port는 인터넷에 직접 노출되지 않는다.
-- [ ] WebSocket upgrade가 정상이다.
 
 ## Alert와 timer
 
@@ -41,7 +40,6 @@
 
 - [ ] Riot production key 승인, 허용 도메인과 quota를 확인했다.
 - [ ] 운영 Twitch 계정의 로그인, 갱신, callback HTTPS와 EventSub 재연결을 확인했다.
-- [ ] OBS Browser Source URL, token, preview, test event를 실제 OBS에서 확인했다.
 - [ ] Twitch live/offline 상태가 실제 방송 상태와 일치한다.
 - [ ] rate limit/timeout 상황에서 사용자 오류 화면과 운영 로그를 확인했다.
 

@@ -121,7 +121,7 @@ docker compose config --quiet
 
 - HTTP 요청은 HTTPS로 `301` 또는 `308` redirect합니다.
 - HTTPS 응답에 `Strict-Transport-Security`를 적용합니다. preload는 모든 하위 도메인의 HTTPS 준비가 끝난 뒤 별도 승인합니다.
-- `/dashboard/config.js`와 `/overlay/config.js`는 `Cache-Control: no-store`여야 합니다.
+- `/dashboard/config.js`는 `Cache-Control: no-store`여야 합니다.
 - upstream은 `127.0.0.1:${HOST_PORT}`를 사용하고 서버 방화벽에서 애플리케이션 포트를 외부에 공개하지 않습니다.
 
 ```bash

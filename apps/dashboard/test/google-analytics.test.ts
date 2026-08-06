@@ -66,6 +66,6 @@ test("공개 링크의 Discord·Twitch·outbound·Dashboard 이벤트를 분류�
   );
   assert.deepEqual(
     analyticsEventsForLink("/overlay/viewer", "https://yoro.gg", "/lol"),
-    ["overlay_open"]
+    []
   );
 });

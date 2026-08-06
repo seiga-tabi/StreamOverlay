@@ -75,7 +75,6 @@ Token 종류:
 
 - shadow token만 사용한다.
 - card마다 다른 shadow를 만들지 않는다.
-- overlay는 OBS readability와 performance를 우선한다.
 - heavy blur/filter는 performance budget 검토 없이 금지한다.
 
 ## 7. Typography 규칙
@@ -91,7 +90,6 @@ Token 종류:
 - motion token을 사용한다.
 - reduced motion을 고려한다.
 - hover/focus feedback은 즉각적이어야 한다.
-- overlay motion은 transform/opacity 중심으로 제한한다.
 - 방송 화면을 방해하는 과한 animation 금지.
 
 ## 9. Component 규칙

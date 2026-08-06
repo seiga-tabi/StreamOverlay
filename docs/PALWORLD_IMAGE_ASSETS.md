@@ -145,4 +145,4 @@ npm --workspace apps/server run rollback:palworld-images
 4. UI는 `PalworldMedia` fallback으로 돌아간다.
 5. 기존 content-hash 파일은 즉시 삭제하지 않는다.
 
-이미 받은 immutable 응답은 브라우저/CDN에 최대 1년 남을 수 있다. manifest 참조 제거와 재배포를 먼저 완료하고 CDN purge를 수행한다. 이후 접근 로그와 cache 정책에 맞는 유예 기간이 지난 뒤, 현재 및 rollback manifest가 참조하지 않는 content-hash 파일만 별도 승인된 정리 작업으로 삭제한다. 이미지 차단·손상은 Palworld 텍스트 API, `/health/ready`, LoL, Followers, Overlay, Dashboard tenant 격리와 OBS Bridge를 중단시키지 않아야 한다.
+이미 받은 immutable 응답은 브라우저/CDN에 최대 1년 남을 수 있다. manifest 참조 제거와 재배포를 먼저 완료하고 CDN purge를 수행한다. 이후 접근 로그와 cache 정책에 맞는 유예 기간이 지난 뒤, 현재 및 rollback manifest가 참조하지 않는 content-hash 파일만 별도 승인된 정리 작업으로 삭제한다. 이미지 차단·손상은 Palworld 텍스트 API, `/health/ready`, LoL, Followers와 Dashboard tenant 격리를 중단시키지 않아야 한다.

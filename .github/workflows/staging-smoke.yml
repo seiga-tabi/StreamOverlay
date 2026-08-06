@@ -7,11 +7,6 @@ on:
         description: "점검할 staging HTTPS URL"
         required: true
         type: string
-      require_obs:
-        description: "OBS bridge와 OBS 연결까지 필수로 검사"
-        required: true
-        default: false
-        type: boolean
 
 permissions:
   contents: read
@@ -46,14 +41,9 @@ jobs:
           STAGING_RIOT_ID: ${{ secrets.STAGING_RIOT_ID }}
           STAGING_DASHBOARD_TOKEN: ${{ secrets.STAGING_DASHBOARD_TOKEN }}
         run: |
-          OBS_FLAG=""
-          if [ "${{ inputs.require_obs }}" = "true" ]; then
-            OBS_FLAG="--require-obs"
-          fi
           node scripts/staging-smoke.mjs \
             --base-url="$STAGING_BASE_URL" \
             --require-integrations \
-            $OBS_FLAG \
             --report=qa/staging-smoke-report.json
 
       - name: Upload staging reports

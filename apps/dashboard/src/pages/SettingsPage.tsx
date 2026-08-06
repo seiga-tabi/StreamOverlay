@@ -25,10 +25,10 @@ export function SettingsPage() {
           <PageHeaderTitle>{t.title}</PageHeaderTitle>
           <PageHeaderDescription>{t.description}</PageHeaderDescription>
           <PageHeaderStatus>
-            <StatusPill tone="info">OBS</StatusPill>
+            <StatusPill tone="info">HTTP API</StatusPill>
           </PageHeaderStatus>
           <PageHeaderActions>
-            <Badge tone="streamer">{t.browserSource}</Badge>
+            <Badge tone="streamer">{t.serverApi}</Badge>
           </PageHeaderActions>
         </PageHeader>
       </AppShellHeader>
@@ -43,7 +43,7 @@ export function SettingsPage() {
               Riot ID
             </NavigationItem>
             <NavigationItem as="a" href="#settings-shared-runtime">
-              OBS URL
+              HTTP API
             </NavigationItem>
             <NavigationItem as="a" href="#settings-shared-safety" badge={<NavigationBadge>{t.warnings.length}</NavigationBadge>}>
               Safety
@@ -64,11 +64,10 @@ export function SettingsPage() {
 
           <Card as="section" className="settings-shared-card" id="settings-shared-runtime" padding="lg" variant="glass">
             <CardHeader className="settings-shared-card-header">
-              <CardTitle as="h2">{t.browserSource}</CardTitle>
+              <CardTitle as="h2">{t.runtime}</CardTitle>
               <StatusPill tone="neutral">runtime</StatusPill>
             </CardHeader>
             <CardContent className="settings-shared-runtime-grid">
-              <Metric label={t.overlayUrl} value="http://localhost:5174" tone="info" size="sm" />
               <Metric label={t.serverApi} value={apiBase} tone="streamer" size="sm" />
             </CardContent>
           </Card>

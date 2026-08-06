@@ -15,7 +15,6 @@ const timeoutMs = Number(process.env.STAGING_HTTP_TIMEOUT_MS || 15_000);
 const riotId = process.env.STAGING_RIOT_ID || "";
 const dashboardToken = process.env.STAGING_DASHBOARD_TOKEN || "";
 const requireIntegrations = args.has("--require-integrations");
-const requireObs = args.has("--require-obs");
 const allowHttp = args.has("--allow-http");
 const checks = [];
 
@@ -115,23 +114,12 @@ if (dashboardToken) {
     const status = await json(statusResponse);
     const statusOk = statusResponse.ok && Boolean(status && typeof status === "object");
     record("dashboard authenticated status", statusOk, `HTTP ${statusResponse.status}`);
-    if (requireObs) {
-      record("OBS bridge", status?.bridge === "connected", `bridge=${status?.bridge || "unknown"}`);
-      record("OBS connection", status?.obs === "connected", `obs=${status?.obs || "unknown"}`);
-    }
   } catch (error) {
     record("dashboard authenticated status", false, error instanceof Error ? error.message : "요청 실패");
   }
 
-  try {
-    const overlayResponse = await request(new URL("/api/overlay/status", origin), { headers });
-    const overlay = await json(overlayResponse);
-    record("overlay status", overlayResponse.ok && Boolean(overlay?.clientsByChannel), `HTTP ${overlayResponse.status}`);
-  } catch (error) {
-    record("overlay status", false, error instanceof Error ? error.message : "요청 실패");
-  }
 } else {
-  record("dashboard and overlay auth", !requireIntegrations && !requireObs, "STAGING_DASHBOARD_TOKEN 미설정");
+  record("dashboard auth", !requireIntegrations, "STAGING_DASHBOARD_TOKEN 미설정");
 }
 
 const report = {
@@ -142,7 +130,6 @@ const report = {
   manualChecksRequired: [
     "Twitch 운영 계정으로 OAuth 로그인과 scope 확인",
     "EventSub 실제 follow/subscription/cheer 이벤트 수신",
-    "OBS Browser Source 렌더와 WebSocket 재연결",
     "시청자 참여 신청·취소·체크인 전체 흐름"
   ]
 };

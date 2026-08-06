@@ -10,7 +10,6 @@ YORO.gg는 방송 중 실행될 수 있다. 보안과 예측 가능성은 편의
 
 - Twitch token 하드코딩
 - Riot API key 하드코딩
-- overlay token 하드코딩
 - admin token 하드코딩
 - session secret 하드코딩
 - webhook URL 하드코딩
@@ -40,20 +39,12 @@ YORO.gg는 방송 중 실행될 수 있다. 보안과 예측 가능성은 편의
 - token refresh 실패는 안전하게 처리한다.
 - external API error를 민감정보 없이 전달한다.
 
-## 6. Overlay Token 보호
-
-- overlay token은 URL fragment/hash 정책을 유지한다.
-- dashboard UI에서 token을 불필요하게 크게 노출하지 않는다.
-- log에 overlay token을 남기지 않는다.
-- OBS URL compatibility를 유지하되 공유 위험을 안내한다.
-
-## 7. Admin 권한 검증
+## 6. Admin 권한 검증
 
 Admin-only:
 
 - action test
 - reward mapping
-- alert asset 관리
 - Riot API key 설정
 - streamer request 승인
 - EventSub reconnect
@@ -61,7 +52,7 @@ Admin-only:
 
 Streamer surface에 admin-only 기능이 노출되면 안 된다.
 
-## 8. Rate Limit
+## 7. Rate Limit
 
 Rate limit 필수:
 
@@ -71,16 +62,15 @@ Rate limit 필수:
 - public community write
 - participation join/cancel
 - dashboard mutating API
-- WebSocket upgrade
 
-## 9. CORS/CSP
+## 8. CORS/CSP
 
 - CORS allowlist를 임의로 넓히지 않는다.
 - `*` 허용 금지.
 - CSP를 약화하지 않는다.
 - static asset path와 API path를 구분한다.
 
-## 10. Logging 금지 항목
+## 9. Logging 금지 항목
 
 절대 log 금지:
 
@@ -88,13 +78,12 @@ Rate limit 필수:
 - refresh token
 - API key
 - session secret
-- overlay key
 - admin token
 - cookie header
 - authorization header
 - raw user PII
 
-## 11. Viewer Input Safety
+## 10. Viewer Input Safety
 
 Viewer-triggered input은 절대 다음으로 이어지면 안 된다.
 
@@ -107,5 +96,4 @@ Viewer-triggered input은 절대 다음으로 이어지면 안 된다.
 - unsafe Twitch moderation
 - Discord `@everyone`/`@here`
 
-OBS/Twitch/Overlay action은 allowlist와 validation을 통과해야 한다.
-
+Twitch action은 allowlist와 validation을 통과해야 한다. 제거된 `obs.*`, `overlay.*` action은 validation에서 계속 거부한다.

@@ -6,7 +6,6 @@ export type YoroRuntimeConfig = Readonly<{
   public: Readonly<{
     baseUrl: string;
     dashboardOrigin: string;
-    overlayOrigin?: string;
   }>;
   features: Readonly<{
     database: boolean;
@@ -165,16 +164,13 @@ export function parseYoroRuntimeConfig(value: unknown): YoroRuntimeConfig {
   const environment = root.environment as YoroRuntimeEnvironment;
 
   const publicConfig = record(root.public, "runtime_public");
-  exactKeys(publicConfig, ["baseUrl", "dashboardOrigin", "overlayOrigin"], "runtime_public");
+  exactKeys(publicConfig, ["baseUrl", "dashboardOrigin"], "runtime_public");
   const baseUrl = origin(publicConfig.baseUrl, "runtime_public_base_url", environment);
   const dashboardOrigin = origin(
     publicConfig.dashboardOrigin,
     "runtime_public_dashboard_origin",
     environment
   );
-  const overlayOrigin = publicConfig.overlayOrigin === undefined
-    ? undefined
-    : origin(publicConfig.overlayOrigin, "runtime_public_overlay_origin", environment);
 
   const features = record(root.features, "runtime_features");
   exactKeys(features, [
@@ -398,8 +394,7 @@ export function parseYoroRuntimeConfig(value: unknown): YoroRuntimeConfig {
     environment,
     public: Object.freeze({
       baseUrl,
-      dashboardOrigin,
-      ...(overlayOrigin ? { overlayOrigin } : {})
+      dashboardOrigin
     }),
     features: Object.freeze(featureConfig),
     ...(database ? { database: Object.freeze(database) } : {}),

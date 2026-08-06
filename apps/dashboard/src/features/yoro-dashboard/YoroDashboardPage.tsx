@@ -305,8 +305,6 @@ const legacyDashboardPaths: Record<string, UnifiedDashboardPage> = {
   "/dashboard/riot-id": "streamingRiot",
   "/dashboard/riot-account": "streamingRiot",
   "/dashboard/lol/account": "streamingRiot",
-  "/dashboard/overlay": "streaming",
-  "/dashboard/alerts": "streaming",
   "/dashboard/lol": "streaming",
   "/dashboard/lol/automation": "streaming",
   "/dashboard/lol/participation": "streamingParticipation",

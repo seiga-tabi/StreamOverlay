@@ -1,28 +1,14 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { BotAction, OverlayBannerAction, OverlayVariant, RewardMappingSummary, TwitchRewardRedemptionInternalEvent } from "@streamops/shared";
+import type { BotAction, RewardMappingSummary, TwitchRewardRedemptionInternalEvent } from "@streamops/shared";
 import type { BotModule } from "../core/module.js";
 import { appConfig } from "../config.js";
 import { sanitizeDisplayName, sanitizeViewerInput } from "../core/safe-text.js";
-
-type DefaultOverlayBannerConfig = boolean | {
-  enabled?: boolean;
-  title?: string;
-  subtitle?: string;
-  message?: string;
-  variant?: OverlayVariant;
-  durationMs?: number;
-  mediaUrl?: string;
-  mediaAlt?: string;
-  soundUrl?: string;
-  soundVolume?: number;
-};
 
 type RewardConfig = {
   name: string;
   cooldownMs?: number;
   maxPerStream?: number;
-  defaultOverlayBanner?: DefaultOverlayBannerConfig;
   actions: BotAction[];
 };
 
@@ -47,7 +33,6 @@ export function getRewardMappingSummaries(config: RewardsConfig = loadConfig()):
   return Object.entries(config).map(([key, rewardConfig]) => {
     const keyType = looksLikeRewardId(key) ? "reward_id" : "title";
     const actionTypes = rewardConfig.actions.map((action) => action.type);
-    const hasOverlayAction = Boolean(rewardConfig.defaultOverlayBanner) || actionTypes.some((type) => type.startsWith("overlay."));
     return {
       key,
       keyType,
@@ -55,35 +40,11 @@ export function getRewardMappingSummaries(config: RewardsConfig = loadConfig()):
       rewardId: keyType === "reward_id" ? key : undefined,
       title: keyType === "title" ? key : rewardConfig.name,
       titleFallbackWarning: keyType === "title",
-      hasOverlayAction,
       actionTypes,
       cooldownMs: rewardConfig.cooldownMs,
       maxPerStream: rewardConfig.maxPerStream
     };
   });
-}
-
-function makeDefaultOverlayBanner(rewardConfig: RewardConfig, event: TwitchRewardRedemptionInternalEvent): OverlayBannerAction | undefined {
-  const option = rewardConfig.defaultOverlayBanner;
-  if (!option) return undefined;
-  if (typeof option === "object" && option.enabled === false) return undefined;
-
-  const user = sanitizeDisplayName(event.userName);
-  const rewardTitle = sanitizeViewerInput(event.rewardTitle, 80);
-  return {
-    type: "overlay.banner",
-    title: typeof option === "object" ? option.title ?? rewardTitle : rewardTitle,
-    subtitle: typeof option === "object" ? option.subtitle : undefined,
-    message: typeof option === "object" ? option.message ?? `${user}님이 ${rewardTitle}을(를) 사용했습니다.` : `${user}님이 ${rewardTitle}을(를) 사용했습니다.`,
-    variant: typeof option === "object" ? option.variant ?? "success" : "success",
-    durationMs: typeof option === "object" ? option.durationMs ?? 4000 : 4000,
-    source: "twitch.reward",
-    eventKind: "reward",
-    mediaUrl: typeof option === "object" ? option.mediaUrl : undefined,
-    mediaAlt: typeof option === "object" ? option.mediaAlt : undefined,
-    soundUrl: typeof option === "object" ? option.soundUrl : undefined,
-    soundVolume: typeof option === "object" ? option.soundVolume : undefined
-  };
 }
 
 export function resolveRewardActionConfig(
@@ -133,11 +94,7 @@ export const rewardsModule: BotModule = {
 
       lastUsed.set(usageKey, now);
       usageCount.set(usageKey, count + 1);
-      const defaultOverlayBanner = makeDefaultOverlayBanner(rewardConfig, event);
-      await ctx.actions.dispatch([
-        ...(defaultOverlayBanner ? [defaultOverlayBanner] : []),
-        ...rewardConfig.actions
-      ], {
+      await ctx.actions.dispatch(rewardConfig.actions, {
         streamerId: event.broadcasterUserId,
         user: sanitizeDisplayName(event.userName),
         userId: event.userId,

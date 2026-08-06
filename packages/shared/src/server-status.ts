@@ -27,9 +27,6 @@ export type DashboardServerStatus = {
   };
   connections: {
     http: number;
-    dashboardWebSocket: number;
-    overlayWebSocket: number;
-    bridge: boolean;
   };
   services: BotStatus;
 };

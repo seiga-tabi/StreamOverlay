@@ -103,7 +103,6 @@ export type RewardMappingSummary = {
   rewardId?: string;
   title?: string;
   titleFallbackWarning: boolean;
-  hasOverlayAction: boolean;
   actionTypes: string[];
   cooldownMs?: number;
   maxPerStream?: number;

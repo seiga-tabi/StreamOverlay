@@ -1204,6 +1204,11 @@ function searchFormText(): SearchFormText {
       ko: publicI18n.ko.searchPlaceholder,
       ja: publicI18n.ja.searchPlaceholder
     },
+    searchPlaceholderShort: {
+      label: t().searchPlaceholderShort,
+      ko: publicI18n.ko.searchPlaceholderShort,
+      ja: publicI18n.ja.searchPlaceholderShort
+    },
     clearSearch: t().clearSearch,
     searching: t().searching,
     search: t().search,
@@ -5705,11 +5710,6 @@ function RecentMatches({
               label: rune.title ?? t().runes,
               content: <img src={rune.iconUrl} alt="" />
             }));
-          const matchAverageTier = rankLoading
-            ? t().tierLoading
-            : rankDetail
-              ? averageTierLabel(rankDetail.participants.map((participant) => participant.rankedStats))
-              : t().tierOnDetail;
           const matchMetrics: RecentMatchRowMetric[] = [
             {
               key: "kill-participation",
@@ -5725,11 +5725,6 @@ function RecentMatches({
               key: "cs-per-minute",
               label: t().perMinuteCs,
               value: <span className={metricToneClass(csTone(match.csPerMinute))}>{formatDecimal(match.csPerMinute, 1)}</span>
-            },
-            {
-              key: "average-tier",
-              label: t().averageTier,
-              value: matchAverageTier
             }
           ];
           const inlineItemSlots: RecentMatchRowMediaItem[] = recentItemSlots.map((item, index) => {

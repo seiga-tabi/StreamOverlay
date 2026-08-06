@@ -707,7 +707,7 @@ test("Palworld 홈은 실제 경로의 기능 대시보드와 로그인 CTA가 �
     twitchConnected={false}
   />);
   assert.doesNotMatch(html, /palworld-hero-meta|palworld-shortcuts|palworld-summary/u);
-  assert.match(html, /PALWORLD DATABASE/u);
+  assert.doesNotMatch(html, /public-game-home__eyebrow/u);
   assert.match(html, /href="\/ko\/palworld\/pals"/u);
   assert.match(html, /href="\/ko\/palworld\/breeding"/u);
   assert.match(html, /href="\/ko\/palworld\/map"/u);

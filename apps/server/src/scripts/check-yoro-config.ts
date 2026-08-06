@@ -81,20 +81,8 @@ const requirements: Array<{
     required: runtime.features.discordBot
   },
   {
-    label: "bridge",
-    path: YORO_SECRET_FILES.bridgeSharedSecret,
-    active: runtime.environment === "production",
-    required: runtime.environment === "production"
-  },
-  {
     label: "dashboardAuth",
     path: YORO_SECRET_FILES.dashboardAuthToken,
-    active: runtime.environment === "production",
-    required: runtime.environment === "production"
-  },
-  {
-    label: "overlayAuth",
-    path: YORO_SECRET_FILES.overlayAccessToken,
     active: runtime.environment === "production",
     required: runtime.environment === "production"
   }

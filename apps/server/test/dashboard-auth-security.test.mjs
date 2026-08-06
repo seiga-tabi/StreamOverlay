@@ -88,12 +88,8 @@ function handlerWithSessionStore(sessionStore, dispatched = []) {
 }
 
 const testAction = {
-  type: "overlay.banner",
-  title: "인증 테스트",
-  message: "CSRF 검증용 action입니다.",
-  variant: "info",
-  durationMs: 1000,
-  source: "security.test"
+  type: "noop",
+  note: "CSRF 검증용 action입니다."
 };
 
 test("dashboard token이 없고 local no-auth가 아니면 로그인 상태로 처리하지 않는다", async () => {
@@ -1323,8 +1319,6 @@ test("관리자는 승인된 스트리머의 대시보드 사용 권한을 별�
       riotGameName: "Seiga",
       riotTagLine: "JP1",
       normalizedRiotId: "seiga#jp1",
-      overlaySlug: "seiga",
-      overlayKey: "sok_test",
       dashboardSlug: undefined,
       dashboardKey: undefined,
       status: "approved",
@@ -1356,7 +1350,6 @@ test("관리자는 승인된 스트리머의 대시보드 사용 권한을 별�
         return { ...request };
       }
     };
-    const disconnectedStreamerIds = [];
     const handler = createHttpHandler({
       store,
       twitchAuth: {},
@@ -1377,10 +1370,7 @@ test("관리자는 승인된 스트리머의 대시보드 사용 권한을 별�
       actions: {
         async dispatchOne() {}
       },
-      sessions,
-      disconnectStreamerDashboard(twitchUserId) {
-        disconnectedStreamerIds.push(twitchUserId);
-      }
+      sessions
     });
 
     const deniedAuthReq = createRequest("GET", "/api/dashboard/auth/status?surface=streamer", undefined, {
@@ -1395,7 +1385,7 @@ test("관리자는 승인된 스트리머의 대시보드 사용 권한을 별�
     assert.equal(JSON.parse(deniedAuthRes.body).authenticated, false);
 
     const disabledStreamerSession = sessions.create({ role: "streamer", twitchUserId: "streamer-1" });
-    const deniedApiReq = createRequest("GET", "/api/overlay/status", undefined, {
+    const deniedApiReq = createRequest("GET", "/api/participation/state", undefined, {
       origin: DASHBOARD_ORIGIN,
       cookie: `${STREAMER_DASHBOARD_SESSION_COOKIE}=${disabledStreamerSession.id}`,
       "x-streamops-dashboard-surface": "streamer"
@@ -1479,9 +1469,8 @@ test("관리자는 승인된 스트리머의 대시보드 사용 권한을 별�
     const disableRes = createResponse();
     await handler(disableReq, disableRes);
     assert.equal(disableRes.statusCode, 200);
-    assert.deepEqual(disconnectedStreamerIds, ["streamer-1"]);
 
-    const revokedSessionReq = createRequest("GET", "/api/overlay/status", undefined, {
+    const revokedSessionReq = createRequest("GET", "/api/participation/state", undefined, {
       origin: DASHBOARD_ORIGIN,
       cookie: streamerCookie,
       "x-streamops-dashboard-surface": "streamer"
@@ -3455,11 +3444,11 @@ test("스트리머 dashboard 세션은 허용된 운영 API만 사용할 수 있
     const session = sessions.create({ role: "streamer", twitchUserId: "streamer-twitch-user" });
     const cookie = `${STREAMER_DASHBOARD_SESSION_COOKIE}=${session.id}`;
 
-    const allowedReq = createRequest("GET", "/api/overlay/status", undefined, {
+    const allowedReq = createRequest("GET", "/api/participation/state", undefined, {
       cookie,
       "x-streamops-dashboard-surface": "streamer"
     });
-    const allowed = authorizeHttpRequest(allowedReq, "/api/overlay/status", sessions);
+    const allowed = authorizeHttpRequest(allowedReq, "/api/participation/state", sessions);
     assert.equal(allowed.ok, true);
     assert.equal(allowed.principal.type, "DASHBOARD_ADMIN");
     assert.equal(allowed.principal.role, "streamer");

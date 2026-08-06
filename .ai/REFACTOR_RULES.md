@@ -23,7 +23,6 @@ PR 크기 기준:
 - CSS token: token group 하나
 - page: section 하나
 - API: endpoint group 하나
-- overlay: mode 또는 channel 하나
 - repository: domain 하나
 
 ## 4. Compatibility Layer 사용
@@ -36,7 +35,6 @@ PR 크기 기준:
 | `/api/*` | `/api/v1/*` | route adapter |
 | global CSS | token/layer CSS | alias bridge |
 | `Store` class | repository interface | JSON adapter |
-| existing overlay URL | source builder | URL compatibility |
 
 ## 5. Feature Flag 사용
 
@@ -47,8 +45,6 @@ High-risk 변경은 반드시 feature flag를 사용한다.
 - dashboard shell
 - shared UI
 - design token
-- overlay studio
-- overlay runtime
 - public search
 - participation
 - community
@@ -63,7 +59,6 @@ Production default는 보수적으로 off에서 시작한다.
 - legacy component 즉시 삭제 금지
 - legacy CSS 즉시 삭제 금지
 - legacy store 직접 제거 금지
-- legacy OBS URL 유지
 
 삭제는 100% rollout 후 최소 1 release 안정화 이후에만 가능하다.
 
@@ -85,7 +80,7 @@ Production default는 보수적으로 off에서 시작한다.
 |---|---|
 | Sprint 1 | foundation, flag, token alias, API adapter |
 | Sprint 2 | dashboard shell, shared UI |
-| Sprint 3 | dashboard/overlay studio boundary |
+| Sprint 3 | dashboard boundary |
 | Sprint 4 | public search/profile strangler |
 | Sprint 5 | participation/community/tournament/API v1 |
 | Sprint 6 | repository/performance/deprecated cleanup |
@@ -99,4 +94,3 @@ Sprint 범위를 넘는 변경은 별도 승인 필요.
 - performance budget 초과 없음
 - rollback 경로 존재
 - 문서 업데이트 완료
-

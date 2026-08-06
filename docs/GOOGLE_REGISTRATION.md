@@ -17,7 +17,7 @@
 
 공개 페이지는 `G-SEG94KMT1H` Google tag를 한 번만 로드하고 SPA route 변경을
 `page_view`로 전송합니다. `/admin`, `/dashboard`, `/login`, `/account`,
-`/overlay`는 측정하지 않으며 query와 hash도 전송하지 않습니다.
+query와 hash도 전송하지 않습니다.
 
 Consent Mode v2의 `analytics_storage`, `ad_storage`, `ad_user_data`,
 `ad_personalization`은 기본 `denied`입니다. 따라서 기본 상태에서는 분석·광고
@@ -46,7 +46,7 @@ DNS 방식을 사용하는 동안 `google-site-verification` 메타 태그나 `g
 공개 페이지의 `<head>`에서는 `ca-pub-7880271953912430`용 AdSense loader를
 한 번만 생성합니다. SPA 이동 시에도 공개 LoL·Palworld·YORO Bot·커뮤니티
 경로를 동일하게 지원하며 `/login`, `/account`, `/dashboard`, `/admin`,
-`/overlay`에는 광고 loader를 추가하지 않습니다.
+비공개 경로에는 광고 loader를 추가하지 않습니다.
 
 광고 태그를 불러오기 전에 Consent Mode v2의 `ad_storage`, `ad_user_data`,
 `ad_personalization`, `analytics_storage`를 `denied`로 설정하고 광고 데이터
@@ -65,7 +65,7 @@ AdSense 콘솔에서 CMP가 게시되고 실제 동의 신호가 연결되기 �
 송출 준비가 완료된 것으로 판단하지 않습니다.
 
 AdSense Auto ads를 활성화할 때도 콘솔의 URL 제외 규칙에 `/login`, `/account`,
-`/dashboard`, `/admin`, `/overlay`를 등록합니다.
+`/dashboard`, `/admin`을 등록합니다.
 
 ## 배포 후 확인
 

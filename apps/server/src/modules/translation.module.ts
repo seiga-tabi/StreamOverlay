@@ -13,7 +13,7 @@ export const translationModule: BotModule = {
       const translated = `[번역 필요] ${event.message}`;
       ctx.logger.translation({ userName: event.chatterUserName, original: event.message, translated, sourceLanguage: "ja", targetLanguage: "ko" });
       await ctx.actions.dispatchOne(
-        { type: "overlay.banner", message: `🇯🇵 ${event.chatterUserName}: ${translated}`, durationMs: 6000, variant: "info" },
+        { type: "twitch.chat", message: `@${event.chatterUserName} ${translated}` },
         { streamerId: event.broadcasterUserId },
         "translation.chat"
       );

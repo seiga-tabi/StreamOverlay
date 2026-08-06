@@ -68,8 +68,6 @@ test("production 설정 도구는 secret을 노출하지 않고 검증된 파일
       "NODE_ENV=development",
       "PUBLIC_BASE_URL=http://localhost:3000",
       "DASHBOARD_AUTH_TOKEN=change-me",
-      "OVERLAY_ACCESS_TOKEN=",
-      "BRIDGE_SHARED_SECRET=dev-secret-change-me",
       completeLegalConfig()
     ].join("\n"),
     "utf8"
@@ -80,11 +78,7 @@ test("production 설정 도구는 secret을 노출하지 않고 검증된 파일
 
   const text = await readFile(envFile, "utf8");
   const values = parseEnv(text);
-  const secrets = [
-    values.get("DASHBOARD_AUTH_TOKEN"),
-    values.get("OVERLAY_ACCESS_TOKEN"),
-    values.get("BRIDGE_SHARED_SECRET")
-  ];
+  const secrets = [values.get("DASHBOARD_AUTH_TOKEN")];
   assert.ok(secrets.every((value) => typeof value === "string" && value.length >= 32));
   assert.equal(new Set(secrets).size, secrets.length);
   for (const secret of secrets) {
@@ -99,7 +93,7 @@ test("production 설정 도구는 법적 운영정보가 미완료이면 원본�
   if (await skipWhenPalworldExternalSecretIsRequired(context)) return;
   const directory = await mkdtemp(path.join(os.tmpdir(), "yoro-runtime-invalid-"));
   const envFile = path.join(directory, ".env");
-  const original = "NODE_ENV=development\nOVERLAY_ACCESS_TOKEN=\n";
+  const original = "NODE_ENV=development\nDASHBOARD_AUTH_TOKEN=\n";
   await writeFile(envFile, original, "utf8");
 
   const result = runConfigure(envFile, ["--write"]);

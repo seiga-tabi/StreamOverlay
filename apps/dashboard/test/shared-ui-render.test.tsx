@@ -468,7 +468,7 @@ test("LoL 홈은 공통 LIVE rail로 기존 스트리머 카드와 전체 보기
   assert.match(html, /public-game-home__live-strip/u);
   assert.match(html, /class="public-game-home__picture"/u);
   assert.match(html, /\/images\/public-home\/lol\/mobile\.[a-f0-9]{16}\.avif/u);
-  assert.match(html, /public-game-home__eyebrow[\s\S]*전적 검색/u);
+  assert.doesNotMatch(html, /public-game-home__eyebrow/u);
   assert.match(html, /<h1 id="public-lol-home-title"[\s\S]*YORO\.gg<\/h1>/u);
   assert.match(html, /LoL Streamer/u);
   assert.match(html, /public-home-live-card--preview/u);
@@ -489,7 +489,7 @@ test("LoL 홈은 공통 LIVE rail로 기존 스트리머 카드와 전체 보기
   assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-card > \.public-home-live-action\s*\{[\s\S]*?margin:\s*0/u);
   assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-pill\.yoro-status\s*\{[\s\S]*?position:\s*static;[\s\S]*?grid-row:\s*1/u);
   assert.match(homeCss, /\.public-game-home__hero:has\(\.public-suggestion-panel\),\s*\.public-game-home__hero:has\(\.palworld-autocomplete\)\s*\{[\s\S]*?z-index:\s*var\(--yoro-z-dropdown\)/u);
-  assert.match(homeCss, /@media \(max-width:\s*72rem\)\s*\{[\s\S]*?\.public-game-home__hero-grid:not\(\.public-game-home__hero-grid--centered\)/u);
+  assert.match(homeCss, /@media \(max-width:\s*64rem\)\s*\{[\s\S]*?\.public-game-home__hero-grid:not\(\.public-game-home__hero-grid--centered\)/u);
   assert.ok(
     html.indexOf("public-game-home__hero") < html.indexOf("public-game-home__live-strip")
       && html.indexOf("public-game-home__live-strip") < html.indexOf("YORO.gg에서 참여해보세요")

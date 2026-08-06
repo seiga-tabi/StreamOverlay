@@ -4,9 +4,7 @@ import { gzipSync } from "node:zlib";
 
 const budgets = [
   { name: "dashboard JS chunk", dir: "apps/dashboard/dist/assets", ext: ".js", max: 520_000, mode: "largest" },
-  { name: "dashboard CSS gzip total", dir: "apps/dashboard/dist/assets", ext: ".css", max: 180_000, mode: "gzip-total" },
-  { name: "overlay JS total", dir: "apps/overlay/dist/assets", ext: ".js", max: 230_000, mode: "total" },
-  { name: "overlay CSS total", dir: "apps/overlay/dist/assets", ext: ".css", max: 80_000, mode: "total" }
+  { name: "dashboard CSS gzip total", dir: "apps/dashboard/dist/assets", ext: ".css", max: 180_000, mode: "gzip-total" }
 ];
 
 let failed = false;
@@ -68,7 +66,7 @@ if (!fs.existsSync(dashboardHtml)) {
   if (initialBytes > initialMax || initialGzipBytes > initialGzipMax) failed = true;
 }
 
-const imageRoots = ["apps/dashboard/public", "apps/overlay/public"];
+const imageRoots = ["apps/dashboard/public"];
 let largestImage = 0;
 let largestMapImage = 0;
 for (const root of imageRoots) {

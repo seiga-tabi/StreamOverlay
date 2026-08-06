@@ -3,8 +3,7 @@
   "environment": "development",
   "public": {
     "baseUrl": "http://localhost:3000",
-    "dashboardOrigin": "http://localhost:3000",
-    "overlayOrigin": "http://localhost:3000"
+    "dashboardOrigin": "http://localhost:3000"
   },
   "features": {
     "database": false,

@@ -1,7 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const dashboardPort = 4173;
-const overlayPort = 4174;
 const snapshotPlatform = process.platform === "darwin"
   ? "darwin"
   : process.platform === "linux"
@@ -55,18 +54,10 @@ export default defineConfig({
       }
     }
   ],
-  webServer: [
-    {
-      command: `npm --workspace apps/dashboard run dev -- --host 127.0.0.1 --port ${dashboardPort} --strictPort`,
-      url: `http://127.0.0.1:${dashboardPort}`,
-      reuseExistingServer: !process.env.CI,
-      timeout: 120_000
-    },
-    {
-      command: `npm --workspace apps/overlay run dev -- --host 127.0.0.1 --port ${overlayPort} --strictPort`,
-      url: `http://127.0.0.1:${overlayPort}`,
-      reuseExistingServer: !process.env.CI,
-      timeout: 120_000
-    }
-  ]
+  webServer: {
+    command: `npm --workspace apps/dashboard run dev -- --host 127.0.0.1 --port ${dashboardPort} --strictPort`,
+    url: `http://127.0.0.1:${dashboardPort}`,
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000
+  }
 });

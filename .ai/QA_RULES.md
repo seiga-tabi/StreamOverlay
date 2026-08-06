@@ -18,7 +18,7 @@ QA는 refactor의 마지막 단계가 아니라 각 PR의 완료 조건이다. �
 | visual regression | baseline screenshot 비교 |
 | i18n | Korean/Japanese copy와 layout |
 | performance | Performance Budget 확인 |
-| smoke test | public/dashboard/overlay 핵심 flow |
+| smoke test | public/dashboard 핵심 flow |
 | rollback test | feature flag off 또는 legacy fallback |
 
 ## 3. Smoke Test
@@ -38,14 +38,6 @@ Dashboard:
 - Twitch status
 - participation 상태
 
-Overlay:
-
-- OBS source URL 생성
-- mock preview
-- WebSocket reconnect
-- event/chat/participation/solo-rank render
-- blank frame 없음
-
 Server:
 
 - `/health`
@@ -62,8 +54,6 @@ Server:
 - 768px tablet
 - 1024px desktop
 - 1440px desktop
-- OBS 1920x1080
-- OBS 1280x720
 
 금지:
 
@@ -95,7 +85,6 @@ Server:
 - INP
 - API p95
 - memory
-- overlay first frame
 
 ## 7. Rollback Test
 
@@ -103,7 +92,6 @@ High-risk PR은 다음을 확인한다.
 
 - feature flag off 시 legacy 정상
 - legacy API endpoint 정상
-- 기존 OBS URL 정상
 - token alias revert 가능
 - Store JSON fallback 가능
 

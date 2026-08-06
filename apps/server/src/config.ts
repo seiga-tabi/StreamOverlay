@@ -183,14 +183,6 @@ const dashboardAuthToken = localNoAuth
   : configuredRuntime
     ? loadFixedSecret(YORO_SECRET_FILES.dashboardAuthToken, { required: nodeEnv === "production" })
     : envOrFile("DASHBOARD_AUTH_TOKEN");
-const overlayAccessToken = localNoAuth
-  ? ""
-  : configuredRuntime
-    ? loadFixedSecret(YORO_SECRET_FILES.overlayAccessToken, { required: nodeEnv === "production" })
-    : envOrFile("OVERLAY_ACCESS_TOKEN");
-const bridgeSharedSecret = configuredRuntime
-  ? loadFixedSecret(YORO_SECRET_FILES.bridgeSharedSecret, { required: nodeEnv === "production" })
-  : envOrFile("BRIDGE_SHARED_SECRET", "dev-secret-change-me");
 const imageBuild = imageReleaseMetadata();
 const databaseEnabled = configuredRuntime?.features.database ?? boolEnv("DATABASE_ENABLED", false);
 if (legacyEnvironmentMode && process.env.DATABASE_URL && process.env.DATABASE_URL_FILE) {
@@ -261,8 +253,6 @@ export const appConfig = {
   publicBaseUrl: configuredRuntime?.public.baseUrl ?? env("PUBLIC_BASE_URL", "http://localhost:3000"),
   dashboardBaseUrl: configuredRuntime?.public.dashboardOrigin
     ?? env("DASHBOARD_BASE_URL", "http://localhost:5173"),
-  overlayBaseUrl: configuredRuntime?.public.overlayOrigin
-    ?? env("OVERLAY_BASE_URL", "http://localhost:5174"),
   twitch: {
     enableEventSub: twitchEventSubEnabled,
     eventSubSubscriptions: configuredRuntime?.twitch?.eventSubSubscriptions
@@ -314,9 +304,6 @@ export const appConfig = {
     apiTimeoutMs: configuredRuntime
       ? DEFAULTS.twitch.apiTimeoutMs
       : Math.max(1_000, intEnv("TWITCH_API_TIMEOUT_MS", DEFAULTS.twitch.apiTimeoutMs))
-  },
-  bridge: {
-    sharedSecret: bridgeSharedSecret
   },
   database: {
     enabled: databaseEnabled,
@@ -431,10 +418,7 @@ export const appConfig = {
     config: path.resolve(serverRoot, "config"),
     dashboardStatic: configuredRuntime
       ? runtimePath("/app/apps/dashboard/dist", path.resolve(projectRoot, "apps", "dashboard", "dist"))
-      : env("DASHBOARD_STATIC_DIR", path.resolve(projectRoot, "apps", "dashboard", "dist")),
-    overlayStatic: configuredRuntime
-      ? runtimePath("/app/apps/overlay/dist", path.resolve(projectRoot, "apps", "overlay", "dist"))
-      : env("OVERLAY_STATIC_DIR", path.resolve(projectRoot, "apps", "overlay", "dist"))
+      : env("DASHBOARD_STATIC_DIR", path.resolve(projectRoot, "apps", "dashboard", "dist"))
   },
   logging: {
     maxBytes: configuredRuntime
@@ -486,19 +470,14 @@ export const appConfig = {
     corsOrigins: configuredRuntime
       ? Array.from(new Set([
           configuredRuntime.public.baseUrl,
-          configuredRuntime.public.dashboardOrigin,
-          configuredRuntime.public.overlayOrigin
+          configuredRuntime.public.dashboardOrigin
         ].filter((value): value is string => Boolean(value))))
-      : listEnv("CORS_ORIGINS", "http://localhost:3000 http://localhost:5173 http://localhost:5174"),
+      : listEnv("CORS_ORIGINS", "http://localhost:3000 http://localhost:5173"),
     dashboardAuthToken,
-    overlayAccessToken,
     dashboardSessionTtlMs: configuredRuntime
       ? DEFAULTS.dashboardSessionTtlMs
       : intEnv("DASHBOARD_SESSION_TTL_MS", DEFAULTS.dashboardSessionTtlMs),
-    trustProxy: configuredRuntime ? nodeEnv === "production" : boolEnv("TRUST_PROXY", false),
-    allowLegacyWsQueryAuth: configuredRuntime
-      ? false
-      : boolEnv("ALLOW_LEGACY_WS_QUERY_AUTH", false)
+    trustProxy: configuredRuntime ? nodeEnv === "production" : boolEnv("TRUST_PROXY", false)
   }
 };
 
@@ -718,8 +697,7 @@ function validateDiscordBotInternalConfig(errors: string[]): void {
     appConfig.discordSaas.clientSecret,
     appConfig.discordSaas.tokenEncryptionKey,
     appConfig.twitch.tokenEncryptionKey,
-    appConfig.security.dashboardAuthToken,
-    appConfig.bridge.sharedSecret
+    appConfig.security.dashboardAuthToken
   ]) {
     if (other && config.authKey && secretsEqual(config.authKey, other)) {
       errors.push("Discord Bot 내부 인증 key는 다른 credential과 재사용할 수 없습니다.");
@@ -919,14 +897,9 @@ export function validateRuntimeConfig(): RuntimeConfigValidationResult {
     validateBuildMetadata(errors);
     if (appConfig.allowInsecureDev) errors.push("ALLOW_INSECURE_DEV는 production에서 사용할 수 없습니다.");
     if (appConfig.security.localNoAuthRequested) errors.push("STREAMOPS_LOCAL_NO_AUTH는 production에서 사용할 수 없습니다.");
-    if (appConfig.security.allowLegacyWsQueryAuth) errors.push("ALLOW_LEGACY_WS_QUERY_AUTH는 production에서 사용할 수 없습니다.");
     validateSecret(errors, "DASHBOARD_AUTH_TOKEN", appConfig.security.dashboardAuthToken);
-    validateSecret(errors, "OVERLAY_ACCESS_TOKEN", appConfig.security.overlayAccessToken);
-    validateSecret(errors, "BRIDGE_SHARED_SECRET", appConfig.bridge.sharedSecret);
     const secrets: Array<[string, string]> = [
       ["DASHBOARD_AUTH_TOKEN", appConfig.security.dashboardAuthToken],
-      ["OVERLAY_ACCESS_TOKEN", appConfig.security.overlayAccessToken],
-      ["BRIDGE_SHARED_SECRET", appConfig.bridge.sharedSecret],
       ["TWITCH_TOKEN_ENCRYPTION_KEY", appConfig.twitch.tokenEncryptionKey],
       ...(appConfig.supportMailbox.enabled
         ? [
@@ -944,7 +917,6 @@ export function validateRuntimeConfig(): RuntimeConfigValidationResult {
     }
     validateHttpsUrl(errors, "PUBLIC_BASE_URL", appConfig.publicBaseUrl);
     validateHttpsUrl(errors, "DASHBOARD_BASE_URL", appConfig.dashboardBaseUrl);
-    validateHttpsUrl(errors, "OVERLAY_BASE_URL", appConfig.overlayBaseUrl);
     validateHttpsUrl(errors, "TWITCH_REDIRECT_URI", appConfig.twitch.redirectUri);
     validateHttpsUrl(errors, "TWITCH_PUBLIC_REDIRECT_URI", appConfig.twitch.publicRedirectUri);
     validateCorsOrigins(errors);

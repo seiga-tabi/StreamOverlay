@@ -1,12 +1,10 @@
 import {
   newId,
   nowIso,
+  type ParticipationMode,
   type ParticipationPhase,
-  type ParticipationPublicQueueEntry,
-  type ParticipationSnapshotStatus,
   type ParticipationState
 } from "@streamops/shared";
-import type { ActionDispatcher } from "../core/action-dispatcher.js";
 import type { JsonlLogger } from "../logging/jsonl-logger.js";
 import type { Store } from "./store.js";
 
@@ -18,14 +16,12 @@ export type ParticipationTrace = {
 
 type ParticipationSnapshotPublisherInput = {
   store: Store;
-  actions: ActionDispatcher;
-  logger?: Partial<Pick<JsonlLogger, "event" | "error">>;
+  logger?: Partial<Pick<JsonlLogger, "event">>;
 };
 
 type PublishParticipationSnapshotOptions = {
   message?: string;
-  mode?: ParticipationSnapshotStatus["mode"];
-  nextCandidate?: ParticipationPublicQueueEntry;
+  mode?: ParticipationMode;
   phase?: ParticipationPhase;
   reason: string;
   streamerId?: string;
@@ -68,30 +64,6 @@ export async function publishParticipationSnapshot(
   const sessionId = state.session?.sessionId ?? `legacy:${streamerId}`;
   const phase = options.phase ?? inferredPhase(state);
   const emittedAt = nowIso();
-  const status = {
-    isOpen: state.isOpen,
-    mode: options.mode,
-    phase,
-    message: options.message,
-    nextCandidate: options.nextCandidate
-      ?? input.store.getNextWaitingParticipationOverlayEntry(options.streamerId),
-    streamerProfile: input.store.getParticipationStreamerProfile(options.streamerId)
-  };
-  const queue = input.store.getParticipationOverlaySnapshotQueue(undefined, options.streamerId);
-
-  await input.actions.dispatchOne({
-    type: "overlay.participationSnapshot",
-    streamerId,
-    sessionId,
-    revision,
-    status,
-    queue,
-    emittedAt,
-    traceId: trace.traceId,
-    source: options.reason
-  }, { user: "dashboard", input: "" }, options.reason);
-
-  const broadcastAt = nowIso();
   const completedAt = nowIso();
   input.logger?.event?.({
     type: "participation.snapshot_trace",
@@ -103,44 +75,13 @@ export async function publishParticipationSnapshot(
     requestReceivedAt: trace.requestReceivedAt,
     riotResolvedAt: trace.riotResolvedAt,
     persistedAt,
-    broadcastAt,
+    emittedAt,
+    phase,
+    isOpen: state.isOpen,
+    mode: options.mode,
+    message: options.message,
     completedAt,
     durationMs: elapsedMs(trace.requestReceivedAt, completedAt)
   });
 
-  // 원자적 snapshot을 먼저 전송한 뒤 구형 호환 메시지는 서로 병렬로 완료한다.
-  const legacyResults = await Promise.allSettled([
-    input.actions.dispatchOne({
-      type: "overlay.participationStatus",
-      streamerId,
-      sessionId,
-      revision,
-      ...status,
-      source: options.reason
-    }, { user: "dashboard", input: "" }, options.reason),
-    input.actions.dispatchOne({
-      type: "overlay.participationQueue",
-      streamerId,
-      sessionId,
-      revision,
-      isOpen: state.isOpen,
-      queue,
-      source: options.reason
-    }, { user: "dashboard", input: "" }, options.reason)
-  ]);
-  const legacyFailure = legacyResults.find(
-    (result): result is PromiseRejectedResult => result.status === "rejected"
-  );
-  if (legacyFailure) {
-    input.logger?.error?.({
-      type: "participation.legacy_overlay_broadcast_failed",
-      traceId: trace.traceId,
-      streamerId,
-      revision,
-      reason: options.reason,
-      error: legacyFailure.reason instanceof Error
-        ? legacyFailure.reason.message
-        : String(legacyFailure.reason)
-    });
-  }
 }

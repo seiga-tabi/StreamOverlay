@@ -1,11 +1,11 @@
 import { Suspense, useEffect, useState } from "react";
 import {
   checkDashboardAuthToken,
+  getDashboardSnapshot,
   getDashboardAuthStatus,
   logoutDashboardSession,
   type DashboardAuthStatus
 } from "./api/client";
-import { connectDashboardSocket } from "./api/socket";
 import { Layout } from "./components/Layout";
 import { LoginPage } from "./components/LoginPage";
 import { applyDashboardLocale, dashboardI18n, detectDashboardLocale, setDashboardLocale as saveDashboardLocale, type DashboardLocale } from "./i18n";
@@ -56,7 +56,7 @@ const CommunityModerationPage = lazyNamed(
 );
 
 const initialSnapshot = {
-  status: { server: "offline", twitch: "disabled", stream: "unknown", bridge: "disconnected", obs: "unknown", participation: "closed" },
+  status: { server: "offline", twitch: "disabled", stream: "unknown", participation: "closed" },
   events: [],
   actions: [],
   participationQueue: [],
@@ -207,9 +207,21 @@ export default function App() {
 
   useEffect(() => {
     if (surface !== "admin" || authState !== "authenticated") return undefined;
-    return connectDashboardSocket((message) => {
-      if (message.type === "dashboard.snapshot") setSnapshot(message);
-    });
+    let cancelled = false;
+    const refresh = async () => {
+      try {
+        const nextSnapshot = await getDashboardSnapshot();
+        if (!cancelled) setSnapshot(nextSnapshot);
+      } catch {
+        // 일시적인 API 오류에는 마지막으로 확인한 상태를 유지합니다.
+      }
+    };
+    void refresh();
+    const timer = window.setInterval(() => void refresh(), 5_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
   }, [surface, authState]);
 
   useEffect(() => {

@@ -17,12 +17,17 @@ export type DashboardStreamerInfo = {
   twitchProfileImageUrl?: string;
   riotGameName: string;
   riotTagLine: string;
-  overlaySlug?: string;
-  overlayKey?: string;
   profileLinkUrl?: string;
   profileLinkLabel?: string;
   profileLinks?: DashboardStreamerProfileLink[];
   dashboardEnabled?: boolean;
+};
+
+export type DashboardSnapshot = {
+  type: "dashboard.snapshot";
+  status: unknown;
+  events: unknown[];
+  actions: unknown[];
 };
 
 export type DashboardAuthStatus = {
@@ -138,6 +143,15 @@ export async function logoutDashboardSession(): Promise<void> {
     headers: { "Content-Type": "application/json", ...surfaceHeaders(), ...csrfHeaders() },
     body: "{}"
   });
+}
+
+export async function getDashboardSnapshot(): Promise<DashboardSnapshot> {
+  const [status, events, actions] = await Promise.all([
+    apiGet<unknown>("/api/status"),
+    apiGet<unknown[]>("/api/events/recent"),
+    apiGet<unknown[]>("/api/actions/recent")
+  ]);
+  return { type: "dashboard.snapshot", status, events, actions };
 }
 
 export async function getCommunityModeration(): Promise<CommunityModerationSnapshot> {

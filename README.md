@@ -1,124 +1,66 @@
-# StreamOps Twitch Bot
+# YORO.gg 방송 자동화 서버
 
-Twitch 방송 자동화용 모듈형 프로젝트입니다. 핵심 목표는 **방송 PC 부하를 낮게 유지하면서** Twitch 이벤트, OBS 제어, 방송 오버레이, 관리자 대시보드, 롤 시참 신청, 한일 번역, Codex 자동화를 단계적으로 붙일 수 있는 구조를 만드는 것입니다.
+Twitch 이벤트, 관리자 Dashboard, LoL 시청자 참여, Palworld 정보, Discord 연동과 Codex 자동화를 제공하는 모듈형 TypeScript 프로젝트입니다.
 
-제품, 아키텍처, Sprint, 운영 문서는 [docs/README.md](docs/README.md)에서 확인할 수 있습니다.
+제품, 아키텍처와 운영 문서는 [docs/README.md](docs/README.md)에서 확인할 수 있습니다.
 
 ## 전체 구조
 
 ```text
-Twitch EventSub
-  → apps/server        # Linux 서버에서 실행
-  → action router
-  → apps/bridge        # 방송 PC에서 실행, OBS WebSocket만 제어
-  → OBS Studio
-
-apps/dashboard         # 방송자 관리자 대시보드
-apps/overlay           # OBS Browser Source용 오버레이
-packages/shared        # 공통 타입과 validation
+Twitch EventSub → apps/server
+HTTP API       → apps/dashboard
+Discord        → apps/discord-bot
+Email          → apps/email-worker
+공통 schema    → packages/shared
 ```
 
-## 포함된 기능
+서버가 제공하던 WebSocket Hub, OBS Studio 제어 Bridge와 OBS Browser Source Overlay는 제거되었습니다. Dashboard 상태 갱신은 인증된 HTTP API polling을 사용합니다. Twitch EventSub 수신에 필요한 외부 WebSocket 연결은 Twitch 연동의 일부로 유지됩니다.
 
-- Twitch EventSub WebSocket 수신 골격
-- Twitch 채팅 명령어 처리
+## 주요 기능
+
+- Twitch OAuth, EventSub와 채팅 처리
 - 채널 포인트 리워드 처리
-- 안전한 action allowlist
-- 방송 PC local bridge
-- OBS WebSocket 명령 실행
-- 대시보드 UI
-- OBS 오버레이 UI
-- 롤 시참 신청 대기열 모듈
-- 질문 큐 / 하이라이트 로그
-- 한일 번역 모듈 골격
-- Codex 방송 후 리포트 / 이벤트 제안 골격
-- config validation script
-- Codex용 프롬프트와 AGENTS.md
+- LoL 시청자 참여 대기열과 Riot profile 조회
+- Dashboard와 공개 LoL·Palworld 화면
+- Discord bot과 관리 API
+- 질문 queue, 하이라이트 log
+- allowlist 기반 action validation
+- runtime/config 검증과 운영 점검 script
 
 ## 빠른 시작
 
 ```bash
 npm install
-cp apps/bridge/.env.example apps/bridge/.env
 npm run build
 YORO_CONFIG_FILE=./config/runtime.development.json npm run dev:server
-npm run dev:bridge
 npm run dev:dashboard
-npm run dev:overlay
 ```
 
-Server의 일반 설정은 `config/runtime.development.json`을 사용합니다. 실제
-secret이 필요한 기능을 로컬에서 켤 때도 `.env`에 값을 넣지 않고 권한을
-제한한 `/run/secrets/*` 파일을 사용합니다. 기존 env 방식은 전환 기간의
-로컬 호환 경로로만 남아 있습니다.
+일반 설정은 `config/runtime.development.json`을 사용합니다. 실제 secret은 저장소에 기록하지 않고 권한이 제한된 `/run/secrets/*` 파일로 제공합니다.
 
 ## Docker/Linux 배포
 
-서버 운영 배포는 Docker Compose 단일 서버 컨테이너를 기준으로 합니다. 이 컨테이너가 API, WebSocket, Dashboard 정적 파일, Overlay 정적 파일을 함께 제공합니다.
+운영 배포는 API와 Dashboard 정적 파일을 제공하는 단일 server container를 기준으로 합니다. production은 `docker-compose.production.yml`을 함께 사용해 `/etc/yoro/runtime.json`과 서비스별 `/run/secrets/*`만 주입합니다.
 
-로컬 Compose는 기존 env 호환을 유지하지만, production은
-`docker-compose.production.yml`을 함께 사용해 `/etc/yoro/runtime.json`과
-서비스별 `/run/secrets/*`만 주입합니다. 운영 `.env`는 만들지 않습니다.
-구체적인 파일 권한과 검증 순서는 [운영 설정](docs/CONFIGURATION.md)과
-[secret 운영](docs/SECRETS.md)을 확인하세요.
-
-운영 URL 기본 구조:
+기본 URL은 다음과 같습니다.
 
 ```text
 https://bot.example.com/dashboard/
-https://bot.example.com/overlay/?mode=participation
 https://bot.example.com/api/twitch/status
 ```
 
-자세한 서버 준비, reverse proxy, OBS URL, 영구 볼륨 설명은 [docs/DEPLOYMENT_DOCKER.md](docs/DEPLOYMENT_DOCKER.md)를 확인하세요. 배포 전에는 [릴리즈 체크리스트](docs/RELEASE_CHECKLIST.md)를 통과하고 [롤백 절차](docs/ROLLBACK.md)를 준비해야 합니다. 실제 key를 예시 파일이나 커밋에 넣었다면 [secret rotation 절차](docs/SECRETS_ROTATION.md)에 따라 즉시 교체하세요.
-
-## OBS 연결
-
-OBS Studio에서 WebSocket을 켜고 비밀번호를 설정하세요.
-
-- 기본 주소: `ws://127.0.0.1:4455`
-- 비밀번호: `apps/bridge/.env`의 `OBS_WEBSOCKET_PASSWORD`와 동일하게 설정
-
-여러 방송 PC를 같은 서버에 연결할 때는 각 PC의 `apps/bridge/.env`를 다음처럼 구분합니다.
-
-```dotenv
-BRIDGE_NAME=broadcast-pc-01
-BRIDGE_STREAMER_ID=등록된_Twitch_user_ID
-```
-
-- `BRIDGE_NAME`은 PC마다 고유하게 설정합니다. 미설정하거나 빈 값이면 해당 PC의 hostname을 사용합니다.
-- `BRIDGE_STREAMER_ID`는 해당 PC가 제어할 등록 스트리머의 Twitch user ID입니다.
-- 기존 단일 PC 환경은 `BRIDGE_STREAMER_ID`를 비워도 동작합니다.
-- 여러 Bridge가 연결된 상태에서 대상 스트리머를 확인할 수 없는 OBS 명령은 다른 PC로 잘못 보내지 않고 안전하게 실패합니다.
-
-OBS Browser Source에는 overlay 개발 서버 URL을 넣습니다.
-
-```text
-http://localhost:5174
-```
-
-Docker 배포 시에는 server가 `/dashboard/`와 `/overlay/` 정적 파일을 함께 서빙합니다.
+자세한 내용은 [Docker 배포](docs/DEPLOYMENT_DOCKER.md), [릴리즈 체크리스트](docs/RELEASE_CHECKLIST.md), [롤백 절차](docs/ROLLBACK.md)를 확인하세요.
 
 ## 안전 원칙
 
-시청자 입력은 절대 다음 동작으로 이어지면 안 됩니다.
+시청자 입력은 shell command 실행, 임의 file 변경, 임의 URL 열기, 원격 방송 제어 또는 승인 없는 moderation 처벌로 이어질 수 없습니다. 허용된 action은 `packages/shared/src/actions.ts`에서 검증합니다.
 
-- shell command 실행
-- 임의 파일 쓰기/삭제
-- 임의 URL 열기
-- OBS stream key 변경
-- 원격 방송 시작/종료
-- 승인 없는 모더레이션 처벌
-
-허용된 action만 `packages/shared/src/actions.ts`에서 정의합니다.
-
-## 현재 상태
-
-이 프로젝트는 바로 확장 가능한 MVP 스캐폴드입니다. 실제 운영 전에 다음을 확인하세요.
+## 검증
 
 ```bash
+npm run lint
+npm run typecheck
 npm run build
 npm run validate:config
+npm test
 ```
-
-그리고 Twitch token, broadcaster ID, OBS scene/source 이름, Riot API key는 본인 환경에 맞게 설정해야 합니다.

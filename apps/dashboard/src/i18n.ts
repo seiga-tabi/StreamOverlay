@@ -15,7 +15,7 @@ export const dashboardI18n = {
       languageJa: "일본어",
       workspaceKicker: "Streamer Profile",
       workspaceLabel: "방송 운영 허브",
-      workspaceDescription: "Twitch 연결, 커뮤니티 반응, OBS overlay를 한 흐름에서 관리합니다.",
+      workspaceDescription: "Twitch 연결, 커뮤니티 반응, 시청자 참여를 한 흐름에서 관리합니다.",
       navGroups: {
         operations: "운영",
         overlay: "Overlay",
@@ -51,8 +51,7 @@ export const dashboardI18n = {
     dashboard: {
       eyebrow: "실시간 모니터링",
       title: "방송 운영 대시보드",
-      description: "Twitch, OBS, 브리지, 시참 상태를 한 화면에서 확인합니다.",
-      websocket: "WebSocket 상태",
+      description: "Twitch와 시청자 참여 상태를 한 화면에서 확인합니다.",
       connected: "연결됨",
       offline: "모의/오프라인",
       twitchOAuth: "OAuth",
@@ -65,8 +64,6 @@ export const dashboardI18n = {
         server: "서버",
         twitch: "Twitch",
         stream: "방송",
-        bridge: "브리지",
-        obs: "OBS",
         participation: "시참"
       }
     },
@@ -88,21 +85,6 @@ export const dashboardI18n = {
       empty: "이벤트가 없습니다.",
       count: "건"
     },
-    actionTester: {
-      title: "안전한 액션 테스트",
-      description: "허용된 action만 버튼으로 노출합니다. 임의 action 입력은 제공하지 않습니다.",
-      sent: "테스트 action 전송 완료",
-      failPrefix: "실패",
-      actions: {
-        banner: "오버레이 배너 테스트",
-        subtitle: "자막 테스트",
-        participation: "시참 대기열 테스트",
-        mission: "미션 테스트",
-        replay: "리플레이 버퍼 저장",
-        scene: "메인 씬 전환"
-      },
-      bannerMessage: "Dashboard 테스트 배너입니다."
-    },
     eventsPage: {
       title: "이벤트 로그",
       description: "수신 이벤트와 실행된 action 결과를 시간순으로 점검합니다.",
@@ -112,26 +94,6 @@ export const dashboardI18n = {
     twitchPage: {
       title: "Twitch 연결 운영",
       description: "OAuth 계정 연결, token 상태, EventSub subscription을 방송 전에 점검합니다."
-    },
-    overlayOpsPage: {
-      views: {
-        status: {
-          title: "Overlay 연결 관리",
-          description: "OBS Browser Source URL, mode별 연결 client, 최근 overlay 메시지를 확인합니다."
-        },
-        test: {
-          title: "Overlay 테스트",
-          description: "방송 전에 이벤트 배너, 자막, 질문, 미션, 시참 overlay를 안전 payload로 점검합니다."
-        },
-        rewards: {
-          title: "Reward 매핑",
-          description: "Channel point reward가 어떤 overlay action으로 이어지는지 read-only로 확인합니다."
-        },
-        alerts: {
-          title: "알림 GIF 관리",
-          description: "팔로우, 정기구독, 후원(Bits/Cheer) 알림에 사용할 GIF를 등록합니다."
-        }
-      }
     },
     followersPage: {
       title: "팔로워 관리",
@@ -210,8 +172,8 @@ export const dashboardI18n = {
       ]
     },
     settingsPage: {
-      title: "설정 / OBS URL",
-      description: "OBS Browser Source와 서버 API 연결 정보를 확인합니다.",
+      title: "시스템 설정",
+      description: "Twitch, Riot API와 서버 연결 정보를 확인합니다.",
       riotApi: {
         title: "Riot API Key",
         description: "시참 Riot ID 검증, 랭크 조회, 게임 감지를 위해 서버에 Riot API key를 저장합니다.",
@@ -244,27 +206,10 @@ export const dashboardI18n = {
           "Riot 개발용 key는 만료될 수 있으므로 만료 시 다시 저장해야 합니다."
         ]
       },
-      browserSource: "OBS Browser Source",
-      overlayUrl: "개발 환경 overlay URL",
+      runtime: "서버 연결",
       serverApi: "서버 API",
-      overlayUrls: "Overlay URLs",
-      copy: "복사",
-      copied: "복사했습니다.",
-      overlayClients: "Overlay 연결",
-      recentOverlayMessages: "최근 overlay 메시지",
-      noOverlayMessages: "최근 overlay 메시지가 없습니다.",
-      overlayModes: {
-        events: "이벤트 배너",
-        subtitles: "한일 자막",
-        questions: "질문",
-        mission: "미션",
-        participation: "시참",
-        all: "전체"
-      },
       safetyTitle: "안전 경고",
       warnings: [
-        "OBS WebSocket을 인터넷에 직접 노출하지 마세요.",
-        "stream key 변경 action을 허용하지 마세요.",
         "viewer input을 shell/file/URL에 직접 연결하지 마세요."
       ]
     }
@@ -285,7 +230,7 @@ export const dashboardI18n = {
       languageJa: "日本語",
       workspaceKicker: "Streamer Profile",
       workspaceLabel: "配信運用ハブ",
-      workspaceDescription: "Twitch 接続、コミュニティ反応、OBS overlay を一つの流れで管理します。",
+      workspaceDescription: "Twitch 接続、コミュニティ反応、視聴者参加を一つの流れで管理します。",
       navGroups: {
         operations: "運用",
         overlay: "Overlay",
@@ -321,8 +266,7 @@ export const dashboardI18n = {
     dashboard: {
       eyebrow: "リアルタイム監視",
       title: "配信運用ダッシュボード",
-      description: "Twitch、OBS、ブリッジ、参加状態を一画面で確認します。",
-      websocket: "WebSocket 状態",
+      description: "Twitch と視聴者参加の状態を一画面で確認します。",
       connected: "接続済み",
       offline: "モック/オフライン",
       twitchOAuth: "OAuth",
@@ -335,8 +279,6 @@ export const dashboardI18n = {
         server: "サーバー",
         twitch: "Twitch",
         stream: "配信",
-        bridge: "ブリッジ",
-        obs: "OBS",
         participation: "参加"
       }
     },
@@ -358,21 +300,6 @@ export const dashboardI18n = {
       empty: "イベントはありません。",
       count: "件"
     },
-    actionTester: {
-      title: "安全なアクションテスト",
-      description: "許可された action だけをボタンで表示します。任意 action 入力は提供しません。",
-      sent: "テスト action を送信しました",
-      failPrefix: "失敗",
-      actions: {
-        banner: "オーバーレイバナーテスト",
-        subtitle: "字幕テスト",
-        participation: "参加待機列テスト",
-        mission: "ミッションテスト",
-        replay: "リプレイバッファ保存",
-        scene: "メインシーン切り替え"
-      },
-      bannerMessage: "Dashboard テストバナーです。"
-    },
     eventsPage: {
       title: "イベントログ",
       description: "受信イベントと実行された action 結果を時系列で確認します。",
@@ -382,26 +309,6 @@ export const dashboardI18n = {
     twitchPage: {
       title: "Twitch 接続運用",
       description: "OAuth アカウント接続、token 状態、EventSub subscription を配信前に確認します。"
-    },
-    overlayOpsPage: {
-      views: {
-        status: {
-          title: "Overlay 接続管理",
-          description: "OBS Browser Source URL、mode 別の接続 client、最近の overlay メッセージを確認します。"
-        },
-        test: {
-          title: "Overlay テスト",
-          description: "配信前にイベントバナー、字幕、質問、ミッション、参加 overlay を安全な payload で確認します。"
-        },
-        rewards: {
-          title: "Reward マッピング",
-          description: "Channel point reward がどの overlay action につながるかを read-only で確認します。"
-        },
-        alerts: {
-          title: "通知 GIF 管理",
-          description: "フォロー、サブスク、支援(Bits/Cheer)通知に使う GIF を登録します。"
-        }
-      }
     },
     followersPage: {
       title: "フォロワー管理",
@@ -480,8 +387,8 @@ export const dashboardI18n = {
       ]
     },
     settingsPage: {
-      title: "設定 / OBS URL",
-      description: "OBS Browser Source とサーバー API の接続情報を確認します。",
+      title: "システム設定",
+      description: "Twitch、Riot API とサーバー接続情報を確認します。",
       riotApi: {
         title: "Riot API Key",
         description: "参加 Riot ID 検証、ランク取得、ゲーム検知のためにサーバーへ Riot API key を保存します。",
@@ -514,27 +421,10 @@ export const dashboardI18n = {
           "Riot 開発用 key は期限切れになるため、失効したら再保存してください。"
         ]
       },
-      browserSource: "OBS Browser Source",
-      overlayUrl: "開発環境 overlay URL",
+      runtime: "サーバー接続",
       serverApi: "サーバー API",
-      overlayUrls: "Overlay URLs",
-      copy: "コピー",
-      copied: "コピーしました。",
-      overlayClients: "Overlay 接続",
-      recentOverlayMessages: "最近の overlay メッセージ",
-      noOverlayMessages: "最近の overlay メッセージはありません。",
-      overlayModes: {
-        events: "イベントバナー",
-        subtitles: "日韓字幕",
-        questions: "質問",
-        mission: "ミッション",
-        participation: "参加",
-        all: "全体"
-      },
       safetyTitle: "安全警告",
       warnings: [
-        "OBS WebSocket をインターネットに直接公開しないでください。",
-        "stream key 変更 action を許可しないでください。",
         "viewer input を shell/file/URL に直接接続しないでください。"
       ]
     }

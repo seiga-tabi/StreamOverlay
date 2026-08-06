@@ -19,9 +19,7 @@ export const YORO_SECRET_FILES = Object.freeze({
   discordOAuthEncryptionKey: "/run/secrets/discord_oauth_encryption_key",
   discordBotToken: "/run/secrets/discord_bot_token",
   discordInternalAuthKey: "/run/discord-internal-auth/server_key",
-  bridgeSharedSecret: "/run/secrets/bridge_shared_secret",
   dashboardAuthToken: "/run/secrets/dashboard_auth_token",
-  overlayAccessToken: "/run/secrets/overlay_access_token",
   supportMailboxWebhookSecret: "/run/secrets/support_mailbox_webhook_secret",
   supportMailboxEncryptionKey: "/run/secrets/support_mailbox_encryption_key"
 });

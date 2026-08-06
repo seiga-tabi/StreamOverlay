@@ -83,7 +83,6 @@ export function PalworldHome({
     <div className="palworld-home-content">
       <PublicGameHomeHero
         description={localizedText(locale, "homeHeroDescription")}
-        eyebrow={localizedText(locale, "homeEyebrow")}
         game="palworld"
         search={(
           <PalworldSearchForm

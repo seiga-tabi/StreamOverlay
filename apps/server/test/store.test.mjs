@@ -35,7 +35,7 @@ test("Store는 질문과 하이라이트를 최근 항목으로 제한해 메모
   assert.equal(store.getHighlights().at(-1).reason, "highlight-50");
 });
 
-test("Store는 overlay 시참 대기열을 4명으로 제한하고 게임 시작 batch를 새 대기열로 갱신한다", () => {
+test("Store는 공개 시참 대기열을 4명으로 제한하고 게임 시작 batch를 새 대기열로 갱신한다", () => {
   const store = new Store();
   store.setParticipationOpen(true);
 
@@ -51,11 +51,11 @@ test("Store는 overlay 시참 대기열을 4명으로 제한하고 게임 시작
     }));
   }
 
-  assert.deepEqual(store.getParticipationOverlayQueue().map((entry) => entry.twitchUserName), ["Viewer1", "Viewer2", "Viewer3", "Viewer4"]);
+  assert.deepEqual(store.getParticipationPublicQueue().map((entry) => entry.twitchUserName), ["Viewer1", "Viewer2", "Viewer3", "Viewer4"]);
 
   const changed = store.markVisibleParticipationQueueInGame();
   assert.deepEqual(changed.map((entry) => entry.twitchUserName), ["Viewer1", "Viewer2", "Viewer3", "Viewer4"]);
-  assert.deepEqual(store.getParticipationOverlayQueue().map((entry) => `${entry.position}:${entry.twitchUserName}`), ["1:Viewer5", "2:Viewer6"]);
+  assert.deepEqual(store.getParticipationPublicQueue().map((entry) => `${entry.position}:${entry.twitchUserName}`), ["1:Viewer5", "2:Viewer6"]);
 });
 
 test("Store는 검증 중 신청을 snapshot에 표시하되 실제 참가 후보에서는 제외한다", () => {
@@ -81,14 +81,14 @@ test("Store는 검증 중 신청을 snapshot에 표시하되 실제 참가 후�
   }));
 
   assert.deepEqual(
-    store.getParticipationOverlaySnapshotQueue().map((entry) => `${entry.position}:${entry.twitchUserName}:${entry.status}`),
+    store.getParticipationPublicSnapshotQueue().map((entry) => `${entry.position}:${entry.twitchUserName}:${entry.status}`),
     ["1:PendingViewer:pending", "2:VerifiedViewer:verified"]
   );
   assert.deepEqual(
-    store.getParticipationOverlayQueue().map((entry) => `${entry.position}:${entry.twitchUserName}`),
+    store.getParticipationPublicQueue().map((entry) => `${entry.position}:${entry.twitchUserName}`),
     ["1:VerifiedViewer"]
   );
-  assert.equal(store.getNextWaitingParticipationOverlayEntry()?.twitchUserName, "VerifiedViewer");
+  assert.equal(store.getNextWaitingParticipationPublicEntry()?.twitchUserName, "VerifiedViewer");
 });
 
 test("Store는 이전 참가자의 비활성 Riot 프로필 기록을 재사용 후보로 반환한다", () => {
@@ -182,7 +182,7 @@ test("Store는 같은 트위치 유저의 이전 비활성 참가 기록을 다�
   assert.equal(result.entry.mainRole, "MIDDLE");
   assert.equal(result.entry.topChampions?.[0]?.nameKo, "아리");
   assert.equal(store.getParticipationQueue().length, 2);
-  assert.deepEqual(store.getParticipationOverlayQueue().map((entry) => entry.twitchUserName), ["Viewer2", "ViewerRenamed"]);
+  assert.deepEqual(store.getParticipationPublicQueue().map((entry) => entry.twitchUserName), ["Viewer2", "ViewerRenamed"]);
 });
 
 test("Store는 참여 운영 상태를 atomic JSON 파일에서 복원한다", async () => {
@@ -213,7 +213,7 @@ test("Store는 참여 운영 상태를 atomic JSON 파일에서 복원한다", a
   }
 });
 
-test("Store는 시청자 참여 프로필의 상위 챔피언을 오버레이 계약상 3개로 제한한다", () => {
+test("Store는 시청자 참여 프로필의 상위 챔피언을 공개 응답 계약상 3개로 제한한다", () => {
   const store = new Store();
   const topChampions = Array.from({ length: 4 }, (_, index) => ({
     championId: index + 1,
@@ -377,8 +377,6 @@ test("Store는 스트리머 Riot ID 등록 요청을 저장하고 승인 목록�
 
     const approved = store.resolveStreamerRiotIdRequest({ requestId: first.id, decision: "approved", reviewer: "dashboard" });
     assert.equal(approved?.status, "approved");
-    assert.equal(approved?.overlaySlug, "streamer");
-    assert.match(approved?.overlayKey ?? "", /^sok_/);
     assert.equal(approved?.dashboardKey, undefined);
     const dashboardApproved = store.setStreamerRiotIdDashboardEnabled({
       requestId: first.id,
@@ -387,7 +385,6 @@ test("Store는 스트리머 Riot ID 등록 요청을 저장하고 승인 목록�
     });
     assert.equal(dashboardApproved?.dashboardSlug, "streamer");
     assert.match(dashboardApproved?.dashboardKey ?? "", /^sdk_/);
-    assert.notEqual(dashboardApproved?.dashboardKey, dashboardApproved?.overlayKey);
     assert.deepEqual(store.listApprovedStreamerRiotIds().map((request) => request.normalizedRiotId), ["seiga#jp1"]);
     const linked = store.updateApprovedStreamerProfileLink({
       twitchUserId: "twitch-1",

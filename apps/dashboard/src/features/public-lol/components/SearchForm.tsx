@@ -30,6 +30,7 @@ export type SearchFormLocalizedText = {
 export type SearchFormText = {
   searchServer: string;
   searchPlaceholder: SearchFormLocalizedText;
+  searchPlaceholderShort: SearchFormLocalizedText;
   clearSearch: string;
   searching: string;
   search: string;
@@ -123,13 +124,7 @@ export function SearchForm<TSuggestion extends SearchFormSuggestion>({
   const isRankingShared = variant === "rankingShared";
   const isShared = isHomeShared || isRankingShared;
   const sharedClassPrefix = isHomeShared ? "public-home-shared" : isRankingShared ? "public-ranking-shared" : "";
-  const placeholderText = isHomeShared
-    ? {
-        label: "Riot ID 입력",
-        ko: "Riot ID 입력",
-        ja: "Riot ID入力",
-      }
-    : text.searchPlaceholder;
+  const placeholderText = isHomeShared ? text.searchPlaceholderShort : text.searchPlaceholder;
   const uniqueSuggestions = useMemo(() => uniquePanelSuggestions(suggestions), [suggestions]);
   const uniqueRecentSearches = useMemo(() => uniquePanelSuggestions(recentSearches), [recentSearches]);
   const uniqueFavorites = useMemo(() => uniquePanelSuggestions(favorites), [favorites]);

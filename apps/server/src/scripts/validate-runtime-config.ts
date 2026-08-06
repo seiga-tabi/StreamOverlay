@@ -13,8 +13,6 @@ try {
     stateDir: appConfig.paths.state,
     reusedSecrets: [
       appConfig.security.dashboardAuthToken,
-      appConfig.security.overlayAccessToken,
-      appConfig.bridge.sharedSecret,
       appConfig.twitch.clientSecret,
       appConfig.twitch.userAccessToken,
       appConfig.riot.apiKey,

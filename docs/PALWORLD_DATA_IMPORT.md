@@ -209,9 +209,9 @@ Pal runtime 전환 절차는 다음과 같다.
 5. 이미지 manifest가 `partial`이면 `readyImages: 272`, `fallbackPals: 15`와 누락 Pal의 화면 fallback을 확인한다. policy가 차단되면 전체가 `blocked_by_license`로 돌아가는지도 확인한다.
 6. 이미지 manifest가 향후 `operator_acknowledged`, `partial` 또는 `ready`로 활성화되면 모든 content-hash 정적 파일을 snapshot보다 먼저 배포한다. `operator_acknowledged`와 `partial`은 권리 확인 완료를 의미하지 않는다.
 7. 첫·중간·마지막 일반종과 변종 상세 화면을 확인한다.
-8. LoL, Dashboard, Overlay와 OBS Bridge 회귀 검증을 수행한다.
+8. LoL과 Dashboard 회귀 검증을 수행한다.
 9. 문제가 있으면 Pal API만 503으로 격리하고 artifact와 이미지 manifest를 이전 검증 release로 함께 되돌린다.
 
-손상된 Palworld artifact는 `/api/palworld/*`에만 안전한 `503 PALWORLD_DATA_UNAVAILABLE`로 격리한다. 이 오류가 서버 전체 기동, `/health/ready`, LoL, Dashboard, Overlay 또는 OBS Bridge를 실패시키면 안 된다.
+손상된 Palworld artifact는 `/api/palworld/*`에만 안전한 `503 PALWORLD_DATA_UNAVAILABLE`로 격리한다. 이 오류가 서버 전체 기동, `/health/ready`, LoL 또는 Dashboard를 실패시키면 안 된다.
 
 이 절차에는 새 환경 변수가 필요하지 않다. 실제 `.env`와 예제 환경 파일을 데이터 반입 경로로 사용하지 않는다.

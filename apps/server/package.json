@@ -19,7 +19,6 @@
     "db:audit": "tsx src/scripts/database-audit.ts",
     "test:database": "node --test test-database/database-integration.test.mjs",
     "migrate:twitch-token-encryption": "tsx src/scripts/migrate-twitch-token-encryption.ts",
-    "migrate:remove-tts-config": "tsx src/scripts/migrate-remove-tts-config.ts",
     "migrate:remove-tournament-state": "tsx src/scripts/remove-retired-tournament-state.ts",
     "fetch:palworld-data": "tsx src/scripts/fetch-palworld-paldex.ts",
     "generate:palworld-data": "tsx src/scripts/generate-palworld-paldex.ts",

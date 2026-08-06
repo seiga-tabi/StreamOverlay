@@ -12,9 +12,7 @@
 분석 대상:
 - Linux server가 Twitch EventSub 이벤트를 수신합니다.
 - server가 action router를 통해 안전한 명령만 생성합니다.
-- broadcast PC local bridge가 OBS WebSocket으로 OBS를 제어합니다.
-- dashboard는 서버 상태, 이벤트 로그, 질문 큐, 액션 테스트, Codex 제안을 보여줍니다.
-- overlay는 OBS Browser Source로 띄우며 이벤트 배너, 자막, 질문 큐, 미션 보드, 롤 시참 대기열을 표시합니다.
+- dashboard는 인증된 HTTP API로 서버 상태, 이벤트 로그, 질문 큐와 Codex 제안을 보여줍니다.
 
 핵심 안전 규칙:
 시청자에 의해 트리거되는 이벤트는 절대로 다음 동작으로 이어지면 안 됩니다:
@@ -35,7 +33,7 @@
 ## 4. 핵심 위험 요소
 | 심각도 | 영역 | 문제 | 왜 중요한가 | 추천 수정안 |
 ## 5. 보안 분석
-## 6. Twitch / OBS 연동 분석
+## 6. Twitch 연동 분석
 ## 7. 모듈성 및 유지보수성
 ## 8. Config 및 Schema 추천
 ## 9. Logging / Observability 추천

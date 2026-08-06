@@ -45,7 +45,7 @@ PR 리뷰는 코드 스타일보다 제품 안정성, 아키텍처 일관성, �
 - CSS 증가가 budget 이내인가?
 - image/media budget을 지켰는가?
 - API response size와 p95 latency가 악화되지 않았는가?
-- overlay first frame이 안전한가?
+- 핵심 public/dashboard 화면의 첫 렌더링이 안전한가?
 
 ## 7. i18n 확인
 
@@ -53,7 +53,7 @@ PR 리뷰는 코드 스타일보다 제품 안정성, 아키텍처 일관성, �
 - 한국어/일본어 copy가 함께 있는가?
 - key naming이 일관적인가?
 - 날짜/시간/숫자 포맷이 locale 기준인가?
-- Riot ID, Twitch, OBS 등 고유명사를 임의 번역하지 않았는가?
+- Riot ID, Twitch 등 고유명사를 임의 번역하지 않았는가?
 
 ## 8. 접근성 확인
 
@@ -84,4 +84,3 @@ PR 리뷰는 코드 스타일보다 제품 안정성, 아키텍처 일관성, �
 4. 성능/번들 regression
 5. 유지보수성
 6. 스타일/명명
-

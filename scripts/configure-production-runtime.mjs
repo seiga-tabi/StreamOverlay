@@ -17,14 +17,13 @@ const weakSecretPatterns = [
   "dev-secret",
   "test-secret"
 ];
-const baseSecretNames = ["DASHBOARD_AUTH_TOKEN", "OVERLAY_ACCESS_TOKEN", "BRIDGE_SHARED_SECRET"];
+const baseSecretNames = ["DASHBOARD_AUTH_TOKEN"];
 const sanitizedRuntimePrefixes = [
   "ALLOW_",
   "CORS_",
   "DASHBOARD_",
   "LEGAL_",
   "NODE_ENV",
-  "OVERLAY_",
   "PUBLIC_BASE_URL",
   "STREAMOPS_LOCAL_NO_AUTH",
   "SUPPORT_MAILBOX_",
@@ -183,11 +182,9 @@ async function main() {
     ["NODE_ENV", "production"],
     ["STREAMOPS_LOCAL_NO_AUTH", "false"],
     ["ALLOW_INSECURE_DEV", "false"],
-    ["ALLOW_LEGACY_WS_QUERY_AUTH", "false"],
     ["TRUST_PROXY", "true"],
     ["PUBLIC_BASE_URL", publicBaseUrl],
     ["DASHBOARD_BASE_URL", `${publicBaseUrl}/dashboard`],
-    ["OVERLAY_BASE_URL", `${publicBaseUrl}/overlay`],
     ["TWITCH_REDIRECT_URI", `${publicBaseUrl}/api/twitch/auth/callback`],
     ["TWITCH_PUBLIC_REDIRECT_URI", `${publicBaseUrl}/api/public/twitch/auth/callback`],
     ["CORS_ORIGINS", publicBaseUrl]

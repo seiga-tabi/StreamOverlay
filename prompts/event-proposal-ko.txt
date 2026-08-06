@@ -9,16 +9,12 @@
 - Twitch custom reward title은 45자 이하로 유지하세요.
 - 모든 이벤트에는 cooldownMs와 maxPerStream을 포함하세요.
 - action type은 다음 중 하나만 사용하세요:
-  - overlay.banner
-  - overlay.subtitle
-  - overlay.question
-  - overlay.mission
-  - obs.showSource
-  - obs.hideSource
-  - obs.saveReplayBuffer
   - twitch.chat
   - queue.question
   - log.highlight
+  - participation.open
+  - participation.close
+  - noop
 - 다음 action은 절대 생성하지 마세요:
   - shell.exec
   - file.delete

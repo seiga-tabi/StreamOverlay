@@ -20,7 +20,7 @@ import { PublicHeaderMenu } from "./PublicHeaderMenu";
 import { PublicLocaleSelector } from "./PublicLocaleSelector";
 
 function isRegisteredStreamerRequest(request: StreamerRiotIdRequest | undefined): request is StreamerRiotIdRequest {
-  return request?.status === "approved" && Boolean(request.overlaySlug && request.overlayKey);
+  return request?.status === "approved";
 }
 
 export type PublicAppHeaderProps = {

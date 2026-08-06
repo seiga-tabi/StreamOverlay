@@ -9,7 +9,6 @@ import { storeParticipationRepository } from "../services/participation-reposito
 import { publishParticipationSnapshot as publishAtomicParticipationSnapshot } from "../services/participation-snapshot.js";
 import type { ActionDispatcher } from "../core/action-dispatcher.js";
 import {
-  OVERLAY_CHANNELS,
   TWITCH_PUBLIC_VIEWER_SCOPES,
   PALWORLD_SERVER_AVAILABILITY_ERROR_CODES,
   PALWORLD_SERVER_DIAGNOSTIC_KEYS,
@@ -70,7 +69,6 @@ import {
   type PalworldPalSpawnResponse,
   type DashboardServerStatus,
   type FollowerManagementResponse,
-  type OverlayStatus,
   type StreamerProfileLink,
   type StreamerRiotIdentity,
   type StreamerRiotIdRequest,
@@ -121,16 +119,6 @@ import { buildRankHistory, inferMainRoleFromMatches, performanceStatsFromMatches
 import type { JsonlLogger } from "../logging/jsonl-logger.js";
 import { SafeDatabaseError } from "../database/errors.js";
 import type { SupportMailboxFilter, SupportMailboxStore } from "../services/support-mailbox-store.js";
-import {
-  ALERT_OVERLAY_KEYS,
-  alertAssetRoot,
-  isAlertOverlayKey,
-  isSafeAlertMediaUrl,
-  listAlertGifAssets,
-  loadAlertOverlayConfig,
-  saveAlertOverlayPreset,
-  type AlertOverlayKey
-} from "../services/alert-overlay-config.js";
 import {
   DashboardSessionStore,
   authenticateDashboardRequest,
@@ -231,7 +219,6 @@ import {
 } from "../security/discord-internal-auth.js";
 
 const MAX_JSON_BODY_BYTES = 1_000_000;
-const MAX_ALERT_GIF_BYTES = 5_000_000;
 const MAX_COMMUNITY_IMAGE_BYTES = 5_000_000;
 const MAX_INBOUND_EMAIL_WEBHOOK_BYTES = 250_000;
 const MAX_SUPPORT_MAIL_TEXT_LENGTH = 100_000;
@@ -1059,16 +1046,6 @@ function originFromUrl(value: string): string | undefined {
   }
 }
 
-function wsOriginFor(value: string): string {
-  try {
-    const url = new URL(value);
-    url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
-    return url.origin;
-  } catch {
-    return "'self'";
-  }
-}
-
 function headerFirstValue(value: string | string[] | undefined): string | undefined {
   const raw = Array.isArray(value) ? value[0] : value;
   return raw?.split(",")[0]?.trim();
@@ -1151,7 +1128,6 @@ function trustedPublicOriginForRequest(req: IncomingMessage): string {
     [
       appConfig.publicBaseUrl,
       appConfig.dashboardBaseUrl,
-      appConfig.overlayBaseUrl,
       appConfig.twitch.publicRedirectUri,
       ...appConfig.security.corsOrigins
     ]
@@ -1160,10 +1136,6 @@ function trustedPublicOriginForRequest(req: IncomingMessage): string {
   );
   const requestedOrigin = requestOrigin(req);
   return requestedOrigin && allowedOrigins.has(requestedOrigin) ? requestedOrigin : fallback;
-}
-
-function wsBaseForOrigin(origin: string): string {
-  return origin.replace(/^https:/, "wss:").replace(/^http:/, "ws:");
 }
 
 function publicTwitchCallbackUrlForRequest(req: IncomingMessage): string {
@@ -1305,9 +1277,7 @@ function cspConnectSrcForRequest(req: IncomingMessage | undefined): string {
   return [
     "'self'",
     originFor(appConfig.publicBaseUrl),
-    wsOriginFor(appConfig.publicBaseUrl),
-    requestPublicOrigin,
-    requestPublicOrigin ? wsBaseForOrigin(requestPublicOrigin) : undefined
+    requestPublicOrigin
   ]
     .filter((value): value is string => Boolean(value))
     .filter((value, index, values) => values.indexOf(value) === index)
@@ -1317,7 +1287,7 @@ function cspConnectSrcForRequest(req: IncomingMessage | undefined): string {
 const DASHBOARD_CSP_NONCE_PLACEHOLDER = "__STREAMOPS_CSP_NONCE__";
 
 function cspForStaticApp(
-  mountPath: "/admin" | "/dashboard" | "/overlay",
+  mountPath: "/admin" | "/dashboard",
   req?: IncomingMessage,
   nonce?: string
 ): string {
@@ -1333,40 +1303,25 @@ function cspForStaticApp(
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https:",
       `connect-src ${cspConnectSrcForRequest(req)} https:`,
-      `frame-src 'self' ${originFor(appConfig.overlayBaseUrl)} https:`,
+      "frame-src 'self' https:",
       "fenced-frame-src https:",
       "frame-ancestors 'self'",
       "form-action 'self'"
     ].join("; ");
   }
-  return [
-    "default-src 'self'",
-    "base-uri 'none'",
-    "object-src 'none'",
-    "script-src 'self'",
-    "style-src 'self'",
-    "img-src 'self' data: https:",
-    "media-src 'self' https:",
-    `connect-src ${cspConnectSrcForRequest(req)}`,
-    "frame-ancestors 'self'",
-    "form-action 'none'"
-  ].join("; ");
+  return "default-src 'none'";
 }
 
 function staticSecurityHeaders(
   req: IncomingMessage,
   filePath: string,
-  mountPath?: "/admin" | "/dashboard" | "/overlay",
+  mountPath?: "/admin" | "/dashboard",
   nonce?: string
 ): Record<string, string> {
   const headers = securityHeadersForRequest(req);
   if (filePath.endsWith("index.html")) {
     const resolvedMountPath = mountPath
-      ?? (filePath.includes(`${path.sep}dashboard${path.sep}`)
-        ? "/dashboard"
-        : filePath.includes(`${path.sep}overlay${path.sep}`)
-          ? "/overlay"
-          : undefined);
+      ?? (filePath.includes(`${path.sep}dashboard${path.sep}`) ? "/dashboard" : undefined);
     if (resolvedMountPath) {
       headers["Content-Security-Policy"] = cspForStaticApp(resolvedMountPath, req, nonce);
     }
@@ -1398,17 +1353,8 @@ function dashboardRuntimeConfig(req: IncomingMessage): string {
   });
   return `window.__STREAMOPS_CONFIG__ = {
   apiBase: "",
-  wsBase: (window.location.protocol === "https:" ? "wss://" : "ws://") + window.location.host,
-  overlayBase: window.location.origin + "/overlay",
   dashboardAuthRequired: ${appConfig.security.localNoAuth ? "false" : "true"},
   legal: ${legal}
-};\n`;
-}
-
-function overlayRuntimeConfig(req: IncomingMessage): string {
-  void req;
-  return `window.__STREAMOPS_CONFIG__ = {
-  wsBase: (window.location.protocol === "https:" ? "wss://" : "ws://") + window.location.host
 };\n`;
 }
 
@@ -1759,13 +1705,6 @@ function communityImageExtension(file: MultipartPart): "png" | "jpg" | "gif" | "
 function multipartText(parts: MultipartPart[], name: string): string | undefined {
   const part = parts.find((item) => item.name === name && !item.filename);
   return part ? part.data.toString("utf8").trim() : undefined;
-}
-
-function alertConfigResponse() {
-  return {
-    keys: ALERT_OVERLAY_KEYS,
-    config: loadAlertOverlayConfig()
-  };
 }
 
 function validateParticipationInviteMessage(value: unknown): { ok: true; message: string } | { ok: false; error: string } {
@@ -2253,7 +2192,7 @@ async function sendStaticFile(
   res: ServerResponse,
   filePath: string,
   extraHeaders: Record<string, string> = {},
-  mountPath?: "/admin" | "/dashboard" | "/overlay",
+  mountPath?: "/admin" | "/dashboard",
   transformHtml?: (html: string) => string
 ): Promise<void> {
   try {
@@ -2346,10 +2285,10 @@ async function sendRankedEmblemAsset(
   }
 }
 
-async function sendStaticApp(req: IncomingMessage, res: ServerResponse, pathname: string, mountPath: "/admin" | "/dashboard" | "/overlay", staticDir: string): Promise<boolean> {
+async function sendStaticApp(req: IncomingMessage, res: ServerResponse, pathname: string, mountPath: "/admin" | "/dashboard", staticDir: string): Promise<boolean> {
   if (pathname !== mountPath && !pathname.startsWith(`${mountPath}/`)) return false;
   if (pathname === `${mountPath}/config.js`) {
-    const body = mountPath === "/overlay" ? overlayRuntimeConfig(req) : dashboardRuntimeConfig(req);
+    const body = dashboardRuntimeConfig(req);
     res.writeHead(200, {
       "Content-Type": "text/javascript; charset=utf-8",
       "Cache-Control": "no-store, max-age=0",
@@ -2400,28 +2339,6 @@ async function sendPublicDashboardAsset(req: IncomingMessage, res: ServerRespons
   const relativePath = PUBLIC_DASHBOARD_ASSETS.get(pathname);
   if (!relativePath) return false;
   await sendStaticFile(req, res, path.resolve(appConfig.paths.dashboardStatic, relativePath));
-  return true;
-}
-
-async function sendOverlayAlertAsset(req: IncomingMessage, res: ServerResponse, pathname: string): Promise<boolean> {
-  if (!pathname.startsWith("/alerts/")) return false;
-  const uploadPrefix = "/alerts/uploads/";
-  const root = pathname.startsWith(uploadPrefix)
-    ? path.resolve(alertAssetRoot())
-    : path.resolve(appConfig.paths.overlayStatic, "alerts");
-  const relative = decodeUrlPathSegment(pathname.slice(pathname.startsWith(uploadPrefix) ? uploadPrefix.length : "/alerts/".length));
-  if (relative === undefined) {
-    sendInvalidStaticPath(req, res);
-    return true;
-  }
-  const normalized = path.normalize(relative).replace(/^(\.\.(\/|\\|$))+/, "");
-  const candidate = path.resolve(root, normalized);
-  if (candidate !== root && !candidate.startsWith(`${root}${path.sep}`)) {
-    res.writeHead(403, { "Content-Type": "application/json; charset=utf-8", ...SECURITY_HEADERS });
-    res.end(JSON.stringify({ error: "forbidden" }));
-    return true;
-  }
-  await sendStaticFile(req, res, candidate);
   return true;
 }
 
@@ -2498,8 +2415,6 @@ type HttpHandlerInput = {
   readiness?: ReadinessCheck;
   isShuttingDown?: () => boolean;
   connectionStatus?: () => DashboardServerStatus["connections"];
-  disconnectStreamerDashboard?: (twitchUserId: string) => void;
-  overlayStatusForStreamer?: (twitchUserId: string) => OverlayStatus;
   palworldDataService?: PalworldDataService;
   palworldMapMarkerProvider?: PalworldMapMarkerProvider;
   palworldSpawnProvider?: PalworldSpawnProvider;
@@ -4156,8 +4071,6 @@ export function createHttpHandler(input: HttpHandlerInput) {
     twitchProfileImageUrl?: string;
     riotGameName: string;
     riotTagLine: string;
-    overlaySlug?: string;
-    overlayKey?: string;
     dashboardSlug?: string;
     dashboardKey?: string;
     dashboardPath?: string;
@@ -4173,8 +4086,6 @@ export function createHttpHandler(input: HttpHandlerInput) {
       twitchProfileImageUrl: request.twitchProfileImageUrl,
       riotGameName: request.riotGameName,
       riotTagLine: request.riotTagLine,
-      overlaySlug: request.overlaySlug,
-      overlayKey: request.overlayKey,
       dashboardSlug: request.dashboardSlug,
       dashboardKey: request.dashboardKey,
       dashboardPath: streamerDashboardPath(request),
@@ -7391,7 +7302,6 @@ export function createHttpHandler(input: HttpHandlerInput) {
           return;
         }
       }
-      if ((req.method === "GET" || req.method === "HEAD") && await sendOverlayAlertAsset(req, res, url.pathname)) return;
       if ((req.method === "GET" || req.method === "HEAD") && await sendCommunityAsset(req, res, url.pathname)) return;
       if (
         (req.method === "GET" || req.method === "HEAD") &&
@@ -7404,7 +7314,6 @@ export function createHttpHandler(input: HttpHandlerInput) {
       ) return;
       if ((req.method === "GET" || req.method === "HEAD") && await sendStaticApp(req, res, url.pathname, "/admin", appConfig.paths.dashboardStatic)) return;
       if ((req.method === "GET" || req.method === "HEAD") && await sendStaticApp(req, res, url.pathname, "/dashboard", appConfig.paths.dashboardStatic)) return;
-      if ((req.method === "GET" || req.method === "HEAD") && await sendStaticApp(req, res, url.pathname, "/overlay", appConfig.paths.overlayStatic)) return;
 
       if (url.pathname.startsWith("/api/")) {
         const palworldLimitGroup = url.pathname.startsWith("/api/palworld/")
@@ -9048,10 +8957,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         const uptimeSeconds = Math.max(0, Math.floor(process.uptime()));
         const memory = process.memoryUsage();
         const connections = input.connectionStatus?.() ?? {
-          http: 0,
-          dashboardWebSocket: 0,
-          overlayWebSocket: 0,
-          bridge: services.bridge === "connected"
+          http: 0
         };
         const response: DashboardServerStatus = {
           collectedAt: new Date().toISOString(),
@@ -9449,70 +9355,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
               server: status.server,
               twitch: "disabled",
               stream: "unknown",
-              bridge: "disconnected",
-              obs: "unknown",
               participation: input.store.getParticipationState(streamerId).isOpen ? "open" : "closed"
             }
           : status);
       }
-      if (req.method === "GET" && url.pathname === "/api/overlay/status") {
-        const streamerId = authenticatedStreamerOwnerId(auth.principal);
-        return sendJson(req, res, 200, streamerId
-          ? input.overlayStatusForStreamer?.(streamerId) ?? {
-              clientCount: 0,
-              clientsByChannel: Object.fromEntries(OVERLAY_CHANNELS.map((channel) => [channel, 0])),
-              recentMessages: []
-            }
-          : input.store.getOverlayStatus());
-      }
       if (req.method === "GET" && url.pathname === "/api/rewards/mappings") return sendJson(req, res, 200, getRewardMappingSummaries());
-      if (req.method === "GET" && url.pathname === "/api/alerts/config") {
-        return sendJson(req, res, 200, {
-          ...alertConfigResponse(),
-          assets: await listAlertGifAssets()
-        });
-      }
-      if (req.method === "POST" && url.pathname === "/api/alerts/config") {
-        const body = await readJsonBody<{ eventType?: unknown; mediaUrl?: unknown; mediaAlt?: unknown }>(req);
-        if (typeof body.eventType !== "string" || !isAlertOverlayKey(body.eventType)) {
-          return sendJson(req, res, 400, { error: "eventType이 허용 목록에 없습니다." });
-        }
-        if (typeof body.mediaUrl !== "string" || !isSafeAlertMediaUrl(body.mediaUrl)) {
-          return sendJson(req, res, 400, { error: "mediaUrl은 안전한 /alerts/... 경로여야 합니다." });
-        }
-        if (body.mediaAlt !== undefined && (typeof body.mediaAlt !== "string" || body.mediaAlt.length > 120)) {
-          return sendJson(req, res, 400, { error: "mediaAlt는 120자 이하 문자열이어야 합니다." });
-        }
-        await saveAlertOverlayPreset(body.eventType, {
-          mediaUrl: body.mediaUrl,
-          mediaAlt: typeof body.mediaAlt === "string" ? body.mediaAlt : `${body.eventType} alert`
-        });
-        return sendJson(req, res, 200, {
-          ...alertConfigResponse(),
-          assets: await listAlertGifAssets()
-        });
-      }
-      if (req.method === "POST" && url.pathname === "/api/alerts/assets") {
-        const parts = parseMultipartBody(req, await readRawBody(req, MAX_ALERT_GIF_BYTES + 200_000));
-        const file = parts.find((part) => part.name === "file" && part.filename);
-        if (!file) return sendJson(req, res, 400, { error: "file 필드가 필요합니다." });
-        if (file.data.byteLength < 6 || file.data.byteLength > MAX_ALERT_GIF_BYTES) {
-          return sendJson(req, res, 400, { error: "GIF 파일은 1바이트 이상 5MB 이하여야 합니다." });
-        }
-        if (!isGifBytes(file.data)) return sendJson(req, res, 400, { error: "GIF 파일만 등록할 수 있습니다." });
-        const rawEventType = multipartText(parts, "eventType") ?? "alert";
-        const eventType: AlertOverlayKey | "alert" = isAlertOverlayKey(rawEventType) ? rawEventType : "alert";
-        const fileName = `${eventType}-${Date.now()}-${crypto.randomBytes(4).toString("hex")}.gif`;
-        const root = alertAssetRoot();
-        await fs.mkdir(root, { recursive: true });
-        const filePath = path.join(root, fileName);
-        await fs.writeFile(filePath, file.data, { mode: 0o644 });
-        return sendJson(req, res, 200, {
-          fileName,
-          url: `/alerts/uploads/${fileName}`,
-          size: file.data.byteLength
-        });
-      }
       if (req.method === "GET" && url.pathname === "/api/events/recent") return sendJson(req, res, 200, input.store.recentEvents(50));
       if (req.method === "GET" && url.pathname === "/api/actions/recent") return sendJson(req, res, 200, input.store.recentActions(50));
       if (req.method === "GET" && url.pathname === "/api/questions") return sendJson(req, res, 200, input.store.getQuestions());
@@ -9808,7 +9655,6 @@ export function createHttpHandler(input: HttpHandlerInput) {
         if (!request) return sendJson(req, res, 404, { error: "등록 요청을 찾을 수 없습니다." });
         if (request.status !== "approved" || request.dashboardEnabled !== true) {
           sessions.revokeByTwitchUserId(request.twitchUserId);
-          input.disconnectStreamerDashboard?.(request.twitchUserId);
         }
         invalidatePublicLolProfileCachesForStreamer(request);
         for (const previousRequest of previousApprovedRequests) invalidatePublicLolProfileCachesForStreamer(previousRequest);
@@ -9836,7 +9682,6 @@ export function createHttpHandler(input: HttpHandlerInput) {
         if (!request) return sendJson(req, res, 404, { error: "승인된 등록 요청을 찾을 수 없습니다." });
         if (!request.dashboardEnabled) {
           sessions.revokeByTwitchUserId(request.twitchUserId);
-          input.disconnectStreamerDashboard?.(request.twitchUserId);
         }
         invalidatePublicLolProfileCachesForStreamer(request);
         return sendJson(req, res, 200, { request, requests: listStreamerRiotIdRequests() });
@@ -10017,12 +9862,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         if (role === "unknown") return sendJson(req, res, 400, { error: "허용되지 않은 role입니다." });
         const updated = input.store.setParticipationRequestedRole(body.entryId, role, compatibilityStreamerId);
         if (!updated) return sendJson(req, res, 404, { error: "시참 entry를 찾을 수 없습니다." });
-        await input.actions.dispatchOne({
-          type: "overlay.participationQueue",
-          streamerId: compatibilityStreamerId,
-          isOpen: input.store.getParticipationState(compatibilityStreamerId).isOpen,
-          queue: input.store.getParticipationOverlayQueue(undefined, compatibilityStreamerId)
-        }, {}, "dashboard.role_override");
+        await input.store.flushRuntimeState();
         return sendJson(req, res, 200, input.store.getParticipationState(compatibilityStreamerId));
       }
 
@@ -10034,13 +9874,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         }
         const updated = input.store.markParticipant(body.entryId.trim(), body.status as ParticipationStatus, compatibilityStreamerId);
         if (!updated) return sendJson(req, res, 404, { error: "시참 entry를 찾을 수 없습니다." });
-        await input.actions.dispatchOne({
-          type: "overlay.participationQueue",
-          streamerId: compatibilityStreamerId,
-          isOpen: input.store.getParticipationState(compatibilityStreamerId).isOpen,
-          queue: input.store.getParticipationOverlayQueue(undefined, compatibilityStreamerId),
-          source: "dashboard.participation_entry_status"
-        }, { user: "dashboard", input: "" }, "dashboard.participation_entry_status");
+        await input.store.flushRuntimeState();
         return sendJson(req, res, 200, input.store.getParticipationState(compatibilityStreamerId));
       }
 

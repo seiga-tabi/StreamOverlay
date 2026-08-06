@@ -1,6 +1,6 @@
 # Palworld 서버 상태 운영 설정
 
-Palworld 서버 상태 기능은 Dashboard 브라우저가 전용 서버에 직접 연결하지 않도록 `apps/server`에서만 REST API를 조회합니다. OBS Bridge나 기존 서비스 secret을 사용하지 않습니다.
+Palworld 서버 상태 기능은 Dashboard 브라우저가 전용 서버에 직접 연결하지 않도록 `apps/server`에서만 REST API를 조회합니다. 다른 서비스 secret을 사용하지 않습니다.
 
 ## 고정 경로
 
@@ -96,7 +96,7 @@ Dashboard 응답은 다음 exact `registrationPolicy` metadata만 스트리머 U
 
 ## 암호화 키 자동 초기화와 보존
 
-키는 Dashboard에 저장되는 Palworld `AdminPassword`를 보호하기 위한 전용 AES key입니다. Dashboard 로그인 비밀번호나 Palworld `AdminPassword` 자체가 아닙니다. 정확히 32바이트인 base64 또는 64자리 hex 형식이어야 하며 Dashboard, Overlay, Bridge, Twitch, Riot, 지원 메일함, Cloudflare 등 다른 서비스 secret과 재사용하지 않습니다. 실제 키를 명령 출력, 로그, 문서, Git 또는 채팅에 남기지 않습니다.
+키는 Dashboard에 저장되는 Palworld `AdminPassword`를 보호하기 위한 전용 AES key입니다. Dashboard 로그인 비밀번호나 Palworld `AdminPassword` 자체가 아닙니다. 정확히 32바이트인 base64 또는 64자리 hex 형식이어야 하며 Dashboard, Twitch, Riot, 지원 메일함, Cloudflare 등 다른 서비스 secret과 재사용하지 않습니다. 실제 키를 명령 출력, 로그, 문서, Git 또는 채팅에 남기지 않습니다.
 
 최초 배포에서 암호화 state가 없을 때만 `palworld-credentials-init`가
 `crypto.randomBytes(32)`로 key를 생성합니다. 반복 실행, image 재빌드,
@@ -161,6 +161,6 @@ yoro-production_palworld_credentials`, `docker system prune --volumes`는 key를
 
 ## 장애 범위
 
-설정 파일 누락·schema 오류, allowlist 정책 누락, secret 누락·손상 또는 원격 Palworld 서버 장애는 Palworld subsystem에만 반영됩니다. LoL, Overlay, Followers, OBS Bridge와 `/health/ready`는 해당 오류 때문에 실패하지 않습니다. Dashboard에는 내부 경로나 원시 오류 대신 안전한 한국어·일본어 운영 안내만 표시됩니다.
+설정 파일 누락·schema 오류, allowlist 정책 누락, secret 누락·손상 또는 원격 Palworld 서버 장애는 Palworld subsystem에만 반영됩니다. LoL, Followers와 `/health/ready`는 해당 오류 때문에 실패하지 않습니다. Dashboard에는 내부 경로나 원시 오류 대신 안전한 한국어·일본어 운영 안내만 표시됩니다.
 
 Palworld의 평문 HTTP 서버까지 완전한 자가 등록이 필요해지더라도 중앙 서버의 public HTTP 또는 사설망 정책을 완화하지 않습니다. 해당 서버는 운영자가 승인한 exact origin과 CIDR 정책을 통해서만 연결합니다.

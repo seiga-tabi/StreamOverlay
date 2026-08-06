@@ -77,11 +77,45 @@ export function PublicHomeSearchPanel({
     />
   );
 
+  const featureCards = [
+    text.participationTitle && text.participationDescription ? (
+      <PublicHomeFeatureCard
+        key="participation"
+        description={text.participationDescription}
+        onClick={() => onPage("followJoin")}
+        title={text.participationTitle}
+      />
+    ) : null,
+    text.aramTitle && text.aramDescription ? (
+      <PublicHomeFeatureCard
+        key="aram"
+        description={text.aramDescription}
+        onClick={() => onPage("aram")}
+        title={text.aramTitle}
+      />
+    ) : null,
+    text.communityTitle && text.communityDescription ? (
+      <PublicHomeFeatureCard
+        key="community"
+        description={text.communityDescription}
+        onClick={() => onPage("communityParty")}
+        title={text.communityTitle}
+      />
+    ) : null,
+    text.streamerTitle && text.streamerDescription ? (
+      <PublicHomeFeatureCard
+        key="streamer"
+        description={text.streamerDescription}
+        onClick={() => onPage("subscriptions")}
+        title={text.streamerTitle}
+      />
+    ) : null,
+  ].filter(Boolean);
+
   return (
     <div id="public-search" className="public-home-content public-dashboard-home public-home-shared-content">
       <PublicGameHomeHero
         description={text.description}
-        eyebrow={text.eyebrow}
         game="lol"
         search={searchForm}
         title={text.title}
@@ -89,40 +123,10 @@ export function PublicHomeSearchPanel({
       <div className="public-game-home__live-strip">
         {liveContent}
       </div>
-      {text.primaryFeaturesTitle
-        && text.participationTitle
-        && text.participationDescription
-        && text.aramTitle
-        && text.aramDescription
-        && text.communityTitle
-        && text.communityDescription
-        && text.additionalFeaturesTitle
-        && text.streamerTitle
-        && text.streamerDescription ? (
+      {text.primaryFeaturesTitle && featureCards.length > 0 ? (
       <div className="public-game-home__feature-grid">
         <PublicHomeFeaturePanel className="public-game-home__feature-panel--primary" title={text.primaryFeaturesTitle}>
-          <PublicHomeFeatureCard
-            description={text.participationDescription}
-            onClick={() => onPage("followJoin")}
-            title={text.participationTitle}
-          />
-          <PublicHomeFeatureCard
-            description={text.aramDescription}
-            onClick={() => onPage("aram")}
-            title={text.aramTitle}
-          />
-          <PublicHomeFeatureCard
-            description={text.communityDescription}
-            onClick={() => onPage("communityParty")}
-            title={text.communityTitle}
-          />
-        </PublicHomeFeaturePanel>
-        <PublicHomeFeaturePanel title={text.additionalFeaturesTitle}>
-          <PublicHomeFeatureCard
-            description={text.streamerDescription}
-            onClick={() => onPage("subscriptions")}
-            title={text.streamerTitle}
-          />
+          {featureCards}
         </PublicHomeFeaturePanel>
       </div>
         ) : null}

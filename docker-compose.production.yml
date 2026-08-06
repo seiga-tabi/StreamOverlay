@@ -58,7 +58,6 @@ services:
       STREAMOPS_STATE_DIR: /app/.streamops
       STREAMOPS_REPORTS_DIR: /app/reports
       DASHBOARD_STATIC_DIR: /app/apps/dashboard/dist
-      OVERLAY_STATIC_DIR: /app/apps/overlay/dist
     depends_on:
       discord-internal-auth-init:
         condition: service_completed_successfully
@@ -75,9 +74,7 @@ services:
       - /etc/yoro/secrets/riot_api_key:/run/secrets/riot_api_key:ro
       - /etc/yoro/secrets/discord_client_secret:/run/secrets/discord_client_secret:ro
       - /etc/yoro/secrets/discord_oauth_encryption_key:/run/secrets/discord_oauth_encryption_key:ro
-      - /etc/yoro/secrets/bridge_shared_secret:/run/secrets/bridge_shared_secret:ro
       - /etc/yoro/secrets/dashboard_auth_token:/run/secrets/dashboard_auth_token:ro
-      - /etc/yoro/secrets/overlay_access_token:/run/secrets/overlay_access_token:ro
       - ./logs:/app/logs
       - ./reports:/app/reports
       - streamops_state:/app/.streamops

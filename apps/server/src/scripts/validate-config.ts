@@ -25,13 +25,6 @@ const TEMPLATE_PATTERN = /\{([a-zA-Z0-9_]+)\}/g;
 
 const VIEWER_TEMPLATE_SAFE_PATHS: Record<string, ReadonlySet<string>> = {
   "twitch.chat": new Set(["message"]),
-  "overlay.banner": new Set(["title", "message"]),
-  "overlay.subtitle": new Set(["original", "translated"]),
-  "overlay.subtitleBoost": new Set(["title", "message"]),
-  "overlay.question": new Set(["userName", "question", "translatedQuestion"]),
-  "overlay.mission": new Set(["title"]),
-  "overlay.participationStatus": new Set(["message"]),
-  "overlay.emergency": new Set(["title", "message"]),
   "queue.question": new Set(["question", "userName", "translatedQuestion"]),
   "log.highlight": new Set(["reason", "userName"]),
   noop: new Set(["note"])
@@ -74,131 +67,6 @@ function validateIntegerField(scope: string, record: Record<string, unknown>, fi
   if (record[fieldName] === undefined) return;
   if (!Number.isInteger(record[fieldName]) || typeof record[fieldName] !== "number" || record[fieldName] < 0) {
     fail(scope, `${fieldName}은 0 이상의 정수여야 합니다.`);
-  }
-}
-
-function validateDefaultOverlayBanner(scope: string, value: unknown): void {
-  if (value === undefined) return;
-  if (typeof value === "boolean") return;
-  if (!isRecord(value)) {
-    fail(scope, "defaultOverlayBanner는 boolean 또는 객체여야 합니다.");
-    return;
-  }
-
-  const allowedKeys = new Set([
-    "enabled",
-    "title",
-    "subtitle",
-    "message",
-    "variant",
-    "durationMs",
-    "mediaUrl",
-    "mediaAlt",
-    "soundUrl",
-    "soundVolume"
-  ]);
-  for (const key of Object.keys(value)) {
-    if (!allowedKeys.has(key)) fail(scope, `defaultOverlayBanner에 허용되지 않는 필드입니다: ${key}`);
-  }
-  if (value.enabled !== undefined && typeof value.enabled !== "boolean") fail(scope, "defaultOverlayBanner.enabled는 boolean이어야 합니다.");
-  if (value.title !== undefined && typeof value.title !== "string") fail(scope, "defaultOverlayBanner.title은 문자열이어야 합니다.");
-  if (value.subtitle !== undefined && typeof value.subtitle !== "string") fail(scope, "defaultOverlayBanner.subtitle은 문자열이어야 합니다.");
-  if (value.message !== undefined && typeof value.message !== "string") fail(scope, "defaultOverlayBanner.message는 문자열이어야 합니다.");
-  if (value.mediaAlt !== undefined && typeof value.mediaAlt !== "string") fail(scope, "defaultOverlayBanner.mediaAlt는 문자열이어야 합니다.");
-  if (value.variant !== undefined && !["info", "success", "warning", "danger"].includes(String(value.variant))) {
-    fail(scope, "defaultOverlayBanner.variant 값이 허용 목록에 없습니다.");
-  }
-  validateIntegerField(scope, value, "durationMs");
-  validateOverlayAssetUrl(scope, value, "mediaUrl");
-  validateOverlayAssetUrl(scope, value, "soundUrl");
-  if (value.soundVolume !== undefined && (typeof value.soundVolume !== "number" || value.soundVolume < 0 || value.soundVolume > 1)) {
-    fail(scope, "defaultOverlayBanner.soundVolume은 0 이상 1 이하 숫자여야 합니다.");
-  }
-  for (const field of ["subtitle", "mediaUrl", "mediaAlt", "soundUrl"] as const) {
-    if (typeof value[field] === "string" && hasTemplate(value[field])) {
-      fail(scope, `defaultOverlayBanner.${field}에는 viewer 템플릿을 사용할 수 없습니다.`);
-    }
-  }
-}
-
-function validateOverlayAssetUrl(scope: string, record: Record<string, unknown>, fieldName: string): void {
-  const value = record[fieldName];
-  if (value === undefined || value === "") return;
-  if (typeof value !== "string") {
-    fail(scope, `${fieldName}은 문자열이어야 합니다.`);
-    return;
-  }
-  if (value.startsWith("/alerts/")) {
-    try {
-      const decoded = decodeURIComponent(value);
-      if (!decoded.includes("..") && !decoded.includes("\\") && !decoded.includes("\0")) return;
-    } catch {
-      fail(scope, `${fieldName}은 안전한 로컬 asset 경로여야 합니다.`);
-      return;
-    }
-  }
-  try {
-    const parsed = new URL(value);
-    if (parsed.protocol === "https:") return;
-  } catch {
-    // 아래 공통 오류로 처리합니다.
-  }
-  fail(scope, `${fieldName}은 https URL 또는 /alerts/... 경로여야 합니다.`);
-}
-
-function validateAlertOverlayPreset(scope: string, value: unknown): void {
-  if (value === undefined) return;
-  if (!isRecord(value)) {
-    fail(scope, "alert overlay preset은 객체여야 합니다.");
-    return;
-  }
-
-  const allowedKeys = new Set([
-    "enabled",
-    "title",
-    "subtitle",
-    "message",
-    "variant",
-    "durationMs",
-    "mediaUrl",
-    "mediaAlt",
-    "soundUrl",
-    "soundVolume"
-  ]);
-  for (const key of Object.keys(value)) {
-    if (!allowedKeys.has(key)) fail(scope, `허용되지 않는 필드입니다: ${key}`);
-  }
-  if (value.enabled !== undefined && typeof value.enabled !== "boolean") fail(scope, "enabled는 boolean이어야 합니다.");
-  for (const field of ["title", "subtitle", "message", "mediaAlt"] as const) {
-    if (value[field] !== undefined && typeof value[field] !== "string") fail(scope, `${field}은 문자열이어야 합니다.`);
-  }
-  if (value.variant !== undefined && !["info", "success", "warning", "danger"].includes(String(value.variant))) {
-    fail(scope, "variant 값이 허용 목록에 없습니다.");
-  }
-  validateIntegerField(scope, value, "durationMs");
-  validateOverlayAssetUrl(scope, value, "mediaUrl");
-  validateOverlayAssetUrl(scope, value, "soundUrl");
-  if (value.soundVolume !== undefined && (typeof value.soundVolume !== "number" || value.soundVolume < 0 || value.soundVolume > 1)) {
-    fail(scope, "soundVolume은 0 이상 1 이하 숫자여야 합니다.");
-  }
-}
-
-function validateAlertOverlayConfig(configDir: string): void {
-  const fileName = "alert-overlays.json";
-  const filePath = path.join(configDir, fileName);
-  if (!fs.existsSync(filePath)) {
-    fail(fileName, `config 파일이 없습니다: ${filePath}`);
-    return;
-  }
-  const parsed = readJson(filePath, fileName);
-  if (!isRecord(parsed)) {
-    fail(fileName, "최상위 JSON은 객체여야 합니다.");
-    return;
-  }
-  const allowedKeys = new Set(["defaults", "follow", "cheer", "subscription", "subscriptionMessage", "raid"]);
-  for (const key of Object.keys(parsed)) {
-    if (!allowedKeys.has(key)) fail(fileName, `허용되지 않는 alert preset입니다: ${key}`);
-    validateAlertOverlayPreset(`${fileName}:${key}`, parsed[key]);
   }
 }
 
@@ -308,7 +176,6 @@ function collectRewardGroups(fileName: string, parsed: unknown): ActionGroup[] {
     if (value.name !== undefined && typeof value.name !== "string") fail(scope, "name은 문자열이어야 합니다.");
     validateIntegerField(scope, value, "cooldownMs");
     validateIntegerField(scope, value, "maxPerStream");
-    validateDefaultOverlayBanner(scope, value.defaultOverlayBanner);
     if (!Array.isArray(value.actions)) {
       fail(scope, "actions는 배열이어야 합니다.");
       continue;
@@ -328,10 +195,6 @@ function validateViewerTemplateUse(scope: string, actionIndex: number, action: u
     const fieldScope = `${scope} action #${actionIndex}`;
     if (field.path === "type") {
       fail(fieldScope, "action.type에는 템플릿을 사용할 수 없습니다.");
-      continue;
-    }
-    if (actionType.startsWith("obs.")) {
-      fail(fieldScope, `viewer 템플릿은 obs.* action 필드에 사용할 수 없습니다: ${field.path}`);
       continue;
     }
     if (!allowedPaths.has(field.path)) {
@@ -392,7 +255,6 @@ for (const spec of specs) {
 }
 
 validateLolParticipationConfig(configDir);
-validateAlertOverlayConfig(configDir);
 validatePalworldServerStatusConfig(configDir);
 
 if (failures.length > 0) {

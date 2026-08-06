@@ -27,7 +27,7 @@ import type { PageHeaderLayout, PageHeaderProps } from "./shared/ui";
   </PageHeaderDescription>
   <PageHeaderStatus>준비 완료</PageHeaderStatus>
   <PageHeaderActions>
-    <Button variant="primary">OBS 열기</Button>
+    <Button variant="primary">설정 열기</Button>
   </PageHeaderActions>
 </PageHeader>
 ```

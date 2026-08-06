@@ -31,12 +31,9 @@ function runConfigValidation(envPatch, dotenvMode = 0o600) {
     BUILD_TIME: "2026-07-27T07:35:19Z",
     PUBLIC_BASE_URL: "https://bot.example.com",
     DASHBOARD_BASE_URL: "https://bot.example.com",
-    OVERLAY_BASE_URL: "https://bot.example.com/overlay",
     TWITCH_REDIRECT_URI: "https://bot.example.com/api/twitch/auth/callback",
     CORS_ORIGINS: "https://bot.example.com",
     DASHBOARD_AUTH_TOKEN: strongSecret("dashboard"),
-    OVERLAY_ACCESS_TOKEN: strongSecret("overlay"),
-    BRIDGE_SHARED_SECRET: strongSecret("bridge"),
     TWITCH_TOKEN_ENCRYPTION_KEY: strongEncryptionKey(4),
     LEGAL_OPERATOR_NAME: "Yoro Individual Service Operator",
     LEGAL_CONTACT_ADDRESS: "1-2-3 Chiyoda, Tokyo, Japan",
@@ -94,9 +91,7 @@ function runConfigSnapshot(envPatch) {
           nodeEnv: appConfig.nodeEnv,
           localNoAuth: appConfig.security.localNoAuth,
           dashboardAuthRequired: !appConfig.security.localNoAuth,
-          dashboardTokenConfigured: Boolean(appConfig.security.dashboardAuthToken),
-          overlayAuthRequired: Boolean(appConfig.security.overlayAccessToken),
-          bridgeSecret: appConfig.bridge.sharedSecret
+          dashboardTokenConfigured: Boolean(appConfig.security.dashboardAuthToken)
         }));
       })
       .catch((error) => {
@@ -361,20 +356,17 @@ test("Discord Bot 관리 기능은 Database·Discord SaaS와 정확한 callback�
   assert.doesNotMatch(unsafeCallback.stdout, /attacker\.example/u);
 });
 
-test("production 설정은 약한 secret, http URL, wildcard CORS를 거부하고 secret 값을 출력하지 않는다", () => {
+test("production 설정은 http URL과 wildcard CORS를 거부한다", () => {
   const result = runConfigValidation({
-    BRIDGE_SHARED_SECRET: "dev-secret-change-me",
     PUBLIC_BASE_URL: "http://localhost:3000",
     TWITCH_REDIRECT_URI: "http://localhost:3000/api/twitch/auth/callback",
     CORS_ORIGINS: "*"
   });
 
   assert.equal(result.status, 2);
-  assert.match(result.stdout, /BRIDGE_SHARED_SECRET/);
   assert.match(result.stdout, /PUBLIC_BASE_URL/);
   assert.match(result.stdout, /TWITCH_REDIRECT_URI/);
   assert.match(result.stdout, /CORS_ORIGINS/);
-  assert.doesNotMatch(result.stdout, /dev-secret-change-me/);
 });
 
 test("secret은 *_FILE에서 읽을 수 있고 직접 값과 동시에 설정하면 실패한다", () => {
@@ -451,12 +443,11 @@ test("DATABASE_URL과 DATABASE_URL_FILE 동시 설정을 secret 노출 없이 �
   assert.doesNotMatch(result.stderr, /private-user|private-password/u);
 });
 
-test("local no-auth mode는 dashboard와 overlay token 입력을 요구하지 않는다", () => {
+test("local no-auth mode는 dashboard token 입력을 요구하지 않는다", () => {
   const result = runConfigSnapshot({
     NODE_ENV: "development",
     STREAMOPS_LOCAL_NO_AUTH: "true",
-    DASHBOARD_AUTH_TOKEN: strongSecret("dashboard_local"),
-    OVERLAY_ACCESS_TOKEN: strongSecret("overlay_local")
+    DASHBOARD_AUTH_TOKEN: strongSecret("dashboard_local")
   });
 
   assert.equal(result.status, 0, result.stderr);
@@ -464,9 +455,7 @@ test("local no-auth mode는 dashboard와 overlay token 입력을 요구하지 �
     nodeEnv: "development",
     localNoAuth: true,
     dashboardAuthRequired: false,
-    dashboardTokenConfigured: false,
-    overlayAuthRequired: false,
-    bridgeSecret: "dev-secret-change-me"
+    dashboardTokenConfigured: false
   });
 });
 
@@ -474,8 +463,7 @@ test("development 기본값은 dashboard 인증을 요구하고 token 미설정 
   const result = runConfigSnapshot({
     NODE_ENV: "development",
     STREAMOPS_LOCAL_NO_AUTH: "false",
-    DASHBOARD_AUTH_TOKEN: undefined,
-    OVERLAY_ACCESS_TOKEN: undefined
+    DASHBOARD_AUTH_TOKEN: undefined
   });
 
   assert.equal(result.status, 0, result.stderr);
@@ -483,8 +471,6 @@ test("development 기본값은 dashboard 인증을 요구하고 token 미설정 
     nodeEnv: "development",
     localNoAuth: false,
     dashboardAuthRequired: true,
-    dashboardTokenConfigured: false,
-    overlayAuthRequired: false,
-    bridgeSecret: "dev-secret-change-me"
+    dashboardTokenConfigured: false
   });
 });

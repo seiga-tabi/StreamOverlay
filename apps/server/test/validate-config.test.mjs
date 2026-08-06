@@ -18,10 +18,6 @@ function makeConfigDir(chatCommands) {
   writeJson(path.join(dir, "reward-actions.json"), {});
   writeJson(path.join(dir, "stream-events.json"), {});
   writeJson(path.join(dir, "chat-commands.json"), chatCommands);
-  writeJson(path.join(dir, "alert-overlays.json"), {
-    defaults: { durationMs: 5000, soundVolume: 0.6 },
-    follow: { enabled: true, mediaUrl: "/alerts/follow.gif", soundUrl: "/alerts/follow.mp3" }
-  });
   writeJson(path.join(dir, "lol-participation.json"), {
     enabled: true,
     showRiotIdPublicly: false,
@@ -49,7 +45,7 @@ function runValidateConfig(configDir) {
   });
 }
 
-test("config validator는 viewer 템플릿이 OBS action으로 흐르는 설정을 거부한다", () => {
+test("config validator는 제거된 OBS action을 거부한다", () => {
   const dir = makeConfigDir({
     "!bad": [
       {
@@ -62,7 +58,7 @@ test("config validator는 viewer 템플릿이 OBS action으로 흐르는 설정�
   try {
     const result = runValidateConfig(dir);
     assert.notEqual(result.status, 0);
-    assert.match(result.stderr, /viewer 템플릿은 obs\.\* action 필드에 사용할 수 없습니다/);
+    assert.match(result.stderr, /금지된 action type입니다: obs\.setScene/);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

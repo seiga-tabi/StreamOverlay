@@ -45,7 +45,6 @@ git tag -a "rollback/v${VERSION}" "${PREVIOUS_GOOD_GIT_SHA}" -m "Rollback point 
 
 - [ ] Riot production key 승인과 quota를 확인했다.
 - [ ] Twitch OAuth callback URL과 EventSub를 운영 계정으로 확인했다.
-- [ ] OBS Browser Source, token, test event를 staging에서 확인했다.
 - [ ] `support@yoro.gg` 송수신과 관리자 문의함 수신을 확인했다.
 - [ ] 개인정보 처리방침과 이용약관의 운영자 정보, 보관 기간, 시행일을 사람이 검토했다.
 - [ ] `ads.txt`, `robots.txt`, `sitemap.xml`의 루트 응답과 MIME을 운영 도메인에서 확인했다.

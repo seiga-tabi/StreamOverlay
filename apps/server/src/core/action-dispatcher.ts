@@ -1,210 +1,59 @@
-import type { BotAction, OverlayBannerMessage, OverlayMessage } from "@streamops/shared";
-import { isObsAction, newId, toSafeErrorMessage, validateBotAction, validateOverlayMessage } from "@streamops/shared";
-import type { BridgeManager } from "../services/bridge-manager.js";
+import type { BotAction } from "@streamops/shared";
+import { newId, toSafeErrorMessage, validateBotAction } from "@streamops/shared";
 import type { TwitchChatService } from "../services/twitch-chat-service.js";
-import type { OverlayHub } from "../services/overlay-hub.js";
 import type { ActionRecord, Store } from "../services/store.js";
 import type { JsonlLogger } from "../logging/jsonl-logger.js";
 import { renderObjectTemplates, type TemplateContext } from "./template.js";
 
 const TEMPLATE_PATTERN = /\{([a-zA-Z0-9_]+)\}/;
-const OVERLAY_COOLDOWN_MS = 1500;
 
-function hasTemplate(value: unknown): boolean {
-  if (typeof value === "string") return TEMPLATE_PATTERN.test(value);
-  if (Array.isArray(value)) return value.some((item) => hasTemplate(item));
-  if (value && typeof value === "object") return Object.values(value).some((item) => hasTemplate(item));
-  return false;
-}
-
-function validateTemplateSafety(rawAction: BotAction): string | undefined {
-  if (typeof rawAction.type === "string" && TEMPLATE_PATTERN.test(rawAction.type)) {
-    return "action.type에는 템플릿을 사용할 수 없습니다.";
-  }
-  if (isObsAction(rawAction) && hasTemplate(rawAction)) {
-    return "obs.* action에는 viewer 템플릿을 사용할 수 없습니다.";
-  }
-  return undefined;
+function validateTemplateSafety(action: BotAction): string | undefined {
+  return TEMPLATE_PATTERN.test(action.type)
+    ? "action.type에는 템플릿을 사용할 수 없습니다."
+    : undefined;
 }
 
 export class ActionDispatcher {
-  private readonly lastOverlaySentAtByKey = new Map<string, number>();
-
   constructor(
-    private readonly bridge: BridgeManager,
     private readonly twitchChat: TwitchChatService,
-    private readonly overlay: OverlayHub,
     private readonly store: Store,
-    private readonly logger: JsonlLogger,
-    private readonly onActionRecorded?: () => void
+    private readonly logger: JsonlLogger
   ) {}
 
   async dispatch(actions: BotAction[], ctx: TemplateContext = {}, reason?: string): Promise<void> {
-    for (const rawAction of actions) {
-      await this.dispatchOne(rawAction, ctx, reason);
-    }
+    for (const action of actions) await this.dispatchOne(action, ctx, reason);
   }
 
   async dispatchOne(rawAction: BotAction, ctx: TemplateContext = {}, reason?: string): Promise<void> {
     const actionId = newId("action");
     const templateSafetyError = validateTemplateSafety(rawAction);
     if (templateSafetyError) {
-      this.logger.error({ type: "action.template_blocked", action: rawAction, error: templateSafetyError });
-      this.logger.action({ id: actionId, type: String((rawAction as { type?: string }).type), status: "failed", error: templateSafetyError, reason });
-      this.recordAction({ id: actionId, type: String((rawAction as { type?: string }).type), status: "failed", error: templateSafetyError, createdAt: new Date().toISOString() });
+      this.recordFailure(actionId, rawAction, templateSafetyError, reason, "action.template_blocked");
       return;
     }
 
     const action = this.renderAction(rawAction, ctx);
     const validation = validateBotAction(action);
     if (!validation.ok) {
-      this.logger.error({ type: "action.validation_failed", action, error: validation.error });
-      this.logger.action({ id: actionId, type: String((action as { type?: string }).type), status: "failed", error: validation.error, reason });
-      this.recordAction({ id: actionId, type: String((action as { type?: string }).type), status: "failed", error: validation.error, createdAt: new Date().toISOString() });
+      this.recordFailure(actionId, action, validation.error, reason, "action.validation_failed");
       return;
     }
-    const overlayStreamerId = this.resolveOverlayStreamerId(action, ctx);
 
     try {
-      let actionStatus: ActionRecord["status"] = "ok";
-      if (isObsAction(action)) {
-        const commandId = this.bridge.send(action, reason, this.resolveBridgeStreamerId(ctx));
-        this.logger.action({ id: actionId, type: action.type, status: "sent_to_bridge", commandId, reason });
-        this.recordAction({ id: actionId, type: action.type, status: "ok", createdAt: new Date().toISOString() });
-        return;
-      }
-
+      let status: ActionRecord["status"] = "ok";
+      const streamerId = typeof ctx.streamerId === "string" && ctx.streamerId.trim()
+        ? ctx.streamerId.trim()
+        : undefined;
       switch (action.type) {
         case "twitch.chat":
           await this.twitchChat.sendChatMessage(action.message, { reason });
           break;
-        case "overlay.banner": {
-          const message: OverlayBannerMessage = {
-            type: "overlay.banner",
-            streamerId: overlayStreamerId,
-            title: action.title,
-            subtitle: action.subtitle,
-            message: action.message,
-            durationMs: action.durationMs,
-            variant: action.variant,
-            source: action.source ?? reason,
-            eventKind: action.eventKind,
-            mediaUrl: action.mediaUrl,
-            mediaAlt: action.mediaAlt,
-            soundUrl: action.soundUrl,
-            soundVolume: action.soundVolume
-          };
-          actionStatus = this.broadcastOverlay(message);
-          break;
-        }
-        case "overlay.subtitle":
-          actionStatus = this.broadcastOverlay({
-            type: "subtitle.update",
-            streamerId: overlayStreamerId,
-            sourceLanguage: action.sourceLanguage,
-            targetLanguage: action.targetLanguage,
-            original: action.original,
-            translated: action.translated,
-            isFinal: action.isFinal ?? true,
-            durationMs: action.durationMs,
-            variant: action.variant,
-            source: action.source ?? reason
-          });
-          break;
-        case "overlay.subtitleBoost":
-          actionStatus = this.broadcastOverlay({ type: "subtitle.boost", streamerId: overlayStreamerId, title: action.title, message: action.message, durationMs: action.durationMs, variant: action.variant, source: action.source ?? reason });
-          break;
-        case "overlay.question":
-          actionStatus = this.broadcastOverlay({ type: "question.show", streamerId: overlayStreamerId, userName: action.userName, question: action.question, translatedQuestion: action.translatedQuestion, durationMs: action.durationMs, variant: action.variant, source: action.source ?? reason });
-          break;
-        case "overlay.mission":
-          actionStatus = this.broadcastOverlay({ type: "mission.update", streamerId: overlayStreamerId, title: action.title, missions: action.missions, durationMs: action.durationMs, variant: action.variant, source: action.source ?? reason });
-          break;
-        case "overlay.participationQueue":
-          actionStatus = this.broadcastOverlay({
-            type: "participation.queue.update",
-            streamerId: overlayStreamerId,
-            sessionId: action.sessionId,
-            revision: action.revision,
-            isOpen: action.isOpen,
-            queue: action.queue,
-            durationMs: action.durationMs,
-            variant: action.variant,
-            source: action.source ?? reason
-          });
-          break;
-        case "overlay.participationStatus":
-          actionStatus = this.broadcastOverlay({
-            type: "participation.status.update",
-            streamerId: overlayStreamerId,
-            sessionId: action.sessionId,
-            revision: action.revision,
-            isOpen: action.isOpen,
-            mode: action.mode,
-            phase: action.phase,
-            message: action.message,
-            nextCandidate: action.nextCandidate,
-            streamerProfile: action.streamerProfile,
-            durationMs: action.durationMs,
-            variant: action.variant,
-            source: action.source ?? reason
-          });
-          break;
-        case "overlay.participationSnapshot":
-          actionStatus = this.broadcastOverlay({
-            type: "participation.snapshot.update",
-            streamerId: overlayStreamerId ?? action.streamerId,
-            sessionId: action.sessionId,
-            revision: action.revision,
-            status: action.status,
-            queue: action.queue,
-            emittedAt: action.emittedAt,
-            traceId: action.traceId,
-            durationMs: action.durationMs,
-            variant: action.variant,
-            source: action.source ?? reason
-          });
-          break;
-        case "overlay.participationSelected":
-          actionStatus = this.broadcastOverlay({
-            type: "participation.selected.show",
-            streamerId: overlayStreamerId,
-            twitchUserName: action.twitchUserName,
-            preferredRole: action.preferredRole,
-            checkInSeconds: action.checkInSeconds,
-            profileStatus: action.profileStatus,
-            mainRole: action.mainRole,
-            mainRoleConfidence: action.mainRoleConfidence,
-            topChampions: action.topChampions,
-            rankedStats: action.rankedStats,
-            durationMs: action.durationMs,
-            variant: action.variant,
-            source: action.source ?? reason
-          });
-          break;
-        case "overlay.participationTeams":
-          actionStatus = this.broadcastOverlay({ type: "participation.teams.update", streamerId: overlayStreamerId, teams: action.teams, durationMs: action.durationMs, variant: action.variant, source: action.source ?? reason });
-          break;
-        case "overlay.soloRankProfile":
-          actionStatus = this.broadcastOverlay({
-            type: "solo-rank.profile.update",
-            streamerId: overlayStreamerId,
-            profile: action.profile,
-            region: action.region,
-            queueLabel: action.queueLabel,
-            ladderRank: action.ladderRank,
-            durationMs: action.durationMs,
-            variant: action.variant,
-            source: action.source ?? reason
-          });
-          break;
-        case "overlay.emergency":
-          actionStatus = this.broadcastOverlay(action.active === false
-            ? { type: "emergency.clear", streamerId: overlayStreamerId, durationMs: action.durationMs, variant: action.variant, source: action.source ?? reason }
-            : { type: "emergency.show", streamerId: overlayStreamerId, title: action.title, message: action.message, durationMs: action.durationMs, variant: action.variant ?? "danger", source: action.source ?? reason });
-          break;
         case "queue.question": {
-          const question = this.store.addQuestion({ userName: action.userName ?? "unknown", question: action.question, translatedQuestion: action.translatedQuestion });
+          const question = this.store.addQuestion({
+            userName: action.userName ?? "unknown",
+            question: action.question,
+            translatedQuestion: action.translatedQuestion
+          });
           this.logger.question(question as unknown as Record<string, unknown>);
           break;
         }
@@ -214,153 +63,48 @@ export class ActionDispatcher {
           break;
         }
         case "participation.open":
-          if (overlayStreamerId && this.store.getParticipationSession(overlayStreamerId)?.status === "completed") {
-            this.logger.event({
-              type: "participation.open_ignored",
-              reason: "completed_session",
-              streamerId: overlayStreamerId
-            });
-            actionStatus = "skipped";
-            break;
+          if (streamerId && this.store.getParticipationSession(streamerId)?.status === "completed") {
+            this.logger.event({ type: "participation.open_ignored", reason: "completed_session", streamerId });
+            status = "skipped";
+          } else {
+            this.store.setParticipationOpen(true, streamerId);
           }
-          this.store.setParticipationOpen(true, overlayStreamerId);
-          actionStatus = this.broadcastOverlay({ type: "overlay.banner", streamerId: overlayStreamerId, title: "参加募集", message: "参加募集を開始しました。", variant: "success", durationMs: 5000, source: reason });
-          this.broadcastOverlay({
-            type: "participation.status.update",
-            streamerId: overlayStreamerId,
-            isOpen: true,
-            mode: action.mode,
-            phase: "recruiting",
-            message: "롤 시참 모집 중",
-            streamerProfile: this.store.getParticipationStreamerProfile(overlayStreamerId),
-            source: reason
-          });
-          this.broadcastOverlay({
-            type: "participation.queue.update",
-            streamerId: overlayStreamerId,
-            isOpen: true,
-            queue: this.store.getParticipationOverlayQueue(undefined, overlayStreamerId),
-            source: reason
-          });
           break;
         case "participation.close":
-          this.store.setParticipationOpen(false, overlayStreamerId);
-          actionStatus = this.broadcastOverlay({ type: "overlay.banner", streamerId: overlayStreamerId, title: "시참 모집", message: "롤 시참 모집을 종료합니다.", variant: "info", durationMs: 5000, source: reason });
-          this.broadcastOverlay({
-            type: "participation.status.update",
-            streamerId: overlayStreamerId,
-            isOpen: false,
-            phase: "closed",
-            message: "롤 시참 모집 종료",
-            streamerProfile: this.store.getParticipationStreamerProfile(overlayStreamerId),
-            source: reason
-          });
-          this.broadcastOverlay({
-            type: "participation.queue.update",
-            streamerId: overlayStreamerId,
-            isOpen: false,
-            queue: this.store.getParticipationOverlayQueue(undefined, overlayStreamerId),
-            source: reason
-          });
+          this.store.setParticipationOpen(false, streamerId);
           break;
         case "noop":
           break;
       }
-      this.logger.action({ id: actionId, type: action.type, status: actionStatus, reason });
-      this.recordAction({ id: actionId, type: action.type, status: actionStatus, createdAt: new Date().toISOString() });
+      this.logger.action({ id: actionId, type: action.type, status, reason });
+      this.store.addAction({ id: actionId, type: action.type, status, createdAt: new Date().toISOString() });
     } catch (error) {
-      const safeError = toSafeErrorMessage(error);
-      this.logger.error({ type: "action.dispatch_failed", action, error: safeError });
-      this.logger.action({ id: actionId, type: action.type, status: "failed", error: safeError, reason });
-      this.recordAction({ id: actionId, type: action.type, status: "failed", error: safeError, createdAt: new Date().toISOString() });
+      this.recordFailure(actionId, action, toSafeErrorMessage(error), reason, "action.dispatch_failed");
     }
   }
 
   private renderAction(rawAction: BotAction, ctx: TemplateContext): BotAction {
     if (rawAction.type === "twitch.chat") {
-      return {
-        ...rawAction,
-        message: this.twitchChat.renderMessageTemplate(rawAction.message, ctx)
-      };
+      return { ...rawAction, message: this.twitchChat.renderMessageTemplate(rawAction.message, ctx) };
     }
     return renderObjectTemplates(rawAction, ctx) as BotAction;
   }
 
-  private resolveOverlayStreamerId(action: BotAction, ctx: TemplateContext): string | undefined {
-    if (typeof ctx.streamerId === "string" && ctx.streamerId.trim()) {
-      return ctx.streamerId.trim();
-    }
-    if ("streamerId" in action && typeof action.streamerId === "string" && action.streamerId.trim()) {
-      return action.streamerId.trim();
-    }
-    return undefined;
-  }
-
-  private resolveBridgeStreamerId(ctx: TemplateContext): string | undefined {
-    return typeof ctx.streamerId === "string" && ctx.streamerId.trim()
-      ? ctx.streamerId.trim()
-      : undefined;
-  }
-
-  private broadcastOverlay(message: OverlayMessage): ActionRecord["status"] {
-    const validation = validateOverlayMessage(message);
-    if (!validation.ok) {
-      this.logger.error({ type: "overlay.message_invalid", error: validation.error, messageType: message.type, source: message.source });
-      throw new Error(`Overlay message validation failed: ${message.type}`);
-    }
-
-    const bypassCooldown = message.type === "participation.snapshot.update";
-    const cooldownKey = this.overlayCooldownKey(message);
-    const now = Date.now();
-    const lastSentAt = this.lastOverlaySentAtByKey.get(cooldownKey) ?? 0;
-    if (!bypassCooldown && now - lastSentAt < OVERLAY_COOLDOWN_MS) {
-      this.logger.event({ type: "overlay.cooldown_skipped", messageType: message.type, source: message.source });
-      return "skipped";
-    }
-
-    if (!this.overlay.broadcast(message)) throw new Error(`Overlay message validation failed: ${message.type}`);
-    if (!bypassCooldown) this.lastOverlaySentAtByKey.set(cooldownKey, now);
-    return "ok";
-  }
-
-  private overlayCooldownKey(message: OverlayMessage): string {
-    const streamerScope = "streamerId" in message && typeof message.streamerId === "string" && message.streamerId.trim()
-      ? `streamer:${message.streamerId.trim()}`
-      : "global";
-    if (message.type === "participation.queue.update") {
-      const queueKey = message.queue
-        .map((entry) => [
-          entry.position,
-          entry.twitchUserName,
-          entry.status,
-          entry.preferredRole ?? "",
-          entry.profileStatus ?? "",
-          entry.mainRole ?? ""
-        ].join(":"))
-        .join("|");
-      return `${streamerScope}:${message.type}:${message.source ?? ""}:${message.isOpen ?? ""}:${queueKey}`;
-    }
-    if (message.type === "participation.status.update") {
-      const nextCandidateKey = message.nextCandidate
-        ? `${message.nextCandidate.position}:${message.nextCandidate.twitchUserName}:${message.nextCandidate.status}`
-        : "";
-      return `${streamerScope}:${message.type}:${message.source ?? ""}:${message.isOpen}:${message.phase ?? ""}:${message.message ?? ""}:${nextCandidateKey}`;
-    }
-    if (message.type === "participation.teams.update") {
-      const teamKey = [
-        message.teams.a.map((player) => `${player.twitchUserName}:${player.preferredRole ?? ""}`).join(","),
-        message.teams.b.map((player) => `${player.twitchUserName}:${player.preferredRole ?? ""}`).join(",")
-      ].join("|");
-      return `${streamerScope}:${message.type}:${message.source ?? ""}:${teamKey}`;
-    }
-    if ("message" in message && typeof message.message === "string") return `${streamerScope}:${message.type}:${message.source ?? ""}:${message.message}`;
-    if (message.type === "question.show") return `${streamerScope}:${message.type}:${message.source ?? ""}:${message.userName}:${message.question}`;
-    if (message.type === "subtitle.update") return `${streamerScope}:${message.type}:${message.source ?? ""}:${message.translated}`;
-    return `${streamerScope}:${message.type}:${message.source ?? ""}`;
-  }
-
-  private recordAction(record: ActionRecord): void {
-    this.store.addAction(record);
-    this.onActionRecorded?.();
+  private recordFailure(
+    actionId: string,
+    action: BotAction,
+    error: string,
+    reason: string | undefined,
+    eventType: string
+  ): void {
+    this.logger.error({ type: eventType, action, error });
+    this.logger.action({ id: actionId, type: action.type, status: "failed", error, reason });
+    this.store.addAction({
+      id: actionId,
+      type: action.type,
+      status: "failed",
+      error,
+      createdAt: new Date().toISOString()
+    });
   }
 }

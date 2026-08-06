@@ -13,8 +13,7 @@ const PRIVATE_PATH_PREFIXES = [
   "/account",
   "/admin",
   "/dashboard",
-  "/login",
-  "/overlay"
+  "/login"
 ] as const;
 
 type GoogleTagWindow = Window & {
@@ -36,7 +35,6 @@ export type YoroAnalyticsEventName =
   | "bot_dashboard"
   | "discord_click"
   | "lol_search"
-  | "overlay_open"
   | "pal_search"
   | "participation_join"
   | "search"
@@ -226,7 +224,6 @@ export function analyticsEventsForLink(
   if (target.origin !== currentOrigin) events.push("outbound_click");
   if (target.hostname === "discord.gg" || target.hostname === "discord.com") events.push("discord_click");
   if (target.hostname === "twitch.tv" || target.hostname.endsWith(".twitch.tv")) events.push("twitch_click");
-  if (target.origin === currentOrigin && target.pathname.startsWith("/overlay")) events.push("overlay_open");
   if (
     target.origin === currentOrigin
     && normalizedPublicPath(currentPathname).startsWith("/bot")
