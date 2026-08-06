@@ -177,3 +177,19 @@ export function updateYoroParticipationEntry(
     body: JSON.stringify({ entryId, status, ...(expectedRevision === undefined ? {} : { expectedRevision }) })
   });
 }
+
+export function selectYoroParticipationEntries(
+  entryIds: string[],
+  csrfToken: string,
+  expectedRevision?: number
+): Promise<ParticipationState> {
+  return request("/api/account/streamer/participation/entry-status", {
+    method: "POST",
+    headers: mutationHeaders(csrfToken),
+    body: JSON.stringify({
+      entryIds,
+      status: "selected",
+      ...(expectedRevision === undefined ? {} : { expectedRevision })
+    })
+  });
+}

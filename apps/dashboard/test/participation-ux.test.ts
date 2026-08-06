@@ -35,6 +35,9 @@ test("시청자 참여 화면은 직접 세션·내 상태·단계·규칙을 �
   assert.match(source, /public-participation-notification-callout/u);
   assert.match(source, /<details className="public-participation-timeline-card" open>/u);
   assert.match(source, /<ol className="public-participation-timeline">/u);
+  assert.match(source, /publicParticipationJourneyPhase/u);
+  assert.doesNotMatch(source, /labelKey: "participationStepSelected"/u);
+  assert.doesNotMatch(source, /labelKey: "participationStepCheckIn"/u);
   assert.match(source, /aria-current=\{current \? "step"/u);
   assert.match(source, /aria-current=\{item\.isViewer \? "true"/u);
   assert.match(source, /public-participation-rules-title/u);
@@ -93,9 +96,11 @@ test("스트리머 참여 화면은 공개 범위·직접 동작·그룹 대기�
   assert.match(source, /視聴者に公開/u);
   assert.match(source, /모집 중지/u);
   assert.match(source, /受付を再開/u);
-  assert.match(source, /selectedWaitingEntryId/u);
+  assert.match(source, /selectedWaitingEntryIds/u);
   assert.match(source, /type="checkbox"/u);
-  assert.match(source, /mutateEntry\(selectedWaitingEntry\.id, "selected"\)/u);
+  assert.match(source, /selectYoroParticipationEntries/u);
+  assert.match(source, /selectedWaitingEntries\.map\(\(entry\) => entry\.id\)/u);
+  assert.match(source, /currentEntries\.map\(\(entry\) => renderParticipantRow\(entry\)\)/u);
   assert.doesNotMatch(source, /mutateSession\("select_next"\)/u);
   assert.match(source, /className="is-danger"[\s\S]*?mutateSession\("finish"\)/u);
   assert.match(css, /grid-template-areas:[\s\S]*?"position participant status"[\s\S]*?"position actions actions"/u);

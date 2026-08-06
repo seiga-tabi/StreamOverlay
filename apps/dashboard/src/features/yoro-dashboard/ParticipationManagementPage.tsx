@@ -14,6 +14,7 @@ import type {
 } from "@streamops/shared";
 import {
   getYoroParticipation,
+  selectYoroParticipationEntries,
   updateYoroParticipationEntry,
   updateYoroParticipationSession,
   type ParticipationSessionAction
@@ -65,8 +66,8 @@ const copy = {
     playedCount: "참여 완료",
     close: "모집 중지",
     reopen: "모집 재개",
-    selectNext: "다음 참가자 선정",
-    selectNextHint: "검증이 완료된 대기자 한 명을 체크한 후 선정하세요.",
+    selectNext: "선택한 참가자 선정",
+    selectNextHint: "검증이 완료된 대기자를 한 명 이상 체크한 후 함께 선정하세요.",
     selectForNext: "다음 참가자로 선택",
     finishGame: "게임 종료 처리",
     finishSession: "세션 종료",
@@ -113,7 +114,8 @@ const copy = {
     sessionStarted: "참여 세션을 시작했습니다.",
     sessionUpdated: "참여 세션 상태를 변경했습니다.",
     sessionFinished: "참여 세션을 종료했습니다.",
-    entryUpdated: "참가자 상태를 변경했습니다."
+    entryUpdated: "참가자 상태를 변경했습니다.",
+    entriesSelected: "선택한 참가자를 선정했습니다."
   },
   ja: {
     eyebrow: "STREAMER PARTICIPATION",
@@ -151,8 +153,8 @@ const copy = {
     playedCount: "参加完了",
     close: "受付を停止",
     reopen: "受付を再開",
-    selectNext: "次の参加者を選出",
-    selectNextHint: "確認済みの待機者を1人選択してから選出してください。",
+    selectNext: "選択した参加者を選出",
+    selectNextHint: "確認済みの待機者を1人以上選択して、一緒に選出してください。",
     selectForNext: "次の参加者として選択",
     finishGame: "ゲーム終了処理",
     finishSession: "セッション終了",
@@ -199,7 +201,8 @@ const copy = {
     sessionStarted: "参加セッションを開始しました。",
     sessionUpdated: "参加セッションの状態を変更しました。",
     sessionFinished: "参加セッションを終了しました。",
-    entryUpdated: "参加者の状態を変更しました。"
+    entryUpdated: "参加者の状態を変更しました。",
+    entriesSelected: "選択した参加者を選出しました。"
   }
 } as const;
 
@@ -268,7 +271,7 @@ export function ParticipationManagementPage({
   const [checkInSeconds, setCheckInSeconds] = useState(60);
   const [allowRejoin, setAllowRejoin] = useState(true);
   const [listingVisibility, setListingVisibility] = useState<ParticipationListingVisibility>("public");
-  const [selectedWaitingEntryId, setSelectedWaitingEntryId] = useState("");
+  const [selectedWaitingEntryIds, setSelectedWaitingEntryIds] = useState<Set<string>>(() => new Set());
 
   const load = useCallback(async (signal?: AbortSignal) => {
     try {
@@ -306,6 +309,10 @@ export function ParticipationManagementPage({
     [state]
   );
   const currentEntry = useMemo(() => getCurrentParticipationEntry(state), [state]);
+  const currentEntries = useMemo(
+    () => state?.queue.filter((entry) => ["selected", "checked_in", "invited", "in_game"].includes(entry.status)) ?? [],
+    [state]
+  );
   const waitingEntries = useMemo(
     () => state?.queue.filter((entry) => ["pending", "verified", "waitlisted"].includes(entry.status)) ?? [],
     [state]
@@ -314,19 +321,21 @@ export function ParticipationManagementPage({
     () => state?.queue.filter((entry) => ["played", "skipped", "cancelled", "no_show", "rejected", "blocked"].includes(entry.status)) ?? [],
     [state]
   );
-  const selectedWaitingEntry = useMemo(
-    () => waitingEntries.find((entry) => (
-      entry.id === selectedWaitingEntryId
+  const selectedWaitingEntries = useMemo(
+    () => waitingEntries.filter((entry) => (
+      selectedWaitingEntryIds.has(entry.id)
       && (entry.status === "verified" || entry.status === "waitlisted")
     )),
-    [selectedWaitingEntryId, waitingEntries]
+    [selectedWaitingEntryIds, waitingEntries]
   );
 
   useEffect(() => {
-    if (selectedWaitingEntryId && !waitingEntries.some((entry) => entry.id === selectedWaitingEntryId)) {
-      setSelectedWaitingEntryId("");
-    }
-  }, [selectedWaitingEntryId, waitingEntries]);
+    const waitingIds = new Set(waitingEntries.map((entry) => entry.id));
+    setSelectedWaitingEntryIds((current) => {
+      const next = new Set(Array.from(current).filter((entryId) => waitingIds.has(entryId)));
+      return next.size === current.size ? current : next;
+    });
+  }, [waitingEntries]);
 
   async function mutateSession(
     action: ParticipationSessionAction,
@@ -370,8 +379,28 @@ export function ParticipationManagementPage({
     setMessage("");
     try {
       setState(await updateYoroParticipationEntry(entryId, status, csrfToken, state?.revision));
-      if (status === "selected") setSelectedWaitingEntryId("");
       setMessage(text.entryUpdated);
+    } catch {
+      setError(text.updateFailed);
+      void load();
+    } finally {
+      setBusyKey("");
+    }
+  }
+
+  async function selectWaitingEntries(): Promise<void> {
+    if (busyKey || selectedWaitingEntries.length === 0) return;
+    setBusyKey("entries:selected");
+    setError("");
+    setMessage("");
+    try {
+      setState(await selectYoroParticipationEntries(
+        selectedWaitingEntries.map((entry) => entry.id),
+        csrfToken,
+        state?.revision
+      ));
+      setSelectedWaitingEntryIds(new Set());
+      setMessage(text.entriesSelected);
     } catch {
       setError(text.updateFailed);
       void load();
@@ -401,9 +430,14 @@ export function ParticipationManagementPage({
           <label className="participation-management-selection">
             <input
               aria-label={`${entry.twitchUserName} ${text.selectForNext}`}
-              checked={selectedWaitingEntryId === entry.id}
+              checked={selectedWaitingEntryIds.has(entry.id)}
               disabled={Boolean(busyKey) || Boolean(currentEntry) || !state?.isOpen || !canSelect}
-              onChange={(event) => setSelectedWaitingEntryId(event.target.checked ? entry.id : "")}
+              onChange={(event) => setSelectedWaitingEntryIds((current) => {
+                const next = new Set(current);
+                if (event.target.checked) next.add(entry.id);
+                else next.delete(entry.id);
+                return next;
+              })}
               type="checkbox"
             />
             <span className="participation-management-position">#{entry.position}</span>
@@ -539,7 +573,9 @@ export function ParticipationManagementPage({
             <header>
               <h2 id="participation-current-title">{text.currentParticipant}</h2>
             </header>
-            {currentEntry ? renderParticipantRow(currentEntry) : <p className="participation-management-empty">{text.noCurrentParticipant}</p>}
+            {currentEntries.length
+              ? <div className="participation-management-group">{currentEntries.map((entry) => renderParticipantRow(entry))}</div>
+              : <p className="participation-management-empty">{text.noCurrentParticipant}</p>}
           </section>
 
           <section className="participation-management-queue" aria-labelledby="participation-queue-title">
@@ -553,11 +589,11 @@ export function ParticipationManagementPage({
                 {!currentEntry && state?.isOpen && waitingEntries.length > 0 ? (
                   <button
                     className="is-primary"
-                    disabled={Boolean(busyKey) || !selectedWaitingEntry}
-                    onClick={() => selectedWaitingEntry && void mutateEntry(selectedWaitingEntry.id, "selected")}
+                    disabled={Boolean(busyKey) || selectedWaitingEntries.length === 0}
+                    onClick={() => void selectWaitingEntries()}
                     type="button"
                   >
-                    {text.selectNext}
+                    {text.selectNext} ({selectedWaitingEntries.length})
                   </button>
                 ) : null}
               </div>

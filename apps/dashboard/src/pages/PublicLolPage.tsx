@@ -2300,16 +2300,21 @@ function publicParticipationIsActiveStatus(status: ParticipationStatus): boolean
 type PublicParticipationConfirmAction = "cancel";
 
 const PUBLIC_PARTICIPATION_PHASE_STEPS: Array<{
-  phase: ParticipationDisplayPhase;
+  phase: Extract<ParticipationDisplayPhase, "checking" | "waiting" | "playing" | "completed">;
   labelKey: PublicTextKey;
 }> = [
   { phase: "checking", labelKey: "participationStepApplication" },
   { phase: "waiting", labelKey: "participationStepWaiting" },
-  { phase: "action_required", labelKey: "participationStepSelected" },
-  { phase: "ready", labelKey: "participationStepCheckIn" },
   { phase: "playing", labelKey: "participationStepGame" },
   { phase: "completed", labelKey: "participationStepComplete" }
 ];
+
+function publicParticipationJourneyPhase(
+  phase: ParticipationDisplayPhase
+): "checking" | "waiting" | "playing" | "completed" | "ended" {
+  if (phase === "action_required" || phase === "ready") return "waiting";
+  return phase;
+}
 
 function PublicParticipationJoinPage({
   status,
@@ -2805,9 +2810,10 @@ function PublicParticipationJoinPage({
           <summary>{t().participationJourneyTitle}</summary>
             <ol className="public-participation-timeline">
               {PUBLIC_PARTICIPATION_PHASE_STEPS.map((step, index) => {
-                const currentIndex = PUBLIC_PARTICIPATION_PHASE_STEPS.findIndex((item) => item.phase === viewerPhase);
-                const complete = index < currentIndex || viewerPhase === "completed";
-                const current = step.phase === viewerPhase;
+                const journeyPhase = publicParticipationJourneyPhase(viewerPhase);
+                const currentIndex = PUBLIC_PARTICIPATION_PHASE_STEPS.findIndex((item) => item.phase === journeyPhase);
+                const complete = index < currentIndex || journeyPhase === "completed";
+                const current = step.phase === journeyPhase;
                 return (
                   <li aria-current={current ? "step" : undefined} className={`${complete ? "is-complete" : ""} ${current ? "is-current" : ""}`} key={step.phase}>
                     <span aria-hidden="true">{complete ? "✓" : current ? "●" : "○"}</span>

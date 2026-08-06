@@ -564,17 +564,28 @@ export const participationModule: BotModule = {
 
     if (settings.openByDefault) {
       const streamerId = appConfig.twitch.broadcasterId?.trim() || undefined;
-      ctx.store.setParticipationOpen(true, streamerId);
-      ctx.logger.event({ type: "participation.opened", reason: "open_by_default", streamerId });
-      void publishState(ctx, settings, {
-        message: "롤 시참 모집 중",
-        reason: "participation.open_by_default",
-        streamerId
-      }).then(() => {
-        ctx.dashboard.broadcastSnapshot();
-      }).catch((error) => {
-        ctx.logger.error({ type: "participation.publish_failed", reason: "open_by_default", error: toSafeErrorMessage(error) });
-      });
+      const completedSession = streamerId
+        ? ctx.store.getParticipationSession(streamerId)?.status === "completed"
+        : false;
+      if (completedSession) {
+        ctx.logger.event({
+          type: "participation.open_ignored",
+          reason: "completed_session",
+          streamerId
+        });
+      } else {
+        ctx.store.setParticipationOpen(true, streamerId);
+        ctx.logger.event({ type: "participation.opened", reason: "open_by_default", streamerId });
+        void publishState(ctx, settings, {
+          message: "롤 시참 모집 중",
+          reason: "participation.open_by_default",
+          streamerId
+        }).then(() => {
+          ctx.dashboard.broadcastSnapshot();
+        }).catch((error) => {
+          ctx.logger.error({ type: "participation.publish_failed", reason: "open_by_default", error: toSafeErrorMessage(error) });
+        });
+      }
     }
 
     ctx.events.on<TwitchChatMessageInternalEvent>("twitch.chatMessage", async (event) => {
@@ -595,6 +606,14 @@ export const participationModule: BotModule = {
       }
 
       if (commandKind === "open") {
+        if (ctx.store.getParticipationSession(event.broadcasterUserId)?.status === "completed") {
+          ctx.logger.event({
+            type: "participation.open_ignored",
+            reason: "completed_session",
+            streamerId: event.broadcasterUserId
+          });
+          return;
+        }
         if (isParticipationOpen(ctx, event.broadcasterUserId)) {
           ctx.logger.event({
             type: "participation.open_ignored",

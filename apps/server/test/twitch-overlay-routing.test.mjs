@@ -149,6 +149,22 @@ test("participation.open action은 시참 상태와 대기열 overlay를 함께 
   assert.deepEqual(queue.queue, []);
 });
 
+test("participation.open action은 종료된 시참 session을 다시 활성화하지 않는다", async () => {
+  const { actions, store, socket } = createHarness();
+  store.startParticipationSession(TEST_BROADCASTER_ID);
+  store.endParticipationSession(TEST_BROADCASTER_ID);
+
+  await actions.dispatchOne(
+    { type: "participation.open", mode: "normal5" },
+    { streamerId: TEST_BROADCASTER_ID },
+    "test.completed_participation_open"
+  );
+
+  assert.equal(store.getParticipationState(TEST_BROADCASTER_ID).isOpen, false);
+  assert.equal(store.getParticipationSession(TEST_BROADCASTER_ID)?.status, "completed");
+  assert.equal(socket.sent.some((message) => message.type === "participation.status.update" && message.isOpen === true), false);
+});
+
 test("DashboardHub는 스트리머별 시참 WebSocket snapshot을 격리한다", () => {
   const store = new Store();
   const dashboard = new DashboardHub(store);

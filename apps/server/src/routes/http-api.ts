@@ -4541,8 +4541,18 @@ export function createHttpHandler(input: HttpHandlerInput) {
         code: "REVISION_CONFLICT"
       });
     }
+    const currentSession = input.store.getParticipationSession(streamerId);
+    if (
+      currentSession?.status === "completed"
+      && body.action !== "start"
+      && body.action !== "finish"
+    ) {
+      throw new HttpRequestError(409, {
+        error: "종료된 시청자 참여 세션은 다시 활성화할 수 없습니다. 새 모집을 시작해 주세요.",
+        code: "SESSION_COMPLETED"
+      });
+    }
     if (body.action === "start") {
-      const currentSession = input.store.getParticipationSession(streamerId);
       if (currentSession && currentSession.status !== "completed") {
         throw new HttpRequestError(409, {
           error: "이미 진행 중인 시청자 참여 세션이 있습니다.",
@@ -4577,9 +4587,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
     bodyValue: unknown,
     allowedStatuses: ReadonlySet<ParticipationStatus> = PARTICIPATION_DASHBOARD_ENTRY_STATUSES
   ): Promise<ParticipationState> {
-    const body = strictJsonObject(bodyValue, ["entryId", "status", "expectedRevision"]);
-    if (typeof body.entryId !== "string" || !body.entryId.trim()) {
-      throw new HttpRequestError(400, { error: "entryId가 필요합니다.", code: "INVALID_ENTRY_ID" });
+    const body = strictJsonObject(bodyValue, ["entryId", "entryIds", "status", "expectedRevision"]);
+    const hasSingleEntryId = typeof body.entryId === "string" && Boolean(body.entryId.trim());
+    const hasBatchEntryIds = Array.isArray(body.entryIds);
+    if (hasSingleEntryId === hasBatchEntryIds) {
+      throw new HttpRequestError(400, { error: "entryId 또는 entryIds 중 하나가 필요합니다.", code: "INVALID_ENTRY_ID" });
     }
     if (typeof body.status !== "string" || !allowedStatuses.has(body.status as ParticipationStatus)) {
       throw new HttpRequestError(400, { error: "허용되지 않은 참가자 상태입니다.", code: "INVALID_ENTRY_STATUS" });
@@ -4598,21 +4610,36 @@ export function createHttpHandler(input: HttpHandlerInput) {
         code: "REVISION_CONFLICT"
       });
     }
-    const entryId = body.entryId.trim();
+    const entryIds = hasBatchEntryIds
+      ? Array.from(new Set((body.entryIds as unknown[]).map((entryId) => (
+        typeof entryId === "string" ? entryId.trim() : ""
+      ))))
+      : [(body.entryId as string).trim()];
+    if (
+      entryIds.length === 0
+      || entryIds.length > 100
+      || (hasBatchEntryIds && (body.entryIds as unknown[]).length > 100)
+      || entryIds.some((entryId) => !entryId)
+    ) {
+      throw new HttpRequestError(400, { error: "entryIds는 1개 이상 100개 이하의 유효한 ID여야 합니다.", code: "INVALID_ENTRY_IDS" });
+    }
+    if (hasBatchEntryIds && body.status !== "selected") {
+      throw new HttpRequestError(400, { error: "여러 참가자는 선정 상태로만 일괄 변경할 수 있습니다.", code: "INVALID_BATCH_ENTRY_STATUS" });
+    }
     const currentState = input.store.getParticipationState(streamerId);
-    const targetEntry = currentState.queue.find((entry) => entry.id === entryId);
-    if (!targetEntry) {
+    const targetEntries = entryIds.map((entryId) => currentState.queue.find((entry) => entry.id === entryId));
+    if (targetEntries.some((entry) => !entry)) {
       throw new HttpRequestError(404, { error: "시청자 참여 항목을 찾을 수 없습니다.", code: "ENTRY_NOT_FOUND" });
     }
     if (body.status === "selected") {
       if (!currentState.session || currentState.session.status !== "recruiting" || !currentState.isOpen) {
         throw new HttpRequestError(409, { error: "모집 중인 참여 세션에서만 참가자를 선정할 수 있습니다.", code: "SESSION_NOT_RECRUITING" });
       }
-      if (!["verified", "waitlisted"].includes(targetEntry.status)) {
+      if (targetEntries.some((entry) => !entry || !["verified", "waitlisted"].includes(entry.status))) {
         throw new HttpRequestError(409, { error: "검증이 완료된 대기 참가자만 선정할 수 있습니다.", code: "ENTRY_NOT_SELECTABLE" });
       }
-      const selected = input.store.selectParticipant(
-        entryId,
+      const selected = input.store.selectParticipants(
+        entryIds,
         currentState.session.checkInSeconds ?? 60,
         streamerId
       );
@@ -4620,7 +4647,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         throw new HttpRequestError(409, { error: "현재 참가자 처리가 끝난 뒤 다음 참가자를 선정해 주세요.", code: "CURRENT_PARTICIPANT_ACTIVE" });
       }
     } else {
-      input.store.markParticipant(entryId, body.status as ParticipationStatus, streamerId);
+      input.store.markParticipant(entryIds[0]!, body.status as ParticipationStatus, streamerId);
     }
     await broadcastParticipationQueue(input, "dashboard.lol_operations.entry_status", streamerId);
     return input.store.getParticipationState(streamerId);

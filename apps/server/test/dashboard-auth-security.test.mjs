@@ -1182,20 +1182,28 @@ test("승인된 방송인은 YORO Dashboard 세션으로 참여 세션과 자신
         status: "waitlisted",
         source: "dashboard"
       }), "12345");
+      const secondEntry = store.addParticipation(store.makeParticipationEntry({
+        twitchUserId: "viewer-2",
+        twitchUserName: "SecondViewer",
+        riotGameName: "SecondViewer",
+        riotTagLine: "JP1",
+        preferredRole: "mid",
+        status: "verified",
+        source: "dashboard"
+      }), "12345");
       const selectNextReq = createRequest(
         "POST",
         "/api/account/streamer/participation/entry-status",
-        { entryId: entry.id, status: "selected" },
+        { entryIds: [entry.id, secondEntry.id], status: "selected" },
         headers
       );
       const selectNextRes = createResponse();
       await handler(selectNextReq, selectNextRes);
-      assert.equal(selectNextRes.statusCode, 200);
-      assert.equal(
-        JSON.parse(selectNextRes.body).queue[0].status,
-        "selected"
-      );
-      assert.equal(typeof JSON.parse(selectNextRes.body).queue[0].checkInExpiresAt, "string");
+      assert.equal(selectNextRes.statusCode, 200, selectNextRes.body);
+      const selectedQueue = JSON.parse(selectNextRes.body).queue;
+      assert.deepEqual(selectedQueue.map((queueEntry) => queueEntry.status), ["selected", "selected"]);
+      assert.equal(typeof selectedQueue[0].checkInExpiresAt, "string");
+      assert.equal(selectedQueue[0].checkInExpiresAt, selectedQueue[1].checkInExpiresAt);
 
       const closeReq = createRequest(
         "POST",
@@ -1230,8 +1238,19 @@ test("승인된 방송인은 YORO Dashboard 세션으로 참여 세션과 자신
       assert.equal(entryRes.statusCode, 200);
       assert.equal(JSON.parse(entryRes.body).queue[0].status, "skipped");
 
+      const secondEntryReq = createRequest(
+        "POST",
+        "/api/account/streamer/participation/entry-status",
+        { entryId: secondEntry.id, status: "skipped" },
+        headers
+      );
+      const secondEntryRes = createResponse();
+      await handler(secondEntryReq, secondEntryRes);
+      assert.equal(secondEntryRes.statusCode, 200);
+      assert.equal(JSON.parse(secondEntryRes.body).queue[1].status, "skipped");
+
       const otherEntry = store.addParticipation(store.makeParticipationEntry({
-        twitchUserId: "viewer-2",
+        twitchUserId: "viewer-other",
         twitchUserName: "OtherViewer",
         riotGameName: "OtherViewer",
         riotTagLine: "JP1",
@@ -1273,6 +1292,19 @@ test("승인된 방송인은 YORO Dashboard 세션으로 참여 세션과 자신
       await handler(finishReq, finishRes);
       assert.equal(finishRes.statusCode, 200);
       assert.equal(JSON.parse(finishRes.body).state.participation.session.status, "completed");
+
+      const reopenCompletedReq = createRequest(
+        "POST",
+        "/api/account/streamer/participation/session",
+        { action: "open" },
+        headers
+      );
+      const reopenCompletedRes = createResponse();
+      await handler(reopenCompletedReq, reopenCompletedRes);
+      assert.equal(reopenCompletedRes.statusCode, 409);
+      assert.equal(JSON.parse(reopenCompletedRes.body).code, "SESSION_COMPLETED");
+      assert.equal(store.getParticipationState("12345").isOpen, false);
+      assert.equal(store.getParticipationSession("12345")?.status, "completed");
     } finally {
       appConfig.database.enabled = previousDatabaseEnabled;
     }

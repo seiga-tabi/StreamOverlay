@@ -1638,7 +1638,9 @@ export class Store {
           throw new Error("runtime 상태 파일의 tenant 프로필 또는 session이 올바르지 않습니다.");
         }
         this.participationByStreamer.set(streamerId, {
-          isOpen: runtime.isOpen === true,
+          isOpen: session?.status === "completed" || session?.status === "closed"
+            ? false
+            : runtime.isOpen === true,
           revision: normalizedNonNegativeInteger(runtime.revision),
           queue: scopedQueue,
           streamerProfile: scopedProfile ? cloneParticipationStreamerProfile(scopedProfile as ParticipationStreamerProfile) : undefined,
@@ -2479,6 +2481,7 @@ export class Store {
     if (streamerId) {
       const runtime = this.scopedParticipationRuntime(streamerId);
       if (!runtime) return;
+      if (open && runtime.session?.status === "completed") return;
       runtime.isOpen = open;
       if (open && !runtime.session) {
         const timestamp = nowIso();
@@ -2498,7 +2501,7 @@ export class Store {
       } else if (runtime.session) {
         runtime.session.status = open ? "recruiting" : "closed";
         runtime.session.updatedAt = nowIso();
-        if (!open) runtime.session.endedAt = nowIso();
+        runtime.session.endedAt = open ? undefined : nowIso();
       }
     } else {
       this.patchStatus({ participation: open ? "open" : "closed" });
@@ -2598,6 +2601,9 @@ export class Store {
   ): ParticipationSession | undefined {
     const runtime = this.scopedParticipationRuntime(streamerId, false);
     if (!runtime?.session) return undefined;
+    if (runtime.session.status === "completed" && status !== "completed") {
+      return cloneParticipationSession(runtime.session);
+    }
     runtime.session.status = status;
     runtime.session.updatedAt = nowIso();
     if (status === "recruiting") {
@@ -2629,21 +2635,35 @@ export class Store {
   }
 
   selectParticipant(entryId: string, checkInSeconds: number, streamerId?: string): ParticipationEntry | undefined {
+    return this.selectParticipants([entryId], checkInSeconds, streamerId)?.[0];
+  }
+
+  selectParticipants(entryIds: readonly string[], checkInSeconds: number, streamerId?: string): ParticipationEntry[] | undefined {
     const queue = this.participationQueueFor(streamerId);
     if (queue.some((entry) => ["selected", "checked_in", "invited", "in_game"].includes(entry.status))) {
       return undefined;
     }
-    const entry = queue.find((candidate) => (
-      candidate.id === entryId
-      && (candidate.status === "waitlisted" || candidate.status === "verified")
-    ));
-    if (!entry) return undefined;
-    entry.status = "selected";
-    entry.selectedAt = nowIso();
-    entry.checkInExpiresAt = new Date(Date.now() + checkInSeconds * 1000).toISOString();
-    entry.updatedAt = nowIso();
+    const uniqueIds = Array.from(new Set(entryIds));
+    if (uniqueIds.length === 0) return undefined;
+    const entries: ParticipationEntry[] = [];
+    for (const entryId of uniqueIds) {
+      const entry = queue.find((candidate) => (
+        candidate.id === entryId
+        && (candidate.status === "waitlisted" || candidate.status === "verified")
+      ));
+      if (!entry) return undefined;
+      entries.push(entry);
+    }
+    const selectedAt = nowIso();
+    const checkInExpiresAt = new Date(Date.now() + checkInSeconds * 1000).toISOString();
+    for (const entry of entries) {
+      entry.status = "selected";
+      entry.selectedAt = selectedAt;
+      entry.checkInExpiresAt = checkInExpiresAt;
+      entry.updatedAt = selectedAt;
+    }
     this.persistRuntimeState();
-    return entry;
+    return entries;
   }
 
   getPendingSelectedParticipant(now = new Date(), streamerId?: string): ParticipationEntry | undefined {

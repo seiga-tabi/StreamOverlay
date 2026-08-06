@@ -312,6 +312,35 @@ test("Store는 스트리머별 참여 session과 설정을 재시작 후 복원�
   }
 });
 
+test("Store는 종료된 참여 session을 기본 모집이나 상태 갱신으로 다시 활성화하지 않는다", async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "streamops-completed-participation-state-"));
+  const filePath = path.join(dir, "runtime-state.json");
+  const streamerId = "streamer-completed";
+  try {
+    const store = new Store({ runtimeStatePath: filePath });
+    store.startParticipationSession(streamerId);
+    store.endParticipationSession(streamerId);
+
+    store.setParticipationOpen(true, streamerId);
+    store.updateParticipationSessionStatus(streamerId, "recruiting");
+
+    assert.equal(store.getParticipationState(streamerId).isOpen, false);
+    assert.equal(store.getParticipationSession(streamerId)?.status, "completed");
+    await store.closeAsync();
+
+    const persistedState = JSON.parse(readFileSync(filePath, "utf8"));
+    persistedState.participationByStreamer[streamerId].isOpen = true;
+    writeFileSync(filePath, `${JSON.stringify(persistedState, null, 2)}\n`, "utf8");
+
+    const restartedStore = new Store({ runtimeStatePath: filePath });
+    assert.equal(restartedStore.getParticipationState(streamerId).isOpen, false);
+    assert.equal(restartedStore.getParticipationSession(streamerId)?.status, "completed");
+    await restartedStore.closeAsync();
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("Store는 잘못된 커뮤니티 상태 경로를 load 단계에서 차단하고 readiness에 노출한다", () => {
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-persistence-failure-"));
   const failures = [];

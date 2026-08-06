@@ -281,8 +281,8 @@ test("시청자 참여 관리 화면은 KO·JA와 세션·대기열 관리 계�
   assert.match(jaMarkup, /視聴者参加の状態を読み込んでいます/u);
   assert.match(source, /새 참여 세션/u);
   assert.match(source, /新しい参加セッション/u);
-  assert.match(source, /다음 참가자 선정/u);
-  assert.match(source, /次の参加者を選出/u);
+  assert.match(source, /선택한 참가자 선정/u);
+  assert.match(source, /選択した参加者を選出/u);
   assert.match(source, /다음 참가자로 선택/u);
   assert.match(source, /次の参加者として選択/u);
   assert.match(source, /참여 페이지 공개 범위/u);

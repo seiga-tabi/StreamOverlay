@@ -214,6 +214,15 @@ export class ActionDispatcher {
           break;
         }
         case "participation.open":
+          if (overlayStreamerId && this.store.getParticipationSession(overlayStreamerId)?.status === "completed") {
+            this.logger.event({
+              type: "participation.open_ignored",
+              reason: "completed_session",
+              streamerId: overlayStreamerId
+            });
+            actionStatus = "skipped";
+            break;
+          }
           this.store.setParticipationOpen(true, overlayStreamerId);
           actionStatus = this.broadcastOverlay({ type: "overlay.banner", streamerId: overlayStreamerId, title: "参加募集", message: "参加募集を開始しました。", variant: "success", durationMs: 5000, source: reason });
           this.broadcastOverlay({
