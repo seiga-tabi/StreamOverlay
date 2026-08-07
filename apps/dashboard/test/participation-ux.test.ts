@@ -160,3 +160,30 @@ test("모바일 공개 검색 결과는 두 항목 이후 목록 내부에서 �
   assert.match(palworldCss, /\.palworld-autocomplete[\s\S]*?max-block-size:[\s\S]*?--yoro-size-touch-target[\s\S]*?--yoro-size-touch-target[\s\S]*?overflow-y:\s*auto/u);
   assert.match(palworldCss, /\.palworld-autocomplete-copy[\s\S]*?\.palworld-autocomplete-heading strong/u);
 });
+
+test("팔로우 목록 자동 로드는 실패해도 무한 재시도하지 않는다", async () => {
+  const source = await readFile(
+    new URL("../src/pages/PublicLolPage.tsx", import.meta.url),
+    "utf8"
+  );
+
+  // 요청이 실패하면 followedLol 은 비어 있는 채로 followedLoading 만 false 가 되어
+  // effect 가 다시 조건을 통과합니다. 시도 횟수를 세지 않으면 렌더 속도만큼
+  // (실측 초당 약 500회) 재요청이 반복되고 메인 스레드가 포화됩니다.
+  assert.match(source, /const FOLLOWED_LOL_MAX_ATTEMPTS = \d+;/u);
+  assert.match(source, /const FOLLOWED_LOL_RETRY_BASE_MS = [\d_]+;/u);
+  assert.match(source, /const FOLLOWED_LOL_RETRY_MAX_MS = [\d_]+;/u);
+  assert.match(source, /followedLolAttemptRef/u);
+
+  const effect = source.slice(
+    source.indexOf("if (!twitchStatus.connected) {\n      followedLolAttemptRef.current = 0;")
+  ).slice(0, 1_400);
+  // 시도 상한과 지수 백오프가 함께 있어야 합니다.
+  assert.match(effect, /followedLolAttemptRef\.current >= FOLLOWED_LOL_MAX_ATTEMPTS/u);
+  assert.match(effect, /Math\.min\(\s*FOLLOWED_LOL_RETRY_MAX_MS/u);
+  assert.match(effect, /FOLLOWED_LOL_RETRY_BASE_MS \* 2 \*\* \(attempt - 1\)/u);
+  // 연결이 끊기면 다음 연결을 위해 시도 횟수를 되돌립니다.
+  assert.match(effect, /followedLolAttemptRef\.current = 0;/u);
+  // 예약한 재시도는 정리해야 합니다.
+  assert.match(effect, /window\.clearTimeout\(followedLolRetryTimerRef\.current\)/u);
+});
