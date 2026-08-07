@@ -8,6 +8,21 @@
   --public-gray-border-strong: var(--yoro-color-border-on-dark-strong);
   --public-gray-text: var(--yoro-color-text-on-dark);
   --public-gray-muted: var(--yoro-color-text-on-dark-muted);
+
+  /* LP 추이 그래프의 구간별 색. 히어로 크레스트의 [data-tier] --tier-color(23-profile-hero.css)와
+     같은 hex 값을 이 화면 전체(히어로 + 사이드바)에서 공유합니다 — 한 그래프 안에서 여러 티어
+     색을 동시에 써야 해서 [data-tier] 컨텍스트 하나만 주는 --tier-color 로는 부족합니다. */
+  --tier-lp-unranked: var(--yoro-color-ground-muted);
+  --tier-lp-iron: #8d8d8d;
+  --tier-lp-bronze: #c08558;
+  --tier-lp-silver: #b3bcc5;
+  --tier-lp-gold: #e5c15a;
+  --tier-lp-platinum: #58c4bb;
+  --tier-lp-emerald: #4fbc7c;
+  --tier-lp-diamond: #6db6f0;
+  --tier-lp-master: #b57ff0;
+  --tier-lp-grandmaster: #ea6560;
+  --tier-lp-challenger: #f0c264;
   background:
     radial-gradient(
       circle at 50% 0,

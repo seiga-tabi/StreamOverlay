@@ -562,6 +562,10 @@
   }
 
   .public-match-card-highlight {
+    /* public-match-card-copy 는 align-items: baseline 이라, descender 없는 알약형
+       배지가 텍스트 기준선에 맞춰져 포지션 텍스트보다 살짝 아래로 처져 보입니다.
+       배지만 그 줄(포지션 아이콘·텍스트) 기준으로 세로 중앙에 오도록 바로잡습니다. */
+    align-self: center;
     flex: none;
     padding: .1rem .28rem;
     border-radius: var(--yoro-radius-xs);

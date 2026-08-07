@@ -62,7 +62,6 @@ export type RecentMatchRowProps = {
   summonerSpellsLabel: string;
   kdaScore: ReactNode;
   kdaMetric: ReactNode;
-  badges: ReactNode;
   scoreClassName: string;
   scoreDescription: RecentMatchRowLocalizedText;
   scoreGrade: string;
@@ -113,7 +112,6 @@ export function RecentMatchRow({
   summonerSpellsLabel,
   kdaScore,
   kdaMetric,
-  badges,
   scoreClassName,
   scoreDescription,
   scoreGrade,
@@ -224,7 +222,6 @@ export function RecentMatchRow({
             <strong>{kdaScore}</strong>
             <div className="public-match-card-kda-summary">
               <span>{kdaMetric}</span>
-              {badges}
             </div>
           </div>
         </div>

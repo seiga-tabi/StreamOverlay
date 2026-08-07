@@ -714,7 +714,6 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
   const html = renderToStaticMarkup(
     <RecentMatchRow
       scoreDescription={{ label: "YORO 경기 점수 설명", ko: "YORO 경기 점수 설명", ja: "YORO試合スコアの説明" }}
-      badges={<span>MVP</span>}
       championFallback="제"
       championIconUrl="https://example.com/champion.png"
       championName="제드"

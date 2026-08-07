@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useRef, useState, type FormEvent, type MouseEvent, type ReactNode } from "react";
+import { Fragment, useEffect, useId, useMemo, useRef, useState, type FormEvent, type MouseEvent, type ReactNode } from "react";
 import {
   normalizeLolPlatformId,
   parseRiotIdDetailed,
@@ -268,7 +268,6 @@ import { usePublicTheme } from "../features/public-lol/hooks/usePublicTheme";
 import {
   championAnalysisMax,
   championAnalysisRows,
-  compactMatchBadgeSelection,
   filteredMatches,
   hasActiveFilters,
   kdaFromTotals,
@@ -2022,28 +2021,72 @@ function profileLpChangeEntries(profile: PublicLolProfile): ProfileLpChangeEntry
   return entries;
 }
 
-function ProfileSidebarLpChart({ values }: { values: number[] }) {
+/** 히어로 LP 추이(ProfileHeroRank.tsx 의 LpSparkline)와 같은 규칙입니다 —
+ * 구간은 "도착 지점" 티어색으로 칠하고, 이미 지난 구간은 되돌아가 다시 칠하지
+ * 않습니다. 색은 20-profile-platform.css 의 .public-profile-platform-v2 에
+ * 있는 --tier-lp-* 를 씁니다(히어로 크레스트의 --tier-color 와 같은 값). */
+function ProfileSidebarLpChart({ points }: { points: Array<{ value: number; tierKey: string }> }) {
+  const gradientId = useId();
   const width = 256;
   const height = 104;
   const pad = 4;
-  const min = Math.min(...values);
-  const max = Math.max(...values);
+  const min = Math.min(...points.map((point) => point.value));
+  const max = Math.max(...points.map((point) => point.value));
   const span = Math.max(1, max - min);
-  const coords = values.map((value, index) => [
-    pad + (index * (width - pad * 2)) / Math.max(1, values.length - 1),
-    height - pad - ((value - min) / span) * (height - pad * 2),
-  ] as const);
-  const line = coords.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
-  const area = `${pad},${height - pad} ${line} ${width - pad},${height - pad}`;
-  const last = coords.at(-1) ?? [pad, height - pad] as const;
+  const coords = points.map((point, index) => ({
+    x: pad + (index * (width - pad * 2)) / Math.max(1, points.length - 1),
+    y: height - pad - ((point.value - min) / span) * (height - pad * 2),
+    tierKey: point.tierKey,
+  }));
+  const segments = coords.slice(1).map((to, index) => ({ from: coords[index]!, to }));
+  const area = `${pad},${height - pad} ${coords.map((c) => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(" ")} ${width - pad},${height - pad}`;
+  const last = coords.at(-1) ?? { x: pad, y: height - pad, tierKey: "unranked" };
+  const colorOf = (tierKey: string) => `var(--tier-lp-${tierKey}, var(--tier-color))`;
+  const gradientStops = segments.slice(0, -1).flatMap((segment, index) => {
+    const boundaryOffset = (segment.to.x / width) * 100;
+    return [
+      <stop key={`${index}-out`} offset={`${boundaryOffset.toFixed(1)}%`} stopColor={colorOf(segment.to.tierKey)} />,
+      <stop key={`${index}-in`} offset={`${boundaryOffset.toFixed(1)}%`} stopColor={colorOf(segments[index + 1]!.to.tierKey)} />,
+    ];
+  });
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${t().rankLpTrendLabel} ${t().period30}`}>
+      <defs>
+        <linearGradient gradientUnits="userSpaceOnUse" id={gradientId} x1="0" x2={width} y1="0" y2="0">
+          <stop offset="0%" stopColor={colorOf(segments[0]?.to.tierKey ?? last.tierKey)} />
+          {gradientStops}
+          <stop offset="100%" stopColor={colorOf(segments.at(-1)?.to.tierKey ?? last.tierKey)} />
+        </linearGradient>
+      </defs>
       <line className="grid" x1="0" y1={height * .34} x2={width} y2={height * .34} strokeDasharray="3 4" />
       <line className="grid" x1="0" y1={height * .67} x2={width} y2={height * .67} strokeDasharray="3 4" />
-      <polygon className="area" points={area} />
-      <polyline className="line" points={line} fill="none" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
-      <circle className="head" cx={last[0].toFixed(1)} cy={last[1].toFixed(1)} r="3.5" />
+      <polygon className="area" fill={`url(#${gradientId})`} points={area} />
+      {segments.map((segment, index) => (
+        <line
+          key={index}
+          stroke={colorOf(segment.to.tierKey)}
+          strokeLinecap="round"
+          strokeWidth="2"
+          x1={segment.from.x.toFixed(1)}
+          x2={segment.to.x.toFixed(1)}
+          y1={segment.from.y.toFixed(1)}
+          y2={segment.to.y.toFixed(1)}
+        />
+      ))}
+      {coords.slice(1, -1).map((point, index) => (
+        point.tierKey !== coords[index]!.tierKey ? (
+          <circle
+            className="tier-change"
+            cx={point.x.toFixed(1)}
+            cy={point.y.toFixed(1)}
+            key={`change-${index}`}
+            r="3.5"
+            stroke={colorOf(point.tierKey)}
+          />
+        ) : null
+      ))}
+      <circle cx={last.x.toFixed(1)} cy={last.y.toFixed(1)} fill={colorOf(last.tierKey)} r="3.5" />
     </svg>
   );
 }
@@ -2096,7 +2139,9 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
       <FeatureProfileLpRecordCard
         changeLabel={trend ? (trend.change === 0 ? t().lpNoChange : `${trend.change > 0 ? "+" : ""}${trend.change} LP`) : undefined}
         changeTone={trend ? (trend.change > 0 ? "up" : trend.change < 0 ? "down" : "flat") : "flat"}
-        chart={trend && trend.points.length > 1 ? <ProfileSidebarLpChart values={trend.points.map((point) => point.value)} /> : undefined}
+        chart={trend && trend.points.length > 1 ? (
+          <ProfileSidebarLpChart points={trend.points.map((point) => ({ value: point.value, tierKey: tierKeyFromScore(point.value) }))} />
+        ) : undefined}
         currentLabel={soloStats ? `${rankTierLabel(soloStats)} ${soloStats.leaguePoints} LP` : t().unranked}
         entries={lpEntries}
         recordCount={trend?.sampleCount ?? 0}
@@ -4699,41 +4744,6 @@ function RecentRecords({ profile }: { profile: PublicLolProfile }) {
   );
 }
 
-function MatchBadges({ badges, compact = false }: { badges?: PublicLolMatchBadge[]; compact?: boolean }) {
-  const allBadges = badges ?? [];
-  const compactSelection = compact ? compactMatchBadgeSelection(allBadges) : undefined;
-  const visibleBadges = compactSelection?.visibleBadges ?? allBadges.slice(0, 4);
-  const overflowCount = compactSelection?.overflowCount ?? Math.max(0, allBadges.length - visibleBadges.length);
-  const overflowLabel = activePublicLocale === "ja"
-    ? `その他のバッジ${overflowCount}件`
-    : `기타 뱃지 ${overflowCount}개`;
-  if (visibleBadges.length === 0 && overflowCount === 0) return null;
-  return (
-    <div className={`public-match-badges ${compact ? "compact" : ""}`}>
-      {visibleBadges.map((badge) => (
-        <span
-          className={`public-match-badge ${badge.code}`}
-          key={`${badge.code}:${badge.score ?? ""}:${badge.rank ?? ""}`}
-
-
-        >
-          {matchBadgeLabel(badge.code)}
-        </span>
-      ))}
-      {overflowCount > 0 ? (
-        <span
-          className="public-match-badge more"
-          aria-label={overflowLabel}
-          data-ja={`その他のバッジ${overflowCount}件`}
-          data-ko={`기타 뱃지 ${overflowCount}개`}
-        >
-          ...
-        </span>
-      ) : null}
-    </div>
-  );
-}
-
 function dataDragonVersionFromUrl(url?: string): string | undefined {
   if (!url) return undefined;
   return url.match(/\/cdn\/([^/]+)\//)?.[1];
@@ -5938,8 +5948,6 @@ function RecentMatches({
           const inlineItemSlots: RecentMatchRowMediaItem[] = recentItemSlots.slice(0, 6).map(itemSlotMediaItem);
           const trinketSlot = itemSlotMediaItem(recentItemSlots[6], 6);
           // 목록 응답의 teams 는 비어 있고 경기를 펼칠 때 채워집니다. 데이터가 있을 때만 그립니다.
-          // MVP·ACE 는 챔피언 이름 줄의 highlight 배지로 이미 표시하므로 KDA 줄에서는 제외합니다.
-          const secondaryBadges = (match.badges ?? []).filter((badge) => badge.code !== "mvp" && badge.code !== "ace");
           const compositionTeams = (hydratedMatch.teams ?? []).filter((team) => team.players.length > 0);
           const targetTeamId = compositionTeams
             .find((team) => team.players.some((player) => player.isTarget))?.teamId;
@@ -6033,7 +6041,6 @@ function RecentMatches({
                 ko: publicI18n.ko.aiScoreDescription,
                 ja: publicI18n.ja.aiScoreDescription
               }}
-              badges={<MatchBadges badges={secondaryBadges} compact />}
               championFallback={championName(match.champion).slice(0, 1)}
               championIconUrl={match.champion.iconUrl}
               championName={championName(match.champion)}

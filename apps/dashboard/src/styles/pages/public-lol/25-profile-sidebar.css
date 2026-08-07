@@ -185,10 +185,11 @@
     font-variant-numeric: tabular-nums;
   }
 
+  /* area/line/점 색은 표본별 tierKey 에 맞춰 PublicLolPage.tsx 가 인라인으로 지정합니다
+     (구간마다 달라서 클래스 하나로 고정할 수 없음 — 히어로 스파크라인과 같은 방식). */
   .public-profile-lp-chart > svg { display: block; width: 100%; height: 6.5rem; }
-  .public-profile-lp-chart .area { fill: var(--yoro-color-rank-trend-area); }
-  .public-profile-lp-chart .line { stroke: var(--yoro-color-rank-trend); }
-  .public-profile-lp-chart .head { fill: var(--yoro-color-rank-trend); }
+  .public-profile-lp-chart .area { opacity: .24; }
+  .public-profile-lp-chart .tier-change { fill: var(--yoro-color-ground-surface); stroke-width: 2; }
   .public-profile-lp-chart .grid { stroke: color-mix(in srgb, var(--yoro-color-text-on-dark) 8%, transparent); }
 
   .public-profile-lp-log {
