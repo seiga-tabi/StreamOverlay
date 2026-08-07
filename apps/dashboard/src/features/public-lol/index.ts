@@ -20,6 +20,7 @@ export { PublicSiteFooter } from "./components/PublicSiteFooter";
 export { ProfileMetricCardItem } from "./components/ProfileMetricCardItem";
 export { ProfileHeroRank } from "./components/ProfileHeroRank";
 export { ProfileMetricStrip } from "./components/ProfileMetricStrip";
+export { ProfileLpRecordCard, ProfileMetricProfileCard, ProfileRoleCard } from "./components/ProfileSidebarCards";
 export { ProfileStreamerCast } from "./components/ProfileStreamerCast";
 export { ProfileRecentChampionsCard } from "./components/ProfileRecentChampionsCard";
 export { ProfileRecentChampionRow } from "./components/ProfileRecentChampionRow";
@@ -228,6 +229,14 @@ export type {
   RecentMatchExpandedToolbarView,
 } from "./components/RecentMatchExpandedToolbar";
 export type {
+  ProfileLpChangeEntry,
+  ProfileLpRecordCardProps,
+  ProfileMetricRow,
+  ProfileMetricProfileCardProps,
+  ProfileRoleEntry,
+  ProfileRoleCardProps,
+} from "./components/ProfileSidebarCards";
+export type {
   ProfileStreamerCastLink,
   ProfileStreamerCastProps,
   ProfileStreamerCastText,
@@ -314,3 +323,18 @@ export type {
   TwitchStreamOverviewRowProps,
   TwitchStreamOverviewRowViewModel,
 } from "./components/TwitchStreamOverviewRow";
+
+export {
+  ParticipationMyStatus,
+  ParticipationQueueList,
+  ParticipationStreamerPicks,
+  ParticipationStreamerSwitcher,
+} from "./components/ParticipationPanels";
+export type {
+  ParticipationMyStatusProps,
+  ParticipationQueueListProps,
+  ParticipationQueueRow,
+  ParticipationStreamerOption,
+  ParticipationStreamerPicksProps,
+  ParticipationStreamerSwitcherProps,
+} from "./components/ParticipationPanels";

@@ -2,21 +2,21 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-test("시청자 참여 화면은 직접 세션·내 상태·단계·규칙을 우선하고 신청 확인 모달을 제거한다", async () => {
+test("시청자 참여 화면은 신청·취소 두 동작만 두고 체크인 흐름을 제거한다", async () => {
   const source = await readFile(
     new URL("../src/pages/PublicLolPage.tsx", import.meta.url),
     "utf8"
   );
+  const panels = await readFile(
+    new URL("../src/features/public-lol/components/ParticipationPanels.tsx", import.meta.url),
+    "utf8"
+  );
   const css = await readFile(
-    new URL("../src/styles/pages/public-lol/05-overrides.css", import.meta.url),
+    new URL("../src/styles/pages/public-lol/26-participation.css", import.meta.url),
     "utf8"
   );
-  const legacyCss = await readFile(
-    new URL("../src/styles/pages/public-lol/02-legacy.css", import.meta.url),
-    "utf8"
-  );
-  const finalCss = await readFile(
-    new URL("../src/styles/pages/public-lol/10-final-overrides.css", import.meta.url),
+  const display = await readFile(
+    new URL("../src/features/participation/participation-display.ts", import.meta.url),
     "utf8"
   );
   const i18n = await readFile(
@@ -24,49 +24,82 @@ test("시청자 참여 화면은 직접 세션·내 상태·단계·규칙을 �
     "utf8"
   );
 
-  assert.match(source, /directSessionLink/u);
-  assert.match(source, /currentParticipants = queue\.filter/u);
-  assert.match(source, /nextParticipant = queue\.find/u);
-  assert.match(source, /public-participation-session-summary-metrics/u);
-  assert.match(source, /public-participation-current-player/u);
-  assert.match(source, /public-participation-my-status/u);
-  assert.match(source, /public-participation-queue-ahead/u);
-  assert.match(source, /public-participation-check-in-state/u);
-  assert.match(source, /public-participation-notification-callout/u);
-  assert.match(source, /<details className="public-participation-timeline-card" open>/u);
-  assert.match(source, /<ol className="public-participation-timeline">/u);
-  assert.match(source, /publicParticipationJourneyPhase/u);
-  assert.doesNotMatch(source, /labelKey: "participationStepSelected"/u);
-  assert.doesNotMatch(source, /labelKey: "participationStepCheckIn"/u);
-  assert.match(source, /aria-current=\{current \? "step"/u);
-  assert.match(source, /aria-current=\{item\.isViewer \? "true"/u);
-  assert.match(source, /public-participation-rules-title/u);
-  assert.match(source, /className="public-participation-rejoin-icon"/u);
-  assert.doesNotMatch(source, /className="public-participation-rejoin-note"[^>]*>[\s\S]{0,160}<Badge/u);
-  assert.match(source, /className="public-participation-queue-status"/u);
-  assert.match(source, /<ol className="public-participation-queue-list"/u);
-  assert.match(source, /className="public-participation-queue-profile"/u);
-  assert.match(source, /className="public-participation-queue-viewer"/u);
-  assert.match(source, /queue\.slice\(start, start \+ 5\)/u);
-  assert.match(source, /aria-expanded=\{queueExpanded\}/u);
-  assert.match(source, /<details className="public-participation-rules">/u);
-  assert.doesNotMatch(source, /setPendingAction\("join"\)/u);
-  assert.match(source, /parseRiotIdDetailed/u);
-  assert.match(css, /env\(safe-area-inset-bottom\)/u);
-  assert.match(css, /@keyframes public-participation-current-step/u);
-  assert.match(css, /@media \(prefers-reduced-motion: reduce\)/u);
-  assert.match(finalCss, /public-participation-queue-tags \.public-participation-queue-status/u);
-  assert.match(finalCss, /public-participation-queue-row:not\(\.yoro-card\)/u);
-  assert.match(finalCss, /public-participation-queue-profile/u);
-  assert.match(finalCss, /public-participation-queue-tags \.public-participation-queue-viewer/u);
-  assert.doesNotMatch(legacyCss, /\.public-participation-queue-tags span\s*\{/u);
-  assert.match(legacyCss, /\.public-participation-queue-tags > :is\(\.yoro-status, \.yoro-badge\)/u);
-  assert.match(i18n, /Riot ID는 게임이름#태그 형식으로 입력해주세요/u);
-  assert.match(i18n, /Riot IDはゲーム名#タグの形式で入力してください/u);
-  assert.match(i18n, /현재 참여자/u);
-  assert.match(i18n, /現在の参加者/u);
-  assert.match(i18n, /내 앞 대기/u);
-  assert.match(i18n, /自分より前の待機/u);
+  // 체크인·건너뛰기는 공개 화면에서 완전히 빠집니다. 서버 endpoint 는 그대로 둡니다.
+  for (const removed of [
+    "postPublicParticipationCheckIn",
+    "postPublicParticipationSkip",
+    "checkInPublicParticipation",
+    "skipPublicParticipation",
+    "publicParticipationCheckingIn",
+    "publicParticipationSkipping",
+    "checkInExpiresAt",
+    "participationCheckInRemaining",
+    "participationSkipTurn",
+  ]) {
+    assert.doesNotMatch(source, new RegExp(removed, "u"), `${removed} 는 공개 참여 화면에서 제거되어야 합니다.`);
+  }
+  assert.doesNotMatch(panels, /checkIn|Skip/u);
+
+  // 뷰어 상태는 네 갈래로 접힙니다. selected·checked_in·invited 는 하나로 묶습니다.
+  assert.match(display, /export function getViewerQueuePhase/u);
+  assert.match(display, /status === "selected" \|\| status === "checked_in" \|\| status === "invited"\) return "soon"/u);
+  assert.match(display, /export function canCancelViewerQueue/u);
+
+  // 설명문은 두지 않습니다.
+  for (const dropped of [
+    "followJoinSubtitle",
+    "participationStreamerSubtitle",
+    "participationSelectStreamerDescription",
+    "participationRiotIdExample",
+    "participationAutoRefresh",
+    "participationNotificationsDescription",
+    "participationJourneyTitle",
+    "participationRulesTitle",
+  ]) {
+    assert.doesNotMatch(source, new RegExp(`t\\(\\)\\.${dropped}`, "u"), `${dropped} 문구는 화면에서 빠져야 합니다.`);
+  }
+
+  // 남는 동작은 신청과 취소뿐입니다.
+  assert.match(source, /t\(\)\.participationSubmit/u);
+  assert.match(source, /t\(\)\.participationCancel\b/u);
+
+  // 대기열을 접어도 내 순번은 반드시 보입니다.
+  assert.match(source, /PUBLIC_PARTICIPATION_QUEUE_WINDOW/u);
+  assert.match(source, /queue\.findIndex\(\(item\) => item\.isViewer\)/u);
+
+  // legacy 의 .public-participation-queue-row 는 !important 로 걸려 있어
+  // 같은 이름을 쓰면 pages layer 가 집니다. 새 이름을 씁니다.
+  assert.doesNotMatch(panels, /public-participation-queue-row/u);
+  assert.match(panels, /public-participation-qrow/u);
+  assert.doesNotMatch(css, /[a-z-]+:[^;{}]*!important/u);
+  assert.match(css, /@layer pages/u);
+  assert.match(css, /container-name:\s*participation/u);
+
+  // 조작 요소는 44×44 이상입니다.
+  for (const rule of [
+    "public-participation-mini-button",
+    "public-participation-cancel",
+    "public-participation-submit",
+    "public-participation-role",
+    "public-participation-qtoggle",
+  ]) {
+    assert.match(
+      css,
+      new RegExp(`\\.${rule}\\s*\\{[\\s\\S]*?min-(height|width):\\s*var\\(--yoro-size-touch-target\\)`, "u"),
+      `${rule} 은 44px 터치 타깃을 지켜야 합니다.`
+    );
+  }
+
+  // 신규 문구는 한국어·일본어를 함께 둡니다.
+  for (const [ko, ja] of [
+    ["곧 내 차례", "まもなく順番"],
+    ["내 앞 \\{count\\}명", "前に\\{count\\}人"],
+    ["더 보기 \\{count\\}", "もっと見る \\{count\\}"],
+    ["무관", "指定なし"],
+  ]) {
+    assert.match(i18n, new RegExp(ko, "u"));
+    assert.match(i18n, new RegExp(ja, "u"));
+  }
 });
 
 test("스트리머 참여 화면은 공개 범위·직접 동작·그룹 대기열을 제공한다", async () => {

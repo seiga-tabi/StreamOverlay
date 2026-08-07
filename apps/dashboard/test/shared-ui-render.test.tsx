@@ -8,6 +8,11 @@ import { PublicAppHeader } from "../src/features/public-lol/components/PublicApp
 import { PublicHomeSearchPanel, type PublicHomeSearchPanelText } from "../src/features/public-lol/components/PublicHomeSearchPanel";
 import { PublicSiteFooter } from "../src/features/public-lol/components/PublicSiteFooter";
 import { ProfileMetricStrip } from "../src/features/public-lol/components/ProfileMetricStrip";
+import {
+  ProfileLpRecordCard,
+  ProfileMetricProfileCard,
+  ProfileRoleCard,
+} from "../src/features/public-lol/components/ProfileSidebarCards";
 import { ProfileTopIdentity } from "../src/features/public-lol/components/ProfileTopIdentity";
 import { ProfileStreamerCast } from "../src/features/public-lol/components/ProfileStreamerCast";
 import { ProfileTopPanel } from "../src/features/public-lol/components/ProfileTopPanel";
@@ -890,18 +895,27 @@ test("모바일 최근 전적은 3행으로 압축하고 등급·지표 정렬 �
   assert.match(cardCss, /\.public-matches-panel\s*\{[\s\S]*?container-type:\s*inline-size[\s\S]*?container-name:\s*match-list/u);
   assert.match(cardCss, /@container match-list \(max-width: 1180px\)[\s\S]*?\.public-match-card-team\s*\{\s*display:\s*none/u);
   assert.match(cardCss, /@container match-list \(max-width: 980px\)[\s\S]*?\.public-match-card-stats > span:nth-child\(3\)\s*\{\s*display:\s*none/u);
+  // 980 구간의 하한은 container 721px 입니다. track 합이 그 폭을 넘지 않도록 gap 도 함께 줄입니다.
+  assert.match(cardCss, /@container match-list \(max-width: 980px\)[\s\S]*?column-gap:\s*var\(--yoro-space-3\)/u);
 
   const mobile = cardCss.slice(cardCss.indexOf("@container match-list (max-width: 720px)"));
-  // 3·4열은 고정 폭이라 KDA 자릿수와 무관하게 등급 배지 x 좌표가 행마다 같습니다.
-  assert.match(mobile, /\.public-match-card-summary\s*\{[\s\S]*?grid-template-columns:\s*2\.25rem minmax\(0, 1fr\) 6\.75rem 2rem/u);
+  // 3·4·5열은 고정 폭이라 KDA 자릿수와 무관하게 등급 배지 x 좌표가 행마다 같습니다.
+  assert.match(mobile, /\.public-match-card-summary\s*\{[\s\S]*?grid-template-columns:\s*2\.25rem minmax\(0, 1fr\) 2rem 4\.25rem 2\.75rem/u);
   // 세로로 쌓지 않고 겹치기 위해 챔피언 셀을 풀어 각각 배치합니다.
   assert.match(mobile, /\.public-match-card-champion\s*\{\s*display:\s*contents/u);
   assert.match(mobile, /\.public-match-card-portrait\s*\{\s*grid-column:\s*1;\s*grid-row:\s*1 \/ span 2/u);
-  assert.match(mobile, /\.public-match-card-perf\s*\{\s*grid-column:\s*3;\s*grid-row:\s*1 \/ span 2/u);
-  // MVP·ACE 는 이름 줄 오른쪽 끝.
-  assert.match(mobile, /\.public-match-card-highlight\s*\{\s*margin-left:\s*auto/u);
-  // 지표는 3열 안에만 놓아 카드 가장자리에 밀착하지 않습니다.
-  assert.match(mobile, /\.public-match-card-stats\s*\{\s*grid-column:\s*3;\s*grid-row:\s*3/u);
+  // 등급은 행 가운데 열에 홀로 세워 오른쪽에 여백을 만듭니다.
+  assert.match(mobile, /\.public-match-card-perf\s*\{\s*display:\s*contents/u);
+  assert.match(mobile, /\.public-match-card-score\s*\{[\s\S]*?grid-column:\s*3;\s*grid-row:\s*1 \/ span 2[\s\S]*?justify-self:\s*center/u);
+  assert.match(mobile, /\.public-match-card-kda\s*\{\s*grid-column:\s*4;\s*grid-row:\s*1 \/ span 2/u);
+  // 상세 버튼 열은 44px 입니다. 좁게 두면 touch target 최소 폭 때문에 열 밖으로 번집니다.
+  assert.match(mobile, /\.public-match-card-expand\s*\{\s*grid-column:\s*5[\s\S]*?width:\s*var\(--yoro-size-touch-target\)/u);
+  // MVP·ACE 는 챔피언 이름 바로 옆.
+  assert.match(mobile, /\.public-match-card-highlight\s*\{\s*margin-left:\s*0/u);
+  // 지표는 4~5열 안에만 놓아 카드 가장자리에 밀착하지 않습니다.
+  assert.match(mobile, /\.public-match-card-stats\s*\{\s*grid-column:\s*4 \/ 6;\s*grid-row:\s*3/u);
+  // 아이템 격자는 stretch 로 두어야 유연한 슬롯이 0 폭으로 붕괴하지 않습니다.
+  assert.match(mobile, /\.public-match-card-items\s*\{[\s\S]*?justify-self:\s*stretch/u);
   // 폭이 좁아지면 보조 문구·게이지·후행 지표 순으로 덜어냅니다.
   assert.match(mobile, /\.public-match-card-stat-bar\s*\{\s*display:\s*none/u);
   // 긴 라벨 대신 짧은 라벨로 바꿔 본문 최소 12px 를 지키면서 폭을 확보합니다.
@@ -913,8 +927,8 @@ test("모바일 최근 전적은 3행으로 압축하고 등급·지표 정렬 �
   // 모바일은 3행 높이를 아이템 한 줄에 맞추기 위해 주문을 가로로 두고 룬은 접습니다.
   assert.match(mobile, /\.public-match-card-loadout-column\s*\{[\s\S]*?grid-auto-flow:\s*column/u);
   assert.match(mobile, /\.public-match-card-loadout \.runes\s*\{\s*display:\s*none/u);
-  // 확장 버튼은 눌러지는 모양을 유지하고, 카드 전체도 토글 영역입니다.
-  assert.match(mobile, /\.public-match-card-expand\s*\{[\s\S]*?width:\s*2rem;\s*height:\s*2\.25rem/u);
+  // 확장 버튼은 44px 터치 타깃을 지키고, 카드 전체도 토글 영역입니다.
+  assert.match(mobile, /\.public-match-card-expand\s*\{[\s\S]*?height:\s*var\(--yoro-size-touch-target\)/u);
   assert.match(cardCss, /\.public-match-card-summary\s*\{[\s\S]*?cursor:\s*pointer/u);
   // 필터 칩은 모바일에서 44px 터치 타깃을 지킵니다.
   assert.match(mobile, /\.public-match-queue-chips button\s*\{\s*min-height:\s*var\(--yoro-size-touch-target\)/u);
@@ -1034,4 +1048,126 @@ test("경기 상세 팀 비교는 피해량·시야·골드·오브젝트를 전
   assert.match(html, /role="tablist" aria-label="팀 지표 선택"/u);
   assert.equal((html.match(/role="tab"/gu) ?? []).length, 4);
   assert.match(html, /aria-selected="true"[^>]*>피해량</u);
+});
+
+test("프로필 사이드바 지표 카드는 비교 기준이 없으면 기준선 없이 값만 알린다", () => {
+  const metrics = [
+    { key: "kda", label: "KDA", value: "3.42", ratio: 57 },
+    { key: "kp", label: "킬 관여", value: "55%", ratio: 55 },
+  ];
+  const text = {
+    title: "최근 20경기 지표",
+    gradeAriaLabel: "종합 등급",
+    noBenchmarkNotice: "동티어 비교 기준을 아직 제공하지 않습니다 · 값만 표시합니다",
+    sampleShortNotice: "표본이 얇습니다 · 2경기 더 필요",
+  };
+
+  const plain = renderToStaticMarkup(
+    <ProfileMetricProfileCard grade="S" metrics={metrics} score={78} text={text} />
+  );
+  assert.match(plain, /class="public-profile-side-card public-profile-metric-profile"/u);
+  assert.match(plain, /aria-label="종합 등급 S"/u);
+  // 기준선은 benchmarkRatio 가 있을 때만 그립니다.
+  assert.doesNotMatch(plain, /<i aria-hidden="true"/u);
+  assert.match(plain, /동티어 비교 기준을 아직 제공하지 않습니다/u);
+  assert.match(plain, /aria-label="KDA 3\.42"/u);
+
+  const benchmarked = renderToStaticMarkup(
+    <ProfileMetricProfileCard
+      grade="S"
+      metrics={[{ ...metrics[0], benchmarkRatio: 40, percentileLabel: "상위 22%" }]}
+      score={78}
+      text={text}
+    />
+  );
+  assert.match(benchmarked, /<i aria-hidden="true" style="left:40%"/u);
+  assert.match(benchmarked, /aria-label="KDA 3\.42, 상위 22%"/u);
+  assert.doesNotMatch(benchmarked, /동티어 비교 기준을 아직 제공하지 않습니다/u);
+
+  // 표본이 얇으면 비교 표시를 모두 끄고 얇다는 사실만 알립니다.
+  const short = renderToStaticMarkup(
+    <ProfileMetricProfileCard
+      grade="B"
+      metrics={[{ ...metrics[0], benchmarkRatio: 40, percentileLabel: "상위 22%" }]}
+      sampleShort
+      score={51}
+      text={text}
+    />
+  );
+  assert.match(short, /public-profile-metric-list is-sample-short/u);
+  assert.doesNotMatch(short, /<i aria-hidden="true"/u);
+  assert.doesNotMatch(short, /상위 22%/u);
+  assert.match(short, /표본이 얇습니다 · 2경기 더 필요/u);
+});
+
+test("프로필 사이드바 LP·포지션 카드는 빈 상태와 기록을 구분해 렌더링한다", () => {
+  const lpText = {
+    title: "LP 기록",
+    periodLabel: "최근 30일",
+    recordCountLabel: "기록",
+    emptyTitle: "아직 LP 기록이 없습니다",
+    emptyDescription: "랭크 경기를 치르면 변화를 모아 보여드립니다",
+  };
+
+  const empty = renderToStaticMarkup(
+    <ProfileLpRecordCard currentLabel="Unranked" entries={[]} recordCount={0} text={lpText} />
+  );
+  assert.match(empty, /public-profile-side-empty/u);
+  assert.match(empty, /아직 LP 기록이 없습니다/u);
+  assert.doesNotMatch(empty, /public-profile-lp-log/u);
+
+  const filled = renderToStaticMarkup(
+    <ProfileLpRecordCard
+      changeLabel="+124 LP"
+      changeTone="up"
+      currentLabel="Grandmaster I 636 LP"
+      entries={[{ key: "a", dateLabel: "8월 6일", delta: 22, deltaLabel: "+22 LP", rangeLabel: "614 → 636 LP" }]}
+      recordCount={12}
+      text={lpText}
+    />
+  );
+  assert.match(filled, /public-profile-lp-delta" data-tone="up">\+124 LP/u);
+  assert.match(filled, /<ol class="public-profile-lp-log">/u);
+  assert.match(filled, /class="delta" data-tone="up">\+22 LP/u);
+  assert.match(filled, /614 → 636 LP/u);
+
+  const roles = renderToStaticMarkup(
+    <ProfileRoleCard
+      roles={[
+        { key: "MIDDLE", label: "미드", isMain: true, winRate: 61, winRateLabel: "61%", recordLabel: "41전 25승", kdaLabel: "4.2" },
+        { key: "JUNGLE", label: "정글", winRate: 44.4, winRateLabel: "44%", recordLabel: "18전 8승", kdaLabel: "2.8" },
+      ]}
+      text={{ title: "포지션별 승률", periodLabel: "최근 20경기", mainTag: "주 포지션", emptyLabel: "데이터 없음" }}
+    />
+  );
+  // 주 포지션과 50% 미만 포지션은 형태로도 구분합니다.
+  assert.match(roles, /public-profile-role is-main/u);
+  assert.match(roles, /public-profile-role\s+is-low/u);
+  assert.match(roles, /class="tag">주 포지션/u);
+  assert.match(roles, /aria-label="미드 61%, 41전 25승, KDA 4\.2"/u);
+});
+
+test("프로필 사이드바 CSS는 legacy 반응형 grid 를 덮지 않고 값 열 폭만 고정한다", () => {
+  const sidebarCss = readFileSync(
+    new URL("../src/styles/pages/public-lol/25-profile-sidebar.css", import.meta.url),
+    "utf8",
+  );
+
+  // 패널의 display 는 legacy 가 폭별로 소유합니다. 여기서 덮으면 반응형이 죽습니다.
+  const panelRule = sidebarCss.slice(
+    sidebarCss.indexOf(".public-overview-dashboard-panel {"),
+    sidebarCss.indexOf(".public-profile-side-card {"),
+  );
+  assert.match(panelRule, /container-type:\s*inline-size/u);
+  assert.match(panelRule, /container-name:\s*profile-side/u);
+  assert.doesNotMatch(panelRule, /display:/u);
+
+  // 값 열 폭이 고정이라야 막대 시작점이 행마다 같은 x 에 옵니다.
+  assert.match(sidebarCss, /\.public-profile-metric-row\s*\{[\s\S]*?grid-template-columns:\s*4\.25rem 2\.5rem minmax\(0, 1fr\)/u);
+  // legacy 의 metric-tone-* 가 !important 로 색을 덮으므로 등급 색은 안쪽 요소에 둡니다.
+  assert.match(sidebarCss, /\.public-profile-metric-grade > b\s*\{[\s\S]*?color:\s*var\(--yoro-color-match-score-on-bright\)/u);
+  // 패널 자신은 자기 container 가 아니므로 패널 레이아웃에 container query 를 쓰지 않습니다.
+  assert.doesNotMatch(sidebarCss, /@container profile-side[^{]*\{\s*\.public-overview-dashboard-panel/u);
+  // 선언에는 !important 를 쓰지 않습니다(주석의 언급은 제외).
+  assert.doesNotMatch(sidebarCss, /[a-z-]+:[^;{}]*!important/u);
 });

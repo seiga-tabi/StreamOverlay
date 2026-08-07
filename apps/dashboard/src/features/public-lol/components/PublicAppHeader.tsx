@@ -44,6 +44,12 @@ export type PublicAppHeaderProps = {
 };
 
 const MOBILE_CHROME_SETTLE_MS = 320;
+/* 이 깊이 아래로 올라오면 상단바를 항상 펼칩니다. */
+const MOBILE_CHROME_RESET_SCROLL = 24;
+/* 접힘 반동이 리셋 구간에 닿지 않도록 두는 여유. */
+const MOBILE_CHROME_COLLAPSE_MARGIN = 32;
+/* 접었다 폈다 하는 영역. 이 두 슬롯 높이의 합이 곧 반동 크기입니다. */
+const MOBILE_CHROME_SLOTS = ".public-game-header__search-slot, .public-game-header__nav-slot";
 
 export function PublicAppHeader({
   locale,
@@ -177,6 +183,16 @@ export function PublicAppHeader({
     let scrollDirection = 0;
     let settleUntil = 0;
 
+    const collapsibleHeight = (): number => {
+      const root = headerRef.current;
+      if (!root) return 0;
+      let total = 0;
+      for (const slot of root.querySelectorAll(MOBILE_CHROME_SLOTS)) {
+        total += slot.getBoundingClientRect().height;
+      }
+      return total;
+    };
+
     const resetMobileChrome = () => {
       lastScrollY = window.scrollY;
       directionStartY = lastScrollY;
@@ -189,7 +205,7 @@ export function PublicAppHeader({
       window.cancelAnimationFrame(animationFrame);
       animationFrame = window.requestAnimationFrame(() => {
         const currentScrollY = Math.max(0, window.scrollY);
-        if (!mobileMedia.matches || currentScrollY <= 24) {
+        if (!mobileMedia.matches || currentScrollY <= MOBILE_CHROME_RESET_SCROLL) {
           resetMobileChrome();
           return;
         }
@@ -212,6 +228,14 @@ export function PublicAppHeader({
 
         const directionTravel = Math.abs(currentScrollY - directionStartY);
         if (scrollDirection > 0 && directionTravel >= 20) {
+          // 접으면 상단바 높이만큼 문서가 짧아지고 브라우저가 scroll 위치를 그만큼
+          // 되돌립니다. 화면 위쪽에서는 그 반동이 리셋 구간(24px)까지 닿아 곧바로
+          // 다시 펼쳐지고, 사용자가 천천히 내리는 동안 이 왕복이 계속 반복됩니다.
+          // 되돌아가도 리셋 구간에 닿지 않을 만큼 내려온 뒤에만 접습니다.
+          if (currentScrollY < collapsibleHeight() + MOBILE_CHROME_RESET_SCROLL + MOBILE_CHROME_COLLAPSE_MARGIN) {
+            lastScrollY = currentScrollY;
+            return;
+          }
           setMobileChromeScrolled(true);
           settleUntil = performance.now() + MOBILE_CHROME_SETTLE_MS;
           directionStartY = currentScrollY;

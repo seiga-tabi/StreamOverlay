@@ -24,3 +24,9 @@
 @import "./pages/public-lol/22-match-card.css";
 /* 프로필 히어로 리디자인. 같은 방식으로 pages layer 에서 레이아웃을 단독 소유합니다. */
 @import "./pages/public-lol/23-profile-hero.css";
+/* 홈 검색바 모바일 잘림 보정. */
+@import "./pages/public-lol/24-home-search.css";
+/* 전적 사이드바 리디자인. pages layer 에서 단독 소유합니다. */
+@import "./pages/public-lol/25-profile-sidebar.css";
+/* 참여 페이지 리디자인. pages layer 에서 단독 소유합니다. */
+@import "./pages/public-lol/26-participation.css";

@@ -63,6 +63,16 @@ test("production runtime config는 HTTPS 공개 origin만 허용한다", () => {
   );
 });
 
+test("legacy overlay origin도 허용 전에 HTTPS origin으로 검증한다", () => {
+  const value = validRuntime();
+  value.public.overlayOrigin = "http://overlay.yoro.gg";
+  assert.throws(
+    () => parseYoroRuntimeConfig(value),
+    (error) => error instanceof YoroRuntimeConfigError
+      && error.code === "runtime_public_overlay_origin_invalid"
+  );
+});
+
 test("활성 Discord 기능은 공개 ID와 callback 설정을 요구한다", () => {
   const value = validRuntime();
   delete value.discord;
@@ -73,12 +83,14 @@ test("활성 Discord 기능은 공개 ID와 callback 설정을 요구한다", ()
   );
 });
 
-test("정상 runtime config를 정규화하고 제거된 Agent 설정은 활성화하지 않는다", () => {
+test("정상 runtime config를 정규화하고 제거된 legacy 설정은 활성화하지 않는다", () => {
   const value = validRuntime();
+  value.public.overlayOrigin = "https://overlay.yoro.gg";
   value.discord.prefixCommandsEnabled = true;
   const parsed = parseYoroRuntimeConfig(value);
   assert.equal(parsed.environment, "production");
   assert.equal(parsed.public.baseUrl, "https://yoro.gg");
+  assert.equal(Object.hasOwn(parsed.public, "overlayOrigin"), false);
   assert.equal(Object.hasOwn(parsed.features, "agentIngestion"), false);
   assert.equal(Object.hasOwn(parsed, "agent"), false);
   assert.equal(parsed.database?.poolMax, 10);

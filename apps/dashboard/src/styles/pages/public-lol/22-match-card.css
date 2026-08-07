@@ -319,7 +319,9 @@
 
   .public-match-card {
     position: relative;
-    overflow: hidden;
+    /* tooltip 이 카드 아래로 8px 잘리던 문제 때문에 clipping 을 풀었습니다.
+       모서리 처리는 각 자식이 스스로 radius 를 갖도록 바꿨습니다. */
+    overflow: visible;
     border: 1px solid var(--yoro-color-border-on-dark);
     border-radius: var(--yoro-radius-md);
     background: var(--yoro-color-ground-surface);
@@ -332,6 +334,7 @@
     position: absolute;
     inset: 0 auto 0 0;
     width: .3125rem;
+    border-radius: var(--yoro-radius-md) 0 0 var(--yoro-radius-md);
   }
 
   /* 승패는 좌측 스트라이프 + 배경 틴트 + 문자 배지 3중으로 인코딩합니다. */
@@ -352,6 +355,12 @@
   .public-match-card.loss::before { background: var(--yoro-color-match-loss-accent); }
   .public-match-card.unknown::before { background: var(--yoro-color-ground-muted); }
   .public-match-card:hover { border-color: var(--yoro-color-border-on-dark-strong); }
+
+  /* 카드마다 z-index 1 짜리 stacking context 가 생겨, 그냥 두면 아래 카드가
+     tooltip 을 덮습니다. tooltip 을 띄운 카드만 위로 올립니다. */
+  .public-match-card:has(:is(.public-match-card-score, .public-match-card-expand):is(:hover, :focus-visible)) {
+    z-index: var(--yoro-z-raised);
+  }
 
   /* MVP·ACE 는 금색·은색 shimmer 로 구분합니다. */
   .public-match-card:is(.highlight-mvp, .highlight-ace)::after {
@@ -588,26 +597,48 @@
     line-height: 1;
   }
 
-  .public-match-card-score.metric-tone-excellent {
+  /* 등급 배지는 metric-tone-* 이 아니라 data-grade 로 칠합니다.
+     legacy 의 .metric-tone-excellent 가 다크에서 color: #34d399 !important 로
+     글자색을 덮어써, 금색 배경 위에 민트색 글자가 얹히기 때문입니다.
+     !important 는 layer 순서를 뒤집으므로 pages layer 에서 이길 수 없습니다.
+     글자색은 legacy 선택자가 닿지 않는 안쪽 b 에 직접 지정해 상속을 끊습니다. */
+  .public-match-card-score[data-grade="S+"],
+  .public-match-card-score[data-grade="S"] {
     background: var(--yoro-theme-match-score-mvp-background);
+    border-color: transparent;
+  }
+
+  .public-match-card-score[data-grade="S+"] > b,
+  .public-match-card-score[data-grade="S"] > b {
     color: var(--yoro-color-match-score-on-bright);
   }
 
-  .public-match-card-score.metric-tone-good {
+  .public-match-card-score[data-grade="A+"],
+  .public-match-card-score[data-grade="A"] {
     background: color-mix(in srgb, var(--yoro-color-match-score-good) 16%, transparent);
     border-color: color-mix(in srgb, var(--yoro-color-match-score-good) 45%, transparent);
+  }
+
+  .public-match-card-score[data-grade="A+"] > b,
+  .public-match-card-score[data-grade="A"] > b {
     color: var(--yoro-color-match-score-good);
   }
 
-  .public-match-card-score.metric-tone-neutral {
+  .public-match-card-score[data-grade="B"] {
     background: color-mix(in srgb, var(--yoro-color-ground-muted) 14%, transparent);
     border-color: color-mix(in srgb, var(--yoro-color-ground-muted) 34%, transparent);
-    color: var(--yoro-color-ground-muted);
   }
 
-  .public-match-card-score:is(.metric-tone-warning, .metric-tone-bad) {
+  .public-match-card-score[data-grade="B"] > b { color: var(--yoro-color-text-on-dark); }
+
+  .public-match-card-score[data-grade="C"],
+  .public-match-card-score[data-grade="D"] {
     background: color-mix(in srgb, var(--yoro-color-match-score-bad) 14%, transparent);
     border-color: color-mix(in srgb, var(--yoro-color-match-score-bad) 40%, transparent);
+  }
+
+  .public-match-card-score[data-grade="C"] > b,
+  .public-match-card-score[data-grade="D"] > b {
     color: var(--yoro-color-match-score-bad);
   }
 
@@ -620,7 +651,7 @@
     position: absolute;
     top: calc(100% + var(--yoro-space-1));
     left: 50%;
-    z-index: 2;
+    z-index: var(--yoro-z-dropdown);
     display: none;
     transform: translateX(-50%);
     padding: var(--yoro-space-1) var(--yoro-space-2);
@@ -862,7 +893,7 @@
     position: absolute;
     top: 50%;
     right: calc(100% + var(--yoro-space-1));
-    z-index: 2;
+    z-index: var(--yoro-z-dropdown);
     display: none;
     margin-top: -.875rem;
     padding: var(--yoro-space-1) var(--yoro-space-2);
@@ -882,6 +913,8 @@
   /* 확장 패널 — 내부 구성은 기존 스타일을 그대로 씁니다. */
   .public-match-card > .public-match-expanded {
     border-top: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: 0 0 var(--yoro-radius-md) var(--yoro-radius-md);
+    overflow: hidden;
     background: color-mix(in srgb, var(--yoro-color-ground) 50%, transparent);
     animation: public-match-card-expand var(--yoro-motion-duration-base) var(--yoro-motion-ease-standard) both;
   }
@@ -907,14 +940,18 @@
     .public-match-card-stat-suffix { display: none; }
   }
 
+  /* 이 구간의 하한은 container 721px 입니다. 그 폭에서 track 합과 gap,
+     좌우 padding 을 더한 값이 container 를 넘으면 카드가 늘어나 페이지에
+     가로 스크롤이 생기므로 gap 까지 함께 줄입니다. */
   @container match-list (max-width: 980px) {
     .public-match-card-summary {
+      column-gap: var(--yoro-space-3);
       grid-template-columns:
-        minmax(5.75rem, 7rem)
-        minmax(9rem, 13rem)
-        8.25rem
-        10.25rem
-        7.5rem
+        minmax(5rem, 6.5rem)
+        minmax(7.5rem, 13rem)
+        7.25rem
+        9.5rem
+        6.75rem
         2.75rem;
     }
     .public-match-card-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -925,11 +962,13 @@
      3·4열은 고정 폭입니다. 행마다 grid 가 따로 계산되므로 auto 로 두면
      KDA 자릿수에 따라 등급 배지의 x 좌표가 행마다 흔들립니다. */
   @container match-list (max-width: 720px) {
+    /* 등급을 오른쪽 묶음에서 떼어 행 가운데 열에 세웁니다.
+       오른쪽에는 KDA 와 확장 버튼만 남아 여백이 생깁니다. */
     .public-match-card-summary {
-      grid-template-columns: 2.25rem minmax(0, 1fr) 6.75rem 2rem;
+      grid-template-columns: 2.25rem minmax(0, 1fr) 2rem 4.25rem 2.75rem;
       grid-template-rows: auto auto auto;
       gap: .1875rem .375rem;
-      padding: var(--yoro-space-2) var(--yoro-space-2) var(--yoro-space-2) var(--yoro-space-3);
+      padding: var(--yoro-space-2) var(--yoro-space-3);
     }
 
     .public-match-card-champion { display: contents; }
@@ -950,8 +989,8 @@
        포지션은 챔피언 셀 title 로, 큐는 바로 위 필터 칩과 펼침 패널에서 확인합니다. */
     .public-match-card-role { display: none; }
     .public-match-card-outcome-line strong { display: none; }
-    /* MVP·ACE 는 이름 줄 오른쪽 끝으로 보내 KDA 줄의 폭을 비웁니다. */
-    .public-match-card-highlight { margin-left: auto; }
+    /* MVP·ACE 는 챔피언 이름 바로 옆에 붙습니다. */
+    .public-match-card-highlight { margin-left: 0; }
 
     .public-match-card-outcome {
       grid-column: 2;
@@ -969,22 +1008,38 @@
     }
     .public-match-card-result { width: 1.125rem; height: 1.125rem; border-radius: .25rem; }
 
-    /* 등급 배지는 3열 왼쪽 끝, KDA 는 오른쪽 끝 — 두 축 모두 행마다 일치합니다. */
-    .public-match-card-perf { grid-column: 3; grid-row: 1 / span 2; gap: var(--yoro-space-2); }
-    .public-match-card-score { width: 2rem; height: 2rem; border-radius: var(--yoro-radius-xs); }
-    .public-match-card-score > b { font-size: var(--yoro-font-size-sm); }
-    .public-match-card-kda { flex: 1; min-width: 0; align-items: flex-end; }
-    .public-match-card-kda > strong { font-size: var(--yoro-font-size-sm); }
+    /* 등급과 KDA 를 각각 독립 열에 놓기 위해 묶음을 풉니다.
+       3~5열이 고정 폭이라 KDA 자릿수와 무관하게 등급 x 좌표가 행마다 같습니다. */
+    .public-match-card-perf { display: contents; }
 
-    /* 카드 전체가 확장 토글이지만 버튼도 눌러지는 모양을 유지합니다. */
-    .public-match-card-expand {
-      grid-column: 4;
+    .public-match-card-score {
+      grid-column: 3;
       grid-row: 1 / span 2;
       justify-self: center;
       width: 2rem;
-      height: 2.25rem;
-      /* 우측 정렬된 KDA·지표가 버튼에 붙어 보이지 않도록 띄웁니다. */
-      margin-left: var(--yoro-space-1);
+      height: 2rem;
+      border-radius: var(--yoro-radius-xs);
+    }
+    .public-match-card-score > b { font-size: var(--yoro-font-size-sm); }
+
+    .public-match-card-kda {
+      grid-column: 4;
+      grid-row: 1 / span 2;
+      align-items: flex-end;
+      min-width: 0;
+    }
+    .public-match-card-kda > strong { font-size: var(--yoro-font-size-sm); }
+
+    /* 카드 전체가 확장 토글이지만 버튼도 눌러지는 모양을 유지합니다.
+       legacy 가 button[aria-label] 에 min-width 44px 를 !important 로 걸어 두므로
+       열도 44px 로 잡습니다. 2rem 으로 두면 버튼이 열 밖으로 6px 씩 번져
+       KDA 와 맞닿고 카드 오른쪽 padding 도 넘습니다. */
+    .public-match-card-expand {
+      grid-column: 5;
+      grid-row: 1 / span 2;
+      justify-self: center;
+      width: var(--yoro-size-touch-target);
+      height: var(--yoro-size-touch-target);
     }
 
     .public-match-card-outcome small { flex: none; }
@@ -1013,8 +1068,11 @@
     /* 360px 처럼 아주 좁은 폭에서도 넘치지 않도록 장비 칸은 남은 폭에 맞춰 줄어듭니다.
        고정 px 로 두면 이웃 열을 침범합니다. */
     .public-match-card-items {
-      grid-column: 2;
+      grid-column: 2 / 4;
       grid-row: 3;
+      /* 데스크톱의 justify-self: center 가 남으면 shrink-to-fit 이 되어
+         유연한 아이템 격자가 0 폭으로 붕괴합니다. */
+      justify-self: stretch;
       min-width: 0;
       gap: var(--yoro-space-1);
     }
@@ -1036,7 +1094,7 @@
     /* 지표는 3열 안에만 놓아 위쪽 KDA 와 오른쪽 끝을 맞춥니다.
        4열까지 넘기면 카드 가장자리에 밀착해 보입니다. */
     .public-match-card-stats {
-      grid-column: 3;
+      grid-column: 4 / 6;
       grid-row: 3;
       display: flex;
       justify-content: flex-end;
@@ -1059,6 +1117,17 @@
     .public-match-queue-chips { width: 100%; }
     .public-match-queue-chips button { min-height: var(--yoro-size-touch-target); }
     .public-match-skeleton-row { height: 5rem; }
+  }
+
+  /* 360px 급에서는 이름 줄이 먼저 눌립니다. 오른쪽 고정 열과 배지 여백을 조금씩 줄여
+     5글자 챔피언 이름까지 잘리지 않게 합니다. */
+  @container match-list (max-width: 400px) {
+    .public-match-card-summary {
+      grid-template-columns: 2.25rem minmax(0, 1fr) 2rem 3.75rem 2.75rem;
+      gap: .1875rem .3125rem;
+    }
+    .public-match-card-highlight { padding-inline: .2rem; }
+    .public-match-card-stats { gap: var(--yoro-space-1); }
   }
 
   @media (prefers-reduced-motion: reduce) {

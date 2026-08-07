@@ -164,13 +164,18 @@ export function parseYoroRuntimeConfig(value: unknown): YoroRuntimeConfig {
   const environment = root.environment as YoroRuntimeEnvironment;
 
   const publicConfig = record(root.public, "runtime_public");
-  exactKeys(publicConfig, ["baseUrl", "dashboardOrigin"], "runtime_public");
+  // schema v1 운영 파일에 존재하던 overlayOrigin은 사용처가 제거됐지만,
+  // 기존 배포 설정을 깨지 않도록 형식만 검증한 뒤 런타임 결과에서는 무시합니다.
+  exactKeys(publicConfig, ["baseUrl", "dashboardOrigin", "overlayOrigin"], "runtime_public");
   const baseUrl = origin(publicConfig.baseUrl, "runtime_public_base_url", environment);
   const dashboardOrigin = origin(
     publicConfig.dashboardOrigin,
     "runtime_public_dashboard_origin",
     environment
   );
+  if (publicConfig.overlayOrigin !== undefined) {
+    origin(publicConfig.overlayOrigin, "runtime_public_overlay_origin", environment);
+  }
 
   const features = record(root.features, "runtime_features");
   exactKeys(features, [

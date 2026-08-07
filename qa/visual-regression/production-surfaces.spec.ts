@@ -360,6 +360,32 @@ test("모바일 LoL 상단 탐색과 검색은 스크롤 방향에 따라 접히
   await expect(header).not.toHaveClass(/mobile-chrome-scrolled/u);
   await expect(nav).toHaveCSS("opacity", "1");
   await expect(search).toHaveCSS("opacity", "1");
+
+  // 천천히 내릴 때 상단바가 접혔다 펼쳐졌다를 반복하면 안 됩니다.
+  // 접히면 문서가 슬롯 높이만큼 짧아지고 브라우저가 scroll 을 되돌리는데,
+  // 그 반동이 리셋 구간(24px)에 닿으면 곧바로 다시 펼쳐져 왕복이 반복됩니다.
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForTimeout(400);
+  await page.evaluate(() => {
+    (window as unknown as { __chromeLog: number[] }).__chromeLog = [];
+    addEventListener("scroll", () => {
+      const collapsed = document.querySelector(".lol-public-game-header")?.classList.contains("mobile-chrome-scrolled") ? 1 : 0;
+      (window as unknown as { __chromeLog: number[] }).__chromeLog.push(collapsed);
+    }, { passive: true });
+  });
+  await page.mouse.move(180, 600);
+  for (let step = 0; step < 16; step += 1) {
+    await page.mouse.wheel(0, 28);
+    await page.waitForTimeout(150);
+  }
+  await page.waitForTimeout(1_200);
+  const toggles = await page.evaluate(() => {
+    const log = (window as unknown as { __chromeLog: number[] }).__chromeLog;
+    let count = 0;
+    for (let index = 1; index < log.length; index += 1) if (log[index] !== log[index - 1]) count += 1;
+    return count;
+  });
+  expect(toggles, "천천히 내리는 동안 상단바 접힘 전환은 한 번이어야 합니다.").toBeLessThanOrEqual(1);
 });
 
 test("전적 아이템·점수·상세 Tooltip은 이름과 안정적인 레이어를 유지한다", async ({ page }) => {
@@ -425,19 +451,20 @@ test("전적 아이템·점수·상세 Tooltip은 이름과 안정적인 레이�
 
   if (viewportWidth <= 768) {
     // 모바일은 3행 압축 카드입니다. 포트레이트가 1·2행을 관통하고
-    // 성과(등급+KDA)가 같은 높이로 오른쪽에 붙습니다.
+    // 등급은 행 가운데 열, KDA·상세 버튼은 그 오른쪽에 따로 섭니다.
+    // (성과 묶음은 display: contents 라 자체 box 가 없습니다.)
     const portrait = row.locator(".public-match-card-portrait");
-    const perf = row.locator(".public-match-card-perf");
     const items = row.locator(".public-match-card-items");
-    const [portraitBox, perfBox, itemsBox] = await Promise.all([
+    const [portraitBox, scoreBox, itemsBox] = await Promise.all([
       portrait.boundingBox(),
-      perf.boundingBox(),
+      score.boundingBox(),
       items.boundingBox(),
     ]);
     expect(portraitBox).not.toBeNull();
-    expect(perfBox).not.toBeNull();
+    expect(scoreBox).not.toBeNull();
     expect(itemsBox).not.toBeNull();
-    expect(perfBox?.x ?? 0, "성과 묶음은 챔피언 묶음 오른쪽에 있어야 합니다.")
+    await expect(row.locator(".public-match-card-perf")).toHaveCSS("display", "contents");
+    expect(scoreBox?.x ?? 0, "등급 배지는 챔피언 묶음 오른쪽에 있어야 합니다.")
       .toBeGreaterThan((portraitBox?.x ?? 0) + (portraitBox?.width ?? 0));
     expect(itemsBox?.y ?? 0, "장비 행은 챔피언 묶음 아래에 있어야 합니다.")
       .toBeGreaterThanOrEqual((portraitBox?.y ?? 0) + (portraitBox?.height ?? 0) - 1);
@@ -595,7 +622,8 @@ test("LoL 프로필 플랫폼은 주요 viewport에서 내부 탐색과 문서 �
     const matchFilter = recentMatches.locator(".public-match-filter-panel");
     const resultsColumn = page.locator(".public-overview-results-column");
     const aggregatePanel = page.locator(".public-overview-dashboard-panel");
-    const aggregateCard = aggregatePanel.locator(".public-aggregate-card");
+    // 사이드바는 지표 프로파일 · LP 기록 · 포지션 세 카드로 재구성했습니다.
+    const metricCard = aggregatePanel.locator(".public-profile-metric-profile");
     const matchSummary = recentMatches.locator(".public-match-card-summary").first();
     await expect(profile).toBeVisible();
     await expect(tabs.getByRole("button")).toHaveCount(5);
@@ -606,7 +634,10 @@ test("LoL 프로필 플랫폼은 주요 viewport에서 내부 탐색과 문서 �
     await expect(page.locator(".public-profile-rank-section")).toHaveCount(0);
     await expect(resultsColumn.locator("#public-recent-matches")).toHaveCount(1);
     await expect(aggregatePanel).toHaveCount(1);
-    await expect(aggregateCard.locator(".public-aggregate-insights")).toHaveCount(0);
+    await expect(aggregatePanel.locator(".public-profile-side-card")).toHaveCount(3);
+    await expect(metricCard.locator(".public-profile-metric-row")).toHaveCount(5);
+    // 동티어 비교 데이터가 없는 동안에는 기준선을 그리지 않습니다.
+    await expect(metricCard.locator(".public-profile-metric-bar > i")).toHaveCount(0);
     await expect(page.locator(".public-profile-details-toggle")).toHaveCount(0);
 
     const heroPrecedesMatches = await page.evaluate(() => {
@@ -639,12 +670,16 @@ test("LoL 프로필 플랫폼은 주요 viewport에서 내부 탐색과 문서 �
     const heroOverflow = await hero.evaluate((element) => element.scrollWidth - element.clientWidth);
     expect(heroOverflow, `${viewport.width}px에서 히어로 내부에 수평 overflow가 없어야 합니다.`).toBeLessThanOrEqual(1);
 
-    const aggregateOverflow = await aggregateCard.locator(".public-aggregate-hero").evaluate((element) => ({
+    const metricOverflow = await metricCard.evaluate((element) => ({
       clientWidth: element.clientWidth,
       scrollWidth: element.scrollWidth,
+      // 값 열 폭이 고정이라 막대 시작 x 는 모든 행에서 같아야 합니다.
+      barLefts: [...new Set([...element.querySelectorAll(".public-profile-metric-bar")]
+        .map((bar) => Math.round(bar.getBoundingClientRect().left)))].length,
     }));
-    expect(aggregateOverflow.scrollWidth, `${viewport.width}px에서 종합 성과 내부가 잘리지 않아야 합니다.`)
-      .toBeLessThanOrEqual(aggregateOverflow.clientWidth + 1);
+    expect(metricOverflow.scrollWidth, `${viewport.width}px에서 지표 카드 내부가 잘리지 않아야 합니다.`)
+      .toBeLessThanOrEqual(metricOverflow.clientWidth + 1);
+    expect(metricOverflow.barLefts, `${viewport.width}px에서 지표 막대는 같은 x에서 시작해야 합니다.`).toBe(1);
 
     const diagnostics = await page.evaluate(() => ({
       clientWidth: document.documentElement.clientWidth,
@@ -698,17 +733,22 @@ test("LoL 프로필 플랫폼은 주요 viewport에서 내부 탐색과 문서 �
       expect(championNameBox).not.toBeNull();
       if (await highlightBadge.count()) {
         const highlightBadgeBox = await highlightBadge.boundingBox();
-        expect(highlightBadgeBox?.x ?? 0, "MVP·ACE는 챔피언 이름 줄 오른쪽 끝에 있어야 합니다.")
-          .toBeGreaterThan((championNameBox?.x ?? 0) + (championNameBox?.width ?? 0));
+        const badgeGap = (highlightBadgeBox?.x ?? 0) - ((championNameBox?.x ?? 0) + (championNameBox?.width ?? 0));
+        expect(badgeGap, "MVP·ACE는 챔피언 이름 오른쪽에 있어야 합니다.").toBeGreaterThan(0);
+        expect(badgeGap, "MVP·ACE는 챔피언 이름 바로 옆에 붙어야 합니다.").toBeLessThanOrEqual(8);
       }
       expect((itemsBox?.y ?? 0) - ((championBox?.y ?? 0) + (championBox?.height ?? 0)), "챔피언 묶음과 장비 행의 간격이 과도하지 않아야 합니다.")
         .toBeLessThanOrEqual(10);
-      // 등급 배지 왼쪽 끝과 KDA·지표 오른쪽 끝이 같은 축에 놓여야 행마다 정렬이 흔들리지 않습니다.
+      // 등급 배지는 행 가운데 열에 홀로 서고, 오른쪽에는 KDA 와 상세 버튼만 남습니다.
       expect(scoreBox?.x ?? 0, "등급 배지는 KDA 왼쪽에 있어야 합니다.")
         .toBeLessThanOrEqual((kdaBox?.x ?? 0) + 1);
-      expect(Math.abs(((kdaBox?.x ?? 0) + (kdaBox?.width ?? 0)) - ((statsBox?.x ?? 0) + (statsBox?.width ?? 0))), "KDA와 지표의 오른쪽 끝이 같아야 합니다.")
+      expect(kdaBox?.x ?? 0, "KDA는 등급 배지와 겹치지 않아야 합니다.")
+        .toBeGreaterThanOrEqual((scoreBox?.x ?? 0) + (scoreBox?.width ?? 0));
+      // 지표 행의 오른쪽 끝은 상세 버튼 오른쪽 끝과 같은 축입니다.
+      expect(Math.abs(((statsBox?.x ?? 0) + (statsBox?.width ?? 0)) - ((expandBox?.x ?? 0) + (expandBox?.width ?? 0))), "지표와 상세 버튼의 오른쪽 끝이 같아야 합니다.")
         .toBeLessThanOrEqual(2);
-      expect((expandBox?.x ?? 0) - ((kdaBox?.x ?? 0) + (kdaBox?.width ?? 0)), "지표와 상세 버튼 사이에 여백이 있어야 합니다.")
+      // KDA 는 상세 버튼 열 안쪽에 머물러 버튼과 맞닿지 않아야 합니다.
+      expect((expandBox?.x ?? 0) - ((kdaBox?.x ?? 0) + (kdaBox?.width ?? 0)), "KDA와 상세 버튼 사이에 여백이 있어야 합니다.")
         .toBeGreaterThanOrEqual(2);
     }
 

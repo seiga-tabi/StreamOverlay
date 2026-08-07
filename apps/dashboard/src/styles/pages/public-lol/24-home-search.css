@@ -1,0 +1,30 @@
+/* 홈 히어로 검색바 — 모바일 모서리 잘림 보정.
+ *
+ * 원 설계는 "서버 배지가 폼 왼쪽 끝에 붙는 segmented" 형태라
+ * 폼의 padding-inline-start 가 0 이고 배지가 형태를 이어받습니다.
+ * 그런데 760px 이하에서 폼은 border-radius 22px, 배지는 15px 로 어긋나 있어
+ * 배지의 좌상·좌하 모서리가 폼 곡선 밖으로 삐져나와 잘려 보였습니다.
+ * 우측 제출 버튼(46×42, radius 14px)도 곡선과 1px 여유밖에 없었습니다.
+ *
+ * 이 파일만 legacy layer 를 다시 열어 마지막 순서로 들어갑니다.
+ * 대상 선언이 07-late-overrides.css 에서 !important 로 걸려 있어
+ * pages layer 에서는 이길 수 없기 때문입니다(important 는 layer 순서가 뒤집힙니다).
+ * 선택자 특이도도 그 파일과 같게 맞춰 두었습니다.
+ */
+
+@layer legacy {
+  @media (max-width: 760px) {
+    /* 폼 radius 22px − 테두리 1px = 21px. 배지의 좌측 모서리를 여기에 맞춥니다. */
+    .public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-server.public-server-pill.yoro-button {
+      border-radius: 21px 0 0 21px !important;
+    }
+
+    /* 제출 버튼은 폼 안쪽에 떠 있으므로 원형으로 두면 곡선과 부딪히지 않습니다. */
+    .public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-submit.yoro-button {
+      width: 42px !important;
+      min-width: 42px !important;
+      height: 42px !important;
+      border-radius: var(--yoro-radius-pill) !important;
+    }
+  }
+}

@@ -19,10 +19,13 @@ import { apiBase } from "../api/client";
 import { publicLegalRuntimeConfig } from "../runtime-config";
 import { trackGoogleAnalyticsEvent } from "../analytics/google-analytics";
 import {
+  canCancelViewerQueue,
   getParticipationDisplayPhase,
+  getViewerQueuePhase,
   getViewerAvailableActions,
   isViewerParticipationActive,
-  type ParticipationDisplayPhase
+  type ParticipationDisplayPhase,
+  type ViewerQueuePhase
 } from "../features/participation/participation-display";
 import {
   createPublicCommunityComment,
@@ -88,7 +91,14 @@ import {
   PlayerItemBuild as FeaturePlayerItemBuild,
   PlayerLoadoutBuild as FeaturePlayerLoadoutBuild,
   PublicMatchFilterBar as FeaturePublicMatchFilterBar,
+  ParticipationMyStatus,
+  ParticipationQueueList,
+  ParticipationStreamerPicks,
+  ParticipationStreamerSwitcher,
   ProfileHeroRank as FeatureProfileHeroRank,
+  ProfileLpRecordCard as FeatureProfileLpRecordCard,
+  ProfileMetricProfileCard as FeatureProfileMetricProfileCard,
+  ProfileRoleCard as FeatureProfileRoleCard,
   ProfileStreamerCast as FeatureProfileStreamerCast,
   ProfileMetricStrip as FeatureProfileMetricStrip,
   ProfileTopPanel as FeatureProfileTopPanel,
@@ -108,7 +118,11 @@ import {
   searchProfile,
   searchSuggestions,
   readPublicApiErrorMessage as readErrorMessage,
+  type ParticipationStreamerOption,
   type ProfileHeroRankQueue,
+  type ProfileLpChangeEntry,
+  type ProfileMetricRow,
+  type ProfileRoleEntry,
   type ProfileHeroRankTrend,
   type ProfileTopIdentityChampion,
   type PublicMatchFilterBarText,
@@ -598,28 +612,7 @@ async function postPublicParticipationCancel(input: { streamerId?: string; publi
   return (await response.json()) as PublicParticipationCancelResponse;
 }
 
-async function postPublicParticipationCheckIn(publicSessionId: string): Promise<PublicParticipationStateResponse> {
-  const response = await fetch(`${apiBase}/api/public/participation/sessions/${encodeURIComponent(publicSessionId)}/check-in`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: "{}"
-  });
-  if (!response.ok) throw new Error(await readErrorMessage(response));
-  const body = await response.json() as { state: PublicParticipationStateResponse };
-  return body.state;
-}
 
-async function postPublicParticipationSkip(publicSessionId: string): Promise<PublicParticipationCancelResponse> {
-  const response = await fetch(`${apiBase}/api/public/participation/sessions/${encodeURIComponent(publicSessionId)}/skip`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: "{}"
-  });
-  if (!response.ok) throw new Error(await readErrorMessage(response));
-  return (await response.json()) as PublicParticipationCancelResponse;
-}
 
 function communityPostRiotId(post: CommunityPost | undefined): string | undefined {
   const gameName = post?.riotGameName?.trim();
@@ -1979,84 +1972,140 @@ function FlexRankPlaceholder() {
   );
 }
 
+/* 지표별 참조 최대치. 동티어 백분위가 없을 때 막대 길이를 만드는 기준입니다.
+   백분위(benchmarkRatio)가 들어오면 이 값 대신 그 기준을 씁니다. */
+const METRIC_SCALE_MAX = {
+  kda: 6,
+  killParticipation: 100,
+  csPerMinute: 10,
+  damageShare: 40,
+  visionScore: 40,
+} as const;
+
+function metricRatio(value: number | undefined, max: number): number {
+  if (value === undefined || !Number.isFinite(value)) return 0;
+  return Math.max(0, Math.min(100, (value / max) * 100));
+}
+
+/** rankHistory 의 연속한 두 점 차이가 곧 LP 변동입니다. 최신 3건만 씁니다. */
+function profileLpChangeEntries(profile: PublicLolProfile): ProfileLpChangeEntry[] {
+  const history = [...(profile.rankHistory ?? [])]
+    .filter((point) => Number.isFinite(Date.parse(point.date)))
+    .sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
+  const entries: ProfileLpChangeEntry[] = [];
+  for (let index = history.length - 1; index > 0 && entries.length < 3; index -= 1) {
+    const current = history[index];
+    const previous = history[index - 1];
+    if (!current || !previous) continue;
+    const delta = current.leaguePoints - previous.leaguePoints;
+    if (delta === 0) continue;
+    entries.push({
+      key: `${current.date}:${index}`,
+      dateLabel: formatDate(current.date).split(" ")[0] ?? formatDate(current.date),
+      delta,
+      deltaLabel: `${delta > 0 ? "+" : ""}${delta} LP`,
+      rangeLabel: `${previous.leaguePoints} → ${current.leaguePoints} LP`,
+    });
+  }
+  return entries;
+}
+
+function ProfileSidebarLpChart({ values }: { values: number[] }) {
+  const width = 256;
+  const height = 104;
+  const pad = 4;
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const span = Math.max(1, max - min);
+  const coords = values.map((value, index) => [
+    pad + (index * (width - pad * 2)) / Math.max(1, values.length - 1),
+    height - pad - ((value - min) / span) * (height - pad * 2),
+  ] as const);
+  const line = coords.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+  const area = `${pad},${height - pad} ${line} ${width - pad},${height - pad}`;
+  const last = coords.at(-1) ?? [pad, height - pad] as const;
+
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${t().rankLpTrendLabel} ${t().period30}`}>
+      <line className="grid" x1="0" y1={height * .34} x2={width} y2={height * .34} strokeDasharray="3 4" />
+      <line className="grid" x1="0" y1={height * .67} x2={width} y2={height * .67} strokeDasharray="3 4" />
+      <polygon className="area" points={area} />
+      <polyline className="line" points={line} fill="none" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+      <circle className="head" cx={last[0].toFixed(1)} cy={last[1].toFixed(1)} r="3.5" />
+    </svg>
+  );
+}
+
 function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
-  const roles = profile.rolePerformance.slice(0, 5);
+  const summary = profile.summary;
   const aggregateSummary = summarizeMatches(recentAnalysisMatches(profile));
-  const recentLosses = Math.max(0, aggregateSummary.recentGames - aggregateSummary.recentWins);
-  const aggregateRank = soloRankStats(profile) ?? flexRankStats(profile) ?? profile.rankedStats;
-  const aggregateTierIcon = assetUrl(aggregateRank?.tierIconUrl);
   const aggregateGrade = aggregatePerformanceGrade(profile);
   const aggregateScore = aggregatePerformanceScore(profile);
-  const winRate = Math.max(0, Math.min(100, aggregateSummary.recentWinRate));
+  const trend = rankTrendLine(profile);
+  const soloStats = soloRankStats(profile) ?? profile.rankedStats;
+  const lpEntries = profileLpChangeEntries(profile);
+  const mainRole = profile.roleAnalysis?.mainRole;
+
+  const metrics: ProfileMetricRow[] = [
+    { key: "kda", label: t().kda, value: formatDecimal(summary.averageKda, 2), ratio: metricRatio(summary.averageKda, METRIC_SCALE_MAX.kda) },
+    { key: "kill-participation", label: t().killParticipation, value: formatPercent(summary.averageKillParticipation), ratio: metricRatio(summary.averageKillParticipation, METRIC_SCALE_MAX.killParticipation) },
+    { key: "cs-per-minute", label: t().perMinuteCs, value: formatDecimal(summary.averageCsPerMinute, 1), ratio: metricRatio(summary.averageCsPerMinute, METRIC_SCALE_MAX.csPerMinute) },
+    { key: "damage-share", label: t().matchStatDamageShare, value: formatPercent(summary.averageDamageShare), ratio: metricRatio(summary.averageDamageShare, METRIC_SCALE_MAX.damageShare) },
+    { key: "vision", label: t().vision, value: formatDecimal(summary.averageVisionScore, 1), ratio: metricRatio(summary.averageVisionScore, METRIC_SCALE_MAX.visionScore) },
+  ];
+
+  const roles: ProfileRoleEntry[] = profile.rolePerformance.slice(0, 5).map((role) => ({
+    key: role.role,
+    label: mainRoleLabel(role.role),
+    icon: <RoleIcon role={role.role} />,
+    isMain: role.role === mainRole,
+    winRate: role.winRate,
+    winRateLabel: formatPercent(role.winRate),
+    recordLabel: winLossText(role.wins, role.games),
+    kdaLabel: formatDecimal(role.averageKda, 1),
+  }));
+
   return (
     <section id="public-stats" className="public-overview-dashboard-panel">
-      <Card as="article" className="public-panel public-aggregate-card public-profile-shared-card" padding="md" variant="elevated">
-        <div className="public-section-head">
-          <h2  >
-            <span className="public-aggregate-title-icon" aria-hidden="true"><i /><i /><i /></span>
-            {t().aggregatePerformance}
-          </h2>
-          <Badge size="sm" tone="info">{aggregateSummary.recentGames}{t().games}</Badge>
-        </div>
-        <div className="public-aggregate-hero">
-          <div className="public-aggregate-emblem" aria-hidden="true">
-            {aggregateTierIcon ? <img src={aggregateTierIcon} alt="" /> : <span>{aggregateGrade}</span>}
-          </div>
-          <div className="public-aggregate-grade">
-            <span  >{t().aggregateGrade}</span>
-            <strong className={metricToneClass(scoreTone(aggregateScore))}>{aggregateGrade}</strong>
-            <div className="public-aggregate-record">
-              <b>{aggregateSummary.recentWins}{activePublicLocale === "ja" ? "勝" : "승"}</b>
-              <b>{recentLosses}{activePublicLocale === "ja" ? "敗" : "패"}</b>
-            </div>
-            <small>{gamesText(aggregateSummary.recentGames)} · {t().aiScore} {aggregateScore}</small>
-          </div>
-          <div className="public-aggregate-winrate" aria-label={`${t().winRate} ${formatPercent(winRate)}`}>
-            <svg viewBox="0 0 120 120" role="img">
-              <circle className="track" cx="60" cy="60" r="48" pathLength="100" />
-              <circle className="value" cx="60" cy="60" r="48" pathLength="100" strokeDasharray={`${winRate} 100`} />
-            </svg>
-            <div>
-              <span>{t().winRate}</span>
-              <strong className={metricToneClass(percentTone(winRate))}>{formatPercent(winRate)}</strong>
-            </div>
-          </div>
-        </div>
-      </Card>
-      <Card as="article" className="public-panel public-lp-trend-card public-profile-shared-card" padding="md" variant="elevated">
-        <div className="public-section-head">
-          <h2  >{t().lpTrend}</h2>
-          <StatusPill size="sm" tone="info"  >{t().period30}</StatusPill>
-        </div>
-        <div className={`public-lp-chart ${rankTrendTierClass(profile.rankedStats)}`}>
-          <LpTrendLineChart profile={profile} />
-        </div>
-      </Card>
-      <Card as="article" className="public-panel public-role-win-card public-profile-shared-card" padding="md" variant="elevated">
-        <div className="public-section-head">
-          <h2  >{t().roleWinRate}</h2>
-          <Badge size="sm" tone="info">{profile.summary.recentGames}{t().games}</Badge>
-        </div>
-        <div className="public-role-win-list">
-          {roles.length === 0 ? (
-            <EmptyState className="public-profile-shared-empty-inline" variant="search">
-              <EmptyStateIcon>?</EmptyStateIcon>
-              <EmptyStateTitle as="h3"  >{t().noData}</EmptyStateTitle>
-              <EmptyStateDescription>{t().roleWinRate}</EmptyStateDescription>
-            </EmptyState>
-          ) : roles.map((role) => (
-            <div key={role.role}>
-              <span className="public-role-win-label" title={mainRoleLabel(role.role)}>
-                <RoleIcon role={role.role} />
-                <b>{mainRoleLabel(role.role)}</b>
-              </span>
-              <div><i style={{ width: barWidth(role.winRate, 100) }} /></div>
-              <strong className={metricToneClass(percentTone(role.winRate))}>{formatPercent(role.winRate)}</strong>
-              <small>{winLossText(role.wins, role.games)}</small>
-            </div>
-          ))}
-        </div>
-      </Card>
+      <FeatureProfileMetricProfileCard
+        grade={aggregateGrade}
+        gradeClassName={metricToneClass(scoreTone(aggregateScore))}
+        metrics={metrics}
+        sampleShort={aggregateSummary.recentGames > 0 && aggregateSummary.recentGames < 10}
+        score={aggregateScore}
+        text={{
+          gradeAriaLabel: t().aggregateGrade,
+          noBenchmarkNotice: t().metricNoBenchmark,
+          sampleShortNotice: `${t().metricSampleShort} · ${t().metricSampleNeeded.replace("{count}", String(Math.max(0, 10 - aggregateSummary.recentGames)))}`,
+          title: t().metricProfileTitle,
+        }}
+      />
+
+      <FeatureProfileLpRecordCard
+        changeLabel={trend ? (trend.change === 0 ? t().lpNoChange : `${trend.change > 0 ? "+" : ""}${trend.change} LP`) : undefined}
+        changeTone={trend ? (trend.change > 0 ? "up" : trend.change < 0 ? "down" : "flat") : "flat"}
+        chart={trend && trend.points.length > 1 ? <ProfileSidebarLpChart values={trend.points.map((point) => point.value)} /> : undefined}
+        currentLabel={soloStats ? `${rankTierLabel(soloStats)} ${soloStats.leaguePoints} LP` : t().unranked}
+        entries={lpEntries}
+        recordCount={trend?.sampleCount ?? 0}
+        text={{
+          emptyDescription: t().lpRecordEmptyDescription,
+          emptyTitle: t().lpRecordEmptyTitle,
+          periodLabel: t().period30,
+          recordCountLabel: t().lpRecordCount,
+          title: t().lpRecordTitle,
+        }}
+      />
+
+      <FeatureProfileRoleCard
+        roles={roles}
+        text={{
+          emptyLabel: t().noData,
+          mainTag: t().roleMainTag,
+          periodLabel: `${t().recentGames} ${profile.summary.recentGames}${t().games}`,
+          title: t().rolePanelTitle,
+        }}
+      />
     </section>
   );
 }
@@ -2518,21 +2567,57 @@ function publicParticipationIsActiveStatus(status: ParticipationStatus): boolean
 
 type PublicParticipationConfirmAction = "cancel";
 
-const PUBLIC_PARTICIPATION_PHASE_STEPS: Array<{
-  phase: Extract<ParticipationDisplayPhase, "checking" | "waiting" | "playing" | "completed">;
-  labelKey: PublicTextKey;
-}> = [
-  { phase: "checking", labelKey: "participationStepApplication" },
-  { phase: "waiting", labelKey: "participationStepWaiting" },
-  { phase: "playing", labelKey: "participationStepGame" },
-  { phase: "completed", labelKey: "participationStepComplete" }
-];
+/** 대기열에서 뷰어 주변만 남길 때 쓰는 창 크기입니다. */
+const PUBLIC_PARTICIPATION_QUEUE_WINDOW = 5;
 
-function publicParticipationJourneyPhase(
-  phase: ParticipationDisplayPhase
-): "checking" | "waiting" | "playing" | "completed" | "ended" {
-  if (phase === "action_required" || phase === "ready") return "waiting";
-  return phase;
+const PUBLIC_PARTICIPATION_ROLE_SHORT_KEYS: Record<LolRole, PublicTextKey> = {
+  unknown: "participationRoleAny",
+  fill: "participationRoleAny",
+  top: "roleTop",
+  jungle: "roleJungle",
+  mid: "roleMid",
+  adc: "roleAdc",
+  support: "roleSupport",
+};
+
+/** 6열 버튼에 들어가야 하므로 "상관없음" 대신 짧은 라벨을 씁니다. */
+function publicParticipationRoleShortLabel(role: LolRole): string {
+  return publicText(PUBLIC_PARTICIPATION_ROLE_SHORT_KEYS[role]);
+}
+
+const PUBLIC_PARTICIPATION_PHASE_LABEL_KEYS: Record<ViewerQueuePhase, PublicTextKey> = {
+  checking: "participationChecking",
+  waiting: "participationStatusWaitlisted",
+  soon: "participationTurnSoon",
+  playing: "participationStatusInGame",
+  done: "participationStatusPlayed",
+  ended: "participationEnded",
+};
+
+function publicParticipationPhaseLabel(phase: ViewerQueuePhase): string {
+  return publicText(PUBLIC_PARTICIPATION_PHASE_LABEL_KEYS[phase]);
+}
+
+/** 대기열 행의 오른쪽에 붙는 짧은 상태. 값이 없으면 티어·포지션을 보여줍니다. */
+function publicParticipationRowStatus(
+  status: ParticipationStatus
+): { label: string; tone: "info" | "warn" | "good" | "mute" } | undefined {
+  if (status === "in_game") return { label: t().participationStatusInGame, tone: "info" };
+  // "곧 내 차례" 는 뷰어 자신의 행에만 씁니다. 남의 행에는 서버 상태 그대로 둡니다.
+  if (status === "selected" || status === "checked_in" || status === "invited") {
+    return { label: t().participationStatusSelected, tone: "warn" };
+  }
+  if (status === "pending") return { label: t().participationChecking, tone: "mute" };
+  return undefined;
+}
+
+/** "Platinum II · 미드" 한 줄. 티어가 없으면 확인 대기로 둡니다. */
+function publicParticipationRowDetail(item: PublicParticipationQueueItem): string {
+  const tier = !item.rankedStats || item.rankedStats.tier === "UNRANKED"
+    ? t().participationRankPending
+    : rankTierLabel(item.rankedStats);
+  const role = item.preferredRole ?? item.requestedRole;
+  return role ? `${tier} · ${publicParticipationRoleLabel(role)}` : tier;
 }
 
 function PublicParticipationJoinPage({
@@ -2545,19 +2630,16 @@ function PublicParticipationJoinPage({
   role,
   joining,
   cancelling,
-  checkingIn,
-  skipping,
   message,
   selectedStreamerId,
   onRefresh,
   onLogin,
+  onStreamerClear,
   onStreamerSelect,
   onRiotIdChange,
   onRoleChange,
   onSubmit,
   onCancel,
-  onCheckIn,
-  onSkip
 }: {
   status: PublicTwitchViewerStatus;
   participation: PublicParticipationStateResponse | null;
@@ -2568,34 +2650,28 @@ function PublicParticipationJoinPage({
   role: LolRole;
   joining: boolean;
   cancelling: boolean;
-  checkingIn: boolean;
-  skipping: boolean;
   message: string;
   selectedStreamerId: string;
   onRefresh: () => void;
   onLogin: () => void;
+  onStreamerClear: () => void;
   onStreamerSelect: (streamer: PublicParticipationStreamer) => void;
   onRiotIdChange: (value: string) => void;
   onRoleChange: (value: LolRole) => void;
   onSubmit: () => void;
   onCancel: () => void;
-  onCheckIn: () => void;
-  onSkip: () => void;
 }) {
   const feedbackKey = error || message;
   const [pendingAction, setPendingAction] = useState<PublicParticipationConfirmAction | null>(null);
   const [dismissedFeedbackKey, setDismissedFeedbackKey] = useState("");
-  const [checkInClockMs, setCheckInClockMs] = useState(() => Date.now());
   const [riotIdError, setRiotIdError] = useState("");
   const [queueExpanded, setQueueExpanded] = useState(false);
-  const [checkInAnnouncement, setCheckInAnnouncement] = useState("");
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | "unsupported">(() => (
     typeof window !== "undefined" && "Notification" in window ? Notification.permission : "unsupported"
   ));
-  const statusTitleRef = useRef<HTMLHeadingElement>(null);
-  const checkInActionRef = useRef<HTMLDivElement>(null);
-  const previousPhaseRef = useRef<ParticipationDisplayPhase>();
-  const announcedCheckInThresholdRef = useRef<number>();
+  const statusHeadingRef = useRef<HTMLDivElement>(null);
+  const previousPhaseRef = useRef<ViewerQueuePhase>();
+
   const streamers = useMemo(() => {
     const candidates = [
       ...(Array.isArray(participation?.streamers) ? participation.streamers : []),
@@ -2615,6 +2691,7 @@ function PublicParticipationJoinPage({
     if (directlySelected) candidates.push(directlySelected);
     return [...new Map(candidates.map((streamer) => [streamer.publicSessionId ?? streamer.id, streamer])).values()];
   }, [discovery, participation, status.connected]);
+
   const selectedStreamer = selectedStreamerId
     ? streamers.find((streamer) => streamer.id === selectedStreamerId)
     : undefined;
@@ -2624,57 +2701,45 @@ function PublicParticipationJoinPage({
   );
   const queue = hasSelectedParticipationState ? participation?.queue ?? [] : [];
   const isOpen = hasSelectedParticipationState && Boolean(participation?.isOpen);
-  const viewerEntry = hasSelectedParticipationState
-    ? participation?.viewerEntry
-    : undefined;
-  const activeViewerEntry = viewerEntry && publicParticipationIsActiveStatus(viewerEntry.status) ? viewerEntry : undefined;
-  const viewerPhase = viewerEntry ? getParticipationDisplayPhase(viewerEntry.status) : undefined;
-  const viewerActions = getViewerAvailableActions(viewerEntry, {
-    isOpen,
-    status: selectedStreamer?.sessionStatus
-  });
+  const viewerEntry = hasSelectedParticipationState ? participation?.viewerEntry : undefined;
+  const viewerPhase = viewerEntry ? getViewerQueuePhase(viewerEntry.status) : undefined;
+  const viewerActive = viewerEntry ? publicParticipationIsActiveStatus(viewerEntry.status) : false;
   const canJoin = isOpen && Boolean(selectedStreamer);
-  const streamerCountLabel = streamers.length > 0
-    ? `${formatNumber(streamers.length)} ${t().participationStreamerCount}`
-    : t().participationNoOpenStreamer;
-  const isStreamerSelectionLoading = loading && streamers.length === 0;
-  const isQueueLoading = loading && queue.length === 0;
-  const confirmTitle = t().participationCancelConfirmTitle;
-  const confirmDescription = t().participationCancelConfirmDescription;
-  const canRejoin = status.connected && canJoin && viewerActions.canRejoin;
-  const submitLabel = canRejoin ? t().participationRejoin : t().participationSubmit;
-  const checkInRemainingSeconds = activeViewerEntry?.checkInExpiresAt
-    ? Math.max(0, Math.ceil((Date.parse(activeViewerEntry.checkInExpiresAt) - checkInClockMs) / 1000))
-    : undefined;
-  const directSessionLink = typeof window !== "undefined"
-    && new URLSearchParams(window.location.search).has("session");
+  const canRejoin = status.connected && canJoin && Boolean(
+    viewerEntry && (viewerEntry.status === "played" || viewerEntry.status === "skipped")
+  );
+  const maxQueueSize = participation?.maxQueueSize ?? 0;
+
+  /* 접었을 때도 내 순번은 반드시 보이도록 뷰어 주변을 창으로 잘라 냅니다. */
   const visibleQueue = useMemo(() => {
-    if (queueExpanded || queue.length <= 5) return queue;
+    if (queueExpanded || queue.length <= PUBLIC_PARTICIPATION_QUEUE_WINDOW) return queue;
     const viewerIndex = queue.findIndex((item) => item.isViewer);
-    if (viewerIndex < 0) return queue.slice(0, 5);
+    if (viewerIndex < 0) return queue.slice(0, PUBLIC_PARTICIPATION_QUEUE_WINDOW);
+    // 진행 중인 맨 앞 두 명은 늘 남기고, 나머지 자리로 내 주변을 보여줍니다.
+    const head = queue.slice(0, 2);
     const start = Math.min(
-      Math.max(0, viewerIndex - 2),
-      Math.max(0, queue.length - 5)
+      Math.max(2, viewerIndex - 1),
+      Math.max(2, queue.length - (PUBLIC_PARTICIPATION_QUEUE_WINDOW - head.length))
     );
-    return queue.slice(start, start + 5);
+    const tail = queue.slice(start, start + (PUBLIC_PARTICIPATION_QUEUE_WINDOW - head.length));
+    return [...head, ...tail.filter((item) => !head.includes(item))];
   }, [queue, queueExpanded]);
+
+  /* 잘라 낸 자리에 "⋯" 를 넣기 위해 끊긴 지점을 찾습니다. */
+  const queueGapPositions = useMemo(() => {
+    const gaps: number[] = [];
+    for (let index = 1; index < visibleQueue.length; index += 1) {
+      const previous = visibleQueue[index - 1];
+      const current = visibleQueue[index];
+      if (previous && current && current.position - previous.position > 1) gaps.push(previous.position);
+    }
+    return gaps;
+  }, [visibleQueue]);
+
   const hiddenQueueCount = Math.max(0, queue.length - visibleQueue.length);
-  const currentParticipants = queue.filter((item) => item.status === "in_game");
-  const nextParticipant = queue.find((item) => (
-    item.status === "selected"
-    || item.status === "checked_in"
-    || item.status === "invited"
-  )) ?? queue.find((item) => item.status === "verified" || item.status === "waitlisted");
-  const currentParticipantLabel = currentParticipants.length > 0
-    ? `${currentParticipants[0]?.twitchUserName ?? ""}${currentParticipants.length > 1 ? ` +${formatNumber(currentParticipants.length - 1)}` : ""}`
-    : t().participationCurrentPlayerEmpty;
-  const nextParticipantLabel = nextParticipant?.twitchUserName ?? t().participationNextParticipantPending;
+  const currentParticipant = queue.find((item) => item.status === "in_game");
+  const currentParticipantLabel = currentParticipant?.twitchUserName ?? t().participationCurrentPlayerEmpty;
   const viewerQueueAhead = viewerEntry ? Math.max(0, viewerEntry.position - 1) : 0;
-  const viewerCheckInLabel = viewerEntry?.status === "selected"
-    ? t().participationCheckInRequired
-    : viewerEntry && ["checked_in", "invited", "in_game", "played"].includes(viewerEntry.status)
-      ? t().participationCheckInDone
-      : t().participationCheckInNotYet;
   const sessionStatusLabel = selectedStreamer?.sessionStatus === "in_game"
     ? t().participationSessionInGame
     : selectedStreamer?.sessionStatus === "completed"
@@ -2685,10 +2750,13 @@ function PublicParticipationJoinPage({
   const sessionStatusTone = selectedStreamer?.sessionStatus === "in_game"
     ? "info" as const
     : selectedStreamer?.sessionStatus === "completed"
-      ? "neutral" as const
+      ? "mute" as const
       : isOpen
-        ? "success" as const
-        : "warning" as const;
+        ? "good" as const
+        : "warn" as const;
+
+  const openStreamers = streamers.filter((streamer) => streamer.isOpen);
+  const closedStreamers = status.connected ? discovery?.followedLiveButClosed ?? [] : [];
 
   useEffect(() => {
     if (feedbackKey) setDismissedFeedbackKey("");
@@ -2698,47 +2766,22 @@ function PublicParticipationJoinPage({
     setQueueExpanded(false);
   }, [effectiveSelectedStreamerId, participation?.publicSessionId]);
 
-  useEffect(() => {
-    if (activeViewerEntry?.status !== "selected" || !activeViewerEntry.checkInExpiresAt) return undefined;
-    setCheckInClockMs(Date.now());
-    const timer = window.setInterval(() => setCheckInClockMs(Date.now()), 1000);
-    return () => window.clearInterval(timer);
-  }, [activeViewerEntry?.checkInExpiresAt, activeViewerEntry?.status]);
-
+  /* 상태가 바뀌면 그 사실을 알립니다. 체크인이 없어졌으므로 시간 제한 안내는 없습니다. */
   useEffect(() => {
     if (!viewerPhase || previousPhaseRef.current === viewerPhase) return;
     const previousPhase = previousPhaseRef.current;
     previousPhaseRef.current = viewerPhase;
-    if (viewerPhase === "action_required") checkInActionRef.current?.focus();
-    else statusTitleRef.current?.focus();
+    statusHeadingRef.current?.focus();
     if (notificationPermission !== "granted" || !previousPhase) return;
-    const notificationBody = viewerPhase === "action_required"
-      ? t().participationNotificationCheckIn
+    const body = viewerPhase === "soon"
+      ? t().participationNotificationSelected
       : viewerPhase === "playing"
         ? t().participationNotificationInGame
-        : viewerPhase === "completed"
+        : viewerPhase === "done"
           ? t().participationNotificationComplete
           : "";
-    if (notificationBody) new Notification(t().participationMyStatusTitle, { body: notificationBody });
+    if (body) new Notification(t().participationMyStatusTitle, { body });
   }, [notificationPermission, viewerPhase]);
-
-  useEffect(() => {
-    if (activeViewerEntry?.status !== "selected" || typeof checkInRemainingSeconds !== "number") {
-      announcedCheckInThresholdRef.current = undefined;
-      setCheckInAnnouncement("");
-      return;
-    }
-    const threshold = checkInRemainingSeconds <= 0
-      ? 0
-      : checkInRemainingSeconds <= 10
-        ? 10
-        : checkInRemainingSeconds <= 30
-          ? 30
-          : undefined;
-    if (threshold === undefined || announcedCheckInThresholdRef.current === threshold) return;
-    announcedCheckInThresholdRef.current = threshold;
-    setCheckInAnnouncement(`${t().participationCheckInRemaining} ${formatNumber(threshold)}${t().participationSecondsUnit}`);
-  }, [activeViewerEntry?.status, checkInRemainingSeconds]);
 
   useEffect(() => {
     if (!viewerEntry) return;
@@ -2758,435 +2801,212 @@ function PublicParticipationJoinPage({
     onSubmit();
   }
 
-  function confirmPendingAction(): void {
-    if (pendingAction === "cancel") onCancel();
-    setPendingAction(null);
-  }
-
-  async function enableNotifications(): Promise<void> {
+  async function toggleNotifications(): Promise<void> {
     if (!("Notification" in window)) {
       setNotificationPermission("unsupported");
       return;
     }
-    const permission = await Notification.requestPermission();
-    setNotificationPermission(permission);
+    if (notificationPermission === "granted") return;
+    setNotificationPermission(await Notification.requestPermission());
+  }
+
+  function streamerOption(streamer: PublicParticipationStreamer): ParticipationStreamerOption {
+    return {
+      key: streamer.publicSessionId ?? streamer.id,
+      id: streamer.id,
+      displayName: streamer.twitchDisplayName,
+      avatar: streamer.twitchProfileImageUrl
+        ? <img alt="" src={assetUrl(streamer.twitchProfileImageUrl)} />
+        : streamer.twitchDisplayName.slice(0, 1),
+      isLive: streamer.isLive === true,
+      isOpen: streamer.isOpen,
+      queueSize: streamer.queueSize,
+      maxQueueSize: streamer.maxQueueSize ?? maxQueueSize,
+    };
   }
 
   return (
-    <section className="public-panel public-menu-page-panel public-participation-page public-streamer-detail-shared-page">
-      <PageHeader as="div" className="public-section-head public-participation-shared-header" layout="split">
-        <PageHeaderTitle as="h2"  >{t().followJoinTitle}</PageHeaderTitle>
-        <PageHeaderDescription  >{t().followJoinSubtitle}</PageHeaderDescription>
-        <PageHeaderActions className="public-participation-actions">
-          <Button className="public-participation-shared-action" variant="secondary" size="sm" type="button" onClick={onRefresh} loading={loading} disabled={loading}>
-            {loading ? t().searching : t().participationRefresh}
-          </Button>
-        </PageHeaderActions>
-      </PageHeader>
-
-      {!error && !status.configured ? (
-        <EmptyState className="public-participation-shared-empty" variant="streamer">
-          <EmptyStateIcon>!</EmptyStateIcon>
-          <EmptyStateTitle as="h3"  >{t().twitchNotConfigured}</EmptyStateTitle>
-        </EmptyState>
-      ) : null}
+    <section className={`public-participation-shell ${selectedStreamer && viewerActive ? "has-side" : ""}`}>
       {!error && status.configured && !status.connected ? (
         <EmptyState className="public-participation-shared-empty" variant="streamer">
           <EmptyStateIcon><TwitchGlitchIcon /></EmptyStateIcon>
           <EmptyStateTitle as="h3">{t().participationLoginDiscoveryTitle}</EmptyStateTitle>
-          <EmptyStateDescription>{t().participationLoginDiscoveryDescription}</EmptyStateDescription>
           <EmptyStateActions>
             <Button type="button" onClick={onLogin}>{t().twitchViewerLogin}</Button>
           </EmptyStateActions>
         </EmptyState>
       ) : null}
-      {!directSessionLink ? (
-      <section className="public-participation-streamer-select public-participation-shared-select" aria-busy={isStreamerSelectionLoading ? true : undefined}>
-        <div className="public-participation-streamer-head">
-          <div>
-            <strong>{t().participationStreamerTitle}</strong>
-            <p>{t().participationStreamerSubtitle}</p>
-          </div>
-          <Badge size="md" tone={streamers.length > 0 ? "streamer" : "warning"}>{streamerCountLabel}</Badge>
-        </div>
-        <div className="public-participation-streamer-list">
-          {isStreamerSelectionLoading ? (
-            Array.from({ length: 3 }, (_, index) => (
-              <SkeletonCard className="public-participation-streamer-card public-participation-shared-streamer-skeleton" key={index} loadingLabel={t().searching} size="md">
-                <SkeletonAvatar size="md" />
-                <SkeletonText lines={2} size="sm" />
-                <SkeletonButton size="sm" />
-              </SkeletonCard>
-            ))
-          ) : streamers.map((streamer) => (
-            <Card
-              key={streamer.publicSessionId ?? streamer.id}
-              aria-pressed={streamer.id === effectiveSelectedStreamerId}
-              className={`public-participation-streamer-card public-participation-shared-streamer-card ${streamer.id === effectiveSelectedStreamerId ? "active" : ""}`}
-              onClick={() => onStreamerSelect(streamer)}
-              padding="md"
-              renderRoot={({ children, className, ...rootProps }) => (
-                <button {...rootProps} className={className} type="button">
-                  {children}
-                </button>
-              )}
-              variant="interactive"
-            >
-              <span className="public-participation-streamer-avatar">
-                {streamer.twitchProfileImageUrl ? (
-                  <img src={assetUrl(streamer.twitchProfileImageUrl)} alt="" />
-                ) : (
-                  (streamer.twitchDisplayName || streamer.riotId || "S").slice(0, 1)
-                )}
-              </span>
-              <span className="public-participation-streamer-info">
-                <strong>{streamer.twitchDisplayName}</strong>
-                <small>{streamer.riotId ?? t().participationRankPending}</small>
-              </span>
-              <span className="public-participation-streamer-meta">
-                <StatusPill size="sm" tone={streamer.isOpen ? "success" : "warning"}>
-                  {streamer.isLive === false ? t().participationOfflineRecruiting : t().participationStreamerOpen}
-                </StatusPill>
-                <Metric
-                  label={t().participationQueueTitle}
-                  value={`${formatNumber(streamer.queueSize)} / ${formatNumber(streamer.maxQueueSize ?? participation?.maxQueueSize ?? 0)}`}
-                  tone={streamer.queueSize > 0 ? "info" : "neutral"}
-                  size="sm"
-                />
-              </span>
-            </Card>
-          ))}
-          {!error && !isStreamerSelectionLoading && streamers.length === 0 ? (
-            <EmptyState as="div" className="public-participation-no-streamer public-participation-shared-empty" variant="streamer">
-              <EmptyStateIcon>?</EmptyStateIcon>
-              <EmptyStateTitle as="h3">{t().participationNoOpenStreamer}</EmptyStateTitle>
-              <EmptyStateDescription>{t().participationNoOpenStreamerDescription}</EmptyStateDescription>
-              <EmptyStateActions>
-                <Button type="button" variant="secondary" onClick={onRefresh}>{t().participationRefresh}</Button>
-                <Button type="button" onClick={() => window.location.assign(localizedPublicUrlForCurrentLocale("/follow"))}>
-                  {t().participationLiveStreamers}
-                </Button>
-              </EmptyStateActions>
-            </EmptyState>
-          ) : null}
-        </div>
-        {status.connected && (discovery?.followedLiveButClosed.length ?? 0) > 0 ? (
-          <div className="public-participation-closed-list" aria-label={t().participationFollowedLiveClosedTitle}>
-            <strong>{t().participationFollowedLiveClosedTitle}</strong>
-            <p>{t().participationFollowedLiveClosedDescription}</p>
-            <div className="public-participation-streamer-list">
-              {discovery?.followedLiveButClosed.map((streamer) => (
-                <Card as="article" className="public-participation-streamer-card public-participation-shared-streamer-card public-participation-closed-card" key={streamer.id} padding="md">
-                  <span className="public-participation-streamer-avatar">
-                    {streamer.twitchProfileImageUrl ? <img src={assetUrl(streamer.twitchProfileImageUrl)} alt="" /> : streamer.twitchDisplayName.slice(0, 1)}
-                  </span>
-                  <span className="public-participation-streamer-info">
-                    <strong>{streamer.twitchDisplayName}</strong>
-                    <small>{streamer.riotId ?? t().participationRankPending}</small>
-                  </span>
-                  <StatusPill size="sm" tone="neutral">{t().participationClosed}</StatusPill>
-                </Card>
-              ))}
-            </div>
-          </div>
-        ) : null}
-      </section>
-      ) : null}
-
-      {selectedStreamer ? (
-        <Card as="section" className="public-participation-session-summary" padding="lg" variant="glass">
-          <div className="public-participation-session-head">
-            <div className="public-participation-session-identity">
-              <span className="public-participation-streamer-avatar">
-                {selectedStreamer.twitchProfileImageUrl ? <img src={assetUrl(selectedStreamer.twitchProfileImageUrl)} alt="" /> : selectedStreamer.twitchDisplayName.slice(0, 1)}
-              </span>
-              <div>
-                <span>{t().participationHeroEyebrow}</span>
-                <h3>{selectedStreamer.twitchDisplayName}</h3>
-                <p>{selectedStreamer.riotId ?? t().participationRankPending}</p>
-              </div>
-            </div>
-            <div className="public-participation-session-state">
-              <StatusPill tone={selectedStreamer.isLive === true ? "danger" : "neutral"}>
-                {selectedStreamer.isLive === true ? t().streamerLiveNow : t().twitchOfflineShort}
-              </StatusPill>
-              <StatusPill tone={sessionStatusTone}>{sessionStatusLabel}</StatusPill>
-            </div>
-          </div>
-          <div className="public-participation-session-game">
-            <span>{t().participationGameLabel}</span>
-            <strong>{t().participationGameValue}</strong>
-            <small>{t().currentGameUpdated} · {formatPublicDateTime(participation?.updatedAt)}</small>
-          </div>
-          <dl className="public-participation-session-summary-metrics">
-            <div className="public-participation-current-player">
-              <dt>{t().participationCurrentPlayerLabel}</dt>
-              <dd>{currentParticipantLabel}</dd>
-              <small>{currentParticipants.length > 0 ? publicParticipationStatusLabel("in_game") : sessionStatusLabel}</small>
-            </div>
-            <div className={nextParticipant?.isViewer ? "is-viewer" : undefined}>
-              <dt>{t().participationNextParticipantLabel}</dt>
-              <dd>{nextParticipantLabel}</dd>
-              <small>{nextParticipant ? publicParticipationRoleLabel(nextParticipant.preferredRole ?? nextParticipant.requestedRole ?? nextParticipant.mainRole) : t().participationWaitingLabel}</small>
-            </div>
-            <div>
-              <dt>{t().participationCapacityLabel}</dt>
-              <dd>{formatNumber(participation?.summary.active ?? 0)} / {formatNumber(participation?.maxQueueSize ?? 0)}</dd>
-              <small>{t().participationWaitingLabel} {formatNumber(participation?.summary.waiting ?? 0)}{t().participationPeopleUnit}</small>
-            </div>
-            <div>
-              <dt>{t().participationSelectedLabel}</dt>
-              <dd>{formatNumber((participation?.summary.selected ?? 0) + (participation?.summary.checkedIn ?? 0))}{t().participationPeopleUnit}</dd>
-              <small>{t().participationCheckedInLabel} {formatNumber(participation?.summary.checkedIn ?? 0)}{t().participationPeopleUnit}</small>
-            </div>
-          </dl>
-        </Card>
-      ) : null}
 
       {error ? (
-        <EmptyState as="div" className="public-participation-shared-empty public-participation-shared-error" variant="error">
+        <EmptyState as="div" className="public-participation-shared-empty" variant="error">
           <EmptyStateIcon>!</EmptyStateIcon>
-          <EmptyStateTitle as="h3"  >{t().searchFailed}</EmptyStateTitle>
+          <EmptyStateTitle as="h3">{t().searchFailed}</EmptyStateTitle>
           <EmptyStateDescription>{error}</EmptyStateDescription>
           <EmptyStateActions>
             <Button type="button" variant="secondary" onClick={onRefresh}>{t().participationRetry}</Button>
           </EmptyStateActions>
         </EmptyState>
       ) : null}
-      {message ? <StatusPill className="public-participation-message" tone="success">{message}</StatusPill> : null}
 
       {selectedStreamer ? (
-      <>
-      <div className="public-participation-status-grid">
-      {viewerEntry ? (
-        <Card
-          as="section"
-          className={`public-participation-my-status is-${viewerPhase ?? "ended"}`}
-          padding="lg"
-          variant="glass"
-        >
-          <CardHeader>
-            <h3 className="yoro-card__title" ref={statusTitleRef} tabIndex={-1}>{viewerPhase === "action_required" ? t().participationMyTurn : t().participationMyStatusTitle}</h3>
-            <StatusPill size="sm" tone={publicParticipationStatusTone(viewerEntry.status)}>{publicParticipationStatusLabel(viewerEntry.status)}</StatusPill>
-          </CardHeader>
-          <CardContent>
-            <dl className="public-participation-my-status-metrics">
-              <div className="is-primary"><dt>{t().participationPosition}</dt><dd>#{formatNumber(viewerEntry.position)}</dd></div>
-              <div className="public-participation-queue-ahead"><dt>{t().participationQueueAhead}</dt><dd>{viewerQueueAhead > 0 ? `${formatNumber(viewerQueueAhead)}${t().participationPeopleUnit}` : t().participationQueueAheadNone}</dd></div>
-              <div><dt>{t().participationRoleLabel}</dt><dd>{publicParticipationRoleLabel(viewerEntry.preferredRole ?? viewerEntry.requestedRole)}</dd></div>
-              <div className="public-participation-check-in-state"><dt>{t().participationCheckInState}</dt><dd>{viewerCheckInLabel}</dd></div>
-            </dl>
-            <div className="public-participation-my-status-copy" aria-live="polite">
-              <strong>{publicParticipationStatusLabel(viewerEntry.status)}</strong>
-              <span>{viewerPhase === "completed" ? t().participationNotificationComplete : viewerPhase === "action_required" ? t().participationNotificationCheckIn : t().participationAutoRefresh}</span>
-            </div>
-            {viewerActions.canCheckIn ? (
-              <div aria-label={t().participationNotificationCheckIn} className="public-participation-check-in-alert" ref={checkInActionRef} role="region" tabIndex={-1}>
-                <span>{t().participationCheckInRemaining}</span>
-                <strong aria-hidden="true">{typeof checkInRemainingSeconds === "number" ? `00:${String(checkInRemainingSeconds).padStart(2, "0")}` : "--:--"}</strong>
-                <span aria-live="assertive" className="sr-only">{checkInAnnouncement}</span>
-                <div className="public-participation-check-in-actions">
-                  <Button variant="primary" type="button" onClick={onCheckIn} loading={checkingIn} disabled={checkingIn || skipping}>
-                    {checkingIn ? t().participationCheckingIn : t().participationCheckIn}
-                  </Button>
-                  <Button variant="secondary" type="button" onClick={onSkip} loading={skipping} disabled={checkingIn || skipping}>
-                    {skipping ? t().participationSkippingTurn : t().participationSkipTurn}
-                  </Button>
-                </div>
-              </div>
-            ) : null}
-            <div className="public-participation-notification-callout">
-              <div>
-                <span aria-hidden="true">●</span>
-                <div>
-                  <strong>{t().participationNotificationsTitle}</strong>
-                  <small>{t().participationNotificationsDescription}</small>
-                </div>
-              </div>
-              {notificationPermission === "default" ? (
-                <Button variant="secondary" type="button" onClick={() => void enableNotifications()}>{t().participationNotificationsEnable}</Button>
-              ) : notificationPermission === "granted" ? (
-                <StatusPill tone="success">{t().participationNotificationsEnabled}</StatusPill>
-              ) : notificationPermission === "denied" ? (
-                <StatusPill tone="warning">{t().participationNotificationsDenied}</StatusPill>
-              ) : notificationPermission === "unsupported" ? (
-                <StatusPill tone="neutral">{t().participationNotificationsUnsupported}</StatusPill>
-              ) : null}
-            </div>
-            <div className="public-participation-my-status-actions">
-              {viewerActions.canCancel ? (
-                <Button variant="danger" type="button" onClick={() => setPendingAction("cancel")} loading={cancelling} disabled={cancelling}>
-                  {cancelling ? t().participationCancelling : t().participationCancel}
-                </Button>
-              ) : null}
-            </div>
-          </CardContent>
-        </Card>
-      ) : null}
+        <ParticipationStreamerSwitcher
+          avatar={selectedStreamer.twitchProfileImageUrl
+            ? <img alt="" src={assetUrl(selectedStreamer.twitchProfileImageUrl)} />
+            : selectedStreamer.twitchDisplayName.slice(0, 1)}
+          displayName={selectedStreamer.twitchDisplayName}
+          isLive={selectedStreamer.isLive === true}
+          onChange={onStreamerClear}
+          onRefresh={onRefresh}
+          sessionLabel={sessionStatusLabel}
+          sessionTone={sessionStatusTone}
+          text={{
+            changeLabel: t().participationChangeStreamer,
+            liveLabel: t().streamerLiveNow,
+            offlineLabel: t().twitchOfflineShort,
+            refreshLabel: t().participationRefresh,
+            watchAriaLabel: t().participationTwitchOpen,
+            watchLabel: "Twitch",
+          }}
+          watchUrl={selectedStreamer.twitchLogin ? `https://www.twitch.tv/${selectedStreamer.twitchLogin}` : undefined}
+        />
+      ) : (
+        <ParticipationStreamerPicks
+          closedOptions={closedStreamers.map(streamerOption)}
+          onSelect={(id) => {
+            const next = streamers.find((streamer) => streamer.id === id);
+            if (next) onStreamerSelect(next);
+          }}
+          options={openStreamers.map(streamerOption)}
+          selectedId={effectiveSelectedStreamerId}
+          text={{
+            closedLabel: t().participationClosed,
+            countLabel: t().participationStreamerCount,
+            emptyLabel: t().participationNoOpenStreamer,
+            title: t().participationStreamerTitle,
+          }}
+        />
+      )}
 
-      {viewerPhase && viewerPhase !== "ended" ? (
-        <details className="public-participation-timeline-card" open>
-          <summary>{t().participationJourneyTitle}</summary>
-            <ol className="public-participation-timeline">
-              {PUBLIC_PARTICIPATION_PHASE_STEPS.map((step, index) => {
-                const journeyPhase = publicParticipationJourneyPhase(viewerPhase);
-                const currentIndex = PUBLIC_PARTICIPATION_PHASE_STEPS.findIndex((item) => item.phase === journeyPhase);
-                const complete = index < currentIndex || journeyPhase === "completed";
-                const current = step.phase === journeyPhase;
-                return (
-                  <li aria-current={current ? "step" : undefined} className={`${complete ? "is-complete" : ""} ${current ? "is-current" : ""}`} key={step.phase}>
-                    <span aria-hidden="true">{complete ? "✓" : current ? "●" : "○"}</span>
-                    <strong>{publicText(step.labelKey)}</strong>
-                    {complete ? <small>{t().participationStatusPlayed}</small> : current ? <small>{t().participationCurrentStep}</small> : null}
-                  </li>
-                );
-              })}
-            </ol>
-        </details>
-      ) : null}
-      </div>
-
-      <div className={`public-participation-layout ${activeViewerEntry ? "is-viewer-active" : ""}`}>
-        {!activeViewerEntry ? (
-        <Card as="article" className="public-participation-card public-participation-shared-card" padding="lg" variant="glass">
-          <CardHeader>
-            <CardTitle as="h3">{t().participationJoinTitle}</CardTitle>
-          </CardHeader>
-          <CardContent>
-          {!status.connected ? (
-            <div className="public-participation-current">
-              <strong>{t().participationNeedLogin}</strong>
-            </div>
-          ) : (
-            <form className="public-participation-form" onSubmit={requestJoin}>
-              {canRejoin ? (
-                <div className="public-participation-rejoin-note" role="status">
-                  <span aria-hidden="true" className="public-participation-rejoin-icon">↻</span>
-                  <span className="public-participation-rejoin-copy">
-                    <strong>{t().participationRejoin}</strong>
-                    <span>{t().participationEndedRejoin}</span>
-                  </span>
-                </div>
-              ) : null}
-              <FormField controlId="public-participation-riot-id" disabled={!canJoin || joining} invalid={Boolean(riotIdError)} required>
-                <FormLabel>{t().participationRiotIdLabel}</FormLabel>
-                <FormControl>
-                  <Input
-                    autoComplete="off"
-                    disabled={!canJoin || joining}
-                    id="public-participation-riot-id"
-                    onChange={(event) => {
-                      setRiotIdError("");
-                      onRiotIdChange(event.currentTarget.value);
-                    }}
-                    placeholder={t().participationRiotIdPlaceholder}
-                    value={riotId}
-                  />
-                </FormControl>
-                <FormHint>{t().participationRiotIdExample}</FormHint>
-                {riotIdError ? <FormError role="alert">{riotIdError}</FormError> : null}
-              </FormField>
-              <FormField controlId="public-participation-role" disabled={!canJoin || joining}>
-                <FormLabel>{t().participationRoleLabel}</FormLabel>
-                <FormControl>
-                  <Select id="public-participation-role" value={role} onChange={(event) => onRoleChange(event.currentTarget.value as LolRole)} disabled={!canJoin || joining}>
-                  {PUBLIC_PARTICIPATION_ROLES.map((item) => (
-                    <option key={item} value={item}>{publicParticipationRoleLabel(item)}</option>
-                  ))}
-                  </Select>
-                </FormControl>
-              </FormField>
-              <Button type="submit" loading={joining} disabled={!canJoin || joining || !riotId.trim()}>
-                {joining ? t().participationSubmitting : submitLabel}
-              </Button>
-            </form>
-          )}
-          </CardContent>
-        </Card>
-        ) : null}
-
-        <Card as="article" className="public-participation-card public-participation-shared-card" padding="lg" variant="glass">
-          <CardHeader>
-            <CardTitle as="h3">{selectedStreamer ? `${selectedStreamer.twitchDisplayName} · ${t().participationQueueTitle}` : t().participationQueueTitle}</CardTitle>
-            {selectedStreamer ? (
-              <CardDescription>{selectedStreamer.riotId ?? t().participationRankPending}</CardDescription>
-            ) : null}
-          </CardHeader>
-          <CardContent>
-          {isQueueLoading ? (
-            <SkeletonCard className="public-participation-shared-queue-skeleton" loadingLabel={t().searching} size="md">
-              <SkeletonText lines={3} size="md" />
-            </SkeletonCard>
-          ) : null}
-          {queue.length === 0 && !loading ? (
-            <EmptyState as="div" className="public-participation-shared-empty" variant="streamer">
-              <EmptyStateIcon>?</EmptyStateIcon>
-              <EmptyStateTitle as="h3">{t().participationQueueEmpty}</EmptyStateTitle>
-            </EmptyState>
-          ) : null}
-          <ol className="public-participation-queue-list" aria-label={t().participationQueueTitle}>
-            {visibleQueue.map((item) => (
-              <li aria-current={item.isViewer ? "true" : undefined} className={`public-participation-queue-row is-${item.status} ${item.isViewer ? "viewer" : ""}`} key={`${item.position}-${item.twitchUserName}`}>
-                <span
-                  aria-label={`${t().participationPosition} ${formatNumber(item.position)}`}
-                  className="public-participation-position"
-                >
-                  #{formatNumber(item.position)}
-                </span>
-                <div className="public-participation-queue-main">
-                  <div className="public-participation-queue-heading">
-                    <strong>{item.twitchUserName}</strong>
-                    {item.isViewer ? <Badge className="public-participation-queue-viewer" size="sm" tone="streamer">{t().participationViewerBadge}</Badge> : null}
-                  </div>
-                  <div className="public-participation-queue-tags">
-                    <StatusPill className="public-participation-queue-status" size="sm" tone={publicParticipationStatusTone(item.status)}>{publicParticipationStatusLabel(item.status)}</StatusPill>
-                  </div>
-                  <span className="public-participation-queue-profile">
-                    {publicParticipationRankText(item)} · {publicParticipationRoleLabel(item.preferredRole ?? item.requestedRole ?? item.mainRole)}
-                  </span>
-                </div>
-                <div className="public-participation-queue-champions" aria-hidden="true">
-                  {(item.topChampions ?? []).slice(0, 2).map((champion) => (
-                    <img key={champion.championId} src={assetUrl(champion.iconUrl)} alt="" />
-                  ))}
-                  {(item.topChampions ?? []).length > 2 ? <em>+{formatNumber((item.topChampions ?? []).length - 2)}</em> : null}
-                  {(item.topChampions ?? []).length === 0 ? <em>?</em> : null}
-                </div>
-              </li>
-            ))}
-          </ol>
-          {queue.length > 5 ? (
-            <Button
-              aria-expanded={queueExpanded}
-              className="public-participation-queue-toggle"
-              type="button"
-              variant="secondary"
-              onClick={() => setQueueExpanded((current) => !current)}
-            >
-              {queueExpanded
-                ? t().participationQueueShowLess
-                : `${t().participationQueueShowAll} (${formatNumber(hiddenQueueCount)})`}
-            </Button>
-          ) : null}
-          </CardContent>
-        </Card>
-      </div>
-      <details className="public-participation-rules">
-        <summary id="public-participation-rules-title">{t().participationRulesTitle}</summary>
-        <div>
-          <article><strong>{t().participationRuleAccountTitle}</strong><p>{t().participationRuleAccountBody}</p></article>
-          <article><strong>{t().participationRuleRiotTitle}</strong><p>{t().participationRuleRiotBody}</p></article>
-          <article><strong>{t().participationRuleCheckInTitle}</strong><p>{t().participationRuleCheckInBody}</p></article>
-          <article><strong>{t().participationRuleRejoinTitle}</strong><p>{t().participationRuleRejoinBody}</p></article>
+      {selectedStreamer && viewerEntry && viewerPhase && viewerActive ? (
+        <div ref={statusHeadingRef} tabIndex={-1}>
+          <ParticipationMyStatus
+            aheadLabel={viewerQueueAhead > 0
+              ? t().participationQueueAheadShort.replace("{count}", formatNumber(viewerQueueAhead))
+              : t().participationQueueAheadNone}
+            canCancel={canCancelViewerQueue(viewerEntry.status)}
+            cancelling={cancelling}
+            capacityLabel={`${formatNumber(participation?.summary.active ?? 0)} / ${formatNumber(maxQueueSize)}`}
+            currentPlayerLabel={currentParticipantLabel}
+            notificationsEnabled={notificationPermission === "granted"}
+            onCancel={() => setPendingAction("cancel")}
+            onToggleNotifications={notificationPermission === "unsupported" ? undefined : () => void toggleNotifications()}
+            phase={viewerPhase}
+            phaseLabel={publicParticipationPhaseLabel(viewerPhase)}
+            position={viewerEntry.position}
+            text={{
+              cancelLabel: t().participationCancel,
+              cancellingLabel: t().participationCancelling,
+              capacityLabel: t().participationCapacityLabel,
+              currentPlayerLabel: t().participationCurrentPlayerLabel,
+              notifyOffLabel: t().participationNotificationsEnable,
+              notifyOnLabel: t().participationNotificationsEnabled,
+            }}
+          />
         </div>
-      </details>
-      </>
-      ) : streamers.length > 0 && !loading ? (
-        <EmptyState as="div" className="public-participation-shared-empty" variant="streamer">
-          <EmptyStateIcon>?</EmptyStateIcon>
-          <EmptyStateTitle as="h3">{t().participationSelectStreamerTitle}</EmptyStateTitle>
-          <EmptyStateDescription>{t().participationSelectStreamerDescription}</EmptyStateDescription>
-        </EmptyState>
+      ) : null}
+
+      {selectedStreamer && !viewerActive ? (
+        <form className="public-participation-join" onSubmit={requestJoin}>
+          <div className="public-participation-queue-head">
+            <h3>{t().participationJoinTitle}</h3>
+            <span className="public-participation-tag" data-tone={isOpen ? "good" : "warn"}>
+              {isOpen ? t().participationSessionRecruiting : t().participationSessionClosed}
+            </span>
+          </div>
+
+          {status.connected ? (
+            <>
+              <input
+                aria-label={t().participationRiotIdLabel}
+                autoComplete="off"
+                className="public-participation-join-input"
+                disabled={!canJoin || joining}
+                id="public-participation-riot-id"
+                onChange={(event) => {
+                  setRiotIdError("");
+                  onRiotIdChange(event.currentTarget.value);
+                }}
+                placeholder={t().participationRiotIdPlaceholder}
+                value={riotId}
+              />
+              {riotIdError ? <p className="public-participation-join-error" role="alert">{riotIdError}</p> : null}
+
+              <div aria-label={t().participationRoleLabel} className="public-participation-roles" role="group">
+                {PUBLIC_PARTICIPATION_ROLES.map((item) => (
+                  <button
+                    aria-pressed={role === item}
+                    className={`public-participation-role ${role === item ? "is-active" : ""}`}
+                    disabled={!canJoin || joining}
+                    key={item}
+                    onClick={() => onRoleChange(item)}
+                    title={publicParticipationRoleLabel(item)}
+                    type="button"
+                  >
+                    <RoleIcon role={item} />
+                    {publicParticipationRoleShortLabel(item)}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                className="public-participation-submit"
+                disabled={!canJoin || joining || !riotId.trim()}
+                type="submit"
+              >
+                {joining
+                  ? t().participationSubmitting
+                  : canRejoin ? t().participationRejoin : t().participationSubmit}
+              </button>
+            </>
+          ) : (
+            <Button type="button" onClick={onLogin}>{t().twitchViewerLogin}</Button>
+          )}
+        </form>
+      ) : null}
+
+      {selectedStreamer ? (
+        <ParticipationQueueList
+          expanded={queueExpanded}
+          gapAfterPositions={queueGapPositions}
+          hiddenCount={hiddenQueueCount}
+          onToggle={() => setQueueExpanded((current) => !current)}
+          rows={visibleQueue.map((item) => {
+            const rowStatus = publicParticipationRowStatus(item.status);
+            return {
+              champions: (item.topChampions ?? []).slice(0, 2).map((champion) => ({
+                iconUrl: champion.iconUrl ? assetUrl(champion.iconUrl) : undefined,
+                key: String(champion.championId),
+              })),
+              detail: publicParticipationRowDetail(item),
+              isViewer: item.isViewer,
+              key: `${item.position}-${item.twitchUserName}`,
+              name: item.isViewer ? t().participationViewerBadge : item.twitchUserName,
+              position: item.position,
+              statusLabel: item.isViewer && viewerPhase
+                ? publicParticipationPhaseLabel(viewerPhase)
+                : rowStatus?.label,
+              statusTone: item.isViewer ? "brand" : rowStatus?.tone,
+            };
+          })}
+          text={{
+            emptyLabel: t().participationQueueEmpty,
+            gapLabel: "⋯",
+            lessLabel: t().participationQueueShowLess,
+            moreLabel: t().participationQueueMore.replace("{count}", formatNumber(hiddenQueueCount)),
+            title: t().participationQueueTitle,
+          }}
+          totalCount={queue.length}
+        />
       ) : null}
 
       <Modal
@@ -3198,25 +3018,17 @@ function PublicParticipationJoinPage({
         size="md"
       >
         <ModalHeader>
-          <ModalTitle>{confirmTitle}</ModalTitle>
-          <ModalDescription>{confirmDescription}</ModalDescription>
+          <ModalTitle>{t().participationCancelConfirmTitle}</ModalTitle>
+          <ModalDescription>{t().participationCancelConfirmDescription}</ModalDescription>
         </ModalHeader>
-        <ModalContent>
-          <div className="public-participation-confirm-summary">
-            {viewerEntry ? (
-              <>
-                <Badge tone="danger">{t().participationCancel}</Badge>
-                <strong>{viewerEntry.riotId}</strong>
-                <span>{t().participationPosition} {formatNumber(viewerEntry.position)}</span>
-              </>
-            ) : null}
-          </div>
-        </ModalContent>
         <ModalFooter>
           <Button
             disabled={!pendingAction}
             loading={cancelling}
-            onClick={confirmPendingAction}
+            onClick={() => {
+              if (pendingAction === "cancel") onCancel();
+              setPendingAction(null);
+            }}
             variant="danger"
           >
             {t().participationConfirm}
@@ -6547,8 +6359,6 @@ export function PublicLolPage({
   const [publicParticipationJoinRole, setPublicParticipationJoinRole] = useState<LolRole>("fill");
   const [publicParticipationJoining, setPublicParticipationJoining] = useState(false);
   const [publicParticipationCancelling, setPublicParticipationCancelling] = useState(false);
-  const [publicParticipationCheckingIn, setPublicParticipationCheckingIn] = useState(false);
-  const [publicParticipationSkipping, setPublicParticipationSkipping] = useState(false);
   const [publicParticipationMessage, setPublicParticipationMessage] = useState("");
   const [publicParticipationStreamerId, setPublicParticipationStreamerId] = useState("");
   const [publicParticipationSessionId, setPublicParticipationSessionId] = useState(
@@ -6993,44 +6803,15 @@ export function PublicLolPage({
     }
   }
 
-  async function checkInPublicParticipation(): Promise<void> {
-    const publicSessionId = publicParticipation?.publicSessionId ?? publicParticipationSessionId;
-    if (!publicSessionId) {
-      setPublicParticipationError(t().participationSelectStreamerTitle);
-      return;
-    }
-    setPublicParticipationCheckingIn(true);
-    setPublicParticipationError("");
-    setPublicParticipationMessage("");
-    try {
-      const response = await postPublicParticipationCheckIn(publicSessionId);
-      setPublicParticipation(response);
-      setPublicParticipationMessage(t().participationCheckInComplete);
-    } catch (requestError) {
-      setPublicParticipationError(requestError instanceof Error ? requestError.message : t().participationCheckInFailed);
-    } finally {
-      setPublicParticipationCheckingIn(false);
-    }
-  }
 
-  async function skipPublicParticipation(): Promise<void> {
-    const publicSessionId = publicParticipation?.publicSessionId ?? publicParticipationSessionId;
-    if (!publicSessionId) {
-      setPublicParticipationError(t().participationSelectStreamerTitle);
-      return;
-    }
-    setPublicParticipationSkipping(true);
-    setPublicParticipationError("");
-    setPublicParticipationMessage("");
-    try {
-      const response = await postPublicParticipationSkip(publicSessionId);
-      setPublicParticipation(response.state);
-      setPublicParticipationMessage(t().participationSkipComplete);
-    } catch (requestError) {
-      setPublicParticipationError(requestError instanceof Error ? requestError.message : t().participationSkipFailed);
-    } finally {
-      setPublicParticipationSkipping(false);
-    }
+
+  function clearPublicParticipationStreamer(): void {
+    setPublicParticipationStreamerId("");
+    setPublicParticipationSessionId("");
+    const url = new URL(window.location.href);
+    url.searchParams.delete("session");
+    url.searchParams.delete("streamerId");
+    window.history.pushState({}, "", `${url.pathname}${url.search}${url.hash}`);
   }
 
   function selectPublicParticipationStreamer(streamer: PublicParticipationStreamer): void {
@@ -7574,19 +7355,16 @@ export function PublicLolPage({
           role={publicParticipationJoinRole}
           joining={publicParticipationJoining}
           cancelling={publicParticipationCancelling}
-          checkingIn={publicParticipationCheckingIn}
-          skipping={publicParticipationSkipping}
           message={publicParticipationMessage}
           selectedStreamerId={publicParticipationStreamerId}
           onRefresh={() => void loadPublicParticipationState()}
           onLogin={startTwitchLogin}
+          onStreamerClear={clearPublicParticipationStreamer}
           onStreamerSelect={selectPublicParticipationStreamer}
           onRiotIdChange={setPublicParticipationJoinRiotId}
           onRoleChange={setPublicParticipationJoinRole}
           onSubmit={submitPublicParticipation}
           onCancel={() => void cancelPublicParticipation()}
-          onCheckIn={() => void checkInPublicParticipation()}
-          onSkip={() => void skipPublicParticipation()}
         />
       );
     }
