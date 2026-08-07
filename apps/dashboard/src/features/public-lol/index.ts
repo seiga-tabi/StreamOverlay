@@ -18,7 +18,9 @@ export { PublicMatchFilterBar } from "./components/PublicMatchFilterBar";
 export { ChampionFilterSelect } from "./components/ChampionFilterSelect";
 export { PublicSiteFooter } from "./components/PublicSiteFooter";
 export { ProfileMetricCardItem } from "./components/ProfileMetricCardItem";
+export { ProfileHeroRank } from "./components/ProfileHeroRank";
 export { ProfileMetricStrip } from "./components/ProfileMetricStrip";
+export { ProfileStreamerCast } from "./components/ProfileStreamerCast";
 export { ProfileRecentChampionsCard } from "./components/ProfileRecentChampionsCard";
 export { ProfileRecentChampionRow } from "./components/ProfileRecentChampionRow";
 export { ProfileSeasonBadgeItem as ProfileSeasonBadgeItemPresenter } from "./components/ProfileSeasonBadgeItem";
@@ -33,6 +35,7 @@ export { PlayerLoadoutBuild } from "./components/PlayerLoadoutBuild";
 export { PublicTeamMetricStat } from "./components/PublicTeamMetricStat";
 export { RankOverviewCard } from "./components/RankOverviewCard";
 export { LpTrendLineChart } from "./components/RankTrendChart";
+export { rankTierLabel } from "./utils/rank";
 export { RankOverviewMetricRow } from "./components/RankOverviewMetricRow";
 export { MatchTeamCompare } from "./components/MatchTeamCompare";
 export { MatchTeamMetricRow } from "./components/MatchTeamMetricRow";
@@ -51,6 +54,7 @@ export { RecentMatchExpandedPanel } from "./components/RecentMatchExpandedPanel"
 export { RecentMatchExpandedToolbar } from "./components/RecentMatchExpandedToolbar";
 export { RecentMatchRow, recentMatchScoreGrade } from "./components/RecentMatchRow";
 export { RecentMatchesPanel } from "./components/RecentMatchesPanel";
+export { RecentMatchesSummaryStrip } from "./components/RecentMatchesSummaryStrip";
 export { RecentMatchesShareActions } from "./components/RecentMatchesShareActions";
 export { SearchForm } from "./components/SearchForm";
 export { SearchableRiotId } from "./components/SearchableRiotId";
@@ -224,11 +228,32 @@ export type {
   RecentMatchExpandedToolbarView,
 } from "./components/RecentMatchExpandedToolbar";
 export type {
+  ProfileStreamerCastLink,
+  ProfileStreamerCastProps,
+  ProfileStreamerCastText,
+} from "./components/ProfileStreamerCast";
+export type {
+  ProfileHeroRankQueue,
+  ProfileHeroRankProps,
+  ProfileHeroRankText,
+  ProfileHeroRankTrend,
+} from "./components/ProfileHeroRank";
+export type {
+  ProfileTopIdentityChampion,
+} from "./components/ProfileTopIdentity";
+export type {
   RecentMatchRowLocalizedText,
   RecentMatchRowMetric,
   RecentMatchRowMediaItem,
   RecentMatchRowProps,
+  RecentMatchRowTeamMember,
+  RecentMatchRowTeams,
 } from "./components/RecentMatchRow";
+export type {
+  RecentMatchesSummaryChampion,
+  RecentMatchesSummaryStripProps,
+  RecentMatchesSummaryStripText,
+} from "./components/RecentMatchesSummaryStrip";
 export type {
   PublicHomeLiveStreamer,
   PublicHomeSearchPanelLocalizedText,

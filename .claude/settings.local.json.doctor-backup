@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"gaming community SaaS dark dashboard information-dense scannable\" --design-system -p \"YORO.gg\")",
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"dashboard mobile navigation bottom nav\" --domain ux -n 5)",
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"forms error feedback inline validation\" --domain ux -n 5)",
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"list rendering virtualize memo\" --stack react)",
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"esports match history stat row scannable data density\" --domain ux -n 6)",
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"gaming stats tracker esports leaderboard\" --domain product -n 4)",
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"data table row hover clickable list scannability\" --domain ux -n 6)",
+      "Bash(awk 'NR==5650,NR==5870' /Users/kokonenne/IdeaProjects/StreamOverlay/apps/dashboard/src/pages/PublicLolPage.tsx)",
+      "Bash(awk 'NR<=1465 && /@media/{line=NR\": \"$0} END{print line}' /Users/kokonenne/IdeaProjects/StreamOverlay/apps/dashboard/src/styles/pages/public-lol/20-profile-platform.css)",
+      "Bash(npm --workspace apps/dashboard run typecheck)",
+      "Bash(node --no-warnings --import tsx --loader ./scripts/css-module-loader.mjs --test apps/dashboard/test/shared-ui-render.test.tsx apps/dashboard/test/public-lol-match-page.test.ts apps/dashboard/test/public-lol-utils.test.ts)",
+      "Bash(node --no-warnings --import tsx --loader ../../scripts/css-module-loader.mjs --test test/shared-ui-render.test.tsx test/public-lol-match-page.test.ts test/public-lol-utils.test.ts)",
+      "Bash(npx eslint *)",
+      "Bash(node scripts/check-design-token-compliance.mjs)",
+      "Bash(node --no-warnings --import tsx --loader ../../scripts/css-module-loader.mjs --test test/shared-ui-render.test.tsx)",
+      "Bash(awk '/public-search-input|public-home-shared-input|public-home-shared-control|\\\\.public-search-field/{print NR\": \"$0}' apps/dashboard/src/styles/legacy/01-core.css)",
+      "Bash(grep -v \"SearchForm.tsx$\")",
+      "Bash(node --no-warnings --import tsx --loader ../../scripts/css-module-loader.mjs --test test/*.test.ts test/*.test.tsx)",
+      "Bash(node --no-warnings --import tsx --loader ../../scripts/css-module-loader.mjs --test test/shared-ui-render.test.tsx test/public-lol-search-mobile.test.ts test/participation-ux.test.ts)",
+      "Bash(grep -rhoE \"#[0-9a-fA-F]{3,8}\\\\b|rgba?\\\\\\([^\\)]*\\\\\\)\" .)",
+      "Bash(python3 \".claude/skills/ui-ux-pro-max/scripts/search.py\" \"esports game stats data-dense dark analytics\" --design-system --density 8 --variance 6 -f markdown)",
+      "WebSearch",
+      "WebFetch(domain:yoro.gg)",
+      "Artifact",
+      "Bash(python3 -)",
+      "Bash(awk '/text=\\\\{\\\\{/,/\\\\}\\\\}/' pages/PublicLolPage.tsx)",
+      "WebFetch(domain:claude.ai)",
+      "Bash(python3 -c ' *)",
+      "Bash(npm run *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5173/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5173/dashboard/config.js)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://localhost:5173/images/public-home/lol/desktop.8373f07fdc4f4b5a.avif\")",
+      "Read(//Users/kokonenne/**)",
+      "Read(//Users/kokonenne/IdeaProjects/StreamOverlay/.projects\\\\[\\\\$p\\\\].mcpServers\\\\ /**)",
+      "Read(//Users/kokonenne/IdeaProjects/StreamOverlay/.projects\\\\[\\\\$p\\\\].disabledMcpServers\\\\ /**)",
+      "Bash(jq -r keys[] /Users/kokonenne/.claude/settings.json)",
+      "Bash(curl -s --max-time 10 \"https://downloads.claude.ai/claude-code-releases/latest\")"
+    ]
+  }
+}

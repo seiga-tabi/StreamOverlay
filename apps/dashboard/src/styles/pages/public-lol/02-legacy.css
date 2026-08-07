@@ -7030,7 +7030,10 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
 
 /* Main Search v2: 검색창 우선 미니멀 레이아웃 */
 .public-dashboard-shell.public-home-shell.public-home-shared-shell {
-  --home-bg: #0B0B11;
+  /* 지면은 design token 계열(--yoro-color-ground)로 통일합니다.
+     홈 내부 패널이 쓰는 ground-surface/ground-raised와 같은 ramp를 공유해야
+     히어로~기능 카드가 하나의 지면으로 읽힙니다. */
+  --home-bg: var(--yoro-color-ground);
   --home-card: #13141A;
   --home-border: #262A36;
   --home-primary: #7B5CFF;

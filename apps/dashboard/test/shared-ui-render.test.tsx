@@ -9,6 +9,7 @@ import { PublicHomeSearchPanel, type PublicHomeSearchPanelText } from "../src/fe
 import { PublicSiteFooter } from "../src/features/public-lol/components/PublicSiteFooter";
 import { ProfileMetricStrip } from "../src/features/public-lol/components/ProfileMetricStrip";
 import { ProfileTopIdentity } from "../src/features/public-lol/components/ProfileTopIdentity";
+import { ProfileStreamerCast } from "../src/features/public-lol/components/ProfileStreamerCast";
 import { ProfileTopPanel } from "../src/features/public-lol/components/ProfileTopPanel";
 import { PublicProfileShareButton } from "../src/features/public-lol/components/PublicProfileShareButton";
 import { MatchTeamCompare } from "../src/features/public-lol/components/MatchTeamCompare";
@@ -532,8 +533,6 @@ test("Profile 상단은 중복 검색을 제거하고 스트리머 CTA 우선순
       onOpenParticipation={() => undefined}
       onRefresh={() => undefined}
       onToggleFavorite={() => undefined}
-      primaryRankLabel="Platinum I"
-      primaryRankTone="info"
       profileIconUrl="https://static-cdn.jtvnw.net/jtv_user_pictures/yoro-profile_image.png"
       profileLinks={<div />}
       refreshButtonLabel="전적 갱신"
@@ -541,7 +540,39 @@ test("Profile 상단은 중복 검색을 제거하고 스트리머 CTA 우선순
       refreshCoolingDown={false}
       refreshDisabled={false}
       refreshTitle="전적 갱신"
+      channelAriaLabel="YORO Live · Twitch에서 보기"
+      channelName="YORO Live"
+      channelUrl="https://www.twitch.tv/yoro"
+      liveStatus={{ isLive: true, label: "LIVE · 125" }}
       seasonBadges={<div>시즌</div>}
+      streamerCast={(
+        <ProfileStreamerCast
+          channelUrl="https://www.twitch.tv/yoro"
+          gameName="League of Legends"
+          isInGame
+          isLive
+          links={[{ id: "discord", url: "https://discord.gg/yoro", label: "Discord", platform: "discord" }]}
+          onOpenParticipation={() => undefined}
+          participationOpen
+          previewUrl="https://static-cdn.jtvnw.net/previews-ttv/live_user_yoro-640x360.jpg"
+          renderLinkIcon={(link) => <a href={link.url}>{link.label}</a>}
+          text={{
+            ingameLabel: "인게임",
+            ingameNotice: "지금 랭크 게임 중입니다",
+            liveBadge: "LIVE",
+            liveHeading: "방송 중",
+            offlineHeading: "최근 방송",
+            offlineLabel: "현재 오프라인",
+            participationLabel: "참여 신청",
+            thumbnailLabel: "방송 미리보기",
+            watchAriaLabel: "Twitch에서 보기",
+            watchLabel: "Twitch",
+          }}
+          title="랭크 방송 중"
+          uptimeLabel="1시간 30분째"
+          viewersLabel="125명 시청"
+        />
+      )}
       shareAction={(
         <PublicProfileShareButton
           copiedLabel="링크를 복사했습니다."
@@ -584,23 +615,36 @@ test("Profile 상단은 중복 검색을 제거하고 스트리머 CTA 우선순
     />
   );
 
-  assert.match(html, /최근 경기/);
-  assert.match(html, /public-profile-streamer-spotlight is-live/u);
-  assert.match(html, /public-profile-platform-hero has-streamer/u);
-  assert.match(html, /public-avatar square is-streamer is-live/u);
-  assert.match(html, /<span class="sr-only">LIVE NOW<\/span>/u);
-  assert.match(html, /href="https:\/\/www\.twitch\.tv\/yoro"/u);
+  // 방송 카드는 새 행이 아니라 랭크와 같은 행(body)에 놓입니다.
+  assert.match(html, /public-profile-hero has-streamer is-live/u);
+  assert.match(html, /public-profile-hero-body has-cast/u);
+  assert.match(html, /public-profile-hero-avatar is-streamer is-live/u);
+  assert.match(html, /<span class="yoro-u-sr-only">LIVE NOW<\/span>/u);
+  // 소환사 신원과 Twitch 채널이 같은 줄에서 이어집니다.
+  assert.match(html, /public-profile-hero-name[\s\S]*public-profile-hero-channel[^>]*href="https:\/\/www\.twitch\.tv\/yoro"[\s\S]*>YORO Live</u);
+  // LIVE 는 색 단독이 아니라 문자와 시청자 수로도 전달합니다.
+  assert.match(html, /public-profile-hero-live-pill[^>]*>[\s\S]*LIVE · 125/u);
   assert.match(html, /href="https:\/\/discord\.gg\/yoro"/u);
   assert.match(html, />참여 신청</u);
-  assert.ok(html.indexOf("참여 신청") < html.indexOf("Twitch에서 보기"));
+  // 참여가 열려 있으면 참여가 주 버튼이고 Twitch 가 그 뒤에 옵니다.
+  assert.ok(html.indexOf("참여 신청") < html.indexOf(">Twitch<"));
+  assert.match(html, /public-profile-hero-cast-action is-primary[^>]*>참여 신청</u);
+  // Twitch 버튼 라벨은 좁은 폭에서 넘치지 않도록 짧게 두고 설명은 aria-label 로 보냅니다.
+  assert.match(html, /aria-label="Twitch에서 보기"[^>]*class="public-profile-hero-cast-action is-twitch"/u);
+  assert.doesNotMatch(html, />Twitch에서 보기</u);
+  // 썸네일은 안전 검증을 통과한 공식 CDN URL 만 들어옵니다.
+  assert.match(html, /src="https:\/\/static-cdn\.jtvnw\.net\/previews-ttv\/live_user_yoro-640x360\.jpg"/u);
+  assert.match(html, /public-profile-hero-cast-thumb[\s\S]*<i aria-hidden="true">LIVE<\/i>/u);
+  // 인게임은 방송 카드 안에서만 한 줄로 추가됩니다.
+  assert.match(html, /public-profile-hero-cast-ingame[\s\S]*지금 랭크 게임 중입니다/u);
   assert.doesNotMatch(html, /public-ranking-shared-toolbar/u);
-  assert.match(html, /public-profile-streamer-spotlight__metrics/u);
+  assert.doesNotMatch(html, /public-profile-streamer-spotlight/u);
   assert.match(html, />League of Legends</u);
   assert.match(html, />전적 공유</u);
   assert.match(html, /data-share-url="https:\/\/yoro\.gg\/ko\/lol\/summoners\/jp\/YORO-JP1"/u);
   assert.doesNotMatch(html, /token=|\?/u);
-  assert.match(html, />Platinum I</u);
-  assert.match(html, />참여 대기열 열림</u);
+  // 티어는 히어로 신원이 아니라 rankSection 이 소유합니다(프로필·티어 테스트에서 검증).
+  // 참여 상태는 메트릭 박스가 아니라 버튼의 라벨과 우선순위로 전달합니다(위에서 검증).
   assert.doesNotMatch(html, /public-profile-rank-summary|public-profile-details-toggle/u);
 });
 
@@ -655,10 +699,10 @@ test("스트리머 프로필 이미지는 방송 상태를 테두리 class와 �
 
   const liveHtml = renderIdentity("live", "방송 중");
   const offlineHtml = renderIdentity("offline", "오프라인");
-  assert.match(liveHtml, /public-avatar square is-streamer is-live/u);
-  assert.match(liveHtml, /<span class="sr-only">방송 중<\/span>/u);
-  assert.match(offlineHtml, /public-avatar square is-streamer is-offline/u);
-  assert.match(offlineHtml, /<span class="sr-only">오프라인<\/span>/u);
+  assert.match(liveHtml, /public-profile-hero-avatar is-streamer is-live/u);
+  assert.match(liveHtml, /<span class="yoro-u-sr-only">방송 중<\/span>/u);
+  assert.match(offlineHtml, /public-profile-hero-avatar is-streamer is-offline/u);
+  assert.match(offlineHtml, /<span class="yoro-u-sr-only">오프라인<\/span>/u);
 });
 
 test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로드아웃을 유지한다", () => {
@@ -669,26 +713,35 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
       championFallback="제"
       championIconUrl="https://example.com/champion.png"
       championName="제드"
-      championRoleLevel="미드 · Lv.18"
+      championLevelLabel="18"
+      championRoleLabel="미드"
       expanded={false}
       expandAriaLabel="경기 상세 펼치기"
       highlightClass="highlight-mvp"
-      itemSlots={Array.from({ length: 7 }, (_, index) => ({ key: `item-${index}`, label: `아이템 ${index + 1}`, focusable: true, content: `아이템${index}` }))}
+      itemSlots={Array.from({ length: 6 }, (_, index) => ({ key: `item-${index}`, label: `아이템 ${index + 1}`, focusable: true, content: `아이템${index}` }))}
       itemsLabel="아이템"
+      teams={{
+        allies: Array.from({ length: 5 }, (_, index) => ({ key: `ally-${index}`, label: `아군${index}`, isTarget: index === 0, content: `아군${index}` })),
+        opponents: Array.from({ length: 5 }, (_, index) => ({ key: `foe-${index}`, label: `상대${index}`, content: `상대${index}` })),
+        compositionLabel: "참가 챔피언",
+        alliesLabel: "아군",
+        opponentsLabel: "상대"
+      }}
+      trinketSlot={{ key: "trinket", label: "장신구", content: "장신구0" }}
       kdaMetric="Perfect"
       kdaScore={<><span>9</span><i>/</i><span className="deaths">0</span><i>/</i><span>6</span></>}
       matchAriaLabel="승리 · 제드 · 9/0/6"
       metrics={[
-        { key: "kill-participation", label: "킬 관여율", value: "70%" },
-        { key: "cs", label: "CS", value: "210" },
-        { key: "cs-per-minute", label: "분당 CS", value: "7.8" },
-        { key: "average-tier", label: "평균 티어", value: "Platinum II" }
+        { key: "kill-participation", label: "킬 관여율", ratio: 70, value: "70%" },
+        { key: "cs", label: "CS", labelSuffix: " · 7.8/분", value: "210" },
+        { key: "damage-share", label: "피해 점유", ratio: 24, value: "24%" }
       ]}
       onToggleExpand={() => undefined}
       queueLabel="솔로랭크"
       result="win"
       resultDurationLabel="26:50"
       resultLabel="승리"
+      resultShortLabel="승"
       scoreAriaLabel="종합 등급 S+"
       scoreClassName="metric-tone-excellent"
       scoreGrade="S+"
@@ -703,35 +756,53 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
     />
   );
 
-  assert.match(html, /public-match-row win highlight-mvp/);
-  assert.match(html, /public-match-mobile-outcome-meta/u);
-  assert.match(html, /public-match-mobile-outcome-meta[\s\S]*2026\. 7\. 14\.[\s\S]*26:50/u);
-  assert.match(html, /public-champion-name-line[\s\S]*public-match-mobile-highlight mvp[^>]*>MVP</u);
+  assert.match(html, /public-match-card win highlight-mvp/u);
+  // 승패는 색 단독이 아니라 문자 배지로도 전달합니다.
+  assert.match(html, /class="public-match-card-result win"[^>]*>승</u);
+  assert.match(html, /class="yoro-u-sr-only">승리</u);
+  // 상대 시각과 게임 길이만 노출하고 절대 시각은 title 로 보냅니다.
+  assert.match(html, /title="오후 1:20 · 26:50"[\s\S]*2026\. 7\. 14\.[\s\S]*26:50/u);
+  // MVP·ACE 는 챔피언 이름 줄에 놓입니다.
+  assert.match(html, /public-match-card-copy[\s\S]*public-match-card-highlight mvp[^>]*>MVP</u);
   assert.equal((html.match(/로드아웃\d/g) ?? []).length, 4);
-  assert.match(html, /public-match-loadout-column spells/u);
-  assert.match(html, /public-match-loadout-column runes/u);
-  assert.equal((html.match(/아이템\d/g) ?? []).length, 7);
-  const championCellStart = html.indexOf("public-champion-cell");
-  const itemRowStart = html.indexOf("public-match-inline-items");
-  const kdaStart = html.indexOf("public-kda");
-  const statsStart = html.indexOf("public-match-meta");
-  const timeStart = html.indexOf("public-match-time");
-  assert.ok(championCellStart >= 0 && kdaStart > championCellStart && itemRowStart > kdaStart);
-  assert.ok(statsStart > itemRowStart && timeStart > statsStart);
-  assert.match(html, /아이템0.*아이템1.*아이템2.*아이템3.*아이템4.*아이템5.*아이템6/u);
-  assert.match(html, /title="아이템 1"/u);
+  assert.match(html, /public-match-card-loadout-column spells/u);
+  assert.match(html, /public-match-card-loadout-column runes/u);
+  // 장비 6칸과 장신구 1칸을 분리합니다.
+  assert.equal((html.match(/아이템\d/g) ?? []).length, 6);
+  assert.match(html, /class="public-match-card-trinket [^"]*"[^>]*>장신구0</u);
+
+  // 시선 순서: 결과 → 챔피언 → 성과 → 지표 → 아이템 → 팀 구성 → 확장
+  const order = [
+    "public-match-card-outcome",
+    "public-match-card-champion",
+    "public-match-card-perf",
+    "public-match-card-stats",
+    "public-match-card-items",
+    "public-match-card-team",
+    "public-match-card-expand",
+  ].map((name) => html.indexOf(name));
+  assert.ok(order.every((index) => index >= 0));
+  assert.deepEqual(order, [...order].sort((a, b) => a - b));
+
   assert.match(html, /tabindex="0" title="아이템 1"/u);
-  assert.match(html, /class="deaths">0/);
-  assert.doesNotMatch(html, /public-match-featured-label/u);
-  assert.match(html, /public-kda-summary/u);
-  assert.doesNotMatch(html, /public-match-score-stars/u);
-  assert.match(html, /<strong>70%<\/strong><small>킬 관여율<\/small>.*<strong>210<\/strong><small>CS<\/small>.*<strong>7\.8<\/strong><small>분당 CS<\/small>.*<strong>Platinum II<\/strong><small>평균 티어<\/small>/u);
-  assert.match(html, /public-match-expand-label" role="tooltip">경기 상세 펼치기/u);
+  assert.match(html, /class="deaths">0/u);
+  assert.match(html, /public-match-card-kda-summary/u);
+  // 모든 지표 셀이 "값 위 / 라벨 아래" 한 규칙을 씁니다.
+  assert.match(html, /<strong>70%<\/strong><small[^>]*><i class="public-match-card-stat-label">킬 관여율<\/i><\/small>/u);
+  assert.match(html, /<strong>210<\/strong><small[^>]*><i class="public-match-card-stat-label">CS<\/i><i class="public-match-card-stat-suffix"> · 7\.8\/분<\/i><\/small>/u);
+  assert.match(html, /<strong>24%<\/strong><small[^>]*><i class="public-match-card-stat-label">피해 점유<\/i><\/small>/u);
+  // 비율 지표에만 게이지가 붙습니다.
+  assert.equal((html.match(/public-match-card-stat-bar/gu) ?? []).length, 2);
+  // 팀 구성은 아군 5 / 상대 5 이고 본인만 강조합니다.
+  assert.equal((html.match(/public-match-card-team-member/gu) ?? []).length, 10);
+  assert.equal((html.match(/public-match-card-team-member is-target/gu) ?? []).length, 1);
+
+  assert.match(html, /public-match-card-expand-label" role="tooltip">경기 상세 펼치기/u);
+  assert.match(html, /aria-expanded="false"/u);
   assert.match(html, /aria-label="승리 · 제드 · 9\/0\/6"/u);
   assert.equal((html.match(/aria-label="종합 등급 S\+"/gu) ?? []).length, 1);
-  assert.match(html, /class="public-match-score metric-tone-excellent" data-grade="S\+"[^>]*><b>S\+<\/b>/u);
-  assert.doesNotMatch(html, /<strong>91<\/strong>|data-ko="점수"/u);
-  assert.match(html, /public-match-score-description.*YORO 경기 점수 설명/u);
+  assert.match(html, /class="public-match-card-score metric-tone-excellent" data-grade="S\+"[^>]*><b>S\+<\/b>/u);
+  assert.match(html, /public-match-card-score-description.*YORO 경기 점수 설명/u);
 });
 
 test("최근 전적 공유 기능은 현재 목록을 이미지 저장과 시스템 공유로 제공한다", () => {
@@ -795,45 +866,74 @@ test("최근 전적 공유 기능은 현재 목록을 이미지 저장과 시스
   assert.match(shareSource, /downloadBlob\(blob, file\.name\)/u);
 });
 
-test("모바일 최근 전적은 압축된 2행과 챔피언 이름 옆 MVP·ACE 위치를 유지한다", () => {
-  const profileCss = readFileSync(
-    new URL("../src/styles/pages/public-lol/20-profile-platform.css", import.meta.url),
+test("모바일 최근 전적은 3행으로 압축하고 등급·지표 정렬 축을 고정한다", () => {
+  const cardCss = readFileSync(
+    new URL("../src/styles/pages/public-lol/22-match-card.css", import.meta.url),
     "utf8",
   );
 
-  assert.match(profileCss, /@media \(max-width:\s*40rem\)[\s\S]*?\.public-profile-platform-v2 \.public-matches-panel \.public-match-summary\s*\{[\s\S]*?--mobile-match-champion-size:[\s\S]*?minmax\(0, 1fr\)[\s\S]*?grid-template-rows:[\s\S]*?var\(--mobile-match-champion-size\)[\s\S]*?var\(--yoro-space-4\)/u);
-  assert.match(profileCss, /\.public-match-mobile-outcome-meta > span:first-child\s*\{[\s\S]*?display:\s*none/u);
-  assert.match(profileCss, /\.public-match-mobile-highlight\s*\{[\s\S]*?display:\s*inline-flex/u);
-  assert.match(profileCss, /--mobile-match-champion-size:\s*calc\(var\(--yoro-space-8\) - var\(--yoro-space-1\)\)/u);
-  assert.match(profileCss, /--mobile-match-loadout-size:\s*calc\(var\(--mobile-match-champion-size\) \/ 2\)/u);
-  assert.match(profileCss, /\.public-champion-cell \.public-match-mobile-spells\s*\{[\s\S]*?grid-column:\s*2 \/ 4\s*!important[\s\S]*?grid-template-columns:\s*repeat\(2, var\(--mobile-match-loadout-size\)\)/u);
-  assert.match(profileCss, /\.public-match-loadout-column\s*\{[\s\S]*?grid-template-rows:\s*repeat\(2, var\(--mobile-match-loadout-size\)\)/u);
-  assert.match(profileCss, /\.public-champion-copy strong\s*\{[\s\S]*?flex:\s*1 1 0[\s\S]*?text-overflow:\s*ellipsis/u);
-  assert.match(profileCss, /\.public-champion-name-line > strong\s*\{[\s\S]*?flex:\s*0 1 auto/u);
-  assert.match(profileCss, /\.public-kda\s*\{[\s\S]*?grid-row:\s*1 \/ 3\s*!important[\s\S]*?align-self:\s*stretch[\s\S]*?justify-content:\s*start[\s\S]*?text-align:\s*center/u);
-  assert.match(profileCss, /\.public-match-inline-items\s*\{[\s\S]*?grid-column:\s*2 \/ 3\s*!important[\s\S]*?repeat\(7, var\(--yoro-space-4\)\)[\s\S]*?gap:\s*calc\(var\(--yoro-space-1\) \/ 2\)/u);
-  assert.match(profileCss, /\.public-match-score\s*\{[\s\S]*?grid-row:\s*1 \/ 3\s*!important[\s\S]*?justify-self:\s*center[\s\S]*?width:\s*var\(--yoro-space-8\)\s*!important/u);
-  assert.match(profileCss, /\.public-match-score > b\s*\{[\s\S]*?font-size:\s*var\(--yoro-font-size-base\)\s*!important/u);
-  assert.match(profileCss, /\.public-match-expand\s*\{[\s\S]*?background:\s*var\(--public-gray-surface-strong\) !important/u);
-  assert.match(profileCss, /\.public-match-expand\[aria-expanded="true"\]/u);
-  assert.doesNotMatch(profileCss, /--yoro-space-(?:7|9)\b/u);
-  assert.match(profileCss, /@media \(max-width:\s*26\.875rem\)[\s\S]*?\.public-match-share-actions\s*\{[\s\S]*?"copy"[\s\S]*?"buttons"[\s\S]*?"status"/u);
+  // 소환사 주문은 왼쪽 열에 D 위 / F 아래, 룬은 오른쪽 열에 주 룬 위 / 보조 룬 아래로 쌓습니다.
+  assert.match(cardCss, /\.public-match-card-loadout\s*\{[\s\S]*?display:\s*flex/u);
+  assert.match(cardCss, /\.public-match-card-loadout-column\s*\{[\s\S]*?display:\s*grid[\s\S]*?grid-template-rows:\s*repeat\(2, 1\.25rem\)/u);
+
+  // 남는 폭을 한 열에 몰아주는 대신 열 사이에 균등 분배합니다.
+  // track 폭이 행마다 동일해야 열 정렬이 흔들리지 않으므로 track 에는 상한을 둡니다.
+  assert.match(cardCss, /\.public-match-card-summary\s*\{[\s\S]*?justify-content:\s*space-between/u);
+  assert.match(cardCss, /\.public-match-card-summary\s*\{[\s\S]*?minmax\(11rem, 12\.5rem\)\s*\/\* 2 챔피언/u);
+  // 그룹 내부 여백(12px)과 그룹 사이 여백(column-gap 16px + 분배분)의 위계를 유지합니다.
+  assert.match(cardCss, /\.public-match-card-summary\s*\{[\s\S]*?column-gap:\s*var\(--yoro-space-4\)/u);
+  for (const group of ["champion", "perf", "stats", "items"]) {
+    assert.match(cardCss, new RegExp(`\\.public-match-card-${group}\\s*\\{[\\s\\S]*?gap:\\s*var\\(--yoro-space-3\\)`, "u"));
+  }
+
+  // 반응형 기준은 viewport 가 아니라 리스트 컨테이너 폭입니다.
+  assert.match(cardCss, /\.public-matches-panel\s*\{[\s\S]*?container-type:\s*inline-size[\s\S]*?container-name:\s*match-list/u);
+  assert.match(cardCss, /@container match-list \(max-width: 1180px\)[\s\S]*?\.public-match-card-team\s*\{\s*display:\s*none/u);
+  assert.match(cardCss, /@container match-list \(max-width: 980px\)[\s\S]*?\.public-match-card-stats > span:nth-child\(3\)\s*\{\s*display:\s*none/u);
+
+  const mobile = cardCss.slice(cardCss.indexOf("@container match-list (max-width: 720px)"));
+  // 3·4열은 고정 폭이라 KDA 자릿수와 무관하게 등급 배지 x 좌표가 행마다 같습니다.
+  assert.match(mobile, /\.public-match-card-summary\s*\{[\s\S]*?grid-template-columns:\s*2\.25rem minmax\(0, 1fr\) 6\.75rem 2rem/u);
+  // 세로로 쌓지 않고 겹치기 위해 챔피언 셀을 풀어 각각 배치합니다.
+  assert.match(mobile, /\.public-match-card-champion\s*\{\s*display:\s*contents/u);
+  assert.match(mobile, /\.public-match-card-portrait\s*\{\s*grid-column:\s*1;\s*grid-row:\s*1 \/ span 2/u);
+  assert.match(mobile, /\.public-match-card-perf\s*\{\s*grid-column:\s*3;\s*grid-row:\s*1 \/ span 2/u);
+  // MVP·ACE 는 이름 줄 오른쪽 끝.
+  assert.match(mobile, /\.public-match-card-highlight\s*\{\s*margin-left:\s*auto/u);
+  // 지표는 3열 안에만 놓아 카드 가장자리에 밀착하지 않습니다.
+  assert.match(mobile, /\.public-match-card-stats\s*\{\s*grid-column:\s*3;\s*grid-row:\s*3/u);
+  // 폭이 좁아지면 보조 문구·게이지·후행 지표 순으로 덜어냅니다.
+  assert.match(mobile, /\.public-match-card-stat-bar\s*\{\s*display:\s*none/u);
+  // 긴 라벨 대신 짧은 라벨로 바꿔 본문 최소 12px 를 지키면서 폭을 확보합니다.
+  assert.match(mobile, /\.public-match-card-stat-label\s*\{\s*display:\s*none/u);
+  assert.match(mobile, /\.public-match-card-stat-label-short\s*\{\s*display:\s*inline/u);
+  // 큐와 포지션은 390px 에서 접고 title 로 남깁니다.
+  assert.match(mobile, /\.public-match-card-role\s*\{\s*display:\s*none/u);
+  assert.match(mobile, /\.public-match-card-outcome-line strong\s*\{\s*display:\s*none/u);
+  // 모바일은 3행 높이를 아이템 한 줄에 맞추기 위해 주문을 가로로 두고 룬은 접습니다.
+  assert.match(mobile, /\.public-match-card-loadout-column\s*\{[\s\S]*?grid-auto-flow:\s*column/u);
+  assert.match(mobile, /\.public-match-card-loadout \.runes\s*\{\s*display:\s*none/u);
+  // 확장 버튼은 눌러지는 모양을 유지하고, 카드 전체도 토글 영역입니다.
+  assert.match(mobile, /\.public-match-card-expand\s*\{[\s\S]*?width:\s*2rem;\s*height:\s*2\.25rem/u);
+  assert.match(cardCss, /\.public-match-card-summary\s*\{[\s\S]*?cursor:\s*pointer/u);
+  // 필터 칩은 모바일에서 44px 터치 타깃을 지킵니다.
+  assert.match(mobile, /\.public-match-queue-chips button\s*\{\s*min-height:\s*var\(--yoro-size-touch-target\)/u);
 });
 
-test("전적 행은 중앙 정렬하며 MVP와 ACE를 왼쪽 금색·은색 애니메이션으로 구분한다", () => {
-  const profileCss = readFileSync(
-    new URL("../src/styles/pages/public-lol/20-profile-platform.css", import.meta.url),
+test("전적 카드는 MVP와 ACE를 금색·은색 shimmer 로 구분한다", () => {
+  const cardCss = readFileSync(
+    new URL("../src/styles/pages/public-lol/22-match-card.css", import.meta.url),
     "utf8",
   );
 
-  assert.match(profileCss, /\.public-match-summary\s*\{[\s\S]*?align-items:\s*center/u);
-  assert.match(profileCss, /\.public-kda\s*\{[\s\S]*?align-self:\s*center[\s\S]*?align-content:\s*center/u);
-  assert.match(profileCss, /@keyframes public-profile-match-featured-shimmer/u);
-  assert.match(profileCss, /\.public-match-row:is\(\.highlight-mvp, \.highlight-ace\)::after\s*\{[\s\S]*?content:\s*""\s*!important[\s\S]*?inset:\s*0\s*!important[\s\S]*?width:\s*100%[\s\S]*?background-size:\s*42% 100%, 100% 100%\s*!important[\s\S]*?animation:\s*public-profile-match-featured-shimmer/u);
-  assert.match(profileCss, /@keyframes public-profile-match-featured-shimmer\s*\{[\s\S]*?background-position:\s*-75% 0, 0 0[\s\S]*?background-position:\s*175% 0, 0 0/u);
-  assert.match(profileCss, /\.public-match-row\.highlight-mvp::after\s*\{[\s\S]*?var\(--yoro-color-warning\)/u);
-  assert.match(profileCss, /\.public-match-row\.highlight-ace::after\s*\{[\s\S]*?var\(--yoro-color-text-on-dark\)/u);
-  assert.match(profileCss, /prefers-reduced-motion:\s*reduce[\s\S]*?\.public-match-row:is\(\.highlight-mvp, \.highlight-ace\)::after\s*\{[\s\S]*?animation:\s*none\s*!important/u);
+  assert.match(cardCss, /\.public-match-card:is\(\.highlight-mvp, \.highlight-ace\)::after\s*\{[\s\S]*?animation:\s*public-match-card-featured-shimmer/u);
+  assert.match(cardCss, /@keyframes public-match-card-featured-shimmer\s*\{[\s\S]*?background-position:\s*-75% 0, 0 0[\s\S]*?background-position:\s*175% 0, 0 0/u);
+  assert.match(cardCss, /\.public-match-card\.highlight-mvp::after\s*\{[\s\S]*?var\(--yoro-color-warning\)/u);
+  assert.match(cardCss, /\.public-match-card\.highlight-ace::after\s*\{[\s\S]*?var\(--yoro-color-text-on-dark\)/u);
+  assert.match(cardCss, /prefers-reduced-motion:\s*reduce[\s\S]*?\.public-match-card:is\(\.highlight-mvp, \.highlight-ace\)::after[\s\S]*?animation:\s*none/u);
+  // 승패는 스트라이프 + 배경 틴트 + 문자 배지 3중 인코딩입니다.
+  assert.match(cardCss, /\.public-match-card\.win::before\s*\{\s*background:\s*var\(--yoro-color-match-win-accent\)/u);
+  assert.match(cardCss, /\.public-match-card\.loss::before\s*\{\s*background:\s*var\(--yoro-color-match-loss-accent\)/u);
 });
 
 test("LoL 모바일 상단바는 스크롤 방향에 따라 탐색·검색 행을 애니메이션으로 전환한다", () => {

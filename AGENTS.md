@@ -10,17 +10,6 @@
 - 사용자 요청 없이 `git add`, commit, push를 하지 않는다.
 - Claude Code와 Codex의 역할, 작업 경계, handoff 및 검증 기준은 `docs/AI_WORKFLOW.md`를 끝까지 읽고 따른다.
 
-## Project purpose
-
-This repository powers a modular Twitch broadcast automation system.
-
-Core architecture:
-- apps/server: Linux server for Twitch EventSub, action routing, logs, dashboard APIs, Codex automation hooks.
-- apps/bridge: Broadcast PC local bridge for OBS WebSocket control.
-- apps/dashboard: Streamer/admin dashboard.
-- apps/overlay: OBS Browser Source overlay.
-- packages/shared: Shared TypeScript types, schemas, and safe action definitions.
-
 ## Prime directive
 
 This system may run during live broadcasts. Prioritize:
@@ -49,23 +38,9 @@ Viewer-triggered input must never lead to:
 
 Allowed runtime actions must remain allowlist-based.
 
-Allowed action families:
-- obs.setScene
-- obs.showSource
-- obs.hideSource
-- obs.toggleSource
-- obs.saveReplayBuffer
-- obs.setInputMute
-- obs.setText
-- obs.playMedia
-- twitch.chat
-- overlay.banner
-- subtitle.update
-- question.show
-- mission.update
-- queue.question
-- log.highlight
-- noop
+허용 action type의 단일 원본은 `packages/shared/src/actions.ts`의 `ALLOWED_ACTION_TYPES`이다.
+금지 대상은 같은 파일의 `FORBIDDEN_ACTION_TYPES`와 `FORBIDDEN_ACTION_PREFIXES`를 따른다.
+목록을 이 문서에 복제하지 않는다.
 
 Do not introduce new action types unless:
 1. The type is added to the shared schema.
@@ -74,12 +49,4 @@ Do not introduce new action types unless:
 4. Tests are added.
 5. The action cannot execute arbitrary user-controlled behavior.
 
-## Required validation
-
-When modifying code, try to keep these commands passing:
-
-```bash
-npm run build
-npm run validate:config
-npm test
-```
+검증 명령은 `docs/AI_WORKFLOW.md` §7을 따른다.

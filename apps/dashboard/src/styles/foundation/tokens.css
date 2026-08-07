@@ -75,9 +75,9 @@
   --yoro-color-product-gray-field: #f1f3f5;
   --yoro-color-product-gray-field-text: #212529;
 
-  /* 공개 게임 홈(히어로~기능 카드) 전용 지면 토큰. 히어로 이미지와 하단 섹션을
-     하나의 어두운 지면으로 잇기 위한 것으로, 다른 화면에서는 참조하지 않습니다.
-     기본값은 다크이며 --yoro-color-public-home-light 클래스/속성으로만 라이트로 전환됩니다. */
+  /* 공개 게임 홈 히어로 전용 지면 토큰. 다른 화면에서는 참조하지 않습니다.
+     항상 다크 값입니다 — data-public-theme는 사이트 전체 라이트/다크 토글과 공유되고
+     기본값이 "light"라, 여기 연동하면 첫 방문자 대부분에게 히어로가 밝게(저대비로) 보입니다. */
   --yoro-color-ground: #12171f;
   --yoro-color-ground-surface: #1a2130;
   --yoro-color-ground-raised: #232c3c;

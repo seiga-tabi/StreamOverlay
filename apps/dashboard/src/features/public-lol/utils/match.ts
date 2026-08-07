@@ -251,6 +251,24 @@ export function profileWithDynamicState(
   };
 }
 
+export function profileWithPreservedStreamerStateAfterRefresh(
+  current: PublicLolProfile | null,
+  refreshed: PublicLolProfile
+): PublicLolProfile {
+  if (
+    !current
+    || current.riotId !== refreshed.riotId
+    || current.lolPlatform !== refreshed.lolPlatform
+    || Object.prototype.hasOwnProperty.call(refreshed, "twitchStream")
+  ) {
+    return refreshed;
+  }
+  return {
+    ...refreshed,
+    twitchStream: current.twitchStream
+  };
+}
+
 export function hasActiveFilters(filters: PublicMatchFilters): boolean {
   return filters.queue !== "all" || filters.championId !== "all" || filters.period !== "all";
 }

@@ -360,9 +360,11 @@
   }
 }
 
-.public-dashboard-shell.public-home-shell,
-.public-dashboard-shell.public-home-shell.theme-dark,
-.public-dashboard-shell.public-home-shell.public-home-shared-shell {
+/* 공개 게임 홈(.public-home-shared-shell)은 02-legacy.css의 Main Search v2 다크 지면을
+   사용하므로 회색 지면에서 제외합니다. 두 선언 모두 !important이고 같은 legacy layer라
+   나중에 import되는 이 파일이 이기기 때문에, 선택자에서 직접 빼야 합니다. */
+.public-dashboard-shell.public-home-shell:not(.public-home-shared-shell),
+.public-dashboard-shell.public-home-shell.theme-dark:not(.public-home-shared-shell) {
   background:
     radial-gradient(circle at 50% 8%, rgba(248, 249, 250, .22), transparent 30%),
     linear-gradient(180deg, #868e96 0%, #7b838b 44%, #6c757d 100%) !important;
@@ -600,8 +602,7 @@
 .public-dashboard-shell .public-twitch-channel-main strong,
 .public-dashboard-shell .public-twitch-channel-meta span,
 .public-dashboard-shell .yoro-card__title,
-.public-dashboard-shell .yoro-metric__value,
-.public-home-shared-shell .public-home-live-head h2 {
+.public-dashboard-shell .yoro-metric__value {
   color: var(--public-gray-text) !important;
   text-shadow: none !important;
 }
@@ -621,8 +622,7 @@
 .public-dashboard-shell .public-community-comment p,
 .public-dashboard-shell .yoro-card__description,
 .public-dashboard-shell .yoro-metric__label,
-.public-dashboard-shell .yoro-metric__description,
-.public-home-shared-shell .public-home-live-head button {
+.public-dashboard-shell .yoro-metric__description {
   color: var(--public-gray-muted) !important;
 }
 

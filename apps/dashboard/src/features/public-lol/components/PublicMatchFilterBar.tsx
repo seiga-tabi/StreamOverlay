@@ -27,6 +27,7 @@ export type PublicMatchFilterBarText = {
   championFilter: PublicMatchFilterBarLocalizedText;
   periodFilter: PublicMatchFilterBarLocalizedText;
   resetFilter: PublicMatchFilterBarLocalizedText;
+  queueGroupLabel: string;
   allQueues: ReactNode;
   soloQueue: ReactNode;
   flexQueue: ReactNode;
@@ -45,6 +46,9 @@ export type PublicMatchFilterBarProps = {
   filterActive: boolean;
   championOptions: PublicMatchFilterChampionOption[];
   text: PublicMatchFilterBarText;
+  /** 필터 적용 결과 한 줄 요약. aria-live 로 읽힙니다. */
+  resultSummary?: ReactNode;
+  resultSummaryLabel?: string;
   onQueueChange: (value: string) => void;
   onChampionChange: (value: string) => void;
   onPeriodChange: (value: string) => void;
@@ -56,51 +60,65 @@ export function PublicMatchFilterBar({
   filterActive,
   championOptions,
   text,
+  resultSummary,
+  resultSummaryLabel,
   onQueueChange,
   onChampionChange,
   onPeriodChange,
   onReset
 }: PublicMatchFilterBarProps) {
+  // 자주 쓰는 큐는 select 를 열지 않고 한 번에 전환할 수 있도록 칩으로 노출합니다.
+  const queueChips: Array<{ value: string; label: ReactNode }> = [
+    { value: "all", label: text.allQueues },
+    { value: "solo", label: text.soloQueue },
+    { value: "flex", label: text.flexQueue },
+    { value: "ranked5v5", label: text.ranked5v5 },
+    { value: "normal", label: text.normalQueue },
+    { value: "aram", label: text.aramQueue },
+    { value: "aramMayhem", label: text.aramMayhemQueue }
+  ];
+
   return (
-    <div className={`public-match-filter-bar ${filterActive ? "active" : ""}`}>
-      <div className="public-match-filter-title">
-        <span aria-hidden="true">▽</span>
-        <strong  >
-          {filterActive ? text.activeFilter : text.filter.label}
-        </strong>
+    <div className={`public-match-filter-panel ${filterActive ? "active" : ""}`}>
+      <div className="public-match-filter-controls">
+        <div className="public-match-queue-chips" role="group" aria-label={text.queueGroupLabel}>
+          {queueChips.map((chip) => (
+            <button
+              aria-pressed={filters.queue === chip.value}
+              key={chip.value}
+              onClick={() => onQueueChange(chip.value)}
+              type="button"
+            >
+              {chip.label}
+            </button>
+          ))}
+        </div>
+        <ChampionFilterSelect
+          allLabel={text.allChampions}
+          label={text.championFilter.label}
+          labelJa={text.championFilter.ja}
+          labelKo={text.championFilter.ko}
+          onChange={onChampionChange}
+          options={championOptions}
+          value={filters.championId}
+        />
+        <label className="public-match-filter-select">
+          <span>{text.periodFilter.label}</span>
+          <select value={filters.period} onChange={(event) => onPeriodChange(event.target.value)}>
+            <option value="all">{text.periodAll}</option>
+            <option value="7d">{text.period7}</option>
+            <option value="30d">{text.period30}</option>
+          </select>
+        </label>
+        <button className="public-match-filter-reset" type="button" onClick={onReset} disabled={!filterActive}>
+          {text.resetFilter.label}
+        </button>
       </div>
-      <label>
-        <span  >{text.queueFilter.label}</span>
-        <select value={filters.queue} onChange={(event) => onQueueChange(event.target.value)}>
-          <option value="all">{text.allQueues}</option>
-          <option value="solo">{text.soloQueue}</option>
-          <option value="flex">{text.flexQueue}</option>
-          <option value="ranked5v5">{text.ranked5v5}</option>
-          <option value="normal">{text.normalQueue}</option>
-          <option value="aram">{text.aramQueue}</option>
-          <option value="aramMayhem">{text.aramMayhemQueue}</option>
-        </select>
-      </label>
-      <ChampionFilterSelect
-        allLabel={text.allChampions}
-        label={text.championFilter.label}
-        labelJa={text.championFilter.ja}
-        labelKo={text.championFilter.ko}
-        onChange={onChampionChange}
-        options={championOptions}
-        value={filters.championId}
-      />
-      <label>
-        <span  >{text.periodFilter.label}</span>
-        <select value={filters.period} onChange={(event) => onPeriodChange(event.target.value)}>
-          <option value="all">{text.periodAll}</option>
-          <option value="7d">{text.period7}</option>
-          <option value="30d">{text.period30}</option>
-        </select>
-      </label>
-      <button type="button" onClick={onReset} disabled={!filterActive}  >
-        {text.resetFilter.label}
-      </button>
+      {resultSummary ? (
+        <p aria-label={resultSummaryLabel} aria-live="polite" className="public-match-filter-summary">
+          {resultSummary}
+        </p>
+      ) : null}
     </div>
   );
 }

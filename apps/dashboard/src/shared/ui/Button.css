@@ -1,5 +1,5 @@
 .yoro-button {
-  display: inline-flex;
+  display: var(--yoro-button-display, inline-flex);
   align-items: center;
   justify-content: center;
   min-width: var(--yoro-size-touch-target);

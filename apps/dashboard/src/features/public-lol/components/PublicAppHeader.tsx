@@ -43,6 +43,8 @@ export type PublicAppHeaderProps = {
   onTwitchLogout: () => void;
 };
 
+const MOBILE_CHROME_SETTLE_MS = 320;
+
 export function PublicAppHeader({
   locale,
   twitchStatus,
@@ -173,11 +175,13 @@ export function PublicAppHeader({
     let lastScrollY = window.scrollY;
     let directionStartY = lastScrollY;
     let scrollDirection = 0;
+    let settleUntil = 0;
 
     const resetMobileChrome = () => {
       lastScrollY = window.scrollY;
       directionStartY = lastScrollY;
       scrollDirection = 0;
+      settleUntil = 0;
       setMobileChromeScrolled(false);
     };
 
@@ -196,11 +200,27 @@ export function PublicAppHeader({
           directionStartY = lastScrollY;
         }
 
+        // 접힘/펼침은 상단바 높이를 바꾸고, 브라우저는 그만큼 scroll 위치를 되돌립니다.
+        // 그 반동(약 40px)을 사용자의 방향 전환으로 오해하면 접힘과 펼침이 서로를
+        // 유발해 계속 진동합니다. 전환 애니메이션이 끝날 때까지는 판정을 멈춥니다.
+        if (performance.now() < settleUntil) {
+          lastScrollY = currentScrollY;
+          directionStartY = currentScrollY;
+          scrollDirection = 0;
+          return;
+        }
+
         const directionTravel = Math.abs(currentScrollY - directionStartY);
         if (scrollDirection > 0 && directionTravel >= 20) {
           setMobileChromeScrolled(true);
+          settleUntil = performance.now() + MOBILE_CHROME_SETTLE_MS;
+          directionStartY = currentScrollY;
+          scrollDirection = 0;
         } else if (scrollDirection < 0 && directionTravel >= 12) {
           setMobileChromeScrolled(false);
+          settleUntil = performance.now() + MOBILE_CHROME_SETTLE_MS;
+          directionStartY = currentScrollY;
+          scrollDirection = 0;
         }
         lastScrollY = currentScrollY;
       });

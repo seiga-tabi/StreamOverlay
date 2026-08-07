@@ -12,6 +12,17 @@
   --public-gray-muted: var(--yoro-color-product-gray-muted);
   --public-gray-field: var(--yoro-color-product-gray-field);
   --public-gray-field-text: var(--yoro-color-product-gray-field-text);
+}
+
+/* 공개 게임 홈은 자체 다크 지면을 소유하므로 회색 지면에서 제외합니다.
+   아래 두 선언은 !important이고 이 파일은 legacy layer에 있습니다.
+   !important 선언은 cascade layer 우선순위가 역전되어 앞선 layer가 이기므로,
+   뒤에 오는 home layer에서는 덮을 수 없습니다. 따라서 선택자에서 제외해야 합니다.
+   --public-gray-* 커스텀 속성은 위 블록에 그대로 남겨, 홈 내부에서 이 값을 참조하는
+   04-followers.css의 기존 규칙이 계속 동작하도록 합니다. */
+.public-lol-shell:not(.public-home-shared-shell),
+.public-dashboard-shell:not(.public-home-shared-shell),
+.app-shell[data-page="followers"] {
   background: var(--yoro-background-product-gray-page) !important;
   color: var(--public-gray-text) !important;
 }

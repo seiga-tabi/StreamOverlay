@@ -11,7 +11,9 @@ export const DEFAULT_APP_SHELL_MAIN_ID = "yoro-app-shell-main";
 
 export type AppShellVariant = "public" | "user" | "streamer" | "admin";
 
-export type AppShellSidebarMode = "static" | "drawer";
+/* "none"은 sidebar를 두지 않는 화면용입니다. sidebar column을 접어
+   콘텐츠가 뷰포트 전체 폭을 쓰게 합니다. */
+export type AppShellSidebarMode = "static" | "drawer" | "none";
 
 export type AppShellElement = "div" | "section";
 

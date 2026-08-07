@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { formatCooldown, formatDecimal, formatDuration, formatPercent } from "../src/features/public-lol/utils/format";
-import { compactMatchBadgeSelection, filteredMatches, summarizeMatches } from "../src/features/public-lol/utils/match";
+import {
+  compactMatchBadgeSelection,
+  filteredMatches,
+  profileWithPreservedStreamerStateAfterRefresh,
+  summarizeMatches,
+} from "../src/features/public-lol/utils/match";
 import { rankScore, rankTrendLine, shortRankLabel } from "../src/features/public-lol/utils/rank";
 import {
   buildSuggestions,
@@ -199,6 +204,40 @@ test("매치 요약과 필터 계산을 기존 규칙으로 유지한다", () =>
   assert.deepEqual(
     filteredMatches(profile, { queue: "aramMayhem", championId: "all", period: "all" }).map((item) => item.matchId),
     ["aram-mayhem"]
+  );
+});
+
+test("전적 갱신 응답은 동일한 프로필의 지연 로딩된 스트리머 정보를 보존한다", () => {
+  const twitchStream = {
+    twitchUserId: "streamer-1",
+    twitchLogin: "streamer",
+    twitchDisplayName: "스트리머",
+    channelUrl: "https://www.twitch.tv/streamer",
+    isLive: true,
+    source: "registered",
+  } as NonNullable<PublicLolProfile["twitchStream"]>;
+  const current = {
+    riotId: "테스터#JP1",
+    lolPlatform: "jp1",
+    twitchStream,
+    fetchedAt: "2026-08-07T00:00:00.000Z",
+  } as PublicLolProfile;
+  const refreshed = {
+    riotId: "테스터#JP1",
+    lolPlatform: "jp1",
+    fetchedAt: "2026-08-07T00:10:00.000Z",
+  } as PublicLolProfile;
+
+  const merged = profileWithPreservedStreamerStateAfterRefresh(current, refreshed);
+
+  assert.equal(merged.twitchStream, twitchStream);
+  assert.equal(merged.fetchedAt, refreshed.fetchedAt);
+  assert.equal(
+    profileWithPreservedStreamerStateAfterRefresh(
+      current,
+      { ...refreshed, riotId: "다른계정#JP1" },
+    ).twitchStream,
+    undefined,
   );
 });
 

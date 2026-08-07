@@ -88,6 +88,8 @@ import {
   PlayerItemBuild as FeaturePlayerItemBuild,
   PlayerLoadoutBuild as FeaturePlayerLoadoutBuild,
   PublicMatchFilterBar as FeaturePublicMatchFilterBar,
+  ProfileHeroRank as FeatureProfileHeroRank,
+  ProfileStreamerCast as FeatureProfileStreamerCast,
   ProfileMetricStrip as FeatureProfileMetricStrip,
   ProfileTopPanel as FeatureProfileTopPanel,
   PublicProfileShareButton,
@@ -100,11 +102,15 @@ import {
   recentMatchScoreGrade,
   RecentMatchesPanel as FeatureRecentMatchesPanel,
   RecentMatchesShareActions,
+  RecentMatchesSummaryStrip,
   SearchForm as FeatureSearchForm,
   SearchableRiotId as FeatureSearchableRiotId,
   searchProfile,
   searchSuggestions,
   readPublicApiErrorMessage as readErrorMessage,
+  type ProfileHeroRankQueue,
+  type ProfileHeroRankTrend,
+  type ProfileTopIdentityChampion,
   type PublicMatchFilterBarText,
   type ProfileTopPanelText,
   type PublicHomeLiveStreamer,
@@ -128,8 +134,11 @@ import {
   type RecentMatchExpandedPanelText,
   type RecentMatchRowMetric,
   type RecentMatchRowMediaItem,
+  type RecentMatchRowTeamMember,
+  type RecentMatchRowTeams,
   type RecentMatchShareItem,
   type RecentMatchesPanelText,
+  type RecentMatchesSummaryChampion,
   type SearchFormProps,
   type SearchFormPanelRequest,
   type SearchFormPlatformOption,
@@ -248,6 +257,7 @@ import {
   profileWithAdditionalMatchPage,
   profileWithDynamicState,
   profileWithMatches,
+  profileWithPreservedStreamerStateAfterRefresh,
   roundTo,
   safeRecordValue,
   summarizeMatches,
@@ -261,6 +271,8 @@ import {
   rankLabel,
   rankScore,
   rankTierClass,
+  rankTierLabel,
+  rankTrendLine,
   rankTrendTierClass,
   shortRankLabel,
   totalGames,
@@ -686,6 +698,11 @@ function resultLabel(result: PublicLolRecentMatch["result"]): string {
   if (result === "win") return t().win;
   if (result === "loss") return t().loss;
   return t().unknown;
+}
+
+/** 매치 행의 승패 배지용 1글자 라벨입니다. 한국어 승/패, 일본어 勝/敗 모두 1글자 폭이 유지됩니다. */
+function resultShortLabel(result: PublicLolRecentMatch["result"]): string {
+  return resultLabel(result).slice(0, 1);
 }
 
 function formatDate(value: string | undefined): string {
@@ -1541,6 +1558,115 @@ function profileTopPanelText(): ProfileTopPanelText {
   };
 }
 
+
+/** Master 이상은 상위 컷 기준, 그 아래는 승급(100 LP) 기준으로 목표 문구가 갈립니다. */
+const APEX_TIERS = new Set(["MASTER", "GRANDMASTER", "CHALLENGER"]);
+const CHALLENGER_CUT_LP = 1900;
+
+function profileHeroRankGoal(stats: LolRankedStats): { label: string; percent: number } | undefined {
+  if (stats.tier === "CHALLENGER") return undefined;
+  if (APEX_TIERS.has(stats.tier)) {
+    const gap = Math.max(0, CHALLENGER_CUT_LP - stats.leaguePoints);
+    if (gap === 0) return undefined;
+    return {
+      label: `${t().rankChallengerCut} ${formatNumber(CHALLENGER_CUT_LP)} LP${t().rankNextTierGap} ${formatNumber(gap)} LP`,
+      percent: (stats.leaguePoints / CHALLENGER_CUT_LP) * 100,
+    };
+  }
+  const gap = Math.max(0, 100 - stats.leaguePoints);
+  return {
+    label: `${t().rankPromotionGap} ${formatNumber(gap)} LP`,
+    percent: Math.min(100, stats.leaguePoints),
+  };
+}
+
+function profileHeroRankQueue(
+  id: string,
+  label: string,
+  stats: LolRankedStats | undefined,
+): ProfileHeroRankQueue {
+  const ranked = Boolean(stats) && stats?.tier !== "UNRANKED";
+  const winLabel = activePublicLocale === "ja" ? "勝" : "승";
+  const lossLabel = activePublicLocale === "ja" ? "敗" : "패";
+  if (!ranked || !stats) {
+    return {
+      id,
+      label,
+      ranked: false,
+      tierKey: "unranked",
+      tierFallbackLabel: "U",
+      segmentValue: t().unranked,
+      rankLabel: t().unranked,
+      wins: 0,
+      losses: 0,
+      winsLabel: winLabel,
+      lossesLabel: lossLabel,
+      winRate: 0,
+      recordCaption: t().noData,
+      unrankedDescription: t().rankUnrankedDescription,
+    };
+  }
+  return {
+    id,
+    label,
+    ranked: true,
+    tierKey: stats.tier.toLocaleLowerCase(),
+    tierIconUrl: assetUrl(stats.tierIconUrl),
+    tierFallbackLabel: stats.tier.slice(0, 1),
+    segmentValue: `${formatNumber(stats.leaguePoints)} LP`,
+    rankLabel: rankTierLabel(stats),
+    leaguePointsLabel: `${formatNumber(stats.leaguePoints)} LP`,
+    wins: stats.wins,
+    losses: stats.losses,
+    winsLabel: winLabel,
+    lossesLabel: lossLabel,
+    winRate: stats.winRate,
+    recordCaption: `${gamesText(totalGames(stats))} · ${t().winRate} ${formatPercent(stats.winRate)}`,
+    goal: profileHeroRankGoal(stats),
+  };
+}
+
+function profileHeroRankQueues(profile: PublicLolProfile): ProfileHeroRankQueue[] {
+  return [
+    profileHeroRankQueue("solo", t().soloRank, soloRankStats(profile)),
+    profileHeroRankQueue("flex", t().flexRank, flexRankStats(profile)),
+    profileHeroRankQueue("ranked5v5", t().ranked5v5, ranked5v5Stats(profile)),
+  ];
+}
+
+function profileHeroRankTrend(profile: PublicLolProfile): ProfileHeroRankTrend | undefined {
+  const trend = rankTrendLine(profile);
+  if (!trend || trend.points.length < 2) return undefined;
+  return {
+    ariaLabel: `${t().rankLpTrendLabel} ${t().period30}`,
+    changeLabel: trend.change === 0 ? t().lpNoChange : `${trend.change > 0 ? "+" : ""}${trend.change} LP`,
+    changeTone: trend.change > 0 ? "up" : trend.change < 0 ? "down" : "flat",
+    values: trend.points.map((point) => point.value),
+  };
+}
+
+function profileHeroTopChampions(profile: PublicLolProfile): ProfileTopIdentityChampion[] {
+  return profile.championPerformance.slice(0, 3).map((entry) => ({
+    key: String(entry.champion.championId),
+    name: championName(entry.champion),
+    iconUrl: assetUrl(entry.champion.iconUrl),
+    fallbackLabel: championName(entry.champion).slice(0, 1),
+  }));
+}
+
+
+/** "1시간 30분째" 처럼 방송 경과 시간을 만듭니다. 한 시간 미만이면 분만 씁니다. */
+function streamerUptimeLabel(startedAt: string | undefined): string | undefined {
+  if (!startedAt) return undefined;
+  const startedMs = Date.parse(startedAt);
+  if (!Number.isFinite(startedMs)) return undefined;
+  const minutes = Math.max(0, Math.floor((Date.now() - startedMs) / 60_000));
+  const hours = Math.floor(minutes / 60);
+  const restMinutes = minutes % 60;
+  if (hours <= 0) return `${restMinutes}${t().streamerUptimeMinutes}`;
+  return `${hours}${t().streamerUptimeHours} ${restMinutes}${t().streamerUptimeMinutes}`;
+}
+
 function ProfileTopPanel({
   profile,
   loading,
@@ -1549,7 +1675,8 @@ function ProfileTopPanel({
   onRefresh,
   onOpenParticipation,
   participationOpen,
-  onToggleFavorite
+  onToggleFavorite,
+  tabs
 }: {
   profile: PublicLolProfile;
   loading: boolean;
@@ -1559,7 +1686,9 @@ function ProfileTopPanel({
   onOpenParticipation: () => void;
   participationOpen: boolean;
   onToggleFavorite: () => void;
+  tabs?: ReactNode;
 }) {
+  const [activeRankQueue, setActiveRankQueue] = useState<string>();
   const refreshDisabled = loading || refreshRemaining > 0;
   const refreshCoolingDown = refreshRemaining > 0;
   const soloStats = soloRankStats(profile);
@@ -1572,9 +1701,7 @@ function ProfileTopPanel({
     link.url !== registeredStreamerStream?.channelUrl
     && profileLinkPlatformClass(link.platform, link.url) !== "twitch"
   ));
-  const primaryRank = soloStats ?? flexStats ?? rank5v5Stats ?? profile.rankedStats;
-  const primaryRankClassName = `tier-${primaryRank?.tier ? primaryRank.tier.toLocaleLowerCase() : "unranked"}`;
-  const fetchedAtText = `${t().fetchedAt} ${formatDate(profile.fetchedAt)}`;
+  const fetchedAtText = `${formatRelativeDate(profile.fetchedAt)} ${t().profileFetchedAgo}`;
   const streamerProfileIconUrl = assetUrl(registeredStreamerStream?.profileImageUrl);
   const streamerSpotlight = registeredStreamerStream ? {
     isLive: registeredStreamerStream.isLive,
@@ -1607,6 +1734,56 @@ function ProfileTopPanel({
       }
     ]
   } : undefined;
+  const streamerCast = registeredStreamerStream ? (
+    <FeatureProfileStreamerCast
+      channelUrl={registeredStreamerStream.channelUrl}
+      gameName={registeredStreamerStream.gameName}
+      isInGame={profile.liveGame.isLive}
+      isLive={registeredStreamerStream.isLive}
+      links={supportingProfileLinks}
+      onOpenParticipation={onOpenParticipation}
+      participationOpen={participationOpen}
+      previewUrl={safeTwitchStreamPreviewUrl(registeredStreamerStream.thumbnailUrl)}
+      renderLinkIcon={(link) => (
+        <ProfileLinkIcon
+          href={link.url}
+          label={link.label}
+          platform={profileLinkPlatformClass(link.platform, link.url)}
+          url={link.url}
+        />
+      )}
+      text={{
+        ingameLabel: t().ingame,
+        ingameNotice: t().streamerIngameNotice,
+        liveBadge: "LIVE",
+        liveHeading: t().streamerCastLive,
+        offlineHeading: t().streamerCastRecent,
+        offlineLabel: t().streamerOfflineNow,
+        participationLabel: participationOpen ? t().streamerParticipationApply : t().streamerParticipationView,
+        thumbnailLabel: t().streamerCastThumbnailLabel,
+        // 좁은 폭에서 버튼 밖으로 넘치지 않도록 라벨은 "Twitch" 만 씁니다.
+        watchAriaLabel: t().streamerWatch,
+        watchLabel: t().streamerWatchShort,
+      }}
+      title={registeredStreamerStream.title}
+      uptimeLabel={registeredStreamerStream.isLive
+        ? streamerUptimeLabel(registeredStreamerStream.startedAt)
+        : registeredStreamerStream.startedAt
+          ? `${formatRelativeDate(registeredStreamerStream.startedAt)} ${t().streamerLastLive}`
+          : undefined}
+      viewersLabel={registeredStreamerStream.viewerCount !== undefined
+        ? `${formatNumber(registeredStreamerStream.viewerCount)}${t().streamerViewersSuffix}`
+        : undefined}
+    />
+  ) : undefined;
+  const rankQueues = profileHeroRankQueues(profile);
+  // 랭크가 있는 큐를 기본 선택합니다. 전부 언랭크면 솔로랭크를 보여 줍니다.
+  const defaultRankQueueId = rankQueues.find((queue) => queue.ranked)?.id ?? rankQueues[0]?.id ?? "solo";
+  const selectedRankQueueId = rankQueues.some((queue) => queue.id === activeRankQueue)
+    ? activeRankQueue ?? defaultRankQueueId
+    : defaultRankQueueId;
+  const heroTrend = profileHeroRankTrend(profile);
+
   const normalizedPlatform = normalizeLolPlatformId(profile.lolPlatform) ?? DEFAULT_PUBLIC_LOL_PLATFORM;
   const canonicalProfilePath = localizedPublicUrlForCurrentLocale(
     publicSummonerPath(profile.riotId, normalizedPlatform),
@@ -1630,12 +1807,39 @@ function ProfileTopPanel({
       masteryChampionArt={masteryChampionArt}
       onRefresh={onRefresh}
       onToggleFavorite={onToggleFavorite}
-      primaryRankClassName={primaryRankClassName}
-      primaryRankLabel={rankLabel(primaryRank)}
-      primaryRankTone={sharedRankTone(primaryRank)}
+      mainRoleLabel={profile.roleAnalysis ? mainRoleLabel(profile.roleAnalysis.mainRole) : undefined}
       profileIconUrl={streamerProfileIconUrl ?? assetUrl(profile.profileIconUrl)}
       profileMetaLabel={undefined}
       profileLinks={<ProfileLinkIcons links={profileLinks} />}
+      rankSection={(
+        <FeatureProfileHeroRank
+          activeQueueId={selectedRankQueueId}
+          onSelectQueue={setActiveRankQueue}
+          onViewRecentMatches={() => document.getElementById("public-recent-matches")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+          queues={rankQueues}
+          text={{
+            lpTrendLabel: `${t().rankLpTrendLabel} · ${t().period30}`,
+            queueSwitcherLabel: t().rankQueueSwitcher,
+            unrankedTitle: t().rankUnrankedTitle,
+            viewRecentMatchesLabel: t().rankViewRecentMatches,
+          }}
+          trend={heroTrend}
+        />
+      )}
+      channelAriaLabel={registeredStreamerStream ? `${registeredStreamerStream.twitchDisplayName} · ${t().streamerWatch}` : undefined}
+      liveStatus={registeredStreamerStream ? {
+        isLive: registeredStreamerStream.isLive,
+        label: registeredStreamerStream.isLive
+          ? `LIVE${registeredStreamerStream.viewerCount !== undefined ? ` · ${formatNumber(registeredStreamerStream.viewerCount)}` : ""}`
+          : t().streamerOfflineNow,
+      } : undefined}
+      channelName={registeredStreamerStream?.twitchDisplayName}
+      channelUrl={registeredStreamerStream?.channelUrl}
+      streamerCast={streamerCast}
+      summonerLevelAriaLabel={profile.summonerLevel ? `${t().profileSummonerLevel} ${profile.summonerLevel}` : undefined}
+      summonerLevelLabel={profile.summonerLevel ? `Lv.${formatNumber(profile.summonerLevel)}` : undefined}
+      tabs={tabs}
+      topChampions={profileHeroTopChampions(profile)}
       refreshButtonLabel={loading ? t().searching : t().refreshProfile}
       refreshCooldownLabel={formatCooldown(refreshRemaining)}
       refreshCoolingDown={refreshCoolingDown}
@@ -1706,12 +1910,12 @@ function PublicProfileTabs({
     });
   };
   return (
-    <nav className="public-profile-tabs" aria-label={t().profileSummary}>
-      <Button type="button" aria-current={activeTab === "overview" ? "page" : undefined} className={activeTab === "overview" ? "active" : ""} onClick={() => onChange("overview")} size="md" variant={activeTab === "overview" ? "secondary" : "ghost"}>{t().matchHistoryTab}</Button>
-      <Button type="button" aria-current={activeTab === "champions" ? "page" : undefined} className={activeTab === "champions" ? "active" : ""} onClick={() => onChange("champions")} size="md" variant={activeTab === "champions" ? "secondary" : "ghost"}>{t().championAnalysis}</Button>
-      <Button type="button" aria-current={activeTab === "ingame" ? "page" : undefined} className={activeTab === "ingame" ? "active" : ""} onClick={() => onChange("ingame")} size="md" variant={activeTab === "ingame" ? "secondary" : "ghost"}>{t().ingame}</Button>
-      <Button type="button" onClick={onParticipation} size="md" variant="ghost">{t().participationHeaderNav}</Button>
-      <Button type="button" onClick={openStats} size="md" variant="ghost">{t().stats}</Button>
+    <nav className="public-profile-hero-nav" aria-label={t().profileSummary}>
+      <button type="button" aria-current={activeTab === "overview" ? "page" : undefined} onClick={() => onChange("overview")}>{t().matchHistoryTab}</button>
+      <button type="button" aria-current={activeTab === "champions" ? "page" : undefined} onClick={() => onChange("champions")}>{t().championAnalysis}</button>
+      <button type="button" aria-current={activeTab === "ingame" ? "page" : undefined} onClick={() => onChange("ingame")}>{t().ingame}</button>
+      <button type="button" onClick={onParticipation}>{t().participationHeaderNav}</button>
+      <button type="button" onClick={openStats}>{t().stats}</button>
     </nav>
   );
 }
@@ -1994,12 +2198,14 @@ function PublicMatchFilterBar({
   filters,
   champions,
   onChange,
-  onReset
+  onReset,
+  resultSummary
 }: {
   filters: PublicMatchFilters;
   champions: LolChampionSummary[];
   onChange: (filters: PublicMatchFilters) => void;
   onReset: () => void;
+  resultSummary?: ReactNode;
 }) {
   const filterActive = hasActiveFilters(filters);
   const championOptions = champions.map((champion) => ({
@@ -2045,7 +2251,8 @@ function PublicMatchFilterBar({
     allChampions: t().allChampions,
     periodAll: t().periodAll,
     period7: t().period7,
-    period30: t().period30
+    period30: t().period30,
+    queueGroupLabel: t().matchFilterQueueGroup
   };
   return (
     <FeaturePublicMatchFilterBar
@@ -2056,6 +2263,8 @@ function PublicMatchFilterBar({
       onPeriodChange={(period) => onChange({ ...filters, period: period as MatchPeriodFilter })}
       onQueueChange={(queue) => onChange({ ...filters, queue: queue as MatchQueueFilter })}
       onReset={onReset}
+      resultSummary={resultSummary}
+      resultSummaryLabel={t().matchFilterResultSummary}
       text={text}
     />
   );
@@ -5710,24 +5919,32 @@ function RecentMatches({
               label: rune.title ?? t().runes,
               content: <img src={rune.iconUrl} alt="" />
             }));
+          // 모든 지표 셀은 "값 위 / 라벨 아래" 한 규칙을 씁니다. 비율 지표에는 게이지를 붙여
+          // 수치를 읽지 않아도 크기가 보이게 합니다.
           const matchMetrics: RecentMatchRowMetric[] = [
             {
               key: "kill-participation",
               label: t().killParticipation,
+              labelShort: t().matchStatKillParticipationShort,
+              ratio: match.killParticipation,
               value: <span className={metricToneClass(percentTone(match.killParticipation))}>{formatPercent(match.killParticipation)}</span>
             },
             {
               key: "cs",
               label: "CS",
-              value: formatNumber(match.cs)
+              labelSuffix: ` · ${formatDecimal(match.csPerMinute, 1)}${t().matchStatPerMinuteSuffix}`,
+              title: `CS · ${t().perMinuteCs} ${formatDecimal(match.csPerMinute, 1)}`,
+              value: <span className={metricToneClass(csTone(match.csPerMinute))}>{formatNumber(match.cs)}</span>
             },
             {
-              key: "cs-per-minute",
-              label: t().perMinuteCs,
-              value: <span className={metricToneClass(csTone(match.csPerMinute))}>{formatDecimal(match.csPerMinute, 1)}</span>
+              key: "damage-share",
+              label: t().matchStatDamageShare,
+              labelShort: t().matchStatDamageShareShort,
+              ratio: match.damageShare,
+              value: <span className={metricToneClass(percentTone(match.damageShare))}>{formatPercent(match.damageShare)}</span>
             }
           ];
-          const inlineItemSlots: RecentMatchRowMediaItem[] = recentItemSlots.map((item, index) => {
+          const itemSlotMediaItem = (item: PublicLolRecentMatch["items"][number] | undefined, index: number): RecentMatchRowMediaItem => {
             const itemName = activePublicLocale === "ja"
               ? item?.nameJa ?? item?.nameKo
               : item?.nameKo ?? item?.nameJa;
@@ -5738,7 +5955,35 @@ function RecentMatches({
               label: itemName ?? (item ? t().unknownItem : `${t().items} ${index + 1}`),
               content: item ? item.iconUrl ? <img src={item.iconUrl} alt="" /> : itemName ?? t().unknownItem : null
             };
+          };
+          // 앞 6칸은 장비, 마지막 칸은 장신구입니다. 형태를 나눠 한 덩어리로 읽히지 않게 합니다.
+          const inlineItemSlots: RecentMatchRowMediaItem[] = recentItemSlots.slice(0, 6).map(itemSlotMediaItem);
+          const trinketSlot = itemSlotMediaItem(recentItemSlots[6], 6);
+          // 목록 응답의 teams 는 비어 있고 경기를 펼칠 때 채워집니다. 데이터가 있을 때만 그립니다.
+          // MVP·ACE 는 챔피언 이름 줄의 highlight 배지로 이미 표시하므로 KDA 줄에서는 제외합니다.
+          const secondaryBadges = (match.badges ?? []).filter((badge) => badge.code !== "mvp" && badge.code !== "ace");
+          const compositionTeams = (hydratedMatch.teams ?? []).filter((team) => team.players.length > 0);
+          const targetTeamId = compositionTeams
+            .find((team) => team.players.some((player) => player.isTarget))?.teamId;
+          const teamMember = (player: PublicLolMatchParticipant, side: string, index: number): RecentMatchRowTeamMember => ({
+            key: `${match.matchId}:${side}:${index}:${player.champion.championId}`,
+            label: player.isTarget ? `${t().matchTeamSelf} · ${championName(player.champion)}` : championName(player.champion),
+            isTarget: player.isTarget,
+            content: player.champion.iconUrl
+              ? <img src={player.champion.iconUrl} alt="" />
+              : <i aria-hidden="true">{championName(player.champion).slice(0, 1)}</i>
           });
+          const allyPlayers = compositionTeams.find((team) => team.teamId === targetTeamId)?.players ?? [];
+          const opponentPlayers = compositionTeams.find((team) => team.teamId !== targetTeamId)?.players ?? [];
+          const teams: RecentMatchRowTeams | undefined = allyPlayers.length > 0 && opponentPlayers.length > 0
+            ? {
+              allies: allyPlayers.map((player, index) => teamMember(player, "ally", index)),
+              opponents: opponentPlayers.map((player, index) => teamMember(player, "foe", index)),
+              compositionLabel: t().matchTeamComposition,
+              alliesLabel: t().matchTeamAllies,
+              opponentsLabel: t().matchTeamOpponents
+            }
+            : undefined;
           const expandedPanelText: RecentMatchExpandedPanelText = {
             matchDetails: t().matchDetails,
             recordTab: {
@@ -5810,11 +6055,12 @@ function RecentMatches({
                 ko: publicI18n.ko.aiScoreDescription,
                 ja: publicI18n.ja.aiScoreDescription
               }}
-              badges={<MatchBadges badges={match.badges} compact />}
+              badges={<MatchBadges badges={secondaryBadges} compact />}
               championFallback={championName(match.champion).slice(0, 1)}
               championIconUrl={match.champion.iconUrl}
               championName={championName(match.champion)}
-              championRoleLevel={`${mainRoleLabel(match.position)} · Lv.${formatNumber(match.championLevel)}`}
+              championRoleLabel={mainRoleLabel(match.position)}
+              championLevelLabel={formatNumber(match.championLevel)}
               expanded={expanded}
               expandedPanel={expandedPanel}
               expandAriaLabel={expanded ? t().collapseMatch : t().expandMatch}
@@ -5843,6 +6089,7 @@ function RecentMatches({
               result={match.result}
               resultDurationLabel={formatDuration(match.durationSeconds)}
               resultLabel={resultLabel(match.result)}
+              resultShortLabel={resultShortLabel(match.result)}
               scoreAriaLabel={`${t().aggregateGrade} ${scoreGrade}`}
               scoreClassName={metricToneClass(scoreTone(aiScore))}
               scoreGrade={scoreGrade}
@@ -5850,6 +6097,8 @@ function RecentMatches({
               startedAtLabel={formatRelativeDate(match.startedAt)}
               startedAtTimeLabel={formatMatchTime(match.startedAt)}
               summonerSpellsLabel={`${t().summonerSpells} / ${t().runes}`}
+              teams={teams}
+              trinketSlot={trinketSlot}
             />
           );
         });
@@ -5896,8 +6145,57 @@ function RecentMatches({
       label: t().noMoreMatches,
       ko: publicI18n.ko.noMoreMatches,
       ja: publicI18n.ja.noMoreMatches
-    }
+    },
+    loadFailedTitle: {
+      label: t().matchListLoadFailed,
+      ko: publicI18n.ko.matchListLoadFailed,
+      ja: publicI18n.ja.matchListLoadFailed
+    },
+    retry: t().matchListRetry
   };
+  // 리스트 바로 위에 승률·평균 KDA·주력 챔피언만 압축해 올립니다.
+  // 사이드바의 심화 분석과 중복되지 않도록 3종으로 제한합니다.
+  const recentWins = profile.summary.recentWins;
+  const recentLosses = Math.max(0, profile.summary.recentGames - recentWins);
+  const summaryChampions: RecentMatchesSummaryChampion[] = profile.championPerformance
+    .slice(0, 3)
+    .map((entry) => ({
+      key: String(entry.champion.championId),
+      name: championName(entry.champion),
+      iconUrl: assetUrl(entry.champion.iconUrl),
+      fallbackLabel: championName(entry.champion).slice(0, 1),
+      metaLabel: `${entry.games}${t().games} ${formatPercent(entry.winRate)}`
+    }));
+  const summaryStrip = profile.summary.recentGames > 0 ? (
+    <RecentMatchesSummaryStrip
+      averageKdaLabel={formatDecimal(profile.summary.averageKda, 2)}
+      champions={summaryChampions}
+      losses={recentLosses}
+      text={{
+        winRateLabel: t().matchSummaryRecentWinRate,
+        winsLabel: t().win.slice(0, 1),
+        lossesLabel: t().loss.slice(0, 1),
+        averageKdaLabel: t().matchSummaryAverageKda,
+        topChampionsLabel: t().matchSummaryTopChampions
+      }}
+      winRateCaption={`${t().recentGames} ${profile.summary.recentGames}${t().games}`}
+      winRatePercent={Math.round(profile.summary.recentWinRate ?? 0)}
+      wins={recentWins}
+    />
+  ) : undefined;
+  const filterResultSummary = profile.summary.recentGames > 0 ? (
+    <>
+      <b>{profile.summary.recentGames}{t().games}</b>
+      <span aria-hidden="true" className="public-match-filter-summary-dot" />
+      <span className="public-match-filter-summary-win">{recentWins}{t().win.slice(0, 1)}</span>
+      {" "}
+      <span className="public-match-filter-summary-loss">{recentLosses}{t().loss.slice(0, 1)}</span>
+      <span aria-hidden="true" className="public-match-filter-summary-dot" />
+      {t().winRate} <b>{formatPercent(profile.summary.recentWinRate)}</b>
+      <span aria-hidden="true" className="public-match-filter-summary-dot" />
+      {t().matchSummaryAverageKda} <b>{formatDecimal(profile.summary.averageKda, 2)}</b>
+    </>
+  ) : undefined;
   const canLoadMore = Boolean(profile.hasMoreRecentMatches && onLoadMore);
   const shareStreamer = visibleStreamerStream(profile.twitchStream);
   const shareProfileImageUrl = assetUrl(shareStreamer?.profileImageUrl) ?? assetUrl(profile.profileIconUrl);
@@ -5907,12 +6205,21 @@ function RecentMatches({
   return (
     <FeatureRecentMatchesPanel
       canLoadMore={canLoadMore}
-      filterBar={<PublicMatchFilterBar filters={filters} champions={champions} onChange={onFilters} onReset={onResetFilters} />}
+      filterBar={(
+        <PublicMatchFilterBar
+          champions={champions}
+          filters={filters}
+          onChange={onFilters}
+          onReset={onResetFilters}
+          resultSummary={filterResultSummary}
+        />
+      )}
       initialLoading={loadingMore && profile.recentMatches.length === 0}
       isEmpty={profile.recentMatches.length === 0}
       loadingMore={loadingMore}
       matchCount={`${profile.summary.recentGames}${t().games}`}
       matchRows={matchRows}
+      summaryStrip={summaryStrip}
       shareAction={(
         <RecentMatchesShareActions
           matches={shareMatches}
@@ -7037,7 +7344,9 @@ export function PublicLolPage({
         platform: requestedPlatform
       });
       if (requestSequence !== profileSearchSequenceRef.current) return;
-      setProfile(result);
+      setProfile((current) => options.refresh
+        ? profileWithPreservedStreamerStateAfterRefresh(current, result)
+        : result);
       setNowTick(Date.now());
       setProfileTab("overview");
       setFilters(DEFAULT_MATCH_FILTERS);
@@ -7350,6 +7659,7 @@ export function PublicLolPage({
       <AppShell
         className={`public-lol-shell public-dashboard-shell public-home-shell theme-${theme}`}
         mainId="public-streamer-register-main"
+        sidebarMode="none"
         skipLinkLabel={t().skipToContent}
         variant="public"
       >
@@ -7411,6 +7721,7 @@ export function PublicLolPage({
       <AppShell
         className={`public-lol-shell public-dashboard-shell public-home-shell public-home-shared-shell theme-${theme}`}
         mainId="public-search-main"
+        sidebarMode="none"
         skipLinkLabel={t().skipToContent}
         variant="public"
       >
@@ -7489,6 +7800,7 @@ export function PublicLolPage({
       <AppShell
         className={`public-lol-shell public-dashboard-shell theme-${theme}`}
         mainId="public-main"
+        sidebarMode="none"
         skipLinkLabel={t().skipToContent}
         variant="public"
       >
@@ -7551,6 +7863,7 @@ export function PublicLolPage({
     <AppShell
       className={`public-lol-shell public-dashboard-shell public-profile-shared-shell ${activeProfile ? "public-profile-platform-v2" : ""} theme-${theme}`}
       mainId="public-profile-main"
+      sidebarMode="none"
       skipLinkLabel={t().skipToContent}
       variant="public"
     >
@@ -7607,15 +7920,14 @@ export function PublicLolPage({
                       && streamer.twitchUserId === activeProfile.twitchStream?.twitchUserId
                     )))}
                     onToggleFavorite={toggleFavorite}
+                    tabs={<PublicProfileTabs activeTab={profileTab} onChange={setProfileTab} onParticipation={() => changeMainPage("followJoin")} />}
                   />
                   <PublicProfileErrorState error={error} />
-                  <PublicProfileTabs activeTab={profileTab} onChange={setProfileTab} onParticipation={() => changeMainPage("followJoin")} />
 
                   {profileTab === "overview" ? (
                     <div className="public-overview-search-layout">
                       <OverviewMetricPanel profile={activeProfile} />
                       <div className="public-overview-results-column">
-                        <ProfileRankSection profile={activeProfile} />
                         <RecentMatches
                           profile={activeProfile}
                           filters={filters}

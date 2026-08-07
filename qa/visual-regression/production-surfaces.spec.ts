@@ -287,18 +287,19 @@ test("모바일 메뉴와 LoL 검색 입력은 상단 레이어·자동 확대·
   await expect(sheet).toBeVisible();
   await expect(sheet).toHaveAttribute("data-sheet-state", "open");
   await expect(closeButton).toBeVisible();
-  const layerState = await closeButton.evaluate((button) => {
+  await expect.poll(() => closeButton.evaluate((button) => {
     const rect = button.getBoundingClientRect();
     const topElement = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+    return topElement === button || button.contains(topElement);
+  })).toBe(true);
+  const layerState = await closeButton.evaluate((button) => {
     const sheetElement = button.closest<HTMLElement>(".public-bottom-sheet");
     const headerElement = document.querySelector<HTMLElement>(".public-game-header");
     return {
-      closeOwnsPoint: topElement === button || button.contains(topElement),
       headerZIndex: Number.parseFloat(headerElement ? window.getComputedStyle(headerElement).zIndex : "0"),
       sheetZIndex: Number.parseFloat(sheetElement ? window.getComputedStyle(sheetElement).zIndex : "0"),
     };
   });
-  expect(layerState.closeOwnsPoint).toBe(true);
   expect(layerState.sheetZIndex).toBeGreaterThan(layerState.headerZIndex);
 
   await closeButton.click();
@@ -315,6 +316,30 @@ test("Public Profile", async ({ page }) => {
 
 test("모바일 LoL 상단 탐색과 검색은 스크롤 방향에 따라 접히고 다시 펼쳐진다", async ({ page }) => {
   test.skip((page.viewportSize()?.width ?? 1440) > 768, "모바일 상단바 전용 검증");
+
+  // 상단바 접힘은 스크롤 진행도에 연동됩니다. 전적이 없는 빈 프로필은 문서가 너무 짧아
+  // 최종 상태까지 도달하지 못하므로, 실제 사용에 가까운 전적 목록을 채워 둡니다.
+  await page.route("**/api/lol/profile**", async (route) => {
+    await json(route, {
+      ...profileFixture,
+      recentMatches: Array.from({ length: 10 }, (_, index) => ({
+        matchId: `JP1_2${index}`,
+        champion: { championId: 238, championKey: "Zed", nameKo: "제드", nameJa: "ゼド" },
+        queueId: 420,
+        startedAt: "2026-07-14T04:20:00.000Z",
+        durationSeconds: 1_610,
+        result: index % 2 === 0 ? "win" : "loss",
+        kills: 9, deaths: 3, assists: 6, kda: 5,
+        championLevel: 18, cs: 210, csPerMinute: 7.8, killParticipation: 70,
+        position: "MIDDLE",
+        items: [], summonerSpells: [4, 14], badges: [], teams: [],
+      })),
+      summary: {
+        recentGames: 10, recentWins: 5, recentWinRate: 50,
+        totalKills: 90, totalDeaths: 30, totalAssists: 60,
+      },
+    });
+  });
 
   await page.goto("/lol/summoners/jp/YORO%20QA-JP1");
   await expect(page.locator(".public-profile-shared-shell")).toBeVisible();
@@ -391,46 +416,38 @@ test("전적 아이템·점수·상세 Tooltip은 이름과 안정적인 레이�
   await expect(page.locator(".public-profile-shared-shell")).toBeVisible({ timeout: 15_000 });
   const viewportWidth = page.viewportSize()?.width ?? 1440;
 
-  const row = page.locator(".public-match-row").first();
-  const item = row.locator(".public-match-inline-items > span").first();
-  const score = row.locator(".public-match-score");
-  const scoreTooltip = row.locator(".public-match-score-description");
-  const expand = row.locator(".public-match-expand");
-  const expandTooltip = row.locator(".public-match-expand-label");
+  const row = page.locator(".public-match-card").first();
+  const item = row.locator(".public-match-card-item-grid > span").first();
+  const score = row.locator(".public-match-card-score");
+  const scoreTooltip = row.locator(".public-match-card-score-description");
+  const expand = row.locator(".public-match-card-expand");
+  const expandTooltip = row.locator(".public-match-card-expand-label");
 
   if (viewportWidth <= 768) {
-    const championMedia = row.locator(".public-champion-cell > :is(img, span)").first();
-    const championCopy = row.locator(".public-champion-copy");
-    const mobileLoadout = row.locator(".public-match-mobile-spells");
-    const spellColumn = mobileLoadout.locator(".public-match-loadout-column.spells");
-    const runeColumn = mobileLoadout.locator(".public-match-loadout-column.runes");
-    const mobileLoadoutItems = mobileLoadout.locator(".public-match-loadout-column > span");
-    await expect(row.locator(".public-match-meta")).toBeHidden();
-    await expect(mobileLoadoutItems).toHaveCount(2);
-
-    const championBox = await championMedia.boundingBox();
-    const championCopyBox = await championCopy.boundingBox();
-    const loadoutBox = await mobileLoadout.boundingBox();
-    const loadoutItemBox = await mobileLoadoutItems.first().boundingBox();
-    const spellItemBoxes = await spellColumn.locator(":scope > span").evaluateAll((elements) => elements.map((element) => {
-      const rect = element.getBoundingClientRect();
-      return { x: rect.x, y: rect.y };
-    }));
-    expect(championBox).not.toBeNull();
-    expect(championCopyBox).not.toBeNull();
-    expect(loadoutBox).not.toBeNull();
-    expect(loadoutItemBox).not.toBeNull();
-    expect(loadoutBox?.x ?? -1).toBeGreaterThanOrEqual((championBox?.x ?? 0) + (championBox?.width ?? 0));
-    expect(championCopyBox?.x ?? -1).toBeGreaterThanOrEqual((loadoutBox?.x ?? 0) + (loadoutBox?.width ?? 0));
-    expect(Math.abs((loadoutItemBox?.width ?? 0) * 2 - (championBox?.width ?? 0))).toBeLessThanOrEqual(1);
-    expect(spellItemBoxes[1]?.x).toBe(spellItemBoxes[0]?.x);
-    expect(spellItemBoxes[1]?.y ?? 0).toBeGreaterThan(spellItemBoxes[0]?.y ?? 0);
-    await expect(spellColumn).toHaveCSS("grid-template-rows", "14px 14px");
-    await expect(runeColumn).toHaveCSS("grid-template-rows", "14px 14px");
-    await expect(row.locator(".public-kda")).toHaveCSS("text-align", "center");
+    // 모바일은 3행 압축 카드입니다. 포트레이트가 1·2행을 관통하고
+    // 성과(등급+KDA)가 같은 높이로 오른쪽에 붙습니다.
+    const portrait = row.locator(".public-match-card-portrait");
+    const perf = row.locator(".public-match-card-perf");
+    const items = row.locator(".public-match-card-items");
+    const [portraitBox, perfBox, itemsBox] = await Promise.all([
+      portrait.boundingBox(),
+      perf.boundingBox(),
+      items.boundingBox(),
+    ]);
+    expect(portraitBox).not.toBeNull();
+    expect(perfBox).not.toBeNull();
+    expect(itemsBox).not.toBeNull();
+    expect(perfBox?.x ?? 0, "성과 묶음은 챔피언 묶음 오른쪽에 있어야 합니다.")
+      .toBeGreaterThan((portraitBox?.x ?? 0) + (portraitBox?.width ?? 0));
+    expect(itemsBox?.y ?? 0, "장비 행은 챔피언 묶음 아래에 있어야 합니다.")
+      .toBeGreaterThanOrEqual((portraitBox?.y ?? 0) + (portraitBox?.height ?? 0) - 1);
+    // 폭이 좁아지면 보조 문구·게이지·후행 지표를 접습니다.
+    await expect(row.locator(".public-match-card-stat-bar")).toBeHidden();
+    await expect(row.locator(".public-match-card-role")).toBeHidden();
+    await expect(row.locator(".public-match-card-stats > span").nth(2)).toBeHidden();
   }
 
-  const kdaFontSizes = await row.locator(".public-kda > strong").evaluate((element) => ({
+  const kdaFontSizes = await row.locator(".public-match-card-kda > strong").evaluate((element) => ({
     number: getComputedStyle(element.querySelector("span")!).fontSize,
     separator: getComputedStyle(element.querySelector("i")!).fontSize,
   }));
@@ -569,61 +586,58 @@ test("LoL 프로필 플랫폼은 주요 viewport에서 내부 탐색과 문서 �
     await page.setViewportSize(viewport);
     await page.goto("/lol/summoners/jp/YORO%20QA-JP1");
     const profile = page.locator(".public-profile-platform-v2");
-    const tabs = page.locator(".public-profile-tabs");
-    const rankSection = page.locator(".public-profile-rank-section");
-    const rankStrip = rankSection.locator(".public-profile-metric-strip");
+    // 랭크 티어는 별도 섹션이 아니라 히어로가 소유합니다.
+    const hero = page.locator(".public-profile-hero");
+    const tabs = hero.locator(".public-profile-hero-nav");
+    const rankSection = hero.locator(".public-profile-hero-rank");
+    const queueSwitcher = rankSection.locator(".public-profile-hero-queue");
     const recentMatches = page.locator("#public-recent-matches");
-    const matchFilter = recentMatches.locator(".public-match-filter-bar");
+    const matchFilter = recentMatches.locator(".public-match-filter-panel");
     const resultsColumn = page.locator(".public-overview-results-column");
     const aggregatePanel = page.locator(".public-overview-dashboard-panel");
     const aggregateCard = aggregatePanel.locator(".public-aggregate-card");
-    const matchSummary = recentMatches.locator(".public-match-summary").first();
+    const matchSummary = recentMatches.locator(".public-match-card-summary").first();
     await expect(profile).toBeVisible();
     await expect(tabs.getByRole("button")).toHaveCount(5);
     await expect(rankSection).toBeVisible();
-    await expect(rankSection.getByRole("heading", { name: "랭크 티어" })).toBeVisible();
-    await expect(rankStrip.locator(".public-profile-metric-card")).toHaveCount(3);
-    await expect(resultsColumn.locator(".public-profile-rank-section")).toHaveCount(1);
+    // 3개 큐를 균등 3등분하지 않고 세그먼트로 접습니다.
+    await expect(queueSwitcher).toHaveCount(3);
+    await expect(queueSwitcher.filter({ has: page.locator("[aria-pressed=\"true\"]") })).toHaveCount(0);
+    await expect(page.locator(".public-profile-rank-section")).toHaveCount(0);
     await expect(resultsColumn.locator("#public-recent-matches")).toHaveCount(1);
     await expect(aggregatePanel).toHaveCount(1);
     await expect(aggregateCard.locator(".public-aggregate-insights")).toHaveCount(0);
     await expect(page.locator(".public-profile-details-toggle")).toHaveCount(0);
 
-    const rankPrecedesMatches = await page.evaluate(() => {
-      const rank = document.querySelector(".public-profile-rank-section");
+    const heroPrecedesMatches = await page.evaluate(() => {
+      const hero = document.querySelector(".public-profile-hero");
       const matches = document.querySelector("#public-recent-matches");
-      return Boolean(rank && matches && (rank.compareDocumentPosition(matches) & Node.DOCUMENT_POSITION_FOLLOWING));
+      return Boolean(hero && matches && (hero.compareDocumentPosition(matches) & Node.DOCUMENT_POSITION_FOLLOWING));
     });
-    expect(rankPrecedesMatches, "티어 영역은 최근 경기보다 앞에 배치되어야 합니다.").toBe(true);
+    expect(heroPrecedesMatches, "히어로(신원·랭크·탭)는 최근 경기보다 앞에 배치되어야 합니다.").toBe(true);
 
-    const [rankBox, matchesBox, aggregateBox, aggregateCardBox] = await Promise.all([
-      rankSection.boundingBox(),
+    // 탭은 히어로 카드 안쪽 마지막 행이어야 합니다.
+    const tabsInsideHero = await page.evaluate(() => {
+      const hero = document.querySelector(".public-profile-hero");
+      const nav = document.querySelector(".public-profile-hero-nav");
+      return Boolean(hero && nav && hero.contains(nav));
+    });
+    expect(tabsInsideHero, "프로필 탭은 히어로 카드 안에 있어야 합니다.").toBe(true);
+
+    const [heroBox, matchesBox, aggregateBox] = await Promise.all([
+      hero.boundingBox(),
       recentMatches.boundingBox(),
       aggregatePanel.boundingBox(),
-      aggregateCard.boundingBox(),
     ]);
-    expect(rankBox).not.toBeNull();
+    expect(heroBox).not.toBeNull();
     expect(matchesBox).not.toBeNull();
-    expect(Math.abs((rankBox?.width ?? 0) - (matchesBox?.width ?? 0)), "티어와 최근 경기 폭이 같아야 합니다.")
-      .toBeLessThanOrEqual(1);
     if (viewport.width > 1344) {
       expect(aggregateBox).not.toBeNull();
-      expect(Math.abs((aggregateBox?.y ?? 0) - (rankBox?.y ?? 0)), "종합 성과와 티어 영역의 시작 높이가 같아야 합니다.")
-        .toBeLessThanOrEqual(1);
       expect(aggregateBox?.width ?? 0, "넓은 PC에서 요약 카드 열은 충분한 가로 폭을 확보해야 합니다.")
         .toBeGreaterThanOrEqual(288);
-      expect(Math.abs((aggregateCardBox?.height ?? 0) - (rankBox?.height ?? 0)), "종합 성과와 랭크 티어 높이가 같아야 합니다.")
-        .toBeLessThanOrEqual(1);
-      const leadingCardOverflow = await Promise.all([
-        aggregateCard.evaluate((element) => element.scrollHeight - element.clientHeight),
-        rankSection.evaluate((element) => element.scrollHeight - element.clientHeight),
-      ]);
-      expect(leadingCardOverflow, "종합 성과와 랭크 티어의 동일 높이 안에서 내용이 잘리지 않아야 합니다.")
-        .toEqual([0, 0]);
-    } else if (viewport.width > 720) {
-      expect(Math.abs((aggregateBox?.width ?? 0) - (rankBox?.width ?? 0)), "중간 PC 폭에서는 요약 영역과 결과 영역이 같은 폭을 사용해야 합니다.")
-        .toBeLessThanOrEqual(1);
     }
+    const heroOverflow = await hero.evaluate((element) => element.scrollWidth - element.clientWidth);
+    expect(heroOverflow, `${viewport.width}px에서 히어로 내부에 수평 overflow가 없어야 합니다.`).toBeLessThanOrEqual(1);
 
     const aggregateOverflow = await aggregateCard.locator(".public-aggregate-hero").evaluate((element) => ({
       clientWidth: element.clientWidth,
@@ -670,27 +684,32 @@ test("LoL 프로필 플랫폼은 주요 viewport에서 내부 탐색과 문서 �
       .toEqual([]);
 
     if (viewport.width <= 430) {
-      const championName = matchSummary.locator(".public-champion-name-line > strong");
-      const highlightBadge = matchSummary.locator(".public-match-mobile-highlight");
-      const [championNameBox, highlightBadgeBox, championBox, itemsBox, kdaBox, scoreBox, expandBox] = await Promise.all([
+      const championName = matchSummary.locator(".public-match-card-copy > strong");
+      const highlightBadge = matchSummary.locator(".public-match-card-highlight");
+      const [championNameBox, championBox, itemsBox, kdaBox, scoreBox, expandBox, statsBox] = await Promise.all([
         championName.boundingBox(),
-        highlightBadge.boundingBox(),
-        matchSummary.locator(".public-champion-cell").boundingBox(),
-        matchSummary.locator(".public-match-inline-items").boundingBox(),
-        matchSummary.locator(".public-kda").boundingBox(),
-        matchSummary.locator(".public-match-score").boundingBox(),
-        matchSummary.locator(".public-match-expand").boundingBox(),
+        matchSummary.locator(".public-match-card-portrait").boundingBox(),
+        matchSummary.locator(".public-match-card-items").boundingBox(),
+        matchSummary.locator(".public-match-card-kda").boundingBox(),
+        matchSummary.locator(".public-match-card-score").boundingBox(),
+        matchSummary.locator(".public-match-card-expand").boundingBox(),
+        matchSummary.locator(".public-match-card-stats").boundingBox(),
       ]);
       expect(championNameBox).not.toBeNull();
-      expect(highlightBadgeBox).not.toBeNull();
-      expect((highlightBadgeBox?.x ?? 0) - ((championNameBox?.x ?? 0) + (championNameBox?.width ?? 0)), "MVP·ACE는 챔피언 이름 바로 옆에 있어야 합니다.")
-        .toBeLessThanOrEqual(4);
-      expect((itemsBox?.y ?? 0) - ((championBox?.y ?? 0) + (championBox?.height ?? 0)), "챔피언 묶음과 아이템 행의 간격이 과도하지 않아야 합니다.")
+      if (await highlightBadge.count()) {
+        const highlightBadgeBox = await highlightBadge.boundingBox();
+        expect(highlightBadgeBox?.x ?? 0, "MVP·ACE는 챔피언 이름 줄 오른쪽 끝에 있어야 합니다.")
+          .toBeGreaterThan((championNameBox?.x ?? 0) + (championNameBox?.width ?? 0));
+      }
+      expect((itemsBox?.y ?? 0) - ((championBox?.y ?? 0) + (championBox?.height ?? 0)), "챔피언 묶음과 장비 행의 간격이 과도하지 않아야 합니다.")
         .toBeLessThanOrEqual(10);
-      expect((kdaBox?.x ?? 0) + (kdaBox?.width ?? 0), "KDA는 점수 등급 왼쪽의 독립 열에 있어야 합니다.")
-        .toBeLessThanOrEqual((scoreBox?.x ?? 0) + 1);
-      expect((expandBox?.x ?? 0) - ((scoreBox?.x ?? 0) + (scoreBox?.width ?? 0)), "점수 등급과 상세 버튼 사이에 여백이 있어야 합니다.")
-        .toBeGreaterThanOrEqual(4);
+      // 등급 배지 왼쪽 끝과 KDA·지표 오른쪽 끝이 같은 축에 놓여야 행마다 정렬이 흔들리지 않습니다.
+      expect(scoreBox?.x ?? 0, "등급 배지는 KDA 왼쪽에 있어야 합니다.")
+        .toBeLessThanOrEqual((kdaBox?.x ?? 0) + 1);
+      expect(Math.abs(((kdaBox?.x ?? 0) + (kdaBox?.width ?? 0)) - ((statsBox?.x ?? 0) + (statsBox?.width ?? 0))), "KDA와 지표의 오른쪽 끝이 같아야 합니다.")
+        .toBeLessThanOrEqual(2);
+      expect((expandBox?.x ?? 0) - ((kdaBox?.x ?? 0) + (kdaBox?.width ?? 0)), "지표와 상세 버튼 사이에 여백이 있어야 합니다.")
+        .toBeGreaterThanOrEqual(2);
     }
 
     await tabs.getByRole("button").last().scrollIntoViewIfNeeded();
@@ -741,55 +760,78 @@ test("스트리머 프로필은 정보 전경을 선명하게 유지하고 일�
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/lol/summoners/jp/YORO%20QA-JP1");
 
-  const hero = page.locator(".public-profile-platform-hero");
-  const main = hero.locator(".public-profile-top-main");
-  const identity = hero.locator(".public-profile-top-content");
-  const artwork = hero.locator(".public-profile-mastery-art");
-  const spotlight = hero.locator(".public-profile-streamer-spotlight");
+  const hero = page.locator(".public-profile-hero");
+  const identity = hero.locator(".public-profile-hero-identity");
+  const artwork = hero.locator(".public-profile-hero-art");
+  const cast = hero.locator(".public-profile-hero-cast");
+  const channelChip = hero.locator(".public-profile-hero-channel");
+  const livePill = hero.locator(".public-profile-hero-live-pill");
 
   await expect(identity.getByText("YORO QA", { exact: true })).toBeVisible();
   await expect(identity.getByText("#JP1", { exact: true })).toBeVisible();
   await expect(identity.getByRole("button", { name: "전적 갱신" })).toBeVisible();
   await expect(identity.getByRole("button", { name: "즐겨찾기 추가" })).toBeVisible();
 
+  // 일러스트는 정보 뒤로 물러나고, 전경 텍스트는 흐려지지 않아야 합니다.
   const foreground = await hero.evaluate((element) => {
-    const mainElement = element.querySelector<HTMLElement>(".public-profile-top-main");
-    const contentElement = element.querySelector<HTMLElement>(".public-profile-top-content");
-    const artworkElement = element.querySelector<HTMLElement>(".public-profile-mastery-art");
+    const identityElement = element.querySelector<HTMLElement>(".public-profile-hero-identity");
+    const artworkElement = element.querySelector<HTMLElement>(".public-profile-hero-art");
     return {
-      overlayZ: Number.parseInt(getComputedStyle(element, "::after").zIndex, 10),
-      mainZ: Number.parseInt(getComputedStyle(mainElement!).zIndex, 10),
-      contentOpacity: getComputedStyle(contentElement!).opacity,
-      contentFilter: getComputedStyle(contentElement!).filter,
-      artworkFilter: getComputedStyle(artworkElement!).filter,
+      identityZ: Number.parseInt(getComputedStyle(identityElement!).zIndex, 10),
+      artworkZ: Number.parseInt(getComputedStyle(artworkElement!).zIndex, 10),
+      identityOpacity: getComputedStyle(identityElement!).opacity,
+      identityFilter: getComputedStyle(identityElement!).filter,
+      artworkOpacity: Number.parseFloat(getComputedStyle(artworkElement!).opacity),
+      artworkMask: getComputedStyle(artworkElement!).maskImage,
     };
   });
-  expect(foreground.mainZ).toBeGreaterThan(foreground.overlayZ);
-  expect(foreground.contentOpacity).toBe("1");
-  expect(foreground.contentFilter).toBe("none");
-  expect(foreground.artworkFilter).toContain("blur(");
+  expect(foreground.identityZ).toBeGreaterThan(foreground.artworkZ);
+  expect(foreground.identityOpacity).toBe("1");
+  expect(foreground.identityFilter).toBe("none");
+  expect(foreground.artworkOpacity).toBeLessThan(1);
+  expect(foreground.artworkMask).toContain("gradient");
 
-  const [identityBox, spotlightBox, mainBox] = await Promise.all([
+  // 소환사 신원과 Twitch 채널이 같은 줄에서 이어져야 같은 사람으로 읽힙니다.
+  await expect(channelChip).toBeVisible();
+  await expect(livePill).toBeVisible();
+  const [identityBox, castBox, heroBox, chipBox] = await Promise.all([
     identity.boundingBox(),
-    spotlight.boundingBox(),
-    main.boundingBox(),
+    cast.boundingBox(),
+    hero.boundingBox(),
+    channelChip.boundingBox(),
   ]);
   expect(identityBox).not.toBeNull();
-  expect(spotlightBox).not.toBeNull();
-  expect(mainBox).not.toBeNull();
-  expect(spotlightBox!.x).toBeGreaterThan(identityBox!.x + identityBox!.width);
-  expect(spotlightBox!.width).toBeLessThanOrEqual(352);
-  expect(Math.abs((spotlightBox!.x + spotlightBox!.width) - (mainBox!.x + mainBox!.width))).toBeLessThanOrEqual(24);
+  expect(castBox).not.toBeNull();
+  expect(heroBox).not.toBeNull();
+  expect(chipBox).not.toBeNull();
+  expect(chipBox!.y, "채널 칩은 이름과 같은 줄에 있어야 합니다.")
+    .toBeLessThan(identityBox!.y + identityBox!.height);
+  // 방송 카드는 신원 행 아래 body 안에 있고 히어로 폭을 넘지 않습니다.
+  expect(castBox!.y).toBeGreaterThanOrEqual(identityBox!.y + identityBox!.height - 1);
+  expect(castBox!.x + castBox!.width).toBeLessThanOrEqual(heroBox!.x + heroBox!.width + 1);
+
+  // 스트리머 히어로가 일반 프로필의 두 배로 부풀지 않아야 합니다.
+  expect(heroBox!.height, "스트리머 히어로는 400px 를 넘지 않아야 합니다.").toBeLessThanOrEqual(400);
+
+  // Twitch 버튼 라벨은 짧게 두고 설명은 aria-label 로 보냅니다.
+  const watch = cast.locator("a.is-twitch");
+  await expect(watch).toHaveText(/^Twitch$/u);
+  await expect(watch).toHaveAttribute("aria-label", /Twitch/u);
+  const watchOverflow = await watch.evaluate((element) => element.scrollWidth - element.clientWidth);
+  expect(watchOverflow, "Twitch 버튼 글자가 버튼 밖으로 넘치지 않아야 합니다.").toBeLessThanOrEqual(1);
 
   await page.setViewportSize({ width: 390, height: 844 });
-  const [mobileIdentityBox, mobileSpotlightBox] = await Promise.all([
+  const [mobileIdentityBox, mobileCastBox, mobileHeroBox] = await Promise.all([
     identity.boundingBox(),
-    spotlight.boundingBox(),
+    cast.boundingBox(),
+    hero.boundingBox(),
   ]);
   expect(mobileIdentityBox).not.toBeNull();
-  expect(mobileSpotlightBox).not.toBeNull();
-  expect(mobileSpotlightBox!.y).toBeGreaterThanOrEqual(mobileIdentityBox!.y + mobileIdentityBox!.height);
-  expect(Math.abs(mobileSpotlightBox!.width - mobileIdentityBox!.width)).toBeLessThanOrEqual(1);
+  expect(mobileCastBox).not.toBeNull();
+  expect(mobileCastBox!.y).toBeGreaterThanOrEqual(mobileIdentityBox!.y + mobileIdentityBox!.height);
+  expect(mobileHeroBox!.height, "모바일 스트리머 히어로는 700px 를 넘지 않아야 합니다.").toBeLessThanOrEqual(700);
+  const mobileWatchOverflow = await watch.evaluate((element) => element.scrollWidth - element.clientWidth);
+  expect(mobileWatchOverflow, "390px 에서도 Twitch 버튼 글자가 넘치지 않아야 합니다.").toBeLessThanOrEqual(1);
 });
 
 test("LoL 공개 하위 페이지는 화면 중앙에 배치된다", async ({ page }) => {

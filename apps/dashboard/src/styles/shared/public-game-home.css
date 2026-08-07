@@ -1,3 +1,32 @@
+/* 공개 게임 홈 지면(ground) 정의.
+   히어로부터 하단 기능 카드까지를 하나의 다크 지면으로 잇습니다.
+   아래 --public-home-* 값을 설정한 shell 안에서만 다크로 전환되고,
+   설정하지 않은 화면(팰월드 홈 등)은 각 사용처의 var() fallback인 기존 라이트 값을 씁니다.
+   따라서 이 파일을 공유하는 다른 게임 홈은 영향을 받지 않습니다. */
+.public-home-shared-shell {
+  --public-home-ground: var(--yoro-color-ground);
+  --public-home-panel: var(--yoro-color-ground-surface);
+  --public-home-panel-raised: var(--yoro-color-ground-raised);
+  --public-home-panel-border: var(--yoro-color-border-on-dark);
+  --public-home-panel-border-strong: var(--yoro-color-border-on-dark-strong);
+  --public-home-text: var(--yoro-color-text-on-dark);
+  --public-home-text-muted: var(--yoro-color-text-on-dark-muted);
+
+  /* 공용 EmptyState는 layer 밖에서 정의되어 layer 규칙으로는 덮을 수 없습니다.
+     컴포넌트가 노출한 커스텀 속성으로 다크 지면 값을 주입합니다. */
+  --yoro-empty-state-surface: var(--public-home-panel-raised);
+  --yoro-empty-state-text: var(--public-home-text);
+  --yoro-empty-state-title: var(--public-home-text);
+  --yoro-empty-state-description: var(--public-home-text-muted);
+  /* 아이콘 원형 배경은 지면색을 써서 variant accent(중간 채도 보라)와의 대비를 확보합니다. */
+  --yoro-empty-state-icon-background: var(--public-home-ground);
+
+  /* 푸터도 같은 지면 위에 놓입니다. 훅을 주지 않으면 AppShell 기본값(흰 surface)이
+     남아 밝은 회색 텍스트와 겹쳐 대비 1.68:1이 됩니다. */
+  --yoro-app-shell-footer-background: var(--public-home-panel);
+  --yoro-app-shell-footer-border: var(--public-home-panel-border);
+}
+
 .public-game-home,
 .public-game-home__feature-grid {
   --public-home-accent: var(--yoro-color-public-primary);
@@ -12,6 +41,16 @@
   --public-home-accent: var(--yoro-color-success);
 }
 
+/* --public-home-accent 기본값(--yoro-color-public-primary)은 다크 패널 위에서
+   3.71:1로 WCAG AA(4.5:1)에 미달합니다. 다크 지면에서는 밝은 브랜드 토큰을 씁니다.
+   --public-home-accent가 아래 요소들에 직접 선언되어 있어 shell 상속으로는
+   덮이지 않으므로 같은 요소를 더 높은 명시도로 다시 지정합니다. */
+.public-home-shared-shell .public-game-home,
+.public-home-shared-shell .public-game-home__feature-grid,
+.public-home-shared-shell .public-game-home__live-strip {
+  --public-home-accent: var(--yoro-color-brand-on-dark);
+}
+
 .palworld-main[data-page-frame="home"] {
   inline-size: min(100%, var(--yoro-size-public-header-max));
 }
@@ -21,11 +60,19 @@
   z-index: 1;
   min-block-size: clamp(20rem, 26vw, 26rem);
   overflow: visible;
-  border: thin solid var(--yoro-color-border-on-dark);
+  /* 지면과 같은 색이므로 테두리/그림자를 쓰면 히어로가 떠 있는 카드로 읽힙니다.
+     라이트 지면(팰월드 홈)에서는 fallback 값으로 기존 카드 표현을 유지합니다. */
+  border: thin solid var(--public-home-panel-border, var(--yoro-color-border-on-dark));
   border-radius: var(--yoro-radius-xl);
-  background: var(--yoro-color-ground);
-  box-shadow: var(--yoro-shadow-panel);
+  background: var(--public-home-ground, var(--yoro-color-ground));
+  box-shadow: var(--public-home-hero-shadow, var(--yoro-shadow-panel));
   color: var(--yoro-color-text-on-dark);
+}
+
+.public-home-shared-shell .public-game-home__hero {
+  --public-home-hero-shadow: var(--yoro-shadow-none);
+
+  border-color: transparent;
 }
 
 .public-game-home__hero:has(.public-suggestion-panel),
@@ -63,6 +110,20 @@
     linear-gradient(90deg, var(--yoro-color-ground), transparent 72%),
     linear-gradient(0deg, var(--yoro-color-ground), transparent 58%);
   pointer-events: none;
+}
+
+/* 위 스크림은 좌측 정렬 카피를 전제한 90deg 방향입니다.
+   중앙 정렬 변형에서는 카피가 캐릭터 아트 위에 놓여 겹치고,
+   밝은 부분에서는 흰 텍스트 대비도 떨어집니다. 중앙에 읽기 띠를 만듭니다.
+   팰월드 홈도 중앙 정렬이지만 지면이 아직 회색이라 좌우 페이드가 지면과 어긋납니다.
+   지면을 다크로 전환한 화면에만 적용합니다. */
+.public-home-shared-shell
+.public-game-home:has(.public-game-home__hero-grid--centered) .public-game-home__image-overlay {
+  background:
+    radial-gradient(ellipse 62% 72% at 50% 56%, var(--yoro-color-ground) 12%, transparent 76%),
+    linear-gradient(90deg, var(--yoro-color-ground), transparent 26%),
+    linear-gradient(270deg, var(--yoro-color-ground), transparent 20%),
+    linear-gradient(0deg, var(--yoro-color-ground), transparent 62%);
 }
 
 .public-game-home__hero-grid {
@@ -132,6 +193,9 @@
   color: var(--yoro-color-text-on-dark);
   font-size: clamp(var(--yoro-font-size-2xl), 4vw, 3rem);
   line-height: 1.08;
+  /* 한국어는 기본 규칙상 어절 중간에서도 줄바꿈됩니다.
+     ("LoL 전적 검색부 / 터 방송 참여까지") 어절 단위로 끊기게 합니다. */
+  word-break: keep-all;
   text-wrap: balance;
 }
 
@@ -141,6 +205,9 @@
   color: var(--yoro-color-text-on-dark-muted);
   font-size: var(--yoro-font-size-lg);
   line-height: 1.6;
+  /* 마지막 줄에 "하세요."만 남는 고아 줄을 막습니다. */
+  word-break: keep-all;
+  text-wrap: balance;
 }
 
 .public-game-home__search,
@@ -419,9 +486,9 @@
   inline-size: 100%;
   margin: 0;
   padding: var(--yoro-space-4);
-  border: thin solid var(--yoro-color-border);
+  border: thin solid var(--public-home-panel-border, var(--yoro-color-border));
   border-radius: var(--yoro-radius-lg);
-  background: var(--yoro-color-surface-strong);
+  background: var(--public-home-panel, var(--yoro-color-surface-strong));
   box-shadow: var(--yoro-shadow-soft);
 }
 
@@ -441,7 +508,9 @@
   align-items: center;
   gap: var(--yoro-space-2);
   margin: 0;
-  color: var(--yoro-color-text-strong) !important;
+  /* 다크 지면에서는 --public-home-text, 라이트 지면에서는 fallback으로 전환됩니다.
+     !important는 쓰지 않습니다 — legacy layer의 !important를 home layer에서 이길 수 없습니다. */
+  color: var(--public-home-text, var(--yoro-color-text-strong));
   font-size: var(--yoro-font-size-lg);
   line-height: var(--yoro-line-height-tight);
 }
@@ -461,7 +530,7 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--public-home-accent) !important;
+  color: var(--public-home-accent);
   font: inherit;
   font-weight: var(--yoro-font-weight-bold);
   cursor: pointer;
@@ -502,9 +571,9 @@
   gap: var(--yoro-space-3);
   padding: var(--yoro-space-3);
   overflow: hidden;
-  border: thin solid var(--yoro-color-border);
+  border: thin solid var(--public-home-panel-border, var(--yoro-color-border));
   border-radius: var(--yoro-radius-md);
-  background: var(--yoro-color-surface-muted);
+  background: var(--public-home-panel-raised, var(--yoro-color-surface-muted));
   box-shadow: var(--yoro-shadow-sm);
   text-align: center;
   scroll-snap-align: start;
@@ -592,7 +661,7 @@
   min-inline-size: 0;
   margin: 0;
   overflow: hidden;
-  color: var(--yoro-color-text-strong);
+  color: var(--public-home-text, var(--yoro-color-text-strong));
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -604,13 +673,13 @@
 .public-game-home__live-strip .public-home-live-primary-meta {
   grid-row: 4;
   padding-block-start: 0;
-  color: var(--yoro-color-text-muted) !important;
+  color: var(--public-home-text-muted, var(--yoro-color-text-muted)) !important;
 }
 
 .public-game-home__live-strip .public-home-live-secondary-meta {
   grid-row: 5;
   padding-block-end: 0;
-  color: var(--yoro-color-text-muted) !important;
+  color: var(--public-home-text-muted, var(--yoro-color-text-muted)) !important;
 }
 
 .public-game-home__live-strip :is(.public-home-live-login, .public-home-live-server) {
@@ -656,8 +725,8 @@
   min-block-size: 6.5rem;
   gap: var(--yoro-space-1) var(--yoro-space-3);
   padding: var(--yoro-space-3);
-  border: thin solid var(--yoro-color-border);
-  background: var(--yoro-color-surface-muted);
+  border: thin solid var(--public-home-panel-border, var(--yoro-color-border));
+  background: var(--public-home-panel-raised, var(--yoro-color-surface-muted));
   box-shadow: none;
   text-align: start;
 }
@@ -745,9 +814,9 @@
 .public-game-home__feature-panel {
   min-inline-size: 0;
   padding: var(--yoro-space-5);
-  border: thin solid var(--yoro-color-border);
+  border: thin solid var(--public-home-panel-border, var(--yoro-color-border));
   border-radius: var(--yoro-radius-lg);
-  background: var(--yoro-color-surface-strong);
+  background: var(--public-home-panel, var(--yoro-color-surface-strong));
   box-shadow: var(--yoro-shadow-soft);
 }
 
@@ -761,13 +830,13 @@
 }
 
 .public-game-home__section-header h2 {
-  color: var(--yoro-color-text-strong);
+  color: var(--public-home-text, var(--yoro-color-text-strong));
   font-size: var(--yoro-font-size-lg);
 }
 
 .public-game-home__section-header p {
   margin-block-start: var(--yoro-space-1);
-  color: var(--yoro-color-text-muted);
+  color: var(--public-home-text-muted, var(--yoro-color-text-muted));
 }
 
 .public-game-home__feature-list {
@@ -788,10 +857,10 @@
   min-inline-size: 0;
   gap: var(--yoro-space-3);
   padding: var(--yoro-space-4);
-  border: thin solid var(--yoro-color-border);
+  border: thin solid var(--public-home-panel-border, var(--yoro-color-border));
   border-radius: var(--yoro-radius-md);
-  background: var(--yoro-color-surface-muted);
-  color: var(--yoro-color-text);
+  background: var(--public-home-panel-raised, var(--yoro-color-surface-muted));
+  color: var(--public-home-text, var(--yoro-color-text));
   text-align: start;
   cursor: pointer;
   transition:
@@ -815,12 +884,12 @@
 }
 
 .public-game-home__feature-card strong {
-  color: var(--yoro-color-text-strong);
+  color: var(--public-home-text, var(--yoro-color-text-strong));
   -webkit-line-clamp: 2;
 }
 
 .public-game-home__feature-card small {
-  color: var(--yoro-color-text-muted);
+  color: var(--public-home-text-muted, var(--yoro-color-text-muted));
   line-height: 1.45;
   -webkit-line-clamp: 2;
 }
@@ -842,9 +911,9 @@
   inline-size: 3.25rem;
   block-size: 3.25rem;
   overflow: hidden;
-  border: thin solid var(--yoro-color-border);
+  border: thin solid var(--public-home-panel-border, var(--yoro-color-border));
   border-radius: var(--yoro-radius-md);
-  background: var(--yoro-color-surface);
+  background: var(--public-home-panel, var(--yoro-color-surface));
   color: var(--public-home-accent);
 }
 
@@ -1462,6 +1531,13 @@
 }
 
 @media (max-width: 48rem) {
+  /* AppShell 기본 좌우 24px에 content·hero·copy 여백이 중첩되면 360px 화면에서
+     Riot ID 입력 폭이 118px까지 줄어듭니다. 최외곽 여백만 줄여 내부 카드 간격과
+     44px touch target은 유지하면서 검색 입력에 최소 150px를 확보합니다. */
+  .public-home-shared-shell {
+    --yoro-app-shell-main-padding: var(--yoro-space-6) var(--yoro-space-2);
+  }
+
   .public-game-home,
   .public-game-home__feature-grid {
     inline-size: 100%;
@@ -1526,7 +1602,10 @@
 
   .public-game-home__hero {
     isolation: isolate;
-    min-block-size: 0;
+    /* 0이면 히어로 높이가 카피 카드 콘텐츠 높이와 같아져서, 카드가 이미지를
+       가려 캐릭터 아트가 전혀 보이지 않습니다. 카드보다 크게 잡아 이미지가
+       카드 위쪽으로 드러나도록 합니다. */
+    min-block-size: clamp(17rem, 60vw, 20rem);
     overflow: visible;
   }
 
@@ -1541,14 +1620,18 @@
   }
 
   .public-game-home__image-overlay {
-    background:
-      linear-gradient(0deg, var(--yoro-color-ground), transparent 78%),
-      var(--yoro-theme-public-header-background);
+    /* --yoro-theme-public-header-background는 헤더용 반투명 tint라 이미지 전체를
+       덮어 캐릭터 아트가 거의 안 보이게 만듭니다. 데스크톱과 동일하게 단순 스크림만 사용합니다. */
+    background: linear-gradient(0deg, var(--yoro-color-ground), transparent 68%);
   }
 
   .public-game-home__hero-grid {
-    align-content: start;
-    min-block-size: 0;
+    /* 카피 카드를 히어로 하단에 붙여, 위쪽에 이미지가 드러나 보이게 합니다.
+       100%로 두면 부모 높이가 auto(min-block-size만 지정)라 백분율이 0으로 계산되어
+       그리드가 콘텐츠 높이에 머물고 align-content: end가 무효화됩니다.
+       데스크톱과 동일하게 부모의 min-block-size를 그대로 상속받습니다. */
+    align-content: end;
+    min-block-size: inherit;
     gap: var(--yoro-space-3);
     padding: var(--yoro-space-3);
   }
@@ -1616,6 +1699,32 @@
   .public-game-home__live .yoro-empty-state__description {
     color: var(--yoro-color-text-on-dark-muted);
     font-size: var(--yoro-font-size-sm);
+  }
+
+  /* 2열 배치에서 아이콘을 가로로 두면 한국어 카드 문구가 20px대 폭으로 눌립니다.
+     아이콘을 위로 올려 문구가 카드 폭을 모두 쓰게 합니다.
+     팰월드 홈은 자체 mobile 규칙(1열 + 전용 카드 크기)을 쓰므로 홈 shell로 한정합니다. */
+  .public-home-shared-shell .public-game-home__feature-card {
+    flex-direction: column;
+    align-items: start;
+    justify-content: start;
+    gap: var(--yoro-space-2);
+  }
+
+  .public-home-shared-shell .public-game-home__feature-visual {
+    inline-size: var(--yoro-space-10);
+    block-size: var(--yoro-space-10);
+  }
+
+  .public-home-shared-shell .public-game-home__feature-visual svg {
+    inline-size: var(--yoro-space-6);
+    block-size: var(--yoro-space-6);
+  }
+
+  /* 세로 배치에서는 chevron이 문구 아래로 내려가 위계를 흐립니다.
+     카드 전체가 이미 하나의 버튼/링크라 모바일에서는 숨깁니다. */
+  .public-home-shared-shell .public-game-home__feature-card > span:last-child {
+    display: none;
   }
 
   .public-game-home__feature-grid,

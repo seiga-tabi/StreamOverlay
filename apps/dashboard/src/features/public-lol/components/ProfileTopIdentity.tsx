@@ -1,8 +1,13 @@
-import type { ReactElement } from "react";
-import { PageHeader, PageHeaderDescription, PageHeaderEyebrow, PageHeaderStatus, PageHeaderTitle } from "../../../shared/ui/PageHeader";
-import { StatusPill, type StatusTone } from "../../../shared/ui/Status";
+import type { ReactElement, ReactNode } from "react";
 
 export type ProfileTopIdentitySeasonBadgesRenderer = () => ReactElement | null;
+
+export type ProfileTopIdentityChampion = {
+  key: string;
+  name: string;
+  iconUrl?: string;
+  fallbackLabel: string;
+};
 
 export type ProfileTopIdentityViewModel = {
   gameName: string;
@@ -12,10 +17,16 @@ export type ProfileTopIdentityViewModel = {
   profileMetaLabel?: string;
   profileIconUrl?: string;
   avatarFallbackLabel: string;
-  fetchedAtText: string;
-  primaryRankLabel: string;
-  primaryRankClassName?: string;
-  primaryRankTone: StatusTone;
+  /** "Lv.421" 처럼 이미 조립된 라벨입니다. 값이 없으면 배지를 그리지 않습니다. */
+  summonerLevelLabel?: string;
+  summonerLevelAriaLabel?: string;
+  mainRoleLabel?: string;
+  /** 등록 스트리머의 Twitch 채널. 소환사 이름 옆에 붙여 같은 사람임을 한 줄에서 보입니다. */
+  channelName?: string;
+  channelUrl?: string;
+  channelAriaLabel?: string;
+  topChampions?: ProfileTopIdentityChampion[];
+  topChampionsLabel?: string;
   streamerStatus?: "live" | "offline";
   streamerStatusLabel?: string;
 };
@@ -26,6 +37,22 @@ export type ProfileTopIdentityProps = {
   renderSeasonBadges: ProfileTopIdentitySeasonBadgesRenderer;
 };
 
+function TwitchIcon(): ReactNode {
+  return (
+    <svg aria-hidden="true" focusable="false" height="12" viewBox="0 0 24 24" width="12" fill="currentColor">
+      <path d="M4 2 2.5 6v14H7v2h3l2-2h3.5L21 16V2zm2 2h13v11l-3 3h-4l-2 2v-2H6zm5 3v6h2V7zm5 0v6h2V7z" />
+    </svg>
+  );
+}
+
+function RoleIcon(): ReactNode {
+  return (
+    <svg aria-hidden="true" focusable="false" height="12" viewBox="0 0 24 24" width="12" fill="currentColor">
+      <path d="M3 21 21 3v5L8 21z" />
+    </svg>
+  );
+}
+
 export function ProfileTopIdentity({
   identity,
   renderActions,
@@ -34,37 +61,77 @@ export function ProfileTopIdentity({
   const titleName = identity.displayName ?? identity.gameName;
   const titleTag = identity.displayTagLabel ?? `#${identity.tagLine}`;
   const seasonBadges = renderSeasonBadges();
+  const champions = identity.topChampions ?? [];
 
   return (
-    <div className="public-profile-top-content">
-      <div className={`public-avatar square${identity.streamerStatus ? ` is-streamer is-${identity.streamerStatus}` : ""}`}>
-        {identity.profileIconUrl ? <img src={identity.profileIconUrl} alt="" /> : <span>{identity.avatarFallbackLabel}</span>}
-        {identity.streamerStatusLabel ? <span className="sr-only">{identity.streamerStatusLabel}</span> : null}
-      </div>
-      <div className="public-profile-top-copy">
-        <PageHeader as="div" className="public-profile-shared-page-header" layout="compact">
-          <PageHeaderEyebrow>
-            <StatusPill
-              className={["public-profile-primary-rank", identity.primaryRankClassName].filter(Boolean).join(" ")}
-              size="sm"
-              tone={identity.primaryRankTone}
-            >
-              {identity.primaryRankLabel}
-            </StatusPill>
-          </PageHeaderEyebrow>
-          <PageHeaderTitle as="h1" className="public-profile-title-row">
-            <span className="public-riot-name">{titleName}</span>
-            <span className="public-riot-tag">{titleTag}</span>
-          </PageHeaderTitle>
-          {identity.profileMetaLabel ? (
-            <PageHeaderDescription>
-              <span className="public-profile-meta-riot-id">{identity.profileMetaLabel}</span>
-            </PageHeaderDescription>
+    <div className="public-profile-hero-identity">
+      <span
+        className={`public-profile-hero-avatar${identity.streamerStatus ? ` is-streamer is-${identity.streamerStatus}` : ""}`}
+      >
+        {identity.profileIconUrl
+          ? <img src={identity.profileIconUrl} alt="" />
+          : <b aria-hidden="true">{identity.avatarFallbackLabel}</b>}
+        {identity.summonerLevelLabel ? (
+          <span className="public-profile-hero-level" title={identity.summonerLevelAriaLabel}>
+            {identity.summonerLevelLabel}
+          </span>
+        ) : null}
+        {identity.streamerStatusLabel ? <span className="yoro-u-sr-only">{identity.streamerStatusLabel}</span> : null}
+      </span>
+
+      <div className="public-profile-hero-copy">
+        <h1 className="public-profile-hero-name">
+          <span className="public-riot-name">{titleName}</span>
+          <span className="public-riot-tag">{titleTag}</span>
+          {identity.channelName ? (
+            identity.channelUrl ? (
+              <a
+                aria-label={identity.channelAriaLabel}
+                className="public-profile-hero-channel"
+                href={identity.channelUrl}
+                rel="noreferrer"
+                target="_blank"
+              >
+                <TwitchIcon />
+                {identity.channelName}
+              </a>
+            ) : (
+              <span className="public-profile-hero-channel">
+                <TwitchIcon />
+                {identity.channelName}
+              </span>
+            )
           ) : null}
-          {seasonBadges ? <PageHeaderStatus>{seasonBadges}</PageHeaderStatus> : null}
-        </PageHeader>
-        {renderActions()}
+        </h1>
+        <div className="public-profile-hero-traits">
+          {identity.mainRoleLabel ? (
+            <span className="public-profile-hero-trait">
+              <RoleIcon />
+              {identity.mainRoleLabel}
+            </span>
+          ) : null}
+          {champions.length > 0 ? (
+            <span className="public-profile-hero-trait">
+              {identity.topChampionsLabel}
+              <span className="public-profile-hero-trait-champions">
+                {champions.map((champion) => (
+                  <span key={champion.key} title={champion.name}>
+                    {champion.iconUrl
+                      ? <img src={champion.iconUrl} alt="" />
+                      : <i aria-hidden="true">{champion.fallbackLabel}</i>}
+                  </span>
+                ))}
+              </span>
+            </span>
+          ) : null}
+          {identity.profileMetaLabel ? (
+            <span className="public-profile-hero-trait public-profile-meta-riot-id">{identity.profileMetaLabel}</span>
+          ) : null}
+          {seasonBadges}
+        </div>
       </div>
+
+      {renderActions()}
     </div>
   );
 }

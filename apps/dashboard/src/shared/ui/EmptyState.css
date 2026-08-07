@@ -1,8 +1,10 @@
 .yoro-empty-state {
-  --yoro-empty-state-background: var(--yoro-color-surface);
+  /* --yoro-empty-state-surface를 지정하면 중립 배경 variant가 모두 그 값을 따릅니다.
+     variant 규칙이 요소 자체에 background를 선언하기 때문에, 상속만으로는
+     외부에서 덮을 수 없어 참조용 훅을 따로 둡니다. */
+  --yoro-empty-state-background: var(--yoro-empty-state-surface, var(--yoro-color-surface));
   --yoro-empty-state-border: var(--yoro-color-border);
   --yoro-empty-state-accent: var(--yoro-color-text-muted);
-
   display: grid;
   justify-items: center;
   min-inline-size: 0;
@@ -11,7 +13,10 @@
   border: thin solid var(--yoro-empty-state-border);
   border-radius: var(--yoro-radius-lg);
   background: var(--yoro-empty-state-background);
-  color: var(--yoro-color-text);
+  /* 아래 텍스트/아이콘 색 훅은 기본값을 var() fallback으로 둡니다.
+     .yoro-empty-state 블록에서 선언하면 요소 자체의 선언이 되어,
+     바깥 지면(예: 공개 게임 홈)에서 상속으로 내려주는 값을 덮어버립니다. */
+  color: var(--yoro-empty-state-text, var(--yoro-color-text));
   box-shadow: var(--yoro-shadow-none);
   font-family: var(--yoro-font-family-base);
   line-height: var(--yoro-line-height-base);
@@ -25,13 +30,13 @@
 }
 
 .yoro-empty-state[data-variant="community"] {
-  --yoro-empty-state-background: var(--yoro-color-surface-strong);
+  --yoro-empty-state-background: var(--yoro-empty-state-surface, var(--yoro-color-surface-strong));
   --yoro-empty-state-border: var(--yoro-color-accent-rose);
   --yoro-empty-state-accent: var(--yoro-color-accent-rose);
 }
 
 .yoro-empty-state[data-variant="streamer"] {
-  --yoro-empty-state-background: var(--yoro-color-surface-strong);
+  --yoro-empty-state-background: var(--yoro-empty-state-surface, var(--yoro-color-surface-strong));
   --yoro-empty-state-border: var(--yoro-color-secondary);
   --yoro-empty-state-accent: var(--yoro-color-secondary-strong);
 }
@@ -50,7 +55,7 @@
   block-size: var(--yoro-space-12);
   border: thin solid var(--yoro-empty-state-border);
   border-radius: var(--yoro-radius-circle);
-  background: var(--yoro-color-surface-muted);
+  background: var(--yoro-empty-state-icon-background, var(--yoro-color-surface-muted));
   color: var(--yoro-empty-state-accent);
   box-shadow: var(--yoro-shadow-none);
 }
@@ -58,7 +63,7 @@
 .yoro-empty-state__title {
   max-inline-size: var(--yoro-breakpoint-mobile);
   margin: var(--yoro-space-0);
-  color: var(--yoro-color-text-strong);
+  color: var(--yoro-empty-state-title, var(--yoro-color-text-strong));
   font-size: var(--yoro-font-size-xl);
   font-weight: var(--yoro-font-weight-black);
   line-height: var(--yoro-line-height-tight);
@@ -69,7 +74,7 @@
 .yoro-empty-state__description {
   max-inline-size: var(--yoro-breakpoint-tablet);
   margin: var(--yoro-space-0);
-  color: var(--yoro-color-text-muted);
+  color: var(--yoro-empty-state-description, var(--yoro-color-text-muted));
   font-size: var(--yoro-font-size-md);
   line-height: var(--yoro-line-height-relaxed);
   overflow-wrap: anywhere;

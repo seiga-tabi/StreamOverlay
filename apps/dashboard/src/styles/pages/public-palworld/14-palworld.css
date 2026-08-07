@@ -1652,6 +1652,10 @@
 }
 
 .yoro-card.palworld-technology-card[data-rarity-band] {
+  --yoro-card-background: var(--palworld-technology-rarity-surface);
+  --yoro-card-border-color: var(--palworld-technology-rarity-accent);
+  --yoro-card-border-width: medium;
+
   border: medium solid var(--palworld-technology-rarity-accent);
   background: var(--palworld-technology-rarity-surface);
 }
@@ -4683,6 +4687,10 @@
 }
 
 @media (max-width: 48rem) {
+  .palworld-pal-location-section {
+    padding-inline: var(--yoro-space-3);
+  }
+
   .palworld-pal-location-loading,
   .palworld-pal-location-preview {
     block-size: clamp(20rem, 74vw, 23.75rem);
@@ -5828,6 +5836,8 @@
 
   .palworld-map-viewport > .palworld-map-controls .palworld-map-zoom-output,
   .palworld-map-viewport > .palworld-map-controls .is-zoom-reset {
+    --yoro-button-display: none;
+
     display: none;
   }
 

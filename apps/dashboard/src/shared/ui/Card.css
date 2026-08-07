@@ -3,9 +3,9 @@
   flex-direction: column;
   gap: var(--yoro-space-4);
   min-width: 0;
-  border: thin solid var(--yoro-color-border);
+  border: var(--yoro-card-border-width, thin) solid var(--yoro-card-border-color, var(--yoro-color-border));
   border-radius: var(--yoro-radius-lg);
-  background: var(--yoro-color-surface);
+  background: var(--yoro-card-background, var(--yoro-color-surface));
   color: var(--yoro-color-text);
   box-shadow: var(--yoro-shadow-none);
   font-family: var(--yoro-font-family-base);
@@ -29,21 +29,21 @@
 }
 
 .yoro-card[data-variant="glass"] {
-  border-color: var(--yoro-color-border);
-  background: var(--yoro-color-surface);
+  border-color: var(--yoro-card-border-color, var(--yoro-color-border));
+  background: var(--yoro-card-background, var(--yoro-color-surface));
   box-shadow: var(--yoro-shadow-soft);
   backdrop-filter: var(--yoro-theme-backdrop-glass);
 }
 
 .yoro-card[data-variant="elevated"] {
-  border-color: var(--yoro-color-border-strong);
-  background: var(--yoro-color-surface-strong);
+  border-color: var(--yoro-card-border-color, var(--yoro-color-border-strong));
+  background: var(--yoro-card-background, var(--yoro-color-surface-strong));
   box-shadow: var(--yoro-shadow-panel);
 }
 
 .yoro-card[data-variant="interactive"] {
-  border-color: var(--yoro-color-border-strong);
-  background: var(--yoro-color-surface-strong);
+  border-color: var(--yoro-card-border-color, var(--yoro-color-border-strong));
+  background: var(--yoro-card-background, var(--yoro-color-surface-strong));
   cursor: pointer;
   transition:
     border-color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
@@ -51,7 +51,7 @@
 }
 
 .yoro-card[data-variant="interactive"]:hover {
-  border-color: var(--yoro-color-primary);
+  border-color: var(--yoro-card-border-color, var(--yoro-color-primary));
   box-shadow: var(--yoro-shadow-soft);
 }
 
@@ -61,14 +61,14 @@
 }
 
 .yoro-card[data-variant="warning"] {
-  border-color: var(--yoro-color-warning);
-  background: var(--yoro-color-warning-bg);
+  border-color: var(--yoro-card-border-color, var(--yoro-color-warning));
+  background: var(--yoro-card-background, var(--yoro-color-warning-bg));
   color: var(--yoro-color-text-strong);
 }
 
 .yoro-card[data-variant="danger"] {
-  border-color: var(--yoro-color-danger);
-  background: var(--yoro-color-danger-bg);
+  border-color: var(--yoro-card-border-color, var(--yoro-color-danger));
+  background: var(--yoro-card-background, var(--yoro-color-danger-bg));
   color: var(--yoro-color-text-strong);
 }
 

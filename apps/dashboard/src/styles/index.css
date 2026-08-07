@@ -1,6 +1,5 @@
 @import "./foundation/layers.css";
 @import "./foundation/globals.css" layer(tokens);
-@import "./foundation/tokens-dark.css" layer(tokens);
 @import "./legacy/01-core.css" layer(legacy);
 @import "./pages/public-lol/02-legacy.css" layer(legacy);
 @import "./legacy/03-product-gray.css" layer(legacy);
@@ -21,3 +20,7 @@
 @import "./pages/account/19-participation-management.css" layer(legacy);
 @import "./pages/public-lol/20-profile-platform.css" layer(legacy);
 @import "./pages/public-lol/21-aram.css" layer(legacy);
+/* 매치 카드 리디자인. 파일 안에서 직접 pages layer 를 선언해 legacy 뒤에 놓입니다. */
+@import "./pages/public-lol/22-match-card.css";
+/* 프로필 히어로 리디자인. 같은 방식으로 pages layer 에서 레이아웃을 단독 소유합니다. */
+@import "./pages/public-lol/23-profile-hero.css";

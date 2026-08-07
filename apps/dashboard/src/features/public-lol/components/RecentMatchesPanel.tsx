@@ -1,6 +1,6 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { Button } from "../../../shared/ui/Button";
-import { EmptyState, EmptyStateDescription, EmptyStateIcon, EmptyStateTitle } from "../../../shared/ui/EmptyState";
+import { EmptyState, EmptyStateActions, EmptyStateDescription, EmptyStateIcon, EmptyStateTitle } from "../../../shared/ui/EmptyState";
 import { Badge } from "../../../shared/ui/Status";
 
 export type RecentMatchesPanelLocalizedText = {
@@ -16,15 +16,21 @@ export type RecentMatchesPanelText = {
   loadingMoreMatches: ReactNode;
   loadMoreMatches: ReactNode;
   noMoreMatches: RecentMatchesPanelLocalizedText;
+  loadFailedTitle: RecentMatchesPanelLocalizedText;
+  retry: ReactNode;
 };
 
 export type RecentMatchesPanelProps = {
   matchCount: ReactNode;
+  summaryStrip?: ReactNode;
   filterBar: ReactNode;
   shareAction?: ReactNode;
   isEmpty: boolean;
   initialLoading?: boolean;
   matchRows: ReactNode;
+  /** 목록 자체를 불러오지 못한 경우. 비어 있음과 구분해 재시도 버튼을 노출합니다. */
+  loadError?: ReactNode;
+  onRetry?: () => void;
   moreError?: ReactNode;
   canLoadMore: boolean;
   loadingMore: boolean;
@@ -34,6 +40,8 @@ export type RecentMatchesPanelProps = {
   onLoadMoreIntent?: () => void;
   loadMoreKey?: string;
 };
+
+const SKELETON_ROW_COUNT = 5;
 
 function allowsPublicLolMatchPrefetch(): boolean {
   if (typeof navigator === "undefined") return false;
@@ -45,11 +53,14 @@ function allowsPublicLolMatchPrefetch(): boolean {
 
 export function RecentMatchesPanel({
   matchCount,
+  summaryStrip,
   filterBar,
   shareAction,
   isEmpty,
   initialLoading = false,
   matchRows,
+  loadError,
+  onRetry,
   moreError,
   canLoadMore,
   loadingMore,
@@ -91,14 +102,28 @@ export function RecentMatchesPanel({
         <h2  >{text.title.label}</h2>
         <Badge size="sm" tone="info">{matchCount}</Badge>
       </div>
+      {summaryStrip}
       {filterBar}
       {shareAction}
       <div className="public-match-list" aria-busy={initialLoading || undefined}>
         {initialLoading ? (
-          <div className="public-match-filter-loading" role="status">
-            <span aria-hidden="true" />
-            <strong>{text.loadingMoreMatches}</strong>
+          // 행 높이를 미리 확보해 스피너 교체 시 발생하던 레이아웃 점프를 없앱니다.
+          <div className="public-match-skeleton-list" role="status" aria-label={String(text.loadingMoreMatches)}>
+            {Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => (
+              <span aria-hidden="true" className="public-match-skeleton-row" key={index} />
+            ))}
           </div>
+        ) : loadError ? (
+          <EmptyState className="public-profile-shared-empty-inline" variant="error">
+            <EmptyStateIcon>!</EmptyStateIcon>
+            <EmptyStateTitle as="h3">{text.loadFailedTitle.label}</EmptyStateTitle>
+            <EmptyStateDescription>{loadError}</EmptyStateDescription>
+            {onRetry ? (
+              <EmptyStateActions>
+                <Button type="button" variant="secondary" onClick={onRetry}>{text.retry}</Button>
+              </EmptyStateActions>
+            ) : null}
+          </EmptyState>
         ) : isEmpty ? (
           <EmptyState className="public-profile-shared-empty-inline" variant="search">
             <EmptyStateIcon>?</EmptyStateIcon>

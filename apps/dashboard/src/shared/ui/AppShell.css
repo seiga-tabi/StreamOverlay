@@ -14,6 +14,19 @@
   font-family: var(--yoro-font-family-base);
 }
 
+/* sidebarMode="none": sidebar를 두지 않는 화면에서 sidebar column을 접습니다.
+   기본 2-column grid를 그대로 두면 좌측에 --yoro-app-shell-sidebar-width 만큼
+   빈 column이 남아 콘텐츠가 오른쪽으로 밀립니다.
+   AppShell 8개 사용처 중 sidebar를 두는 곳은 2곳뿐이므로 나머지 화면도 이 값을
+   쓸 수 있지만, 화면별 visual regression 확인이 필요해 opt-in으로 둡니다. */
+.yoro-app-shell[data-sidebar-mode="none"] {
+  grid-template-areas:
+    "header"
+    "main"
+    "footer";
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .yoro-app-shell[data-variant="public"] {
   --yoro-app-shell-accent: var(--yoro-color-primary);
 }
@@ -73,7 +86,7 @@
 .yoro-app-shell__main {
   grid-area: main;
   min-width: 0;
-  padding: var(--yoro-space-6);
+  padding: var(--yoro-app-shell-main-padding, var(--yoro-space-6));
   outline: none;
 }
 
@@ -84,8 +97,10 @@
 .yoro-app-shell__footer {
   grid-area: footer;
   min-width: 0;
-  border-block-start: thin solid var(--yoro-color-border);
-  background: var(--yoro-color-surface);
+  /* 지면이 어두운 화면에서 재정의할 수 있도록 훅으로 노출합니다.
+     기본값은 var() fallback에 두어야 바깥에서 상속으로 내려준 값을 덮지 않습니다. */
+  border-block-start: thin solid var(--yoro-app-shell-footer-border, var(--yoro-color-border));
+  background: var(--yoro-app-shell-footer-background, var(--yoro-color-surface));
 }
 
 .yoro-app-shell[data-sidebar-mode="drawer"] {

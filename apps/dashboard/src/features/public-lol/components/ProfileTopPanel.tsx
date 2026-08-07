@@ -1,9 +1,6 @@
 import { isValidElement, type ReactElement, type ReactNode } from "react";
-import { Button } from "../../../shared/ui/Button";
-import { Card } from "../../../shared/ui/Card";
-import { type StatusTone } from "../../../shared/ui/Status";
 import { ProfileTopActions, type ProfileTopActionLink } from "./ProfileTopActions";
-import { ProfileTopIdentity, type ProfileTopIdentitySeasonBadgesRenderer } from "./ProfileTopIdentity";
+import { ProfileTopIdentity, type ProfileTopIdentityChampion, type ProfileTopIdentitySeasonBadgesRenderer } from "./ProfileTopIdentity";
 
 export type ProfileTopPanelLocalizedText = {
   label: string;
@@ -15,6 +12,7 @@ export type ProfileTopPanelText = {
   profileLinksLabel?: ProfileTopPanelLocalizedText;
   searching: string;
   recentMatches: ProfileTopPanelLocalizedText;
+  topChampionsLabel?: string;
 };
 
 export type ProfileTopStreamerSpotlight = {
@@ -44,10 +42,11 @@ export type ProfileTopPanelProps = {
   profileMetaLabel?: string;
   profileIconUrl?: string;
   masteryChampionArt?: string;
+  summonerLevelLabel?: string;
+  summonerLevelAriaLabel?: string;
+  mainRoleLabel?: string;
+  topChampions?: ProfileTopIdentityChampion[];
   fetchedAtText: string;
-  primaryRankLabel: string;
-  primaryRankClassName?: string;
-  primaryRankTone: StatusTone;
   seasonBadges: ReactNode;
   profileLinks: ReactNode;
   loading: boolean;
@@ -61,6 +60,16 @@ export type ProfileTopPanelProps = {
   favoriteActionLabel: string;
   streamerSpotlight?: ProfileTopStreamerSpotlight;
   shareAction?: ReactNode;
+  /** 큐 세그먼트 + 티어 상세. 랭크 정보를 히어로가 단독으로 소유합니다. */
+  rankSection?: ReactNode;
+  /** 등록 스트리머의 방송 카드. 랭크와 같은 행에 놓여 히어로 높이를 늘리지 않습니다. */
+  streamerCast?: ReactNode;
+  channelName?: string;
+  channelUrl?: string;
+  channelAriaLabel?: string;
+  liveStatus?: { isLive: boolean; label: string };
+  /** 히어로 하단에 붙는 프로필 탭. */
+  tabs?: ReactNode;
   text: ProfileTopPanelText;
   onRefresh: () => void;
   onOpenParticipation?: () => void;
@@ -111,26 +120,34 @@ export function ProfileTopPanel({
   displayName,
   displayTagLabel,
   loading,
+  mainRoleLabel,
   masteryChampionArt,
   onRefresh,
   onOpenParticipation,
   onToggleFavorite,
-  primaryRankLabel,
-  primaryRankClassName,
-  primaryRankTone,
   profileMetaLabel,
   profileIconUrl,
   profileLinks,
+  rankSection,
   refreshButtonLabel,
   refreshCooldownLabel,
   refreshCoolingDown,
   refreshDisabled,
   refreshTitle,
+  channelAriaLabel,
+  channelName,
+  channelUrl,
+  liveStatus,
   seasonBadges,
   shareAction,
+  streamerCast,
   streamerSpotlight,
+  summonerLevelAriaLabel,
+  summonerLevelLabel,
+  tabs,
   tagLine,
   text,
+  topChampions,
 }: ProfileTopPanelProps) {
   const actionProfileLinks = profileTopActionLinksFromNode(profileLinks);
   const renderSeasonBadges = profileTopSeasonBadgesRendererFromNode(seasonBadges);
@@ -141,6 +158,7 @@ export function ProfileTopPanel({
         favoriteActive,
         favoriteAriaLabel,
         fetchedAtText,
+        liveStatus,
         loading,
         profileLinks: streamerSpotlight ? [] : actionProfileLinks,
         profileLinksLabel: text.profileLinksLabel?.label ?? defaultProfileLinksLabel(),
@@ -158,101 +176,56 @@ export function ProfileTopPanel({
   );
 
   return (
-    <Card
-      as="section"
-      id="public-ranking"
+    <section
       className={[
-        "public-profile-top-grid public-profile-shared-top public-profile-platform-hero",
+        "public-profile-hero",
         masteryChampionArt ? "has-mastery-art" : "",
-        streamerSpotlight ? "has-streamer" : ""
+        streamerSpotlight ? "has-streamer" : "",
+        streamerSpotlight?.isLive ? "is-live" : "",
       ].filter(Boolean).join(" ")}
-      padding="none"
-      variant="glass"
+      id="public-ranking"
     >
-      {masteryChampionArt ? <img className="public-profile-mastery-art" src={masteryChampionArt} alt="" aria-hidden="true" /> : null}
-      <div className="public-profile-top-main">
-        <ProfileTopIdentity
-          identity={{
-            avatarFallbackLabel: gameName.slice(0, 1).toUpperCase(),
-            displayName,
-            displayTagLabel,
-            fetchedAtText,
-            gameName,
-            primaryRankClassName,
-            primaryRankLabel,
-            primaryRankTone,
-            profileMetaLabel,
-            profileIconUrl,
-            streamerStatus: streamerSpotlight ? (streamerSpotlight.isLive ? "live" : "offline") : undefined,
-            streamerStatusLabel: streamerSpotlight?.statusLabel,
-            tagLine,
-          }}
-          renderActions={renderActions}
-          renderSeasonBadges={renderSeasonBadges}
-        />
-        {streamerSpotlight ? (
-          <aside className={`public-profile-streamer-spotlight ${streamerSpotlight.isLive ? "is-live" : "is-offline"}`}>
-            <div className="public-profile-streamer-spotlight__status">
-              <span className="public-profile-streamer-spotlight__eyebrow">
-                <i aria-hidden="true" />
-                {streamerSpotlight.eyebrow}
-              </span>
-              <strong>{streamerSpotlight.displayName}</strong>
-              <span>{streamerSpotlight.statusLabel}</span>
-            </div>
-            <div className="public-profile-streamer-spotlight__copy">
-              {streamerSpotlight.title ? <strong>{streamerSpotlight.title}</strong> : null}
-              {streamerSpotlight.viewerLabel ? <span>{streamerSpotlight.viewerLabel}</span> : null}
-            </div>
-            {streamerSpotlight.metrics?.length ? (
-              <dl className="public-profile-streamer-spotlight__metrics">
-                {streamerSpotlight.metrics.map((metric) => (
-                  <div className={metric.tone ? `is-${metric.tone}` : undefined} key={metric.id}>
-                    <dt>{metric.label}</dt>
-                    <dd>{metric.value}</dd>
-                  </div>
-                ))}
-              </dl>
-            ) : null}
-            <div className="public-profile-streamer-spotlight__actions">
-              {onOpenParticipation ? (
-                <button className="is-primary" type="button" onClick={onOpenParticipation}>
-                  {streamerSpotlight.participationActionLabel}
-                </button>
-              ) : null}
-              {streamerSpotlight.channelUrl ? (
-                <a className="is-secondary" href={streamerSpotlight.channelUrl} target="_blank" rel="noreferrer">
-                  {streamerSpotlight.channelActionLabel}
-                </a>
-              ) : null}
-              <button
-                className="is-ghost is-recent-matches"
-                data-ja={text.recentMatches.ja}
-                data-ko={text.recentMatches.ko}
-                type="button"
-                onClick={() => document.getElementById("public-recent-matches")?.scrollIntoView({ behavior: "smooth", block: "start" })}
-              >
-                {text.recentMatches.label}
-              </button>
-              {streamerSpotlight.supportingLinks?.map((link, index) => (
-                <a className="is-ghost" href={link.url} target="_blank" rel="noreferrer" key={`${link.id ?? link.url}:${index}`}>
-                  {link.label}
-                </a>
-              ))}
-            </div>
-          </aside>
-        ) : null}
-        <div className="public-profile-summary-controls">
-          <Button
-            type="button"
-            size="sm"
-            variant="primary"
-            onClick={() => document.getElementById("public-recent-matches")?.scrollIntoView({ behavior: "smooth", block: "start" })}
-          >
-            <span  >{text.recentMatches.label}</span>
-          </Button>
-        </div>
-      </div>
-    </Card>
+      {/* 챔피언 일러스트는 정보 뒤로 물러나고 오른쪽 끝에서만 드러납니다. */}
+      {masteryChampionArt ? (
+        <img aria-hidden="true" alt="" className="public-profile-hero-art" src={masteryChampionArt} />
+      ) : null}
+
+      <ProfileTopIdentity
+        identity={{
+          avatarFallbackLabel: gameName.slice(0, 1).toUpperCase(),
+          channelAriaLabel,
+          channelName,
+          channelUrl,
+          displayName,
+          displayTagLabel,
+          gameName,
+          mainRoleLabel,
+          profileIconUrl,
+          profileMetaLabel,
+          streamerStatus: streamerSpotlight ? (streamerSpotlight.isLive ? "live" : "offline") : undefined,
+          streamerStatusLabel: streamerSpotlight?.statusLabel,
+          summonerLevelAriaLabel,
+          summonerLevelLabel,
+          tagLine,
+          topChampions,
+          topChampionsLabel: text.topChampionsLabel,
+        }}
+        renderActions={renderActions}
+        renderSeasonBadges={renderSeasonBadges}
+      />
+
+      {rankSection || streamerCast ? (
+        <>
+          <span aria-hidden="true" className="public-profile-hero-rule" />
+          {/* 방송 카드는 랭크와 같은 행에 놓입니다. 행을 늘리지 않아야 히어로가 커지지 않습니다. */}
+          <div className={`public-profile-hero-body${streamerCast ? " has-cast" : ""}`}>
+            {rankSection}
+            {streamerCast}
+          </div>
+        </>
+      ) : null}
+
+      {tabs}
+    </section>
   );
 }
