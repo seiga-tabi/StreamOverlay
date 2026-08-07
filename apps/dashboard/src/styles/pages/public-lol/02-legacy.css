@@ -4082,6 +4082,18 @@
     overflow-wrap: normal;
   }
 
+  /* 일본어는 띄어쓰기가 없어 keep-all이 라벨 전체를 하나의 덩어리로 만들어
+     넘칠 수 있습니다(홈 히어로·봇 온보딩과 같은 유형). 기본 줄바꿈으로 전환합니다. */
+  :lang(ja) .public-streamers-shared-summary .yoro-metric,
+  :lang(ja) .public-streamers-shared-summary .yoro-metric__header,
+  :lang(ja) .public-streamers-shared-summary .yoro-metric__footer,
+  :lang(ja) .public-streamers-shared-summary .yoro-metric__label,
+  :lang(ja) .public-streamers-shared-summary .yoro-metric__description,
+  :lang(ja) .public-streamers-shared-summary .yoro-metric__value {
+    word-break: normal;
+    line-break: strict;
+  }
+
   .public-twitch-followed-list .public-streamers-shared-card.yoro-card {
     width: 100%;
     max-width: 100%;

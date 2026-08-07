@@ -1,0 +1,21 @@
+/* 서버 선택 메뉴 — 4글자 코드가 배지 밖으로 삐져나오던 문제 보정.
+ *
+ * legacy/01-core.css 의 .public-server-menu button 은 배지 열을 44px 로 못 박습니다.
+ * 한국어 글꼴(Inter/Pretendard)에서 "EUNE" 는 정확히 44px 라 겨우 들어가지만,
+ * 일본어 글꼴(Noto Sans JP)은 같은 라틴 글자가 더 넓어 48px 가 되어
+ * 알약 모양 배지의 좌우로 글자가 튀어나옵니다(실측: ja 에서 scrollWidth 48 > 44).
+ *
+ * 글꼴 폭에 기대지 않도록 배지 열을 내용에 맞춰 늘리고 44px 는 하한으로만 둡니다.
+ * 대상 선언에 !important 가 없어 pages layer 로 이깁니다.
+ */
+
+@layer pages {
+  .public-server-menu button {
+    grid-template-columns: minmax(2.75rem, auto) minmax(0, 1fr);
+  }
+
+  .public-server-menu strong {
+    /* 알약 곡선과 글자가 맞닿지 않도록 좌우 여백을 둡니다. */
+    padding-inline: var(--yoro-space-1);
+  }
+}

@@ -2471,6 +2471,15 @@
   word-break: keep-all;
 }
 
+/* 일본어는 어절 사이 공백이 없어 keep-all이 문장 전체를 하나의 끊을 수 없는
+   덩어리로 만듭니다. 9rem 칸을 넘어 옆 단계 라벨과 겹칩니다("로그인と
+   Organization連携alworld REST連携"). 일본어는 기본 줄바꿈을 쓰고
+   line-break: strict로 행두 금칙만 지킵니다. */
+:lang(ja) .public-bot-onboarding__progress li > strong {
+  word-break: normal;
+  line-break: strict;
+}
+
 .public-bot-onboarding__layout {
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) minmax(20rem, .7fr);

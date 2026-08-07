@@ -20,6 +20,8 @@ export type ProfileStreamerCastText = {
   ingameLabel: string;
   ingameNotice: string;
   thumbnailLabel: string;
+  /** previewUrl 이 없을 때(오프라인 채널 대부분) 썸네일 안에 보이는 캡션. */
+  previewUnavailableLabel: string;
 };
 
 export type ProfileStreamerCastProps = {
@@ -57,6 +59,16 @@ function TwitchIcon() {
   );
 }
 
+function VideoOffIcon() {
+  return (
+    <svg aria-hidden="true" focusable="false" height="18" viewBox="0 0 24 24" width="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10.5 5H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2.5" />
+      <path d="M16 9.5V8a1 1 0 0 1 1-1h.5l4-2.5v11l-4-2.5" />
+      <path d="M2 2l20 20" />
+    </svg>
+  );
+}
+
 export function ProfileStreamerCast({
   isLive,
   previewUrl,
@@ -87,7 +99,16 @@ export function ProfileStreamerCast({
 
       <div className="public-profile-hero-cast-media">
         <span className={`public-profile-hero-cast-thumb ${isLive ? "" : "is-offline"}`}>
-          {previewUrl ? <img src={previewUrl} alt="" /> : null}
+          {previewUrl ? (
+            <img alt="" src={previewUrl} />
+          ) : (
+            /* 오프라인 채널은 Twitch가 미리보기 URL을 주지 않아 거의 항상 이 분기입니다.
+               빈 배경색만 남기는 대신 "왜 비어 있는지"를 아이콘+캡션으로 설명합니다. */
+            <span aria-hidden="true" className="public-profile-hero-cast-thumb-empty">
+              <VideoOffIcon />
+              <span>{text.previewUnavailableLabel}</span>
+            </span>
+          )}
           {isLive ? <i aria-hidden="true">{text.liveBadge}</i> : null}
           <span className="yoro-u-sr-only">{text.thumbnailLabel}</span>
         </span>

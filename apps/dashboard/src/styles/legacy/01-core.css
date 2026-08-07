@@ -9637,6 +9637,14 @@ code {
   word-break: keep-all;
 }
 
+/* 일본어는 띄어쓰기가 없어 keep-all이 제목 전체를 하나의 끊을 수 없는 덩어리로
+   만들어 넘칠 수 있습니다(홈 히어로·봇 온보딩에서 실제로 재현된 것과 같은 유형).
+   일본어는 기본 줄바꿈 + line-break: strict(행두 금칙만 유지)로 전환합니다. */
+:lang(ja) .public-dashboard-shell .public-profile-title-row h2 {
+  word-break: normal;
+  line-break: strict;
+}
+
 .public-dashboard-shell .public-profile-title-row span {
   color: #50617d;
 }

@@ -159,27 +159,32 @@ export function ProfileHeroRank({
               ) : null}
             </span>
 
-            <span className="public-profile-hero-record">
-              <WinRateDonut percent={active.winRate} label={`${active.winRate}%`} />
-              <span className="public-profile-hero-record-copy">
-                <strong>
-                  <em>{active.wins}{active.winsLabel}</em>
-                  {" "}
-                  <i>{active.losses}{active.lossesLabel}</i>
-                </strong>
-                <span>{active.recordCaption}</span>
-              </span>
-            </span>
-
-            {trend && trend.values.length > 1 ? (
-              <span className="public-profile-hero-trend">
-                <span>{text.lpTrendLabel}</span>
-                <LpSparkline trend={trend} />
-                <span className="public-profile-hero-trend-foot">
-                  <b data-tone={trend.changeTone}>{trend.changeLabel}</b>
+            {/* record(도넛+승패)와 trend(LP 추이)를 한 그룹으로 둡니다. 넓은 화면에서는
+                display:contents 로 지워져 각자 다른 grid-area(1행 옆 / 2행 전체)를
+                받고, 좁은 화면에서는 실제 flex 행으로 살아나 둘을 나란히 묶습니다. */}
+            <span className="public-profile-hero-metrics">
+              <span className="public-profile-hero-record">
+                <WinRateDonut percent={active.winRate} label={`${active.winRate}%`} />
+                <span className="public-profile-hero-record-copy">
+                  <strong>
+                    <em>{active.wins}{active.winsLabel}</em>
+                    {" "}
+                    <i>{active.losses}{active.lossesLabel}</i>
+                  </strong>
+                  <span>{active.recordCaption}</span>
                 </span>
               </span>
-            ) : null}
+
+              {trend && trend.values.length > 1 ? (
+                <span className="public-profile-hero-trend">
+                  <span>{text.lpTrendLabel}</span>
+                  <LpSparkline trend={trend} />
+                  <span className="public-profile-hero-trend-foot">
+                    <b data-tone={trend.changeTone}>{trend.changeLabel}</b>
+                  </span>
+                </span>
+              ) : null}
+            </span>
           </div>
         ) : (
           <div className="public-profile-hero-tier is-unranked" data-tier="unranked">

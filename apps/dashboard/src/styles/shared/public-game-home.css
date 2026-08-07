@@ -199,6 +199,16 @@
   text-wrap: balance;
 }
 
+/* keep-all 은 한국어 어절 기준입니다. 일본어는 어절 사이 공백이 없어
+   문장 전체가 끊을 수 없는 한 덩어리가 되고, 그 min-content 폭(실측 433px)이
+   히어로 전체를 밀어 검색 폼이 화면 밖으로 나갑니다(390px 기기에서 r=483).
+   일본어는 기본 줄바꿈을 쓰고, line-break: strict 로 행두 금칙만 지킵니다. */
+:lang(ja) .public-game-home__copy h1,
+:lang(ja) .public-game-home__copy > p {
+  word-break: normal;
+  line-break: strict;
+}
+
 .public-game-home__copy > p {
   max-inline-size: 36rem;
   margin: var(--yoro-space-0);

@@ -388,6 +388,94 @@ test("모바일 LoL 상단 탐색과 검색은 스크롤 방향에 따라 접히
   expect(toggles, "천천히 내리는 동안 상단바 접힘 전환은 한 번이어야 합니다.").toBeLessThanOrEqual(1);
 });
 
+test("모바일 상단 탐색 줄은 주요 기기 폭에서 항목을 화면 밖으로 밀어내지 않는다", async ({ page }) => {
+  test.skip((page.viewportSize()?.width ?? 1440) > 768, "모바일 상단바 전용 검증");
+
+  // 항목마다 88px 하한을 두면 5개 × 88 = 456px 라 375~430px 기기에서
+  // 마지막 항목이 통째로 화면 밖에 놓입니다. 컨테이너에 overflow-x: auto 가 있어
+  // 문서 가로 스크롤로는 잡히지 않고 화면에서만 잘려 보입니다.
+  for (const width of [375, 390, 393, 430]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto("/");
+    const nav = page.locator(".public-horizontal-nav__content");
+    await expect(nav).toBeVisible();
+
+    const diagnostics = await nav.evaluate((element) => {
+      const viewportWidth = window.innerWidth;
+      const items = [...element.children].map((child) => {
+        const rect = child.getBoundingClientRect();
+        return { width: rect.width, height: rect.height, left: rect.left, right: rect.right };
+      });
+      return {
+        itemCount: items.length,
+        outside: items.filter((item) => item.right > viewportWidth + 0.5 || item.left < -0.5).length,
+        tooSmall: items.filter((item) => item.width < 44 || item.height < 44).length,
+        scrollOverflow: element.scrollWidth - element.clientWidth,
+      };
+    });
+
+    expect(diagnostics.itemCount, `${width}px에서 상단 탐색 항목이 있어야 합니다.`).toBeGreaterThan(0);
+    expect(diagnostics.outside, `${width}px에서 상단 탐색 항목이 화면 밖으로 나가면 안 됩니다.`).toBe(0);
+    expect(diagnostics.scrollOverflow, `${width}px에서 상단 탐색 줄이 가로로 스크롤되면 안 됩니다.`).toBeLessThanOrEqual(1);
+    expect(diagnostics.tooSmall, `${width}px에서 상단 탐색 항목은 44×44 이상이어야 합니다.`).toBe(0);
+  }
+});
+
+test("일본어 홈 검색 영역은 화면 폭 안에 머물고 서버 코드가 배지를 넘지 않는다", async ({ page }) => {
+  test.skip((page.viewportSize()?.width ?? 1440) > 768, "모바일 홈 전용 검증");
+
+  // word-break: keep-all 은 한국어 어절 기준입니다. 일본어는 어절 사이 공백이 없어
+  // 문장 전체가 끊을 수 없는 한 덩어리가 되고, 그 min-content 폭이 히어로를 밀어
+  // 검색 폼이 화면 밖으로 나갑니다(수정 전 390px에서 폼 오른쪽 끝 483px).
+  for (const width of [375, 390, 393, 430]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto("/ja");
+    const form = page.locator(".public-home-shared-search-form");
+    await expect(form).toBeVisible();
+
+    const layout = await form.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      const copy = document.querySelector(".public-game-home__copy");
+      const heading = copy?.querySelector("h1");
+      const paragraph = copy?.querySelector("p");
+      const minContent = (node: Element | null | undefined) => {
+        if (!(node instanceof HTMLElement)) return 0;
+        const previous = node.style.width;
+        node.style.width = "min-content";
+        const value = node.getBoundingClientRect().width;
+        node.style.width = previous;
+        return Math.round(value);
+      };
+      return {
+        formRight: Math.round(rect.right),
+        viewportWidth: window.innerWidth,
+        copyWidth: Math.round(copy?.getBoundingClientRect().width ?? 0),
+        headingMinContent: minContent(heading),
+        paragraphMinContent: minContent(paragraph),
+      };
+    });
+
+    expect(layout.formRight, `${width}px 일본어 홈에서 검색 폼이 화면 밖으로 나가면 안 됩니다.`)
+      .toBeLessThanOrEqual(layout.viewportWidth);
+    // 줄바꿈이 가능하면 min-content 는 컨테이너 폭보다 작아집니다.
+    expect(layout.headingMinContent, `${width}px 일본어 제목이 줄바꿈되어야 합니다.`)
+      .toBeLessThanOrEqual(layout.copyWidth);
+    expect(layout.paragraphMinContent, `${width}px 일본어 본문이 줄바꿈되어야 합니다.`)
+      .toBeLessThanOrEqual(layout.copyWidth);
+  }
+
+  // 일본어 글꼴은 라틴 글자가 더 넓어 4글자 코드가 44px 배지를 넘습니다.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/ja");
+  await page.locator(".public-home-shared-server").click();
+  const badges = page.locator(".public-server-menu .public-server-badge");
+  await expect(badges.first()).toBeVisible();
+  const overflowing = await badges.evaluateAll((elements) => elements
+    .filter((element) => element.scrollWidth > element.clientWidth + 1)
+    .map((element) => element.textContent?.trim() ?? ""));
+  expect(overflowing, "일본어 서버 메뉴에서 코드가 배지를 넘치면 안 됩니다.").toEqual([]);
+});
+
 test("전적 아이템·점수·상세 Tooltip은 이름과 안정적인 레이어를 유지한다", async ({ page }) => {
   await page.route("**/api/lol/match-ranks**", async (route) => {
     await json(route, {

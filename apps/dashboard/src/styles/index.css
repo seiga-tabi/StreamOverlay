@@ -30,3 +30,7 @@
 @import "./pages/public-lol/25-profile-sidebar.css";
 /* 참여 페이지 리디자인. pages layer 에서 단독 소유합니다. */
 @import "./pages/public-lol/26-participation.css";
+/* 모바일 상단 탐색 줄 항목 이탈 보정. */
+@import "./pages/public-lol/27-mobile-nav.css";
+/* 서버 선택 메뉴 4글자 코드 보정. */
+@import "./pages/public-lol/28-server-menu.css";

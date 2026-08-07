@@ -374,6 +374,11 @@ const PARTY_TAG_OPTIONS: PublicLocalizedOption[] = [
   { value: "beginner", ko: "초보환영", ja: "初心者歓迎" }
 ];
 
+/* 팔로우 목록 자동 로드 재시도 정책. 실패해도 화면은 동작하므로 짧게 끊습니다. */
+const FOLLOWED_LOL_MAX_ATTEMPTS = 4;
+const FOLLOWED_LOL_RETRY_BASE_MS = 1_000;
+const FOLLOWED_LOL_RETRY_MAX_MS = 30_000;
+
 function publicOptionLabel(options: PublicLocalizedOption[], value: string | undefined): string {
   if (!value) return "";
   const option = options.find((item) => item.value === value);
@@ -1753,6 +1758,7 @@ function ProfileTopPanel({
         offlineHeading: t().streamerCastRecent,
         offlineLabel: t().streamerOfflineNow,
         participationLabel: participationOpen ? t().streamerParticipationApply : t().streamerParticipationView,
+        previewUnavailableLabel: t().streamerCastPreviewUnavailable,
         thumbnailLabel: t().streamerCastThumbnailLabel,
         // 좁은 폭에서 버튼 밖으로 넘치지 않도록 라벨은 "Twitch" 만 씁니다.
         watchAriaLabel: t().streamerWatch,
@@ -6351,6 +6357,12 @@ export function PublicLolPage({
     includeSubscriptions: boolean;
     promise: Promise<void>;
   } | null>(null);
+  /* 팔로우 목록 자동 로드의 시도 횟수와 예약된 재시도입니다.
+     요청이 실패하면 followedLol 이 비어 있는 채로 followedLoading 만 false 가 되어
+     아래 effect 가 다시 조건을 통과합니다. 시도 횟수를 따로 세지 않으면
+     렌더 속도만큼(실측 초당 약 500회) 재요청이 반복됩니다. */
+  const followedLolAttemptRef = useRef(0);
+  const followedLolRetryTimerRef = useRef<number>();
   const [publicParticipation, setPublicParticipation] = useState<PublicParticipationStateResponse | null>(null);
   const [publicParticipationDiscovery, setPublicParticipationDiscovery] = useState<PublicParticipationDiscoveryResponse | null>(null);
   const [publicParticipationLoading, setPublicParticipationLoading] = useState(false);
@@ -6535,11 +6547,34 @@ export function PublicLolPage({
 
   useEffect(() => {
     if (!twitchStatus.connected) {
+      followedLolAttemptRef.current = 0;
       setFollowedLol(null);
-      return;
+      return undefined;
     }
-    if (!twitchStatus.connected || followedLol || followedLoading) return;
-    void loadFollowedLol();
+    if (followedLol || followedLoading) return undefined;
+    if (followedLolAttemptRef.current >= FOLLOWED_LOL_MAX_ATTEMPTS) return undefined;
+
+    const attempt = followedLolAttemptRef.current;
+    followedLolAttemptRef.current = attempt + 1;
+    if (attempt === 0) {
+      void loadFollowedLol();
+      return undefined;
+    }
+
+    // 첫 시도가 실패한 뒤에는 간격을 두고 다시 시도합니다.
+    const delay = Math.min(
+      FOLLOWED_LOL_RETRY_MAX_MS,
+      FOLLOWED_LOL_RETRY_BASE_MS * 2 ** (attempt - 1)
+    );
+    followedLolRetryTimerRef.current = window.setTimeout(() => {
+      followedLolRetryTimerRef.current = undefined;
+      void loadFollowedLol();
+    }, delay);
+    return () => {
+      if (followedLolRetryTimerRef.current === undefined) return;
+      window.clearTimeout(followedLolRetryTimerRef.current);
+      followedLolRetryTimerRef.current = undefined;
+    };
   }, [twitchStatus.connected, followedLol, followedLoading]);
 
   useEffect(() => {

@@ -304,14 +304,33 @@
     color: var(--yoro-color-text-on-dark);
   }
 
+  /* LP 추이(trend)는 crest·copy와 같은 1행에 "티어 옆"으로 두고, 도넛+승패(record)는
+     2행 전체를 온전히 씁니다. metrics 래퍼는 좁은 폭(≤1080px)에서만 record·trend를
+     한 데 묶는 flex 행으로 쓰고, 이 기본(넓은) 상태에서는 display:contents로 지워
+     record·trend가 각자 다른 grid-area를 직접 받게 합니다. */
   .public-profile-hero-tier {
     display: grid;
-    grid-template-columns: auto minmax(11rem, 1fr) auto auto;
+    grid-template-columns: auto minmax(11rem, 1fr) minmax(13rem, 1fr);
+    grid-template-areas: "crest copy trend" "record record record";
     align-items: center;
-    gap: var(--yoro-space-6);
+    row-gap: var(--yoro-space-3);
+    column-gap: var(--yoro-space-6);
   }
 
-  .public-profile-hero-tier.is-unranked { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .public-profile-hero-tier .public-profile-hero-metrics { display: contents; }
+  .public-profile-hero-crest { grid-area: crest; }
+  .public-profile-hero-tier-copy { grid-area: copy; }
+  .public-profile-hero-trend { grid-area: trend; align-self: center; }
+  .public-profile-hero-record {
+    grid-area: record;
+    padding-block-start: var(--yoro-space-2);
+    border-block-start: 1px solid var(--yoro-color-border-on-dark);
+  }
+
+  .public-profile-hero-tier.is-unranked { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "crest copy ghost"; }
+  .public-profile-hero-tier.is-unranked .public-profile-hero-crest { grid-area: crest; }
+  .public-profile-hero-tier.is-unranked .public-profile-hero-tier-copy { grid-area: copy; }
+  .public-profile-hero-tier.is-unranked .public-profile-hero-ghost { grid-area: ghost; }
 
   .public-profile-hero-crest {
     display: grid;
@@ -385,7 +404,11 @@
     background: var(--tier-color);
   }
 
-  .public-profile-hero-record { display: flex; align-items: center; gap: var(--yoro-space-3); }
+  /* 좁은 화면(≤1080px)에서만 실제 flex 행으로 살아나 record·trend를 나란히 묶습니다.
+     넓은 화면에서는 위 .public-profile-hero-tier 규칙이 display:contents 로 지웁니다. */
+  .public-profile-hero-metrics { display: flex; align-items: center; gap: var(--yoro-space-4); min-width: 0; }
+
+  .public-profile-hero-record { display: flex; align-items: center; flex: none; gap: var(--yoro-space-3); }
 
   .public-profile-hero-donut { position: relative; flex: none; width: 3.75rem; height: 3.75rem; }
   .public-profile-hero-donut svg { display: block; width: 100%; height: 100%; transform: rotate(-90deg); }
@@ -420,14 +443,14 @@
     font-variant-numeric: tabular-nums;
   }
 
-  .public-profile-hero-trend { display: flex; flex-direction: column; gap: var(--yoro-space-1); min-width: 0; }
+  .public-profile-hero-trend { display: flex; flex: 1 1 auto; flex-direction: column; gap: var(--yoro-space-1); min-width: 0; }
 
   .public-profile-hero-trend > span:first-child {
     color: var(--yoro-color-text-on-dark-muted);
     font-size: var(--yoro-font-size-xs);
   }
 
-  .public-profile-hero-sparkline { display: block; width: 11rem; height: 2.75rem; }
+  .public-profile-hero-sparkline { display: block; width: 100%; max-width: 11rem; height: 2.75rem; }
   .public-profile-hero-sparkline .area { fill: var(--yoro-color-rank-trend-area); }
   .public-profile-hero-sparkline .line { stroke: var(--yoro-color-rank-trend); }
   .public-profile-hero-sparkline .head { fill: var(--yoro-color-rank-trend); }
@@ -627,6 +650,30 @@
   .public-profile-hero-cast-thumb > img { width: 100%; height: 100%; display: block; object-fit: cover; }
   .public-profile-hero-cast-thumb.is-offline > img { filter: grayscale(.6); opacity: .7; }
 
+  /* previewUrl 이 없을 때(오프라인 채널 대부분) 배경색만 있는 빈 박스 대신
+     "왜 비어 있는지"를 아이콘+짧은 캡션으로 보여줍니다. */
+  .public-profile-hero-cast-thumb-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--yoro-space-1);
+    width: 100%;
+    height: 100%;
+    background:
+      repeating-linear-gradient(135deg, color-mix(in srgb, var(--yoro-color-text-on-dark) 3%, transparent) 0 .5rem, transparent .5rem 1rem),
+      var(--yoro-color-ground-raised);
+    color: var(--yoro-color-text-on-dark-muted);
+  }
+
+  .public-profile-hero-cast-thumb-empty > span {
+    padding-inline: var(--yoro-space-1);
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-medium);
+    text-align: center;
+    line-height: var(--yoro-line-height-tight);
+  }
+
   .public-profile-hero-cast-thumb > i {
     position: absolute;
     left: .3rem;
@@ -754,9 +801,28 @@
   @container profile-hero (max-width: 1080px) {
     .public-profile-hero-body.has-cast { grid-template-columns: minmax(0, 1fr) 20rem; gap: var(--yoro-space-4); }
     .public-profile-hero-rank { grid-template-columns: 10.5rem minmax(0, 1fr); gap: var(--yoro-space-4); }
-    .public-profile-hero-tier { grid-template-columns: auto minmax(9rem, 1fr) auto; gap: var(--yoro-space-4); }
-    /* 추이는 통계 탭에 더 큰 차트로 있습니다. */
-    .public-profile-hero-trend { display: none; }
+
+    /* LP 추이를 더 이상 숨기지 않습니다. 대신 도넛 옆 metrics 행으로 내려 크레스트·
+       티어명 아래 둘째 줄에 두고, 둘 다 작게 줄입니다. */
+    .public-profile-hero-tier {
+      grid-template-columns: auto minmax(9rem, 1fr);
+      grid-template-areas: "crest copy" "metrics metrics";
+      column-gap: var(--yoro-space-4);
+      row-gap: var(--yoro-space-3);
+    }
+    /* 넓은 화면 규칙(위)이 display:contents 로 지운 metrics를 다시 실제 행으로
+       되살립니다 — 그래야 이 폭에서 metrics 가 grid-area 를 받을 수 있습니다. */
+    .public-profile-hero-tier .public-profile-hero-metrics {
+      display: flex;
+      grid-area: metrics;
+      padding-block-start: var(--yoro-space-2);
+      border-block-start: 1px solid var(--yoro-color-border-on-dark);
+    }
+    .public-profile-hero-record { padding-block-start: 0; border-block-start: 0; }
+    .public-profile-hero-donut { width: 3.25rem; height: 3.25rem; }
+    .public-profile-hero-donut > b { font-size: var(--yoro-font-size-xs); }
+    .public-profile-hero-record-copy > strong { font-size: var(--yoro-font-size-sm); }
+    .public-profile-hero-sparkline { max-width: 9rem; height: 2.25rem; }
   }
 
   @container profile-hero (max-width: 820px) {
@@ -809,10 +875,14 @@
     .public-profile-hero-actions { flex-wrap: wrap; }
     .public-profile-hero-actions .public-profile-hero-fetched { flex-basis: 100%; text-align: right; }
 
-    .public-profile-hero-tier,
+    .public-profile-hero-tier {
+      grid-template-columns: auto minmax(0, 1fr);
+      grid-template-areas: "crest copy" "metrics metrics";
+      gap: var(--yoro-space-3);
+    }
     .public-profile-hero-tier.is-unranked {
       grid-template-columns: auto minmax(0, 1fr);
-      grid-template-areas: "crest copy" "record record";
+      grid-template-areas: "crest copy" "ghost ghost";
       gap: var(--yoro-space-3);
     }
     .public-profile-hero-crest { grid-area: crest; width: var(--yoro-space-10); height: var(--yoro-space-10); border-radius: var(--yoro-radius-md); }
@@ -820,13 +890,19 @@
     .public-profile-hero-tier-copy { grid-area: copy; }
     .public-profile-hero-tier-name { font-size: var(--yoro-font-size-md); }
     .public-profile-hero-goal-track { max-width: none; }
-    .public-profile-hero-record {
-      grid-area: record;
-      justify-content: space-between;
-      padding-top: var(--yoro-space-2);
-      border-top: 1px solid var(--yoro-color-border-on-dark);
+
+    /* 이 폭에서는 도넛+승패 옆에 LP 추이를 나란히 두면 둘 다 너무 작아지므로,
+       metrics 안에서 다시 세로로 쌓습니다(도넛 위, LP 아래). space-between 은 쓰지
+       않습니다 — 그러면 도넛은 왼쪽 끝, 숫자는 오른쪽 끝으로 갈라져 한 쌍처럼 안
+       보입니다(이전 버그). */
+    .public-profile-hero-metrics {
+      flex-direction: column;
+      align-items: stretch;
+      gap: var(--yoro-space-3);
     }
-    .public-profile-hero-ghost { grid-area: record; justify-self: start; }
+    .public-profile-hero-record { justify-content: flex-start; }
+    .public-profile-hero-sparkline { max-width: none; }
+    .public-profile-hero-ghost { grid-area: ghost; justify-self: start; }
 
     .public-profile-hero-nav { padding-inline: var(--yoro-space-3); }
     .public-profile-hero .public-profile-streamer-spotlight { margin: 0 var(--yoro-space-3) var(--yoro-space-3); }
