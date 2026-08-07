@@ -1101,19 +1101,25 @@
   }
 }
 
-/* 최근 게임 챔피언 필터: 이미지가 포함된 목록형 선택 컨트롤 */
+/* 최근 게임 챔피언 필터: 이미지가 포함된 목록형 선택 컨트롤.
+   같은 행의 큐 칩·기간 select·초기화 버튼과 같은 --yoro-color-ground-surface /
+   --yoro-radius-md 톤을 써서 하나의 필터 바로 보이게 맞춥니다(예전에는
+   --public-gray-* 를 써서 밝은 회색 카드처럼 튀어 보였습니다). 라벨도
+   기간 select(.public-match-filter-select)처럼 값 옆에 한 줄로 붙입니다. */
 .public-dashboard-shell .public-match-filter-field {
   position: relative;
-  display: grid;
-  gap: var(--yoro-space-1);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--yoro-space-2);
   min-width: var(--yoro-space-0);
-  color: var(--public-gray-muted);
+  color: var(--yoro-color-text-on-dark-muted);
   font-size: var(--yoro-font-size-xs);
-  font-weight: var(--yoro-font-weight-bold);
+  font-weight: var(--yoro-font-weight-medium);
 }
 
 .public-dashboard-shell .public-match-filter-field > span {
-  min-width: var(--yoro-space-0);
+  flex: none;
+  white-space: nowrap;
 }
 
 .public-dashboard-shell .public-champion-filter-select .public-champion-filter-trigger {
@@ -1125,10 +1131,10 @@
   min-width: var(--yoro-space-0) !important;
   min-height: var(--yoro-size-touch-target) !important;
   padding: var(--yoro-space-1) var(--yoro-space-3) !important;
-  border: var(--yoro-size-sr-only) solid var(--public-gray-border) !important;
-  border-radius: var(--yoro-radius-sm) !important;
-  background: var(--public-gray-surface-strong) !important;
-  color: var(--public-gray-text) !important;
+  border: var(--yoro-size-sr-only) solid var(--yoro-color-border-on-dark) !important;
+  border-radius: var(--yoro-radius-md) !important;
+  background: var(--yoro-color-ground-surface) !important;
+  color: var(--yoro-color-text-on-dark) !important;
   box-shadow: var(--yoro-shadow-none) !important;
   text-align: start;
 }
@@ -1136,7 +1142,7 @@
 .public-dashboard-shell .public-champion-filter-select .public-champion-filter-trigger:hover,
 .public-dashboard-shell .public-champion-filter-select .public-champion-filter-trigger[aria-expanded="true"] {
   border-color: var(--yoro-color-secondary) !important;
-  background: var(--public-gray-surface) !important;
+  background: color-mix(in srgb, var(--yoro-color-text-on-dark) 6%, transparent) !important;
 }
 
 .public-dashboard-shell .public-champion-filter-select .public-champion-filter-trigger:focus-visible,

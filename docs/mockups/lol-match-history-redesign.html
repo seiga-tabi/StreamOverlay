@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>YORO.gg 전적검색 리디자인 목업</title>
 <style>
 /* ─────────────────────────────────────────────────────────────
@@ -267,15 +268,24 @@ code {
 .ghost-btn:hover { background: rgb(255 255 255 / .1); color: var(--p-text); }
 .ghost-btn:focus-visible { outline: 3px solid color-mix(in srgb, var(--p-brand) 55%, transparent); outline-offset: 2px; }
 
-/* 필터 */
-.filters { display: flex; flex-direction: column; gap: .625rem; }
+/* 필터
+   seg(큐 세그먼트) · sel(챔피언/기간 드롭다운 트리거) · 초기화 버튼이
+   한 행에서 서로 다른 컴포넌트를 조합하지만, 높이·반경은 --filter-ctrl-h /
+   --filter-ctrl-r 하나로 통일해 "따로 노는" 인상을 없앱니다. 데스크톱·태블릿은
+   40px(마우스 기준), 모바일은 44px(터치 타깃 최소값)로 전환됩니다. */
+.filters {
+  display: flex; flex-direction: column; gap: .625rem;
+  --filter-ctrl-h: 2.5rem;
+  --filter-ctrl-r: .625rem;
+}
 .filter-row { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
 .seg {
-  display: flex; gap: .25rem; padding: .25rem;
-  background: var(--p-surface); border: 1px solid var(--p-line); border-radius: .625rem;
+  display: flex; gap: .25rem; padding: .1875rem;
+  height: var(--filter-ctrl-h);
+  background: var(--p-surface); border: 1px solid var(--p-line); border-radius: var(--filter-ctrl-r);
 }
 .seg button {
-  min-height: 2rem; padding: 0 .75rem; border: 0; border-radius: .4375rem;
+  height: 100%; padding: 0 .75rem; border: 0; border-radius: calc(var(--filter-ctrl-r) - .1875rem);
   background: transparent; color: var(--p-muted);
   font-size: .8125rem; font-weight: 700; white-space: nowrap;
   transition: background 140ms cubic-bezier(.2,.8,.2,1), color 140ms cubic-bezier(.2,.8,.2,1);
@@ -289,14 +299,18 @@ code {
 
 .sel {
   display: inline-flex; align-items: center; gap: .5rem;
-  min-height: 2.5rem; padding: 0 .75rem;
+  height: var(--filter-ctrl-h); padding: 0 .75rem;
   background: var(--p-surface); color: var(--p-text);
-  border: 1px solid var(--p-line); border-radius: .625rem;
+  border: 1px solid var(--p-line); border-radius: var(--filter-ctrl-r);
   font-size: .8125rem; font-weight: 700;
 }
 .sel img { width: 1.25rem; height: 1.25rem; border-radius: 50%; }
 .sel small { color: var(--p-dim); font-weight: 600; }
 .sel svg { color: var(--p-dim); }
+.filter-row > .ghost-btn {
+  height: var(--filter-ctrl-h); padding: 0 .875rem;
+  border-radius: var(--filter-ctrl-r);
+}
 .filter-summary {
   display: flex; flex-wrap: wrap; align-items: center; gap: .5rem;
   font-size: .8125rem; color: var(--p-muted);
@@ -559,10 +573,11 @@ code {
   .ghost-btn { min-height: 2.5rem; padding: 0 .625rem; }
   .ghost-btn .lbl { display: none; }
 
-  /* 필터 */
+  /* 필터 — 44px 터치 타깃으로 전환. 높이·반경은 --filter-ctrl-h 하나만 바꾸면
+     seg·sel·초기화 버튼이 함께 맞춰집니다. */
+  .filters { --filter-ctrl-h: 2.75rem; }
   .seg { width: 100%; overflow-x: auto; }
-  .seg button { min-height: 2.5rem; }
-  .sel { flex: 1; min-width: 0; min-height: 2.5rem; }
+  .sel { flex: 1; min-width: 0; }
   .filter-summary { font-size: .75rem; }
 
   /* ── 매치 카드 · 3행 압축 (약 76px) ──────────────────────────

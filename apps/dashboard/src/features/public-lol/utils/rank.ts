@@ -126,21 +126,26 @@ export function rankScore(stats: LolRankedStats | undefined): number {
   return rankScoreFromParts(stats.tier, stats.rank, stats.leaguePoints);
 }
 
+const RANK_TIER_BANDS: Array<{ tier: string; base: number }> = [
+  { tier: "IRON", base: 0 },
+  { tier: "BRONZE", base: 400 },
+  { tier: "SILVER", base: 800 },
+  { tier: "GOLD", base: 1200 },
+  { tier: "PLATINUM", base: 1600 },
+  { tier: "EMERALD", base: 2000 },
+  { tier: "DIAMOND", base: 2400 },
+  { tier: "MASTER", base: 2800 },
+  { tier: "GRANDMASTER", base: 3200 },
+  { tier: "CHALLENGER", base: 3600 }
+];
+
+function tierBandFromScore(score: number): { tier: string; base: number } {
+  return [...RANK_TIER_BANDS].reverse().find((item) => score >= item.base) ?? RANK_TIER_BANDS[0]!;
+}
+
 export function rankLabelFromScore(score: number): string {
   if (!Number.isFinite(score) || score <= 0) return t().unranked;
-  const tiers = [
-    { tier: "IRON", base: 0 },
-    { tier: "BRONZE", base: 400 },
-    { tier: "SILVER", base: 800 },
-    { tier: "GOLD", base: 1200 },
-    { tier: "PLATINUM", base: 1600 },
-    { tier: "EMERALD", base: 2000 },
-    { tier: "DIAMOND", base: 2400 },
-    { tier: "MASTER", base: 2800 },
-    { tier: "GRANDMASTER", base: 3200 },
-    { tier: "CHALLENGER", base: 3600 }
-  ];
-  const tier = [...tiers].reverse().find((item) => score >= item.base) ?? { tier: "IRON", base: 0 };
+  const tier = tierBandFromScore(score);
   if (tier.tier === "MASTER" || tier.tier === "GRANDMASTER" || tier.tier === "CHALLENGER") {
     return tierLabels[tier.tier] ?? tier.tier;
   }
@@ -148,6 +153,12 @@ export function rankLabelFromScore(score: number): string {
   const divisions = ["IV", "III", "II", "I"];
   const division = divisions[Math.min(3, Math.floor(remainder / 100))] ?? "IV";
   return `${tierLabels[tier.tier] ?? tier.tier} ${division}`;
+}
+
+/** rankScore 값이 속한 티어를 소문자 key로 돌려줍니다. LP 추이 그래프의 구간별 색상 지정에 씁니다. */
+export function tierKeyFromScore(score: number): string {
+  if (!Number.isFinite(score) || score <= 0) return "unranked";
+  return tierBandFromScore(score).tier.toLowerCase();
 }
 
 export function averageTierLabel(stats: Array<LolRankedStats | undefined>): string {

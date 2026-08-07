@@ -178,10 +178,14 @@
     gap: var(--yoro-space-2);
   }
 
+  /* 컨테이너 높이를 옆의 챔피언/기간/초기화 컨트롤과 같은 --yoro-size-touch-target
+     으로 맞추고, 안쪽 버튼은 그 안에서 패딩만큼 줄어든 높이로 채웁니다 —
+     한 행의 네 컨트롤이 같은 높이·모서리 반경 축으로 정렬됩니다. */
   .public-match-queue-chips {
     display: flex;
     gap: var(--yoro-space-1);
     padding: var(--yoro-space-1);
+    min-height: var(--yoro-size-touch-target);
     border: 1px solid var(--yoro-color-border-on-dark);
     border-radius: var(--yoro-radius-md);
     background: var(--yoro-color-ground-surface);
@@ -189,7 +193,8 @@
   }
 
   .public-match-queue-chips button {
-    min-height: var(--yoro-space-8);
+    /* 컨테이너의 1px 테두리 2개 + 안쪽 패딩 2개를 뺀 나머지를 정확히 채웁니다. */
+    min-height: calc(var(--yoro-size-touch-target) - (var(--yoro-space-1) * 2) - .125rem);
     padding: 0 var(--yoro-space-3);
     border: 0;
     border-radius: var(--yoro-radius-xs);
@@ -236,8 +241,10 @@
   }
 
   .public-match-filter-panel .public-match-filter-select > span {
+    flex: none;
     color: var(--yoro-color-text-on-dark-muted);
     font-size: var(--yoro-font-size-xs);
+    white-space: nowrap;
   }
 
   .public-match-filter-panel .public-match-filter-select select {
@@ -1114,7 +1121,10 @@
     }
     .public-match-summary-divider,
     .public-match-summary-champions { display: none; }
-    .public-match-queue-chips { width: 100%; }
+    /* 버튼 자체를 44px 터치 타깃으로 키우는 대신, 컨테이너의 패딩·테두리를 비워
+       버튼 높이 = 컨테이너 높이가 되게 합니다 — 옆 챔피언/기간/초기화 버튼과
+       여전히 44px 로 나란합니다(패딩을 남기면 컨테이너만 54px 로 더 커집니다). */
+    .public-match-queue-chips { width: 100%; padding: 0; border: 0; }
     .public-match-queue-chips button { min-height: var(--yoro-size-touch-target); }
     .public-match-skeleton-row { height: 5rem; }
   }

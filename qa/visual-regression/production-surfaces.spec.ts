@@ -476,6 +476,117 @@ test("일본어 홈 검색 영역은 화면 폭 안에 머물고 서버 코드�
   expect(overflowing, "일본어 서버 메뉴에서 코드가 배지를 넘치면 안 됩니다.").toEqual([]);
 });
 
+test("스트리머 목록은 한국어·일본어 모두에서 랭크 배지와 동작을 잘리지 않게 보여 준다", async ({ page }) => {
+  test.skip((page.viewportSize()?.width ?? 1440) > 768, "모바일 스트리머 목록 전용 검증");
+
+  // 기본 fixture 는 미로그인이라 목록이 비어 있습니다. 실제 채널을 넣어야
+  // 배지 잘림을 검사할 수 있습니다.
+  const ranked = (tier: string) => ({
+    queueType: "RANKED_SOLO_5x5", tier, rank: "I", leaguePoints: 120,
+    wins: 40, losses: 30, winRate: 57.1,
+    hotStreak: false, veteran: false, freshBlood: false, inactive: false,
+  });
+  const streamerChannel = (index: number, tier: string, live: boolean) => ({
+    twitchUserId: `s${index}`,
+    twitchLogin: `streamer${index}`,
+    twitchDisplayName: `ストリーマー${index}`,
+    profileImageUrl: "https://static-cdn.jtvnw.net/jtv_user_pictures/avatar.png",
+    channelUrl: `https://twitch.tv/streamer${index}`,
+    followedAt: "2026-08-01T00:00:00.000Z",
+    isLive: live,
+    riotId: `ストリーマー${index}#JP${index}`,
+    riotGameName: `ストリーマー${index}`,
+    riotTagLine: `JP${index}`,
+    rankedStats: ranked(tier),
+    ...(live
+      ? {
+        title: "【LoL】チャレンジャーになるその日まで走り続ける｜視聴者参加型やってます",
+        gameName: "League of Legends",
+        viewerCount: 1_200 - index * 40,
+        startedAt: "2026-08-08T00:00:00.000Z",
+      }
+      : {}),
+  });
+
+  await page.route("**/api/public/twitch/status", async (route) => {
+    await json(route, {
+      connected: true, configured: true, requiredScopes: [], missingScopes: [],
+      streamers: [], queue: [], maxQueueSize: 100, updatedAt: "2026-08-08T00:00:00.000Z",
+      user: { id: "1", login: "yoro", displayName: "YORO" },
+    });
+  });
+  await page.route("**/api/public/twitch/followed-lol**", async (route) => {
+    await json(route, {
+      connected: true, truncated: false, matchedCount: 4,
+      subscriptionScopeGranted: true, total: 4,
+      channels: [
+        streamerChannel(0, "CHALLENGER", true),
+        streamerChannel(1, "GRANDMASTER", false),
+        streamerChannel(2, "PLATINUM", false),
+        streamerChannel(3, "MASTER", false),
+      ],
+      subscriptions: [{
+        twitchUserId: "s1", twitchLogin: "streamer1", twitchDisplayName: "ストリーマー1",
+        channelUrl: "https://twitch.tv/streamer1", tier: "1000", tierLabel: "ティア 1", isGift: true,
+      }],
+    });
+  });
+
+  // 일본어 글꼴(Noto Sans JP)은 같은 라틴 글자가 더 넓어 "Grandmaster I" 같은
+  // 티어 문구가 배지 안에서 잘립니다(수정 전 ja 375px: 필요 99px / 확보 92px).
+  for (const locale of ["ko", "ja"]) {
+    for (const width of [375, 390, 430]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(`/${locale}/follow`);
+      const shell = page.locator(".public-streamer-shell");
+      await expect(shell).toBeVisible();
+
+      const diagnostics = await shell.evaluate((element) => {
+        const clipped = [...element.querySelectorAll("*")].filter((node) => {
+          const style = getComputedStyle(node);
+          return node.children.length === 0
+            && (node.textContent ?? "").trim() !== ""
+            && node.clientWidth > 2
+            && style.textOverflow !== "ellipsis"
+            && style.webkitLineClamp === "none"
+            && node.scrollWidth > node.clientWidth + 1;
+        }).map((node) => `${String(node.className).split(" ")[0]}:${(node.textContent ?? "").trim().slice(0, 14)}`);
+
+        // 카드가 내용을 잘라 내지 않아야 합니다. 이전 구현은 64px 카드에
+        // 178px 내용을 넣고 overflow: hidden 으로 감췄습니다.
+        const cut = [...element.querySelectorAll(".public-streamer-row, .public-streamer-live")]
+          .filter((node) => node.scrollHeight > node.clientHeight + 1).length;
+
+        const tooSmall = [...element.querySelectorAll("button, a.public-streamer-button")]
+          .filter((node) => node.getBoundingClientRect().height < 44).length;
+
+        return {
+          clipped,
+          cut,
+          tooSmall,
+          ranks: element.querySelectorAll(".public-streamer-rank").length,
+          nestedScroll: [...element.querySelectorAll("*")]
+            .filter((node) => {
+              const style = getComputedStyle(node);
+              return (style.overflowY === "auto" || style.overflowY === "scroll")
+                && node.scrollHeight > node.clientHeight + 1;
+            }).length,
+          legacy: element.querySelectorAll(".public-streamers-shared-card, .public-twitch-followed-list").length,
+        };
+      });
+
+      const where = `${locale} ${width}px`;
+      // 데이터가 없으면 검사가 무의미하므로 배지가 실제로 그려졌는지 먼저 확인합니다.
+      expect(diagnostics.ranks, `${where}에서 랭크 배지가 렌더링되어야 합니다.`).toBeGreaterThan(0);
+      expect(diagnostics.clipped, `${where}에서 스트리머 목록 문구가 잘리면 안 됩니다.`).toEqual([]);
+      expect(diagnostics.cut, `${where}에서 카드가 내용을 잘라 내면 안 됩니다.`).toBe(0);
+      expect(diagnostics.tooSmall, `${where}에서 조작 요소는 44px 이상이어야 합니다.`).toBe(0);
+      expect(diagnostics.nestedScroll, `${where}에서 목록 안에 별도 스크롤을 두지 않습니다.`).toBe(0);
+      expect(diagnostics.legacy, `${where}에서 legacy 스트리머 마크업이 남으면 안 됩니다.`).toBe(0);
+    }
+  }
+});
+
 test("전적 아이템·점수·상세 Tooltip은 이름과 안정적인 레이어를 유지한다", async ({ page }) => {
   await page.route("**/api/lol/match-ranks**", async (route) => {
     await json(route, {

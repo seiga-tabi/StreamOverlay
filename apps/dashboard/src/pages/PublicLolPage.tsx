@@ -45,6 +45,7 @@ import {
   publicTwitchLoginUrl,
 } from "../features/public-twitch/api";
 import { safeTwitchStreamPreviewUrl } from "../features/public-twitch/stream-preview";
+import { streamerBuckets, type StreamerFilter } from "../features/public-lol/utils/streamers";
 import { isTwitchAccountOAuthReturn } from "../features/yoro-account/api";
 import { ProfileLinkIcon, profileLinkPlatformFromUrl, profileLinkPlatformClass } from "../components/ProfileLinkIcon";
 import { AppShell, AppShellHeader, AppShellMain, AppShellSidebar } from "../shared/ui/AppShell";
@@ -96,6 +97,9 @@ import {
   ParticipationStreamerPicks,
   ParticipationStreamerSwitcher,
   ProfileHeroRank as FeatureProfileHeroRank,
+  StreamerFilterBar,
+  StreamerLiveCard,
+  StreamerRow,
   ProfileLpRecordCard as FeatureProfileLpRecordCard,
   ProfileMetricProfileCard as FeatureProfileMetricProfileCard,
   ProfileRoleCard as FeatureProfileRoleCard,
@@ -120,6 +124,7 @@ import {
   readPublicApiErrorMessage as readErrorMessage,
   type ParticipationStreamerOption,
   type ProfileHeroRankQueue,
+  type StreamerChannelView,
   type ProfileLpChangeEntry,
   type ProfileMetricRow,
   type ProfileRoleEntry,
@@ -289,6 +294,7 @@ import {
   rankTrendLine,
   rankTrendTierClass,
   shortRankLabel,
+  tierKeyFromScore,
   totalGames,
 } from "../features/public-lol/utils/rank";
 
@@ -1639,7 +1645,7 @@ function profileHeroRankTrend(profile: PublicLolProfile): ProfileHeroRankTrend |
     ariaLabel: `${t().rankLpTrendLabel} ${t().period30}`,
     changeLabel: trend.change === 0 ? t().lpNoChange : `${trend.change > 0 ? "+" : ""}${trend.change} LP`,
     changeTone: trend.change > 0 ? "up" : trend.change < 0 ? "down" : "flat",
-    values: trend.points.map((point) => point.value),
+    points: trend.points.map((point) => ({ value: point.value, tierKey: tierKeyFromScore(point.value) })),
   };
 }
 
@@ -3196,6 +3202,9 @@ function PublicTwitchFollowedPanel({
   );
 }
 
+/** 목록을 접었을 때 먼저 보여 줄 오프라인 인원입니다. */
+const STREAMER_OFFLINE_PREVIEW = 5;
+
 function PublicSubscriptionsPage({
   twitchStatus,
   followed,
@@ -3213,44 +3222,195 @@ function PublicSubscriptionsPage({
   onRefresh: () => void;
   onSearch: (riotId: string) => void;
 }) {
+  const [filter, setFilter] = useState<StreamerFilter>("all");
+  const [sortByRank, setSortByRank] = useState(false);
+  const [offlineExpanded, setOfflineExpanded] = useState(false);
+
+  const channels = useMemo(() => followed?.channels ?? [], [followed]);
   const subscriptions = followed?.subscriptions ?? [];
+  const buckets = useMemo(
+    () => streamerBuckets(channels, filter, sortByRank),
+    [channels, filter, sortByRank]
+  );
+
+  const cardText = {
+    liveLabel: t().twitchLive,
+    noRankLabel: t().streamerNoRankShort,
+    profileLabel: t().viewRecord,
+    watchLabel: "Twitch",
+  };
+
+  function toView(channel: PublicTwitchFollowedLolChannel): StreamerChannelView {
+    const ranked = channel.rankedStats && channel.rankedStats.tier !== "UNRANKED" ? channel.rankedStats : undefined;
+    return {
+      avatar: channel.profileImageUrl
+        ? <img alt="" src={assetUrl(channel.profileImageUrl)} />
+        : channel.twitchDisplayName.slice(0, 1).toUpperCase(),
+      channelUrl: channel.channelUrl,
+      displayName: channel.twitchDisplayName,
+      isLive: channel.isLive,
+      key: channel.twitchUserId,
+      login: channel.twitchLogin,
+      onOpenProfile: channel.riotId ? () => onSearch(channel.riotId as string) : undefined,
+      previewUrl: safeTwitchStreamPreviewUrl(channel.thumbnailUrl),
+      rankClassName: ranked ? rankBadgeClass(ranked) : undefined,
+      rankLabel: ranked ? rankTierLabel(ranked) : undefined,
+      riotId: channel.riotId,
+      subLabel: formatDate(channel.followedAt),
+      title: channel.title,
+      uptimeLabel: streamerUptimeLabel(channel.startedAt),
+      viewersLabel: channel.viewerCount === undefined
+        ? undefined
+        : `${formatNumber(channel.viewerCount)}${t().streamerViewersUnit}`,
+    };
+  }
+
+  const visibleOffline = offlineExpanded
+    ? buckets.offline
+    : buckets.offline.slice(0, STREAMER_OFFLINE_PREVIEW);
+  const hiddenOffline = Math.max(0, buckets.offline.length - visibleOffline.length);
+
   return (
-    <section className="public-panel public-saved-data-panel public-menu-page-panel public-subscriptions-page">
-      <div className="public-section-head">
-        <h2  >{t().subscriptionStatus}</h2>
-        <span>{subscriptions.length}</span>
-      </div>
-      <div className="public-subscriptions-layout">
-        <article className="public-subscriptions-card">
-          <strong  >{t().subscriptionsTitle}</strong>
-          <p  >{t().subscriptionsSubtitle}</p>
-          {!twitchStatus.connected ? (
-            <p className="public-empty">{t().twitchLoginRequired}</p>
-          ) : followed && !followed.subscriptionScopeGranted ? (
-            <p className="public-empty">{t().subscriptionMissingScope}</p>
-          ) : subscriptions.length === 0 ? (
-            <p className="public-empty">{t().subscriptionsEmpty}</p>
-          ) : subscriptions.slice(0, 8).map((subscription) => (
-            <a className="public-subscription-row" href={subscription.channelUrl} target="_blank" rel="noreferrer" key={`subscription:${subscription.twitchUserId}`}>
-              {subscription.profileImageUrl ? <img src={subscription.profileImageUrl} alt="" /> : <em>{subscription.twitchDisplayName.slice(0, 1).toUpperCase()}</em>}
-              <strong>{subscription.twitchDisplayName}<small>@{subscription.twitchLogin}</small></strong>
-              <span>
-                <b>{subscription.tierLabel}</b>
-                {subscription.isGift ? <small>{t().subscriptionGift}</small> : null}
-              </span>
-            </a>
-          ))}
-        </article>
-        <PublicTwitchFollowedPanel
-          status={twitchStatus}
-          followed={followed}
+    <section className="public-streamer-shell" id="public-twitch-followed">
+      <div className="public-streamer-section-head is-page">
+        <h2>{t().streamersNav}</h2>
+        <span className="public-streamer-count">{buckets.counts.all}</span>
+        <Button
+          className="public-streamer-refresh"
+          disabled={loading}
           loading={loading}
-          error={error}
-          onLogin={onLogin}
-          onRefresh={onRefresh}
-          onSearch={onSearch}
-        />
+          onClick={onRefresh}
+          size="sm"
+          type="button"
+          variant="secondary"
+        >
+          {t().twitchFollowedRefresh}
+        </Button>
       </div>
+
+      {!twitchStatus.configured ? (
+        <EmptyState as="div" className="public-streamers-shared-empty" variant="streamer">
+          <EmptyStateIcon>!</EmptyStateIcon>
+          <EmptyStateTitle as="h3">{t().twitchNotConfigured}</EmptyStateTitle>
+        </EmptyState>
+      ) : !twitchStatus.connected ? (
+        <EmptyState as="div" className="public-streamers-shared-empty" variant="streamer">
+          <EmptyStateIcon><TwitchGlitchIcon /></EmptyStateIcon>
+          <EmptyStateTitle as="h3">{t().twitchLoginRequired}</EmptyStateTitle>
+          <EmptyStateActions>
+            <Button onClick={onLogin} type="button">{t().twitchViewerLogin}</Button>
+          </EmptyStateActions>
+        </EmptyState>
+      ) : error ? (
+        <EmptyState as="div" className="public-streamers-shared-empty public-streamers-shared-error" variant="error">
+          <EmptyStateIcon>!</EmptyStateIcon>
+          <EmptyStateTitle as="h3">{t().searchFailed}</EmptyStateTitle>
+          <EmptyStateDescription>{error}</EmptyStateDescription>
+          <EmptyStateActions>
+            <Button onClick={onRefresh} type="button" variant="secondary">{t().participationRetry}</Button>
+          </EmptyStateActions>
+        </EmptyState>
+      ) : (
+        <>
+          <StreamerFilterBar
+            onSelect={(id) => setFilter(id as StreamerFilter)}
+            onToggleSort={() => setSortByRank((current) => !current)}
+            options={[
+              { id: "live", label: t().streamerFilterLiveOnly.replace("{count}", formatNumber(buckets.counts.live)), live: true },
+              { id: "all", label: t().streamerFilterAll.replace("{count}", formatNumber(buckets.counts.all)) },
+              { id: "linked", label: t().streamerFilterLinked.replace("{count}", formatNumber(buckets.counts.linked)) },
+            ]}
+            selectedId={filter}
+            sortByRank={sortByRank}
+            sortLabel={t().streamerSortByRank}
+          />
+
+          {buckets.counts.all === 0 ? (
+            <EmptyState as="div" className="public-streamers-shared-empty" variant="streamer">
+              <EmptyStateIcon>?</EmptyStateIcon>
+              <EmptyStateTitle as="h3">{t().twitchFollowedEmpty}</EmptyStateTitle>
+            </EmptyState>
+          ) : (
+            <div className="public-streamer-body">
+              <div className="public-streamer-section">
+                {buckets.live.length > 0 ? (
+                  <>
+                    <div className="public-streamer-section-head">
+                      <h3>{t().streamerLiveNowSection}</h3>
+                      <span className="public-streamer-tag" data-tone="live">
+                        <i aria-hidden="true" />{formatNumber(buckets.live.length)}
+                      </span>
+                    </div>
+                    <div className="public-streamer-live-grid">
+                      {buckets.live.map((channel) => (
+                        <StreamerLiveCard channel={toView(channel)} key={channel.twitchUserId} text={cardText} />
+                      ))}
+                    </div>
+                  </>
+                ) : null}
+
+                {buckets.offline.length > 0 ? (
+                  <>
+                    <div className="public-streamer-section-head">
+                      <h3>{t().streamerOfflineSection}</h3>
+                      <span className="public-streamer-count">{buckets.offline.length}</span>
+                    </div>
+                    <ol className="public-streamer-rows">
+                      {visibleOffline.map((channel) => (
+                        <StreamerRow channel={toView(channel)} key={channel.twitchUserId} text={cardText} />
+                      ))}
+                    </ol>
+                    {hiddenOffline > 0 || offlineExpanded ? (
+                      <button
+                        aria-expanded={offlineExpanded}
+                        className="public-streamer-more"
+                        onClick={() => setOfflineExpanded((current) => !current)}
+                        type="button"
+                      >
+                        {offlineExpanded
+                          ? t().participationQueueShowLess
+                          : t().participationQueueMore.replace("{count}", formatNumber(hiddenOffline))}
+                      </button>
+                    ) : null}
+                  </>
+                ) : null}
+
+                {buckets.live.length === 0 && buckets.offline.length === 0 ? (
+                  <p className="public-streamer-empty">{t().twitchFollowedEmpty}</p>
+                ) : null}
+              </div>
+
+              <details className="public-streamer-side" open>
+                <summary>
+                  {t().subscriptionsTitle}
+                  <span className="public-streamer-count">{subscriptions.length}</span>
+                </summary>
+                {followed && !followed.subscriptionScopeGranted ? (
+                  <p className="public-streamer-empty">{t().subscriptionMissingScope}</p>
+                ) : subscriptions.length === 0 ? (
+                  <p className="public-streamer-empty">{t().subscriptionsEmpty}</p>
+                ) : subscriptions.slice(0, 8).map((subscription) => (
+                  <a
+                    className="public-streamer-sub"
+                    href={subscription.channelUrl}
+                    key={`subscription:${subscription.twitchUserId}`}
+                    rel="noreferrer noopener"
+                    target="_blank"
+                  >
+                    <span className="public-streamer-avatar">
+                      {subscription.profileImageUrl
+                        ? <img alt="" src={assetUrl(subscription.profileImageUrl)} />
+                        : subscription.twitchDisplayName.slice(0, 1).toUpperCase()}
+                    </span>
+                    <b>{subscription.twitchDisplayName}</b>
+                    <small>{subscription.tierLabel}{subscription.isGift ? ` · ${t().subscriptionGift}` : ""}</small>
+                  </a>
+                ))}
+              </details>
+            </div>
+          )}
+        </>
+      )}
     </section>
   );
 }
