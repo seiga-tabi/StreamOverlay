@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { chmodSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -443,6 +443,86 @@ test("Store는 스트리머 Riot ID 등록 요청을 저장하고 승인 목록�
     assert.equal(restartedStore.listApprovedStreamerRiotIds()[0].dashboardKey, dashboardApproved?.dashboardKey);
     assert.equal(restartedStore.listApprovedStreamerRiotIds()[0].profileLinkLabel, "YouTube");
     assert.equal(restartedStore.listApprovedStreamerRiotIds()[0].profileLinks?.[1]?.label, "Discord");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("Store는 Riot ID 승인·Dashboard 권한 저장 실패를 호출자에 전파하고 메모리를 원복한다", () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "streamops-riot-admin-persistence-failure-"));
+  const filePath = path.join(dir, "streamer-riot-ids.json");
+  const backupPath = path.join(dir, "streamer-riot-ids.backup.json");
+  const failures = [];
+  const blockStateRename = () => {
+    renameSync(filePath, backupPath);
+    mkdirSync(filePath);
+  };
+  const restoreStateFile = () => {
+    rmSync(filePath, { recursive: true, force: true });
+    renameSync(backupPath, filePath);
+  };
+
+  try {
+    const store = new Store({
+      streamerRiotIdStatePath: filePath,
+      onPersistenceError(failure) {
+        failures.push(failure);
+      }
+    });
+    const request = store.upsertStreamerRiotIdRequest({
+      twitchUserId: "twitch-persistence",
+      twitchLogin: "persistence_streamer",
+      twitchDisplayName: "Persistence Streamer",
+      riotGameName: "Persistence",
+      riotTagLine: "JP1"
+    });
+    const pendingOnDisk = readFileSync(filePath, "utf8");
+
+    blockStateRename();
+    try {
+      assert.throws(() => store.resolveStreamerRiotIdRequest({
+        requestId: request.id,
+        decision: "approved",
+        reviewer: "dashboard"
+      }));
+      assert.equal(store.listStreamerRiotIdRequests()[0]?.status, "pending");
+    } finally {
+      restoreStateFile();
+    }
+    assert.equal(readFileSync(filePath, "utf8"), pendingOnDisk);
+
+    const approved = store.resolveStreamerRiotIdRequest({
+      requestId: request.id,
+      decision: "approved",
+      reviewer: "dashboard"
+    });
+    assert.equal(approved?.status, "approved");
+    assert.equal(approved?.dashboardEnabled, false);
+    const approvedOnDisk = readFileSync(filePath, "utf8");
+
+    blockStateRename();
+    try {
+      assert.throws(() => store.setStreamerRiotIdDashboardEnabled({
+        requestId: request.id,
+        dashboardEnabled: true,
+        reviewer: "dashboard"
+      }));
+      const rolledBack = store.listStreamerRiotIdRequests()[0];
+      assert.equal(rolledBack?.dashboardEnabled, false);
+      assert.equal(rolledBack?.dashboardKey, undefined);
+    } finally {
+      restoreStateFile();
+    }
+    assert.equal(readFileSync(filePath, "utf8"), approvedOnDisk);
+    assert.equal(failures.filter((failure) =>
+      failure.scope === "streamer_riot_ids" && failure.operation === "save"
+    ).length, 2);
+
+    const restarted = new Store({ streamerRiotIdStatePath: filePath });
+    const persisted = restarted.listStreamerRiotIdRequests()[0];
+    assert.equal(persisted?.status, "approved");
+    assert.equal(persisted?.dashboardEnabled, false);
+    assert.equal(persisted?.dashboardKey, undefined);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -1026,7 +1106,7 @@ test("Store는 읽을 수 없는 state 파일을 unreadable로 구분한다", { 
   }
 });
 
-test("Store는 서브 Riot 계정을 대표와 별개로 추가·승인·대표 교체·삭제한다", () => {
+test("Store는 서브 Riot 계정을 대표와 별개로 즉시 승인·대표 교체·삭제한다", () => {
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-sub-riot-accounts-"));
   const filePath = path.join(dir, "streamer-riot-ids.json");
   try {
@@ -1036,6 +1116,15 @@ test("Store는 서브 Riot 계정을 대표와 별개로 추가·승인·대표 
       twitchLogin: "streamer",
       twitchDisplayName: "Streamer"
     };
+    const selfService = { approvalMode: "owner_self_service" };
+
+    const beforeMainApproval = store.addStreamerSubRiotIdRequest(
+      { ...identity, riotGameName: "TooEarly", riotTagLine: "KR0" },
+      selfService
+    );
+    assert.equal(beforeMainApproval.ok, false);
+    assert.equal(beforeMainApproval.code, "streamer_approval_required");
+    assert.equal(store.listStreamerRiotIdRequests().length, 0);
 
     // 대표 계정 승인 + 대시보드 접근 키 발급
     const mainRequest = store.upsertStreamerRiotIdRequest({ ...identity, riotGameName: "Main", riotTagLine: "KR1" });
@@ -1046,19 +1135,30 @@ test("Store는 서브 Riot 계정을 대표와 별개로 추가·승인·대표 
     const mainDashboardKey = mainApproved?.dashboardKey;
     assert.match(mainDashboardKey ?? "", /^sdk_/);
 
-    // 서브 추가: 자기 중복·타 스트리머 선점 거부
-    const sub = store.addStreamerSubRiotIdRequest({ ...identity, riotGameName: "Smurf", riotTagLine: "KR2" });
+    // 서브 추가: self-service 즉시 승인, 자기 중복·타 스트리머 선점 거부
+    const sub = store.addStreamerSubRiotIdRequest(
+      { ...identity, riotGameName: "Smurf", riotTagLine: "KR2" },
+      selfService
+    );
     assert.equal(sub.ok, true);
-    assert.equal(sub.request.status, "pending");
+    assert.equal(sub.request.status, "approved");
     assert.equal(sub.request.accountRole, "sub");
-    assert.equal(store.addStreamerSubRiotIdRequest({ ...identity, riotGameName: "Main", riotTagLine: "KR1" }).code, "riot_id_duplicated");
+    assert.equal(sub.request.reviewer, "streamer-self-service");
+    assert.equal(sub.request.dashboardEnabled, false);
+    assert.equal(sub.request.dashboardKey, undefined);
+    assert.equal(store.addStreamerSubRiotIdRequest(
+      { ...identity, riotGameName: "Main", riotTagLine: "KR1" },
+      selfService
+    ).code, "riot_id_duplicated");
+    const otherIdentity = { twitchUserId: "twitch-2", twitchLogin: "other", twitchDisplayName: "Other" };
+    const otherMain = store.upsertStreamerRiotIdRequest({ ...otherIdentity, riotGameName: "Other", riotTagLine: "JP1" });
+    store.resolveStreamerRiotIdRequest({ requestId: otherMain.id, decision: "approved", reviewer: "dashboard" });
     assert.equal(store.addStreamerSubRiotIdRequest({
-      twitchUserId: "twitch-2", twitchLogin: "other", twitchDisplayName: "Other",
+      ...otherIdentity,
       riotGameName: "Smurf", riotTagLine: "KR2"
-    }).code, "riot_id_taken");
+    }, selfService).code, "riot_id_taken");
 
-    // 서브 승인은 대표를 비활성화하지 않고, 대시보드 접근도 승계하지 않는다
-    store.resolveStreamerRiotIdRequest({ requestId: sub.request.id, decision: "approved", reviewer: "dashboard" });
+    // 서브 즉시 승인은 대표를 비활성화하지 않고, 대시보드 접근도 승계하지 않는다
     const approvedAll = store.listApprovedStreamerRiotIds().filter((request) => request.twitchUserId === "twitch-1");
     assert.equal(approvedAll.length, 2);
     assert.deepEqual(
@@ -1069,11 +1169,15 @@ test("Store는 서브 Riot 계정을 대표와 별개로 추가·승인·대표 
     assert.equal(approvedSub?.dashboardEnabled, false);
     assert.equal(approvedSub?.dashboardKey, undefined);
 
-    // 서브 승인 대기 중에도 본계정 재신청 슬롯을 빼앗지 않는다
-    const pendingSub = store.addStreamerSubRiotIdRequest({ ...identity, riotGameName: "Third", riotTagLine: "KR3" });
-    assert.equal(pendingSub.ok, true);
+    // 승인된 서브가 있어도 본계정 재신청 슬롯을 빼앗지 않는다
+    const anotherSub = store.addStreamerSubRiotIdRequest(
+      { ...identity, riotGameName: "Third", riotTagLine: "KR3" },
+      selfService
+    );
+    assert.equal(anotherSub.ok, true);
+    assert.equal(anotherSub.request.status, "approved");
     const reapply = store.upsertStreamerRiotIdRequest({ ...identity, riotGameName: "Renamed", riotTagLine: "KR9" });
-    assert.notEqual(reapply.id, pendingSub.request.id);
+    assert.notEqual(reapply.id, anotherSub.request.id);
 
     // 대표 삭제 금지 · 대표 교체 시 대시보드 접근 이관
     assert.equal(store.deleteStreamerRiotIdRequest({ twitchUserId: "twitch-1", requestId: mainRequest.id }).code, "cannot_delete_main");
@@ -1094,11 +1198,17 @@ test("Store는 서브 Riot 계정을 대표와 별개로 추가·승인·대표 
     const removed = store.deleteStreamerRiotIdRequest({ twitchUserId: "twitch-1", requestId: mainRequest.id });
     assert.equal(removed.ok, true);
 
-    // 개수 상한: 남은 서브(pending 1) + 추가 3개 = 4개까지, 5번째는 거부
+    // 개수 상한: 남은 서브 1개 + 추가 3개 = 4개까지, 5번째는 거부
     for (const tag of ["S4", "S5", "S6"]) {
-      assert.equal(store.addStreamerSubRiotIdRequest({ ...identity, riotGameName: "Extra", riotTagLine: tag }).ok, true);
+      assert.equal(store.addStreamerSubRiotIdRequest(
+        { ...identity, riotGameName: "Extra", riotTagLine: tag },
+        selfService
+      ).ok, true);
     }
-    assert.equal(store.addStreamerSubRiotIdRequest({ ...identity, riotGameName: "Extra", riotTagLine: "S7" }).code, "limit_exceeded");
+    assert.equal(store.addStreamerSubRiotIdRequest(
+      { ...identity, riotGameName: "Extra", riotTagLine: "S7" },
+      selfService
+    ).code, "limit_exceeded");
 
     // 재시작 후에도 역할이 유지된다
     const restarted = new Store({ streamerRiotIdStatePath: filePath });
@@ -1111,13 +1221,49 @@ test("Store는 서브 Riot 계정을 대표와 별개로 추가·승인·대표 
   }
 });
 
+test("Store는 관리자가 사후 거절한 서브 Riot 계정의 삭제·자동 재승인을 막는다", () => {
+  const store = new Store();
+  const identity = { twitchUserId: "twitch-1", twitchLogin: "streamer", twitchDisplayName: "Streamer" };
+  const selfService = { approvalMode: "owner_self_service" };
+  const main = store.upsertStreamerRiotIdRequest({ ...identity, riotGameName: "Main", riotTagLine: "KR1" });
+  store.resolveStreamerRiotIdRequest({ requestId: main.id, decision: "approved", reviewer: "test" });
+
+  const sub = store.addStreamerSubRiotIdRequest(
+    { ...identity, riotGameName: "BlockedSub", riotTagLine: "KR2" },
+    selfService
+  );
+  assert.equal(sub.ok, true);
+  store.resolveStreamerRiotIdRequest({ requestId: sub.request.id, decision: "rejected", reviewer: "test" });
+
+  const readded = store.addStreamerSubRiotIdRequest(
+    { ...identity, riotGameName: "BlockedSub", riotTagLine: "KR2" },
+    selfService
+  );
+  assert.equal(readded.ok, false);
+  assert.equal(readded.code, "riot_id_rejected");
+  assert.equal(
+    store.deleteStreamerRiotIdRequest({ twitchUserId: identity.twitchUserId, requestId: sub.request.id }).code,
+    "cannot_delete_rejected"
+  );
+
+  const restored = store.resolveStreamerRiotIdRequest({
+    requestId: sub.request.id,
+    decision: "approved",
+    reviewer: "test"
+  });
+  assert.equal(restored?.status, "approved");
+  assert.equal(store.deleteStreamerRiotIdRequest({ twitchUserId: identity.twitchUserId, requestId: sub.request.id }).ok, true);
+});
+
 test("Store는 서브 계정 row에 dashboard 접근을 켤 수 없다", () => {
   const store = new Store();
   const identity = { twitchUserId: "twitch-1", twitchLogin: "streamer", twitchDisplayName: "Streamer" };
   const main = store.upsertStreamerRiotIdRequest({ ...identity, riotGameName: "Main", riotTagLine: "KR1" });
   store.resolveStreamerRiotIdRequest({ requestId: main.id, decision: "approved", reviewer: "test" });
-  const sub = store.addStreamerSubRiotIdRequest({ ...identity, riotGameName: "Smurf", riotTagLine: "KR2" });
-  store.resolveStreamerRiotIdRequest({ requestId: sub.request.id, decision: "approved", reviewer: "test" });
+  const sub = store.addStreamerSubRiotIdRequest(
+    { ...identity, riotGameName: "Smurf", riotTagLine: "KR2" },
+    { approvalMode: "owner_self_service" }
+  );
 
   assert.equal(store.setStreamerRiotIdDashboardEnabled({ requestId: sub.request.id, dashboardEnabled: true, reviewer: "test" }), undefined);
   assert.notEqual(store.setStreamerRiotIdDashboardEnabled({ requestId: main.id, dashboardEnabled: true, reviewer: "test" }), undefined);
@@ -1128,8 +1274,10 @@ test("Store는 자신의 서브 계정 ID로 본계정을 재신청해도 중복
   const identity = { twitchUserId: "twitch-1", twitchLogin: "streamer", twitchDisplayName: "Streamer" };
   const main = store.upsertStreamerRiotIdRequest({ ...identity, riotGameName: "Main", riotTagLine: "KR1" });
   store.resolveStreamerRiotIdRequest({ requestId: main.id, decision: "approved", reviewer: "test" });
-  const sub = store.addStreamerSubRiotIdRequest({ ...identity, riotGameName: "Smurf", riotTagLine: "KR2" });
-  store.resolveStreamerRiotIdRequest({ requestId: sub.request.id, decision: "approved", reviewer: "test" });
+  const sub = store.addStreamerSubRiotIdRequest(
+    { ...identity, riotGameName: "Smurf", riotTagLine: "KR2" },
+    { approvalMode: "owner_self_service" }
+  );
 
   // 승인된 서브와 같은 ID로 재신청 → 새 row 없이 그 서브 row를 반환
   const reapplied = store.upsertStreamerRiotIdRequest({ ...identity, riotGameName: "Smurf", riotTagLine: "KR2" });

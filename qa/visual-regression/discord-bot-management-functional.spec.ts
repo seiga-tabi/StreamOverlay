@@ -228,7 +228,7 @@ test("/dashboard는 모든 YORO 로그인 사용자에게 계정·Organization·
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "Dashboard 검증 사용자"
   );
-  await expect(page.getByText("YORO 검증 Organization")).toBeVisible();
+  await expect(page.getByText("YORO 검증 Organization", { exact: true })).toBeVisible();
   const dashboardNavigation = page.getByRole("navigation", {
     name: "YORO.gg Dashboard",
   });
@@ -773,6 +773,7 @@ test("Discord Bot 제어는 플레이어 명령과 응답 후 삭제 설정을 r
           playerCommandEnabled,
           guideCommandEnabled: true,
           deleteInvocationAfterReply,
+          participationAnnounceEnabled: false,
           preferredLocale: "ko",
           statusFields: {
             players: true,

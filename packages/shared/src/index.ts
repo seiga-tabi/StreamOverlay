@@ -1,4 +1,5 @@
 export * from "./actions.js";
+export * from "./admin-audit.js";
 export * from "./aram.js";
 export * from "./community.js";
 export * from "./discord-internal.js";
@@ -13,6 +14,7 @@ export * from "./palworld-map.js";
 export * from "./palworld-pak-candidate.js";
 export * from "./palworld-server.js";
 export * from "./participation.js";
+export * from "./public-lol.js";
 export * from "./server-status.js";
 export * from "./support-mail.js";
 export * from "./twitch.js";

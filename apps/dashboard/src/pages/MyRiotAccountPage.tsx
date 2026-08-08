@@ -87,15 +87,15 @@ const i18n = {
     formatHint: "게임명#태그 형식으로 입력합니다.",
     close: "닫기",
     riotAccountsTitle: "Riot 계정 목록",
-    riotAccountsDescription: "대표 계정은 스트리머 카드와 게임 모니터에 사용되고, 서브 계정으로 검색해도 같은 스트리머로 연결됩니다.",
+    riotAccountsDescription: "대표 계정은 스트리머 카드와 게임 모니터에 사용됩니다. 서브 계정은 추가 즉시 공개 전적에 연결됩니다.",
     mainAccount: "대표 계정",
     subAccount: "서브 계정",
     mainHint: "스트리머 카드와 게임 모니터가 이 계정을 씁니다.",
     subHint: "이 계정으로 검색해도 같은 스트리머로 연결됩니다.",
     pendingReview: "승인 대기",
-    pendingHint: "승인 후 공개 전적에 연결됩니다.",
-    rejectedBadge: "승인 거절",
-    rejectedHint: "삭제 후 다시 추가할 수 있습니다.",
+    pendingHint: "기존 등록 건으로, 관리자 승인 후 공개 전적에 연결됩니다.",
+    rejectedBadge: "연결 중지",
+    rejectedHint: "관리자 사후 검토로 연결이 중지되었습니다. 재검토가 필요하면 관리자에게 문의하세요.",
     setMain: "대표로 지정",
     remove: "삭제",
     removeConfirmText: "삭제할까요? 이 계정으로는 더 이상 스트리머가 연결되지 않습니다.",
@@ -109,7 +109,7 @@ const i18n = {
     accountsRetry: "다시 시도",
     emptySubTitle: "등록한 서브 계정이 없습니다.",
     emptySubDescription: "부계정 전적도 연결되게 하려면 계정을 추가하세요.",
-    accountAdded: "서브 계정 등록을 신청했습니다. 승인 후 반영됩니다.",
+    accountAdded: "서브 계정을 등록했습니다. 공개 전적에 바로 연결됩니다.",
     accountAddFailed: "서브 계정 추가에 실패했습니다.",
     accountRemoved: "계정을 삭제했습니다.",
     accountRemoveFailed: "계정 삭제에 실패했습니다.",
@@ -164,15 +164,15 @@ const i18n = {
     formatHint: "ゲーム名#タグ形式で入力します。",
     close: "閉じる",
     riotAccountsTitle: "Riot アカウント一覧",
-    riotAccountsDescription: "メインアカウントは配信者カードとゲームモニターに使用され、サブアカウントで検索しても同じ配信者に紐づきます。",
+    riotAccountsDescription: "メインアカウントは配信者カードとゲームモニターに使用されます。サブアカウントは追加後すぐに公開戦績へ反映されます。",
     mainAccount: "メインアカウント",
     subAccount: "サブアカウント",
     mainHint: "配信者カードとゲームモニターがこのアカウントを使用します。",
     subHint: "このアカウントで検索しても同じ配信者に紐づきます。",
     pendingReview: "承認待ち",
-    pendingHint: "承認後に公開戦績へ反映されます。",
-    rejectedBadge: "承認却下",
-    rejectedHint: "削除してから再度追加できます。",
+    pendingHint: "既存の登録申請です。管理者の承認後に公開戦績へ反映されます。",
+    rejectedBadge: "連携停止",
+    rejectedHint: "管理者の事後確認により連携が停止されました。再確認が必要な場合は管理者へお問い合わせください。",
     setMain: "メインに設定",
     remove: "削除",
     removeConfirmText: "削除しますか？このアカウントでは配信者が紐づかなくなります。",
@@ -186,7 +186,7 @@ const i18n = {
     accountsRetry: "再試行",
     emptySubTitle: "登録済みのサブアカウントはありません。",
     emptySubDescription: "サブアカウントの戦績も紐づけるにはアカウントを追加してください。",
-    accountAdded: "サブアカウントの登録を申請しました。承認後に反映されます。",
+    accountAdded: "サブアカウントを登録しました。公開戦績にすぐ反映されます。",
     accountAddFailed: "サブアカウントの追加に失敗しました。",
     accountRemoved: "アカウントを削除しました。",
     accountRemoveFailed: "アカウントの削除に失敗しました。",
@@ -287,7 +287,7 @@ function AccountRow({
             {t.setMain}
           </Button>
         ) : null}
-        {!account.isMain ? (
+        {!account.isMain && !isRejected ? (
           <Button
             aria-label={t.removeAria(account.riotId)}
             disabled={busy || confirming}
@@ -299,7 +299,7 @@ function AccountRow({
           </Button>
         ) : null}
       </span>
-      {confirming ? (
+      {confirming && !isRejected ? (
         <span className="my-riot-account-confirm" role="alert">
           <span>{t.removeConfirmText}</span>
           <span className="my-riot-account-confirm-actions">

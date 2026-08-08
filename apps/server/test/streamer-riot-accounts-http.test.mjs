@@ -99,7 +99,7 @@ test("서브 Riot 계정 API는 세션·CSRF·소유권을 검증하고 계정 �
     twitchDisplayName: "other",
     riotGameName: "OtherSub",
     riotTagLine: "JP2"
-  });
+  }, { approvalMode: "owner_self_service" });
   assert.equal(otherSub.ok, true);
 
   const handler = createHttpHandler({
@@ -142,13 +142,14 @@ test("서브 Riot 계정 API는 세션·CSRF·소유권을 검증하고 계정 �
   assert.equal(initialBody.accounts[0].riotId, "Main#KR1");
   assert.equal(initialBody.limit.sub, 4);
 
-  // 서브 추가 → pending row
+  // 서브 추가 → 관리자 승인 없이 즉시 approved row
   const added = await send("POST", "/api/account/streamer/riot-ids", { riotId: "Smurf#KR2" }, authedHeaders(true));
   assert.equal(added.statusCode, 200);
   const addedBody = JSON.parse(added.body);
   assert.equal(addedBody.accounts.length, 2);
-  const pendingSub = addedBody.accounts.find((account) => !account.isMain);
-  assert.equal(pendingSub.status, "pending");
+  const approvedSub = addedBody.accounts.find((account) => !account.isMain);
+  assert.equal(approvedSub.status, "approved");
+  assert.ok(approvedSub.reviewedAt);
 
   // 다른 스트리머가 이미 등록한 ID → 409 riot_id_taken (소유자 정보 비노출)
   const taken = await send("POST", "/api/account/streamer/riot-ids", { riotId: "OtherSub#JP2" }, authedHeaders(true));
@@ -156,22 +157,11 @@ test("서브 Riot 계정 API는 세션·CSRF·소유권을 검증하고 계정 �
   assert.equal(JSON.parse(taken.body).code, "riot_id_taken");
   assert.doesNotMatch(taken.body, /other/i);
 
-  // 승인 전 대표 지정 → 409
-  const premature = await send(
-    "POST",
-    "/api/account/streamer/riot-ids/main",
-    { accountId: pendingSub.id },
-    authedHeaders(true)
-  );
-  assert.equal(premature.statusCode, 409);
-  assert.equal(JSON.parse(premature.body).code, "not_approved_account");
-
-  // 관리자 승인 후 대표 지정 → 대표 교체
-  store.resolveStreamerRiotIdRequest({ requestId: pendingSub.id, decision: "approved", reviewer: "test" });
+  // 별도 관리자 승인 없이 곧바로 대표 지정 → 대표 교체
   const swapped = await send(
     "POST",
     "/api/account/streamer/riot-ids/main",
-    { accountId: pendingSub.id },
+    { accountId: approvedSub.id },
     authedHeaders(true)
   );
   assert.equal(swapped.statusCode, 200);
@@ -217,7 +207,7 @@ test("서브 Riot 계정 API는 세션·CSRF·소유권을 검증하고 계정 �
   assert.equal(JSON.parse(removed.body).accounts.length, 1);
 });
 
-test("서브 계정은 자격 fallback·개명 선점·관리자 승인 세션 만료에 영향을 주지 않는다", async (t) => {
+test("서브 계정은 자격 fallback·개명 선점·관리자 사후 조치 세션 만료에 영향을 주지 않는다", async (t) => {
   const previous = {
     databaseEnabled: appConfig.database.enabled,
     token: appConfig.security.dashboardAuthToken,
@@ -244,7 +234,9 @@ test("서브 계정은 자격 fallback·개명 선점·관리자 승인 세션 �
   const mySub = store.addStreamerSubRiotIdRequest({
     twitchUserId: "12345", twitchLogin: "streamer", twitchDisplayName: "Streamer",
     riotGameName: "MySub", riotTagLine: "KR2"
-  });
+  }, { approvalMode: "owner_self_service" });
+  assert.equal(mySub.ok, true);
+  assert.equal(mySub.request.status, "approved");
   approveStreamer(store, "99999", "other", "Other", "JP1");
 
   const sessions = new DashboardSessionStore();
@@ -254,7 +246,16 @@ test("서브 계정은 자격 fallback·개명 선점·관리자 승인 세션 �
     actions: { async dispatchOne() {} },
     sessions,
     discordDatabaseReady: () => true,
-    yoroAccounts: createYoroAccounts(csrfToken)
+    yoroAccounts: createYoroAccounts(csrfToken),
+    adminAuditLogs: {
+      async list() {
+        throw new Error("이 테스트에서는 관리자 감사 로그 목록을 조회하지 않습니다.");
+      },
+      async beginGlobalMutation() {
+        return { mutationId: "00000000-0000-4000-8000-000000000001" };
+      },
+      async completeGlobalMutation() {}
+    }
   });
   const yoroHeaders = (mutation = false) => ({
     cookie: "yoro_session=yoro-session",
@@ -274,8 +275,8 @@ test("서브 계정은 자격 fallback·개명 선점·관리자 승인 세션 �
   assert.equal(renameDuplicated.statusCode, 409);
   assert.equal(JSON.parse(renameDuplicated.body).code, "riot_id_duplicated");
 
-  // [관리자 서브 승인 시 세션 유지] 승인 전 스트리머 대시보드 세션을 만들고,
-  // 관리자가 서브를 승인해도 그 세션이 만료되지 않아야 한다.
+  // [관리자 사후 거절 시 세션 유지] self-service 등록 뒤 관리자가 서브를
+  // 거절해도 대표 스트리머의 대시보드 세션이 만료되지 않아야 한다.
   const streamerSession = sessions.create({ role: "streamer", twitchUserId: "12345" });
   const adminSession = sessions.create({ role: "admin" });
   const adminHeaders = {
@@ -284,16 +285,41 @@ test("서브 계정은 자격 fallback·개명 선점·관리자 승인 세션 �
     "x-streamops-csrf": adminSession.csrfToken,
     "x-streamops-dashboard-surface": "admin"
   };
-  const approveSub = await send(
+  const rejectSub = await send(
     "POST",
     "/api/participation/streamer-riot-id-requests/resolve",
-    { requestId: mySub.request.id, decision: "approved" },
+    { requestId: mySub.request.id, decision: "rejected" },
     adminHeaders
   );
-  assert.equal(approveSub.statusCode, 200);
-  assert.notEqual(sessions.get(streamerSession.id), undefined, "서브 승인이 스트리머 세션을 만료시키면 안 됩니다.");
+  assert.equal(rejectSub.statusCode, 200);
+  assert.notEqual(sessions.get(streamerSession.id), undefined, "서브 사후 거절이 스트리머 세션을 만료시키면 안 됩니다.");
 
-  // [자격 fallback 차단] 관리자가 대표를 거절하면, 승인된 서브가 남아 있어도
+  // 사후 차단된 ID의 삭제·재등록으로 self-service 승인을 되찾을 수 없어야 합니다.
+  const readdRejected = await send(
+    "POST",
+    "/api/account/streamer/riot-ids",
+    { riotId: "MySub#KR2" },
+    yoroHeaders(true)
+  );
+  assert.equal(readdRejected.statusCode, 409);
+  assert.equal(JSON.parse(readdRejected.body).code, "riot_id_rejected");
+  const deleteRejected = await send(
+    "DELETE",
+    `/api/account/streamer/riot-ids/${mySub.request.id}`,
+    undefined,
+    yoroHeaders(true)
+  );
+  assert.equal(deleteRejected.statusCode, 409);
+  assert.equal(JSON.parse(deleteRejected.body).code, "cannot_delete_rejected");
+
+  const remainingSub = store.addStreamerSubRiotIdRequest({
+    twitchUserId: "12345", twitchLogin: "streamer", twitchDisplayName: "Streamer",
+    riotGameName: "RemainingSub", riotTagLine: "KR3"
+  }, { approvalMode: "owner_self_service" });
+  assert.equal(remainingSub.ok, true);
+  assert.equal(remainingSub.request.status, "approved");
+
+  // [자격 fallback 차단] 관리자가 대표를 거절하면, 자동 승인된 서브가 남아 있어도
   // 스트리머 전용 API 자격이 유지되면 안 된다.
   store.resolveStreamerRiotIdRequest({ requestId: mainRequest.id, decision: "rejected", reviewer: "test" });
   const revoked = await send("GET", "/api/account/streamer/riot-ids", undefined, yoroHeaders());

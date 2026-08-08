@@ -214,6 +214,8 @@ const discordBotInternalAuthKey = discordBotInternalApiEnabled
   : "";
 const discordBotManagementEnabled = configuredRuntime?.features.discordBotManagement
   ?? boolEnv("DISCORD_BOT_MANAGEMENT_ENABLED", false);
+const discordParticipationAnnounceEnabled = configuredRuntime?.features.discordParticipationAnnounce
+  ?? boolEnv("DISCORD_PARTICIPATION_ANNOUNCE_ENABLED", false);
 const twitchEventSubEnabled = configuredRuntime?.features.twitchEventSub
   ?? boolEnv("TWITCH_ENABLE_EVENTSUB", false);
 const twitchClientSecret = twitchEventSubEnabled
@@ -370,6 +372,9 @@ export const appConfig = {
     absoluteTtlSeconds: configuredRuntime
       ? DEFAULTS.discord.managementAbsoluteTtlSeconds
       : intEnv("DISCORD_MANAGEMENT_ABSOLUTE_TTL_SECONDS", DEFAULTS.discord.managementAbsoluteTtlSeconds)
+  },
+  discordParticipationAnnounce: {
+    enabled: discordParticipationAnnounceEnabled
   },
   riot: {
     apiKey: riotApiKey,
@@ -746,6 +751,18 @@ function validateDiscordBotManagementConfig(errors: string[]): void {
   }
 }
 
+function validateDiscordParticipationAnnounceConfig(errors: string[]): void {
+  if (!appConfig.discordParticipationAnnounce.enabled) return;
+  if (
+    !appConfig.database.enabled
+    || !appConfig.discordSaas.enabled
+    || !appConfig.discordBotInternal.enabled
+    || !appConfig.discordBotManagement.enabled
+  ) {
+    errors.push("참여 모집 Discord 알림에는 Database, Discord SaaS, Discord Bot 내부 API와 Discord Bot 관리 기능 활성화가 필요합니다.");
+  }
+}
+
 function validateCorsOrigins(errors: string[]): void {
   if (appConfig.security.corsOrigins.length === 0) {
     errors.push("CORS_ORIGINS가 설정되지 않았습니다.");
@@ -893,6 +910,7 @@ export function validateRuntimeConfig(): RuntimeConfigValidationResult {
   validateDiscordSaasConfig(errors);
   validateDiscordBotInternalConfig(errors);
   validateDiscordBotManagementConfig(errors);
+  validateDiscordParticipationAnnounceConfig(errors);
   if (isProduction()) {
     validateBuildMetadata(errors);
     if (appConfig.allowInsecureDev) errors.push("ALLOW_INSECURE_DEV는 production에서 사용할 수 없습니다.");

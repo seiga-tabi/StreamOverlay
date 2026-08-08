@@ -28,7 +28,8 @@ export class ActionDispatcher {
     private readonly twitchChat: TwitchChatService,
     private readonly store: Store,
     private readonly logger: JsonlLogger,
-    private readonly discordAnnouncements?: DiscordAnnouncementPublisher
+    private readonly discordAnnouncements?: DiscordAnnouncementPublisher,
+    private readonly discordParticipationAnnounceEnabled = false
   ) {}
 
   async dispatch(actions: BotAction[], ctx: TemplateContext = {}, reason?: string): Promise<void> {
@@ -84,9 +85,12 @@ export class ActionDispatcher {
         case "participation.close":
           this.store.setParticipationOpen(false, streamerId);
           break;
-        /* 발행자가 없거나 streamerId 를 모르면 조용히 성공했다고 하지 않고 skipped 로 남깁니다. */
+        /* 기능이 꺼졌거나 발행자가 없거나 streamerId 를 모르면 성공으로 위장하지 않고 skipped 로 남깁니다. */
         case "discord.notify":
-          if (!streamerId) {
+          if (!this.discordParticipationAnnounceEnabled) {
+            this.logger.event({ type: "discord.notify_skipped", reason: "feature_disabled" });
+            status = "skipped";
+          } else if (!streamerId) {
             this.logger.event({ type: "discord.notify_skipped", reason: "missing_streamer" });
             status = "skipped";
           } else if (!this.discordAnnouncements) {

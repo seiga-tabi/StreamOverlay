@@ -1,0 +1,278 @@
+@layer pages {
+  /* 관리자 콘솔 보정.
+   *
+   * 08-shell.css 와 03-product-gray.css 는 legacy layer 이고 !important 가
+   * 많아 그 이름들을 다시 쓰지 않습니다. 새 이름(.yoro-ac-*, .yoro-ar-*)만
+   * 쓰고, 기존 이름은 !important 가 걸리지 않은 속성만 덮습니다.
+   *
+   * 근거: docs/mockups/admin-console-redesign.html
+   */
+
+  /* --- 확인 모달 --- */
+  .yoro-ac-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    background: rgb(12 14 20 / 62%);
+  }
+
+  .yoro-ac {
+    width: min(100%, 26rem);
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+    padding: 18px;
+    border: 1px solid rgb(255 255 255 / 16%);
+    border-radius: 14px;
+    display: grid;
+    gap: 12px;
+    background: #1a1d25;
+    color: #eef1f6;
+    box-shadow: 0 24px 60px rgb(0 0 0 / 45%);
+  }
+
+  .yoro-ac h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: -.01em;
+  }
+
+  .yoro-ac > p {
+    margin: 0;
+    /* 본문 대비를 4.5 이상으로 둡니다. 기존 안내 문구는 1.28 이었습니다. */
+    color: #c6cddb;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .yoro-ac-summary {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    display: grid;
+    gap: 6px;
+    background: #15171e;
+  }
+
+  .yoro-ac-summary > div {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    gap: 10px;
+    align-items: baseline;
+  }
+
+  .yoro-ac-summary dt {
+    color: #97a1b4;
+    font-size: 11.5px;
+    font-weight: 700;
+  }
+
+  .yoro-ac-summary dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+    font-size: 12.5px;
+  }
+
+  .yoro-ac-field {
+    display: grid;
+    gap: 6px;
+  }
+
+  .yoro-ac-field > span {
+    color: #97a1b4;
+    font-size: 11.5px;
+    font-weight: 700;
+  }
+
+  .yoro-ac-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .yoro-ac-preset {
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid rgb(255 255 255 / 18%);
+    border-radius: 999px;
+    background: transparent;
+    color: #c6cddb;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .yoro-ac-preset[aria-pressed="true"] {
+    border-color: transparent;
+    background: rgb(91 140 245 / 24%);
+    color: #d5e2ff;
+  }
+
+  .yoro-ac textarea {
+    min-height: 5rem;
+    padding: 9px 11px;
+    border: 1px solid rgb(255 255 255 / 18%);
+    border-radius: 10px;
+    background: #15171e;
+    color: inherit;
+    font: inherit;
+    font-size: 13px;
+    resize: vertical;
+  }
+
+  .yoro-ac-count {
+    color: #97a1b4;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
+  .yoro-ac-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .yoro-ac-button {
+    min-height: 44px;
+    padding: 0 16px;
+    border: 1px solid rgb(255 255 255 / 18%);
+    border-radius: 10px;
+    background: transparent;
+    color: #eef1f6;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .yoro-ac-button.is-primary {
+    border-color: transparent;
+    background: #3a6fe0;
+    color: #fff;
+  }
+
+  .yoro-ac-button.is-danger {
+    border-color: transparent;
+    background: #c3323f;
+    color: #fff;
+  }
+
+  .yoro-ac-button:disabled {
+    opacity: .5;
+    cursor: default;
+  }
+
+  /* --- 목록 도구 (검색·상태 필터) --- */
+  .yoro-ar-tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  /* 이 도구들은 흰색 카드(rgba(255,255,255,.74)) 위에 놓입니다.
+     페이지 배경 기준의 밝은 글자를 쓰면 읽히지 않습니다. */
+  .yoro-ar-search {
+    flex: 1 1 14rem;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid rgb(33 37 41 / 24%);
+    border-radius: 10px;
+    background: #fff;
+    color: #212529;
+    font: inherit;
+    font-size: 13px;
+  }
+
+  .yoro-ar-search::placeholder {
+    color: #5c636a;
+  }
+
+  .yoro-ar-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .yoro-ar-filter {
+    min-height: 44px;
+    padding: 0 13px;
+    border: 1px solid rgb(33 37 41 / 24%);
+    border-radius: 999px;
+    background: #fff;
+    color: #343a40;
+    font: inherit;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .yoro-ar-filter[aria-pressed="true"] {
+    border-color: transparent;
+    background: #343a40;
+    color: #fff;
+  }
+
+  .yoro-ar-filter > b {
+    margin-left: 5px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .yoro-ar-empty {
+    margin: 0;
+    padding: 18px 12px;
+    color: #343a40;
+    font-size: 13px;
+    text-align: center;
+  }
+
+  /* 거절 사유를 목록에서도 보이게 합니다. 지금은 어디에도 표시되지 않습니다. */
+  .yoro-ar-note {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: rgb(33 37 41 / 7%);
+    color: #343a40;
+    font-size: 12px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  /* --- 접근성 보정 --- */
+
+  /* 안내 문구가 배경과 거의 같은 밝기였습니다(실측 1.28:1).
+     페이지 배경이 중간 회색(#868e96~#5f676f)이라 밝은 글자로는 4.5 에
+     도달하지 못합니다(흰색도 3.8). 어두운 쪽으로 내려야 통과합니다.
+     legacy 에 !important 가 없는 속성이라 pages layer 에서 덮습니다. */
+  .page-header .muted,
+  .page-title-row .muted {
+    color: #14171a;
+  }
+
+  /* 승인·거절이 34px, 상단 조작이 36px 이었습니다. */
+  .streamer-riot-request-actions .compact-button,
+  .top-actions .top-action,
+  .dashboard-menu-actions .top-action,
+  .dashboard-menu-actions .dashboard-locale-button {
+    min-height: 44px;
+  }
+
+  /* 390px 에서 메뉴가 가운데 정렬이라 현재 항목이 화면 왼쪽 밖으로
+     밀려났습니다(left: -119px). 좁을 때는 왼쪽부터 채웁니다. */
+  @media (max-width: 60rem) {
+    .app-sidebar nav {
+      justify-content: flex-start;
+    }
+  }
+}

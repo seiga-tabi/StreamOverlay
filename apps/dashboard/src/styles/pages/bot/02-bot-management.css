@@ -572,6 +572,15 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.bot-control-announcement-policy {
+  display: grid;
+  gap: .8rem;
+}
+
+.bot-control-announcement-policy .bot-control-switch-card small + small {
+  color: var(--text-subtle, var(--text-muted));
+}
+
 .bot-control-switch-card,
 .bot-control-command-card,
 .bot-control-preview-option {

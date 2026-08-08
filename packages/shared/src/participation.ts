@@ -109,6 +109,8 @@ export type LolRecentMatchChampion = {
   loadingUrl?: string;
   imageVersion?: string;
   imageLocale?: "neutral";
+  /** Riot match의 실제 시작 시각. 이전 cache row에는 없을 수 있습니다. */
+  startedAt?: string;
   won: boolean;
 };
 
@@ -311,7 +313,7 @@ export type StreamerRiotIdRequestStatus = "pending" | "approved" | "rejected";
  */
 export type StreamerRiotAccountRole = "main" | "sub";
 
-/** 스트리머 1명이 등록할 수 있는 서브 계정(pending+approved) 상한. */
+/** 스트리머 1명이 등록할 수 있는 활성 서브 계정(rejected 제외) 상한. */
 export const STREAMER_SUB_RIOT_ACCOUNT_LIMIT = 4;
 
 export type StreamerProfileLink = {
@@ -344,6 +346,243 @@ export type StreamerRiotIdRequest = {
   reviewer?: string;
   note?: string;
 };
+
+export type StreamerRiotIdVerificationAccount = {
+  /** 소유권 판단이 아니라 기존 LoL cache가 확인한 계정 실존 사실만 나타냅니다. */
+  state: "exists" | "not_found" | "unknown";
+  evidence: "fresh_cache" | "stale_cache" | "cache_miss";
+  observedAt?: string;
+};
+
+export type StreamerRiotIdVerificationRank = Pick<
+  LolRankedStats,
+  "queueType" | "tier" | "rank" | "leaguePoints" | "fetchedAt"
+>;
+
+export type StreamerRiotIdVerificationSummary = {
+  account: StreamerRiotIdVerificationAccount;
+  rank?: StreamerRiotIdVerificationRank;
+  /** cache에 실제 경기 시작 시각이 있을 때만 제공합니다. */
+  lastPlayedAt?: string;
+  twitchDisplayNameComparison: {
+    /** NFKC·대소문자·공백만 정규화한 뒤 Riot gameName과 정확히 같은지 여부입니다. */
+    normalizedExactMatch: boolean;
+    method: "nfkc_lowercase_ignore_whitespace";
+  };
+};
+
+/** 관리자 목록에 필요한 표시·처리 필드만 노출합니다. dashboardKey 같은 capability는 포함하지 않습니다. */
+export type StreamerRiotIdRequestListItem = Pick<
+  StreamerRiotIdRequest,
+  | "id"
+  | "twitchLogin"
+  | "twitchDisplayName"
+  | "twitchProfileImageUrl"
+  | "riotGameName"
+  | "riotTagLine"
+  | "status"
+  | "accountRole"
+  | "dashboardEnabled"
+  | "requestedAt"
+  | "updatedAt"
+  | "reviewedAt"
+  | "note"
+> & {
+  verification: StreamerRiotIdVerificationSummary;
+};
+
+export type StreamerRiotIdRequestListPagination = {
+  limit: number;
+  total: number;
+  returned: number;
+  hasMore: boolean;
+  nextCursor?: string;
+};
+
+export type StreamerRiotIdRequestListResponse = {
+  requests: StreamerRiotIdRequestListItem[];
+  /** 무인자 legacy 호출에서는 하위 호환을 위해 생략합니다. */
+  pagination?: StreamerRiotIdRequestListPagination;
+};
+
+const STREAMER_RIOT_ID_LIST_STATUSES = ["pending", "approved", "rejected"] as const;
+const STREAMER_RIOT_ID_LIST_ACCOUNT_ROLES = ["main", "sub"] as const;
+const STREAMER_RIOT_ID_VERIFICATION_STATES = ["exists", "not_found", "unknown"] as const;
+const STREAMER_RIOT_ID_VERIFICATION_EVIDENCE = ["fresh_cache", "stale_cache", "cache_miss"] as const;
+const STREAMER_RIOT_ID_RANK_QUEUES = ["RANKED_SOLO_5x5", "RANKED_FLEX_SR", "RANKED_TEAM_5x5", "UNRANKED"] as const;
+const STREAMER_RIOT_ID_RANK_TIERS = [
+  "IRON",
+  "BRONZE",
+  "SILVER",
+  "GOLD",
+  "PLATINUM",
+  "EMERALD",
+  "DIAMOND",
+  "MASTER",
+  "GRANDMASTER",
+  "CHALLENGER",
+  "UNRANKED"
+] as const;
+
+function streamerRiotIdListExactRecord(value: unknown, allowedKeys: readonly string[]): Record<string, unknown> | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const record = value as Record<string, unknown>;
+  return Object.keys(record).every((key) => allowedKeys.includes(key)) ? record : undefined;
+}
+
+function streamerRiotIdListString(value: unknown, maxLength: number): value is string {
+  return typeof value === "string"
+    && value.length > 0
+    && value.length <= maxLength
+    && !/[\u0000-\u001f\u007f]/u.test(value);
+}
+
+function streamerRiotIdListIsoTimestamp(value: unknown): value is string {
+  if (!streamerRiotIdListString(value, 64)) return false;
+  const timestamp = Date.parse(value);
+  return Number.isFinite(timestamp) && new Date(timestamp).toISOString() === value;
+}
+
+function streamerRiotIdListSafeInteger(value: unknown, maximum: number): value is number {
+  return Number.isSafeInteger(value) && (value as number) >= 0 && (value as number) <= maximum;
+}
+
+function parseStreamerRiotIdVerificationRank(value: unknown): StreamerRiotIdVerificationRank | undefined {
+  const record = streamerRiotIdListExactRecord(value, ["queueType", "tier", "rank", "leaguePoints", "fetchedAt"]);
+  if (
+    !record
+    || !STREAMER_RIOT_ID_RANK_QUEUES.includes(record.queueType as typeof STREAMER_RIOT_ID_RANK_QUEUES[number])
+    || !STREAMER_RIOT_ID_RANK_TIERS.includes(record.tier as typeof STREAMER_RIOT_ID_RANK_TIERS[number])
+    || (record.rank !== undefined && !streamerRiotIdListString(record.rank, 16))
+    || !streamerRiotIdListSafeInteger(record.leaguePoints, 100_000)
+    || !streamerRiotIdListIsoTimestamp(record.fetchedAt)
+  ) return undefined;
+  return {
+    queueType: record.queueType as StreamerRiotIdVerificationRank["queueType"],
+    tier: record.tier as StreamerRiotIdVerificationRank["tier"],
+    ...(record.rank !== undefined ? { rank: record.rank as string } : {}),
+    leaguePoints: record.leaguePoints as number,
+    fetchedAt: record.fetchedAt
+  };
+}
+
+function parseStreamerRiotIdVerification(value: unknown): StreamerRiotIdVerificationSummary | undefined {
+  const record = streamerRiotIdListExactRecord(value, ["account", "rank", "lastPlayedAt", "twitchDisplayNameComparison"]);
+  const account = streamerRiotIdListExactRecord(record?.account, ["state", "evidence", "observedAt"]);
+  const comparison = streamerRiotIdListExactRecord(record?.twitchDisplayNameComparison, ["normalizedExactMatch", "method"]);
+  if (
+    !record
+    || !account
+    || !STREAMER_RIOT_ID_VERIFICATION_STATES.includes(account.state as typeof STREAMER_RIOT_ID_VERIFICATION_STATES[number])
+    || !STREAMER_RIOT_ID_VERIFICATION_EVIDENCE.includes(account.evidence as typeof STREAMER_RIOT_ID_VERIFICATION_EVIDENCE[number])
+    || (account.observedAt !== undefined && !streamerRiotIdListIsoTimestamp(account.observedAt))
+    || !comparison
+    || typeof comparison.normalizedExactMatch !== "boolean"
+    || comparison.method !== "nfkc_lowercase_ignore_whitespace"
+    || (record.lastPlayedAt !== undefined && !streamerRiotIdListIsoTimestamp(record.lastPlayedAt))
+  ) return undefined;
+  const rank = record.rank === undefined ? undefined : parseStreamerRiotIdVerificationRank(record.rank);
+  if (record.rank !== undefined && !rank) return undefined;
+  return {
+    account: {
+      state: account.state as StreamerRiotIdVerificationAccount["state"],
+      evidence: account.evidence as StreamerRiotIdVerificationAccount["evidence"],
+      ...(account.observedAt !== undefined ? { observedAt: account.observedAt as string } : {})
+    },
+    ...(rank ? { rank } : {}),
+    ...(record.lastPlayedAt !== undefined ? { lastPlayedAt: record.lastPlayedAt as string } : {}),
+    twitchDisplayNameComparison: {
+      normalizedExactMatch: comparison.normalizedExactMatch,
+      method: "nfkc_lowercase_ignore_whitespace"
+    }
+  };
+}
+
+function parseStreamerRiotIdRequestListItem(value: unknown): StreamerRiotIdRequestListItem | undefined {
+  const record = streamerRiotIdListExactRecord(value, [
+    "id",
+    "twitchLogin",
+    "twitchDisplayName",
+    "twitchProfileImageUrl",
+    "riotGameName",
+    "riotTagLine",
+    "status",
+    "accountRole",
+    "dashboardEnabled",
+    "requestedAt",
+    "updatedAt",
+    "reviewedAt",
+    "note",
+    "verification"
+  ]);
+  if (
+    !record
+    || !streamerRiotIdListString(record.id, 128)
+    || !streamerRiotIdListString(record.twitchLogin, 64)
+    || !streamerRiotIdListString(record.twitchDisplayName, 128)
+    || (record.twitchProfileImageUrl !== undefined && !streamerRiotIdListString(record.twitchProfileImageUrl, 2_048))
+    || !streamerRiotIdListString(record.riotGameName, 64)
+    || !streamerRiotIdListString(record.riotTagLine, 32)
+    || !STREAMER_RIOT_ID_LIST_STATUSES.includes(record.status as typeof STREAMER_RIOT_ID_LIST_STATUSES[number])
+    || (record.accountRole !== undefined && !STREAMER_RIOT_ID_LIST_ACCOUNT_ROLES.includes(record.accountRole as typeof STREAMER_RIOT_ID_LIST_ACCOUNT_ROLES[number]))
+    || (record.dashboardEnabled !== undefined && typeof record.dashboardEnabled !== "boolean")
+    || !streamerRiotIdListIsoTimestamp(record.requestedAt)
+    || !streamerRiotIdListIsoTimestamp(record.updatedAt)
+    || (record.reviewedAt !== undefined && !streamerRiotIdListIsoTimestamp(record.reviewedAt))
+    || (record.note !== undefined && !streamerRiotIdListString(record.note, 1_000))
+  ) return undefined;
+  const verification = parseStreamerRiotIdVerification(record.verification);
+  if (!verification) return undefined;
+  return {
+    id: record.id,
+    twitchLogin: record.twitchLogin,
+    twitchDisplayName: record.twitchDisplayName,
+    ...(record.twitchProfileImageUrl !== undefined ? { twitchProfileImageUrl: record.twitchProfileImageUrl as string } : {}),
+    riotGameName: record.riotGameName,
+    riotTagLine: record.riotTagLine,
+    status: record.status as StreamerRiotIdRequestStatus,
+    ...(record.accountRole !== undefined ? { accountRole: record.accountRole as StreamerRiotAccountRole } : {}),
+    ...(record.dashboardEnabled !== undefined ? { dashboardEnabled: record.dashboardEnabled as boolean } : {}),
+    requestedAt: record.requestedAt,
+    updatedAt: record.updatedAt,
+    ...(record.reviewedAt !== undefined ? { reviewedAt: record.reviewedAt as string } : {}),
+    ...(record.note !== undefined ? { note: record.note as string } : {}),
+    verification
+  };
+}
+
+/** 관리자 Riot ID 요청 목록을 capability 누출 없는 exact·bounded schema로 검증합니다. */
+export function parseStreamerRiotIdRequestListResponse(value: unknown): StreamerRiotIdRequestListResponse | undefined {
+  const record = streamerRiotIdListExactRecord(value, ["requests", "pagination"]);
+  if (!record || !Array.isArray(record.requests) || record.requests.length > 10_000) return undefined;
+  const requests = record.requests.map(parseStreamerRiotIdRequestListItem);
+  if (requests.some((request) => !request)) return undefined;
+  if (record.pagination === undefined) return { requests: requests as StreamerRiotIdRequestListItem[] };
+
+  const pagination = streamerRiotIdListExactRecord(record.pagination, ["limit", "total", "returned", "hasMore", "nextCursor"]);
+  if (
+    !pagination
+    || !streamerRiotIdListSafeInteger(pagination.limit, 100)
+    || pagination.limit < 1
+    || !streamerRiotIdListSafeInteger(pagination.total, 10_000_000)
+    || !streamerRiotIdListSafeInteger(pagination.returned, 100)
+    || pagination.returned !== requests.length
+    || pagination.returned > pagination.limit
+    || typeof pagination.hasMore !== "boolean"
+    || (pagination.nextCursor !== undefined && !streamerRiotIdListString(pagination.nextCursor, 512))
+    || (pagination.hasMore && requests.length > 0 && pagination.nextCursor === undefined)
+  ) return undefined;
+  return {
+    requests: requests as StreamerRiotIdRequestListItem[],
+    pagination: {
+      limit: pagination.limit,
+      total: pagination.total,
+      returned: pagination.returned,
+      hasMore: pagination.hasMore,
+      ...(pagination.nextCursor !== undefined ? { nextCursor: pagination.nextCursor as string } : {})
+    }
+  };
+}
 
 export type ParticipationDashboardQueueEntry = ParticipationPublicQueueEntry & {
   id: string;

@@ -45,11 +45,15 @@ if (botConfig.enabled) {
           )
         }
       : {}),
-    announcements: new DiscordAnnouncementPublisher({
-      applicationId: botConfig.applicationId,
-      client,
-      internalApi
-    }),
+    ...(botConfig.participationAnnounceEnabled
+      ? {
+          announcements: new DiscordAnnouncementPublisher({
+            applicationId: botConfig.applicationId,
+            client,
+            internalApi
+          })
+        }
+      : {}),
     health,
     internalApi
   });

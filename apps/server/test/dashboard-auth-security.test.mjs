@@ -1414,6 +1414,10 @@ test("관리자는 승인된 스트리머의 대시보드 사용 권한을 별�
     const toggleBody = JSON.parse(toggleRes.body);
     assert.equal(toggleBody.request.dashboardEnabled, true);
     assert.equal(toggleBody.requests[0].dashboardEnabled, true);
+    assert.equal(Object.hasOwn(toggleBody.request, "dashboardKey"), false);
+    assert.equal(Object.hasOwn(toggleBody.request, "dashboardSlug"), false);
+    assert.equal(Object.hasOwn(toggleBody.request, "normalizedRiotId"), false);
+    assert.equal(Object.hasOwn(toggleBody.request, "twitchUserId"), false);
 
     const allowedAuthReq = createRequest("GET", "/api/dashboard/auth/status?surface=streamer", undefined, {
       origin: DASHBOARD_ORIGIN,
@@ -3252,6 +3256,7 @@ test("공개 LoL 연관검색 API는 저장된 프로필 캐시를 부분 검색
             riotGameName: "HideOnBush",
             riotTagLine: "KR1",
             riotIdKey: "hideonbush#kr1",
+            lolPlatform: "jp1",
             status: "ready",
             rankedStats: {
               queueType: "RANKED_SOLO_5x5",
@@ -3647,7 +3652,9 @@ test("공개 시청자 참여 취소 API는 dashboard CSRF를 요구하지 않�
 test("참여 알림 설정 API는 승인·CSRF·strict body와 안전한 오류 코드를 지킨다", async () => {
   await withAuthConfig(async () => {
   const previousDatabaseEnabled = appConfig.database.enabled;
+  const previousParticipationAnnounceEnabled = appConfig.discordParticipationAnnounce.enabled;
   appConfig.database.enabled = true;
+  appConfig.discordParticipationAnnounce.enabled = false;
   const csrfToken = "csrf_value_for_participation_announcement_1234";
   const store = new Store();
   const approval = store.upsertStreamerRiotIdRequest({
@@ -3730,6 +3737,12 @@ test("참여 알림 설정 API는 승인·CSRF·strict body와 안전한 오류 
   };
 
   try {
+    const disabled = await send("GET", undefined, {});
+    assert.equal(disabled.statusCode, 404);
+    assert.deepEqual(JSON.parse(disabled.body), { error: "not found" });
+    assert.equal(calls.length, 0, "비활성 endpoint는 계정 service를 호출하면 안 됩니다.");
+
+    appConfig.discordParticipationAnnounce.enabled = true;
     const read = await send("GET", undefined, { cookie: headers.cookie });
     assert.equal(read.statusCode, 200);
     assert.equal(JSON.parse(read.body).enabled, false);
@@ -3806,6 +3819,7 @@ test("참여 알림 설정 API는 승인·CSRF·strict body와 안전한 오류 
     assert.equal(wrongMethod.statusCode, 405);
   } finally {
     appConfig.database.enabled = previousDatabaseEnabled;
+    appConfig.discordParticipationAnnounce.enabled = previousParticipationAnnounceEnabled;
   }
   });
 });

@@ -50,3 +50,5 @@
 @import "./pages/account/31-dashboard-home.css";
 /* 참여 모집 Discord 알림 설정. pages layer 에서 단독 소유합니다. */
 @import "./pages/account/32-participation-announcement.css";
+/* 관리자 콘솔 보정. pages layer 에서 단독 소유합니다. */
+@import "./pages/account/33-admin-console.css";

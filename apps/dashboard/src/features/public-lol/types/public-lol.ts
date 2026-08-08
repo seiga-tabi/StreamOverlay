@@ -1,5 +1,7 @@
 import type { LolChampionSummary, LolPerformanceStats, LolRankHistoryPoint, LolRankedStats, LolRole, LolRoleAnalysis, ParticipationStatus, StreamerRiotIdRequest } from "@streamops/shared";
 
+export type { PublicLolMatchRankParticipant, PublicLolMatchRankResponse } from "@streamops/shared";
+
 export type PublicLolMatchItem = {
   slot: number;
   itemId: number;
@@ -58,21 +60,6 @@ export type PublicLolMatchTeamDetail = {
   damageTaken: number;
   objectives: Record<string, number>;
   players: PublicLolMatchParticipant[];
-};
-
-export type PublicLolMatchRankParticipant = {
-  riotId?: string;
-  teamId?: number;
-  championId: number;
-  position?: string;
-  rankedStats?: LolRankedStats;
-};
-
-export type PublicLolMatchRankResponse = {
-  status: "ready";
-  matchId: string;
-  participants: PublicLolMatchRankParticipant[];
-  fetchedAt: string;
 };
 
 export type PublicLolMatchBuildItemEvent = {

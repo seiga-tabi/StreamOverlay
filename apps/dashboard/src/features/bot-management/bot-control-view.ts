@@ -22,6 +22,7 @@ export function botControlDraftChanged(
     || current.playerCommandEnabled !== saved.playerCommandEnabled
     || current.guideCommandEnabled !== saved.guideCommandEnabled
     || current.deleteInvocationAfterReply !== saved.deleteInvocationAfterReply
+    || current.participationAnnounceEnabled !== saved.participationAnnounceEnabled
     || current.preferredLocale !== saved.preferredLocale
     || current.statusFields.players !== saved.statusFields.players
     || current.statusFields.version !== saved.statusFields.version

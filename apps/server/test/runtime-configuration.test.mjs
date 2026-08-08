@@ -34,7 +34,58 @@ test("runtime config는 strict schema로 읽는다", () => {
   }), { mode: 0o644 });
   const config = loadYoroRuntimeConfig(file);
   assert.equal(config.environment, "development");
+  assert.equal(config.features.discordParticipationAnnounce, false);
   fs.rmSync(directory, { recursive: true });
+});
+
+test("config-check는 참여 모집 Discord 알림 flag의 타입을 검증한다", () => {
+  const directory = temporaryDirectory();
+  const file = path.join(directory, "runtime.json");
+  const runtime = {
+    schemaVersion: 1,
+    environment: "development",
+    public: {
+      baseUrl: "http://localhost:3000",
+      dashboardOrigin: "http://localhost:3000"
+    },
+    features: {
+      database: false,
+      discordSaas: false,
+      discordBot: false,
+      discordBotManagement: false,
+      discordParticipationAnnounce: "true",
+      twitchEventSub: false
+    }
+  };
+  try {
+    fs.writeFileSync(file, JSON.stringify(runtime), { mode: 0o644 });
+    const invalid = spawnSync(
+      process.execPath,
+      ["dist/scripts/check-yoro-config.js", "check"],
+      {
+        cwd: path.resolve(import.meta.dirname, ".."),
+        encoding: "utf8",
+        env: { PATH: process.env.PATH ?? "", YORO_CONFIG_FILE: file }
+      }
+    );
+    assert.notEqual(invalid.status, 0);
+
+    runtime.features.discordParticipationAnnounce = false;
+    fs.writeFileSync(file, JSON.stringify(runtime), { mode: 0o644 });
+    const valid = spawnSync(
+      process.execPath,
+      ["dist/scripts/check-yoro-config.js", "check"],
+      {
+        cwd: path.resolve(import.meta.dirname, ".."),
+        encoding: "utf8",
+        env: { PATH: process.env.PATH ?? "", YORO_CONFIG_FILE: file }
+      }
+    );
+    assert.equal(valid.status, 0, valid.stderr);
+    assert.match(valid.stdout, /Runtime config validation passed/u);
+  } finally {
+    fs.rmSync(directory, { recursive: true });
+  }
 });
 
 test("secret loader는 0600 파일의 마지막 개행만 제거한다", () => {
@@ -114,6 +165,7 @@ test("runtime config가 있으면 legacy env feature override를 무시한다", 
         "import('./dist/config.js').then(({appConfig})=>process.stdout.write(JSON.stringify({",
         "source:appConfig.configurationSource,",
         "database:appConfig.database.enabled,",
+        "discordParticipationAnnounce:appConfig.discordParticipationAnnounce.enabled,",
         "databaseTimeout:appConfig.database.connectionTimeoutMs,",
         "discordTtl:appConfig.discordSaas.setupLinkTtlSeconds,",
         "logFiles:appConfig.logging.maxFiles",
@@ -127,6 +179,7 @@ test("runtime config가 있으면 legacy env feature override를 무시한다", 
         ...process.env,
         YORO_CONFIG_FILE: runtime,
         DATABASE_ENABLED: "true",
+        DISCORD_PARTICIPATION_ANNOUNCE_ENABLED: "true",
         DATABASE_URL_FILE: "/존재하지-않는-경로",
         DATABASE_CONNECTION_TIMEOUT_MS: "29999",
         DISCORD_SETUP_LINK_TTL_SECONDS: "1799",
@@ -138,9 +191,41 @@ test("runtime config가 있으면 legacy env feature override를 무시한다", 
   assert.deepEqual(JSON.parse(result.stdout), {
     source: "runtime_file",
     database: false,
+    discordParticipationAnnounce: false,
     databaseTimeout: 5_000,
     discordTtl: 600,
     logFiles: 5
   });
   fs.rmSync(directory, { recursive: true });
+});
+
+test("legacy 참여 모집 Discord 알림은 의존 기능 없이 활성화할 수 없다", () => {
+  const result = spawnSync(
+    process.execPath,
+    [
+      "--input-type=module",
+      "-e",
+      "import('./dist/config.js').then(({validateRuntimeConfig})=>process.stdout.write(JSON.stringify(validateRuntimeConfig())))"
+    ],
+    {
+      cwd: path.resolve(import.meta.dirname, ".."),
+      encoding: "utf8",
+      env: {
+        PATH: process.env.PATH ?? "",
+        NODE_ENV: "development",
+        DATABASE_ENABLED: "false",
+        DISCORD_SAAS_ENABLED: "false",
+        DISCORD_BOT_INTERNAL_API_ENABLED: "false",
+        DISCORD_BOT_MANAGEMENT_ENABLED: "false",
+        DISCORD_PARTICIPATION_ANNOUNCE_ENABLED: "true"
+      }
+    }
+  );
+  assert.equal(result.status, 0, result.stderr);
+  const validation = JSON.parse(result.stdout);
+  assert.equal(validation.ok, false);
+  assert.equal(
+    validation.errors.some((error) => error.includes("참여 모집 Discord 알림")),
+    true
+  );
 });

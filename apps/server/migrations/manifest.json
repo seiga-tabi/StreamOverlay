@@ -144,6 +144,14 @@
       "checksumSha256": "8b608ba92678784298bc05ffdd1390e3503b0760645193a4685d2117dab7054a",
       "destructive": false,
       "transaction": true
+    },
+    {
+      "id": "0019_admin_audit_logs",
+      "file": "0019_admin_audit_logs.sql",
+      "description": "전역 관리자 변경 감사 기록과 tenant 감사 로그 전역 조회 인덱스",
+      "checksumSha256": "c18652e1093e717f078a58ea35b5abfa629afe6cccd44cb7e179046e55cf84ee",
+      "destructive": false,
+      "transaction": true
     }
   ]
 }

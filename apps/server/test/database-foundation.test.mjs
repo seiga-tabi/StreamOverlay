@@ -39,7 +39,8 @@ test("migration manifest와 SQL checksum을 strict하게 검증한다", async ()
       "0015_discord_command_message_cleanup",
       "0016_discord_bot_english_response_locale",
       "0017_discord_participation_announcement",
-      "0018_discord_guild_directory_cache"
+      "0018_discord_guild_directory_cache",
+      "0019_admin_audit_logs"
     ]
   );
 
@@ -57,6 +58,21 @@ test("migration manifest와 SQL checksum을 strict하게 검증한다", async ()
   } finally {
     rmSync(tempRoot, { recursive: true, force: true });
   }
+});
+
+test("0019 관리자 감사 migration은 global index와 finalize-only lifecycle을 선언한다", () => {
+  const sql = readFileSync(path.join(migrationsRoot, "0019_admin_audit_logs.sql"), "utf8");
+  assert.match(sql, /CREATE INDEX audit_logs_admin_recent_idx\s+ON audit_logs \(created_at DESC, id DESC\)/u);
+  assert.match(sql, /CREATE TABLE admin_audit_logs/u);
+  assert.match(sql, /actor_reference_hash BYTEA NOT NULL[\s\S]*octet_length\(actor_reference_hash\) = 32/u);
+  assert.match(sql, /target_reference_hash BYTEA NOT NULL[\s\S]*octet_length\(target_reference_hash\) = 32/u);
+  assert.match(sql, /NEW\.outcome = 'started'/u);
+  assert.match(sql, /OLD\.outcome = 'started'[\s\S]*NEW\.outcome IN \('succeeded', 'failed'\)/u);
+  assert.match(sql, /BEFORE INSERT OR UPDATE OR DELETE ON admin_audit_logs/u);
+  assert.match(sql, /BEFORE TRUNCATE ON admin_audit_logs/u);
+  assert.match(sql, /ENABLE ALWAYS TRIGGER admin_audit_logs_finalize_only/u);
+  assert.match(sql, /ENABLE ALWAYS TRIGGER admin_audit_logs_no_truncate/u);
+  assert.doesNotMatch(sql, /actor_(?:user|session)_id|target_id|session_reference/u);
 });
 
 test("migration check는 빈 Database를 변경하지 않고 pending으로 판정한다", async () => {

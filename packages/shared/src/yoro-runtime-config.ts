@@ -12,6 +12,7 @@ export type YoroRuntimeConfig = Readonly<{
     discordSaas: boolean;
     discordBot: boolean;
     discordBotManagement: boolean;
+    discordParticipationAnnounce: boolean;
     twitchEventSub: boolean;
   }>;
   database?: Readonly<{
@@ -183,6 +184,7 @@ export function parseYoroRuntimeConfig(value: unknown): YoroRuntimeConfig {
     "discordSaas",
     "discordBot",
     "discordBotManagement",
+    "discordParticipationAnnounce",
     // schema v1 운영 파일의 하위 호환을 위해 읽기만 허용하고 기능에는 반영하지 않습니다.
     "agentIngestion",
     "twitchEventSub"
@@ -198,6 +200,12 @@ export function parseYoroRuntimeConfig(value: unknown): YoroRuntimeConfig {
       features.discordBotManagement,
       "runtime_features_discord_bot_management"
     ),
+    discordParticipationAnnounce: features.discordParticipationAnnounce === undefined
+      ? false
+      : bool(
+          features.discordParticipationAnnounce,
+          "runtime_features_discord_participation_announce"
+        ),
     twitchEventSub: bool(features.twitchEventSub, "runtime_features_twitch_eventsub")
   };
 
@@ -389,6 +397,17 @@ export function parseYoroRuntimeConfig(value: unknown): YoroRuntimeConfig {
     && !featureConfig.discordSaas
   ) {
     throw new YoroRuntimeConfigError("runtime_discord_feature_dependency");
+  }
+  if (
+    featureConfig.discordParticipationAnnounce
+    && (
+      !featureConfig.database
+      || !featureConfig.discordSaas
+      || !featureConfig.discordBot
+      || !featureConfig.discordBotManagement
+    )
+  ) {
+    throw new YoroRuntimeConfigError("runtime_discord_participation_announce_dependency");
   }
   if (featureConfig.twitchEventSub && !twitch) {
     throw new YoroRuntimeConfigError("runtime_twitch_required");

@@ -563,6 +563,9 @@ function isSubStreamerRiotAccount(request: Pick<StreamerRiotIdRequest, "accountR
   return request.accountRole === "sub";
 }
 
+const SELF_SERVICE_SUB_ACCOUNT_REVIEWER = "streamer-self-service";
+const SELF_SERVICE_SUB_ACCOUNT_NOTE = "스트리머 본인 등록으로 자동 승인되었습니다.";
+
 function normalizedStreamerRiotIdRequest(value: unknown): StreamerRiotIdRequest | undefined {
   const input = objectRecord(value);
   const id = optionalString(input?.id);
@@ -1495,13 +1498,13 @@ export class Store {
     }
   }
 
-  private persistStreamerRiotIdState(): void {
+  private persistStreamerRiotIdState(options: { throwOnFailure?: boolean } = {}): void {
     if (!this.options.streamerRiotIdStatePath) return;
     this.assertPersistenceAvailable("streamer_riot_ids");
+    const tmpPath = `${this.options.streamerRiotIdStatePath}.${process.pid}.${Date.now()}.tmp`;
     try {
       const dir = path.dirname(this.options.streamerRiotIdStatePath);
       fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
-      const tmpPath = `${this.options.streamerRiotIdStatePath}.${process.pid}.${Date.now()}.tmp`;
       const payload = {
         version: 1,
         requests: this.streamerRiotIdRequests.map(cloneStreamerRiotIdRequest)
@@ -1510,7 +1513,24 @@ export class Store {
       fs.renameSync(tmpPath, this.options.streamerRiotIdStatePath);
       this.clearPersistenceFailure("streamer_riot_ids");
     } catch (error) {
+      try {
+        fs.rmSync(tmpPath, { force: true });
+      } catch {
+        // 임시 파일 정리 실패보다 원래 영속화 오류를 우선 보고합니다.
+      }
       this.reportPersistenceFailure({ scope: "streamer_riot_ids", operation: "save", filePath: this.options.streamerRiotIdStatePath, error: toSafeErrorMessage(error) });
+      if (options.throwOnFailure) throw error;
+    }
+  }
+
+  private persistStreamerRiotIdStateOrRollback(previousState: StreamerRiotIdRequest[]): void {
+    try {
+      this.persistStreamerRiotIdState({ throwOnFailure: true });
+    } catch (error) {
+      /* 관리자 감사 로그가 성공으로 확정되기 전에 파일 저장이 실패하면, 같은
+         프로세스의 메모리 상태도 디스크에 남은 이전 상태와 일치시킵니다. */
+      this.streamerRiotIdRequests = previousState;
+      throw error;
     }
   }
 
@@ -2202,6 +2222,7 @@ export class Store {
     this.assertPersistenceAvailable("streamer_riot_ids");
     const request = this.streamerRiotIdRequests.find((candidate) => candidate.id === input.requestId);
     if (!request) return undefined;
+    const previousState = this.streamerRiotIdRequests.map(cloneStreamerRiotIdRequest);
     const now = nowIso();
     request.status = input.decision;
     request.dashboardEnabled = false;
@@ -2212,7 +2233,7 @@ export class Store {
     if (input.decision === "approved" && isSubStreamerRiotAccount(request)) {
       /* 서브 계정 승인: 전적 검색 연결만 활성화합니다. 대시보드 접근 키·프로필 링크는
          대표 계정의 자산이므로 승계하지 않고, 다른 계정도 비활성화하지 않습니다. */
-      this.persistStreamerRiotIdState();
+      this.persistStreamerRiotIdStateOrRollback(previousState);
       return cloneStreamerRiotIdRequest(request);
     }
     if (input.decision === "approved") {
@@ -2247,7 +2268,7 @@ export class Store {
         candidate.note = "새 Riot ID 승인으로 이전 승인 기록을 비활성화했습니다.";
       }
     }
-    this.persistStreamerRiotIdState();
+    this.persistStreamerRiotIdStateOrRollback(previousState);
     return cloneStreamerRiotIdRequest(request);
   }
 
@@ -2262,6 +2283,7 @@ export class Store {
     /* 대시보드 접근 키는 대표 계정만 가질 수 있습니다 — 서브 row에 켜면
        한 스트리머에게 접근 키가 계정 수만큼 생깁니다. */
     if (!request || request.status !== "approved" || isSubStreamerRiotAccount(request)) return undefined;
+    const previousState = this.streamerRiotIdRequests.map(cloneStreamerRiotIdRequest);
     const now = nowIso();
     request.dashboardEnabled = input.dashboardEnabled;
     ensureApprovedStreamerDashboardAccess(request);
@@ -2269,7 +2291,7 @@ export class Store {
     request.reviewedAt = now;
     request.reviewer = input.reviewer;
     request.note = input.note;
-    this.persistStreamerRiotIdState();
+    this.persistStreamerRiotIdStateOrRollback(previousState);
     return cloneStreamerRiotIdRequest(request);
   }
 
@@ -2326,17 +2348,43 @@ export class Store {
     return cloneStreamerRiotIdRequest(request);
   }
 
-  /* 서브 계정 등록 신청. upsertStreamerRiotIdRequest(본계정 재신청 슬롯 재사용)와 달리
-     항상 새 row를 만들고, 스트리머 간 선점·자기 중복·개수 상한을 여기서 검증합니다. */
-  addStreamerSubRiotIdRequest(input: StreamerRiotIdRequestInput):
+  /* 서브 계정 등록. owner_self_service는 승인된 대표 스트리머의 대시보드 API만
+     전달하며 즉시 승인합니다. 기본값은 기존 수동 검토를 보존해 다른 내부 호출자가
+     실수로 자동 승인하지 못하게 합니다. */
+  addStreamerSubRiotIdRequest(
+    input: StreamerRiotIdRequestInput,
+    options?: { approvalMode?: "manual_review" | "owner_self_service" }
+  ):
     | { ok: true; request: StreamerRiotIdRequest }
-    | { ok: false; code: "riot_id_duplicated" | "riot_id_taken" | "limit_exceeded" } {
+    | {
+      ok: false;
+      code: "streamer_approval_required" | "riot_id_duplicated" | "riot_id_taken" | "riot_id_rejected" | "limit_exceeded";
+    } {
     this.assertPersistenceAvailable("streamer_riot_ids");
+    const selfServiceApproval = options?.approvalMode === "owner_self_service";
+    if (selfServiceApproval) {
+      /* route 밖의 미래 호출자도 대표 승인 절차를 우회할 수 없게 저장 계층에서
+         다시 확인합니다. 자동 승인은 승인된 스트리머의 서브 계정에만 적용됩니다. */
+      const approvedMain = this.streamerRiotIdRequests.some((request) =>
+        request.twitchUserId === input.twitchUserId
+        && request.status === "approved"
+        && !isSubStreamerRiotAccount(request)
+      );
+      if (!approvedMain) return { ok: false, code: "streamer_approval_required" };
+    }
+
     const now = nowIso();
     const normalizedRiotId = normalizeRiotIdKey(input.riotGameName, input.riotTagLine);
     for (const request of this.streamerRiotIdRequests) {
       if (request.normalizedRiotId !== normalizedRiotId) continue;
-      if (request.status === "rejected") continue;
+      if (request.status === "rejected") {
+        /* 관리자가 사후 차단한 자신의 서브 계정을 삭제·재등록해 자동 승인을
+           되찾는 우회를 막습니다. 다른 스트리머의 rejected row는 선점하지 않습니다. */
+        if (selfServiceApproval && request.twitchUserId === input.twitchUserId && isSubStreamerRiotAccount(request)) {
+          return { ok: false, code: "riot_id_rejected" };
+        }
+        continue;
+      }
       /* 누가 가졌는지는 응답에 싣지 않습니다 — code만 구분합니다. */
       return { ok: false, code: request.twitchUserId === input.twitchUserId ? "riot_id_duplicated" : "riot_id_taken" };
     }
@@ -2357,11 +2405,18 @@ export class Store {
       riotGameName: input.riotGameName,
       riotTagLine: input.riotTagLine,
       normalizedRiotId,
-      status: "pending",
+      status: selfServiceApproval ? "approved" : "pending",
       accountRole: "sub",
       dashboardEnabled: false,
       requestedAt: now,
-      updatedAt: now
+      updatedAt: now,
+      ...(selfServiceApproval
+        ? {
+          reviewedAt: now,
+          reviewer: SELF_SERVICE_SUB_ACCOUNT_REVIEWER,
+          note: SELF_SERVICE_SUB_ACCOUNT_NOTE
+        }
+        : {})
     };
     this.streamerRiotIdRequests.unshift(request);
     this.persistStreamerRiotIdState();
@@ -2415,7 +2470,7 @@ export class Store {
 
   deleteStreamerRiotIdRequest(input: { twitchUserId: string; requestId: string }):
     | { ok: true; request: StreamerRiotIdRequest }
-    | { ok: false; code: "not_found" | "cannot_delete_main" } {
+    | { ok: false; code: "not_found" | "cannot_delete_main" | "cannot_delete_rejected" } {
     this.assertPersistenceAvailable("streamer_riot_ids");
     const index = this.streamerRiotIdRequests.findIndex((candidate) =>
       candidate.id === input.requestId && candidate.twitchUserId === input.twitchUserId
@@ -2426,6 +2481,11 @@ export class Store {
        먼저 다른 계정을 대표로 지정한 뒤 삭제해야 합니다. */
     if (target.status === "approved" && !isSubStreamerRiotAccount(target)) {
       return { ok: false, code: "cannot_delete_main" };
+    }
+    /* rejected 서브 row는 관리자 사후 차단의 tombstone입니다. 사용자가 이를
+       지우고 같은 Riot ID를 자동 승인으로 재등록하지 못하게 보존합니다. */
+    if (target.status === "rejected" && isSubStreamerRiotAccount(target)) {
+      return { ok: false, code: "cannot_delete_rejected" };
     }
     this.streamerRiotIdRequests.splice(index, 1);
     this.persistStreamerRiotIdState();

@@ -79,6 +79,8 @@ const imageBuild = imageReleaseMetadata();
 const nodeEnv = runtimeConfig?.environment ?? env("NODE_ENV", "development");
 const production = nodeEnv === "production";
 const enabled = runtimeConfig?.features.discordBot ?? boolEnv("DISCORD_BOT_ENABLED", false);
+const participationAnnounceEnabled = runtimeConfig?.features.discordParticipationAnnounce
+  ?? boolEnv("DISCORD_PARTICIPATION_ANNOUNCE_ENABLED", false);
 const token = enabled
   ? runtimeConfig
     ? loadBotSecret("discord_bot_token", true)
@@ -95,6 +97,7 @@ export const botConfig = Object.freeze({
   production,
   configurationSource: runtimeConfig ? "runtime_file" : "legacy_environment",
   enabled,
+  participationAnnounceEnabled,
   token,
   internalAuthKey,
   applicationId: runtimeConfig?.discord?.applicationId ?? env("DISCORD_APPLICATION_ID").trim(),
@@ -121,8 +124,11 @@ export const botConfig = Object.freeze({
 });
 
 export function validateBotConfig(): string[] {
-  if (!botConfig.enabled) return [];
   const errors: string[] = [];
+  if (botConfig.participationAnnounceEnabled && !botConfig.enabled) {
+    errors.push("참여 모집 Discord 알림을 사용하려면 Discord Bot을 활성화해야 합니다.");
+  }
+  if (!botConfig.enabled) return errors;
   if (!/^[0-9]{1,32}$/u.test(botConfig.applicationId)) {
     errors.push("DISCORD_APPLICATION_ID가 올바르지 않습니다.");
   }

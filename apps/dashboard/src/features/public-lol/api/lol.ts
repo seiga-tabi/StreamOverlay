@@ -1,5 +1,5 @@
 import { apiBase } from "../../../api/client";
-import type { LolPlatformId } from "@streamops/shared";
+import { parsePublicLolMatchRankResponse, type LolPlatformId } from "@streamops/shared";
 import { t } from "../i18n/public-lol-i18n";
 import type {
   MatchQueueFilter,
@@ -201,7 +201,11 @@ export async function getPublicLolMatchRanks(
     signal
   });
   if (!response.ok) throw new Error(await readPublicApiErrorMessage(response));
-  return (await response.json()) as PublicLolMatchRankResponse;
+  const parsed = parsePublicLolMatchRankResponse(await response.json());
+  if (!parsed || parsed.matchId.toUpperCase() !== matchId.trim().toUpperCase()) {
+    throw new Error(t().tierUnavailable);
+  }
+  return parsed;
 }
 
 export async function getPublicLolMatchBuild(matchId: string): Promise<PublicLolMatchBuildResponse> {

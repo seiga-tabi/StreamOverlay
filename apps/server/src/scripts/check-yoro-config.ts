@@ -26,6 +26,7 @@ if (!requestedPath && !fs.existsSync(configPath)) {
     console.log(`discordSaas: ${enabled("DISCORD_SAAS_ENABLED") ? "enabled" : "disabled"}`);
     console.log(`discordBot: ${enabled("DISCORD_BOT_INTERNAL_API_ENABLED") ? "enabled" : "disabled"}`);
     console.log(`discordBotManagement: ${enabled("DISCORD_BOT_MANAGEMENT_ENABLED") ? "enabled" : "disabled"}`);
+    console.log(`discordParticipationAnnounce: ${enabled("DISCORD_PARTICIPATION_ANNOUNCE_ENABLED") ? "enabled" : "disabled"}`);
     process.exit(0);
   }
   throw new Error("runtime_config_not_configured");
@@ -100,6 +101,7 @@ if (command === "check") {
   console.log(`database: ${runtime.features.database ? "enabled" : "disabled"}, ${configured.get("database") ? "configured" : "not configured"}`);
   console.log(`discordSaas: ${runtime.features.discordSaas ? "enabled" : "disabled"}, ${configured.get("discordClientSecret") ? "configured" : "not configured"}`);
   console.log(`discordBot: ${runtime.features.discordBot ? "enabled" : "disabled"}, ${configured.get("discordInternalAuth") ? "configured" : "not configured"}`);
+  console.log(`discordParticipationAnnounce: ${runtime.features.discordParticipationAnnounce ? "enabled" : "disabled"}`);
   console.log(`twitchEventSub: ${runtime.features.twitchEventSub ? "enabled" : "disabled"}, ${configured.get("twitchClientSecret") ? "configured" : "not configured"}`);
   console.log(`riotApi: ${runtime.riot ? (configured.get("riotApi") ? "configured" : "not configured") : "disabled"}`);
 } else if (command === "secrets") {

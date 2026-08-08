@@ -38,6 +38,28 @@ privileged `MESSAGE_CONTENT` intent를 추가하고 설치 URL이 `View Channels
 반드시 같은 runtime 파일을 읽어야 합니다. token이나 secret을 이 설정에
 추가하지 않습니다.
 
+참여 모집 Discord 알림은 별도의 전역 feature flag로 제어합니다.
+
+```json
+{
+  "features": {
+    "discordParticipationAnnounce": false
+  }
+}
+```
+
+기본값은 `false`이며 필드가 없는 기존 schema version 1 파일도 비활성 상태로
+읽습니다. 활성화하려면 `database`, `discordSaas`, `discordBot`,
+`discordBotManagement`가 모두 활성화되어야 합니다. migration `0017`과 `0018`의
+backup·plan·apply·검증이 끝나기 전에는 이 값을 켜지 않습니다. 비활성 상태에서는
+스트리머 설정 API와 참여 알림용 Bot 내부 API가 `404`를 반환하고,
+`discord.notify` action은 `skipped`로 기록됩니다.
+
+Server와 Discord Bot은 같은 `runtime.json`을 읽은 상태로 함께 재시작합니다.
+로컬 legacy 설정에서만 `DISCORD_PARTICIPATION_ANNOUNCE_ENABLED=true`를 사용할 수
+있으며 production Compose는 이 환경 변수로 runtime 파일을 덮어쓰지 않습니다.
+이 flag 자체에는 신규 secret이나 secret mount가 없습니다.
+
 runtime 파일 모드에서는 legacy 일반 환경 변수와 `*_FILE` 경로 override를
 적용하지 않습니다. 컨테이너 실행에 필요한 `NODE_ENV`,
 `YORO_CONFIG_FILE`, image release metadata와 내부 filesystem 경로만 배포
@@ -78,10 +100,10 @@ docker compose up -d --build --force-recreate --wait
 명령 출력에는 secret 값, 길이, 일부 마스킹 값, DB hostname이 포함되지
 않습니다.
 
-저장소의 `docker-compose.production.yml`은 예제 runtime처럼 모든 기능을
-활성화한 배포 manifest입니다. 특정 기능을 끈 배포에서는 해당 secret bind
-mount도 배포 override에서 제거합니다. 애플리케이션은 비활성 기능의 secret
-파일을 읽거나 요구하지 않습니다.
+`deploy/production/compose.yaml`은 예제 runtime의 운영 기반 기능을 위한 배포
+manifest입니다. 참여 모집 Discord 알림은 예제에서도 기본 비활성입니다. 특정
+기능을 끈 배포에서는 해당 secret bind mount도 배포 override에서 제거합니다.
+애플리케이션은 비활성 기능의 secret 파일을 읽거나 요구하지 않습니다.
 
 ## 배포 정보
 

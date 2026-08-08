@@ -128,13 +128,19 @@ export function ParticipationAnnouncementPanel({
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [enabled, setEnabled] = useState(false);
   const [loadFailed, setLoadFailed] = useState(false);
+  const [unavailable, setUnavailable] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ tone: "ok" | "error"; text: string }>();
 
   const load = useCallback(async (signal?: AbortSignal) => {
     setLoadFailed(false);
+    setUnavailable(false);
     try {
       const next = await getParticipationAnnouncement(signal);
+      if (!next) {
+        setUnavailable(true);
+        return;
+      }
       setSettings(next);
       setDrafts(draftsFrom(next));
       setEnabled(next.enabled);
@@ -210,6 +216,8 @@ export function ParticipationAnnouncementPanel({
       setSaving(false);
     }
   }
+
+  if (unavailable) return null;
 
   if (!settings && !loadFailed) {
     return (

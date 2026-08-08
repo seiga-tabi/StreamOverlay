@@ -488,6 +488,17 @@ test("Bot 설정은 기본 비활성이고 production secret file 경계를 강�
   assert.equal(disabled.status, 0, disabled.stderr);
   assert.deepEqual(JSON.parse(disabled.stdout), []);
 
+  const announcementWithoutBot = inspectConfig({
+    NODE_ENV: "development",
+    DISCORD_BOT_ENABLED: "false",
+    DISCORD_PARTICIPATION_ANNOUNCE_ENABLED: "true"
+  });
+  assert.equal(announcementWithoutBot.status, 0, announcementWithoutBot.stderr);
+  assert.equal(
+    JSON.parse(announcementWithoutBot.stdout).some((error) => error.includes("참여 모집 Discord 알림")),
+    true
+  );
+
   const directToken = "discord_bot_token_should_not_be_logged_123456789";
   const rejected = inspectConfig({
     NODE_ENV: "production",
@@ -507,6 +518,7 @@ test("Bot 설정은 기본 비활성이고 production secret file 경계를 강�
     const valid = inspectConfig({
       NODE_ENV: "production",
       DISCORD_BOT_ENABLED: "true",
+      DISCORD_PARTICIPATION_ANNOUNCE_ENABLED: "true",
       DISCORD_BOT_TOKEN_FILE: tokenPath,
       DISCORD_BOT_INTERNAL_AUTH_KEY_FILE: internalKeyPath,
       DISCORD_APPLICATION_ID: IDS.application,

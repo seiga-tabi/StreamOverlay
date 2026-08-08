@@ -1,5 +1,5 @@
 import type { LolChampionSummary, LolMainRole, LolPerformanceStats, LolProfileStatus, LolRankedStats, LolRankHistoryPoint, LolRankTier, LolRecentMatchChampion, ParticipationEntry } from "@streamops/shared";
-import { formatRiotId, normalizeRiotIdKey, toSafeErrorMessage } from "@streamops/shared";
+import { formatRiotId, normalizeLolPlatformId, normalizeRiotIdKey, toSafeErrorMessage } from "@streamops/shared";
 import type { JsonlLogger } from "../logging/jsonl-logger.js";
 import { DataDragonService } from "./data-dragon.js";
 import { RiotApiClient, RiotApiHttpError, RiotRateLimitError, type RiotMatch } from "./riot-api.js";
@@ -270,6 +270,12 @@ function shouldFailProfileAnalysis(error: unknown): boolean {
   return error instanceof RiotRateLimitError || (error instanceof RiotApiHttpError && (error.status === 401 || error.status === 403));
 }
 
+function profileFailureCode(error: unknown): NonNullable<LolProfileCacheEntry["failureCode"]> {
+  if (error instanceof RiotRateLimitError || (error instanceof RiotApiHttpError && error.status === 429)) return "rate_limited";
+  if (error instanceof RiotApiHttpError && (error.status === 401 || error.status === 403)) return "riot_auth";
+  return "riot_error";
+}
+
 export class LolProfileEnrichmentService {
   constructor(
     private readonly riot: RiotApiClient,
@@ -308,14 +314,14 @@ export class LolProfileEnrichmentService {
     }
 
     if (!this.riot.isConfigured()) {
-      return this.saveFailure(entry, "failed", "RIOT_API_KEY가 설정되지 않았습니다.");
+      return this.saveFailure(entry, "failed", "RIOT_API_KEY가 설정되지 않았습니다.", "riot_not_configured");
     }
 
     try {
       const account = isUsablePuuid(entry.riotPuuid)
         ? { puuid: entry.riotPuuid, gameName: riotGameName, tagLine: riotTagLine }
         : await this.riot.getAccountByRiotId(riotGameName, riotTagLine);
-      if (!account) return this.saveFailure(entry, "failed", "Riot 계정을 찾을 수 없습니다.");
+      if (!account) return this.saveFailure(entry, "failed", "Riot 계정을 찾을 수 없습니다.", "account_not_found");
 
       const [topChampions, rankedStats, ladderRank, matches] = await Promise.all([
         this.getTopChampions(account.puuid, skinOverrides).catch((error) => {
@@ -356,6 +362,7 @@ export class LolProfileEnrichmentService {
         riotGameName: account.gameName,
         riotTagLine: account.tagLine,
         riotIdKey: normalizeRiotIdKey(account.gameName, account.tagLine),
+        lolPlatform: this.cacheLolPlatform(),
         status: "ready",
         mainRole: role.mainRole,
         mainRoleConfidence: role.confidence,
@@ -373,11 +380,11 @@ export class LolProfileEnrichmentService {
     } catch (error) {
       if (error instanceof RiotRateLimitError) {
         const backoffMs = Math.min(error.retryAfterMs ?? config.rateLimit.backoffMs, config.rateLimit.maxBackoffMs);
-        return this.saveFailure(entry, "rate_limited", "Riot API rate limit", backoffMs);
+        return this.saveFailure(entry, "rate_limited", "Riot API rate limit", "rate_limited", backoffMs);
       }
       const reason = profileFailureReason(error);
       this.logger.error({ type: "lol_profile.enrichment_failed", error: reason, riotId: formatRiotId(riotGameName, riotTagLine), entryId: entry.id });
-      return this.saveFailure(entry, "failed", reason);
+      return this.saveFailure(entry, "failed", reason, profileFailureCode(error));
     }
   }
 
@@ -420,13 +427,30 @@ export class LolProfileEnrichmentService {
         loadingUrl: champion.loadingUrl,
         imageVersion: champion.imageVersion,
         imageLocale: champion.imageLocale,
+        startedAt: match.info.gameCreation && Number.isFinite(new Date(match.info.gameCreation).getTime())
+          ? new Date(match.info.gameCreation).toISOString()
+          : undefined,
         won: participant.win
       });
     }
     return recent;
   }
 
-  private saveFailure(entry: ParticipationEntry, status: Exclude<LolProfileStatus, "pending" | "analyzing" | "ready">, reason: string, backoffMs?: number): LolProfilePatch {
+  private cacheLolPlatform(): string | undefined {
+    try {
+      return normalizeLolPlatformId(this.riot.routingStatus().lolPlatform);
+    } catch {
+      return undefined;
+    }
+  }
+
+  private saveFailure(
+    entry: ParticipationEntry,
+    status: Exclude<LolProfileStatus, "pending" | "analyzing" | "ready">,
+    reason: string,
+    failureCode: NonNullable<LolProfileCacheEntry["failureCode"]>,
+    backoffMs?: number
+  ): LolProfilePatch {
     const riotGameName = entry.riotGameName ?? "";
     const riotTagLine = entry.riotTagLine ?? "";
     const analyzedAt = new Date().toISOString();
@@ -435,9 +459,11 @@ export class LolProfileEnrichmentService {
       riotGameName,
       riotTagLine,
       riotIdKey: normalizeRiotIdKey(riotGameName, riotTagLine),
+      lolPlatform: this.cacheLolPlatform(),
       status,
       analyzedAt,
       failedReason: reason,
+      failureCode,
       nextRetryAt: backoffMs ? new Date(Date.now() + backoffMs).toISOString() : undefined
     });
     return patchFromProfile(profile);

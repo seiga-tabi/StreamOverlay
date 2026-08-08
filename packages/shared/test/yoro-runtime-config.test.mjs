@@ -18,6 +18,7 @@ function validRuntime() {
       discordSaas: true,
       discordBot: true,
       discordBotManagement: true,
+      discordParticipationAnnounce: true,
       agentIngestion: true,
       twitchEventSub: true
     },
@@ -83,6 +84,33 @@ test("활성 Discord 기능은 공개 ID와 callback 설정을 요구한다", ()
   );
 });
 
+test("참여 모집 Discord 알림은 누락 시 false이고 boolean만 허용한다", () => {
+  const omitted = validRuntime();
+  delete omitted.features.discordParticipationAnnounce;
+  assert.equal(parseYoroRuntimeConfig(omitted).features.discordParticipationAnnounce, false);
+
+  const invalid = validRuntime();
+  invalid.features.discordParticipationAnnounce = "true";
+  assert.throws(
+    () => parseYoroRuntimeConfig(invalid),
+    (error) => error instanceof YoroRuntimeConfigError
+      && error.code === "runtime_features_discord_participation_announce_invalid"
+  );
+});
+
+test("참여 모집 Discord 알림은 Database와 Discord 전체 기능을 요구한다", () => {
+  const value = validRuntime();
+  value.features.database = false;
+  value.features.discordSaas = false;
+  value.features.discordBot = false;
+  value.features.discordBotManagement = false;
+  assert.throws(
+    () => parseYoroRuntimeConfig(value),
+    (error) => error instanceof YoroRuntimeConfigError
+      && error.code === "runtime_discord_participation_announce_dependency"
+  );
+});
+
 test("정상 runtime config를 정규화하고 제거된 legacy 설정은 활성화하지 않는다", () => {
   const value = validRuntime();
   value.public.overlayOrigin = "https://overlay.yoro.gg";
@@ -92,6 +120,7 @@ test("정상 runtime config를 정규화하고 제거된 legacy 설정은 활성
   assert.equal(parsed.public.baseUrl, "https://yoro.gg");
   assert.equal(Object.hasOwn(parsed.public, "overlayOrigin"), false);
   assert.equal(Object.hasOwn(parsed.features, "agentIngestion"), false);
+  assert.equal(parsed.features.discordParticipationAnnounce, true);
   assert.equal(Object.hasOwn(parsed, "agent"), false);
   assert.equal(parsed.database?.poolMax, 10);
   assert.equal(parsed.discord?.prefixCommandsEnabled, true);

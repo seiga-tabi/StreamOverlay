@@ -1,10 +1,20 @@
-import { useEffect, useState } from "react";
-import type { StreamerRiotIdRequest } from "@streamops/shared";
+import { useEffect, useMemo, useState } from "react";
+import {
+  parseStreamerRiotIdRequestListResponse,
+  type StreamerRiotIdRequest,
+  type StreamerRiotIdRequestListItem
+} from "@streamops/shared";
 import { apiGet, apiPost } from "../api/client";
 import { createDashboardLocaleProxy } from "../i18n";
+import { AdminConfirmDialog } from "../components/AdminConfirmDialog";
 
 type DashboardSnapshot = {
   streamerRiotIdRequests?: StreamerRiotIdRequest[];
+};
+
+type AdminStreamerRiotIdRequest = Omit<StreamerRiotIdRequestListItem, "verification"> & {
+  /** 초기 dashboard snapshot·mutation 구형 응답에는 없을 수 있습니다. */
+  verification?: StreamerRiotIdRequestListItem["verification"];
 };
 
 const i18n = {
@@ -36,7 +46,25 @@ const i18n = {
     dashboardEnable: "대시보드 허용",
     dashboardDisable: "대시보드 차단",
     loading: "불러오는 중",
-    none: "없음"
+    none: "없음",
+    search: "Twitch 또는 Riot ID 검색",
+    searchEmpty: "검색 결과가 없습니다.",
+    filterAll: "전체",
+    reapprove: "승인으로 변경",
+    confirmApproveTitle: "스트리머 승인",
+    confirmApproveBody: "승인하면 공개 전적에 노출되고 스트리머 기능이 열립니다. 되돌리려면 별도 차단이 필요합니다.",
+    confirmApprove: "승인합니다",
+    confirmRejectTitle: "신청 거절",
+    confirmRejectBody: "사유는 감사 기록에 남습니다. 신청자가 다시 신청할 때 참고합니다.",
+    confirmReject: "거절합니다",
+    cancel: "취소",
+    reasonLabel: "거절 사유 (필수)",
+    reasonPlaceholder: "사유를 입력하세요",
+    reasonRiot: "Riot ID 확인 불가",
+    reasonIdentity: "본인 확인 필요",
+    reasonOther: "직접 입력",
+    noteLabel: "거절 사유",
+    processing: "처리 중"
   },
   ja: {
     title: "配信者 Riot ID 承認",
@@ -66,13 +94,31 @@ const i18n = {
     dashboardEnable: "利用を許可",
     dashboardDisable: "利用を停止",
     loading: "読み込み中",
-    none: "なし"
+    none: "なし",
+    search: "Twitch または Riot ID を検索",
+    searchEmpty: "検索結果がありません。",
+    filterAll: "すべて",
+    reapprove: "承認に変更",
+    confirmApproveTitle: "配信者を承認",
+    confirmApproveBody: "承認すると公開戦績に表示され、ストリーマー機能が利用できます。取り消すには別途ブロックが必要です。",
+    confirmApprove: "承認します",
+    confirmRejectTitle: "申請を拒否",
+    confirmRejectBody: "理由は監査記録に残ります。再申請時の参考になります。",
+    confirmReject: "拒否します",
+    cancel: "キャンセル",
+    reasonLabel: "拒否理由 (必須)",
+    reasonPlaceholder: "理由を入力してください",
+    reasonRiot: "Riot ID を確認できません",
+    reasonIdentity: "本人確認が必要です",
+    reasonOther: "自由入力",
+    noteLabel: "拒否理由",
+    processing: "処理中"
   }
 } as const;
 
 const t = createDashboardLocaleProxy(i18n);
 
-function requestStatusLabel(status: StreamerRiotIdRequest["status"]): string {
+function requestStatusLabel(status: AdminStreamerRiotIdRequest["status"]): string {
   return t[status] ?? status;
 }
 
@@ -95,10 +141,18 @@ function apiErrorDetail(error: unknown, path: string, fallback: string): string 
 }
 
 export function StreamerRiotRequestsPage({ snapshot }: { snapshot: DashboardSnapshot }) {
-  const [requests, setRequests] = useState<StreamerRiotIdRequest[]>(snapshot.streamerRiotIdRequests ?? []);
+  const [requests, setRequests] = useState<AdminStreamerRiotIdRequest[]>(snapshot.streamerRiotIdRequests ?? []);
   const [loading, setLoading] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | AdminStreamerRiotIdRequest["status"]>("pending");
+  /* 되돌릴 수 없는 조작은 확인을 거칩니다. */
+  const [pendingAction, setPendingAction] = useState<{
+    request: AdminStreamerRiotIdRequest;
+    decision: "approved" | "rejected";
+  }>();
+  const [reason, setReason] = useState("");
 
   const pendingCount = requests.filter((request) => request.status === "pending").length;
   const approvedCount = requests.filter((request) => request.status === "approved").length;
@@ -106,8 +160,10 @@ export function StreamerRiotRequestsPage({ snapshot }: { snapshot: DashboardSnap
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    apiGet<{ requests: StreamerRiotIdRequest[] }>("/api/participation/streamer-riot-id-requests")
-      .then((result) => {
+    apiGet<unknown>("/api/participation/streamer-riot-id-requests")
+      .then((value) => {
+        const result = parseStreamerRiotIdRequestListResponse(value);
+        if (!result) throw new Error("streamer Riot ID 요청 목록 응답이 올바르지 않습니다.");
         if (!cancelled) setRequests(result.requests);
       })
       .catch(() => {
@@ -121,13 +177,17 @@ export function StreamerRiotRequestsPage({ snapshot }: { snapshot: DashboardSnap
     };
   }, []);
 
-  async function resolveRequest(requestId: string, decision: "approved" | "rejected") {
+  async function resolveRequest(
+    requestId: string,
+    decision: "approved" | "rejected",
+    note?: string
+  ) {
     setBusyId(requestId);
     setMessage("");
     try {
-      const result = await apiPost<{ request: StreamerRiotIdRequest; requests: StreamerRiotIdRequest[] }>(
+      const result = await apiPost<{ request: AdminStreamerRiotIdRequest; requests: AdminStreamerRiotIdRequest[] }>(
         "/api/participation/streamer-riot-id-requests/resolve",
-        { requestId, decision }
+        { requestId, decision, ...(note ? { note } : {}) }
       );
       setRequests(result.requests);
       setMessage(t.resolved);
@@ -142,7 +202,7 @@ export function StreamerRiotRequestsPage({ snapshot }: { snapshot: DashboardSnap
     setBusyId(requestId);
     setMessage("");
     try {
-      const result = await apiPost<{ request: StreamerRiotIdRequest; requests: StreamerRiotIdRequest[] }>(
+      const result = await apiPost<{ request: AdminStreamerRiotIdRequest; requests: AdminStreamerRiotIdRequest[] }>(
         "/api/participation/streamer-riot-id-requests/dashboard-access",
         { requestId, dashboardEnabled }
       );
@@ -154,6 +214,37 @@ export function StreamerRiotRequestsPage({ snapshot }: { snapshot: DashboardSnap
       setBusyId(null);
     }
   }
+
+  async function confirmPendingAction(): Promise<void> {
+    if (!pendingAction) return;
+    const { request, decision } = pendingAction;
+    const note = decision === "rejected" ? reason.trim() : undefined;
+    setPendingAction(undefined);
+    setReason("");
+    await resolveRequest(request.id, decision, note);
+  }
+
+  /* 현재 화면은 하위 호환 무인자 응답을 사용합니다. 서버 pagination UI 연결 전까지
+     이미 받아 둔 목록 안에서만 검색·상태 필터를 적용합니다. */
+  const visibleRequests = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    return requests.filter((request) => {
+      if (statusFilter !== "all" && request.status !== statusFilter) return false;
+      if (!needle) return true;
+      return [
+        request.twitchDisplayName,
+        request.twitchLogin,
+        `${request.riotGameName}#${request.riotTagLine}`
+      ].some((value) => value.toLowerCase().includes(needle));
+    });
+  }, [requests, query, statusFilter]);
+
+  const statusCounts = {
+    all: requests.length,
+    pending: pendingCount,
+    approved: approvedCount,
+    rejected: requests.filter((request) => request.status === "rejected").length
+  } as const;
 
   return (
     <>
@@ -173,10 +264,43 @@ export function StreamerRiotRequestsPage({ snapshot }: { snapshot: DashboardSnap
 
       <div className="card streamer-riot-requests-card">
         {message ? <p className="form-message">{message}</p> : null}
-        {requests.length === 0 ? <p className="muted">{t.empty}</p> : null}
-        {requests.length > 0 ? (
+
+        <div className="yoro-ar-tools">
+          <input
+            aria-label={t.search}
+            className="yoro-ar-search"
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder={t.search}
+            type="search"
+            value={query}
+          />
+          <div className="yoro-ar-filters">
+            {([
+              ["pending", t.pending],
+              ["approved", t.approved],
+              ["rejected", t.rejected],
+              ["all", t.filterAll]
+            ] as const).map(([key, label]) => (
+              <button
+                aria-pressed={statusFilter === key}
+                className="yoro-ar-filter"
+                key={key}
+                onClick={() => setStatusFilter(key)}
+                type="button"
+              >
+                {label}<b>{statusCounts[key]}</b>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {requests.length === 0 ? <p className="yoro-ar-empty">{t.empty}</p> : null}
+        {requests.length > 0 && visibleRequests.length === 0 ? (
+          <p className="yoro-ar-empty">{t.searchEmpty}</p>
+        ) : null}
+        {visibleRequests.length > 0 ? (
           <div className="streamer-riot-requests-list">
-            {requests.map((request) => (
+            {visibleRequests.map((request) => (
               <article className={`streamer-riot-request-row ${request.status}`} key={request.id}>
                 <div className="streamer-riot-request-user">
                   <span className="streamer-riot-request-avatar">
@@ -207,20 +331,29 @@ export function StreamerRiotRequestsPage({ snapshot }: { snapshot: DashboardSnap
                   {request.reviewedAt ? <small>{t.reviewedAt}: {formatDateTime(request.reviewedAt)}</small> : null}
                 </div>
                 <div className="streamer-riot-request-actions">
-                  <button
-                    className="secondary compact-button"
-                    disabled={busyId === request.id || request.status === "approved"}
-                    onClick={() => void resolveRequest(request.id, "approved")}
-                  >
-                    {t.approve}
-                  </button>
-                  <button
-                    className="secondary compact-button danger"
-                    disabled={busyId === request.id || request.status === "rejected"}
-                    onClick={() => void resolveRequest(request.id, "rejected")}
-                  >
-                    {t.reject}
-                  </button>
+                  {/* 같은 자리에서 반대 조작이 일어나지 않게 상태별로 가릅니다.
+                      거절된 요청에 "승인"이 그대로 활성이던 것을 바꿉니다. */}
+                  {request.status === "approved" ? null : (
+                    <button
+                      className="secondary compact-button"
+                      disabled={busyId === request.id}
+                      onClick={() => setPendingAction({ request, decision: "approved" })}
+                    >
+                      {request.status === "rejected" ? t.reapprove : t.approve}
+                    </button>
+                  )}
+                  {request.status === "rejected" ? null : (
+                    <button
+                      className="secondary compact-button danger"
+                      disabled={busyId === request.id}
+                      onClick={() => {
+                        setReason("");
+                        setPendingAction({ request, decision: "rejected" });
+                      }}
+                    >
+                      {t.reject}
+                    </button>
+                  )}
                   {request.status === "approved" ? (
                     <button
                       className={`secondary compact-button ${request.dashboardEnabled ? "danger" : ""}`}
@@ -231,11 +364,70 @@ export function StreamerRiotRequestsPage({ snapshot }: { snapshot: DashboardSnap
                     </button>
                   ) : null}
                 </div>
+                {/* 저장된 거절 사유가 어디에도 보이지 않았습니다. */}
+                {request.note ? (
+                  <p className="yoro-ar-note">{t.noteLabel}: {request.note}</p>
+                ) : null}
               </article>
             ))}
           </div>
         ) : null}
       </div>
+
+      {pendingAction ? (
+        <AdminConfirmDialog
+          busy={busyId === pendingAction.request.id}
+          cancelLabel={t.cancel}
+          confirmDisabled={pendingAction.decision === "rejected" && !reason.trim()}
+          confirmLabel={pendingAction.decision === "approved" ? t.confirmApprove : t.confirmReject}
+          description={pendingAction.decision === "approved" ? t.confirmApproveBody : t.confirmRejectBody}
+          onCancel={() => {
+            setPendingAction(undefined);
+            setReason("");
+          }}
+          onConfirm={() => void confirmPendingAction()}
+          summary={[
+            {
+              label: t.twitchAccount,
+              value: `${pendingAction.request.twitchDisplayName} (@${pendingAction.request.twitchLogin})`
+            },
+            {
+              label: t.riotId,
+              value: `${pendingAction.request.riotGameName}#${pendingAction.request.riotTagLine}`
+            },
+            { label: t.requestedAt, value: formatDateTime(pendingAction.request.requestedAt) }
+          ]}
+          title={pendingAction.decision === "approved" ? t.confirmApproveTitle : t.confirmRejectTitle}
+          tone={pendingAction.decision === "approved" ? "primary" : "danger"}
+        >
+          {pendingAction.decision === "rejected" ? (
+            <label className="yoro-ac-field">
+              <span>{t.reasonLabel}</span>
+              <span className="yoro-ac-presets">
+                {[t.reasonRiot, t.reasonIdentity].map((preset) => (
+                  <button
+                    aria-pressed={reason === preset}
+                    className="yoro-ac-preset"
+                    key={preset}
+                    onClick={() => setReason(preset)}
+                    type="button"
+                  >
+                    {preset}
+                  </button>
+                ))}
+              </span>
+              <textarea
+                maxLength={300}
+                onChange={(event) => setReason(event.target.value)}
+                placeholder={t.reasonPlaceholder}
+                value={reason}
+              />
+              {/* 서버가 300자까지만 저장합니다. */}
+              <span className="yoro-ac-count">{reason.length} / 300</span>
+            </label>
+          ) : null}
+        </AdminConfirmDialog>
+      ) : null}
     </>
   );
 }

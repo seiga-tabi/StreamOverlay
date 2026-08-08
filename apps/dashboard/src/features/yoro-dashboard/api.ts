@@ -48,6 +48,17 @@ function apiBase(): string {
     ?? "http://localhost:3000";
 }
 
+class YoroDashboardApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly code: string
+  ) {
+    super(message);
+    this.name = "YoroDashboardApiError";
+  }
+}
+
 async function request<T>(
   path: string,
   options: RequestInit = {}
@@ -64,7 +75,7 @@ async function request<T>(
       ? body.code
       : `streamer_api_${response.status}`;
     const message = typeof body?.error === "string" ? body.error : code;
-    throw new Error(message);
+    throw new YoroDashboardApiError(message, response.status, code);
   }
   return await response.json() as T;
 }
@@ -306,10 +317,17 @@ export type ParticipationAnnounceInput = {
   }>;
 };
 
-export function getParticipationAnnouncement(
+export async function getParticipationAnnouncement(
   signal?: AbortSignal
-): Promise<ParticipationAnnounceSettings> {
-  return request("/api/account/streamer/participation/announcement", { signal });
+): Promise<ParticipationAnnounceSettings | undefined> {
+  try {
+    return await request("/api/account/streamer/participation/announcement", { signal });
+  } catch (error) {
+    /* 이 GET의 404는 전역 feature flag가 꺼진 상태입니다. PUT의 404는
+       Organization 경계 오류일 수 있으므로 저장 경로에서는 숨기지 않습니다. */
+    if (error instanceof YoroDashboardApiError && error.status === 404) return undefined;
+    throw error;
+  }
 }
 
 export function saveParticipationAnnouncement(

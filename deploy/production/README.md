@@ -60,9 +60,11 @@ Discord Bot과 Server 사이의 HMAC key도 호스트에서 두 파일로 수동
 down -v` 또는 `docker volume rm yoro-production_discord_internal_auth`는
 실행하지 않습니다.
 
-예제 runtime처럼 모든 기능을 켠 구성이므로 활성 기능에 필요한 secret이
-하나라도 없으면 `config-check`가 실제 서비스를 시작하기 전에 실패합니다.
-secret 값은 로그에 출력하지 않습니다.
+예제 runtime은 운영 기반 기능을 켜지만 참여 모집 Discord 알림은 안전한 단계적
+배포를 위해 `features.discordParticipationAnnounce=false`가 기본입니다. migration
+`0017`·`0018`의 backup·plan·apply·검증이 끝난 뒤에만 활성화합니다. 활성 기능에
+필요한 secret이 하나라도 없으면 `config-check`가 실제 서비스를 시작하기 전에
+실패하며 secret 값은 로그에 출력하지 않습니다.
 
 ## Build identity
 

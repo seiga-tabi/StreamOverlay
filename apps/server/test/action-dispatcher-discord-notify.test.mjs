@@ -5,7 +5,7 @@ const { ActionDispatcher } = await import("../dist/core/action-dispatcher.js");
 
 /* dispatcher 는 twitchChat / store / logger 만 있으면 동작합니다.
    discord.notify 경로에서 실제로 건드리는 것만 최소로 흉내 냅니다. */
-function harness(publisher) {
+function harness(publisher, featureEnabled = true) {
   const actions = [];
   const events = [];
   const errors = [];
@@ -27,9 +27,28 @@ function harness(publisher) {
     sendChatMessage: async () => {},
     renderMessageTemplate: (message) => message
   };
-  const dispatcher = new ActionDispatcher(twitchChat, store, logger, publisher);
+  const dispatcher = new ActionDispatcher(twitchChat, store, logger, publisher, featureEnabled);
   return { dispatcher, actions, events, errors };
 }
+
+test("discord.notify는 feature flag가 꺼져 있으면 발행자 없이 skipped로 기록한다", async () => {
+  const calls = [];
+  const { dispatcher, actions, events } = harness({
+    publish: async (input) => { calls.push(input); }
+  }, false);
+
+  await dispatcher.dispatchOne(
+    { type: "discord.notify", event: "participation.recruiting" },
+    { streamerId: "123456789" }
+  );
+
+  assert.equal(calls.length, 0);
+  assert.equal(actions[0].status, "skipped");
+  assert.equal(
+    events.some((entry) => entry.type === "discord.notify_skipped" && entry.reason === "feature_disabled"),
+    true
+  );
+});
 
 test("discord.notify는 발행자가 없으면 ok가 아니라 skipped로 기록한다", async () => {
   const { dispatcher, actions, events } = harness(undefined);

@@ -71,6 +71,8 @@ import {
   type ParticipationState,
   type ParticipationStreamerProfile,
   type ParticipationStatus,
+  type PublicLolMatchRankParticipant,
+  type PublicLolMatchRankResponse,
   type PalworldServerAvailabilityErrorCode,
   type PalworldServerConnectionInput,
   type PalworldServerDashboardResponse,
@@ -80,9 +82,13 @@ import {
   type PalworldPalSpawnResponse,
   type DashboardServerStatus,
   type FollowerManagementResponse,
+  type GlobalAdminAuditAction,
   type StreamerProfileLink,
   type StreamerRiotIdentity,
   type StreamerRiotIdRequest,
+  type StreamerRiotIdRequestListItem,
+  type StreamerRiotIdRequestListResponse,
+  type StreamerRiotIdVerificationSummary,
   type SupportMailAttachmentSummary,
   type SupportMailInboundPayload
 } from "@streamops/shared";
@@ -133,6 +139,11 @@ import {
   ANNOUNCEMENT_MAX_TARGETS,
   type AnnouncementDispatchTarget
 } from "../database/repositories/discord-participation-announcement-repository.js";
+import {
+  AdminAuditLogQueryError,
+  parseAdminAuditLogQuery,
+  type AdminAuditLogRepository
+} from "../database/repositories/admin-audit-log-repository.js";
 
 /* 같은 메시지를 30초보다 자주 편집하지 않습니다. Discord rate limit 과
    채널 소음을 서버에서 막습니다. */
@@ -152,6 +163,7 @@ import {
   type DashboardRole
 } from "../security/auth.js";
 import {
+  adminAuditApiLimiter,
   dashboardApiLimiter,
   dashboardLoginLimiter,
   inboundEmailLimiter,
@@ -309,6 +321,13 @@ const PUBLIC_LOL_MATCH_DETAIL_CACHE_MAX = 1000;
 const PUBLIC_LOL_PROFILE_CACHE_MAX = 500;
 const PUBLIC_LOL_CURRENT_GAME_CACHE_MAX = 500;
 const PUBLIC_LOL_MATCH_CACHE_MAX = 1000;
+const STREAMER_RIOT_ID_REQUEST_DEFAULT_PAGE_SIZE = 50;
+const STREAMER_RIOT_ID_REQUEST_MAX_PAGE_SIZE = 100;
+const STREAMER_RIOT_ID_REQUEST_QUERY_MAX_LENGTH = 100;
+const STREAMER_RIOT_ID_REQUEST_CURSOR_MAX_LENGTH = 512;
+const STREAMER_RIOT_ID_VERIFICATION_FAILURE_TTL_MS = 10 * 60_000;
+const STREAMER_RIOT_ID_VERIFICATION_FUTURE_SKEW_MS = 5 * 60_000;
+const STREAMER_RIOT_ID_REQUEST_CURSOR_FALLBACK_SECRET = crypto.randomBytes(32);
 const TWITCH_STREAM_EVENTSUB_LIVE_FALLBACK_MAX_AGE_MS = 5 * 60_000;
 const SERVER_PROCESS_STARTED_AT = new Date(Date.now() - process.uptime() * 1000).toISOString();
 const PUBLIC_TWITCH_SUBSCRIPTION_CHECK_LIMIT = 30;
@@ -513,21 +532,6 @@ type PublicLolMatchTeamDetail = {
   damageTaken: number;
   objectives: Record<string, number>;
   players: PublicLolMatchParticipant[];
-};
-
-type PublicLolMatchRankParticipant = {
-  riotId?: string;
-  teamId?: number;
-  championId: number;
-  position?: string;
-  rankedStats?: LolRankedStats;
-};
-
-type PublicLolMatchRankResponse = {
-  status: "ready";
-  matchId: string;
-  participants: PublicLolMatchRankParticipant[];
-  fetchedAt: string;
 };
 
 type PublicLolMatchBuildItemEvent = {
@@ -2290,6 +2294,10 @@ type HttpHandlerInput = {
   discordInternalAuth?: DiscordInternalAuthVerifier;
   gameServerStatusRead?: GameServerStatusReadService;
   discordBotCommandPolicy?: DiscordBotCommandPolicyService;
+  adminAuditLogs?: Pick<
+    AdminAuditLogRepository,
+    "list" | "beginGlobalMutation" | "completeGlobalMutation"
+  >;
 };
 
 const PALWORLD_SERVER_DASHBOARD_PATH = "/api/dashboard/palworld-server";
@@ -3154,6 +3162,7 @@ function profileRecentMatchesForCache(matches: PublicLolRecentMatch[]): LolProfi
     loadingUrl: match.champion.loadingUrl,
     imageVersion: match.champion.imageVersion,
     imageLocale: match.champion.imageLocale,
+    startedAt: match.startedAt,
     won: match.result === "win"
   }));
 }
@@ -3837,15 +3846,16 @@ export function createHttpHandler(input: HttpHandlerInput) {
   }
 
   async function profileCacheEntryToSuggestion(profile: LolProfileCacheEntry, routing: LolRoutingContext): Promise<PublicLolSuggestion> {
+    const platformMatches = normalizeLolPlatformId(profile.lolPlatform) === routing.lolPlatform;
     return {
       riotId: `${profile.riotGameName}#${profile.riotTagLine}`,
       gameName: profile.riotGameName,
       tagLine: profile.riotTagLine,
       source: "recent",
-      profileIconUrl: await profileIconUrl(input.dataDragon, profile.rankedStats?.profileIconId),
-      summonerLevel: profile.rankedStats?.summonerLevel,
+      profileIconUrl: await profileIconUrl(input.dataDragon, platformMatches ? profile.rankedStats?.profileIconId : undefined),
+      summonerLevel: platformMatches ? profile.rankedStats?.summonerLevel : undefined,
       lolPlatform: routing.lolPlatform,
-      rankedStats: profile.rankedStats ? { ...profile.rankedStats } : undefined,
+      rankedStats: platformMatches && profile.rankedStats ? { ...profile.rankedStats } : undefined,
       lastSeenAt: profile.analyzedAt ?? new Date(0).toISOString()
     };
   }
@@ -3875,6 +3885,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       riotGameName: profile.gameName,
       riotTagLine: profile.tagLine,
       riotIdKey: normalizeRiotIdKey(profile.gameName, profile.tagLine),
+      lolPlatform: profile.lolPlatform,
       status: "ready",
       mainRole: profile.roleAnalysis?.mainRole,
       mainRoleConfidence: profile.roleAnalysis?.confidence,
@@ -4198,6 +4209,497 @@ export function createHttpHandler(input: HttpHandlerInput) {
     return typeof storeWithRegistry.listStreamerRiotIdRequests === "function"
       ? storeWithRegistry.listStreamerRiotIdRequests()
       : [];
+  }
+
+  type GlobalAdminAuditHandle = Readonly<{
+    mutationId: string;
+    action: GlobalAdminAuditAction;
+  }>;
+
+  function globalAdminAuditActor(principal: AuthPrincipal): {
+    actorMethod: "session";
+    actorSessionId: string;
+  } | {
+    actorMethod: "token";
+  } {
+    if (
+      principal.type !== "DASHBOARD_ADMIN"
+      || principal.role !== "admin"
+    ) {
+      throw new HttpRequestError(403, {
+        error: "관리자 권한이 필요합니다.",
+        code: "FORBIDDEN"
+      });
+    }
+    if (principal.method === "session") {
+      if (!principal.sessionId) {
+        throw new HttpRequestError(503, {
+          error: "관리자 감사 로그를 사용할 수 없습니다.",
+          code: "AUDIT_LOGS_UNAVAILABLE"
+        });
+      }
+      return {
+        actorMethod: "session",
+        actorSessionId: `dashboard-session:${principal.sessionId}`
+      };
+    }
+    /* bearer token 원문이나 그 hash는 actor identity로 저장하지 않습니다.
+       token 인증은 현재 사람 단위 identity가 없으므로 비밀이 아닌 방식 표지만 기록합니다. */
+    return { actorMethod: "token" };
+  }
+
+  async function beginGlobalAdminAudit(
+    principal: AuthPrincipal,
+    action: GlobalAdminAuditAction,
+    targetIdentifier: string,
+    metadata: Record<string, string | boolean>
+  ): Promise<GlobalAdminAuditHandle | undefined> {
+    if (!input.adminAuditLogs) {
+      /* DB를 의도적으로 끈 local/legacy 환경의 기존 승인 흐름만 보존합니다.
+         production 또는 DB 활성 환경에서는 감사 기록 없이 mutation하지 않습니다. */
+      if (!appConfig.database.enabled && appConfig.nodeEnv !== "production") return undefined;
+      throw new HttpRequestError(503, {
+        error: "관리자 감사 로그를 사용할 수 없습니다.",
+        code: "AUDIT_LOGS_UNAVAILABLE"
+      });
+    }
+    if (input.discordDatabaseReady?.() === false) {
+      throw new HttpRequestError(503, {
+        error: "관리자 감사 로그를 사용할 수 없습니다.",
+        code: "AUDIT_LOGS_UNAVAILABLE"
+      });
+    }
+    try {
+      const actor = globalAdminAuditActor(principal);
+      const mutation = await input.adminAuditLogs.beginGlobalMutation({
+        ...actor,
+        action,
+        targetIdentifier,
+        metadata
+      });
+      return { mutationId: mutation.mutationId, action };
+    } catch (error) {
+      if (error instanceof HttpRequestError) throw error;
+      input.logger?.error?.({
+        type: "admin.audit_logs.begin_failed",
+        action,
+        errorCode: error instanceof SafeDatabaseError ? error.code : "AUDIT_LOGS_UNAVAILABLE"
+      });
+      throw new HttpRequestError(503, {
+        error: "관리자 감사 로그를 사용할 수 없습니다.",
+        code: "AUDIT_LOGS_UNAVAILABLE"
+      });
+    }
+  }
+
+  async function completeGlobalAdminAudit(
+    handle: GlobalAdminAuditHandle | undefined,
+    outcome: "succeeded" | "failed"
+  ): Promise<void> {
+    if (!handle || !input.adminAuditLogs) return;
+    try {
+      await input.adminAuditLogs.completeGlobalMutation({
+        mutationId: handle.mutationId,
+        outcome
+      });
+    } catch (error) {
+      /* started row는 이미 영속됐으므로 원본 mutation을 재시도하게 만들지 않습니다.
+         finalize 실패는 별도 안전 로그로 남겨 운영자가 미완료 row를 조사하게 합니다. */
+      input.logger?.error?.({
+        type: "admin.audit_logs.finalize_failed",
+        action: handle.action,
+        outcome,
+        errorCode: error instanceof SafeDatabaseError ? error.code : "AUDIT_LOGS_UNAVAILABLE"
+      });
+    }
+  }
+
+  type StreamerRiotIdRequestListQuery = {
+    parameterized: boolean;
+    status?: StreamerRiotIdRequest["status"];
+    query: string;
+    cursor?: string;
+    limit: number;
+  };
+
+  function streamerRiotIdRequestListQuery(url: URL): StreamerRiotIdRequestListQuery {
+    const allowedKeys = new Set(["status", "q", "cursor", "limit"]);
+    const providedKeys = [...url.searchParams.keys()];
+    for (const key of providedKeys) {
+      if (!allowedKeys.has(key) || url.searchParams.getAll(key).length !== 1) {
+        throw new HttpRequestError(400, {
+          error: "지원하지 않거나 중복된 조회 조건입니다.",
+          code: "INVALID_QUERY_PARAMETER"
+        });
+      }
+    }
+    const parameterized = providedKeys.length > 0;
+    const rawStatus = url.searchParams.get("status")?.trim().toLocaleLowerCase("en-US");
+    if (rawStatus && rawStatus !== "all" && !["pending", "approved", "rejected"].includes(rawStatus)) {
+      throw new HttpRequestError(400, {
+        error: "status는 pending, approved, rejected 또는 all이어야 합니다.",
+        code: "INVALID_STATUS"
+      });
+    }
+
+    const rawQuery = url.searchParams.get("q") ?? "";
+    if (
+      rawQuery.length > STREAMER_RIOT_ID_REQUEST_QUERY_MAX_LENGTH
+      || /[\u0000-\u001f\u007f]/u.test(rawQuery)
+    ) {
+      throw new HttpRequestError(400, {
+        error: `q는 ${STREAMER_RIOT_ID_REQUEST_QUERY_MAX_LENGTH}자 이하여야 합니다.`,
+        code: "INVALID_QUERY"
+      });
+    }
+    const query = normalizeSuggestionText(rawQuery);
+
+    const rawCursor = url.searchParams.get("cursor");
+    if (
+      rawCursor !== null
+      && (
+        !rawCursor
+        || rawCursor !== rawCursor.trim()
+        || rawCursor.length > STREAMER_RIOT_ID_REQUEST_CURSOR_MAX_LENGTH
+        || !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/u.test(rawCursor)
+      )
+    ) {
+      throw new HttpRequestError(400, { error: "cursor가 올바르지 않습니다.", code: "INVALID_CURSOR" });
+    }
+
+    const rawLimit = url.searchParams.get("limit");
+    let limit = STREAMER_RIOT_ID_REQUEST_DEFAULT_PAGE_SIZE;
+    if (rawLimit !== null) {
+      if (!/^[1-9][0-9]*$/u.test(rawLimit)) {
+        throw new HttpRequestError(400, { error: "limit은 1 이상의 정수여야 합니다.", code: "INVALID_LIMIT" });
+      }
+      const requestedLimit = Number(rawLimit);
+      if (!Number.isSafeInteger(requestedLimit)) {
+        throw new HttpRequestError(400, { error: "limit이 올바르지 않습니다.", code: "INVALID_LIMIT" });
+      }
+      limit = Math.min(requestedLimit, STREAMER_RIOT_ID_REQUEST_MAX_PAGE_SIZE);
+    }
+
+    return {
+      parameterized,
+      ...(rawStatus && rawStatus !== "all" ? { status: rawStatus as StreamerRiotIdRequest["status"] } : {}),
+      query,
+      ...(rawCursor ? { cursor: rawCursor } : {}),
+      limit
+    };
+  }
+
+  type StreamerRiotIdRequestCursorPayload = {
+    version: 1;
+    filter: string;
+    updatedAt: string;
+    id: string;
+  };
+
+  function streamerRiotIdRequestFilterFingerprint(query: StreamerRiotIdRequestListQuery): string {
+    return crypto.createHash("sha256")
+      .update(`${query.status ?? "all"}\u0000${query.query}`, "utf8")
+      .digest("base64url");
+  }
+
+  function streamerRiotIdRequestCursorSecret(): Buffer {
+    const secret = appConfig.security.dashboardAuthToken || STREAMER_RIOT_ID_REQUEST_CURSOR_FALLBACK_SECRET;
+    return crypto.createHash("sha256")
+      .update("streamer-riot-id-request-cursor\u0000", "utf8")
+      .update(secret)
+      .digest();
+  }
+
+  function streamerRiotIdRequestCursorError(): never {
+    throw new HttpRequestError(400, { error: "cursor가 현재 조회 조건에 맞지 않습니다.", code: "INVALID_CURSOR" });
+  }
+
+  function encodeStreamerRiotIdRequestCursor(
+    request: StreamerRiotIdRequest,
+    query: StreamerRiotIdRequestListQuery
+  ): string {
+    const payload: StreamerRiotIdRequestCursorPayload = {
+      version: 1,
+      filter: streamerRiotIdRequestFilterFingerprint(query),
+      updatedAt: request.updatedAt,
+      id: request.id
+    };
+    const encoded = Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
+    const signature = crypto.createHmac("sha256", streamerRiotIdRequestCursorSecret())
+      .update(encoded, "ascii")
+      .digest("base64url");
+    return `${encoded}.${signature}`;
+  }
+
+  function decodeStreamerRiotIdRequestCursor(
+    cursor: string,
+    query: StreamerRiotIdRequestListQuery
+  ): StreamerRiotIdRequestCursorPayload {
+    const [encoded, signature] = cursor.split(".");
+    if (!encoded || !signature) return streamerRiotIdRequestCursorError();
+    const expectedSignature = crypto.createHmac("sha256", streamerRiotIdRequestCursorSecret())
+      .update(encoded, "ascii")
+      .digest();
+    const actualSignature = Buffer.from(signature, "base64url");
+    if (
+      actualSignature.length !== expectedSignature.length
+      || actualSignature.toString("base64url") !== signature
+      || !crypto.timingSafeEqual(actualSignature, expectedSignature)
+    ) return streamerRiotIdRequestCursorError();
+
+    let parsed: unknown;
+    try {
+      const decoded = Buffer.from(encoded, "base64url");
+      if (decoded.toString("base64url") !== encoded) return streamerRiotIdRequestCursorError();
+      parsed = JSON.parse(decoded.toString("utf8"));
+    } catch {
+      return streamerRiotIdRequestCursorError();
+    }
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return streamerRiotIdRequestCursorError();
+    const payload = parsed as Partial<StreamerRiotIdRequestCursorPayload>;
+    if (
+      payload.version !== 1
+      || payload.filter !== streamerRiotIdRequestFilterFingerprint(query)
+      || typeof payload.updatedAt !== "string"
+      || payload.updatedAt.length > 64
+      || !Number.isFinite(Date.parse(payload.updatedAt))
+      || typeof payload.id !== "string"
+      || !payload.id
+      || payload.id.length > 128
+      || /[\u0000-\u001f\u007f]/u.test(payload.id)
+    ) return streamerRiotIdRequestCursorError();
+    return payload as StreamerRiotIdRequestCursorPayload;
+  }
+
+  function streamerRiotIdVerificationCacheState(
+    value: string | undefined,
+    ttlMs: number,
+    now: number
+  ): "fresh" | "stale" | undefined {
+    const observedAt = Date.parse(value ?? "");
+    if (!Number.isFinite(observedAt) || observedAt - now > STREAMER_RIOT_ID_VERIFICATION_FUTURE_SKEW_MS) {
+      return undefined;
+    }
+    return now - observedAt <= ttlMs ? "fresh" : "stale";
+  }
+
+  function latestIsoTimestamp(values: Iterable<string | undefined>, now = Date.now()): string | undefined {
+    let latest: { value: string; timestamp: number } | undefined;
+    for (const value of values) {
+      if (!value) continue;
+      const timestamp = Date.parse(value);
+      if (!Number.isFinite(timestamp) || timestamp - now > STREAMER_RIOT_ID_VERIFICATION_FUTURE_SKEW_MS) continue;
+      if (!latest || timestamp > latest.timestamp) latest = { value, timestamp };
+    }
+    return latest?.value;
+  }
+
+  function streamerDisplayNameComparisonKey(value: string): string {
+    return value.trim().normalize("NFKC").replace(/\s+/gu, "").toLowerCase();
+  }
+
+  function streamerRiotIdVerificationSummary(
+    request: StreamerRiotIdRequest
+  ): StreamerRiotIdVerificationSummary {
+    const now = Date.now();
+    const riotIdKey = request.normalizedRiotId
+      || normalizeRiotIdKey(request.riotGameName, request.riotTagLine);
+    const expectedLolPlatform = normalizeLolPlatformId(appConfig.riot.lolPlatform) ?? "jp1";
+    let repositoryProfile: LolProfileCacheEntry | undefined;
+    try {
+      repositoryProfile = input.profileRepository?.getByRiotId(request.riotGameName, request.riotTagLine);
+    } catch {
+      // 관리자 목록은 cache 조회 장애로 중단하지 않습니다. Riot API fallback도 하지 않습니다.
+    }
+    const repositoryPlatformMatches = repositoryProfile?.lolPlatform === expectedLolPlatform;
+
+    const memoryProfiles = [...publicLolProfileCache.values()]
+      .filter(({ response }) =>
+        normalizeRiotIdKey(response.gameName, response.tagLine) === riotIdKey
+        && normalizeLolPlatformId(response.lolPlatform) === expectedLolPlatform
+      );
+    const matchPages = [...publicLolMatchPageCache.values()]
+      .filter(({ response }) =>
+        normalizeRiotIdKey(response.gameName, response.tagLine) === riotIdKey
+        && normalizeLolPlatformId(response.lolPlatform) === expectedLolPlatform
+      );
+    const suggestions = [...publicLolSuggestionCache.values()]
+      .filter((suggestion) =>
+        normalizeRiotIdKey(suggestion.gameName, suggestion.tagLine) === riotIdKey
+        && normalizeLolPlatformId(suggestion.lolPlatform) === expectedLolPlatform
+      );
+
+    const repositoryObservedAt = repositoryProfile?.analyzedAt ?? repositoryProfile?.rankedStats?.fetchedAt;
+    const repositoryState = streamerRiotIdVerificationCacheState(
+      repositoryObservedAt,
+      PUBLIC_LOL_PROFILE_STALE_TTL_MS,
+      now
+    );
+    const freshMemoryProfiles = memoryProfiles.filter(({ staleUntil, response }) =>
+      staleUntil > now
+      && streamerRiotIdVerificationCacheState(response.fetchedAt, PUBLIC_LOL_PROFILE_STALE_TTL_MS, now) === "fresh"
+    );
+    const freshMatchPages = matchPages.filter(({ expiresAt, response }) =>
+      expiresAt > now
+      && streamerRiotIdVerificationCacheState(response.fetchedAt, PUBLIC_LOL_PROFILE_STALE_TTL_MS, now) === "fresh"
+    );
+    const freshSuggestions = suggestions.filter((suggestion) =>
+      streamerRiotIdVerificationCacheState(suggestion.lastSeenAt, PUBLIC_LOL_PROFILE_STALE_TTL_MS, now) === "fresh"
+    );
+
+    const successfulObservations = [
+      ...(repositoryProfile?.status === "ready" && repositoryState === "fresh" ? [repositoryObservedAt] : []),
+      ...freshMemoryProfiles.map(({ response }) => response.fetchedAt),
+      ...freshMatchPages.map(({ response }) => response.fetchedAt),
+      ...freshSuggestions.map((suggestion) => suggestion.lastSeenAt)
+    ];
+    const accountExistsObservedAt = latestIsoTimestamp(successfulObservations, now);
+    const negativeCacheFresh = repositoryPlatformMatches
+      && repositoryProfile?.status === "failed"
+      && repositoryProfile.failureCode === "account_not_found"
+      && streamerRiotIdVerificationCacheState(
+        repositoryObservedAt,
+        STREAMER_RIOT_ID_VERIFICATION_FAILURE_TTL_MS,
+        now
+      ) === "fresh";
+    const allObservations = [
+      repositoryObservedAt,
+      ...memoryProfiles.map(({ response }) => response.fetchedAt),
+      ...matchPages.map(({ response }) => response.fetchedAt),
+      ...suggestions.map((suggestion) => suggestion.lastSeenAt)
+    ];
+    const latestObservedAt = latestIsoTimestamp(allObservations, now);
+    const hasFreshUnknownEvidence = repositoryProfile !== undefined && repositoryState === "fresh";
+    const hasStaleEvidence = repositoryState === "stale"
+      || memoryProfiles.some(({ staleUntil }) => staleUntil <= now)
+      || matchPages.some(({ expiresAt }) => expiresAt <= now)
+      || suggestions.some((suggestion) =>
+        streamerRiotIdVerificationCacheState(suggestion.lastSeenAt, PUBLIC_LOL_PROFILE_STALE_TTL_MS, now) === "stale"
+      );
+
+    const account: StreamerRiotIdVerificationSummary["account"] = accountExistsObservedAt
+      ? { state: "exists", evidence: "fresh_cache", observedAt: accountExistsObservedAt }
+      : negativeCacheFresh && repositoryObservedAt
+        ? { state: "not_found", evidence: "fresh_cache", observedAt: repositoryObservedAt }
+        : {
+          state: "unknown",
+          evidence: hasFreshUnknownEvidence ? "fresh_cache" : hasStaleEvidence ? "stale_cache" : "cache_miss",
+          ...(latestObservedAt ? { observedAt: latestObservedAt } : {})
+        };
+
+    const rankCandidates = [
+      ...(repositoryPlatformMatches && repositoryProfile?.rankedStats
+        ? [{ rankedStats: repositoryProfile.rankedStats, observedAt: repositoryObservedAt }]
+        : []),
+      ...memoryProfiles.flatMap(({ response }) => response.rankedStats
+        ? [{ rankedStats: response.rankedStats, observedAt: response.fetchedAt }]
+        : []),
+      ...suggestions.flatMap((suggestion) => suggestion.rankedStats
+        ? [{ rankedStats: suggestion.rankedStats, observedAt: suggestion.lastSeenAt }]
+        : [])
+    ].filter(({ rankedStats, observedAt }) =>
+      streamerRiotIdVerificationCacheState(observedAt, PUBLIC_LOL_PARTICIPANT_RANK_CACHE_TTL_MS, now) === "fresh"
+      && streamerRiotIdVerificationCacheState(rankedStats.fetchedAt, PUBLIC_LOL_PARTICIPANT_RANK_CACHE_TTL_MS, now) === "fresh"
+    ).sort((a, b) => Date.parse(b.rankedStats.fetchedAt) - Date.parse(a.rankedStats.fetchedAt));
+    const rankedStats = rankCandidates[0]?.rankedStats;
+
+    const lastPlayedAt = latestIsoTimestamp([
+      ...(repositoryPlatformMatches && repositoryProfile?.status === "ready" && repositoryState === "fresh"
+        ? repositoryProfile.recentMatches?.map((match) => match.startedAt) ?? []
+        : []),
+      ...freshMemoryProfiles.flatMap(({ response }) => response.recentMatches.map((match) => match.startedAt)),
+      ...freshMatchPages.flatMap(({ response }) => response.recentMatches.map((match) => match.startedAt))
+    ], now);
+
+    return {
+      account,
+      ...(rankedStats
+        ? {
+          rank: {
+            queueType: rankedStats.queueType,
+            tier: rankedStats.tier,
+            ...(rankedStats.rank ? { rank: rankedStats.rank } : {}),
+            leaguePoints: rankedStats.leaguePoints,
+            fetchedAt: rankedStats.fetchedAt
+          }
+        }
+        : {}),
+      ...(lastPlayedAt ? { lastPlayedAt } : {}),
+      twitchDisplayNameComparison: {
+        normalizedExactMatch: streamerDisplayNameComparisonKey(request.twitchDisplayName)
+          === streamerDisplayNameComparisonKey(request.riotGameName),
+        method: "nfkc_lowercase_ignore_whitespace"
+      }
+    };
+  }
+
+  function streamerRiotIdRequestListItem(request: StreamerRiotIdRequest): StreamerRiotIdRequestListItem {
+    const note = request.note?.replace(/[\u0000-\u001f\u007f]+/gu, " ").trim();
+    return {
+      id: request.id,
+      twitchLogin: request.twitchLogin,
+      twitchDisplayName: request.twitchDisplayName,
+      ...(request.twitchProfileImageUrl ? { twitchProfileImageUrl: request.twitchProfileImageUrl } : {}),
+      riotGameName: request.riotGameName,
+      riotTagLine: request.riotTagLine,
+      status: request.status,
+      ...(request.accountRole ? { accountRole: request.accountRole } : {}),
+      ...(request.dashboardEnabled !== undefined ? { dashboardEnabled: request.dashboardEnabled } : {}),
+      requestedAt: request.requestedAt,
+      updatedAt: request.updatedAt,
+      ...(request.reviewedAt ? { reviewedAt: request.reviewedAt } : {}),
+      ...(note ? { note } : {}),
+      verification: streamerRiotIdVerificationSummary(request)
+    };
+  }
+
+  function streamerRiotIdRequestListResponse(url: URL): StreamerRiotIdRequestListResponse {
+    const query = streamerRiotIdRequestListQuery(url);
+    const requests = listStreamerRiotIdRequests()
+      .sort((a, b) => {
+        const updatedDifference = (Date.parse(b.updatedAt) || 0) - (Date.parse(a.updatedAt) || 0);
+        return updatedDifference || b.id.localeCompare(a.id);
+      })
+      .filter((request) => !query.status || request.status === query.status)
+      .filter((request) => {
+        if (!query.query) return true;
+        return [
+          request.twitchLogin,
+          `@${request.twitchLogin}`,
+          request.twitchDisplayName,
+          request.riotGameName,
+          request.riotTagLine,
+          formatRiotId(request.riotGameName, request.riotTagLine)
+        ].some((value) => normalizeSuggestionText(value).includes(query.query));
+      });
+
+    if (!query.parameterized) {
+      return { requests: requests.map(streamerRiotIdRequestListItem) };
+    }
+
+    let startIndex = 0;
+    if (query.cursor) {
+      const cursor = decodeStreamerRiotIdRequestCursor(query.cursor, query);
+      const cursorIndex = requests.findIndex((request) =>
+        request.id === cursor.id && request.updatedAt === cursor.updatedAt
+      );
+      if (cursorIndex < 0) return streamerRiotIdRequestCursorError();
+      startIndex = cursorIndex + 1;
+    }
+    const page = requests.slice(startIndex, startIndex + query.limit);
+    const hasMore = startIndex + page.length < requests.length;
+    return {
+      requests: page.map(streamerRiotIdRequestListItem),
+      pagination: {
+        limit: query.limit,
+        total: requests.length,
+        returned: page.length,
+        hasMore,
+        ...(hasMore && page.length > 0
+          ? { nextCursor: encodeStreamerRiotIdRequestCursor(page[page.length - 1]!, query) }
+          : {})
+      }
+    };
   }
 
   function upsertStreamerRiotIdRequest(request: {
@@ -7533,7 +8035,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
           ? url.pathname
           : `/api/palworld/${palworldLimitGroup.group}`;
         const limitKey = `${ip}:${rateLimitPath}`;
-        const limiter = url.pathname === "/api/inbound-email/cloudflare"
+        const limiter = url.pathname === "/api/admin/audit-logs"
+          ? adminAuditApiLimiter
+          : url.pathname === "/api/inbound-email/cloudflare"
           ? inboundEmailLimiter
           : url.pathname.startsWith("/api/dashboard/auth/")
           ? dashboardLoginLimiter
@@ -7563,6 +8067,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
       }
 
       if (url.pathname.startsWith("/internal/discord/")) {
+        const participationAnnouncementPaths = new Set([
+          "/internal/discord/guild-channels/report",
+          "/internal/discord/participation-announcements/pending",
+          "/internal/discord/participation-announcements/ack"
+        ]);
         const internalPaths = new Set([
           "/internal/discord/setup-sessions",
           "/internal/discord/installations/upsert",
@@ -7576,6 +8085,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
           "/internal/discord/participation-announcements/ack"
         ]);
         if (!internalPaths.has(url.pathname) || req.method !== "POST") {
+          return sendJson(req, res, 404, { error: "not found" });
+        }
+        if (
+          !appConfig.discordParticipationAnnounce.enabled
+          && participationAnnouncementPaths.has(url.pathname)
+        ) {
           return sendJson(req, res, 404, { error: "not found" });
         }
         if (
@@ -7890,6 +8405,13 @@ export function createHttpHandler(input: HttpHandlerInput) {
         return sendJson(req, res, 204, {}, noStoreHeaders());
       }
 
+      if (
+        url.pathname === "/api/account/streamer/participation/announcement"
+        && !appConfig.discordParticipationAnnounce.enabled
+      ) {
+        return sendJson(req, res, 404, { error: "not found" });
+      }
+
       const auth = authorizeHttpRequest(req, url.pathname, sessions);
       if (!auth.ok) {
         return sendJson(req, res, auth.status, { error: auth.message, code: auth.code });
@@ -8154,7 +8676,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
           }
           /* Twitch 채널명·아바타는 방송인 신청(apply) 경로처럼 라이브 컨텍스트에서
              읽습니다 — 대표 row 스냅샷은 개명·아바타 변경 이후 낡아 있을 수 있고,
-             이 값이 서브 계정 검색 페이지의 스트리머 카드에 그대로 노출됩니다. */
+             이 값이 서브 계정 검색 페이지의 스트리머 카드에 그대로 노출됩니다.
+             이 endpoint는 승인된 대표 스트리머만 통과하며 서브 계정은 즉시 승인됩니다. */
           const result = input.store.addStreamerSubRiotIdRequest({
             twitchUserId: twitch.userId,
             twitchLogin: twitch.user.login || streamer.twitchLogin,
@@ -8162,15 +8685,19 @@ export function createHttpHandler(input: HttpHandlerInput) {
             twitchProfileImageUrl: twitch.user.profileImageUrl ?? streamer.twitchProfileImageUrl,
             riotGameName: parsed.gameName,
             riotTagLine: parsed.tagLine
-          });
+          }, { approvalMode: "owner_self_service" });
           if (!result.ok) {
-            const messages = {
-              riot_id_duplicated: "이미 등록한 Riot ID입니다.",
-              riot_id_taken: "이미 다른 스트리머가 등록한 Riot ID입니다.",
-              limit_exceeded: `서브 계정은 최대 ${STREAMER_SUB_RIOT_ACCOUNT_LIMIT}개까지 등록할 수 있습니다.`
+            const failures = {
+              streamer_approval_required: { status: 403, error: "승인된 대표 스트리머만 서브 계정을 등록할 수 있습니다." },
+              riot_id_duplicated: { status: 409, error: "이미 등록한 Riot ID입니다." },
+              riot_id_taken: { status: 409, error: "이미 다른 스트리머가 등록한 Riot ID입니다." },
+              riot_id_rejected: { status: 409, error: "관리자가 연결을 중지한 Riot ID입니다. 재검토가 필요하면 관리자에게 문의해주세요." },
+              limit_exceeded: { status: 409, error: `서브 계정은 최대 ${STREAMER_SUB_RIOT_ACCOUNT_LIMIT}개까지 등록할 수 있습니다.` }
             } as const;
-            return sendJson(req, res, 409, { error: messages[result.code], code: result.code }, noStoreHeaders());
+            const failure = failures[result.code];
+            return sendJson(req, res, failure.status, { error: failure.error, code: result.code }, noStoreHeaders());
           }
+          invalidatePublicLolProfileCachesForStreamer(result.request);
           return sendJson(req, res, 200, streamerRiotAccountsResponse(twitch.userId), noStoreHeaders());
         }
         if (url.pathname === "/api/account/streamer/riot-ids/main" && req.method === "POST") {
@@ -8216,9 +8743,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
               requestId: riotAccountMatch[1]!
             });
             if (!result.ok) {
-              const failure = result.code === "not_found"
-                ? { status: 404, error: "계정을 찾을 수 없습니다." }
-                : { status: 409, error: "대표 계정은 삭제할 수 없습니다. 먼저 다른 계정을 대표로 지정해주세요." };
+              const failures = {
+                not_found: { status: 404, error: "계정을 찾을 수 없습니다." },
+                cannot_delete_main: { status: 409, error: "대표 계정은 삭제할 수 없습니다. 먼저 다른 계정을 대표로 지정해주세요." },
+                cannot_delete_rejected: { status: 409, error: "관리자가 연결을 중지한 계정은 삭제할 수 없습니다. 재검토가 필요하면 관리자에게 문의해주세요." }
+              } as const;
+              const failure = failures[result.code];
               return sendJson(req, res, failure.status, { error: failure.error, code: result.code }, noStoreHeaders());
             }
             if (result.request.status === "approved") {
@@ -9364,6 +9894,39 @@ export function createHttpHandler(input: HttpHandlerInput) {
         }
       }
       if (await handlePalworldServerDashboardApi(req, res, url, auth.principal)) return;
+      if (url.pathname === "/api/admin/audit-logs" && req.method === "GET") {
+        if (auth.principal.type !== "DASHBOARD_ADMIN" || auth.principal.role !== "admin") {
+          return sendJson(req, res, 403, {
+            error: "관리자 권한이 필요합니다.",
+            code: "FORBIDDEN"
+          }, noStoreHeaders());
+        }
+        if (!input.adminAuditLogs || input.discordDatabaseReady?.() === false) {
+          return sendJson(req, res, 503, {
+            error: "감사 로그를 사용할 수 없습니다.",
+            code: "AUDIT_LOGS_UNAVAILABLE"
+          }, noStoreHeaders());
+        }
+        try {
+          const response = await input.adminAuditLogs.list(parseAdminAuditLogQuery(url.searchParams));
+          return sendJson(req, res, 200, response, noStoreHeaders());
+        } catch (error) {
+          if (error instanceof AdminAuditLogQueryError) {
+            return sendJson(req, res, 400, {
+              error: "감사 로그 조회 조건이 올바르지 않습니다.",
+              code: error.code
+            }, noStoreHeaders());
+          }
+          input.logger?.error({
+            type: "admin.audit_logs.read_failed",
+            errorCode: error instanceof SafeDatabaseError ? error.code : "AUDIT_LOGS_UNAVAILABLE"
+          });
+          return sendJson(req, res, 503, {
+            error: "감사 로그를 사용할 수 없습니다.",
+            code: "AUDIT_LOGS_UNAVAILABLE"
+          }, noStoreHeaders());
+        }
+      }
       if (url.pathname === "/api/dashboard/server-status" && req.method === "GET") {
         if (auth.principal.type !== "DASHBOARD_ADMIN" || auth.principal.role !== "admin") {
           return sendJson(req, res, 403, { error: "관리자 권한이 필요합니다." });
@@ -9976,7 +10539,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         if (auth.principal.type !== "DASHBOARD_ADMIN" || auth.principal.role !== "admin") {
           return sendJson(req, res, 403, { error: "관리자 권한이 필요합니다." });
         }
-        return sendJson(req, res, 200, { requests: listStreamerRiotIdRequests() });
+        return sendJson(req, res, 200, streamerRiotIdRequestListResponse(url));
       }
       if (req.method === "GET" && url.pathname === "/api/participation/profile-settings") return sendJson(req, res, 200, loadLolParticipationProfileSettings());
       if (req.method === "GET" && url.pathname === "/api/participation/profile-settings/skin-options") {
@@ -10072,17 +10635,35 @@ export function createHttpHandler(input: HttpHandlerInput) {
         }
         const beforeRequests = listStreamerRiotIdRequests();
         const beforeRequest = beforeRequests.find((candidate) => candidate.id === body.requestId);
-        const previousApprovedRequests = beforeRequest
-          ? beforeRequests.filter((candidate) => candidate.twitchUserId === beforeRequest.twitchUserId && candidate.status === "approved")
-          : [];
+        if (!beforeRequest) return sendJson(req, res, 404, { error: "등록 요청을 찾을 수 없습니다." });
+        const previousApprovedRequests = beforeRequests.filter((candidate) =>
+          candidate.twitchUserId === beforeRequest.twitchUserId
+          && candidate.status === "approved"
+        );
         const note = typeof body.note === "string" && body.note.trim() ? body.note.trim().slice(0, 300) : undefined;
-        const request = resolveStreamerRiotIdRequest({
-          requestId: body.requestId,
-          decision: body.decision,
-          reviewer: "dashboard",
-          note
-        });
-        if (!request) return sendJson(req, res, 404, { error: "등록 요청을 찾을 수 없습니다." });
+        const audit = await beginGlobalAdminAudit(
+          auth.principal,
+          "streamer.riot_id_request.resolved",
+          beforeRequest.id,
+          { decision: body.decision, noteProvided: Boolean(note) }
+        );
+        let request: StreamerRiotIdRequest | undefined;
+        try {
+          request = resolveStreamerRiotIdRequest({
+            requestId: body.requestId,
+            decision: body.decision,
+            reviewer: "dashboard",
+            note
+          });
+        } catch (error) {
+          await completeGlobalAdminAudit(audit, "failed");
+          throw error;
+        }
+        if (!request) {
+          await completeGlobalAdminAudit(audit, "failed");
+          return sendJson(req, res, 404, { error: "등록 요청을 찾을 수 없습니다." });
+        }
+        await completeGlobalAdminAudit(audit, "succeeded");
         /* 세션 강제 만료는 "대시보드 접근 근거가 사라졌을 때"의 조치입니다.
            서브 계정 row는 dashboardEnabled를 갖지 않으므로 이 조건에 항상 걸립니다 —
            서브 승인·거절은 대표 계정의 접근 근거와 무관하니 세션을 건드리지 않습니다.
@@ -10092,7 +10673,10 @@ export function createHttpHandler(input: HttpHandlerInput) {
         }
         invalidatePublicLolProfileCachesForStreamer(request);
         for (const previousRequest of previousApprovedRequests) invalidatePublicLolProfileCachesForStreamer(previousRequest);
-        return sendJson(req, res, 200, { request, requests: listStreamerRiotIdRequests() });
+        return sendJson(req, res, 200, {
+          request: streamerRiotIdRequestListItem(request),
+          requests: listStreamerRiotIdRequests().map(streamerRiotIdRequestListItem)
+        });
       }
 
       if (req.method === "POST" && url.pathname === "/api/participation/streamer-riot-id-requests/dashboard-access") {
@@ -10107,18 +10691,43 @@ export function createHttpHandler(input: HttpHandlerInput) {
           return sendJson(req, res, 400, { error: "dashboardEnabled는 boolean이어야 합니다." });
         }
         const note = typeof body.note === "string" && body.note.trim() ? body.note.trim().slice(0, 300) : undefined;
-        const request = setStreamerRiotIdDashboardEnabled({
-          requestId: body.requestId,
-          dashboardEnabled: body.dashboardEnabled,
-          reviewer: "dashboard",
-          note
-        });
-        if (!request) return sendJson(req, res, 404, { error: "승인된 등록 요청을 찾을 수 없습니다." });
+        const beforeRequest = listStreamerRiotIdRequests().find((candidate) =>
+          candidate.id === body.requestId
+          && candidate.status === "approved"
+          && !isSubStreamerRiotAccount(candidate)
+        );
+        if (!beforeRequest) return sendJson(req, res, 404, { error: "승인된 등록 요청을 찾을 수 없습니다." });
+        const audit = await beginGlobalAdminAudit(
+          auth.principal,
+          "streamer.dashboard_access.updated",
+          beforeRequest.id,
+          { dashboardEnabled: body.dashboardEnabled, noteProvided: Boolean(note) }
+        );
+        let request: StreamerRiotIdRequest | undefined;
+        try {
+          request = setStreamerRiotIdDashboardEnabled({
+            requestId: body.requestId,
+            dashboardEnabled: body.dashboardEnabled,
+            reviewer: "dashboard",
+            note
+          });
+        } catch (error) {
+          await completeGlobalAdminAudit(audit, "failed");
+          throw error;
+        }
+        if (!request) {
+          await completeGlobalAdminAudit(audit, "failed");
+          return sendJson(req, res, 404, { error: "승인된 등록 요청을 찾을 수 없습니다." });
+        }
+        await completeGlobalAdminAudit(audit, "succeeded");
         if (!request.dashboardEnabled) {
           sessions.revokeByTwitchUserId(request.twitchUserId);
         }
         invalidatePublicLolProfileCachesForStreamer(request);
-        return sendJson(req, res, 200, { request, requests: listStreamerRiotIdRequests() });
+        return sendJson(req, res, 200, {
+          request: streamerRiotIdRequestListItem(request),
+          requests: listStreamerRiotIdRequests().map(streamerRiotIdRequestListItem)
+        });
       }
 
       if (req.method === "POST" && url.pathname === "/api/participation/manual-control") {

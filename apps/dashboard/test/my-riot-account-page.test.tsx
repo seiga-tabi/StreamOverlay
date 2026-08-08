@@ -50,7 +50,7 @@ test("Riot 계정 목록 카드는 서브 계정 추가 폼과 개수 안내를 
   const html = renderToStaticMarkup(<MyRiotAccountPage csrfToken="csrf-test" streamer={streamer} />);
 
   assert.match(html, /Riot 계정 목록/);
-  assert.match(html, /서브 계정으로 검색해도 같은 스트리머로 연결됩니다|같은 스트리머로 연결/);
+  assert.match(html, /서브 계정은 추가 즉시 공개 전적에 연결됩니다/);
   assert.match(html, /추가할 Riot ID/);
   assert.match(html, /계정 추가/);
   assert.match(html, /서브 계정 4개 더 추가할 수 있습니다/);
@@ -62,6 +62,7 @@ test("Riot 계정 목록 카드는 서브 계정 추가 폼과 개수 안내를 
   setDashboardLocale("ja");
   const japanese = renderToStaticMarkup(<MyRiotAccountPage csrfToken="csrf-test" streamer={streamer} />);
   assert.match(japanese, /Riot アカウント一覧/);
+  assert.match(japanese, /サブアカウントは追加後すぐに公開戦績へ反映されます/);
   assert.match(japanese, /アカウント追加/);
   assert.match(japanese, /サブアカウントをあと 4 件追加できます/);
   assert.match(japanese, /メインアカウントの名前を変更/);

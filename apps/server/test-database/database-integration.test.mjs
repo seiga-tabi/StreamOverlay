@@ -16,6 +16,10 @@ import { DiscordManagementRepository } from "../dist/database/repositories/disco
 import { DiscordBotControlRepository } from "../dist/database/repositories/discord-bot-control-repository.js";
 import { DiscordGuildDirectoryRepository } from "../dist/database/repositories/discord-guild-directory-repository.js";
 import { DiscordParticipationAnnouncementRepository } from "../dist/database/repositories/discord-participation-announcement-repository.js";
+import {
+  AdminAuditLogRepository,
+  parseAdminAuditLogQuery
+} from "../dist/database/repositories/admin-audit-log-repository.js";
 import { YoroAccountRepository } from "../dist/database/repositories/yoro-account-repository.js";
 import { DiscordManagementService } from "../dist/services/discord-management-service.js";
 import { YoroAccountService } from "../dist/services/yoro-account-service.js";
@@ -103,6 +107,161 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
         dirty: false
       }))
     );
+  });
+
+  await t.test("전역 관리자 감사 로그는 started insert와 단방향 finalize만 허용한다", async () => {
+    const auditId = crypto.randomUUID();
+    const actorSentinel = "admin_session_SENTINEL_never_store_plaintext";
+    const targetSentinel = "riot_request_SENTINEL_never_store_plaintext";
+    const actorHash = crypto.createHash("sha256").update(actorSentinel).digest();
+    const targetHash = crypto.createHash("sha256").update(targetSentinel).digest();
+    await pool.query(
+      `INSERT INTO admin_audit_logs (
+         id, actor_reference_hash, actor_method, action, target_type,
+         target_reference_hash, safe_metadata
+       ) VALUES (
+         $1, $2, 'session', 'streamer.riot_id_request.resolved',
+         'streamer_riot_id_request', $3, $4::JSONB
+       )`,
+      [auditId, actorHash, targetHash, JSON.stringify({ decision: "approved", noteProvided: true })]
+    );
+
+    await assert.rejects(
+      pool.query(
+        `INSERT INTO admin_audit_logs (
+           id, actor_reference_hash, actor_method, action, target_type,
+           target_reference_hash, outcome, safe_metadata, completed_at
+         ) VALUES (
+           $1, $2, 'token', 'streamer.dashboard_access.updated',
+           'streamer_riot_id_request', $3, 'succeeded', $4::JSONB, NOW()
+         )`,
+        [
+          crypto.randomUUID(),
+          actorHash,
+          targetHash,
+          JSON.stringify({ dashboardEnabled: true, noteProvided: false })
+        ]
+      ),
+      (error) => error?.code === "23514"
+    );
+    await assert.rejects(
+      pool.query(
+        `UPDATE admin_audit_logs
+         SET safe_metadata = '{"decision":"approved","noteProvided":false}'::JSONB
+         WHERE id = $1`,
+        [auditId]
+      ),
+      (error) => error?.code === "23514"
+    );
+
+    await pool.query(
+      `UPDATE admin_audit_logs
+       SET outcome = 'succeeded', completed_at = NOW()
+       WHERE id = $1`,
+      [auditId]
+    );
+    await assert.rejects(
+      pool.query(
+        `UPDATE admin_audit_logs
+         SET outcome = 'failed', completed_at = NOW()
+         WHERE id = $1`,
+        [auditId]
+      ),
+      (error) => error?.code === "23514"
+    );
+    await assert.rejects(
+      pool.query("DELETE FROM admin_audit_logs WHERE id = $1", [auditId]),
+      (error) => error?.code === "23514"
+    );
+    await assert.rejects(
+      pool.query("TRUNCATE admin_audit_logs"),
+      (error) => error?.code === "23514"
+    );
+
+    const stored = await pool.query(
+      `SELECT outcome, completed_at IS NOT NULL AS completed,
+         encode(actor_reference_hash, 'hex') AS actor_reference,
+         encode(target_reference_hash, 'hex') AS target_reference,
+         safe_metadata::TEXT AS safe_metadata
+       FROM admin_audit_logs
+       WHERE id = $1`,
+      [auditId]
+    );
+    assert.deepEqual({
+      outcome: stored.rows[0].outcome,
+      completed: stored.rows[0].completed
+    }, {
+      outcome: "succeeded",
+      completed: true
+    });
+    assert.doesNotMatch(JSON.stringify(stored.rows[0]), new RegExp(`${actorSentinel}|${targetSentinel}`, "u"));
+
+    const from = new Date(Date.now() - 60_000).toISOString();
+    const to = new Date(Date.now() + 60_000).toISOString();
+    const listed = await new AdminAuditLogRepository(pool).list(parseAdminAuditLogQuery(
+      new URLSearchParams({
+        from,
+        to,
+        action: "streamer.riot_id_request.resolved",
+        actor: actorHash.toString("hex"),
+        targetReference: targetHash.toString("hex"),
+        offset: "0",
+        limit: "10"
+      })
+    ));
+    assert.equal(listed.logs.length, 1);
+    assert.deepEqual({
+      scope: listed.logs[0].scope,
+      action: listed.logs[0].action,
+      outcome: listed.logs[0].outcome,
+      metadata: listed.logs[0].metadata,
+      actorReference: listed.logs[0].actorReference,
+      targetReference: listed.logs[0].targetReference
+    }, {
+      scope: "global",
+      action: "streamer.riot_id_request.resolved",
+      outcome: "succeeded",
+      metadata: { decision: "approved", noteProvided: true },
+      actorReference: actorHash.toString("hex"),
+      targetReference: targetHash.toString("hex")
+    });
+    assert.deepEqual(listed.page, {
+      from,
+      to,
+      offset: 0,
+      limit: 10,
+      hasMore: false,
+      truncated: false
+    });
+    assert.doesNotMatch(JSON.stringify(listed), new RegExp(`${actorSentinel}|${targetSentinel}`, "u"));
+
+    const triggers = await pool.query(
+      `SELECT tgname, tgenabled
+       FROM pg_trigger
+       WHERE tgrelid = 'admin_audit_logs'::REGCLASS
+         AND tgname IN ('admin_audit_logs_finalize_only', 'admin_audit_logs_no_truncate')
+       ORDER BY tgname`
+    );
+    assert.deepEqual(triggers.rows, [
+      { tgname: "admin_audit_logs_finalize_only", tgenabled: "A" },
+      { tgname: "admin_audit_logs_no_truncate", tgenabled: "A" }
+    ]);
+    const indexes = await pool.query(
+      `SELECT indexname
+       FROM pg_indexes
+       WHERE schemaname = 'public'
+         AND indexname IN (
+           'audit_logs_admin_recent_idx',
+           'admin_audit_logs_recent_idx',
+           'admin_audit_logs_started_idx'
+         )
+       ORDER BY indexname`
+    );
+    assert.deepEqual(indexes.rows.map((row) => row.indexname), [
+      "admin_audit_logs_recent_idx",
+      "admin_audit_logs_started_idx",
+      "audit_logs_admin_recent_idx"
+    ]);
   });
 
   await t.test("checksum 변조와 미래 migration을 fail-closed 처리한다", async () => {

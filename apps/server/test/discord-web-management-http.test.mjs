@@ -116,6 +116,7 @@ async function withDiscordConfig(run) {
     discordSaasEnabled: appConfig.discordSaas.enabled,
     botInternalEnabled: appConfig.discordBotInternal.enabled,
     botManagementEnabled: appConfig.discordBotManagement.enabled,
+    participationAnnounceEnabled: appConfig.discordParticipationAnnounce.enabled,
     applicationId: appConfig.discordBotInternal.applicationId,
     corsOrigins: [...appConfig.security.corsOrigins],
     nodeEnv: appConfig.nodeEnv
@@ -125,6 +126,7 @@ async function withDiscordConfig(run) {
   appConfig.discordSaas.enabled = true;
   appConfig.discordBotInternal.enabled = true;
   appConfig.discordBotManagement.enabled = true;
+  appConfig.discordParticipationAnnounce.enabled = true;
   appConfig.discordBotInternal.applicationId = APPLICATION_ID;
   appConfig.security.corsOrigins = [DASHBOARD_ORIGIN];
   appConfig.nodeEnv = "development";
@@ -135,6 +137,7 @@ async function withDiscordConfig(run) {
     appConfig.discordSaas.enabled = previous.discordSaasEnabled;
     appConfig.discordBotInternal.enabled = previous.botInternalEnabled;
     appConfig.discordBotManagement.enabled = previous.botManagementEnabled;
+    appConfig.discordParticipationAnnounce.enabled = previous.participationAnnounceEnabled;
     appConfig.discordBotInternal.applicationId = previous.applicationId;
     appConfig.security.corsOrigins = previous.corsOrigins;
     appConfig.nodeEnv = previous.nodeEnv;
@@ -1256,6 +1259,40 @@ test("Organization 소유자의 게임 서버 삭제는 REST 자격 증명 제�
     );
     assert.equal(calls[0]?.input.organizationId, organizationId);
     assert.equal(calls[0]?.input.gameServerId, gameServerId);
+  });
+});
+
+test("참여 모집 Discord 알림 내부 경로는 feature flag가 꺼지면 인증 전에 404를 반환한다", async () => {
+  await withDiscordConfig(async () => {
+    appConfig.discordParticipationAnnounce.enabled = false;
+    let verifyCalls = 0;
+    const { handler } = createDiscordHandler({
+      handlerInput: {
+        discordInternalAuth: {
+          verify() {
+            verifyCalls += 1;
+            return { ok: true };
+          }
+        }
+      }
+    });
+
+    for (const path of [
+      "/internal/discord/guild-channels/report",
+      "/internal/discord/participation-announcements/pending",
+      "/internal/discord/participation-announcements/ack"
+    ]) {
+      const response = await request(
+        handler,
+        "POST",
+        path,
+        {},
+        { "content-type": "application/json" }
+      );
+      assert.equal(response.statusCode, 404, path);
+      assert.deepEqual(JSON.parse(response.body), { error: "not found" });
+    }
+    assert.equal(verifyCalls, 0);
   });
 });
 

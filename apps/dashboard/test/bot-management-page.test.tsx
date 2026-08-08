@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -114,7 +115,8 @@ test("Discord Bot 운영 콘솔은 활성 명령 수와 저장 전 변경 상태
       version: true,
       latency: true,
       observedAt: false
-    }
+    },
+    participationAnnounceEnabled: true
   };
 
   assert.equal(botControlActiveCommandCount(saved), 2);
@@ -127,6 +129,18 @@ test("Discord Bot 운영 콘솔은 활성 명령 수와 저장 전 변경 상태
     ...saved,
     preferredLocale: "ko"
   }, saved), true);
+  assert.equal(botControlDraftChanged({
+    ...saved,
+    participationAnnounceEnabled: false
+  }, saved), true);
+});
+
+test("Discord Bot 제어는 참여 모집 알림 거부권을 한국어·일본어로 제공한다", () => {
+  const source = readFileSync(new URL("../src/features/bot-management/BotControlCard.tsx", import.meta.url), "utf8");
+  assert.match(source, /announceGuildAllow: "참여 모집 알림 허용"/u);
+  assert.match(source, /announceGuildAllow: "参加募集通知を許可"/u);
+  assert.match(source, /participationAnnounceEnabled: event\.target\.checked/u);
+  assert.match(source, /text\.announceGuildBlockedWarning/u);
 });
 
 test("관리 로그인 URL은 통합 YORO 로그인과 안전한 복귀 경로만 사용한다", async () => {

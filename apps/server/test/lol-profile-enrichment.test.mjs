@@ -275,6 +275,7 @@ test("LolProfileEnrichmentService는 mastery API 실패 시에도 ready profile�
   const repo = new LocalJsonLolProfileRepository(join(mkdtempSync(join(tmpdir(), "lol-profile-fallback-")), "profiles.json"));
   const riot = {
     isConfigured: () => true,
+    routingStatus: () => ({ lolPlatform: "jp1" }),
     getAccountByRiotId: async () => ({ puuid: "puuid-1", gameName: "HideOnBush", tagLine: "KR1" }),
     getChampionMasteryTopByPuuid: async () => {
       throw new Error("mastery down");
@@ -283,7 +284,10 @@ test("LolProfileEnrichmentService는 mastery API 실패 시에도 ready profile�
     getRecentMatchIdsByPuuid: async () => ["match-1"],
     getMatch: async () => ({
       metadata: { matchId: "match-1", participants: ["puuid-1"] },
-      info: { participants: [{ puuid: "puuid-1", championId: 103, individualPosition: "MIDDLE", kills: 7, deaths: 3, assists: 8, win: false }] }
+      info: {
+        gameCreation: Date.parse("2026-06-16T01:02:03.000Z"),
+        participants: [{ puuid: "puuid-1", championId: 103, individualPosition: "MIDDLE", kills: 7, deaths: 3, assists: 8, win: false }]
+      }
     })
   };
   const dataDragon = {
@@ -299,7 +303,9 @@ test("LolProfileEnrichmentService는 mastery API 실패 시에도 ready profile�
   assert.deepEqual(patch.performanceStats, { sampleSize: 1, averageKills: 7, averageDeaths: 3, averageAssists: 8, kda: 5 });
   assert.equal(patch.recentMatches?.[0]?.championId, 103);
   assert.equal(patch.recentMatches?.[0]?.nameKo, "챔피언 103");
+  assert.equal(patch.recentMatches?.[0]?.startedAt, "2026-06-16T01:02:03.000Z");
   assert.equal(patch.recentMatches?.[0]?.won, false);
+  assert.equal(repo.getByRiotId("HideOnBush", "KR1")?.lolPlatform, "jp1");
 });
 
 test("LolProfileEnrichmentService는 방송자 프로필 최근 전적을 솔로랭크 10개로 제한하고 랭크 히스토리를 저장한다", async () => {
@@ -310,6 +316,7 @@ test("LolProfileEnrichmentService는 방송자 프로필 최근 전적을 솔로
   let requestedLadderQueueTypes;
   const riot = {
     isConfigured: () => true,
+    routingStatus: () => ({ lolPlatform: "jp1" }),
     getChampionMasteryTopByPuuid: async () => [],
     getRankedStatsByPuuid: async (_puuid, queueTypes) => {
       requestedRankedQueueTypes = queueTypes;
@@ -367,6 +374,7 @@ test("LolProfileEnrichmentService는 Riot API key 오류를 failed profile로 �
   const errors = [];
   const riot = {
     isConfigured: () => true,
+    routingStatus: () => ({ lolPlatform: "jp1" }),
     getAccountByRiotId: async () => {
       throw new RiotApiHttpError(401, "account.by_riot_id", "asia.api.riotgames.com", "{\"status\":{\"message\":\"Unknown apikey\"}}");
     }
@@ -385,6 +393,25 @@ test("LolProfileEnrichmentService는 Riot API key 오류를 failed profile로 �
   assert.equal(patch.riotPuuid, undefined);
   assert.equal(errors[0].type, "lol_profile.enrichment_failed");
   assert.match(errors[0].error, /RIOT_API_KEY/);
+  assert.equal(repo.getByRiotId("HideOnBush", "KR1")?.failureCode, "riot_auth");
+  assert.equal(repo.getByRiotId("HideOnBush", "KR1")?.lolPlatform, "jp1");
+});
+
+test("LolProfileEnrichmentService는 계정 없음 사실을 표시 문구가 아닌 structured failureCode로 저장한다", async () => {
+  const repo = new LocalJsonLolProfileRepository(join(mkdtempSync(join(tmpdir(), "lol-profile-not-found-")), "profiles.json"));
+  const riot = {
+    isConfigured: () => true,
+    routingStatus: () => ({ lolPlatform: "jp1" }),
+    getAccountByRiotId: async () => null
+  };
+  const service = new LolProfileEnrichmentService(riot, {}, repo, logger);
+
+  const patch = await service.enrich(entry({ riotPuuid: undefined }), config(), true);
+  const cached = repo.getByRiotId("HideOnBush", "KR1");
+
+  assert.equal(patch.profileStatus, "failed");
+  assert.equal(cached?.failureCode, "account_not_found");
+  assert.equal(cached?.lolPlatform, "jp1");
 });
 
 test("LolProfileEnrichmentService는 실패 캐시의 임시 key를 PUUID처럼 재사용하지 않는다", async () => {

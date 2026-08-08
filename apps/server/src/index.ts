@@ -71,6 +71,7 @@ import { DiscordInternalAuthVerifier } from "./security/discord-internal-auth.js
 import { GameServerStatusReadRepository } from "./database/repositories/game-server-status-read-repository.js";
 import { GameServerStatusReadService } from "./services/game-server-status-read-service.js";
 import { DiscordBotCommandPolicyService } from "./services/discord-bot-command-policy-service.js";
+import { AdminAuditLogRepository } from "./database/repositories/admin-audit-log-repository.js";
 import {
   PALWORLD_SERVER_SAFE_REGISTRATION_POLICY,
   toSafeErrorMessage,
@@ -127,6 +128,9 @@ const discordManagement = appConfig.discordBotManagement.enabled && postgresPool
   : undefined;
 const discordInternalAuth = appConfig.discordBotInternal.enabled
   ? new DiscordInternalAuthVerifier(appConfig.discordBotInternal.authKey)
+  : undefined;
+const adminAuditLogs = postgresPool
+  ? new AdminAuditLogRepository(postgresPool)
   : undefined;
 discordOnboarding?.startCleanup();
 yoroAccounts?.startCleanup();
@@ -522,7 +526,13 @@ void dataDragon.getLatestVersion()
 const lolProfileRepository = new LocalJsonLolProfileRepository(`${appConfig.paths.state}/lol-profiles.json`);
 const publicLolSnapshotStore = new LocalPublicLolSnapshotStore(`${appConfig.paths.state}/lol-public-profile-snapshots`);
 const lolProfileEnrichment = new LolProfileEnrichmentService(riot, dataDragon, lolProfileRepository, logger);
-const actions = new ActionDispatcher(twitchChat, store, logger);
+const actions = new ActionDispatcher(
+  twitchChat,
+  store,
+  logger,
+  undefined,
+  appConfig.discordParticipationAnnounce.enabled
+);
 const loggedMissingFollowerScopes = new Set<string>();
 
 const moduleContext = { events, actions, logger, store, twitch, riot, lolProfileEnrichment };
@@ -588,6 +598,7 @@ const server = http.createServer(createHttpHandler({
   discordInternalAuth,
   gameServerStatusRead,
   discordBotCommandPolicy,
+  adminAuditLogs,
   readiness: () => {
     const storeReadiness = store.getReadiness();
     const database = databaseHealth.snapshot();

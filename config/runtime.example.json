@@ -10,6 +10,7 @@
     "discordSaas": true,
     "discordBot": true,
     "discordBotManagement": true,
+    "discordParticipationAnnounce": false,
     "twitchEventSub": true
   },
   "database": {

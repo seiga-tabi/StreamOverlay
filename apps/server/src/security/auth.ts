@@ -190,6 +190,7 @@ export function authenticateDashboardRequest(req: IncomingMessage, sessions: Das
 
 export function requiredHttpPrincipal(method: string | undefined, pathname: string): PrincipalType {
   if (pathname === "/health" || pathname === "/health/live" || pathname === "/health/ready") return "PUBLIC";
+  if (method === "GET" && pathname === "/api/admin/audit-logs") return "DASHBOARD_ADMIN";
   if (method === "POST" && pathname === "/api/inbound-email/cloudflare") return "PUBLIC";
   if (pathname === "/api/dashboard/auth/status" || pathname === "/api/dashboard/auth/check") return "PUBLIC";
   if (method === "GET" && pathname.startsWith("/api/palworld/")) return "PUBLIC";

@@ -48,6 +48,7 @@ export class MemoryRateLimiter {
 
 export const dashboardLoginLimiter = new MemoryRateLimiter(8, 60_000);
 export const dashboardApiLimiter = new MemoryRateLimiter(240, 60_000);
+export const adminAuditApiLimiter = new MemoryRateLimiter(60, 60_000);
 export const publicLolApiLimiter = new MemoryRateLimiter(60, 60_000);
 export const publicPalworldApiLimiter = new MemoryRateLimiter(60, 60_000);
 export const publicPalworldListApiLimiter = new MemoryRateLimiter(180, 60_000);
@@ -59,6 +60,7 @@ export const bridgeCommandLimiter = new MemoryRateLimiter(120, 60_000);
 export function resetSecurityRateLimiters(): void {
   dashboardLoginLimiter.reset();
   dashboardApiLimiter.reset();
+  adminAuditApiLimiter.reset();
   publicLolApiLimiter.reset();
   publicPalworldApiLimiter.reset();
   publicPalworldListApiLimiter.reset();

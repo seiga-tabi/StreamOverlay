@@ -8,6 +8,8 @@ export type LolProfileCacheEntry = {
   riotGameName: string;
   riotTagLine: string;
   riotIdKey: string;
+  /** 랭크·전적 근거를 다른 shard와 섞지 않기 위한 LoL platform입니다. 이전 cache에는 없을 수 있습니다. */
+  lolPlatform?: string;
   status: LolProfileStatus;
   mainRole?: LolMainRole;
   mainRoleConfidence?: number;
@@ -20,6 +22,8 @@ export type LolProfileCacheEntry = {
   championSkinOverridesKey?: string;
   analyzedAt?: string;
   failedReason?: string;
+  /** 표시 문구와 분리된 machine-readable 실패 원인입니다. */
+  failureCode?: "account_not_found" | "riot_not_configured" | "rate_limited" | "riot_auth" | "riot_error";
   nextRetryAt?: string;
 };
 

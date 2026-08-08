@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 test("LoL 추가 전적 미리 준비와 클릭 요청은 하나의 네트워크 요청을 공유한다", async () => {
@@ -112,4 +113,55 @@ test("칼바람과 증강 칼바람 전적은 서로 다른 query와 캐시로 �
     globalThis.fetch = originalFetch;
     Object.assign(globalThis, { window: originalWindow });
   }
+});
+
+test("match-ranks API는 Shared schema를 벗어난 응답을 티어 섹션 오류로 격리한다", async () => {
+  const originalWindow = globalThis.window;
+  const originalFetch = globalThis.fetch;
+  Object.assign(globalThis, {
+    window: {
+      __STREAMOPS_CONFIG__: { apiBase: "http://localhost:3000" }
+    } as unknown as Window
+  });
+  const valid = {
+    status: "ready",
+    matchId: "JP1_123",
+    participants: [{ championId: 1 }],
+    fetchedAt: "2026-08-08T00:00:00.000Z"
+  };
+  try {
+    const { getPublicLolMatchRanks } = await import("../src/features/public-lol/api/lol");
+    globalThis.fetch = async () => new Response(JSON.stringify(valid), {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    });
+    assert.deepEqual(await getPublicLolMatchRanks(valid.matchId), valid);
+
+    globalThis.fetch = async () => new Response(JSON.stringify({
+      ...valid,
+      participants: [{ championId: "손상" }]
+    }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    });
+    await assert.rejects(getPublicLolMatchRanks(valid.matchId));
+
+    globalThis.fetch = async () => new Response(JSON.stringify({
+      ...valid,
+      matchId: "JP1_999"
+    }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    });
+    await assert.rejects(getPublicLolMatchRanks(valid.matchId));
+  } finally {
+    globalThis.fetch = originalFetch;
+    Object.assign(globalThis, { window: originalWindow });
+  }
+});
+
+test("match-ranks 오류는 전적 상세를 유지하고 티어 섹션에 안전하게 안내한다", () => {
+  const source = readFileSync(new URL("../src/pages/PublicLolPage.tsx", import.meta.url), "utf8");
+  assert.match(source, /<MatchLaneCompareView[\s\S]*\{rankError \? <FormError role="status">\{rankError\}<\/FormError> : null\}/u);
+  assert.match(source, /setMatchRankErrors\(\(current\) => \(\{ \.\.\.current, \[matchId\]: t\(\)\.tierUnavailable \}\)\)/u);
 });

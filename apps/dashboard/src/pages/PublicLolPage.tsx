@@ -5945,6 +5945,7 @@ function RecentMatches({
   const [expandedMatchViews, setExpandedMatchViews] = useState<Record<string, PublicExpandedMatchView>>({});
   const [matchRanks, setMatchRanks] = useState<Record<string, PublicLolMatchRankResponse>>({});
   const [matchRankLoading, setMatchRankLoading] = useState<Record<string, boolean>>({});
+  const [matchRankErrors, setMatchRankErrors] = useState<Record<string, string>>({});
   const [matchDetails, setMatchDetails] = useState<Record<string, PublicLolMatchTeamsResponse>>({});
   const [matchDetailLoading, setMatchDetailLoading] = useState<Record<string, boolean>>({});
   const [matchDetailErrors, setMatchDetailErrors] = useState<Record<string, string>>({});
@@ -5960,6 +5961,7 @@ function RecentMatches({
     setExpandedMatchViews({});
     setMatchRanks({});
     setMatchRankLoading({});
+    setMatchRankErrors({});
     matchDetailControllers.current.forEach((controller) => controller.abort());
     matchDetailControllers.current.clear();
     setMatchDetails({});
@@ -6005,11 +6007,13 @@ function RecentMatches({
   async function ensureMatchRanks(matchId: string): Promise<void> {
     if (matchRanks[matchId] || matchRankLoading[matchId]) return;
     setMatchRankLoading((current) => ({ ...current, [matchId]: true }));
+    setMatchRankErrors((current) => ({ ...current, [matchId]: "" }));
     try {
       const response = await getPublicLolMatchRanks(matchId);
       setMatchRanks((current) => ({ ...current, [matchId]: response }));
     } catch {
       // 티어 조회 실패는 전적 상세 자체를 숨기지 않습니다.
+      setMatchRankErrors((current) => ({ ...current, [matchId]: t().tierUnavailable }));
     } finally {
       setMatchRankLoading((current) => ({ ...current, [matchId]: false }));
     }
@@ -6039,6 +6043,7 @@ function RecentMatches({
           const highlightClass = matchHighlightClass(match.badges);
           const rankDetail = matchRanks[match.matchId];
           const rankLoading = Boolean(matchRankLoading[match.matchId]);
+          const rankError = matchRankErrors[match.matchId] ?? "";
           const matchDetail = matchDetails[match.matchId];
           const detailLoading = Boolean(matchDetailLoading[match.matchId]);
           const detailError = matchDetailErrors[match.matchId] ?? "";
@@ -6153,7 +6158,10 @@ function RecentMatches({
             }
           };
           const recordContent = (hydratedMatch.teams?.length ?? 0) > 0 ? (
-            <MatchLaneCompareView match={hydratedMatch} rankDetail={rankDetail} rankLoading={rankLoading} hideRiotIds={hideRiotIds} onSearchRiotId={onSearchRiotId} />
+            <>
+              <MatchLaneCompareView match={hydratedMatch} rankDetail={rankDetail} rankLoading={rankLoading} hideRiotIds={hideRiotIds} onSearchRiotId={onSearchRiotId} />
+              {rankError ? <FormError role="status">{rankError}</FormError> : null}
+            </>
           ) : detailLoading ? (
             <SkeletonCard loadingLabel={t().matchDetailLoading} size="md">
               <SkeletonText lines={4} />

@@ -54,8 +54,42 @@ test("패널은 로딩·빈 상태·차단·실패를 각각 다르게 처리한
   assert.match(panel, /blocked \? \(/u);
   // 중단된 요청을 실패로 세지 않습니다.
   assert.match(panel, /AbortError/u);
+  // 전역 feature flag가 꺼진 GET 404는 오류 배너 대신 패널 전체를 숨깁니다.
+  assert.match(panel, /if \(!next\)/u);
+  assert.match(panel, /if \(unavailable\) return null/u);
   // 저장 실패해도 사용자가 고른 값을 지우지 않습니다.
   assert.equal(/catch[\s\S]{0,120}setDrafts\(\[\]\)/u.test(panel), false);
+});
+
+test("참여 알림 GET 404만 feature 비활성 신호로 바꾸고 다른 오류는 유지한다", async () => {
+  const originalWindow = globalThis.window;
+  const originalFetch = globalThis.fetch;
+  Object.assign(globalThis, {
+    window: {
+      __STREAMOPS_CONFIG__: { apiBase: "http://localhost:3000" }
+    } as unknown as Window
+  });
+  try {
+    const { getParticipationAnnouncement } = await import(
+      "../src/features/yoro-dashboard/api"
+    );
+    globalThis.fetch = async () => new Response(
+      JSON.stringify({ error: "not found" }),
+      { status: 404, headers: { "content-type": "application/json" } }
+    );
+    assert.equal(await getParticipationAnnouncement(), undefined);
+
+    globalThis.fetch = async () => new Response(
+      JSON.stringify({ error: "일시적으로 사용할 수 없습니다." }),
+      { status: 503, headers: { "content-type": "application/json" } }
+    );
+    await assert.rejects(
+      () => getParticipationAnnouncement(),
+      /일시적으로 사용할 수 없습니다/u
+    );
+  } finally {
+    Object.assign(globalThis, { window: originalWindow, fetch: originalFetch });
+  }
 });
 
 test("패널 CSS는 pages layer에서 !important 없이 44px 조작 요소를 지킨다", () => {

@@ -48,6 +48,12 @@ const copy = {
     privateCommandNotice: "작성자에게만 보이는 응답은 Discord의 제한상 `!` 메시지가 아니라 `/yoro status`, `/yoro player`, `/yoro guide`로 제공합니다.",
     publicCommands: "일반 사용자 명령 사용",
     moduleEnabled: "Palworld 상태 모듈 사용",
+    announceGuildAllow: "참여 모집 알림 허용",
+    announceGuildAllowDescription: "이 서버의 스트리머가 참여 모집 알림을 보낼 수 있게 합니다.",
+    announceGuildDelegation: "스트리머가 각자 Dashboard에서 채널을 고릅니다. 관리자가 대신 지정하지 않습니다.",
+    announceGuildBlockedWarning: "이 서버를 대상으로 설정해 둔 스트리머가 있으면 차단 중에는 발송이 멈춥니다.",
+    announceAllowed: "허용",
+    announceBlocked: "차단",
     statusCommand: "`!yoro status` 사용",
     playerCommand: "`!yoro player` 사용",
     guideCommand: "`!yoro guide` 사용",
@@ -154,6 +160,12 @@ const copy = {
     privateCommandNotice: "実行者だけに表示される応答はDiscordの制限により`!`メッセージではなく、`/yoro status`、`/yoro player`、`/yoro guide`で提供します。",
     publicCommands: "一般ユーザーコマンドを使用",
     moduleEnabled: "Palworld状態モジュールを使用",
+    announceGuildAllow: "参加募集通知を許可",
+    announceGuildAllowDescription: "このサーバーのストリーマーが参加募集通知を送信できるようにします。",
+    announceGuildDelegation: "ストリーマーが各自のDashboardでチャンネルを選びます。管理者が代わりに指定することはありません。",
+    announceGuildBlockedWarning: "このサーバーを通知先に設定しているストリーマーがいる場合、ブロック中は送信が停止します。",
+    announceAllowed: "許可",
+    announceBlocked: "ブロック",
     statusCommand: "`!yoro status`を使用",
     playerCommand: "`!yoro player`を使用",
     guideCommand: "`!yoro guide`を使用",
@@ -593,6 +605,31 @@ export function BotControlCard(props: {
                     </span>
                   </label>
                 ))}
+              </div>
+              <div className="bot-control-announcement-policy">
+                <label className="bot-control-switch-card">
+                  <span>
+                    <strong>{text.announceGuildAllow}</strong>
+                    <small>{text.announceGuildAllowDescription}</small>
+                    <small>{text.announceGuildDelegation}</small>
+                  </span>
+                  <span className="bot-control-switch-card__control">
+                    <span className={draft.participationAnnounceEnabled ? "is-enabled" : undefined}>
+                      {draft.participationAnnounceEnabled ? text.announceAllowed : text.announceBlocked}
+                    </span>
+                    <input
+                      checked={draft.participationAnnounceEnabled}
+                      type="checkbox"
+                      onChange={(event) => setDraft({
+                        ...draft,
+                        participationAnnounceEnabled: event.target.checked
+                      })}
+                    />
+                  </span>
+                </label>
+                {!draft.participationAnnounceEnabled ? (
+                  <p className="bot-control-warning" role="status">{text.announceGuildBlockedWarning}</p>
+                ) : null}
               </div>
               <div className="bot-control-language">
                 <div>
