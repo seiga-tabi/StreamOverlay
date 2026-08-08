@@ -279,18 +279,26 @@ export class LolProfileEnrichmentService {
   ) {}
 
   getCachedPatch(entry: ParticipationEntry, config: LolParticipationProfileConfig): LolProfilePatch | undefined {
+    const riotGameName = entry.riotGameName ?? "";
+    const riotTagLine = entry.riotTagLine ?? "";
     const cached = isUsablePuuid(entry.riotPuuid)
       ? this.profiles.getByPuuid(entry.riotPuuid)
-      : this.profiles.getByRiotId(entry.riotGameName, entry.riotTagLine);
+      : this.profiles.getByRiotId(riotGameName, riotTagLine);
     if (!cached) return undefined;
     if (isBackoffActive(cached) || isFresh(cached, config.profileCacheTtlHours, skinOverridesKey(config, entry))) return patchFromProfile(cached);
     return undefined;
   }
 
+  // 이 서비스는 LoL 참가자(riotGameName/riotTagLine이 있는 항목)에만 호출됩니다 —
+  // 호출부(analyzeEntry, lol-profile-enrichment.module.ts)에서 Palworld 참가자를
+  // 먼저 걸러냅니다. 타입만 optional이라 아래에서는 빈 문자열 fallback으로 안전하게
+  // 처리하되, 실제로 빈 문자열이 Riot API까지 가는 일은 없습니다.
   async enrich(entry: ParticipationEntry, config: LolParticipationProfileConfig, force = false): Promise<LolProfilePatch> {
+    const riotGameName = entry.riotGameName ?? "";
+    const riotTagLine = entry.riotTagLine ?? "";
     const cached = isUsablePuuid(entry.riotPuuid)
       ? this.profiles.getByPuuid(entry.riotPuuid)
-      : this.profiles.getByRiotId(entry.riotGameName, entry.riotTagLine);
+      : this.profiles.getByRiotId(riotGameName, riotTagLine);
     const currentSkinOverridesKey = skinOverridesKey(config, entry);
     const isStreamerProfile = entry.id === "streamer-profile";
     const skinOverrides = isStreamerProfile ? config.championSkinOverrides : undefined;
@@ -305,31 +313,31 @@ export class LolProfileEnrichmentService {
 
     try {
       const account = isUsablePuuid(entry.riotPuuid)
-        ? { puuid: entry.riotPuuid, gameName: entry.riotGameName, tagLine: entry.riotTagLine }
-        : await this.riot.getAccountByRiotId(entry.riotGameName, entry.riotTagLine);
+        ? { puuid: entry.riotPuuid, gameName: riotGameName, tagLine: riotTagLine }
+        : await this.riot.getAccountByRiotId(riotGameName, riotTagLine);
       if (!account) return this.saveFailure(entry, "failed", "Riot 계정을 찾을 수 없습니다.");
 
       const [topChampions, rankedStats, ladderRank, matches] = await Promise.all([
         this.getTopChampions(account.puuid, skinOverrides).catch((error) => {
           if (shouldFailProfileAnalysis(error)) throw error;
-          this.logger.error({ type: "lol_profile.mastery_lookup_failed", error: toSafeErrorMessage(error), riotId: formatRiotId(entry.riotGameName, entry.riotTagLine) });
+          this.logger.error({ type: "lol_profile.mastery_lookup_failed", error: toSafeErrorMessage(error), riotId: formatRiotId(riotGameName, riotTagLine) });
           return [];
         }),
         this.riot.getRankedStatsByPuuid(account.puuid, isStreamerProfile ? ["RANKED_SOLO_5x5"] : undefined).catch((error) => {
           if (shouldFailProfileAnalysis(error)) throw error;
-          this.logger.error({ type: "lol_profile.rank_lookup_failed", error: toSafeErrorMessage(error), riotId: formatRiotId(entry.riotGameName, entry.riotTagLine) });
+          this.logger.error({ type: "lol_profile.rank_lookup_failed", error: toSafeErrorMessage(error), riotId: formatRiotId(riotGameName, riotTagLine) });
           return undefined;
         }),
         isStreamerProfile && typeof this.riot.getLadderRankByPuuid === "function"
           ? this.riot.getLadderRankByPuuid(account.puuid, ["RANKED_SOLO_5x5"]).catch((error) => {
             if (shouldFailProfileAnalysis(error)) throw error;
-            this.logger.error({ type: "lol_profile.ladder_rank_lookup_failed", error: toSafeErrorMessage(error), riotId: formatRiotId(entry.riotGameName, entry.riotTagLine) });
+            this.logger.error({ type: "lol_profile.ladder_rank_lookup_failed", error: toSafeErrorMessage(error), riotId: formatRiotId(riotGameName, riotTagLine) });
             return undefined;
           })
           : Promise.resolve(undefined),
         this.getRecentMatches(account.puuid, config.matchAnalysisCount, matchQueueIds).catch((error) => {
           if (shouldFailProfileAnalysis(error)) throw error;
-          this.logger.error({ type: "lol_profile.match_lookup_failed", error: toSafeErrorMessage(error), riotId: formatRiotId(entry.riotGameName, entry.riotTagLine) });
+          this.logger.error({ type: "lol_profile.match_lookup_failed", error: toSafeErrorMessage(error), riotId: formatRiotId(riotGameName, riotTagLine) });
           return [];
         })
       ]);
@@ -360,7 +368,7 @@ export class LolProfileEnrichmentService {
         analyzedAt,
         championSkinOverridesKey: currentSkinOverridesKey
       });
-      this.logger.event({ type: "lol_profile.ready", riotId: formatRiotId(entry.riotGameName, entry.riotTagLine), entryId: entry.id, mainRole: profile.mainRole });
+      this.logger.event({ type: "lol_profile.ready", riotId: formatRiotId(riotGameName, riotTagLine), entryId: entry.id, mainRole: profile.mainRole });
       return patchFromProfile(profile);
     } catch (error) {
       if (error instanceof RiotRateLimitError) {
@@ -368,7 +376,7 @@ export class LolProfileEnrichmentService {
         return this.saveFailure(entry, "rate_limited", "Riot API rate limit", backoffMs);
       }
       const reason = profileFailureReason(error);
-      this.logger.error({ type: "lol_profile.enrichment_failed", error: reason, riotId: formatRiotId(entry.riotGameName, entry.riotTagLine), entryId: entry.id });
+      this.logger.error({ type: "lol_profile.enrichment_failed", error: reason, riotId: formatRiotId(riotGameName, riotTagLine), entryId: entry.id });
       return this.saveFailure(entry, "failed", reason);
     }
   }
@@ -419,12 +427,14 @@ export class LolProfileEnrichmentService {
   }
 
   private saveFailure(entry: ParticipationEntry, status: Exclude<LolProfileStatus, "pending" | "analyzing" | "ready">, reason: string, backoffMs?: number): LolProfilePatch {
+    const riotGameName = entry.riotGameName ?? "";
+    const riotTagLine = entry.riotTagLine ?? "";
     const analyzedAt = new Date().toISOString();
     const profile = this.profiles.save({
-      riotPuuid: entry.riotPuuid ?? normalizeRiotIdKey(entry.riotGameName, entry.riotTagLine),
-      riotGameName: entry.riotGameName,
-      riotTagLine: entry.riotTagLine,
-      riotIdKey: normalizeRiotIdKey(entry.riotGameName, entry.riotTagLine),
+      riotPuuid: entry.riotPuuid ?? normalizeRiotIdKey(riotGameName, riotTagLine),
+      riotGameName,
+      riotTagLine,
+      riotIdKey: normalizeRiotIdKey(riotGameName, riotTagLine),
       status,
       analyzedAt,
       failedReason: reason,

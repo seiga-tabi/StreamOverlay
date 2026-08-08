@@ -87,6 +87,7 @@ import {
   prefetchPublicLolMatchPage,
   PublicHomeSearchPanel,
   PublicAppHeader as FeaturePublicAppHeader,
+  PublicBottomTabBar,
   PublicLocaleSelector,
   ChampionFilterSelect,
   PublicSiteFooter,
@@ -7853,6 +7854,7 @@ export function PublicLolPage({
             }}
           />
         </AppShellMain>
+        <PublicBottomTabBar activePage={activeMainPage} activeTarget={activeNav} onPage={changeMainPage} />
         <PublicSiteFooter onPage={changeMainPage} text={publicSiteFooterText()} />
         <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
       </AppShell>
@@ -7932,6 +7934,7 @@ export function PublicLolPage({
             text={publicHomeSearchPanelText(selectedLolPlatform, locale)}
           />
         </AppShellMain>
+        <PublicBottomTabBar activePage={activeMainPage} activeTarget={activeNav} onPage={changeMainPage} />
         <PublicSiteFooter onPage={changeMainPage} text={publicSiteFooterText()} />
         <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
       </AppShell>
@@ -7993,6 +7996,7 @@ export function PublicLolPage({
             </div>
           </div>
         </AppShellMain>
+        <PublicBottomTabBar activePage={activeMainPage} activeTarget={activeNav} onPage={changeMainPage} />
         <PublicSiteFooter onPage={changeMainPage} text={publicSiteFooterText()} />
         <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
       </AppShell>
@@ -8112,6 +8116,10 @@ export function PublicLolPage({
           </div>
         </div>
       </AppShellMain>
+      {/* 하단 탭바는 헤더가 아니라 AppShell 직계 자식으로 둡니다 — 전적검색 결과
+          헤더의 backdrop-filter가 position:fixed 의 기준(containing block)을
+          가로채 탭바를 화면 하단이 아닌 상단바 밑에 붙였습니다. */}
+      <PublicBottomTabBar activePage={activeMainPage} activeTarget={activeNav} onPage={changeMainPage} />
       <PublicSiteFooter onPage={changeMainPage} text={publicSiteFooterText()} />
       <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
     </AppShell>

@@ -351,13 +351,13 @@ test("시청자 참여 관리 화면은 KO·JA와 세션·대기열 관리 계�
   assert.doesNotMatch(source, /URLをコピー/u);
   assert.match(source, /\/participation/u);
   assert.match(source, /updateYoroParticipationEntry/u);
-  // 게임 선택 UI: LoL만 실제 데이터/검증이 있어 활성 상태로, Palworld는
-  // 스키마·검증 로직이 없어 "준비 중"으로만 노출합니다(가짜 데이터 금지).
-  assert.match(source, /LOL_TOTAL_CAPACITY = LOL_VIEWER_SEATS \+ 1/u);
+  // 게임 선택은 LoL/Palworld 둘 다 실제로 세션을 시작할 수 있는 버튼입니다 —
+  // 정원은 packages/shared의 PARTICIPATION_GAME_CAPACITY를 그대로 씁니다
+  // (프런트엔드가 숫자를 다시 정의하지 않고, 서버와 같은 값을 봅니다).
+  assert.match(source, /PARTICIPATION_GAME_CAPACITY\[selectedGame\]/u);
+  assert.match(source, /PARTICIPATION_GAME_CAPACITY\[activeGame\]/u);
   assert.match(source, /gamePalworld: "Palworld"/u);
-  assert.match(source, /comingSoon: "준비 중"/u);
-  assert.match(source, /comingSoon: "近日対応"/u);
-  assert.doesNotMatch(source, /riotGameName:\s*"palworld"|game:\s*"palworld"/iu);
+  assert.match(source, /mutateSession\("start", \{ game: selectedGame/u);
   assert.match(css, /@media \(max-width:\s*72rem\)/u);
   assert.match(css, /@media \(max-width:\s*48rem\)/u);
   assert.match(css, /var\(--surface\)/u);

@@ -2,6 +2,7 @@ import type {
   FollowerManagementResponse,
   FollowerOAuthStatus,
   LolOperationsState,
+  ParticipationGame,
   ParticipationListingVisibility,
   ParticipationState,
   ParticipationStatus
@@ -114,6 +115,60 @@ export function refreshYoroFollowers(
   });
 }
 
+export type StreamerRiotAccount = {
+  id: string;
+  riotGameName: string;
+  riotTagLine: string;
+  riotId: string;
+  status: "pending" | "approved" | "rejected";
+  isMain: boolean;
+  requestedAt: string;
+  updatedAt: string;
+  reviewedAt?: string;
+  note?: string;
+};
+
+export type StreamerRiotAccountsResponse = {
+  accounts: StreamerRiotAccount[];
+  limit: { sub: number };
+};
+
+export function getYoroRiotAccounts(signal?: AbortSignal): Promise<StreamerRiotAccountsResponse> {
+  return request("/api/account/streamer/riot-ids", { signal });
+}
+
+export function addYoroRiotAccount(
+  riotId: string,
+  csrfToken: string
+): Promise<StreamerRiotAccountsResponse> {
+  return request("/api/account/streamer/riot-ids", {
+    method: "POST",
+    headers: mutationHeaders(csrfToken),
+    body: JSON.stringify({ riotId })
+  });
+}
+
+export function setYoroMainRiotAccount(
+  accountId: string,
+  csrfToken: string
+): Promise<StreamerRiotAccountsResponse> {
+  return request("/api/account/streamer/riot-ids/main", {
+    method: "POST",
+    headers: mutationHeaders(csrfToken),
+    body: JSON.stringify({ accountId })
+  });
+}
+
+export function deleteYoroRiotAccount(
+  accountId: string,
+  csrfToken: string
+): Promise<StreamerRiotAccountsResponse> {
+  return request(`/api/account/streamer/riot-ids/${encodeURIComponent(accountId)}`, {
+    method: "DELETE",
+    headers: mutationHeaders(csrfToken)
+  });
+}
+
 export async function updateYoroRiotId(
   riotId: string,
   csrfToken: string
@@ -152,6 +207,7 @@ export function getYoroParticipation(signal?: AbortSignal): Promise<Participatio
 export function updateYoroParticipationSession(
   input: {
     action: ParticipationSessionAction;
+    game?: ParticipationGame;
     maxQueueSize?: number;
     allowRejoin?: boolean;
     checkInSeconds?: number;

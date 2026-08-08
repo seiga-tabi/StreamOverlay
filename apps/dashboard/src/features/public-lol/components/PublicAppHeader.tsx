@@ -15,7 +15,6 @@ import {
 } from "../../yoro-account/useYoroAccountSession";
 import { publicI18n, t, type PublicLocale } from "../i18n/public-lol-i18n";
 import type { PublicMainPage, PublicNavTarget, PublicTwitchViewerStatus } from "../types/public-lol";
-import { PublicBottomTabBar } from "./PublicBottomTabBar";
 import { PublicGameSelector } from "./PublicGameSelector";
 import { PublicHeaderMenu } from "./PublicHeaderMenu";
 import { PublicLocaleSelector } from "./PublicLocaleSelector";
@@ -344,6 +343,13 @@ export function PublicAppHeader({
     </div>
   ) : undefined;
 
+  /* 모바일 하단 탭바(PublicBottomTabBar)는 이 헤더 안에서 렌더링하지 않습니다.
+     전적검색 결과 헤더에는 backdrop-filter가 걸려 있어(02-legacy.css) 그 안의
+     position:fixed 는 뷰포트가 아니라 헤더를 기준으로 배치됩니다 — 탭바가 화면
+     하단이 아니라 상단바 바로 아래에 붙었습니다. 탭바는 PublicLolPage 의 AppShell
+     직계 자식으로 두어 어떤 헤더 스타일에도 영향받지 않게 합니다.
+     탭 클릭 시 열려 있던 메뉴는 아래 pointerdown 핸들러가 headerRef 밖 클릭으로
+     인식해 닫습니다. */
   return (
     <div id={showSearch ? "public-search" : undefined} ref={headerRef}>
       <PublicGameHeaderFrame
@@ -451,11 +457,6 @@ export function PublicAppHeader({
         )}
         pageActions={pageActions}
         search={showSearch ? searchContent : undefined}
-      />
-      <PublicBottomTabBar
-        activePage={activePage}
-        activeTarget={activeTarget}
-        onPage={handleMenuPage}
       />
     </div>
   );

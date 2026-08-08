@@ -142,6 +142,8 @@ async function analyzeEntry(
   if (!ctx.lolProfileEnrichment) return false;
   const entry = ctx.store.getParticipationEntryById(entryId, streamerId);
   if (!entry) return false;
+  // Palworld 참가자는 Riot 프로필이 없어 분석 대상이 아닙니다.
+  if (entry.game === "palworld") return false;
 
   if (!force) {
     const cached = ctx.lolProfileEnrichment.getCachedPatch(entry, config);
@@ -163,7 +165,7 @@ async function analyzeEntry(
 function profileIdentityKey(entry: ParticipationEntry): string {
   const puuid = typeof entry.riotPuuid === "string" ? entry.riotPuuid.trim() : "";
   if (puuid) return `puuid:${puuid}`;
-  return `riot:${normalizeRiotIdKey(entry.riotGameName, entry.riotTagLine)}`;
+  return `riot:${normalizeRiotIdKey(entry.riotGameName ?? "", entry.riotTagLine ?? "")}`;
 }
 
 function visibleQueuePriority(ctx: ModuleContext, entryId: string, streamerId?: string): number {

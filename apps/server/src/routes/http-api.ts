@@ -20,7 +20,15 @@ import {
   normalizeLolPlatformId,
   normalizeRiotIdKey,
   normalizeLolRole,
+  PARTICIPATION_CHAT_LOCALES,
+  PARTICIPATION_GAME_CAPACITY,
+  PARTICIPATION_GAMES,
   parseRiotIdDetailed,
+  STREAMER_SUB_RIOT_ACCOUNT_LIMIT,
+  DISCORD_ANNOUNCEMENT_MAX_JOBS,
+  type DiscordAnnouncementJob,
+  parseDiscordAnnouncementAckRequest,
+  parseDiscordAnnouncementPendingRequest,
   parseDiscordGuildDirectoryReportRequest,
   parseDiscordInstallationObservationRequest,
   parseDiscordGameServerStatusRequest,
@@ -54,7 +62,9 @@ import {
   type LolRole,
   type LolRoleAnalysis,
   type LolRoutingContext,
+  type ParticipationChatLocale,
   type ParticipationEntry,
+  type ParticipationGame,
   type ParticipationListingVisibility,
   type ParticipationPhase,
   type ParticipationSession,
@@ -119,7 +129,14 @@ import { loadLolParticipationProfileSettings, saveLolParticipationProfileSetting
 import { buildRankHistory, inferMainRoleFromMatches, performanceStatsFromMatches } from "../services/lol-profile-enrichment.js";
 import type { JsonlLogger } from "../logging/jsonl-logger.js";
 import { SafeDatabaseError } from "../database/errors.js";
-import { ANNOUNCEMENT_MAX_TARGETS } from "../database/repositories/discord-participation-announcement-repository.js";
+import {
+  ANNOUNCEMENT_MAX_TARGETS,
+  type AnnouncementDispatchTarget
+} from "../database/repositories/discord-participation-announcement-repository.js";
+
+/* 같은 메시지를 30초보다 자주 편집하지 않습니다. Discord rate limit 과
+   채널 소음을 서버에서 막습니다. */
+const ANNOUNCEMENT_MIN_EDIT_INTERVAL_MS = 30_000;
 import type { SupportMailboxFilter, SupportMailboxStore } from "../services/support-mailbox-store.js";
 import {
   DashboardSessionStore,
@@ -855,6 +872,8 @@ type PublicTwitchViewerStatusResponse = Awaited<ReturnType<PublicTwitchAuthServi
 type PublicParticipationQueueItem = {
   position: number;
   twitchUserName: string;
+  game: ParticipationGame;
+  palworldNickname?: string;
   preferredRole?: LolRole;
   requestedRole?: LolRole;
   status: ParticipationStatus;
@@ -867,7 +886,7 @@ type PublicParticipationQueueItem = {
 };
 
 type PublicParticipationViewerEntry = PublicParticipationQueueItem & {
-  riotId: string;
+  riotId?: string;
   source: ParticipationEntry["source"];
   checkInExpiresAt?: string;
 };
@@ -3876,6 +3895,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
     const participationQueue = typeof input.store.getParticipationQueue === "function" ? input.store.getParticipationQueue() : [];
 
     for (const entry of participationQueue) {
+      if (!entry.riotGameName || !entry.riotTagLine) continue;
       if (normalizeRiotIdKey(entry.riotGameName, entry.riotTagLine) !== riotIdKey) continue;
       candidates.set(entry.twitchUserId, {
         twitchUserId: entry.twitchUserId,
@@ -4012,9 +4032,27 @@ export function createHttpHandler(input: HttpHandlerInput) {
       : [];
   }
 
+  function isSubStreamerRiotAccount(request: Pick<StreamerRiotIdRequest, "accountRole">): boolean {
+    return request.accountRole === "sub";
+  }
+
+  /* "스트리머 1명 = 계정 1개"를 전제하는 소비자용 대표(main) 계정 목록.
+     전체 approved 목록(listApprovedStreamerRiotIds)은 Riot ID → 스트리머 매칭처럼
+     계정 단위 소비자만 사용해야 합니다 — Map(twitchUserId, ...)으로 접으면
+     서브 계정이 대표를 덮어씁니다. */
+  function listApprovedMainStreamerRiotIds(): StreamerRiotIdRequest[] {
+    return listApprovedStreamerRiotIds().filter((request) => !isSubStreamerRiotAccount(request));
+  }
+
   function approvedStreamerRiotIdForTwitchUser(twitchUserId: string | undefined): StreamerRiotIdRequest | undefined {
     if (!twitchUserId) return undefined;
-    return listApprovedStreamerRiotIds().find((request) => request.twitchUserId === twitchUserId);
+    /* 스트리머 자격은 승인된 "대표" row에만 걸립니다. 서브 row로 fallback하면
+       관리자가 대표를 거절(자격 회수)해도 승인된 서브가 남아 있는 동안
+       /api/account/streamer/* 권한이 계속 살아 있게 됩니다 —
+       approvedStreamerIdentityForOwner(대표 전용)와도 판정이 어긋납니다. */
+    return listApprovedStreamerRiotIds().find((request) =>
+      request.twitchUserId === twitchUserId && !isSubStreamerRiotAccount(request)
+    );
   }
 
   function streamerDashboardEnabled(request: StreamerRiotIdRequest | undefined): request is StreamerRiotIdRequest {
@@ -4026,11 +4064,61 @@ export function createHttpHandler(input: HttpHandlerInput) {
     return streamerDashboardEnabled(request) ? request : undefined;
   }
 
+  /* 대시보드 "내 Riot ID" 계정 목록 응답. 대표 row와 서브 row만 싣습니다 —
+     본계정 재신청 flow가 남긴 pending·rejected non-sub row는 이 목록의 대상이
+     아니라 /api/account/streamer 승인 상태 화면의 몫입니다. */
+  function streamerRiotAccountsResponse(twitchUserId: string): {
+    accounts: Array<{
+      id: string;
+      riotGameName: string;
+      riotTagLine: string;
+      riotId: string;
+      status: StreamerRiotIdRequest["status"];
+      isMain: boolean;
+      requestedAt: string;
+      updatedAt: string;
+      reviewedAt?: string;
+      note?: string;
+    }>;
+    limit: { sub: number };
+  } {
+    const rows = listStreamerRiotIdRequests()
+      .filter((request) => request.twitchUserId === twitchUserId)
+      .filter((request) => isSubStreamerRiotAccount(request)
+        || (request.status === "approved" && !isSubStreamerRiotAccount(request)));
+    const rank = (request: StreamerRiotIdRequest): number => {
+      if (request.status === "approved" && !isSubStreamerRiotAccount(request)) return 0;
+      if (request.status === "approved") return 1;
+      if (request.status === "pending") return 2;
+      return 3;
+    };
+    rows.sort((a, b) => rank(a) - rank(b) || Date.parse(a.requestedAt) - Date.parse(b.requestedAt));
+    return {
+      accounts: rows.map((request) => ({
+        id: request.id,
+        riotGameName: request.riotGameName,
+        riotTagLine: request.riotTagLine,
+        riotId: formatRiotId(request.riotGameName, request.riotTagLine),
+        status: request.status,
+        isMain: request.status === "approved" && !isSubStreamerRiotAccount(request),
+        requestedAt: request.requestedAt,
+        updatedAt: request.updatedAt,
+        ...(request.reviewedAt ? { reviewedAt: request.reviewedAt } : {}),
+        ...(request.note ? { note: request.note } : {})
+      })),
+      limit: { sub: STREAMER_SUB_RIOT_ACCOUNT_LIMIT }
+    };
+  }
+
   function currentStreamerRiotIdRequestForTwitchUser(twitchUserId: string | undefined): StreamerRiotIdRequest | undefined {
     if (!twitchUserId) return undefined;
     const requests = listStreamerRiotIdRequests().filter((request) => request.twitchUserId === twitchUserId);
-    return requests.find((request) => request.status === "approved")
-      ?? requests.find((request) => request.status === "pending")
+    /* 서브 계정 row는 스트리머의 "현재 등록 상태"가 아닙니다 — 승인 대기 중인
+       서브 때문에 대시보드가 본계정 재신청 대기로 보이면 안 됩니다. */
+    const mains = requests.filter((request) => !isSubStreamerRiotAccount(request));
+    return mains.find((request) => request.status === "approved")
+      ?? mains.find((request) => request.status === "pending")
+      ?? mains[0]
       ?? requests[0];
   }
 
@@ -4353,12 +4441,16 @@ export function createHttpHandler(input: HttpHandlerInput) {
   function startParticipationSessionForOwner(
     streamerId: string,
     options: {
+      game?: ParticipationGame;
       maxQueueSize?: number;
       allowRejoin?: boolean;
       checkInSeconds?: number;
       listingVisibility?: ParticipationListingVisibility;
     } = {}
   ) {
+    // Riot ID 승인 게이트는 게임 종류와 무관하게 참여 기능 전체의 기존 입구입니다.
+    // Palworld 세션도 이 게이트를 그대로 통과해야 합니다 — 승인/권한 로직 자체를
+    // 건드리는 건 이번 변경 범위 밖입니다.
     const identity = approvedStreamerIdentityForOwner(streamerId);
     if (!identity) {
       throw new HttpRequestError(409, { error: "승인된 Riot ID가 있어야 시참 모집을 시작할 수 있습니다." });
@@ -4374,23 +4466,28 @@ export function createHttpHandler(input: HttpHandlerInput) {
 
   function participationSessionMutationBody(value: unknown): {
     action: string;
+    game?: ParticipationGame;
     maxQueueSize?: number;
     allowRejoin?: boolean;
     checkInSeconds?: number;
     listingVisibility?: ParticipationListingVisibility;
     expectedRevision?: number;
   } {
-    const body = strictJsonObject(value, ["action", "maxQueueSize", "allowRejoin", "checkInSeconds", "listingVisibility", "expectedRevision"]);
+    const body = strictJsonObject(value, ["action", "game", "maxQueueSize", "allowRejoin", "checkInSeconds", "listingVisibility", "expectedRevision"]);
     if (typeof body.action !== "string" || !PARTICIPATION_SESSION_ACTIONS.has(body.action)) {
       throw new HttpRequestError(400, { error: "허용되지 않은 시청자 참여 세션 조작입니다.", code: "INVALID_ACTION" });
     }
     if (body.action !== "start" && (
-      body.maxQueueSize !== undefined
+      body.game !== undefined
+      || body.maxQueueSize !== undefined
       || body.allowRejoin !== undefined
       || body.checkInSeconds !== undefined
       || body.listingVisibility !== undefined
     )) {
       throw new HttpRequestError(400, { error: "세션 생성 설정은 start 동작에서만 사용할 수 있습니다.", code: "INVALID_REQUEST" });
+    }
+    if (body.game !== undefined && !PARTICIPATION_GAMES.includes(body.game as ParticipationGame)) {
+      throw new HttpRequestError(400, { error: "지원하지 않는 게임입니다.", code: "INVALID_GAME" });
     }
     if (body.expectedRevision !== undefined && (
       typeof body.expectedRevision !== "number"
@@ -4423,6 +4520,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
     }
     return {
       action: body.action,
+      ...(body.game === "lol" || body.game === "palworld" ? { game: body.game } : {}),
       ...(typeof body.maxQueueSize === "number" ? { maxQueueSize: body.maxQueueSize } : {}),
       ...(typeof body.allowRejoin === "boolean" ? { allowRejoin: body.allowRejoin } : {}),
       ...(typeof body.checkInSeconds === "number" ? { checkInSeconds: body.checkInSeconds } : {}),
@@ -4464,6 +4562,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         });
       }
       startParticipationSessionForOwner(streamerId, {
+        ...(body.game !== undefined ? { game: body.game } : {}),
         ...(body.maxQueueSize !== undefined ? { maxQueueSize: body.maxQueueSize } : {}),
         ...(body.allowRejoin !== undefined ? { allowRejoin: body.allowRejoin } : {}),
         ...(body.checkInSeconds !== undefined ? { checkInSeconds: body.checkInSeconds } : {}),
@@ -4542,6 +4641,18 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if (targetEntries.some((entry) => !entry || !["verified", "waitlisted"].includes(entry.status))) {
         throw new HttpRequestError(409, { error: "검증이 완료된 대기 참가자만 선정할 수 있습니다.", code: "ENTRY_NOT_SELECTABLE" });
       }
+      // 게임별 진행 인원 정원(방송인 1자리 제외)을 넘는 선정은 막습니다. 이 서버
+      // 검증이 최종 판단입니다 — 대시보드의 비활성화는 안내용일 뿐입니다.
+      const activeParticipantCount = currentState.queue.filter((entry) => (
+        ["selected", "checked_in", "invited", "in_game"].includes(entry.status)
+      )).length;
+      const viewerCapacity = PARTICIPATION_GAME_CAPACITY[currentState.session.game] - 1;
+      if (activeParticipantCount + entryIds.length > viewerCapacity) {
+        throw new HttpRequestError(409, {
+          error: "진행 인원이 가득 찼습니다.",
+          code: "PARTICIPATION_CAPACITY_FULL"
+        });
+      }
       const selected = input.store.selectParticipants(
         entryIds,
         currentState.session.checkInSeconds ?? 60,
@@ -4584,6 +4695,20 @@ export function createHttpHandler(input: HttpHandlerInput) {
     }
     const parsed = parseRiotIdDetailed(rawRiotId);
     if (!parsed.ok) throw new HttpRequestError(400, { error: parsed.message });
+    /* 개명은 self-serve라 이 검사가 없으면 다른 스트리머(또는 자신의 서브)가
+       이미 등록한 ID를 대표로 덮어써 같은 Riot ID의 승인 row가 둘이 됩니다 —
+       서브 추가(addStreamerSubRiotIdRequest)의 선점 가드와 같은 기준을 적용합니다. */
+    const normalizedKey = normalizeRiotIdKey(parsed.gameName, parsed.tagLine);
+    const conflict = listStreamerRiotIdRequests().find((row) =>
+      row.status !== "rejected"
+      && row.normalizedRiotId === normalizedKey
+      && row.id !== previous.id
+    );
+    if (conflict) {
+      throw new HttpRequestError(409, conflict.twitchUserId === streamerId
+        ? { error: "이미 등록한 Riot ID입니다. 대표 전환은 계정 목록의 대표 지정을 사용해주세요.", code: "riot_id_duplicated" }
+        : { error: "이미 다른 스트리머가 등록한 Riot ID입니다.", code: "riot_id_taken" });
+    }
     const request = updateApprovedStreamerRiotId({
       twitchUserId: streamerId,
       riotGameName: parsed.gameName,
@@ -4854,7 +4979,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       rankedStats?: LolRankedStats;
       source: "approved_streamer";
     }>();
-    for (const request of listApprovedStreamerRiotIds()) {
+    for (const request of listApprovedMainStreamerRiotIds()) {
       profiles.set(request.twitchUserId, {
         riotGameName: request.riotGameName,
         riotTagLine: request.riotTagLine,
@@ -5011,6 +5136,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
     return {
       position,
       twitchUserName: entry.twitchUserName,
+      game: entry.game ?? "lol",
+      ...(entry.game === "palworld" && entry.palworldNickname ? { palworldNickname: entry.palworldNickname } : {}),
       ...(entry.preferredRole ? { preferredRole: entry.preferredRole } : {}),
       ...(entry.requestedRole ? { requestedRole: entry.requestedRole } : {}),
       status: entry.status,
@@ -5026,7 +5153,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
   function publicParticipationViewerEntry(entry: ParticipationEntry, position: number): PublicParticipationViewerEntry {
     return {
       ...publicParticipationQueueItem(entry, position, entry.twitchUserId),
-      riotId: formatRiotId(entry.riotGameName, entry.riotTagLine),
+      ...(entry.game === "palworld"
+        ? {}
+        : { riotId: formatRiotId(entry.riotGameName ?? "", entry.riotTagLine ?? "") }),
       source: entry.source,
       ...(entry.checkInExpiresAt ? { checkInExpiresAt: entry.checkInExpiresAt } : {})
     };
@@ -5040,7 +5169,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
     selectedStreamerId?: string;
     scopeStreamerId?: string;
   }> {
-    const approvedStreamers = listApprovedStreamerRiotIds();
+    const approvedStreamers = listApprovedMainStreamerRiotIds();
     const approvedByOwner = new Map(approvedStreamers.map((request) => [request.twitchUserId, request]));
     const activeSessions = input.store.listParticipationSessions()
       .filter((session) => (
@@ -5094,8 +5223,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
     const streamerProfile = input.store.getParticipationStreamerProfile();
     const monitorRiotId = parseRiotIdDetailed(loadGameMonitorConfig().streamerRiotId);
     const monitorKey = monitorRiotId.ok ? normalizeRiotIdKey(monitorRiotId.gameName, monitorRiotId.tagLine) : undefined;
+    /* riot-id 키 매칭은 서브 계정도 대상입니다 — approvedStreamers(대표 목록)가
+       아니라 전체 승인 목록에서 찾아야 legacy monitor 설정이 서브가 된 계정을
+       가리켜도 스트리머 연결이 끊기지 않습니다. */
     const matchedApproved = monitorKey
-      ? approvedStreamers.find((request) => request.normalizedRiotId === monitorKey)
+      ? listApprovedStreamerRiotIds().find((request) => request.normalizedRiotId === monitorKey)
       : undefined;
     const connectedStreamer = await connectedStreamerRiotProfile().catch(() => undefined);
     const connectedApproved = connectedStreamer?.twitchUserId
@@ -5151,7 +5283,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       };
     }
     const followed = await getPublicTwitchFollowedLol(100, req, false);
-    const approvedByOwner = new Map(listApprovedStreamerRiotIds().map((request) => [request.twitchUserId, request]));
+    const approvedByOwner = new Map(listApprovedMainStreamerRiotIds().map((request) => [request.twitchUserId, request]));
     const recruitingByOwner = new Map(
       participationRepository.listSessions()
         .filter((session) => session.status === "recruiting")
@@ -5279,7 +5411,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
     }
     const body = strictJsonObject(
       await readJsonBody<unknown>(req),
-      publicSessionId ? ["riotId", "role"] : ["riotId", "role", "streamerId"]
+      publicSessionId ? ["riotId", "role", "palworldNickname"] : ["riotId", "role", "palworldNickname", "streamerId"]
     );
     const selectedSession = publicSessionId ? participationRepository.getSession(publicSessionId) : undefined;
     if (publicSessionId && !selectedSession) {
@@ -5297,15 +5429,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (!streamerState.selectedStreamerId || !input.store.getParticipationState(streamerState.scopeStreamerId).isOpen) {
       throw new HttpRequestError(409, { error: "현재 시청자 참여 대기열이 닫혀 있습니다.", code: "SESSION_CLOSED" });
     }
-    if (typeof body.riotId !== "string") {
-      throw new HttpRequestError(400, { error: "Riot ID를 입력해주세요." });
-    }
-    const parsed = parseRiotIdDetailed(body.riotId);
-    if (!parsed.ok) {
-      throw new HttpRequestError(400, { error: parsed.message });
-    }
-    const normalizedRole = normalizeLolRole(typeof body.role === "string" ? body.role : undefined);
-    const role: LolRole = normalizedRole === "unknown" ? "fill" : normalizedRole;
+    // 세션이 정한 게임에 따라 입력 필드와 검증 방식이 갈립니다. Palworld는 공식
+    // 계정 조회 API가 없어 검증 없이 자기 신고 닉네임만으로 대기열에 등록합니다.
+    const targetGame = selectedSession?.game
+      ?? input.store.getParticipationState(streamerState.scopeStreamerId).session?.game
+      ?? "lol";
     const previousViewerEntry = input.store.getParticipationQueue(streamerState.scopeStreamerId)
       .filter((entry) => entry.twitchUserId === status.user!.id)
       .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))[0];
@@ -5315,11 +5443,36 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (rejoinOnly && selectedSession?.allowRejoin === false) {
       throw new HttpRequestError(409, { error: "이 참여 세션은 재참여를 허용하지 않습니다.", code: "REJOIN_NOT_ALLOWED" });
     }
-    const duplicateBefore = input.store.findParticipationDuplicate({
+
+    let parsedRiotId: { gameName: string; tagLine: string } | undefined;
+    let role: LolRole = "fill";
+    let palworldNickname = "";
+    if (targetGame === "palworld") {
+      palworldNickname = typeof body.palworldNickname === "string" ? body.palworldNickname.trim() : "";
+      if (!palworldNickname) {
+        throw new HttpRequestError(400, { error: "Palworld 닉네임을 입력해주세요." });
+      }
+      if (palworldNickname.length > 32) {
+        throw new HttpRequestError(400, { error: "닉네임은 32자 이하로 입력해주세요." });
+      }
+    } else {
+      if (typeof body.riotId !== "string") {
+        throw new HttpRequestError(400, { error: "Riot ID를 입력해주세요." });
+      }
+      const parsed = parseRiotIdDetailed(body.riotId);
+      if (!parsed.ok) {
+        throw new HttpRequestError(400, { error: parsed.message });
+      }
+      parsedRiotId = { gameName: parsed.gameName, tagLine: parsed.tagLine };
+      const normalizedRole = normalizeLolRole(typeof body.role === "string" ? body.role : undefined);
+      role = normalizedRole === "unknown" ? "fill" : normalizedRole;
+    }
+    const duplicateLookup = {
       twitchUserId: status.user.id,
-      riotGameName: parsed.gameName,
-      riotTagLine: parsed.tagLine
-    }, streamerState.scopeStreamerId);
+      ...(parsedRiotId ? { riotGameName: parsedRiotId.gameName, riotTagLine: parsedRiotId.tagLine } : {})
+    };
+
+    const duplicateBefore = input.store.findParticipationDuplicate(duplicateLookup, streamerState.scopeStreamerId);
     if (duplicateBefore) {
       const state = await getPublicParticipationState(req, status, streamerState.selectedStreamerId, selectedSession?.publicSessionId);
       return {
@@ -5335,16 +5488,27 @@ export function createHttpHandler(input: HttpHandlerInput) {
       throw new HttpRequestError(409, { error: "참여 대기열이 가득 찼습니다.", code: "QUEUE_FULL" });
     }
 
-    const previousProfile = input.store.findReusableParticipationProfile({
-      riotGameName: parsed.gameName,
-      riotTagLine: parsed.tagLine
-    }, streamerState.scopeStreamerId);
+    const previousProfile = parsedRiotId
+      ? input.store.findReusableParticipationProfile({
+        riotGameName: parsedRiotId.gameName,
+        riotTagLine: parsedRiotId.tagLine
+      }, streamerState.scopeStreamerId)
+      : undefined;
     const profileReady = previousProfile?.profileStatus === "ready" || Boolean(previousProfile?.rankedStats);
-    const entry = input.store.makeParticipationEntry({
+    const entry = input.store.makeParticipationEntry(targetGame === "palworld" ? {
       twitchUserId: status.user.id,
       twitchUserName: status.user.displayName || status.user.login,
-      riotGameName: parsed.gameName,
-      riotTagLine: parsed.tagLine,
+      game: "palworld",
+      palworldNickname,
+      status: "waitlisted",
+      source: "dashboard",
+      joinedFrom: "public_web"
+    } : {
+      twitchUserId: status.user.id,
+      twitchUserName: status.user.displayName || status.user.login,
+      game: "lol",
+      riotGameName: parsedRiotId!.gameName,
+      riotTagLine: parsedRiotId!.tagLine,
       ...(previousProfile?.riotPuuid ? { riotPuuid: previousProfile.riotPuuid } : {}),
       requestedRole: role,
       preferredRole: role,
@@ -5370,11 +5534,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
     ) {
       throw new HttpRequestError(409, { error: "현재 시청자 참여 대기열이 닫혀 있습니다.", code: "SESSION_CLOSED" });
     }
-    const duplicateImmediatelyBeforeSave = input.store.findParticipationDuplicate({
-      twitchUserId: status.user.id,
-      riotGameName: parsed.gameName,
-      riotTagLine: parsed.tagLine
-    }, streamerState.scopeStreamerId);
+    const duplicateImmediatelyBeforeSave = input.store.findParticipationDuplicate(duplicateLookup, streamerState.scopeStreamerId);
     if (duplicateImmediatelyBeforeSave) {
       const state = await getPublicParticipationState(req, status, streamerState.selectedStreamerId, latestSession.publicSessionId);
       return {
@@ -5395,7 +5555,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       streamerState.scopeStreamerId
     )
       .catch(() => undefined);
-    if (input.refreshLolProfile && saved.entry.profileStatus !== "ready") {
+    if (targetGame === "lol" && input.refreshLolProfile && saved.entry.profileStatus !== "ready") {
       void input.refreshLolProfile(saved.entry.id, streamerState.scopeStreamerId).catch(() => undefined);
     }
     const state = await getPublicParticipationState(req, status, streamerState.selectedStreamerId, selectedSession?.publicSessionId);
@@ -7077,6 +7237,69 @@ export function createHttpHandler(input: HttpHandlerInput) {
     }
   }
 
+  /* 이 대상이 지금 무엇을 보내야 하는지 계산합니다.
+   *
+   * 별도 job 테이블 없이, 마지막으로 보낸 내용(discord_participation_messages)과
+   * 현재 참여 상태를 비교해 필요한 것만 만듭니다. 편집 최소 간격 30초도 여기서
+   * 강제합니다 — 봇의 절제에 맡기지 않습니다. */
+  function announcementSessionId(
+    target: { streamerTwitchUserId: string }
+  ): string | undefined {
+    return input.store
+      .getParticipationSession(target.streamerTwitchUserId)?.publicSessionId;
+  }
+
+  function announcementJobFor(
+    target: AnnouncementDispatchTarget
+  ): DiscordAnnouncementJob | undefined {
+    const session = input.store.getParticipationSession(target.streamerTwitchUserId);
+    if (!session) return undefined;
+    const state: "recruiting" | "closed" = session.status === "recruiting"
+      ? "recruiting"
+      : "closed";
+    /* 아직 아무것도 안 올렸는데 이미 끝난 세션이면 새로 만들지 않습니다. */
+    if (!target.messageId && state === "closed") return undefined;
+
+    const participation = input.store.getParticipationState(target.streamerTwitchUserId);
+    /* followers 한정 세션은 인원을 싣지 않습니다. 팔로워 전용이라는 의도를
+       공개 채널에서 깨지 않기 위해서입니다. */
+    const publicCounts = session.listingVisibility !== "followers";
+    const waiting = publicCounts ? participation.summary.waiting : undefined;
+    const selected = publicCounts ? participation.summary.selected : undefined;
+
+    if (target.messageId) {
+      const stateSame = target.lastState === state;
+      const waitingSame = (target.lastWaiting ?? undefined) === waiting;
+      if (stateSame && waitingSame) return undefined;
+      if (stateSame && target.lastEditedAt) {
+        const elapsed = Date.now() - Date.parse(target.lastEditedAt);
+        if (Number.isFinite(elapsed) && elapsed < ANNOUNCEMENT_MIN_EDIT_INTERVAL_MS) {
+          return undefined;
+        }
+      }
+    }
+
+    const profile = session.profileSnapshot;
+    return Object.freeze({
+      jobId: target.targetId,
+      guildId: target.discordGuildId,
+      channelId: target.channelId,
+      ...(target.mentionRoleId ? { mentionRoleId: target.mentionRoleId } : {}),
+      ...(target.messageId ? { messageId: target.messageId } : {}),
+      locale: target.preferredLocale,
+      state,
+      streamerDisplayName: profile?.profile?.displayName
+        ?? profile?.riotGameName
+        ?? "YORO",
+      participationUrl: new URL(
+        `/participation?session=${encodeURIComponent(session.publicSessionId)}`,
+        appConfig.publicBaseUrl
+      ).toString(),
+      ...(waiting === undefined ? {} : { waiting }),
+      ...(selected === undefined ? {} : { selected })
+    });
+  }
+
   async function yoroStreamerContext(
     req: IncomingMessage,
     mutation = false
@@ -7348,7 +7571,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
           "/internal/discord/palworld-players",
           "/internal/discord/command-policy",
           "/internal/discord/response-locale",
-          "/internal/discord/guild-channels/report"
+          "/internal/discord/guild-channels/report",
+          "/internal/discord/participation-announcements/pending",
+          "/internal/discord/participation-announcements/ack"
         ]);
         if (!internalPaths.has(url.pathname) || req.method !== "POST") {
           return sendJson(req, res, 404, { error: "not found" });
@@ -7577,6 +7802,62 @@ export function createHttpHandler(input: HttpHandlerInput) {
               code: denied ? "permission_required" : "response_locale_failed"
             }, noStoreHeaders());
           }
+        }
+        if (url.pathname === "/internal/discord/participation-announcements/pending") {
+          const pending = parseDiscordAnnouncementPendingRequest(body);
+          if (
+            !pending
+            || pending.applicationId !== appConfig.discordBotInternal.applicationId
+          ) {
+            return sendJson(req, res, 400, { error: "요청 형식이 올바르지 않습니다.", code: "invalid_input" });
+          }
+          const targets = await input.discordOnboarding
+            .listAnnouncementTargets(pending.applicationId);
+          const jobs: DiscordAnnouncementJob[] = [];
+          for (const target of targets) {
+            if (jobs.length >= DISCORD_ANNOUNCEMENT_MAX_JOBS) break;
+            const job = announcementJobFor(target);
+            if (job) jobs.push(job);
+          }
+          return sendJson(req, res, 200, { jobs }, noStoreHeaders());
+        }
+        if (url.pathname === "/internal/discord/participation-announcements/ack") {
+          const ack = parseDiscordAnnouncementAckRequest(body);
+          if (
+            !ack
+            || ack.applicationId !== appConfig.discordBotInternal.applicationId
+          ) {
+            return sendJson(req, res, 400, { error: "요청 형식이 올바르지 않습니다.", code: "invalid_input" });
+          }
+          if (ack.result === "ok" && ack.messageId) {
+            const target = (await input.discordOnboarding
+              .listAnnouncementTargets(ack.applicationId))
+              .find((entry) => entry.targetId === ack.jobId);
+            const job = target ? announcementJobFor(target) : undefined;
+            if (!target || !job) {
+              return sendJson(req, res, 200, { ok: true }, noStoreHeaders());
+            }
+            await input.discordOnboarding.recordAnnouncementPublished({
+              targetId: target.targetId,
+              messageId: ack.messageId,
+              publicSessionId: announcementSessionId(target) ?? "",
+              state: job.state,
+              ...(job.waiting === undefined ? {} : { waiting: job.waiting })
+            });
+            return sendJson(req, res, 200, { ok: true }, noStoreHeaders());
+          }
+          if (ack.result !== "failed") {
+            await input.discordOnboarding.recordAnnouncementFailure({
+              targetId: ack.jobId,
+              deliverable: ack.result === "channel_missing"
+                ? "missing_channel"
+                : ack.result === "permission_missing"
+                  ? "missing_permission"
+                  : "missing_channel",
+              dropMessage: ack.result === "message_deleted"
+            });
+          }
+          return sendJson(req, res, 200, { ok: true }, noStoreHeaders());
         }
         if (url.pathname === "/internal/discord/guild-channels/report") {
           const report = parseDiscordGuildDirectoryReportRequest(body);
@@ -7851,6 +8132,100 @@ export function createHttpHandler(input: HttpHandlerInput) {
             riotGameName: result.request.riotGameName,
             riotTagLine: result.request.riotTagLine
           }, noStoreHeaders());
+        }
+        if (url.pathname === "/api/account/streamer/riot-ids" && req.method === "GET") {
+          const context = await yoroStreamerContext(req);
+          const { twitch } = requireApprovedYoroStreamer(context);
+          return sendJson(req, res, 200, streamerRiotAccountsResponse(twitch.userId), noStoreHeaders());
+        }
+        if (url.pathname === "/api/account/streamer/riot-ids" && req.method === "POST") {
+          const context = await yoroStreamerContext(req, true);
+          const { twitch, streamer } = requireApprovedYoroStreamer(context);
+          const body = await readJsonBody<Record<string, unknown>>(req);
+          if (Object.keys(body).length !== 1 || typeof body.riotId !== "string") {
+            return sendJson(req, res, 400, {
+              error: "riotId 입력이 올바르지 않습니다.",
+              code: "invalid_input"
+            }, noStoreHeaders());
+          }
+          const parsed = parseRiotIdDetailed(body.riotId);
+          if (!parsed.ok) {
+            return sendJson(req, res, 400, { error: parsed.message, code: "invalid_input" }, noStoreHeaders());
+          }
+          /* Twitch 채널명·아바타는 방송인 신청(apply) 경로처럼 라이브 컨텍스트에서
+             읽습니다 — 대표 row 스냅샷은 개명·아바타 변경 이후 낡아 있을 수 있고,
+             이 값이 서브 계정 검색 페이지의 스트리머 카드에 그대로 노출됩니다. */
+          const result = input.store.addStreamerSubRiotIdRequest({
+            twitchUserId: twitch.userId,
+            twitchLogin: twitch.user.login || streamer.twitchLogin,
+            twitchDisplayName: twitch.user.displayName || streamer.twitchDisplayName,
+            twitchProfileImageUrl: twitch.user.profileImageUrl ?? streamer.twitchProfileImageUrl,
+            riotGameName: parsed.gameName,
+            riotTagLine: parsed.tagLine
+          });
+          if (!result.ok) {
+            const messages = {
+              riot_id_duplicated: "이미 등록한 Riot ID입니다.",
+              riot_id_taken: "이미 다른 스트리머가 등록한 Riot ID입니다.",
+              limit_exceeded: `서브 계정은 최대 ${STREAMER_SUB_RIOT_ACCOUNT_LIMIT}개까지 등록할 수 있습니다.`
+            } as const;
+            return sendJson(req, res, 409, { error: messages[result.code], code: result.code }, noStoreHeaders());
+          }
+          return sendJson(req, res, 200, streamerRiotAccountsResponse(twitch.userId), noStoreHeaders());
+        }
+        if (url.pathname === "/api/account/streamer/riot-ids/main" && req.method === "POST") {
+          const context = await yoroStreamerContext(req, true);
+          const { twitch } = requireApprovedYoroStreamer(context);
+          const body = await readJsonBody<Record<string, unknown>>(req);
+          if (Object.keys(body).length !== 1 || typeof body.accountId !== "string") {
+            return sendJson(req, res, 400, {
+              error: "accountId 입력이 올바르지 않습니다.",
+              code: "invalid_input"
+            }, noStoreHeaders());
+          }
+          const previousMain = approvedStreamerRiotIdForTwitchUser(twitch.userId);
+          const result = input.store.setMainStreamerRiotId({
+            twitchUserId: twitch.userId,
+            requestId: body.accountId
+          });
+          if (!result.ok) {
+            const failure = result.code === "not_found"
+              ? { status: 404, error: "계정을 찾을 수 없습니다." }
+              : { status: 409, error: "승인된 계정만 대표로 지정할 수 있습니다." };
+            return sendJson(req, res, failure.status, { error: failure.error, code: result.code }, noStoreHeaders());
+          }
+          /* 대표 교체는 게임 모니터 추적 대상과 공개 프로필의 스트리머 카드 기준을
+             바꿉니다 — Riot ID 개명(updateStreamerRiotIdentityForOwner)과 같은
+             재시작·캐시 무효화 절차를 따릅니다. */
+          invalidatePublicLolProfileCachesForStreamer(previousMain);
+          invalidatePublicLolProfileCachesForStreamer(result.request);
+          const automation = input.store.getLolAutomationSettings(twitch.userId);
+          await restartStreamerLolGameMonitor(twitch.userId, result.request, automation);
+          if (automation.enabled) {
+            await refreshStreamerProfileForOwner(twitch.userId, true).catch(() => undefined);
+          }
+          return sendJson(req, res, 200, streamerRiotAccountsResponse(twitch.userId), noStoreHeaders());
+        }
+        {
+          const riotAccountMatch = url.pathname.match(/^\/api\/account\/streamer\/riot-ids\/([^/]+)$/);
+          if (riotAccountMatch && riotAccountMatch[1] !== "main" && req.method === "DELETE") {
+            const context = await yoroStreamerContext(req, true);
+            const { twitch } = requireApprovedYoroStreamer(context);
+            const result = input.store.deleteStreamerRiotIdRequest({
+              twitchUserId: twitch.userId,
+              requestId: riotAccountMatch[1]!
+            });
+            if (!result.ok) {
+              const failure = result.code === "not_found"
+                ? { status: 404, error: "계정을 찾을 수 없습니다." }
+                : { status: 409, error: "대표 계정은 삭제할 수 없습니다. 먼저 다른 계정을 대표로 지정해주세요." };
+              return sendJson(req, res, failure.status, { error: failure.error, code: result.code }, noStoreHeaders());
+            }
+            if (result.request.status === "approved") {
+              invalidatePublicLolProfileCachesForStreamer(result.request);
+            }
+            return sendJson(req, res, 200, streamerRiotAccountsResponse(twitch.userId), noStoreHeaders());
+          }
         }
         if (url.pathname === "/api/account/streamer/participation/announcement") {
           if (req.method === "GET") {
@@ -9514,6 +9889,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
           if (!Number.isFinite(value) || value < 0) return sendJson(req, res, 400, { error: `${key}는 0 이상의 숫자여야 합니다.` });
           patch[key] = Math.trunc(value);
         }
+        if (body.chatLocale !== undefined) {
+          if (!PARTICIPATION_CHAT_LOCALES.includes(body.chatLocale as ParticipationChatLocale)) {
+            return sendJson(req, res, 400, { error: "지원하지 않는 봇 응답 언어입니다.", code: "INVALID_CHAT_LOCALE" });
+          }
+          patch.chatLocale = body.chatLocale as ParticipationChatLocale;
+        }
         const identity = approvedStreamerIdentityForOwner(streamerId);
         if (patch.enabled === true && !identity) {
           return sendJson(req, res, 409, { error: "승인된 Riot ID가 있어야 게임 감시를 시작할 수 있습니다." });
@@ -9642,6 +10023,13 @@ export function createHttpHandler(input: HttpHandlerInput) {
             if (!Number.isFinite(value) || value < 0) return sendJson(req, res, 400, { error: `${key}는 0 이상의 숫자여야 합니다.` });
             scopedPatch[key] = Math.trunc(value);
           }
+          const bodyChatLocale = (body as Record<string, unknown>).chatLocale;
+          if (bodyChatLocale !== undefined) {
+            if (!PARTICIPATION_CHAT_LOCALES.includes(bodyChatLocale as ParticipationChatLocale)) {
+              return sendJson(req, res, 400, { error: "지원하지 않는 봇 응답 언어입니다.", code: "INVALID_CHAT_LOCALE" });
+            }
+            scopedPatch.chatLocale = bodyChatLocale as ParticipationChatLocale;
+          }
           if (scopedPatch.enabled === true && !identity) {
             return sendJson(req, res, 409, { error: "승인된 Riot ID가 있어야 게임 감시를 시작할 수 있습니다." });
           }
@@ -9695,7 +10083,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
           note
         });
         if (!request) return sendJson(req, res, 404, { error: "등록 요청을 찾을 수 없습니다." });
-        if (request.status !== "approved" || request.dashboardEnabled !== true) {
+        /* 세션 강제 만료는 "대시보드 접근 근거가 사라졌을 때"의 조치입니다.
+           서브 계정 row는 dashboardEnabled를 갖지 않으므로 이 조건에 항상 걸립니다 —
+           서브 승인·거절은 대표 계정의 접근 근거와 무관하니 세션을 건드리지 않습니다.
+           방송 중 서브 승인 한 건으로 스트리머가 로그아웃되는 사고를 막습니다. */
+        if (!isSubStreamerRiotAccount(request) && (request.status !== "approved" || request.dashboardEnabled !== true)) {
           sessions.revokeByTwitchUserId(request.twitchUserId);
         }
         invalidatePublicLolProfileCachesForStreamer(request);

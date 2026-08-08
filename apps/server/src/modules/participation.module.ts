@@ -2,16 +2,82 @@ import fs from "node:fs";
 import path from "node:path";
 import type {
   LolRole,
+  ParticipationChatLocale,
   ParticipationEntry,
   ParticipationSettings,
   TwitchChatMessageInternalEvent,
   TwitchRewardRedemptionInternalEvent
 } from "@streamops/shared";
-import { formatBilingualNotice, newId, normalizeLolRole, nowIso, parseRiotIdDetailed, toSafeErrorMessage } from "@streamops/shared";
+import { newId, normalizeLolRole, nowIso, parseRiotIdDetailed, toSafeErrorMessage } from "@streamops/shared";
 import type { BotModule, ModuleContext } from "../core/module.js";
 import { appConfig } from "../config.js";
 import { createParticipationTrace, publishParticipationSnapshot, type ParticipationTrace } from "../services/participation-snapshot.js";
 import { RiotRateLimitError } from "../services/riot-api.js";
+
+/**
+ * 봇이 채팅에 보내는 답변 문구입니다. 명령어 인식은 영어로 고정하지만(위
+ * PARTICIPATION_COMMANDS), 답변은 스트리머가 고른 chatLocale 하나로만 보냅니다 —
+ * 예전처럼 일본어/한국어를 한 메시지에 같이 넣지 않습니다.
+ */
+export const PARTICIPATION_MESSAGES: Record<ParticipationChatLocale, {
+  riotIdNotFound: string;
+  verificationDeferred: string;
+  emptyInputGuide: string;
+  duplicateTwitchUser: (name: string) => string;
+  duplicateRiotId: (name: string) => string;
+  queueOpen: string;
+  queueClose: string;
+  checkInCompleteNote: (name: string) => string;
+  cancelledByViewerNote: string;
+  riotAccountVerificationFailed: string;
+}> = {
+  ko: {
+    riotIdNotFound: "Riot ID를 확인할 수 없습니다. 입력 내용을 확인한 뒤 다시 신청해주세요.",
+    verificationDeferred: "Riot ID 확인이 지연되고 있습니다. 신청은 접수된 상태입니다.",
+    emptyInputGuide: "Riot ID를 입력해주세요. 예: !join HideOnBush#KR1",
+    duplicateTwitchUser: (name) => `${name}님, 이미 참여 대기열에 등록되어 있습니다.`,
+    duplicateRiotId: (name) => `${name}님, 이미 등록된 Riot ID입니다.`,
+    queueOpen: "참여 모집을 시작했습니다.",
+    queueClose: "참여 모집을 종료했습니다.",
+    checkInCompleteNote: (name) => `${name} 참가 확인 완료`,
+    cancelledByViewerNote: "시청자가 채팅 명령어로 참가를 취소했습니다.",
+    riotAccountVerificationFailed: "Riot 계정 확인에 실패했습니다."
+  },
+  ja: {
+    riotIdNotFound: "Riot IDを確認できませんでした。入力内容を確認してもう一度申請してください。",
+    verificationDeferred: "Riot IDの確認が遅延しています。申請は受け付け済みです。",
+    emptyInputGuide: "Riot IDを入力してください。例: !join HideOnBush#KR1",
+    duplicateTwitchUser: (name) => `${name}さんはすでに参加待機列に登録されています。`,
+    duplicateRiotId: (name) => `${name}さん、このRiot IDはすでに登録されています。`,
+    queueOpen: "参加募集を開始しました。",
+    queueClose: "参加募集を終了しました。",
+    checkInCompleteNote: (name) => `${name} 参加確認完了`,
+    cancelledByViewerNote: "視聴者がチャットコマンドで参加をキャンセルしました。",
+    riotAccountVerificationFailed: "Riotアカウントの確認に失敗しました。"
+  },
+  en: {
+    riotIdNotFound: "We couldn't verify that Riot ID. Please check it and apply again.",
+    verificationDeferred: "Riot ID verification is taking longer than usual. Your entry has been received.",
+    emptyInputGuide: "Please enter your Riot ID. Example: !join HideOnBush#KR1",
+    duplicateTwitchUser: (name) => `${name}, you're already in the queue.`,
+    duplicateRiotId: (name) => `${name}, that Riot ID is already registered.`,
+    queueOpen: "Viewer participation is now open.",
+    queueClose: "Viewer participation is now closed.",
+    checkInCompleteNote: (name) => `${name} checked in`,
+    cancelledByViewerNote: "The viewer cancelled their entry via chat command.",
+    riotAccountVerificationFailed: "Failed to verify the Riot account."
+  }
+};
+
+export function resolveChatLocale(ctx: ModuleContext, streamerId?: string): ParticipationChatLocale {
+  const scopedStreamerId = streamerId ?? appConfig.twitch.broadcasterId?.trim();
+  if (!scopedStreamerId) return "ko";
+  return ctx.store.getLolAutomationSettings(scopedStreamerId).chatLocale;
+}
+
+function participationMessages(ctx: ModuleContext, streamerId?: string): (typeof PARTICIPATION_MESSAGES)["ko"] {
+  return PARTICIPATION_MESSAGES[resolveChatLocale(ctx, streamerId)];
+}
 
 type ParticipationSettingsFile = ParticipationSettings & {
   channelPointRewardTitles: string[];
@@ -31,58 +97,17 @@ type ParticipationApplySource = "chat_command" | "channel_point" | "dashboard";
 
 type ParticipationCommandKind = "open" | "close" | "checkIn" | "cancel" | "apply";
 
-const PARTICIPATION_COMMANDS: Record<ParticipationCommandKind, readonly string[]> = {
-  open: [
-    "!시참시작",
-    "!참가시작",
-    "!参加開始",
-    "!参加募集開始",
-    "!さんか開始",
-    "!joinstart",
-    "!participationstart",
-    "!queueopen",
-    "!openqueue"
-  ],
-  close: [
-    "!시참종료",
-    "!참가종료",
-    "!参加終了",
-    "!参加募集終了",
-    "!さんか終了",
-    "!joinend",
-    "!participationstop",
-    "!queueclose",
-    "!closequeue"
-  ],
-  checkIn: [
-    "!참가확인",
-    "!시참확인",
-    "!参加確認",
-    "!さんか確認",
-    "!checkin",
-    "!check-in",
-    "!ready"
-  ],
-  cancel: [
-    "!시참취소",
-    "!참가취소",
-    "!参加取消",
-    "!参加キャンセル",
-    "!さんか取消",
-    "!キャンセル",
-    "!cancel",
-    "!leave",
-    "!quit"
-  ],
-  apply: [
-    "!시참",
-    "!참가",
-    "!参加",
-    "!さんか",
-    "!join",
-    "!participate",
-    "!loljoin"
-  ]
+/**
+ * 명령어 트리거는 영어로 고정합니다. 봇이 한/일/영 모든 표기를 다 인식하게
+ * 만드는 유지비가 커서, 인식은 영어 하나로 좁히고 대신 답변 텍스트만
+ * chatLocale(스트리머가 한 번 고르는 설정)로 언어를 맞춥니다.
+ */
+export const PARTICIPATION_COMMANDS: Record<ParticipationCommandKind, readonly string[]> = {
+  open: ["!joinstart", "!participationstart", "!queueopen", "!openqueue"],
+  close: ["!joinend", "!participationstop", "!queueclose", "!closequeue"],
+  checkIn: ["!checkin", "!check-in", "!ready"],
+  cancel: ["!cancel", "!leave", "!quit"],
+  apply: ["!join", "!participate", "!loljoin"]
 };
 
 const OPERATOR_COMMAND_KINDS = new Set<ParticipationCommandKind>(["open", "close"]);
@@ -93,7 +118,7 @@ function normalizeCommandToken(command: string): string {
   return command.trim().normalize("NFKC").toLowerCase();
 }
 
-function participationCommandKind(command: string): ParticipationCommandKind | undefined {
+export function participationCommandKind(command: string): ParticipationCommandKind | undefined {
   const normalized = normalizeCommandToken(command);
   for (const [kind, commands] of Object.entries(PARTICIPATION_COMMANDS) as Array<[ParticipationCommandKind, readonly string[]]>) {
     if (commands.some((candidate) => normalizeCommandToken(candidate) === normalized)) return kind;
@@ -158,8 +183,8 @@ function emitEntryCreated(ctx: ModuleContext, entry: ParticipationEntry, streame
     streamerId,
     twitchUserId: entry.twitchUserId,
     twitchUserName: entry.twitchUserName,
-    riotGameName: entry.riotGameName,
-    riotTagLine: entry.riotTagLine,
+    riotGameName: entry.riotGameName ?? "",
+    riotTagLine: entry.riotTagLine ?? "",
     riotPuuid: entry.riotPuuid,
     requestedRole: entry.requestedRole,
     createdAt: nowIso()
@@ -174,7 +199,7 @@ async function resolveRiotAccount(ctx: ModuleContext, entry: ParticipationEntry)
     if (configuredDelayMs > 0) await sleep(configuredDelayMs);
 
     try {
-      return await ctx.riot.getAccountByRiotId(entry.riotGameName, entry.riotTagLine);
+      return await ctx.riot.getAccountByRiotId(entry.riotGameName ?? "", entry.riotTagLine ?? "");
     } catch (error) {
       lastError = error;
       if (attempt >= RIOT_VERIFICATION_RETRY_DELAYS_MS.length - 1) break;
@@ -184,7 +209,7 @@ async function resolveRiotAccount(ctx: ModuleContext, entry: ParticipationEntry)
     }
   }
 
-  throw lastError ?? new Error("Riot 계정 확인에 실패했습니다.");
+  throw lastError ?? new Error(participationMessages(ctx, entry.streamerId).riotAccountVerificationFailed);
 }
 
 async function verifyPendingParticipation(
@@ -209,12 +234,7 @@ async function verifyPendingParticipation(
         entry: rejected ? logEntry(rejected, streamerId) : { id: entry.id, streamerId }
       });
       await publishState(ctx, settings, {
-        message: chatGuide(
-          "Riot IDを確認できませんでした。入力内容を確認してもう一度申請してください。",
-          "Riot ID를 확인할 수 없습니다. 입력 내용을 확인한 뒤 다시 신청해주세요.",
-          "確認失敗",
-          "확인 실패"
-        ),
+        message: participationMessages(ctx, streamerId).riotIdNotFound,
         reason: "participation.verification_rejected",
         streamerId,
         trace
@@ -238,7 +258,7 @@ async function verifyPendingParticipation(
         entry: rejected ? logEntry(rejected, streamerId) : { id: entry.id, streamerId }
       });
       await publishState(ctx, settings, {
-        message: duplicateMessage(duplicate.reason, current.twitchUserName),
+        message: duplicateMessage(ctx, streamerId, duplicate.reason, current.twitchUserName),
         reason: "participation.verification_duplicate",
         streamerId,
         trace
@@ -270,12 +290,7 @@ async function verifyPendingParticipation(
       error: toSafeErrorMessage(error)
     });
     await publishState(ctx, settings, {
-      message: chatGuide(
-        "Riot IDの確認が遅延しています。申請は受け付け済みです。",
-        "Riot ID 확인이 지연되고 있습니다. 신청은 접수된 상태입니다.",
-        "確認待機",
-        "확인 대기"
-      ),
+      message: participationMessages(ctx, streamerId).verificationDeferred,
       reason: "participation.verification_deferred",
       streamerId,
       trace
@@ -309,21 +324,12 @@ function scheduleRiotVerification(
   void task;
 }
 
-function chatGuide(ja: string, ko: string, titleJa = "案内", titleKo = "안내"): string {
-  return formatBilingualNotice(titleJa, titleKo, ja, ko);
-}
-
-function parseParticipationInput(text: string): ParticipationInputParseResult {
+function parseParticipationInput(ctx: ModuleContext, streamerId: string | undefined, text: string): ParticipationInputParseResult {
   const trimmed = text.trim();
   if (!trimmed) {
     return {
       ok: false,
-      message: chatGuide(
-        "Riot IDを入力してください。例: !参加 HideOnBush#KR1 / !join HideOnBush#KR1",
-        "Riot ID를 입력해주세요. 예: !시참 HideOnBush#KR1 / !join HideOnBush#KR1",
-        "入力案内",
-        "입력 안내"
-      )
+      message: participationMessages(ctx, streamerId).emptyInputGuide
     };
   }
 
@@ -368,9 +374,10 @@ function isOperatorCommandAllowed(event: TwitchChatMessageInternalEvent): boolea
   });
 }
 
-function duplicateMessage(reason: "twitch_user" | "riot_id", twitchUserName: string): string {
-  if (reason === "twitch_user") return chatGuide(`${twitchUserName}さんはすでに参加待機列に登録されています。`, `${twitchUserName}님, 이미 시참 대기열에 등록되어 있습니다.`, "登録済み", "등록됨");
-  return chatGuide(`${twitchUserName}さん、この Riot ID はすでに登録されています。`, `${twitchUserName}님, 이미 등록된 Riot ID입니다.`, "登録済み", "등록됨");
+function duplicateMessage(ctx: ModuleContext, streamerId: string | undefined, reason: "twitch_user" | "riot_id", twitchUserName: string): string {
+  const messages = participationMessages(ctx, streamerId);
+  if (reason === "twitch_user") return messages.duplicateTwitchUser(twitchUserName);
+  return messages.duplicateRiotId(twitchUserName);
 }
 
 function reusableProfilePatch(previous: ParticipationEntry | undefined): Pick<
@@ -404,7 +411,7 @@ async function applyFromText(ctx: ModuleContext, settings: ParticipationSettings
     return;
   }
 
-  const parsed = parseParticipationInput(input.text);
+  const parsed = parseParticipationInput(ctx, input.streamerId, input.text);
   if (!parsed.ok) {
     ctx.logger.event({
       type: "participation.apply_rejected",
@@ -521,7 +528,7 @@ async function handleCheckIn(ctx: ModuleContext, settings: ParticipationSettings
     streamerId: event.broadcasterUserId
   });
   void ctx.actions.dispatch([
-    { type: "noop", note: `${event.chatterUserName} 참가 확인 완료` }
+    { type: "noop", note: participationMessages(ctx, event.broadcasterUserId).checkInCompleteNote(event.chatterUserName) }
   ], { streamerId: event.broadcasterUserId }, "participation.checked_in").catch((error) => {
     ctx.logger.error({ type: "participation.banner_failed", error: toSafeErrorMessage(error) });
   });
@@ -530,7 +537,7 @@ async function handleCheckIn(ctx: ModuleContext, settings: ParticipationSettings
 async function handleCancel(ctx: ModuleContext, settings: ParticipationSettingsFile, event: TwitchChatMessageInternalEvent): Promise<void> {
   const result = ctx.store.cancelParticipationByUser(
     event.chatterUserId,
-    "시청자가 채팅 명령어로 참가를 취소했습니다.",
+    participationMessages(ctx, event.broadcasterUserId).cancelledByViewerNote,
     event.broadcasterUserId
   );
   if (!result.ok) {
@@ -568,7 +575,7 @@ export const participationModule: BotModule = {
         ctx.store.setParticipationOpen(true, streamerId);
         ctx.logger.event({ type: "participation.opened", reason: "open_by_default", streamerId });
         void publishState(ctx, settings, {
-          message: "롤 시참 모집 중",
+          message: participationMessages(ctx, streamerId).queueOpen,
           reason: "participation.open_by_default",
           streamerId
         }).catch((error) => {
@@ -615,7 +622,7 @@ export const participationModule: BotModule = {
         ctx.store.setParticipationOpen(true, event.broadcasterUserId);
         ctx.logger.event({ type: "participation.opened", streamerId: event.broadcasterUserId });
         await publishState(ctx, settings, {
-          message: "롤 시참 모집 중",
+          message: participationMessages(ctx, event.broadcasterUserId).queueOpen,
           reason: "participation.open",
           streamerId: event.broadcasterUserId
         });
@@ -631,7 +638,7 @@ export const participationModule: BotModule = {
         ctx.store.setParticipationOpen(false, event.broadcasterUserId);
         ctx.logger.event({ type: "participation.closed", streamerId: event.broadcasterUserId });
         await publishState(ctx, settings, {
-          message: "롤 시참 모집 종료",
+          message: participationMessages(ctx, event.broadcasterUserId).queueClose,
           reason: "participation.close",
           streamerId: event.broadcasterUserId
         });

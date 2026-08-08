@@ -1,3 +1,21 @@
+export type ParticipationGame = "lol" | "palworld";
+
+export const PARTICIPATION_GAMES = ["lol", "palworld"] as const satisfies readonly ParticipationGame[];
+
+/**
+ * 게임별 진행 인원 정원(방송인 포함). LoL은 5인 커스텀 기준(방송인 1 + 시청자 4),
+ * Palworld는 서버 정원 기준입니다. 세션을 시작한 뒤에는 이 값을 바꿀 수 없습니다 —
+ * 도중에 정원이 바뀌면 이미 선정된 인원과 충돌할 수 있어서입니다.
+ */
+export const PARTICIPATION_GAME_CAPACITY: Record<ParticipationGame, number> = {
+  lol: 5,
+  palworld: 32
+};
+
+export function normalizeParticipationGame(value: unknown): ParticipationGame {
+  return value === "palworld" ? "palworld" : "lol";
+}
+
 export type LolRole = "top" | "jungle" | "mid" | "adc" | "support" | "fill" | "unknown";
 
 export type LolMainRole = "TOP" | "JUNGLE" | "MIDDLE" | "BOTTOM" | "UTILITY" | "FILL" | "UNKNOWN";
@@ -132,13 +150,18 @@ export type ParticipationEntry = {
   id: string;
   streamerId?: string;
   sessionId?: string;
+  /** 기본값 "lol" — 이 필드가 없는 기존 저장 데이터는 전부 LoL 참가자였습니다. */
+  game?: ParticipationGame;
   twitchUserId: string;
   twitchUserName: string;
-  riotGameName: string;
-  riotTagLine: string;
+  /** LoL 참가자만 채웁니다. Palworld 참가자는 대신 palworldNickname을 씁니다. */
+  riotGameName?: string;
+  riotTagLine?: string;
   riotPuuid?: string;
+  /** Palworld 참가자의 자기 신고 닉네임. 검증하지 않고 그대로 대기열에 등록합니다. */
+  palworldNickname?: string;
   requestedRole?: LolRole;
-  preferredRole: LolRole;
+  preferredRole?: LolRole;
   secondaryRole?: LolRole;
   declaredRank?: string;
   verifiedRank?: string;
@@ -195,11 +218,25 @@ export type StreamerRiotIdentity = {
   updatedAt: string;
 };
 
+/**
+ * 봇 명령어(!join 등)는 언어 인식 없이 영어 고정입니다 — 트리거를 여러 언어로
+ * 인식시키는 건 유지비가 커서 포기하고, 대신 봇이 채팅에 보내는 답변만 이
+ * 값으로 언어를 고정합니다("auto"는 없습니다 — 스트리머가 한 번 직접 고릅니다).
+ */
+export type ParticipationChatLocale = "ko" | "ja" | "en";
+
+export const PARTICIPATION_CHAT_LOCALES = ["ko", "ja", "en"] as const satisfies readonly ParticipationChatLocale[];
+
+export function normalizeParticipationChatLocale(value: unknown): ParticipationChatLocale {
+  return value === "ja" || value === "en" ? value : "ko";
+}
+
 export type LolAutomationSettings = {
   streamerId: string;
   enabled: boolean;
   autoSelectNextAfterGame: boolean;
   announceInChat: boolean;
+  chatLocale: ParticipationChatLocale;
   pollIntervalMs: number;
   gameEndDebounceMs: number;
   updatedAt: string;
@@ -221,6 +258,9 @@ export type ParticipationSession = {
   streamerId: string;
   sessionId: string;
   publicSessionId: string;
+  /** 세션 시작 시 확정되고 이후 바뀌지 않습니다. 기본값 "lol" — 이 필드가 없는
+   *  기존 저장 데이터는 전부 LoL 세션이었습니다. */
+  game: ParticipationGame;
   status: ParticipationSessionStatus;
   listingVisibility: ParticipationListingVisibility;
   maxQueueSize?: number;
@@ -235,6 +275,8 @@ export type ParticipationSession = {
 export type ParticipationPublicQueueEntry = {
   position: number;
   twitchUserName: string;
+  game?: ParticipationGame;
+  palworldNickname?: string;
   preferredRole?: LolRole;
   status: ParticipationStatus;
   requestedRole?: LolRole;
@@ -261,6 +303,17 @@ export type ParticipationStreamerProfile = {
 
 export type StreamerRiotIdRequestStatus = "pending" | "approved" | "rejected";
 
+/**
+ * 스트리머 Riot 계정의 역할.
+ * - "main": 스트리머 카드·게임 모니터·대시보드 접근 키가 따라가는 대표 계정.
+ * - "sub": 같은 스트리머로 전적 검색이 연결되는 부계정.
+ * 이 필드가 없는 기존 row는 main으로 취급합니다(단일 계정 시절 데이터).
+ */
+export type StreamerRiotAccountRole = "main" | "sub";
+
+/** 스트리머 1명이 등록할 수 있는 서브 계정(pending+approved) 상한. */
+export const STREAMER_SUB_RIOT_ACCOUNT_LIMIT = 4;
+
 export type StreamerProfileLink = {
   id: string;
   url: string;
@@ -283,6 +336,7 @@ export type StreamerRiotIdRequest = {
   profileLinkLabel?: string;
   profileLinks?: StreamerProfileLink[];
   status: StreamerRiotIdRequestStatus;
+  accountRole?: StreamerRiotAccountRole;
   dashboardEnabled?: boolean;
   requestedAt: string;
   updatedAt: string;
@@ -294,7 +348,8 @@ export type StreamerRiotIdRequest = {
 export type ParticipationDashboardQueueEntry = ParticipationPublicQueueEntry & {
   id: string;
   twitchUserName: string;
-  riotId: string;
+  /** LoL 참가자만 있습니다. Palworld 참가자는 palworldNickname을 대신 씁니다. */
+  riotId?: string;
   source: ParticipationEntry["source"];
   verifiedRank?: string;
   profileAnalyzedAt?: string;

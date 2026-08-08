@@ -278,3 +278,151 @@ export class DiscordParticipationAnnouncementRepository {
     }
   }
 }
+
+/* 발행 큐.
+ *
+ * 별도 job 테이블을 두지 않습니다. "이 대상의 메시지를 현재 상태에 맞춘다"가
+ * 유일한 작업이고 대상당 활성 메시지는 하나이므로, job 식별자는 target id 를
+ * 그대로 씁니다. 마지막 발행 내용은 discord_participation_messages 에 있으므로
+ * 무엇을 다시 보낼지도 여기서 계산합니다.
+ */
+
+export type AnnouncementDispatchTarget = Readonly<{
+  targetId: string;
+  organizationId: string;
+  discordGuildId: string;
+  channelId: string;
+  mentionRoleId?: string;
+  streamerTwitchUserId: string;
+  preferredLocale: "auto" | "ko" | "ja" | "en";
+  messageId?: string;
+  lastState?: "recruiting" | "closed";
+  lastWaiting?: number;
+  lastEditedAt?: string;
+}>;
+
+type DispatchRow = {
+  target_id: string;
+  organization_id: string;
+  discord_guild_id: string;
+  channel_id: string;
+  mention_role_id: string | null;
+  streamer_twitch_user_id: string;
+  preferred_locale: "auto" | "ko" | "ja" | "en";
+  message_id: string | null;
+  last_state: "recruiting" | "closed" | null;
+  last_waiting: number | null;
+  last_edited_at: Date | null;
+};
+
+export class DiscordAnnouncementDispatchRepository {
+  constructor(private readonly queryable: RepositoryQueryable) {}
+
+  /** 길드가 막지 않은, 켜져 있는 대상만 돌려줍니다. */
+  async listDispatchable(applicationId: string): Promise<readonly AnnouncementDispatchTarget[]> {
+    const result = await repositoryQuery<DispatchRow>(
+      this.queryable,
+      `SELECT target.id AS target_id, target.organization_id, target.discord_guild_id,
+              target.channel_id, target.mention_role_id, target.streamer_twitch_user_id,
+              COALESCE(config.preferred_locale, 'auto') AS preferred_locale,
+              message.message_id, message.last_state, message.last_waiting,
+              message.last_edited_at
+         FROM discord_participation_announcement_targets target
+         JOIN discord_installations installation
+           ON installation.organization_id = target.organization_id
+          AND installation.discord_guild_id = target.discord_guild_id
+          AND installation.application_id = target.application_id
+          AND installation.status = 'active'
+         LEFT JOIN discord_bot_control_configs config
+           ON config.organization_id = target.organization_id
+          AND config.discord_guild_id = target.discord_guild_id
+          AND config.application_id = target.application_id
+         LEFT JOIN discord_participation_messages message
+           ON message.organization_id = target.organization_id
+          AND message.target_id = target.id
+        WHERE target.application_id = $1
+          AND target.is_enabled = TRUE
+          AND target.deliverable <> 'bot_removed'
+          AND COALESCE(config.participation_announce_enabled, TRUE) = TRUE
+        ORDER BY target.created_at ASC`,
+      [applicationId]
+    );
+    return Object.freeze(result.rows.map((row) => Object.freeze({
+      targetId: row.target_id,
+      organizationId: row.organization_id,
+      discordGuildId: row.discord_guild_id,
+      channelId: row.channel_id,
+      ...(row.mention_role_id ? { mentionRoleId: row.mention_role_id } : {}),
+      streamerTwitchUserId: row.streamer_twitch_user_id,
+      preferredLocale: row.preferred_locale,
+      ...(row.message_id ? { messageId: row.message_id } : {}),
+      ...(row.last_state ? { lastState: row.last_state } : {}),
+      ...(row.last_waiting === null ? {} : { lastWaiting: row.last_waiting }),
+      ...(row.last_edited_at ? { lastEditedAt: row.last_edited_at.toISOString() } : {})
+    })));
+  }
+
+  /** 발행 성공을 기록합니다. 다음 폴링이 무엇을 편집할지 여기서 결정됩니다. */
+  async recordPublished(input: {
+    targetId: string;
+    messageId: string;
+    publicSessionId: string;
+    state: "recruiting" | "closed";
+    waiting?: number;
+  }): Promise<void> {
+    await repositoryQuery(
+      this.queryable,
+      `INSERT INTO discord_participation_messages (
+         target_id, organization_id, message_id, public_session_id,
+         last_state, last_waiting, last_edited_at
+       )
+       SELECT target.id, target.organization_id, $2, $3, $4, $5, NOW()
+         FROM discord_participation_announcement_targets target
+        WHERE target.id = $1
+       ON CONFLICT (target_id) DO UPDATE SET
+         message_id = EXCLUDED.message_id,
+         public_session_id = EXCLUDED.public_session_id,
+         last_state = EXCLUDED.last_state,
+         last_waiting = EXCLUDED.last_waiting,
+         last_edited_at = EXCLUDED.last_edited_at`,
+      [
+        input.targetId,
+        input.messageId,
+        input.publicSessionId,
+        input.state,
+        input.waiting ?? null
+      ]
+    );
+    await repositoryQuery(
+      this.queryable,
+      `UPDATE discord_participation_announcement_targets
+          SET deliverable = 'ok', last_delivered_at = NOW(), updated_at = NOW()
+        WHERE id = $1`,
+      [input.targetId]
+    );
+  }
+
+  /** 발행 실패를 기록합니다. 사용자 화면이 사유를 그대로 보여 줍니다. */
+  async recordFailure(input: {
+    targetId: string;
+    deliverable: Exclude<AnnouncementDeliverable, "blocked_by_guild">;
+    dropMessage: boolean;
+  }): Promise<void> {
+    if (input.dropMessage) {
+      /* 메시지가 지워졌으면 참조를 버려 다음에 새로 만들게 합니다.
+         자동으로 다시 올리지는 않습니다. */
+      await repositoryQuery(
+        this.queryable,
+        `DELETE FROM discord_participation_messages WHERE target_id = $1`,
+        [input.targetId]
+      );
+    }
+    await repositoryQuery(
+      this.queryable,
+      `UPDATE discord_participation_announcement_targets
+          SET deliverable = $2, updated_at = NOW()
+        WHERE id = $1`,
+      [input.targetId, input.deliverable]
+    );
+  }
+}

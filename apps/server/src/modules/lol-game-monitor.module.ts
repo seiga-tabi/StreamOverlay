@@ -399,8 +399,10 @@ class LolGameMonitorRegistry {
   }
 
   async restore(): Promise<void> {
+    /* 게임 모니터는 스트리머당 하나뿐인 대표 계정을 추적합니다 — 전체 approved
+       목록을 쓰면 서브 계정이 Map에서 대표를 덮어씁니다. */
     const approvedByOwner = new Map(
-      this.ctx.store.listApprovedStreamerRiotIds().map((identity) => [identity.twitchUserId, identity])
+      this.ctx.store.listApprovedMainStreamerRiotIds().map((identity) => [identity.twitchUserId, identity])
     );
     for (const settings of this.ctx.store.listLolAutomationSettings()) {
       const identity = approvedByOwner.get(settings.streamerId);

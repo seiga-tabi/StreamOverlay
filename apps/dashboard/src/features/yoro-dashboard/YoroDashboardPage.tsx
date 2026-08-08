@@ -1591,6 +1591,7 @@ export function YoroDashboardPage() {
         ) : null}
         {page === "streamingRiot" ? (
           <MyRiotAccountPage
+            csrfToken={authenticated.csrfToken}
             onStreamerChange={() => void getYoroStreamerStatus().then(setStreamer)}
             onUpdateRiotId={(riotId) => (
               updateYoroRiotId(riotId, authenticated.csrfToken)

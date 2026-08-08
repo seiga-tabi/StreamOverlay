@@ -5,6 +5,7 @@ import { DiscordBotHealth, startHealthServer } from "./health.js";
 import { DiscordInternalApiClient } from "./internal-api-client.js";
 import { auditEvent } from "./logger.js";
 import { YoroPrefixCommandHandler } from "./prefix-command-handler.js";
+import { DiscordAnnouncementPublisher } from "./announcement-publisher.js";
 
 assertBotConfig();
 
@@ -44,6 +45,11 @@ if (botConfig.enabled) {
           )
         }
       : {}),
+    announcements: new DiscordAnnouncementPublisher({
+      applicationId: botConfig.applicationId,
+      client,
+      internalApi
+    }),
     health,
     internalApi
   });

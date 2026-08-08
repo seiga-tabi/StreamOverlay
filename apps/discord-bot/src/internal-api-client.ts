@@ -3,6 +3,8 @@ import {
   DISCORD_INTERNAL_AUTH_VERSION,
   discordInternalCanonicalRequest,
   parseDiscordBotCommandPolicyResponse,
+  type DiscordAnnouncementAckRequest,
+  type DiscordAnnouncementJob,
   parseDiscordBotResponseLocaleUpdateResponse,
   parseDiscordGameServerStatusResponse,
   parseDiscordPalworldPlayerLookupResponse,
@@ -146,6 +148,31 @@ export class DiscordInternalApiClient {
     );
     if (!result) throw new DiscordInternalApiError("invalid_response");
     return result;
+  }
+
+  async reportGuildDirectory(body: {
+    applicationId: string;
+    guildId: string;
+    channels: ReadonlyArray<{ id: string; name: string }>;
+    roles: ReadonlyArray<{ id: string; name: string }>;
+    channelsTruncated: boolean;
+    rolesTruncated: boolean;
+  }): Promise<void> {
+    await this.request("/internal/discord/guild-channels/report", body);
+  }
+
+  async pendingAnnouncements(applicationId: string): Promise<readonly DiscordAnnouncementJob[]> {
+    const result = await this.request(
+      "/internal/discord/participation-announcements/pending",
+      { applicationId }
+    ) as { jobs?: unknown };
+    /* 서버 응답을 그대로 믿지 않습니다. 형식이 어긋나면 아무것도 발행하지 않습니다. */
+    if (!Array.isArray(result.jobs)) throw new DiscordInternalApiError("invalid_response");
+    return result.jobs as readonly DiscordAnnouncementJob[];
+  }
+
+  async ackAnnouncement(body: DiscordAnnouncementAckRequest): Promise<void> {
+    await this.request("/internal/discord/participation-announcements/ack", body);
   }
 
   async palworldPlayers(

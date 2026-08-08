@@ -190,12 +190,6 @@
   background: color-mix(in srgb, var(--brand) 22%, var(--surface-strong));
 }
 
-.participation-management-game-chip.is-soon {
-  color: var(--muted);
-  background: transparent;
-  border-style: dashed;
-}
-
 .participation-management-capacity-meter {
   flex: 0 0 auto;
   padding: var(--space-1) var(--space-3);

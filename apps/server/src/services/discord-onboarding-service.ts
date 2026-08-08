@@ -12,6 +12,10 @@ import {
 import { YoroAccountRepository } from "../database/repositories/yoro-account-repository.js";
 import { DiscordGuildDirectoryRepository } from "../database/repositories/discord-guild-directory-repository.js";
 import {
+  DiscordAnnouncementDispatchRepository,
+  type AnnouncementDispatchTarget
+} from "../database/repositories/discord-participation-announcement-repository.js";
+import {
   decryptDiscordSecret,
   discordPkceChallenge,
   discordSafeToken,
@@ -379,6 +383,34 @@ export class DiscordOnboardingService {
       roles: input.roles.length
     });
     return { stored };
+  }
+
+  async listAnnouncementTargets(
+    applicationId: string
+  ): Promise<readonly AnnouncementDispatchTarget[]> {
+    if (applicationId !== appConfig.discordBotInternal.applicationId) {
+      throw new DiscordOnboardingError("setup_session_invalid", 404);
+    }
+    return new DiscordAnnouncementDispatchRepository(this.pool)
+      .listDispatchable(applicationId);
+  }
+
+  async recordAnnouncementPublished(input: {
+    targetId: string;
+    messageId: string;
+    publicSessionId: string;
+    state: "recruiting" | "closed";
+    waiting?: number;
+  }): Promise<void> {
+    await new DiscordAnnouncementDispatchRepository(this.pool).recordPublished(input);
+  }
+
+  async recordAnnouncementFailure(input: {
+    targetId: string;
+    deliverable: "missing_channel" | "missing_permission" | "bot_removed";
+    dropMessage: boolean;
+  }): Promise<void> {
+    await new DiscordAnnouncementDispatchRepository(this.pool).recordFailure(input);
   }
 
   async revokeBotInstallation(input: {

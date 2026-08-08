@@ -12,6 +12,7 @@ export {
 } from "./api/lol";
 export { PublicHomeSearchPanel } from "./components/PublicHomeSearchPanel";
 export { PublicAppHeader } from "./components/PublicAppHeader";
+export { PublicBottomTabBar } from "./components/PublicBottomTabBar";
 export { PublicHeaderMenu } from "./components/PublicHeaderMenu";
 export { PublicLocaleSelector } from "./components/PublicLocaleSelector";
 export { PublicMatchFilterBar } from "./components/PublicMatchFilterBar";

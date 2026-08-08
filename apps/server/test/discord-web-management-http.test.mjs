@@ -1342,3 +1342,154 @@ test("길드 채널 보고는 HMAC allowlist 경로에서만 받고 형식을 �
     assert.equal(reports.length, 1, "거부된 요청은 service 까지 가면 안 됩니다.");
   });
 });
+
+test("참여 알림 폴링은 변경분만 내려주고 30초 편집 간격을 서버에서 강제한다", async () => {
+  await withDiscordConfig(async () => {
+    const targetId = "11111111-1111-4111-8111-111111111111";
+    const session = {
+      streamerId: "12345",
+      sessionId: "s1",
+      publicSessionId: "ps_abcdefghijklmnopqrstuvwxyz123456",
+      status: "recruiting",
+      listingVisibility: "public",
+      createdAt: "2026-08-08T00:00:00.000Z",
+      updatedAt: "2026-08-08T00:00:00.000Z"
+    };
+    let targets = [];
+    const acks = [];
+    const build = (storeOverrides = {}) => createDiscordHandler({
+      handlerInput: {
+        discordInternalAuth: { verify() { return { ok: true }; } },
+        store: {
+          getParticipationSession: () => session,
+          getParticipationState: () => ({
+            isOpen: true,
+            queue: [],
+            activeQueue: [],
+            summary: { total: 0, active: 0, waiting: 5, selected: 1, checkedIn: 0, noShow: 0, played: 0 }
+          }),
+          ...storeOverrides
+        }
+      },
+      discordOnboarding: {
+        async listAnnouncementTargets() { return targets; },
+        async recordAnnouncementPublished(input) { acks.push({ type: "ok", input }); },
+        async recordAnnouncementFailure(input) { acks.push({ type: "fail", input }); }
+      }
+    });
+    const poll = async (handler) => {
+      const response = await request(
+        handler,
+        "POST",
+        "/internal/discord/participation-announcements/pending",
+        { applicationId: APPLICATION_ID },
+        { "content-type": "application/json" }
+      );
+      assert.equal(response.statusCode, 200);
+      return JSON.parse(response.body).jobs;
+    };
+
+    const base = {
+      targetId,
+      organizationId: "22222222-2222-4222-8222-222222222222",
+      discordGuildId: "123456789012345678",
+      channelId: "223456789012345678",
+      streamerTwitchUserId: "12345",
+      preferredLocale: "ko"
+    };
+
+    // 아직 아무것도 올리지 않았으면 새로 만듭니다.
+    targets = [base];
+    const first = await poll(build().handler);
+    assert.equal(first.length, 1);
+    assert.equal(first[0].jobId, targetId);
+    assert.equal(first[0].state, "recruiting");
+    assert.equal(first[0].waiting, 5);
+    assert.match(first[0].participationUrl, /session=ps_abcdefghijklmnopqrstuvwxyz123456/u);
+
+    // 이미 같은 내용을 올렸으면 다시 내려주지 않습니다.
+    targets = [{
+      ...base,
+      messageId: "333333333333333333",
+      lastState: "recruiting",
+      lastWaiting: 5,
+      lastEditedAt: new Date().toISOString()
+    }];
+    assert.deepEqual(await poll(build().handler), []);
+
+    // 인원이 바뀌어도 30초가 지나지 않았으면 편집하지 않습니다.
+    targets = [{
+      ...base,
+      messageId: "333333333333333333",
+      lastState: "recruiting",
+      lastWaiting: 1,
+      lastEditedAt: new Date().toISOString()
+    }];
+    assert.deepEqual(await poll(build().handler), []);
+
+    // 30초가 지나면 편집 job 이 나옵니다.
+    targets = [{
+      ...base,
+      messageId: "333333333333333333",
+      lastState: "recruiting",
+      lastWaiting: 1,
+      lastEditedAt: new Date(Date.now() - 60_000).toISOString()
+    }];
+    const edit = await poll(build().handler);
+    assert.equal(edit.length, 1);
+    assert.equal(edit[0].messageId, "333333333333333333");
+
+    // 상태가 바뀌면 간격과 무관하게 즉시 내려줍니다.
+    targets = [{
+      ...base,
+      messageId: "333333333333333333",
+      lastState: "recruiting",
+      lastWaiting: 5,
+      lastEditedAt: new Date().toISOString()
+    }];
+    const closedHandler = build({
+      getParticipationSession: () => ({ ...session, status: "completed" })
+    }).handler;
+    const closed = await poll(closedHandler);
+    assert.equal(closed.length, 1);
+    assert.equal(closed[0].state, "closed");
+
+    // followers 한정 세션은 인원을 싣지 않습니다.
+    targets = [base];
+    const followersOnly = await poll(build({
+      getParticipationSession: () => ({ ...session, listingVisibility: "followers" })
+    }).handler);
+    assert.equal(followersOnly.length, 1);
+    assert.equal("waiting" in followersOnly[0], false);
+    assert.equal("selected" in followersOnly[0], false);
+
+    // 세션이 없으면 아무것도 만들지 않습니다.
+    assert.deepEqual(
+      await poll(build({ getParticipationSession: () => undefined }).handler),
+      []
+    );
+
+    // 실패 ack 는 deliverable 로 기록됩니다.
+    const failed = await request(
+      build().handler,
+      "POST",
+      "/internal/discord/participation-announcements/ack",
+      { applicationId: APPLICATION_ID, jobId: targetId, result: "permission_missing" },
+      { "content-type": "application/json" }
+    );
+    assert.equal(failed.statusCode, 200);
+    assert.equal(acks.at(-1).type, "fail");
+    assert.equal(acks.at(-1).input.deliverable, "missing_permission");
+    assert.equal(acks.at(-1).input.dropMessage, false);
+
+    // 메시지가 지워졌으면 참조를 버려 다음에 새로 만들게 합니다.
+    await request(
+      build().handler,
+      "POST",
+      "/internal/discord/participation-announcements/ack",
+      { applicationId: APPLICATION_ID, jobId: targetId, result: "message_deleted" },
+      { "content-type": "application/json" }
+    );
+    assert.equal(acks.at(-1).input.dropMessage, true);
+  });
+});

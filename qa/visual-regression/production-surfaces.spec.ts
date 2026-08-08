@@ -314,7 +314,7 @@ test("Public Profile", async ({ page }) => {
   await assertStableSurface(page, errors, "public-profile.png");
 });
 
-test("모바일 LoL 상단 탐색과 검색은 스크롤 방향에 따라 접히고 다시 펼쳐진다", async ({ page }) => {
+test("모바일 LoL 상단 검색 줄은 스크롤 방향에 따라 접히고 하단 탭바는 고정된다", async ({ page }) => {
   test.skip((page.viewportSize()?.width ?? 1440) > 768, "모바일 상단바 전용 검증");
 
   // 상단바 접힘은 스크롤 진행도에 연동됩니다. 전적이 없는 빈 프로필은 문서가 너무 짧아
@@ -346,19 +346,31 @@ test("모바일 LoL 상단 탐색과 검색은 스크롤 방향에 따라 접히
   const header = page.locator(".lol-public-game-header");
   const nav = header.locator(".public-game-header__nav-slot");
   const search = header.locator(".public-game-header__search-slot");
+  const tabBar = page.locator(".public-bottom-tab-bar");
 
-  await expect(nav).toBeVisible();
+  // 모바일 상단 가로 nav는 하단 고정 탭바가 대체합니다(31-bottom-tab-bar.css).
+  // 헤더에서 접히고 펼쳐지는 것은 검색 줄뿐입니다.
+  await expect(nav).toBeHidden();
+  await expect(tabBar).toBeVisible();
   await expect(search).toBeVisible();
-  await expect(nav).not.toHaveCSS("transition-duration", "0s");
+
+  const tabBarPinnedToViewportBottom = () => tabBar.evaluate(
+    (element) => Math.round(element.getBoundingClientRect().bottom) === window.innerHeight
+  );
+  expect(await tabBarPinnedToViewportBottom(), "하단 탭바는 화면 하단에 붙어 있어야 합니다.").toBe(true);
 
   await page.evaluate(() => window.scrollTo(0, 240));
   await expect(header).toHaveClass(/mobile-chrome-scrolled/u);
-  await expect(nav).toHaveCSS("opacity", "0");
   await expect(search).toHaveCSS("opacity", "0");
+  // 탭바는 헤더와 달리 스크롤에 숨지 않습니다 — 어디까지 내려가도 자리를 지켜야 합니다.
+  await expect(tabBar).toBeVisible();
+  expect(
+    await tabBarPinnedToViewportBottom(),
+    "스크롤 후에도 하단 탭바는 화면 하단에 고정돼야 합니다."
+  ).toBe(true);
 
   await page.evaluate(() => window.scrollBy(0, -48));
   await expect(header).not.toHaveClass(/mobile-chrome-scrolled/u);
-  await expect(nav).toHaveCSS("opacity", "1");
   await expect(search).toHaveCSS("opacity", "1");
 
   // 천천히 내릴 때 상단바가 접혔다 펼쳐졌다를 반복하면 안 됩니다.
@@ -388,19 +400,19 @@ test("모바일 LoL 상단 탐색과 검색은 스크롤 방향에 따라 접히
   expect(toggles, "천천히 내리는 동안 상단바 접힘 전환은 한 번이어야 합니다.").toBeLessThanOrEqual(1);
 });
 
-test("모바일 상단 탐색 줄은 주요 기기 폭에서 항목을 화면 밖으로 밀어내지 않는다", async ({ page }) => {
-  test.skip((page.viewportSize()?.width ?? 1440) > 768, "모바일 상단바 전용 검증");
+test("모바일 하단 탭바는 주요 기기 폭에서 항목을 화면 밖으로 밀어내지 않는다", async ({ page }) => {
+  test.skip((page.viewportSize()?.width ?? 1440) > 768, "모바일 탐색 전용 검증");
 
-  // 항목마다 88px 하한을 두면 5개 × 88 = 456px 라 375~430px 기기에서
-  // 마지막 항목이 통째로 화면 밖에 놓입니다. 컨테이너에 overflow-x: auto 가 있어
-  // 문서 가로 스크롤로는 잡히지 않고 화면에서만 잘려 보입니다.
+  // 예전 상단 가로 nav는 항목마다 88px 하한을 둬 5개 × 88 = 456px 였고, 375~430px
+  // 기기에서 마지막 항목이 화면 밖에 놓였습니다. 하단 탭바는 flex: 1 1 0 균등폭이라
+  // 구조적으로 잘릴 수 없지만, 그 전제가 유지되는지 실제 폭에서 확인합니다.
   for (const width of [375, 390, 393, 430]) {
     await page.setViewportSize({ width, height: 844 });
     await page.goto("/");
-    const nav = page.locator(".public-horizontal-nav__content");
-    await expect(nav).toBeVisible();
+    const tabBar = page.locator(".public-bottom-tab-bar");
+    await expect(tabBar).toBeVisible();
 
-    const diagnostics = await nav.evaluate((element) => {
+    const diagnostics = await tabBar.evaluate((element) => {
       const viewportWidth = window.innerWidth;
       const items = [...element.children].map((child) => {
         const rect = child.getBoundingClientRect();
@@ -411,13 +423,15 @@ test("모바일 상단 탐색 줄은 주요 기기 폭에서 항목을 화면 �
         outside: items.filter((item) => item.right > viewportWidth + 0.5 || item.left < -0.5).length,
         tooSmall: items.filter((item) => item.width < 44 || item.height < 44).length,
         scrollOverflow: element.scrollWidth - element.clientWidth,
+        pinnedToBottom: Math.round(element.getBoundingClientRect().bottom) === window.innerHeight,
       };
     });
 
-    expect(diagnostics.itemCount, `${width}px에서 상단 탐색 항목이 있어야 합니다.`).toBeGreaterThan(0);
-    expect(diagnostics.outside, `${width}px에서 상단 탐색 항목이 화면 밖으로 나가면 안 됩니다.`).toBe(0);
-    expect(diagnostics.scrollOverflow, `${width}px에서 상단 탐색 줄이 가로로 스크롤되면 안 됩니다.`).toBeLessThanOrEqual(1);
-    expect(diagnostics.tooSmall, `${width}px에서 상단 탐색 항목은 44×44 이상이어야 합니다.`).toBe(0);
+    expect(diagnostics.itemCount, `${width}px에서 하단 탭 5개가 모두 있어야 합니다.`).toBe(5);
+    expect(diagnostics.outside, `${width}px에서 하단 탭이 화면 밖으로 나가면 안 됩니다.`).toBe(0);
+    expect(diagnostics.scrollOverflow, `${width}px에서 하단 탭바가 가로로 스크롤되면 안 됩니다.`).toBeLessThanOrEqual(1);
+    expect(diagnostics.tooSmall, `${width}px에서 하단 탭은 44×44 이상이어야 합니다.`).toBe(0);
+    expect(diagnostics.pinnedToBottom, `${width}px에서 하단 탭바는 화면 하단에 붙어야 합니다.`).toBe(true);
   }
 });
 

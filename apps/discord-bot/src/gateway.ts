@@ -9,6 +9,7 @@ import type { YoroCommandHandler } from "./command-handler.js";
 import type { YoroPrefixCommandHandler } from "./prefix-command-handler.js";
 import type { DiscordInternalApiClient } from "./internal-api-client.js";
 import type { DiscordBotHealth } from "./health.js";
+import type { DiscordAnnouncementPublisher } from "./announcement-publisher.js";
 import { auditEvent, safeReference } from "./logger.js";
 
 export function createDiscordClient(prefixCommandsEnabled = false): Client {
@@ -33,6 +34,7 @@ export class DiscordGateway {
       client: Client;
       commandHandler: YoroCommandHandler;
       prefixCommandHandler?: YoroPrefixCommandHandler;
+      announcements?: DiscordAnnouncementPublisher;
       health: DiscordBotHealth;
       internalApi: Pick<
         DiscordInternalApiClient,
@@ -57,6 +59,7 @@ export class DiscordGateway {
 
   async stop(): Promise<void> {
     this.options.health.setState("stopping");
+    this.options.announcements?.stop();
     if (this.heartbeatObservation) clearInterval(this.heartbeatObservation);
     this.heartbeatObservation = undefined;
     this.options.client.destroy();
@@ -69,6 +72,7 @@ export class DiscordGateway {
       internalApi,
       commandHandler,
       prefixCommandHandler,
+      announcements,
       applicationId
     } = this.options;
     client.once(Events.ClientReady, () => {
@@ -76,7 +80,11 @@ export class DiscordGateway {
       auditEvent("discord.bot.ready");
       for (const guild of client.guilds.cache.values()) {
         this.observeInstallation(guild.id);
+        /* 알림 채널 후보는 봇만 알 수 있습니다. 서버가 봇을 호출하지 않도록
+           준비되는 대로 먼저 보고합니다. */
+        void announcements?.reportGuild(guild);
       }
+      announcements?.start();
       this.heartbeatObservation = setInterval(() => {
         if (!client.isReady()) return;
         const heartbeatTimestamp = Math.max(
@@ -104,6 +112,13 @@ export class DiscordGateway {
     });
     client.on(Events.GuildCreate, (guild) => {
       this.observeInstallation(guild.id);
+      void announcements?.reportGuild(guild);
+    });
+    client.on(Events.ChannelCreate, (channel) => {
+      if ("guild" in channel && channel.guild) void announcements?.reportGuild(channel.guild);
+    });
+    client.on(Events.ChannelDelete, (channel) => {
+      if ("guild" in channel && channel.guild) void announcements?.reportGuild(channel.guild);
     });
     client.on(Events.GuildDelete, (guild) => {
       void internalApi.revokeInstallation({

@@ -7,11 +7,13 @@ import {
 } from "react";
 import type {
   ParticipationDashboardQueueEntry,
+  ParticipationGame,
   ParticipationListingVisibility,
   ParticipationSessionStatus,
   ParticipationState,
   ParticipationStatus
 } from "@streamops/shared";
+import { PARTICIPATION_GAME_CAPACITY } from "@streamops/shared";
 import {
   getYoroParticipation,
   selectYoroParticipationEntries,
@@ -31,12 +33,16 @@ type EntryMutationStatus = Extract<
 >;
 
 /**
- * LoL 참여 세션의 진행 인원 정원. 방송인 1명 + 시청자 4명 = 5명(5인 커스텀 기준).
- * 서버는 아직 이 정원을 강제하지 않으므로(전 게임 공통 대기열/선정 API), 여기서는
- * 화면 안내와 "선정" 버튼 비활성화용 소프트 가드로만 사용합니다.
+ * 진행 인원 정원(PARTICIPATION_GAME_CAPACITY, packages/shared)은 방송인 1자리를
+ * 포함합니다 — LoL 5명 = 방송인 1 + 시청자 4, Palworld 32명 = 방송인 1 + 시청자 31.
+ * 서버(entry-status "selected" 처리)가 최종 정원을 강제하고, 여기서는 같은 상수로
+ * "선정" 버튼을 미리 비활성화하는 안내용 가드로만 씁니다.
  */
-const LOL_VIEWER_SEATS = 4;
-const LOL_TOTAL_CAPACITY = LOL_VIEWER_SEATS + 1;
+function viewerSeatCount(game: ParticipationGame): number {
+  return PARTICIPATION_GAME_CAPACITY[game] - 1;
+}
+/** 정원이 이보다 크면(Palworld) 슬롯 카드 대신 압축된 점 그리드로 보여줍니다. */
+const COMPACT_SEAT_THRESHOLD = 8;
 
 const copy = {
   ko: {
@@ -49,7 +55,6 @@ const copy = {
     gameLabel: "게임",
     gameLol: "League of Legends",
     gamePalworld: "Palworld",
-    comingSoon: "준비 중",
     createTitle: "새 참여 세션",
     createDescription: "기본 설정으로 바로 모집을 시작하고, 필요한 경우에만 세부 설정을 변경할 수 있습니다.",
     quickStartTitle: "시청자 참여를 시작하세요",
@@ -153,7 +158,6 @@ const copy = {
     gameLabel: "ゲーム",
     gameLol: "League of Legends",
     gamePalworld: "Palworld",
-    comingSoon: "近日対応",
     createTitle: "新しい参加セッション",
     createDescription: "基本設定ですぐ受付を開始し、必要な場合だけ詳細設定を変更できます。",
     quickStartTitle: "視聴者参加を始めましょう",
@@ -314,6 +318,7 @@ export function ParticipationManagementPage({
   const [checkInSeconds, setCheckInSeconds] = useState(60);
   const [allowRejoin, setAllowRejoin] = useState(true);
   const [listingVisibility, setListingVisibility] = useState<ParticipationListingVisibility>("public");
+  const [selectedGame, setSelectedGame] = useState<ParticipationGame>("lol");
   const [selectedWaitingEntryIds, setSelectedWaitingEntryIds] = useState<Set<string>>(() => new Set());
   const [startSettingsOpen, setStartSettingsOpen] = useState(false);
   const [bulkSelectOpen, setBulkSelectOpen] = useState(false);
@@ -347,6 +352,10 @@ export function ParticipationManagementPage({
 
   const session = state?.session;
   const activeSession = Boolean(session && session.status !== "completed");
+  /* 세션이 시작된 뒤에는 게임을 바꿀 수 없으므로 서버가 돌려준 session.game이
+     항상 우선합니다 — selectedGame은 시작 전 화면에서만 의미가 있습니다. */
+  const activeGame: ParticipationGame = session?.game ?? selectedGame;
+  const gameLabels: Record<ParticipationGame, string> = { lol: text.gameLol, palworld: text.gamePalworld };
   const publicUrl = session?.publicSessionId
     ? publicParticipationUrl(session.publicSessionId, locale)
     : "";
@@ -372,7 +381,8 @@ export function ParticipationManagementPage({
     if (!query) return waitingEntries;
     return waitingEntries.filter((entry) => (
       entry.twitchUserName.toLowerCase().includes(query)
-      || entry.riotId.toLowerCase().includes(query)
+      || (entry.riotId ?? "").toLowerCase().includes(query)
+      || (entry.palworldNickname ?? "").toLowerCase().includes(query)
     ));
   }, [queueSearch, waitingEntries]);
   const selectedWaitingEntries = useMemo(
@@ -383,10 +393,11 @@ export function ParticipationManagementPage({
     [selectedWaitingEntryIds, waitingEntries]
   );
 
-  /* LoL 진행 인원(방송인 포함 5명) 정원까지 몇 자리가 남았는지. 서버가 아직
-     이 정원을 강제하지 않으므로, 여기서는 "선정" 동작을 앞서 막는 안내용
-     가드로만 씁니다 — 정원 판단의 근거는 항상 서버 응답(currentEntries)입니다. */
-  const remainingSeats = Math.max(0, LOL_VIEWER_SEATS - currentEntries.length);
+  /* 진행 인원 정원(방송인 포함)까지 몇 자리가 남았는지. 서버가 최종 정원을
+     강제하므로(entry-status "selected" 처리), 여기서는 "선정" 동작을 앞서
+     막는 안내용 가드로만 씁니다 — 판단 근거는 항상 서버 응답(currentEntries)입니다. */
+  const viewerSeats = viewerSeatCount(activeGame);
+  const remainingSeats = Math.max(0, viewerSeats - currentEntries.length);
   const capacityIsFull = remainingSeats <= 0;
 
   useEffect(() => {
@@ -400,6 +411,7 @@ export function ParticipationManagementPage({
   async function mutateSession(
     action: ParticipationSessionAction,
     options: {
+      game?: ParticipationGame;
       maxQueueSize?: number;
       checkInSeconds?: number;
       allowRejoin?: boolean;
@@ -429,7 +441,7 @@ export function ParticipationManagementPage({
 
   async function createSession(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
-    await mutateSession("start", { maxQueueSize, checkInSeconds, allowRejoin, listingVisibility });
+    await mutateSession("start", { game: selectedGame, maxQueueSize, checkInSeconds, allowRejoin, listingVisibility });
   }
 
   async function mutateEntry(entryId: string, status: EntryMutationStatus): Promise<void> {
@@ -515,10 +527,27 @@ export function ParticipationManagementPage({
       <div className="participation-management-seat" key={entry.id}>
         <span className="participation-management-seat-avatar" aria-hidden="true">{entry.twitchUserName.slice(0, 1)}</span>
         <span className="participation-management-seat-name">{entry.twitchUserName}</span>
-        <span className="participation-management-seat-role">{roleLabels[locale][entry.preferredRole ?? "unknown"]}</span>
+        {entry.preferredRole ? (
+          <span className="participation-management-seat-role">{roleLabels[locale][entry.preferredRole]}</span>
+        ) : null}
         <span className="participation-management-status">{text[entry.status]}</span>
         {renderEntryActions(entry)}
       </div>
+    );
+  }
+
+  /* 정원이 큰 게임(Palworld)은 슬롯 카드를 다 펼치면 화면이 너무 길어져,
+     대기열과 같은 압축 행으로 보여줍니다 — 동작(체크인 등)은 동일하게 유지합니다. */
+  function renderCompactSeat(entry: ParticipationDashboardQueueEntry) {
+    return (
+      <article className="participation-management-participant is-compact" key={entry.id}>
+        <div className="participation-management-participant-main">
+          <strong>{entry.twitchUserName}</strong>
+          {entry.game === "palworld" && entry.palworldNickname ? <span>{entry.palworldNickname}</span> : null}
+        </div>
+        <span className="participation-management-status">{text[entry.status]}</span>
+        {renderEntryActions(entry)}
+      </article>
     );
   }
 
@@ -549,7 +578,10 @@ export function ParticipationManagementPage({
         ) : <span className="participation-management-position">#{entry.position}</span>}
         <div className="participation-management-participant-main">
           <strong>{entry.twitchUserName}</strong>
-          <span>{entry.riotId} · {roleLabels[locale][entry.preferredRole ?? "unknown"]}</span>
+          <span>
+            {entry.game === "palworld" ? entry.palworldNickname : entry.riotId}
+            {entry.preferredRole ? ` · ${roleLabels[locale][entry.preferredRole]}` : ""}
+          </span>
           <small>{text.appliedAt} {new Date(entry.createdAt).toLocaleString(locale === "ko" ? "ko-KR" : "ja-JP")}</small>
         </div>
         <span className="participation-management-status">{text[entry.status]}</span>
@@ -592,14 +624,23 @@ export function ParticipationManagementPage({
 
       {!activeSession ? (
         <section className="participation-management-start" aria-labelledby="participation-start-title">
-          <div className="participation-management-game-row">
-            <span className="participation-management-game-chip is-active">{text.gameLol}</span>
-            <span className="participation-management-game-chip is-soon">{text.gamePalworld} · {text.comingSoon}</span>
+          <div className="participation-management-game-row" role="radiogroup" aria-label={text.gameLabel}>
+            {(["lol", "palworld"] as const).map((game) => (
+              <button
+                aria-pressed={selectedGame === game}
+                className={`participation-management-game-chip ${selectedGame === game ? "is-active" : ""}`}
+                key={game}
+                onClick={() => setSelectedGame(game)}
+                type="button"
+              >
+                {gameLabels[game]}
+              </button>
+            ))}
           </div>
           <h2 id="participation-start-title">{text.quickStartTitle}</h2>
           <p>{text.createDescription}</p>
           <ul className="participation-management-capacity-preview">
-            <li><strong>{LOL_TOTAL_CAPACITY}{text.personUnit}</strong> {text.capacityIngame}({text.capacityHostNote})</li>
+            <li><strong>{PARTICIPATION_GAME_CAPACITY[selectedGame]}{text.personUnit}</strong> {text.capacityIngame}({text.capacityHostNote})</li>
             <li><strong>{checkInSeconds}{text.secondUnit}</strong> {text.capacityCheckin}</li>
             <li><strong>{maxQueueSize}{text.personUnit}</strong> {text.capacityQueueMax}</li>
           </ul>
@@ -657,7 +698,7 @@ export function ParticipationManagementPage({
         <>
           <section className="participation-management-control-bar" aria-labelledby="participation-session-title">
             <div className="participation-management-control-bar-lead">
-              <span className="participation-management-game-chip is-active">{text.gameLol}</span>
+              <span className="participation-management-game-chip is-active">{gameLabels[activeGame]}</span>
               <strong data-status={session?.status}>{sessionStatusLabel(session?.status ?? "closed", text)}</strong>
               <h2 id="participation-session-title" className="yoro-u-sr-only">{text.sessionTitle}</h2>
             </div>
@@ -685,16 +726,24 @@ export function ParticipationManagementPage({
               <header>
                 <h2 id="participation-current-title">{text.currentParticipant}</h2>
                 <span className="participation-management-capacity-meter">
-                  {currentEntries.length + 1}/{LOL_TOTAL_CAPACITY}
+                  {currentEntries.length + 1}/{PARTICIPATION_GAME_CAPACITY[activeGame]}
                 </span>
               </header>
-              <div className="participation-management-seat-grid">
-                <div className="participation-management-seat is-host">
-                  <span className="participation-management-seat-avatar" aria-hidden="true">🎙</span>
-                  <span className="participation-management-seat-name">{text.hostSeatLabel}</span>
+              {viewerSeats > COMPACT_SEAT_THRESHOLD ? (
+                <div className="participation-management-group">
+                  {currentEntries.length
+                    ? currentEntries.map((entry) => renderCompactSeat(entry))
+                    : <p className="participation-management-empty">{text.noCurrentParticipant}</p>}
                 </div>
-                {Array.from({ length: LOL_VIEWER_SEATS }, (_, index) => renderSeat(currentEntries[index]))}
-              </div>
+              ) : (
+                <div className="participation-management-seat-grid">
+                  <div className="participation-management-seat is-host">
+                    <span className="participation-management-seat-avatar" aria-hidden="true">🎙</span>
+                    <span className="participation-management-seat-name">{text.hostSeatLabel}</span>
+                  </div>
+                  {Array.from({ length: viewerSeats }, (_, index) => renderSeat(currentEntries[index]))}
+                </div>
+              )}
             </section>
 
             <section className="participation-management-queue" aria-labelledby="participation-queue-title">

@@ -136,10 +136,12 @@ test("스트리머 참여 화면은 공개 범위·직접 동작·그룹 대기�
   assert.match(source, /type="checkbox"/u);
   assert.match(source, /selectYoroParticipationEntries/u);
   assert.match(source, /selectedWaitingEntries\.map\(\(entry\) => entry\.id\)/u);
-  // "현재 참가자"는 이제 평범한 목록이 아니라 게임 정원(LoL 5명 = 방송인 1 + 시청자
-  // 4)에 맞춘 고정 슬롯 그리드입니다 — 빈 자리도 항상 눈에 보여야 하므로 배열
-  // 길이를 정원에 고정하고 채워진 자리만 실제 참가자로 렌더링합니다.
-  assert.match(source, /Array\.from\(\{ length: LOL_VIEWER_SEATS \}, \(_, index\) => renderSeat\(currentEntries\[index\]\)\)/u);
+  // "현재 참가자"는 이제 평범한 목록이 아니라 게임 정원(방송인 1 + 시청자, LoL은
+  // 5명·Palworld는 32명)에 맞춘 고정 슬롯 그리드입니다 — 빈 자리도 항상 눈에
+  // 보여야 하므로 배열 길이를 정원에 고정하고 채워진 자리만 실제 참가자로
+  // 렌더링합니다. 정원이 큰 게임은 카드 대신 압축된 목록으로 바뀝니다.
+  assert.match(source, /Array\.from\(\{ length: viewerSeats \}, \(_, index\) => renderSeat\(currentEntries\[index\]\)\)/u);
+  assert.match(source, /viewerSeats > COMPACT_SEAT_THRESHOLD/u);
   assert.doesNotMatch(source, /mutateSession\("select_next"\)/u);
   assert.match(source, /className="is-danger"[\s\S]*?mutateSession\("finish"\)/u);
   assert.match(css, /grid-template-areas:[\s\S]*?"position participant status"[\s\S]*?"position actions actions"/u);

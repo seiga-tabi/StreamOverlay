@@ -23,6 +23,7 @@ import type {
   LolAutomationSettings,
   ParticipationDashboardQueueEntry,
   ParticipationEntry,
+  ParticipationGame,
   ParticipationListingVisibility,
   ParticipationPublicQueueEntry,
   ParticipationSession,
@@ -35,7 +36,20 @@ import type {
   TwitchEventSubStatus,
   TwitchEventSubSubscriptionStatus
 } from "@streamops/shared";
-import { formatRiotId, isActiveParticipationStatus, isWaitingParticipationStatus, newId, normalizeRiotIdKey, nowIso, toSafeErrorMessage, type ParticipationStreamerProfile } from "@streamops/shared";
+import {
+  formatRiotId,
+  isActiveParticipationStatus,
+  isWaitingParticipationStatus,
+  newId,
+  normalizeParticipationChatLocale,
+  normalizeParticipationGame,
+  normalizeRiotIdKey,
+  nowIso,
+  PARTICIPATION_GAME_CAPACITY,
+  STREAMER_SUB_RIOT_ACCOUNT_LIMIT,
+  toSafeErrorMessage,
+  type ParticipationStreamerProfile
+} from "@streamops/shared";
 
 export type QuestionEntry = {
   id: string;
@@ -147,6 +161,11 @@ const PERSISTED_LOL_ROLES = new Set<ParticipationEntry["preferredRole"]>(["top",
 const PARTICIPATION_PUBLIC_VISIBLE_LIMIT = 4;
 const PARTICIPATION_TOP_CHAMPION_LIMIT = 3;
 
+/** Palworld 참가자는 Riot ID가 없습니다 — 둘 다 있을 때만 중복판정 키를 만듭니다. */
+function riotIdKeyOrUndefined(gameName?: string, tagLine?: string): string | undefined {
+  return gameName && tagLine ? normalizeRiotIdKey(gameName, tagLine) : undefined;
+}
+
 function cloneParticipationTopChampions(
   topChampions: ParticipationEntry["topChampions"]
 ): ParticipationEntry["topChampions"] {
@@ -166,7 +185,10 @@ function toDashboardQueueEntry(entry: ParticipationEntry, position: number): Par
     id: entry.id,
     position,
     twitchUserName: entry.twitchUserName,
-    riotId: formatRiotId(entry.riotGameName, entry.riotTagLine),
+    game: entry.game ?? "lol",
+    ...(entry.game === "palworld"
+      ? { palworldNickname: entry.palworldNickname }
+      : { riotId: formatRiotId(entry.riotGameName ?? "", entry.riotTagLine ?? "") }),
     preferredRole: entry.preferredRole,
     status: entry.status,
     requestedRole: entry.requestedRole,
@@ -191,6 +213,8 @@ function toPublicQueueEntry(entry: ParticipationEntry, position: number): Partic
   return {
     position,
     twitchUserName: entry.twitchUserName,
+    game: entry.game ?? "lol",
+    ...(entry.game === "palworld" ? { palworldNickname: entry.palworldNickname } : {}),
     preferredRole: entry.preferredRole,
     status: entry.status,
     requestedRole: entry.requestedRole,
@@ -247,22 +271,35 @@ function normalizedParticipationEntry(value: unknown): ParticipationEntry | unde
   const id = optionalString(input?.id);
   const twitchUserId = optionalString(input?.twitchUserId);
   const twitchUserName = optionalString(input?.twitchUserName);
-  const riotGameName = optionalString(input?.riotGameName);
-  const riotTagLine = optionalString(input?.riotTagLine);
   const status = optionalString(input?.status) as ParticipationEntry["status"] | undefined;
   const source = optionalString(input?.source) as ParticipationEntry["source"] | undefined;
-  const preferredRole = optionalString(input?.preferredRole) as ParticipationEntry["preferredRole"] | undefined;
   const createdAt = optionalString(input?.createdAt);
   const updatedAt = optionalString(input?.updatedAt);
-  if (!id || !twitchUserId || !twitchUserName || !riotGameName || !riotTagLine || !status || !source || !preferredRole || !createdAt || !updatedAt) return undefined;
-  if (!PERSISTED_PARTICIPATION_STATUSES.has(status) || !PERSISTED_PARTICIPATION_SOURCES.has(source) || !PERSISTED_LOL_ROLES.has(preferredRole)) return undefined;
+  if (!id || !twitchUserId || !twitchUserName || !status || !source || !createdAt || !updatedAt) return undefined;
+  if (!PERSISTED_PARTICIPATION_STATUSES.has(status) || !PERSISTED_PARTICIPATION_SOURCES.has(source)) return undefined;
+
+  // 기존 저장 데이터에는 game 필드가 없었고 전부 LoL 참가자였습니다. Palworld는
+  // Riot ID 대신 palworldNickname만 있고, 검증 없이 등록되므로 preferredRole도 없습니다.
+  const game = normalizeParticipationGame(input?.game);
+  const riotGameName = optionalString(input?.riotGameName);
+  const riotTagLine = optionalString(input?.riotTagLine);
+  const preferredRole = optionalString(input?.preferredRole) as ParticipationEntry["preferredRole"] | undefined;
+  const palworldNickname = optionalString(input?.palworldNickname);
+  if (game === "lol") {
+    if (!riotGameName || !riotTagLine || !preferredRole || !PERSISTED_LOL_ROLES.has(preferredRole)) return undefined;
+  } else if (!palworldNickname) {
+    return undefined;
+  }
+
   return {
     ...(input as ParticipationEntry),
     id,
     twitchUserId,
     twitchUserName,
+    game,
     riotGameName,
     riotTagLine,
+    ...(game === "palworld" ? { palworldNickname } : {}),
     status,
     source,
     joinedFrom: input?.joinedFrom === "public_web"
@@ -331,6 +368,7 @@ function normalizedParticipationSession(value: unknown, streamerId: string): Par
     publicSessionId: /^ps_[A-Za-z0-9_-]{32}$/u.test(optionalString(input?.publicSessionId) ?? "")
       ? optionalString(input?.publicSessionId)!
       : publicParticipationSessionIdFromInternal(sessionId),
+    game: normalizeParticipationGame(input?.game),
     status,
     listingVisibility: input?.listingVisibility === "followers" ? "followers" : "public",
     maxQueueSize: Math.max(1, optionalInteger(input?.maxQueueSize) ?? 100),
@@ -367,6 +405,7 @@ function normalizedLolAutomationSettings(value: unknown, streamerId: string): Lo
     autoSelectNextAfterGame: typeof input?.autoSelectNextAfterGame === "boolean" ? input.autoSelectNextAfterGame : DEFAULT_LOL_AUTOMATION_SETTINGS.autoSelectNextAfterGame,
     // 등록 스트리머별 Twitch chat token이 분리되기 전에는 서버 전역 채팅으로의 전송을 허용하지 않습니다.
     announceInChat: false,
+    chatLocale: normalizeParticipationChatLocale(input?.chatLocale),
     pollIntervalMs: Number.isFinite(pollIntervalMs) ? Math.max(10_000, Math.trunc(pollIntervalMs)) : DEFAULT_LOL_AUTOMATION_SETTINGS.pollIntervalMs,
     gameEndDebounceMs: Number.isFinite(gameEndDebounceMs) ? Math.max(0, Math.trunc(gameEndDebounceMs)) : DEFAULT_LOL_AUTOMATION_SETTINGS.gameEndDebounceMs,
     updatedAt: optionalString(input?.updatedAt) ?? nowIso()
@@ -518,6 +557,12 @@ function ensureApprovedStreamerDashboardAccess(request: StreamerRiotIdRequest): 
   request.dashboardKey = request.dashboardKey || newStreamerDashboardKey();
 }
 
+/* accountRole이 없는 row는 단일 계정 시절 데이터이므로 main으로 취급합니다.
+   서브 계정은 생성 시점부터 명시적으로 "sub"를 갖습니다. */
+function isSubStreamerRiotAccount(request: Pick<StreamerRiotIdRequest, "accountRole">): boolean {
+  return request.accountRole === "sub";
+}
+
 function normalizedStreamerRiotIdRequest(value: unknown): StreamerRiotIdRequest | undefined {
   const input = objectRecord(value);
   const id = optionalString(input?.id);
@@ -549,6 +594,7 @@ function normalizedStreamerRiotIdRequest(value: unknown): StreamerRiotIdRequest 
     profileLinkLabel: primaryProfileLink?.label ?? profileLinkLabel,
     profileLinks,
     status,
+    accountRole: input?.accountRole === "sub" ? "sub" : input?.accountRole === "main" ? "main" : undefined,
     dashboardEnabled: status === "approved" && input?.dashboardEnabled === true,
     requestedAt,
     updatedAt,
@@ -2036,6 +2082,23 @@ export class Store {
     return this.listStreamerRiotIdRequests().filter((request) => request.status === "approved");
   }
 
+  /* 스트리머당 정확히 1개인 대표(main) 계정 목록. 게임 모니터·스트리머 카드처럼
+     "스트리머 1명 = 계정 1개"를 전제하는 소비자는 전체 approved 목록이 아니라
+     이 목록을 써야 서브 계정이 그 자리를 가로채지 않습니다. */
+  listApprovedMainStreamerRiotIds(): StreamerRiotIdRequest[] {
+    return this.listApprovedStreamerRiotIds().filter((request) => !isSubStreamerRiotAccount(request));
+  }
+
+  mainApprovedStreamerRiotId(twitchUserId: string): StreamerRiotIdRequest | undefined {
+    this.assertPersistenceAvailable("streamer_riot_ids");
+    const request = this.streamerRiotIdRequests.find((candidate) =>
+      candidate.twitchUserId === twitchUserId &&
+      candidate.status === "approved" &&
+      !isSubStreamerRiotAccount(candidate)
+    );
+    return request ? cloneStreamerRiotIdRequest(request) : undefined;
+  }
+
   upsertStreamerRiotIdRequest(input: StreamerRiotIdRequestInput): StreamerRiotIdRequest {
     this.assertPersistenceAvailable("streamer_riot_ids");
     const now = nowIso();
@@ -2043,7 +2106,8 @@ export class Store {
     const approvedSame = this.streamerRiotIdRequests.find((request) =>
       request.twitchUserId === input.twitchUserId &&
       request.normalizedRiotId === normalizedRiotId &&
-      request.status === "approved"
+      request.status === "approved" &&
+      !isSubStreamerRiotAccount(request)
     );
     if (approvedSame) {
       Object.assign(approvedSame, {
@@ -2057,11 +2121,39 @@ export class Store {
       return cloneStreamerRiotIdRequest(approvedSame);
     }
 
-    const existing = this.streamerRiotIdRequests.find((request) => request.twitchUserId === input.twitchUserId && request.status === "pending")
+    /* 이미 자신의 서브 계정으로 등록된 ID를 본계정으로 재신청하면 새 row를 만들지
+       않고 그 서브 row를 돌려줍니다 — 같은 normalizedRiotId를 가진 row가 둘이 되면
+       승인 시 같은 ID의 main·sub가 공존해 목록·매칭이 이중으로 잡힙니다.
+       본계정 전환은 대시보드의 대표 지정(setMainStreamerRiotId)으로 안내합니다. */
+    const subSame = this.streamerRiotIdRequests.find((request) =>
+      request.twitchUserId === input.twitchUserId &&
+      request.normalizedRiotId === normalizedRiotId &&
+      request.status !== "rejected" &&
+      isSubStreamerRiotAccount(request)
+    );
+    if (subSame) {
+      Object.assign(subSame, {
+        twitchLogin: input.twitchLogin,
+        twitchDisplayName: input.twitchDisplayName,
+        twitchProfileImageUrl: input.twitchProfileImageUrl,
+        updatedAt: now
+      });
+      this.persistStreamerRiotIdState();
+      return cloneStreamerRiotIdRequest(subSame);
+    }
+
+    /* 서브 계정 row는 재신청 슬롯으로 재사용하지 않습니다 — 재사용하면 대기 중인
+       서브 등록이 본계정 재신청으로 소리 없이 바뀝니다. */
+    const existing = this.streamerRiotIdRequests.find((request) =>
+      request.twitchUserId === input.twitchUserId
+      && request.status === "pending"
+      && !isSubStreamerRiotAccount(request)
+    )
       ?? this.streamerRiotIdRequests.find((request) =>
         request.twitchUserId === input.twitchUserId &&
         request.normalizedRiotId === normalizedRiotId &&
-        request.status === "rejected"
+        request.status === "rejected" &&
+        !isSubStreamerRiotAccount(request)
       );
     if (existing) {
       Object.assign(existing, {
@@ -2117,12 +2209,20 @@ export class Store {
     request.reviewedAt = now;
     request.reviewer = input.reviewer;
     request.note = input.note;
+    if (input.decision === "approved" && isSubStreamerRiotAccount(request)) {
+      /* 서브 계정 승인: 전적 검색 연결만 활성화합니다. 대시보드 접근 키·프로필 링크는
+         대표 계정의 자산이므로 승계하지 않고, 다른 계정도 비활성화하지 않습니다. */
+      this.persistStreamerRiotIdState();
+      return cloneStreamerRiotIdRequest(request);
+    }
     if (input.decision === "approved") {
       const previousApproved = this.streamerRiotIdRequests.find((candidate) =>
         candidate.id !== request.id &&
         candidate.twitchUserId === request.twitchUserId &&
-        candidate.status === "approved"
+        candidate.status === "approved" &&
+        !isSubStreamerRiotAccount(candidate)
       );
+      request.accountRole = "main";
       request.dashboardSlug = request.dashboardSlug || previousApproved?.dashboardSlug;
       request.dashboardKey = request.dashboardKey || previousApproved?.dashboardKey;
       request.dashboardEnabled = previousApproved?.dashboardEnabled === true;
@@ -2134,8 +2234,11 @@ export class Store {
       request.profileLinkLabel = request.profileLinkLabel || primaryProfileLink?.label || previousApproved?.profileLinkLabel;
       request.profileLinks = normalizedStreamerProfileLinks(request.profileLinks, request.profileLinkUrl, request.profileLinkLabel);
       ensureApprovedStreamerDashboardAccess(request);
+      /* 대표 계정 재신청 승인은 이전 "대표" 승인만 교체합니다 — 승인된 서브 계정은
+         별도 자산이므로 함께 비활성화하지 않습니다. */
       for (const candidate of this.streamerRiotIdRequests) {
         if (candidate.id === request.id || candidate.twitchUserId !== request.twitchUserId || candidate.status !== "approved") continue;
+        if (isSubStreamerRiotAccount(candidate)) continue;
         candidate.status = "rejected";
         candidate.dashboardEnabled = false;
         candidate.updatedAt = now;
@@ -2156,7 +2259,9 @@ export class Store {
   }): StreamerRiotIdRequest | undefined {
     this.assertPersistenceAvailable("streamer_riot_ids");
     const request = this.streamerRiotIdRequests.find((candidate) => candidate.id === input.requestId);
-    if (!request || request.status !== "approved") return undefined;
+    /* 대시보드 접근 키는 대표 계정만 가질 수 있습니다 — 서브 row에 켜면
+       한 스트리머에게 접근 키가 계정 수만큼 생깁니다. */
+    if (!request || request.status !== "approved" || isSubStreamerRiotAccount(request)) return undefined;
     const now = nowIso();
     request.dashboardEnabled = input.dashboardEnabled;
     ensureApprovedStreamerDashboardAccess(request);
@@ -2177,7 +2282,8 @@ export class Store {
     this.assertPersistenceAvailable("streamer_riot_ids");
     const request = this.streamerRiotIdRequests.find((candidate) =>
       candidate.twitchUserId === input.twitchUserId &&
-      candidate.status === "approved"
+      candidate.status === "approved" &&
+      !isSubStreamerRiotAccount(candidate)
     );
     if (!request) return undefined;
     const profileLinks = normalizedStreamerProfileLinks(input.profileLinks, input.profileLinkUrl, input.profileLinkLabel);
@@ -2198,15 +2304,132 @@ export class Store {
     this.assertPersistenceAvailable("streamer_riot_ids");
     const request = this.streamerRiotIdRequests.find((candidate) =>
       candidate.twitchUserId === input.twitchUserId &&
-      candidate.status === "approved"
+      candidate.status === "approved" &&
+      !isSubStreamerRiotAccount(candidate)
     );
     if (!request) return undefined;
+    /* 다른 row(타 스트리머 또는 자신의 서브)가 이미 쓰는 ID로의 개명은 저장
+       계층에서도 거부합니다 — route 검사를 우회하는 미래 호출자에 대한 안전망.
+       구체적인 오류 코드 구분은 route 계층(updateStreamerRiotIdentityForOwner) 몫. */
+    const normalizedRiotId = normalizeRiotIdKey(input.riotGameName, input.riotTagLine);
+    const conflict = this.streamerRiotIdRequests.find((candidate) =>
+      candidate.id !== request.id &&
+      candidate.status !== "rejected" &&
+      candidate.normalizedRiotId === normalizedRiotId
+    );
+    if (conflict) return undefined;
     request.riotGameName = input.riotGameName;
     request.riotTagLine = input.riotTagLine;
-    request.normalizedRiotId = normalizeRiotIdKey(input.riotGameName, input.riotTagLine);
+    request.normalizedRiotId = normalizedRiotId;
     request.updatedAt = nowIso();
     this.persistStreamerRiotIdState();
     return cloneStreamerRiotIdRequest(request);
+  }
+
+  /* 서브 계정 등록 신청. upsertStreamerRiotIdRequest(본계정 재신청 슬롯 재사용)와 달리
+     항상 새 row를 만들고, 스트리머 간 선점·자기 중복·개수 상한을 여기서 검증합니다. */
+  addStreamerSubRiotIdRequest(input: StreamerRiotIdRequestInput):
+    | { ok: true; request: StreamerRiotIdRequest }
+    | { ok: false; code: "riot_id_duplicated" | "riot_id_taken" | "limit_exceeded" } {
+    this.assertPersistenceAvailable("streamer_riot_ids");
+    const now = nowIso();
+    const normalizedRiotId = normalizeRiotIdKey(input.riotGameName, input.riotTagLine);
+    for (const request of this.streamerRiotIdRequests) {
+      if (request.normalizedRiotId !== normalizedRiotId) continue;
+      if (request.status === "rejected") continue;
+      /* 누가 가졌는지는 응답에 싣지 않습니다 — code만 구분합니다. */
+      return { ok: false, code: request.twitchUserId === input.twitchUserId ? "riot_id_duplicated" : "riot_id_taken" };
+    }
+    const subCount = this.streamerRiotIdRequests.filter((request) =>
+      request.twitchUserId === input.twitchUserId
+      && isSubStreamerRiotAccount(request)
+      && request.status !== "rejected"
+    ).length;
+    if (subCount >= STREAMER_SUB_RIOT_ACCOUNT_LIMIT) {
+      return { ok: false, code: "limit_exceeded" };
+    }
+    const request: StreamerRiotIdRequest = {
+      id: newId("riotreq"),
+      twitchUserId: input.twitchUserId,
+      twitchLogin: input.twitchLogin,
+      twitchDisplayName: input.twitchDisplayName,
+      twitchProfileImageUrl: input.twitchProfileImageUrl,
+      riotGameName: input.riotGameName,
+      riotTagLine: input.riotTagLine,
+      normalizedRiotId,
+      status: "pending",
+      accountRole: "sub",
+      dashboardEnabled: false,
+      requestedAt: now,
+      updatedAt: now
+    };
+    this.streamerRiotIdRequests.unshift(request);
+    this.persistStreamerRiotIdState();
+    return { ok: true, request: cloneStreamerRiotIdRequest(request) };
+  }
+
+  /* 승인된 서브 계정을 대표로 교체합니다. 대시보드 접근 키·프로필 링크는 스트리머의
+     자산이므로 이전 대표 row에서 새 대표 row로 옮겨, "대표 row를 읽는" 모든 소비자
+     (dashboard slug/key 조회·게임 모니터·스트리머 카드)가 끊기지 않게 합니다. */
+  setMainStreamerRiotId(input: { twitchUserId: string; requestId: string }):
+    | { ok: true; request: StreamerRiotIdRequest }
+    | { ok: false; code: "not_found" | "not_approved_account" } {
+    this.assertPersistenceAvailable("streamer_riot_ids");
+    const target = this.streamerRiotIdRequests.find((candidate) =>
+      candidate.id === input.requestId && candidate.twitchUserId === input.twitchUserId
+    );
+    if (!target) return { ok: false, code: "not_found" };
+    if (target.status !== "approved") return { ok: false, code: "not_approved_account" };
+    if (!isSubStreamerRiotAccount(target)) {
+      /* 이미 대표인 계정 — 상태 변화 없이 성공으로 돌려 재시도에 안전하게 합니다. */
+      return { ok: true, request: cloneStreamerRiotIdRequest(target) };
+    }
+    const now = nowIso();
+    const currentMain = this.streamerRiotIdRequests.find((candidate) =>
+      candidate.twitchUserId === input.twitchUserId &&
+      candidate.status === "approved" &&
+      !isSubStreamerRiotAccount(candidate)
+    );
+    target.accountRole = "main";
+    target.updatedAt = now;
+    if (currentMain) {
+      target.dashboardSlug = currentMain.dashboardSlug;
+      target.dashboardKey = currentMain.dashboardKey;
+      target.dashboardEnabled = currentMain.dashboardEnabled;
+      target.profileLinks = cloneStreamerProfileLinks(currentMain.profileLinks);
+      target.profileLinkUrl = currentMain.profileLinkUrl;
+      target.profileLinkLabel = currentMain.profileLinkLabel;
+      currentMain.accountRole = "sub";
+      currentMain.dashboardSlug = undefined;
+      currentMain.dashboardKey = undefined;
+      currentMain.dashboardEnabled = false;
+      currentMain.profileLinks = undefined;
+      currentMain.profileLinkUrl = undefined;
+      currentMain.profileLinkLabel = undefined;
+      currentMain.updatedAt = now;
+    }
+    ensureApprovedStreamerDashboardAccess(target);
+    this.persistStreamerRiotIdState();
+    return { ok: true, request: cloneStreamerRiotIdRequest(target) };
+  }
+
+  deleteStreamerRiotIdRequest(input: { twitchUserId: string; requestId: string }):
+    | { ok: true; request: StreamerRiotIdRequest }
+    | { ok: false; code: "not_found" | "cannot_delete_main" } {
+    this.assertPersistenceAvailable("streamer_riot_ids");
+    const index = this.streamerRiotIdRequests.findIndex((candidate) =>
+      candidate.id === input.requestId && candidate.twitchUserId === input.twitchUserId
+    );
+    if (index < 0) return { ok: false, code: "not_found" };
+    const target = this.streamerRiotIdRequests[index]!;
+    /* 대표 계정 삭제는 대시보드 접근·게임 모니터의 기준을 없애므로 금지합니다.
+       먼저 다른 계정을 대표로 지정한 뒤 삭제해야 합니다. */
+    if (target.status === "approved" && !isSubStreamerRiotAccount(target)) {
+      return { ok: false, code: "cannot_delete_main" };
+    }
+    this.streamerRiotIdRequests.splice(index, 1);
+    this.persistStreamerRiotIdState();
+    return { ok: true, request: cloneStreamerRiotIdRequest(target) };
   }
 
   getParticipationQueue(streamerId?: string): ParticipationEntry[] {
@@ -2319,10 +2542,11 @@ export class Store {
     const riotIdKey = normalizeRiotIdKey(input.riotGameName, input.riotTagLine);
     const reusable = this.participationQueueFor(streamerId)
       .filter((candidate) => {
+        if (candidate.game === "palworld") return false;
         if (isActiveParticipationStatus(candidate.status)) return false;
         if (!candidate.profileStatus && !candidate.rankedStats && !candidate.topChampions?.length) return false;
         if (input.riotPuuid && candidate.riotPuuid && candidate.riotPuuid === input.riotPuuid) return true;
-        return normalizeRiotIdKey(candidate.riotGameName, candidate.riotTagLine) === riotIdKey;
+        return riotIdKeyOrUndefined(candidate.riotGameName, candidate.riotTagLine) === riotIdKey;
       })
       .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))[0];
     return reusable ? cloneParticipationEntry(reusable) : undefined;
@@ -2330,19 +2554,20 @@ export class Store {
 
   findParticipationDuplicate(input: {
     twitchUserId: string;
-    riotGameName: string;
-    riotTagLine: string;
+    riotGameName?: string;
+    riotTagLine?: string;
     riotPuuid?: string;
     excludeEntryId?: string;
   }, streamerId?: string): ParticipationDuplicate | undefined {
-    const riotIdKey = normalizeRiotIdKey(input.riotGameName, input.riotTagLine);
+    const riotIdKey = riotIdKeyOrUndefined(input.riotGameName, input.riotTagLine);
     return this.getActiveParticipationQueue(streamerId).reduce<ParticipationDuplicate | undefined>((found, candidate) => {
       if (found) return found;
       if (candidate.id === input.excludeEntryId) return undefined;
       if (candidate.twitchUserId === input.twitchUserId) return { reason: "twitch_user", entry: candidate };
       if (input.riotPuuid && candidate.riotPuuid && candidate.riotPuuid === input.riotPuuid) return { reason: "riot_id", entry: candidate };
-      const candidateRiotIdKey = normalizeRiotIdKey(candidate.riotGameName, candidate.riotTagLine);
-      if (candidateRiotIdKey === riotIdKey) return { reason: "riot_id", entry: candidate };
+      if (riotIdKey && riotIdKeyOrUndefined(candidate.riotGameName, candidate.riotTagLine) === riotIdKey) {
+        return { reason: "riot_id", entry: candidate };
+      }
       return undefined;
     }, undefined);
   }
@@ -2371,8 +2596,9 @@ export class Store {
 
     const previous = reusable.candidate;
     const requeuedAt = nowIso();
+    const previousRiotIdKey = riotIdKeyOrUndefined(previous.riotGameName, previous.riotTagLine);
     const sameRiotIdentity = Boolean(entry.riotPuuid && previous.riotPuuid && entry.riotPuuid === previous.riotPuuid)
-      || normalizeRiotIdKey(previous.riotGameName, previous.riotTagLine) === normalizeRiotIdKey(entry.riotGameName, entry.riotTagLine);
+      || (previousRiotIdKey !== undefined && previousRiotIdKey === riotIdKeyOrUndefined(entry.riotGameName, entry.riotTagLine));
     const profileFallback = sameRiotIdentity ? previous : undefined;
     const reactivated: ParticipationEntry = {
       ...previous,
@@ -2404,10 +2630,11 @@ export class Store {
   addOrUpdateParticipation(entry: ParticipationEntry, streamerId?: string): ParticipationEntry {
     const queue = this.participationQueueFor(streamerId);
     const ownedEntry = this.ownedParticipationEntry(entry, streamerId);
+    const ownedRiotIdKey = riotIdKeyOrUndefined(ownedEntry.riotGameName, ownedEntry.riotTagLine);
     const existingIndex = queue.findIndex(
       (candidate) =>
         candidate.twitchUserId === ownedEntry.twitchUserId ||
-        normalizeRiotIdKey(candidate.riotGameName, candidate.riotTagLine) === normalizeRiotIdKey(ownedEntry.riotGameName, ownedEntry.riotTagLine) ||
+        (ownedRiotIdKey !== undefined && riotIdKeyOrUndefined(candidate.riotGameName, candidate.riotTagLine) === ownedRiotIdKey) ||
         Boolean(ownedEntry.riotPuuid && candidate.riotPuuid === ownedEntry.riotPuuid)
     );
     if (existingIndex >= 0) {
@@ -2436,6 +2663,7 @@ export class Store {
           streamerId,
           sessionId,
           publicSessionId: publicParticipationSessionIdFromInternal(sessionId),
+          game: "lol",
           status: "recruiting",
           listingVisibility: "public",
           maxQueueSize: 100,
@@ -2507,6 +2735,7 @@ export class Store {
     streamerId: string,
     profileSnapshot?: StreamerProfileSnapshot,
     options: {
+      game?: ParticipationGame;
       maxQueueSize?: number;
       allowRejoin?: boolean;
       checkInSeconds?: number;
@@ -2527,6 +2756,7 @@ export class Store {
       streamerId: normalizedStreamerId,
       sessionId,
       publicSessionId: publicParticipationSessionIdFromInternal(sessionId),
+      game: normalizeParticipationGame(options.game),
       status: "recruiting",
       listingVisibility: options.listingVisibility === "followers" ? "followers" : "public",
       maxQueueSize: Math.max(1, Math.trunc(options.maxQueueSize ?? 100)),
