@@ -335,6 +335,7 @@ test("서명된 Bot 내부 명령 정책 API는 exact Guild·command만 전달�
                 latency: false,
                 observedAt: true
               },
+              participationAnnounceEnabled: true,
               revision: 2
             };
           }
@@ -444,6 +445,7 @@ test("Organization Bot 제어 API는 session·Origin·CSRF와 strict body를 유
         latency: true,
         observedAt: true
       },
+      participationAnnounceEnabled: true,
       revision: 0
     };
     const { handler } = createDiscordHandler({
@@ -1254,5 +1256,89 @@ test("Organization 소유자의 게임 서버 삭제는 REST 자격 증명 제�
     );
     assert.equal(calls[0]?.input.organizationId, organizationId);
     assert.equal(calls[0]?.input.gameServerId, gameServerId);
+  });
+});
+
+test("길드 채널 보고는 HMAC allowlist 경로에서만 받고 형식을 강제한다", async () => {
+  await withDiscordConfig(async () => {
+    const reports = [];
+    const makeHandler = () => createDiscordHandler({
+      handlerInput: {
+        discordInternalAuth: {
+          verify() {
+            return { ok: true };
+          }
+        }
+      },
+      discordOnboarding: {
+        async reportGuildDirectory(input) {
+          reports.push(input);
+          return { stored: true };
+        }
+      }
+    });
+
+    const valid = {
+      applicationId: APPLICATION_ID,
+      guildId: "123456789012345678",
+      channels: [{ id: "323456789012345678", name: "참여-알림" }],
+      roles: [{ id: "423456789012345678", name: "참여알림" }],
+      channelsTruncated: false,
+      rolesTruncated: false
+    };
+
+    const ok = await request(
+      makeHandler().handler,
+      "POST",
+      "/internal/discord/guild-channels/report",
+      valid,
+      { "content-type": "application/json" }
+    );
+    assert.equal(ok.statusCode, 200);
+    assert.deepEqual(JSON.parse(ok.body), { stored: true });
+    assert.equal(reports.length, 1);
+    assert.equal(reports[0].channels.length, 1);
+
+    // 다른 application 의 보고는 받지 않습니다.
+    const wrongApp = await request(
+      makeHandler().handler,
+      "POST",
+      "/internal/discord/guild-channels/report",
+      { ...valid, applicationId: "999999999999999999" },
+      { "content-type": "application/json" }
+    );
+    assert.equal(wrongApp.statusCode, 400);
+
+    // schema 밖 필드는 거부합니다.
+    const extraField = await request(
+      makeHandler().handler,
+      "POST",
+      "/internal/discord/guild-channels/report",
+      { ...valid, webhookUrl: "https://example.invalid/hook" },
+      { "content-type": "application/json" }
+    );
+    assert.equal(extraField.statusCode, 400);
+
+    // 브라우저에서 온 요청은 내부 경로에 접근할 수 없습니다.
+    const fromBrowser = await request(
+      makeHandler().handler,
+      "POST",
+      "/internal/discord/guild-channels/report",
+      valid,
+      { "content-type": "application/json", origin: DASHBOARD_ORIGIN }
+    );
+    assert.equal(fromBrowser.statusCode, 403);
+
+    // GET 은 허용하지 않습니다.
+    const viaGet = await request(
+      makeHandler().handler,
+      "GET",
+      "/internal/discord/guild-channels/report",
+      undefined,
+      {}
+    );
+    assert.equal(viaGet.statusCode, 404);
+
+    assert.equal(reports.length, 1, "거부된 요청은 service 까지 가면 안 됩니다.");
   });
 });

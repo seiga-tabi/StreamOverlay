@@ -338,8 +338,8 @@ test("시청자 참여 관리 화면은 KO·JA와 세션·대기열 관리 계�
 
   assert.match(koMarkup, /시청자 참여 상태를 불러오는 중입니다/u);
   assert.match(jaMarkup, /視聴者参加の状態を読み込んでいます/u);
-  assert.match(source, /새 참여 세션/u);
-  assert.match(source, /新しい参加セッション/u);
+  assert.match(source, /새 참여 세션을 시작하세요|시청자 참여를 시작하세요/u);
+  assert.match(source, /視聴者参加を始めましょう/u);
   assert.match(source, /선택한 참가자 선정/u);
   assert.match(source, /選択した参加者を選出/u);
   assert.match(source, /다음 참가자로 선택/u);
@@ -351,7 +351,14 @@ test("시청자 참여 관리 화면은 KO·JA와 세션·대기열 관리 계�
   assert.doesNotMatch(source, /URLをコピー/u);
   assert.match(source, /\/participation/u);
   assert.match(source, /updateYoroParticipationEntry/u);
-  assert.match(css, /overflow-x:\s*auto/u);
+  // 게임 선택 UI: LoL만 실제 데이터/검증이 있어 활성 상태로, Palworld는
+  // 스키마·검증 로직이 없어 "준비 중"으로만 노출합니다(가짜 데이터 금지).
+  assert.match(source, /LOL_TOTAL_CAPACITY = LOL_VIEWER_SEATS \+ 1/u);
+  assert.match(source, /gamePalworld: "Palworld"/u);
+  assert.match(source, /comingSoon: "준비 중"/u);
+  assert.match(source, /comingSoon: "近日対応"/u);
+  assert.doesNotMatch(source, /riotGameName:\s*"palworld"|game:\s*"palworld"/iu);
+  assert.match(css, /@media \(max-width:\s*72rem\)/u);
   assert.match(css, /@media \(max-width:\s*48rem\)/u);
   assert.match(css, /var\(--surface\)/u);
   assert.doesNotMatch(css, /#[0-9a-f]{3,8}/iu);

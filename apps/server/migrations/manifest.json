@@ -128,6 +128,22 @@
       "checksumSha256": "20e4867be541182f67bfc9017922383996acc9da3b35ad98cbc7f710b5b15585",
       "destructive": false,
       "transaction": true
+    },
+    {
+      "id": "0017_discord_participation_announcement",
+      "file": "0017_discord_participation_announcement.sql",
+      "description": "참여 모집 Discord 알림 대상과 메시지 상태",
+      "checksumSha256": "e6ec6d33d24585c062e18a0bf2269649ff758d536a7fb409e9ed948a238cb02d",
+      "destructive": false,
+      "transaction": true
+    },
+    {
+      "id": "0018_discord_guild_directory_cache",
+      "file": "0018_discord_guild_directory_cache.sql",
+      "description": "Bot이 보고한 길드 채널·역할 후보 캐시",
+      "checksumSha256": "8b608ba92678784298bc05ffdd1390e3503b0760645193a4685d2117dab7054a",
+      "destructive": false,
+      "transaction": true
     }
   ]
 }

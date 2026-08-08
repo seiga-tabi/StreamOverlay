@@ -37,7 +37,9 @@ test("migration manifest와 SQL checksum을 strict하게 검증한다", async ()
       "0013_discord_bot_control_plane",
       "0014_discord_palworld_player_command",
       "0015_discord_command_message_cleanup",
-      "0016_discord_bot_english_response_locale"
+      "0016_discord_bot_english_response_locale",
+      "0017_discord_participation_announcement",
+      "0018_discord_guild_directory_cache"
     ]
   );
 
@@ -69,7 +71,8 @@ test("migration check는 빈 Database를 변경하지 않고 pending으로 판�
 
   const result = await inspectMigrationState(queryable, manifest);
   assert.equal(result.status, "pending");
-  assert.equal(result.pending.length, 16);
+  // 빈 DB 에서는 manifest 전체가 pending 입니다. migration 추가 때마다 숫자를 고치지 않습니다.
+  assert.equal(result.pending.length, manifest.migrations.length);
   assert.equal(queries.length, 1);
   assert.match(queries[0], /^SELECT to_regclass/u);
 });

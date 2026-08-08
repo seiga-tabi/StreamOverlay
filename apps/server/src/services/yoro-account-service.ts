@@ -7,6 +7,11 @@ import {
 import { appConfig } from "../config.js";
 import { withTransaction } from "../database/transaction.js";
 import {
+  DiscordParticipationAnnouncementRepository,
+  type AnnouncementSettings,
+  type AnnouncementTargetInput
+} from "../database/repositories/discord-participation-announcement-repository.js";
+import {
   type YoroExternalIdentity,
   type YoroUserPreferences,
   type YoroIdentityProvider,
@@ -1014,5 +1019,27 @@ export class YoroAccountService {
       scopes,
       expiresAt: new Date(Date.now() + body.expires_in * 1_000).toISOString()
     };
+  }
+
+  /* 참여 모집 Discord 알림 대상 (안 A: 스트리머 본인이 켠다). */
+
+  async participationAnnouncement(input: {
+    userId: string;
+    streamerTwitchUserId: string;
+  }): Promise<AnnouncementSettings> {
+    return new DiscordParticipationAnnouncementRepository(this.pool).read(input);
+  }
+
+  async replaceParticipationAnnouncement(input: {
+    userId: string;
+    streamerTwitchUserId: string;
+    enabled: boolean;
+    targets: readonly AnnouncementTargetInput[];
+  }): Promise<AnnouncementSettings> {
+    return withTransaction(this.pool, async (client) => {
+      const repository = new DiscordParticipationAnnouncementRepository(client);
+      await repository.replace(input);
+      return repository.read(input);
+    });
   }
 }

@@ -3,6 +3,9 @@ import assert from "node:assert/strict";
 import {
   discordInternalCanonicalRequest,
   parseDiscordGameServerStatusRequest,
+  parseDiscordAnnouncementAckRequest,
+  parseDiscordAnnouncementPendingRequest,
+  parseDiscordGuildDirectoryReportRequest,
   parseDiscordGameServerStatusResponse,
   parseDiscordPalworldPlayerLookupRequest,
   parseDiscordPalworldPlayerLookupResponse,
@@ -162,4 +165,112 @@ test("Discord 내부 canonical request는 method와 path를 정확히 귀속한�
     path: "/api/discord/setup",
     timestamp: "1800000000"
   }));
+});
+
+test("길드 채널 보고는 exact schema와 상한을 강제한다", () => {
+  const valid = {
+    applicationId: "123456789012345678",
+    guildId: "223456789012345678",
+    channels: [{ id: "323456789012345678", name: "참여-알림" }],
+    roles: [{ id: "423456789012345678", name: "참여알림" }],
+    channelsTruncated: false,
+    rolesTruncated: false
+  };
+  assert.deepEqual(parseDiscordGuildDirectoryReportRequest(valid), valid);
+
+  // 빈 목록은 정상입니다. 봇이 쓸 수 있는 채널이 하나도 없을 수 있습니다.
+  assert.ok(parseDiscordGuildDirectoryReportRequest({
+    ...valid,
+    channels: [],
+    roles: []
+  }));
+
+  for (const invalid of [
+    { ...valid, extra: true },
+    { ...valid, applicationId: "not-a-snowflake" },
+    { ...valid, channelsTruncated: "false" },
+    { ...valid, channels: [{ id: "323456789012345678" }] },
+    { ...valid, channels: [{ id: "323456789012345678", name: "", }] },
+    { ...valid, channels: [{ id: "323456789012345678", name: "x".repeat(101) }] },
+    { ...valid, channels: [{ id: "nope", name: "일반" }] },
+    { ...valid, channels: [{ id: "323456789012345678", name: "a", kind: "text" }] },
+    // 같은 채널을 두 번 보고하면 캐시가 어긋납니다.
+    {
+      ...valid,
+      channels: [
+        { id: "323456789012345678", name: "a" },
+        { id: "323456789012345678", name: "b" }
+      ]
+    },
+    // 상한 초과
+    {
+      ...valid,
+      channels: Array.from({ length: 201 }, (_, index) => ({
+        id: String(300000000000000000 + index),
+        name: `c${index}`
+      }))
+    }
+  ]) {
+    assert.equal(
+      parseDiscordGuildDirectoryReportRequest(invalid),
+      undefined,
+      JSON.stringify(invalid).slice(0, 90)
+    );
+  }
+});
+
+test("길드 채널 이름의 제어문자는 거부한다", () => {
+  const withControl = {
+    applicationId: "123456789012345678",
+    guildId: "223456789012345678",
+    channels: [{ id: "323456789012345678", name: `일반${String.fromCharCode(0)}` }],
+    roles: [],
+    channelsTruncated: false,
+    rolesTruncated: false
+  };
+  assert.equal(parseDiscordGuildDirectoryReportRequest(withControl), undefined);
+});
+
+test("참여 알림 폴링 요청은 applicationId 하나만 받는다", () => {
+  const valid = { applicationId: "123456789012345678" };
+  assert.deepEqual(parseDiscordAnnouncementPendingRequest(valid), valid);
+  for (const invalid of [
+    { ...valid, guildId: "223456789012345678" },
+    { applicationId: "nope" },
+    {}
+  ]) {
+    assert.equal(parseDiscordAnnouncementPendingRequest(invalid), undefined);
+  }
+});
+
+test("참여 알림 ack 은 성공 시 messageId를 반드시 요구한다", () => {
+  const base = {
+    applicationId: "123456789012345678",
+    jobId: "11111111-1111-4111-8111-111111111111",
+    result: "ok",
+    messageId: "323456789012345678"
+  };
+  assert.deepEqual(parseDiscordAnnouncementAckRequest(base), base);
+
+  // 실패 보고에는 messageId 가 없어도 됩니다.
+  assert.ok(parseDiscordAnnouncementAckRequest({
+    applicationId: base.applicationId,
+    jobId: base.jobId,
+    result: "permission_missing"
+  }));
+
+  for (const invalid of [
+    // 성공인데 어떤 메시지인지 모르면 다음 편집을 할 수 없습니다.
+    { applicationId: base.applicationId, jobId: base.jobId, result: "ok" },
+    { ...base, result: "exploded" },
+    { ...base, jobId: "not-a-uuid" },
+    { ...base, channelId: "423456789012345678" },
+    { ...base, messageId: "nope" }
+  ]) {
+    assert.equal(
+      parseDiscordAnnouncementAckRequest(invalid),
+      undefined,
+      JSON.stringify(invalid)
+    );
+  }
 });

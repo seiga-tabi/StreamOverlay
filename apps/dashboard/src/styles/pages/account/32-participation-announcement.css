@@ -1,0 +1,410 @@
+@layer pages {
+  /* 참여 모집 Discord 알림 설정.
+   *
+   * 기존 .participation-management-* 는 legacy layer 이고 같은 파일에서 다른
+   * 작업이 진행 중이라, 새 이름으로 분리해 서로 건드리지 않게 했습니다.
+   * 색은 이 화면이 이미 쓰던 어두운 팔레트를 그대로 옮겨 왔습니다.
+   */
+  .yoro-pa {
+    --pa-surface: #1c232d;
+    --pa-sunken: #161d26;
+    --pa-raised: #232b36;
+    --pa-line: rgb(255 255 255 / 10%);
+    --pa-line-strong: rgb(255 255 255 / 18%);
+    --pa-muted: #aab4c2;
+    --pa-dim: #8b96a8;
+    --pa-blue: #5d84f4;
+    --pa-good: #65d6a6;
+    --pa-warn: #f0a63a;
+    --pa-bad: #ff858c;
+
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid var(--pa-line);
+    border-radius: 14px;
+    display: grid;
+    gap: 12px;
+    background: var(--pa-surface);
+  }
+
+  .yoro-pa-head {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: start;
+  }
+
+  .yoro-pa-head h2 {
+    margin: 0;
+    font-size: 15px;
+    letter-spacing: -.01em;
+  }
+
+  .yoro-pa-head p {
+    margin: 4px 0 0;
+    color: var(--pa-muted);
+    font-size: 12.5px;
+    line-height: 1.5;
+  }
+
+  .yoro-pa-head small {
+    display: block;
+    margin-top: 5px;
+    color: var(--pa-dim);
+    font-size: 11.5px;
+    line-height: 1.5;
+  }
+
+  /* 토글은 checkbox 를 그대로 씁니다. 라벨 연결과 키보드 조작이 유지됩니다. */
+  .yoro-pa-toggle {
+    flex: none;
+    min-height: 44px;
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .yoro-pa-toggle > span {
+    order: 1;
+    color: var(--pa-dim);
+    font-size: 11.5px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .yoro-pa-toggle > i {
+    order: 2;
+    position: relative;
+    width: 40px;
+    height: 24px;
+    border: 1px solid var(--pa-line-strong);
+    border-radius: 12px;
+    background: var(--pa-raised);
+  }
+
+  .yoro-pa-toggle > i::after {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--pa-dim);
+    content: "";
+  }
+
+  .yoro-pa-toggle > input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+
+  .yoro-pa-toggle > input:checked ~ i {
+    border-color: transparent;
+    background: var(--pa-blue);
+  }
+
+  .yoro-pa-toggle > input:checked ~ i::after {
+    left: auto;
+    right: 3px;
+    background: #fff;
+  }
+
+  .yoro-pa-toggle > input:checked ~ span {
+    color: #f2f5fa;
+  }
+
+  .yoro-pa-toggle > input:focus-visible ~ i {
+    outline: 2px solid var(--pa-blue);
+    outline-offset: 2px;
+  }
+
+  .yoro-pa-targets {
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+    list-style: none;
+  }
+
+  .yoro-pa-target {
+    min-width: 0;
+    padding: 11px 13px;
+    border: 1px solid var(--pa-line);
+    border-radius: 11px;
+    display: grid;
+    gap: 9px;
+    background: var(--pa-sunken);
+  }
+
+  .yoro-pa-target[data-warn="1"] {
+    border-color: rgb(240 166 58 / 45%);
+  }
+
+  .yoro-pa-target-head {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 9px;
+    align-items: center;
+  }
+
+  .yoro-pa-name {
+    min-width: 0;
+  }
+
+  .yoro-pa-name b,
+  .yoro-pa-name small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .yoro-pa-name b {
+    font-size: 12.5px;
+    font-weight: 800;
+  }
+
+  .yoro-pa-name small {
+    color: var(--pa-dim);
+    font-size: 11px;
+  }
+
+  /* 상태는 색만으로 알리지 않고 문구를 함께 둡니다. */
+  .yoro-pa-badge {
+    flex: none;
+    padding: 3px 8px;
+    border: 1px solid var(--pa-line-strong);
+    border-radius: 999px;
+    color: var(--pa-muted);
+    font-size: 10.5px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .yoro-pa-badge[data-tone="ok"] {
+    border-color: transparent;
+    background: rgb(101 214 166 / 18%);
+    color: var(--pa-good);
+  }
+
+  .yoro-pa-badge[data-tone="warn"] {
+    border-color: transparent;
+    background: rgb(240 166 58 / 20%);
+    color: var(--pa-warn);
+  }
+
+  .yoro-pa-badge[data-tone="bad"] {
+    border-color: transparent;
+    background: rgb(255 133 140 / 18%);
+    color: var(--pa-bad);
+  }
+
+  .yoro-pa-fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: 8px;
+  }
+
+  .yoro-pa-fields label {
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+  }
+
+  .yoro-pa-fields label > span {
+    color: var(--pa-dim);
+    font-size: 10.5px;
+    font-weight: 700;
+  }
+
+  .yoro-pa-fields select {
+    min-width: 0;
+    min-height: 44px;
+    padding: 0 10px;
+    border: 1px solid var(--pa-line-strong);
+    border-radius: 9px;
+    background: var(--pa-raised);
+    color: inherit;
+    font: inherit;
+    font-size: 12.5px;
+    font-weight: 700;
+  }
+
+  .yoro-pa-note {
+    margin: 0;
+    padding: 9px 11px;
+    border-radius: 9px;
+    background: rgb(240 166 58 / 10%);
+    color: #ffc887;
+    font-size: 11.5px;
+    line-height: 1.5;
+  }
+
+  .yoro-pa-target-foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .yoro-pa-target-foot small {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--pa-dim);
+    font-size: 10.5px;
+    text-overflow: ellipsis;
+  }
+
+  .yoro-pa-foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: space-between;
+  }
+
+  .yoro-pa-action {
+    flex: none;
+    min-height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--pa-line-strong);
+    border-radius: 10px;
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 12.5px;
+    font-weight: 800;
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .yoro-pa-action > span {
+    color: var(--pa-dim);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .yoro-pa-action.is-primary {
+    border-color: transparent;
+    background: var(--pa-blue);
+    color: #fff;
+  }
+
+  .yoro-pa-action.is-danger {
+    border-color: rgb(255 133 140 / 35%);
+    color: var(--pa-bad);
+  }
+
+  .yoro-pa-action.is-block {
+    width: 100%;
+  }
+
+  .yoro-pa-action:disabled {
+    opacity: .45;
+    cursor: default;
+  }
+
+  .yoro-pa-empty {
+    margin: 0;
+    padding: 16px 12px;
+    border: 1px dashed var(--pa-line-strong);
+    border-radius: 10px;
+    display: grid;
+    gap: 5px;
+    color: #f2f5fa;
+    font-size: 12.5px;
+    text-align: center;
+    text-wrap: balance;
+  }
+
+  .yoro-pa-empty > span {
+    color: var(--pa-dim);
+    font-size: 11.5px;
+    line-height: 1.5;
+  }
+
+  .yoro-pa-saved,
+  .yoro-pa-alert {
+    margin: 0;
+    padding: 9px 11px;
+    border-radius: 9px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    font-size: 11.5px;
+    line-height: 1.5;
+  }
+
+  .yoro-pa-saved {
+    background: rgb(101 214 166 / 12%);
+    color: #9fe6c8;
+  }
+
+  .yoro-pa-alert {
+    background: rgb(255 133 140 / 12%);
+    color: #ffb2b7;
+  }
+
+  .yoro-pa-alert button {
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid rgb(255 133 140 / 35%);
+    border-radius: 9px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 11.5px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .yoro-pa-hint {
+    margin: 0;
+    color: var(--pa-dim);
+    font-size: 10.5px;
+    line-height: 1.55;
+  }
+
+  .yoro-pa-skeleton {
+    height: 44px;
+    margin: 0;
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--pa-raised), var(--pa-sunken), var(--pa-raised));
+  }
+
+  /* 좁은 폭에서는 토글을 제목 아래로 내리고 선택 칸을 1열로 접습니다.
+     일본어 "メンションするロール" 가 가장 길어 2열에서 잘립니다. */
+  @media (max-width: 30rem) {
+    .yoro-pa-head,
+    .yoro-pa-target-head {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .yoro-pa-toggle {
+      justify-self: start;
+    }
+
+    .yoro-pa-badge {
+      justify-self: start;
+    }
+
+    .yoro-pa-fields {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .yoro-pa-foot .yoro-pa-action {
+      flex: 1 1 auto;
+    }
+  }
+}

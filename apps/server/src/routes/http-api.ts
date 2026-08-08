@@ -21,6 +21,7 @@ import {
   normalizeRiotIdKey,
   normalizeLolRole,
   parseRiotIdDetailed,
+  parseDiscordGuildDirectoryReportRequest,
   parseDiscordInstallationObservationRequest,
   parseDiscordGameServerStatusRequest,
   parseDiscordPalworldPlayerLookupRequest,
@@ -118,6 +119,7 @@ import { loadLolParticipationProfileSettings, saveLolParticipationProfileSetting
 import { buildRankHistory, inferMainRoleFromMatches, performanceStatsFromMatches } from "../services/lol-profile-enrichment.js";
 import type { JsonlLogger } from "../logging/jsonl-logger.js";
 import { SafeDatabaseError } from "../database/errors.js";
+import { ANNOUNCEMENT_MAX_TARGETS } from "../database/repositories/discord-participation-announcement-repository.js";
 import type { SupportMailboxFilter, SupportMailboxStore } from "../services/support-mailbox-store.js";
 import {
   DashboardSessionStore,
@@ -963,8 +965,80 @@ async function readBody(req: IncomingMessage, maxBytes = MAX_JSON_BODY_BYTES): P
   return (await readRawBody(req, maxBytes)).toString("utf8");
 }
 
-async function readJsonBody<T>(req: IncomingMessage): Promise<T> {
-  const raw = await readBody(req);
+/* 알림 대상은 최대 3개라 본문이 작습니다. 기본 상한보다 좁게 잡습니다. */
+const ANNOUNCEMENT_MAX_BODY_BYTES = 4 * 1024;
+
+function parseParticipationAnnouncementInput(value: unknown): {
+  enabled: boolean;
+  targets: Array<{
+    organizationId: string;
+    discordGuildId: string;
+    channelId: string;
+    mentionRoleId?: string;
+  }>;
+} | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const record = value as Record<string, unknown>;
+  if (
+    Object.keys(record).sort().join(",") !== "enabled,targets"
+    || typeof record.enabled !== "boolean"
+    || !Array.isArray(record.targets)
+    || record.targets.length > ANNOUNCEMENT_MAX_TARGETS
+  ) return undefined;
+  const targets: Array<{
+    organizationId: string;
+    discordGuildId: string;
+    channelId: string;
+    mentionRoleId?: string;
+  }> = [];
+  for (const item of record.targets) {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return undefined;
+    const target = item as Record<string, unknown>;
+    const keys = Object.keys(target).sort().join(",");
+    if (
+      (keys !== "channelId,discordGuildId,organizationId"
+        && keys !== "channelId,discordGuildId,mentionRoleId,organizationId")
+      || !isManagementOrganizationId(target.organizationId)
+      || !isDiscordSnowflake(target.discordGuildId)
+      || !isDiscordSnowflake(target.channelId)
+      || (target.mentionRoleId !== undefined && !isDiscordSnowflake(target.mentionRoleId))
+    ) return undefined;
+    targets.push({
+      organizationId: target.organizationId,
+      discordGuildId: target.discordGuildId,
+      channelId: target.channelId,
+      ...(target.mentionRoleId === undefined
+        ? {}
+        : { mentionRoleId: target.mentionRoleId as string })
+    });
+  }
+  return { enabled: record.enabled, targets };
+}
+
+/* 저장 실패를 안전한 코드로 바꿉니다.
+   멤버가 아닌 organization 은 존재 여부가 새지 않도록 404 로 답합니다. */
+function announcementFailure(error: unknown): [number, { error: string; code: string }] {
+  const code = error instanceof SafeDatabaseError ? error.code : undefined;
+  if (code === "DATABASE_REFERENCE_INVALID") {
+    return [404, { error: "Organization을 찾을 수 없습니다.", code: "ORGANIZATION_NOT_FOUND" }];
+  }
+  if (code === "DATABASE_CONFLICT") {
+    return [409, {
+      error: "이 서버의 관리자가 참여 알림을 껐습니다.",
+      code: "ANNOUNCEMENT_DISABLED_BY_GUILD"
+    }];
+  }
+  if (code === "DATABASE_INVALID_INPUT") {
+    return [400, { error: "알림 대상이 올바르지 않습니다.", code: "CHANNEL_NOT_ALLOWED" }];
+  }
+  throw error;
+}
+
+async function readJsonBody<T>(
+  req: IncomingMessage,
+  maxBytes = MAX_JSON_BODY_BYTES
+): Promise<T> {
+  const raw = await readBody(req, maxBytes);
   if (!raw.trim()) throw new HttpRequestError(400, { error: "JSON body가 필요합니다." });
   try {
     return JSON.parse(raw) as T;
@@ -7008,6 +7082,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
     mutation = false
   ): Promise<{
     csrfToken: string;
+    userId: string;
     account: NonNullable<Awaited<ReturnType<YoroAccountService["session"]>>>;
     twitch?: NonNullable<Awaited<ReturnType<YoroAccountService["getTwitchAccessContext"]>>>;
   }> {
@@ -7046,6 +7121,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
     }
     return {
       csrfToken: authenticated.csrfToken,
+      userId: authenticated.userId,
       account,
       ...(twitch ? { twitch } : {})
     };
@@ -7271,7 +7347,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
           "/internal/discord/game-server-status",
           "/internal/discord/palworld-players",
           "/internal/discord/command-policy",
-          "/internal/discord/response-locale"
+          "/internal/discord/response-locale",
+          "/internal/discord/guild-channels/report"
         ]);
         if (!internalPaths.has(url.pathname) || req.method !== "POST") {
           return sendJson(req, res, 404, { error: "not found" });
@@ -7500,6 +7577,20 @@ export function createHttpHandler(input: HttpHandlerInput) {
               code: denied ? "permission_required" : "response_locale_failed"
             }, noStoreHeaders());
           }
+        }
+        if (url.pathname === "/internal/discord/guild-channels/report") {
+          const report = parseDiscordGuildDirectoryReportRequest(body);
+          if (
+            !report
+            || report.applicationId !== appConfig.discordBotInternal.applicationId
+          ) {
+            return sendJson(req, res, 400, {
+              error: "길드 채널 보고 형식이 올바르지 않습니다.",
+              code: "invalid_input"
+            });
+          }
+          const result = await input.discordOnboarding.reportGuildDirectory(report);
+          return sendJson(req, res, 200, result, noStoreHeaders());
         }
         const observation = parseDiscordInstallationObservationRequest(body);
         if (
@@ -7760,6 +7851,43 @@ export function createHttpHandler(input: HttpHandlerInput) {
             riotGameName: result.request.riotGameName,
             riotTagLine: result.request.riotTagLine
           }, noStoreHeaders());
+        }
+        if (url.pathname === "/api/account/streamer/participation/announcement") {
+          if (req.method === "GET") {
+            if (url.search) {
+              return sendJson(req, res, 400, { error: "query는 허용되지 않습니다.", code: "invalid_request" });
+            }
+            const context = await yoroStreamerContext(req);
+            const { twitch } = requireApprovedYoroStreamer(context);
+            return sendJson(req, res, 200, await input.yoroAccounts.participationAnnouncement({
+              userId: context.userId,
+              streamerTwitchUserId: twitch.userId
+            }), noStoreHeaders());
+          }
+          if (req.method === "PUT") {
+            const context = await yoroStreamerContext(req, true);
+            const { twitch } = requireApprovedYoroStreamer(context);
+            const parsed = parseParticipationAnnouncementInput(
+              await readJsonBody<unknown>(req, ANNOUNCEMENT_MAX_BODY_BYTES)
+            );
+            if (!parsed) {
+              return sendJson(req, res, 400, {
+                error: "알림 설정 형식이 올바르지 않습니다.",
+                code: "invalid_request"
+              }, noStoreHeaders());
+            }
+            try {
+              return sendJson(req, res, 200, await input.yoroAccounts.replaceParticipationAnnouncement({
+                userId: context.userId,
+                streamerTwitchUserId: twitch.userId,
+                enabled: parsed.enabled,
+                targets: parsed.targets
+              }), noStoreHeaders());
+            } catch (error) {
+              return sendJson(req, res, ...announcementFailure(error));
+            }
+          }
+          return sendJson(req, res, 405, { error: "method not allowed" });
         }
         if (
           req.method === "GET"

@@ -14,6 +14,8 @@ import { EntitlementRepository } from "../dist/database/repositories/entitlement
 import { DiscordOnboardingRepository } from "../dist/database/repositories/discord-onboarding-repository.js";
 import { DiscordManagementRepository } from "../dist/database/repositories/discord-management-repository.js";
 import { DiscordBotControlRepository } from "../dist/database/repositories/discord-bot-control-repository.js";
+import { DiscordGuildDirectoryRepository } from "../dist/database/repositories/discord-guild-directory-repository.js";
+import { DiscordParticipationAnnouncementRepository } from "../dist/database/repositories/discord-participation-announcement-repository.js";
 import { YoroAccountRepository } from "../dist/database/repositories/yoro-account-repository.js";
 import { DiscordManagementService } from "../dist/services/discord-management-service.js";
 import { YoroAccountService } from "../dist/services/yoro-account-service.js";
@@ -62,7 +64,9 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
   await t.test("check와 plan 기반 검사는 빈 DB를 변경하지 않는다", async () => {
     const inspection = await inspectMigrationState(pool, manifest);
     assert.equal(inspection.status, "pending");
-    assert.equal(inspection.pending.length, 16);
+    // 빈 DB에서는 manifest 전체가 pending 이어야 합니다.
+    // 숫자를 고정하면 migration 을 추가할 때마다 여기서만 깨집니다.
+    assert.equal(inspection.pending.length, manifest.migrations.length);
     const table = await pool.query(
       "SELECT to_regclass('public.schema_migrations')::TEXT AS name"
     );
@@ -588,6 +592,264 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
     assert.equal(pool.waitingCount, 0);
   });
 
+  await t.test("길드 채널 캐시는 설치된 Guild만 저장하고 tenant로 격리한다", async () => {
+    const applicationId = "910000000000000001";
+    const guildA = "910000000000000002";
+    const unknownGuild = "910000000000000009";
+    await pool.query(
+      `INSERT INTO discord_guilds (id, organization_id, discord_guild_id, display_name)
+       VALUES ($1, $2, $3, 'Directory Guild A')`,
+      [crypto.randomUUID(), organizationA, guildA]
+    );
+    await pool.query(
+      `INSERT INTO discord_installations (
+         id, organization_id, discord_guild_id, application_id,
+         installed_by_user_id, status
+       ) VALUES ($1, $2, $3, $4, $5, 'active')`,
+      [crypto.randomUUID(), organizationA, guildA, applicationId, userA]
+    );
+
+    const repository = new DiscordGuildDirectoryRepository(pool);
+    const report = {
+      applicationId,
+      guildId: guildA,
+      channels: [
+        { id: "911000000000000001", name: "참여-알림" },
+        { id: "911000000000000002", name: "공지" }
+      ],
+      roles: [{ id: "912000000000000001", name: "참여알림" }],
+      channelsTruncated: false,
+      rolesTruncated: false
+    };
+    assert.equal(await repository.replaceReport(report), true);
+
+    // 설치되지 않은 Guild 보고는 저장하지 않고 조용히 무시합니다.
+    assert.equal(
+      await repository.replaceReport({ ...report, guildId: unknownGuild }),
+      false
+    );
+
+    const listed = await repository.listForOrganizations([organizationA]);
+    const entry = listed.find((item) => item.discordGuildId === guildA);
+    assert.ok(entry);
+    assert.deepEqual(entry.channels.map((channel) => channel.id), [
+      "911000000000000001",
+      "911000000000000002"
+    ]);
+
+    // 다른 tenant 는 같은 캐시를 볼 수 없습니다.
+    assert.deepEqual(await repository.listForOrganizations([organizationB]), []);
+
+    // 후보 안의 채널만 저장을 허용합니다.
+    assert.equal(await repository.allowsChannel({
+      organizationId: organizationA,
+      discordGuildId: guildA,
+      channelId: "911000000000000001"
+    }), true);
+    assert.equal(await repository.allowsChannel({
+      organizationId: organizationA,
+      discordGuildId: guildA,
+      channelId: "911000000000000099"
+    }), false);
+    // 역할도 후보 안에 있어야 합니다.
+    assert.equal(await repository.allowsChannel({
+      organizationId: organizationA,
+      discordGuildId: guildA,
+      channelId: "911000000000000001",
+      mentionRoleId: "912000000000000001"
+    }), true);
+    assert.equal(await repository.allowsChannel({
+      organizationId: organizationA,
+      discordGuildId: guildA,
+      channelId: "911000000000000001",
+      mentionRoleId: "912000000000000099"
+    }), false);
+    // 다른 tenant 로는 허용 판정이 나오지 않습니다.
+    assert.equal(await repository.allowsChannel({
+      organizationId: organizationB,
+      discordGuildId: guildA,
+      channelId: "911000000000000001"
+    }), false);
+
+    // 재보고는 통째로 교체합니다.
+    assert.equal(await repository.replaceReport({
+      ...report,
+      channels: [{ id: "911000000000000003", name: "새-채널" }],
+      channelsTruncated: true
+    }), true);
+    const replaced = (await repository.listForOrganizations([organizationA]))
+      .find((item) => item.discordGuildId === guildA);
+    assert.deepEqual(replaced.channels.map((channel) => channel.id), [
+      "911000000000000003"
+    ]);
+    assert.equal(replaced.channelsTruncated, true);
+    assert.equal(await repository.allowsChannel({
+      organizationId: organizationA,
+      discordGuildId: guildA,
+      channelId: "911000000000000001"
+    }), false);
+  });
+
+  await t.test("참여 알림 대상은 본인 organization·후보 채널·길드 거부권을 강제한다", async () => {
+    const applicationId = "920000000000000001";
+    const guildA = "920000000000000002";
+    const channelOk = "921000000000000001";
+    const roleOk = "922000000000000001";
+    const streamerTwitchId = "923000000000000001";
+    await pool.query(
+      `INSERT INTO discord_guilds (id, organization_id, discord_guild_id, display_name)
+       VALUES ($1, $2, $3, 'Announce Guild A')`,
+      [crypto.randomUUID(), organizationA, guildA]
+    );
+    await pool.query(
+      `INSERT INTO discord_installations (
+         id, organization_id, discord_guild_id, application_id,
+         installed_by_user_id, status
+       ) VALUES ($1, $2, $3, $4, $5, 'active')`,
+      [crypto.randomUUID(), organizationA, guildA, applicationId, userA]
+    );
+    await new DiscordGuildDirectoryRepository(pool).replaceReport({
+      applicationId,
+      guildId: guildA,
+      channels: [{ id: channelOk, name: "참여-알림" }],
+      roles: [{ id: roleOk, name: "참여알림" }],
+      channelsTruncated: false,
+      rolesTruncated: false
+    });
+
+    const repository = new DiscordParticipationAnnouncementRepository(pool);
+    const base = { userId: userA, streamerTwitchUserId: streamerTwitchId };
+
+    const empty = await repository.read(base);
+    assert.equal(empty.enabled, false);
+    assert.deepEqual(empty.targets, []);
+    // 앞선 테스트가 만든 길드도 후보에 들어오므로 대상 길드만 찾습니다.
+    const candidate = empty.available.find((item) => item.discordGuildId === guildA);
+    assert.ok(candidate, "설치된 길드는 후보에 있어야 합니다.");
+    assert.equal(candidate.announcementAllowed, true);
+    assert.deepEqual(candidate.channels.map((entry) => entry.id), [channelOk]);
+
+    await repository.replace({
+      ...base,
+      enabled: true,
+      targets: [{
+        organizationId: organizationA,
+        discordGuildId: guildA,
+        channelId: channelOk,
+        mentionRoleId: roleOk
+      }]
+    });
+    const saved = await repository.read(base);
+    assert.equal(saved.enabled, true);
+    assert.equal(saved.targets.length, 1);
+    assert.equal(saved.targets[0].channelName, "참여-알림");
+    assert.equal(saved.targets[0].mentionRoleName, "참여알림");
+    assert.equal(saved.targets[0].deliverable, "ok");
+
+    // 후보에 없는 채널은 저장할 수 없습니다.
+    await assert.rejects(
+      repository.replace({
+        ...base,
+        enabled: true,
+        targets: [{
+          organizationId: organizationA,
+          discordGuildId: guildA,
+          channelId: "921000000000000099"
+        }]
+      }),
+      (error) => error.code === "DATABASE_INVALID_INPUT"
+    );
+
+    // 후보에 없는 역할도 막습니다.
+    await assert.rejects(
+      repository.replace({
+        ...base,
+        enabled: true,
+        targets: [{
+          organizationId: organizationA,
+          discordGuildId: guildA,
+          channelId: channelOk,
+          mentionRoleId: "922000000000000099"
+        }]
+      }),
+      (error) => error.code === "DATABASE_INVALID_INPUT"
+    );
+
+    // 본인이 멤버가 아닌 organization 은 "없는 것"으로 다룹니다(403 아님).
+    await assert.rejects(
+      repository.replace({
+        ...base,
+        enabled: true,
+        targets: [{
+          organizationId: organizationB,
+          discordGuildId: guildA,
+          channelId: channelOk
+        }]
+      }),
+      (error) => error.code === "DATABASE_REFERENCE_INVALID"
+    );
+
+    // 상한 초과
+    await assert.rejects(
+      repository.replace({
+        ...base,
+        enabled: true,
+        targets: Array.from({ length: 4 }, () => ({
+          organizationId: organizationA,
+          discordGuildId: guildA,
+          channelId: channelOk
+        }))
+      }),
+      (error) => error.code === "DATABASE_INVALID_INPUT"
+    );
+
+    // 다른 스트리머는 이 설정을 보지 못합니다.
+    const otherStreamer = await repository.read({
+      userId: userA,
+      streamerTwitchUserId: "923000000000000099"
+    });
+    assert.deepEqual(otherStreamer.targets, []);
+
+    // 길드 관리자가 끄면 저장을 막고, 기존 대상은 사유를 드러냅니다.
+    await pool.query(
+      `INSERT INTO discord_bot_control_configs (
+         organization_id, discord_guild_id, application_id,
+         participation_announce_enabled, updated_by_user_id
+       ) VALUES ($1, $2, $3, FALSE, $4)
+       ON CONFLICT (organization_id, discord_guild_id, application_id)
+       DO UPDATE SET participation_announce_enabled = FALSE`,
+      [organizationA, guildA, applicationId, userA]
+    );
+    const blocked = await repository.read(base);
+    const blockedCandidate = blocked.available
+      .find((item) => item.discordGuildId === guildA);
+    assert.equal(blockedCandidate.announcementAllowed, false);
+    assert.equal(blocked.targets[0].deliverable, "blocked_by_guild");
+    await assert.rejects(
+      repository.replace({
+        ...base,
+        enabled: true,
+        targets: [{
+          organizationId: organizationA,
+          discordGuildId: guildA,
+          channelId: channelOk
+        }]
+      }),
+      (error) => error.code === "DATABASE_CONFLICT"
+    );
+
+    // 이 테스트가 만든 행은 되돌립니다. 뒤 테스트가 같은 organization 을 씁니다.
+    await pool.query(
+      `DELETE FROM discord_participation_announcement_targets
+        WHERE streamer_twitch_user_id = $1`,
+      [streamerTwitchId]
+    );
+    await pool.query(
+      `DELETE FROM discord_bot_control_configs WHERE discord_guild_id = $1`,
+      [guildA]
+    );
+  });
+
   await t.test("Discord Bot 제어 설정은 tenant·role·revision을 강제한다", async () => {
     const applicationId = "900000000000000001";
     const guildA = "900000000000000002";
@@ -679,6 +941,7 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
             latency: false,
             observedAt: true
           },
+          participationAnnounceEnabled: true,
           expectedRevision: 0
         }
       })
@@ -768,6 +1031,7 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
               latency: true,
               observedAt: true
             },
+            participationAnnounceEnabled: true,
             expectedRevision: 1
           }
         })
@@ -795,6 +1059,7 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
             latency: true,
             observedAt: true
           },
+          participationAnnounceEnabled: true,
           expectedRevision: 1
         }
       }),

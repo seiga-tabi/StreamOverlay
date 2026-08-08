@@ -461,6 +461,7 @@ test("Discord Bot 설정 API는 Organization 경로와 revision·CSRF를 함께 
           latency: true,
           observedAt: true
         },
+        participationAnnounceEnabled: false,
         revision: 8
       }
     }), {
@@ -483,6 +484,7 @@ test("Discord Bot 설정 API는 Organization 경로와 revision·CSRF를 함께 
         latency: true,
         observedAt: true
       },
+      participationAnnounceEnabled: false,
       expectedRevision: 7
     };
     const response = await updateManagementBotControl({

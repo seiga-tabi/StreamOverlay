@@ -1,6 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { normalizeLolRole, redactSensitiveString, redactSensitiveValue, validateBotAction } from "../dist/index.js";
+import {
+  DISCORD_NOTIFY_EVENTS,
+  normalizeLolRole,
+  redactSensitiveString,
+  redactSensitiveValue,
+  validateBotAction
+} from "../dist/index.js";
 
 test("제거되었거나 위험한 action type은 allowlist에서 차단한다", () => {
   for (const type of [
@@ -23,10 +29,52 @@ test("정상 allowlist action은 exact schema로 통과한다", () => {
     { type: "log.highlight", reason: "viewer_clip_request" },
     { type: "participation.open", mode: "aram", requiredPlayers: 5 },
     { type: "participation.close" },
+    { type: "discord.notify", event: "participation.recruiting" },
     { type: "noop", note: "처리하지 않음" }
   ]) {
     assert.equal(validateBotAction(action).ok, true, JSON.stringify(action));
   }
+});
+
+test("discord.notify는 고정 enum 한 필드만 받는다", () => {
+  for (const event of DISCORD_NOTIFY_EVENTS) {
+    assert.equal(validateBotAction({ type: "discord.notify", event }).ok, true, event);
+  }
+  assert.equal(DISCORD_NOTIFY_EVENTS.length, 2);
+});
+
+test("discord.notify는 대상·본문·멘션을 payload로 받지 않는다", () => {
+  // viewer 나 외부 입력이 임의 채널·본문·멘션을 실어 보내는 통로를 막는 회귀 테스트입니다.
+  for (const action of [
+    { type: "discord.notify", event: "participation.recruiting", channelId: "123456789012345678" },
+    { type: "discord.notify", event: "participation.recruiting", guildId: "123456789012345678" },
+    { type: "discord.notify", event: "participation.recruiting", content: "@everyone 지금 참여하세요" },
+    { type: "discord.notify", event: "participation.recruiting", mentionRoleId: "123456789012345678" },
+    { type: "discord.notify", event: "participation.recruiting", webhookUrl: "https://example.invalid/hook" },
+    { type: "discord.notify", event: "participation.recruiting", streamerId: "999" }
+  ]) {
+    assert.equal(validateBotAction(action).ok, false, JSON.stringify(action));
+  }
+});
+
+test("discord.notify는 허용 목록 밖 event와 템플릿 잔재를 거부한다", () => {
+  for (const event of [
+    "participation.opened",
+    "stream.online",
+    "",
+    "{event}",
+    "participation.recruiting ",
+    "PARTICIPATION.RECRUITING",
+    123,
+    null
+  ]) {
+    assert.equal(
+      validateBotAction({ type: "discord.notify", event }).ok,
+      false,
+      JSON.stringify(event)
+    );
+  }
+  assert.equal(validateBotAction({ type: "discord.notify" }).ok, false, "event 누락");
 });
 
 test("허용 action도 정의되지 않은 위험 필드를 거부한다", () => {

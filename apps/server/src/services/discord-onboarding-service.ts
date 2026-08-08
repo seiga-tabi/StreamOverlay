@@ -10,6 +10,7 @@ import {
   type DiscordSetupIssuedVia
 } from "../database/repositories/discord-onboarding-repository.js";
 import { YoroAccountRepository } from "../database/repositories/yoro-account-repository.js";
+import { DiscordGuildDirectoryRepository } from "../database/repositories/discord-guild-directory-repository.js";
 import {
   decryptDiscordSecret,
   discordPkceChallenge,
@@ -17,7 +18,10 @@ import {
   discordSecretHash,
   encryptDiscordSecret
 } from "./discord-oauth-crypto.js";
-import { isDiscordSnowflake } from "@streamops/shared";
+import {
+  isDiscordSnowflake,
+  type DiscordGuildDirectoryReportRequest
+} from "@streamops/shared";
 
 const DISCORD_API_BASE = "https://discord.com/api/v10";
 const DISCORD_AUTHORIZE_URL = "https://discord.com/oauth2/authorize";
@@ -351,6 +355,30 @@ export class DiscordOnboardingService {
     }
     await new DiscordOnboardingRepository(this.pool).observeBotInstallation(input);
     this.logger?.event?.({ type: "discord.installation.observed" });
+  }
+
+  /**
+   * 봇이 보고한 채널·역할 후보를 캐시에 저장합니다.
+   *
+   * 서버가 봇을 호출하지 않기 위해 방향을 뒤집은 구조입니다. 설치되지 않은
+   * Guild 보고는 저장하지 않고 조용히 무시합니다 — 봇은 아직 YORO 와 연결되지
+   * 않은 Guild 에도 들어가 있을 수 있고, 그것은 오류가 아닙니다.
+   */
+  async reportGuildDirectory(
+    input: DiscordGuildDirectoryReportRequest
+  ): Promise<{ stored: boolean }> {
+    if (input.applicationId !== appConfig.discordBotInternal.applicationId) {
+      throw new DiscordOnboardingError("setup_session_invalid", 404);
+    }
+    const stored = await new DiscordGuildDirectoryRepository(this.pool)
+      .replaceReport(input);
+    this.logger?.event?.({
+      type: "discord.guild_directory.reported",
+      stored,
+      channels: input.channels.length,
+      roles: input.roles.length
+    });
+    return { stored };
   }
 
   async revokeBotInstallation(input: {

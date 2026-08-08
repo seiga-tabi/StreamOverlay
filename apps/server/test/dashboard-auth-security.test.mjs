@@ -4,6 +4,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import crypto from "node:crypto";
+const { SafeDatabaseError } = await import("../dist/database/errors.js");
 
 const { createHttpHandler } = await import("../dist/routes/http-api.js");
 const { appConfig } = await import("../dist/config.js");
@@ -3640,5 +3641,171 @@ test("공개 시청자 참여 취소 API는 dashboard CSRF를 요구하지 않�
 
     assert.equal(result.ok, true);
     assert.equal(result.principal.type, "PUBLIC");
+  });
+});
+
+test("참여 알림 설정 API는 승인·CSRF·strict body와 안전한 오류 코드를 지킨다", async () => {
+  await withAuthConfig(async () => {
+  const previousDatabaseEnabled = appConfig.database.enabled;
+  appConfig.database.enabled = true;
+  const csrfToken = "csrf_value_for_participation_announcement_1234";
+  const store = new Store();
+  const approval = store.upsertStreamerRiotIdRequest({
+    twitchUserId: "12345",
+    twitchLogin: "streamer",
+    twitchDisplayName: "Streamer",
+    riotGameName: "Streamer",
+    riotTagLine: "KR1"
+  });
+  store.resolveStreamerRiotIdRequest({
+    requestId: approval.id,
+    decision: "approved",
+    reviewer: "test"
+  });
+
+  const calls = [];
+  const yoroAccounts = {
+    async authenticateForManagement() {
+      return {
+        userId: "11111111-1111-4111-8111-111111111111",
+        csrfToken,
+        csrfTokenHash: Buffer.alloc(32)
+      };
+    },
+    async session() {
+      return {
+        authenticated: true,
+        csrfToken,
+        authenticationProvider: "twitch",
+        identities: [],
+        preferences: {
+          locale: "ko",
+          defaultDashboardPage: "overview",
+          reducedMotion: false
+        }
+      };
+    },
+    async getTwitchAccessContext() {
+      return {
+        clientId: "client-id",
+        accessToken: "access-token",
+        userId: "12345",
+        scopes: [],
+        user: { id: "12345", login: "streamer", displayName: "Streamer" },
+        tokenExpiresAt: "2026-08-10T00:00:00.000Z"
+      };
+    },
+    async participationAnnouncement(input) {
+      calls.push({ type: "read", input });
+      return { enabled: false, targets: [], available: [] };
+    },
+    async replaceParticipationAnnouncement(input) {
+      calls.push({ type: "replace", input });
+      return { enabled: input.enabled, targets: [], available: [] };
+    }
+  };
+  const handler = createHttpHandler({
+    store,
+    twitchAuth: {},
+    actions: { async dispatchOne() {} },
+    sessions: new DashboardSessionStore(),
+    discordDatabaseReady: () => true,
+    yoroAccounts
+  });
+  const headers = {
+    cookie: "yoro_session=yoro-session",
+    origin: DASHBOARD_ORIGIN,
+    "x-yoro-csrf": csrfToken
+  };
+  const send = async (method, body, overrideHeaders = headers) => {
+    const req = createRequest(
+      method,
+      "/api/account/streamer/participation/announcement",
+      body,
+      overrideHeaders
+    );
+    const res = createResponse();
+    await handler(req, res);
+    return res;
+  };
+
+  try {
+    const read = await send("GET", undefined, { cookie: headers.cookie });
+    assert.equal(read.statusCode, 200);
+    assert.equal(JSON.parse(read.body).enabled, false);
+
+    const valid = {
+      enabled: true,
+      targets: [{
+        organizationId: "11111111-1111-4111-8111-111111111111",
+        discordGuildId: "123456789012345678",
+        channelId: "223456789012345678"
+      }]
+    };
+    const saved = await send("PUT", valid);
+    assert.equal(saved.statusCode, 200);
+    assert.equal(calls.at(-1).type, "replace");
+    assert.equal(calls.at(-1).input.streamerTwitchUserId, "12345");
+
+    // CSRF 없이 변경할 수 없습니다.
+    const noCsrf = await send("PUT", valid, {
+      cookie: headers.cookie,
+      origin: DASHBOARD_ORIGIN
+    });
+    assert.equal(noCsrf.statusCode, 403);
+
+    // Origin 없이 변경할 수 없습니다.
+    const noOrigin = await send("PUT", valid, {
+      cookie: headers.cookie,
+      "x-yoro-csrf": csrfToken
+    });
+    assert.equal(noOrigin.statusCode, 403);
+
+    // schema 밖 필드와 잘못된 형식은 거부합니다.
+    for (const body of [
+      { ...valid, extra: true },
+      { enabled: true, targets: [{ ...valid.targets[0], webhookUrl: "https://x.invalid" }] },
+      { enabled: true, targets: [{ ...valid.targets[0], channelId: "nope" }] },
+      { enabled: true, targets: [{ ...valid.targets[0], organizationId: "not-uuid" }] },
+      { enabled: "yes", targets: [] },
+      {
+        enabled: true,
+        targets: [valid.targets[0], valid.targets[0], valid.targets[0], valid.targets[0]]
+      }
+    ]) {
+      const rejected = await send("PUT", body);
+      assert.equal(rejected.statusCode, 400, JSON.stringify(body).slice(0, 80));
+      assert.equal(JSON.parse(rejected.body).code, "invalid_request");
+    }
+
+    // 멤버가 아닌 organization 은 403 이 아니라 404 로 답합니다(존재 여부 은닉).
+    yoroAccounts.replaceParticipationAnnouncement = async () => {
+      throw new SafeDatabaseError("DATABASE_REFERENCE_INVALID", false);
+    };
+    const notFound = await send("PUT", valid);
+    assert.equal(notFound.statusCode, 404);
+    assert.equal(JSON.parse(notFound.body).code, "ORGANIZATION_NOT_FOUND");
+
+    // 길드 거부권
+    yoroAccounts.replaceParticipationAnnouncement = async () => {
+      throw new SafeDatabaseError("DATABASE_CONFLICT", false);
+    };
+    const blocked = await send("PUT", valid);
+    assert.equal(blocked.statusCode, 409);
+    assert.equal(JSON.parse(blocked.body).code, "ANNOUNCEMENT_DISABLED_BY_GUILD");
+
+    // 후보 밖 채널
+    yoroAccounts.replaceParticipationAnnouncement = async () => {
+      throw new SafeDatabaseError("DATABASE_INVALID_INPUT", false);
+    };
+    const notAllowed = await send("PUT", valid);
+    assert.equal(notAllowed.statusCode, 400);
+    assert.equal(JSON.parse(notAllowed.body).code, "CHANNEL_NOT_ALLOWED");
+
+    const wrongMethod = await send("DELETE", undefined, { cookie: headers.cookie });
+    assert.equal(wrongMethod.statusCode, 405);
+  } finally {
+    appConfig.database.enabled = previousDatabaseEnabled;
+  }
   });
 });

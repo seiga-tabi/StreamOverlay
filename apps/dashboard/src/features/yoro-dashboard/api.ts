@@ -195,3 +195,74 @@ export function selectYoroParticipationEntries(
     })
   });
 }
+
+/* 참여 모집 Discord 알림 설정.
+ *
+ * 후보 채널·역할은 서버가 Bot 보고 캐시에서 내려줍니다. 사용자가 채널 ID를
+ * 직접 입력하는 경로는 만들지 않습니다 — 후보 밖 채널은 서버가 거부합니다.
+ */
+export type ParticipationAnnounceDeliverable =
+  | "ok"
+  | "missing_channel"
+  | "missing_permission"
+  | "bot_removed"
+  | "blocked_by_guild";
+
+export type ParticipationAnnounceEntry = { id: string; name: string };
+
+export type ParticipationAnnounceTarget = {
+  organizationId: string;
+  organizationName: string;
+  discordGuildId: string;
+  guildDisplayName: string;
+  channelId: string;
+  channelName?: string;
+  mentionRoleId?: string;
+  mentionRoleName?: string;
+  deliverable: ParticipationAnnounceDeliverable;
+  lastDeliveredAt?: string;
+};
+
+export type ParticipationAnnounceCandidate = {
+  organizationId: string;
+  organizationName: string;
+  discordGuildId: string;
+  guildDisplayName: string;
+  channels: ParticipationAnnounceEntry[];
+  channelsTruncated: boolean;
+  roles: ParticipationAnnounceEntry[];
+  announcementAllowed: boolean;
+};
+
+export type ParticipationAnnounceSettings = {
+  enabled: boolean;
+  targets: ParticipationAnnounceTarget[];
+  available: ParticipationAnnounceCandidate[];
+};
+
+export type ParticipationAnnounceInput = {
+  enabled: boolean;
+  targets: Array<{
+    organizationId: string;
+    discordGuildId: string;
+    channelId: string;
+    mentionRoleId?: string;
+  }>;
+};
+
+export function getParticipationAnnouncement(
+  signal?: AbortSignal
+): Promise<ParticipationAnnounceSettings> {
+  return request("/api/account/streamer/participation/announcement", { signal });
+}
+
+export function saveParticipationAnnouncement(
+  value: ParticipationAnnounceInput,
+  csrfToken: string
+): Promise<ParticipationAnnounceSettings> {
+  return request("/api/account/streamer/participation/announcement", {
+    method: "PUT",
+    headers: mutationHeaders(csrfToken),
+    body: JSON.stringify(value)
+  });
+}

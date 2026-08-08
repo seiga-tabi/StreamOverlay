@@ -471,3 +471,173 @@ export function parseDiscordPalworldPlayerLookupResponse(
     ...(result ? { result } : {})
   });
 }
+
+/* 길드 채널·역할 후보 보고 (Bot → Server).
+ *
+ * Discord 로 메시지를 보내려면 후보 목록이 필요한데, 서버는 Discord 를 직접 보지
+ * 않습니다. 봇이 자기가 실제로 쓸 수 있는 것만 골라 보고하고 서버가 캐시합니다.
+ * 서버가 봇을 호출하는 방향을 만들지 않기 위한 구조입니다.
+ */
+export const DISCORD_GUILD_DIRECTORY_MAX_ENTRIES = 200;
+const DISCORD_GUILD_DIRECTORY_MAX_NAME = 100;
+
+export type DiscordGuildDirectoryEntry = Readonly<{
+  id: string;
+  name: string;
+}>;
+
+export type DiscordGuildDirectoryReportRequest = Readonly<{
+  applicationId: string;
+  guildId: string;
+  /** 봇이 메시지를 보낼 수 있는 텍스트 채널만. */
+  channels: readonly DiscordGuildDirectoryEntry[];
+  /** @everyone 을 제외한 멘션 가능 역할. */
+  roles: readonly DiscordGuildDirectoryEntry[];
+  channelsTruncated: boolean;
+  rolesTruncated: boolean;
+}>;
+
+function parseGuildDirectoryEntries(
+  value: unknown
+): readonly DiscordGuildDirectoryEntry[] | undefined {
+  if (!Array.isArray(value) || value.length > DISCORD_GUILD_DIRECTORY_MAX_ENTRIES) {
+    return undefined;
+  }
+  const seen = new Set<string>();
+  const entries: DiscordGuildDirectoryEntry[] = [];
+  for (const item of value) {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return undefined;
+    const record = item as Record<string, unknown>;
+    if (
+      Object.keys(record).sort().join(",") !== "id,name"
+      || !isDiscordSnowflake(record.id)
+      || typeof record.name !== "string"
+      || record.name.length < 1
+      || record.name.length > DISCORD_GUILD_DIRECTORY_MAX_NAME
+      /* 이름은 Discord 가 준 외부 문자열입니다. 제어문자를 그대로 저장하지 않습니다. */
+      || /[\u0000-\u001f\u007f]/u.test(record.name)
+      || seen.has(record.id)
+    ) return undefined;
+    seen.add(record.id);
+    entries.push(Object.freeze({ id: record.id, name: record.name }));
+  }
+  return Object.freeze(entries);
+}
+
+export function parseDiscordGuildDirectoryReportRequest(
+  value: unknown
+): DiscordGuildDirectoryReportRequest | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const record = value as Record<string, unknown>;
+  const channels = parseGuildDirectoryEntries(record.channels);
+  const roles = parseGuildDirectoryEntries(record.roles);
+  if (
+    Object.keys(record).sort().join(",")
+      !== "applicationId,channels,channelsTruncated,guildId,roles,rolesTruncated"
+    || !isDiscordSnowflake(record.applicationId)
+    || !isDiscordSnowflake(record.guildId)
+    || typeof record.channelsTruncated !== "boolean"
+    || typeof record.rolesTruncated !== "boolean"
+    || !channels
+    || !roles
+  ) return undefined;
+  return Object.freeze({
+    applicationId: record.applicationId,
+    guildId: record.guildId,
+    channels,
+    roles,
+    channelsTruncated: record.channelsTruncated,
+    rolesTruncated: record.rolesTruncated
+  });
+}
+
+/* 참여 알림 작업 큐 (Bot → Server 폴링).
+ *
+ * 서버가 봇을 호출하지 않기 위해 방향을 뒤집었습니다. 봇이 주기적으로 물어보고,
+ * 발행·편집한 결과를 다시 보고합니다. 대상 채널과 문구는 서버가 정하며 봇은
+ * 받은 값을 그대로 씁니다 — 봇이 임의 채널로 보낼 수 있는 통로를 만들지 않습니다.
+ */
+export const DISCORD_ANNOUNCEMENT_STATES = ["recruiting", "closed"] as const;
+export type DiscordAnnouncementState = (typeof DISCORD_ANNOUNCEMENT_STATES)[number];
+
+export const DISCORD_ANNOUNCEMENT_ACK_RESULTS = [
+  "ok",
+  "channel_missing",
+  "permission_missing",
+  "message_deleted",
+  "failed"
+] as const;
+export type DiscordAnnouncementAckResult =
+  (typeof DISCORD_ANNOUNCEMENT_ACK_RESULTS)[number];
+
+export const DISCORD_ANNOUNCEMENT_MAX_JOBS = 20;
+
+export type DiscordAnnouncementJob = Readonly<{
+  jobId: string;
+  guildId: string;
+  channelId: string;
+  mentionRoleId?: string;
+  /** 이미 올린 메시지가 있으면 새로 만들지 않고 편집합니다. */
+  messageId?: string;
+  locale: "auto" | "ko" | "ja" | "en";
+  state: DiscordAnnouncementState;
+  streamerDisplayName: string;
+  participationUrl: string;
+  /** followers 한정 세션이면 서버가 인원을 보내지 않습니다. */
+  waiting?: number;
+  selected?: number;
+}>;
+
+export type DiscordAnnouncementPendingRequest = Readonly<{
+  applicationId: string;
+}>;
+
+export type DiscordAnnouncementPendingResponse = Readonly<{
+  jobs: readonly DiscordAnnouncementJob[];
+}>;
+
+export type DiscordAnnouncementAckRequest = Readonly<{
+  applicationId: string;
+  jobId: string;
+  result: DiscordAnnouncementAckResult;
+  messageId?: string;
+}>;
+
+export function parseDiscordAnnouncementPendingRequest(
+  value: unknown
+): DiscordAnnouncementPendingRequest | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const record = value as Record<string, unknown>;
+  if (
+    Object.keys(record).sort().join(",") !== "applicationId"
+    || !isDiscordSnowflake(record.applicationId)
+  ) return undefined;
+  return Object.freeze({ applicationId: record.applicationId });
+}
+
+export function parseDiscordAnnouncementAckRequest(
+  value: unknown
+): DiscordAnnouncementAckRequest | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const record = value as Record<string, unknown>;
+  const keys = Object.keys(record).sort().join(",");
+  if (
+    (keys !== "applicationId,jobId,result" && keys !== "applicationId,jobId,messageId,result")
+    || !isDiscordSnowflake(record.applicationId)
+    || typeof record.jobId !== "string"
+    || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/u.test(record.jobId)
+    || typeof record.result !== "string"
+    || !(DISCORD_ANNOUNCEMENT_ACK_RESULTS as readonly string[]).includes(record.result)
+    || (record.messageId !== undefined && !isDiscordSnowflake(record.messageId))
+  ) return undefined;
+  /* 성공했다면 어떤 메시지인지 알아야 다음에 편집할 수 있습니다. */
+  if (record.result === "ok" && record.messageId === undefined) return undefined;
+  return Object.freeze({
+    applicationId: record.applicationId,
+    jobId: record.jobId,
+    result: record.result as DiscordAnnouncementAckResult,
+    ...(record.messageId === undefined
+      ? {}
+      : { messageId: record.messageId as string })
+  });
+}

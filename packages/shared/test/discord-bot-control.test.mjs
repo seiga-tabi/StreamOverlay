@@ -64,6 +64,7 @@ const validOverview = {
       latency: false,
       observedAt: true
     },
+    participationAnnounceEnabled: true,
     revision: 2
   }
 };
@@ -82,6 +83,7 @@ const validUpdate = {
     latency: false,
     observedAt: true
   },
+  participationAnnounceEnabled: false,
   expectedRevision: 3
 };
 

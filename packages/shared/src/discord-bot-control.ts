@@ -6,7 +6,7 @@ import {
 
 export const DISCORD_BOT_CONTROL_MODULE_ID = "palworld.status" as const;
 export const DISCORD_BOT_CONTROL_MODULE_VERSION = 1 as const;
-export const DISCORD_BOT_CONTROL_SCHEMA_VERSION = 3 as const;
+export const DISCORD_BOT_CONTROL_SCHEMA_VERSION = 4 as const;
 
 export const DISCORD_BOT_CONTROL_COMMANDS = [
   "help",
@@ -95,6 +95,8 @@ export type DiscordBotControlSettings = Readonly<{
   deleteInvocationAfterReply: boolean;
   preferredLocale: DiscordBotControlLocale;
   statusFields: DiscordBotStatusFields;
+  /* 길드 관리자의 거부권. 스트리머가 켜도 이 값이 false 면 발송하지 않습니다. */
+  participationAnnounceEnabled: boolean;
   revision: number;
 }>;
 
@@ -125,6 +127,7 @@ export type UpdateDiscordBotControlInput = Readonly<{
   deleteInvocationAfterReply: boolean;
   preferredLocale: DiscordBotControlLocale;
   statusFields: DiscordBotStatusFields;
+  participationAnnounceEnabled: boolean;
   expectedRevision: number;
 }>;
 
@@ -180,6 +183,9 @@ export const DEFAULT_DISCORD_BOT_CONTROL_SETTINGS: DiscordBotControlSettings =
     deleteInvocationAfterReply: false,
     preferredLocale: "auto",
     statusFields: DEFAULT_DISCORD_BOT_STATUS_FIELDS,
+    /* migration 0017 의 컬럼 기본값과 같습니다. 스트리머가 켜지 않으면
+       어차피 아무 일도 일어나지 않으므로 바깥쪽 문만 열어 둡니다. */
+    participationAnnounceEnabled: true,
     revision: 0
   });
 
@@ -226,6 +232,7 @@ function parseControlSettings(
     "deleteInvocationAfterReply",
     "preferredLocale",
     "statusFields",
+    "participationAnnounceEnabled",
     "revision"
   ]);
   const statusFields = record ? parseStatusFields(record.statusFields) : undefined;
@@ -240,6 +247,7 @@ function parseControlSettings(
     || !DISCORD_BOT_CONTROL_LOCALES.includes(
       record.preferredLocale as DiscordBotControlLocale
     )
+    || typeof record.participationAnnounceEnabled !== "boolean"
     || !Number.isSafeInteger(record.revision)
     || (record.revision as number) < 0
     || !statusFields
@@ -253,6 +261,7 @@ function parseControlSettings(
     deleteInvocationAfterReply: record.deleteInvocationAfterReply,
     preferredLocale: record.preferredLocale as DiscordBotControlLocale,
     statusFields,
+    participationAnnounceEnabled: record.participationAnnounceEnabled,
     revision: record.revision as number
   });
 }
@@ -372,6 +381,7 @@ export function parseUpdateDiscordBotControlInput(
     "deleteInvocationAfterReply",
     "preferredLocale",
     "statusFields",
+    "participationAnnounceEnabled",
     "expectedRevision"
   ]);
   const statusFields = record ? parseStatusFields(record.statusFields) : undefined;
@@ -386,6 +396,7 @@ export function parseUpdateDiscordBotControlInput(
     || !DISCORD_BOT_CONTROL_LOCALES.includes(
       record.preferredLocale as DiscordBotControlLocale
     )
+    || typeof record.participationAnnounceEnabled !== "boolean"
     || !Number.isSafeInteger(record.expectedRevision)
     || (record.expectedRevision as number) < 0
     || !statusFields
@@ -399,6 +410,7 @@ export function parseUpdateDiscordBotControlInput(
     deleteInvocationAfterReply: record.deleteInvocationAfterReply,
     preferredLocale: record.preferredLocale as DiscordBotControlLocale,
     statusFields,
+    participationAnnounceEnabled: record.participationAnnounceEnabled,
     expectedRevision: record.expectedRevision as number
   });
 }
@@ -490,6 +502,8 @@ export function parseDiscordBotCommandPolicyResponse(
     || !DISCORD_BOT_CONTROL_LOCALES.includes(
       record.preferredLocale as DiscordBotControlLocale
     )
+    /* 거부권은 서버가 강제하므로 봇에 내려보내지 않습니다.
+       정책 응답에는 participationAnnounceEnabled 가 없습니다. */
     || !Number.isSafeInteger(record.revision)
     || (record.revision as number) < 0
     || !statusFields

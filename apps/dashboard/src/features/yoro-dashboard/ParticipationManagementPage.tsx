@@ -22,12 +22,21 @@ import {
 import {
   getCurrentParticipationEntry
 } from "../participation/participation-display";
+import { ParticipationAnnouncementPanel } from "./ParticipationAnnouncementPanel";
 
 type Locale = "ko" | "ja";
 type EntryMutationStatus = Extract<
   ParticipationStatus,
   "selected" | "checked_in" | "in_game" | "played" | "skipped" | "no_show"
 >;
+
+/**
+ * LoL 참여 세션의 진행 인원 정원. 방송인 1명 + 시청자 4명 = 5명(5인 커스텀 기준).
+ * 서버는 아직 이 정원을 강제하지 않으므로(전 게임 공통 대기열/선정 API), 여기서는
+ * 화면 안내와 "선정" 버튼 비활성화용 소프트 가드로만 사용합니다.
+ */
+const LOL_VIEWER_SEATS = 4;
+const LOL_TOTAL_CAPACITY = LOL_VIEWER_SEATS + 1;
 
 const copy = {
   ko: {
@@ -37,6 +46,10 @@ const copy = {
     loading: "시청자 참여 상태를 불러오는 중입니다.",
     loadFailed: "시청자 참여 상태를 불러오지 못했습니다.",
     retry: "다시 시도",
+    gameLabel: "게임",
+    gameLol: "League of Legends",
+    gamePalworld: "Palworld",
+    comingSoon: "준비 중",
     createTitle: "새 참여 세션",
     createDescription: "기본 설정으로 바로 모집을 시작하고, 필요한 경우에만 세부 설정을 변경할 수 있습니다.",
     quickStartTitle: "시청자 참여를 시작하세요",
@@ -53,6 +66,12 @@ const copy = {
     listingScope: "공개 범위",
     create: "참여 세션 시작",
     creating: "세션 생성 중",
+    capacityIngame: "진행 인원",
+    capacityHostNote: "방송인 포함",
+    capacityCheckin: "체크인",
+    capacityQueueMax: "대기열 최대",
+    personUnit: "명",
+    secondUnit: "초",
     sessionTitle: "진행 중인 세션",
     openPublic: "공개 화면 열기",
     status: "세션 상태",
@@ -66,17 +85,24 @@ const copy = {
     playedCount: "참여 완료",
     close: "모집 중지",
     reopen: "모집 재개",
+    select: "선정",
     selectNext: "선택한 참가자 선정",
     selectNextHint: "검증이 완료된 대기자를 한 명 이상 체크한 후 함께 선정하세요.",
     selectForNext: "다음 참가자로 선택",
+    bulkSelectToggle: "여러 명 선택",
     finishGame: "게임 종료 처리",
     finishSession: "세션 종료",
     more: "더보기",
     currentParticipant: "현재 참가자",
     noCurrentParticipant: "현재 처리 중인 참가자가 없습니다.",
+    hostSeatLabel: "방송인",
+    emptySeatLabel: "빈 슬롯",
+    capacityFull: "진행 인원이 가득 찼어요.",
     queueWaiting: "대기 중",
     queueHistory: "완료·취소",
     queueHistoryEmpty: "완료되거나 취소된 참가 이력이 없습니다.",
+    queueSearchPlaceholder: "이름 또는 Riot ID로 검색",
+    queueSearchEmpty: "검색 결과가 없습니다.",
     botIntegrationTitle: "Discord Bot 연동",
     botIntegrationDescription: "참여 상태는 YORO Server에서 관리되며, Discord 공지와 체크인 알림은 같은 공개 참여 링크를 사용합니다.",
     botIntegrationAction: "Discord Bot 제어 열기",
@@ -124,6 +150,10 @@ const copy = {
     loading: "視聴者参加の状態を読み込んでいます。",
     loadFailed: "視聴者参加の状態を読み込めませんでした。",
     retry: "再試行",
+    gameLabel: "ゲーム",
+    gameLol: "League of Legends",
+    gamePalworld: "Palworld",
+    comingSoon: "近日対応",
     createTitle: "新しい参加セッション",
     createDescription: "基本設定ですぐ受付を開始し、必要な場合だけ詳細設定を変更できます。",
     quickStartTitle: "視聴者参加を始めましょう",
@@ -140,6 +170,12 @@ const copy = {
     listingScope: "公開範囲",
     create: "参加セッションを開始",
     creating: "セッション作成中",
+    capacityIngame: "進行人数",
+    capacityHostNote: "配信者を含む",
+    capacityCheckin: "チェックイン",
+    capacityQueueMax: "待機列 最大",
+    personUnit: "名",
+    secondUnit: "秒",
     sessionTitle: "進行中のセッション",
     openPublic: "公開画面を開く",
     status: "セッション状態",
@@ -153,17 +189,24 @@ const copy = {
     playedCount: "参加完了",
     close: "受付を停止",
     reopen: "受付を再開",
+    select: "選出",
     selectNext: "選択した参加者を選出",
     selectNextHint: "確認済みの待機者を1人以上選択して、一緒に選出してください。",
     selectForNext: "次の参加者として選択",
+    bulkSelectToggle: "複数人選択",
     finishGame: "ゲーム終了処理",
     finishSession: "セッション終了",
     more: "その他",
     currentParticipant: "現在の参加者",
     noCurrentParticipant: "現在処理中の参加者はいません。",
+    hostSeatLabel: "配信者",
+    emptySeatLabel: "空きスロット",
+    capacityFull: "進行人数が満員です。",
     queueWaiting: "待機中",
     queueHistory: "完了・取消",
     queueHistoryEmpty: "完了または取り消された参加履歴はありません。",
+    queueSearchPlaceholder: "名前またはRiot IDで検索",
+    queueSearchEmpty: "検索結果がありません。",
     botIntegrationTitle: "Discord Bot連携",
     botIntegrationDescription: "参加状態はYORO Serverで管理され、Discordのお知らせとチェックイン通知も同じ公開参加リンクを使用します。",
     botIntegrationAction: "Discord Bot管理を開く",
@@ -272,6 +315,9 @@ export function ParticipationManagementPage({
   const [allowRejoin, setAllowRejoin] = useState(true);
   const [listingVisibility, setListingVisibility] = useState<ParticipationListingVisibility>("public");
   const [selectedWaitingEntryIds, setSelectedWaitingEntryIds] = useState<Set<string>>(() => new Set());
+  const [startSettingsOpen, setStartSettingsOpen] = useState(false);
+  const [bulkSelectOpen, setBulkSelectOpen] = useState(false);
+  const [queueSearch, setQueueSearch] = useState("");
 
   const load = useCallback(async (signal?: AbortSignal) => {
     try {
@@ -321,6 +367,14 @@ export function ParticipationManagementPage({
     () => state?.queue.filter((entry) => ["played", "skipped", "cancelled", "no_show", "rejected", "blocked"].includes(entry.status)) ?? [],
     [state]
   );
+  const visibleWaitingEntries = useMemo(() => {
+    const query = queueSearch.trim().toLowerCase();
+    if (!query) return waitingEntries;
+    return waitingEntries.filter((entry) => (
+      entry.twitchUserName.toLowerCase().includes(query)
+      || entry.riotId.toLowerCase().includes(query)
+    ));
+  }, [queueSearch, waitingEntries]);
   const selectedWaitingEntries = useMemo(
     () => waitingEntries.filter((entry) => (
       selectedWaitingEntryIds.has(entry.id)
@@ -328,6 +382,12 @@ export function ParticipationManagementPage({
     )),
     [selectedWaitingEntryIds, waitingEntries]
   );
+
+  /* LoL 진행 인원(방송인 포함 5명) 정원까지 몇 자리가 남았는지. 서버가 아직
+     이 정원을 강제하지 않으므로, 여기서는 "선정" 동작을 앞서 막는 안내용
+     가드로만 씁니다 — 정원 판단의 근거는 항상 서버 응답(currentEntries)입니다. */
+  const remainingSeats = Math.max(0, LOL_VIEWER_SEATS - currentEntries.length);
+  const capacityIsFull = remainingSeats <= 0;
 
   useEffect(() => {
     const waitingIds = new Set(waitingEntries.map((entry) => entry.id));
@@ -388,17 +448,13 @@ export function ParticipationManagementPage({
     }
   }
 
-  async function selectWaitingEntries(): Promise<void> {
-    if (busyKey || selectedWaitingEntries.length === 0) return;
+  async function selectEntries(entryIds: string[]): Promise<void> {
+    if (busyKey || entryIds.length === 0) return;
     setBusyKey("entries:selected");
     setError("");
     setMessage("");
     try {
-      setState(await selectYoroParticipationEntries(
-        selectedWaitingEntries.map((entry) => entry.id),
-        csrfToken,
-        state?.revision
-      ));
+      setState(await selectYoroParticipationEntries(entryIds, csrfToken, state?.revision));
       setSelectedWaitingEntryIds(new Set());
       setMessage(text.entriesSelected);
     } catch {
@@ -419,19 +475,67 @@ export function ParticipationManagementPage({
     return null;
   }
 
-  function renderParticipantRow(entry: ParticipationDashboardQueueEntry, compact = false, selectable = false) {
+  function renderEntryActions(entry: ParticipationDashboardQueueEntry) {
     const actions = entryActions(entry);
     const primaryAction = actions[0];
     const secondaryActions = actions.slice(1);
-    const canSelect = entry.status === "verified" || entry.status === "waitlisted";
     return (
-      <article className={`participation-management-participant ${compact ? "is-compact" : ""} ${selectable ? "is-selectable" : ""}`} key={entry.id}>
-        {selectable ? (
+      <div className="participation-management-entry-actions">
+        {primaryAction ? (
+          <button disabled={Boolean(busyKey)} onClick={() => void mutateEntry(entry.id, primaryAction.status)} type="button">
+            {text[primaryAction.labelKey]}
+          </button>
+        ) : null}
+        {secondaryActions.length ? (
+          <details className="participation-management-row-more">
+            <summary>{text.more}</summary>
+            <div>
+              {secondaryActions.map((action) => (
+                <button disabled={Boolean(busyKey)} key={action.status} onClick={() => void mutateEntry(entry.id, action.status)} type="button">
+                  {text[action.labelKey]}
+                </button>
+              ))}
+            </div>
+          </details>
+        ) : null}
+      </div>
+    );
+  }
+
+  function renderSeat(entry: ParticipationDashboardQueueEntry | undefined) {
+    if (!entry) {
+      return (
+        <div className="participation-management-seat is-empty" key="empty">
+          <span className="participation-management-seat-avatar" aria-hidden="true">+</span>
+          <span className="participation-management-seat-name">{text.emptySeatLabel}</span>
+        </div>
+      );
+    }
+    return (
+      <div className="participation-management-seat" key={entry.id}>
+        <span className="participation-management-seat-avatar" aria-hidden="true">{entry.twitchUserName.slice(0, 1)}</span>
+        <span className="participation-management-seat-name">{entry.twitchUserName}</span>
+        <span className="participation-management-seat-role">{roleLabels[locale][entry.preferredRole ?? "unknown"]}</span>
+        <span className="participation-management-status">{text[entry.status]}</span>
+        {renderEntryActions(entry)}
+      </div>
+    );
+  }
+
+  function renderQueueRow(entry: ParticipationDashboardQueueEntry, historic = false) {
+    const canSelect = !historic && (entry.status === "verified" || entry.status === "waitlisted");
+    const selectDisabled = Boolean(busyKey) || Boolean(currentEntry) || !state?.isOpen || !canSelect || capacityIsFull;
+    return (
+      <article className={`participation-management-participant ${historic ? "is-compact" : ""}`} key={entry.id}>
+        {!historic && bulkSelectOpen ? (
           <label className="participation-management-selection">
             <input
               aria-label={`${entry.twitchUserName} ${text.selectForNext}`}
               checked={selectedWaitingEntryIds.has(entry.id)}
-              disabled={Boolean(busyKey) || Boolean(currentEntry) || !state?.isOpen || !canSelect}
+              disabled={
+                Boolean(busyKey) || Boolean(currentEntry) || !state?.isOpen || !canSelect
+                || (!selectedWaitingEntryIds.has(entry.id) && selectedWaitingEntries.length >= remainingSeats)
+              }
               onChange={(event) => setSelectedWaitingEntryIds((current) => {
                 const next = new Set(current);
                 if (event.target.checked) next.add(entry.id);
@@ -449,25 +553,19 @@ export function ParticipationManagementPage({
           <small>{text.appliedAt} {new Date(entry.createdAt).toLocaleString(locale === "ko" ? "ko-KR" : "ja-JP")}</small>
         </div>
         <span className="participation-management-status">{text[entry.status]}</span>
-        <div className="participation-management-entry-actions">
-          {primaryAction ? (
-            <button disabled={Boolean(busyKey)} onClick={() => void mutateEntry(entry.id, primaryAction.status)} type="button">
-              {text[primaryAction.labelKey]}
+        {historic ? renderEntryActions(entry) : (
+          <div className="participation-management-entry-actions">
+            <button
+              className="is-primary"
+              disabled={selectDisabled}
+              onClick={() => void selectEntries([entry.id])}
+              title={capacityIsFull ? text.capacityFull : undefined}
+              type="button"
+            >
+              {text.select}
             </button>
-          ) : null}
-          {secondaryActions.length ? (
-            <details className="participation-management-row-more">
-              <summary>{text.more}</summary>
-              <div>
-                {secondaryActions.map((action) => (
-                  <button disabled={Boolean(busyKey)} key={action.status} onClick={() => void mutateEntry(entry.id, action.status)} type="button">
-                    {text[action.labelKey]}
-                  </button>
-                ))}
-              </div>
-            </details>
-          ) : null}
-        </div>
+          </div>
+        )}
       </article>
     );
   }
@@ -493,70 +591,76 @@ export function ParticipationManagementPage({
       {message ? <p className="participation-management-alert" aria-live="polite">{message}</p> : null}
 
       {!activeSession ? (
-        <form className="participation-management-create" onSubmit={(event) => void createSession(event)}>
-          <header>
-            <h2>{text.quickStartTitle}</h2>
-            <p>{text.createDescription}</p>
-            <small>{text.quickStartHint}</small>
-          </header>
-          <button disabled={Boolean(busyKey)} type="submit">
-            {busyKey === "session:start" ? text.creating : text.create}
-          </button>
-          <details className="participation-management-advanced">
-            <summary>{text.advancedSettings}</summary>
-            <div className="participation-management-form-grid">
-              <label>
-                <span>{text.maxQueueSize}</span>
-                <input min={1} max={500} onChange={(event) => setMaxQueueSize(Number(event.target.value))} required type="number" value={maxQueueSize} />
-              </label>
-              <label>
-                <span>{text.checkInSeconds}</span>
-                <input min={15} max={600} onChange={(event) => setCheckInSeconds(Number(event.target.value))} required type="number" value={checkInSeconds} />
-              </label>
-              <label className="participation-management-checkbox">
-                <input checked={allowRejoin} onChange={(event) => setAllowRejoin(event.target.checked)} type="checkbox" />
-                <span>{text.allowRejoin}</span>
-              </label>
-              <fieldset className="participation-management-visibility">
-                <legend>{text.listingVisibility}</legend>
+        <section className="participation-management-start" aria-labelledby="participation-start-title">
+          <div className="participation-management-game-row">
+            <span className="participation-management-game-chip is-active">{text.gameLol}</span>
+            <span className="participation-management-game-chip is-soon">{text.gamePalworld} · {text.comingSoon}</span>
+          </div>
+          <h2 id="participation-start-title">{text.quickStartTitle}</h2>
+          <p>{text.createDescription}</p>
+          <ul className="participation-management-capacity-preview">
+            <li><strong>{LOL_TOTAL_CAPACITY}{text.personUnit}</strong> {text.capacityIngame}({text.capacityHostNote})</li>
+            <li><strong>{checkInSeconds}{text.secondUnit}</strong> {text.capacityCheckin}</li>
+            <li><strong>{maxQueueSize}{text.personUnit}</strong> {text.capacityQueueMax}</li>
+          </ul>
+          <form className="participation-management-start-actions" onSubmit={(event) => void createSession(event)}>
+            <button className="is-primary" disabled={Boolean(busyKey)} type="submit">
+              {busyKey === "session:start" ? text.creating : text.create}
+            </button>
+            <button
+              aria-expanded={startSettingsOpen}
+              onClick={() => setStartSettingsOpen((open) => !open)}
+              type="button"
+            >
+              {text.advancedSettings}
+            </button>
+            {startSettingsOpen ? (
+              <div className="participation-management-form-grid">
                 <label>
-                  <input
-                    checked={listingVisibility === "public"}
-                    name="listingVisibility"
-                    onChange={() => setListingVisibility("public")}
-                    type="radio"
-                  />
-                  <span><strong>{text.listingPublic}</strong><small>{text.listingPublicDescription}</small></span>
+                  <span>{text.maxQueueSize}</span>
+                  <input min={1} max={500} onChange={(event) => setMaxQueueSize(Number(event.target.value))} required type="number" value={maxQueueSize} />
                 </label>
                 <label>
-                  <input
-                    checked={listingVisibility === "followers"}
-                    name="listingVisibility"
-                    onChange={() => setListingVisibility("followers")}
-                    type="radio"
-                  />
-                  <span><strong>{text.listingFollowers}</strong><small>{text.listingFollowersDescription}</small></span>
+                  <span>{text.checkInSeconds}</span>
+                  <input min={15} max={600} onChange={(event) => setCheckInSeconds(Number(event.target.value))} required type="number" value={checkInSeconds} />
                 </label>
-              </fieldset>
-            </div>
-          </details>
-        </form>
+                <label className="participation-management-checkbox">
+                  <input checked={allowRejoin} onChange={(event) => setAllowRejoin(event.target.checked)} type="checkbox" />
+                  <span>{text.allowRejoin}</span>
+                </label>
+                <fieldset className="participation-management-visibility">
+                  <legend>{text.listingVisibility}</legend>
+                  <label>
+                    <input
+                      checked={listingVisibility === "public"}
+                      name="listingVisibility"
+                      onChange={() => setListingVisibility("public")}
+                      type="radio"
+                    />
+                    <span><strong>{text.listingPublic}</strong><small>{text.listingPublicDescription}</small></span>
+                  </label>
+                  <label>
+                    <input
+                      checked={listingVisibility === "followers"}
+                      name="listingVisibility"
+                      onChange={() => setListingVisibility("followers")}
+                      type="radio"
+                    />
+                    <span><strong>{text.listingFollowers}</strong><small>{text.listingFollowersDescription}</small></span>
+                  </label>
+                </fieldset>
+              </div>
+            ) : null}
+          </form>
+        </section>
       ) : (
         <>
-          <section className="participation-management-session" aria-labelledby="participation-session-title">
-            <header>
-              <div>
-                <h2 id="participation-session-title">{text.sessionTitle}</h2>
-                <p>{text.listingScope} · {session?.listingVisibility === "followers" ? text.listingFollowers : text.listingPublic}</p>
-              </div>
+          <section className="participation-management-control-bar" aria-labelledby="participation-session-title">
+            <div className="participation-management-control-bar-lead">
+              <span className="participation-management-game-chip is-active">{text.gameLol}</span>
               <strong data-status={session?.status}>{sessionStatusLabel(session?.status ?? "closed", text)}</strong>
-            </header>
-            <dl className="participation-management-metrics">
-              <div><dt>{text.queueCapacity}</dt><dd>{state?.summary.waiting ?? 0}</dd></div>
-              <div><dt>{text.selectedCount}</dt><dd>{selectedCount}</dd></div>
-              <div><dt>{text.checkedInCount}</dt><dd>{state?.summary.checkedIn ?? 0}</dd></div>
-              <div><dt>{text.playedCount}</dt><dd>{state?.summary.played ?? 0}</dd></div>
-            </dl>
+              <h2 id="participation-session-title" className="yoro-u-sr-only">{text.sessionTitle}</h2>
+            </div>
             <div className="participation-management-session-toolbar">
               <a href={publicUrl} rel="noopener noreferrer" target="_blank">{text.openPublic}</a>
               {renderOperationalActionButton()}
@@ -569,60 +673,91 @@ export function ParticipationManagementPage({
             </div>
           </section>
 
-          <section className="participation-management-current" aria-labelledby="participation-current-title">
-            <header>
-              <h2 id="participation-current-title">{text.currentParticipant}</h2>
-            </header>
-            {currentEntries.length
-              ? <div className="participation-management-group">{currentEntries.map((entry) => renderParticipantRow(entry))}</div>
-              : <p className="participation-management-empty">{text.noCurrentParticipant}</p>}
-          </section>
+          <dl className="participation-management-metrics">
+            <div><dt>{text.queueCapacity}</dt><dd>{state?.summary.waiting ?? 0}</dd></div>
+            <div><dt>{text.selectedCount}</dt><dd>{selectedCount}</dd></div>
+            <div><dt>{text.checkedInCount}</dt><dd>{state?.summary.checkedIn ?? 0}</dd></div>
+            <div><dt>{text.playedCount}</dt><dd>{state?.summary.played ?? 0}</dd></div>
+          </dl>
 
-          <section className="participation-management-queue" aria-labelledby="participation-queue-title">
-            <header>
-              <div>
-                <h2 id="participation-queue-title">{text.queueTitle}</h2>
-                <p>{text.queueDescription}</p>
+          <div className="participation-management-board">
+            <section className="participation-management-current" aria-labelledby="participation-current-title">
+              <header>
+                <h2 id="participation-current-title">{text.currentParticipant}</h2>
+                <span className="participation-management-capacity-meter">
+                  {currentEntries.length + 1}/{LOL_TOTAL_CAPACITY}
+                </span>
+              </header>
+              <div className="participation-management-seat-grid">
+                <div className="participation-management-seat is-host">
+                  <span className="participation-management-seat-avatar" aria-hidden="true">🎙</span>
+                  <span className="participation-management-seat-name">{text.hostSeatLabel}</span>
+                </div>
+                {Array.from({ length: LOL_VIEWER_SEATS }, (_, index) => renderSeat(currentEntries[index]))}
               </div>
-              <div className="participation-management-queue-actions">
-                <span>{waitingEntries.length}</span>
-                {!currentEntry && state?.isOpen && waitingEntries.length > 0 ? (
+            </section>
+
+            <section className="participation-management-queue" aria-labelledby="participation-queue-title">
+              <header>
+                <div>
+                  <h2 id="participation-queue-title">{text.queueTitle}</h2>
+                  <p>{text.queueDescription}</p>
+                </div>
+                <span className="participation-management-capacity-meter">
+                  {waitingEntries.length}/{session?.maxQueueSize ?? maxQueueSize}
+                </span>
+              </header>
+              {capacityIsFull ? <p className="participation-management-capacity-full">{text.capacityFull}</p> : null}
+              <div className="participation-management-queue-tools">
+                <label className="participation-management-search">
+                  <span className="yoro-u-sr-only">{text.queueSearchPlaceholder}</span>
+                  <input
+                    onChange={(event) => setQueueSearch(event.target.value)}
+                    placeholder={text.queueSearchPlaceholder}
+                    type="search"
+                    value={queueSearch}
+                  />
+                </label>
+                <button
+                  aria-pressed={bulkSelectOpen}
+                  className="participation-management-bulk-toggle"
+                  onClick={() => setBulkSelectOpen((open) => !open)}
+                  type="button"
+                >
+                  {text.bulkSelectToggle}
+                </button>
+              </div>
+              {bulkSelectOpen && !currentEntry && state?.isOpen && waitingEntries.length > 0 ? (
+                <div className="participation-management-bulk-bar">
+                  <span>{text.selectNextHint}</span>
                   <button
                     className="is-primary"
                     disabled={Boolean(busyKey) || selectedWaitingEntries.length === 0}
-                    onClick={() => void selectWaitingEntries()}
+                    onClick={() => void selectEntries(selectedWaitingEntries.map((entry) => entry.id))}
                     type="button"
                   >
                     {text.selectNext} ({selectedWaitingEntries.length})
                   </button>
-                ) : null}
+                </div>
+              ) : null}
+              <div className="participation-management-group" aria-labelledby="participation-waiting-title">
+                <h3 id="participation-waiting-title" className="yoro-u-sr-only">{text.queueWaiting}</h3>
+                {visibleWaitingEntries.length
+                  ? visibleWaitingEntries.map((entry) => renderQueueRow(entry))
+                  : <p className="participation-management-empty">{queueSearch ? text.queueSearchEmpty : text.queueEmpty}</p>}
               </div>
-            </header>
-            {!currentEntry && state?.isOpen && waitingEntries.length > 0 ? <p className="participation-management-select-hint">{text.selectNextHint}</p> : null}
-            <div className="participation-management-group" aria-labelledby="participation-waiting-title">
-              <h3 id="participation-waiting-title">{text.queueWaiting}</h3>
-              {waitingEntries.length
-                ? waitingEntries.map((entry) => renderParticipantRow(entry, true, true))
-                : <p className="participation-management-empty">{text.queueEmpty}</p>}
-            </div>
-            <details className="participation-management-history">
-              <summary>{text.queueHistory} <span>{historyEntries.length}</span></summary>
-              <div>
-                {historyEntries.length
-                  ? historyEntries.map((entry) => renderParticipantRow(entry, true))
-                  : <p className="participation-management-empty">{text.queueHistoryEmpty}</p>}
-              </div>
-            </details>
-          </section>
+              <details className="participation-management-history">
+                <summary>{text.queueHistory} <span>{historyEntries.length}</span></summary>
+                <div>
+                  {historyEntries.length
+                    ? historyEntries.map((entry) => renderQueueRow(entry, true))
+                    : <p className="participation-management-empty">{text.queueHistoryEmpty}</p>}
+                </div>
+              </details>
+            </section>
+          </div>
 
-          <aside className="participation-management-bot" aria-labelledby="participation-bot-title">
-            <div>
-              <h2 id="participation-bot-title">{text.botIntegrationTitle}</h2>
-              <p>{text.botIntegrationDescription}</p>
-              <small>{text.botIntegrationSafety}</small>
-            </div>
-            <a href="/dashboard/organizations/bot">{text.botIntegrationAction}</a>
-          </aside>
+          <ParticipationAnnouncementPanel csrfToken={csrfToken} locale={locale} />
         </>
       )}
     </section>

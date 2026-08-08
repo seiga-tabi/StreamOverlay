@@ -4,6 +4,7 @@ export const ALLOWED_ACTION_TYPES = [
   "log.highlight",
   "participation.open",
   "participation.close",
+  "discord.notify",
   "noop"
 ] as const;
 
@@ -62,6 +63,24 @@ export type ParticipationCloseAction = {
   type: "participation.close";
 };
 
+/* Discord 알림으로 보낼 수 있는 사건 목록.
+ *
+ * 자유 문자열이 아니라 고정 enum 입니다. 대상 채널·길드·멘션 역할과 메시지 본문은
+ * 이 payload 에 담기지 않고, 서버가 Dashboard 에 등록된 대상에서만 읽습니다.
+ * viewer 나 외부 입력이 임의 채널로 메시지를 보내는 통로를 만들지 않기 위해서입니다.
+ */
+export const DISCORD_NOTIFY_EVENTS = [
+  "participation.recruiting",
+  "participation.closed"
+] as const;
+
+export type DiscordNotifyEvent = (typeof DISCORD_NOTIFY_EVENTS)[number];
+
+export type DiscordNotifyAction = {
+  type: "discord.notify";
+  event: DiscordNotifyEvent;
+};
+
 export type NoopAction = {
   type: "noop";
   note?: string;
@@ -73,6 +92,7 @@ export type BotAction =
   | LogHighlightAction
   | ParticipationOpenAction
   | ParticipationCloseAction
+  | DiscordNotifyAction
   | NoopAction;
 
 export type ValidationResult =
@@ -179,6 +199,15 @@ export function validateBotAction(action: unknown): ValidationResult {
     }
     case "participation.close":
       return validateKeys(candidate, []);
+    case "discord.notify": {
+      const keys = validateKeys(candidate, ["event"]);
+      if (!keys.ok) return keys;
+      /* template 렌더 후에 검증되므로 "{foo}" 같은 주입은 빈 문자열이 되어 여기서 걸립니다. */
+      return typeof candidate.event === "string"
+        && (DISCORD_NOTIFY_EVENTS as readonly string[]).includes(candidate.event)
+        ? ok()
+        : fail("event 값이 허용 목록에 없습니다.");
+    }
     case "noop": {
       const keys = validateKeys(candidate, ["note"]);
       return keys.ok ? optionalString(candidate.note, MAX_CHAT_LENGTH, "note") : keys;

@@ -117,11 +117,14 @@ test("스트리머 참여 화면은 공개 범위·직접 동작·그룹 대기�
   assert.doesNotMatch(source, /copyPublicUrl/u);
   assert.doesNotMatch(source, /participation-management-public-link/u);
   assert.doesNotMatch(source, /participation-management-more/u);
-  assert.match(source, /participation-management-advanced/u);
+  // 세부 설정은 <details> 대신 톱니 버튼 + 접이식 폼으로 바뀌었습니다 — 진입점이
+  // 항상 보이는 게임 정보/정원 미리보기 뒤로 한 단계 더 숨어 기본 흐름을 덜 가립니다.
+  assert.match(source, /startSettingsOpen/u);
   assert.match(source, /participation-management-visibility/u);
   assert.match(source, /participation-management-current/u);
   assert.match(source, /participation-management-history/u);
-  assert.match(source, /participation-management-bot/u);
+  // 링크만 있던 Bot 연동 aside 는 실제 알림 설정 패널로 교체했습니다.
+  assert.match(source, /ParticipationAnnouncementPanel/u);
   assert.match(source, /expectedRevision: state\.revision/u);
   assert.match(source, /시청자 참여를 시작하세요/u);
   assert.match(source, /視聴者参加を始めましょう/u);
@@ -133,7 +136,10 @@ test("스트리머 참여 화면은 공개 범위·직접 동작·그룹 대기�
   assert.match(source, /type="checkbox"/u);
   assert.match(source, /selectYoroParticipationEntries/u);
   assert.match(source, /selectedWaitingEntries\.map\(\(entry\) => entry\.id\)/u);
-  assert.match(source, /currentEntries\.map\(\(entry\) => renderParticipantRow\(entry\)\)/u);
+  // "현재 참가자"는 이제 평범한 목록이 아니라 게임 정원(LoL 5명 = 방송인 1 + 시청자
+  // 4)에 맞춘 고정 슬롯 그리드입니다 — 빈 자리도 항상 눈에 보여야 하므로 배열
+  // 길이를 정원에 고정하고 채워진 자리만 실제 참가자로 렌더링합니다.
+  assert.match(source, /Array\.from\(\{ length: LOL_VIEWER_SEATS \}, \(_, index\) => renderSeat\(currentEntries\[index\]\)\)/u);
   assert.doesNotMatch(source, /mutateSession\("select_next"\)/u);
   assert.match(source, /className="is-danger"[\s\S]*?mutateSession\("finish"\)/u);
   assert.match(css, /grid-template-areas:[\s\S]*?"position participant status"[\s\S]*?"position actions actions"/u);

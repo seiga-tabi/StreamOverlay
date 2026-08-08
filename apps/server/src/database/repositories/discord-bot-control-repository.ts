@@ -44,6 +44,7 @@ type ControlRow = {
   show_version: boolean;
   show_latency: boolean;
   show_observed_at: boolean;
+  participation_announce_enabled: boolean;
   revision: string;
 };
 
@@ -67,6 +68,7 @@ function settings(row?: ControlRow): DiscordBotControlSettings {
       latency: row.show_latency,
       observedAt: row.show_observed_at
     }),
+    participationAnnounceEnabled: row.participation_announce_enabled,
     revision: Number(row.revision)
   });
 }
@@ -171,6 +173,7 @@ export class DiscordBotControlRepository {
          guide_command_enabled, delete_invocation_after_reply,
          preferred_locale,
          show_players, show_version, show_latency, show_observed_at,
+         participation_announce_enabled,
          revision::TEXT AS revision
        FROM discord_bot_control_configs
        WHERE organization_id = $1
@@ -200,7 +203,8 @@ export class DiscordBotControlRepository {
       input.value.statusFields.players,
       input.value.statusFields.version,
       input.value.statusFields.latency,
-      input.value.statusFields.observedAt
+      input.value.statusFields.observedAt,
+      input.value.participationAnnounceEnabled
     ] as const;
     await repositoryQuery(
       this.queryable,
@@ -211,9 +215,10 @@ export class DiscordBotControlRepository {
          guide_command_enabled, delete_invocation_after_reply,
          preferred_locale,
          show_players, show_version, show_latency, show_observed_at,
+         participation_announce_enabled,
          revision, updated_by_user_id
        ) VALUES (
-         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
+         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
        )
        ON CONFLICT (organization_id, discord_guild_id, application_id)
        DO UPDATE SET
@@ -228,6 +233,7 @@ export class DiscordBotControlRepository {
          show_version = EXCLUDED.show_version,
          show_latency = EXCLUDED.show_latency,
          show_observed_at = EXCLUDED.show_observed_at,
+         participation_announce_enabled = EXCLUDED.participation_announce_enabled,
          revision = EXCLUDED.revision,
          updated_by_user_id = EXCLUDED.updated_by_user_id,
          updated_at = NOW()`,
@@ -318,6 +324,8 @@ export class DiscordBotControlRepository {
          COALESCE(config.show_version, TRUE) AS show_version,
          COALESCE(config.show_latency, TRUE) AS show_latency,
          COALESCE(config.show_observed_at, TRUE) AS show_observed_at,
+         COALESCE(config.participation_announce_enabled, TRUE)
+           AS participation_announce_enabled,
          COALESCE(config.revision, 0)::TEXT AS revision
        FROM discord_installations installation
        JOIN discord_guilds guild
@@ -434,6 +442,7 @@ export class DiscordBotControlRepository {
          guide_command_enabled, delete_invocation_after_reply,
          preferred_locale,
          show_players, show_version, show_latency, show_observed_at,
+         participation_announce_enabled,
          revision::TEXT AS revision
        FROM discord_bot_control_configs
        WHERE organization_id = $1
@@ -462,9 +471,10 @@ export class DiscordBotControlRepository {
          guide_command_enabled, delete_invocation_after_reply,
          preferred_locale,
          show_players, show_version, show_latency, show_observed_at,
+         participation_announce_enabled,
          revision, updated_by_user_id
        ) VALUES (
-         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
+         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
        )
        ON CONFLICT (organization_id, discord_guild_id, application_id)
        DO UPDATE SET
@@ -487,6 +497,7 @@ export class DiscordBotControlRepository {
         next.statusFields.version,
         next.statusFields.latency,
         next.statusFields.observedAt,
+        next.participationAnnounceEnabled,
         nextRevision,
         installation.actor_user_id
       ]
@@ -587,6 +598,7 @@ export class DiscordBotControlRepository {
          guide_command_enabled, delete_invocation_after_reply,
          preferred_locale,
          show_players, show_version, show_latency, show_observed_at,
+         participation_announce_enabled,
          revision::TEXT AS revision
        FROM discord_bot_control_configs
        WHERE organization_id = $1
