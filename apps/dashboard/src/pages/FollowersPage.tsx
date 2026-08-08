@@ -64,6 +64,44 @@ function followerRiotId(record: FollowerRecord): string | undefined {
   return `${record.riotGameName}#${record.riotTagLine}`;
 }
 
+export const FOLLOWER_DIRECTORY_PAGE_SIZE = 20;
+
+type FollowerDirectoryStatusFilter = "all" | FollowerRecord["status"];
+type FollowerDirectorySortKey = "followedAt" | "activity";
+type FollowerDirectorySort = { key: FollowerDirectorySortKey; dir: "asc" | "desc" };
+
+export function matchesFollowerQuery(record: FollowerRecord, query: string): boolean {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  const riotId = followerRiotId(record) ?? "";
+  return record.userName.toLowerCase().includes(q)
+    || (record.userLogin ?? "").toLowerCase().includes(q)
+    || riotId.toLowerCase().includes(q);
+}
+
+export function filterFollowerDirectory(
+  records: FollowerRecord[],
+  query: string,
+  status: FollowerDirectoryStatusFilter
+): FollowerRecord[] {
+  return records.filter((record) => (
+    (status === "all" || record.status === status) && matchesFollowerQuery(record, query)
+  ));
+}
+
+export function sortFollowerDirectory(records: FollowerRecord[], sort: FollowerDirectorySort): FollowerRecord[] {
+  return [...records].sort((a, b) => {
+    const av = sort.key === "activity" ? a.activity.total : new Date(a.followedAt ?? a.firstSeenAt).getTime();
+    const bv = sort.key === "activity" ? b.activity.total : new Date(b.followedAt ?? b.firstSeenAt).getTime();
+    return sort.dir === "asc" ? av - bv : bv - av;
+  });
+}
+
+export function genreBarPercent(count: number, max: number): number {
+  if (max <= 0) return 0;
+  return Math.max(0, Math.min(100, Math.round((count / max) * 100)));
+}
+
 export function safeFollowerOAuthUrl(value: string): string | undefined {
   try {
     const url = new URL(value);
@@ -204,6 +242,19 @@ export function FollowersPage({ dataSource }: { dataSource?: FollowersDataSource
   const [connecting, setConnecting] = useState(false);
   const [loadFailed, setLoadFailed] = useState(false);
   const [message, setMessage] = useState<{ tone: "success" | "danger"; text: string }>();
+  const [directoryQuery, setDirectoryQuery] = useState("");
+  const [directoryStatus, setDirectoryStatus] = useState<FollowerDirectoryStatusFilter>("all");
+  const [directorySort, setDirectorySort] = useState<FollowerDirectorySort>({ key: "followedAt", dir: "desc" });
+  const [directoryPage, setDirectoryPage] = useState(1);
+
+  function toggleDirectorySort(key: FollowerDirectorySortKey) {
+    setDirectorySort((current) => (
+      current.key === key
+        ? { key, dir: current.dir === "asc" ? "desc" : "asc" }
+        : { key, dir: "desc" }
+    ));
+    setDirectoryPage(1);
+  }
 
   async function load() {
     setLoading(true);
@@ -261,6 +312,16 @@ export function FollowersPage({ dataSource }: { dataSource?: FollowersDataSource
     { label: t.metrics.observedGenreFollowers, value: state.summary.observedGenreFollowers }
   ] : [];
   const oauthConnected = state?.oauth.state === "connected";
+
+  const maxGenreCount = state ? Math.max(1, ...state.topObservedGenres.map((genre) => genre.count)) : 1;
+
+  const filteredDirectoryFollowers = filterFollowerDirectory(state?.followers ?? [], directoryQuery, directoryStatus);
+  const sortedDirectoryFollowers = sortFollowerDirectory(filteredDirectoryFollowers, directorySort);
+  const directoryPageCount = Math.max(1, Math.ceil(sortedDirectoryFollowers.length / FOLLOWER_DIRECTORY_PAGE_SIZE));
+  const currentDirectoryPage = Math.min(directoryPage, directoryPageCount);
+  const directoryPageStart = (currentDirectoryPage - 1) * FOLLOWER_DIRECTORY_PAGE_SIZE;
+  const directoryRangeEnd = Math.min(directoryPageStart + FOLLOWER_DIRECTORY_PAGE_SIZE, sortedDirectoryFollowers.length);
+  const pagedDirectoryFollowers = sortedDirectoryFollowers.slice(directoryPageStart, directoryPageStart + FOLLOWER_DIRECTORY_PAGE_SIZE);
 
   return (
     <section className="followers-page" aria-labelledby="followers-page-title">
@@ -361,8 +422,16 @@ export function FollowersPage({ dataSource }: { dataSource?: FollowersDataSource
                 <div className="genre-bar-list">
                   {state.topObservedGenres.map((genre) => (
                     <div className="genre-bar-row" key={genre.name}>
-                      <span>{localizedGenre(genre.name)}</span>
-                      <strong>{genre.count}</strong>
+                      <div className="genre-bar-row-label">
+                        <span>{localizedGenre(genre.name)}</span>
+                        <strong>{genre.count}</strong>
+                      </div>
+                      <div className="genre-bar-track">
+                        <div
+                          className="genre-bar-fill"
+                          style={{ width: `${genreBarPercent(genre.count, maxGenreCount)}%` }}
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -394,26 +463,108 @@ export function FollowersPage({ dataSource }: { dataSource?: FollowersDataSource
             {state.followers.length === 0 ? (
               <FollowerEmptyState text={t.empty.followers} />
             ) : (
-              <div className="follower-table">
-                <div className="follower-row follower-head">
-                  <span>{t.columns.user}</span>
-                  <span>{t.columns.riotId}</span>
-                  <span>{t.columns.status}</span>
-                  <span>{t.columns.followedAt}</span>
-                  <span>{t.columns.activity}</span>
-                  <span>{t.columns.genre}</span>
-                </div>
-                {state.followers.map((follower) => (
-                  <div className="follower-row" key={follower.userId}>
-                    <FollowerIdentity record={follower} />
-                    <span className="follower-riot-id">{followerRiotId(follower) ?? t.riotIdMissing}</span>
-                    <span className={`queue-status ${statusClass(follower.status)}`}>{t.statuses[follower.status]}</span>
-                    <span>{formatDate(follower.followedAt ?? follower.firstSeenAt)}</span>
-                    <span>{follower.activity.total}</span>
-                    <span>{mainGenre(follower)}</span>
+              <>
+                <div className="follower-directory-toolbar">
+                  <label className="follower-directory-search">
+                    <span className="yoro-u-sr-only">{t.directory.searchLabel}</span>
+                    <input
+                      onChange={(event) => { setDirectoryQuery(event.target.value); setDirectoryPage(1); }}
+                      placeholder={t.directory.searchPlaceholder}
+                      type="search"
+                      value={directoryQuery}
+                    />
+                  </label>
+                  <div className="follower-status-filter" role="group" aria-label={t.columns.status}>
+                    {(["all", "following", "unfollowed"] as const).map((option) => (
+                      <button
+                        aria-pressed={directoryStatus === option}
+                        key={option}
+                        onClick={() => { setDirectoryStatus(option); setDirectoryPage(1); }}
+                        type="button"
+                      >
+                        {option === "all" ? t.directory.filterAll : t.statuses[option]}
+                      </button>
+                    ))}
                   </div>
-                ))}
-              </div>
+                  <span className="follower-directory-count">
+                    {sortedDirectoryFollowers.length}{t.directory.resultUnit}
+                  </span>
+                </div>
+
+                {pagedDirectoryFollowers.length === 0 ? (
+                  <FollowerEmptyState text={t.directory.noResults} />
+                ) : (
+                  <div className="follower-table">
+                    <div className="follower-row follower-head">
+                      <span>{t.columns.user}</span>
+                      <span>{t.columns.riotId}</span>
+                      <span>{t.columns.status}</span>
+                      <span>
+                        <button
+                          aria-sort={directorySort.key === "followedAt" ? (directorySort.dir === "asc" ? "ascending" : "descending") : undefined}
+                          onClick={() => toggleDirectorySort("followedAt")}
+                          type="button"
+                        >
+                          {t.columns.followedAt}
+                          {directorySort.key === "followedAt" ? (directorySort.dir === "asc" ? " ▲" : " ▼") : ""}
+                        </button>
+                      </span>
+                      <span>
+                        <button
+                          aria-sort={directorySort.key === "activity" ? (directorySort.dir === "asc" ? "ascending" : "descending") : undefined}
+                          onClick={() => toggleDirectorySort("activity")}
+                          type="button"
+                        >
+                          {t.columns.activity}
+                          {directorySort.key === "activity" ? (directorySort.dir === "asc" ? " ▲" : " ▼") : ""}
+                        </button>
+                      </span>
+                      <span>{t.columns.genre}</span>
+                    </div>
+                    {pagedDirectoryFollowers.map((follower) => (
+                      <div className="follower-row" key={follower.userId}>
+                        <FollowerIdentity record={follower} />
+                        <span className="follower-riot-id" data-label={t.columns.riotId}>
+                          {followerRiotId(follower) ?? t.riotIdMissing}
+                        </span>
+                        <span className={`queue-status ${statusClass(follower.status)}`}>
+                          {t.statuses[follower.status]}
+                        </span>
+                        <span data-label={t.columns.followedAt}>{formatDate(follower.followedAt ?? follower.firstSeenAt)}</span>
+                        <span data-label={t.columns.activity}>{follower.activity.total}</span>
+                        <span data-label={t.columns.genre}>{mainGenre(follower)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {directoryPageCount > 1 ? (
+                  <div className="follower-directory-pagination">
+                    <span className="follower-directory-range">
+                      {directoryPageStart + 1}-{directoryRangeEnd} / {sortedDirectoryFollowers.length}
+                    </span>
+                    <div className="follower-pager">
+                      <button
+                        aria-label={t.directory.pagePrev}
+                        disabled={currentDirectoryPage <= 1}
+                        onClick={() => setDirectoryPage((page) => Math.max(1, page - 1))}
+                        type="button"
+                      >
+                        ‹
+                      </button>
+                      <span className="follower-pager-indicator">{currentDirectoryPage} / {directoryPageCount}</span>
+                      <button
+                        aria-label={t.directory.pageNext}
+                        disabled={currentDirectoryPage >= directoryPageCount}
+                        onClick={() => setDirectoryPage((page) => Math.min(directoryPageCount, page + 1))}
+                        type="button"
+                      >
+                        ›
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+              </>
             )}
           </section>
         </>

@@ -254,18 +254,72 @@
 }
 
 .yoro-dashboard-shell[data-page="streamingFollowers"] .follower-riot-id,
-.yoro-dashboard-shell[data-page="streamingFollowers"] .genre-bar-row span {
+.yoro-dashboard-shell[data-page="streamingFollowers"] .genre-bar-row-label span {
   color: var(--followers-text);
 }
 
-.yoro-dashboard-shell[data-page="streamingFollowers"] .genre-bar-row strong {
+.yoro-dashboard-shell[data-page="streamingFollowers"] .genre-bar-row-label strong {
   color: #b6a5ff;
+}
+
+.yoro-dashboard-shell[data-page="streamingFollowers"] .genre-bar-track {
+  background: rgb(255 255 255 / 8%);
+}
+
+.yoro-dashboard-shell[data-page="streamingFollowers"] .genre-bar-fill {
+  background: linear-gradient(90deg, #7658eb, var(--followers-accent));
 }
 
 .yoro-dashboard-shell[data-page="streamingFollowers"] .follower-head {
   border-color: var(--followers-border-strong);
   background: rgb(137 121 255 / 10%);
   color: #b6a5ff;
+}
+
+.yoro-dashboard-shell[data-page="streamingFollowers"] .follower-directory-search input {
+  border-color: var(--followers-border-strong);
+  background: var(--followers-surface-soft);
+  color: var(--followers-text);
+}
+
+.yoro-dashboard-shell[data-page="streamingFollowers"] .follower-directory-search input::placeholder {
+  color: var(--followers-muted);
+}
+
+.yoro-dashboard-shell[data-page="streamingFollowers"] .follower-status-filter {
+  border-color: var(--followers-border);
+  background: var(--followers-surface-soft);
+}
+
+.yoro-dashboard-shell[data-page="streamingFollowers"] .follower-status-filter button {
+  color: var(--followers-muted);
+}
+
+.yoro-dashboard-shell[data-page="streamingFollowers"] .follower-status-filter button[aria-pressed="true"] {
+  background: rgb(137 121 255 / 16%);
+  color: #b6a5ff;
+}
+
+.yoro-dashboard-shell[data-page="streamingFollowers"] .follower-directory-count,
+.yoro-dashboard-shell[data-page="streamingFollowers"] .follower-directory-range,
+.yoro-dashboard-shell[data-page="streamingFollowers"] .follower-pager-indicator,
+.yoro-dashboard-shell[data-page="streamingFollowers"] .follower-row > [data-label]::before {
+  color: var(--followers-muted);
+}
+
+.yoro-dashboard-shell[data-page="streamingFollowers"] .follower-directory-pagination {
+  border-color: var(--followers-border);
+}
+
+.yoro-dashboard-shell[data-page="streamingFollowers"] .follower-pager button {
+  border-color: var(--followers-border);
+  background: var(--followers-surface-soft);
+  color: var(--followers-text);
+}
+
+.yoro-dashboard-shell[data-page="streamingFollowers"] .follower-pager button:hover:not(:disabled) {
+  border-color: var(--followers-border-strong);
+  background: rgb(137 121 255 / 8%);
 }
 
 .yoro-dashboard-shell[data-page="streamingFollowers"] .follower-mini-row .queue-status,
@@ -357,6 +411,19 @@
 
   .yoro-dashboard-shell[data-page="streamingFollowers"] .follower-row > :nth-child(n) {
     grid-column: auto;
+  }
+
+  .yoro-dashboard-shell[data-page="streamingFollowers"] .follower-directory-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .yoro-dashboard-shell[data-page="streamingFollowers"] .follower-directory-count {
+    margin-inline-start: 0;
+  }
+
+  .yoro-dashboard-shell[data-page="streamingFollowers"] .follower-status-filter button {
+    flex: 1;
   }
 }
 

@@ -6152,9 +6152,7 @@ code {
 
 .genre-bar-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 12px;
-  align-items: center;
+  gap: 8px;
   min-width: 0;
   padding: var(--space-3);
   background:
@@ -6164,17 +6162,111 @@ code {
   border-radius: var(--radius-md);
 }
 
-.genre-bar-row span {
+.genre-bar-row-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.genre-bar-row-label span {
   min-width: 0;
   color: var(--text-strong);
   font-weight: 850;
   overflow-wrap: anywhere;
 }
 
-.genre-bar-row strong {
+.genre-bar-row-label strong {
   min-width: 42px;
   color: var(--brand-strong);
   text-align: right;
+}
+
+.genre-bar-track {
+  position: relative;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .14);
+}
+
+.genre-bar-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 999px;
+  background: var(--brand-strong);
+  transition: width 400ms cubic-bezier(.2, .8, .2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .genre-bar-fill {
+    transition: none;
+  }
+}
+
+.follower-directory-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  margin-bottom: var(--space-4);
+}
+
+.follower-directory-search {
+  flex: 1 1 240px;
+  min-inline-size: 0;
+}
+
+.follower-directory-search input {
+  inline-size: 100%;
+  min-block-size: var(--yoro-size-touch-target);
+  padding-inline: var(--space-4);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  color: var(--text-strong);
+  background: var(--surface-strong);
+  font: inherit;
+}
+
+.follower-directory-search input::placeholder {
+  color: var(--muted);
+}
+
+.follower-status-filter {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .06);
+}
+
+.follower-status-filter button {
+  min-height: 38px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.follower-status-filter button[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--brand-strong) 22%, transparent);
+  color: var(--brand-strong);
+}
+
+.follower-directory-count {
+  margin-inline-start: auto;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
 }
 
 .follower-row {
@@ -6201,10 +6293,72 @@ code {
   text-transform: uppercase;
 }
 
+.follower-head button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
 .follower-riot-id {
   color: var(--text-strong);
   font-size: 13px;
   font-weight: 850;
+}
+
+.follower-directory-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--line);
+}
+
+.follower-directory-range {
+  color: var(--muted);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.follower-pager {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.follower-pager button {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, .06);
+  color: var(--text-strong);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.follower-pager button:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}
+
+.follower-pager-indicator {
+  padding: 0 var(--space-2);
+  color: var(--muted);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
 }
 
 @media (max-width: 1200px) {
@@ -6396,6 +6550,39 @@ code {
   .follower-row > :nth-child(5),
   .follower-row > :nth-child(6) {
     grid-column: auto;
+  }
+
+  .follower-head {
+    display: none;
+  }
+
+  .follower-row > [data-label] {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .follower-row > [data-label]::before {
+    flex: 0 0 auto;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    content: attr(data-label);
+  }
+
+  .follower-directory-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .follower-directory-count {
+    margin-inline-start: 0;
+  }
+
+  .follower-status-filter button {
+    flex: 1;
   }
 
   .queue-status,

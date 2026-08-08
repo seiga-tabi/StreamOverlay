@@ -154,6 +154,15 @@ export const dashboardI18n = {
         following: "팔로우 중",
         unfollowed: "취소 추정"
       },
+      directory: {
+        searchLabel: "팔로워 검색",
+        searchPlaceholder: "이름, 로그인, Riot ID로 검색",
+        filterAll: "전체",
+        noResults: "검색 결과가 없습니다.",
+        resultUnit: "건",
+        pagePrev: "이전 페이지",
+        pageNext: "다음 페이지"
+      },
       genres: {
         chat: "채팅 참여",
         participation: "League of Legends 시참"
@@ -368,6 +377,15 @@ export const dashboardI18n = {
       statuses: {
         following: "フォロー中",
         unfollowed: "解除推定"
+      },
+      directory: {
+        searchLabel: "フォロワー検索",
+        searchPlaceholder: "名前・ログイン・Riot IDで検索",
+        filterAll: "すべて",
+        noResults: "検索結果がありません。",
+        resultUnit: "件",
+        pagePrev: "前のページ",
+        pageNext: "次のページ"
       },
       genres: {
         chat: "チャット参加",
