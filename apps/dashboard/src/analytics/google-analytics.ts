@@ -34,9 +34,13 @@ export type GoogleConsentState = {
 export type YoroAnalyticsEventName =
   | "bot_dashboard"
   | "discord_click"
+  | "entity_view"
+  | "filter_use"
+  | "internal_link_click"
   | "lol_search"
   | "pal_search"
   | "participation_join"
+  | "scroll_depth"
   | "search"
   | "streamer_follow"
   | "twitch_click"
@@ -49,6 +53,9 @@ let googleTagConfigured = false;
 let lastPageKey = "";
 let scheduledPageView: number | undefined;
 let debugMode = false;
+/** 한 page view 안에서 이미 보고한 scroll 구간. route가 바뀌면 초기화합니다. */
+let reportedScrollDepths = new Set<number>();
+let scheduledScrollDepth: number | undefined;
 
 function normalizedPublicPath(pathname: string): string {
   const withoutLocale = pathname.replace(/^\/(?:ko|ja)(?=\/|$)/u, "") || "/";
@@ -259,6 +266,83 @@ function schedulePageView(): void {
   }, 0);
 }
 
+const SCROLL_DEPTH_THRESHOLDS = [25, 50, 75, 100] as const;
+
+/**
+ * 체류시간이 짧은 원인이 속도인지 콘텐츠인지 구분하려면 실제로 읽었는지를 알아야 합니다.
+ * GA4 기본 지표에는 없는 신호이므로 직접 보고합니다.
+ */
+function currentScrollDepthPercent(): number {
+  const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+  if (scrollable <= 0) return 100;
+  const ratio = (window.scrollY / scrollable) * 100;
+  return Math.min(100, Math.max(0, Math.round(ratio)));
+}
+
+function reportScrollDepth(): void {
+  // 화면 안으로 요소를 옮기는 프로그램적 scroll이나 문서 최상단은 읽기 신호가 아닙니다.
+  if (window.scrollY <= 0) return;
+  const percent = currentScrollDepthPercent();
+  for (const threshold of SCROLL_DEPTH_THRESHOLDS) {
+    if (percent < threshold || reportedScrollDepths.has(threshold)) continue;
+    reportedScrollDepths.add(threshold);
+    trackGoogleAnalyticsEvent("scroll_depth", {
+      percent: threshold,
+      page_path: window.location.pathname.slice(0, 100)
+    });
+  }
+}
+
+function trackScroll(): void {
+  if (scheduledScrollDepth !== undefined) return;
+  // scroll event는 매우 자주 발생하므로 frame 단위로 묶어 보고합니다.
+  scheduledScrollDepth = window.requestAnimationFrame(() => {
+    scheduledScrollDepth = undefined;
+    reportScrollDepth();
+  });
+}
+
+function resetScrollDepthTracking(): void {
+  reportedScrollDepths = new Set<number>();
+}
+
+/** Palworld·LoL 상세를 열었을 때 어떤 엔티티가 유입과 체류를 만드는지 기록합니다. */
+export function trackEntityView(input: {
+  entityId: string;
+  entityType: "pal" | "item" | "skill" | "summoner" | "community_post";
+  locale?: string;
+  surface?: string;
+}): void {
+  trackGoogleAnalyticsEvent("entity_view", {
+    entity_id: input.entityId,
+    entity_type: input.entityType,
+    locale: input.locale,
+    surface: input.surface
+  });
+}
+
+/** 목록에서 상세로, 상세에서 도구로 이동이 실제로 일어나는지 확인합니다. */
+export function trackInternalLinkClick(input: {
+  fromType: string;
+  toType: string;
+  toPath?: string;
+}): void {
+  trackGoogleAnalyticsEvent("internal_link_click", {
+    from_type: input.fromType,
+    to_type: input.toType,
+    to_path: input.toPath?.slice(0, 100)
+  });
+}
+
+/** 단순 조회인지 도구로 쓰이는지 구분합니다. */
+export function trackFilterUse(input: { filterKey: string; surface: string; value?: string }): void {
+  trackGoogleAnalyticsEvent("filter_use", {
+    filter_key: input.filterKey,
+    surface: input.surface,
+    value: input.value?.slice(0, 60)
+  });
+}
+
 function analyticsCollectionDisabledByBrowser(): boolean {
   const privacyNavigator = navigator as Navigator & {
     globalPrivacyControl?: boolean;
@@ -274,7 +358,10 @@ export function initializeGoogleAnalytics(options: { debugMode?: boolean } = {})
   trackPageView();
   for (const eventName of ROUTE_EVENTS) {
     window.addEventListener(eventName, schedulePageView);
+    // route가 바뀌면 새 화면이므로 scroll 구간 보고를 다시 시작합니다.
+    window.addEventListener(eventName, resetScrollDepthTracking);
   }
   document.addEventListener("click", trackLinkClick, true);
   document.addEventListener("submit", trackSearchSubmission, true);
+  window.addEventListener("scroll", trackScroll, { passive: true });
 }

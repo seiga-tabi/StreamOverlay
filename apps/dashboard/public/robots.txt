@@ -1,5 +1,14 @@
 User-agent: *
 Allow: /
+
+# 공개 페이지 렌더링에 필요한 build asset은 크롤러가 반드시 받아야 합니다.
+# robots 경로 매칭은 더 긴 규칙이 이기므로 아래 Allow가 Disallow: /dashboard보다 우선합니다.
+Allow: /dashboard/assets/
+Allow: /dashboard/images/
+Allow: /dashboard/config.js
+Allow: /dashboard/favicon.png
+Allow: /dashboard/favicon.svg
+
 Disallow: /admin
 Disallow: /dashboard
 

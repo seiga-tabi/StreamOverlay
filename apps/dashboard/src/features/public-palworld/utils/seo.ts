@@ -54,7 +54,18 @@ function updateHeadTarget(target: HeadTarget): () => void {
   };
 }
 
-export function applyPalworldSeo(page: PalworldPage, locale: PalworldLocale): () => void {
+/**
+ * 상세 URL(`/palworld/pals/lamball`)의 head는 서버가 엔티티 단위로 이미 채웁니다.
+ * 목록 page 기준으로 다시 덮어쓰면 canonical이 목록 URL로 바뀌어 상세가 색인되지 않습니다.
+ */
+export function applyPalworldSeo(
+  page: PalworldPage,
+  locale: PalworldLocale,
+  pathname: string = typeof window === "undefined" ? "/" : window.location.pathname
+): () => void {
+  if (/^(?:\/(?:ko|ja))?\/palworld\/(?:pals|items|skills)\/[^/]+\/?$/u.test(pathname)) {
+    return () => {};
+  }
   const metadata = palworldSeoMetadata(page, locale);
   const previousTitle = document.title;
   document.title = metadata.title;

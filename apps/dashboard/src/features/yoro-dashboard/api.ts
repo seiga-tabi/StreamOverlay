@@ -35,6 +35,8 @@ export type YoroStreamerStatus = {
   summary?: {
     activeFollowers: number;
     knownFollowers: number;
+    /** 최근 7일 신규 팔로워. 예전 응답에는 없어서 optional 로 둡니다. */
+    newFollowers7d?: number;
     lastSnapshotAt?: string;
   };
 };

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import "../../styles/pages/bot/bot-route.css";
 import { AppShell, AppShellHeader, AppShellMain } from "../../shared/ui/AppShell";
 import { BottomSheet } from "../../shared/ui/BottomSheet";
 import {

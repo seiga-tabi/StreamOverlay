@@ -13,8 +13,15 @@ import { MyRiotAccountPage } from "../../pages/MyRiotAccountPage";
 import type { DashboardStreamerInfo } from "../../api/client";
 import { BotManagementPage } from "../bot-management/BotManagementPage";
 import { DiscordSetupPage } from "../discord-onboarding/DiscordSetupPage";
+import type {
+  BotManagementGameServer,
+  DiscordBotControlOverview,
+  ParticipationState
+} from "@streamops/shared";
 import {
+  getManagementBotControl,
   getManagementSession,
+  listManagementGameServers,
   type BotManagementSession
 } from "../bot-management/api";
 import { YoroAccountPage } from "../yoro-account/YoroAccountPage";
@@ -32,6 +39,7 @@ import {
 import {
   applyForStreamer,
   getYoroFollowers,
+  getYoroParticipation,
   getYoroStreamerStatus,
   refreshYoroFollowers,
   startFollowerPermission,
@@ -73,31 +81,58 @@ const copy = {
     login: "로그인",
     loading: "Dashboard를 불러오는 중입니다.",
     failed: "Dashboard 정보를 불러오지 못했습니다.",
-    greeting: "다시 오신 것을 환영합니다.",
-    overviewDescription: "연결 계정, Organization, Discord Bot과 스트리머 권한을 한곳에서 관리합니다.",
     identityTitle: "로그인 계정",
     organizationTitle: "Organization",
-    organizationEmpty: "연결된 Organization이 없습니다.",
     organizationEmptyDescription: "Discord 계정을 연결하고 YORO Bot이 설치된 서버를 선택해 시작하세요.",
     organizationManage: "Organization 관리",
     roleOwner: "소유자",
     roleManager: "관리자",
     roleViewer: "조회자",
-    nextTitle: "다음 작업",
-    nextConnectDiscord: "Discord 계정 연결",
-    nextConnectOrganization: "Discord 서버와 Organization 연결",
-    nextManage: "게임 서버 REST 연결 관리",
+    manage: "관리",
+    connected: "연결됨",
+    notConnected: "미연결",
+    actionRequired: "필요",
+    setupTitle: "설정을 마치면 스트리머 기능이 열립니다",
+    stepAccountHint: "스트리머 신청에 Twitch 계정이 필요합니다.",
+    stepApplicationHint: "Riot ID로 승인을 신청합니다.",
+    stepApprovalHint: "관리자 검토가 끝나면 열립니다.",
+    stepPermissionHint: "Followers 조회 권한만 별도로 승인합니다.",
+    opsParticipationOpen: "시청자 참여 열림",
+    opsParticipationClosed: "시청자 참여 닫힘",
+    opsQueueDetail: "대기 {waiting}명 · 선정 {selected}명",
+    opsParticipationIdle: "참여를 시작하면 대기열이 열립니다",
+    opsFollowerTitle: "Followers 최근 갱신",
+    opsFollowerNever: "아직 갱신하지 않았습니다",
+    opsFollowerAction: "지금 갱신하기",
+    opsFollowerFresh: "최신 상태입니다",
+    opsSectionLabel: "운영 상태",
+    opsBotInstalled: "Discord Bot 설치됨",
+    opsBotMissing: "Discord Bot 미설치",
+    opsBotModuleOff: "Palworld 상태 기능 꺼짐",
+    opsBotInstall: "서버에 Bot을 추가하세요",
+    opsServerReady: "게임 서버 연결 정상",
+    opsServerPending: "게임 서버 연결 확인 중",
+    opsServerUnavailable: "게임 서버 연결 실패",
+    opsServerRevoked: "게임 서버 인증 만료",
+    opsServerNotConfigured: "게임 서버 연결 미설정",
+    opsServerNone: "등록한 게임 서버 없음",
+    opsServerAdd: "Palworld 서버를 등록하세요",
+    followerDelta7d: "7일 신규 +{n}",
+    timeJustNow: "방금",
+    timeMinutes: "{n}분 전",
+    timeHours: "{n}시간 전",
+    timeDays: "{n}일 전",
+    participationCount: "참여 신청",
+    participationDetail: "오늘 {played}명 참여",
+    organizationCount: "Organization",
+    organizationDetail: "소유 {owner} · 그 외 {other}",
     connectedAccounts: "연결된 계정",
-    streamerState: "스트리머 상태",
     streamerNotRequested: "미신청",
     streamerPending: "승인 대기",
     streamerApproved: "승인 완료",
     streamerRejected: "재신청 필요",
     followerCount: "Followers",
-    riotId: "Riot ID",
     unavailable: "미등록",
-    quickStart: "빠른 시작",
-    quickStartDescription: "계정 연결부터 스트리머 권한 승인까지 현재 진행 상태를 확인하세요.",
     stepAccount: "계정 연결",
     stepApplication: "스트리머 신청",
     stepApproval: "승인 완료",
@@ -188,31 +223,58 @@ const copy = {
     login: "ログイン",
     loading: "Dashboardを読み込んでいます。",
     failed: "Dashboard情報を読み込めませんでした。",
-    greeting: "おかえりなさい。",
-    overviewDescription: "連携アカウント、Organization、Discord Bot、ストリーマー権限を一か所で管理します。",
     identityTitle: "ログインアカウント",
     organizationTitle: "Organization",
-    organizationEmpty: "連携済みのOrganizationがありません。",
     organizationEmptyDescription: "Discordアカウントを連携し、YORO Botを導入したサーバーを選択して開始してください。",
     organizationManage: "Organizationを管理",
     roleOwner: "所有者",
     roleManager: "管理者",
     roleViewer: "閲覧者",
-    nextTitle: "次の操作",
-    nextConnectDiscord: "Discordアカウントを連携",
-    nextConnectOrganization: "DiscordサーバーとOrganizationを連携",
-    nextManage: "ゲームサーバーのREST接続を管理",
+    manage: "管理",
+    connected: "連携済み",
+    notConnected: "未連携",
+    actionRequired: "必要",
+    setupTitle: "設定を完了するとストリーマー機能を利用できます",
+    stepAccountHint: "ストリーマー申請にはTwitchアカウントが必要です。",
+    stepApplicationHint: "Riot IDで承認を申請します。",
+    stepApprovalHint: "管理者の確認が完了すると利用できます。",
+    stepPermissionHint: "Followers参照の権限のみ別途承認します。",
+    opsParticipationOpen: "視聴者参加 受付中",
+    opsParticipationClosed: "視聴者参加 停止中",
+    opsQueueDetail: "待機 {waiting}人 · 選出 {selected}人",
+    opsParticipationIdle: "参加を開始すると待機列が開きます",
+    opsFollowerTitle: "Followers 最終更新",
+    opsFollowerNever: "まだ更新していません",
+    opsFollowerAction: "今すぐ更新",
+    opsFollowerFresh: "最新の状態です",
+    opsSectionLabel: "運用状況",
+    opsBotInstalled: "Discord Bot 導入済み",
+    opsBotMissing: "Discord Bot 未導入",
+    opsBotModuleOff: "Palworld ステータス機能 オフ",
+    opsBotInstall: "サーバーにBotを追加してください",
+    opsServerReady: "ゲームサーバー接続 正常",
+    opsServerPending: "ゲームサーバー接続 確認中",
+    opsServerUnavailable: "ゲームサーバー接続 失敗",
+    opsServerRevoked: "ゲームサーバー認証 失効",
+    opsServerNotConfigured: "ゲームサーバー接続 未設定",
+    opsServerNone: "登録済みゲームサーバーなし",
+    opsServerAdd: "Palworldサーバーを登録してください",
+    followerDelta7d: "7日 新規 +{n}",
+    timeJustNow: "たった今",
+    timeMinutes: "{n}分前",
+    timeHours: "{n}時間前",
+    timeDays: "{n}日前",
+    participationCount: "参加申請",
+    participationDetail: "本日 {played}人が参加",
+    organizationCount: "Organization",
+    organizationDetail: "所有 {owner} · その他 {other}",
     connectedAccounts: "連携アカウント",
-    streamerState: "ストリーマー状態",
     streamerNotRequested: "未申請",
     streamerPending: "承認待ち",
     streamerApproved: "承認済み",
     streamerRejected: "再申請が必要",
     followerCount: "Followers",
-    riotId: "Riot ID",
     unavailable: "未登録",
-    quickStart: "クイックスタート",
-    quickStartDescription: "アカウント連携からストリーマー権限承認までの進行状況を確認できます。",
     stepAccount: "アカウント連携",
     stepApplication: "ストリーマー申請",
     stepApproval: "承認完了",
@@ -413,6 +475,29 @@ function streamerStatusLabel(
   return text.streamerNotRequested;
 }
 
+function fill(template: string, values: Record<string, string | number>): string {
+  return template.replace(/\{(\w+)\}/gu, (match, key: string) => (
+    key in values ? String(values[key]) : match
+  ));
+}
+
+/** ISO 시각을 "3시간 전"처럼 만듭니다. 값이 없거나 이상하면 undefined 입니다. */
+function relativeTimeLabel(
+  isoTime: string | undefined,
+  text: typeof copy.ko | typeof copy.ja
+): { label: string; stale: boolean } | undefined {
+  if (!isoTime) return undefined;
+  const elapsedMs = Date.now() - Date.parse(isoTime);
+  if (!Number.isFinite(elapsedMs) || elapsedMs < 0) return undefined;
+  const minutes = Math.floor(elapsedMs / 60_000);
+  const stale = elapsedMs >= 24 * 60 * 60_000;
+  if (minutes < 1) return { label: text.timeJustNow, stale };
+  if (minutes < 60) return { label: fill(text.timeMinutes, { n: minutes }), stale };
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return { label: fill(text.timeHours, { n: hours }), stale };
+  return { label: fill(text.timeDays, { n: Math.floor(hours / 24) }), stale };
+}
+
 function streamerInfo(status: YoroStreamerStatus | undefined): DashboardStreamerInfo | undefined {
   if (
     !status?.approval.enabled
@@ -441,6 +526,9 @@ export function YoroDashboardPage() {
   const [draft, setDraft] = useState<YoroUserPreferences>();
   const [streamer, setStreamer] = useState<YoroStreamerStatus>();
   const [streamerFailed, setStreamerFailed] = useState(false);
+  const [participation, setParticipation] = useState<ParticipationState>();
+  const [botControl, setBotControl] = useState<DiscordBotControlOverview>();
+  const [gameServer, setGameServer] = useState<BotManagementGameServer | null>();
   const [applying, setApplying] = useState(false);
   const [permissionOpening, setPermissionOpening] = useState(false);
   const [riotIdDraft, setRiotIdDraft] = useState("");
@@ -556,6 +644,44 @@ export function YoroDashboardPage() {
     return () => controller.abort();
   }, [authenticated]);
 
+  /* 참여 대기열은 홈의 운영 상태 줄과 사이드바 표시에 씁니다.
+     페이지마다 신호가 달라지지 않도록 화면과 무관하게 한 번만 읽습니다.
+     승인 전에는 endpoint 가 권한 오류를 돌려주므로 호출하지 않고,
+     실패해도 재시도하지 않습니다 — 보조 정보라 조용히 비웁니다. */
+  useEffect(() => {
+    if (!authenticated || !streamer?.approval.enabled) return undefined;
+    const controller = new AbortController();
+    void getYoroParticipation(controller.signal)
+      .then(setParticipation)
+      .catch(() => setParticipation(undefined));
+    return () => controller.abort();
+  }, [authenticated, streamer?.approval.enabled]);
+
+  /* Discord Bot 설치 여부와 게임 서버 연결 상태.
+     둘 다 organization 단위라 대표 organization 하나만 읽습니다
+     (소유 중인 곳 우선, 없으면 첫 번째). 홈에서만 쓰므로 홈에서만 부릅니다.
+     실패는 조용히 비웁니다 — 홈의 보조 정보이고 각 관리 화면이 본판입니다. */
+  const primaryOrganizationId = management?.authenticated
+    ? (management.organizations.find((item) => item.role === "owner")
+        ?? management.organizations[0])?.id
+    : undefined;
+
+  useEffect(() => {
+    if (!authenticated || page !== "overview" || !primaryOrganizationId) {
+      setBotControl(undefined);
+      setGameServer(undefined);
+      return undefined;
+    }
+    const controller = new AbortController();
+    void getManagementBotControl(primaryOrganizationId, controller.signal)
+      .then(setBotControl)
+      .catch(() => setBotControl(undefined));
+    void listManagementGameServers(primaryOrganizationId, controller.signal)
+      .then((items) => setGameServer(items[0] ?? null))
+      .catch(() => setGameServer(undefined));
+    return () => controller.abort();
+  }, [authenticated, page, primaryOrganizationId]);
+
   useEffect(() => {
     if (
       !authenticated
@@ -657,6 +783,172 @@ export function YoroDashboardPage() {
   ), [authenticated]);
 
   const approvedStreamer = streamerInfo(streamer);
+  const organizations = management?.authenticated ? management.organizations : [];
+  const ownedOrganizations = organizations.filter(
+    (organization) => organization.role === "owner"
+  ).length;
+
+  /* 온보딩 단계. 기존 화면은 같은 진행 상태를 "빠른 시작"(원형 스텝)과
+     "다음 작업"(취소선 목록)으로 두 번, 서로 다른 항목으로 보여 줬습니다.
+     하나로 합치고 끝나면 통째로 감춥니다. */
+  const twitchLinked = connectedProviders.has("twitch");
+  const applicationSent = streamer?.approval.status === "pending"
+    || streamer?.approval.status === "approved";
+  const streamerApproved = streamer?.approval.enabled === true;
+  const followerPermissionReady = streamer?.followerPermission.state === "connected";
+  const setupSteps: Array<{
+    key: string;
+    label: string;
+    hint: string;
+    done: boolean;
+    action?: { label: string; href?: string; onClick?: () => void };
+  }> = [
+    {
+      key: "account",
+      label: text.stepAccount,
+      hint: twitchLinked ? twitchIdentity?.displayName ?? "Twitch" : text.stepAccountHint,
+      done: twitchLinked,
+      ...(twitchLinked ? {} : {
+        action: {
+          label: text.connectTwitch,
+          href: accountOAuthUrl("twitch", "link_identity", "/dashboard")
+        }
+      })
+    },
+    {
+      key: "application",
+      label: text.stepApplication,
+      hint: streamer?.approval.status === "rejected"
+        ? text.rejectedDescription
+        : text.stepApplicationHint,
+      done: applicationSent,
+      ...(twitchLinked && !applicationSent ? {
+        action: { label: text.apply, onClick: () => navigate("streaming") }
+      } : {})
+    },
+    {
+      key: "approval",
+      label: text.stepApproval,
+      hint: text.stepApprovalHint,
+      done: streamerApproved
+    },
+    {
+      key: "permission",
+      label: text.stepPermission,
+      hint: text.stepPermissionHint,
+      done: followerPermissionReady,
+      ...(streamerApproved && !followerPermissionReady ? {
+        action: {
+          label: text.permissionAction,
+          onClick: () => navigate("streaming")
+        }
+      } : {})
+    }
+  ];
+  const setupDoneCount = setupSteps.filter((step) => step.done).length;
+  const currentSetupStep = setupSteps.find((step) => !step.done)?.key;
+
+  /* 이름 아래 한 줄. 인사말과 설명문 대신 지금 무슨 역할인지만 남깁니다. */
+  const ownerOrganization = organizations.find(
+    (organization) => organization.role === "owner"
+  ) ?? organizations[0];
+  const roleLine = [
+    streamerApproved ? text.streamingGroup : undefined,
+    ownerOrganization
+      ? `${ownerOrganization.displayName} · ${roleLabel(ownerOrganization.role, text)}`
+      : undefined
+  ].filter(Boolean).join(" · ")
+    || (identity?.provider === "discord" ? "Discord" : "Twitch");
+
+  const followerSync = relativeTimeLabel(streamer?.summary?.lastSnapshotAt, text);
+
+  /* Bot 은 설치 여부와 명령 기능 on/off 만 알 수 있습니다.
+     실시간 접속 여부나 응답 시간을 주는 계약은 없어 그렇게 적지 않습니다. */
+  const botCard = botControl
+    ? botControl.installation
+      /* 기능이 꺼져 있으면 그걸 알리고, 정상이면 어느 서버인지만 적습니다.
+         둘을 이어 붙이면 4열에서 잘립니다(실측 200 > 182). */
+      ? botControl.modules[0]?.enabled
+        ? {
+            tone: "good",
+            title: text.opsBotInstalled,
+            detail: botControl.installation.guildDisplayName
+          }
+        : {
+            tone: "warn",
+            title: text.opsBotInstalled,
+            detail: text.opsBotModuleOff
+          }
+      : { tone: "warn", title: text.opsBotMissing, detail: text.opsBotInstall }
+    : undefined;
+
+  /* 게임 서버는 organization 당 한 대까지 내려옵니다(server LIMIT 1). */
+  const serverStatusText: Record<BotManagementGameServer["connectionStatus"], string> = {
+    ready: text.opsServerReady,
+    pending: text.opsServerPending,
+    unavailable: text.opsServerUnavailable,
+    revoked: text.opsServerRevoked,
+    not_configured: text.opsServerNotConfigured
+  };
+  const serverCard = gameServer === undefined
+    ? undefined
+    : gameServer === null
+      ? { tone: undefined, title: text.opsServerNone, detail: text.opsServerAdd }
+      : {
+          tone: gameServer.connectionStatus === "ready"
+            ? "good"
+            : gameServer.connectionStatus === "pending" ? undefined : "warn",
+          title: serverStatusText[gameServer.connectionStatus],
+          detail: gameServer.displayName
+        };
+
+  const opsCards: Array<{
+    key: string;
+    tone?: string;
+    title: string;
+    detail: string;
+    onClick: () => void;
+  }> = [
+    ...(streamerApproved && participation ? [{
+      key: "participation",
+      ...(participation.isOpen ? { tone: "live" } : {}),
+      title: participation.isOpen
+        ? text.opsParticipationOpen
+        : text.opsParticipationClosed,
+      detail: participation.isOpen
+        ? fill(text.opsQueueDetail, {
+            waiting: participation.summary.waiting,
+            selected: participation.summary.selected
+          })
+        : text.opsParticipationIdle,
+      onClick: () => navigate("streamingParticipation")
+    }] : []),
+    ...(streamerApproved ? [{
+      key: "followers",
+      tone: !followerSync || followerSync.stale ? "warn" : "good",
+      title: text.opsFollowerTitle,
+      detail: !followerSync
+        ? text.opsFollowerNever
+        : followerSync.stale
+          ? `${followerSync.label} · ${text.opsFollowerAction}`
+          : `${followerSync.label} · ${text.opsFollowerFresh}`,
+      onClick: () => navigate("streamingFollowers")
+    }] : []),
+    ...(botCard ? [{
+      key: "bot",
+      ...(botCard.tone ? { tone: botCard.tone } : {}),
+      title: botCard.title,
+      detail: botCard.detail,
+      onClick: () => navigate("organizationBot")
+    }] : []),
+    ...(serverCard ? [{
+      key: "server",
+      ...(serverCard.tone ? { tone: serverCard.tone } : {}),
+      title: serverCard.title,
+      detail: serverCard.detail,
+      onClick: () => navigate("organizationServers")
+    }] : [])
+  ];
 
   function closeMobileMenu(restoreFocus = true): void {
     setMobileMenuOpen(false);
@@ -668,6 +960,36 @@ export function YoroDashboardPage() {
   function selectDashboardPage(nextPage: UnifiedDashboardPage): void {
     closeMobileMenu(false);
     navigate(nextPage);
+  }
+
+  /* 메뉴 이름만으로는 참여가 열려 있는지, 팔로워를 며칠째 갱신하지 않았는지
+     알 수 없었습니다. 값이 확실한 항목에만 표시를 붙입니다. */
+  function navBadge(item: UnifiedDashboardPage) {
+    if (item === "streamingParticipation" && participation?.isOpen) {
+      return (
+        <span
+          aria-label={text.opsParticipationOpen}
+          className="yoro-dashboard-nav-dot"
+          data-tone="live"
+          role="img"
+        />
+      );
+    }
+    if (item === "streamingFollowers" && followerSync) {
+      return (
+        <span aria-hidden="true" className="yoro-dashboard-nav-note">
+          {followerSync.label}
+        </span>
+      );
+    }
+    if (item === "organizations" && organizations.length > 0) {
+      return (
+        <span aria-hidden="true" className="yoro-dashboard-nav-note">
+          {organizations.length}
+        </span>
+      );
+    }
+    return null;
   }
 
   if (account.loading) {
@@ -764,7 +1086,8 @@ export function YoroDashboardPage() {
               onClick={() => selectDashboardPage(item)}
               type="button"
             >
-              {text[item]}
+              <span className="yoro-dashboard-nav-text">{text[item]}</span>
+              {navBadge(item)}
             </button>
           ))}
           <span className="yoro-dashboard-nav-label">{text.organizationGroup}</span>
@@ -780,7 +1103,8 @@ export function YoroDashboardPage() {
               onClick={() => selectDashboardPage(item)}
               type="button"
             >
-              {text[item]}
+              <span className="yoro-dashboard-nav-text">{text[item]}</span>
+              {navBadge(item)}
             </button>
           ))}
           <span className="yoro-dashboard-nav-label">{text.streamingGroup}</span>
@@ -797,7 +1121,8 @@ export function YoroDashboardPage() {
               onClick={() => selectDashboardPage(item)}
               type="button"
             >
-              {text[item]}
+              <span className="yoro-dashboard-nav-text">{text[item]}</span>
+              {navBadge(item)}
             </button>
           ))}
           <span className="yoro-dashboard-nav-label">
@@ -809,7 +1134,7 @@ export function YoroDashboardPage() {
             onClick={() => selectDashboardPage("settings")}
             type="button"
           >
-            {text.settings}
+            <span className="yoro-dashboard-nav-text">{text.settings}</span>
           </button>
         </nav>
         <div className="yoro-dashboard-sidebar-actions">
@@ -826,141 +1151,249 @@ export function YoroDashboardPage() {
       </aside>
       <main className="yoro-dashboard-main">
         {page === "overview" ? (
-          <div className="yoro-dashboard-overview">
-            <header>
-              <span>YORO DASHBOARD</span>
-              <h1>{identity?.displayName}, {text.greeting}</h1>
-              <p>{text.overviewDescription}</p>
+          <div className="yoro-dh">
+            <header className="yoro-dh-top">
+              {identity?.avatarUrl ? (
+                <img alt="" src={identity.avatarUrl} />
+              ) : (
+                <span aria-hidden="true">
+                  {identity?.provider === "discord"
+                    ? <DiscordSymbolIcon />
+                    : <TwitchGlitchIcon />}
+                </span>
+              )}
+              <div className="yoro-dh-top-who">
+                <h1>{identity?.displayName}</h1>
+                <p>{roleLine}</p>
+              </div>
             </header>
-            <section
-              aria-label={text.overviewDescription}
-              className="yoro-dashboard-metrics"
-            >
-              <article>
+
+            {/* 운영 상태. 값을 실제로 받은 항목만 줄에 올립니다. */}
+            {opsCards.length > 0 ? (
+              <section aria-label={text.opsSectionLabel} className="yoro-dh-ops">
+                {opsCards.map((card) => (
+                  <button
+                    className="yoro-dh-op"
+                    data-tone={card.tone}
+                    key={card.key}
+                    onClick={card.onClick}
+                    type="button"
+                  >
+                    <i aria-hidden="true" />
+                    <span className="yoro-dh-op-text">
+                      <b>{card.title}</b>
+                      <small>{card.detail}</small>
+                    </span>
+                    <span aria-hidden="true">›</span>
+                  </button>
+                ))}
+              </section>
+            ) : null}
+
+            {/* 지표는 전부 해당 화면으로 가는 문입니다. */}
+            <section className="yoro-dh-kpis">
+              {streamerApproved ? (
+                <button
+                  className="yoro-dh-kpi"
+                  onClick={() => navigate("streamingFollowers")}
+                  type="button"
+                >
+                  <span>{text.followerCount}</span>
+                  <strong>{streamer?.summary?.activeFollowers ?? "—"}</strong>
+                  {/* 예전 응답에는 없는 값이라 있을 때만 증감을 적습니다. */}
+                  {streamer?.summary?.newFollowers7d === undefined ? (
+                    <small>Twitch</small>
+                  ) : (
+                    <small data-tone={streamer.summary.newFollowers7d > 0 ? "up" : undefined}>
+                      {fill(text.followerDelta7d, { n: streamer.summary.newFollowers7d })}
+                    </small>
+                  )}
+                </button>
+              ) : null}
+              {streamerApproved && participation ? (
+                <button
+                  className="yoro-dh-kpi"
+                  onClick={() => navigate("streamingParticipation")}
+                  type="button"
+                >
+                  <span>{text.participationCount}</span>
+                  <strong>{participation.summary.waiting}</strong>
+                  <small>
+                    {fill(text.participationDetail, {
+                      played: participation.summary.played
+                    })}
+                  </small>
+                </button>
+              ) : null}
+              <button
+                className="yoro-dh-kpi"
+                onClick={() => navigate("organizations")}
+                type="button"
+              >
+                <span>{text.organizationCount}</span>
+                <strong>{organizations.length}</strong>
+                <small>
+                  {fill(text.organizationDetail, {
+                    owner: ownedOrganizations,
+                    other: organizations.length - ownedOrganizations
+                  })}
+                </small>
+              </button>
+              <button
+                className="yoro-dh-kpi"
+                onClick={() => navigate("account")}
+                type="button"
+              >
                 <span>{text.connectedAccounts}</span>
                 <strong>{connectedProviders.size}</strong>
-                <small>Discord · Twitch</small>
-              </article>
-              <article>
-                <span>{text.streamerState}</span>
-                <strong>{streamerStatusLabel(streamer?.approval.status, text)}</strong>
+                {/* 연결하지 않은 제공자까지 적으면 숫자와 어긋납니다. */}
                 <small>
-                  {streamer?.approval.enabled ? text.complete : text.waiting}
+                  {[
+                    connectedProviders.has("discord") ? "Discord" : undefined,
+                    connectedProviders.has("twitch") ? "Twitch" : undefined
+                  ].filter(Boolean).join(" · ") || text.notConnected}
                 </small>
-              </article>
-              <article>
-                <span>{text.followerCount}</span>
-                <strong>{streamer?.summary?.activeFollowers ?? "—"}</strong>
-                <small>Twitch</small>
-              </article>
-              <article>
-                <span>{text.riotId}</span>
-                <strong>
-                  {streamer?.profile?.riotGameName && streamer.profile.riotTagLine
-                    ? `${streamer.profile.riotGameName}#${streamer.profile.riotTagLine}`
-                    : text.unavailable}
-                </strong>
-                <small>Riot Games</small>
-              </article>
+              </button>
             </section>
-            <section className="yoro-dashboard-quick-start">
-              <header>
-                <h2>{text.quickStart}</h2>
-                <p>{text.quickStartDescription}</p>
-              </header>
-              <ol>
-                {[
-                  {
-                    label: text.stepAccount,
-                    complete: connectedProviders.has("twitch")
-                  },
-                  {
-                    label: text.stepApplication,
-                    complete: streamer?.approval.status !== undefined
-                      && streamer.approval.status !== "not_requested"
-                  },
-                  {
-                    label: text.stepApproval,
-                    complete: streamer?.approval.enabled === true
-                  },
-                  {
-                    label: text.stepPermission,
-                    complete: streamer?.followerPermission.state === "connected"
-                  }
-                ].map((step, index) => (
-                  <li className={step.complete ? "complete" : ""} key={step.label}>
-                    <span aria-hidden="true">{step.complete ? "✓" : index + 1}</span>
-                    <strong>{step.label}</strong>
-                    <small>{step.complete ? text.complete : text.waiting}</small>
-                  </li>
-                ))}
-              </ol>
-            </section>
-            <section className="yoro-dashboard-summary-grid">
-              <article>
-                <h2>{text.identityTitle}</h2>
-                <ul>
-                  <li>
-                    <DiscordSymbolIcon />
-                    <span className="yoro-dashboard-identity-label">
-                      <strong>Discord</strong>
-                      {discordIdentity ? <small>{discordIdentity.displayName}</small> : null}
-                    </span>
-                    <span className="yoro-dashboard-identity-status">
-                      {connectedProviders.has("discord") ? "✓" : "—"}
-                    </span>
-                  </li>
-                  <li>
-                    <TwitchGlitchIcon />
-                    <span className="yoro-dashboard-identity-label">
-                      <strong>Twitch</strong>
-                      {twitchIdentity ? <small>{twitchIdentity.displayName}</small> : null}
-                    </span>
-                    <span className="yoro-dashboard-identity-status">
-                      {connectedProviders.has("twitch") ? "✓" : "—"}
-                    </span>
-                  </li>
-                </ul>
-                <button type="button" onClick={() => navigate("account")}>{text.account}</button>
-              </article>
-              <article>
-                <h2>{text.organizationTitle}</h2>
-                {management?.authenticated && management.organizations.length > 0 ? (
-                  <ul>
-                    {management.organizations.map((organization) => (
+
+            {/* 온보딩이 끝나면 이 카드는 아예 렌더링되지 않습니다. */}
+            {currentSetupStep ? (
+              <section className="yoro-dh-setup">
+                <div className="yoro-dh-setup-head">
+                  <h2>{text.setupTitle}</h2>
+                  <span>{setupDoneCount} / {setupSteps.length}</span>
+                </div>
+                <ol className="yoro-dh-steps">
+                  {setupSteps.map((step, index) => (
+                    <li
+                      className={step.done
+                        ? "is-done"
+                        : step.key === currentSetupStep ? "is-now" : ""}
+                      key={step.key}
+                    >
+                      <span aria-hidden="true" className="yoro-dh-step-mark">
+                        {step.done ? "✓" : index + 1}
+                      </span>
+                      <span className="yoro-dh-step-text">
+                        <b>{step.label}</b>
+                        <small>{step.hint}</small>
+                      </span>
+                      {step.action?.href ? (
+                        <a className="yoro-dh-action is-primary" href={step.action.href}>
+                          {step.action.label}
+                        </a>
+                      ) : step.action?.onClick ? (
+                        <button
+                          className="yoro-dh-action is-primary"
+                          onClick={step.action.onClick}
+                          type="button"
+                        >
+                          {step.action.label}
+                        </button>
+                      ) : (
+                        <span className="yoro-dh-step-state">
+                          {step.done ? text.complete : text.waiting}
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            ) : null}
+
+            <section className="yoro-dh-cards">
+              <article className="yoro-dh-card">
+                <div className="yoro-dh-card-head">
+                  <h2>{text.organizationTitle}</h2>
+                  <button
+                    className="yoro-dh-action"
+                    onClick={() => navigate("organizations")}
+                    type="button"
+                  >
+                    {text.manage}
+                  </button>
+                </div>
+                {organizations.length > 0 ? (
+                  <ul className="yoro-dh-card-list">
+                    {organizations.map((organization) => (
                       <li key={organization.id}>
-                        <span>{organization.displayName}</span>
-                        <strong>{roleLabel(organization.role, text)}</strong>
+                        <span aria-hidden="true" className="yoro-dh-card-mark">
+                          {organization.discordGuild?.iconUrl
+                            ? <img alt="" src={organization.discordGuild.iconUrl} />
+                            : organization.displayName.slice(0, 1)}
+                        </span>
+                        <span className="yoro-dh-card-text">
+                          <b>{organization.displayName}</b>
+                          {organization.discordGuild ? (
+                            <small>{organization.discordGuild.displayName}</small>
+                          ) : null}
+                        </span>
+                        <span
+                          className="yoro-dh-tag"
+                          data-tone={organization.role === "owner" ? "good" : undefined}
+                        >
+                          {roleLabel(organization.role, text)}
+                        </span>
                       </li>
                     ))}
                   </ul>
                 ) : (
                   <>
-                    <strong>{text.organizationEmpty}</strong>
-                    <p>{text.organizationEmptyDescription}</p>
+                    <p className="yoro-dh-empty">{text.organizationEmptyDescription}</p>
+                    <button
+                      className="yoro-dh-action is-primary is-block"
+                      onClick={() => navigate("organizations")}
+                      type="button"
+                    >
+                      {text.organizationManage}
+                    </button>
                   </>
                 )}
-                {managementFailed ? <p role="alert">{text.failed}</p> : null}
-                <button type="button" onClick={() => navigate("organizations")}>
-                  {text.organizationManage}
-                </button>
+                {managementFailed ? (
+                  <p className="yoro-dh-alert" role="alert">{text.failed}</p>
+                ) : null}
               </article>
-            </section>
-            <section className="yoro-dashboard-next">
-              <h2>{text.nextTitle}</h2>
-              <ol>
-                <li className={connectedProviders.has("discord") ? "complete" : ""}>
-                  {text.nextConnectDiscord}
-                </li>
-                <li className={
-                  management?.authenticated && management.organizations.length > 0
-                    ? "complete"
-                    : ""
-                }>
-                  {text.nextConnectOrganization}
-                </li>
-                <li>{text.nextManage}</li>
-              </ol>
+
+              <article className="yoro-dh-card">
+                <div className="yoro-dh-card-head">
+                  <h2>{text.identityTitle}</h2>
+                  <button
+                    className="yoro-dh-action"
+                    onClick={() => navigate("account")}
+                    type="button"
+                  >
+                    {text.manage}
+                  </button>
+                </div>
+                <ul className="yoro-dh-card-list">
+                  <li>
+                    <DiscordSymbolIcon />
+                    <span className="yoro-dh-card-text">
+                      <b>Discord</b>
+                      {discordIdentity ? <small>{discordIdentity.displayName}</small> : null}
+                    </span>
+                    <span
+                      className="yoro-dh-tag"
+                      data-tone={connectedProviders.has("discord") ? "good" : undefined}
+                    >
+                      {connectedProviders.has("discord") ? text.connected : text.notConnected}
+                    </span>
+                  </li>
+                  <li>
+                    <TwitchGlitchIcon />
+                    <span className="yoro-dh-card-text">
+                      <b>Twitch</b>
+                      {twitchIdentity ? <small>{twitchIdentity.displayName}</small> : null}
+                    </span>
+                    <span
+                      className="yoro-dh-tag"
+                      data-tone={connectedProviders.has("twitch") ? "good" : "warn"}
+                    >
+                      {connectedProviders.has("twitch") ? text.connected : text.actionRequired}
+                    </span>
+                  </li>
+                </ul>
+              </article>
             </section>
           </div>
         ) : null}

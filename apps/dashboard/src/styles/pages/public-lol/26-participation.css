@@ -53,8 +53,8 @@
 
   .public-participation-tag[data-tone="warn"] {
     border-color: transparent;
-    background: color-mix(in srgb, var(--yoro-color-rank-lp) 24%, transparent);
-    color: var(--yoro-color-rank-lp);
+    background: color-mix(in srgb, var(--yoro-color-accent-gold) 24%, transparent);
+    color: var(--yoro-color-accent-gold);
   }
 
   .public-participation-tag[data-tone="brand"] {
@@ -263,10 +263,10 @@
 
   /* 곧 차례일 때만 색을 바꿉니다. 늘 강조하면 강조가 의미를 잃습니다. */
   .public-participation-mine[data-phase="soon"] {
-    border-color: color-mix(in srgb, var(--yoro-color-rank-lp) 55%, transparent);
+    border-color: color-mix(in srgb, var(--yoro-color-accent-gold) 55%, transparent);
     background: linear-gradient(
       180deg,
-      color-mix(in srgb, var(--yoro-color-rank-lp) 12%, var(--yoro-color-ground-surface)),
+      color-mix(in srgb, var(--yoro-color-accent-gold) 12%, var(--yoro-color-ground-surface)),
       var(--yoro-color-ground-surface)
     );
   }
@@ -288,7 +288,7 @@
   }
 
   .public-participation-mine[data-phase="soon"] .public-participation-mine-number {
-    color: var(--yoro-color-rank-lp);
+    color: var(--yoro-color-accent-gold);
   }
 
   .public-participation-mine-copy { min-width: 0; }
@@ -545,8 +545,8 @@
   }
 
   .public-participation-qrow[data-tone="warn"] {
-    border-color: color-mix(in srgb, var(--yoro-color-rank-lp) 45%, transparent);
-    background: color-mix(in srgb, var(--yoro-color-rank-lp) 10%, var(--yoro-color-ground-base));
+    border-color: color-mix(in srgb, var(--yoro-color-accent-gold) 45%, transparent);
+    background: color-mix(in srgb, var(--yoro-color-accent-gold) 10%, var(--yoro-color-ground-base));
   }
 
   .public-participation-qrow.is-viewer {

@@ -1,0 +1,529 @@
+@layer pages {
+  /* Dashboard 홈 리디자인.
+   *
+   * 기존 .yoro-dashboard-metrics / -quick-start / -summary-grid / -next 는
+   * 온보딩이 끝난 사용자에게도 완료 표시로만 425px(1440px 기준)를 쓰고 있었고,
+   * "빠른 시작"과 "다음 작업"이 같은 진행 상태를 서로 다른 항목·표현으로
+   * 두 번 말하고 있었습니다. 상태에 따라 무엇을 보여 줄지 갈라내기 위해
+   * 새 이름(.yoro-dh-*)으로 다시 짭니다.
+   *
+   * 색은 이 화면이 이미 쓰던 어두운 hex 팔레트를 그대로 씁니다.
+   * 전역 --yoro-color-* 는 밝은 배경 기준이라 여기서는 맞지 않습니다.
+   */
+  .yoro-dh {
+    --dh-surface: #1c232d;
+    --dh-surface-2: #161d26;
+    --dh-line: rgb(255 255 255 / 10%);
+    --dh-line-strong: rgb(255 255 255 / 18%);
+    --dh-text: #f2f5fa;
+    --dh-muted: #aab4c2;
+    --dh-dim: #8b96a8;
+    --dh-brand: #9b90ff;
+    --dh-brand-deep: #5d84f4;
+    --dh-good: #65d6a6;
+    --dh-live: #f4555f;
+    --dh-warn: #f0a63a;
+
+    display: grid;
+    gap: 16px;
+  }
+
+  /* 인사말 대신 지금 누구로 로그인했고 무슨 역할인지만 남깁니다. */
+  .yoro-dh-top {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+  }
+
+  .yoro-dh-top > img,
+  .yoro-dh-top > span[aria-hidden] {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    object-fit: cover;
+    background: rgb(255 255 255 / 8%);
+  }
+
+  .yoro-dh-top svg,
+  .yoro-dh-top .discord-symbol-icon,
+  .yoro-dh-top .twitch-glitch-icon {
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+  }
+
+  .yoro-dh-top-who {
+    min-width: 0;
+  }
+
+  .yoro-dh-top-who h1 {
+    margin: 0;
+    overflow: hidden;
+    font-size: clamp(20px, 2.4vw, 28px);
+    letter-spacing: -.02em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .yoro-dh-top-who p {
+    margin: 2px 0 0;
+    overflow: hidden;
+    color: var(--dh-muted);
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* 운영 상태 — 매일 대시보드를 열 이유. */
+  .yoro-dh-ops {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 8px;
+  }
+
+  .yoro-dh-op {
+    min-width: 0;
+    min-height: 56px;
+    padding: 10px 14px;
+    border: 1px solid var(--dh-line);
+    border-radius: 12px;
+    display: grid;
+    grid-template-columns: 10px minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    background: var(--dh-surface);
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .yoro-dh-op:hover,
+  .yoro-dh-op:focus-visible {
+    border-color: rgb(155 144 255 / 55%);
+  }
+
+  .yoro-dh-op > i {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--dh-dim);
+  }
+
+  .yoro-dh-op[data-tone="live"] > i { background: var(--dh-live); }
+  .yoro-dh-op[data-tone="good"] > i { background: var(--dh-good); }
+  .yoro-dh-op[data-tone="warn"] > i { background: var(--dh-warn); }
+
+  .yoro-dh-op-text {
+    min-width: 0;
+  }
+
+  .yoro-dh-op-text b,
+  .yoro-dh-op-text small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .yoro-dh-op-text b {
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .yoro-dh-op-text small {
+    color: var(--dh-dim);
+    font-size: 11.5px;
+  }
+
+  .yoro-dh-op > span[aria-hidden] {
+    color: var(--dh-dim);
+    font-size: 15px;
+  }
+
+  /* 지표 — 전부 해당 화면으로 가는 문입니다. */
+  .yoro-dh-kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+    gap: 8px;
+  }
+
+  .yoro-dh-kpi {
+    min-width: 0;
+    min-height: 72px;
+    padding: 11px 14px;
+    border: 1px solid var(--dh-line);
+    border-radius: 12px;
+    display: grid;
+    align-content: center;
+    gap: 2px;
+    background: var(--dh-surface);
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .yoro-dh-kpi:hover,
+  .yoro-dh-kpi:focus-visible {
+    border-color: rgb(155 144 255 / 55%);
+  }
+
+  .yoro-dh-kpi > span,
+  .yoro-dh-kpi > small,
+  .yoro-dh-kpi > strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .yoro-dh-kpi > span {
+    color: var(--dh-dim);
+    font-size: 11.5px;
+    font-weight: 700;
+  }
+
+  .yoro-dh-kpi > strong {
+    font-size: clamp(18px, 2vw, 22px);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.02em;
+  }
+
+  .yoro-dh-kpi > small {
+    color: var(--dh-dim);
+    font-size: 11.5px;
+  }
+
+  .yoro-dh-kpi > small[data-tone="up"] {
+    color: var(--dh-good);
+  }
+
+  /* 온보딩 — "빠른 시작"과 "다음 작업"을 하나로 합친 단계 목록입니다.
+     모두 끝나면 이 카드는 렌더링되지 않습니다. */
+  .yoro-dh-setup {
+    padding: 16px;
+    border: 1px solid rgb(155 144 255 / 45%);
+    border-radius: 16px;
+    display: grid;
+    gap: 12px;
+    background: linear-gradient(180deg, rgb(94 78 214 / 14%), rgb(28 35 45 / 96%));
+  }
+
+  .yoro-dh-setup-head {
+    min-width: 0;
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  .yoro-dh-setup-head h2 {
+    margin: 0;
+    font-size: 15px;
+  }
+
+  .yoro-dh-setup-head span {
+    flex: none;
+    color: var(--dh-brand);
+    font-size: 12px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .yoro-dh-steps {
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+    list-style: none;
+  }
+
+  .yoro-dh-steps > li {
+    min-width: 0;
+    padding: 8px 10px;
+    border: 1px solid transparent;
+    border-radius: 11px;
+    display: grid;
+    grid-template-columns: 26px minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    background: var(--dh-surface-2);
+  }
+
+  .yoro-dh-steps > li.is-done {
+    opacity: .6;
+  }
+
+  .yoro-dh-steps > li.is-now {
+    border-color: rgb(155 144 255 / 45%);
+    background: linear-gradient(180deg, rgb(94 78 214 / 18%), var(--dh-surface-2));
+  }
+
+  .yoro-dh-step-mark {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: rgb(255 255 255 / 8%);
+    color: var(--dh-dim);
+    font-size: 11px;
+    font-weight: 900;
+  }
+
+  .yoro-dh-steps > li.is-done .yoro-dh-step-mark {
+    background: rgb(68 187 132 / 20%);
+    color: var(--dh-good);
+  }
+
+  .yoro-dh-steps > li.is-now .yoro-dh-step-mark {
+    background: var(--dh-brand-deep);
+    color: #fff;
+  }
+
+  .yoro-dh-step-text {
+    min-width: 0;
+  }
+
+  .yoro-dh-step-text b,
+  .yoro-dh-step-text small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .yoro-dh-step-text b {
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .yoro-dh-step-text small {
+    color: var(--dh-dim);
+    font-size: 11.5px;
+  }
+
+  .yoro-dh-step-state {
+    flex: none;
+    color: var(--dh-dim);
+    font-size: 11.5px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  /* 카드 — Organization / 연결 계정 */
+  .yoro-dh-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+    gap: 10px;
+    align-items: start;
+  }
+
+  .yoro-dh-card {
+    min-width: 0;
+    padding: 14px 16px;
+    border: 1px solid var(--dh-line);
+    border-radius: 14px;
+    display: grid;
+    gap: 8px;
+    align-content: start;
+    background: var(--dh-surface);
+  }
+
+  .yoro-dh-card-head {
+    min-width: 0;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .yoro-dh-card-head h2 {
+    margin: 0;
+    overflow: hidden;
+    font-size: 14px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .yoro-dh-card-list {
+    margin: 0;
+    padding: 0;
+    display: grid;
+    list-style: none;
+  }
+
+  .yoro-dh-card-list > li {
+    min-width: 0;
+    min-height: 44px;
+    padding: 4px 0;
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .yoro-dh-card-list > li + li {
+    border-top: 1px solid rgb(255 255 255 / 7%);
+  }
+
+  .yoro-dh-card-list > li > svg,
+  .yoro-dh-card-list > li > .discord-symbol-icon,
+  .yoro-dh-card-list > li > .twitch-glitch-icon {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+  }
+
+  .yoro-dh-card-mark {
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    background: rgb(255 255 255 / 8%);
+    color: var(--dh-muted);
+    font-size: 11px;
+    font-weight: 900;
+  }
+
+  .yoro-dh-card-mark > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .yoro-dh-card-text {
+    min-width: 0;
+  }
+
+  .yoro-dh-card-text b,
+  .yoro-dh-card-text small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .yoro-dh-card-text b {
+    font-size: 12.5px;
+    font-weight: 800;
+  }
+
+  .yoro-dh-card-text small {
+    color: var(--dh-dim);
+    font-size: 11.5px;
+  }
+
+  .yoro-dh-empty {
+    margin: 0;
+    padding: 16px 12px;
+    border: 1px dashed var(--dh-line-strong);
+    border-radius: 11px;
+    color: var(--dh-dim);
+    font-size: 12px;
+    text-align: center;
+    text-wrap: balance;
+  }
+
+  /* 상태 배지. 색만으로 구분하지 않고 글자를 함께 둡니다. */
+  .yoro-dh-tag {
+    flex: none;
+    min-width: 0;
+    padding: 3px 8px;
+    border: 1px solid var(--dh-line-strong);
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    color: var(--dh-muted);
+    font-size: 11px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .yoro-dh-tag[data-tone="good"] {
+    border-color: transparent;
+    background: rgb(68 187 132 / 20%);
+    color: var(--dh-good);
+  }
+
+  .yoro-dh-tag[data-tone="warn"] {
+    border-color: transparent;
+    background: rgb(240 166 58 / 20%);
+    color: var(--dh-warn);
+  }
+
+  .yoro-dh-action {
+    flex: none;
+    min-height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--dh-line-strong);
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .yoro-dh-action.is-primary {
+    border-color: transparent;
+    background: var(--dh-brand-deep);
+    color: #fff;
+  }
+
+  .yoro-dh-action.is-block {
+    width: 100%;
+  }
+
+  .yoro-dh-alert {
+    margin: 0;
+    color: #ff9ba1;
+    font-size: 12px;
+  }
+
+  /* 단계 카드의 버튼은 좁은 폭에서 글자를 밀어내지 않도록 아래로 내립니다. */
+  @media (max-width: 30rem) {
+    .yoro-dh-steps > li {
+      grid-template-columns: 26px minmax(0, 1fr);
+    }
+
+    .yoro-dh-step-state,
+    .yoro-dh-steps .yoro-dh-action {
+      grid-column: 2;
+      justify-self: start;
+    }
+
+    /* 좁은 폭에서 안내 문구를 말줄임으로 자르면 문장 절반이 사라집니다
+       (ja "ストリーマー申請にはTwitchアカウントが必要です。" 276 > 251).
+       한 줄 고집을 풀고 접히게 둡니다. */
+    .yoro-dh-step-text small {
+      overflow: visible;
+      white-space: normal;
+    }
+
+    .yoro-dh-top {
+      grid-template-columns: 40px minmax(0, 1fr);
+    }
+
+    .yoro-dh-top > img,
+    .yoro-dh-top > span[aria-hidden] {
+      width: 40px;
+      height: 40px;
+    }
+  }
+}

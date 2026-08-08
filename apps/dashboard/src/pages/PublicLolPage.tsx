@@ -46,6 +46,7 @@ import {
 } from "../features/public-twitch/api";
 import { safeTwitchStreamPreviewUrl } from "../features/public-twitch/stream-preview";
 import { streamerBuckets, type StreamerFilter } from "../features/public-lol/utils/streamers";
+import { matchGap, matchLanePairs, type LanePair } from "../features/public-lol/utils/match-lanes";
 import { isTwitchAccountOAuthReturn } from "../features/yoro-account/api";
 import { ProfileLinkIcon, profileLinkPlatformFromUrl, profileLinkPlatformClass } from "../components/ProfileLinkIcon";
 import { AppShell, AppShellHeader, AppShellMain, AppShellSidebar } from "../shared/ui/AppShell";
@@ -108,6 +109,9 @@ import {
   ProfileTopPanel as FeatureProfileTopPanel,
   PublicProfileShareButton,
   MatchTeamCompare as FeatureMatchTeamCompare,
+  MatchBuildBoard as FeatureMatchBuildBoard,
+  RecentMatchBuildRuneBoard as FeatureRecentMatchBuildRuneBoard,
+  MatchLaneCompare as FeatureMatchLaneCompare,
   MatchTeamDetails as FeatureMatchTeamDetails,
   LpTrendLineChart,
   RecentMatchBuildPanel as FeatureRecentMatchBuildPanel,
@@ -139,6 +143,8 @@ import {
   type MatchTeamCompareObjectiveViewModel,
   type MatchTeamCompareTeamViewModel,
   type MatchTeamCompareViewModel,
+  type LaneSideView,
+  type MatchGapCard,
   type MatchTeamDetailsTeam,
   type PlayerItemBuildSlotViewModel,
   type PlayerItemBuildViewModel,
@@ -5213,7 +5219,74 @@ function RecentMatchBuildPanel({
     hideRiotIds,
     runeCatalog
   });
-  return <FeatureRecentMatchBuildPanel viewModel={viewModel} onSelectParticipant={onSelect} />;
+  if (viewModel.state !== "ready") {
+    return <FeatureRecentMatchBuildPanel viewModel={viewModel} onSelectParticipant={onSelect} />;
+  }
+
+  // 선택된 참가자를 뷰모델에서 되찾아 머리말에 씁니다.
+  const selected = viewModel.participants.find((participant) => participant.active) ?? viewModel.participants[0];
+  const allyTeamId = match.teams.find((team) => team.players.some((player) => player.isTarget))?.teamId;
+  const buildParticipants = build?.participants ?? [];
+  const isAlly = (key: string) => {
+    const participant = buildParticipants.find((item) => buildParticipantKey(item) === key);
+    return allyTeamId === undefined ? true : participant?.teamId === allyTeamId;
+  };
+  const selectedBuild = buildParticipants.find((item) => buildParticipantKey(item) === selected?.key);
+
+  return (
+    <FeatureMatchBuildBoard
+      headline={{
+        championIcon: selectedBuild?.champion.iconUrl
+          ? <img alt="" src={assetUrl(selectedBuild.champion.iconUrl)} />
+          : undefined,
+        championName: viewModel.summary.championLabel,
+        detail: `${viewModel.summary.scoreLabel} ${formatNumber(selectedBuild?.score ?? 0)}`,
+        name: viewModel.summary.participantLabel,
+        // 룬은 아래 룬 보드가 맡습니다. 머리말에는 소환사 주문만 둡니다.
+        spells: (selectedBuild?.summonerSpells ?? []).length > 0
+          ? (
+            <>
+              {(selectedBuild?.summonerSpells ?? []).slice(0, 2).map((spellId) => (
+                <img alt="" key={spellId} src={summonerSpellIconUrl(spellId, dataDragonVersion)} />
+              ))}
+            </>
+          )
+          : undefined
+      }}
+      items={viewModel.itemSlots.map((item) => ({
+        icon: item.iconUrl ? <img alt="" src={item.iconUrl} /> : undefined,
+        key: item.key,
+        timeLabel: item.minuteLabel === "-" ? undefined : item.minuteLabel
+      }))}
+      onSelectParticipant={onSelect}
+      participants={viewModel.participants.map((participant) => ({
+        championIcon: participant.championIconUrl
+          ? <img alt="" src={participant.championIconUrl} />
+          : undefined,
+        isAlly: isAlly(participant.key),
+        isSelected: participant.active,
+        key: participant.key,
+        label: participant.title,
+        score: participant.score
+      }))}
+      runes={<FeatureRecentMatchBuildRuneBoard label={viewModel.runesLabel} noDataLabel={viewModel.noDataLabel} runeColumns={viewModel.runeColumns} />}
+      skills={(["Q", "W", "E", "R"] as const).map((key) => ({
+        key,
+        levels: (viewModel.skillRows.find((row) => row.key === key)?.cells ?? [])
+          .map((cell, index) => (cell.label ? index + 1 : 0))
+          .filter((level) => level > 0)
+      }))}
+      text={{
+        allyLabel: t().buildAllyTeam,
+        ariaLabel: viewModel.ariaLabel,
+        enemyLabel: t().buildEnemyTeam,
+        itemsLabel: t().buildItemOrder,
+        noTimeLabel: t().buildNoTime,
+        runesLabel: viewModel.runesLabel.label,
+        skillsLabel: viewModel.skillOrderLabel
+      }}
+    />
+  );
 }
 
 function fixedTeamItemSlots(items: PublicLolMatchParticipant["items"]): Array<PublicLolMatchParticipant["items"][number] | undefined> {
@@ -5505,6 +5578,96 @@ function teamChampionAvatarViewModel(
       ariaLabel: streamStatusLabel
     } : undefined
   };
+}
+
+function MatchLaneCompareView({
+  match,
+  rankDetail,
+  rankLoading,
+  hideRiotIds,
+  onSearchRiotId
+}: {
+  match: PublicLolRecentMatch;
+  rankDetail?: PublicLolMatchRankResponse;
+  rankLoading?: boolean;
+  hideRiotIds: boolean;
+  onSearchRiotId: (riotId: string) => void;
+}) {
+  const pairs = matchLanePairs(match);
+  const gap = matchGap(match);
+  if (pairs.length === 0) return null;
+
+  const positionLabel = (position: LanePair["position"], index: number) =>
+    position === "UNKNOWN" ? String(index + 1) : mainRoleLabel(position);
+
+  const side = (
+    player: PublicLolMatchParticipant | undefined,
+    teamId: number,
+    index: number
+  ): LaneSideView | undefined => {
+    if (!player) return undefined;
+    const rankedStats = matchRankForPlayer(rankDetail, teamId, player, index);
+    const name = hideRiotIds ? t().riotIdMasked : player.riotId ?? championName(player.champion);
+    return {
+      championIcon: player.champion.iconUrl
+        ? <img alt="" src={assetUrl(player.champion.iconUrl)} />
+        : undefined,
+      championName: championName(player.champion),
+      isTarget: player.isTarget,
+      kdaLabel: `${player.kills}/${player.deaths}/${player.assists}`,
+      name,
+      onSearch: !hideRiotIds && player.riotId ? () => onSearchRiotId(player.riotId as string) : undefined,
+      rankLabel: rankedStats ? rankTierLabel(rankedStats) : undefined,
+      rankShortLabel: matchRankBadgeLabel(rankedStats, rankLoading),
+      rankTier: rankedStats?.tier ? rankedStats.tier.toLocaleLowerCase() : "unranked"
+    };
+  };
+
+  const allyTeamId = match.teams.find((team) => team.players.some((player) => player.isTarget))?.teamId
+    ?? match.teams[0]?.teamId ?? 100;
+  const enemyTeamId = match.teams.find((team) => team.teamId !== allyTeamId)?.teamId ?? 200;
+
+  const signed = (value: number) => `${value > 0 ? "+" : ""}${formatNumber(value)}`;
+  const tone = (value: number) => (value > 0 ? "up" as const : value < 0 ? "down" as const : "flat" as const);
+  const gapCards: MatchGapCard[] = gap
+    ? [
+      { key: "gold", label: t().goldGap, tone: tone(gap.gold), value: signed(gap.gold) },
+      { key: "damage", label: t().damageGap, tone: tone(gap.damage), value: signed(gap.damage) },
+      {
+        key: "objective",
+        label: t().objectiveGap,
+        tone: tone(gap.objectives.ally - gap.objectives.enemy),
+        value: `${formatNumber(gap.objectives.ally)} : ${formatNumber(gap.objectives.enemy)}`
+      },
+      ...(gap.myRank
+        ? [{
+          key: "rank",
+          label: t().myTeamRank,
+          value: t().teamRankValue.replace("{rank}", String(gap.myRank)).replace("{total}", String(gap.teamSize))
+        }]
+        : [])
+    ]
+    : [];
+
+  return (
+    <FeatureMatchLaneCompare
+      gapCards={gapCards}
+      rows={pairs.map((pair, index) => ({
+        ally: side(pair.ally, allyTeamId, index),
+        damageShare: pair.damageShare,
+        enemy: side(pair.enemy, enemyTeamId, index),
+        goldShare: pair.goldShare,
+        key: `${match.matchId}:lane:${pair.position}:${index}`,
+        positionLabel: positionLabel(pair.position, index)
+      }))}
+      text={{
+        ariaLabel: t().matchLaneCompare,
+        damageLabel: t().damage,
+        emptySlotLabel: t().noData,
+        goldLabel: t().gold
+      }}
+    />
+  );
 }
 
 function MatchTeamDetails({
@@ -5989,7 +6152,7 @@ function RecentMatches({
             }
           };
           const recordContent = (hydratedMatch.teams?.length ?? 0) > 0 ? (
-            <MatchTeamDetails match={hydratedMatch} rankDetail={rankDetail} rankLoading={rankLoading} hideRiotIds={hideRiotIds} onSearchRiotId={onSearchRiotId} />
+            <MatchLaneCompareView match={hydratedMatch} rankDetail={rankDetail} rankLoading={rankLoading} hideRiotIds={hideRiotIds} onSearchRiotId={onSearchRiotId} />
           ) : detailLoading ? (
             <SkeletonCard loadingLabel={t().matchDetailLoading} size="md">
               <SkeletonText lines={4} />

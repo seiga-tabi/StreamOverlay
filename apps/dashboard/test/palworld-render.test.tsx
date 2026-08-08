@@ -1686,7 +1686,8 @@ test("Pal 카드는 왼쪽 이미지·오른쪽 정보·하단 작업 적성 구
   assert.doesNotMatch(korean, /data-work-type="farming"/u);
   assert.doesNotMatch(korean, /data-work-type="mining"/u);
   assert.match(korean, /class="palworld-card-work-more"[^>]+data-ko="그 외 작업 적성 2개"[^>]+role="listitem"[^>]*>\.\.\.<\/span>/u);
-  assert.match(korean, /<button[^>]+aria-haspopup="dialog"[^>]+class="yoro-button palworld-card-open-action"/u);
+  // 상세 열기는 실제 anchor여야 crawler가 목록에서 상세 URL로 내려가고 새 탭 열기도 동작합니다.
+  assert.match(korean, /<a[^>]+aria-haspopup="dialog"[^>]+href="\/palworld\/pals\/lamball"[^>]+class="yoro-button palworld-card-open-action"/u);
   assert.doesNotMatch(korean, /<article[^>]+role="button"/u);
   assert.match(japanese, /alt="モコロン"/);
   assert.match(japanese, /class="palworld-work-suitability-tooltip">手作業: Lv\.1/u);
@@ -2549,7 +2550,25 @@ test("홈 Hero 제목은 표시하고 하위 페이지 소개 문구와 Pal 표�
 });
 
 test("sitemap은 query 없는 한국어·일본어 Palworld 공개 base 경로를 모두 포함한다", () => {
-  const sitemap = readFileSync(new URL("../public/sitemap.xml", import.meta.url), "utf8");
+  // sitemap은 정적 파일이 아니라 서버 route 목록에서 생성합니다.
+  const sitemapSource = readFileSync(
+    new URL("../../server/src/routes/public-sitemap.ts", import.meta.url),
+    "utf8",
+  );
+  const staticPaths = sitemapSource
+    .split("PUBLIC_SITEMAP_STATIC_PATHS: readonly string[] = [")[1]
+    ?.split("];")[0] ?? "";
+  const sitemap = staticPaths
+    .split("\n")
+    .flatMap((line) => {
+      const match = /^\s*"([^"]+)",?\s*$/u.exec(line);
+      if (!match?.[1]) return [];
+      const path = match[1] === "/" ? "/" : match[1];
+      return ["ko", "ja"].map((locale) => (
+        `<loc>https://yoro.gg/${locale}${path === "/" ? "/" : path}</loc>`
+      ));
+    })
+    .join("");
   for (const path of [
     "/palworld",
     "/palworld/pals",

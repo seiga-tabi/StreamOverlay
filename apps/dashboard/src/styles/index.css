@@ -1,5 +1,7 @@
 @import "./foundation/layers.css";
 @import "./foundation/globals.css" layer(tokens);
+/* 서버가 주입하는 SEO fallback 본문. React mount 전 잠깐 보이는 동안의 표시 규칙입니다. */
+@import "./shared/seo-fallback.css";
 @import "./legacy/01-core.css" layer(legacy);
 @import "./pages/public-lol/02-legacy.css" layer(legacy);
 @import "./legacy/03-product-gray.css" layer(legacy);
@@ -8,12 +10,14 @@
 @import "./pages/public-lol/07-late-overrides.css" layer(legacy);
 @import "./pages/dashboard/08-shell.css" layer(legacy);
 @import "./pages/public-lol/10-final-overrides.css" layer(legacy);
-@import "./pages/public-palworld/14-palworld.css" layer(legacy);
+/* Palworld route CSS는 PublicPalworldPage lazy chunk가 소유합니다.
+   -> styles/pages/public-palworld/palworld-route.css */
 @import "./shared/public-game-chrome.css" layer(legacy);
 @import "./shared/public-game-home.css" layer(home);
 @import "./shared/google-consent.css" layer(legacy);
 @import "./pages/discord/15-discord-setup.css" layer(legacy);
-@import "./pages/bot/16-yoro-bot.css" layer(legacy);
+/* YORO Bot 공개 route CSS는 PublicBotPage lazy chunk가 소유합니다.
+   -> styles/pages/bot/bot-route.css */
 @import "./pages/bot/02-bot-management.css" layer(legacy);
 @import "./pages/account/17-yoro-account.css" layer(legacy);
 @import "./pages/account/18-yoro-dashboard.css" layer(legacy);
@@ -36,3 +40,11 @@
 @import "./pages/public-lol/28-server-menu.css";
 /* 스트리머 페이지 리디자인. pages layer 에서 단독 소유합니다. */
 @import "./pages/public-lol/29-streamers.css";
+/* 전적 상세·빌드 리디자인. pages layer 에서 단독 소유합니다. */
+@import "./pages/public-lol/30-match-detail.css";
+/* 모바일 하단 탭바(상단바 리디자인). LoL 헤더에서만 가로 스크롤 nav를 대체합니다. */
+@import "./pages/public-lol/31-bottom-tab-bar.css";
+/* 데스크톱 상단바 1행 통합(상단바 리디자인). 80rem 이상에서만 nav를 합칩니다. */
+@import "./pages/public-lol/32-desktop-header-row.css";
+/* Dashboard 홈 리디자인. pages layer 에서 단독 소유합니다. */
+@import "./pages/account/31-dashboard-home.css";

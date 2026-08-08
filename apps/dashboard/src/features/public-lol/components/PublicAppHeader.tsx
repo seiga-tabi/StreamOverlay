@@ -15,6 +15,7 @@ import {
 } from "../../yoro-account/useYoroAccountSession";
 import { publicI18n, t, type PublicLocale } from "../i18n/public-lol-i18n";
 import type { PublicMainPage, PublicNavTarget, PublicTwitchViewerStatus } from "../types/public-lol";
+import { PublicBottomTabBar } from "./PublicBottomTabBar";
 import { PublicGameSelector } from "./PublicGameSelector";
 import { PublicHeaderMenu } from "./PublicHeaderMenu";
 import { PublicLocaleSelector } from "./PublicLocaleSelector";
@@ -46,10 +47,14 @@ export type PublicAppHeaderProps = {
 const MOBILE_CHROME_SETTLE_MS = 320;
 /* 이 깊이 아래로 올라오면 상단바를 항상 펼칩니다. */
 const MOBILE_CHROME_RESET_SCROLL = 24;
-/* 접힘 반동이 리셋 구간에 닿지 않도록 두는 여유. */
+/* nav-slot은 하단 탭바가 대체해 모바일에서 항상 숨어 있으므로(31-bottom-tab-bar.css)
+   실제로 접히는 건 검색 행뿐입니다. 그 높이만큼 스크롤이 지나가기 전에는 접지 않아야,
+   접힘으로 문서 높이가 줄면서 브라우저가 scroll 위치를 되돌리는 반동이 화면 밖에서
+   일어나 눈에 보이지 않습니다. */
 const MOBILE_CHROME_COLLAPSE_MARGIN = 32;
-/* 접었다 폈다 하는 영역. 이 두 슬롯 높이의 합이 곧 반동 크기입니다. */
 const MOBILE_CHROME_SLOTS = ".public-game-header__search-slot, .public-game-header__nav-slot";
+/* 이 값보다 작은 프레임 간 이동은 방향 전환으로 보지 않습니다. */
+const MOBILE_CHROME_DELTA_THRESHOLD = 6;
 
 export function PublicAppHeader({
   locale,
@@ -179,8 +184,6 @@ export function PublicAppHeader({
     const mobileMedia = window.matchMedia("(max-width: 48rem)");
     let animationFrame = 0;
     let lastScrollY = window.scrollY;
-    let directionStartY = lastScrollY;
-    let scrollDirection = 0;
     let settleUntil = 0;
 
     const collapsibleHeight = (): number => {
@@ -195,8 +198,6 @@ export function PublicAppHeader({
 
     const resetMobileChrome = () => {
       lastScrollY = window.scrollY;
-      directionStartY = lastScrollY;
-      scrollDirection = 0;
       settleUntil = 0;
       setMobileChromeScrolled(false);
     };
@@ -210,43 +211,28 @@ export function PublicAppHeader({
           return;
         }
 
-        const nextDirection = Math.sign(currentScrollY - lastScrollY);
-        if (nextDirection !== 0 && nextDirection !== scrollDirection) {
-          scrollDirection = nextDirection;
-          directionStartY = lastScrollY;
-        }
-
-        // 접힘/펼침은 상단바 높이를 바꾸고, 브라우저는 그만큼 scroll 위치를 되돌립니다.
-        // 그 반동(약 40px)을 사용자의 방향 전환으로 오해하면 접힘과 펼침이 서로를
-        // 유발해 계속 진동합니다. 전환 애니메이션이 끝날 때까지는 판정을 멈춥니다.
+        // 접힘/펼침은 검색 행 높이만큼 문서를 줄이고, 브라우저는 그만큼 scroll
+        // 위치를 되돌립니다. 그 반동을 방향 전환으로 오해하지 않도록 전환
+        // 애니메이션이 끝날 때까지는 판정을 쉽니다.
         if (performance.now() < settleUntil) {
           lastScrollY = currentScrollY;
-          directionStartY = currentScrollY;
-          scrollDirection = 0;
           return;
         }
 
-        const directionTravel = Math.abs(currentScrollY - directionStartY);
-        if (scrollDirection > 0 && directionTravel >= 20) {
-          // 접으면 상단바 높이만큼 문서가 짧아지고 브라우저가 scroll 위치를 그만큼
-          // 되돌립니다. 화면 위쪽에서는 그 반동이 리셋 구간(24px)까지 닿아 곧바로
-          // 다시 펼쳐지고, 사용자가 천천히 내리는 동안 이 왕복이 계속 반복됩니다.
+        const delta = currentScrollY - lastScrollY;
+        lastScrollY = currentScrollY;
+        if (delta > MOBILE_CHROME_DELTA_THRESHOLD) {
+          // 반동이 리셋 구간까지 닿으면 접자마자 다시 펼쳐져 왕복이 반복되므로,
           // 되돌아가도 리셋 구간에 닿지 않을 만큼 내려온 뒤에만 접습니다.
           if (currentScrollY < collapsibleHeight() + MOBILE_CHROME_RESET_SCROLL + MOBILE_CHROME_COLLAPSE_MARGIN) {
-            lastScrollY = currentScrollY;
             return;
           }
           setMobileChromeScrolled(true);
           settleUntil = performance.now() + MOBILE_CHROME_SETTLE_MS;
-          directionStartY = currentScrollY;
-          scrollDirection = 0;
-        } else if (scrollDirection < 0 && directionTravel >= 12) {
+        } else if (delta < -MOBILE_CHROME_DELTA_THRESHOLD) {
           setMobileChromeScrolled(false);
           settleUntil = performance.now() + MOBILE_CHROME_SETTLE_MS;
-          directionStartY = currentScrollY;
-          scrollDirection = 0;
         }
-        lastScrollY = currentScrollY;
       });
     };
 
@@ -270,6 +256,17 @@ export function PublicAppHeader({
 
   const accountTools = (
     <>
+      {accountConnected && canRegisterStreamer ? (
+        <button
+          className="public-header-streamer-cta"
+          data-ja={publicI18n.ja.streamerRiotRegister}
+          data-ko={publicI18n.ko.streamerRiotRegister}
+          onClick={onStreamerRegister}
+          type="button"
+        >
+          {t().streamerRiotRegister}
+        </button>
+      ) : null}
       <PublicLocaleSelector
         locale={locale}
         onLocale={onLocale}
@@ -454,6 +451,11 @@ export function PublicAppHeader({
         )}
         pageActions={pageActions}
         search={showSearch ? searchContent : undefined}
+      />
+      <PublicBottomTabBar
+        activePage={activePage}
+        activeTarget={activeTarget}
+        onPage={handleMenuPage}
       />
     </div>
   );

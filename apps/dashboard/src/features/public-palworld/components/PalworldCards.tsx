@@ -1,3 +1,4 @@
+import type { MouseEvent } from "react";
 import type { PalworldItemSummary, PalworldPalSummary } from "@streamops/shared";
 import { Button } from "../../../shared/ui/Button";
 import { Card, CardContent } from "../../../shared/ui/Card";
@@ -11,6 +12,7 @@ import {
   itemTypeLabel,
 } from "../utils/labels";
 import { resolvePalworldDescription, resolvePalworldName } from "../utils/localization";
+import { palworldDetailHref, shouldOpenDetailInPlace } from "../utils/routes";
 import { PalworldElementBadge } from "./PalworldElementBadge";
 import { PalworldItemMedia, PalworldMedia } from "./PalworldMedia";
 import { PalworldTranslationBadges } from "./PalworldTranslationBadge";
@@ -94,11 +96,16 @@ export function PalCard({ locale, onOpen, pal, priority = false }: { locale: Pal
         </div>
       ) : null}
       <Button
+        as="a"
         aria-haspopup="dialog"
         className="palworld-card-open-action"
-        onClick={() => onOpen(pal)}
+        href={palworldDetailHref("pal", pal.id)}
+        onClick={(event: MouseEvent<HTMLAnchorElement>) => {
+          if (!shouldOpenDetailInPlace(event)) return;
+          event.preventDefault();
+          onOpen(pal);
+        }}
         size="sm"
-        type="button"
         variant="secondary"
       >
         {text.openPal}
@@ -128,11 +135,16 @@ export function ItemCard({ item, locale, onOpen, priority = false }: { item: Pal
         <p className="palworld-card-description palworld-localized-copy">{description.text || text.originalDataUnavailable}</p>
       </CardContent>
       <Button
+        as="a"
         aria-haspopup="dialog"
         className="palworld-card-open-action"
-        onClick={() => onOpen(item)}
+        href={palworldDetailHref("item", item.id)}
+        onClick={(event: MouseEvent<HTMLAnchorElement>) => {
+          if (!shouldOpenDetailInPlace(event)) return;
+          event.preventDefault();
+          onOpen(item);
+        }}
         size="sm"
-        type="button"
         variant="secondary"
       >
         {text.openItem}

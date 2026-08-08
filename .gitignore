@@ -26,3 +26,10 @@ config/legal.json
 .idea/
 __pycache__/
 *.pyc
+/reports/yoro-architecture-growth-review-2026-08-08.md
+/reports/yoro-operations-monetization-analysis-2026-08-08.md
+/reports/yoro-public-beta-ux-audit-2026-08-07.html
+/reports/yoro-seo-growth-audit-2026-08-07.md
+/docs/mockups/
+/docs/handoff/
+/docs/PROJECT_ARCHITECTURE_AND_AI_GUIDE.md

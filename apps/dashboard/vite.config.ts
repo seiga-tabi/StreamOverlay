@@ -704,20 +704,46 @@ export default defineConfig(({ command }) => ({
     cssMinify: "lightningcss",
     rollupOptions: {
       output: {
-        manualChunks(id) {
-          if (id.includes("/apps/dashboard/src/shared/ui/")) {
-            return "dashboard-shared-ui";
-          }
-          if (/\/(?:CommunityModeration|EventLog|Events|ServerStatus|StreamerRiotRequests|SupportInbox)Page\.tsx$/.test(id)) {
-            return "dashboard-admin-pages";
-          }
-          if (/\/(?:Followers|Settings|TwitchConnection)Page\.tsx$/.test(id)) {
-            return "dashboard-settings-pages";
-          }
-          if (/\/(?:Dashboard|LolOperations|OverlayOps)Page\.tsx$/.test(id)) {
-            return "dashboard-operations-pages";
-          }
-          return undefined;
+        // rolldown은 CJS 본문 모듈을 manualChunks 반환값과 다르게 배치합니다. react runtime이
+        // admin page chunk에 흡수되면 entry 정적 graph가 admin CSS까지 끌고 와 공개 페이지가
+        // 쓰지 않는 CSS를 render-blocking으로 받게 되므로 advancedChunks로 배치를 고정합니다.
+        advancedChunks: {
+          groups: [
+            {
+              name: "vendor-react",
+              priority: 100,
+              test: /[\\/]node_modules[\\/](?:react|react-dom|scheduler)[\\/]/
+            },
+            {
+              name: "dashboard-shared-ui",
+              priority: 50,
+              test: /[\\/]apps[\\/]dashboard[\\/]src[\\/]shared[\\/]ui[\\/]/
+            },
+            {
+              // api client, i18n 같은 공용 코어가 page group에 흡수되면 해당 page의 CSS까지
+              // entry 정적 graph에 딸려 옵니다. page group보다 높은 우선순위로 먼저 확보합니다.
+              name: "dashboard-app-core",
+              priority: 45,
+              // shared/ 전체를 넣으면 lazy chunk(PublicTwitchAccountChip 등)까지 eager로 승격되므로
+              // entry가 정적으로 의존하는 모듈만 지정합니다.
+              test: /[\\/]apps[\\/]dashboard[\\/]src[\\/](?:(?:api|routing|analytics|fonts)[\\/]|shared[\\/]lazyNamed\.ts$|(?:i18n|runtime-config)\.ts$)/
+            },
+            {
+              name: "dashboard-admin-pages",
+              priority: 40,
+              test: /[\\/](?:CommunityModeration|EventLog|Events|ServerStatus|StreamerRiotRequests|SupportInbox)Page\.(?:tsx|css)$/
+            },
+            {
+              name: "dashboard-settings-pages",
+              priority: 40,
+              test: /[\\/](?:Followers|Settings|TwitchConnection)Page\.(?:tsx|css)$/
+            },
+            {
+              name: "dashboard-operations-pages",
+              priority: 40,
+              test: /[\\/](?:Dashboard|LolOperations|OverlayOps)Page\.(?:tsx|css)$/
+            }
+          ]
         }
       }
     }

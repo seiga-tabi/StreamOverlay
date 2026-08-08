@@ -1,0 +1,107 @@
+/* 데스크톱 상단바 1행 통합 — LoL 전용.
+ *
+ * 기존 상단바는 48.001rem 이상 모든 폭에서 "product/search/tools" 1행 +
+ * nav 2행 구조를 그대로 씁니다. 여유 폭이 가장 넉넉한 80rem(1280px) 이상
+ * 구간에서만 nav를 1행으로 합쳐 상단바 높이를 줄입니다 — 80rem 미만 태블릿
+ * 구간은 이미 product 열을 좁혀 쓰고 있어 nav까지 한 줄에 더하면 검색창이
+ * 지나치게 좁아지므로 기존 2행 구조를 그대로 유지합니다.
+ *
+ * .public-game-header__primary-row/secondary-row 를 display:contents 로
+ * 지워 자식들을 .public-game-header__layout 의 직접 grid item으로 만드는
+ * 방식은 모바일 브레이크포인트(public-game-chrome.css)에서 이미 쓰는
+ * 패턴을 그대로 재사용한 것입니다. nav가 폭에 비해 길어지면 항목이 깨지는
+ * 대신 기존 가로 스크롤(.public-horizontal-nav)로 자연스럽게 전환됩니다.
+ */
+
+@layer pages {
+  /* 스트리머 등록 CTA. 기존에는 계정 칩 팝오버 안에만 있어 로그인 후에도 한 번
+     더 열어야 보였습니다. 조건(canRegisterStreamer)이 같은 채로 팝오버 항목은
+     그대로 두고, 태블릿·데스크톱(48.001rem+)에서는 헤더에도 바로 노출합니다.
+     .public-game-header__tools 자체가 모바일(48rem 이하)에서 display:none 이라
+     별도 media query 없이도 모바일에는 자동으로 나타나지 않습니다. */
+  .lol-public-game-header .public-header-streamer-cta {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    min-block-size: var(--yoro-size-touch-target);
+    padding-inline: var(--yoro-space-3);
+    border: 0;
+    border-radius: var(--yoro-radius-md);
+    background: var(--public-game-accent);
+    color: var(--yoro-color-text-on-dark);
+    font-size: var(--yoro-font-size-sm);
+    font-weight: var(--yoro-font-weight-bold);
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .lol-public-game-header .public-header-streamer-cta:hover,
+  .lol-public-game-header .public-header-streamer-cta:focus-visible {
+    background: color-mix(in srgb, var(--public-game-accent) 86%, white);
+  }
+
+  .lol-public-game-header .public-header-streamer-cta:focus-visible {
+    outline: none;
+    box-shadow: var(--yoro-shadow-focus);
+  }
+
+  @media (min-width: 80.001rem) {
+    /* primary-row/secondary-row 는 각자 독립된 중첩 grid였습니다. display:contents 로
+       박스 자체를 지우면 그 안의 product/nav/search/tools 가 .public-game-header__layout
+       의 직접 grid item으로 올라오므로, 행 배치는 이제 layout 쪽에서 새로 정의합니다. */
+    .lol-public-game-header .public-game-header__primary-row,
+    .lol-public-game-header .public-game-header__secondary-row {
+      display: contents;
+    }
+
+    /* primary-row/secondary-row가 각자 갖고 있던 최대폭·중앙정렬·상하 padding을
+       contents 처리로 잃으므로 layout이 그대로 이어받습니다. */
+    .lol-public-game-header .public-game-header__layout {
+      grid-template-areas: "product nav tools";
+      /* nav는 5개 라벨이 로케일마다 폭이 달라(코미유니티 등) rem으로 고정폭을
+         주면 잘리기 쉬우므로 max-content로 필요한 만큼만 차지하게 둡니다.
+         product는 게임 선택기 라벨이 줄어들 수 있는 최소한의 바닥(12rem)을 둡니다. */
+      grid-template-columns: minmax(12rem, 1fr) max-content minmax(0, 1fr);
+      align-items: center;
+      inline-size: min(100%, var(--yoro-size-public-header-max));
+      min-block-size: var(--yoro-size-public-header-height);
+      gap: var(--yoro-space-3);
+      margin-inline: auto;
+      padding: var(--yoro-space-2) var(--yoro-size-public-header-padding-inline);
+      box-sizing: border-box;
+    }
+
+    .lol-public-game-header[data-search="true"] .public-game-header__layout {
+      grid-template-areas: "product nav search tools";
+      grid-template-columns:
+        minmax(12rem, 1fr)
+        max-content
+        minmax(16rem, 32rem)
+        minmax(0, 1fr);
+    }
+
+    .lol-public-game-header .public-game-header__nav-slot {
+      grid-area: nav;
+    }
+
+    /* 게임 선택기 트리거는 flex item 기본 min-width:auto 때문에 자기 컨텐츠
+       크기 아래로 못 줄어들어, product 열이 좁아지면 nav 쪽으로 삐져나왔습니다.
+       .public-game-selector-label 은 이미 ellipsis 처리가 돼 있으므로(10-final-overrides.css)
+       min-inline-size:0 체인만 열어주면 라벨이 정상적으로 줄임표로 줄어듭니다. */
+    .lol-public-game-header .public-game-header__product,
+    .lol-public-game-header .public-game-header__desktop-game-selector,
+    .lol-public-game-header .public-game-selector {
+      min-inline-size: 0;
+    }
+
+    /* .public-game-selector 는 flex 컨테이너가 아니라 트리거 버튼이 자기
+       max-width(264px) 캡까지 그대로 렌더링해 154px 짜리 부모를 무시하고
+       넘쳤습니다. 기존 48.001–56rem 구간에서 쓰는 것과 같은
+       inline-size:100% 로 실제 남은 폭에 맞춰 줄어들게 합니다. */
+    .lol-public-game-header .public-game-header__desktop-game-selector .public-game-selector-trigger {
+      inline-size: 100%;
+      max-inline-size: 100%;
+    }
+  }
+}

@@ -1,0 +1,8 @@
+/*
+ * YORO Bot 공개 route 전용 stylesheet 진입점.
+ *
+ * 공개 LoL·Palworld 페이지는 이 CSS를 쓰지 않으므로 전역 index.css에서 분리해
+ * PublicBotPage lazy chunk에만 붙입니다. layer 순서는 foundation/layers.css가
+ * 문서 상단에서 이미 선언하므로 나중에 로드되어도 legacy layer 위치가 유지됩니다.
+ */
+@import "./16-yoro-bot.css" layer(legacy);

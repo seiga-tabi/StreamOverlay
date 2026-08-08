@@ -969,9 +969,9 @@ test("LoL 모바일 상단바는 스크롤 방향에 따라 탐색·검색 행�
     new URL("../src/features/public-lol/components/PublicAppHeader.tsx", import.meta.url),
     "utf8",
   );
-  assert.match(headerSource, /Math\.sign\(currentScrollY - lastScrollY\)/u);
-  assert.match(headerSource, /scrollDirection > 0 && directionTravel >= 20/u);
-  assert.match(headerSource, /scrollDirection < 0 && directionTravel >= 12/u);
+  assert.match(headerSource, /const delta = currentScrollY - lastScrollY/u);
+  assert.match(headerSource, /delta > MOBILE_CHROME_DELTA_THRESHOLD/u);
+  assert.match(headerSource, /delta < -MOBILE_CHROME_DELTA_THRESHOLD/u);
   assert.match(headerSource, /mobileChromeScrolled \? "mobile-chrome-scrolled"/u);
 });
 
@@ -1169,4 +1169,12 @@ test("프로필 사이드바 CSS는 legacy 반응형 grid 를 덮지 않고 값 
   assert.doesNotMatch(sidebarCss, /@container profile-side[^{]*\{\s*\.public-overview-dashboard-panel/u);
   // 선언에는 !important 를 쓰지 않습니다(주석의 언급은 제외).
   assert.doesNotMatch(sidebarCss, /[a-z-]+:[^;{}]*!important/u);
+});
+
+test("app entry는 서버가 넣은 SEO fallback 본문을 mount 전에 제거한다", () => {
+  const entry = readFileSync(new URL("../src/main.tsx", import.meta.url), "utf8");
+  // fallback이 남으면 실제 화면 위에 중복 콘텐츠가 보입니다.
+  // React의 container 정리 동작에 의존하지 않고 명시적으로 제거해야 합니다.
+  assert.match(entry, /querySelector\("\[data-seo-fallback\]"\)\?\.remove\(\)/u);
+  assert.match(entry, /createRoot\(container\)/u);
 });

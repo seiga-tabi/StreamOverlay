@@ -30,7 +30,7 @@ import {
   resolvePalworldLocalizedText,
   resolvePalworldName,
 } from "../utils/localization";
-import { setPalworldUrl } from "../utils/routes";
+import { palworldDetailPathWithListQuery, setPalworldUrl } from "../utils/routes";
 import { PalworldAutoLoadControl } from "./PalworldAutoLoadControl";
 import { PalworldPreviousLoadControl } from "./PalworldPreviousLoadControl";
 import { PalworldMedia } from "./PalworldMedia";
@@ -402,11 +402,8 @@ export function PalworldSkillsPage({ locale, params }: { locale: PalworldLocale;
   }
 
   function openSkill(id: string) {
-    const current = new URL(`${window.location.pathname}${window.location.search}`, window.location.origin);
-    current.searchParams.delete("pal");
-    current.searchParams.delete("item");
-    current.searchParams.set("skill", id);
-    setPalworldUrl(`${current.pathname}${current.search}`);
+    // 상세는 고유 경로로 열어 색인·공유·뒤로가기가 동작하게 하고 필터 query는 유지합니다.
+    setPalworldUrl(palworldDetailPathWithListQuery("skill", id));
   }
 
   return <section aria-labelledby="palworld-skills-title" className="palworld-page-section palworld-catalog-page palworld-skills-page">

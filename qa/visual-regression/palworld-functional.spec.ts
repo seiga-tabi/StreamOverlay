@@ -1879,7 +1879,7 @@ test("통합 검색 자동완성은 오류를 빈 결과와 구분하고 키보�
   await input.focus();
   await input.press("ArrowDown");
   await input.press("Enter");
-  await expect(page).toHaveURL(/\/palworld\/pals\?pal=penking$/u);
+  await expect(page).toHaveURL(/\/palworld\/pals\/penking$/u);
   await expect(page.getByTestId("pal-detail-modal").getByRole("dialog", { name: "펭킹" })).toBeVisible();
 });
 
@@ -2199,8 +2199,8 @@ test("Pal 필터 query를 유지하고 정렬된 compact 카드·ESC·직접 URL
     expect(cardImageFrameBox.width).toBeLessThanOrEqual(120);
   }
 
-  await anubisCard.getByRole("button", { name: "Pal 상세 보기" }).click();
-  await expect(page).toHaveURL(/pal=anubis/u);
+  await anubisCard.getByRole("link", { name: "Pal 상세 보기" }).click();
+  await expect(page).toHaveURL(/\/palworld\/pals\/anubis/u);
   await expect(page.getByTestId("pal-detail-modal").getByRole("dialog", { name: "아누비스" })).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(page.getByTestId("pal-detail-modal")).toHaveCount(0);
@@ -2785,6 +2785,7 @@ test("Pal 상세 mini-map은 일반 스폰과 필드 보스를 함께 표시하�
   await expect(page.getByTestId("palworld-map-viewport")).toHaveAttribute("data-zoomed", "true");
 
   await page.goBack();
+  // 이 흐름은 legacy query URL로 진입했으므로 history 복원도 같은 URL이어야 합니다.
   await expect(page).toHaveURL(/\/palworld\/pals\?pal=anubis$/u);
   const restoredDialog = page.getByTestId("pal-detail-modal").getByRole("dialog", { name: "아누비스" });
   await expect(restoredDialog).toBeVisible();
@@ -2982,7 +2983,7 @@ test("아이템 상세의 관련 Pal 링크는 이미지와 fallback을 유지�
   await expect(relatedPal).toBeVisible();
   await expect(relatedPal.getByRole("img", { name: "아누비스 · 이미지 준비 중" })).toBeVisible();
   await relatedPal.click();
-  await expect(page).toHaveURL(/\/palworld\/pals\?pal=anubis/u);
+  await expect(page).toHaveURL(/\/palworld\/pals\/anubis/u);
   await expect(page.getByTestId("pal-detail-modal").getByRole("dialog", { name: "아누비스" })).toBeVisible();
 });
 
@@ -3026,7 +3027,8 @@ test("스킬 경로는 필터·현지화 번역·속성 아이콘·상세·관�
     element.scrollWidth <= element.clientWidth
   )).toBe(true);
   await skillCard.getByRole("button", { name: "스킬 상세 보기" }).click();
-  await expect.poll(() => new URL(page.url()).searchParams.get("skill")).toBe("active-ground-stone-blast-30-2");
+  // 목록 page의 상세는 색인 가능한 고유 경로로 열립니다.
+  await expect.poll(() => new URL(page.url()).pathname).toMatch(/\/palworld\/skills\/active-ground-stone-blast-30-2$/u);
   const dialog = page.getByTestId("skill-detail-modal").getByRole("dialog", { name: "스톤 샷" });
   await expect(dialog).toBeVisible();
   await expect(dialog.locator(".palworld-translation-review-notice")).toHaveCount(1);
@@ -3035,10 +3037,10 @@ test("스킬 경로는 필터·현지화 번역·속성 아이콘·상세·관�
   await expect(apiRequestUrls.get(page) ?? []).toContain("/api/palworld/skills/active-ground-stone-blast-30-2");
 
   await dialog.getByRole("button", { name: /아누비스/u }).click();
-  await expect(page).toHaveURL(/\/palworld\/pals\?pal=anubis/u);
+  await expect(page).toHaveURL(/\/palworld\/pals\/anubis/u);
   await expect(page.getByTestId("pal-detail-modal").getByRole("dialog", { name: "아누비스" })).toBeVisible();
   await page.goBack();
-  await expect(page).toHaveURL(/\/palworld\/skills\?.*skill=active-ground-stone-blast-30-2/u);
+  await expect(page).toHaveURL(/\/palworld\/skills\/active-ground-stone-blast-30-2/u);
   await expect(page.getByTestId("skill-detail-modal").getByRole("dialog", { name: "스톤 샷" })).toBeVisible();
   await page.keyboard.press("Escape");
   await expect.poll(() => new URL(page.url()).searchParams.has("skill")).toBe(false);
@@ -3456,7 +3458,7 @@ test("Pal 이미지 404는 페이지 오류 없이 접근 가능한 fallback으�
   await expect(card).toBeVisible();
   await expect(card.locator(".palworld-media-image")).toHaveCount(0);
   await expect(card.getByRole("img", { name: "펭킹 · 이미지 준비 중" })).toBeVisible();
-  await card.getByRole("button", { name: "Pal 상세 보기" }).click();
+  await card.getByRole("link", { name: "Pal 상세 보기" }).click();
   const dialog = page.getByTestId("pal-detail-modal").getByRole("dialog", { name: "펭킹" });
   await expect(dialog).toBeVisible();
   await expect(dialog.locator(".palworld-media-image")).toHaveCount(0);
@@ -3858,7 +3860,7 @@ test("Palworld 화면은 외부 origin 이미지 요청 없이 카드·자동완
   await page
     .getByTestId("pal-card")
     .filter({ hasText: "펭킹" })
-    .getByRole("button", { name: "Pal 상세 보기" })
+    .getByRole("link", { name: "Pal 상세 보기" })
     .click();
   await expect(page.getByTestId("pal-detail-modal").getByRole("img", { name: "펭킹" })).toBeVisible();
   await page.keyboard.press("Escape");

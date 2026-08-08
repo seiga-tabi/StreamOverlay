@@ -69,7 +69,7 @@ test("공통 YORO Dashboard는 로그인 사용자용 진입점과 KO·JA 문구
   assert.match(source, /updateAccountPreferences/u);
   assert.match(source, /discordIdentity\.displayName/u);
   assert.match(source, /twitchIdentity\.displayName/u);
-  assert.match(source, /yoro-dashboard-identity-label/u);
+  assert.match(source, /yoro-dh-card-text/u);
   assert.match(source, /DiscordSetupPage/u);
   assert.match(source, /BotManagementPage/u);
   assert.match(source, /스트리머 이용 상태/u);
@@ -102,11 +102,9 @@ test("공통 YORO Dashboard는 로그인 사용자용 진입점과 KO·JA 문구
     new URL("../src/styles/pages/account/18-yoro-dashboard.css", import.meta.url),
     "utf8"
   );
-  assert.match(
-    css,
-    /\.yoro-dashboard-summary-grid li > \.discord-symbol-icon[\s\S]*?width:\s*22px/u
-  );
   assert.match(css, /grid-template-columns:\s*288px minmax\(0, 1fr\)/u);
+  // 브랜드 링크는 글자 높이(ko 25px · ja 32px)로만 잡히던 것을 44px 로 세웁니다.
+  assert.match(css, /\.yoro-dashboard-brand\s*\{[\s\S]*?min-height:\s*44px/u);
   assert.match(
     css,
     /\.yoro-dashboard-main[\s\S]*?margin-inline:\s*auto/u
@@ -128,6 +126,80 @@ test("공통 YORO Dashboard는 로그인 사용자용 진입점과 KO·JA 문구
     css,
     /\.yoro-dashboard-settings-actions[\s\S]*?position:\s*sticky/u
   );
+});
+
+test("Dashboard 홈은 상태별로 다른 화면을 보여 주고 지표를 링크로 만든다", async () => {
+  const source = await readFile(
+    new URL("../src/features/yoro-dashboard/YoroDashboardPage.tsx", import.meta.url),
+    "utf8"
+  );
+
+  // 같은 진행 상태를 "빠른 시작"과 "다음 작업"으로 두 번 말하던 구조를 없앴습니다.
+  assert.equal(source.includes("yoro-dashboard-quick-start"), false);
+  assert.equal(source.includes("yoro-dashboard-next"), false);
+  assert.equal(source.includes("yoro-dashboard-summary-grid"), false);
+  assert.equal(source.includes("yoro-dashboard-metrics"), false);
+
+  // 단계 카드는 남은 단계가 있을 때만 렌더링합니다.
+  assert.match(source, /\{currentSetupStep \? \(/u);
+  assert.match(source, /const currentSetupStep = setupSteps\.find/u);
+
+  // 운영 상태는 값을 실제로 받은 항목만 올립니다.
+  assert.match(source, /\{opsCards\.length > 0 \? \(/u);
+  assert.match(source, /lastSnapshotAt/u);
+  assert.match(source, /getYoroParticipation/u);
+  assert.match(source, /getManagementBotControl/u);
+  assert.match(source, /listManagementGameServers/u);
+  // 실시간 접속 여부·응답 시간을 주는 계약이 없으므로 그렇게 적지 않습니다.
+  assert.equal(source.includes("온라인"), false);
+  assert.equal(source.includes("オンライン"), false);
+  assert.equal(/응답\s*\d+\s*ms/u.test(source), false);
+  // 7일 신규는 서버가 이미 계산한 값을 그대로 씁니다.
+  assert.match(source, /newFollowers7d/u);
+
+  // 지표 4개는 전부 해당 화면으로 이동합니다.
+  for (const target of [
+    "streamingFollowers",
+    "streamingParticipation",
+    "organizations",
+    "account"
+  ]) {
+    assert.match(
+      source,
+      new RegExp(`className="yoro-dh-kpi"\\s*\\n\\s*onClick=\\{\\(\\) => navigate\\("${target}"\\)\\}`, "u")
+    );
+  }
+
+  // ko·ja 문구를 함께 관리합니다.
+  for (const pair of [
+    ["시청자 참여 열림", "視聴者参加 受付中"],
+    ["Followers 최근 갱신", "Followers 最終更新"],
+    ["{n}일 전", "{n}日前"],
+    ["소유 {owner} · 그 외 {other}", "所有 {owner} · その他 {other}"],
+    ["Discord Bot 설치됨", "Discord Bot 導入済み"],
+    ["게임 서버 연결 정상", "ゲームサーバー接続 正常"],
+    ["7일 신규 +{n}", "7日 新規 +{n}"]
+  ]) {
+    assert.equal(source.includes(pair[0]), true, pair[0]);
+    assert.equal(source.includes(pair[1]), true, pair[1]);
+  }
+
+  const css = await readFile(
+    new URL("../src/styles/pages/account/31-dashboard-home.css", import.meta.url),
+    "utf8"
+  );
+  // legacy !important 를 피하려고 만든 이름이므로 layer 와 무가중치 규칙을 유지합니다.
+  // 주석에 옛 이름이 근거로 적혀 있어 선언부만 남기고 검사합니다.
+  const cssRules = css.replace(/\/\*[\s\S]*?\*\//gu, "");
+  assert.match(cssRules, /@layer pages \{/u);
+  assert.equal(cssRules.includes("!important"), false);
+  assert.equal(
+    /\.yoro-dashboard-(metrics|quick-start|summary-grid|next)\b/u.test(cssRules),
+    false
+  );
+  // 조작 요소는 44px 를 지킵니다.
+  assert.match(css, /\.yoro-dh-action\s*\{[\s\S]*?min-height:\s*44px/u);
+  assert.match(css, /\.yoro-dh-card-list > li\s*\{[\s\S]*?min-height:\s*44px/u);
 });
 
 test("공통 Dashboard 경로는 기존 방송 운영 하위 경로와 겹치지 않는다", async () => {

@@ -1,0 +1,9 @@
+/*
+ * Palworld route 전용 stylesheet 진입점.
+ *
+ * 공개 LoL 페이지는 이 CSS를 쓰지 않으므로 전역 index.css에서 분리해
+ * PublicPalworldPage lazy chunk에만 붙입니다. layer 순서는
+ * foundation/layers.css가 문서 상단에서 이미 선언하므로 나중에 로드되어도
+ * legacy layer 위치가 그대로 유지됩니다.
+ */
+@import "./14-palworld.css" layer(legacy);

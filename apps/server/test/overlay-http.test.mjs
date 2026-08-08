@@ -514,12 +514,11 @@ test("Palworld content-hash WebP는 immutable로 서빙하고 누락·directory 
   }
 });
 
-test("favicon, sitemap과 ads.txt는 dashboard public asset으로 서빙된다", async () => {
+test("favicon과 ads.txt는 dashboard public asset으로 서빙된다", async () => {
   const previousDashboardStatic = appConfig.paths.dashboardStatic;
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-dashboard-public-"));
   try {
     writeFileSync(path.join(dir, "favicon.png"), Buffer.from([0x89, 0x50, 0x4e, 0x47]));
-    writeFileSync(path.join(dir, "sitemap.xml"), "<?xml version=\"1.0\"?><urlset></urlset>");
     writeFileSync(path.join(dir, "ads.txt"), "google.com, pub-7880271953912430, DIRECT, f08c47fec0942fa0\n");
     appConfig.paths.dashboardStatic = dir;
     const handler = createHttpHandler({
@@ -534,11 +533,6 @@ test("favicon, sitemap과 ads.txt는 dashboard public asset으로 서빙된다",
     await handler(createRequest("GET", "/favicon.png"), faviconResponse);
     assert.equal(faviconResponse.statusCode, 200);
     assert.equal(faviconResponse.headers["Content-Type"], "image/png");
-
-    const sitemapResponse = createResponse();
-    await handler(createRequest("GET", "/sitemap.xml"), sitemapResponse);
-    assert.equal(sitemapResponse.statusCode, 200);
-    assert.equal(sitemapResponse.headers["Content-Type"], "application/xml; charset=utf-8");
 
     const adsResponse = createResponse();
     await handler(createRequest("GET", "/ads.txt"), adsResponse);
@@ -1819,5 +1813,110 @@ test("정적 파일 경로의 잘못된 URL 인코딩은 400으로 응답한다"
 
     assert.equal(res.statusCode, 400, target);
     assert.equal(JSON.parse(res.body).error, "잘못된 정적 파일 경로입니다.");
+  }
+});
+
+test("공개 sitemap route는 index와 정적 sitemap을 생성한다", async () => {
+  const handler = createHttpHandler({
+    store: {},
+    twitchAuth: {},
+    actions: {
+      async dispatchOne() {}
+    }
+  });
+
+  const indexResponse = createResponse();
+  await handler(createRequest("GET", "/sitemap.xml"), indexResponse);
+  assert.equal(indexResponse.statusCode, 200);
+  assert.equal(indexResponse.headers["Content-Type"], "application/xml; charset=utf-8");
+  assert.match(indexResponse.body, /<sitemapindex/u);
+  assert.match(indexResponse.body, /<loc>https:\/\/yoro\.gg\/sitemap-static\.xml<\/loc>/u);
+  // palworldDataService가 없으면 빈 엔티티 sitemap을 index에 넣지 않는다.
+  assert.doesNotMatch(indexResponse.body, /sitemap-palworld-pals/u);
+
+  const staticResponse = createResponse();
+  await handler(createRequest("GET", "/sitemap-static.xml"), staticResponse);
+  assert.equal(staticResponse.statusCode, 200);
+  assert.match(staticResponse.body, /<loc>https:\/\/yoro\.gg\/ko\/palworld\/pals<\/loc>/u);
+  assert.match(staticResponse.body, /<xhtml:link rel="alternate" hreflang="ja"/u);
+
+  const missingEntitySitemap = createResponse();
+  await handler(createRequest("GET", "/sitemap-palworld-pals.xml"), missingEntitySitemap);
+  assert.equal(missingEntitySitemap.statusCode, 404);
+});
+
+test("Palworld 상세 query URL은 고유 경로로 영구 이전되고 없는 엔티티는 404다", async () => {
+  const previousDashboardStatic = appConfig.paths.dashboardStatic;
+  const dir = mkdtempSync(path.join(tmpdir(), "streamops-palworld-entity-"));
+  try {
+    writeFileSync(
+      path.join(dir, "index.html"),
+      "<!doctype html><html lang=\"ko\"><head><meta name=\"description\" content=\"home\"><link rel=\"canonical\" href=\"https://yoro.gg/\"><meta property=\"og:title\" content=\"home\"><meta property=\"og:description\" content=\"home\"><meta property=\"og:url\" content=\"https://yoro.gg/\"><meta name=\"twitter:title\" content=\"home\"><meta name=\"twitter:description\" content=\"home\"><script nonce=\"__STREAMOPS_CSP_NONCE__\" src=\"/dashboard/config.js\"></script><title>YORO.gg</title></head><body><div id=\"root\"></div></body></html>"
+    );
+    appConfig.paths.dashboardStatic = dir;
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      actions: {
+        async dispatchOne() {}
+      }
+    });
+
+    const redirectResponse = createResponse();
+    await handler(createRequest("GET", "/ko/palworld/pals?pal=lamball"), redirectResponse);
+    assert.equal(redirectResponse.statusCode, 308);
+    assert.equal(redirectResponse.headers.Location, "/ko/palworld/pals/lamball");
+
+    // 데이터가 없는 엔티티 URL에 app shell을 200으로 주면 soft 404가 된다.
+    const notFoundResponse = createResponse();
+    await handler(createRequest("GET", "/ko/palworld/pals/lamball"), notFoundResponse);
+    assert.equal(notFoundResponse.statusCode, 404);
+    assert.equal(notFoundResponse.headers["X-Robots-Tag"], "noindex, nofollow");
+
+    // 목록 URL은 그대로 app shell을 서빙한다.
+    const listResponse = createResponse();
+    await handler(createRequest("GET", "/ko/palworld/pals"), listResponse);
+    assert.equal(listResponse.statusCode, 200);
+    assert.match(listResponse.body, /<link rel="canonical" href="https:\/\/yoro\.gg\/ko\/palworld\/pals">/u);
+  } finally {
+    appConfig.paths.dashboardStatic = previousDashboardStatic;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("공개 app shell은 crawler가 읽는 h1과 hreflang, JSON-LD를 함께 담는다", async () => {
+  const previousDashboardStatic = appConfig.paths.dashboardStatic;
+  const dir = mkdtempSync(path.join(tmpdir(), "streamops-seo-shell-"));
+  try {
+    writeFileSync(
+      path.join(dir, "index.html"),
+      "<!doctype html><html lang=\"ko\"><head><meta name=\"description\" content=\"home\"><link rel=\"canonical\" href=\"https://yoro.gg/\"><meta property=\"og:title\" content=\"home\"><meta property=\"og:description\" content=\"home\"><meta property=\"og:url\" content=\"https://yoro.gg/\"><meta name=\"twitter:title\" content=\"home\"><meta name=\"twitter:description\" content=\"home\"><script nonce=\"__STREAMOPS_CSP_NONCE__\" src=\"/dashboard/config.js\"></script><title>YORO.gg</title></head><body><div id=\"root\"></div></body></html>"
+    );
+    appConfig.paths.dashboardStatic = dir;
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      actions: {
+        async dispatchOne() {}
+      }
+    });
+
+    const response = createResponse();
+    await handler(createRequest("GET", "/ja/"), response);
+    assert.equal(response.statusCode, 200);
+    assert.match(response.body, /<html lang="ja"/u);
+    assert.match(response.body, /<link rel="alternate" hreflang="x-default" href="https:\/\/yoro\.gg\/ko\/" \/>/u);
+    assert.match(response.body, /<div id="root"><div class="seo-fallback"/u);
+    assert.match(response.body, /<h1>YORO\.gg — LoL戦績検索とパルワールドデータベース<\/h1>/u);
+    assert.doesNotMatch(response.body, /<div id="root"><\/div>/u);
+
+    // JSON-LD script도 정적 script와 같은 nonce로 치환되어야 CSP에서 실행 차단되지 않는다.
+    const nonce = /script-src 'nonce-([^']+)'/.exec(response.headers["Content-Security-Policy"])?.[1];
+    assert.ok(nonce);
+    assert.match(response.body, new RegExp(`<script type="application/ld\\+json" nonce="${nonce}">`, "u"));
+    assert.doesNotMatch(response.body, /__STREAMOPS_CSP_NONCE__/u);
+  } finally {
+    appConfig.paths.dashboardStatic = previousDashboardStatic;
+    rmSync(dir, { recursive: true, force: true });
   }
 });

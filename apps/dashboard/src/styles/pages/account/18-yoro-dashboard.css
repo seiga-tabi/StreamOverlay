@@ -39,11 +39,18 @@
   display: none;
 }
 
+/* 링크 높이가 글자 높이(ko 25px · ja 32px)로만 잡혀 터치 타깃 44px 을 못 채웠습니다.
+   글자 크기는 그대로 두고 상자만 44px 로 세웁니다. */
 .yoro-dashboard-brand {
   min-width: 0;
+  min-height: 44px;
   overflow: hidden;
+  display: block;
+  line-height: 44px;
   color: inherit;
-  font-size: 21px;
+  /* 21px 에서는 일본어 글꼴로 "YORO.gg Dashboard" 가 232px 이 되어
+     사이드바(223px)와 모바일 바(226px) 양쪽에서 잘렸습니다. */
+  font-size: 19px;
   font-weight: 900;
   text-decoration: none;
   text-overflow: ellipsis;
@@ -126,6 +133,49 @@
   cursor: pointer;
 }
 
+/* 메뉴 이름 옆 상태 표시. 이름이 길어도 표시가 밀려나지 않게 잡습니다. */
+.yoro-dashboard-sidebar nav button {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.yoro-dashboard-nav-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.yoro-dashboard-nav-dot,
+.yoro-dashboard-nav-note {
+  flex: none;
+  margin-left: auto;
+}
+
+.yoro-dashboard-nav-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #8f9aae;
+}
+
+.yoro-dashboard-nav-dot[data-tone="live"] {
+  background: #f4555f;
+}
+
+.yoro-dashboard-nav-note {
+  color: #8f9aae;
+  font-size: 11px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.yoro-dashboard-sidebar nav button.active .yoro-dashboard-nav-note {
+  color: rgb(255 255 255 / 78%);
+}
+
 .yoro-dashboard-sidebar nav button:hover,
 .yoro-dashboard-sidebar nav button:focus-visible,
 .yoro-dashboard-sidebar nav button.active {
@@ -151,145 +201,22 @@
   padding: 48px clamp(24px, 5vw, 72px);
 }
 
-.yoro-dashboard-overview,
+/* Dashboard 홈(.yoro-dh-*)은 pages layer 의 31-dashboard-home.css 가 소유합니다. */
 .yoro-dashboard-settings,
 .yoro-dashboard-streaming {
   display: grid;
   gap: 28px;
 }
 
-.yoro-dashboard-overview > header span {
-  color: #7ba4ff;
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: .12em;
-}
-
-.yoro-dashboard-overview h1,
 .yoro-dashboard-settings h1,
 .yoro-dashboard-streaming > header h1 {
   margin: 8px 0;
   font-size: clamp(30px, 4vw, 48px);
 }
 
-.yoro-dashboard-overview header p,
 .yoro-dashboard-settings header p,
-.yoro-dashboard-streaming > header p,
-.yoro-dashboard-summary-grid article p {
+.yoro-dashboard-streaming > header p {
   color: #b8c1ce;
-}
-
-.yoro-dashboard-metrics {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.yoro-dashboard-metrics article {
-  min-width: 0;
-  min-height: 128px;
-  padding: 20px;
-  border: 1px solid rgb(142 123 255 / 18%);
-  border-radius: 15px;
-  display: grid;
-  align-content: center;
-  gap: 7px;
-  background: linear-gradient(145deg, rgb(27 35 60 / 94%), rgb(22 29 50 / 92%));
-  box-shadow: 0 18px 42px rgb(0 0 0 / 16%);
-}
-
-.yoro-dashboard-metrics span,
-.yoro-dashboard-metrics small {
-  overflow: hidden;
-  color: #aeb8ca;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.yoro-dashboard-metrics strong {
-  overflow: hidden;
-  font-size: clamp(20px, 2vw, 28px);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.yoro-dashboard-quick-start {
-  padding: 24px;
-  border: 1px solid rgb(142 123 255 / 18%);
-  border-radius: 16px;
-  background: linear-gradient(145deg, rgb(25 33 56 / 96%), rgb(21 28 47 / 94%));
-}
-
-.yoro-dashboard-quick-start header h2,
-.yoro-dashboard-quick-start header p {
-  margin: 0;
-}
-
-.yoro-dashboard-quick-start header p {
-  margin-top: 6px;
-  color: #aeb8ca;
-}
-
-.yoro-dashboard-quick-start ol {
-  margin: 24px 0 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  list-style: none;
-}
-
-.yoro-dashboard-quick-start li {
-  position: relative;
-  min-width: 0;
-  display: grid;
-  justify-items: center;
-  gap: 7px;
-  text-align: center;
-}
-
-.yoro-dashboard-quick-start li:not(:last-child)::after {
-  position: absolute;
-  top: 22px;
-  left: calc(50% + 28px);
-  width: calc(100% - 56px);
-  height: 1px;
-  background: rgb(255 255 255 / 18%);
-  content: "";
-}
-
-.yoro-dashboard-quick-start li > span {
-  z-index: 1;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: rgb(112 73 213 / 25%);
-  color: #bca8ff;
-  font-weight: 900;
-}
-
-.yoro-dashboard-quick-start li.complete > span {
-  background: rgb(68 187 132 / 18%);
-  color: #65d6a6;
-}
-
-.yoro-dashboard-quick-start li small {
-  color: #8f9aae;
-}
-
-.yoro-dashboard-summary-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
-}
-
-.yoro-dashboard-summary-grid article,
-.yoro-dashboard-next {
-  padding: 24px;
-  border: 1px solid rgb(255 255 255 / 10%);
-  border-radius: 16px;
-  background: #1c232d;
 }
 
 .yoro-dashboard-streamer-grid {
@@ -388,61 +315,6 @@
   color: #bca8ff;
 }
 
-.yoro-dashboard-summary-grid h2,
-.yoro-dashboard-next h2 {
-  margin-top: 0;
-}
-
-.yoro-dashboard-summary-grid ul {
-  padding: 0;
-  list-style: none;
-}
-
-.yoro-dashboard-summary-grid li {
-  min-width: 0;
-  padding: 10px 0;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  border-bottom: 1px solid rgb(255 255 255 / 8%);
-}
-
-.yoro-dashboard-summary-grid li > svg,
-.yoro-dashboard-summary-grid li > .discord-symbol-icon,
-.yoro-dashboard-summary-grid li > .twitch-glitch-icon {
-  flex: 0 0 22px;
-  width: 22px;
-  height: 22px;
-  object-fit: contain;
-}
-
-.yoro-dashboard-summary-grid li strong {
-  margin-left: auto;
-}
-
-.yoro-dashboard-identity-label {
-  min-width: 0;
-  display: grid;
-  gap: 2px;
-}
-
-.yoro-dashboard-identity-label strong {
-  margin-left: 0;
-}
-
-.yoro-dashboard-identity-label small {
-  overflow: hidden;
-  color: #aab4c2;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.yoro-dashboard-identity-status {
-  margin-left: auto;
-  font-weight: 800;
-}
-
-.yoro-dashboard-summary-grid button,
 .yoro-dashboard-settings > button,
 .yoro-dashboard-entry a {
   min-height: 44px;
@@ -458,20 +330,6 @@
   font-weight: 800;
   text-decoration: none;
   cursor: pointer;
-}
-
-.yoro-dashboard-next ol {
-  margin: 0;
-  padding-left: 24px;
-}
-
-.yoro-dashboard-next li {
-  padding: 8px;
-}
-
-.yoro-dashboard-next li.complete {
-  color: #65d6a6;
-  text-decoration: line-through;
 }
 
 .yoro-dashboard-settings {
@@ -1291,11 +1149,6 @@
     width: 100%;
   }
 
-  .yoro-dashboard-summary-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .yoro-dashboard-metrics,
   .yoro-dashboard-streamer-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1312,29 +1165,8 @@
 }
 
 @media (max-width: 520px) {
-  .yoro-dashboard-metrics,
   .yoro-dashboard-streamer-grid {
     grid-template-columns: 1fr;
-  }
-
-  .yoro-dashboard-quick-start ol {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .yoro-dashboard-quick-start li {
-    grid-template-columns: 44px minmax(0, 1fr) auto;
-    justify-items: start;
-    align-items: center;
-    text-align: left;
-  }
-
-  .yoro-dashboard-quick-start li:not(:last-child)::after {
-    top: 44px;
-    bottom: -16px;
-    left: 21px;
-    width: 1px;
-    height: auto;
   }
 }
 

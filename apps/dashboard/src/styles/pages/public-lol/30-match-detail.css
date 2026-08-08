@@ -1,0 +1,495 @@
+/* 전적 상세 · 빌드 리디자인.
+ *
+ * 기존 .public-team-card(!important 49건) · .public-match-build-picker(26건) ·
+ * .public-match-skill-grid(26건) · .public-match-expanded-tabs(27건) 는 legacy 에서
+ * !important 로 잠겨 있어 pages layer 로는 이길 수 없습니다(important 는 layer 순서를 뒤집습니다).
+ * 그래서 .public-md-* 라는 새 이름만 씁니다. 여기서는 !important 를 쓰지 않습니다.
+ */
+
+@layer pages {
+  .public-md-record,
+  .public-md-build {
+    container-type: inline-size;
+    container-name: match-detail;
+    display: flex;
+    flex-direction: column;
+    gap: var(--yoro-space-2);
+  }
+
+  /* ── 상세 툴바 ─────────────────────────────────────────── */
+  /* legacy 의 .public-match-expanded-tabs button 은 !important 27건으로
+     30~34px 에 묶여 있었습니다. 이름을 바꿔 그 규칙을 벗어납니다. */
+  .public-md-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--yoro-space-2);
+  }
+
+  .public-md-tabs { display: flex; gap: var(--yoro-space-1); }
+
+  .public-md-tab,
+  .public-md-mask {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--yoro-size-touch-target);
+    padding: 0 var(--yoro-space-3);
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-sm);
+    background: var(--yoro-color-ground-surface);
+    color: var(--yoro-color-text-on-dark-muted);
+    font: inherit;
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-bold);
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .public-md-mask { margin-left: auto; border-radius: var(--yoro-radius-pill); }
+
+  .public-md-tab.is-active,
+  .public-md-mask.is-active {
+    border-color: color-mix(in srgb, var(--yoro-color-public-primary) 60%, transparent);
+    background: color-mix(in srgb, var(--yoro-color-public-primary) 18%, var(--yoro-color-ground-surface));
+    color: var(--yoro-color-text-on-dark);
+  }
+
+  /* ── 팀 격차 스트립 ─────────────────────────────────────── */
+  /* 골드·딜·오브젝트를 탭으로 숨기지 않고 한 줄에 함께 둡니다. */
+  .public-md-gap {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--yoro-space-1);
+    margin: 0;
+  }
+
+  .public-md-gap > div {
+    min-width: 0;
+    padding: var(--yoro-space-1) var(--yoro-space-2);
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-sm);
+    background: var(--yoro-color-ground-base);
+  }
+
+  .public-md-gap dt {
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-bold);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .public-md-gap dd {
+    margin: 0;
+    font-size: var(--yoro-font-size-sm);
+    font-weight: var(--yoro-font-weight-black);
+    letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .public-md-gap dd[data-tone="up"] { color: var(--yoro-color-match-win-accent); }
+  .public-md-gap dd[data-tone="down"] { color: var(--yoro-color-match-loss-accent); }
+
+  /* ── 라인 1:1 ──────────────────────────────────────────── */
+  .public-md-lanes {
+    display: flex;
+    flex-direction: column;
+    gap: var(--yoro-space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* 좁을 때는 위·아래로 마주보고, 넓어지면 좌·우로 마주봅니다. */
+  .public-md-lane {
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+    align-items: center;
+    gap: var(--yoro-space-1) var(--yoro-space-2);
+    padding: var(--yoro-space-2);
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-md);
+    background: var(--yoro-color-ground-surface);
+  }
+
+  .public-md-lane.is-mine {
+    border-color: color-mix(in srgb, var(--yoro-color-public-primary) 60%, transparent);
+    background: color-mix(in srgb, var(--yoro-color-public-primary) 12%, var(--yoro-color-ground-surface));
+  }
+
+  .public-md-lane-pos {
+    grid-row: 1 / span 3;
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-black);
+    text-align: center;
+  }
+
+  .public-md-lane-side {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--yoro-space-2);
+    min-width: 0;
+  }
+
+  .public-md-lane-side.is-empty {
+    display: block;
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+  }
+
+  .public-md-lane-side.is-start { border-left: 2px solid var(--yoro-color-match-win-accent); padding-left: var(--yoro-space-2); }
+  .public-md-lane-side.is-end { border-left: 2px solid var(--yoro-color-match-loss-accent); padding-left: var(--yoro-space-2); }
+
+  .public-md-lane-portrait {
+    display: block;
+    width: 1.875rem;
+    height: 1.875rem;
+    flex: none;
+    border-radius: var(--yoro-radius-xs);
+    background: var(--yoro-color-ground-raised);
+    overflow: hidden;
+  }
+
+  .public-md-lane-portrait > img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* 티어 색은 프로필 히어로(23-profile-hero.css)와 같은 값을 씁니다. */
+  .public-md-lane-rank {
+    display: inline-flex;
+    align-items: center;
+    flex: none;
+    min-width: 1.75rem;
+    justify-content: center;
+    padding: .0625rem .25rem;
+    border-radius: var(--yoro-radius-xs);
+    background: color-mix(in srgb, var(--tier-color) 22%, transparent);
+    color: var(--tier-color);
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-black);
+    white-space: nowrap;
+  }
+
+  .public-md-lane-rank > i { display: none; font-style: normal; }
+
+  .public-md-lane-rank { --tier-color: var(--yoro-color-text-on-dark-muted); }
+  .public-md-lane-rank[data-tier="iron"] { --tier-color: #8d8d8d; }
+  .public-md-lane-rank[data-tier="bronze"] { --tier-color: #c08558; }
+  .public-md-lane-rank[data-tier="silver"] { --tier-color: #b3bcc5; }
+  .public-md-lane-rank[data-tier="gold"] { --tier-color: #e5c15a; }
+  .public-md-lane-rank[data-tier="platinum"] { --tier-color: #58c4bb; }
+  .public-md-lane-rank[data-tier="emerald"] { --tier-color: #4fbc7c; }
+  .public-md-lane-rank[data-tier="diamond"] { --tier-color: #6db6f0; }
+  .public-md-lane-rank[data-tier="master"] { --tier-color: #b57ff0; }
+  .public-md-lane-rank[data-tier="grandmaster"] { --tier-color: #ea6560; }
+  .public-md-lane-rank[data-tier="challenger"] { --tier-color: #f0c264; }
+
+  .public-md-lane-name { display: block; min-width: 0; text-align: start; }
+
+  .public-md-lane-name > b {
+    display: block;
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-black);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .public-md-lane-name > small {
+    display: block;
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* 이름은 전적 검색으로 가는 버튼이지만 행 안에서는 글자처럼 보입니다. */
+  .public-md-lane-search {
+    min-width: 0;
+    min-height: var(--yoro-size-touch-target);
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .public-md-lane-kda {
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-black);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  /* 가운데 라벨 열을 고정 폭으로 두면 일본어에서 잘립니다
+     (실측: "ダメージ" 47px 필요 / 2rem=32px 확보). 내용에 맞춰 늘립니다. */
+  .public-md-lane-bars {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: .1875rem var(--yoro-space-1);
+  }
+
+  .public-md-lane-bars > em {
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    font-style: normal;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .public-md-lane-bar {
+    display: flex;
+    justify-content: flex-end;
+    height: .375rem;
+    border-radius: var(--yoro-radius-pill);
+    background: color-mix(in srgb, var(--yoro-color-text-on-dark) 8%, transparent);
+    overflow: hidden;
+  }
+
+  .public-md-lane-bar.is-right { justify-content: flex-start; }
+
+  .public-md-lane-bar > i {
+    display: block;
+    height: 100%;
+    border-radius: var(--yoro-radius-pill);
+    background: var(--yoro-color-match-win-accent);
+  }
+
+  .public-md-lane-bar > i.is-enemy { background: var(--yoro-color-match-loss-accent); }
+  .public-md-lane-bar > i.is-gold { background: var(--yoro-color-accent-gold); }
+
+  /* ── 빌드 ──────────────────────────────────────────────── */
+  /* 누구 빌드인지 스크롤해도 보이게 붙여 둡니다. */
+  .public-md-build-headline {
+    position: sticky;
+    top: 0;
+    z-index: var(--yoro-z-raised, 2);
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--yoro-space-2);
+    padding: var(--yoro-space-2);
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-md);
+    background: var(--yoro-color-ground-surface);
+  }
+
+  .public-md-build-portrait {
+    display: block;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--yoro-radius-sm);
+    background: var(--yoro-color-ground-raised);
+    overflow: hidden;
+  }
+
+  .public-md-build-portrait > img { width: 100%; height: 100%; object-fit: cover; }
+
+  .public-md-build-who { min-width: 0; }
+
+  .public-md-build-who > b {
+    display: block;
+    font-size: var(--yoro-font-size-sm);
+    font-weight: var(--yoro-font-weight-black);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .public-md-build-who > small {
+    display: block;
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .public-md-build-spells { display: flex; gap: .125rem; }
+  .public-md-build-spells img { width: 1.25rem; height: 1.25rem; border-radius: var(--yoro-radius-xs); }
+
+  .public-md-build-picker {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: var(--yoro-space-1);
+  }
+
+  .public-md-build-side {
+    grid-column: 1 / -1;
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-bold);
+  }
+
+  .public-md-build-chip {
+    display: grid;
+    place-items: center;
+    gap: .0625rem;
+    min-height: var(--yoro-size-touch-target);
+    padding: var(--yoro-space-1) .125rem;
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-sm);
+    background: var(--yoro-color-ground-base);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .public-md-build-chip.is-selected {
+    border-color: color-mix(in srgb, var(--yoro-color-public-primary) 65%, transparent);
+    background: color-mix(in srgb, var(--yoro-color-public-primary) 16%, var(--yoro-color-ground-base));
+  }
+
+  .public-md-build-chip-portrait {
+    display: block;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: var(--yoro-radius-xs);
+    background: var(--yoro-color-ground-raised);
+    overflow: hidden;
+  }
+
+  .public-md-build-chip-portrait > img { width: 100%; height: 100%; object-fit: cover; }
+
+  .public-md-build-chip > s {
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-black);
+    font-variant-numeric: tabular-nums;
+    text-decoration: none;
+  }
+
+  .public-md-build-heading {
+    margin: var(--yoro-space-1) 0 0;
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-black);
+    color: var(--yoro-color-text-on-dark-muted);
+  }
+
+  /* 룬 보드는 기존 컴포넌트를 그대로 씁니다. 바깥에서 배치를 강제하지 않습니다. */
+  .public-md-build-runes { display: block; min-width: 0; }
+
+  /* "몇 분에 뭐"가 핵심입니다. 세로 목록으로 두면 9칸이 300px 을 넘으므로
+     감싸는 격자로 두고 시각을 아이콘 바로 아래에 붙입니다. */
+  .public-md-build-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(2.75rem, 1fr));
+    gap: var(--yoro-space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .public-md-build-items > li {
+    display: grid;
+    justify-items: center;
+    gap: .0625rem;
+    padding: var(--yoro-space-1) .125rem;
+    border-radius: var(--yoro-radius-xs);
+    background: var(--yoro-color-ground-base);
+  }
+
+  .public-md-build-time {
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-bold);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .public-md-build-item {
+    display: block;
+    width: 1.625rem;
+    height: 1.625rem;
+    border-radius: var(--yoro-radius-xs);
+    background: var(--yoro-color-ground-raised);
+    overflow: hidden;
+  }
+
+  .public-md-build-item > img { width: 100%; height: 100%; object-fit: cover; }
+
+  .public-md-build-skills { display: flex; flex-direction: column; gap: .1875rem; }
+
+  .public-md-build-skill-row {
+    display: grid;
+    grid-template-columns: 1.25rem minmax(0, 1fr);
+    align-items: center;
+    gap: var(--yoro-space-1);
+  }
+
+  .public-md-build-skill-row > b {
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-black);
+    text-align: center;
+  }
+
+  /* 18칸을 폭에 맞춰 나눠 갖습니다. 가로 스크롤을 만들지 않습니다. */
+  .public-md-build-skill-cells {
+    display: grid;
+    grid-template-columns: repeat(18, minmax(0, 1fr));
+    gap: .0625rem;
+  }
+
+  .public-md-build-skill-cells > i {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    min-width: 0;
+    border-radius: .1875rem;
+    background: color-mix(in srgb, var(--yoro-color-text-on-dark) 8%, transparent);
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: .5rem;
+    font-style: normal;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .public-md-build-skill-cells > i.is-taken {
+    background: var(--yoro-color-public-primary);
+    color: var(--yoro-color-text-on-bright, #fff);
+    font-weight: var(--yoro-font-weight-black);
+  }
+
+  /* ── 반응형 ────────────────────────────────────────────── */
+  /* 넓어지면 라인 두 사람이 좌·우로 마주봅니다. */
+  @container match-detail (min-width: 44rem) {
+    .public-md-lane {
+      grid-template-columns: 2.25rem minmax(0, 1fr) minmax(9rem, 13rem) minmax(0, 1fr);
+    }
+
+    .public-md-lane-pos { grid-row: auto; }
+
+    .public-md-lane-side.is-end {
+      border-left: 0;
+      border-right: 2px solid var(--yoro-color-match-loss-accent);
+      padding-left: 0;
+      padding-right: var(--yoro-space-2);
+      grid-template-columns: auto auto minmax(0, 1fr) auto;
+      direction: rtl;
+    }
+
+    /* direction 반전은 배치만 뒤집고 글자는 원래 방향으로 되돌립니다. */
+    .public-md-lane-side.is-end > * { direction: ltr; }
+    .public-md-lane-side.is-end .public-md-lane-name { text-align: end; }
+  }
+
+  /* 폭이 나면 축약 대신 전체 티어 문구를 보여 줍니다. */
+  @container match-detail (min-width: 56rem) {
+    .public-md-lane-rank > b { display: none; }
+    .public-md-lane-rank > i { display: inline; }
+  }
+
+  @container match-detail (min-width: 30rem) {
+    .public-md-gap { grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr)); }
+    .public-md-build-picker { grid-template-columns: repeat(10, minmax(0, 1fr)); }
+    .public-md-build-side { grid-column: auto; align-self: center; }
+  }
+}

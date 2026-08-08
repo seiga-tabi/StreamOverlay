@@ -149,6 +149,27 @@ import {
   type PublicUrlLocale,
 } from "../routing/public-dashboard-routes.js";
 import {
+  applyPublicSeoMetadata,
+  localizedPublicSeoUrl,
+  palworldEntityRedirectPath,
+  palworldEntityRouteForPath,
+  palworldEntitySeoMetadata,
+  publicSeoMetadataForPath,
+  withLolProfileSeo,
+  type PalworldSeoEntity,
+  type PublicSeoFact,
+  type PublicSeoMetadata,
+} from "./public-seo.js";
+import {
+  PALWORLD_SITEMAP_KINDS,
+  PUBLIC_SITEMAP_PATHS,
+  SITEMAP_MAX_URLS,
+  buildPalworldEntitySitemap,
+  buildSitemapIndex,
+  buildStaticSitemap,
+} from "./public-sitemap.js";
+import type { PalworldEntityKind } from "./public-seo.js";
+import {
   buildLivenessResponse,
   buildReadinessResponse,
   resolveReadiness,
@@ -1861,17 +1882,23 @@ function isNotModified(req: IncomingMessage, etag: string, mtime: Date): boolean
   return Number.isFinite(since) && mtime.getTime() <= since;
 }
 
-type PublicSeoMetadata = {
-  canonicalUrl: string;
-  description: string;
-  imageAlt: string;
-  imageUrl: string;
-  locale: PublicUrlLocale;
-  openGraphType: "website" | "profile";
-  title: string;
-};
-
-type PublicSeoContent = Pick<PublicSeoMetadata, "description" | "title">;
+/**
+ * sitemap에 넣을 Palworld 엔티티 id 목록입니다.
+ * 정렬을 고정해 sitemap 내용이 요청마다 흔들리지 않게 합니다.
+ */
+function palworldEntityIdsForSitemap(
+  service: PalworldDataService,
+  kind: PalworldEntityKind
+): string[] {
+  const page = { order: "asc", page: 1, limit: SITEMAP_MAX_URLS } as const;
+  if (kind === "pal") {
+    return service.listPals({ ...page, sort: "number" }).items.map((entry) => entry.id);
+  }
+  if (kind === "item") {
+    return service.listItems({ ...page, sort: "name" }).items.map((entry) => entry.id);
+  }
+  return service.listSkills({ ...page, sort: "name" }).items.map((entry) => entry.id);
+}
 
 type PublicLolProfileRoute = {
   gameName: string;
@@ -1926,265 +1953,6 @@ function publicLolSocialImageRouteForPath(pathname: string): PublicLolSocialImag
     profileSlug: match[3],
     revision: match[4],
   };
-}
-
-function publicSeoMetadataForPath(pathname: string): PublicSeoMetadata {
-  const locale = publicUrlLocaleFromPathname(pathname) ?? "ko";
-  const unprefixedPath = stripPublicUrlLocalePrefix(pathname);
-  const normalizedPath = unprefixedPath !== "/" && unprefixedPath.endsWith("/")
-    ? unprefixedPath.slice(0, -1)
-    : unprefixedPath;
-  const defaultMetadata: PublicSeoContent = {
-    title: "YORO.gg",
-    description: "YORO.gg에서 League of Legends 전적 검색, 스트리머 방송 상태, 팔로우와 시청자 참여 기능을 확인하세요."
-  };
-  const palworldMetadata: Record<string, PublicSeoContent> = {
-    "/palworld": {
-      title: "펠월드 데이터베이스 | YORO.gg",
-      description: "Pal, 아이템, 스킬과 교배 정보를 한곳에서 확인하세요."
-    },
-    "/palworld/pals": {
-      title: "Pal 도감 | YORO.gg",
-      description: "Palworld Pal의 속성, 능력치, 작업 적성과 상세 정보를 확인하세요."
-    },
-    "/palworld/breeding": {
-      title: "교배 조합 | YORO.gg",
-      description: "Palworld 일반·특수 교배 결과와 부모 조합을 확인하세요."
-    },
-    "/palworld/items": {
-      title: "아이템 | YORO.gg",
-      description: "Palworld 아이템의 분류, 제작 재료와 상세 정보를 확인하세요."
-    },
-    "/palworld/technology": {
-      title: "Palworld 기술 해금 | YORO.gg",
-      description: "기술 레벨별로 해금되는 Palworld 아이템을 확인하세요."
-    },
-    "/palworld/skills": {
-      title: "Palworld 스킬 | YORO.gg",
-      description: "액티브·파트너·패시브 스킬의 효과와 관련 Pal을 확인하세요."
-    },
-    "/palworld/map": {
-      title: "Palworld 월드 지도 | YORO.gg",
-      description: "필드 보스·야생 스폰과 이동·수집 위치를 레이어별로 탐색하세요."
-    },
-    "/palworld/search": {
-      title: "Palworld 통합 검색 | YORO.gg",
-      description: "Palworld Pal과 아이템을 한국어·일본어 이름으로 검색하세요."
-    }
-  };
-  const exactMetadata: Record<string, PublicSeoContent> = {
-    "/": defaultMetadata,
-    "/lol": {
-      title: "LoL 전적 검색 | YORO.gg",
-      description: "League of Legends 전적과 최근 게임 정보를 검색하세요."
-    },
-    "/lol/aram": {
-      title: "증강 칼바람 | YORO.gg",
-      description: "증강 칼바람의 증강 정보와 조합 데이터를 확인하세요."
-    },
-    "/follow": {
-      title: "팔로우 중인 스트리머 | YORO.gg",
-      description: "Twitch에서 팔로우 중인 스트리머의 방송 상태를 확인하세요."
-    },
-    "/participation": {
-      title: "시청자 참여 | YORO.gg",
-      description: "YORO.gg 스트리머 방송의 시청자 참여 기능을 이용하세요."
-    },
-    "/bot": {
-      title: "YORO Bot | Discord 게임 서버 도우미",
-      description: "Discord 서버와 게임 서버 운영 기능을 안전하게 연결하는 YORO Bot을 확인하세요."
-    },
-    "/bot/getting-started": {
-      title: "사용방법 | YORO Bot",
-      description: "Bot 초대부터 Organization, Palworld REST와 Discord Bot 제어 연결까지 순서대로 확인하세요."
-    },
-    "/bot/commands": {
-      title: "명령어 목록 | YORO Bot",
-      description: "YORO Bot의 일반 사용자, 작성자와 관리자 명령 및 활성화 조건을 확인하세요."
-    },
-    "/bot/game-files": {
-      title: "Palworld 게임파일 | YORO Bot",
-      description: "검증된 PalWorldSettings.ini를 브라우저에서 만들고 안전하게 설치하는 방법을 확인하세요."
-    },
-    "/privacy": {
-      title: "개인정보 처리방침 | YORO.gg",
-      description: "YORO.gg의 개인정보 처리방침을 확인하세요."
-    },
-    "/terms": {
-      title: "이용약관 | YORO.gg",
-      description: "YORO.gg 서비스 이용약관을 확인하세요."
-    },
-    "/contact": {
-      title: "문의 | YORO.gg",
-      description: "YORO.gg 서비스 운영자에게 문의하세요."
-    }
-  };
-  const selected = palworldMetadata[normalizedPath]
-    ?? exactMetadata[normalizedPath]
-    ?? (normalizedPath.startsWith("/lol/summoners/")
-      ? {
-          title: "LoL 소환사 전적 | YORO.gg",
-          description: "League of Legends 소환사의 전적과 최근 게임 정보를 확인하세요."
-        }
-      : normalizedPath.startsWith("/community/")
-          ? {
-              title: "LoL 커뮤니티 | YORO.gg",
-              description: "YORO.gg League of Legends 커뮤니티 게시물을 확인하세요."
-            }
-          : defaultMetadata);
-  const japaneseMetadata: Record<string, PublicSeoContent> = {
-    "/": {
-      title: "YORO.gg",
-      description: "YORO.ggでLeague of Legendsの戦績検索、配信者のLIVE状況、フォロー、視聴者参加機能を確認できます。"
-    },
-    "/lol": {
-      title: "LoL戦績検索 | YORO.gg",
-      description: "League of Legendsの戦績と最近のゲーム情報を検索できます。"
-    },
-    "/lol/aram": {
-      title: "オーグメントARAM | YORO.gg",
-      description: "オーグメントARAMのオーグメント情報と組み合わせデータを確認できます。"
-    },
-    "/follow": {
-      title: "フォロー中の配信者 | YORO.gg",
-      description: "Twitchでフォロー中の配信者のLIVE状況を確認できます。"
-    },
-    "/participation": {
-      title: "視聴者参加 | YORO.gg",
-      description: "YORO.gg配信者の視聴者参加機能を利用できます。"
-    },
-    "/bot": {
-      title: "YORO Bot | Discordゲームサーバーアシスタント",
-      description: "Discordサーバーとゲームサーバー運用機能を安全に連携するYORO Botを確認できます。"
-    },
-    "/bot/getting-started": {
-      title: "使い方 | YORO Bot",
-      description: "Bot招待からOrganization、Palworld REST、Discord Bot制御の連携まで順番に確認できます。"
-    },
-    "/bot/commands": {
-      title: "コマンド一覧 | YORO Bot",
-      description: "YORO Botの一般ユーザー、実行者、管理者コマンドと有効化条件を確認できます。"
-    },
-    "/bot/game-files": {
-      title: "Palworldゲームファイル | YORO Bot",
-      description: "検証済みPalWorldSettings.iniをブラウザで作成し、安全に設置する方法を確認できます。"
-    },
-    "/privacy": {
-      title: "プライバシーポリシー | YORO.gg",
-      description: "YORO.ggのプライバシーポリシーを確認できます。"
-    },
-    "/terms": {
-      title: "利用規約 | YORO.gg",
-      description: "YORO.ggのサービス利用規約を確認できます。"
-    },
-    "/contact": {
-      title: "お問い合わせ | YORO.gg",
-      description: "YORO.ggの運営者へお問い合わせいただけます。"
-    },
-    "/palworld": {
-      title: "パルワールドデータベース | YORO.gg",
-      description: "パル、アイテム、スキル、配合情報をまとめて確認できます。"
-    },
-    "/palworld/pals": {
-      title: "パル図鑑 | YORO.gg",
-      description: "パルの属性、ステータス、作業適性、詳細情報を確認できます。"
-    },
-    "/palworld/breeding": {
-      title: "配合組み合わせ | YORO.gg",
-      description: "パルワールドの通常・特殊配合結果と親の組み合わせを確認できます。"
-    },
-    "/palworld/items": {
-      title: "アイテム | YORO.gg",
-      description: "パルワールドのアイテム分類、製作素材、詳細情報を確認できます。"
-    },
-    "/palworld/technology": {
-      title: "テクノロジー解放 | YORO.gg",
-      description: "テクノロジーレベルごとに解放されるアイテムを確認できます。"
-    },
-    "/palworld/skills": {
-      title: "パルワールドスキル | YORO.gg",
-      description: "アクティブ・パートナー・パッシブスキルの効果と関連パルを確認できます。"
-    },
-    "/palworld/map": {
-      title: "パルワールドワールドマップ | YORO.gg",
-      description: "フィールドボス、野生スポーン、移動・収集地点をレイヤー別に探索できます。"
-    },
-    "/palworld/search": {
-      title: "パルワールド統合検索 | YORO.gg",
-      description: "パルとアイテムを韓国語・日本語の名前で検索できます。"
-    }
-  };
-  const japaneseFallback = normalizedPath.startsWith("/lol/summoners/")
-    ? {
-        title: "LoLサモナー戦績 | YORO.gg",
-        description: "League of Legendsサモナーの戦績と最近のゲーム情報を確認できます。"
-      }
-    : normalizedPath.startsWith("/community/")
-        ? {
-            title: "LoLコミュニティ | YORO.gg",
-            description: "YORO.ggのLeague of Legendsコミュニティ投稿を確認できます。"
-          }
-        : japaneseMetadata["/"];
-  const localized = locale === "ja"
-    ? japaneseMetadata[normalizedPath] ?? japaneseFallback ?? selected
-    : selected;
-  const localizedPath = normalizedPath === "/"
-    ? `/${locale}/`
-    : `/${locale}${normalizedPath}`;
-  return {
-    ...localized,
-    canonicalUrl: new URL(localizedPath, "https://yoro.gg").href,
-    imageAlt: locale === "ja" ? "YORO.gg サービスプレビュー" : "YORO.gg 서비스 미리보기",
-    imageUrl: "https://yoro.gg/images/yorogg-og.png",
-    locale,
-    openGraphType: "website",
-  };
-}
-
-function replaceOrInsertHeadTag(html: string, matcher: RegExp, tag: string): string {
-  if (matcher.test(html)) return html.replace(matcher, tag);
-  return html.replace(/<\/head>/iu, `${tag}</head>`);
-}
-
-function applyPublicSeoMetadata(html: string, metadata: PublicSeoMetadata): string {
-  const replacements: Array<[RegExp, string]> = [
-    [/(<meta\s+name="description"\s+content=")[^"]*("\s*\/?>)/u, metadata.description],
-    [/(<link\s+rel="canonical"\s+href=")[^"]*("\s*\/?>)/u, metadata.canonicalUrl],
-    [/(<meta\s+property="og:title"\s+content=")[^"]*("\s*\/?>)/u, metadata.title],
-    [/(<meta\s+property="og:description"\s+content=")[^"]*("\s*\/?>)/u, metadata.description],
-    [/(<meta\s+property="og:url"\s+content=")[^"]*("\s*\/?>)/u, metadata.canonicalUrl],
-    [/(<meta\s+name="twitter:title"\s+content=")[^"]*("\s*\/?>)/u, metadata.title],
-    [/(<meta\s+name="twitter:description"\s+content=")[^"]*("\s*\/?>)/u, metadata.description]
-  ];
-  let nextHtml = html.replace(
-    /<title>[^<]*<\/title>/u,
-    `<title>${escapeHtml(metadata.title)}</title>`
-  );
-  nextHtml = nextHtml.replace(/<html\s+lang="[^"]*"/u, `<html lang="${metadata.locale}"`);
-  for (const [pattern, value] of replacements) {
-    nextHtml = nextHtml.replace(pattern, (_match, prefix: string, suffix: string) => (
-      `${prefix}${escapeHtml(value)}${suffix}`
-    ));
-  }
-  const openGraphLocale = metadata.locale === "ja" ? "ja_JP" : "ko_KR";
-  const alternateLocale = metadata.locale === "ja" ? "ko_KR" : "ja_JP";
-  const additionalTags: Array<[RegExp, string]> = [
-    [/<meta\s+property="og:type"\s+content="[^"]*"\s*\/?>/iu, `<meta property="og:type" content="${metadata.openGraphType}" />`],
-    [/<meta\s+property="og:site_name"\s+content="[^"]*"\s*\/?>/iu, '<meta property="og:site_name" content="YORO.gg" />'],
-    [/<meta\s+property="og:locale"\s+content="[^"]*"\s*\/?>/iu, `<meta property="og:locale" content="${openGraphLocale}" />`],
-    [/<meta\s+property="og:locale:alternate"\s+content="[^"]*"\s*\/?>/iu, `<meta property="og:locale:alternate" content="${alternateLocale}" />`],
-    [/<meta\s+property="og:image"\s+content="[^"]*"\s*\/?>/iu, `<meta property="og:image" content="${escapeHtml(metadata.imageUrl)}" />`],
-    [/<meta\s+property="og:image:secure_url"\s+content="[^"]*"\s*\/?>/iu, `<meta property="og:image:secure_url" content="${escapeHtml(metadata.imageUrl)}" />`],
-    [/<meta\s+property="og:image:alt"\s+content="[^"]*"\s*\/?>/iu, `<meta property="og:image:alt" content="${escapeHtml(metadata.imageAlt)}" />`],
-    [/<meta\s+property="og:image:type"\s+content="[^"]*"\s*\/?>/iu, '<meta property="og:image:type" content="image/png" />'],
-    [/<meta\s+property="og:image:width"\s+content="[^"]*"\s*\/?>/iu, '<meta property="og:image:width" content="1200" />'],
-    [/<meta\s+property="og:image:height"\s+content="[^"]*"\s*\/?>/iu, '<meta property="og:image:height" content="630" />'],
-    [/<meta\s+name="twitter:card"\s+content="[^"]*"\s*\/?>/iu, '<meta name="twitter:card" content="summary_large_image" />'],
-    [/<meta\s+name="twitter:image"\s+content="[^"]*"\s*\/?>/iu, `<meta name="twitter:image" content="${escapeHtml(metadata.imageUrl)}" />`],
-    [/<meta\s+name="twitter:image:alt"\s+content="[^"]*"\s*\/?>/iu, `<meta name="twitter:image:alt" content="${escapeHtml(metadata.imageAlt)}" />`],
-  ];
-  for (const [matcher, tag] of additionalTags) nextHtml = replaceOrInsertHeadTag(nextHtml, matcher, tag);
-  return nextHtml;
 }
 
 async function sendStaticFile(
@@ -2327,12 +2095,13 @@ async function sendStaticApp(req: IncomingMessage, res: ServerResponse, pathname
   return true;
 }
 
+// sitemap.xml은 route 목록과 Palworld data service를 단일 원본으로 삼아 서버가 생성합니다.
+// public/sitemap.xml 정적 파일을 함께 두면 두 원본이 갈라지므로 여기에 넣지 않습니다.
 const PUBLIC_DASHBOARD_ASSETS = new Map([
   ["/ads.txt", "ads.txt"],
   ["/favicon.png", "favicon.png"],
   ["/favicon.svg", "favicon.svg"],
-  ["/robots.txt", "robots.txt"],
-  ["/sitemap.xml", "sitemap.xml"]
+  ["/robots.txt", "robots.txt"]
 ]);
 
 async function sendPublicDashboardAsset(req: IncomingMessage, res: ServerResponse, pathname: string): Promise<boolean> {
@@ -3618,8 +3387,128 @@ export function createHttpHandler(input: HttpHandlerInput) {
     });
   }
 
+  /**
+   * 색인되면 안 되는 공개 경로에 실제 404를 돌려줍니다.
+   * SPA shell을 200으로 주면 Google이 soft 404로 분류하고 같은 패턴 URL 전체의
+   * 크롤 신뢰도가 떨어집니다.
+   */
+  function sendPublicNotFound(req: IncomingMessage, res: ServerResponse, pathname: string): void {
+    const locale = publicUrlLocaleFromPathname(pathname) ?? "ko";
+    const message = locale === "ja"
+      ? "お探しのページは存在しません。"
+      : "요청한 페이지를 찾을 수 없습니다.";
+    res.writeHead(404, {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store",
+      "X-Robots-Tag": "noindex, nofollow",
+      ...securityHeadersForRequest(req)
+    });
+    res.end(req.method === "HEAD" ? undefined : JSON.stringify({ error: message, code: "NOT_FOUND" }));
+  }
+
+  /**
+   * sitemap index와 하위 sitemap을 응답합니다.
+   * Palworld 하위 sitemap은 data service가 준비된 경우에만 index에 넣어
+   * 크롤러가 빈 sitemap을 반복해서 받지 않게 합니다.
+   */
+  function sendPublicSitemap(req: IncomingMessage, res: ServerResponse, pathname: string): boolean {
+    const palworldData = input.palworldDataService;
+    const dataVersion = (() => {
+      if (!palworldData) return undefined;
+      try {
+        const metadata = palworldData.meta().metadata as { generatedAt?: unknown } | undefined;
+        return typeof metadata?.generatedAt === "string" ? metadata.generatedAt : undefined;
+      } catch {
+        return undefined;
+      }
+    })();
+    const respond = (body: string): boolean => {
+      res.writeHead(200, {
+        "Content-Type": "application/xml; charset=utf-8",
+        "Cache-Control": "public, max-age=3600",
+        ...securityHeadersForRequest(req)
+      });
+      res.end(req.method === "HEAD" ? undefined : body);
+      return true;
+    };
+
+    if (pathname === PUBLIC_SITEMAP_PATHS.index) {
+      const children = [
+        { path: PUBLIC_SITEMAP_PATHS.static },
+        ...(palworldData
+          ? [
+              { path: PUBLIC_SITEMAP_PATHS.pals, lastmod: dataVersion },
+              { path: PUBLIC_SITEMAP_PATHS.items, lastmod: dataVersion },
+              { path: PUBLIC_SITEMAP_PATHS.skills, lastmod: dataVersion }
+            ]
+          : [])
+      ];
+      return respond(buildSitemapIndex(children));
+    }
+    if (pathname === PUBLIC_SITEMAP_PATHS.static) {
+      return respond(buildStaticSitemap());
+    }
+    const kind = PALWORLD_SITEMAP_KINDS[pathname];
+    if (!kind) return false;
+    if (!palworldData) {
+      res.writeHead(404, {
+        "Content-Type": "application/json; charset=utf-8",
+        ...securityHeadersForRequest(req)
+      });
+      res.end(req.method === "HEAD" ? undefined : JSON.stringify({ error: "not found" }));
+      return true;
+    }
+    try {
+      const ids = palworldEntityIdsForSitemap(palworldData, kind);
+      return respond(buildPalworldEntitySitemap(kind, ids, dataVersion));
+    } catch (error) {
+      input.logger?.error({
+        type: "public_seo.sitemap_failed",
+        errorCode: "sitemap_unavailable",
+        error: toSafeErrorMessage(error)
+      });
+      res.writeHead(503, {
+        "Content-Type": "application/json; charset=utf-8",
+        "Retry-After": "600",
+        ...securityHeadersForRequest(req)
+      });
+      res.end(req.method === "HEAD" ? undefined : JSON.stringify({ error: "sitemap unavailable" }));
+      return true;
+    }
+  }
+
+  /**
+   * Palworld 엔티티 상세 URL의 데이터를 읽습니다.
+   * 데이터가 없으면 undefined를 돌려 호출자가 soft 404 대신 실제 404를 내도록 합니다.
+   */
+  function resolvePalworldSeoEntity(pathname: string): {
+    entity?: PalworldSeoEntity;
+    isEntityRoute: boolean;
+  } {
+    const route = palworldEntityRouteForPath(pathname);
+    if (!route) return { isEntityRoute: false };
+    const palworldData = input.palworldDataService;
+    if (!palworldData) return { isEntityRoute: true };
+    try {
+      const entity = route.kind === "pal"
+        ? palworldData.getPal(route.id)
+        : route.kind === "item"
+          ? palworldData.getItem(route.id)
+          : palworldData.getSkill(route.id);
+      return { entity: entity as PalworldSeoEntity, isEntityRoute: true };
+    } catch {
+      // 존재하지 않는 id는 정상적인 404입니다. 진단 로그를 남길 사유가 아닙니다.
+      return { isEntityRoute: true };
+    }
+  }
+
   async function resolvePublicSeoMetadata(pathname: string): Promise<PublicSeoMetadata> {
     const fallback = publicSeoMetadataForPath(pathname);
+    const palworldRoute = palworldEntityRouteForPath(pathname);
+    if (palworldRoute) {
+      const { entity } = resolvePalworldSeoEntity(pathname);
+      return entity ? palworldEntitySeoMetadata(palworldRoute, entity) : fallback;
+    }
     const route = publicLolProfileRouteForPath(pathname);
     if (!route) return fallback;
     try {
@@ -3627,21 +3516,28 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if (!profile) return fallback;
       const summary = buildPublicLolSocialSummary(profile, route.locale);
       const safeProfileSlug = encodeURIComponent(`${route.gameName}-${route.tagLine}`);
-      return {
-        ...fallback,
-        canonicalUrl: new URL(
-          `/${route.locale}/lol/summoners/${route.platformSlug}/${safeProfileSlug}`,
-          "https://yoro.gg",
-        ).href,
+      const ja = route.locale === "ja";
+      const facts: PublicSeoFact[] = [
+        { label: ja ? "ランク" : "랭크", value: summary.rankLabel },
+        ...(summary.recentRecordLabel
+          ? [{ label: ja ? "最近の戦績" : "최근 전적", value: summary.recentRecordLabel }]
+          : []),
+        ...(summary.winRateLabel ? [{ label: ja ? "勝率" : "승률", value: summary.winRateLabel }] : []),
+        ...(summary.kdaLabel ? [{ label: "KDA", value: summary.kdaLabel }] : []),
+        { label: ja ? "サーバー" : "서버", value: route.platformSlug.toUpperCase() },
+      ];
+      return withLolProfileSeo(fallback, {
+        canonicalPath: `/lol/summoners/${route.platformSlug}/${safeProfileSlug}`,
         description: summary.description,
+        facts,
+        heading: summary.riotId,
         imageAlt: summary.imageAlt,
         imageUrl: new URL(
           `/social/lol/${route.locale}/${route.lolPlatform}/${safeProfileSlug}/${summary.revision}.png`,
           "https://yoro.gg",
         ).href,
-        openGraphType: "profile",
         title: summary.title,
-      };
+      });
     } catch (error) {
       input.logger?.error({
         type: "public_lol.social_metadata_failed",
@@ -7284,9 +7180,24 @@ export function createHttpHandler(input: HttpHandlerInput) {
           });
         }
         if (await sendPublicLolSocialImage(req, res, url.pathname)) return;
+        if (sendPublicSitemap(req, res, url.pathname)) return;
         if (await sendPublicDashboardAsset(req, res, url.pathname)) return;
+        // 기존 `?pal=` 상세 query는 고유 URL로 영구 이전합니다. 두 URL이 같은 내용을
+        // 제공하면 중복 색인이 되고 canonical 신호가 흩어집니다.
+        const palworldEntityTarget = palworldEntityRedirectPath(url.pathname, url.searchParams);
+        if (palworldEntityTarget) {
+          return sendPermanentRedirect(res, palworldEntityTarget, {
+            "Cache-Control": "public, max-age=3600"
+          });
+        }
         if (url.pathname === "/" || isPublicDashboardAppRoute(url.pathname)) {
           const publicPathname = stripPublicUrlLocalePrefix(url.pathname);
+          const palworldEntity = resolvePalworldSeoEntity(url.pathname);
+          if (palworldEntity.isEntityRoute && !palworldEntity.entity) {
+            // 존재하지 않는 엔티티에 200을 주면 soft 404가 되어 같은 패턴 URL 전체의
+            // 크롤 신뢰도가 떨어집니다.
+            return sendPublicNotFound(req, res, url.pathname);
+          }
           const legalDraftHeaders = publicPathname === "/privacy" || publicPathname === "/terms"
             ? { "X-Robots-Tag": "noindex, nofollow" }
             : undefined;
@@ -7689,6 +7600,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
               summary: {
                 activeFollowers: followerState.summary.activeFollowers,
                 knownFollowers: followerState.summary.knownFollowers,
+                // Dashboard 홈이 증감을 보여 주려고 팔로워 전체 목록을 다시
+                // 받지 않도록, 이미 계산된 값을 여기서 함께 내려줍니다.
+                newFollowers7d: followerState.summary.newFollowers7d,
                 ...(followerState.lastSnapshotAt
                   ? { lastSnapshotAt: followerState.lastSnapshotAt }
                   : {})

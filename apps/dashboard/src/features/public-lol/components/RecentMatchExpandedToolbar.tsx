@@ -31,11 +31,11 @@ export function RecentMatchExpandedToolbar({
   onToggleMask
 }: RecentMatchExpandedToolbarProps) {
   return (
-    <div className="public-match-expanded-toolbar">
-      <div className="public-match-expanded-tabs" role="tablist" aria-label={text.matchDetails}>
+    <div className="public-md-toolbar">
+      <div className="public-md-tabs" role="tablist" aria-label={text.matchDetails}>
         <button
           type="button"
-          className={activeView === "record" ? "active" : ""}
+          className={`public-md-tab ${activeView === "record" ? "is-active" : ""}`}
           role="tab"
           aria-selected={activeView === "record"}
           onClick={onRecord}
@@ -46,7 +46,7 @@ export function RecentMatchExpandedToolbar({
         </button>
         <button
           type="button"
-          className={activeView === "build" ? "active" : ""}
+          className={`public-md-tab ${activeView === "build" ? "is-active" : ""}`}
           role="tab"
           aria-selected={activeView === "build"}
           onClick={onBuild}
@@ -58,7 +58,7 @@ export function RecentMatchExpandedToolbar({
       </div>
       <button
         type="button"
-        className={`public-match-id-mask-toggle ${hideRiotIds ? "active" : ""}`}
+        className={`public-md-mask ${hideRiotIds ? "is-active" : ""}`}
         aria-pressed={hideRiotIds}
         onClick={onToggleMask}
 

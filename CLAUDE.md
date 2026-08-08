@@ -8,7 +8,7 @@
 Claude Code는 기본적으로 UI/UX와 프런트엔드 표현 계층을 담당한다.
 
 - 정보 구조, layout, responsive, typography, color, motion과 accessibility
-- `apps/dashboard`, `apps/overlay`의 React component와 CSS
+- `apps/dashboard`의 React component와 CSS
 - 기존 API contract를 사용하는 frontend state와 interaction
 - 한국어·일본어 i18n 및 UI 관련 component test와 visual regression
 

@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
 } from "react";
+import "../styles/pages/public-palworld/palworld-route.css";
 import type { PublicTwitchFollowedLolResponse, PublicTwitchViewerStatus } from "../features/public-lol/types/public-lol";
 import { AppShell, AppShellHeader, AppShellMain } from "../shared/ui/AppShell";
 import {
@@ -35,9 +36,15 @@ import { usePalworldRoute } from "../features/public-palworld/hooks/usePalworldR
 import { palworldHomeLiveStreamerCards } from "../features/public-palworld/utils/streamers";
 import {
   isKnownPalworldPagePath,
+  isPalworldEntityListPath,
   palworldCondensationStarsFromParams,
-  palworldDetailSelectionFromParams,
+  palworldDetailFromPath,
+  palworldDetailPath,
+  palworldDetailPathWithListQuery,
+  palworldDetailSelectionFromLocation,
   palworldFocusPalFromParams,
+  palworldPageFromPath,
+  palworldPathForPage,
   palworldSpawnPeriodFromParams,
   palworldTwitchReturnTo,
   palworldUrl,
@@ -46,6 +53,7 @@ import {
   type PalworldPage,
 } from "../features/public-palworld/utils/routes";
 import { applyPalworldSeo } from "../features/public-palworld/utils/seo";
+import { trackEntityView, trackInternalLinkClick } from "../analytics/google-analytics";
 import {
   getPublicTwitchFollowedChannels,
   getPublicTwitchStatus,
@@ -121,9 +129,10 @@ export function PublicPalworldPage() {
   const needsFollowedChannelsOnOAuthReturnRef = useRef(needsFollowedChannels);
   const focusPalId = page === "map" ? palworldFocusPalFromParams(params) : undefined;
   const routeQuery = params.toString();
+  const routePathname = window.location.pathname;
   const detailRoute = useMemo(
-    () => palworldDetailSelectionFromParams(params),
-    [routeQuery]
+    () => palworldDetailSelectionFromLocation(routePathname, params),
+    [routePathname, routeQuery]
   );
   const selectedPalId = detailRoute.selection?.type === "pal" ? detailRoute.selection.id : undefined;
   const selectedItemId = detailRoute.selection?.type === "item" ? detailRoute.selection.id : undefined;
@@ -142,7 +151,15 @@ export function PublicPalworldPage() {
 
   setActivePublicLocale(locale);
 
-  useEffect(() => applyPalworldSeo(knownPage ? page : "home", locale), [knownPage, locale, page]);
+  useEffect(
+    () => applyPalworldSeo(knownPage ? page : "home", locale, routePathname),
+    [knownPage, locale, page, routePathname]
+  );
+  useEffect(() => {
+    const selection = detailRoute.selection;
+    if (!selection) return;
+    trackEntityView({ entityId: selection.id, entityType: selection.type, locale });
+  }, [detailRoute.selection, locale]);
   useEffect(() => {
     const canonicalQuery = detailRoute.canonicalParams.toString();
     if (canonicalQuery === routeQuery) return;
@@ -356,50 +373,63 @@ export function PublicPalworldPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
+  // 상세는 고유 경로로 이동합니다. query 형태로 열면 canonical이 목록 URL 하나로 접혀
+  // 색인되지 않고 공유·북마크도 목록으로 되돌아갑니다.
   const openPalPage = useCallback((id: string) => {
-    setPalworldUrl(palworldUrl("pals", new URLSearchParams({ pal: id })));
+    trackInternalLinkClick({ fromType: "palworld_list", toType: "pal", toPath: palworldDetailPath("pal", id) });
+    setPalworldUrl(palworldDetailPath("pal", id));
   }, []);
 
   const openItemPage = useCallback((id: string) => {
-    setPalworldUrl(palworldUrl("items", new URLSearchParams({ item: id })));
+    trackInternalLinkClick({ fromType: "palworld_list", toType: "item", toPath: palworldDetailPath("item", id) });
+    setPalworldUrl(palworldDetailPath("item", id));
   }, []);
 
   const openPalMap = useCallback((id: string) => {
     setPalworldUrl(palworldUrl("map", new URLSearchParams({ focusPal: id })));
   }, []);
 
-  const openPalHere = useCallback((id: string) => {
+  /**
+   * 목록 page에서는 색인 가능한 고유 경로로 이동하고 필터는 유지합니다.
+   * 교배·지도·검색 같은 도구 page에서는 작업 중인 화면을 잃지 않도록 경로를 그대로 두고
+   * query modal로 엽니다.
+   */
+  const openDetailHere = useCallback((type: "pal" | "item", id: string) => {
+    trackInternalLinkClick({
+      fromType: palworldPageFromPath(window.location.pathname),
+      toType: type,
+      toPath: palworldDetailPath(type, id),
+    });
+    if (isPalworldEntityListPath(window.location.pathname, type)) {
+      setPalworldUrl(palworldDetailPathWithListQuery(type, id));
+      return;
+    }
     const current = `${window.location.pathname}${window.location.search}`;
-    const withoutDetailState = withQueryParam(
-      withQueryParam(
-        withQueryParam(
-          withQueryParam(current, "stars"),
-          "spawnPeriod"
-        ),
-        "item"
-      ),
-      "skill"
+    const cleared = ["stars", "spawnPeriod", "pal", "item", "skill"].reduce(
+      (url, key) => withQueryParam(url, key),
+      current,
     );
-    setPalworldUrl(withQueryParam(withoutDetailState, "pal", id));
+    setPalworldUrl(withQueryParam(cleared, type, id));
   }, []);
 
-  const openItemHere = useCallback((id: string) => {
-    const current = `${window.location.pathname}${window.location.search}`;
-    const withoutPalState = withQueryParam(
-      withQueryParam(
-        withQueryParam(current, "stars"),
-        "spawnPeriod"
-      ),
-      "pal"
-    );
-    setPalworldUrl(withQueryParam(withQueryParam(withoutPalState, "skill"), "item", id));
-  }, []);
+  const openPalHere = useCallback((id: string) => openDetailHere("pal", id), [openDetailHere]);
+  const openItemHere = useCallback((id: string) => openDetailHere("item", id), [openDetailHere]);
 
   const closeDetail = useCallback(() => {
-    if (!detailRoute.selection) return;
+    const selection = detailRoute.selection;
+    if (!selection) return;
+    // 경로형 상세에서는 목록으로 돌아가되 필터 query는 유지합니다.
+    if (palworldDetailFromPath(window.location.pathname)) {
+      const listPath = palworldPathForPage(palworldPageFromPath(window.location.pathname));
+      const params = new URLSearchParams(window.location.search);
+      for (const key of ["stars", "spawnPeriod"]) params.delete(key);
+      const query = params.toString();
+      setPalworldUrl(`${listPath}${query ? `?${query}` : ""}`, true);
+      return;
+    }
     const current = `${window.location.pathname}${window.location.search}`;
-    const withoutSelection = withQueryParam(current, detailRoute.selection.type);
-    const withoutPalState = detailRoute.selection.type === "pal"
+    const withoutSelection = withQueryParam(current, selection.type);
+    const withoutPalState = selection.type === "pal"
       ? withQueryParam(withQueryParam(withoutSelection, "stars"), "spawnPeriod")
       : withoutSelection;
     setPalworldUrl(withoutPalState, true);
