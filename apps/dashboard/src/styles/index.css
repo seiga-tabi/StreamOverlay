@@ -52,3 +52,5 @@
 @import "./pages/account/32-participation-announcement.css";
 /* 관리자 콘솔 보정. pages layer 에서 단독 소유합니다. */
 @import "./pages/account/33-admin-console.css";
+/* 증강 칼바람 보정. pages layer 에서 단독 소유합니다. */
+@import "./pages/public-lol/34-aram-augments.css";

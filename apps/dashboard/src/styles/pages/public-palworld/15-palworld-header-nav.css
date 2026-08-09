@@ -1,0 +1,81 @@
+/* Palworld 상단바 리디자인 — 태블릿 2행 nav 보정 + 하단 탭바 더보기 시트.
+ *
+ * 모바일(≤48rem)의 하단 탭바 자체는 전역 31-bottom-tab-bar.css 가 소유합니다
+ * (LoL 과 공용). 이 파일은 Palworld 페이지에서만 필요한 나머지를 담습니다.
+ *
+ * 태블릿(48~72rem): 기존 nav 는 내용 폭 + 가로 스크롤이었습니다. 스크롤을
+ * 없애려고 7칸 균등폭(flex-basis 0)으로 펴면 실측(820px · 16px 글꼴)에서
+ * 라벨 가용 폭 97px < 配合組み合わせ 112px 라 일본어가 잘립니다. 그래서
+ * 균등폭이 아니라 내용 비례(flex-basis auto)로 폅니다 — 긴 라벨 칸이 필요한
+ * 만큼 가져가고 남는 폭을 나눠 갖습니다. 일본어 라벨 총합(434px)이 컨테이너
+ * (759px)보다 훨씬 작아 어떤 항목도 잘리지 않습니다.
+ */
+
+@layer pages {
+  @media (min-width: 48rem) and (max-width: 72rem) {
+    .palworld-header .public-horizontal-nav {
+      flex: 1 1 auto;
+      inline-size: 100%;
+    }
+
+    .palworld-header .public-horizontal-nav__content {
+      inline-size: 100%;
+      min-inline-size: 0;
+      justify-content: space-between;
+      gap: var(--yoro-space-1);
+    }
+
+    .palworld-header .public-horizontal-nav__content > :is(button, a) {
+      flex: 1 1 auto;
+      min-inline-size: var(--yoro-size-touch-target);
+      padding-inline: var(--yoro-space-1);
+    }
+  }
+
+  /* 하단 탭바 "더보기" 시트 — 아이템·기술 해금·스킬.
+     프레젠테이션(배경·닫기·포커스)은 공용 BottomSheet 가 담당하고,
+     여기는 목록 항목만 정의합니다. */
+  .palworld-more-menu {
+    display: grid;
+    gap: var(--yoro-space-1);
+  }
+
+  .palworld-more-menu__item {
+    display: flex;
+    align-items: center;
+    gap: var(--yoro-space-3);
+    min-block-size: var(--yoro-size-touch-target);
+    padding: 0 var(--yoro-space-3);
+    border: 0;
+    border-radius: var(--yoro-radius-md);
+    background: transparent;
+    color: var(--yoro-color-text-on-dark);
+    font-size: var(--yoro-font-size-sm);
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .palworld-more-menu__item .public-header-menu-icon {
+    inline-size: var(--yoro-space-4);
+    block-size: var(--yoro-space-4);
+    color: var(--yoro-color-text-on-dark-muted);
+  }
+
+  .palworld-more-menu__item:hover {
+    background: hsl(210 17% 98% / .08);
+  }
+
+  .palworld-more-menu__item.active {
+    background: color-mix(in srgb, var(--yoro-color-success) 18%, transparent);
+    color: var(--yoro-color-success);
+  }
+
+  .palworld-more-menu__item.active .public-header-menu-icon {
+    color: var(--yoro-color-success);
+  }
+
+  .palworld-more-menu__item:focus-visible {
+    outline: none;
+    box-shadow: var(--yoro-shadow-focus);
+  }
+}

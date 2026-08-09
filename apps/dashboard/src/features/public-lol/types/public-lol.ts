@@ -550,7 +550,7 @@ export type PublicExpandedMatchView = "record" | "build";
 
 export type PublicTheme = "light" | "dark";
 
-export type MatchQueueFilter = "all" | "solo" | "flex" | "ranked5v5" | "normal" | "aram" | "aramMayhem";
+export type MatchQueueFilter = "all" | "solo" | "flex" | "ranked5v5" | "normal" | "aram";
 
 export type MatchPeriodFilter = "all" | "7d" | "30d";
 

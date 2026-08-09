@@ -37,12 +37,28 @@ test("하단 탭바는 헤더가 아니라 AppShell 직계 자식으로 렌더�
    legacy layer 의 !important padding shorthand 가 있고, !important 는 cascade
    layer 순서가 뒤집혀 legacy 가 pages 를 이깁니다. shell 루트에는 경쟁하는
    !important 가 없어 pages layer 규칙이 그대로 적용됩니다. */
-test("탭바 높이만큼의 여백은 main 이 아니라 shell 루트에 두고, Palworld는 제외한다", () => {
+test("탭바 높이만큼의 여백은 main 이 아니라 shell 루트에 두고, Palworld도 포함한다", () => {
+  /* Palworld 도 하단 탭바를 렌더링하므로(.palworld-shell 은 .public-lol-shell 을
+     공유) shell 여백에서 더 이상 제외하면 안 됩니다 — 제외가 남으면 Palworld
+     모바일에서 탭바가 마지막 콘텐츠·푸터를 덮습니다. */
   assert.match(
     tabBarCss,
-    /\.public-lol-shell\.yoro-app-shell:not\(\.palworld-shell\) \{[\s\S]*?--public-bottom-tab-bar-height:[\s\S]*?padding-block-end: var\(--public-bottom-tab-bar-height\);/u
+    /\.public-lol-shell\.yoro-app-shell \{[\s\S]*?--public-bottom-tab-bar-height:[\s\S]*?padding-block-end: var\(--public-bottom-tab-bar-height\);/u
   );
+  assert.doesNotMatch(tabBarCss, /:not\(\.palworld-shell\)/u);
   assert.doesNotMatch(tabBarCss, /\.yoro-app-shell__main \{/u);
+});
+
+test("모바일에서 Palworld 헤더의 상단 nav 도 탭바로 대체되어 숨는다", () => {
+  assert.match(
+    tabBarCss,
+    /\.palworld-header \.public-game-header__nav-slot \{[\s\S]{0,80}display: none;/u
+  );
+  // Palworld 탭바 활성색은 헤더와 같은 초록 토큰을 씁니다.
+  assert.match(
+    tabBarCss,
+    /\.palworld-shell \.public-bottom-tab-bar \{[\s\S]{0,120}--public-game-accent: var\(--yoro-color-success\);/u
+  );
 });
 
 /* --public-game-* 토큰은 .public-game-header 요소 자신에만 정의됩니다. 탭바는 그

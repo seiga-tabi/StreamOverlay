@@ -7,3 +7,5 @@
  * legacy layer 위치가 그대로 유지됩니다.
  */
 @import "./14-palworld.css" layer(legacy);
+/* 상단바 리디자인: 태블릿 nav 보정 + 하단 탭바 더보기 시트. pages layer 소유. */
+@import "./15-palworld-header-nav.css";

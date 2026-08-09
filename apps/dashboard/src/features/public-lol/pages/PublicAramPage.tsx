@@ -1,15 +1,53 @@
 import { useEffect, useMemo, useState } from "react";
 import { parseAramAugmentCatalog, type AramAugmentCatalog, type AramAugmentRarity } from "@streamops/shared";
 import { Button } from "../../../shared/ui/Button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../shared/ui/Card";
+import { Card, CardContent, CardHeader } from "../../../shared/ui/Card";
 import { EmptyState, EmptyStateActions, EmptyStateDescription, EmptyStateIcon, EmptyStateTitle } from "../../../shared/ui/EmptyState";
 import { Input } from "../../../shared/ui/Form";
 import { PageHeader, PageHeaderDescription, PageHeaderEyebrow, PageHeaderStatus, PageHeaderTitle } from "../../../shared/ui/PageHeader";
 import { SkeletonCard } from "../../../shared/ui/Skeleton";
 import { Badge } from "../../../shared/ui/Status";
 import { activePublicLocale, t } from "../i18n/public-lol-i18n";
+import { localizedPublicUrlForCurrentLocale } from "../utils/public-locale-path";
 
 type LoadState = "loading" | "ready" | "error";
+
+/* 등급 배지에 "silver" 같은 원문 값이 그대로 보이고 있었습니다. */
+function rarityLabel(value: AramAugmentRarity): string {
+  if (value === "gold") return t().aramRarityGold;
+  if (value === "prismatic") return t().aramRarityPrismatic;
+  return t().aramRaritySilver;
+}
+
+/* 이 페이지에서 나갈 곳이 개인정보·약관·문의뿐이었습니다.
+   증강을 보러 온 사람이 다른 기능을 만날 경로를 둡니다. */
+function AramExits() {
+  return (
+    <nav aria-labelledby="public-aram-exits-title" className="yoro-aram-exits-block">
+      <p className="yoro-aram-exits-title" id="public-aram-exits-title">{t().aramExitsTitle}</p>
+      <ul className="yoro-aram-exits">
+        <li>
+          <a className="yoro-aram-exit" href={localizedPublicUrlForCurrentLocale("/")}>
+            <b>{t().aramExitMatchTitle}</b>
+            <small>{t().aramExitMatchDescription}</small>
+          </a>
+        </li>
+        <li>
+          <a className="yoro-aram-exit" href={localizedPublicUrlForCurrentLocale("/participation")}>
+            <b>{t().aramExitParticipationTitle}</b>
+            <small>{t().aramExitParticipationDescription}</small>
+          </a>
+        </li>
+        <li>
+          <a className="yoro-aram-exit" href={localizedPublicUrlForCurrentLocale("/follow")}>
+            <b>{t().aramExitStreamerTitle}</b>
+            <small>{t().aramExitStreamerDescription}</small>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  );
+}
 
 async function requestCatalog(signal: AbortSignal): Promise<AramAugmentCatalog> {
   const response = await fetch("/api/public/aram/augments", {
@@ -102,6 +140,8 @@ export function PublicAramPage() {
         </EmptyState>
       ) : null}
 
+      {state === "ready" && catalog?.status === "preparing" ? <AramExits /> : null}
+
       {state === "ready" && catalog?.status === "ready" ? (
         <>
           <div className="public-aram-toolbar">
@@ -145,13 +185,22 @@ export function PublicAramPage() {
                       />
                     ) : null}
                     <div className="public-aram-card-heading-copy">
-                      <Badge tone="neutral">{augment.rarity}</Badge>
-                      <CardTitle as="h2">{activePublicLocale === "ja" ? augment.nameJa : augment.nameKo}</CardTitle>
+                      <Badge tone="neutral">{rarityLabel(augment.rarity)}</Badge>
+                      {/* CardTitle 도 04-followers.css:671 의 !important 에 걸립니다. */}
+                      <h2 className="yoro-aram-name">
+                        {activePublicLocale === "ja" ? augment.nameJa : augment.nameKo}
+                      </h2>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription>{activePublicLocale === "ja" ? augment.descriptionJa : augment.descriptionKo}</CardDescription>
+                  {/* CardDescription 을 쓰면 04-followers.css 의
+                      `.public-dashboard-shell .yoro-card__description { color: ... !important }`
+                      에 걸려 카드 배경과 같은 밝기가 됩니다(실측 1.03:1).
+                      legacy !important 는 pages layer 로 이길 수 없어 새 이름을 씁니다. */}
+                  <p className="yoro-aram-desc">
+                    {activePublicLocale === "ja" ? augment.descriptionJa : augment.descriptionKo}
+                  </p>
                 </CardContent>
               </Card>
             ))}
@@ -162,6 +211,7 @@ export function PublicAramPage() {
               <EmptyStateDescription>{t().aramNoResultsDescription}</EmptyStateDescription>
             </EmptyState>
           ) : null}
+          <AramExits />
         </>
       ) : null}
     </section>

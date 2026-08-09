@@ -1682,12 +1682,21 @@ test("펠월드 홈은 Hero 검색과 Twitch 로그인 LIVE rail만 표시하고
   await expect(page.getByRole("heading", { name: "Palworld DB", level: 1 })).toBeVisible();
   await expect(page.getByTestId("hero-search")).toBeVisible();
   await expect(page.getByTestId("header-search")).toHaveCount(0);
-  await expect(page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "홈" })).toHaveAttribute("aria-current", "page");
+  if (usesMobilePublicMenu(page)) {
+    await expect(page.getByTestId("palworld-bottom-tab-bar").getByRole("button", { name: "홈" })).toHaveAttribute("aria-current", "page");
+  } else {
+    await expect(page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "홈" })).toHaveAttribute("aria-current", "page");
+  }
   await expect(page.locator(".palworld-hero-meta, .palworld-shortcuts, .palworld-summary")).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "팔로우 중인 LIVE 스트리머" })).toBeVisible();
   await expect(page.getByText("Twitch 로그인 후 팔로우 중인 스트리머의 방송 상태를 확인할 수 있습니다.")).toBeVisible();
   await expect(page.getByTestId("public-live-streamer-rail").getByRole("button", { name: "Twitch 로그인" })).toBeVisible();
-  await expect(page.getByTestId("palworld-secondary-nav").getByRole("button")).toHaveCount(7);
+  if (usesMobilePublicMenu(page)) {
+    /* 모바일 주 메뉴 = 하단 탭바 5칸(핵심 4 + 더보기). 나머지 3개는 더보기 시트. */
+    await expect(page.getByTestId("palworld-bottom-tab-bar").getByRole("button")).toHaveCount(5);
+  } else {
+    await expect(page.getByTestId("palworld-secondary-nav").getByRole("button")).toHaveCount(7);
+  }
   const primaryCards = page.locator(".palworld-home-primary-card");
   await expect(primaryCards).toHaveCount(3);
   await expect(page.locator(".palworld-home-primary-card__arrow")).toHaveCount(0);
@@ -1793,7 +1802,11 @@ test("Palworld 하위 데이터 페이지는 Twitch 상태만 조회하고 홈 �
   }
   expect(fixture.followedRequestCount()).toBe(0);
 
-  await page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "홈" }).click();
+  /* 모바일에서 주 메뉴는 하단 탭바입니다(상단 nav 는 접근성 트리에서 제외). */
+  const homeNav = usesMobilePublicMenu(page)
+    ? page.getByTestId("palworld-bottom-tab-bar").getByRole("button", { name: "홈" })
+    : page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "홈" });
+  await homeNav.click();
   await expect(page).toHaveURL(/\/palworld$/u);
   await expect.poll(() => fixture.followedRequestCount()).toBe(1);
   await expect(page.getByTestId("public-live-streamer-rail").getByText("Live Pal", { exact: true })).toBeVisible();
@@ -2989,10 +3002,19 @@ test("아이템 상세의 관련 Pal 링크는 이미지와 fallback을 유지�
 
 test("스킬 경로는 필터·현지화 번역·속성 아이콘·상세·관련 Pal과 history를 지원한다", async ({ page }) => {
   const errors = collectRuntimeErrors(page);
+  /* 모바일에서는 상단 nav 가 하단 탭바로 대체되고, 스킬은 "더보기" 시트 안에
+     있습니다 — 활성 표시는 더보기 트리거가 active 색으로 이어받습니다. */
+  const skillsTabBarMode = (page.viewportSize()?.width ?? 0) <= 768;
   await page.goto("/palworld/skills?type=active&element=ground&sort=power&order=desc");
 
   await expect(page.getByTestId("header-search")).toBeVisible();
-  await expect(page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "스킬" })).toHaveAttribute("aria-current", "page");
+  if (skillsTabBarMode) {
+    await expect(
+      page.getByTestId("palworld-bottom-tab-bar").locator("[aria-controls='palworld-more-menu']")
+    ).toHaveClass(/active/u);
+  } else {
+    await expect(page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "스킬" })).toHaveAttribute("aria-current", "page");
+  }
   const skillTypeTabs = page.getByRole("navigation", { name: "스킬 종류" });
   await expect(skillTypeTabs.getByRole("button", { name: "액티브 스킬" })).toHaveAttribute("aria-pressed", "true");
   await expect(skillTypeTabs.getByRole("button", { name: "패시브 스킬" })).toHaveAttribute("aria-pressed", "false");
@@ -3074,11 +3096,23 @@ test("스킬 경로는 필터·현지화 번역·속성 아이콘·상세·관�
   await expect(page.locator(".palworld-skill-card").filter({ hasText: "ストーンショット" })).not.toContainText(
     "翻訳確認中",
   );
-  await page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "アイテム" }).click();
+  if (skillsTabBarMode) {
+    /* 더보기 시트를 통해 아이템으로 이동 — 시트 항목의 실제 라우팅 검증을 겸합니다. */
+    await page.getByTestId("palworld-bottom-tab-bar").getByRole("button", { name: "その他" }).click();
+    await page.locator(".palworld-more-menu").getByRole("button", { name: "アイテム" }).click();
+  } else {
+    await page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "アイテム" }).click();
+  }
   await expect(page).toHaveURL(/\/palworld\/items/u);
   await page.goBack();
   await expect(page).toHaveURL(/\/palworld\/skills/u);
-  await expect(page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "スキル" })).toHaveAttribute("aria-current", "page");
+  if (skillsTabBarMode) {
+    await expect(
+      page.getByTestId("palworld-bottom-tab-bar").locator("[aria-controls='palworld-more-menu']")
+    ).toHaveClass(/active/u);
+  } else {
+    await expect(page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "スキル" })).toHaveAttribute("aria-current", "page");
+  }
   await page.goForward();
   await expect(page).toHaveURL(/\/palworld\/items/u);
   await assertHealthyDocument(page, errors);
@@ -3575,11 +3609,15 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
   const errors = collectRuntimeErrors(page);
   const isMobileViewport = (page.viewportSize()?.width ?? 0) <= 768;
   await page.goto("/palworld/items");
-  await page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "지도" }).click();
+  /* 모바일에서는 상단 nav 가 하단 탭바로 대체됩니다(PalworldBottomTabBar). */
+  const mapNavButton = isMobileViewport
+    ? page.getByTestId("palworld-bottom-tab-bar").getByRole("button", { name: "지도" })
+    : page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "지도" });
+  await mapNavButton.click();
 
   await expect(page).toHaveURL(/\/palworld\/map(?:\?.*)?$/u);
   await expect(page.getByTestId("header-search")).toBeVisible();
-  await expect(page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "지도" })).toHaveAttribute("aria-current", "page");
+  await expect(mapNavButton).toHaveAttribute("aria-current", "page");
   await expect(page.getByRole("heading", { name: "Palworld 월드 지도", level: 1 })).toHaveClass(/yoro-u-sr-only/u);
   await expect(page.locator(".palworld-map-page > .palworld-page-heading")).toHaveCount(0);
   const mapImage = page.getByTestId("palworld-map-image");
@@ -3947,43 +3985,78 @@ for (const viewport of publicChromeResponsiveViewports) {
     await expect(page.getByTestId("public-live-streamer-rail").locator(".public-home-live-card")).toHaveCount(1);
     await assertHealthyDocument(page, errors);
 
-    const secondaryRow = page.locator(".public-horizontal-nav");
-    const homeMenu = page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "홈" });
-    const mapMenu = page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "지도" });
-    await homeMenu.focus();
-    await expect(homeMenu).toBeFocused();
-    await expect.poll(() => secondaryRow.evaluate((row) => {
-      const button = document.activeElement as HTMLElement | null;
-      if (!button || !row.contains(button)) return false;
-      const rowBounds = row.getBoundingClientRect();
-      const buttonBounds = button.getBoundingClientRect();
-      return buttonBounds.left >= rowBounds.left - 1 && buttonBounds.right <= rowBounds.right + 1;
-    })).toBe(true);
-    await mapMenu.focus();
-    await expect(mapMenu).toBeFocused();
-    await expect.poll(() => secondaryRow.evaluate((row) => {
-      const button = row.querySelector<HTMLElement>("button:last-child");
-      if (!button) return false;
-      const rowBounds = row.getBoundingClientRect();
-      const buttonBounds = button.getBoundingClientRect();
-      return buttonBounds.left >= rowBounds.left - 1 && buttonBounds.right <= rowBounds.right + 1;
-    })).toBe(true);
-    const menuMetrics = await secondaryRow.evaluate((row) => ({
-      clientHeight: row.clientHeight,
-      scrollHeight: row.scrollHeight,
-      clientWidth: row.clientWidth,
-      scrollWidth: row.scrollWidth,
-      overflowY: window.getComputedStyle(row).overflowY,
-    }));
-    expect(menuMetrics.overflowY).toBe("hidden");
-    if (viewport.width >= 1024) {
-      expect(menuMetrics.scrollHeight, `${viewport.width}px 메뉴에 세로 스크롤 영역이 없어야 합니다.`).toBe(menuMetrics.clientHeight);
-    }
-    if (viewport.width === 1440) expect(menuMetrics.scrollWidth).toBeLessThanOrEqual(menuMetrics.clientWidth + 1);
+    /* 모바일(≤48rem)에서는 상단 가로 nav 가 하단 고정 탭바로 대체됩니다
+       (31-bottom-tab-bar.css · PalworldBottomTabBar). 탭바 모드에서는 상단
+       nav 대신 탭바의 고정 위치·칸 잘림·지도 이동을 검증합니다. */
+    const tabBarMode = viewport.width <= 768;
+    if (tabBarMode) {
+      const tabBar = page.getByTestId("palworld-bottom-tab-bar");
+      await expect(tabBar).toBeVisible();
+      await expect(page.getByTestId("palworld-secondary-nav")).toBeHidden();
+      const tabState = await tabBar.evaluate((bar) => {
+        const rect = bar.getBoundingClientRect();
+        const labels = [...bar.querySelectorAll(".public-bottom-tab-bar__item span")].map((span) => ({
+          text: span.textContent ?? "",
+          clipped: span.scrollWidth > span.clientWidth + 1,
+        }));
+        return {
+          pinnedToBottom: Math.round(rect.bottom) === window.innerHeight,
+          withinViewport: rect.left >= -0.5 && rect.right <= window.innerWidth + 0.5,
+          insideHeader: Boolean(bar.closest(".yoro-app-shell__header")),
+          labels,
+        };
+      });
+      expect(tabState.pinnedToBottom, `${viewport.width}px에서 탭바는 화면 하단에 고정돼야 합니다.`).toBe(true);
+      expect(tabState.withinViewport, `${viewport.width}px에서 탭바가 화면 밖으로 나가면 안 됩니다.`).toBe(true);
+      expect(tabState.insideHeader, "탭바는 헤더 밖(AppShell 직계)에서 렌더링돼야 합니다.").toBe(false);
+      expect(tabState.labels.map((label) => label.text)).toEqual(["홈", "Pal 도감", "교배", "지도", "더보기"]);
+      expect(
+        tabState.labels.filter((label) => label.clipped).map((label) => label.text),
+        `${viewport.width}px에서 잘리는 탭 라벨이 없어야 합니다.`
+      ).toEqual([]);
 
-    await mapMenu.click();
-    await expect(page).toHaveURL(/\/palworld\/map$/u);
-    await expect(page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "지도" })).toHaveAttribute("aria-current", "page");
+      await tabBar.getByRole("button", { name: "지도" }).click();
+      await expect(page).toHaveURL(/\/palworld\/map$/u);
+      await expect(tabBar.getByRole("button", { name: "지도" })).toHaveAttribute("aria-current", "page");
+    } else {
+      const secondaryRow = page.locator(".public-horizontal-nav");
+      const homeMenu = page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "홈" });
+      const mapMenu = page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "지도" });
+      await homeMenu.focus();
+      await expect(homeMenu).toBeFocused();
+      await expect.poll(() => secondaryRow.evaluate((row) => {
+        const button = document.activeElement as HTMLElement | null;
+        if (!button || !row.contains(button)) return false;
+        const rowBounds = row.getBoundingClientRect();
+        const buttonBounds = button.getBoundingClientRect();
+        return buttonBounds.left >= rowBounds.left - 1 && buttonBounds.right <= rowBounds.right + 1;
+      })).toBe(true);
+      await mapMenu.focus();
+      await expect(mapMenu).toBeFocused();
+      await expect.poll(() => secondaryRow.evaluate((row) => {
+        const button = row.querySelector<HTMLElement>("button:last-child");
+        if (!button) return false;
+        const rowBounds = row.getBoundingClientRect();
+        const buttonBounds = button.getBoundingClientRect();
+        return buttonBounds.left >= rowBounds.left - 1 && buttonBounds.right <= rowBounds.right + 1;
+      })).toBe(true);
+      const menuMetrics = await secondaryRow.evaluate((row) => ({
+        clientHeight: row.clientHeight,
+        scrollHeight: row.scrollHeight,
+        clientWidth: row.clientWidth,
+        scrollWidth: row.scrollWidth,
+        overflowY: window.getComputedStyle(row).overflowY,
+      }));
+      expect(menuMetrics.overflowY).toBe("hidden");
+      if (viewport.width >= 1024) {
+        expect(menuMetrics.scrollHeight, `${viewport.width}px 메뉴에 세로 스크롤 영역이 없어야 합니다.`).toBe(menuMetrics.clientHeight);
+      }
+      if (viewport.width === 1440) expect(menuMetrics.scrollWidth).toBeLessThanOrEqual(menuMetrics.clientWidth + 1);
+
+      await mapMenu.click();
+      await expect(page).toHaveURL(/\/palworld\/map$/u);
+      await expect(page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "지도" })).toHaveAttribute("aria-current", "page");
+    }
     await expect(page.getByTestId("palworld-map-image")).toBeVisible();
     const mobileMapLayout = viewport.width <= 768;
     if (!mobileMapLayout) {

@@ -1,14 +1,15 @@
-/* 모바일 하단 고정 탭바 — LoL 전용.
+/* 모바일 하단 고정 탭바 — LoL(5칸)·Palworld(4+더보기) 공용.
  *
  * 기존 상단 가로 스크롤 nav(27-mobile-nav.css)는 폭을 정확히 나눠 잘림을
- * 막았지만, 스크롤이 필요한 방식 자체는 그대로였습니다. 이 파일은 LoL 화면에서만
- * 그 nav를 하단 고정 탭바로 완전히 대체합니다 — 5칸이 always 균등폭이라
- * 스크롤도, 잘림도 애초에 성립하지 않습니다. Palworld·Bot 헤더는
- * 27-mobile-nav.css 의 기존 가로 nav를 그대로 씁니다(이 파일의 영향 밖).
+ * 막았지만, 스크롤이 필요한 방식 자체는 그대로였습니다. 이 파일은 그 nav를
+ * 하단 고정 탭바로 완전히 대체합니다 — 5칸이 always 균등폭이라 스크롤도,
+ * 잘림도 애초에 성립하지 않습니다. Bot 헤더만 27-mobile-nav.css 의 기존
+ * 가로 nav를 그대로 씁니다(이 파일의 영향 밖).
  *
- * 탭바 요소는 헤더가 아니라 AppShell 직계 자식입니다(PublicLolPage). 헤더 안에
- * 두면 전적검색 결과 헤더의 backdrop-filter 가 position:fixed 의 containing block
- * 이 되어 탭바가 화면 하단이 아니라 상단바 아래에 붙습니다.
+ * 탭바 요소는 헤더가 아니라 AppShell 직계 자식입니다(PublicLolPage ·
+ * PublicPalworldPage). 헤더 안에 두면 전적검색 결과 헤더의 backdrop-filter 가
+ * position:fixed 의 containing block 이 되어 탭바가 화면 하단이 아니라
+ * 상단바 아래에 붙습니다.
  */
 
 @layer pages {
@@ -24,6 +25,12 @@
     display: none;
   }
 
+  /* Palworld 헤더와 같은 accent(초록) — public-game-chrome.css 의
+     .palworld-shell .public-game-header 재정의와 같은 원본 토큰입니다. */
+  .palworld-shell .public-bottom-tab-bar {
+    --public-game-accent: var(--yoro-color-success);
+  }
+
   @media (max-width: 48rem) {
     /* PublicBottomTabBar 는 LoL 페이지(PublicLolPage)의 AppShell 에서만
        렌더링해, 이 클래스 자체가 Palworld·Bot 페이지 DOM에는 등장하지
@@ -34,9 +41,9 @@
        padding-block-end 를 더합니다. */
     /* 탭바와 shell padding이 같은 값을 읽도록 shell 루트에서 정의합니다 —
        .public-bottom-tab-bar 자신에 정의하면 형제 요소에는 상속되지 않습니다.
-       Palworld 페이지는 .public-lol-shell 클래스를 공유하지만 탭바가 없으므로
-       제외합니다 — 빼먹으면 탭바 없는 화면이 빈 하단 여백만 받습니다. */
-    .public-lol-shell.yoro-app-shell:not(.palworld-shell) {
+       Palworld 도 이제 탭바를 렌더링하므로(.public-lol-shell 공유) 함께
+       여백을 받습니다 — Bot 페이지는 이 클래스를 쓰지 않아 영향 밖입니다. */
+    .public-lol-shell.yoro-app-shell {
       --public-bottom-tab-bar-height: calc(
         var(--yoro-size-touch-target) + var(--yoro-space-2)
         + max(var(--yoro-space-1), env(safe-area-inset-bottom))
@@ -73,19 +80,22 @@
       box-sizing: border-box;
     }
 
-    /* 대체되는 상단 가로 nav는 LoL 헤더에서만 숨깁니다 — Palworld·Bot은
-       27-mobile-nav.css 의 기존 동작을 그대로 유지합니다. */
-    .lol-public-game-header .public-game-header__nav-slot {
+    /* 대체되는 상단 가로 nav는 탭바를 쓰는 LoL·Palworld 헤더에서 숨깁니다 —
+       Bot 은 27-mobile-nav.css 의 기존 동작을 그대로 유지합니다. */
+    .lol-public-game-header .public-game-header__nav-slot,
+    .palworld-header .public-game-header__nav-slot {
       display: none;
     }
 
-    .lol-public-game-header[data-search="true"] .public-game-header__layout {
+    .lol-public-game-header[data-search="true"] .public-game-header__layout,
+    .palworld-header[data-search="true"] .public-game-header__layout {
       grid-template-areas:
         "product toggle"
         "search search";
     }
 
-    .lol-public-game-header[data-home="true"] .public-game-header__layout {
+    .lol-public-game-header[data-home="true"] .public-game-header__layout,
+    .palworld-header[data-home="true"] .public-game-header__layout {
       grid-template-areas: "product toggle";
     }
   }

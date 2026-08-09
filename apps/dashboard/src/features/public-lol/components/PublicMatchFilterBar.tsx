@@ -34,7 +34,6 @@ export type PublicMatchFilterBarText = {
   ranked5v5: ReactNode;
   normalQueue: ReactNode;
   aramQueue: ReactNode;
-  aramMayhemQueue: ReactNode;
   allChampions: ReactNode;
   periodAll: ReactNode;
   period7: ReactNode;
@@ -74,8 +73,7 @@ export function PublicMatchFilterBar({
     { value: "flex", label: text.flexQueue },
     { value: "ranked5v5", label: text.ranked5v5 },
     { value: "normal", label: text.normalQueue },
-    { value: "aram", label: text.aramQueue },
-    { value: "aramMayhem", label: text.aramMayhemQueue }
+    { value: "aram", label: text.aramQueue }
   ];
 
   return (

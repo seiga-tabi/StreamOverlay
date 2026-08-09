@@ -77,6 +77,9 @@ const ko = {
   mainMenu: "주 메뉴",
   pals: "Pal 도감",
   breeding: "교배 조합",
+  /* 하단 탭바 전용 짧은 라벨 — "교배 조합"·"配合組み合わせ"는 탭 칸 폭을 넘습니다. */
+  breedingShort: "교배",
+  moreMenu: "더보기",
   items: "아이템",
   technology: "기술 해금",
   technologyTitle: "Palworld 기술 해금",
@@ -653,6 +656,9 @@ const ja: Record<keyof typeof ko, string> = {
   mainMenu: "メインメニュー",
   pals: "パル図鑑",
   breeding: "配合組み合わせ",
+  /* 下部タブバー専用の短いラベル — フルラベルはタブ幅を超えます。 */
+  breedingShort: "配合",
+  moreMenu: "その他",
   items: "アイテム",
   technology: "技術解放",
   technologyTitle: "Palworld テクノロジー解放",

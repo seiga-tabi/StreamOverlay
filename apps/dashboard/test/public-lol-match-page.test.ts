@@ -63,7 +63,7 @@ test("LoL 추가 전적 미리 준비와 클릭 요청은 하나의 네트워크
   }
 });
 
-test("칼바람과 증강 칼바람 전적은 서로 다른 query와 캐시로 조회한다", async () => {
+test("칼바람과 솔로랭크 전적은 서로 다른 query와 캐시로 조회한다", async () => {
   const originalWindow = globalThis.window;
   const originalFetch = globalThis.fetch;
   Object.assign(globalThis, {
@@ -100,15 +100,15 @@ test("칼바람과 증강 칼바람 전적은 서로 다른 query와 캐시로 �
     invalidatePublicLolMatchPageCache("AramPlayer#JP1", "jp1");
 
     const aram = await getPublicLolMatchPage("AramPlayer#JP1", 0, "jp1", undefined, "aram");
-    const mayhem = await getPublicLolMatchPage("AramPlayer#JP1", 0, "jp1", undefined, "aramMayhem");
-    const cachedMayhem = await getPublicLolMatchPage("AramPlayer#JP1", 0, "jp1", undefined, "aramMayhem");
+    const solo = await getPublicLolMatchPage("AramPlayer#JP1", 0, "jp1", undefined, "solo");
+    const cachedSolo = await getPublicLolMatchPage("AramPlayer#JP1", 0, "jp1", undefined, "solo");
 
     assert.equal(aram.fetchedAt, "2026-08-06T00:00:00.000Z");
-    assert.equal(mayhem.fetchedAt, "2026-08-06T00:01:00.000Z");
-    assert.equal(cachedMayhem.fetchedAt, mayhem.fetchedAt);
+    assert.equal(solo.fetchedAt, "2026-08-06T00:01:00.000Z");
+    assert.equal(cachedSolo.fetchedAt, solo.fetchedAt);
     assert.equal(requestedUrls.length, 2);
     assert.equal(new URL(requestedUrls[0]!).searchParams.get("queue"), "aram");
-    assert.equal(new URL(requestedUrls[1]!).searchParams.get("queue"), "aramMayhem");
+    assert.equal(new URL(requestedUrls[1]!).searchParams.get("queue"), "solo");
   } finally {
     globalThis.fetch = originalFetch;
     Object.assign(globalThis, { window: originalWindow });

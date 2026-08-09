@@ -201,9 +201,11 @@ test("매치 요약과 필터 계산을 기존 규칙으로 유지한다", () =>
   const profile = { recentMatches: matches } as PublicLolProfile;
   assert.deepEqual(filteredMatches(profile, { queue: "solo", championId: "all", period: "all" }).map((item) => item.matchId), ["solo"]);
   assert.deepEqual(filteredMatches(profile, { queue: "aram", championId: "all", period: "all" }).map((item) => item.matchId), ["aram"]);
+  // Riot는 증강 칼바람(queueId 2400) 매치 조회를 공개 API에서 막고 있어 별도 필터를 제공하지 않습니다.
+  // 다만 과거에 저장된 데이터에 남아 있을 수 있는 알 수 없는 큐도 "전체"에서는 계속 보여야 합니다.
   assert.deepEqual(
-    filteredMatches(profile, { queue: "aramMayhem", championId: "all", period: "all" }).map((item) => item.matchId),
-    ["aram-mayhem"]
+    filteredMatches(profile, { queue: "all", championId: "all", period: "all" }).map((item) => item.matchId),
+    ["solo", "aram", "aram-mayhem"]
   );
 });
 

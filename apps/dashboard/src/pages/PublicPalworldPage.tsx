@@ -22,6 +22,7 @@ import { lazyNamed } from "../shared/lazyNamed";
 import { usePublicLocale } from "../features/public-lol/hooks/usePublicLocale";
 import { usePublicTheme } from "../features/public-lol/hooks/usePublicTheme";
 import { setActivePublicLocale } from "../features/public-lol/i18n/public-lol-i18n";
+import { PalworldBottomTabBar } from "../features/public-palworld/components/PalworldBottomTabBar";
 import { PalworldHeader } from "../features/public-palworld/components/PalworldHeader";
 import { PalworldHome } from "../features/public-palworld/components/PalworldHome";
 import { PalworldNotFoundPage } from "../features/public-palworld/components/PalworldNotFoundPage";
@@ -509,6 +510,10 @@ export function PublicPalworldPage() {
         {page === "map" ? <PalworldMapPage focusPalId={focusPalId} locale={locale} onOpenPal={openPalHere} /> : null}
         </Suspense> : null}
       </AppShellMain>
+      {/* 하단 탭바는 헤더가 아니라 AppShell 직계 자식으로 둡니다 — 헤더에
+          backdrop-filter류가 걸리면 position:fixed 기준이 헤더로 바뀌어 탭바가
+          화면 하단에서 떨어집니다(LoL 전적검색 헤더에서 실제 발생했던 사고). */}
+      <PalworldBottomTabBar locale={locale} page={page} />
       <PalworldSourceFooter locale={locale} />
       {selectedPalId ? (
         <Suspense fallback={(

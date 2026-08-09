@@ -446,8 +446,7 @@ const queueLabels: Record<PublicLocale, Record<number, string>> = {
     420: "솔로랭크",
     430: "일반",
     440: "자유랭크",
-    450: "칼바람",
-    2400: "증강 칼바람"
+    450: "칼바람"
   },
   ja: {
     6: "5v5 ランク",
@@ -456,8 +455,7 @@ const queueLabels: Record<PublicLocale, Record<number, string>> = {
     420: "ソロランク",
     430: "ノーマル",
     440: "フレックスランク",
-    450: "ランダムミッド",
-    2400: "ランダムミッド：メイヘム"
+    450: "ランダムミッド"
   }
 };
 
@@ -2278,7 +2276,6 @@ function PublicFilterPanel({
           <option value="ranked5v5">{t().ranked5v5}</option>
           <option value="normal">{t().normalQueue}</option>
           <option value="aram">{t().aramQueue}</option>
-          <option value="aramMayhem">{t().aramMayhemQueue}</option>
         </select>
       </label>
       <ChampionFilterSelect
@@ -2360,7 +2357,6 @@ function PublicMatchFilterBar({
     ranked5v5: t().ranked5v5,
     normalQueue: t().normalQueue,
     aramQueue: t().aramQueue,
-    aramMayhemQueue: t().aramMayhemQueue,
     allChampions: t().allChampions,
     periodAll: t().periodAll,
     period7: t().period7,

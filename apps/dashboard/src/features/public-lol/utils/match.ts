@@ -176,7 +176,6 @@ export function queueMatchesFilter(match: PublicLolRecentMatch, queue: MatchQueu
   if (queue === "ranked5v5") return match.queueId === 42 || match.queueId === 6;
   if (queue === "normal") return match.queueId === 400 || match.queueId === 430;
   if (queue === "aram") return match.queueId === 450;
-  if (queue === "aramMayhem") return match.queueId === 2400;
   return true;
 }
 

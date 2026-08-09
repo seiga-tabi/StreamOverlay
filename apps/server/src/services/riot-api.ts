@@ -95,6 +95,15 @@ export type RiotMatchParticipant = {
   totalTimeSpentDead?: number;
   summoner1Id?: number;
   summoner2Id?: number;
+  /* 증강. Match-V5 는 모든 경기에 이 여섯 필드를 담아 주고, 증강이 없는 모드에서는
+     값이 0 입니다. 실측: 아레나(queue 1700)는 0 이 아닌 값, 칼바람(450)은 전부 0.
+     4개가 아니라 6개입니다. */
+  playerAugment1?: number;
+  playerAugment2?: number;
+  playerAugment3?: number;
+  playerAugment4?: number;
+  playerAugment5?: number;
+  playerAugment6?: number;
   perks?: {
     statPerks?: {
       defense?: number;

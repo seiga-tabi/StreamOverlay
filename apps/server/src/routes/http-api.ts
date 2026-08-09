@@ -290,8 +290,8 @@ const STREAMER_PROFILE_LINK_MAX = 5;
 const STREAMER_PROFILE_LINK_LABEL_MAX = 40;
 const STREAMER_PROFILE_LINK_URL_MAX = 2048;
 const PUBLIC_LOL_PROFILE_TOP_CHAMPION_COUNT = 5;
-const PUBLIC_LOL_PROFILE_QUEUES = [420, 440, 42, 6, 430, 400, 450, 2400];
-type PublicLolMatchQueueFilter = "all" | "solo" | "flex" | "ranked5v5" | "normal" | "aram" | "aramMayhem";
+const PUBLIC_LOL_PROFILE_QUEUES = [420, 440, 42, 6, 430, 400, 450];
+type PublicLolMatchQueueFilter = "all" | "solo" | "flex" | "ranked5v5" | "normal" | "aram";
 
 const PUBLIC_LOL_MATCH_QUEUE_IDS: Record<PublicLolMatchQueueFilter, readonly number[]> = {
   all: [],
@@ -299,8 +299,7 @@ const PUBLIC_LOL_MATCH_QUEUE_IDS: Record<PublicLolMatchQueueFilter, readonly num
   flex: [440],
   ranked5v5: [42, 6],
   normal: [400, 430],
-  aram: [450],
-  aramMayhem: [2400]
+  aram: [450]
 };
 const PUBLIC_LOL_PROFILE_CACHE_TTL_MS = 10 * 60_000;
 const PUBLIC_LOL_PROFILE_STALE_TTL_MS = 24 * 60 * 60_000;
@@ -517,6 +516,9 @@ type PublicLolMatchParticipant = {
   items: PublicLolMatchItem[];
   summonerSpells: number[];
   runes: PublicLolMatchRune[];
+  /* 증강 모드에서 고른 증강 id. 증강이 없는 모드에서는 생략합니다.
+     Riot 은 모든 경기에 playerAugment1~6 을 담아 주고 값 0 은 미선택입니다. */
+  augmentIds?: number[];
   badges?: PublicLolMatchBadge[];
 };
 
@@ -2537,6 +2539,24 @@ async function participantItems(
   }
 }
 
+/* 실제로 고른 증강 id 만 남깁니다.
+ *
+ * Match-V5 는 모든 경기에 playerAugment1~6 을 담아 줍니다(4개가 아닙니다).
+ * 증강이 없는 모드는 여섯 값이 전부 0 이므로 결과가 비고, 그때는 응답에서 생략합니다.
+ * 실측 2026-08-09: 아레나(queue 1700) 6개 모두 0 이 아님 · 칼바람(450) 전부 0.
+ */
+function participantAugmentIds(participant: RiotMatchParticipant): number[] | undefined {
+  const ids = [
+    participant.playerAugment1,
+    participant.playerAugment2,
+    participant.playerAugment3,
+    participant.playerAugment4,
+    participant.playerAugment5,
+    participant.playerAugment6
+  ].filter((id): id is number => Number.isInteger(id) && (id as number) > 0);
+  return ids.length > 0 ? ids : undefined;
+}
+
 function participantSummonerSpells(participant: RiotMatchParticipant): number[] {
   return [safeMatchStat(participant.summoner1Id), safeMatchStat(participant.summoner2Id)].filter((spellId) => spellId > 0);
 }
@@ -2864,6 +2884,7 @@ async function publicLolMatchParticipantDetail(
   const damageDealtToObjectives = safeOptionalStat(participant.totalDamageDealtToObjectives);
   const damageTaken = safeOptionalStat(participant.totalDamageTaken);
   const visionScore = safeOptionalStat(participant.visionScore);
+  const augmentIds = participantAugmentIds(participant);
   return {
     participantId: safeOptionalStat(participant.participantId),
     riotId,
@@ -2894,6 +2915,7 @@ async function publicLolMatchParticipantDetail(
     visionScorePerMinute: averageDefined([participant.challenges?.visionScorePerMinute], 2) ?? (visionScore !== undefined && durationMinutes ? roundTo(visionScore / durationMinutes, 2) : undefined),
     items: await participantItems(dataDragon, participant, dataDragonVersion),
     summonerSpells: participantSummonerSpells(participant),
+    ...(augmentIds ? { augmentIds } : {}),
     runes: await participantRunes(dataDragon, dataDragonVersion, participant),
     badges: publicLolMatchBadges(match, participant)
   };

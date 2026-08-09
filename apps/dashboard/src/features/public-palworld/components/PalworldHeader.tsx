@@ -19,7 +19,9 @@ import {
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import { palworldPathForPage, setPalworldUrl, type PalworldPage } from "../utils/routes";
 
-const navItems: Array<{ page: Exclude<PalworldPage, "search">; ko: string; ja: string }> = [
+/* 하단 탭바(PalworldBottomTabBar)와 항목 데이터·아이콘을 공유합니다 —
+   라벨·순서·활성 판정이 두 곳에서 어긋나지 않게 하는 단일 원본입니다. */
+export const palworldNavItems: Array<{ page: Exclude<PalworldPage, "search">; ko: string; ja: string }> = [
   { page: "home", ko: palworldI18n.ko.home, ja: palworldI18n.ja.home },
   { page: "pals", ko: palworldI18n.ko.pals, ja: palworldI18n.ja.pals },
   { page: "breeding", ko: palworldI18n.ko.breeding, ja: palworldI18n.ja.breeding },
@@ -28,8 +30,16 @@ const navItems: Array<{ page: Exclude<PalworldPage, "search">; ko: string; ja: s
   { page: "skills", ko: palworldI18n.ko.skills, ja: palworldI18n.ja.skills },
   { page: "map", ko: palworldI18n.ko.map, ja: palworldI18n.ja.map },
 ];
+const navItems = palworldNavItems;
 
-function PalworldNavIcon({ page }: { page: Exclude<PalworldPage, "search"> }) {
+export function isPalworldNavItemActive(
+  itemPage: Exclude<PalworldPage, "search">,
+  page: PalworldPage
+): boolean {
+  return itemPage === page || (page === "search" && itemPage === "home");
+}
+
+export function PalworldNavIcon({ page }: { page: Exclude<PalworldPage, "search"> }) {
   const commonProps = {
     "aria-hidden": true,
     className: "public-header-menu-icon",
@@ -169,7 +179,7 @@ export function PalworldHeader({
   const navigation = (
     <PublicHorizontalNav ariaLabel={text.mainMenu} testId="palworld-secondary-nav">
       {navItems.map((item) => {
-        const active = item.page === page || (page === "search" && item.page === "home");
+        const active = isPalworldNavItemActive(item.page, page);
         return (
           <button
             className={active ? "active" : ""}
