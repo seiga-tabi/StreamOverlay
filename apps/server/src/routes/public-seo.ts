@@ -333,6 +333,7 @@ function organizationStructuredData(): unknown {
 const BREADCRUMB_SEGMENT_LABELS: Readonly<Record<string, Readonly<Record<PublicUrlLocale, string>>>> = {
   "/lol": { ko: "LoL 전적 검색", ja: "LoL戦績検索" },
   "/lol/aram": { ko: "증강 칼바람", ja: "オーグメントARAM" },
+  "/patch-notes": { ko: "패치 노트", ja: "パッチノート" },
   "/lol/summoners": { ko: "소환사", ja: "サモナー" },
   "/palworld": { ko: "팰월드", ja: "パルワールド" },
   "/palworld/pals": { ko: "팰 도감", ja: "パル図鑑" },
@@ -347,8 +348,7 @@ const BREADCRUMB_SEGMENT_LABELS: Readonly<Record<string, Readonly<Record<PublicU
   "/bot/commands": { ko: "명령어 목록", ja: "コマンド一覧" },
   "/bot/game-files": { ko: "게임파일", ja: "ゲームファイル" },
   "/follow": { ko: "팔로우", ja: "フォロー" },
-  "/participation": { ko: "시청자 참여", ja: "視聴者参加" },
-  "/community": { ko: "커뮤니티", ja: "コミュニティ" }
+  "/participation": { ko: "시청자 참여", ja: "視聴者参加" }
 };
 
 function breadcrumbStructuredData(
@@ -395,6 +395,7 @@ function homeFallback(locale: PublicUrlLocale): PublicSeoFallback {
     links: [
       { href: `/${locale}/lol`, label: ja ? "LoL戦績検索" : "LoL 전적 검색" },
       { href: `/${locale}/lol/aram`, label: ja ? "オーグメントARAM" : "증강 칼바람" },
+      { href: `/${locale}/patch-notes`, label: ja ? "パッチノート" : "패치 노트" },
       { href: `/${locale}/palworld`, label: ja ? "パルワールドデータベース" : "팰월드 데이터베이스" },
       { href: `/${locale}/palworld/pals`, label: ja ? "パル図鑑" : "팰 도감" },
       { href: `/${locale}/palworld/breeding`, label: ja ? "配合組み合わせ" : "교배 조합" },
@@ -443,6 +444,10 @@ const KOREAN_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
     title: "증강 칼바람 | YORO.gg",
     description: "증강 칼바람의 증강 정보와 조합 데이터를 확인하세요."
   },
+  "/patch-notes": {
+    title: "LoL 패치 노트 | YORO.gg",
+    description: "리그 오브 레전드 패치 노트를 최신순으로 모아 봅니다. 본문은 Riot Games 원문에서 확인하세요."
+  },
   "/follow": {
     title: "팔로우 중인 스트리머 | YORO.gg",
     description: "Twitch에서 팔로우 중인 스트리머의 방송 상태를 확인하세요."
@@ -450,10 +455,6 @@ const KOREAN_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   "/participation": {
     title: "시청자 참여 | YORO.gg",
     description: "YORO.gg 스트리머 방송의 시청자 참여 기능을 이용하세요."
-  },
-  "/community": {
-    title: "LoL 커뮤니티 | YORO.gg",
-    description: "YORO.gg League of Legends 커뮤니티 게시물을 확인하세요."
   },
   "/bot": {
     title: "YORO Bot | Discord 게임 서버 도우미",
@@ -530,6 +531,10 @@ const JAPANESE_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
     title: "オーグメントARAM | YORO.gg",
     description: "オーグメントARAMのオーグメント情報と組み合わせデータを確認できます。"
   },
+  "/patch-notes": {
+    title: "LoLパッチノート | YORO.gg",
+    description: "リーグ・オブ・レジェンドのパッチノートを新しい順にまとめます。本文はRiot Gamesの原文でご確認ください。"
+  },
   "/follow": {
     title: "フォロー中の配信者 | YORO.gg",
     description: "Twitchでフォロー中の配信者のLIVE状況を確認できます。"
@@ -537,10 +542,6 @@ const JAPANESE_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   "/participation": {
     title: "視聴者参加 | YORO.gg",
     description: "YORO.gg配信者の視聴者参加機能を利用できます。"
-  },
-  "/community": {
-    title: "LoLコミュニティ | YORO.gg",
-    description: "YORO.ggのLeague of Legendsコミュニティ投稿を確認できます。"
   },
   "/bot": {
     title: "YORO Bot | Discordゲームサーバーアシスタント",
@@ -618,9 +619,6 @@ function contentForPath(normalizedPath: string, locale: PublicUrlLocale): Public
           title: "LoL 소환사 전적 | YORO.gg",
           description: "League of Legends 소환사의 전적과 최근 게임 정보를 확인하세요."
         };
-  }
-  if (normalizedPath.startsWith("/community/")) {
-    return table["/community"] ?? (locale === "ja" ? JAPANESE_CONTENT["/"]! : KOREAN_DEFAULT);
   }
   return table["/"] ?? KOREAN_DEFAULT;
 }

@@ -57,6 +57,7 @@ import {
 import { recordFollowerManagementEvent } from "./services/follower-event-recorder.js";
 import { createHttpHandler } from "./routes/http-api.js";
 import { LocalPublicLolSnapshotStore } from "./services/public-lol-snapshot-store.js";
+import { LocalPatchNotesFeedStore, PatchNotesService } from "./services/patch-notes-service.js";
 import { DashboardSessionStore } from "./security/auth.js";
 import { getEnabledModules } from "./modules/index.js";
 import { refreshLolProfileForEntry } from "./modules/lol-profile-enrichment.module.js";
@@ -464,7 +465,6 @@ const discordBotCommandPolicy = appConfig.discordBotInternal.enabled && postgres
 const store = new Store({
   followerStatePath: `${appConfig.paths.state}/followers.json`,
   streamerRiotIdStatePath: `${appConfig.paths.state}/streamer-riot-ids.json`,
-  communityStatePath: `${appConfig.paths.state}/community-posts.json`,
   runtimeStatePath: `${appConfig.paths.state}/runtime-state.json`,
   onPersistenceError: (failure) => {
     logger.error({
@@ -526,6 +526,10 @@ void dataDragon.getLatestVersion()
 const lolProfileRepository = new LocalJsonLolProfileRepository(`${appConfig.paths.state}/lol-profiles.json`);
 const publicLolSnapshotStore = new LocalPublicLolSnapshotStore(`${appConfig.paths.state}/lol-public-profile-snapshots`);
 const lolProfileEnrichment = new LolProfileEnrichmentService(riot, dataDragon, lolProfileRepository, logger);
+const patchNotes = new PatchNotesService({
+  store: new LocalPatchNotesFeedStore(`${appConfig.paths.state}/patch-notes`),
+  dataDragonVersionsProvider: () => dataDragon.getVersions()
+});
 const actions = new ActionDispatcher(
   twitchChat,
   store,
@@ -599,6 +603,7 @@ const server = http.createServer(createHttpHandler({
   gameServerStatusRead,
   discordBotCommandPolicy,
   adminAuditLogs,
+  patchNotes,
   readiness: () => {
     const storeReadiness = store.getReadiness();
     const database = databaseHealth.snapshot();
@@ -630,6 +635,7 @@ server.on("connection", (socket) => {
 
 twitchEventSub.start();
 palworldServerMonitor?.start();
+patchNotes.start();
 
 function shutdown(signal: NodeJS.Signals): void {
   if (shuttingDown) return;
@@ -637,6 +643,7 @@ function shutdown(signal: NodeJS.Signals): void {
   logger.event({ type: "server.shutdown_started", signal });
   twitchEventSub.stop();
   palworldServerMonitor?.stop();
+  patchNotes.stop();
   discordOnboarding?.stopCleanup();
   discordManagement?.stopCleanup();
   yoroAccounts?.stopCleanup();

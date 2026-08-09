@@ -16,6 +16,7 @@ type LoadState = "loading" | "ready" | "error";
 function rarityLabel(value: AramAugmentRarity): string {
   if (value === "gold") return t().aramRarityGold;
   if (value === "prismatic") return t().aramRarityPrismatic;
+  if (value === "legend") return t().aramRarityLegend;
   return t().aramRaritySilver;
 }
 
@@ -153,7 +154,7 @@ export function PublicAramPage() {
               onChange={(event) => setQuery(event.currentTarget.value)}
             />
             <div className="public-aram-rarity" role="group" aria-label={t().aramRarityLabel}>
-              {(["all", "silver", "gold", "prismatic"] as const).map((value) => (
+              {(["all", "silver", "gold", "prismatic", "legend"] as const).map((value) => (
                 <Button
                   key={value}
                   type="button"
@@ -162,7 +163,7 @@ export function PublicAramPage() {
                   aria-pressed={rarity === value}
                   onClick={() => setRarity(value)}
                 >
-                  {value === "all" ? t().aramRarityAll : value === "silver" ? t().aramRaritySilver : value === "gold" ? t().aramRarityGold : t().aramRarityPrismatic}
+                  {value === "all" ? t().aramRarityAll : rarityLabel(value)}
                 </Button>
               ))}
             </div>

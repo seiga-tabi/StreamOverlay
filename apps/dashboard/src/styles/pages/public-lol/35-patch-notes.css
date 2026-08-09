@@ -1,0 +1,1033 @@
+@layer pages {
+  /* 패치 노트 아카이브.
+   *
+   * 새 이름은 .yoro-pn-* 만 씁니다. legacy layer 의 !important 는 pages layer 로
+   * 이길 수 없으므로 공유 CardTitle/CardDescription 을 쓰지 않고 직접 그립니다
+   * (04-followers.css:671,690 이 .public-dashboard-shell 안의 카드 글자색을
+   * !important 로 잡고 있어 증강 페이지에서 실측 1.03:1 이 나온 적이 있습니다).
+   *
+   * 구성은 히어로 1장 + 키아트 타일 5장 + 아카이브 줄입니다.
+   * --pn-k 는 Riot 이 썸네일에서 뽑아 준 그 패치의 대표 색입니다(우리가 만들지 않음).
+   *
+   * 근거: docs/mockups/patch-notes-redesign.html
+   */
+
+  .yoro-pn-page {
+    --pn-surface: rgb(255 255 255 / 94%);
+    --pn-ink: #14171f;
+    --pn-ink-soft: #3b414f;
+    --pn-ink-dim: #4a5160;
+    --pn-accent: #3b4bd8;
+    --pn-good: #0f6b3c;
+    --pn-bad: #a32433;
+    --pn-scrim: 8 10 16;
+    min-width: 0;
+  }
+
+  /* 색을 못 받은 패치도 있으므로 기본값을 둡니다. */
+  .yoro-pn-hero,
+  .yoro-pn-tile,
+  .yoro-pn-row {
+    --pn-k: #3b4bd8;
+  }
+
+  .yoro-pn-loading {
+    min-width: 0;
+    display: grid;
+    gap: var(--yoro-space-3, 12px);
+  }
+
+  .yoro-pn-stage {
+    min-width: 0;
+    margin-top: var(--yoro-space-4, 16px);
+    display: grid;
+    gap: var(--yoro-space-4, 16px);
+  }
+
+  /* 카드 전체가 원문으로 가는 링크 하나입니다. 제목만 anchor 로 두고 영역을 넓힙니다. */
+  .yoro-pn-link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .yoro-pn-link::after {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    content: "";
+  }
+
+  .yoro-pn-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .yoro-pn-link:focus-visible {
+    outline: none;
+  }
+
+  /* ── 히어로: 최신 패치는 목록의 한 줄이 아니라 화면입니다 ── */
+  .yoro-pn-hero {
+    position: relative;
+    min-width: 0;
+    border-radius: var(--yoro-radius-xl, 24px);
+    display: grid;
+    isolation: isolate;
+    background: #0a0d14;
+    color: #fff;
+    overflow: hidden;
+  }
+
+  .yoro-pn-hero-art,
+  .yoro-pn-tile-art {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* 글자가 항상 이미지 위에서 읽혀야 하므로 scrim 은 넉넉히 깝니다. */
+  .yoro-pn-hero-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(100deg, rgb(var(--pn-scrim) / 94%) 0%, rgb(var(--pn-scrim) / 80%) 46%, rgb(var(--pn-scrim) / 12%) 100%),
+      linear-gradient(0deg, color-mix(in srgb, var(--pn-k) 22%, transparent), transparent 62%);
+  }
+
+  .yoro-pn-hero-body {
+    min-width: 0;
+    max-width: 44rem;
+    padding: clamp(20px, 4vw, 40px);
+    display: grid;
+    gap: var(--yoro-space-3, 12px);
+    align-content: center;
+  }
+
+  .yoro-pn-hero-eyebrow {
+    min-width: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--yoro-space-2, 8px);
+    align-items: center;
+    color: rgb(255 255 255 / 84%);
+    font-size: var(--yoro-font-size-xs, 12px);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    letter-spacing: .04em;
+  }
+
+  .yoro-pn-hero-eyebrow em {
+    padding: 2px 8px;
+    border-radius: var(--yoro-radius-pill, 999px);
+    background: rgb(255 255 255 / 18%);
+    font-size: 11px;
+    font-style: normal;
+  }
+
+  /* 사람들이 실제로 찾는 값은 패치 번호입니다. 제목 자리를 번호에 줍니다. */
+  .yoro-pn-hero-num {
+    margin: 0;
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    font-size: clamp(48px, 8vw, 84px);
+    font-variant-numeric: tabular-nums;
+    font-weight: 900;
+    letter-spacing: -.05em;
+    line-height: .9;
+  }
+
+  .yoro-pn-hero-num span {
+    color: rgb(255 255 255 / 74%);
+    font-size: .2em;
+    font-weight: 800;
+    letter-spacing: .06em;
+  }
+
+  .yoro-pn-hero-title {
+    min-width: 0;
+    margin: 0;
+    font-size: var(--yoro-font-size-lg, 18px);
+    font-weight: 800;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+  }
+
+  .yoro-pn-hero-sum {
+    min-width: 0;
+    margin: 0;
+    max-width: 40ch;
+    color: rgb(255 255 255 / 86%);
+    font-size: var(--yoro-font-size-sm, 14px);
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+
+  .yoro-pn-hero-mine {
+    min-width: 0;
+    margin-top: var(--yoro-space-1, 4px);
+    padding-top: var(--yoro-space-3, 12px);
+    border-top: 1px solid rgb(255 255 255 / 22%);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--yoro-space-5, 20px);
+    align-items: flex-end;
+  }
+
+  .yoro-pn-hero-cta {
+    margin: 0;
+    color: #fff;
+    font-size: var(--yoro-font-size-xs, 12px);
+    font-weight: 800;
+  }
+
+  .yoro-pn-delta {
+    margin: 0;
+    display: grid;
+    gap: 2px;
+  }
+
+  .yoro-pn-delta span {
+    color: rgb(255 255 255 / 74%);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .05em;
+  }
+
+  .yoro-pn-delta b {
+    font-size: var(--yoro-font-size-md, 16px);
+    font-variant-numeric: tabular-nums;
+    font-weight: 900;
+  }
+
+  .yoro-pn-delta[data-tone="good"] b {
+    color: #9df3c6;
+  }
+
+  .yoro-pn-delta[data-tone="bad"] b {
+    color: #ffb3bb;
+  }
+
+  /* ── 승률 게이지: 50% 기준선을 함께 그려 숫자 없이도 읽힙니다 ── */
+  .yoro-pn-gauge {
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+  }
+
+  .yoro-pn-gauge.is-hero {
+    min-width: 13rem;
+  }
+
+  .yoro-pn-gauge-track {
+    position: relative;
+    height: 8px;
+    border-radius: var(--yoro-radius-pill, 999px);
+    background: rgb(20 23 31 / 12%);
+    overflow: hidden;
+  }
+
+  .yoro-pn-gauge.is-hero .yoro-pn-gauge-track {
+    height: 10px;
+    background: rgb(255 255 255 / 24%);
+  }
+
+  .yoro-pn-gauge-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: var(--yoro-radius-pill, 999px);
+    background: var(--pn-good);
+  }
+
+  .yoro-pn-gauge[data-tone="bad"] .yoro-pn-gauge-fill {
+    background: var(--pn-bad);
+  }
+
+  .yoro-pn-gauge.is-hero .yoro-pn-gauge-fill {
+    background: linear-gradient(90deg, #4ec792, #9df3c6);
+  }
+
+  .yoro-pn-gauge.is-hero[data-tone="bad"] .yoro-pn-gauge-fill {
+    background: linear-gradient(90deg, #d6606f, #ffb3bb);
+  }
+
+  /* 기준선이 있어야 62.5%가 좋은 값인지 한눈에 읽힙니다. */
+  .yoro-pn-gauge-mid {
+    position: absolute;
+    inset: -2px auto -2px 50%;
+    width: 2px;
+    background: rgb(20 23 31 / 38%);
+  }
+
+  .yoro-pn-gauge.is-hero .yoro-pn-gauge-mid {
+    inset: -3px auto -3px 50%;
+    background: rgb(255 255 255 / 82%);
+  }
+
+  .yoro-pn-gauge b {
+    color: var(--pn-good);
+    font-size: var(--yoro-font-size-sm, 14px);
+    font-variant-numeric: tabular-nums;
+    font-weight: 900;
+  }
+
+  .yoro-pn-gauge[data-tone="bad"] b {
+    color: var(--pn-bad);
+  }
+
+  .yoro-pn-gauge.is-hero b {
+    color: #fff;
+    font-size: var(--yoro-font-size-xl, 24px);
+    letter-spacing: -.02em;
+    line-height: 1.1;
+  }
+
+  .yoro-pn-gauge span {
+    color: var(--pn-ink-dim);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .yoro-pn-gauge.is-hero span {
+    color: rgb(255 255 255 / 76%);
+  }
+
+  /* ── 키아트 타일: 최근 패치는 포스터로 ── */
+  .yoro-pn-tiles {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: var(--yoro-space-3, 12px);
+  }
+
+  .yoro-pn-tile {
+    position: relative;
+    min-width: 0;
+    min-height: 13rem;
+    padding: var(--yoro-space-4, 16px);
+    border-radius: var(--yoro-radius-lg, 16px);
+    display: grid;
+    gap: var(--yoro-space-1, 4px);
+    align-content: end;
+    isolation: isolate;
+    background: #0a0d14;
+    color: #fff;
+    overflow: hidden;
+    transition: transform .18s ease;
+  }
+
+  .yoro-pn-tile:hover {
+    transform: translateY(-3px);
+  }
+
+  /* 초점 표시는 실제 클릭 영역과 같아야 하므로 카드에 그립니다. */
+  .yoro-pn-tile:focus-within,
+  .yoro-pn-hero:focus-within,
+  .yoro-pn-row:focus-within {
+    outline: 2px solid var(--pn-accent);
+    outline-offset: 2px;
+  }
+
+  /* 위쪽 날짜가 밝은 키아트 위에 놓여도 읽히도록 위아래 모두 덮습니다. */
+  .yoro-pn-tile-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+      180deg,
+      rgb(var(--pn-scrim) / 64%) 0%,
+      rgb(var(--pn-scrim) / 18%) 26%,
+      rgb(var(--pn-scrim) / 62%) 58%,
+      rgb(var(--pn-scrim) / 95%) 100%
+    );
+  }
+
+  .yoro-pn-tile-top {
+    position: absolute;
+    inset: var(--yoro-space-3, 12px) var(--yoro-space-4, 16px) auto;
+    margin: 0;
+    display: flex;
+    gap: var(--yoro-space-2, 8px);
+    align-items: center;
+    justify-content: space-between;
+    color: #fff;
+    font-size: var(--yoro-font-size-xs, 12px);
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    text-shadow: 0 1px 3px rgb(8 10 16 / 80%);
+  }
+
+  .yoro-pn-tile-rate {
+    padding: 2px 8px;
+    border-radius: var(--yoro-radius-pill, 999px);
+    background: rgb(15 107 60 / 88%);
+    color: #eafff3;
+    text-shadow: none;
+  }
+
+  .yoro-pn-tile-rate[data-tone="bad"] {
+    background: rgb(163 36 51 / 88%);
+    color: #ffe9ec;
+  }
+
+  .yoro-pn-tile-num {
+    min-width: 0;
+    margin: 0;
+    font-size: 40px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 900;
+    letter-spacing: -.05em;
+    line-height: .92;
+    text-shadow: 0 2px 12px rgb(8 10 16 / 55%);
+  }
+
+  .yoro-pn-tile-sum {
+    min-width: 0;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    color: rgb(255 255 255 / 86%);
+    font-size: var(--yoro-font-size-sm, 14px);
+    line-height: 1.5;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+  }
+
+  /* ── 아카이브: 시간 축 위의 줄 ── */
+  /* 페이지 배경이 중간 회색이라 그 위에 글자를 직접 얹으면 실측 1.4~4.4:1 로 무너집니다.
+     아카이브는 자체 표면 위에 올려 밝은 바탕을 확보합니다. */
+  .yoro-pn-archive {
+    min-width: 0;
+    margin-top: var(--yoro-space-2, 8px);
+    padding: var(--yoro-space-4, 16px);
+    border: 1px solid var(--yoro-color-border, rgb(33 37 41 / 14%));
+    border-radius: var(--yoro-radius-lg, 16px);
+    background: var(--pn-surface);
+  }
+
+  .yoro-pn-archive-title {
+    margin: 0 0 var(--yoro-space-2, 8px);
+    color: var(--pn-ink);
+    font-size: var(--yoro-font-size-xs, 12px);
+    font-weight: 800;
+    letter-spacing: .06em;
+  }
+
+  .yoro-pn-list {
+    position: relative;
+    min-width: 0;
+    display: grid;
+    gap: 2px;
+  }
+
+  /* 세로 축이 2주 주기를 눈에 보이게 만듭니다. */
+  .yoro-pn-list::before {
+    position: absolute;
+    inset: 12px auto 12px 17px;
+    width: 2px;
+    background: rgb(20 23 31 / 16%);
+    content: "";
+  }
+
+  .yoro-pn-group {
+    min-width: 0;
+  }
+
+  .yoro-pn-season {
+    margin: var(--yoro-space-4, 16px) 0 var(--yoro-space-1, 4px);
+    padding-left: 36px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--yoro-space-2, 8px);
+    align-items: baseline;
+  }
+
+  .yoro-pn-season b {
+    color: var(--pn-ink);
+    font-size: var(--yoro-font-size-xs, 12px);
+    font-weight: 900;
+    letter-spacing: .04em;
+  }
+
+  .yoro-pn-season small {
+    color: var(--pn-ink-soft);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .yoro-pn-row {
+    position: relative;
+    min-width: 0;
+    padding: 12px 14px 12px 36px;
+    border: 1px solid transparent;
+    border-radius: var(--yoro-radius-md, 12px);
+    display: grid;
+    grid-template-columns: 52px 4.2rem minmax(0, 1fr) 8.5rem 9rem;
+    gap: var(--yoro-space-3, 12px);
+    align-items: center;
+    transition: background-color .16s ease, border-color .16s ease;
+  }
+
+  /* 표면이 이미 밝으므로 hover 는 그 패치의 색으로 옅게 물들입니다. */
+  .yoro-pn-row:hover {
+    border-color: color-mix(in srgb, var(--pn-k) 34%, transparent);
+    background: color-mix(in srgb, var(--pn-k) 6%, transparent);
+  }
+
+  /* 축 위의 점. 채워져 있으면 내가 플레이한 패치입니다. */
+  .yoro-pn-node {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    width: 8px;
+    height: 8px;
+    margin-top: -4px;
+    border: 1.5px solid rgb(20 23 31 / 34%);
+    border-radius: var(--yoro-radius-circle, 50%);
+    background: #fff;
+  }
+
+  .yoro-pn-row.is-played .yoro-pn-node {
+    left: 11px;
+    width: 14px;
+    height: 14px;
+    margin-top: -7px;
+    border: 0;
+    background: var(--pn-k);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--pn-k) 22%, transparent);
+  }
+
+  .yoro-pn-row-art {
+    width: 52px;
+    height: 30px;
+    border-radius: var(--yoro-radius-xs, 6px);
+    object-fit: cover;
+  }
+
+  .yoro-pn-row-num {
+    margin: 0;
+    color: var(--pn-ink);
+    font-size: var(--yoro-font-size-xl, 24px);
+    font-variant-numeric: tabular-nums;
+    font-weight: 900;
+    letter-spacing: -.045em;
+    line-height: 1;
+  }
+
+  .yoro-pn-row-body {
+    min-width: 0;
+    display: grid;
+    gap: 1px;
+  }
+
+  /* 원문 제목은 열 줄 내내 같은 글자입니다. 구분되는 요약을 앞에 둡니다. */
+  .yoro-pn-row-title {
+    min-width: 0;
+    margin: 0;
+    color: var(--pn-ink);
+    font-size: var(--yoro-font-size-sm, 14px);
+    font-weight: 700;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .yoro-pn-row-source {
+    min-width: 0;
+    margin: 0;
+    color: #5b6472;
+    font-size: var(--yoro-font-size-xs, 12px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .yoro-pn-row-when {
+    margin: 0;
+    display: grid;
+    gap: 1px;
+    color: var(--pn-ink-dim);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .yoro-pn-row-when time {
+    color: var(--pn-ink-soft);
+    font-size: var(--yoro-font-size-xs, 12px);
+    font-weight: 800;
+  }
+
+  .yoro-pn-row-when em {
+    font-size: 11px;
+    font-style: normal;
+    opacity: .82;
+  }
+
+  .yoro-pn-row-norate {
+    margin: 0;
+    color: var(--pn-ink-dim);
+    font-size: 11px;
+  }
+
+  /* ── 컨트롤 바: 검색 · 빠른 필터 · 소환사를 한 줄에 ──
+   *
+   * 예전에는 전폭 흰 바가 두 개였고, 1440px 에서 Riot ID 와 표본 수 사이가
+   * 987px 떨어져 있었습니다. 같이 읽어야 뜻이 되는 값이라 한 덩어리로 묶습니다.
+   */
+  .yoro-pn-bar {
+    /* 가로 스크롤 줄이 안에 있어 min-width 를 풀어 주지 않으면 부모를 밀어냅니다. */
+    min-width: 0;
+    max-width: 100%;
+    margin-top: var(--yoro-space-4, 16px);
+    padding: 8px;
+    border: 1px solid var(--yoro-color-border, rgb(33 37 41 / 14%));
+    border-radius: var(--yoro-radius-lg, 16px);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--yoro-space-2, 8px);
+    align-items: center;
+    background: var(--pn-surface);
+  }
+
+  .yoro-pn-bar-search {
+    flex: 1 1 17rem;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0 10px 0 12px;
+    border: 1px solid var(--yoro-color-border, rgb(33 37 41 / 14%));
+    border-radius: var(--yoro-radius-md, 12px);
+    display: flex;
+    gap: var(--yoro-space-2, 8px);
+    align-items: center;
+    background: rgb(20 23 31 / 4%);
+  }
+
+  .yoro-pn-bar-search:focus-within {
+    border-color: var(--pn-accent);
+    outline: 2px solid color-mix(in srgb, var(--pn-accent) 30%, transparent);
+    outline-offset: 1px;
+  }
+
+  .yoro-pn-bar-icon {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    color: var(--pn-ink-dim);
+  }
+
+  .yoro-pn-bar-search input {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: 0;
+    background: none;
+    color: var(--pn-ink);
+    font: inherit;
+    font-size: var(--yoro-font-size-sm, 14px);
+    outline: none;
+  }
+
+  .yoro-pn-bar-search input::placeholder {
+    color: #5b6472;
+  }
+
+  /* 결과 수는 입력창 안에 둡니다. 밖에 있으면 무엇의 개수인지 붙지 않습니다. */
+  .yoro-pn-bar-count {
+    flex: none;
+    padding: 2px 8px;
+    border-radius: var(--yoro-radius-pill, 999px);
+    background: rgb(20 23 31 / 10%);
+    color: var(--pn-ink-soft);
+    font-size: var(--yoro-font-size-xs, 12px);
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+  }
+
+  .yoro-pn-bar-chips {
+    flex: none;
+    min-width: 0;
+    max-width: 100%;
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .yoro-pn-bar-chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* 좁은 화면에서 칩이 잘릴 때 오른쪽이 흐려져 "더 있다"가 읽힙니다. */
+  @supports (mask-image: linear-gradient(90deg, #000, transparent)) {
+    .yoro-pn-bar-chips {
+      mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 18px), transparent 100%);
+    }
+  }
+
+  .yoro-pn-chip {
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid var(--yoro-color-border, rgb(33 37 41 / 14%));
+    border-radius: var(--yoro-radius-pill, 999px);
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    background: none;
+    color: var(--pn-ink-soft);
+    font-size: var(--yoro-font-size-sm, 14px);
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  /* 눌린 상태를 색만이 아니라 반전으로도 알립니다. */
+  .yoro-pn-chip[aria-pressed="true"] {
+    border-color: transparent;
+    background: var(--pn-ink);
+    color: #fff;
+  }
+
+  .yoro-pn-chip b {
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+  }
+
+  .yoro-pn-chip[aria-pressed="true"] b {
+    opacity: .74;
+  }
+
+  .yoro-pn-chip i {
+    width: 7px;
+    height: 7px;
+    border-radius: var(--yoro-radius-circle, 50%);
+    background: var(--pn-accent);
+  }
+
+  .yoro-pn-chip[aria-pressed="true"] i {
+    background: #9db0ff;
+  }
+
+  .yoro-pn-who-wrap {
+    position: relative;
+    min-width: 0;
+    margin-left: auto;
+  }
+
+  /* 아바타·Riot ID·표본을 한 덩어리로 묶습니다. */
+  .yoro-pn-who {
+    min-height: 44px;
+    padding: 4px 12px 4px 5px;
+    border: 1px solid var(--yoro-color-border, rgb(33 37 41 / 14%));
+    border-radius: var(--yoro-radius-pill, 999px);
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    background: none;
+    color: var(--pn-ink);
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .yoro-pn-who:hover {
+    border-color: color-mix(in srgb, var(--pn-accent) 45%, transparent);
+  }
+
+  .yoro-pn-who img {
+    width: 30px;
+    height: 30px;
+    border-radius: var(--yoro-radius-circle, 50%);
+    object-fit: cover;
+  }
+
+  .yoro-pn-who > span {
+    min-width: 0;
+    display: grid;
+    gap: 0;
+  }
+
+  .yoro-pn-who b {
+    font-size: var(--yoro-font-size-sm, 14px);
+    font-weight: 800;
+    line-height: 1.25;
+  }
+
+  .yoro-pn-who small {
+    color: #5b6472;
+    font-size: var(--yoro-font-size-xs, 12px);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.25;
+  }
+
+  .yoro-pn-who-caret {
+    color: var(--pn-ink-dim);
+    font-size: var(--yoro-font-size-xs, 12px);
+  }
+
+  .yoro-pn-who-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    z-index: 20;
+    min-width: 15rem;
+    padding: 5px;
+    border: 1px solid var(--yoro-color-border, rgb(33 37 41 / 14%));
+    border-radius: var(--yoro-radius-md, 12px);
+    display: grid;
+    gap: 2px;
+    background: #fff;
+    box-shadow: 0 12px 28px rgb(8 10 16 / 16%);
+  }
+
+  .yoro-pn-who-menu button {
+    min-height: 44px;
+    padding: 5px 8px;
+    border: 0;
+    border-radius: var(--yoro-radius-sm, 8px);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    background: none;
+    color: var(--pn-ink);
+    font: inherit;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .yoro-pn-who-menu button[aria-checked="true"],
+  .yoro-pn-who-menu button:hover {
+    background: color-mix(in srgb, var(--pn-accent) 10%, transparent);
+  }
+
+  .yoro-pn-who-menu img {
+    width: 26px;
+    height: 26px;
+    border-radius: var(--yoro-radius-circle, 50%);
+  }
+
+  .yoro-pn-who-menu b {
+    display: block;
+    font-size: var(--yoro-font-size-sm, 14px);
+    font-weight: 800;
+  }
+
+  .yoro-pn-who-menu small {
+    display: block;
+    color: #5b6472;
+    font-size: var(--yoro-font-size-xs, 12px);
+  }
+
+  .yoro-pn-who-more {
+    min-height: 44px;
+    margin-top: 2px;
+    padding: 5px 8px;
+    border-top: 1px solid var(--yoro-color-border, rgb(33 37 41 / 14%));
+    display: flex;
+    align-items: center;
+    color: var(--pn-accent);
+    font-size: var(--yoro-font-size-sm, 14px);
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .yoro-pn-bar-cta {
+    min-height: 44px;
+    margin-left: auto;
+    padding: 0 16px;
+    border: 1px solid rgb(59 75 216 / 34%);
+    border-radius: var(--yoro-radius-pill, 999px);
+    display: inline-flex;
+    align-items: center;
+    color: var(--pn-accent);
+    font-size: var(--yoro-font-size-sm, 14px);
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .yoro-pn-bar-cta:hover,
+  .yoro-pn-bar-cta:focus-visible {
+    background: rgb(59 75 216 / 8%);
+  }
+
+  .yoro-pn-bar-state {
+    min-height: 44px;
+    margin-left: auto;
+    padding: 0 14px;
+    border: 1px solid var(--yoro-color-border, rgb(33 37 41 / 14%));
+    border-radius: var(--yoro-radius-pill, 999px);
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    color: var(--pn-ink-soft);
+    font-size: var(--yoro-font-size-xs, 12px);
+    font-weight: 700;
+  }
+
+  .yoro-pn-bar-state[data-tone="bad"] {
+    border-color: rgb(163 36 51 / 45%);
+    color: var(--pn-bad);
+  }
+
+  .yoro-pn-updated {
+    color: #14171a;
+    font-size: var(--yoro-font-size-xs, 12px);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+  }
+
+  .yoro-pn-mine-hint {
+    min-width: 0;
+    margin: var(--yoro-space-2, 8px) 0 0;
+    display: grid;
+    gap: 2px;
+  }
+
+  .yoro-pn-mine-hint b {
+    color: #14171a;
+    font-size: var(--yoro-font-size-sm, 14px);
+    font-weight: 800;
+  }
+
+  .yoro-pn-mine-hint small {
+    color: #23272f;
+    font-size: var(--yoro-font-size-xs, 12px);
+  }
+
+  .yoro-pn-stale {
+    min-width: 0;
+    margin: var(--yoro-space-4, 16px) 0 0;
+    padding: 10px 14px;
+    border: 1px solid rgb(138 82 0 / 34%);
+    border-radius: var(--yoro-radius-md, 12px);
+    background: rgb(255 249 235 / 94%);
+    color: #6b4200;
+    font-size: var(--yoro-font-size-sm, 14px);
+    line-height: 1.55;
+  }
+
+  /* 저작권 고지는 반드시 읽혀야 하므로 밝은 표면 위로 올립니다(회색 배경 위 실측 4.62:1). */
+  .yoro-pn-attribution {
+    min-width: 0;
+    margin: var(--yoro-space-6, 24px) 0 0;
+    padding: 12px 14px;
+    border: 1px solid var(--yoro-color-border, rgb(33 37 41 / 14%));
+    border-radius: var(--yoro-radius-md, 12px);
+    background: var(--pn-surface);
+    color: #23272f;
+    font-size: var(--yoro-font-size-xs, 12px);
+    line-height: 1.6;
+  }
+
+  /* 좁은 화면: 축을 접고 색 띠만 남깁니다. 번호가 먼저, 요약이 다음입니다. */
+  @media (max-width: 52rem) {
+    /* 세 줄로 쌓으면 첫 화면에 패치가 한 장도 안 들어옵니다.
+       검색이 한 줄, 필터와 소환사가 한 줄 — 두 줄로 둡니다. */
+    .yoro-pn-bar-search {
+      flex: 1 1 100%;
+    }
+
+    .yoro-pn-bar-chips {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+
+    .yoro-pn-who-wrap,
+    .yoro-pn-bar-cta,
+    .yoro-pn-bar-state {
+      flex: none;
+      margin-left: 0;
+    }
+
+    .yoro-pn-bar-cta,
+    .yoro-pn-bar-state {
+      flex: 1 1 100%;
+      justify-content: center;
+    }
+
+    .yoro-pn-who-menu {
+      right: 0;
+      left: auto;
+      min-width: 13rem;
+    }
+
+    .yoro-pn-list::before {
+      display: none;
+    }
+
+    .yoro-pn-season {
+      padding-left: 0;
+    }
+
+    .yoro-pn-row {
+      padding: 12px 14px 12px 16px;
+      grid-template-columns: 3.6rem minmax(0, 1fr);
+      gap: var(--yoro-space-2, 8px);
+      align-items: start;
+    }
+
+    .yoro-pn-node {
+      inset: 12px auto 12px 0;
+      width: 4px;
+      height: auto;
+      margin-top: 0;
+      border: 0;
+      border-radius: var(--yoro-radius-pill, 999px);
+      background: var(--pn-k);
+      opacity: .4;
+    }
+
+    .yoro-pn-row.is-played .yoro-pn-node {
+      inset: 12px auto 12px 0;
+      width: 4px;
+      height: auto;
+      margin-top: 0;
+      box-shadow: none;
+      opacity: 1;
+    }
+
+    .yoro-pn-row-art,
+    .yoro-pn-row-source,
+    .yoro-pn-row-norate {
+      display: none;
+    }
+
+    .yoro-pn-row-title {
+      white-space: normal;
+    }
+
+    .yoro-pn-row-when {
+      grid-column: 2;
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--yoro-space-2, 8px);
+    }
+
+    .yoro-pn-row .yoro-pn-gauge {
+      grid-column: 1 / -1;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: var(--yoro-space-2, 8px);
+      align-items: center;
+    }
+
+    .yoro-pn-tile {
+      min-height: 11rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .yoro-pn-tile,
+    .yoro-pn-row {
+      transition: none;
+    }
+
+    .yoro-pn-tile:hover {
+      transform: none;
+    }
+  }
+}

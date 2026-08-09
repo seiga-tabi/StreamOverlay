@@ -9,7 +9,7 @@ export type PublicHeaderMenuProps = {
 };
 
 export type HeaderMenuItem = {
-  icon: "home" | "streamers" | "participation" | "aram" | "community";
+  icon: "home" | "streamers" | "participation" | "aram" | "patchNotes";
   page: PublicMainPage;
   pages: PublicMainPage[];
   ko: string;
@@ -54,19 +54,15 @@ export function publicHeaderMenuItems(activePage: PublicMainPage): HeaderMenuIte
       ja: publicI18n.ja.aramHeaderNav,
       label: t().aramHeaderNav
     },
+    /* 커뮤니티가 있던 자리입니다. 커뮤니티 route 는 아직 살아 있고
+       nav 에서만 내려옵니다 — 화면이 자리를 잡은 뒤 4번 작업에서 걷어냅니다. */
     {
-      icon: "community",
-      page: "patch",
-      pages: [
-        "patch",
-        "communityParty",
-        "communityServerWrite",
-        "communityPartyWrite",
-        "communityDetail"
-      ],
-      ko: publicI18n.ko.community,
-      ja: publicI18n.ja.community,
-      label: t().community
+      icon: "patchNotes",
+      page: "patchNotes",
+      pages: ["patchNotes"],
+      ko: publicI18n.ko.patchNotesHeaderNav,
+      ja: publicI18n.ja.patchNotesHeaderNav,
+      label: t().patchNotesHeaderNav
     }
   ];
 }
@@ -85,7 +81,7 @@ export function PublicHeaderMenuIcon({ icon }: { icon: HeaderMenuItem["icon"] })
     streamers: <><circle cx="9" cy="8" r="3" /><path d="M3.5 20v-2.5A5.5 5.5 0 0 1 9 12h1a5.5 5.5 0 0 1 5.5 5.5V20M16 7a3 3 0 0 1 0 6M17 14a4 4 0 0 1 4 4v2" /></>,
     participation: <><circle cx="12" cy="7" r="3" /><path d="M5 21v-2a7 7 0 0 1 14 0v2M4 9H1m1.5-1.5v3M23 9h-3m1.5-1.5v3" /></>,
     aram: <><path d="M5 12h14M12 5v14M7 7l10 10M17 7 7 17" /><circle cx="12" cy="12" r="9" /></>,
-    community: <><circle cx="8" cy="9" r="3" /><circle cx="16" cy="9" r="3" /><path d="M2 20v-2a6 6 0 0 1 12 0v2M10 20v-2a6 6 0 0 1 12 0v2" /></>,
+    patchNotes: <><path d="M6 3h9l4 4v14H6z" /><path d="M14 3v5h5M9 12h7M9 16h5" /></>,
   } satisfies Record<HeaderMenuItem["icon"], JSX.Element>;
 
   return (

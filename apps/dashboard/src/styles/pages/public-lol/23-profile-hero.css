@@ -226,12 +226,51 @@
     border: 1px solid var(--yoro-color-border-on-dark);
     background: color-mix(in srgb, var(--yoro-color-text-on-dark) 5%, transparent);
     color: var(--yoro-color-text-on-dark-muted);
+    transition:
+      background var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
+      border-color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
+      color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard);
   }
 
-  .public-profile-hero-icon-button:hover,
-  .public-profile-hero-icon-button[aria-pressed="true"] {
+  /* 즐겨찾기 눌림 상태와 hover가 같은 스타일을 써서, 클릭할 때 커서가 버튼 위에
+     있는 채로 이미 hover 색이 나오는 바람에 눌러도 화면이 안 바뀌는 것처럼
+     보였습니다. hover와 눌림 상태를 분리하고, 눌림 상태는 별을 금색으로 채워
+     확실히 구분되게 합니다. */
+  .public-profile-hero-icon-button:hover {
     background: color-mix(in srgb, var(--yoro-color-text-on-dark) 11%, transparent);
     color: var(--yoro-color-text-on-dark);
+  }
+
+  .public-profile-hero-icon-button[aria-pressed="true"] {
+    border-color: color-mix(in srgb, var(--yoro-color-accent-gold) 55%, transparent);
+    background: color-mix(in srgb, var(--yoro-color-accent-gold) 16%, transparent);
+    color: var(--yoro-color-accent-gold);
+  }
+
+  .public-profile-hero-icon-button[aria-pressed="true"]:hover {
+    background: color-mix(in srgb, var(--yoro-color-accent-gold) 24%, transparent);
+  }
+
+  .public-profile-hero-icon-button svg {
+    transition: fill var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard);
+  }
+
+  .public-profile-hero-icon-button[aria-pressed="true"] svg {
+    fill: currentcolor;
+    animation: public-profile-favorite-pop 320ms var(--yoro-motion-ease-standard);
+  }
+
+  @keyframes public-profile-favorite-pop {
+    0% { transform: scale(1); }
+    35% { transform: scale(1.35); }
+    60% { transform: scale(0.92); }
+    100% { transform: scale(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .public-profile-hero-icon-button[aria-pressed="true"] svg {
+      animation: none;
+    }
   }
 
   .public-profile-hero-refresh:focus-visible,

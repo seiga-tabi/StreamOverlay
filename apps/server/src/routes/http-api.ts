@@ -5,6 +5,7 @@ import path from "node:path";
 import { URL } from "node:url";
 import type { Store } from "../services/store.js";
 import { loadAramAugmentCatalog } from "../services/aram-augment-catalog.js";
+import type { PatchNotesService } from "../services/patch-notes-service.js";
 import { storeParticipationRepository } from "../services/participation-repository.js";
 import { publishParticipationSnapshot as publishAtomicParticipationSnapshot } from "../services/participation-snapshot.js";
 import type { ActionDispatcher } from "../core/action-dispatcher.js";
@@ -47,11 +48,6 @@ import {
   validatePalworldPalSpawnResponse,
   validateBotAction,
   type BotAction,
-  type CommunityPost,
-  type CommunityPostCategory,
-  type CommunityPostCommentCreateInput,
-  type CommunityPostCreateInput,
-  type CommunityPostReport,
   type LolChampionSkinOption,
   type LolChampionSummary,
   type LolAutomationSettings,
@@ -206,7 +202,6 @@ import {
   resolveReadiness,
   type ReadinessCheck
 } from "../routing/health-responses.js";
-import { CommunityModerationService, CommunityModerationServiceError } from "../services/community-moderation-service.js";
 import {
   PALWORLD_PUBLIC_CACHE_CONTROL,
   PalworldDomainUnavailableError,
@@ -263,7 +258,11 @@ import {
 } from "../services/yoro-account-service.js";
 import {
   isManagementOrganizationId,
-  parseCreatePalworldGameServerInput
+  parseCreatePalworldGameServerInput,
+  patchPlayRecords,
+  PATCH_PLAY_SAMPLE_LIMIT,
+  type PatchNoteLocale,
+  type PatchPlaySummary
 } from "@streamops/shared";
 import {
   DISCORD_INTERNAL_MAX_BODY_BYTES,
@@ -271,7 +270,6 @@ import {
 } from "../security/discord-internal-auth.js";
 
 const MAX_JSON_BODY_BYTES = 1_000_000;
-const MAX_COMMUNITY_IMAGE_BYTES = 5_000_000;
 const MAX_INBOUND_EMAIL_WEBHOOK_BYTES = 250_000;
 const MAX_SUPPORT_MAIL_TEXT_LENGTH = 100_000;
 const MAX_SUPPORT_MAIL_ATTACHMENTS = 20;
@@ -302,6 +300,8 @@ const PUBLIC_LOL_MATCH_QUEUE_IDS: Record<PublicLolMatchQueueFilter, readonly num
   aram: [450]
 };
 const PUBLIC_LOL_PROFILE_CACHE_TTL_MS = 10 * 60_000;
+/* 패치별 전적은 경기가 끝나야 바뀝니다. 10분이면 충분하고 Riot 호출을 아낍니다. */
+const PATCH_PLAY_CACHE_TTL_MS = 10 * 60_000;
 const PUBLIC_LOL_PROFILE_STALE_TTL_MS = 24 * 60 * 60_000;
 const PUBLIC_LOL_PROFILE_REFRESH_COOLDOWN_MS = 10 * 60_000;
 const PUBLIC_LOL_PROFILE_CACHE_KEY_VERSION = "v2";
@@ -1582,6 +1582,25 @@ function legacyBotPublicReturnPath(url: URL): string | undefined {
   return `${locale ? `/${locale}` : ""}${canonical}${url.search}`;
 }
 
+/** 걷어낸 커뮤니티가 향하는 곳. dashboard 의 route key 와 같은 값입니다. */
+const PUBLIC_PATCH_NOTES_PATH = "/patch-notes";
+
+/**
+ * 걷어낸 커뮤니티 URL을 패치 노트로 영구 이전합니다.
+ *
+ * `/community/*` 는 색인과 북마크에 남아 있습니다. 404 로 두면 그 신호가 버려지므로
+ * 308 로 넘깁니다. 언어 prefix 와 query 는 그대로 유지합니다.
+ */
+function retiredCommunityReturnPath(url: URL): string | undefined {
+  const locale = publicUrlLocaleFromPathname(url.pathname);
+  const unprefixed = stripPublicUrlLocalePrefix(url.pathname);
+  const normalized = unprefixed.length > 1 && unprefixed.endsWith("/")
+    ? unprefixed.slice(0, -1)
+    : unprefixed;
+  if (normalized !== "/community" && !normalized.startsWith("/community/")) return undefined;
+  return `${locale ? `/${locale}` : ""}${PUBLIC_PATCH_NOTES_PATH}${url.search}`;
+}
+
 function legacyStreamerDashboardReturnPath(pathname: string): string | undefined {
   const normalized = pathname.length > 1 && pathname.endsWith("/")
     ? pathname.slice(0, -1)
@@ -1795,31 +1814,6 @@ function parseMultipartBody(req: IncomingMessage, body: Buffer): MultipartPart[]
 function isGifBytes(data: Buffer): boolean {
   const signature = data.subarray(0, 6).toString("ascii");
   return signature === "GIF87a" || signature === "GIF89a";
-}
-
-function communityAssetRoot(): string {
-  return path.resolve(appConfig.paths.state, "community-assets");
-}
-
-function communityImageExtension(file: MultipartPart): "png" | "jpg" | "gif" | "webp" | undefined {
-  const type = file.contentType?.toLowerCase().split(";")[0]?.trim();
-  if (file.data.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) {
-    return type === undefined || type === "image/png" ? "png" : undefined;
-  }
-  if (file.data.byteLength >= 3 && file.data[0] === 0xff && file.data[1] === 0xd8 && file.data[2] === 0xff) {
-    return type === undefined || type === "image/jpeg" || type === "image/jpg" ? "jpg" : undefined;
-  }
-  if (isGifBytes(file.data)) {
-    return type === undefined || type === "image/gif" ? "gif" : undefined;
-  }
-  if (
-    file.data.byteLength >= 12 &&
-    file.data.subarray(0, 4).toString("ascii") === "RIFF" &&
-    file.data.subarray(8, 12).toString("ascii") === "WEBP"
-  ) {
-    return type === undefined || type === "image/webp" ? "webp" : undefined;
-  }
-  return undefined;
 }
 
 function multipartText(parts: MultipartPart[], name: string): string | undefined {
@@ -2210,26 +2204,6 @@ async function sendPublicDashboardAsset(req: IncomingMessage, res: ServerRespons
   return true;
 }
 
-async function sendCommunityAsset(req: IncomingMessage, res: ServerResponse, pathname: string): Promise<boolean> {
-  const uploadPrefix = "/community/uploads/";
-  if (!pathname.startsWith(uploadPrefix)) return false;
-  const root = communityAssetRoot();
-  const relative = decodeUrlPathSegment(pathname.slice(uploadPrefix.length));
-  if (relative === undefined) {
-    sendInvalidStaticPath(req, res);
-    return true;
-  }
-  const normalized = path.normalize(relative).replace(/^(\.\.(\/|\\|$))+/, "");
-  const candidate = path.resolve(root, normalized);
-  if (candidate !== root && !candidate.startsWith(`${root}${path.sep}`)) {
-    res.writeHead(403, { "Content-Type": "application/json; charset=utf-8", ...SECURITY_HEADERS });
-    res.end(JSON.stringify({ error: "forbidden" }));
-    return true;
-  }
-  await sendStaticFile(req, res, candidate);
-  return true;
-}
-
 function sendSafeOAuthHtml(res: ServerResponse, status: number, title: string, message: string): void {
   const dashboardUrl = escapeHtml(appConfig.dashboardBaseUrl);
   const safeTitle = escapeHtml(title);
@@ -2296,6 +2270,7 @@ type HttpHandlerInput = {
   discordInternalAuth?: DiscordInternalAuthVerifier;
   gameServerStatusRead?: GameServerStatusReadService;
   discordBotCommandPolicy?: DiscordBotCommandPolicyService;
+  patchNotes?: PatchNotesService;
   adminAuditLogs?: Pick<
     AdminAuditLogRepository,
     "list" | "beginGlobalMutation" | "completeGlobalMutation"
@@ -3343,7 +3318,6 @@ export function createHttpHandler(input: HttpHandlerInput) {
   } catch {
     input.logger?.error?.({ type: "aram.augment_catalog_unavailable", errorCode: "invalid_catalog" });
   }
-  const communityModeration = new CommunityModerationService(input.store);
   const participationRepository = storeParticipationRepository(input.store);
   const followerRefreshByBroadcaster = new Map<string, FollowerRefreshRuntime>();
   let streamerProfileRefreshInFlight: Promise<ParticipationStreamerProfile | undefined> | undefined;
@@ -3379,6 +3353,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
   const publicLolMatchTeamsCache = new Map<string, { expiresAt: number; response: PublicLolMatchTeamsResponse }>();
   const publicLolMatchTeamsInFlight = new Map<string, Promise<PublicLolMatchTeamsResponse>>();
   const publicLolMatchDetailCache = new Map<string, { expiresAt: number; match: RiotMatch }>();
+  const patchPlaySummaryCache = new Map<string, { expiresAt: number; summary: PatchPlaySummary }>();
+  const patchPlaySummaryInFlight = new Map<string, Promise<PatchPlaySummary>>();
   const publicLolMatchDetailInFlight = new Map<string, Promise<RiotMatch | null>>();
   const publicTwitchFollowedCache = new Map<string, {
     expiresAt: number;
@@ -5257,166 +5233,6 @@ export function createHttpHandler(input: HttpHandlerInput) {
     };
   }
 
-  function communityText(value: unknown, maxLength: number): string {
-    if (typeof value !== "string") return "";
-    return value
-      .replace(/\r\n/g, "\n")
-      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "")
-      .trim()
-      .slice(0, maxLength);
-  }
-
-  function communityTags(value: unknown): string[] {
-    const rawTags = Array.isArray(value)
-      ? value
-      : typeof value === "string"
-        ? value.split(",")
-        : [];
-    const tags: string[] = [];
-    for (const rawTag of rawTags) {
-      if (typeof rawTag !== "string") continue;
-      const tag = communityText(rawTag.replace(/^#+/, ""), 20);
-      if (!tag || tags.includes(tag)) continue;
-      tags.push(tag);
-      if (tags.length >= 5) break;
-    }
-    return tags;
-  }
-
-  function communityCategory(value: unknown): CommunityPostCategory {
-    return value === "party" ? "party" : "server";
-  }
-
-  function communityPositiveInt(value: unknown, max: number): number | undefined {
-    const numberValue = Number(value);
-    if (!Number.isFinite(numberValue) || numberValue <= 0) return undefined;
-    return Math.max(1, Math.min(max, Math.trunc(numberValue)));
-  }
-
-  function isSafeCommunityImageUrl(value: string | undefined): boolean {
-    return Boolean(value && /^\/community\/uploads\/[a-z0-9._-]+\.(?:png|jpe?g|gif|webp)$/i.test(value));
-  }
-
-  async function saveCommunityImage(file: MultipartPart | undefined): Promise<{ imageUrl?: string; imageAlt?: string }> {
-    if (!file || !file.filename || file.data.byteLength === 0) return {};
-    if (file.data.byteLength > MAX_COMMUNITY_IMAGE_BYTES) {
-      throw new HttpRequestError(400, { error: "이미지는 5MB 이하로 등록해주세요." });
-    }
-    const ext = communityImageExtension(file);
-    if (!ext) {
-      throw new HttpRequestError(400, { error: "PNG, JPG, GIF, WEBP 이미지만 등록할 수 있습니다." });
-    }
-    const fileName = `community-${Date.now()}-${crypto.randomBytes(4).toString("hex")}.${ext}`;
-    const root = communityAssetRoot();
-    await fs.mkdir(root, { recursive: true });
-    await fs.writeFile(path.join(root, fileName), file.data, { mode: 0o644 });
-    return {
-      imageUrl: `/community/uploads/${fileName}`,
-      imageAlt: file.filename.slice(0, 120)
-    };
-  }
-
-  function listCommunityPosts(limit: number, category?: CommunityPostCategory): CommunityPost[] {
-    const storeWithCommunity = input.store as Store & { listCommunityPosts?: (limit?: number, category?: CommunityPostCategory) => CommunityPost[] };
-    return typeof storeWithCommunity.listCommunityPosts === "function"
-      ? storeWithCommunity.listCommunityPosts(limit, category)
-      : [];
-  }
-
-  function getCommunityPostByAuthor(twitchUserId: string | undefined, category?: CommunityPostCategory): CommunityPost | undefined {
-    const storeWithCommunity = input.store as Store & { getCommunityPostByAuthor?: (twitchUserId: string | undefined, category?: CommunityPostCategory) => CommunityPost | undefined };
-    return typeof storeWithCommunity.getCommunityPostByAuthor === "function"
-      ? storeWithCommunity.getCommunityPostByAuthor(twitchUserId, category)
-      : undefined;
-  }
-
-  function countCommunityPostsByAuthor(twitchUserId: string | undefined, category?: CommunityPostCategory): number {
-    const storeWithCommunity = input.store as Store & { countCommunityPostsByAuthor?: (twitchUserId: string | undefined, category?: CommunityPostCategory) => number };
-    return typeof storeWithCommunity.countCommunityPostsByAuthor === "function"
-      ? storeWithCommunity.countCommunityPostsByAuthor(twitchUserId, category)
-      : 0;
-  }
-
-  function getCommunityPostById(postId: string | undefined): CommunityPost | undefined {
-    const storeWithCommunity = input.store as Store & { getCommunityPostById?: (postId: string | undefined) => CommunityPost | undefined };
-    return typeof storeWithCommunity.getCommunityPostById === "function"
-      ? storeWithCommunity.getCommunityPostById(postId)
-      : undefined;
-  }
-
-  function createCommunityPost(inputBody: CommunityPostCreateInput & {
-    authorTwitchUserId: string;
-    authorTwitchLogin: string;
-    authorDisplayName: string;
-    authorProfileImageUrl?: string;
-    authorRiotGameName?: string;
-    authorRiotTagLine?: string;
-    riotGameName?: string;
-    riotTagLine?: string;
-    tags?: string[] | string;
-    imageUrl?: string;
-    imageAlt?: string;
-    partyTier?: string;
-    partyRole?: string;
-    partyMode?: string;
-    partyVoice?: string;
-    partyCapacity?: number;
-  }): CommunityPost {
-    const storeWithCommunity = input.store as Store & {
-      createCommunityPost?: (body: typeof inputBody) => CommunityPost | undefined;
-      getCommunityPostByAuthor?: (twitchUserId: string | undefined, category?: CommunityPostCategory) => CommunityPost | undefined;
-      countCommunityPostsByAuthor?: (twitchUserId: string | undefined, category?: CommunityPostCategory) => number;
-    };
-    if (typeof storeWithCommunity.createCommunityPost !== "function") {
-      throw new HttpRequestError(503, { error: "커뮤니티 저장소를 사용할 수 없습니다." });
-    }
-    const category = communityCategory(inputBody.category);
-    if (category === "party" && typeof storeWithCommunity.countCommunityPostsByAuthor === "function" && storeWithCommunity.countCommunityPostsByAuthor(inputBody.authorTwitchUserId, category) >= 2) {
-      throw new HttpRequestError(409, { error: "파티 모집글은 하루에 2개까지 작성할 수 있습니다." });
-    }
-    if (category !== "party" && typeof storeWithCommunity.getCommunityPostByAuthor === "function" && storeWithCommunity.getCommunityPostByAuthor(inputBody.authorTwitchUserId, category)) {
-      throw new HttpRequestError(409, { error: "커뮤니티 게시글은 게시판별 계정당 1개만 작성할 수 있습니다." });
-    }
-    const post = storeWithCommunity.createCommunityPost(inputBody);
-    if (!post) throw new HttpRequestError(400, { error: "게시글 제목과 내용을 입력해주세요." });
-    return post;
-  }
-
-  function updateCommunityPost(postId: string, inputBody: CommunityPostCreateInput & {
-    riotGameName?: string;
-    riotTagLine?: string;
-    tags?: string[] | string;
-    imageUrl?: string;
-    imageAlt?: string;
-  }): CommunityPost {
-    const storeWithCommunity = input.store as Store & {
-      updateCommunityPost?: (postId: string, body: typeof inputBody) => CommunityPost | undefined;
-    };
-    if (typeof storeWithCommunity.updateCommunityPost !== "function") {
-      throw new HttpRequestError(503, { error: "커뮤니티 저장소를 사용할 수 없습니다." });
-    }
-    const post = storeWithCommunity.updateCommunityPost(postId, inputBody);
-    if (!post) throw new HttpRequestError(400, { error: "게시글 제목과 내용을 입력해주세요." });
-    return post;
-  }
-
-  function addCommunityPostComment(postId: string, inputBody: CommunityPostCommentCreateInput & {
-    authorTwitchUserId: string;
-    authorTwitchLogin: string;
-    authorDisplayName: string;
-    authorProfileImageUrl?: string;
-  }): CommunityPost {
-    const storeWithCommunity = input.store as Store & {
-      addCommunityPostComment?: (postId: string, body: typeof inputBody) => CommunityPost | undefined;
-    };
-    if (typeof storeWithCommunity.addCommunityPostComment !== "function") {
-      throw new HttpRequestError(503, { error: "커뮤니티 저장소를 사용할 수 없습니다." });
-    }
-    const post = storeWithCommunity.addCommunityPostComment(postId, inputBody);
-    if (!post) throw new HttpRequestError(404, { error: "댓글을 작성할 파티모집 글을 찾을 수 없습니다." });
-    return post;
-  }
-
   function rememberPublicLolParticipantRank(riotId: string | undefined, rankedStats: LolRankedStats | undefined, fetchedAt: string): void {
     if (!riotId || !rankedStats) return;
     const parsed = parseRiotIdDetailed(riotId);
@@ -6213,261 +6029,6 @@ export function createHttpHandler(input: HttpHandlerInput) {
     });
   }
 
-  async function createPublicCommunityPost(req: IncomingMessage): Promise<CommunityPost> {
-    if (!input.publicTwitchAuth) {
-      throw new HttpRequestError(503, { error: "Twitch 공개 로그인을 사용할 수 없습니다." });
-    }
-    const sessionId = publicTwitchViewerSessionIdFromRequest(req);
-    const status = await input.publicTwitchAuth.getStatus(sessionId);
-    if (!status.connected || !status.user) {
-      throw new HttpRequestError(401, { error: "Twitch 로그인 후 게시글을 작성할 수 있습니다." });
-    }
-    if (communityModeration.isUserSanctioned(status.user.id)) {
-      throw new HttpRequestError(403, { error: "커뮤니티 작성이 제한된 계정입니다. 관리자에게 문의해주세요." });
-    }
-    const contentType = requestHeaderValue(req, "content-type") ?? "";
-    let category: CommunityPostCategory = "server";
-    let title = "";
-    let content = "";
-    let rawRiotId = "";
-    let tags: string[] = [];
-    let partyTier: string | undefined;
-    let partyRole: string | undefined;
-    let partyMode: string | undefined;
-    let partyVoice: string | undefined;
-    let partyCapacity: number | undefined;
-    let imageUrl: string | undefined;
-    let imageAlt: string | undefined;
-
-    if (/^multipart\/form-data\b/i.test(contentType)) {
-      const parts = parseMultipartBody(req, await readRawBody(req, MAX_COMMUNITY_IMAGE_BYTES + MAX_JSON_BODY_BYTES));
-      category = communityCategory(multipartText(parts, "category"));
-      title = communityText(multipartText(parts, "title"), 80);
-      content = communityText(multipartText(parts, "body"), 2000);
-      rawRiotId = communityText(multipartText(parts, "riotId"), 80);
-      tags = communityTags(multipartText(parts, "tags"));
-      partyTier = communityText(multipartText(parts, "partyTier"), 24) || undefined;
-      partyRole = communityText(multipartText(parts, "partyRole"), 24) || undefined;
-      partyMode = communityText(multipartText(parts, "partyMode"), 32) || undefined;
-      partyVoice = communityText(multipartText(parts, "partyVoice"), 32) || undefined;
-      partyCapacity = communityPositiveInt(multipartText(parts, "partyCapacity"), 5);
-      const image = await saveCommunityImage(parts.find((part) => (part.name === "image" || part.name === "file") && part.filename));
-      imageUrl = image.imageUrl;
-      imageAlt = image.imageAlt;
-    } else {
-      const body = await readJsonBody<CommunityPostCreateInput>(req);
-      category = communityCategory(body.category);
-      title = communityText(body.title, 80);
-      content = communityText(body.body, 2000);
-      rawRiotId = communityText(body.riotId, 80);
-      tags = communityTags(body.tags);
-      partyTier = communityText(body.partyTier, 24) || undefined;
-      partyRole = communityText(body.partyRole, 24) || undefined;
-      partyMode = communityText(body.partyMode, 32) || undefined;
-      partyVoice = communityText(body.partyVoice, 32) || undefined;
-      partyCapacity = communityPositiveInt(body.partyCapacity, 5);
-      const requestedImageUrl = communityText(body.imageUrl, 220);
-      if (requestedImageUrl && !isSafeCommunityImageUrl(requestedImageUrl)) {
-        throw new HttpRequestError(400, { error: "이미지는 파일 업로드 또는 저장된 커뮤니티 이미지 경로만 사용할 수 있습니다." });
-      }
-      imageUrl = requestedImageUrl || undefined;
-      imageAlt = communityText(body.imageAlt, 120) || undefined;
-    }
-
-    if (!title || !content) {
-      throw new HttpRequestError(400, { error: "게시글 제목과 내용을 입력해주세요." });
-    }
-    if (category === "party" && countCommunityPostsByAuthor(status.user.id, category) >= 2) {
-      throw new HttpRequestError(409, { error: "파티 모집글은 하루에 2개까지 작성할 수 있습니다." });
-    }
-    if (category !== "party" && getCommunityPostByAuthor(status.user.id, category)) {
-      throw new HttpRequestError(409, { error: "커뮤니티 게시글은 게시판별 계정당 1개만 작성할 수 있습니다." });
-    }
-    let riotGameName: string | undefined;
-    let riotTagLine: string | undefined;
-    if (rawRiotId) {
-      const parsed = parseRiotIdDetailed(rawRiotId);
-      if (!parsed.ok) {
-        throw new HttpRequestError(400, { error: parsed.message });
-      }
-      riotGameName = parsed.gameName;
-      riotTagLine = parsed.tagLine;
-    }
-    const streamerRiotRequest = currentStreamerRiotIdRequestForTwitchUser(status.user.id);
-    const approvedRiotRequest = streamerRiotRequest?.status === "approved" ? streamerRiotRequest : undefined;
-    return createCommunityPost({
-      category,
-      title,
-      body: content,
-      riotGameName,
-      riotTagLine,
-      tags,
-      imageUrl,
-      imageAlt,
-      partyTier,
-      partyRole,
-      partyMode,
-      partyVoice,
-      partyCapacity,
-      authorTwitchUserId: status.user.id,
-      authorTwitchLogin: status.user.login,
-      authorDisplayName: status.user.displayName || status.user.login,
-      authorProfileImageUrl: status.user.profileImageUrl,
-      authorRiotGameName: approvedRiotRequest?.riotGameName,
-      authorRiotTagLine: approvedRiotRequest?.riotTagLine
-    });
-  }
-
-  async function updatePublicCommunityPost(req: IncomingMessage, postId: string): Promise<CommunityPost> {
-    if (!input.publicTwitchAuth) {
-      throw new HttpRequestError(503, { error: "Twitch 공개 로그인을 사용할 수 없습니다." });
-    }
-    const currentPost = getCommunityPostById(postId);
-    if (!currentPost) {
-      throw new HttpRequestError(404, { error: "수정할 게시글을 찾을 수 없습니다." });
-    }
-    if (currentPost.category !== "server") {
-      throw new HttpRequestError(400, { error: "서버 모집 글만 수정할 수 있습니다." });
-    }
-    const sessionId = publicTwitchViewerSessionIdFromRequest(req);
-    const status = await input.publicTwitchAuth.getStatus(sessionId);
-    if (!status.connected || !status.user) {
-      throw new HttpRequestError(401, { error: "Twitch 로그인 후 게시글을 수정할 수 있습니다." });
-    }
-    if (currentPost.authorTwitchUserId !== status.user.id) {
-      throw new HttpRequestError(403, { error: "본인이 작성한 게시글만 수정할 수 있습니다." });
-    }
-    if (communityModeration.isUserSanctioned(status.user.id)) {
-      throw new HttpRequestError(403, { error: "커뮤니티 작성이 제한된 계정입니다. 관리자에게 문의해주세요." });
-    }
-
-    const contentType = requestHeaderValue(req, "content-type") ?? "";
-    let title = "";
-    let content = "";
-    let rawRiotId = "";
-    let tags: string[] = [];
-    let imageUrl: string | undefined;
-    let imageAlt: string | undefined;
-    let hasImageReplacement = false;
-
-    if (/^multipart\/form-data\b/i.test(contentType)) {
-      const parts = parseMultipartBody(req, await readRawBody(req, MAX_COMMUNITY_IMAGE_BYTES + MAX_JSON_BODY_BYTES));
-      title = communityText(multipartText(parts, "title"), 80);
-      content = communityText(multipartText(parts, "body"), 2000);
-      rawRiotId = communityText(multipartText(parts, "riotId"), 80);
-      tags = communityTags(multipartText(parts, "tags"));
-      const image = await saveCommunityImage(parts.find((part) => (part.name === "image" || part.name === "file") && part.filename));
-      imageUrl = image.imageUrl;
-      imageAlt = image.imageAlt;
-      hasImageReplacement = Boolean(imageUrl);
-    } else {
-      const body = await readJsonBody<CommunityPostCreateInput>(req);
-      title = communityText(body.title, 80);
-      content = communityText(body.body, 2000);
-      rawRiotId = communityText(body.riotId, 80);
-      tags = communityTags(body.tags);
-      const requestedImageUrl = communityText(body.imageUrl, 220);
-      if (requestedImageUrl && !isSafeCommunityImageUrl(requestedImageUrl)) {
-        throw new HttpRequestError(400, { error: "이미지는 파일 업로드 또는 저장된 커뮤니티 이미지 경로만 사용할 수 있습니다." });
-      }
-      if (requestedImageUrl) {
-        imageUrl = requestedImageUrl;
-        imageAlt = communityText(body.imageAlt, 120) || undefined;
-        hasImageReplacement = true;
-      }
-    }
-
-    if (!title || !content) {
-      throw new HttpRequestError(400, { error: "게시글 제목과 내용을 입력해주세요." });
-    }
-
-    let riotGameName: string | undefined;
-    let riotTagLine: string | undefined;
-    if (rawRiotId) {
-      const parsed = parseRiotIdDetailed(rawRiotId);
-      if (!parsed.ok) {
-        throw new HttpRequestError(400, { error: parsed.message });
-      }
-      riotGameName = parsed.gameName;
-      riotTagLine = parsed.tagLine;
-    }
-
-    return updateCommunityPost(postId, {
-      category: "server",
-      title,
-      body: content,
-      riotGameName,
-      riotTagLine,
-      tags,
-      ...(hasImageReplacement ? { imageUrl, imageAlt } : {})
-    });
-  }
-
-  async function createPublicCommunityComment(req: IncomingMessage, postId: string): Promise<CommunityPost> {
-    if (!input.publicTwitchAuth) {
-      throw new HttpRequestError(503, { error: "Twitch 공개 로그인을 사용할 수 없습니다." });
-    }
-    const currentPost = getCommunityPostById(postId);
-    if (!currentPost || currentPost.category !== "party") {
-      throw new HttpRequestError(404, { error: "댓글을 작성할 파티모집 글을 찾을 수 없습니다." });
-    }
-    const sessionId = publicTwitchViewerSessionIdFromRequest(req);
-    const status = await input.publicTwitchAuth.getStatus(sessionId);
-    if (!status.connected || !status.user) {
-      throw new HttpRequestError(401, { error: "Twitch 로그인 후 댓글을 작성할 수 있습니다." });
-    }
-    if (communityModeration.isUserSanctioned(status.user.id)) {
-      throw new HttpRequestError(403, { error: "커뮤니티 작성이 제한된 계정입니다. 관리자에게 문의해주세요." });
-    }
-    const body = await readJsonBody<CommunityPostCommentCreateInput>(req);
-    const commentBody = communityText(body.body, 500);
-    if (!commentBody) {
-      throw new HttpRequestError(400, { error: "댓글 내용을 입력해주세요." });
-    }
-    return addCommunityPostComment(postId, {
-      body: commentBody,
-      authorTwitchUserId: status.user.id,
-      authorTwitchLogin: status.user.login,
-      authorDisplayName: status.user.displayName || status.user.login,
-      authorProfileImageUrl: status.user.profileImageUrl
-    });
-  }
-
-  async function createPublicCommunityReport(req: IncomingMessage, postId: string): Promise<CommunityPostReport> {
-    if (!input.publicTwitchAuth) {
-      throw new HttpRequestError(503, { error: "Twitch 공개 로그인을 사용할 수 없습니다." });
-    }
-    const status = await getPublicTwitchViewerStatus(req);
-    if (!status.connected || !status.user) {
-      throw new HttpRequestError(401, { error: "Twitch 로그인 후 게시글을 신고할 수 있습니다." });
-    }
-    const post = getCommunityPostById(postId);
-    if (!post) throw new HttpRequestError(404, { error: "신고할 게시글을 찾을 수 없습니다." });
-    if (post.authorTwitchUserId === status.user.id) {
-      throw new HttpRequestError(409, { error: "본인이 작성한 게시글은 신고할 수 없습니다." });
-    }
-    const body = await readJsonBody<{ reason?: unknown; detail?: unknown }>(req);
-    const reason = body.reason;
-    if (reason !== "spam" && reason !== "harassment" && reason !== "privacy" && reason !== "other") {
-      throw new HttpRequestError(400, { error: "신고 사유를 선택해주세요." });
-    }
-    const report = communityModeration.reportPost({
-      postId,
-      reason,
-      detail: communityText(body.detail, 500) || undefined,
-      reporterTwitchUserId: status.user.id,
-      reporterTwitchLogin: status.user.login,
-      reporterDisplayName: status.user.displayName || status.user.login
-    });
-    input.logger?.event?.({
-      type: "community.post.reported",
-      reportId: report.id,
-      postId: report.postId,
-      reason: report.reason
-    });
-    return report;
-  }
-
   async function getPublicTwitchViewerStatus(req: IncomingMessage): Promise<PublicTwitchViewerStatusResponse> {
     const yoroContext = input.yoroAccounts
       ? await input.yoroAccounts
@@ -6693,6 +6254,78 @@ export function createHttpHandler(input: HttpHandlerInput) {
         publicLolMatchDetailInFlight.delete(cacheKey);
       });
     publicLolMatchDetailInFlight.set(cacheKey, request);
+    return request;
+  }
+
+  /* 패치별 내 전적.
+   *
+   * 경기의 gameVersion 이 Data Dragon 과 같은 major.minor 라서 패치 노트와 그대로
+   * 이어집니다. 표본은 최근 PATCH_PLAY_SAMPLE_LIMIT 경기로 못 박습니다 —
+   * 방문자 한 명이 Riot 호출을 무한정 늘릴 수 없어야 합니다.
+   */
+  async function buildPatchPlaySummary(
+    rawRiotId: string,
+    routing: LolRoutingContext
+  ): Promise<PatchPlaySummary> {
+    const parsed = parseRiotIdDetailed(rawRiotId);
+    if (!parsed.ok) throw new HttpRequestError(400, { error: parsed.message, code: parsed.code });
+    if (!input.riot) throw new HttpRequestError(503, { error: "Riot API client를 사용할 수 없습니다." });
+    if (!input.riot.isConfigured()) throw new HttpRequestError(503, { error: "Riot API key가 설정되어 있지 않습니다." });
+
+    const cacheKey = publicLolProfileCacheKey(parsed.gameName, parsed.tagLine, routing.lolPlatform);
+    const cached = patchPlaySummaryCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) return cached.summary;
+    if (cached) patchPlaySummaryCache.delete(cacheKey);
+    const running = patchPlaySummaryInFlight.get(cacheKey);
+    if (running) return running;
+
+    const request = (async (): Promise<PatchPlaySummary> => {
+      const riot = input.riot;
+      if (!riot) throw new HttpRequestError(503, { error: "Riot API client를 사용할 수 없습니다." });
+      const account = await riot.getAccountByRiotId(parsed.gameName, parsed.tagLine, routing).catch((error) => {
+        throw new HttpRequestError(502, { error: publicLolErrorMessage(error) });
+      });
+      if (!account?.puuid) throw new HttpRequestError(404, { error: "Riot 계정을 찾지 못했습니다." });
+      await requirePublicLolPlatformMembership(account.puuid, routing);
+
+      const matchIds = await riot.getRecentMatchIdsByPuuid(
+        account.puuid,
+        PATCH_PLAY_SAMPLE_LIMIT,
+        [...PUBLIC_LOL_MATCH_QUEUE_IDS.all],
+        0,
+        routing
+      ).catch(() => []);
+      const matches = (await Promise.all(
+        matchIds.slice(0, PATCH_PLAY_SAMPLE_LIMIT).map((matchId) => getPublicLolMatchDetail(matchId, routing).catch(() => null))
+      ))
+        .filter((match): match is RiotMatch => Boolean(match))
+        .filter(isPublicLolQueue);
+
+      const samples = matches
+        .map((match) => {
+          const participant = match.info.participants.find((item) => item.puuid === account.puuid);
+          /* 승패를 모르는 경기는 표본에서 뺍니다. 추측해서 승률을 만들지 않습니다. */
+          if (!participant || typeof participant.win !== "boolean") return undefined;
+          return { gameVersion: match.info.gameVersion, won: participant.win };
+        })
+        .filter((sample): sample is { gameVersion: string | undefined; won: boolean } => Boolean(sample));
+
+      const summary: PatchPlaySummary = Object.freeze({
+        schemaVersion: 1 as const,
+        gameName: account.gameName || parsed.gameName,
+        tagLine: account.tagLine || parsed.tagLine,
+        lolPlatform: routing.lolPlatform,
+        sampledMatches: samples.length,
+        fetchedAt: new Date().toISOString(),
+        patches: Object.freeze(patchPlayRecords(samples))
+      });
+      patchPlaySummaryCache.set(cacheKey, { summary, expiresAt: Date.now() + PATCH_PLAY_CACHE_TTL_MS });
+      pruneMapToMax(patchPlaySummaryCache, PUBLIC_LOL_PROFILE_CACHE_MAX);
+      return summary;
+    })().finally(() => {
+      patchPlaySummaryInFlight.delete(cacheKey);
+    });
+    patchPlaySummaryInFlight.set(cacheKey, request);
     return request;
   }
 
@@ -7982,6 +7615,13 @@ export function createHttpHandler(input: HttpHandlerInput) {
             "Referrer-Policy": "no-referrer"
           });
         }
+        const retiredCommunityPath = retiredCommunityReturnPath(url);
+        if (retiredCommunityPath) {
+          return sendPermanentRedirect(res, retiredCommunityPath, {
+            "Cache-Control": "public, max-age=3600",
+            "Referrer-Policy": "no-referrer"
+          });
+        }
         if (
           url.pathname === "/setup/discord"
           || url.pathname === "/setup/discord/"
@@ -8036,7 +7676,6 @@ export function createHttpHandler(input: HttpHandlerInput) {
           return;
         }
       }
-      if ((req.method === "GET" || req.method === "HEAD") && await sendCommunityAsset(req, res, url.pathname)) return;
       if (
         (req.method === "GET" || req.method === "HEAD") &&
         await sendRankedEmblemAsset(req, res, url.pathname, input.logger)
@@ -8072,7 +7711,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
             ? publicPalworldListApiLimiter
             : palworldLimitGroup
               ? publicPalworldApiLimiter
-          : url.pathname.startsWith("/api/lol/") || url.pathname.startsWith("/api/public/twitch/") || url.pathname.startsWith("/api/public/aram/") || url.pathname.startsWith("/api/public/community/") || url.pathname.startsWith("/api/public/participation/") || url.pathname === "/api/public/locale"
+          : url.pathname.startsWith("/api/lol/") || url.pathname.startsWith("/api/public/twitch/") || url.pathname.startsWith("/api/public/aram/") || url.pathname.startsWith("/api/public/patch-notes") || url.pathname.startsWith("/api/public/participation/") || url.pathname === "/api/public/locale"
               ? publicLolApiLimiter
               : dashboardApiLimiter;
         const limited = limiter.check(limitKey);
@@ -10101,32 +9740,44 @@ export function createHttpHandler(input: HttpHandlerInput) {
             : "no-store"
         });
       }
-      if (req.method === "GET" && url.pathname === "/api/public/community/posts") {
-        const limit = Math.max(1, Math.min(100, Math.trunc(Number(url.searchParams.get("limit")) || 50)));
-        const category = url.searchParams.has("category") ? communityCategory(url.searchParams.get("category")) : undefined;
-        return sendJson(req, res, 200, { posts: listCommunityPosts(limit, category) });
+      if (req.method === "GET" && url.pathname === "/api/public/patch-notes") {
+        if (!input.patchNotes) {
+          return sendJson(req, res, 503, {
+            error: "PATCH_NOTES_UNAVAILABLE",
+            message: "패치 노트를 사용할 수 없습니다."
+          }, { "Cache-Control": "no-store" });
+        }
+        const requested = url.searchParams.get("locale");
+        /* 목록에 없는 값은 무시하고 방문자 언어로 되돌립니다. 임의 값이 수집기로 들어가지 않습니다. */
+        const explicitLocale = requested === "ko" || requested === "ja" ? requested : undefined;
+        const locale: PatchNoteLocale = explicitLocale
+          ?? (publicLocalePreference(req).locale === "ja" ? "ja" : "ko");
+        const feed = await input.patchNotes.getFeed(locale);
+        if (!feed) {
+          return sendJson(req, res, 503, {
+            error: "PATCH_NOTES_UNAVAILABLE",
+            message: "패치 노트를 아직 받아오지 못했습니다."
+          }, { "Cache-Control": "no-store" });
+        }
+        return sendJson(req, res, 200, feed, {
+          /* 언어가 query 로 오면 URL 이 응답을 결정하므로 공용 캐시에 둘 수 있습니다.
+             요청 header 로 언어를 고른 경우에는 같은 URL 이 사람마다 다른 본문을 내므로
+             공용 캐시에 두면 한국어 방문자에게 일본어가 나갈 수 있습니다. */
+          "Cache-Control": explicitLocale
+            ? (feed.stale ? "public, max-age=60" : "public, max-age=900, stale-while-revalidate=21600")
+            : (feed.stale ? "private, max-age=60" : "private, max-age=900"),
+          Vary: "Accept-Language"
+        });
       }
-      if (req.method === "POST" && url.pathname === "/api/public/community/posts") {
-        const post = await createPublicCommunityPost(req);
-        return sendJson(req, res, 201, { post, posts: listCommunityPosts(50, post.category) });
-      }
-      const communityPostMatch = url.pathname.match(/^\/api\/public\/community\/posts\/([^/]+)$/);
-      if (req.method === "PATCH" && communityPostMatch) {
-        const postId = decodeURIComponent(communityPostMatch[1] ?? "");
-        const post = await updatePublicCommunityPost(req, postId);
-        return sendJson(req, res, 200, { post, posts: listCommunityPosts(50, post.category) });
-      }
-      const communityCommentMatch = url.pathname.match(/^\/api\/public\/community\/posts\/([^/]+)\/comments$/);
-      if (req.method === "POST" && communityCommentMatch) {
-        const postId = decodeURIComponent(communityCommentMatch[1] ?? "");
-        const post = await createPublicCommunityComment(req, postId);
-        return sendJson(req, res, 201, { post, posts: listCommunityPosts(50, post.category) });
-      }
-      const communityReportMatch = url.pathname.match(/^\/api\/public\/community\/posts\/([^/]+)\/reports$/);
-      if (req.method === "POST" && communityReportMatch) {
-        const postId = decodeURIComponent(communityReportMatch[1] ?? "");
-        const report = await createPublicCommunityReport(req, postId);
-        return sendJson(req, res, 201, { report });
+      if (req.method === "GET" && url.pathname === "/api/public/patch-notes/summary") {
+        const summary = await buildPatchPlaySummary(
+          url.searchParams.get("riotId") ?? "",
+          publicLolRouting(url.searchParams.get("platform"), input.riot)
+        );
+        return sendJson(req, res, 200, summary, {
+          /* 개인 전적입니다. 공용 캐시에 남기지 않습니다. */
+          "Cache-Control": "private, max-age=60"
+        });
       }
       if (req.method === "GET" && url.pathname === "/api/public/participation/state") {
         return sendJson(req, res, 200, await getPublicParticipationState(req));
@@ -10369,55 +10020,6 @@ export function createHttpHandler(input: HttpHandlerInput) {
       if (req.method === "GET" && url.pathname === "/api/followers") {
         const broadcasterUserId = requireAuthenticatedStreamerOwner(auth.principal);
         return sendJson(req, res, 200, await followerManagementResponse(broadcasterUserId));
-      }
-      if (req.method === "GET" && url.pathname === "/api/community/moderation") {
-        if (auth.principal.type !== "DASHBOARD_ADMIN" || auth.principal.role !== "admin") {
-          return sendJson(req, res, 403, { error: "관리자 권한이 필요합니다." });
-        }
-        return sendJson(req, res, 200, communityModeration.snapshot());
-      }
-      const communityVisibilityMatch = url.pathname.match(/^\/api\/community\/moderation\/posts\/([^/]+)\/visibility$/);
-      if (req.method === "POST" && communityVisibilityMatch) {
-        if (auth.principal.type !== "DASHBOARD_ADMIN" || auth.principal.role !== "admin") {
-          return sendJson(req, res, 403, { error: "관리자 권한이 필요합니다." });
-        }
-        const body = await readJsonBody<{ visibility?: unknown; reason?: unknown }>(req);
-        if (body.visibility !== "visible" && body.visibility !== "hidden") {
-          return sendJson(req, res, 400, { error: "visibility는 visible 또는 hidden이어야 합니다." });
-        }
-        const post = communityModeration.setPostVisibility({
-          postId: decodeURIComponent(communityVisibilityMatch[1] ?? ""),
-          visibility: body.visibility,
-          reason: communityText(body.reason, 300) || undefined,
-          updatedBy: "dashboard-admin"
-        });
-        input.logger?.event?.({ type: "community.post.visibility_changed", postId: post.id, visibility: body.visibility });
-        return sendJson(req, res, 200, { post, ...communityModeration.snapshot() });
-      }
-      const communitySanctionMatch = url.pathname.match(/^\/api\/community\/moderation\/users\/([^/]+)\/sanction$/);
-      if (req.method === "POST" && communitySanctionMatch) {
-        if (auth.principal.type !== "DASHBOARD_ADMIN" || auth.principal.role !== "admin") {
-          return sendJson(req, res, 403, { error: "관리자 권한이 필요합니다." });
-        }
-        const body = await readJsonBody<{ active?: unknown; twitchLogin?: unknown; reason?: unknown; expiresAt?: unknown }>(req);
-        if (typeof body.active !== "boolean") return sendJson(req, res, 400, { error: "active는 boolean이어야 합니다." });
-        const expiresAt = communityText(body.expiresAt, 40) || undefined;
-        if (expiresAt && !Number.isFinite(Date.parse(expiresAt))) {
-          return sendJson(req, res, 400, { error: "expiresAt은 올바른 날짜여야 합니다." });
-        }
-        const twitchUserId = decodeURIComponent(communitySanctionMatch[1] ?? "").trim();
-        if (!twitchUserId) return sendJson(req, res, 400, { error: "Twitch 사용자 ID가 필요합니다." });
-        const sanction = communityModeration.setUserSanction({
-          twitchUserId,
-          twitchLogin: communityText(body.twitchLogin, 80) || undefined,
-          active: body.active,
-          reason: communityText(body.reason, 300) || undefined,
-          expiresAt,
-          updatedBy: "dashboard-admin"
-        });
-        if (body.active && !sanction) return sendJson(req, res, 400, { error: "제재를 적용하지 못했습니다." });
-        input.logger?.event?.({ type: "community.user.sanction_changed", twitchUserId, active: body.active });
-        return sendJson(req, res, 200, { sanction, ...communityModeration.snapshot() });
       }
       if (req.method === "GET" && url.pathname === "/api/riot/settings") {
         if (!input.riot) return sendJson(req, res, 503, { error: "Riot API client를 사용할 수 없습니다." });
@@ -11004,9 +10606,6 @@ export function createHttpHandler(input: HttpHandlerInput) {
           ...PALWORLD_DATA_UNAVAILABLE_RESPONSE,
           domain: error.domain
         }, { "Cache-Control": "no-store" });
-      }
-      if (error instanceof CommunityModerationServiceError) {
-        return sendJson(req, res, error.status, { error: error.publicMessage });
       }
       input.logger?.error({
         type: "http_api.unhandled_error",

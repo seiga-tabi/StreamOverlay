@@ -567,7 +567,7 @@ test("공개 Twitch OAuth는 Palworld 허용 경로와 안전한 query를 복귀
       "/palworld/search?q=%ED%8C%94%20100%25&pal=pal-1",
       "/ko/",
       "/ja/lol/aram",
-      "/ko/community",
+      "/ko/patch-notes",
       "/ja/palworld/search?q=%E3%83%91%E3%83%AB",
       "/dashboard",
       "/dashboard/seiga/key"
@@ -3525,34 +3525,6 @@ test("스트리머 dashboard 세션은 허용된 운영 API만 사용할 수 있
       assert.equal(methodMismatch.status, 403);
       assert.equal(methodMismatch.code, "FORBIDDEN");
     }
-  });
-});
-
-test("공개 커뮤니티 댓글 API는 dashboard 인증을 요구하지 않는다", async () => {
-  await withAuthConfig(async () => {
-    const sessions = new DashboardSessionStore();
-    const req = createRequest("POST", "/api/public/community/posts/post-1/comments", { body: "참여하고 싶어요" }, {
-      origin: DASHBOARD_ORIGIN
-    });
-
-    const result = authorizeHttpRequest(req, "/api/public/community/posts/post-1/comments", sessions);
-
-    assert.equal(result.ok, true);
-    assert.equal(result.principal.type, "PUBLIC");
-  });
-});
-
-test("공개 커뮤니티 신고 API는 dashboard 인증 대신 공개 세션을 사용한다", async () => {
-  await withAuthConfig(async () => {
-    const sessions = new DashboardSessionStore();
-    const req = createRequest("POST", "/api/public/community/posts/post-1/reports", { reason: "spam" }, {
-      origin: DASHBOARD_ORIGIN
-    });
-
-    const result = authorizeHttpRequest(req, "/api/public/community/posts/post-1/reports", sessions);
-
-    assert.equal(result.ok, true);
-    assert.equal(result.principal.type, "PUBLIC");
   });
 });
 

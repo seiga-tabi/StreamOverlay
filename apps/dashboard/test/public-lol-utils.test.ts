@@ -82,19 +82,16 @@ test("공개 페이지 경로를 페이지 상태와 왕복 변환한다", () =>
   assert.equal(publicPageRouteFromPath("/bot")?.page, "bot");
   assert.equal(publicPageRouteFromPath("/lol/aram")?.page, "aram");
   assert.equal(publicPageRouteFromPath("/ja/lol/aram")?.page, "aram");
-  assert.equal(publicPageRouteFromPath("/community/server")?.page, "patch");
-  assert.equal(publicPageRouteFromPath("/community/party/")?.page, "communityParty");
-  assert.deepEqual(publicPageRouteFromPath("/community/posts/post%201"), {
-    page: "communityDetail",
-    postId: "post 1"
-  });
-  assert.equal(publicPathForPage("communityDetail", { postId: "post 1" }), "/community/posts/post%201");
+  assert.equal(publicPageRouteFromPath("/patch-notes")?.page, "patchNotes");
+  assert.equal(publicPageRouteFromPath("/ja/patch-notes")?.page, "patchNotes");
+  /* 커뮤니티는 걷어냈습니다. 앱이 아니라 서버가 308 로 넘깁니다. */
+  assert.equal(publicPageRouteFromPath("/community/server"), undefined);
+  assert.equal(publicPageRouteFromPath("/community/posts/post%201"), undefined);
   assert.equal(publicPathForPage("palworld"), "/palworld");
   assert.equal(publicPathForPage("bot"), "/bot");
   assert.equal(publicPathForPage("aram"), "/lol/aram");
   assert.equal(publicPathForPage("followJoin"), "/participation");
-  assert.equal(publicPageRouteFromPath("/ko/community/server")?.page, "patch");
-  assert.equal(publicPageRouteFromPath("/ja/community/posts/post%201")?.postId, "post 1");
+  assert.equal(publicPathForPage("patchNotes"), "/patch-notes");
 });
 
 test("공개 언어 URL은 경로·query·hash를 보존하고 비공개 경로에는 적용하지 않는다", () => {
@@ -117,7 +114,8 @@ test("공개 언어 URL은 경로·query·hash를 보존하고 비공개 경로�
 test("관리자 Dashboard 경로를 페이지 상태와 왕복 변환한다", () => {
   assert.equal(dashboardPathForPage("supportInbox"), "/admin/support");
   assert.equal(dashboardPageFromPath("/admin/support"), "supportInbox");
-  assert.equal(dashboardPageFromPath("/admin/community"), "communityModeration");
+  /* 커뮤니티 관리 화면은 제거됐습니다. 모르는 경로는 첫 화면으로 돌아갑니다. */
+  assert.equal(dashboardPageFromPath("/admin/community"), "streamerRiotRequests");
   assert.equal(dashboardPageFromPath("/admin"), "streamerRiotRequests");
   assert.equal(dashboardPageFromPath("/admin/unknown"), "streamerRiotRequests");
   assert.equal(DASHBOARD_PAGES.includes("streamerRiotRequests"), true);

@@ -214,11 +214,9 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
     (pathname === "/api/public/participation/join" && method === "POST") ||
     (pathname === "/api/public/participation/cancel" && method === "POST") ||
     /^\/api\/public\/participation\/sessions\/[^/]+(?:\/(?:join|cancel|check-in|rejoin|skip))?$/.test(pathname) ||
-    (pathname === "/api/public/community/posts" && (method === "GET" || method === "POST")) ||
-    (method === "PATCH" && /^\/api\/public\/community\/posts\/[^/]+$/.test(pathname)) ||
-    (method === "POST" && /^\/api\/public\/community\/posts\/[^/]+\/comments$/.test(pathname)) ||
-    (method === "POST" && /^\/api\/public\/community\/posts\/[^/]+\/reports$/.test(pathname)) ||
-    (method === "GET" && pathname === "/api/public/aram/augments")
+    (method === "GET" && pathname === "/api/public/aram/augments") ||
+    (method === "GET" && pathname === "/api/public/patch-notes") ||
+    (method === "GET" && pathname === "/api/public/patch-notes/summary")
   ) return "PUBLIC";
   if (method === "GET" && (pathname === "/api/public/twitch/auth/start" || pathname === "/api/public/twitch/auth/callback")) return "OAUTH_CALLBACK";
   if (

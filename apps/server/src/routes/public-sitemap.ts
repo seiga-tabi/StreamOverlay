@@ -35,13 +35,13 @@ export const PALWORLD_SITEMAP_KINDS: Readonly<Record<string, PalworldEntityKind>
  *
  * 색인 가치가 없거나 비어 있는 화면은 의도적으로 제외합니다.
  * - `/privacy`, `/terms`: 법적 문구 확정 전까지 noindex로 서빙됩니다.
- * - `/community`: 게시물이 0건이라 thin content가 됩니다.
  * - `/follow`, `/participation`: 로그인한 사용자에게만 의미가 있습니다.
  */
 export const PUBLIC_SITEMAP_STATIC_PATHS: readonly string[] = [
   "/",
   "/lol",
   "/lol/aram",
+  "/patch-notes",
   "/bot",
   "/bot/getting-started",
   "/bot/commands",

@@ -1,8 +1,2034 @@
 {
   "schemaVersion": 1,
   "mode": "aram_augments",
-  "status": "preparing",
-  "dataVersion": "candidate",
-  "sourceRevision": "not_imported",
-  "augments": []
+  "status": "ready",
+  "dataVersion": "16.15.1",
+  "sourceRevision": "communitydragon:latest@16.15.1",
+  "augments": [
+    {
+      "id": "augment404",
+      "nameKo": "404: 증강을 찾을 수 없습니다",
+      "nameJa": "404 オーグメントが見つかりません",
+      "descriptionKo": "이걸 어떻게 찾아낸 건가요?! 모자 3개를 획득합니다.",
+      "descriptionJa": "どうやってこれを見つけたの！？！？ 帽子を3個獲得する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/b4e2c7b500c224c4a425da7fb1d514536b39f0dad081c8cd6d74680f72564c7d.webp"
+    },
+    {
+      "id": "heavyhitter",
+      "nameKo": "강타자",
+      "nameJa": "ヘビーヒッター",
+      "descriptionKo": "기본 공격 시 최대 체력의 3.5%에 해당하는 추가 물리 피해를 입힙니다.",
+      "descriptionJa": "通常攻撃が自身の最大体力の3.5%にあたる追加物理ダメージを与える。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/3ff5d626d32d399f3dcd0c4b7159f2cead92c6be2f51badf1e442a11cf598e27.webp"
+    },
+    {
+      "id": "trailblazer",
+      "nameKo": "개척자",
+      "nameJa": "先人の道標",
+      "descriptionKo": "돌진이나 순간이동 시 주변 적에게 무한히 중첩되는 화상 효과를 적용해 지속적으로 피해를 입힙니다.",
+      "descriptionJa": "ダッシュかブリンクをすると、近くの敵を炎上させて継続ダメージを与える。この効果は無限にスタックする。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/4f42d0707fec54a1b61a720119ee1384b741344596f95857988dad646cd8d6f7.webp"
+    },
+    {
+      "id": "mirrorimage",
+      "nameKo": "거울 환영",
+      "nameJa": "鏡像",
+      "descriptionKo": "체력이 30% 아래로 떨어지면 잠시 투명 상태가 되고 자신의 분신 4명을 생성합니다.",
+      "descriptionJa": "体力が30%未満になると、短時間インビジブル状態となって自身のクローンを4体作り出す。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/70276bdb8e61df3bbf4fb7d6eb089e65a27c0c3b873015deb9896406bfeae08b.webp"
+    },
+    {
+      "id": "tormentor",
+      "nameKo": "고문자",
+      "nameJa": "苦みの種",
+      "descriptionKo": "적 챔피언을 이동 불가 상태로 만들거나 이동 스킬을 사용할 수 없게 하면 무한히 중첩되는 화상 효과를 적용해 지속적으로 피해를 입힙니다.",
+      "descriptionJa": "敵チャンピオンに移動不能効果か釘付け効果を付与すると、対象を炎上させて継続ダメージを与える。この効果は無限にスタックする。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/f5e8bc0e7f91031d843b67a4537143c6d5f1e6042a56b18482dd710cfc6c010f.webp"
+    },
+    {
+      "id": "grievousvenom",
+      "nameKo": "고통스러운 맹독",
+      "nameJa": "重傷の毒",
+      "descriptionKo": "적 챔피언에게 피해를 입히면 받는 보호막 효과를 감소시키고, 고통스러운 상처를 적용하며, 받는 체력 회복 효과도 감소시킵니다.",
+      "descriptionJa": "敵チャンピオンにダメージを与えると、対象が獲得するシールドの耐久値を低下させ、「重傷」を付与して、対象が受けるあらゆる体力回復効果を減少させる。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/9bb47466bb6af7892fd2fe96a5d5315e4d1247a72a675da24f84df805ed237ea.webp"
+    },
+    {
+      "id": "ultimateunstoppable",
+      "nameKo": "궁극의 저지 불가",
+      "nameJa": "破竹のアルティメット",
+      "descriptionKo": "궁극기 사용 시 2초 동안 군중 제어 효과에 면역이 됩니다. (재사용 대기시간 8초)",
+      "descriptionJa": "アルティメットスキルを使用すると、2秒間、行動妨害効果を受けなくなる(クールダウン8秒)。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/20fb14206ce7687a8aca5c213cb9262d7fc8b3596170366b6b8d1a174b8ee7d1.webp"
+    },
+    {
+      "id": "shadowrunner",
+      "nameKo": "그림자 질주",
+      "nameJa": "影走り",
+      "descriptionKo": "돌진, 도약, 점멸, 순간이동 스킬을 사용하거나 투명 상태에서 벗어난 후 초 동안 이동 속도가 증가합니다.",
+      "descriptionJa": "ダッシュ、リープ、ブリンク、またはテレポートを行うスキルを使用した後、もしくはステルス状態解除後に、秒間移動速度が増加する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/c1de15787a37d9828f085924d4c9782b5fd2aff02f4a419e78a200c43231727c.webp"
+    },
+    {
+      "id": "servebeyonddeath",
+      "nameKo": "기사회생",
+      "nameJa": "死を超えた献身",
+      "descriptionKo": "라운드마다 처음으로 사망할 때 체력을 완전히 회복하고, 회복된 체력이 점차 줄어듭니다. 체력이 줄어드는 동안 적 챔피언 처치에 관여하면 체력 감소가 중단됩니다.",
+      "descriptionJa": "各ラウンドで初めて倒された際、体力が最大まで回復し、時間経過で減衰していく。 体力減衰中に敵チャンピオンからキルまたはアシストを獲得すると、その時点で減衰が止まる。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/b4e90e7552d5986637055ff67ee933e4e444c77904246efa3fed2df24d4956cd.webp"
+    },
+    {
+      "id": "parasiticmutation",
+      "nameKo": "기생 돌연변이",
+      "nameJa": "寄生的変異",
+      "descriptionKo": "라운드마다 상대의 증강 중 하나로 변이합니다. 내가 뽑을 수 있는 증강으로만 변이합니다.",
+      "descriptionJa": "毎ラウンド、これが対戦相手のオーグメントの1つに突然変異する。 変異の対象は抽選可能なオーグメントのみ。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/bb71f3454a4ab60f748416c4d988b4506c652e107c35a248e2762ef05ab2a253.webp"
+    },
+    {
+      "id": "fruitsofyourlabor",
+      "nameKo": "노력의 결실",
+      "nameJa": "労働の成果",
+      "descriptionKo": "힘의 꽃 효과가 20% 증가하고 아군과 효과를 공유합니다.",
+      "descriptionJa": "パワーフラワーから付与される自身への効果が20%増加し、味方と共有される。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/0c5a512a18e486a9d9ae3b9e5e8c1702b82a992b8cab8b46b8ea32fde28fe088.webp"
+    },
+    {
+      "id": "stats",
+      "nameKo": "능력치!",
+      "nameJa": "ステータス！",
+      "descriptionKo": "능력치 모루를 2개 획득합니다.",
+      "descriptionJa": "「ステータスの金床」を2個獲得する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/51753f8a7c141ab3e0cab5c4d9e28d08272c0a307babae41cee756e37400c157.webp"
+    },
+    {
+      "id": "deft",
+      "nameKo": "능수능란",
+      "nameJa": "技巧",
+      "descriptionKo": "60%의 공격 속도를 얻습니다.",
+      "descriptionJa": "攻撃速度が60%増加する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/0b44334ac888c2bec93b3651f0ebbb4cb7b1d3a676cea88994b6b74c12288737.webp"
+    },
+    {
+      "id": "stackosaurusrex",
+      "nameKo": "다단 중첩",
+      "nameJa": "スタックサウルス・レックス",
+      "descriptionKo": "스킬 중첩을 영구적으로 획득할 때마다 75% 더 획득합니다!",
+      "descriptionJa": "恒久的なスキルのスタックを獲得する際に、獲得量が75%増加する！",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/6429b1d55be2472b31ab828d554730edaa9938c504c422722143e7a0ea0037e5.webp"
+    },
+    {
+      "id": "mountainsoul",
+      "nameKo": "대지의 영혼",
+      "nameJa": "マウンテンソウル",
+      "descriptionKo": "전투에서 벗어나면 잠시 동안 보호막을 획득하는 대지의 영혼을 얻습니다.",
+      "descriptionJa": "「マウンテンソウル」を獲得し、少しの間、非戦闘状態が続くとシールドを獲得する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/e0cc4acb11be8ff5bbe21f27bcc5a8c614780543c1a4521a143bb3c8a7b3e853.webp"
+    },
+    {
+      "id": "panicroom",
+      "nameKo": "대피소",
+      "nameJa": "パニックルーム",
+      "descriptionKo": "전투당 1회 사망할 때, 대신 영혼 상태가 되고 체력이 20%가 되며 아레나의 무작위 지점으로 이동합니다.",
+      "descriptionJa": "各戦闘で1回のみ、デスするはずの時に幽影となり、体力が20%の状態でアリーナのランダムな地点へと移動する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/98ec50ef1eeff64b7c2607167e34668fffabd7acd2156b0260f9e1d863aaa35e.webp"
+    },
+    {
+      "id": "dontchase",
+      "nameKo": "따라올 테면 따라와 봐",
+      "nameJa": "追うなよ、追うなよ",
+      "descriptionKo": "유체화 상태가 되어 독가스를 남깁니다. 독가스 안으로 들어오는 적에게 마법 피해를 입힙니다.",
+      "descriptionJa": "ゴースト化して自分が通った場所に毒ガスをまき散らし、範囲内にいる敵に魔法ダメージを与える。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/c11f1102d908a088fbc5cbc58d646cb254fdd9bb6c49fd2298d229f50def6607.webp"
+    },
+    {
+      "id": "escapade",
+      "nameKo": "마법사 (물리)",
+      "nameJa": "魔攻のいたずら",
+      "descriptionKo": "주문력을 추가 공격력으로 전환합니다. 공격력이 15% 증가합니다.",
+      "descriptionJa": "魔力を増加攻撃力に変換する。攻撃力が15%増加する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/2a08fed9b6ccb621bed70f6231265c913c3150869e6f4c9c34aefd66c6852928.webp"
+    },
+    {
+      "id": "numbtopain",
+      "nameKo": "무통각증",
+      "nameJa": "痛覚耐性",
+      "descriptionKo": "받는 피해의 25%를 6초에 걸쳐 받습니다. (원거리 챔피언의 경우 10%)",
+      "descriptionJa": "受けたダメージの25%を代わりに6秒かけて受ける(遠隔チャンピオンは10%)。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/e0cc4acb11be8ff5bbe21f27bcc5a8c614780543c1a4521a143bb3c8a7b3e853.webp"
+    },
+    {
+      "id": "holdverystill",
+      "nameKo": "미동 없이",
+      "nameJa": "動かないでね",
+      "descriptionKo": "유격 전투 효과를 얻습니다. 가만히 있으면 다시 이동할 때까지 투명 상태가 됩니다. 투명 상태에서 벗어나면 다음 기본 공격 시 추가 마법 피해를 입힙니다.",
+      "descriptionJa": "「やぶからヨードル」を獲得する。 移動せずにいると、移動するまでインビジブル状態になる。このインビジブル状態が終了すると、次の通常攻撃が追加で魔法ダメージを与える。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/631bc414d7b466109f6ac4f431f961e203e8b320f1ffb5d76562d6d668743587.webp"
+    },
+    {
+      "id": "homeguard",
+      "nameKo": "민병대",
+      "nameJa": "ホームガード",
+      "descriptionKo": "이동 속도가 % 증가합니다. 피해를 입은 후 초 동안은 효과가 멈춥니다.",
+      "descriptionJa": "移動速度が%増加し、ダメージを受けると秒間無効化される。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/2c38aece73236a89f329ba5f5722dc40ccc39aa931c29939f52f9b2de8d62d35.webp"
+    },
+    {
+      "id": "oceansoul",
+      "nameKo": "바다의 영혼",
+      "nameJa": "オーシャンソウル",
+      "descriptionKo": "적에게 피해를 입힌 후 높은 체력 및 마나 재생 효과를 얻는 바다의 영혼을 획득합니다.",
+      "descriptionJa": "「オーシャンソウル」を獲得し、敵にダメージを与えると体力およびマナの自動回復量が増加する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/5b26d1f8f55565b01ea23cd02be8c7747c740f8dd80cdc9ac21e93c667947946.webp"
+    },
+    {
+      "id": "repulsor",
+      "nameKo": "반발",
+      "nameJa": "反撃機構",
+      "descriptionKo": "체력이 60% 또는 30% 이하로 내려가면 주변 적들을 뒤로 밀어냅니다.",
+      "descriptionJa": "体力が60%または30%未満に低下した際、周囲の敵をノックバックさせる。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/179d10c9d9ee460648ec95a4d5a1f7285930bf008ad47e90f248e1b7241d52d1.webp"
+    },
+    {
+      "id": "erosion",
+      "nameKo": "부식",
+      "nameJa": "浸食",
+      "descriptionKo": "적에게 피해를 입히면 4초 동안 방어력 및 마법 저항력 감소 중첩을 얻습니다.",
+      "descriptionJa": "敵にダメージを与えると、4秒間物理防御と魔法防御を低下させるスタックを付与する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/c3bdf1ac716e7054afbed12c2c32797db03ef165774ba06489f39582a85b73bb.webp"
+    },
+    {
+      "id": "fallenaegis",
+      "nameKo": "부패한 방패",
+      "nameJa": "フォールンイージス",
+      "descriptionKo": "8초 동안 칠흑의 방패를 가지고 전투를 시작합니다. 칠흑의 방패는 마법 피해를 흡수하고 이동 불가 효과를 방어합니다.",
+      "descriptionJa": "戦闘開始時に、8秒間「ブラックシールド」を獲得する。 「ブラックシールド」は魔法ダメージと移動不能効果をブロックする。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/41e81f0cd65375f0d949d9ae94393f050a1a47d6b5032f359094a336ddfde4e6.webp"
+    },
+    {
+      "id": "firefox",
+      "nameKo": "불여우",
+      "nameJa": "ファイヤーフォックス",
+      "descriptionKo": "자동 사용 이동 속도가 증가하고 주위를 빙빙 도는 불꽃 3개를 생성합니다. 불꽃은 시야에 들어오는 가장 가까운 적을 대상으로 지정해 마법 피해를 입힙니다.",
+      "descriptionJa": "自動発動 移動速度が増加して、周回する3つの炎を作り出し、可視化されていて射程内で最も近くにいる敵を対象に魔法ダメージを与える。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/c617c3a3ce9e8b9f9b7a3e96359a9f5ca20d8e905720ed8f76496853299030b8.webp"
+    },
+    {
+      "id": "lightemup",
+      "nameKo": "불을 밝혀",
+      "nameJa": "撃て！",
+      "descriptionKo": "4번째 기본 공격마다 추가로 마법 피해를 입힙니다.",
+      "descriptionJa": "通常攻撃4回ごとに魔法ダメージを追加で与える。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/3ff5d626d32d399f3dcd0c4b7159f2cead92c6be2f51badf1e442a11cf598e27.webp"
+    },
+    {
+      "id": "nowyouseeme",
+      "nameKo": "불의의 습격",
+      "nameJa": "瞬間移動マジック",
+      "descriptionKo": "불의의 습격 소환사 주문을 얻습니다. 불의의 습격을 사용하면 마지막 이동 스킬의 시작 지점으로 순간이동합니다.",
+      "descriptionJa": "サモナースペルの「転送マジック」を獲得する。 「転送マジック」を発動すると、最後に使用した移動スキルの開始位置まで瞬間移動する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/bef7aecf02bc0bc3d7c7f8eb64b3236a62f42fb0002142f1e731786ee92f16cb.webp"
+    },
+    {
+      "id": "clothesline",
+      "nameKo": "빨랫줄",
+      "nameJa": "物干しロープ",
+      "descriptionKo": "아군을 연결하는 밧줄이 닿는 적에게 마법 피해를 지속적으로 입힙니다.",
+      "descriptionJa": "味方チームとの間に繋がりを形成して、それに触れた敵に魔法ダメージを継続的に与える。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/43ace1d88742a40e776f543d4de1383c7475ed2e6bfdab513acd23e265be6099.webp"
+    },
+    {
+      "id": "witchfulthinking",
+      "nameKo": "사악한 정신",
+      "nameJa": "魔法的思考",
+      "descriptionKo": "주문력이 60 증가합니다.",
+      "descriptionJa": "魔力が60増加する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/368d28287c9892c611f210828040f54f642121e971ffd2d29d72312f5cdb9646.webp"
+    },
+    {
+      "id": "frostwraith",
+      "nameKo": "서리 망령",
+      "nameJa": "フロストレイス",
+      "descriptionKo": "자동 사용 6.5초마다 주변 적을 1.3초 동안 속박합니다.",
+      "descriptionJa": "6.5秒ごとに、周囲の敵に対して1.3秒間のスネア効果を自動で付与する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/d9d12d17c109ca20e06fb980e006bb00b30a29bed0ba1fc15c3f59c08ecf32d9.webp"
+    },
+    {
+      "id": "goredrink",
+      "nameKo": "선혈포식",
+      "nameJa": "ゴアドリンク",
+      "descriptionKo": "모든 피해 흡혈 15%를 얻습니다.",
+      "descriptionJa": "オムニヴァンプが15%増加する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/b12ff90bf236a91785f8c26ad6587b42fb6ab5e43aa023b14eecf579a3e5f8e1.webp"
+    },
+    {
+      "id": "dontblink",
+      "nameKo": "속전속결",
+      "nameJa": "瞬きより速く",
+      "descriptionKo": "대상보다 이동 속도가 10 높을 때마다 추가 피해량이 1% 증가합니다.",
+      "descriptionJa": "自身の移動速度が敵を上回っている場合、対象に追加ダメージを与える(移動速度差10につき、1%の追加ダメージ)。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/032ec6f1225fa86c1634914d9991c879cc9d8b842d8eff0919a225467e6d36ef.webp"
+    },
+    {
+      "id": "spintowin",
+      "nameKo": "승리를 위한 회전",
+      "nameJa": "勝利への回転",
+      "descriptionKo": "회전 스킬의 피해량이 15%, 스킬 가속이 15 증가합니다!",
+      "descriptionJa": "回転するスキルが15のスキルヘイストを獲得し、15%の追加ダメージを与える！",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/0b44334ac888c2bec93b3651f0ebbb4cb7b1d3a676cea88994b6b74c12288737.webp"
+    },
+    {
+      "id": "desecrator",
+      "nameKo": "신성 모독자",
+      "nameJa": "冒涜者",
+      "descriptionKo": "적 챔피언을 이동 불가 상태로 만들면 영구히 저주받은 힘을 얻습니다. 저주받은 힘에 따라 방어력과 마법 저항력을 얻습니다.",
+      "descriptionJa": "敵チャンピオンに移動不能効果を与えると、「呪われし力」が恒久的に増加する。自身の「呪われし力」に応じて物理防御と魔法防御が増加する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/fcfc1c33d2ab70ddb616d38930d9c77231eaab75a86b603ce55858c3974418b1.webp"
+    },
+    {
+      "id": "buffbuddies",
+      "nameKo": "쌍버프",
+      "nameJa": "バフバディー",
+      "descriptionKo": "잉걸불 문장과 통찰력의 문장을 획득합니다. 자신에게 스킬 가속 및 자원 재생을 부여하며, 기본 공격 시 적 챔피언에게 화상을 적용하고 둔화시킵니다.",
+      "descriptionJa": "残火の赤紋章と洞察の青紋章を獲得する。 自身のスキルヘイストとリソース自動回復効果が増加し、通常攻撃が敵チャンピオンに炎上とスロウ効果を与える。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/934f7a23e9aa1b48adf6ae1f5088d1e0fdcd3bbf303d6ebdd9fcb5fa971c4c71.webp"
+    },
+    {
+      "id": "thebrutalizer",
+      "nameKo": "야수화",
+      "nameJa": "ブルータライザー",
+      "descriptionKo": "공격력이 20, 스킬 가속이 10, 물리 관통력이 10 증가합니다.",
+      "descriptionJa": "攻撃力が20、スキルヘイストが10、脅威が10増加する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/0b44334ac888c2bec93b3651f0ebbb4cb7b1d3a676cea88994b6b74c12288737.webp"
+    },
+    {
+      "id": "energetic",
+      "nameKo": "에너지 충만",
+      "nameJa": "元気いっぱい",
+      "descriptionKo": "200% 더 빠르게 충전 상태가 됩니다. 충전 상태가 발동되면 마법 미사일을 발사해 이동한 거리에 따라 최대 최대 체력의 0.3%에 해당하는 고정 피해를 입힙니다.",
+      "descriptionJa": "エネルギー充填が200%早くなる。エネルギー充填を発動させると、マジックミサイルを発射し、ミサイルの移動距離に応じて最大で最大体力の0.3%にあたる確定ダメージを与える。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/d1d440f1c68b19692e921d8f1f6576989a64572f0477b8ee88440a4528faa480.webp"
+    },
+    {
+      "id": "bravestofthebrave",
+      "nameKo": "용자 중의 용자",
+      "nameJa": "勇者のなかの勇者",
+      "descriptionKo": "다음 증강 제안이 1단계 상승합니다. 증강이 이미 프리즘 단계일 경우, 추가로 750골드를 획득합니다.",
+      "descriptionJa": "今後提示されるオーグメントのティアが1上昇する。オーグメントがすでにプリズムティアだった場合は追加で750ゴールド獲得する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/193603ecce7a075b10fcf9a013fe901a4342141fcfecf9a77243a92ed11d2695.webp"
+    },
+    {
+      "id": "slaparound",
+      "nameKo": "우당탕탕",
+      "nameJa": "叩きまくれ",
+      "descriptionKo": "적을 이동 불가 상태로 만들거나 이동 스킬을 사용할 수 없게 하면 해당 라운드에 15의 적응형 능력치를 얻습니다.",
+      "descriptionJa": "敵に移動不能効果か釘付け効果を与えるたびに、ラウンド終了まで持続する15のアダプティブフォースを獲得する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/e9e21081bd1199be71208f1e1361ae6eafc52433e3cd783f59fbf94c29a4e07d.webp"
+    },
+    {
+      "id": "castle",
+      "nameKo": "위치 변경",
+      "nameJa": "キャスリング",
+      "descriptionKo": "위치 변경 소환사 주문을 얻습니다. 위치 변경: 아군과 위치를 바꾸고 이동 속도 및 보호막을 얻습니다.",
+      "descriptionJa": "サモナースペルの「キャスリング」を獲得する。 キャスリング: 自分と味方の位置を入れ替え、移動速度とシールドを獲得する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/36eab5624e335fbfea14cee3a2c606e9cf09577ecf83a87061c350a3fde0ceec.webp"
+    },
+    {
+      "id": "bluntforce",
+      "nameKo": "육중한 힘",
+      "nameJa": "無骨なる力",
+      "descriptionKo": "공격력이 10% 증가합니다.",
+      "descriptionJa": "攻撃力が10%増加する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/6fefc189e80334ce1b3f29392e1f6214fc8b6fad161ab4cc231a401d080f207b.webp"
+    },
+    {
+      "id": "silverspoon",
+      "nameKo": "은수저",
+      "nameJa": "銀の匙",
+      "descriptionKo": "보유한 실버 증강 하나당 입히는 피해가 증가합니다.",
+      "descriptionJa": "所持しているシルバーオーグメントの数に応じて与えるダメージが増加する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/4d4524177bd3f4cbc4e4c864e85e83d1103b18dcf259101200ea6823af3c9855.webp"
+    },
+    {
+      "id": "sonicboom",
+      "nameKo": "음속 폭발",
+      "nameJa": "ソニックブーム",
+      "descriptionKo": "아군에게 이로운 효과, 회복, 보호막을 부여하면 아군 주변 적들에게 피해를 입히고 둔화시킵니다.",
+      "descriptionJa": "味方にバフ、体力回復効果、またはシールドを付与すると、その周囲の敵にダメージとスロウ効果を与える。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/ef2bcc23a65d0c0620be35adebef184c1d644e2aaba61a5629f12e1d7f18408d.webp"
+    },
+    {
+      "id": "firstaidkit",
+      "nameKo": "응급처치 키트",
+      "nameJa": "救急セット",
+      "descriptionKo": "체력 회복 및 보호막 효과가 20% 증가합니다.",
+      "descriptionJa": "体力回復量とシールド量が20%増加する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/fe6096732507a781f91c0999ba7d050a02845e586bf2b6a573ca57822e60c4b5.webp"
+    },
+    {
+      "id": "selfdestruct",
+      "nameKo": "자폭",
+      "nameJa": "自己破壊",
+      "descriptionKo": "13초마다 자동 사용으로 자신에게 폭탄을 부착합니다. 폭탄은 폭발 시 주변 적에게 막대한 고정 피해를 입히고 공중으로 띄워 올립니다.",
+      "descriptionJa": "13秒ごとに自動発動し、自身に爆弾を取り付ける。爆弾は爆発し、確定大ダメージを与えて、周囲の敵をノックアップさせる。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/b3e303fbda81727c4d95b67a5bf422fce3ffed0832bbf526bf97400615f934fe.webp"
+    },
+    {
+      "id": "adapt",
+      "nameKo": "적응형 능력치",
+      "nameJa": "変力装置",
+      "descriptionKo": "추가 공격력을 주문력으로 전환합니다. 주문력이 15% 증가합니다.",
+      "descriptionJa": "増加攻撃力を魔力に変換する。魔力が15%増加する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/2a08fed9b6ccb621bed70f6231265c913c3150869e6f4c9c34aefd66c6852928.webp"
+    },
+    {
+      "id": "transmutegold",
+      "nameKo": "전환: 골드",
+      "nameJa": "変質: ゴールド",
+      "descriptionKo": "무작위 골드 증강을 획득합니다.",
+      "descriptionJa": "ランダムなゴールドオーグメントを1個獲得する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/e1abbfb0fc56c72538032a67abef2942d2b13f089c94ca4ed0d4d5d797e95ba4.webp"
+    },
+    {
+      "id": "slimetime",
+      "nameKo": "점액 천지",
+      "nameJa": "スライムタイム",
+      "descriptionKo": "몇 초마다 자동 사용으로 몸에서 점액을 터뜨려 주변 적에게 마법 피해를 입힙니다. 챔피언에게 적중 시, 밟으면 체력이 회복되는 방울을 분비합니다.",
+      "descriptionJa": "数秒ごとに自身の体から爆発スライムを自動発動し、近くの敵に魔法ダメージを与える。 チャンピオンに当たるとスライムが1体放たれ、その上を歩くと体力が回復する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/337089d7cca92f1d30fcca173c84b2e8b40cda3fa00c6acdf59b188af081d17a.webp"
+    },
+    {
+      "id": "mindtomatter",
+      "nameKo": "정신 변환",
+      "nameJa": "精神の体現",
+      "descriptionKo": "최대 체력이 마나의 절반만큼 증가합니다.",
+      "descriptionJa": "マナの半分にあたる最大体力を獲得する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/e0cc4acb11be8ff5bbe21f27bcc5a8c614780543c1a4521a143bb3c8a7b3e853.webp"
+    },
+    {
+      "id": "guiltypleasure",
+      "nameKo": "죄책감의 쾌락",
+      "nameJa": "罪なる喜び",
+      "descriptionKo": "적 챔피언을 이동 불가 상태로 만들거나 이동 스킬을 사용할 수 없게 하면 체력을 회복합니다.",
+      "descriptionJa": "敵チャンピオンに移動不能効果か釘付け効果を与えると、体力を回復する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/49241e7f4ee7393e9f0533a758681d14a7bfd83d966bc88f522283df7de4e34a.webp"
+    },
+    {
+      "id": "juicebox",
+      "nameKo": "주스 팩",
+      "nameJa": "ジュースボックス",
+      "descriptionKo": "라운드마다 모든 아군이 1개의 주스를 얻습니다.",
+      "descriptionJa": "各ラウンドで、味方チームの全員が1個のジュースを獲得する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/39c73a4fd90fd368be7881ad6712d557eb36e2e7203740ff7dee00dcdc57c2b9.webp"
+    },
+    {
+      "id": "warmuproutine",
+      "nameKo": "준비 운동",
+      "nameJa": "ウォームアップルーティーン",
+      "descriptionKo": "준비 운동 소환사 주문을 얻습니다. 내면의 춤꾼에게 정신을 집중해 피해량이 초당 2% 증가하며 최대 20% 증가합니다.",
+      "descriptionJa": "サモナースペルの「ウォームアップルーティーン」を獲得する。 内なるダンサーを呼び覚まし、与ダメージを毎秒2%、最大20%まで増加させる。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/78c3add23ad7f4f6d79513c5eed570204d09b0e1e487a1317209a2c268b0ec1b.webp"
+    },
+    {
+      "id": "nullaugment",
+      "nameKo": "증강 없음",
+      "nameJa": "ヌル・オーグメント",
+      "descriptionKo": "없음",
+      "descriptionJa": "効果なし",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/6801c1b99c71eef7987f4e71389183189cc2ed89fd50304f0afa0a3e15e65e79.webp"
+    },
+    {
+      "id": "augmentedpower",
+      "nameKo": "증강된 힘",
+      "nameJa": "オーグメントパワー",
+      "descriptionKo": "내 증강 및 아이템의 피해량이 증가합니다.",
+      "descriptionJa": "オーグメントとアイテムのダメージが増加する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/23c7e3b51409f990e03d9476724646cbd404dbd3008380dba7335ec76603fe3b.webp"
+    },
+    {
+      "id": "infernalsoul",
+      "nameKo": "지옥불 영혼",
+      "nameJa": "インファーナルソウル",
+      "descriptionKo": "스킬 또는 기본 공격으로 적을 공격할 때마다 추가 피해를 입히는 화염의 드래곤 영혼을 얻습니다.",
+      "descriptionJa": "「インファーナルドラゴンソウル」を獲得し、敵にスキルまたは通常攻撃を命中させた際、追加ダメージを与える。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/475efc2c5491b3bb7296813fc53813153702dd8ee21c07043947e2ab83d8c707.webp"
+    },
+    {
+      "id": "icecold",
+      "nameKo": "차가운 냉기",
+      "nameJa": "結氷",
+      "descriptionKo": "둔화 효과가 이동 속도를 추가로 0 감소시킵니다.",
+      "descriptionJa": "敵へのスロウ効果が、移動速度を追加で0低下させる。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/797c5d5fe823c40cfb6cf4acf0fb6911be093a9cd1e93baa41fb9c674459a6d5.webp"
+    },
+    {
+      "id": "executioner",
+      "nameKo": "처형자",
+      "nameJa": "執行人",
+      "descriptionKo": "체력이 40% 아래로 떨어진 적에게 입히는 피해량이 10% 증가합니다. 처치 관여 시 기본 스킬이 초기화됩니다.",
+      "descriptionJa": "体力が40%未満の敵に対しては、与えるダメージが10%増加する。キルまたはアシストを獲得すると、通常スキルがリセットされる。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/022af2e527e042156643f789552224309391c3662bb0361066bb74fe68d012fa.webp"
+    },
+    {
+      "id": "contractkiller",
+      "nameKo": "청부 살인마",
+      "nameJa": "プロの殺し屋",
+      "descriptionKo": "라운드마다 적 챔피언에게 표식을 남깁니다. 이 챔피언에게 입히는 피해가 15% 증가하고, 처치 시 +150골드를 얻습니다.",
+      "descriptionJa": "毎ラウンド、敵チャンピオン1体をマークする。 そのチャンピオンは受けるダメージが15%増加し、倒されると+150ゴールドを付与する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/1c5d60a75f931faf51cdf8994c72c826cb7fae1f33a52cee00a97a0d18b9451c.webp"
+    },
+    {
+      "id": "despoil",
+      "nameKo": "침탈",
+      "nameJa": "略奪",
+      "descriptionKo": "주변에 적이 있을 때 돌진하거나 순간이동하면 저주받은 힘을 얻습니다. 저주받은 힘에 비례해 이동 속도가 증가합니다.",
+      "descriptionJa": "近くに敵がいると、ダッシュまたはテレポートを行った際に「呪われし力」を獲得する。「呪われし力」に応じて移動速度が増加する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/fcfc1c33d2ab70ddb616d38930d9c77231eaab75a86b603ce55858c3974418b1.webp"
+    },
+    {
+      "id": "typhoon",
+      "nameKo": "태풍",
+      "nameJa": "タイフーン",
+      "descriptionKo": "기본 공격 시 추가 대상에게 화살을 발사해 감소된 피해를 입히고 효과를 적용합니다.",
+      "descriptionJa": "通常攻撃で追加の対象1体に向けて矢を放ち、一定割合低下したダメージを与えて、を適用する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/bf52b54e51efd98b731098c4fd3531d06bd0ff118c069104e830d6e560b72056.webp"
+    },
+    {
+      "id": "cannonfodder",
+      "nameKo": "포탄",
+      "nameJa": "大砲要員",
+      "descriptionKo": "대포에서 발사되어 전투를 시작합니다.",
+      "descriptionJa": "戦闘参加時に大砲から発射される。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/e4673b2d9f4c472d8474cda83bf1d48fa7bb97aaf76fe53a87e3b83dc24fa7ca.webp"
+    },
+    {
+      "id": "divebomber",
+      "nameKo": "폭격기",
+      "nameJa": "急降下爆撃",
+      "descriptionKo": "라운드마다 처음으로 사망하는 아군이 폭발해 막대한 고정 피해를 입힙니다.",
+      "descriptionJa": "毎ラウンド、味方チームの誰かが初めてデスした際に、そのチャンピオンが爆発して確定大ダメージを与える。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/244ebc4089107606c05895ebf6d7094c0e66fee0e92739b2e79c556f7f50f9d8.webp"
+    },
+    {
+      "id": "firesale",
+      "nameKo": "폭탄 세일",
+      "nameJa": "ファイアセール",
+      "descriptionKo": "보유한 모든 퀘스트 아이템이 아닌 아이템을 구매한 가격의 100%로 즉시 판매합니다. 할인된 모루에 적격입니다.",
+      "descriptionJa": "即座にクエスト以外の全アイテムを直接購入価格の100%で販売する。 値引きされた金床に最適。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/b70ba8dd42bbd0df43ea33a41c7a35c81104594129544261fda76091b93e1894.webp"
+    },
+    {
+      "id": "legday",
+      "nameKo": "하체 운동의 날",
+      "nameJa": "レッグデー",
+      "descriptionKo": "10의 이동 속도와 15%의 둔화 저항을 얻습니다.",
+      "descriptionJa": "移動速度が10、スロウ耐性が15%増加する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/03db892038f6f2bfe6daf2e2538c969577e711859ce3f859628bc6e3e1134b49.webp"
+    },
+    {
+      "id": "dematerialize",
+      "nameKo": "해체분석",
+      "nameJa": "非物質化",
+      "descriptionKo": "각 라운드에서 챔피언당 한 번씩 처치 관여 시 적응형 능력치가 10 증가합니다. 4라운드 이후 이 증강을 획득하면, 적응형 능력치가 30 증가합니다.",
+      "descriptionJa": "キルまたはアシストを奪うと、の10アダプティブフォースを獲得する(各ラウンドでチャンピオン1体につき1回まで) ラウンド4以降にこのオーグメントを獲得すると、の30アダプティブフォースを獲得する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/d3a0d86cfc4a1391dcc5de613faa39827469a9bf9ca6d623c4f9e645eb290fa6.webp"
+    },
+    {
+      "id": "tankitorleaveit",
+      "nameKo": "확률적 방어",
+      "nameJa": "タンクこそ至高",
+      "descriptionKo": "공격당할 때 치명타 확률(최대 50%)에 따라 치명 방어가 발동해 받는 피해가 감소할 수 있습니다. 치명타 확률이 25% 증가합니다.",
+      "descriptionJa": "クリティカル防御判定を持つようになる。これはクリティカル率の数値を参照し(最大確率は50%)、受けるダメージを軽減する。 クリティカル率が25%増加する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/2e53631b19d00de3cbf520b78ae5511857764bd873c2aa41db5bca2dfb137331.webp"
+    },
+    {
+      "id": "gohsacrificeforsilver",
+      "nameKo": "희생: 실버",
+      "nameJa": "犠牲: シルバーのために",
+      "descriptionKo": "2라운드 후 추가 실버 증강을 얻습니다.",
+      "descriptionJa": "2ラウンド終了後、ボーナスのシルバーオーグメントを1個獲得する。",
+      "rarity": "silver",
+      "iconUrl": "/images/lol/aram/188b09c45e94217892b5500e5d911ac5f1a705dd9783acda01c906d47a0a8e2d.webp"
+    },
+    {
+      "id": "shrinkray",
+      "nameKo": "감쇠 광선",
+      "nameJa": "縮小光線",
+      "descriptionKo": "기본 공격 시 대상의 입히는 피해량과 크기를 10% 감소시킵니다.",
+      "descriptionJa": "通常攻撃が対象のダメージとサイズを10%低下させる。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/482143bb0c1f20b8afa7064cab852d21d9cdb4d3cd2e045742acdcba2f1558b9.webp"
+    },
+    {
+      "id": "bodyguard",
+      "nameKo": "경호대",
+      "nameJa": "ボディーガード",
+      "descriptionKo": "돌진, 점멸 또는 순간이동 시 자신 및 이동 경로에 있는 아군 챔피언이 보호막을 얻습니다.",
+      "descriptionJa": "ダッシュ、ブリンク、テレポートを使用すると、自身と触れた味方チャンピオンにシールドを付与する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/77bfa076422acdd860cc66923501996cd60cf841b2dc02b00832690a97a639aa.webp"
+    },
+    {
+      "id": "oathsworn",
+      "nameKo": "계약",
+      "nameJa": "魂盟の同志",
+      "descriptionKo": "도주를 운명의 부름으로 교체합니다. 운명의 부름으로 아군이 최대 4초 동안 대상으로 지정할 수 없는 상태가 됩니다. 아군은 직접 날아가 적을 밀어낼 수 있습니다.",
+      "descriptionJa": "「逃亡」を「宿命の呼び声」に置き換える。 「宿命の呼び声」は、最大4秒間パートナーを対象指定不可にする。味方は突撃することができ、敵をノックバックする。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/4e805976f4388a854f93f377626a8bcb36247c75a9f109886ec69c8edff2a831.webp"
+    },
+    {
+      "id": "symbioticmutation",
+      "nameKo": "공생 돌연변이",
+      "nameJa": "共生的変異",
+      "descriptionKo": "라운드마다 아군의 증강 중 하나로 변이합니다. 내가 뽑을 수 있는 증강으로만 변이합니다.",
+      "descriptionJa": "毎ラウンド、これが味方のオーグメントの1つに突然変異する。 変異の対象は抽選可能なオーグメントのみ。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/4b707ed5b3ef4a461c60aafc3f6bcec7f7f4443669c4a7cff90d47ab75a3012b.webp"
+    },
+    {
+      "id": "phenomenalevil",
+      "nameKo": "극악무도",
+      "nameJa": "偉大なる悪",
+      "descriptionKo": "적을 스킬로 맞히면 영구적으로 1의 주문력을 얻습니다. 4라운드 이후 이 증강을 선택할 경우 40의 주문력을 얻습니다.",
+      "descriptionJa": "敵にスキルを命中させると、魔力が1恒久的に増加する。 4ラウンド以降に獲得した場合、魔力が40増加する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/75369cc8b0cdcc9b08cb332a1bf2d81ac8f9a34adbf278f010e705ffe640468a.webp"
+    },
+    {
+      "id": "wellberightback",
+      "nameKo": "금방 돌아올게",
+      "nameJa": "すぐに戻る",
+      "descriptionKo": "시간 정지 소환사 주문을 얻습니다. 시간 정지: 주변 모든 챔피언이 경직 상태에 빠집니다. 자신에게 적용되는 경직 효과는 지속시간이 짧으며, 지속시간 동안 잃은 체력에 따라 체력을 회복합니다.",
+      "descriptionJa": "サモナースペルの「時間停止」を獲得する。 時間停止: 周囲のすべてのチャンピオンが固有時停止状態になる。自身が受ける固有時停止は効果時間が短縮され、その間、減少体力に応じて体力が回復する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/b5897f698ddafc0755f4f1e8531f16fbd1c11e83c652b8e42b2ba278164c815a.webp"
+    },
+    {
+      "id": "tricksterdemon",
+      "nameKo": "기만하는 악마",
+      "nameJa": "トリックスターの悪魔",
+      "descriptionKo": "은신에서 벗어나면 폭발을 일으켜 의 마법 피해를 입힙니다. 분신과 함정도 사망 시 폭발합니다.",
+      "descriptionJa": "ステルス状態が解除された際に爆発しての魔法ダメージを与え、自身の分身とトラップもデス時に同じことを行う。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/f214e615ee4de8521f36984e9eae4a0916baf9ae0bcb55640d0c5265de1ae825.webp"
+    },
+    {
+      "id": "parasiticrelationship",
+      "nameKo": "기생 관계",
+      "nameJa": "寄生関係",
+      "descriptionKo": "게임 내 상황에 따라 효과가 달라집니다.",
+      "descriptionJa": "ゲーム内の状況によって効果が変わります。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/4b6894d857ab12d2b4695475dd6cd4314762da76d88afc3956944a0daf4f1d11.webp"
+    },
+    {
+      "id": "restlessrestoration",
+      "nameKo": "끊임없는 회복",
+      "nameJa": "無尽蔵のスタミナ",
+      "descriptionKo": "이동 시 지속적으로 체력을 회복합니다.",
+      "descriptionJa": "移動中、継続的に体力が回復する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/7930e7de395e82b9c934c635c21e9e38871ec6ae80e61c66284cec8fce577f6e.webp"
+    },
+    {
+      "id": "allforyou",
+      "nameKo": "너만을 위해",
+      "nameJa": "キミのため",
+      "descriptionKo": "아군에게 사용하는 체력 회복 및 보호막 효과가 증가합니다.",
+      "descriptionJa": "味方に対する体力回復効果とシールドが強化される。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/63154e2f2032600d5f8b613035a5df5046e35e9e776021f2dd3add0ff9157e3a.webp"
+    },
+    {
+      "id": "impassable",
+      "nameKo": "넘을 수 없는 벽",
+      "nameJa": "通行不可",
+      "descriptionKo": "여진과 빙결 강화 핵심 룬을 얻습니다.",
+      "descriptionJa": "キーストーンルーンの「アフターショック」と「グレイシャルオーグメント」を獲得する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/cb134661bd1d6983ff308d24773fdf9e153e48dbe81159f16b8c91aacf4b515d.webp"
+    },
+    {
+      "id": "skilledsniper",
+      "nameKo": "노련한 저격수",
+      "nameJa": "腕利きスナイパー",
+      "descriptionKo": "멀리 떨어진 적에게 궁극기 이외의 스킬을 적중시키면 해당 스킬의 재사용 대기시간이 대폭 감소합니다.",
+      "descriptionJa": "遠距離から非アルティメットスキルを敵に命中させると、そのスキルのクールダウンが大幅に短縮される。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/425ea535307fd83eee0e580b195ee1fbedd8b74b9a3804194bdcd3fc68b71de1.webp"
+    },
+    {
+      "id": "extendoarm",
+      "nameKo": "늘어나는 팔",
+      "nameJa": "ノビールアーム",
+      "descriptionKo": "자동 사용으로 12초마다 주변 적에게 블리츠크랭크 로켓 손을 발사합니다.",
+      "descriptionJa": "12秒ごとに、近くの敵チャンピオン1体に対して、ブリッツクランクのフックが自動発動で発射される。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/21e06c7aceacf7915b88e9b994142ee20a65fbeec944a22730998a75d3757c65.webp"
+    },
+    {
+      "id": "statsonstats",
+      "nameKo": "능력치 더하기 능력치!",
+      "nameJa": "ステータス上のステータス！",
+      "descriptionKo": "능력치 모루를 3개 획득합니다.",
+      "descriptionJa": "「ステータスの金床」を3個獲得する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/5c1879e5ef2985395d1106f1dd639cb90913bee81975b9399cf6009a8a586bf2.webp"
+    },
+    {
+      "id": "andmyaxe",
+      "nameKo": "도끼 받아라!",
+      "nameJa": "この斧にかけて！",
+      "descriptionKo": "자동 사용: 주기적으로 가장 가까운 적에게 도끼를 던져 물리 피해를 입히고, 둔화를 적용하며, 방어력과 마법 저항력을 감소시킵니다. 도끼를 회수하면 재사용 대기시간이 감소합니다.",
+      "descriptionJa": "自動発動: 一定時間ごとに最も近くにいる相手に斧を投げ、物理ダメージとスロウ効果を与えて、対象の物理防御と魔法防御を低下させる。斧を拾うとクールダウンが短縮される。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/11fa049d05b8e3536751807e77b5cd204a79ae4d03335e8b54bce3b4b57bde90.webp"
+    },
+    {
+      "id": "recursion",
+      "nameKo": "되풀이",
+      "nameJa": "再帰",
+      "descriptionKo": "스킬 가속이 40 증가합니다.",
+      "descriptionJa": "スキルヘイストが40増加する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/73a2fef97b7eb7dda24e5a32ace5b0b20cccc2e7893025e408e4c97163bcb6fe.webp"
+    },
+    {
+      "id": "twicethrice",
+      "nameKo": "두 배 세 배",
+      "nameJa": "二度三度",
+      "descriptionKo": "3번째 기본 공격을 가할 때마다 효과가 한 번 더 발동합니다.",
+      "descriptionJa": "通常攻撃3回ごとに、が2回発動する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/2570a9c68f822e333c736d2b7a1ba87ef2bc90c1f90f94f3c654efbdb84031ac.webp"
+    },
+    {
+      "id": "marksmage",
+      "nameKo": "마법 명사수",
+      "nameJa": "マークスメイジ",
+      "descriptionKo": "기본 공격 시 주문력의 75%만큼 추가 물리 피해를 입힙니다.",
+      "descriptionJa": "通常攻撃が魔力の75%にあたる物理ダメージを追加で与える。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/786c29398d54813b696c3b92d56a6e5acf201e53743b0830b25a97709f16b1fd.webp"
+    },
+    {
+      "id": "magicmissile",
+      "nameKo": "마법 미사일",
+      "nameJa": "マジックミサイル",
+      "descriptionKo": "스킬로 피해를 입히면 마법 탄환 3발을 발사해 각각 최대 체력에 비례하는 고정 피해를 입힙니다.",
+      "descriptionJa": "スキルでダメージを与えると、3発の魔法のミサイルが発射される。ミサイルはそれぞれ、最大体力の一定割合の確定ダメージを与える。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/b7507996ab635bde99be2394679bb223e9fda660c8a24eda46864677bb1657e7.webp"
+    },
+    {
+      "id": "aimforthehead",
+      "nameKo": "머리를 노려라",
+      "nameJa": "頭を狙え",
+      "descriptionKo": "치명타 확률의 최대치가 50%로 제한됩니다. 50%를 초과하는 치명타 확률의 40%가 치명타 피해량으로 전환됩니다. 치명타 확률을 25%, 치명타 피해량을 25% 얻습니다.",
+      "descriptionJa": "クリティカル率の上限が50%になる。50%を上回るクリティカル率の40%をクリティカルダメージに変換する。 クリティカル率が25%増加し、クリティカルダメージが25%増加する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/b6ff530e75ab04ea87869349eb885b58e101fe050871d92ff9c57908daef686f.webp"
+    },
+    {
+      "id": "outlawsgrit",
+      "nameKo": "무법자의 투지",
+      "nameJa": "無法者の気概",
+      "descriptionKo": "돌진, 점멸, 순간이동 스킬을 사용한 후 방어력 및 마법 저항력을 얻습니다.",
+      "descriptionJa": "ダッシュ、ブリンク、またはテレポートを行うスキルを使用すると、物理防御と魔法防御が増加する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/66a3fa81eafeec9064fd1c69f7101b0e6185717c363f3f505b5fc5bc90bf9dca.webp"
+    },
+    {
+      "id": "threadtheneedle",
+      "nameKo": "바늘에 실 끼우기",
+      "nameJa": "貫通力",
+      "descriptionKo": "방어구 관통력 및 마법 관통력 15%를 얻습니다.",
+      "descriptionJa": "物理防御貫通と魔法防御貫通が15%増加する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/35d700a551b5779b90a32809e31c4a4d5a9ae12dbaef5ba5e5b26a973f502197.webp"
+    },
+    {
+      "id": "defensivemaneuvers",
+      "nameKo": "방어 기동",
+      "nameJa": "防衛戦略",
+      "descriptionKo": "방어 기동 소환사 주문을 얻습니다. 방어 기동을 사용하면 아군 팀에게 방어막 및 회복 소환사 주문을 사용합니다.",
+      "descriptionJa": "サモナースペルの「防衛戦略」を獲得する。 「防衛戦略」は味方チームにサモナースペルの「バリア」と「ヒール」を両方使用する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/5a94b56b5871e64559ccd583608e75f6b5624b56856f39f6f6e7c5a1e8ee3ebc.webp"
+    },
+    {
+      "id": "overflow",
+      "nameKo": "범람",
+      "nameJa": "オーバーフロー",
+      "descriptionKo": "마나 소모량이 2배가 됩니다. 스킬의 체력 회복량, 보호막 흡수량 및 피해량이 최대 마나에 비례해 증가합니다.",
+      "descriptionJa": "自身のマナコストが2倍になる。 スキルの回復、シールド、およびダメージが最大マナに基づいて増加する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/e714873bb82d76c793c4f8ffb0b7de092620983cdcee51d6e7d5944b5d90a5fa.webp"
+    },
+    {
+      "id": "lightningstrikes",
+      "nameKo": "벼락",
+      "nameJa": "ライトニングストライク",
+      "descriptionKo": "총 공격 속도가 20% 증가합니다. 초당 공격 횟수 3.5회에서 추가 마법 피해를 입힙니다.",
+      "descriptionJa": "合計攻撃速度が20%増加する。 毎秒攻撃回数が3.5回になると、追加で魔法ダメージを与える。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/35d700a551b5779b90a32809e31c4a4d5a9ae12dbaef5ba5e5b26a973f502197.webp"
+    },
+    {
+      "id": "vengeance",
+      "nameKo": "복수",
+      "nameJa": "仇討ち",
+      "descriptionKo": "게임 내 상황에 따라 효과가 달라집니다.",
+      "descriptionJa": "ゲーム内の状況によって効果が変わります。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/812b86d10e723dce0a6e992fbf4a5b7f5dbe341bea11c21b8972df2e561c30d8.webp"
+    },
+    {
+      "id": "okboomerang",
+      "nameKo": "부메랑 투척",
+      "nameJa": "OKブーメラン",
+      "descriptionKo": "자동 사용 7초마다 근처 적에게 부메랑을 던집니다.",
+      "descriptionJa": "7秒ごとに、近くの敵1体に対してブーメランが自動発動で発射される。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/11fa049d05b8e3536751807e77b5cd204a79ae4d03335e8b54bce3b4b57bde90.webp"
+    },
+    {
+      "id": "undyingguard",
+      "nameKo": "불멸의 경계",
+      "nameJa": "不死の衛兵",
+      "descriptionKo": "전쟁 단련으로 부활 시 자헨이 주위 적들에게 각 유닛의 현재 체력에 비례한 피해를 입히고 모든 대상을 뒤로 밀어내며 일정 거리 밖에 있는 적 챔피언에게 피해를 받지 않는 상태가 됩니다. 또한 이동 속도가 잠시 동안 크게 증가합니다.",
+      "descriptionJa": "「戦威修養」で復活する時、周囲にいる敵に対象の現在体力に応じたダメージを与え、すべての対象をノックバックさせる。発生した円の外にいる敵チャンピオンからはダメージを受けなくなり、少しの間移動速度が上昇する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/283585d2ce1942e4b5b9c7e5b8e4974ae66c5f1fbc9c55eb410e8a32f6aa651a.webp"
+    },
+    {
+      "id": "dieanotherday",
+      "nameKo": "불사의 날",
+      "nameJa": "不死の意志",
+      "descriptionKo": "불사의 날 소환사 주문을 얻습니다. 불사의 날을 사용하면 4초 동안 어떤 유닛도 죽지 않는 영역을 생성합니다.",
+      "descriptionJa": "サモナースペルの「不死の意志」を獲得する。 「不死の意志」は4秒間、あらゆるユニットが倒されなくなるゾーンを作り出す。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/9c8814486ba90f0a69c3c88dfbbd37b25364c565cff78d193220bbddd3fa91c4.webp"
+    },
+    {
+      "id": "dawnbringersresolve",
+      "nameKo": "빛의 인도자 결의",
+      "nameJa": "ドーンブリンガーの誓い",
+      "descriptionKo": "체력이 60% 아래로 떨어지면 3초 동안 만큼 체력을 회복합니다.",
+      "descriptionJa": "体力が60%未満に低下すると、3秒かけて体力が回復する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/283585d2ce1942e4b5b9c7e5b8e4974ae66c5f1fbc9c55eb410e8a32f6aa651a.webp"
+    },
+    {
+      "id": "lightwarden",
+      "nameKo": "빛의 파수꾼",
+      "nameJa": "ライトワーデン",
+      "descriptionKo": "몇 초마다 공격을 막는 빛을 자동 사용하여 빛을 통과하는 아군과 자신에게 보호막을 부여합니다. 이후 빛이 돌아오며 같은 효과를 반복합니다.",
+      "descriptionJa": "数秒ごとに、結界の光を自動発動し、自身と光が通過した味方にシールドを付与する。その後、光はその効果を繰り返しながら戻る。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/4644beec7f0152b25260201cbbb5716cbea02d928f9921105dd3ddb92d953eff.webp"
+    },
+    {
+      "id": "breadandbutter",
+      "nameKo": "빵과 버터",
+      "nameJa": "パンとバター",
+      "descriptionKo": "스킬 가속을 100 얻습니다.",
+      "descriptionJa": "のスキルヘイストが100増加する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/73a2fef97b7eb7dda24e5a32ace5b0b20cccc2e7893025e408e4c97163bcb6fe.webp"
+    },
+    {
+      "id": "breadandjam",
+      "nameKo": "빵과 잼",
+      "nameJa": "パンとジャム",
+      "descriptionKo": "스킬 가속을 100 얻습니다.",
+      "descriptionJa": "のスキルヘイストが100増加する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/73a2fef97b7eb7dda24e5a32ace5b0b20cccc2e7893025e408e4c97163bcb6fe.webp"
+    },
+    {
+      "id": "breadandcheese",
+      "nameKo": "빵과 치즈",
+      "nameJa": "パンとチーズ",
+      "descriptionKo": "스킬 가속을 100 얻습니다.",
+      "descriptionJa": "のスキルヘイストが100増加する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/73a2fef97b7eb7dda24e5a32ace5b0b20cccc2e7893025e408e4c97163bcb6fe.webp"
+    },
+    {
+      "id": "rabblerousing",
+      "nameKo": "선동",
+      "nameJa": "扇動者",
+      "descriptionKo": "스킬 사용 시 의 체력을 회복합니다.",
+      "descriptionJa": "スキルを使用すると体力が回復する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/738038c995edf28a2760fdd7df79c9793d0286a6ce97eb88bca1cbc32ee902d6.webp"
+    },
+    {
+      "id": "vanish",
+      "nameKo": "소멸",
+      "nameJa": "ヴァニッシュ",
+      "descriptionKo": "소멸 소환사 주문을 얻습니다. 소멸 사용 시 투명 상태가 됩니다.",
+      "descriptionJa": "サモナースペルの「ヴァニッシュ」を獲得する。 「ヴァニッシュ」を発動すると、インビジブル状態になる。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/b9deb78446721a221ba1d00cdd11d3712f4844bb94226d5fd68197b3854665e9.webp"
+    },
+    {
+      "id": "summonerrevolution",
+      "nameKo": "소환사 혁명",
+      "nameJa": "サモナー革命",
+      "descriptionKo": "소환사 주문 충전 횟수가 1회 추가됩니다. 점멸이 라운드마다 초기화됩니다.",
+      "descriptionJa": "サモナースペルのチャージ数が1増加する。 「フラッシュ」が毎ラウンドリセットされる。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/aca1abc175ce46030fabea57db4e2fbd42425e4521ed7d4f112f61cb27dd50de.webp"
+    },
+    {
+      "id": "minionmancer",
+      "nameKo": "소환술사",
+      "nameJa": "ミニオンマンサー",
+      "descriptionKo": "소환물의 크기, 체력, 피해량이 35% 증가합니다.",
+      "descriptionJa": "自身が召喚したユニットのサイズ、体力、ダメージが35%増加する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/14ffcdb3999419b25a252c00245047d78ad84c60f3102d613b654de88d546b2c.webp"
+    },
+    {
+      "id": "withhaste",
+      "nameKo": "속행",
+      "nameJa": "大急ぎ",
+      "descriptionKo": "스킬 가속의 120%에 해당하는 이동 속도를 얻습니다.",
+      "descriptionJa": "スキルヘイストの120%にあたる移動速度を獲得する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/aca1ab8c6768bc9803e894a8a743adf3d8e981b59f87993d215a9eeee30ff662.webp"
+    },
+    {
+      "id": "frombeginningtoend",
+      "nameKo": "시작부터 끝까지",
+      "nameJa": "徹頭徹尾",
+      "descriptionKo": "선제공격과 어둠의 수확 핵심 룬을 얻습니다.",
+      "descriptionJa": "キーストーンルーンの「ファーストストライク」と「魂の収穫」を獲得する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/ac35b1abd59109a41407896e797a07b1c5c9e137ffd0607e7e9a0250e46096f1.webp"
+    },
+    {
+      "id": "holyfire",
+      "nameKo": "신성한 불길",
+      "nameJa": "聖なる炎",
+      "descriptionKo": "체력을 회복하거나 보호막을 씌울 때 주변 적에게 무한히 중첩되는 화상 효과를 적용해 몇 초에 걸쳐 최대 체력에 비례하는 마법 피해를 입힙니다.",
+      "descriptionJa": "自身の体力回復効果とシールドが、近くの敵1体に炎上のスタックを1つ付与する。これは無限にスタックし、数秒かけて最大体力の一定割合の魔法ダメージを与える。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/4bb5eed6d8ecc45cb6a7ad7d736de56db9829fcffd9ede6491273d2843fd0315.webp"
+    },
+    {
+      "id": "divineintervention",
+      "nameKo": "신성한 중재",
+      "nameJa": "聖なる介入",
+      "descriptionKo": "전투 시작 직후, 보호의 별을 소환합니다. 별이 착지하면 자신과 주변 아군이 몇 초 동안 무적 상태가 됩니다. 이후 25초마다 자동 사용합니다.",
+      "descriptionJa": "戦闘開始から少し経つと、守護星を召喚する。星が落下すると、自身および周囲の味方が数秒間無敵状態になる。 その後は25秒ごとに自動発動する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/b757b8b66dc790e4b573988b5d0fb12344181cef4bc486f59436628146fc3dd2.webp"
+    },
+    {
+      "id": "demonsdance",
+      "nameKo": "악마의 춤",
+      "nameJa": "悪魔のダンス",
+      "descriptionKo": "기민한 발놀림 및 착취의 손아귀 핵심 룬을 얻습니다.",
+      "descriptionJa": "キーストーンルーンの「フリートフットワーク」と「不死者の握撃」を獲得する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/a88f7f3a024f578d8613dae123a69aa1e3ced725328fcb009831d9078b9d76c4.webp"
+    },
+    {
+      "id": "darkblessing",
+      "nameKo": "어둠의 축복",
+      "nameJa": "闇の祝福",
+      "descriptionKo": "아군의 체력을 회복시키거나 보호막을 씌우면 영구히 저주받은 힘을 얻습니다. 저주받은 힘에 따라 스킬 가속을 얻습니다.",
+      "descriptionJa": "味方に体力回復効果またはシールドを付与すると、自身が恒久的に「呪われし力」を獲得する。自身の「呪われし力」に応じてスキルヘイストが増加する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/5f3eea40786845978f597069b4b61296f3312dc014fa6608489eea3efc4cb365.webp"
+    },
+    {
+      "id": "combomaster",
+      "nameKo": "연계의 대가",
+      "nameJa": "コンボマスター",
+      "descriptionKo": "감전과 난입 핵심 룬을 얻습니다.",
+      "descriptionJa": "キーストーンルーンの「電撃」と「フェイズラッシュ」を獲得する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/f05063d2ddbdd3e9006b3dae9fec7b4ce15cce80d9c2a69ac1e8624363b5f8f6.webp"
+    },
+    {
+      "id": "soulsiphon",
+      "nameKo": "영혼 흡수",
+      "nameJa": "ソウルサイフォン",
+      "descriptionKo": "치명타로 입힌 피해량의 10%만큼 체력을 회복합니다. 치명타 확률이 25% 증가합니다.",
+      "descriptionJa": "クリティカルによって与えたダメージの10%にあたる体力を回復する。 クリティカル率が25%増加する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/b7c63a504de4f48f52adb933674d458ee73e6ca92828570f4d0dc90a04684470.webp"
+    },
+    {
+      "id": "perseverance",
+      "nameKo": "인내심",
+      "nameJa": "忍耐力",
+      "descriptionKo": "체력 재생 효과가 크게 증가하고 체력이 낮으면 추가로 증가합니다.",
+      "descriptionJa": "体力自動回復が大幅に増加する。体力が低下すると、回復量がさらに増加する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/283585d2ce1942e4b5b9c7e5b8e4974ae66c5f1fbc9c55eb410e8a32f6aa651a.webp"
+    },
+    {
+      "id": "restart",
+      "nameKo": "재시작",
+      "nameJa": "再起動",
+      "descriptionKo": "기본 스킬이 12초마다 자동으로 초기화됩니다.",
+      "descriptionJa": "非アルティメットスキルが12秒ごとに自動でリフレッシュされる。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/ac46fe56d33a5cb0fc62bd3a2883d2d6577b02655f2a2cb4ae7fd03d4fc538dc.webp"
+    },
+    {
+      "id": "bigbrain",
+      "nameKo": "전술적 대비",
+      "nameJa": "頭脳派",
+      "descriptionKo": "각 라운드 시작 시 주문력 1당 1의 피해를 흡수하는 보호막을 얻습니다.",
+      "descriptionJa": "各ラウンド開始時、魔力1につき耐久値1のシールドを獲得する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/4779af379c5abdf663dee0568608d1d65825c7dfa11d8575bd43b48f4b841d7a.webp"
+    },
+    {
+      "id": "transmuteprismatic",
+      "nameKo": "전환: 프리즘",
+      "nameJa": "変質: プリズム",
+      "descriptionKo": "무작위 프리즘 증강을 획득합니다.",
+      "descriptionJa": "ランダムなプリズムオーグメントを1個獲得する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/4d0777891155204149488074c8c8b47f23796605d23ee12a1043d0e8ec63f4ad.webp"
+    },
+    {
+      "id": "flashy",
+      "nameKo": "점멸 난사",
+      "nameJa": "閃光",
+      "descriptionKo": "점멸 사용 가능 횟수가 1번, 재사용 대기시간이 2초가 됩니다.",
+      "descriptionJa": "「フラッシュ」が1回分のチャージを獲得し、クールダウンが2秒間になる。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/6b116d4d4782b57eea6e16fb07851d7fcec2f18818b98534152778f221213079.webp"
+    },
+    {
+      "id": "deathtouch",
+      "nameKo": "죽음의 손길",
+      "nameJa": "死の感触",
+      "descriptionKo": "적 챔피언에게 기본 공격을 가하면 영구히 저주받은 힘을 얻으며 저주받은 힘에 따라 마법 피해를 추가로 입힙니다.",
+      "descriptionJa": "敵チャンピオンに通常攻撃を行うと「呪われし力」を恒久的に獲得し、自身の「呪われし力」に応じて追加の魔法ダメージを与える。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/ea22a9cdbd8f724bfd68322828722e8d14612829b67ed9accfb59cdb31902b82.webp"
+    },
+    {
+      "id": "bannerofcommand",
+      "nameKo": "지휘관의 깃발",
+      "nameJa": "統率の旗",
+      "descriptionKo": "지휘관의 깃발 소환사 주문을 얻습니다. 지휘관의 깃발이 잠시 동안 아군을 강화합니다.",
+      "descriptionJa": "サモナースペルの「統率の旗」を獲得する。 「統率の旗」は少しの間、味方を強化する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/494154a53607c467bd21295b59cd55aac9637fb6a21b26449d1a33c504e8b54d.webp"
+    },
+    {
+      "id": "itskillingtime",
+      "nameKo": "처형 시간",
+      "nameJa": "殺戮の時",
+      "descriptionKo": "궁극기 사용 후 모든 적 챔피언에게 죽음의 표식을 남깁니다. 표식이 있는 동안 적에게 입힌 피해를 비축합니다. 표식의 효과가 끝날 때 폭발해 비축된 피해를 입힙니다.",
+      "descriptionJa": "アルティメットスキル発動後、すべての敵チャンピオンに死のマークを付与する。 マーク中は、対象が受けたダメージが蓄積され、マーク終了時に爆発してダメージを与える。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/ef34f5c791c1fada5fad997ca9c4cd4409f546d6dd4bad9daa8662cbc93ccba0.webp"
+    },
+    {
+      "id": "celestialbody",
+      "nameKo": "천상의 신체",
+      "nameJa": "聖体",
+      "descriptionKo": "1000의 체력을 얻지만, 피해량이 10% 감소합니다.",
+      "descriptionJa": "体力が1000増加する代わりに、与えるダメージが10%低下する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/93ddb9086ea801e935ac125d54de27c8e1a041e93510a071ab939f2b5c0705c0.webp"
+    },
+    {
+      "id": "apexinventor",
+      "nameKo": "최첨단 발명가",
+      "nameJa": "至高の発明家",
+      "descriptionKo": "아이템 가속이 100 증가합니다. (50%의 아이템 재사용 대기시간 감소 효과와 동일) 아이템 가속은 모든 아이템 스킬의 재사용 대기시간을 감소시킵니다.",
+      "descriptionJa": "アイテムヘイストが100増加する(アイテムクールダウン短縮50%に相当)。 アイテムヘイストはすべてのアイテムスキルのクールダウンを短縮する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/1c6bfb72b87ed9dd345cd8ff6de460062e551b5d51fad5c158f12696ca8ac8d5.webp"
+    },
+    {
+      "id": "vulnerability",
+      "nameKo": "취약",
+      "nameJa": "搦め手",
+      "descriptionKo": "아이템 및 지속 피해 효과에 치명타가 적용될 수 있습니다. 치명타 확률이 25% 증가합니다.",
+      "descriptionJa": "アイテムおよび継続ダメージ効果がクリティカル判定を持つ。 クリティカル率が25%増加する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/83b92b0e2e8537045068f17a12921441b3d167edf998d1d29890d94dedb237b3.webp"
+    },
+    {
+      "id": "criticalhealing",
+      "nameKo": "치명적 치유",
+      "nameJa": "クリティカルヒール",
+      "descriptionKo": "체력 회복 및 보호막 효과에 치명타가 적용되어 만큼 증가합니다. 치명타 확률이 25% 증가합니다.",
+      "descriptionJa": "自身の体力回復効果およびシールド効果がクリティカル判定を持ち、クリティカル時は効果が追加で上昇する。 クリティカル率が25%増加する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/6218e3e121780897d32e23af6617381bf060558d0898a9d4a9fa778aff1480da.webp"
+    },
+    {
+      "id": "itscritical",
+      "nameKo": "치명적인 공격",
+      "nameJa": "まさにクリティカル",
+      "descriptionKo": "치명타 확률이 50% 증가합니다.",
+      "descriptionJa": "クリティカル率が50%増加する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/ae8478f99d69861376d5d55f747f35ef8d55b2bfdda96d7df5cdae4766d976ce.webp"
+    },
+    {
+      "id": "quest_steelyourheart",
+      "nameKo": "퀘스트: 강철 같은 심장",
+      "nameJa": "クエスト: 覚悟を決めろ",
+      "descriptionKo": "조건: 효과가 400중첩 이상 적용된 강철심장을 보유해야 합니다. 보상: 강철심장 중첩이 3배가 됩니다. 체력 재생이 강철심장 중첩의 12.5%만큼 증가합니다.",
+      "descriptionJa": "条件: 「心の鋼」を所持して、スタックを400以上溜める。 報酬: 「心の鋼」のスタック数が3倍になる。体力自動回復が「心の鋼」のスタック数の12.5%分だけ増加する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/905397d483c0a90693b7f45377434042050bf60007cf70dbb92bb9d0ada62698.webp"
+    },
+    {
+      "id": "quest_madhatter",
+      "nameKo": "퀘스트: 미치광이 모자장수",
+      "nameJa": "クエスト: マッドハッター",
+      "descriptionKo": "조건: 전투 종료 시 모자 10개를 착용해야 합니다. 보상: 모자 1개당 적응형 능력치, 방어력, 마법 저항력, 강인함, 이동 속도를 얻습니다.",
+      "descriptionJa": "条件: 戦闘終了時に帽子を10個被る。 報酬: 帽子1個ごとにアダプティブフォース、物理防御、魔法防御、行動妨害耐性、移動速度が増加する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/c3a55dc71e0585c10db632a9255c86e2e4595efd03eeb33f1b95b4232f998c64.webp"
+    },
+    {
+      "id": "quest_threesacredtreasures",
+      "nameKo": "퀘스트: 삼종신기",
+      "nameJa": "クエスト: 聖なる三宝",
+      "descriptionKo": "조건: 무한의 대검, 당혹, 마법공학 총검을 보유해야 합니다. 보상: 유나라의 기본 공격이 혼합 피해를 입히는 빛줄기로 대체됩니다.",
+      "descriptionJa": "条件: 「インフィニティ エッジ」、「混乱」、「へクステック ガンブレード」を所有する。 報酬: ユナラの通常攻撃がレーザーに置き換わり、混合ダメージを与える。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/11227b4bfd2d036d900658228e5314b22ff70745c69855d41d640b536dd4d49a.webp"
+    },
+    {
+      "id": "quest_urfschampion",
+      "nameKo": "퀘스트: 우르프의 챔피언",
+      "nameJa": "クエスト: アーフのチャンピオン",
+      "descriptionKo": "조건: 처치에 10회 관여해야 합니다. 보상: 황금 뒤집개",
+      "descriptionJa": "条件: キルまたはアシストを10回獲得する。 報酬: 金のへら",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/6f26e0e45419bef9f379c47d5963286605d8f4e9a8701999d184d4e6ca2ce67d.webp"
+    },
+    {
+      "id": "quest_angelofretribution",
+      "nameKo": "퀘스트: 응징의 천사",
+      "nameJa": "クエスト: 報復の天使",
+      "descriptionKo": "조건: 2500만큼 아군의 체력을 회복시키거나 피해량을 막아야 합니다. 보상: 100%의 공격 속도를 얻습니다. 또한 기본 공격 시 체력 회복과 보호막 효과의 350%에 해당하는 추가 마법 피해를 입힙니다.",
+      "descriptionJa": "条件: 味方に対するダメージを2500回復または防御する。 報酬: 攻撃速度が100%増加し、通常攻撃が体力回復量およびシールド量の350%にあたる魔法ダメージを追加で与える。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/d309ce10209bee943f7db26adcbbd0efd4d59d6b9e0e375a2e077bbc8f12ffed.webp"
+    },
+    {
+      "id": "searingdawn",
+      "nameKo": "타오르는 새벽",
+      "nameJa": "灼熱の夜明け",
+      "descriptionKo": "스킬이 적에게 표식을 남깁니다. 적은 아군의 다음 기본 공격 또는 스킬로부터 마법 피해를 추가로 입습니다.",
+      "descriptionJa": "スキルが敵をマークする。味方はマークされた敵に対し、次の通常攻撃またはスキルで追加の魔法ダメージを与える。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/c9bd550fff6a9c20620d33af3a7ea2a76aec5b883cfd218086931da581a242c3.webp"
+    },
+    {
+      "id": "tankengine",
+      "nameKo": "탱크 엔진",
+      "nameJa": "タンクエンジン",
+      "descriptionKo": "처치 관여마다 크기가 커지고 일정 비율의 추가 체력을 얻습니다.",
+      "descriptionJa": "キルまたはアシストを獲得するたびにサイズが大きくなり、増加体力の倍率が増加する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/ae6b2dce806a326fcd24643f28d80980238a48667f28fba9d42ccc2afb447488.webp"
+    },
+    {
+      "id": "bloodbrother",
+      "nameKo": "피를 나눈 형제",
+      "nameJa": "血を分けた兄弟",
+      "descriptionKo": "다리우스의 기본 지속 효과 과다출혈을 얻습니다. 기본 공격과 공격 스킬이 대상에게 과다출혈을 일으켜 5초에 걸쳐 의 물리 피해를 입힙니다. 이 효과는 최대 5번 중첩됩니다. 대상에게 과다출혈이 5회 중첩되면 드레이븐의 공격력이 증가합니다.",
+      "descriptionJa": "ダリウスの固有スキル「大出血」を獲得する。 通常攻撃と攻撃スキルが対象に「大出血」を付与し、5秒かけての物理ダメージを与える。この効果は5回までスタックする。 「大出血」が5スタックになると、攻撃力が増加する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/dc08d61eacca7e46ff2107d03dfa32e784b1ea17cb406f456cb961e04675431e.webp"
+    },
+    {
+      "id": "hybrid",
+      "nameKo": "하이브리드",
+      "nameJa": "ハイブリッド",
+      "descriptionKo": "기본 공격으로 피해를 입히면 다음 스킬 피해량이 10% 증가합니다. 스킬로 피해를 입히면 다음 기본 공격 피해량이 10% 증가합니다.",
+      "descriptionJa": "通常攻撃でダメージを与えると、次のスキルのダメージが10%増加する。 スキルでダメージを与えると、次の通常攻撃のダメージが10%増加する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/0e897086952517b135ee598075349c3cfd84f3ae63bd7280a79679e6b593e47c.webp"
+    },
+    {
+      "id": "unshackled",
+      "nameKo": "해방",
+      "nameJa": "解放",
+      "descriptionKo": "이제 아군의 궁극기를 강탈할 수 있습니다. 처치 관여 시, 강탈의 사용 제한 시간 및 재사용 대기시간이 20% 감소합니다. 궁극기 가속이 60 증가합니다.",
+      "descriptionJa": "味方のアルティメットスキルを「乗っ取り」できるようになる。 キルまたはアシストを獲得すると、「乗っ取り」の使用不可時間およびクールダウンが20%短縮される。 アルティメットヘイストが60増加する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/be6c8f3d4acc4e6d9ffc2382f0fefdd356223c205f90587cf860be287a6bfff4.webp"
+    },
+    {
+      "id": "hattrick",
+      "nameKo": "해트트릭",
+      "nameJa": "ハットトリック",
+      "descriptionKo": "즉시 모자 3개를 얻으며, 카파 주스의 가격이 350 감소합니다. 체력이 30% 아래로 떨어지면 이동 속도와 보호막을 얻지만, 모자를 하나 잃습니다.",
+      "descriptionJa": "直ちに帽子を3個獲得し、「帽子ジュース」の価格が350低下する。 自身の体力が30%未満になると移動速度とシールドを獲得するが、帽子を1個失う。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/69f6e61ce18f70b0348d24d617540cf90fc3c9e65a088c91904933028e5514d9.webp"
+    },
+    {
+      "id": "keystoneconjurer",
+      "nameKo": "핵심 룬 요술사",
+      "nameJa": "キーストーンの奇術師",
+      "descriptionKo": "콩콩이 소환과 신비로운 유성 핵심 룬을 얻습니다.",
+      "descriptionJa": "キーストーンルーンの「エアリー召喚」と「秘儀の彗星」を獲得する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/b7507996ab635bde99be2394679bb223e9fda660c8a24eda46864677bb1657e7.webp"
+    },
+    {
+      "id": "firebrand",
+      "nameKo": "화염 낙인",
+      "nameJa": "火付け役",
+      "descriptionKo": "기본 공격 시 무한히 중첩되는 화상 효과를 적용해 지속적으로 피해를 입힙니다.",
+      "descriptionJa": "通常攻撃が無限にスタック可能な炎上を付与し、継続ダメージを与える。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/6afcff0c8e20961ade64719a21c848e601924f0f2919e9057f87cf43c40419fb.webp"
+    },
+    {
+      "id": "etherealweapon",
+      "nameKo": "환영 무기",
+      "nameJa": "エーテル武器",
+      "descriptionKo": "스킬 사용 시 효과를 적용합니다.",
+      "descriptionJa": "自身のスキルがを付与する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/af285b3a9eb682bb3604464a1b2d6f6617d2deaaa52134948a59a8b790c05b36.webp"
+    },
+    {
+      "id": "gohsacrificeforgold",
+      "nameKo": "희생: 골드",
+      "nameJa": "犠牲: ゴールドのために",
+      "descriptionKo": "현재 체력의 25%를 희생합니다. 4라운드 후 추가 골드 증강을 얻고 체력을 회복합니다.",
+      "descriptionJa": "現在体力の25%を犠牲にする。 4ラウンド終了後、ボーナスのゴールドオーグメントを1個獲得し、体力が回復する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/d02be9f50da9049cdf629e14b217b7b7fe6335672061e46acd6100a8bd1f55d1.webp"
+    },
+    {
+      "id": "willingsacrifice",
+      "nameKo": "희생의 의지",
+      "nameJa": "自己犠牲",
+      "descriptionKo": "아군 챔피언의 체력이 30% 아래로 떨어지면, 자신의 체력 일부를 보호막으로 바꿔 해당 아군에게 부여합니다.",
+      "descriptionJa": "味方チャンピオンの体力が30%未満に低下した際、自身の体力の一部をシールドに変換してその味方に付与する。",
+      "rarity": "gold",
+      "iconUrl": "/images/lol/aram/04b3f143550a04785d19106f63960948970853d8da8422c933550d5e17949d56.webp"
+    },
+    {
+      "id": "gambaanvil",
+      "nameKo": "감바 모루",
+      "nameJa": "ガンバの金床",
+      "descriptionKo": "+1000골드를 획득하고 모든 모루의 가격이 감소합니다. 프리즘 모루: -1500골드 전설급 모루: -750골드 능력치 모루: -250골드 모루로 획득한 아이템을 되팔 때 받는 비용이 -500골드 감소합니다.",
+      "descriptionJa": "+1000ゴールドを獲得し、すべての金床の価格が低下する。 プリズムの金床: -1500ゴールド レジェンダリーの金床: -750ゴールド ステータスの金床: -250ゴールド 金床から獲得したアイテムの売却価格が-500ゴールド低下する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/51e69dd6ac4b9778fe3820ba9c61b0b28018e2f8a9948070660936480b1efeaa.webp"
+    },
+    {
+      "id": "courageofthecolossus",
+      "nameKo": "거석상의 용기",
+      "nameJa": "巨人の勇気",
+      "descriptionKo": "적 챔피언을 이동 불가 상태로 만들거나 이동 스킬을 사용할 수 없게 하면 의 보호막을 얻습니다.",
+      "descriptionJa": "敵チャンピオンに移動不能効果か釘付け効果を与えると耐久値のシールドを獲得する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/67d51f676fca5d2243a2f346c2db013f3e07ddad1664ed8fac9a94f812dcbe0d.webp"
+    },
+    {
+      "id": "goliath",
+      "nameKo": "거인",
+      "nameJa": "大巨人",
+      "descriptionKo": "크기가 커져 체력이 15% 증가하고 적응형 능력치가 10% 증가합니다.",
+      "descriptionJa": "サイズが大きくなり、体力が15%、アダプティブフォースが10%増加する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/37a3aae1277b28147060748f6def6bf36941a373b04880f031b0a192ef7fb465.webp"
+    },
+    {
+      "id": "giantslayer",
+      "nameKo": "거인 학살자",
+      "nameJa": "ジャイアント スレイヤー",
+      "descriptionKo": "크기가 작아져 이동 속도가 증가하며 상대가 자신보다 큰 정도에 비례해 챔피언에게 추가 피해를 입힙니다.",
+      "descriptionJa": "小さくなって移動速度が増加する。また、対象のチャンピオンが自身よりどれだけ大きいかに応じて、追加ダメージを与える。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/31618afcd12f312d3b3e8e6facc39e43aa1bcbc3f6e4d8b55a90a8c4dd0a7738.webp"
+    },
+    {
+      "id": "bladewaltz",
+      "nameKo": "검무",
+      "nameJa": "ブレードワルツ",
+      "descriptionKo": "검무 소환사 주문을 얻습니다. 검무를 사용하면 적에게 돌진해 6회 공격하는 동안 대상으로 지정되지 않습니다.",
+      "descriptionJa": "サモナースペルの「ブレードワルツ」を獲得する。 「ブレードワルツ」を使うと、敵に向かって6回ダッシュしてダメージを与える。その間、自身は対象指定不可になる。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/4dc3ca4ed73cacf6a6f15c7ea50753317dca806e455f4add8e007d5231ebe49b.webp"
+    },
+    {
+      "id": "drawyoursword",
+      "nameKo": "검을 뽑아라",
+      "nameJa": "剣を構えよ",
+      "descriptionKo": "이제 근접 챔피언으로 간주됩니다. 잃은 공격 사거리에 비례해 공격력, 체력, 공격 속도, 생명력 흡수 효과, 이동 속도를 얻습니다.",
+      "descriptionJa": "近接攻撃チャンピオンに変化する。 減少した射程に応じて、攻撃力、体力、攻撃速度、ライフスティール、移動速度が増加する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/7989ceb7d44e20770ee3b660d0fc9074979194443c49d3fd37813bb932a17d40.webp"
+    },
+    {
+      "id": "masterofduality",
+      "nameKo": "결투의 대가",
+      "nameJa": "文武両道",
+      "descriptionKo": "라운드가 끝날 때까지, 기본 공격 시 주문력을, 스킬 사용 시 공격력을 얻습니다.",
+      "descriptionJa": "通常攻撃で魔力 が、スキルで攻撃力が増加する。この効果はラウンド終了まで継続する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/46c4e9f327f321bacf06ecacbc1dc206e41f39abbae974c819c82a622bd9aa3a.webp"
+    },
+    {
+      "id": "dreadbringer",
+      "nameKo": "공포를 부르는 자",
+      "nameJa": "ドレッドブリンガー",
+      "descriptionKo": "오라를 획득해 안에 있는 적 챔피언 하나당 영구적인 저주받은 힘을 지속적으로 얻습니다. 저주받은 힘에 따라 최대 체력을 얻습니다.",
+      "descriptionJa": "オーラを獲得する。オーラは範囲内の敵チャンピオン1体ごとに恒久的な「呪われし力」を継続的に収穫する。自身の「呪われし力」に応じて最大体力が増加する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/ccec31cb8d479e522993e356cc3a9e28a9e1283e9e4726af426d5419ea70f174.webp"
+    },
+    {
+      "id": "clowncollege",
+      "nameKo": "광대 대학",
+      "nameJa": "ピエロ大学",
+      "descriptionKo": "속임수 소환사 주문을 얻습니다. 속임수: 근처로 순간이동해 투명 상태가 됩니다. 투명 상태에서 다음 기본 공격 시 물리 피해를 추가로 입힙니다. 사망 시, 폭발하는 상자를 생성하여 엄청난 마법 피해를 입히고 주변 적을 공포에 빠뜨립니다.",
+      "descriptionJa": "サモナースペル「幻惑」を獲得する。 「幻惑」: 瞬間移動してインビジブル状態になる。インビジブル状態中の次の通常攻撃が物理ダメージを追加で与える。 倒されると爆発する箱を出現させ、周囲の敵に大量の魔法ダメージとフィアー効果を与える。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/8a33447006b72dd9f750eb0823a482892e0697e2f3f39b7dbaf1bc926c1f32b5.webp"
+    },
+    {
+      "id": "hivemind",
+      "nameKo": "군체 의식",
+      "nameJa": "集合意識",
+      "descriptionKo": "매 라운드를 벌 0마리와 함께 시작합니다. 꽃을 수확하면 추가로 벌을 얻습니다. 적 챔피언에게 피해를 입히면 벌을 보냅니다. 벌은 대상에 다다르면 2초 동안 의 마법 피해를 입히고 다시 돌아옵니다.",
+      "descriptionJa": "ハチを0匹所持して各ラウンドを開始し、花を摘むごとに追加のハチを獲得する。敵チャンピオンにダメージを与えるとハチが送り出され、到着後2秒かけての魔法ダメージを与えて自身のところに戻ってくる。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/5882cf88d0604c42e81d897bc5e2cc4fda96779728ec069933cb84f1f66eb950.webp"
+    },
+    {
+      "id": "ultimaterevolution",
+      "nameKo": "궁극기 대변혁",
+      "nameJa": "究極進化",
+      "descriptionKo": "라운드마다 한 번 궁극기를 사용한 다음 초기화합니다.",
+      "descriptionJa": "各ラウンドで1回のみ、アルティメットスキルが使用後にリフレッシュされる。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/8836ab0e2214d42b5fcc96bf67e694764e084ca230a5132dfdeef40fda992b38.webp"
+    },
+    {
+      "id": "ultimateroulette",
+      "nameKo": "궁극의 룰렛",
+      "nameJa": "アルティメットルーレット",
+      "descriptionKo": "도주를 무작위 궁극기로 교체합니다. 궁극기 사용 후 새로운 무작위 궁극기로 교체합니다.",
+      "descriptionJa": "「逃亡」をランダムなアルティメットスキルに置き換える。 そのアルティメットスキルを使用後、別の新たなランダムなアルティメットスキルに置き換わる。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/8836ab0e2214d42b5fcc96bf67e694764e084ca230a5132dfdeef40fda992b38.webp"
+    },
+    {
+      "id": "orbitallaser",
+      "nameKo": "궤도형 레이저",
+      "nameJa": "軌道レーザー",
+      "descriptionKo": "소환사 질주를 궤도형 레이저로 교체합니다. 교체가 끝나면 잠시 후 궤도형 레이저로 최대 체력의 30%에 해당하는 고정 피해를 입히고, 추가로 3초 동안 의 마법 피해를 입힙니다.",
+      "descriptionJa": "サモナースペルの「逃亡」を「軌道レーザー」に置き換える。 発動から少し遅れて、軌道レーザーが降り注ぎ、3秒かけて最大体力の30%にあたる確定ダメージとの魔法ダメージを与える。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/1ab3ea916ea196622df6c8124e001ed2cad373d1cc13c44ccd1702dff4415de4.webp"
+    },
+    {
+      "id": "backtobasics",
+      "nameKo": "기본으로 돌아가기",
+      "nameJa": "初志貫徹",
+      "descriptionKo": "스킬 피해량, 체력 회복량, 보호막 흡수량 및 스킬 가속이 증가하지만 궁극기를 사용할 수 없습니다.",
+      "descriptionJa": "スキルダメージ、体力回復効果、シールド効果、スキルヘイストが増加する代わりに、アルティメットスキルを使用できなくなる。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/48687a2f4a960900c03e5c7f8fdf528aaa53870165e1d7092b115bbc615656f8.webp"
+    },
+    {
+      "id": "raidboss",
+      "nameKo": "끝판왕",
+      "nameJa": "レイドボス",
+      "descriptionKo": "매 라운드를 갇힌 상태로 시작합니다. 갇힌 동안 받는 피해량이 큰 폭으로 감소하고 크기와 능력치가 지속적으로 축적됩니다. 해방 시 적들을 밀어내고 보호막을 얻습니다.",
+      "descriptionJa": "囚われた状態で各ラウンドを開始する。囚われている間は時間経過とともに大量のダメージ軽減効果を獲得し、サイズと攻撃力が増加する。 逃亡時に敵をノックバックさせ、シールドを獲得する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/aeeb3c657c9743b402b71b3a6d9970c3f9813f4995120db694b64942460b3a84.webp"
+    },
+    {
+      "id": "canttouchthis",
+      "nameKo": "난공불락",
+      "nameJa": "不可侵",
+      "descriptionKo": "궁극기를 사용하면 잠시 동안 무적 상태가 됩니다.",
+      "descriptionJa": "アルティメットスキルを発動すると、少しの間無敵状態になる。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/6801c1b99c71eef7987f4e71389183189cc2ed89fd50304f0afa0a3e15e65e79.webp"
+    },
+    {
+      "id": "lasereyes",
+      "nameKo": "눈알 광선",
+      "nameJa": "レーザーアイ",
+      "descriptionKo": "시야 방향으로 마법 피해를 지속적으로 입히는 광선을 발사합니다.",
+      "descriptionJa": "進行方向にレーザーが射出され、継続的に魔法ダメージを与える。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/1ab3ea916ea196622df6c8124e001ed2cad373d1cc13c44ccd1702dff4415de4.webp"
+    },
+    {
+      "id": "statsonstatsonstats",
+      "nameKo": "능력치 더하기 능력치 더하기 능력치!",
+      "nameJa": "ステータス上のステータス上のステータス！",
+      "descriptionKo": "능력치 모루를 4개 획득합니다.",
+      "descriptionJa": "「ステータスの金床」を4個獲得する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/f79782f451a899f8b1b8b5122d45c8c6165912bc8bfc5168c989e607efb1c6b5.webp"
+    },
+    {
+      "id": "earthwake",
+      "nameKo": "대지의 각성",
+      "nameJa": "アースウェイク",
+      "descriptionKo": "돌진, 점멸, 순간이동 스킬이 1초 후에 폭발하는 흔적을 남깁니다.",
+      "descriptionJa": "ダッシュ、ブリンク、またはテレポートを行うスキルを使用すると軌跡が残る。軌跡は1秒後に爆発する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/c5dd5b25424f7ec66c2c9f9a8125550444ecbac01bd0b8712a697c30e648f615.webp"
+    },
+    {
+      "id": "dashing",
+      "nameKo": "돌진",
+      "nameJa": "軽快",
+      "descriptionKo": "돌진, 도약, 점멸, 순간이동 스킬의 스킬 가속이 75만큼 증가합니다.",
+      "descriptionJa": "ダッシュ、リープ、ブリンク、またはテレポートを行うスキルのスキルヘイストが75増加する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/a92018f44ffe0a39b5945a5dd965fa2b277c15331a79cc4ea345246239f94b2a.webp"
+    },
+    {
+      "id": "acceleratingsorcery",
+      "nameKo": "마법 가속",
+      "nameJa": "加速魔法",
+      "descriptionKo": "스킬 사용 시 중첩되는 스킬 가속을 얻습니다. 이 효과는 매 라운드 초기화됩니다.",
+      "descriptionJa": "スキルを使用すると、スキルヘイストのスタックを獲得する。 このスタックは毎ラウンドリセットされる。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/61a556b2b850c294c39c9cd35965bcb9e656d899cdaeb34b91bf97584de39438.webp"
+    },
+    {
+      "id": "magicalgirl",
+      "nameKo": "마법 소녀",
+      "nameJa": "魔法少女",
+      "descriptionKo": "라운드마다 떨어지는 별을 획득하면 강력한 마법 소녀로 변신합니다. 마법 소녀가 되면, 자신과 적 주위에 별이 쏟아져 내려 마법 피해를 입힙니다.",
+      "descriptionJa": "各ラウンドで星が1つ降ってくる。それを拾うと、強力な魔法少女に変身する。 魔法少女は、自分と敵の周囲に星を降らせて魔法ダメージを与える。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/f90911ea81ab63e491b80e9e009d6c98635fe38f51cd85ba1e666788937e0a59.webp"
+    },
+    {
+      "id": "nestingdoll",
+      "nameKo": "마트료시카",
+      "nameJa": "入れ子人形",
+      "descriptionKo": "부활을 1회 추가로 얻고, 사망 후 자동으로 부활하기 시작합니다. 크기가 작아지고 최대 체력이 감소한 채 부활하며, 부활 시 주변 적들을 밀어냅니다.",
+      "descriptionJa": "追加で1回復活できるようになり、デス後に自力で復活を開始する。 復活した際に、周囲の敵をノックバックさせ、サイズが小さくなって最大体力が減少した状態で復帰する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/c8423124479e36d8c0768c888f04cbfd94eea422e4df1cf1735800b30d201cf0.webp"
+    },
+    {
+      "id": "madscientist",
+      "nameKo": "미친 과학자",
+      "nameJa": "狂気の化学者",
+      "descriptionKo": "라운드마다 크기가 커져 적응형 능력치 및 체력이 증가하거나 크기가 작아져 스킬 가속 및 이동 속도가 증가합니다.",
+      "descriptionJa": "ラウンドごとに、自身が巨大化(アダプティブフォースと体力が増加)または小型化(スキルヘイストと移動速度が増加)する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/30ca03ae684f2db9ec3c9bef6382c7a22baf6b81d493ea39ee2c027c728ae4ba.webp"
+    },
+    {
+      "id": "jeweledgauntlet",
+      "nameKo": "보석 건틀릿",
+      "nameJa": "ジュエル ガントレット",
+      "descriptionKo": "스킬에 치명타가 적용될 수 있습니다. 치명타 확률이 % 증가합니다.",
+      "descriptionJa": "スキルがクリティカル判定を持つ。 クリティカル率が増加する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/3290c654ce63a911feb62384f00333e58d1b8d793c0d8084db7644d907108311.webp"
+    },
+    {
+      "id": "breadsandwich",
+      "nameKo": "샌드위치 빵",
+      "nameJa": "食パンサンドイッチ",
+      "descriptionKo": "스킬 가속이 200 증가합니다. 스킬을 사용하면 2초 동안 40%의 효과를 얻습니다.",
+      "descriptionJa": "スキルヘイストが200増加する。 スキルを使用すると2秒間、移動速度が40%増加する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/45eee0d6620ddece6d743cd14eb278079435b68f5982284fafcd4d4b25323c4c.webp"
+    },
+    {
+      "id": "wisdomofages",
+      "nameKo": "세월의 지혜",
+      "nameJa": "歴戦の知恵",
+      "descriptionKo": "지금 1레벨이 증가하고 두 라운드마다 추가로 1레벨이 증가합니다. 레벨 제한이 사라집니다. 4라운드 이후 이 증강을 선택할 경우, 2레벨이 추가로 증가합니다.",
+      "descriptionJa": "レベルが即座に1増加し、その後は1ラウンドおきにレベルが追加で1増加する。 自身のレベル上限がなくなる。 ラウンド4以降に獲得した場合、追加で2レベルを獲得する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/17758ad04d4494b877118571d45f0018e181007b6d558f26fe9aa849c5013074.webp"
+    },
+    {
+      "id": "summonersroulette",
+      "nameKo": "소환사의 룰렛",
+      "nameJa": "サモナーズルーレット",
+      "descriptionKo": "소환사 주문을 무작위 주문으로 교체합니다. 소환사 주문 사용 시 6초의 재사용 대기시간이 적용된 무작위 주문으로 교체합니다.",
+      "descriptionJa": "サモナースペルをランダムなサモナースペルに置き換える。 サモナースペルを使用すると、それが6秒間のクールダウンを持つランダムな別のサモナースペルに置き換わる。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/f79782f451a899f8b1b8b5122d45c8c6165912bc8bfc5168c989e607efb1c6b5.webp"
+    },
+    {
+      "id": "mysticpunch",
+      "nameKo": "신비한 주먹",
+      "nameJa": "神秘の鉄拳",
+      "descriptionKo": "스킬의 재사용 대기시간이 1.3초 감소합니다.",
+      "descriptionJa": "がスキルのクールダウンを1.3秒短縮する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/4006b9dfaf0a9a5ac7406872d09ad1b5dcd0f9b1b7bf2700d9b624438aa0ae36.webp"
+    },
+    {
+      "id": "dualwield",
+      "nameKo": "양손잡이",
+      "nameJa": "二刀流",
+      "descriptionKo": "기본 공격 시 40%의 피해를 입히고 효과를 40%만큼 적용하는 투사체를 발사합니다. 총 공격 속도가 15% 증가합니다.",
+      "descriptionJa": "通常攻撃時、矢を放ってダメージを40%与え、を40%の効果量で適用する。 合計攻撃速度が15%増加する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/9cb5d4e289cef47198b45d4a44f55101601a2bfde9054d3e5224848dcdad92bf.webp"
+    },
+    {
+      "id": "quantumcomputing",
+      "nameKo": "양자 연산",
+      "nameJa": "量子演算",
+      "descriptionKo": "주기적으로 주변에 강력한 베기를 자동 사용하여 물리 피해를 입힙니다. 바깥쪽 칼날에 맞은 적은 둔화되고 추가 피해를 받으며, 자신은 체력을 회복합니다.",
+      "descriptionJa": "一定時間ごとに自動発動で周囲を大きく斬りつけ、物理ダメージを与える。 外縁部に命中した敵にはスロウ効果および追加ダメージを与え、自身の体力を回復する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/a0c243d17ebfe13a0b9034a4b71404cdadb01518355de097cc9672ac53bd5e97.webp"
+    },
+    {
+      "id": "feymagic",
+      "nameKo": "요정 마법",
+      "nameJa": "神秘の魔法",
+      "descriptionKo": "궁극기로 적에게 피해를 입히면 몇 초 동안 변이시킵니다.",
+      "descriptionJa": "アルティメットスキルでダメージを与えると、敵に数秒間のポリモーフ効果を付与する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/b7d8ee6e766488ae64e728eb922d20db7dcfc7c46c90a49483e92c285f44deaa.webp"
+    },
+    {
+      "id": "centeroftheuniverse",
+      "nameKo": "우주의 중심",
+      "nameJa": "宇宙の中心",
+      "descriptionKo": "별이 주위를 맴돌며 통과하는 적에게 마법 피해를 입힙니다.",
+      "descriptionJa": "星が自身の周囲を回り、軌道上にいる敵に魔法ダメージを与える。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/1ab3ea916ea196622df6c8124e001ed2cad373d1cc13c44ccd1702dff4415de4.webp"
+    },
+    {
+      "id": "chauffeur",
+      "nameKo": "운전기사",
+      "nameJa": "お抱え運転手",
+      "descriptionKo": "아군에게 밀착하며 스스로 이동할 수 없습니다. 아군에게 나의 추가 이동 속도를 부여하고 스킬 가속, 공격 속도가 증가합니다.",
+      "descriptionJa": "味方にくっつき、自らの意思では移動できなくなる。 自身の増加移動速度が味方にも付与されるようになり、自身はスキルヘイストと攻撃速度が増加する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/ff32e1f221806da76529c1192bc2e789d0b638ea125a25c971f2defd56ba7d1f.webp"
+    },
+    {
+      "id": "eureka",
+      "nameKo": "유레카",
+      "nameJa": "エウレカ",
+      "descriptionKo": "주문력의 20%에 해당하는 스킬 가속을 얻습니다.",
+      "descriptionJa": "魔力の20%にあたるスキルヘイストを獲得する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/bd1753075e4821d3ae0f385175f4360671c4ae74b7d650e765cc16db7297694f.webp"
+    },
+    {
+      "id": "feeltheburn",
+      "nameKo": "저주의 화염",
+      "nameJa": "熱気",
+      "descriptionKo": "저주의 화염 소환사 주문을 얻습니다. 저주의 화염을 사용하면 주변 모든 적 챔피언에게 점화와 탈진을 사용합니다.",
+      "descriptionJa": "サモナースペルの「熱気」を獲得する。 「熱気」を発動すると、周囲のすべての敵チャンピオンに「イグナイト」と「イグゾースト」を使用できる。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/0ad49870f43ba41785fffbe29142731b05c9bcf81715980cbb291d355f791f8e.webp"
+    },
+    {
+      "id": "omnisoul",
+      "nameKo": "전능의 영혼",
+      "nameJa": "オムニソウル",
+      "descriptionKo": "무작위 드래곤 영혼 2개를 획득합니다.",
+      "descriptionJa": "ランダムなドラゴンソウルを2個獲得する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/8ec9fd0a755dd4ca8ba8855fd1b5c8ffeca44f0ba9144d9e6da081a5b5f3f90d.webp"
+    },
+    {
+      "id": "symphonyofwar",
+      "nameKo": "전장의 교향곡",
+      "nameJa": "闘争交響曲",
+      "descriptionKo": "치명적 속도와 정복자 핵심 룬을 얻습니다.",
+      "descriptionJa": "キーストーンルーンの「リーサルテンポ」と「征服者」を獲得する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/4d6ccc707b32f5af82eb112a397a2a0ba43c91ec95b290b8868ca19ca003f91d.webp"
+    },
+    {
+      "id": "transmutechaos",
+      "nameKo": "전환: 혼돈",
+      "nameJa": "変質: 混沌",
+      "descriptionKo": "무작위 증강 2개를 획득합니다.",
+      "descriptionJa": "ランダムなオーグメントを2個獲得する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/d24acd06f04fb99cb784dcb76c3ad443fd488096c2070974903c2d6623c66b9e.webp"
+    },
+    {
+      "id": "spiritlink",
+      "nameKo": "정신 결속",
+      "nameJa": "精神の交わり",
+      "descriptionKo": "게임 내 상황에 따라 효과가 달라집니다.",
+      "descriptionJa": "ゲーム内の状況によって効果が変わります。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/b8f47b7df74bc83cc7f3d6608ca38d6253c40ddd7f50bc2b710db0c56787f5b1.webp"
+    },
+    {
+      "id": "righteousfury",
+      "nameKo": "정의로운 분노",
+      "nameJa": "正義の激憤",
+      "descriptionKo": "체력 회복 또는 보호막 부여 시 스킬 피해량이 2% 증가합니다. 라운드가 끝날 때까지 무한히 중첩됩니다.",
+      "descriptionJa": "体力回復効果またはシールド効果を付与すると、スキルダメージを2%増加させる。この効果はこのラウンド中無限にスタックする。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/ae80bf4e24f9f61df578f7097f50e3be2c40b63fff92cdc8b29c1e598c89bd39.webp"
+    },
+    {
+      "id": "trueshotprodigy",
+      "nameKo": "정조준 일격 신동",
+      "nameJa": "トゥルーショットプロディジー",
+      "descriptionKo": "멀리 떨어진 챔피언에게 피해를 입히면 정조준 일격을 발사합니다.",
+      "descriptionJa": "遠くからチャンピオンにダメージを与えると、対象に向けて「トゥルーショットバラージ」が発射される。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/6872b76ca347830e9b6065c84830b3d52d4e16bdaff16ac90a4edd57b4e398e6.webp"
+    },
+    {
+      "id": "spellwake",
+      "nameKo": "주문 각성",
+      "nameJa": "スキルの覚醒",
+      "descriptionKo": "스킬이 적에게 적중하면 현재 위치에서 적중당한 대상의 위치까지 마법 피해를 입히는 파동을 방출합니다.",
+      "descriptionJa": "敵にスキルを命中させると、自身からスキル命中位置にかけて爆発が起こり、魔法ダメージ与える。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/68592139a231dc7cdbac9bf70c9d10d72db887d48ac4e95e6fa194493bc324bf.webp"
+    },
+    {
+      "id": "circleofdeath",
+      "nameKo": "죽음의 순환",
+      "nameJa": "死の円環",
+      "descriptionKo": "체력을 회복하거나 체력을 재생하면 가장 가까운 적 챔피언에게 일정 비율만큼 마법 피해를 입힙니다.",
+      "descriptionJa": "自身の体力を回復または体力を自動回復すると、最も近くにいる敵チャンピオンに、その回復量の一部を魔法ダメージとして与える。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/c5fb98d700f2cc4d34390ff39665537dd534a1bc5fb54f0f87a0da4f19811d82.webp"
+    },
+    {
+      "id": "augment405",
+      "nameKo": "증강 405",
+      "nameJa": "オーグメント405",
+      "descriptionKo": "착용 중인 모자 하나당 피해량이 5% 증가합니다.",
+      "descriptionJa": "被っている帽子1個ごとにダメージが5%増加する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/51e69dd6ac4b9778fe3820ba9c61b0b28018e2f8a9948070660936480b1efeaa.webp"
+    },
+    {
+      "id": "infernalconduit",
+      "nameKo": "지옥의 전도체",
+      "nameJa": "獄炎路",
+      "descriptionKo": "스킬 사용 시 무한히 중첩되는 화상 효과를 적용해 지속적으로 마법 피해를 입힙니다. 화상 효과가 기본 스킬의 재사용 대기시간을 감소시킵니다.",
+      "descriptionJa": "スキルが無限にスタック可能な炎上を付与し、継続魔法ダメージを与える。 敵に炎上の効果を与えると、自身の通常スキルのクールダウンが短縮される。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/78d596ad1d8df6979a1960a50c5e5e3b008242a27bfd61d90f4d6e2ea5703b42.webp"
+    },
+    {
+      "id": "slowcooker",
+      "nameKo": "찜솥",
+      "nameJa": "スロウクッカー",
+      "descriptionKo": "매초 최대 체력에 비례해 주변 적에게 무한히 중첩되는 화상 효과를 적용합니다.",
+      "descriptionJa": "毎秒、周囲の敵チャンピオンに無限にスタック可能な炎上を付与し、自身の最大体力に応じたダメージを与える。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/9f36b600bd5ccafb4fb54682e893051b19b8b589cb9ad9c07663ff8b33b02d26.webp"
+    },
+    {
+      "id": "scopiestweapons",
+      "nameKo": "최상급 조준경 부착",
+      "nameJa": "超改造スコープ装着",
+      "descriptionKo": "공격 사거리가 증가합니다.",
+      "descriptionJa": "射程距離が増加する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/910034574757e0184aee4556e466d43c8dedc6c1d922f708170d6cf2ae13bf3a.webp"
+    },
+    {
+      "id": "cerberus",
+      "nameKo": "케르베로스",
+      "nameJa": "ケルベロス",
+      "descriptionKo": "칼날비와 집중 공격 핵심 룬을 얻습니다.",
+      "descriptionJa": "「ヘイルブレード」と「プレスアタック」のキーストーンルーンを獲得する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/0efdc922c01650cd21989c9be293c30868c8581fde6a0f6af8026a366b2b81a2.webp"
+    },
+    {
+      "id": "quest_riteoftheforgegod",
+      "nameKo": "퀘스트: 대장장이 신의 의식",
+      "nameJa": "クエスト: 鍛冶神の儀式",
+      "descriptionKo": "조건: 아이템 모루를 2개 구매해야 합니다. 보상: 모든 아이템이 걸작 아이템으로 변하여 해당 아이템의 능력치가 40% 증가합니다.",
+      "descriptionJa": "条件: アイテムの金床を2個購入する。 報酬: すべてのアイテムがマスターワークになり、ステータスが40%増加する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/52bb2e6ed0047f73a6a09350b9ff1e8ccd53a459cbd0dbc1828f1646889b99e5.webp"
+    },
+    {
+      "id": "quest_woogletswitchcap",
+      "nameKo": "퀘스트: 우글렛의 마녀 모자",
+      "nameJa": "クエスト: ウーグレット ウィッチキャップ",
+      "descriptionKo": "즉시: 쓸데없이 큰 지팡이를 획득합니다. 조건: 라바돈의 죽음모자와 존야의 모래시계를 보유해야 합니다. 보상: 우글렛의 마녀 모자를 획득합니다.",
+      "descriptionJa": "即時: 「ムダニ デカイ ロッド」を獲得する。 条件: 「ラバドン デスキャップ」と「ゾーニャの砂時計」を所有する。 報酬: 「ウーグレット ウィッチキャップ」を獲得する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/28a841a884b7e42c4fa341a1565e8731794efc262c2c3784d593ea91589a9494.webp"
+    },
+    {
+      "id": "fanthehammer",
+      "nameKo": "탄환 세례",
+      "nameJa": "ぐるぐるハンマー",
+      "descriptionKo": "기본 공격 시 탄환을 5개 발사해 각각 물리 피해를 입히고 효과를 적용합니다.",
+      "descriptionJa": "通常攻撃時、5本の矢が発射されて、それぞれが物理ダメージを与え、自身のを適用する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/4cda84e8ae6e2c30b6940656b9831e0eec4e8a2b90cec9d148fa7616a8ba0d4f.webp"
+    },
+    {
+      "id": "tapdancer",
+      "nameKo": "탭 댄서",
+      "nameJa": "タップダンサー",
+      "descriptionKo": "기본 공격 시 6의 이동 속도를 얻습니다. 이동 속도의 10%에 해당하는 공격 속도를 얻습니다.",
+      "descriptionJa": "通常攻撃で6移動速度が増加する。 移動速度の10%にあたる攻撃速度を獲得する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/3687786a46546aaaa8291930931f55b9826742907d5832c76988b27b0dfc3ae6.webp"
+    },
+    {
+      "id": "doomsayer",
+      "nameKo": "파멸의 예언자",
+      "nameJa": "災難の予言者",
+      "descriptionKo": "적 챔피언에게 스킬을 적중시키면 영구히 저주받은 힘을 얻습니다. 저주받은 힘에 따라 적응형 능력치를 얻습니다.",
+      "descriptionJa": "敵チャンピオンにスキルを当てるたびに「呪われし力」が恒久的に増加する。自身の「呪われし力」に応じてアダプティブフォースが増加する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/a229428430f5f07dd2950e4a95db917a60aa4ffc1228634ac41317251a1029a8.webp"
+    },
+    {
+      "id": "pandorasbox",
+      "nameKo": "판도라의 상자",
+      "nameJa": "パンドラの箱",
+      "descriptionKo": "모든 증강을 무작위 프리즘증강으로 전환합니다.",
+      "descriptionJa": "自分のすべてのオーグメントがランダムなプリズムオーグメントに変質する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/7740e5d23d157ad832475a970b2f993eb6e1225702deb767023aa7064c08c915.webp"
+    },
+    {
+      "id": "prismaticegg",
+      "nameKo": "프리즘 알",
+      "nameJa": "プリズムタマゴ",
+      "descriptionKo": "각 라운드에서 챔피언당 한 번씩 처치에 관여할 때마다 중첩을 1회 얻습니다. 5회 중첩되면 프리즘 아이템 모루, 프리즘 증강, 프리즘 능력치 모루로 부화합니다.",
+      "descriptionJa": "キルまたはアシストを奪うと1スタックを獲得する(各ラウンドでチャンピオンごとに1回まで)。 スタックが5貯まると孵化してプリズムアイテムの金床、プリズムオーグメント、プリズムのステータスの金床になる。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/8a48e72983a577ff308b1e93d55818bf364e5518b272dd592df2d0b8638b9299.webp"
+    },
+    {
+      "id": "gohsacrificeforprismatic",
+      "nameKo": "희생: 프리즘",
+      "nameJa": "犠牲: プリズムのために",
+      "descriptionKo": "현재 체력의 50%를 희생합니다. 7라운드 후 추가 프리즘 증강을 얻고 체력을 회복합니다.",
+      "descriptionJa": "現在体力の50%を犠牲にする。 7ラウンド終了後、ボーナスのプリズムオーグメントを1個獲得し、体力が回復する。",
+      "rarity": "prismatic",
+      "iconUrl": "/images/lol/aram/76eae4f97f1bcef0140a711081367570c834350dc80ce177abf0cb5439aa61d4.webp"
+    },
+    {
+      "id": "gohwolf",
+      "nameKo": "늑대의 광기",
+      "nameJa": "狼の激昂",
+      "descriptionKo": "기본 부활 효과를 잃습니다. 체력이 15% 증가합니다. 챔피언에게 피해를 입혀 체력이 최대 체력의 10% 아래가 되면 처형합니다.",
+      "descriptionJa": "復活能力を失う。 自身の体力が15%増加する。 敵チャンピオンに、その体力が最大体力の10%未満になるダメージを与えると、とどめを刺す。",
+      "rarity": "legend",
+      "iconUrl": "/images/lol/aram/4efa1d23cedd62313f75d9f3a00150cd7a5c16f954886dd4efda2dd9538ca7c0.webp"
+    },
+    {
+      "id": "gainstatanvil",
+      "nameKo": "능력치 모루 획득",
+      "nameJa": "ステータスの金床を獲得",
+      "descriptionKo": "무작위 능력치 모루를 획득합니다.",
+      "descriptionJa": "ランダムな「ステータスの金床」を1個獲得する。",
+      "rarity": "legend",
+      "iconUrl": "/images/lol/aram/4f350b5de5740b017a5afc9f7e2ff09b1ad9e1b5601ae9023c2c39e2a8ab9f1c.webp"
+    },
+    {
+      "id": "gohenchantedflask",
+      "nameKo": "마법 플라스크",
+      "nameJa": "魔法のフラスコ",
+      "descriptionKo": "10초 마다 주문 방어막을 얻습니다.",
+      "descriptionJa": "10秒ごとにスペルシールドを獲得する。",
+      "rarity": "legend",
+      "iconUrl": "/images/lol/aram/68d5a649454d4a8fb7011cba8a5f324ef90a1bcf7bbbb7a6d7742c32cb251ff0.webp"
+    },
+    {
+      "id": "gohswindlersorb",
+      "nameKo": "사기꾼의 보주",
+      "nameJa": "詐欺師のオーブ",
+      "descriptionKo": "적 챔피언에게 피해를 입히면 대상의 보호막 효과를 감소시킵니다.",
+      "descriptionJa": "敵チャンピオンにダメージを与えると、その敵チャンピオンのシールドの耐久値を減少させる。",
+      "rarity": "legend",
+      "iconUrl": "/images/lol/aram/6c07980d3838d90d3b5e724c7d8c7a86fbe8da8b72a5e7593cc809d030d98ced.webp"
+    },
+    {
+      "id": "gohvoteallyhunter",
+      "nameKo": "사냥꾼과 동맹",
+      "nameJa": "ハンターと手を組む",
+      "descriptionKo": "아군이 악마 사냥꾼과 동맹을 맺도록 투표합니다. 악마 사냥꾼과 동맹을 맺으면 악마 팀을 처치할 때 +500의 추가 골드를 획득합니다.",
+      "descriptionJa": "味方チームがデーモンハンターと手を組む方に投票する。 デーモンハンターと手を組むと、悪魔のチームを倒した際に追加で500ゴールドを獲得する。",
+      "rarity": "legend",
+      "iconUrl": "/images/lol/aram/fa5df5314ddd6957e490f273d006a1052360ae674feab250c1427b827bae70e1.webp"
+    },
+    {
+      "id": "gohremnantofthewatchers",
+      "nameKo": "수호자의 유물",
+      "nameJa": "ウォッチャーのレムナント",
+      "descriptionKo": "주변 챔피언의 공격 속도를 감소시킵니다.",
+      "descriptionJa": "周囲のチャンピオンの攻撃速度を低下させる。",
+      "rarity": "legend",
+      "iconUrl": "/images/lol/aram/6f9a305463558a2928f52294081b40acf10b8b59567e358c38bcf83aee53d5ad.webp"
+    },
+    {
+      "id": "gohvoteallydemon",
+      "nameKo": "악마와 동맹",
+      "nameJa": "悪魔と手を組む",
+      "descriptionKo": "아군이 악마와 동맹을 맺도록 투표합니다. 악마와 동맹을 맺으면 사냥꾼 팀이 탈락할 때 증강 레벨이 오릅니다.",
+      "descriptionJa": "味方チームが悪魔と手を組む方に投票する。 悪魔と手を組むと、ハンターのチームが敗退した際にオーグメントレベルを獲得する。",
+      "rarity": "legend",
+      "iconUrl": "/images/lol/aram/a40d6b5117f020ab93b4f03b1a88ff5533817de706aa12521d8c676ff6d7067d.webp"
+    },
+    {
+      "id": "gohlamb",
+      "nameKo": "양의 안식처",
+      "nameJa": "羊の執行猶予",
+      "descriptionKo": "1회 추가로 부활할 수 있으며, 부활에 필요한 시간이 절반으로 줄어듭니다.",
+      "descriptionJa": "復活回数が1回追加され、復活にかかる時間が半分になる。",
+      "rarity": "legend",
+      "iconUrl": "/images/lol/aram/892506dd0a02a0c61c4b21bd26753496fb6ce86fc74451fc6758f785646b55ba.webp"
+    },
+    {
+      "id": "gohfrozenmallet",
+      "nameKo": "얼어붙은 망치",
+      "nameJa": "フローズン マレット",
+      "descriptionKo": "피해를 입히면 적을 둔화시킵니다.",
+      "descriptionJa": "敵にダメージを与えた際にスロウ効果を付与する。",
+      "rarity": "legend",
+      "iconUrl": "/images/lol/aram/293b0d1d962f980f7ff7172a0f148977279ed9fee4a0f37f9c721c24e9745f0c.webp"
+    },
+    {
+      "id": "gohcravingforrisk",
+      "nameKo": "위험 갈망",
+      "nameJa": "リスクへの渇望",
+      "descriptionKo": "탐 켄치에게 최대 체력의 10%를 바칩니다. 바친 양이 -최대 체력의 %로 증가합니다. 골드 증강을 획득합니다.",
+      "descriptionJa": "タム・ケンチに自身の最大体力の10%を捧げる。 捧げる体力の合計が最大体力の-%に増加する。 ゴールドオーグメントを1個獲得する。",
+      "rarity": "legend",
+      "iconUrl": "/images/lol/aram/c24020666359f90feb330a3401f6a1fe0d24e9e384aa0bdce4dc93e7dae6edc9.webp"
+    },
+    {
+      "id": "gohabstainfromrisk",
+      "nameKo": "위험 거부",
+      "nameJa": "リスクの抑制",
+      "descriptionKo": "탐 켄치에게 바친 체력의 10%를 회복합니다. 즉시 실버 증강을 획득합니다.",
+      "descriptionJa": "タム・ケンチに捧げた体力の10%を回復する。 即座にシルバーオーグメントを1個獲得する。",
+      "rarity": "legend",
+      "iconUrl": "/images/lol/aram/c24020666359f90feb330a3401f6a1fe0d24e9e384aa0bdce4dc93e7dae6edc9.webp"
+    },
+    {
+      "id": "gohcompulsionforrisk",
+      "nameKo": "위험 집착",
+      "nameJa": "リスクの衝動",
+      "descriptionKo": "탐 켄치에게 최대 체력의 15%를 바칩니다. 바친 양이 -최대 체력의 %로 증가합니다. 프리즘 증강을 얻습니다.",
+      "descriptionJa": "タム・ケンチに自身の最大体力の15%を捧げる。 捧げる体力の合計が最大体力の-%に増加する。 プリズムオーグメントを1個獲得する。",
+      "rarity": "legend",
+      "iconUrl": "/images/lol/aram/c24020666359f90feb330a3401f6a1fe0d24e9e384aa0bdce4dc93e7dae6edc9.webp"
+    },
+    {
+      "id": "gohcravingforwealth",
+      "nameKo": "재물 갈망",
+      "nameJa": "富への渇望",
+      "descriptionKo": "탐 켄치에게 최대 체력의 10%를 바칩니다. 바친 양이 -최대 체력의 %로 증가합니다. +1500골드를 획득합니다.",
+      "descriptionJa": "タム・ケンチに自身の最大体力の10%を捧げる。 捧げる体力の合計が最大体力の-%に増加する。 +1500ゴールドを獲得する。",
+      "rarity": "legend",
+      "iconUrl": "/images/lol/aram/886fe524a671cedeb85ed3cb48aad6c6963815d3a3e147486cf599f48f132b79.webp"
+    },
+    {
+      "id": "gohabstainfromwealth",
+      "nameKo": "재물 거부",
+      "nameJa": "富の抑制",
+      "descriptionKo": "탐 켄치에게 바친 체력의 10%를 회복합니다. +500골드를 획득합니다.",
+      "descriptionJa": "タム・ケンチに捧げた体力の10%を回復する。 +500ゴールドを獲得する。",
+      "rarity": "legend",
+      "iconUrl": "/images/lol/aram/886fe524a671cedeb85ed3cb48aad6c6963815d3a3e147486cf599f48f132b79.webp"
+    },
+    {
+      "id": "gohcompulsionforwealth",
+      "nameKo": "재물 집착",
+      "nameJa": "富の衝動",
+      "descriptionKo": "탐 켄치에게 최대 체력의 15%를 바칩니다. 바친 양이 -최대 체력의 %로 증가합니다. +2500골드를 획득합니다.",
+      "descriptionJa": "タム・ケンチに自身の最大体力の15%を捧げる。 捧げる体力の合計が最大体力の-%に増加する。 +2500ゴールドを獲得する。",
+      "rarity": "legend",
+      "iconUrl": "/images/lol/aram/886fe524a671cedeb85ed3cb48aad6c6963815d3a3e147486cf599f48f132b79.webp"
+    },
+    {
+      "id": "craftingsellaugment",
+      "nameKo": "증강 강화",
+      "nameJa": "オーグメントレベル",
+      "descriptionKo": "증강 1개를 제거합니다. 무작위 증강 레벨을 2개 획득합니다.",
+      "descriptionJa": "オーグメントを1個削除する。 ランダムなオーグメントレベルを2獲得する。",
+      "rarity": "legend",
+      "iconUrl": "/images/lol/aram/b05c102489f7b1337a264c0367e79858424e2302f8c5249ba8e07009e07d548b.webp"
+    },
+    {
+      "id": "replaceaugment",
+      "nameKo": "증강 교체",
+      "nameJa": "オーグメント交換",
+      "descriptionKo": "증강 중 하나를 1등급 높은 증강으로 교체합니다.",
+      "descriptionJa": "自分のオーグメントを1個交換し、ティアが1つ上のものにできる。",
+      "rarity": "legend",
+      "iconUrl": "/images/lol/aram/65cce3990f5113b8bb10e1314060a48cb55fcb083e80f269c145f29f3e80c535.webp"
+    },
+    {
+      "id": "craftingaugmentslot",
+      "nameKo": "증강 슬롯 획득",
+      "nameJa": "オーグメントスロット獲得",
+      "descriptionKo": "5번째 증강 슬롯을 잠금 해제합니다. 4라운드 후 실버 증강을 획득합니다.",
+      "descriptionJa": "5つ目のオーグメントスロットが解除される。 4ラウンド後にシルバーオーグメントを1個獲得する。",
+      "rarity": "legend",
+      "iconUrl": "/images/lol/aram/c41f5dbcdc5ccd11dff2244608c723893c3a583813bf60952b6ce92aa1edca1d.webp"
+    },
+    {
+      "id": "craftingprisstatanvil",
+      "nameKo": "프리즘 능력치 모루 획득",
+      "nameJa": "プリズムのステータスの金床を獲得",
+      "descriptionKo": "프리즘 능력치 모루를 획득합니다.",
+      "descriptionJa": "プリズムのステータスの金床を1個獲得する。",
+      "rarity": "legend",
+      "iconUrl": "/images/lol/aram/deed21a0cc5c3d77d02aed376a4f33e01ea7b4c959efbbe21ef79837cfc5753e.webp"
+    },
+    {
+      "id": "gohbloodrazor",
+      "nameKo": "피갈퀴손",
+      "nameJa": "ブラッドレイザー",
+      "descriptionKo": "피해를 입히면 최대 체력의 1.5%에 해당하는 물리 피해를 추가로 입힙니다.",
+      "descriptionJa": "ダメージを与えると、追加で最大体力の1.5%にあたる物理ダメージを与える。",
+      "rarity": "legend",
+      "iconUrl": "/images/lol/aram/f94cf21893adcfc3dd2c513322665fb87e4e702bae073006ed958a72a862b3d4.webp"
+    },
+    {
+      "id": "gohdematerializer",
+      "nameKo": "해체분석기",
+      "nameJa": "吸収装置",
+      "descriptionKo": "체력이 10% 아래인 챔피언에게 피해를 입힐 경우 처형합니다.",
+      "descriptionJa": "体力が10%未満のチャンピオンにとどめを刺す。",
+      "rarity": "legend",
+      "iconUrl": "/images/lol/aram/7456f2beced8372b96f6e97c31608e8419ce87216f91d7a42a97caf371dbdd2f.webp"
+    },
+    {
+      "id": "gohchemtechputrifier",
+      "nameKo": "화학공학 부패기",
+      "nameJa": "ケミテック ピュートリファイアー",
+      "descriptionKo": "입히는 모든 피해에 고통스러운 상처가 적용됩니다.",
+      "descriptionJa": "自身が与えるすべてのダメージが重傷を付与する。",
+      "rarity": "legend",
+      "iconUrl": "/images/lol/aram/d0743f43791c9adc3958a8f5c9225059a768fe3d346e36c4f789ab83099e84fe.webp"
+    },
+    {
+      "id": "gohcravingforpower",
+      "nameKo": "힘 갈망",
+      "nameJa": "力への渇望",
+      "descriptionKo": "탐 켄치에게 최대 체력의 10%를 바칩니다. 바친 양이 -최대 체력의 %로 증가합니다. 골드 능력치 모루 1개를 획득합니다.",
+      "descriptionJa": "タム・ケンチに自身の最大体力の10%を捧げる。 捧げる体力の合計が最大体力の-%に増加する。 ゴールドのステータスの金床を1個獲得する。",
+      "rarity": "legend",
+      "iconUrl": "/images/lol/aram/44a13eea918c36e9875085a4de139440bbaa5be5e5360c16547e5855acfd11af.webp"
+    },
+    {
+      "id": "gohabstainfrompower",
+      "nameKo": "힘 거부",
+      "nameJa": "力の抑制",
+      "descriptionKo": "탐 켄치에게 바친 체력의 10%를 회복합니다. 실버 능력치 모루 1개를 획득합니다.",
+      "descriptionJa": "タム・ケンチに捧げた体力の10%を回復する。 シルバーの「ステータスの金床」を1個獲得する。",
+      "rarity": "legend",
+      "iconUrl": "/images/lol/aram/44a13eea918c36e9875085a4de139440bbaa5be5e5360c16547e5855acfd11af.webp"
+    },
+    {
+      "id": "gohcompulsionforpower",
+      "nameKo": "힘 집착",
+      "nameJa": "力の衝動",
+      "descriptionKo": "탐 켄치에게 최대 체력의 15%를 바칩니다. 바친 양이 -최대 체력의 %로 증가합니다. 1 프리즘 능력치 모루를 획득합니다.",
+      "descriptionJa": "タム・ケンチに自身の最大体力の15%を捧げる。 捧げる体力の合計が最大体力の-%に増加する。 プリズムの「ステータスの金床」を1個獲得する。",
+      "rarity": "legend",
+      "iconUrl": "/images/lol/aram/44a13eea918c36e9875085a4de139440bbaa5be5e5360c16547e5855acfd11af.webp"
+    }
+  ]
 }

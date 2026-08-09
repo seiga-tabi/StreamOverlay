@@ -1092,7 +1092,7 @@ test("LoL 공개 하위 페이지는 화면 중앙에 배치된다", async ({ pa
     "/follow",
     "/participation",
     "/lol/aram",
-    "/community/server",
+    "/patch-notes",
     "/privacy",
     "/terms",
     "/contact",

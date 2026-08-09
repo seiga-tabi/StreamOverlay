@@ -36,8 +36,8 @@ export type PublicHomeSearchPanelText = {
   participationDescription?: PublicHomeSearchPanelLocalizedText;
   aramTitle?: PublicHomeSearchPanelLocalizedText;
   aramDescription?: PublicHomeSearchPanelLocalizedText;
-  communityTitle?: PublicHomeSearchPanelLocalizedText;
-  communityDescription?: PublicHomeSearchPanelLocalizedText;
+  patchNotesTitle?: PublicHomeSearchPanelLocalizedText;
+  patchNotesDescription?: PublicHomeSearchPanelLocalizedText;
   streamerTitle?: PublicHomeSearchPanelLocalizedText;
   streamerDescription?: PublicHomeSearchPanelLocalizedText;
   additionalFeaturesTitle?: PublicHomeSearchPanelLocalizedText;
@@ -50,7 +50,7 @@ export type PublicHomeLiveStreamer = PublicLiveStreamerCard;
 function PublicHomeFeatureIcon({
   kind,
 }: {
-  kind: "aram" | "community" | "participation" | "streamer";
+  kind: "aram" | "patchNotes" | "participation" | "streamer";
 }) {
   const common = {
     "aria-hidden": true,
@@ -65,8 +65,8 @@ function PublicHomeFeatureIcon({
   if (kind === "aram") {
     return <svg {...common}><path d="m12 3 2.2 5.1L20 9.3l-4 3.9.9 5.8-4.9-2.7-4.9 2.7.9-5.8-4-3.9 5.8-1.2L12 3Z" /></svg>;
   }
-  if (kind === "community") {
-    return <svg {...common}><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5.4A8 8 0 1 1 21 12Z" /><path d="M9 11h.01M12 11h.01M15 11h.01" /></svg>;
+  if (kind === "patchNotes") {
+    return <svg {...common}><path d="M6 3h9l4 4v14H6z" /><path d="M14 3v5h5M9 12h7M9 16h5" /></svg>;
   }
   return <svg {...common}><rect height="12" rx="2" width="16" x="2" y="6" /><path d="m18 12 4-2.5v7L18 14" /><circle cx="7" cy="12" r="1.6" /></svg>;
 }
@@ -122,13 +122,13 @@ export function PublicHomeSearchPanel({
         visual={<PublicHomeFeatureIcon kind="aram" />}
       />
     ) : null,
-    text.communityTitle && text.communityDescription ? (
+    text.patchNotesTitle && text.patchNotesDescription ? (
       <PublicHomeFeatureCard
-        key="community"
-        description={text.communityDescription}
-        onClick={() => onPage("communityParty")}
-        title={text.communityTitle}
-        visual={<PublicHomeFeatureIcon kind="community" />}
+        key="patchNotes"
+        description={text.patchNotesDescription}
+        onClick={() => onPage("patchNotes")}
+        title={text.patchNotesTitle}
+        visual={<PublicHomeFeatureIcon kind="patchNotes" />}
       />
     ) : null,
     text.streamerTitle && text.streamerDescription ? (

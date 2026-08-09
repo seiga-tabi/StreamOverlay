@@ -50,10 +50,6 @@ const StreamerRiotRequestsPage = lazyNamed(
 );
 const SettingsPage = lazyNamed(() => import("./pages/SettingsPage"), "SettingsPage");
 const SupportInboxPage = lazyNamed(() => import("./pages/SupportInboxPage"), "SupportInboxPage");
-const CommunityModerationPage = lazyNamed(
-  () => import("./pages/CommunityModerationPage"),
-  "CommunityModerationPage",
-);
 
 const initialSnapshot = {
   status: { server: "offline", twitch: "disabled", stream: "unknown", participation: "closed" },
@@ -353,7 +349,6 @@ export default function App() {
       <Suspense fallback={<div className="card loading-card" data-ko={dashboardI18n.ko.app.loading} data-ja={dashboardI18n.ja.app.loading}>{currentText.app.loading}</div>}>
         {page === "events" ? <EventsPage snapshot={snapshot} /> : null}
         {page === "streamerRiotRequests" ? <StreamerRiotRequestsPage snapshot={snapshot} /> : null}
-        {page === "communityModeration" ? <CommunityModerationPage /> : null}
         {page === "supportInbox" ? <SupportInboxPage /> : null}
         {page === "settings" ? <SettingsPage /> : null}
       </Suspense>

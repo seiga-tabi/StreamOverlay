@@ -309,7 +309,7 @@ function resetScrollDepthTracking(): void {
 /** Palworld·LoL 상세를 열었을 때 어떤 엔티티가 유입과 체류를 만드는지 기록합니다. */
 export function trackEntityView(input: {
   entityId: string;
-  entityType: "pal" | "item" | "skill" | "summoner" | "community_post";
+  entityType: "pal" | "item" | "skill" | "summoner";
   locale?: string;
   surface?: string;
 }): void {

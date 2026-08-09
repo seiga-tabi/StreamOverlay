@@ -48,7 +48,6 @@
           "/lol",
           "/follow",
           "/participation",
-          "/community",
           "/privacy",
           "/terms",
           "/contact",
@@ -67,13 +66,11 @@
           "/palworld/skills",
           "/palworld/map",
           "/palworld/search",
-          "/lol/aram"
+          "/lol/aram",
+          "/patch-notes"
         ]);
         const publicPathPrefixes = [
-          "/lol/summoners/",
-          "/community/server",
-          "/community/party",
-          "/community/posts/"
+          "/lol/summoners/"
         ];
         const isAdEligiblePath = () => {
           const localizedPath = window.location.pathname.replace(/^\/(?:ko|ja)(?=\/|$)/, "") || "/";

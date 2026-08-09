@@ -3,17 +3,6 @@ import path from "node:path";
 import crypto from "node:crypto";
 import type {
   BotStatus,
-  CommunityPost,
-  CommunityPostCategory,
-  CommunityPostComment,
-  CommunityPostCommentCreateInput,
-  CommunityPostCreateInput,
-  CommunityPostReport,
-  CommunityPostReportCreateInput,
-  CommunityPostModeration,
-  CommunityReportReason,
-  CommunityModerationSnapshot,
-  CommunitySanction,
   FollowerActivity,
   FollowerActivityKind,
   FollowerManagementState,
@@ -78,7 +67,6 @@ export type ActionRecord = {
 export type StoreOptions = {
   followerStatePath?: string;
   streamerRiotIdStatePath?: string;
-  communityStatePath?: string;
   runtimeStatePath?: string;
   onPersistenceError?: (failure: StorePersistenceFailure) => void;
 };
@@ -96,7 +84,7 @@ type UnassignedLegacyFollowerState = ScopedFollowerState & {
 };
 
 export type StorePersistenceFailure = {
-  scope: "followers" | "streamer_riot_ids" | "community" | "runtime";
+  scope: "followers" | "streamer_riot_ids" | "runtime";
   operation: "load" | "save" | "readiness";
   filePath: string;
   error: string;
@@ -614,194 +602,6 @@ function optionalInteger(value: unknown): number | undefined {
   return Number.isFinite(number) ? Math.trunc(number) : undefined;
 }
 
-function cloneCommunityPost(post: CommunityPost): CommunityPost {
-  return {
-    ...post,
-    tags: [...post.tags],
-    comments: post.comments.map((comment) => ({ ...comment })),
-    moderation: post.moderation ? { ...post.moderation } : undefined
-  };
-}
-
-function cloneCommunityReport(report: CommunityPostReport): CommunityPostReport {
-  return { ...report };
-}
-
-function cloneCommunitySanction(sanction: CommunitySanction): CommunitySanction {
-  return { ...sanction };
-}
-
-function normalizedCommunityTags(value: unknown): string[] {
-  const rawTags = Array.isArray(value)
-    ? value
-    : typeof value === "string"
-      ? value.split(",")
-      : [];
-  const tags: string[] = [];
-  for (const rawTag of rawTags) {
-    if (typeof rawTag !== "string") continue;
-    const tag = rawTag.trim().replace(/^#+/, "").slice(0, 20);
-    if (!tag || tags.includes(tag)) continue;
-    tags.push(tag);
-    if (tags.length >= 5) break;
-  }
-  return tags;
-}
-
-function normalizedCommunityCategory(value: unknown): CommunityPostCategory {
-  return value === "party" ? "party" : "server";
-}
-
-function normalizedCommunityComment(value: unknown): CommunityPostComment | undefined {
-  const input = objectRecord(value);
-  const id = optionalString(input?.id);
-  const body = optionalString(input?.body);
-  const authorTwitchUserId = optionalString(input?.authorTwitchUserId);
-  const authorTwitchLogin = optionalString(input?.authorTwitchLogin);
-  const authorDisplayName = optionalString(input?.authorDisplayName);
-  const createdAt = optionalString(input?.createdAt) || nowIso();
-  if (!id || !body || !authorTwitchUserId || !authorTwitchLogin || !authorDisplayName) return undefined;
-  return {
-    id,
-    body,
-    authorTwitchUserId,
-    authorTwitchLogin,
-    authorDisplayName,
-    authorProfileImageUrl: optionalString(input?.authorProfileImageUrl),
-    createdAt
-  };
-}
-
-function normalizedCommunityComments(value: unknown): CommunityPostComment[] {
-  return Array.isArray(value)
-    ? value.map(normalizedCommunityComment).filter((comment): comment is CommunityPostComment => Boolean(comment))
-    : [];
-}
-
-function normalizedCommunityPost(value: unknown): CommunityPost | undefined {
-  const input = objectRecord(value);
-  const id = optionalString(input?.id);
-  const title = optionalString(input?.title);
-  const body = optionalString(input?.body);
-  const authorTwitchUserId = optionalString(input?.authorTwitchUserId);
-  const authorTwitchLogin = optionalString(input?.authorTwitchLogin);
-  const authorDisplayName = optionalString(input?.authorDisplayName);
-  if (!id || !title || !body || !authorTwitchUserId || !authorTwitchLogin || !authorDisplayName) return undefined;
-  const createdAt = optionalString(input?.createdAt) || nowIso();
-  const moderationInput = objectRecord(input?.moderation);
-  const moderationUpdatedAt = optionalString(moderationInput?.updatedAt);
-  const moderationUpdatedBy = optionalString(moderationInput?.updatedBy);
-  const moderation: CommunityPostModeration | undefined = moderationUpdatedAt && moderationUpdatedBy
-    ? {
-        visibility: moderationInput?.visibility === "hidden" ? "hidden" : "visible",
-        reason: optionalString(moderationInput?.reason),
-        updatedAt: moderationUpdatedAt,
-        updatedBy: moderationUpdatedBy
-      }
-    : undefined;
-  return {
-    id,
-    category: normalizedCommunityCategory(input?.category),
-    title,
-    body,
-    riotGameName: optionalString(input?.riotGameName),
-    riotTagLine: optionalString(input?.riotTagLine),
-    tags: normalizedCommunityTags(input?.tags),
-    imageUrl: optionalString(input?.imageUrl),
-    imageAlt: optionalString(input?.imageAlt),
-    partyTier: optionalString(input?.partyTier),
-    partyRole: optionalString(input?.partyRole),
-    partyMode: optionalString(input?.partyMode),
-    partyVoice: optionalString(input?.partyVoice),
-    partyCapacity: optionalNumber(input?.partyCapacity),
-    authorTwitchUserId,
-    authorTwitchLogin,
-    authorDisplayName,
-    authorProfileImageUrl: optionalString(input?.authorProfileImageUrl),
-    authorRiotGameName: optionalString(input?.authorRiotGameName),
-    authorRiotTagLine: optionalString(input?.authorRiotTagLine),
-    comments: normalizedCommunityComments(input?.comments),
-    moderation,
-    createdAt,
-    updatedAt: optionalString(input?.updatedAt) || createdAt
-  };
-}
-
-function normalizedCommunityReportReason(value: unknown): CommunityReportReason {
-  return value === "harassment" || value === "privacy" || value === "other" ? value : "spam";
-}
-
-function normalizedCommunityReport(value: unknown): CommunityPostReport | undefined {
-  const input = objectRecord(value);
-  const id = optionalString(input?.id);
-  const postId = optionalString(input?.postId);
-  const reporterTwitchUserId = optionalString(input?.reporterTwitchUserId);
-  const reporterTwitchLogin = optionalString(input?.reporterTwitchLogin);
-  const reporterDisplayName = optionalString(input?.reporterDisplayName);
-  if (!id || !postId || !reporterTwitchUserId || !reporterTwitchLogin || !reporterDisplayName) return undefined;
-  return {
-    id,
-    postId,
-    reason: normalizedCommunityReportReason(input?.reason),
-    detail: optionalString(input?.detail),
-    reporterTwitchUserId,
-    reporterTwitchLogin,
-    reporterDisplayName,
-    status: input?.status === "resolved" ? "resolved" : "open",
-    createdAt: optionalString(input?.createdAt) || nowIso(),
-    resolvedAt: optionalString(input?.resolvedAt),
-    resolvedBy: optionalString(input?.resolvedBy),
-    resolutionNote: optionalString(input?.resolutionNote)
-  };
-}
-
-function normalizedCommunitySanction(value: unknown): CommunitySanction | undefined {
-  const input = objectRecord(value);
-  const id = optionalString(input?.id);
-  const twitchUserId = optionalString(input?.twitchUserId);
-  const reason = optionalString(input?.reason);
-  const createdBy = optionalString(input?.createdBy);
-  if (!id || !twitchUserId || !reason || !createdBy) return undefined;
-  return {
-    id,
-    twitchUserId,
-    twitchLogin: optionalString(input?.twitchLogin),
-    action: "posting_suspension",
-    reason,
-    createdAt: optionalString(input?.createdAt) || nowIso(),
-    createdBy,
-    expiresAt: optionalString(input?.expiresAt),
-    revokedAt: optionalString(input?.revokedAt),
-    revokedBy: optionalString(input?.revokedBy)
-  };
-}
-
-type CommunityPostAuthorInput = {
-  authorTwitchUserId: string;
-  authorTwitchLogin: string;
-  authorDisplayName: string;
-  authorProfileImageUrl?: string;
-  authorRiotGameName?: string;
-  authorRiotTagLine?: string;
-  riotGameName?: string;
-  riotTagLine?: string;
-  tags?: string[] | string;
-  imageUrl?: string;
-  imageAlt?: string;
-  partyTier?: string;
-  partyRole?: string;
-  partyMode?: string;
-  partyVoice?: string;
-  partyCapacity?: number;
-};
-
-type CommunityPostCommentAuthorInput = {
-  authorTwitchUserId: string;
-  authorTwitchLogin: string;
-  authorDisplayName: string;
-  authorProfileImageUrl?: string;
-};
-
 type ScopedParticipationRuntime = {
   isOpen: boolean;
   revision: number;
@@ -824,9 +624,6 @@ export class Store {
   private static readonly maxActions = 200;
   private static readonly maxQuestions = 200;
   private static readonly maxHighlights = 200;
-  private static readonly maxPartyCommunityPostsPerDay = 2;
-  private static readonly partyCommunityPostTtlMs = 24 * 60 * 60 * 1000;
-  private static readonly communityCleanupIntervalMs = 24 * 60 * 60 * 1000;
   private readonly seenTwitchMessageIds = new Set<string>();
   private readonly seenTwitchMessageIdOrder: string[] = [];
   private readonly events: InternalEvent[] = [];
@@ -847,15 +644,10 @@ export class Store {
   private runtimePersistTask?: Promise<void>;
   private runtimePersistLastError?: { generation: number; error: Error };
   private streamerRiotIdRequests: StreamerRiotIdRequest[] = [];
-  private communityPosts: CommunityPost[] = [];
-  private communityReports: CommunityPostReport[] = [];
-  private communitySanctions: CommunitySanction[] = [];
-  private communityCleanupTimer?: NodeJS.Timeout;
   private readonly persistenceFailures = new Map<string, StorePersistenceFailure>();
   private readonly persistenceLoadStates: Record<StorePersistenceFailure["scope"], PersistenceLoadState> = {
     followers: "not_loaded",
     streamer_riot_ids: "not_loaded",
-    community: "not_loaded",
     runtime: "not_loaded"
   };
   private readonly twitchStreamLiveStatusByUserId = new Map<string, TwitchStreamLiveStatus>();
@@ -886,10 +678,7 @@ export class Store {
   constructor(private readonly options: StoreOptions = {}) {
     this.loadFollowerState();
     this.loadStreamerRiotIdState();
-    this.loadCommunityState();
     this.loadRuntimeState();
-    this.cleanupExpiredPartyCommunityPosts();
-    this.startCommunityCleanupTimer();
   }
 
   private scopedFollowerState(broadcasterUserId: string, create = true): ScopedFollowerState | undefined {
@@ -967,7 +756,6 @@ export class Store {
     const paths = [
       ["followers", this.options.followerStatePath],
       ["streamer_riot_ids", this.options.streamerRiotIdStatePath],
-      ["community", this.options.communityStatePath],
       ["runtime", this.options.runtimeStatePath]
     ].filter((entry): entry is [StorePersistenceFailure["scope"], string] => Boolean(entry[1]));
     let statePathsWritable = true;
@@ -1006,7 +794,6 @@ export class Store {
     }
     if (this.persistenceLoadStates.followers === "ready") this.persistFollowerState();
     if (this.persistenceLoadStates.streamer_riot_ids === "ready") this.persistStreamerRiotIdState();
-    if (this.persistenceLoadStates.community === "ready") this.persistCommunityState();
     if (this.persistenceLoadStates.runtime === "ready") this.persistRuntimeState();
   }
 
@@ -1017,18 +804,10 @@ export class Store {
   }
 
   close(): void {
-    if (this.communityCleanupTimer) {
-      clearInterval(this.communityCleanupTimer);
-      this.communityCleanupTimer = undefined;
-    }
     this.flush();
   }
 
   async closeAsync(): Promise<void> {
-    if (this.communityCleanupTimer) {
-      clearInterval(this.communityCleanupTimer);
-      this.communityCleanupTimer = undefined;
-    }
     this.flush();
     await this.waitForRuntimePersistence(this.runtimePersistRequestedGeneration);
   }
@@ -1534,63 +1313,6 @@ export class Store {
     }
   }
 
-  private loadCommunityState(): void {
-    if (!this.options.communityStatePath) return;
-    try {
-      const raw = fs.readFileSync(this.options.communityStatePath, "utf8");
-      const parsed = objectRecord(JSON.parse(raw));
-      if (
-        (parsed?.version !== 1 && parsed?.version !== 2)
-        || !Array.isArray(parsed.posts)
-        || (parsed.version === 2 && (!Array.isArray(parsed.reports) || !Array.isArray(parsed.sanctions)))
-      ) {
-        throw new Error("커뮤니티 상태 파일 schema가 올바르지 않습니다.");
-      }
-      const posts = parsed.posts.map(normalizedCommunityPost);
-      const reports = (parsed.version === 2 ? parsed.reports as unknown[] : []).map(normalizedCommunityReport);
-      const sanctions = (parsed.version === 2 ? parsed.sanctions as unknown[] : []).map(normalizedCommunitySanction);
-      if ([...posts, ...reports, ...sanctions].some((record) => !record)) {
-        throw new Error("커뮤니티 상태 파일에 올바르지 않은 레코드가 있습니다.");
-      }
-      this.communityPosts = posts as CommunityPost[];
-      this.communityReports = reports as CommunityPostReport[];
-      this.communitySanctions = sanctions as CommunitySanction[];
-      this.clearPersistenceFailure("community");
-    } catch (error) {
-      this.communityPosts = [];
-      this.communityReports = [];
-      this.communitySanctions = [];
-      const missingStateFile = this.isMissingStateFile(error);
-      if (!missingStateFile) {
-        this.markPersistenceLoadFailure("community", error);
-        this.reportPersistenceFailure({ scope: "community", operation: "load", filePath: this.options.communityStatePath, error: toSafeErrorMessage(error) });
-      } else {
-        this.clearPersistenceFailure("community");
-      }
-    }
-  }
-
-  private persistCommunityState(): void {
-    if (!this.options.communityStatePath) return;
-    this.assertPersistenceAvailable("community");
-    try {
-      const dir = path.dirname(this.options.communityStatePath);
-      fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
-      const tmpPath = `${this.options.communityStatePath}.${process.pid}.${Date.now()}.tmp`;
-      const payload = {
-        version: 2,
-        posts: this.communityPosts.map(cloneCommunityPost),
-        reports: this.communityReports.map(cloneCommunityReport),
-        sanctions: this.communitySanctions.map(cloneCommunitySanction)
-      };
-      fs.writeFileSync(tmpPath, `${JSON.stringify(payload, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
-      fs.renameSync(tmpPath, this.options.communityStatePath);
-      this.clearPersistenceFailure("community");
-    } catch (error) {
-      this.reportPersistenceFailure({ scope: "community", operation: "save", filePath: this.options.communityStatePath, error: toSafeErrorMessage(error) });
-    }
-  }
-
   private loadRuntimeState(): void {
     if (!this.options.runtimeStatePath) return;
     try {
@@ -1772,323 +1494,6 @@ export class Store {
     if (this.runtimePersistLastError && this.runtimePersistLastError.generation >= generation) {
       throw this.runtimePersistLastError.error;
     }
-  }
-
-  private startCommunityCleanupTimer(): void {
-    if (this.communityCleanupTimer) return;
-    this.communityCleanupTimer = setInterval(() => {
-      this.cleanupExpiredPartyCommunityPosts();
-    }, Store.communityCleanupIntervalMs);
-    this.communityCleanupTimer.unref?.();
-  }
-
-  private isExpiredPartyCommunityPost(post: CommunityPost, referenceMs = Date.now()): boolean {
-    if (post.category !== "party") return false;
-    const createdMs = Date.parse(post.createdAt);
-    return !Number.isFinite(createdMs) || referenceMs - createdMs >= Store.partyCommunityPostTtlMs;
-  }
-
-  private cleanupExpiredPartyCommunityPosts(referenceMs = Date.now()): boolean {
-    const nextPosts = this.communityPosts.filter((post) => !this.isExpiredPartyCommunityPost(post, referenceMs));
-    if (nextPosts.length === this.communityPosts.length) return false;
-    this.communityPosts = nextPosts;
-    this.persistCommunityState();
-    return true;
-  }
-
-  listCommunityPosts(limit = 50, category?: CommunityPostCategory): CommunityPost[] {
-    this.assertPersistenceAvailable("community");
-    this.cleanupExpiredPartyCommunityPosts();
-    const safeLimit = Math.max(1, Math.min(100, Math.trunc(Number(limit) || 50)));
-    return this.communityPosts
-      .filter((post) => post.moderation?.visibility !== "hidden" && (!category || post.category === category))
-      .map(cloneCommunityPost)
-      .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
-      .slice(0, safeLimit);
-  }
-
-  getCommunityPostByAuthor(twitchUserId: string | undefined, category?: CommunityPostCategory): CommunityPost | undefined {
-    this.assertPersistenceAvailable("community");
-    this.cleanupExpiredPartyCommunityPosts();
-    const safeUserId = twitchUserId?.trim();
-    if (!safeUserId) return undefined;
-    const post = this.communityPosts.find((item) => item.authorTwitchUserId === safeUserId && (!category || item.category === category));
-    return post ? cloneCommunityPost(post) : undefined;
-  }
-
-  countCommunityPostsByAuthor(twitchUserId: string | undefined, category?: CommunityPostCategory): number {
-    this.assertPersistenceAvailable("community");
-    this.cleanupExpiredPartyCommunityPosts();
-    const safeUserId = twitchUserId?.trim();
-    if (!safeUserId) return 0;
-    return this.communityPosts.filter((item) => item.authorTwitchUserId === safeUserId && (!category || item.category === category)).length;
-  }
-
-  getCommunityPostById(postId: string | undefined): CommunityPost | undefined {
-    this.assertPersistenceAvailable("community");
-    this.cleanupExpiredPartyCommunityPosts();
-    const safePostId = postId?.trim();
-    if (!safePostId) return undefined;
-    const post = this.communityPosts.find((item) => item.id === safePostId && item.moderation?.visibility !== "hidden");
-    return post ? cloneCommunityPost(post) : undefined;
-  }
-
-  getCommunityModerationSnapshot(limit = 200): CommunityModerationSnapshot {
-    this.assertPersistenceAvailable("community");
-    this.cleanupExpiredPartyCommunityPosts();
-    const safeLimit = Math.max(1, Math.min(500, Math.trunc(Number(limit) || 200)));
-    return {
-      posts: this.communityPosts
-        .map(cloneCommunityPost)
-        .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
-        .slice(0, safeLimit),
-      reports: this.communityReports
-        .map(cloneCommunityReport)
-        .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
-        .slice(0, safeLimit),
-      sanctions: this.communitySanctions
-        .map(cloneCommunitySanction)
-        .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
-        .slice(0, safeLimit)
-    };
-  }
-
-  isCommunityUserSanctioned(twitchUserId: string | undefined, referenceMs = Date.now()): boolean {
-    this.assertPersistenceAvailable("community");
-    const safeUserId = twitchUserId?.trim();
-    if (!safeUserId) return false;
-    return this.communitySanctions.some((sanction) => {
-      if (sanction.twitchUserId !== safeUserId || sanction.revokedAt) return false;
-      if (!sanction.expiresAt) return true;
-      const expiresAt = Date.parse(sanction.expiresAt);
-      return Number.isFinite(expiresAt) && expiresAt > referenceMs;
-    });
-  }
-
-  reportCommunityPost(input: CommunityPostReportCreateInput & {
-    postId: string;
-    reporterTwitchUserId: string;
-    reporterTwitchLogin: string;
-    reporterDisplayName: string;
-  }): CommunityPostReport | undefined {
-    this.assertPersistenceAvailable("community");
-    const postId = input.postId.trim();
-    const reporterTwitchUserId = input.reporterTwitchUserId.trim();
-    const reporterTwitchLogin = input.reporterTwitchLogin.trim();
-    const reporterDisplayName = input.reporterDisplayName.trim();
-    const post = this.communityPosts.find((item) => item.id === postId && item.moderation?.visibility !== "hidden");
-    if (!post || !reporterTwitchUserId || !reporterTwitchLogin || !reporterDisplayName) return undefined;
-    const duplicate = this.communityReports.find((report) => (
-      report.postId === postId &&
-      report.reporterTwitchUserId === reporterTwitchUserId &&
-      report.status === "open"
-    ));
-    if (duplicate) return cloneCommunityReport(duplicate);
-    const report: CommunityPostReport = {
-      id: newId("community_report"),
-      postId,
-      reason: normalizedCommunityReportReason(input.reason),
-      detail: input.detail?.trim().slice(0, 500) || undefined,
-      reporterTwitchUserId,
-      reporterTwitchLogin,
-      reporterDisplayName,
-      status: "open",
-      createdAt: nowIso()
-    };
-    this.communityReports = [report, ...this.communityReports].slice(0, 2000);
-    this.persistCommunityState();
-    return cloneCommunityReport(report);
-  }
-
-  setCommunityPostVisibility(input: {
-    postId: string;
-    visibility: "visible" | "hidden";
-    reason?: string;
-    updatedBy: string;
-  }): CommunityPost | undefined {
-    this.assertPersistenceAvailable("community");
-    const postId = input.postId.trim();
-    const updatedBy = input.updatedBy.trim();
-    const postIndex = this.communityPosts.findIndex((post) => post.id === postId);
-    const post = this.communityPosts[postIndex];
-    if (postIndex < 0 || !post || !updatedBy) return undefined;
-    const updatedAt = nowIso();
-    const updatedPost: CommunityPost = {
-      ...post,
-      moderation: {
-        visibility: input.visibility,
-        reason: input.reason?.trim().slice(0, 300) || undefined,
-        updatedAt,
-        updatedBy
-      },
-      updatedAt
-    };
-    this.communityPosts = this.communityPosts.map((item, index) => index === postIndex ? updatedPost : item);
-    this.communityReports = this.communityReports.map((report) => (
-      report.postId === postId && report.status === "open"
-        ? {
-            ...report,
-            status: "resolved",
-            resolvedAt: updatedAt,
-            resolvedBy: updatedBy,
-            resolutionNote: input.reason?.trim().slice(0, 300) || input.visibility
-          }
-        : report
-    ));
-    this.persistCommunityState();
-    return cloneCommunityPost(updatedPost);
-  }
-
-  setCommunityUserSanction(input: {
-    twitchUserId: string;
-    twitchLogin?: string;
-    active: boolean;
-    reason?: string;
-    expiresAt?: string;
-    updatedBy: string;
-  }): CommunitySanction | undefined {
-    this.assertPersistenceAvailable("community");
-    const twitchUserId = input.twitchUserId.trim();
-    const updatedBy = input.updatedBy.trim();
-    if (!twitchUserId || !updatedBy) return undefined;
-    const now = nowIso();
-    if (!input.active) {
-      let revoked: CommunitySanction | undefined;
-      this.communitySanctions = this.communitySanctions.map((sanction) => {
-        if (sanction.twitchUserId !== twitchUserId || sanction.revokedAt) return sanction;
-        const next = { ...sanction, revokedAt: now, revokedBy: updatedBy };
-        revoked ??= next;
-        return next;
-      });
-      if (revoked) this.persistCommunityState();
-      return revoked ? cloneCommunitySanction(revoked) : undefined;
-    }
-    const activeSanction = this.communitySanctions.find((sanction) => (
-      sanction.twitchUserId === twitchUserId && !sanction.revokedAt && (!sanction.expiresAt || Date.parse(sanction.expiresAt) > Date.now())
-    ));
-    if (activeSanction) return cloneCommunitySanction(activeSanction);
-    const sanction: CommunitySanction = {
-      id: newId("community_sanction"),
-      twitchUserId,
-      twitchLogin: input.twitchLogin?.trim() || undefined,
-      action: "posting_suspension",
-      reason: input.reason?.trim().slice(0, 300) || "community moderation",
-      createdAt: now,
-      createdBy: updatedBy,
-      expiresAt: input.expiresAt?.trim() || undefined
-    };
-    this.communitySanctions = [sanction, ...this.communitySanctions].slice(0, 1000);
-    this.persistCommunityState();
-    return cloneCommunitySanction(sanction);
-  }
-
-  createCommunityPost(input: CommunityPostCreateInput & CommunityPostAuthorInput): CommunityPost | undefined {
-    this.assertPersistenceAvailable("community");
-    const title = input.title.trim();
-    const body = input.body.trim();
-    const category = normalizedCommunityCategory(input.category);
-    const authorTwitchUserId = input.authorTwitchUserId.trim();
-    const authorTwitchLogin = input.authorTwitchLogin.trim();
-    const authorDisplayName = input.authorDisplayName.trim();
-    if (!title || !body || !authorTwitchUserId || !authorTwitchLogin || !authorDisplayName || this.isCommunityUserSanctioned(authorTwitchUserId)) return undefined;
-    this.cleanupExpiredPartyCommunityPosts();
-    if (category === "party") {
-      if (this.countCommunityPostsByAuthor(authorTwitchUserId, category) >= Store.maxPartyCommunityPostsPerDay) return undefined;
-    } else if (this.communityPosts.some((item) => item.authorTwitchUserId === authorTwitchUserId && item.category === category)) {
-      return undefined;
-    }
-    const now = nowIso();
-    const post: CommunityPost = {
-      id: newId("post"),
-      category,
-      title,
-      body,
-      riotGameName: input.riotGameName?.trim() || undefined,
-      riotTagLine: input.riotTagLine?.trim() || undefined,
-      tags: normalizedCommunityTags(input.tags),
-      imageUrl: input.imageUrl?.trim() || undefined,
-      imageAlt: input.imageAlt?.trim() || undefined,
-      partyTier: input.partyTier?.trim() || undefined,
-      partyRole: input.partyRole?.trim() || undefined,
-      partyMode: input.partyMode?.trim() || undefined,
-      partyVoice: input.partyVoice?.trim() || undefined,
-      partyCapacity: input.partyCapacity && input.partyCapacity > 0 ? Math.max(1, Math.min(5, Math.trunc(input.partyCapacity))) : undefined,
-      authorTwitchUserId,
-      authorTwitchLogin,
-      authorDisplayName,
-      authorProfileImageUrl: input.authorProfileImageUrl?.trim() || undefined,
-      authorRiotGameName: input.authorRiotGameName?.trim() || undefined,
-      authorRiotTagLine: input.authorRiotTagLine?.trim() || undefined,
-      comments: [],
-      createdAt: now,
-      updatedAt: now
-    };
-    this.communityPosts = [post, ...this.communityPosts].slice(0, 500);
-    this.persistCommunityState();
-    return cloneCommunityPost(post);
-  }
-
-  updateCommunityPost(postId: string, input: CommunityPostCreateInput & {
-    riotGameName?: string;
-    riotTagLine?: string;
-    tags?: string[] | string;
-  }): CommunityPost | undefined {
-    this.assertPersistenceAvailable("community");
-    this.cleanupExpiredPartyCommunityPosts();
-    const safePostId = postId.trim();
-    const title = input.title.trim();
-    const body = input.body.trim();
-    if (!safePostId || !title || !body) return undefined;
-    const postIndex = this.communityPosts.findIndex((item) => item.id === safePostId);
-    if (postIndex < 0) return undefined;
-    const post = this.communityPosts[postIndex];
-    if (!post) return undefined;
-    const updatedPost: CommunityPost = {
-      ...post,
-      title,
-      body,
-      riotGameName: input.riotGameName?.trim() || undefined,
-      riotTagLine: input.riotTagLine?.trim() || undefined,
-      tags: normalizedCommunityTags(input.tags),
-      imageUrl: input.imageUrl !== undefined ? input.imageUrl.trim() || undefined : post.imageUrl,
-      imageAlt: input.imageAlt !== undefined ? input.imageAlt.trim() || undefined : post.imageAlt,
-      updatedAt: nowIso()
-    };
-    this.communityPosts = this.communityPosts.map((item, index) => (index === postIndex ? updatedPost : item));
-    this.persistCommunityState();
-    return cloneCommunityPost(updatedPost);
-  }
-
-  addCommunityPostComment(postId: string, input: CommunityPostCommentCreateInput & CommunityPostCommentAuthorInput): CommunityPost | undefined {
-    this.assertPersistenceAvailable("community");
-    this.cleanupExpiredPartyCommunityPosts();
-    const safePostId = postId.trim();
-    const body = input.body.trim();
-    const authorTwitchUserId = input.authorTwitchUserId.trim();
-    const authorTwitchLogin = input.authorTwitchLogin.trim();
-    const authorDisplayName = input.authorDisplayName.trim();
-    if (!safePostId || !body || !authorTwitchUserId || !authorTwitchLogin || !authorDisplayName || this.isCommunityUserSanctioned(authorTwitchUserId)) return undefined;
-    const postIndex = this.communityPosts.findIndex((item) => item.id === safePostId);
-    if (postIndex < 0) return undefined;
-    const post = this.communityPosts[postIndex];
-    if (!post || post.category !== "party" || post.moderation?.visibility === "hidden") return undefined;
-    const comment: CommunityPostComment = {
-      id: newId("comment"),
-      body,
-      authorTwitchUserId,
-      authorTwitchLogin,
-      authorDisplayName,
-      authorProfileImageUrl: input.authorProfileImageUrl?.trim() || undefined,
-      createdAt: nowIso()
-    };
-    const updatedPost: CommunityPost = {
-      ...post,
-      comments: [...post.comments, comment],
-      updatedAt: comment.createdAt
-    };
-    this.communityPosts = this.communityPosts.map((item, index) => (index === postIndex ? updatedPost : item));
-    this.persistCommunityState();
-    return cloneCommunityPost(updatedPost);
   }
 
   listStreamerRiotIdRequests(): StreamerRiotIdRequest[] {

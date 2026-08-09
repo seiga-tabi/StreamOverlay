@@ -7,7 +7,6 @@ const LOCALIZABLE_PUBLIC_EXACT_PATHS = new Set([
   "/lol",
   "/follow",
   "/participation",
-  "/community",
   "/privacy",
   "/terms",
   "/contact",
@@ -27,13 +26,11 @@ const LOCALIZABLE_PUBLIC_EXACT_PATHS = new Set([
   "/palworld/map",
   "/palworld/search",
   "/lol/aram",
+  "/patch-notes",
 ]);
 
 const LOCALIZABLE_PUBLIC_PATH_PREFIXES = [
   "/lol/summoners/",
-  "/community/server",
-  "/community/party",
-  "/community/posts/",
 ];
 
 function pathOnly(value: string): string {

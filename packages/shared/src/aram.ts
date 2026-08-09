@@ -1,4 +1,4 @@
-export const ARAM_AUGMENT_RARITIES = ["silver", "gold", "prismatic"] as const;
+export const ARAM_AUGMENT_RARITIES = ["silver", "gold", "prismatic", "legend"] as const;
 
 export type AramAugmentRarity = (typeof ARAM_AUGMENT_RARITIES)[number];
 

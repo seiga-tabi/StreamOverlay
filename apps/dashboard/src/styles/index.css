@@ -54,3 +54,5 @@
 @import "./pages/account/33-admin-console.css";
 /* 증강 칼바람 보정. pages layer 에서 단독 소유합니다. */
 @import "./pages/public-lol/34-aram-augments.css";
+/* 패치 노트 목록. pages layer 에서 단독 소유합니다. */
+@import "./pages/public-lol/35-patch-notes.css";

@@ -1,5 +1,4 @@
 import { getDashboardCsrfToken, runtimeConfig, setDashboardCsrfToken } from "../runtime-config";
-import type { CommunityModerationSnapshot } from "@streamops/shared";
 
 const API_BASE = runtimeConfig().apiBase ?? import.meta.env.VITE_API_BASE ?? "http://localhost:3000";
 
@@ -152,34 +151,6 @@ export async function getDashboardSnapshot(): Promise<DashboardSnapshot> {
     apiGet<unknown[]>("/api/actions/recent")
   ]);
   return { type: "dashboard.snapshot", status, events, actions };
-}
-
-export async function getCommunityModeration(): Promise<CommunityModerationSnapshot> {
-  return apiGet<CommunityModerationSnapshot>("/api/community/moderation");
-}
-
-export async function updateCommunityPostVisibility(input: {
-  postId: string;
-  visibility: "visible" | "hidden";
-  reason?: string;
-}): Promise<CommunityModerationSnapshot> {
-  return apiPost<CommunityModerationSnapshot>(
-    `/api/community/moderation/posts/${encodeURIComponent(input.postId)}/visibility`,
-    { visibility: input.visibility, reason: input.reason }
-  );
-}
-
-export async function updateCommunityUserSanction(input: {
-  twitchUserId: string;
-  twitchLogin?: string;
-  active: boolean;
-  reason?: string;
-  expiresAt?: string;
-}): Promise<CommunityModerationSnapshot> {
-  return apiPost<CommunityModerationSnapshot>(
-    `/api/community/moderation/users/${encodeURIComponent(input.twitchUserId)}/sanction`,
-    input
-  );
 }
 
 export const apiBase = API_BASE;

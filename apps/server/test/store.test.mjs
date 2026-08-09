@@ -341,23 +341,6 @@ test("Store는 종료된 참여 session을 기본 모집이나 상태 갱신으�
   }
 });
 
-test("Store는 잘못된 커뮤니티 상태 경로를 load 단계에서 차단하고 readiness에 노출한다", () => {
-  const dir = mkdtempSync(path.join(tmpdir(), "streamops-persistence-failure-"));
-  const failures = [];
-  try {
-    const store = new Store({
-      communityStatePath: dir,
-      onPersistenceError: (failure) => failures.push(failure)
-    });
-    store.flush();
-
-    assert.ok(failures.some((failure) => failure.scope === "community" && failure.operation === "load"));
-    assert.equal(store.getReadiness().ok, false);
-  } finally {
-    rmSync(dir, { recursive: true, force: true });
-  }
-});
-
 test("Store는 스트리머 Riot ID 등록 요청을 저장하고 승인 목록을 갱신한다", () => {
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-riot-requests-"));
   const filePath = path.join(dir, "streamer-riot-ids.json");
@@ -557,194 +540,6 @@ test("Store는 기존 승인 스트리머의 dashboard tenant key를 한 번만 
     const secondStore = new Store({ streamerRiotIdStatePath: filePath });
     const second = secondStore.listApprovedStreamerRiotIds()[0];
     assert.equal(second.dashboardKey, first.dashboardKey);
-  } finally {
-    rmSync(dir, { recursive: true, force: true });
-  }
-});
-
-test("Store는 파티 모집글 댓글을 저장하고 서버 모집글에는 허용하지 않는다", () => {
-  const dir = mkdtempSync(path.join(tmpdir(), "streamops-community-"));
-  const communityPath = path.join(dir, "community.json");
-  try {
-    const store = new Store({ communityStatePath: communityPath });
-    const partyPost = store.createCommunityPost({
-      category: "party",
-      title: "파티 모집",
-      body: "랭크 같이 하실 분",
-      partyTier: "Emerald",
-      partyRole: "MID",
-      authorTwitchUserId: "twitch-1",
-      authorTwitchLogin: "seiga",
-      authorDisplayName: "Seiga",
-      authorProfileImageUrl: "https://example.test/seiga.png"
-    });
-    const serverPost = store.createCommunityPost({
-      category: "server",
-      title: "서버 모집",
-      body: "디스코드 서버 모집",
-      authorTwitchUserId: "twitch-2",
-      authorTwitchLogin: "server",
-      authorDisplayName: "Server"
-    });
-
-    assert.ok(partyPost);
-    assert.ok(serverPost);
-    assert.deepEqual(partyPost.comments, []);
-
-    let commented = partyPost;
-    for (let index = 0; index < 105; index += 1) {
-      commented = store.addCommunityPostComment(partyPost.id, {
-        body: `참여하고 싶어요 ${index}`,
-        authorTwitchUserId: "twitch-3",
-        authorTwitchLogin: "viewer",
-        authorDisplayName: "Viewer",
-        authorProfileImageUrl: "https://example.test/viewer.png"
-      });
-    }
-    assert.equal(commented?.comments.length, 105);
-    assert.equal(commented?.comments[0].body, "참여하고 싶어요 0");
-    assert.equal(commented?.comments.at(-1).body, "참여하고 싶어요 104");
-    assert.equal(commented?.comments[0].authorTwitchLogin, "viewer");
-
-    const rejected = store.addCommunityPostComment(serverPost.id, {
-      body: "서버 글에는 댓글을 막습니다",
-      authorTwitchUserId: "twitch-4",
-      authorTwitchLogin: "blocked",
-      authorDisplayName: "Blocked"
-    });
-    assert.equal(rejected, undefined);
-
-    const restartedStore = new Store({ communityStatePath: communityPath });
-    const persistedPost = restartedStore.getCommunityPostById(partyPost.id);
-    assert.equal(persistedPost?.comments.length, 105);
-    assert.equal(persistedPost?.comments[0].authorDisplayName, "Viewer");
-    assert.deepEqual(restartedStore.getCommunityPostById(serverPost.id)?.comments, []);
-  } finally {
-    rmSync(dir, { recursive: true, force: true });
-  }
-});
-
-test("Store는 파티 모집글을 최근 24시간 2개까지 허용하고 오래된 글을 정리한다", () => {
-  const dir = mkdtempSync(path.join(tmpdir(), "streamops-party-community-"));
-  const communityPath = path.join(dir, "community.json");
-  const expiredAt = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString();
-  try {
-    writeFileSync(communityPath, `${JSON.stringify({
-      version: 1,
-      posts: [{
-        id: "post-expired-party",
-        category: "party",
-        title: "오래된 파티 모집",
-        body: "정리 대상",
-        tags: [],
-        authorTwitchUserId: "twitch-1",
-        authorTwitchLogin: "seiga",
-        authorDisplayName: "Seiga",
-        comments: [],
-        createdAt: expiredAt,
-        updatedAt: expiredAt
-      }]
-    }, null, 2)}\n`);
-
-    const store = new Store({ communityStatePath: communityPath });
-    assert.equal(store.getCommunityPostById("post-expired-party"), undefined);
-    assert.equal(store.countCommunityPostsByAuthor("twitch-1", "party"), 0);
-
-    const first = store.createCommunityPost({
-      category: "party",
-      title: "첫 번째 파티 모집",
-      body: "랭크 같이 하실 분",
-      authorTwitchUserId: "twitch-1",
-      authorTwitchLogin: "seiga",
-      authorDisplayName: "Seiga"
-    });
-    const second = store.createCommunityPost({
-      category: "party",
-      title: "두 번째 파티 모집",
-      body: "일반 같이 하실 분",
-      authorTwitchUserId: "twitch-1",
-      authorTwitchLogin: "seiga",
-      authorDisplayName: "Seiga"
-    });
-    const third = store.createCommunityPost({
-      category: "party",
-      title: "세 번째 파티 모집",
-      body: "제한 대상",
-      authorTwitchUserId: "twitch-1",
-      authorTwitchLogin: "seiga",
-      authorDisplayName: "Seiga"
-    });
-
-    assert.ok(first);
-    assert.ok(second);
-    assert.equal(third, undefined);
-    assert.equal(store.countCommunityPostsByAuthor("twitch-1", "party"), 2);
-  } finally {
-    rmSync(dir, { recursive: true, force: true });
-  }
-});
-
-test("Store는 커뮤니티 신고·숨김·작성 제재를 영속화한다", () => {
-  const dir = mkdtempSync(path.join(tmpdir(), "streamops-community-moderation-"));
-  const communityPath = path.join(dir, "community.json");
-  try {
-    const store = new Store({ communityStatePath: communityPath });
-    const post = store.createCommunityPost({
-      category: "server",
-      title: "서버 모집",
-      body: "테스트 게시글",
-      authorTwitchUserId: "author-1",
-      authorTwitchLogin: "author",
-      authorDisplayName: "Author"
-    });
-    assert.ok(post);
-
-    const report = store.reportCommunityPost({
-      postId: post.id,
-      reason: "spam",
-      detail: "반복 게시글",
-      reporterTwitchUserId: "viewer-1",
-      reporterTwitchLogin: "viewer",
-      reporterDisplayName: "Viewer"
-    });
-    assert.ok(report);
-    assert.equal(store.getCommunityModerationSnapshot().reports.length, 1);
-
-    const hidden = store.setCommunityPostVisibility({
-      postId: post.id,
-      visibility: "hidden",
-      reason: "신고 확인",
-      updatedBy: "admin"
-    });
-    assert.equal(hidden?.moderation?.visibility, "hidden");
-    assert.equal(store.listCommunityPosts().length, 0);
-    assert.equal(store.getCommunityModerationSnapshot().reports[0]?.status, "resolved");
-
-    const sanction = store.setCommunityUserSanction({
-      twitchUserId: "author-1",
-      twitchLogin: "author",
-      active: true,
-      reason: "반복 스팸",
-      updatedBy: "admin"
-    });
-    assert.ok(sanction);
-    assert.equal(store.isCommunityUserSanctioned("author-1"), true);
-    assert.equal(store.createCommunityPost({
-      category: "party",
-      title: "차단 대상",
-      body: "작성 불가",
-      authorTwitchUserId: "author-1",
-      authorTwitchLogin: "author",
-      authorDisplayName: "Author"
-    }), undefined);
-
-    store.close();
-    const restartedStore = new Store({ communityStatePath: communityPath });
-    const snapshot = restartedStore.getCommunityModerationSnapshot();
-    assert.equal(snapshot.posts[0]?.moderation?.visibility, "hidden");
-    assert.equal(snapshot.reports[0]?.status, "resolved");
-    assert.equal(restartedStore.isCommunityUserSanctioned("author-1"), true);
-    restartedStore.close();
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -978,12 +773,11 @@ test("Store는 손상되거나 미래 버전인 follower 상태 파일을 덮어
   }
 });
 
-test("Store는 손상된 tenant·커뮤니티·runtime 상태 파일을 후속 변경으로 덮어쓰지 않는다", async () => {
+test("Store는 손상된 tenant·runtime 상태 파일을 후속 변경으로 덮어쓰지 않는다", async () => {
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-domain-state-invalid-"));
   const original = "{ invalid json\n";
   const paths = {
     streamer: path.join(dir, "streamer-riot-ids.json"),
-    community: path.join(dir, "community.json"),
     runtime: path.join(dir, "runtime-state.json")
   };
   try {
@@ -993,7 +787,6 @@ test("Store는 손상된 tenant·커뮤니티·runtime 상태 파일을 후속 �
     const failures = [];
     const store = new Store({
       streamerRiotIdStatePath: paths.streamer,
-      communityStatePath: paths.community,
       runtimeStatePath: paths.runtime,
       onPersistenceError(failure) {
         failures.push(failure);
@@ -1007,14 +800,6 @@ test("Store는 손상된 tenant·커뮤니티·runtime 상태 파일을 후속 �
       riotGameName: "Streamer",
       riotTagLine: "JP1"
     }), /STATE_UNAVAILABLE:streamer_riot_ids:corrupted/u);
-    assert.throws(() => store.createCommunityPost({
-      category: "server",
-      title: "복구 전 변경",
-      body: "손상된 원본을 덮어쓰면 안 됩니다.",
-      authorTwitchUserId: "1001",
-      authorTwitchLogin: "streamer",
-      authorDisplayName: "Streamer"
-    }), /STATE_UNAVAILABLE:community:corrupted/u);
     assert.throws(() => store.setParticipationOpen(true, "1001"), /STATE_UNAVAILABLE:runtime:corrupted/u);
     await store.closeAsync();
 
@@ -1024,7 +809,6 @@ test("Store는 손상된 tenant·커뮤니티·runtime 상태 파일을 후속 �
     assert.deepEqual(
       failures.map((failure) => [failure.scope, failure.operation]).sort(),
       [
-        ["community", "load"],
         ["runtime", "load"],
         ["streamer_riot_ids", "load"]
       ]
@@ -1033,7 +817,6 @@ test("Store는 손상된 tenant·커뮤니티·runtime 상태 파일을 후속 �
     assert.deepEqual(store.getReadiness().loadStates, {
       followers: "not_loaded",
       streamer_riot_ids: "corrupted",
-      community: "corrupted",
       runtime: "corrupted"
     });
   } finally {
@@ -1043,11 +826,11 @@ test("Store는 손상된 tenant·커뮤니티·runtime 상태 파일을 후속 �
 
 test("Store는 빈 파일과 schema 불일치를 손상 상태로 구분하고 정상 domain은 계속 사용할 수 있다", () => {
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-domain-state-schema-"));
-  const communityPath = path.join(dir, "community.json");
   const streamerPath = path.join(dir, "streamer-riot-ids.json");
   const runtimePath = path.join(dir, "runtime-state.json");
+  const emptyPath = path.join(dir, "empty-runtime.json");
   try {
-    writeFileSync(communityPath, "", { mode: 0o600 });
+    writeFileSync(emptyPath, "", { mode: 0o600 });
     const invalidRuntime = {
       version: 3,
       participation: { isOpen: false, revision: 0, queue: [{ id: "invalid-participant" }] },
@@ -1056,21 +839,16 @@ test("Store는 빈 파일과 schema 불일치를 손상 상태로 구분하고 �
     };
     writeFileSync(runtimePath, `${JSON.stringify(invalidRuntime)}\n`, { mode: 0o600 });
     const store = new Store({
-      communityStatePath: communityPath,
       streamerRiotIdStatePath: streamerPath,
       runtimeStatePath: runtimePath
     });
 
-    assert.equal(store.getReadiness().loadStates.community, "corrupted");
+    /* 빈 파일도 schema 불일치와 같은 "손상"으로 봅니다. */
+    const emptyStore = new Store({ runtimeStatePath: emptyPath });
+    assert.equal(emptyStore.getReadiness().loadStates.runtime, "corrupted");
+    emptyStore.close();
+
     assert.equal(store.getReadiness().loadStates.runtime, "corrupted");
-    assert.throws(() => store.createCommunityPost({
-      category: "server",
-      title: "차단 대상",
-      body: "저장되면 안 됩니다.",
-      authorTwitchUserId: "1001",
-      authorTwitchLogin: "streamer",
-      authorDisplayName: "Streamer"
-    }), /STATE_UNAVAILABLE:community:corrupted/u);
     assert.throws(() => store.setParticipationOpen(true), /STATE_UNAVAILABLE:runtime:corrupted/u);
 
     const request = store.upsertStreamerRiotIdRequest({
@@ -1082,7 +860,7 @@ test("Store는 빈 파일과 schema 불일치를 손상 상태로 구분하고 �
     });
     assert.equal(request.status, "pending");
     assert.equal(store.listStreamerRiotIdRequests().length, 1);
-    assert.equal(readFileSync(communityPath, "utf8"), "");
+    assert.equal(readFileSync(emptyPath, "utf8"), "");
     assert.deepEqual(JSON.parse(readFileSync(runtimePath, "utf8")), invalidRuntime);
     store.close();
   } finally {
@@ -1092,13 +870,13 @@ test("Store는 빈 파일과 schema 불일치를 손상 상태로 구분하고 �
 
 test("Store는 읽을 수 없는 state 파일을 unreadable로 구분한다", { skip: process.platform === "win32" }, () => {
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-domain-state-permission-"));
-  const filePath = path.join(dir, "community.json");
+  const filePath = path.join(dir, "runtime-state.json");
   try {
-    writeFileSync(filePath, `${JSON.stringify({ version: 1, posts: [] })}\n`, { mode: 0o600 });
+    writeFileSync(filePath, `${JSON.stringify({ version: 3, participation: { isOpen: false, revision: 0, queue: [] } })}\n`, { mode: 0o600 });
     chmodSync(filePath, 0o000);
-    const store = new Store({ communityStatePath: filePath });
-    assert.equal(store.getReadiness().loadStates.community, "unreadable");
-    assert.throws(() => store.listCommunityPosts(), /STATE_UNAVAILABLE:community:unreadable/u);
+    const store = new Store({ runtimeStatePath: filePath });
+    assert.equal(store.getReadiness().loadStates.runtime, "unreadable");
+    assert.throws(() => store.setParticipationOpen(true), /STATE_UNAVAILABLE:runtime:unreadable/u);
     store.close();
   } finally {
     chmodSync(filePath, 0o600);

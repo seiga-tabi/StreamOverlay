@@ -40,6 +40,7 @@
     "extract:palworld-translations": "npm --workspace apps/server run extract:palworld-translations",
     "generate:public-home-heroes": "node scripts/generate-public-home-hero-assets.mjs",
     "generate:palworld-home-assets": "node scripts/generate-palworld-home-feature-assets.mjs",
+    "generate:aram-augments": "node scripts/generate-aram-augments.mjs",
     "import:palworld-translations": "npm --workspace apps/server run import:palworld-translations --",
     "import:palworld-item-details": "npm --workspace apps/server run import:palworld-item-details --",
     "validate:palworld-translations": "npm --workspace apps/server run validate:palworld-translations",

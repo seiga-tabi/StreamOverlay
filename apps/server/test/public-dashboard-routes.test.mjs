@@ -31,10 +31,7 @@ test("공개 페이지 URL을 Dashboard SPA 진입 경로로 허용한다", () =
     "/lol/summoners/jp/test-JP1",
     "/follow",
     "/participation",
-    "/community/server",
-    "/community/server/write",
-    "/community/party",
-    "/community/posts/post-1",
+    "/patch-notes",
     "/lol/aram",
     "/palworld",
     "/palworld/pals",
@@ -74,7 +71,7 @@ test("한국어·일본어 공개 URL만 언어 prefix 아래에서 SPA 경로�
 });
 
 test("API와 Dashboard 내부 URL 및 존재하지 않는 Palworld URL은 공개 SPA 경로로 오인하지 않는다", () => {
-  for (const pathname of ["/api/public/community/posts", "/palworldish", "/palworld/streamers", "/palworld/not-a-real-page", "/dashboard", "/setup/discord", "/bot/manage", "/admin", "/overlay"]) {
+  for (const pathname of ["/api/public/patch-notes", "/palworldish", "/palworld/streamers", "/palworld/not-a-real-page", "/dashboard", "/setup/discord", "/bot/manage", "/admin", "/overlay"]) {
     assert.equal(isPublicDashboardAppRoute(pathname), false, pathname);
   }
 });

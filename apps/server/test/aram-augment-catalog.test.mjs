@@ -5,11 +5,14 @@ import os from "node:os";
 import path from "node:path";
 import { defaultAramAugmentCatalogPath, loadAramAugmentCatalog } from "../dist/services/aram-augment-catalog.js";
 
-test("커밋된 증강 칼바람 카탈로그는 준비 상태로 안전하게 로드된다", () => {
+test("커밋된 증강 칼바람 카탈로그는 실제 증강 데이터로 안전하게 로드된다", () => {
   const catalog = loadAramAugmentCatalog();
   assert.equal(catalog.mode, "aram_augments");
-  assert.equal(catalog.status, "preparing");
-  assert.equal(catalog.augments.length, 0);
+  assert.equal(catalog.status, "ready");
+  assert.ok(catalog.augments.length > 0, "generate:aram-augments 로 채운 증강이 있어야 합니다.");
+  for (const augment of catalog.augments) {
+    assert.ok(augment.iconUrl, `${augment.id}에 아이콘이 있어야 합니다.`);
+  }
   assert.match(defaultAramAugmentCatalogPath(), /data\/lol\/aram\/augment-catalog\.json$/u);
 });
 

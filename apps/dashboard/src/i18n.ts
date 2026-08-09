@@ -21,7 +21,6 @@ export const dashboardI18n = {
         overlay: "Overlay",
         lol: "LoL 방송",
         palworld: "펠월드",
-        community: "커뮤니티",
         system: "시스템"
       },
       loading: "화면을 불러오는 중입니다."
@@ -44,7 +43,6 @@ export const dashboardI18n = {
     pages: {
       events: { label: "이벤트 로그", short: "이벤트" },
       streamerRiotRequests: { label: "Riot ID 승인", short: "Riot ID" },
-      communityModeration: { label: "커뮤니티 관리", short: "커뮤니티" },
       supportInbox: { label: "문의 메일", short: "메일" },
       settings: { label: "시스템 설정", short: "설정" }
     },
@@ -245,7 +243,6 @@ export const dashboardI18n = {
         overlay: "Overlay",
         lol: "LoL 配信",
         palworld: "パルワールド",
-        community: "コミュニティ",
         system: "システム"
       },
       loading: "画面を読み込んでいます。"
@@ -268,7 +265,6 @@ export const dashboardI18n = {
     pages: {
       events: { label: "イベントログ", short: "イベント" },
       streamerRiotRequests: { label: "Riot ID 承認", short: "Riot ID" },
-      communityModeration: { label: "コミュニティ管理", short: "コミュニティ" },
       supportInbox: { label: "お問い合わせメール", short: "メール" },
       settings: { label: "システム設定", short: "設定" }
     },

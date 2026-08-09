@@ -47,3 +47,15 @@ test("unknown field, 중복 ID, 외부 아이콘 URL을 거부한다", () => {
     augments: [{ ...augment, iconUrl: `/images/lol/aram/${"a".repeat(64)}.webp` }]
   }));
 });
+
+test("실제 CommunityDragon 4단계 등급(레전드 포함)을 허용한다", () => {
+  const legendAugment = {
+    id: "test-legend-augment",
+    nameKo: "테스트 레전드 증강",
+    nameJa: "テストレジェンドオーグメント",
+    descriptionKo: "테스트 설명",
+    descriptionJa: "テスト説明",
+    rarity: "legend"
+  };
+  assert.ok(parseAramAugmentCatalog({ ...preparingCatalog, status: "ready", augments: [legendAugment] }));
+});

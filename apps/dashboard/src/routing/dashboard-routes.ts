@@ -1,6 +1,5 @@
 export const DASHBOARD_PAGES = [
   "streamerRiotRequests",
-  "communityModeration",
   "events",
   "supportInbox",
   "settings",
@@ -10,7 +9,6 @@ export type Page = (typeof DASHBOARD_PAGES)[number];
 
 export const ADMIN_ALLOWED_PAGES: Page[] = [
   "streamerRiotRequests",
-  "communityModeration",
   "events",
   "supportInbox",
   "settings",
@@ -18,7 +16,6 @@ export const ADMIN_ALLOWED_PAGES: Page[] = [
 
 const ADMIN_PAGE_PATHS: Partial<Record<Page, string>> = {
   streamerRiotRequests: "/admin/riot-id-requests",
-  communityModeration: "/admin/community",
   events: "/admin/events",
   supportInbox: "/admin/support",
   settings: "/admin/settings",

@@ -522,12 +522,6 @@ export type PublicLolProfileDynamicState = {
   fetchedAt: string;
 };
 
-export type CommunityPostProfileState = {
-  riotId?: string;
-  status: "idle" | "loading" | "ready" | "error";
-  profile?: PublicLolProfile;
-  error?: string;
-};
 
 export type SearchSuggestion = {
   gameName: string;
@@ -542,7 +536,7 @@ export type SearchSuggestion = {
 
 export type PublicNavTarget = "search" | "ranking" | "champion" | "stats" | "ingame" | "promotion" | "community";
 
-export type PublicMainPage = "search" | "palworld" | "bot" | "subscriptions" | "followJoin" | "aram" | "patch" | "communityParty" | "communityServerWrite" | "communityPartyWrite" | "communityDetail" | "privacy" | "terms" | "contact";
+export type PublicMainPage = "search" | "palworld" | "bot" | "subscriptions" | "followJoin" | "aram" | "patchNotes" | "privacy" | "terms" | "contact";
 
 export type PublicProfileTab = "overview" | "champions" | "ingame";
 

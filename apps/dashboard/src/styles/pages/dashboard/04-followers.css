@@ -579,15 +579,7 @@
 .public-dashboard-shell .public-twitch-followed-list article,
 .public-dashboard-shell .public-streamers-shared-card.yoro-card,
 .public-dashboard-shell .public-participation-shared-streamer-card.yoro-card,
-.public-dashboard-shell .public-participation-queue-row.yoro-card,
-.public-dashboard-shell .public-community-shared-shell.yoro-app-shell,
-.public-dashboard-shell .public-menu-page-panel.public-community-shared-shell,
-.public-dashboard-shell .public-community-shared-post-card.yoro-card,
-.public-dashboard-shell .public-community-shared-compose.yoro-card,
-.public-dashboard-shell .public-community-shared-detail-article.yoro-card,
-.public-dashboard-shell .public-community-shared-record-card.yoro-card,
-.public-dashboard-shell .public-community-shared-comments.yoro-card,
-.public-dashboard-shell .public-community-comment.yoro-card {
+.public-dashboard-shell .public-participation-queue-row.yoro-card{
   border-color: var(--public-gray-border) !important;
   background: var(--public-gray-surface) !important;
   color: var(--public-gray-text) !important;
@@ -661,11 +653,7 @@
 .public-dashboard-shell .public-stream-overview-card strong,
 .public-dashboard-shell .public-profile-metric-card > strong,
 .public-dashboard-shell .public-match-row strong,
-.public-dashboard-shell .public-community-post h3,
 .public-dashboard-shell .public-party-post h3,
-.public-dashboard-shell .public-community-card-head strong,
-.public-dashboard-shell .public-community-record-main strong,
-.public-dashboard-shell .public-community-comments-head strong,
 .public-dashboard-shell .public-twitch-channel-main strong,
 .public-dashboard-shell .public-twitch-channel-meta span,
 .public-dashboard-shell .yoro-card__title,
@@ -684,9 +672,7 @@
 .public-dashboard-shell .public-profile-metric-scale,
 .public-dashboard-shell .public-match-row small,
 .public-dashboard-shell .public-match-row span,
-.public-dashboard-shell .public-community-post p,
 .public-dashboard-shell .public-party-post p,
-.public-dashboard-shell .public-community-comment p,
 .public-dashboard-shell .yoro-card__description,
 .public-dashboard-shell .yoro-metric__label,
 .public-dashboard-shell .yoro-metric__description {
@@ -695,10 +681,6 @@
 
 .public-dashboard-shell .public-profile-tabs button,
 .public-dashboard-shell .public-match-filter-bar select,
-.public-dashboard-shell .public-community-shared-form .yoro-input,
-.public-dashboard-shell .public-community-shared-form .yoro-textarea,
-.public-dashboard-shell .public-community-shared-form .yoro-select,
-.public-dashboard-shell .public-community-comment-form .yoro-textarea,
 .public-streamer-detail-shared-page .public-participation-form .yoro-input,
 .public-streamer-detail-shared-page .public-participation-form .yoro-select {
   border-color: rgba(222, 226, 230, .2) !important;

@@ -82,13 +82,13 @@ const origin = baseUrl.origin;
 await checkJson(origin, "/health/live", (body) => body?.ok === true && Boolean(body?.build?.gitSha) && body.build.gitSha !== "unknown");
 await checkJson(origin, "/health/ready", (body) => body?.ok === true && body?.checks?.acceptingRequests === true);
 
-for (const pathname of ["/", "/privacy", "/terms", "/lol/aram"]) {
+for (const pathname of ["/", "/privacy", "/terms", "/lol/aram", "/patch-notes"]) {
   await checkPage(origin, pathname);
 }
 
 await checkJson(origin, "/api/public/locale", (body) => body?.locale === "ko" || body?.locale === "ja");
 await checkJson(origin, "/api/public/aram/augments", (body) => body?.mode === "aram_augments" && Array.isArray(body?.augments));
-await checkJson(origin, "/api/public/community/posts?limit=1", (body) => Array.isArray(body?.posts));
+await checkJson(origin, "/api/public/patch-notes", (body) => body?.schemaVersion === 1 && Array.isArray(body?.notes));
 await checkJson(origin, "/api/public/participation/state", (body) => Boolean(body && typeof body === "object"));
 await checkJson(origin, "/api/public/twitch/status", (body) => Boolean(body && typeof body === "object"));
 

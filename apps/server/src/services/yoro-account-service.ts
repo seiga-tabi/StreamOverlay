@@ -269,7 +269,7 @@ function safeReturnPath(value: string | undefined): string {
     "/lol",
     "/palworld",
     "/participation",
-    "/community",
+    "/patch-notes",
     "/dashboard"
   ];
   return allowed.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))

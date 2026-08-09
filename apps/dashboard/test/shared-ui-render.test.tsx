@@ -220,7 +220,8 @@ test("LoL PublicAppHeader가 공통 Twitch account chip으로 기존 프로필�
   assert.match(html, /class="public-game-header__brand-logo" src="\/images\/yorogg-home-logo\.webp" alt="YORO\.gg"/);
   assert.doesNotMatch(html, /src="\/images\/yorogg-mark\.png"/);
   assert.match(html, /data-testid="lol-primary-nav"/u);
-  assert.match(html, /홈[\s\S]*스트리머[\s\S]*참여[\s\S]*칼바람[\s\S]*커뮤니티/u);
+  /* 커뮤니티가 있던 자리를 패치 노트가 이어받았습니다. */
+  assert.match(html, /홈[\s\S]*스트리머[\s\S]*참여[\s\S]*칼바람[\s\S]*패치 노트/u);
   assert.match(html, /aria-current="page"[^>]*data-ko="홈"/u);
   assert.match(html, /data-ko="메뉴" data-ja="メニュー"/u);
   assert.match(html, /aria-haspopup="dialog"/u);

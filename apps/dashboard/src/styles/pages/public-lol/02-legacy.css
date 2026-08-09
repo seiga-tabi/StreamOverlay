@@ -75,25 +75,12 @@
 .public-dashboard-shell:not(.public-home-shell) .public-saved-grid button,
 .public-dashboard-shell:not(.public-home-shell) .public-subscription-row,
 .public-dashboard-shell:not(.public-home-shell) .public-patch-placeholder,
-.public-dashboard-shell:not(.public-home-shell) .public-community-compose,
-.public-dashboard-shell:not(.public-home-shell) .public-community-list,
-.public-dashboard-shell:not(.public-home-shell) .public-community-post,
 .public-dashboard-shell:not(.public-home-shell) .public-party-post,
-.public-dashboard-shell:not(.public-home-shell) .public-community-detail-article,
-.public-dashboard-shell:not(.public-home-shell) .public-community-record-preview,
-.public-dashboard-shell:not(.public-home-shell) .public-community-login,
 .public-dashboard-shell:not(.public-home-shell) .public-ingame-summary > div,
 .public-dashboard-shell:not(.public-home-shell) .public-ingame-bottom-summary > div {
   border-color: rgba(93, 110, 145, .34);
   background: rgba(15, 24, 42, .76);
   box-shadow: 0 12px 26px rgba(2, 6, 23, .16);
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-community-page.list-only {
-  border-color: transparent;
-  background: transparent;
-  box-shadow: none;
-  backdrop-filter: none;
 }
 
 .public-dashboard-shell:not(.public-home-shell) .public-section-head h2,
@@ -108,15 +95,8 @@
 .public-dashboard-shell:not(.public-home-shell) .public-subscriptions-card > strong,
 .public-dashboard-shell:not(.public-home-shell) .public-saved-grid button strong,
 .public-dashboard-shell:not(.public-home-shell) .public-subscription-row strong,
-.public-dashboard-shell:not(.public-home-shell) .public-community-card-head strong,
-.public-dashboard-shell:not(.public-home-shell) .public-community-post header strong,
-.public-dashboard-shell:not(.public-home-shell) .public-community-post h3,
 .public-dashboard-shell:not(.public-home-shell) .public-party-post header strong,
 .public-dashboard-shell:not(.public-home-shell) .public-party-post h3,
-.public-dashboard-shell:not(.public-home-shell) .public-community-detail-article header strong,
-.public-dashboard-shell:not(.public-home-shell) .public-community-detail-article h3,
-.public-dashboard-shell:not(.public-home-shell) .public-community-record-main strong,
-.public-dashboard-shell:not(.public-home-shell) .public-community-record-stats b,
 .public-dashboard-shell:not(.public-home-shell) .public-twitch-channel-main strong,
 .public-dashboard-shell:not(.public-home-shell) .public-twitch-channel-meta span,
 .public-dashboard-shell:not(.public-home-shell) .public-patch-placeholder strong,
@@ -162,21 +142,9 @@
 .public-dashboard-shell:not(.public-home-shell) .public-twitch-channel-meta .muted,
 .public-dashboard-shell:not(.public-home-shell) .public-twitch-profile-menu-head small,
 .public-dashboard-shell:not(.public-home-shell) .public-patch-placeholder p,
-.public-dashboard-shell:not(.public-home-shell) .public-community-lead,
-.public-dashboard-shell:not(.public-home-shell) .public-community-login p,
-.public-dashboard-shell:not(.public-home-shell) .public-community-form label,
-.public-dashboard-shell:not(.public-home-shell) .public-community-post header small,
-.public-dashboard-shell:not(.public-home-shell) .public-community-post time,
-.public-dashboard-shell:not(.public-home-shell) .public-community-post p,
 .public-dashboard-shell:not(.public-home-shell) .public-party-post header small,
 .public-dashboard-shell:not(.public-home-shell) .public-party-post p,
 .public-dashboard-shell:not(.public-home-shell) .public-party-meta span,
-.public-dashboard-shell:not(.public-home-shell) .public-community-detail-article header small,
-.public-dashboard-shell:not(.public-home-shell) .public-community-detail-article p,
-.public-dashboard-shell:not(.public-home-shell) .public-community-record-main strong small,
-.public-dashboard-shell:not(.public-home-shell) .public-community-record-main em,
-.public-dashboard-shell:not(.public-home-shell) .public-community-record-stats small,
-.public-dashboard-shell:not(.public-home-shell) .public-community-record-stats em,
 .public-dashboard-shell:not(.public-home-shell) .public-ingame-summary span,
 .public-dashboard-shell:not(.public-home-shell) .public-ingame-summary small,
 .public-dashboard-shell:not(.public-home-shell) .public-ingame-status-head small,
@@ -189,70 +157,6 @@
 .public-dashboard-shell:not(.public-home-shell) .public-champion-analysis-name small,
 .public-dashboard-shell:not(.public-home-shell) .public-champion-analysis-metric small {
   color: #9fb0c8;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-community-post {
-  background:
-    radial-gradient(circle at 20% 15%, rgba(125, 92, 255, .24), transparent 30%),
-    linear-gradient(145deg, #121a2b, #080e18);
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-community-already-posted {
-  border-color: rgba(93, 110, 145, .38);
-  background: rgba(15, 24, 42, .78);
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-community-already-posted strong,
-.public-dashboard-shell:not(.public-home-shell) .public-community-post header strong,
-.public-dashboard-shell:not(.public-home-shell) .public-community-post h3 {
-  color: #ffffff;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-community-already-posted p,
-.public-dashboard-shell:not(.public-home-shell) .public-community-post p {
-  color: rgba(233, 239, 250, .86);
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-community-policy-note {
-  border-color: rgba(102, 118, 255, .28);
-  background: rgba(80, 96, 255, .12);
-  color: rgba(231, 236, 255, .88);
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-community-post header small,
-.public-dashboard-shell:not(.public-home-shell) .public-community-post time,
-.public-dashboard-shell:not(.public-home-shell) .public-community-file-field small {
-  color: rgba(224, 232, 246, .82);
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-community-tag-picker,
-.public-dashboard-shell:not(.public-home-shell) .public-community-file-control {
-  border-color: rgba(93, 110, 145, .42);
-  background: rgba(6, 13, 28, .86);
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-community-tag-picker button {
-  border-color: rgba(93, 110, 145, .5);
-  background: rgba(15, 24, 42, .84);
-  color: #c7d2e5;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-community-tag-picker button.active {
-  border-color: rgba(106, 127, 255, .85);
-  background: linear-gradient(135deg, #4d6fff, #6b4cff);
-  color: #ffffff;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-community-file-control strong {
-  color: #c7d2e5;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-community-riot-message.valid {
-  color: #34d399;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-community-riot-message.invalid {
-  color: #f87171;
 }
 
 .public-dashboard-shell:not(.public-home-shell) .public-party-compose-prompt,
@@ -271,52 +175,6 @@
   background:
     radial-gradient(circle at 12% 0%, rgba(91, 110, 255, .14), transparent 28%),
     rgba(15, 24, 42, .78);
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-community-comments {
-  border-color: rgba(93, 110, 145, .34);
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-community-comments-head strong,
-.public-dashboard-shell:not(.public-home-shell) .public-community-comment header strong {
-  color: #f2f6ff;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-community-comments-head span {
-  background: rgba(91, 110, 255, .18);
-  color: #aebcff;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-community-comment {
-  border-color: rgba(93, 110, 145, .34);
-  background: rgba(9, 15, 28, .72);
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-community-comment header small,
-.public-dashboard-shell:not(.public-home-shell) .public-community-comment p {
-  color: #9fb0c8;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-community-comment-form textarea {
-  border-color: rgba(93, 110, 145, .34);
-  background: rgba(9, 15, 28, .72);
-  color: #f2f6ff;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-community-detail-article,
-.public-dashboard-shell:not(.public-home-shell) .public-community-record-preview {
-  background:
-    radial-gradient(circle at 20% 0%, rgba(125, 92, 255, .15), transparent 32%),
-    rgba(10, 17, 32, .92);
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-community-record-stats span {
-  border-color: rgba(93, 110, 145, .34);
-  background: rgba(18, 29, 51, .78);
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-community-record-champions small {
-  color: rgba(224, 232, 246, .82);
 }
 
 .public-dashboard-shell:not(.public-home-shell) .metric-tone-excellent {
@@ -1545,11 +1403,6 @@
 .public-dashboard-shell:not(.public-home-shell) .public-subscriptions-card,
 .public-dashboard-shell .public-twitch-followed-summary,
 .public-dashboard-shell .public-twitch-followed-list article,
-.public-dashboard-shell .public-community-compose,
-.public-dashboard-shell .public-community-detail-article,
-.public-dashboard-shell .public-community-record-preview,
-.public-dashboard-shell .public-community-record-strip,
-.public-dashboard-shell .public-community-login,
 .public-dashboard-shell .public-party-post,
 .public-dashboard-shell:not(.public-home-shell) .public-party-post {
   border-color: var(--seiga-pastel-border) !important;
@@ -1558,12 +1411,6 @@
     radial-gradient(circle at 16% 0%, rgba(213, 241, 255, .65), transparent 44%) !important;
   color: var(--seiga-pastel-text) !important;
   box-shadow: var(--seiga-pastel-shadow) !important;
-}
-
-.public-dashboard-shell .public-menu-page-panel.public-community-page.list-only {
-  background: transparent !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
 }
 
 .public-dashboard-shell .public-profile-top-grid.has-mastery-art::after,
@@ -1589,10 +1436,7 @@
 .public-dashboard-shell .public-profile-metric-label > span,
 .public-dashboard-shell .public-rank-overview-card strong,
 .public-dashboard-shell .public-streamer-register-head h1,
-.public-dashboard-shell .public-community-card-head strong,
-.public-dashboard-shell .public-community-post h3,
-.public-dashboard-shell .public-party-post h3,
-.public-dashboard-shell .public-community-detail-article h3 {
+.public-dashboard-shell .public-party-post h3{
   color: var(--seiga-pastel-heading) !important;
   text-shadow: none !important;
 }
@@ -1604,17 +1448,12 @@
 .public-dashboard-shell .public-profile-metric-scale,
 .public-dashboard-shell .public-rank-overview-card span,
 .public-dashboard-shell .public-rank-overview-card small,
-.public-dashboard-shell .public-community-lead,
-.public-dashboard-shell .public-community-post p,
-.public-dashboard-shell .public-party-post p,
-.public-dashboard-shell .public-community-detail-article p {
+.public-dashboard-shell .public-party-post p{
   color: var(--seiga-pastel-muted) !important;
 }
 
 .public-dashboard-shell .public-refresh-button,
 .public-dashboard-shell.theme-dark .public-refresh-button,
-.public-dashboard-shell .public-community-card-head button.primary,
-.public-dashboard-shell:not(.public-home-shell) .public-community-card-head button.primary,
 .public-dashboard-shell .public-twitch-followed-actions button.primary {
   border-color: transparent !important;
   background: linear-gradient(135deg, #5d8cff, #7a66ff) !important;
@@ -1625,8 +1464,6 @@
 .public-dashboard-shell .public-favorite-button,
 .public-dashboard-shell .public-back-button,
 .public-dashboard-shell .public-filter-button,
-.public-dashboard-shell .public-community-card-head button,
-.public-dashboard-shell:not(.public-home-shell) .public-community-card-head button,
 .public-dashboard-shell .public-twitch-followed-actions button,
 .public-dashboard-shell .public-twitch-channel-actions a {
   border-color: var(--seiga-pastel-border) !important;
@@ -1811,73 +1648,10 @@
   background: rgba(213, 241, 255, .88) !important;
   color: #245fbb !important;
 }
-
-.public-dashboard-shell .public-community-post:not(.has-image),
-.public-dashboard-shell:not(.public-home-shell) .public-community-post:not(.has-image),
-.public-dashboard-shell .public-community-comment,
-.public-dashboard-shell .public-community-comment-form textarea,
-.public-dashboard-shell .public-community-form input,
-.public-dashboard-shell .public-community-form select,
-.public-dashboard-shell .public-community-form textarea,
-.public-dashboard-shell:not(.public-home-shell) .public-community-form input,
-.public-dashboard-shell:not(.public-home-shell) .public-community-form select,
-.public-dashboard-shell:not(.public-home-shell) .public-community-form textarea {
-  border-color: rgba(126, 177, 223, .44) !important;
-  background: rgba(255, 255, 255, .86) !important;
-  color: var(--seiga-pastel-text) !important;
-}
-
-.public-dashboard-shell .public-community-post.has-image {
-  border-color: rgba(126, 177, 223, .44) !important;
-  box-shadow: 0 18px 46px rgba(55, 96, 164, .14) !important;
-}
-
-.public-dashboard-shell .public-community-post.has-image::before {
-  background: linear-gradient(180deg, rgba(10, 26, 50, .05), rgba(10, 26, 50, .7)) !important;
-}
-
-.public-dashboard-shell .public-community-post.has-image h3,
-.public-dashboard-shell .public-community-post.has-image header strong,
-.public-dashboard-shell .public-community-post.has-image p {
-  color: #fff !important;
-}
-
-.public-dashboard-shell .public-community-detail-article header strong,
-.public-dashboard-shell .public-community-record-main strong {
-  color: var(--seiga-pastel-heading) !important;
-  text-shadow: none !important;
-}
-
-.public-dashboard-shell .public-community-detail-article header small,
-.public-dashboard-shell .public-community-record-main strong small,
-.public-dashboard-shell .public-community-record-main em {
-  color: var(--seiga-pastel-muted) !important;
-  text-shadow: none !important;
-}
-
-.public-dashboard-shell .public-community-error {
-  color: #d72d55 !important;
-}
-
-.public-dashboard-shell .public-community-tag-picker,
-.public-dashboard-shell .public-community-file-control,
-.public-dashboard-shell:not(.public-home-shell) .public-community-tag-picker,
-.public-dashboard-shell:not(.public-home-shell) .public-community-file-control {
-  border-color: rgba(126, 177, 223, .42) !important;
-  background: rgba(243, 247, 251, .82) !important;
-}
-
-.public-dashboard-shell .public-community-tag-picker button,
-.public-dashboard-shell:not(.public-home-shell) .public-community-tag-picker button,
 .public-dashboard-shell .public-party-tags span {
   border-color: rgba(126, 177, 223, .42) !important;
   background: rgba(213, 241, 255, .72) !important;
   color: #245fbb !important;
-}
-
-.public-dashboard-shell .public-community-tag-picker button.active {
-  background: linear-gradient(135deg, #5d8cff, #7a66ff) !important;
-  color: #fff !important;
 }
 
 .public-dashboard-shell .public-subscription-row,
@@ -5817,328 +5591,6 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
 
 }
 
-.public-community-shared-shell.yoro-app-shell {
-  width: 100%;
-  min-height: auto;
-  border: thin solid var(--yoro-color-border);
-  border-radius: var(--yoro-radius-xl);
-  background: var(--yoro-color-surface);
-  box-shadow: var(--yoro-shadow-panel);
-  color: var(--yoro-color-text);
-  overflow: hidden;
-}
-
-.public-community-shared-header {
-  border-bottom: thin solid var(--yoro-color-border);
-  background: var(--yoro-color-surface-strong);
-}
-
-.public-community-shared-sidebar {
-  background: var(--yoro-color-surface-muted);
-}
-
-.public-community-shared-main {
-  display: grid;
-  gap: var(--yoro-space-6);
-  min-width: 0;
-  padding: var(--yoro-space-6);
-}
-
-.public-community-shared-metrics {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--yoro-space-4);
-}
-
-.public-community-shared-post-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
-  gap: var(--yoro-space-5);
-}
-
-.public-community-shared-post-list {
-  display: grid;
-  gap: var(--yoro-space-4);
-}
-
-.public-community-shared-post-card.yoro-card {
-  min-width: 0;
-  gap: var(--yoro-space-4);
-  color: var(--yoro-color-text);
-}
-
-.public-community-shared-post-card.public-community-post::before {
-  display: none;
-}
-
-.public-community-shared-post-card.yoro-card:hover {
-  box-shadow: var(--yoro-shadow-panel);
-}
-
-.public-community-shared-post-header,
-.public-community-shared-detail-head {
-  display: grid;
-  grid-template-columns: var(--yoro-space-12) minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--yoro-space-3);
-}
-
-.public-community-shared-post-header .yoro-card__title,
-.public-community-shared-detail-head .yoro-card__title,
-.public-community-shared-post-header .yoro-card__description,
-.public-community-shared-detail-head .yoro-card__description {
-  overflow-wrap: anywhere;
-}
-
-.public-community-shared-post-content,
-.public-community-shared-detail-content {
-  display: grid;
-  gap: var(--yoro-space-4);
-}
-
-.public-community-shared-post-content > p,
-.public-community-shared-detail-content > p {
-  margin: 0;
-  color: var(--yoro-color-text);
-  line-height: var(--yoro-line-height-relaxed);
-  overflow-wrap: anywhere;
-}
-
-.public-community-shared-card-metrics {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--yoro-space-3);
-}
-
-.public-community-shared-card-metrics .yoro-metric {
-  min-width: 0;
-}
-
-.public-community-shared-compose.yoro-card {
-  max-width: 58rem;
-  width: 100%;
-  margin: 0 auto;
-}
-
-.public-community-shared-form {
-  display: grid;
-  gap: var(--yoro-space-4);
-}
-
-.public-community-shared-form .yoro-form-control,
-.public-community-shared-form .public-community-riot-check,
-.public-community-shared-form .public-community-file-control,
-.public-community-shared-form .public-community-tag-picker {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--yoro-space-3);
-  align-items: center;
-}
-
-.public-community-shared-form .yoro-input,
-.public-community-shared-form .yoro-textarea,
-.public-community-shared-form .yoro-select {
-  width: 100%;
-  min-height: var(--yoro-space-12);
-  border: thin solid var(--yoro-color-border);
-  border-radius: var(--yoro-radius-lg);
-  background: var(--yoro-color-surface-strong);
-  color: var(--yoro-color-text);
-  box-shadow: var(--yoro-shadow-none);
-}
-
-.public-community-shared-form .public-community-riot-check .yoro-input {
-  flex: 1 1 18rem;
-}
-
-.public-community-shared-form .yoro-textarea {
-  min-height: 10rem;
-  resize: vertical;
-}
-
-.public-community-shared-form .yoro-button {
-  border-radius: var(--yoro-radius-md);
-  box-shadow: var(--yoro-shadow-none);
-}
-
-.public-community-shared-option-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
-  gap: var(--yoro-space-4);
-}
-
-.public-community-detail-layout.public-community-shared-detail-layout {
-  display: grid;
-  grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr);
-  align-items: start;
-  gap: var(--yoro-space-5);
-}
-
-.public-community-shared-record-card.yoro-card,
-.public-community-shared-detail-article.yoro-card,
-.public-community-shared-comments.yoro-card {
-  min-width: 0;
-}
-
-.public-community-shared-record-head,
-.public-community-comments-head {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--yoro-space-3);
-}
-
-.public-community-record-inline {
-  display: grid;
-  gap: var(--yoro-space-4);
-}
-
-.public-community-record-main {
-  display: grid;
-  grid-template-columns: var(--yoro-space-12) minmax(0, 1fr);
-  align-items: center;
-  gap: var(--yoro-space-3);
-}
-
-.public-community-record-main > img,
-.public-community-record-main > span,
-.public-community-avatar,
-.public-community-avatar img,
-.public-community-avatar em {
-  width: var(--yoro-space-12);
-  height: var(--yoro-space-12);
-  border-radius: var(--yoro-radius-circle);
-}
-
-.public-community-record-main > span,
-.public-community-avatar em {
-  display: inline-grid;
-  place-items: center;
-  background: var(--yoro-color-surface-strong);
-  color: var(--yoro-color-text-strong);
-  font-weight: var(--yoro-font-weight-bold);
-}
-
-.public-community-record-main strong {
-  display: grid;
-  gap: var(--yoro-space-1);
-  color: var(--yoro-color-text-strong);
-}
-
-.public-community-record-main small,
-.public-community-record-main em {
-  color: var(--yoro-color-text-muted);
-}
-
-.public-community-record-champions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--yoro-space-2);
-}
-
-.public-community-record-champions img {
-  width: var(--yoro-space-10);
-  height: var(--yoro-space-10);
-  border-radius: var(--yoro-radius-md);
-}
-
-.public-community-detail-media {
-  overflow: hidden;
-  border-radius: var(--yoro-radius-lg);
-  background: var(--yoro-color-surface-muted);
-}
-
-.public-community-detail-media img,
-.public-community-post-media img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.public-community-post-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--yoro-space-2);
-}
-
-.public-community-comment-list {
-  display: grid;
-  gap: var(--yoro-space-3);
-}
-
-.public-community-comment.yoro-card {
-  display: grid;
-  grid-template-columns: var(--yoro-space-10) minmax(0, 1fr);
-  gap: var(--yoro-space-3);
-}
-
-.public-community-comment p {
-  margin: var(--yoro-space-2) 0 0;
-  color: var(--yoro-color-text);
-  overflow-wrap: anywhere;
-}
-
-.public-community-comment-form {
-  display: grid;
-  grid-template-columns: var(--yoro-space-12) minmax(0, 1fr) auto;
-  align-items: start;
-  gap: var(--yoro-space-3);
-}
-
-.public-community-comment-form .yoro-form-field {
-  min-width: 0;
-}
-
-.public-community-shared-toast-viewport {
-  z-index: var(--yoro-z-index-toast);
-}
-
-@media (max-width: 64rem) {
-  .public-community-shared-main {
-    padding: var(--yoro-space-4);
-  }
-
-  .public-community-shared-metrics,
-  .public-community-shared-card-metrics,
-  .public-community-detail-layout.public-community-shared-detail-layout,
-  .public-community-comment-form {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .public-community-shared-post-header,
-  .public-community-shared-detail-head,
-  .public-community-shared-record-head,
-  .public-community-comments-head {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .public-community-comment.yoro-card {
-    grid-template-columns: var(--yoro-space-10) minmax(0, 1fr);
-  }
-}
-
-@media (max-width: 40rem) {
-  .public-community-shared-main {
-    padding: var(--yoro-space-3);
-  }
-
-  .public-community-shared-compose.yoro-card {
-    margin: 0;
-  }
-
-  .public-community-shared-post-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .public-community-shared-form .public-community-riot-check .yoro-input {
-    flex-basis: 100%;
-  }
-
-  .public-community-comment.yoro-card {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
 /* 전적검색 결과 화면: 메인 다크 톤과 동일한 프리미엄 검색 경험 */
 .public-profile-shared-shell.yoro-app-shell {
   background:
@@ -7898,7 +7350,7 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
   }
 }
 
-/* Public menu pages: 남아 있던 pastel community 디자인 제거 */
+/* Public menu pages: 남아 있던 pastel 디자인 제거 */
 .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) {
   min-height: 100dvh;
   background:
@@ -8264,112 +7716,9 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
     grid-template-columns: minmax(0, 1fr) !important;
   }
 }
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-menu-page-panel.public-community-shared-shell,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-shell.yoro-app-shell {
-  border-color: rgba(119, 131, 169, .28) !important;
-  background: rgba(8, 12, 24, .74) !important;
-  color: #f5f5f7 !important;
-  box-shadow: 0 18px 48px rgba(0, 0, 0, .28) !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-header {
-  border-bottom-color: rgba(119, 131, 169, .24) !important;
-  background: rgba(10, 15, 29, .88) !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-sidebar {
-  background: rgba(7, 11, 22, .64) !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-main {
-  background: transparent !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-header .yoro-page-header__eyebrow {
-  color: #8ea2ff !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-header .yoro-page-header__title {
-  color: #ffffff !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-header .yoro-page-header__description {
-  color: rgba(199, 207, 229, .76) !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-post-card.yoro-card,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-compose.yoro-card,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-detail-article.yoro-card,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-record-card.yoro-card,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-comments.yoro-card,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-comment.yoro-card {
-  border-color: rgba(119, 131, 169, .28) !important;
-  background:
-    linear-gradient(180deg, rgba(18, 24, 42, .76), rgba(12, 17, 31, .82)) !important;
-  color: #f3f6ff !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06) !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-post-card.has-image .public-community-post-media {
-  display: none !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-post-card.has-image::before {
-  display: none !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-post-header .yoro-card__title,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-detail-head .yoro-card__title,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-post h3,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-party-post h3,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-card-head strong,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-record-main strong,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-comments-head strong,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-comment header strong {
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-party-post h3{
   color: #ffffff !important;
   text-shadow: none !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-post-content > p,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-detail-content > p,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-post-header .yoro-card__description,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-detail-head .yoro-card__description,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-record-main small,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-record-main em,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-comment p,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-comment header small {
-  color: rgba(199, 207, 229, .76) !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-card-metrics .yoro-metric,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-metrics .yoro-metric {
-  border-color: rgba(119, 131, 169, .24) !important;
-  background: rgba(9, 14, 27, .7) !important;
-  color: #f3f6ff !important;
-  box-shadow: none !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-card-metrics .yoro-metric__label,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-metrics .yoro-metric__label,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-card-metrics .yoro-metric__description,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-metrics .yoro-metric__description {
-  color: rgba(199, 207, 229, .72) !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-card-metrics .yoro-metric__value,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-metrics .yoro-metric__value {
-  color: #f5f5f7 !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-form .yoro-input,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-form .yoro-textarea,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-shared-form .yoro-select,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-community-comment-form .yoro-textarea {
-  border-color: rgba(119, 131, 169, .28) !important;
-  background: rgba(9, 14, 27, .82) !important;
-  color: #f5f5f7 !important;
-  box-shadow: none !important;
 }
 
 @media (max-width: 760px) {

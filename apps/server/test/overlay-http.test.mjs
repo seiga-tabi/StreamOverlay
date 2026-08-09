@@ -269,14 +269,11 @@ test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => 
     await handler(createRequest("GET", "/api/public/aram/augments"), aramApiRes);
     assert.equal(aramApiRes.statusCode, 200);
     assert.equal(aramApiRes.headers["Cache-Control"], "no-store");
-    assert.deepEqual(JSON.parse(aramApiRes.body), {
-      schemaVersion: 1,
-      mode: "aram_augments",
-      status: "preparing",
-      dataVersion: "candidate",
-      sourceRevision: "not_imported",
-      augments: []
-    });
+    const aramBody = JSON.parse(aramApiRes.body);
+    assert.equal(aramBody.schemaVersion, 1);
+    assert.equal(aramBody.mode, "aram_augments");
+    assert.equal(aramBody.status, "ready");
+    assert.ok(Array.isArray(aramBody.augments) && aramBody.augments.length > 0);
 
     const legalRes = createResponse();
     await handler(createRequest("GET", "/privacy"), legalRes);

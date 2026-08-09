@@ -79,7 +79,9 @@ test("AdSense는 Consent Mode를 적용해 모든 공개 페이지에서 한 번
   assert.match(html, /"\/palworld\/skills"/);
   assert.match(html, /"\/palworld\/map"/);
   assert.match(html, /"\/lol\/summoners\/"/);
-  assert.match(html, /"\/community\/posts\/"/);
+  assert.match(html, /"\/patch-notes"/);
+  /* 커뮤니티는 걷어냈습니다. 광고 대상 경로에도 남아 있으면 안 됩니다. */
+  assert.doesNotMatch(html, /"\/community/);
   assert.match(html, /applyStoredGoogleConsent\(\);\s+window\.addEventListener/);
   assert.match(html, /localStorage\.getItem\(googleConsentKey\) !== "granted"/);
   assert.doesNotMatch(html, /applyStoredGoogleConsent\(\);\s+loadAdsense\(\)/);

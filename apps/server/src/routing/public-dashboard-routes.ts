@@ -5,8 +5,6 @@ const PUBLIC_DASHBOARD_EXACT_PATHS = new Set([
   "/follow/",
   "/participation",
   "/participation/",
-  "/community",
-  "/community/",
   "/privacy",
   "/terms",
   "/contact",
@@ -48,7 +46,9 @@ const PUBLIC_DASHBOARD_EXACT_PATHS = new Set([
   "/palworld/search",
   "/palworld/search/",
   "/lol/aram",
-  "/lol/aram/"
+  "/lol/aram/",
+  "/patch-notes",
+  "/patch-notes/"
 ]);
 
 const NON_LOCALIZED_PUBLIC_PATHS = new Set([
@@ -62,9 +62,6 @@ const NON_LOCALIZED_PUBLIC_PATHS = new Set([
 
 const PUBLIC_DASHBOARD_PATH_PREFIXES = [
   "/lol/summoners/",
-  "/community/server",
-  "/community/party",
-  "/community/posts/",
   // Palworld 상세는 query가 아니라 고유 URL을 가져야 검색에 색인되고 공유·북마크가 동작합니다.
   "/palworld/pals/",
   "/palworld/items/",
