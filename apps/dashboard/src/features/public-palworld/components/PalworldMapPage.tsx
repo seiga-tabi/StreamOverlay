@@ -45,6 +45,7 @@ import {
   updatePalworldMapLayerSelection,
   usePalworldMapQueryState,
   type PalworldMapLayer,
+  type PalworldMapWorld,
 } from "../hooks/usePalworldMapQueryState";
 import {
   clampPalworldMapView,
@@ -96,7 +97,7 @@ import {
 import { PalworldMapFilterPanel } from "./PalworldMapFilterPanel";
 import { PalworldMapLocationLayer } from "./PalworldMapLocationLayer";
 import { PalworldMapMarkerPopover } from "./PalworldMapMarkerPopover";
-import { PalworldMapMobileFilters } from "./PalworldMapMobileFilters";
+import { PalworldMapMobileFilters, type PalworldMapSheetSnap } from "./PalworldMapMobileFilters";
 import { isLocalPalworldImageUrl, PalworldMedia } from "./PalworldMedia";
 import { PalworldPalPicker } from "./PalworldPalPicker";
 
@@ -141,6 +142,118 @@ const PALWORLD_MAP_LOCATION_PAGE_LIMIT = PALWORLD_MAP_LOCATION_MAX_RESPONSE;
 const PALWORLD_MAP_LOCATION_MAX_PAGES = Math.ceil(
   PALWORLD_MAP_LOCATION_MAX_ARTIFACT_ENTRIES / PALWORLD_MAP_LOCATION_PAGE_LIMIT,
 );
+
+/**
+ * 캐시에 실제로 받은 카테고리만 집계합니다.
+ *
+ * 엔트리가 없는 카테고리·타입은 "아직 모름"이라 count 를 내지 않습니다 —
+ * 0 은 서버가 비었다고 확인해 준 경우에만 씁니다. 로드된 카테고리에 속한
+ * 타입은 0 으로 초기화해 "확인된 비어 있음"이 구분되게 합니다.
+ */
+function summarizePalworldLocationCache(
+  layers: ReadonlyMap<PalworldMapLocationCategory, readonly PalworldMapLocation[]>,
+): {
+  categories: ReadonlyMap<PalworldMapLocationCategory, number>;
+  types: ReadonlyMap<PalworldMapCollectibleTypeId, number>;
+} {
+  const categories = new Map<PalworldMapLocationCategory, number>();
+  const types = new Map<PalworldMapCollectibleTypeId, number>();
+  for (const [category, locations] of layers) {
+    categories.set(category, locations.length);
+    for (const typeId of palworldMapCollectibleTypesForCategory(category)) {
+      types.set(typeId, types.get(typeId) ?? 0);
+    }
+    for (const location of locations) {
+      const typeId = palworldMapCollectibleTypeForLocation(location);
+      if (typeId) types.set(typeId, (types.get(typeId) ?? 0) + 1);
+    }
+  }
+  return { categories, types };
+}
+
+/**
+ * 요청한 카테고리들의 위치를 페이지네이션으로 끝까지 받습니다.
+ *
+ * 페이지 사이에 데이터가 바뀌면(총계·식별자 불일치) 절반짜리 목록을 그리지 않도록
+ * 통째로 실패시킵니다 — 예전 전체 로드가 하던 검증을 그대로 유지합니다.
+ */
+async function fetchPalworldMapLocationCategories(
+  categories: readonly PalworldMapLocationCategory[],
+  world: PalworldMapWorld,
+  signal: AbortSignal,
+): Promise<
+  | { state: "ready"; byCategory: Map<PalworldMapLocationCategory, PalworldMapLocation[]> }
+  | { state: Exclude<PalworldMapLocationRequestState, "ready" | "loading"> }
+> {
+  /* 서버는 카테고리를 정의 순서로 돌려주므로 요청도 같은 순서로 보냅니다. */
+  const ordered = PALWORLD_MAP_LOCATION_CATEGORIES.filter(
+    (category) => categories.includes(category),
+  );
+  const byCategory = new Map<PalworldMapLocationCategory, PalworldMapLocation[]>();
+  const ids = new Set<string>();
+  let expectedTotal: number | undefined;
+  let expectedPageIdentity: string | undefined;
+  let offset = 0;
+  let pageCount = 0;
+  while (true) {
+    if (pageCount >= PALWORLD_MAP_LOCATION_MAX_PAGES) {
+      throw new Error("지도 위치 pagination이 안전한 최대 페이지 수를 초과했습니다.");
+    }
+    pageCount += 1;
+    const response = await getPalworldMapLocations(ordered, world, signal, {
+      limit: PALWORLD_MAP_LOCATION_PAGE_LIMIT,
+      offset,
+    });
+    if (signal.aborted) return { state: "error" };
+    if (offset === 0 && response.state !== "ready") {
+      return { state: response.state };
+    }
+    const pageIdentity = mapLocationPageIdentity(response);
+    const pageTotal = expectedTotal ?? response.total;
+    const expectedReturned = Math.min(
+      PALWORLD_MAP_LOCATION_PAGE_LIMIT,
+      pageTotal - offset,
+    );
+    if (
+      response.state !== "ready"
+      || response.world !== world
+      || response.layers.length !== ordered.length
+      || response.layers.some((layer, index) => layer !== ordered[index])
+      || response.offset !== offset
+      || response.limit !== PALWORLD_MAP_LOCATION_PAGE_LIMIT
+      || response.returned !== expectedReturned
+      || (expectedTotal !== undefined && response.total !== expectedTotal)
+      || (
+        expectedPageIdentity !== undefined
+        && pageIdentity !== expectedPageIdentity
+      )
+    ) {
+      throw new Error("지도 위치 pagination 응답이 서로 일치하지 않습니다.");
+    }
+    expectedTotal ??= response.total;
+    expectedPageIdentity ??= pageIdentity;
+    for (const location of response.locations) {
+      if (ids.has(location.id)) {
+        throw new Error("지도 위치 pagination 응답에 중복 ID가 있습니다.");
+      }
+      ids.add(location.id);
+      const bucket = byCategory.get(location.category) ?? [];
+      bucket.push(location);
+      byCategory.set(location.category, bucket);
+    }
+    if (!response.hasMore) break;
+    if (response.returned === 0) {
+      throw new Error("지도 위치 pagination이 진행되지 않았습니다.");
+    }
+    offset += response.returned;
+  }
+  let received = 0;
+  for (const bucket of byCategory.values()) received += bucket.length;
+  if (received !== (expectedTotal ?? 0)) {
+    throw new Error("지도 위치 pagination 전체 수가 일치하지 않습니다.");
+  }
+  return { state: "ready", byCategory };
+}
 
 function mapLocationPageIdentity(response: PalworldMapLocationsResponse): string {
   return JSON.stringify({
@@ -551,6 +664,13 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
   const [bossRevision, setBossRevision] = useState(0);
   const [spawnRevision, setSpawnRevision] = useState(0);
   const [locationRevision, setLocationRevision] = useState(0);
+  /* 카테고리별 위치 캐시. world 나 재시도(revision)가 바뀌면 통째로 버립니다. */
+  const locationCacheRef = useRef<{
+    world: PalworldMapWorld;
+    revision: number;
+    unavailable: boolean;
+    layers: Map<PalworldMapLocationCategory, readonly PalworldMapLocation[]>;
+  }>({ world: "main", revision: 0, unavailable: false, layers: new Map() });
   const [markerResponse, setMarkerResponse] = useState<PalworldMapMarkersResponse>();
   const [markerState, setMarkerState] = useState<PalworldMapMarkerRequestState>("loading");
   const [spawnResponse, setSpawnResponse] = useState<PalworldPalSpawnResponse>();
@@ -560,7 +680,10 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
     useState<PalworldMapLocationRequestState>("loading");
   const [focusedPal, setFocusedPal] = useState<PalworldPalReference | PalworldPalSummary | null>(null);
   const [filtersCollapsed, setFiltersCollapsed] = useState(false);
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  /* 64행 중 49행이 "위치 없음"이었습니다. 기본은 켤 수 있는 항목만 보여 줍니다. */
+  const [filtersAvailableOnly, setFiltersAvailableOnly] = useState(true);
+  /* 좁은 화면 시트의 자리. peek=손잡이만 · half=칩 줄 · full=전체 목록. */
+  const [mobileSheetSnap, setMobileSheetSnap] = useState<PalworldMapSheetSnap>("peek");
   const [collapsedFilterGroups, setCollapsedFilterGroups] = useState<ReadonlySet<string>>(
     () => new Set(),
   );
@@ -615,32 +738,13 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
       : undefined,
     [mapQuery.marker, visibleBossMarkers],
   );
-  const locationCounts = useMemo<ReadonlyMap<PalworldMapLocationCategory, number>>(() => {
-    const counts = new Map<PalworldMapLocationCategory, number>();
-    for (const category of PALWORLD_MAP_LOCATION_CATEGORIES) {
-      counts.set(category, 0);
-    }
-    if (locationState === "ready") {
-      for (const location of mapLocations) {
-        counts.set(location.category, (counts.get(location.category) ?? 0) + 1);
-      }
-    }
-    return counts;
-  }, [locationState, mapLocations]);
-  const collectibleTypeCounts = useMemo<
-    ReadonlyMap<PalworldMapCollectibleTypeId, number>
-  >(() => {
-    const counts = new Map<PalworldMapCollectibleTypeId, number>(
-      PALWORLD_MAP_COLLECTIBLE_TYPE_IDS.map((typeId) => [typeId, 0]),
-    );
-    if (locationState === "ready") {
-      for (const location of mapLocations) {
-        const typeId = palworldMapCollectibleTypeForLocation(location);
-        if (typeId) counts.set(typeId, (counts.get(typeId) ?? 0) + 1);
-      }
-    }
-    return counts;
-  }, [locationState, mapLocations]);
+  /* 카테고리를 골라 받게 되면서 "0 = 확인된 비어 있음"과 "엔트리 없음 = 아직 모름"을
+     구분해야 합니다. 모름을 0 으로 보고하면 데이터가 있는 레이어까지 잠급니다.
+     캐시는 ref 라 프리페치가 채워도 리렌더가 없으므로 집계를 state 로 둡니다. */
+  const [locationCounts, setLocationCounts] =
+    useState<ReadonlyMap<PalworldMapLocationCategory, number>>(new Map());
+  const [collectibleTypeCounts, setCollectibleTypeCounts] =
+    useState<ReadonlyMap<PalworldMapCollectibleTypeId, number>>(new Map());
   const visibleMapLocations = useMemo(
     () => locationState === "ready"
       ? mapLocations.filter((location) => {
@@ -707,6 +811,19 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
   const mapAspectRatio = activeMapImage
     ? `${activeMapImage.width} / ${activeMapImage.height}`
     : "1 / 1";
+  /* 변형이 없으면 srcSet 을 아예 만들지 않아 기존 동작 그대로입니다. */
+  const mapImageSrcSet = useMemo(() => {
+    if (!activeMapImage?.variants?.length) return undefined;
+    return [
+      ...activeMapImage.variants.map(
+        (variant) => `${variant.imageUrl} ${variant.width}w`,
+      ),
+      `${activeMapImage.imageUrl} ${activeMapImage.width}w`,
+    ].join(", ");
+  }, [activeMapImage]);
+  const mapImageSizes = mapImageSrcSet
+    ? `${Math.min(Math.ceil(view.zoom * 100), 400)}vw`
+    : undefined;
 
   useEffect(() => {
     setLoadState(activeMapImage ? "loading" : "error");
@@ -728,86 +845,116 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
     return () => controller.abort();
   }, [bossRevision, mapQuery.world]);
 
+  /* 위치는 켜진 레이어만 받습니다.
+   *
+   * 예전에는 첫 로드에 11개 카테고리 20,786건을 5왕복(gzip 564KB)으로 전부
+   * 받았습니다 — 기본 상태에서는 위치 레이어가 하나도 켜져 있지 않은데도요.
+   * 지금은 켜진 카테고리 중 캐시에 없는 것만 요청하고, 받은 카테고리는
+   * world 가 바뀔 때까지 캐시합니다. 즉시 토글은 idle 프리페치가 맡습니다.
+   */
   useEffect(() => {
+    const cache = locationCacheRef.current;
+    if (cache.world !== mapQuery.world || cache.revision !== locationRevision) {
+      cache.world = mapQuery.world;
+      cache.revision = locationRevision;
+      cache.layers.clear();
+      cache.unavailable = false;
+      setLocationCounts(new Map());
+      setCollectibleTypeCounts(new Map());
+    }
+    if (cache.unavailable) {
+      setLocationState("data_unavailable");
+      return;
+    }
+    const missing = selectedLocationLayers.filter(
+      (category) => !cache.layers.has(category),
+    );
+    if (missing.length === 0) {
+      const cached = selectedLocationLayers.flatMap(
+        (category) => cache.layers.get(category) ?? [],
+      );
+      setMapLocations(cached);
+      setLocationState(
+        selectedLocationLayers.length === 0 || cached.length > 0
+          ? "ready"
+          : "confirmed_empty",
+      );
+      return;
+    }
     const controller = new AbortController();
-    setMapLocations([]);
     setLocationState("loading");
-    void (async () => {
-      const locations: PalworldMapLocation[] = [];
-      const ids = new Set<string>();
-      let expectedTotal: number | undefined;
-      let expectedPageIdentity: string | undefined;
-      let offset = 0;
-      let pageCount = 0;
-      while (true) {
-        if (pageCount >= PALWORLD_MAP_LOCATION_MAX_PAGES) {
-          throw new Error("지도 위치 pagination이 안전한 최대 페이지 수를 초과했습니다.");
-        }
-        pageCount += 1;
-        const response = await getPalworldMapLocations(
-          PALWORLD_MAP_LOCATION_CATEGORIES,
-          mapQuery.world,
-          controller.signal,
-          {
-            limit: PALWORLD_MAP_LOCATION_PAGE_LIMIT,
-            offset,
-          },
-        );
-        if (controller.signal.aborted) return;
-        if (offset === 0 && response.state !== "ready") {
-          setLocationState(response.state);
-          return;
-        }
-        const pageIdentity = mapLocationPageIdentity(response);
-        const pageTotal = expectedTotal ?? response.total;
-        const expectedReturned = Math.min(
-          PALWORLD_MAP_LOCATION_PAGE_LIMIT,
-          pageTotal - offset,
-        );
-        if (
-          response.state !== "ready"
-          || response.world !== mapQuery.world
-          || response.layers.length !== PALWORLD_MAP_LOCATION_CATEGORIES.length
-          || response.layers.some(
-            (layer, index) => layer !== PALWORLD_MAP_LOCATION_CATEGORIES[index],
-          )
-          || response.offset !== offset
-          || response.limit !== PALWORLD_MAP_LOCATION_PAGE_LIMIT
-          || response.returned !== expectedReturned
-          || (expectedTotal !== undefined && response.total !== expectedTotal)
-          || (
-            expectedPageIdentity !== undefined
-            && pageIdentity !== expectedPageIdentity
-          )
-        ) {
-          throw new Error("지도 위치 pagination 응답이 서로 일치하지 않습니다.");
-        }
-        expectedTotal ??= response.total;
-        expectedPageIdentity ??= pageIdentity;
-        for (const location of response.locations) {
-          if (ids.has(location.id)) {
-            throw new Error("지도 위치 pagination 응답에 중복 ID가 있습니다.");
-          }
-          ids.add(location.id);
-          locations.push(location);
-        }
-        if (!response.hasMore) break;
-        if (response.returned === 0) {
-          throw new Error("지도 위치 pagination이 진행되지 않았습니다.");
-        }
-        offset += response.returned;
-      }
+    void fetchPalworldMapLocationCategories(
+      missing,
+      mapQuery.world,
+      controller.signal,
+    ).then((result) => {
       if (controller.signal.aborted) return;
-      if (locations.length !== expectedTotal) {
-        throw new Error("지도 위치 pagination 전체 수가 일치하지 않습니다.");
+      if (result.state !== "ready") {
+        if (result.state === "data_unavailable") cache.unavailable = true;
+        setLocationState(result.state);
+        return;
       }
-      setMapLocations(locations);
-      setLocationState(locations.length > 0 ? "ready" : "confirmed_empty");
-    })().catch(() => {
+      for (const category of missing) {
+        cache.layers.set(category, result.byCategory.get(category) ?? []);
+      }
+      const summary = summarizePalworldLocationCache(cache.layers);
+      setLocationCounts(summary.categories);
+      setCollectibleTypeCounts(summary.types);
+      const merged = selectedLocationLayers.flatMap(
+        (category) => cache.layers.get(category) ?? [],
+      );
+      setMapLocations(merged);
+      setLocationState(merged.length > 0 ? "ready" : "confirmed_empty");
+    }).catch(() => {
       if (!controller.signal.aborted) setLocationState("error");
     });
     return () => controller.abort();
-  }, [locationRevision, mapQuery.world]);
+  }, [locationRevision, mapQuery.world, selectedLocationLayers]);
+
+  /* 나머지 카테고리는 첫 페인트가 끝난 뒤 한가할 때 조용히 채웁니다.
+     그래야 레이어 토글이 지금처럼 즉시이면서 첫 화면은 그 비용을 내지 않습니다. */
+  useEffect(() => {
+    if (locationState !== "ready" && locationState !== "confirmed_empty") return;
+    const cache = locationCacheRef.current;
+    if (cache.world !== mapQuery.world || cache.unavailable) return;
+    const remaining = PALWORLD_MAP_LOCATION_CATEGORIES.filter(
+      (category) => !cache.layers.has(category),
+    );
+    if (remaining.length === 0) return;
+    const controller = new AbortController();
+    const idleWindow = window as Window & {
+      requestIdleCallback?: (callback: () => void) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
+    const schedule = idleWindow.requestIdleCallback
+      ?? ((callback: () => void) => window.setTimeout(callback, 1_200));
+    const cancel = idleWindow.cancelIdleCallback
+      ?? ((handle: number) => window.clearTimeout(handle));
+    const handle = schedule(() => {
+      void fetchPalworldMapLocationCategories(
+        remaining,
+        mapQuery.world,
+        controller.signal,
+      ).then((result) => {
+        if (controller.signal.aborted || result.state !== "ready") return;
+        if (cache.world !== mapQuery.world) return;
+        for (const category of remaining) {
+          if (!cache.layers.has(category)) {
+            cache.layers.set(category, result.byCategory.get(category) ?? []);
+          }
+        }
+        const summary = summarizePalworldLocationCache(cache.layers);
+        setLocationCounts(summary.categories);
+        setCollectibleTypeCounts(summary.types);
+      }).catch(() => {
+        /* 프리페치 실패는 조용히 둡니다. 켜는 순간 정식 경로가 다시 요청합니다. */
+      });
+    });
+    return () => {
+      cancel(handle);
+      controller.abort();
+    };
+  }, [locationState, mapQuery.world]);
 
   useEffect(() => {
     if (!activeFocusPalId) {
@@ -1435,10 +1582,17 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
     const locationLayer = (
       id: PalworldMapLocationCategory,
     ): PalworldMapLayerGroup["layers"][number] => {
-      const count = importedLocationState === "ready"
-        ? locationCounts.get(id) ?? 0
-        : undefined;
-      const state = count === 0 ? "confirmed_empty" : importedLocationState;
+      /* count 가 없으면 아직 안 받아 본 카테고리입니다. 잠그지 않고 켤 수 있게 두면
+         켜는 순간 정식 로드가 받아 옵니다. 0 은 서버가 확인해 준 비어 있음입니다. */
+      const count = locationCounts.get(id);
+      const selectedNow = mapQuery.layers.includes(id);
+      const state = importedLocationState === "data_unavailable"
+        ? "data_unavailable"
+        : selectedNow && importedLocationState !== "ready"
+          ? importedLocationState
+          : count === 0
+            ? "confirmed_empty"
+            : "ready";
       return {
         id,
         label: PALWORLD_MAP_LOCATION_LABELS[id],
@@ -1446,7 +1600,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
         count,
         iconAsset: PALWORLD_MAP_LAYER_ICONS[id],
         iconFallback: PALWORLD_MAP_LOCATION_FALLBACKS[id],
-        selected: state === "ready" && mapQuery.layers.includes(id),
+        selected: state === "ready" && selectedNow,
         state,
       };
     };
@@ -1454,10 +1608,15 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
       id: PalworldMapCollectibleTypeId,
     ): PalworldMapLayerGroup["layers"][number] => {
       const category = palworldMapCollectibleCategory(id);
-      const count = importedLocationState === "ready"
-        ? collectibleTypeCounts.get(id) ?? 0
-        : undefined;
-      const state = count === 0 ? "confirmed_empty" : importedLocationState;
+      const count = collectibleTypeCounts.get(id);
+      const categorySelected = mapQuery.layers.includes(category);
+      const state = importedLocationState === "data_unavailable"
+        ? "data_unavailable"
+        : categorySelected && importedLocationState !== "ready"
+          ? importedLocationState
+          : count === 0
+            ? "confirmed_empty"
+            : "ready";
       return {
         id,
         label: PALWORLD_MAP_COLLECTIBLE_TYPE_LABELS[id],
@@ -1487,7 +1646,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
                   ? "♙"
                   : "✦",
         selected: state === "ready"
-          && mapQuery.layers.includes(category)
+          && categorySelected
           && mapQuery.types.includes(id),
         state,
       };
@@ -1606,6 +1765,14 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
   const importedLayerSelected = selectedLocationLayers.length > 0;
   const filterCopy = {
     all: mapLabel(palworldI18n.ko.mapFilterAll, palworldI18n.ja.mapFilterAll),
+    availableOnly: mapLabel(
+      palworldI18n.ko.mapFilterAvailableOnly,
+      palworldI18n.ja.mapFilterAvailableOnly,
+    ),
+    hiddenEmpty: mapLabel(
+      palworldI18n.ko.mapFilterHiddenEmpty,
+      palworldI18n.ja.mapFilterHiddenEmpty,
+    ),
     hide: mapLabel(palworldI18n.ko.mapFilterHide, palworldI18n.ja.mapFilterHide),
     reset: mapLabel(palworldI18n.ko.mapFilterReset, palworldI18n.ja.mapFilterReset),
     show: mapLabel(palworldI18n.ko.mapFilterShow, palworldI18n.ja.mapFilterShow),
@@ -1780,11 +1947,13 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
         data-filter-collapsed={filtersCollapsed ? "true" : undefined}
       >
         <PalworldMapFilterPanel
+          availableOnly={filtersAvailableOnly}
           className="palworld-map-desktop-filter"
           collapsed={filtersCollapsed}
           copy={filterCopy}
           groups={layerGroups}
           locale={locale}
+          onAvailableOnlyChange={setFiltersAvailableOnly}
           onCollapsedChange={setFiltersCollapsed}
           onGroupCollapsedChange={changeGroupCollapsed}
           onGroupLayerChange={changeGroupLayers}
@@ -1794,31 +1963,34 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
           {renderFilterControls("palworld-map-pal-picker")}
         </PalworldMapFilterPanel>
         <PalworldMapMobileFilters
+          availableOnly={filtersAvailableOnly}
           copy={filterCopy}
           groups={layerGroups}
           locale={locale}
-          onClose={() => setMobileFiltersOpen(false)}
+          onAvailableOnlyChange={setFiltersAvailableOnly}
           onGroupCollapsedChange={changeGroupCollapsed}
           onGroupLayerChange={changeGroupLayers}
           onLayerChange={changeLayer}
           onReset={() => {
             resetExplorer();
-            setMobileFiltersOpen(false);
+            setMobileSheetSnap("half");
           }}
-          open={mobileFiltersOpen}
+          onSnapChange={setMobileSheetSnap}
           returnFocusRef={mobileFilterButtonRef}
+          snap={mobileSheetSnap}
         >
           {renderFilterControls("palworld-map-mobile-pal-picker")}
         </PalworldMapMobileFilters>
         <div className="palworld-map-explorer-main">
           <div className="palworld-map-mobile-command-bar">
             <Button
-              aria-expanded={mobileFiltersOpen}
-              aria-haspopup="dialog"
+              aria-expanded={mobileSheetSnap === "full"}
               className="palworld-map-mobile-filter-trigger"
               data-ja={mobileFilterButtonCopy.ja}
               data-ko={mobileFilterButtonCopy.ko}
-              onClick={() => setMobileFiltersOpen(true)}
+              onClick={() => setMobileSheetSnap(
+                mobileSheetSnap === "full" ? "peek" : "full",
+              )}
               ref={mobileFilterButtonRef}
               size="sm"
               variant="secondary"
@@ -1830,6 +2002,225 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
             ) : null}
           </div>
           <Card as="section" className="palworld-map-card" padding="none" aria-labelledby="palworld-map-title">
+
+            <div className="palworld-map-canvas-shell">
+              <figure className="palworld-map-figure">
+                <div
+                aria-label={text.mapImageAlt}
+                aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight + - Home"
+                className="palworld-map-viewport"
+                data-testid="palworld-map-viewport"
+                data-panning={isPanning ? "true" : undefined}
+                data-touch-mode="map"
+                data-zoomed={view.zoom > PALWORLD_MAP_MIN_ZOOM + PALWORLD_MAP_ZOOM_EPSILON ? "true" : undefined}
+                onClick={(event) => {
+                  const target = event.target;
+                  if (
+                    target === event.currentTarget
+                    || !(target instanceof Element)
+                    || !target.closest("[data-map-interactive='true']")
+                  ) {
+                    if (selectedMarker || selectedMapLocation) closeMarkerPopover();
+                  }
+                }}
+                onKeyDown={handleKeyDown}
+                onLostPointerCapture={endPointer}
+                onPointerCancel={endPointer}
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={endPointer}
+                onWheel={handleWheel}
+                ref={viewportRef}
+                role="region"
+                style={{ aspectRatio: mapAspectRatio }}
+                tabIndex={0}
+              >
+                {loadState === "loading" ? (
+                  <div className="palworld-map-loading" role="status" aria-label={text.mapLoading}>
+                    <Skeleton className="palworld-map-skeleton" rounded />
+                  </div>
+                ) : null}
+                {loadState === "error" || !activeMapImage ? (
+                  <EmptyState className="palworld-map-error" variant="error" role="alert">
+                    <EmptyStateIcon>!</EmptyStateIcon>
+                    <EmptyStateTitle>{text.mapLoadError}</EmptyStateTitle>
+                    <EmptyStateDescription>{text.mapLoadErrorDescription}</EmptyStateDescription>
+                    <EmptyStateActions>
+                      <Button onClick={retryMapImage} variant="secondary">{text.mapRetry}</Button>
+                    </EmptyStateActions>
+                  </EmptyState>
+                ) : (
+                  <div
+                    className="palworld-map-stage palworld-map-stage-layout-zoom"
+                    data-testid="palworld-map-stage"
+                    style={mapStyle}
+                  >
+                    <img
+                      alt={text.mapImageAlt}
+                      className={`palworld-map-image${loadState === "loading" ? " is-loading" : ""}`}
+                      data-testid="palworld-map-image"
+                      decoding="async"
+                      draggable={false}
+                      /* 지도는 이 화면의 LCP 요소입니다. React 18 은 camelCase 를 모르므로 소문자로 넘깁니다. */
+                      {...{ fetchpriority: "high" }}
+                      height={activeMapImage.height}
+                      key={`${mapQuery.world}-${imageRevision}`}
+                      onError={() => setLoadState("error")}
+                      onLoad={() => setLoadState("ready")}
+                      /* 원본은 4096×4096(1,056KB)인데 390px 화면에도 그대로 내려갔습니다.
+                         변형이 있으면 폭·배율에 맞는 판을 브라우저가 고릅니다.
+                         sizes 를 확대 배율에 묶어 두면 확대할 때 더 큰 판으로 올라갑니다
+                         (브라우저는 이미 받은 판보다 작은 판으로는 되돌아가지 않습니다). */
+                      sizes={mapImageSizes}
+                      src={activeMapImage.imageUrl}
+                      srcSet={mapImageSrcSet}
+                      width={activeMapImage.width}
+                    />
+                    {markerLayer ? (
+                      <div className="palworld-map-marker-layer">
+                        {typeof markerLayer === "function" ? markerLayer(view) : markerLayer}
+                      </div>
+                    ) : null}
+                    {loadState === "ready" && spawnLayerSelected && spawnState === "ready" ? (
+                      <div className="palworld-map-marker-layer" data-testid="palworld-map-spawn-areas">
+                        <PalworldSpawnAreaLayer points={visibleSpawnPoints} zoom={view.zoom} />
+                      </div>
+                    ) : null}
+                    {loadState === "ready" && visibleMapLocations.length ? (
+                      <div
+                        className="palworld-map-marker-layer"
+                        data-testid="palworld-map-imported-locations"
+                      >
+                        <PalworldMapLocationLayer
+                          clusterLabel={locationClusterLabel}
+                          iconAssets={PALWORLD_MAP_LAYER_ICONS}
+                          labels={PALWORLD_MAP_LOCATION_LABELS}
+                          locale={locale}
+                          locations={visibleMapLocations}
+                          subtypeLabels={PALWORLD_MAP_COLLECTIBLE_TYPE_LABELS}
+                          onSelectCluster={focusMapLocationCluster}
+                          onSelectLocation={selectMapLocation}
+                          popoverId={PALWORLD_MAP_MARKER_POPOVER_ID}
+                          selectedLocationId={selectedMapLocation?.id}
+                          zoom={view.zoom}
+                        />
+                      </div>
+                    ) : null}
+                    {loadState === "ready" && visibleBossMarkers.length ? (
+                      <div className="palworld-map-marker-layer" data-testid="palworld-map-boss-markers">
+                        <PalworldBossMarkerLayer
+                          focusedPalId={activeFocusPalId}
+                          locale={locale}
+                          markers={visibleBossMarkers}
+                          onOpenPal={onOpenPal}
+                          onSelectMarker={selectBossMarker}
+                          popoverId={PALWORLD_MAP_MARKER_POPOVER_ID}
+                          selectedMarkerId={selectedMarker?.id}
+                          zoom={view.zoom}
+                        />
+                      </div>
+                    ) : null}
+                  </div>
+                )}
+                {/* 월드 전환은 어느 폭에서나 지도 왼쪽 위입니다. 예전에는 좁은 화면에서 지도 아래 회색 띠에 있었습니다. */}
+              <div
+                aria-label={text.mapWorldSelection}
+                className="palworld-map-world-switcher"
+                role="tablist"
+              >
+                <button
+                  aria-selected={mapQuery.world === "main"}
+                  onClick={() => {
+                    if (mapQuery.world === "main") return;
+                    pushQuery({
+                      center: null,
+                      marker: null,
+                      world: "main",
+                      zoom: PALWORLD_MAP_MIN_ZOOM,
+                    });
+                  }}
+                  role="tab"
+                  type="button"
+                >
+                  {text.mapMainWorld}
+                </button>
+                <button
+                  aria-selected={mapQuery.world === "tree"}
+                  onClick={() => {
+                    if (mapQuery.world === "tree" || !PALWORLD_MAP_IMAGES.tree) return;
+                    pushQuery({
+                      center: null,
+                      marker: null,
+                      world: "tree",
+                      zoom: PALWORLD_MAP_MIN_ZOOM,
+                    });
+                  }}
+                  role="tab"
+                  type="button"
+                >
+                  {text.mapTreeWorld}
+                </button>
+              </div>
+                <div className="palworld-map-controls" aria-label={text.mapZoomLevel} data-map-interactive="true">
+                  <Button
+                    aria-label={text.mapZoomOut}
+                    className="palworld-map-control is-zoom-out"
+                    disabled={view.zoom <= PALWORLD_MAP_MIN_ZOOM + PALWORLD_MAP_ZOOM_EPSILON}
+                    onClick={() => zoomAt(viewRef.current.zoom - PALWORLD_MAP_ZOOM_STEP)}
+                    size="sm"
+                    variant="secondary"
+                  >
+                    −
+                  </Button>
+                  <output
+                    aria-live="polite"
+                    aria-label={`${text.mapZoomLevel} ${zoomPercent}%`}
+                    className="palworld-map-zoom-output"
+                  >
+                    {zoomPercent}%
+                  </output>
+                  <Button
+                    aria-label={text.mapZoomIn}
+                    className="palworld-map-control is-zoom-in"
+                    disabled={view.zoom >= PALWORLD_MAP_MAX_ZOOM - PALWORLD_MAP_ZOOM_EPSILON}
+                    onClick={() => zoomAt(viewRef.current.zoom + PALWORLD_MAP_ZOOM_STEP)}
+                    size="sm"
+                    variant="secondary"
+                  >
+                    +
+                  </Button>
+                  <Button
+                    className="palworld-map-control is-zoom-reset"
+                    disabled={view.zoom <= PALWORLD_MAP_MIN_ZOOM + PALWORLD_MAP_ZOOM_EPSILON && view.x === 0 && view.y === 0}
+                    onClick={() => {
+                      resetView();
+                      replaceQuery({ center: null, marker: null, zoom: PALWORLD_MAP_MIN_ZOOM });
+                    }}
+                    size="sm"
+                    variant="ghost"
+                  >
+                    {text.mapZoomReset}
+                  </Button>
+                </div>
+                <div
+                  aria-label={text.mapWheelZoomHint}
+                  className="palworld-map-wheel-hint"
+                  data-map-interactive="true"
+                  role="note"
+                >
+                  <kbd>{text.mapWheelZoomShortcut}</kbd>
+                  <span>{text.mapWheelZoomHint}</span>
+                </div>
+                <span aria-live="polite" className="yoro-u-sr-only">
+                  {copyState === "copied"
+                    ? text.mapLinkCopied
+                    : copyState === "error"
+                      ? text.mapLinkCopyError
+                      : ""}
+                </span>
+                </div>
+              </figure>
+              {/* 상태 배지는 지도 상자 기준으로 놓습니다. 카드 기준이면 지도가 좁아졌을 때 밖으로 나갑니다. */}
             <div className="palworld-map-toolbar">
               <div
                 aria-live="polite"
@@ -1899,216 +2290,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
                   </span>
                 ) : null}
               </div>
-              <div
-                aria-label={text.mapWorldSelection}
-                className="palworld-map-world-switcher"
-                role="tablist"
-              >
-                <button
-                  aria-selected={mapQuery.world === "main"}
-                  onClick={() => {
-                    if (mapQuery.world === "main") return;
-                    pushQuery({
-                      center: null,
-                      marker: null,
-                      world: "main",
-                      zoom: PALWORLD_MAP_MIN_ZOOM,
-                    });
-                  }}
-                  role="tab"
-                  type="button"
-                >
-                  {text.mapMainWorld}
-                </button>
-                <button
-                  aria-selected={mapQuery.world === "tree"}
-                  onClick={() => {
-                    if (mapQuery.world === "tree" || !PALWORLD_MAP_IMAGES.tree) return;
-                    pushQuery({
-                      center: null,
-                      marker: null,
-                      world: "tree",
-                      zoom: PALWORLD_MAP_MIN_ZOOM,
-                    });
-                  }}
-                  role="tab"
-                  type="button"
-                >
-                  {text.mapTreeWorld}
-                </button>
-              </div>
             </div>
-
-            <div className="palworld-map-canvas-shell">
-              <figure className="palworld-map-figure">
-                <div
-                aria-label={text.mapImageAlt}
-                aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight + - Home"
-                className="palworld-map-viewport"
-                data-testid="palworld-map-viewport"
-                data-panning={isPanning ? "true" : undefined}
-                data-touch-mode="map"
-                data-zoomed={view.zoom > PALWORLD_MAP_MIN_ZOOM + PALWORLD_MAP_ZOOM_EPSILON ? "true" : undefined}
-                onClick={(event) => {
-                  const target = event.target;
-                  if (
-                    target === event.currentTarget
-                    || !(target instanceof Element)
-                    || !target.closest("[data-map-interactive='true']")
-                  ) {
-                    if (selectedMarker || selectedMapLocation) closeMarkerPopover();
-                  }
-                }}
-                onKeyDown={handleKeyDown}
-                onLostPointerCapture={endPointer}
-                onPointerCancel={endPointer}
-                onPointerDown={handlePointerDown}
-                onPointerMove={handlePointerMove}
-                onPointerUp={endPointer}
-                onWheel={handleWheel}
-                ref={viewportRef}
-                role="region"
-                style={{ aspectRatio: mapAspectRatio }}
-                tabIndex={0}
-              >
-                {loadState === "loading" ? (
-                  <div className="palworld-map-loading" role="status" aria-label={text.mapLoading}>
-                    <Skeleton className="palworld-map-skeleton" rounded />
-                  </div>
-                ) : null}
-                {loadState === "error" || !activeMapImage ? (
-                  <EmptyState className="palworld-map-error" variant="error" role="alert">
-                    <EmptyStateIcon>!</EmptyStateIcon>
-                    <EmptyStateTitle>{text.mapLoadError}</EmptyStateTitle>
-                    <EmptyStateDescription>{text.mapLoadErrorDescription}</EmptyStateDescription>
-                    <EmptyStateActions>
-                      <Button onClick={retryMapImage} variant="secondary">{text.mapRetry}</Button>
-                    </EmptyStateActions>
-                  </EmptyState>
-                ) : (
-                  <div
-                    className="palworld-map-stage palworld-map-stage-layout-zoom"
-                    data-testid="palworld-map-stage"
-                    style={mapStyle}
-                  >
-                    <img
-                      alt={text.mapImageAlt}
-                      className={`palworld-map-image${loadState === "loading" ? " is-loading" : ""}`}
-                      data-testid="palworld-map-image"
-                      decoding="async"
-                      draggable={false}
-                      height={activeMapImage.height}
-                      key={`${mapQuery.world}-${imageRevision}`}
-                      onError={() => setLoadState("error")}
-                      onLoad={() => setLoadState("ready")}
-                      src={activeMapImage.imageUrl}
-                      width={activeMapImage.width}
-                    />
-                    {markerLayer ? (
-                      <div className="palworld-map-marker-layer">
-                        {typeof markerLayer === "function" ? markerLayer(view) : markerLayer}
-                      </div>
-                    ) : null}
-                    {loadState === "ready" && spawnLayerSelected && spawnState === "ready" ? (
-                      <div className="palworld-map-marker-layer" data-testid="palworld-map-spawn-areas">
-                        <PalworldSpawnAreaLayer points={visibleSpawnPoints} zoom={view.zoom} />
-                      </div>
-                    ) : null}
-                    {loadState === "ready" && visibleMapLocations.length ? (
-                      <div
-                        className="palworld-map-marker-layer"
-                        data-testid="palworld-map-imported-locations"
-                      >
-                        <PalworldMapLocationLayer
-                          clusterLabel={locationClusterLabel}
-                          iconAssets={PALWORLD_MAP_LAYER_ICONS}
-                          labels={PALWORLD_MAP_LOCATION_LABELS}
-                          locale={locale}
-                          locations={visibleMapLocations}
-                          subtypeLabels={PALWORLD_MAP_COLLECTIBLE_TYPE_LABELS}
-                          onSelectCluster={focusMapLocationCluster}
-                          onSelectLocation={selectMapLocation}
-                          popoverId={PALWORLD_MAP_MARKER_POPOVER_ID}
-                          selectedLocationId={selectedMapLocation?.id}
-                          zoom={view.zoom}
-                        />
-                      </div>
-                    ) : null}
-                    {loadState === "ready" && visibleBossMarkers.length ? (
-                      <div className="palworld-map-marker-layer" data-testid="palworld-map-boss-markers">
-                        <PalworldBossMarkerLayer
-                          focusedPalId={activeFocusPalId}
-                          locale={locale}
-                          markers={visibleBossMarkers}
-                          onOpenPal={onOpenPal}
-                          onSelectMarker={selectBossMarker}
-                          popoverId={PALWORLD_MAP_MARKER_POPOVER_ID}
-                          selectedMarkerId={selectedMarker?.id}
-                          zoom={view.zoom}
-                        />
-                      </div>
-                    ) : null}
-                  </div>
-                )}
-                <div className="palworld-map-controls" aria-label={text.mapZoomLevel} data-map-interactive="true">
-                  <Button
-                    aria-label={text.mapZoomOut}
-                    className="palworld-map-control is-zoom-out"
-                    disabled={view.zoom <= PALWORLD_MAP_MIN_ZOOM + PALWORLD_MAP_ZOOM_EPSILON}
-                    onClick={() => zoomAt(viewRef.current.zoom - PALWORLD_MAP_ZOOM_STEP)}
-                    size="sm"
-                    variant="secondary"
-                  >
-                    −
-                  </Button>
-                  <output
-                    aria-live="polite"
-                    aria-label={`${text.mapZoomLevel} ${zoomPercent}%`}
-                    className="palworld-map-zoom-output"
-                  >
-                    {zoomPercent}%
-                  </output>
-                  <Button
-                    aria-label={text.mapZoomIn}
-                    className="palworld-map-control is-zoom-in"
-                    disabled={view.zoom >= PALWORLD_MAP_MAX_ZOOM - PALWORLD_MAP_ZOOM_EPSILON}
-                    onClick={() => zoomAt(viewRef.current.zoom + PALWORLD_MAP_ZOOM_STEP)}
-                    size="sm"
-                    variant="secondary"
-                  >
-                    +
-                  </Button>
-                  <Button
-                    className="palworld-map-control is-zoom-reset"
-                    disabled={view.zoom <= PALWORLD_MAP_MIN_ZOOM + PALWORLD_MAP_ZOOM_EPSILON && view.x === 0 && view.y === 0}
-                    onClick={() => {
-                      resetView();
-                      replaceQuery({ center: null, marker: null, zoom: PALWORLD_MAP_MIN_ZOOM });
-                    }}
-                    size="sm"
-                    variant="ghost"
-                  >
-                    {text.mapZoomReset}
-                  </Button>
-                </div>
-                <div
-                  aria-label={text.mapWheelZoomHint}
-                  className="palworld-map-wheel-hint"
-                  data-map-interactive="true"
-                  role="note"
-                >
-                  <kbd>{text.mapWheelZoomShortcut}</kbd>
-                  <span>{text.mapWheelZoomHint}</span>
-                </div>
-                <span aria-live="polite" className="yoro-u-sr-only">
-                  {copyState === "copied"
-                    ? text.mapLinkCopied
-                    : copyState === "error"
-                      ? text.mapLinkCopyError
-                      : ""}
-                </span>
-                </div>
-              </figure>
               {markerPopover ?? locationPopover}
             </div>
           </Card>

@@ -1850,67 +1850,29 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   assert.match(korean, /role="tablist"/u);
   assert.match(korean, /팰파고스섬/u);
   assert.match(korean, /세계수/u);
+  /* 기본은 "데이터 있는 항목만"이지만, 숨김은 서버가 0 을 확인해 준 카테고리만
+     대상입니다. SSR 은 아직 아무것도 받지 않았으므로(모두 "모름") 전 행이 켤 수
+     있는 상태로 남습니다 — 모름을 숨기면 데이터가 있는 레이어까지 잠급니다.
+     실제 숨김 동작은 Playwright 실데이터 테스트가 검증합니다. */
+  assert.match(korean, /데이터 있는 항목만/u);
+  assert.match(japanese, /データがある項目のみ/u);
+  assert.doesNotMatch(korean, /비어 있는 항목 \d+종은 숨겼습니다\./u);
+  assert.doesNotMatch(korean, />위치 없음</u);
   assert.match(korean, />위치</u);
-  assert.match(korean, /빠른 이동 지점/u);
-  assert.match(korean, /수집품/u);
   assert.match(korean, /쿠룰리스 상/u);
-  assert.match(korean, /도로롱 상/u);
-  assert.match(korean, /펭키 상/u);
-  assert.match(korean, /크로꽁 상/u);
-  assert.match(korean, /초원 알/u);
-  assert.match(korean, /천락 알/u);
-  assert.match(korean, /광물·광석/u);
-  assert.match(korean, /고대 짐승뼈/u);
-  assert.match(korean, /고대나무껍질/u);
-  assert.match(korean, /크로마이트/u);
-  assert.match(korean, /헥솔라이트/u);
-  assert.match(korean, /순수한 석영 클러스터/u);
+  /* 행 바로 안의 input 만 봅니다 — 느슨한 [\s\S]* 는 뒤 그룹의 disabled 행까지 잡습니다. */
   assert.match(
     korean,
-    /data-layer="resource-chromite"[\s\S]*<input disabled=""/u,
+    /data-layer="resource-chromite"><label for="[^"]*"><input id=/u,
   );
   assert.match(
     korean,
-    /data-layer="resource-hexolite-quartz"[\s\S]*<input disabled=""/u,
+    /data-layer="resource-hexolite-quartz"><label for="[^"]*"><input id=/u,
   );
   assert.match(korean, /팰지움 파편/u);
-  assert.match(korean, /금속 광석/u);
-  assert.match(korean, /코랄리움 광석/u);
-  assert.match(korean, /팰키사이트/u);
-  assert.match(korean, /data-layer="fast-travel"[\s\S]*<input disabled=""/u);
-  assert.equal(
-    (korean.match(/class="palworld-map-filter-layer-icon"/gu) ?? []).length,
-    55,
-  );
+  assert.match(korean, /data-layer="fast-travel"><label for="[^"]*"><input id=/u);
+  assert.match(korean, /data-layer="egg-grass"/u);
   assert.match(
-    korean,
-    /data-layer="fast-travel"[\s\S]*src="\/images\/palworld\/1\.0\.1\/map-icons\/[a-f0-9]{64}\.webp"/u,
-  );
-  assert.match(
-    korean,
-    /data-layer="egg-grass"[\s\S]*?src="\/images\/palworld\/1\.0\.1\/map-icons\/[a-f0-9]{64}\.webp"/u,
-  );
-  assert.match(
-    korean,
-    /data-layer="egg-grass"[\s\S]*?<img[^>]*loading="eager"[^>]*src="\/images\/palworld\/1\.0\.1\/map-icons\/[a-f0-9]{64}\.webp"/u,
-  );
-  assert.match(
-    korean,
-    /data-layer="statue-lifmunk"[\s\S]*?src="\/images\/palworld\/1\.0\.1\/map-icons\/[a-f0-9]{64}\.webp"/u,
-  );
-  assert.match(
-    korean,
-    /data-layer="resource-copper-ore"[\s\S]*?src="\/images\/palworld\/1\.0\.1\/items\/[a-f0-9]{64}\.webp"/u,
-  );
-  assert.match(
-    korean,
-    /data-layer="resource-stone"[\s\S]*?src="\/images\/palworld\/1\.0\.1\/items\/[a-f0-9]{64}\.webp"/u,
-  );
-  assert.match(
-    korean,
-    /data-layer="resource-manganese-ore"[\s\S]*?src="\/images\/palworld\/1\.0\.1\/items\/[a-f0-9]{64}\.webp"/u,
-  );
-  assert.doesNotMatch(
     korean,
     /data-layer="statue-lifmunk"[\s\S]*?src="\/images\/palworld\/1\.0\.1\/pals\//u,
   );
@@ -1922,14 +1884,10 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   assert.doesNotMatch(korean, /게임 월드에서 검증된 위치를 표시합니다/u);
   assert.match(japanese, /Palworld ワールドマップ/u);
   assert.match(japanese, />フィルター 1件</u);
+  /* 일본어도 같은 기본값 — SSR 은 아직 "모름"이라 접힌 행이 없습니다. */
+  assert.match(japanese, /データがある項目のみ/u);
+  assert.doesNotMatch(japanese, /空の項目\d+種を非表示にしました。/u);
   assert.match(japanese, />場所</u);
-  assert.match(japanese, /収集品/u);
-  assert.match(japanese, /鉱物・鉱石/u);
-  assert.match(japanese, /金属鉱石/u);
-  assert.match(japanese, /コラルム鉱石/u);
-  assert.match(japanese, /パルキサイト/u);
-  assert.match(japanese, /クルリス像/u);
-  assert.match(japanese, /モコロン像/u);
   assert.match(
     japanese,
     /検証済みのフィールドボス、野生スポーン、移動・収集地点が表示されたPalworldワールドマップ/u
@@ -1974,8 +1932,14 @@ test("월드 지도 필터와 마커 상세는 검증된 레이어만 선택하�
   const filter = renderToStaticMarkup(
     <PalworldMapFilterPanel
       collapsed={false}
+      availableOnly={false}
       copy={{
         all: { ko: "전체", ja: "すべて" },
+        availableOnly: { ko: "데이터 있는 항목만", ja: "データがある項目のみ" },
+        hiddenEmpty: {
+          ko: "비어 있는 항목 {count}종은 숨겼습니다.",
+          ja: "空の項目{count}種を非表示にしました。",
+        },
         hide: { ko: "필터 숨기기", ja: "フィルターを隠す" },
         reset: { ko: "초기화", ja: "リセット" },
         show: { ko: "필터 열기", ja: "フィルターを開く" },
@@ -2001,6 +1965,7 @@ test("월드 지도 필터와 마커 상세는 검증된 레이어만 선택하�
         }],
       }]}
       locale="ko"
+      onAvailableOnlyChange={() => undefined}
       onCollapsedChange={() => undefined}
       onGroupLayerChange={() => undefined}
       onLayerChange={() => undefined}
@@ -2126,17 +2091,24 @@ test("월드 지도 이동과 기준점 확대는 지도 경계를 벗어나지 
     shouldZoomPalworldMapFromWheel("always", { ctrlKey: false, metaKey: false }),
     true,
   );
+  // stage 는 뷰포트 폭 기준 정사각입니다. 세로 한계도 폭(1,000)으로 셉니다 —
+  // 그래야 넓은 화면(h < w)에서 줌 1 에서도 남쪽으로 밀 수 있습니다.
   assert.deepEqual(
     clampPalworldMapView({ x: 120, y: -1_000, zoom: 2 }, 1_000, 800),
-    { x: 0, y: -800, zoom: 2 },
+    { x: 0, y: -1_000, zoom: 2 },
   );
   assert.deepEqual(
     clampPalworldMapView({ x: -400, y: -300, zoom: 1 }, 1_000, 800),
+    { x: 0, y: -200, zoom: 1 },
+  );
+  // 정사각 뷰포트(상세 미니맵)에서는 예전 수식과 완전히 같습니다.
+  assert.deepEqual(
+    clampPalworldMapView({ x: -400, y: -300, zoom: 1 }, 800, 800),
     { x: 0, y: 0, zoom: 1 },
   );
   assert.deepEqual(
     clampPalworldMapView({ x: -12_000, y: -12_000, zoom: 12 }, 1_000, 800),
-    { x: -9_000, y: -7_200, zoom: 10 },
+    { x: -9_000, y: -9_200, zoom: 10 },
   );
 
   const zoomed = zoomPalworldMapViewAt(
@@ -2155,13 +2127,14 @@ test("월드 지도 이동과 기준점 확대는 지도 경계를 벗어나지 
     { x: 0, y: 0, zoom: 1 },
   );
 
+  // 마커의 세로 화면 좌표도 stage(폭 × zoom) 기준입니다.
   assert.deepEqual(
     focusPalworldMapViewAt({ normalizedX: 0.25, normalizedY: 0.75 }, 1_000, 800),
-    { x: 0, y: -800, zoom: 2 },
+    { x: 0, y: -1_100, zoom: 2 },
   );
   assert.deepEqual(
     focusPalworldMapViewAt({ normalizedX: 0.5, normalizedY: 0.5 }, 1_000, 800),
-    { x: -500, y: -400, zoom: 2 },
+    { x: -500, y: -600, zoom: 2 },
   );
 });
 

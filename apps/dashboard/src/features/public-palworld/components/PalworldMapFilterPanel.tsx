@@ -24,6 +24,8 @@ export type PalworldMapFilterPanelCopy = {
   show: PalworldMapLocalizedLabel;
   reset: PalworldMapLocalizedLabel;
   all: PalworldMapLocalizedLabel;
+  availableOnly: PalworldMapLocalizedLabel;
+  hiddenEmpty: PalworldMapLocalizedLabel;
 };
 
 type PalworldMapFilterPanelProps = {
@@ -41,6 +43,9 @@ type PalworldMapFilterPanelProps = {
   ) => void;
   onLayerChange: (layerId: PalworldMapLayerOption["id"], selected: boolean) => void;
   onReset: () => void;
+  /** true 면 데이터가 없는(선택 불가·0건) 항목을 접습니다. */
+  availableOnly: boolean;
+  onAvailableOnlyChange: (availableOnly: boolean) => void;
 };
 
 function GroupSelectionInput({
@@ -167,6 +172,7 @@ function LayerRow({
 }
 
 function LayerGroup({
+  availableOnly,
   allLabel,
   group,
   groupIndex,
@@ -176,6 +182,7 @@ function LayerGroup({
   onLayerChange,
   rootId,
 }: {
+  availableOnly: boolean;
   allLabel: PalworldMapLocalizedLabel;
   group: PalworldMapLayerGroup;
   groupIndex: number;
@@ -232,15 +239,17 @@ function LayerGroup({
         />
       </div>
       <ul hidden={collapsed} id={contentId}>
-        {group.layers.map((layer, layerIndex) => (
-          <LayerRow
-            inputId={`${contentId}-layer-${layerIndex}`}
-            key={layer.id}
-            layer={layer}
-            locale={locale}
-            onChange={(event) => onLayerChange(layer.id, event.currentTarget.checked)}
-          />
-        ))}
+        {group.layers
+          .filter((layer) => !availableOnly || !isEmptyLayer(layer))
+          .map((layer) => (
+            <LayerRow
+              inputId={`${contentId}-layer-${layer.id}`}
+              key={layer.id}
+              layer={layer}
+              locale={locale}
+              onChange={(event) => onLayerChange(layer.id, event.currentTarget.checked)}
+            />
+          ))}
       </ul>
     </fieldset>
   );
@@ -250,13 +259,23 @@ function LayerGroup({
  * 검증된 지도 레이어의 노출만 제어하는 접근 가능한 필터 패널입니다.
  * `state="ready"`가 아닌 레이어는 UI에서 선택할 수 없습니다.
  */
+/** 켜도 아무것도 나오지 않는 항목인지 판정합니다. 켜져 있는 항목은 항상 보여 줍니다. */
+/* "비어 있음"은 서버가 0 을 확인해 준 경우뿐입니다. count 가 없는(아직 안 받아 본)
+   레이어나 로딩·선택 대기 상태를 숨기면 데이터가 있는 항목까지 사라집니다. */
+function isEmptyLayer(layer: PalworldMapLayerOption): boolean {
+  if (layer.selected) return false;
+  return layer.count === 0;
+}
+
 export function PalworldMapFilterPanel({
+  availableOnly,
   children,
   className,
   collapsed,
   copy,
   groups,
   locale,
+  onAvailableOnlyChange,
   onCollapsedChange,
   onGroupCollapsedChange,
   onGroupLayerChange,
@@ -265,6 +284,15 @@ export function PalworldMapFilterPanel({
 }: PalworldMapFilterPanelProps) {
   const rootId = useId();
   const contentId = `${rootId}-content`;
+  const hiddenCount = groups.reduce(
+    (total, group) => total + group.layers.filter(isEmptyLayer).length,
+    0,
+  );
+  /* 그룹의 모든 항목이 접히면 그룹 머리글도 함께 접습니다. */
+  const visibleGroups = groups
+    .map((group, index) => ({ group, index }))
+    .filter(({ group }) => !availableOnly
+      || group.layers.some((layer) => !isEmptyLayer(layer)));
   const panelClassName = ["palworld-map-filter-panel", className]
     .filter(Boolean)
     .join(" ");
@@ -312,9 +340,21 @@ export function PalworldMapFilterPanel({
             {children}
           </div>
         ) : null}
-        {groups.map((group, index) => (
+        {/* 64행 중 49행이 "위치 없음"이었습니다. 켤 수 있는 것만 먼저 보여 줍니다. */}
+        <label className="palworld-map-filter-available-toggle">
+          <input
+            checked={availableOnly}
+            onChange={(event) => onAvailableOnlyChange(event.currentTarget.checked)}
+            type="checkbox"
+          />
+          <span data-ja={copy.availableOnly.ja} data-ko={copy.availableOnly.ko}>
+            {resolvePalworldMapLabel(copy.availableOnly, locale)}
+          </span>
+        </label>
+        {visibleGroups.map(({ group, index }) => (
           <LayerGroup
             allLabel={copy.all}
+            availableOnly={availableOnly}
             group={group}
             groupIndex={index}
             key={group.id}
@@ -325,6 +365,18 @@ export function PalworldMapFilterPanel({
             rootId={rootId}
           />
         ))}
+        {availableOnly && hiddenCount > 0 ? (
+          <p
+            className="palworld-map-filter-hidden-note"
+            data-ja={copy.hiddenEmpty.ja.replace("{count}", String(hiddenCount))}
+            data-ko={copy.hiddenEmpty.ko.replace("{count}", String(hiddenCount))}
+          >
+            {resolvePalworldMapLabel(copy.hiddenEmpty, locale).replace(
+              "{count}",
+              String(hiddenCount),
+            )}
+          </p>
+        ) : null}
       </div>
     </Card>
   );

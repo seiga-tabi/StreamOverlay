@@ -4565,6 +4565,15 @@ function MatchLaneCompareView({
         : undefined,
       championName: championName(player.champion),
       isTarget: player.isTarget,
+      /* slot 6은 장신구(와드)입니다. 라인 비교의 남는 폭은 장비 6칸 기준으로
+         계산돼 있어(44rem 부근에서 7칸이면 넘칩니다) 장신구는 뺍니다. */
+      items: player.items
+        .filter((item) => item.slot !== 6 && item.iconUrl)
+        .map((item) => ({
+          key: `${match.matchId}:lane-item:${teamId}:${index}:${item.slot}:${item.itemId}`,
+          iconUrl: assetUrl(item.iconUrl as string),
+          label: activePublicLocale === "ja" ? item.nameJa ?? item.nameKo : item.nameKo ?? item.nameJa
+        })),
       kdaLabel: `${player.kills}/${player.deaths}/${player.assists}`,
       name,
       onSearch: !hideRiotIds && player.riotId ? () => onSearchRiotId(player.riotId as string) : undefined,
@@ -4615,7 +4624,8 @@ function MatchLaneCompareView({
         ariaLabel: t().matchLaneCompare,
         damageLabel: t().damage,
         emptySlotLabel: t().noData,
-        goldLabel: t().gold
+        goldLabel: t().gold,
+        itemsLabel: t().items
       }}
     />
   );

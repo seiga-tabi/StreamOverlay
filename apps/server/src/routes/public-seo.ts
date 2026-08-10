@@ -54,6 +54,13 @@ export type PublicSeoMetadata = {
   imageUrl: string;
   locale: PublicUrlLocale;
   openGraphType: "website" | "profile" | "article";
+  /**
+   * 색인 제외 여부. 소환사 프로필처럼 URL 공간이 무한한 경로에서, 실제 조회된 적
+   * 없는(캐시에 없는) 페이지가 200 + 자기 canonical로 서빙되면 Google이 임의
+   * 문자열 URL 전부를 색인 후보로 삼아 soft 404가 쌓입니다. 그런 페이지는 동작은
+   * 유지하되 noindex로 색인 대상에서만 제외합니다.
+   */
+  robotsNoindex?: boolean;
   structuredData: readonly unknown[];
   title: string;
 };
@@ -334,7 +341,10 @@ const BREADCRUMB_SEGMENT_LABELS: Readonly<Record<string, Readonly<Record<PublicU
   "/lol": { ko: "LoL 전적 검색", ja: "LoL戦績検索" },
   "/lol/aram": { ko: "증강 칼바람", ja: "オーグメントARAM" },
   "/patch-notes": { ko: "패치 노트", ja: "パッチノート" },
-  "/lol/summoners": { ko: "소환사", ja: "サモナー" },
+  /* "/lol/summoners"(목록)는 실제 라우트가 없어 404입니다 — 여기 두면
+     genericFallback의 sibling 링크와 breadcrumb JSON-LD가 404 URL을
+     크롤러에게 제공합니다. 라벨이 없으면 두 곳 모두에서 자동으로 빠지고,
+     소환사 상세 breadcrumb은 "홈 > LoL 전적 검색 > 소환사명"으로 이어집니다. */
   "/palworld": { ko: "팰월드", ja: "パルワールド" },
   "/palworld/pals": { ko: "팰 도감", ja: "パル図鑑" },
   "/palworld/items": { ko: "아이템", ja: "アイテム" },
@@ -755,6 +765,7 @@ function replaceOrInsertHeadTag(html: string, matcher: RegExp, tag: string): str
 function stripInjectedSeoTags(html: string): string {
   return html
     .replaceAll(/<link\s+rel="alternate"\s+hreflang="[^"]*"[^>]*>/giu, "")
+    .replaceAll(/<meta\s+name="robots"[^>]*>/giu, "")
     .replaceAll(/<script\s+type="application\/ld\+json"[\s\S]*?<\/script>/giu, "");
 }
 
@@ -773,6 +784,9 @@ export function applyPublicSeoMetadata(html: string, metadata: PublicSeoMetadata
     `<title>${escapeSeoHtml(metadata.title)}</title>`
   );
   nextHtml = nextHtml.replace(/<html\s+lang="[^"]*"/u, `<html lang="${metadata.locale}"`);
+  if (metadata.robotsNoindex) {
+    nextHtml = nextHtml.replace(/<\/head>/iu, '<meta name="robots" content="noindex" /></head>');
+  }
   for (const [pattern, value] of replacements) {
     nextHtml = nextHtml.replace(pattern, (_match, prefix: string, suffix: string) => (
       `${prefix}${escapeSeoHtml(value)}${suffix}`

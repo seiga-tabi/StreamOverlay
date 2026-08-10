@@ -455,6 +455,14 @@
   gap: var(--yoro-space-4);
 }
 
+/* 시트는 48rem 이하(태블릿 세로 포함) 전용입니다. 그보다 넓으면 —
+   태블릿 가로의 2컬럼 분할을 포함해 — 사이드 레일이 담당합니다. */
+@media (min-width: 48.001rem) {
+  .palworld-map-sheet {
+    display: none;
+  }
+}
+
 .palworld-map-mobile-filter-trigger {
   display: none;
 }
@@ -514,6 +522,33 @@
 .palworld-map-filter-content[hidden],
 .palworld-map-filter-group > ul[hidden] {
   display: none;
+}
+
+/* "데이터 있는 항목만" 토글. 행들과 같은 44px 목표를 지킵니다. */
+.palworld-map-filter-available-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--yoro-space-2);
+  min-block-size: var(--yoro-size-touch-target);
+  padding-inline: var(--yoro-space-3);
+  border-block-end: thin solid var(--yoro-color-border);
+  color: var(--yoro-color-text);
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-medium);
+  cursor: pointer;
+}
+
+.palworld-map-filter-available-toggle input {
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  accent-color: var(--palworld-accent);
+}
+
+.palworld-map-filter-hidden-note {
+  margin: 0;
+  padding: var(--yoro-space-2) var(--yoro-space-3) var(--yoro-space-3);
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-xs);
 }
 
 .palworld-map-filter-search {
@@ -584,6 +619,17 @@
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+/* 그룹 머리의 "전체" 체크박스는 19px 이었습니다. 레이어 행과 같은 목표 크기로 맞춥니다. */
+.palworld-map-filter-all {
+  min-block-size: var(--yoro-size-touch-target);
+}
+
+/* 상태 배지가 눌려 "위치 없음"(45px)이 41px 상자에서 잘렸습니다.
+   배지는 줄이지 말고 레이어 이름 쪽이 줄어들게 합니다. */
+.palworld-map-filter-layer > label > .yoro-badge {
+  flex: none;
 }
 
 .palworld-map-filter-layer > label {
@@ -741,6 +787,19 @@
   gap: var(--yoro-space-2);
 }
 
+/* 월드 전환은 어느 폭에서나 지도 왼쪽 위에 둡니다.
+   예전에는 데스크톱만 지도 위였고 좁은 화면에서는 지도 아래 회색 띠에 있었습니다. */
+.palworld-map-viewport > .palworld-map-world-switcher {
+  position: absolute;
+  inset-block-start: var(--yoro-space-3);
+  inset-inline-start: var(--yoro-space-3);
+  z-index: var(--yoro-z-sticky);
+  padding: var(--yoro-space-1);
+  border-radius: var(--yoro-radius-lg);
+  background: color-mix(in srgb, var(--yoro-color-surface-strong) 92%, transparent);
+  box-shadow: var(--yoro-shadow-panel);
+}
+
 .palworld-map-viewport > .palworld-map-controls {
   position: absolute;
   inset-inline-end: var(--yoro-space-3);
@@ -815,18 +874,14 @@
   position: relative;
   inline-size: 100%;
   min-inline-size: 0;
-  overflow: hidden;
+  /* hidden 은 여전히 스크롤 컨테이너라 내부 focus() 가 scrollTop 을 몰래 밀어
+     stage(transform 기준) 와 어긋납니다. clip 은 스크롤 자체가 불가능합니다. */
+  overflow: clip;
   overscroll-behavior: contain;
   background: var(--yoro-color-surface-strong);
   cursor: grab;
   /* 상세 미니맵은 1배율에서 Modal 스크롤을 허용합니다. */
   touch-action: pan-y;
-}
-
-@media (min-width: 64rem) {
-  .palworld-map-viewport {
-    block-size: clamp(30rem, calc(100dvh - 17rem), 42rem);
-  }
 }
 
 .palworld-map-viewport[data-touch-mode="map"],
@@ -5418,6 +5473,31 @@
     gap: 0;
   }
 
+  /* 두 열의 높이를 창에 묶습니다.
+     이렇게 하지 않으면 필터 그룹을 접을 때 레일이 줄면서 stretch 로 붙은
+     지도 카드까지 따라 줄어듭니다(실측 229px). 각 열은 안에서만 스크롤합니다. */
+  @media (min-width: 64rem) {
+    .palworld-map-workspace {
+      block-size: calc(100dvh - 11rem);
+      min-block-size: 34rem;
+    }
+
+    .palworld-map-workspace > .palworld-map-filter-panel,
+    .palworld-map-workspace > .palworld-map-explorer-main,
+    .palworld-map-card {
+      min-block-size: 0;
+    }
+
+    .palworld-map-card {
+      overflow: hidden;
+    }
+
+    .palworld-map-card .palworld-map-canvas-shell {
+      min-block-size: 0;
+      overflow: auto;
+    }
+  }
+
   .palworld-map-filter-panel.palworld-map-desktop-filter {
     align-self: stretch;
     block-size: auto;
@@ -5453,8 +5533,18 @@
     min-block-size: 0;
   }
 
+  /* 지도 크기의 단일 출처.
+   *
+   * block-size 를 auto 로 두면 stage 가 열 폭만큼의 정사각이 되어
+   * 1440×900 에서 1,099px(창의 122%)가 되고 줌 버튼이 화면 밖으로 나갔습니다.
+   * 높이만 잘라내면 stage 는 그대로 폭 기준 정사각이라 남쪽이 잘리는데,
+   * clampPalworldMapView 가 "stage = 뷰포트 × zoom" 을 전제로 해서
+   * 줌 1 에서는 세로로 밀 수도 없습니다. 그래서 폭을 창 높이에 맞춰 줄입니다 —
+   * aspect-ratio(inline style)가 높이를 따라오므로 stage 와 뷰포트가 계속 일치합니다. */
+  /* 지도는 폭을 다 씁니다. 세로는 창에 맞춰 자르고, 잘린 남쪽은 끌어서 봅니다 —
+     clampPalworldMapView 가 stage 크기 기준이라 줌 1 에서도 세로 팬이 됩니다. */
   .palworld-map-card .palworld-map-viewport {
-    block-size: auto;
+    max-block-size: clamp(22rem, calc(100dvh - 13rem), 54rem);
   }
 
   .palworld-map-card .palworld-map-hint {
@@ -5601,8 +5691,8 @@
     flex-direction: column;
   }
 
-  .palworld-map-viewport {
-    block-size: clamp(32rem, calc(100dvh - 14rem), 40rem);
+  .palworld-map-card .palworld-map-viewport {
+    max-block-size: clamp(22rem, calc(100dvh - 12rem), 44rem);
   }
 }
 
@@ -5688,6 +5778,8 @@
     border-block-end: 0;
   }
 
+
+
   .palworld-map-layer-legend {
     display: none;
   }
@@ -5740,13 +5832,11 @@
     white-space: nowrap;
   }
 
-  .palworld-map-mobile-filters,
   .palworld-map-legend-sheet {
     place-items: end center;
     padding: var(--yoro-space-0);
   }
 
-  .palworld-map-mobile-filters .yoro-modal__dialog,
   .palworld-map-legend-sheet .yoro-modal__dialog {
     inline-size: 100%;
     max-block-size: min(92dvh, 48rem);
@@ -5760,29 +5850,154 @@
     padding-block-end: env(safe-area-inset-bottom);
   }
 
-  .palworld-map-mobile-filters__content {
+  /* ── 지도 필터 하단 시트 ──
+   *
+   * 예전 전체 화면 Modal 은 여는 순간 지도를 가렸습니다. 시트는 지도 위로
+   * 올라오되 덮지 않아, 칩을 누르면 마커가 즉시 늘고 주는 것이 보입니다.
+   * 세 자리: peek(손잡이) · half(칩 줄) · full(전체 목록). */
+  .palworld-map-sheet {
+    position: fixed;
+    inset-inline: 0;
+    inset-block-end: 0;
+    z-index: var(--yoro-z-overlay);
     display: flex;
-    overflow: hidden;
-    padding: var(--yoro-space-0);
+    flex-direction: column;
+    max-block-size: 78dvh;
+    border: thin solid var(--yoro-color-border);
+    border-block-end: none;
+    border-radius: var(--yoro-radius-lg) var(--yoro-radius-lg) 0 0;
+    background: var(--yoro-color-surface-strong);
+    box-shadow: var(--yoro-shadow-panel);
+    transition: transform 180ms ease-out;
   }
 
-  .palworld-map-mobile-filters__header {
+  /* 자리 이동은 transform 으로만 — 레이아웃을 다시 계산하지 않습니다. */
+  .palworld-map-sheet[data-snap="peek"] {
+    transform: translateY(calc(100% - 3.5rem));
+  }
+
+  .palworld-map-sheet[data-snap="half"] {
+    transform: translateY(calc(100% - 3.5rem - 4.25rem));
+  }
+
+  .palworld-map-sheet[data-snap="full"] {
+    transform: translateY(0);
+  }
+
+  .palworld-map-sheet__grab {
+    display: grid;
     flex: none;
-    padding: var(--yoro-space-3) var(--yoro-space-4);
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--yoro-space-1) var(--yoro-space-2);
+    min-block-size: 3.5rem;
+    padding: var(--yoro-space-2) var(--yoro-space-4) var(--yoro-space-1);
+    border: none;
+    background: none;
+    color: var(--yoro-color-text-strong);
+    font: inherit;
+    font-weight: var(--yoro-font-weight-bold);
+    cursor: grab;
+    touch-action: none;
+    text-align: start;
   }
 
-  .palworld-map-mobile-filters__footer {
+  .palworld-map-sheet__grab-bar {
+    grid-column: 1 / -1;
+    justify-self: center;
+    inline-size: var(--yoro-space-10);
+    block-size: var(--yoro-space-1);
+    border-radius: var(--yoro-radius-pill);
+    background: var(--yoro-color-border-strong);
+  }
+
+  .palworld-map-sheet__grab-count {
+    align-self: center;
+    padding: 0 var(--yoro-space-2);
+    border-radius: var(--yoro-radius-pill);
+    background: var(--palworld-accent-soft);
+    color: var(--yoro-color-text-strong);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--yoro-font-size-sm);
+  }
+
+  .palworld-map-sheet__body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-block-size: 0;
+  }
+
+  .palworld-map-sheet__chips {
+    display: flex;
+    flex: none;
+    gap: var(--yoro-space-1);
+    min-block-size: 4.25rem;
+    align-items: center;
+    padding: var(--yoro-space-2) var(--yoro-space-4);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .palworld-map-sheet__chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .palworld-map-sheet__chip {
+    display: inline-flex;
+    flex: none;
+    gap: var(--yoro-space-1);
+    align-items: center;
+    min-block-size: var(--yoro-size-touch-target);
+    padding: 0 var(--yoro-space-3);
+    border: thin solid var(--yoro-color-border);
+    border-radius: var(--yoro-radius-pill);
+    background: var(--yoro-color-surface);
+    color: var(--yoro-color-text);
+    font: inherit;
+    font-size: var(--yoro-font-size-sm);
+    font-weight: var(--yoro-font-weight-medium);
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .palworld-map-sheet__chip[aria-pressed="true"] {
+    border-color: var(--palworld-accent);
+    background: var(--palworld-accent-soft);
+    color: var(--yoro-color-text-strong);
+    font-weight: var(--yoro-font-weight-bold);
+  }
+
+  .palworld-map-sheet__chip b {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .palworld-map-sheet__panel {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-block-size: 0;
+    overflow: hidden;
+  }
+
+  .palworld-map-sheet__footer {
     display: grid;
     flex: none;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--yoro-space-2);
     padding:
       var(--yoro-space-3)
       var(--yoro-space-4)
       max(var(--yoro-space-3), env(safe-area-inset-bottom));
   }
 
-  .palworld-map-mobile-filters__footer .yoro-button {
+  .palworld-map-sheet__footer .yoro-button {
     inline-size: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .palworld-map-sheet {
+      transition: none;
+    }
   }
 
   .palworld-map-mobile-filters__panel {
@@ -5845,12 +6060,21 @@
     display: none;
   }
 
+  /* 좁은 화면에서는 왼쪽 위가 "필터" 버튼 자리입니다.
+     휠 안내는 여기서 숨기므로 월드 전환을 왼쪽 아래로 내립니다. */
+  .palworld-map-viewport > .palworld-map-world-switcher {
+    inset-block-start: auto;
+    inset-block-end: var(--yoro-space-3);
+  }
+
   .palworld-map-viewport {
-    block-size: min(
-      58dvh,
-      calc(100vw - (var(--yoro-space-6) + 2px)),
-      40rem
-    );
+    max-block-size: min(58dvh, 40rem);
+  }
+
+  /* 하단 시트(peek 3.5rem)가 지도 아래 모서리를 가리므로 컨트롤을 그 위로 올립니다. */
+  .palworld-map-viewport > .palworld-map-controls,
+  .palworld-map-viewport > .palworld-map-world-switcher {
+    inset-block-end: calc(3.5rem + var(--yoro-space-3));
   }
 
   .palworld-map-page > .palworld-page-heading {
@@ -6044,7 +6268,6 @@
   }
 
   .palworld-pals-filter-modal .yoro-modal__dialog::before,
-  .palworld-map-mobile-filters .yoro-modal__dialog::before,
   .palworld-map-legend-sheet .yoro-modal__dialog::before {
     align-self: center;
     flex: none;

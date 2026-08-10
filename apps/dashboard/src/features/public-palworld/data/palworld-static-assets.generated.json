@@ -155,17 +155,71 @@
     "main": {
       "imageUrl": "/images/palworld/1.0.1/maps/3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003.webp",
       "width": 4096,
-      "height": 4096
+      "height": 4096,
+      "variants": [
+        {
+          "width": 768,
+          "imageUrl": "/images/palworld-derived/1.0.1/maps/3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003-w768.webp"
+        },
+        {
+          "width": 1024,
+          "imageUrl": "/images/palworld-derived/1.0.1/maps/3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003-w1024.webp"
+        },
+        {
+          "width": 1536,
+          "imageUrl": "/images/palworld-derived/1.0.1/maps/3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003-w1536.webp"
+        },
+        {
+          "width": 2048,
+          "imageUrl": "/images/palworld-derived/1.0.1/maps/3b9c9c70f0fe0e025d67971d16bc6cb42a8ce3b63ad42f30681dcbf6ac379003-w2048.webp"
+        }
+      ]
     },
     "main-display": {
       "imageUrl": "/images/palworld/1.0.1/maps/dfb08d86604f7e563aaf4c4de4a426af169982ee67792867d8945ab105f66e8a.webp",
       "width": 4096,
-      "height": 4096
+      "height": 4096,
+      "variants": [
+        {
+          "width": 768,
+          "imageUrl": "/images/palworld-derived/1.0.1/maps/dfb08d86604f7e563aaf4c4de4a426af169982ee67792867d8945ab105f66e8a-w768.webp"
+        },
+        {
+          "width": 1024,
+          "imageUrl": "/images/palworld-derived/1.0.1/maps/dfb08d86604f7e563aaf4c4de4a426af169982ee67792867d8945ab105f66e8a-w1024.webp"
+        },
+        {
+          "width": 1536,
+          "imageUrl": "/images/palworld-derived/1.0.1/maps/dfb08d86604f7e563aaf4c4de4a426af169982ee67792867d8945ab105f66e8a-w1536.webp"
+        },
+        {
+          "width": 2048,
+          "imageUrl": "/images/palworld-derived/1.0.1/maps/dfb08d86604f7e563aaf4c4de4a426af169982ee67792867d8945ab105f66e8a-w2048.webp"
+        }
+      ]
     },
     "tree": {
       "imageUrl": "/images/palworld/1.0.1/maps/c49b2a18bf1512019f0e18c592c20d74cd491b10394ab8121581cc294f74a2cf.webp",
       "width": 4096,
-      "height": 4096
+      "height": 4096,
+      "variants": [
+        {
+          "width": 768,
+          "imageUrl": "/images/palworld-derived/1.0.1/maps/c49b2a18bf1512019f0e18c592c20d74cd491b10394ab8121581cc294f74a2cf-w768.webp"
+        },
+        {
+          "width": 1024,
+          "imageUrl": "/images/palworld-derived/1.0.1/maps/c49b2a18bf1512019f0e18c592c20d74cd491b10394ab8121581cc294f74a2cf-w1024.webp"
+        },
+        {
+          "width": 1536,
+          "imageUrl": "/images/palworld-derived/1.0.1/maps/c49b2a18bf1512019f0e18c592c20d74cd491b10394ab8121581cc294f74a2cf-w1536.webp"
+        },
+        {
+          "width": 2048,
+          "imageUrl": "/images/palworld-derived/1.0.1/maps/c49b2a18bf1512019f0e18c592c20d74cd491b10394ab8121581cc294f74a2cf-w2048.webp"
+        }
+      ]
     }
   }
 }

@@ -186,3 +186,27 @@ test("엔티티 sitemap은 ko·ja 두 URL을 만든다", () => {
   assert.match(xml, /<loc>https:\/\/yoro\.gg\/ja\/palworld\/pals\/cattiva<\/loc>/u);
   assert.equal((xml.match(/<url>/gu) ?? []).length, 4);
 });
+
+test("robotsNoindex metadata는 noindex 메타를 주입하고, 기본 페이지는 주입하지 않는다", () => {
+  const metadata = publicSeoMetadataForPath("/ko/lol/summoners/kr/Unknown-XX99");
+  // 기본 metadata에는 noindex가 없어야 합니다(캐시 존재 여부는 라우트 계층 판단).
+  const indexed = applyPublicSeoMetadata(APP_SHELL, metadata);
+  assert.doesNotMatch(indexed, /name="robots"/u);
+
+  const blocked = applyPublicSeoMetadata(APP_SHELL, { ...metadata, robotsNoindex: true });
+  assert.match(blocked, /<meta name="robots" content="noindex" \/>/u);
+  // strip이 동작해 재적용해도 중복되지 않습니다.
+  const reapplied = applyPublicSeoMetadata(blocked, { ...metadata, robotsNoindex: true });
+  assert.equal((reapplied.match(/name="robots"/gu) ?? []).length, 1);
+});
+
+test("fallback 링크와 breadcrumb은 라우트가 없는 /lol/summoners 목록을 가리키지 않는다", () => {
+  // /lol 페이지의 sibling 링크에 404인 소환사 목록이 섞이면 크롤러에게 깨진
+  // 내부 링크를 제공하게 됩니다.
+  const lolHtml = render("/ko/lol");
+  assert.doesNotMatch(lolHtml, /href="\/ko\/lol\/summoners"/u);
+
+  // 소환사 상세 breadcrumb JSON-LD에도 목록 URL이 없어야 합니다.
+  const profileHtml = render("/ko/lol/summoners/kr/Seiga-KR1");
+  assert.doesNotMatch(profileHtml, /yoro\.gg\/ko\/lol\/summoners"/u);
+});

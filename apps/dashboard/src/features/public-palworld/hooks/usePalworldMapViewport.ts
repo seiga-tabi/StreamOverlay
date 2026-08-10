@@ -64,9 +64,14 @@ export function clampPalworldMapView(
     return { x: 0, y: 0, zoom };
   }
 
+  /* stage 는 뷰포트 "폭" 기준 정사각입니다(layout width = 폭 × zoom, 이미지 1:1).
+     세로 한계를 뷰포트 높이 × zoom 으로 잡으면 넓은 화면(h < w)에서 줌 1 일 때
+     남쪽에 영영 닿지 못합니다 — 한계는 stage 크기에서 구합니다.
+     정사각 뷰포트(상세 미니맵)에서는 예전 수식과 완전히 같습니다. */
+  const stageSize = viewportWidth * zoom;
   return {
-    x: clamp(Number.isFinite(view.x) ? view.x : 0, viewportWidth - (viewportWidth * zoom), 0),
-    y: clamp(Number.isFinite(view.y) ? view.y : 0, viewportHeight - (viewportHeight * zoom), 0),
+    x: clamp(Number.isFinite(view.x) ? view.x : 0, Math.min(0, viewportWidth - stageSize), 0),
+    y: clamp(Number.isFinite(view.y) ? view.y : 0, Math.min(0, viewportHeight - stageSize), 0),
     zoom,
   };
 }
@@ -93,9 +98,11 @@ export function focusPalworldMapViewAt(
   viewportHeight: number,
   zoom = 2,
 ): PalworldMapViewState {
+  /* 마커의 화면 좌표는 stage 크기(폭 × zoom) 기준입니다. 세로도 폭으로 셉니다. */
+  const stageSize = viewportWidth * zoom;
   return clampPalworldMapView({
-    x: (viewportWidth / 2) - (marker.normalizedX * viewportWidth * zoom),
-    y: (viewportHeight / 2) - (marker.normalizedY * viewportHeight * zoom),
+    x: (viewportWidth / 2) - (marker.normalizedX * stageSize),
+    y: (viewportHeight / 2) - (marker.normalizedY * stageSize),
     zoom,
   }, viewportWidth, viewportHeight);
 }
@@ -180,6 +187,8 @@ export function usePalworldMapViewport(
     passiveTouchRef.current.clear();
     gestureRef.current = undefined;
     setIsPanning(false);
+    /* 넓은 화면에서는 stage 가 뷰포트보다 세로로 커서 북쪽부터 보입니다.
+       남쪽은 줌 1 에서도 끌어서 볼 수 있습니다(clamp 가 stage 크기 기준). */
     commitView({ x: 0, y: 0, zoom: PALWORLD_MAP_MIN_ZOOM });
   }, [commitView]);
 

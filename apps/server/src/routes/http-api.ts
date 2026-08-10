@@ -3613,7 +3613,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (!route) return fallback;
     try {
       const profile = await resolveCachedPublicLolSocialProfile(route);
-      if (!profile) return fallback;
+      /* 조회된 적 없는 소환사 URL은 200으로 동작은 유지하되 noindex 합니다 —
+         임의 문자열로 무한히 만들 수 있는 URL 공간이 전부 색인 후보가 되면
+         Search Console에 soft 404·"크롤링됨-색인 생성 안 됨"이 쌓입니다.
+         실제로 조회되어 캐시에 남은 프로필만 색인을 허용합니다. */
+      if (!profile) return { ...fallback, robotsNoindex: true };
       const summary = buildPublicLolSocialSummary(profile, route.locale);
       const safeProfileSlug = encodeURIComponent(`${route.gameName}-${route.tagLine}`);
       const ja = route.locale === "ja";
@@ -3644,7 +3648,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
         errorCode: "metadata_unavailable",
         error: toSafeErrorMessage(error),
       });
-      return fallback;
+      /* 일시 오류로 프로필을 못 읽었을 때 generic 페이지가 색인되면 낮은 품질
+         스냅샷이 남습니다 — 오류 응답도 색인 대상에서 제외합니다. */
+      return { ...fallback, robotsNoindex: true };
     }
   }
 
@@ -7607,6 +7613,16 @@ export function createHttpHandler(input: HttpHandlerInput) {
 
     try {
       if (req.method === "GET" || req.method === "HEAD") {
+        /* www 호스트가 canonical 없이 200으로 서빙되면 Google이 모든 페이지를
+           "적절한 표준 태그가 있는 대체 페이지"로 이중 크롤합니다 — 색인 예산
+           낭비의 원인이라 apex로 영구 이동시킵니다. 다른 호스트(로컬·스테이징)는
+           건드리지 않습니다. */
+        const requestHost = (req.headers.host ?? "").toLowerCase();
+        if (requestHost === "www.yoro.gg") {
+          return sendPermanentRedirect(res, `https://yoro.gg${req.url}`, {
+            "Cache-Control": "public, max-age=86400"
+          });
+        }
         if (url.pathname === "/dashborad" || url.pathname === "/dashborad/") return sendRedirect(res, "/");
         const canonicalBotPath = legacyBotPublicReturnPath(url);
         if (canonicalBotPath) {

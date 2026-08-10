@@ -17,6 +17,8 @@ export type LaneSideView = {
   rankShortLabel?: string;
   /** 소문자 티어 키. 색을 고르는 데 씁니다. */
   rankTier?: string;
+  /** 최종 아이템. 넓은 폭에서 KDA 옆 남는 공간에만 그립니다. */
+  items?: Array<{ key: string; iconUrl?: string; label?: string }>;
   isTarget?: boolean;
   onSearch?: () => void;
 };
@@ -37,6 +39,7 @@ export type MatchLaneCompareText = {
   damageLabel: string;
   goldLabel: string;
   emptySlotLabel: string;
+  itemsLabel: string;
 };
 
 function LaneSide({ side, align, text }: { side: LaneSideView | undefined; align: "start" | "end"; text: MatchLaneCompareText }) {
@@ -64,6 +67,18 @@ function LaneSide({ side, align, text }: { side: LaneSideView | undefined; align
     </span>
   );
 
+  /* 데스크톱에서 각 편 블록이 배정 폭의 1/3만 쓰고 나머지가 비어 있었습니다.
+     남는 공간에 최종 아이템을 그립니다. 좁은 폭에서는 CSS 가 숨깁니다. */
+  const items = side.items?.length ? (
+    <span aria-label={text.itemsLabel} className="public-md-lane-items">
+      {side.items.map((item) => (
+        item.iconUrl
+          ? <img alt="" key={item.key} src={item.iconUrl} title={item.label} />
+          : <i aria-hidden="true" key={item.key} />
+      ))}
+    </span>
+  ) : null;
+
   return (
     <span className={`public-md-lane-side is-${align} ${side.isTarget ? "is-target" : ""}`}>
       <span className="public-md-lane-portrait">{side.championIcon}</span>
@@ -72,6 +87,7 @@ function LaneSide({ side, align, text }: { side: LaneSideView | undefined; align
         <button className="public-md-lane-search" onClick={side.onSearch} type="button">{name}</button>
       ) : name}
       <span className="public-md-lane-kda">{side.kdaLabel}</span>
+      {items}
     </span>
   );
 }

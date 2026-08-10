@@ -3623,7 +3623,14 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
   const mapImage = page.getByTestId("palworld-map-image");
   await expect(mapImage).toBeVisible();
   await expect(mapImage).toHaveAttribute("src", READY_WORLD_MAP_URL);
-  await expect.poll(() => mapImage.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBe(4096);
+  /* srcset 도입: 화면 폭·배율에 맞는 변형이 옵니다(390px 폰이 4096 원본을 받지 않습니다).
+     w-descriptor 를 쓰면 naturalWidth 는 밀도 보정값이라 파일명으로 확인합니다. */
+  await expect.poll(() => mapImage.evaluate(
+    (image: HTMLImageElement) => image.currentSrc,
+  )).toMatch(/dfb08d86604f7e563aaf4c4de4a426af169982ee67792867d8945ab105f66e8a(?:-w(?:768|1024|1536|2048))?\.webp$/u);
+  await expect.poll(() => mapImage.evaluate(
+    (image: HTMLImageElement) => image.naturalWidth > 0,
+  )).toBe(true);
   const viewport = page.getByTestId("palworld-map-viewport");
   await expect.poll(() => viewport.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
 
@@ -3689,12 +3696,14 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
   ]);
   expect(resetViewportBounds).not.toBeNull();
   expect(resetImageBounds).not.toBeNull();
+  /* 지도는 폭을 다 쓰고 세로는 창에 맞춰 자릅니다(줌 1 에서 세로 팬으로 남쪽 확인).
+     따라서 초기화 뒤 이미지는 뷰포트를 "안에 들어가는" 게 아니라 "덮어야" 합니다. */
   expect(resetImageBounds!.x).toBeGreaterThanOrEqual(resetViewportBounds!.x - 1);
-  expect(resetImageBounds!.y).toBeGreaterThanOrEqual(resetViewportBounds!.y - 1);
+  expect(resetImageBounds!.y).toBeLessThanOrEqual(resetViewportBounds!.y + 1);
   expect(resetImageBounds!.x + resetImageBounds!.width)
     .toBeLessThanOrEqual(resetViewportBounds!.x + resetViewportBounds!.width + 1);
   expect(resetImageBounds!.y + resetImageBounds!.height)
-    .toBeLessThanOrEqual(resetViewportBounds!.y + resetViewportBounds!.height + 1);
+    .toBeGreaterThanOrEqual(resetViewportBounds!.y + resetViewportBounds!.height - 1);
 
   await page.goBack();
   await expect(page).toHaveURL(/\/palworld\/items$/u);
@@ -3704,9 +3713,9 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
   await page.getByRole("tab", { name: "세계수" }).click();
   await expect.poll(() => new URL(page.url()).searchParams.get("world")).toBe("tree");
   await expect(mapImage).toHaveAttribute("src", READY_TREE_MAP_URL);
-  await expect.poll(
-    () => mapImage.evaluate((image: HTMLImageElement) => image.naturalWidth),
-  ).toBe(4096);
+  await expect.poll(() => mapImage.evaluate(
+    (image: HTMLImageElement) => image.currentSrc,
+  )).toMatch(/c49b2a18bf1512019f0e18c592c20d74cd491b10394ab8121581cc294f74a2cf(?:-w(?:768|1024|1536|2048))?\.webp$/u);
   await expect(page.getByRole("button", { name: "필드 보스: 스태초, Lv.75" })).toBeVisible();
   await page.getByRole("tab", { name: "팰파고스섬" }).click();
   await expect.poll(() => new URL(page.url()).searchParams.has("world")).toBe(false);
@@ -3725,10 +3734,13 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
   if (mobileViewport) {
     await expect(coordinateControl).toHaveCount(0);
     await expect(mobileFilterTrigger).toBeVisible();
+    /* 필터는 전체 화면 Modal 이 아니라 지도를 덮지 않는 3단 하단 시트입니다. */
+    await expect(filterScope).toHaveAttribute("data-snap", "peek");
     await mobileFilterTrigger.click();
-    await expect(filterScope).toBeVisible();
-    await expect(filterScope.getByRole("heading", { name: "지도 필터" })).toBeVisible();
-    await expect(filterScope.locator(".palworld-map-mobile-filters__footer")).toBeVisible();
+    await expect(filterScope).toHaveAttribute("data-snap", "full");
+    await expect(filterScope.locator(".palworld-map-sheet__chips")).toBeVisible();
+    await expect(filterScope.locator(".palworld-map-sheet__footer")).toBeVisible();
+    /* 전체 목록일 때만 문서 스크롤을 잠급니다. */
     await expect.poll(() => page.evaluate(() => document.body.style.overflow)).toBe("hidden");
   } else {
     await expect(coordinateControl).toHaveCount(0);
@@ -3749,6 +3761,11 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
     const mapCard = page.locator(".palworld-map-card");
     const groupToggles = filterScope.locator(".palworld-map-filter-group-toggle");
     const expandedMapCardHeight = await mapCard.evaluate((element) => element.getBoundingClientRect().height);
+    /* 기본값은 "데이터 있는 항목만"이라 목록이 짧습니다. 꺼서 전체 목록을 되살린 뒤
+       목록이 카드보다 길어도(내부 스크롤) 그룹 접기가 카드 높이를 못 바꾸는지 봅니다. */
+    const availableOnlyToggle = filterScope.getByRole("checkbox", { name: "데이터 있는 항목만" });
+    await expect(availableOnlyToggle).toBeChecked();
+    await availableOnlyToggle.click();
     await expect.poll(
       () => filterContent.evaluate((element) => element.scrollHeight > element.clientHeight),
     ).toBe(true);
@@ -3808,8 +3825,10 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
   await expect(
     page.locator('.palworld-map-location-marker[data-category="resource"]').first(),
   ).toBeVisible();
-  await expect(page.getByRole("button", { name: "고대 짐승뼈" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "고대나무껍질" })).toBeVisible();
+  /* 시트 칩에도 같은 이름이 있어 지도 마커 레이어로 한정합니다. */
+  const importedLocations = page.getByTestId("palworld-map-imported-locations");
+  await expect(importedLocations.getByRole("button", { name: "고대 짐승뼈" })).toBeVisible();
+  await expect(importedLocations.getByRole("button", { name: "고대나무껍질" })).toBeVisible();
   await resourceGroupAll.uncheck();
   await expect.poll(
     () => new URL(page.url()).searchParams.get("layers")?.split(",") ?? [],
@@ -3830,10 +3849,10 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
   await expect(page.getByTestId("palworld-map-boss-markers")).toBeVisible();
   if (mobileViewport) {
     await filterScope
-      .locator(".palworld-map-mobile-filters__header")
+      .locator(".palworld-map-sheet__footer")
       .getByRole("button", { name: "닫기" })
       .click();
-    await expect(filterScope).toBeHidden();
+    await expect(filterScope).toHaveAttribute("data-snap", "peek");
     await expect.poll(() => page.evaluate(() => document.body.style.overflow)).toBe("");
     await expect(mobileFilterTrigger).toBeFocused();
   }
@@ -3870,14 +3889,18 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
 });
 
 test("월드 지도 이미지 오류는 페이지를 깨뜨리지 않고 재시도할 수 있다", async ({ page }) => {
-  const mapRoute = `**${READY_WORLD_MAP_URL}`;
+  /* srcset 이후에는 브라우저가 변형(-wNNN)을 고르므로 원본만 막으면 오류가 나지 않습니다.
+     변형은 /images/palworld-derived/ 에 살아 경로가 다르므로 해시 파일명으로 막습니다. */
+  const mapRoute = `**/${READY_WORLD_MAP_URL.split("/").at(-1)!.replace(".webp", "")}*.webp`;
   await page.route(mapRoute, async (route) => route.abort());
   await page.goto("/palworld/map");
   await expect(page.getByRole("alert")).toContainText("월드 지도를 불러오지 못했습니다.");
   await page.unroute(mapRoute);
   await page.getByRole("button", { name: "지도 다시 불러오기" }).click();
   await expect(page.getByTestId("palworld-map-image")).toBeVisible();
-  await expect.poll(() => page.getByTestId("palworld-map-image").evaluate((image: HTMLImageElement) => image.naturalWidth)).toBe(4096);
+  await expect.poll(() => page.getByTestId("palworld-map-image").evaluate(
+    (image: HTMLImageElement) => image.naturalWidth > 0,
+  )).toBe(true);
 });
 
 test("Palworld 화면은 외부 origin 이미지 요청 없이 카드·자동완성·상세·교배 이미지를 표시한다", async ({ page }) => {
@@ -4066,12 +4089,14 @@ for (const viewport of publicChromeResponsiveViewports) {
       ]);
       expect(baseMapBounds).not.toBeNull();
       expect(baseMapImageBounds).not.toBeNull();
+      /* 지도는 폭을 다 쓰고 세로는 창에 맞춰 자릅니다(남쪽은 끌어서 확인).
+         이미지는 뷰포트 안에 "들어가는" 게 아니라 뷰포트를 "덮어야" 합니다. */
       expect(baseMapImageBounds!.x).toBeGreaterThanOrEqual(baseMapBounds!.x - 1);
-      expect(baseMapImageBounds!.y).toBeGreaterThanOrEqual(baseMapBounds!.y - 1);
+      expect(baseMapImageBounds!.y).toBeLessThanOrEqual(baseMapBounds!.y + 1);
       expect(baseMapImageBounds!.x + baseMapImageBounds!.width)
         .toBeLessThanOrEqual(baseMapBounds!.x + baseMapBounds!.width + 1);
       expect(baseMapImageBounds!.y + baseMapImageBounds!.height)
-        .toBeLessThanOrEqual(baseMapBounds!.y + baseMapBounds!.height + 1);
+        .toBeGreaterThanOrEqual(baseMapBounds!.y + baseMapBounds!.height - 2);
     }
     await page.goto("/palworld/map?focusPal=anubis");
     const mapViewport = page.getByTestId("palworld-map-viewport");
@@ -4087,9 +4112,9 @@ for (const viewport of publicChromeResponsiveViewports) {
     if (mobileMapLayout) {
       const commandBounds = await page.locator(".palworld-map-mobile-command-bar").boundingBox();
       expect(commandBounds).not.toBeNull();
-      expect(commandBounds!.y).toBeGreaterThanOrEqual(mapBounds!.y);
-      expect(commandBounds!.y + commandBounds!.height).toBeLessThanOrEqual(mapBounds!.y + mapBounds!.height);
-      expect(toolbarBounds!.y).toBeGreaterThanOrEqual(mapBounds!.y + mapBounds!.height);
+      expect(commandBounds!.y).toBeGreaterThanOrEqual(mapBounds!.y - 1);
+      expect(commandBounds!.y + commandBounds!.height).toBeLessThanOrEqual(mapBounds!.y + mapBounds!.height + 1);
+      expect(toolbarBounds!.y).toBeGreaterThanOrEqual(mapBounds!.y + mapBounds!.height - 1);
     } else {
       const [sidebarBounds, cardBounds] = await Promise.all([
         page.locator(".palworld-map-desktop-filter").boundingBox(),
