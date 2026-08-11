@@ -116,7 +116,6 @@ test("스트리머 참여 화면은 공개 범위·직접 동작·그룹 대기�
   assert.doesNotMatch(source, /participation-management-next-action/u);
   assert.doesNotMatch(source, /copyPublicUrl/u);
   assert.doesNotMatch(source, /participation-management-public-link/u);
-  assert.doesNotMatch(source, /participation-management-more/u);
   // 세부 설정은 <details> 대신 톱니 버튼 + 접이식 폼으로 바뀌었습니다 — 진입점이
   // 항상 보이는 게임 정보/정원 미리보기 뒤로 한 단계 더 숨어 기본 흐름을 덜 가립니다.
   assert.match(source, /startSettingsOpen/u);
@@ -136,16 +135,28 @@ test("스트리머 참여 화면은 공개 범위·직접 동작·그룹 대기�
   assert.match(source, /type="checkbox"/u);
   assert.match(source, /selectYoroParticipationEntries/u);
   assert.match(source, /selectedWaitingEntries\.map\(\(entry\) => entry\.id\)/u);
-  // "현재 참가자"는 이제 평범한 목록이 아니라 게임 정원(방송인 1 + 시청자, LoL은
-  // 5명·Palworld는 32명)에 맞춘 고정 슬롯 그리드입니다 — 빈 자리도 항상 눈에
-  // 보여야 하므로 배열 길이를 정원에 고정하고 채워진 자리만 실제 참가자로
-  // 렌더링합니다. 정원이 큰 게임은 카드 대신 압축된 목록으로 바뀝니다.
-  assert.match(source, /Array\.from\(\{ length: viewerSeats \}, \(_, index\) => renderSeat\(currentEntries\[index\]\)\)/u);
+  // v2 콕핏: 운영 루프(모집→체크인→게임→완료)가 파이프라인 스테퍼로 드러나고,
+  // 각 단계의 주행동이 활성 단계 안에 고정됩니다. 메트릭 dl 은 스테퍼에 흡수됩니다.
+  assert.match(source, /participation-management-pipe/u);
+  assert.doesNotMatch(source, /participation-management-metrics/u);
+  // 서버가 주는 checkInExpiresAt 을 카운트다운으로 사용합니다. 만료 처리(노쇼)는
+  // 자동이 아니라 방송인의 명시 클릭입니다 — 자동 상태 변경 금지(방송 안정성 원칙).
+  assert.match(source, /checkInExpiresAt/u);
+  assert.match(source, /participation-management-chip-ring/u);
+  assert.doesNotMatch(source, /mutateEntry\([^)]*"no_show"\)[^;]*setInterval/u);
+  // LoL(정원 소형)은 빈 슬롯 카드 대신 가로 스트립 칩, Palworld(대형)는 압축 목록 유지.
+  assert.match(source, /participation-management-strip/u);
   assert.match(source, /viewerSeats > COMPACT_SEAT_THRESHOLD/u);
-  assert.doesNotMatch(source, /mutateSession\("select_next"\)/u);
+  assert.doesNotMatch(source, /renderSeat\(/u);
+  // 복구 불가능한 세션 종료는 넘침 메뉴로 분리하고, 모바일은 하단 고정 주행동 바.
+  assert.match(source, /participation-management-overflow-menu/u);
   assert.match(source, /className="is-danger"[\s\S]*?mutateSession\("finish"\)/u);
+  assert.match(source, /participation-management-mobile-bar/u);
+  assert.doesNotMatch(source, /mutateSession\("select_next"\)/u);
   assert.match(css, /grid-template-areas:[\s\S]*?"position participant status"[\s\S]*?"position actions actions"/u);
   assert.match(css, /color:\s*var\(--yoro-color-text-on-dark-strong\)/u);
+  assert.match(css, /--participation-checkin-progress/u);
+  assert.match(css, /participation-management-mobile-bar[\s\S]*?position:\s*fixed/u);
 });
 
 test("모바일 공개 검색 결과는 두 항목 이후 목록 내부에서 스크롤한다", async () => {
