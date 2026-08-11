@@ -153,10 +153,22 @@ test("스트리머 참여 화면은 공개 범위·직접 동작·그룹 대기�
   assert.match(source, /className="is-danger"[\s\S]*?mutateSession\("finish"\)/u);
   assert.match(source, /participation-management-mobile-bar/u);
   assert.doesNotMatch(source, /mutateSession\("select_next"\)/u);
-  assert.match(css, /grid-template-areas:[\s\S]*?"position participant status"[\s\S]*?"position actions actions"/u);
-  assert.match(css, /color:\s*var\(--yoro-color-text-on-dark-strong\)/u);
+  // v3(실화면 결함 수정): 대기열 행은 한 줄 그리드 — 2줄 areas 유산이 선정 버튼을
+  // 우하단에 고립시키고(데스크톱), 모바일에선 행 하나를 6줄로 쌓던 원인이었습니다.
+  assert.doesNotMatch(css, /"position participant status"/u);
+  assert.doesNotMatch(css, /"position"[\s\S]{0,40}"participant"[\s\S]{0,40}"status"/u);
+  // 모바일은 2줄 콤팩트(sel·main·status / sel·main·actions), 신청 시각·순번은 숨김.
+  assert.match(css, /"sel main status"[\s\S]*?"sel main actions"/u);
+  assert.match(css, /participation-management-participant-main small[\s\S]{0,40}display:\s*none/u);
+  // 라이트용 전역 상태색을 다크 화면용으로 페이지 스코프에서 재정의(뿌연 상태색 방지).
+  assert.match(css, /participation-management-page \{[\s\S]{0,400}--info:\s*hsl\(/u);
+  // 유령 스텝 방지 — 비활성 스텝은 opacity 가 아니라 배경·글자색으로 구분합니다.
+  assert.doesNotMatch(css, /participation-management-pipe-step \{[\s\S]{0,400}opacity:/u);
   assert.match(css, /--participation-checkin-progress/u);
   assert.match(css, /participation-management-mobile-bar[\s\S]*?position:\s*fixed/u);
+  // 잠긴 선정은 잠금 사유와 함께(고장처럼 보이지 않게), 체크인 단계 CTA 공백은 안내문으로.
+  assert.match(source, /queueLockedNote/u);
+  assert.match(source, /stepCheckinHint/u);
 });
 
 test("모바일 공개 검색 결과는 두 항목 이후 목록 내부에서 스크롤한다", async () => {

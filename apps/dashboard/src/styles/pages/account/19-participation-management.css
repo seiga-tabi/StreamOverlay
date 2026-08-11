@@ -1,4 +1,10 @@
 .participation-management-page {
+  /* 전역 축약 상태색(--info 등)은 라이트 배경 기준이라 이 다크 화면에서 뿌옇습니다.
+     실화면 결함 4 — 페이지 스코프에서 다크용 명도로 재정의합니다. */
+  --info: hsl(205 90% 68%);
+  --success: hsl(158 64% 56%);
+  --danger: hsl(344 90% 70%);
+  --warning: hsl(43 96% 62%);
   --surface: var(--yoro-color-product-gray-surface);
   --surface-muted: var(--yoro-color-product-gray-surface-strong);
   --surface-strong: var(--yoro-color-product-gray-surface-strong);
@@ -478,6 +484,7 @@
   gap: var(--space-2);
 }
 
+/* 비활성 스텝은 opacity 대신 배경·글자색으로 낮춥니다 — 유령 스텝 방지(결함 4). */
 .participation-management-pipe-step {
   min-inline-size: 0;
   display: grid;
@@ -486,18 +493,19 @@
   padding: var(--space-3) var(--space-4);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  background: var(--surface);
-  opacity: .55;
+  background: color-mix(in srgb, var(--surface) 55%, transparent);
+  color: var(--muted);
 }
 
 .participation-management-pipe-step.is-active {
-  opacity: 1;
   border-color: var(--brand);
+  background: var(--surface);
+  color: var(--text);
   box-shadow: inset 3px 0 0 var(--brand);
 }
 
 .participation-management-pipe-step.is-done {
-  opacity: .85;
+  background: var(--surface);
 }
 
 .participation-management-pipe-num {
@@ -512,14 +520,19 @@
   font-weight: 900;
 }
 
+.participation-management-pipe-step.is-active .participation-management-pipe-count,
+.participation-management-pipe-step.is-done .participation-management-pipe-count {
+  color: var(--text-strong);
+}
+
 .participation-management-pipe-step.is-active .participation-management-pipe-num {
   background: var(--brand);
-  color: var(--yoro-color-text-on-dark-strong);
+  color: hsl(224 60% 14%);
 }
 
 .participation-management-pipe-step.is-done .participation-management-pipe-num {
   background: var(--success);
-  color: var(--yoro-color-text-on-dark-strong);
+  color: hsl(163 90% 10%);
 }
 
 .participation-management-pipe-step > strong {
@@ -531,8 +544,13 @@
   font-size: .72rem;
 }
 
+.participation-management-pipe-hint {
+  color: var(--text);
+  font-size: .75rem;
+}
+
 .participation-management-pipe-count {
-  color: var(--text-strong);
+  color: inherit;
   font-size: 1.1rem;
   font-weight: 900;
   font-variant-numeric: tabular-nums;
@@ -782,16 +800,15 @@
   overflow-y: auto;
 }
 
+/* 한 줄 그리드(순번·이름/부가·상태·동작) — 예전 2줄 areas 유산이 선정 버튼을
+   우하단에 고립시키던 결함 1 의 수정입니다. */
 .participation-management-participant {
   min-inline-size: 0;
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-2) var(--space-4);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   display: grid;
-  grid-template-columns: max-content minmax(0, 1fr) minmax(0, auto);
-  grid-template-areas:
-    "position participant status"
-    "position actions actions";
+  grid-template-columns: max-content minmax(0, 1fr) auto auto;
   gap: var(--space-2) var(--space-3);
   align-items: center;
   background: var(--surface-muted);
@@ -807,8 +824,7 @@
 }
 
 .participation-management-selection {
-  grid-area: position;
-  align-self: start;
+  align-self: center;
   display: inline-flex;
   gap: var(--space-2);
   align-items: center;
@@ -828,15 +844,13 @@
 }
 
 .participation-management-position {
-  grid-area: position;
-  align-self: start;
   color: var(--brand);
-  font-size: 1rem;
+  font-size: .9375rem;
   font-weight: 900;
+  font-variant-numeric: tabular-nums;
 }
 
 .participation-management-participant-main {
-  grid-area: participant;
   min-inline-size: 0;
   display: grid;
   gap: var(--space-1);
@@ -862,10 +876,9 @@
 }
 
 .participation-management-participant > .participation-management-status {
-  grid-area: status;
   max-inline-size: 100%;
-  white-space: normal;
-  text-align: center;
+  white-space: nowrap;
+  justify-self: end;
 }
 
 .participation-management-status {
@@ -881,7 +894,6 @@
 
 .participation-management-participant > .participation-management-entry-actions,
 .participation-management-participant > .participation-management-row-more {
-  grid-area: actions;
   min-inline-size: 0;
   justify-self: end;
 }
@@ -902,6 +914,24 @@
   overflow-wrap: anywhere;
 }
 
+/* 잠긴 선정은 "고장"이 아니라 잠금으로 읽혀야 합니다(결함 5). */
+.participation-management-entry-actions button:disabled {
+  border-color: var(--line);
+  background: transparent;
+  color: var(--muted);
+  opacity: 1;
+  cursor: not-allowed;
+}
+
+.participation-management-queue-locked {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: rgb(255 255 255 / 5%);
+  color: var(--muted);
+  font-size: .8125rem;
+}
+
 .participation-management-empty {
   margin: 0;
   padding: var(--space-6) var(--space-4);
@@ -920,19 +950,6 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .participation-management-participant {
-    grid-template-columns: max-content minmax(0, 1fr);
-    grid-template-areas:
-      "position participant"
-      "status status"
-      "actions actions";
-  }
-
-  .participation-management-participant > .participation-management-status,
-  .participation-management-participant > .participation-management-entry-actions,
-  .participation-management-participant > .participation-management-row-more {
-    justify-self: start;
-  }
 }
 
 @media (max-width: 48rem) {
@@ -1009,21 +1026,48 @@
     color: var(--yoro-color-text-on-dark-strong);
   }
 
-  .participation-management-current > header,
-  .participation-management-queue > header,
   .participation-management-alert.is-error {
     align-items: stretch;
     flex-direction: column;
   }
 
+  /* 행 하나 = 2줄 콤팩트(이름/부가 + 상태·동작). 신청 시각·순번은 화면에서 걷어냅니다 —
+     실화면에서 행 하나가 6줄 스택으로 무너지던 결함 2 의 수정입니다. */
   .participation-management-participant {
-    align-items: stretch;
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: auto minmax(0, 1fr) auto;
     grid-template-areas:
-      "position"
-      "participant"
-      "status"
-      "actions";
+      "sel main status"
+      "sel main actions";
+    row-gap: var(--space-1);
+  }
+
+  .participation-management-participant > .participation-management-position {
+    display: none;
+  }
+
+  .participation-management-selection {
+    grid-area: sel;
+  }
+
+  .participation-management-selection .participation-management-position {
+    display: none;
+  }
+
+  .participation-management-participant-main {
+    grid-area: main;
+  }
+
+  .participation-management-participant-main small {
+    display: none;
+  }
+
+  .participation-management-participant > .participation-management-status {
+    grid-area: status;
+  }
+
+  .participation-management-participant > .participation-management-entry-actions,
+  .participation-management-participant > .participation-management-row-more {
+    grid-area: actions;
   }
 
   .participation-management-bot {

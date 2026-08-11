@@ -161,7 +161,9 @@ const copy = {
     moreActionsMenu: "더 많은 동작",
     announceSettings: "Discord 공지 설정",
     finishDangerNote: "복구 불가",
-    stripEmpty: "아직 없음 — 아래 대기열에서 선정하세요"
+    stripEmpty: "아직 없음 — 아래 대기열에서 선정하세요",
+    stepCheckinHint: "칩에서 체크인 처리 — {count}명 대기",
+    queueLockedNote: "진행 중인 참가자 처리 후 다음 선정이 열립니다."
   },
   ja: {
     eyebrow: "STREAMER PARTICIPATION",
@@ -277,7 +279,9 @@ const copy = {
     moreActionsMenu: "その他の操作",
     announceSettings: "Discordお知らせ設定",
     finishDangerNote: "復元不可",
-    stripEmpty: "まだいません — 下の待機列から選出してください"
+    stripEmpty: "まだいません — 下の待機列から選出してください",
+    stepCheckinHint: "チップでチェックイン処理 — {count}名待ち",
+    queueLockedNote: "進行中の参加者を処理すると次の選出ができます。"
   }
 } as const;
 
@@ -908,7 +912,14 @@ export function ParticipationManagementPage({
                     <button className="participation-management-pipe-cta" onClick={scrollToQueue} type="button">{text.stepGoQueue}</button>
                   ) : null}
                   {(step === "checkin" || step === "game") && isActive ? (
-                    <span className="participation-management-pipe-cta-slot">{renderOperationalActionButton()}</span>
+                    <span className="participation-management-pipe-cta-slot">
+                      {renderOperationalActionButton()
+                        ?? (step === "checkin" && checkinPendingEntries.length ? (
+                          <small className="participation-management-pipe-hint">
+                            {text.stepCheckinHint.replace("{count}", String(checkinPendingEntries.length))}
+                          </small>
+                        ) : null)}
+                    </span>
                   ) : null}
                 </li>
               );
@@ -953,6 +964,9 @@ export function ParticipationManagementPage({
                 </span>
               </header>
               {capacityIsFull ? <p className="participation-management-capacity-full">{text.capacityFull}</p> : null}
+              {!capacityIsFull && currentEntry && state?.isOpen && waitingEntries.length > 0 ? (
+                <p className="participation-management-queue-locked">{text.queueLockedNote}</p>
+              ) : null}
               <div className="participation-management-queue-tools">
                 <label className="participation-management-search">
                   <span className="yoro-u-sr-only">{text.queueSearchPlaceholder}</span>
