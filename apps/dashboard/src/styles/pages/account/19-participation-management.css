@@ -12,7 +12,10 @@
   --text-strong: var(--yoro-color-product-gray-text);
   --muted: var(--yoro-color-product-gray-muted);
   --line: var(--yoro-color-product-gray-border);
-  --line-strong: var(--yoro-color-product-gray-border-strong);
+  /* 결함 수정 — 기본 border-strong(alpha .34)은 카드 배경 대비 2.5:1로, WCAG 비텍스트
+     UI 경계 기준(3:1) 미달이라 버튼 테두리가 흐릿했습니다. 이 페이지 스코프에서만
+     alpha를 올려 3.5:1 이상을 확보합니다. */
+  --line-strong: rgb(248 249 250 / 46%);
   min-inline-size: 0;
   display: grid;
   gap: var(--space-5);
@@ -148,8 +151,14 @@
   border-color: var(--brand);
 }
 
+/* 결함 수정 — opacity로 텍스트째 흐리게 만들면 대비가 11.9:1 → 4.7:1, 테두리는
+   2.5:1 → 1.7:1(기준 3:1 미달)까지 떨어져 비활성 버튼 글씨가 거의 안 보였습니다.
+   배경·테두리·텍스트 색만 낮은 톤으로 바꾸고 opacity는 1로 유지합니다. */
 .participation-management-page button:disabled {
-  opacity: .55;
+  border-color: var(--line);
+  background: var(--surface-muted);
+  color: var(--muted);
+  opacity: 1;
   cursor: not-allowed;
 }
 
@@ -377,10 +386,27 @@
 
 /* 콕핏 카드 한 몸: 단계 바 + 진행 슬롯 + 액션 줄 */
 .participation-management-cockpit {
+  position: relative;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: var(--surface);
-  overflow: hidden;
+}
+
+/* 결함 수정 — 카드에 overflow:hidden을 걸면 "더 많은 동작"(⋯) 드롭다운도 카드
+   경계에서 함께 잘립니다(실측: 드롭다운 151px 중 142px가 화면에 안 보였음).
+   대신 corner 클리핑이 필요한 요소(상단 색상 바·액션 줄 배경) 각각에 radius를
+   직접 줘서, 카드는 overflow:visible로 두고도 둥근 모서리를 유지합니다. */
+.participation-management-cockpit::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  block-size: 3px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: linear-gradient(90deg, var(--info), color-mix(in srgb, var(--info) 30%, transparent));
+}
+
+.participation-management-cockpit[data-step="game"]::before {
+  background: linear-gradient(90deg, var(--success), color-mix(in srgb, var(--success) 30%, transparent));
 }
 
 .participation-management-session-status {
@@ -484,35 +510,33 @@
 }
 
 /* ---------- 단계 바 (모집 → 게임 → 정산) ---------- */
+/* 결함 수정 — 예전에는 텍스트 목록 + 세로 구분선이라 현재 단계가 색(box-shadow)에만
+   의존했습니다. 각 단계마다 진행 트랙을 붙여 "얼마나 진행됐는지"를 형태로도 보여줍니다. */
 
 .participation-management-steps {
   margin: 0;
-  padding: 0;
+  padding: var(--space-5) var(--space-6) var(--space-4);
   list-style: none;
   display: flex;
+  gap: var(--space-6);
   border-block-end: 1px solid var(--line);
 }
 
 .participation-management-step {
   flex: 1 1 0;
   min-inline-size: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
   gap: var(--space-2);
-  min-block-size: 3.25rem;
-  padding: 0 var(--space-3);
   color: var(--muted);
   font-size: .8125rem;
   position: relative;
 }
 
-.participation-management-step + .participation-management-step::before {
-  content: "";
-  position: absolute;
-  inset-inline-start: 0;
-  inset-block: 25%;
-  border-inline-start: 1px solid var(--line);
+.participation-management-step-row {
+  min-inline-size: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .participation-management-step-num {
@@ -527,18 +551,34 @@
   flex: none;
 }
 
-.participation-management-step > strong {
+.participation-management-step > .participation-management-step-row > strong {
   white-space: nowrap;
 }
 
 .participation-management-step-count {
+  margin-inline-start: auto;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
+.participation-management-step-track {
+  display: block;
+  position: relative;
+  block-size: .25rem;
+  border-radius: 999px;
+  background: var(--surface-muted);
+}
+
+.participation-management-step-track > i {
+  position: absolute;
+  inset: 0;
+  inline-size: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--info), var(--brand));
+}
+
 .participation-management-step.is-active {
   color: var(--text-strong);
-  box-shadow: inset 0 -2px 0 var(--brand);
 }
 
 .participation-management-step.is-active .participation-management-step-num {
@@ -546,9 +586,18 @@
   color: hsl(224 60% 14%);
 }
 
+.participation-management-step.is-active .participation-management-step-track > i {
+  inline-size: 60%;
+}
+
 .participation-management-step.is-done .participation-management-step-num {
   background: var(--success);
   color: hsl(163 90% 10%);
+}
+
+.participation-management-step.is-done .participation-management-step-track > i {
+  inline-size: 100%;
+  background: var(--success);
 }
 
 /* ---------- 액션 줄 — 주행동이 항상 같은 자리 ---------- */
@@ -560,6 +609,9 @@
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
   border-block-start: 1px solid var(--line);
+  /* 카드의 overflow:hidden을 없앴으므로(⋯ 드롭다운 클리핑 결함 수정), 이 행이
+     카드의 마지막 자식일 때 배경이 둥근 아래 모서리를 그대로 유지하도록 직접 지정합니다. */
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
   background: rgb(255 255 255 / 2%);
 }
 
@@ -643,6 +695,57 @@
   white-space: nowrap;
 }
 
+/* 진행 인원 원형 게이지 — "3/5" 텍스트만으로는 여유 좌석이 한눈에 안 들어와,
+   숫자 옆에 채움 비율을 형태로도 보여줍니다. */
+.participation-management-gauge-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-inline-end: var(--space-2);
+  padding-inline-end: var(--space-3);
+  border-inline-end: 1px solid var(--line);
+}
+
+.participation-management-gauge {
+  flex: none;
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+}
+
+.participation-management-gauge circle.is-track {
+  fill: none;
+  stroke: var(--surface-muted);
+  stroke-width: 4;
+}
+
+.participation-management-gauge circle.is-fill {
+  fill: none;
+  stroke: url(#participation-gauge-gradient);
+  stroke-width: 4;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  transition: stroke-dashoffset .2s ease;
+}
+
+.participation-management-gauge-label {
+  display: grid;
+  line-height: 1.2;
+}
+
+.participation-management-gauge-label > strong {
+  color: var(--text-strong);
+  font-size: .9375rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.participation-management-gauge-label > span {
+  color: var(--muted);
+  font-size: .75rem;
+  font-weight: 700;
+}
+
 .participation-management-chip {
   display: inline-flex;
   align-items: center;
@@ -721,15 +824,25 @@
 
 .participation-management-chip-copy small {
   color: var(--muted);
-  font-size: .6875rem;
+  /* 결함 수정 — 11px(.6875rem)은 본문 최소 권장 크기(12px) 아래였습니다. */
+  font-size: .75rem;
 }
 
 .participation-management-strip-empty {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
   border: 1px dashed var(--line-strong);
   border-radius: 999px;
   color: var(--muted);
   font-size: .8125rem;
+}
+
+.participation-management-strip-empty svg {
+  flex: none;
+  inline-size: .875rem;
+  block-size: .875rem;
 }
 
 /* ---------- 모바일 하단 고정 주행동 바 ---------- */
@@ -813,6 +926,8 @@
 /* 한 줄 그리드(순번·이름/부가·상태·동작) — 예전 2줄 areas 유산이 선정 버튼을
    우하단에 고립시키던 결함 1 의 수정입니다. */
 .participation-management-queue .participation-management-participant {
+  position: relative;
+  padding-inline-start: calc(var(--space-4) + 6px);
   border: 0;
   border-radius: 0;
   border-block-end: 1px solid rgb(222 226 230 / 7%);
@@ -821,6 +936,32 @@
 
 .participation-management-queue .participation-management-participant:hover {
   background: rgb(255 255 255 / 2.5%);
+}
+
+/* 상태 좌측 스트라이프 — pill 텍스트를 안 읽어도 색으로 먼저 스캔할 수 있습니다. */
+.participation-management-queue .participation-management-participant::before {
+  content: "";
+  position: absolute;
+  inset-block: var(--space-2);
+  inset-inline-start: 2px;
+  inline-size: 3px;
+  border-radius: 999px;
+  background: var(--info);
+}
+
+.participation-management-queue .participation-management-participant[data-status="waitlisted"]::before,
+.participation-management-queue .participation-management-participant[data-status="pending"]::before {
+  background: var(--muted);
+}
+
+.participation-management-queue .participation-management-participant[data-status="played"]::before {
+  background: var(--success);
+}
+
+.participation-management-queue .participation-management-participant[data-status="no_show"]::before,
+.participation-management-queue .participation-management-participant[data-status="rejected"]::before,
+.participation-management-queue .participation-management-participant[data-status="blocked"]::before {
+  background: var(--danger);
 }
 
 .participation-management-participant {
@@ -967,15 +1108,21 @@
 .participation-management-empty {
   margin: 0;
   padding: var(--space-6) var(--space-4);
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
   color: var(--muted);
   text-align: center;
 }
 
+.participation-management-empty svg {
+  opacity: .55;
+}
+
 @media (max-width: 72rem) {
-  .participation-management-step {
-    flex-direction: column;
-    gap: 2px;
-    min-block-size: 3.5rem;
+  .participation-management-steps {
+    padding: var(--space-4) var(--space-4) var(--space-3);
+    gap: var(--space-4);
   }
 }
 

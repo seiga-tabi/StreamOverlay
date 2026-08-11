@@ -45,6 +45,15 @@ function viewerSeatCount(game: ParticipationGame): number {
 /** 정원이 이보다 크면(Palworld) 슬롯 카드 대신 압축된 점 그리드로 보여줍니다. */
 const COMPACT_SEAT_THRESHOLD = 8;
 
+/* 진행 인원 원형 게이지 반지름·둘레 — SVG stroke-dasharray/-dashoffset 계산에 씁니다. */
+const GAUGE_RADIUS = 15;
+const GAUGE_CIRCUMFERENCE = 2 * Math.PI * GAUGE_RADIUS;
+
+function gaugeDashoffset(filled: number, total: number): number {
+  const ratio = total > 0 ? Math.min(1, Math.max(0, filled / total)) : 0;
+  return GAUGE_CIRCUMFERENCE * (1 - ratio);
+}
+
 const copy = {
   ko: {
     eyebrow: "STREAMER PARTICIPATION",
@@ -650,6 +659,7 @@ export function ParticipationManagementPage({
     return (
       <article
         className={`participation-management-participant ${historic ? "is-compact" : ""}`}
+        data-status={entry.status}
         key={entry.id}
         title={appliedAtLabel}
       >
@@ -802,7 +812,7 @@ export function ParticipationManagementPage({
       ) : (
         <>
           {/* 콕핏 카드 한 몸: 단계 바(모집→게임→정산) + 진행 슬롯 + 액션 줄 */}
-          <section className="participation-management-cockpit" aria-labelledby="participation-session-title">
+          <section className="participation-management-cockpit" data-step={activeStep} aria-labelledby="participation-session-title">
             <h2 className="yoro-u-sr-only" id="participation-session-title">{text.sessionTitle}</h2>
             <ol className="participation-management-steps">
               {(["recruit", "game", "done"] as const).map((step, index) => {
@@ -817,9 +827,12 @@ export function ParticipationManagementPage({
                     : `${state?.summary.played ?? 0}${text.personUnit}`;
                 return (
                   <li className={`participation-management-step${isActive ? " is-active" : ""}${isDone ? " is-done" : ""}`} key={step}>
-                    <span aria-hidden="true" className="participation-management-step-num">{isDone ? "✓" : index + 1}</span>
-                    <strong>{label}</strong>
-                    <span className="participation-management-step-count">{count}</span>
+                    <span className="participation-management-step-row">
+                      <span aria-hidden="true" className="participation-management-step-num">{isDone ? "✓" : index + 1}</span>
+                      <strong>{label}</strong>
+                      <span className="participation-management-step-count">{count}</span>
+                    </span>
+                    <span aria-hidden="true" className="participation-management-step-track"><i /></span>
                   </li>
                 );
               })}
@@ -827,8 +840,31 @@ export function ParticipationManagementPage({
 
             {/* 진행 슬롯 — 방송인 + 확정·후보 칩. 선정 즉시 확정 모델(체크인 없음). */}
             <div className="participation-management-strip">
-              <span className="participation-management-strip-count">
-                {text.capacityIngame} {currentEntries.length + candidateEntries.length + 1}/{PARTICIPATION_GAME_CAPACITY[activeGame]}
+              <span className="participation-management-gauge-wrap">
+                <svg aria-hidden="true" className="participation-management-gauge" viewBox="0 0 36 36">
+                  <defs>
+                    <linearGradient id="participation-gauge-gradient" x1="0" x2="1" y1="0" y2="1">
+                      <stop offset="0%" stopColor="var(--info)" />
+                      <stop offset="100%" stopColor="var(--brand)" />
+                    </linearGradient>
+                  </defs>
+                  <circle className="is-track" cx="18" cy="18" r={GAUGE_RADIUS} />
+                  <circle
+                    className="is-fill"
+                    cx="18"
+                    cy="18"
+                    r={GAUGE_RADIUS}
+                    strokeDasharray={GAUGE_CIRCUMFERENCE}
+                    strokeDashoffset={gaugeDashoffset(
+                      currentEntries.length + candidateEntries.length + 1,
+                      PARTICIPATION_GAME_CAPACITY[activeGame]
+                    )}
+                  />
+                </svg>
+                <span className="participation-management-gauge-label">
+                  <strong>{currentEntries.length + candidateEntries.length + 1}/{PARTICIPATION_GAME_CAPACITY[activeGame]}</strong>
+                  <span>{text.capacityIngame}</span>
+                </span>
               </span>
               <span className="participation-management-chip is-host">
                 <span className="participation-management-chip-avatar" aria-hidden="true">🎙</span>
@@ -876,7 +912,12 @@ export function ParticipationManagementPage({
                 </span>
               ))}
               {currentEntries.length === 0 && candidateEntries.length === 0 ? (
-                <span className="participation-management-strip-empty">{text.stripEmpty}</span>
+                <span className="participation-management-strip-empty">
+                  <svg aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                  {text.stripEmpty}
+                </span>
               ) : null}
             </div>
 
@@ -968,14 +1009,31 @@ export function ParticipationManagementPage({
                 <h3 id="participation-waiting-title" className="yoro-u-sr-only">{text.queueWaiting}</h3>
                 {visibleWaitingEntries.length
                   ? visibleWaitingEntries.map((entry) => renderQueueRow(entry))
-                  : <p className="participation-management-empty">{queueSearch ? text.queueSearchEmpty : text.queueEmpty}</p>}
+                  : (
+                    <p className="participation-management-empty">
+                      <svg aria-hidden="true" fill="none" height="32" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24" width="32">
+                        <circle cx="9" cy="8" r="3" />
+                        <path d="M2 20c0-3.3 3.1-6 7-6s7 2.7 7 6" />
+                        <path d="M17 8h5M19.5 5.5v5" />
+                      </svg>
+                      <span>{queueSearch ? text.queueSearchEmpty : text.queueEmpty}</span>
+                    </p>
+                  )}
               </div>
               <details className="participation-management-history">
                 <summary>{text.historyToggle} <span>{historyEntries.length}</span></summary>
                 <div>
                   {historyEntries.length
                     ? historyEntries.map((entry) => renderQueueRow(entry, true))
-                    : <p className="participation-management-empty">{text.queueHistoryEmpty}</p>}
+                    : (
+                      <p className="participation-management-empty">
+                        <svg aria-hidden="true" fill="none" height="32" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24" width="32">
+                          <path d="M12 8v5l3 2" />
+                          <circle cx="12" cy="12" r="9" />
+                        </svg>
+                        <span>{text.queueHistoryEmpty}</span>
+                      </p>
+                    )}
                 </div>
               </details>
           </section>

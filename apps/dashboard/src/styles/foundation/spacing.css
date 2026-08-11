@@ -52,6 +52,9 @@
   --space-2: var(--yoro-space-2);
   --space-3: var(--yoro-space-3);
   --space-4: var(--yoro-space-4);
+  /* 결함 수정 — 이 별칭이 빠져 있어 var(--space-5)를 쓰던 모든 규칙(gap·padding)이
+     무효 값으로 처리돼 초기값(사실상 0)으로 되돌아가고 있었습니다. */
+  --space-5: var(--yoro-space-5);
   --space-6: var(--yoro-space-6);
   --space-8: var(--yoro-space-8);
 }
