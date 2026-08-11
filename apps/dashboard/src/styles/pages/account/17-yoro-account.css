@@ -61,6 +61,24 @@
   gap: var(--yoro-space-3);
 }
 
+.yoro-login-option__icon.is-riot {
+  background: #d13639;
+  color: #fff;
+  font-weight: 800;
+}
+
+.yoro-account-consent-note {
+  color: var(--yoro-color-product-gray-muted);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.yoro-account-consent-note a {
+  color: var(--yoro-color-primary);
+  text-underline-offset: 0.2em;
+}
+
 .yoro-login-option,
 .yoro-connection-card {
   display: grid;
@@ -178,6 +196,14 @@
   border: 1px solid color-mix(in srgb, var(--yoro-color-danger) 55%, transparent);
   border-radius: var(--yoro-radius-md);
   color: var(--yoro-color-danger);
+  text-align: center;
+}
+
+.yoro-account-success {
+  padding: var(--yoro-space-3);
+  border: 1px solid color-mix(in srgb, var(--yoro-color-success) 55%, transparent);
+  border-radius: var(--yoro-radius-md);
+  color: var(--yoro-color-success);
   text-align: center;
 }
 

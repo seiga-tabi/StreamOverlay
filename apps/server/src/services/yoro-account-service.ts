@@ -12,6 +12,7 @@ import {
   type AnnouncementTargetInput
 } from "../database/repositories/discord-participation-announcement-repository.js";
 import {
+  type YoroAuthenticationProvider,
   type YoroExternalIdentity,
   type YoroUserPreferences,
   type YoroIdentityProvider,
@@ -46,6 +47,8 @@ const DISCORD_PROFILE_URL = "https://discord.com/api/v10/users/@me";
 const TWITCH_AUTHORIZE_URL = "https://id.twitch.tv/oauth2/authorize";
 const TWITCH_TOKEN_URL = "https://id.twitch.tv/oauth2/token";
 const TWITCH_PROFILE_URL = "https://api.twitch.tv/helix/users";
+const RIOT_AUTHORIZE_URL = "https://auth.riotgames.com/authorize";
+const RIOT_TOKEN_URL = "https://auth.riotgames.com/token";
 const RECENT_AUTHENTICATION_MS = 15 * 60 * 1_000;
 const TWITCH_AVATAR_HOST = "static-cdn.jtvnw.net";
 const TWITCH_TOKEN_REFRESH_SKEW_MS = 60 * 1_000;
@@ -94,14 +97,19 @@ export type PublicYoroIdentity = {
   avatarUrl?: string;
   connectedAt: string;
   lastAuthenticatedAt: string;
+  valorantRecordConsent?: boolean;
 };
 
 export type PublicYoroAccountSession = {
   authenticated: true;
   csrfToken: string;
-  authenticationProvider: YoroIdentityProvider;
+  authenticationProvider: YoroAuthenticationProvider;
   identities: readonly PublicYoroIdentity[];
   preferences: YoroUserPreferences;
+  connectionCapabilities: Readonly<{
+    riotRsoAvailable: boolean;
+    riotRsoRequiresTwitchAuthentication: boolean;
+  }>;
 };
 
 type AuthenticatedSession = {
@@ -109,7 +117,7 @@ type AuthenticatedSession = {
   userId: string;
   csrfToken: string;
   csrfTokenHash: Buffer;
-  authenticationProvider: YoroIdentityProvider;
+  authenticationProvider: YoroAuthenticationProvider;
   authenticatedAt: Date;
 };
 
@@ -118,9 +126,11 @@ export type YoroAccountErrorCode =
   | "oauth_failed"
   | "session_required"
   | "recent_authentication_required"
+  | "twitch_authentication_required"
   | "csrf_required"
   | "identity_conflict"
   | "last_identity_required"
+  | "riot_identity_required"
   | "invalid_input";
 
 export class YoroAccountError extends Error {
@@ -150,6 +160,22 @@ function validTwitchUserId(value: unknown): value is string {
 
 function validTwitchLogin(value: unknown): value is string {
   return typeof value === "string" && /^[A-Za-z0-9_]{1,64}$/u.test(value);
+}
+
+function validRiotPuuid(value: unknown): value is string {
+  return typeof value === "string" && /^[A-Za-z0-9_-]{40,128}$/u.test(value);
+}
+
+function safeRiotIdPart(value: unknown, maximum: number): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.normalize("NFKC").trim();
+  if (
+    normalized.length < 1
+    || normalized.length > maximum
+    || normalized.includes("#")
+    || /[\u0000-\u001f\u007f]/u.test(normalized)
+  ) return undefined;
+  return normalized;
 }
 
 function normalizeScopes(value: unknown): string[] {
@@ -316,7 +342,10 @@ export function publicYoroIdentity(identity: YoroExternalIdentity): PublicYoroId
     displayName: identity.displayName,
     ...(avatarUrl ? { avatarUrl } : {}),
     connectedAt: identity.connectedAt,
-    lastAuthenticatedAt: identity.lastAuthenticatedAt
+    lastAuthenticatedAt: identity.lastAuthenticatedAt,
+    ...(identity.provider === "riot"
+      ? { valorantRecordConsent: identity.valorantRecordConsent === true }
+      : {})
   };
 }
 
@@ -355,6 +384,8 @@ export function clearYoroCookie(name: typeof YORO_OAUTH_COOKIE | typeof YORO_SES
 }
 
 export class YoroAccountService {
+  private valorantVisibilityInvalidator?: (userId: string) => void;
+
   private cleanupTimer?: NodeJS.Timeout;
 
   constructor(
@@ -382,6 +413,14 @@ export class YoroAccountService {
     returnPath?: string;
     sessionCookie?: string;
   }): Promise<{ authorizationUrl: string; cookieValue: string }> {
+    if (input.provider === "riot") {
+      if (!appConfig.riot.rsoEnabled) {
+        throw new YoroAccountError("feature_unavailable", 503);
+      }
+      if (input.purpose !== "link_identity") {
+        throw new YoroAccountError("invalid_input", 400);
+      }
+    }
     let targetUserId: string | undefined;
     if (input.purpose === "link_identity") {
       const authenticated = await this.requireSession(input.sessionCookie);
@@ -390,6 +429,12 @@ export class YoroAccountService {
         > RECENT_AUTHENTICATION_MS
       ) {
         throw new YoroAccountError("recent_authentication_required", 401);
+      }
+      if (
+        input.provider === "riot"
+        && authenticated.authenticationProvider !== "twitch"
+      ) {
+        throw new YoroAccountError("twitch_authentication_required", 401);
       }
       targetUserId = authenticated.userId;
     }
@@ -422,7 +467,9 @@ export class YoroAccountService {
 
     const authorizationUrl = input.provider === "discord"
       ? this.discordAuthorizationUrl(state, verifier!)
-      : this.twitchAuthorizationUrl(state);
+      : input.provider === "twitch"
+        ? this.twitchAuthorizationUrl(state)
+        : this.riotAuthorizationUrl(state);
     this.logger?.event?.({
       type: "yoro.account.oauth_started",
       provider: input.provider,
@@ -436,6 +483,7 @@ export class YoroAccountService {
     state: string;
     code: string;
     oauthCookie?: string;
+    sessionCookie?: string;
   }): Promise<{ sessionToken: string; returnPath: string }> {
     if (
       !validToken(input.state)
@@ -454,6 +502,25 @@ export class YoroAccountService {
     if (!oauth) throw new YoroAccountError("oauth_failed", 401);
 
     try {
+      let riotLinkingSession: AuthenticatedSession | undefined;
+      if (input.provider === "riot") {
+        if (
+          !appConfig.riot.rsoEnabled
+          || oauth.purpose !== "link_identity"
+          || !oauth.target_user_id
+        ) {
+          throw new YoroAccountError("oauth_failed", 401);
+        }
+        riotLinkingSession = await this.requireSession(input.sessionCookie);
+        if (
+          riotLinkingSession.userId !== oauth.target_user_id
+          || riotLinkingSession.authenticationProvider !== "twitch"
+          || Date.now() - riotLinkingSession.authenticatedAt.getTime()
+            > RECENT_AUTHENTICATION_MS
+        ) {
+          throw new YoroAccountError("twitch_authentication_required", 401);
+        }
+      }
       const providerResult = input.provider === "discord"
         ? {
             profile: await this.completeDiscordProvider(
@@ -462,7 +529,9 @@ export class YoroAccountService {
               input.code
             )
           }
-        : await this.completeTwitchProvider(input.code);
+        : input.provider === "twitch"
+          ? await this.completeTwitchProvider(input.code)
+          : { profile: await this.completeRiotProvider(input.code) };
       const sessionToken = discordSafeToken();
       const csrfToken = discordSafeToken();
       const now = Date.now();
@@ -482,6 +551,9 @@ export class YoroAccountService {
           userId = oauth.target_user_id;
           await transactionRepository.revokeUserSessions(userId);
         } else {
+          if (input.provider === "riot") {
+            throw new YoroAccountError("oauth_failed", 401);
+          }
           userId = await transactionRepository.resolveUserForLogin({
             provider: input.provider,
             ...providerResult.profile
@@ -497,12 +569,15 @@ export class YoroAccountService {
             tokenExpiresAt: new Date(providerResult.credential.expiresAt)
           });
         }
+        const authenticationProvider: YoroAuthenticationProvider = input.provider === "riot"
+          ? riotLinkingSession!.authenticationProvider
+          : input.provider;
         await transactionRepository.createSession({
           id: crypto.randomUUID(),
           userId,
           sessionTokenHash: discordSecretHash(sessionToken),
           csrfTokenHash: discordSecretHash(csrfToken),
-          authenticationProvider: input.provider,
+          authenticationProvider,
           idleExpiresAt: new Date(
             now + appConfig.discordBotManagement.idleTtlSeconds * 1_000
           ),
@@ -548,7 +623,17 @@ export class YoroAccountService {
       csrfToken: authenticated.csrfToken,
       authenticationProvider: authenticated.authenticationProvider,
       identities: safeIdentities,
-      preferences
+      preferences,
+      connectionCapabilities: {
+        riotRsoAvailable: appConfig.riot.rsoEnabled,
+        riotRsoRequiresTwitchAuthentication:
+          appConfig.riot.rsoEnabled
+          && (
+            authenticated.authenticationProvider !== "twitch"
+            || Date.now() - authenticated.authenticatedAt.getTime()
+              > RECENT_AUTHENTICATION_MS
+          )
+      }
     };
   }
 
@@ -567,6 +652,41 @@ export class YoroAccountService {
     );
     this.logger?.event?.({ type: "yoro.account.preferences_updated" });
     return preferences;
+  }
+
+  setValorantVisibilityInvalidator(invalidator: (userId: string) => void): void {
+    this.valorantVisibilityInvalidator = invalidator;
+  }
+
+  async updateValorantRecordConsent(input: {
+    enabled: boolean;
+    sessionCookie?: string;
+    csrfToken?: string;
+  }): Promise<{ enabled: boolean; consentedAt?: string }> {
+    const authenticated = await this.requireMutationSession(input.sessionCookie, input.csrfToken);
+    if (authenticated.authenticationProvider !== "twitch") {
+      throw new YoroAccountError("twitch_authentication_required", 403);
+    }
+    if (Date.now() - authenticated.authenticatedAt.getTime() > RECENT_AUTHENTICATION_MS) {
+      throw new YoroAccountError("recent_authentication_required", 403);
+    }
+    const identities = await new YoroAccountRepository(this.pool).listIdentities(authenticated.userId);
+    if (!identities.some((identity) => identity.provider === "riot")) {
+      throw new YoroAccountError("riot_identity_required", 409);
+    }
+    const result = await withTransaction(this.pool, async (client) => (
+      new YoroAccountRepository(client).setValorantRecordConsent(
+        authenticated.userId,
+        input.enabled
+      )
+    ));
+    this.valorantVisibilityInvalidator?.(authenticated.userId);
+    this.logger?.event?.({
+      type: input.enabled
+        ? "yoro.account.valorant_record_consent_granted"
+        : "yoro.account.valorant_record_consent_revoked"
+    });
+    return result;
   }
 
   async authenticateForManagement(cookieValue?: string): Promise<{
@@ -699,6 +819,7 @@ export class YoroAccountService {
       }
       await repository.revokeUserSessions(session.userId);
     });
+    if (input.provider === "riot") this.valorantVisibilityInvalidator?.(session.userId);
     this.logger?.event?.({
       type: "yoro.account.identity_unlinked",
       provider: input.provider
@@ -787,6 +908,17 @@ export class YoroAccountService {
     url.searchParams.set("client_id", appConfig.twitch.clientId);
     url.searchParams.set("redirect_uri", appConfig.twitch.publicRedirectUri);
     url.searchParams.set("scope", TWITCH_PUBLIC_VIEWER_SCOPES.join(" "));
+    url.searchParams.set("state", state);
+    return url.toString();
+  }
+
+  private riotAuthorizationUrl(state: string): string {
+    const url = new URL(RIOT_AUTHORIZE_URL);
+    url.searchParams.set("response_type", "code");
+    url.searchParams.set("client_id", appConfig.riot.rsoClientId);
+    url.searchParams.set("redirect_uri", appConfig.riot.rsoRedirectUri);
+    // 계정 소유 확인만 수행하므로 장기 access를 요청하지 않습니다.
+    url.searchParams.set("scope", "openid");
     url.searchParams.set("state", state);
     return url.toString();
   }
@@ -925,6 +1057,50 @@ export class YoroAccountService {
           ...(avatarReference ? { profileImageUrl: avatarReference } : {})
         }
       }
+    };
+  }
+
+  private async completeRiotProvider(code: string): Promise<ProviderProfile> {
+    const basicCredential = Buffer.from(
+      `${appConfig.riot.rsoClientId}:${appConfig.riot.rsoClientSecret}`,
+      "utf8"
+    ).toString("base64");
+    const token = await this.fetchImpl(RIOT_TOKEN_URL, {
+      method: "POST",
+      signal: AbortSignal.timeout(appConfig.riot.apiTimeoutMs),
+      headers: {
+        Authorization: `Basic ${basicCredential}`,
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: new URLSearchParams({
+        grant_type: "authorization_code",
+        code,
+        redirect_uri: appConfig.riot.rsoRedirectUri
+      })
+    });
+    if (!token.ok) throw new YoroAccountError("oauth_failed", 401);
+    const tokenBody = await token.json() as { access_token?: unknown };
+    if (!validOAuthToken(tokenBody.access_token)) {
+      throw new YoroAccountError("oauth_failed", 401);
+    }
+
+    const account = await this.fetchImpl(
+      `https://${appConfig.riot.accountRegion}.api.riotgames.com/riot/account/v1/accounts/me`,
+      {
+        signal: AbortSignal.timeout(appConfig.riot.apiTimeoutMs),
+        headers: { Authorization: `Bearer ${tokenBody.access_token}` }
+      }
+    );
+    if (!account.ok) throw new YoroAccountError("oauth_failed", 401);
+    const value = await account.json() as Record<string, unknown>;
+    const gameName = safeRiotIdPart(value.gameName, 64);
+    const tagLine = safeRiotIdPart(value.tagLine, 32);
+    if (!validRiotPuuid(value.puuid) || !gameName || !tagLine) {
+      throw new YoroAccountError("oauth_failed", 401);
+    }
+    return {
+      providerSubject: value.puuid,
+      displayName: `${gameName}#${tagLine}`.slice(0, 80)
     };
   }
 

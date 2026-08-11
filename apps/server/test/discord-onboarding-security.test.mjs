@@ -167,6 +167,18 @@ test("Discord onboarding route는 OAuth callback과 자체 session 보안을 분
     "OAUTH_CALLBACK"
   );
   assert.equal(
+    requiredHttpPrincipal("GET", "/api/account/oauth/riot/start"),
+    "OAUTH_CALLBACK"
+  );
+  assert.equal(
+    requiredHttpPrincipal("GET", "/api/account/oauth/riot/callback"),
+    "OAUTH_CALLBACK"
+  );
+  assert.equal(
+    requiredHttpPrincipal("GET", "/api/account/oauth/riot/logout/callback"),
+    "OAUTH_CALLBACK"
+  );
+  assert.equal(
     requiredHttpPrincipal("DELETE", "/api/account/connections/discord"),
     "PUBLIC"
   );

@@ -2,18 +2,28 @@ import { useCallback, useEffect, useState } from "react";
 import {
   getAccountSession,
   logoutAccount,
+  type YoroAccountIdentity,
+  type YoroAuthenticationProvider,
   type YoroAccountSession
 } from "./api";
 
-export function authenticatedYoroIdentity(session: YoroAccountSession | undefined) {
+type AuthenticationIdentity = YoroAccountIdentity & {
+  provider: YoroAuthenticationProvider;
+};
+
+export function authenticatedYoroIdentity(
+  session: YoroAccountSession | undefined
+): AuthenticationIdentity | undefined {
   if (!session?.authenticated) return undefined;
   const twitchIdentity = session.identities.find(
-    (identity) => identity.provider === "twitch"
+    (identity): identity is AuthenticationIdentity => identity.provider === "twitch"
   );
   if (twitchIdentity) return twitchIdentity;
   return session.identities.find(
-    (identity) => identity.provider === session.authenticationProvider
-  ) ?? session.identities[0];
+    (identity): identity is AuthenticationIdentity => (
+      identity.provider === session.authenticationProvider
+    )
+  );
 }
 
 export function useYoroAccountSession() {

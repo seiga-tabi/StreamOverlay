@@ -5922,7 +5922,7 @@ export function PublicLolPage({
         setProfile(null);
         setError("");
         setActiveMainPage(route.page);
-        setActiveNav(route.page === "palworld" || route.page === "privacy" || route.page === "terms" || route.page === "contact" ? "search" : "community");
+        setActiveNav(route.page === "palworld" || route.page === "valorant" || route.page === "privacy" || route.page === "terms" || route.page === "contact" ? "search" : "community");
         setStreamerRegisterOpen(false);
         if (route.page === "followJoin") {
           setPublicParticipationSessionId(new URLSearchParams(window.location.search).get("session")?.trim() ?? "");
@@ -6196,7 +6196,7 @@ export function PublicLolPage({
       setActiveNav("search");
       setPublicPath(legalPath);
     } else {
-      setActiveNav(page === "palworld" ? "search" : "community");
+      setActiveNav(page === "palworld" || page === "valorant" ? "search" : "community");
       const pagePath = publicPathForPage(page);
       if (pagePath) setPublicPath(pagePath);
     }
@@ -6463,7 +6463,7 @@ export function PublicLolPage({
   }
 
   function renderMainMenuPage() {
-    if (activeMainPage === "palworld") {
+    if (activeMainPage === "palworld" || activeMainPage === "valorant") {
       return (
         <section
           className="public-game-empty-page"

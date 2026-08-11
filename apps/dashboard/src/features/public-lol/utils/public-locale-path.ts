@@ -25,6 +25,11 @@ const LOCALIZABLE_PUBLIC_EXACT_PATHS = new Set([
   "/palworld/skills",
   "/palworld/map",
   "/palworld/search",
+  "/valorant",
+  "/valorant/agents",
+  "/valorant/weapons",
+  "/valorant/maps",
+  "/valorant/ranked",
   "/lol/aram",
   "/patch-notes",
 ]);

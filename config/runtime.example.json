@@ -11,6 +11,8 @@
     "discordBot": true,
     "discordBotManagement": true,
     "discordParticipationAnnounce": false,
+    "riotRso": false,
+    "valorantPublic": false,
     "twitchEventSub": true
   },
   "database": {
@@ -37,6 +39,10 @@
   },
   "riot": {
     "accountRegion": "asia",
-    "lolPlatform": "kr"
+    "lolPlatform": "kr",
+    "rsoClientId": "public-riot-rso-client-id",
+    "rsoRedirectUri": "https://yoro.gg/api/account/oauth/riot/callback",
+    "rsoLogoutRedirectUri": "https://yoro.gg/api/account/oauth/riot/logout/callback",
+    "valorantProductionApproved": false
   }
 }

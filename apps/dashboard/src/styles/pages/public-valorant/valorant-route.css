@@ -1,0 +1,7 @@
+/*
+ * Valorant route 전용 stylesheet 진입점.
+ *
+ * PublicValorantPage lazy chunk에만 붙습니다. 신규 페이지이므로 legacy layer
+ * 없이 pages layer 단독 소유입니다(LoL의 !important 지층을 만들지 않습니다).
+ */
+@import "./01-valorant.css";

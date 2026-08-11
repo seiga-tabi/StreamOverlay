@@ -10,6 +10,7 @@ database_url
 twitch_client_secret
 twitch_token_encryption_key
 riot_api_key
+riot_rso_client_secret
 discord_client_secret
 discord_oauth_encryption_key
 bridge_shared_secret
@@ -59,7 +60,7 @@ Production bind mount를 사용할 때 파일 소유자는 컨테이너 실행 U
 
 ## 회전
 
-Bot token, Riot API key, OAuth client secret은 공급자에서 새 값을 발급한 뒤
+Bot token, Riot API key, Riot RSO client secret과 OAuth client secret은 공급자에서 새 값을 발급한 뒤
 동일 디렉터리에 임시 파일을 `0600`으로 쓰고 atomic rename으로 교체합니다.
 그 후 해당 secret을 사용하는 서비스만 재시작합니다.
 

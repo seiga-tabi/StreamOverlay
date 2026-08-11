@@ -117,6 +117,7 @@ async function withDiscordConfig(run) {
     botInternalEnabled: appConfig.discordBotInternal.enabled,
     botManagementEnabled: appConfig.discordBotManagement.enabled,
     participationAnnounceEnabled: appConfig.discordParticipationAnnounce.enabled,
+    riotRsoEnabled: appConfig.riot.rsoEnabled,
     applicationId: appConfig.discordBotInternal.applicationId,
     corsOrigins: [...appConfig.security.corsOrigins],
     nodeEnv: appConfig.nodeEnv
@@ -127,6 +128,7 @@ async function withDiscordConfig(run) {
   appConfig.discordBotInternal.enabled = true;
   appConfig.discordBotManagement.enabled = true;
   appConfig.discordParticipationAnnounce.enabled = true;
+  appConfig.riot.rsoEnabled = true;
   appConfig.discordBotInternal.applicationId = APPLICATION_ID;
   appConfig.security.corsOrigins = [DASHBOARD_ORIGIN];
   appConfig.nodeEnv = "development";
@@ -138,6 +140,7 @@ async function withDiscordConfig(run) {
     appConfig.discordBotInternal.enabled = previous.botInternalEnabled;
     appConfig.discordBotManagement.enabled = previous.botManagementEnabled;
     appConfig.discordParticipationAnnounce.enabled = previous.participationAnnounceEnabled;
+    appConfig.riot.rsoEnabled = previous.riotRsoEnabled;
     appConfig.discordBotInternal.applicationId = previous.applicationId;
     appConfig.security.corsOrigins = previous.corsOrigins;
     appConfig.nodeEnv = previous.nodeEnv;
@@ -692,6 +695,10 @@ test("YORO 계정 route는 통합 OAuth cookie·Origin·CSRF 경계를 유지한
             locale: "ko",
             defaultDashboardPage: "overview",
             reducedMotion: false
+          },
+          connectionCapabilities: {
+            riotRsoAvailable: true,
+            riotRsoRequiresTwitchAuthentication: true
           }
         };
       },
@@ -734,6 +741,35 @@ test("YORO 계정 route는 통합 OAuth cookie·Origin·CSRF 경계를 유지한
     assert.equal(new URL(started.headers.Location).origin, "https://discord.com");
     assert.match(String(started.headers["Set-Cookie"]), /HttpOnly/u);
     assert.doesNotMatch(String(started.headers["Set-Cookie"]), /return_to|bot\/manage/u);
+
+    const riotLoginDenied = await request(
+      handler,
+      "GET",
+      "/api/account/oauth/riot/start?purpose=login&return_to=%2Fdashboard%2Faccount"
+    );
+    assert.equal(riotLoginDenied.statusCode, 400);
+
+    const riotStarted = await request(
+      handler,
+      "GET",
+      "/api/account/oauth/riot/start?purpose=link_identity&return_to=%2Fdashboard%2Faccount",
+      undefined,
+      {
+        cookie:
+          "yoro_session=session_value_abcdefghijklmnopqrstuvwxyz123456.csrf_value_abcdefghijklmnopqrstuvwxyz123456"
+      }
+    );
+    assert.equal(riotStarted.statusCode, 302);
+    assert.deepEqual(
+      calls.filter((call) => call.type === "oauth").at(-1)?.input,
+      {
+        provider: "riot",
+        purpose: "link_identity",
+        returnPath: "/dashboard/account",
+        sessionCookie:
+          "session_value_abcdefghijklmnopqrstuvwxyz123456.csrf_value_abcdefghijklmnopqrstuvwxyz123456"
+      }
+    );
 
     const cookie =
       "yoro_session=session_value_abcdefghijklmnopqrstuvwxyz123456.csrf_value_abcdefghijklmnopqrstuvwxyz123456";
@@ -868,6 +904,23 @@ test("YORO 계정 route는 통합 OAuth cookie·Origin·CSRF 경계를 유지한
     assert.equal(calls.some((call) => call.type === "logout"), true);
     assert.equal(calls.some((call) => call.type === "unlink"), true);
 
+    const unlinkRiot = await request(
+      handler,
+      "DELETE",
+      "/api/account/connections/riot",
+      undefined,
+      {
+        cookie,
+        origin: DASHBOARD_ORIGIN,
+        "x-yoro-csrf": "csrf_value_abcdefghijklmnopqrstuvwxyz123456"
+      }
+    );
+    assert.equal(unlinkRiot.statusCode, 204);
+    assert.equal(
+      calls.some((call) => call.type === "unlink" && call.input.provider === "riot"),
+      true
+    );
+
     const callback = await request(
       handler,
       "GET",
@@ -880,6 +933,40 @@ test("YORO 계정 route는 통합 OAuth cookie·Origin·CSRF 경계를 유지한
     assert.equal(callbackLocation.pathname, "/palworld");
     assert.equal(callbackLocation.searchParams.get("account"), "twitch_connected");
     assert.match(String(callback.headers["Set-Cookie"]), /yoro_session=/u);
+
+    const riotCallback = await request(
+      handler,
+      "GET",
+      "/api/account/oauth/riot/callback?code=riot-code&state=abcdefghijklmnopqrstuvwxyzABCDEFGH",
+      undefined,
+      {
+        cookie:
+          "yoro_oauth=oauth_binding_abcdefghijklmnopqrstuvwxyz123456; yoro_session=session_value_abcdefghijklmnopqrstuvwxyz123456.csrf_value_abcdefghijklmnopqrstuvwxyz123456"
+      }
+    );
+    assert.equal(riotCallback.statusCode, 302);
+    const riotCallbackLocation = new URL(riotCallback.headers.Location);
+    assert.equal(riotCallbackLocation.pathname, "/palworld");
+    assert.equal(riotCallbackLocation.searchParams.get("account"), "riot_connected");
+    assert.deepEqual(
+      calls.filter((call) => call.type === "oauth_complete").at(-1)?.input,
+      {
+        provider: "riot",
+        state: "abcdefghijklmnopqrstuvwxyzABCDEFGH",
+        code: "riot-code",
+        oauthCookie: "oauth_binding_abcdefghijklmnopqrstuvwxyz123456",
+        sessionCookie:
+          "session_value_abcdefghijklmnopqrstuvwxyz123456.csrf_value_abcdefghijklmnopqrstuvwxyz123456"
+      }
+    );
+
+    appConfig.riot.rsoEnabled = false;
+    const riotDisabled = await request(
+      handler,
+      "GET",
+      "/api/account/oauth/riot/start?purpose=link_identity"
+    );
+    assert.equal(riotDisabled.statusCode, 404);
   });
 });
 

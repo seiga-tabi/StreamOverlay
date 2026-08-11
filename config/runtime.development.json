@@ -11,6 +11,8 @@
     "discordBot": false,
     "discordBotManagement": false,
     "discordParticipationAnnounce": false,
+    "riotRso": false,
+    "valorantPublic": false,
     "twitchEventSub": false
   },
   "database": {
@@ -19,6 +21,7 @@
   },
   "riot": {
     "accountRegion": "asia",
-    "lolPlatform": "kr"
+    "lolPlatform": "kr",
+    "valorantProductionApproved": false
   }
 }

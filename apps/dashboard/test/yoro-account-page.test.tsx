@@ -55,12 +55,18 @@ test("YORO 로그인 페이지는 Discord와 Twitch를 별도 비밀번호 없�
   assert.doesNotMatch(source, /localStorage/u);
 });
 
-test("YORO 계정 페이지는 Discord와 Twitch 연결 상태를 한 화면에서 관리한다", async () => {
+test("YORO 계정 페이지는 Discord·Twitch 로그인과 Riot opt-in 연결을 분리한다", async () => {
   const { YoroAccountPage } = await import("../src/features/yoro-account/YoroAccountPage");
   const markup = renderToStaticMarkup(<YoroAccountPage />);
+  const source = await readFile(
+    new URL("../src/features/yoro-account/YoroAccountPage.tsx", import.meta.url),
+    "utf8"
+  );
 
   assert.match(markup, /연결된 계정/u);
   assert.match(markup, /Discord와 Twitch는 로그인 수단/u);
+  assert.match(source, /Riot PUUID와 Riot ID/u);
+  assert.match(source, /identities\.has\("twitch"\) \? "login" : "link_identity"/u);
   assert.doesNotMatch(markup, /providerSubject/u);
 });
 
@@ -91,6 +97,10 @@ test("공개 헤더용 계정 선택기는 두 계정 연결 시 Twitch identity
       locale: "ko",
       defaultDashboardPage: "overview",
       reducedMotion: false
+    },
+    connectionCapabilities: {
+      riotRsoAvailable: true,
+      riotRsoRequiresTwitchAuthentication: false
     }
   }), twitchIdentity);
   assert.equal(authenticatedYoroIdentity({ authenticated: false }), undefined);

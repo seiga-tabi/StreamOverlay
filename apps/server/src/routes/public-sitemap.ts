@@ -54,7 +54,12 @@ export const PUBLIC_SITEMAP_STATIC_PATHS: readonly string[] = [
   "/palworld/technology",
   "/palworld/skills",
   "/palworld/map",
-  "/palworld/search"
+  "/palworld/search",
+  "/valorant",
+  "/valorant/agents",
+  "/valorant/weapons",
+  "/valorant/maps",
+  "/valorant/ranked"
 ];
 
 export type SitemapEntry = {

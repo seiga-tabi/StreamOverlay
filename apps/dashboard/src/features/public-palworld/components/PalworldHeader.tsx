@@ -169,6 +169,10 @@ export function PalworldHeader({
       setPalworldUrl("/palworld");
       return;
     }
+    if (nextPage === "valorant") {
+      setPublicPath("/valorant");
+      return;
+    }
     if (nextPage === "bot") {
       setPublicPath("/bot");
       return;

@@ -60,6 +60,34 @@ Server와 Discord Bot은 같은 `runtime.json`을 읽은 상태로 함께 재시
 있으며 production Compose는 이 환경 변수로 runtime 파일을 덮어쓰지 않습니다.
 이 flag 자체에는 신규 secret이나 secret mount가 없습니다.
 
+Riot RSO 계정 연결은 별도 feature flag로 제어합니다.
+
+```json
+{
+  "features": {
+    "riotRso": false
+  },
+  "riot": {
+    "rsoClientId": "public-riot-rso-client-id",
+    "rsoRedirectUri": "https://yoro.gg/api/account/oauth/riot/callback",
+    "rsoLogoutRedirectUri": "https://yoro.gg/api/account/oauth/riot/logout/callback"
+  }
+}
+```
+
+기본값은 `false`입니다. 활성화에는 `database`, `discordSaas`,
+`discordBotManagement`와 Twitch OAuth 설정이 필요하며, secret은 runtime JSON이
+아닌 `/etc/yoro/secrets/riot_rso_client_secret`에 둡니다. Riot RSO는 Twitch로
+최근 인증한 YORO 사용자만 Dashboard의 연결 계정 화면에서 시작할 수 있습니다.
+상세 운영 절차는 `docs/RIOT_RSO.md`를 따릅니다.
+
+발로란트 공개 surface는 `features.valorantPublic`으로 분리합니다. 이 flag만 켜면
+로컬 공식 카탈로그는 제공되고 Riot API가 필요한 리더보드·전적은
+`approval_pending`을 반환합니다. Riot 프로덕션 승인을 받은 뒤에만
+`riot.valorantProductionApproved=true`와 `riot.valorantCurrentActId`를 함께
+설정합니다. 이때 `/run/secrets/riot_api_key`가 필수입니다. 상세 계약은
+`docs/VALORANT_PUBLIC_API.md`를 따릅니다.
+
 runtime 파일 모드에서는 legacy 일반 환경 변수와 `*_FILE` 경로 override를
 적용하지 않습니다. 컨테이너 실행에 필요한 `NODE_ENV`,
 `YORO_CONFIG_FILE`, image release metadata와 내부 filesystem 경로만 배포

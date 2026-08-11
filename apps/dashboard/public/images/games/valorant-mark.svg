@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- 게임 선택기용 자체 제작 V 모노그램 — Riot 상표 로고를 복제하지 않습니다. -->
+  <rect width="48" height="48" rx="10" fill="#0f1923"/>
+  <path d="M10 14h8l6 12 6-12h8L26 36h-4L10 14Z" fill="hsl(355 100% 64%)"/>
+</svg>

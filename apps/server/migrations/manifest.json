@@ -152,6 +152,22 @@
       "checksumSha256": "c18652e1093e717f078a58ea35b5abfa629afe6cccd44cb7e179046e55cf84ee",
       "destructive": false,
       "transaction": true
+    },
+    {
+      "id": "0020_yoro_riot_rso_identity",
+      "file": "0020_yoro_riot_rso_identity.sql",
+      "description": "Twitch 인증 YORO 계정의 Riot RSO opt-in identity 연결 기반",
+      "checksumSha256": "ce2a530f4b6ea8d14d44727c7ffa44f76fcfdbdbd61fbb9de313c96afa59e2e6",
+      "destructive": false,
+      "transaction": true
+    },
+    {
+      "id": "0021_yoro_valorant_record_consent",
+      "file": "0021_yoro_valorant_record_consent.sql",
+      "description": "Riot identity와 분리된 발로란트 공개 전적 명시 동의",
+      "checksumSha256": "ab3182499c962361e2ccd56e4e3dcf5589997bd1afbfbdd9f50a62ad4e25ef05",
+      "destructive": false,
+      "transaction": true
     }
   ]
 }

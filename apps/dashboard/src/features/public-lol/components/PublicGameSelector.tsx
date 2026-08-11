@@ -3,11 +3,11 @@ import { publicI18n, t } from "../i18n/public-lol-i18n";
 import type { PublicMainPage } from "../types/public-lol";
 import { DISCORD_SYMBOL_ICON_SRC } from "../../../shared/DiscordSymbolIcon";
 
-export type PublicGameId = "league-of-legends" | "palworld" | "yoro-bot";
+export type PublicGameId = "league-of-legends" | "palworld" | "valorant" | "yoro-bot";
 
 type PublicGameOption = {
   id: PublicGameId;
-  page?: Extract<PublicMainPage, "search" | "palworld" | "bot">;
+  page?: Extract<PublicMainPage, "search" | "palworld" | "valorant" | "bot">;
   logo?: string;
   ko: string;
   ja: string;
@@ -45,6 +45,15 @@ const games: PublicGameOption[] = [
     subtitleJa: publicI18n.ja.palworldSubtitle
   },
   {
+    id: "valorant",
+    page: "valorant",
+    logo: "/images/games/valorant-mark.svg",
+    ko: publicI18n.ko.valorant,
+    ja: publicI18n.ja.valorant,
+    subtitleKo: publicI18n.ko.valorantSubtitle,
+    subtitleJa: publicI18n.ja.valorantSubtitle
+  },
+  {
     id: "yoro-bot",
     page: "bot",
     logo: DISCORD_SYMBOL_ICON_SRC,
@@ -61,6 +70,7 @@ function isPublicGameId(value: string | null): value is PublicGameId {
 
 function gameIdForPage(page: PublicMainPage): PublicGameId | undefined {
   if (page === "palworld") return "palworld";
+  if (page === "valorant") return "valorant";
   if (page === "bot") return "yoro-bot";
   return "league-of-legends";
 }
@@ -68,18 +78,21 @@ function gameIdForPage(page: PublicMainPage): PublicGameId | undefined {
 function gameLabel(game: PublicGameOption): string {
   if (game.id === "league-of-legends") return t().leagueOfLegends;
   if (game.id === "palworld") return t().palworld;
+  if (game.id === "valorant") return t().valorant;
   return t().yoroBot;
 }
 
 function gameSubtitle(game: PublicGameOption): string {
   if (game.id === "league-of-legends") return t().leagueOfLegendsSubtitle;
   if (game.id === "palworld") return t().palworldSubtitle;
+  if (game.id === "valorant") return t().valorantSubtitle;
   return t().yoroBotSubtitle;
 }
 
 function gameSelectionLabel(game: PublicGameOption): string {
   if (game.id === "league-of-legends") return t().selectLeagueOfLegends;
   if (game.id === "palworld") return t().selectPalworld;
+  if (game.id === "valorant") return t().selectValorant;
   return t().selectYoroBot;
 }
 

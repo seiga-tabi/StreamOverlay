@@ -2,7 +2,8 @@ import crypto from "node:crypto";
 import { requireUuid } from "../tenant-context.js";
 import { repositoryQuery, requireBoundedText, type RepositoryQueryable } from "./types.js";
 
-export type YoroIdentityProvider = "discord" | "twitch";
+export type YoroAuthenticationProvider = "discord" | "twitch";
+export type YoroIdentityProvider = YoroAuthenticationProvider | "riot";
 export type YoroOAuthPurpose = "login" | "link_identity";
 
 export type YoroOAuthSessionRow = {
@@ -18,7 +19,7 @@ export type YoroSessionRow = {
   id: string;
   user_id: string;
   csrf_token_hash: Buffer;
-  authentication_provider: YoroIdentityProvider;
+  authentication_provider: YoroAuthenticationProvider;
   authenticated_at: Date;
 };
 
@@ -35,6 +36,16 @@ export type YoroExternalIdentity = Readonly<{
   avatarReference?: string;
   connectedAt: string;
   lastAuthenticatedAt: string;
+  valorantRecordConsent: boolean;
+}>;
+
+export type EligibleValorantIdentity = Readonly<{
+  userId: string;
+  riotPuuid: string;
+  riotDisplayName: string;
+  twitchUserId: string;
+  twitchDisplayName: string;
+  consentedAt: string;
 }>;
 
 export type YoroDashboardPage =
@@ -57,6 +68,7 @@ type ExternalIdentityRow = {
   avatar_reference: string | null;
   connected_at: Date;
   last_authenticated_at: Date;
+  valorant_record_consent: boolean;
 };
 
 export class YoroAccountRepository {
@@ -138,7 +150,7 @@ export class YoroAccountRepository {
   }
 
   async resolveUserForLogin(input: {
-    provider: YoroIdentityProvider;
+    provider: YoroAuthenticationProvider;
     providerSubject: string;
     displayName: string;
     avatarReference?: string;
@@ -286,7 +298,9 @@ export class YoroAccountRepository {
           userId
         ]
       );
-      await this.setLegacyProviderId(userId, input.provider, input.providerSubject);
+      if (input.provider !== "riot") {
+        await this.setLegacyProviderId(userId, input.provider, input.providerSubject);
+      }
       return existing.rows[0].revoked_at ? "linked" : "already_linked";
     }
     await repositoryQuery(
@@ -303,7 +317,9 @@ export class YoroAccountRepository {
         input.avatarReference ?? null
       ]
     );
-    await this.setLegacyProviderId(userId, input.provider, input.providerSubject);
+    if (input.provider !== "riot") {
+      await this.setLegacyProviderId(userId, input.provider, input.providerSubject);
+    }
     return "linked";
   }
 
@@ -312,7 +328,7 @@ export class YoroAccountRepository {
     userId: string;
     sessionTokenHash: Buffer;
     csrfTokenHash: Buffer;
-    authenticationProvider: YoroIdentityProvider;
+    authenticationProvider: YoroAuthenticationProvider;
     idleExpiresAt: Date;
     absoluteExpiresAt: Date;
   }): Promise<void> {
@@ -360,11 +376,15 @@ export class YoroAccountRepository {
   async listIdentities(userId: string): Promise<readonly YoroExternalIdentity[]> {
     const result = await repositoryQuery<ExternalIdentityRow>(
       this.queryable,
-      `SELECT user_id, provider, provider_subject, display_name,
-         avatar_reference, connected_at, last_authenticated_at
-       FROM external_identities
-       WHERE user_id = $1 AND revoked_at IS NULL
-       ORDER BY provider ASC`,
+      `SELECT identity.user_id, identity.provider, identity.provider_subject,
+         identity.display_name, identity.avatar_reference, identity.connected_at,
+         identity.last_authenticated_at,
+         COALESCE(consent.enabled, FALSE) AS valorant_record_consent
+       FROM external_identities identity
+       LEFT JOIN yoro_valorant_record_consents consent
+         ON consent.external_identity_id = identity.id
+       WHERE identity.user_id = $1 AND identity.revoked_at IS NULL
+       ORDER BY identity.provider ASC`,
       [requireUuid(userId, "userId")]
     );
     return Object.freeze(result.rows.map((row) => Object.freeze({
@@ -373,7 +393,95 @@ export class YoroAccountRepository {
       displayName: row.display_name,
       ...(row.avatar_reference ? { avatarReference: row.avatar_reference } : {}),
       connectedAt: row.connected_at.toISOString(),
-      lastAuthenticatedAt: row.last_authenticated_at.toISOString()
+      lastAuthenticatedAt: row.last_authenticated_at.toISOString(),
+      valorantRecordConsent: row.valorant_record_consent === true
+    })));
+  }
+
+  async setValorantRecordConsent(userId: string, enabled: boolean): Promise<{
+    enabled: boolean;
+    consentedAt?: string;
+  }> {
+    const identity = await repositoryQuery<{ id: string }>(
+      this.queryable,
+      `SELECT id
+       FROM external_identities
+       WHERE user_id = $1 AND provider = 'riot' AND revoked_at IS NULL
+       FOR UPDATE`,
+      [requireUuid(userId, "userId")]
+    );
+    const externalIdentityId = identity.rows[0]?.id;
+    if (!externalIdentityId) throw new Error("riot_identity_required");
+    const result = await repositoryQuery<{
+      enabled: boolean;
+      consented_at: Date | null;
+    }>(
+      this.queryable,
+      `INSERT INTO yoro_valorant_record_consents (
+         external_identity_id, enabled, policy_version, consented_at, revoked_at
+       ) VALUES ($1, $2, 'valorant-record-v1',
+         CASE WHEN $2 THEN NOW() ELSE NULL END,
+         CASE WHEN $2 THEN NULL ELSE NOW() END)
+       ON CONFLICT (external_identity_id) DO UPDATE
+       SET enabled = EXCLUDED.enabled,
+           policy_version = EXCLUDED.policy_version,
+           consented_at = CASE
+             WHEN EXCLUDED.enabled THEN NOW()
+             ELSE yoro_valorant_record_consents.consented_at
+           END,
+           revoked_at = CASE WHEN EXCLUDED.enabled THEN NULL ELSE NOW() END,
+           updated_at = NOW()
+       RETURNING enabled, consented_at`,
+      [externalIdentityId, enabled]
+    );
+    const row = result.rows[0];
+    if (!row) throw new Error("valorant_consent_update_failed");
+    return {
+      enabled: row.enabled,
+      ...(row.enabled && row.consented_at ? { consentedAt: row.consented_at.toISOString() } : {})
+    };
+  }
+
+  async listEligibleValorantIdentities(): Promise<readonly EligibleValorantIdentity[]> {
+    const result = await repositoryQuery<{
+      user_id: string;
+      riot_puuid: string;
+      riot_display_name: string;
+      twitch_user_id: string;
+      twitch_display_name: string;
+      consented_at: Date;
+    }>(
+      this.queryable,
+      `SELECT account.id AS user_id,
+         riot.provider_subject AS riot_puuid,
+         riot.display_name AS riot_display_name,
+         twitch.provider_subject AS twitch_user_id,
+         twitch.display_name AS twitch_display_name,
+         consent.consented_at
+       FROM users account
+       JOIN external_identities riot
+         ON riot.user_id = account.id
+        AND riot.provider = 'riot'
+        AND riot.revoked_at IS NULL
+       JOIN yoro_valorant_record_consents consent
+         ON consent.external_identity_id = riot.id
+        AND consent.enabled = TRUE
+       JOIN external_identities twitch
+         ON twitch.user_id = account.id
+        AND twitch.provider = 'twitch'
+        AND twitch.revoked_at IS NULL
+       WHERE account.status = 'active'
+       ORDER BY consent.updated_at DESC, account.id ASC
+       LIMIT 1000`,
+      []
+    );
+    return Object.freeze(result.rows.map((row) => Object.freeze({
+      userId: row.user_id,
+      riotPuuid: row.riot_puuid,
+      riotDisplayName: row.riot_display_name,
+      twitchUserId: row.twitch_user_id,
+      twitchDisplayName: row.twitch_display_name,
+      consentedAt: row.consented_at.toISOString()
     })));
   }
 
@@ -502,7 +610,10 @@ export class YoroAccountRepository {
        FOR UPDATE`,
       [id]
     );
-    if (identities.rows.length <= 1) return false;
+    const authenticationIdentityCount = identities.rows.filter(
+      (identity) => identity.provider === "discord" || identity.provider === "twitch"
+    ).length;
+    if (provider !== "riot" && authenticationIdentityCount <= 1) return false;
     const result = await repositoryQuery(
       this.queryable,
       `UPDATE external_identities
@@ -511,13 +622,27 @@ export class YoroAccountRepository {
       [id, provider]
     );
     if ((result.rowCount ?? 0) > 0) {
-      await repositoryQuery(
-        this.queryable,
-        provider === "discord"
-          ? "UPDATE users SET discord_user_id = NULL, updated_at = NOW() WHERE id = $1"
-          : "UPDATE users SET twitch_user_id = NULL, updated_at = NOW() WHERE id = $1",
-        [id]
-      );
+      if (provider === "riot") {
+        await repositoryQuery(
+          this.queryable,
+          `UPDATE yoro_valorant_record_consents consent
+           SET enabled = FALSE, revoked_at = NOW(), updated_at = NOW()
+           FROM external_identities identity
+           WHERE consent.external_identity_id = identity.id
+             AND identity.user_id = $1
+             AND identity.provider = 'riot'`,
+          [id]
+        );
+      }
+      if (provider !== "riot") {
+        await repositoryQuery(
+          this.queryable,
+          provider === "discord"
+            ? "UPDATE users SET discord_user_id = NULL, updated_at = NOW() WHERE id = $1"
+            : "UPDATE users SET twitch_user_id = NULL, updated_at = NOW() WHERE id = $1",
+          [id]
+        );
+      }
     }
     return (result.rowCount ?? 0) > 0;
   }
@@ -589,7 +714,7 @@ export class YoroAccountRepository {
 
   private async setLegacyProviderId(
     userId: string,
-    provider: YoroIdentityProvider,
+    provider: YoroAuthenticationProvider,
     providerSubject: string
   ): Promise<void> {
     await repositoryQuery(

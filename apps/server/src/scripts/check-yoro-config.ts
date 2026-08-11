@@ -27,6 +27,9 @@ if (!requestedPath && !fs.existsSync(configPath)) {
     console.log(`discordBot: ${enabled("DISCORD_BOT_INTERNAL_API_ENABLED") ? "enabled" : "disabled"}`);
     console.log(`discordBotManagement: ${enabled("DISCORD_BOT_MANAGEMENT_ENABLED") ? "enabled" : "disabled"}`);
     console.log(`discordParticipationAnnounce: ${enabled("DISCORD_PARTICIPATION_ANNOUNCE_ENABLED") ? "enabled" : "disabled"}`);
+    console.log(`riotRso: ${enabled("RIOT_RSO_ENABLED") ? "enabled" : "disabled"}`);
+    console.log(`valorantPublic: ${enabled("VALORANT_PUBLIC_ENABLED") ? "enabled" : "disabled"}`);
+    console.log(`valorantProductionApproved: ${enabled("VALORANT_PRODUCTION_APPROVED") ? "enabled" : "disabled"}`);
     process.exit(0);
   }
   throw new Error("runtime_config_not_configured");
@@ -61,7 +64,13 @@ const requirements: Array<{
     label: "riotApi",
     path: YORO_SECRET_FILES.riotApiKey,
     active: Boolean(runtime.riot),
-    required: false
+    required: runtime.riot?.valorantProductionApproved === true
+  },
+  {
+    label: "riotRsoClientSecret",
+    path: YORO_SECRET_FILES.riotRsoClientSecret,
+    active: runtime.features.riotRso,
+    required: runtime.features.riotRso
   },
   {
     label: "discordClientSecret",
@@ -104,6 +113,9 @@ if (command === "check") {
   console.log(`discordParticipationAnnounce: ${runtime.features.discordParticipationAnnounce ? "enabled" : "disabled"}`);
   console.log(`twitchEventSub: ${runtime.features.twitchEventSub ? "enabled" : "disabled"}, ${configured.get("twitchClientSecret") ? "configured" : "not configured"}`);
   console.log(`riotApi: ${runtime.riot ? (configured.get("riotApi") ? "configured" : "not configured") : "disabled"}`);
+  console.log(`riotRso: ${runtime.features.riotRso ? (configured.get("riotRsoClientSecret") ? "configured" : "not configured") : "disabled"}`);
+  console.log(`valorantPublic: ${runtime.features.valorantPublic ? "enabled" : "disabled"}`);
+  console.log(`valorantProductionApproved: ${runtime.riot?.valorantProductionApproved ? "enabled" : "pending"}`);
 } else if (command === "secrets") {
   for (const item of requirements.filter((entry) => entry.required)) {
     loadFixedSecret(item.path, { required: true });

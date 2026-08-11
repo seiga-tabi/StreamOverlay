@@ -66,6 +66,18 @@ down -v` 또는 `docker volume rm yoro-production_discord_internal_auth`는
 필요한 secret이 하나라도 없으면 `config-check`가 실제 서비스를 시작하기 전에
 실패하며 secret 값은 로그에 출력하지 않습니다.
 
+Riot RSO는 별도 승인을 받은 뒤에만 `features.riotRso=true`로 활성화합니다.
+승인 전에는 `false`를 유지하며 기본 Compose는 RSO secret을 mount하지 않습니다.
+승인 후 `deploy/production/riot-rso.override.example.yaml`을 운영 전용 경로에
+복사해 secret mount를 추가합니다. 활성화 절차와 Developer Portal 등록 URL은
+`docs/RIOT_RSO.md`를 따릅니다.
+
+발로란트 공개 카탈로그는 `features.valorantPublic=true`로 승인 전에 배포할 수
+있습니다. `riot.valorantProductionApproved=false`인 동안 리더보드·스트리머
+전적은 외부 Riot API를 호출하지 않고 `approval_pending`만 반환합니다. 승인 후
+공식 current act UUID와 `riot_api_key`를 갖춘 상태에서만 approval flag를 켭니다.
+동의 migration `0021`과 운영 순서는 `docs/VALORANT_PUBLIC_API.md`를 따릅니다.
+
 ## Build identity
 
 운영 호스트는 Git checkout이어야 합니다. Docker build는 제한적으로 포함된

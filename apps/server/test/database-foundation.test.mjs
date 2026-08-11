@@ -40,7 +40,9 @@ test("migration manifest와 SQL checksum을 strict하게 검증한다", async ()
       "0016_discord_bot_english_response_locale",
       "0017_discord_participation_announcement",
       "0018_discord_guild_directory_cache",
-      "0019_admin_audit_logs"
+      "0019_admin_audit_logs",
+      "0020_yoro_riot_rso_identity",
+      "0021_yoro_valorant_record_consent"
     ]
   );
 
@@ -73,6 +75,28 @@ test("0019 관리자 감사 migration은 global index와 finalize-only lifecycle
   assert.match(sql, /ENABLE ALWAYS TRIGGER admin_audit_logs_finalize_only/u);
   assert.match(sql, /ENABLE ALWAYS TRIGGER admin_audit_logs_no_truncate/u);
   assert.doesNotMatch(sql, /actor_(?:user|session)_id|target_id|session_reference/u);
+});
+
+test("0020 Riot RSO migration은 Riot을 link identity로만 허용한다", () => {
+  const sql = readFileSync(
+    path.join(migrationsRoot, "0020_yoro_riot_rso_identity.sql"),
+    "utf8"
+  );
+  assert.match(sql, /provider IN \('discord', 'twitch', 'riot'\)/u);
+  assert.match(sql, /provider_subject ~ '\^\[A-Za-z0-9_-\]\{40,128\}\$'/u);
+  assert.match(sql, /provider <> 'riot' OR purpose = 'link_identity'/u);
+  assert.doesNotMatch(sql, /ALTER TABLE yoro_sessions/u);
+});
+
+test("0021 발로란트 전적 동의는 Riot identity와 분리되고 상태 전이를 제약한다", () => {
+  const sql = readFileSync(
+    path.join(migrationsRoot, "0021_yoro_valorant_record_consent.sql"),
+    "utf8"
+  );
+  assert.match(sql, /CREATE TABLE yoro_valorant_record_consents/u);
+  assert.match(sql, /REFERENCES external_identities\(id\) ON DELETE RESTRICT/u);
+  assert.match(sql, /enabled = TRUE AND consented_at IS NOT NULL AND revoked_at IS NULL/u);
+  assert.match(sql, /enabled = FALSE AND revoked_at IS NOT NULL/u);
 });
 
 test("migration check는 빈 Database를 변경하지 않고 pending으로 판정한다", async () => {

@@ -7,7 +7,7 @@ export type PublicTwitchAccountUser = {
   displayName: string;
   profileImageUrl?: string;
   provider?: "discord" | "twitch";
-  linkedProviders?: Array<"discord" | "twitch">;
+  linkedProviders?: Array<"discord" | "twitch" | "riot">;
 };
 
 export type PublicTwitchAccountMenuAction = {

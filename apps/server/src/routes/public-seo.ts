@@ -353,6 +353,11 @@ const BREADCRUMB_SEGMENT_LABELS: Readonly<Record<string, Readonly<Record<PublicU
   "/palworld/technology": { ko: "기술 해금", ja: "テクノロジー解放" },
   "/palworld/map": { ko: "월드 지도", ja: "ワールドマップ" },
   "/palworld/search": { ko: "통합 검색", ja: "統合検索" },
+  "/valorant": { ko: "발로란트", ja: "VALORANT" },
+  "/valorant/agents": { ko: "요원", ja: "エージェント" },
+  "/valorant/weapons": { ko: "무기", ja: "武器" },
+  "/valorant/maps": { ko: "맵", ja: "マップ" },
+  "/valorant/ranked": { ko: "랭킹", ja: "ランキング" },
   "/bot": { ko: "YORO Bot", ja: "YORO Bot" },
   "/bot/getting-started": { ko: "사용방법", ja: "使い方" },
   "/bot/commands": { ko: "명령어 목록", ja: "コマンド一覧" },
@@ -525,6 +530,26 @@ const KOREAN_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   "/palworld/search": {
     title: "Palworld 통합 검색 | YORO.gg",
     description: "Palworld Pal과 아이템을 한국어·일본어 이름으로 검색하세요."
+  },
+  "/valorant": {
+    title: "발로란트 전적·도감 | YORO.gg",
+    description: "공식 발로란트 요원·무기·맵 정보와 동의한 스트리머의 전적, 경쟁전 리더보드를 확인하세요."
+  },
+  "/valorant/agents": {
+    title: "발로란트 요원 도감 | YORO.gg",
+    description: "공식 한국어·일본어 이름과 설명으로 발로란트 요원과 스킬을 확인하세요."
+  },
+  "/valorant/weapons": {
+    title: "발로란트 무기 도감 | YORO.gg",
+    description: "발로란트 표준 무기를 분류별로 확인하세요."
+  },
+  "/valorant/maps": {
+    title: "발로란트 맵 | YORO.gg",
+    description: "발로란트 경쟁전·일반전의 표준 맵 정보를 확인하세요."
+  },
+  "/valorant/ranked": {
+    title: "발로란트 경쟁전 리더보드 | YORO.gg",
+    description: "Riot 공식 경쟁전 리더보드를 지역과 액트별로 확인하세요."
   }
 };
 
@@ -612,6 +637,26 @@ const JAPANESE_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   "/palworld/search": {
     title: "パルワールド統合検索 | YORO.gg",
     description: "パルとアイテムを韓国語・日本語の名前で検索できます。"
+  },
+  "/valorant": {
+    title: "VALORANT戦績・データベース | YORO.gg",
+    description: "公式のエージェント・武器・マップ情報、同意した配信者の戦績、コンペティティブランキングを確認できます。"
+  },
+  "/valorant/agents": {
+    title: "VALORANTエージェント | YORO.gg",
+    description: "公式の韓国語・日本語表記でVALORANTのエージェントとアビリティを確認できます。"
+  },
+  "/valorant/weapons": {
+    title: "VALORANT武器 | YORO.gg",
+    description: "VALORANTの標準武器をカテゴリー別に確認できます。"
+  },
+  "/valorant/maps": {
+    title: "VALORANTマップ | YORO.gg",
+    description: "VALORANTのコンペティティブ・アンレート用標準マップを確認できます。"
+  },
+  "/valorant/ranked": {
+    title: "VALORANTコンペティティブランキング | YORO.gg",
+    description: "Riot公式コンペティティブランキングを地域・Act別に確認できます。"
   }
 };
 

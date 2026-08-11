@@ -1,6 +1,7 @@
 import { runtimeConfig } from "../../runtime-config";
 
-export type YoroIdentityProvider = "discord" | "twitch";
+export type YoroAuthenticationProvider = "discord" | "twitch";
+export type YoroIdentityProvider = YoroAuthenticationProvider | "riot";
 
 export const YORO_DASHBOARD_PATH = "/dashboard";
 export const TWITCH_ACCOUNT_CONNECTED_RESULT = "twitch_connected";
@@ -11,6 +12,7 @@ export type YoroAccountIdentity = {
   avatarUrl?: string;
   connectedAt: string;
   lastAuthenticatedAt: string;
+  valorantRecordConsent?: boolean;
 };
 
 export type YoroDashboardPage =
@@ -30,9 +32,13 @@ export type YoroAccountSession =
   | {
       authenticated: true;
       csrfToken: string;
-      authenticationProvider: YoroIdentityProvider;
+      authenticationProvider: YoroAuthenticationProvider;
       identities: YoroAccountIdentity[];
       preferences: YoroUserPreferences;
+      connectionCapabilities: {
+        riotRsoAvailable: boolean;
+        riotRsoRequiresTwitchAuthentication: boolean;
+      };
     };
 
 function accountApiBase(): string {
@@ -108,4 +114,27 @@ export async function unlinkAccountIdentity(
       typeof body?.code === "string" ? body.code : `account_unlink_${response.status}`
     );
   }
+}
+
+export async function updateValorantRecordConsent(
+  enabled: boolean,
+  csrfToken: string
+): Promise<boolean> {
+  const response = await fetch(`${accountApiBase()}/api/account/riot/valorant-record-consent`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Yoro-CSRF": csrfToken
+    },
+    body: JSON.stringify({ enabled })
+  });
+  if (!response.ok) {
+    const body = await response.json().catch(() => undefined) as { code?: unknown } | undefined;
+    throw new Error(
+      typeof body?.code === "string" ? body.code : `valorant_consent_${response.status}`
+    );
+  }
+  const body = await response.json() as { valorantRecordConsent: boolean };
+  return body.valorantRecordConsent;
 }

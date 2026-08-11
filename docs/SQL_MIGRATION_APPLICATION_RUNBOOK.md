@@ -4,7 +4,7 @@
 >
 > 목적: 새로운 PostgreSQL SQL 파일을 추가할 때 개발 검증부터 운영 적용, 장애 진단, rollback까지 동일한 절차로 수행하기 위한 단일 실행 가이드
 >
-> 현재 manifest 기준 최신 migration: 0019_admin_audit_logs
+> 현재 manifest 기준 최신 migration: 0021_yoro_valorant_record_consent
 
 ---
 
@@ -61,10 +61,12 @@ apps/server/migrations/
 ├── 0001_database_foundation.sql
 ├── ...
 ├── 0019_admin_audit_logs.sql
+├── 0020_yoro_riot_rso_identity.sql
+├── 0021_yoro_valorant_record_consent.sql
 └── manifest.json
 ~~~
 
-현재 최신 번호는 0019이다. 따라서 다음 migration은 0020부터 사용하지만, 실제 작업 직전에 manifest의 마지막 ID를 다시 확인해야 한다.
+현재 최신 번호는 0021이다. 따라서 다음 migration은 0022부터 사용하지만, 실제 작업 직전에 manifest의 마지막 ID를 다시 확인해야 한다.
 
 ### 2.2 적용 기록
 
@@ -115,10 +117,10 @@ PostgreSQL advisory lock 획득
 tail -80 apps/server/migrations/manifest.json
 ~~~
 
-예를 들어 최신 ID가 0019이면 다음 파일을 만든다.
+예를 들어 최신 ID가 0021이면 다음 파일을 만든다.
 
 ~~~text
-apps/server/migrations/0020_example_change.sql
+apps/server/migrations/0022_example_change.sql
 ~~~
 
 이름 규칙:
@@ -131,7 +133,7 @@ apps/server/migrations/0020_example_change.sql
 허용 예:
 
 ~~~text
-0020_add_participation_audit.sql
+0021_add_participation_audit.sql
 0021_add_guild_channel_index.sql
 ~~~
 
@@ -139,9 +141,9 @@ apps/server/migrations/0020_example_change.sql
 
 ~~~text
 19-change.sql
-0020_AddField.sql
-0020 fix.sql
-0020.sql
+0021_AddField.sql
+0021 fix.sql
+0021.sql
 ~~~
 
 ### 3.2 SQL 파일 규칙
@@ -179,6 +181,16 @@ apps/server/migrations/0020_example_change.sql
 `audit_logs`의 row 수와 table/index 크기를 읽기 전용으로 확인하고, 10초 timeout과 write lock 안에
 완료될 근거가 없으면 적용하지 않는다. 이 경우 transaction migration에 `CONCURRENTLY`를 억지로
 추가하지 말고 별도 운영 절차와 승인 계획을 먼저 세운다.
+
+`0020_yoro_riot_rso_identity`는 두 table의 CHECK constraint를 교체하므로 짧은
+`ACCESS EXCLUSIVE` lock이 필요하다. 적용 전 `external_identities`와
+`yoro_oauth_sessions`의 row 수, 장기 transaction과 대기 lock을 확인하고, 방송
+운영 중에는 적용하지 않는다. 이 migration을 적용하기 전에는
+`features.riotRso`를 활성화하지 않는다.
+
+`0021_yoro_valorant_record_consent`는 신규 table과 partial index만 추가한다. 적용 전
+`external_identities` constraint와 참조 무결성을 staging Database에서 확인하고, 적용
+후에는 Riot 연결 해제와 동의 철회가 같은 transaction에서 처리되는지 검증한다.
 
 ### 3.4 Transaction 제약
 
@@ -230,13 +242,13 @@ SQL 파일의 정확한 byte를 기준으로 checksum을 계산한다.
 Linux:
 
 ~~~bash
-sha256sum apps/server/migrations/0020_example_change.sql
+sha256sum apps/server/migrations/0021_example_change.sql
 ~~~
 
 macOS:
 
 ~~~bash
-shasum -a 256 apps/server/migrations/0020_example_change.sql
+shasum -a 256 apps/server/migrations/0021_example_change.sql
 ~~~
 
 공백, 주석, 줄바꿈 하나만 변경해도 checksum이 달라진다.
@@ -247,8 +259,8 @@ apps/server/migrations/manifest.json의 마지막에 정렬 순서대로 등록�
 
 ~~~json
 {
-  "id": "0020_example_change",
-  "file": "0020_example_change.sql",
+  "id": "0021_example_change",
+  "file": "0021_example_change.sql",
   "description": "변경 목적을 설명하는 한국어 문장",
   "checksumSha256": "<64자리 lowercase SHA-256>",
   "destructive": false,
@@ -278,8 +290,8 @@ manifest에 등록하지 않은 SQL 파일은 자동으로 적용되지 않는�
 예:
 
 ~~~text
-0019_admin_audit_logs
-0020_example_change
+0020_yoro_riot_rso_identity
+0021_example_change
 ~~~
 
 이 테스트는 manifest 순서, ID, 파일, checksum 계약의 회귀를 잡는 역할을 한다.
@@ -868,19 +880,19 @@ future schema
 예:
 
 ~~~text
-0019 성공·commit
-0020 실패·rollback
+0020 성공·commit
+0021 실패·rollback
 ~~~
 
-이 경우 0019는 적용된 상태로 남고 0020만 pending이다.
+이 경우 0020은 적용된 상태로 남고 0021만 pending이다.
 
 대응:
 
 1. check와 plan으로 실제 상태 확인
-2. 0019와 application 호환성 확인
-3. 0020 SQL을 수정하지 않음
-4. 적용되지 않은 0020 파일 자체에 결함이 있다면 release 전이라도 checksum/manifest와 함께 올바르게 교체할지 책임자 검토
-5. 이미 다른 환경에 0020이 적용됐다면 반드시 새 번호의 forward-fix 사용
+2. 0020과 application 호환성 확인
+3. 0021 SQL을 수정하지 않음
+4. 적용되지 않은 0021 파일 자체에 결함이 있다면 release 전이라도 checksum/manifest와 함께 올바르게 교체할지 책임자 검토
+5. 이미 다른 환경에 0021이 적용됐다면 반드시 새 번호의 forward-fix 사용
 
 ### 11.4 Restore
 

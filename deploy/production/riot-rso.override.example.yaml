@@ -1,0 +1,8 @@
+services:
+  config-check:
+    volumes:
+      - /etc/yoro/secrets/riot_rso_client_secret:/run/secrets/riot_rso_client_secret:ro
+
+  server:
+    volumes:
+      - /etc/yoro/secrets/riot_rso_client_secret:/run/secrets/riot_rso_client_secret:ro

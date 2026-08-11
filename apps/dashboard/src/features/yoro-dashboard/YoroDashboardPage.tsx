@@ -1250,7 +1250,8 @@ export function YoroDashboardPage() {
                 <small>
                   {[
                     connectedProviders.has("discord") ? "Discord" : undefined,
-                    connectedProviders.has("twitch") ? "Twitch" : undefined
+                    connectedProviders.has("twitch") ? "Twitch" : undefined,
+                    connectedProviders.has("riot") ? "Riot" : undefined
                   ].filter(Boolean).join(" · ") || text.notConnected}
                 </small>
               </button>

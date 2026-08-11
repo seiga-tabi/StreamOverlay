@@ -46,6 +46,12 @@ import {
   validatePalworldMapLocationsResponse,
   validatePalworldMapMarkersResponse,
   validatePalworldPalSpawnResponse,
+  validateValorantAgentCatalogResponse,
+  validateValorantLeaderboardResponse,
+  validateValorantMapCatalogResponse,
+  validateValorantStreamerListResponse,
+  validateValorantStreamerMatchesResponse,
+  validateValorantWeaponCatalogResponse,
   validateBotAction,
   type BotAction,
   type LolChampionSkinOption,
@@ -166,7 +172,8 @@ import {
   oauthLimiter,
   publicLolApiLimiter,
   publicPalworldApiLimiter,
-  publicPalworldListApiLimiter
+  publicPalworldListApiLimiter,
+  publicValorantApiLimiter
 } from "../security/rate-limit.js";
 import {
   isPublicDashboardAppRoute,
@@ -226,6 +233,14 @@ import {
 import type { PalworldMapMarkerProvider } from "../data/palworld-map-marker-artifact.js";
 import type { PalworldSpawnProvider } from "../data/palworld-spawn-artifact.js";
 import type { PalworldMapLocationsProvider } from "../data/palworld-map-locations-artifact.js";
+import {
+  ValorantCatalogError,
+  type ValorantPublicCatalogService
+} from "../services/valorant-public-catalog.js";
+import {
+  ValorantPublicQueryError,
+  type ValorantPublicService
+} from "../services/valorant-public-service.js";
 import {
   clearDiscordOnboardingCookie,
   DISCORD_ONBOARDING_COOKIE,
@@ -1623,7 +1638,7 @@ function legacyStreamerDashboardReturnPath(pathname: string): string | undefined
 function yoroAccountReturnUrl(
   returnPath: string,
   errorCode?: string,
-  connectedProvider?: "twitch"
+  connectedProvider?: "twitch" | "riot"
 ): string {
   const target = new URL(returnPath, appConfig.dashboardBaseUrl);
   if (errorCode) target.searchParams.set("account", errorCode);
@@ -2275,6 +2290,8 @@ type HttpHandlerInput = {
     AdminAuditLogRepository,
     "list" | "beginGlobalMutation" | "completeGlobalMutation"
   >;
+  valorantCatalog?: ValorantPublicCatalogService;
+  valorantPublic?: ValorantPublicService;
 };
 
 const PALWORLD_SERVER_DASHBOARD_PATH = "/api/dashboard/palworld-server";
@@ -7709,7 +7726,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
           ? palworldRateLimitGroup(url.pathname)
           : undefined;
         const rateLimitPath = palworldLimitGroup === undefined
-          ? url.pathname
+          ? url.pathname.startsWith("/api/valorant/")
+            ? "/api/valorant/public"
+            : url.pathname
           : `/api/palworld/${palworldLimitGroup.group}`;
         const limitKey = `${ip}:${rateLimitPath}`;
         const limiter = url.pathname === "/api/admin/audit-logs"
@@ -7727,6 +7746,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
             ? publicPalworldListApiLimiter
             : palworldLimitGroup
               ? publicPalworldApiLimiter
+          : url.pathname.startsWith("/api/valorant/")
+              ? publicValorantApiLimiter
           : url.pathname.startsWith("/api/lol/") || url.pathname.startsWith("/api/public/twitch/") || url.pathname.startsWith("/api/public/aram/") || url.pathname.startsWith("/api/public/patch-notes") || url.pathname.startsWith("/api/public/participation/") || url.pathname === "/api/public/locale"
               ? publicLolApiLimiter
               : dashboardApiLimiter;
@@ -8088,10 +8109,40 @@ export function createHttpHandler(input: HttpHandlerInput) {
       ) {
         return sendJson(req, res, 404, { error: "not found" });
       }
+      if (
+        (
+          url.pathname === "/api/account/oauth/riot/start"
+          || url.pathname === "/api/account/oauth/riot/callback"
+        )
+        && !appConfig.riot.rsoEnabled
+      ) {
+        return sendJson(req, res, 404, { error: "not found" });
+      }
+      if (url.pathname.startsWith("/api/valorant/") && !appConfig.riot.valorantPublicEnabled) {
+        return sendJson(req, res, 404, { error: "not found" });
+      }
 
       const auth = authorizeHttpRequest(req, url.pathname, sessions);
       if (!auth.ok) {
         return sendJson(req, res, auth.status, { error: auth.message, code: auth.code });
+      }
+
+      if (
+        req.method === "GET"
+        && url.pathname === "/api/account/oauth/riot/logout/callback"
+      ) {
+        if (url.search) {
+          return sendJson(req, res, 400, { error: "query는 허용되지 않습니다." });
+        }
+        return sendRedirect(
+          res,
+          yoroAccountReturnUrl("/dashboard/account", "riot_logged_out"),
+          {
+            "Set-Cookie": clearYoroCookie(YORO_OAUTH_COOKIE),
+            "Cache-Control": "no-store",
+            "Referrer-Policy": "no-referrer"
+          }
+        );
       }
 
       if (url.pathname.startsWith("/api/account/")) {
@@ -8552,21 +8603,33 @@ export function createHttpHandler(input: HttpHandlerInput) {
           return sendJson(req, res, 200, { preferences }, noStoreHeaders());
         }
         const oauthStartMatch = url.pathname.match(
-          /^\/api\/account\/oauth\/(discord|twitch)\/start$/u
+          /^\/api\/account\/oauth\/(discord|twitch|riot)\/start$/u
         );
         if (req.method === "GET" && oauthStartMatch) {
           if (
             [...url.searchParams.keys()].some(
               (key) => key !== "purpose" && key !== "return_to"
             )
+            || url.searchParams.getAll("purpose").length > 1
+            || url.searchParams.getAll("return_to").length > 1
           ) {
             return sendJson(req, res, 400, { error: "허용되지 않은 query입니다." });
+          }
+          const provider = oauthStartMatch[1] as "discord" | "twitch" | "riot";
+          if (
+            provider === "riot"
+            && url.searchParams.get("purpose") !== "link_identity"
+          ) {
+            return sendJson(req, res, 400, {
+              error: "Riot 계정은 Twitch 로그인 후 연결해야 합니다.",
+              code: "invalid_input"
+            });
           }
           const purpose = url.searchParams.get("purpose") === "link_identity"
             ? "link_identity"
             : "login";
           const started = await input.yoroAccounts.beginOAuth({
-            provider: oauthStartMatch[1] as "discord" | "twitch",
+            provider,
             purpose,
             returnPath: url.searchParams.get("return_to") ?? undefined,
             sessionCookie
@@ -8576,6 +8639,87 @@ export function createHttpHandler(input: HttpHandlerInput) {
             "Cache-Control": "no-store",
             "Referrer-Policy": "no-referrer"
           });
+        }
+        if (req.method === "GET" && url.pathname === "/api/account/oauth/riot/callback") {
+          const allowed = new Set(["code", "state", "error", "error_description"]);
+          if (
+            [...url.searchParams.keys()].some((key) => !allowed.has(key))
+            || [...allowed].some((key) => url.searchParams.getAll(key).length > 1)
+            || url.searchParams.has("error")
+          ) {
+            return sendRedirect(
+              res,
+              yoroAccountReturnUrl("/dashboard/account", "oauth_failed"),
+              {
+                "Set-Cookie": clearYoroCookie(YORO_OAUTH_COOKIE),
+                "Cache-Control": "no-store",
+                "Referrer-Policy": "no-referrer"
+              }
+            );
+          }
+          try {
+            const completed = await input.yoroAccounts.completeOAuth({
+              provider: "riot",
+              state: url.searchParams.get("state") ?? "",
+              code: url.searchParams.get("code") ?? "",
+              oauthCookie: requestCookie(req, YORO_OAUTH_COOKIE),
+              sessionCookie
+            });
+            return sendRedirect(
+              res,
+              yoroAccountReturnUrl(completed.returnPath, undefined, "riot"),
+              {
+                "Set-Cookie": [
+                  clearYoroCookie(YORO_OAUTH_COOKIE),
+                  yoroSessionCookie(completed.sessionToken)
+                ],
+                "Cache-Control": "no-store",
+                "Referrer-Policy": "no-referrer"
+              }
+            );
+          } catch {
+            return sendRedirect(
+              res,
+              yoroAccountReturnUrl("/dashboard/account", "oauth_failed"),
+              {
+                "Set-Cookie": clearYoroCookie(YORO_OAUTH_COOKIE),
+                "Cache-Control": "no-store",
+                "Referrer-Policy": "no-referrer"
+              }
+            );
+          }
+        }
+        if (
+          req.method === "POST"
+          && url.pathname === "/api/account/riot/valorant-record-consent"
+        ) {
+          if (!stateChangingRequestHasTrustedOrigin(req)) {
+            return sendJson(req, res, 403, {
+              error: "trusted Origin이 필요합니다.",
+              code: "origin_denied"
+            });
+          }
+          if (!discordJsonBodyAllowed(req)) {
+            return sendJson(req, res, 415, {
+              error: "application/json Content-Type이 필요합니다."
+            });
+          }
+          const body = await readJsonBody<Record<string, unknown>>(req);
+          if (Object.keys(body).length !== 1 || typeof body.enabled !== "boolean") {
+            return sendJson(req, res, 400, {
+              error: "enabled boolean만 허용됩니다.",
+              code: "invalid_input"
+            });
+          }
+          const consent = await input.yoroAccounts.updateValorantRecordConsent({
+            enabled: body.enabled,
+            sessionCookie,
+            csrfToken: requestHeaderValue(req, "x-yoro-csrf")
+          });
+          return sendJson(req, res, 200, {
+            valorantRecordConsent: consent.enabled,
+            ...consent
+          }, noStoreHeaders());
         }
         if (req.method === "POST" && url.pathname === "/api/account/logout") {
           if (!stateChangingRequestHasTrustedOrigin(req)) {
@@ -8599,7 +8743,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
           });
         }
         const connectionMatch = url.pathname.match(
-          /^\/api\/account\/connections\/(discord|twitch)$/u
+          /^\/api\/account\/connections\/(discord|twitch|riot)$/u
         );
         if (req.method === "DELETE" && connectionMatch) {
           if (!stateChangingRequestHasTrustedOrigin(req)) {
@@ -8609,7 +8753,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
             });
           }
           await input.yoroAccounts.unlinkIdentity({
-            provider: connectionMatch[1] as "discord" | "twitch",
+            provider: connectionMatch[1] as "discord" | "twitch" | "riot",
             sessionCookie,
             csrfToken: requestHeaderValue(req, "x-yoro-csrf")
           });
@@ -9302,6 +9446,63 @@ export function createHttpHandler(input: HttpHandlerInput) {
           readiness.ok ? 200 : 503,
           buildReadinessResponse(readiness, appConfig.build)
         );
+      }
+      if (req.method === "GET" && url.pathname.startsWith("/api/valorant/")) {
+        const catalog = input.valorantCatalog;
+        if (url.pathname === "/api/valorant/agents") {
+          const response = catalog?.agents(url.searchParams) ?? { state: "data_unavailable" as const };
+          const validation = validateValorantAgentCatalogResponse(response);
+          if (!validation.ok) throw new Error(`valorant_agent_response_invalid:${validation.error}`);
+          return sendJson(req, res, 200, validation.data, validation.data.state === "ready"
+            ? { "Cache-Control": "public, max-age=300, s-maxage=3600" }
+            : noStoreHeaders());
+        }
+        if (url.pathname === "/api/valorant/weapons") {
+          const response = catalog?.weapons(url.searchParams) ?? { state: "data_unavailable" as const };
+          const validation = validateValorantWeaponCatalogResponse(response);
+          if (!validation.ok) throw new Error(`valorant_weapon_response_invalid:${validation.error}`);
+          return sendJson(req, res, 200, validation.data, validation.data.state === "ready"
+            ? { "Cache-Control": "public, max-age=300, s-maxage=3600" }
+            : noStoreHeaders());
+        }
+        if (url.pathname === "/api/valorant/maps") {
+          const response = catalog?.maps(url.searchParams) ?? { state: "data_unavailable" as const };
+          const validation = validateValorantMapCatalogResponse(response);
+          if (!validation.ok) throw new Error(`valorant_map_response_invalid:${validation.error}`);
+          return sendJson(req, res, 200, validation.data, validation.data.state === "ready"
+            ? { "Cache-Control": "public, max-age=300, s-maxage=3600" }
+            : noStoreHeaders());
+        }
+        if (url.pathname === "/api/valorant/leaderboard") {
+          const candidate = input.valorantPublic
+            ? await input.valorantPublic.leaderboard(url.searchParams)
+            : { state: appConfig.riot.valorantProductionApproved ? "data_unavailable" : "approval_pending" } as const;
+          const response = validateValorantLeaderboardResponse(candidate);
+          if (!response.ok) throw new Error(`valorant_leaderboard_response_invalid:${response.error}`);
+          return sendJson(req, res, 200, response.data, response.data.state === "ready"
+            ? { "Cache-Control": "public, max-age=60, s-maxage=300, stale-while-revalidate=1800" }
+            : noStoreHeaders());
+        }
+        if (url.pathname === "/api/valorant/streamers") {
+          if (url.search) throw new ValorantPublicQueryError("invalid_query");
+          const candidate = input.valorantPublic
+            ? await input.valorantPublic.streamers()
+            : { state: appConfig.riot.valorantProductionApproved ? "data_unavailable" : "approval_pending" } as const;
+          const response = validateValorantStreamerListResponse(candidate);
+          if (!response.ok) throw new Error(`valorant_streamer_response_invalid:${response.error}`);
+          return sendJson(req, res, 200, response.data, noStoreHeaders());
+        }
+        const match = /^\/api\/valorant\/streamers\/([a-f0-9]{32})\/matches$/u.exec(url.pathname);
+        if (match?.[1]) {
+          const candidate = input.valorantPublic
+            ? await input.valorantPublic.streamerMatches(match[1], url.searchParams)
+            : { state: appConfig.riot.valorantProductionApproved ? "data_unavailable" : "approval_pending" } as const;
+          if (!candidate) return sendJson(req, res, 404, { error: "not_found" }, noStoreHeaders());
+          const response = validateValorantStreamerMatchesResponse(candidate);
+          if (!response.ok) throw new Error(`valorant_matches_response_invalid:${response.error}`);
+          return sendJson(req, res, 200, response.data, noStoreHeaders());
+        }
+        return sendJson(req, res, 404, { error: "not found" });
       }
       if (req.method === "GET" && url.pathname.startsWith("/api/palworld/")) {
         const palworldData = input.palworldDataService;
@@ -10609,6 +10810,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
         return sendJson(req, res, error.status, {
           error: "YORO 계정 요청을 처리할 수 없습니다.",
           code: error.code
+        }, noStoreHeaders());
+      }
+      if (error instanceof ValorantCatalogError || error instanceof ValorantPublicQueryError) {
+        return sendJson(req, res, 400, {
+          error: "발로란트 요청 query가 올바르지 않습니다.",
+          code: "invalid_query"
         }, noStoreHeaders());
       }
       if (error instanceof PalworldQueryError) {

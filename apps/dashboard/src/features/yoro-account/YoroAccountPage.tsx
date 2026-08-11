@@ -14,11 +14,12 @@ const text = {
   ko: {
     eyebrow: "YORO ACCOUNT",
     title: "연결된 계정",
-    description: "Discord와 Twitch는 로그인 수단이며 권한은 YORO Organization에서 관리됩니다.",
+    description: "Discord와 Twitch는 로그인 수단이며, Riot은 본인 게임 계정 확인과 데이터 공개 동의를 위한 연결 계정입니다.",
     connected: "연결됨",
     notConnected: "연결되지 않음",
     discord: "Discord",
     twitch: "Twitch",
+    riot: "Riot Games",
     connect: "계정 연결",
     unlink: "연결 해제",
     logout: "로그아웃",
@@ -29,16 +30,26 @@ const text = {
     failed: "계정 정보를 불러오지 못했습니다.",
     lastIdentity: "마지막 로그인 수단은 해제할 수 없습니다.",
     relogin: "계정 연결 상태가 변경되어 다시 로그인해야 합니다.",
+    riotTwitchRequired: "Riot 계정 연결 전 Twitch로 다시 인증해주세요.",
+    riotReconnectTwitch: "Twitch로 다시 인증",
+    riotConsent: "연결하면 Riot PUUID와 Riot ID를 저장해 본인 계정과 데이터 공개 동의를 확인합니다.",
+    privacy: "개인정보 처리방침",
+    terms: "서비스 약관",
+    unavailable: "현재 연결을 사용할 수 없음",
+    riotConnected: "Riot 계정 연결을 완료했습니다.",
+    oauthFailed: "계정 연결을 완료하지 못했습니다. 다시 시도해주세요.",
+    riotLoggedOut: "Riot 로그아웃 후 YORO.gg로 돌아왔습니다.",
     language: "日本語"
   },
   ja: {
     eyebrow: "YORO ACCOUNT",
     title: "連携アカウント",
-    description: "Discord と Twitch はログイン手段として使用し、権限は YORO Organization で管理します。",
+    description: "Discord と Twitch はログイン手段として使用し、Riot は本人のゲームアカウント確認とデータ公開同意のために連携します。",
     connected: "連携済み",
     notConnected: "未連携",
     discord: "Discord",
     twitch: "Twitch",
+    riot: "Riot Games",
     connect: "アカウントを連携",
     unlink: "連携解除",
     logout: "ログアウト",
@@ -49,6 +60,15 @@ const text = {
     failed: "アカウント情報を読み込めませんでした。",
     lastIdentity: "最後のログイン手段は解除できません。",
     relogin: "連携状態が変更されたため、再ログインが必要です。",
+    riotTwitchRequired: "Riotアカウントを連携する前にTwitchで再認証してください。",
+    riotReconnectTwitch: "Twitchで再認証",
+    riotConsent: "連携するとRiot PUUIDとRiot IDを保存し、本人アカウントとデータ公開への同意を確認します。",
+    privacy: "プライバシーポリシー",
+    terms: "利用規約",
+    unavailable: "現在連携を利用できません",
+    riotConnected: "Riotアカウントの連携が完了しました。",
+    oauthFailed: "アカウント連携を完了できませんでした。もう一度お試しください。",
+    riotLoggedOut: "RiotからログアウトしてYORO.ggに戻りました。",
     language: "한국어"
   }
 } as const;
@@ -75,6 +95,21 @@ export function YoroAccountPage({ embedded = false }: { embedded?: boolean }) {
       : new Map(),
     [session]
   );
+  const providers = useMemo<readonly YoroIdentityProvider[]>(() => (
+    session?.authenticated && session.connectionCapabilities.riotRsoAvailable
+      ? ["discord", "twitch", "riot"]
+      : ["discord", "twitch"]
+  ), [session]);
+  const accountResult = typeof window === "undefined"
+    ? undefined
+    : new URLSearchParams(window.location.search).get("account");
+  const resultMessage = accountResult === "riot_connected"
+    ? copy.riotConnected
+    : accountResult === "oauth_failed"
+      ? copy.oauthFailed
+      : accountResult === "riot_logged_out"
+        ? copy.riotLoggedOut
+        : undefined;
 
   async function unlink(provider: YoroIdentityProvider): Promise<void> {
     if (!session?.authenticated || busyProvider) return;
@@ -106,6 +141,14 @@ export function YoroAccountPage({ embedded = false }: { embedded?: boolean }) {
           <p data-ko={text.ko.description} data-ja={text.ja.description}>{copy.description}</p>
         </div>
         {!session && !error ? <p role="status">{copy.loading}</p> : null}
+        {resultMessage ? (
+          <p
+            className={accountResult === "oauth_failed" ? "yoro-account-error" : "yoro-account-success"}
+            role={accountResult === "oauth_failed" ? "alert" : "status"}
+          >
+            {resultMessage}
+          </p>
+        ) : null}
         {error ? <p className="yoro-account-error" role="alert">{error}</p> : null}
         {session && !session.authenticated ? (
           <div className="yoro-account-empty">
@@ -118,17 +161,30 @@ export function YoroAccountPage({ embedded = false }: { embedded?: boolean }) {
         {session?.authenticated ? (
           <>
             <div className="yoro-connections">
-              {(["discord", "twitch"] as const).map((provider) => {
+              {providers.map((provider) => {
                 const identity = identities.get(provider);
+                const riotNeedsTwitch = provider === "riot"
+                  && session.connectionCapabilities.riotRsoRequiresTwitchAuthentication;
+                const returnPath = embedded ? "/dashboard/account" : "/account/connections";
+                const connectionUrl = riotNeedsTwitch
+                  ? accountOAuthUrl(
+                      "twitch",
+                      identities.has("twitch") ? "login" : "link_identity",
+                      returnPath
+                    )
+                  : accountOAuthUrl(provider, "link_identity", returnPath);
                 return (
                   <article className="yoro-connection-card" key={provider}>
                     <span className={`yoro-login-option__icon is-${provider}`}>
-                      {provider === "discord" ? <DiscordSymbolIcon /> : "T"}
+                      {provider === "discord" ? <DiscordSymbolIcon /> : provider === "twitch" ? "T" : "R"}
                     </span>
                     <div>
                       <h2>{copy[provider]}</h2>
                       <strong>{identity ? copy.connected : copy.notConnected}</strong>
                       {identity ? <p>{identity.displayName}</p> : null}
+                      {provider === "riot" && !identity ? (
+                        <p>{riotNeedsTwitch ? copy.riotTwitchRequired : copy.riotConsent}</p>
+                      ) : null}
                     </div>
                     {identity ? (
                       <button
@@ -139,14 +195,21 @@ export function YoroAccountPage({ embedded = false }: { embedded?: boolean }) {
                         {copy.unlink}
                       </button>
                     ) : (
-                      <a href={accountOAuthUrl(provider, "link_identity", "/account/connections")}>
-                        {copy.connect}
+                      <a href={connectionUrl}>
+                        {riotNeedsTwitch ? copy.riotReconnectTwitch : copy.connect}
                       </a>
                     )}
                   </article>
                 );
               })}
             </div>
+            {session.connectionCapabilities.riotRsoAvailable ? (
+              <p className="yoro-account-consent-note">
+                {copy.riotConsent}{" "}
+                <a href="/privacy">{copy.privacy}</a>{" · "}
+                <a href="/terms">{copy.terms}</a>
+              </p>
+            ) : null}
             <div className="yoro-account-actions">
               <a href="/dashboard/organizations">{copy.dashboard}</a>
               <button

@@ -41,6 +41,11 @@ test("공개 페이지 URL을 Dashboard SPA 진입 경로로 허용한다", () =
     "/palworld/skills",
     "/palworld/map",
     "/palworld/search",
+    "/valorant",
+    "/valorant/agents",
+    "/valorant/weapons",
+    "/valorant/maps",
+    "/valorant/ranked",
     "/privacy",
     "/terms",
     "/contact"
@@ -57,6 +62,7 @@ test("한국어·일본어 공개 URL만 언어 prefix 아래에서 SPA 경로�
     "/ko/lol/summoners/jp/test-JP1",
     "/ja/bot/commands",
     "/ko/palworld/items",
+    "/ja/valorant/agents",
     "/ja/privacy"
   ]) {
     assert.equal(isPublicDashboardAppRoute(pathname), true, pathname);
@@ -70,8 +76,8 @@ test("한국어·일본어 공개 URL만 언어 prefix 아래에서 SPA 경로�
   assert.equal(stripPublicUrlLocalePrefix("/ja"), "/");
 });
 
-test("API와 Dashboard 내부 URL 및 존재하지 않는 Palworld URL은 공개 SPA 경로로 오인하지 않는다", () => {
-  for (const pathname of ["/api/public/patch-notes", "/palworldish", "/palworld/streamers", "/palworld/not-a-real-page", "/dashboard", "/setup/discord", "/bot/manage", "/admin", "/overlay"]) {
+test("API와 Dashboard 내부 URL 및 존재하지 않는 게임 URL은 공개 SPA 경로로 오인하지 않는다", () => {
+  for (const pathname of ["/api/public/patch-notes", "/palworldish", "/palworld/streamers", "/palworld/not-a-real-page", "/valorant/not-a-real-page", "/dashboard", "/setup/discord", "/bot/manage", "/admin", "/overlay"]) {
     assert.equal(isPublicDashboardAppRoute(pathname), false, pathname);
   }
 });

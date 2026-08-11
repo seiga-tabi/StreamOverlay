@@ -67,6 +67,18 @@ test("하위 경로는 BreadcrumbList를 제공한다", () => {
   );
 });
 
+test("발로란트 공개 경로는 locale별 metadata와 sitemap URL을 제공한다", () => {
+  const ko = render("/ko/valorant/agents");
+  const ja = render("/ja/valorant/ranked");
+  assert.match(ko, /<title>발로란트 요원 도감 \| YORO\.gg<\/title>/u);
+  assert.match(ko, /<link rel="canonical" href="https:\/\/yoro\.gg\/ko\/valorant\/agents">/u);
+  assert.match(ja, /<html lang="ja"/u);
+  assert.match(ja, /<link rel="canonical" href="https:\/\/yoro\.gg\/ja\/valorant\/ranked">/u);
+  const sitemap = buildStaticSitemap();
+  assert.match(sitemap, /<loc>https:\/\/yoro\.gg\/ko\/valorant\/agents<\/loc>/u);
+  assert.match(sitemap, /<loc>https:\/\/yoro\.gg\/ja\/valorant\/ranked<\/loc>/u);
+});
+
 test("JSON-LD는 script 종료 태그를 만들 수 있는 문자를 escape한다", () => {
   const metadata = publicSeoMetadataForPath("/");
   const html = applyPublicSeoMetadata(APP_SHELL, {

@@ -19,6 +19,7 @@ function validRuntime() {
       discordBot: true,
       discordBotManagement: true,
       discordParticipationAnnounce: true,
+      riotRso: false,
       agentIngestion: true,
       twitchEventSub: true
     },
@@ -109,6 +110,73 @@ test("참여 모집 Discord 알림은 Database와 Discord 전체 기능을 요�
     (error) => error instanceof YoroRuntimeConfigError
       && error.code === "runtime_discord_participation_announce_dependency"
   );
+});
+
+test("Riot RSO는 누락 시 false이고 활성화 시 Twitch·계정 기반과 callback을 요구한다", () => {
+  const omitted = validRuntime();
+  delete omitted.features.riotRso;
+  assert.equal(parseYoroRuntimeConfig(omitted).features.riotRso, false);
+
+  const missing = validRuntime();
+  missing.features.riotRso = true;
+  assert.throws(
+    () => parseYoroRuntimeConfig(missing),
+    (error) => error instanceof YoroRuntimeConfigError
+      && error.code === "runtime_riot_rso_required"
+  );
+
+  const enabled = validRuntime();
+  enabled.features.riotRso = true;
+  enabled.riot.rsoClientId = "riot-rso-client-id";
+  enabled.riot.rsoRedirectUri = "https://yoro.gg/api/account/oauth/riot/callback";
+  enabled.riot.rsoLogoutRedirectUri = "https://yoro.gg/api/account/oauth/riot/logout/callback";
+  assert.equal(parseYoroRuntimeConfig(enabled).features.riotRso, true);
+
+  const foreignOrigin = structuredClone(enabled);
+  foreignOrigin.riot.rsoRedirectUri = "https://account.example.com/api/account/oauth/riot/callback";
+  assert.throws(
+    () => parseYoroRuntimeConfig(foreignOrigin),
+    (error) => error instanceof YoroRuntimeConfigError
+      && error.code === "runtime_riot_rso_origin_mismatch"
+  );
+});
+
+test("Riot RSO는 Database·Discord 관리 계정·Twitch OAuth 의존성을 강제한다", () => {
+  const value = validRuntime();
+  value.features.riotRso = true;
+  value.riot.rsoClientId = "riot-rso-client-id";
+  value.riot.rsoRedirectUri = "https://yoro.gg/api/account/oauth/riot/callback";
+  value.riot.rsoLogoutRedirectUri = "https://yoro.gg/api/account/oauth/riot/logout/callback";
+  value.features.twitchEventSub = false;
+  delete value.twitch;
+  assert.throws(
+    () => parseYoroRuntimeConfig(value),
+    (error) => error instanceof YoroRuntimeConfigError
+      && error.code === "runtime_riot_rso_dependency"
+  );
+});
+
+test("발로란트 공개 기능과 Riot 프로덕션 승인 게이트를 분리한다", () => {
+  const omitted = validRuntime();
+  delete omitted.features.valorantPublic;
+  assert.equal(parseYoroRuntimeConfig(omitted).features.valorantPublic, false);
+
+  const invalid = validRuntime();
+  invalid.riot.valorantProductionApproved = true;
+  assert.throws(
+    () => parseYoroRuntimeConfig(invalid),
+    (error) => error instanceof YoroRuntimeConfigError
+      && error.code === "runtime_valorant_approval_feature_dependency"
+  );
+
+  const enabled = validRuntime();
+  enabled.features.valorantPublic = true;
+  enabled.riot.valorantProductionApproved = true;
+  enabled.riot.valorantCurrentActId = "d816f426-48ea-f052-117f-9697a155b319";
+  const parsed = parseYoroRuntimeConfig(enabled);
+  assert.equal(parsed.features.valorantPublic, true);
+  assert.equal(parsed.riot?.valorantProductionApproved, true);
+  assert.equal(parsed.riot?.valorantCurrentActId, "d816f426-48ea-f052-117f-9697a155b319");
 });
 
 test("정상 runtime config를 정규화하고 제거된 legacy 설정은 활성화하지 않는다", () => {

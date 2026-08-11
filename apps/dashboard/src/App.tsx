@@ -19,14 +19,18 @@ import {
   type Page
 } from "./routing/dashboard-routes";
 import { isPalworldPath } from "./features/public-palworld/utils/routes";
+import { isValorantPath } from "./features/public-valorant/utils/routes";
 import { PalworldPageErrorBoundary } from "./features/public-palworld/components/PalworldPageErrorBoundary";
+import { ValorantPageErrorBoundary } from "./features/public-valorant/components/ValorantPageErrorBoundary";
 import { lazyNamed } from "./shared/lazyNamed";
 import { stripPublicLocalePrefix } from "./features/public-lol/utils/public-locale-path";
 
 const loadPublicLolPage = () => import("./pages/PublicLolPage");
 const loadPublicPalworldPage = () => import("./pages/PublicPalworldPage");
+const loadPublicValorantPage = () => import("./pages/PublicValorantPage");
 const PublicLolPage = lazyNamed(loadPublicLolPage, "PublicLolPage");
 const PublicPalworldPage = lazyNamed(loadPublicPalworldPage, "PublicPalworldPage");
+const PublicValorantPage = lazyNamed(loadPublicValorantPage, "PublicValorantPage");
 const PublicBotPage = lazyNamed(
   () => import("./features/public-bot/PublicBotPage"),
   "PublicBotPage",
@@ -301,6 +305,7 @@ export default function App() {
       || publicPathname === "/bot/dedicated-server"
       || publicPathname === "/bot/dedicated-server/";
     const palworldPublic = isPalworldPath(publicPathname);
+    const valorantPublic = isValorantPath(publicPathname);
     return (
       yoroDashboard ? (
         <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>
@@ -318,6 +323,20 @@ export default function App() {
         <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>
           <PublicBotPage />
         </Suspense>
+      ) : valorantPublic ? (
+        <ValorantPageErrorBoundary>
+          <Suspense fallback={(
+            <SkeletonCard
+              className="valorant-page-section"
+              data-ko={dashboardI18n.ko.app.loading}
+              data-ja={dashboardI18n.ja.app.loading}
+              loadingLabel={currentText.app.loading}
+              size="lg"
+            />
+          )}>
+            <PublicValorantPage />
+          </Suspense>
+        </ValorantPageErrorBoundary>
       ) : palworldPublic ? (
         <PalworldPageErrorBoundary>
           <Suspense fallback={(

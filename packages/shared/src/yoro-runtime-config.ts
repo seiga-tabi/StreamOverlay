@@ -13,6 +13,8 @@ export type YoroRuntimeConfig = Readonly<{
     discordBot: boolean;
     discordBotManagement: boolean;
     discordParticipationAnnounce: boolean;
+    riotRso: boolean;
+    valorantPublic: boolean;
     twitchEventSub: boolean;
   }>;
   database?: Readonly<{
@@ -40,6 +42,11 @@ export type YoroRuntimeConfig = Readonly<{
   riot?: Readonly<{
     accountRegion?: string;
     lolPlatform?: string;
+    rsoClientId?: string;
+    rsoRedirectUri?: string;
+    rsoLogoutRedirectUri?: string;
+    valorantProductionApproved?: boolean;
+    valorantCurrentActId?: string;
   }>;
 }>;
 
@@ -185,6 +192,8 @@ export function parseYoroRuntimeConfig(value: unknown): YoroRuntimeConfig {
     "discordBot",
     "discordBotManagement",
     "discordParticipationAnnounce",
+    "riotRso",
+    "valorantPublic",
     // schema v1 운영 파일의 하위 호환을 위해 읽기만 허용하고 기능에는 반영하지 않습니다.
     "agentIngestion",
     "twitchEventSub"
@@ -206,6 +215,12 @@ export function parseYoroRuntimeConfig(value: unknown): YoroRuntimeConfig {
           features.discordParticipationAnnounce,
           "runtime_features_discord_participation_announce"
         ),
+    riotRso: features.riotRso === undefined
+      ? false
+      : bool(features.riotRso, "runtime_features_riot_rso"),
+    valorantPublic: features.valorantPublic === undefined
+      ? false
+      : bool(features.valorantPublic, "runtime_features_valorant_public"),
     twitchEventSub: bool(features.twitchEventSub, "runtime_features_twitch_eventsub")
   };
 
@@ -344,13 +359,61 @@ export function parseYoroRuntimeConfig(value: unknown): YoroRuntimeConfig {
   let riot: YoroRuntimeConfig["riot"];
   if (root.riot !== undefined) {
     const item = record(root.riot, "runtime_riot");
-    exactKeys(item, ["accountRegion", "lolPlatform"], "runtime_riot");
+    exactKeys(item, [
+      "accountRegion",
+      "lolPlatform",
+      "rsoClientId",
+      "rsoRedirectUri",
+      "rsoLogoutRedirectUri",
+      "valorantProductionApproved",
+      "valorantCurrentActId"
+    ], "runtime_riot");
     riot = {
       ...(optionalText(item.accountRegion, "runtime_riot_account_region", 32) !== undefined
         ? { accountRegion: text(item.accountRegion, "runtime_riot_account_region", 32) }
         : {}),
       ...(optionalText(item.lolPlatform, "runtime_riot_lol_platform", 32) !== undefined
         ? { lolPlatform: text(item.lolPlatform, "runtime_riot_lol_platform", 32) }
+        : {}),
+      ...(item.rsoClientId !== undefined
+        ? { rsoClientId: text(item.rsoClientId, "runtime_riot_rso_client_id", 128) }
+        : {}),
+      ...(item.rsoRedirectUri !== undefined
+        ? {
+            rsoRedirectUri: callbackUrl(
+              item.rsoRedirectUri,
+              "runtime_riot_rso_redirect_uri",
+              "/api/account/oauth/riot/callback",
+              environment
+            )
+          }
+        : {}),
+      ...(item.rsoLogoutRedirectUri !== undefined
+        ? {
+            rsoLogoutRedirectUri: callbackUrl(
+              item.rsoLogoutRedirectUri,
+              "runtime_riot_rso_logout_redirect_uri",
+              "/api/account/oauth/riot/logout/callback",
+              environment
+            )
+          }
+        : {}),
+      ...(item.valorantProductionApproved !== undefined
+        ? {
+            valorantProductionApproved: bool(
+              item.valorantProductionApproved,
+              "runtime_riot_valorant_production_approved"
+            )
+          }
+        : {}),
+      ...(item.valorantCurrentActId !== undefined
+        ? {
+            valorantCurrentActId: text(
+              item.valorantCurrentActId,
+              "runtime_riot_valorant_current_act_id",
+              64
+            ).toLowerCase()
+          }
         : {})
     };
   }
@@ -411,6 +474,44 @@ export function parseYoroRuntimeConfig(value: unknown): YoroRuntimeConfig {
   }
   if (featureConfig.twitchEventSub && !twitch) {
     throw new YoroRuntimeConfigError("runtime_twitch_required");
+  }
+  if (
+    featureConfig.riotRso
+    && (
+      !featureConfig.database
+      || !featureConfig.discordSaas
+      || !featureConfig.discordBotManagement
+      || !twitch
+    )
+  ) {
+    throw new YoroRuntimeConfigError("runtime_riot_rso_dependency");
+  }
+  if (
+    featureConfig.riotRso
+    && (!riot?.rsoClientId || !riot.rsoRedirectUri || !riot.rsoLogoutRedirectUri)
+  ) {
+    throw new YoroRuntimeConfigError("runtime_riot_rso_required");
+  }
+  if (
+    featureConfig.riotRso
+    && riot
+    && (
+      new URL(riot.rsoRedirectUri!).origin !== baseUrl
+      || new URL(riot.rsoLogoutRedirectUri!).origin !== baseUrl
+    )
+  ) {
+    throw new YoroRuntimeConfigError("runtime_riot_rso_origin_mismatch");
+  }
+  if (riot?.valorantProductionApproved && !featureConfig.valorantPublic) {
+    throw new YoroRuntimeConfigError("runtime_valorant_approval_feature_dependency");
+  }
+  if (
+    riot?.valorantProductionApproved
+    && !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/u.test(
+      riot.valorantCurrentActId ?? ""
+    )
+  ) {
+    throw new YoroRuntimeConfigError("runtime_valorant_current_act_required");
   }
 
   return Object.freeze({

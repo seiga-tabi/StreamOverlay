@@ -216,6 +216,12 @@ const discordBotManagementEnabled = configuredRuntime?.features.discordBotManage
   ?? boolEnv("DISCORD_BOT_MANAGEMENT_ENABLED", false);
 const discordParticipationAnnounceEnabled = configuredRuntime?.features.discordParticipationAnnounce
   ?? boolEnv("DISCORD_PARTICIPATION_ANNOUNCE_ENABLED", false);
+const riotRsoEnabled = configuredRuntime?.features.riotRso
+  ?? boolEnv("RIOT_RSO_ENABLED", false);
+const valorantPublicEnabled = configuredRuntime?.features.valorantPublic
+  ?? boolEnv("VALORANT_PUBLIC_ENABLED", false);
+const valorantProductionApproved = configuredRuntime?.riot?.valorantProductionApproved
+  ?? boolEnv("VALORANT_PRODUCTION_APPROVED", false);
 const twitchEventSubEnabled = configuredRuntime?.features.twitchEventSub
   ?? boolEnv("TWITCH_ENABLE_EVENTSUB", false);
 const twitchClientSecret = twitchEventSubEnabled
@@ -237,6 +243,11 @@ const twitchTokenEncryptionKey = configuredRuntime
 const riotApiKey = configuredRuntime?.riot
   ? loadFixedSecret(YORO_SECRET_FILES.riotApiKey)
   : configuredRuntime ? "" : envOrFile("RIOT_API_KEY");
+const riotRsoClientSecret = riotRsoEnabled
+  ? configuredRuntime
+    ? loadFixedSecret(YORO_SECRET_FILES.riotRsoClientSecret, { required: true })
+    : secretEnvOrFile("RIOT_RSO_CLIENT_SECRET")
+  : "";
 const legalFileConfig = configuredRuntime && nodeEnv === "production"
   ? loadYoroLegalConfig()
   : undefined;
@@ -378,6 +389,27 @@ export const appConfig = {
   },
   riot: {
     apiKey: riotApiKey,
+    rsoEnabled: riotRsoEnabled,
+    valorantPublicEnabled,
+    valorantProductionApproved,
+    valorantCurrentActId: configuredRuntime?.riot?.valorantCurrentActId
+      ?? env("VALORANT_CURRENT_ACT_ID").trim().toLowerCase(),
+    valorantPlatform: configuredRuntime
+      ? "kr"
+      : env("VALORANT_PLATFORM", "kr").trim().toLowerCase(),
+    rsoClientId: configuredRuntime?.riot?.rsoClientId
+      ?? env("RIOT_RSO_CLIENT_ID").trim(),
+    rsoClientSecret: riotRsoClientSecret,
+    rsoRedirectUri: configuredRuntime?.riot?.rsoRedirectUri
+      ?? env(
+        "RIOT_RSO_REDIRECT_URI",
+        `${configuredRuntime?.public.baseUrl ?? env("PUBLIC_BASE_URL", "http://localhost:3000")}/api/account/oauth/riot/callback`
+      ).trim(),
+    rsoLogoutRedirectUri: configuredRuntime?.riot?.rsoLogoutRedirectUri
+      ?? env(
+        "RIOT_RSO_LOGOUT_REDIRECT_URI",
+        `${configuredRuntime?.public.baseUrl ?? env("PUBLIC_BASE_URL", "http://localhost:3000")}/api/account/oauth/riot/logout/callback`
+      ).trim(),
     accountRegion: configuredRuntime?.riot?.accountRegion
       ?? (configuredRuntime ? DEFAULTS.riot.accountRegion : env("RIOT_ACCOUNT_REGION", DEFAULTS.riot.accountRegion)),
     lolPlatform: configuredRuntime?.riot?.lolPlatform
@@ -763,6 +795,83 @@ function validateDiscordParticipationAnnounceConfig(errors: string[]): void {
   }
 }
 
+function validateRiotRsoConfig(errors: string[]): void {
+  const config = appConfig.riot;
+  if (!config.rsoEnabled) return;
+  if (
+    !appConfig.database.enabled
+    || !appConfig.discordSaas.enabled
+    || !appConfig.discordBotManagement.enabled
+    || !appConfig.twitch.clientId
+    || !appConfig.twitch.clientSecret
+  ) {
+    errors.push("Riot RSO 계정 연결에는 Database, Discord SaaS 관리 계정과 Twitch OAuth 설정이 필요합니다.");
+  }
+  if (
+    !config.rsoClientId
+    || !/^[A-Za-z0-9._-]{3,128}$/u.test(config.rsoClientId)
+  ) {
+    errors.push("RIOT_RSO_CLIENT_ID가 올바르지 않습니다.");
+  }
+  if (!new Set(["americas", "asia", "europe", "sea"]).has(config.accountRegion)) {
+    errors.push("Riot RSO accountRegion은 허용된 regional routing 값이어야 합니다.");
+  }
+  if (
+    !config.rsoClientSecret
+    || config.rsoClientSecret.length < 24
+    || isWeakSecret(config.rsoClientSecret)
+  ) {
+    errors.push("RIOT_RSO_CLIENT_SECRET이 설정되지 않았거나 약한 값입니다.");
+  }
+  const redirects: Array<[string, string, string]> = [
+    ["RIOT_RSO_REDIRECT_URI", config.rsoRedirectUri, "/api/account/oauth/riot/callback"],
+    [
+      "RIOT_RSO_LOGOUT_REDIRECT_URI",
+      config.rsoLogoutRedirectUri,
+      "/api/account/oauth/riot/logout/callback"
+    ]
+  ];
+  for (const [name, value, expectedPath] of redirects) {
+    try {
+      const redirect = new URL(value);
+      const publicOrigin = new URL(appConfig.publicBaseUrl).origin;
+      if (
+        redirect.username
+        || redirect.password
+        || redirect.hash
+        || redirect.search
+        || redirect.pathname !== expectedPath
+        || redirect.origin !== publicOrigin
+        || (isProduction() && redirect.protocol !== "https:")
+        || (!isProduction() && !["http:", "https:"].includes(redirect.protocol))
+      ) {
+        errors.push(`${name}는 PUBLIC_BASE_URL과 같은 origin의 정확한 callback URL이어야 합니다.`);
+      }
+    } catch {
+      errors.push(`${name}가 올바른 URL이 아닙니다.`);
+    }
+  }
+}
+
+function validateValorantConfig(errors: string[]): void {
+  const config = appConfig.riot;
+  if (!config.valorantProductionApproved) return;
+  if (!config.valorantPublicEnabled) {
+    errors.push("VALORANT_PRODUCTION_APPROVED에는 VALORANT_PUBLIC_ENABLED가 필요합니다.");
+  }
+  if (!config.apiKey) {
+    errors.push("VALORANT_PRODUCTION_APPROVED에는 RIOT_API_KEY가 필요합니다.");
+  }
+  if (!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/u.test(
+    config.valorantCurrentActId
+  )) {
+    errors.push("VALORANT_CURRENT_ACT_ID가 올바르지 않습니다.");
+  }
+  if (!new Set(["kr", "ap", "na"]).has(config.valorantPlatform)) {
+    errors.push("VALORANT_PLATFORM은 kr, ap, na 중 하나여야 합니다.");
+  }
+}
+
 function validateCorsOrigins(errors: string[]): void {
   if (appConfig.security.corsOrigins.length === 0) {
     errors.push("CORS_ORIGINS가 설정되지 않았습니다.");
@@ -911,6 +1020,8 @@ export function validateRuntimeConfig(): RuntimeConfigValidationResult {
   validateDiscordBotInternalConfig(errors);
   validateDiscordBotManagementConfig(errors);
   validateDiscordParticipationAnnounceConfig(errors);
+  validateRiotRsoConfig(errors);
+  validateValorantConfig(errors);
   if (isProduction()) {
     validateBuildMetadata(errors);
     if (appConfig.allowInsecureDev) errors.push("ALLOW_INSECURE_DEV는 production에서 사용할 수 없습니다.");

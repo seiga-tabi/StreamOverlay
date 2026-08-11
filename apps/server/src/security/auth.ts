@@ -194,6 +194,7 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
   if (method === "POST" && pathname === "/api/inbound-email/cloudflare") return "PUBLIC";
   if (pathname === "/api/dashboard/auth/status" || pathname === "/api/dashboard/auth/check") return "PUBLIC";
   if (method === "GET" && pathname.startsWith("/api/palworld/")) return "PUBLIC";
+  if (method === "GET" && pathname.startsWith("/api/valorant/")) return "PUBLIC";
   if (method === "GET" && (
     pathname === "/api/lol/profile" ||
     pathname === "/api/lol/profile-state" ||
@@ -221,7 +222,14 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
   if (method === "GET" && (pathname === "/api/public/twitch/auth/start" || pathname === "/api/public/twitch/auth/callback")) return "OAUTH_CALLBACK";
   if (
     method === "GET"
-    && /^\/api\/account\/oauth\/(?:discord|twitch)\/start$/u.test(pathname)
+    && (
+      /^\/api\/account\/oauth\/(?:discord|twitch|riot)\/start$/u.test(pathname)
+      || pathname === "/api/account/oauth/riot/callback"
+    )
+  ) return "OAUTH_CALLBACK";
+  if (
+    method === "GET"
+    && pathname === "/api/account/oauth/riot/logout/callback"
   ) return "OAUTH_CALLBACK";
   if (
     pathname === "/api/account/session"
@@ -229,7 +237,8 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
     || pathname === "/api/account/logout"
     || pathname === "/api/account/streamer"
     || pathname.startsWith("/api/account/streamer/")
-    || /^\/api\/account\/connections\/(?:discord|twitch)$/u.test(pathname)
+    || pathname === "/api/account/riot/valorant-record-consent"
+    || /^\/api\/account\/connections\/(?:discord|twitch|riot)$/u.test(pathname)
   ) return "PUBLIC";
   if (method === "GET" && (pathname === "/api/twitch/auth/start" || pathname === "/api/twitch/auth/callback")) return "OAUTH_CALLBACK";
   if (

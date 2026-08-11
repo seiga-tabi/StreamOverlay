@@ -8,6 +8,7 @@ YORO는 별도의 이메일·비밀번호 계정을 만들지 않습니다. Post
 YORO Account
 ├─ Discord identity
 ├─ Twitch identity
+├─ Riot RSO identity (연결 전용)
 └─ Organization memberships
 ```
 
@@ -28,6 +29,12 @@ membership으로 판정합니다. Discord와 Twitch의 이메일·닉네임·표
 - 이미 다른 YORO user에 연결된 identity는 `identity_conflict`로 차단합니다.
 - 마지막 로그인 수단은 해제할 수 없습니다.
 - 연결 또는 해제 후 해당 사용자의 기존 YORO session을 모두 폐기합니다.
+
+Riot RSO는 로그인 수단이 아닙니다. Twitch로 최근 인증한 YORO session에서만
+`purpose=link_identity`로 시작하며 callback에서도 같은 user와 Twitch 인증을 다시
+확인합니다. Riot access token은 `/riot/account/v1/accounts/me` 확인 후 저장하지
+않고 PUUID와 표시용 Riot ID만 identity로 보관합니다. 상세 설정은
+`docs/RIOT_RSO.md`를 따릅니다.
 
 초기 버전은 서로 다른 YORO user 사이의 자동 병합을 제공하지 않습니다. 충돌 계정의
 membership과 리소스를 안전하게 합치는 별도 운영 절차가 준비되기 전에는 identity를
@@ -69,6 +76,9 @@ access token을 저장하거나 scope를 확대하지 않습니다.
 - `yoro_oauth_sessions`
 - `yoro_sessions`
 - 기존 Discord·Twitch user 식별자의 identity backfill
+
+`0020_yoro_riot_rso_identity.sql`은 기존 migration을 수정하지 않고 `riot` identity와
+link-only OAuth session 제약을 추가합니다.
 
 기존 migration은 수정하지 않습니다. 운영 적용 전에는 PostgreSQL backup, migration
 `check`, `plan`, staging 로그인·연결·충돌·해제 검증이 필요합니다. rollback은 먼저

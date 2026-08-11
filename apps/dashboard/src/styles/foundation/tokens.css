@@ -14,6 +14,8 @@
   --yoro-color-secondary: hsl(254 100% 81%);
   --yoro-color-secondary-strong: hsl(253 61% 62%);
   --yoro-color-success: hsl(163 70% 29%);
+  /* 발로란트 공개 페이지 accent — #ff4655 근사. 셸에서 --public-game-accent 로 소비합니다. */
+  --yoro-color-valorant-primary: hsl(355 100% 64%);
   --yoro-color-success-bg: hsl(166 64% 76% / .42);
   --yoro-color-warning: hsl(43 100% 27%);
   --yoro-color-warning-bg: hsl(41 100% 77% / .44);

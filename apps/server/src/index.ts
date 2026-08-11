@@ -73,6 +73,8 @@ import { GameServerStatusReadRepository } from "./database/repositories/game-ser
 import { GameServerStatusReadService } from "./services/game-server-status-read-service.js";
 import { DiscordBotCommandPolicyService } from "./services/discord-bot-command-policy-service.js";
 import { AdminAuditLogRepository } from "./database/repositories/admin-audit-log-repository.js";
+import { ValorantPublicCatalogService } from "./services/valorant-public-catalog.js";
+import { ValorantPublicService } from "./services/valorant-public-service.js";
 import {
   PALWORLD_SERVER_SAFE_REGISTRATION_POLICY,
   toSafeErrorMessage,
@@ -489,6 +491,29 @@ if (storeStartupState.ok) {
   logger.error(storeStartupLog);
   console.error(JSON.stringify(storeStartupLog));
 }
+let valorantCatalog: ValorantPublicCatalogService | undefined;
+if (appConfig.riot.valorantPublicEnabled) {
+  try {
+    valorantCatalog = ValorantPublicCatalogService.load();
+    logger.event({ type: "valorant.catalog_loaded" });
+  } catch {
+    logger.error({ type: "valorant.catalog_unavailable", errorCode: "artifact_unavailable" });
+  }
+}
+const valorantPublic = valorantCatalog
+  ? new ValorantPublicService({
+      pool: postgresPool,
+      registry: store,
+      catalog: valorantCatalog,
+      approved: appConfig.riot.valorantProductionApproved,
+      apiKey: appConfig.riot.apiKey,
+      currentActId: appConfig.riot.valorantCurrentActId,
+      platform: appConfig.riot.valorantPlatform as "kr" | "ap" | "na",
+      timeoutMs: appConfig.riot.apiTimeoutMs,
+      logger
+    })
+  : undefined;
+yoroAccounts?.setValorantVisibilityInvalidator((userId) => valorantPublic?.invalidateUser(userId));
 const sessions = new DashboardSessionStore();
 const events = new EventBus();
 const twitchTokenStore = new LocalJsonTwitchTokenStore(
@@ -604,6 +629,8 @@ const server = http.createServer(createHttpHandler({
   discordBotCommandPolicy,
   adminAuditLogs,
   patchNotes,
+  valorantCatalog,
+  valorantPublic,
   readiness: () => {
     const storeReadiness = store.getReadiness();
     const database = databaseHealth.snapshot();
