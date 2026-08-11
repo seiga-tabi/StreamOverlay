@@ -2069,7 +2069,7 @@ async function sendStaticFile(
   filePath: string,
   extraHeaders: Record<string, string> = {},
   mountPath?: "/admin" | "/dashboard",
-  transformHtml?: (html: string) => string
+  transformText?: (text: string) => string
 ): Promise<void> {
   try {
     const stat = await fs.stat(filePath);
@@ -2100,12 +2100,17 @@ async function sendStaticFile(
       return;
     }
     const fileBody = await fs.readFile(filePath);
+    const transformedText = transformText
+      ? transformText(fileBody.toString("utf8"))
+      : undefined;
     const body = cspNonce
       ? Buffer.from(
-          (transformHtml ? transformHtml(fileBody.toString("utf8")) : fileBody.toString("utf8"))
+          (transformedText ?? fileBody.toString("utf8"))
             .replaceAll(DASHBOARD_CSP_NONCE_PLACEHOLDER, cspNonce),
           "utf8"
         )
+      : transformedText !== undefined
+        ? Buffer.from(transformedText, "utf8")
       : fileBody;
     res.writeHead(200, baseHeaders);
     if (req.method === "HEAD") {
@@ -2209,13 +2214,22 @@ const PUBLIC_DASHBOARD_ASSETS = new Map([
   ["/ads.txt", "ads.txt"],
   ["/favicon.png", "favicon.png"],
   ["/favicon.svg", "favicon.svg"],
-  ["/robots.txt", "robots.txt"]
+  ["/robots.txt", "robots.txt"],
+  ["/valorant/riot.txt", "valorant/riot.txt"]
 ]);
 
 async function sendPublicDashboardAsset(req: IncomingMessage, res: ServerResponse, pathname: string): Promise<boolean> {
   const relativePath = PUBLIC_DASHBOARD_ASSETS.get(pathname);
   if (!relativePath) return false;
-  await sendStaticFile(req, res, path.resolve(appConfig.paths.dashboardStatic, relativePath));
+  const isRiotVerification = pathname === "/valorant/riot.txt";
+  await sendStaticFile(
+    req,
+    res,
+    path.resolve(appConfig.paths.dashboardStatic, relativePath),
+    isRiotVerification ? { "Cache-Control": "no-store" } : {},
+    undefined,
+    isRiotVerification ? (text) => text.trim() : undefined
+  );
   return true;
 }
 

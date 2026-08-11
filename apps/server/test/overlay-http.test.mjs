@@ -511,12 +511,14 @@ test("Palworld content-hash WebP는 immutable로 서빙하고 누락·directory 
   }
 });
 
-test("favicon과 ads.txt는 dashboard public asset으로 서빙된다", async () => {
+test("favicon, ads.txt와 Riot 제품 검증 파일은 dashboard public asset으로 서빙된다", async () => {
   const previousDashboardStatic = appConfig.paths.dashboardStatic;
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-dashboard-public-"));
   try {
+    mkdirSync(path.join(dir, "valorant"), { recursive: true });
     writeFileSync(path.join(dir, "favicon.png"), Buffer.from([0x89, 0x50, 0x4e, 0x47]));
     writeFileSync(path.join(dir, "ads.txt"), "google.com, pub-7880271953912430, DIRECT, f08c47fec0942fa0\n");
+    writeFileSync(path.join(dir, "valorant", "riot.txt"), "a9be3168-55f0-44a0-9797-88fc9522c5a2\n");
     appConfig.paths.dashboardStatic = dir;
     const handler = createHttpHandler({
       store: {},
@@ -537,6 +539,19 @@ test("favicon과 ads.txt는 dashboard public asset으로 서빙된다", async ()
     assert.equal(adsResponse.headers["Content-Type"], "text/plain; charset=utf-8");
     assert.equal(adsResponse.headers["Cache-Control"], "public, max-age=3600");
     assert.equal(adsResponse.body, "google.com, pub-7880271953912430, DIRECT, f08c47fec0942fa0\n");
+
+    const riotVerificationResponse = createResponse();
+    await handler(createRequest("GET", "/valorant/riot.txt"), riotVerificationResponse);
+    assert.equal(riotVerificationResponse.statusCode, 200);
+    assert.equal(riotVerificationResponse.headers["Content-Type"], "text/plain; charset=utf-8");
+    assert.equal(riotVerificationResponse.headers["Cache-Control"], "no-store");
+    assert.equal(riotVerificationResponse.body, "a9be3168-55f0-44a0-9797-88fc9522c5a2");
+
+    const riotVerificationHeadResponse = createResponse();
+    await handler(createRequest("HEAD", "/valorant/riot.txt"), riotVerificationHeadResponse);
+    assert.equal(riotVerificationHeadResponse.statusCode, 200);
+    assert.equal(riotVerificationHeadResponse.headers["Content-Type"], "text/plain; charset=utf-8");
+    assert.equal(riotVerificationHeadResponse.body, "");
   } finally {
     appConfig.paths.dashboardStatic = previousDashboardStatic;
     rmSync(dir, { recursive: true, force: true });
