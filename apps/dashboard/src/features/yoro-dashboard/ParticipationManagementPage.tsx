@@ -166,6 +166,11 @@ const copy = {
     finishDangerNote: "복구 불가",
     stripEmpty: "아래 대기열에서 선정하세요",
     queueLockedNote: "게임이 끝나면 다음 선정이 열립니다.",
+    /* 결함 수정 — 확정만 하고 아직 게임을 시작하지 않은 상태에서도 위 문구가 떴는데,
+       "게임이 끝나면"은 게임 중이 아닐 때는 사실과 다른 안내였습니다. */
+    queueLockedNoteRecruit: "확정된 인원으로 게임을 시작해야 다음 선정이 열립니다.",
+    pickLockedTooltip: "이미 확정된 참가자가 있어 선정할 수 없어요. 게임을 시작하거나 종료해야 다음 선정이 열립니다.",
+    refresh: "새로고침",
     historyToggle: "완료·취소 이력",
     candidateLabel: "후보",
     confirmedLabel: "확정됨",
@@ -286,6 +291,9 @@ const copy = {
     finishDangerNote: "復元不可",
     stripEmpty: "下の待機列から選出してください",
     queueLockedNote: "ゲームが終わると次の選出ができます。",
+    queueLockedNoteRecruit: "確定した人数でゲームを開始すると、次の選出ができます。",
+    pickLockedTooltip: "すでに確定した参加者がいるため選出できません。ゲームを開始または終了すると次の選出ができます。",
+    refresh: "更新",
     historyToggle: "完了・取消履歴",
     candidateLabel: "候補",
     confirmedLabel: "確定済み",
@@ -355,6 +363,7 @@ export function ParticipationManagementPage({
   const text = copy[locale];
   const [state, setState] = useState<ParticipationState>();
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [busyKey, setBusyKey] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -385,6 +394,13 @@ export function ParticipationManagementPage({
       if (!signal?.aborted) setLoading(false);
     }
   }, [text.loadFailed]);
+
+  async function manualRefresh(): Promise<void> {
+    if (refreshing || busyKey) return;
+    setRefreshing(true);
+    await load();
+    setRefreshing(false);
+  }
 
   useEffect(() => {
     const controller = new AbortController();
@@ -655,6 +671,14 @@ export function ParticipationManagementPage({
     /* "선정"은 로컬 후보 담기입니다 — 서버 배치 선정은 액션 줄의 "선정 확정"이 수행합니다. */
     const pickDisabled = Boolean(busyKey) || Boolean(currentEntry) || !state?.isOpen || !canSelect
       || capacityIsFull || candidateEntries.length >= remainingSeats;
+    /* 결함 수정 — 정원이 안 찼는데도 "선정"이 잠기는 건 서버가 확정된 참가자가
+       하나라도 있으면 다음 배치 선정을 막기 때문입니다(순차 처리 규칙). 이유 없이
+       버튼만 흐려지던 문제를 툴팁으로 설명합니다. */
+    const pickLockedReason = capacityIsFull
+      ? text.capacityFull
+      : Boolean(currentEntry)
+        ? text.pickLockedTooltip
+        : undefined;
     const appliedAtLabel = `${text.appliedAt} ${new Date(entry.createdAt).toLocaleString(locale === "ko" ? "ko-KR" : "ja-JP")}`;
     return (
       <article
@@ -678,7 +702,7 @@ export function ParticipationManagementPage({
               className="is-primary"
               disabled={pickDisabled}
               onClick={() => toggleCandidate(entry.id)}
-              title={capacityIsFull ? text.capacityFull : undefined}
+              title={pickLockedReason}
               type="button"
             >
               {text.select}
@@ -710,6 +734,18 @@ export function ParticipationManagementPage({
       {/* 대형 히어로 대신 한 줄 제목 — 매일 쓰는 운영 화면은 공간이 자산입니다. */}
       <header className="participation-management-titlebar">
         <h1 id="participation-management-title">{text.title}</h1>
+        <button
+          aria-label={text.refresh}
+          className={`participation-management-refresh${refreshing ? " is-spinning" : ""}`}
+          disabled={refreshing || Boolean(busyKey)}
+          onClick={() => void manualRefresh()}
+          title={text.refresh}
+          type="button"
+        >
+          <svg aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5" />
+          </svg>
+        </button>
         {activeSession ? (
           <>
             <span className="participation-management-game-chip is-active">{gameLabels[activeGame]}</span>
@@ -1003,7 +1039,9 @@ export function ParticipationManagementPage({
               </header>
               {capacityIsFull ? <p className="participation-management-capacity-full">{text.capacityFull}</p> : null}
               {activeStep !== "recruit" || currentEntries.length > 0 ? (
-                <p className="participation-management-queue-locked">{text.queueLockedNote}</p>
+                <p className="participation-management-queue-locked">
+                  {inGameEntries.length > 0 ? text.queueLockedNote : text.queueLockedNoteRecruit}
+                </p>
               ) : null}
               <div className="participation-management-group" aria-labelledby="participation-waiting-title">
                 <h3 id="participation-waiting-title" className="yoro-u-sr-only">{text.queueWaiting}</h3>

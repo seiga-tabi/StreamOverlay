@@ -39,12 +39,52 @@
   font-weight: 900;
 }
 
-.participation-management-public-open {
+/* 새로고침 — 10초 자동 폴링과 별개로 즉시 재조회할 수 있는 수동 버튼입니다.
+   .participation-management-titlebar 로 한 겹 더 스코프해서 공용 button 규칙의
+   min-block-size·padding·border보다 우선하도록 합니다. */
+.participation-management-titlebar .participation-management-refresh {
+  flex: none;
+  min-inline-size: 2.5rem;
+  min-block-size: 2.5rem;
+  padding: 0;
+  border-color: var(--line);
+  border-radius: 999px;
+  background: none;
+  color: var(--muted);
+}
+
+.participation-management-refresh svg {
+  inline-size: 1.05rem;
+  block-size: 1.05rem;
+}
+
+.participation-management-refresh.is-spinning svg {
+  animation: participation-management-refresh-spin .7s linear infinite;
+}
+
+@keyframes participation-management-refresh-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .participation-management-refresh.is-spinning svg {
+    animation: none;
+  }
+}
+
+/* 결함 수정 — 공용 a 규칙(.participation-management-page a)이 class+type
+   조합이라 클래스 하나짜리 이 규칙보다 우선순위가 높아, 실제로는 옅은 밑줄
+   링크가 아니라 공용 버튼 박스(테두리·배경·흰 글자)로 렌더링되고 있었습니다.
+   부모(.participation-management-titlebar)로 한 겹 더 스코프해서 뒤집습니다. */
+.participation-management-titlebar .participation-management-public-open {
   margin-inline-start: auto;
   min-block-size: var(--yoro-size-touch-target);
+  padding-inline: 0;
+  border: 0;
   display: inline-flex;
   align-items: center;
   color: var(--muted);
+  background: none;
   font-size: .8125rem;
   font-weight: 700;
   text-decoration: underline;
@@ -764,9 +804,16 @@
   border-color: color-mix(in srgb, var(--brand) 55%, var(--line));
 }
 
-.participation-management-chip-remove {
+/* 결함 수정 — 공용 button 규칙의 min-block-size(44px)가 여기 inline/block-size
+   (1.9rem≈30px)보다 커서 원형 버튼이 44px 정사각형으로 찍히고 있었습니다.
+   .participation-management-chip + button 태그로 스코프를 더해 이겨내고,
+   min-inline/block-size를 0으로 직접 눌러줍니다. */
+.participation-management-chip button.participation-management-chip-remove {
   inline-size: 1.9rem;
   block-size: 1.9rem;
+  min-inline-size: 0;
+  min-block-size: 0;
+  padding: 0;
   display: grid;
   place-items: center;
   border: 1px solid var(--line);
@@ -778,7 +825,7 @@
   cursor: pointer;
 }
 
-.participation-management-chip-remove:hover {
+.participation-management-chip button.participation-management-chip-remove:hover {
   border-color: color-mix(in srgb, var(--danger) 60%, var(--line));
   color: var(--danger);
 }
