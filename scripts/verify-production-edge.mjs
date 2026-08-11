@@ -278,7 +278,7 @@ try {
   record("runtime config response", false, error instanceof Error ? error.message : "요청 실패");
 }
 
-for (const pathname of ["/privacy", "/terms", "/favicon.png", "/robots.txt", "/sitemap.xml"]) {
+for (const pathname of ["/privacy", "/terms", "/favicon.png", "/riot.txt", "/robots.txt", "/sitemap.xml"]) {
   await checkStatic(origin, pathname);
 }
 await checkAdsTxt(origin);

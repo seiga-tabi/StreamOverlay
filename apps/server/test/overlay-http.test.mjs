@@ -518,6 +518,7 @@ test("favicon, ads.txt와 Riot 제품 검증 파일은 dashboard public asset으
     mkdirSync(path.join(dir, "valorant"), { recursive: true });
     writeFileSync(path.join(dir, "favicon.png"), Buffer.from([0x89, 0x50, 0x4e, 0x47]));
     writeFileSync(path.join(dir, "ads.txt"), "google.com, pub-7880271953912430, DIRECT, f08c47fec0942fa0\n");
+    writeFileSync(path.join(dir, "riot.txt"), "11111111-2222-3333-4444-555555555555\n");
     writeFileSync(path.join(dir, "valorant", "riot.txt"), "a9be3168-55f0-44a0-9797-88fc9522c5a2\n");
     appConfig.paths.dashboardStatic = dir;
     const handler = createHttpHandler({
@@ -539,6 +540,19 @@ test("favicon, ads.txt와 Riot 제품 검증 파일은 dashboard public asset으
     assert.equal(adsResponse.headers["Content-Type"], "text/plain; charset=utf-8");
     assert.equal(adsResponse.headers["Cache-Control"], "public, max-age=3600");
     assert.equal(adsResponse.body, "google.com, pub-7880271953912430, DIRECT, f08c47fec0942fa0\n");
+
+    const lolRiotVerificationResponse = createResponse();
+    await handler(createRequest("GET", "/riot.txt"), lolRiotVerificationResponse);
+    assert.equal(lolRiotVerificationResponse.statusCode, 200);
+    assert.equal(lolRiotVerificationResponse.headers["Content-Type"], "text/plain; charset=utf-8");
+    assert.equal(lolRiotVerificationResponse.headers["Cache-Control"], "no-store");
+    assert.equal(lolRiotVerificationResponse.body, "11111111-2222-3333-4444-555555555555");
+
+    const lolRiotVerificationHeadResponse = createResponse();
+    await handler(createRequest("HEAD", "/riot.txt"), lolRiotVerificationHeadResponse);
+    assert.equal(lolRiotVerificationHeadResponse.statusCode, 200);
+    assert.equal(lolRiotVerificationHeadResponse.headers["Content-Type"], "text/plain; charset=utf-8");
+    assert.equal(lolRiotVerificationHeadResponse.body, "");
 
     const riotVerificationResponse = createResponse();
     await handler(createRequest("GET", "/valorant/riot.txt"), riotVerificationResponse);

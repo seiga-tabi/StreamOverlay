@@ -2214,6 +2214,7 @@ const PUBLIC_DASHBOARD_ASSETS = new Map([
   ["/ads.txt", "ads.txt"],
   ["/favicon.png", "favicon.png"],
   ["/favicon.svg", "favicon.svg"],
+  ["/riot.txt", "riot.txt"],
   ["/robots.txt", "robots.txt"],
   ["/valorant/riot.txt", "valorant/riot.txt"]
 ]);
@@ -2221,7 +2222,7 @@ const PUBLIC_DASHBOARD_ASSETS = new Map([
 async function sendPublicDashboardAsset(req: IncomingMessage, res: ServerResponse, pathname: string): Promise<boolean> {
   const relativePath = PUBLIC_DASHBOARD_ASSETS.get(pathname);
   if (!relativePath) return false;
-  const isRiotVerification = pathname === "/valorant/riot.txt";
+  const isRiotVerification = pathname === "/riot.txt" || pathname === "/valorant/riot.txt";
   await sendStaticFile(
     req,
     res,
