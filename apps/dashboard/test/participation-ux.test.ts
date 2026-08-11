@@ -118,7 +118,7 @@ test("스트리머 참여 화면은 방송인 직접 컨트롤 콕핏(체크인 
   // 세부 설정은 톱니 버튼 + 접이식 폼(시작 전 화면 유지).
   assert.match(source, /startSettingsOpen/u);
   assert.match(source, /participation-management-visibility/u);
-  assert.match(source, /participation-management-history/u);
+  assert.match(source, /participation-console-history/u);
   assert.match(source, /ParticipationAnnouncementPanel/u);
   assert.match(source, /expectedRevision: state\.revision/u);
   assert.match(source, /시청자 참여를 시작하세요/u);
@@ -138,29 +138,61 @@ test("스트리머 참여 화면은 방송인 직접 컨트롤 콕핏(체크인 
   assert.doesNotMatch(source, /checkInExpiresAt/u);
   assert.doesNotMatch(source, /stepCheckin|체크인 대기|チェックイン待ち/u);
   assert.doesNotMatch(source, /nowTick|checkinTimer|checkInRemaining/u);
-  // 단계 바는 모집→게임→정산 3칸, 주행동은 액션 줄 한 자리(모바일은 하단 바).
-  assert.match(source, /participation-management-steps/u);
-  assert.match(source, /\["recruit", "game", "done"\] as const/u);
+  /* 콘솔 v2 — 정보 구조 계약.
+     수치는 상태 줄 한 곳에서만 읽고, 본문은 대기열(재료) → 슬롯(결정) 2열입니다.
+     단계 바와 원형 게이지는 상태 줄로 흡수했으므로 남아 있으면 안 됩니다. */
+  assert.match(source, /participation-console-statusbar/u);
+  assert.match(source, /participation-console-stats/u);
+  assert.match(source, /participation-console-body/u);
+  assert.match(source, /participation-console-queue/u);
+  assert.match(source, /participation-console-slots/u);
+  assert.doesNotMatch(source, /participation-management-steps|participation-management-gauge/u);
+  assert.doesNotMatch(css, /participation-management-steps|participation-management-gauge/u);
+
+  /* 주행동은 단계마다 색·문구가 함께 바뀝니다 — 확정과 게임 종료가 같은 자리·같은
+     색이면 라이브 중 근육 기억만으로 눌러 오조작이 납니다. */
   assert.match(source, /renderPrimaryAction/u);
-  assert.match(source, /participation-management-actions/u);
-  assert.match(source, /participation-management-mobile-bar/u);
-  // 슬롯 칩: 확정/후보 + 제외(✕). 게임 시작은 확정 전원 in_game 전이.
-  assert.match(source, /participation-management-chip-remove/u);
-  assert.match(source, /is-candidate/u);
+  assert.match(source, /primaryActionSpec/u);
+  assert.match(source, /tone: "pick"/u);
+  assert.match(source, /tone: "finish"/u);
+  assert.match(css, /participation-console-primary\[data-tone="finish"\]/u);
+
+  /* 파괴적 행동(세션 종료)은 주행동과 물리적으로 분리된 위험 영역에 둡니다. */
+  assert.match(source, /participation-console-danger[\s\S]*?mutateSession\("finish"\)/u);
+  assert.match(css, /participation-console-danger/u);
+
+  /* 슬롯: 확정/후보 + 빈 자리 시각화. 게임 시작은 확정 전원 in_game 전이. */
+  assert.match(source, /renderSlotRow/u);
+  assert.match(source, /emptySlotKeys/u);
+  assert.match(source, /"candidate"/u);
   assert.match(source, /updateYoroParticipationEntry\(entry\.id, "in_game"/u);
-  // 복구 불가 세션 종료는 넘침 메뉴로 분리 유지.
-  assert.match(source, /participation-management-overflow-menu/u);
-  assert.match(source, /className="is-danger"[\s\S]*?mutateSession\("finish"\)/u);
-  // 한 줄 제목 줄 — 대형 히어로 제거.
-  assert.match(source, /participation-management-titlebar/u);
-  assert.doesNotMatch(source, /participation-management-hero/u);
-  // CSS: 콕핏 카드 한 몸(단계 바·액션 줄), 대기열은 구분선 리스트, 체크인 링 없음.
-  assert.match(css, /participation-management-steps/u);
-  assert.match(css, /participation-management-actions/u);
+  assert.match(css, /participation-console-slot\.is-empty/u);
+
+  /* 후보로 담긴 신청자는 대기열에서 사라지지 않고 상태만 바뀝니다 —
+     사라지면 "어디까지 담았는지" 추적이 끊깁니다. */
+  assert.match(source, /is-picked/u);
+  assert.match(source, /pickedToSlot/u);
+  assert.match(css, /participation-console-row\.is-picked/u);
+
+  /* 잦은 동작은 항상 보이고, 보조 동작은 details가 아니라 실제 메뉴입니다. */
+  assert.match(source, /renderRowMenu/u);
+  assert.match(source, /role="menu"/u);
+  assert.doesNotMatch(source, /participation-management-row-more/u);
+
+  /* 잠금은 버튼을 흐리게 두는 대신 이유를 문장으로 알려 줍니다. */
+  assert.match(source, /participation-console-lock/u);
+
+  /* 아이콘은 SVG로 통일합니다 — 이모지는 플랫폼마다 모양이 달라지고
+     스크린 리더가 읽는 이름을 제어할 수 없습니다. */
+  assert.match(source, /ConsoleIcon/u);
+  assert.doesNotMatch(source, /🎙|⋯|✕/u);
+
+  /* 모바일 주행동은 하단 바 한 벌만 존재합니다(이전에는 두 벌이 렌더됐습니다). */
+  assert.match(source, /participation-console-mobilebar/u);
+  assert.match(css, /participation-console-mobilebar[\s\S]*?position:\s*sticky/u);
+  assert.match(css, /env\(safe-area-inset-bottom\)/u);
+
   assert.doesNotMatch(css, /--participation-checkin-progress/u);
-  assert.doesNotMatch(css, /"sel main status"/u);
-  assert.match(css, /"main status"[\s\S]*?"main actions"/u);
-  assert.match(css, /participation-management-mobile-bar[\s\S]*?position:\s*fixed/u);
   assert.match(css, /participation-management-page \{[\s\S]{0,400}--info:\s*hsl\(/u);
 });
 

@@ -741,57 +741,109 @@
   background: transparent;
 }
 
-/* Riot ID 관리는 통합 Dashboard 안에서 상태 → 계정 → 미리보기 → 변경 순서로 읽힌다. */
-.yoro-dashboard-shell[data-page="streamingRiot"] .my-riot-account-shell.yoro-app-shell {
-  grid-template-areas:
-    "header"
-    "main";
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto auto;
-  min-height: 0;
-  overflow: clip;
-  border-color: color-mix(in srgb, var(--yoro-color-secondary) 24%, var(--yoro-color-border));
-  background: var(--yoro-color-surface-muted);
+/* 결함 수정 — Riot ID 관리의 AppShell 그리드·히어로 배경 오버라이드는
+   shared/app-shell-page-overrides.css(layer 없음)로 옮겼습니다. shared/ui/AppShell.css가
+   layer 없이 로드돼, 여기(layer(legacy))에 있으면 특이성이 훨씬 높아도 항상 졌습니다.
+
+   리디자인 — 대시보드 나머지 화면(스트리밍 설정 카드·대시보드 홈)이 쓰는 다크
+   팔레트를 이 페이지에도 그대로 입힙니다. shared/ui의 Card·Button·Status·Metric은
+   전부 --yoro-color-* 토큰을 통해 렌더링되므로, 이 페이지 스코프에서 토큰 값만
+   다시 정의하면 새 컴포넌트를 만들지 않고도 다크 테마가 전체에 반영됩니다
+   (참여 관리 화면에서 쓴 것과 같은 패턴). 흰 글자 대비는 각 배경색에 대해 실측
+   4.5:1 이상을 확인했습니다(#6842c4 6.64:1 · #7a3fd1 6.07:1 · danger 텍스트로 쓰는
+   --yoro-color-bg 값 자체가 danger 배경과 5.55:1). */
+.yoro-dashboard-shell[data-page="streamingRiot"] .my-riot-account-shell {
+  --yoro-color-bg: #0f141b;
+  --yoro-color-surface: #1a2130;
+  --yoro-color-surface-muted: #161d26;
+  --yoro-color-surface-strong: #1c232d;
+  --yoro-color-text: #f5f7fb;
+  --yoro-color-text-strong: #f5f7fb;
+  --yoro-color-text-muted: #b8c1ce;
+  --yoro-color-border: rgb(255 255 255 / .1);
+  --yoro-color-border-strong: rgb(142 123 255 / .28);
+  --yoro-color-primary: #6842c4;
+  --yoro-color-primary-strong: #5636a8;
+  --yoro-color-secondary: #7a3fd1;
+  --yoro-color-secondary-strong: #6830b0;
+  --yoro-color-success: #65d6a6;
+  --yoro-color-success-bg: rgb(101 214 166 / .16);
+  --yoro-color-warning: #f0a63a;
+  --yoro-color-warning-bg: rgb(240 166 58 / .16);
+  --yoro-color-danger: #f4555f;
+  --yoro-color-danger-bg: rgb(244 85 95 / .16);
+  --yoro-color-info: #5d84f4;
+  --yoro-color-info-bg: rgb(93 132 244 / .16);
+  color-scheme: dark;
 }
 
-.yoro-dashboard-shell[data-page="streamingRiot"] .my-riot-account-hero {
-  background:
-    radial-gradient(circle at 88% 12%, color-mix(in srgb, var(--yoro-color-secondary) 20%, transparent), transparent 22rem),
-    linear-gradient(135deg, var(--yoro-color-surface-strong), var(--yoro-color-surface));
+/* ── 정체성 히어로 — 대표 Riot ID를 한 번만 크게 보여줍니다 ── */
+.my-riot-identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--yoro-space-4);
+  padding: var(--yoro-space-5);
+  border: thin solid var(--yoro-color-border-strong);
+  border-radius: var(--yoro-radius-xl);
+  background: linear-gradient(145deg, rgb(27 35 60 / .96), rgb(22 29 50 / .96));
 }
 
-.yoro-dashboard-shell[data-page="streamingRiot"] .my-riot-account-hero .yoro-page-header {
-  padding: clamp(var(--yoro-space-6), 3vw, var(--yoro-space-10));
-}
-
-.yoro-dashboard-shell[data-page="streamingRiot"] .settings-shared-main.yoro-app-shell__main {
+.my-riot-identity-mark {
   display: grid;
-  gap: var(--yoro-space-6);
-  padding: clamp(var(--yoro-space-5), 3vw, var(--yoro-space-8));
+  place-items: center;
+  flex: none;
+  inline-size: var(--yoro-space-12);
+  block-size: var(--yoro-space-12);
+  border-radius: var(--yoro-radius-circle);
+  background: linear-gradient(135deg, #6842c4, #7a3fd1);
+  color: #fff;
+  font-size: var(--yoro-font-size-xl);
+  font-weight: var(--yoro-font-weight-black);
+}
+
+.my-riot-identity-copy {
+  min-inline-size: 0;
+  flex: 1 1 auto;
+  display: grid;
+  gap: var(--yoro-space-1);
+}
+
+.my-riot-identity-copy small {
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.my-riot-identity-copy strong {
+  color: var(--yoro-color-text-strong);
+  font-size: var(--yoro-font-size-xl);
+  font-weight: var(--yoro-font-weight-black);
+  overflow-wrap: anywhere;
+}
+
+.my-riot-identity-actions {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--yoro-space-2);
 }
 
 .my-riot-account-metrics {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--yoro-space-4);
   min-inline-size: 0;
 }
 
 .my-riot-account-metrics .yoro-metric {
-  min-block-size: calc(var(--yoro-space-12) * 3);
+  min-block-size: calc(var(--yoro-space-12) * 2.5);
   align-content: center;
   background: var(--yoro-color-surface-strong);
   box-shadow: var(--yoro-shadow-sm);
 }
 
-.yoro-dashboard-shell[data-page="streamingRiot"] .my-riot-account-grid {
-  grid-template-columns: minmax(0, 1.15fr) minmax(20rem, .85fr);
-  gap: var(--yoro-space-6);
-}
-
-.my-riot-connected-card,
-.my-riot-preview-card,
-.my-riot-settings-card {
+.my-riot-connected-card {
   min-inline-size: 0;
 }
 
@@ -823,15 +875,13 @@
 }
 
 .my-riot-connected-row small,
-.my-riot-connected-row span:not(.yoro-status, .yoro-status__label),
-.my-riot-preview-content small {
+.my-riot-connected-row span:not(.yoro-status, .yoro-status__label) {
   color: var(--yoro-color-text-muted);
   font-size: var(--yoro-font-size-sm);
   font-weight: var(--yoro-font-weight-bold);
 }
 
-.my-riot-connected-row strong,
-.my-riot-preview-content strong {
+.my-riot-connected-row strong {
   min-inline-size: 0;
   color: var(--yoro-color-text-strong);
   font-size: var(--yoro-font-size-xl);
@@ -840,8 +890,7 @@
   overflow-wrap: anywhere;
 }
 
-.my-riot-provider-mark,
-.my-riot-preview-mark {
+.my-riot-provider-mark {
   display: grid;
   place-items: center;
   inline-size: var(--yoro-space-12);
@@ -849,60 +898,9 @@
   border: thin solid color-mix(in srgb, var(--yoro-color-secondary) 46%, transparent);
   border-radius: var(--yoro-radius-circle);
   background: color-mix(in srgb, var(--yoro-color-secondary) 18%, var(--yoro-color-surface));
-  color: var(--yoro-color-secondary-strong);
+  color: #fff;
   font-size: var(--yoro-font-size-xl);
   font-weight: var(--yoro-font-weight-black);
-}
-
-.my-riot-preview-card.yoro-card {
-  border-color: color-mix(in srgb, var(--yoro-color-secondary) 38%, var(--yoro-color-border));
-  background:
-    radial-gradient(circle at 82% 22%, color-mix(in srgb, var(--yoro-color-secondary) 18%, transparent), transparent 15rem),
-    var(--yoro-color-surface-strong);
-}
-
-.my-riot-preview-content {
-  display: grid;
-  grid-template-columns: calc(var(--yoro-space-12) * 1.35) minmax(0, 1fr);
-  align-items: center;
-  gap: var(--yoro-space-5);
-  min-block-size: calc(var(--yoro-space-12) * 4);
-  margin: var(--yoro-space-2) var(--yoro-space-5) var(--yoro-space-5);
-  padding: var(--yoro-space-6);
-  border: thin solid var(--yoro-color-border);
-  border-radius: var(--yoro-radius-xl);
-  background: color-mix(in srgb, var(--yoro-color-bg) 72%, transparent);
-  box-shadow: var(--yoro-shadow-panel);
-}
-
-.my-riot-preview-content > div {
-  display: grid;
-  justify-items: start;
-  gap: var(--yoro-space-3);
-  min-inline-size: 0;
-}
-
-.my-riot-preview-content .my-riot-preview-mark {
-  inline-size: calc(var(--yoro-space-12) * 1.35);
-  block-size: calc(var(--yoro-space-12) * 1.35);
-  font-size: var(--yoro-font-size-2xl);
-}
-
-.my-riot-settings-card {
-  margin-block-start: var(--yoro-space-2);
-}
-
-.my-riot-settings-card .yoro-card__content {
-  gap: var(--yoro-space-5);
-}
-
-.my-riot-settings-card .my-riot-id-form {
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--yoro-space-4);
-}
-
-.my-riot-settings-card .settings-shared-actions {
-  justify-content: flex-end;
 }
 
 /* Riot 계정 목록 — 대표 1개 + 서브 N개. 기존 my-riot-connected-row 골격을
@@ -927,7 +925,7 @@
 .my-riot-account-row.is-main {
   border-color: color-mix(in srgb, var(--yoro-color-secondary) 46%, var(--yoro-color-border));
   background:
-    radial-gradient(circle at 88% 20%, color-mix(in srgb, var(--yoro-color-secondary) 14%, transparent), transparent 12rem),
+    radial-gradient(circle at 88% 20%, color-mix(in srgb, var(--yoro-color-secondary) 22%, transparent), transparent 12rem),
     var(--yoro-color-surface-strong);
 }
 
@@ -953,6 +951,30 @@
   align-items: center;
   justify-content: flex-end;
   gap: var(--yoro-space-2);
+}
+
+/* 대표 계정 행 안의 인라인 이름 변경 — 별도 카드 대신 그 행 안에서 펼쳐집니다. */
+.my-riot-inline-edit {
+  display: flex;
+  flex-wrap: wrap;
+  grid-column: 1 / -1;
+  align-items: center;
+  gap: var(--yoro-space-2);
+  padding-block-start: var(--yoro-space-3);
+  margin-block-start: var(--yoro-space-2);
+  border-block-start: thin dashed var(--yoro-color-border-strong);
+}
+
+.my-riot-inline-edit .yoro-input {
+  flex: 1 1 12rem;
+  min-inline-size: 0;
+}
+
+.my-riot-inline-hint {
+  flex-basis: 100%;
+  color: var(--yoro-color-info);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-bold);
 }
 
 .my-riot-account-confirm {
@@ -1024,17 +1046,28 @@
   padding: var(--yoro-space-4);
   border: thin dashed var(--yoro-color-border-strong);
   border-radius: var(--yoro-radius-lg);
-  background: color-mix(in srgb, var(--yoro-color-bg) 60%, transparent);
+  background: rgb(255 255 255 / .02);
 }
 
 @media (max-width: 70rem) {
-  .my-riot-account-metrics,
-  .yoro-dashboard-shell[data-page="streamingRiot"] .my-riot-account-grid {
+  .my-riot-account-metrics {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 
 @media (max-width: 48rem) {
+  .my-riot-identity {
+    padding: var(--yoro-space-4);
+  }
+
+  .my-riot-identity-actions {
+    inline-size: 100%;
+  }
+
+  .my-riot-identity-actions > .yoro-button {
+    flex: 1 1 0;
+  }
+
   .my-riot-account-metrics {
     gap: var(--yoro-space-3);
   }
@@ -1053,18 +1086,6 @@
     justify-self: stretch;
   }
 
-  .my-riot-preview-content {
-    grid-template-columns: minmax(0, 1fr);
-    justify-items: center;
-    margin: var(--yoro-space-2) var(--yoro-space-3) var(--yoro-space-3);
-    padding: var(--yoro-space-5);
-    text-align: center;
-  }
-
-  .my-riot-preview-content > div {
-    justify-items: center;
-  }
-
   /* 계정 행: 좁은 폭에서는 아바타+정보 아래로 액션 줄이 내려가고,
      버튼이 남은 폭을 나눠 가져 44px 터치 타깃을 유지합니다. */
   .my-riot-account-actions {
@@ -1074,6 +1095,11 @@
 
   .my-riot-account-actions > .yoro-button {
     flex: 1 1 0;
+  }
+
+  .my-riot-inline-edit {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .my-riot-add-form {

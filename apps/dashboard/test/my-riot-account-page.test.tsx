@@ -34,17 +34,17 @@ test("Riot ID 전용 페이지는 프로필 링크 정보를 DOM에 노출하지
 
   assert.match(html, /내 Riot ID/);
   assert.match(html, /계정 상태/);
-  assert.match(html, /연결된 계정/);
-  assert.match(html, /검색 결과 미리보기/);
-  assert.match(html, /Twitch · Riot/);
+  // 결함 수정 — 대표 Riot ID는 정체성 히어로 한 곳에만 표시하고, 연결된 계정·
+  // 검색 결과 미리보기 카드의 중복 표시는 없앴습니다.
+  assert.match(html, /내 대표 Riot ID/);
+  assert.match(html, /이름이 바뀌었나요\?/);
+  assert.match(html, /Twitch 계정/);
   assert.match(html, /게임이름#KR1/);
-  assert.match(html, /새 Riot ID/);
-  assert.match(html, /Riot ID 저장/);
   assert.doesNotMatch(html, /should-not-render/);
   assert.doesNotMatch(html, /Overlay 접근|프로필 링크/);
 });
 
-test("Riot 계정 목록 카드는 서브 계정 추가 폼과 개수 안내를 제공한다", async () => {
+test("Riot 계정 목록 카드는 계정 추가 폼과 개수 안내를 제공하고 대표 계정 행에 인라인 개명 진입점을 둔다", async () => {
   const { MyRiotAccountPage } = await import("../src/pages/MyRiotAccountPage");
   setDashboardLocale("ko");
   const html = renderToStaticMarkup(<MyRiotAccountPage csrfToken="csrf-test" streamer={streamer} />);
@@ -56,8 +56,11 @@ test("Riot 계정 목록 카드는 서브 계정 추가 폼과 개수 안내를 
   assert.match(html, /서브 계정 4개 더 추가할 수 있습니다/);
   // 계정 목록을 불러오기 전에는 skeleton이 자리를 지킵니다(SSR 초기 상태).
   assert.match(html, /aria-busy="true"/);
-  // 개명 카드는 계정 추가와 역할이 분리된 문구를 씁니다.
-  assert.match(html, /대표 계정 이름 변경/);
+  // 결함 수정 — "서브 계정 추가"와 똑같이 생겼던 별도 개명 카드는 없앴습니다.
+  // 개명 진입점은 정체성 히어로(테스트 1)와 대표 계정 행의 인라인 편집으로
+  // 옮겼습니다 — 계정 목록이 로딩 중(skeleton, SSR 초기 상태)이라 행 자체는
+  // 여기서 렌더링되지 않습니다.
+  assert.doesNotMatch(html, /대표 계정 이름 변경/);
 
   setDashboardLocale("ja");
   const japanese = renderToStaticMarkup(<MyRiotAccountPage csrfToken="csrf-test" streamer={streamer} />);
@@ -65,19 +68,19 @@ test("Riot 계정 목록 카드는 서브 계정 추가 폼과 개수 안내를 
   assert.match(japanese, /サブアカウントは追加後すぐに公開戦績へ反映されます/);
   assert.match(japanese, /アカウント追加/);
   assert.match(japanese, /サブアカウントをあと 4 件追加できます/);
-  assert.match(japanese, /メインアカウントの名前を変更/);
+  assert.doesNotMatch(japanese, /メインアカウントの名前を変更/);
   setDashboardLocale("ko");
 });
 
-test("Riot ID 계정 상태와 검색 미리보기는 일본어 UI 구조를 함께 제공한다", async () => {
+test("Riot ID 계정 상태와 정체성 히어로는 일본어 UI 구조를 함께 제공한다", async () => {
   const { MyRiotAccountPage } = await import("../src/pages/MyRiotAccountPage");
   setDashboardLocale("ja");
   const html = renderToStaticMarkup(<MyRiotAccountPage streamer={streamer} />);
 
   assert.match(html, /アカウント状態/);
-  assert.match(html, /連携アカウント/);
-  assert.match(html, /検索結果プレビュー/);
-  assert.match(html, /Twitch・Riot/);
+  assert.match(html, /自分のメイン Riot ID/);
+  assert.match(html, /名前が変わりましたか？/);
+  assert.match(html, /Twitch アカウント/);
   assert.match(html, /게임이름#KR1/);
   setDashboardLocale("ko");
 });

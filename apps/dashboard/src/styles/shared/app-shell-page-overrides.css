@@ -1,0 +1,39 @@
+/* 결함 수정 — shared/ui/AppShell.tsx가 AppShell.css를 layer 없이(JS import) 불러와서,
+ * 이 규칙들이 원래 있던 18-yoro-dashboard.css(layer(legacy))에서는 특이성이 훨씬 높아도
+ * 항상 졌습니다. CSS cascade layer 규칙상 레이어 없는 스타일은 특이성과 무관하게 레이어에
+ * 속한 스타일을 항상 이기기 때문입니다. AppShell 특정 페이지 오버라이드는 이 파일처럼
+ * layer 없이 import해야 실제로 적용됩니다 — 이 파일도 index.css에서 layer() 없이 import합니다.
+ *
+ * 실측: 이 수정 전에는 .my-riot-account-shell이 AppShell 기본 그리드
+ * (사이드바 288px + 본문)를 그대로 써서, 일반적인 데스크톱 폭에서 본문 카드가
+ * 132px로 찌그러지고 텍스트가 한 글자씩 세로로 줄바꿈됐습니다.
+ */
+
+/* Riot ID 관리는 통합 Dashboard 안에서 상태 → 계정 순서로 읽힌다. */
+.yoro-dashboard-shell[data-page="streamingRiot"] .my-riot-account-shell.yoro-app-shell {
+  grid-template-areas:
+    "header"
+    "main";
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  min-height: 0;
+  overflow: clip;
+  border-color: color-mix(in srgb, var(--yoro-color-secondary) 24%, var(--yoro-color-border));
+  background: var(--yoro-color-surface-muted);
+}
+
+.yoro-dashboard-shell[data-page="streamingRiot"] .my-riot-account-hero {
+  background:
+    radial-gradient(circle at 88% 12%, color-mix(in srgb, var(--yoro-color-secondary) 20%, transparent), transparent 22rem),
+    linear-gradient(135deg, var(--yoro-color-surface-strong), var(--yoro-color-surface));
+}
+
+.yoro-dashboard-shell[data-page="streamingRiot"] .my-riot-account-hero .yoro-page-header {
+  padding: clamp(var(--yoro-space-6), 3vw, var(--yoro-space-10));
+}
+
+.yoro-dashboard-shell[data-page="streamingRiot"] .settings-shared-main.yoro-app-shell__main {
+  display: grid;
+  gap: var(--yoro-space-6);
+  padding: clamp(var(--yoro-space-5), 3vw, var(--yoro-space-8));
+}

@@ -10,7 +10,7 @@ import {
 import { createDashboardLocaleProxy } from "../i18n";
 import { AppShell, AppShellHeader, AppShellMain } from "../shared/ui/AppShell";
 import { Button } from "../shared/ui/Button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../shared/ui/Card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../shared/ui/Card";
 import {
   EmptyState,
   EmptyStateActions,
@@ -54,31 +54,20 @@ const i18n = {
     approved: "승인 완료",
     current: "현재",
     twitchAccount: "Twitch 계정",
-    riotAccount: "Riot 계정",
     connected: "연결됨",
     verified: "확인됨",
     accountOverview: "계정 상태",
-    connectedServices: "연결 서비스",
-    connectedServicesValue: "2개",
-    connectedServicesDescription: "Twitch · Riot",
     approvalState: "방송인 승인",
-    profileVisibility: "공개 전적",
-    publicAvailable: "공개 가능",
-    connectedAccountsTitle: "연결된 계정",
-    connectedAccountsDescription: "방송과 전적 검색에 사용되는 계정을 확인합니다.",
-    previewTitle: "검색 결과 미리보기",
-    previewDescription: "저장한 Riot ID는 공개 전적 검색과 스트리머 프로필에 표시됩니다.",
-    previewEyebrow: "Riot 플레이어",
-    pendingPreview: "저장 전 미리보기",
-    savedPreview: "현재 공개 정보",
-    currentRiotId: "현재 Riot ID",
-    riotIdChange: "대표 계정 이름 변경",
-    riotIdDescription: "대표 계정의 게임명이나 태그를 실제로 변경(개명)했다면 새 Riot ID를 게임명#태그 형식으로 입력하세요. 다른 계정을 추가하려면 위의 서브 계정 추가를 사용합니다.",
+    currentRiotId: "내 대표 Riot ID",
+    riotIdChangeCta: "이름이 바뀌었나요?",
     riotIdInput: "새 Riot ID",
     riotIdPlaceholder: "게임명#태그",
-    saveRiotId: "Riot ID 저장",
+    saveRiotId: "저장",
     riotIdSaved: "Riot ID를 저장했습니다.",
     riotIdSaveFailed: "Riot ID 저장에 실패했습니다.",
+    riotIdInlineHint: "저장하면 공개 전적·스트리머 카드가 이 이름으로 바뀝니다.",
+    cancelAction: "취소",
+    startEditAria: (riotId: string) => `${riotId} 이름 변경`,
     openRecord: "공개 전적 보기",
     openTwitch: "Twitch 채널 열기",
     registrationRequired: "방송인 등록이 필요합니다.",
@@ -101,7 +90,6 @@ const i18n = {
     removeConfirmText: "삭제할까요? 이 계정으로는 더 이상 스트리머가 연결되지 않습니다.",
     removeConfirm: "삭제",
     removeCancel: "취소",
-    addTitle: "서브 계정 추가",
     addLabel: "추가할 Riot ID",
     addAction: "계정 추가",
     accountsLoading: "계정 목록을 불러오는 중입니다.",
@@ -131,31 +119,20 @@ const i18n = {
     approved: "承認済み",
     current: "現在",
     twitchAccount: "Twitch アカウント",
-    riotAccount: "Riot アカウント",
     connected: "連携済み",
     verified: "確認済み",
     accountOverview: "アカウント状態",
-    connectedServices: "連携サービス",
-    connectedServicesValue: "2件",
-    connectedServicesDescription: "Twitch・Riot",
     approvalState: "配信者承認",
-    profileVisibility: "公開戦績",
-    publicAvailable: "公開可能",
-    connectedAccountsTitle: "連携アカウント",
-    connectedAccountsDescription: "配信と戦績検索に使用するアカウントを確認します。",
-    previewTitle: "検索結果プレビュー",
-    previewDescription: "保存した Riot ID は公開戦績検索と配信者プロフィールに表示されます。",
-    previewEyebrow: "Riot プレイヤー",
-    pendingPreview: "保存前プレビュー",
-    savedPreview: "現在の公開情報",
-    currentRiotId: "現在の Riot ID",
-    riotIdChange: "メインアカウントの名前を変更",
-    riotIdDescription: "メインアカウントのゲーム名やタグを実際に変更した場合は、新しい Riot ID をゲーム名#タグ形式で入力してください。別のアカウントを追加する場合は上のサブアカウント追加を使用します。",
+    currentRiotId: "自分のメイン Riot ID",
+    riotIdChangeCta: "名前が変わりましたか？",
     riotIdInput: "新しい Riot ID",
     riotIdPlaceholder: "ゲーム名#タグ",
-    saveRiotId: "Riot IDを保存",
+    saveRiotId: "保存",
     riotIdSaved: "Riot IDを保存しました。",
     riotIdSaveFailed: "Riot IDの保存に失敗しました。",
+    riotIdInlineHint: "保存すると公開戦績・配信者カードがこの名前に変わります。",
+    cancelAction: "キャンセル",
+    startEditAria: (riotId: string) => `${riotId} の名前を変更`,
     openRecord: "公開戦績を見る",
     openTwitch: "Twitch チャンネルを開く",
     registrationRequired: "配信者登録が必要です。",
@@ -178,7 +155,6 @@ const i18n = {
     removeConfirmText: "削除しますか？このアカウントでは配信者が紐づかなくなります。",
     removeConfirm: "削除",
     removeCancel: "キャンセル",
-    addTitle: "サブアカウントを追加",
     addLabel: "追加する Riot ID",
     addAction: "アカウント追加",
     accountsLoading: "アカウント一覧を読み込んでいます。",
@@ -221,6 +197,14 @@ function apiErrorDetail(error: unknown, fallback: string): string {
   return error.message.replace(/^\/api\/[^ ]+ failed: \d+(?: - )?/, "") || fallback;
 }
 
+function EditIcon() {
+  return (
+    <svg aria-hidden="true" fill="none" height="16" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" width="16">
+      <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
+  );
+}
+
 function AccountRow({
   account,
   busy,
@@ -229,6 +213,13 @@ function AccountRow({
   onCancelRemove,
   onRemove,
   onSetMain,
+  editing,
+  editDraft,
+  editSaveDisabled,
+  onEditDraftChange,
+  onStartEdit,
+  onCancelEdit,
+  onSaveEdit,
 }: {
   account: StreamerRiotAccount;
   busy: boolean;
@@ -237,11 +228,23 @@ function AccountRow({
   onCancelRemove: () => void;
   onRemove: () => void;
   onSetMain: () => void;
+  /* 대표 계정 행에서만 씁니다 — 인라인 이름 변경. */
+  editing?: boolean;
+  editDraft?: string;
+  editSaveDisabled?: boolean;
+  onEditDraftChange?: (value: string) => void;
+  onStartEdit?: () => void;
+  onCancelEdit?: () => void;
+  onSaveEdit?: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   const confirmRef = useRef<HTMLButtonElement>(null);
+  const editInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (confirming) confirmRef.current?.focus();
   }, [confirming]);
+  useEffect(() => {
+    if (editing) editInputRef.current?.focus();
+  }, [editing]);
 
   const isPending = account.status === "pending";
   const isRejected = account.status === "rejected";
@@ -276,6 +279,16 @@ function AccountRow({
         <span>{hint}</span>
       </div>
       <span className="my-riot-account-actions">
+        {account.isMain && onStartEdit && !editing ? (
+          <Button
+            aria-label={t.startEditAria(account.riotId)}
+            onClick={onStartEdit}
+            size="sm"
+            variant="ghost"
+          >
+            <EditIcon />
+          </Button>
+        ) : null}
         {!account.isMain && account.status === "approved" ? (
           <Button
             aria-label={t.setMainAria(account.riotId)}
@@ -299,6 +312,26 @@ function AccountRow({
           </Button>
         ) : null}
       </span>
+      {editing && onSaveEdit ? (
+        <form className="my-riot-inline-edit" onSubmit={onSaveEdit}>
+          <Input
+            aria-label={t.riotIdInput}
+            autoComplete="off"
+            maxLength={80}
+            onChange={(event) => onEditDraftChange?.(event.target.value)}
+            placeholder={t.riotIdPlaceholder}
+            ref={editInputRef}
+            value={editDraft ?? ""}
+          />
+          <Button disabled={busy || editSaveDisabled} loading={busy} size="sm" type="submit">
+            {t.saveRiotId}
+          </Button>
+          <Button onClick={onCancelEdit} size="sm" type="button" variant="ghost">
+            {t.cancelAction}
+          </Button>
+          <span className="my-riot-inline-hint">{t.riotIdInlineHint}</span>
+        </form>
+      ) : null}
       {confirming && !isRejected ? (
         <span className="my-riot-account-confirm" role="alert">
           <span>{t.removeConfirmText}</span>
@@ -341,6 +374,10 @@ export function MyRiotAccountPage({
   const [addError, setAddError] = useState("");
   const [rowBusyId, setRowBusyId] = useState<string | null>(null);
   const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
+  /* 결함 수정 — "서브 계정 추가"와 "대표 계정 이름 변경"이 똑같이 생긴 별도 폼이라
+     헷갈렸습니다. 개명을 대표 계정 행 안의 인라인 편집으로 옮겨 별도 카드 없이도
+     구분되게 합니다. */
+  const [renamingMain, setRenamingMain] = useState(false);
 
   useEffect(() => {
     setRiotIdDraft(currentRiotId(streamer));
@@ -445,6 +482,7 @@ export function MyRiotAccountPage({
       onStreamerChange?.(updated);
       setRiotIdDraft(currentRiotId(updated));
       setRiotIdMessage(t.riotIdSaved);
+      setRenamingMain(false);
       showToast("success", t.riotIdSaved);
       loadAccounts();
     } catch (error) {
@@ -486,8 +524,6 @@ export function MyRiotAccountPage({
   const mainAccount = accounts?.find((account) => account.isMain);
   const savedRiotId = mainAccount?.riotId ?? currentRiotId(streamer);
   const normalizedDraft = riotIdDraft.normalize("NFKC").trim();
-  const draftChanged = Boolean(normalizedDraft && normalizedDraft !== savedRiotId);
-  const previewRiotId = normalizedDraft || savedRiotId;
   const saveDisabled = riotIdBusy || !normalizedDraft || normalizedDraft === savedRiotId;
   const subAccounts = accounts?.filter((account) => !account.isMain) ?? [];
   const activeSubCount = subAccounts.filter((account) => account.status !== "rejected").length;
@@ -522,9 +558,29 @@ export function MyRiotAccountPage({
         </AppShellHeader>
 
         <AppShellMain className="settings-shared-main" id="my-riot-account-main">
+          {/* 결함 수정 — 같은 Riot ID가 지표·연결된 계정·미리보기·개명 카드 4곳에
+              반복 표시되던 걸, 정체성 하나만 상단에 크게 보여주는 걸로 통합했습니다. */}
+          <section aria-label={t.currentRiotId} className="my-riot-identity">
+            <span aria-hidden="true" className="my-riot-identity-mark">R</span>
+            <div className="my-riot-identity-copy">
+              <small>{t.currentRiotId}</small>
+              <strong>{savedRiotId}</strong>
+            </div>
+            <span className="my-riot-identity-actions">
+              <Button as="a" href={mainPublicPath} rel="noreferrer" size="sm" target="_blank" variant="secondary" data-ko={i18n.ko.openRecord} data-ja={i18n.ja.openRecord}>
+                {t.openRecord}
+              </Button>
+              {!renamingMain ? (
+                <Button onClick={() => setRenamingMain(true)} size="sm" data-ko={i18n.ko.riotIdChangeCta} data-ja={i18n.ja.riotIdChangeCta}>
+                  <EditIcon /> {t.riotIdChangeCta}
+                </Button>
+              ) : null}
+            </span>
+          </section>
+
           <section aria-label={t.accountOverview} className="my-riot-account-metrics">
             <Metric
-              description={t.connectedServicesDescription}
+              description={t.status}
               label={t.metricAccounts}
               size="lg"
               status={<StatusPill tone="success" size="sm">{t.connected}</StatusPill>}
@@ -539,204 +595,134 @@ export function MyRiotAccountPage({
               tone="success"
               value={t.approved}
             />
-            <Metric
-              description={savedRiotId}
-              label={t.profileVisibility}
-              size="lg"
-              status={<StatusPill tone="info" size="sm">{t.current}</StatusPill>}
-              tone="streamer"
-              value={t.publicAvailable}
-            />
           </section>
 
-          <div className="settings-shared-grid my-riot-account-grid">
-            <Card as="section" className="settings-shared-card my-riot-connected-card" id="my-riot-account-profile" padding="lg" variant="glass">
-              <CardHeader className="settings-shared-card-header">
+          <Card as="section" className="settings-shared-card my-riot-connected-card" id="my-riot-account-profile" padding="lg" variant="glass">
+            <CardHeader className="settings-shared-card-header">
+              <div>
+                <CardTitle as="h2">{t.twitchAccount}</CardTitle>
+              </div>
+              <StatusPill tone="success" size="sm">{t.connected}</StatusPill>
+            </CardHeader>
+            <CardContent className="my-riot-connected-list">
+              <article className="my-riot-connected-row">
+                <span className="my-riot-avatar">
+                  {streamer.twitchProfileImageUrl ? (
+                    <img src={streamer.twitchProfileImageUrl} alt={streamer.twitchDisplayName} />
+                  ) : streamer.twitchDisplayName.slice(0, 1).toUpperCase()}
+                </span>
                 <div>
-                  <CardTitle as="h2">{t.connectedAccountsTitle}</CardTitle>
-                  <CardDescription>{t.connectedAccountsDescription}</CardDescription>
+                  <strong>{streamer.twitchDisplayName}</strong>
+                  <span>@{streamer.twitchLogin}</span>
                 </div>
-                <StatusPill tone="success" size="sm">{t.connectedServicesValue}</StatusPill>
-              </CardHeader>
-              <CardContent className="my-riot-connected-list">
-                <article className="my-riot-connected-row">
-                  <span className="my-riot-avatar">
-                    {streamer.twitchProfileImageUrl ? (
-                      <img src={streamer.twitchProfileImageUrl} alt={streamer.twitchDisplayName} />
-                    ) : streamer.twitchDisplayName.slice(0, 1).toUpperCase()}
-                  </span>
-                  <div>
-                    <small>{t.twitchAccount}</small>
-                    <strong>{streamer.twitchDisplayName}</strong>
-                    <span>@{streamer.twitchLogin}</span>
-                  </div>
-                  <StatusPill tone="success" size="sm">{t.connected}</StatusPill>
-                  <Button as="a" href={twitchChannelUrl(streamer)} target="_blank" rel="noreferrer" variant="secondary" size="sm" data-ko={i18n.ko.openTwitch} data-ja={i18n.ja.openTwitch}>
-                    {t.openTwitch}
-                  </Button>
-                </article>
-                <article className="my-riot-connected-row">
-                  <span aria-hidden="true" className="my-riot-provider-mark">R</span>
-                  <div>
-                    <small>{t.riotAccount}</small>
-                    <strong>{savedRiotId}</strong>
-                    <span>{t.publicAvailable}</span>
-                  </div>
-                  <StatusPill tone="info" size="sm">{t.verified}</StatusPill>
-                </article>
-              </CardContent>
-            </Card>
+                <Button as="a" href={twitchChannelUrl(streamer)} target="_blank" rel="noreferrer" variant="secondary" size="sm" data-ko={i18n.ko.openTwitch} data-ja={i18n.ja.openTwitch}>
+                  {t.openTwitch}
+                </Button>
+              </article>
+            </CardContent>
+          </Card>
 
-            <Card as="section" className="settings-shared-card my-riot-preview-card" padding="lg" variant="elevated">
-              <CardHeader className="settings-shared-card-header">
-                <div>
-                  <CardTitle as="h2">{t.previewTitle}</CardTitle>
-                  <CardDescription>{t.previewDescription}</CardDescription>
+          <Card as="section" className="settings-shared-card my-riot-account-card featured wide my-riot-accounts-card" id="my-riot-account-list" padding="lg" variant="glass">
+            <CardHeader className="settings-shared-card-header">
+              <div>
+                <CardTitle as="h2" data-ko={i18n.ko.riotAccountsTitle} data-ja={i18n.ja.riotAccountsTitle}>{t.riotAccountsTitle}</CardTitle>
+                <CardDescription data-ko={i18n.ko.riotAccountsDescription} data-ja={i18n.ja.riotAccountsDescription}>{t.riotAccountsDescription}</CardDescription>
+              </div>
+              <StatusPill tone={remainingSubSlots > 0 ? "info" : "warning"} size="sm">
+                {remainingSubSlots > 0 ? t.remaining(remainingSubSlots) : t.limitReached(subLimit)}
+              </StatusPill>
+            </CardHeader>
+            <CardContent className="my-riot-accounts-content">
+              {accountsError ? (
+                <div className="my-riot-accounts-error" role="alert">
+                  <span>{accountsError}</span>
+                  <Button onClick={loadAccounts} size="sm" variant="secondary">{t.accountsRetry}</Button>
                 </div>
-                <StatusPill tone={draftChanged ? "warning" : "success"} size="sm">
-                  {draftChanged ? t.pendingPreview : t.savedPreview}
+              ) : accounts === null ? (
+                <ul aria-busy="true" aria-label={t.accountsLoading} className="my-riot-accounts-list">
+                  {[0, 1].map((index) => (
+                    <li aria-hidden="true" className="my-riot-connected-row my-riot-account-row is-skeleton" key={index}>
+                      <span className="my-riot-provider-mark" />
+                      <div>
+                        <small>&nbsp;</small>
+                        <strong>&nbsp;</strong>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <ul aria-live="polite" className="my-riot-accounts-list">
+                  {accounts.map((account) => (
+                    <AccountRow
+                      account={account}
+                      busy={rowBusyId === account.id || (account.isMain && riotIdBusy)}
+                      confirming={confirmRemoveId === account.id}
+                      key={account.id}
+                      onAskRemove={() => setConfirmRemoveId(account.id)}
+                      onCancelRemove={() => setConfirmRemoveId(null)}
+                      onRemove={() => void removeAccount(account)}
+                      onSetMain={() => void setMainAccount(account)}
+                      editing={account.isMain && renamingMain}
+                      editDraft={riotIdDraft}
+                      editSaveDisabled={saveDisabled}
+                      onEditDraftChange={setRiotIdDraft}
+                      onStartEdit={account.isMain ? () => setRenamingMain(true) : undefined}
+                      onCancelEdit={() => {
+                        setRiotIdDraft(savedRiotId);
+                        setRiotIdMessage("");
+                        setRenamingMain(false);
+                      }}
+                      onSaveEdit={(event) => void saveRiotId(event)}
+                    />
+                  ))}
+                  {subAccounts.length === 0 ? (
+                    <li className="my-riot-accounts-empty">
+                      <strong data-ko={i18n.ko.emptySubTitle} data-ja={i18n.ja.emptySubTitle}>{t.emptySubTitle}</strong>
+                      <span>{t.emptySubDescription}</span>
+                    </li>
+                  ) : null}
+                </ul>
+              )}
+
+              <form className="my-riot-add-form" onSubmit={(event) => void submitAddAccount(event)}>
+                <FormField controlId="my-riot-add-input" disabled={addBusy || !canAddSub}>
+                  <FormLabel data-ko={i18n.ko.addLabel} data-ja={i18n.ja.addLabel}>{t.addLabel}</FormLabel>
+                  <FormControl>
+                    <Input
+                      aria-describedby="my-riot-add-hint"
+                      aria-invalid={addError ? true : undefined}
+                      autoComplete="off"
+                      disabled={addBusy || !canAddSub}
+                      id="my-riot-add-input"
+                      maxLength={80}
+                      onChange={(event) => setAddDraft(event.target.value)}
+                      placeholder={t.riotIdPlaceholder}
+                      value={addDraft}
+                    />
+                  </FormControl>
+                  {addError ? (
+                    <FormError id="my-riot-add-hint">{addError}</FormError>
+                  ) : (
+                    <FormHint id="my-riot-add-hint" data-ko={i18n.ko.formatHint} data-ja={i18n.ja.formatHint}>{t.formatHint}</FormHint>
+                  )}
+                </FormField>
+                <Button
+                  data-ko={i18n.ko.addAction}
+                  data-ja={i18n.ja.addAction}
+                  disabled={addBusy || !canAddSub || !addDraft.trim()}
+                  loading={addBusy}
+                  type="submit"
+                >
+                  {t.addAction}
+                </Button>
+              </form>
+              {riotIdMessage ? (
+                <StatusPill role={riotIdMessage === t.riotIdSaved ? "status" : "alert"} tone={riotIdMessage === t.riotIdSaved ? "success" : "danger"}>
+                  {riotIdMessage}
                 </StatusPill>
-              </CardHeader>
-              <CardContent className="my-riot-preview-content">
-                <span aria-hidden="true" className="my-riot-preview-mark">R</span>
-                <div>
-                  <small>{t.previewEyebrow}</small>
-                  <strong>{previewRiotId}</strong>
-                  <StatusPill tone={draftChanged ? "warning" : "success"} size="sm">
-                    {draftChanged ? t.pendingPreview : t.verified}
-                  </StatusPill>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card as="section" className="settings-shared-card my-riot-account-card featured wide my-riot-accounts-card" id="my-riot-account-list" padding="lg" variant="glass">
-              <CardHeader className="settings-shared-card-header">
-                <div>
-                  <CardTitle as="h2" data-ko={i18n.ko.riotAccountsTitle} data-ja={i18n.ja.riotAccountsTitle}>{t.riotAccountsTitle}</CardTitle>
-                  <CardDescription data-ko={i18n.ko.riotAccountsDescription} data-ja={i18n.ja.riotAccountsDescription}>{t.riotAccountsDescription}</CardDescription>
-                </div>
-                <StatusPill tone={remainingSubSlots > 0 ? "info" : "warning"} size="sm">
-                  {remainingSubSlots > 0 ? t.remaining(remainingSubSlots) : t.limitReached(subLimit)}
-                </StatusPill>
-              </CardHeader>
-              <CardContent className="my-riot-accounts-content">
-                {accountsError ? (
-                  <div className="my-riot-accounts-error" role="alert">
-                    <span>{accountsError}</span>
-                    <Button onClick={loadAccounts} size="sm" variant="secondary">{t.accountsRetry}</Button>
-                  </div>
-                ) : accounts === null ? (
-                  <ul aria-busy="true" aria-label={t.accountsLoading} className="my-riot-accounts-list">
-                    {[0, 1].map((index) => (
-                      <li aria-hidden="true" className="my-riot-connected-row my-riot-account-row is-skeleton" key={index}>
-                        <span className="my-riot-provider-mark" />
-                        <div>
-                          <small>&nbsp;</small>
-                          <strong>&nbsp;</strong>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <ul aria-live="polite" className="my-riot-accounts-list">
-                    {accounts.map((account) => (
-                      <AccountRow
-                        account={account}
-                        busy={rowBusyId === account.id}
-                        confirming={confirmRemoveId === account.id}
-                        key={account.id}
-                        onAskRemove={() => setConfirmRemoveId(account.id)}
-                        onCancelRemove={() => setConfirmRemoveId(null)}
-                        onRemove={() => void removeAccount(account)}
-                        onSetMain={() => void setMainAccount(account)}
-                      />
-                    ))}
-                    {subAccounts.length === 0 ? (
-                      <li className="my-riot-accounts-empty">
-                        <strong data-ko={i18n.ko.emptySubTitle} data-ja={i18n.ja.emptySubTitle}>{t.emptySubTitle}</strong>
-                        <span>{t.emptySubDescription}</span>
-                      </li>
-                    ) : null}
-                  </ul>
-                )}
-
-                <form className="my-riot-add-form" onSubmit={(event) => void submitAddAccount(event)}>
-                  <FormField controlId="my-riot-add-input" disabled={addBusy || !canAddSub}>
-                    <FormLabel data-ko={i18n.ko.addLabel} data-ja={i18n.ja.addLabel}>{t.addLabel}</FormLabel>
-                    <FormControl>
-                      <Input
-                        aria-describedby="my-riot-add-hint"
-                        aria-invalid={addError ? true : undefined}
-                        autoComplete="off"
-                        disabled={addBusy || !canAddSub}
-                        id="my-riot-add-input"
-                        maxLength={80}
-                        onChange={(event) => setAddDraft(event.target.value)}
-                        placeholder={t.riotIdPlaceholder}
-                        value={addDraft}
-                      />
-                    </FormControl>
-                    {addError ? (
-                      <FormError id="my-riot-add-hint">{addError}</FormError>
-                    ) : (
-                      <FormHint id="my-riot-add-hint" data-ko={i18n.ko.formatHint} data-ja={i18n.ja.formatHint}>{t.formatHint}</FormHint>
-                    )}
-                  </FormField>
-                  <Button
-                    data-ko={i18n.ko.addAction}
-                    data-ja={i18n.ja.addAction}
-                    disabled={addBusy || !canAddSub || !addDraft.trim()}
-                    loading={addBusy}
-                    type="submit"
-                  >
-                    {t.addAction}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-
-            <Card as="section" className="settings-shared-card my-riot-account-card featured wide my-riot-settings-card" id="my-riot-account-riot" padding="lg" variant="glass">
-              <CardHeader className="settings-shared-card-header">
-                <div>
-                  <CardTitle as="h2" data-ko={i18n.ko.riotIdChange} data-ja={i18n.ja.riotIdChange}>{t.riotIdChange}</CardTitle>
-                  <CardDescription data-ko={i18n.ko.riotIdDescription} data-ja={i18n.ja.riotIdDescription}>{t.riotIdDescription}</CardDescription>
-                </div>
-                <StatusPill tone="info">{mainAccount?.riotTagLine ?? streamer.riotTagLine}</StatusPill>
-              </CardHeader>
-              <CardContent className="settings-shared-card-content">
-                <Metric label={t.currentRiotId} value={savedRiotId} tone="streamer" />
-                <form className="settings-shared-form my-riot-id-form" onSubmit={(event) => void saveRiotId(event)}>
-                  <FormField controlId="my-riot-id-input" disabled={riotIdBusy} required>
-                    <FormLabel data-ko={i18n.ko.riotIdInput} data-ja={i18n.ja.riotIdInput}>{t.riotIdInput}</FormLabel>
-                    <FormControl>
-                      <Input
-                        id="my-riot-id-input"
-                        value={riotIdDraft}
-                        placeholder={t.riotIdPlaceholder}
-                        maxLength={80}
-                        autoComplete="off"
-                        aria-describedby="my-riot-id-hint"
-                        onChange={(event) => setRiotIdDraft(event.target.value)}
-                        disabled={riotIdBusy}
-                      />
-                    </FormControl>
-                    <FormHint id="my-riot-id-hint" data-ko={i18n.ko.formatHint} data-ja={i18n.ja.formatHint}>{t.formatHint}</FormHint>
-                  </FormField>
-                  <CardFooter className="settings-shared-actions settings-shared-actions--flush">
-                    <Button type="submit" loading={riotIdBusy} disabled={saveDisabled} data-ko={i18n.ko.saveRiotId} data-ja={i18n.ja.saveRiotId}>{t.saveRiotId}</Button>
-                    <Button as="a" href={mainPublicPath} target="_blank" rel="noreferrer" variant="secondary" data-ko={i18n.ko.openRecord} data-ja={i18n.ja.openRecord}>
-                      {t.openRecord}
-                    </Button>
-                  </CardFooter>
-                </form>
-                {riotIdMessage ? (
-                  <StatusPill role={riotIdMessage === t.riotIdSaved ? "status" : "alert"} tone={riotIdMessage === t.riotIdSaved ? "success" : "danger"}>
-                    {riotIdMessage}
-                  </StatusPill>
-                ) : null}
-              </CardContent>
-            </Card>
-          </div>
+              ) : null}
+            </CardContent>
+          </Card>
         </AppShellMain>
       </AppShell>
 

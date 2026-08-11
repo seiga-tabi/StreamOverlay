@@ -24,134 +24,6 @@
   overflow-wrap: anywhere;
 }
 
-/* 한 줄 제목 줄 — 대형 히어로 제거(운영 화면 공간 확보) */
-.participation-management-titlebar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.participation-management-titlebar h1 {
-  margin: 0;
-  color: var(--text-strong);
-  font-size: 1.25rem;
-  font-weight: 900;
-}
-
-/* 새로고침 — 10초 자동 폴링과 별개로 즉시 재조회할 수 있는 수동 버튼입니다.
-   .participation-management-titlebar 로 한 겹 더 스코프해서 공용 button 규칙의
-   min-block-size·padding·border보다 우선하도록 합니다. */
-.participation-management-titlebar .participation-management-refresh {
-  flex: none;
-  min-inline-size: 2.5rem;
-  min-block-size: 2.5rem;
-  padding: 0;
-  border-color: var(--line);
-  border-radius: 999px;
-  background: none;
-  color: var(--muted);
-}
-
-.participation-management-refresh svg {
-  inline-size: 1.05rem;
-  block-size: 1.05rem;
-}
-
-.participation-management-refresh.is-spinning svg {
-  animation: participation-management-refresh-spin .7s linear infinite;
-}
-
-@keyframes participation-management-refresh-spin {
-  to { transform: rotate(360deg); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .participation-management-refresh.is-spinning svg {
-    animation: none;
-  }
-}
-
-/* 결함 수정 — 공용 a 규칙(.participation-management-page a)이 class+type
-   조합이라 클래스 하나짜리 이 규칙보다 우선순위가 높아, 실제로는 옅은 밑줄
-   링크가 아니라 공용 버튼 박스(테두리·배경·흰 글자)로 렌더링되고 있었습니다.
-   부모(.participation-management-titlebar)로 한 겹 더 스코프해서 뒤집습니다. */
-.participation-management-titlebar .participation-management-public-open {
-  margin-inline-start: auto;
-  min-block-size: var(--yoro-size-touch-target);
-  padding-inline: 0;
-  border: 0;
-  display: inline-flex;
-  align-items: center;
-  color: var(--muted);
-  background: none;
-  font-size: .8125rem;
-  font-weight: 700;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-/* ---------- shared surfaces ---------- */
-
-.participation-management-start,
-.participation-management-current,
-.participation-management-queue,
-.participation-management-bot {
-  min-inline-size: 0;
-  padding: var(--space-5);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  background: var(--surface);
-}
-
-.participation-management-current,
-.participation-management-queue {
-  display: grid;
-  gap: var(--space-4);
-  align-content: start;
-}
-
-.participation-management-bot {
-  display: flex;
-  gap: var(--space-4);
-  align-items: center;
-  justify-content: space-between;
-}
-
-.participation-management-bot > div {
-  min-inline-size: 0;
-  display: grid;
-  gap: var(--space-2);
-}
-
-.participation-management-bot h2,
-.participation-management-bot p {
-  margin: 0;
-}
-
-.participation-management-bot h2 {
-  color: var(--text-strong);
-}
-
-.participation-management-bot p,
-.participation-management-bot small {
-  color: var(--muted);
-  overflow-wrap: anywhere;
-}
-
-.participation-management-current h2,
-.participation-management-queue h2 {
-  margin: 0;
-  color: var(--text-strong);
-}
-
-.participation-management-queue header p {
-  margin: var(--space-1) 0 0;
-  color: var(--muted);
-}
-
-/* ---------- buttons ---------- */
-
 .participation-management-page button,
 .participation-management-page a,
 .participation-management-page summary {
@@ -254,17 +126,6 @@
 }
 
 
-.participation-management-capacity-full {
-  margin: 0;
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-  color: var(--yoro-color-text-on-dark-strong);
-  background: color-mix(in srgb, var(--warning) 26%, var(--surface-strong));
-  font-size: .8125rem;
-  font-weight: 700;
-}
-
-/* ---------- start card (no active session) ---------- */
 
 .participation-management-start {
   display: grid;
@@ -425,67 +286,7 @@
 /* ---------- control bar (active session) ---------- */
 
 /* 콕핏 카드 한 몸: 단계 바 + 진행 슬롯 + 액션 줄 */
-.participation-management-cockpit {
-  position: relative;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  background: var(--surface);
-}
 
-/* 결함 수정 — 카드에 overflow:hidden을 걸면 "더 많은 동작"(⋯) 드롭다운도 카드
-   경계에서 함께 잘립니다(실측: 드롭다운 151px 중 142px가 화면에 안 보였음).
-   대신 corner 클리핑이 필요한 요소(상단 색상 바·액션 줄 배경) 각각에 radius를
-   직접 줘서, 카드는 overflow:visible로 두고도 둥근 모서리를 유지합니다. */
-.participation-management-cockpit::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto;
-  block-size: 3px;
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  background: linear-gradient(90deg, var(--info), color-mix(in srgb, var(--info) 30%, transparent));
-}
-
-.participation-management-cockpit[data-step="game"]::before {
-  background: linear-gradient(90deg, var(--success), color-mix(in srgb, var(--success) 30%, transparent));
-}
-
-.participation-management-session-status {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  color: var(--text);
-  font-size: .875rem;
-  font-weight: 800;
-}
-
-.participation-management-session-status::before {
-  content: "";
-  inline-size: .5rem;
-  block-size: .5rem;
-  border-radius: 999px;
-  background: var(--muted);
-}
-
-.participation-management-session-status[data-status="recruiting"]::before {
-  background: var(--info);
-}
-
-.participation-management-session-status[data-step="checkin"]::before {
-  background: var(--warning);
-}
-
-.participation-management-session-status[data-step="game"]::before {
-  background: var(--success);
-}
-
-.participation-management-cockpit-tools {
-  margin-inline-start: auto;
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-/* 넘침 메뉴 — 복구 불가 동작(세션 종료)을 일상 버튼과 분리합니다. */
 .participation-management-overflow {
   position: relative;
 }
@@ -553,751 +354,750 @@
 /* 결함 수정 — 예전에는 텍스트 목록 + 세로 구분선이라 현재 단계가 색(box-shadow)에만
    의존했습니다. 각 단계마다 진행 트랙을 붙여 "얼마나 진행됐는지"를 형태로도 보여줍니다. */
 
-.participation-management-steps {
-  margin: 0;
-  padding: var(--space-5) var(--space-6) var(--space-4);
-  list-style: none;
-  display: flex;
-  gap: var(--space-6);
-  border-block-end: 1px solid var(--line);
-}
+/* ══════════════════════════════════════════════════════════════════
+   참여 관리 콘솔 (리디자인 v2)
 
-.participation-management-step {
-  flex: 1 1 0;
-  min-inline-size: 0;
-  display: grid;
-  gap: var(--space-2);
-  color: var(--muted);
-  font-size: .8125rem;
-  position: relative;
-}
+   구조: 상태 줄 1개 + 본문 2열(대기열 → 슬롯) + 위험 영역.
+   원칙
+     1. 수치는 상태 줄 한 곳에서만 읽습니다. 단계 바와 원형 게이지가 하던
+        역할을 여기로 합쳐, 같은 질문의 답이 화면에 여러 개 있지 않게 합니다.
+     2. 시선은 왼쪽(대기열=재료) → 오른쪽(슬롯=결정) 한 방향으로만 흐릅니다.
+     3. 주행동은 단계마다 색·문구가 함께 바뀌고, 파괴적 행동은 이 자리에
+        절대 오지 않습니다(라이브 중 근육 기억 오조작 방지).
+   ══════════════════════════════════════════════════════════════════ */
 
-.participation-management-step-row {
-  min-inline-size: 0;
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.participation-management-step-num {
-  display: inline-grid;
-  place-items: center;
-  inline-size: 1.35rem;
-  block-size: 1.35rem;
-  border-radius: 999px;
-  background: var(--surface-muted);
-  font-size: .7rem;
-  font-weight: 900;
+.participation-console-icon {
+  inline-size: 1rem;
+  block-size: 1rem;
   flex: none;
 }
 
-.participation-management-step > .participation-management-step-row > strong {
-  white-space: nowrap;
-}
+/* ---------- 상태 줄 ---------- */
 
-.participation-management-step-count {
-  margin-inline-start: auto;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.participation-management-step-track {
-  display: block;
-  position: relative;
-  block-size: .25rem;
-  border-radius: 999px;
-  background: var(--surface-muted);
-}
-
-.participation-management-step-track > i {
-  position: absolute;
-  inset: 0;
-  inline-size: 0%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--info), var(--brand));
-}
-
-.participation-management-step.is-active {
-  color: var(--text-strong);
-}
-
-.participation-management-step.is-active .participation-management-step-num {
-  background: var(--brand);
-  color: hsl(224 60% 14%);
-}
-
-.participation-management-step.is-active .participation-management-step-track > i {
-  inline-size: 60%;
-}
-
-.participation-management-step.is-done .participation-management-step-num {
-  background: var(--success);
-  color: hsl(163 90% 10%);
-}
-
-.participation-management-step.is-done .participation-management-step-track > i {
-  inline-size: 100%;
-  background: var(--success);
-}
-
-/* ---------- 액션 줄 — 주행동이 항상 같은 자리 ---------- */
-
-.participation-management-actions {
+.participation-console-statusbar {
   display: flex;
+  gap: var(--space-4);
+  align-items: center;
   flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
-  border-block-start: 1px solid var(--line);
-  /* 카드의 overflow:hidden을 없앴으므로(⋯ 드롭다운 클리핑 결함 수정), 이 행이
-     카드의 마지막 자식일 때 배경이 둥근 아래 모서리를 그대로 유지하도록 직접 지정합니다. */
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-  background: rgb(255 255 255 / 2%);
-}
-
-.participation-management-actions > button.is-primary,
-.participation-management-mobile-bar > button.is-primary {
-  min-block-size: var(--yoro-size-touch-target);
-  padding-inline: var(--space-5);
-  border: 0;
-  border-radius: var(--radius-sm);
-  background: var(--brand);
-  color: hsl(224 60% 14%);
-  font-size: .875rem;
-  font-weight: 900;
-  cursor: pointer;
-}
-
-.participation-management-actions > button.is-primary:disabled,
-.participation-management-mobile-bar > button.is-primary:disabled {
-  background: var(--surface-muted);
-  color: var(--muted);
-  cursor: not-allowed;
-  opacity: 1;
-}
-
-.participation-management-actions-hint {
-  color: var(--muted);
-  font-size: .78rem;
-}
-
-.participation-management-actions-aside {
-  margin-inline-start: auto;
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.participation-management-queue {
-  padding: 0;
-  overflow: hidden;
-}
-
-.participation-management-queue > header {
-  min-inline-size: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2) var(--space-3);
-  align-items: center;
-  padding: var(--space-3) var(--space-4);
-  border-block-end: 1px solid var(--line);
-}
-
-.participation-management-queue > header h2 {
-  margin: 0;
-  font-size: .9375rem;
-  font-weight: 900;
-}
-
-.participation-management-queue-count {
-  color: var(--muted);
-  font-size: .8125rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-/* ---------- 진행 스트립 (LoL: 정원이 작을 때) ---------- */
-
-.participation-management-strip {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-}
-
-.participation-management-strip-count {
-  margin-inline-end: var(--space-2);
-  color: var(--muted);
-  font-size: .8125rem;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-/* 진행 인원 원형 게이지 — "3/5" 텍스트만으로는 여유 좌석이 한눈에 안 들어와,
-   숫자 옆에 채움 비율을 형태로도 보여줍니다. */
-.participation-management-gauge-wrap {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-inline-end: var(--space-2);
-  padding-inline-end: var(--space-3);
-  border-inline-end: 1px solid var(--line);
-}
-
-.participation-management-gauge {
-  flex: none;
-  inline-size: 2.25rem;
-  block-size: 2.25rem;
-}
-
-.participation-management-gauge circle.is-track {
-  fill: none;
-  stroke: var(--surface-muted);
-  stroke-width: 4;
-}
-
-.participation-management-gauge circle.is-fill {
-  fill: none;
-  stroke: url(#participation-gauge-gradient);
-  stroke-width: 4;
-  stroke-linecap: round;
-  transform: rotate(-90deg);
-  transform-origin: 50% 50%;
-  transition: stroke-dashoffset .2s ease;
-}
-
-.participation-management-gauge-label {
-  display: grid;
-  line-height: 1.2;
-}
-
-.participation-management-gauge-label > strong {
-  color: var(--text-strong);
-  font-size: .9375rem;
-  font-weight: 900;
-  font-variant-numeric: tabular-nums;
-}
-
-.participation-management-gauge-label > span {
-  color: var(--muted);
-  font-size: .75rem;
-  font-weight: 700;
-}
-
-.participation-management-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-block-size: 2.75rem;
-  padding: var(--space-1) var(--space-2);
   border: 1px solid var(--line);
-  border-radius: 999px;
-  background: var(--surface-muted);
-  font-size: .8125rem;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
 }
 
-/* 후보 칩(로컬) — 확정 전임을 점선으로 표시합니다. */
-.participation-management-chip.is-candidate {
-  border-style: dashed;
-  border-color: color-mix(in srgb, var(--brand) 55%, var(--line));
-}
-
-/* 결함 수정 — 공용 button 규칙의 min-block-size(44px)가 여기 inline/block-size
-   (1.9rem≈30px)보다 커서 원형 버튼이 44px 정사각형으로 찍히고 있었습니다.
-   .participation-management-chip + button 태그로 스코프를 더해 이겨내고,
-   min-inline/block-size를 0으로 직접 눌러줍니다. */
-.participation-management-chip button.participation-management-chip-remove {
-  inline-size: 1.9rem;
-  block-size: 1.9rem;
-  min-inline-size: 0;
-  min-block-size: 0;
-  padding: 0;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: none;
-  color: var(--muted);
-  font-size: .72rem;
-  font-weight: 900;
-  cursor: pointer;
-}
-
-.participation-management-chip button.participation-management-chip-remove:hover {
-  border-color: color-mix(in srgb, var(--danger) 60%, var(--line));
-  color: var(--danger);
-}
-
-.participation-management-strip-compact-note {
-  color: var(--text-strong);
-  font-size: .8125rem;
-  font-weight: 800;
-}
-
-.participation-management-compact-list {
-  padding: 0 var(--space-4) var(--space-3);
-}
-
-.participation-management-chip-avatar {
-  inline-size: 2rem;
-  block-size: 2rem;
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
-  color: var(--yoro-color-text-on-dark-strong);
-  font-weight: 800;
-  background: color-mix(in srgb, var(--brand) 55%, var(--surface-strong));
-}
-
-.participation-management-chip.is-host .participation-management-chip-avatar {
-  background: color-mix(in srgb, var(--warning) 45%, var(--surface-strong));
-}
-
-.participation-management-chip-copy {
-  display: grid;
-  min-inline-size: 0;
-}
-
-.participation-management-chip-copy strong {
-  max-inline-size: 9rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--text-strong);
-  font-size: .8125rem;
-}
-
-.participation-management-chip-copy small {
-  color: var(--muted);
-  /* 결함 수정 — 11px(.6875rem)은 본문 최소 권장 크기(12px) 아래였습니다. */
-  font-size: .75rem;
-}
-
-.participation-management-strip-empty {
+.participation-console-state {
   display: inline-flex;
+  gap: var(--space-2);
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border: 1px dashed var(--line-strong);
-  border-radius: 999px;
-  color: var(--muted);
-  font-size: .8125rem;
-}
-
-.participation-management-strip-empty svg {
-  flex: none;
-  inline-size: .875rem;
-  block-size: .875rem;
-}
-
-/* ---------- 모바일 하단 고정 주행동 바 ---------- */
-
-.participation-management-mobile-bar {
-  display: none;
-}
-
-
-.participation-management-search {
-  margin-inline-start: auto;
-  flex: 0 1 20rem;
-  min-inline-size: 0;
-}
-
-.participation-management-search input {
-  inline-size: 100%;
-  min-block-size: var(--yoro-size-touch-target);
-  padding-inline: var(--space-4);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-md);
+  font-weight: 800;
   color: var(--text-strong);
-  background: var(--surface-strong);
-  font: inherit;
 }
 
-.participation-management-search input::placeholder {
-  color: var(--muted);
-}
-
-/* ---------- queue rows ---------- */
-
-.participation-management-row-more {
-  position: relative;
-}
-
-.participation-management-row-more > div {
-  z-index: 2;
-  min-inline-size: 10rem;
-  padding: var(--space-2);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-md);
-  display: grid;
-  gap: var(--space-2);
-  background: var(--surface-strong);
-  box-shadow: var(--shadow-lg);
-}
-
-.participation-management-history {
-  min-inline-size: 0;
-  border-block-start: 1px solid var(--line);
-  padding-block-start: var(--space-3);
-}
-
-.participation-management-history > summary {
-  border: 0;
-  background: none;
-  color: var(--muted);
-  font-size: .8125rem;
-  inline-size: fit-content;
-  min-block-size: var(--yoro-size-touch-target);
-  display: inline-flex;
-  gap: var(--space-2);
-}
-
-.participation-management-history > summary span {
-  color: var(--muted);
-}
-
-.participation-management-history[open] > summary {
-  margin-block-end: var(--space-4);
-}
-
-.participation-management-group {
-  display: grid;
-  gap: var(--space-2);
-  max-block-size: 32rem;
-  overflow-y: auto;
-}
-
-/* 한 줄 그리드(순번·이름/부가·상태·동작) — 예전 2줄 areas 유산이 선정 버튼을
-   우하단에 고립시키던 결함 1 의 수정입니다. */
-.participation-management-queue .participation-management-participant {
-  position: relative;
-  padding-inline-start: calc(var(--space-4) + 6px);
-  border: 0;
-  border-radius: 0;
-  border-block-end: 1px solid rgb(222 226 230 / 7%);
-  background: none;
-}
-
-.participation-management-queue .participation-management-participant:hover {
-  background: rgb(255 255 255 / 2.5%);
-}
-
-/* 상태 좌측 스트라이프 — pill 텍스트를 안 읽어도 색으로 먼저 스캔할 수 있습니다. */
-.participation-management-queue .participation-management-participant::before {
-  content: "";
-  position: absolute;
-  inset-block: var(--space-2);
-  inset-inline-start: 2px;
-  inline-size: 3px;
-  border-radius: 999px;
-  background: var(--info);
-}
-
-.participation-management-queue .participation-management-participant[data-status="waitlisted"]::before,
-.participation-management-queue .participation-management-participant[data-status="pending"]::before {
+.participation-console-state-dot {
+  inline-size: .5rem;
+  block-size: .5rem;
+  border-radius: 50%;
   background: var(--muted);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--muted) 26%, transparent);
 }
 
-.participation-management-queue .participation-management-participant[data-status="played"]::before {
-  background: var(--success);
-}
-
-.participation-management-queue .participation-management-participant[data-status="no_show"]::before,
-.participation-management-queue .participation-management-participant[data-status="rejected"]::before,
-.participation-management-queue .participation-management-participant[data-status="blocked"]::before {
+.participation-console-state[data-status="recruiting"] .participation-console-state-dot {
   background: var(--danger);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 26%, transparent);
 }
 
-.participation-management-participant {
-  min-inline-size: 0;
-  padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  display: grid;
-  grid-template-columns: max-content minmax(0, 1fr) auto auto;
-  gap: var(--space-2) var(--space-3);
-  align-items: center;
-  background: var(--surface-muted);
+.participation-console-state[data-step="game"] .participation-console-state-dot {
+  background: var(--success);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--success) 26%, transparent);
 }
 
-.participation-management-participant.is-compact {
-  opacity: .82;
-}
-
-.participation-management-position {
-  color: var(--brand);
-  font-size: .9375rem;
-  font-weight: 900;
-  font-variant-numeric: tabular-nums;
-}
-
-.participation-management-participant-main {
-  min-inline-size: 0;
-  display: grid;
-  gap: var(--space-1);
-}
-
-.participation-management-participant-main strong,
-.participation-management-participant-main span,
-.participation-management-participant-main small {
-  min-inline-size: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.participation-management-participant-main strong {
-  color: var(--text-strong);
-}
-
-.participation-management-participant-main span,
-.participation-management-participant-main small {
-  color: var(--muted);
-  font-size: .8125rem;
-}
-
-.participation-management-participant > .participation-management-status {
-  max-inline-size: 100%;
-  white-space: nowrap;
-  justify-self: end;
-  border: 0;
-  background: none;
-  padding: 0;
-  color: var(--muted);
-}
-
-.participation-management-participant > .participation-management-status[data-status="verified"],
-.participation-management-participant > .participation-management-status[data-status="played"] {
-  color: var(--success);
-}
-
-.participation-management-participant > .participation-management-status[data-status="no_show"],
-.participation-management-participant > .participation-management-status[data-status="rejected"],
-.participation-management-participant > .participation-management-status[data-status="blocked"] {
-  color: var(--danger);
-}
-
-.participation-management-status {
-  flex: 0 0 auto;
-  padding: var(--space-1) var(--space-2);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--yoro-radius-pill);
-  color: var(--text-strong);
-  background: var(--surface-strong);
-  font-size: .75rem;
+.participation-console-gamechip {
+  padding: .125rem var(--space-3);
+  border: 1px solid color-mix(in srgb, var(--brand) 50%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand) 16%, transparent);
+  font-size: var(--yoro-font-size-xs);
   font-weight: 800;
+  color: var(--text-strong);
 }
 
-.participation-management-participant > .participation-management-entry-actions,
-.participation-management-participant > .participation-management-row-more {
-  min-inline-size: 0;
-  justify-self: end;
+.participation-console-sep {
+  inline-size: 1px;
+  block-size: 1.5rem;
+  background: var(--line);
 }
 
-.participation-management-entry-actions {
+/* 수치 3개 — 화면에서 이 값들의 유일한 출처입니다. */
+.participation-console-stats {
   display: flex;
-  flex-wrap: wrap;
+  gap: var(--space-5);
+  align-items: baseline;
+  margin: 0;
+}
+
+.participation-console-stats > div {
+  display: flex;
   gap: var(--space-2);
+  align-items: baseline;
 }
 
-.participation-management-entry-actions button,
-.participation-management-row-more summary {
-  min-block-size: 2.25rem;
+.participation-console-stats dt {
+  font-size: var(--yoro-font-size-xs);
+  color: var(--muted);
+}
+
+.participation-console-stats dd {
+  margin: 0;
+  font-size: var(--yoro-font-size-xl);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  color: var(--text-strong);
+}
+
+.participation-console-stats dd > span {
+  font-size: var(--yoro-font-size-sm);
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.participation-console-stats > div[data-tone="waiting"] dd {
+  color: var(--warning);
+}
+
+.participation-console-statusbar-actions {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  margin-inline-start: auto;
+}
+
+.participation-console-statusbar .participation-console-iconbutton {
+  inline-size: var(--yoro-size-touch-target);
+  padding-inline: 0;
+}
+
+.participation-console-iconbutton.is-spinning .participation-console-icon {
+  animation: participation-console-spin 900ms linear infinite;
+}
+
+@keyframes participation-console-spin {
+  to { rotate: 1turn; }
+}
+
+.participation-console-statusbar .participation-console-publiclink {
   padding-inline: var(--space-3);
-  max-inline-size: 100%;
-  font-size: .8125rem;
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
-
-.participation-management-participant .participation-management-row-more > summary {
-  min-inline-size: 2.25rem;
-  padding-inline: var(--space-2);
-  text-align: center;
-}
-
-/* 잠긴 선정은 "고장"이 아니라 잠금으로 읽혀야 합니다(결함 5). */
-.participation-management-entry-actions button:disabled {
   border-color: var(--line);
   background: transparent;
   color: var(--muted);
-  opacity: 1;
-  cursor: not-allowed;
+  font-weight: 700;
 }
 
-.participation-management-queue-locked {
+/* ---------- 본문 2열 ---------- */
+
+.participation-console-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.participation-console-panel {
+  min-inline-size: 0;
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.participation-console-panel-head {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.participation-console-panel-head h2,
+.participation-console-panel-head h3 {
   margin: 0;
-  padding: var(--space-2) var(--space-4);
-  border-block-end: 1px solid var(--line);
-  background: rgb(255 255 255 / 3%);
+  font-size: var(--yoro-font-size-sm);
+  font-weight: 800;
+  color: var(--text-strong);
+}
+
+.participation-console-badge {
+  padding: .125rem var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: var(--yoro-font-size-xs);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-strong);
+}
+
+.participation-console-badge > span {
   color: var(--muted);
-  font-size: .8125rem;
 }
 
-.participation-management-queue .participation-management-capacity-full {
+.participation-console-badge[data-tone="slots"] {
+  border-color: color-mix(in srgb, var(--brand) 50%, transparent);
+  background: color-mix(in srgb, var(--brand) 16%, transparent);
+}
+
+.participation-console-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-inline-start: auto;
+}
+
+.participation-console-search .participation-console-icon {
+  position: absolute;
+  inset-inline-start: var(--space-3);
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.participation-console-search input {
+  min-block-size: var(--yoro-size-touch-target);
+  inline-size: 11rem;
+  max-inline-size: 100%;
+  padding-inline: var(--space-3) var(--space-3);
+  padding-inline-start: 2.25rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface-muted);
+  color: var(--text-strong);
+  font: inherit;
+}
+
+.participation-console-search input::placeholder {
+  color: var(--muted);
+}
+
+/* 잠금은 버튼을 흐리게 두는 대신 이유를 문장으로 알려 줍니다. */
+.participation-console-lock {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
   margin: 0;
-  padding: var(--space-2) var(--space-4);
-  border-block-end: 1px solid var(--line);
+  padding: var(--space-3);
+  border: 1px solid color-mix(in srgb, var(--info) 42%, transparent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--info) 14%, var(--surface-strong));
+  font-size: var(--yoro-font-size-sm);
+  color: var(--yoro-color-text-on-dark-strong);
 }
 
-.participation-management-queue .participation-management-group {
-  gap: 0;
+.participation-console-lock .participation-console-icon {
+  margin-block-start: .125rem;
+  color: var(--info);
 }
 
-.participation-management-queue .participation-management-history {
-  padding: 0 var(--space-4);
+/* ---------- 행(대기열·슬롯 공용) ---------- */
+
+.participation-console-rows {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.participation-console-row,
+.participation-console-slot {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  min-block-size: var(--yoro-size-touch-target);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-muted);
+}
+
+/* 후보로 담긴 신청자는 목록에서 사라지지 않고 상태만 바뀝니다 —
+   "어디까지 담았는지"를 추적할 수 있어야 합니다. */
+.participation-console-row.is-picked {
+  border-color: color-mix(in srgb, var(--brand) 45%, transparent);
+  background: color-mix(in srgb, var(--brand) 12%, var(--surface-muted));
+}
+
+.participation-console-row-position {
+  min-inline-size: 1.5rem;
+  font-size: var(--yoro-font-size-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.participation-console-avatar {
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--brand-strong);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: 800;
+  color: var(--yoro-color-text-on-dark-strong);
+}
+
+.participation-console-row-name,
+.participation-console-slot-name {
+  min-inline-size: 0;
+  flex: 1;
+  display: grid;
+}
+
+.participation-console-row-name strong,
+.participation-console-slot-name strong {
+  overflow: hidden;
+  font-size: var(--yoro-font-size-sm);
+  font-weight: 700;
+  color: var(--text-strong);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.participation-console-row-name small,
+.participation-console-slot-name small {
+  overflow: hidden;
+  font-size: var(--yoro-font-size-xs);
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.participation-console-row-picked {
+  font-weight: 800;
+  color: var(--brand);
+}
+
+.participation-console-row-status,
+.participation-console-slot-status {
+  padding: .125rem var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: var(--yoro-font-size-xs);
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.participation-console-row-status[data-status="verified"],
+.participation-console-row-status[data-status="played"] {
+  border-color: color-mix(in srgb, var(--success) 45%, transparent);
+  color: var(--success);
+}
+
+.participation-console-row-status[data-status="no_show"],
+.participation-console-row-status[data-status="rejected"],
+.participation-console-row-status[data-status="blocked"] {
+  border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+  color: var(--danger);
+}
+
+/* 잦은 동작 하나는 항상 보입니다 — 펼쳐야 나오면 라이브 중 클릭이 두 배가 됩니다. */
+.participation-console-rowactions {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  flex: none;
+}
+
+.participation-console-rowactions > button {
+  min-block-size: 2rem;
+  padding-inline: var(--space-3);
+  font-size: var(--yoro-font-size-xs);
+}
+
+.participation-console-rowmenu {
+  position: relative;
+}
+
+.participation-console-rowmenu > button {
+  inline-size: 2rem;
+  min-block-size: 2rem;
+  padding-inline: 0;
+}
+
+.participation-console-rowmenu-list {
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block-start: calc(100% + var(--space-2));
+  z-index: var(--yoro-z-dropdown, 30);
+  display: grid;
+  gap: var(--space-1);
+  min-inline-size: 9rem;
+  padding: var(--space-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--yoro-color-product-gray-page-deep);
+  box-shadow: var(--yoro-shadow-panel);
+}
+
+.participation-console-rowmenu-list > button {
+  min-block-size: var(--yoro-size-touch-target);
+  justify-content: flex-start;
+  border-color: transparent;
+  background: transparent;
+  font-size: var(--yoro-font-size-sm);
+}
+
+/* ---------- 슬롯 열 ---------- */
+
+.participation-console-slots-note {
+  font-size: var(--yoro-font-size-xs);
+  color: var(--muted);
+}
+
+.participation-console-slots-head .participation-console-badge {
+  margin-inline-start: auto;
+}
+
+.participation-console-slot[data-variant="confirmed"] {
+  border-color: color-mix(in srgb, var(--success) 45%, transparent);
+  background: color-mix(in srgb, var(--success) 12%, var(--surface-muted));
+}
+
+.participation-console-slot[data-variant="confirmed"] .participation-console-slot-status {
+  border-color: color-mix(in srgb, var(--success) 45%, transparent);
+  color: var(--success);
+}
+
+/* 후보는 아직 서버에 반영되지 않은 상태라 점선으로 구분합니다. */
+.participation-console-slot[data-variant="candidate"] {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--brand) 55%, transparent);
+  background: color-mix(in srgb, var(--brand) 12%, var(--surface-muted));
+}
+
+.participation-console-slot[data-variant="candidate"] .participation-console-slot-status {
+  border-color: color-mix(in srgb, var(--brand) 55%, transparent);
+  color: var(--brand);
+}
+
+.participation-console-slot-hosticon {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  color: var(--brand);
+}
+
+/* 빈 자리를 실제로 그려야 "몇 자리 남았지?"를 세지 않아도 보입니다. */
+.participation-console-slot.is-empty {
+  border-style: dashed;
+  background: transparent;
+  font-size: var(--yoro-font-size-xs);
+  color: var(--muted);
+}
+
+.participation-console-slot-remove {
+  inline-size: 2rem;
+  min-block-size: 2rem;
+  padding-inline: 0;
+  flex: none;
+}
+
+/* ---------- 주행동 ---------- */
+
+.participation-console-actions {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  padding-block-start: var(--space-3);
   border-block-start: 1px solid var(--line);
 }
 
-.participation-management-empty {
+.participation-console-primary {
+  flex: 1;
+  min-block-size: 2.75rem;
+  border-color: var(--brand);
+  color: var(--yoro-color-text-on-dark-strong);
+  background: var(--brand-strong);
+}
+
+/* 단계마다 색이 바뀝니다 — 확정(보라)과 게임 종료(초록)가 같은 색이면
+   라이브 중 근육 기억만으로 눌러 사고가 납니다. */
+.participation-console-primary[data-tone="finish"] {
+  border-color: var(--success);
+  background: color-mix(in srgb, var(--success) 30%, var(--surface-strong));
+}
+
+.participation-console-primary[data-tone="start"] {
+  border-color: var(--info);
+  background: color-mix(in srgb, var(--info) 30%, var(--surface-strong));
+}
+
+.participation-console-secondary {
+  min-block-size: 2.75rem;
+}
+
+.participation-console-actions .participation-console-iconbutton {
+  inline-size: 2.75rem;
+  min-block-size: 2.75rem;
+  padding-inline: 0;
+}
+
+.participation-console-actions-note {
   margin: 0;
-  padding: var(--space-6) var(--space-4);
+  font-size: var(--yoro-font-size-xs);
+  color: var(--muted);
+}
+
+/* ---------- 대기열 하단 ---------- */
+
+.participation-console-queue-foot {
   display: grid;
-  justify-items: center;
   gap: var(--space-2);
+}
+
+.participation-console-queue-foot > button {
+  min-block-size: 2.25rem;
+  border-color: transparent;
+  background: transparent;
+  font-size: var(--yoro-font-size-xs);
+  color: var(--muted);
+}
+
+.participation-console-history > summary {
+  min-block-size: 2.25rem;
+  padding-inline: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: transparent;
+  font-size: var(--yoro-font-size-xs);
+  color: var(--muted);
+}
+
+.participation-console-history > summary span {
+  font-variant-numeric: tabular-nums;
+}
+
+.participation-console-history[open] > summary {
+  margin-block-end: var(--space-2);
+}
+
+.participation-console-empty {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: center;
+  margin: 0;
+  padding: var(--space-5) var(--space-4);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-md);
+  font-size: var(--yoro-font-size-sm);
   color: var(--muted);
   text-align: center;
 }
 
-.participation-management-empty svg {
-  opacity: .55;
+/* ---------- 위험 영역 ---------- */
+
+.participation-console-danger {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  flex-wrap: wrap;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--danger) 34%, transparent);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
 }
 
-@media (max-width: 72rem) {
-  .participation-management-steps {
-    padding: var(--space-4) var(--space-4) var(--space-3);
-    gap: var(--space-4);
-  }
+.participation-console-danger > .participation-console-icon {
+  color: var(--danger);
 }
+
+.participation-console-danger > span {
+  flex: 1;
+  min-inline-size: 12rem;
+  font-size: var(--yoro-font-size-sm);
+  color: var(--muted);
+}
+
+.participation-console-danger > button {
+  border-color: color-mix(in srgb, var(--danger) 55%, transparent);
+  background: color-mix(in srgb, var(--danger) 18%, var(--surface-strong));
+  color: var(--yoro-color-text-on-dark-strong);
+}
+
+/* ---------- 모바일 전용 요소 (데스크톱에서는 숨김) ---------- */
+
+.participation-management-page .participation-console-slots-toggle,
+.participation-management-page .participation-console-mobilebar {
+  display: none;
+}
+
+/* ---------- 반응형 ---------- */
 
 @media (max-width: 64rem) {
-  .participation-management-form-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .participation-console-body {
+    grid-template-columns: minmax(0, 1fr);
   }
-
 }
 
 @media (max-width: 48rem) {
-  .participation-management-start,
-  .participation-management-cockpit,
-  .participation-management-current,
-  .participation-management-queue,
-  .participation-management-bot {
-    padding: var(--space-4);
+  .participation-console-statusbar {
+    gap: var(--space-3);
   }
 
-  .participation-management-form-grid,
-  .participation-management-visibility {
-    grid-template-columns: minmax(0, 1fr);
+  .participation-console-sep {
+    display: none;
   }
 
-  .participation-management-start-actions,
-  .participation-management-start-actions > div:first-child {
+  .participation-console-stats {
+    order: 3;
     inline-size: 100%;
+    gap: var(--space-2);
   }
 
-  .participation-management-start-actions button {
+  .participation-console-stats > div {
+    flex: 1;
+    display: grid;
+    gap: 0;
+    padding: var(--space-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    background: var(--surface-muted);
+    text-align: center;
+  }
+
+  .participation-console-statusbar-actions {
+    order: 2;
+  }
+
+  .participation-console-statusbar .participation-console-publiclink span {
+    display: none;
+  }
+
+  /* 좁은 화면에서는 대기열이 먼저 보여야 합니다 — 슬롯은 요약으로 접습니다. */
+  .participation-console-body {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .participation-console-queue {
+    order: 2;
+    /* 하단 고정 바가 마지막 행을 가리지 않도록 여백을 확보합니다. */
+    padding-block-end: calc(var(--space-8) + env(safe-area-inset-bottom));
+  }
+
+  .participation-console-slots {
+    order: 1;
+    gap: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+
+  .participation-management-page .participation-console-slots-toggle {
     inline-size: 100%;
+    display: flex;
+    gap: var(--space-3);
+    align-items: center;
+    justify-content: flex-start;
+    padding: var(--space-3);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
   }
 
-
-  .participation-management-entry-actions > * {
-    inline-size: 100%;
+  .participation-console-facepile {
+    display: flex;
+    flex: none;
   }
 
-  /* 스트립 칩 안의 액션은 전폭으로 늘리지 않습니다 — 칩이 세로로 터집니다. */
-  .participation-management-chip .participation-management-entry-actions > * {
-    inline-size: auto;
+  .participation-console-facepile > i {
+    inline-size: 1.5rem;
+    block-size: 1.5rem;
+    display: grid;
+    place-items: center;
+    border: 2px solid var(--yoro-color-product-gray-page);
+    border-radius: 50%;
+    background: var(--brand-strong);
+    font-size: .625rem;
+    font-style: normal;
+    font-weight: 800;
+    color: var(--yoro-color-text-on-dark-strong);
   }
 
-  /* 하단 고정 주행동 바 — 활성 단계의 다음 행동이 엄지 범위에 옵니다. */
-  .participation-management-page {
-    padding-block-end: calc(var(--yoro-size-touch-target) + var(--space-6));
+  .participation-console-facepile > i + i {
+    margin-inline-start: -.5rem;
   }
 
-  .participation-management-mobile-bar {
-    position: fixed;
-    inset-inline: 0;
+  .participation-console-slots-toggle-copy {
+    flex: 1;
+    display: grid;
+    text-align: start;
+  }
+
+  .participation-console-slots-toggle-copy small {
+    font-size: var(--yoro-font-size-xs);
+    color: var(--muted);
+  }
+
+  .participation-console-slots-caret {
+    transition: rotate 160ms ease;
+  }
+
+  .participation-console-slots[data-open="true"] .participation-console-slots-caret {
+    rotate: 180deg;
+  }
+
+  /* 접힘 상태에서는 슬롯 본문과 액션 줄을 숨기고, 주행동은 하단 바가 담당합니다. */
+  .participation-console-slots[data-open="false"] > .participation-console-slots-head,
+  .participation-console-slots[data-open="false"] > .participation-console-rows,
+  .participation-console-slots[data-open="false"] > .participation-console-actions,
+  .participation-console-slots[data-open="false"] > .participation-console-actions-note {
+    display: none;
+  }
+
+  .participation-console-slots[data-open="true"] > .participation-console-slots-head,
+  .participation-console-slots[data-open="true"] > .participation-console-rows,
+  .participation-console-slots[data-open="true"] > .participation-console-actions,
+  .participation-console-slots[data-open="true"] > .participation-console-actions-note {
+    margin-block-start: var(--space-3);
+  }
+
+  /* 데스크톱 액션 줄은 하단 고정 바와 중복되므로 감춥니다 — 주행동은 항상 한 벌입니다. */
+  .participation-console-slots > .participation-console-actions,
+  .participation-console-slots > .participation-console-actions-note {
+    display: none;
+  }
+
+  .participation-management-page .participation-console-mobilebar {
+    position: sticky;
     inset-block-end: 0;
-    z-index: var(--yoro-z-sticky, 20);
+    z-index: var(--yoro-z-sticky, 10);
     display: flex;
     gap: var(--space-2);
-    padding: var(--space-2) var(--space-4) calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
-    border-block-start: 1px solid var(--line-strong);
-    background: color-mix(in srgb, var(--surface-strong) 92%, transparent);
-    backdrop-filter: blur(8px);
+    padding: var(--space-3);
+    padding-block-end: calc(var(--space-3) + env(safe-area-inset-bottom));
+    border-block-start: 1px solid var(--line);
+    background: var(--yoro-color-product-gray-page-deep);
   }
 
-  .participation-management-mobile-bar > button {
-    min-block-size: var(--yoro-size-touch-target);
-    border: 1px solid var(--line-strong);
-    border-radius: var(--radius-md);
-    background: var(--surface);
-    color: var(--text);
-    font-weight: 800;
-    cursor: pointer;
-    padding-inline: var(--space-4);
+  .participation-console-mobilebar > button {
+    min-block-size: 3rem;
   }
 
-  .participation-management-mobile-bar > button.is-primary {
-    flex: 1;
+  .participation-console-search {
+    inline-size: 100%;
+    margin-inline-start: 0;
   }
 
-  .participation-management-actions {
-    display: none;
-  }
-
-  .participation-management-alert.is-error {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  /* 행 하나 = 2줄 콤팩트(이름/부가 + 상태·동작). 신청 시각·순번은 화면에서 걷어냅니다 —
-     실화면에서 행 하나가 6줄 스택으로 무너지던 결함 2 의 수정입니다. */
-  .participation-management-participant {
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas:
-      "main status"
-      "main actions";
-    row-gap: var(--space-1);
-  }
-
-  .participation-management-participant > .participation-management-position {
-    display: none;
-  }
-
-  .participation-management-participant-main {
-    grid-area: main;
-  }
-
-  .participation-management-participant-main small {
-    display: none;
-  }
-
-  .participation-management-participant > .participation-management-status {
-    grid-area: status;
-  }
-
-  .participation-management-participant > .participation-management-entry-actions,
-  .participation-management-participant > .participation-management-row-more {
-    grid-area: actions;
-  }
-
-  .participation-management-bot {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .participation-management-bot > a {
+  .participation-console-search input {
     inline-size: 100%;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .participation-management-group {
-    scroll-behavior: auto;
+  .participation-console-iconbutton.is-spinning .participation-console-icon,
+  .participation-console-slots-caret {
+    animation: none;
+    transition: none;
   }
 }

@@ -21,6 +21,10 @@
 @import "./pages/bot/02-bot-management.css" layer(legacy);
 @import "./pages/account/17-yoro-account.css" layer(legacy);
 @import "./pages/account/18-yoro-dashboard.css" layer(legacy);
+/* 결함 수정 — shared/ui/AppShell.tsx가 AppShell.css를 layer 없이 불러오기 때문에,
+   AppShell 그리드를 페이지별로 재정의하려면 이 파일도 layer 없이 import해야
+   합니다(레이어에 속한 스타일은 특이성이 아무리 높아도 레이어 없는 스타일을 못 이깁니다). */
+@import "./shared/app-shell-page-overrides.css";
 @import "./pages/account/19-participation-management.css" layer(legacy);
 @import "./pages/public-lol/20-profile-platform.css" layer(legacy);
 @import "./pages/public-lol/21-aram.css" layer(legacy);

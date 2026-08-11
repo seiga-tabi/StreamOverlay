@@ -281,7 +281,7 @@ test("/dashboard는 모든 YORO 로그인 사용자에게 계정·Organization·
   await expectNoHorizontalOverflow(page);
 });
 
-test("팔로워 관리는 통합 Dashboard의 어두운 카드와 반응형 레이아웃을 사용한다", async ({ page }) => {
+test("팔로워 관리는 hero 요약·목록 카드와 어두운 반응형 레이아웃을 사용한다", async ({ page }) => {
   await page.route("**/api/account/session", async (route) => {
     await json(route, {
       authenticated: true,
@@ -330,14 +330,14 @@ test("팔로워 관리는 통합 Dashboard의 어두운 카드와 반응형 레�
       },
     });
   });
-  const follower = (id: string, name: string) => ({
+  const follower = (id: string, name: string, status = "following") => ({
     userId: id,
-    userLogin: name.toLowerCase(),
+    userLogin: name.toLowerCase().replaceAll(" ", "_"),
     userName: name,
     followedAt: "2026-07-29T00:00:00.000Z",
     firstSeenAt: "2026-07-29T00:00:00.000Z",
     lastSeenAt: "2026-07-30T00:00:00.000Z",
-    status: "following",
+    status,
     source: "snapshot",
     activity: {
       chatMessages: 1,
@@ -377,13 +377,37 @@ test("팔로워 관리는 통합 Dashboard의 어두운 카드와 반응형 레�
   await page.goto("/dashboard/streaming/followers");
   await expect(page.getByRole("heading", { level: 1, name: "팔로워 관리" }))
     .toBeVisible();
-  await expect(page.locator(".followers-metrics > article")).toHaveCount(5);
-  await expect(page.locator(".followers-card strong", {
-    hasText: "Follower One",
-  }).first()).toBeVisible();
-  await expect(page.getByText("팔로우 취소로 추정된 사용자가 없습니다."))
-    .toBeVisible();
 
+  // 리디자인 계약: 5장짜리 지표 카드 대신 hero 한 줄이 요약을 담습니다.
+  const hero = page.locator(".followers-hero");
+  await expect(hero).toBeVisible();
+  await expect(hero.locator(".followers-hero-stat strong")).toHaveText("2");
+  await expect(hero.locator(".followers-hero-delta")).toContainText("+2 이번 주");
+  await expect(hero.locator(".followers-hero-sync")).toContainText("기록된 전체 2명");
+  await expect(page.locator(".followers-metrics")).toHaveCount(0);
+
+  // 목록 카드: 헤더 count 배지 + 사용자 행. 머리글 행은 데이터 행에서 제외합니다.
+  const directory = page.locator(".followers-directory");
+  await expect(directory.locator(".card-title-row .count-badge")).toHaveText("2");
+  const rows = directory.locator(".follower-row:not(.follower-head)");
+  await expect(rows).toHaveCount(2);
+  await expect(rows.first().locator(".queue-user strong")).toHaveText("Follower One");
+
+  // 검색은 이름·@아이디를 거릅니다.
+  await directory.getByRole("searchbox").fill("Two");
+  await expect(rows).toHaveCount(1);
+  await expect(rows.first().locator(".queue-user strong")).toHaveText("Follower Two");
+  await directory.getByRole("searchbox").fill("");
+  await expect(rows).toHaveCount(2);
+
+  // 상태 필터: 취소 추정만 고르면 빈 결과 안내가 나옵니다.
+  await directory.getByRole("button", { name: "취소 추정" }).click();
+  await expect(rows).toHaveCount(0);
+  await expect(directory.getByText("조건에 맞는 팔로워가 없습니다.")).toBeVisible();
+  await directory.getByRole("button", { name: "전체" }).click();
+  await expect(rows).toHaveCount(2);
+
+  // 통합 Dashboard의 어두운 카드 표현을 그대로 씁니다.
   const presentation = await page.locator(".followers-card").first().evaluate((card) => {
     const style = window.getComputedStyle(card);
     return {
@@ -396,12 +420,6 @@ test("팔로워 관리는 통합 Dashboard의 어두운 카드와 반응형 레�
   expect(presentation.color).toBe("rgb(244, 246, 251)");
   expect(presentation.borderColor).not.toBe("rgb(255, 255, 255)");
 
-  const recentCards = page.locator(".followers-grid").first().locator(".followers-card");
-  const cardHeights = await recentCards.evaluateAll((cards) => (
-    cards.map((card) => Math.round(card.getBoundingClientRect().height))
-  ));
-  expect(cardHeights).toHaveLength(2);
-  expect(cardHeights[1]).toBeLessThan(360);
   await expectNoHorizontalOverflow(page);
 });
 

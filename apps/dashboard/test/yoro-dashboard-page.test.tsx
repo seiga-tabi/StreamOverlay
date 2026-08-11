@@ -358,7 +358,8 @@ test("시청자 참여 관리 화면은 KO·JA와 세션·대기열 관리 계�
   assert.match(source, /PARTICIPATION_GAME_CAPACITY\[activeGame\]/u);
   assert.match(source, /gamePalworld: "Palworld"/u);
   assert.match(source, /mutateSession\("start", \{ game: selectedGame/u);
-  assert.match(css, /@media \(max-width:\s*72rem\)/u);
+  // 콘솔 v2: 2열 → 1열 전환은 1024px, 모바일 재구성은 768px입니다.
+  assert.match(css, /@media \(max-width:\s*64rem\)/u);
   assert.match(css, /@media \(max-width:\s*48rem\)/u);
   assert.match(css, /var\(--surface\)/u);
   assert.doesNotMatch(css, /#[0-9a-f]{3,8}/iu);
