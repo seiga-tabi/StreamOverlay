@@ -4,7 +4,6 @@ import {
   useMemo,
   useRef,
   useState,
-  type CSSProperties,
   type FormEvent
 } from "react";
 import type {
@@ -150,22 +149,22 @@ const copy = {
     entryUpdated: "참가자 상태를 변경했습니다.",
     entriesSelected: "선택한 참가자를 선정했습니다.",
     stepRecruit: "모집",
-    stepCheckin: "체크인",
     stepGame: "게임",
     stepDone: "정산",
     stepWaitingSuffix: "명 대기",
-    stepSeatsLeft: "남은 자리",
-    stepGoQueue: "대기열에서 선정",
-    checkinRemaining: "체크인 남은 시간",
-    checkinExpired: "응답 없음",
     moreActionsMenu: "더 많은 동작",
     announceSettings: "Discord 공지 설정",
     finishDangerNote: "복구 불가",
-    stripEmpty: "아직 없음 — 아래 대기열에서 선정하세요",
-    stepCheckinHint: "칩에서 체크인 처리 — {count}명 대기",
-    queueLockedNote: "진행 중인 참가자 처리 후 다음 선정이 열립니다.",
-    checkinWaitingStatus: "체크인 대기",
-    historyToggle: "완료·취소 이력"
+    stripEmpty: "아래 대기열에서 선정하세요",
+    queueLockedNote: "게임이 끝나면 다음 선정이 열립니다.",
+    historyToggle: "완료·취소 이력",
+    candidateLabel: "후보",
+    confirmedLabel: "확정됨",
+    excludeLabel: "제외",
+    confirmPick: "선정 확정",
+    startGame: "게임 시작",
+    fillFirstCta: "슬롯을 채우면 게임 시작",
+    pickHint: "대기열에서 선정하면 슬롯에 담기고, 선정 확정으로 한 번에 확정합니다"
   },
   ja: {
     eyebrow: "STREAMER PARTICIPATION",
@@ -270,22 +269,22 @@ const copy = {
     entryUpdated: "参加者の状態を変更しました。",
     entriesSelected: "選択した参加者を選出しました。",
     stepRecruit: "受付",
-    stepCheckin: "チェックイン",
     stepGame: "ゲーム",
     stepDone: "精算",
     stepWaitingSuffix: "名待機",
-    stepSeatsLeft: "残り枠",
-    stepGoQueue: "待機列から選出",
-    checkinRemaining: "チェックイン残り時間",
-    checkinExpired: "未応答",
     moreActionsMenu: "その他の操作",
     announceSettings: "Discordお知らせ設定",
     finishDangerNote: "復元不可",
-    stripEmpty: "まだいません — 下の待機列から選出してください",
-    stepCheckinHint: "チップでチェックイン処理 — {count}名待ち",
-    queueLockedNote: "進行中の参加者を処理すると次の選出ができます。",
-    checkinWaitingStatus: "チェックイン待ち",
-    historyToggle: "完了・取消履歴"
+    stripEmpty: "下の待機列から選出してください",
+    queueLockedNote: "ゲームが終わると次の選出ができます。",
+    historyToggle: "完了・取消履歴",
+    candidateLabel: "候補",
+    confirmedLabel: "確定済み",
+    excludeLabel: "除外",
+    confirmPick: "選出を確定",
+    startGame: "ゲーム開始",
+    fillFirstCta: "スロットを埋めるとゲーム開始",
+    pickHint: "待機列から選出するとスロットに入り、選出確定で一括確定します"
   }
 } as const;
 
@@ -355,14 +354,14 @@ export function ParticipationManagementPage({
   const [allowRejoin, setAllowRejoin] = useState(true);
   const [listingVisibility, setListingVisibility] = useState<ParticipationListingVisibility>("public");
   const [selectedGame, setSelectedGame] = useState<ParticipationGame>("lol");
-  const [selectedWaitingEntryIds, setSelectedWaitingEntryIds] = useState<Set<string>>(() => new Set());
   const [startSettingsOpen, setStartSettingsOpen] = useState(false);
-  const [bulkSelectOpen, setBulkSelectOpen] = useState(false);
   const [queueSearch, setQueueSearch] = useState("");
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const [announceOpen, setAnnounceOpen] = useState(false);
-  /* 체크인 카운트다운용 1초 tick — 대기 중인 선정자가 있을 때만 돕니다. */
-  const [nowTick, setNowTick] = useState(() => Date.now());
+  /* 후보 담기(로컬) — 서버 선정은 활성 참가자 0명일 때 한 번의 배치만 허용하므로,
+     "선정" 클릭은 로컬 후보로 담고 "선정 확정"이 배치 선정 + 즉시 자동 체크인을
+     수행합니다(체크인 UI 제거 모델 — selected 방치 시 서버가 60초 뒤 자동 노쇼). */
+  const [candidateIds, setCandidateIds] = useState<ReadonlySet<string>>(() => new Set());
   const queueSectionRef = useRef<HTMLElement>(null);
 
   const load = useCallback(async (signal?: AbortSignal) => {
@@ -413,33 +412,28 @@ export function ParticipationManagementPage({
     () => state?.queue.filter((entry) => ["pending", "verified", "waitlisted"].includes(entry.status)) ?? [],
     [state]
   );
-  /* 파이프라인 단계 파생 — 선정(응답 대기) → 체크인 완료 → 게임 중 */
-  const checkinPendingEntries = useMemo(
-    () => currentEntries.filter((entry) => entry.status === "selected"),
-    [currentEntries]
-  );
-  const readyEntries = useMemo(
-    () => currentEntries.filter((entry) => entry.status === "checked_in" || entry.status === "invited"),
-    [currentEntries]
-  );
+  /* 단계 파생 — 모집(후보 담는 중) → 게임 → 정산. 체크인 단계는 없습니다. */
   const inGameEntries = useMemo(
     () => currentEntries.filter((entry) => entry.status === "in_game"),
     [currentEntries]
   );
-  const activeStep: "recruit" | "checkin" | "game" = inGameEntries.length
-    ? "game"
-    : checkinPendingEntries.length || readyEntries.length
-      ? "checkin"
-      : "recruit";
-  /* 서버가 주는 checkInExpiresAt 기반 남은 초. 만료 처리(노쇼)는 자동이 아니라
-     방송인의 명시 클릭입니다 — 화면은 시각만 알려줍니다(방송 안정성 원칙). */
-  const hasCheckinDeadline = checkinPendingEntries.some((entry) => entry.checkInExpiresAt);
+  const confirmedEntries = useMemo(
+    () => currentEntries.filter((entry) => entry.status !== "in_game"),
+    [currentEntries]
+  );
+  const activeStep: "recruit" | "game" = inGameEntries.length ? "game" : "recruit";
+  const candidateEntries = useMemo(
+    () => waitingEntries.filter((entry) => candidateIds.has(entry.id)),
+    [candidateIds, waitingEntries]
+  );
   useEffect(() => {
-    if (!hasCheckinDeadline) return undefined;
-    setNowTick(Date.now());
-    const timer = window.setInterval(() => setNowTick(Date.now()), 1_000);
-    return () => window.clearInterval(timer);
-  }, [hasCheckinDeadline]);
+    /* 서버 큐에서 사라진 후보(취소·이탈)는 로컬 후보에서도 뺍니다. */
+    const waitingIdSet = new Set(waitingEntries.map((entry) => entry.id));
+    setCandidateIds((current) => {
+      const next = new Set(Array.from(current).filter((entryId) => waitingIdSet.has(entryId)));
+      return next.size === current.size ? current : next;
+    });
+  }, [waitingEntries]);
   useEffect(() => {
     if (!moreMenuOpen) return undefined;
     const handlePointerDown = (event: PointerEvent) => {
@@ -449,20 +443,56 @@ export function ParticipationManagementPage({
     document.addEventListener("pointerdown", handlePointerDown);
     return () => document.removeEventListener("pointerdown", handlePointerDown);
   }, [moreMenuOpen]);
-  function checkInRemainingSeconds(entry: ParticipationDashboardQueueEntry): number | null {
-    if (entry.status !== "selected" || !entry.checkInExpiresAt) return null;
-    const expires = Date.parse(entry.checkInExpiresAt);
-    if (Number.isNaN(expires)) return null;
-    return Math.max(0, Math.ceil((expires - nowTick) / 1_000));
+  function toggleCandidate(entryId: string): void {
+    setCandidateIds((current) => {
+      const next = new Set(current);
+      if (next.has(entryId)) next.delete(entryId);
+      else if (next.size < remainingSeats) next.add(entryId);
+      return next;
+    });
   }
-  const checkinTimerSeconds = useMemo(() => {
-    const remaining = checkinPendingEntries
-      .map((entry) => checkInRemainingSeconds(entry))
-      .filter((value): value is number => value !== null && value > 0);
-    return remaining.length ? Math.min(...remaining) : null;
-  }, [checkinPendingEntries, nowTick]);
-  function scrollToQueue(): void {
-    queueSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  /* 선정 확정: 배치 선정(selected) 직후 각 참가자를 자동 체크인(checked_in) 처리해
+     확정합니다 — selected 로 남겨두면 서버 스위퍼가 60초 뒤 자동 노쇼 처리합니다. */
+  async function confirmCandidates(): Promise<void> {
+    const entryIds = candidateEntries.map((entry) => entry.id);
+    if (busyKey || entryIds.length === 0) return;
+    setBusyKey("entries:confirm");
+    setError("");
+    setMessage("");
+    try {
+      let next = await selectYoroParticipationEntries(entryIds, csrfToken, state?.revision);
+      for (const entryId of entryIds) {
+        next = await updateYoroParticipationEntry(entryId, "checked_in", csrfToken, next.revision);
+      }
+      setState(next);
+      setCandidateIds(new Set());
+      setMessage(text.entriesSelected);
+    } catch {
+      setError(text.updateFailed);
+      void load();
+    } finally {
+      setBusyKey("");
+    }
+  }
+  /* 게임 시작: 확정 인원 전원을 게임 중으로 전이합니다. */
+  async function startGame(): Promise<void> {
+    if (busyKey || confirmedEntries.length === 0) return;
+    setBusyKey("entries:start-game");
+    setError("");
+    setMessage("");
+    try {
+      let next = state;
+      for (const entry of confirmedEntries) {
+        next = await updateYoroParticipationEntry(entry.id, "in_game", csrfToken, next?.revision);
+      }
+      if (next) setState(next);
+      setMessage(text.entryUpdated);
+    } catch {
+      setError(text.updateFailed);
+      void load();
+    } finally {
+      setBusyKey("");
+    }
   }
   const historyEntries = useMemo(
     () => state?.queue.filter((entry) => ["played", "skipped", "cancelled", "no_show", "rejected", "blocked"].includes(entry.status)) ?? [],
@@ -470,35 +500,21 @@ export function ParticipationManagementPage({
   );
   const visibleWaitingEntries = useMemo(() => {
     const query = queueSearch.trim().toLowerCase();
-    if (!query) return waitingEntries;
-    return waitingEntries.filter((entry) => (
+    /* 후보로 담긴 신청자는 슬롯 칩으로 이동한 것처럼 목록에서 숨깁니다. */
+    const withoutCandidates = waitingEntries.filter((entry) => !candidateIds.has(entry.id));
+    if (!query) return withoutCandidates;
+    return withoutCandidates.filter((entry) => (
       entry.twitchUserName.toLowerCase().includes(query)
       || (entry.riotId ?? "").toLowerCase().includes(query)
       || (entry.palworldNickname ?? "").toLowerCase().includes(query)
     ));
-  }, [queueSearch, waitingEntries]);
-  const selectedWaitingEntries = useMemo(
-    () => waitingEntries.filter((entry) => (
-      selectedWaitingEntryIds.has(entry.id)
-      && (entry.status === "verified" || entry.status === "waitlisted")
-    )),
-    [selectedWaitingEntryIds, waitingEntries]
-  );
-
+  }, [candidateIds, queueSearch, waitingEntries]);
   /* 진행 인원 정원(방송인 포함)까지 몇 자리가 남았는지. 서버가 최종 정원을
      강제하므로(entry-status "selected" 처리), 여기서는 "선정" 동작을 앞서
      막는 안내용 가드로만 씁니다 — 판단 근거는 항상 서버 응답(currentEntries)입니다. */
   const viewerSeats = viewerSeatCount(activeGame);
   const remainingSeats = Math.max(0, viewerSeats - currentEntries.length);
   const capacityIsFull = remainingSeats <= 0;
-
-  useEffect(() => {
-    const waitingIds = new Set(waitingEntries.map((entry) => entry.id));
-    setSelectedWaitingEntryIds((current) => {
-      const next = new Set(Array.from(current).filter((entryId) => waitingIds.has(entryId)));
-      return next.size === current.size ? current : next;
-    });
-  }, [waitingEntries]);
 
   async function mutateSession(
     action: ParticipationSessionAction,
@@ -552,31 +568,35 @@ export function ParticipationManagementPage({
     }
   }
 
-  async function selectEntries(entryIds: string[]): Promise<void> {
-    if (busyKey || entryIds.length === 0) return;
-    setBusyKey("entries:selected");
-    setError("");
-    setMessage("");
-    try {
-      setState(await selectYoroParticipationEntries(entryIds, csrfToken, state?.revision));
-      setSelectedWaitingEntryIds(new Set());
-      setMessage(text.entriesSelected);
-    } catch {
-      setError(text.updateFailed);
-      void load();
-    } finally {
-      setBusyKey("");
+  /* 주행동 하나가 항상 액션 줄 같은 자리에 옵니다:
+     후보 있음 → 선정 확정 / 확정 있음 → 게임 시작 / 게임 중 → 게임 종료 처리. */
+  function renderPrimaryAction() {
+    if (inGameEntries.length > 0) {
+      return (
+        <button className="is-primary" disabled={Boolean(busyKey)} onClick={() => void mutateSession("finish_game")} type="button">
+          {text.finishGame}
+        </button>
+      );
     }
-  }
-
-  function renderOperationalActionButton() {
-    if (currentEntry?.status === "checked_in" || currentEntry?.status === "invited") {
-      return <button className="is-primary" disabled={Boolean(busyKey)} onClick={() => void mutateEntry(currentEntry.id, "in_game")} type="button">{text.markInGame}</button>;
+    if (candidateEntries.length > 0) {
+      return (
+        <button className="is-primary" disabled={Boolean(busyKey)} onClick={() => void confirmCandidates()} type="button">
+          {text.confirmPick} · {candidateEntries.length}{text.personUnit}
+        </button>
+      );
     }
-    if (currentEntry?.status === "in_game") {
-      return <button className="is-primary" disabled={Boolean(busyKey)} onClick={() => void mutateSession("finish_game")} type="button">{text.finishGame}</button>;
+    if (confirmedEntries.length > 0) {
+      return (
+        <button className="is-primary" disabled={Boolean(busyKey)} onClick={() => void startGame()} type="button">
+          {text.startGame}
+        </button>
+      );
     }
-    return null;
+    return (
+      <button className="is-primary" disabled type="button">
+        {text.fillFirstCta}
+      </button>
+    );
   }
 
   function renderEntryActions(entry: ParticipationDashboardQueueEntry) {
@@ -606,67 +626,6 @@ export function ParticipationManagementPage({
     );
   }
 
-  /* 진행 스트립 칩 — 체크인 대기(selected)면 카운트다운 링을, 만료됐으면
-     노쇼 처리를 주행동으로 승격합니다. 상태 변경은 언제나 명시 클릭입니다. */
-  function renderChip(entry: ParticipationDashboardQueueEntry) {
-    const remaining = checkInRemainingSeconds(entry);
-    const expired = remaining === 0;
-    const total = session?.checkInSeconds ?? checkInSeconds;
-    let actions = entryActions(entry);
-    if (expired) {
-      actions = [
-        ...actions.filter((action) => action.status === "no_show"),
-        ...actions.filter((action) => action.status !== "no_show"),
-      ];
-    }
-    const primaryAction = actions[0];
-    const secondaryActions = actions.slice(1);
-    return (
-      <span className={`participation-management-chip${expired ? " is-expired" : ""}`} key={entry.id}>
-        {remaining !== null ? (
-          <span
-            aria-label={`${text.checkinRemaining} ${remaining}${text.secondUnit}`}
-            className={`participation-management-chip-ring${remaining <= 15 ? " is-low" : ""}`}
-            role="timer"
-            style={{ "--participation-checkin-progress": total > 0 ? Math.round((remaining / total) * 100) : 0 } as CSSProperties}
-          >
-            <span>{expired ? "✕" : remaining}</span>
-          </span>
-        ) : (
-          <span className="participation-management-chip-avatar" aria-hidden="true">{entry.twitchUserName.slice(0, 1)}</span>
-        )}
-        <span className="participation-management-chip-copy">
-          <strong>{entry.twitchUserName}</strong>
-          <small>{expired ? text.checkinExpired : text[entry.status]}</small>
-        </span>
-        <span className="participation-management-entry-actions">
-          {primaryAction ? (
-            <button
-              className={expired && primaryAction.status === "no_show" ? "is-danger" : ""}
-              disabled={Boolean(busyKey)}
-              onClick={() => void mutateEntry(entry.id, primaryAction.status)}
-              type="button"
-            >
-              {text[primaryAction.labelKey]}
-            </button>
-          ) : null}
-          {secondaryActions.length ? (
-            <details className="participation-management-row-more">
-              <summary>{text.more}</summary>
-              <div>
-                {secondaryActions.map((action) => (
-                  <button disabled={Boolean(busyKey)} key={action.status} onClick={() => void mutateEntry(entry.id, action.status)} type="button">
-                    {text[action.labelKey]}
-                  </button>
-                ))}
-              </div>
-            </details>
-          ) : null}
-        </span>
-      </span>
-    );
-  }
-
   /* 정원이 큰 게임(Palworld)은 슬롯 카드를 다 펼치면 화면이 너무 길어져,
      대기열과 같은 압축 행으로 보여줍니다 — 동작(체크인 등)은 동일하게 유지합니다. */
   function renderCompactSeat(entry: ParticipationDashboardQueueEntry) {
@@ -684,7 +643,9 @@ export function ParticipationManagementPage({
 
   function renderQueueRow(entry: ParticipationDashboardQueueEntry, historic = false) {
     const canSelect = !historic && (entry.status === "verified" || entry.status === "waitlisted");
-    const selectDisabled = Boolean(busyKey) || Boolean(currentEntry) || !state?.isOpen || !canSelect || capacityIsFull;
+    /* "선정"은 로컬 후보 담기입니다 — 서버 배치 선정은 액션 줄의 "선정 확정"이 수행합니다. */
+    const pickDisabled = Boolean(busyKey) || Boolean(currentEntry) || !state?.isOpen || !canSelect
+      || capacityIsFull || candidateEntries.length >= remainingSeats;
     const appliedAtLabel = `${text.appliedAt} ${new Date(entry.createdAt).toLocaleString(locale === "ko" ? "ko-KR" : "ja-JP")}`;
     return (
       <article
@@ -692,26 +653,7 @@ export function ParticipationManagementPage({
         key={entry.id}
         title={appliedAtLabel}
       >
-        {!historic && bulkSelectOpen ? (
-          <label className="participation-management-selection">
-            <input
-              aria-label={`${entry.twitchUserName} ${text.selectForNext}`}
-              checked={selectedWaitingEntryIds.has(entry.id)}
-              disabled={
-                Boolean(busyKey) || Boolean(currentEntry) || !state?.isOpen || !canSelect
-                || (!selectedWaitingEntryIds.has(entry.id) && selectedWaitingEntries.length >= remainingSeats)
-              }
-              onChange={(event) => setSelectedWaitingEntryIds((current) => {
-                const next = new Set(current);
-                if (event.target.checked) next.add(entry.id);
-                else next.delete(entry.id);
-                return next;
-              })}
-              type="checkbox"
-            />
-            <span className="participation-management-position">#{entry.position}</span>
-          </label>
-        ) : <span className="participation-management-position">#{entry.position}</span>}
+        <span className="participation-management-position">#{entry.position}</span>
         <div className="participation-management-participant-main">
           <strong>{entry.twitchUserName}</strong>
           <span>
@@ -724,8 +666,8 @@ export function ParticipationManagementPage({
           <div className="participation-management-entry-actions">
             <button
               className="is-primary"
-              disabled={selectDisabled}
-              onClick={() => void selectEntries([entry.id])}
+              disabled={pickDisabled}
+              onClick={() => toggleCandidate(entry.id)}
               title={capacityIsFull ? text.capacityFull : undefined}
               type="button"
             >
@@ -755,10 +697,26 @@ export function ParticipationManagementPage({
 
   return (
     <section className="participation-management-page" aria-labelledby="participation-management-title">
-      <header className="participation-management-hero">
-        <span>{text.eyebrow}</span>
+      {/* 대형 히어로 대신 한 줄 제목 — 매일 쓰는 운영 화면은 공간이 자산입니다. */}
+      <header className="participation-management-titlebar">
         <h1 id="participation-management-title">{text.title}</h1>
-        <p>{text.description}</p>
+        {activeSession ? (
+          <>
+            <span className="participation-management-game-chip is-active">{gameLabels[activeGame]}</span>
+            <span className="participation-management-session-status" data-status={session?.status} data-step={activeStep}>
+              {activeStep === "game" ? text.statusInGame : sessionStatusLabel(session?.status ?? "closed", text)}
+            </span>
+            <a
+              className="participation-management-public-open"
+              href={publicUrl}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              {text.openPublic} ↗
+            </a>
+          </>
+        ) : null}
+        <p className="yoro-u-sr-only">{text.description}</p>
       </header>
 
       {error ? (
@@ -843,141 +801,146 @@ export function ParticipationManagementPage({
         </section>
       ) : (
         <>
+          {/* 콕핏 카드 한 몸: 단계 바(모집→게임→정산) + 진행 슬롯 + 액션 줄 */}
           <section className="participation-management-cockpit" aria-labelledby="participation-session-title">
             <h2 className="yoro-u-sr-only" id="participation-session-title">{text.sessionTitle}</h2>
-            <span className="participation-management-game-chip is-active">{gameLabels[activeGame]}</span>
-            <strong className="participation-management-session-status" data-status={session?.status} data-step={activeStep}>
-              {activeStep === "checkin"
-                ? text.checkinWaitingStatus
-                : activeStep === "game"
-                  ? text.statusInGame
-                  : sessionStatusLabel(session?.status ?? "closed", text)}
-            </strong>
-            <div className="participation-management-cockpit-tools">
-              {state?.isOpen ? (
-                <button disabled={Boolean(busyKey)} onClick={() => void mutateSession("close")} type="button">{text.close}</button>
-              ) : session?.status === "closed" ? (
-                <button className="is-primary" disabled={Boolean(busyKey)} onClick={() => void mutateSession("open")} type="button">{text.reopen}</button>
-              ) : null}
-              {/* 복구 불가능한 세션 종료는 일상 버튼과 분리해 넘침 메뉴 맨 아래에 둡니다. */}
-              <div className="participation-management-overflow">
-                <button
-                  aria-expanded={moreMenuOpen}
-                  aria-haspopup="menu"
-                  aria-label={text.moreActionsMenu}
-                  onClick={() => setMoreMenuOpen((open) => !open)}
-                  type="button"
-                >
-                  ⋯
-                </button>
-                {moreMenuOpen ? (
-                  <div className="participation-management-overflow-menu" role="menu">
-                    <a href={publicUrl} onClick={() => setMoreMenuOpen(false)} rel="noopener noreferrer" role="menuitem" target="_blank">
-                      {text.openPublic}
-                    </a>
+            <ol className="participation-management-steps">
+              {(["recruit", "game", "done"] as const).map((step, index) => {
+                const isActive = (step === "recruit" && activeStep === "recruit")
+                  || (step === "game" && activeStep === "game");
+                const isDone = step === "recruit" && activeStep === "game";
+                const label = step === "recruit" ? text.stepRecruit : step === "game" ? text.stepGame : text.stepDone;
+                const count = step === "recruit"
+                  ? `${state?.summary.waiting ?? 0}${text.stepWaitingSuffix}`
+                  : step === "game"
+                    ? inGameEntries.length ? `${inGameEntries.length}${text.personUnit}` : "—"
+                    : `${state?.summary.played ?? 0}${text.personUnit}`;
+                return (
+                  <li className={`participation-management-step${isActive ? " is-active" : ""}${isDone ? " is-done" : ""}`} key={step}>
+                    <span aria-hidden="true" className="participation-management-step-num">{isDone ? "✓" : index + 1}</span>
+                    <strong>{label}</strong>
+                    <span className="participation-management-step-count">{count}</span>
+                  </li>
+                );
+              })}
+            </ol>
+
+            {/* 진행 슬롯 — 방송인 + 확정·후보 칩. 선정 즉시 확정 모델(체크인 없음). */}
+            <div className="participation-management-strip">
+              <span className="participation-management-strip-count">
+                {text.capacityIngame} {currentEntries.length + candidateEntries.length + 1}/{PARTICIPATION_GAME_CAPACITY[activeGame]}
+              </span>
+              <span className="participation-management-chip is-host">
+                <span className="participation-management-chip-avatar" aria-hidden="true">🎙</span>
+                <span className="participation-management-chip-copy"><strong>{text.hostSeatLabel}</strong></span>
+              </span>
+              {viewerSeats > COMPACT_SEAT_THRESHOLD && currentEntries.length > 0 ? (
+                <span className="participation-management-strip-compact-note">
+                  {currentEntries.length}{text.personUnit}
+                </span>
+              ) : currentEntries.map((entry) => (
+                <span className="participation-management-chip" key={entry.id}>
+                  <span className="participation-management-chip-avatar" aria-hidden="true">{entry.twitchUserName.slice(0, 1)}</span>
+                  <span className="participation-management-chip-copy">
+                    <strong>{entry.twitchUserName}</strong>
+                    <small>{entry.status === "in_game" ? text.in_game : text.confirmedLabel}</small>
+                  </span>
+                  {entry.status !== "in_game" ? (
                     <button
-                      onClick={() => {
-                        setMoreMenuOpen(false);
-                        setAnnounceOpen((open) => !open);
-                      }}
-                      role="menuitem"
-                      type="button"
-                    >
-                      {text.announceSettings}
-                    </button>
-                    <hr />
-                    <button
-                      className="is-danger"
+                      aria-label={`${entry.twitchUserName} ${text.excludeLabel}`}
+                      className="participation-management-chip-remove"
                       disabled={Boolean(busyKey)}
-                      onClick={() => {
-                        setMoreMenuOpen(false);
-                        void mutateSession("finish");
-                      }}
-                      role="menuitem"
+                      onClick={() => void mutateEntry(entry.id, "skipped")}
                       type="button"
                     >
-                      {text.finishSession} · {text.finishDangerNote}
+                      ✕
                     </button>
-                  </div>
+                  ) : null}
+                </span>
+              ))}
+              {candidateEntries.map((entry) => (
+                <span className="participation-management-chip is-candidate" key={entry.id}>
+                  <span className="participation-management-chip-avatar" aria-hidden="true">{entry.twitchUserName.slice(0, 1)}</span>
+                  <span className="participation-management-chip-copy">
+                    <strong>{entry.twitchUserName}</strong>
+                    <small>{text.candidateLabel}</small>
+                  </span>
+                  <button
+                    aria-label={`${entry.twitchUserName} ${text.excludeLabel}`}
+                    className="participation-management-chip-remove"
+                    onClick={() => toggleCandidate(entry.id)}
+                    type="button"
+                  >
+                    ✕
+                  </button>
+                </span>
+              ))}
+              {currentEntries.length === 0 && candidateEntries.length === 0 ? (
+                <span className="participation-management-strip-empty">{text.stripEmpty}</span>
+              ) : null}
+            </div>
+
+            {viewerSeats > COMPACT_SEAT_THRESHOLD && currentEntries.length > 0 ? (
+              <div className="participation-management-group participation-management-compact-list">
+                {currentEntries.map((entry) => renderCompactSeat(entry))}
+              </div>
+            ) : null}
+
+            {/* 액션 줄 — 주행동이 항상 같은 자리. 모바일은 이 내용이 하단 고정 바로 갑니다. */}
+            <div className="participation-management-actions">
+              {renderPrimaryAction()}
+              {activeStep === "recruit" && candidateEntries.length === 0 && currentEntries.length === 0 ? (
+                <span className="participation-management-actions-hint">{text.pickHint}</span>
+              ) : null}
+              <div className="participation-management-actions-aside">
+                {state?.isOpen ? (
+                  <button disabled={Boolean(busyKey)} onClick={() => void mutateSession("close")} type="button">{text.close}</button>
+                ) : session?.status === "closed" ? (
+                  <button disabled={Boolean(busyKey)} onClick={() => void mutateSession("open")} type="button">{text.reopen}</button>
                 ) : null}
+                <div className="participation-management-overflow">
+                  <button
+                    aria-expanded={moreMenuOpen}
+                    aria-haspopup="menu"
+                    aria-label={text.moreActionsMenu}
+                    onClick={() => setMoreMenuOpen((open) => !open)}
+                    type="button"
+                  >
+                    ⋯
+                  </button>
+                  {moreMenuOpen ? (
+                    <div className="participation-management-overflow-menu" role="menu">
+                      <a href={publicUrl} onClick={() => setMoreMenuOpen(false)} rel="noopener noreferrer" role="menuitem" target="_blank">
+                        {text.openPublic}
+                      </a>
+                      <button
+                        onClick={() => {
+                          setMoreMenuOpen(false);
+                          setAnnounceOpen((open) => !open);
+                        }}
+                        role="menuitem"
+                        type="button"
+                      >
+                        {text.announceSettings}
+                      </button>
+                      <hr />
+                      <button
+                        className="is-danger"
+                        disabled={Boolean(busyKey)}
+                        onClick={() => {
+                          setMoreMenuOpen(false);
+                          void mutateSession("finish");
+                        }}
+                        role="menuitem"
+                        type="button"
+                      >
+                        {text.finishSession} · {text.finishDangerNote}
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
               </div>
             </div>
-          </section>
-
-          {/* 파이프라인 스테퍼 — 숫자가 단계에 붙고, 활성 단계 안에 주행동이 고정됩니다. */}
-          <ol className="participation-management-pipe">
-            {(["recruit", "checkin", "game", "done"] as const).map((step, index) => {
-              const order = ["recruit", "checkin", "game"] as const;
-              const activeIndex = order.indexOf(activeStep);
-              const isActive = step === activeStep;
-              const isDone = step !== "done" && order.indexOf(step as typeof order[number]) < activeIndex;
-              const label = step === "recruit" ? text.stepRecruit : step === "checkin" ? text.stepCheckin : step === "game" ? text.stepGame : text.stepDone;
-              const count = step === "recruit"
-                ? `${state?.summary.waiting ?? 0}${text.stepWaitingSuffix}`
-                : step === "checkin"
-                  ? `${readyEntries.length}/${checkinPendingEntries.length + readyEntries.length}`
-                  : step === "game"
-                    ? `${inGameEntries.length}${text.personUnit}`
-                    : `${state?.summary.played ?? 0}${text.personUnit}`;
-              return (
-                <li className={`participation-management-pipe-step${isActive ? " is-active" : ""}${isDone ? " is-done" : ""}`} key={step}>
-                  <span aria-hidden="true" className="participation-management-pipe-num">{isDone ? "✓" : index + 1}</span>
-                  <strong>{label}</strong>
-                  <span className="participation-management-pipe-count">
-                    {count}
-                    {step === "checkin" && isActive && checkinTimerSeconds !== null ? (
-                      <span className={`participation-management-pipe-timer${checkinTimerSeconds <= 15 ? " is-low" : ""}`}>
-                        ⏱ {checkinTimerSeconds}{text.secondUnit}
-                      </span>
-                    ) : null}
-                  </span>
-                  {step === "recruit" && isActive ? <small>{text.stepSeatsLeft} {remainingSeats}</small> : null}
-                  {step === "recruit" && isActive && state?.isOpen && waitingEntries.length > 0 && !currentEntry ? (
-                    <button className="participation-management-pipe-cta" onClick={scrollToQueue} type="button">{text.stepGoQueue}</button>
-                  ) : null}
-                  {(step === "checkin" || step === "game") && isActive ? (
-                    <span className="participation-management-pipe-cta-slot">
-                      {renderOperationalActionButton()
-                        ?? (step === "checkin" && checkinPendingEntries.length ? (
-                          <small className="participation-management-pipe-hint">
-                            {text.stepCheckinHint.replace("{count}", String(checkinPendingEntries.length))}
-                          </small>
-                        ) : null)}
-                    </span>
-                  ) : null}
-                </li>
-              );
-            })}
-          </ol>
-
-          <section className="participation-management-current" aria-labelledby="participation-current-title">
-            <h2 className="yoro-u-sr-only" id="participation-current-title">{text.currentParticipant}</h2>
-            {viewerSeats > COMPACT_SEAT_THRESHOLD ? (
-              <>
-                <span className="participation-management-strip-count">
-                  {text.capacityIngame} {currentEntries.length + 1}/{PARTICIPATION_GAME_CAPACITY[activeGame]}
-                </span>
-                <div className="participation-management-group">
-                  {currentEntries.length
-                    ? currentEntries.map((entry) => renderCompactSeat(entry))
-                    : <p className="participation-management-empty">{text.noCurrentParticipant}</p>}
-                </div>
-              </>
-            ) : (
-              <div className="participation-management-strip">
-                <span className="participation-management-strip-count">
-                  {text.capacityIngame} {currentEntries.length + 1}/{PARTICIPATION_GAME_CAPACITY[activeGame]}
-                </span>
-                <span className="participation-management-chip is-host">
-                  <span className="participation-management-chip-avatar" aria-hidden="true">🎙</span>
-                  <span className="participation-management-chip-copy"><strong>{text.hostSeatLabel}</strong></span>
-                </span>
-                {currentEntries.map((entry) => renderChip(entry))}
-                {currentEntries.length === 0 ? (
-                  <span className="participation-management-strip-empty">{text.stripEmpty}</span>
-                ) : null}
-              </div>
-            )}
           </section>
 
           <section className="participation-management-queue" aria-labelledby="participation-queue-title" ref={queueSectionRef}>
@@ -986,13 +949,6 @@ export function ParticipationManagementPage({
                 <span className="participation-management-queue-count">
                   {waitingEntries.length}/{session?.maxQueueSize ?? maxQueueSize}
                 </span>
-                <p className="yoro-u-sr-only">{text.queueDescription}</p>
-              </header>
-              {capacityIsFull ? <p className="participation-management-capacity-full">{text.capacityFull}</p> : null}
-              {!capacityIsFull && currentEntry && state?.isOpen && waitingEntries.length > 0 ? (
-                <p className="participation-management-queue-locked">{text.queueLockedNote}</p>
-              ) : null}
-              <div className="participation-management-queue-tools">
                 <label className="participation-management-search">
                   <span className="yoro-u-sr-only">{text.queueSearchPlaceholder}</span>
                   <input
@@ -1002,27 +958,11 @@ export function ParticipationManagementPage({
                     value={queueSearch}
                   />
                 </label>
-                <button
-                  aria-pressed={bulkSelectOpen}
-                  className="participation-management-bulk-toggle"
-                  onClick={() => setBulkSelectOpen((open) => !open)}
-                  type="button"
-                >
-                  {text.bulkSelectToggle}
-                </button>
-              </div>
-              {bulkSelectOpen && !currentEntry && state?.isOpen && waitingEntries.length > 0 ? (
-                <div className="participation-management-bulk-bar">
-                  <span>{text.selectNextHint}</span>
-                  <button
-                    className="is-primary"
-                    disabled={Boolean(busyKey) || selectedWaitingEntries.length === 0}
-                    onClick={() => void selectEntries(selectedWaitingEntries.map((entry) => entry.id))}
-                    type="button"
-                  >
-                    {text.selectNext} ({selectedWaitingEntries.length})
-                  </button>
-                </div>
+                <p className="yoro-u-sr-only">{text.queueDescription}</p>
+              </header>
+              {capacityIsFull ? <p className="participation-management-capacity-full">{text.capacityFull}</p> : null}
+              {activeStep !== "recruit" || currentEntries.length > 0 ? (
+                <p className="participation-management-queue-locked">{text.queueLockedNote}</p>
               ) : null}
               <div className="participation-management-group" aria-labelledby="participation-waiting-title">
                 <h3 id="participation-waiting-title" className="yoro-u-sr-only">{text.queueWaiting}</h3>
@@ -1042,12 +982,9 @@ export function ParticipationManagementPage({
 
           {announceOpen ? <ParticipationAnnouncementPanel csrfToken={csrfToken} locale={locale} /> : null}
 
-          {/* 모바일 하단 고정 바 — 활성 단계의 주행동이 엄지 범위로 내려옵니다. */}
+          {/* 모바일 하단 고정 바 — 액션 줄의 주행동이 엄지 범위로 내려옵니다. */}
           <div className="participation-management-mobile-bar">
-            {renderOperationalActionButton()
-              ?? (activeStep === "recruit" && state?.isOpen && waitingEntries.length > 0 && !currentEntry ? (
-                <button className="is-primary" onClick={scrollToQueue} type="button">{text.stepGoQueue}</button>
-              ) : null)}
+            {renderPrimaryAction()}
             {state?.isOpen ? (
               <button disabled={Boolean(busyKey)} onClick={() => void mutateSession("close")} type="button">{text.close}</button>
             ) : session?.status === "closed" ? (

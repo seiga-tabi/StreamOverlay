@@ -95,16 +95,14 @@ export const dashboardI18n = {
     },
     followersPage: {
       title: "팔로워 관리",
-      description: "새 팔로워, 팔로우 취소 추정, StreamOps 관측 활동을 한눈에 확인합니다.",
+      description: "팔로워 현황과 전체 목록을 한 화면에서 확인하고 관리합니다.",
       loading: "팔로워 정보를 불러오는 중입니다.",
       loadFailed: "팔로워 정보를 불러오지 못했습니다.",
       retry: "다시 시도",
-      refresh: "팔로워 목록 새로고침",
+      refresh: "전체 새로고침",
       refreshing: "새로고침 중",
       refreshDone: "팔로워 목록을 갱신했습니다.",
       refreshFailed: "팔로워 목록 갱신 실패",
-      scopeHint: "전체 목록과 팔로우 취소 추정에는 스트리머 계정의 Twitch OAuth scope moderator:read:followers가 필요합니다.",
-      dataLimit: "Twitch는 시청자의 장르별 시청 이력을 제공하지 않습니다. 장르는 StreamOps가 관측한 채팅/시참 활동 기준입니다.",
       oauth: {
         connected: "운영 권한 연결됨",
         requiredScope: "필수 권한",
@@ -120,63 +118,38 @@ export const dashboardI18n = {
         connecting: "연결 준비 중",
         connectFailed: "Twitch 운영 권한 연결을 시작하지 못했습니다."
       },
-      metrics: {
-        activeFollowers: "현재 팔로워",
-        knownFollowers: "기록된 사용자",
-        unfollowed: "팔로우 취소 추정",
-        newFollowers7d: "최근 7일 신규",
-        observedGenreFollowers: "관측 장르 보유"
+      hero: {
+        followers: "팔로워",
+        delta: "+{count} 이번 주",
+        known: "기록된 전체 {count}명",
+        synced: "마지막 동기화 {time}"
       },
       sections: {
-        recentFollowers: "새 팔로워",
-        recentUnfollowers: "팔로우 취소 추정",
-        topGenres: "관측 장르",
-        allFollowers: "팔로워 목록",
-        notes: "데이터 기준"
+        allFollowers: "팔로워 목록"
       },
       empty: {
-        followers: "아직 기록된 팔로워가 없습니다.",
-        unfollowers: "팔로우 취소로 추정된 사용자가 없습니다.",
-        genres: "관측된 장르 활동이 없습니다."
+        followers: "아직 기록된 팔로워가 없습니다."
       },
       columns: {
         user: "사용자",
         riotId: "Riot ID",
         status: "상태",
-        followedAt: "팔로우 시각",
-        activity: "관측 활동",
-        genre: "주요 관측 장르"
+        followedAt: "팔로우 날짜"
       },
       riotIdMissing: "미등록",
       statuses: {
-        following: "팔로우 중",
+        following: "팔로잉",
         unfollowed: "취소 추정"
       },
       directory: {
         searchLabel: "팔로워 검색",
-        searchPlaceholder: "이름, 로그인, Riot ID로 검색",
+        searchPlaceholder: "이름 · @아이디 · Riot ID 검색",
         filterAll: "전체",
-        noResults: "검색 결과가 없습니다.",
-        resultUnit: "건",
+        noResults: "조건에 맞는 팔로워가 없습니다.",
+        resultUnit: "명",
         pagePrev: "이전 페이지",
         pageNext: "다음 페이지"
-      },
-      genres: {
-        chat: "채팅 참여",
-        participation: "League of Legends 시참"
-      },
-      snapshot: "마지막 목록 확인",
-      total: "Twitch total",
-      truncated: "일부만 조회됨",
-      yes: "예",
-      no: "아니요",
-      dataNotes: [
-        "새 팔로워는 Twitch EventSub channel.follow 이벤트와 팔로워 목록 확인에서 기록합니다.",
-        "팔로우 취소는 Twitch가 실시간 이벤트를 제공하지 않아 전체 팔로워 목록 비교로만 추정합니다.",
-        "첫 팔로워 목록 저장 이후 다음 전체 새로고침부터 팔로우 취소 추정이 가능합니다.",
-        "일부만 조회된 경우 누락을 팔로우 취소로 오인하지 않도록 취소 추정을 하지 않습니다.",
-        "시청 장르 이력은 Twitch API가 제공하지 않으므로 StreamOps가 관측한 채팅·시참 활동만 표시합니다."
-      ]
+      }
     },
     settingsPage: {
       title: "시스템 설정",
@@ -317,16 +290,14 @@ export const dashboardI18n = {
     },
     followersPage: {
       title: "フォロワー管理",
-      description: "新規フォロワー、フォロー解除推定、StreamOps が観測した活動を一覧で確認します。",
+      description: "フォロワーの状況と全体一覧を一つの画面で確認・管理します。",
       loading: "フォロワー情報を読み込んでいます。",
       loadFailed: "フォロワー情報を読み込めませんでした。",
       retry: "再試行",
-      refresh: "フォロワー一覧を更新",
+      refresh: "全体を更新",
       refreshing: "更新中",
       refreshDone: "フォロワー一覧を更新しました。",
       refreshFailed: "フォロワー一覧の更新に失敗しました",
-      scopeHint: "全体一覧とフォロー解除推定には、配信者アカウントの Twitch OAuth scope moderator:read:followers が必要です。",
-      dataLimit: "Twitch は視聴者のジャンル別視聴履歴を提供しません。ジャンルは StreamOps が観測したチャット/参加活動基準です。",
       oauth: {
         connected: "運用権限接続済み",
         requiredScope: "必須権限",
@@ -342,63 +313,38 @@ export const dashboardI18n = {
         connecting: "接続を準備中",
         connectFailed: "Twitch 運用権限の接続を開始できませんでした。"
       },
-      metrics: {
-        activeFollowers: "現在のフォロワー",
-        knownFollowers: "記録済みユーザー",
-        unfollowed: "解除推定",
-        newFollowers7d: "直近7日の新規",
-        observedGenreFollowers: "観測ジャンルあり"
+      hero: {
+        followers: "フォロワー",
+        delta: "+{count} 今週",
+        known: "記録済み全体 {count}人",
+        synced: "最終同期 {time}"
       },
       sections: {
-        recentFollowers: "新規フォロワー",
-        recentUnfollowers: "フォロー解除推定",
-        topGenres: "観測ジャンル",
-        allFollowers: "フォロワー一覧",
-        notes: "データ基準"
+        allFollowers: "フォロワー一覧"
       },
       empty: {
-        followers: "記録されたフォロワーはまだありません。",
-        unfollowers: "フォロー解除と推定されたユーザーはいません。",
-        genres: "観測されたジャンル活動はありません。"
+        followers: "記録されたフォロワーはまだありません。"
       },
       columns: {
         user: "ユーザー",
         riotId: "Riot ID",
         status: "状態",
-        followedAt: "フォロー日時",
-        activity: "観測活動",
-        genre: "主な観測ジャンル"
+        followedAt: "フォロー日"
       },
       riotIdMissing: "未登録",
       statuses: {
         following: "フォロー中",
-        unfollowed: "解除推定"
+        unfollowed: "解除の推定"
       },
       directory: {
         searchLabel: "フォロワー検索",
-        searchPlaceholder: "名前・ログイン・Riot IDで検索",
+        searchPlaceholder: "名前・@ID・Riot IDを検索",
         filterAll: "すべて",
-        noResults: "検索結果がありません。",
-        resultUnit: "件",
+        noResults: "条件に一致するフォロワーがいません。",
+        resultUnit: "人",
         pagePrev: "前のページ",
         pageNext: "次のページ"
-      },
-      genres: {
-        chat: "チャット参加",
-        participation: "League of Legends 参加"
-      },
-      snapshot: "最終一覧確認",
-      total: "Twitch total",
-      truncated: "一部のみ取得",
-      yes: "はい",
-      no: "いいえ",
-      dataNotes: [
-        "新規フォロワーは Twitch EventSub channel.follow イベントとフォロワー一覧の確認から記録します。",
-        "Twitch はフォロー解除のリアルタイムイベントを提供しないため、全フォロワー一覧の比較から推定します。",
-        "最初のフォロワー一覧保存後、次回の全件更新からフォロー解除を推定できます。",
-        "一部のみ取得した場合は、未取得のユーザーを解除と誤認しないよう解除推定を行いません。",
-        "視聴ジャンル履歴は Twitch API から取得できないため、StreamOps が観測したチャット・参加活動のみ表示します。"
-      ]
+      }
     },
     settingsPage: {
       title: "システム設定",

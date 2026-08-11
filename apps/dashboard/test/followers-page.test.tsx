@@ -24,7 +24,7 @@ function oauthStatus(state: FollowerOAuthStatus["state"]): FollowerOAuthStatus {
   };
 }
 
-test("팔로워 페이지 초기 로딩은 Skeleton을 표시하고 새로고침을 비활성화한다", async () => {
+test("팔로워 페이지 초기 로딩은 Skeleton을 표시한다", async () => {
   const { FollowersPage } = await import("../src/pages/FollowersPage");
   setDashboardLocale("ko");
   const html = renderToStaticMarkup(<FollowersPage />);
@@ -32,8 +32,7 @@ test("팔로워 페이지 초기 로딩은 Skeleton을 표시하고 새로고침
   assert.match(html, /class="followers-page"/);
   assert.match(html, /aria-labelledby="followers-page-title"/);
   assert.match(html, /aria-label="팔로워 정보를 불러오는 중입니다\."/);
-  assert.match(html, /disabled=""/);
-  assert.match(html, /팔로워 목록 새로고침/);
+  assert.match(html, /팔로워 관리/);
 });
 
 test("팔로워 OAuth 미연결, 권한 부족, token 만료 상태를 구분한다", async () => {
@@ -69,8 +68,8 @@ test("팔로워 OAuth 미연결, 권한 부족, token 만료 상태를 구분한
   );
   assert.match(japaneseMissingScopes, /フォロワー取得権限が不足しています/);
   assert.match(japaneseMissingScopes, /権限を再承認/);
-  assert.match(uiText.followersPage.dataNotes.join(" "), /フォロー解除/);
-  assert.equal(uiText.followersPage.genres.chat, "チャット参加");
+  assert.equal(uiText.followersPage.statuses.unfollowed, "解除の推定");
+  assert.equal(uiText.followersPage.hero.followers, "フォロワー");
   setDashboardLocale("ko");
 });
 
@@ -125,62 +124,52 @@ test("filterFollowerDirectory는 이름·로그인·Riot ID로 검색하고 상�
   assert.deepEqual(filterFollowerDirectory(records, "  FAKER  ", "all").map((r) => r.userId), ["u1"]);
 });
 
-test("sortFollowerDirectory는 팔로우 시각·관측 활동 기준 오름차순/내림차순 정렬한다", async () => {
+test("sortFollowerDirectory는 팔로우 시각 기준 오름차순/내림차순 정렬한다", async () => {
   const { sortFollowerDirectory } = await import("../src/pages/FollowersPage");
   const records = [
-    follower({ userId: "old-low", followedAt: "2026-01-01T00:00:00.000Z", activity: { chatMessages: 1, participationEntries: 0, total: 1, genres: {} } }),
-    follower({ userId: "new-high", followedAt: "2026-03-01T00:00:00.000Z", activity: { chatMessages: 9, participationEntries: 0, total: 9, genres: {} } }),
-    follower({ userId: "mid-mid", followedAt: "2026-02-01T00:00:00.000Z", activity: { chatMessages: 5, participationEntries: 0, total: 5, genres: {} } })
+    follower({ userId: "old", followedAt: "2026-01-01T00:00:00.000Z" }),
+    follower({ userId: "new", followedAt: "2026-03-01T00:00:00.000Z" }),
+    follower({ userId: "mid", followedAt: "2026-02-01T00:00:00.000Z" })
   ];
 
   assert.deepEqual(
     sortFollowerDirectory(records, { key: "followedAt", dir: "desc" }).map((r) => r.userId),
-    ["new-high", "mid-mid", "old-low"]
+    ["new", "mid", "old"]
   );
   assert.deepEqual(
     sortFollowerDirectory(records, { key: "followedAt", dir: "asc" }).map((r) => r.userId),
-    ["old-low", "mid-mid", "new-high"]
-  );
-  assert.deepEqual(
-    sortFollowerDirectory(records, { key: "activity", dir: "desc" }).map((r) => r.userId),
-    ["new-high", "mid-mid", "old-low"]
-  );
-  assert.deepEqual(
-    sortFollowerDirectory(records, { key: "activity", dir: "asc" }).map((r) => r.userId),
-    ["old-low", "mid-mid", "new-high"]
+    ["old", "mid", "new"]
   );
 });
 
-test("genreBarPercent은 최댓값 대비 비율을 0~100 사이로 계산한다", async () => {
-  const { genreBarPercent } = await import("../src/pages/FollowersPage");
-  assert.equal(genreBarPercent(50, 100), 50);
-  assert.equal(genreBarPercent(100, 100), 100);
-  assert.equal(genreBarPercent(0, 100), 0);
-  assert.equal(genreBarPercent(33, 0), 0);
-  assert.equal(genreBarPercent(1, 3), 33);
-});
-
-test("팔로워 목록에는 관측 장르 막대 그래프, 검색·필터·정렬·페이지네이션 UI가 있다", async () => {
+test("팔로워 화면은 히어로 스탯 바와 4컬럼 디렉토리로 구성된다", async () => {
   const source = await readFile(new URL("../src/pages/FollowersPage.tsx", import.meta.url), "utf8");
 
-  // 관측 장르는 텍스트 두 줄이 아니라 실제 비율 막대(genre-bar-track/fill)로 렌더링합니다.
-  assert.match(source, /genre-bar-track/u);
-  assert.match(source, /genre-bar-fill/u);
-  assert.match(source, /genreBarPercent\(genre\.count, maxGenreCount\)/u);
+  // 히어로: 팔로워 수 + 주간 증감(+N) + 기록 전체 · 마지막 동기화 + 새로고침.
+  assert.match(source, /followers-hero-stat/u);
+  assert.match(source, /followers-hero-delta/u);
+  assert.match(source, /t\.hero\.known\.replace\("\{count\}", formatCount\(state\.summary\.knownFollowers\)\)/u);
+  assert.match(source, /t\.hero\.synced\.replace\("\{time\}", formatDate\(state\.lastSnapshotAt\)\)/u);
 
-  // 팔로워 목록에 검색, 상태 필터, 정렬 가능한 헤더, 페이지네이션이 있어야 합니다.
+  // 주간 증감은 newFollowers7d가 0보다 클 때만 표시합니다.
+  assert.match(source, /state\.summary\.newFollowers7d > 0/u);
+
+  // 팔로워 목록에 검색, 상태 필터, 팔로우 날짜 정렬, 페이지네이션이 있어야 합니다.
   assert.match(source, /follower-directory-search/u);
   assert.match(source, /type="search"/u);
   assert.match(source, /follower-status-filter/u);
   assert.match(source, /aria-pressed=\{directoryStatus === option\}/u);
-  assert.match(source, /toggleDirectorySort\("followedAt"\)/u);
-  assert.match(source, /toggleDirectorySort\("activity"\)/u);
+  assert.match(source, /toggleDirectorySort\(\)/u);
   assert.match(source, /follower-directory-pagination/u);
   assert.match(source, /follower-pager/u);
 
-  // 모바일 카드형 라벨(data-label)이 Riot ID·팔로우 시각·관측 활동·주요 관측 장르에 있어야 합니다.
+  // 4컬럼: 사용자 / Riot ID / 상태 / 팔로우 날짜 — 관측 활동·장르 컬럼은 제거되었습니다.
   assert.match(source, /data-label=\{t\.columns\.riotId\}/u);
   assert.match(source, /data-label=\{t\.columns\.followedAt\}/u);
-  assert.match(source, /data-label=\{t\.columns\.activity\}/u);
-  assert.match(source, /data-label=\{t\.columns\.genre\}/u);
+  assert.doesNotMatch(source, /columns\.activity/u);
+  assert.doesNotMatch(source, /columns\.genre/u);
+  assert.doesNotMatch(source, /genre-bar/u);
+  assert.doesNotMatch(source, /FollowerMiniList/u);
+  assert.doesNotMatch(source, /ops-note/u);
+  assert.doesNotMatch(source, /scope-warning/u);
 });

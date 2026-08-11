@@ -102,7 +102,7 @@ test("시청자 참여 화면은 신청·취소 두 동작만 두고 체크인 �
   }
 });
 
-test("스트리머 참여 화면은 공개 범위·직접 동작·그룹 대기열을 제공한다", async () => {
+test("스트리머 참여 화면은 방송인 직접 컨트롤 콕핏(체크인 없음)을 제공한다", async () => {
   const source = await readFile(
     new URL("../src/features/yoro-dashboard/ParticipationManagementPage.tsx", import.meta.url),
     "utf8"
@@ -115,14 +115,10 @@ test("스트리머 참여 화면은 공개 범위·직접 동작·그룹 대기�
   assert.doesNotMatch(source, /getStreamerNextAction/u);
   assert.doesNotMatch(source, /participation-management-next-action/u);
   assert.doesNotMatch(source, /copyPublicUrl/u);
-  assert.doesNotMatch(source, /participation-management-public-link/u);
-  // 세부 설정은 <details> 대신 톱니 버튼 + 접이식 폼으로 바뀌었습니다 — 진입점이
-  // 항상 보이는 게임 정보/정원 미리보기 뒤로 한 단계 더 숨어 기본 흐름을 덜 가립니다.
+  // 세부 설정은 톱니 버튼 + 접이식 폼(시작 전 화면 유지).
   assert.match(source, /startSettingsOpen/u);
   assert.match(source, /participation-management-visibility/u);
-  assert.match(source, /participation-management-current/u);
   assert.match(source, /participation-management-history/u);
-  // 링크만 있던 Bot 연동 aside 는 실제 알림 설정 패널로 교체했습니다.
   assert.match(source, /ParticipationAnnouncementPanel/u);
   assert.match(source, /expectedRevision: state\.revision/u);
   assert.match(source, /시청자 참여를 시작하세요/u);
@@ -131,44 +127,41 @@ test("스트리머 참여 화면은 공개 범위·직접 동작·그룹 대기�
   assert.match(source, /視聴者に公開/u);
   assert.match(source, /모집 중지/u);
   assert.match(source, /受付を再開/u);
-  assert.match(source, /selectedWaitingEntryIds/u);
-  assert.match(source, /type="checkbox"/u);
-  assert.match(source, /selectYoroParticipationEntries/u);
-  assert.match(source, /selectedWaitingEntries\.map\(\(entry\) => entry\.id\)/u);
-  // v2 콕핏: 운영 루프(모집→체크인→게임→완료)가 파이프라인 스테퍼로 드러나고,
-  // 각 단계의 주행동이 활성 단계 안에 고정됩니다. 메트릭 dl 은 스테퍼에 흡수됩니다.
-  assert.match(source, /participation-management-pipe/u);
-  assert.doesNotMatch(source, /participation-management-metrics/u);
-  // 서버가 주는 checkInExpiresAt 을 카운트다운으로 사용합니다. 만료 처리(노쇼)는
-  // 자동이 아니라 방송인의 명시 클릭입니다 — 자동 상태 변경 금지(방송 안정성 원칙).
-  assert.match(source, /checkInExpiresAt/u);
-  assert.match(source, /participation-management-chip-ring/u);
-  assert.doesNotMatch(source, /mutateEntry\([^)]*"no_show"\)[^;]*setInterval/u);
-  // LoL(정원 소형)은 빈 슬롯 카드 대신 가로 스트립 칩, Palworld(대형)는 압축 목록 유지.
-  assert.match(source, /participation-management-strip/u);
-  assert.match(source, /viewerSeats > COMPACT_SEAT_THRESHOLD/u);
-  assert.doesNotMatch(source, /renderSeat\(/u);
-  // 복구 불가능한 세션 종료는 넘침 메뉴로 분리하고, 모바일은 하단 고정 주행동 바.
+  // v4.1 운영 모델: 체크인 단계 없음 — 시청자는 신청만, 방송인이 후보를 담아
+  // "선정 확정" 한 번으로 배치 선정 + 즉시 자동 체크인(확정) 처리합니다.
+  // 서버 제약: 선정은 활성 참가자 0명일 때 배치 1회만 허용, selected 방치 시
+  // 60초 뒤 자동 노쇼 — 그래서 확정이 selected 를 곧바로 checked_in 으로 올립니다.
+  assert.match(source, /candidateIds/u);
+  assert.match(source, /toggleCandidate/u);
+  assert.match(source, /selectYoroParticipationEntries\(entryIds, csrfToken, state\?\.revision\)/u);
+  assert.match(source, /updateYoroParticipationEntry\(entryId, "checked_in"/u);
+  assert.doesNotMatch(source, /checkInExpiresAt/u);
+  assert.doesNotMatch(source, /stepCheckin|체크인 대기|チェックイン待ち/u);
+  assert.doesNotMatch(source, /nowTick|checkinTimer|checkInRemaining/u);
+  // 단계 바는 모집→게임→정산 3칸, 주행동은 액션 줄 한 자리(모바일은 하단 바).
+  assert.match(source, /participation-management-steps/u);
+  assert.match(source, /\["recruit", "game", "done"\] as const/u);
+  assert.match(source, /renderPrimaryAction/u);
+  assert.match(source, /participation-management-actions/u);
+  assert.match(source, /participation-management-mobile-bar/u);
+  // 슬롯 칩: 확정/후보 + 제외(✕). 게임 시작은 확정 전원 in_game 전이.
+  assert.match(source, /participation-management-chip-remove/u);
+  assert.match(source, /is-candidate/u);
+  assert.match(source, /updateYoroParticipationEntry\(entry\.id, "in_game"/u);
+  // 복구 불가 세션 종료는 넘침 메뉴로 분리 유지.
   assert.match(source, /participation-management-overflow-menu/u);
   assert.match(source, /className="is-danger"[\s\S]*?mutateSession\("finish"\)/u);
-  assert.match(source, /participation-management-mobile-bar/u);
-  assert.doesNotMatch(source, /mutateSession\("select_next"\)/u);
-  // v3(실화면 결함 수정): 대기열 행은 한 줄 그리드 — 2줄 areas 유산이 선정 버튼을
-  // 우하단에 고립시키고(데스크톱), 모바일에선 행 하나를 6줄로 쌓던 원인이었습니다.
-  assert.doesNotMatch(css, /"position participant status"/u);
-  assert.doesNotMatch(css, /"position"[\s\S]{0,40}"participant"[\s\S]{0,40}"status"/u);
-  // 모바일은 2줄 콤팩트(sel·main·status / sel·main·actions), 신청 시각·순번은 숨김.
-  assert.match(css, /"sel main status"[\s\S]*?"sel main actions"/u);
-  assert.match(css, /participation-management-participant-main small[\s\S]{0,40}display:\s*none/u);
-  // 라이트용 전역 상태색을 다크 화면용으로 페이지 스코프에서 재정의(뿌연 상태색 방지).
-  assert.match(css, /participation-management-page \{[\s\S]{0,400}--info:\s*hsl\(/u);
-  // 유령 스텝 방지 — 비활성 스텝은 opacity 가 아니라 배경·글자색으로 구분합니다.
-  assert.doesNotMatch(css, /participation-management-pipe-step \{[\s\S]{0,400}opacity:/u);
-  assert.match(css, /--participation-checkin-progress/u);
+  // 한 줄 제목 줄 — 대형 히어로 제거.
+  assert.match(source, /participation-management-titlebar/u);
+  assert.doesNotMatch(source, /participation-management-hero/u);
+  // CSS: 콕핏 카드 한 몸(단계 바·액션 줄), 대기열은 구분선 리스트, 체크인 링 없음.
+  assert.match(css, /participation-management-steps/u);
+  assert.match(css, /participation-management-actions/u);
+  assert.doesNotMatch(css, /--participation-checkin-progress/u);
+  assert.doesNotMatch(css, /"sel main status"/u);
+  assert.match(css, /"main status"[\s\S]*?"main actions"/u);
   assert.match(css, /participation-management-mobile-bar[\s\S]*?position:\s*fixed/u);
-  // 잠긴 선정은 잠금 사유와 함께(고장처럼 보이지 않게), 체크인 단계 CTA 공백은 안내문으로.
-  assert.match(source, /queueLockedNote/u);
-  assert.match(source, /stepCheckinHint/u);
+  assert.match(css, /participation-management-page \{[\s\S]{0,400}--info:\s*hsl\(/u);
 });
 
 test("모바일 공개 검색 결과는 두 항목 이후 목록 내부에서 스크롤한다", async () => {
