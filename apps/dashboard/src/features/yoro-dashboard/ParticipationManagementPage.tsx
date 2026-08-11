@@ -152,7 +152,7 @@ const copy = {
     stepRecruit: "모집",
     stepCheckin: "체크인",
     stepGame: "게임",
-    stepDone: "완료",
+    stepDone: "정산",
     stepWaitingSuffix: "명 대기",
     stepSeatsLeft: "남은 자리",
     stepGoQueue: "대기열에서 선정",
@@ -163,7 +163,9 @@ const copy = {
     finishDangerNote: "복구 불가",
     stripEmpty: "아직 없음 — 아래 대기열에서 선정하세요",
     stepCheckinHint: "칩에서 체크인 처리 — {count}명 대기",
-    queueLockedNote: "진행 중인 참가자 처리 후 다음 선정이 열립니다."
+    queueLockedNote: "진행 중인 참가자 처리 후 다음 선정이 열립니다.",
+    checkinWaitingStatus: "체크인 대기",
+    historyToggle: "완료·취소 이력"
   },
   ja: {
     eyebrow: "STREAMER PARTICIPATION",
@@ -270,7 +272,7 @@ const copy = {
     stepRecruit: "受付",
     stepCheckin: "チェックイン",
     stepGame: "ゲーム",
-    stepDone: "完了",
+    stepDone: "精算",
     stepWaitingSuffix: "名待機",
     stepSeatsLeft: "残り枠",
     stepGoQueue: "待機列から選出",
@@ -281,7 +283,9 @@ const copy = {
     finishDangerNote: "復元不可",
     stripEmpty: "まだいません — 下の待機列から選出してください",
     stepCheckinHint: "チップでチェックイン処理 — {count}名待ち",
-    queueLockedNote: "進行中の参加者を処理すると次の選出ができます。"
+    queueLockedNote: "進行中の参加者を処理すると次の選出ができます。",
+    checkinWaitingStatus: "チェックイン待ち",
+    historyToggle: "完了・取消履歴"
   }
 } as const;
 
@@ -681,8 +685,13 @@ export function ParticipationManagementPage({
   function renderQueueRow(entry: ParticipationDashboardQueueEntry, historic = false) {
     const canSelect = !historic && (entry.status === "verified" || entry.status === "waitlisted");
     const selectDisabled = Boolean(busyKey) || Boolean(currentEntry) || !state?.isOpen || !canSelect || capacityIsFull;
+    const appliedAtLabel = `${text.appliedAt} ${new Date(entry.createdAt).toLocaleString(locale === "ko" ? "ko-KR" : "ja-JP")}`;
     return (
-      <article className={`participation-management-participant ${historic ? "is-compact" : ""}`} key={entry.id}>
+      <article
+        className={`participation-management-participant ${historic ? "is-compact" : ""}`}
+        key={entry.id}
+        title={appliedAtLabel}
+      >
         {!historic && bulkSelectOpen ? (
           <label className="participation-management-selection">
             <input
@@ -709,9 +718,8 @@ export function ParticipationManagementPage({
             {entry.game === "palworld" ? entry.palworldNickname : entry.riotId}
             {entry.preferredRole ? ` · ${roleLabels[locale][entry.preferredRole]}` : ""}
           </span>
-          <small>{text.appliedAt} {new Date(entry.createdAt).toLocaleString(locale === "ko" ? "ko-KR" : "ja-JP")}</small>
         </div>
-        <span className="participation-management-status">{text[entry.status]}</span>
+        <span className="participation-management-status" data-status={entry.status}>{text[entry.status]}</span>
         {historic ? renderEntryActions(entry) : (
           <div className="participation-management-entry-actions">
             <button
@@ -723,6 +731,18 @@ export function ParticipationManagementPage({
             >
               {text.select}
             </button>
+            <details className="participation-management-row-more">
+              <summary aria-label={text.more}>⋯</summary>
+              <div>
+                <button
+                  disabled={Boolean(busyKey)}
+                  onClick={() => void mutateEntry(entry.id, "skipped")}
+                  type="button"
+                >
+                  {text.skip}
+                </button>
+              </div>
+            </details>
           </div>
         )}
       </article>
@@ -826,8 +846,12 @@ export function ParticipationManagementPage({
           <section className="participation-management-cockpit" aria-labelledby="participation-session-title">
             <h2 className="yoro-u-sr-only" id="participation-session-title">{text.sessionTitle}</h2>
             <span className="participation-management-game-chip is-active">{gameLabels[activeGame]}</span>
-            <strong className="participation-management-session-status" data-status={session?.status}>
-              {sessionStatusLabel(session?.status ?? "closed", text)}
+            <strong className="participation-management-session-status" data-status={session?.status} data-step={activeStep}>
+              {activeStep === "checkin"
+                ? text.checkinWaitingStatus
+                : activeStep === "game"
+                  ? text.statusInGame
+                  : sessionStatusLabel(session?.status ?? "closed", text)}
             </strong>
             <div className="participation-management-cockpit-tools">
               {state?.isOpen ? (
@@ -927,20 +951,23 @@ export function ParticipationManagementPage({
           </ol>
 
           <section className="participation-management-current" aria-labelledby="participation-current-title">
-            <header>
-              <h2 id="participation-current-title">{text.currentParticipant}</h2>
-              <span className="participation-management-capacity-meter">
-                {currentEntries.length + 1}/{PARTICIPATION_GAME_CAPACITY[activeGame]}
-              </span>
-            </header>
+            <h2 className="yoro-u-sr-only" id="participation-current-title">{text.currentParticipant}</h2>
             {viewerSeats > COMPACT_SEAT_THRESHOLD ? (
-              <div className="participation-management-group">
-                {currentEntries.length
-                  ? currentEntries.map((entry) => renderCompactSeat(entry))
-                  : <p className="participation-management-empty">{text.noCurrentParticipant}</p>}
-              </div>
+              <>
+                <span className="participation-management-strip-count">
+                  {text.capacityIngame} {currentEntries.length + 1}/{PARTICIPATION_GAME_CAPACITY[activeGame]}
+                </span>
+                <div className="participation-management-group">
+                  {currentEntries.length
+                    ? currentEntries.map((entry) => renderCompactSeat(entry))
+                    : <p className="participation-management-empty">{text.noCurrentParticipant}</p>}
+                </div>
+              </>
             ) : (
               <div className="participation-management-strip">
+                <span className="participation-management-strip-count">
+                  {text.capacityIngame} {currentEntries.length + 1}/{PARTICIPATION_GAME_CAPACITY[activeGame]}
+                </span>
                 <span className="participation-management-chip is-host">
                   <span className="participation-management-chip-avatar" aria-hidden="true">🎙</span>
                   <span className="participation-management-chip-copy"><strong>{text.hostSeatLabel}</strong></span>
@@ -955,13 +982,11 @@ export function ParticipationManagementPage({
 
           <section className="participation-management-queue" aria-labelledby="participation-queue-title" ref={queueSectionRef}>
               <header>
-                <div>
-                  <h2 id="participation-queue-title">{text.queueTitle}</h2>
-                  <p>{text.queueDescription}</p>
-                </div>
-                <span className="participation-management-capacity-meter">
+                <h2 id="participation-queue-title">{text.queueTitle}</h2>
+                <span className="participation-management-queue-count">
                   {waitingEntries.length}/{session?.maxQueueSize ?? maxQueueSize}
                 </span>
+                <p className="yoro-u-sr-only">{text.queueDescription}</p>
               </header>
               {capacityIsFull ? <p className="participation-management-capacity-full">{text.capacityFull}</p> : null}
               {!capacityIsFull && currentEntry && state?.isOpen && waitingEntries.length > 0 ? (
@@ -1006,7 +1031,7 @@ export function ParticipationManagementPage({
                   : <p className="participation-management-empty">{queueSearch ? text.queueSearchEmpty : text.queueEmpty}</p>}
               </div>
               <details className="participation-management-history">
-                <summary>{text.queueHistory} <span>{historyEntries.length}</span></summary>
+                <summary>{text.historyToggle} <span>{historyEntries.length}</span></summary>
                 <div>
                   {historyEntries.length
                     ? historyEntries.map((entry) => renderQueueRow(entry, true))

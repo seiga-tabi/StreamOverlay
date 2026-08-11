@@ -195,17 +195,6 @@
   background: color-mix(in srgb, var(--brand) 22%, var(--surface-strong));
 }
 
-.participation-management-capacity-meter {
-  flex: 0 0 auto;
-  padding: var(--space-1) var(--space-3);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--yoro-radius-pill);
-  color: var(--text-strong);
-  background: var(--surface-muted);
-  font-size: .8125rem;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-}
 
 .participation-management-capacity-full {
   margin: 0;
@@ -389,17 +378,32 @@
 }
 
 .participation-management-session-status {
-  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text);
   font-size: .875rem;
   font-weight: 800;
 }
 
-.participation-management-session-status[data-status="recruiting"] {
-  color: var(--info);
+.participation-management-session-status::before {
+  content: "";
+  inline-size: .5rem;
+  block-size: .5rem;
+  border-radius: 999px;
+  background: var(--muted);
 }
 
-.participation-management-session-status[data-status="in_game"] {
-  color: var(--success);
+.participation-management-session-status[data-status="recruiting"]::before {
+  background: var(--info);
+}
+
+.participation-management-session-status[data-step="checkin"]::before {
+  background: var(--warning);
+}
+
+.participation-management-session-status[data-step="game"]::before {
+  background: var(--success);
 }
 
 .participation-management-cockpit-tools {
@@ -580,14 +584,19 @@
   justify-self: start;
 }
 
-.participation-management-current > header,
 .participation-management-queue > header {
   min-inline-size: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-3);
-  align-items: flex-start;
-  justify-content: space-between;
+  gap: var(--space-2);
+  align-items: baseline;
+}
+
+.participation-management-queue-count {
+  color: var(--muted);
+  font-size: .8125rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---------- 진행 스트립 (LoL: 정원이 작을 때) ---------- */
@@ -597,6 +606,15 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
+}
+
+.participation-management-strip-count {
+  margin-inline-end: var(--space-2);
+  color: var(--muted);
+  font-size: .8125rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .participation-management-chip {
@@ -779,6 +797,10 @@
 }
 
 .participation-management-history > summary {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: .8125rem;
   inline-size: fit-content;
   min-block-size: var(--yoro-size-touch-target);
   display: inline-flex;
@@ -879,6 +901,21 @@
   max-inline-size: 100%;
   white-space: nowrap;
   justify-self: end;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--muted);
+}
+
+.participation-management-participant > .participation-management-status[data-status="verified"],
+.participation-management-participant > .participation-management-status[data-status="played"] {
+  color: var(--success);
+}
+
+.participation-management-participant > .participation-management-status[data-status="no_show"],
+.participation-management-participant > .participation-management-status[data-status="rejected"],
+.participation-management-participant > .participation-management-status[data-status="blocked"] {
+  color: var(--danger);
 }
 
 .participation-management-status {
@@ -912,6 +949,12 @@
   font-size: .8125rem;
   white-space: normal;
   overflow-wrap: anywhere;
+}
+
+.participation-management-participant .participation-management-row-more > summary {
+  min-inline-size: 2.25rem;
+  padding-inline: var(--space-2);
+  text-align: center;
 }
 
 /* 잠긴 선정은 "고장"이 아니라 잠금으로 읽혀야 합니다(결함 5). */
