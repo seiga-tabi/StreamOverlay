@@ -1847,8 +1847,10 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   );
   assert.match(korean, /class="[^"]*palworld-map-filter-panel/u);
   assert.match(korean, /data-testid="palworld-map-pal-picker"/u);
-  assert.match(korean, /class="[^"]*palworld-map-mobile-filter-trigger/u);
-  assert.match(korean, />필터 1개</u);
+  /* 좌상단 "필터 N개" 버튼은 제거 — 시트 손잡이가 유일한 필터 트리거이며
+     활성 개수를 함께 보여줍니다. 트리거가 두 곳이면 상태가 갈립니다. */
+  assert.doesNotMatch(korean, /palworld-map-mobile-filter-trigger|palworld-map-mobile-command-bar/u);
+  assert.match(korean, /class="palworld-map-sheet__grab-count">1</u);
   assert.match(korean, /role="tablist"/u);
   assert.match(korean, /팰파고스섬/u);
   assert.match(korean, /세계수/u);
@@ -1885,7 +1887,9 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   assert.doesNotMatch(korean, /휠·핀치/u);
   assert.doesNotMatch(korean, /게임 월드에서 검증된 위치를 표시합니다/u);
   assert.match(japanese, /Palworld ワールドマップ/u);
-  assert.match(japanese, />フィルター 1件</u);
+  /* 일본어도 트리거 버튼 대신 시트 손잡이가 활성 개수를 보여줍니다. */
+  assert.doesNotMatch(japanese, /palworld-map-mobile-filter-trigger/u);
+  assert.match(japanese, /class="palworld-map-sheet__grab-count">1</u);
   /* 일본어도 같은 기본값 — SSR 은 아직 "모름"이라 접힌 행이 없습니다. */
   assert.match(japanese, /データがある項目のみ/u);
   assert.doesNotMatch(japanese, /空の項目\d+種を非表示にしました。/u);

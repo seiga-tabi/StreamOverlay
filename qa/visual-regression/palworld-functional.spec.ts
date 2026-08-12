@@ -3653,7 +3653,12 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
     expect(controlsBounds).not.toBeNull();
     expect(zoomInBounds).not.toBeNull();
     expect(zoomOutBounds).not.toBeNull();
-    expect(controlsBounds!.y).toBeLessThan(viewportBounds!.y + (viewportBounds!.height * 0.25));
+    /* 리디자인 계약: 줌은 오른쪽 아래 고정 컴팩트 2버튼입니다. top+bottom 이
+       동시에 걸려 지도의 78%를 차지하던 세로 스트레치 회귀를 함께 고정합니다. */
+    expect(controlsBounds!.y).toBeGreaterThan(viewportBounds!.y + (viewportBounds!.height * 0.5));
+    expect(controlsBounds!.y + controlsBounds!.height)
+      .toBeLessThanOrEqual(viewportBounds!.y + viewportBounds!.height + 1);
+    expect(controlsBounds!.height).toBeLessThanOrEqual(120);
     expect(Math.abs(controlsBounds!.x + controlsBounds!.width - viewportBounds!.x - viewportBounds!.width))
       .toBeLessThanOrEqual(16);
     expect(zoomInBounds!.y).toBeLessThan(zoomOutBounds!.y);
@@ -3726,17 +3731,22 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
   ).toBe(true);
   await expect(page.getByRole("button", { name: "지도 범례" })).toHaveCount(0);
   await expect(page.locator(".palworld-map-layer-legend, .palworld-map-legend-sheet")).toHaveCount(0);
-  const mobileFilterTrigger = page.getByRole("button", { name: "필터 1개" });
+  /* 좌상단 "필터 N개" 버튼은 제거 — 시트 손잡이가 유일한 트리거이며 활성 개수를 보여줍니다. */
+  const sheetGrab = page.locator(".palworld-map-sheet__grab");
   const coordinateControl = page.locator(".palworld-map-coordinate-control");
   const filterScope = mobileViewport
     ? page.getByTestId("palworld-map-mobile-filters")
     : page.locator(".palworld-map-desktop-filter");
   if (mobileViewport) {
     await expect(coordinateControl).toHaveCount(0);
-    await expect(mobileFilterTrigger).toBeVisible();
-    /* 필터는 전체 화면 Modal 이 아니라 지도를 덮지 않는 3단 하단 시트입니다. */
+    await expect(page.locator(".palworld-map-mobile-filter-trigger")).toHaveCount(0);
+    await expect(sheetGrab.locator(".palworld-map-sheet__grab-count")).toHaveText("1");
+    /* 필터는 전체 화면 Modal 이 아니라 지도를 덮지 않는 3단 하단 시트입니다.
+       손잡이 탭은 peek → half → full 순서로 한 단계씩 올라갑니다. */
     await expect(filterScope).toHaveAttribute("data-snap", "peek");
-    await mobileFilterTrigger.click();
+    await sheetGrab.click();
+    await expect(filterScope).toHaveAttribute("data-snap", "half");
+    await sheetGrab.click();
     await expect(filterScope).toHaveAttribute("data-snap", "full");
     await expect(filterScope.locator(".palworld-map-sheet__chips")).toBeVisible();
     await expect(filterScope.locator(".palworld-map-sheet__footer")).toBeVisible();
@@ -3744,7 +3754,7 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
     await expect.poll(() => page.evaluate(() => document.body.style.overflow)).toBe("hidden");
   } else {
     await expect(coordinateControl).toHaveCount(0);
-    await expect(mobileFilterTrigger).toBeHidden();
+    await expect(page.locator(".palworld-map-mobile-filter-trigger")).toHaveCount(0);
     const filterContent = filterScope.locator(".palworld-map-filter-content");
     const explorerMain = page.locator(".palworld-map-explorer-main");
     const expandedWidth = await explorerMain.evaluate((element) => element.getBoundingClientRect().width);
@@ -3854,7 +3864,8 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
       .click();
     await expect(filterScope).toHaveAttribute("data-snap", "peek");
     await expect.poll(() => page.evaluate(() => document.body.style.overflow)).toBe("");
-    await expect(mobileFilterTrigger).toBeFocused();
+    /* 별도 트리거가 없으므로 초점은 시트 손잡이로 돌아옵니다. */
+    await expect(sheetGrab).toBeFocused();
   }
   const bossMarker = page.getByRole("button", { name: "필드 보스: 아누비스, Lv.55" });
   await expect(bossMarker).toBeVisible();
@@ -4106,16 +4117,24 @@ for (const viewport of publicChromeResponsiveViewports) {
       mapToolbar.boundingBox(),
     ]);
     expect(mapBounds).not.toBeNull();
-    expect(toolbarBounds).not.toBeNull();
     expect(mapBounds!.x).toBeGreaterThanOrEqual(0);
     expect(mapBounds!.x + mapBounds!.width).toBeLessThanOrEqual(viewport.width + 1);
     if (mobileMapLayout) {
-      const commandBounds = await page.locator(".palworld-map-mobile-command-bar").boundingBox();
-      expect(commandBounds).not.toBeNull();
-      expect(commandBounds!.y).toBeGreaterThanOrEqual(mapBounds!.y - 1);
-      expect(commandBounds!.y + commandBounds!.height).toBeLessThanOrEqual(mapBounds!.y + mapBounds!.height + 1);
-      expect(toolbarBounds!.y).toBeGreaterThanOrEqual(mapBounds!.y + mapBounds!.height - 1);
+      /* 명령 바는 제거됐고 상태 요약은 시트 손잡이가 담당합니다.
+         오류가 없는 평상시에는 지도 아래 배지 줄도 렌더되지 않습니다. */
+      await expect(page.locator(".palworld-map-mobile-command-bar")).toHaveCount(0);
+      expect(toolbarBounds).toBeNull();
+      /* 줌 컨트롤은 우하단 고정 2버튼 — top+bottom 동시 지정으로 세로로
+         늘어나던(284px) 회귀를 높이 상한으로 고정합니다. */
+      const zoomBounds = await page
+        .locator(".palworld-map-viewport > .palworld-map-controls")
+        .boundingBox();
+      expect(zoomBounds).not.toBeNull();
+      expect(zoomBounds!.height).toBeLessThanOrEqual(120);
+      expect(zoomBounds!.y + zoomBounds!.height)
+        .toBeLessThanOrEqual(mapBounds!.y + mapBounds!.height + 1);
     } else {
+      expect(toolbarBounds).not.toBeNull();
       const [sidebarBounds, cardBounds] = await Promise.all([
         page.locator(".palworld-map-desktop-filter").boundingBox(),
         page.locator(".palworld-map-card").boundingBox(),
@@ -4140,3 +4159,40 @@ for (const viewport of publicChromeResponsiveViewports) {
     await assertHealthyDocument(page, errors);
   });
 }
+
+test("지도 필터 시트는 어느 단계에서도 하단 탭바를 가리지 않는다", async ({ page }) => {
+  /* 회귀 고정 — 예전에는 시트(bottom:0, z-overlay)가 같은 자리의 탭바(z-sticky)를
+     항상 덮어, 지도 화면에서 홈·도감·교배 탭을 누를 수 없었습니다. */
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/palworld/map");
+  await expect(page.getByTestId("palworld-map-image")).toBeVisible();
+
+  const sheet = page.getByTestId("palworld-map-mobile-filters");
+  const tabBar = page.getByTestId("palworld-bottom-tab-bar");
+  await expect(sheet).toHaveAttribute("data-snap", "peek");
+
+  /* 시트 바닥은 탭바 위에서 시작합니다 — 겹침 0. */
+  const [sheetBox, tabBarBox] = await Promise.all([sheet.boundingBox(), tabBar.boundingBox()]);
+  expect(sheetBox).not.toBeNull();
+  expect(tabBarBox).not.toBeNull();
+  expect(sheetBox!.y + sheetBox!.height).toBeLessThanOrEqual(tabBarBox!.y + 1);
+
+  /* 탭바 중앙 hit-test: 최상단 요소가 탭바 안에 있어야 합니다. */
+  const hitsTabBar = () => page.evaluate(() => {
+    const bar = document.querySelector('[data-testid="palworld-bottom-tab-bar"]');
+    if (!bar) return false;
+    const rect = bar.getBoundingClientRect();
+    const target = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+    return target instanceof Element && bar.contains(target);
+  });
+  expect(await hitsTabBar()).toBe(true);
+
+  /* 전체 목록(full)에서도 탭바는 눌리고, 탭 이동이 실제로 동작합니다. */
+  const grab = page.locator(".palworld-map-sheet__grab");
+  await grab.click();
+  await grab.click();
+  await expect(sheet).toHaveAttribute("data-snap", "full");
+  expect(await hitsTabBar()).toBe(true);
+  await tabBar.getByRole("button", { name: "Pal 도감" }).click();
+  await expect(page).toHaveURL(/\/palworld\/pals(?:\?.*)?$/u);
+});

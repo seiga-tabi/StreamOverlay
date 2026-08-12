@@ -34,6 +34,8 @@ export type PalworldMapMobileFiltersProps = Omit<
   snap: PalworldMapSheetSnap;
   onSnapChange: (snap: PalworldMapSheetSnap) => void;
   returnFocusRef?: RefObject<HTMLElement>;
+  /** 손잡이 줄에 붙는 한 줄 상태 요약(예: "필드 보스 12"). 버튼 중첩이 불가능하므로 텍스트만 받습니다. */
+  statusSummary?: string;
 };
 
 function snapAfterDrag(
@@ -63,6 +65,7 @@ export function PalworldMapMobileFilters({
   onSnapChange,
   returnFocusRef,
   snap,
+  statusSummary,
   ...panelProps
 }: PalworldMapMobileFiltersProps) {
   /* 전체 목록일 때만 문서 스크롤을 잠급니다. 칩 줄에서는 지도를 계속 만질 수 있어야 합니다. */
@@ -76,9 +79,10 @@ export function PalworldMapMobileFilters({
     (nextSnap: PalworldMapSheetSnap) => {
       if (nextSnap === snap) return;
       onSnapChange(nextSnap);
-      /* 전체 목록에서 내려오면 초점을 트리거로 되돌립니다. 시트 안에 갇히지 않게요. */
+      /* 전체 목록에서 내려오면 초점을 되돌립니다 — 시트 안에 갇히지 않게요.
+         별도 트리거가 없어졌으므로 기본 복귀 지점은 시트 손잡이입니다. */
       if (snap === "full" && nextSnap !== "full") {
-        window.requestAnimationFrame(() => returnFocusRef?.current?.focus());
+        window.requestAnimationFrame(() => (returnFocusRef?.current ?? grabRef.current)?.focus());
       }
     },
     [onSnapChange, returnFocusRef, snap],
@@ -137,6 +141,10 @@ export function PalworldMapMobileFilters({
       data-snap={snap}
       data-testid="palworld-map-mobile-filters"
     >
+      {/* 루트는 탭바 위에 고정된 "창"(overflow clip)이고, 실제로 미끄러지는 것은
+          이 래퍼입니다. 루트에 직접 transform 을 걸면 내려간 본체가 루트 바닥을
+          넘어 탭바 좌표 위에 남아(transform 은 clip 되지 않음) 탭을 가립니다. */}
+      <div className="palworld-map-sheet__inner">
       <button
         aria-controls={sheetId}
         aria-expanded={snap === "full"}
@@ -153,6 +161,9 @@ export function PalworldMapMobileFilters({
         <span aria-hidden="true" className="palworld-map-sheet__grab-bar" />
         <span className="palworld-map-sheet__grab-title">
           {resolvePalworldMapLabel(copy.title, locale)}
+          {statusSummary ? (
+            <span className="palworld-map-sheet__grab-status">{statusSummary}</span>
+          ) : null}
         </span>
         <span className="palworld-map-sheet__grab-count">{selectedCount}</span>
       </button>
@@ -211,6 +222,7 @@ export function PalworldMapMobileFilters({
             </Button>
           </div>
         </div>
+      </div>
       </div>
     </section>
   );

@@ -688,7 +688,6 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
     () => new Set(),
   );
   const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
-  const mobileFilterButtonRef = useRef<HTMLButtonElement | HTMLAnchorElement>(null);
   const selectedMarkerTriggerRef = useRef<HTMLElement | null>(null);
   const restoredViewKeyRef = useRef<string>();
   const appliedFocusMarkerRef = useRef<string>();
@@ -1791,16 +1790,23 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
     + selectedCollectibleTypes.filter((typeId) =>
       mapQuery.layers.includes(palworldMapCollectibleCategory(typeId))
     ).length;
-  const mobileFilterButtonCopy = mapLabel(
-    palworldI18n.ko.mapMobileFilterButton.replace(
-      "{count}",
-      activeLayerCount.toLocaleString("ko-KR"),
-    ),
-    palworldI18n.ja.mapMobileFilterButton.replace(
-      "{count}",
-      activeLayerCount.toLocaleString("ja-JP"),
-    ),
-  );
+  /* 시트 손잡이에 넣는 한 줄 상태 요약 — 지도 아래 배지 줄이 하던 "지금 몇 개가
+     보이는가"를 대신합니다. 재시도 버튼이 필요한 오류 상태는 여기 넣지 않고
+     toolbar 를 유지합니다(손잡이는 button 이라 버튼을 중첩할 수 없습니다). */
+  const mobileStatusSummary = [
+    focusedPal ? resolvePalworldName(focusedPal, locale).text : undefined,
+    markerState === "ready" && markerResponse
+      ? `${text.mapBossMarkers} ${visibleBossMarkers.length}`
+      : undefined,
+    importedLayerSelected && locationState === "ready"
+      ? `${text.mapLocationPoint} ${visibleMapLocations.length.toLocaleString(localeTag)}`
+      : undefined,
+    spawnLayerSelected && spawnState === "ready" && spawnSummary ? spawnMapSummary : undefined,
+  ].filter(Boolean).join(" · ");
+  /* 오류 상태에서만 모바일에서도 toolbar 를 보여 재시도 경로를 남깁니다. */
+  const toolbarHasAlert = markerState === "error"
+    || (importedLayerSelected && locationState === "error")
+    || (spawnLayerSelected && spawnState === "error");
 
   function worldPositionDetail(coordinate: {
     normalizedX: number;
@@ -1976,31 +1982,14 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
             setMobileSheetSnap("half");
           }}
           onSnapChange={setMobileSheetSnap}
-          returnFocusRef={mobileFilterButtonRef}
           snap={mobileSheetSnap}
+          statusSummary={mobileStatusSummary}
         >
           {renderFilterControls("palworld-map-mobile-pal-picker")}
         </PalworldMapMobileFilters>
+        {/* 좌상단 명령 바(필터 N개 버튼)는 제거 — 시트 손잡이가 유일한 필터 트리거입니다.
+            트리거가 두 곳이면 상태가 갈리고, 지도 위 위젯도 하나 늘어납니다. */}
         <div className="palworld-map-explorer-main">
-          <div className="palworld-map-mobile-command-bar">
-            <Button
-              aria-expanded={mobileSheetSnap === "full"}
-              className="palworld-map-mobile-filter-trigger"
-              data-ja={mobileFilterButtonCopy.ja}
-              data-ko={mobileFilterButtonCopy.ko}
-              onClick={() => setMobileSheetSnap(
-                mobileSheetSnap === "full" ? "peek" : "full",
-              )}
-              ref={mobileFilterButtonRef}
-              size="sm"
-              variant="secondary"
-            >
-              {mobileFilterButtonCopy[locale]}
-            </Button>
-            {focusedPal ? (
-              <Badge tone="info">{resolvePalworldName(focusedPal, locale).text}</Badge>
-            ) : null}
-          </div>
           <Card as="section" className="palworld-map-card" padding="none" aria-labelledby="palworld-map-title">
 
             <div className="palworld-map-canvas-shell">
@@ -2221,7 +2210,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
                 </div>
               </figure>
               {/* 상태 배지는 지도 상자 기준으로 놓습니다. 카드 기준이면 지도가 좁아졌을 때 밖으로 나갑니다. */}
-            <div className="palworld-map-toolbar">
+            <div className="palworld-map-toolbar" data-has-alert={toolbarHasAlert ? "true" : undefined}>
               <div
                 aria-live="polite"
                 aria-relevant="text"

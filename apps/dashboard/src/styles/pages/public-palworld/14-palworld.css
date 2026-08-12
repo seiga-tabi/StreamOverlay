@@ -463,14 +463,6 @@
   }
 }
 
-.palworld-map-mobile-filter-trigger {
-  display: none;
-}
-
-.palworld-map-mobile-command-bar {
-  display: none;
-}
-
 .palworld-map-filter-panel {
   position: sticky;
   inset-block-start: var(--yoro-space-4);
@@ -5796,42 +5788,6 @@
     display: none !important;
   }
 
-  .palworld-map-mobile-filter-trigger {
-    display: inline-flex;
-  }
-
-  .palworld-map-mobile-command-bar {
-    position: absolute;
-    inset-block-start: var(--yoro-space-3);
-    inset-inline-start: var(--yoro-space-3);
-    inset-inline-end: calc(var(--yoro-size-touch-target) + var(--yoro-space-8));
-    z-index: var(--yoro-z-sticky);
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    min-inline-size: 0;
-    gap: var(--yoro-space-2);
-    pointer-events: none;
-  }
-
-  .palworld-map-mobile-command-bar > * {
-    pointer-events: auto;
-  }
-
-  .palworld-map-mobile-command-bar .yoro-button,
-  .palworld-map-mobile-command-bar .yoro-badge {
-    box-shadow: var(--yoro-shadow-soft);
-  }
-
-  .palworld-map-mobile-command-bar .yoro-badge {
-    min-inline-size: 0;
-    max-inline-size: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
   .palworld-map-legend-sheet {
     place-items: end center;
     padding: var(--yoro-space-0);
@@ -5855,32 +5811,47 @@
    * 예전 전체 화면 Modal 은 여는 순간 지도를 가렸습니다. 시트는 지도 위로
    * 올라오되 덮지 않아, 칩을 누르면 마커가 즉시 늘고 주는 것이 보입니다.
    * 세 자리: peek(손잡이) · half(칩 줄) · full(전체 목록). */
+  /* 루트는 탭바(z-sticky) 바로 위에 고정된 "창"입니다. 예전 bottom:0 은
+     시트(z-overlay)가 같은 자리의 탭바를 항상 덮어 탭을 누를 수 없었습니다.
+     변수는 shell 루트(.public-lol-shell)에서 상속되며 safe-area 를 포함합니다.
+     내려간 본체가 탭바 좌표에 남지 않도록 루트가 overflow 로 잘라내고,
+     빈 위쪽 영역이 지도를 막지 않도록 루트는 pointer-events 를 끕니다. */
   .palworld-map-sheet {
     position: fixed;
     inset-inline: 0;
-    inset-block-end: 0;
+    inset-block-end: var(--public-bottom-tab-bar-height, 0px);
     z-index: var(--yoro-z-overlay);
+    block-size: 78dvh;
+    overflow: clip;
+    pointer-events: none;
+  }
+
+  .palworld-map-sheet__inner {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 0;
     display: flex;
     flex-direction: column;
-    max-block-size: 78dvh;
+    max-block-size: 100%;
     border: thin solid var(--yoro-color-border);
     border-block-end: none;
     border-radius: var(--yoro-radius-lg) var(--yoro-radius-lg) 0 0;
     background: var(--yoro-color-surface-strong);
     box-shadow: var(--yoro-shadow-panel);
+    pointer-events: auto;
     transition: transform 180ms ease-out;
   }
 
   /* 자리 이동은 transform 으로만 — 레이아웃을 다시 계산하지 않습니다. */
-  .palworld-map-sheet[data-snap="peek"] {
+  .palworld-map-sheet[data-snap="peek"] .palworld-map-sheet__inner {
     transform: translateY(calc(100% - 3.5rem));
   }
 
-  .palworld-map-sheet[data-snap="half"] {
+  .palworld-map-sheet[data-snap="half"] .palworld-map-sheet__inner {
     transform: translateY(calc(100% - 3.5rem - 4.25rem));
   }
 
-  .palworld-map-sheet[data-snap="full"] {
+  .palworld-map-sheet[data-snap="full"] .palworld-map-sheet__inner {
     transform: translateY(0);
   }
 
@@ -5908,6 +5879,21 @@
     block-size: var(--yoro-space-1);
     border-radius: var(--yoro-radius-pill);
     background: var(--yoro-color-border-strong);
+  }
+
+  /* 상태 요약은 시트 손잡이가 담당합니다. 재시도 버튼이 필요한 오류만 이 줄을 남깁니다. */
+  .palworld-map-toolbar:not([data-has-alert="true"]) {
+    display: none;
+  }
+
+  .palworld-map-sheet__grab-status {
+    margin-inline-start: var(--yoro-space-2);
+    color: var(--yoro-color-text-muted);
+    font-weight: var(--yoro-font-weight-medium);
+    font-size: var(--yoro-font-size-sm);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .palworld-map-sheet__grab-count {
@@ -5995,7 +5981,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .palworld-map-sheet {
+    .palworld-map-sheet__inner {
       transition: none;
     }
   }
@@ -6031,9 +6017,13 @@
     display: grid;
   }
 
+  /* 줌은 오른쪽 아래 고정 2버튼입니다. 이전에는 이 규칙이 top 을 지정하고
+     아래쪽의 "시트 위로 올리기" 패치가 bottom 을 다시 지정해, 절대배치 요소가
+     세로로 늘어나며(top+bottom 동시) 지도 높이의 78%를 차지했습니다. 세로 위치는
+     여기 한 곳에서만 선언합니다. */
   .palworld-map-viewport > .palworld-map-controls {
-    inset-block-start: var(--yoro-space-3);
-    inset-block-end: auto;
+    inset-block-start: auto;
+    inset-block-end: var(--yoro-space-3);
     inset-inline-end: max(var(--yoro-space-3), env(safe-area-inset-right));
     grid-template-columns: minmax(var(--yoro-size-touch-target), auto);
     inline-size: auto;
@@ -6060,21 +6050,16 @@
     display: none;
   }
 
-  /* 좁은 화면에서는 왼쪽 위가 "필터" 버튼 자리입니다.
-     휠 안내는 여기서 숨기므로 월드 전환을 왼쪽 아래로 내립니다. */
-  .palworld-map-viewport > .palworld-map-world-switcher {
-    inset-block-start: auto;
-    inset-block-end: var(--yoro-space-3);
+  /* 좌상단 명령 바(필터 버튼)가 사라져 왼쪽 위가 비었습니다 — 월드 전환이
+     기본 위치(왼쪽 위)를 그대로 쓰되, 지도를 덜 가리게 한 단계 작게 그립니다. */
+  .palworld-map-viewport > .palworld-map-world-switcher button {
+    min-block-size: var(--yoro-space-8);
+    padding-inline: var(--yoro-space-3);
+    font-size: var(--yoro-font-size-sm);
   }
 
   .palworld-map-viewport {
     max-block-size: min(58dvh, 40rem);
-  }
-
-  /* 하단 시트(peek 3.5rem)가 지도 아래 모서리를 가리므로 컨트롤을 그 위로 올립니다. */
-  .palworld-map-viewport > .palworld-map-controls,
-  .palworld-map-viewport > .palworld-map-world-switcher {
-    inset-block-end: calc(3.5rem + var(--yoro-space-3));
   }
 
   .palworld-map-page > .palworld-page-heading {
