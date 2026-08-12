@@ -480,8 +480,14 @@
   margin-block-start: var(--yoro-space-4);
 }
 
+/* 결함 수정 — 이 안의 캐러셀 화살표(.public-home-live-control)는 z-index:2를 쓰는데,
+   이 요소도 부모도 stacking context가 없어 그 값이 밖으로 새어나가 검색창 히어로
+   (ambient z-index:1)를 이깁니다. .public-game-home__live 내부 변형과 같은 방식으로
+   여기에도 낮은 z-index를 줘서 안쪽 값이 새지 않게 가둡니다. */
 .public-game-home__live-strip {
   --public-home-accent: var(--yoro-color-public-primary);
+  position: relative;
+  z-index: var(--yoro-z-base);
   inline-size: min(100%, var(--yoro-size-public-header-max));
   min-inline-size: 0;
   margin: var(--yoro-space-4) auto 0;
