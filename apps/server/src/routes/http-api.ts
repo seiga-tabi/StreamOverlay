@@ -120,6 +120,11 @@ import {
   buildPublicLolSocialSummary,
   type PublicLolSocialProfile,
 } from "../services/public-lol-social-card.js";
+import {
+  PatchNotesSocialCardRenderer,
+  latestPatchNoteWithVersion,
+  patchNotesCardModel,
+} from "../services/patch-notes-social-card.js";
 import { appConfig, legalRuntimeConfigReady } from "../config.js";
 import type { TwitchEventSubClient } from "../services/twitch-eventsub-client.js";
 import { rankedEmblemAssetPath } from "../services/ranked-emblems.js";
@@ -3373,6 +3378,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
   const publicLolPlatformMembershipCache = new Map<string, { expiresAt: number; verified: boolean }>();
   const publicLolPlatformMembershipInFlight = new Map<string, Promise<boolean>>();
   const publicLolSocialCardRenderer = new PublicLolSocialCardRenderer();
+  const patchNotesSocialCardRenderer = new PatchNotesSocialCardRenderer();
   const publicLolCurrentGameCache = new Map<string, { expiresAt: number; response: PublicLolCurrentGame }>();
   const publicLolCurrentGameInFlight = new Map<string, Promise<PublicLolCurrentGame>>();
   let publicLolParticipantRankCacheInvalidatedAt = 0;
@@ -3636,6 +3642,36 @@ export function createHttpHandler(input: HttpHandlerInput) {
 
   async function resolvePublicSeoMetadata(pathname: string): Promise<PublicSeoMetadata> {
     const fallback = publicSeoMetadataForPath(pathname);
+    /* 패치 노트 공유 카드 — SNS 크롤러는 JS 를 실행하지 않으므로 서버가
+       최신 패치 번호·요약·카드 이미지를 메타에 넣어야만 미리보기가 살아납니다.
+       카드 URL 에 패치 버전이 들어가 새 패치마다 SNS 캐시를 자연 우회합니다.
+       근거: docs/mockups/patch-share-card.html §03 */
+    const patchNotesLocale = publicUrlLocaleFromPathname(pathname) ?? "ko";
+    if (stripPublicUrlLocalePrefix(pathname).replace(/\/$/u, "") === "/patch-notes" && input.patchNotes) {
+      try {
+        const feed = await input.patchNotes.getFeed(patchNotesLocale);
+        const latest = latestPatchNoteWithVersion(feed);
+        if (latest?.patchVersion) {
+          const ja = patchNotesLocale === "ja";
+          return {
+            ...fallback,
+            title: ja
+              ? `LoL パッチ ${latest.patchVersion} | YORO.gg`
+              : `LoL 패치 ${latest.patchVersion} | YORO.gg`,
+            description: latest.summary ?? fallback.description,
+            imageUrl: new URL(
+              `/social/patch-notes/${patchNotesLocale}/${latest.patchVersion}.png`,
+              "https://yoro.gg",
+            ).href,
+            imageAlt: ja
+              ? `LoL パッチ ${latest.patchVersion} プレビュー`
+              : `LoL 패치 ${latest.patchVersion} 미리보기`,
+          };
+        }
+      } catch {
+        /* 피드가 없으면 기존 고정 문구로 동작합니다 — 공유가 깨질 이유는 아닙니다. */
+      }
+    }
     const palworldRoute = palworldEntityRouteForPath(pathname);
     if (palworldRoute) {
       const { entity } = resolvePalworldSeoEntity(pathname);
@@ -3683,6 +3719,62 @@ export function createHttpHandler(input: HttpHandlerInput) {
       /* 일시 오류로 프로필을 못 읽었을 때 generic 페이지가 색인되면 낮은 품질
          스냅샷이 남습니다 — 오류 응답도 색인 대상에서 제외합니다. */
       return { ...fallback, robotsNoindex: true };
+    }
+  }
+
+  /* /social/patch-notes/<locale>/<version>.png — 버전이 URL 에 들어가므로
+     응답은 immutable 캐시가 안전하고, 새 패치는 새 URL 이 됩니다. */
+  async function sendPatchNotesSocialImage(
+    req: IncomingMessage,
+    res: ServerResponse,
+    pathname: string,
+  ): Promise<boolean> {
+    const match = /^\/social\/patch-notes\/(ko|ja)\/(\d{1,2}\.\d{1,2})\.png$/u.exec(pathname);
+    if (!match?.[1] || !match[2]) return false;
+    const locale = match[1] as "ko" | "ja";
+    const version = match[2];
+    const sendFallback = async () => {
+      await sendStaticFile(
+        req,
+        res,
+        path.resolve(appConfig.paths.dashboardStatic, "images", "yorogg-og.png"),
+        { "Cache-Control": "no-store" },
+      );
+    };
+    try {
+      const feed = input.patchNotes ? await input.patchNotes.getFeed(locale) : undefined;
+      const note = feed?.notes.find((candidate) => candidate.patchVersion === version);
+      const model = note ? patchNotesCardModel(note) : undefined;
+      if (!model) {
+        /* 피드에 없는 버전은 기본 OG 이미지로 — 공유 카드가 깨진 이미지로 남지 않게. */
+        await sendFallback();
+        return true;
+      }
+      const body = await patchNotesSocialCardRenderer.render(model, locale);
+      const etag = `"patch-social-${locale}-${version}"`;
+      const headers = {
+        "Content-Type": "image/png",
+        "Content-Length": String(body.length),
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "ETag": etag,
+        ...securityHeadersForRequest(req),
+      };
+      if (req.headers["if-none-match"]?.split(",").map((value) => value.trim()).includes(etag)) {
+        res.writeHead(304, headers);
+        res.end();
+        return true;
+      }
+      res.writeHead(200, headers);
+      res.end(req.method === "HEAD" ? undefined : body);
+      return true;
+    } catch (error) {
+      input.logger?.error({
+        type: "patch_notes.social_image_failed",
+        errorCode: "render_failed",
+        error: toSafeErrorMessage(error),
+      });
+      await sendFallback();
+      return true;
     }
   }
 
@@ -7691,6 +7783,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
           });
         }
         if (await sendPublicLolSocialImage(req, res, url.pathname)) return;
+        if (await sendPatchNotesSocialImage(req, res, url.pathname)) return;
         if (sendPublicSitemap(req, res, url.pathname)) return;
         if (await sendPublicDashboardAsset(req, res, url.pathname)) return;
         // 기존 `?pal=` 상세 query는 고유 URL로 영구 이전합니다. 두 URL이 같은 내용을

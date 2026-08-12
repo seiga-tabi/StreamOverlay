@@ -180,3 +180,98 @@ test("언어를 header 로 고른 응답은 공용 캐시에 두지 않는다", 
   assert.match(res.headers["Cache-Control"], /^private,/u);
   assert.equal(res.headers.Vary, "Accept-Language");
 });
+
+/* ---------- SNS 공유 카드 (docs/mockups/patch-share-card.html §03) ---------- */
+
+function fakePatchNotes(notes) {
+  return {
+    async getFeed(locale) {
+      return {
+        schemaVersion: 1,
+        locale,
+        fetchedAt: "2026-08-12T00:00:00.000Z",
+        stale: false,
+        notes
+      };
+    }
+  };
+}
+
+const cardNote = {
+  slug: "league-of-legends-patch-26-16-notes",
+  title: "리그 오브 레전드 26.16 패치 노트",
+  summary: "챔피언과 체계 업데이트, 클래식에 찾아온 닌자 등 다양한 변경 사항을 확인해 보세요!",
+  publishedAt: "2026-08-11T18:00:00.000Z",
+  patchVersion: "26.16",
+  url: "https://www.leagueoflegends.com/ko-kr/news/game-updates/league-of-legends-patch-26-16-notes"
+  /* imageUrl 없음 — 테스트가 원격을 부르지 않도록 폴백형 경로만 씁니다.
+     키 아트 합성은 patch-notes-social-card.test.mjs 가 fetch 스텁으로 검증합니다. */
+};
+
+test("패치 카드 이미지는 버전 키 immutable 로 나가고, 모르는 버전은 기본 OG 로 폴백한다", async () => {
+  const { mkdtempSync, writeFileSync, mkdirSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const previousStatic = appConfig.paths.dashboardStatic;
+  const dir = mkdtempSync(path.join(tmpdir(), "patch-card-"));
+  mkdirSync(path.join(dir, "images"), { recursive: true });
+  /* 폴백 파일 — 내용은 중요하지 않고 존재만 하면 됩니다. */
+  writeFileSync(path.join(dir, "images", "yorogg-og.png"), Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+  appConfig.paths.dashboardStatic = dir;
+  try {
+    const handler = handlerWith(fakePatchNotes([cardNote]));
+    const hit = await get(handler, "/social/patch-notes/ko/26.16.png");
+    assert.equal(hit.statusCode, 200);
+    assert.equal(hit.headers["Content-Type"], "image/png");
+    assert.equal(hit.headers["Cache-Control"], "public, max-age=31536000, immutable");
+    assert.match(hit.headers.ETag, /patch-social-ko-26\.16/u);
+
+    const cached = await get(handler, "/social/patch-notes/ko/26.16.png", { "if-none-match": hit.headers.ETag });
+    assert.equal(cached.statusCode, 304);
+
+    /* 피드에 없는 버전 — 깨진 이미지 대신 기본 OG, 캐시 금지. */
+    const unknown = await get(handler, "/social/patch-notes/ko/99.99.png");
+    assert.equal(unknown.statusCode, 200);
+    assert.equal(unknown.headers["Cache-Control"], "no-store");
+
+    /* 형식 밖 경로는 카드 라우트가 아닙니다. */
+    const invalid = await get(handler, "/social/patch-notes/en/26.16.png");
+    assert.notEqual(invalid.headers["Content-Type"], "image/png");
+  } finally {
+    appConfig.paths.dashboardStatic = previousStatic;
+  }
+});
+
+test("패치 노트 HTML 공유 메타는 최신 패치 번호·요약·버전 키 카드 URL 을 담는다", async () => {
+  const { mkdtempSync, writeFileSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const previousStatic = appConfig.paths.dashboardStatic;
+  const dir = mkdtempSync(path.join(tmpdir(), "patch-seo-"));
+  writeFileSync(
+    path.join(dir, "index.html"),
+    '<!doctype html><head><meta name="description" content="home">'
+    + '<link rel="canonical" href="https://yoro.gg/">'
+    + '<meta property="og:title" content="home"><meta property="og:description" content="home">'
+    + '<meta property="og:url" content="https://yoro.gg/">'
+    + '<meta property="og:image" content="https://yoro.gg/images/yorogg-og.png" />'
+    + '<meta property="og:image:secure_url" content="https://yoro.gg/images/yorogg-og.png" />'
+    + '<meta property="og:image:alt" content="preview" />'
+    + '<meta property="og:image:type" content="image/png" />'
+    + '<meta property="og:image:width" content="1200" />'
+    + '<meta property="og:image:height" content="630" />'
+    + '<meta name="twitter:title" content="home"><meta name="twitter:description" content="home">'
+    + '<meta name="twitter:image" content="https://yoro.gg/images/yorogg-og.png" />'
+    + '<script nonce="__STREAMOPS_CSP_NONCE__" src="/dashboard/config.js"></script>'
+    + '<title>YORO.gg</title></head><div id="root"></div>'
+  );
+  appConfig.paths.dashboardStatic = dir;
+  try {
+    const handler = handlerWith(fakePatchNotes([cardNote]));
+    const res = await get(handler, "/ko/patch-notes");
+    assert.equal(res.statusCode, 200);
+    assert.match(res.body, /LoL 패치 26\.16 \| YORO\.gg/u);
+    assert.match(res.body, /챔피언과 체계 업데이트/u);
+    assert.match(res.body, /https:\/\/yoro\.gg\/social\/patch-notes\/ko\/26\.16\.png/u);
+  } finally {
+    appConfig.paths.dashboardStatic = previousStatic;
+  }
+});
