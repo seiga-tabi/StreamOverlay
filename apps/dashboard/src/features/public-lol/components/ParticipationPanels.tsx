@@ -23,6 +23,7 @@ export type ParticipationStreamerSwitcherProps = {
   avatar?: ReactNode;
   displayName: string;
   isLive?: boolean;
+  loading?: boolean;
   sessionLabel: string;
   sessionTone: "good" | "info" | "warn" | "mute";
   watchUrl?: string;
@@ -35,6 +36,7 @@ export function ParticipationStreamerSwitcher({
   avatar,
   displayName,
   isLive = false,
+  loading = false,
   sessionLabel,
   sessionTone,
   watchUrl,
@@ -68,8 +70,10 @@ export function ParticipationStreamerSwitcher({
           {text.changeLabel}
         </button>
         <button
+          aria-busy={loading}
           aria-label={text.refreshLabel}
-          className="public-participation-mini-button is-icon"
+          className={`public-participation-mini-button is-icon${loading ? " is-spinning" : ""}`}
+          disabled={loading}
           onClick={onRefresh}
           type="button"
         >

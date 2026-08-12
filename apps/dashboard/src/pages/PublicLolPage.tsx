@@ -2887,6 +2887,7 @@ function PublicParticipationJoinPage({
             : selectedStreamer.twitchDisplayName.slice(0, 1)}
           displayName={selectedStreamer.twitchDisplayName}
           isLive={selectedStreamer.isLive === true}
+          loading={loading}
           onChange={onStreamerClear}
           onRefresh={onRefresh}
           sessionLabel={sessionStatusLabel}
@@ -2949,7 +2950,10 @@ function PublicParticipationJoinPage({
 
       {selectedStreamer && !viewerActive ? (
         <form className="public-participation-join" onSubmit={requestJoin}>
-          <div className="public-participation-queue-head">
+          <div className="public-participation-join-head">
+            <span aria-hidden="true" className="public-participation-join-head-icon">
+              <svg fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
+            </span>
             <h3>{t().participationJoinTitle}</h3>
             <span className="public-participation-tag" data-tone={isOpen ? "good" : "warn"}>
               {isOpen ? t().participationSessionRecruiting : t().participationSessionClosed}
@@ -2958,36 +2962,45 @@ function PublicParticipationJoinPage({
 
           {status.connected ? (
             <>
-              <input
-                aria-label={t().participationRiotIdLabel}
-                autoComplete="off"
-                className="public-participation-join-input"
-                disabled={!canJoin || joining}
-                id="public-participation-riot-id"
-                onChange={(event) => {
-                  setRiotIdError("");
-                  onRiotIdChange(event.currentTarget.value);
-                }}
-                placeholder={t().participationRiotIdPlaceholder}
-                value={riotId}
-              />
-              {riotIdError ? <p className="public-participation-join-error" role="alert">{riotIdError}</p> : null}
+              <div className="public-participation-field">
+                <label className="public-participation-field-label" htmlFor="public-participation-riot-id">
+                  {t().participationRiotIdLabel}
+                </label>
+                <input
+                  autoComplete="off"
+                  className="public-participation-join-input"
+                  disabled={!canJoin || joining}
+                  id="public-participation-riot-id"
+                  onChange={(event) => {
+                    setRiotIdError("");
+                    onRiotIdChange(event.currentTarget.value);
+                  }}
+                  placeholder={t().participationRiotIdPlaceholder}
+                  value={riotId}
+                />
+                {riotIdError ? <p className="public-participation-join-error" role="alert">{riotIdError}</p> : null}
+              </div>
 
-              <div aria-label={t().participationRoleLabel} className="public-participation-roles" role="group">
-                {PUBLIC_PARTICIPATION_ROLES.map((item) => (
-                  <button
-                    aria-pressed={role === item}
-                    className={`public-participation-role ${role === item ? "is-active" : ""}`}
-                    disabled={!canJoin || joining}
-                    key={item}
-                    onClick={() => onRoleChange(item)}
-                    title={publicParticipationRoleLabel(item)}
-                    type="button"
-                  >
-                    <RoleIcon role={item} />
-                    {publicParticipationRoleShortLabel(item)}
-                  </button>
-                ))}
+              <div className="public-participation-field">
+                <span className="public-participation-field-label" id="public-participation-role-label">
+                  {t().participationRoleLabel}
+                </span>
+                <div aria-labelledby="public-participation-role-label" className="public-participation-roles" role="group">
+                  {PUBLIC_PARTICIPATION_ROLES.map((item) => (
+                    <button
+                      aria-pressed={role === item}
+                      className={`public-participation-role ${role === item ? "is-active" : ""}`}
+                      disabled={!canJoin || joining}
+                      key={item}
+                      onClick={() => onRoleChange(item)}
+                      title={publicParticipationRoleLabel(item)}
+                      type="button"
+                    >
+                      <RoleIcon role={item} />
+                      {publicParticipationRoleShortLabel(item)}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <button
@@ -2998,6 +3011,9 @@ function PublicParticipationJoinPage({
                 {joining
                   ? t().participationSubmitting
                   : canRejoin ? t().participationRejoin : t().participationSubmit}
+                {!joining ? (
+                  <svg aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7" /></svg>
+                ) : null}
               </button>
             </>
           ) : (

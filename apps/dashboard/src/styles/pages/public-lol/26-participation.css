@@ -98,6 +98,22 @@
     font-size: var(--yoro-font-size-sm);
   }
 
+  .public-participation-mini-button:disabled {
+    opacity: .6;
+    cursor: default;
+  }
+
+  /* 새로고침 버튼 — 클릭해도 눌렀다는 증거가 없어 "안 눌린다"는 신고로 이어졌습니다.
+     회전 애니메이션과 잠금으로 진행 중임을 보여줍니다. */
+  .public-participation-mini-button.is-icon.is-spinning span {
+    display: inline-block;
+    animation: public-participation-refresh-spin 900ms linear infinite;
+  }
+
+  @keyframes public-participation-refresh-spin {
+    to { rotate: 1turn; }
+  }
+
   /* 결함 수정 겸 리디자인 — 32px 아바타는 목록·전환 바 어디서든 존재감이 없었습니다.
      "이 스트리머와 함께한다"는 느낌을 주려고 키우고, LIVE 는 정적 링 대신 은은한
      펄스로 바꿨습니다(reduced-motion 에서는 정지 링만 남습니다). */
@@ -145,6 +161,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     .public-participation-switcher-avatar.is-live::after { animation: none; display: none; }
+    .public-participation-mini-button.is-icon.is-spinning span { animation: none; }
   }
 
   /* ── 전환 바 ───────────────────────────────────────────── */
@@ -474,18 +491,59 @@
   .public-participation-cancel:disabled { opacity: .6; cursor: default; }
 
   /* ── 참여 신청 ─────────────────────────────────────────── */
+  /* 결함 수정 겸 리디자인 — 카드 배경이 보라 그라디언트로 시끄러워 보이던 것을
+     표준 서페이스 색으로 낮추고, 강조는 헤더 아이콘 뱃지 하나로 모았습니다. */
   .public-participation-join {
     display: flex;
     flex-direction: column;
-    gap: var(--yoro-space-3);
+    gap: var(--yoro-space-4);
     padding: var(--yoro-space-4);
-    border: 1px solid color-mix(in srgb, var(--yoro-color-public-primary) 55%, transparent);
+    border: 1px solid var(--yoro-color-border-on-dark);
     border-radius: var(--yoro-radius-lg);
-    background: linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--yoro-color-public-primary) 12%, var(--yoro-color-ground-surface)),
-      var(--yoro-color-ground-surface)
-    );
+    background: var(--yoro-color-ground-surface);
+  }
+
+  .public-participation-join-head {
+    display: flex;
+    align-items: center;
+    gap: var(--yoro-space-2);
+    padding-bottom: var(--yoro-space-3);
+    border-bottom: 1px solid var(--yoro-color-border-on-dark);
+  }
+
+  .public-participation-join-head-icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--yoro-radius-sm);
+    background: color-mix(in srgb, var(--yoro-color-public-primary) 20%, transparent);
+    color: var(--yoro-color-public-primary);
+  }
+
+  .public-participation-join-head-icon svg { width: 1.05rem; height: 1.05rem; }
+
+  .public-participation-join-head h3 {
+    margin: 0;
+    font-size: var(--yoro-font-size-md);
+    font-weight: var(--yoro-font-weight-black);
+  }
+
+  .public-participation-join-head .public-participation-tag {
+    margin-inline-start: auto;
+  }
+
+  .public-participation-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--yoro-space-2);
+  }
+
+  .public-participation-field-label {
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-bold);
+    color: var(--yoro-color-text-on-dark-muted);
   }
 
   .public-participation-join-input {
@@ -517,17 +575,17 @@
   .public-participation-roles {
     display: grid;
     grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: var(--yoro-space-1);
+    gap: var(--yoro-space-2);
   }
 
   .public-participation-role {
     display: grid;
     place-items: center;
-    gap: .1875rem;
+    gap: .25rem;
     /* 44px 최소 기준(--yoro-size-touch-target)을 먼저 만족시키고, 디자인상
-       더 크게 키운 값으로 덮어씁니다(52px > 44px, 기준 위반 아님). */
+       더 크게 키운 값으로 덮어씁니다(54.4px > 44px, 기준 위반 아님). */
     min-height: var(--yoro-size-touch-target);
-    min-height: 3.25rem;
+    min-height: 3.4rem;
     padding: var(--yoro-space-1) .125rem;
     border: 1.5px solid var(--yoro-color-border-on-dark);
     border-radius: var(--yoro-radius-md);
@@ -539,10 +597,16 @@
     line-height: 1.1;
     cursor: pointer;
     transition: border-color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
-      background var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard);
+      background var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
+      color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard);
   }
 
   .public-participation-role > svg { width: 1.15rem; height: 1.15rem; }
+
+  .public-participation-role:hover {
+    border-color: var(--yoro-color-border-on-dark-strong);
+    color: var(--yoro-color-text-on-dark);
+  }
 
   .public-participation-role.is-active {
     border-color: var(--yoro-color-public-primary);
@@ -555,6 +619,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: var(--yoro-space-2);
     width: 100%;
     /* 44px 최소 기준(--yoro-size-touch-target)을 먼저 만족시키고, 디자인상
        더 크게 키운 값으로 덮어씁니다(52px > 44px, 기준 위반 아님). */
@@ -578,6 +643,8 @@
   }
 
   .public-participation-submit:disabled { opacity: .5; cursor: default; }
+
+  .public-participation-submit svg { width: 1.05rem; height: 1.05rem; flex: none; }
 
   /* ── 대기열 ────────────────────────────────────────────── */
   .public-participation-qpanel {
