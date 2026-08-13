@@ -4066,26 +4066,29 @@ test("지도는 확대 후 이동 위치를 URL 동기화가 되돌리지 않고
   await expect(page.locator("#palworld-map-marker-popover")).toBeVisible();
   await page.keyboard.press("Escape");
 
-  /* ③ ctrl+휠 줌은 기본 동작(브라우저 페이지 줌)을 막고 지도 줌만 바꾼다 —
-     synthetic onWheel 은 React 의 passive root 리스너라 preventDefault 가 통하지 않았다. */
-  const zoomBefore = await mapStage.evaluate(
+  /* ③ Alt+휠 줌은 기본 동작을 막고 지도 줌만 바꾼다. Ctrl+휠은 브라우저 페이지 줌과
+     겹치므로 더 이상 지도 줌 수정키가 아니다(이벤트를 소비하지 않아야 한다). */
+  const readZoom = () => mapStage.evaluate(
     (element) => window.getComputedStyle(element).getPropertyValue("--palworld-map-zoom"),
   );
-  const prevented = await viewport.evaluate((element) => {
+  const dispatchWheel = (modifier: "alt" | "ctrl") => viewport.evaluate((element, kind) => {
     const rect = element.getBoundingClientRect();
     return !element.dispatchEvent(new WheelEvent("wheel", {
       bubbles: true,
       cancelable: true,
       clientX: rect.left + (rect.width / 2),
       clientY: rect.top + (rect.height / 2),
-      ctrlKey: true,
+      altKey: kind === "alt",
+      ctrlKey: kind === "ctrl",
       deltaY: -240,
     }));
-  });
-  expect(prevented).toBe(true);
-  await expect.poll(() => mapStage.evaluate(
-    (element) => window.getComputedStyle(element).getPropertyValue("--palworld-map-zoom"),
-  )).not.toBe(zoomBefore);
+  }, modifier);
+  const zoomBefore = await readZoom();
+  expect(await dispatchWheel("ctrl")).toBe(false);
+  await page.waitForTimeout(120);
+  expect(await readZoom()).toBe(zoomBefore);
+  expect(await dispatchWheel("alt")).toBe(true);
+  await expect.poll(readZoom).not.toBe(zoomBefore);
   await assertHealthyDocument(page, errors);
 });
 

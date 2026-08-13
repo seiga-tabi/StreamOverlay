@@ -27,11 +27,14 @@ export type PalworldMapViewState = PalworldMapPoint & {
 export type PalworldMapTouchMode = "map" | "page-scroll";
 export type PalworldMapWheelMode = "always" | "modifier";
 
+/* 수정키는 Alt(mac Option) — Ctrl/⌘+휠은 브라우저 페이지 줌과 겹쳐
+   지도 줌과 화면 줌이 동시에 걸린다. Alt+휠의 브라우저 기본 동작(Firefox
+   히스토리 이동)은 non-passive 리스너의 preventDefault 로 차단된다. */
 export function shouldZoomPalworldMapFromWheel(
   wheelMode: PalworldMapWheelMode,
-  modifiers: Readonly<{ ctrlKey: boolean; metaKey: boolean }>,
+  modifiers: Readonly<{ altKey: boolean }>,
 ): boolean {
-  return wheelMode === "always" || modifiers.ctrlKey || modifiers.metaKey;
+  return wheelMode === "always" || modifiers.altKey;
 }
 
 type PalworldMapGesture =

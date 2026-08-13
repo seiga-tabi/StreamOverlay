@@ -1840,7 +1840,7 @@ test("월드 지도는 generated manifest의 content-hash WebP와 한국어·일
   assert.match(korean, /class="[^"]*palworld-map-control is-zoom-out[^"]*"/u);
   assert.match(korean, /class="palworld-map-zoom-output"/u);
   assert.match(korean, /class="[^"]*palworld-map-control is-zoom-reset[^"]*"/u);
-  assert.match(korean, /<kbd>Ctrl\/⌘ \+ Wheel<\/kbd>/u);
+  assert.match(korean, /<kbd>Alt\/⌥ \+ Wheel<\/kbd>/u);
   assert.match(korean, />확대·축소</u);
   assert.match(japanese, />拡大・縮小</u);
   assert.doesNotMatch(korean, /게임 내 좌표로 이동/u);
@@ -2088,19 +2088,19 @@ test("월드 지도 이동과 기준점 확대는 지도 경계를 벗어나지 
   assert.equal(zoomPalworldMapViewAt, zoomSharedPalworldMapViewAt);
   assert.equal(focusPalworldMapViewAt, focusSharedPalworldMapViewAt);
   assert.equal(
-    shouldZoomPalworldMapFromWheel("modifier", { ctrlKey: false, metaKey: false }),
+    shouldZoomPalworldMapFromWheel("modifier", { altKey: false }),
     false,
   );
   assert.equal(
-    shouldZoomPalworldMapFromWheel("modifier", { ctrlKey: true, metaKey: false }),
+    shouldZoomPalworldMapFromWheel("modifier", { altKey: true }),
     true,
   );
   assert.equal(
-    shouldZoomPalworldMapFromWheel("modifier", { ctrlKey: false, metaKey: true }),
+    shouldZoomPalworldMapFromWheel("modifier", { altKey: true }),
     true,
   );
   assert.equal(
-    shouldZoomPalworldMapFromWheel("always", { ctrlKey: false, metaKey: false }),
+    shouldZoomPalworldMapFromWheel("always", { altKey: false }),
     true,
   );
   // stage 는 뷰포트 폭 기준 정사각입니다. 세로 한계도 폭(1,000)으로 셉니다 —
