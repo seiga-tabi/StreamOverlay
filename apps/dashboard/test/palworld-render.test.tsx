@@ -1341,6 +1341,11 @@ test("교배 UI는 결과 Pal을 강조하고 역검색 카드에서 목표 Pal 
     breedingCss,
     /\.palworld-breeding-combination-row\s*\{[\s\S]*?content-visibility:\s*auto;/u,
   );
+  /* 하단 고정 시트·본문 스크롤 컨테이너는 svh 를 쓴다 — dvh 는 모바일 URL 바가
+     접힐 때마다 값이 변해 하단 바가 위로 튀는 글리치를 만든다(Modal 은 예외). */
+  assert.match(breedingCss, /\.palworld-map-sheet\s*\{[^}]*block-size:\s*78svh;/u);
+  assert.doesNotMatch(breedingCss, /\.palworld-map-sheet\s*\{[^}]*dvh/u);
+  assert.match(breedingCss, /\.palworld-breeding-combination-scroll\s*\{[^}]*62svh/u);
   assert.match(
     breedingCss,
     /\.palworld-breeding-result > \.palworld-section-title\s*\{[\s\S]*?padding-block-start:\s*var\(--yoro-space-4\);/u,

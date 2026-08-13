@@ -870,7 +870,7 @@
 }
 
 .palworld-map-legend-content {
-  max-block-size: min(30rem, 58dvh);
+  max-block-size: min(30rem, 58svh);
   overflow-y: auto;
   padding: var(--yoro-space-3);
   border-block-start: thin solid var(--yoro-color-border);
@@ -3528,7 +3528,7 @@
 }
 
 .palworld-breeding-combination-scroll {
-  block-size: clamp(28rem, 62dvh, 42rem);
+  block-size: clamp(28rem, 62svh, 42rem);
   min-inline-size: 0;
   overflow-y: auto;
   contain: layout paint;
@@ -5570,7 +5570,10 @@
     inset-inline: 0;
     inset-block-end: var(--public-bottom-tab-bar-height, 0px);
     z-index: var(--yoro-z-overlay);
-    block-size: 78dvh;
+    /* 동적 뷰포트 단위는 URL 바가 접힐 때마다 변해 bottom 고정 시트의 손잡이가
+       위로 튀었다 내려오는 글리치를 만든다(레이아웃은 즉시, transform 전환은
+       180ms 뒤따름). small 뷰포트 단위는 스크롤 중 상수라 하단 바가 움직이지 않는다. */
+    block-size: 78svh;
     overflow: clip;
     pointer-events: none;
   }
@@ -5808,7 +5811,7 @@
   }
 
   .palworld-map-viewport {
-    max-block-size: min(58dvh, 40rem);
+    max-block-size: min(58svh, 40rem);
   }
 
   .palworld-map-page > .palworld-page-heading {
@@ -5976,7 +5979,7 @@
     z-index: var(--yoro-z-dropdown);
     inset-inline: 0;
     inset-block-start: 100%;
-    max-block-size: min(20rem, 45dvh);
+    max-block-size: min(20rem, 45svh);
     margin-block-start: var(--yoro-space-1);
     overflow: auto;
     border: thin solid var(--yoro-color-border-strong);
@@ -6043,7 +6046,7 @@
 
   .palworld-picker .palworld-picker-list {
     position: static;
-    max-block-size: min(20rem, 45dvh);
+    max-block-size: min(20rem, 45svh);
   }
 
   .palworld-special-parent-flow {
@@ -6197,7 +6200,7 @@
   }
 
   .palworld-breeding-combination-scroll {
-    block-size: clamp(24rem, 58dvh, 34rem);
+    block-size: clamp(24rem, 58svh, 34rem);
     scrollbar-gutter: auto;
   }
 
