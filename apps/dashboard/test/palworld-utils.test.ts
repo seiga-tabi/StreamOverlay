@@ -42,6 +42,11 @@ import {
 } from "../src/features/public-palworld/utils/breeding";
 import { parseRecentPals } from "../src/features/public-palworld/utils/recent-pals";
 import {
+  clampPalworldMapView,
+  focusPalworldMapViewAt,
+  palworldMapCenterFromView,
+} from "../src/features/public-palworld/hooks/usePalworldMapViewport";
+import {
   clearPalworldPalsFilterParams,
   palworldPalsDetailFilterCount,
   updatePalworldPalsParams,
@@ -1259,6 +1264,26 @@ test("교배 URL query는 exact ID·성별·page만 슬롯 상태로 복원한�
   ]) {
     assert.equal(parsePalworldBreedingQuery(new URLSearchParams(invalid)).ok, false, invalid);
   }
+});
+
+test("지도 center 저장·복원은 넓은 뷰포트에서도 왕복 항등이다 — y를 높이로 나누면 팬이 북쪽으로 스냅백한다", () => {
+  const width = 1280;
+  const height = 640;
+  const zoom = 3;
+  /* clamp 범위 안의 임의 시점(남동쪽으로 팬한 상태) */
+  const view = clampPalworldMapView({ x: -900, y: -1400, zoom }, width, height);
+  const center = palworldMapCenterFromView(view, width, height);
+  assert.ok(center);
+  const restored = focusPalworldMapViewAt(
+    { normalizedX: center!.x, normalizedY: center!.y },
+    width,
+    height,
+    zoom,
+  );
+  assert.ok(Math.abs(restored.x - view.x) < 0.001, `x 왕복 오차: ${restored.x} vs ${view.x}`);
+  assert.ok(Math.abs(restored.y - view.y) < 0.001, `y 왕복 오차: ${restored.y} vs ${view.y}`);
+  /* stage 는 두 축 모두 폭 기준 정사각 — y 정규화도 폭×zoom 분모를 쓴다. */
+  assert.ok(Math.abs(((height / 2) - view.y) / (width * zoom) - center!.y) < 0.000001);
 });
 
 test("최근 사용 Pal 저장값은 필드 단위로 검증하고 형식 밖 항목·외부 이미지·중복을 버린다", () => {

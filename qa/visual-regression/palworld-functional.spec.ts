@@ -3473,31 +3473,37 @@ for (const viewport of breedingResponsiveViewports) {
     await expect(partnerCells.nth(0)).toBeVisible();
     await expect(partnerCells.nth(1)).toBeVisible();
     await expect(partnerCells.nth(2)).toBeVisible();
-    if (viewport.width <= 768) {
-      const parentCells = partnerRow.locator(":scope > .palworld-breeding-combination-cell.is-pal");
-      const resultCell = partnerRow.locator(":scope > .palworld-breeding-combination-result");
-      const [firstParentBounds, secondParentBounds, resultBounds] = await Promise.all([
-        parentCells.nth(0).boundingBox(),
-        parentCells.nth(1).boundingBox(),
-        resultCell.boundingBox(),
-      ]);
-      expect(firstParentBounds).not.toBeNull();
-      expect(secondParentBounds).not.toBeNull();
-      expect(resultBounds).not.toBeNull();
-      expect(secondParentBounds!.y).toBeGreaterThan(firstParentBounds!.y);
-      expect(resultBounds!.y).toBeGreaterThan(secondParentBounds!.y);
+    const parentCells = partnerRow.locator(":scope > .palworld-breeding-combination-cell.is-pal");
+    const resultCell = partnerRow.locator(":scope > .palworld-breeding-combination-result");
+    const [firstParentBounds, secondParentBounds, resultBounds] = await Promise.all([
+      parentCells.nth(0).boundingBox(),
+      parentCells.nth(1).boundingBox(),
+      resultCell.boundingBox(),
+    ]);
+    expect(firstParentBounds).not.toBeNull();
+    expect(secondParentBounds).not.toBeNull();
+    expect(resultBounds).not.toBeNull();
+    /* 부모 두 칸은 모든 폭에서 한 줄 수식으로 나란히 (높이가 달라도 중심선 기준) */
+    const centerY = (bounds: { y: number; height: number }) => bounds.y + bounds.height / 2;
+    expect(secondParentBounds!.x).toBeGreaterThan(firstParentBounds!.x);
+    expect(Math.abs(centerY(secondParentBounds!) - centerY(firstParentBounds!))).toBeLessThanOrEqual(3);
+    if (viewport.width <= 1024) {
+      /* 태블릿·모바일: 결과 셀은 폭 확보를 위해 2행째 */
+      expect(resultBounds!.y).toBeGreaterThan(firstParentBounds!.y);
     } else {
-      const [firstCellBounds, secondCellBounds, resultCellBounds] = await Promise.all([
-        partnerCells.nth(0).boundingBox(),
-        partnerCells.nth(1).boundingBox(),
-        partnerCells.nth(2).boundingBox(),
-      ]);
-      expect(firstCellBounds).not.toBeNull();
-      expect(secondCellBounds).not.toBeNull();
-      expect(resultCellBounds).not.toBeNull();
-      expect(secondCellBounds!.x).toBeGreaterThan(firstCellBounds!.x);
-      expect(resultCellBounds!.x).toBeGreaterThan(secondCellBounds!.x);
+      expect(resultBounds!.x).toBeGreaterThan(secondParentBounds!.x);
+      expect(Math.abs(centerY(resultBounds!) - centerY(firstParentBounds!))).toBeLessThanOrEqual(8);
     }
+    /* 결과 팰 텍스트와 배지·"보드에 채우기" 버튼이 겹치지 않는다 */
+    const useButtonBounds = await partnerRow.getByRole("button", { name: /^보드에 채우기/u }).boundingBox();
+    const resultNameBounds = await resultCell.locator("strong").first().boundingBox();
+    expect(useButtonBounds).not.toBeNull();
+    expect(resultNameBounds).not.toBeNull();
+    const buttonOverlapsName = useButtonBounds!.y < resultNameBounds!.y + resultNameBounds!.height
+      && useButtonBounds!.y + useButtonBounds!.height > resultNameBounds!.y
+      && useButtonBounds!.x < resultNameBounds!.x + resultNameBounds!.width
+      && useButtonBounds!.x + useButtonBounds!.width > resultNameBounds!.x;
+    expect(buttonOverlapsName).toBe(false);
     await assertHealthyDocument(page, errors);
   });
 }
@@ -3981,6 +3987,105 @@ test("월드 지도 메뉴는 직접 URL·확대·초기화·뒤로 가기와 �
   await expect(page.getByRole("heading", { name: "Palworld ワールドマップ", level: 1 })).toHaveClass(/yoro-u-sr-only/u);
   await expect(page.getByRole("button", { name: "マップを拡大" })).toBeVisible();
   await expect(page.getByRole("button", { name: "フィールドボス: アヌビス, Lv.55" })).toBeVisible();
+  await assertHealthyDocument(page, errors);
+});
+
+test("지도는 확대 후 이동 위치를 URL 동기화가 되돌리지 않고 마커 위 드래그와 ctrl+휠 줌을 지원한다", async ({ page }) => {
+  const errors = collectRuntimeErrors(page);
+  await page.goto("/palworld/map?zoom=3");
+  const viewport = page.getByTestId("palworld-map-viewport");
+  const mapStage = page.getByTestId("palworld-map-stage");
+  await expect(page.getByTestId("palworld-map-image")).toBeVisible();
+  await viewport.scrollIntoViewIfNeeded();
+  const translateY = () => mapStage.evaluate(
+    (element) => new DOMMatrixReadOnly(window.getComputedStyle(element).transform).f,
+  );
+
+  /* ① 확대 상태에서 남쪽으로 팬 → URL 동기화 사이클(240ms) 뒤에도 위치가 유지된다.
+     회귀: center 의 y 를 뷰포트 높이로 정규화하면 복원 때 w/h 배로 틀어져 북쪽으로 스냅백했다. */
+  const bounds = (await viewport.boundingBox())!;
+  await page.mouse.move(bounds.x + (bounds.width / 2), bounds.y + (bounds.height * 0.75));
+  await page.mouse.down();
+  await page.mouse.move(bounds.x + (bounds.width / 2), bounds.y + (bounds.height * 0.15), { steps: 6 });
+  await page.mouse.up();
+  const afterDrag = await translateY();
+  await page.waitForTimeout(700);
+  const afterSync = await translateY();
+  expect(Math.abs(afterSync - afterDrag)).toBeLessThanOrEqual(1);
+  await expect.poll(() => new URL(page.url()).searchParams.has("y")).toBe(true);
+
+  /* ② 보스 마커 위에서 시작한 드래그도 지도를 팬하고, 드래그 후 클릭은 삼켜져 마커가 열리지 않는다.
+     남쪽으로 팬한 상태에는 화면에 마커가 없을 수 있으므로 전체 지도로 초기화해 진행한다. */
+  await page.goto("/palworld/map");
+  await expect(page.getByTestId("palworld-map-image")).toBeVisible();
+  await viewport.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(300);
+  /* 모바일 뷰포트는 정사각이라 줌 1에서 팬 여지가 0 — 한 단계 확대해 여지를 만든다. */
+  await page.getByRole("button", { name: "지도 확대" }).first().click();
+  await page.waitForTimeout(300);
+  const visibleMarkerBox = async (): Promise<{ x: number; y: number } | null> => {
+    const viewportBox = (await viewport.boundingBox())!;
+    const markers = page.locator(".palworld-map-boss-marker");
+    const markerCount = await markers.count();
+    for (let index = 0; index < markerCount; index += 1) {
+      const box = await markers.nth(index).boundingBox();
+      if (
+        box
+        && box.x > viewportBox.x + 8
+        && box.y > viewportBox.y + 8
+        && box.x + box.width < viewportBox.x + viewportBox.width - 8
+        && box.y + box.height < viewportBox.y + viewportBox.height - 96
+      ) {
+        return { x: box.x + (box.width / 2), y: box.y + (box.height / 2) };
+      }
+    }
+    return null;
+  };
+  const translateXY = () => mapStage.evaluate((element) => {
+    const matrix = new DOMMatrixReadOnly(window.getComputedStyle(element).transform);
+    return { x: matrix.e, y: matrix.f };
+  });
+  const dragStart = await visibleMarkerBox();
+  expect(dragStart).not.toBeNull();
+  const beforeMarkerDrag = await translateXY();
+  await page.mouse.move(dragStart!.x, dragStart!.y);
+  await page.mouse.down();
+  /* 중앙 확대 직후라 양방향 모두 팬 여지가 있다. */
+  await page.mouse.move(dragStart!.x - 90, dragStart!.y - 90, { steps: 6 });
+  await page.mouse.up();
+  const afterMarkerDrag = await translateXY();
+  expect(
+    Math.abs(afterMarkerDrag.x - beforeMarkerDrag.x) + Math.abs(afterMarkerDrag.y - beforeMarkerDrag.y),
+  ).toBeGreaterThan(30);
+  await expect(page.locator("#palworld-map-marker-popover")).toHaveCount(0);
+
+  /* 이동 없는 클릭은 여전히 마커를 연다. */
+  const clickPoint = await visibleMarkerBox();
+  expect(clickPoint).not.toBeNull();
+  await page.mouse.click(clickPoint!.x, clickPoint!.y);
+  await expect(page.locator("#palworld-map-marker-popover")).toBeVisible();
+  await page.keyboard.press("Escape");
+
+  /* ③ ctrl+휠 줌은 기본 동작(브라우저 페이지 줌)을 막고 지도 줌만 바꾼다 —
+     synthetic onWheel 은 React 의 passive root 리스너라 preventDefault 가 통하지 않았다. */
+  const zoomBefore = await mapStage.evaluate(
+    (element) => window.getComputedStyle(element).getPropertyValue("--palworld-map-zoom"),
+  );
+  const prevented = await viewport.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return !element.dispatchEvent(new WheelEvent("wheel", {
+      bubbles: true,
+      cancelable: true,
+      clientX: rect.left + (rect.width / 2),
+      clientY: rect.top + (rect.height / 2),
+      ctrlKey: true,
+      deltaY: -240,
+    }));
+  });
+  expect(prevented).toBe(true);
+  await expect.poll(() => mapStage.evaluate(
+    (element) => window.getComputedStyle(element).getPropertyValue("--palworld-map-zoom"),
+  )).not.toBe(zoomBefore);
   await assertHealthyDocument(page, errors);
 });
 

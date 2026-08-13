@@ -3664,7 +3664,7 @@
 }
 
 .palworld-breeding-combination-pal {
-  grid-template-columns: 3rem minmax(0, 1fr);
+  grid-template-columns: 3.5rem minmax(0, 1fr);
   inline-size: 100%;
   min-block-size: var(--yoro-size-touch-target);
   padding: var(--yoro-space-1);
@@ -3758,6 +3758,24 @@
 
 .palworld-breeding-combination-mobile-label {
   display: none;
+}
+
+/* 태블릿: partner 행의 결과 셀이 좁아 배지·버튼이 결과 팰 위로 겹치므로 행을 나눠 폭을 확보 */
+@media (min-width: 48.001rem) and (max-width: 64rem) {
+  .palworld-breeding-combination-list.is-partner-results .palworld-breeding-combination-row {
+    grid-template-columns: minmax(0, 1fr) 2rem minmax(0, 1fr);
+  }
+
+  .palworld-breeding-combination-list.is-partner-results .palworld-breeding-combination-symbol.is-arrow {
+    display: none;
+  }
+
+  .palworld-breeding-combination-list.is-partner-results .palworld-breeding-combination-result {
+    grid-column: 1 / -1;
+    margin-block-start: var(--yoro-space-1);
+    padding-block-start: var(--yoro-space-2);
+    border-block-start: thin solid var(--yoro-color-border);
+  }
 }
 
 .palworld-breeding-combination-invalid {
@@ -6200,69 +6218,67 @@
     text-align: start;
   }
 
+  /* 조합식은 모바일에서도 수식으로 읽히게 — 1행: A × B, 2행: 결과·조건·액션 */
   .palworld-breeding-combination-row,
   .palworld-breeding-combination-list.is-reverse-results .palworld-breeding-combination-row {
-    grid-template-columns: minmax(0, 1fr);
-    align-items: stretch;
+    grid-template-columns: minmax(0, 1fr) 1.25rem minmax(0, 1fr);
+    align-items: center;
     min-block-size: 0;
-    padding: var(--yoro-space-3);
-    gap: var(--yoro-space-2);
+    padding: var(--yoro-space-2) var(--yoro-space-3);
+    gap: var(--yoro-space-1) var(--yoro-space-1);
   }
 
   .palworld-breeding-combination-row > .palworld-breeding-combination-cell.is-pal {
-    grid-column: 1;
     padding: var(--yoro-space-0);
   }
 
-  .palworld-breeding-combination-symbol {
-    display: grid;
-    grid-column: 1;
-    min-block-size: 1.5rem;
+  .palworld-breeding-combination-symbol.is-plus {
+    font-size: var(--yoro-font-size-md);
   }
 
-  .palworld-breeding-combination-mobile-label {
-    display: block;
-    color: var(--yoro-color-text-muted);
-    font-size: var(--yoro-font-size-xs);
-    font-weight: var(--yoro-font-weight-bold);
-  }
-
-  .palworld-breeding-combination-cell.is-pal {
-    align-items: stretch;
-    flex-direction: column;
+  .palworld-breeding-combination-symbol.is-arrow {
+    display: none;
   }
 
   .palworld-breeding-combination-pal {
-    grid-template-columns: 3.5rem minmax(0, 1fr);
-    gap: var(--yoro-space-3);
-    padding: var(--yoro-space-2);
-    background: color-mix(in srgb, var(--yoro-color-surface) 72%, transparent);
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    gap: var(--yoro-space-2);
+    padding: var(--yoro-space-1);
+    min-block-size: 0;
   }
 
   .palworld-breeding-combination-media {
-    inline-size: 3.5rem;
-    block-size: 3.5rem;
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+  }
+
+  .palworld-breeding-combination-copy > strong {
+    -webkit-line-clamp: 1;
+    font-size: var(--yoro-font-size-sm);
+  }
+
+  .palworld-breeding-combination-meta {
+    font-size: var(--yoro-font-size-xs);
   }
 
   .palworld-breeding-combination-result,
   .palworld-breeding-combination-row > .palworld-breeding-combination-cell.is-action {
-    grid-column: 1;
+    grid-column: 1 / -1;
     inline-size: 100%;
-    padding: var(--yoro-space-0);
-    border-block-start: 0;
+    margin-block-start: var(--yoro-space-1);
+    padding: var(--yoro-space-2) var(--yoro-space-0) var(--yoro-space-0);
+    border-block-start: thin solid var(--yoro-color-border);
   }
 
   .palworld-breeding-combination-result {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 
-  .palworld-breeding-combination-result .is-action,
   .palworld-breeding-combination-row > .is-action {
-    justify-items: stretch;
-  }
-
-  .palworld-breeding-combination-result .is-action .palworld-breeding-combination-mobile-label {
-    display: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--yoro-space-2);
   }
 
   .palworld-breeding-combination-badges {

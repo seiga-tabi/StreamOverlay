@@ -4,8 +4,8 @@ import {
   useRef,
   useState,
   type KeyboardEvent,
+  type MouseEvent as ReactMouseEvent,
   type PointerEvent,
-  type WheelEvent,
 } from "react";
 import type { PalworldMapMarker } from "@streamops/shared";
 
@@ -92,6 +92,24 @@ export function zoomPalworldMapViewAt(
   }, viewportWidth, viewportHeight);
 }
 
+/* view → URL center 변환. stage 는 두 축 모두 "뷰포트 폭 × zoom" 기준 정사각이므로
+   y 도 반드시 폭으로 나눈다 — 높이로 나누면 pan 저장/복원 왕복마다 y 가 w/h 배씩 틀어져
+   넓은 화면에서 지도가 북쪽으로 계속 스냅백한다(확대 후 이동 불가 결함의 원인). */
+export function palworldMapCenterFromView(
+  view: Readonly<PalworldMapViewState>,
+  viewportWidth: number,
+  viewportHeight: number,
+): PalworldMapPoint | undefined {
+  if (viewportWidth <= 0 || viewportHeight <= 0 || view.zoom <= 0) {
+    return undefined;
+  }
+  const stageSize = viewportWidth * view.zoom;
+  return {
+    x: Math.min(1, Math.max(0, ((viewportWidth / 2) - view.x) / stageSize)),
+    y: Math.min(1, Math.max(0, ((viewportHeight / 2) - view.y) / stageSize)),
+  };
+}
+
 export function focusPalworldMapViewAt(
   marker: Pick<PalworldMapMarker, "normalizedX" | "normalizedY">,
   viewportWidth: number,
@@ -140,6 +158,8 @@ export function usePalworldMapViewport(
   const passiveTouchRef = useRef(new Map<number, PalworldMapPoint>());
   const gestureRef = useRef<PalworldMapGesture>();
   const renderFrameRef = useRef<number>();
+  const pendingControlPointersRef = useRef(new Map<number, PalworldMapPoint>());
+  const dragOccurredRef = useRef(false);
 
   const commitView = useCallback((nextView: PalworldMapViewState): void => {
     const viewport = viewportRef.current;
@@ -185,6 +205,7 @@ export function usePalworldMapViewport(
   const resetView = useCallback((): void => {
     pointersRef.current.clear();
     passiveTouchRef.current.clear();
+    pendingControlPointersRef.current.clear();
     gestureRef.current = undefined;
     setIsPanning(false);
     /* 넓은 화면에서는 stage 가 뷰포트보다 세로로 커서 북쪽부터 보입니다.
@@ -214,6 +235,39 @@ export function usePalworldMapViewport(
       window.cancelAnimationFrame(renderFrameRef.current);
     }
   }, []);
+
+  /* React 17+ 는 wheel 을 root 에 passive 로 붙이므로 synthetic onWheel 에서는
+     preventDefault 가 통하지 않는다(ctrl+휠이 지도 줌과 브라우저 페이지 줌을 동시에
+     일으킴). 뷰포트에 non-passive 네이티브 리스너를 직접 단다. */
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) {
+      return;
+    }
+    const handleNativeWheel = (event: globalThis.WheelEvent): void => {
+      if (!enabled || !shouldZoomPalworldMapFromWheel(wheelMode, event)) {
+        return;
+      }
+      event.preventDefault();
+      const bounds = viewport.getBoundingClientRect();
+      const wheelDelta = event.deltaMode === 1 ? event.deltaY * 16 : event.deltaY;
+      zoomAt(viewRef.current.zoom * Math.exp(-wheelDelta * 0.0015), {
+        x: event.clientX - bounds.left,
+        y: event.clientY - bounds.top,
+      });
+    };
+    /* 마커 안의 IMG 는 기본 draggable 이라 마우스 팬이 두 번째 move 에서
+       네이티브 이미지 드래그로 넘어가 버린다 — 지도 안의 native drag 는 전부 막는다. */
+    const handleDragStart = (event: DragEvent): void => {
+      event.preventDefault();
+    };
+    viewport.addEventListener("wheel", handleNativeWheel, { passive: false });
+    viewport.addEventListener("dragstart", handleDragStart);
+    return () => {
+      viewport.removeEventListener("wheel", handleNativeWheel);
+      viewport.removeEventListener("dragstart", handleDragStart);
+    };
+  }, [enabled, wheelMode, zoomAt]);
 
   function pointFromPointer(event: PointerEvent<HTMLDivElement>): PalworldMapPoint {
     const bounds = event.currentTarget.getBoundingClientRect();
@@ -245,11 +299,14 @@ export function usePalworldMapViewport(
   }
 
   function handlePointerDown(event: PointerEvent<HTMLDivElement>): void {
-    if (
-      !enabled
-      || (event.pointerType === "mouse" && event.button !== 0)
-      || isMapControlTarget(event.target)
-    ) {
+    if (!enabled || (event.pointerType === "mouse" && event.button !== 0)) {
+      return;
+    }
+    dragOccurredRef.current = false;
+    if (isMapControlTarget(event.target)) {
+      /* 마커·버튼 위에서도 팬을 시작할 수 있어야 한다. 임계값을 넘기 전에는
+         capture/preventDefault 없이 추적만 해서 탭·클릭은 그대로 동작한다. */
+      pendingControlPointersRef.current.set(event.pointerId, pointFromPointer(event));
       return;
     }
 
@@ -299,8 +356,34 @@ export function usePalworldMapViewport(
       passiveTouchRef.current.set(event.pointerId, pointFromPointer(event));
       return;
     }
+    const pendingStart = pendingControlPointersRef.current.get(event.pointerId);
+    if (pendingStart) {
+      const point = pointFromPointer(event);
+      if (distanceBetween(pendingStart, point) <= 8) {
+        return;
+      }
+      /* 임계값을 넘었다 — 이 제스처는 클릭이 아니라 팬이다. */
+      pendingControlPointersRef.current.delete(event.pointerId);
+      try {
+        event.currentTarget.setPointerCapture(event.pointerId);
+      } catch {
+        return;
+      }
+      dragOccurredRef.current = true;
+      pointersRef.current.set(event.pointerId, point);
+      setIsPanning(true);
+      if (pointersRef.current.size >= 2) {
+        beginPinch();
+      } else {
+        gestureRef.current = { kind: "drag", lastPoint: point };
+      }
+      return;
+    }
     if (!pointersRef.current.has(event.pointerId)) {
       return;
+    }
+    if (gestureRef.current?.kind === "drag") {
+      dragOccurredRef.current = true;
     }
 
     event.preventDefault();
@@ -345,6 +428,9 @@ export function usePalworldMapViewport(
   }
 
   function endPointer(event: PointerEvent<HTMLDivElement>): void {
+    if (pendingControlPointersRef.current.delete(event.pointerId)) {
+      return;
+    }
     if (passiveTouchRef.current.delete(event.pointerId)) {
       return;
     }
@@ -364,20 +450,13 @@ export function usePalworldMapViewport(
     setIsPanning(false);
   }
 
-  function handleWheel(event: WheelEvent<HTMLDivElement>): void {
-    if (
-      !enabled
-      || !shouldZoomPalworldMapFromWheel(wheelMode, event)
-    ) {
+  function handleClickCapture(event: ReactMouseEvent<HTMLDivElement>): void {
+    if (!dragOccurredRef.current) {
       return;
     }
+    dragOccurredRef.current = false;
     event.preventDefault();
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const wheelDelta = event.deltaMode === 1 ? event.deltaY * 16 : event.deltaY;
-    zoomAt(viewRef.current.zoom * Math.exp(-wheelDelta * 0.0015), {
-      x: event.clientX - bounds.left,
-      y: event.clientY - bounds.top,
-    });
+    event.stopPropagation();
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>): void {
@@ -418,10 +497,10 @@ export function usePalworldMapViewport(
   return {
     commitView,
     endPointer,
+    handleClickCapture,
     handleKeyDown,
     handlePointerDown,
     handlePointerMove,
-    handleWheel,
     isPanning,
     resetView,
     view,

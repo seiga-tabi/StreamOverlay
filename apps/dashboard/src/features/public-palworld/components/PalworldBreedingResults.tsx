@@ -220,11 +220,11 @@ function BreedingPalCell({
         <span className="palworld-breeding-combination-meta">
           <small>{formatPalNumber(pal.number, locale)}</small>
           {pal.elements[0] ? <PalworldElementBadge element={pal.elements[0]} locale={locale} /> : null}
+          {gender ? <Badge size="sm" tone="warning">{genderLabel(gender, locale)}</Badge> : null}
         </span>
         <PalworldTranslationBadge locale={locale} status={name.status} />
       </span>
     </button>
-    {gender ? <Badge size="sm" tone="warning">{genderLabel(gender, locale)}</Badge> : null}
   </div>;
 }
 

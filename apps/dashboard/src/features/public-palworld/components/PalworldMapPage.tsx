@@ -54,6 +54,7 @@ import {
   PALWORLD_MAP_MIN_ZOOM,
   PALWORLD_MAP_ZOOM_EPSILON,
   PALWORLD_MAP_ZOOM_STEP,
+  palworldMapCenterFromView,
   usePalworldMapViewport,
   zoomPalworldMapViewAt,
   type PalworldMapViewState,
@@ -522,20 +523,6 @@ function isRuntimeMapLayer(
   return PALWORLD_MAP_LAYERS.includes(layerId as PalworldMapLayer);
 }
 
-function mapCenterFromView(
-  view: Readonly<PalworldMapViewState>,
-  viewportWidth: number,
-  viewportHeight: number,
-): { x: number; y: number } | undefined {
-  if (viewportWidth <= 0 || viewportHeight <= 0 || view.zoom <= 0) {
-    return undefined;
-  }
-  return {
-    x: Math.min(1, Math.max(0, ((viewportWidth / 2) - view.x) / (viewportWidth * view.zoom))),
-    y: Math.min(1, Math.max(0, ((viewportHeight / 2) - view.y) / (viewportHeight * view.zoom))),
-  };
-}
-
 function markerLabel(marker: PalworldMapMarker, locale: PalworldLocale): string {
   const text = palworldI18n[locale];
   const name = resolvePalworldName(marker.pal, locale).text || marker.pal.nameEn;
@@ -695,9 +682,9 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
     commitView,
     endPointer,
     handleKeyDown,
+    handleClickCapture,
     handlePointerDown,
     handlePointerMove,
-    handleWheel,
     isPanning,
     resetView,
     view,
@@ -1189,7 +1176,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
         }
         return;
       }
-      const center = mapCenterFromView(
+      const center = palworldMapCenterFromView(
         viewRef.current,
         viewport.clientWidth,
         viewport.clientHeight,
@@ -2012,13 +1999,13 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
                     if (selectedMarker || selectedMapLocation) closeMarkerPopover();
                   }
                 }}
+                onClickCapture={handleClickCapture}
                 onKeyDown={handleKeyDown}
                 onLostPointerCapture={endPointer}
                 onPointerCancel={endPointer}
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
                 onPointerUp={endPointer}
-                onWheel={handleWheel}
                 ref={viewportRef}
                 role="region"
                 style={{ aspectRatio: mapAspectRatio }}

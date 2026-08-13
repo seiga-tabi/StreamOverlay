@@ -327,7 +327,7 @@ export function PalworldPalLocationMap({
     handleKeyDown,
     handlePointerDown,
     handlePointerMove,
-    handleWheel,
+    handleClickCapture,
     isPanning,
     resetView,
     view,
@@ -570,7 +570,7 @@ export function PalworldPalLocationMap({
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={endPointer}
-            onWheel={handleWheel}
+            onClickCapture={handleClickCapture}
             ref={viewportRef}
             role="region"
             tabIndex={0}
