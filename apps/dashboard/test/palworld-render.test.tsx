@@ -113,23 +113,26 @@ function assertPngAsset(fileName: string, width: number, height: number): void {
   assert.equal(data.readUInt32BE(20), height);
 }
 
-test("게임 선택 메뉴에는 LoL, 펠월드, 발로란트, YORO Bot 네 항목을 표시한다", () => {
+test("게임 선택 메뉴에는 LoL, 펠월드, 발로란트, 마인크래프트, YORO Bot 다섯 항목을 표시한다", () => {
   setActivePublicLocale("ko");
   const html = renderToStaticMarkup(<PublicGameSelector activePage="palworld" onPage={() => undefined} mode="tray" />);
-  assert.equal((html.match(/role="option"/g) ?? []).length, 4);
+  assert.equal((html.match(/role="option"/g) ?? []).length, 5);
   assert.match(html, /리그 오브 레전드/);
   assert.match(html, /펠월드/);
   assert.match(html, /발로란트/);
+  assert.match(html, /<strong[^>]*>마인크래프트<\/strong>/);
+  assert.match(html, /<small[^>]*>위키·자료실<\/small>/);
+  assert.match(html, /aria-label="마인크래프트 선택"/);
   assert.match(html, /YORO Bot/);
   assert.match(html, /Discord 서버 도우미/);
   assert.match(html, /src="\/images\/games\/league-of-legends-f01a628bbea2\.png"/);
   assert.match(html, /src="\/images\/games\/palworld-a88d83f86cfe\.png"/);
   assert.match(html, /src="\/images\/games\/valorant-mark\.svg"/);
+  assert.match(html, /src="\/images\/games\/minecraft-mark\.svg"/);
   assert.doesNotMatch(html, /src="\/images\/games\/(?:league-of-legends|palworld)\.png"/);
-  assert.equal((html.match(/class="public-game-selector-logo is-(?:league-of-legends|palworld|valorant|yoro-bot)"[^>]*alt=""[^>]*aria-hidden="true"/g) ?? []).length, 4);
+  assert.equal((html.match(/class="public-game-selector-logo is-(?:league-of-legends|palworld|valorant|minecraft|yoro-bot)"[^>]*alt=""[^>]*aria-hidden="true"/g) ?? []).length, 5);
   assert.match(html, /class="public-game-selector-logo is-yoro-bot" src="\/images\/brand\/discord-symbol-blurple\.f6c1a66250d3\.png"/u);
   assert.doesNotMatch(html, /public-game-selector-mark is-yoro-bot/u);
-  assert.doesNotMatch(html, /마인크래프트/);
 
   assertPngAsset("league-of-legends-f01a628bbea2.png", 48, 48);
   assertPngAsset("palworld-a88d83f86cfe.png", 256, 256);

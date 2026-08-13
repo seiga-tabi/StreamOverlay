@@ -399,8 +399,6 @@
 }
 
 .public-lol-shell .public-topbar,
-.public-dashboard-shell .public-app-header,
-.public-dashboard-shell .public-app-header.home,
 .public-home-shared-shell .public-home-shared-header.yoro-app-shell__header,
 .public-profile-shared-shell .public-profile-shared-header.yoro-app-shell__header {
   border-color: var(--public-gray-border) !important;
@@ -410,8 +408,6 @@
   backdrop-filter: blur(18px) saturate(120%);
 }
 
-.public-dashboard-shell .public-header-nav button,
-.public-dashboard-shell .public-header-menu-item > button,
 .public-dashboard-shell .public-locale-button,
 .public-dashboard-shell .public-twitch-login-chip {
   border-color: var(--public-gray-border) !important;
@@ -419,15 +415,6 @@
   color: var(--public-gray-text) !important;
 }
 
-.public-dashboard-shell .public-header-nav button:hover,
-.public-dashboard-shell .public-header-nav button.active,
-.public-dashboard-shell .public-header-menu-item > button:hover,
-.public-dashboard-shell .public-header-menu-item > button.active {
-  background: rgba(248, 249, 250, .14) !important;
-  color: #ffffff !important;
-}
-
-.public-dashboard-shell .public-header-submenu,
 .public-dashboard-shell .public-twitch-profile-menu,
 .public-dashboard-shell .public-locale-popover,
 .public-dashboard-shell .public-popover {
@@ -437,14 +424,11 @@
   box-shadow: 0 20px 48px rgba(33, 37, 41, .18) !important;
 }
 
-.public-dashboard-shell .public-header-submenu button,
 .public-dashboard-shell .public-twitch-profile-menu button,
 .public-dashboard-shell .public-locale-popover button {
   color: var(--public-gray-text) !important;
 }
 
-.public-dashboard-shell .public-header-submenu button:hover,
-.public-dashboard-shell .public-header-submenu button.active,
 .public-dashboard-shell .public-twitch-profile-menu button:hover,
 .public-dashboard-shell .public-locale-popover button:hover,
 .public-dashboard-shell .public-locale-popover button.active {
@@ -452,9 +436,7 @@
 }
 
 .public-dashboard-shell .public-search-form,
-.public-home-shared-shell .public-home-shared-search-form.public-search-form,
-.public-profile-shared-shell .public-app-header:not(.home) > .public-search-wrap .public-search-form,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) > .public-search-wrap .public-search-form {
+.public-home-shared-shell .public-home-shared-search-form.public-search-form{
   border-color: var(--public-gray-border-strong) !important;
   background: rgba(52, 58, 64, .88) !important;
   box-shadow: 0 16px 36px rgba(33, 37, 41, .2) !important;
@@ -462,24 +444,20 @@
 
 .public-dashboard-shell .public-server-pill,
 .public-dashboard-shell .public-search-icon-button,
-.public-home-shared-shell .public-home-shared-server.public-server-pill.yoro-button,
-.public-profile-shared-shell .public-app-header:not(.home) > .public-search-wrap .public-server-pill {
+.public-home-shared-shell .public-home-shared-server.public-server-pill.yoro-button{
   border-color: rgba(222, 226, 230, .2) !important;
   background: rgba(33, 37, 41, .42) !important;
   color: var(--public-gray-text) !important;
 }
 
 .public-dashboard-shell .public-search-field input,
-.public-home-shared-shell .public-home-shared-input.yoro-input,
-.public-profile-shared-shell .public-app-header:not(.home) > .public-search-wrap .public-search-field input,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) > .public-search-wrap .public-search-field input {
+.public-home-shared-shell .public-home-shared-input.yoro-input{
   background: var(--public-gray-field) !important;
   color: var(--public-gray-field-text) !important;
 }
 
 .public-dashboard-shell .public-search-field input::placeholder,
-.public-home-shared-shell .public-home-shared-input.yoro-input::placeholder,
-.public-profile-shared-shell .public-app-header:not(.home) > .public-search-wrap .public-search-field input::placeholder {
+.public-home-shared-shell .public-home-shared-input.yoro-input::placeholder{
   color: #6c757d !important;
 }
 

@@ -13,14 +13,13 @@
     --public-page-side-gutter: clamp(72px, 9vw, 220px);
   }
 
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header,
   .public-dashboard-shell:not(.public-home-shell) .public-profile-layout {
     width: min(100%, 1280px);
   }
 }
 
 @media (min-width: 1680px) {
-  .public-dashboard-shell:not(.public-home-shell) .public-app-header,
+
   .public-dashboard-shell:not(.public-home-shell) .public-profile-layout {
     width: min(100%, 1320px);
   }
@@ -992,19 +991,6 @@
 }
 
 @media (max-width: 760px) {
-  .public-app-header,
-  .public-app-header.home,
-  .public-app-header:not(.home) {
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    gap: 8px;
-    align-items: center;
-    padding: 8px 10px 10px;
-  }
-
-  .public-app-header .public-header-brand,
-  .public-app-header.home .public-header-brand {
-    display: none;
-  }
 
   .public-mobile-menu-toggle {
     display: inline-flex;
@@ -1044,36 +1030,6 @@
     font-size: 12px;
     font-weight: 950;
     letter-spacing: 0;
-  }
-
-  .public-app-header .public-header-tools,
-  .public-app-header.home .public-header-tools,
-  .public-app-header:not(.home) .public-header-tools {
-    grid-column: 3;
-    width: auto;
-    min-height: 38px;
-    justify-self: end;
-    justify-content: flex-end;
-  }
-
-  .public-app-header .public-header-tools > :not(.public-twitch-profile-wrap) {
-    display: none;
-  }
-
-  .public-app-header .public-twitch-login-chip,
-  .public-app-header.home .public-twitch-login-chip,
-  .public-app-header:not(.home) .public-twitch-login-chip {
-    flex: 0 1 auto;
-    max-width: 142px;
-    min-height: 38px;
-    padding: 0 11px;
-    border-radius: 12px;
-  }
-
-  .public-app-header .public-search-wrap,
-  .public-app-header:not(.home) .public-search-wrap {
-    grid-column: 1 / -1;
-    order: 4;
   }
 }
 
@@ -1212,54 +1168,6 @@
   color: var(--seiga-pastel-text) !important;
 }
 
-.public-dashboard-shell .public-app-header,
-.public-dashboard-shell.theme-dark .public-app-header,
-.public-dashboard-shell:not(.public-home-shell) .public-app-header {
-  border-color: var(--seiga-pastel-border) !important;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, .92), rgba(243, 247, 251, .82)),
-    radial-gradient(circle at 18% 0%, rgba(191, 227, 255, .7), transparent 42%) !important;
-  color: var(--seiga-pastel-text) !important;
-  box-shadow: 0 14px 40px rgba(68, 112, 190, .12) !important;
-}
-
-.public-dashboard-shell .public-app-header.home {
-  background: transparent !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-}
-
-.public-dashboard-shell .public-header-nav,
-.public-dashboard-shell .public-app-header.home .public-header-nav {
-  border-color: rgba(128, 161, 224, .4) !important;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, .92), rgba(229, 244, 255, .82)),
-    radial-gradient(circle at 18% 0%, rgba(191, 227, 255, .82), transparent 46%) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .78),
-    0 16px 34px rgba(68, 112, 190, .16) !important;
-}
-
-.public-dashboard-shell .public-header-nav button {
-  color: rgba(16, 35, 61, .72) !important;
-}
-
-.public-dashboard-shell .public-header-nav button:hover,
-.public-dashboard-shell .public-header-nav button.active {
-  color: var(--seiga-pastel-accent-strong) !important;
-}
-
-.public-dashboard-shell .public-header-nav button::after {
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-.public-dashboard-shell .public-header-nav button.active::after {
-  background: linear-gradient(90deg, #77b9ff, #4f7cff) !important;
-  box-shadow: 0 0 12px rgba(79, 124, 255, .42) !important;
-}
-
-.public-dashboard-shell .public-header-submenu,
 .public-dashboard-shell .public-twitch-profile-menu,
 .public-dashboard-shell.theme-dark .public-twitch-profile-menu,
 .public-dashboard-shell .public-popover {
@@ -1269,13 +1177,10 @@
   box-shadow: 0 24px 64px rgba(55, 96, 164, .18) !important;
 }
 
-.public-dashboard-shell .public-header-submenu button,
 .public-dashboard-shell .public-twitch-profile-menu button {
   color: var(--seiga-pastel-text) !important;
 }
 
-.public-dashboard-shell .public-header-submenu button:hover,
-.public-dashboard-shell .public-header-submenu button.active,
 .public-dashboard-shell .public-twitch-profile-menu button:hover {
   background: rgba(213, 241, 255, .72) !important;
   color: var(--seiga-pastel-accent-strong) !important;
@@ -1302,7 +1207,6 @@
 }
 
 .public-dashboard-shell .public-search-form,
-.public-dashboard-shell.theme-dark .public-app-header .public-search-form,
 .public-dashboard-shell.theme-dark .public-home-search-stage .public-search-form,
 .public-dashboard-shell:not(.public-home-shell) main .public-search-form,
 .public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-form {
@@ -1318,13 +1222,11 @@
 }
 
 .public-dashboard-shell .public-search-field input,
-.public-dashboard-shell .public-app-header:not(.home) .public-search-field input,
 .public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-field input {
   color: var(--seiga-pastel-heading) !important;
 }
 
 .public-dashboard-shell .public-search-field input::placeholder,
-.public-dashboard-shell .public-app-header:not(.home) .public-search-field input::placeholder,
 .public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-field input::placeholder {
   color: rgba(99, 119, 149, .72) !important;
 }
@@ -2584,10 +2486,6 @@
       var(--seiga-pastel-bg) !important;
   }
 
-  .public-dashboard-shell .public-app-header.home .public-header-nav {
-    background: rgba(255, 255, 255, .92) !important;
-  }
-
   .public-dashboard-shell .public-match-row,
   .public-dashboard-shell:not(.public-home-shell) .public-match-row,
   .public-dashboard-shell .public-team-card,
@@ -2597,18 +2495,6 @@
 }
 
 /* 상단 메뉴 바깥 컨테이너 배경 제거 */
-.public-dashboard-shell .public-header-nav,
-.public-dashboard-shell .public-app-header.home .public-header-nav,
-.public-dashboard-shell .public-app-header:not(.home) .public-header-nav {
-  border-color: transparent !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-.public-dashboard-shell .public-header-nav button:hover,
-.public-dashboard-shell .public-header-nav button.active {
-  background: rgba(191, 227, 255, .72) !important;
-}
 
 .public-dashboard-shell:not(.public-home-shell) .public-team-stat.metric-bar {
   position: relative;
@@ -4069,57 +3955,6 @@ html[lang="ja"] .public-dashboard-shell select {
   letter-spacing: 0;
 }
 
-html[lang="ja"] .public-dashboard-shell .public-header-nav button,
-html[lang="ja"] .public-dashboard-shell .public-app-header.home .public-header-nav button,
-html[lang="ja"] .public-dashboard-shell .public-app-header:not(.home) .public-header-nav button,
-html[lang="ja"] .public-dashboard-shell .public-header-submenu button {
-  align-items: center;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: var(--yoro-font-weight-ja-medium);
-  line-height: 1;
-  letter-spacing: 0;
-}
-
-html[lang="ja"] .public-dashboard-shell .public-header-nav button strong,
-html[lang="ja"] .public-dashboard-shell .public-app-header.home .public-header-nav button strong,
-html[lang="ja"] .public-dashboard-shell .public-app-header:not(.home) .public-header-nav button strong,
-html[lang="ja"] .public-dashboard-shell .public-header-submenu button strong {
-  display: inline-flex;
-  align-items: center;
-  min-height: 1em;
-  color: inherit;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: var(--yoro-font-weight-ja-medium);
-  line-height: 1;
-  letter-spacing: 0;
-}
-
-html[lang="ja"] .public-dashboard-shell .public-header-nav button.active strong,
-html[lang="ja"] .public-dashboard-shell .public-header-submenu button.active strong {
-  font-size: 13px;
-  font-weight: var(--yoro-font-weight-ja-bold);
-  line-height: 1;
-}
-
-html[lang="ja"] .public-dashboard-shell .public-header-nav button span,
-html[lang="ja"] .public-dashboard-shell .public-app-header.home .public-header-nav button span,
-html[lang="ja"] .public-dashboard-shell .public-app-header:not(.home) .public-header-nav button span,
-html[lang="ja"] .public-dashboard-shell .public-header-submenu button span {
-  flex: 0 0 18px;
-  width: 18px;
-  height: 18px;
-  font-family: inherit;
-  font-size: 13px;
-  line-height: 1;
-}
-
-html[lang="ja"] .public-dashboard-shell .public-app-header:not(.home) .public-header-nav button,
-html[lang="ja"] .public-dashboard-shell .public-app-header:not(.home) .public-header-nav button strong {
-  font-size: 12px;
-}
-
 html[lang="ja"] .public-dashboard-shell :where(
   .public-section-head h2,
   .public-section-head h3,
@@ -4450,147 +4285,6 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
 }
 
 .public-home-shared-shell .public-home-shared-main.yoro-app-shell__main {
-}
-
-.public-app-header.home {
-  width: min(100%, 1500px);
-  margin: 0 auto;
-  padding: 26px 30px 0;
-}
-
-.public-app-header.home .public-header-brand {
-  gap: 12px;
-  padding: 0;
-}
-
-.public-app-header.home .public-header-brand .public-brand-logo {
-  width: 54px;
-  height: 54px;
-  border-radius: 18px;
-  filter:
-    drop-shadow(0 0 16px rgba(120, 88, 255, .4))
-    drop-shadow(0 8px 22px rgba(0, 0, 0, .5));
-}
-
-.public-app-header.home .public-header-brand strong {
-  color: #ffffff;
-  font-size: clamp(26px, 2.3vw, 36px);
-  font-weight: 950;
-  letter-spacing: -.03em;
-  text-shadow: 0 0 18px rgba(125, 96, 255, .34);
-}
-
-.public-app-header.home .public-header-brand strong::first-letter {
-  color: #ffffff;
-}
-
-.public-app-header.home .public-header-nav {
-  top: 24px;
-  height: 54px;
-  padding: 0;
-  gap: clamp(20px, 3.4vw, 54px);
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-.public-app-header.home .public-header-nav button {
-  height: 54px;
-  padding: 0 2px;
-  border-radius: 0;
-  color: rgba(255, 255, 255, .88);
-}
-
-.public-dashboard-shell.public-home-shell .public-app-header.home .public-header-nav > button,
-.public-dashboard-shell.public-home-shell .public-app-header.home .public-header-menu-item > button {
-  background: transparent !important;
-  color: rgba(255, 255, 255, .9) !important;
-}
-
-.public-dashboard-shell.public-home-shell .public-app-header.home .public-header-nav > button.active,
-.public-dashboard-shell.public-home-shell .public-app-header.home .public-header-menu-item > button.active {
-  background: transparent !important;
-  color: #a879ff !important;
-}
-
-.public-app-header.home .public-header-nav button span {
-  display: none;
-}
-
-.public-app-header.home .public-header-nav button strong {
-  color: inherit;
-  font-size: 16px;
-  font-weight: 850;
-}
-
-.public-app-header.home .public-header-nav button.active {
-  color: #a879ff;
-}
-
-.public-app-header.home .public-header-nav button.active::after {
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #8c55ff, #6c61ff);
-  box-shadow: 0 0 18px rgba(130, 88, 255, .75);
-}
-
-.public-dashboard-shell.public-home-shell .public-header-submenu {
-  z-index: 30;
-  border-color: rgba(126, 126, 185, .32) !important;
-  background:
-    linear-gradient(180deg, rgba(15, 18, 36, .96), rgba(7, 10, 24, .98)),
-    radial-gradient(circle at 24% 0%, rgba(132, 93, 255, .22), transparent 44%) !important;
-  color: rgba(242, 246, 255, .94) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .08),
-    0 20px 44px rgba(0, 0, 0, .48),
-    0 0 22px rgba(99, 81, 255, .18) !important;
-}
-
-.public-dashboard-shell.public-home-shell .public-header-submenu button {
-  background: transparent !important;
-  color: rgba(231, 236, 255, .88) !important;
-}
-
-.public-dashboard-shell.public-home-shell .public-header-submenu button:hover,
-.public-dashboard-shell.public-home-shell .public-header-submenu button:focus-visible,
-.public-dashboard-shell.public-home-shell .public-header-submenu button.active {
-  background: rgba(126, 92, 255, .18) !important;
-  color: #ffffff !important;
-}
-
-.public-dashboard-shell.public-home-shell .public-header-menu-item:not(:hover):not(:focus-within) .public-header-submenu {
-  opacity: 0;
-  pointer-events: none;
-  transform: translate(-50%, 6px);
-}
-
-.public-dashboard-shell.public-home-shell .public-header-menu-item:hover .public-header-submenu,
-.public-dashboard-shell.public-home-shell .public-header-menu-item:focus-within .public-header-submenu {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translate(-50%, 0);
-}
-
-.public-app-header.home .public-twitch-login-chip {
-  max-width: none;
-  min-height: 54px;
-  padding: 0 22px;
-  border-color: rgba(151, 95, 255, .95);
-  border-radius: 16px;
-  background: linear-gradient(135deg, #8c55ff, #5134d9);
-  color: #ffffff;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .18),
-    0 18px 38px rgba(78, 54, 220, .36);
-}
-
-.public-app-header.home .public-twitch-login-chip.connected {
-  border-color: rgba(151, 95, 255, .95);
-  background: linear-gradient(135deg, #8c55ff, #5134d9);
-  color: #ffffff;
 }
 
 .public-home-shared-content {
@@ -4983,17 +4677,6 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
 }
 
 @media (max-width: 1180px) {
-  .public-app-header.home {
-    grid-template-columns: auto auto;
-  }
-
-  .public-app-header.home .public-header-nav {
-    position: static;
-    grid-column: 1 / -1;
-    justify-self: center;
-    order: 3;
-    transform: none;
-  }
 
   .public-home-live-rail {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -5001,19 +4684,6 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
 }
 
 @media (max-width: 760px) {
-  .public-app-header.home {
-    padding: 16px 16px 0;
-  }
-
-  .public-app-header.home .public-header-brand .public-brand-logo {
-    width: 44px;
-    height: 44px;
-    border-radius: 15px;
-  }
-
-  .public-app-header.home .public-header-brand strong {
-    font-size: 24px;
-  }
 
   .public-home-shared-content {
     padding: 32px 16px 28px;
@@ -5102,7 +4772,6 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
   }
 }
 
-.public-profile-shared-shell .public-app-header,
 .public-profile-shared-shell .public-profile-layout {
   justify-self: center;
   width: min(100%, calc(var(--yoro-space-12) * 27));
@@ -5608,46 +5277,6 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
   border-bottom: 1px solid rgba(138, 116, 255, .2) !important;
   box-shadow: 0 20px 52px rgba(0, 0, 0, .34) !important;
   backdrop-filter: blur(18px);
-}
-
-.public-profile-shared-shell .public-app-header,
-.public-profile-shared-shell .public-app-header:not(.home) {
-  width: min(100%, 1480px) !important;
-  min-height: 68px;
-  padding: 10px 24px !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  color: #f6f7ff !important;
-  box-shadow: none !important;
-}
-
-.public-profile-shared-shell .public-header-brand {
-  display: inline-flex !important;
-}
-
-.public-profile-shared-shell .public-header-nav {
-  border-color: transparent !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-.public-profile-shared-shell .public-header-nav button {
-  color: rgba(246, 247, 255, .88) !important;
-  background: transparent !important;
-}
-
-.public-profile-shared-shell .public-header-nav button:hover,
-.public-profile-shared-shell .public-header-nav button.active {
-  color: #a178ff !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-.public-profile-shared-shell .public-header-nav button.active::after {
-  height: 3px;
-  background: linear-gradient(90deg, #8a5cff, #5f8cff) !important;
-  box-shadow: 0 0 16px rgba(138, 92, 255, .64) !important;
 }
 
 .public-profile-shared-shell .public-twitch-login-chip,
@@ -6329,11 +5958,6 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
     padding: 12px 12px 28px !important;
   }
 
-  .public-profile-shared-shell .public-app-header,
-  .public-profile-shared-shell .public-app-header:not(.home) {
-    padding-inline: 12px !important;
-  }
-
   .public-profile-shared-shell .public-profile-top-main {
     padding: 22px 18px !important;
   }
@@ -6520,119 +6144,6 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
   background: rgba(11, 11, 17, .86) !important;
   box-shadow: none !important;
   backdrop-filter: blur(14px);
-}
-
-.public-home-shared-shell .public-app-header.home {
-  display: grid;
-  grid-template-columns: minmax(170px, auto) minmax(0, 1fr) max-content;
-  align-items: center;
-  width: min(100%, 1440px) !important;
-  min-height: 72px;
-  margin: 0 auto;
-  padding: 0 32px !important;
-  border: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-.public-home-shared-shell .public-app-header.home .public-header-brand {
-  gap: 8px;
-  min-width: 0;
-}
-
-.public-app-header .public-header-brand .public-brand-logo-full,
-.public-home-shared-shell .public-app-header.home .public-header-brand .public-brand-logo-full {
-  width: 152px !important;
-  min-width: 152px !important;
-  max-width: none !important;
-  height: 38px !important;
-  flex: 0 0 152px;
-  border-radius: 0 !important;
-  object-fit: contain;
-  object-position: center;
-  filter: none !important;
-  box-shadow: none !important;
-}
-
-.public-home-shared-shell .public-app-header.home .public-header-nav {
-  position: static !important;
-  justify-self: center;
-  display: flex;
-  gap: 40px;
-  height: 72px;
-  padding: 0 !important;
-  border: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  transform: none !important;
-}
-
-.public-home-shared-shell .public-app-header.home .public-header-nav button {
-  height: 72px;
-  padding: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  color: var(--home-secondary) !important;
-  box-shadow: none !important;
-}
-
-.public-home-shared-shell .public-app-header.home .public-header-nav button strong {
-  color: inherit;
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.public-home-shared-shell .public-app-header.home .public-header-nav button:hover,
-.public-home-shared-shell .public-app-header.home .public-header-nav button.active,
-.public-home-shared-shell.public-dashboard-shell.public-home-shell .public-app-header.home .public-header-nav > button.active,
-.public-home-shared-shell.public-dashboard-shell.public-home-shell .public-app-header.home .public-header-menu-item > button.active {
-  background: transparent !important;
-  color: var(--home-primary) !important;
-}
-
-.public-home-shared-shell .public-app-header.home .public-header-nav button.active::after {
-  right: 0;
-  bottom: 10px;
-  left: 0;
-  height: 3px;
-  border-radius: 999px;
-  background: var(--home-primary) !important;
-  box-shadow: none !important;
-}
-
-.public-home-shared-shell .public-app-header.home .public-header-tools {
-  gap: 12px;
-  justify-self: end;
-}
-
-.public-home-shared-shell .public-app-header.home .public-twitch-login-chip {
-  min-height: 42px !important;
-  border: 1px solid var(--home-border) !important;
-  border-radius: 12px !important;
-  background: rgba(19, 20, 26, .72) !important;
-  color: var(--home-text) !important;
-  box-shadow: none !important;
-}
-
-.public-home-shared-shell .public-app-header.home .public-twitch-login-chip,
-.public-home-shared-shell .public-app-header.home .public-twitch-login-chip.connected {
-  padding: 0 16px;
-  border-color: rgba(123, 92, 255, .7) !important;
-  background: var(--home-primary) !important;
-}
-
-.public-home-shared-shell .public-header-submenu {
-  border-color: var(--home-border) !important;
-  background: rgba(19, 20, 26, .98) !important;
-  color: var(--home-text) !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, .18) !important;
-}
-
-.public-home-shared-shell .public-header-submenu button:hover,
-.public-home-shared-shell .public-header-submenu button:focus-visible,
-.public-home-shared-shell .public-header-submenu button.active {
-  background: rgba(123, 92, 255, .12) !important;
-  color: var(--home-text) !important;
 }
 
 .public-home-shared-shell .public-home-shared-main.yoro-app-shell__main {
@@ -6914,24 +6425,6 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
 }
 
 @media (max-width: 1180px) {
-  .public-home-shared-shell .public-app-header.home {
-    grid-template-columns: minmax(150px, auto) max-content;
-    row-gap: 0;
-    min-height: 112px;
-    padding-top: 10px !important;
-    padding-bottom: 10px !important;
-  }
-
-  .public-home-shared-shell .public-app-header.home .public-header-nav {
-    grid-column: 1 / -1;
-    order: 3;
-    height: 38px;
-    gap: 28px;
-  }
-
-  .public-home-shared-shell .public-app-header.home .public-header-nav button {
-    height: 38px;
-  }
 
   .public-home-shared-shell .public-home-shared-content {
     min-height: calc(100dvh - 112px);
@@ -6941,23 +6434,6 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
 }
 
 @media (max-width: 760px) {
-  .public-home-shared-shell .public-app-header.home {
-    grid-template-columns: minmax(0, 1fr) auto;
-    min-height: auto;
-    padding: 12px 16px !important;
-  }
-
-  .public-app-header .public-header-brand .public-brand-logo-full,
-  .public-home-shared-shell .public-app-header.home .public-header-brand .public-brand-logo-full {
-    width: 124px !important;
-    min-width: 124px !important;
-    height: 32px !important;
-    flex-basis: 124px;
-  }
-
-  .public-home-shared-shell .public-app-header.home .public-header-nav {
-    display: none;
-  }
 
   .public-home-shared-shell .public-home-shared-content {
     min-height: auto;
@@ -7029,62 +6505,6 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
     font-size: 12px;
   }
 
-}
-
-.public-profile-shared-shell .public-app-header:not(.home) > .public-search-wrap .public-search-form {
-  grid-template-columns: 88px minmax(0, 1fr) auto;
-  min-height: 60px !important;
-  padding: 0 8px 0 0 !important;
-  overflow: visible;
-  border: 1px solid rgba(119, 131, 169, .34) !important;
-  border-radius: 14px !important;
-  background: rgba(13, 18, 34, .96) !important;
-  color: #f5f5f7 !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, .18) !important;
-}
-
-.public-profile-shared-shell .public-app-header:not(.home) > .public-search-wrap .public-search-server {
-  display: block;
-}
-
-.public-profile-shared-shell .public-app-header:not(.home) > .public-search-wrap .public-server-pill {
-  min-width: 88px;
-  min-height: 58px;
-  padding: 0 16px;
-  border: 0 !important;
-  border-right: 1px solid rgba(119, 131, 169, .28) !important;
-  border-radius: 13px 0 0 13px !important;
-  background: transparent !important;
-  color: #f5f5f7 !important;
-  box-shadow: none !important;
-}
-
-.public-profile-shared-shell .public-app-header:not(.home) > .public-search-wrap .public-search-field input {
-  min-height: 58px !important;
-  padding: 0 18px !important;
-  color: #f5f5f7 !important;
-  font-size: 16px !important;
-  font-weight: 600;
-}
-
-.public-profile-shared-shell .public-app-header:not(.home) > .public-search-wrap .public-search-field input::placeholder {
-  color: rgba(156, 163, 175, .74) !important;
-}
-
-.public-profile-shared-shell .public-app-header:not(.home) > .public-search-wrap .public-search-icon-button {
-  width: 44px !important;
-  height: 44px !important;
-  min-height: 44px !important;
-}
-
-.public-profile-shared-shell .public-app-header:not(.home) > .public-search-wrap .public-search-submit {
-  border-radius: 12px !important;
-  background: #7B5CFF !important;
-  color: #ffffff !important;
-}
-
-.public-profile-shared-shell .public-app-header:not(.home) > .public-search-wrap .public-search-clear {
-  background: rgba(245, 245, 247, .06) !important;
 }
 
 .public-profile-shared-shell .public-profile-top-main .public-ranking-shared-toolbar {
@@ -7328,15 +6748,6 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
 }
 
 @media (max-width: 760px) {
-  .public-profile-shared-shell .public-app-header:not(.home) > .public-search-wrap .public-search-form {
-    grid-template-columns: 76px minmax(0, 1fr) auto;
-    min-height: 56px !important;
-  }
-
-  .public-profile-shared-shell .public-app-header:not(.home) > .public-search-wrap .public-server-pill,
-  .public-profile-shared-shell .public-app-header:not(.home) > .public-search-wrap .public-search-field input {
-    min-height: 54px !important;
-  }
 
   .public-profile-shared-shell .public-profile-top-main {
     min-height: 0;
@@ -7364,74 +6775,6 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
 .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-dashboard-content-grid,
 .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-dashboard-center {
   color: #f5f5f7 !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) > .public-search-wrap .public-search-form {
-  grid-template-columns: 88px minmax(0, 1fr) auto;
-  min-height: 60px !important;
-  padding: 0 8px 0 0 !important;
-  overflow: visible;
-  border: 1px solid rgba(119, 131, 169, .34) !important;
-  border-radius: 14px !important;
-  background: rgba(13, 18, 34, .96) !important;
-  color: #f5f5f7 !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, .18) !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) > .public-search-wrap .public-search-server {
-  display: block !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) > .public-search-wrap .public-server-pill {
-  min-width: 88px;
-  min-height: 58px;
-  padding: 0 16px;
-  border: 0 !important;
-  border-right: 1px solid rgba(119, 131, 169, .28) !important;
-  border-radius: 13px 0 0 13px !important;
-  background: transparent !important;
-  color: #f5f5f7 !important;
-  box-shadow: none !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) > .public-search-wrap .public-search-field {
-  width: auto !important;
-  min-width: 0;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) > .public-search-wrap .public-search-field input {
-  min-height: 58px !important;
-  padding: 0 18px !important;
-  color: #f5f5f7 !important;
-  font-size: 16px !important;
-  font-weight: 600;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) > .public-search-wrap .public-search-field input::placeholder {
-  color: rgba(156, 163, 175, .74) !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) > .public-search-wrap .public-search-actions {
-  width: auto !important;
-  justify-content: flex-end;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) > .public-search-wrap .public-search-icon-button {
-  width: 44px !important;
-  height: 44px !important;
-  min-height: 44px !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) > .public-search-wrap .public-search-submit {
-  border-color: transparent !important;
-  border-radius: 12px !important;
-  background: #7b5cff !important;
-  color: #ffffff !important;
-  box-shadow: none !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) > .public-search-wrap .public-search-clear {
-  background: rgba(245, 245, 247, .06) !important;
 }
 
 .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-suggestion-panel {
@@ -7722,15 +7065,6 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
 }
 
 @media (max-width: 760px) {
-  .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) > .public-search-wrap .public-search-form {
-    grid-template-columns: 76px minmax(0, 1fr) auto;
-    min-height: 56px !important;
-  }
-
-  .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) > .public-search-wrap .public-server-pill,
-  .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-header:not(.home) > .public-search-wrap .public-search-field input {
-    min-height: 54px !important;
-  }
 
   .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-list button {
     min-height: 72px !important;

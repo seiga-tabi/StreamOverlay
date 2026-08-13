@@ -59,7 +59,13 @@ export const PUBLIC_SITEMAP_STATIC_PATHS: readonly string[] = [
   "/valorant/agents",
   "/valorant/weapons",
   "/valorant/maps",
-  "/valorant/ranked"
+  "/valorant/ranked",
+  "/minecraft",
+  "/minecraft/recipes",
+  "/minecraft/items",
+  "/minecraft/enchants",
+  "/minecraft/library",
+  "/minecraft/patch-notes"
 ];
 
 export type SitemapEntry = {

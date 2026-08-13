@@ -15,19 +15,23 @@ import {
   authenticatedYoroIdentity,
   useYoroAccountSession,
 } from "../../yoro-account/useYoroAccountSession";
-import { valorantI18n, type ValorantLocale } from "../i18n/valorant-i18n";
-import { setValorantUrl, valorantPathForPage, type ValorantPage } from "../utils/routes";
+import { minecraftI18n, type MinecraftLocale } from "../i18n/minecraft-i18n";
+import { setMinecraftUrl, minecraftPathForPage, type MinecraftPage } from "../utils/routes";
 
 /* 상단 nav 와 하단 탭바가 공유하는 단일 원본 — 라벨·순서·활성 판정이 어긋나지 않게. */
-export const valorantNavItems: Array<{ page: ValorantPage; ko: string; ja: string }> = [
-  { page: "home", ko: valorantI18n.ko.home, ja: valorantI18n.ja.home },
-  { page: "agents", ko: valorantI18n.ko.agents, ja: valorantI18n.ja.agents },
-  { page: "weapons", ko: valorantI18n.ko.weapons, ja: valorantI18n.ja.weapons },
-  { page: "maps", ko: valorantI18n.ko.maps, ja: valorantI18n.ja.maps },
-  { page: "ranked", ko: valorantI18n.ko.ranked, ja: valorantI18n.ja.ranked },
+export const minecraftNavItems: Array<{ page: MinecraftPage; ko: string; ja: string }> = [
+  { page: "home", ko: minecraftI18n.ko.home, ja: minecraftI18n.ja.home },
+  { page: "recipes", ko: minecraftI18n.ko.recipes, ja: minecraftI18n.ja.recipes },
+  { page: "items", ko: minecraftI18n.ko.items, ja: minecraftI18n.ja.items },
+  { page: "enchants", ko: minecraftI18n.ko.enchants, ja: minecraftI18n.ja.enchants },
+  { page: "library", ko: minecraftI18n.ko.library, ja: minecraftI18n.ja.library },
+  { page: "patchNotes", ko: minecraftI18n.ko.patchNotes, ja: minecraftI18n.ja.patchNotes },
 ];
 
-export function ValorantNavIcon({ page }: { page: ValorantPage }) {
+/* 하단 탭바는 5칸 규칙 — 인챈트는 상단 nav 와 위키 홈 타일로 접근합니다. */
+export const minecraftTabItems = minecraftNavItems.filter((item) => item.page !== "enchants");
+
+export function MinecraftNavIcon({ page }: { page: MinecraftPage }) {
   const commonProps = {
     "aria-hidden": true,
     className: "public-header-menu-icon",
@@ -39,21 +43,22 @@ export function ValorantNavIcon({ page }: { page: ValorantPage }) {
     viewBox: "0 0 24 24",
   };
 
-  if (page === "home") return <svg {...commonProps}><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3Z" /></svg>;
-  if (page === "agents") return <svg {...commonProps}><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 9a7 7 0 0 1 14 0" /></svg>;
-  if (page === "weapons") return <svg {...commonProps}><path d="M3 17 17 3l4 4L7 21l-4-4Zm10-10 4 4M5 15l4 4" /></svg>;
-  if (page === "maps") return <svg {...commonProps}><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="2.5" /></svg>;
-  return <svg {...commonProps}><path d="M8 21h8m-4-4v4M5 4h14v3a7 7 0 0 1-14 0V4Zm-2 2H1v1a4 4 0 0 0 4 4M21 6h2v1a4 4 0 0 1-4 4" /></svg>;
+  if (page === "home") return <svg {...commonProps}><path d="M4 8h16v12H4Zm0 0 8-5 8 5M9 13h2v2H9Zm4 0h2v2h-2Z" /></svg>;
+  if (page === "recipes") return <svg {...commonProps}><path d="M4 4h16v16H4Zm5.3 0v16M14.6 4v16M4 9.3h16M4 14.6h16" /></svg>;
+  if (page === "items") return <svg {...commonProps}><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9Zm0 0v9m8-4.5L12 12M4 7.5 12 12" /></svg>;
+  if (page === "enchants") return <svg {...commonProps}><path d="M12 3v4m0 10v4M3 12h4m10 0h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6" /></svg>;
+  if (page === "library") return <svg {...commonProps}><path d="M4 7h16v13H4Zm0 0 2-4h12l2 4M10 11h4" /></svg>;
+  return <svg {...commonProps}><path d="M6 3h9l4 4v14H6Zm9 0v4h4M9 12h6M9 16h6" /></svg>;
 }
 
-export function ValorantHeader({
+export function MinecraftHeader({
   locale,
   onLocale,
   page,
 }: {
-  locale: ValorantLocale;
-  onLocale: (locale: ValorantLocale) => void;
-  page: ValorantPage | null;
+  locale: MinecraftLocale;
+  onLocale: (locale: MinecraftLocale) => void;
+  page: MinecraftPage | null;
 }) {
   const [gameSelectorOpen, setGameSelectorOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -62,7 +67,7 @@ export function ValorantHeader({
   const yoroAccount = useYoroAccountSession();
   const headerRef = useRef<HTMLDivElement>(null);
   const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
-  const text = valorantI18n[locale];
+  const text = minecraftI18n[locale];
   const yoroIdentity = authenticatedYoroIdentity(yoroAccount.session);
   const yoroConnected = yoroAccount.session?.authenticated === true;
   const accountUser: PublicTwitchAccountUser | undefined = yoroIdentity
@@ -117,16 +122,16 @@ export function ValorantHeader({
 
   function handleGame(nextPage: PublicMainPage): void {
     closeMenus();
-    if (nextPage === "valorant") {
-      setValorantUrl("/valorant");
+    if (nextPage === "minecraft") {
+      setMinecraftUrl("/minecraft");
       return;
     }
     if (nextPage === "palworld") {
       setPublicPath("/palworld");
       return;
     }
-    if (nextPage === "minecraft") {
-      setPublicPath("/minecraft");
+    if (nextPage === "valorant") {
+      setPublicPath("/valorant");
       return;
     }
     if (nextPage === "bot") {
@@ -137,8 +142,8 @@ export function ValorantHeader({
   }
 
   const navigation = (
-    <PublicHorizontalNav ariaLabel={text.mainMenu} testId="valorant-secondary-nav">
-      {valorantNavItems.map((item) => {
+    <PublicHorizontalNav ariaLabel={text.mainMenu} testId="minecraft-secondary-nav">
+      {minecraftNavItems.map((item) => {
         const active = item.page === page;
         return (
           <button
@@ -147,10 +152,10 @@ export function ValorantHeader({
             aria-current={active ? "page" : undefined}
             data-ko={item.ko}
             data-ja={item.ja}
-            onClick={() => setValorantUrl(valorantPathForPage(item.page))}
+            onClick={() => setMinecraftUrl(minecraftPathForPage(item.page))}
             key={item.page}
           >
-            <ValorantNavIcon page={item.page} />
+            <MinecraftNavIcon page={item.page} />
             <strong>{locale === "ja" ? item.ja : item.ko}</strong>
           </button>
         );
@@ -180,17 +185,17 @@ export function ValorantHeader({
               configured={false}
               connected={yoroConnected}
               dashboardLabel={text.yoroDashboardOpen}
-              dashboardLabelJa={valorantI18n.ja.yoroDashboardOpen}
-              dashboardLabelKo={valorantI18n.ko.yoroDashboardOpen}
+              dashboardLabelJa={minecraftI18n.ja.yoroDashboardOpen}
+              dashboardLabelKo={minecraftI18n.ko.yoroDashboardOpen}
               discordLoginLabel={text.discordLogin}
               loginLabel={text.accountLogin}
-              loginLabelJa={valorantI18n.ja.accountLogin}
-              loginLabelKo={valorantI18n.ko.accountLogin}
+              loginLabelJa={minecraftI18n.ja.accountLogin}
+              loginLabelKo={minecraftI18n.ko.accountLogin}
               loginMenuLabel={text.accountLoginMenu}
               loginTitle={text.accountLoginTitle}
               logoutLabel={text.accountLogout}
-              logoutLabelJa={valorantI18n.ja.accountLogout}
-              logoutLabelKo={valorantI18n.ko.accountLogout}
+              logoutLabelJa={minecraftI18n.ja.accountLogout}
+              logoutLabelKo={minecraftI18n.ko.accountLogout}
               menuActions={[]}
               menuLabel={text.accountMenu}
               onDashboard={openYoroDashboard}
@@ -215,7 +220,7 @@ export function ValorantHeader({
           <button
             className="public-game-header__brand"
             type="button"
-            onClick={() => setValorantUrl("/valorant")}
+            onClick={() => setMinecraftUrl("/minecraft")}
             aria-label={text.home}
           >
             <img
@@ -225,10 +230,10 @@ export function ValorantHeader({
             />
           </button>
         )}
-        className="valorant-header"
+        className="minecraft-header"
         gameSelector={(
           <PublicGameSelector
-            activePage="valorant"
+            activePage="minecraft"
             onPage={handleGame}
             open={gameSelectorOpen}
             onOpenChange={(open) => {
@@ -244,7 +249,7 @@ export function ValorantHeader({
         home
         mobileMenuToggle={(
           <button
-            aria-controls="valorant-mobile-menu"
+            aria-controls="minecraft-mobile-menu"
             aria-expanded={mobileMenuOpen}
             aria-haspopup="dialog"
             aria-label={mobileMenuOpen ? text.closeMobileMenu : text.openMobileMenu}
@@ -266,7 +271,7 @@ export function ValorantHeader({
             <svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path d="M4 7h16M4 12h16M4 17h16" />
             </svg>
-            <strong data-ko={valorantI18n.ko.mobileMenu} data-ja={valorantI18n.ja.mobileMenu}>
+            <strong data-ko={minecraftI18n.ko.mobileMenu} data-ja={minecraftI18n.ja.mobileMenu}>
               {text.mobileMenu}
             </strong>
           </button>
@@ -275,8 +280,8 @@ export function ValorantHeader({
           <PublicMobileMenuSheet
             accountConnected={yoroConnected}
             accountUser={accountUser}
-            activePage="valorant"
-            id="valorant-mobile-menu"
+            activePage="minecraft"
+            id="minecraft-mobile-menu"
             labels={{
               close: text.closeMobileMenu,
               dashboard: text.yoroDashboardOpen,

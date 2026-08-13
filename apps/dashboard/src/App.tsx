@@ -20,17 +20,21 @@ import {
 } from "./routing/dashboard-routes";
 import { isPalworldPath } from "./features/public-palworld/utils/routes";
 import { isValorantPath } from "./features/public-valorant/utils/routes";
+import { isMinecraftPath } from "./features/public-minecraft/utils/routes";
 import { PalworldPageErrorBoundary } from "./features/public-palworld/components/PalworldPageErrorBoundary";
 import { ValorantPageErrorBoundary } from "./features/public-valorant/components/ValorantPageErrorBoundary";
+import { MinecraftPageErrorBoundary } from "./features/public-minecraft/components/MinecraftPageErrorBoundary";
 import { lazyNamed } from "./shared/lazyNamed";
 import { stripPublicLocalePrefix } from "./features/public-lol/utils/public-locale-path";
 
 const loadPublicLolPage = () => import("./pages/PublicLolPage");
 const loadPublicPalworldPage = () => import("./pages/PublicPalworldPage");
 const loadPublicValorantPage = () => import("./pages/PublicValorantPage");
+const loadPublicMinecraftPage = () => import("./pages/PublicMinecraftPage");
 const PublicLolPage = lazyNamed(loadPublicLolPage, "PublicLolPage");
 const PublicPalworldPage = lazyNamed(loadPublicPalworldPage, "PublicPalworldPage");
 const PublicValorantPage = lazyNamed(loadPublicValorantPage, "PublicValorantPage");
+const PublicMinecraftPage = lazyNamed(loadPublicMinecraftPage, "PublicMinecraftPage");
 const PublicBotPage = lazyNamed(
   () => import("./features/public-bot/PublicBotPage"),
   "PublicBotPage",
@@ -306,6 +310,7 @@ export default function App() {
       || publicPathname === "/bot/dedicated-server/";
     const palworldPublic = isPalworldPath(publicPathname);
     const valorantPublic = isValorantPath(publicPathname);
+    const minecraftPublic = isMinecraftPath(publicPathname);
     return (
       yoroDashboard ? (
         <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>
@@ -323,6 +328,20 @@ export default function App() {
         <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>
           <PublicBotPage />
         </Suspense>
+      ) : minecraftPublic ? (
+        <MinecraftPageErrorBoundary>
+          <Suspense fallback={(
+            <SkeletonCard
+              className="minecraft-page-section"
+              data-ko={dashboardI18n.ko.app.loading}
+              data-ja={dashboardI18n.ja.app.loading}
+              loadingLabel={currentText.app.loading}
+              size="lg"
+            />
+          )}>
+            <PublicMinecraftPage />
+          </Suspense>
+        </MinecraftPageErrorBoundary>
       ) : valorantPublic ? (
         <ValorantPageErrorBoundary>
           <Suspense fallback={(

@@ -6626,9 +6626,6 @@ code {
 }
 
 @media (max-width: 1180px) {
-  .public-header-nav {
-    display: none;
-  }
 
   .public-topbar {
     grid-template-columns: minmax(180px, auto) auto;
@@ -8774,71 +8771,9 @@ code {
   padding: 12px 20px 20px;
 }
 
-.public-dashboard-shell:not(.public-home-shell) .public-app-header,
 .public-dashboard-shell:not(.public-home-shell) .public-profile-layout {
   justify-self: center;
   width: min(100%, 1540px);
-}
-
-.public-app-header {
-  position: relative;
-  z-index: 50;
-  display: grid;
-  grid-template-columns: minmax(118px, auto) minmax(0, auto) minmax(300px, 1fr) max-content;
-  gap: 10px;
-  align-items: center;
-  min-height: 54px;
-  padding: 0 0 12px;
-  background: linear-gradient(180deg, rgba(251, 253, 255, .98), rgba(251, 253, 255, .82));
-  backdrop-filter: blur(16px);
-}
-
-.public-app-header:not(.home) {
-  grid-template-columns: minmax(0, auto) minmax(280px, 1fr) max-content;
-  gap: 10px;
-  min-height: 50px;
-  padding: 6px 10px;
-  border: 1px solid rgba(99, 102, 241, .28);
-  border-radius: 0 0 12px 12px;
-  background:
-    radial-gradient(circle at 16% 0%, rgba(99, 102, 241, .18), transparent 34%),
-    linear-gradient(180deg, rgba(8, 13, 28, .98), rgba(6, 10, 23, .96));
-  box-shadow:
-    0 12px 30px rgba(5, 10, 25, .18),
-    inset 0 -1px 0 rgba(104, 92, 255, .3);
-}
-
-.public-app-header:not(.home) .public-header-brand {
-  display: none;
-}
-
-.public-app-header.home {
-  position: relative;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  justify-content: space-between;
-  min-height: 68px;
-  background: transparent;
-  backdrop-filter: none;
-}
-
-.public-header-brand {
-  display: inline-flex;
-  gap: 10px;
-  align-items: center;
-  min-width: 0;
-  width: min-content;
-  padding: 2px 8px 2px 0;
-  border: 0;
-  border-radius: 12px;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-}
-
-.public-header-brand:focus-visible {
-  outline: 2px solid rgba(123, 92, 255, .72);
-  outline-offset: 4px;
 }
 
 .public-brand-logo {
@@ -8848,329 +8783,6 @@ code {
   height: 44px;
   border-radius: 12px;
   object-fit: cover;
-}
-
-.public-header-brand .public-brand-logo {
-  width: 42px;
-  height: 42px;
-  filter: drop-shadow(0 1px 6px rgba(255, 255, 255, .74)) drop-shadow(0 8px 20px rgba(25, 38, 78, .16));
-}
-
-.public-header-nav {
-  display: inline-flex;
-  align-items: center;
-  align-self: stretch;
-  gap: 1px;
-  min-width: 0;
-  height: 44px;
-  padding: 0 5px;
-  justify-self: start;
-  border: 1px solid rgba(90, 105, 145, .16);
-  border-radius: 999px;
-  background:
-    linear-gradient(180deg, rgba(12, 18, 36, .82), rgba(7, 12, 26, .9)),
-    radial-gradient(circle at 12% 0%, rgba(95, 80, 255, .18), transparent 34%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .08),
-    0 12px 26px rgba(4, 8, 18, .2);
-}
-
-.public-app-header:not(.home) .public-header-nav {
-  height: 36px;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-.public-app-header.home .public-header-nav {
-  position: absolute;
-  left: 50%;
-  z-index: 2;
-  justify-self: center;
-  border-color: rgba(126, 115, 255, .34);
-  transform: translateX(-50%);
-}
-
-.public-app-header.home .public-header-nav button {
-}
-
-.public-app-header.home .public-header-menu-item {
-  align-self: stretch;
-}
-
-.public-app-header.home .public-header-nav button span {
-  width: 18px;
-  height: 18px;
-  font-size: 14px;
-}
-
-.public-app-header.home .public-header-nav button strong {
-}
-
-.public-header-nav button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  gap: 6px;
-  height: 40px;
-  padding: 0 12px;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: rgba(214, 224, 246, .72);
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.public-app-header:not(.home) .public-header-nav button {
-  gap: 5px;
-  height: 36px;
-  padding: 0 12px;
-  color: rgba(211, 222, 244, .72);
-}
-
-.public-header-nav button::after {
-  position: absolute;
-  right: 12px;
-  bottom: -3px;
-  left: 12px;
-  height: 2px;
-  border-radius: 999px;
-  background: transparent;
-  content: "";
-}
-
-.public-header-nav button.active {
-  color: #ffffff;
-}
-
-.public-header-nav button.active::after {
-  background: linear-gradient(90deg, #7c6dff, #4d7dff);
-  box-shadow: 0 0 12px rgba(124, 109, 255, .72);
-}
-
-.public-app-header:not(.home) .public-header-nav button.active::after {
-  right: 8px;
-  bottom: -6px;
-  left: 8px;
-  height: 3px;
-  background: linear-gradient(90deg, #805cff, #4d7dff);
-}
-
-.public-header-nav button span {
-  display: grid;
-  place-items: center;
-  width: 15px;
-  height: 16px;
-  color: #8e8bff;
-  font-size: 12px;
-  line-height: 1;
-}
-
-.public-app-header:not(.home) .public-header-nav button span {
-  color: #8e82ff;
-}
-
-.public-header-nav button strong {
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: 0;
-}
-
-.public-header-menu-item {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  align-self: stretch;
-}
-
-.public-header-menu-item > button {
-  height: 100%;
-}
-
-.public-header-menu-item::after {
-  position: absolute;
-  top: 100%;
-  right: -12px;
-  left: -12px;
-  z-index: 79;
-  height: 10px;
-  content: "";
-}
-
-.public-header-submenu {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 50%;
-  z-index: 80;
-  display: grid;
-  gap: 4px;
-  min-width: 164px;
-  padding: 8px;
-  border: 1px solid rgba(126, 139, 185, .32);
-  border-radius: 14px;
-  background:
-    linear-gradient(180deg, rgba(12, 18, 36, .97), rgba(7, 12, 28, .98)),
-    radial-gradient(circle at 14% 0%, rgba(124, 109, 255, .2), transparent 38%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .08),
-    0 18px 42px rgba(2, 6, 18, .42),
-    0 0 20px rgba(92, 83, 255, .12);
-  opacity: 0;
-  pointer-events: none;
-  transform: translate(-50%, 6px);
-  transition: opacity .14s ease, transform .14s ease;
-}
-
-.public-header-menu-item:hover .public-header-submenu {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translate(-50%, 0);
-}
-
-.public-header-submenu button,
-.public-app-header.home .public-header-submenu button,
-.public-app-header:not(.home) .public-header-submenu button {
-  justify-content: flex-start;
-  width: 100%;
-  height: 36px;
-  padding: 0 10px;
-  border-radius: 10px;
-  color: rgba(224, 232, 250, .86);
-  text-align: left;
-}
-
-.public-header-submenu button::after {
-  display: none;
-}
-
-.public-header-submenu button:hover,
-.public-header-submenu button:focus-visible {
-  background: rgba(96, 107, 255, .16);
-  color: #ffffff;
-}
-
-.public-header-submenu button span,
-.public-app-header.home .public-header-submenu button span,
-.public-app-header:not(.home) .public-header-submenu button span {
-  width: 16px;
-  height: 16px;
-  color: #9ea7ff;
-  font-size: 12px;
-}
-
-.public-header-submenu button strong,
-.public-app-header.home .public-header-submenu button strong,
-.public-app-header:not(.home) .public-header-submenu button strong {
-  color: inherit;
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.public-header-brand strong {
-  color: #15223c;
-  font-size: 16px;
-  font-weight: 950;
-}
-
-.public-app-header .public-search-wrap {
-  width: 100%;
-  justify-self: stretch;
-  min-width: 0;
-}
-
-@media (min-width: 981px) {
-  .public-app-header:not(.home) .public-search-wrap {
-    width: min(50vw, 520px);
-    justify-self: end;
-  }
-}
-
-.public-app-header .public-search-form {
-  grid-template-columns: minmax(0, 1fr) auto;
-  min-height: 46px;
-  padding: 0 12px 0 16px;
-  border-color: #d9e3f2;
-  border-radius: 8px;
-  background: #fff;
-  box-shadow: 0 10px 26px rgba(58, 76, 113, .08);
-}
-
-.public-app-header:not(.home) .public-search-form {
-  min-height: 32px;
-  padding: 0 6px 0 13px;
-  border-color: rgba(107, 86, 255, .54);
-  border-radius: 999px;
-  background: rgba(8, 13, 29, .86);
-  box-shadow:
-    inset 0 0 0 1px rgba(119, 92, 255, .2),
-    0 0 18px rgba(104, 92, 255, .2);
-}
-
-.public-app-header .public-search-server {
-  display: none;
-}
-
-.public-app-header .public-search-field {
-  border-left: 0;
-}
-
-.public-app-header .public-search-field input {
-  min-height: 44px;
-  padding-left: 0;
-  color: #1e2b45;
-  font-size: 14px;
-}
-
-.public-app-header:not(.home) .public-search-field input {
-  min-height: 30px;
-  color: #eaf0ff;
-  font-size: 12px;
-}
-
-.public-app-header:not(.home) .public-search-field input::placeholder {
-  color: rgba(194, 203, 225, .56);
-}
-
-.public-app-header .public-search-actions {
-  gap: 4px;
-}
-
-.public-app-header:not(.home) .public-search-actions {
-  gap: 2px;
-}
-
-.public-app-header:not(.home) .public-search-actions button {
-  color: #9ea7ff;
-}
-
-.public-app-header:not(.home) .public-search-icon-button {
-  width: 28px;
-  height: 28px;
-}
-
-.public-app-header:not(.home) .public-search-clear span,
-.public-app-header:not(.home) .public-search-clear span::after {
-  width: 14px;
-  height: 3px;
-}
-
-.public-app-header:not(.home) .public-search-submit span {
-  top: -1px;
-  left: -1px;
-  width: 17px;
-  height: 17px;
-  border-width: 2px;
-}
-
-.public-app-header:not(.home) .public-search-submit span::after {
-  right: -6px;
-  bottom: -3px;
-  width: 8px;
-  height: 2px;
 }
 
 .public-header-tools {
@@ -9184,76 +8796,6 @@ code {
 
 .public-mobile-menu-toggle {
   display: none;
-}
-
-.public-app-header.home .public-header-brand,
-.public-app-header.home .public-header-tools {
-  position: relative;
-  z-index: 3;
-}
-
-.public-app-header.home .public-header-tools {
-  justify-self: end;
-  align-self: start;
-  gap: 10px;
-  min-height: 52px;
-}
-
-@media (max-width: 1440px) and (min-width: 1181px) {
-  .public-app-header:not(.home) {
-    grid-template-columns: minmax(0, auto) minmax(300px, 1fr) max-content;
-  }
-
-  .public-app-header:not(.home) .public-header-brand {
-    display: none;
-  }
-
-  .public-app-header:not(.home) .public-header-nav {
-    height: 40px;
-    padding: 0 4px;
-  }
-
-  .public-app-header:not(.home) .public-header-nav button {
-    gap: 4px;
-    height: 36px;
-    padding: 0 9px;
-  }
-
-  .public-app-header:not(.home) .public-header-nav button strong {
-    font-size: 11px;
-  }
-
-  .public-app-header:not(.home) .public-search-form {
-    min-height: 32px;
-  }
-
-  .public-app-header:not(.home) .public-search-field input {
-    min-height: 30px;
-  }
-}
-
-@media (max-width: 1280px) and (min-width: 1181px) {
-  .public-app-header:not(.home) {
-    gap: 8px;
-    grid-template-columns: minmax(0, auto) minmax(260px, 1fr) max-content;
-  }
-
-  .public-app-header:not(.home) .public-header-nav button {
-    padding: 0 8px;
-  }
-
-  .public-app-header:not(.home) .public-header-nav button span {
-    width: 12px;
-    font-size: 10px;
-  }
-
-  .public-app-header:not(.home) .public-header-tools {
-    gap: 6px;
-  }
-
-  .public-app-header:not(.home) .public-twitch-login-chip {
-    padding: 0 10px;
-  }
 }
 
 .public-header-select,
@@ -9270,22 +8812,6 @@ code {
   color: #22304a;
   font-weight: 900;
   box-shadow: 0 10px 26px rgba(58, 76, 113, .06);
-}
-
-.public-app-header .public-app-locale-menu .public-locale-button {
-  gap: var(--yoro-space-2);
-  width: auto;
-  min-width: calc(var(--yoro-size-touch-target) + var(--yoro-space-4));
-  min-height: var(--yoro-size-touch-target);
-  height: var(--yoro-size-touch-target);
-  padding: var(--yoro-space-0) var(--yoro-space-3);
-  border-color: var(--yoro-color-border-on-dark-strong) !important;
-  border-radius: var(--yoro-radius-md);
-  background: var(--yoro-color-product-gray-surface-strong) !important;
-  color: var(--yoro-color-text-on-dark) !important;
-  line-height: 1;
-  white-space: nowrap;
-  box-shadow: var(--yoro-shadow-public-header);
 }
 
 .public-app-locale-menu .public-locale-current-code {
@@ -9305,65 +8831,6 @@ code {
   border-right: var(--yoro-space-1) solid transparent;
   border-left: var(--yoro-space-1) solid transparent;
   opacity: .58;
-}
-
-.public-app-header .public-app-locale-menu .public-locale-popover {
-  top: calc(100% + var(--yoro-space-2));
-  right: var(--yoro-space-0);
-  gap: var(--yoro-space-1);
-  width: max-content;
-  min-width: max-content;
-  max-width: calc(100vw - (var(--yoro-space-4) + var(--yoro-space-4)));
-  padding: var(--yoro-space-2);
-  border-color: var(--yoro-color-border-on-dark-strong);
-  border-radius: var(--yoro-radius-md);
-  background: var(--yoro-color-product-gray-surface-strong);
-  box-shadow: var(--yoro-shadow-panel);
-}
-
-.public-app-header .public-app-locale-menu .public-locale-popover button {
-  grid-template-columns: minmax(0, 1fr) auto var(--yoro-space-4);
-  gap: var(--yoro-space-2);
-  min-height: var(--yoro-size-touch-target);
-  padding: var(--yoro-space-2) var(--yoro-space-3);
-  color: var(--yoro-color-text-on-dark-muted);
-  text-align: start;
-}
-
-.public-app-header .public-app-locale-menu .public-locale-popover button:hover,
-.public-app-header .public-app-locale-menu .public-locale-popover button.active {
-  background: var(--yoro-color-product-gray-surface);
-  color: var(--yoro-color-text-on-dark);
-}
-
-.public-app-header .public-app-locale-menu .public-locale-option-label {
-  display: block;
-  min-width: 0;
-  min-height: auto;
-  overflow: hidden;
-  background: transparent;
-  color: inherit;
-  font-size: var(--yoro-font-size-sm);
-  font-weight: var(--yoro-font-weight-bold);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.public-app-header .public-app-locale-menu .public-locale-option-code {
-  min-width: calc(var(--yoro-space-4) + var(--yoro-space-2));
-  padding: var(--yoro-space-1) var(--yoro-space-2);
-  overflow: visible;
-  border-radius: var(--yoro-radius-pill);
-  background: var(--yoro-color-product-gray-surface);
-  color: var(--yoro-color-text-on-dark-muted);
-  font-size: var(--yoro-font-size-xs);
-  text-align: center;
-  text-overflow: clip;
-}
-
-.public-app-header .public-app-locale-menu .public-locale-option-check {
-  width: var(--yoro-space-4);
-  justify-self: center;
 }
 
 .public-filter-button strong {
@@ -9391,16 +8858,6 @@ code {
   font-size: 12px;
   font-weight: 950;
   box-shadow: 0 10px 26px rgba(58, 76, 113, .06);
-}
-
-.public-app-header:not(.home) .public-twitch-login-chip {
-  min-height: 36px;
-  padding: 0 13px;
-  border-color: rgba(113, 96, 255, .46);
-  border-radius: 9px;
-  background: linear-gradient(135deg, #7559ff, #4d6dff);
-  color: #ffffff;
-  box-shadow: 0 10px 22px rgba(79, 70, 229, .32);
 }
 
 .public-twitch-login-chip:disabled {
@@ -11813,11 +11270,6 @@ code {
   }
 }
 
-.public-header-submenu button.active {
-  background: rgba(96, 107, 255, .2);
-  color: #ffffff;
-}
-
 .visibility-pill.public {
   background: rgba(45, 212, 191, .18);
   color: #5eead4;
@@ -11843,7 +11295,6 @@ code {
 }
 
 .public-dashboard-shell.theme-dark .public-sidebar,
-.public-dashboard-shell.theme-dark .public-app-header,
 .public-dashboard-shell.theme-dark .public-panel,
 .public-dashboard-shell.theme-dark .public-profile-top-grid,
 .public-dashboard-shell.theme-dark .public-profile-tabs,
@@ -12006,16 +11457,7 @@ code {
   border-color: #151f2e;
 }
 
-.public-dashboard-shell.theme-dark .public-app-header {
-  background: linear-gradient(180deg, rgba(17, 24, 39, .98), rgba(17, 24, 39, .86));
-}
-
-.public-dashboard-shell.theme-dark .public-app-header.home {
-  background: transparent;
-}
-
 .public-dashboard-shell.theme-dark .public-sidebar-brand strong,
-.public-dashboard-shell.theme-dark .public-header-brand strong,
 .public-dashboard-shell.theme-dark .public-dashboard-empty-card h1,
 .public-dashboard-shell.theme-dark .public-profile-title-row h2,
 .public-dashboard-shell.theme-dark .public-rank-overview-card strong,
@@ -12166,7 +11608,6 @@ code {
   color: #8fa1bd;
 }
 
-.public-dashboard-shell.theme-dark .public-app-header .public-search-form,
 .public-dashboard-shell.theme-dark .public-home-search-stage .public-search-form,
 .public-dashboard-shell.theme-dark .public-header-select,
 .public-dashboard-shell.theme-dark .public-filter-button,
@@ -12182,32 +11623,6 @@ code {
   border-color: #2c3b54;
   background: #101827;
   color: #dbe6f7;
-}
-
-.public-dashboard-shell.theme-dark .public-app-header:not(.home) {
-  border-color: rgba(99, 102, 241, .28);
-  background:
-    radial-gradient(circle at 16% 0%, rgba(99, 102, 241, .18), transparent 34%),
-    linear-gradient(180deg, rgba(8, 13, 28, .98), rgba(6, 10, 23, .96));
-  box-shadow:
-    0 12px 30px rgba(5, 10, 25, .18),
-    inset 0 -1px 0 rgba(104, 92, 255, .3);
-}
-
-.public-dashboard-shell.theme-dark .public-app-header:not(.home) .public-search-form {
-  border-color: rgba(107, 86, 255, .54);
-  background: rgba(8, 13, 29, .86);
-  color: #eaf0ff;
-  box-shadow:
-    inset 0 0 0 1px rgba(119, 92, 255, .2),
-    0 0 18px rgba(104, 92, 255, .2);
-}
-
-.public-dashboard-shell.theme-dark .public-app-header:not(.home) .public-twitch-login-chip {
-  border-color: rgba(113, 96, 255, .46);
-  background: linear-gradient(135deg, #7559ff, #4d6dff);
-  color: #ffffff;
-  box-shadow: 0 10px 22px rgba(79, 70, 229, .32);
 }
 
 .public-dashboard-shell.theme-dark .public-match-filter-bar {
@@ -12559,90 +11974,9 @@ code {
     padding: 10px 10px 86px;
   }
 
-  .public-app-header:not(.home) {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .public-app-header:not(.home) .public-search-wrap {
-    grid-column: 1 / -1;
-    order: 2;
-  }
-
-  .public-app-header:not(.home) .public-header-tools {
-    justify-self: end;
-  }
-
-  .public-app-header.home {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  .public-app-header.home .public-header-nav {
-    position: static;
-    grid-column: 1 / -1;
-    justify-self: stretch;
-    order: 3;
-    width: 100%;
-    min-height: 46px;
-    height: auto;
-    margin-top: 4px;
-    overflow: visible;
-    transform: none;
-  }
-
-  .public-app-header.home .public-header-menu-item {
-    flex: 1 0 auto;
-  }
-
-  .public-app-header.home .public-header-nav button {
-    flex: 1 0 auto;
-    height: 40px;
-    padding: 0 12px;
-  }
-
-  .public-app-header.home .public-header-nav button strong {
-    font-size: 12px;
-  }
-
 }
 
 @media (max-width: 760px) {
-  .public-app-header {
-    grid-template-columns: 1fr;
-  }
-
-  .public-app-header.home {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  .public-app-header.home .public-header-nav {
-    position: static;
-    grid-column: 1 / -1;
-    justify-self: stretch;
-    order: 3;
-    width: 100%;
-    min-height: 46px;
-    height: auto;
-    margin-top: 4px;
-    overflow: visible;
-    transform: none;
-  }
-
-  .public-app-header.home .public-header-menu-item {
-    flex: 1 0 auto;
-  }
-
-  .public-app-header.home .public-header-nav button {
-    flex: 1 0 auto;
-    height: 40px;
-    padding: 0 12px;
-  }
-
-  .public-app-header.home .public-header-nav button strong {
-    font-size: 12px;
-  }
-
-  .public-app-header.home .public-header-brand .public-brand-logo {
-  }
 
   .public-header-tools {
     display: flex;
@@ -12664,16 +11998,6 @@ code {
   .public-filter-button {
     min-height: 40px;
     padding: 0 10px;
-  }
-
-  .public-app-header.home .public-header-tools {
-    gap: 6px;
-    justify-content: flex-end;
-  }
-
-  .public-app-header.home .public-twitch-login-chip {
-    flex: 0 1 auto;
-    max-width: 124px;
   }
 
   .public-twitch-followed-panel .public-section-head,
@@ -14081,22 +13405,6 @@ code {
 }
 
 @media (max-width: 520px) {
-  .public-app-header.home .public-header-brand .public-brand-logo {
-    width: 40px;
-    height: 40px;
-  }
-
-  .public-app-header.home .public-twitch-login-chip {
-    max-width: 114px;
-    gap: 6px;
-    padding: 0 8px;
-  }
-
-  .public-app-header.home .public-twitch-login-chip img,
-  .public-app-header.home .public-twitch-login-chip span {
-    width: 22px;
-    height: 22px;
-  }
 
   .public-dashboard-shell.public-home-shell .public-home-search-stage .public-search-form {
     grid-template-columns: 68px minmax(0, 1fr) 36px;

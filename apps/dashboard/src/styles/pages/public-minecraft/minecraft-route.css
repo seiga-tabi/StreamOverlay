@@ -1,0 +1,148 @@
+/*
+ * Minecraft route 전용 stylesheet — PublicMinecraftPage lazy chunk 에만 붙습니다.
+ * 발로란트 선례를 따릅니다: layer 없이 단독 소유하고, 셸(.public-dashboard-shell)이
+ * 어두운 배경용 밝은 글자색을 상속시키므로 게임 고유 다크 팔레트를 자체 정의합니다.
+ * 블록 감성은 모티브 수준(잔디 스트립·각진 카드) — docs/mockups/minecraft-vertical.html §07.
+ */
+
+.minecraft-shell .public-game-header,
+.minecraft-shell .public-bottom-tab-bar,
+.minecraft-shell .public-bottom-sheet,
+.public-bottom-sheet--minecraft {
+  --public-game-accent: #3be0bf;
+}
+
+.minecraft-shell {
+  background: #101418;
+}
+
+.minecraft-main {
+  min-inline-size: 0;
+}
+
+.minecraft-page-section,
+.minecraft-home {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--yoro-space-6);
+}
+
+.minecraft-page-section {
+  --minecraft-accent: #3be0bf;
+  --minecraft-surface: #171d23;
+  --minecraft-ink: #e8ecef;
+  --minecraft-ink-muted: #9aa5b0;
+  --minecraft-line: #232c34;
+
+  color: var(--minecraft-ink);
+}
+
+.minecraft-hero {
+  position: relative;
+  overflow: hidden;
+  padding: calc(var(--yoro-space-8) + 12px) var(--yoro-space-6) var(--yoro-space-8);
+  border: thin solid var(--minecraft-line);
+  border-radius: var(--yoro-radius-md);
+  background: var(--minecraft-surface);
+  text-align: center;
+}
+
+/* 잔디 블록 모티브 — 상단 잔디+흙 레이어 스트립(단일 의사요소, 2층 배경) */
+.minecraft-grass-top::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 0;
+  block-size: 12px;
+  background:
+    linear-gradient(90deg, #6cc349 0 12%, #7fd35b 12% 22%, #6cc349 22% 47%, #5cb43e 47% 58%, #6cc349 58% 79%, #7fd35b 79% 88%, #6cc349 88%) top / 100% 8px no-repeat,
+    linear-gradient(90deg, #7a5433 0 18%, #614226 18% 41%, #7a5433 41% 66%, #614226 66% 83%, #7a5433 83%) bottom / 100% 4px no-repeat;
+}
+
+.minecraft-hero__kicker {
+  display: block;
+  margin-block-end: var(--yoro-space-2);
+  color: var(--minecraft-accent);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-black);
+  letter-spacing: .14em;
+}
+
+.minecraft-hero__title {
+  margin: 0 0 var(--yoro-space-3);
+  color: var(--minecraft-ink);
+  font-size: var(--yoro-font-size-3xl);
+  line-height: var(--yoro-line-height-tight);
+  text-wrap: balance;
+}
+
+.minecraft-hero > p {
+  max-inline-size: 44rem;
+  margin: 0 auto var(--yoro-space-4);
+  color: var(--minecraft-ink-muted);
+}
+
+.minecraft-hero__status {
+  display: inline-block;
+  padding: var(--yoro-space-1) var(--yoro-space-3);
+  border: thin solid rgba(59, 224, 191, .45);
+  border-radius: var(--yoro-radius-pill);
+  color: var(--minecraft-accent);
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.minecraft-categories > h2 {
+  margin: 0 0 var(--yoro-space-4);
+  color: var(--minecraft-ink);
+  font-size: var(--yoro-font-size-xl);
+}
+
+.minecraft-categories__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--yoro-space-4);
+}
+
+.minecraft-category-card {
+  padding: var(--yoro-space-5);
+  border: thin solid var(--minecraft-line);
+  border-radius: var(--yoro-radius-md);
+  background: var(--minecraft-surface);
+}
+
+.minecraft-category-card > h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--yoro-space-2);
+  margin: 0 0 var(--yoro-space-2);
+  color: var(--minecraft-ink);
+  font-size: var(--yoro-font-size-md);
+}
+
+.minecraft-category-card__phase {
+  padding: 0 var(--yoro-space-2);
+  border-radius: var(--yoro-radius-pill);
+  background: rgba(59, 224, 191, .16);
+  color: var(--minecraft-accent);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-black);
+}
+
+.minecraft-category-card > p,
+.minecraft-unofficial-note {
+  margin: 0;
+  color: var(--minecraft-ink-muted);
+  font-size: var(--yoro-font-size-sm);
+}
+
+.minecraft-unofficial-note {
+  margin-block-start: var(--yoro-space-5);
+  text-align: center;
+}
+
+/* 준비 중·404 화면(EmptyState)도 다크 표면 위에서 읽히게 */
+.minecraft-page-section .yoro-empty-state {
+  border-color: var(--minecraft-line);
+  background: var(--minecraft-surface);
+}

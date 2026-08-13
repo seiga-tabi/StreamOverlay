@@ -30,6 +30,12 @@ const LOCALIZABLE_PUBLIC_EXACT_PATHS = new Set([
   "/valorant/weapons",
   "/valorant/maps",
   "/valorant/ranked",
+  "/minecraft",
+  "/minecraft/recipes",
+  "/minecraft/items",
+  "/minecraft/enchants",
+  "/minecraft/library",
+  "/minecraft/patch-notes",
   "/lol/aram",
   "/patch-notes",
 ]);

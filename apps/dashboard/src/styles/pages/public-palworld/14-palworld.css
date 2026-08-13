@@ -20,12 +20,6 @@
   min-inline-size: 0;
 }
 
-.palworld-header.public-app-header,
-.palworld-header.public-app-header.is-home {
-  min-inline-size: 0;
-  margin: var(--yoro-space-0) !important;
-}
-
 .palworld-search-form {
   position: relative;
   z-index: var(--yoro-z-dropdown);
@@ -912,32 +906,6 @@
   color: var(--yoro-color-text-muted);
 }
 
-.palworld-map-legend-spawn,
-.palworld-map-legend-boss,
-.palworld-map-legend-location {
-  flex: 0 0 auto;
-  inline-size: var(--yoro-space-4);
-  block-size: var(--yoro-space-4);
-  margin-block-start: var(--yoro-space-1);
-  border-radius: var(--yoro-radius-pill);
-}
-
-.palworld-map-legend-spawn {
-  border: thin solid var(--yoro-color-text-on-dark);
-  background: var(--yoro-color-info);
-}
-
-.palworld-map-legend-boss {
-  border: var(--yoro-focus-ring-width) solid var(--yoro-color-danger);
-  background: var(--yoro-color-surface-strong);
-}
-
-.palworld-map-legend-location {
-  border: var(--yoro-focus-ring-width) solid currentColor;
-  background: var(--yoro-color-surface-strong);
-  color: var(--palworld-accent);
-}
-
 .palworld-map-location-icon {
   display: grid;
   flex: 0 0 auto;
@@ -957,45 +925,24 @@
   line-height: 1;
 }
 
-.palworld-map-legend-location-icon {
-  inline-size: var(--yoro-space-6);
-  block-size: var(--yoro-space-6);
-  margin-block-start: var(--yoro-space-1);
-  border: thin solid var(--yoro-color-border);
-  border-radius: var(--yoro-radius-sm);
-  background: var(--yoro-color-surface-strong);
-}
-
-.palworld-map-legend-location[data-category="fast-travel"],
 .palworld-map-location-marker[data-category="fast-travel"] {
   color: var(--yoro-color-info);
 }
 
-.palworld-map-legend-location[data-category="dungeon"],
 .palworld-map-location-marker[data-category="dungeon"] {
   color: var(--yoro-color-danger);
 }
 
-.palworld-map-legend-location[data-category="egg"],
 .palworld-map-location-marker[data-category="egg"] {
   color: var(--yoro-color-warning);
 }
 
-.palworld-map-legend-location[data-category="skill-fruit"],
 .palworld-map-location-marker[data-category="skill-fruit"] {
   color: var(--yoro-color-success);
 }
 
-.palworld-map-legend-location[data-category="journal"],
 .palworld-map-location-marker[data-category="journal"] {
   color: var(--yoro-color-text-muted);
-}
-
-.palworld-map-legend-periods {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--yoro-space-1);
 }
 
 .palworld-map-boss-marker {
@@ -1294,15 +1241,6 @@
 .palworld-map-visible-location-media .palworld-media-fallback {
   inline-size: 100%;
   block-size: 100%;
-}
-
-.palworld-map-visible-location-icon {
-  inline-size: 100%;
-  block-size: 100%;
-  padding: var(--yoro-space-1);
-  border: thin solid var(--yoro-color-border);
-  border-radius: inherit;
-  background: var(--yoro-color-surface-strong);
 }
 
 .palworld-map-visible-location-copy,
@@ -3680,7 +3618,6 @@
   border-radius: var(--yoro-radius-md);
 }
 
-.palworld-breeding-combination-media .palworld-media,
 .palworld-breeding-combination-media img {
   inline-size: 100%;
   block-size: 100%;
@@ -4180,20 +4117,6 @@
   background: var(--yoro-color-surface-muted);
 }
 
-.palworld-pal-location-spawn-summary {
-  flex-wrap: wrap;
-}
-
-.palworld-pal-location-spawn-details {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  min-inline-size: 0;
-  gap: var(--yoro-space-2);
-  text-align: end;
-}
-
 .palworld-pal-location-caption li > span:first-child {
   min-inline-size: 0;
   overflow-wrap: anywhere;
@@ -4476,11 +4399,6 @@
   border: thin solid var(--yoro-color-border-strong);
   border-radius: var(--yoro-radius-md);
   background: var(--palworld-accent-soft);
-}
-
-.palworld-pal-location-overview-media .palworld-media {
-  inline-size: 100%;
-  block-size: 100%;
 }
 
 .palworld-pal-location-overview-copy {
@@ -4782,11 +4700,6 @@
   .palworld-pal-location-actions,
   .palworld-pal-location-actions > .yoro-button {
     inline-size: 100%;
-  }
-
-  .palworld-pal-location-spawn-details {
-    justify-content: flex-start;
-    text-align: start;
   }
 
   .palworld-pal-location-loading,
@@ -5276,15 +5189,6 @@
   .palworld-item-search-row .yoro-button,
   .palworld-skill-search-row .yoro-button {
     inline-size: 100%;
-  }
-}
-
-@media (min-width: 96rem) {
-  .palworld-header.public-app-header {
-    display: block !important;
-    min-block-size: var(--yoro-size-public-header-height);
-    border-block-end: thin solid var(--yoro-color-border);
-    background: var(--yoro-color-surface-strong);
   }
 }
 

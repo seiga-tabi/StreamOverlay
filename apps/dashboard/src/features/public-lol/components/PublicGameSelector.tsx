@@ -3,11 +3,11 @@ import { publicI18n, t } from "../i18n/public-lol-i18n";
 import type { PublicMainPage } from "../types/public-lol";
 import { DISCORD_SYMBOL_ICON_SRC } from "../../../shared/DiscordSymbolIcon";
 
-export type PublicGameId = "league-of-legends" | "palworld" | "valorant" | "yoro-bot";
+export type PublicGameId = "league-of-legends" | "palworld" | "valorant" | "minecraft" | "yoro-bot";
 
 type PublicGameOption = {
   id: PublicGameId;
-  page?: Extract<PublicMainPage, "search" | "palworld" | "valorant" | "bot">;
+  page?: Extract<PublicMainPage, "search" | "palworld" | "valorant" | "minecraft" | "bot">;
   logo?: string;
   ko: string;
   ja: string;
@@ -54,6 +54,15 @@ const games: PublicGameOption[] = [
     subtitleJa: publicI18n.ja.valorantSubtitle
   },
   {
+    id: "minecraft",
+    page: "minecraft",
+    logo: "/images/games/minecraft-mark.svg",
+    ko: publicI18n.ko.minecraft,
+    ja: publicI18n.ja.minecraft,
+    subtitleKo: publicI18n.ko.minecraftSubtitle,
+    subtitleJa: publicI18n.ja.minecraftSubtitle
+  },
+  {
     id: "yoro-bot",
     page: "bot",
     logo: DISCORD_SYMBOL_ICON_SRC,
@@ -71,6 +80,7 @@ function isPublicGameId(value: string | null): value is PublicGameId {
 function gameIdForPage(page: PublicMainPage): PublicGameId | undefined {
   if (page === "palworld") return "palworld";
   if (page === "valorant") return "valorant";
+  if (page === "minecraft") return "minecraft";
   if (page === "bot") return "yoro-bot";
   return "league-of-legends";
 }
@@ -79,6 +89,7 @@ function gameLabel(game: PublicGameOption): string {
   if (game.id === "league-of-legends") return t().leagueOfLegends;
   if (game.id === "palworld") return t().palworld;
   if (game.id === "valorant") return t().valorant;
+  if (game.id === "minecraft") return t().minecraft;
   return t().yoroBot;
 }
 
@@ -86,6 +97,7 @@ function gameSubtitle(game: PublicGameOption): string {
   if (game.id === "league-of-legends") return t().leagueOfLegendsSubtitle;
   if (game.id === "palworld") return t().palworldSubtitle;
   if (game.id === "valorant") return t().valorantSubtitle;
+  if (game.id === "minecraft") return t().minecraftSubtitle;
   return t().yoroBotSubtitle;
 }
 
@@ -93,6 +105,7 @@ function gameSelectionLabel(game: PublicGameOption): string {
   if (game.id === "league-of-legends") return t().selectLeagueOfLegends;
   if (game.id === "palworld") return t().selectPalworld;
   if (game.id === "valorant") return t().selectValorant;
+  if (game.id === "minecraft") return t().selectMinecraft;
   return t().selectYoroBot;
 }
 

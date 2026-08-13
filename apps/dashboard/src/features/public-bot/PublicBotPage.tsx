@@ -664,6 +664,14 @@ function navigateGame(page: PublicMainPage): void {
     setPublicPath("/palworld");
     return;
   }
+  if (page === "valorant") {
+    setPublicPath("/valorant");
+    return;
+  }
+  if (page === "minecraft") {
+    setPublicPath("/minecraft");
+    return;
+  }
   if (page === "bot") {
     setPublicPath("/bot");
     return;
