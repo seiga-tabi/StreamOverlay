@@ -3436,14 +3436,22 @@ for (const viewport of breedingResponsiveViewports) {
     expect(parentABounds).not.toBeNull();
     expect(parentBBounds).not.toBeNull();
     expect(targetBounds).not.toBeNull();
-    if (viewport.width <= 768) {
-      expect(parentBBounds!.y).toBeGreaterThan(parentABounds!.y);
-      expect(targetBounds!.y).toBeGreaterThan(parentBBounds!.y);
-    } else {
-      expect(parentBBounds!.x).toBeGreaterThan(parentABounds!.x);
-      expect(targetBounds!.x).toBeGreaterThan(parentBBounds!.x);
-    }
+    /* 보드는 모든 폭에서 한 줄 — 행 분리 브레이크포인트가 없어야 한다. */
+    expect(parentBBounds!.x).toBeGreaterThan(parentABounds!.x);
+    expect(targetBounds!.x).toBeGreaterThan(parentBBounds!.x);
+    expect(Math.abs(parentBBounds!.y - parentABounds!.y)).toBeLessThanOrEqual(2);
+    expect(Math.abs(targetBounds!.y - parentBBounds!.y)).toBeLessThanOrEqual(2);
     expect(targetBounds!.x + targetBounds!.width).toBeLessThanOrEqual(viewport.width + 1);
+    /* "자동 계산" 코너 태그는 결과 이름과 어떤 폭에서도 겹치지 않는다. */
+    const tagBounds = await page.locator(".palworld-breeding-auto-tag").boundingBox();
+    const nameBounds = await page.getByTestId("breeding-target").locator("strong").first().boundingBox();
+    expect(tagBounds).not.toBeNull();
+    expect(nameBounds).not.toBeNull();
+    const tagOverlapsName = tagBounds!.y < nameBounds!.y + nameBounds!.height
+      && tagBounds!.y + tagBounds!.height > nameBounds!.y
+      && tagBounds!.x < nameBounds!.x + nameBounds!.width
+      && tagBounds!.x + tagBounds!.width > nameBounds!.x;
+    expect(tagOverlapsName).toBe(false);
     if (viewport.width <= 768) {
       await expect(page.getByTestId("breeding-summary-bar")).toBeVisible();
       await expect(page.getByTestId("breeding-summary-bar")).toContainText("실키누");

@@ -582,7 +582,7 @@ export function PalworldBreedingPage({
               <small>{formatPalNumber(directResultPair.child.number, locale)}</small>
             </span>
           </button>
-          <Badge tone="success">{text.computedResultBadge}</Badge>
+          <Badge className="palworld-breeding-auto-tag" size="sm" tone="success">{text.computedResultBadge}</Badge>
         </div>
         : <p className="palworld-breeding-input-hint" role="status">
           {direct.status === "requires_gender"
@@ -621,18 +621,7 @@ export function PalworldBreedingPage({
         <p className="palworld-breeding-input-hint">{text.autoCalculateHint}</p>
         <div className="palworld-breeding-pickers is-board">
           <PalworldPalPicker label={text.parentA} locale={locale} selected={parentA} onChange={(pal) => changeParent("parentA", pal)} onOpenPal={onOpenPal} testId="breeding-parent-a" />
-          <Button className="palworld-swap-button" variant="secondary" aria-label={text.swapParents} data-testid="breeding-swap" disabled={!query.parentA && !query.parentB} onClick={() => {
-            const [nextA, nextB] = swapBreedingParents(parentA, parentB);
-            setParentA(nextA);
-            setParentB(nextB);
-            navigate({
-              ...query,
-              parentA: query.parentB,
-              parentB: query.parentA,
-              parentAGender: query.parentBGender,
-              parentBGender: query.parentAGender,
-            });
-          }}><span aria-hidden="true">⇄</span></Button>
+          <span aria-hidden="true" className="palworld-breeding-eq">×</span>
           <PalworldPalPicker label={text.parentB} locale={locale} selected={parentB} onChange={(pal) => changeParent("parentB", pal)} onOpenPal={onOpenPal} testId="breeding-parent-b" />
           <span aria-hidden="true" className="palworld-breeding-eq">=</span>
           {childSlot}
@@ -645,7 +634,21 @@ export function PalworldBreedingPage({
           parentAGender={query.parentAGender}
           parentBGender={query.parentBGender}
         /> : null}
-        <div className="palworld-breeding-actions"><Button variant="ghost" onClick={resetAll}>{text.reset}</Button></div>
+        <div className="palworld-breeding-actions">
+          <Button variant="secondary" aria-label={text.swapParents} data-testid="breeding-swap" disabled={!query.parentA && !query.parentB} onClick={() => {
+            const [nextA, nextB] = swapBreedingParents(parentA, parentB);
+            setParentA(nextA);
+            setParentB(nextB);
+            navigate({
+              ...query,
+              parentA: query.parentB,
+              parentB: query.parentA,
+              parentAGender: query.parentBGender,
+              parentBGender: query.parentAGender,
+            });
+          }}><span aria-hidden="true">⇄</span> {text.swapParents}</Button>
+          <Button variant="ghost" onClick={resetAll}>{text.reset}</Button>
+        </div>
       </CardContent></Card></div>
       {!boardEmpty ? <div className="palworld-breeding-summary-bar" data-testid="breeding-summary-bar">
         <span className="palworld-breeding-summary-formula">
