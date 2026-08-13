@@ -167,19 +167,17 @@ test("펠월드 홈 헤더에는 상단 검색이 없고 하위 페이지에는 
   assert.doesNotMatch(home, /src="\/images\/yorogg-mark\.png"/);
 });
 
-test("펠월드 홈 Hero는 모바일 검색 제안이 경계 밖에서도 잘리지 않게 유지한다", () => {
+test("펠월드 shell은 가로 overflow만 clip하고 은퇴한 hero 규칙을 되살리지 않는다", () => {
   const css = readFileSync(
     new URL("../src/styles/pages/public-palworld/14-palworld.css", import.meta.url),
     "utf8",
   );
-  const heroRule = css.match(/\.palworld-hero\s*\{(?<body>[^}]+)\}/u)?.groups?.body;
   const shellRule = css.match(/\.palworld-shell\s*\{(?<body>[^}]+)\}/u)?.groups?.body;
 
-  assert.ok(heroRule);
-  assert.match(heroRule, /overflow:\s*visible;/u);
-  assert.doesNotMatch(heroRule, /overflow:\s*hidden;/u);
   assert.ok(shellRule);
   assert.match(shellRule, /overflow-x:\s*clip;/u);
+  /* 구 홈 hero 클래스는 마크업에서 은퇴했다 — 죽은 CSS가 되살아나면 실패해야 한다. */
+  assert.doesNotMatch(css, /\.palworld-hero[\s{,.:]/u);
 });
 
 test("Palworld 2행 메뉴는 한국어·일본어 7개 순서와 기술 해금 활성 상태를 유지한다", () => {
@@ -1739,18 +1737,18 @@ test("Palworld 9개 속성 Badge는 검증된 content-hash 이미지와 접근 �
 });
 
 test("Palworld 2행 메뉴는 세로 overflow 없이 모바일 가로 스크롤 단서를 제공한다", () => {
+  /* 스크롤 단서 불변식은 공용 PublicHorizontalNav(chrome css)로 이관되었다. */
   const css = readFileSync(new URL("../src/styles/pages/public-palworld/14-palworld.css", import.meta.url), "utf8");
-  const secondaryRule = css.match(/\.palworld-secondary-row\s*\{[\s\S]*?\}/u)?.[0] ?? "";
-  assert.match(secondaryRule, /overflow-y:\s*hidden/u);
-  assert.match(secondaryRule, /scrollbar-width:\s*none/u);
-  assert.match(css, /\.palworld-secondary-row::-webkit-scrollbar\s*\{[\s\S]*?display:\s*none/u);
-  assert.match(css, /\.palworld-secondary-row\.can-scroll-end\s*\{[\s\S]*?mask-image:\s*linear-gradient/u);
-  assert.match(css, /\.palworld-secondary-row\.can-scroll-start\.can-scroll-end\s*\{[\s\S]*?mask-image:\s*linear-gradient/u);
-  assert.match(css, /\.palworld-shell\.public-dashboard-shell[\s\S]*?button\.active::after\s*\{[\s\S]*?bottom:\s*var\(--yoro-space-1\)\s*!important/u);
-  assert.match(
-    css,
-    /@media \(min-width:\s*48\.001rem\) and \(max-width:\s*63\.999rem\)[\s\S]*?\.palworld-header-layout > \.public-header-product-cluster\s*\{[\s\S]*?grid-column:\s*1\s*!important;[\s\S]*?\.palworld-header-layout > \.public-header-tools\s*\{[\s\S]*?grid-column:\s*2\s*!important;[\s\S]*?\.palworld-header-layout > \.palworld-secondary-row\s*\{[\s\S]*?grid-row:\s*2\s*!important;[\s\S]*?\.palworld-header-layout > \.palworld-search-form\s*\{[\s\S]*?grid-row:\s*3\s*!important;/u,
-  );
+  const chrome = readFileSync(new URL("../src/styles/shared/public-game-chrome.css", import.meta.url), "utf8");
+  const navRule = chrome.match(/\.public-horizontal-nav\s*\{[\s\S]*?\}/u)?.[0] ?? "";
+  assert.match(navRule, /overflow-y:\s*hidden/u);
+  assert.match(navRule, /scrollbar-width:\s*none/u);
+  assert.match(chrome, /\.public-horizontal-nav::-webkit-scrollbar\s*\{[\s\S]*?display:\s*none/u);
+  assert.match(chrome, /\.public-horizontal-nav\.can-scroll-end\s*\{[\s\S]*?mask-image:\s*linear-gradient/u);
+  assert.match(chrome, /\.public-horizontal-nav\.can-scroll-start\.can-scroll-end\s*\{[\s\S]*?mask-image:\s*linear-gradient/u);
+  assert.match(chrome, /\.public-horizontal-nav__content > button\.active::after/u);
+  /* 은퇴한 헤더 레이아웃 클래스가 CSS에 되살아나면 실패해야 한다. */
+  assert.doesNotMatch(css, /\.palworld-secondary-row|\.palworld-header-layout/u);
 });
 
 test("긴 한국어·일본어 번역문과 상세 링크는 페이지 너비를 확장하지 않는다", () => {
