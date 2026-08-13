@@ -645,18 +645,6 @@ export function PalworldBreedingPage({
           parentAGender={query.parentAGender}
           parentBGender={query.parentBGender}
         /> : null}
-        {query.child ? <label className="palworld-breeding-type-filter">
-          <span>{text.breedingTypeFilter}</span>
-          <select value={query.type ?? "all"} onChange={(event) => navigate({
-            ...query,
-            type: event.target.value === "all" ? undefined : event.target.value as PalworldBreedingPairType,
-            page: 1,
-          })}>
-            <option value="all">{text.allBreedingTypes}</option>
-            <option value="normal">{text.normalBreedingOnly}</option>
-            <option value="special">{text.specialBreedingOnly}</option>
-          </select>
-        </label> : null}
         <div className="palworld-breeding-actions"><Button variant="ghost" onClick={resetAll}>{text.reset}</Button></div>
       </CardContent></Card></div>
       {!boardEmpty ? <div className="palworld-breeding-summary-bar" data-testid="breeding-summary-bar">
@@ -752,7 +740,21 @@ export function PalworldBreedingPage({
           {copyFeedback ? <p className="palworld-copy-feedback" role={copyFeedback === "error" ? "alert" : "status"}>{copyFeedback === "success" ? text.linkCopied : text.linkCopyFailed}</p> : null}
         </> : null}
         {query.child ? <section className="palworld-breeding-result" data-testid="breeding-parent-results" aria-busy={reverseLoading || reverseLoadMoreLoading}>
-          <div className="palworld-section-title"><h2 id="palworld-breeding-reverse-list-title">{text.childToParents}</h2></div>
+          <div className="palworld-section-title">
+            <h2 id="palworld-breeding-reverse-list-title">{text.childToParents}</h2>
+            <label className="palworld-breeding-type-filter">
+              <span>{text.breedingTypeFilter}</span>
+              <select value={query.type ?? "all"} onChange={(event) => navigate({
+                ...query,
+                type: event.target.value === "all" ? undefined : event.target.value as PalworldBreedingPairType,
+                page: 1,
+              })}>
+                <option value="all">{text.allBreedingTypes}</option>
+                <option value="normal">{text.normalBreedingOnly}</option>
+                <option value="special">{text.specialBreedingOnly}</option>
+              </select>
+            </label>
+          </div>
           {narrowParentId ? <div className="palworld-breeding-gender-disclosure-heading" data-testid="breeding-narrow-note">
             <span className="palworld-picker-label" role="note">
               {text.narrowedNotice.replace("{parent}", narrowParentName ?? narrowParentId)}

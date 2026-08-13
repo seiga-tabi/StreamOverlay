@@ -105,7 +105,7 @@ export function DirectBreedingResult({
     <CardContent>
       <div className="palworld-direct-parent-summary">
         <BreedingPalButton locale={locale} onOpen={onOpenPal} pal={pair.parentA} role={text.parentRoleA} />
-        <span aria-hidden="true">＋</span>
+        <span aria-hidden="true">×</span>
         <BreedingPalButton locale={locale} onOpen={onOpenPal} pal={pair.parentB} role={text.parentRoleB} />
       </div>
       <div className="palworld-direct-result-connector" aria-hidden="true">↓</div>
@@ -287,7 +287,7 @@ export function ReverseBreedingPairCard({
       onOpenPal={onOpenPal}
       pal={pair.parentA}
     />
-    <span aria-hidden="true" className="palworld-breeding-combination-symbol is-plus">＋</span>
+    <span aria-hidden="true" className="palworld-breeding-combination-symbol is-plus">×</span>
     <BreedingPalCell
       gender={pair.genderCondition?.parentB}
       locale={locale}
@@ -332,7 +332,7 @@ export function BreedingPartnerPairCard({
       onOpenPal={onOpenPal}
       pal={oriented.selectedParent}
     />
-    <span aria-hidden="true" className="palworld-breeding-combination-symbol is-plus">＋</span>
+    <span aria-hidden="true" className="palworld-breeding-combination-symbol is-plus">×</span>
     <BreedingPalCell
       gender={oriented.partnerParentGender}
       locale={locale}
@@ -340,7 +340,7 @@ export function BreedingPartnerPairCard({
       onOpenPal={onOpenPal}
       pal={oriented.partnerParent}
     />
-    <span aria-hidden="true" className="palworld-breeding-combination-symbol is-arrow">↓</span>
+    <span aria-hidden="true" className="palworld-breeding-combination-symbol is-arrow">=</span>
     <div className="palworld-breeding-combination-result" role="cell">
       <BreedingPalCell
         cellRole={false}
