@@ -71,7 +71,7 @@ const SKILL_LIST_QUERY_KEYS = new Set([
 ]);
 const SEARCH_QUERY_KEYS = new Set(["q", "limit"]);
 const BREEDING_QUERY_KEYS = new Set(["parentA", "parentB", "parentAGender", "parentBGender"]);
-const BREEDING_PARENTS_QUERY_KEYS = new Set(["child", "type", "page", "limit"]);
+const BREEDING_PARENTS_QUERY_KEYS = new Set(["child", "parent", "type", "page", "limit"]);
 const BREEDING_PARTNERS_QUERY_KEYS = new Set(["parent", "type", "page", "limit"]);
 const MAP_MARKERS_QUERY_KEYS = new Set(["world"]);
 const PAL_SPAWN_QUERY_KEYS = new Set(["world", "pal"]);
@@ -162,6 +162,8 @@ export type PalworldBreedingQuery = {
 
 export type PalworldBreedingParentsQuery = {
   child: string;
+  /** 지정하면 이 Pal이 부모로 포함된 조합만 반환한다. */
+  parent?: string;
   type?: (typeof PALWORLD_BREEDING_PAIR_TYPES)[number];
   page: number;
   limit: number;
@@ -229,6 +231,11 @@ function requiredId(params: URLSearchParams, key: string): string {
   const value = optionalText(params, key);
   if (!value) throw new PalworldQueryError(`${key} 값이 필요합니다.`);
   return parsePalworldId(value, key);
+}
+
+function optionalId(params: URLSearchParams, key: string): string | undefined {
+  const value = optionalText(params, key);
+  return value === undefined ? undefined : parsePalworldId(value, key);
 }
 
 function optionalEnum<const T extends readonly string[]>(
@@ -391,8 +398,10 @@ export function parsePalworldBreedingQuery(params: URLSearchParams): PalworldBre
 
 export function parsePalworldBreedingParentsQuery(params: URLSearchParams): PalworldBreedingParentsQuery {
   assertKnownKeys(params, BREEDING_PARENTS_QUERY_KEYS);
+  const parent = optionalId(params, "parent");
   return {
     child: requiredId(params, "child"),
+    ...(parent === undefined ? {} : { parent }),
     type: optionalEnum(params, "type", PALWORLD_BREEDING_PAIR_TYPES) ?? "all",
     ...pagination(params, 20)
   };

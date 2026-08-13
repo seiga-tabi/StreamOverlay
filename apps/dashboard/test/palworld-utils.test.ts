@@ -40,6 +40,7 @@ import {
   samePalworldBreedingPalId,
   swapBreedingParents,
 } from "../src/features/public-palworld/utils/breeding";
+import { parseRecentPals } from "../src/features/public-palworld/utils/recent-pals";
 import {
   clearPalworldPalsFilterParams,
   palworldPalsDetailFilterCount,
@@ -1218,12 +1219,12 @@ test("성별 조건은 현재 부모 순서에 맞게 적용하고 교환된 응
   assert.deepEqual(pair.genderCondition, { parentA: "male", parentB: "female" });
 });
 
-test("교배 URL query는 exact ID·성별·mode·page만 상태로 복원한다", () => {
-  const direct = parsePalworldBreedingQuery(new URLSearchParams("mode=parents&parentA=lamball&parentB=cattiva&parentAGender=male&parentBGender=female"));
+test("교배 URL query는 exact ID·성별·page만 슬롯 상태로 복원한다", () => {
+  const direct = parsePalworldBreedingQuery(new URLSearchParams("parentA=lamball&parentB=cattiva&parentAGender=male&parentBGender=female"));
   assert.deepEqual(direct, {
     ok: true,
+    legacy: false,
     state: {
-      mode: "parents",
       parentA: "lamball",
       parentB: "cattiva",
       parentAGender: "male",
@@ -1231,28 +1232,75 @@ test("교배 URL query는 exact ID·성별·mode·page만 상태로 복원한다
       page: 1,
     },
   });
-  assert.deepEqual(parsePalworldBreedingQuery(new URLSearchParams("mode=child&child=anubis&type=special&page=2")), {
+  assert.deepEqual(parsePalworldBreedingQuery(new URLSearchParams("child=anubis&type=special&page=2")), {
     ok: true,
-    state: { mode: "child", child: "anubis", type: "special", page: 2 },
+    legacy: false,
+    state: { child: "anubis", type: "special", page: 2 },
+  });
+  /* 부모 하나 + 목표 Pal 동시 지정은 유효한 슬롯 조합입니다. */
+  assert.deepEqual(parsePalworldBreedingQuery(new URLSearchParams("parentA=shellgadra&child=anubis")), {
+    ok: true,
+    legacy: false,
+    state: { parentA: "shellgadra", child: "anubis", page: 1 },
   });
   for (const invalid of [
     "mode=unknown",
-    "mode=parents&parentA=Anubis",
-    "mode=parents&parentA=anubis&parentAGender=unknown",
-    "mode=parents&parentA=anubis&parentA=cattiva",
-    "mode=child&child=anubis&page=0",
-    "mode=child&child=anubis&page=10001",
-    "mode=child&child=anubis&type=unknown",
+    "parentA=Anubis",
+    "parentA=anubis&parentAGender=unknown",
+    "parentA=anubis&parentA=cattiva",
+    "child=anubis&page=0",
+    "child=anubis&page=10001",
+    "child=anubis&type=unknown",
+    "parentA=anubis&type=special",
+    "parentA=anubis&page=2",
+    "parentA=lamball&parentB=cattiva&child=anubis",
     "mode=child&child=anubis&parentA=lamball",
-    "mode=parents&parentA=anubis&type=special",
+    "mode=parents&parentA=anubis&child=anubis",
   ]) {
     assert.equal(parsePalworldBreedingQuery(new URLSearchParams(invalid)).ok, false, invalid);
   }
 });
 
+test("최근 사용 Pal 저장값은 필드 단위로 검증하고 형식 밖 항목·외부 이미지·중복을 버린다", () => {
+  assert.deepEqual(parseRecentPals(null), []);
+  assert.deepEqual(parseRecentPals("not-json"), []);
+  assert.deepEqual(parseRecentPals("{}"), []);
+  const parsed = parseRecentPals(JSON.stringify([
+    { id: "penking", number: 18, nameKo: "펭킹", nameJa: "キャプペン", imageUrl: "/images/palworld/1.0.1/pals/a.webp", elements: ["water", "ice", "fire"] },
+    { id: "penking", number: 18, nameKo: "중복", nameJa: "重複", elements: [] },
+    { id: "Evil", number: 1, nameKo: "나쁨", nameJa: "悪", elements: [] },
+    { id: "bushi", number: 85, nameKo: "불무사", nameJa: "ツジギリ", imageUrl: "https://evil.example/x.webp", elements: ["fire", "unknown"] },
+  ]));
+  assert.equal(parsed.length, 2);
+  assert.equal(parsed[0]?.id, "penking");
+  assert.deepEqual(parsed[0]?.elements, ["water", "ice"]);
+  assert.equal(parsed[1]?.id, "bushi");
+  assert.equal(parsed[1]?.imageUrl, undefined);
+  assert.deepEqual(parsed[1]?.elements, ["fire"]);
+  const many = JSON.stringify(Array.from({ length: 10 }, (_, index) => ({
+    id: `pal-${index}`, number: index, nameKo: `팰${index}`, nameJa: `パル${index}`, elements: [],
+  })));
+  assert.equal(parseRecentPals(many).length, 6);
+});
+
+test("이전 mode URL은 같은 슬롯 상태로 옮기고 legacy로 표시한다", () => {
+  const parents = parsePalworldBreedingQuery(new URLSearchParams("mode=parents&parentA=lamball&parentB=cattiva&parentBGender=female"));
+  assert.deepEqual(parents, {
+    ok: true,
+    legacy: true,
+    state: { parentA: "lamball", parentB: "cattiva", parentBGender: "female", page: 1 },
+  });
+  const child = parsePalworldBreedingQuery(new URLSearchParams("mode=child&child=anubis&type=special&page=2"));
+  assert.deepEqual(child, {
+    ok: true,
+    legacy: true,
+    state: { child: "anubis", type: "special", page: 2 },
+  });
+});
+
 test("교배 단일 부모 direct-link의 underscore alias는 canonical 서버 응답과 같은 Pal로 처리한다", () => {
   const parsed = parsePalworldBreedingQuery(
-    new URLSearchParams("mode=parents&parentA=broncherry_aqua"),
+    new URLSearchParams("parentA=broncherry_aqua"),
   );
   assert.equal(parsed.ok, true);
   assert.equal(parsed.state.parentA, "broncherry_aqua");
@@ -1390,13 +1438,17 @@ test("농축 능력치는 계산하지 않고 서버가 제공한 단계 값만 
 
 test("교배 URL 직렬화와 초기화는 Modal 등 다른 query를 보존한다", () => {
   const current = new URLSearchParams("pal=anubis&mode=parents&parentA=lamball&parentB=cattiva");
-  const child = palworldBreedingParams(current, { mode: "child", child: "anubis", type: "special", page: 3 });
+  const child = palworldBreedingParams(current, { child: "anubis", type: "special", page: 3 });
   assert.equal(child.get("pal"), "anubis");
-  assert.equal(child.get("mode"), "child");
+  assert.equal(child.has("mode"), false, "legacy mode 파라미터는 표준 URL에서 제거된다");
   assert.equal(child.get("child"), "anubis");
   assert.equal(child.get("page"), "3");
   assert.equal(child.get("type"), "special");
   assert.equal(child.has("parentA"), false);
+  const narrowed = palworldBreedingParams(current, { parentA: "shellgadra", child: "anubis", page: 1 });
+  assert.equal(narrowed.get("parentA"), "shellgadra");
+  assert.equal(narrowed.get("child"), "anubis");
+  assert.equal(narrowed.has("page"), false);
   assert.equal(clearPalworldBreedingParams(child).toString(), "pal=anubis");
 });
 

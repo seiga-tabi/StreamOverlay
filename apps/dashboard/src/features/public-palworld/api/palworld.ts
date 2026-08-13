@@ -374,9 +374,11 @@ export function getPalworldBreedingParents(
   pageSize = 12,
   signal?: AbortSignal,
   type: PalworldBreedingPairType = "all",
+  parent?: string,
 ): Promise<PalworldBreedingParentsResponse> {
   const params = new URLSearchParams({ child, page: String(page), limit: String(pageSize) });
   if (type !== "all") params.set("type", type);
+  if (parent) params.set("parent", parent);
   return publicGet(queryPath("/api/palworld/breeding/parents", params), signal, validatePalworldBreedingParentsResponse);
 }
 

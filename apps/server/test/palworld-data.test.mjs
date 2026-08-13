@@ -69,6 +69,15 @@ test("명시적인 operator/shadow 경로만 snapshot 교배 index를 사용한�
       .map((pair) => [pair.parentA.id, pair.parentB.id]),
     [["penking", "bushi"]]
   );
+  assert.deepEqual(
+    withIndex.breedingParents({ child: "anubis", parent: "penking", page: 1, limit: 10 }).items
+      .map((pair) => [pair.parentA.id, pair.parentB.id]),
+    [["penking", "bushi"]]
+  );
+  const narrowedNone = withIndex.breedingParents({ child: "anubis", parent: "lamball", page: 1, limit: 10 });
+  assert.equal(narrowedNone.pagination.total, 0);
+  assert.equal(narrowedNone.state, "not_found");
+  assert.throws(() => withIndex.breedingParents({ child: "anubis", parent: "missing-pal", page: 1, limit: 10 }));
   const special = withIndex.breedingParents({ child: "anubis", type: "special", page: 1, limit: 10 });
   const filteredNormal = withIndex.breedingParents({ child: "anubis", type: "normal", page: 1, limit: 10 });
   const normal = withIndex.breedingParents({ child: "lamball", type: "normal", page: 1, limit: 1 });

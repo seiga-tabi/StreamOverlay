@@ -21,25 +21,15 @@ function formatTemplate(template: string, values: Record<string, string | number
   );
 }
 
-export function BreedingEmptyGuide({
-  locale,
-  mode,
-}: {
-  locale: PalworldLocale;
-  mode: "parents" | "child";
-}) {
+export function BreedingEmptyGuide({ locale }: { locale: PalworldLocale }) {
   const text = palworldI18n[locale];
-  const title = mode === "parents" ? text.selectAtLeastOneParent : text.selectTarget;
-  const description = mode === "parents" ? text.autoCalculateHint : text.reverseAutoCalculateHint;
-  const steps = mode === "parents"
-    ? [text.breedingStepParentA, text.breedingStepParentB, text.breedingStepResult]
-    : [text.breedingStepTarget, text.breedingStepFilter, text.breedingStepParents];
+  const steps = [text.breedingStepParentA, text.breedingStepTarget, text.breedingStepResult];
 
-  return <div className="palworld-breeding-empty-guide" data-testid={`breeding-${mode}-empty`}>
+  return <div className="palworld-breeding-empty-guide" data-testid="breeding-board-empty">
     <div aria-hidden="true" className="palworld-breeding-empty-icon">🧬</div>
     <p className="palworld-breeding-empty-kicker">{text.breedingGuideKicker}</p>
-    <h3>{title}</h3>
-    <p className="palworld-breeding-empty-description">{description}</p>
+    <h3>{text.selectAtLeastOneParent}</h3>
+    <p className="palworld-breeding-empty-description">{text.autoCalculateHint}</p>
     <ol className="palworld-breeding-empty-steps">
       {steps.map((step, index) => <li key={step}>
         <span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
@@ -241,19 +231,31 @@ function BreedingPalCell({
 function BreedingCombinationConditionCell({
   cellRole = true,
   locale,
+  onUsePair,
   pair,
 }: {
   cellRole?: boolean;
   locale: PalworldLocale;
+  onUsePair?: (pair: PalworldBreedingPair) => void;
   pair: PalworldBreedingPair;
 }) {
   const text = palworldI18n[locale];
+  const parentAName = resolvePalworldName(pair.parentA, locale).text;
+  const parentBName = resolvePalworldName(pair.parentB, locale).text;
   return <div className="palworld-breeding-combination-cell is-action" role={cellRole ? "cell" : undefined}>
     <span aria-hidden="true" className="palworld-breeding-combination-mobile-label">{text.breedingCondition}</span>
     <div className="palworld-breeding-combination-badges">
       <Badge size="sm" tone={pair.isSpecial ? "warning" : "info"}>
         {pair.isSpecial ? text.specialBreeding : text.normalBreeding}
       </Badge>
+      {onUsePair ? <Button
+        size="sm"
+        variant="secondary"
+        aria-label={`${text.usePairAction}: ${parentAName} × ${parentBName}`}
+        onClick={() => onUsePair(pair)}
+      >
+        {text.usePairAction}
+      </Button> : null}
     </div>
   </div>;
 }
@@ -261,11 +263,13 @@ function BreedingCombinationConditionCell({
 export function ReverseBreedingPairCard({
   locale,
   onOpenPal,
+  onUsePair,
   pair,
   rowIndex,
 }: {
   locale: PalworldLocale;
   onOpenPal: (id: string) => void;
+  onUsePair?: (pair: PalworldBreedingPair) => void;
   pair: PalworldBreedingPair;
   rowIndex?: number;
 }) {
@@ -291,19 +295,21 @@ export function ReverseBreedingPairCard({
       onOpenPal={onOpenPal}
       pal={pair.parentB}
     />
-    <BreedingCombinationConditionCell locale={locale} pair={pair} />
+    <BreedingCombinationConditionCell locale={locale} onUsePair={onUsePair} pair={pair} />
   </div>;
 }
 
 export function BreedingPartnerPairCard({
   locale,
   onOpenPal,
+  onUsePair,
   pair,
   rowIndex,
   selectedParentId,
 }: {
   locale: PalworldLocale;
   onOpenPal: (id: string) => void;
+  onUsePair?: (pair: PalworldBreedingPair) => void;
   pair: PalworldBreedingPair;
   rowIndex?: number;
   selectedParentId: string;
@@ -347,6 +353,7 @@ export function BreedingPartnerPairCard({
       <BreedingCombinationConditionCell
         cellRole={false}
         locale={locale}
+        onUsePair={onUsePair}
         pair={pair}
       />
     </div>
@@ -358,6 +365,7 @@ export function BreedingCombinationList({
   loading = false,
   locale,
   onOpenPal,
+  onUsePair,
   pairs,
   selectedParentId,
   total,
@@ -367,6 +375,7 @@ export function BreedingCombinationList({
   loading?: boolean;
   locale: PalworldLocale;
   onOpenPal: (id: string) => void;
+  onUsePair?: (pair: PalworldBreedingPair) => void;
   pairs: PalworldBreedingPair[];
   selectedParentId?: string;
   total: number;
@@ -412,6 +421,7 @@ export function BreedingCombinationList({
               key={pair.id}
               locale={locale}
               onOpenPal={onOpenPal}
+              onUsePair={onUsePair}
               pair={pair}
               rowIndex={index + 2}
               selectedParentId={selectedParentId!}
@@ -420,6 +430,7 @@ export function BreedingCombinationList({
               key={pair.id}
               locale={locale}
               onOpenPal={onOpenPal}
+              onUsePair={onUsePair}
               pair={pair}
               rowIndex={index + 2}
             />)}

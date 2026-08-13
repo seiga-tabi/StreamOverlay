@@ -1313,10 +1313,15 @@ export class PalworldDataService {
 
   breedingParents(query: PalworldBreedingParentsQuery): PalworldBreedingParentsResponse {
     const child = this.getPal(query.child);
+    /* parent 필터는 child와 같은 alias 해석·미존재 처리 경로를 지난다. */
+    const parent = query.parent === undefined ? undefined : this.getPal(query.parent);
     const pairs = (this.breedingEngine?.parents(child.id).map((pair) => this.enginePair(pair)) ?? [])
       .filter((pair) => query.type === undefined
         || query.type === "all"
-        || (query.type === "special" ? pair.isSpecial : !pair.isSpecial));
+        || (query.type === "special" ? pair.isSpecial : !pair.isSpecial))
+      .filter((pair) => parent === undefined
+        || pair.parentA.id === parent.id
+        || pair.parentB.id === parent.id);
     const pageInfo = pagination(query.page, query.limit, pairs.length);
     return {
       child: palReference(child),

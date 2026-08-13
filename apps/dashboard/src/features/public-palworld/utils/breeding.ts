@@ -7,10 +7,7 @@ import {
   type PalworldPalReference,
 } from "@streamops/shared";
 
-export type PalworldBreedingMode = "parents" | "child";
-
 export type PalworldBreedingQueryState = {
-  mode: PalworldBreedingMode;
   parentA?: string;
   parentB?: string;
   parentAGender?: PalworldBreedingGender;
@@ -21,8 +18,8 @@ export type PalworldBreedingQueryState = {
 };
 
 export type PalworldBreedingQueryResult =
-  | { ok: true; state: PalworldBreedingQueryState }
-  | { ok: false; state: PalworldBreedingQueryState };
+  | { ok: true; state: PalworldBreedingQueryState; legacy: boolean }
+  | { ok: false; state: PalworldBreedingQueryState; legacy: boolean };
 
 const BREEDING_QUERY_KEYS = [
   "mode",
@@ -55,12 +52,12 @@ function explicitGender(value: string | undefined | null): PalworldBreedingGende
 }
 
 export function parsePalworldBreedingQuery(params: URLSearchParams): PalworldBreedingQueryResult {
-  const fallback: PalworldBreedingQueryState = { mode: "parents", page: 1 };
+  const fallback: PalworldBreedingQueryState = { page: 1 };
   const modeValue = singleValue(params, "mode");
-  if (modeValue === null || (modeValue !== undefined && modeValue !== "parents" && modeValue !== "child")) {
-    return { ok: false, state: fallback };
+  const legacy = modeValue !== undefined && modeValue !== null;
+  if (modeValue === null || (legacy && modeValue !== "parents" && modeValue !== "child")) {
+    return { ok: false, state: fallback, legacy: false };
   }
-  const mode: PalworldBreedingMode = modeValue ?? "parents";
   const parentA = singleValue(params, "parentA");
   const parentB = singleValue(params, "parentB");
   const child = singleValue(params, "child");
@@ -68,7 +65,7 @@ export function parsePalworldBreedingQuery(params: URLSearchParams): PalworldBre
   const parentAGender = explicitGender(singleValue(params, "parentAGender"));
   const parentBGender = explicitGender(singleValue(params, "parentBGender"));
   const pageValue = singleValue(params, "page");
-  const page = pageValue === undefined || mode === "parents" ? 1 : Number(pageValue);
+  const page = pageValue === undefined ? 1 : Number(pageValue);
 
   if (
     parentA === null
@@ -87,41 +84,35 @@ export function parsePalworldBreedingQuery(params: URLSearchParams): PalworldBre
     || (type !== undefined && !PALWORLD_BREEDING_PAIR_TYPES.includes(type as PalworldBreedingPairType))
     || (parentAGender !== undefined && parentA === undefined)
     || (parentBGender !== undefined && parentB === undefined)
+    /* 세 슬롯이 모두 차면 계산 방향이 정해지지 않으므로 잘못된 링크로 처리합니다. */
+    || (parentA !== undefined && parentB !== undefined && child !== undefined)
+    || (child === undefined && (type !== undefined || pageValue !== undefined))
   ) {
-    return { ok: false, state: fallback };
+    return { ok: false, state: fallback, legacy: false };
   }
 
-  if (mode === "parents") {
-    if (child !== undefined || type !== undefined || pageValue !== undefined) return { ok: false, state: fallback };
-    return {
-      ok: true,
-      state: {
-        mode,
-        ...(parentA ? { parentA } : {}),
-        ...(parentB ? { parentB } : {}),
-        ...(parentAGender ? { parentAGender } : {}),
-        ...(parentBGender ? { parentBGender } : {}),
-        page: 1,
-      },
-    };
-  }
-
+  /* 이전 URL(mode=…)은 슬롯 상태로 그대로 옮기되, 당시 규칙 밖의 조합은 계속 거부합니다. */
+  if (legacy && modeValue === "parents" && child !== undefined) return { ok: false, state: fallback, legacy: false };
   if (
-    parentA !== undefined
-    || parentB !== undefined
-    || parentAGender !== undefined
-    || parentBGender !== undefined
+    legacy
+    && modeValue === "child"
+    && (parentA !== undefined || parentB !== undefined)
   ) {
-    return { ok: false, state: fallback };
+    return { ok: false, state: fallback, legacy: false };
   }
+
   return {
     ok: true,
     state: {
-      mode,
+      ...(parentA ? { parentA } : {}),
+      ...(parentB ? { parentB } : {}),
+      ...(parentAGender ? { parentAGender } : {}),
+      ...(parentBGender ? { parentBGender } : {}),
       ...(child ? { child } : {}),
-      ...(type && type !== "all" ? { type: type as PalworldBreedingPairType } : {}),
-      page,
+      ...(child && type && type !== "all" ? { type: type as PalworldBreedingPairType } : {}),
+      page: child ? page : 1,
     },
+    legacy,
   };
 }
 
@@ -131,17 +122,13 @@ export function palworldBreedingParams(
 ): URLSearchParams {
   const params = new URLSearchParams(current);
   for (const key of BREEDING_QUERY_KEYS) params.delete(key);
-  params.set("mode", state.mode);
-  if (state.mode === "parents") {
-    if (state.parentA) params.set("parentA", state.parentA);
-    if (state.parentB) params.set("parentB", state.parentB);
-    if (state.parentAGender) params.set("parentAGender", state.parentAGender);
-    if (state.parentBGender) params.set("parentBGender", state.parentBGender);
-    return params;
-  }
+  if (state.parentA) params.set("parentA", state.parentA);
+  if (state.parentB) params.set("parentB", state.parentB);
+  if (state.parentA && state.parentAGender) params.set("parentAGender", state.parentAGender);
+  if (state.parentB && state.parentBGender) params.set("parentBGender", state.parentBGender);
   if (state.child) params.set("child", state.child);
-  if (state.type && state.type !== "all") params.set("type", state.type);
-  if (state.page > 1) params.set("page", String(state.page));
+  if (state.child && state.type && state.type !== "all") params.set("type", state.type);
+  if (state.child && state.page > 1) params.set("page", String(state.page));
   return params;
 }
 

@@ -179,10 +179,16 @@ test("검색과 교배 query는 빈 값, 중복 값, 알 수 없는 필드와 �
     parsePalworldBreedingParentsQuery(new URLSearchParams("child=anubis&type=special")),
     { child: "anubis", type: "special", page: 1, limit: 20 }
   );
+  assert.deepEqual(
+    parsePalworldBreedingParentsQuery(new URLSearchParams("child=anubis&parent=shellgadra")),
+    { child: "anubis", parent: "shellgadra", type: "all", page: 1, limit: 20 }
+  );
   for (const invalid of [
     "child=anubis&type=unknown",
     "child=anubis&type=all&type=normal",
-    "child=anubis&filter=special"
+    "child=anubis&filter=special",
+    "child=anubis&parent=Bad Id",
+    "child=anubis&parent=a&parent=b"
   ]) {
     assert.throws(
       () => parsePalworldBreedingParentsQuery(new URLSearchParams(invalid)),

@@ -60,7 +60,6 @@ import { PalworldElementBadge } from "../src/features/public-palworld/components
 import { PalworldPalCondensation } from "../src/features/public-palworld/components/PalworldPalCondensation";
 import { PalworldPalStatsGraph } from "../src/features/public-palworld/components/PalworldPalStatsGraph";
 import { PalworldPalPicker } from "../src/features/public-palworld/components/PalworldPalPicker";
-import { BreedingModeTabs } from "../src/features/public-palworld/components/PalworldBreedingControls";
 import {
   BreedingCombinationList,
   BreedingEmptyGuide,
@@ -1245,12 +1244,12 @@ test("교배 UI는 결과 Pal을 강조하고 역검색 카드에서 목표 Pal 
     isSpecial: true,
     genderCondition: { parentA: "male", parentB: "female" },
   };
-  const tabs = renderToStaticMarkup(<BreedingModeTabs locale="ja" mode="child" onMode={() => undefined} />);
   const direct = renderToStaticMarkup(<DirectBreedingResult locale="ko" onCopy={() => undefined} onOpenPal={() => undefined} onViewParents={() => undefined} pair={pair} />);
   const reverse = renderToStaticMarkup(<ReverseBreedingPairCard locale="ko" onOpenPal={() => undefined} pair={pair} />);
+  const reverseWithAction = renderToStaticMarkup(<ReverseBreedingPairCard locale="ko" onOpenPal={() => undefined} onUsePair={() => undefined} pair={pair} />);
   const partner = renderToStaticMarkup(<BreedingPartnerPairCard locale="ko" onOpenPal={() => undefined} pair={pair} selectedParentId="penking" />);
-  const emptyParents = renderToStaticMarkup(<BreedingEmptyGuide locale="ko" mode="parents" />);
-  const emptyChild = renderToStaticMarkup(<BreedingEmptyGuide locale="ja" mode="child" />);
+  const emptyBoard = renderToStaticMarkup(<BreedingEmptyGuide locale="ko" />);
+  const emptyBoardJa = renderToStaticMarkup(<BreedingEmptyGuide locale="ja" />);
   const partnerList = renderToStaticMarkup(<BreedingCombinationList
     labelledBy="partner-list-title"
     locale="ko"
@@ -1286,9 +1285,11 @@ test("교배 UI는 결과 Pal을 강조하고 역검색 카드에서 목표 Pal 
     "utf8",
   );
 
-  assert.equal((tabs.match(/role="tab"/gu) ?? []).length, 2);
-  assert.match(tabs, /親から結果を探す[\s\S]*結果パルの親を探す/u);
-  assert.match(tabs, /aria-selected="true"[^>]*>結果パルの親を探す/u);
+  /* mode tab이 제거되어 교배 화면에는 tablist가 없어야 합니다. */
+  assert.doesNotMatch(breedingPageSource, /BreedingModeTabs|role="tablist"/u);
+  assert.match(breedingPageSource, /data-testid="breeding-narrow-note"/u);
+  assert.match(breedingPageSource, /data-testid="breeding-summary-bar"/u);
+  assert.match(breedingPageSource, /className="palworld-breeding-eq"/u);
   assert.match(direct, /data-testid="breeding-direct-card"/u);
   assert.match(direct, /class="palworld-direct-result-hero"/u);
   assert.match(direct, /결과 Pal 상세 보기/u);
@@ -1299,13 +1300,15 @@ test("교배 UI는 결과 Pal을 강조하고 역검색 카드에서 목표 Pal 
   assert.match(reverse, /불무사/u);
   assert.doesNotMatch(reverse, /실키누/u);
   assert.doesNotMatch(reverse, /계산기에 넣기/u);
+  assert.doesNotMatch(reverse, /보드에 채우기/u);
+  assert.match(reverseWithAction, /보드에 채우기/u);
+  assert.match(reverseWithAction, /aria-label="보드에 채우기: 펭킹 × 불무사"/u);
   assert.match(partner, /data-testid="breeding-partner-pair"/u);
   assert.match(partner, /펭킹[\s\S]*불무사[\s\S]*실키누/u);
   assert.doesNotMatch(partner, /계산기에 넣기/u);
-  assert.match(emptyParents, /data-testid="breeding-parents-empty"/u);
-  assert.match(emptyParents, /3단계 자동 계산[\s\S]*첫 번째 부모 선택[\s\S]*두 번째 부모 선택[\s\S]*교배 결과 확인/u);
-  assert.match(emptyChild, /data-testid="breeding-child-empty"/u);
-  assert.match(emptyChild, /3ステップ自動計算[\s\S]*目標パルを選択[\s\S]*配合種類を選択[\s\S]*親の組み合わせを確認/u);
+  assert.match(emptyBoard, /data-testid="breeding-board-empty"/u);
+  assert.match(emptyBoard, /하나의 교배식[\s\S]*부모 Pal을 채우면 결과를 계산[\s\S]*목표 Pal을 채우면 부모 조합을 검색[\s\S]*조합을 눌러 상세로 이어가기/u);
+  assert.match(emptyBoardJa, /ひとつの配合式[\s\S]*親パルを入れると結果を計算[\s\S]*目標パルを入れると親の組み合わせを検索/u);
   assert.match(partnerList, /role="table"/u);
   assert.match(partnerList, /aria-rowcount="288"/u);
   assert.match(partnerList, /가능한 조합 287개/u);

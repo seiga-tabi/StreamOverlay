@@ -1484,7 +1484,7 @@ export function PalworldMapPage({ focusPalId, locale, markerLayer, onOpenPal }: 
     });
   }, []);
 
-  const selectSpawnPal = useCallback((pal: PalworldPalSummary | null): void => {
+  const selectSpawnPal = useCallback((pal: PalworldPalReference | PalworldPalSummary | null): void => {
     setFocusedPal(pal);
     if (!pal) {
       pushQuery({

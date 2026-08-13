@@ -6,6 +6,7 @@ import {
 } from "@streamops/shared";
 import { Button } from "../../../shared/ui/Button";
 import { PalworldApiError, searchPalworld } from "../api/palworld";
+import { readRecentPals, saveRecentPal } from "../utils/recent-pals";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import { resolvePalworldName } from "../utils/localization";
 import { formatPalNumber } from "../utils/search";
@@ -44,7 +45,7 @@ export function PalworldPalPicker({
 }: {
   label: string;
   locale: PalworldLocale;
-  onChange: (pal: PalworldPalSummary | null) => void;
+  onChange: (pal: PickerPal | null) => void;
   onOpenPal?: (id: string) => void;
   selected: PickerPal | null;
   testId: string;
@@ -55,6 +56,7 @@ export function PalworldPalPicker({
   const [revision, setRevision] = useState(0);
   const [focused, setFocused] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [recentPals, setRecentPals] = useState<PalworldPalReference[]>([]);
   const pickerRef = useRef<HTMLDivElement>(null);
   const requestIdRef = useRef(0);
   const listId = useId();
@@ -107,7 +109,8 @@ export function PalworldPalPicker({
     return () => document.removeEventListener("pointerdown", close);
   }, []);
 
-  function selectPal(pal: PalworldPalSummary): void {
+  function selectPal(pal: PickerPal): void {
+    saveRecentPal(pal);
     onChange(pal);
     setQuery("");
     setFocused(false);
@@ -180,7 +183,10 @@ export function PalworldPalPicker({
       maxLength={PALWORLD_SEARCH_MAX_LENGTH}
       value={query}
       onChange={(event) => setQuery(event.target.value)}
-      onFocus={() => setFocused(true)}
+      onFocus={() => {
+        setRecentPals(readRecentPals());
+        setFocused(true);
+      }}
       onKeyDown={handleInputKeyDown}
       placeholder={text.palPickerPlaceholder}
       aria-autocomplete="list"
@@ -212,6 +218,16 @@ export function PalworldPalPicker({
         >
           <span className="palworld-picker-option-media"><PalworldMedia kind="pal" imageUrl={pal.imageUrl} alt={name.text} locale={locale} /></span>
           <span><strong>{name.text}</strong><PalworldTranslationBadge locale={locale} status={name.status} /><small>{formatPalNumber(pal.number, locale)}</small><span className="palworld-badge-row palworld-compact-element-row">{pal.elements.map((element) => <PalworldElementBadge element={element} locale={locale} key={element} />)}</span></span>
+        </button>;
+      })}
+    </div> : null}
+    {focused && !normalizedQuery && recentPals.length ? <div className="palworld-picker-list" role="group" aria-label={text.recentPals} data-testid={`${testId}-recent`}>
+      <p className="palworld-picker-label">{text.recentPals}</p>
+      {recentPals.map((pal) => {
+        const name = resolvePalworldName(pal, locale);
+        return <button type="button" onClick={() => selectPal(pal)} key={pal.id}>
+          <span className="palworld-picker-option-media"><PalworldMedia kind="pal" imageUrl={pal.imageUrl} alt={name.text} locale={locale} /></span>
+          <span><strong>{name.text}</strong><small>{formatPalNumber(pal.number, locale)}</small><span className="palworld-badge-row palworld-compact-element-row">{pal.elements.map((element) => <PalworldElementBadge element={element} locale={locale} key={element} />)}</span></span>
         </button>;
       })}
     </div> : null}
