@@ -63,9 +63,7 @@ export const PUBLIC_SITEMAP_STATIC_PATHS: readonly string[] = [
   "/minecraft",
   "/minecraft/recipes",
   "/minecraft/items",
-  "/minecraft/enchants",
-  "/minecraft/library",
-  "/minecraft/patch-notes"
+  "/minecraft/enchants"
 ];
 
 export type SitemapEntry = {

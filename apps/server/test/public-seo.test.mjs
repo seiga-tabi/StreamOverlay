@@ -79,6 +79,27 @@ test("발로란트 공개 경로는 locale별 metadata와 sitemap URL을 제공�
   assert.match(sitemap, /<loc>https:\/\/yoro\.gg\/ja\/valorant\/ranked<\/loc>/u);
 });
 
+test("마인크래프트 실데이터 경로는 고유 metadata를 제공하고 준비 중 경로는 색인하지 않는다", () => {
+  const ko = publicSeoMetadataForPath("/ko/minecraft/recipes");
+  const ja = publicSeoMetadataForPath("/ja/minecraft/enchants");
+  assert.equal(ko.title, "마인크래프트 조합법 | YORO.gg");
+  assert.match(ko.description, /제작 조합법/u);
+  assert.equal(ko.robotsNoindex, undefined);
+  assert.equal(ja.title, "マインクラフト エンチャント | YORO.gg");
+  assert.equal(ja.canonicalUrl, "https://yoro.gg/ja/minecraft/enchants");
+
+  const library = publicSeoMetadataForPath("/ko/minecraft/library");
+  const patchNotes = publicSeoMetadataForPath("/ja/minecraft/patch-notes");
+  assert.equal(library.robotsNoindex, true);
+  assert.equal(patchNotes.robotsNoindex, true);
+  assert.match(applyPublicSeoMetadata(APP_SHELL, library), /name="robots" content="noindex"/u);
+
+  const sitemap = buildStaticSitemap();
+  assert.match(sitemap, /\/ko\/minecraft\/recipes/u);
+  assert.match(sitemap, /\/ja\/minecraft\/items/u);
+  assert.doesNotMatch(sitemap, /\/minecraft\/(?:library|patch-notes)/u);
+});
+
 test("JSON-LD는 script 종료 태그를 만들 수 있는 문자를 escape한다", () => {
   const metadata = publicSeoMetadataForPath("/");
   const html = applyPublicSeoMetadata(APP_SHELL, {

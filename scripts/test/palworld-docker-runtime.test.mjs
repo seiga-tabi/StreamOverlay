@@ -34,6 +34,10 @@ test("server runtime image는 active manifest allowlist bundle만 포함하고 s
     dockerfile,
     /RUN node apps\/server\/dist\/scripts\/smoke-palworld-runtime-artifacts\.js/u
   );
+  assert.match(
+    dockerfile,
+    /COPY --from=build \/app\/apps\/server\/data\/minecraft \.\/apps\/server\/data\/minecraft/u
+  );
   assert.doesNotMatch(
     dockerfile,
     /COPY --from=build \/app\/apps\/server\/data\/palworld/u

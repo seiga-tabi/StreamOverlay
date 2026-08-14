@@ -1,8 +1,185 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
-/* 마인크래프트 공개 페이지 — 준비 단계 셸(위키 메인)의 기능 검증.
-   데이터 화면은 /api/minecraft/* 카탈로그 contract 이후라 여기서는 라우팅·i18n·
-   정직한 준비 중 상태·외부 origin 0·overflow·대비를 검증합니다. */
+/* 마인크래프트 공개 페이지 — 위키 셸 + 2단계 카탈로그(조합법·아이템·인챈트) 기능 검증.
+   카탈로그 응답은 shared strict validator(packages/shared/src/minecraft.ts)를 그대로
+   통과하는 mock 픽스처로 제공합니다 — pagination 수식·metadata 필드가 조금이라도
+   어긋나면 클라이언트가 오류 화면을 그리므로 픽스처 자체가 계약 회귀 테스트입니다. */
+
+const SOURCE_REVISION = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+
+type LocalizedName = {
+  en: string;
+  ko: string;
+  ja: string;
+  status: { ko: "source_provided" | "source_language_fallback"; ja: "source_provided" | "source_language_fallback" };
+};
+
+/* ko/ja 번역이 없으면 validator 규칙대로 en 원문 + source_language_fallback 로 만듭니다. */
+function localized(en: string, ko?: string, ja?: string): LocalizedName {
+  return {
+    en,
+    ko: ko ?? en,
+    ja: ja ?? en,
+    status: {
+      ko: ko ? "source_provided" : "source_language_fallback",
+      ja: ja ? "source_provided" : "source_language_fallback",
+    },
+  };
+}
+
+function reference(id: string, en: string, ko?: string, ja?: string) {
+  return { id, name: localized(en, ko, ja) };
+}
+
+const FIXTURE_ITEMS = [
+  {
+    id: "diamond_sword",
+    numericId: 1,
+    name: localized("Diamond Sword", "다이아몬드 검", "ダイヤモンドの剣"),
+    stackSize: 1,
+    maxDurability: 1561,
+    enchantCategoryIds: ["weapon"],
+  },
+  ...Array.from({ length: 59 }, (_, index) => ({
+    id: `fixture_item_${index}`,
+    numericId: index + 2,
+    name: localized(`Fixture Item ${index}`),
+    stackSize: 64,
+    enchantCategoryIds: [],
+  })),
+];
+
+const FIXTURE_RECIPES = [
+  {
+    id: "diamond_sword",
+    type: "crafting",
+    result: { item: reference("diamond_sword", "Diamond Sword", "다이아몬드 검", "ダイヤモンドの剣"), count: 1 },
+    ingredients: [
+      { item: reference("diamond", "Diamond", "다이아몬드", "ダイヤモンド"), count: 2 },
+      { item: reference("stick", "Stick", "막대기", "棒"), count: 1 },
+    ],
+    /* 3×1 최소 shape — 클라이언트가 제작대와 같은 3×3(9슬롯)로 정규화하는지 검증합니다. */
+    shape: [
+      [reference("diamond", "Diamond", "다이아몬드", "ダイヤモンド")],
+      [reference("diamond", "Diamond", "다이아몬드", "ダイヤモンド")],
+      [reference("stick", "Stick", "막대기", "棒")],
+    ],
+  },
+  {
+    id: "mossy_cobblestone",
+    type: "crafting",
+    result: { item: reference("mossy_cobblestone", "Mossy Cobblestone"), count: 1 },
+    ingredients: [
+      { item: reference("cobblestone", "Cobblestone", "조약돌", "丸石"), count: 1 },
+      { item: reference("vine", "Vine"), count: 1 },
+    ],
+  },
+];
+
+const FIXTURE_ENCHANTS = [
+  {
+    id: "sharpness",
+    numericId: 1,
+    name: localized("Sharpness", "날카로움", "ダメージ増加"),
+    maxLevel: 5,
+    minCost: { a: 11, b: 1 },
+    maxCost: { a: 11, b: 21 },
+    treasureOnly: false,
+    curse: false,
+    categoryId: "weapon",
+    weight: 10,
+    tradeable: true,
+    discoverable: true,
+    incompatibleIds: ["smite", "bane_of_arthropods"],
+  },
+  {
+    id: "binding_curse",
+    numericId: 2,
+    name: localized("Curse of Binding"),
+    maxLevel: 1,
+    minCost: { a: 25, b: 0 },
+    maxCost: { a: 50, b: 0 },
+    treasureOnly: true,
+    curse: true,
+    categoryId: "wearable",
+    weight: 1,
+    tradeable: false,
+    discoverable: true,
+    incompatibleIds: [],
+  },
+];
+
+const FIXTURE_METADATA = {
+  schemaVersion: 1,
+  gameVersion: "1.21.11",
+  sourceName: "minecraft-data",
+  sourceUrl: "https://github.com/PrismarineJS/minecraft-data",
+  sourcePackageVersion: "3.90.0",
+  sourceRevision: SOURCE_REVISION,
+  generatedAt: "2026-08-12T00:00:00.000Z",
+  license: "MIT",
+  coverage: {
+    items: FIXTURE_ITEMS.length,
+    recipes: FIXTURE_RECIPES.length,
+    enchants: FIXTURE_ENCHANTS.length,
+    excludedRecipes: 0,
+    localizedItemNamesKo: 1,
+    localizedItemNamesJa: 1,
+    localizedEnchantNamesKo: 1,
+    localizedEnchantNamesJa: 1,
+    recipeTypes: {
+      crafting: "ready",
+      smelting: "not_provided_by_source",
+      brewing: "not_provided_by_source",
+      smithing: "not_provided_by_source",
+      stonecutting: "not_provided_by_source",
+    },
+  },
+};
+
+/* 서버와 같은 방식으로 q·page·limit 를 해석해 pagination 수식을 항상 만족시킵니다. */
+function catalogPayload(url: URL, source: ReadonlyArray<{ id: string; name?: LocalizedName; result?: { item: { name: LocalizedName } } }>) {
+  const q = (url.searchParams.get("q") ?? "").trim().toLowerCase();
+  const page = Number(url.searchParams.get("page") ?? "1");
+  const limit = Number(url.searchParams.get("limit") ?? "50");
+  const filtered = q
+    ? source.filter((entry) => {
+        const name = entry.name ?? entry.result?.item.name;
+        return entry.id.includes(q)
+          || name?.en.toLowerCase().includes(q)
+          || name?.ko.toLowerCase().includes(q)
+          || name?.ja.toLowerCase().includes(q);
+      })
+    : source;
+  const total = filtered.length;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const items = filtered.slice((page - 1) * limit, page * limit);
+  return {
+    state: "ready",
+    items,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages,
+      returned: items.length,
+      hasNextPage: page < totalPages,
+    },
+    metadata: FIXTURE_METADATA,
+  };
+}
+
+async function mockMinecraftCatalog(page: Page): Promise<void> {
+  await page.route(/\/api\/minecraft\/(items|recipes|enchants)/u, async (route) => {
+    const url = new URL(route.request().url());
+    const source = url.pathname.endsWith("/items")
+      ? FIXTURE_ITEMS
+      : url.pathname.endsWith("/recipes")
+        ? FIXTURE_RECIPES
+        : FIXTURE_ENCHANTS;
+    await route.fulfill({ json: catalogPayload(url, source) });
+  });
+}
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
@@ -17,6 +194,10 @@ test.beforeEach(async ({ page }) => {
       body: "window.__STREAMOPS_CONFIG__ = { apiBase: window.location.origin };",
     });
   });
+  /* 앱 전역 gtag.js 는 consent denied 로도 로드되고 드물게 샘플링 진단 beacon
+     (googletagmanager.com/a)을 이미지 요청으로 쏩니다 — "외부 origin 요청 0" 검사의
+     간헐 실패 원인이라 여기서 차단합니다. GA 동작은 전용 consent 스펙이 검증합니다. */
+  await page.route("https://www.googletagmanager.com/**", (route) => route.abort());
 });
 
 test("위키 홈은 구성 소개와 비공식 고지를 렌더하고 외부 origin 요청·가로 overflow가 없다", async ({ page }) => {
@@ -24,6 +205,10 @@ test("위키 홈은 구성 소개와 비공식 고지를 렌더하고 외부 ori
   page.on("request", (request) => {
     if (!["image", "font", "media"].includes(request.resourceType())) return;
     if (!request.url().startsWith("http://127.0.0.1")) externalAssets.push(request.url());
+  });
+  /* 카탈로그 API 실패 시나리오 — 홈은 준비 중 문구를 유지해야 합니다(가짜 수치 금지). */
+  await page.route(/\/api\/minecraft\//u, async (route) => {
+    await route.fulfill({ status: 503, json: { error: "unavailable" } });
   });
   await page.goto("/minecraft");
   await expect(page.getByRole("heading", { name: "무엇이든 찾는 마인크래프트 위키" })).toBeVisible();
@@ -34,6 +219,13 @@ test("위키 홈은 구성 소개와 비공식 고지를 렌더하고 외부 ori
   expect(externalAssets).toEqual([]);
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(0);
+
+  /* lazy 라우트 chunk 의 CSS link 는 렌더보다 늦게 적용될 수 있어,
+     computed color 를 읽기 전에 페이지 스타일 적용을 먼저 기다립니다. */
+  await expect(page.locator(".minecraft-page-section")).toHaveCSS(
+    "background-color",
+    "rgb(16, 20, 24)",
+  );
 
   /* 주요 텍스트 대비 AA(4.5:1) — 발로란트 2026-08-10 대비 회귀 방지와 같은 계약. */
   const contrasts = await page.evaluate(() => {
@@ -74,7 +266,149 @@ test("위키 홈은 구성 소개와 비공식 고지를 렌더하고 외부 ori
   }
 });
 
-test("마인크래프트 메뉴는 준비 중 화면과 홈 복귀·404·직접 URL을 지원한다", async ({ page }) => {
+test("위키 홈은 카탈로그 metadata 로 실제 수치를 보여 주고 카테고리 타일로 이동한다", async ({ page }) => {
+  await mockMinecraftCatalog(page);
+  await page.goto("/minecraft");
+  await expect(page.getByTestId("minecraft-home-stats")).toHaveText(
+    "Java 1.21.11 · 아이템 60 · 조합법 2 · 인챈트 2",
+  );
+  await page.getByRole("link", { name: /아이템 · 도구/u }).click();
+  await expect(page).toHaveURL(/\/minecraft\/items$/u);
+  await expect(page.getByRole("heading", { name: "아이템", exact: true })).toBeVisible();
+});
+
+test("조합법 페이지는 3×3 그리드·자유 배치·유형 칩·미제공 비활성을 렌더한다", async ({ page }) => {
+  await mockMinecraftCatalog(page);
+  await page.goto("/minecraft/recipes");
+  await expect(page.getByRole("heading", { name: "조합법", exact: true })).toBeVisible();
+  await expect(page.getByText("2개", { exact: true })).toBeVisible();
+
+  const shaped = page.getByTestId("minecraft-recipe-card").filter({ hasText: "다이아몬드 검" });
+  await expect(shaped.getByRole("img", { name: "조합 배치" })).toBeVisible();
+  /* 작은 shape 도 제작대와 같은 3×3(9슬롯)로 정규화되고, 결과 슬롯이 함께 보입니다. */
+  await expect(shaped.locator(".minecraft-craft-grid .minecraft-craft-cell")).toHaveCount(9);
+  await expect(shaped.locator(".minecraft-craft-out")).toBeVisible();
+  await expect(shaped.getByRole("img", { name: "다이아몬드" }).first()).toBeVisible();
+  await expect(shaped.getByText("막대기", { exact: false }).first()).toBeVisible();
+
+  /* shapeless — 그리드 대신 재료 슬롯 나열 + 자유 배치 표기, 미번역 명칭은 EN 원문 + 배지 */
+  const shapeless = page.getByTestId("minecraft-recipe-card").filter({ hasText: "Mossy Cobblestone" });
+  await expect(shapeless.getByText("자유 배치")).toBeVisible();
+  await expect(shapeless.locator(".minecraft-craft-shapeless .minecraft-craft-cell")).toHaveCount(2);
+  await expect(shapeless.locator(".minecraft-craft-out")).toBeVisible();
+  await expect(shapeless.getByTitle("공식 한국어 명칭 준비 전 — 영문 원문 표시")).toBeVisible();
+
+  /* crafting 만 원천 제공 — 나머지 칩은 비활성 + 미제공 표기 */
+  const chips = page.getByRole("group", { name: "레시피 유형" });
+  await expect(chips.getByRole("button", { name: /^제작/u })).toBeEnabled();
+  await expect(chips.getByRole("button", { name: /제련/u })).toBeDisabled();
+  await expect(chips.getByRole("button", { name: /양조/u })).toBeDisabled();
+  await expect(page.getByText("데이터: minecraft-data (MIT) · Java 1.21.11", { exact: false })).toBeVisible();
+});
+
+test("아이템 페이지는 검색·페이지네이션(더 보기)·빈 결과를 처리한다", async ({ page }) => {
+  await mockMinecraftCatalog(page);
+  await page.goto("/minecraft/items");
+  await expect(page.getByText("60개", { exact: true })).toBeVisible();
+  await expect(page.getByTestId("minecraft-item-row")).toHaveCount(50);
+
+  await page.getByRole("button", { name: "더 보기" }).click();
+  await expect(page.getByTestId("minecraft-item-row")).toHaveCount(60);
+  await expect(page.getByText("모든 결과를 불러왔습니다.")).toBeVisible();
+
+  const search = page.getByRole("searchbox", { name: "카탈로그 검색" });
+  await search.fill("다이아몬드 검");
+  await search.press("Enter");
+  await expect(page.getByTestId("minecraft-item-row")).toHaveCount(1);
+  await expect(page.getByText("묶음 1")).toBeVisible();
+  await expect(page.getByText("내구도 1,561").or(page.getByText("내구도 1561"))).toBeVisible();
+
+  /* 목업 도구 상세의 "적용 가능 인챈트" — enchantCategoryIds(weapon) × 인챈트 교차 참조 */
+  await page.getByText("적용 인챈트 1종").click();
+  await expect(page.getByTestId("minecraft-item-row").getByText("날카로움")).toBeVisible();
+
+  await search.fill("존재하지않는아이템");
+  await search.press("Enter");
+  await expect(page.getByText("검색 결과가 없습니다.")).toBeVisible();
+});
+
+test("더 보기 도중 데이터 세대(sourceRevision)가 바뀌면 병합하지 않고 처음부터 다시 불러온다", async ({ page }) => {
+  const NEXT_REVISION = "f".repeat(64);
+  const NEXT_ITEMS = FIXTURE_ITEMS.slice(0, 55);
+  let generation = 0;
+  await page.route(/\/api\/minecraft\/(items|recipes|enchants)/u, async (route) => {
+    const url = new URL(route.request().url());
+    /* 첫 목록 요청은 구세대(60개), page=2 부터는 신세대(55개) 배포가 완료된 상황을 재현합니다. */
+    if (url.searchParams.get("page") === "2") generation = 1;
+    const payload = catalogPayload(url, generation === 0 ? FIXTURE_ITEMS : NEXT_ITEMS);
+    await route.fulfill({
+      json: generation === 0
+        ? payload
+        : {
+            ...payload,
+            metadata: {
+              ...FIXTURE_METADATA,
+              sourceRevision: NEXT_REVISION,
+              coverage: { ...FIXTURE_METADATA.coverage, items: NEXT_ITEMS.length },
+            },
+          },
+    });
+  });
+  await page.goto("/minecraft/items");
+  await expect(page.getByText("60개", { exact: true })).toBeVisible();
+  await expect(page.getByTestId("minecraft-item-row")).toHaveCount(50);
+  await page.getByRole("button", { name: "더 보기" }).click();
+  /* 세대 불일치 → page 2 를 병합하는 대신 신세대 page 1 로 리셋(총 개수도 신세대 기준) */
+  await expect(page.getByText("55개", { exact: true })).toBeVisible();
+  await expect(page.getByTestId("minecraft-item-row")).toHaveCount(50);
+  /* 같은 세대끼리는 정상 누적 */
+  await page.getByRole("button", { name: "더 보기" }).click();
+  await expect(page.getByTestId("minecraft-item-row")).toHaveCount(55);
+});
+
+test("인챈트 카드는 레벨·획득 경로·적용 대상·상충 명칭을 표기한다", async ({ page }) => {
+  await mockMinecraftCatalog(page);
+  await page.goto("/minecraft/enchants");
+  const sharpness = page.getByTestId("minecraft-enchant-card").filter({ hasText: "날카로움" });
+  await expect(sharpness.getByText("최대 Lv 5")).toBeVisible();
+  await expect(sharpness.getByText("인챈트 테이블")).toBeVisible();
+  await expect(sharpness.getByText("주민 거래")).toBeVisible();
+  await expect(sharpness.getByText("weapon")).toBeVisible();
+  /* 상충 ID 는 목록에 없으면 사람이 읽을 형태(EN)로 표기 */
+  await expect(sharpness.getByText("Smite · Bane Of Arthropods")).toBeVisible();
+  const curse = page.getByTestId("minecraft-enchant-card").filter({ hasText: "Curse of Binding" });
+  await expect(curse.getByText("저주")).toBeVisible();
+  await expect(curse.getByText("보물 전용")).toBeVisible();
+  await expect(curse.getByText("거래 불가")).toBeVisible();
+});
+
+test("카탈로그는 오류·data_unavailable 상태를 정직하게 그리고 재시도로 복구한다", async ({ page }) => {
+  let failing = true;
+  await page.route(/\/api\/minecraft\/(items|recipes|enchants)/u, async (route) => {
+    if (failing) {
+      await route.fulfill({ status: 500, json: { error: "boom" } });
+      return;
+    }
+    const url = new URL(route.request().url());
+    await route.fulfill({ json: catalogPayload(url, FIXTURE_ENCHANTS) });
+  });
+  await page.goto("/minecraft/enchants");
+  await expect(page.getByText("데이터를 불러오지 못했습니다.")).toBeVisible();
+  failing = false;
+  await page.getByRole("button", { name: "다시 시도" }).click();
+  await expect(page.getByTestId("minecraft-enchant-card")).toHaveCount(2);
+
+  /* data_unavailable 상태 문구 — config.js mock 은 유지한 채 카탈로그 route 만 교체 */
+  await page.unroute(/\/api\/minecraft\/(items|recipes|enchants)/u);
+  await page.route(/\/api\/minecraft\/(items|recipes|enchants)/u, async (route) => {
+    await route.fulfill({ json: { state: "data_unavailable" } });
+  });
+  await page.goto("/minecraft/items");
+  await expect(page.getByText("카탈로그 데이터를 사용할 수 없습니다.")).toBeVisible();
+});
+
+test("마인크래프트 메뉴는 실데이터 화면과 준비 중 화면·404·직접 URL을 지원한다", async ({ page }) => {
+  await mockMinecraftCatalog(page);
   await page.goto("/minecraft");
   const isMobile = (page.viewportSize()?.width ?? 1280) <= 768;
   const nav = isMobile
@@ -84,7 +418,7 @@ test("마인크래프트 메뉴는 준비 중 화면과 홈 복귀·404·직접 
 
   await nav.getByRole("button", { name: "조합법" }).click();
   await expect(page).toHaveURL(/\/minecraft\/recipes$/u);
-  await expect(page.getByText("조합법 위키를 준비하고 있습니다")).toBeVisible();
+  await expect(page.getByTestId("minecraft-recipe-card").first()).toBeVisible();
   await expect(nav.getByRole("button", { name: "조합법" })).toHaveAttribute("aria-current", "page");
 
   await nav.getByRole("button", { name: "자료실" }).click();
@@ -105,6 +439,7 @@ test("마인크래프트 메뉴는 준비 중 화면과 홈 복귀·404·직접 
 });
 
 test("마인크래프트 일본어 경로는 ja 문구와 canonical을 유지한다", async ({ page }) => {
+  await mockMinecraftCatalog(page);
   await page.addInitScript(() => {
     window.localStorage.setItem("loltrace.locale", "ja");
   });
@@ -116,12 +451,15 @@ test("마인크래프트 일본어 경로는 ja 문구와 canonical을 유지한
     "https://yoro.gg/ja/minecraft",
   );
   await page.goto("/ja/minecraft/enchants");
-  await expect(page.getByText("エンチャント Wiki を準備しています")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "エンチャント", exact: true })).toBeVisible();
+  await expect(page.getByText("2件", { exact: true })).toBeVisible();
+  await expect(page.getByText("最大 Lv 5")).toBeVisible();
 });
 
 test("게임 선택기에서 마인크래프트로 이동하고 다시 다른 게임으로 돌아온다", async ({ page }) => {
   const isMobile = (page.viewportSize()?.width ?? 1280) <= 768;
   test.skip(isMobile, "모바일은 통합 메뉴 시트 경로를 쓰므로 데스크톱 드롭다운만 검증합니다.");
+  await mockMinecraftCatalog(page);
   await page.goto("/palworld");
   await page.getByRole("button", { name: "게임 메뉴" }).click();
   await page.getByRole("option", { name: "마인크래프트 선택" }).click();

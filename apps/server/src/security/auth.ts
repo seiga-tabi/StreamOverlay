@@ -193,6 +193,11 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
   if (method === "GET" && pathname === "/api/admin/audit-logs") return "DASHBOARD_ADMIN";
   if (method === "POST" && pathname === "/api/inbound-email/cloudflare") return "PUBLIC";
   if (pathname === "/api/dashboard/auth/status" || pathname === "/api/dashboard/auth/check") return "PUBLIC";
+  if (method === "GET" && (
+    pathname === "/api/minecraft/items"
+    || pathname === "/api/minecraft/recipes"
+    || pathname === "/api/minecraft/enchants"
+  )) return "PUBLIC";
   if (method === "GET" && pathname.startsWith("/api/palworld/")) return "PUBLIC";
   if (method === "GET" && pathname.startsWith("/api/valorant/")) return "PUBLIC";
   if (method === "GET" && (

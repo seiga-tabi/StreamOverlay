@@ -556,6 +556,30 @@ const KOREAN_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   "/valorant/ranked": {
     title: "발로란트 경쟁전 리더보드 | YORO.gg",
     description: "Riot 공식 경쟁전 리더보드를 지역과 액트별로 확인하세요."
+  },
+  "/minecraft": {
+    title: "마인크래프트 위키 | YORO.gg",
+    description: "Java 마인크래프트 아이템, 조합법과 인챈트 카탈로그를 확인하세요."
+  },
+  "/minecraft/recipes": {
+    title: "마인크래프트 조합법 | YORO.gg",
+    description: "Java 마인크래프트 제작 조합법과 재료 배치를 검색하세요."
+  },
+  "/minecraft/items": {
+    title: "마인크래프트 아이템 | YORO.gg",
+    description: "Java 마인크래프트 아이템의 영문 ID, 묶음 수와 내구도를 확인하세요."
+  },
+  "/minecraft/enchants": {
+    title: "마인크래프트 인챈트 | YORO.gg",
+    description: "Java 마인크래프트 인챈트의 최대 레벨과 배타 관계를 확인하세요."
+  },
+  "/minecraft/library": {
+    title: "마인크래프트 자료실 준비 중 | YORO.gg",
+    description: "마인크래프트 모드·플러그인·셰이더 자료실을 준비하고 있습니다."
+  },
+  "/minecraft/patch-notes": {
+    title: "마인크래프트 패치 노트 준비 중 | YORO.gg",
+    description: "Mojang 공식 피드 기반 Java·Bedrock 패치 노트를 준비하고 있습니다."
   }
 };
 
@@ -663,6 +687,30 @@ const JAPANESE_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   "/valorant/ranked": {
     title: "VALORANTコンペティティブランキング | YORO.gg",
     description: "Riot公式コンペティティブランキングを地域・Act別に確認できます。"
+  },
+  "/minecraft": {
+    title: "マインクラフト Wiki | YORO.gg",
+    description: "Java版マインクラフトのアイテム、レシピ、エンチャントカタログを確認できます。"
+  },
+  "/minecraft/recipes": {
+    title: "マインクラフト レシピ | YORO.gg",
+    description: "Java版マインクラフトのクラフトレシピと材料配置を検索できます。"
+  },
+  "/minecraft/items": {
+    title: "マインクラフト アイテム | YORO.gg",
+    description: "Java版マインクラフトのアイテムID、スタック数、耐久値を確認できます。"
+  },
+  "/minecraft/enchants": {
+    title: "マインクラフト エンチャント | YORO.gg",
+    description: "Java版マインクラフトのエンチャント最大レベルと排他関係を確認できます。"
+  },
+  "/minecraft/library": {
+    title: "マインクラフト 資料室 準備中 | YORO.gg",
+    description: "マインクラフトのMOD・プラグイン・シェーダー資料室を準備しています。"
+  },
+  "/minecraft/patch-notes": {
+    title: "マインクラフト パッチノート 準備中 | YORO.gg",
+    description: "Mojang公式フィードに基づくJava・Bedrockパッチノートを準備しています。"
   }
 };
 
@@ -690,6 +738,8 @@ export function publicSeoMetadataForPath(pathname: string): PublicSeoMetadata {
   const content = contentForPath(normalizedPath, locale);
   const canonicalUrl = localizedPublicSeoUrl(normalizedPath, locale);
   const structuredData: unknown[] = [websiteStructuredData(locale)];
+  const robotsNoindex = normalizedPath === "/minecraft/library"
+    || normalizedPath === "/minecraft/patch-notes";
   if (normalizedPath !== "/") structuredData.push(breadcrumbStructuredData(normalizedPath, locale));
   if (normalizedPath === "/") {
     structuredData.push({ "@context": "https://schema.org", ...(organizationStructuredData() as object) });
@@ -705,6 +755,7 @@ export function publicSeoMetadataForPath(pathname: string): PublicSeoMetadata {
     imageUrl: DEFAULT_SOCIAL_IMAGE,
     locale,
     openGraphType: "website",
+    ...(robotsNoindex ? { robotsNoindex: true } : {}),
     structuredData,
     title: content.title
   };

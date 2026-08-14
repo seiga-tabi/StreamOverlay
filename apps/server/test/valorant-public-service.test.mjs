@@ -76,7 +76,7 @@ test("카탈로그 loader는 acts·queues의 unknown field와 잘못된 ID를 fa
   const directory = mkdtempSync(path.join(tmpdir(), "yoro-valorant-catalog-"));
   try {
     const source = JSON.parse(readFileSync(
-      path.resolve("apps/server/data/valorant/public-content-12.08.json"),
+      new URL("../data/valorant/public-content-12.08.json", import.meta.url),
       "utf8"
     ));
     source.acts[0].id = "------------------------------------";

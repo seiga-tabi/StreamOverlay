@@ -9,19 +9,17 @@ import {
 import { minecraftI18n, type MinecraftLocale } from "../i18n/minecraft-i18n";
 import { setMinecraftUrl, type MinecraftPage } from "../utils/routes";
 
-type ComingSoonPage = Exclude<MinecraftPage, "home">;
+type ComingSoonPage = Extract<MinecraftPage, "library" | "patchNotes">;
 
-/* 데이터 화면의 정직한 준비 중 상태 — 가짜 표본으로 채우지 않습니다.
-   실데이터 연결은 /api/minecraft/* 카탈로그 contract(Codex handoff) 이후입니다. */
+/* 자료실·패치 노트의 정직한 준비 중 상태 — 가짜 표본으로 채우지 않습니다.
+   조합법·아이템·인챈트는 2단계에서 실데이터 페이지로 전환되었고,
+   남은 두 화면은 3단계 handoff(피드 수집·큐레이션 계약) 이후 연결합니다. */
 export function MinecraftComingSoonPage({ locale, page }: {
   locale: MinecraftLocale;
   page: ComingSoonPage;
 }) {
   const text = minecraftI18n[locale];
-  const keys: Record<ComingSoonPage, { title: "recipesComingSoonTitle" | "itemsComingSoonTitle" | "enchantsComingSoonTitle" | "libraryComingSoonTitle" | "patchNotesComingSoonTitle"; description: "recipesComingSoonDescription" | "itemsComingSoonDescription" | "enchantsComingSoonDescription" | "libraryComingSoonDescription" | "patchNotesComingSoonDescription" }> = {
-    recipes: { title: "recipesComingSoonTitle", description: "recipesComingSoonDescription" },
-    items: { title: "itemsComingSoonTitle", description: "itemsComingSoonDescription" },
-    enchants: { title: "enchantsComingSoonTitle", description: "enchantsComingSoonDescription" },
+  const keys: Record<ComingSoonPage, { title: "libraryComingSoonTitle" | "patchNotesComingSoonTitle"; description: "libraryComingSoonDescription" | "patchNotesComingSoonDescription" }> = {
     library: { title: "libraryComingSoonTitle", description: "libraryComingSoonDescription" },
     patchNotes: { title: "patchNotesComingSoonTitle", description: "patchNotesComingSoonDescription" },
   };

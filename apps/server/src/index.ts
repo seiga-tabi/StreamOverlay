@@ -73,6 +73,10 @@ import { GameServerStatusReadRepository } from "./database/repositories/game-ser
 import { GameServerStatusReadService } from "./services/game-server-status-read-service.js";
 import { DiscordBotCommandPolicyService } from "./services/discord-bot-command-policy-service.js";
 import { AdminAuditLogRepository } from "./database/repositories/admin-audit-log-repository.js";
+import {
+  MinecraftCatalogService,
+  MinecraftCatalogUnavailableError
+} from "./services/minecraft-catalog.js";
 import { ValorantPublicCatalogService } from "./services/valorant-public-catalog.js";
 import { ValorantPublicService } from "./services/valorant-public-service.js";
 import {
@@ -491,6 +495,26 @@ if (storeStartupState.ok) {
   logger.error(storeStartupLog);
   console.error(JSON.stringify(storeStartupLog));
 }
+let minecraftCatalog: MinecraftCatalogService | undefined;
+try {
+  minecraftCatalog = MinecraftCatalogService.load();
+  const metadata = minecraftCatalog.metadata();
+  logger.event({
+    type: "minecraft.catalog_loaded",
+    gameVersion: metadata.gameVersion,
+    sourceRevision: metadata.sourceRevision,
+    items: metadata.coverage.items,
+    recipes: metadata.coverage.recipes,
+    enchants: metadata.coverage.enchants
+  });
+} catch (error) {
+  logger.error({
+    type: "minecraft.catalog_unavailable",
+    errorCode: error instanceof MinecraftCatalogUnavailableError
+      ? error.code
+      : "MINECRAFT_CATALOG_UNAVAILABLE"
+  });
+}
 let valorantCatalog: ValorantPublicCatalogService | undefined;
 if (appConfig.riot.valorantPublicEnabled) {
   try {
@@ -614,6 +638,7 @@ const server = http.createServer(createHttpHandler({
   refreshLolProfile: (entryId, streamerId) => refreshLolProfileForEntry(moduleContext, entryId, streamerId),
   sessions,
   supportMailbox,
+  minecraftCatalog,
   palworldDataService,
   palworldMapMarkerProvider,
   palworldSpawnProvider,

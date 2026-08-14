@@ -8,6 +8,7 @@ export * from "./bot-management.js";
 export * from "./events.js";
 export * from "./followers.js";
 export * from "./lol-platform.js";
+export * from "./minecraft.js";
 export * from "./palworld.js";
 export * from "./palworld-map.js";
 export * from "./palworld-pak-candidate.js";

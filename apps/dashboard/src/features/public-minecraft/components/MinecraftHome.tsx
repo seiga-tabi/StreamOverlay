@@ -1,21 +1,47 @@
+import { useEffect, useState } from "react";
+import type { MinecraftCatalogMetadata } from "@streamops/shared";
+import { getMinecraftItems } from "../api/minecraft";
 import { minecraftI18n, type MinecraftLocale } from "../i18n/minecraft-i18n";
+import { setMinecraftUrl, minecraftPathForPage, type MinecraftPage } from "../utils/routes";
+import { formatMinecraftTemplate } from "./MinecraftCatalogShell";
 
-/* 마인크래프트 위키 홈 — 준비 단계의 정직한 소개 화면.
+/* 마인크래프트 위키 홈 — 카탈로그 metadata 로 실제 수치를 소개합니다.
  *
- * 카탈로그 파이프라인(/api/minecraft/* contract, Codex handoff)이 연결되기 전이라
- * 검색 입력·가짜 수치를 두지 않고, 위키의 실제 구성과 원칙만 소개합니다.
+ * 수치는 /api/minecraft/items?limit=1 한 번으로 얻는 metadata.coverage 이며,
+ * 실패하거나 data_unavailable 이면 기존 "준비 중" 문구를 그대로 유지합니다(가짜 수치 금지).
  * 근거: docs/mockups/minecraft-vertical.html §02·§09 (라이선스·자체 작성 원칙)
  */
 export function MinecraftHome({ locale }: { locale: MinecraftLocale }) {
   const text = minecraftI18n[locale];
-  const categories = [
-    { key: "recipes", title: text.catRecipesTitle, description: text.catRecipesDescription },
-    { key: "items", title: text.catItemsTitle, description: text.catItemsDescription },
-    { key: "enchants", title: text.catEnchantsTitle, description: text.catEnchantsDescription },
+  const [metadata, setMetadata] = useState<MinecraftCatalogMetadata | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void getMinecraftItems({ limit: 1 }, controller.signal)
+      .then((response) => {
+        if (controller.signal.aborted || response.state !== "ready") return;
+        setMetadata(response.metadata);
+      })
+      .catch(() => {
+        /* 준비 중 문구 유지 — 홈에서는 오류 상태를 별도로 그리지 않습니다. */
+      });
+    return () => controller.abort();
+  }, []);
+
+  const categories: Array<{
+    key: string;
+    page?: MinecraftPage;
+    title: string;
+    description: string;
+    phase?: string;
+  }> = [
+    { key: "recipes", page: "recipes", title: text.catRecipesTitle, description: text.catRecipesDescription },
+    { key: "items", page: "items", title: text.catItemsTitle, description: text.catItemsDescription },
+    { key: "enchants", page: "enchants", title: text.catEnchantsTitle, description: text.catEnchantsDescription },
     { key: "mobs", title: text.catMobsTitle, description: text.catMobsDescription, phase: text.catMobsPhase },
-    { key: "library", title: text.catLibraryTitle, description: text.catLibraryDescription },
-    { key: "patch", title: text.catPatchTitle, description: text.catPatchDescription },
-  ] as const;
+    { key: "library", page: "library", title: text.catLibraryTitle, description: text.catLibraryDescription },
+    { key: "patch", page: "patchNotes", title: text.catPatchTitle, description: text.catPatchDescription },
+  ];
 
   return (
     <div className="minecraft-home">
@@ -32,13 +58,24 @@ export function MinecraftHome({ locale }: { locale: MinecraftLocale }) {
         <p data-ja={minecraftI18n.ja.heroDescription} data-ko={minecraftI18n.ko.heroDescription}>
           {text.heroDescription}
         </p>
-        <span
-          className="minecraft-hero__status"
-          data-ja={minecraftI18n.ja.heroStatus}
-          data-ko={minecraftI18n.ko.heroStatus}
-        >
-          {text.heroStatus}
-        </span>
+        {metadata ? (
+          <span className="minecraft-hero__status is-ready" data-testid="minecraft-home-stats">
+            {formatMinecraftTemplate(text.homeStatsReady, {
+              version: metadata.gameVersion,
+              items: metadata.coverage.items.toLocaleString(),
+              recipes: metadata.coverage.recipes.toLocaleString(),
+              enchants: metadata.coverage.enchants.toLocaleString(),
+            })}
+          </span>
+        ) : (
+          <span
+            className="minecraft-hero__status"
+            data-ja={minecraftI18n.ja.heroStatus}
+            data-ko={minecraftI18n.ko.heroStatus}
+          >
+            {text.heroStatus}
+          </span>
+        )}
       </section>
 
       <section aria-labelledby="minecraft-category-title" className="minecraft-categories">
@@ -47,15 +84,31 @@ export function MinecraftHome({ locale }: { locale: MinecraftLocale }) {
         </h2>
         <div className="minecraft-categories__grid">
           {categories.map((category) => (
-            <article className="minecraft-category-card" key={category.key}>
-              <h3>
-                {category.title}
-                {"phase" in category && category.phase
-                  ? <span className="minecraft-category-card__phase">{category.phase}</span>
-                  : null}
-              </h3>
-              <p>{category.description}</p>
-            </article>
+            category.page ? (
+              <a
+                className="minecraft-category-card is-link"
+                href={minecraftPathForPage(category.page)}
+                key={category.key}
+                onClick={(event) => {
+                  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+                  event.preventDefault();
+                  setMinecraftUrl(minecraftPathForPage(category.page!));
+                }}
+              >
+                <h3>{category.title}</h3>
+                <p>{category.description}</p>
+              </a>
+            ) : (
+              <article className="minecraft-category-card" key={category.key}>
+                <h3>
+                  {category.title}
+                  {category.phase
+                    ? <span className="minecraft-category-card__phase">{category.phase}</span>
+                    : null}
+                </h3>
+                <p>{category.description}</p>
+              </article>
+            )
           ))}
         </div>
         <p className="minecraft-unofficial-note" data-ja={minecraftI18n.ja.unofficialNotice} data-ko={minecraftI18n.ko.unofficialNotice}>

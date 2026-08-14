@@ -5,9 +5,12 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { setActivePublicLocale } from "../src/features/public-lol/i18n/public-lol-i18n";
 import { MinecraftBottomTabBar } from "../src/features/public-minecraft/components/MinecraftBottomTabBar";
 import { MinecraftComingSoonPage } from "../src/features/public-minecraft/components/MinecraftComingSoonPage";
+import { MinecraftEnchantsPage } from "../src/features/public-minecraft/components/MinecraftEnchantsPage";
 import { MinecraftHeader, minecraftNavItems, minecraftTabItems } from "../src/features/public-minecraft/components/MinecraftHeader";
 import { MinecraftHome } from "../src/features/public-minecraft/components/MinecraftHome";
+import { MinecraftItemsPage } from "../src/features/public-minecraft/components/MinecraftItemsPage";
 import { MinecraftNotFoundPage } from "../src/features/public-minecraft/components/MinecraftNotFoundPage";
+import { MinecraftRecipesPage } from "../src/features/public-minecraft/components/MinecraftRecipesPage";
 import {
   isMinecraftPath,
   minecraftPageFromPath,
@@ -36,26 +39,31 @@ test("마인크래프트 SEO 메타는 페이지·언어별 canonical을 만든�
   assert.match(ja.title, /パッチノート \| YORO\.gg/u);
 });
 
-test("위키 홈은 준비 상태·구성 소개·비공식 고지를 ko·ja로 렌더하고 가짜 수치를 두지 않는다", () => {
+test("위키 홈은 구성 소개·비공식 고지를 ko·ja로 렌더하고 데이터 도착 전 가짜 수치를 두지 않는다", () => {
   setActivePublicLocale("ko");
   const korean = renderToStaticMarkup(<MinecraftHome locale="ko" />);
   assert.match(korean, /무엇이든 찾는 마인크래프트 위키/u);
+  /* metadata 도착 전(SSR 포함)에는 준비 중 문구를 유지합니다 — 가짜 수치 금지. */
   assert.match(korean, /준비 중 — 카탈로그 파이프라인 연결 단계/u);
   assert.match(korean, /제작·제련·양조·대장장이/u);
   assert.match(korean, /효과 공식·최대 레벨·배타 관계/u);
   assert.match(korean, /2차/u);
   assert.match(korean, /Mojang Synergies AB 의 상표/u);
-  /* 준비 단계 — 가짜 레시피 수·검색 입력·동작하지 않는 CTA 를 두지 않습니다. */
   assert.doesNotMatch(korean, /\d+개 레시피|<input|<button/u);
+  /* 카테고리 타일은 실제 라우트로 가는 링크입니다. */
+  assert.match(korean, /href="\/minecraft\/recipes"/u);
+  assert.match(korean, /href="\/minecraft\/items"/u);
+  assert.match(korean, /href="\/minecraft\/enchants"/u);
+  assert.match(korean, /href="\/minecraft\/patch-notes"/u);
 
   const japanese = renderToStaticMarkup(<MinecraftHome locale="ja" />);
   assert.match(japanese, /なんでも探せるマインクラフト Wiki/u);
   assert.match(japanese, /Mojang Synergies AB の商標/u);
 });
 
-test("데이터 화면은 정직한 준비 중 상태와 위키 홈 복귀를 제공한다", () => {
+test("자료실·패치 노트는 정직한 준비 중 상태와 위키 홈 복귀를 제공한다", () => {
   setActivePublicLocale("ko");
-  for (const page of ["recipes", "items", "enchants", "library", "patchNotes"] as const) {
+  for (const page of ["library", "patchNotes"] as const) {
     const korean = renderToStaticMarkup(<MinecraftComingSoonPage locale="ko" page={page} />);
     assert.match(korean, /준비하고 있습니다/u);
     assert.match(korean, /위키 홈으로/u);
@@ -65,6 +73,30 @@ test("데이터 화면은 정직한 준비 중 상태와 위키 홈 복귀를 �
   }
   const library = renderToStaticMarkup(<MinecraftComingSoonPage locale="ko" page="library" />);
   assert.match(library, /파일은 호스팅하지 않고 공식 출처로만/u);
+});
+
+test("카탈로그 3화면은 검색 UI·제목을 ko·ja로 렌더하고 로딩 상태로 시작한다", () => {
+  setActivePublicLocale("ko");
+  const recipes = renderToStaticMarkup(<MinecraftRecipesPage locale="ko" />);
+  assert.match(recipes, /id="minecraft-recipes-title"/u);
+  assert.match(recipes, /조합법/u);
+  assert.match(recipes, /이름 또는 영문 ID 검색/u);
+  /* crafting 만 원천 제공 — 나머지 유형 칩은 비활성 + 미제공 표기 */
+  assert.match(recipes, /제작/u);
+  assert.match(recipes, /원천 미제공/u);
+  assert.match(recipes, /disabled/u);
+  /* 데이터 도착 전에는 skeleton 로딩만 — 가짜 레시피 카드 금지 */
+  assert.doesNotMatch(recipes, /minecraft-recipe-card/u);
+  assert.match(recipes, /maxlength="80"/iu);
+
+  const items = renderToStaticMarkup(<MinecraftItemsPage locale="ja" />);
+  assert.match(items, /id="minecraft-items-title"/u);
+  assert.match(items, /名前または英語 ID を検索/u);
+  assert.doesNotMatch(items, /minecraft-item-row/u);
+
+  const enchants = renderToStaticMarkup(<MinecraftEnchantsPage locale="ko" />);
+  assert.match(enchants, /id="minecraft-enchants-title"/u);
+  assert.doesNotMatch(enchants, /minecraft-enchant-card/u);
 });
 
 test("마인크래프트 헤더 nav는 6개, 탭바는 5칸이며 게임 선택기에 마인크래프트가 있다", () => {

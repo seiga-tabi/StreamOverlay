@@ -268,7 +268,10 @@ test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => 
     const aramApiRes = createResponse();
     await handler(createRequest("GET", "/api/public/aram/augments"), aramApiRes);
     assert.equal(aramApiRes.statusCode, 200);
-    assert.equal(aramApiRes.headers["Cache-Control"], "no-store");
+    assert.equal(
+      aramApiRes.headers["Cache-Control"],
+      "public, max-age=300, stale-while-revalidate=3600"
+    );
     const aramBody = JSON.parse(aramApiRes.body);
     assert.equal(aramBody.schemaVersion, 1);
     assert.equal(aramBody.mode, "aram_augments");

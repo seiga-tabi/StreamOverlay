@@ -46,6 +46,9 @@ import {
   validatePalworldMapLocationsResponse,
   validatePalworldMapMarkersResponse,
   validatePalworldPalSpawnResponse,
+  validateMinecraftEnchantCatalogResponse,
+  validateMinecraftItemCatalogResponse,
+  validateMinecraftRecipeCatalogResponse,
   validateValorantAgentCatalogResponse,
   validateValorantLeaderboardResponse,
   validateValorantMapCatalogResponse,
@@ -238,6 +241,10 @@ import {
 import type { PalworldMapMarkerProvider } from "../data/palworld-map-marker-artifact.js";
 import type { PalworldSpawnProvider } from "../data/palworld-spawn-artifact.js";
 import type { PalworldMapLocationsProvider } from "../data/palworld-map-locations-artifact.js";
+import {
+  MinecraftCatalogQueryError,
+  type MinecraftCatalogService
+} from "../services/minecraft-catalog.js";
 import {
   ValorantCatalogError,
   type ValorantPublicCatalogService
@@ -2292,6 +2299,7 @@ type HttpHandlerInput = {
   readiness?: ReadinessCheck;
   isShuttingDown?: () => boolean;
   connectionStatus?: () => DashboardServerStatus["connections"];
+  minecraftCatalog?: MinecraftCatalogService;
   palworldDataService?: PalworldDataService;
   palworldMapMarkerProvider?: PalworldMapMarkerProvider;
   palworldSpawnProvider?: PalworldSpawnProvider;
@@ -9555,6 +9563,45 @@ export function createHttpHandler(input: HttpHandlerInput) {
           buildReadinessResponse(readiness, appConfig.build)
         );
       }
+      if (req.method === "GET" && url.pathname.startsWith("/api/minecraft/")) {
+        const catalog = input.minecraftCatalog;
+        if (url.pathname === "/api/minecraft/items") {
+          const response = catalog?.items(url.searchParams) ?? { state: "data_unavailable" as const };
+          const validation = validateMinecraftItemCatalogResponse(response);
+          if (!validation.ok) throw new Error(`minecraft_item_response_invalid:${validation.error}`);
+          return sendJson(req, res, 200, validation.data, validation.data.state === "ready"
+            ? {
+                "Cache-Control": "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",
+                "X-Minecraft-Data-Version": validation.data.metadata.gameVersion,
+                "X-Minecraft-Data-Revision": validation.data.metadata.sourceRevision
+              }
+            : noStoreHeaders());
+        }
+        if (url.pathname === "/api/minecraft/recipes") {
+          const response = catalog?.recipes(url.searchParams) ?? { state: "data_unavailable" as const };
+          const validation = validateMinecraftRecipeCatalogResponse(response);
+          if (!validation.ok) throw new Error(`minecraft_recipe_response_invalid:${validation.error}`);
+          return sendJson(req, res, 200, validation.data, validation.data.state === "ready"
+            ? {
+                "Cache-Control": "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",
+                "X-Minecraft-Data-Version": validation.data.metadata.gameVersion,
+                "X-Minecraft-Data-Revision": validation.data.metadata.sourceRevision
+              }
+            : noStoreHeaders());
+        }
+        if (url.pathname === "/api/minecraft/enchants") {
+          const response = catalog?.enchants(url.searchParams) ?? { state: "data_unavailable" as const };
+          const validation = validateMinecraftEnchantCatalogResponse(response);
+          if (!validation.ok) throw new Error(`minecraft_enchant_response_invalid:${validation.error}`);
+          return sendJson(req, res, 200, validation.data, validation.data.state === "ready"
+            ? {
+                "Cache-Control": "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",
+                "X-Minecraft-Data-Version": validation.data.metadata.gameVersion,
+                "X-Minecraft-Data-Revision": validation.data.metadata.sourceRevision
+              }
+            : noStoreHeaders());
+        }
+      }
       if (req.method === "GET" && url.pathname.startsWith("/api/valorant/")) {
         const catalog = input.valorantCatalog;
         if (url.pathname === "/api/valorant/agents") {
@@ -10924,6 +10971,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
         return sendJson(req, res, 400, {
           error: "발로란트 요청 query가 올바르지 않습니다.",
           code: "invalid_query"
+        }, noStoreHeaders());
+      }
+      if (error instanceof MinecraftCatalogQueryError) {
+        return sendJson(req, res, 400, {
+          error: error.publicMessage,
+          code: error.code
         }, noStoreHeaders());
       }
       if (error instanceof PalworldQueryError) {

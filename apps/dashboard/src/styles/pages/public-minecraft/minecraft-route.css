@@ -12,7 +12,10 @@
   --public-game-accent: #3be0bf;
 }
 
-.minecraft-shell {
+/* 셸 기본 규칙이 복합 셀렉터(0,2,0)로 배경을 지정하므로 특이도를 맞춰 이긴다.
+   페이지 섹션에도 같은 색을 깔아 어느 경로로도 어두운 바탕이 보장되게 한다. */
+.public-dashboard-shell.minecraft-shell,
+.minecraft-shell .minecraft-page-section {
   background: #101418;
 }
 
@@ -145,4 +148,452 @@
 .minecraft-page-section .yoro-empty-state {
   border-color: var(--minecraft-line);
   background: var(--minecraft-surface);
+}
+
+/* ---------- 카탈로그 공통(조합법·아이템·인챈트) ---------- */
+
+.minecraft-catalog {
+  display: grid;
+  gap: var(--yoro-space-5);
+}
+
+.minecraft-catalog__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--yoro-space-3);
+  flex-wrap: wrap;
+}
+
+.minecraft-catalog__head > h1 {
+  margin: 0;
+  color: var(--minecraft-ink);
+  font-size: var(--yoro-font-size-2xl);
+}
+
+.minecraft-catalog__count {
+  color: var(--minecraft-accent);
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.minecraft-catalog__toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--yoro-space-3);
+}
+
+.minecraft-catalog__toolbar > input[type="search"] {
+  min-block-size: 2.75rem;
+  padding: 0 var(--yoro-space-4);
+  border: thin solid var(--minecraft-line);
+  border-radius: var(--yoro-radius-md);
+  background: var(--minecraft-surface);
+  color: var(--minecraft-ink);
+  font-size: var(--yoro-font-size-md);
+}
+
+.minecraft-catalog__toolbar > input[type="search"]::placeholder {
+  color: var(--minecraft-ink-muted);
+}
+
+.minecraft-catalog__toolbar > input[type="search"]:focus-visible {
+  outline: 2px solid var(--minecraft-accent);
+  outline-offset: 2px;
+}
+
+.minecraft-type-chips {
+  display: flex;
+  gap: var(--yoro-space-2);
+  flex-wrap: wrap;
+}
+
+.minecraft-type-chips > button {
+  min-block-size: 2.75rem;
+  padding: 0 var(--yoro-space-3);
+  border: thin solid var(--minecraft-line);
+  border-radius: var(--yoro-radius-pill);
+  background: var(--minecraft-surface);
+  color: var(--minecraft-ink);
+  font-size: var(--yoro-font-size-sm);
+  cursor: pointer;
+}
+
+.minecraft-type-chips > button.active {
+  border-color: var(--minecraft-accent);
+  background: rgba(59, 224, 191, .16);
+  color: var(--minecraft-accent);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.minecraft-type-chips > button:disabled {
+  color: var(--minecraft-ink-muted);
+  cursor: not-allowed;
+  opacity: .6;
+}
+
+.minecraft-type-chips > button:focus-visible {
+  outline: 2px solid var(--minecraft-accent);
+  outline-offset: 2px;
+}
+
+.minecraft-catalog__skeletons {
+  display: grid;
+  gap: var(--yoro-space-3);
+}
+
+.minecraft-catalog__skeleton {
+  block-size: 4.5rem;
+  border-radius: var(--yoro-radius-md);
+}
+
+.minecraft-catalog__more {
+  display: grid;
+  justify-items: center;
+  gap: var(--yoro-space-2);
+}
+
+.minecraft-catalog__more > p {
+  margin: 0;
+  color: var(--minecraft-ink-muted);
+  font-size: var(--yoro-font-size-sm);
+}
+
+.minecraft-catalog__more > p[role="alert"] {
+  color: var(--yoro-color-danger, #ff7a7a);
+}
+
+/* 이름 + EN fallback 배지 */
+.minecraft-name {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--yoro-space-2);
+  color: var(--minecraft-ink);
+}
+
+.minecraft-name__fallback {
+  padding: 0 var(--yoro-space-1);
+  border: thin solid var(--minecraft-line);
+  border-radius: var(--yoro-radius-sm);
+  color: var(--minecraft-ink-muted);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-bold);
+  letter-spacing: .04em;
+}
+
+/* 자체 스와치 — 텍스처(Mojang 자산) 대신 ID 해시 색 + 2글자 라벨 */
+.minecraft-item-swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 1.875rem;
+  block-size: 1.875rem;
+  border-radius: var(--yoro-radius-sm);
+  background: hsl(var(--minecraft-tile-hue, 0) 35% 30%);
+  color: #f2f5f4;
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-bold);
+  overflow: hidden;
+  flex: none;
+}
+
+/* 조합 시각화 — 목업 §06: 슬롯 그리드 → 화살표 → 결과 슬롯 */
+.minecraft-craft {
+  display: flex;
+  align-items: center;
+  gap: var(--yoro-space-3);
+  flex-wrap: wrap;
+}
+
+.minecraft-craft-grid {
+  display: inline-grid;
+  gap: 5px;
+  padding: var(--yoro-space-2);
+  border: thin solid var(--minecraft-line);
+  border-radius: var(--yoro-radius-md);
+  background: #0c1013;
+}
+
+.minecraft-craft-grid__row {
+  display: flex;
+  gap: 5px;
+}
+
+/* MC 인벤토리 슬롯 베벨 — 각진 셀, 위 어둡고 아래 밝은 안쪽 음영 */
+.minecraft-craft-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  border: thin solid #29333c;
+  background: #161c22;
+  box-shadow: inset 2px 2px 0 rgba(0, 0, 0, .45), inset -2px -2px 0 rgba(255, 255, 255, .05);
+  flex: none;
+}
+
+.minecraft-craft-arrow {
+  color: #55636e;
+  font-size: var(--yoro-font-size-xl);
+  font-weight: var(--yoro-font-weight-black);
+}
+
+.minecraft-craft-out {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 4rem;
+  block-size: 4rem;
+  border: thin solid var(--minecraft-accent);
+  border-radius: var(--yoro-radius-md);
+  background: #161c22;
+  box-shadow: 0 0 0 3px rgba(59, 224, 191, .12);
+  flex: none;
+}
+
+.minecraft-craft-out > .minecraft-item-swatch {
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+}
+
+.minecraft-craft-out__count {
+  position: absolute;
+  inset-block-end: 2px;
+  inset-inline-end: 4px;
+  color: var(--minecraft-accent);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-black);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, .6);
+}
+
+/* shapeless — 슬롯 나열 + 자유 배치 표기 */
+.minecraft-craft-shapeless {
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--yoro-space-2);
+  align-items: flex-start;
+}
+
+.minecraft-craft-shapeless__tiles {
+  display: inline-flex;
+  gap: 5px;
+  padding: var(--yoro-space-2);
+  border: thin solid var(--minecraft-line);
+  border-radius: var(--yoro-radius-md);
+  background: #0c1013;
+  flex-wrap: wrap;
+}
+
+/* 조합법 카드 */
+.minecraft-recipe-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
+  gap: var(--yoro-space-4);
+}
+
+.minecraft-recipe-card {
+  display: grid;
+  gap: var(--yoro-space-3);
+  align-content: start;
+  padding: var(--yoro-space-4);
+  border: thin solid var(--minecraft-line);
+  border-radius: var(--yoro-radius-md);
+  background: var(--minecraft-surface);
+}
+
+.minecraft-recipe-card__title {
+  display: flex;
+  align-items: center;
+  gap: var(--yoro-space-2);
+  margin: 0;
+  font-size: var(--yoro-font-size-md);
+}
+
+.minecraft-recipe-card__count {
+  color: var(--minecraft-accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.minecraft-recipe-card__shapeless {
+  padding: var(--yoro-space-1) var(--yoro-space-3);
+  border: thin dashed var(--minecraft-line);
+  border-radius: var(--yoro-radius-pill);
+  color: var(--minecraft-ink-muted);
+  font-size: var(--yoro-font-size-sm);
+}
+
+.minecraft-recipe-card__facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--yoro-space-1) var(--yoro-space-3);
+  margin: 0;
+  min-inline-size: 0;
+  font-size: var(--yoro-font-size-sm);
+}
+
+.minecraft-recipe-card__facts > dt {
+  color: var(--minecraft-ink-muted);
+}
+
+.minecraft-recipe-card__facts > dd {
+  margin: 0;
+  color: var(--minecraft-ink);
+  overflow-wrap: anywhere;
+}
+
+/* 아이템 목록 행 */
+.minecraft-item-list {
+  display: grid;
+  gap: var(--yoro-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.minecraft-item-row {
+  display: flex;
+  align-items: center;
+  gap: var(--yoro-space-3);
+  padding: var(--yoro-space-3) var(--yoro-space-4);
+  border: thin solid var(--minecraft-line);
+  border-radius: var(--yoro-radius-md);
+  background: var(--minecraft-surface);
+  flex-wrap: wrap;
+}
+
+.minecraft-item-row__copy {
+  display: grid;
+  gap: 2px;
+  min-inline-size: 0;
+  flex: 1 1 12rem;
+}
+
+.minecraft-item-row__copy > code {
+  color: var(--minecraft-ink-muted);
+  font-size: var(--yoro-font-size-xs);
+  overflow-wrap: anywhere;
+}
+
+.minecraft-item-row__facts {
+  display: flex;
+  gap: var(--yoro-space-3);
+  color: var(--minecraft-ink-muted);
+  font-size: var(--yoro-font-size-sm);
+  font-variant-numeric: tabular-nums;
+  flex-wrap: wrap;
+}
+
+/* 적용 가능 인챈트 disclosure — 행 아래 전체 폭으로 펼쳐지는 칩 목록 */
+.minecraft-item-row__enchants {
+  flex: 1 1 100%;
+  min-inline-size: 0;
+}
+
+.minecraft-item-row__enchants > summary {
+  inline-size: fit-content;
+  min-block-size: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  color: var(--minecraft-accent);
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-bold);
+  cursor: pointer;
+}
+
+.minecraft-item-row__enchants > summary:focus-visible {
+  outline: 2px solid var(--minecraft-accent);
+  outline-offset: 2px;
+  border-radius: var(--yoro-radius-sm);
+}
+
+.minecraft-item-row__enchant-chips {
+  display: flex;
+  gap: var(--yoro-space-2);
+  padding-block: var(--yoro-space-1) var(--yoro-space-2);
+  flex-wrap: wrap;
+}
+
+/* 인챈트 카드 — 목업 §06 인챈트 상세 문법(제목 + 최대 Lv pill + 획득 칩 + kv) */
+.minecraft-enchant-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
+  gap: var(--yoro-space-4);
+}
+
+.minecraft-enchant-card {
+  display: grid;
+  gap: var(--yoro-space-3);
+  align-content: start;
+  padding: var(--yoro-space-4);
+  border: thin solid var(--minecraft-line);
+  border-radius: var(--yoro-radius-md);
+  background: var(--minecraft-surface);
+}
+
+.minecraft-enchant-card__title {
+  display: flex;
+  align-items: center;
+  gap: var(--yoro-space-2);
+  margin: 0;
+  font-size: var(--yoro-font-size-md);
+  flex-wrap: wrap;
+}
+
+.minecraft-enchant-card__chips {
+  display: flex;
+  gap: var(--yoro-space-2);
+  flex-wrap: wrap;
+}
+
+.minecraft-pill {
+  padding: 2px var(--yoro-space-2);
+  border: thin solid rgba(59, 224, 191, .45);
+  border-radius: var(--yoro-radius-pill);
+  color: var(--minecraft-accent);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-black);
+  font-variant-numeric: tabular-nums;
+}
+
+.minecraft-chip {
+  padding: 2px var(--yoro-space-2);
+  border: thin solid var(--minecraft-line);
+  border-radius: var(--yoro-radius-pill);
+  color: var(--minecraft-ink-muted);
+  font-size: var(--yoro-font-size-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.minecraft-chip.is-warning {
+  border-color: rgba(255, 122, 122, .5);
+  color: #ff9d9d;
+}
+
+/* 위키 홈 — 실데이터 상태·카테고리 링크 */
+.minecraft-hero__status.is-ready {
+  font-variant-numeric: tabular-nums;
+}
+
+.minecraft-category-card.is-link {
+  display: block;
+  text-decoration: none;
+  transition: border-color 120ms ease;
+}
+
+.minecraft-category-card.is-link:hover,
+.minecraft-category-card.is-link:focus-visible {
+  border-color: var(--minecraft-accent);
+}
+
+.minecraft-category-card.is-link:focus-visible {
+  outline: 2px solid var(--minecraft-accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 47.9375rem) {
+  .minecraft-recipe-list {
+    grid-template-columns: 1fr;
+  }
 }
