@@ -42,7 +42,8 @@ test("migration manifest와 SQL checksum을 strict하게 검증한다", async ()
       "0018_discord_guild_directory_cache",
       "0019_admin_audit_logs",
       "0020_yoro_riot_rso_identity",
-      "0021_yoro_valorant_record_consent"
+      "0021_yoro_valorant_record_consent",
+      "0022_twitch_extension_settings"
     ]
   );
 
@@ -97,6 +98,18 @@ test("0021 발로란트 전적 동의는 Riot identity와 분리되고 상태 �
   assert.match(sql, /REFERENCES external_identities\(id\) ON DELETE RESTRICT/u);
   assert.match(sql, /enabled = TRUE AND consented_at IS NOT NULL AND revoked_at IS NULL/u);
   assert.match(sql, /enabled = FALSE AND revoked_at IS NOT NULL/u);
+});
+
+test("0022 Twitch Extension 설정은 계정·채널 소유권과 허용값을 DB에서도 제약한다", () => {
+  const sql = readFileSync(
+    path.join(migrationsRoot, "0022_twitch_extension_settings.sql"),
+    "utf8"
+  );
+  assert.match(sql, /user_id UUID PRIMARY KEY REFERENCES users\(id\) ON DELETE RESTRICT/u);
+  assert.match(sql, /streamer_twitch_user_id TEXT NOT NULL UNIQUE[\s\S]*\^\[0-9\]\{1,32\}\$/u);
+  assert.match(sql, /inactive_behavior IN \('hide', 'message'\)/u);
+  assert.match(sql, /extension_type IN \('panel', 'overlay'\)/u);
+  assert.match(sql, /revision BIGINT NOT NULL DEFAULT 1 CHECK \(revision >= 1\)/u);
 });
 
 test("migration check는 빈 Database를 변경하지 않고 pending으로 판정한다", async () => {

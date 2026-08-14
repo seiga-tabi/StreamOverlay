@@ -1,0 +1,8 @@
+services:
+  config-check:
+    volumes:
+      - /etc/yoro/secrets/twitch_extension_secret:/run/secrets/twitch_extension_secret:ro
+
+  server:
+    volumes:
+      - /etc/yoro/secrets/twitch_extension_secret:/run/secrets/twitch_extension_secret:ro

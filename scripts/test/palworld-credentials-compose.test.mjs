@@ -58,6 +58,19 @@ test("Discord 내부 HMAC key는 수동 복사 없이 UID별 named volume 사본
   );
 });
 
+test("Twitch Extension secret은 운영 server와 config-check에 읽기 전용으로 전달한다", () => {
+  const extensionOverride = source("deploy/production/twitch-extension.override.example.yaml");
+  const mount = "/etc/yoro/secrets/twitch_extension_secret:/run/secrets/twitch_extension_secret:ro";
+
+  assert.match(extensionOverride, /config-check:/u);
+  assert.match(extensionOverride, /server:/u);
+  assert.equal(extensionOverride.split(mount).length - 1, 2);
+  assert.match(
+    source("apps/server/src/runtime-configuration.ts"),
+    /twitchExtensionSecret: "\/run\/secrets\/twitch_extension_secret"/u
+  );
+});
+
 test("Cloudflared는 기본 Palworld REST 배포를 막지 않는 선택 profile이다", () => {
   const standaloneCompose = source("deploy/production/compose.yaml");
   const productionOverlay = source("docker-compose.production.yml");

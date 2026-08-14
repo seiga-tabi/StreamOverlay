@@ -72,6 +72,16 @@ Riot RSO는 별도 승인을 받은 뒤에만 `features.riotRso=true`로 활성�
 복사해 secret mount를 추가합니다. 활성화 절차와 Developer Portal 등록 URL은
 `docs/RIOT_RSO.md`를 따릅니다.
 
+Twitch Extension도 기본 배포에서는 비활성입니다. 활성화할 때만
+`/etc/yoro/secrets/twitch_extension_secret`을 준비하고
+`twitch-extension.override.example.yaml`을 운영 전용 경로에 복사해 함께 적용합니다.
+이 override는 `config-check`와 `server`에 같은 파일을 읽기 전용으로 전달합니다.
+
+```bash
+cp twitch-extension.override.example.yaml twitch-extension.override.yaml
+docker compose -f compose.yaml -f twitch-extension.override.yaml up -d --build --force-recreate --wait
+```
+
 발로란트 공개 카탈로그는 `features.valorantPublic=true`로 승인 전에 배포할 수
 있습니다. `riot.valorantProductionApproved=false`인 동안 리더보드·스트리머
 전적은 외부 Riot API를 호출하지 않고 `approval_pending`만 반환합니다. 승인 후

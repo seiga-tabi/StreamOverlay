@@ -14,6 +14,7 @@ export const YORO_SECRET_FILES = Object.freeze({
   databaseUrl: "/run/secrets/database_url",
   twitchClientSecret: "/run/secrets/twitch_client_secret",
   twitchTokenEncryptionKey: "/run/secrets/twitch_token_encryption_key",
+  twitchExtensionSecret: "/run/secrets/twitch_extension_secret",
   riotApiKey: "/run/secrets/riot_api_key",
   riotRsoClientSecret: "/run/secrets/riot_rso_client_secret",
   discordClientSecret: "/run/secrets/discord_client_secret",

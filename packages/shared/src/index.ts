@@ -20,6 +20,7 @@ export * from "./public-lol.js";
 export * from "./server-status.js";
 export * from "./support-mail.js";
 export * from "./twitch.js";
+export * from "./twitch-extension.js";
 export * from "./utils.js";
 export * from "./valorant.js";
 export * from "./yoro-runtime-config.js";

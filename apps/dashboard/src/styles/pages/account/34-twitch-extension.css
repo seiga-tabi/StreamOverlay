@@ -317,6 +317,12 @@
   font-weight: var(--yoro-font-weight-black);
 }
 
+.twitch-ext-card__badge.is-connected {
+  border-color: var(--yoro-color-success);
+  background: var(--yoro-color-success-bg);
+  color: var(--yoro-color-success);
+}
+
 .twitch-ext-card__description {
   margin: var(--yoro-space-1) 0 0;
   color: var(--yoro-color-text-muted);
@@ -410,6 +416,38 @@
   min-block-size: 2.25rem;
   font-size: var(--yoro-font-size-sm);
   cursor: pointer;
+}
+
+.twitch-ext-card__save-row {
+  display: flex;
+  align-items: center;
+  gap: var(--yoro-space-3);
+  margin-block-start: var(--yoro-space-4);
+  min-block-size: 2.5rem;
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-xs);
+}
+
+.twitch-ext-card__save {
+  min-block-size: 2.5rem;
+  padding-inline: var(--yoro-space-4);
+  border: 0;
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-secondary-strong);
+  color: #fff;
+  font-weight: var(--yoro-font-weight-black);
+  cursor: pointer;
+}
+
+.twitch-ext-card__save:disabled {
+  background: var(--yoro-color-surface-muted);
+  color: var(--yoro-color-text-muted);
+  cursor: not-allowed;
+}
+
+.twitch-ext-card__save:focus-visible {
+  outline: 2px solid var(--yoro-color-primary-strong);
+  outline-offset: 2px;
 }
 
 .twitch-ext-card__sim {

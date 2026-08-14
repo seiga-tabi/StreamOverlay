@@ -5,7 +5,9 @@ import type {
   ParticipationGame,
   ParticipationListingVisibility,
   ParticipationState,
-  ParticipationStatus
+  ParticipationStatus,
+  TwitchExtensionSettingsInput,
+  TwitchExtensionSettingsResponse
 } from "@streamops/shared";
 import { runtimeConfig } from "../../runtime-config";
 import type { DashboardStreamerInfo } from "../../api/client";
@@ -260,6 +262,23 @@ export function selectYoroParticipationEntries(
       status: "selected",
       ...(expectedRevision === undefined ? {} : { expectedRevision })
     })
+  });
+}
+
+export function getTwitchExtensionSettings(
+  signal?: AbortSignal
+): Promise<TwitchExtensionSettingsResponse> {
+  return request("/api/account/streamer/twitch-extension", { signal });
+}
+
+export function saveTwitchExtensionSettings(
+  value: TwitchExtensionSettingsInput,
+  csrfToken: string
+): Promise<TwitchExtensionSettingsResponse> {
+  return request("/api/account/streamer/twitch-extension", {
+    method: "PUT",
+    headers: mutationHeaders(csrfToken),
+    body: JSON.stringify(value)
   });
 }
 

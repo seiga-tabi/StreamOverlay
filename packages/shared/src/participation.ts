@@ -146,7 +146,7 @@ export type ParticipationStatus =
   | "rejected"
   | "blocked";
 
-export type ParticipationJoinSource = "public_web" | "discord_announcement" | "twitch_chat" | "dashboard";
+export type ParticipationJoinSource = "public_web" | "discord_announcement" | "twitch_chat" | "twitch_extension" | "dashboard";
 
 export type ParticipationEntry = {
   id: string;

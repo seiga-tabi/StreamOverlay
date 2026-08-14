@@ -93,6 +93,28 @@ runtime 파일 모드에서는 legacy 일반 환경 변수와 `*_FILE` 경로 ov
 `YORO_CONFIG_FILE`, image release metadata와 내부 filesystem 경로만 배포
 manifest가 고정합니다.
 
+Twitch Extension EBS는 별도 feature flag와 credential을 사용합니다.
+
+```json
+{
+  "features": {
+    "twitchExtension": false
+  },
+  "twitch": {
+    "extensionClientId": "publictwitchextensionclientid"
+  }
+}
+```
+
+활성화에는 Database와 migration `0022`가 필요합니다. 공개 client ID만
+`runtime.json`에 두고 shared secret은
+`/etc/yoro/secrets/twitch_extension_secret`을 Server 컨테이너의
+`/run/secrets/twitch_extension_secret`에 읽기 전용으로 mount합니다. 일반 Twitch
+OAuth의 `twitch_client_secret`을 재사용하지 않습니다. 운영 Compose에서 기능을
+켤 때는 `deploy/production/twitch-extension.override.example.yaml`을 운영 전용 경로에
+복사해 `server`와 `config-check` 두 서비스에 같은 읽기 전용 mount를 추가한 뒤
+`config:check`와 `secrets:check`를 먼저 실행합니다.
+
 법적 고지와 사업자 정보는 `/etc/yoro/legal.json`에 분리합니다. production
 runtime mode에서는 이 파일이 필요합니다.
 

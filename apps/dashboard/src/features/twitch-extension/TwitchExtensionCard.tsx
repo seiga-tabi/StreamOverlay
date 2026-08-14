@@ -1,4 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type {
+  TwitchExtensionConnectionState,
+  TwitchExtensionInactiveBehavior,
+  TwitchExtensionType,
+} from "@streamops/shared";
 import {
   DEFAULT_EXTENSION_DISPLAY,
   ExtensionOverlayCollapsed,
@@ -8,9 +13,10 @@ import {
   type ExtensionViewerStatus,
 } from "./ExtensionViewer";
 import { extensionCardI18n, type ExtensionLocale } from "./extension-i18n";
-
-type InactiveBehavior = "hide" | "message";
-type ExtensionType = "panel" | "overlay";
+import {
+  getTwitchExtensionSettings,
+  saveTwitchExtensionSettings,
+} from "../yoro-dashboard/api";
 
 const SIM_STATUSES: ReadonlyArray<{ status: ExtensionViewerStatus; labelKey: keyof typeof extensionCardI18n.ko }> = [
   { status: "active", labelKey: "simActive" },
@@ -34,18 +40,76 @@ function previewData(status: ExtensionViewerStatus): ExtensionViewerData {
   };
 }
 
-/* Twitch Extension 관리 카드 — 설정 변경이 Live Preview 에 즉시 반영됩니다.
- *
- * Twitch 연동(EBS·JWT)과 설정 저장 API 는 Codex handoff 대상이라 아직 없습니다.
- * 가짜 연동 상태(Connected 등)를 표시하지 않고 "연동 준비 중"으로 정직하게 표기하며,
- * 미리보기는 실제 Viewer 컴포넌트(ExtensionViewerPanel)를 그대로 렌더합니다.
- */
-export function TwitchExtensionCard({ locale }: { locale: ExtensionLocale }) {
+/* Twitch Extension 관리 카드 — 미리보기 변경은 즉시 반영하고 저장은 명시적으로 수행합니다. */
+export function TwitchExtensionCard({
+  csrfToken,
+  locale,
+}: {
+  csrfToken?: string;
+  locale: ExtensionLocale;
+}) {
   const text = extensionCardI18n[locale];
   const [display, setDisplay] = useState<ExtensionDisplaySettings>(DEFAULT_EXTENSION_DISPLAY);
-  const [inactiveBehavior, setInactiveBehavior] = useState<InactiveBehavior>("hide");
-  const [extensionType, setExtensionType] = useState<ExtensionType>("panel");
+  const [inactiveBehavior, setInactiveBehavior] = useState<TwitchExtensionInactiveBehavior>("hide");
+  const [extensionType, setExtensionType] = useState<TwitchExtensionType>("panel");
   const [simStatus, setSimStatus] = useState<ExtensionViewerStatus>("active");
+  const [connectionState, setConnectionState] = useState<TwitchExtensionConnectionState>();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setLoading(true);
+    void getTwitchExtensionSettings(controller.signal)
+      .then((settings) => {
+        setDisplay(settings.display);
+        setInactiveBehavior(settings.inactiveBehavior);
+        setExtensionType(settings.extensionType);
+        setConnectionState(settings.connectionState);
+        setDirty(false);
+        setSaveMessage("");
+      })
+      .catch((error) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setConnectionState("configuration_required");
+        setSaveMessage(text.loadError);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, [text.loadError]);
+
+  function updateDisplay(key: keyof ExtensionDisplaySettings, checked: boolean) {
+    setDisplay((previous) => ({ ...previous, [key]: checked }));
+    setDirty(true);
+    setSaveMessage("");
+  }
+
+  async function save() {
+    if (!csrfToken || saving) return;
+    setSaving(true);
+    setSaveMessage("");
+    try {
+      const settings = await saveTwitchExtensionSettings({
+        display,
+        inactiveBehavior,
+        extensionType,
+      }, csrfToken);
+      setDisplay(settings.display);
+      setInactiveBehavior(settings.inactiveBehavior);
+      setExtensionType(settings.extensionType);
+      setConnectionState(settings.connectionState);
+      setDirty(false);
+      setSaveMessage(text.saved);
+    } catch {
+      setSaveMessage(text.saveError);
+    } finally {
+      setSaving(false);
+    }
+  }
 
   const toggles: ReadonlyArray<{ key: keyof ExtensionDisplaySettings; label: string }> = [
     { key: "joinButton", label: text.displayJoinButton },
@@ -73,10 +137,18 @@ export function TwitchExtensionCard({ locale }: { locale: ExtensionLocale }) {
       <div className="twitch-ext-card__settings">
         <header className="twitch-ext-card__head">
           <h2 id="twitch-extension-title">{text.title}</h2>
-          <span className="twitch-ext-card__badge">{text.comingSoonBadge}</span>
+          <span className={`twitch-ext-card__badge${connectionState === "connected" ? " is-connected" : ""}`}>
+            {loading
+              ? text.checkingBadge
+              : connectionState === "connected"
+                ? text.connectedBadge
+                : text.setupBadge}
+          </span>
         </header>
         <p className="twitch-ext-card__description">{text.description}</p>
-        <p className="twitch-ext-card__note" role="note">{text.comingSoonNote}</p>
+        <p className="twitch-ext-card__note" role="note">
+          {connectionState === "connected" ? text.connectedNote : text.setupNote}
+        </p>
 
         <h3>{text.displayTitle}</h3>
         <div className="twitch-ext-card__toggles">
@@ -85,7 +157,8 @@ export function TwitchExtensionCard({ locale }: { locale: ExtensionLocale }) {
               <span>{toggle.label}</span>
               <input
                 checked={display[toggle.key]}
-                onChange={(event) => setDisplay((previous) => ({ ...previous, [toggle.key]: event.target.checked }))}
+                disabled={loading || saving}
+                onChange={(event) => updateDisplay(toggle.key, event.target.checked)}
                 type="checkbox"
               />
               <span aria-hidden="true" className="twitch-ext-card__switch" />
@@ -98,7 +171,8 @@ export function TwitchExtensionCard({ locale }: { locale: ExtensionLocale }) {
           <button
             aria-pressed={inactiveBehavior === "hide"}
             className={inactiveBehavior === "hide" ? "is-active" : ""}
-            onClick={() => setInactiveBehavior("hide")}
+            disabled={loading || saving}
+            onClick={() => { setInactiveBehavior("hide"); setDirty(true); setSaveMessage(""); }}
             type="button"
           >
             {text.inactiveHide}
@@ -106,7 +180,8 @@ export function TwitchExtensionCard({ locale }: { locale: ExtensionLocale }) {
           <button
             aria-pressed={inactiveBehavior === "message"}
             className={inactiveBehavior === "message" ? "is-active" : ""}
-            onClick={() => setInactiveBehavior("message")}
+            disabled={loading || saving}
+            onClick={() => { setInactiveBehavior("message"); setDirty(true); setSaveMessage(""); }}
             type="button"
           >
             {text.inactiveMessage}
@@ -116,13 +191,24 @@ export function TwitchExtensionCard({ locale }: { locale: ExtensionLocale }) {
         <h3>{text.typeTitle}</h3>
         <div className="twitch-ext-card__radios" role="radiogroup" aria-label={text.typeTitle}>
           <label>
-            <input checked={extensionType === "panel"} name="twitch-extension-type" onChange={() => setExtensionType("panel")} type="radio" />
+            <input checked={extensionType === "panel"} disabled={loading || saving} name="twitch-extension-type" onChange={() => { setExtensionType("panel"); setDirty(true); setSaveMessage(""); }} type="radio" />
             <span>{text.typePanel}</span>
           </label>
           <label>
-            <input checked={extensionType === "overlay"} name="twitch-extension-type" onChange={() => setExtensionType("overlay")} type="radio" />
+            <input checked={extensionType === "overlay"} disabled={loading || saving} name="twitch-extension-type" onChange={() => { setExtensionType("overlay"); setDirty(true); setSaveMessage(""); }} type="radio" />
             <span>{text.typeOverlay}</span>
           </label>
+        </div>
+        <div className="twitch-ext-card__save-row">
+          <button
+            className="twitch-ext-card__save"
+            disabled={!csrfToken || loading || saving || !dirty}
+            onClick={() => void save()}
+            type="button"
+          >
+            {saving ? text.saving : text.save}
+          </button>
+          {saveMessage ? <span aria-live="polite">{saveMessage}</span> : null}
         </div>
       </div>
 

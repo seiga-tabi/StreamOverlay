@@ -82,6 +82,29 @@ async function installRoutes(page: Page, state: unknown): Promise<void> {
     profile: { twitchLogin: "verifier", twitchDisplayName: "검증 스트리머" },
     summary: { activeFollowers: 120, knownFollowers: 150, newFollowers7d: 4 }
   }));
+  await page.route("**/api/account/streamer/twitch-extension", async (route) => {
+    const saved = route.request().method() === "PUT"
+      ? await route.request().postDataJSON()
+      : {
+          display: {
+            joinButton: true,
+            game: true,
+            waitingCount: true,
+            myPosition: true,
+            cancelButton: true,
+            nextState: true
+          },
+          inactiveBehavior: "hide",
+          extensionType: "panel"
+        };
+    await json(route, {
+      ...saved,
+      configured: true,
+      connectionState: "connected",
+      revision: route.request().method() === "PUT" ? 2 : 1,
+      updatedAt: "2026-08-11T09:00:00.000Z"
+    });
+  });
   await page.route("**/api/discord/management/session", async (route) => (
     json(route, { authenticated: true, csrfToken: "management-csrf", organizations: [] })
   ));
@@ -192,9 +215,8 @@ test("Twitch Extension 카드 — 설정이 실컴포넌트 Live Preview 에 즉
 
   const card = page.getByTestId("twitch-extension-card");
   await card.scrollIntoViewIfNeeded();
-  /* 가짜 연동 상태 금지 — Connected 대신 정직한 준비 중 배지 */
-  await expect(card.getByText("연동 준비 중")).toBeVisible();
-  await expect(card).not.toContainText("Connected");
+  /* 연동 배지는 저장 API의 실제 connectionState를 반영합니다. */
+  await expect(card.getByText("연동됨")).toBeVisible();
 
   /* 기본 미리보기 = Panel · 모집 중(실 Viewer 컴포넌트, ko 카피) */
   const preview = page.getByTestId("twitch-extension-preview");
@@ -206,6 +228,8 @@ test("Twitch Extension 카드 — 설정이 실컴포넌트 Live Preview 에 즉
   /* 표시 토글 → 즉시 반영: 현재 게임 끄기 */
   await card.getByText("현재 게임", { exact: true }).click();
   await expect(preview.getByText("League of Legends")).toHaveCount(0);
+  await card.getByRole("button", { name: "설정 저장" }).click();
+  await expect(card.getByText("저장했습니다.")).toBeVisible();
 
   /* 상태 시뮬레이터: NEXT — lavender ring 카드 */
   await card.getByRole("button", { name: "NEXT", exact: true }).click();

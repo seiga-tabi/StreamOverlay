@@ -16,6 +16,7 @@ export type YoroRuntimeConfig = Readonly<{
     riotRso: boolean;
     valorantPublic: boolean;
     twitchEventSub: boolean;
+    twitchExtension: boolean;
   }>;
   database?: Readonly<{
     poolMax?: number;
@@ -38,6 +39,7 @@ export type YoroRuntimeConfig = Readonly<{
     botUserId?: string;
     chatSenderId?: string;
     chatMode?: "broadcaster" | "bot";
+    extensionClientId?: string;
   }>;
   riot?: Readonly<{
     accountRegion?: string;
@@ -196,7 +198,8 @@ export function parseYoroRuntimeConfig(value: unknown): YoroRuntimeConfig {
     "valorantPublic",
     // schema v1 운영 파일의 하위 호환을 위해 읽기만 허용하고 기능에는 반영하지 않습니다.
     "agentIngestion",
-    "twitchEventSub"
+    "twitchEventSub",
+    "twitchExtension"
   ], "runtime_features");
   if (features.agentIngestion !== undefined) {
     bool(features.agentIngestion, "runtime_features_agent_ingestion");
@@ -221,7 +224,10 @@ export function parseYoroRuntimeConfig(value: unknown): YoroRuntimeConfig {
     valorantPublic: features.valorantPublic === undefined
       ? false
       : bool(features.valorantPublic, "runtime_features_valorant_public"),
-    twitchEventSub: bool(features.twitchEventSub, "runtime_features_twitch_eventsub")
+    twitchEventSub: bool(features.twitchEventSub, "runtime_features_twitch_eventsub"),
+    twitchExtension: features.twitchExtension === undefined
+      ? false
+      : bool(features.twitchExtension, "runtime_features_twitch_extension")
   };
 
   let database: YoroRuntimeConfig["database"];
@@ -293,7 +299,8 @@ export function parseYoroRuntimeConfig(value: unknown): YoroRuntimeConfig {
       "broadcasterId",
       "botUserId",
       "chatSenderId",
-      "chatMode"
+      "chatMode",
+      "extensionClientId"
     ], "runtime_twitch");
     const subscriptions = item.eventSubSubscriptions;
     if (
@@ -352,7 +359,16 @@ export function parseYoroRuntimeConfig(value: unknown): YoroRuntimeConfig {
       ...(item.chatSenderId !== undefined
         ? { chatSenderId: text(item.chatSenderId, "runtime_twitch_chat_sender_id", 32) }
         : {}),
-      ...(chatMode ? { chatMode: chatMode as "broadcaster" | "bot" } : {})
+      ...(chatMode ? { chatMode: chatMode as "broadcaster" | "bot" } : {}),
+      ...(item.extensionClientId !== undefined
+        ? {
+            extensionClientId: text(
+              item.extensionClientId,
+              "runtime_twitch_extension_client_id",
+              128
+            )
+          }
+        : {})
     };
   }
 
@@ -474,6 +490,16 @@ export function parseYoroRuntimeConfig(value: unknown): YoroRuntimeConfig {
   }
   if (featureConfig.twitchEventSub && !twitch) {
     throw new YoroRuntimeConfigError("runtime_twitch_required");
+  }
+  if (
+    featureConfig.twitchExtension
+    && (
+      !featureConfig.database
+      || !twitch?.extensionClientId
+      || !/^[A-Za-z0-9]{8,128}$/u.test(twitch.extensionClientId)
+    )
+  ) {
+    throw new YoroRuntimeConfigError("runtime_twitch_extension_dependency");
   }
   if (
     featureConfig.riotRso

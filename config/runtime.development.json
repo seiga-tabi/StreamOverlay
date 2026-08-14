@@ -13,7 +13,8 @@
     "discordParticipationAnnounce": false,
     "riotRso": false,
     "valorantPublic": false,
-    "twitchEventSub": false
+    "twitchEventSub": false,
+    "twitchExtension": false
   },
   "database": {
     "poolMax": 10,

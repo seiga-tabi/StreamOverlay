@@ -73,6 +73,8 @@ import { GameServerStatusReadRepository } from "./database/repositories/game-ser
 import { GameServerStatusReadService } from "./services/game-server-status-read-service.js";
 import { DiscordBotCommandPolicyService } from "./services/discord-bot-command-policy-service.js";
 import { AdminAuditLogRepository } from "./database/repositories/admin-audit-log-repository.js";
+import { TwitchExtensionSettingsRepository } from "./database/repositories/twitch-extension-settings-repository.js";
+import { TwitchExtensionJwtVerifier } from "./security/twitch-extension-jwt.js";
 import {
   MinecraftCatalogService,
   MinecraftCatalogUnavailableError
@@ -127,8 +129,17 @@ databaseHealth.start();
 const discordOnboarding = appConfig.discordSaas.enabled && postgresPool
   ? new DiscordOnboardingService(postgresPool, logger)
   : undefined;
-const yoroAccounts = appConfig.discordBotManagement.enabled && postgresPool
+const yoroAccounts = (
+  appConfig.discordBotManagement.enabled
+  || appConfig.twitchExtension.enabled
+) && postgresPool
   ? new YoroAccountService(postgresPool, logger)
+  : undefined;
+const twitchExtensionSettings = postgresPool
+  ? new TwitchExtensionSettingsRepository(postgresPool)
+  : undefined;
+const twitchExtensionJwt = appConfig.twitchExtension.enabled
+  ? new TwitchExtensionJwtVerifier(appConfig.twitchExtension.sharedSecret)
   : undefined;
 const discordManagement = appConfig.discordBotManagement.enabled && postgresPool
   ? new DiscordManagementService(postgresPool, logger, fetch, yoroAccounts)
@@ -648,6 +659,8 @@ const server = http.createServer(createHttpHandler({
   discordOnboarding,
   discordManagement,
   yoroAccounts,
+  twitchExtensionSettings,
+  twitchExtensionJwt,
   discordDatabaseReady: () => databaseHealth.snapshot().ready,
   discordInternalAuth,
   gameServerStatusRead,

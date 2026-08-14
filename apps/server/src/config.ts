@@ -224,6 +224,8 @@ const valorantProductionApproved = configuredRuntime?.riot?.valorantProductionAp
   ?? boolEnv("VALORANT_PRODUCTION_APPROVED", false);
 const twitchEventSubEnabled = configuredRuntime?.features.twitchEventSub
   ?? boolEnv("TWITCH_ENABLE_EVENTSUB", false);
+const twitchExtensionEnabled = configuredRuntime?.features.twitchExtension
+  ?? boolEnv("TWITCH_EXTENSION_ENABLED", false);
 const twitchClientSecret = twitchEventSubEnabled
   ? configuredRuntime
     ? loadFixedSecret(YORO_SECRET_FILES.twitchClientSecret, { required: true })
@@ -240,6 +242,16 @@ const twitchTokenEncryptionKey = configuredRuntime
       })
     : ""
   : envOrFile("TWITCH_TOKEN_ENCRYPTION_KEY");
+const twitchExtensionSecret = twitchExtensionEnabled
+  ? configuredRuntime
+    ? loadFixedSecret(YORO_SECRET_FILES.twitchExtensionSecret, { required: true })
+    : secretEnvOrFile("TWITCH_EXTENSION_SECRET")
+  : "";
+const twitchExtensionClientId = configuredRuntime?.twitch?.extensionClientId
+  ?? env("TWITCH_EXTENSION_CLIENT_ID").trim();
+const twitchExtensionOrigin = /^[A-Za-z0-9]{8,128}$/u.test(twitchExtensionClientId)
+  ? `https://${twitchExtensionClientId.toLowerCase()}.ext-twitch.tv`
+  : "";
 const riotApiKey = configuredRuntime?.riot
   ? loadFixedSecret(YORO_SECRET_FILES.riotApiKey)
   : configuredRuntime ? "" : envOrFile("RIOT_API_KEY");
@@ -317,6 +329,12 @@ export const appConfig = {
     apiTimeoutMs: configuredRuntime
       ? DEFAULTS.twitch.apiTimeoutMs
       : Math.max(1_000, intEnv("TWITCH_API_TIMEOUT_MS", DEFAULTS.twitch.apiTimeoutMs))
+  },
+  twitchExtension: {
+    enabled: twitchExtensionEnabled,
+    clientId: twitchExtensionClientId,
+    sharedSecret: twitchExtensionSecret,
+    origin: twitchExtensionOrigin
   },
   database: {
     enabled: databaseEnabled,
@@ -507,7 +525,8 @@ export const appConfig = {
     corsOrigins: configuredRuntime
       ? Array.from(new Set([
           configuredRuntime.public.baseUrl,
-          configuredRuntime.public.dashboardOrigin
+          configuredRuntime.public.dashboardOrigin,
+          twitchExtensionEnabled ? twitchExtensionOrigin : ""
         ].filter((value): value is string => Boolean(value))))
       : listEnv("CORS_ORIGINS", "http://localhost:3000 http://localhost:5173"),
     dashboardAuthToken,
@@ -853,6 +872,48 @@ function validateRiotRsoConfig(errors: string[]): void {
   }
 }
 
+function validateTwitchExtensionConfig(errors: string[]): void {
+  const config = appConfig.twitchExtension;
+  if (!config.enabled) return;
+  if (!appConfig.database.enabled) {
+    errors.push("Twitch Extension에는 Database 활성화가 필요합니다.");
+  }
+  if (!/^[A-Za-z0-9]{8,128}$/u.test(config.clientId) || !config.origin) {
+    errors.push("TWITCH_EXTENSION_CLIENT_ID가 올바르지 않습니다.");
+  }
+  if (
+    isProduction()
+    && legacyEnvironmentMode
+    && process.env.TWITCH_EXTENSION_SECRET
+    && !process.env.TWITCH_EXTENSION_SECRET_FILE
+  ) {
+    errors.push("production에서는 TWITCH_EXTENSION_SECRET_FILE을 사용해야 합니다.");
+  }
+  try {
+    const decoded = Buffer.from(config.sharedSecret, "base64");
+    if (
+      decoded.length < 32
+      || decoded.length > 512
+      || decoded.toString("base64").replace(/=+$/u, "")
+        !== config.sharedSecret.trim().replace(/=+$/u, "")
+    ) {
+      errors.push("TWITCH_EXTENSION_SECRET은 Twitch가 발급한 강한 base64 shared secret이어야 합니다.");
+    }
+  } catch {
+    errors.push("TWITCH_EXTENSION_SECRET은 Twitch가 발급한 강한 base64 shared secret이어야 합니다.");
+  }
+  for (const other of [
+    appConfig.twitch.clientSecret,
+    appConfig.twitch.tokenEncryptionKey,
+    appConfig.security.dashboardAuthToken
+  ]) {
+    if (other && config.sharedSecret && secretsEqual(config.sharedSecret, other)) {
+      errors.push("Twitch Extension shared secret은 다른 Twitch·Dashboard credential과 재사용할 수 없습니다.");
+      break;
+    }
+  }
+}
+
 function validateValorantConfig(errors: string[]): void {
   const config = appConfig.riot;
   if (!config.valorantProductionApproved) return;
@@ -1020,6 +1081,7 @@ export function validateRuntimeConfig(): RuntimeConfigValidationResult {
   validateDiscordBotInternalConfig(errors);
   validateDiscordBotManagementConfig(errors);
   validateDiscordParticipationAnnounceConfig(errors);
+  validateTwitchExtensionConfig(errors);
   validateRiotRsoConfig(errors);
   validateValorantConfig(errors);
   if (isProduction()) {
@@ -1030,6 +1092,9 @@ export function validateRuntimeConfig(): RuntimeConfigValidationResult {
     const secrets: Array<[string, string]> = [
       ["DASHBOARD_AUTH_TOKEN", appConfig.security.dashboardAuthToken],
       ["TWITCH_TOKEN_ENCRYPTION_KEY", appConfig.twitch.tokenEncryptionKey],
+      ...(appConfig.twitchExtension.enabled
+        ? [["TWITCH_EXTENSION_SECRET", appConfig.twitchExtension.sharedSecret] as [string, string]]
+        : []),
       ...(appConfig.supportMailbox.enabled
         ? [
             ["SUPPORT_MAILBOX_WEBHOOK_SECRET", appConfig.supportMailbox.webhookSecret] as [string, string],

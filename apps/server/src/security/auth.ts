@@ -200,6 +200,13 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
   )) return "PUBLIC";
   if (method === "GET" && pathname.startsWith("/api/palworld/")) return "PUBLIC";
   if (method === "GET" && pathname.startsWith("/api/valorant/")) return "PUBLIC";
+  if (
+    (method === "GET" && pathname === "/api/twitch-extension/viewer")
+    || (method === "POST" && (
+      pathname === "/api/twitch-extension/join"
+      || pathname === "/api/twitch-extension/cancel"
+    ))
+  ) return "PUBLIC";
   if (method === "GET" && (
     pathname === "/api/lol/profile" ||
     pathname === "/api/lol/profile-state" ||

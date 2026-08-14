@@ -53,6 +53,7 @@ export const publicLolApiLimiter = new MemoryRateLimiter(60, 60_000);
 export const publicPalworldApiLimiter = new MemoryRateLimiter(60, 60_000);
 export const publicPalworldListApiLimiter = new MemoryRateLimiter(180, 60_000);
 export const publicValorantApiLimiter = new MemoryRateLimiter(120, 60_000);
+export const twitchExtensionApiLimiter = new MemoryRateLimiter(60, 60_000);
 export const oauthLimiter = new MemoryRateLimiter(20, 60_000);
 export const inboundEmailLimiter = new MemoryRateLimiter(120, 60_000);
 export const websocketLimiter = new MemoryRateLimiter(60, 60_000);
@@ -66,6 +67,7 @@ export function resetSecurityRateLimiters(): void {
   publicPalworldApiLimiter.reset();
   publicPalworldListApiLimiter.reset();
   publicValorantApiLimiter.reset();
+  twitchExtensionApiLimiter.reset();
   oauthLimiter.reset();
   inboundEmailLimiter.reset();
   websocketLimiter.reset();

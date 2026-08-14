@@ -81,12 +81,10 @@ test("Collapsed 오버레이는 한 줄 요약을 렌더한다", () => {
   assert.match(collapsed, /参加受付中 · 4人/u);
 });
 
-test("대시보드 Extension 카드는 정직한 준비 중 배지·설정·실컴포넌트 미리보기를 렌더한다", () => {
+test("대시보드 Extension 카드는 연동 확인 상태·저장 동작·실컴포넌트 미리보기를 렌더한다", () => {
   const korean = renderToStaticMarkup(<TwitchExtensionCard locale="ko" />);
-  assert.match(korean, /연동 준비 중/u);
-  assert.match(korean, /설정 저장은 준비 중/u);
-  /* 가짜 연동 상태 금지 — Connected 표기가 없어야 합니다. */
-  assert.doesNotMatch(korean, /Connected/u);
+  assert.match(korean, /연동 확인 중/u);
+  assert.match(korean, /설정 저장/u);
   assert.match(korean, /표시 항목/u);
   assert.match(korean, /Extension 숨기기/u);
   assert.match(korean, /Live Preview/u);
@@ -95,6 +93,6 @@ test("대시보드 Extension 카드는 정직한 준비 중 배지·설정·실�
   assert.match(korean, /참가 모집 중/u);
 
   const japanese = renderToStaticMarkup(<TwitchExtensionCard locale="ja" />);
-  assert.match(japanese, /連携準備中/u);
+  assert.match(japanese, /連携確認中/u);
   assert.match(japanese, /参加受付中/u);
 });

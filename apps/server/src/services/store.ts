@@ -293,6 +293,7 @@ function normalizedParticipationEntry(value: unknown): ParticipationEntry | unde
     joinedFrom: input?.joinedFrom === "public_web"
       || input?.joinedFrom === "discord_announcement"
       || input?.joinedFrom === "twitch_chat"
+      || input?.joinedFrom === "twitch_extension"
       || input?.joinedFrom === "dashboard"
       ? input.joinedFrom
       : source === "chat_command" || source === "channel_point"

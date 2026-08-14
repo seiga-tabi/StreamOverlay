@@ -3,6 +3,10 @@ import {
   formatExtensionTemplate,
   type ExtensionLocale,
 } from "./extension-i18n";
+import {
+  DEFAULT_TWITCH_EXTENSION_DISPLAY,
+  type TwitchExtensionDisplaySettings,
+} from "@streamops/shared";
 
 /* Twitch Extension Viewer UI — 순수 표시 컴포넌트.
  *
@@ -30,23 +34,9 @@ export type ExtensionViewerData = {
   myPosition?: number;
 };
 
-export type ExtensionDisplaySettings = {
-  joinButton: boolean;
-  game: boolean;
-  waitingCount: boolean;
-  myPosition: boolean;
-  cancelButton: boolean;
-  nextState: boolean;
-};
+export type ExtensionDisplaySettings = TwitchExtensionDisplaySettings;
 
-export const DEFAULT_EXTENSION_DISPLAY: ExtensionDisplaySettings = {
-  joinButton: true,
-  game: true,
-  waitingCount: true,
-  myPosition: true,
-  cancelButton: true,
-  nextState: true,
-};
+export const DEFAULT_EXTENSION_DISPLAY = DEFAULT_TWITCH_EXTENSION_DISPLAY;
 
 function GameBadge({ name }: { name: string }) {
   return (

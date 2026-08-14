@@ -9,6 +9,7 @@ Server가 사용하는 고정 파일:
 database_url
 twitch_client_secret
 twitch_token_encryption_key
+twitch_extension_secret
 riot_api_key
 riot_rso_client_secret
 discord_client_secret
@@ -75,7 +76,9 @@ persisted credential 암호화 key는 즉시 덮어쓰지 않습니다.
 → 검증 완료 후 이전 key 폐기
 ```
 
-Twitch token encryption key와 Discord OAuth encryption key는 외부의
+Twitch Extension shared secret은 일반 Twitch OAuth client secret과 분리하고,
+Twitch Developer Console에서 발급한 base64 값을 그대로 저장합니다. Twitch token
+encryption key와 Discord OAuth encryption key는 외부의
 암호화된 백업에 보관해야 합니다. key 유실 시 저장된 credential을 복호화할
 수 없습니다.
 

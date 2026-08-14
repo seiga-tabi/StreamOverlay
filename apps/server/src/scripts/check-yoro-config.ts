@@ -28,6 +28,7 @@ if (!requestedPath && !fs.existsSync(configPath)) {
     console.log(`discordBotManagement: ${enabled("DISCORD_BOT_MANAGEMENT_ENABLED") ? "enabled" : "disabled"}`);
     console.log(`discordParticipationAnnounce: ${enabled("DISCORD_PARTICIPATION_ANNOUNCE_ENABLED") ? "enabled" : "disabled"}`);
     console.log(`riotRso: ${enabled("RIOT_RSO_ENABLED") ? "enabled" : "disabled"}`);
+    console.log(`twitchExtension: ${enabled("TWITCH_EXTENSION_ENABLED") ? "enabled" : "disabled"}`);
     console.log(`valorantPublic: ${enabled("VALORANT_PUBLIC_ENABLED") ? "enabled" : "disabled"}`);
     console.log(`valorantProductionApproved: ${enabled("VALORANT_PRODUCTION_APPROVED") ? "enabled" : "disabled"}`);
     process.exit(0);
@@ -59,6 +60,12 @@ const requirements: Array<{
     path: YORO_SECRET_FILES.twitchTokenEncryptionKey,
     active: Boolean(runtime.twitch),
     required: runtime.environment === "production" && Boolean(runtime.twitch)
+  },
+  {
+    label: "twitchExtensionSecret",
+    path: YORO_SECRET_FILES.twitchExtensionSecret,
+    active: runtime.features.twitchExtension,
+    required: runtime.features.twitchExtension
   },
   {
     label: "riotApi",
@@ -112,6 +119,7 @@ if (command === "check") {
   console.log(`discordBot: ${runtime.features.discordBot ? "enabled" : "disabled"}, ${configured.get("discordInternalAuth") ? "configured" : "not configured"}`);
   console.log(`discordParticipationAnnounce: ${runtime.features.discordParticipationAnnounce ? "enabled" : "disabled"}`);
   console.log(`twitchEventSub: ${runtime.features.twitchEventSub ? "enabled" : "disabled"}, ${configured.get("twitchClientSecret") ? "configured" : "not configured"}`);
+  console.log(`twitchExtension: ${runtime.features.twitchExtension ? (configured.get("twitchExtensionSecret") ? "configured" : "not configured") : "disabled"}`);
   console.log(`riotApi: ${runtime.riot ? (configured.get("riotApi") ? "configured" : "not configured") : "disabled"}`);
   console.log(`riotRso: ${runtime.features.riotRso ? (configured.get("riotRsoClientSecret") ? "configured" : "not configured") : "disabled"}`);
   console.log(`valorantPublic: ${runtime.features.valorantPublic ? "enabled" : "disabled"}`);

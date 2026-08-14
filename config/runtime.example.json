@@ -13,7 +13,8 @@
     "discordParticipationAnnounce": false,
     "riotRso": false,
     "valorantPublic": false,
-    "twitchEventSub": true
+    "twitchEventSub": true,
+    "twitchExtension": false
   },
   "database": {
     "poolMax": 10,
@@ -30,6 +31,7 @@
     "clientId": "public-twitch-client-id",
     "redirectUri": "https://yoro.gg/api/twitch/auth/callback",
     "publicRedirectUri": "https://yoro.gg/api/public/twitch/auth/callback",
+    "extensionClientId": "publictwitchextensionclientid",
     "eventSubSubscriptions": [
       "stream.online",
       "stream.offline",

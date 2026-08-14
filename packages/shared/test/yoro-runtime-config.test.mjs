@@ -112,6 +112,25 @@ test("참여 모집 Discord 알림은 Database와 Discord 전체 기능을 요�
   );
 });
 
+test("Twitch Extension은 누락 시 비활성이고 활성화 시 DB와 공개 client ID를 요구한다", () => {
+  const omitted = validRuntime();
+  delete omitted.features.twitchExtension;
+  assert.equal(parseYoroRuntimeConfig(omitted).features.twitchExtension, false);
+
+  const missing = validRuntime();
+  missing.features.twitchExtension = true;
+  assert.throws(
+    () => parseYoroRuntimeConfig(missing),
+    (error) => error instanceof YoroRuntimeConfigError
+      && error.code === "runtime_twitch_extension_dependency"
+  );
+
+  const enabled = validRuntime();
+  enabled.features.twitchExtension = true;
+  enabled.twitch.extensionClientId = "publictwitchextensionclientid";
+  assert.equal(parseYoroRuntimeConfig(enabled).features.twitchExtension, true);
+});
+
 test("Riot RSO는 누락 시 false이고 활성화 시 Twitch·계정 기반과 callback을 요구한다", () => {
   const omitted = validRuntime();
   delete omitted.features.riotRso;

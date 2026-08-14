@@ -25,6 +25,7 @@ import {
   PARTICIPATION_GAME_CAPACITY,
   PARTICIPATION_GAMES,
   parseRiotIdDetailed,
+  parseTwitchExtensionSettingsInput,
   STREAMER_SUB_RIOT_ACCOUNT_LIMIT,
   DISCORD_ANNOUNCEMENT_MAX_JOBS,
   type DiscordAnnouncementJob,
@@ -95,7 +96,8 @@ import {
   type StreamerRiotIdRequestListResponse,
   type StreamerRiotIdVerificationSummary,
   type SupportMailAttachmentSummary,
-  type SupportMailInboundPayload
+  type SupportMailInboundPayload,
+  type TwitchExtensionSettingsResponse
 } from "@streamops/shared";
 import type { TwitchAuthService } from "../services/twitch-auth.js";
 import { TwitchFollowerLookupError, type TwitchApiClient, type TwitchStreamStatus } from "../services/twitch-api.js";
@@ -144,6 +146,12 @@ import {
 import { loadLolParticipationProfileSettings, saveLolParticipationProfileSettings, type LolParticipationProfileSettings } from "../modules/lol-profile-enrichment.module.js";
 import { buildRankHistory, inferMainRoleFromMatches, performanceStatsFromMatches } from "../services/lol-profile-enrichment.js";
 import type { JsonlLogger } from "../logging/jsonl-logger.js";
+import type { TwitchExtensionSettingsRepository } from "../database/repositories/twitch-extension-settings-repository.js";
+import {
+  TwitchExtensionJwtError,
+  type TwitchExtensionPrincipal,
+  type TwitchExtensionJwtVerifier
+} from "../security/twitch-extension-jwt.js";
 import { SafeDatabaseError } from "../database/errors.js";
 import {
   ANNOUNCEMENT_MAX_TARGETS,
@@ -181,7 +189,8 @@ import {
   publicLolApiLimiter,
   publicPalworldApiLimiter,
   publicPalworldListApiLimiter,
-  publicValorantApiLimiter
+  publicValorantApiLimiter,
+  twitchExtensionApiLimiter
 } from "../security/rate-limit.js";
 import {
   isPublicDashboardAppRoute,
@@ -1107,12 +1116,14 @@ function corsHeaders(req: IncomingMessage): Record<string, string> {
   const requestHeaders = req.headers ?? {};
   const origin = requestHeaders.origin;
   const responseHeaders: Record<string, string> = {
-    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-StreamOps-Dashboard-Token, X-StreamOps-Dashboard-Surface, X-StreamOps-Streamer-Slug, X-StreamOps-Dashboard-Key, X-StreamOps-CSRF, X-Discord-CSRF",
+    "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-StreamOps-Dashboard-Token, X-StreamOps-Dashboard-Surface, X-StreamOps-Streamer-Slug, X-StreamOps-Dashboard-Key, X-StreamOps-CSRF, X-Discord-CSRF, X-Yoro-CSRF",
     "Vary": "Origin"
   };
   if (typeof origin === "string") {
-    const allowed = appConfig.security.corsOrigins.includes(origin) || (appConfig.nodeEnv !== "production" && isDevLocalOrigin(origin));
+    const allowed = appConfig.security.corsOrigins.includes(origin)
+      || (appConfig.twitchExtension.enabled && origin === appConfig.twitchExtension.origin)
+      || (appConfig.nodeEnv !== "production" && isDevLocalOrigin(origin));
     if (allowed) {
       responseHeaders["Access-Control-Allow-Origin"] = origin;
       responseHeaders["Access-Control-Allow-Credentials"] = "true";
@@ -2309,6 +2320,8 @@ type HttpHandlerInput = {
   discordOnboarding?: DiscordOnboardingService;
   discordManagement?: DiscordManagementService;
   yoroAccounts?: YoroAccountService;
+  twitchExtensionSettings?: TwitchExtensionSettingsRepository;
+  twitchExtensionJwt?: TwitchExtensionJwtVerifier;
   discordDatabaseReady?: () => boolean;
   discordInternalAuth?: DiscordInternalAuthVerifier;
   gameServerStatusRead?: GameServerStatusReadService;
@@ -6090,6 +6103,316 @@ export function createHttpHandler(input: HttpHandlerInput) {
     };
   }
 
+  function requireTwitchExtensionPrincipal(
+    req: IncomingMessage,
+    options: Readonly<{ mutation?: boolean }> = {}
+  ): TwitchExtensionPrincipal {
+    if (
+      !appConfig.twitchExtension.enabled
+      || !input.twitchExtensionJwt
+      || !input.twitchExtensionSettings
+    ) {
+      throw new HttpRequestError(503, {
+        error: "Twitch Extension을 사용할 수 없습니다.",
+        code: "EXTENSION_UNAVAILABLE"
+      });
+    }
+    try {
+      const principal = input.twitchExtensionJwt.verifyRequest(req);
+      if (options.mutation && (principal.role !== "viewer" || !principal.userId)) {
+        throw new HttpRequestError(403, {
+          error: "Twitch에서 신원을 공유한 시청자만 이 작업을 할 수 있습니다.",
+          code: "IDENTITY_REQUIRED"
+        });
+      }
+      return principal;
+    } catch (error) {
+      if (error instanceof HttpRequestError) throw error;
+      if (error instanceof TwitchExtensionJwtError) {
+        throw new HttpRequestError(401, {
+          error: error.code === "expired"
+            ? "Twitch Extension 인증이 만료되었습니다."
+            : "Twitch Extension 인증이 올바르지 않습니다.",
+          code: error.code === "expired" ? "TOKEN_EXPIRED" : "INVALID_TOKEN"
+        });
+      }
+      throw error;
+    }
+  }
+
+  async function twitchExtensionSettingsFor(
+    streamerTwitchUserId: string
+  ): Promise<TwitchExtensionSettingsResponse> {
+    if (!input.twitchExtensionSettings) {
+      throw new HttpRequestError(503, {
+        error: "Twitch Extension 설정을 사용할 수 없습니다.",
+        code: "EXTENSION_UNAVAILABLE"
+      });
+    }
+    return input.twitchExtensionSettings.readForStreamer({
+      streamerTwitchUserId,
+      connectionState: appConfig.twitchExtension.enabled
+        ? "connected"
+        : "configuration_required"
+    });
+  }
+
+  async function twitchExtensionViewerResponse(
+    principal: TwitchExtensionPrincipal
+  ): Promise<{
+    identityLinked: boolean;
+    settings: TwitchExtensionSettingsResponse;
+    viewer: {
+      status: "no_session" | "active" | "joined" | "next" | "paused" | "full" | "ended";
+      game?: string;
+      waitingCount?: number;
+      myPosition?: number;
+    };
+  }> {
+    const settings = await twitchExtensionSettingsFor(principal.channelId);
+    const session = input.store.getParticipationSession(principal.channelId);
+    if (!session) {
+      return {
+        identityLinked: Boolean(principal.userId),
+        settings,
+        viewer: { status: "no_session" }
+      };
+    }
+    const state = input.store.getParticipationState(principal.channelId);
+    const activeEntries = input.store.getActiveParticipationQueue(principal.channelId);
+    const viewerIndex = principal.userId
+      ? activeEntries.findIndex((entry) => entry.twitchUserId === principal.userId)
+      : -1;
+    const viewerEntry = viewerIndex >= 0 ? activeEntries[viewerIndex] : undefined;
+    const maxQueueSize = session.maxQueueSize ?? PUBLIC_PARTICIPATION_MAX_QUEUE_SIZE;
+    const status = session.status === "completed"
+      ? "ended" as const
+      : !state.isOpen || session.status === "closed"
+        ? "paused" as const
+        : viewerEntry && ["selected", "checked_in", "invited", "in_game"].includes(viewerEntry.status)
+          ? "next" as const
+          : viewerEntry
+            ? "joined" as const
+            : activeEntries.length >= maxQueueSize
+              ? "full" as const
+              : "active" as const;
+    return {
+      identityLinked: Boolean(principal.userId),
+      settings,
+      viewer: {
+        status,
+        game: session.game === "palworld" ? "Palworld" : "League of Legends",
+        waitingCount: activeEntries.length,
+        ...(viewerIndex >= 0 ? { myPosition: viewerIndex + 1 } : {})
+      }
+    };
+  }
+
+  async function joinTwitchExtensionParticipation(
+    req: IncomingMessage,
+    principal: TwitchExtensionPrincipal
+  ): Promise<{
+    ok: true;
+    alreadyJoined: boolean;
+    viewer: Awaited<ReturnType<typeof twitchExtensionViewerResponse>>;
+  }> {
+    const twitchUserId = principal.userId!;
+    const body = strictJsonObject(
+      await readJsonBody<unknown>(req),
+      ["riotId", "role", "palworldNickname"]
+    );
+    const session = input.store.getParticipationSession(principal.channelId);
+    const state = input.store.getParticipationState(principal.channelId);
+    if (
+      !session
+      || !["recruiting", "in_game"].includes(session.status)
+      || !state.isOpen
+    ) {
+      throw new HttpRequestError(409, {
+        error: "현재 시청자 참여 대기열이 닫혀 있습니다.",
+        code: "SESSION_CLOSED"
+      });
+    }
+
+    const previousViewerEntry = input.store.getParticipationQueue(principal.channelId)
+      .filter((entry) => entry.twitchUserId === twitchUserId)
+      .sort((left, right) => Date.parse(right.updatedAt) - Date.parse(left.updatedAt))[0];
+    if (
+      ["played", "skipped"].includes(previousViewerEntry?.status ?? "")
+      && session.allowRejoin === false
+    ) {
+      throw new HttpRequestError(409, {
+        error: "이 참여 세션은 재참여를 허용하지 않습니다.",
+        code: "REJOIN_NOT_ALLOWED"
+      });
+    }
+
+    const duplicateLookup = { twitchUserId };
+    if (input.store.findParticipationDuplicate(duplicateLookup, principal.channelId)) {
+      return {
+        ok: true,
+        alreadyJoined: true,
+        viewer: await twitchExtensionViewerResponse(principal)
+      };
+    }
+    const maxQueueSize = session.maxQueueSize ?? PUBLIC_PARTICIPATION_MAX_QUEUE_SIZE;
+    if (input.store.getActiveParticipationCount(principal.channelId) >= maxQueueSize) {
+      throw new HttpRequestError(409, {
+        error: "참여 대기열이 가득 찼습니다.",
+        code: "QUEUE_FULL"
+      });
+    }
+
+    let parsedRiotId: { gameName: string; tagLine: string } | undefined;
+    let role: LolRole = "fill";
+    let palworldNickname = "";
+    if (session.game === "palworld") {
+      palworldNickname = typeof body.palworldNickname === "string"
+        ? body.palworldNickname.trim()
+        : previousViewerEntry?.game === "palworld"
+          ? previousViewerEntry.palworldNickname ?? ""
+          : "";
+      if (!palworldNickname || palworldNickname.length > 32) {
+        throw new HttpRequestError(400, {
+          error: "Palworld 닉네임은 1자 이상 32자 이하여야 합니다.",
+          code: "PROFILE_REQUIRED"
+        });
+      }
+    } else {
+      const riotId = typeof body.riotId === "string"
+        ? body.riotId
+        : previousViewerEntry?.riotGameName && previousViewerEntry.riotTagLine
+          ? formatRiotId(previousViewerEntry.riotGameName, previousViewerEntry.riotTagLine)
+          : "";
+      const parsed = parseRiotIdDetailed(riotId);
+      if (!parsed.ok) {
+        throw new HttpRequestError(400, {
+          error: "Riot ID가 필요합니다. YORO.gg 참가 페이지에서 먼저 프로필을 등록해주세요.",
+          code: "PROFILE_REQUIRED"
+        });
+      }
+      parsedRiotId = { gameName: parsed.gameName, tagLine: parsed.tagLine };
+      const normalizedRole = normalizeLolRole(
+        typeof body.role === "string" ? body.role : previousViewerEntry?.preferredRole
+      );
+      role = normalizedRole === "unknown" ? "fill" : normalizedRole;
+    }
+
+    const twitchProfile = await input.twitch?.getUserProfile(twitchUserId).catch(() => undefined);
+    const twitchUserName = twitchProfile?.displayName
+      || twitchProfile?.login
+      || previousViewerEntry?.twitchUserName
+      || "Twitch 시청자";
+    const previousProfile = parsedRiotId
+      ? input.store.findReusableParticipationProfile({
+          riotGameName: parsedRiotId.gameName,
+          riotTagLine: parsedRiotId.tagLine
+        }, principal.channelId)
+      : undefined;
+    const profileReady = previousProfile?.profileStatus === "ready"
+      || Boolean(previousProfile?.rankedStats);
+    const entry = input.store.makeParticipationEntry(session.game === "palworld" ? {
+      twitchUserId,
+      twitchUserName,
+      game: "palworld",
+      palworldNickname,
+      status: "waitlisted",
+      source: "dashboard",
+      joinedFrom: "twitch_extension"
+    } : {
+      twitchUserId,
+      twitchUserName,
+      game: "lol",
+      riotGameName: parsedRiotId!.gameName,
+      riotTagLine: parsedRiotId!.tagLine,
+      ...(previousProfile?.riotPuuid ? { riotPuuid: previousProfile.riotPuuid } : {}),
+      requestedRole: role,
+      preferredRole: role,
+      ...(previousProfile?.rankedStats ? { rankedStats: previousProfile.rankedStats } : {}),
+      profileStatus: previousProfile?.profileStatus ?? "pending",
+      ...(previousProfile?.mainRole ? { mainRole: previousProfile.mainRole } : {}),
+      ...(typeof previousProfile?.mainRoleConfidence === "number"
+        ? { mainRoleConfidence: previousProfile.mainRoleConfidence }
+        : {}),
+      ...(previousProfile?.topChampions?.length
+        ? { topChampions: previousProfile.topChampions.map((champion) => ({ ...champion })) }
+        : {}),
+      status: profileReady ? "verified" : "waitlisted",
+      source: "dashboard",
+      joinedFrom: "twitch_extension"
+    });
+
+    const latestSession = input.store.getParticipationSession(principal.channelId);
+    if (
+      !latestSession
+      || !["recruiting", "in_game"].includes(latestSession.status)
+      || !input.store.getParticipationState(principal.channelId).isOpen
+    ) {
+      throw new HttpRequestError(409, {
+        error: "현재 시청자 참여 대기열이 닫혀 있습니다.",
+        code: "SESSION_CLOSED"
+      });
+    }
+    if (input.store.findParticipationDuplicate(duplicateLookup, principal.channelId)) {
+      return {
+        ok: true,
+        alreadyJoined: true,
+        viewer: await twitchExtensionViewerResponse(principal)
+      };
+    }
+    if (
+      input.store.getActiveParticipationCount(principal.channelId)
+      >= (latestSession.maxQueueSize ?? PUBLIC_PARTICIPATION_MAX_QUEUE_SIZE)
+    ) {
+      throw new HttpRequestError(409, {
+        error: "참여 대기열이 가득 찼습니다.",
+        code: "QUEUE_FULL"
+      });
+    }
+    const saved = input.store.reactivateReusableParticipation(entry, principal.channelId);
+    await broadcastParticipationQueue(
+      { store: input.store, actions: input.actions },
+      "twitch.extension_participation_join",
+      principal.channelId
+    ).catch(() => undefined);
+    if (session.game === "lol" && input.refreshLolProfile && saved.entry.profileStatus !== "ready") {
+      void input.refreshLolProfile(saved.entry.id, principal.channelId).catch(() => undefined);
+    }
+    return {
+      ok: true,
+      alreadyJoined: false,
+      viewer: await twitchExtensionViewerResponse(principal)
+    };
+  }
+
+  async function cancelTwitchExtensionParticipation(
+    req: IncomingMessage,
+    principal: TwitchExtensionPrincipal
+  ): Promise<{
+    ok: true;
+    viewer: Awaited<ReturnType<typeof twitchExtensionViewerResponse>>;
+  }> {
+    strictJsonObject(await readJsonBody<unknown>(req), []);
+    const result = participationRepository.cancel(principal.userId!, principal.channelId);
+    if (!result.ok) {
+      throw new HttpRequestError(result.reason === "in_game" ? 409 : 404, {
+        error: result.reason === "in_game"
+          ? "이미 게임 진행 상태라 참여 취소를 할 수 없습니다."
+          : "취소할 참여 신청을 찾지 못했습니다.",
+        code: result.reason === "in_game" ? "CANCEL_NOT_AVAILABLE" : "PARTICIPATION_NOT_FOUND"
+      });
+    }
+    await broadcastParticipationQueue(
+      { store: input.store, actions: input.actions },
+      "twitch.extension_participation_cancel",
+      principal.channelId
+    ).catch(() => undefined);
+    return {
+      ok: true,
+      viewer: await twitchExtensionViewerResponse(principal)
+    };
+  }
+
   async function checkInPublicParticipation(req: IncomingMessage, publicSessionId: string): Promise<PublicParticipationStateResponse> {
     const status = await getPublicTwitchViewerStatus(req);
     if (!status.connected || !status.user) {
@@ -7864,6 +8187,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
               ? publicPalworldApiLimiter
           : url.pathname.startsWith("/api/valorant/")
               ? publicValorantApiLimiter
+          : url.pathname.startsWith("/api/twitch-extension/")
+              ? twitchExtensionApiLimiter
           : url.pathname.startsWith("/api/lol/") || url.pathname.startsWith("/api/public/twitch/") || url.pathname.startsWith("/api/public/aram/") || url.pathname.startsWith("/api/public/patch-notes") || url.pathname.startsWith("/api/public/participation/") || url.pathname === "/api/public/locale"
               ? publicLolApiLimiter
               : dashboardApiLimiter;
@@ -8635,6 +8960,53 @@ export function createHttpHandler(input: HttpHandlerInput) {
             } catch (error) {
               return sendJson(req, res, ...announcementFailure(error));
             }
+          }
+          return sendJson(req, res, 405, { error: "method not allowed" });
+        }
+        if (url.pathname === "/api/account/streamer/twitch-extension") {
+          if (url.search) {
+            return sendJson(req, res, 400, {
+              error: "query는 허용되지 않습니다.",
+              code: "invalid_request"
+            });
+          }
+          if (!input.twitchExtensionSettings) {
+            return sendJson(req, res, 503, {
+              error: "Twitch Extension 설정 저장소를 사용할 수 없습니다.",
+              code: "feature_unavailable"
+            }, noStoreHeaders());
+          }
+          if (req.method === "GET") {
+            const context = await yoroStreamerContext(req);
+            const { twitch } = requireApprovedYoroStreamer(context);
+            return sendJson(req, res, 200, await input.twitchExtensionSettings.readForOwner({
+              userId: context.userId,
+              streamerTwitchUserId: twitch.userId,
+              connectionState: appConfig.twitchExtension.enabled
+                ? "connected"
+                : "configuration_required"
+            }), noStoreHeaders());
+          }
+          if (req.method === "PUT") {
+            const context = await yoroStreamerContext(req, true);
+            const { twitch } = requireApprovedYoroStreamer(context);
+            const settings = parseTwitchExtensionSettingsInput(
+              await readJsonBody<unknown>(req, 8 * 1_024)
+            );
+            if (!settings) {
+              return sendJson(req, res, 400, {
+                error: "Twitch Extension 설정 형식이 올바르지 않습니다.",
+                code: "invalid_request"
+              }, noStoreHeaders());
+            }
+            return sendJson(req, res, 200, await input.twitchExtensionSettings.replace({
+              userId: context.userId,
+              streamerTwitchUserId: twitch.userId,
+              settings,
+              connectionState: appConfig.twitchExtension.enabled
+                ? "connected"
+                : "configuration_required"
+            }), noStoreHeaders());
           }
           return sendJson(req, res, 405, { error: "method not allowed" });
         }
@@ -10153,6 +10525,63 @@ export function createHttpHandler(input: HttpHandlerInput) {
       }
       if (req.method === "GET" && url.pathname === "/api/public/participation/state") {
         return sendJson(req, res, 200, await getPublicParticipationState(req));
+      }
+      if (url.pathname === "/api/twitch-extension/viewer") {
+        if (url.search) {
+          return sendJson(req, res, 400, {
+            error: "query는 허용되지 않습니다.",
+            code: "INVALID_REQUEST"
+          });
+        }
+        if (req.method !== "GET") {
+          return sendJson(req, res, 405, { error: "method not allowed" });
+        }
+        const principal = requireTwitchExtensionPrincipal(req);
+        return sendJson(
+          req,
+          res,
+          200,
+          await twitchExtensionViewerResponse(principal),
+          noStoreHeaders()
+        );
+      }
+      if (url.pathname === "/api/twitch-extension/join") {
+        if (url.search) {
+          return sendJson(req, res, 400, {
+            error: "query는 허용되지 않습니다.",
+            code: "INVALID_REQUEST"
+          });
+        }
+        if (req.method !== "POST") {
+          return sendJson(req, res, 405, { error: "method not allowed" });
+        }
+        const principal = requireTwitchExtensionPrincipal(req, { mutation: true });
+        return sendJson(
+          req,
+          res,
+          200,
+          await joinTwitchExtensionParticipation(req, principal),
+          noStoreHeaders()
+        );
+      }
+      if (url.pathname === "/api/twitch-extension/cancel") {
+        if (url.search) {
+          return sendJson(req, res, 400, {
+            error: "query는 허용되지 않습니다.",
+            code: "INVALID_REQUEST"
+          });
+        }
+        if (req.method !== "POST") {
+          return sendJson(req, res, 405, { error: "method not allowed" });
+        }
+        const principal = requireTwitchExtensionPrincipal(req, { mutation: true });
+        return sendJson(
+          req,
+          res,
+          200,
+          await cancelTwitchExtensionParticipation(req, principal),
+          noStoreHeaders()
+        );
       }
       if (req.method === "GET" && url.pathname === "/api/public/participation/discovery") {
         if ((url.searchParams.get("scope") ?? "followed") !== "followed") {

@@ -168,6 +168,14 @@
       "checksumSha256": "ab3182499c962361e2ccd56e4e3dcf5589997bd1afbfbdd9f50a62ad4e25ef05",
       "destructive": false,
       "transaction": true
+    },
+    {
+      "id": "0022_twitch_extension_settings",
+      "file": "0022_twitch_extension_settings.sql",
+      "description": "스트리머별 Twitch Extension 표시 설정과 revision 저장",
+      "checksumSha256": "d67a03f6e4ecc8c5f1a46aa29cb5a52366e87afee37279f10dfd93ebee638af1",
+      "destructive": false,
+      "transaction": true
     }
   ]
 }
