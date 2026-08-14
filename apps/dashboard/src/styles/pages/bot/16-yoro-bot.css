@@ -2754,3 +2754,46 @@
     width: 100%;
   }
 }
+
+/* FAQ — 자체 작성 콘텐츠 블록(AdSense 대비). 빈 컨테이너를 만들지 않는다. */
+.public-bot-faq {
+  margin-top: var(--yoro-space-6);
+}
+
+.public-bot-faq > h2 {
+  margin: 0 0 var(--yoro-space-3);
+  font-size: var(--yoro-font-size-lg);
+}
+
+.public-bot-faq__item {
+  border-top: thin solid var(--yoro-color-product-gray-border);
+  padding-block: var(--yoro-space-2);
+}
+
+.public-bot-faq__item > summary {
+  min-height: var(--yoro-size-touch-target);
+  display: flex;
+  align-items: center;
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-bold);
+  cursor: pointer;
+}
+
+.public-bot-faq__item > summary:focus-visible {
+  outline: none;
+  box-shadow: var(--yoro-shadow-focus);
+  border-radius: var(--yoro-radius-sm);
+}
+
+.public-bot-faq__item > p {
+  margin: var(--yoro-space-1) 0 var(--yoro-space-2);
+  color: var(--yoro-color-product-gray-muted);
+  font-size: var(--yoro-font-size-sm);
+  max-width: 80ch;
+}
+
+.public-bot-faq__note {
+  margin: var(--yoro-space-4) 0 0;
+  color: var(--yoro-color-product-gray-muted);
+  font-size: var(--yoro-font-size-xs);
+}

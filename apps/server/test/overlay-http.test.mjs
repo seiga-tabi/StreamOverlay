@@ -285,6 +285,14 @@ test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => 
     assert.match(legalRes.body, /<title>개인정보 처리방침 \| YORO\.gg<\/title>/);
     assert.match(legalRes.body, /<link rel="canonical" href="https:\/\/yoro\.gg\/ko\/privacy">/);
 
+    for (const pathname of ["/login", "/follow", "/participation", "/contact", "/palworld/search", "/valorant/agents"]) {
+      const noindexRes = createResponse();
+      await handler(createRequest("GET", pathname), noindexRes);
+      assert.equal(noindexRes.statusCode, 200, pathname);
+      assert.equal(noindexRes.headers["X-Robots-Tag"], "noindex, nofollow", pathname);
+      assert.match(noindexRes.body, /<meta name="robots" content="noindex" \/>/, pathname);
+    }
+
     const japanesePalworldRes = createResponse();
     await handler(createRequest("GET", "/ja/palworld/pals"), japanesePalworldRes);
     assert.equal(japanesePalworldRes.statusCode, 200);

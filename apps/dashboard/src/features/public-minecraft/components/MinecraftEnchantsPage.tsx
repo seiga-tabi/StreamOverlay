@@ -5,7 +5,7 @@ import { minecraftI18n, type MinecraftLocale } from "../i18n/minecraft-i18n";
 import { useMinecraftCatalog } from "../hooks/useMinecraftCatalog";
 import { useMinecraftRoute } from "../hooks/useMinecraftRoute";
 import { minecraftSearchQueryFromUrl, setMinecraftSearchUrl } from "../utils/routes";
-import { minecraftNameFromId, resolveMinecraftName } from "../utils/names";
+import { minecraftEnchantCategoryLabel, minecraftNameFromId, resolveMinecraftName } from "../utils/names";
 import { formatMinecraftTemplate, MinecraftCatalogShell, MinecraftName } from "./MinecraftCatalogShell";
 import { MinecraftItemImage } from "./MinecraftItemImage";
 
@@ -16,6 +16,7 @@ function EnchantCard({ enchant, locale, namesById }: {
 }) {
   const text = minecraftI18n[locale];
   const name = resolveMinecraftName(enchant.name, locale);
+  const categoryLabel = minecraftEnchantCategoryLabel(enchant.categoryId, locale);
   const incompatibleNames = enchant.incompatibleIds.map((id) => {
     const known = namesById.get(id);
     return known ? resolveMinecraftName(known, locale).text : minecraftNameFromId(id);
@@ -30,23 +31,22 @@ function EnchantCard({ enchant, locale, namesById }: {
         </span>
       </h2>
       <div className="minecraft-enchant-card__chips">
-        {enchant.curse ? <span className="minecraft-chip is-warning">{text.enchantCurse}</span> : null}
-        {enchant.treasureOnly ? <span className="minecraft-chip">{text.enchantTreasure}</span> : null}
+        {categoryLabel
+          ? <span className="minecraft-chip is-category">{categoryLabel}</span>
+          : <span className="minecraft-chip is-category"><code>{enchant.categoryId}</code></span>}
         {enchant.discoverable ? <span className="minecraft-chip">{text.enchantFromTable}</span> : null}
         {enchant.tradeable
           ? <span className="minecraft-chip">{text.enchantFromTrade}</span>
           : <span className="minecraft-chip">{text.enchantNotTradeable}</span>}
+        {enchant.treasureOnly ? <span className="minecraft-chip">{text.enchantTreasure}</span> : null}
+        {enchant.curse ? <span className="minecraft-chip is-warning">{text.enchantCurse}</span> : null}
       </div>
-      <dl className="minecraft-recipe-card__facts">
-        <dt>{text.enchantCategory}</dt>
-        <dd><code>{enchant.categoryId}</code></dd>
-        {incompatibleNames.length > 0 ? (
-          <>
-            <dt>{text.enchantIncompatibleLabel}</dt>
-            <dd>{incompatibleNames.join(" · ")}</dd>
-          </>
-        ) : null}
-      </dl>
+      {incompatibleNames.length > 0 ? (
+        <dl className="minecraft-recipe-card__facts">
+          <dt>{text.enchantIncompatibleLabel}</dt>
+          <dd>{incompatibleNames.join(" · ")}</dd>
+        </dl>
+      ) : null}
     </article>
   );
 }

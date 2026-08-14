@@ -20,6 +20,26 @@ export const PUBLIC_SEO_LOCALES: readonly PublicUrlLocale[] = ["ko", "ja"];
 
 const DEFAULT_SOCIAL_IMAGE = `${PUBLIC_SEO_ORIGIN}/images/yorogg-og.png`;
 
+/** 검색 색인보다 로그인·행동·법적 고지 또는 개발 상태 전달이 중심인 화면입니다. */
+const PUBLIC_SEO_NOINDEX_PATHS = new Set([
+  "/login",
+  "/account",
+  "/account/connections",
+  "/follow",
+  "/participation",
+  "/privacy",
+  "/terms",
+  "/contact",
+  "/palworld/search",
+  "/valorant",
+  "/valorant/agents",
+  "/valorant/weapons",
+  "/valorant/maps",
+  "/valorant/ranked",
+  "/minecraft/library",
+  "/minecraft/patch-notes"
+]);
+
 /** JSON-LD script는 CSP nonce가 필요하므로 정적 HTML과 같은 placeholder를 사용합니다. */
 const CSP_NONCE_PLACEHOLDER = "__STREAMOPS_CSP_NONCE__";
 
@@ -738,8 +758,7 @@ export function publicSeoMetadataForPath(pathname: string): PublicSeoMetadata {
   const content = contentForPath(normalizedPath, locale);
   const canonicalUrl = localizedPublicSeoUrl(normalizedPath, locale);
   const structuredData: unknown[] = [websiteStructuredData(locale)];
-  const robotsNoindex = normalizedPath === "/minecraft/library"
-    || normalizedPath === "/minecraft/patch-notes";
+  const robotsNoindex = PUBLIC_SEO_NOINDEX_PATHS.has(normalizedPath);
   if (normalizedPath !== "/") structuredData.push(breadcrumbStructuredData(normalizedPath, locale));
   if (normalizedPath === "/") {
     structuredData.push({ "@context": "https://schema.org", ...(organizationStructuredData() as object) });

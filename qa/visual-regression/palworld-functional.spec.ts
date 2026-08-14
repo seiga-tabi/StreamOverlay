@@ -1511,6 +1511,13 @@ test.beforeEach(async ({ page }) => {
       body: "window.__STREAMOPS_CONFIG__ = { apiBase: window.location.origin };",
     });
   });
+  /* 앱 전역 gtag.js 는 consent denied 로도 드물게 샘플링 진단 beacon(googletagmanager.com/a)을
+     이미지 요청으로 쏩니다 — "외부 origin 요청 0" 검사의 간헐 실패 원인이라 빈 JS 로 대체합니다(abort 는 콘솔 오류 0 단언을 깨뜨립니다).
+     (minecraft·valorant 스펙과 같은 처방. GA 동작은 전용 consent 스펙이 검증합니다.) */
+  await page.route("https://www.googletagmanager.com/**", (route) => route.fulfill({
+    contentType: "application/javascript; charset=utf-8",
+    body: "/* gtag stubbed in tests */",
+  }));
   await installApiFixtures(page);
 });
 
@@ -4388,4 +4395,28 @@ test("지도 필터 시트는 어느 단계에서도 하단 탭바를 가리지 
   expect(await hitsTabBar()).toBe(true);
   await tabBar.getByRole("button", { name: "Pal 도감" }).click();
   await expect(page).toHaveURL(/\/palworld\/pals(?:\?.*)?$/u);
+});
+
+test("도감·아이템·기술·스킬 페이지는 자체 작성 가이드 콘텐츠를 함께 렌더한다", async ({ page }) => {
+  /* AdSense "콘텐츠 없는 화면" 대응 — 검색 도구만 있는 화면 금지 회귀 방지 */
+  await page.goto("/palworld/pals");
+  await expect(page.getByRole("heading", { name: "팰 도감 — 스탯·작업 적성·서식지를 한 곳에서" })).toBeVisible();
+  const palsGuide = page.getByTestId("palworld-guide-pals");
+  await palsGuide.scrollIntoViewIfNeeded();
+  await expect(palsGuide.getByText("데이터 출처와 갱신 기준")).toBeVisible();
+  /* FAQ 는 접힘 상태에서 시작하고 클릭으로 열린다 */
+  const question = palsGuide.getByText("교배 조합은 어디서 확인하나요?");
+  await question.click();
+  await expect(palsGuide.getByText(/부모 두 마리로 결과를 계산하거나/u)).toBeVisible();
+
+  for (const [path, lead] of [
+    ["/palworld/items", "아이템 도감 — 장비 스탯과 제작 재료의 연결"],
+    ["/palworld/technology", "기술 해금 — 레벨별 해금 순서 계획"],
+    ["/palworld/skills", "스킬 사전 — 위력·속성·쿨타임 비교"],
+  ] as const) {
+    await page.goto(path);
+    await expect(page.getByRole("heading", { name: lead })).toBeVisible();
+  }
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  expect(overflow).toBeLessThanOrEqual(0);
 });

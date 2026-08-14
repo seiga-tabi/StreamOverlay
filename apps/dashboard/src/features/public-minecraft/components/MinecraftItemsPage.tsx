@@ -18,11 +18,12 @@ function ItemRow({ enchants, item, locale }: {
   const name = resolveMinecraftName(item.name, locale);
   return (
     <li className="minecraft-item-row" data-testid="minecraft-item-row">
-      <MinecraftItemImage decorative fallbackText={name.text} id={item.id} label={name.text} />
-      <span className="minecraft-item-row__copy">
-        <MinecraftName fallback={name.fallback} locale={locale} text={name.text} />
-        <code>{item.id}</code>
+      <span className="minecraft-item-row__slot">
+        <MinecraftItemImage decorative fallbackText={name.text} id={item.id} label={name.text} />
       </span>
+      <MinecraftName fallback={name.fallback} locale={locale} text={name.text} />
+      {/* ID 는 보조 위계 — 이름을 지배하던 전폭 막대 결함의 수정점(내용 폭 모노스페이스) */}
+      <code className="minecraft-item-row__id">{item.id}</code>
       <span className="minecraft-item-row__facts">
         <span>{formatMinecraftTemplate(text.itemStackSize, { count: item.stackSize })}</span>
         {item.maxDurability !== undefined ? (

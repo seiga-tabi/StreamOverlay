@@ -8126,22 +8126,21 @@ export function createHttpHandler(input: HttpHandlerInput) {
           });
         }
         if (url.pathname === "/" || isPublicDashboardAppRoute(url.pathname)) {
-          const publicPathname = stripPublicUrlLocalePrefix(url.pathname);
           const palworldEntity = resolvePalworldSeoEntity(url.pathname);
           if (palworldEntity.isEntityRoute && !palworldEntity.entity) {
             // 존재하지 않는 엔티티에 200을 주면 soft 404가 되어 같은 패턴 URL 전체의
             // 크롤 신뢰도가 떨어집니다.
             return sendPublicNotFound(req, res, url.pathname);
           }
-          const legalDraftHeaders = publicPathname === "/privacy" || publicPathname === "/terms"
+          const seoMetadata = await resolvePublicSeoMetadata(url.pathname);
+          const noindexHeaders = seoMetadata.robotsNoindex
             ? { "X-Robots-Tag": "noindex, nofollow" }
             : undefined;
-          const seoMetadata = await resolvePublicSeoMetadata(url.pathname);
           await sendStaticFile(
             req,
             res,
             path.resolve(appConfig.paths.dashboardStatic, "index.html"),
-            legalDraftHeaders,
+            noindexHeaders,
             "/dashboard",
             (html) => applyPublicSeoMetadata(html, seoMetadata)
           );

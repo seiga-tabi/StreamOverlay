@@ -34,8 +34,8 @@ export const PALWORLD_SITEMAP_KINDS: Readonly<Record<string, PalworldEntityKind>
  * sitemap에 넣는 정적 공개 경로.
  *
  * 색인 가치가 없거나 비어 있는 화면은 의도적으로 제외합니다.
- * - `/privacy`, `/terms`: 법적 문구 확정 전까지 noindex로 서빙됩니다.
- * - `/follow`, `/participation`: 로그인한 사용자에게만 의미가 있습니다.
+ * - 법적 고지·문의·로그인·팔로우·참여·검색: 행동 목적 또는 개인화 화면입니다.
+ * - 준비 중인 Valorant 화면과 Minecraft 자료실·패치 노트는 완성 후에만 추가합니다.
  */
 export const PUBLIC_SITEMAP_STATIC_PATHS: readonly string[] = [
   "/",
@@ -46,7 +46,6 @@ export const PUBLIC_SITEMAP_STATIC_PATHS: readonly string[] = [
   "/bot/getting-started",
   "/bot/commands",
   "/bot/game-files",
-  "/contact",
   "/palworld",
   "/palworld/pals",
   "/palworld/breeding",
@@ -54,12 +53,6 @@ export const PUBLIC_SITEMAP_STATIC_PATHS: readonly string[] = [
   "/palworld/technology",
   "/palworld/skills",
   "/palworld/map",
-  "/palworld/search",
-  "/valorant",
-  "/valorant/agents",
-  "/valorant/weapons",
-  "/valorant/maps",
-  "/valorant/ranked",
   "/minecraft",
   "/minecraft/recipes",
   "/minecraft/items",

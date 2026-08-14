@@ -37,6 +37,7 @@ import {
   useYoroAccountSession,
 } from "../yoro-account/useYoroAccountSession";
 import { PalworldDedicatedServerSettings } from "./PalworldDedicatedServerSettings";
+import { PublicBotFaq } from "./PublicBotFaq";
 import { DISCORD_BOT_PREFIX_COMMAND_MANIFEST } from "@streamops/shared";
 import { trackGoogleAnalyticsEvent } from "../../analytics/google-analytics";
 
@@ -1430,6 +1431,7 @@ export function PublicBotPage() {
             </section>
           );
         })() : null}
+        {activeSection === "gettingStarted" ? <PublicBotFaq locale={locale} page="gettingStarted" /> : null}
 
         {activeSection === "commands" ? (
           <section className="public-bot-command-docs public-bot-page-section" id="bot-commands">
@@ -1573,9 +1575,13 @@ export function PublicBotPage() {
             </div>
           </section>
         ) : null}
+        {activeSection === "commands" ? <PublicBotFaq locale={locale} page="commands" /> : null}
 
         {activeSection === "gameFiles" ? (
-          <PalworldDedicatedServerSettings locale={locale} />
+          <>
+            <PalworldDedicatedServerSettings locale={locale} />
+            <PublicBotFaq locale={locale} page="gameFiles" />
+          </>
         ) : null}
       </AppShellMain>
 

@@ -51,7 +51,8 @@ export function MinecraftHome({ locale }: { locale: MinecraftLocale }) {
   }> = [
     {
       page: "recipes",
-      textureId: "crafting_table",
+      /* crafting_table 은 면별 텍스처라 단일 파일이 없음 — 제작 그리드가 보이는 정면 사용 */
+      textureId: "crafting_table_front",
       title: text.catRecipesTitle,
       description: text.catRecipesDescription,
       count: metadata?.coverage.recipes,

@@ -200,8 +200,11 @@ test.beforeEach(async ({ page }) => {
   });
   /* 앱 전역 gtag.js 는 consent denied 로도 로드되고 드물게 샘플링 진단 beacon
      (googletagmanager.com/a)을 이미지 요청으로 쏩니다 — "외부 origin 요청 0" 검사의
-     간헐 실패 원인이라 여기서 차단합니다. GA 동작은 전용 consent 스펙이 검증합니다. */
-  await page.route("https://www.googletagmanager.com/**", (route) => route.abort());
+     간헐 실패 원인이라 빈 JS 로 대체합니다(abort 는 콘솔 오류 0 단언을 깨뜨립니다). GA 동작은 전용 consent 스펙이 검증합니다. */
+  await page.route("https://www.googletagmanager.com/**", (route) => route.fulfill({
+    contentType: "application/javascript; charset=utf-8",
+    body: "/* gtag stubbed in tests */",
+  }));
   /* 실제 텍스처 CDN에 테스트가 의존하지 않도록 같은 origin 계약만 유지한 1px PNG로 대체합니다. */
   await page.route("https://assets.mcasset.cloud/**", async (route) => {
     await route.fulfill({ body: TEST_TEXTURE_PNG, contentType: "image/png", status: 200 });
@@ -326,7 +329,7 @@ test("홈 검색은 스코프에 맞는 카탈로그 페이지의 ?q= 로 이동
   await expect(page.getByTestId("minecraft-item-row")).toHaveCount(1);
 });
 
-test("조합법 페이지는 3×3 그리드·자유 배치·유형 칩·미제공 비활성을 렌더한다", async ({ page }) => {
+test("조합법 페이지는 3×3 그리드·자유 배치·제공 유형 칩·미제공 캡션을 렌더한다", async ({ page }) => {
   await mockMinecraftCatalog(page);
   await page.goto("/minecraft/recipes");
   await expect(page.getByRole("heading", { name: "조합법", exact: true })).toBeVisible();
@@ -344,15 +347,15 @@ test("조합법 페이지는 3×3 그리드·자유 배치·유형 칩·미제�
   /* shapeless — 그리드 대신 재료 슬롯 나열 + 자유 배치 표기, 미번역 명칭은 EN 원문 + 배지 */
   const shapeless = page.getByTestId("minecraft-recipe-card").filter({ hasText: "Mossy Cobblestone" });
   await expect(shapeless.getByText("자유 배치")).toBeVisible();
-  await expect(shapeless.locator(".minecraft-craft-shapeless .minecraft-craft-cell")).toHaveCount(2);
+  await expect(shapeless.locator(".minecraft-craft-shapeless__tiles .minecraft-craft-cell")).toHaveCount(2);
   await expect(shapeless.locator(".minecraft-craft-out")).toBeVisible();
   await expect(shapeless.getByTitle("공식 한국어 명칭 준비 전 — 영문 원문 표시")).toBeVisible();
 
-  /* crafting 만 원천 제공 — 나머지 칩은 비활성 + 미제공 표기 */
+  /* crafting 만 원천 제공 — 제공 유형만 칩으로, 미제공은 캡션 한 줄(2026-08-15 밀도 개선) */
   const chips = page.getByRole("group", { name: "레시피 유형" });
-  await expect(chips.getByRole("button", { name: /^제작/u })).toBeEnabled();
-  await expect(chips.getByRole("button", { name: /제련/u })).toBeDisabled();
-  await expect(chips.getByRole("button", { name: /양조/u })).toBeDisabled();
+  await expect(chips.getByRole("button", { name: "제작", exact: true })).toBeEnabled();
+  await expect(chips.getByRole("button", { name: /제련/u })).toHaveCount(0);
+  await expect(page.getByText("원천 미제공: 제련 · 양조 · 대장장이 · 절단")).toBeVisible();
   await expect(page.getByText("데이터: minecraft-data (MIT) · Java 1.21.11", { exact: false })).toBeVisible();
 });
 
@@ -393,7 +396,7 @@ test("아이템 페이지는 검색·페이지네이션(더 보기)·빈 결과�
   await expect(page.getByText("내구도 1,561").or(page.getByText("내구도 1561"))).toBeVisible();
 
   /* 목업 도구 상세의 "적용 가능 인챈트" — enchantCategoryIds(weapon) × 인챈트 교차 참조 */
-  await page.getByText("적용 인챈트 1종").click();
+  await page.getByText("인챈트 1종", { exact: true }).click();
   await expect(page.getByTestId("minecraft-item-row").getByText("날카로움")).toBeVisible();
 
   await search.fill("존재하지않는아이템");
@@ -472,7 +475,8 @@ test("인챈트 카드는 레벨·획득 경로·적용 대상·상충 명칭을
   await expect(sharpness.getByText("최대 Lv 5")).toBeVisible();
   await expect(sharpness.getByText("인챈트 테이블")).toBeVisible();
   await expect(sharpness.getByText("주민 거래")).toBeVisible();
-  await expect(sharpness.getByText("weapon")).toBeVisible();
+  /* 카테고리는 ko 라벨(알려진 값) — 원시 코드 노출 금지 */
+  await expect(sharpness.getByText("무기", { exact: true })).toBeVisible();
   /* 상충 ID 는 목록에 없으면 사람이 읽을 형태(EN)로 표기 */
   await expect(sharpness.getByText("Smite · Bane Of Arthropods")).toBeVisible();
   const curse = page.getByTestId("minecraft-enchant-card").filter({ hasText: "Curse of Binding" });
@@ -514,6 +518,9 @@ test("마인크래프트 메뉴는 실데이터 화면과 준비 중 화면·404
     ? page.getByTestId("minecraft-bottom-tab-bar")
     : page.getByTestId("minecraft-secondary-nav");
   await expect(nav.getByRole("button", { name: "위키" })).toHaveAttribute("aria-current", "page");
+  /* 모바일은 하단 탭바 단일 nav — 상단 가로 nav 와 이중 표시 금지(2026-08-15 결함 회귀 방지) */
+  if (isMobile) await expect(page.getByTestId("minecraft-secondary-nav")).toBeHidden();
+  else await expect(page.getByTestId("minecraft-bottom-tab-bar")).toBeHidden();
 
   await nav.getByRole("button", { name: "조합법" }).click();
   await expect(page).toHaveURL(/\/minecraft\/recipes$/u);

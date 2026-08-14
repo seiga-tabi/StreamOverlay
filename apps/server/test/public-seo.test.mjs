@@ -67,16 +67,17 @@ test("하위 경로는 BreadcrumbList를 제공한다", () => {
   );
 });
 
-test("발로란트 공개 경로는 locale별 metadata와 sitemap URL을 제공한다", () => {
+test("준비 중인 발로란트 공개 경로는 locale별 metadata를 제공하되 색인하지 않는다", () => {
   const ko = render("/ko/valorant/agents");
   const ja = render("/ja/valorant/ranked");
   assert.match(ko, /<title>발로란트 요원 도감 \| YORO\.gg<\/title>/u);
   assert.match(ko, /<link rel="canonical" href="https:\/\/yoro\.gg\/ko\/valorant\/agents">/u);
   assert.match(ja, /<html lang="ja"/u);
   assert.match(ja, /<link rel="canonical" href="https:\/\/yoro\.gg\/ja\/valorant\/ranked">/u);
+  assert.match(ko, /name="robots" content="noindex"/u);
+  assert.match(ja, /name="robots" content="noindex"/u);
   const sitemap = buildStaticSitemap();
-  assert.match(sitemap, /<loc>https:\/\/yoro\.gg\/ko\/valorant\/agents<\/loc>/u);
-  assert.match(sitemap, /<loc>https:\/\/yoro\.gg\/ja\/valorant\/ranked<\/loc>/u);
+  assert.doesNotMatch(sitemap, /\/valorant/u);
 });
 
 test("마인크래프트 실데이터 경로는 고유 metadata를 제공하고 준비 중 경로는 색인하지 않는다", () => {
@@ -209,8 +210,24 @@ test("정적 sitemap은 ko·ja URL과 hreflang alternate를 함께 담는다", (
   assert.match(xml, /xmlns:xhtml="http:\/\/www\.w3\.org\/1999\/xhtml"/u);
   assert.match(xml, /<xhtml:link rel="alternate" hreflang="x-default"/u);
   // 색인 가치가 없는 경로는 넣지 않습니다.
-  assert.doesNotMatch(xml, /\/privacy|\/terms|\/community/u);
+  assert.doesNotMatch(xml, /\/privacy|\/terms|\/contact|\/palworld\/search|\/valorant|\/community/u);
   assert.doesNotMatch(xml, /<loc>[^<]*\?/u);
+});
+
+test("행동·개인화·법적 고지 화면은 noindex로 제공한다", () => {
+  for (const pathname of [
+    "/login",
+    "/account",
+    "/account/connections",
+    "/follow",
+    "/participation",
+    "/privacy",
+    "/terms",
+    "/contact",
+    "/palworld/search",
+  ]) {
+    assert.equal(publicSeoMetadataForPath(pathname).robotsNoindex, true, pathname);
+  }
 });
 
 test("엔티티 sitemap은 ko·ja 두 URL을 만든다", () => {

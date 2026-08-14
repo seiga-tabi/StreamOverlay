@@ -70,26 +70,27 @@ export function MinecraftCatalogShell({
             {formatMinecraftTemplate(text.resultCount, { count: pagination.total.toLocaleString() })}
           </span>
         ) : null}
-      </header>
-      <form
-        className="minecraft-catalog__toolbar"
-        onSubmit={(event) => {
-          event.preventDefault();
-          onSearch(draft);
-        }}
-        role="search"
-        aria-label={text.searchLabel}
-      >
-        <input
+        <form
+          className="minecraft-catalog__search"
+          onSubmit={(event) => {
+            event.preventDefault();
+            onSearch(draft);
+          }}
+          role="search"
           aria-label={text.searchLabel}
-          maxLength={MINECRAFT_SEARCH_MAX_LENGTH}
-          onChange={(event) => setDraft(event.target.value)}
-          placeholder={text.searchPlaceholder}
-          type="search"
-          value={draft}
-        />
-        {filters}
-      </form>
+        >
+          <input
+            aria-label={text.searchLabel}
+            maxLength={MINECRAFT_SEARCH_MAX_LENGTH}
+            onChange={(event) => setDraft(event.target.value)}
+            placeholder={text.searchPlaceholder}
+            type="search"
+            value={draft}
+          />
+          <button type="submit">{text.homeSearchSubmit}</button>
+        </form>
+      </header>
+      {filters}
       {status === "loading" ? (
         <div aria-hidden="true" className="minecraft-catalog__skeletons">
           <Skeleton className="minecraft-catalog__skeleton" />

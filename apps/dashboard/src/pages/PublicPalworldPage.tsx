@@ -28,6 +28,7 @@ import { PalworldHome } from "../features/public-palworld/components/PalworldHom
 import { PalworldNotFoundPage } from "../features/public-palworld/components/PalworldNotFoundPage";
 import { PalworldSearchForm } from "../features/public-palworld/components/PalworldSearchForm";
 import { PalworldSourceFooter } from "../features/public-palworld/components/PalworldSourceFooter";
+import { PalworldPageGuide } from "../features/public-palworld/components/PalworldPageGuide";
 import { palworldI18n, type PalworldLocale } from "../features/public-palworld/i18n/palworld-i18n";
 import {
   PALWORLD_VERSION_MISMATCH_EVENT,
@@ -502,11 +503,27 @@ export function PublicPalworldPage() {
           />
         ) : null}
         {page === "search" ? <PalworldSearchResults locale={locale} query={params.get("q") ?? ""} onOpenPal={openPalHere} onOpenItem={openItemHere} /> : null}
-        {page === "pals" ? <PalworldPalsPage locale={locale} params={params} onOpenPal={openPalHere} /> : null}
+        {page === "pals" ? (<>
+          <PalworldPageGuide locale={locale} page="pals" section="lead" />
+          <PalworldPalsPage locale={locale} params={params} onOpenPal={openPalHere} />
+          <PalworldPageGuide locale={locale} page="pals" section="deep" />
+        </>) : null}
         {page === "breeding" ? <PalworldBreedingPage locale={locale} onOpenPal={openPalHere} params={params} /> : null}
-        {page === "items" ? <PalworldItemsPage locale={locale} params={params} onOpenItem={openItemHere} /> : null}
-        {page === "technology" ? <PalworldTechnologyPage locale={locale} params={params} onOpenItem={openItemHere} /> : null}
-        {page === "skills" ? <PalworldSkillsPage locale={locale} params={params} /> : null}
+        {page === "items" ? (<>
+          <PalworldPageGuide locale={locale} page="items" section="lead" />
+          <PalworldItemsPage locale={locale} params={params} onOpenItem={openItemHere} />
+          <PalworldPageGuide locale={locale} page="items" section="deep" />
+        </>) : null}
+        {page === "technology" ? (<>
+          <PalworldPageGuide locale={locale} page="technology" section="lead" />
+          <PalworldTechnologyPage locale={locale} params={params} onOpenItem={openItemHere} />
+          <PalworldPageGuide locale={locale} page="technology" section="deep" />
+        </>) : null}
+        {page === "skills" ? (<>
+          <PalworldPageGuide locale={locale} page="skills" section="lead" />
+          <PalworldSkillsPage locale={locale} params={params} />
+          <PalworldPageGuide locale={locale} page="skills" section="deep" />
+        </>) : null}
         {page === "map" ? <PalworldMapPage focusPalId={focusPalId} locale={locale} onOpenPal={openPalHere} /> : null}
         </Suspense> : null}
       </AppShellMain>

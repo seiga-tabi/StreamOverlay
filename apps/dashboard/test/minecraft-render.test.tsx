@@ -100,10 +100,9 @@ test("카탈로그 3화면은 검색 UI·제목을 ko·ja로 렌더하고 로딩
   assert.match(recipes, /id="minecraft-recipes-title"/u);
   assert.match(recipes, /조합법/u);
   assert.match(recipes, /이름 또는 영문 ID 검색/u);
-  /* crafting 만 원천 제공 — 나머지 유형 칩은 비활성 + 미제공 표기 */
+  /* crafting 만 원천 제공 — 제공 유형만 칩, 미제공은 캡션 한 줄 */
   assert.match(recipes, /제작/u);
-  assert.match(recipes, /원천 미제공/u);
-  assert.match(recipes, /disabled/u);
+  assert.match(recipes, /원천 미제공: 제련 · 양조 · 대장장이 · 절단/u);
   /* 데이터 도착 전에는 skeleton 로딩만 — 가짜 레시피 카드 금지 */
   assert.doesNotMatch(recipes, /minecraft-recipe-card/u);
   assert.match(recipes, /maxlength="80"/iu);

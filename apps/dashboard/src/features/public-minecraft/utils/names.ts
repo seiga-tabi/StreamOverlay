@@ -34,3 +34,30 @@ export function minecraftTileHue(id: string): number {
   }
   return ((hash % 360) + 360) % 360;
 }
+
+/* minecraft-data enchantCategory 의 ko·ja 라벨 — 알려진 값만 번역하고
+ * 미지 코드는 null 을 돌려 호출부가 코드 그대로(en) 표기하게 합니다(가짜 번역 금지). */
+const ENCHANT_CATEGORY_LABELS: Record<string, { ko: string; ja: string }> = {
+  armor: { ko: "갑옷", ja: "防具" },
+  armor_chest: { ko: "갑옷(상체)", ja: "防具(胴)" },
+  armor_feet: { ko: "갑옷(신발)", ja: "防具(足)" },
+  armor_head: { ko: "갑옷(머리)", ja: "防具(頭)" },
+  armor_legs: { ko: "갑옷(하체)", ja: "防具(脚)" },
+  bow: { ko: "활", ja: "弓" },
+  breakable: { ko: "내구 아이템", ja: "耐久あり" },
+  crossbow: { ko: "석궁", ja: "クロスボウ" },
+  digger: { ko: "도구", ja: "ツール" },
+  fishing_rod: { ko: "낚싯대", ja: "釣り竿" },
+  mace: { ko: "철퇴", ja: "メイス" },
+  trident: { ko: "삼지창", ja: "トライデント" },
+  vanishable: { ko: "소멸 가능", ja: "消滅可能" },
+  weapon: { ko: "무기", ja: "武器" },
+  wearable: { ko: "착용품", ja: "装着品" },
+};
+
+export function minecraftEnchantCategoryLabel(
+  categoryId: string,
+  locale: MinecraftLocale,
+): string | null {
+  return ENCHANT_CATEGORY_LABELS[categoryId]?.[locale] ?? null;
+}

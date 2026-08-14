@@ -49,11 +49,15 @@ test("탭바 높이만큼의 여백은 main 이 아니라 shell 루트에 두고
   assert.doesNotMatch(tabBarCss, /\.yoro-app-shell__main \{/u);
 });
 
-test("모바일에서 Palworld 헤더의 상단 nav 도 탭바로 대체되어 숨는다", () => {
-  assert.match(
-    tabBarCss,
-    /\.palworld-header \.public-game-header__nav-slot \{[\s\S]{0,80}display: none;/u
-  );
+test("모바일에서 탭바를 쓰는 4개 게임 헤더의 상단 nav 가 전부 숨는다", () => {
+  /* 2026-08-15 결함 회귀 방지 — valorant·minecraft 가 그룹에서 빠지면
+     모바일에서 상단 nav + 하단 탭바가 이중 표시됩니다. */
+  for (const header of ["lol-public-game-header", "palworld-header", "valorant-header", "minecraft-header"]) {
+    assert.match(
+      tabBarCss,
+      new RegExp(`\\.${header} \\.public-game-header__nav-slot[\\s\\S]{0,220}display: none;`, "u")
+    );
+  }
   // Palworld 탭바 활성색은 헤더와 같은 초록 토큰을 씁니다.
   assert.match(
     tabBarCss,

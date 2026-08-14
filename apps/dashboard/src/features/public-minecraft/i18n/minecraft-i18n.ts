@@ -77,6 +77,7 @@ const ko = {
   recipeTypeSmithing: "대장장이",
   recipeTypeStonecutting: "절단",
   recipeTypeNotProvided: "원천 미제공",
+  recipeTypeNotProvidedList: "원천 미제공: {types}",
   recipeTypeFilterLabel: "레시피 유형",
   recipeIngredients: "재료",
   recipeResult: "결과",
@@ -86,14 +87,13 @@ const ko = {
   /* 아이템 */
   itemStackSize: "묶음 {count}",
   itemDurability: "내구도 {count}",
-  itemEnchants: "적용 인챈트 {count}종",
+  itemEnchants: "인챈트 {count}종",
 
   /* 인챈트 */
   enchantMaxLevel: "최대 Lv {count}",
   enchantCurse: "저주",
   enchantTreasure: "보물 전용",
   enchantNotTradeable: "거래 불가",
-  enchantCategory: "적용 대상",
   enchantIncompatibleLabel: "상충",
   enchantFromTable: "인챈트 테이블",
   enchantFromTrade: "주민 거래",
@@ -192,6 +192,7 @@ const ja: Record<keyof typeof ko, string> = {
   recipeTypeSmithing: "鍛冶",
   recipeTypeStonecutting: "石切",
   recipeTypeNotProvided: "ソース未提供",
+  recipeTypeNotProvidedList: "ソース未提供: {types}",
   recipeTypeFilterLabel: "レシピの種類",
   recipeIngredients: "材料",
   recipeResult: "結果",
@@ -200,13 +201,12 @@ const ja: Record<keyof typeof ko, string> = {
 
   itemStackSize: "スタック {count}",
   itemDurability: "耐久値 {count}",
-  itemEnchants: "適用エンチャント {count}種",
+  itemEnchants: "エンチャント {count}種",
 
   enchantMaxLevel: "最大 Lv {count}",
   enchantCurse: "呪い",
   enchantTreasure: "宝物限定",
   enchantNotTradeable: "取引不可",
-  enchantCategory: "適用対象",
   enchantIncompatibleLabel: "排他",
   enchantFromTable: "エンチャントテーブル",
   enchantFromTrade: "村人取引",

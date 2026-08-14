@@ -19,8 +19,11 @@ test.beforeEach(async ({ page }) => {
   });
   /* 앱 전역 gtag.js 는 consent denied 로도 로드되고 드물게 샘플링 진단 beacon
      (googletagmanager.com/a)을 이미지 요청으로 쏩니다 — "외부 origin 요청 0" 검사의
-     간헐 실패 원인이라 여기서 차단합니다. GA 동작은 전용 consent 스펙이 검증합니다. */
-  await page.route("https://www.googletagmanager.com/**", (route) => route.abort());
+     간헐 실패 원인이라 빈 JS 로 대체합니다(abort 는 콘솔 오류 0 단언을 깨뜨립니다). GA 동작은 전용 consent 스펙이 검증합니다. */
+  await page.route("https://www.googletagmanager.com/**", (route) => route.fulfill({
+    contentType: "application/javascript; charset=utf-8",
+    body: "/* gtag stubbed in tests */",
+  }));
 });
 
 test("발로란트 홈은 정책 3단 모델을 렌더하고 외부 origin 요청과 가로 overflow가 없다", async ({ page }) => {
@@ -88,6 +91,9 @@ test("발로란트 메뉴는 준비 중 화면과 홈 복귀·404·직접 URL을
     ? page.getByTestId("valorant-bottom-tab-bar")
     : page.getByTestId("valorant-secondary-nav");
   await expect(nav.getByRole("button", { name: "홈" })).toHaveAttribute("aria-current", "page");
+  /* 모바일은 하단 탭바 단일 nav — 상단 가로 nav 와 이중 표시 금지(2026-08-15 결함 회귀 방지) */
+  if (isMobile) await expect(page.getByTestId("valorant-secondary-nav")).toBeHidden();
+  else await expect(page.getByTestId("valorant-bottom-tab-bar")).toBeHidden();
 
   await nav.getByRole("button", { name: "요원" }).click();
   await expect(page).toHaveURL(/\/valorant\/agents$/u);

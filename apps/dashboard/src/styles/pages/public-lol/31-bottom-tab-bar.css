@@ -80,22 +80,29 @@
       box-sizing: border-box;
     }
 
-    /* 대체되는 상단 가로 nav는 탭바를 쓰는 LoL·Palworld 헤더에서 숨깁니다 —
+    /* 대체되는 상단 가로 nav는 탭바를 쓰는 LoL·Palworld·Valorant·Minecraft
+       헤더에서 숨깁니다(하단 탭바와 이중 표시 방지) —
        Bot 은 27-mobile-nav.css 의 기존 동작을 그대로 유지합니다. */
     .lol-public-game-header .public-game-header__nav-slot,
-    .palworld-header .public-game-header__nav-slot {
+    .palworld-header .public-game-header__nav-slot,
+    .valorant-header .public-game-header__nav-slot,
+    .minecraft-header .public-game-header__nav-slot {
       display: none;
     }
 
     .lol-public-game-header[data-search="true"] .public-game-header__layout,
-    .palworld-header[data-search="true"] .public-game-header__layout {
+    .palworld-header[data-search="true"] .public-game-header__layout,
+    .valorant-header[data-search="true"] .public-game-header__layout,
+    .minecraft-header[data-search="true"] .public-game-header__layout {
       grid-template-areas:
         "product toggle"
         "search search";
     }
 
     .lol-public-game-header[data-home="true"] .public-game-header__layout,
-    .palworld-header[data-home="true"] .public-game-header__layout {
+    .palworld-header[data-home="true"] .public-game-header__layout,
+    .valorant-header[data-home="true"] .public-game-header__layout,
+    .minecraft-header[data-home="true"] .public-game-header__layout {
       grid-template-areas: "product toggle";
     }
   }

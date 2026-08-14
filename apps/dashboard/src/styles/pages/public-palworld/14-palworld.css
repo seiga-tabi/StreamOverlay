@@ -6420,3 +6420,102 @@
     transition: none;
   }
 }
+
+/* ═══ 페이지 가이드 — 콘텐츠 중심 구성(AdSense 대비 자체 작성 콘텐츠) ═══ */
+.palworld-guide--lead {
+  max-inline-size: 62rem;
+}
+
+.palworld-guide--lead > h2 {
+  margin: 0 0 var(--yoro-space-2);
+  font-size: var(--yoro-font-size-xl);
+}
+
+.palworld-guide--lead > p {
+  margin: 0 0 var(--yoro-space-5);
+  color: var(--yoro-color-ground-muted);
+  font-size: var(--yoro-font-size-sm);
+  max-inline-size: 70ch;
+}
+
+.palworld-guide--deep {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: var(--yoro-space-6);
+  margin-block-start: var(--yoro-space-8);
+  padding-block-start: var(--yoro-space-6);
+  border-block-start: thin solid var(--yoro-color-border-on-dark);
+}
+
+.palworld-guide__column {
+  min-inline-size: 0;
+}
+
+.palworld-guide__column > h3 {
+  margin: 0 0 var(--yoro-space-3);
+  font-size: var(--yoro-font-size-md);
+}
+
+.palworld-guide__column > h3 + h3,
+.palworld-guide__column > p + h3,
+.palworld-guide__steps + h3 {
+  margin-block-start: var(--yoro-space-5);
+}
+
+.palworld-guide__steps {
+  margin: 0;
+  padding-inline-start: 1.25rem;
+  display: grid;
+  gap: var(--yoro-space-2);
+  color: var(--yoro-color-ground-muted);
+  font-size: var(--yoro-font-size-sm);
+}
+
+.palworld-guide__data {
+  margin: 0;
+  color: var(--yoro-color-ground-muted);
+  font-size: var(--yoro-font-size-sm);
+}
+
+.palworld-guide__read {
+  margin: 0;
+  display: grid;
+  gap: var(--yoro-space-3);
+}
+
+.palworld-guide__read dt {
+  font-weight: var(--yoro-font-weight-bold);
+  font-size: var(--yoro-font-size-sm);
+}
+
+.palworld-guide__read dd {
+  margin: 2px 0 0;
+  color: var(--yoro-color-ground-muted);
+  font-size: var(--yoro-font-size-sm);
+}
+
+.palworld-guide__faq {
+  border-block-start: thin solid var(--yoro-color-border-on-dark);
+  padding-block: var(--yoro-space-2);
+}
+
+.palworld-guide__faq > summary {
+  min-block-size: var(--yoro-size-touch-target);
+  display: flex;
+  align-items: center;
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-bold);
+  cursor: pointer;
+}
+
+.palworld-guide__faq > summary:focus-visible {
+  outline: none;
+  box-shadow: var(--yoro-shadow-focus);
+  border-radius: var(--yoro-radius-sm);
+}
+
+.palworld-guide__faq > p {
+  margin: var(--yoro-space-1) 0 var(--yoro-space-2);
+  color: var(--yoro-color-ground-muted);
+  font-size: var(--yoro-font-size-sm);
+}

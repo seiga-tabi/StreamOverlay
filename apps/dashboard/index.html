@@ -43,43 +43,38 @@
         });
         window.__yoroGoogleConsentInitialized = true;
         window.gtag("set", "ads_data_redaction", true);
-        const publicExactPaths = new Set([
-          "/",
-          "/lol",
-          "/follow",
-          "/participation",
-          "/privacy",
-          "/terms",
-          "/contact",
-          "/bot",
+        /* Auto ads는 문서형 안내와 실데이터 목록처럼 게시자 콘텐츠가 화면의
+           중심인 경로에서만 허용합니다. 검색·로그인·설정·법적 고지·빈 상태·
+           준비 중·계산기 화면은 행동 목적 화면이므로 여기에 추가하지 않습니다. */
+        const publisherContentExactPaths = new Set([
           "/bot/getting-started",
           "/bot/commands",
           "/bot/game-files",
-          "/bot/features",
-          "/bot/connect",
-          "/bot/dedicated-server",
-          "/palworld",
           "/palworld/pals",
-          "/palworld/breeding",
           "/palworld/items",
           "/palworld/technology",
-          "/palworld/skills",
-          "/palworld/map",
-          "/palworld/search",
-          "/lol/aram",
-          "/patch-notes"
+          "/palworld/skills"
         ]);
-        const publicPathPrefixes = [
-          "/lol/summoners/"
+        const publisherContentPathPrefixes = [
+          "/palworld/pals/",
+          "/palworld/items/",
+          "/palworld/skills/"
         ];
         const isAdEligiblePath = () => {
+          if (document.querySelector('meta[name="robots"][content*="noindex"]')) return false;
           const localizedPath = window.location.pathname.replace(/^\/(?:ko|ja)(?=\/|$)/, "") || "/";
           const pathname = localizedPath.replace(/\/+$/, "") || "/";
-          return publicExactPaths.has(pathname)
-            || publicPathPrefixes.some((prefix) => pathname.startsWith(prefix));
+          return publisherContentExactPaths.has(pathname)
+            || publisherContentPathPrefixes.some((prefix) => pathname.startsWith(prefix));
         };
         const loadAdsense = () => {
-          if (!isAdEligiblePath()) return;
+          if (!isAdEligiblePath()) {
+            /* SPA에서 이미 Auto ads가 실행된 문서가 기능성 화면으로 이동하면
+               script 태그만 제거해도 내부 실행이 남습니다. 새 문서로 전환해
+               광고 실행 컨텍스트 자체를 확실히 종료합니다. */
+            if (document.getElementById(adsenseScriptId)) window.location.reload();
+            return;
+          }
           try {
             if (window.localStorage.getItem(googleConsentKey) !== "granted") return;
           } catch {
