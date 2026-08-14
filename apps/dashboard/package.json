@@ -8,7 +8,9 @@
     "build": "tsc -p tsconfig.json && vite build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:run": "node --no-warnings --import tsx --loader ../../scripts/css-module-loader.mjs --test test/*.test.ts test/*.test.tsx",
-    "preview": "vite preview --port 5173"
+    "preview": "vite preview --port 5173",
+    "build:twitch-extension": "vite build --config vite.twitch-extension.config.ts",
+    "package:twitch-extension": "npm run build:twitch-extension && cd dist-twitch-extension && rm -f ../twitch-extension.zip && zip -qr ../twitch-extension.zip . && cd .. && node ../../scripts/check-twitch-extension-bundle.mjs"
   },
   "dependencies": {
     "@fontsource-variable/noto-sans-jp": "^5.3.0",

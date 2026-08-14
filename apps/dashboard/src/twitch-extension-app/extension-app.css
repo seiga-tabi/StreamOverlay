@@ -1,0 +1,36 @@
+/* Twitch iframe 전용 최소 지면 — 대시보드 전역 CSS 를 로드하지 않습니다. */
+@import "../styles/foundation/tokens.css";
+@import "../styles/foundation/typography.css";
+@import "../styles/foundation/radius.css";
+@import "../styles/foundation/spacing.css";
+@import "../styles/pages/account/34-twitch-extension.css";
+
+* { box-sizing: border-box; }
+
+html,
+body {
+  margin: 0;
+  /* 오버레이는 영상이 비쳐야 하므로 지면을 칠하지 않습니다. */
+  background: transparent;
+}
+
+#root { font-family: var(--yoro-font-family-ja); }
+
+/* Panel(318×496): 위젯을 상단에 그대로 배치 */
+.twitch-ext-panel-root { padding: var(--yoro-space-2); }
+
+/* Video Overlay: iframe 이 영상 전체를 덮으므로 기본은 클릭 통과,
+   위젯만 상호작용을 받습니다 — 영상 조작을 가로채면 심사에서 반려됩니다. */
+.twitch-ext-overlay-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.twitch-ext-overlay-root > .twitch-ext-collapsed,
+.twitch-ext-overlay-root > .twitch-ext-panel {
+  position: absolute;
+  inset-block-start: var(--yoro-space-4);
+  inset-inline-end: var(--yoro-space-4);
+  pointer-events: auto;
+}

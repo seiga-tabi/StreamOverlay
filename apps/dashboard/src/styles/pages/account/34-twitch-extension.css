@@ -48,6 +48,30 @@
   color: var(--yoro-color-secondary-strong);
 }
 
+.twitch-ext-panel__head-end {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--yoro-space-1);
+  flex: none;
+}
+
+.twitch-ext-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  border: 0;
+  border-radius: var(--yoro-radius-sm);
+  background: transparent;
+  color: var(--yoro-color-text-muted);
+  cursor: pointer;
+}
+
+.twitch-ext-close > svg { inline-size: .875rem; block-size: .875rem; }
+.twitch-ext-close:hover { color: var(--yoro-color-text); }
+.twitch-ext-close:focus-visible { outline: 2px solid var(--yoro-color-primary-strong); outline-offset: 2px; }
+
 .twitch-ext-game {
   display: inline-flex;
   align-items: center;
@@ -262,6 +286,10 @@
   border-radius: 50%;
   background: var(--yoro-color-success);
 }
+
+.twitch-ext-collapsed__dot.is-paused { background: var(--yoro-color-warning); }
+.twitch-ext-collapsed__dot.is-error { background: var(--yoro-color-danger); }
+.twitch-ext-collapsed__dot.is-muted { background: var(--yoro-color-text-muted); }
 
 /* ─────────── Dashboard 관리 카드 ─────────── */
 .twitch-ext-card {

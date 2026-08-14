@@ -86,16 +86,39 @@ function CheckIcon() {
   );
 }
 
+/** collapsed pill 라벨 — 상태를 그대로 반영합니다(모집 중이 아닐 때 "受付中" 오표기 금지). */
+function collapsedLabel(data: ExtensionViewerData, locale: ExtensionLocale): { label: string; tone: string } {
+  const text = extensionViewerI18n[locale];
+  switch (data.status) {
+    case "active":
+    case "joining":
+      return { label: formatExtensionTemplate(text.collapsed, { count: data.waitingCount ?? 0 }), tone: "is-open" };
+    case "joined":
+    case "next":
+      return { label: `${text.myTurnLabel} #${data.myPosition ?? "-"}`, tone: "is-open" };
+    case "paused":
+      return { label: text.statusPaused, tone: "is-paused" };
+    case "full":
+      return { label: text.statusFull, tone: "is-paused" };
+    case "ended":
+      return { label: text.statusClosed, tone: "is-muted" };
+    case "error":
+      return { label: text.statusError, tone: "is-error" };
+    default:
+      return { label: text.loadingLabel, tone: "is-muted" };
+  }
+}
+
 export function ExtensionOverlayCollapsed({ data, locale, onExpand }: {
   data: ExtensionViewerData;
   locale: ExtensionLocale;
   onExpand?: () => void;
 }) {
-  const text = extensionViewerI18n[locale];
+  const { label, tone } = collapsedLabel(data, locale);
   return (
     <button className="twitch-ext-shell twitch-ext-collapsed" onClick={onExpand} type="button">
-      <span aria-hidden="true" className="twitch-ext-collapsed__dot" />
-      {formatExtensionTemplate(text.collapsed, { count: data.waitingCount ?? 0 })}
+      <span aria-hidden="true" className={`twitch-ext-collapsed__dot ${tone}`} />
+      {label}
     </button>
   );
 }
@@ -105,6 +128,7 @@ export function ExtensionViewerPanel({
   display = DEFAULT_EXTENSION_DISPLAY,
   locale,
   onCancel,
+  onClose,
   onJoin,
   onRetry,
   variant = "panel",
@@ -113,6 +137,8 @@ export function ExtensionViewerPanel({
   display?: ExtensionDisplaySettings;
   locale: ExtensionLocale;
   onCancel?: () => void;
+  /** 오버레이 확장 상태에서만 사용 — 전달되면 헤더에 닫기 버튼을 렌더합니다. */
+  onClose?: () => void;
   onJoin?: () => void;
   onRetry?: () => void;
   variant?: "panel" | "overlay";
@@ -132,7 +158,16 @@ export function ExtensionViewerPanel({
     >
       <div className="twitch-ext-panel__head">
         {showHead ? <GameBadge name={data.game ?? ""} /> : <span />}
-        <YoroLogo />
+        <span className="twitch-ext-panel__head-end">
+          <YoroLogo />
+          {onClose ? (
+            <button aria-label={text.closeLabel} className="twitch-ext-close" onClick={onClose} type="button">
+              <svg aria-hidden="true" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2" viewBox="0 0 24 24">
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
+            </button>
+          ) : null}
+        </span>
       </div>
 
       {status === "loading" ? (

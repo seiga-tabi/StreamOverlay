@@ -57,7 +57,9 @@ export function TwitchExtensionCard({
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
-  const [saveMessage, setSaveMessage] = useState("");
+  /* 문구가 아니라 로케일 무관 상태를 보관 — 문구를 deps 로 걸면 언어 전환이
+     재조회를 일으켜 편집 중(dirty)인 미저장 변경이 조용히 유실됩니다. */
+  const [feedback, setFeedback] = useState<"" | "saved" | "save_error" | "load_error">("");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -69,29 +71,29 @@ export function TwitchExtensionCard({
         setExtensionType(settings.extensionType);
         setConnectionState(settings.connectionState);
         setDirty(false);
-        setSaveMessage("");
+        setFeedback("");
       })
       .catch((error) => {
         if (error instanceof DOMException && error.name === "AbortError") return;
         setConnectionState("configuration_required");
-        setSaveMessage(text.loadError);
+        setFeedback("load_error");
       })
       .finally(() => {
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [text.loadError]);
+  }, []);
 
   function updateDisplay(key: keyof ExtensionDisplaySettings, checked: boolean) {
     setDisplay((previous) => ({ ...previous, [key]: checked }));
     setDirty(true);
-    setSaveMessage("");
+    setFeedback("");
   }
 
   async function save() {
     if (!csrfToken || saving) return;
     setSaving(true);
-    setSaveMessage("");
+    setFeedback("");
     try {
       const settings = await saveTwitchExtensionSettings({
         display,
@@ -103,13 +105,19 @@ export function TwitchExtensionCard({
       setExtensionType(settings.extensionType);
       setConnectionState(settings.connectionState);
       setDirty(false);
-      setSaveMessage(text.saved);
+      setFeedback("saved");
     } catch {
-      setSaveMessage(text.saveError);
+      setFeedback("save_error");
     } finally {
       setSaving(false);
     }
   }
+
+  const feedbackText =
+    feedback === "saved" ? text.saved
+      : feedback === "save_error" ? text.saveError
+        : feedback === "load_error" ? text.loadError
+          : "";
 
   const toggles: ReadonlyArray<{ key: keyof ExtensionDisplaySettings; label: string }> = [
     { key: "joinButton", label: text.displayJoinButton },
@@ -172,7 +180,7 @@ export function TwitchExtensionCard({
             aria-pressed={inactiveBehavior === "hide"}
             className={inactiveBehavior === "hide" ? "is-active" : ""}
             disabled={loading || saving}
-            onClick={() => { setInactiveBehavior("hide"); setDirty(true); setSaveMessage(""); }}
+            onClick={() => { setInactiveBehavior("hide"); setDirty(true); setFeedback(""); }}
             type="button"
           >
             {text.inactiveHide}
@@ -181,7 +189,7 @@ export function TwitchExtensionCard({
             aria-pressed={inactiveBehavior === "message"}
             className={inactiveBehavior === "message" ? "is-active" : ""}
             disabled={loading || saving}
-            onClick={() => { setInactiveBehavior("message"); setDirty(true); setSaveMessage(""); }}
+            onClick={() => { setInactiveBehavior("message"); setDirty(true); setFeedback(""); }}
             type="button"
           >
             {text.inactiveMessage}
@@ -191,11 +199,11 @@ export function TwitchExtensionCard({
         <h3>{text.typeTitle}</h3>
         <div className="twitch-ext-card__radios" role="radiogroup" aria-label={text.typeTitle}>
           <label>
-            <input checked={extensionType === "panel"} disabled={loading || saving} name="twitch-extension-type" onChange={() => { setExtensionType("panel"); setDirty(true); setSaveMessage(""); }} type="radio" />
+            <input checked={extensionType === "panel"} disabled={loading || saving} name="twitch-extension-type" onChange={() => { setExtensionType("panel"); setDirty(true); setFeedback(""); }} type="radio" />
             <span>{text.typePanel}</span>
           </label>
           <label>
-            <input checked={extensionType === "overlay"} disabled={loading || saving} name="twitch-extension-type" onChange={() => { setExtensionType("overlay"); setDirty(true); setSaveMessage(""); }} type="radio" />
+            <input checked={extensionType === "overlay"} disabled={loading || saving} name="twitch-extension-type" onChange={() => { setExtensionType("overlay"); setDirty(true); setFeedback(""); }} type="radio" />
             <span>{text.typeOverlay}</span>
           </label>
         </div>
@@ -208,7 +216,7 @@ export function TwitchExtensionCard({
           >
             {saving ? text.saving : text.save}
           </button>
-          {saveMessage ? <span aria-live="polite">{saveMessage}</span> : null}
+          {feedbackText ? <span aria-live="polite">{feedbackText}</span> : null}
         </div>
       </div>
 
