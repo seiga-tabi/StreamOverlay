@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   extensionLocaleFromSearch,
+  resolveExtensionLocale,
   shouldAutoExpand,
   shouldHideExtension,
   viewerDataFrom,
@@ -48,4 +49,13 @@ test("오버레이 자동 확장은 NEXT 신규 진입 시 1회만", () => {
   assert.equal(shouldAutoExpand("next", "next"), false);
   assert.equal(shouldAutoExpand("next", "joined"), false);
   assert.equal(shouldAutoExpand("active", "joined"), false);
+});
+
+test("저장된 시청자 언어 선택이 Twitch 언어보다 우선한다", () => {
+  assert.equal(resolveExtensionLocale("?language=ko", "ja"), "ja");
+  assert.equal(resolveExtensionLocale("?language=en", "ko"), "ko");
+  /* 저장값이 없거나 오염되면 Twitch 언어 자동으로 복귀 */
+  assert.equal(resolveExtensionLocale("?language=ko", null), "ko");
+  assert.equal(resolveExtensionLocale("?language=en", "de"), "ja");
+  assert.equal(resolveExtensionLocale("", undefined), "ja");
 });

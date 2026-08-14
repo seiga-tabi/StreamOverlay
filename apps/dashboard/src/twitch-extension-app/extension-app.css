@@ -27,12 +27,60 @@ body {
   pointer-events: none;
 }
 
-.twitch-ext-overlay-root > .twitch-ext-collapsed,
-.twitch-ext-overlay-root > .twitch-ext-panel {
+.twitch-ext-overlay-widget {
   position: absolute;
   inset-block-start: var(--yoro-space-4);
   inset-inline-end: var(--yoro-space-4);
+  display: grid;
+  gap: var(--yoro-space-1);
+  justify-items: end;
   pointer-events: auto;
+}
+
+/* 시청자 언어 스위치 — 브랜드와 같은 최저 위계의 작은 칩 */
+.twitch-ext-locale {
+  display: inline-flex;
+  gap: 2px;
+  justify-content: flex-end;
+  padding: var(--yoro-space-1) 0 0;
+}
+
+.twitch-ext-locale > button {
+  min-block-size: 1.75rem;
+  padding: 0 var(--yoro-space-2);
+  border: thin solid transparent;
+  border-radius: var(--yoro-radius-pill);
+  background: transparent;
+  color: var(--yoro-color-text-muted);
+  font: var(--yoro-font-weight-bold) var(--yoro-font-size-xs)/1 var(--yoro-font-family-ja);
+  cursor: pointer;
+}
+
+.twitch-ext-locale > button[aria-pressed="true"] {
+  border-color: var(--yoro-color-border-strong);
+  background: var(--yoro-color-surface);
+  color: var(--yoro-color-secondary-strong);
+}
+
+.twitch-ext-locale > button:focus-visible {
+  outline: 2px solid var(--yoro-color-primary-strong);
+  outline-offset: 2px;
+}
+
+@media (pointer: coarse) {
+  .twitch-ext-locale > button { min-block-size: 2.75rem; }
+}
+
+/* 오버레이는 영상 위라 비선택 칩도 글라스 배경이 있어야 읽힙니다. */
+.twitch-ext-overlay-widget .twitch-ext-locale > button {
+  border-color: var(--yoro-color-border-strong);
+  background: var(--yoro-color-surface);
+  backdrop-filter: blur(14px);
+}
+
+.twitch-ext-overlay-widget .twitch-ext-locale > button[aria-pressed="true"] {
+  color: var(--yoro-color-secondary-strong);
+  border-color: var(--yoro-color-secondary-strong);
 }
 
 /* Video Component: Twitch 가 주는 고정 박스 안 — 컴팩트 카드를 좌상단에 채웁니다. */

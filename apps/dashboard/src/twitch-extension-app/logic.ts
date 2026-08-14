@@ -26,6 +26,34 @@ export function extensionLocaleFromSearch(search: string): ExtensionLocale {
   return language === "ko" || language.startsWith("ko-") ? "ko" : "ja";
 }
 
+export const EXTENSION_LOCALE_STORAGE_KEY = "yoro.twitch-ext.locale";
+
+/** 시청자가 패널에서 고른 언어가 최우선, 없으면 Twitch 언어 자동(그 외 ja). */
+export function resolveExtensionLocale(
+  search: string,
+  stored: string | null | undefined,
+): ExtensionLocale {
+  if (stored === "ko" || stored === "ja") return stored;
+  return extensionLocaleFromSearch(search);
+}
+
+/* Twitch iframe sandbox 에서 storage 접근이 거부될 수 있어 항상 가드합니다. */
+export function readStoredExtensionLocale(): string | null {
+  try {
+    return window.localStorage.getItem(EXTENSION_LOCALE_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function storeExtensionLocale(locale: ExtensionLocale): void {
+  try {
+    window.localStorage.setItem(EXTENSION_LOCALE_STORAGE_KEY, locale);
+  } catch {
+    /* 저장 불가 환경에서는 세션 동안만 유지됩니다. */
+  }
+}
+
 /** 서버 상태 + 클라이언트 일시 상태(joining)를 Viewer 데이터로 변환합니다. */
 export function viewerDataFrom(
   response: EbsViewerResponse,

@@ -27,6 +27,7 @@ const viewerJa = {
   nextMessage: "配信者の案内を確認してください",
   loadingLabel: "読み込み中",
   closeLabel: "閉じる",
+  localeSwitchLabel: "言語",
 } as const;
 
 const viewerKo: Record<keyof typeof viewerJa, string> = {
@@ -54,6 +55,7 @@ const viewerKo: Record<keyof typeof viewerJa, string> = {
   nextMessage: "방송인의 안내를 확인해 주세요",
   loadingLabel: "불러오는 중",
   closeLabel: "닫기",
+  localeSwitchLabel: "언어",
 };
 
 export const extensionViewerI18n = { ja: viewerJa, ko: viewerKo } as const;

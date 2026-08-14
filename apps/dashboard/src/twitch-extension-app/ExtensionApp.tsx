@@ -4,11 +4,14 @@ import {
   ExtensionViewerPanel,
   type ExtensionViewerData,
 } from "../features/twitch-extension/ExtensionViewer";
-import type { ExtensionLocale } from "../features/twitch-extension/extension-i18n";
+import { extensionViewerI18n, type ExtensionLocale } from "../features/twitch-extension/extension-i18n";
 import { cancelParticipation, EbsError, fetchViewer, joinParticipation } from "./ebs";
 import {
+  readStoredExtensionLocale,
+  resolveExtensionLocale,
   shouldAutoExpand,
   shouldHideExtension,
+  storeExtensionLocale,
   viewerDataFrom,
   type EbsViewerResponse,
 } from "./logic";
@@ -24,11 +27,41 @@ type TwitchAuth = { token: string; channelId: string };
  * - 신원 미공유 시 참가 버튼은 Twitch 의 requestIdShare 동의 UI 를 띄웁니다.
  * - 표시 설정·inactiveBehavior 는 스트리머가 대시보드에서 저장한 값(응답 포함)을 따릅니다.
  */
-export function ExtensionApp({ locale, variant }: {
+const LOCALE_NAMES: Record<ExtensionLocale, string> = { ja: "日本語", ko: "한국어" };
+
+function LocaleSwitch({ label, locale, onLocale }: {
+  label: string;
   locale: ExtensionLocale;
+  onLocale: (locale: ExtensionLocale) => void;
+}) {
+  return (
+    <div aria-label={label} className="twitch-ext-locale" role="group">
+      {(Object.keys(LOCALE_NAMES) as ExtensionLocale[]).map((candidate) => (
+        <button
+          aria-pressed={locale === candidate}
+          key={candidate}
+          onClick={() => onLocale(candidate)}
+          type="button"
+        >
+          {LOCALE_NAMES[candidate]}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export function ExtensionApp({ variant }: {
   /* component 는 Twitch 가 영상 위에 고정 박스를 주는 타입 — 컴팩트 카드를 상시 표시합니다. */
   variant: "panel" | "overlay" | "component";
 }) {
+  /* 언어: 시청자 선택(저장) > Twitch 언어 자동 > ja 기본. */
+  const [locale, setLocale] = useState<ExtensionLocale>(() =>
+    resolveExtensionLocale(window.location.search, readStoredExtensionLocale()));
+  const changeLocale = useCallback((next: ExtensionLocale) => {
+    setLocale(next);
+    storeExtensionLocale(next);
+    document.documentElement.lang = next;
+  }, []);
   const authRef = useRef<TwitchAuth | null>(null);
   const [response, setResponse] = useState<EbsViewerResponse | null>(null);
   const [failed, setFailed] = useState(false);
@@ -125,10 +158,20 @@ export function ExtensionApp({ locale, variant }: {
   /* 모집 없음 + 숨기기 설정 — 아무것도 그리지 않습니다(패널·오버레이 공통). */
   if (!failed && response && shouldHideExtension(response)) return null;
 
+  const localeSwitch = (
+    <LocaleSwitch
+      label={extensionViewerI18n[locale].localeSwitchLabel}
+      locale={locale}
+      onLocale={changeLocale}
+    />
+  );
+
   if (variant === "overlay" && !expanded) {
     return (
       <div className="twitch-ext-overlay-root">
-        <ExtensionOverlayCollapsed data={data} locale={locale} onExpand={() => setExpanded(true)} />
+        <span className="twitch-ext-overlay-widget">
+          <ExtensionOverlayCollapsed data={data} locale={locale} onExpand={() => setExpanded(true)} />
+        </span>
       </div>
     );
   }
@@ -146,7 +189,13 @@ export function ExtensionApp({ locale, variant }: {
     />
   );
 
-  if (variant === "overlay") return <div className="twitch-ext-overlay-root">{panel}</div>;
-  if (variant === "component") return <div className="twitch-ext-component-root">{panel}</div>;
-  return <div className="twitch-ext-panel-root">{panel}</div>;
+  if (variant === "overlay") {
+    return (
+      <div className="twitch-ext-overlay-root">
+        <span className="twitch-ext-overlay-widget">{panel}{localeSwitch}</span>
+      </div>
+    );
+  }
+  if (variant === "component") return <div className="twitch-ext-component-root">{panel}{localeSwitch}</div>;
+  return <div className="twitch-ext-panel-root">{panel}{localeSwitch}</div>;
 }
