@@ -1,0 +1,481 @@
+/*
+ * Twitch Extension — Viewer UI + 대시보드 관리 카드.
+ * 색·radius·타이포는 기존 yoro 토큰만 사용합니다(독립 디자인 시스템 금지).
+ * 근거: docs/mockups/twitch-extension-viewer.html
+ */
+
+/* ─────────── Viewer 공통(ExtensionShell) — Twitch 영상 위에서도 쓰는 light glass ─────────── */
+.twitch-ext-shell {
+  background: var(--yoro-color-surface);
+  backdrop-filter: blur(14px);
+  border: thin solid var(--yoro-color-border-strong);
+  border-radius: var(--yoro-radius-lg);
+  box-shadow: 0 6px 24px hsl(230 40% 40% / .1);
+  color: var(--yoro-color-text);
+  font-family: var(--yoro-font-family-ja);
+}
+
+.twitch-ext-panel {
+  display: grid;
+  gap: var(--yoro-space-3);
+  inline-size: 100%;
+  max-inline-size: 19.875rem; /* Twitch panel 318px */
+  padding: var(--yoro-space-4);
+}
+
+.twitch-ext-panel.is-overlay {
+  max-inline-size: 15rem; /* video overlay expanded 240px */
+  padding: var(--yoro-space-3);
+  gap: var(--yoro-space-2);
+}
+
+.twitch-ext-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--yoro-space-2);
+  min-inline-size: 0;
+}
+
+.twitch-ext-logo {
+  color: var(--yoro-color-text-muted);
+  font: 800 .6875rem/1 Inter, var(--yoro-font-family-base);
+  letter-spacing: .02em;
+  flex: none;
+}
+
+.twitch-ext-logo > b {
+  color: var(--yoro-color-secondary-strong);
+}
+
+.twitch-ext-game {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--yoro-space-1);
+  min-inline-size: 0;
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.twitch-ext-game > svg {
+  inline-size: .875rem;
+  block-size: .875rem;
+  color: var(--yoro-color-secondary-strong);
+  flex: none;
+}
+
+/* 긴 게임명·일본어 장문 1줄 ellipsis */
+.twitch-ext-game__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.twitch-ext-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--yoro-space-1);
+  justify-self: start;
+  padding: 2px var(--yoro-space-3);
+  border-radius: var(--yoro-radius-pill);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-black);
+}
+
+.twitch-ext-status::before {
+  content: "";
+  inline-size: 7px;
+  block-size: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.twitch-ext-status.is-open { background: var(--yoro-color-success-bg); color: var(--yoro-color-success); }
+.twitch-ext-status.is-paused, .twitch-ext-status.is-full { background: var(--yoro-color-warning-bg); color: var(--yoro-color-warning); }
+.twitch-ext-status.is-closed { background: hsl(226 20% 92%); color: var(--yoro-color-text-muted); }
+.twitch-ext-status.is-error { background: var(--yoro-color-danger-bg); color: var(--yoro-color-danger); }
+
+.twitch-ext-waiting {
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.twitch-ext-waiting > b {
+  color: var(--yoro-color-text-strong);
+  font-weight: var(--yoro-font-weight-black);
+}
+
+.twitch-ext-join {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--yoro-space-2);
+  min-block-size: 2.75rem;
+  border: 0;
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-secondary-strong);
+  color: #fff;
+  font: var(--yoro-font-weight-black) var(--yoro-font-size-sm)/1 var(--yoro-font-family-ja);
+  cursor: pointer;
+  transition: background 150ms ease, transform 80ms ease, box-shadow 150ms ease;
+}
+
+.twitch-ext-join:hover:not(:disabled) {
+  background: hsl(253 61% 56%);
+  box-shadow: 0 4px 14px hsl(253 61% 62% / .35);
+}
+
+.twitch-ext-join:active:not(:disabled) { transform: translateY(1px); }
+
+.twitch-ext-join:disabled {
+  background: hsl(226 20% 90%);
+  color: var(--yoro-color-text-muted);
+  cursor: not-allowed;
+}
+
+.twitch-ext-join.is-loading {
+  background: hsl(253 40% 74%);
+  color: #fff;
+  cursor: progress;
+}
+
+.twitch-ext-join:focus-visible,
+.twitch-ext-cancel:focus-visible,
+.twitch-ext-collapsed:focus-visible {
+  outline: 2px solid var(--yoro-color-primary-strong);
+  outline-offset: 2px;
+}
+
+.twitch-ext-spinner {
+  inline-size: .875rem;
+  block-size: .875rem;
+  border: 2px solid hsl(0 0% 100% / .45);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: twitch-ext-spin .8s linear infinite;
+}
+
+@keyframes twitch-ext-spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .twitch-ext-spinner { animation: none; }
+  .twitch-ext-skeleton { animation: none; }
+}
+
+.twitch-ext-cancel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 2.25rem;
+  border: thin solid var(--yoro-color-border-strong);
+  border-radius: var(--yoro-radius-md);
+  background: transparent;
+  color: var(--yoro-color-text-muted);
+  font: var(--yoro-font-weight-bold) var(--yoro-font-size-xs)/1 var(--yoro-font-family-ja);
+  cursor: pointer;
+  transition: color 150ms ease, border-color 150ms ease;
+}
+
+.twitch-ext-cancel:hover { color: var(--yoro-color-danger); border-color: var(--yoro-color-danger); }
+.twitch-ext-cancel.is-retry:hover { color: var(--yoro-color-primary-strong); border-color: var(--yoro-color-primary-strong); }
+
+.twitch-ext-joined {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--yoro-space-1);
+  color: var(--yoro-color-success);
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-black);
+}
+
+.twitch-ext-joined > svg { inline-size: .9375rem; block-size: .9375rem; }
+
+.twitch-ext-queuepos { text-align: center; padding-block: var(--yoro-space-2) 0; }
+.twitch-ext-queuepos__label {
+  display: block;
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.twitch-ext-queuepos__num {
+  color: var(--yoro-color-secondary-strong);
+  font: var(--yoro-font-weight-black) 2.125rem/1.2 Inter, var(--yoro-font-family-base);
+  font-variant-numeric: tabular-nums;
+}
+
+/* NEXT — 정적 lavender ring, 애니메이션 없음 */
+.twitch-ext-panel.is-next {
+  border-color: var(--yoro-color-secondary-strong);
+  box-shadow: 0 0 0 4px hsl(253 61% 62% / .14), 0 6px 24px hsl(230 40% 40% / .1);
+  text-align: center;
+}
+
+.twitch-ext-next-tag {
+  justify-self: center;
+  padding: 2px var(--yoro-space-3);
+  border-radius: var(--yoro-radius-pill);
+  background: linear-gradient(90deg, var(--yoro-color-secondary-strong), var(--yoro-color-primary-strong));
+  color: #fff;
+  font: var(--yoro-font-weight-black) .6875rem/1.7 Inter, var(--yoro-font-family-base);
+  letter-spacing: .12em;
+}
+
+.twitch-ext-next-title {
+  color: var(--yoro-color-text-strong);
+  font-size: var(--yoro-font-size-md);
+}
+
+.twitch-ext-message {
+  margin: 0;
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-sm);
+  text-align: center;
+}
+
+.twitch-ext-skeletons { display: grid; gap: var(--yoro-space-2); }
+
+.twitch-ext-skeleton {
+  display: block;
+  border-radius: var(--yoro-radius-sm);
+  background: linear-gradient(90deg, hsl(226 30% 93%) 25%, hsl(226 40% 97%) 50%, hsl(226 30% 93%) 75%);
+  background-size: 200% 100%;
+  animation: twitch-ext-shimmer 1.4s infinite;
+}
+
+@keyframes twitch-ext-shimmer { to { background-position: -200% 0; } }
+
+.twitch-ext-collapsed {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--yoro-space-2);
+  padding: var(--yoro-space-2) var(--yoro-space-3);
+  font: var(--yoro-font-weight-black) var(--yoro-font-size-xs)/1 var(--yoro-font-family-ja);
+  color: var(--yoro-color-text);
+  cursor: pointer;
+}
+
+.twitch-ext-collapsed__dot {
+  inline-size: 7px;
+  block-size: 7px;
+  border-radius: 50%;
+  background: var(--yoro-color-success);
+}
+
+/* ─────────── Dashboard 관리 카드 ─────────── */
+.twitch-ext-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--yoro-space-5);
+  margin-block-start: var(--yoro-space-6);
+  padding: var(--yoro-space-5);
+  border: thin solid var(--yoro-color-border);
+  border-radius: var(--yoro-radius-lg);
+  background: var(--yoro-color-surface-strong);
+  /* 참가형 콘솔의 흐린 상속색이 라벨을 씻어내지 않게 카드에서 본문색을 고정합니다. */
+  color: var(--yoro-color-text);
+}
+
+.twitch-ext-card__head > h2,
+.twitch-ext-card__head > h3 {
+  color: var(--yoro-color-text-strong);
+}
+
+.twitch-ext-card__toggle > span:first-child,
+.twitch-ext-card__radios label > span {
+  color: var(--yoro-color-text);
+}
+
+.twitch-ext-card__head {
+  display: flex;
+  align-items: center;
+  gap: var(--yoro-space-2);
+  flex-wrap: wrap;
+}
+
+.twitch-ext-card__head > h2,
+.twitch-ext-card__head > h3 {
+  margin: 0;
+  font-size: var(--yoro-font-size-md);
+}
+
+.twitch-ext-card h3 {
+  margin: var(--yoro-space-4) 0 var(--yoro-space-2);
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.twitch-ext-card__badge {
+  padding: 2px var(--yoro-space-2);
+  border: thin solid var(--yoro-color-warning);
+  border-radius: var(--yoro-radius-pill);
+  background: var(--yoro-color-warning-bg);
+  color: var(--yoro-color-warning);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-black);
+}
+
+.twitch-ext-card__description {
+  margin: var(--yoro-space-1) 0 0;
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-sm);
+}
+
+.twitch-ext-card__note {
+  margin: var(--yoro-space-2) 0 0;
+  padding: var(--yoro-space-2) var(--yoro-space-3);
+  border: thin solid var(--yoro-color-border-strong);
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-surface-muted);
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-xs);
+}
+
+.twitch-ext-card__toggles { display: grid; gap: 2px; }
+
+.twitch-ext-card__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--yoro-space-3);
+  min-block-size: 2.375rem;
+  font-size: var(--yoro-font-size-sm);
+  cursor: pointer;
+}
+
+.twitch-ext-card__toggle > input {
+  position: absolute;
+  opacity: 0;
+  inline-size: 1px;
+  block-size: 1px;
+}
+
+.twitch-ext-card__switch {
+  position: relative;
+  inline-size: 2.375rem;
+  block-size: 1.375rem;
+  border-radius: var(--yoro-radius-pill);
+  background: hsl(226 20% 86%);
+  transition: background 150ms ease;
+  flex: none;
+}
+
+.twitch-ext-card__switch::after {
+  content: "";
+  position: absolute;
+  inset-block-start: 3px;
+  inset-inline-start: 3px;
+  inline-size: 1rem;
+  block-size: 1rem;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 150ms ease;
+}
+
+.twitch-ext-card__toggle > input:checked + .twitch-ext-card__switch { background: var(--yoro-color-secondary-strong); }
+.twitch-ext-card__toggle > input:checked + .twitch-ext-card__switch::after { transform: translateX(1rem); }
+.twitch-ext-card__toggle > input:focus-visible + .twitch-ext-card__switch { outline: 2px solid var(--yoro-color-primary-strong); outline-offset: 2px; }
+
+.twitch-ext-card__segmented {
+  display: inline-flex;
+  border: thin solid var(--yoro-color-border-strong);
+  border-radius: var(--yoro-radius-pill);
+  overflow: hidden;
+}
+
+.twitch-ext-card__segmented > button {
+  min-block-size: 2.25rem;
+  padding: 0 var(--yoro-space-3);
+  border: 0;
+  background: transparent;
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-bold);
+  cursor: pointer;
+}
+
+.twitch-ext-card__segmented > button.is-active {
+  background: var(--yoro-color-secondary-strong);
+  color: #fff;
+}
+
+.twitch-ext-card__radios { display: grid; gap: var(--yoro-space-1); }
+
+.twitch-ext-card__radios label {
+  display: flex;
+  align-items: center;
+  gap: var(--yoro-space-2);
+  min-block-size: 2.25rem;
+  font-size: var(--yoro-font-size-sm);
+  cursor: pointer;
+}
+
+.twitch-ext-card__sim {
+  display: flex;
+  gap: var(--yoro-space-1);
+  margin-block-start: var(--yoro-space-3);
+  flex-wrap: wrap;
+}
+
+.twitch-ext-card__sim > button {
+  min-block-size: 2rem;
+  padding: 0 var(--yoro-space-2);
+  border: thin solid var(--yoro-color-border-strong);
+  border-radius: var(--yoro-radius-pill);
+  background: transparent;
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-bold);
+  cursor: pointer;
+}
+
+.twitch-ext-card__sim > button.is-active {
+  border-color: var(--yoro-color-secondary-strong);
+  background: hsl(253 61% 62% / .12);
+  color: var(--yoro-color-secondary-strong);
+}
+
+.twitch-ext-card__stage {
+  display: grid;
+  justify-items: center;
+  margin-block-start: var(--yoro-space-3);
+  padding: var(--yoro-space-4);
+  border: thin dashed var(--yoro-color-border-strong);
+  border-radius: var(--yoro-radius-md);
+  background: var(--yoro-color-bg);
+}
+
+.twitch-ext-card__hidden {
+  margin: var(--yoro-space-4) 0;
+  color: var(--yoro-color-text-muted);
+  font-size: var(--yoro-font-size-sm);
+}
+
+/* Overlay 미리보기 — 미니 방송 화면 위에 배치 */
+.twitch-ext-card__video {
+  position: relative;
+  inline-size: 100%;
+  max-inline-size: 26rem;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--yoro-radius-md);
+  background: radial-gradient(circle at 30% 35%, #3d4663 0%, #23283b 55%, #16192a 100%);
+  overflow: hidden;
+}
+
+.twitch-ext-card__video > .twitch-ext-collapsed {
+  position: absolute;
+  inset-block-start: var(--yoro-space-3);
+  inset-inline-end: var(--yoro-space-3);
+}
+
+.twitch-ext-card__video-widget {
+  position: absolute;
+  inset-block-start: var(--yoro-space-3);
+  inset-inline-start: var(--yoro-space-3);
+}
+
+@media (max-width: 64rem) {
+  .twitch-ext-card { grid-template-columns: 1fr; }
+}

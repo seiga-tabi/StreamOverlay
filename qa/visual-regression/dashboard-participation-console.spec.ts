@@ -184,3 +184,49 @@ test("콘솔 v2 — 모바일은 슬롯 요약 + 하단 바 한 벌", async ({ p
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(0);
 });
+
+test("Twitch Extension 카드 — 설정이 실컴포넌트 Live Preview 에 즉시 반영된다", async ({ page }) => {
+  await page.setViewportSize(DESKTOP_VIEWPORT);
+  await installRoutes(page, participationState(RECRUIT_QUEUE));
+  await page.goto("/dashboard/streaming/participation");
+
+  const card = page.getByTestId("twitch-extension-card");
+  await card.scrollIntoViewIfNeeded();
+  /* 가짜 연동 상태 금지 — Connected 대신 정직한 준비 중 배지 */
+  await expect(card.getByText("연동 준비 중")).toBeVisible();
+  await expect(card).not.toContainText("Connected");
+
+  /* 기본 미리보기 = Panel · 모집 중(실 Viewer 컴포넌트, ko 카피) */
+  const preview = page.getByTestId("twitch-extension-preview");
+  await expect(preview.getByTestId("twitch-ext-panel")).toBeVisible();
+  await expect(preview.getByText("참가 모집 중")).toBeVisible();
+  await expect(preview.getByRole("button", { name: "참가하기" })).toBeVisible();
+  await expect(preview.getByText("League of Legends")).toBeVisible();
+
+  /* 표시 토글 → 즉시 반영: 현재 게임 끄기 */
+  await card.getByText("현재 게임", { exact: true }).click();
+  await expect(preview.getByText("League of Legends")).toHaveCount(0);
+
+  /* 상태 시뮬레이터: NEXT — lavender ring 카드 */
+  await card.getByRole("button", { name: "NEXT", exact: true }).click();
+  await expect(preview.getByText("당신 차례입니다!")).toBeVisible();
+
+  /* NEXT 표시 끄기 → 참가 완료로 강등 */
+  await card.getByText("NEXT 상태", { exact: true }).click();
+  await expect(preview.getByText("당신 차례입니다!")).toHaveCount(0);
+  await expect(preview.getByText("참가 신청 완료")).toBeVisible();
+  await expect(preview.getByText("#3")).toBeVisible();
+
+  /* 모집 없음 + Extension 숨기기(기본) → 숨김 안내 */
+  await card.getByRole("button", { name: "모집 없음", exact: true }).click();
+  await expect(preview.getByText("모집이 없어 Extension 이 숨겨진 상태입니다.")).toBeVisible();
+  /* 모집 없음 표시로 전환 → no_session 패널 */
+  await card.getByRole("button", { name: "모집 없음 표시" }).click();
+  await expect(preview.getByText("지금 진행 중인 참가 모집이 없습니다.")).toBeVisible();
+
+  /* Overlay 타입 → 미니 방송 화면 위 위젯 + (모집 중일 때) collapsed pill */
+  await card.getByRole("button", { name: "모집 중", exact: true }).click();
+  await card.getByText("Video Overlay", { exact: false }).click();
+  await expect(preview.locator(".twitch-ext-card__video")).toBeVisible();
+  await expect(preview.getByText(/참가 모집 중 · 4명/u)).toBeVisible();
+});

@@ -1,0 +1,138 @@
+export type ExtensionLocale = "ko" | "ja";
+
+/* Viewer UI 카피 — 일본 Twitch 시청자 기준(ja 우선), ko 동시 관리.
+ * docs/mockups/twitch-extension-viewer.html §04·§07 카피 확정본. */
+const viewerJa = {
+  statusOpen: "参加受付中",
+  statusPaused: "受付一時停止中",
+  statusClosed: "受付終了",
+  statusFull: "満員",
+  statusError: "接続エラー",
+  waiting: "現在 {count}人待機中",
+  collapsed: "参加受付中 · {count}人",
+  join: "参加する",
+  joining: "参加処理中…",
+  joinedOverlay: "参加しました",
+  joinedPanel: "参加申請完了",
+  myTurnLabel: "あなたの順番",
+  cancel: "参加をキャンセル",
+  pausedMessage: "現在、新規参加を受け付けていません。",
+  fullMessage: "現在、参加枠がいっぱいです。",
+  endedMessage: "ご参加ありがとうございました！",
+  noSessionMessage: "現在、参加募集はありません。",
+  errorMessage: "接続に問題が発生しました。",
+  retry: "再試行",
+  nextTag: "NEXT",
+  nextTitle: "あなたの番です！",
+  nextMessage: "配信者の案内を確認してください",
+  loadingLabel: "読み込み中",
+} as const;
+
+const viewerKo: Record<keyof typeof viewerJa, string> = {
+  statusOpen: "참가 모집 중",
+  statusPaused: "모집 일시정지",
+  statusClosed: "모집 종료",
+  statusFull: "만원",
+  statusError: "연결 오류",
+  waiting: "현재 {count}명 대기 중",
+  collapsed: "참가 모집 중 · {count}명",
+  join: "참가하기",
+  joining: "참가 처리 중…",
+  joinedOverlay: "참가했습니다",
+  joinedPanel: "참가 신청 완료",
+  myTurnLabel: "내 순번",
+  cancel: "참가 취소",
+  pausedMessage: "지금은 새 참가를 받지 않습니다.",
+  fullMessage: "지금은 참가 정원이 가득 찼습니다.",
+  endedMessage: "참여해 주셔서 감사합니다!",
+  noSessionMessage: "지금 진행 중인 참가 모집이 없습니다.",
+  errorMessage: "연결에 문제가 발생했습니다.",
+  retry: "다시 시도",
+  nextTag: "NEXT",
+  nextTitle: "당신 차례입니다!",
+  nextMessage: "방송인의 안내를 확인해 주세요",
+  loadingLabel: "불러오는 중",
+};
+
+export const extensionViewerI18n = { ja: viewerJa, ko: viewerKo } as const;
+
+/* Dashboard 관리 카드 카피 — ko 기본, ja 동시 관리. */
+const cardKo = {
+  title: "Twitch Extension",
+  description: "시청자에게 보이는 참가 위젯을 설정합니다. 스트리머 운영은 이 대시보드에서, Extension 은 시청자 화면만 담당합니다.",
+  comingSoonBadge: "연동 준비 중",
+  comingSoonNote: "Twitch 연동과 설정 저장은 준비 중입니다 — 아래 미리보기는 실제 시청자 UI 컴포넌트로 동작합니다.",
+  displayTitle: "표시 항목",
+  displayJoinButton: "참가 버튼",
+  displayGame: "현재 게임",
+  displayWaitingCount: "현재 대기 인원",
+  displayMyPosition: "내 순번",
+  displayCancelButton: "참가 취소 버튼",
+  displayNextState: "NEXT 상태",
+  inactiveTitle: "모집이 없을 때",
+  inactiveHide: "Extension 숨기기",
+  inactiveMessage: "모집 없음 표시",
+  typeTitle: "Extension 형태",
+  typePanel: "Panel — 방송 하단 패널",
+  typeOverlay: "Video Overlay — 영상 위 위젯",
+  previewTitle: "Live Preview",
+  previewDescription: "설정을 바꾸면 즉시 반영되는 시청자 화면입니다.",
+  previewHidden: "모집이 없어 Extension 이 숨겨진 상태입니다.",
+  previewVideoLabel: "방송 화면",
+  simLabel: "미리보기 상태",
+  simActive: "모집 중",
+  simJoined: "참가 완료",
+  simNext: "NEXT",
+  simPaused: "일시정지",
+  simFull: "만원",
+  simEnded: "종료",
+  simError: "오류",
+  simNoSession: "모집 없음",
+  simLoading: "로딩",
+} as const;
+
+const cardJa: Record<keyof typeof cardKo, string> = {
+  title: "Twitch Extension",
+  description: "視聴者に表示される参加ウィジェットを設定します。配信者の操作はこのダッシュボードで行い、Extension は視聴者画面のみを担当します。",
+  comingSoonBadge: "連携準備中",
+  comingSoonNote: "Twitch 連携と設定の保存は準備中です — 下のプレビューは実際の視聴者 UI コンポーネントで動作します。",
+  displayTitle: "表示項目",
+  displayJoinButton: "参加ボタン",
+  displayGame: "現在のゲーム",
+  displayWaitingCount: "現在の待機人数",
+  displayMyPosition: "自分の順番",
+  displayCancelButton: "参加キャンセルボタン",
+  displayNextState: "NEXT 状態",
+  inactiveTitle: "募集がないとき",
+  inactiveHide: "Extension を隠す",
+  inactiveMessage: "募集なしを表示",
+  typeTitle: "Extension の形",
+  typePanel: "Panel — 配信下部のパネル",
+  typeOverlay: "Video Overlay — 映像上のウィジェット",
+  previewTitle: "Live Preview",
+  previewDescription: "設定を変えると即座に反映される視聴者画面です。",
+  previewHidden: "募集がないため Extension が非表示の状態です。",
+  previewVideoLabel: "配信画面",
+  simLabel: "プレビュー状態",
+  simActive: "受付中",
+  simJoined: "参加済み",
+  simNext: "NEXT",
+  simPaused: "一時停止",
+  simFull: "満員",
+  simEnded: "終了",
+  simError: "エラー",
+  simNoSession: "募集なし",
+  simLoading: "読み込み",
+};
+
+export const extensionCardI18n = { ko: cardKo, ja: cardJa } as const;
+
+export function formatExtensionTemplate(
+  template: string,
+  values: Record<string, string | number>,
+): string {
+  return Object.entries(values).reduce(
+    (result, [key, value]) => result.replaceAll(`{${key}}`, String(value)),
+    template,
+  );
+}

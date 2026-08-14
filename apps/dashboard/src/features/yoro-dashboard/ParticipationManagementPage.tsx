@@ -26,6 +26,7 @@ import {
   getCurrentParticipationEntry
 } from "../participation/participation-display";
 import { ParticipationAnnouncementPanel } from "./ParticipationAnnouncementPanel";
+import { TwitchExtensionCard } from "../twitch-extension/TwitchExtensionCard";
 
 type Locale = "ko" | "ja";
 type EntryMutationStatus = Extract<
@@ -1360,6 +1361,10 @@ export function ParticipationManagementPage({
           </div>
         </>
       )}
+
+      {/* Extension 은 Viewer UI 전용 — 운영 제어는 위 콘솔이 담당하고,
+          이 카드는 표시 설정과 실컴포넌트 Live Preview 만 제공합니다. */}
+      <TwitchExtensionCard locale={locale} />
     </section>
   );
 }
