@@ -1,11 +1,14 @@
-import { useCallback, useState, type CSSProperties } from "react";
+import { useMemo, useCallback, useState } from "react";
 import type { MinecraftItemReference, MinecraftRecipe, MinecraftRecipeType } from "@streamops/shared";
 import { MINECRAFT_RECIPE_TYPES } from "@streamops/shared";
 import { getMinecraftRecipes } from "../api/minecraft";
 import { minecraftI18n, type MinecraftLocale } from "../i18n/minecraft-i18n";
 import { useMinecraftCatalog } from "../hooks/useMinecraftCatalog";
-import { minecraftTileHue, resolveMinecraftName } from "../utils/names";
+import { useMinecraftRoute } from "../hooks/useMinecraftRoute";
+import { minecraftSearchQueryFromUrl, setMinecraftSearchUrl } from "../utils/routes";
+import { resolveMinecraftName } from "../utils/names";
 import { MinecraftCatalogShell, MinecraftName } from "./MinecraftCatalogShell";
+import { MinecraftItemImage } from "./MinecraftItemImage";
 
 const TYPE_LABEL_KEYS = {
   crafting: "recipeTypeCrafting",
@@ -17,23 +20,12 @@ const TYPE_LABEL_KEYS = {
 
 const CRAFT_GRID_SIZE = 3;
 
-/* 텍스처 대신 쓰는 자체 스와치 — ID 해시 색 + 2글자 라벨(전체 명칭은 aria/title). */
 function ItemSwatch({ locale, reference }: {
   locale: MinecraftLocale;
   reference: MinecraftItemReference;
 }) {
   const name = resolveMinecraftName(reference.name, locale);
-  return (
-    <span
-      aria-label={name.text}
-      className="minecraft-item-swatch"
-      role="img"
-      style={{ "--minecraft-tile-hue": minecraftTileHue(reference.id) } as CSSProperties}
-      title={name.text}
-    >
-      {name.text.slice(0, 2)}
-    </span>
-  );
+  return <MinecraftItemImage fallbackText={name.text} id={reference.id} label={name.text} />;
 }
 
 function CraftSlot({ locale, reference }: {
@@ -114,7 +106,10 @@ function RecipeCard({ locale, recipe }: { locale: MinecraftLocale; recipe: Minec
 
 export function MinecraftRecipesPage({ locale }: { locale: MinecraftLocale }) {
   const text = minecraftI18n[locale];
-  const [search, setSearch] = useState("");
+  /* 검색어의 단일 원본은 URL 의 ?q= — 공유·새로고침·뒤로가기·nav 재클릭이 전부 일관됩니다. */
+  const { locationRevision } = useMinecraftRoute();
+  const search = useMemo(() => minecraftSearchQueryFromUrl(), [locationRevision]);
+  const submitSearch = useCallback((value: string) => setMinecraftSearchUrl("recipes", value), []);
   const [type, setType] = useState<MinecraftRecipeType | "all">("all");
   const fetcher = useCallback(
     (page: number, signal: AbortSignal) =>
@@ -160,7 +155,7 @@ export function MinecraftRecipesPage({ locale }: { locale: MinecraftLocale }) {
       loadMoreLoading={catalog.loadMoreLoading}
       locale={locale}
       metadata={catalog.metadata}
-      onSearch={setSearch}
+      onSearch={submitSearch}
       pagination={catalog.pagination}
       retry={catalog.retry}
       search={search}

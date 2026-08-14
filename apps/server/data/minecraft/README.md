@@ -18,6 +18,8 @@
 
 upstream README는 일부 과거 데이터의 wiki 계열 추출 이력을 별도로 경고한다. 따라서 YORO.gg artifact에는 canonical ID, 정수·boolean 수치와 recipe 구조만 넣는다. `displayName`, 설명문, 텍스처, 이미지, 외부 위키 본문은 임포트하지 않는다. Minecraft Wiki 문구를 복사하거나 번안하지 않는다.
 
+공개 UI의 게임 텍스처는 artifact나 저장소에 복사하지 않는다. 대시보드가 `assets.mcasset.cloud`의 버전 고정 `1.21.11` 경로에서 직접 읽으며, canonical ID를 item → block 경로로만 변환한다. 외부 URL 입력은 받지 않고 CDN 장애·404는 자체 스와치로 닫힌다. 게임 텍스처의 권리는 Mojang·Microsoft에 있으며 비공식 서비스 고지를 항상 함께 표시한다.
+
 ## 번역 overlay
 
 `apps/server/src/data/minecraft-translations.json`은 공식 게임 내 명칭을 별도로 검수한 뒤 추가하는 overlay다. 각 항목은 아래 필드만 허용한다.

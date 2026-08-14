@@ -5938,7 +5938,7 @@ export function PublicLolPage({
         setProfile(null);
         setError("");
         setActiveMainPage(route.page);
-        setActiveNav(route.page === "palworld" || route.page === "valorant" || route.page === "privacy" || route.page === "terms" || route.page === "contact" ? "search" : "community");
+        setActiveNav(route.page === "palworld" || route.page === "valorant" || route.page === "minecraft" || route.page === "privacy" || route.page === "terms" || route.page === "contact" ? "search" : "community");
         setStreamerRegisterOpen(false);
         if (route.page === "followJoin") {
           setPublicParticipationSessionId(new URLSearchParams(window.location.search).get("session")?.trim() ?? "");
@@ -6212,7 +6212,7 @@ export function PublicLolPage({
       setActiveNav("search");
       setPublicPath(legalPath);
     } else {
-      setActiveNav(page === "palworld" || page === "valorant" ? "search" : "community");
+      setActiveNav(page === "palworld" || page === "valorant" || page === "minecraft" ? "search" : "community");
       const pagePath = publicPathForPage(page);
       if (pagePath) setPublicPath(pagePath);
     }
@@ -6479,13 +6479,15 @@ export function PublicLolPage({
   }
 
   function renderMainMenuPage() {
-    if (activeMainPage === "palworld" || activeMainPage === "valorant") {
+    /* App 이 publicroutechange 로 게임 전용 페이지로 갈아끼우기 전의 순간 placeholder */
+    if (activeMainPage === "palworld" || activeMainPage === "valorant" || activeMainPage === "minecraft") {
+      const gameLabel = activeMainPage === "minecraft" ? "minecraft" : "palworld";
       return (
         <section
           className="public-game-empty-page"
-          aria-label={t().palworld}
-          data-ko={publicI18n.ko.palworld}
-          data-ja={publicI18n.ja.palworld}
+          aria-label={t()[gameLabel]}
+          data-ko={publicI18n.ko[gameLabel]}
+          data-ja={publicI18n.ja[gameLabel]}
         />
       );
     }

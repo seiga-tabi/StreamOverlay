@@ -6,6 +6,10 @@ import { expect, test, type Page } from "@playwright/test";
    어긋나면 클라이언트가 오류 화면을 그리므로 픽스처 자체가 계약 회귀 테스트입니다. */
 
 const SOURCE_REVISION = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+const TEST_TEXTURE_PNG = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/wHwAF/gL+X2n44wAAAABJRU5ErkJggg==",
+  "base64",
+);
 
 type LocalizedName = {
   en: string;
@@ -198,13 +202,20 @@ test.beforeEach(async ({ page }) => {
      (googletagmanager.com/a)을 이미지 요청으로 쏩니다 — "외부 origin 요청 0" 검사의
      간헐 실패 원인이라 여기서 차단합니다. GA 동작은 전용 consent 스펙이 검증합니다. */
   await page.route("https://www.googletagmanager.com/**", (route) => route.abort());
+  /* 실제 텍스처 CDN에 테스트가 의존하지 않도록 같은 origin 계약만 유지한 1px PNG로 대체합니다. */
+  await page.route("https://assets.mcasset.cloud/**", async (route) => {
+    await route.fulfill({ body: TEST_TEXTURE_PNG, contentType: "image/png", status: 200 });
+  });
 });
 
 test("위키 홈은 구성 소개와 비공식 고지를 렌더하고 외부 origin 요청·가로 overflow가 없다", async ({ page }) => {
   const externalAssets: string[] = [];
   page.on("request", (request) => {
     if (!["image", "font", "media"].includes(request.resourceType())) return;
-    if (!request.url().startsWith("http://127.0.0.1")) externalAssets.push(request.url());
+    const url = request.url();
+    /* 텍스처는 버전 고정 allowlist CDN(MinecraftItemImage)만 허용 — 그 외 외부 origin 은 0 */
+    if (url.startsWith("http://127.0.0.1") || url.startsWith("https://assets.mcasset.cloud/")) return;
+    externalAssets.push(url);
   });
   /* 카탈로그 API 실패 시나리오 — 홈은 준비 중 문구를 유지해야 합니다(가짜 수치 금지). */
   await page.route(/\/api\/minecraft\//u, async (route) => {
@@ -224,7 +235,7 @@ test("위키 홈은 구성 소개와 비공식 고지를 렌더하고 외부 ori
      computed color 를 읽기 전에 페이지 스타일 적용을 먼저 기다립니다. */
   await expect(page.locator(".minecraft-page-section")).toHaveCSS(
     "background-color",
-    "rgb(16, 20, 24)",
+    "rgb(15, 23, 36)",
   );
 
   /* 주요 텍스트 대비 AA(4.5:1) — 발로란트 2026-08-10 대비 회귀 방지와 같은 계약. */
@@ -247,8 +258,9 @@ test("위키 홈은 구성 소개와 비공식 고지를 렌더하고 외부 ori
     return [
       ".minecraft-hero__title",
       ".minecraft-hero > p",
-      ".minecraft-category-card > h3",
-      ".minecraft-category-card > p",
+      ".minecraft-core-card h3",
+      ".minecraft-core-card > p",
+      ".minecraft-aux-card__copy > strong",
       ".minecraft-unofficial-note",
     ].map((selector) => {
       const element = document.querySelector(selector);
@@ -266,15 +278,52 @@ test("위키 홈은 구성 소개와 비공식 고지를 렌더하고 외부 ori
   }
 });
 
-test("위키 홈은 카탈로그 metadata 로 실제 수치를 보여 주고 카테고리 타일로 이동한다", async ({ page }) => {
+test("위키 홈은 카탈로그 metadata 로 실제 수치를 보여 주고 카테고리 카드로 이동한다", async ({ page }) => {
   await mockMinecraftCatalog(page);
   await page.goto("/minecraft");
   await expect(page.getByTestId("minecraft-home-stats")).toHaveText(
-    "Java 1.21.11 · 아이템 60 · 조합법 2 · 인챈트 2",
+    "Java 1.21.11 · minecraft-data (MIT) 기준",
   );
-  await page.getByRole("link", { name: /아이템 · 도구/u }).click();
+  /* 실카운트는 코어 카드에 배분 — fixture coverage: 아이템 60 · 조합법 2 · 인챈트 2 */
+  const itemsCard = page.getByRole("link", { name: /아이템 · 도구/u });
+  await expect(itemsCard.locator(".minecraft-core-card__count")).toHaveText("60개");
+  await expect(page.getByRole("link", { name: /^조합법/u }).locator(".minecraft-core-card__count")).toHaveText("2개");
+  await expect(page.getByRole("link", { name: /^인챈트/u }).locator(".minecraft-core-card__count")).toHaveText("2종");
+  /* 준비 중 기능은 클릭 전에 배지로 보임 */
+  await expect(page.getByRole("link", { name: /자료실/u }).getByText("준비 중")).toBeVisible();
+
+  /* 본문 컨테이너 — 발로란트와 같은 78rem 중앙 규격(전폭 회귀 방지) */
+  const section = await page.locator(".minecraft-page-section").boundingBox();
+  const viewport = page.viewportSize();
+  if (section && viewport) {
+    expect(section.width).toBeLessThanOrEqual(78 * 16 + 1);
+    if (viewport.width > 78 * 16) {
+      expect(section.x).toBeGreaterThan(16);
+      expect(Math.abs(section.x - (viewport.width - section.x - section.width))).toBeLessThanOrEqual(2);
+    }
+  }
+  await itemsCard.click();
   await expect(page).toHaveURL(/\/minecraft\/items$/u);
   await expect(page.getByRole("heading", { name: "아이템", exact: true })).toBeVisible();
+});
+
+test("홈 검색은 스코프에 맞는 카탈로그 페이지의 ?q= 로 이동하고 초기 검색어가 적용된다", async ({ page }) => {
+  await mockMinecraftCatalog(page);
+  await page.goto("/minecraft");
+  const search = page.getByRole("search", { name: "카탈로그 검색" }).getByRole("searchbox");
+  await search.fill("다이아몬드 검");
+  await page.getByRole("button", { name: "검색", exact: true }).click();
+  await expect(page).toHaveURL(/\/minecraft\/recipes\?q=/u);
+  await expect(page.getByTestId("minecraft-recipe-card")).toHaveCount(1);
+  await expect(page.getByText("1개", { exact: true })).toBeVisible();
+
+  /* 스코프 칩 전환 — 아이템 대상 검색 */
+  await page.goBack();
+  await page.getByRole("group", { name: "검색 대상" }).getByRole("button", { name: "아이템", exact: true }).click();
+  await search.fill("다이아몬드 검");
+  await page.getByRole("button", { name: "검색", exact: true }).click();
+  await expect(page).toHaveURL(/\/minecraft\/items\?q=/u);
+  await expect(page.getByTestId("minecraft-item-row")).toHaveCount(1);
 });
 
 test("조합법 페이지는 3×3 그리드·자유 배치·유형 칩·미제공 비활성을 렌더한다", async ({ page }) => {
@@ -289,6 +338,7 @@ test("조합법 페이지는 3×3 그리드·자유 배치·유형 칩·미제�
   await expect(shaped.locator(".minecraft-craft-grid .minecraft-craft-cell")).toHaveCount(9);
   await expect(shaped.locator(".minecraft-craft-out")).toBeVisible();
   await expect(shaped.getByRole("img", { name: "다이아몬드" }).first()).toBeVisible();
+  await expect(shaped.locator('img[src*="/textures/item/diamond.png"]').first()).toBeVisible();
   await expect(shaped.getByText("막대기", { exact: false }).first()).toBeVisible();
 
   /* shapeless — 그리드 대신 재료 슬롯 나열 + 자유 배치 표기, 미번역 명칭은 EN 원문 + 배지 */
@@ -304,6 +354,25 @@ test("조합법 페이지는 3×3 그리드·자유 배치·유형 칩·미제�
   await expect(chips.getByRole("button", { name: /제련/u })).toBeDisabled();
   await expect(chips.getByRole("button", { name: /양조/u })).toBeDisabled();
   await expect(page.getByText("데이터: minecraft-data (MIT) · Java 1.21.11", { exact: false })).toBeVisible();
+});
+
+test("아이템 텍스처가 item 경로에 없으면 block 경로를 시도하고 CDN 장애 시 자체 fallback을 표시한다", async ({ page }) => {
+  await page.unroute("https://assets.mcasset.cloud/**");
+  await page.route("https://assets.mcasset.cloud/**", async (route) => {
+    const url = route.request().url();
+    if (url.includes("/textures/block/mossy_cobblestone.png")) {
+      await route.fulfill({ body: TEST_TEXTURE_PNG, contentType: "image/png", status: 200 });
+      return;
+    }
+    await route.fulfill({ body: "not found", contentType: "text/plain", status: 404 });
+  });
+  await mockMinecraftCatalog(page);
+  await page.goto("/minecraft/recipes");
+
+  const mossy = page.getByTestId("minecraft-recipe-card").filter({ hasText: "Mossy Cobblestone" });
+  await expect(mossy.locator('img[src*="/textures/block/mossy_cobblestone.png"]')).toBeVisible();
+  const vine = mossy.getByRole("img", { name: "Vine" });
+  await expect(vine.locator(".minecraft-item-swatch__fallback")).toHaveText("Vi");
 });
 
 test("아이템 페이지는 검색·페이지네이션(더 보기)·빈 결과를 처리한다", async ({ page }) => {
@@ -364,6 +433,36 @@ test("더 보기 도중 데이터 세대(sourceRevision)가 바뀌면 병합하�
   /* 같은 세대끼리는 정상 누적 */
   await page.getByRole("button", { name: "더 보기" }).click();
   await expect(page.getByTestId("minecraft-item-row")).toHaveCount(55);
+});
+
+test("카탈로그 검색은 URL(?q=)과 동기화된다 — nav 재클릭·뒤로가기 포함", async ({ page }) => {
+  await mockMinecraftCatalog(page);
+  /* 딥링크: ?q= 가 목록·입력 모두에 적용 */
+  await page.goto("/minecraft/items?q=%EB%8B%A4%EC%9D%B4%EC%95%84%EB%AA%AC%EB%93%9C%20%EA%B2%80");
+  await expect(page.getByTestId("minecraft-item-row")).toHaveCount(1);
+  const search = page.getByRole("searchbox", { name: "카탈로그 검색" });
+  await expect(search).toHaveValue("다이아몬드 검");
+
+  /* nav 로 같은 페이지 재클릭 → q 없는 URL → 목록·입력이 함께 초기화(과거: 필터 잔존 결함) */
+  const isMobile = (page.viewportSize()?.width ?? 1280) <= 768;
+  const nav = isMobile
+    ? page.getByTestId("minecraft-bottom-tab-bar")
+    : page.getByTestId("minecraft-secondary-nav");
+  await nav.getByRole("button", { name: "아이템" }).click();
+  await expect(page).toHaveURL(/\/minecraft\/items$/u);
+  await expect(page.getByTestId("minecraft-item-row")).toHaveCount(50);
+  await expect(search).toHaveValue("");
+
+  /* 페이지 내 검색 → URL 에 반영(공유·새로고침 가능) */
+  await search.fill("다이아몬드 검");
+  await search.press("Enter");
+  await expect(page).toHaveURL(/\/minecraft\/items\?q=/u);
+  await expect(page.getByTestId("minecraft-item-row")).toHaveCount(1);
+
+  /* 뒤로가기 → 검색 전 상태 복원 */
+  await page.goBack();
+  await expect(page).toHaveURL(/\/minecraft\/items$/u);
+  await expect(page.getByTestId("minecraft-item-row")).toHaveCount(50);
 });
 
 test("인챈트 카드는 레벨·획득 경로·적용 대상·상충 명칭을 표기한다", async ({ page }) => {
@@ -460,12 +559,19 @@ test("게임 선택기에서 마인크래프트로 이동하고 다시 다른 �
   const isMobile = (page.viewportSize()?.width ?? 1280) <= 768;
   test.skip(isMobile, "모바일은 통합 메뉴 시트 경로를 쓰므로 데스크톱 드롭다운만 검증합니다.");
   await mockMinecraftCatalog(page);
-  await page.goto("/palworld");
+  /* LoL 메인(/)은 PUBLIC_PAGE_PATHS 경유라 별도 경로 — minecraft 항목 누락 회귀 방지
+     (2026-08-14: 맵 누락으로 메인에서만 선택이 무시되던 결함) */
+  await page.goto("/");
   await page.getByRole("button", { name: "게임 메뉴" }).click();
   await page.getByRole("option", { name: "마인크래프트 선택" }).click();
   await expect(page).toHaveURL(/\/minecraft$/u);
   await expect(page.getByRole("heading", { name: "무엇이든 찾는 마인크래프트 위키" })).toBeVisible();
+
   await page.getByRole("button", { name: "게임 메뉴" }).click();
   await page.getByRole("option", { name: "Palworld 선택" }).click();
   await expect(page).toHaveURL(/\/palworld$/u);
+  await page.getByRole("button", { name: "게임 메뉴" }).click();
+  await page.getByRole("option", { name: "마인크래프트 선택" }).click();
+  await expect(page).toHaveURL(/\/minecraft$/u);
+  await expect(page.getByRole("heading", { name: "무엇이든 찾는 마인크래프트 위키" })).toBeVisible();
 });

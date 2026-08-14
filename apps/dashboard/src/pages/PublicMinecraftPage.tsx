@@ -29,7 +29,7 @@ export function PublicMinecraftPage() {
   const text = minecraftI18n[locale];
   setActivePublicLocale(locale);
 
-  useEffect(() => applyMinecraftSeo(page ?? "home", locale), [locale, page]);
+  useEffect(() => applyMinecraftSeo(page, locale), [locale, page]);
 
   const handleLocale = useCallback((nextLocale: MinecraftLocale) => {
     setActivePublicLocale(nextLocale);

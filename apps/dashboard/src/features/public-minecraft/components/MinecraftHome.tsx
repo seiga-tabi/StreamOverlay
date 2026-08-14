@@ -1,19 +1,26 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import type { MinecraftCatalogMetadata } from "@streamops/shared";
-import { getMinecraftItems } from "../api/minecraft";
+import { getMinecraftItems, MINECRAFT_SEARCH_MAX_LENGTH } from "../api/minecraft";
 import { minecraftI18n, type MinecraftLocale } from "../i18n/minecraft-i18n";
-import { setMinecraftUrl, minecraftPathForPage, type MinecraftPage } from "../utils/routes";
+import { setMinecraftUrl, setMinecraftSearchUrl, minecraftPathForPage, type MinecraftPage } from "../utils/routes";
 import { formatMinecraftTemplate } from "./MinecraftCatalogShell";
+import { MinecraftItemImage } from "./MinecraftItemImage";
 
-/* 마인크래프트 위키 홈 — 카탈로그 metadata 로 실제 수치를 소개합니다.
+type MinecraftSearchScope = Extract<MinecraftPage, "recipes" | "items" | "enchants">;
+
+const SCOPES: readonly MinecraftSearchScope[] = ["recipes", "items", "enchants"];
+
+/* 마인크래프트 위키 홈 — 히어로가 곧 검색입니다(docs/mockups/minecraft-home-redesign.html).
  *
- * 수치는 /api/minecraft/items?limit=1 한 번으로 얻는 metadata.coverage 이며,
- * 실패하거나 data_unavailable 이면 기존 "준비 중" 문구를 그대로 유지합니다(가짜 수치 금지).
- * 근거: docs/mockups/minecraft-vertical.html §02·§09 (라이선스·자체 작성 원칙)
+ * 검색은 신규 API 없이 카탈로그 페이지의 ?q= 로 이동만 하고, 수치는
+ * /api/minecraft/items?limit=1 한 번의 metadata.coverage 를 코어 카드에 배분합니다.
+ * 실패·data_unavailable 이면 수치 없이 카드만 남습니다(가짜 수치 금지).
  */
 export function MinecraftHome({ locale }: { locale: MinecraftLocale }) {
   const text = minecraftI18n[locale];
   const [metadata, setMetadata] = useState<MinecraftCatalogMetadata | null>(null);
+  const [scope, setScope] = useState<MinecraftSearchScope>("recipes");
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -28,20 +35,51 @@ export function MinecraftHome({ locale }: { locale: MinecraftLocale }) {
     return () => controller.abort();
   }, []);
 
-  const categories: Array<{
-    key: string;
-    page?: MinecraftPage;
+  const scopeLabels: Record<MinecraftSearchScope, string> = {
+    recipes: text.recipes,
+    items: text.items,
+    enchants: text.enchants,
+  };
+
+  const coreCards: Array<{
+    page: MinecraftSearchScope;
+    textureId: string;
     title: string;
     description: string;
-    phase?: string;
+    count: number | undefined;
+    countTemplate: string;
   }> = [
-    { key: "recipes", page: "recipes", title: text.catRecipesTitle, description: text.catRecipesDescription },
-    { key: "items", page: "items", title: text.catItemsTitle, description: text.catItemsDescription },
-    { key: "enchants", page: "enchants", title: text.catEnchantsTitle, description: text.catEnchantsDescription },
-    { key: "mobs", title: text.catMobsTitle, description: text.catMobsDescription, phase: text.catMobsPhase },
-    { key: "library", page: "library", title: text.catLibraryTitle, description: text.catLibraryDescription },
-    { key: "patch", page: "patchNotes", title: text.catPatchTitle, description: text.catPatchDescription },
+    {
+      page: "recipes",
+      textureId: "crafting_table",
+      title: text.catRecipesTitle,
+      description: text.catRecipesDescription,
+      count: metadata?.coverage.recipes,
+      countTemplate: text.homeCountRecipes,
+    },
+    {
+      page: "items",
+      textureId: "diamond_pickaxe",
+      title: text.catItemsTitle,
+      description: text.catItemsDescription,
+      count: metadata?.coverage.items,
+      countTemplate: text.homeCountItems,
+    },
+    {
+      page: "enchants",
+      textureId: "enchanted_book",
+      title: text.catEnchantsTitle,
+      description: text.catEnchantsDescription,
+      count: metadata?.coverage.enchants,
+      countTemplate: text.homeCountEnchants,
+    },
   ];
+
+  const cardClick = (page: MinecraftPage) => (event: MouseEvent<HTMLAnchorElement>) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    setMinecraftUrl(minecraftPathForPage(page));
+  };
 
   return (
     <div className="minecraft-home">
@@ -58,15 +96,41 @@ export function MinecraftHome({ locale }: { locale: MinecraftLocale }) {
         <p data-ja={minecraftI18n.ja.heroDescription} data-ko={minecraftI18n.ko.heroDescription}>
           {text.heroDescription}
         </p>
+        <form
+          aria-label={text.searchLabel}
+          className="minecraft-hero__search"
+          onSubmit={(event) => {
+            event.preventDefault();
+            setMinecraftSearchUrl(scope, query);
+          }}
+          role="search"
+        >
+          <input
+            aria-label={text.searchLabel}
+            maxLength={MINECRAFT_SEARCH_MAX_LENGTH}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder={text.homeSearchPlaceholder}
+            type="search"
+            value={query}
+          />
+          <button type="submit">{text.homeSearchSubmit}</button>
+        </form>
+        <div aria-label={text.homeScopeLabel} className="minecraft-hero__scope" role="group">
+          {SCOPES.map((candidate) => (
+            <button
+              aria-pressed={scope === candidate}
+              key={candidate}
+              onClick={() => setScope(candidate)}
+              type="button"
+            >
+              {scopeLabels[candidate]}
+            </button>
+          ))}
+        </div>
         {metadata ? (
-          <span className="minecraft-hero__status is-ready" data-testid="minecraft-home-stats">
-            {formatMinecraftTemplate(text.homeStatsReady, {
-              version: metadata.gameVersion,
-              items: metadata.coverage.items.toLocaleString(),
-              recipes: metadata.coverage.recipes.toLocaleString(),
-              enchants: metadata.coverage.enchants.toLocaleString(),
-            })}
-          </span>
+          <p className="minecraft-hero__statline" data-testid="minecraft-home-stats">
+            {formatMinecraftTemplate(text.homeVersionLine, { version: metadata.gameVersion })}
+          </p>
         ) : (
           <span
             className="minecraft-hero__status"
@@ -78,43 +142,64 @@ export function MinecraftHome({ locale }: { locale: MinecraftLocale }) {
         )}
       </section>
 
-      <section aria-labelledby="minecraft-category-title" className="minecraft-categories">
-        <h2 data-ja={minecraftI18n.ja.categoryTitle} data-ko={minecraftI18n.ko.categoryTitle} id="minecraft-category-title">
-          {text.categoryTitle}
-        </h2>
-        <div className="minecraft-categories__grid">
-          {categories.map((category) => (
-            category.page ? (
-              <a
-                className="minecraft-category-card is-link"
-                href={minecraftPathForPage(category.page)}
-                key={category.key}
-                onClick={(event) => {
-                  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-                  event.preventDefault();
-                  setMinecraftUrl(minecraftPathForPage(category.page!));
-                }}
-              >
-                <h3>{category.title}</h3>
-                <p>{category.description}</p>
-              </a>
-            ) : (
-              <article className="minecraft-category-card" key={category.key}>
-                <h3>
-                  {category.title}
-                  {category.phase
-                    ? <span className="minecraft-category-card__phase">{category.phase}</span>
-                    : null}
-                </h3>
-                <p>{category.description}</p>
-              </article>
-            )
-          ))}
-        </div>
+      <nav aria-label={text.homeCoreLabel} className="minecraft-core">
+        {coreCards.map((card) => (
+          <a
+            className="minecraft-core-card"
+            href={minecraftPathForPage(card.page)}
+            key={card.page}
+            onClick={cardClick(card.page)}
+          >
+            <span aria-hidden="true" className="minecraft-core-card__arrow">→</span>
+            <span className="minecraft-core-card__head">
+              <MinecraftItemImage decorative fallbackText={card.title} id={card.textureId} label={card.title} />
+              <h3>{card.title}</h3>
+            </span>
+            {card.count !== undefined ? (
+              <span className="minecraft-core-card__count">
+                {card.count.toLocaleString()}
+                <small>{card.countTemplate.replace("{count}", "").trim()}</small>
+              </span>
+            ) : null}
+            <p>{card.description}</p>
+          </a>
+        ))}
+      </nav>
+
+      <div className="minecraft-aux">
+        <a className="minecraft-aux-card" href={minecraftPathForPage("library")} onClick={cardClick("library")}>
+          <span className="minecraft-aux-card__copy">
+            <strong>{text.catLibraryTitle}</strong>
+            <p>{text.catLibraryDescription}</p>
+          </span>
+          <span className="minecraft-aux-card__badge">{text.comingSoonBadge}</span>
+        </a>
+        <a className="minecraft-aux-card" href={minecraftPathForPage("patchNotes")} onClick={cardClick("patchNotes")}>
+          <span className="minecraft-aux-card__copy">
+            <strong>{text.catPatchTitle}</strong>
+            <p>{text.catPatchDescription}</p>
+          </span>
+          <span className="minecraft-aux-card__badge">{text.comingSoonBadge}</span>
+        </a>
+        <article className="minecraft-aux-card is-dim">
+          <span className="minecraft-aux-card__copy">
+            <strong>{text.catMobsTitle}</strong>
+            <p>{text.catMobsDescription}</p>
+          </span>
+          <span className="minecraft-aux-card__badge is-next">{text.catMobsPhase}</span>
+        </article>
+      </div>
+
+      <footer className="minecraft-home__foot">
+        {metadata ? (
+          <p className="minecraft-unofficial-note">
+            {formatMinecraftTemplate(text.dataSourceNote, { version: metadata.gameVersion })}
+          </p>
+        ) : null}
         <p className="minecraft-unofficial-note" data-ja={minecraftI18n.ja.unofficialNotice} data-ko={minecraftI18n.ko.unofficialNotice}>
           {text.unofficialNotice}
         </p>
-      </section>
+      </footer>
     </div>
   );
 }

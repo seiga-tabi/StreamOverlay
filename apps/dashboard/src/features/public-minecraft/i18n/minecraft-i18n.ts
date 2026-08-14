@@ -15,27 +15,34 @@ const ko = {
   patchNotes: "패치 노트",
   mainMenu: "마인크래프트 메뉴",
 
-  /* 위키 홈 히어로 */
+  /* 위키 홈 히어로 — 히어로가 곧 검색 */
   heroKicker: "MINECRAFT WIKI // YORO.GG",
   heroTitle: "무엇이든 찾는 마인크래프트 위키",
-  heroDescription: "3×3 조합 그리드로 보는 조합법, 도구 스탯과 용도, 인챈트의 효과·배타 관계까지 — 한국어·일본어 위키를 준비하고 있습니다.",
+  heroDescription: "조합법 그리드, 아이템 스탯, 인챈트 상충 관계까지 — 한 번의 검색으로 찾습니다.",
   heroStatus: "준비 중 — 카탈로그 파이프라인 연결 단계",
+  homeSearchPlaceholder: "예: 다이아몬드 검, diamond_sword",
+  homeSearchSubmit: "검색",
+  homeScopeLabel: "검색 대상",
+  homeCoreLabel: "위키 바로가기",
+  homeVersionLine: "Java {version} · minecraft-data (MIT) 기준",
+  homeCountItems: "{count}개",
+  homeCountRecipes: "{count}개",
+  homeCountEnchants: "{count}종",
 
-  /* 카테고리 타일 — 위키의 실제 구성 소개 */
-  categoryTitle: "위키는 이렇게 구성됩니다",
+  /* 카테고리 카드 */
   catRecipesTitle: "조합법",
-  catRecipesDescription: "제작·제련·양조·대장장이 유형별 레시피를 그리드로 시각화합니다.",
+  catRecipesDescription: "3×3 제작대 그리드로 보는 전체 레시피",
   catItemsTitle: "아이템 · 도구",
-  catItemsDescription: "스탯·내구도·용도와 티어 비교를 한 페이지에서 봅니다.",
+  catItemsDescription: "묶음·내구도·적용 인챈트를 한 줄에서",
   catEnchantsTitle: "인챈트",
-  catEnchantsDescription: "효과 공식·최대 레벨·배타 관계·획득처를 정리합니다.",
+  catEnchantsDescription: "최대 레벨·획득 경로·상충 관계 정리",
   catMobsTitle: "몹",
-  catMobsDescription: "드롭·스폰 정보는 위키 코어 이후 2차로 확장합니다.",
+  catMobsDescription: "드롭·스폰 정보",
   catMobsPhase: "2차",
   catLibraryTitle: "자료실",
-  catLibraryDescription: "모드·플러그인·셰이더를 큐레이션합니다 — 다운로드는 공식 출처로만 이동합니다.",
+  catLibraryDescription: "모드·플러그인·셰이더 — 공식 출처로만 이동",
   catPatchTitle: "패치 노트",
-  catPatchDescription: "Java·Bedrock 패치 노트를 에디션 탭으로 제공합니다.",
+  catPatchDescription: "Java·Bedrock 에디션 탭",
 
   /* 데이터 화면 준비 중 상태 */
   comingSoonBadge: "준비 중",
@@ -60,7 +67,7 @@ const ko = {
   retry: "다시 시도",
   fallbackNameBadge: "EN",
   fallbackNameLabel: "공식 한국어 명칭 준비 전 — 영문 원문 표시",
-  dataSourceNote: "데이터: minecraft-data (MIT) · Java {version} · 명칭 번역은 준비되는 대로 반영됩니다.",
+  dataSourceNote: "데이터: minecraft-data (MIT) · Java {version} · 게임 텍스처: mcasset.cloud 경유 · 명칭 번역은 준비되는 대로 반영됩니다.",
 
   /* 조합법 */
   recipeTypeAll: "전체",
@@ -86,14 +93,10 @@ const ko = {
   enchantCurse: "저주",
   enchantTreasure: "보물 전용",
   enchantNotTradeable: "거래 불가",
-  enchantIncompatible: "상충 {count}종",
   enchantCategory: "적용 대상",
   enchantIncompatibleLabel: "상충",
   enchantFromTable: "인챈트 테이블",
   enchantFromTrade: "주민 거래",
-
-  /* 위키 홈 실데이터 */
-  homeStatsReady: "Java {version} · 아이템 {items} · 조합법 {recipes} · 인챈트 {enchants}",
 
   /* 비공식 고지 */
   unofficialNotice: "YORO.gg 는 Mojang·Microsoft 와 관련이 없는 비공식 팬 서비스입니다. Minecraft 는 Mojang Synergies AB 의 상표입니다.",
@@ -140,23 +143,30 @@ const ja: Record<keyof typeof ko, string> = {
 
   heroKicker: "MINECRAFT WIKI // YORO.GG",
   heroTitle: "なんでも探せるマインクラフト Wiki",
-  heroDescription: "3×3 クラフトグリッドで見るレシピ、道具のステータスと用途、エンチャントの効果・排他関係まで — 韓国語・日本語の Wiki を準備しています。",
+  heroDescription: "レシピグリッド、アイテムのステータス、エンチャントの排他関係まで — 一度の検索で見つかります。",
   heroStatus: "準備中 — カタログパイプライン接続段階",
+  homeSearchPlaceholder: "例: ダイヤモンドの剣, diamond_sword",
+  homeSearchSubmit: "検索",
+  homeScopeLabel: "検索対象",
+  homeCoreLabel: "Wiki ショートカット",
+  homeVersionLine: "Java {version} · minecraft-data (MIT) 基準",
+  homeCountItems: "{count}個",
+  homeCountRecipes: "{count}個",
+  homeCountEnchants: "{count}種",
 
-  categoryTitle: "Wiki の構成",
   catRecipesTitle: "レシピ",
-  catRecipesDescription: "作業台・かまど・醸造・鍛冶の種類別レシピをグリッドで可視化します。",
+  catRecipesDescription: "3×3 作業台グリッドで見る全レシピ",
   catItemsTitle: "アイテム・道具",
-  catItemsDescription: "ステータス・耐久値・用途とティア比較を 1 ページで見られます。",
+  catItemsDescription: "スタック・耐久値・適用エンチャントを一行で",
   catEnchantsTitle: "エンチャント",
-  catEnchantsDescription: "効果の計算式・最大レベル・排他関係・入手先を整理します。",
+  catEnchantsDescription: "最大レベル・入手先・排他関係を整理",
   catMobsTitle: "モブ",
-  catMobsDescription: "ドロップ・スポーン情報は Wiki コア後の第 2 段階で拡張します。",
+  catMobsDescription: "ドロップ・スポーン情報",
   catMobsPhase: "第2段階",
   catLibraryTitle: "資料室",
-  catLibraryDescription: "MOD・プラグイン・シェーダーをキュレーションします — ダウンロードは公式ページへの移動のみです。",
+  catLibraryDescription: "MOD・プラグイン・シェーダー — 公式ページのみ案内",
   catPatchTitle: "パッチノート",
-  catPatchDescription: "Java・Bedrock のパッチノートをエディションタブで提供します。",
+  catPatchDescription: "Java・Bedrock エディションタブ",
 
   /* カタログ共通 */
   searchPlaceholder: "名前または英語 ID を検索",
@@ -173,7 +183,7 @@ const ja: Record<keyof typeof ko, string> = {
   retry: "再試行",
   fallbackNameBadge: "EN",
   fallbackNameLabel: "公式日本語名の準備前 — 英語原文を表示",
-  dataSourceNote: "データ: minecraft-data (MIT) · Java {version} · 名称の翻訳は準備でき次第反映されます。",
+  dataSourceNote: "データ: minecraft-data (MIT) · Java {version} · ゲームテクスチャ: mcasset.cloud 経由 · 名称の翻訳は準備でき次第反映されます。",
 
   recipeTypeAll: "すべて",
   recipeTypeCrafting: "クラフト",
@@ -196,13 +206,10 @@ const ja: Record<keyof typeof ko, string> = {
   enchantCurse: "呪い",
   enchantTreasure: "宝物限定",
   enchantNotTradeable: "取引不可",
-  enchantIncompatible: "排他 {count}種",
   enchantCategory: "適用対象",
   enchantIncompatibleLabel: "排他",
   enchantFromTable: "エンチャントテーブル",
   enchantFromTrade: "村人取引",
-
-  homeStatsReady: "Java {version} · アイテム {items} · レシピ {recipes} · エンチャント {enchants}",
 
   comingSoonBadge: "準備中",
   libraryComingSoonTitle: "資料室を準備しています",

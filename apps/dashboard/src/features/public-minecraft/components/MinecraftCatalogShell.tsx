@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Button } from "../../../shared/ui/Button";
 import {
   EmptyState,
@@ -58,6 +58,8 @@ export function MinecraftCatalogShell({
 }) {
   const text = minecraftI18n[locale];
   const [draft, setDraft] = useState(search);
+  /* URL(?q=)이 단일 원본 — nav 재클릭·뒤로가기로 search 가 바뀌면 입력도 따라갑니다. */
+  useEffect(() => setDraft(search), [search]);
 
   return (
     <section aria-labelledby={titleId} className="minecraft-catalog">

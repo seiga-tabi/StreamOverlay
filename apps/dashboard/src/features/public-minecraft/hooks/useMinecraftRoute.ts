@@ -15,7 +15,8 @@ export function useMinecraftRoute() {
   }, []);
 
   return {
-    page: minecraftPageFromPath(window.location.pathname),
+    /* SSR(테스트 renderToStaticMarkup 포함)에는 location 이 없으므로 홈으로 간주합니다. */
+    page: typeof window === "undefined" ? "home" : minecraftPageFromPath(window.location.pathname),
     locationRevision,
   };
 }

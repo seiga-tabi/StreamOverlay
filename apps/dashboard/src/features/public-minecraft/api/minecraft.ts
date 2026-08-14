@@ -14,7 +14,7 @@ import {
 import { runtimeConfig } from "../../../runtime-config";
 
 const MINECRAFT_REQUEST_TIMEOUT_MS = 10_000;
-export const MINECRAFT_SEARCH_MAX_LENGTH = 80;
+export { MINECRAFT_SEARCH_MAX_LENGTH } from "../utils/routes";
 
 export class MinecraftApiError extends Error {
   readonly status: number;

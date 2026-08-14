@@ -26,7 +26,7 @@ export function minecraftNameFromId(id: string): string {
     .join(" ");
 }
 
-/* 텍스처를 쓰지 않으므로 아이템 타일 색은 ID 해시로 결정합니다 — 같은 아이템은 항상 같은 색. */
+/* 외부 텍스처가 없거나 로드에 실패했을 때 사용할 자체 fallback 색입니다. */
 export function minecraftTileHue(id: string): number {
   let hash = 0;
   for (let index = 0; index < id.length; index += 1) {

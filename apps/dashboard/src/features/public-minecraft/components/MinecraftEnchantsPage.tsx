@@ -1,10 +1,13 @@
-import { useCallback, useEffect, useState, type CSSProperties } from "react";
+import { useMemo, useCallback, useEffect, useState } from "react";
 import type { MinecraftEnchant, MinecraftLocalizedName } from "@streamops/shared";
 import { getMinecraftEnchants } from "../api/minecraft";
 import { minecraftI18n, type MinecraftLocale } from "../i18n/minecraft-i18n";
 import { useMinecraftCatalog } from "../hooks/useMinecraftCatalog";
-import { minecraftNameFromId, minecraftTileHue, resolveMinecraftName } from "../utils/names";
+import { useMinecraftRoute } from "../hooks/useMinecraftRoute";
+import { minecraftSearchQueryFromUrl, setMinecraftSearchUrl } from "../utils/routes";
+import { minecraftNameFromId, resolveMinecraftName } from "../utils/names";
 import { formatMinecraftTemplate, MinecraftCatalogShell, MinecraftName } from "./MinecraftCatalogShell";
+import { MinecraftItemImage } from "./MinecraftItemImage";
 
 function EnchantCard({ enchant, locale, namesById }: {
   enchant: MinecraftEnchant;
@@ -20,13 +23,7 @@ function EnchantCard({ enchant, locale, namesById }: {
   return (
     <article className="minecraft-enchant-card" data-testid="minecraft-enchant-card">
       <h2 className="minecraft-enchant-card__title">
-        <span
-          aria-hidden="true"
-          className="minecraft-item-swatch"
-          style={{ "--minecraft-tile-hue": minecraftTileHue(enchant.id) } as CSSProperties}
-        >
-          {name.text.slice(0, 2)}
-        </span>
+        <MinecraftItemImage decorative fallbackText={name.text} id="enchanted_book" label={name.text} />
         <MinecraftName fallback={name.fallback} locale={locale} text={name.text} />
         <span className="minecraft-pill">
           {formatMinecraftTemplate(text.enchantMaxLevel, { count: enchant.maxLevel })}
@@ -56,7 +53,10 @@ function EnchantCard({ enchant, locale, namesById }: {
 
 export function MinecraftEnchantsPage({ locale }: { locale: MinecraftLocale }) {
   const text = minecraftI18n[locale];
-  const [search, setSearch] = useState("");
+  /* 검색어의 단일 원본은 URL 의 ?q= — 공유·새로고침·뒤로가기·nav 재클릭이 전부 일관됩니다. */
+  const { locationRevision } = useMinecraftRoute();
+  const search = useMemo(() => minecraftSearchQueryFromUrl(), [locationRevision]);
+  const submitSearch = useCallback((value: string) => setMinecraftSearchUrl("enchants", value), []);
   const fetcher = useCallback(
     (page: number, signal: AbortSignal) => getMinecraftEnchants({ q: search, page }, signal),
     [search],
@@ -82,7 +82,7 @@ export function MinecraftEnchantsPage({ locale }: { locale: MinecraftLocale }) {
       loadMoreLoading={catalog.loadMoreLoading}
       locale={locale}
       metadata={catalog.metadata}
-      onSearch={setSearch}
+      onSearch={submitSearch}
       pagination={catalog.pagination}
       retry={catalog.retry}
       search={search}

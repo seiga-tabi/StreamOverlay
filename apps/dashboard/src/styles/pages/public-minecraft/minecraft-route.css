@@ -13,10 +13,11 @@
 }
 
 /* 셸 기본 규칙이 복합 셀렉터(0,2,0)로 배경을 지정하므로 특이도를 맞춰 이긴다.
-   페이지 섹션에도 같은 색을 깔아 어느 경로로도 어두운 바탕이 보장되게 한다. */
+   yoro.gg 다크 셸(.public-dashboard-shell.theme-dark)과 같은 블루 네이비 계열 —
+   gradient 뒤에 solid #0f1724 를 깔아 computed background-color 도 보장한다. */
 .public-dashboard-shell.minecraft-shell,
 .minecraft-shell .minecraft-page-section {
-  background: #101418;
+  background: linear-gradient(180deg, #111827 0, #0f1724 100%) #0f1724;
 }
 
 .minecraft-main {
@@ -32,12 +33,25 @@
 
 .minecraft-page-section {
   --minecraft-accent: #3be0bf;
-  --minecraft-surface: #171d23;
-  --minecraft-ink: #e8ecef;
-  --minecraft-ink-muted: #9aa5b0;
-  --minecraft-line: #232c34;
+  --minecraft-surface: #182132;
+  --minecraft-ink: #e8edf5;
+  --minecraft-ink-muted: #9aa8bd;
+  --minecraft-line: #28334a;
 
+  /* 본문 컨테이너 — 발로란트와 동일 규격(78rem 중앙 + 좌우 gutter).
+     다른 게임 홈과 달리 전폭으로 퍼지던 문제의 수정점입니다. */
+  inline-size: 100%;
+  max-inline-size: 78rem;
+  margin-inline: auto;
+  padding: var(--yoro-space-5) var(--yoro-space-4) var(--yoro-space-8);
   color: var(--minecraft-ink);
+}
+
+@media (max-width: 48rem) {
+  /* 하단 탭바가 본문 끝(푸터·더 보기)을 가리지 않게 여백을 예약합니다. */
+  .minecraft-page-section {
+    padding-block-end: calc(var(--yoro-space-8) + 3.5rem);
+  }
 }
 
 .minecraft-hero {
@@ -95,53 +109,264 @@
   font-weight: var(--yoro-font-weight-bold);
 }
 
-.minecraft-categories > h2 {
-  margin: 0 0 var(--yoro-space-4);
-  color: var(--minecraft-ink);
-  font-size: var(--yoro-font-size-xl);
-}
-
-.minecraft-categories__grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  gap: var(--yoro-space-4);
-}
-
-.minecraft-category-card {
-  padding: var(--yoro-space-5);
-  border: thin solid var(--minecraft-line);
-  border-radius: var(--yoro-radius-md);
-  background: var(--minecraft-surface);
-}
-
-.minecraft-category-card > h3 {
+/* 히어로 검색 — 홈의 첫 행동. 스코프 칩으로 대상 카탈로그를 고른다. */
+.minecraft-hero__search {
   display: flex;
-  align-items: center;
-  gap: var(--yoro-space-2);
-  margin: 0 0 var(--yoro-space-2);
+  max-inline-size: 35rem;
+  margin: 0 auto;
+  border: thin solid rgba(59, 224, 191, .5);
+  border-radius: var(--yoro-radius-md);
+  background: #0d1420;
+  box-shadow: 0 0 0 4px rgba(59, 224, 191, .07);
+  overflow: hidden;
+}
+
+.minecraft-hero__search > input[type="search"] {
+  flex: 1;
+  min-inline-size: 0;
+  min-block-size: 2.75rem;
+  padding: 0 var(--yoro-space-4);
+  border: 0;
+  background: transparent;
   color: var(--minecraft-ink);
   font-size: var(--yoro-font-size-md);
 }
 
-.minecraft-category-card__phase {
-  padding: 0 var(--yoro-space-2);
-  border-radius: var(--yoro-radius-pill);
-  background: rgba(59, 224, 191, .16);
-  color: var(--minecraft-accent);
-  font-size: var(--yoro-font-size-xs);
-  font-weight: var(--yoro-font-weight-black);
+.minecraft-hero__search > input[type="search"]::placeholder {
+  color: var(--minecraft-ink-muted);
 }
 
-.minecraft-category-card > p,
-.minecraft-unofficial-note {
+.minecraft-hero__search > input[type="search"]:focus-visible {
+  outline: 2px solid var(--minecraft-accent);
+  outline-offset: -2px;
+}
+
+.minecraft-hero__search > button {
+  min-inline-size: 4.5rem;
+  border: 0;
+  background: var(--minecraft-accent);
+  color: #08211b;
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-black);
+  cursor: pointer;
+}
+
+.minecraft-hero__search > button:focus-visible {
+  outline: 2px solid var(--minecraft-ink);
+  outline-offset: -3px;
+}
+
+.minecraft-hero__scope {
+  display: flex;
+  justify-content: center;
+  gap: var(--yoro-space-2);
+  margin-block-start: var(--yoro-space-3);
+  flex-wrap: wrap;
+}
+
+.minecraft-hero__scope > button {
+  min-block-size: 2.25rem;
+  padding: 0 var(--yoro-space-3);
+  border: thin solid var(--minecraft-line);
+  border-radius: var(--yoro-radius-pill);
+  background: transparent;
+  color: var(--minecraft-ink-muted);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-bold);
+  cursor: pointer;
+}
+
+.minecraft-hero__scope > button[aria-pressed="true"] {
+  border-color: var(--minecraft-accent);
+  background: rgba(59, 224, 191, .14);
+  color: var(--minecraft-accent);
+}
+
+.minecraft-hero__scope > button:focus-visible {
+  outline: 2px solid var(--minecraft-accent);
+  outline-offset: 2px;
+}
+
+.minecraft-hero__statline {
+  margin-block-start: var(--yoro-space-4);
+  color: var(--minecraft-ink-muted);
+  font-size: var(--yoro-font-size-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.minecraft-hero__statline > b {
+  color: var(--minecraft-accent);
+}
+
+.minecraft-hero__status {
+  margin-block-start: var(--yoro-space-4);
+}
+
+/* 코어 3 카드 — 실카운트를 담는 큰 바로가기 */
+.minecraft-core {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--yoro-space-4);
+}
+
+.minecraft-core-card {
+  position: relative;
+  display: grid;
+  gap: var(--yoro-space-2);
+  align-content: start;
+  padding: var(--yoro-space-5);
+  border: thin solid var(--minecraft-line);
+  border-radius: var(--yoro-radius-md);
+  background: var(--minecraft-surface);
+  text-decoration: none;
+  transition: border-color 120ms ease;
+}
+
+.minecraft-core-card:hover,
+.minecraft-core-card:focus-visible {
+  border-color: var(--minecraft-accent);
+}
+
+.minecraft-core-card:focus-visible {
+  outline: 2px solid var(--minecraft-accent);
+  outline-offset: 2px;
+}
+
+.minecraft-core-card__head {
+  display: flex;
+  align-items: center;
+  gap: var(--yoro-space-2);
+}
+
+.minecraft-core-card__head > h3 {
+  margin: 0;
+  color: var(--minecraft-ink);
+  font-size: var(--yoro-font-size-md);
+}
+
+.minecraft-core-card__count {
+  color: var(--minecraft-accent);
+  font-size: var(--yoro-font-size-2xl);
+  font-weight: var(--yoro-font-weight-black);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--yoro-line-height-tight);
+}
+
+.minecraft-core-card__count > small {
+  margin-inline-start: 2px;
+  color: var(--minecraft-ink-muted);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.minecraft-core-card > p {
   margin: 0;
   color: var(--minecraft-ink-muted);
   font-size: var(--yoro-font-size-sm);
 }
 
+.minecraft-core-card__arrow {
+  position: absolute;
+  inset-block-start: var(--yoro-space-4);
+  inset-inline-end: var(--yoro-space-4);
+  color: #5b6a83;
+  font-weight: var(--yoro-font-weight-black);
+}
+
+.minecraft-core-card:hover .minecraft-core-card__arrow {
+  color: var(--minecraft-accent);
+}
+
+/* 보조 행 — 준비 중·예정 상태를 클릭 전에 보여준다 */
+.minecraft-aux {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--yoro-space-4);
+}
+
+.minecraft-aux-card {
+  display: flex;
+  align-items: center;
+  gap: var(--yoro-space-3);
+  min-block-size: 2.75rem;
+  padding: var(--yoro-space-3) var(--yoro-space-4);
+  border: thin solid var(--minecraft-line);
+  border-radius: var(--yoro-radius-md);
+  background: var(--minecraft-surface);
+  text-decoration: none;
+  transition: border-color 120ms ease;
+}
+
+a.minecraft-aux-card:hover,
+a.minecraft-aux-card:focus-visible {
+  border-color: var(--minecraft-accent);
+}
+
+a.minecraft-aux-card:focus-visible {
+  outline: 2px solid var(--minecraft-accent);
+  outline-offset: 2px;
+}
+
+.minecraft-aux-card.is-dim {
+  opacity: .62;
+}
+
+.minecraft-aux-card__copy {
+  display: grid;
+  gap: 1px;
+  min-inline-size: 0;
+}
+
+.minecraft-aux-card__copy > strong {
+  color: var(--minecraft-ink);
+  font-size: var(--yoro-font-size-sm);
+}
+
+.minecraft-aux-card__copy > p {
+  margin: 0;
+  color: var(--minecraft-ink-muted);
+  font-size: var(--yoro-font-size-xs);
+}
+
+.minecraft-aux-card__badge {
+  margin-inline-start: auto;
+  padding: 2px var(--yoro-space-2);
+  border: thin solid rgba(255, 180, 84, .4);
+  border-radius: var(--yoro-radius-pill);
+  background: rgba(255, 180, 84, .13);
+  color: #ffb454;
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-black);
+  white-space: nowrap;
+  flex: none;
+}
+
+.minecraft-aux-card__badge.is-next {
+  border-color: var(--minecraft-line);
+  background: #212b3d;
+  color: var(--minecraft-ink-muted);
+}
+
+/* 홈 푸터 — 출처·비공식 고지 통합 */
+.minecraft-home__foot {
+  display: grid;
+  gap: var(--yoro-space-1);
+  padding-block-start: var(--yoro-space-4);
+  border-block-start: thin solid var(--minecraft-line);
+}
+
 .minecraft-unofficial-note {
-  margin-block-start: var(--yoro-space-5);
+  margin: 0;
+  color: var(--minecraft-ink-muted);
+  font-size: var(--yoro-font-size-sm);
   text-align: center;
+}
+
+@media (max-width: 47.9375rem) {
+  .minecraft-core,
+  .minecraft-aux {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* 준비 중·404 화면(EmptyState)도 다크 표면 위에서 읽히게 */
@@ -281,7 +506,7 @@
   letter-spacing: .04em;
 }
 
-/* 자체 스와치 — 텍스처(Mojang 자산) 대신 ID 해시 색 + 2글자 라벨 */
+/* 실제 게임 텍스처 + CDN 장애·미제공 항목용 자체 fallback */
 .minecraft-item-swatch {
   display: inline-flex;
   align-items: center;
@@ -295,6 +520,22 @@
   font-weight: var(--yoro-font-weight-bold);
   overflow: hidden;
   flex: none;
+}
+
+.minecraft-item-swatch__image {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.minecraft-item-swatch__fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 100%;
+  block-size: 100%;
 }
 
 /* 조합 시각화 — 목업 §06: 슬롯 그리드 → 화살표 → 결과 슬롯 */
@@ -311,7 +552,7 @@
   padding: var(--yoro-space-2);
   border: thin solid var(--minecraft-line);
   border-radius: var(--yoro-radius-md);
-  background: #0c1013;
+  background: #0d1420;
 }
 
 .minecraft-craft-grid__row {
@@ -326,14 +567,14 @@
   justify-content: center;
   inline-size: 2.75rem;
   block-size: 2.75rem;
-  border: thin solid #29333c;
-  background: #161c22;
+  border: thin solid #2a3549;
+  background: #151d2d;
   box-shadow: inset 2px 2px 0 rgba(0, 0, 0, .45), inset -2px -2px 0 rgba(255, 255, 255, .05);
   flex: none;
 }
 
 .minecraft-craft-arrow {
-  color: #55636e;
+  color: #5b6a83;
   font-size: var(--yoro-font-size-xl);
   font-weight: var(--yoro-font-weight-black);
 }
@@ -347,7 +588,7 @@
   block-size: 4rem;
   border: thin solid var(--minecraft-accent);
   border-radius: var(--yoro-radius-md);
-  background: #161c22;
+  background: #151d2d;
   box-shadow: 0 0 0 3px rgba(59, 224, 191, .12);
   flex: none;
 }
@@ -382,7 +623,7 @@
   padding: var(--yoro-space-2);
   border: thin solid var(--minecraft-line);
   border-radius: var(--yoro-radius-md);
-  background: #0c1013;
+  background: #0d1420;
   flex-wrap: wrap;
 }
 
@@ -572,26 +813,6 @@
 }
 
 /* 위키 홈 — 실데이터 상태·카테고리 링크 */
-.minecraft-hero__status.is-ready {
-  font-variant-numeric: tabular-nums;
-}
-
-.minecraft-category-card.is-link {
-  display: block;
-  text-decoration: none;
-  transition: border-color 120ms ease;
-}
-
-.minecraft-category-card.is-link:hover,
-.minecraft-category-card.is-link:focus-visible {
-  border-color: var(--minecraft-accent);
-}
-
-.minecraft-category-card.is-link:focus-visible {
-  outline: 2px solid var(--minecraft-accent);
-  outline-offset: 2px;
-}
-
 @media (max-width: 47.9375rem) {
   .minecraft-recipe-list {
     grid-template-columns: 1fr;
