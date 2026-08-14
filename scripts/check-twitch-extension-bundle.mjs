@@ -13,7 +13,7 @@ const root = path.resolve(process.cwd(), "dist-twitch-extension");
 const zipPath = path.resolve(process.cwd(), "twitch-extension.zip");
 const failures = [];
 
-for (const name of ["panel.html", "video_overlay.html", "config.html"]) {
+for (const name of ["panel.html", "video_overlay.html", "video_component.html", "mobile.html", "config.html"]) {
   try {
     statSync(path.join(root, name));
   } catch {

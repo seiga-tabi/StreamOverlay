@@ -5,7 +5,7 @@ import { extensionLocaleFromSearch } from "./logic";
 import "./extension-app.css";
 
 /* panel.html / video_overlay.html 공용 부트스트랩. */
-export function bootTwitchExtension(variant: "panel" | "overlay"): void {
+export function bootTwitchExtension(variant: "panel" | "overlay" | "component"): void {
   const container = document.getElementById("root");
   if (!container) return;
   const locale = extensionLocaleFromSearch(window.location.search);

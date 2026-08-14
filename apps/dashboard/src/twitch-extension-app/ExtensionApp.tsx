@@ -26,13 +26,14 @@ type TwitchAuth = { token: string; channelId: string };
  */
 export function ExtensionApp({ locale, variant }: {
   locale: ExtensionLocale;
-  variant: "panel" | "overlay";
+  /* component 는 Twitch 가 영상 위에 고정 박스를 주는 타입 — 컴팩트 카드를 상시 표시합니다. */
+  variant: "panel" | "overlay" | "component";
 }) {
   const authRef = useRef<TwitchAuth | null>(null);
   const [response, setResponse] = useState<EbsViewerResponse | null>(null);
   const [failed, setFailed] = useState(false);
   const [joining, setJoining] = useState(false);
-  const [expanded, setExpanded] = useState(variant === "panel");
+  const [expanded, setExpanded] = useState(variant !== "overlay");
   const previousStatusRef = useRef<ExtensionViewerData["status"] | undefined>(undefined);
 
   const refresh = useCallback(async () => {
@@ -140,12 +141,12 @@ export function ExtensionApp({ locale, variant }: {
       onCancel={() => void cancel()}
       onJoin={() => void join()}
       onRetry={retry}
-      variant={variant}
+      variant={variant === "panel" ? "panel" : "overlay"}
       {...(variant === "overlay" ? { onClose: () => setExpanded(false) } : {})}
     />
   );
 
-  return variant === "overlay"
-    ? <div className="twitch-ext-overlay-root">{panel}</div>
-    : <div className="twitch-ext-panel-root">{panel}</div>;
+  if (variant === "overlay") return <div className="twitch-ext-overlay-root">{panel}</div>;
+  if (variant === "component") return <div className="twitch-ext-component-root">{panel}</div>;
+  return <div className="twitch-ext-panel-root">{panel}</div>;
 }

@@ -19,6 +19,8 @@ export default defineConfig({
         panel: path.join(here, "twitch-extension/panel.html"),
         video_overlay: path.join(here, "twitch-extension/video_overlay.html"),
         config: path.join(here, "twitch-extension/config.html"),
+        mobile: path.join(here, "twitch-extension/mobile.html"),
+        video_component: path.join(here, "twitch-extension/video_component.html"),
       },
     },
   },
