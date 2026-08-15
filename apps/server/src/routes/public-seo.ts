@@ -20,6 +20,80 @@ export const PUBLIC_SEO_LOCALES: readonly PublicUrlLocale[] = ["ko", "ja"];
 
 const DEFAULT_SOCIAL_IMAGE = `${PUBLIC_SEO_ORIGIN}/images/yorogg-og.png`;
 
+/* 게임별 정적 소셜 이미지 (1200×630, docs/mockups/sns-link-previews.html §02 기준).
+ *
+ * X(Twitter)는 카드에서 제목·설명을 표시하지 않으므로 이미지 자체가 페이지 정체성을
+ * 전달해야 하고, 전 페이지가 범용 이미지 1장을 공유하면 게임별 링크가 전부 동일하게
+ * 보입니다. 경로 접두사가 긴 것부터 먼저 매칭합니다. 소환사 프로필·LoL 패치 노트의
+ * 동적 이미지(/social/...)는 이 기본값을 각자의 URL 로 덮어씁니다. */
+const SOCIAL_IMAGES_BY_PREFIX: readonly {
+  prefix: string;
+  url: string;
+  alt: Readonly<Record<PublicUrlLocale, string>>;
+}[] = [
+  {
+    prefix: "/palworld",
+    url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-palworld.png`,
+    alt: { ko: "YORO.gg 팰월드 데이터베이스 미리보기", ja: "YORO.gg パルワールドデータベースのプレビュー" }
+  },
+  {
+    prefix: "/minecraft",
+    url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-minecraft.png`,
+    alt: { ko: "YORO.gg 마인크래프트 위키 미리보기", ja: "YORO.gg マインクラフト Wiki のプレビュー" }
+  },
+  {
+    prefix: "/valorant",
+    url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-valorant.png`,
+    alt: { ko: "YORO.gg 발로란트 전적·도감 미리보기", ja: "YORO.gg VALORANT 戦績・データベースのプレビュー" }
+  },
+  {
+    prefix: "/bot",
+    url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-bot.png`,
+    alt: { ko: "YORO Bot Discord 게임 서버 도우미 미리보기", ja: "YORO Bot Discordゲームサーバーアシスタントのプレビュー" }
+  },
+  /* LoL 생태(전적·패치 노트·팔로우·참가)와 홈은 LoL 이미지를 사이트 대표로 겸용합니다. */
+  {
+    prefix: "/lol",
+    url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-lol.png`,
+    alt: { ko: "YORO.gg LoL 전적 검색 미리보기", ja: "YORO.gg LoL戦績検索のプレビュー" }
+  },
+  {
+    prefix: "/patch-notes",
+    url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-lol.png`,
+    alt: { ko: "YORO.gg LoL 전적 검색 미리보기", ja: "YORO.gg LoL戦績検索のプレビュー" }
+  },
+  {
+    prefix: "/follow",
+    url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-lol.png`,
+    alt: { ko: "YORO.gg LoL 전적 검색 미리보기", ja: "YORO.gg LoL戦績検索のプレビュー" }
+  },
+  {
+    prefix: "/participation",
+    url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-lol.png`,
+    alt: { ko: "YORO.gg LoL 전적 검색 미리보기", ja: "YORO.gg LoL戦績検索のプレビュー" }
+  }
+];
+
+const HOME_SOCIAL_IMAGE = {
+  url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-lol.png`,
+  alt: { ko: "YORO.gg LoL 전적 검색 미리보기", ja: "YORO.gg LoL戦績検索のプレビュー" }
+} as const;
+
+export function socialImageForPath(normalizedPath: string): {
+  url: string;
+  alt: Readonly<Record<PublicUrlLocale, string>>;
+} {
+  if (normalizedPath === "/") return HOME_SOCIAL_IMAGE;
+  const match = SOCIAL_IMAGES_BY_PREFIX.find(({ prefix }) =>
+    normalizedPath === prefix || normalizedPath.startsWith(`${prefix}/`));
+  if (match) return { url: match.url, alt: match.alt };
+  /* 법적 고지·계정 등 게임 외 화면은 기존 범용 이미지를 유지합니다. */
+  return {
+    url: DEFAULT_SOCIAL_IMAGE,
+    alt: { ko: "YORO.gg 서비스 미리보기", ja: "YORO.gg サービスプレビュー" }
+  };
+}
+
 /** 검색 색인보다 로그인·행동·법적 고지 또는 개발 상태 전달이 중심인 화면입니다. */
 const PUBLIC_SEO_NOINDEX_PATHS = new Set([
   "/login",
@@ -297,7 +371,7 @@ export function palworldEntitySeoMetadata(
     description,
     fallback: palworldEntityFallback(entity, kind, locale),
     imageAlt: name,
-    imageUrl: DEFAULT_SOCIAL_IMAGE,
+    imageUrl: socialImageForPath(normalizedPath).url,
     locale,
     openGraphType: "article",
     structuredData: [
@@ -782,6 +856,7 @@ export function publicSeoMetadataForPath(
   if (normalizedPath === "/") {
     structuredData.push({ "@context": "https://schema.org", ...(organizationStructuredData() as object) });
   }
+  const socialImage = socialImageForPath(normalizedPath);
   return {
     alternateUrls: alternateUrlsForPath(normalizedPath),
     canonicalUrl,
@@ -789,8 +864,8 @@ export function publicSeoMetadataForPath(
     fallback: normalizedPath === "/"
       ? homeFallback(locale)
       : genericFallback(content, normalizedPath, locale),
-    imageAlt: locale === "ja" ? "YORO.gg サービスプレビュー" : "YORO.gg 서비스 미리보기",
-    imageUrl: DEFAULT_SOCIAL_IMAGE,
+    imageAlt: socialImage.alt[locale],
+    imageUrl: socialImage.url,
     locale,
     openGraphType: "website",
     ...(robotsNoindex ? { robotsNoindex: true } : {}),

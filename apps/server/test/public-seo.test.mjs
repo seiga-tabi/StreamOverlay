@@ -269,3 +269,31 @@ test("fallback 링크와 breadcrumb은 라우트가 없는 /lol/summoners 목록
   const profileHtml = render("/ko/lol/summoners/kr/Seiga-KR1");
   assert.doesNotMatch(profileHtml, /yoro\.gg\/ko\/lol\/summoners"/u);
 });
+
+test("소셜 이미지는 게임별 경로 접두사로 매핑되고 그 외에는 범용 이미지를 유지한다", () => {
+  /* 회귀 고정 — 전 페이지가 범용 이미지 1장을 공유하면 X(제목·설명 미표시)에서
+     어떤 페이지를 공유해도 동일하게 보입니다. docs/mockups/sns-link-previews.html §02. */
+  const image = (pathname) => publicSeoMetadataForPath(pathname).imageUrl;
+  assert.equal(image("/palworld"), "https://yoro.gg/images/yorogg-og-palworld.png");
+  assert.equal(image("/ja/palworld/breeding"), "https://yoro.gg/images/yorogg-og-palworld.png");
+  assert.equal(image("/minecraft"), "https://yoro.gg/images/yorogg-og-minecraft.png");
+  assert.equal(image("/ko/minecraft/recipes"), "https://yoro.gg/images/yorogg-og-minecraft.png");
+  assert.equal(image("/valorant/agents"), "https://yoro.gg/images/yorogg-og-valorant.png");
+  assert.equal(image("/bot/commands"), "https://yoro.gg/images/yorogg-og-bot.png");
+  /* LoL 생태와 홈은 LoL 이미지를 사이트 대표로 겸용합니다. */
+  for (const path of ["/", "/lol", "/lol/aram", "/patch-notes", "/follow", "/participation"]) {
+    assert.equal(image(path), "https://yoro.gg/images/yorogg-og-lol.png", path);
+  }
+  /* 게임 외 화면은 기존 범용 이미지 유지 — 접두사 오탐(/bottle 류)도 범용으로. */
+  for (const path of ["/privacy", "/terms", "/contact", "/bottle"]) {
+    assert.equal(image(path), "https://yoro.gg/images/yorogg-og.png", path);
+  }
+  /* imageAlt 는 게임·locale 별 문구를 씁니다. */
+  assert.match(publicSeoMetadataForPath("/minecraft").imageAlt, /마인크래프트/u);
+  assert.match(publicSeoMetadataForPath("/ja/minecraft").imageAlt, /マインクラフト/u);
+
+  /* Palworld 엔티티 상세도 팰월드 이미지를 씁니다. */
+  const route = palworldEntityRouteForPath("/palworld/pals/anubis");
+  const metadata = palworldEntitySeoMetadata(route, { id: "anubis", nameKo: "아누비스", nameEn: "Anubis" });
+  assert.equal(metadata.imageUrl, "https://yoro.gg/images/yorogg-og-palworld.png");
+});
