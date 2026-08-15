@@ -197,6 +197,7 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
     pathname === "/api/minecraft/items"
     || pathname === "/api/minecraft/recipes"
     || pathname === "/api/minecraft/enchants"
+    || pathname === "/api/minecraft/patch-notes"
   )) return "PUBLIC";
   if (method === "GET" && pathname.startsWith("/api/palworld/")) return "PUBLIC";
   if (method === "GET" && pathname.startsWith("/api/valorant/")) return "PUBLIC";

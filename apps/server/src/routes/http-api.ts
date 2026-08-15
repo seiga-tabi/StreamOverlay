@@ -49,6 +49,7 @@ import {
   validatePalworldPalSpawnResponse,
   validateMinecraftEnchantCatalogResponse,
   validateMinecraftItemCatalogResponse,
+  validateMinecraftPatchNotesResponse,
   validateMinecraftRecipeCatalogResponse,
   validateValorantAgentCatalogResponse,
   validateValorantLeaderboardResponse,
@@ -86,6 +87,7 @@ import {
   type PalworldMapLocationsResponse,
   type PalworldMapMarkersResponse,
   type PalworldPalSpawnResponse,
+  type MinecraftPatchNotesResponse,
   type DashboardServerStatus,
   type FollowerManagementResponse,
   type GlobalAdminAuditAction,
@@ -187,6 +189,7 @@ import {
   inboundEmailLimiter,
   oauthLimiter,
   publicLolApiLimiter,
+  publicMinecraftPatchNotesApiLimiter,
   publicPalworldApiLimiter,
   publicPalworldListApiLimiter,
   publicValorantApiLimiter,
@@ -254,6 +257,11 @@ import {
   MinecraftCatalogQueryError,
   type MinecraftCatalogService
 } from "../services/minecraft-catalog.js";
+import {
+  MinecraftPatchNotesQueryError,
+  parseMinecraftPatchNotesQuery,
+  type MinecraftPatchNotesService
+} from "../services/minecraft-patch-notes-service.js";
 import {
   ValorantCatalogError,
   type ValorantPublicCatalogService
@@ -2311,6 +2319,7 @@ type HttpHandlerInput = {
   isShuttingDown?: () => boolean;
   connectionStatus?: () => DashboardServerStatus["connections"];
   minecraftCatalog?: MinecraftCatalogService;
+  minecraftPatchNotes?: MinecraftPatchNotesService;
   palworldDataService?: PalworldDataService;
   palworldMapMarkerProvider?: PalworldMapMarkerProvider;
   palworldSpawnProvider?: PalworldSpawnProvider;
@@ -3605,7 +3614,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
       return respond(buildSitemapIndex(children));
     }
     if (pathname === PUBLIC_SITEMAP_PATHS.static) {
-      return respond(buildStaticSitemap());
+      return respond(buildStaticSitemap(undefined, {
+        minecraftPatchNotesReady: input.minecraftPatchNotes?.hasReadyData() === true
+      }));
     }
     const kind = PALWORLD_SITEMAP_KINDS[pathname];
     if (!kind) return false;
@@ -3662,7 +3673,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
   }
 
   async function resolvePublicSeoMetadata(pathname: string): Promise<PublicSeoMetadata> {
-    const fallback = publicSeoMetadataForPath(pathname);
+    const fallback = publicSeoMetadataForPath(pathname, {
+      minecraftPatchNotesReady: input.minecraftPatchNotes?.hasReadyData() === true
+    });
     /* 패치 노트 공유 카드 — SNS 크롤러는 JS 를 실행하지 않으므로 서버가
        최신 패치 번호·요약·카드 이미지를 메타에 넣어야만 미리보기가 살아납니다.
        카드 URL 에 패치 버전이 들어가 새 패치마다 SNS 캐시를 자연 우회합니다.
@@ -8163,13 +8176,17 @@ export function createHttpHandler(input: HttpHandlerInput) {
         const palworldLimitGroup = url.pathname.startsWith("/api/palworld/")
           ? palworldRateLimitGroup(url.pathname)
           : undefined;
-        const rateLimitPath = palworldLimitGroup === undefined
+        const rateLimitPath = url.pathname === "/api/minecraft/patch-notes"
+          ? "/api/minecraft/patch-notes"
+          : palworldLimitGroup === undefined
           ? url.pathname.startsWith("/api/valorant/")
             ? "/api/valorant/public"
             : url.pathname
           : `/api/palworld/${palworldLimitGroup.group}`;
         const limitKey = `${ip}:${rateLimitPath}`;
-        const limiter = url.pathname === "/api/admin/audit-logs"
+        const limiter = url.pathname === "/api/minecraft/patch-notes"
+          ? publicMinecraftPatchNotesApiLimiter
+          : url.pathname === "/api/admin/audit-logs"
           ? adminAuditApiLimiter
           : url.pathname === "/api/inbound-email/cloudflare"
           ? inboundEmailLimiter
@@ -9936,6 +9953,22 @@ export function createHttpHandler(input: HttpHandlerInput) {
       }
       if (req.method === "GET" && url.pathname.startsWith("/api/minecraft/")) {
         const catalog = input.minecraftCatalog;
+        if (url.pathname === "/api/minecraft/patch-notes") {
+          let candidate: MinecraftPatchNotesResponse;
+          if (input.minecraftPatchNotes) {
+            candidate = await input.minecraftPatchNotes.page(url.searchParams);
+          } else {
+            parseMinecraftPatchNotesQuery(url.searchParams);
+            candidate = { state: "data_unavailable" as const };
+          }
+          const validation = validateMinecraftPatchNotesResponse(candidate);
+          if (!validation.ok) throw new Error(`minecraft_patch_notes_response_invalid:${validation.error}`);
+          return sendJson(req, res, 200, validation.data, validation.data.state === "ready"
+            ? {
+                "Cache-Control": "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400"
+              }
+            : noStoreHeaders());
+        }
         if (url.pathname === "/api/minecraft/items") {
           const response = catalog?.items(url.searchParams) ?? { state: "data_unavailable" as const };
           const validation = validateMinecraftItemCatalogResponse(response);
@@ -11402,6 +11435,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
         }, noStoreHeaders());
       }
       if (error instanceof MinecraftCatalogQueryError) {
+        return sendJson(req, res, 400, {
+          error: error.publicMessage,
+          code: error.code
+        }, noStoreHeaders());
+      }
+      if (error instanceof MinecraftPatchNotesQueryError) {
         return sendJson(req, res, 400, {
           error: error.publicMessage,
           code: error.code

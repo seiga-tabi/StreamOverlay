@@ -99,6 +99,15 @@ test("마인크래프트 실데이터 경로는 고유 metadata를 제공하고 
   assert.match(sitemap, /\/ko\/minecraft\/recipes/u);
   assert.match(sitemap, /\/ja\/minecraft\/items/u);
   assert.doesNotMatch(sitemap, /\/minecraft\/(?:library|patch-notes)/u);
+
+  const readyPatchNotes = publicSeoMetadataForPath("/ja/minecraft/patch-notes", {
+    minecraftPatchNotesReady: true,
+  });
+  assert.equal(readyPatchNotes.robotsNoindex, undefined);
+  assert.equal(readyPatchNotes.title, "マインクラフト パッチノート | YORO.gg");
+  const readySitemap = buildStaticSitemap(undefined, { minecraftPatchNotesReady: true });
+  assert.match(readySitemap, /\/ko\/minecraft\/patch-notes/u);
+  assert.match(readySitemap, /\/ja\/minecraft\/patch-notes/u);
 });
 
 test("JSON-LD는 script 종료 태그를 만들 수 있는 문자를 escape한다", () => {

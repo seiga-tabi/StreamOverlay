@@ -11,6 +11,7 @@ import { MinecraftHeader } from "../features/public-minecraft/components/Minecra
 import { MinecraftHome } from "../features/public-minecraft/components/MinecraftHome";
 import { MinecraftItemsPage } from "../features/public-minecraft/components/MinecraftItemsPage";
 import { MinecraftNotFoundPage } from "../features/public-minecraft/components/MinecraftNotFoundPage";
+import { MinecraftPatchNotesPage } from "../features/public-minecraft/components/MinecraftPatchNotesPage";
 import { MinecraftRecipesPage } from "../features/public-minecraft/components/MinecraftRecipesPage";
 import { useMinecraftRoute } from "../features/public-minecraft/hooks/useMinecraftRoute";
 import { minecraftI18n, type MinecraftLocale } from "../features/public-minecraft/i18n/minecraft-i18n";
@@ -54,9 +55,8 @@ export function PublicMinecraftPage() {
           {page === "recipes" ? <MinecraftRecipesPage locale={locale} /> : null}
           {page === "items" ? <MinecraftItemsPage locale={locale} /> : null}
           {page === "enchants" ? <MinecraftEnchantsPage locale={locale} /> : null}
-          {page === "library" || page === "patchNotes" ? (
-            <MinecraftComingSoonPage locale={locale} page={page} />
-          ) : null}
+          {page === "patchNotes" ? <MinecraftPatchNotesPage locale={locale} /> : null}
+          {page === "library" ? <MinecraftComingSoonPage locale={locale} page={page} /> : null}
         </section>
       </AppShellMain>
       {/* 하단 탭바는 AppShell 직계 자식 — 헤더의 backdrop-filter 가

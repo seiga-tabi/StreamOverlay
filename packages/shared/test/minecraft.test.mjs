@@ -1,8 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  isMinecraftPatchOfficialUrl,
   validateMinecraftEnchantCatalogResponse,
   validateMinecraftItemCatalogResponse,
+  validateMinecraftPatchNotesResponse,
   validateMinecraftRecipeCatalogResponse
 } from "../dist/index.js";
 
@@ -145,4 +147,59 @@ test("Minecraft 응답 validator는 잘못된 날짜·coverage·pagination을 �
     assert.doesNotThrow(() => validateMinecraftItemCatalogResponse(candidate));
     assert.equal(validateMinecraftItemCatalogResponse(candidate).ok, false);
   }
+});
+
+test("Minecraft 패치 노트 응답은 공식 URL·내림차순·큐레이션 상한을 검증한다", () => {
+  const valid = {
+    state: "ready",
+    entries: [
+      {
+        id: "java-26.3-snapshot-8",
+        edition: "java",
+        version: "26.3-snapshot-8",
+        type: "snapshot",
+        publishedAt: "2026-08-12T09:39:37.000Z",
+        officialUrl: "https://www.minecraft.net/en-us/articles",
+        title: { ko: "직접 작성한 변경 요약", ja: "独自に作成した変更要約" },
+        highlights: [{ ko: "검수한 핵심 내용", ja: "確認済みの主な内容" }]
+      },
+      {
+        id: "java-26.2",
+        edition: "java",
+        version: "26.2",
+        type: "release",
+        publishedAt: "2026-06-16T09:00:00.000Z",
+        officialUrl: "https://minecraft.net/en-us/articles"
+      }
+    ],
+    pagination: { page: 1, totalPages: 1, hasNextPage: false, total: 2 }
+  };
+  assert.equal(validateMinecraftPatchNotesResponse(valid).ok, true);
+  assert.equal(validateMinecraftPatchNotesResponse({
+    ...valid,
+    entries: [...valid.entries].reverse()
+  }).ok, false);
+  assert.equal(validateMinecraftPatchNotesResponse({
+    ...valid,
+    entries: [{ ...valid.entries[0], officialUrl: "https://minecraft.net.evil.example/steal" }]
+  }).ok, false);
+  assert.deepEqual(validateMinecraftPatchNotesResponse({ state: "data_unavailable" }), {
+    ok: true,
+    data: { state: "data_unavailable" }
+  });
+});
+
+test("Minecraft 패치 노트 officialUrl allowlist는 HTTPS Mojang 계열만 허용한다", () => {
+  for (const url of [
+    "https://minecraft.net/en-us/articles",
+    "https://www.minecraft.net/en-us/article/minecraft-java-edition-26-2",
+    "https://bugs.mojang.com/browse/MC-1"
+  ]) assert.equal(isMinecraftPatchOfficialUrl(url), true, url);
+  for (const url of [
+    "http://minecraft.net/en-us/articles",
+    "https://minecraft.net.evil.example/",
+    "https://user@minecraft.net/",
+    "https://minecraft.net:444/",
+    "javascript:alert(1)"
+  ]) assert.equal(isMinecraftPatchOfficialUrl(url), false, url);
 });

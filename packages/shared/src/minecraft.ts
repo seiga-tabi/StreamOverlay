@@ -6,6 +6,9 @@ export const MINECRAFT_RECIPE_TYPES = [
   "stonecutting"
 ] as const;
 
+export const MINECRAFT_PATCH_EDITIONS = ["java", "bedrock"] as const;
+export const MINECRAFT_PATCH_TYPES = ["release", "snapshot", "preview"] as const;
+
 export const MINECRAFT_TRANSLATION_DISPLAY_STATUSES = [
   "source_provided",
   "source_language_fallback"
@@ -17,6 +20,8 @@ export const MINECRAFT_RECIPE_TYPE_AVAILABILITIES = [
 ] as const;
 
 export type MinecraftRecipeType = (typeof MINECRAFT_RECIPE_TYPES)[number];
+export type MinecraftPatchEdition = (typeof MINECRAFT_PATCH_EDITIONS)[number];
+export type MinecraftPatchType = (typeof MINECRAFT_PATCH_TYPES)[number];
 export type MinecraftTranslationDisplayStatus =
   (typeof MINECRAFT_TRANSLATION_DISPLAY_STATUSES)[number];
 export type MinecraftRecipeTypeAvailability =
@@ -116,6 +121,36 @@ export type MinecraftCatalogResponse<T> =
       metadata: MinecraftCatalogMetadata;
     }>;
 
+export type MinecraftPatchLocalizedSummary = Readonly<{
+  ko: string;
+  ja: string;
+}>;
+
+export type MinecraftPatchEntry = Readonly<{
+  id: string;
+  edition: MinecraftPatchEdition;
+  version: string;
+  type: MinecraftPatchType;
+  publishedAt: string;
+  officialUrl: string;
+  /** 사람이 검수해 작성한 요약만 존재하며, 준비 전에는 필드 자체를 생략합니다. */
+  title?: MinecraftPatchLocalizedSummary;
+  highlights?: readonly MinecraftPatchLocalizedSummary[];
+}>;
+
+export type MinecraftPatchNotesResponse =
+  | Readonly<{ state: "data_unavailable" }>
+  | Readonly<{
+      state: "ready";
+      entries: readonly MinecraftPatchEntry[];
+      pagination: Readonly<{
+        page: number;
+        totalPages: number;
+        hasNextPage: boolean;
+        total: number;
+      }>;
+    }>;
+
 export type MinecraftValidationResult<T> =
   | { ok: true; data: T }
   | { ok: false; error: string };
@@ -123,6 +158,8 @@ export type MinecraftValidationResult<T> =
 const ID_PATTERN = /^[a-z0-9][a-z0-9_]{0,127}$/u;
 const RECIPE_ID_PATTERN = /^[a-z0-9][a-z0-9_-]{0,159}$/u;
 const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
+const MINECRAFT_PATCH_ID_PATTERN = /^[a-z0-9][a-z0-9._-]{0,127}$/u;
+const MINECRAFT_PATCH_VERSION_PATTERN = /^[0-9][0-9a-zA-Z._-]{0,31}$/u;
 
 function invalid<T>(error: string): MinecraftValidationResult<T> {
   return { ok: false, error };
@@ -460,4 +497,126 @@ export function validateMinecraftEnchantCatalogResponse(
   value: unknown
 ): MinecraftValidationResult<MinecraftCatalogResponse<MinecraftEnchant>> {
   return catalogResponse(value, enchant);
+}
+
+export function isMinecraftPatchOfficialUrl(value: unknown): value is string {
+  if (typeof value !== "string" || value.length > 2_048) return false;
+  try {
+    const parsed = new URL(value);
+    const hostname = parsed.hostname.toLowerCase();
+    const officialHostname = hostname === "minecraft.net"
+      || hostname.endsWith(".minecraft.net")
+      || hostname === "mojang.com"
+      || hostname.endsWith(".mojang.com");
+    return parsed.protocol === "https:"
+      && parsed.username === ""
+      && parsed.password === ""
+      && parsed.port === ""
+      && officialHostname;
+  } catch {
+    return false;
+  }
+}
+
+function patchLocalizedSummary(
+  value: unknown,
+  path: string
+): MinecraftValidationResult<MinecraftPatchLocalizedSummary> {
+  const result = exactRecord(value, ["ko", "ja"], path);
+  if (!result.ok) return result;
+  if (!boundedText(result.data.ko, 300) || !boundedText(result.data.ja, 300)) {
+    return invalid(`${path}_invalid`);
+  }
+  return { ok: true, data: result.data as MinecraftPatchLocalizedSummary };
+}
+
+export function validateMinecraftPatchEntry(
+  value: unknown,
+  path = "entry"
+): MinecraftValidationResult<MinecraftPatchEntry> {
+  const result = exactRecord(value, [
+    "id", "edition", "version", "type", "publishedAt", "officialUrl", "title", "highlights"
+  ], path);
+  if (!result.ok) return result;
+  if (
+    typeof result.data.id !== "string"
+    || !MINECRAFT_PATCH_ID_PATTERN.test(result.data.id)
+    || !MINECRAFT_PATCH_EDITIONS.includes(result.data.edition as MinecraftPatchEdition)
+    || typeof result.data.version !== "string"
+    || !MINECRAFT_PATCH_VERSION_PATTERN.test(result.data.version)
+    || !MINECRAFT_PATCH_TYPES.includes(result.data.type as MinecraftPatchType)
+    || !canonicalIsoDate(result.data.publishedAt)
+    || !isMinecraftPatchOfficialUrl(result.data.officialUrl)
+  ) return invalid(`${path}_invalid`);
+
+  if (result.data.title !== undefined) {
+    const title = patchLocalizedSummary(result.data.title, `${path}_title`);
+    if (!title.ok) return title;
+  }
+  if (result.data.highlights !== undefined) {
+    if (
+      !Array.isArray(result.data.highlights)
+      || result.data.highlights.length < 1
+      || result.data.highlights.length > 8
+    ) return invalid(`${path}_highlights_invalid`);
+    for (const [index, candidate] of result.data.highlights.entries()) {
+      const highlight = patchLocalizedSummary(candidate, `${path}_highlights_${index}`);
+      if (!highlight.ok) return highlight;
+    }
+  }
+  return { ok: true, data: result.data as MinecraftPatchEntry };
+}
+
+export function validateMinecraftPatchNotesResponse(
+  value: unknown
+): MinecraftValidationResult<MinecraftPatchNotesResponse> {
+  const root = exactRecord(value, ["state", "entries", "pagination"], "response");
+  if (!root.ok) return root;
+  if (root.data.state === "data_unavailable") {
+    return Object.keys(root.data).length === 1
+      ? { ok: true, data: { state: "data_unavailable" } }
+      : invalid("response_unavailable_unknown_field");
+  }
+  if (
+    root.data.state !== "ready"
+    || !Array.isArray(root.data.entries)
+    || root.data.entries.length > 100
+  ) return invalid("response_invalid");
+
+  const ids = new Set<string>();
+  let previousPublishedAt = Number.POSITIVE_INFINITY;
+  for (const [index, candidate] of root.data.entries.entries()) {
+    const entry = validateMinecraftPatchEntry(candidate, `entries_${index}`);
+    if (!entry.ok) return entry;
+    if (ids.has(entry.data.id)) return invalid("response_duplicate_id");
+    ids.add(entry.data.id);
+    const publishedAt = Date.parse(entry.data.publishedAt);
+    if (publishedAt > previousPublishedAt) return invalid("response_sort_invalid");
+    previousPublishedAt = publishedAt;
+  }
+
+  const page = exactRecord(
+    root.data.pagination,
+    ["page", "totalPages", "hasNextPage", "total"],
+    "pagination"
+  );
+  if (!page.ok) return page;
+  if (
+    !integer(page.data.page, 1, 10_000)
+    || !integer(page.data.totalPages, 1, 10_000)
+    || !integer(page.data.total, 0, 100_000)
+    || page.data.page > page.data.totalPages
+    || typeof page.data.hasNextPage !== "boolean"
+    || page.data.hasNextPage !== (page.data.page < page.data.totalPages)
+    || root.data.entries.length > page.data.total
+    || (page.data.total === 0 && (
+      root.data.entries.length !== 0
+      || page.data.page !== 1
+      || page.data.totalPages !== 1
+    ))
+    || (page.data.total > 0 && root.data.entries.length === 0)
+    || page.data.totalPages < Math.max(1, Math.ceil((page.data.total as number) / 100))
+  ) return invalid("pagination_invalid");
+
+  return { ok: true, data: root.data as MinecraftPatchNotesResponse };
 }

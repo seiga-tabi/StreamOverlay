@@ -79,6 +79,12 @@ import {
   MinecraftCatalogService,
   MinecraftCatalogUnavailableError
 } from "./services/minecraft-catalog.js";
+import {
+  LocalMinecraftPatchSnapshotStore,
+  MinecraftPatchCurationError,
+  MinecraftPatchNotesService,
+  loadMinecraftPatchCuration
+} from "./services/minecraft-patch-notes-service.js";
 import { ValorantPublicCatalogService } from "./services/valorant-public-catalog.js";
 import { ValorantPublicService } from "./services/valorant-public-service.js";
 import {
@@ -526,6 +532,27 @@ try {
       : "MINECRAFT_CATALOG_UNAVAILABLE"
   });
 }
+let minecraftPatchNotes: MinecraftPatchNotesService | undefined;
+try {
+  const curation = loadMinecraftPatchCuration();
+  minecraftPatchNotes = new MinecraftPatchNotesService({
+    store: new LocalMinecraftPatchSnapshotStore(`${appConfig.paths.state}/minecraft-patch-notes`),
+    curation,
+    logger
+  });
+  logger.event({
+    type: "minecraft.patch_notes_initialized",
+    curatedJavaVersions: Object.keys(curation.java).length,
+    curatedBedrockVersions: Object.keys(curation.bedrock).length
+  });
+} catch (error) {
+  logger.error({
+    type: "minecraft.patch_notes_unavailable",
+    errorCode: error instanceof MinecraftPatchCurationError
+      ? error.code
+      : "MINECRAFT_PATCH_NOTES_UNAVAILABLE"
+  });
+}
 let valorantCatalog: ValorantPublicCatalogService | undefined;
 if (appConfig.riot.valorantPublicEnabled) {
   try {
@@ -650,6 +677,7 @@ const server = http.createServer(createHttpHandler({
   sessions,
   supportMailbox,
   minecraftCatalog,
+  minecraftPatchNotes,
   palworldDataService,
   palworldMapMarkerProvider,
   palworldSpawnProvider,
@@ -701,6 +729,7 @@ server.on("connection", (socket) => {
 twitchEventSub.start();
 palworldServerMonitor?.start();
 patchNotes.start();
+minecraftPatchNotes?.start();
 
 function shutdown(signal: NodeJS.Signals): void {
   if (shuttingDown) return;
@@ -709,6 +738,7 @@ function shutdown(signal: NodeJS.Signals): void {
   twitchEventSub.stop();
   palworldServerMonitor?.stop();
   patchNotes.stop();
+  minecraftPatchNotes?.stop();
   discordOnboarding?.stopCleanup();
   discordManagement?.stopCleanup();
   yoroAccounts?.stopCleanup();

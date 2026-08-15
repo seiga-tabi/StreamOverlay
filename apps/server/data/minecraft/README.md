@@ -53,3 +53,17 @@ node --test apps/server/test/minecraft-catalog.test.mjs apps/server/test/minecra
 `air` 결과와 count `0`으로 표현된 upstream special recipe sentinel 1건은 공개 조합법에서 제외한다. 이 제외 수가 달라지거나 source hash가 바뀌면 generator가 실패하므로, 패키지나 game version 갱신 시 원천 diff와 권리 범위를 다시 검수해야 한다.
 
 생성 결과의 SHA-256도 `MinecraftCatalogService`에 고정되어 있다. 번역 overlay, package 또는 game version을 갱신해 artifact가 달라지면 generator 출력의 `artifactSha256`을 검수한 뒤 서비스의 기대값도 함께 갱신해야 하며, 불일치 상태에서는 운영 API가 fail-closed된다.
+
+## 패치 노트 수집기
+
+- Java 원천: `https://piston-meta.mojang.com/mc/game/version_manifest_v2.json`
+- 수집 주기: 서버 기동 직후와 이후 6시간마다
+- 재시도: timeout 10초, 일시 오류에 최대 3회 bounded retry
+- 저장 위치: `${STREAMOPS_STATE_DIR}/minecraft-patch-notes/java.json`
+- 공개 API: `GET /api/minecraft/patch-notes?edition=java|bedrock&type=release|snapshot|preview&page=N`
+
+manifest에서 버전·유형·`releaseTime`만 읽으며 원문 패치 노트 본문이나 이미지는 저장하지 않는다. manifest가 개별 패치 노트 URL을 제공하지 않으므로 `officialUrl`은 Minecraft 공식 기사 허브인 `https://www.minecraft.net/en-us/articles`를 사용한다. 마지막 정상 snapshot은 원자적으로 저장하고, 이후 수집이 실패해도 계속 제공한다. snapshot이 한 번도 없으면 `data_unavailable`이다.
+
+Bedrock은 현재 신뢰 가능한 Mojang 공식 버전 manifest를 확보하지 못했으므로 수집하지 않는다. `edition=bedrock` 요청은 비공식 자료로 보완하지 않고 `data_unavailable`을 반환한다.
+
+사람이 검수한 한국어·일본어 요약은 `patch-note-curation.json`에서 edition·version 키 기반으로 관리한다. `title`과 `highlights`는 ko·ja를 동시에 제공해야 하며, 없는 버전에는 응답 필드 자체가 추가되지 않는다. 기계 번역이나 자동 요약은 사용하지 않는다.

@@ -16,6 +16,7 @@ import {
   minecraftTextureUrls,
 } from "../src/features/public-minecraft/components/MinecraftItemImage";
 import { MinecraftNotFoundPage } from "../src/features/public-minecraft/components/MinecraftNotFoundPage";
+import { MinecraftPatchNotesPage } from "../src/features/public-minecraft/components/MinecraftPatchNotesPage";
 import { MinecraftRecipesPage } from "../src/features/public-minecraft/components/MinecraftRecipesPage";
 import {
   isMinecraftPath,
@@ -80,18 +81,32 @@ test("위키 홈은 검색 히어로·코어 카드·비공식 고지를 ko·ja�
   assert.match(japanese, /Mojang Synergies AB の商標/u);
 });
 
-test("자료실·패치 노트는 정직한 준비 중 상태와 위키 홈 복귀를 제공한다", () => {
+test("자료실은 정직한 준비 중 상태와 위키 홈 복귀를 제공한다", () => {
   setActivePublicLocale("ko");
-  for (const page of ["library", "patchNotes"] as const) {
-    const korean = renderToStaticMarkup(<MinecraftComingSoonPage locale="ko" page={page} />);
-    assert.match(korean, /준비하고 있습니다/u);
-    assert.match(korean, /위키 홈으로/u);
-    const japanese = renderToStaticMarkup(<MinecraftComingSoonPage locale="ja" page={page} />);
-    assert.match(japanese, /準備しています/u);
-    assert.match(japanese, /Wiki ホームへ/u);
-  }
-  const library = renderToStaticMarkup(<MinecraftComingSoonPage locale="ko" page="library" />);
-  assert.match(library, /파일은 호스팅하지 않고 공식 출처로만/u);
+  const korean = renderToStaticMarkup(<MinecraftComingSoonPage locale="ko" page="library" />);
+  assert.match(korean, /준비하고 있습니다/u);
+  assert.match(korean, /위키 홈으로/u);
+  assert.match(korean, /파일은 호스팅하지 않고 공식 출처로만/u);
+  const japanese = renderToStaticMarkup(<MinecraftComingSoonPage locale="ja" page="library" />);
+  assert.match(japanese, /準備しています/u);
+  assert.match(japanese, /Wiki ホームへ/u);
+});
+
+test("패치 노트 페이지는 에디션 탭·유형 칩·가이드를 ko·ja 로 렌더하고 로딩으로 시작한다", () => {
+  setActivePublicLocale("ko");
+  const korean = renderToStaticMarkup(<MinecraftPatchNotesPage locale="ko" />);
+  assert.match(korean, /aria-pressed="true"[^>]*class="[^"]*is-java"|is-java[^>]*aria-pressed="true"/u);
+  assert.match(korean, /Bedrock/u);
+  assert.match(korean, /하이라이트는 YORO\.gg 가 요약한 것/u);
+  assert.match(korean, /정식/u);
+  assert.match(korean, /스냅샷/u);
+  /* 데이터 도착 전에는 skeleton — 가짜 패치 카드 금지 */
+  assert.doesNotMatch(korean, /minecraft-patch is-latest|data-testid="minecraft-patch-card"/u);
+  /* 가이드는 상태와 무관하게 항상 렌더(광고 오인 빈 박스 금지) */
+  assert.match(korean, /Mojang 공식 런처 피드를 주기적으로 수집합니다/u);
+  assert.match(korean, /스냅샷은 어디서 받나요\?/u);
+  const japanese = renderToStaticMarkup(<MinecraftPatchNotesPage locale="ja" />);
+  assert.match(japanese, /要約は人が直接作成しています/u);
 });
 
 test("카탈로그 3화면은 검색 UI·제목을 ko·ja로 렌더하고 로딩 상태로 시작한다", () => {

@@ -539,7 +539,9 @@ test("마인크래프트 메뉴는 실데이터 화면과 준비 중 화면·404
   await expect(page).toHaveURL(/\/minecraft\/library$/u);
 
   await page.goto("/minecraft/patch-notes");
-  await expect(page.getByText("패치 노트를 준비하고 있습니다")).toBeVisible();
+  /* 수집기 미배포 상태 — 오류가 아니라 정직한 "수집 전" 빈 상태 + 가이드 콘텐츠 */
+  await expect(page.getByText("아직 수집된 패치 노트가 없습니다.")).toBeVisible();
+  await expect(page.getByTestId("minecraft-patch-guide")).toBeVisible();
   await page.goto("/minecraft/recipes/diamond-sword");
   await expect(page.getByText("페이지를 찾을 수 없습니다.")).toBeVisible();
 });
@@ -560,6 +562,69 @@ test("마인크래프트 일본어 경로는 ja 문구와 canonical을 유지한
   await expect(page.getByRole("heading", { name: "エンチャント", exact: true })).toBeVisible();
   await expect(page.getByText("2件", { exact: true })).toBeVisible();
   await expect(page.getByText("最大 Lv 5")).toBeVisible();
+});
+
+
+test("패치 노트는 에디션 탭·유형 필터·LATEST·요약 정책·상태 화면을 렌더한다", async ({ page }) => {
+  const entry = (id: string, edition: string, version: string, type: string, publishedAt: string, summarized: boolean) => ({
+    id, edition, version, type, publishedAt,
+    officialUrl: "https://www.minecraft.net/article/" + id,
+    ...(summarized ? {
+      title: { ko: `${version} 핵심 변경`, ja: `${version} 主な変更` },
+      highlights: [{ ko: "전투 밸런스가 조정되었습니다.", ja: "戦闘バランスが調整されました。" }],
+    } : {}),
+  });
+  const java = [
+    entry("java-1-21-11", "java", "1.21.11", "release", "2026-07-30T00:00:00.000Z", true),
+    entry("java-26w18a", "java", "26w18a", "snapshot", "2026-07-14T00:00:00.000Z", true),
+    entry("java-1-21-10", "java", "1.21.10", "release", "2026-06-21T00:00:00.000Z", false),
+  ];
+  const bedrock = [entry("bedrock-1-21-132", "bedrock", "1.21.132", "release", "2026-08-02T00:00:00.000Z", true)];
+  await page.route(/\/api\/minecraft\/patch-notes/u, async (route) => {
+    const url = new URL(route.request().url());
+    const edition = url.searchParams.get("edition") ?? "java";
+    const type = url.searchParams.get("type");
+    const source = (edition === "bedrock" ? bedrock : java).filter((item) => !type || item.type === type);
+    await route.fulfill({ json: { state: "ready", entries: source, pagination: { page: 1, totalPages: 1, hasNextPage: false, total: source.length } } });
+  });
+
+  await page.goto("/minecraft/patch-notes");
+  await expect(page.getByTestId("minecraft-patch-card")).toHaveCount(3);
+  /* LATEST = 최신 정식 1건, 스냅샷에는 붙지 않음 */
+  const latest = page.getByTestId("minecraft-patch-card").filter({ hasText: "1.21.11" });
+  await expect(latest.getByText("LATEST")).toBeVisible();
+  await expect(latest.getByText("1.21.11 핵심 변경")).toBeVisible();
+  await expect(latest.getByText("요약: YORO.gg 자체 작성")).toBeVisible();
+  /* 공식 링크는 Mojang 도메인 allowlist */
+  await expect(latest.getByRole("link", { name: "공식 패치 노트" })).toHaveAttribute("href", /^https:\/\/www\.minecraft\.net\//u);
+  /* 요약 준비 전 버전 — 기계 채움 없이 정직 표기 */
+  const pending = page.getByTestId("minecraft-patch-card").filter({ hasText: "1.21.10" });
+  await expect(pending.getByText("요약 준비 중 — 공식 노트를 참고하세요")).toBeVisible();
+
+  /* 유형 필터 */
+  await page.getByRole("group", { name: "릴리스 유형" }).getByRole("button", { name: "정식", exact: true }).click();
+  await expect(page.getByTestId("minecraft-patch-card")).toHaveCount(2);
+
+  /* 에디션 전환 — URL(?edition=)이 단일 원본 */
+  await page.getByRole("group", { name: "에디션" }).getByRole("button", { name: "Bedrock" }).click();
+  await expect(page).toHaveURL(/\/minecraft\/patch-notes\?edition=bedrock$/u);
+  await expect(page.getByTestId("minecraft-patch-card").filter({ hasText: "1.21.132" })).toBeVisible();
+
+  /* 오류 → 재시도 복구 */
+  await page.unroute(/\/api\/minecraft\/patch-notes/u);
+  let failing = true;
+  await page.route(/\/api\/minecraft\/patch-notes/u, async (route) => {
+    if (failing) { await route.fulfill({ status: 500, json: { error: "boom" } }); return; }
+    await route.fulfill({ json: { state: "ready", entries: java, pagination: { page: 1, totalPages: 1, hasNextPage: false, total: 3 } } });
+  });
+  await page.goto("/minecraft/patch-notes");
+  await expect(page.getByText("패치 노트를 불러오지 못했습니다.")).toBeVisible();
+  failing = false;
+  await page.getByRole("button", { name: "다시 시도" }).click();
+  await expect(page.getByTestId("minecraft-patch-card")).toHaveCount(3);
+
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  expect(overflow).toBeLessThanOrEqual(0);
 });
 
 test("게임 선택기에서 마인크래프트로 이동하고 다시 다른 게임으로 돌아온다", async ({ page }) => {

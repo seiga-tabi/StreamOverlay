@@ -122,9 +122,20 @@ export function buildSitemapIndex(entries: readonly SitemapEntry[]): string {
     + "</sitemapindex>";
 }
 
-export function buildStaticSitemap(lastmod?: string): string {
+export function publicSitemapStaticPaths(
+  options: { minecraftPatchNotesReady?: boolean } = {}
+): readonly string[] {
+  return options.minecraftPatchNotesReady
+    ? [...PUBLIC_SITEMAP_STATIC_PATHS, "/minecraft/patch-notes"]
+    : PUBLIC_SITEMAP_STATIC_PATHS;
+}
+
+export function buildStaticSitemap(
+  lastmod?: string,
+  options: { minecraftPatchNotesReady?: boolean } = {}
+): string {
   return buildLocalizedUrlSetSitemap(
-    PUBLIC_SITEMAP_STATIC_PATHS.map((path) => ({ path, lastmod }))
+    publicSitemapStaticPaths(options).map((path) => ({ path, lastmod }))
   );
 }
 

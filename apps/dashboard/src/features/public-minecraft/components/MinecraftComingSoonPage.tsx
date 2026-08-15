@@ -9,7 +9,7 @@ import {
 import { minecraftI18n, type MinecraftLocale } from "../i18n/minecraft-i18n";
 import { setMinecraftUrl, type MinecraftPage } from "../utils/routes";
 
-type ComingSoonPage = Extract<MinecraftPage, "library" | "patchNotes">;
+type ComingSoonPage = Extract<MinecraftPage, "library">;
 
 /* 자료실·패치 노트의 정직한 준비 중 상태 — 가짜 표본으로 채우지 않습니다.
    조합법·아이템·인챈트는 2단계에서 실데이터 페이지로 전환되었고,
@@ -19,9 +19,8 @@ export function MinecraftComingSoonPage({ locale, page }: {
   page: ComingSoonPage;
 }) {
   const text = minecraftI18n[locale];
-  const keys: Record<ComingSoonPage, { title: "libraryComingSoonTitle" | "patchNotesComingSoonTitle"; description: "libraryComingSoonDescription" | "patchNotesComingSoonDescription" }> = {
+  const keys: Record<ComingSoonPage, { title: "libraryComingSoonTitle"; description: "libraryComingSoonDescription" }> = {
     library: { title: "libraryComingSoonTitle", description: "libraryComingSoonDescription" },
-    patchNotes: { title: "patchNotesComingSoonTitle", description: "patchNotesComingSoonDescription" },
   };
   const selected = keys[page];
 

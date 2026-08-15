@@ -734,7 +734,22 @@ const JAPANESE_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   }
 };
 
-function contentForPath(normalizedPath: string, locale: PublicUrlLocale): PublicSeoContent {
+function contentForPath(
+  normalizedPath: string,
+  locale: PublicUrlLocale,
+  options: { minecraftPatchNotesReady?: boolean } = {}
+): PublicSeoContent {
+  if (normalizedPath === "/minecraft/patch-notes" && options.minecraftPatchNotesReady) {
+    return locale === "ja"
+      ? {
+          title: "マインクラフト パッチノート | YORO.gg",
+          description: "Mojang公式配布メタデータに基づくJava版パッチ履歴を新しい順に確認できます。"
+        }
+      : {
+          title: "마인크래프트 패치 노트 | YORO.gg",
+          description: "Mojang 공식 배포 메타데이터 기반 Java Edition 패치 이력을 최신순으로 확인하세요."
+        };
+  }
   const table = locale === "ja" ? JAPANESE_CONTENT : KOREAN_CONTENT;
   const exact = table[normalizedPath];
   if (exact) return exact;
@@ -752,13 +767,17 @@ function contentForPath(normalizedPath: string, locale: PublicUrlLocale): Public
   return table["/"] ?? KOREAN_DEFAULT;
 }
 
-export function publicSeoMetadataForPath(pathname: string): PublicSeoMetadata {
+export function publicSeoMetadataForPath(
+  pathname: string,
+  options: { minecraftPatchNotesReady?: boolean } = {}
+): PublicSeoMetadata {
   const locale = publicUrlLocaleFromPathname(pathname) ?? "ko";
   const normalizedPath = normalizePublicSeoPath(pathname);
-  const content = contentForPath(normalizedPath, locale);
+  const content = contentForPath(normalizedPath, locale, options);
   const canonicalUrl = localizedPublicSeoUrl(normalizedPath, locale);
   const structuredData: unknown[] = [websiteStructuredData(locale)];
-  const robotsNoindex = PUBLIC_SEO_NOINDEX_PATHS.has(normalizedPath);
+  const robotsNoindex = PUBLIC_SEO_NOINDEX_PATHS.has(normalizedPath)
+    && !(normalizedPath === "/minecraft/patch-notes" && options.minecraftPatchNotesReady);
   if (normalizedPath !== "/") structuredData.push(breadcrumbStructuredData(normalizedPath, locale));
   if (normalizedPath === "/") {
     structuredData.push({ "@context": "https://schema.org", ...(organizationStructuredData() as object) });

@@ -940,3 +940,226 @@ a.minecraft-aux-card:focus-visible {
     grid-template-columns: 1fr;
   }
 }
+
+/* ═══ 패치 노트 — 도트 문법(에디션 탭·타임라인 카드·가이드) ═══ */
+.minecraft-patch-editions {
+  display: flex;
+  gap: var(--yoro-space-2);
+  margin-inline-start: auto;
+}
+
+.minecraft-patch-editions > button {
+  min-block-size: 2.75rem;
+  padding: 0 var(--yoro-space-4);
+  border: 2px solid var(--minecraft-edge);
+  border-radius: 0;
+  background: #131b2a;
+  color: var(--minecraft-ink-muted);
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-black);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .06);
+  cursor: pointer;
+}
+
+.minecraft-patch-editions > button.active.is-java {
+  background: var(--minecraft-accent);
+  color: #10230b;
+  text-shadow: 1px 1px 0 rgba(255, 255, 255, .2);
+  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, .35), inset -2px -2px 0 #4e9634;
+}
+
+.minecraft-patch-editions > button.active.is-bedrock {
+  background: #8ab4f8;
+  color: #0c1a33;
+  text-shadow: 1px 1px 0 rgba(255, 255, 255, .25);
+  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, .4), inset -2px -2px 0 #5a86d4;
+}
+
+.minecraft-patch-editions > button:focus-visible {
+  outline: 2px solid var(--minecraft-ink);
+  outline-offset: -4px;
+}
+
+.minecraft-patch-lead {
+  margin: 0;
+  max-inline-size: 70ch;
+  color: var(--minecraft-ink-muted);
+  font-size: var(--yoro-font-size-sm);
+}
+
+.minecraft-patch-list {
+  display: grid;
+  gap: var(--yoro-space-3);
+}
+
+.minecraft-patch-year {
+  margin: var(--yoro-space-2) 0 0;
+  color: #66748c;
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-black);
+  letter-spacing: .08em;
+}
+
+.minecraft-patch {
+  display: grid;
+  gap: var(--yoro-space-2);
+  padding: var(--yoro-space-4);
+  border: 2px solid var(--minecraft-edge);
+  border-radius: 0;
+  background: var(--minecraft-surface);
+  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, .09), inset -2px -2px 0 rgba(0, 0, 0, .45);
+}
+
+.minecraft-patch.is-latest {
+  border-color: #8b5cf6;
+  outline: 2px solid #100a1e;
+}
+
+.minecraft-patch__head {
+  display: flex;
+  align-items: center;
+  gap: var(--yoro-space-2);
+  flex-wrap: wrap;
+}
+
+.minecraft-patch__latest {
+  padding: 1px var(--yoro-space-2);
+  border: 2px solid var(--minecraft-edge);
+  background: #8b5cf6;
+  color: #fff;
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-black);
+  letter-spacing: .08em;
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .3);
+}
+
+.minecraft-patch__version {
+  margin: 0;
+  font-size: var(--yoro-font-size-lg);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, .55);
+}
+
+.minecraft-patch__type {
+  padding: 1px var(--yoro-space-2);
+  border: 2px solid var(--minecraft-edge);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-black);
+}
+
+.minecraft-patch__type.is-release {
+  background: var(--minecraft-xp);
+  color: #142200;
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .4);
+}
+
+.minecraft-patch__type.is-snapshot,
+.minecraft-patch__type.is-preview {
+  background: #313b52;
+  color: var(--minecraft-ink-muted);
+}
+
+.minecraft-patch__date {
+  margin-inline-start: auto;
+  color: var(--minecraft-ink-muted);
+  font-size: var(--yoro-font-size-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.minecraft-patch__title {
+  margin: 0;
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-bold);
+}
+
+.minecraft-patch__highlights {
+  margin: 0;
+  padding-inline-start: 1.1rem;
+  display: grid;
+  gap: 4px;
+  color: var(--minecraft-ink-muted);
+  font-size: var(--yoro-font-size-xs);
+}
+
+.minecraft-patch__foot {
+  display: flex;
+  align-items: center;
+  gap: var(--yoro-space-3);
+  flex-wrap: wrap;
+}
+
+.minecraft-patch__foot > a {
+  color: var(--minecraft-accent);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-black);
+  text-decoration: none;
+}
+
+.minecraft-patch__foot > a::after { content: " ↗"; }
+
+.minecraft-patch__foot > a:focus-visible {
+  outline: 2px solid var(--minecraft-accent);
+  outline-offset: 2px;
+}
+
+.minecraft-patch__foot > span {
+  margin-inline-start: auto;
+  color: #66748c;
+  font-size: var(--yoro-font-size-xs);
+}
+
+/* 하단 가이드 — 상태와 무관하게 항상 실콘텐츠 */
+.minecraft-patch-guide {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: var(--yoro-space-6);
+  margin-block-start: var(--yoro-space-6);
+  padding-block-start: var(--yoro-space-5);
+  border-block-start: thin solid var(--minecraft-line);
+}
+
+.minecraft-patch-guide h3 {
+  margin: 0 0 var(--yoro-space-2);
+  font-size: var(--yoro-font-size-md);
+}
+
+.minecraft-patch-guide p + h3 { margin-block-start: var(--yoro-space-4); }
+
+.minecraft-patch-guide ol {
+  margin: 0;
+  padding-inline-start: 1.1rem;
+  display: grid;
+  gap: var(--yoro-space-2);
+  color: var(--minecraft-ink-muted);
+  font-size: var(--yoro-font-size-sm);
+}
+
+.minecraft-patch-guide dl { margin: 0; display: grid; gap: var(--yoro-space-3); }
+.minecraft-patch-guide dt { font-weight: var(--yoro-font-weight-bold); font-size: var(--yoro-font-size-sm); }
+.minecraft-patch-guide dd { margin: 2px 0 0; color: var(--minecraft-ink-muted); font-size: var(--yoro-font-size-sm); }
+.minecraft-patch-guide > div > p { margin: 0; color: var(--minecraft-ink-muted); font-size: var(--yoro-font-size-sm); }
+
+.minecraft-patch-guide__faq {
+  border-block-start: thin solid var(--minecraft-line);
+  padding-block: var(--yoro-space-1);
+}
+
+.minecraft-patch-guide__faq > summary {
+  min-block-size: 2.75rem;
+  display: flex;
+  align-items: center;
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-bold);
+  cursor: pointer;
+}
+
+.minecraft-patch-guide__faq > summary:focus-visible {
+  outline: 2px solid var(--minecraft-accent);
+  outline-offset: 2px;
+}
+
+.minecraft-patch-guide__faq > p {
+  margin: var(--yoro-space-1) 0 var(--yoro-space-2);
+  color: var(--minecraft-ink-muted);
+  font-size: var(--yoro-font-size-sm);
+}
