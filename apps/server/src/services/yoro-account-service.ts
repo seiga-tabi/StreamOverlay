@@ -37,7 +37,6 @@ import type {
 } from "./public-twitch-auth.js";
 import {
   isLocalizablePublicDashboardRoute,
-  publicUrlLocaleFromPathname,
   stripPublicUrlLocalePrefix
 } from "../routing/public-dashboard-routes.js";
 
@@ -281,23 +280,17 @@ function safeReturnPath(value: string | undefined): string {
     return "/account/connections";
   }
   const pathname = returnUrl.pathname;
-  if (
-    publicUrlLocaleFromPathname(pathname)
-    && isLocalizablePublicDashboardRoute(stripPublicUrlLocalePrefix(pathname))
-  ) {
+  /* 공개 화면은 route 목록(public-dashboard-routes)을 단일 원본으로 판정합니다.
+     예전에는 로케일 접두사가 있을 때만 이 목록을 보고, 접두사가 없으면 별도
+     하드코딩 배열을 봤습니다 — 두 원본이 갈라져 신규 공개 게임(/minecraft,
+     /valorant)이 접두사 없는 형태에서만 조용히 /account/connections 로 버려졌습니다.
+     이제 접두사 유무와 무관하게 같은 목록으로 판정하므로 공개 route 를 추가할 때
+     이 파일을 함께 고칠 필요가 없습니다. */
+  if (isLocalizablePublicDashboardRoute(stripPublicUrlLocalePrefix(pathname))) {
     return `${pathname}${returnUrl.search}`;
   }
-  const allowed = [
-    "/",
-    "/bot",
-    "/account",
-    "/account/connections",
-    "/lol",
-    "/palworld",
-    "/participation",
-    "/patch-notes",
-    "/dashboard"
-  ];
+  /* 공개 route 가 아닌 로그인 후 복귀 지점 — route 목록에 없으므로 여기서 유지합니다. */
+  const allowed = ["/account", "/dashboard"];
   return allowed.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))
     ? `${pathname}${returnUrl.search}`
     : "/account/connections";

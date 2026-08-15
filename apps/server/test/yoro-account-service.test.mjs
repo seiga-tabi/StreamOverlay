@@ -379,3 +379,51 @@ test("발로란트 전적 공개 동의는 최근 Twitch 인증·CSRF를 요구�
   );
   assert.equal(JSON.stringify(transactionQueries).includes("riot-puuid"), false);
 });
+
+test("계정 OAuth return_to 는 공개 route 목록을 단일 원본으로 판정한다", async () => {
+  /* 회귀 고정 — 예전에는 로케일 접두사가 있을 때만 공개 route 목록을 보고,
+     접두사가 없으면 별도 하드코딩 배열을 봤습니다. 두 원본이 갈라져 신규 공개
+     게임(/minecraft, /valorant)이 접두사 없는 형태에서만 /account/connections 로
+     조용히 버려졌습니다(로그인 후 원래 페이지 복귀 계약 위반). */
+  async function resolveReturnPath(returnPath) {
+    let stored;
+    const pool = {
+      async query(text, values) {
+        if (text.includes("INSERT INTO yoro_oauth_sessions")) {
+          /* 컬럼 순서: provider, purpose, user_id, state_hash, cookie_binding_hash,
+             pkce_verifier_encrypted, return_path, expires_at */
+          stored = values.at(-2);
+          return { rows: [], rowCount: 1 };
+        }
+        throw new Error(`unexpected query: ${text}`);
+      }
+    };
+    await new YoroAccountService(pool).beginOAuth({
+      provider: "twitch",
+      purpose: "login",
+      returnPath
+    });
+    return stored;
+  }
+
+  /* 공개 게임 경로는 접두사 유무와 무관하게 유지됩니다. */
+  for (const path of [
+    "/", "/lol", "/palworld", "/bot", "/bot/commands", "/patch-notes", "/participation",
+    "/minecraft", "/minecraft/recipes", "/valorant", "/valorant/agents",
+    "/ko/minecraft", "/ja/valorant/agents", "/ko/palworld/pals/lamball"
+  ]) {
+    assert.equal(await resolveReturnPath(path), path, `${path} 는 복귀 경로로 유지되어야 합니다.`);
+  }
+
+  /* 공개 route 가 아닌 로그인 후 복귀 지점도 계속 허용합니다. */
+  assert.equal(await resolveReturnPath("/account/connections"), "/account/connections");
+  assert.equal(await resolveReturnPath("/dashboard/streaming/participation"), "/dashboard/streaming/participation");
+  assert.equal(await resolveReturnPath("/lol?q=1"), "/lol?q=1");
+
+  /* 목록 밖·조작된 입력은 기본 복귀 지점으로 버립니다. */
+  for (const path of [
+    "//evil.com", "https://evil.com", "/../etc", "/unknown-page", "/admin", "/login"
+  ]) {
+    assert.equal(await resolveReturnPath(path), "/account/connections", `${path} 는 거부되어야 합니다.`);
+  }
+});

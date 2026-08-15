@@ -712,6 +712,7 @@ export function PublicBotPage() {
     loginWithDiscord,
     loginWithTwitch,
     logout: logoutAccount,
+    twitchConfigured,
   } = usePublicAccountLogin({ tracking: { linkContext: "public_bot_account" } });
   /* 계정 라벨의 단일 원본 — 다섯 게임 헤더가 같은 문구를 씁니다. */
   const account = publicAccountI18n[locale];
@@ -957,7 +958,7 @@ export function PublicBotPage() {
                 }}
               />
               <PublicTwitchAccountChip
-                configured
+                configured={twitchConfigured}
                 connected={accountConnected}
                 dashboardLabel={account.dashboard}
                 dashboardLabelJa={publicAccountI18n.ja.dashboard}
@@ -1063,7 +1064,7 @@ export function PublicBotPage() {
                 <section className="public-mobile-menu__section">
                   <h3>{account.section}</h3>
                   <PublicTwitchAccountPanel
-                    configured
+                    configured={twitchConfigured}
                     connected={accountConnected}
                     dashboardLabel={account.dashboard}
                     dashboardLabelJa={publicAccountI18n.ja.dashboard}

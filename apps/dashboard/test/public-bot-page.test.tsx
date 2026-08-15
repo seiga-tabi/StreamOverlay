@@ -163,3 +163,33 @@ test("YORO Bot 사용방법·명령어·게임파일은 canonical URL별 독립 
   assert.match(dedicatedServerMarkup, /RCON/u);
   assert.doesNotMatch(dedicatedServerMarkup, /accessToken|refreshToken|clientSecret|setupToken/u);
 });
+
+test("공개 게임 헤더는 Twitch 로그인 가용성을 서버 실값으로만 판정한다", async () => {
+  /* 회귀 고정 — Bot 만 configured 를 하드코딩 true 로 두어, Twitch 앱이 미설정인
+     환경에서도 로그인 버튼이 활성으로 보였습니다. 계정 OAuth 와 공개 뷰어 상태는
+     같은 자격증명(appConfig.twitch.clientId/clientSecret/publicRedirectUri)을 쓰므로
+     configured=false 면 계정 로그인도 반드시 실패합니다 — 별도 필드가 아니라
+     같은 값을 게이트로 써야 합니다. */
+  const { readFile } = await import("node:fs/promises");
+  const sources = await Promise.all([
+    readFile(new URL("../src/features/public-bot/PublicBotPage.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../src/features/public-lol/components/PublicAppHeader.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../src/features/public-palworld/components/PalworldHeader.tsx", import.meta.url), "utf8"),
+  ]);
+
+  for (const source of sources) {
+    /* 값 없는 `configured` 는 JSX 에서 true 와 같습니다 — 하드코딩 금지. */
+    assert.doesNotMatch(
+      source,
+      /<PublicTwitchAccount(?:Chip|Panel)\b[^>]*?\n\s*configured\s*\n/u,
+      "configured 를 하드코딩하지 말고 서버 실값을 전달해야 합니다.",
+    );
+    assert.doesNotMatch(source, /configured=\{true\}/u);
+  }
+
+  const botSource = sources[0];
+  assert.match(botSource, /twitchConfigured,/u);
+  assert.match(botSource, /configured=\{twitchConfigured\}/u);
+  /* 칩(데스크톱)과 패널(모바일 메뉴) 두 곳 모두 같은 값을 씁니다. */
+  assert.equal((botSource.match(/configured=\{twitchConfigured\}/gu) ?? []).length, 2);
+});
