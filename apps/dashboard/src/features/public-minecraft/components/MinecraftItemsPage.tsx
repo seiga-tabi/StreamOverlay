@@ -25,7 +25,10 @@ function ItemRow({ enchants, item, locale }: {
       {/* ID 는 보조 위계 — 이름을 지배하던 전폭 막대 결함의 수정점(내용 폭 모노스페이스) */}
       <code className="minecraft-item-row__id">{item.id}</code>
       <span className="minecraft-item-row__facts">
-        <span>{formatMinecraftTemplate(text.itemStackSize, { count: item.stackSize })}</span>
+        {/* 묶음 64 는 기본값이라 표기하지 않습니다 — 1·16 같은 예외만 보여야 눈에 들어옵니다. */}
+        {item.stackSize !== 64 ? (
+          <span>{formatMinecraftTemplate(text.itemStackSize, { count: item.stackSize })}</span>
+        ) : null}
         {item.maxDurability !== undefined ? (
           <span>{formatMinecraftTemplate(text.itemDurability, { count: item.maxDurability.toLocaleString() })}</span>
         ) : null}

@@ -1,6 +1,8 @@
-/* 공개 프로필/서브페이지 회색 톤 보정 */
-.public-dashboard-shell:not(.public-home-shell),
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell),
+/* 공개 프로필/서브페이지 회색 톤 보정.
+   게임 DB 셸(팰월드·발로란트·마인크래프트)은 다크 지면 소유라 제외합니다 —
+   지면 정의는 legacy/03-product-gray.css 의 네이비 규칙 한 곳입니다. */
+.public-dashboard-shell:not(.public-home-shell):not(.palworld-shell):not(.valorant-shell):not(.minecraft-shell),
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell):not(.palworld-shell):not(.valorant-shell):not(.minecraft-shell),
 .public-dashboard-shell.public-profile-shared-shell {
   background:
     radial-gradient(circle at 50% 0%, rgba(248, 249, 250, .18), transparent 30%),

@@ -11,7 +11,8 @@ export const MINECRAFT_JAVA_VERSION_MANIFEST_URL =
 export const MINECRAFT_JAVA_PATCH_NOTES_HUB_URL =
   "https://www.minecraft.net/en-us/articles";
 
-const SOURCE_USER_AGENT = "YOROggMinecraftPatchNotes/1.0 (+https://yoro.gg)";
+export const MINECRAFT_PATCH_SOURCE_USER_AGENT =
+  "YOROggMinecraftPatchNotes/1.0 (+https://yoro.gg)";
 const SOURCE_TIMEOUT_MS = 10_000;
 const SOURCE_MAX_ATTEMPTS = 3;
 const SOURCE_RETRY_DELAY_MS = 250;
@@ -187,7 +188,7 @@ export async function fetchMinecraftJavaPatchEntries(
         redirect: "error",
         headers: {
           accept: "application/json",
-          "user-agent": SOURCE_USER_AGENT
+          "user-agent": MINECRAFT_PATCH_SOURCE_USER_AGENT
         },
         signal: AbortSignal.timeout(timeoutMs)
       });

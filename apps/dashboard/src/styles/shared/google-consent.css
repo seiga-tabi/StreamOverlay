@@ -1,19 +1,19 @@
+/* 부유 카드 대신 전폭 슬림 바 — 본문 카드를 덮는 면적을 최소화하고
+   모바일에서 화면 1/3을 차지하던 높이를 줄입니다. */
 .google-consent-banner {
   position: fixed;
-  right: var(--space-4);
-  bottom: var(--space-4);
-  left: var(--space-4);
+  right: 0;
+  bottom: 0;
+  left: 0;
   z-index: var(--yoro-z-toast);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--yoro-space-5);
-  width: min(56rem, calc(100% - (var(--space-4) * 2)));
-  margin-inline: auto;
-  padding-block: var(--yoro-space-5);
+  width: 100%;
+  padding-block: var(--space-3);
   padding-inline: clamp(var(--yoro-space-6), 3vw, var(--yoro-space-10));
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-lg);
+  border-block-start: 1px solid var(--line-strong);
   color: var(--text);
   background: var(--surface-strong);
   box-shadow: var(--panel-shadow);
@@ -24,18 +24,19 @@
 }
 
 .google-consent-banner__copy strong {
-  display: block;
-  margin-block-end: var(--space-1);
+  display: inline;
+  margin-inline-end: var(--space-2);
   color: var(--text-strong);
-  font-size: 1rem;
+  font-size: .9375rem;
   line-height: 1.4;
 }
 
 .google-consent-banner__copy p {
+  display: inline;
   margin: 0;
   color: var(--muted);
-  font-size: .875rem;
-  line-height: 1.6;
+  font-size: .8125rem;
+  line-height: 1.5;
   overflow-wrap: anywhere;
 }
 
@@ -83,8 +84,8 @@
   .google-consent-banner {
     align-items: stretch;
     flex-direction: column;
-    gap: var(--space-3);
-    padding: var(--space-4);
+    gap: var(--space-2);
+    padding: var(--space-3);
   }
 
   .google-consent-banner__actions {

@@ -145,3 +145,22 @@ test("게임 선택기에서 발로란트로 이동하고 다시 다른 게임�
   await page.getByRole("option", { name: "Palworld 선택" }).click();
   await expect(page).toHaveURL(/\/palworld$/u);
 });
+
+test("Twitch 로그인 버튼은 공개 상태 API 의 configured 실값을 따른다", async ({ page }) => {
+  /* configured=false 하드코딩으로 버튼이 영구 비활성이던 결함(2026-08-15) 회귀 방지 */
+  await page.route("**/api/public/twitch/status", async (route) => {
+    await route.fulfill({ json: { connected: false, configured: true, requiredScopes: [], missingScopes: [] } });
+  });
+  await page.goto("/valorant");
+  const isMobile = (page.viewportSize()?.width ?? 1280) <= 768;
+  test.skip(isMobile, "모바일은 통합 메뉴 시트 경로 — 데스크톱 칩만 검증합니다.");
+  await page.getByRole("button", { name: "로그인" }).first().click();
+  const twitchLogin = page.locator("button", { hasText: "Twitch로 로그인" }).first();
+  await expect(twitchLogin).toBeEnabled();
+  /* OAuth 시작으로 실제 이동하는지 — 이동만 확인하고 외부 인증은 수행하지 않습니다 */
+  await page.route("**/api/account/oauth/twitch/start**", async (route) => {
+    await route.fulfill({ status: 200, contentType: "text/html", body: "<!doctype html><title>oauth-start</title>" });
+  });
+  await twitchLogin.click();
+  await page.waitForURL(/\/api\/account\/oauth\/twitch\/start\?purpose=login&return_to=/u);
+});

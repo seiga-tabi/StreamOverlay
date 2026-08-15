@@ -1,5 +1,5 @@
-import type { PublicLiveStreamerCard, PublicLiveStreamerRailState } from "../../../shared/PublicLiveStreamerRail";
-import { PublicLiveStreamerRail } from "../../../shared/PublicLiveStreamerRail";
+import type { PublicLiveStreamerCard } from "../../../shared/PublicLiveStreamerRail";
+import { PublicFollowedLiveRail } from "../../../shared/public-live-streamers";
 import {
   PublicGameHomeHero,
 } from "../../../shared/PublicGameHome";
@@ -48,36 +48,19 @@ export function PalworldHome({
 }) {
   const text = palworldI18n[locale];
   const { data: dashboardData, retry: retryDashboardData } = usePalworldHomeDashboardData(locale);
-  const liveState: PublicLiveStreamerRailState = liveError
-    ? "error"
-    : !twitchConfigured
-      ? "not-configured"
-      : !twitchConnected
-        ? "login-required"
-        : "ready";
-
-  const liveContent = <PublicLiveStreamerRail
-      emptyDescription={localizedText(locale, "noLiveStreamersDescription")}
-      emptyTitle={localizedText(locale, liveError ? "twitchErrorTitle" : "noLiveStreamers")}
-      errorDescription={localizedText(locale, "twitchErrorDescription")}
+  /* 문구·상태 산출은 shared/public-live-streamers.tsx 가 단일 원본입니다. */
+  const liveContent = (
+    <PublicFollowedLiveRail
+      configured={twitchConfigured}
+      connected={twitchConnected}
+      error={liveError}
       loading={liveLoading}
-      loadingLabel={localizedText(locale, "loadingStreamers")}
-      loginAction={localizedText(locale, "twitchLogin")}
-      loginDescription={localizedText(locale, "twitchLoginDescription")}
-      loginTitle={localizedText(locale, "twitchLoginTitle")}
-      notConfiguredDescription={localizedText(locale, "twitchNotConfiguredDescription")}
-      notConfiguredTitle={localizedText(locale, "twitchNotConfiguredTitle")}
+      locale={locale}
       onLogin={onTwitchLogin}
       onRetry={onLiveRetry}
-      previous={localizedText(locale, "livePrevious")}
-      retryAction={localizedText(locale, "retryTwitch")}
-      state={liveState}
       streamers={liveStreamers}
-      title={localizedText(locale, "followedLiveTitle")}
-      next={localizedText(locale, "liveNext")}
-      viewAll={localizedText(locale, "viewAll")}
-      watch={localizedText(locale, "watchStream")}
-    />;
+    />
+  );
 
   return (
     <div className="palworld-home-content">

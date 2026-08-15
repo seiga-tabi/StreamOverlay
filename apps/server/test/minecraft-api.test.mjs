@@ -4,6 +4,12 @@ import assert from "node:assert/strict";
 const { createHttpHandler } = await import("../dist/routes/http-api.js");
 const { MinecraftCatalogService } = await import("../dist/services/minecraft-catalog.js");
 const { MinecraftPatchNotesService } = await import("../dist/services/minecraft-patch-notes-service.js");
+const { MINECRAFT_FEEDBACK_SECTION_IDS } = await import(
+  "../dist/services/minecraft-patch-notes-feedback-source.js"
+);
+const { MINECRAFT_JAVA_VERSION_MANIFEST_URL } = await import(
+  "../dist/services/minecraft-patch-notes-source.js"
+);
 const { requiredHttpPrincipal } = await import("../dist/security/auth.js");
 const { publicMinecraftPatchNotesApiLimiter } = await import("../dist/security/rate-limit.js");
 const {
@@ -60,15 +66,53 @@ function sourceEntry(id, type, releaseTime) {
   };
 }
 
+function feedbackResponse(sectionId, articles) {
+  return new Response(JSON.stringify({
+    articles,
+    count: articles.length,
+    next_page: null,
+    page: 1,
+    page_count: 1,
+    per_page: 100,
+    previous_page: null,
+    sort_by: "created_at",
+    sort_order: "desc"
+  }), { headers: { "content-type": "application/json" } });
+}
+
+function feedbackArticle(id, sectionId, title, createdAt) {
+  return {
+    id,
+    section_id: sectionId,
+    locale: "en-us",
+    draft: false,
+    title,
+    created_at: createdAt,
+    html_url: `https://feedback.minecraft.net/hc/en-us/articles/${id}-Minecraft-Changelog`
+  };
+}
+
 function patchService() {
   return new MinecraftPatchNotesService({
-    fetchImpl: async () => new Response(JSON.stringify({
-      latest: { release: "26.2", snapshot: "26.3-snapshot-8" },
-      versions: [
-        sourceEntry("26.3-snapshot-8", "snapshot", "2026-08-12T09:39:37Z"),
-        sourceEntry("26.2", "release", "2026-06-16T09:00:00Z")
-      ]
-    }), { headers: { "content-type": "application/json" } }),
+    fetchImpl: async (input) => {
+      const url = new URL(input);
+      if (url.href === MINECRAFT_JAVA_VERSION_MANIFEST_URL) {
+        return new Response(JSON.stringify({
+          latest: { release: "26.2", snapshot: "26.3-snapshot-8" },
+          versions: [
+            sourceEntry("26.3-snapshot-8", "snapshot", "2026-08-12T09:39:37Z"),
+            sourceEntry("26.2", "release", "2026-06-16T09:00:00Z")
+          ]
+        }), { headers: { "content-type": "application/json" } });
+      }
+      const sectionId = Number(/\/sections\/(\d+)\/articles\.json$/u.exec(url.pathname)?.[1]);
+      const article = sectionId === MINECRAFT_FEEDBACK_SECTION_IDS.release
+        ? feedbackArticle(201, sectionId, "Minecraft - 1.21.132 (Bedrock)", "2026-08-14T17:00:33Z")
+        : sectionId === MINECRAFT_FEEDBACK_SECTION_IDS.bedrockPreview
+          ? feedbackArticle(202, sectionId, "Minecraft Beta & Preview - 26.50.25", "2026-08-11T14:50:48Z")
+          : feedbackArticle(203, sectionId, "Minecraft Java Edition - 26.3 Snapshot 8", "2026-08-12T11:40:16Z");
+      return feedbackResponse(sectionId, [article]);
+    },
     sleepImpl: async () => undefined
   });
 }
@@ -137,16 +181,27 @@ test("Minecraft 패치 노트 API는 unknown·중복·잘못된 query를 400으�
   }
 });
 
-test("Bedrock과 수집기 미연결 상태는 오류 대신 data_unavailable을 반환한다", async () => {
-  for (const [handler, url] of [
-    [createPatchHandler(), "/api/minecraft/patch-notes?edition=bedrock&type=preview"],
-    [createPatchHandler(null), "/api/minecraft/patch-notes?edition=java"]
-  ]) {
-    const { response, body } = await request(handler, url);
-    assert.equal(response.statusCode, 200, url);
-    assert.deepEqual(body, { state: "data_unavailable" }, url);
-    assert.equal(response.headers["Cache-Control"], "no-store", url);
-  }
+test("Bedrock preview API는 shared schema와 공개 캐시 정책으로 정상 응답한다", async () => {
+  const { response, body } = await request(
+    createPatchHandler(),
+    "/api/minecraft/patch-notes?edition=bedrock&type=preview"
+  );
+  assert.equal(response.statusCode, 200);
+  assert.equal(validateMinecraftPatchNotesResponse(body).ok, true);
+  assert.equal(body.state, "ready");
+  assert.equal(body.entries[0].version, "26.50.25");
+  assert.equal(body.entries[0].type, "preview");
+  assert.match(response.headers["Cache-Control"], /^public, max-age=300/u);
+});
+
+test("수집기 미연결 상태는 오류 대신 data_unavailable을 반환한다", async () => {
+  const { response, body } = await request(
+    createPatchHandler(null),
+    "/api/minecraft/patch-notes?edition=java"
+  );
+  assert.equal(response.statusCode, 200);
+  assert.deepEqual(body, { state: "data_unavailable" });
+  assert.equal(response.headers["Cache-Control"], "no-store");
 });
 
 test("Minecraft 패치 snapshot이 실제 준비된 뒤에만 sitemap에 패치 노트를 추가한다", async () => {

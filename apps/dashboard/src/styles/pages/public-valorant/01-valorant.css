@@ -123,16 +123,53 @@
   color: var(--valorant-ink);
 }
 
-/* 번호는 장식이 아니라 순서 있는 제공 단계입니다(opt-in → 로그인 → 공개 데이터). */
-.valorant-model-card__step {
+/* FAQ — 준비 단계의 빈 지면을 확정 사실 문답으로 채우는 섹션 */
+.valorant-faq {
   display: grid;
-  place-items: center;
-  inline-size: 1.75rem;
-  block-size: 1.75rem;
+  gap: var(--yoro-space-3);
+}
+
+.valorant-faq > h2 {
+  margin: 0;
+  font-size: var(--yoro-font-size-lg);
+  font-weight: 800;
+}
+
+.valorant-faq__item {
+  padding: var(--yoro-space-4);
+  background: var(--valorant-surface);
+  color: var(--valorant-ink);
+}
+
+.valorant-faq__item > summary {
+  min-block-size: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.valorant-faq__item > summary:focus-visible {
+  outline: 2px solid var(--yoro-color-valorant-primary);
+  outline-offset: 2px;
+}
+
+.valorant-faq__item > p {
+  margin: var(--yoro-space-3) 0 0;
+  color: var(--valorant-ink-muted, inherit);
+  line-height: 1.6;
+}
+
+/* 접근 조건 라벨 — 세 모델은 병렬 제공이라 순번 대신 조건을 칩으로 보여줍니다. */
+.valorant-model-card__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--yoro-space-1) var(--yoro-space-2);
   border: thin solid var(--yoro-color-valorant-primary);
   color: var(--yoro-color-valorant-primary);
   font-size: var(--yoro-font-size-xs);
   font-weight: 800;
+  letter-spacing: .02em;
 }
 
 .valorant-model-card > h3 {

@@ -78,6 +78,25 @@ const FIXTURE_RECIPES = [
       { item: reference("vine", "Vine"), count: 1 },
     ],
   },
+  /* 같은 결과(barrel)의 재료 변형 2종 — 변형 그룹핑(대표 1장 + 확장) 회귀용 */
+  {
+    id: "barrel_oak",
+    type: "crafting",
+    result: { item: reference("barrel", "Barrel", "통", "樽"), count: 1 },
+    ingredients: [
+      { item: reference("oak_planks", "Oak Planks", "참나무 판자", "オークの板材"), count: 6 },
+      { item: reference("oak_slab", "Oak Slab", "참나무 반 블록", "オークのハーフブロック"), count: 2 },
+    ],
+  },
+  {
+    id: "barrel_spruce",
+    type: "crafting",
+    result: { item: reference("barrel", "Barrel", "통", "樽"), count: 1 },
+    ingredients: [
+      { item: reference("spruce_planks", "Spruce Planks", "가문비나무 판자", "トウヒの板材"), count: 6 },
+      { item: reference("spruce_slab", "Spruce Slab", "가문비나무 반 블록", "トウヒのハーフブロック"), count: 2 },
+    ],
+  },
 ];
 
 const FIXTURE_ENCHANTS = [
@@ -290,7 +309,7 @@ test("위키 홈은 카탈로그 metadata 로 실제 수치를 보여 주고 카
   /* 실카운트는 코어 카드에 배분 — fixture coverage: 아이템 60 · 조합법 2 · 인챈트 2 */
   const itemsCard = page.getByRole("link", { name: /아이템 · 도구/u });
   await expect(itemsCard.locator(".minecraft-core-card__count")).toHaveText("60개");
-  await expect(page.getByRole("link", { name: /^조합법/u }).locator(".minecraft-core-card__count")).toHaveText("2개");
+  await expect(page.getByRole("link", { name: /^조합법/u }).locator(".minecraft-core-card__count")).toHaveText("4개");
   await expect(page.getByRole("link", { name: /^인챈트/u }).locator(".minecraft-core-card__count")).toHaveText("2종");
   /* 준비 중 기능은 클릭 전에 배지로 보임 */
   await expect(page.getByRole("link", { name: /자료실/u }).getByText("준비 중")).toBeVisible();
@@ -333,7 +352,7 @@ test("조합법 페이지는 3×3 그리드·자유 배치·제공 유형 칩·�
   await mockMinecraftCatalog(page);
   await page.goto("/minecraft/recipes");
   await expect(page.getByRole("heading", { name: "조합법", exact: true })).toBeVisible();
-  await expect(page.getByText("2개", { exact: true })).toBeVisible();
+  await expect(page.getByText("4개", { exact: true })).toBeVisible();
 
   const shaped = page.getByTestId("minecraft-recipe-card").filter({ hasText: "다이아몬드 검" });
   await expect(shaped.getByRole("img", { name: "조합 배치" })).toBeVisible();
@@ -357,6 +376,26 @@ test("조합법 페이지는 3×3 그리드·자유 배치·제공 유형 칩·�
   await expect(chips.getByRole("button", { name: /제련/u })).toHaveCount(0);
   await expect(page.getByText("원천 미제공: 제련 · 양조 · 대장장이 · 절단")).toBeVisible();
   await expect(page.getByText("데이터: minecraft-data (MIT) · Java 1.21.11", { exact: false })).toBeVisible();
+});
+
+test("같은 결과 아이템의 재료 변형은 대표 1장으로 접히고 확장 시 전부 보인다", async ({ page }) => {
+  await mockMinecraftCatalog(page);
+  await page.goto("/minecraft/recipes");
+
+  /* barrel 변형 2종 → 대표 카드 1장만 보이고 나머지는 details 안 */
+  const group = page.locator(".minecraft-recipe-group");
+  await expect(group).toHaveCount(1);
+  await expect(group.getByTestId("minecraft-recipe-card").first()).toBeVisible();
+  const toggle = group.locator("summary");
+  await expect(toggle).toHaveText("재료 변형 1종 보기");
+  await expect(group.getByText("가문비나무 판자", { exact: false })).toBeHidden();
+
+  await toggle.click();
+  await expect(group.getByText("가문비나무 판자", { exact: false })).toBeVisible();
+  await expect(group.getByTestId("minecraft-recipe-card")).toHaveCount(2);
+
+  /* 변형이 없는 레시피(다이아몬드 검)는 그룹 래퍼 없이 그대로 */
+  await expect(page.getByTestId("minecraft-recipe-card").filter({ hasText: "다이아몬드 검" })).toBeVisible();
 });
 
 test("아이템 텍스처가 item 경로에 없으면 block 경로를 시도하고 CDN 장애 시 자체 fallback을 표시한다", async ({ page }) => {
@@ -597,17 +636,23 @@ test("패치 노트는 에디션 탭·유형 필터·LATEST·요약 정책·상�
   await expect(latest.getByText("요약: YORO.gg 자체 작성")).toBeVisible();
   /* 공식 링크는 Mojang 도메인 allowlist */
   await expect(latest.getByRole("link", { name: "공식 패치 노트" })).toHaveAttribute("href", /^https:\/\/www\.minecraft\.net\//u);
-  /* 요약 준비 전 버전 — 기계 채움 없이 정직 표기 */
+  /* 요약 준비 전 버전 — 컴팩트 1줄 카드 + 상단 안내 1회(카드별 반복 문구 없음) */
   const pending = page.getByTestId("minecraft-patch-card").filter({ hasText: "1.21.10" });
-  await expect(pending.getByText("요약 준비 중 — 공식 노트를 참고하세요")).toBeVisible();
+  await expect(pending).toHaveClass(/is-compact/u);
+  await expect(pending.getByRole("link", { name: "공식 패치 노트" })).toBeVisible();
+  await expect(pending.getByText("요약 준비 중")).toHaveCount(0);
+  await expect(page.getByText(/요약이 아직 준비되지 않은 버전은/u)).toBeVisible();
 
   /* 유형 필터 */
-  await page.getByRole("group", { name: "릴리스 유형" }).getByRole("button", { name: "정식", exact: true }).click();
-  await expect(page.getByTestId("minecraft-patch-card")).toHaveCount(2);
+  await page.getByRole("group", { name: "릴리스 유형" }).getByRole("button", { name: "스냅샷", exact: true }).click();
+  await expect(page.getByTestId("minecraft-patch-card")).toHaveCount(1);
 
-  /* 에디션 전환 — URL(?edition=)이 단일 원본 */
+  /* 에디션 전환 — URL(?edition=) 단일 원본 + 유형 필터 리셋(잠복 결함 회귀 방지):
+     java 에서 스냅샷을 고른 채 전환해도 bedrock 목록이 비어 보이면 안 됩니다. */
   await page.getByRole("group", { name: "에디션" }).getByRole("button", { name: "Bedrock" }).click();
   await expect(page).toHaveURL(/\/minecraft\/patch-notes\?edition=bedrock$/u);
+  await expect(page.getByRole("group", { name: "릴리스 유형" }).getByRole("button", { name: "전체", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("group", { name: "릴리스 유형" }).getByRole("button", { name: "프리뷰", exact: true })).toBeVisible();
   await expect(page.getByTestId("minecraft-patch-card").filter({ hasText: "1.21.132" })).toBeVisible();
 
   /* 오류 → 재시도 복구 */
@@ -646,4 +691,23 @@ test("게임 선택기에서 마인크래프트로 이동하고 다시 다른 �
   await page.getByRole("option", { name: "마인크래프트 선택" }).click();
   await expect(page).toHaveURL(/\/minecraft$/u);
   await expect(page.getByRole("heading", { name: "무엇이든 찾는 마인크래프트 위키" })).toBeVisible();
+});
+
+test("Twitch 로그인 버튼은 공개 상태 API 의 configured 실값을 따른다", async ({ page }) => {
+  /* configured=false 하드코딩으로 버튼이 영구 비활성이던 결함(2026-08-15) 회귀 방지 */
+  await page.route("**/api/public/twitch/status", async (route) => {
+    await route.fulfill({ json: { connected: false, configured: true, requiredScopes: [], missingScopes: [] } });
+  });
+  await page.goto("/minecraft");
+  const isMobile = (page.viewportSize()?.width ?? 1280) <= 768;
+  test.skip(isMobile, "모바일은 통합 메뉴 시트 경로 — 데스크톱 칩만 검증합니다.");
+  await page.getByRole("button", { name: "로그인" }).first().click();
+  const twitchLogin = page.locator("button", { hasText: "Twitch로 로그인" }).first();
+  await expect(twitchLogin).toBeEnabled();
+  /* OAuth 시작으로 실제 이동하는지 — 이동만 확인하고 외부 인증은 수행하지 않습니다 */
+  await page.route("**/api/account/oauth/twitch/start**", async (route) => {
+    await route.fulfill({ status: 200, contentType: "text/html", body: "<!doctype html><title>oauth-start</title>" });
+  });
+  await twitchLogin.click();
+  await page.waitForURL(/\/api\/account\/oauth\/twitch\/start\?purpose=login&return_to=/u);
 });

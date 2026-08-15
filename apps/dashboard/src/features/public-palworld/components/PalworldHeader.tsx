@@ -1,21 +1,15 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { trackGoogleAnalyticsEvent } from "../../../analytics/google-analytics";
 import { PublicGameHeaderFrame, PublicHorizontalNav } from "../../../shared/PublicGameChrome";
 import { PublicMobileMenuSheet } from "../../../shared/PublicMobileMenuSheet";
 import {
   PublicTwitchAccountChip,
-  type PublicTwitchAccountMenuAction,
-  type PublicTwitchAccountUser
+  type PublicTwitchAccountMenuAction
 } from "../../../shared/PublicTwitchAccountChip";
+import { usePublicAccountLogin } from "../../../shared/public-account-login";
 import { PublicGameSelector } from "../../public-lol/components/PublicGameSelector";
 import { PublicLocaleSelector } from "../../public-lol/components/PublicLocaleSelector";
 import type { PublicMainPage, PublicTwitchViewerStatus } from "../../public-lol/types/public-lol";
 import { setPublicPath } from "../../public-lol/utils/routes";
-import { accountOAuthUrl, openYoroDashboard } from "../../yoro-account/api";
-import {
-  authenticatedYoroIdentity,
-  useYoroAccountSession
-} from "../../yoro-account/useYoroAccountSession";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import { palworldPathForPage, setPalworldUrl, type PalworldPage } from "../utils/routes";
 
@@ -66,7 +60,6 @@ export function PalworldHeader({
   page,
   searchContent,
   twitchStatus = { connected: false, configured: false, requiredScopes: [], missingScopes: [] },
-  onTwitchLogin = () => undefined,
   onTwitchLogout = () => undefined,
 }: {
   locale: PalworldLocale;
@@ -74,60 +67,32 @@ export function PalworldHeader({
   page: PalworldPage;
   searchContent?: ReactNode;
   twitchStatus?: PublicTwitchViewerStatus;
-  onTwitchLogin?: () => void;
   onTwitchLogout?: () => void;
 }) {
   const [gameSelectorOpen, setGameSelectorOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
   const [twitchMenuOpen, setTwitchMenuOpen] = useState(false);
-  const yoroAccount = useYoroAccountSession();
   const headerRef = useRef<HTMLDivElement>(null);
   const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
   const text = palworldI18n[locale];
-  const yoroIdentity = authenticatedYoroIdentity(yoroAccount.session);
-  const yoroConnected = yoroAccount.session?.authenticated === true;
-  const accountConnected = yoroConnected || twitchStatus.connected;
-  const accountUser: PublicTwitchAccountUser | undefined = yoroIdentity
-    ? {
-      displayName: yoroIdentity.displayName,
-      provider: yoroIdentity.provider,
-      linkedProviders: yoroAccount.session?.authenticated
-        ? yoroAccount.session.identities.map((identity) => identity.provider)
-        : [yoroIdentity.provider],
-      ...(yoroIdentity.avatarUrl ? { profileImageUrl: yoroIdentity.avatarUrl } : {}),
-      ...(yoroIdentity.provider === "twitch" && twitchStatus.user
-        ? {
-          login: twitchStatus.user.login,
-          ...(yoroIdentity.avatarUrl
-            ? {}
-            : { profileImageUrl: twitchStatus.user.profileImageUrl })
-        }
-        : {})
-    }
-    : twitchStatus.user
-      ? { ...twitchStatus.user, linkedProviders: ["twitch"] }
-      : undefined;
-  const handleDiscordLogin = () => {
-    const returnPath = `${window.location.pathname}${window.location.search}`;
-    trackGoogleAnalyticsEvent("discord_click", { link_context: "account_login" });
-    window.location.assign(accountOAuthUrl("discord", "login", returnPath));
-  };
-  const handleTwitchAccountLogin = () => {
-    const returnPath = `${window.location.pathname}${window.location.search}`;
-    trackGoogleAnalyticsEvent("twitch_click", { link_context: "account_login" });
-    window.location.assign(accountOAuthUrl("twitch", "login", returnPath));
-  };
-  const handleAccountLogout = () => {
-    void (async () => {
-      try {
-        if (yoroConnected) await yoroAccount.logout();
-        if (twitchStatus.connected) onTwitchLogout();
-      } catch {
-        // 로그아웃 요청이 실패하면 연결 표시를 유지해 사용자가 다시 시도할 수 있게 합니다.
-      }
-    })();
-  };
+  /* 계정 세션·핸들러·뷰어 Twitch 합성의 단일 원본 — shared/public-account-login.ts.
+     페이지가 소유한 뷰어 세션은 옵션으로 주입합니다(로그아웃 시 함께 해제). */
+  const {
+    accountConnected,
+    accountUser,
+    loginWithDiscord,
+    loginWithTwitch,
+    logout: handleAccountLogout,
+    openDashboard,
+    twitchConfigured,
+  } = usePublicAccountLogin({
+    viewerTwitch: {
+      connected: twitchStatus.connected,
+      ...(twitchStatus.user ? { user: twitchStatus.user } : {}),
+      onDisconnect: onTwitchLogout,
+    },
+  });
 
   const closeMenus = useCallback(() => {
     setGameSelectorOpen(false);
@@ -225,7 +190,7 @@ export function PalworldHeader({
               }}
             />
             <PublicTwitchAccountChip
-              configured={twitchStatus.configured}
+              configured={twitchConfigured}
               connected={accountConnected}
               dashboardLabel={text.yoroDashboardOpen}
               dashboardLabelJa={palworldI18n.ja.yoroDashboardOpen}
@@ -241,9 +206,9 @@ export function PalworldHeader({
               logoutLabelKo={palworldI18n.ko.accountLogout}
               menuActions={twitchMenuActions}
               menuLabel={text.accountMenu}
-              onDashboard={openYoroDashboard}
-              onDiscordLogin={handleDiscordLogin}
-              onLogin={handleTwitchAccountLogin}
+              onDashboard={openDashboard}
+              onDiscordLogin={loginWithDiscord}
+              onLogin={loginWithTwitch}
               onLogout={handleAccountLogout}
               onOpenChange={(open) => {
                 setTwitchMenuOpen(open);
@@ -343,15 +308,15 @@ export function PalworldHeader({
             onClose={() => setMobileMenuOpen(false)}
             onGamePage={handleGame}
             onLocale={onLocale}
-            onDiscordLogin={handleDiscordLogin}
-            onDashboard={openYoroDashboard}
-            onTwitchLogin={handleTwitchAccountLogin}
+            onDiscordLogin={loginWithDiscord}
+            onDashboard={openDashboard}
+            onTwitchLogin={loginWithTwitch}
             onTwitchLogout={onTwitchLogout}
             onAccountLogout={handleAccountLogout}
             open={mobileMenuOpen}
             returnFocusRef={mobileMenuTriggerRef}
             twitchActions={twitchMenuActions}
-            twitchConfigured={twitchStatus.configured}
+            twitchConfigured={twitchConfigured}
             twitchConnected={twitchStatus.connected}
             twitchUser={twitchStatus.user}
           />

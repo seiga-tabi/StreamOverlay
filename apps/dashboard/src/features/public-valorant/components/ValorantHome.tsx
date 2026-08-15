@@ -11,9 +11,9 @@ import { valorantI18n, type ValorantLocale } from "../i18n/valorant-i18n";
 export function ValorantHome({ locale }: { locale: ValorantLocale }) {
   const text = valorantI18n[locale];
   const models = [
-    { key: "streamer", title: text.modelStreamerTitle, description: text.modelStreamerDescription },
-    { key: "mine", title: text.modelMineTitle, description: text.modelMineDescription },
-    { key: "leaderboard", title: text.modelLeaderboardTitle, description: text.modelLeaderboardDescription },
+    { key: "streamer", badge: text.modelStreamerBadge, title: text.modelStreamerTitle, description: text.modelStreamerDescription },
+    { key: "mine", badge: text.modelMineBadge, title: text.modelMineTitle, description: text.modelMineDescription },
+    { key: "leaderboard", badge: text.modelLeaderboardBadge, title: text.modelLeaderboardTitle, description: text.modelLeaderboardDescription },
   ] as const;
 
   return (
@@ -45,9 +45,10 @@ export function ValorantHome({ locale }: { locale: ValorantLocale }) {
           {text.modelTitle}
         </h2>
         <div className="valorant-models__grid">
-          {models.map((model, index) => (
+          {models.map((model) => (
             <article className="valorant-model-card valorant-cut" key={model.key}>
-              <span aria-hidden="true" className="valorant-model-card__step">{index + 1}</span>
+              {/* 세 모델은 병렬 제공 방식이라 순번 대신 접근 조건을 라벨로 보여줍니다. */}
+              <span className="valorant-model-card__badge">{model.badge}</span>
               <h3>{model.title}</h3>
               <p>{model.description}</p>
             </article>
@@ -56,6 +57,23 @@ export function ValorantHome({ locale }: { locale: ValorantLocale }) {
         <p className="valorant-policy-note" data-ja={valorantI18n.ja.policyNote} data-ko={valorantI18n.ko.policyNote}>
           {text.policyNote}
         </p>
+      </section>
+
+      {/* 준비 단계의 빈 화면을 확정 사실 기반 FAQ 로 채웁니다 — 가짜 데이터·일정 약속 금지 */}
+      <section aria-labelledby="valorant-faq-title" className="valorant-faq">
+        <h2 data-ja={valorantI18n.ja.faqTitle} data-ko={valorantI18n.ko.faqTitle} id="valorant-faq-title">
+          {text.faqTitle}
+        </h2>
+        {([
+          { key: "release", question: text.faqReleaseQuestion, answer: text.faqReleaseAnswer },
+          { key: "search", question: text.faqSearchQuestion, answer: text.faqSearchAnswer },
+          { key: "privacy", question: text.faqPrivacyQuestion, answer: text.faqPrivacyAnswer },
+        ] as const).map((entry) => (
+          <details className="valorant-faq__item valorant-cut" key={entry.key}>
+            <summary>{entry.question}</summary>
+            <p>{entry.answer}</p>
+          </details>
+        ))}
       </section>
     </div>
   );

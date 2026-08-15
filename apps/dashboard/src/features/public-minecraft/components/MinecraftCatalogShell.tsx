@@ -154,15 +154,13 @@ export function MinecraftName({
   text: string;
 }) {
   const text = minecraftI18n[locale];
+  /* 번역 준비 전에는 전 항목이 영문이라 행마다 붙는 EN 배지가 정보를 잃습니다.
+     시각 배지는 없애고 접근성 주석(title·sr-only)만 이름에 남깁니다 —
+     전역 고지는 카탈로그 푸터의 데이터 출처 문구가 담당합니다. */
   return (
     <span className="minecraft-name">
-      <strong>{nameText}</strong>
-      {fallback ? (
-        <span className="minecraft-name__fallback" title={text.fallbackNameLabel}>
-          {text.fallbackNameBadge}
-          <span className="yoro-u-sr-only">{text.fallbackNameLabel}</span>
-        </span>
-      ) : null}
+      <strong title={fallback ? text.fallbackNameLabel : undefined}>{nameText}</strong>
+      {fallback ? <span className="yoro-u-sr-only">{text.fallbackNameLabel}</span> : null}
     </span>
   );
 }

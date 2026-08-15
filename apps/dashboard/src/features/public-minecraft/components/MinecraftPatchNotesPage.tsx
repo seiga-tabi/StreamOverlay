@@ -43,6 +43,31 @@ function PatchCard({ entry, isLatest, locale }: {
   const typeLabel = entry.type === "release"
     ? text.patchTypeRelease
     : entry.type === "snapshot" ? text.patchTypeSnapshot : text.patchTypePreview;
+  const summarized = Boolean(entry.title);
+  const officialLink = (
+    <a href={entry.officialUrl} rel="noopener noreferrer" target="_blank">
+      {text.patchOfficialLink}
+    </a>
+  );
+
+  /* 요약이 없는 버전은 컴팩트 1줄 — 카드마다 "준비 중"을 반복하지 않고
+     목록 상단 안내 1회로 대신합니다(노이즈 축소, 정직성 유지). */
+  if (!summarized) {
+    return (
+      <article className={`minecraft-patch is-compact${isLatest ? " is-latest" : ""}`} data-testid="minecraft-patch-card">
+        <header className="minecraft-patch__head">
+          {isLatest ? <span className="minecraft-patch__latest">{text.patchLatest}</span> : null}
+          <h2 className="minecraft-patch__version">{entry.version}</h2>
+          <span className={`minecraft-patch__type is-${entry.type}`}>{typeLabel}</span>
+          <time className="minecraft-patch__date" dateTime={entry.publishedAt}>
+            {formatPatchDate(entry.publishedAt, locale)}
+          </time>
+          {officialLink}
+        </header>
+      </article>
+    );
+  }
+
   return (
     <article className={`minecraft-patch${isLatest ? " is-latest" : ""}`} data-testid="minecraft-patch-card">
       <header className="minecraft-patch__head">
@@ -53,17 +78,15 @@ function PatchCard({ entry, isLatest, locale }: {
           {formatPatchDate(entry.publishedAt, locale)}
         </time>
       </header>
-      {entry.title ? <p className="minecraft-patch__title">{entry.title[locale]}</p> : null}
+      <p className="minecraft-patch__title">{entry.title![locale]}</p>
       {entry.highlights && entry.highlights.length > 0 ? (
         <ul className="minecraft-patch__highlights">
           {entry.highlights.map((highlight) => <li key={highlight.ko}>{highlight[locale]}</li>)}
         </ul>
       ) : null}
       <footer className="minecraft-patch__foot">
-        <a href={entry.officialUrl} rel="noopener noreferrer" target="_blank">
-          {text.patchOfficialLink}
-        </a>
-        <span>{entry.title ? text.patchSummaryCredit : text.patchSummaryPending}</span>
+        {officialLink}
+        <span>{text.patchSummaryCredit}</span>
       </footer>
     </article>
   );
@@ -74,6 +97,9 @@ export function MinecraftPatchNotesPage({ locale }: { locale: MinecraftLocale })
   const { locationRevision } = useMinecraftRoute();
   const edition = useMemo(() => editionFromUrl(), [locationRevision]);
   const [type, setType] = useState<MinecraftPatchType | "all">("all");
+  /* 에디션 전환 시 유형을 리셋 — java 의 snapshot 선택이 bedrock 요청에 남아
+     빈 결과처럼 보이던 잠복 결함의 수정점입니다. */
+  useEffect(() => setType("all"), [edition]);
   const [status, setStatus] = useState<PatchStatus>("loading");
   const [entries, setEntries] = useState<readonly MinecraftPatchEntry[]>([]);
   const [hasNextPage, setHasNextPage] = useState(false);
@@ -213,6 +239,9 @@ export function MinecraftPatchNotesPage({ locale }: { locale: MinecraftLocale })
 
       {status === "ready" ? (
         <>
+          {entries.some((entry) => !entry.title) ? (
+            <p className="minecraft-patch-pending-note" role="note">{text.patchPendingNote}</p>
+          ) : null}
           <div className="minecraft-patch-list">
             {entries.map((entry) => {
               const year = String(new Date(entry.publishedAt).getFullYear());

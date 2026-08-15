@@ -3,6 +3,7 @@ import type { PublicLocale } from "../i18n/public-lol-i18n";
 import {
   clearStoredLocale,
   detectBrowserPublicLocale,
+  detectExplicitBrowserPublicLocale,
   detectPublicLocale,
   readStoredLocale,
   saveStoredLocale,
@@ -46,6 +47,15 @@ export function usePublicLocale(loadPreference: PublicLocalePreferenceLoader) {
 
   const autoDetectLocale = useCallback((): void => {
     clearStoredLocale();
+    /* 판정 우선순위: 브라우저 명시 언어(ko·ja) > 서버 지역 추정 > 브라우저 폴백.
+       모든 게임 페이지가 이 훅을 쓰므로 여기서만 순서를 정의합니다. */
+    const explicitLocale = detectExplicitBrowserPublicLocale();
+    if (explicitLocale) {
+      setLocale(explicitLocale);
+      setLocaleResolved(true);
+      updateLocaleUrl(explicitLocale, false);
+      return;
+    }
     void loadPreference()
       .then((preferredLocale) => {
         const nextLocale = preferredLocale ?? detectBrowserPublicLocale();
@@ -89,6 +99,15 @@ export function usePublicLocale(loadPreference: PublicLocalePreferenceLoader) {
 
   useEffect(() => {
     if (pathLocaleAtMount || readStoredLocale()) return undefined;
+    /* 브라우저 언어가 ko·ja 로 명시돼 있으면 서버 지역 추정을 묻지 않습니다.
+       기존에는 서버 추정이 브라우저 언어를 덮어써 LoL 만 ja 로 판정되는
+       게임 간 불일치가 있었습니다. */
+    const explicitLocale = detectExplicitBrowserPublicLocale();
+    if (explicitLocale) {
+      setLocale(explicitLocale);
+      setLocaleResolved(true);
+      return undefined;
+    }
     const controller = new AbortController();
     void loadPreference(controller.signal)
       .then((preferredLocale) => {

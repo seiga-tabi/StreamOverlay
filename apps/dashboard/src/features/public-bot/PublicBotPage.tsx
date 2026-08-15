@@ -29,13 +29,9 @@ import { DiscordSymbolIcon } from "../../shared/DiscordSymbolIcon";
 import {
   PublicTwitchAccountChip,
   PublicTwitchAccountPanel,
-  type PublicTwitchAccountUser,
 } from "../../shared/PublicTwitchAccountChip";
-import { accountOAuthUrl, openYoroDashboard } from "../yoro-account/api";
-import {
-  authenticatedYoroIdentity,
-  useYoroAccountSession,
-} from "../yoro-account/useYoroAccountSession";
+import { usePublicAccountLogin } from "../../shared/public-account-login";
+import { openYoroDashboard } from "../yoro-account/api";
 import { PalworldDedicatedServerSettings } from "./PalworldDedicatedServerSettings";
 import { PublicBotFaq } from "./PublicBotFaq";
 import { DISCORD_BOT_PREFIX_COMMAND_MANIFEST } from "@streamops/shared";
@@ -707,20 +703,16 @@ export function PublicBotPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [commandTab, setCommandTab] = useState<CommandTab>("user");
   const [selectedCommandId, setSelectedCommandId] = useState<CommandDocId>("status");
-  const yoroAccount = useYoroAccountSession();
   const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
-  const accountIdentity = authenticatedYoroIdentity(yoroAccount.session);
-  const accountConnected = yoroAccount.session?.authenticated === true;
-  const accountUser: PublicTwitchAccountUser | undefined = accountIdentity
-    ? {
-      displayName: accountIdentity.displayName,
-      provider: accountIdentity.provider,
-      linkedProviders: yoroAccount.session?.authenticated
-        ? yoroAccount.session.identities.map((identity) => identity.provider)
-        : [accountIdentity.provider],
-      ...(accountIdentity.avatarUrl ? { profileImageUrl: accountIdentity.avatarUrl } : {}),
-    }
-    : undefined;
+  /* 계정 세션·핸들러의 단일 원본 — shared/public-account-login.ts.
+     Bot 은 GA link_context 만 화면 전용 값으로 오버라이드합니다. */
+  const {
+    accountConnected,
+    accountUser,
+    loginWithDiscord,
+    loginWithTwitch,
+    logout: logoutAccount,
+  } = usePublicAccountLogin({ tracking: { linkContext: "public_bot_account" } });
   const commandDocs = useMemo<readonly CommandDoc[]>(() => {
     const prefixAliases = (command: "help" | "status" | "player" | "guide") => {
       const definition = DISCORD_BOT_PREFIX_COMMAND_MANIFEST.find((entry) => entry.command === command);
@@ -905,20 +897,6 @@ export function PublicBotPage() {
     setMobileMenuOpen(false);
   }, []);
 
-  const startAccountLogin = (provider: "discord" | "twitch") => {
-    trackGoogleAnalyticsEvent(
-      provider === "discord" ? "discord_click" : "twitch_click",
-      { link_context: "public_bot_account" },
-    );
-    const returnPath = `${window.location.pathname}${window.location.search}`;
-    window.location.assign(accountOAuthUrl(provider, "login", returnPath));
-  };
-  const logoutAccount = () => {
-    void yoroAccount.logout().catch(() => {
-      // 로그아웃 실패 시 연결 상태를 유지해 사용자가 다시 시도할 수 있게 합니다.
-    });
-  };
-
   const navigation = (
     <PublicHorizontalNav ariaLabel={text.menu} testId="bot-secondary-nav">
       {([
@@ -991,8 +969,8 @@ export function PublicBotPage() {
                 logoutLabel={publicI18n[locale].accountLogout}
                 menuLabel={publicI18n[locale].accountMenu}
                 onDashboard={openTrackedYoroDashboard}
-                onDiscordLogin={() => startAccountLogin("discord")}
-                onLogin={() => startAccountLogin("twitch")}
+                onDiscordLogin={loginWithDiscord}
+                onLogin={loginWithTwitch}
                 onLogout={logoutAccount}
                 onOpenChange={(open) => {
                   setAccountMenuOpen(open);
@@ -1094,8 +1072,8 @@ export function PublicBotPage() {
                     logoutLabel={publicI18n[locale].accountLogout}
                     onAction={() => setMobileMenuOpen(false)}
                     onDashboard={openTrackedYoroDashboard}
-                    onDiscordLogin={() => startAccountLogin("discord")}
-                    onLogin={() => startAccountLogin("twitch")}
+                    onDiscordLogin={loginWithDiscord}
+                    onLogin={loginWithTwitch}
                     onLogout={logoutAccount}
                     twitchLoginLabel={publicI18n[locale].twitchLoginChoice}
                     unavailableLabel={publicI18n[locale].twitchNotConfigured}
@@ -1375,7 +1353,7 @@ export function PublicBotPage() {
                           ) : step.action === "login" ? (
                             <button
                               className="public-bot-button is-secondary"
-                              onClick={() => startAccountLogin("discord")}
+                              onClick={loginWithDiscord}
                               type="button"
                             >
                               <DiscordSymbolIcon />

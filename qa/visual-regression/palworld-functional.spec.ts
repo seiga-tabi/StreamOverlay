@@ -3691,7 +3691,11 @@ test("모든 Palworld 공개 경로 하단에 한국어·일본어 비공식 출
     await expect(koreanFooter.locator("p")).toHaveText(PALWORLD_PUBLIC_NOTICE_KO);
     await expect(koreanFooter.locator("p")).toHaveAttribute("data-ko", PALWORLD_PUBLIC_NOTICE_KO);
     await expect(koreanFooter.locator("p")).toHaveAttribute("data-ja", PALWORLD_PUBLIC_NOTICE_JA);
-    await expect(koreanFooter.locator("a")).toHaveCount(2);
+    /* 출처 링크 2개 + 법적 링크 3개(프라이버시·약관·문의 — LoL 푸터와 구성 통일) */
+    await expect(koreanFooter.locator("a")).toHaveCount(5);
+    await expect(koreanFooter.getByRole("link", { name: "프라이버시 정책" })).toHaveAttribute("href", "/privacy");
+    await expect(koreanFooter.getByRole("link", { name: "이용약관" })).toHaveAttribute("href", "/terms");
+    await expect(koreanFooter.getByRole("link", { name: "문의하기" })).toHaveAttribute("href", "/contact");
     await expect.poll(() => koreanFooter.evaluate((footer) => window.getComputedStyle(footer).position)).toBe("static");
     await expect(koreanFooter.getByRole("link", { name: /Palworld · 외부 사이트, 새 창에서 열기/u })).toHaveAttribute("target", "_blank");
     await expect(koreanFooter.getByRole("link", { name: /Pocketpair · 외부 사이트, 새 창에서 열기/u })).toHaveAttribute("rel", "noopener noreferrer");

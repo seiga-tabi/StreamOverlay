@@ -11,6 +11,12 @@ const {
   parseMinecraftPatchCuration,
   parseMinecraftPatchNotesQuery
 } = await import("../dist/services/minecraft-patch-notes-service.js");
+const {
+  MINECRAFT_FEEDBACK_SECTION_IDS
+} = await import("../dist/services/minecraft-patch-notes-feedback-source.js");
+const {
+  MINECRAFT_JAVA_VERSION_MANIFEST_URL
+} = await import("../dist/services/minecraft-patch-notes-source.js");
 
 function sourceEntry(id, type, releaseTime) {
   return {
@@ -32,6 +38,82 @@ function manifestResponse() {
       sourceEntry("26.2", "release", "2026-06-16T09:00:00Z")
     ]
   }), { headers: { "content-type": "application/json" } });
+}
+
+function feedbackArticle(id, sectionId, title, createdAt) {
+  return {
+    id,
+    section_id: sectionId,
+    locale: "en-us",
+    draft: false,
+    title,
+    created_at: createdAt,
+    html_url: `https://feedback.minecraft.net/hc/en-us/articles/${id}-Minecraft-Changelog`
+  };
+}
+
+function feedbackResponse(sectionId, articles, status = 200) {
+  return new Response(JSON.stringify({
+    articles,
+    count: articles.length,
+    next_page: null,
+    page: 1,
+    page_count: 1,
+    per_page: 100,
+    previous_page: null,
+    sort_by: "created_at",
+    sort_order: "desc"
+  }), { status, headers: { "content-type": "application/json" } });
+}
+
+function officialSourceFetch(options = {}) {
+  return async (input) => {
+    const url = new URL(input);
+    if (url.href === MINECRAFT_JAVA_VERSION_MANIFEST_URL) {
+      if (options.javaFailure) throw new Error("java source down");
+      options.onJava?.();
+      return manifestResponse();
+    }
+    if (options.feedbackFailure) return feedbackResponse(
+      MINECRAFT_FEEDBACK_SECTION_IDS.release,
+      [],
+      503
+    );
+    const sectionId = Number(/\/sections\/(\d+)\/articles\.json$/u.exec(url.pathname)?.[1]);
+    if (sectionId === MINECRAFT_FEEDBACK_SECTION_IDS.release) {
+      return feedbackResponse(sectionId, [
+        feedbackArticle(
+          101,
+          sectionId,
+          "Minecraft: Java Edition 26.2",
+          "2026-06-16T15:20:47Z"
+        ),
+        feedbackArticle(
+          102,
+          sectionId,
+          "Minecraft - 1.21.132 (Bedrock)",
+          "2026-08-14T17:00:33Z"
+        )
+      ]);
+    }
+    if (sectionId === MINECRAFT_FEEDBACK_SECTION_IDS.javaSnapshot) {
+      return feedbackResponse(sectionId, [feedbackArticle(
+        103,
+        sectionId,
+        "Minecraft Java Edition - 26.3 Snapshot 8",
+        "2026-08-12T11:40:16Z"
+      )]);
+    }
+    if (sectionId === MINECRAFT_FEEDBACK_SECTION_IDS.bedrockPreview) {
+      return feedbackResponse(sectionId, [feedbackArticle(
+        104,
+        sectionId,
+        "Minecraft Beta & Preview - 26.50.25",
+        "2026-08-11T14:50:48Z"
+      )]);
+    }
+    throw new Error(`unexpected URL: ${url.href}`);
+  };
 }
 
 const curation = parseMinecraftPatchCuration({
@@ -95,13 +177,10 @@ test("strict query는 allowlist·중복·형식 오류를 거부한다", () => {
 });
 
 test("수집 성공본을 큐레이션과 병합하고 유형별 pagination을 반환한다", async () => {
-  let calls = 0;
+  let javaCalls = 0;
   const service = new MinecraftPatchNotesService({
     curation,
-    fetchImpl: async () => {
-      calls += 1;
-      return manifestResponse();
-    },
+    fetchImpl: officialSourceFetch({ onJava: () => { javaCalls += 1; } }),
     sleepImpl: async () => undefined
   });
   const response = await service.page(new URLSearchParams("edition=java&type=snapshot&page=1"));
@@ -109,24 +188,40 @@ test("수집 성공본을 큐레이션과 병합하고 유형별 pagination을 �
   assert.equal(response.entries.length, 1);
   assert.equal(response.entries[0].type, "snapshot");
   assert.equal(response.entries[0].title.ko, "사람이 작성한 스냅샷 요약");
+  assert.match(response.entries[0].officialUrl, /^https:\/\/feedback\.minecraft\.net/u);
   assert.deepEqual(response.pagination, { page: 1, totalPages: 1, hasNextPage: false, total: 1 });
   assert.equal(service.hasReadyData(), true);
   await service.page(new URLSearchParams("edition=java"));
-  assert.equal(calls, 1, "갱신 주기 안에서는 upstream을 다시 호출하지 않습니다.");
+  assert.equal(javaCalls, 1, "갱신 주기 안에서는 manifest를 다시 호출하지 않습니다.");
 });
 
-test("Bedrock은 공식 피드가 없으므로 호출 없이 data_unavailable을 반환한다", async () => {
-  let calls = 0;
+test("Bedrock 공식 release·preview 피드를 유형별 pagination으로 반환한다", async () => {
+  let javaCalls = 0;
   const service = new MinecraftPatchNotesService({
-    fetchImpl: async () => {
-      calls += 1;
-      return manifestResponse();
-    }
+    fetchImpl: officialSourceFetch({ onJava: () => { javaCalls += 1; } }),
+    sleepImpl: async () => undefined
   });
+  const preview = await service.page(new URLSearchParams("edition=bedrock&type=preview"));
+  assert.equal(preview.state, "ready");
+  assert.deepEqual(preview.entries.map(({ version, type }) => ({ version, type })), [
+    { version: "26.50.25", type: "preview" }
+  ]);
+  assert.equal(preview.entries[0].edition, "bedrock");
+  assert.equal(javaCalls, 0, "Bedrock 요청은 Java manifest에 의존하지 않습니다.");
+});
+
+test("feedback 장애는 Java manifest 응답과 격리하고 Bedrock만 data_unavailable 처리한다", async () => {
+  const service = new MinecraftPatchNotesService({
+    fetchImpl: officialSourceFetch({ feedbackFailure: true }),
+    sleepImpl: async () => undefined
+  });
+  const java = await service.page(new URLSearchParams("edition=java"));
+  assert.equal(java.state, "ready");
+  assert.equal(java.entries.length, 2);
+  assert.equal(java.entries.every((entry) => entry.officialUrl === "https://www.minecraft.net/en-us/articles"), true);
   assert.deepEqual(await service.page(new URLSearchParams("edition=bedrock")), {
     state: "data_unavailable"
   });
-  assert.equal(calls, 0);
 });
 
 test("갱신 실패 시 마지막 정상 snapshot을 유지하고 재시작 뒤에도 복구한다", async () => {
@@ -137,10 +232,9 @@ test("갱신 실패 시 마지막 정상 snapshot을 유지하고 재시작 뒤�
     const store = new LocalMinecraftPatchSnapshotStore(directory);
     const writer = new MinecraftPatchNotesService({
       store,
-      fetchImpl: async () => {
-        if (fail) throw new Error("network down");
-        return manifestResponse();
-      },
+      fetchImpl: async (input, init) => fail
+        ? Promise.reject(new Error("network down"))
+        : officialSourceFetch()(input, init),
       sleepImpl: async () => undefined,
       now: () => now,
       refreshIntervalMs: 1_000

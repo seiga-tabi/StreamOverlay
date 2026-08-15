@@ -39,6 +39,23 @@ export function PalworldSourceFooter({ locale }: { locale: PalworldLocale }) {
       className="palworld-footer"
       data-testid="palworld-source-footer"
       brand="YORO.gg"
+      /* LoL 푸터와 같은 법적 링크 세트 — 게임 간 푸터 구성 통일(전체 페이지 이동) */
+      legalNavigation={(
+        <nav
+          aria-label={`${text.footerPrivacy} · ${text.footerTerms} · ${text.footerContact}`}
+          className="public-site-footer-nav"
+        >
+          <a data-ja={palworldI18n.ja.footerPrivacy} data-ko={palworldI18n.ko.footerPrivacy} href="/privacy">
+            {text.footerPrivacy}
+          </a>
+          <a data-ja={palworldI18n.ja.footerTerms} data-ko={palworldI18n.ko.footerTerms} href="/terms">
+            {text.footerTerms}
+          </a>
+          <a data-ja={palworldI18n.ja.footerContact} data-ko={palworldI18n.ko.footerContact} href="/contact">
+            {text.footerContact}
+          </a>
+        </nav>
+      )}
       disclaimer={(
         <p
         data-ja={palworldI18n.ja.sourceNotice}

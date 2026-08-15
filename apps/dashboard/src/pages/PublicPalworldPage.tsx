@@ -56,16 +56,7 @@ import {
 } from "../features/public-palworld/utils/routes";
 import { applyPalworldSeo } from "../features/public-palworld/utils/seo";
 import { trackEntityView, trackInternalLinkClick } from "../analytics/google-analytics";
-import {
-  getPublicTwitchFollowedChannels,
-  getPublicTwitchStatus,
-  invalidatePublicTwitchClientCache,
-  logoutPublicTwitch,
-  peekPublicTwitchFollowedChannels,
-  peekPublicTwitchStatus,
-  publicTwitchLoginUrl,
-} from "../features/public-twitch/api";
-import { isTwitchAccountOAuthReturn } from "../features/yoro-account/api";
+import { usePublicViewerTwitchSession } from "../shared/usePublicViewerTwitchSession";
 
 const noServerLocalePreference = async (): Promise<PalworldLocale | undefined> => undefined;
 const loadPalworldDeferredPages = () =>
@@ -86,12 +77,6 @@ const PalDetailModal = lazyNamed(loadPalworldDetailModals, "PalDetailModal");
 const ItemDetailModal = lazyNamed(loadPalworldDetailModals, "ItemDetailModal");
 const SkillDetailModal = lazyNamed(loadPalworldDeferredPages, "SkillDetailModal");
 
-const EMPTY_TWITCH_STATUS: PublicTwitchViewerStatus = {
-  connected: false,
-  configured: false,
-  requiredScopes: [],
-  missingScopes: [],
-};
 
 export function PublicPalworldPage() {
   const { locale, changeLocale } = usePublicLocale(noServerLocalePreference);
@@ -100,35 +85,20 @@ export function PublicPalworldPage() {
   const knownPage = isKnownPalworldPagePath(window.location.pathname);
   const text = palworldI18n[locale];
   const [versionMismatch, setVersionMismatch] = useState(false);
-  const [twitchStatus, setTwitchStatus] = useState<PublicTwitchViewerStatus>(
-    () => peekPublicTwitchStatus() ?? EMPTY_TWITCH_STATUS,
-  );
-  const [followedChannels, setFollowedChannels] = useState<PublicTwitchFollowedLolResponse | null>(
-    () => peekPublicTwitchFollowedChannels() ?? null,
-  );
-  const [twitchStatusLoading, setTwitchStatusLoading] = useState(
-    () => peekPublicTwitchStatus() === undefined,
-  );
-  const [followedLoading, setFollowedLoading] = useState(false);
-  const [twitchStatusError, setTwitchStatusError] = useState(false);
-  const [followedError, setFollowedError] = useState(false);
-  const [twitchOAuthSettling, setTwitchOAuthSettling] = useState(() =>
-    isTwitchAccountOAuthReturn(window.location.search)
-      || new URLSearchParams(window.location.search).get("viewer_twitch") === "connected"
-  );
-  const twitchStatusRef = useRef<PublicTwitchViewerStatus>(twitchStatus);
-  const statusRequestRef = useRef<Promise<void> | null>(null);
-  const statusAbortRef = useRef<AbortController | null>(null);
-  const followedRequestRef = useRef<Promise<void> | null>(null);
-  const followedAbortRef = useRef<AbortController | null>(null);
-  const logoutInFlightRef = useRef(false);
-  const mountedRef = useRef(true);
-  const viewerTwitchConnectedRef = useRef(
-    isTwitchAccountOAuthReturn(window.location.search)
-      || new URLSearchParams(window.location.search).get("viewer_twitch") === "connected",
-  );
-  const needsFollowedChannels = page === "home";
-  const needsFollowedChannelsOnOAuthReturnRef = useRef(needsFollowedChannels);
+  /* 뷰어 Twitch 세션의 단일 원본 — shared/usePublicViewerTwitchSession.ts.
+     팔로우 채널은 홈에서만 쓰고, 로그인 복귀 경로 규칙은 palworld 라우트가 소유합니다. */
+  const {
+    disconnectTwitch,
+    followedChannels,
+    retryTwitch,
+    startTwitchLogin,
+    twitchError,
+    twitchLoading,
+    twitchStatus,
+  } = usePublicViewerTwitchSession({
+    loginReturnTo: () => palworldTwitchReturnTo(window.location.pathname, window.location.search),
+    needsFollowedChannels: page === "home",
+  });
   const focusPalId = page === "map" ? palworldFocusPalFromParams(params) : undefined;
   const routeQuery = params.toString();
   const routePathname = window.location.pathname;
@@ -168,132 +138,6 @@ export function PublicPalworldPage() {
     setPalworldUrl(`${window.location.pathname}${canonicalQuery ? `?${canonicalQuery}` : ""}`, true);
   }, [detailRoute, routeQuery]);
 
-  const refreshTwitchStatus = useCallback(async (force = false): Promise<void> => {
-    if (logoutInFlightRef.current) return;
-    if (statusRequestRef.current) return statusRequestRef.current;
-    const controller = new AbortController();
-    statusAbortRef.current?.abort();
-    statusAbortRef.current = controller;
-    setTwitchStatusLoading(true);
-    setTwitchStatusError(false);
-    const request = (async () => {
-      try {
-        const status = await getPublicTwitchStatus(controller.signal, { force });
-        if (!mountedRef.current || controller.signal.aborted) return;
-        twitchStatusRef.current = status;
-        setTwitchStatus(status);
-        if (!status.connected) {
-          followedAbortRef.current?.abort();
-          followedAbortRef.current = null;
-          followedRequestRef.current = null;
-          setFollowedChannels(null);
-          setFollowedLoading(false);
-          setFollowedError(false);
-        }
-      } catch (requestError) {
-        if (requestError instanceof DOMException && requestError.name === "AbortError") return;
-        if (mountedRef.current && !controller.signal.aborted) setTwitchStatusError(true);
-      } finally {
-        if (mountedRef.current && statusAbortRef.current === controller) setTwitchStatusLoading(false);
-      }
-    })();
-    statusRequestRef.current = request;
-    try {
-      await request;
-    } finally {
-      if (statusRequestRef.current === request) statusRequestRef.current = null;
-      if (statusAbortRef.current === controller) statusAbortRef.current = null;
-    }
-  }, []);
-
-  const refreshFollowedChannels = useCallback(async (): Promise<void> => {
-    if (logoutInFlightRef.current) return;
-    if (!twitchStatusRef.current.connected) return;
-    if (followedRequestRef.current) return followedRequestRef.current;
-    const controller = new AbortController();
-    followedAbortRef.current?.abort();
-    followedAbortRef.current = controller;
-    setFollowedLoading(true);
-    setFollowedError(false);
-    const request = (async () => {
-      try {
-        const followed = await getPublicTwitchFollowedChannels(controller.signal);
-        if (!mountedRef.current || controller.signal.aborted) return;
-        setFollowedChannels(followed);
-        if (!followed.connected) {
-          const disconnected = { ...twitchStatusRef.current, connected: false, user: undefined };
-          twitchStatusRef.current = disconnected;
-          setTwitchStatus(disconnected);
-        }
-      } catch (requestError) {
-        if (requestError instanceof DOMException && requestError.name === "AbortError") return;
-        if (mountedRef.current && !controller.signal.aborted) setFollowedError(true);
-      } finally {
-        if (mountedRef.current && followedAbortRef.current === controller) setFollowedLoading(false);
-      }
-    })();
-    followedRequestRef.current = request;
-    try {
-      await request;
-    } finally {
-      if (followedRequestRef.current === request) followedRequestRef.current = null;
-      if (followedAbortRef.current === controller) followedAbortRef.current = null;
-    }
-  }, []);
-
-  useEffect(() => {
-    mountedRef.current = true;
-    let disposed = false;
-    let retryTimer: number | undefined;
-    const query = new URLSearchParams(window.location.search);
-    const viewerConnected = viewerTwitchConnectedRef.current;
-    if (viewerConnected) {
-      query.delete("viewer_twitch");
-      query.delete("account");
-      const nextQuery = query.toString();
-      window.history.replaceState({}, "", `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`);
-    }
-    if (viewerConnected) invalidatePublicTwitchClientCache();
-    void refreshTwitchStatus(viewerConnected).finally(() => {
-      if (viewerConnected && !disposed) {
-        retryTimer = window.setTimeout(() => {
-          void (async () => {
-            await refreshTwitchStatus(true);
-            if (
-              needsFollowedChannelsOnOAuthReturnRef.current
-              && twitchStatusRef.current.connected
-            ) {
-              await refreshFollowedChannels();
-            }
-            if (!disposed) setTwitchOAuthSettling(false);
-          })();
-        }, 350);
-      }
-    });
-    return () => {
-      disposed = true;
-      mountedRef.current = false;
-      statusAbortRef.current?.abort();
-      followedAbortRef.current?.abort();
-      statusAbortRef.current = null;
-      followedAbortRef.current = null;
-      statusRequestRef.current = null;
-      followedRequestRef.current = null;
-      if (retryTimer !== undefined) window.clearTimeout(retryTimer);
-    };
-  }, [refreshFollowedChannels, refreshTwitchStatus]);
-
-  useEffect(() => {
-    if (!needsFollowedChannels) {
-      followedAbortRef.current?.abort();
-      followedAbortRef.current = null;
-      followedRequestRef.current = null;
-      setFollowedLoading(false);
-      return;
-    }
-    if (twitchStatus.connected && !followedChannels && !followedError) void refreshFollowedChannels();
-  }, [followedChannels, followedError, needsFollowedChannels, refreshFollowedChannels, twitchStatus.connected]);
-
   useEffect(() => {
     // 이전 Palworld 화면이나 개발 중 교체된 release의 관찰값을 새 화면 세션으로
     // 가져오지 않습니다. 현재 화면 안에서 섞이는 실제 mismatch 감시는 유지됩니다.
@@ -307,51 +151,6 @@ export function PublicPalworldPage() {
     setActivePublicLocale(nextLocale);
     changeLocale(nextLocale);
   }, [changeLocale]);
-
-  const startTwitchLogin = useCallback(() => {
-    const returnTo = palworldTwitchReturnTo(window.location.pathname, window.location.search);
-    window.location.href = publicTwitchLoginUrl(returnTo);
-  }, []);
-
-  const disconnectTwitch = useCallback(async () => {
-    if (logoutInFlightRef.current) return;
-    logoutInFlightRef.current = true;
-    try {
-      statusAbortRef.current?.abort();
-      followedAbortRef.current?.abort();
-      statusRequestRef.current = null;
-      followedRequestRef.current = null;
-      await logoutPublicTwitch();
-      if (!mountedRef.current) return;
-      const disconnected = {
-        connected: false,
-        configured: twitchStatusRef.current.configured,
-        requiredScopes: twitchStatusRef.current.requiredScopes,
-        missingScopes: twitchStatusRef.current.requiredScopes,
-      };
-      twitchStatusRef.current = disconnected;
-      setTwitchStatus(disconnected);
-      setFollowedChannels(null);
-      setTwitchStatusLoading(false);
-      setFollowedLoading(false);
-      setTwitchStatusError(false);
-      setFollowedError(false);
-    } catch {
-      if (mountedRef.current) setTwitchStatusError(true);
-    } finally {
-      logoutInFlightRef.current = false;
-    }
-  }, []);
-
-  const twitchLoading = twitchStatusLoading
-    || (needsFollowedChannels && twitchStatus.connected && !followedChannels && !followedError)
-    || followedLoading
-    || twitchOAuthSettling;
-  const twitchError = !twitchOAuthSettling && (twitchStatusError || followedError);
-  const retryTwitch = useCallback(() => {
-    if (twitchStatusError || !twitchStatusRef.current.connected) return refreshTwitchStatus();
-    return refreshFollowedChannels();
-  }, [refreshFollowedChannels, refreshTwitchStatus, twitchStatusError]);
 
   const liveStreamers = useMemo(
     () => palworldHomeLiveStreamerCards(followedChannels?.channels ?? [], locale),
@@ -468,7 +267,6 @@ export function PublicPalworldPage() {
         <PalworldHeader
           locale={locale}
           onLocale={handleLocale}
-          onTwitchLogin={startTwitchLogin}
           onTwitchLogout={() => void disconnectTwitch()}
           page={page}
           searchContent={headerSearch}

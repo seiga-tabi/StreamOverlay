@@ -57,13 +57,22 @@ node --test apps/server/test/minecraft-catalog.test.mjs apps/server/test/minecra
 ## 패치 노트 수집기
 
 - Java 원천: `https://piston-meta.mojang.com/mc/game/version_manifest_v2.json`
+- 공식 Help Center 원천: `https://feedback.minecraft.net/api/v2/help_center/en-us/sections/{sectionId}/articles.json`
+  - Release Changelogs: `360001186971`
+  - Beta and Preview Information and Changelogs: `360001185332`
+  - Snapshot Information and Changelogs: `360002267532`
 - 수집 주기: 서버 기동 직후와 이후 6시간마다
 - 재시도: timeout 10초, 일시 오류에 최대 3회 bounded retry
 - 저장 위치: `${STREAMOPS_STATE_DIR}/minecraft-patch-notes/java.json`
+- Bedrock 저장 위치: `${STREAMOPS_STATE_DIR}/minecraft-patch-notes/bedrock.json`
 - 공개 API: `GET /api/minecraft/patch-notes?edition=java|bedrock&type=release|snapshot|preview&page=N`
 
-manifest에서 버전·유형·`releaseTime`만 읽으며 원문 패치 노트 본문이나 이미지는 저장하지 않는다. manifest가 개별 패치 노트 URL을 제공하지 않으므로 `officialUrl`은 Minecraft 공식 기사 허브인 `https://www.minecraft.net/en-us/articles`를 사용한다. 마지막 정상 snapshot은 원자적으로 저장하고, 이후 수집이 실패해도 계속 제공한다. snapshot이 한 번도 없으면 `data_unavailable`이다.
+Java의 버전·유형·`releaseTime` 단일 원본은 계속 piston-meta manifest다. Help Center의 Release·Snapshot article 제목에서 manifest version과 정확히 일치하는 것만 찾아 `officialUrl`을 버전별 공식 링크로 교체하고, 일치하지 않거나 Help Center가 실패하면 `https://www.minecraft.net/en-us/articles` 허브를 유지한다.
 
-Bedrock은 현재 신뢰 가능한 Mojang 공식 버전 manifest를 확보하지 못했으므로 수집하지 않는다. `edition=bedrock` 요청은 비공식 자료로 보완하지 않고 `data_unavailable`을 반환한다.
+Bedrock은 Help Center의 Release Changelogs와 Beta and Preview Changelogs를 단일 원본으로 사용한다. 제목을 strict regex로 분류해 release·preview만 만들며 일치하지 않는 article은 제외한다. 두 Bedrock 섹션 중 하나라도 실패하면 새 snapshot을 만들지 않고 마지막 정상본을 유지하며, 정상본이 한 번도 없을 때만 `data_unavailable`이다.
+
+Help Center 응답은 페이지당 8MiB, 섹션당 10페이지·1,000 article로 제한한다. URL은 고정 section ID로 직접 조립하므로 upstream의 `next_page`를 따라가지 않는다. JSON에 포함된 article 본문은 parsing 과정에서 사용하지 않고 snapshot·API·로그 어디에도 저장하거나 게재하지 않는다. 제목 불일치 로그도 원문 대신 제외 건수만 기록한다.
+
+마지막 정상 snapshot은 원자적으로 저장하고 이후 수집 실패에도 계속 제공한다. Java piston-meta와 Help Center, Bedrock 수집 상태는 서로 격리되어 Help Center 장애가 Java API를 중단시키지 않는다.
 
 사람이 검수한 한국어·일본어 요약은 `patch-note-curation.json`에서 edition·version 키 기반으로 관리한다. `title`과 `highlights`는 ko·ja를 동시에 제공해야 하며, 없는 버전에는 응답 필드 자체가 추가되지 않는다. 기계 번역이나 자동 요약은 사용하지 않는다.

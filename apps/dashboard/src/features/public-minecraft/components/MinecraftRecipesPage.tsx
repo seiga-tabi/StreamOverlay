@@ -96,6 +96,21 @@ function RecipeCard({ locale, recipe }: { locale: MinecraftLocale; recipe: Minec
   );
 }
 
+/* 같은 결과 아이템의 재료 변형(Barrel — 목재별 8종 등)을 대표 1장 + 확장으로 접습니다.
+ * 알파벳순 정렬에서 변형이 연속으로 도배되어 스캔 거리가 길어지던 문제의 수정점 —
+ * 그룹 키는 결과 아이템 id, 대표는 첫 레시피(정렬 순서 보존)입니다. */
+function groupedByResult<T extends { result: { item: { id: string } } }>(
+  entries: readonly T[],
+): Array<{ representative: T; variants: T[] }> {
+  const byResult = new Map<string, { representative: T; variants: T[] }>();
+  for (const entry of entries) {
+    const bucket = byResult.get(entry.result.item.id);
+    if (bucket) bucket.variants.push(entry);
+    else byResult.set(entry.result.item.id, { representative: entry, variants: [] });
+  }
+  return [...byResult.values()];
+}
+
 export function MinecraftRecipesPage({ locale }: { locale: MinecraftLocale }) {
   const text = minecraftI18n[locale];
   /* 검색어의 단일 원본은 URL 의 ?q= — 공유·새로고침·뒤로가기·nav 재클릭이 전부 일관됩니다. */
@@ -163,8 +178,20 @@ export function MinecraftRecipesPage({ locale }: { locale: MinecraftLocale }) {
       titleId="minecraft-recipes-title"
     >
       <div className="minecraft-recipe-list">
-        {catalog.entries.map((entry) => (
-          <RecipeCard key={entry.id} locale={locale} recipe={entry} />
+        {groupedByResult(catalog.entries).map(({ representative, variants }) => (
+          variants.length === 0 ? (
+            <RecipeCard key={representative.id} locale={locale} recipe={representative} />
+          ) : (
+            <div className="minecraft-recipe-group" key={representative.id}>
+              <RecipeCard locale={locale} recipe={representative} />
+              <details className="minecraft-recipe-group__variants">
+                <summary>{formatMinecraftTemplate(text.recipeVariantToggle, { count: variants.length })}</summary>
+                {variants.map((variant) => (
+                  <RecipeCard key={variant.id} locale={locale} recipe={variant} />
+                ))}
+              </details>
+            </div>
+          )
         ))}
       </div>
     </MinecraftCatalogShell>

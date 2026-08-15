@@ -557,16 +557,6 @@ a.minecraft-aux-card:focus-visible {
   color: var(--minecraft-ink);
 }
 
-.minecraft-name__fallback {
-  padding: 0 var(--yoro-space-1);
-  border: thin solid var(--minecraft-line);
-  border-radius: 0;
-  color: var(--minecraft-ink-muted);
-  font-size: var(--yoro-font-size-xs);
-  font-weight: var(--yoro-font-weight-bold);
-  letter-spacing: .04em;
-}
-
 /* 실제 게임 텍스처 + CDN 장애·미제공 항목용 자체 fallback */
 .minecraft-item-swatch {
   display: inline-flex;
@@ -678,6 +668,35 @@ a.minecraft-aux-card:focus-visible {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
   gap: var(--yoro-space-4);
+}
+
+/* 재료 변형 그룹 — 대표 카드 아래 접힌 변형 목록(같은 결과 아이템) */
+.minecraft-recipe-group {
+  display: grid;
+  gap: var(--yoro-space-2);
+  align-content: start;
+}
+
+.minecraft-recipe-group__variants > summary {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 44px;
+  padding: 0 var(--yoro-space-3);
+  border: 2px solid var(--minecraft-line);
+  color: var(--minecraft-ink-muted);
+  font-size: var(--yoro-font-size-sm);
+  font-weight: var(--yoro-font-weight-bold);
+  cursor: pointer;
+}
+
+.minecraft-recipe-group__variants > summary:focus-visible {
+  outline: 2px solid var(--minecraft-green, #6cc349);
+  outline-offset: 2px;
+}
+
+.minecraft-recipe-group__variants[open] {
+  display: grid;
+  gap: var(--yoro-space-2);
 }
 
 /* 가로형 컴팩트 카드 — 픽셀 표면(각·2px 프레임·좌상광 베벨), 높이 통일 */
@@ -938,6 +957,19 @@ a.minecraft-aux-card:focus-visible {
 @media (max-width: 47.9375rem) {
   .minecraft-recipe-list {
     grid-template-columns: 1fr;
+    gap: var(--yoro-space-3);
+  }
+
+  /* 모바일 밀도 — 그리드 셀·카드 여백을 줄여 1열 스크롤 길이를 줄입니다.
+     44px 터치 목표는 카드 전체·변형 토글이 담당하고 셀은 표시 전용입니다. */
+  .minecraft-recipe-card {
+    padding: var(--yoro-space-3);
+    gap: var(--yoro-space-2);
+  }
+
+  .minecraft-recipe-card .minecraft-craft-cell {
+    inline-size: 1.5rem;
+    block-size: 1.5rem;
   }
 }
 
@@ -1162,4 +1194,39 @@ a.minecraft-aux-card:focus-visible {
   margin: var(--yoro-space-1) 0 var(--yoro-space-2);
   color: var(--minecraft-ink-muted);
   font-size: var(--yoro-font-size-sm);
+}
+
+/* 요약 미준비 버전 — 컴팩트 1줄 카드(반복 "준비 중" 문구 대신 상단 안내 1회) */
+.minecraft-patch.is-compact {
+  padding-block: var(--yoro-space-3);
+}
+
+.minecraft-patch.is-compact .minecraft-patch__version {
+  font-size: var(--yoro-font-size-md);
+}
+
+.minecraft-patch__head > a {
+  color: var(--minecraft-accent);
+  font-size: var(--yoro-font-size-xs);
+  font-weight: var(--yoro-font-weight-black);
+  text-decoration: none;
+  flex: none;
+}
+
+.minecraft-patch__head > a::after { content: " ↗"; }
+
+.minecraft-patch__head > a:focus-visible {
+  outline: 2px solid var(--minecraft-accent);
+  outline-offset: 2px;
+}
+
+/* 컴팩트 카드에서는 날짜가 auto 마진을 갖고 링크가 그 오른쪽에 붙습니다 */
+.minecraft-patch.is-compact .minecraft-patch__date {
+  margin-inline-start: auto;
+}
+
+.minecraft-patch-pending-note {
+  margin: 0;
+  color: #66748c;
+  font-size: var(--yoro-font-size-xs);
 }

@@ -1,18 +1,13 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import type { StreamerRiotIdRequest } from "@streamops/shared";
-import { trackGoogleAnalyticsEvent } from "../../../analytics/google-analytics";
 import { PublicGameHeaderFrame } from "../../../shared/PublicGameChrome";
 import { PublicMobileMenuSheet } from "../../../shared/PublicMobileMenuSheet";
 import {
   PublicTwitchAccountChip,
-  type PublicTwitchAccountMenuAction,
-  type PublicTwitchAccountUser
+  type PublicTwitchAccountMenuAction
 } from "../../../shared/PublicTwitchAccountChip";
-import { accountOAuthUrl, openYoroDashboard } from "../../yoro-account/api";
-import {
-  authenticatedYoroIdentity,
-  useYoroAccountSession
-} from "../../yoro-account/useYoroAccountSession";
+import { usePublicAccountLogin } from "../../../shared/public-account-login";
+import { openYoroDashboard } from "../../yoro-account/api";
 import { publicI18n, t, type PublicLocale } from "../i18n/public-lol-i18n";
 import type { PublicMainPage, PublicNavTarget, PublicTwitchViewerStatus } from "../types/public-lol";
 import { PublicGameSelector } from "./PublicGameSelector";
@@ -80,7 +75,6 @@ export function PublicAppHeader({
   const [filterOpen, setFilterOpen] = useState(false);
   const [twitchMenuOpen, setTwitchMenuOpen] = useState(false);
   const [mobileChromeScrolled, setMobileChromeScrolled] = useState(false);
-  const yoroAccount = useYoroAccountSession();
   const headerRef = useRef<HTMLDivElement>(null);
   const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
   const registeredStreamerRequest = isRegisteredStreamerRequest(twitchStatus.streamerRiotRequest)
@@ -88,49 +82,21 @@ export function PublicAppHeader({
     : undefined;
   const canRegisterStreamer = twitchStatus.streamerRiotRequest?.status !== "approved"
     && twitchStatus.streamerRiotRequest?.status !== "pending";
-  const yoroIdentity = authenticatedYoroIdentity(yoroAccount.session);
-  const yoroConnected = yoroAccount.session?.authenticated === true;
-  const accountConnected = yoroConnected || twitchStatus.connected;
-  const accountUser: PublicTwitchAccountUser | undefined = yoroIdentity
-    ? {
-      displayName: yoroIdentity.displayName,
-      provider: yoroIdentity.provider,
-      linkedProviders: yoroAccount.session?.authenticated
-        ? yoroAccount.session.identities.map((identity) => identity.provider)
-        : [yoroIdentity.provider],
-      ...(yoroIdentity.avatarUrl ? { profileImageUrl: yoroIdentity.avatarUrl } : {}),
-      ...(yoroIdentity.provider === "twitch" && twitchStatus.user
-        ? {
-          login: twitchStatus.user.login,
-          ...(yoroIdentity.avatarUrl
-            ? {}
-            : { profileImageUrl: twitchStatus.user.profileImageUrl })
-        }
-        : {})
-    }
-    : twitchStatus.user
-      ? { ...twitchStatus.user, linkedProviders: ["twitch"] }
-      : undefined;
-  const handleDiscordLogin = () => {
-    const returnPath = `${window.location.pathname}${window.location.search}`;
-    trackGoogleAnalyticsEvent("discord_click", { link_context: "account_login" });
-    window.location.assign(accountOAuthUrl("discord", "login", returnPath));
-  };
-  const handleTwitchAccountLogin = () => {
-    const returnPath = `${window.location.pathname}${window.location.search}`;
-    trackGoogleAnalyticsEvent("twitch_click", { link_context: "account_login" });
-    window.location.assign(accountOAuthUrl("twitch", "login", returnPath));
-  };
-  const handleAccountLogout = () => {
-    void (async () => {
-      try {
-        if (yoroConnected) await yoroAccount.logout();
-        if (twitchStatus.connected) onTwitchLogout();
-      } catch {
-        // 로그아웃 요청이 실패하면 연결 표시를 유지해 사용자가 다시 시도할 수 있게 합니다.
-      }
-    })();
-  };
+  /* 계정 세션·핸들러·뷰어 Twitch 합성의 단일 원본 — shared/public-account-login.ts.
+     페이지가 소유한 뷰어 세션은 옵션으로 주입합니다(로그아웃 시 함께 해제). */
+  const {
+    accountConnected,
+    accountUser,
+    loginWithDiscord: handleDiscordLogin,
+    loginWithTwitch: handleTwitchAccountLogin,
+    logout: handleAccountLogout,
+  } = usePublicAccountLogin({
+    viewerTwitch: {
+      connected: twitchStatus.connected,
+      ...(twitchStatus.user ? { user: twitchStatus.user } : {}),
+      onDisconnect: onTwitchLogout,
+    },
+  });
 
   const closeMenus = useCallback(() => {
     setGameSelectorOpen(false);

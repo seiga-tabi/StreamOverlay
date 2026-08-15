@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { trackGoogleAnalyticsEvent } from "../../../analytics/google-analytics";
 import { PublicGameHeaderFrame, PublicHorizontalNav } from "../../../shared/PublicGameChrome";
 import { PublicMobileMenuSheet } from "../../../shared/PublicMobileMenuSheet";
 import {
@@ -10,11 +9,7 @@ import { PublicGameSelector } from "../../public-lol/components/PublicGameSelect
 import { PublicLocaleSelector } from "../../public-lol/components/PublicLocaleSelector";
 import type { PublicMainPage } from "../../public-lol/types/public-lol";
 import { setPublicPath } from "../../public-lol/utils/routes";
-import { accountOAuthUrl, openYoroDashboard } from "../../yoro-account/api";
-import {
-  authenticatedYoroIdentity,
-  useYoroAccountSession,
-} from "../../yoro-account/useYoroAccountSession";
+import { publicAccountI18n, usePublicAccountLogin } from "../../../shared/public-account-login";
 import { valorantI18n, type ValorantLocale } from "../i18n/valorant-i18n";
 import { setValorantUrl, valorantPathForPage, type ValorantPage } from "../utils/routes";
 
@@ -59,38 +54,19 @@ export function ValorantHeader({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
-  const yoroAccount = useYoroAccountSession();
   const headerRef = useRef<HTMLDivElement>(null);
   const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
   const text = valorantI18n[locale];
-  const yoroIdentity = authenticatedYoroIdentity(yoroAccount.session);
-  const yoroConnected = yoroAccount.session?.authenticated === true;
-  const accountUser: PublicTwitchAccountUser | undefined = yoroIdentity
-    ? {
-      displayName: yoroIdentity.displayName,
-      provider: yoroIdentity.provider,
-      linkedProviders: yoroAccount.session?.authenticated
-        ? yoroAccount.session.identities.map((identity) => identity.provider)
-        : [yoroIdentity.provider],
-      ...(yoroIdentity.avatarUrl ? { profileImageUrl: yoroIdentity.avatarUrl } : {}),
-    }
-    : undefined;
-
-  const handleDiscordLogin = () => {
-    const returnPath = `${window.location.pathname}${window.location.search}`;
-    trackGoogleAnalyticsEvent("discord_click", { link_context: "account_login" });
-    window.location.assign(accountOAuthUrl("discord", "login", returnPath));
-  };
-  const handleTwitchAccountLogin = () => {
-    const returnPath = `${window.location.pathname}${window.location.search}`;
-    trackGoogleAnalyticsEvent("twitch_click", { link_context: "account_login" });
-    window.location.assign(accountOAuthUrl("twitch", "login", returnPath));
-  };
-  const handleAccountLogout = () => {
-    void yoroAccount.logout().catch(() => {
-      /* 로그아웃 실패 시 연결 표시를 유지해 다시 시도할 수 있게 합니다. */
-    });
-  };
+  const {
+    accountUser,
+    loginWithDiscord,
+    loginWithTwitch,
+    logout: handleAccountLogout,
+    openDashboard,
+    twitchConfigured,
+    yoroConnected,
+  } = usePublicAccountLogin();
+  const account = publicAccountI18n[locale];
 
   const closeMenus = useCallback(() => {
     setGameSelectorOpen(false);
@@ -177,25 +153,25 @@ export function ValorantHeader({
               }}
             />
             <PublicTwitchAccountChip
-              configured={false}
+              configured={twitchConfigured}
               connected={yoroConnected}
-              dashboardLabel={text.yoroDashboardOpen}
-              dashboardLabelJa={valorantI18n.ja.yoroDashboardOpen}
-              dashboardLabelKo={valorantI18n.ko.yoroDashboardOpen}
-              discordLoginLabel={text.discordLogin}
-              loginLabel={text.accountLogin}
-              loginLabelJa={valorantI18n.ja.accountLogin}
-              loginLabelKo={valorantI18n.ko.accountLogin}
-              loginMenuLabel={text.accountLoginMenu}
-              loginTitle={text.accountLoginTitle}
-              logoutLabel={text.accountLogout}
-              logoutLabelJa={valorantI18n.ja.accountLogout}
-              logoutLabelKo={valorantI18n.ko.accountLogout}
+              dashboardLabel={account.dashboard}
+              dashboardLabelJa={publicAccountI18n.ja.dashboard}
+              dashboardLabelKo={publicAccountI18n.ko.dashboard}
+              discordLoginLabel={account.discordLogin}
+              loginLabel={account.login}
+              loginLabelJa={publicAccountI18n.ja.login}
+              loginLabelKo={publicAccountI18n.ko.login}
+              loginMenuLabel={account.loginMenu}
+              loginTitle={account.loginTitle}
+              logoutLabel={account.logout}
+              logoutLabelJa={publicAccountI18n.ja.logout}
+              logoutLabelKo={publicAccountI18n.ko.logout}
               menuActions={[]}
-              menuLabel={text.accountMenu}
-              onDashboard={openYoroDashboard}
-              onDiscordLogin={handleDiscordLogin}
-              onLogin={handleTwitchAccountLogin}
+              menuLabel={account.menu}
+              onDashboard={openDashboard}
+              onDiscordLogin={loginWithDiscord}
+              onLogin={loginWithTwitch}
               onLogout={handleAccountLogout}
               onOpenChange={(open) => {
                 setAccountMenuOpen(open);
@@ -206,7 +182,7 @@ export function ValorantHeader({
                 }
               }}
               open={accountMenuOpen}
-              twitchLoginLabel={text.twitchLoginChoice}
+              twitchLoginLabel={account.twitchLogin}
               user={accountUser}
             />
           </>
@@ -279,31 +255,31 @@ export function ValorantHeader({
             id="valorant-mobile-menu"
             labels={{
               close: text.closeMobileMenu,
-              dashboard: text.yoroDashboardOpen,
-              discordLogin: text.discordLogin,
+              dashboard: account.dashboard,
+              discordLogin: account.discordLogin,
               game: text.gameMenu,
               language: text.languageSection,
-              login: text.accountLogin,
-              loginLoading: text.twitchLoginLoading,
-              logout: text.accountLogout,
+              login: account.login,
+              loginLoading: account.twitchLoading,
+              logout: account.logout,
               title: text.mobileMenu,
-              twitch: text.account,
-              twitchLogin: text.twitchLoginChoice,
-              twitchUnavailable: text.twitchNotConfiguredDescription,
+              twitch: account.section,
+              twitchLogin: account.twitchLogin,
+              twitchUnavailable: account.twitchUnavailable,
             }}
             locale={locale}
             onClose={() => setMobileMenuOpen(false)}
             onGamePage={handleGame}
             onLocale={onLocale}
-            onDiscordLogin={handleDiscordLogin}
-            onDashboard={openYoroDashboard}
-            onTwitchLogin={handleTwitchAccountLogin}
+            onDiscordLogin={loginWithDiscord}
+            onDashboard={openDashboard}
+            onTwitchLogin={loginWithTwitch}
             onTwitchLogout={handleAccountLogout}
             onAccountLogout={handleAccountLogout}
             open={mobileMenuOpen}
             returnFocusRef={mobileMenuTriggerRef}
             twitchActions={[]}
-            twitchConfigured={false}
+            twitchConfigured={twitchConfigured}
             twitchConnected={false}
           />
         )}

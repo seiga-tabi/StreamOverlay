@@ -17,6 +17,16 @@ import {
   MinecraftPatchNotesSourceError,
   fetchMinecraftJavaPatchEntries
 } from "./minecraft-patch-notes-source.js";
+import {
+  MINECRAFT_FEEDBACK_SECTION_IDS,
+  MinecraftFeedbackSourceError,
+  applyMinecraftJavaOfficialUrls,
+  bedrockVersionsFromFeedbackTitle,
+  fetchMinecraftFeedbackSectionArticles,
+  javaVersionsFromFeedbackTitle,
+  minecraftBedrockPatchEntriesFromArticles,
+  minecraftJavaFallbackOnly
+} from "./minecraft-patch-notes-feedback-source.js";
 
 const PROJECT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "..");
 const DEFAULT_CURATION_PATH = path.resolve(
@@ -308,15 +318,40 @@ export class MinecraftPatchNotesService {
   }
 
   private async refreshJavaOnce(): Promise<void> {
-    const entries = await fetchMinecraftJavaPatchEntries({
+    const manifestEntries = await fetchMinecraftJavaPatchEntries({
       fetchImpl: this.deps.fetchImpl,
       sleepImpl: this.deps.sleepImpl
     });
+    const feedbackResults = await Promise.allSettled([
+      fetchMinecraftFeedbackSectionArticles(MINECRAFT_FEEDBACK_SECTION_IDS.release, {
+        fetchImpl: this.deps.fetchImpl,
+        sleepImpl: this.deps.sleepImpl
+      }),
+      fetchMinecraftFeedbackSectionArticles(MINECRAFT_FEEDBACK_SECTION_IDS.javaSnapshot, {
+        fetchImpl: this.deps.fetchImpl,
+        sleepImpl: this.deps.sleepImpl
+      })
+    ]);
+    const feedbackArticles = feedbackResults.flatMap((result, index) => {
+      if (result.status === "fulfilled") return result.value;
+      this.deps.logger?.error?.({
+        type: "minecraft.patch_notes_feedback_unavailable",
+        edition: "java",
+        section: index === 0 ? "release" : "java_snapshot",
+        errorCode: result.reason instanceof MinecraftFeedbackSourceError
+          ? result.reason.code
+          : "feedback_unavailable"
+      });
+      return [];
+    });
+    const officialUrls = feedbackArticles.length > 0
+      ? applyMinecraftJavaOfficialUrls(manifestEntries, feedbackArticles)
+      : minecraftJavaFallbackOnly(manifestEntries);
     const snapshot: MinecraftPatchSnapshot = Object.freeze({
       schemaVersion: 1,
       edition: "java",
       fetchedAt: new Date(this.now()).toISOString(),
-      entries: Object.freeze(entries)
+      entries: Object.freeze(officialUrls.entries)
     });
     const state = this.stateFor("java");
     state.snapshot = snapshot;
@@ -335,7 +370,63 @@ export class MinecraftPatchNotesService {
       type: "minecraft.patch_notes_refreshed",
       edition: "java",
       source: MINECRAFT_JAVA_VERSION_MANIFEST_URL,
-      entries: entries.length
+      entries: officialUrls.entries.length,
+      officialUrlMatched: officialUrls.matched,
+      officialUrlFallback: officialUrls.fallback,
+      feedbackArticlesSkipped: feedbackArticles.filter(
+        (article) => javaVersionsFromFeedbackTitle(article.title).length === 0
+      ).length
+    });
+  }
+
+  private async refreshBedrockOnce(): Promise<void> {
+    const [releaseArticles, previewArticles] = await Promise.all([
+      fetchMinecraftFeedbackSectionArticles(MINECRAFT_FEEDBACK_SECTION_IDS.release, {
+        fetchImpl: this.deps.fetchImpl,
+        sleepImpl: this.deps.sleepImpl
+      }),
+      fetchMinecraftFeedbackSectionArticles(MINECRAFT_FEEDBACK_SECTION_IDS.bedrockPreview, {
+        fetchImpl: this.deps.fetchImpl,
+        sleepImpl: this.deps.sleepImpl
+      })
+    ]);
+    const entries = minecraftBedrockPatchEntriesFromArticles(releaseArticles, previewArticles);
+    if (entries.length === 0) {
+      throw new MinecraftFeedbackSourceError("MINECRAFT_FEEDBACK_BEDROCK_EMPTY");
+    }
+    const snapshot: MinecraftPatchSnapshot = Object.freeze({
+      schemaVersion: 1,
+      edition: "bedrock",
+      fetchedAt: new Date(this.now()).toISOString(),
+      entries: Object.freeze(entries)
+    });
+    const state = this.stateFor("bedrock");
+    state.snapshot = snapshot;
+    state.refreshedAt = this.now();
+    state.lastFailureAt = undefined;
+    try {
+      await this.deps.store?.save(snapshot);
+    } catch {
+      this.deps.logger?.error?.({
+        type: "minecraft.patch_notes_snapshot_save_failed",
+        edition: "bedrock",
+        errorCode: "snapshot_save_failed"
+      });
+    }
+    this.deps.logger?.event?.({
+      type: "minecraft.patch_notes_refreshed",
+      edition: "bedrock",
+      source: "feedback.minecraft.net",
+      entries: entries.length,
+      releases: entries.filter((entry) => entry.type === "release").length,
+      previews: entries.filter((entry) => entry.type === "preview").length,
+      feedbackArticlesSkipped:
+        releaseArticles.filter(
+          (article) => bedrockVersionsFromFeedbackTitle(article.title, "release").length === 0
+        ).length
+        + previewArticles.filter(
+          (article) => bedrockVersionsFromFeedbackTitle(article.title, "preview").length === 0
+        ).length
     });
   }
 
@@ -349,6 +440,28 @@ export class MinecraftPatchNotesService {
           type: "minecraft.patch_notes_refresh_failed",
           edition: "java",
           errorCode: error instanceof MinecraftPatchNotesSourceError
+            ? error.code
+            : "refresh_failed"
+        });
+        throw error;
+      })
+      .finally(() => {
+        state.inFlight = undefined;
+      });
+    state.inFlight = running;
+    return running;
+  }
+
+  private refreshBedrock(): Promise<void> {
+    const state = this.stateFor("bedrock");
+    if (state.inFlight) return state.inFlight;
+    const running = this.refreshBedrockOnce()
+      .catch((error: unknown) => {
+        state.lastFailureAt = this.now();
+        this.deps.logger?.error?.({
+          type: "minecraft.patch_notes_refresh_failed",
+          edition: "bedrock",
+          errorCode: error instanceof MinecraftFeedbackSourceError
             ? error.code
             : "refresh_failed"
         });
@@ -377,16 +490,33 @@ export class MinecraftPatchNotesService {
     }
   }
 
+  private async ensureBedrockCurrent(): Promise<void> {
+    await this.hydrate("bedrock");
+    const state = this.stateFor("bedrock");
+    const fresh = state.refreshedAt !== undefined
+      && this.now() - state.refreshedAt < this.refreshIntervalMs;
+    if (fresh) return;
+    const backingOff = state.lastFailureAt !== undefined
+      && this.now() - state.lastFailureAt < FAILURE_BACKOFF_MS;
+    if (backingOff) return;
+    try {
+      await this.refreshBedrock();
+    } catch {
+      /* 마지막 정상 Bedrock snapshot은 유지하고, 없으면 data_unavailable을 반환합니다. */
+    }
+  }
+
   hasReadyData(): boolean {
-    return Boolean(this.stateFor("java").snapshot?.entries.length);
+    return MINECRAFT_PATCH_EDITIONS.some(
+      (edition) => Boolean(this.stateFor(edition).snapshot?.entries.length)
+    );
   }
 
   async page(params: URLSearchParams): Promise<MinecraftPatchNotesResponse> {
     const query = parseMinecraftPatchNotesQuery(params);
-    if (query.edition === "bedrock") return { state: "data_unavailable" };
-
-    await this.ensureJavaCurrent();
-    const snapshot = this.stateFor("java").snapshot;
+    if (query.edition === "java") await this.ensureJavaCurrent();
+    else await this.ensureBedrockCurrent();
+    const snapshot = this.stateFor(query.edition).snapshot;
     if (!snapshot) return { state: "data_unavailable" };
     const curated = mergeMinecraftPatchCuration(snapshot.entries, this.curation);
     const filtered = query.type === undefined
@@ -410,8 +540,10 @@ export class MinecraftPatchNotesService {
   start(): void {
     if (this.timer) return;
     void this.ensureJavaCurrent();
+    void this.ensureBedrockCurrent();
     this.timer = setInterval(() => {
       void this.ensureJavaCurrent();
+      void this.ensureBedrockCurrent();
     }, this.refreshIntervalMs);
     this.timer.unref?.();
   }

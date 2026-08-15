@@ -27,16 +27,16 @@ import {
 import {
   getPublicTwitchFollowedChannels,
   getPublicTwitchStatus,
-  invalidatePublicTwitchClientCache,
   logoutPublicTwitch,
   peekPublicTwitchFollowedChannels,
   peekPublicTwitchStatus,
   publicTwitchLoginUrl,
 } from "../features/public-twitch/api";
 import { safeTwitchStreamPreviewUrl } from "../features/public-twitch/stream-preview";
+import { useViewerTwitchOAuthReturn } from "../shared/useViewerTwitchOAuthReturn";
+import { publicLiveText } from "../shared/public-live-streamers";
 import { streamerBuckets, type StreamerFilter } from "../features/public-lol/utils/streamers";
 import { matchGap, matchLanePairs, type LanePair } from "../features/public-lol/utils/match-lanes";
-import { isTwitchAccountOAuthReturn } from "../features/yoro-account/api";
 import { ProfileLinkIcon, profileLinkPlatformFromUrl, profileLinkPlatformClass } from "../components/ProfileLinkIcon";
 import { AppShell, AppShellHeader, AppShellMain, AppShellSidebar } from "../shared/ui/AppShell";
 import { Button } from "../shared/ui/Button";
@@ -1313,43 +1313,15 @@ function publicHomeSearchPanelText(platform: LolPlatformId, locale: PublicLocale
       ko: publicI18n.ko.searchPlaceholder,
       ja: publicI18n.ja.searchPlaceholder,
     },
-    liveTitle: {
-      label: activePublicLocale === "ja" ? "現在LIVE配信者" : "현재 LIVE 스트리머",
-      ko: "현재 LIVE 스트리머",
-      ja: "現在LIVE配信者",
-    },
-    livePrevious: {
-      label: activePublicLocale === "ja" ? "前のLIVE配信者を見る" : "이전 LIVE 스트리머 보기",
-      ko: "이전 LIVE 스트리머 보기",
-      ja: "前のLIVE配信者を見る",
-    },
-    liveNext: {
-      label: activePublicLocale === "ja" ? "次のLIVE配信者を見る" : "다음 LIVE 스트리머 보기",
-      ko: "다음 LIVE 스트리머 보기",
-      ja: "次のLIVE配信者を見る",
-    },
-    liveViewAll: {
-      label: activePublicLocale === "ja" ? "すべて見る" : "전체 보기",
-      ko: "전체 보기",
-      ja: "すべて見る",
-    },
-    liveWatch: {
-      label: activePublicLocale === "ja" ? "配信を見る" : "방송 보기",
-      ko: "방송 보기",
-      ja: "配信を見る",
-    },
-    liveEmptyTitle: {
-      label: activePublicLocale === "ja" ? "現在登録済みのLIVE配信者はいません。" : "현재 등록된 LIVE 스트리머가 없습니다.",
-      ko: "현재 등록된 LIVE 스트리머가 없습니다.",
-      ja: "現在登録済みのLIVE配信者はいません。",
-    },
-    liveEmptyDescription: {
-      label: activePublicLocale === "ja"
-        ? "登録済みの配信者がLIVE配信を開始すると、ここに表示されます。"
-        : "등록된 스트리머가 LIVE 방송을 시작하면 여기에 표시됩니다.",
-      ko: "등록된 스트리머가 LIVE 방송을 시작하면 여기에 표시됩니다.",
-      ja: "登録済みの配信者がLIVE配信を開始すると、ここに表示されます。",
-    },
+    /* LIVE 레일 문구의 단일 원본은 shared/public-live-streamers.tsx —
+       LoL 홈은 등록 스트리머 데이터라 registered 변형을 씁니다. */
+    liveTitle: publicLiveText(activePublicLocale, "registeredTitle"),
+    livePrevious: publicLiveText(activePublicLocale, "previous"),
+    liveNext: publicLiveText(activePublicLocale, "next"),
+    liveViewAll: publicLiveText(activePublicLocale, "viewAll"),
+    liveWatch: publicLiveText(activePublicLocale, "watch"),
+    liveEmptyTitle: publicLiveText(activePublicLocale, "registeredEmptyTitle"),
+    liveEmptyDescription: publicLiveText(activePublicLocale, "registeredEmptyDescription"),
     primaryFeaturesTitle: {
       label: t().homePrimaryFeatures,
       ko: publicI18n.ko.homePrimaryFeatures,
@@ -5661,13 +5633,11 @@ export function PublicLolPage({
     () => Boolean(peekPublicTwitchStatus()?.connected && !peekPublicTwitchFollowedChannels()),
   );
   const [followedError, setFollowedError] = useState("");
-  const twitchOAuthReturnRef = useRef(
-    isTwitchAccountOAuthReturn(window.location.search)
-      || new URLSearchParams(window.location.search).get("viewer_twitch") === "connected"
-  );
-  const [twitchOAuthSettling, setTwitchOAuthSettling] = useState(
-    twitchOAuthReturnRef.current
-  );
+  /* OAuth 복귀 감지·마커 정리·초기/확정 재조회·settling 의 단일 원본 —
+     shared/useViewerTwitchOAuthReturn.ts (팰월드 세션 훅과 공유). */
+  const { settling: twitchOAuthSettling } = useViewerTwitchOAuthReturn({
+    refresh: (force) => loadTwitchViewer(force),
+  });
   const followedLolRequestRef = useRef<{
     includeSubscriptions: boolean;
     promise: Promise<void>;
@@ -5816,34 +5786,6 @@ export function PublicLolPage({
     canonical?.setAttribute("href", canonicalUrl);
     openGraphUrl?.setAttribute("content", canonicalUrl);
   }, [activeMainPage, locale, profile?.riotId]);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const viewerConnected = twitchOAuthReturnRef.current;
-    if (viewerConnected) invalidatePublicTwitchClientCache();
-    const initialRequest = loadTwitchViewer(viewerConnected);
-    let disposed = false;
-    let retryTimer: number | undefined;
-    if (viewerConnected) {
-      params.delete("viewer_twitch");
-      params.delete("account");
-      const nextQuery = params.toString();
-      const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`;
-      window.history.replaceState({}, "", nextUrl);
-      void initialRequest.finally(() => {
-        if (disposed) return;
-        retryTimer = window.setTimeout(() => {
-          void loadTwitchViewer(true).finally(() => {
-            if (!disposed) setTwitchOAuthSettling(false);
-          });
-        }, 350);
-      });
-    }
-    return () => {
-      disposed = true;
-      if (retryTimer !== undefined) window.clearTimeout(retryTimer);
-    };
-  }, []);
 
   useEffect(() => {
     if (!twitchStatus.connected) {
