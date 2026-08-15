@@ -324,7 +324,10 @@ const MAX_TWITCH_CHAT_MESSAGE_LENGTH = 500;
 const PROFILE_REFRESH_COOLDOWN_MS = 60_000;
 const SKIN_OPTIONS_CACHE_TTL_MS = 10 * 60_000;
 const FOLLOWER_REFRESH_COOLDOWN_MS = 5 * 60_000;
-const PUBLIC_LOL_PROFILE_INITIAL_MATCH_COUNT = 10;
+/* 첫 조회에서 보여줄 최근 게임 수 — 그날의 종합 바가 하루 단위 흐름을 보여주므로
+   초기 20게임이 2~3일치를 담습니다. 추가 페이지(MATCH_COUNT)는 10 유지.
+   주의: 값만큼 Riot 매치 상세 조회가 늘어납니다(20 → 프로필당 최대 21회). */
+const PUBLIC_LOL_PROFILE_INITIAL_MATCH_COUNT = 20;
 const PUBLIC_LOL_PROFILE_MATCH_COUNT = 10;
 const PUBLIC_LOL_PROFILE_MATCH_LOOKUP_COUNT = PUBLIC_LOL_PROFILE_MATCH_COUNT + 1;
 const PUBLIC_LOL_PROFILE_MAX_MATCH_START = 200;
@@ -332,14 +335,16 @@ const STREAMER_PROFILE_LINK_MAX = 5;
 const STREAMER_PROFILE_LINK_LABEL_MAX = 40;
 const STREAMER_PROFILE_LINK_URL_MAX = 2048;
 const PUBLIC_LOL_PROFILE_TOP_CHAMPION_COUNT = 5;
-const PUBLIC_LOL_PROFILE_QUEUES = [420, 440, 42, 6, 430, 400, 450];
+const PUBLIC_LOL_PROFILE_QUEUES = [420, 440, 430, 400, 450];
 type PublicLolMatchQueueFilter = "all" | "solo" | "flex" | "ranked5v5" | "normal" | "aram";
 
 const PUBLIC_LOL_MATCH_QUEUE_IDS: Record<PublicLolMatchQueueFilter, readonly number[]> = {
   all: [],
   solo: [420],
   flex: [440],
-  ranked5v5: [42, 6],
+  /* 42·6 은 폐기된 레거시 랭크 팀 큐라 항상 빈 결과였습니다(2026-08-16 수정).
+     5v5 랭크 = 현행 솔로(420)+자유(440) 합산으로 정의합니다. */
+  ranked5v5: [420, 440],
   normal: [400, 430],
   aram: [450]
 };
@@ -6820,9 +6825,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (!input.riot) throw new HttpRequestError(503, { error: "Riot API client를 사용할 수 없습니다." });
     const safeStart = publicLolMatchStart(matchStart);
     const queueIds = [...PUBLIC_LOL_MATCH_QUEUE_IDS[queueFilter]];
+    /* ID 조회는 요청 페이지 크기 + 1 — 상수(11) 고정이면 초기 페이지 크기
+       (PUBLIC_LOL_PROFILE_INITIAL_MATCH_COUNT=20)를 키워도 11개만 조회되던 결함. */
     const matchIds = await input.riot.getRecentMatchIdsByPuuid(
       account.puuid,
-      PUBLIC_LOL_PROFILE_MATCH_LOOKUP_COUNT,
+      matchCount + 1,
       queueIds,
       safeStart,
       routing
@@ -6841,8 +6848,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         await dataDragonVersionForMatch(input.dataDragon, match, dataDragonVersion)
       ))
     )).filter((match): match is PublicLolRecentMatch => Boolean(match));
-    const hasMoreRecentMatches = matchIds.length > matchCount
-      || (matchCount >= PUBLIC_LOL_PROFILE_MATCH_LOOKUP_COUNT && matchIds.length >= PUBLIC_LOL_PROFILE_MATCH_LOOKUP_COUNT);
+    const hasMoreRecentMatches = matchIds.length > matchCount;
     return {
       rawMatches,
       recentMatches,

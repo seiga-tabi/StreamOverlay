@@ -173,7 +173,8 @@ export function queueMatchesFilter(match: PublicLolRecentMatch, queue: MatchQueu
   if (queue === "all") return true;
   if (queue === "solo") return match.queueId === 420;
   if (queue === "flex") return match.queueId === 440;
-  if (queue === "ranked5v5") return match.queueId === 42 || match.queueId === 6;
+  /* 42·6 은 폐기된 레거시 큐 — 5v5 랭크는 현행 솔로(420)+자유(440)입니다. */
+  if (queue === "ranked5v5") return match.queueId === 420 || match.queueId === 440;
   if (queue === "normal") return match.queueId === 400 || match.queueId === 430;
   if (queue === "aram") return match.queueId === 450;
   return true;

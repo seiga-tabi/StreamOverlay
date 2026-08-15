@@ -1771,10 +1771,10 @@ test("공개 LoL 전적 API는 allowlist 밖의 큐 필터를 거부한다", asy
   });
 });
 
-test("공개 LoL 첫 검색은 최근 10게임만 상세 조회하고 다음 페이지 위치를 반환한다", async () => {
+test("공개 LoL 첫 검색은 최근 20게임만 상세 조회하고 다음 페이지 위치를 반환한다", async () => {
   await withAuthConfig(async () => {
     let matchLookups = 0;
-    const matchIds = Array.from({ length: 20 }, (_, index) => `JP1_${index + 1}`);
+    const matchIds = Array.from({ length: 30 }, (_, index) => `JP1_${index + 1}`);
     const handler = createHttpHandler({
       store: {},
       twitchAuth: {},
@@ -1799,10 +1799,11 @@ test("공개 LoL 첫 검색은 최근 10게임만 상세 조회하고 다음 페
           return [];
         },
         async getRecentMatchIdsByPuuid(_puuid, count, queueIds, start) {
-          assert.equal(count, 11);
+          /* 초기 20게임 + 다음 페이지 존재 판정용 1 (PUBLIC_LOL_PROFILE_INITIAL_MATCH_COUNT) */
+          assert.equal(count, 21);
           assert.deepEqual(queueIds ?? [], []);
           assert.equal(start, 0);
-          return matchIds;
+          return matchIds.slice(0, count);
         },
         async getMatch(matchId) {
           matchLookups += 1;
@@ -1836,9 +1837,9 @@ test("공개 LoL 첫 검색은 최근 10게임만 상세 조회하고 다음 페
 
     assert.equal(res.statusCode, 200, res.body);
     const body = JSON.parse(res.body);
-    assert.equal(matchLookups, 10);
-    assert.equal(body.recentMatches.length, 10);
-    assert.equal(body.nextRecentMatchStart, 10);
+    assert.equal(matchLookups, 20);
+    assert.equal(body.recentMatches.length, 20);
+    assert.equal(body.nextRecentMatchStart, 20);
     assert.equal(body.hasMoreRecentMatches, true);
   });
 });
@@ -2883,7 +2884,7 @@ test("공개 LoL 전적 API는 같은 Riot ID 요청을 캐시하고 최근 경�
           return [];
         },
         async getRecentMatchIdsByPuuid(_puuid, count, queueIds) {
-          assert.equal(count, 11);
+          assert.equal(count, 21);  /* 초기 20게임 + 다음 페이지 판정 1 */
           assert.deepEqual(queueIds ?? [], []);
           return ["old-match", "new-match", "custom-match"];
         },

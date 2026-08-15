@@ -101,3 +101,12 @@ test("요약 바는 ko·ja 라벨과 Perfect KDA·승률 색 클래스를 렌더
   assert.match(japaneseBar, /8月13日/u);
   setActivePublicLocale("ko");
 });
+
+test("5v5 랭크 필터는 현행 랭크 큐(420·440)를 매칭한다 — 레거시 42·6 회귀 방지", async () => {
+  const { queueMatchesFilter } = await import("../src/features/public-lol/utils/match");
+  assert.equal(queueMatchesFilter(match({ queueId: 420 }), "ranked5v5"), true);
+  assert.equal(queueMatchesFilter(match({ queueId: 440 }), "ranked5v5"), true);
+  assert.equal(queueMatchesFilter(match({ queueId: 42 }), "ranked5v5"), false);
+  assert.equal(queueMatchesFilter(match({ queueId: 450 }), "ranked5v5"), false);
+  assert.equal(queueMatchesFilter(match({ queueId: 420 }), "solo"), true);
+});
