@@ -1128,3 +1128,77 @@ test("기존 스트리머 Dashboard 경로는 통합 Dashboard로 정리된다",
   await expect(page.locator(".app-shell-followers")).toHaveCount(0);
   expect(errors, "console 또는 page runtime 오류가 없어야 합니다.").toEqual([]);
 });
+
+test("전적 리스트는 로컬 날짜 경계마다 그날의 종합 바를 표시한다", async ({ page }) => {
+  /* 그날의 종합(A안) 회귀 — docs/mockups/lol-daily-summary.html.
+     UTC 03~14시 사이 시각만 써서 KST·UTC 어느 타임존에서도 같은 날짜로 묶입니다.
+     픽스처 날짜(2026-07)는 항상 과거이므로 라벨은 상대 표기 대신 날짜로 고정됩니다. */
+  const dayMatch = (index: number, startedAt: string, result: "win" | "loss", deaths: number) => ({
+    matchId: `JP1_DAY_${index}`,
+    champion: { championId: 238, championKey: "Zed", nameKo: "제드", nameJa: "ゼド" },
+    queueId: 420,
+    startedAt,
+    durationSeconds: 1_610,
+    result,
+    kills: 6, deaths, assists: 6, kda: deaths === 0 ? 12 : 12 / deaths,
+    championLevel: 18, cs: 210, csPerMinute: 7.8, killParticipation: 70,
+    position: "MIDDLE",
+    items: [], summonerSpells: [4, 14], badges: [], teams: [],
+  });
+  await page.route("**/api/lol/profile**", async (route) => {
+    await json(route, {
+      ...profileFixture,
+      recentMatches: [
+        dayMatch(0, "2026-07-14T10:00:00.000Z", "win", 2),
+        dayMatch(1, "2026-07-14T08:00:00.000Z", "loss", 4),
+        dayMatch(2, "2026-07-14T05:00:00.000Z", "win", 2),
+        dayMatch(3, "2026-07-13T12:00:00.000Z", "loss", 6),
+        dayMatch(4, "2026-07-13T09:00:00.000Z", "loss", 6),
+      ],
+      summary: {
+        recentGames: 5, recentWins: 2, recentWinRate: 40,
+        totalKills: 30, totalDeaths: 20, totalAssists: 30,
+      },
+    });
+  });
+
+  await page.goto("/lol/summoners/jp/YORO%20QA-JP1");
+  const bars = page.getByTestId("lol-daily-summary");
+  await expect(bars).toHaveCount(2);
+
+  /* 첫 바(7월 14일): 3게임 2승 1패 · 승률 67% · 시간순 점 막대(승-패-승) */
+  const first = bars.nth(0);
+  await expect(first).toContainText("7월 14일");
+  await expect(first).toContainText("3게임");
+  await expect(first).toContainText("2승");
+  await expect(first).toContainText("1패");
+  await expect(first).toContainText("승률 67%");
+  await expect(first.locator(".public-match-day-summary__dots i")).toHaveCount(3);
+  await expect(first.locator(".public-match-day-summary__dots i.is-win")).toHaveCount(2);
+
+  /* 둘째 바(7월 13일): 전패 → 저조 톤 클래스 */
+  const second = bars.nth(1);
+  await expect(second).toContainText("7월 13일");
+  await expect(second).toContainText("0승");
+  await expect(second).toContainText("2패");
+  await expect(second.locator(".public-match-day-summary__rate.is-cold")).toBeVisible();
+
+  /* 평균 KDA 는 데스크톱에서만 — 모바일은 목업 규칙대로 숨김(:has 로 앞 구분선까지). */
+  const kda = first.locator(".public-match-day-summary__kda");
+  if ((page.viewportSize()?.width ?? 1440) > 768) {
+    await expect(kda).toBeVisible();
+    await expect(kda).toContainText("평균 KDA");
+  } else {
+    await expect(kda).toBeHidden();
+  }
+
+  /* 바는 그날의 첫 매치 카드보다 앞에 옵니다 — 리스트 안 상대 순서 고정 */
+  const orderProbe = await page.evaluate(() => {
+    const bar = document.querySelector('[data-testid="lol-daily-summary"]');
+    const rows = document.querySelectorAll(".public-match-row, [class*='match-card']");
+    if (!bar || rows.length === 0) return "missing";
+    const firstRow = rows[0];
+    return bar.compareDocumentPosition(firstRow) & Node.DOCUMENT_POSITION_FOLLOWING ? "bar-first" : "row-first";
+  });
+  expect(orderProbe).toBe("bar-first");
+});

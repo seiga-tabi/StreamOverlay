@@ -3206,3 +3206,55 @@
 }
 
 /* 메인 상단바 우측 도구 정렬: 언어/로그인 버튼을 메뉴 중심선에 맞춤 */
+
+/* ══ 전적 리스트 · 그날의 종합 바(A안) ═════════════════════════════════
+   로컬 날짜 경계마다 끼어드는 슬림 요약 — docs/mockups/lol-daily-summary.html.
+   매치 카드보다 낮은 시각 무게(작은 글자·옅은 표면)로, 구분자이지 카드가 아닙니다. */
+.public-match-day-summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 10px;
+  padding: 9px 16px;
+  border: 1px solid rgba(148, 163, 196, .16) !important;
+  border-radius: 10px;
+  background: rgba(21, 29, 52, .85) !important;
+  color: #94a0bd !important;
+  font-size: 13px;
+}
+
+.public-match-day-summary:first-child { margin-top: 0; }
+
+.public-match-day-summary__date strong { color: #fff; font-weight: 800; }
+.public-match-day-summary__date small { color: #94a0bd; font-weight: 600; margin-left: 6px; font-size: 12px; }
+
+.public-match-day-summary__record .is-win { color: #4f76ff; font-weight: 800; }
+.public-match-day-summary__record .is-loss { color: #e15b6d; font-weight: 800; }
+
+.public-match-day-summary__sep { width: 1px; height: 14px; background: rgba(148, 163, 196, .25); }
+
+.public-match-day-summary__rate { font-weight: 800; color: #dfe6f5; }
+.public-match-day-summary__rate.is-hot { color: #34d399; }
+.public-match-day-summary__rate.is-cold { color: #e15b6d; }
+
+.public-match-day-summary__kda b { color: #c9b6ff; font-weight: 800; }
+
+.public-match-day-summary__dots { display: flex; gap: 3px; margin-left: auto; }
+.public-match-day-summary__dots i {
+  width: 14px;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(148, 163, 196, .35);
+}
+.public-match-day-summary__dots i.is-win { background: #4f76ff; }
+.public-match-day-summary__dots i.is-loss { background: #e15b6d; }
+
+/* 모바일 — 핵심 3개(날짜·전적·승률)만, 평균 KDA 생략(목업 §모바일). */
+@media (max-width: 48rem) {
+  .public-match-day-summary { padding: 8px 12px; row-gap: 2px; }
+  .public-match-day-summary__kda { display: none; }
+  /* KDA 바로 앞의 구분선도 함께 숨깁니다(:has 이전 형제 선택). */
+  .public-match-day-summary__sep:has(+ .public-match-day-summary__kda) { display: none; }
+  .public-match-day-summary__dots { flex-basis: 100%; margin-left: 0; }
+}

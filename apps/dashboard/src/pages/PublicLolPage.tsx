@@ -34,6 +34,7 @@ import {
 } from "../features/public-twitch/api";
 import { safeTwitchStreamPreviewUrl } from "../features/public-twitch/stream-preview";
 import { useViewerTwitchOAuthReturn } from "../shared/useViewerTwitchOAuthReturn";
+import { withLolDailySummaryBars } from "../features/public-lol/components/LolDailySummaryBar";
 import { publicLiveText } from "../shared/public-live-streamers";
 import { streamerBuckets, type StreamerFilter } from "../features/public-lol/utils/streamers";
 import { matchGap, matchLanePairs, type LanePair } from "../features/public-lol/utils/match-lanes";
@@ -5207,6 +5208,9 @@ function RecentMatches({
             />
           );
         });
+  /* 그날의 종합(A안) — 로컬 날짜 경계마다 요약 바를 끼웁니다.
+     요약은 보이는(필터 반영) 목록 합계 · docs/mockups/lol-daily-summary.html */
+  const matchRowsWithDailySummaries = withLolDailySummaryBars(profile.recentMatches, matchRows);
   const shareMatches: RecentMatchShareItem[] = profile.recentMatches.slice(0, 8).map((match) => {
     const aiScore = matchAiScore(match);
     const highlight = matchHighlightBadges(match.badges)[0]?.code;
@@ -5323,7 +5327,7 @@ function RecentMatches({
       isEmpty={profile.recentMatches.length === 0}
       loadingMore={loadingMore}
       matchCount={`${profile.summary.recentGames}${t().games}`}
-      matchRows={matchRows}
+      matchRows={matchRowsWithDailySummaries}
       summaryStrip={summaryStrip}
       shareAction={(
         <RecentMatchesShareActions
