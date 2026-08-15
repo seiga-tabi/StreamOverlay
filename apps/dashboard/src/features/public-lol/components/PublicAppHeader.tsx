@@ -6,7 +6,7 @@ import {
   PublicTwitchAccountChip,
   type PublicTwitchAccountMenuAction
 } from "../../../shared/PublicTwitchAccountChip";
-import { usePublicAccountLogin } from "../../../shared/public-account-login";
+import { publicAccountI18n, usePublicAccountLogin } from "../../../shared/public-account-login";
 import { openYoroDashboard } from "../../yoro-account/api";
 import { publicI18n, t, type PublicLocale } from "../i18n/public-lol-i18n";
 import type { PublicMainPage, PublicNavTarget, PublicTwitchViewerStatus } from "../types/public-lol";
@@ -69,6 +69,8 @@ export function PublicAppHeader({
   onStreamerRecord,
   onTwitchLogout,
 }: PublicAppHeaderProps) {
+  /* 계정 라벨의 단일 원본 — 다섯 게임 헤더가 같은 문구를 씁니다. */
+  const account = publicAccountI18n[locale];
   const [gameSelectorOpen, setGameSelectorOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
@@ -250,20 +252,20 @@ export function PublicAppHeader({
       <PublicTwitchAccountChip
         configured={twitchStatus.configured}
         connected={accountConnected}
-        dashboardLabel={t().yoroDashboardOpen}
-        dashboardLabelJa={publicI18n.ja.yoroDashboardOpen}
-        dashboardLabelKo={publicI18n.ko.yoroDashboardOpen}
-        discordLoginLabel={t().discordLogin}
-        loginLabel={t().accountLogin}
-        loginLabelJa={publicI18n.ja.accountLogin}
-        loginLabelKo={publicI18n.ko.accountLogin}
-        loginMenuLabel={t().accountLoginMenu}
-        loginTitle={t().accountLoginTitle}
-        logoutLabel={t().accountLogout}
-        logoutLabelJa={publicI18n.ja.accountLogout}
-        logoutLabelKo={publicI18n.ko.accountLogout}
+        dashboardLabel={account.dashboard}
+        dashboardLabelJa={publicAccountI18n.ja.dashboard}
+        dashboardLabelKo={publicAccountI18n.ko.dashboard}
+        discordLoginLabel={account.discordLogin}
+        loginLabel={account.login}
+        loginLabelJa={publicAccountI18n.ja.login}
+        loginLabelKo={publicAccountI18n.ko.login}
+        loginMenuLabel={account.loginMenu}
+        loginTitle={account.loginTitle}
+        logoutLabel={account.logout}
+        logoutLabelJa={publicAccountI18n.ja.logout}
+        logoutLabelKo={publicAccountI18n.ko.logout}
         menuActions={twitchMenuActions}
-        menuLabel={t().accountMenu}
+        menuLabel={account.menu}
         onDashboard={openYoroDashboard}
         onDiscordLogin={handleDiscordLogin}
         onLogin={handleTwitchAccountLogin}
@@ -278,7 +280,7 @@ export function PublicAppHeader({
           }
         }}
         open={twitchMenuOpen}
-        twitchLoginLabel={t().twitchLoginChoice}
+        twitchLoginLabel={account.twitchLogin}
         user={accountUser}
       />
     </>
@@ -385,17 +387,17 @@ export function PublicAppHeader({
             id="lol-mobile-menu"
             labels={{
               close: t().closeMobileMenu,
-              dashboard: t().yoroDashboardOpen,
-              discordLogin: t().discordLogin,
+              dashboard: account.dashboard,
+              discordLogin: account.discordLogin,
               game: t().gameMenu,
               language: t().language,
-              login: t().accountLogin,
-              loginLoading: t().twitchLoginLoading,
-              logout: t().accountLogout,
+              login: account.login,
+              loginLoading: account.twitchLoading,
+              logout: account.logout,
               title: t().mobileMenu,
-              twitch: t().account,
-              twitchLogin: t().twitchLoginChoice,
-              twitchUnavailable: t().twitchNotConfigured,
+              twitch: account.section,
+              twitchLogin: account.twitchLogin,
+              twitchUnavailable: account.twitchUnavailable,
             }}
             locale={locale}
             onClose={() => setMobileMenuOpen(false)}

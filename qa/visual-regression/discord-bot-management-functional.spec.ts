@@ -124,16 +124,16 @@ test("Public /bot 헤더는 로그인 선택과 Discord YORO Bot 아이콘만 �
   if ((page.viewportSize()?.width ?? 0) <= 768) {
     await header.getByRole("button", { name: "메뉴 열기" }).click();
     const mobileMenu = page.locator(".public-bottom-sheet");
-    await expect(mobileMenu.getByRole("button", { name: "Discord 로그인" })).toBeVisible();
-    await expect(mobileMenu.getByRole("button", { name: "Twitch 로그인" })).toBeVisible();
+    await expect(mobileMenu.getByRole("button", { name: "Discord로 로그인" })).toBeVisible();
+    await expect(mobileMenu.getByRole("button", { name: "Twitch로 로그인" })).toBeVisible();
     await expect(
       mobileMenu.locator('.public-game-selector-logo.is-yoro-bot[src*="discord-symbol-blurple"]')
     ).toBeVisible();
   } else {
     const login = header.getByRole("button", { name: "로그인", exact: true });
     await login.click();
-    await expect(header.getByRole("menuitem", { name: "Discord 로그인" })).toBeVisible();
-    await expect(header.getByRole("menuitem", { name: "Twitch 로그인" })).toBeVisible();
+    await expect(header.getByRole("menuitem", { name: "Discord로 로그인" })).toBeVisible();
+    await expect(header.getByRole("menuitem", { name: "Twitch로 로그인" })).toBeVisible();
     await expect(
       header.locator('.public-game-selector-logo.is-yoro-bot[src*="discord-symbol-blurple"]')
     ).toBeVisible();

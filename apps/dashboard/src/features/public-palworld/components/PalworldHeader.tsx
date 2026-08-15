@@ -5,7 +5,7 @@ import {
   PublicTwitchAccountChip,
   type PublicTwitchAccountMenuAction
 } from "../../../shared/PublicTwitchAccountChip";
-import { usePublicAccountLogin } from "../../../shared/public-account-login";
+import { publicAccountI18n, usePublicAccountLogin } from "../../../shared/public-account-login";
 import { PublicGameSelector } from "../../public-lol/components/PublicGameSelector";
 import { PublicLocaleSelector } from "../../public-lol/components/PublicLocaleSelector";
 import type { PublicMainPage, PublicTwitchViewerStatus } from "../../public-lol/types/public-lol";
@@ -76,6 +76,8 @@ export function PalworldHeader({
   const headerRef = useRef<HTMLDivElement>(null);
   const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
   const text = palworldI18n[locale];
+  /* 계정 라벨의 단일 원본 — 다섯 게임 헤더가 같은 문구를 씁니다. */
+  const account = publicAccountI18n[locale];
   /* 계정 세션·핸들러·뷰어 Twitch 합성의 단일 원본 — shared/public-account-login.ts.
      페이지가 소유한 뷰어 세션은 옵션으로 주입합니다(로그아웃 시 함께 해제). */
   const {
@@ -192,20 +194,20 @@ export function PalworldHeader({
             <PublicTwitchAccountChip
               configured={twitchConfigured}
               connected={accountConnected}
-              dashboardLabel={text.yoroDashboardOpen}
-              dashboardLabelJa={palworldI18n.ja.yoroDashboardOpen}
-              dashboardLabelKo={palworldI18n.ko.yoroDashboardOpen}
-              discordLoginLabel={text.discordLogin}
-              loginLabel={text.accountLogin}
-              loginLabelJa={palworldI18n.ja.accountLogin}
-              loginLabelKo={palworldI18n.ko.accountLogin}
-              loginMenuLabel={text.accountLoginMenu}
-              loginTitle={text.accountLoginTitle}
-              logoutLabel={text.accountLogout}
-              logoutLabelJa={palworldI18n.ja.accountLogout}
-              logoutLabelKo={palworldI18n.ko.accountLogout}
+              dashboardLabel={account.dashboard}
+              dashboardLabelJa={publicAccountI18n.ja.dashboard}
+              dashboardLabelKo={publicAccountI18n.ko.dashboard}
+              discordLoginLabel={account.discordLogin}
+              loginLabel={account.login}
+              loginLabelJa={publicAccountI18n.ja.login}
+              loginLabelKo={publicAccountI18n.ko.login}
+              loginMenuLabel={account.loginMenu}
+              loginTitle={account.loginTitle}
+              logoutLabel={account.logout}
+              logoutLabelJa={publicAccountI18n.ja.logout}
+              logoutLabelKo={publicAccountI18n.ko.logout}
               menuActions={twitchMenuActions}
-              menuLabel={text.accountMenu}
+              menuLabel={account.menu}
               onDashboard={openDashboard}
               onDiscordLogin={loginWithDiscord}
               onLogin={loginWithTwitch}
@@ -219,7 +221,7 @@ export function PalworldHeader({
                 }
               }}
               open={twitchMenuOpen}
-              twitchLoginLabel={text.twitchLoginChoice}
+              twitchLoginLabel={account.twitchLogin}
               user={accountUser}
             />
           </>
@@ -292,17 +294,17 @@ export function PalworldHeader({
             id="palworld-mobile-menu"
             labels={{
               close: text.closeMobileMenu,
-              dashboard: text.yoroDashboardOpen,
-              discordLogin: text.discordLogin,
+              dashboard: account.dashboard,
+              discordLogin: account.discordLogin,
               game: text.gameMenu,
               language: text.languageSection,
-              login: text.accountLogin,
-              loginLoading: text.twitchLoginLoading,
-              logout: text.accountLogout,
+              login: account.login,
+              loginLoading: account.twitchLoading,
+              logout: account.logout,
               title: text.mobileMenu,
-              twitch: text.account,
-              twitchLogin: text.twitchLoginChoice,
-              twitchUnavailable: text.twitchNotConfiguredDescription,
+              twitch: account.section,
+              twitchLogin: account.twitchLogin,
+              twitchUnavailable: account.twitchUnavailable,
             }}
             locale={locale}
             onClose={() => setMobileMenuOpen(false)}

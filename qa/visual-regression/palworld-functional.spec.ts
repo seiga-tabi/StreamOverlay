@@ -1766,7 +1766,7 @@ test("LoL의 공개 Twitch session은 Palworld 프로필과 홈 LIVE 목록에 �
   if (usesMobilePublicMenu(page)) {
     const mobileMenu = await openMobilePublicMenu(page);
     await expect(mobileMenu.getByText("Pal Viewer", { exact: true })).toBeVisible();
-    await expect(mobileMenu.getByRole("button", { name: "YORO Dashboard" })).toBeVisible();
+    await expect(mobileMenu.getByRole("button", { name: "내 대시보드" })).toBeVisible();
     await expect(mobileMenu.getByRole("button", { name: "대시보드 열기" })).toHaveCount(0);
     await expect(mobileMenu.getByRole("button", { name: "로그아웃" })).toBeVisible();
     await expect(mobileMenu.getByText(/Riot ID|내 전적/u)).toHaveCount(0);
@@ -1777,7 +1777,7 @@ test("LoL의 공개 Twitch session은 Palworld 프로필과 홈 LIVE 목록에 �
     await expect(accountButton).toBeVisible();
     await accountButton.click();
     await expect(page.getByRole("menu", { name: "계정 메뉴" })).toBeVisible();
-    const dashboardMenuItem = page.getByRole("menuitem", { name: "YORO Dashboard" });
+    const dashboardMenuItem = page.getByRole("menuitem", { name: "내 대시보드" });
     const logoutMenuItem = page.getByRole("menuitem", { name: "로그아웃" });
     await expect(dashboardMenuItem).toBeVisible();
     await expect(page.getByRole("menuitem", { name: "대시보드 열기" })).toHaveCount(0);
@@ -1989,10 +1989,10 @@ test("Palworld OAuth marker는 기존 검색 query를 보존해 제거하고 현
   );
   if (usesMobilePublicMenu(page)) {
     const mobileMenu = await openMobilePublicMenu(page);
-    await mobileMenu.getByRole("button", { name: "Twitch 로그인" }).click();
+    await mobileMenu.getByRole("button", { name: "Twitch로 로그인" }).click();
   } else {
     await page.getByRole("button", { name: "로그인", exact: true }).click();
-    await page.getByRole("menuitem", { name: "Twitch 로그인" }).click();
+    await page.getByRole("menuitem", { name: "Twitch로 로그인" }).click();
   }
   const authRequest = await authRequestPromise;
   const returnTo = new URL(authRequest.url()).searchParams.get("return_to");
@@ -2004,8 +2004,8 @@ test("LoL과 Palworld 상단 로그인은 Discord·Twitch 선택 메뉴를 동�
     await page.goto(path);
     if (usesMobilePublicMenu(page)) {
       const mobileMenu = await openMobilePublicMenu(page);
-      await expect(mobileMenu.getByRole("button", { name: "Discord 로그인" })).toBeVisible();
-      await expect(mobileMenu.getByRole("button", { name: "Twitch 로그인" })).toBeVisible();
+      await expect(mobileMenu.getByRole("button", { name: "Discord로 로그인" })).toBeVisible();
+      await expect(mobileMenu.getByRole("button", { name: "Twitch로 로그인" })).toBeVisible();
       await page.keyboard.press("Escape");
       await expect(mobileMenu).toHaveCount(0);
       continue;
@@ -2014,8 +2014,8 @@ test("LoL과 Palworld 상단 로그인은 Discord·Twitch 선택 메뉴를 동�
     const header = page.locator(".public-game-header").first();
     const loginButton = header.getByRole("button", { name: "로그인", exact: true });
     await loginButton.click();
-    await expect(header.getByRole("menuitem", { name: "Discord 로그인" })).toBeVisible();
-    await expect(header.getByRole("menuitem", { name: "Twitch 로그인" })).toBeVisible();
+    await expect(header.getByRole("menuitem", { name: "Discord로 로그인" })).toBeVisible();
+    await expect(header.getByRole("menuitem", { name: "Twitch로 로그인" })).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(loginButton).toHaveAttribute("aria-expanded", "false");
     await expect(loginButton).toBeFocused();
@@ -2110,7 +2110,7 @@ test("Palworld 로그아웃은 공유 session을 제거해 LoL에서도 미로�
   await expect.poll(() => fixture.isConnected()).toBe(false);
   if (usesMobilePublicMenu(page)) {
     const mobileMenu = await openMobilePublicMenu(page);
-    await expect(mobileMenu.getByRole("button", { name: "Twitch 로그인" })).toBeVisible();
+    await expect(mobileMenu.getByRole("button", { name: "Twitch로 로그인" })).toBeVisible();
     await page.keyboard.press("Escape");
   } else {
     await expect(page.getByRole("button", { name: "로그인", exact: true }).first()).toBeVisible();
@@ -2120,8 +2120,8 @@ test("Palworld 로그아웃은 공유 session을 제거해 LoL에서도 미로�
   await expect(page).toHaveURL(/\/$/u);
   if (usesMobilePublicMenu(page)) {
     const mobileMenu = await openMobilePublicMenu(page);
-    await expect(mobileMenu.getByRole("button", { name: "Discord 로그인" })).toBeVisible();
-    await expect(mobileMenu.getByRole("button", { name: "Twitch 로그인" })).toBeVisible();
+    await expect(mobileMenu.getByRole("button", { name: "Discord로 로그인" })).toBeVisible();
+    await expect(mobileMenu.getByRole("button", { name: "Twitch로 로그인" })).toBeVisible();
     await page.keyboard.press("Escape");
   } else {
     await expect(page.getByRole("button", { name: "로그인", exact: true }).first()).toBeVisible();

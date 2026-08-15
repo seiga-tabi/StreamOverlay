@@ -30,7 +30,7 @@ import {
   PublicTwitchAccountChip,
   PublicTwitchAccountPanel,
 } from "../../shared/PublicTwitchAccountChip";
-import { usePublicAccountLogin } from "../../shared/public-account-login";
+import { publicAccountI18n, usePublicAccountLogin } from "../../shared/public-account-login";
 import { openYoroDashboard } from "../yoro-account/api";
 import { PalworldDedicatedServerSettings } from "./PalworldDedicatedServerSettings";
 import { PublicBotFaq } from "./PublicBotFaq";
@@ -713,6 +713,8 @@ export function PublicBotPage() {
     loginWithTwitch,
     logout: logoutAccount,
   } = usePublicAccountLogin({ tracking: { linkContext: "public_bot_account" } });
+  /* 계정 라벨의 단일 원본 — 다섯 게임 헤더가 같은 문구를 씁니다. */
+  const account = publicAccountI18n[locale];
   const commandDocs = useMemo<readonly CommandDoc[]>(() => {
     const prefixAliases = (command: "help" | "status" | "player" | "guide") => {
       const definition = DISCORD_BOT_PREFIX_COMMAND_MANIFEST.find((entry) => entry.command === command);
@@ -957,17 +959,17 @@ export function PublicBotPage() {
               <PublicTwitchAccountChip
                 configured
                 connected={accountConnected}
-                dashboardLabel={text.dashboardOpen}
-                dashboardLabelJa={botText.ja.dashboardOpen}
-                dashboardLabelKo={botText.ko.dashboardOpen}
-                discordLoginLabel={publicI18n[locale].discordLogin}
-                loginLabel={publicI18n[locale].accountLogin}
-                loginLabelJa={publicI18n.ja.accountLogin}
-                loginLabelKo={publicI18n.ko.accountLogin}
-                loginMenuLabel={publicI18n[locale].accountLoginMenu}
-                loginTitle={publicI18n[locale].accountLoginTitle}
-                logoutLabel={publicI18n[locale].accountLogout}
-                menuLabel={publicI18n[locale].accountMenu}
+                dashboardLabel={account.dashboard}
+                dashboardLabelJa={publicAccountI18n.ja.dashboard}
+                dashboardLabelKo={publicAccountI18n.ko.dashboard}
+                discordLoginLabel={account.discordLogin}
+                loginLabel={account.login}
+                loginLabelJa={publicAccountI18n.ja.login}
+                loginLabelKo={publicAccountI18n.ko.login}
+                loginMenuLabel={account.loginMenu}
+                loginTitle={account.loginTitle}
+                logoutLabel={account.logout}
+                menuLabel={account.menu}
                 onDashboard={openTrackedYoroDashboard}
                 onDiscordLogin={loginWithDiscord}
                 onLogin={loginWithTwitch}
@@ -981,7 +983,7 @@ export function PublicBotPage() {
                   }
                 }}
                 open={accountMenuOpen}
-                twitchLoginLabel={publicI18n[locale].twitchLoginChoice}
+                twitchLoginLabel={account.twitchLogin}
                 user={accountUser}
               />
             </>
@@ -1059,24 +1061,24 @@ export function PublicBotPage() {
                   <PublicLocaleOptions ariaLabel={text.language} locale={locale} onLocale={changeLocale} />
                 </section>
                 <section className="public-mobile-menu__section">
-                  <h3>{publicI18n[locale].account}</h3>
+                  <h3>{account.section}</h3>
                   <PublicTwitchAccountPanel
                     configured
                     connected={accountConnected}
-                    dashboardLabel={text.dashboardOpen}
-                    dashboardLabelJa={botText.ja.dashboardOpen}
-                    dashboardLabelKo={botText.ko.dashboardOpen}
-                    discordLoginLabel={publicI18n[locale].discordLogin}
-                    loginLabel={publicI18n[locale].accountLogin}
-                    loginLoadingLabel={publicI18n[locale].twitchLoginLoading}
-                    logoutLabel={publicI18n[locale].accountLogout}
+                    dashboardLabel={account.dashboard}
+                    dashboardLabelJa={publicAccountI18n.ja.dashboard}
+                    dashboardLabelKo={publicAccountI18n.ko.dashboard}
+                    discordLoginLabel={account.discordLogin}
+                    loginLabel={account.login}
+                    loginLoadingLabel={account.twitchLoading}
+                    logoutLabel={account.logout}
                     onAction={() => setMobileMenuOpen(false)}
                     onDashboard={openTrackedYoroDashboard}
                     onDiscordLogin={loginWithDiscord}
                     onLogin={loginWithTwitch}
                     onLogout={logoutAccount}
-                    twitchLoginLabel={publicI18n[locale].twitchLoginChoice}
-                    unavailableLabel={publicI18n[locale].twitchNotConfigured}
+                    twitchLoginLabel={account.twitchLogin}
+                    unavailableLabel={account.twitchUnavailable}
                     user={accountUser}
                   />
                 </section>
