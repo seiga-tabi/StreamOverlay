@@ -110,3 +110,11 @@ test("5v5 랭크 필터는 현행 랭크 큐(420·440)를 매칭한다 — 레�
   assert.equal(queueMatchesFilter(match({ queueId: 450 }), "ranked5v5"), false);
   assert.equal(queueMatchesFilter(match({ queueId: 420 }), "solo"), true);
 });
+
+test("증강 칼바람 필터는 큐 2400 만 매칭한다", async () => {
+  const { queueMatchesFilter } = await import("../src/features/public-lol/utils/match");
+  assert.equal(queueMatchesFilter(match({ queueId: 2400 }), "aramMayhem"), true);
+  assert.equal(queueMatchesFilter(match({ queueId: 450 }), "aramMayhem"), false);
+  assert.equal(queueMatchesFilter(match({ queueId: 2400 }), "aram"), false);
+  assert.equal(queueMatchesFilter(match({ queueId: 2400 }), "all"), true);
+});

@@ -1060,3 +1060,34 @@
     scroll-behavior: auto;
   }
 }
+
+/* 모바일 현재 게임 칩(2026-08-16) — 로고와 버거 사이, 시트로 가는 지름길이자 위치 표시.
+   데스크톱에서는 게임 선택기 트리거가 있으므로 숨깁니다. */
+.public-game-header__game-chip {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 11px;
+  border: thin solid var(--yoro-color-border, rgba(148, 163, 196, .25));
+  border-radius: 99px;
+  background: rgba(21, 27, 48, .9);
+  color: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.public-game-header__game-chip .public-game-selector-logo {
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 48rem) {
+  .public-game-header__game-chip { display: inline-flex; }
+}
+
+.public-game-header__game-chip:focus-visible {
+  outline: 2px solid var(--yoro-color-public-primary, #7b5cff);
+  outline-offset: 2px;
+}

@@ -77,6 +77,7 @@ export function PublicHomeSearchPanel({
   onPage,
   onShowStreamers,
   searchForm,
+  searchQuickPicks,
   text,
 }: {
   liveLoading?: boolean;
@@ -85,6 +86,8 @@ export function PublicHomeSearchPanel({
   onPage: (page: PublicMainPage) => void;
   onShowStreamers?: () => void;
   searchForm: ReactNode;
+  /** 검색바 아래 원터치 최근 검색·즐겨찾기 칩(없으면 생략) */
+  searchQuickPicks?: ReactNode;
   text: PublicHomeSearchPanelText;
 }) {
   const liveContent = (
@@ -149,7 +152,7 @@ export function PublicHomeSearchPanel({
       <PublicGameHomeHero
         description={text.description}
         game="lol"
-        search={searchForm}
+        search={(<>{searchForm}{searchQuickPicks}</>)}
         title={text.title}
       />
       <div className="public-game-home__live-strip">

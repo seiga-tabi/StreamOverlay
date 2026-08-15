@@ -335,8 +335,9 @@ const STREAMER_PROFILE_LINK_MAX = 5;
 const STREAMER_PROFILE_LINK_LABEL_MAX = 40;
 const STREAMER_PROFILE_LINK_URL_MAX = 2048;
 const PUBLIC_LOL_PROFILE_TOP_CHAMPION_COUNT = 5;
-const PUBLIC_LOL_PROFILE_QUEUES = [420, 440, 430, 400, 450];
-type PublicLolMatchQueueFilter = "all" | "solo" | "flex" | "ranked5v5" | "normal" | "aram";
+/* 2400 = ARAM: Mayhem(증강 칼바람) — 공식 큐 목록 실측 확인(2026-08-16) */
+const PUBLIC_LOL_PROFILE_QUEUES = [420, 440, 430, 400, 450, 2400];
+type PublicLolMatchQueueFilter = "all" | "solo" | "flex" | "ranked5v5" | "normal" | "aram" | "aramMayhem";
 
 const PUBLIC_LOL_MATCH_QUEUE_IDS: Record<PublicLolMatchQueueFilter, readonly number[]> = {
   all: [],
@@ -346,7 +347,8 @@ const PUBLIC_LOL_MATCH_QUEUE_IDS: Record<PublicLolMatchQueueFilter, readonly num
      5v5 랭크 = 현행 솔로(420)+자유(440) 합산으로 정의합니다. */
   ranked5v5: [420, 440],
   normal: [400, 430],
-  aram: [450]
+  aram: [450],
+  aramMayhem: [2400]
 };
 const PUBLIC_LOL_PROFILE_CACHE_TTL_MS = 10 * 60_000;
 /* 패치별 전적은 경기가 끝나야 바뀝니다. 10분이면 충분하고 Riot 호출을 아낍니다. */
@@ -633,6 +635,8 @@ type PublicLolMatchTeamsResponse = {
 
 type PublicLolRecentMatch = {
   matchId: string;
+  /** 증강 픽(픽 순서 유지) — 증강이 있는 모드(큐 2400 등)에서만 채워집니다. */
+  augments?: number[];
   champion: LolChampionSummary;
   queueId?: number;
   gameMode?: string;
@@ -6648,8 +6652,18 @@ export function createHttpHandler(input: HttpHandlerInput) {
     const damageTaken = safeOptionalStat(participant.totalDamageTaken);
     const goldEarned = safeOptionalStat(participant.goldEarned);
     const visionScore = safeOptionalStat(participant.visionScore);
+    /* playerAugment1~6 — 값이 있는 슬롯만 픽 순서대로. 증강 없는 큐에서는 필드 생략. */
+    const augments = [
+      participant.playerAugment1,
+      participant.playerAugment2,
+      participant.playerAugment3,
+      participant.playerAugment4,
+      participant.playerAugment5,
+      participant.playerAugment6
+    ].filter((id): id is number => typeof id === "number" && id > 0);
     return {
       matchId: match.metadata.matchId,
+      ...(augments.length > 0 ? { augments } : {}),
       champion,
       queueId: match.info.queueId,
       gameMode: match.info.gameMode,

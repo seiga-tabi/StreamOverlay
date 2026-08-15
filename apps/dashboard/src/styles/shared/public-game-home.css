@@ -1892,3 +1892,97 @@
     transition: none;
   }
 }
+
+/* ══ 검색바 교정(2026-08-16 실측 결함 수정) — 목업 lol-home-game-selector-redesign §③.
+   실측: 한 행 안에서 서버 칩 60px·검색 버튼 44px 혼재(버튼 떠 보임), 폰트 18/16 혼재,
+   input line-height normal 로 placeholder 수직 중앙 미보장, 전체 640px 과폭.
+   규칙: 전 구간 높이 56px 단일 · 타이포 16px(위계는 굵기) · flex 중앙 · max 560px. ══ */
+.public-game-home .public-search-form {
+  max-width: 560px;
+  min-height: 56px;
+  align-items: stretch;
+}
+
+.public-game-home .public-search-form .public-search-server,
+.public-game-home .public-search-form .public-search-server .yoro-button {
+  height: 56px;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.public-game-home .public-search-form .yoro-form-control,
+.public-game-home .public-search-form .yoro-form-control input {
+  height: 56px;
+}
+
+.public-game-home .public-search-form input {
+  display: flex;
+  align-items: center;
+  padding-block: 0;
+  font-size: 16px;
+  line-height: 56px; /* 단일 행 입력 — 어떤 폰트 환경에서도 수직 중앙 */
+}
+
+.public-game-home .public-search-form .public-search-actions,
+.public-game-home .public-search-form .public-search-actions .yoro-button {
+  height: 56px;
+  min-height: 56px;
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* 포커스는 input 개별이 아니라 바 전체에 — 하나의 컨트롤로 읽히게 */
+.public-game-home .public-search-form:focus-within {
+  outline: 2px solid var(--yoro-color-public-primary, #7b5cff);
+  outline-offset: 2px;
+  border-radius: 14px;
+}
+
+/* 기능 카드 설명 클램프 해제 — "…" 잘림 제거(높이는 내용에 맞춤) */
+.public-game-home__feature-card small {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+
+/* 히어로 원터치 칩(최근 검색·즐겨찾기, 2026-08-16) — 재방문자가 타이핑 없이 재검색.
+   모바일은 한 줄 가로 스크롤로 히어로 높이를 늘리지 않습니다. */
+.public-home-quick {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+.public-home-quick__label { color: var(--public-home-text-muted, var(--yoro-color-text-muted)); }
+
+.public-home-quick button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: thin solid var(--public-home-panel-border, rgba(148, 163, 196, .25));
+  border-radius: 99px;
+  background: rgba(21, 27, 48, .55);
+  color: var(--public-home-text, #dfe6f5);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.public-home-quick button i { font-style: normal; color: #fbbf24; }
+.public-home-quick button em { font-style: normal; color: var(--yoro-color-brand-on-dark, #9b90ff); font-size: 10.5px; }
+
+.public-home-quick button:focus-visible {
+  outline: 2px solid var(--yoro-color-public-primary, #7b5cff);
+  outline-offset: 2px;
+}
+
+@media (max-width: 48rem) {
+  .public-home-quick { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .public-home-quick::-webkit-scrollbar { display: none; }
+  .public-home-quick button { flex: none; min-height: 36px; }
+}

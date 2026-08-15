@@ -1202,3 +1202,32 @@ test("전적 리스트는 로컬 날짜 경계마다 그날의 종합 바를 표
   });
   expect(orderProbe).toBe("bar-first");
 });
+
+test("홈 히어로의 최근 검색 칩은 원터치로 재검색한다", async ({ page }) => {
+  /* 재방문 지름길(2026-08-16) — 저장 데이터가 있을 때만 나타나는 상태 의존 UI 회귀. */
+  await page.addInitScript(() => {
+    window.localStorage.setItem("loltrace.favorites.jp", JSON.stringify([
+      { gameName: "YORO QA", tagLine: "JP1", lolPlatform: "jp1", source: "favorite" },
+    ]));
+    window.localStorage.setItem("loltrace.recent.jp", JSON.stringify([
+      { gameName: "세이가", tagLine: "KR1", lolPlatform: "kr", source: "recent" },
+    ]));
+  });
+  await page.goto("/");
+  const quick = page.locator(".public-home-quick");
+  await expect(quick).toBeVisible();
+  await expect(quick).toContainText("최근 검색");
+  /* 즐겨찾기 우선 + ★ 표식, 최근 검색이 뒤따릅니다. */
+  const chips = quick.locator("button");
+  await expect(chips).toHaveCount(2);
+  await expect(chips.nth(0)).toContainText("YORO QA");
+  await expect(chips.nth(0).locator("i")).toHaveText("★");
+  await expect(chips.nth(1)).toContainText("세이가");
+  /* 칩 클릭 = 해당 소환사 재검색(프로필 요청 발생) */
+  const profileRequest = page.waitForRequest((request) => {
+    const url = new URL(request.url());
+    return url.pathname === "/api/lol/profile" && (url.searchParams.get("riotId") ?? "").includes("YORO QA");
+  });
+  await chips.nth(0).click();
+  await profileRequest;
+});

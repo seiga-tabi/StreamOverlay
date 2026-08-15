@@ -2693,3 +2693,33 @@
     flex: 0 0 auto;
   }
 }
+
+/* ══ 게임 선택기 층위·상태 강화(2026-08-16) — 목업 lol-home-game-selector-redesign §②.
+   결함: 패널이 히어로 텍스트와 겹쳐 읽힘(그림자 약함), 활성 행 대비 미약, 호버에
+   "이동" 어포던스 없음. 게임 브랜드 컬러를 활성 표시에 사용합니다. ══ */
+.public-dashboard-shell .public-game-selector-menu {
+  border-color: rgba(148, 163, 196, .28);
+  background: #131a30;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .55);
+}
+
+.public-dashboard-shell .public-game-selector-option.active {
+  background: rgba(123, 92, 255, .14);
+}
+
+/* 활성 행 좌측 브랜드 컬러 바 — 게임 정체성을 선택 상태에 씁니다. */
+.public-game-selector-option.active:has(.is-lol) { box-shadow: inset 3px 0 0 #d13639; }
+.public-game-selector-option.active:has(.is-palworld) { box-shadow: inset 3px 0 0 #34c76a; }
+.public-game-selector-option.active:has(.is-valorant) { box-shadow: inset 3px 0 0 #ff4655; }
+.public-game-selector-option.active:has(.is-minecraft) { box-shadow: inset 3px 0 0 #6cc349; }
+.public-game-selector-option.active:has(.is-yoro-bot) { box-shadow: inset 3px 0 0 #8b7bff; }
+
+/* 호버 = 이동 어포던스(언어 중립 화살표) — 활성 행에는 붙지 않습니다. */
+.public-dashboard-shell .public-game-selector-menu .public-game-selector-option:not(.active):hover {
+  background: rgba(148, 163, 196, .1);
+}
+.public-dashboard-shell .public-game-selector-menu .public-game-selector-option:not(.active):not(.is-coming-soon):hover .public-game-selector-meta::after {
+  content: "›";
+  color: var(--yoro-color-text-muted, #94a0bd);
+  font-weight: 800;
+}

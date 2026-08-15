@@ -20,6 +20,7 @@ import {
   type PatchNotesFilter,
   type PatchNotesFilterOption
 } from "../components/PatchNotesControlBar";
+import { PatchNotesMineModule } from "../components/PatchNotesMineModule";
 import { requestPatchNotes, requestPatchPlaySummary } from "../api/patch-notes";
 import { activePublicLocale, t } from "../i18n/public-lol-i18n";
 import { readFavorites, readRecentSearches } from "../utils/storage";
@@ -231,7 +232,7 @@ function FeaturedTile({ entry }: { entry: PatchEntry }) {
   );
 }
 
-function ArchiveRow({ entry }: { entry: PatchEntry }) {
+function ArchiveRow({ entry, showMine }: { entry: PatchEntry; showMine: boolean }) {
   const { note, record, gapDays } = entry;
 
   return (
@@ -266,9 +267,12 @@ function ArchiveRow({ entry }: { entry: PatchEntry }) {
         {gapDays === undefined ? null : <span>{t().patchNotesGapDays.replace("{days}", String(gapDays))}</span>}
         {note.dataDragonVersion ? <em>{note.dataDragonVersion}</em> : null}
       </p>
+      {/* 개인 전적 미표시 상태에서는 빈 값 문구를 아예 그리지 않습니다 — 60줄 "기록 없음" 노이즈의 수정점 */}
       {record
         ? <WinRateGauge record={record} size="row" />
-        : <p className="yoro-pn-row-norate">{t().patchNotesNoRecordShort}</p>}
+        : showMine
+          ? <p className="yoro-pn-row-norate">{t().patchNotesNotPlayed}</p>
+          : null}
     </article>
   );
 }
@@ -282,8 +286,17 @@ export function PublicPatchNotesPage({ locale }: { locale: string }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<PatchNotesFilter>("all");
   /* 이 화면은 저장소를 읽기만 합니다. 아무것도 새로 저장하지 않습니다. */
-  const [targets] = useState<PatchNoteTarget[]>(() => storedTargets());
-  const [targetIndex, setTargetIndex] = useState(0);
+  const [storedTargetList] = useState<PatchNoteTarget[]>(() => storedTargets());
+  /* 모듈 입력으로 조회한 소환사는 이 세션에서만 앞에 붙습니다(저장 안 함). */
+  const [manualTargets, setManualTargets] = useState<PatchNoteTarget[]>([]);
+  const targets = useMemo(
+    () => [...manualTargets, ...storedTargetList].slice(0, 8),
+    [manualTargets, storedTargetList],
+  );
+  /* null = 해제(개인 전적 미표시). 최근 검색이 있으면 첫 항목을 기본 표시합니다. */
+  const [targetIndex, setTargetIndex] = useState<number | null>(
+    () => (storedTargets().length > 0 ? 0 : null),
+  );
   const [mineState, setMineState] = useState<MineState>("idle");
   const [mine, setMine] = useState<PatchPlaySummary>();
   const [mineError, setMineError] = useState("");
@@ -315,10 +328,15 @@ export function PublicPatchNotesPage({ locale }: { locale: string }) {
     return () => controller.abort();
   }, [feedLocale]);
 
-  const target = targets[targetIndex];
+  const target = targetIndex === null ? undefined : targets[targetIndex];
 
   useEffect(() => {
-    if (!target) return undefined;
+    if (!target) {
+      setMineState("idle");
+      setMine(undefined);
+      setMineError("");
+      return undefined;
+    }
     const controller = new AbortController();
     setMineState("loading");
     setMineError("");
@@ -465,31 +483,36 @@ export function PublicPatchNotesPage({ locale }: { locale: string }) {
             <p className="yoro-pn-stale" role="status">{t().patchNotesStaleDescription}</p>
           ) : null}
 
-          {/* 검색·빠른 필터·소환사를 한 줄에 둡니다. 예전에는 전폭 흰 바 두 개였습니다. */}
+          {/* 개인 전적은 전용 모듈, 검색·칩은 목록 소속 필터 바 — 역할 분리(목업 §②). */}
           {feed.notes.length > 0 ? (
-            <PatchNotesControlBar
-              filter={filter}
-              filterOptions={filterOptions}
-              mineError={mineError}
-              mineState={mineState}
-              onFilter={setFilter}
-              onQuery={setQuery}
-              onRetryMine={() => setMineAttempt((current) => current + 1)}
-              onTargetIndex={setTargetIndex}
-              query={query}
-              resultCount={visibleEntries.length}
-              sampledMatches={mine?.sampledMatches}
-              targetIndex={targetIndex}
-              targets={targets}
-            />
-          ) : null}
-
-          {/* 검색 이력이 없으면 왜 승률이 없는지 한 번 더 말합니다. */}
-          {feed.notes.length > 0 && targets.length === 0 ? (
-            <p className="yoro-pn-mine-hint">
-              <b>{t().patchNotesMineEmptyTitle}</b>
-              <small>{t().patchNotesMineEmptyDescription}</small>
-            </p>
+            <>
+              <PatchNotesMineModule
+                mineError={mineError}
+                mineState={mineState}
+                onDismiss={() => setTargetIndex(null)}
+                onManualTarget={(manual) => {
+                  setManualTargets((current) => [
+                    manual,
+                    ...current.filter((item) => targetKey(item) !== targetKey(manual))
+                  ]);
+                  setTargetIndex(0);
+                }}
+                onRetryMine={() => setMineAttempt((current) => current + 1)}
+                onTargetIndex={setTargetIndex}
+                sampledMatches={mine?.sampledMatches}
+                target={target}
+                targetIndex={targetIndex}
+                targets={targets}
+              />
+              <PatchNotesControlBar
+                filter={filter}
+                filterOptions={filterOptions}
+                onFilter={setFilter}
+                onQuery={setQuery}
+                query={query}
+                resultCount={visibleEntries.length}
+              />
+            </>
           ) : null}
 
           {feed.notes.length === 0 ? (
@@ -527,7 +550,7 @@ export function PublicPatchNotesPage({ locale }: { locale: string }) {
                             </small>
                           </p>
                         ) : null}
-                        <ArchiveRow entry={entry} />
+                        <ArchiveRow entry={entry} showMine={Boolean(target)} />
                       </div>
                     );
                   })}

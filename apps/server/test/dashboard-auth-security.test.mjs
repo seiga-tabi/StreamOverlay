@@ -1823,7 +1823,11 @@ test("공개 LoL 첫 검색은 최근 20게임만 상세 조회하고 다음 페
                 kills: 3,
                 deaths: 1,
                 assists: 4,
-                win: true
+                win: true,
+                /* 증강 칼바람 파싱 회귀 — 값이 있는 슬롯만 순서대로 수집 */
+                playerAugment1: 93,
+                playerAugment2: 89,
+                playerAugment3: 0
               }]
             }
           };
@@ -1839,6 +1843,7 @@ test("공개 LoL 첫 검색은 최근 20게임만 상세 조회하고 다음 페
     const body = JSON.parse(res.body);
     assert.equal(matchLookups, 20);
     assert.equal(body.recentMatches.length, 20);
+    assert.deepEqual(body.recentMatches[0].augments, [93, 89]);
     assert.equal(body.nextRecentMatchStart, 20);
     assert.equal(body.hasMoreRecentMatches, true);
   });

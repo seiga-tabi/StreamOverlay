@@ -462,17 +462,23 @@ test("기록이 없는 패치에는 아무 숫자도 만들지 않는다", async
   await expect(page.locator(".yoro-pn-who")).not.toContainText("최근");
 });
 
-test("검색 이력이 없으면 전적 검색으로 안내한다", async ({ page }) => {
+test("검색 이력이 없으면 내 승률 모듈이 초대 카드로 안내한다", async ({ page }) => {
+  /* 리디자인(2026-08-16): 이동 CTA 대신 모듈 안 직접 입력 — 목업 §②. */
   await installFixtures(page, { patchNotes: feed(), stored: [] });
   await page.goto("/patch-notes");
   await expect(page.locator(".yoro-pn-hero")).toBeVisible();
 
-  await expect(page.locator(".yoro-pn-mine-hint")).toContainText("전적을 검색하면");
-  const cta = page.locator(".yoro-pn-bar-cta");
-  await expect(cta).toHaveAttribute("href", /\/$/u);
-  const box = await cta.boundingBox();
-  expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+  const module = page.getByTestId("patch-notes-mine-module");
+  await expect(module).toContainText("전적을 검색하면");
+  await expect(module).toContainText("계정 연동이 아닙니다");
+  await expect(module.getByLabel("Riot ID")).toBeVisible();
+  /* 형식 오류는 인라인으로 안내합니다. */
+  await module.getByLabel("Riot ID").fill("형식오류");
+  await module.getByRole("button", { name: "보기" }).click();
+  await expect(module.getByRole("alert")).toContainText("닉네임#태그 형식");
+  /* 미표시 상태에서는 행에 개인 컬럼(게이지·빈 값)이 전혀 없습니다. */
   await expect(page.locator(".yoro-pn-gauge")).toHaveCount(0);
+  await expect(page.locator(".yoro-pn-row-norate")).toHaveCount(0);
 });
 
 test("내 전적만 실패해도 패치 목록은 그대로 보인다", async ({ page }) => {

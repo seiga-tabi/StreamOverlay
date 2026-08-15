@@ -350,6 +350,22 @@ export function PublicAppHeader({
         )}
         home={!showSearch}
         mobileMenuToggle={(
+          <>
+            {/* 모바일 현재 게임 칩 — 어느 게임 섹션인지 상시 표시 + 1탭으로 시트(게임 카드가 최상단).
+               목업 lol-home-game-selector-redesign §② 모바일. */}
+            <button
+              aria-controls="lol-mobile-menu"
+              aria-expanded={mobileMenuOpen}
+              aria-haspopup="dialog"
+              aria-label={t().gameMenu}
+              className="public-game-header__game-chip"
+              onClick={() => setMobileMenuOpen(true)}
+              type="button"
+            >
+              <span aria-hidden="true" className="public-game-selector-logo is-lol" />
+              LoL
+              <span aria-hidden="true">⌄</span>
+            </button>
           <button
             aria-controls="lol-mobile-menu"
             aria-expanded={mobileMenuOpen}
@@ -378,6 +394,7 @@ export function PublicAppHeader({
               {t().mobileMenu}
             </strong>
           </button>
+          </>
         )}
         mobileMenu={(
           <PublicMobileMenuSheet

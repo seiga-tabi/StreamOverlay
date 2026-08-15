@@ -19,6 +19,10 @@ const i18n = await readFile(
   new URL("../src/features/public-lol/i18n/public-lol-i18n.ts", import.meta.url),
   "utf8"
 );
+const mineModule = await readFile(
+  new URL("../src/features/public-lol/components/PatchNotesMineModule.tsx", import.meta.url),
+  "utf8"
+);
 const bar = await readFile(
   new URL("../src/features/public-lol/components/PatchNotesControlBar.tsx", import.meta.url),
   "utf8"
@@ -189,9 +193,9 @@ test("노트와 전적은 Data Dragon major.minor 로만 이어진다", () => {
 test("기록이 없는 패치에는 숫자를 만들어 넣지 않는다", () => {
   assert.match(page, /record\s*\?\s*<WinRateGauge[\s\S]{0,120}yoro-pn-row-norate/u);
   // 표본 수를 밝히지 않으면 20경기 승률이 전체 승률로 읽힙니다. 소환사 칩 안에 답니다.
-  assert.match(bar, /patchNotesSampleShort\.replace\("\{count\}"/u);
+  assert.match(mineModule, /patchNotesSampleShort\.replace\("\{count\}"/u);
   // 기록이 없으면 표본 문구를 붙이지 않습니다.
-  assert.match(bar, /sampledMatches !== undefined && sampledMatches > 0/u);
+  assert.match(mineModule, /sampledMatches !== undefined && sampledMatches > 0/u);
 });
 
 test("승/판/승률이 서로 어긋난 응답은 화면에 올리지 않는다", () => {
@@ -231,21 +235,21 @@ test("컨트롤 바는 검색·필터·소환사를 한 줄에 둔다", () => {
 test("소환사는 아바타 칩과 팝오버 메뉴로 고른다", () => {
   // native select 는 아바타도, 다른 소환사를 찾아 나갈 길도 담지 못했습니다.
   assert.equal(bar.includes("<Select"), false);
-  assert.match(bar, /aria-haspopup="menu"/u);
-  assert.match(bar, /role="menuitemradio"/u);
-  assert.match(bar, /aria-checked=\{index === targetIndex\}/u);
+  assert.match(mineModule, /aria-haspopup="menu"/u);
+  assert.match(mineModule, /role="menuitemradio"/u);
+  assert.match(mineModule, /aria-checked=\{index === targetIndex\}/u);
   // 저장돼 있던 프로필 아이콘을 씁니다. 새로 받아오지 않습니다.
   assert.match(page, /item\.profileIconUrl \? \{ profileIconUrl: item\.profileIconUrl \} : \{\}/u);
-  assert.match(bar, /target\.profileIconUrl \?/u);
+  assert.match(mineModule, /target\.profileIconUrl \?/u);
 });
 
 test("메뉴는 Escape 와 바깥 클릭으로 닫히고 초점을 되돌린다", () => {
-  assert.match(bar, /event\.key === "Escape"/u);
-  assert.match(bar, /document\.addEventListener\("pointerdown", handlePointerDown\)/u);
-  assert.match(bar, /restoreTriggerFocus/u);
+  assert.match(mineModule, /event\.key === "Escape"/u);
+  assert.match(mineModule, /document\.addEventListener\("pointerdown", handlePointerDown\)/u);
+  assert.match(mineModule, /restoreTriggerFocus/u);
   // 열려 있지 않을 때 document listener 를 남기면 다른 화면의 Escape 를 삼킵니다.
-  assert.match(bar, /if \(!open\) return undefined;/u);
-  assert.match(bar, /removeEventListener\("pointerdown", handlePointerDown\)/u);
+  assert.match(mineModule, /if \(!open\) return undefined;/u);
+  assert.match(mineModule, /removeEventListener\("pointerdown", handlePointerDown\)/u);
 });
 
 test("빠른 필터는 결과가 있는 것만 내고 개수를 함께 보여 준다", () => {

@@ -118,6 +118,8 @@ export type PublicLolMatchBadge = {
 
 export type PublicLolRecentMatch = {
   matchId: string;
+  /** 증강 픽(픽 순서) — 증강 칼바람(큐 2400) 등 증강 모드에서만 옵니다. */
+  augments?: number[];
   champion: LolChampionSummary;
   queueId?: number;
   gameMode?: string;
@@ -544,7 +546,7 @@ export type PublicExpandedMatchView = "record" | "build";
 
 export type PublicTheme = "light" | "dark";
 
-export type MatchQueueFilter = "all" | "solo" | "flex" | "ranked5v5" | "normal" | "aram";
+export type MatchQueueFilter = "all" | "solo" | "flex" | "ranked5v5" | "normal" | "aram" | "aramMayhem";
 
 export type MatchPeriodFilter = "all" | "7d" | "30d";
 

@@ -35,6 +35,7 @@ import {
 import { safeTwitchStreamPreviewUrl } from "../features/public-twitch/stream-preview";
 import { useViewerTwitchOAuthReturn } from "../shared/useViewerTwitchOAuthReturn";
 import { withLolDailySummaryBars } from "../features/public-lol/components/LolDailySummaryBar";
+import { LolAugmentIcon } from "../features/public-lol/components/LolAugmentIcon";
 import { publicLiveText } from "../shared/public-live-streamers";
 import { streamerBuckets, type StreamerFilter } from "../features/public-lol/utils/streamers";
 import { matchGap, matchLanePairs, type LanePair } from "../features/public-lol/utils/match-lanes";
@@ -2221,6 +2222,7 @@ function PublicFilterPanel({
           <option value="ranked5v5">{t().ranked5v5}</option>
           <option value="normal">{t().normalQueue}</option>
           <option value="aram">{t().aramQueue}</option>
+          <option value="aramMayhem">{t().aramMayhemQueue}</option>
         </select>
       </label>
       <ChampionFilterSelect
@@ -2302,6 +2304,7 @@ function PublicMatchFilterBar({
     ranked5v5: t().ranked5v5,
     normalQueue: t().normalQueue,
     aramQueue: t().aramQueue,
+    aramMayhemQueue: t().aramMayhemQueue,
     allChampions: t().allChampions,
     periodAll: t().periodAll,
     period7: t().period7,
@@ -5017,6 +5020,13 @@ function RecentMatches({
               content: iconUrl ? <img src={iconUrl} alt="" /> : spellId
             };
           });
+          /* 증강 칼바람 픽 — 실게임 아이콘·희귀도 프레임(LolAugmentIcon), 픽 순서 배지 */
+          (match.augments ?? []).forEach((augmentId, augmentIndex) => spellItems.push({
+            key: `${match.matchId}:augment:${augmentId}:${augmentIndex}`,
+            className: "augment",
+            label: `${t().aramMayhemQueue} ${augmentIndex + 1}`,
+            content: <LolAugmentIcon id={augmentId} order={augmentIndex + 1} />
+          }));
           playerRuneBuildSlotsViewModel(targetRunes)
             .filter((rune) => rune.iconUrl)
             .forEach((rune) => spellItems.push({
@@ -6620,6 +6630,24 @@ export function PublicLolPage({
                 variant="homeShared"
               />
             }
+            searchQuickPicks={storedSuggestions.length > 0 ? (
+              /* 재방문 지름길 — 즐겨찾기(★ 우선)·최근 검색을 검색바 아래 원터치 칩으로.
+                 localStorage 기존 데이터만 사용 · 목업 lol-home-game-selector-redesign §③ */
+              <div aria-label={t().homeQuickLabel} className="public-home-quick" role="group">
+                <span className="public-home-quick__label">{t().homeQuickLabel}</span>
+                {storedSuggestions.slice(0, 4).map((suggestion) => {
+                  const key = normalizeSuggestionKey(suggestion);
+                  const starred = favorites.some((favorite) => normalizeSuggestionKey(favorite) === key);
+                  return (
+                    <button key={key} onClick={() => pickSuggestion(suggestion)} type="button">
+                      {starred ? <i aria-hidden="true">★</i> : null}
+                      {suggestion.gameName}
+                      <em>#{suggestion.tagLine}</em>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : undefined}
             text={publicHomeSearchPanelText(selectedLolPlatform, locale)}
           />
         </AppShellMain>
