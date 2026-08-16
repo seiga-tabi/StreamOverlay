@@ -362,14 +362,21 @@ export function ProfilePlaytimeCard({
 
           <div className="public-profile-playtime-strip-wrap">
             <div aria-label={text.stripAriaLabel} className="public-profile-playtime-strip" role="img">
-              {zones.map((zone) => (
-                <span
-                  className="public-profile-playtime-zone"
-                  data-label={zone.withLabel ? text.peakZoneLabel : ""}
-                  key={zone.startHour}
-                  style={{ left: `${(zone.startHour / 24) * 100}%`, width: `${(zone.span / 24) * 100}%` }}
-                />
-              ))}
+              {zones.map((zone) => {
+                /* 존 중심이 가장자리(18%/82% 밖)면 라벨을 안쪽 정렬로 붙입니다 —
+                   중앙 고정(translateX -50%)은 새벽·심야 존에서 카드 밖으로 새던 결함. */
+                const center = (zone.startHour + zone.span / 2) / 24;
+                const align = center < 0.18 ? "start" : center > 0.82 ? "end" : "center";
+                return (
+                  <span
+                    className="public-profile-playtime-zone"
+                    data-align={align}
+                    data-label={zone.withLabel ? text.peakZoneLabel : ""}
+                    key={zone.startHour}
+                    style={{ left: `${(zone.startHour / 24) * 100}%`, width: `${(zone.span / 24) * 100}%` }}
+                  />
+                );
+              })}
               {hourly.map((count, hour) => (
                 <i
                   /* 시간별 막대라 시(hour)가 곧 안정된 key 입니다. */

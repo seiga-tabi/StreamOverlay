@@ -378,11 +378,16 @@
 
   /* 승률 링 — conic-gradient 도넛. mask 미지원 구형에선 배경 원으로 강등되지만
      중앙 숫자는 항상 보입니다(핵심 값은 텍스트). */
+  /* 겹침 결함 수정(2026-08-17): 라벨을 absolute(bottom 6px)로 두면 정확히 링 띠
+     위에 얹혀 글자가 그래프와 겹쳤습니다. 두 텍스트를 정적 흐름으로 쌓아
+     도넛 구멍(지름 약 2.75rem) 안에 수납합니다. */
   .public-profile-playtime-ring {
     flex: none;
     position: relative;
     display: grid;
+    grid-auto-rows: min-content;
     place-items: center;
+    align-content: center;
     width: 3.5rem;
     height: 3.5rem;
     margin-left: auto;
@@ -403,13 +408,13 @@
     font-weight: var(--yoro-font-weight-black);
     font-variant-numeric: tabular-nums;
     letter-spacing: -.02em;
+    line-height: 1;
   }
 
   .public-profile-playtime-ring > small {
-    position: absolute;
-    bottom: 6px;
     color: var(--yoro-color-text-on-dark-muted);
     font-size: .53125rem;
+    line-height: 1.2;
   }
 
   /* LP delta 와 같은 tone 규칙 — up 초록 / down 붉음 / flat 회색. */
@@ -420,11 +425,13 @@
      — 안 그러면 라벨이 히어로에 붙습니다(목업에서 실측한 결함). */
   .public-profile-playtime-strip-wrap { position: relative; padding-top: 18px; }
 
+  /* 정렬 결함 수정: gap 이 있으면 막대 k 의 실제 x 가 k/24 좌표에서 최대 ~2px
+     밀려 존 오버레이(h/24 %)와 어긋났습니다. 셀 폭을 정확히 1/24 로 두고
+     시각적 간격은 막대 margin 으로 만듭니다 — 존·막대·축이 같은 좌표계를 공유. */
   .public-profile-playtime-strip {
     position: relative;
     display: flex;
     align-items: flex-end;
-    gap: 2px;
     height: 2.75rem;
     padding: 4px 0 2px;
   }
@@ -435,6 +442,7 @@
   .public-profile-playtime-strip > i {
     position: relative;
     flex: 1 1 0;
+    margin-inline: 1px;
     min-height: 2px;
     border-radius: var(--yoro-radius-pill);
     background: color-mix(in srgb, var(--yoro-color-text-on-dark) 28%, transparent);
@@ -449,7 +457,7 @@
   .public-profile-playtime-zone {
     position: absolute;
     top: 0;
-    bottom: 14px;
+    bottom: 2px;
     border: 1px solid color-mix(in srgb, var(--yoro-color-public-primary) 35%, transparent);
     border-radius: var(--yoro-radius-sm);
     background: color-mix(in srgb, var(--yoro-color-public-primary) 14%, transparent);
@@ -466,6 +474,10 @@
     font-weight: var(--yoro-font-weight-bold);
     white-space: nowrap;
   }
+
+  /* 가장자리 존은 카드 밖으로 새지 않게 안쪽 정렬(ja 라벨이 더 길어 필수). */
+  .public-profile-playtime-zone[data-align="start"]::after { left: 0; transform: none; }
+  .public-profile-playtime-zone[data-align="end"]::after { left: auto; right: 0; transform: none; }
 
   .public-profile-playtime-hero.is-day ~ .public-profile-playtime-strip-wrap .public-profile-playtime-zone {
     border-color: color-mix(in srgb, var(--yoro-color-accent-gold) 35%, transparent);
@@ -499,7 +511,7 @@
 
   .public-profile-playtime-bands > li {
     display: grid;
-    grid-template-columns: 4.4rem minmax(0, 1fr) 3.9rem;
+    grid-template-columns: minmax(4.4rem, auto) minmax(0, 1fr) minmax(3.9rem, auto);
     align-items: center;
     gap: var(--yoro-space-2);
     font-size: var(--yoro-font-size-xs);
@@ -525,12 +537,87 @@
     white-space: nowrap;
   }
 
+  /* ── 같이 플레이한 소환사(2026-08-17) — LP 기록·플레이 시간대와 같은
+     side-card 문법으로 통일합니다. 이전에는 yoro-card(밝은 표면·범용 토큰)를 써서
+     이 카드만 사이드바에서 배경·경계·글자색이 어긋났습니다(05-overrides 에서 이관).
+     승률 바의 승/패 색은 플레이 시간대의 분할 바와 같은 계열을 씁니다. */
+  .public-frequent-teammates > ul {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .public-frequent-teammates li + li { border-block-start: thin solid var(--yoro-color-border-on-dark); }
+
+  /* 카드 패딩 안에서 행 hover 가 모서리까지 차 보이도록 음수 마진으로 폭을 되살립니다. */
+  .public-frequent-teammates li a {
+    display: flex;
+    align-items: center;
+    gap: var(--yoro-space-3);
+    min-height: var(--yoro-size-touch-target);
+    margin-inline: calc(-1 * var(--yoro-space-3));
+    padding: var(--yoro-space-2) var(--yoro-space-3);
+    border-radius: var(--yoro-radius-sm);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .public-frequent-teammates li a:hover {
+    background: color-mix(in srgb, var(--yoro-color-text-on-dark) 6%, transparent);
+  }
+
+  .public-frequent-teammates__who { min-width: 0; flex: 1; }
+
+  .public-frequent-teammates__who b {
+    display: block;
+    font-size: var(--yoro-font-size-sm);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .public-frequent-teammates__who b i {
+    font-style: normal;
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+  }
+
+  .public-frequent-teammates__who small {
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+  }
+
+  .public-frequent-teammates__bar {
+    flex: none;
+    inline-size: calc(var(--yoro-space-8) + var(--yoro-space-3));
+    block-size: var(--yoro-space-1);
+    border-radius: var(--yoro-radius-pill);
+    background: color-mix(in srgb, var(--yoro-color-match-loss-accent) 45%, transparent);
+    overflow: hidden;
+  }
+
+  .public-frequent-teammates__bar i { display: block; block-size: 100%; background: var(--yoro-color-rank-trend); }
+
+  .public-frequent-teammates__stat {
+    flex: none;
+    text-align: end;
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .public-frequent-teammates__stat b { display: block; font-size: var(--yoro-font-size-sm); }
+  .public-frequent-teammates__stat b.is-hot { color: var(--yoro-color-rank-trend); }
+  .public-frequent-teammates__stat b.is-cold { color: var(--yoro-color-match-loss-accent); }
+
   /* 260px 급 좁은 카드 — 링·제목을 한 단계 줄여 히어로 한 줄을 지킵니다. */
   @container (max-width: 17.5rem) {
     .public-profile-playtime-hero { gap: var(--yoro-space-2); padding: var(--yoro-space-3); }
     .public-profile-playtime-when > b { font-size: var(--yoro-font-size-sm); }
     .public-profile-playtime-ring { width: 3rem; height: 3rem; }
     .public-profile-playtime-ring > b { font-size: .78125rem; }
-    .public-profile-playtime-ring > small { bottom: 4px; font-size: .5rem; }
+    .public-profile-playtime-ring > small { font-size: .5rem; }
   }
 }

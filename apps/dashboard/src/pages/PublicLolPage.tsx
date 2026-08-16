@@ -2087,11 +2087,13 @@ function ProfileFrequentTeammatesCard({ profile }: { profile: PublicLolProfile }
   const teammates = profile.frequentTeammates ?? [];
   if (teammates.length === 0) return null;
   return (
-    <section aria-labelledby="frequent-teammates-title" className="yoro-card public-frequent-teammates" data-testid="frequent-teammates-card">
-      <h3 id="frequent-teammates-title">
-        {t().frequentTeammatesTitle}
-        <small>{t().frequentTeammatesSample.replace("{count}", String(profile.summary.recentGames))}</small>
-      </h3>
+    <article aria-labelledby="frequent-teammates-title" className="public-profile-side-card public-frequent-teammates" data-testid="frequent-teammates-card">
+      <div className="public-profile-side-head">
+        <h2 id="frequent-teammates-title">{t().frequentTeammatesTitle}</h2>
+        <span className="public-profile-side-pill">
+          {t().frequentTeammatesSample.replace("{count}", String(profile.summary.recentGames))}
+        </span>
+      </div>
       <ul>
         {teammates.map((mate) => {
           const winRate = Math.round((mate.wins / mate.games) * 100);
@@ -2123,8 +2125,8 @@ function ProfileFrequentTeammatesCard({ profile }: { profile: PublicLolProfile }
           );
         })}
       </ul>
-      <p className="public-frequent-teammates__foot">{t().frequentTeammatesFoot}</p>
-    </section>
+      <p className="public-profile-side-foot">{t().frequentTeammatesFoot}</p>
+    </article>
   );
 }
 
