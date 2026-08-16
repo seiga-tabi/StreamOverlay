@@ -8,6 +8,16 @@
   --followers-text: #f4f6fb;
   --followers-muted: #aeb8c8;
   --followers-accent: #9e85ff;
+
+  /* 이 화면은 다크(#0f141b)인데 상태색은 라이트 테마 기본값이 그대로 왔습니다.
+     실측 — 「운영 권한 연결됨」 배지 1.13:1, 「+4 이번 주」 3.69:1.
+     밝은 tint 배경 위에 어두운 초록 글자라 둘 다 묻혔습니다. 다른 다크 화면
+     (18-yoro-dashboard.css 의 streamingRiot 블록)이 이미 검증해 쓰는 값과
+     같은 쌍으로 맞춥니다. */
+  --success: #65d6a6;
+  --success-bg: rgb(101 214 166 / 16%);
+  --yoro-color-success: #65d6a6;
+  --yoro-color-success-bg: rgb(101 214 166 / 16%);
   color-scheme: dark;
 }
 
@@ -44,6 +54,15 @@
 .yoro-dashboard-shell[data-page="streamingFollowers"] .followers-page .follower-identity .queue-user span,
 .yoro-dashboard-shell[data-page="streamingFollowers"] .followers-page .follower-row > span {
   color: var(--followers-muted);
+}
+
+/* 위 규칙이 상태 배지까지 회색으로 덮어, tint 배경 위 회색 글자가 되어 실측
+   2.31:1 이었습니다. 배지는 제 상태색을 유지해야 tint 와 짝이 맞습니다. */
+.yoro-dashboard-shell[data-page="streamingFollowers"] .followers-page .follower-row > span.queue-status.good,
+.yoro-dashboard-shell[data-page="streamingFollowers"] .followers-page .follower-row > span.queue-status.verified,
+.yoro-dashboard-shell[data-page="streamingFollowers"] .followers-page .follower-row > span.queue-status.checked_in,
+.yoro-dashboard-shell[data-page="streamingFollowers"] .followers-page .follower-row > span.queue-status.played {
+  color: var(--success);
 }
 
 /* 히어로 스탯 바 — 팔로워 수 + 주간 증감 + 기록 전체 · 마지막 동기화 + 새로고침 */
@@ -633,11 +652,15 @@
   color: var(--public-gray-text) !important;
 }
 
+/* 이 규칙이 .public-dashboard-shell 안의 primary 버튼 색을 단독으로 정합니다
+   (!important 라 Button.css 의 token 을 덮습니다). #6c63ff 는 흰 글자와 실측
+   4.32:1 로 AA(4.5:1)에 못 미쳤습니다 — 공개 화면의 주 실행 버튼 전부가 대상
+   이었습니다. 같은 계열에서 명도만 낮춰 5.01:1 로 올립니다. */
 .public-dashboard-shell .public-refresh-button,
 .public-home-shared-shell .public-home-live-card > .public-home-live-action,
 .public-dashboard-shell .yoro-button[data-variant="primary"],
 .public-dashboard-shell .public-twitch-login-chip:not(.connected) {
   border-color: transparent !important;
-  background: #6c63ff !important;
+  background: #6259ef !important;
   color: #ffffff !important;
 }

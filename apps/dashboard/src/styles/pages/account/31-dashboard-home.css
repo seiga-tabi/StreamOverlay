@@ -19,7 +19,9 @@
     --dh-muted: #aab4c2;
     --dh-dim: #8b96a8;
     --dh-brand: #9b90ff;
-    --dh-brand-deep: #5d84f4;
+    /* 쓰이는 두 곳(.yoro-dh-action.is-primary, .is-now .yoro-dh-step-mark)이
+       모두 흰 글자 배경입니다. #5d84f4 는 흰 글자와 실측 3.46:1 이었습니다. */
+    --dh-brand-deep: #3f6ae4;
     --dh-good: #65d6a6;
     --dh-live: #f4555f;
     --dh-warn: #f0a63a;

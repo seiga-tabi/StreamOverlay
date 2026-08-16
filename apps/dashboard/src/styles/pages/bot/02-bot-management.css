@@ -7,6 +7,15 @@
   --yoro-color-text-muted: #9daabd;
   --yoro-color-border: rgb(164 181 209 / 14%);
   --yoro-color-border-strong: rgb(154 126 255 / 34%);
+
+  /* Button.css 는 background:--yoro-color-primary 와 color:--yoro-color-text-strong
+     을 짝지어 씁니다. 위에서 text-strong 만 흰색으로 뒤집고 primary·secondary 는
+     밝은 기본값(hsl 219 100% 74% / 254 100% 81%)을 그대로 두면 밝은 배경 위 밝은
+     글자가 되어 실측 2.25:1·2.16:1 이었습니다. 색상·채도는 두고 명도만 낮춥니다. */
+  --yoro-color-primary: hsl(224 78% 52%);
+  --yoro-color-primary-strong: hsl(224 78% 44%);
+  --yoro-color-secondary: hsl(253 61% 52%);
+  --yoro-color-secondary-strong: hsl(253 61% 44%);
   --surface: #101826;
   --text: #f4f7fc;
   --text-muted: #9daabd;
@@ -23,6 +32,12 @@
 .bot-management-header {
   min-width: 0;
   padding-bottom: .25rem;
+}
+
+/* legacy .eyebrow 는 라이트용 --muted 를 쓰는데 이 페이지 지면은 어둡습니다
+   (실측 3.76:1). 이 페이지가 이미 정의한 다크 muted 로 맞춥니다. */
+.bot-management-header .eyebrow {
+  color: var(--yoro-color-text-muted);
 }
 
 .bot-management-header h1 {
@@ -1371,7 +1386,8 @@
 }
 
 .bot-management-error {
-  color: var(--danger);
+  /* legacy --danger 는 라이트 표면용이라 이 다크 페이지에서 실측 2.87:1 입니다. */
+  color: #f4555f;
 }
 
 .bot-management-delete-confirmation {

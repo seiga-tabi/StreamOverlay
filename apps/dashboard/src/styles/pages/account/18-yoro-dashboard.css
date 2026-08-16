@@ -774,7 +774,24 @@
   --yoro-color-danger-bg: rgb(244 85 95 / .16);
   --yoro-color-info: #5d84f4;
   --yoro-color-info-bg: rgb(93 132 244 / .16);
+
   color-scheme: dark;
+}
+
+/* 위 primary/secondary 값은 "흰 글자를 얹는 배경"으로만 검증했습니다. 그런데 공유
+   컴포넌트는 같은 토큰을 글자색으로도 씁니다(PageHeader eyebrow, EmptyState icon)
+   — 어두운 지면에 어두운 보라가 얹혀 실측 1.91:1·2.13:1 이었습니다.
+
+   !important 가 필요합니다. shared/ui 의 PageHeader.css·EmptyState.css 는 컴포넌트가
+   layer 없이 import 하므로(index.css 24행의 AppShell 주석과 같은 사정) 어떤 layer 의
+   규칙보다도 우선합니다. EmptyState 는 변수를 .yoro-empty-state 자기 자신에 선언해
+   조상에서 준 값도 덮습니다. 일반 선언으로는 이길 수 없습니다. */
+.yoro-dashboard-shell[data-page="streamingRiot"] .my-riot-account-shell .yoro-page-header__eyebrow {
+  color: #b9a7ff !important;
+}
+
+.yoro-dashboard-shell[data-page="streamingRiot"] .my-riot-account-shell .yoro-empty-state {
+  --yoro-empty-state-accent: #b9a7ff !important;
 }
 
 /* ── 정체성 히어로 — 대표 Riot ID를 한 번만 크게 보여줍니다 ── */

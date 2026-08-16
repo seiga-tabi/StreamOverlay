@@ -158,8 +158,11 @@ export function PatchNotesMineModule({
   if (target) {
     return (
       <div className="yoro-pn-mine-module is-active" data-testid="patch-notes-mine-module">
-        {/* 신원과 상태는 한 열입니다 — 형제로 두면 2열 grid 에서 조작부가 다음 행으로
-            밀려 모듈 높이가 상태마다 달라집니다. */}
+        {/* 신원·상태·최근 검색이 첫 열입니다. 최근 검색을 모듈 직계 자식으로 두면
+            자기 행을 못박아 폭이 남아도 항상 2행이 됐습니다. */}
+        <div className="yoro-pn-mine-main">
+        {/* 신원과 상태는 한 덩어리입니다 — 형제로 두면 2열 grid 에서 조작부가 다음
+            행으로 밀려 모듈 높이가 상태마다 달라집니다. */}
         <div className="yoro-pn-mine-head">
         <div className="yoro-pn-who-wrap" ref={wrapRef}>
           <button
@@ -228,6 +231,8 @@ export function PatchNotesMineModule({
           </span>
         ) : null}
         </div>
+        {renderRecent()}
+        </div>
 
         <span className="yoro-pn-mine-acts">
           {renderSearchForm(t().patchNotesMineSearchOther)}
@@ -244,7 +249,6 @@ export function PatchNotesMineModule({
           </button>
         </span>
         {draftError ? <p className="yoro-pn-mine-error" role="alert">{draftError}</p> : null}
-        {renderRecent()}
       </div>
     );
   }
@@ -252,15 +256,17 @@ export function PatchNotesMineModule({
   /* ── 초대(미표시) 상태 ─────────────────────────────────────────── */
   return (
     <div className="yoro-pn-mine-module" data-testid="patch-notes-mine-module">
-      <div className="yoro-pn-mine-copy">
-        <b>{t().patchNotesMineEmptyTitle}</b>
-        <small>{t().patchNotesMineModuleDescription}</small>
+      <div className="yoro-pn-mine-main">
+        <div className="yoro-pn-mine-copy">
+          <b>{t().patchNotesMineEmptyTitle}</b>
+          <small>{t().patchNotesMineModuleDescription}</small>
+        </div>
+        {renderRecent()}
       </div>
       <span className="yoro-pn-mine-acts">
         {renderSearchForm(t().patchNotesMinePlaceholder)}
       </span>
       {draftError ? <p className="yoro-pn-mine-error" role="alert">{draftError}</p> : null}
-      {renderRecent()}
     </div>
   );
 }

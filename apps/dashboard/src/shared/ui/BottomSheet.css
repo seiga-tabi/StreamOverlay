@@ -105,3 +105,40 @@
     transition: none;
   }
 }
+
+/* ══ 우측 풀스크린 드로어 전환(2026-08-17) — docs/mockups/mobile-side-menu.html.
+   DOM·핸들러·접근성 로직은 불변, 배치와 모션만 교체합니다: 하단 62% 시트 대신
+   우측에서 슬라이드 인. 모바일은 전폭, 태블릿(≥48rem)은 23.75rem 패널. ══ */
+.public-bottom-sheet {
+  place-items: stretch end;
+}
+
+.public-bottom-sheet .yoro-modal__dialog {
+  inline-size: 100%;
+  block-size: 100dvh;
+  max-block-size: none;
+  border-radius: var(--yoro-space-0);
+  transform: translate3d(100%, 0, 0);
+}
+
+@media (min-width: 48rem) {
+  .public-bottom-sheet .yoro-modal__dialog {
+    inline-size: min(100%, 23.75rem);
+  }
+}
+
+.public-bottom-sheet[data-sheet-state="open"] .yoro-modal__dialog {
+  transform: translate3d(0, 0, 0);
+}
+
+.public-bottom-sheet[data-sheet-state="closing"] .yoro-modal__dialog,
+.public-bottom-sheet.yoro-modal[data-state="closing"] .yoro-modal__dialog {
+  transform: translate3d(100%, 0, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-bottom-sheet .yoro-modal__dialog {
+    transition-property: opacity;
+    transform: translate3d(0, 0, 0);
+  }
+}

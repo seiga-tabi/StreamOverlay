@@ -254,8 +254,12 @@
   /* 안내 문구가 배경과 거의 같은 밝기였습니다(실측 1.28:1).
      페이지 배경이 중간 회색(#868e96~#5f676f)이라 밝은 글자로는 4.5 에
      도달하지 못합니다(흰색도 3.8). 어두운 쪽으로 내려야 통과합니다.
-     legacy 에 !important 가 없는 속성이라 pages layer 에서 덮습니다. */
-  .page-header .muted,
+     legacy 에 !important 가 없는 속성이라 pages layer 에서 덮습니다.
+
+     .page-header 단독으로 잡으면 안 됩니다 — 그 이름은 다크 화면도 씁니다.
+     이 규칙이 pages layer 라 legacy 의 다크 색을 이겨서, 팔로워 관리 헤더가
+     #0f141b 배경에 #14171a 글자가 되어 실측 1.03:1(사실상 안 보임)이 됐습니다.
+     관리자 콘솔 헤더는 .page-title-row 를 함께 달고 있으므로 그것만 봅니다. */
   .page-title-row .muted {
     color: #14171a;
   }

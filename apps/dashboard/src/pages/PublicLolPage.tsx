@@ -5270,16 +5270,31 @@ function RecentMatches({
       ko: publicI18n.ko.recentGames,
       ja: publicI18n.ja.recentGames
     },
-    emptyTitle: {
-      label: t().noData,
-      ko: publicI18n.ko.noData,
-      ja: publicI18n.ja.noData
-    },
-    emptyDescription: {
-      label: t().recentGames,
-      ko: publicI18n.ko.recentGames,
-      ja: publicI18n.ja.recentGames
-    },
+    /* 증강 칼바람(아수라장)은 Riot match-v5 에 기록되지 않음을 실측으로 확인
+       (2026-08-17: 기본 ids 40경기 전수·큐 2300/2400 직접 조회 모두 부재).
+       칩은 유지하되 빈 목록을 고장처럼 보이지 않게 미지원 사실을 정직하게 안내합니다. */
+    emptyTitle: filters.queue === "aramMayhem"
+      ? {
+        label: t().aramMayhemUnsupportedTitle,
+        ko: publicI18n.ko.aramMayhemUnsupportedTitle,
+        ja: publicI18n.ja.aramMayhemUnsupportedTitle
+      }
+      : {
+        label: t().noData,
+        ko: publicI18n.ko.noData,
+        ja: publicI18n.ja.noData
+      },
+    emptyDescription: filters.queue === "aramMayhem"
+      ? {
+        label: t().aramMayhemUnsupportedDescription,
+        ko: publicI18n.ko.aramMayhemUnsupportedDescription,
+        ja: publicI18n.ja.aramMayhemUnsupportedDescription
+      }
+      : {
+        label: t().recentGames,
+        ko: publicI18n.ko.recentGames,
+        ja: publicI18n.ja.recentGames
+      },
     loadingMoreMatches: t().loadingMoreMatches,
     loadMoreMatches: t().loadMoreMatches,
     noMoreMatches: {

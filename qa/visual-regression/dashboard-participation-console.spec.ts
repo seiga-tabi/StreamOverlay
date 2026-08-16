@@ -6,6 +6,7 @@
  * 후보 담기의 추적 가능성, 단계별 주행동 색, 위험 행동 분리, 모바일 단일 액션 바.
  */
 import { expect, test, type Page, type Route } from "@playwright/test";
+import { auditContrast, formatFindings } from "./contrast";
 
 async function json(route: Route, body: unknown): Promise<void> {
   await route.fulfill({
@@ -253,4 +254,24 @@ test("Twitch Extension 카드 — 설정이 실컴포넌트 Live Preview 에 즉
   await card.getByText("Video Overlay", { exact: false }).click();
   await expect(preview.locator(".twitch-ext-card__video")).toBeVisible();
   await expect(preview.getByText(/참가 모집 중 · 4명/u)).toBeVisible();
+});
+
+test("참여 관리 화면의 글자는 모두 AA 대비를 넘는다", async ({ page }) => {
+  /* 회귀 고정 — Twitch 확장 카드의 토글 9개가 밝은 카드 표면 위에서
+     --yoro-color-text-muted(실측 4.16:1)와, 자기 색 12% tint 위에 같은
+     --yoro-color-secondary-strong(3.37:1)을 써서 AA 에 못 미쳤습니다.
+     눈으로는 "좀 흐리네" 정도라 놓치기 쉬워 계산으로 고정합니다.
+
+     버튼 밖에도 같은 사고가 있었습니다 — 아바타 이니셜이 밝은 보라 배경에
+     88% 투명도 흰 글자로 3.40:1, 상태 배지가 자기 tint 위 3.97:1 이었습니다.
+     이제 화면 전체를 봅니다. */
+  await page.setViewportSize(DESKTOP_VIEWPORT);
+  await installRoutes(page, participationState(RECRUIT_QUEUE));
+  await page.goto("/dashboard/streaming/participation");
+  await expect(page.locator(".participation-console-statusbar")).toBeVisible();
+
+  const { failures, skipped } = await auditContrast(page, ".participation-management-page");
+  expect(formatFindings(failures), "참여 관리 저대비 글자").toEqual([]);
+  /* 불투명 배경을 못 찾으면 계산이 성립하지 않습니다 — 조용히 넘어가지 않게 고정합니다. */
+  expect(skipped, "대비를 계산할 수 없는 글자").toEqual([]);
 });

@@ -829,3 +829,113 @@ test("소환사 모듈은 상태가 바뀌어도 행 수가 유지되고 좁은 
   });
   expect(sameRow).toBe(true);
 });
+
+test("소환사 모듈의 글자는 어떤 상태에서도 배경에 묻히지 않는다", async ({ page }) => {
+  /* 회귀 고정 — .yoro-pn-who 와 .yoro-pn-bar-state 는 흰색 .yoro-pn-bar 안에
+     살던 선택기였는데, 다크한 .yoro-pn-mine-module 로 옮겨오면서 라이트 카드용
+     --pn-ink(#14171f)·--pn-ink-soft·--pn-bad 를 그대로 들고 왔습니다. 실측하면
+     소환사 이름 1.14:1, 로딩 문구 1.58:1, 오류 문구 2.18:1 이었습니다.
+     모듈 배경이 불투명해졌으므로 조상 배경을 거슬러 올라가 계산할 수 있습니다. */
+  await installFixtures(page, {
+    patchNotes: feed(),
+    stored: [
+      { gameName: "맹금류애니비아", tagLine: "9314", lolPlatform: "kr" },
+      { gameName: "YORO", tagLine: "KR1", lolPlatform: "kr" }
+    ],
+    summary: SUMMARY_V2
+  });
+  await page.goto("/patch-notes");
+  const mine = page.getByTestId("patch-notes-mine-module");
+  await expect(mine).toBeVisible();
+
+  const failures = await mine.evaluate((root) => {
+    const parse = (value: string) => {
+      const match = /rgba?\(([^)]+)\)/u.exec(value);
+      if (!match?.[1]) return null;
+      const parts = match[1].split(",").map((part) => Number.parseFloat(part.trim()));
+      return { r: parts[0]!, g: parts[1]!, b: parts[2]!, a: parts.length > 3 ? parts[3]! : 1 };
+    };
+    const channel = (value: number) => {
+      const v = value / 255;
+      return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+    };
+    const luminance = (c: { r: number; g: number; b: number }) =>
+      0.2126 * channel(c.r) + 0.7152 * channel(c.g) + 0.0722 * channel(c.b);
+    /* 첫 불투명 배경까지 올라가며 반투명 층을 합성합니다. */
+    const backdrop = (element: Element) => {
+      let node: Element | null = element;
+      let acc: { r: number; g: number; b: number; a: number } | null = null;
+      while (node) {
+        const bg = parse(getComputedStyle(node).backgroundColor);
+        if (bg && bg.a > 0) {
+          if (!acc) acc = { ...bg };
+          else {
+            const a = acc.a;
+            acc = {
+              r: acc.r * a + bg.r * (1 - a),
+              g: acc.g * a + bg.g * (1 - a),
+              b: acc.b * a + bg.b * (1 - a),
+              a: a + bg.a * (1 - a)
+            };
+          }
+          if (acc.a >= 0.99) return acc;
+        }
+        node = node.parentElement;
+      }
+      return acc;
+    };
+
+    const bad: string[] = [];
+    for (const element of root.querySelectorAll<HTMLElement>("*")) {
+      const text = [...element.childNodes]
+        .filter((node) => node.nodeType === Node.TEXT_NODE)
+        .map((node) => node.textContent?.trim() ?? "")
+        .join("");
+      if (!text) continue;
+      const box = element.getBoundingClientRect();
+      if (box.width === 0 || box.height === 0) continue;
+
+      const style = getComputedStyle(element);
+      const fg = parse(style.color);
+      const bg = backdrop(element);
+      /* 불투명 배경을 못 찾으면 계산이 성립하지 않습니다 — 그 자체가 결함입니다. */
+      if (!fg || !bg || bg.a < 0.99) {
+        bad.push(`${element.className || element.tagName}: 불투명 배경 없음`);
+        continue;
+      }
+      const blended = fg.a >= 1
+        ? fg
+        : {
+          r: fg.r * fg.a + bg.r * (1 - fg.a),
+          g: fg.g * fg.a + bg.g * (1 - fg.a),
+          b: fg.b * fg.a + bg.b * (1 - fg.a)
+        };
+      const l1 = luminance(blended);
+      const l2 = luminance(bg);
+      const ratio = (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+      const size = Number.parseFloat(style.fontSize);
+      const weight = Number.parseInt(style.fontWeight, 10) || 400;
+      const large = size >= 24 || (size >= 18.66 && weight >= 700);
+      const need = large ? 3 : 4.5;
+      if (ratio < need) {
+        bad.push(`${element.className || element.tagName} "${text.slice(0, 12)}" ${ratio.toFixed(2)}:1 < ${need}`);
+      }
+    }
+    return bad;
+  });
+  expect(failures, "모듈 안 저대비 글자").toEqual([]);
+
+  /* 넓은 폭에서는 최근 검색도 신원과 같은 행입니다 — grid-column:1/-1 로 자기 행을
+     못박으면 폭이 남아도 항상 2행이 되어 모듈이 70px → 112px 로 커집니다. */
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const rows = await mine.evaluate((root) => {
+    const tops = new Set<number>();
+    for (const child of root.children) {
+      const box = child.getBoundingClientRect();
+      if (box.width === 0 && box.height === 0) continue;
+      tops.add(Math.round(box.top / 8));
+    }
+    return tops.size;
+  });
+  expect(rows, "1440px 에서 모듈 행 수").toBe(1);
+});

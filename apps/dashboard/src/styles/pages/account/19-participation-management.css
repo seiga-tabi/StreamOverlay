@@ -640,10 +640,15 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: var(--brand-strong);
+
+  /* --brand-strong(=--yoro-color-primary-strong, hsl 224 78% 61%)는 흰 글자를
+     받기엔 밝아 실측 3.40:1 이었습니다. 88% 투명도까지 겹쳐 더 흐려졌습니다.
+     --brand-strong 은 다른 곳에서 글자색으로도 쓰이므로 토큰을 건드리지 않고
+     이 아바타에서만 명도를 낮추고 글자를 불투명하게 둡니다. */
+  background: hsl(224 78% 52%);
   font-size: var(--yoro-font-size-xs);
   font-weight: 800;
-  color: var(--yoro-color-text-on-dark-strong);
+  color: var(--yoro-color-text-on-dark);
 }
 
 .participation-console-row-name,

@@ -293,6 +293,17 @@
 
 /* ─────────── Dashboard 관리 카드 ─────────── */
 .twitch-ext-card {
+  /* 이 파일은 대시보드와 Twitch 확장 번들이 함께 씁니다(extension-app.css).
+     확장은 영상 위 투명 지면이라 뷰어 색을 바꾸면 방송 화면이 바뀌므로,
+     아래 두 값은 .twitch-ext-card(대시보드 미리보기) 안에서만 씁니다.
+
+     --yoro-color-text-muted(hsl 215 17% 46%)는 이 카드의 밝은 표면 위에서
+     실측 4.16:1, --yoro-color-success 는 자기 tint 위에서 3.97:1 이었습니다.
+     색상·채도는 두고 명도만 낮춥니다. */
+  --ext-muted: hsl(215 17% 40%);
+  --ext-success: hsl(163 70% 24%);
+  --ext-brand: hsl(253 61% 58%);
+
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: var(--yoro-space-5);
@@ -330,7 +341,7 @@
 
 .twitch-ext-card h3 {
   margin: var(--yoro-space-4) 0 var(--yoro-space-2);
-  color: var(--yoro-color-text-muted);
+  color: var(--ext-muted);
   font-size: var(--yoro-font-size-xs);
   font-weight: var(--yoro-font-weight-bold);
 }
@@ -346,16 +357,22 @@
 }
 
 .twitch-ext-card__badge.is-connected {
-  border-color: var(--yoro-color-success);
+  border-color: var(--ext-success);
   background: var(--yoro-color-success-bg);
-  color: var(--yoro-color-success);
+  color: var(--ext-success);
 }
 
 .twitch-ext-card__description {
   margin: var(--yoro-space-1) 0 0;
-  color: var(--yoro-color-text-muted);
+  color: var(--ext-muted);
   font-size: var(--yoro-font-size-sm);
 }
+
+/* 아래 둘은 확장 번들에도 실리는 뷰어 선택기입니다. 확장(영상 위)의 색은 그대로
+   두고, 밝은 미리보기 지면(--yoro-color-bg) 위에서만 명도를 낮춥니다.
+   실측: 상태 배지 4.40:1, 로고 4.44:1. */
+.twitch-ext-card .twitch-ext-status.is-open { color: var(--ext-success); }
+.twitch-ext-card .twitch-ext-logo > b { color: var(--ext-brand); }
 
 .twitch-ext-card__note {
   margin: var(--yoro-space-2) 0 0;
@@ -424,7 +441,7 @@
   padding: 0 var(--yoro-space-3);
   border: 0;
   background: transparent;
-  color: var(--yoro-color-text-muted);
+  color: var(--ext-muted);
   font-size: var(--yoro-font-size-xs);
   font-weight: var(--yoro-font-weight-bold);
   cursor: pointer;
@@ -491,7 +508,7 @@
   border: thin solid var(--yoro-color-border-strong);
   border-radius: var(--yoro-radius-pill);
   background: transparent;
-  color: var(--yoro-color-text-muted);
+  color: var(--ext-muted);
   font-size: var(--yoro-font-size-xs);
   font-weight: var(--yoro-font-weight-bold);
   cursor: pointer;
@@ -500,7 +517,11 @@
 .twitch-ext-card__sim > button.is-active {
   border-color: var(--yoro-color-secondary-strong);
   background: hsl(253 61% 62% / .12);
-  color: var(--yoro-color-secondary-strong);
+
+  /* 배경이 같은 보라의 12% tint 라 글자까지 --yoro-color-secondary-strong 을 쓰면
+     같은 색끼리 겹쳐 실측 3.37:1 이 됩니다. 테두리·배경은 그대로 두고 글자만
+     같은 색상에서 명도를 낮춰 분리합니다. */
+  color: hsl(253 61% 46%);
 }
 
 .twitch-ext-card__stage {

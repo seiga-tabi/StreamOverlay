@@ -1,4 +1,5 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
+import { auditContrast, formatFindings } from "./contrast";
 
 const installedGuild = {
   id: "123456789012345678",
@@ -874,4 +875,36 @@ test("/bot과 통합 Organization Dashboard는 요구 viewport에서 focus와 ov
     await expect(login).toBeFocused();
     await expectNoHorizontalOverflow(page);
   }
+});
+
+test("Dashboard 홈과 Organization 화면의 글자는 AA 대비를 넘는다", async ({ page }) => {
+  /* 회귀 고정 — 두 가지 색 사고가 있었습니다.
+     1. .bot-management-page 가 팔레트를 다크로 재정의하면서 --yoro-color-text-strong
+        만 흰색으로 뒤집고 버튼 배경이 되는 --yoro-color-primary·secondary 는 밝은
+        기본값을 남겨, Button.css 가 둘을 짝지어 쓰는 순간 밝은 배경 위 밝은 글자가
+        됐습니다(실측 2.25:1·2.16:1 — 거의 안 보이는 수준).
+     2. --dh-brand-deep(#5d84f4)이 흰 글자를 받기엔 밝아 3.46:1 이었습니다. */
+  await installAuthenticatedAccountRoute(page);
+  await page.route("**/api/discord/management/session", async (route) => {
+    await json(route, { authenticated: true, csrfToken: "management-csrf", organizations: [] });
+  });
+  await page.route("**/api/discord/management/connect/session", async (route) => {
+    await json(route, {
+      authenticated: true,
+      csrfToken: "connect-csrf",
+      installedGuilds: [],
+      missingBotGuilds: [],
+      organizations: [],
+    });
+  });
+
+  await page.goto("/dashboard");
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  const home = await auditContrast(page);
+  expect(formatFindings(home.failures), "/dashboard 저대비 글자").toEqual([]);
+
+  await page.goto("/dashboard/organizations");
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  const organizations = await auditContrast(page);
+  expect(formatFindings(organizations.failures), "/dashboard/organizations 저대비 글자").toEqual([]);
 });
