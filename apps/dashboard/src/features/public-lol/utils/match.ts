@@ -173,8 +173,8 @@ export function queueMatchesFilter(match: PublicLolRecentMatch, queue: MatchQueu
   if (queue === "all") return true;
   if (queue === "solo") return match.queueId === 420;
   if (queue === "flex") return match.queueId === 440;
-  /* 42·6 은 폐기된 레거시 큐 — 5v5 랭크는 현행 솔로(420)+자유(440)입니다. */
-  if (queue === "ranked5v5") return match.queueId === 420 || match.queueId === 440;
+  /* 710 = 신규 특별 랭크 모드(실측) — 솔로·자유는 각자 칩이 담당합니다. */
+  if (queue === "ranked5v5") return match.queueId === 710;
   if (queue === "normal") return match.queueId === 400 || match.queueId === 430;
   if (queue === "aram") return match.queueId === 450;
   /* 2300 = 아수라장 실측 id(2026-08-17) — queues.json 의 2400 문서값과 다릅니다. */

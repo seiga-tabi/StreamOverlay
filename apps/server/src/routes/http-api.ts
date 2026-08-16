@@ -344,9 +344,9 @@ const PUBLIC_LOL_MATCH_QUEUE_IDS: Record<PublicLolMatchQueueFilter, readonly num
   all: [],
   solo: [420],
   flex: [440],
-  /* 42·6 은 폐기된 레거시 랭크 팀 큐라 항상 빈 결과였습니다(2026-08-16 수정).
-     5v5 랭크 = 현행 솔로(420)+자유(440) 합산으로 정의합니다. */
-  ranked5v5: [420, 440],
+  /* 710 = 신규 특별 랭크 모드(2026-08-17 실데이터 확인). 솔로(420)·자유(440)는
+     별도 칩이 담당하므로 이 칩은 710 전용입니다. 42·6 은 폐기 레거시. */
+  ranked5v5: [710],
   normal: [400, 430],
   aram: [450],
   aramMayhem: [2300]
