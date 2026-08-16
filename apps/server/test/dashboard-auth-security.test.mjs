@@ -1849,6 +1849,30 @@ test("공개 LoL 첫 검색은 최근 20게임만 상세 조회하고 다음 페
   });
 });
 
+test("매치 상세가 전부 실패하면 빈 전적으로 위장하지 않고 503 을 반환한다", async () => {
+  /* 레이트 리밋 등 상류 장애 시 "전적 없음" 오표시 방지(2026-08-16). */
+  await withAuthConfig(async () => {
+    const handler = createHttpHandler({
+      store: {}, twitchAuth: {}, actions: { async dispatchOne() {} },
+      sessions: new DashboardSessionStore(),
+      riot: {
+        isConfigured() { return true; },
+        routingStatus() { return { configured: true, source: "runtime", accountRegion: "asia", lolPlatform: "jp1" }; },
+        async getAccountByRiotId(gameName, tagLine) { return { puuid: "wipeout-puuid", gameName, tagLine }; },
+        async getRankedStatsByPuuid() { return undefined; },
+        async getChampionMasteryTopByPuuid() { return []; },
+        async getRecentMatchIdsByPuuid() { return ["JP1_1", "JP1_2"]; },
+        async getMatch() { throw new Error("rate limited"); }
+      }
+    });
+    const req = createRequest("GET", "/api/lol/profile?riotId=Wipeout%23KR1", undefined, { origin: DASHBOARD_ORIGIN });
+    const res = createResponse();
+    await handler(req, res);
+    assert.equal(res.statusCode, 503, res.body);
+    assert.match(res.body, /다시 시도/u);
+  });
+});
+
 test("공개 LoL 전적 API는 현재 게임 중 상태를 응답하고 PUUID를 노출하지 않는다", async () => {
   await withAuthConfig(async () => {
     const handler = createHttpHandler({
@@ -2952,7 +2976,8 @@ test("공개 LoL 전적 API는 같은 Riot ID 요청을 캐시하고 최근 경�
     assert.equal(accountLookups, 1);
     assert.equal(matchLookups, 3);
     const body = JSON.parse(firstRes.body);
-    assert.deepEqual(body.recentMatches.map((match) => match.matchId), ["new-match", "old-match"]);
+    /* 2026-08-16 정책 변경: 미지·이벤트 큐(900 등)도 버리지 않습니다 — 신규 모드 소실 방지. */
+    assert.deepEqual(body.recentMatches.map((match) => match.matchId), ["custom-match", "new-match", "old-match"]);
     assert.equal(savedProfiles[0].riotGameName, "HideOnBush");
   });
 });

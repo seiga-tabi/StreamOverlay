@@ -111,9 +111,10 @@ test("5v5 랭크 필터는 현행 랭크 큐(420·440)를 매칭한다 — 레�
   assert.equal(queueMatchesFilter(match({ queueId: 420 }), "solo"), true);
 });
 
-test("증강 칼바람 필터는 큐 2400 만 매칭한다", async () => {
+test("증강 칼바람 필터는 실측 큐 2300 만 매칭한다", async () => {
   const { queueMatchesFilter } = await import("../src/features/public-lol/utils/match");
-  assert.equal(queueMatchesFilter(match({ queueId: 2400 }), "aramMayhem"), true);
+  assert.equal(queueMatchesFilter(match({ queueId: 2300 }), "aramMayhem"), true);
+  assert.equal(queueMatchesFilter(match({ queueId: 2400 }), "aramMayhem"), false);
   assert.equal(queueMatchesFilter(match({ queueId: 450 }), "aramMayhem"), false);
   assert.equal(queueMatchesFilter(match({ queueId: 2400 }), "aram"), false);
   assert.equal(queueMatchesFilter(match({ queueId: 2400 }), "all"), true);
@@ -122,8 +123,8 @@ test("증강 칼바람 필터는 큐 2400 만 매칭한다", async () => {
 test("증강 역필터는 해당 증강을 픽한 경기만 남긴다", async () => {
   const { filteredMatches } = await import("../src/features/public-lol/utils/match");
   const profile = { recentMatches: [
-    match({ queueId: 2400, augments: [93, 89] }),
-    match({ queueId: 2400, augments: [7] }),
+    match({ queueId: 2300, augments: [93, 89] }),
+    match({ queueId: 2300, augments: [7] }),
     match({ queueId: 450 }),
   ] } as never;
   const base = { queue: "all", championId: "all", period: "all" } as const;

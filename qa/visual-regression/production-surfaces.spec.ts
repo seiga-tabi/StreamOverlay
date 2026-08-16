@@ -1231,3 +1231,48 @@ test("홈 히어로의 최근 검색 칩은 원터치로 재검색한다", async
   await chips.nth(0).click();
   await profileRequest;
 });
+
+test("좁은 화면에서 문구가 글자 단위로 세로로 쪼개지지 않는다", async ({ page }) => {
+  /* 회귀 고정 — 가로 스크롤 칩 줄(flex-wrap:nowrap)에서 라벨이 보호되지 않아
+     "최근 검색"이 10×60px, 4줄로 무너졌습니다. Palworld 홈 카드도 360px 에서
+     2열을 유지하다 문구 열이 25px 로 짓눌렸습니다. */
+  await page.addInitScript(() => {
+    window.localStorage.setItem("loltrace.recent.jp", JSON.stringify([
+      { gameName: "せいが", tagLine: "SEI", source: "recent", lolPlatform: "jp1" },
+      { gameName: "Hide on bush", tagLine: "KR1", source: "recent", lolPlatform: "kr" },
+      { gameName: "구름달빛나그네", tagLine: "KR22", source: "recent", lolPlatform: "kr" },
+      { gameName: "Faker the Unkillable", tagLine: "KR1", source: "recent", lolPlatform: "kr" },
+    ]));
+  });
+
+  for (const width of [430, 390, 375, 360]) {
+    await page.setViewportSize({ width, height: 844 });
+    for (const route of ["/ko/", "/ko/lol", "/ko/palworld", "/ko/patch-notes"]) {
+      await page.goto(route);
+      await page.waitForTimeout(400);
+      const squeezed = await page.evaluate(() => {
+        const out: string[] = [];
+        for (const el of document.querySelectorAll<HTMLElement>("body *")) {
+          if (el.children.length > 0) continue;
+          const text = (el.textContent ?? "").trim();
+          if (text.length < 2 || text.length > 40) continue;
+          const rect = el.getBoundingClientRect();
+          if (rect.width === 0 || rect.height === 0) continue;
+          const style = getComputedStyle(el);
+          if (style.writingMode !== "horizontal-tb") continue;
+          const fontSize = parseFloat(style.fontSize) || 14;
+          const lineHeight = parseFloat(style.lineHeight) || fontSize * 1.4;
+          /* 인라인 요소는 한 줄이어도 rect 가 여러 개 나오므로 실제 높이로 한 번 더 거릅니다. */
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          const rects = range.getClientRects().length;
+          if (rects >= 2 && Math.round(rect.height / lineHeight) >= 2 && rect.width <= fontSize * 2.2) {
+            out.push(`${el.className || el.tagName}:"${text.slice(0, 14)}"(${Math.round(rect.width)}x${Math.round(rect.height)})`);
+          }
+        }
+        return out;
+      });
+      expect(squeezed, `${width}px ${route}`).toEqual([]);
+    }
+  }
+});

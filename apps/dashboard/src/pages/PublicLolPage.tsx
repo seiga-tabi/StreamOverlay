@@ -433,6 +433,9 @@ const queueLabels: Record<PublicLocale, Record<number, string>> = {
   ko: {
     6: "5v5 랭크",
     42: "5v5 랭크",
+    /* 710 = 신규 특별 랭크 모드(2026-08-17 맹금류애니비아 실데이터로 확인) */
+    710: "5vs5 랭크",
+    2300: "증강 칼바람",
     400: "일반 교차",
     420: "솔로랭크",
     430: "일반",
@@ -442,6 +445,8 @@ const queueLabels: Record<PublicLocale, Record<number, string>> = {
   ja: {
     6: "5v5 ランク",
     42: "5v5 ランク",
+    710: "5vs5 ランク",
+    2300: "オーグメントARAM",
     400: "ノーマルドラフト",
     420: "ソロランク",
     430: "ノーマル",
@@ -633,13 +638,13 @@ async function requestPublicStreamerRiotId(riotId: string): Promise<StreamerRiot
   return body.request;
 }
 
-/* 증강 숫자 id → 픽·승 집계(큐 2400 매치만) — 도감 카드 "내 전적" 배지의 데이터원. */
+/* 증강 숫자 id → 픽·승 집계(아수라장 큐 2300 매치만) — 도감 카드 "내 전적" 배지의 데이터원. */
 export function aramAugmentStatsFromMatches(
   matches: readonly PublicLolRecentMatch[],
 ): Map<number, { picks: number; wins: number }> {
   const stats = new Map<number, { picks: number; wins: number }>();
   for (const match of matches) {
-    if (match.queueId !== 2400 || !match.augments) continue;
+    if (match.queueId !== 2300 || !match.augments) continue;
     for (const augmentId of match.augments) {
       const entry = stats.get(augmentId) ?? { picks: 0, wins: 0 };
       entry.picks += 1;

@@ -177,7 +177,8 @@ export function queueMatchesFilter(match: PublicLolRecentMatch, queue: MatchQueu
   if (queue === "ranked5v5") return match.queueId === 420 || match.queueId === 440;
   if (queue === "normal") return match.queueId === 400 || match.queueId === 430;
   if (queue === "aram") return match.queueId === 450;
-  if (queue === "aramMayhem") return match.queueId === 2400;
+  /* 2300 = 아수라장 실측 id(2026-08-17) — queues.json 의 2400 문서값과 다릅니다. */
+  if (queue === "aramMayhem") return match.queueId === 2300;
   return true;
 }
 

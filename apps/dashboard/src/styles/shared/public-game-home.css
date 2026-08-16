@@ -1860,7 +1860,15 @@
   }
 }
 
-@media (max-width: 22rem) {
+/* 카드 안에는 아이콘과 문구가 나란히 들어갑니다. 2열을 22rem(352px)까지 버티면
+   360px 기기에서 카드가 132px 이 되고 문구 열이 25px 로 무너져 글자가 세로로
+   쪼개집니다. 폭을 재보면 2열일 때 문구 열이 430px 에서 60px, 390px 에서 40px,
+   360px 에서 25px 입니다 — 한글 2~4자 폭이라 어느 폰에서도 성립하지 않습니다.
+   기준을 22rem(352px) → 30rem(480px)으로 올려 폰은 전부 한 열로 둡니다. */
+@media (max-width: 30rem) {
+  /* --more 패널은 위에서 2열을 따로 못박으므로(특이도 0,2,0) 여기서도 같은
+     특이도로 되돌려야 합니다. 빠뜨리면 이 패널만 계속 2열로 남아 무너집니다. */
+  .palworld-home-dashboard-panel--more .public-game-home__feature-list,
   .public-game-home__feature-panel--primary .public-game-home__feature-list,
   .public-game-home__feature-list {
     grid-template-columns: minmax(0, 1fr);
@@ -1956,7 +1964,13 @@
   font-size: 12px;
 }
 
-.public-home-quick__label { color: var(--public-home-text-muted, var(--yoro-color-text-muted)); }
+/* nowrap 가로 스크롤 줄에서는 flex 항목이 min-content 까지 줄어듭니다.
+   보호하지 않으면 "최근 검색"이 한 글자씩 세로로 쪼개집니다(실측 10×60, 4줄). */
+.public-home-quick__label {
+  flex: none;
+  color: var(--public-home-text-muted, var(--yoro-color-text-muted));
+  white-space: nowrap;
+}
 
 .public-home-quick button {
   display: inline-flex;
@@ -1970,11 +1984,18 @@
   color: var(--public-home-text, #dfe6f5);
   font-size: 12px;
   font-weight: 700;
+  white-space: nowrap;
   cursor: pointer;
 }
 
-.public-home-quick button i { font-style: normal; color: #fbbf24; }
-.public-home-quick button em { font-style: normal; color: var(--yoro-color-brand-on-dark, #9b90ff); font-size: 10.5px; }
+.public-home-quick button i { flex: none; font-style: normal; color: #fbbf24; }
+.public-home-quick button em {
+  flex: none;
+  font-style: normal;
+  color: var(--yoro-color-brand-on-dark, #9b90ff);
+  font-size: 10.5px;
+  white-space: nowrap;
+}
 
 .public-home-quick button:focus-visible {
   outline: 2px solid var(--yoro-color-public-primary, #7b5cff);

@@ -335,8 +335,9 @@ const STREAMER_PROFILE_LINK_MAX = 5;
 const STREAMER_PROFILE_LINK_LABEL_MAX = 40;
 const STREAMER_PROFILE_LINK_URL_MAX = 2048;
 const PUBLIC_LOL_PROFILE_TOP_CHAMPION_COUNT = 5;
-/* 2400 = ARAM: Mayhem(증강 칼바람) — 공식 큐 목록 실측 확인(2026-08-16) */
-const PUBLIC_LOL_PROFILE_QUEUES = [420, 440, 430, 400, 450, 2400];
+/* 2300 = 아수라장(증강 칼바람) — 실데이터로 확인(2026-08-17, 맹금류애니비아).
+   공식 queues.json 의 2400(ARAM: Mayhem)과 다름 — 문서보다 실측을 따릅니다. */
+const PUBLIC_LOL_PROFILE_QUEUES = [420, 440, 430, 400, 450, 2300];
 type PublicLolMatchQueueFilter = "all" | "solo" | "flex" | "ranked5v5" | "normal" | "aram" | "aramMayhem";
 
 const PUBLIC_LOL_MATCH_QUEUE_IDS: Record<PublicLolMatchQueueFilter, readonly number[]> = {
@@ -348,7 +349,7 @@ const PUBLIC_LOL_MATCH_QUEUE_IDS: Record<PublicLolMatchQueueFilter, readonly num
   ranked5v5: [420, 440],
   normal: [400, 430],
   aram: [450],
-  aramMayhem: [2400]
+  aramMayhem: [2300]
 };
 const PUBLIC_LOL_PROFILE_CACHE_TTL_MS = 10 * 60_000;
 /* 패치별 전적은 경기가 끝나야 바뀝니다. 10분이면 충분하고 Riot 호출을 아낍니다. */
@@ -3221,7 +3222,11 @@ function publicLolMatchQueueFilter(value: unknown): PublicLolMatchQueueFilter {
 }
 
 function isPublicLolQueue(match: RiotMatch): boolean {
-  return match.info.queueId === undefined || PUBLIC_LOL_PROFILE_QUEUES.includes(match.info.queueId);
+  /* 2026-08-16 실사례(맹금류애니비아#9314): 신규 이벤트 모드(특별 랭크·아수라장)가
+     공식 queues.json 에도 없는 큐 id 로 와서, 허용 목록에 걸러진 채 조회 창(21개)만
+     소모 → 최근 전적이 통째로 사라지고 옛 매치만 남았습니다. 모르는 큐를 버리는
+     대신 전부 통과시킵니다 — 큐별 칩 필터는 별도 매핑이 그대로 담당합니다. */
+  return true;
 }
 
 function profileRecentMatchesForCache(matches: PublicLolRecentMatch[]): LolProfileCacheEntry["recentMatches"] {
@@ -6848,10 +6853,16 @@ export function createHttpHandler(input: HttpHandlerInput) {
       safeStart,
       routing
     ).catch(() => []);
-    const rawMatches = (await Promise.all(
+    const detailResults = await Promise.all(
       matchIds.slice(0, matchCount).map((matchId) => getPublicLolMatchDetail(matchId, routing).catch(() => null))
-    ))
-      .filter((match): match is RiotMatch => Boolean(match))
+    );
+    const fetchedDetails = detailResults.filter((match): match is RiotMatch => Boolean(match));
+    /* ID 는 있는데 상세가 전부 실패하면(레이트 리밋·상류 장애) 빈 목록으로 위장하지 않습니다 —
+       "전적 없음"이 아니라 오류+재시도가 맞습니다. 큐 필터로 0이 되는 정상 경우와 구분합니다. */
+    if (matchIds.length > 0 && fetchedDetails.length === 0) {
+      throw new HttpRequestError(503, { error: "Riot 매치 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요." });
+    }
+    const rawMatches = fetchedDetails
       .filter(isPublicLolQueue)
       .sort((a, b) => publicLolMatchSortTime(b) - publicLolMatchSortTime(a))
       .slice(0, matchCount);
