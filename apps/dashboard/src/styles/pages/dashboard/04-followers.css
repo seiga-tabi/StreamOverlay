@@ -446,7 +446,6 @@
 .public-dashboard-shell .public-search-icon-button,
 .public-home-shared-shell .public-home-shared-server.public-server-pill.yoro-button{
   border-color: rgba(222, 226, 230, .2) !important;
-  background: rgba(33, 37, 41, .42) !important;
   color: var(--public-gray-text) !important;
 }
 

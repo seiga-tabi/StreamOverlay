@@ -116,28 +116,92 @@ function accentStyle(note: PatchNote): Record<string, string> {
   return note.accentColor ? { "--pn-k": note.accentColor } : {};
 }
 
-/** 50% 기준선이 있는 승률 게이지. 색만이 아니라 길이와 눈금으로도 읽힙니다. */
-function WinRateGauge({ record, size }: { record: PatchPlayRecord; size: "hero" | "row" }) {
+/** 표본이 이보다 적으면 승률을 참고용으로 표시합니다 — 3판 2승의 66.7%를 과신하지 않게. */
+const THIN_SAMPLE_GAMES = 5;
+
+/**
+ * 승/패 2색 막대.
+ *
+ * 이전 게이지는 승률 한 값만 길이로 그려서 3판 2승(66.7%)과 30판 20승(66.7%)이
+ * 똑같이 보였습니다. 이제 막대 안쪽 비율이 승률이고, 막대 전체 길이는 판수에
+ * 비례합니다(기준 = 그 소환사의 최다 판수 패치). 50% 기준선과 승·패 숫자는
+ * 그대로 두어 색을 구분하지 못해도 읽힙니다.
+ */
+function WinRateGauge({
+  maxGames,
+  record,
+  size
+}: {
+  maxGames: number;
+  record: PatchPlayRecord;
+  size: "hero" | "row";
+}) {
+  const losses = Math.max(0, record.games - record.wins);
+  /* 판수 비례 폭. 0 나눗셈과 "너무 얇아 안 보이는" 막대를 함께 막습니다. */
+  const widthRatio = maxGames > 0 ? Math.max(0.18, record.games / maxGames) : 1;
+  const thin = record.games < THIN_SAMPLE_GAMES;
   return (
     <div
       className={size === "hero" ? "yoro-pn-gauge is-hero" : "yoro-pn-gauge"}
       data-tone={record.winRate >= 50 ? "good" : "bad"}
     >
       <div
-        aria-label={t().patchNotesGaugeLabel.replace("{rate}", String(record.winRate))}
+        aria-label={t().patchNotesBarLabel
+          .replace("{games}", String(record.games))
+          .replace("{wins}", String(record.wins))
+          .replace("{rate}", String(record.winRate))}
         className="yoro-pn-gauge-track"
         role="img"
+        style={{ inlineSize: `${(widthRatio * 100).toFixed(1)}%` }}
       >
-        <span className="yoro-pn-gauge-fill" style={{ width: `${record.winRate}%` }} />
+        <span className="yoro-pn-gauge-win" style={{ flexGrow: record.wins }} />
+        <span className="yoro-pn-gauge-loss" style={{ flexGrow: losses }} />
         <span className="yoro-pn-gauge-mid" />
       </div>
       <b>{`${record.winRate.toFixed(1)}%`}</b>
-      <span>{`${record.wins}${t().patchNotesMineWins} / ${record.games}${t().patchNotesMineGames}`}</span>
+      <span>
+        {t().patchNotesRecordLabel
+          .replace("{wins}", String(record.wins))
+          .replace("{losses}", String(losses))
+          .replace("{games}", String(record.games))}
+      </span>
+      {thin ? (
+        <small className="yoro-pn-gauge-thin">
+          {t().patchNotesThinSample.replace("{games}", String(record.games))}
+        </small>
+      ) : null}
     </div>
   );
 }
 
-function HeroCard({ entry }: { entry: PatchEntry }) {
+/** 최근 패치 승률 추이. 이미 받아 온 summary.patches 만 씁니다(추가 요청 없음). */
+function WinRateTrend({ records }: { records: readonly PatchPlayRecord[] }) {
+  if (records.length < 3) return null;
+  /* 최신이 오른쪽에 오도록 뒤집습니다 — 응답은 최신순입니다. */
+  const points = [...records].slice(0, 10).reverse();
+  return (
+    <section aria-label={t().patchNotesTrendTitle} className="yoro-pn-trend">
+      <p className="yoro-pn-trend-copy">
+        <b>{t().patchNotesTrendTitle}</b>
+        <small>{t().patchNotesTrendHint}</small>
+      </p>
+      <span className="yoro-pn-trend-bars">
+        {points.map((point) => (
+          <i
+            data-tone={point.winRate > 50 ? "good" : point.winRate < 50 ? "bad" : undefined}
+            key={point.patchKey}
+            style={{ blockSize: `${Math.max(6, point.winRate)}%` }}
+            title={t().patchNotesTrendItem
+              .replace("{patch}", point.patchKey)
+              .replace("{rate}", String(point.winRate))}
+          />
+        ))}
+      </span>
+    </section>
+  );
+}
+
+function HeroCard({ entry, maxGames }: { entry: PatchEntry; maxGames: number }) {
   const { note, record, previousRecord } = entry;
   const delta = record && previousRecord
     ? Math.round((record.winRate - previousRecord.winRate) * 10) / 10
@@ -180,7 +244,7 @@ function HeroCard({ entry }: { entry: PatchEntry }) {
         {note.summary ? <p className="yoro-pn-hero-sum">{note.summary}</p> : null}
         {record ? (
           <div className="yoro-pn-hero-mine">
-            <WinRateGauge record={record} size="hero" />
+            <WinRateGauge maxGames={maxGames} record={record} size="hero" />
             {delta === undefined ? null : (
               <p className="yoro-pn-delta" data-tone={delta === 0 ? undefined : delta > 0 ? "good" : "bad"}>
                 <span>{t().patchNotesMineDelta}</span>
@@ -217,6 +281,8 @@ function FeaturedTile({ entry }: { entry: PatchEntry }) {
         <time dateTime={note.publishedAt}>{formatShortDate(note.publishedAt)}</time>
         {record ? (
           <span className="yoro-pn-tile-rate" data-tone={record.winRate >= 50 ? "good" : "bad"}>
+            {/* 카드 줄을 훑을 때 숫자만으로는 비교가 안 돼 미니 막대를 함께 둡니다. */}
+            <i aria-hidden="true" style={{ inlineSize: `${record.winRate}%` }} />
             {`${record.winRate.toFixed(1)}%`}
           </span>
         ) : null}
@@ -232,7 +298,7 @@ function FeaturedTile({ entry }: { entry: PatchEntry }) {
   );
 }
 
-function ArchiveRow({ entry, showMine }: { entry: PatchEntry; showMine: boolean }) {
+function ArchiveRow({ entry, maxGames, showMine }: { entry: PatchEntry; maxGames: number; showMine: boolean }) {
   const { note, record, gapDays } = entry;
 
   return (
@@ -269,7 +335,7 @@ function ArchiveRow({ entry, showMine }: { entry: PatchEntry; showMine: boolean 
       </p>
       {/* 개인 전적 미표시 상태에서는 빈 값 문구를 아예 그리지 않습니다 — 60줄 "기록 없음" 노이즈의 수정점 */}
       {record
-        ? <WinRateGauge record={record} size="row" />
+        ? <WinRateGauge maxGames={maxGames} record={record} size="row" />
         : showMine
           ? <p className="yoro-pn-row-norate">{t().patchNotesNotPlayed}</p>
           : null}
@@ -378,6 +444,13 @@ export function PublicPatchNotesPage({ locale }: { locale: string }) {
       };
     });
   }, [feed, mine]);
+
+  /* 막대 폭의 기준선 — 이 소환사가 가장 많이 플레이한 패치의 판수입니다.
+     절대 기준(예: 20판)을 쓰면 판수가 적은 사용자는 막대가 늘 뭉개집니다. */
+  const maxGames = useMemo(
+    () => (mine?.patches ?? []).reduce((most, record) => Math.max(most, record.games), 0),
+    [mine]
+  );
 
   const trimmedQuery = query.trim();
 
@@ -504,6 +577,9 @@ export function PublicPatchNotesPage({ locale }: { locale: string }) {
                 targetIndex={targetIndex}
                 targets={targets}
               />
+              {target && mineState === "ready" && mine?.patches.length
+                ? <WinRateTrend records={mine.patches} />
+                : null}
               <PatchNotesControlBar
                 filter={filter}
                 filterOptions={filterOptions}
@@ -524,7 +600,7 @@ export function PublicPatchNotesPage({ locale }: { locale: string }) {
           ) : null}
 
           <div aria-live="polite" className="yoro-pn-stage">
-            {hero ? <HeroCard entry={hero} key={hero.note.slug} /> : null}
+            {hero ? <HeroCard entry={hero} key={hero.note.slug} maxGames={maxGames} /> : null}
 
             {tiles.length > 0 ? (
               <div className="yoro-pn-tiles">
@@ -550,7 +626,7 @@ export function PublicPatchNotesPage({ locale }: { locale: string }) {
                             </small>
                           </p>
                         ) : null}
-                        <ArchiveRow entry={entry} showMine={Boolean(target)} />
+                        <ArchiveRow entry={entry} maxGames={maxGames} showMine={Boolean(target)} />
                       </div>
                     );
                   })}

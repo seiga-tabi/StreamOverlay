@@ -9,8 +9,9 @@ const imagesDirectory = path.join(repositoryRoot, "apps/dashboard/public/images/
 const catalogPath = path.join(repositoryRoot, "apps/server/data/lol/aram/augment-catalog.json");
 
 const DDRAGON_VERSIONS_URL = "https://ddragon.leagueoflegends.com/api/versions.json";
-const arenaJsonUrl = (locale) => `https://raw.communitydragon.org/latest/cdragon/arena/${locale}.json`;
-const RAW_ASSET_BASE = "https://raw.communitydragon.org/latest/game/";
+const arenaJsonUrl = (version, locale) =>
+  `https://raw.communitydragon.org/${version}/cdragon/arena/${locale}.json`;
+const rawAssetBase = (version) => `https://raw.communitydragon.org/${version}/game/`;
 
 // CommunityDragon 실측 등급 코드: 0=실버, 1=골드, 2=프리즘, 4=레전드(3은 쓰이지 않음).
 const RARITY_BY_CODE = { 0: "silver", 1: "gold", 2: "prismatic", 4: "legend" };
@@ -68,10 +69,10 @@ function sanitizeDescription(raw, dataValues, fallback) {
   return text.length > 0 ? text : fallback;
 }
 
-async function downloadIcon(iconPath, cache) {
+async function downloadIcon(iconPath, cache, assetBase) {
   const cached = cache.get(iconPath);
   if (cached) return cached;
-  const url = `${RAW_ASSET_BASE}${iconPath}`;
+  const url = `${assetBase}${iconPath}`;
   const response = await fetch(url);
   if (!response.ok) throw new Error(`아이콘을 받아올 수 없습니다 (${response.status}): ${url}`);
   const sourceBuffer = Buffer.from(await response.arrayBuffer());
@@ -111,24 +112,42 @@ async function mapWithConcurrency(items, limit, worker) {
   return results;
 }
 
-const [versions, koData, jaData] = await Promise.all([
-  fetchJson(DDRAGON_VERSIONS_URL),
-  fetchJson(arenaJsonUrl("ko_kr")),
-  fetchJson(arenaJsonUrl("ja_jp"))
-]);
-
-const dataVersion = versions?.[0];
-if (typeof dataVersion !== "string" || !dataVersion) {
+const versions = await fetchJson(DDRAGON_VERSIONS_URL);
+const requestedDataVersion = process.argv[2];
+if (process.argv.length > 3) {
+  throw new Error("사용법: node scripts/generate-aram-augments.mjs [dataVersion]");
+}
+const dataVersion = requestedDataVersion ?? versions?.[0];
+if (
+  typeof dataVersion !== "string"
+  || !/^\d+\.\d+\.\d+$/.test(dataVersion)
+  || !Array.isArray(versions)
+  || !versions.includes(dataVersion)
+) {
   throw new Error("dataVersion(Data Dragon 최신 patch)을 확인할 수 없습니다.");
 }
+const cdragonVersionMatch = /^(\d+\.\d+)\.\d+$/.exec(dataVersion);
+if (!cdragonVersionMatch) throw new Error(`CommunityDragon 버전을 결정할 수 없습니다: ${dataVersion}`);
+const cdragonVersion = cdragonVersionMatch[1];
+const [koData, jaData] = await Promise.all([
+  fetchJson(arenaJsonUrl(cdragonVersion, "ko_kr")),
+  fetchJson(arenaJsonUrl(cdragonVersion, "ja_jp"))
+]);
+if (!Array.isArray(koData?.augments) || !Array.isArray(jaData?.augments)) {
+  throw new Error(`CommunityDragon 증강 목록이 올바르지 않습니다: ${cdragonVersion}`);
+}
+const cdragonContentRevision = sha256(Buffer.from(JSON.stringify([koData, jaData])));
+const assetBase = rawAssetBase(cdragonVersion);
 
-const jaById = new Map(jaData.augments.map((entry) => [entry.id, entry]));
+// 표시 이름이 아니라 cdragon의 안정적인 apiName으로 locale 레코드를 연결합니다.
+// 양쪽 locale의 숫자 id가 정확히 같을 때만 match-v5 조인 키를 노출합니다.
+const jaByApiName = new Map(jaData.augments.map((entry) => [entry.apiName, entry]));
 
 await mkdir(imagesDirectory, { recursive: true });
 const iconCache = new Map();
 
 const augments = await mapWithConcurrency(koData.augments, 8, async (ko) => {
-  const ja = jaById.get(ko.id);
+  const ja = jaByApiName.get(ko.apiName);
   if (!ja) throw new Error(`일본어 데이터가 없습니다: id=${ko.id} (${ko.apiName})`);
 
   const rarity = RARITY_BY_CODE[ko.rarity];
@@ -146,7 +165,12 @@ const augments = await mapWithConcurrency(koData.augments, 8, async (ko) => {
   const descriptionKo = sanitizeDescription(ko.desc, ko.dataValues, "게임 내 상황에 따라 효과가 달라집니다.");
   const descriptionJa = sanitizeDescription(ja.desc, ja.dataValues, "ゲーム内の状況によって効果が変わります。");
 
-  const iconUrl = ko.iconLarge ? await downloadIcon(ko.iconLarge, iconCache) : undefined;
+  const iconUrl = ko.iconLarge
+    ? await downloadIcon(ko.iconLarge, iconCache, assetBase)
+    : undefined;
+  const cdragonId = Number.isSafeInteger(ko.id) && ko.id > 0 && ja.id === ko.id
+    ? ko.id
+    : undefined;
 
   return {
     id,
@@ -155,14 +179,21 @@ const augments = await mapWithConcurrency(koData.augments, 8, async (ko) => {
     descriptionKo,
     descriptionJa,
     rarity,
-    ...(iconUrl ? { iconUrl } : {})
+    ...(iconUrl ? { iconUrl } : {}),
+    ...(cdragonId !== undefined ? { cdragonId } : {})
   };
 });
 
 const seenIds = new Set();
+const seenCdragonIds = new Set();
 for (const augment of augments) {
   if (seenIds.has(augment.id)) throw new Error(`중복된 id입니다: ${augment.id}`);
   seenIds.add(augment.id);
+  if (augment.cdragonId === undefined) continue;
+  if (seenCdragonIds.has(augment.cdragonId)) {
+    throw new Error(`중복된 cdragonId입니다: ${augment.cdragonId}`);
+  }
+  seenCdragonIds.add(augment.cdragonId);
 }
 
 augments.sort((a, b) => (
@@ -175,9 +206,13 @@ const catalog = {
   mode: "aram_augments",
   status: "ready",
   dataVersion,
-  sourceRevision: `communitydragon:latest@${dataVersion}`,
+  sourceRevision:
+    `communitydragon:${cdragonVersion}@sha256:${cdragonContentRevision};ddragon:${dataVersion}`,
   augments
 };
 
 await writeFile(catalogPath, `${JSON.stringify(catalog, null, 2)}\n`, "utf8");
-console.log(`증강 ${augments.length}개, 아이콘 ${iconCache.size}개를 생성했습니다. dataVersion=${dataVersion}`);
+console.log(
+  `증강 ${augments.length}개, cdragonId ${seenCdragonIds.size}개, 아이콘 ${iconCache.size}개를 생성했습니다. `
+    + `dataVersion=${dataVersion} cdragonVersion=${cdragonVersion}`
+);

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { activePublicLocale } from "../i18n/public-lol-i18n";
+import { activePublicLocale, t } from "../i18n/public-lol-i18n";
+import { localizedPublicUrlForCurrentLocale } from "../utils/public-locale-path";
 
 /* 증강 아이콘(증강 칼바람 큐 2400 등) — Community Dragon 실게임 에셋.
  *
@@ -74,6 +75,28 @@ export function LolAugmentIcon({ id, order }: { id: number; order?: number }) {
   }, [id]);
 
   const title = meta?.name ?? `Augment ${id}`;
+  /* 결합 ①(전적→도감): 아이콘 클릭 시 칼바람 도감이 이 증강으로 필터된 채 열립니다. */
+  if (meta && !failed) {
+    const href = localizedPublicUrlForCurrentLocale(`/lol/aram?augment=${encodeURIComponent(meta.name)}`);
+    return (
+      <a
+        className={`lol-augment${rarityClass(meta.rarity)}`}
+        href={href}
+        title={`${title} — ${t().aramMayhemAugmentLink}`}
+      >
+        {order !== undefined ? <small aria-hidden="true">{order}</small> : null}
+        <img
+          alt={title}
+          decoding="async"
+          loading="lazy"
+          onError={() => setFailed(true)}
+          referrerPolicy="no-referrer"
+          src={`${CDRAGON_ORIGIN}/latest/game/${meta.iconPath}`}
+        />
+        <span className="yoro-u-sr-only">{`${title} — ${t().aramMayhemAugmentLink}`}</span>
+      </a>
+    );
+  }
   return (
     <span className={`lol-augment${rarityClass(meta?.rarity)}`} title={title}>
       {order !== undefined ? <small aria-hidden="true">{order}</small> : null}

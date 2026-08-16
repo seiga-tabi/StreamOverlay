@@ -12,6 +12,9 @@ export type AramAugment = {
   descriptionJa: string;
   rarity: AramAugmentRarity;
   iconUrl?: string;
+  /** match-v5 playerAugment 숫자 id(cdragon augments.id) — 전적↔도감 조인용.
+      파이프라인이 확정 매핑한 항목만 채웁니다(추측 매핑 금지, 미연결 시 생략). */
+  cdragonId?: number;
 };
 
 export type AramAugmentCatalog = {
@@ -65,6 +68,7 @@ export function parseAramAugmentCatalog(value: unknown): AramAugmentCatalog | un
   if (!dataVersion || !sourceRevision || !Array.isArray(record.augments) || record.augments.length > 1_000) return undefined;
 
   const ids = new Set<string>();
+  const cdragonIds = new Set<number>();
   const augments: AramAugment[] = [];
   for (const candidate of record.augments) {
     const augment = recordOf(candidate);
@@ -75,7 +79,7 @@ export function parseAramAugmentCatalog(value: unknown): AramAugmentCatalog | un
       "descriptionKo",
       "descriptionJa",
       "rarity"
-    ], ["iconUrl"])) return undefined;
+    ], ["iconUrl", "cdragonId"])) return undefined;
     const id = boundedText(augment.id, 80);
     const nameKo = boundedText(augment.nameKo, 120);
     const nameJa = boundedText(augment.nameJa, 120);
@@ -86,7 +90,16 @@ export function parseAramAugmentCatalog(value: unknown): AramAugmentCatalog | un
     if (!nameKo || !nameJa || !descriptionKo || !descriptionJa) return undefined;
     if (!(ARAM_AUGMENT_RARITIES as readonly unknown[]).includes(augment.rarity)) return undefined;
     if (augment.iconUrl !== undefined && !iconUrl) return undefined;
+    const cdragonId = augment.cdragonId;
+    if (cdragonId !== undefined
+      && (
+        typeof cdragonId !== "number"
+        || !Number.isSafeInteger(cdragonId)
+        || cdragonId <= 0
+        || cdragonIds.has(cdragonId)
+      )) return undefined;
     ids.add(id);
+    if (cdragonId !== undefined) cdragonIds.add(cdragonId);
     augments.push({
       id,
       nameKo,
@@ -94,7 +107,8 @@ export function parseAramAugmentCatalog(value: unknown): AramAugmentCatalog | un
       descriptionKo,
       descriptionJa,
       rarity: augment.rarity as AramAugmentRarity,
-      ...(iconUrl ? { iconUrl } : {})
+      ...(iconUrl ? { iconUrl } : {}),
+      ...(cdragonId !== undefined ? { cdragonId } : {})
     });
   }
   if (record.status === "ready" && augments.length === 0) return undefined;

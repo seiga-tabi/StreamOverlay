@@ -554,6 +554,8 @@ export type PublicMatchFilters = {
   queue: MatchQueueFilter;
   championId: string;
   period: MatchPeriodFilter;
+  /** 결합 ③ — 이 증강(cdragon 숫자 id)을 픽한 경기만. undefined = 미적용. */
+  augmentId?: number;
 };
 
 export type PublicFavorite = SearchSuggestion & {

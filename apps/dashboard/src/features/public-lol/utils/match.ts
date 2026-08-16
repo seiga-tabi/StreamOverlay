@@ -193,7 +193,8 @@ export function filteredMatches(profile: PublicLolProfile, filters: PublicMatchF
   return profile.recentMatches.filter((match) => (
     queueMatchesFilter(match, filters.queue) &&
     periodMatchesFilter(match, filters.period) &&
-    (filters.championId === "all" || String(match.champion.championId) === filters.championId)
+    (filters.championId === "all" || String(match.champion.championId) === filters.championId) &&
+    (filters.augmentId === undefined || (match.augments ?? []).includes(filters.augmentId))
   ));
 }
 

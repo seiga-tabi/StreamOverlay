@@ -3290,3 +3290,46 @@
   font-size: 8.5px;
 }
 .lol-augment__fallback { color: #94a0bd; font-size: 11px; font-weight: 800; }
+
+/* 도감 카드 "내 전적" 배지(결합 ②, 2026-08-16) — cdragonId 정확 조인 시에만 렌더 */
+.yoro-aram-mine {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(148, 163, 196, .16);
+  color: #34d399;
+  font-size: 12.5px;
+  font-weight: 800;
+}
+
+/* 결합 ③ — 증강 역필터 진입 버튼(도감)·활성 상태 바(전적 목록) */
+.yoro-aram-mine-jump {
+  margin-left: 10px;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--yoro-color-border);
+  border-radius: 99px;
+  background: none;
+  color: var(--yoro-color-secondary);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.public-match-augment-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+  font-size: 12.5px;
+}
+
+.public-match-augment-filter button {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--yoro-color-border);
+  border-radius: 99px;
+  background: none;
+  color: var(--yoro-color-text-muted);
+  font-size: 12px;
+  cursor: pointer;
+}

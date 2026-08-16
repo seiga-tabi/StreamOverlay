@@ -4774,7 +4774,6 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
 
 .public-profile-shared-shell .public-profile-layout {
   justify-self: center;
-  width: min(100%, calc(var(--yoro-space-12) * 27));
 }
 
 .public-profile-shared-top.yoro-card {

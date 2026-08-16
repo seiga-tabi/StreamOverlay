@@ -633,6 +633,23 @@ async function requestPublicStreamerRiotId(riotId: string): Promise<StreamerRiot
   return body.request;
 }
 
+/* 증강 숫자 id → 픽·승 집계(큐 2400 매치만) — 도감 카드 "내 전적" 배지의 데이터원. */
+export function aramAugmentStatsFromMatches(
+  matches: readonly PublicLolRecentMatch[],
+): Map<number, { picks: number; wins: number }> {
+  const stats = new Map<number, { picks: number; wins: number }>();
+  for (const match of matches) {
+    if (match.queueId !== 2400 || !match.augments) continue;
+    for (const augmentId of match.augments) {
+      const entry = stats.get(augmentId) ?? { picks: 0, wins: 0 };
+      entry.picks += 1;
+      if (match.result === "win") entry.wins += 1;
+      stats.set(augmentId, entry);
+    }
+  }
+  return stats;
+}
+
 function suggestionSourceLabel(suggestion: SearchSuggestion): string {
   if (suggestion.source === "verified") return t().verifiedSearch;
   if (suggestion.source === "recent") return t().recentSearch;
@@ -5302,6 +5319,15 @@ function RecentMatches({
       wins={recentWins}
     />
   ) : undefined;
+  const augmentFilterNotice = filters.augmentId !== undefined ? (
+    <span className="public-match-augment-filter" data-testid="augment-filter-notice">
+      <LolAugmentIcon id={filters.augmentId} />
+      {t().augmentFilterActive}
+      <button onClick={() => onFilters({ ...filters, augmentId: undefined })} type="button">
+        {t().augmentFilterClear} ✕
+      </button>
+    </span>
+  ) : undefined;
   const filterResultSummary = profile.summary.recentGames > 0 ? (
     <>
       <b>{profile.summary.recentGames}{t().games}</b>
@@ -5330,7 +5356,8 @@ function RecentMatches({
           filters={filters}
           onChange={onFilters}
           onReset={onResetFilters}
-          resultSummary={filterResultSummary}
+          /* 프래그먼트는 내용이 없어도 truthy — 빈 요약 컨테이너가 렌더되지 않게 조건부로 합칩니다. */
+          resultSummary={augmentFilterNotice ? <>{filterResultSummary}{augmentFilterNotice}</> : filterResultSummary}
         />
       )}
       initialLoading={loadingMore && profile.recentMatches.length === 0}
@@ -6489,7 +6516,17 @@ export function PublicLolPage({
       );
     }
     if (activeMainPage === "aram") {
-      return <PublicAramPage />;
+      /* 결합 ②: 검색된 프로필의 증강별 내 픽·승률을 도감에 전달(카탈로그 cdragonId 로 조인). */
+      return (
+        <PublicAramPage
+          augmentStats={profile ? aramAugmentStatsFromMatches(profile.recentMatches) : undefined}
+          onFilterAugment={profile ? (augmentId) => {
+            /* 결합 ③: 도감에서 "이 증강 쓴 경기" → 전적 화면으로 이동하며 증강 필터 적용 */
+            setFilters((current) => ({ ...current, augmentId }));
+            changeMainPage("search");
+          } : undefined}
+        />
+      );
     }
     if (activeMainPage === "patchNotes") {
       return <PublicPatchNotesPage locale={locale} />;

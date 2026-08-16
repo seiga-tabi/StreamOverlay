@@ -118,3 +118,16 @@ test("증강 칼바람 필터는 큐 2400 만 매칭한다", async () => {
   assert.equal(queueMatchesFilter(match({ queueId: 2400 }), "aram"), false);
   assert.equal(queueMatchesFilter(match({ queueId: 2400 }), "all"), true);
 });
+
+test("증강 역필터는 해당 증강을 픽한 경기만 남긴다", async () => {
+  const { filteredMatches } = await import("../src/features/public-lol/utils/match");
+  const profile = { recentMatches: [
+    match({ queueId: 2400, augments: [93, 89] }),
+    match({ queueId: 2400, augments: [7] }),
+    match({ queueId: 450 }),
+  ] } as never;
+  const base = { queue: "all", championId: "all", period: "all" } as const;
+  assert.equal(filteredMatches(profile, { ...base, augmentId: 93 }).length, 1);
+  assert.equal(filteredMatches(profile, { ...base, augmentId: 1 }).length, 0);
+  assert.equal(filteredMatches(profile, { ...base }).length, 3);
+});

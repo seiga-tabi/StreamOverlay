@@ -10,9 +10,19 @@ test("커밋된 증강 칼바람 카탈로그는 실제 증강 데이터로 안�
   assert.equal(catalog.mode, "aram_augments");
   assert.equal(catalog.status, "ready");
   assert.ok(catalog.augments.length > 0, "generate:aram-augments 로 채운 증강이 있어야 합니다.");
+  assert.match(
+    catalog.sourceRevision,
+    /^communitydragon:\d+\.\d+@sha256:[a-f0-9]{64};ddragon:\d+\.\d+\.\d+$/u
+  );
+  const cdragonIds = new Set();
   for (const augment of catalog.augments) {
     assert.ok(augment.iconUrl, `${augment.id}에 아이콘이 있어야 합니다.`);
+    assert.ok(Number.isSafeInteger(augment.cdragonId) && augment.cdragonId > 0,
+      `${augment.id}에 검증된 cdragonId가 있어야 합니다.`);
+    assert.equal(cdragonIds.has(augment.cdragonId), false, `중복 cdragonId=${augment.cdragonId}`);
+    cdragonIds.add(augment.cdragonId);
   }
+  assert.equal(cdragonIds.size, catalog.augments.length);
   assert.match(defaultAramAugmentCatalogPath(), /data\/lol\/aram\/augment-catalog\.json$/u);
 });
 

@@ -20,6 +20,7 @@
     --pn-accent: #3b4bd8;
     --pn-good: #0f6b3c;
     --pn-bad: #a32433;
+    --pn-warn: #7a5a06;
     --pn-scrim: 8 10 16;
     min-width: 0;
   }
@@ -225,37 +226,83 @@
     min-width: 13rem;
   }
 
+  /* 승 구간과 패 구간을 모두 칠합니다. 트랙 폭(inline style)이 판수에 비례하므로
+     3판 2승과 30판 20승이 같은 승률이어도 다르게 보입니다. */
   .yoro-pn-gauge-track {
     position: relative;
-    height: 8px;
+    display: flex;
+    height: 10px;
+    max-inline-size: 100%;
     border-radius: var(--yoro-radius-pill, 999px);
     background: rgb(20 23 31 / 12%);
     overflow: hidden;
   }
 
   .yoro-pn-gauge.is-hero .yoro-pn-gauge-track {
-    height: 10px;
+    height: 14px;
     background: rgb(255 255 255 / 24%);
   }
 
-  .yoro-pn-gauge-fill {
-    position: absolute;
-    inset: 0 auto 0 0;
-    border-radius: var(--yoro-radius-pill, 999px);
-    background: var(--pn-good);
+  .yoro-pn-gauge-win,
+  .yoro-pn-gauge-loss {
+    display: block;
+    min-inline-size: 0;
   }
 
-  .yoro-pn-gauge[data-tone="bad"] .yoro-pn-gauge-fill {
-    background: var(--pn-bad);
-  }
+  .yoro-pn-gauge-win { background: var(--pn-good); }
+  .yoro-pn-gauge-loss { background: color-mix(in srgb, var(--pn-bad) 55%, transparent); }
 
-  .yoro-pn-gauge.is-hero .yoro-pn-gauge-fill {
+  .yoro-pn-gauge.is-hero .yoro-pn-gauge-win {
     background: linear-gradient(90deg, #4ec792, #9df3c6);
   }
 
-  .yoro-pn-gauge.is-hero[data-tone="bad"] .yoro-pn-gauge-fill {
-    background: linear-gradient(90deg, #d6606f, #ffb3bb);
+  .yoro-pn-gauge.is-hero .yoro-pn-gauge-loss {
+    background: rgb(214 96 111 / 62%);
   }
+
+  /* 표본이 적으면 숫자만 보고 과신하지 않게 문구를 답니다. */
+  .yoro-pn-gauge-thin {
+    color: var(--pn-warn);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .yoro-pn-gauge.is-hero .yoro-pn-gauge-thin { color: #f0c674; }
+
+  /* 최근 패치 추이 — 개별 성적만으로는 흐름이 안 보입니다. */
+  .yoro-pn-trend {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    margin-block-end: 10px;
+    padding: 10px 16px;
+    border: 1px solid var(--yoro-color-border, rgb(148 163 196 / 16%));
+    border-radius: 12px;
+    background: var(--pn-surface);
+  }
+
+  .yoro-pn-trend-copy { margin: 0; }
+  .yoro-pn-trend-copy b { display: block; font-size: 13px; color: var(--pn-ink); }
+  .yoro-pn-trend-copy small { color: var(--pn-ink-dim); font-size: 11.5px; }
+
+  .yoro-pn-trend-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    block-size: 34px;
+    margin-inline-start: auto;
+  }
+
+  .yoro-pn-trend-bars > i {
+    inline-size: 10px;
+    min-block-size: 3px;
+    border-radius: 3px;
+    background: rgb(20 23 31 / 22%);
+  }
+
+  .yoro-pn-trend-bars > i[data-tone="good"] { background: var(--pn-good); }
+  .yoro-pn-trend-bars > i[data-tone="bad"] { background: var(--pn-bad); }
 
   /* 기준선이 있어야 62.5%가 좋은 값인지 한눈에 읽힙니다. */
   .yoro-pn-gauge-mid {
@@ -363,12 +410,26 @@
     text-shadow: 0 1px 3px rgb(8 10 16 / 80%);
   }
 
+  /* 카드 줄을 훑을 때 숫자만으로는 비교가 안 돼 미니 막대를 함께 둡니다. */
   .yoro-pn-tile-rate {
-    padding: 2px 8px;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px 4px;
     border-radius: var(--yoro-radius-pill, 999px);
     background: rgb(15 107 60 / 88%);
     color: #eafff3;
     text-shadow: none;
+    overflow: hidden;
+  }
+
+  .yoro-pn-tile-rate > i {
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline-start: 0;
+    block-size: 3px;
+    max-inline-size: 100%;
+    background: rgb(255 255 255 / 78%);
   }
 
   .yoro-pn-tile-rate[data-tone="bad"] {
@@ -1034,11 +1095,18 @@
 
 
 /* ══ 내 패치 전적 모듈(2026-08-16 분리) — 목업 §②. 히어로보다 낮은 시각 무게. ══ */
+/* 이 모듈은 다크 표면입니다. 라이트 테마용 --yoro-color-text-muted
+   (hsl(215 17% 46%) = rgb(97,114,137))를 쓰면 실측 3.86:1 로 배경에 묻히므로,
+   폴백이 아니라 모듈 전용 변수를 단일 원본으로 둡니다(측정 6.86:1). */
 .yoro-pn-mine-module {
-  display: flex;
+  --pn-mine-muted: #94a0bd;
+
+  /* flex-wrap 이면 문구 길이에 따라 폼이 제 줄로 접혀 같은 모듈이 상태마다
+     75px ↔ 166px 로 요동합니다. 열을 고정해 행 수를 예측 가능하게 만듭니다. */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 8px 14px;
+  gap: 10px 14px;
   margin-block-end: 10px;
   padding: 12px 16px;
   border: 1px solid rgba(123, 92, 255, .22);
@@ -1046,26 +1114,48 @@
   background: linear-gradient(90deg, rgba(123, 92, 255, .09), rgba(16, 22, 42, .9) 40%);
 }
 
-.yoro-pn-mine-icon { font-size: 17px; }
-.yoro-pn-mine-copy b { display: block; font-size: 14px; }
-.yoro-pn-mine-copy small { color: var(--yoro-color-text-muted, #94a0bd); font-size: 12px; }
+.yoro-pn-mine-copy,
+.yoro-pn-mine-head { min-inline-size: 0; }
 
-.yoro-pn-mine-form { display: flex; gap: 8px; margin-inline-start: auto; align-items: center; }
+/* 표시 중 상태의 첫 열 — 소환사 선택기와 상태 배지를 한 덩어리로 묶습니다. */
+.yoro-pn-mine-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+.yoro-pn-mine-copy b { display: block; font-size: 14px; }
+.yoro-pn-mine-copy small { display: block; color: var(--pn-mine-muted); font-size: 12px; }
+
+/* 폼과 보조 버튼은 한 덩어리로 마지막 열을 씁니다 — 각자 열을 차지하면
+   상태마다 열 수가 달라져 다시 높이가 흔들립니다. */
+.yoro-pn-mine-acts {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-self: end;
+}
+
+/* 오류·최근 검색은 "가끔 접히는 줄"이 아니라 항상 다음 행입니다. */
+.yoro-pn-mine-error,
+.yoro-pn-mine-recent { grid-column: 1 / -1; }
+
+.yoro-pn-mine-form { display: flex; gap: 8px; align-items: center; }
 .yoro-pn-mine-form select,
 .yoro-pn-mine-form input {
   min-height: 40px;
   padding: 0 12px;
   border: 1px solid rgba(148, 163, 196, .25);
   border-radius: 8px;
-  background: rgba(11, 16, 31, .9);
-  color: inherit;
+  background: rgb(255 255 255 / 6%);
+  color: #f5f5f7;
   font-size: 13px;
 }
-.yoro-pn-mine-form input { width: 200px; }
+.yoro-pn-mine-form input { width: 176px; }
 
-.yoro-pn-mine-error { flex-basis: 100%; margin: 0; color: #e15b6d; font-size: 12.5px; }
+.yoro-pn-mine-error { margin: 0; color: #e15b6d; font-size: 12.5px; }
 
-.yoro-pn-mine-recent { flex-basis: 100%; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; color: var(--yoro-color-text-muted, #94a0bd); font-size: 12px; }
+.yoro-pn-mine-recent { margin: 0; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; color: var(--pn-mine-muted); font-size: 12px; }
 .yoro-pn-mine-recent button {
   min-height: 32px;
   padding: 0 10px;
@@ -1080,7 +1170,7 @@
 
 .yoro-pn-mine-module.is-active { border-color: rgba(52, 211, 153, .35); background: linear-gradient(90deg, rgba(52, 211, 153, .08), rgba(16, 22, 42, .9) 40%); }
 .yoro-pn-mine-badge { border-radius: 99px; padding: 2px 9px; background: rgba(52, 211, 153, .15); color: #34d399; font-size: 11px; font-weight: 800; }
-.yoro-pn-mine-actions { display: flex; gap: 10px; align-items: center; margin-inline-start: auto; }
+
 .yoro-pn-mine-profile { color: #c9b6ff; font-weight: 700; font-size: 12.5px; text-decoration: none; }
 .yoro-pn-mine-dismiss {
   min-height: 36px;
@@ -1088,7 +1178,7 @@
   border: 1px solid rgba(148, 163, 196, .25);
   border-radius: 8px;
   background: none;
-  color: var(--yoro-color-text-muted, #94a0bd);
+  color: var(--pn-mine-muted);
   font-size: 12.5px;
   cursor: pointer;
 }
@@ -1102,10 +1192,14 @@
   opacity: .8;
 }
 
-@media (max-width: 48rem) {
-  .yoro-pn-mine-module { flex-direction: column; align-items: stretch; }
-  .yoro-pn-mine-form { margin-inline-start: 0; }
+/* 조작부(폼+해제) 실측 폭과 문구 최소폭 때문에 약 720px 아래에서는 2열이
+   성립하지 않습니다. 48rem(768px)까지 2열을 버티게 두면 문구 열이 짓눌려
+   블록 높이가 481px 까지 치솟습니다(목업 실측). 넉넉히 47.5rem 에서 내립니다. */
+@media (max-width: 47.5rem) {
+  .yoro-pn-mine-module { grid-template-columns: minmax(0, 1fr); align-items: stretch; }
+  .yoro-pn-mine-acts { display: grid; gap: 8px; justify-self: stretch; }
+  .yoro-pn-mine-form { justify-self: stretch; }
   .yoro-pn-mine-form input { flex: 1; width: auto; min-width: 0; }
-  .yoro-pn-mine-actions { margin-inline-start: 0; }
   .yoro-pn-mine-dismiss { min-height: 44px; }
+  .yoro-pn-trend-bars { margin-inline-start: 0; }
 }

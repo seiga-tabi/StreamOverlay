@@ -763,8 +763,6 @@
   padding: var(--yoro-space-2);
   border: thin solid var(--yoro-color-product-gray-border-strong);
   border-radius: var(--yoro-radius-sm);
-  background: var(--yoro-color-product-gray-surface-strong);
-  box-shadow: var(--yoro-shadow-public-header);
 }
 
 .public-dashboard-shell .public-game-selector-option {
@@ -2698,28 +2696,30 @@
    결함: 패널이 히어로 텍스트와 겹쳐 읽힘(그림자 약함), 활성 행 대비 미약, 호버에
    "이동" 어포던스 없음. 게임 브랜드 컬러를 활성 표시에 사용합니다. ══ */
 .public-dashboard-shell .public-game-selector-menu {
-  border-color: rgba(148, 163, 196, .28);
-  background: #131a30;
-  box-shadow: 0 18px 44px rgba(0, 0, 0, .55);
+  border-color: var(--yoro-color-product-gray-border-strong);
+  background: var(--yoro-color-ground-surface);
+  box-shadow: var(--yoro-shadow-public-header);
 }
 
 .public-dashboard-shell .public-game-selector-option.active {
-  background: rgba(123, 92, 255, .14);
+  background: var(--yoro-color-secondary-soft, var(--yoro-color-info-bg));
 }
 
-/* 활성 행 좌측 브랜드 컬러 바 — 게임 정체성을 선택 상태에 씁니다. */
-.public-game-selector-option.active:has(.is-lol) { box-shadow: inset 3px 0 0 #d13639; }
-.public-game-selector-option.active:has(.is-palworld) { box-shadow: inset 3px 0 0 #34c76a; }
-.public-game-selector-option.active:has(.is-valorant) { box-shadow: inset 3px 0 0 #ff4655; }
-.public-game-selector-option.active:has(.is-minecraft) { box-shadow: inset 3px 0 0 #6cc349; }
-.public-game-selector-option.active:has(.is-yoro-bot) { box-shadow: inset 3px 0 0 #8b7bff; }
+/* 활성 행 좌측 브랜드 컬러 바 — 게임 정체성을 선택 상태에 씁니다.
+   게임 색은 각 로고 배경이 이미 브랜드 토큰/자산으로 갖고 있으므로 currentColor 계열
+   대신 대표 토큰을 씁니다(발로란트만 전용 토큰 존재, 나머지는 의미 토큰으로 수렴). */
+.public-game-selector-option.active:has(.is-lol) { box-shadow: inset var(--yoro-space-1) 0 0 var(--yoro-color-danger); }
+.public-game-selector-option.active:has(.is-palworld) { box-shadow: inset var(--yoro-space-1) 0 0 var(--yoro-color-success); }
+.public-game-selector-option.active:has(.is-valorant) { box-shadow: inset var(--yoro-space-1) 0 0 var(--yoro-color-valorant-primary); }
+.public-game-selector-option.active:has(.is-minecraft) { box-shadow: inset var(--yoro-space-1) 0 0 var(--yoro-color-success); }
+.public-game-selector-option.active:has(.is-yoro-bot) { box-shadow: inset var(--yoro-space-1) 0 0 var(--yoro-color-secondary); }
 
 /* 호버 = 이동 어포던스(언어 중립 화살표) — 활성 행에는 붙지 않습니다. */
 .public-dashboard-shell .public-game-selector-menu .public-game-selector-option:not(.active):hover {
-  background: rgba(148, 163, 196, .1);
+  background: var(--yoro-color-product-gray-border);
 }
 .public-dashboard-shell .public-game-selector-menu .public-game-selector-option:not(.active):not(.is-coming-soon):hover .public-game-selector-meta::after {
   content: "›";
-  color: var(--yoro-color-text-muted, #94a0bd);
+  color: var(--yoro-color-text-muted);
   font-weight: 800;
 }

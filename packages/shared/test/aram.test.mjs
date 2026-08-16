@@ -59,3 +59,34 @@ test("실제 CommunityDragon 4단계 등급(레전드 포함)을 허용한다", 
   };
   assert.ok(parseAramAugmentCatalog({ ...preparingCatalog, status: "ready", augments: [legendAugment] }));
 });
+
+test("cdragonId는 선택적인 양의 safe integer이며 카탈로그 안에서 중복될 수 없다", () => {
+  const augment = {
+    id: "test-augment",
+    nameKo: "테스트 증강",
+    nameJa: "テストオーグメント",
+    descriptionKo: "테스트 설명",
+    descriptionJa: "テスト説明",
+    rarity: "gold"
+  };
+  const ready = { ...preparingCatalog, status: "ready" };
+  assert.ok(parseAramAugmentCatalog({ ...ready, augments: [augment] }));
+  assert.equal(
+    parseAramAugmentCatalog({ ...ready, augments: [{ ...augment, cdragonId: 123 }] })?.augments[0]?.cdragonId,
+    123
+  );
+  for (const cdragonId of [0, -1, 1.5, Number.MAX_SAFE_INTEGER + 1, "123"]) {
+    assert.equal(
+      parseAramAugmentCatalog({ ...ready, augments: [{ ...augment, cdragonId }] }),
+      undefined,
+      `허용되지 않는 cdragonId=${cdragonId}`
+    );
+  }
+  assert.equal(parseAramAugmentCatalog({
+    ...ready,
+    augments: [
+      { ...augment, cdragonId: 123 },
+      { ...augment, id: "another-augment", cdragonId: 123 }
+    ]
+  }), undefined);
+});

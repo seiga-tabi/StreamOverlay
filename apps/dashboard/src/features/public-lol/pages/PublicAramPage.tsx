@@ -62,11 +62,18 @@ async function requestCatalog(signal: AbortSignal): Promise<AramAugmentCatalog> 
   return catalog;
 }
 
-export function PublicAramPage() {
+export function PublicAramPage({ augmentStats, onFilterAugment }: {
+  /** 결합 ② — 검색된 소환사의 증강별 픽·승(숫자 cdragonId 키). 없으면 배지 생략. */
+  augmentStats?: Map<number, { picks: number; wins: number }>;
+  /** 결합 ③ — "이 증강 쓴 경기" 클릭 시 전적 화면에 증강 필터를 적용합니다. */
+  onFilterAugment?: (augmentId: number) => void;
+} = {}) {
   const [state, setState] = useState<LoadState>("loading");
   const [catalog, setCatalog] = useState<AramAugmentCatalog>();
   const [error, setError] = useState("");
-  const [query, setQuery] = useState("");
+  /* 전적 카드의 증강 아이콘 딥링크(?augment=이름) 수신 — 도감이 해당 증강으로 필터된 채 열립니다. */
+  const [query, setQuery] = useState(() =>
+    new URLSearchParams(window.location.search).get("augment")?.trim() ?? "");
   const [rarity, setRarity] = useState<AramAugmentRarity | "all">("all");
 
   function load(): AbortController {
@@ -202,6 +209,27 @@ export function PublicAramPage() {
                   <p className="yoro-aram-desc">
                     {activePublicLocale === "ja" ? augment.descriptionJa : augment.descriptionKo}
                   </p>
+                  {/* 결합 ② — 카탈로그 cdragonId 와 전적의 숫자 id 가 정확히 조인될 때만 표시(추측 매칭 금지) */}
+                  {(() => {
+                    const stat = augment.cdragonId !== undefined ? augmentStats?.get(augment.cdragonId) : undefined;
+                    if (!stat) return null;
+                    return (
+                      <p className="yoro-aram-mine" data-testid="aram-augment-mine">
+                        {t().aramMineStat
+                          .replace("{picks}", String(stat.picks))
+                          .replace("{rate}", String(Math.round((stat.wins / stat.picks) * 100)))}
+                        {onFilterAugment && augment.cdragonId !== undefined ? (
+                          <button
+                            className="yoro-aram-mine-jump"
+                            onClick={() => onFilterAugment(augment.cdragonId as number)}
+                            type="button"
+                          >
+                            {t().aramMineJump.replace("{count}", String(stat.picks))} →
+                          </button>
+                        ) : null}
+                      </p>
+                    );
+                  })()}
                 </CardContent>
               </Card>
             ))}

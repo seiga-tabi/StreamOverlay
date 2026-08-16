@@ -407,18 +407,24 @@ test("기록이 있는 패치에만 승률 게이지가 붙고 기준선이 함�
   await expect(page.locator(".yoro-pn-gauge")).toHaveCount(1);
   const hero = page.locator(".yoro-pn-hero .yoro-pn-gauge");
   await expect(hero).toContainText("62.5%");
-  await expect(hero).toContainText("5승 / 8판");
+  /* v2 — 승만이 아니라 패도 함께 말합니다(승/패 2색 막대와 같은 정보). */
+  await expect(hero).toContainText("5승 3패 · 8판");
+  await expect(hero.locator(".yoro-pn-gauge-win")).toHaveCount(1);
+  await expect(hero.locator(".yoro-pn-gauge-loss")).toHaveCount(1);
   /* 직전 패치(25%) 대비 +37.5%p. 색만이 아니라 부호와 숫자로 말합니다. */
   await expect(page.locator(".yoro-pn-delta")).toContainText("+37.5%p");
   /* 26.14 는 타일이므로 배지로 붙습니다. */
   await expect(page.locator(".yoro-pn-tile-rate")).toHaveText("25.0%");
 
   const gauge = await page.locator(".yoro-pn-hero .yoro-pn-gauge").evaluate((element) => ({
-    fill: (element.querySelector(".yoro-pn-gauge-fill") as HTMLElement).style.width,
+    /* v2 — 승 구간과 패 구간을 모두 칠하므로 비율은 flex-grow 로 표현됩니다. */
+    win: (element.querySelector(".yoro-pn-gauge-win") as HTMLElement).style.flexGrow,
+    loss: (element.querySelector(".yoro-pn-gauge-loss") as HTMLElement).style.flexGrow,
     mid: window.getComputedStyle(element.querySelector(".yoro-pn-gauge-mid")!).position,
     label: element.querySelector(".yoro-pn-gauge-track")?.getAttribute("aria-label")
   }));
-  expect(gauge.fill).toBe("62.5%");
+  expect(gauge.win).toBe("5");
+  expect(gauge.loss).toBe("3");
   expect(gauge.mid).toBe("absolute");
   expect(gauge.label).toContain("기준 50");
 
@@ -639,8 +645,8 @@ test("소환사 메뉴는 키보드로 다루고 닫으면 초점이 돌아온�
   await expect(menu).toBeVisible();
   await expect(menu.getByRole("menuitemradio")).toHaveCount(2);
   await expect(menu.getByRole("menuitemradio").first()).toHaveAttribute("aria-checked", "true");
-  /* 이 화면에서 다른 소환사를 찾아 나갈 길도 둡니다. */
-  await expect(menu.getByRole("menuitem")).toContainText("다른 소환사 검색하기");
+  /* v2 — 홈으로 나가는 링크는 제거했습니다. 다른 소환사는 모듈의 검색창으로 봅니다. */
+  await expect(menu.getByRole("menuitem")).toHaveCount(0);
 
   /* 화살표로 옮기고 Escape 로 닫으면 초점이 트리거로 돌아와야 합니다. */
   await menu.getByRole("menuitemradio").first().focus();
@@ -696,4 +702,130 @@ test("컨트롤 바가 문서를 가로로 넘치게 하지 않는다", async ({
   }));
   expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth);
   expect(layout.chipsScrolls).toBe("auto");
+});
+
+/* v2 계약 — docs/mockups/lol-patch-notes-search-redesign.html §②-B/C/D, v2-6 */
+const SUMMARY_V2: PatchPlaySummary = {
+  schemaVersion: 1,
+  gameName: "YORO",
+  tagLine: "KR1",
+  lolPlatform: "kr",
+  sampledMatches: 20,
+  fetchedAt: "2026-07-15T00:00:00.000Z",
+  /* 히어로(16.15)·타일(16.14)·아카이브 줄(16.10, 15.24)에 고루 붙여
+     막대 길이가 판수에 따라 달라지는지 한 화면에서 확인합니다. 합계는 표본 20 이하. */
+  patches: [
+    { patchKey: "16.15", games: 8, wins: 5, winRate: 62.5 },
+    { patchKey: "16.14", games: 2, wins: 1, winRate: 50 },
+    { patchKey: "16.10", games: 7, wins: 4, winRate: 57.1 },
+    { patchKey: "15.24", games: 3, wins: 2, winRate: 66.7 }
+  ]
+};
+
+async function installV2(page: Page): Promise<void> {
+  await installFixtures(page, {
+    patchNotes: feed(),
+    stored: [{
+      gameName: "YORO",
+      tagLine: "KR1",
+      lolPlatform: "kr",
+      profileIconUrl: "https://ddragon.leagueoflegends.com/i.png"
+    }],
+    summary: SUMMARY_V2
+  });
+}
+
+test("표시 중에도 소환사 검색창이 남고 페이지를 떠나지 않는다", async ({ page }) => {
+  /* v1 결함 — 활성 분기에 form 이 없어 이미 조회한 대상 사이에서만 오갈 수 있었고,
+     "다른 소환사 검색하기" 링크는 홈(/)으로 이동해 패치 노트를 떠났습니다. */
+  await installV2(page);
+  await page.goto("/patch-notes");
+  const mine = page.getByTestId("patch-notes-mine-module");
+  await expect(mine).toContainText("YORO#KR1");
+
+  await expect(mine.locator("form")).toHaveCount(1);
+  await expect(mine.getByRole("textbox")).toBeVisible();
+  /* 홈으로 튕기는 이탈 링크는 없어야 합니다. */
+  await expect(mine.locator('a[href="/"], a[href="/ko/"], a[href="/ja/"]')).toHaveCount(0);
+
+  await mine.getByRole("textbox").fill("Faker#KR1");
+  await mine.getByRole("button", { name: "보기" }).click();
+  await expect(mine).toContainText("Faker#KR1");
+  await expect(page).toHaveURL(/\/patch-notes(?:\?.*)?$/u);
+});
+
+test("소환사 모듈은 이모지 없이 그리고 설명문 대비를 4.5:1 이상으로 유지한다", async ({ page }) => {
+  await installFixtures(page, { patchNotes: feed() });
+  await page.goto("/patch-notes");
+  const mine = page.getByTestId("patch-notes-mine-module");
+  await expect(mine).toBeVisible();
+
+  /* 이모지는 플랫폼마다 모양이 달라지고 문구와 같은 말을 반복합니다. */
+  await expect(mine.locator(".yoro-pn-mine-icon")).toHaveCount(0);
+  await expect(mine).not.toContainText("📊");
+
+  /* 라이트 테마 토큰(--yoro-color-text-muted)을 이 다크 모듈에서 쓰면 3.86:1 로 묻힙니다. */
+  const ratio = await mine.locator(".yoro-pn-mine-copy small").evaluate((el) => {
+    const lum = (c: number[]) => {
+      const [r, g, b] = c.map((v) => {
+        const s = v / 255;
+        return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * r! + 0.7152 * g! + 0.0722 * b!;
+    };
+    const parse = (value: string) => (value.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number);
+    const [a, b] = [lum(parse(getComputedStyle(el).color)), lum([16, 22, 42])].sort((x, y) => y - x);
+    return Math.round(((a! + 0.05) / (b! + 0.05)) * 100) / 100;
+  });
+  expect(ratio).toBeGreaterThanOrEqual(4.5);
+});
+
+test("승률 막대는 판수에 비례하고 표본이 적으면 참고용으로 표시한다", async ({ page }) => {
+  await installV2(page);
+  await page.goto("/patch-notes");
+  await expect(page.locator(".yoro-pn-hero")).toBeVisible();
+
+  /* 승률이 같아도 판수가 다르면 막대 길이가 달라야 합니다(3판 2승 vs 30판 20승 문제). */
+  const widths = await page.locator(".yoro-pn-gauge-track").evaluateAll(
+    (nodes) => nodes.map((node) => Math.round(node.getBoundingClientRect().width))
+  );
+  expect(widths.length).toBeGreaterThan(1);
+  expect(Math.max(...widths)).toBeGreaterThan(Math.min(...widths));
+
+  /* 5판 미만은 숫자만 보고 과신하지 않게 문구를 답니다. */
+  await expect(page.locator(".yoro-pn-gauge-thin").first()).toContainText("참고용");
+
+  /* 타일은 숫자 배지 안에 미니 막대를 함께 그립니다. */
+  await expect(page.locator(".yoro-pn-tile-rate > i").first()).toBeVisible();
+
+  /* 추이 스파크는 이미 받은 summary.patches 로만 그립니다. */
+  const trend = page.locator(".yoro-pn-trend");
+  await expect(trend).toBeVisible();
+  await expect(trend.locator("i")).toHaveCount(SUMMARY_V2.patches.length);
+});
+
+test("소환사 모듈은 상태가 바뀌어도 행 수가 유지되고 좁은 화면에서 넘치지 않는다", async ({ page }) => {
+  /* v1 은 flex-wrap 이라 문구 길이에 따라 폼이 제 줄로 접혀 75px ↔ 166px 로 요동했습니다. */
+  await installV2(page);
+  await page.goto("/patch-notes");
+  const mine = page.getByTestId("patch-notes-mine-module");
+  await expect(mine).toBeVisible();
+
+  for (const width of [1440, 1024, 820, 700, 430, 390, 360]) {
+    await page.setViewportSize({ width, height: 900 });
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth
+    );
+    expect(overflow, `${width}px 가로 스크롤`).toBeLessThanOrEqual(0);
+  }
+
+  /* 넓은 폭에서는 조작부가 같은 행에 있어야 합니다(다음 행으로 밀리면 높이가 뜁니다). */
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const sameRow = await mine.evaluate((root) => {
+    const head = root.querySelector(".yoro-pn-mine-head");
+    const acts = root.querySelector(".yoro-pn-mine-acts");
+    if (!head || !acts) return false;
+    return Math.abs(head.getBoundingClientRect().top - acts.getBoundingClientRect().top) <= 8;
+  });
+  expect(sameRow).toBe(true);
 });

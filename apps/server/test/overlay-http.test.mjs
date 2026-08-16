@@ -277,6 +277,9 @@ test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => 
     assert.equal(aramBody.mode, "aram_augments");
     assert.equal(aramBody.status, "ready");
     assert.ok(Array.isArray(aramBody.augments) && aramBody.augments.length > 0);
+    assert.ok(aramBody.augments.every(
+      (augment) => Number.isSafeInteger(augment.cdragonId) && augment.cdragonId > 0
+    ));
 
     const legalRes = createResponse();
     await handler(createRequest("GET", "/privacy"), legalRes);

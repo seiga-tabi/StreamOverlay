@@ -110,11 +110,57 @@ export function PatchNotesMineModule({
     setDraft("");
   }
 
+  /* 검색 폼은 표시 전·표시 중 양쪽에서 같은 마크업을 씁니다.
+     활성 상태에서 폼을 없애면 이미 조회한 대상 사이에서만 오갈 수 있고,
+     새 소환사를 보려면 홈으로 나가야 합니다(v1 결함). */
+  function renderSearchForm(placeholder: string) {
+    return (
+      <form className="yoro-pn-mine-form" onSubmit={submitDraft}>
+        <select
+          aria-label={t().patchNotesMinePlatform}
+          onChange={(event) => setPlatform(event.currentTarget.value)}
+          value={platform}
+        >
+          {LOL_PLATFORM_IDS.map((id) => <option key={id} value={id}>{id.toUpperCase()}</option>)}
+        </select>
+        <input
+          aria-label="Riot ID"
+          maxLength={52}
+          onChange={(event) => {
+            setDraft(event.currentTarget.value);
+            if (draftError) setDraftError("");
+          }}
+          placeholder={placeholder}
+          value={draft}
+        />
+        <Button size="sm" type="submit">{t().patchNotesMineView}</Button>
+      </form>
+    );
+  }
+
+  /* 최근 검색 줄도 두 상태 모두에 둡니다 — 행 수가 같아야 상태 전환에서 높이가 튀지 않고,
+     표시 중에도 한 번 눌러 다른 소환사로 바꿀 수 있습니다. */
+  function renderRecent() {
+    if (targets.length === 0) return null;
+    return (
+      <p className="yoro-pn-mine-recent">
+        {t().patchNotesMineRecent}
+        {targets.slice(0, 3).map((item, index) => (
+          <button key={targetKey(item)} onClick={() => onTargetIndex(index)} type="button">
+            {riotIdOf(item)}
+          </button>
+        ))}
+      </p>
+    );
+  }
+
   /* ── 표시 중(활성) 상태 ─────────────────────────────────────────── */
   if (target) {
     return (
       <div className="yoro-pn-mine-module is-active" data-testid="patch-notes-mine-module">
-        <span aria-hidden="true" className="yoro-pn-mine-icon">📊</span>
+        {/* 신원과 상태는 한 열입니다 — 형제로 두면 2열 grid 에서 조작부가 다음 행으로
+            밀려 모듈 높이가 상태마다 달라집니다. */}
+        <div className="yoro-pn-mine-head">
         <div className="yoro-pn-who-wrap" ref={wrapRef}>
           <button
             aria-controls={menuId}
@@ -163,9 +209,6 @@ export function PatchNotesMineModule({
                   </span>
                 </button>
               ))}
-              <a className="yoro-pn-who-more" href={localizedPublicUrlForCurrentLocale("/")} role="menuitem">
-                {`${t().patchNotesSummonerChange} →`}
-              </a>
             </div>
           ) : null}
         </div>
@@ -184,8 +227,10 @@ export function PatchNotesMineModule({
             </Button>
           </span>
         ) : null}
+        </div>
 
-        <span className="yoro-pn-mine-actions">
+        <span className="yoro-pn-mine-acts">
+          {renderSearchForm(t().patchNotesMineSearchOther)}
           <a
             className="yoro-pn-mine-profile"
             href={localizedPublicUrlForCurrentLocale(
@@ -198,6 +243,8 @@ export function PatchNotesMineModule({
             {t().patchNotesMineDismiss}
           </button>
         </span>
+        {draftError ? <p className="yoro-pn-mine-error" role="alert">{draftError}</p> : null}
+        {renderRecent()}
       </div>
     );
   }
@@ -205,42 +252,15 @@ export function PatchNotesMineModule({
   /* ── 초대(미표시) 상태 ─────────────────────────────────────────── */
   return (
     <div className="yoro-pn-mine-module" data-testid="patch-notes-mine-module">
-      <span aria-hidden="true" className="yoro-pn-mine-icon">📊</span>
       <div className="yoro-pn-mine-copy">
         <b>{t().patchNotesMineEmptyTitle}</b>
         <small>{t().patchNotesMineModuleDescription}</small>
       </div>
-      <form className="yoro-pn-mine-form" onSubmit={submitDraft}>
-        <select
-          aria-label={t().patchNotesMinePlatform}
-          onChange={(event) => setPlatform(event.currentTarget.value)}
-          value={platform}
-        >
-          {LOL_PLATFORM_IDS.map((id) => <option key={id} value={id}>{id.toUpperCase()}</option>)}
-        </select>
-        <input
-          aria-label="Riot ID"
-          maxLength={52}
-          onChange={(event) => {
-            setDraft(event.currentTarget.value);
-            if (draftError) setDraftError("");
-          }}
-          placeholder={t().patchNotesMinePlaceholder}
-          value={draft}
-        />
-        <Button size="sm" type="submit">{t().patchNotesMineView}</Button>
-      </form>
+      <span className="yoro-pn-mine-acts">
+        {renderSearchForm(t().patchNotesMinePlaceholder)}
+      </span>
       {draftError ? <p className="yoro-pn-mine-error" role="alert">{draftError}</p> : null}
-      {targets.length > 0 ? (
-        <p className="yoro-pn-mine-recent">
-          {t().patchNotesMineRecent}
-          {targets.slice(0, 3).map((item, index) => (
-            <button key={targetKey(item)} onClick={() => onTargetIndex(index)} type="button">
-              {riotIdOf(item)}
-            </button>
-          ))}
-        </p>
-      ) : null}
+      {renderRecent()}
     </div>
   );
 }
