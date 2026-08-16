@@ -491,6 +491,14 @@ export type PublicLolProfile = {
   roleAnalysis?: LolRoleAnalysis;
   topChampions: LolChampionSummary[];
   recentMatches: PublicLolRecentMatch[];
+  /** 같이 플레이한 소환사(함께 2게임 이상, 상위 5) — 서버 집계, 없으면 카드 미렌더. */
+  frequentTeammates?: Array<{
+    gameName: string;
+    tagLine: string;
+    games: number;
+    wins: number;
+    lastPlayedAt?: string;
+  }>;
   liveGame: PublicLolCurrentGame;
   recentMatchStart: number;
   nextRecentMatchStart?: number;

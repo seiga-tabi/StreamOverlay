@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 /* ── 지표 프로파일 ─────────────────────────────────────────── */
 
@@ -223,6 +223,185 @@ export function ProfileRoleCard({ roles, text }: ProfileRoleCardProps) {
             </div>
           ))}
         </div>
+      )}
+    </article>
+  );
+}
+
+/* ── 플레이 시간대 ─────────────────────────────────────────── */
+/* 근거: docs/mockups/lol-profile-playtime-card.html (v2).
+ * 읽는 순서 1초/3초/5초 — 히어로(언제+승률 링) → 24h 스트립(peak 존) → 보조 2줄.
+ * 계산은 utils/playtime.ts 의 playtimeSummary 가 전담하고 이 컴포넌트는 표현만 맡습니다. */
+
+export type ProfilePlaytimeBandRow = {
+  key: string;
+  /** "밤 22–02" 처럼 이미 조립된 구간명. */
+  label: string;
+  /** 0~100. 분할 바의 승 구간 폭이자 표시 수치입니다. */
+  winRate: number;
+  games: number;
+  /** "40% · 5판" — 로케일 조립은 호출부가 합니다. */
+  statLabel: string;
+};
+
+export type ProfilePlaytimeCardText = {
+  title: string;
+  /** "최근 20경기 · KST" */
+  pillLabel: string;
+  peakZoneLabel: string;
+  winRateLabel: string;
+  stripAriaLabel: string;
+  emptyTitle: string;
+  emptyDescription: string;
+};
+
+export type ProfilePlaytimeCardProps = {
+  /** 낮 성향(peak 06–18시 시작)이면 해 아이콘 + 주황 틴트. */
+  daytime: boolean;
+  /** "저녁 18–22시" */
+  peakLabel?: string;
+  /** "8게임 · 전체의 40%" */
+  peakMetaLabel?: string;
+  /** 없으면 링을 그리지 않습니다(표본 부족 — 과신 방지). */
+  peakWinRate?: number;
+  peakWinRateTone: "up" | "down" | "flat";
+  /** 현지 0~23시별 게임 수. */
+  hourly: number[];
+  /** peak 구간 시작시. night(22)는 자정을 넘으므로 존을 둘로 쪼개 그립니다. */
+  peakStartHour?: number;
+  bands: ProfilePlaytimeBandRow[];
+  footLabel?: string;
+  /** 축 눈금 문구 — ["0시","6","12","18","24"] 형태. */
+  axisLabels: string[];
+  text: ProfilePlaytimeCardText;
+};
+
+const PLAYTIME_BAND_SPAN = 4;
+
+function MoonIcon() {
+  return (
+    <svg aria-hidden="true" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24">
+      <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />
+    </svg>
+  );
+}
+
+function SunIcon() {
+  return (
+    <svg aria-hidden="true" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+    </svg>
+  );
+}
+
+export function ProfilePlaytimeCard({
+  daytime,
+  peakLabel,
+  peakMetaLabel,
+  peakWinRate,
+  peakWinRateTone,
+  hourly,
+  peakStartHour,
+  bands,
+  footLabel,
+  axisLabels,
+  text,
+}: ProfilePlaytimeCardProps) {
+  const totalGames = hourly.reduce((sum, count) => sum + count, 0);
+  const maxHourly = Math.max(1, ...hourly);
+
+  /* 자정을 넘는 밤 구간(22–02)은 22–24 와 0–2 두 조각으로 그립니다.
+     라벨은 첫 조각에만 — 두 번 붙이면 같은 문구가 겹쳐 보입니다. */
+  const zones: Array<{ startHour: number; span: number; withLabel: boolean }> = [];
+  if (peakStartHour !== undefined) {
+    const end = peakStartHour + PLAYTIME_BAND_SPAN;
+    if (end <= 24) {
+      zones.push({ startHour: peakStartHour, span: PLAYTIME_BAND_SPAN, withLabel: true });
+    } else {
+      zones.push({ startHour: peakStartHour, span: 24 - peakStartHour, withLabel: true });
+      zones.push({ startHour: 0, span: end - 24, withLabel: false });
+    }
+  }
+
+  return (
+    <article className="public-profile-side-card public-profile-playtime">
+      <div className="public-profile-side-head">
+        <h2>{text.title}</h2>
+        <span className="public-profile-side-pill">{text.pillLabel}</span>
+      </div>
+
+      {totalGames === 0 ? (
+        <div className="public-profile-side-empty">
+          <strong>{text.emptyTitle}</strong>
+          <span>{text.emptyDescription}</span>
+        </div>
+      ) : (
+        <>
+          <div className={`public-profile-playtime-hero ${daytime ? "is-day" : "is-night"}`}>
+            <span aria-hidden="true" className="public-profile-playtime-icon">
+              {daytime ? <SunIcon /> : <MoonIcon />}
+            </span>
+            <span className="public-profile-playtime-when">
+              <b>{peakLabel}</b>
+              <span>{peakMetaLabel}</span>
+            </span>
+            {peakWinRate !== undefined ? (
+              <span
+                aria-label={`${text.winRateLabel} ${peakWinRate}%`}
+                className="public-profile-playtime-ring"
+                data-tone={peakWinRateTone}
+                role="img"
+                style={{ "--playtime-rate": peakWinRate } as CSSProperties}
+              >
+                <b>{peakWinRate}%</b>
+                <small>{text.winRateLabel}</small>
+              </span>
+            ) : null}
+          </div>
+
+          <div className="public-profile-playtime-strip-wrap">
+            <div aria-label={text.stripAriaLabel} className="public-profile-playtime-strip" role="img">
+              {zones.map((zone) => (
+                <span
+                  className="public-profile-playtime-zone"
+                  data-label={zone.withLabel ? text.peakZoneLabel : ""}
+                  key={zone.startHour}
+                  style={{ left: `${(zone.startHour / 24) * 100}%`, width: `${(zone.span / 24) * 100}%` }}
+                />
+              ))}
+              {hourly.map((count, hour) => (
+                <i
+                  /* 시간별 막대라 시(hour)가 곧 안정된 key 입니다. */
+                  key={hour}
+                  className={count > 0 ? "is-on" : ""}
+                  style={{ height: count > 0 ? `${Math.max(18, Math.round((count / maxHourly) * 100))}%` : undefined }}
+                />
+              ))}
+            </div>
+            <div aria-hidden="true" className="public-profile-playtime-axis">
+              {axisLabels.map((label, index) => (
+                <span key={label} style={{ left: `${(index / (axisLabels.length - 1)) * 100}%` }}>{label}</span>
+              ))}
+            </div>
+          </div>
+
+          {bands.length > 0 ? (
+            <ol className="public-profile-playtime-bands">
+              {bands.map((band) => (
+                <li key={band.key}>
+                  <span className="zone">{band.label}</span>
+                  <span aria-label={`${band.label} ${band.statLabel}`} className="split" role="img">
+                    <span className="w" style={{ width: `${Math.max(0, Math.min(100, band.winRate))}%` }} />
+                  </span>
+                  <span className="stat">{band.statLabel}</span>
+                </li>
+              ))}
+            </ol>
+          ) : null}
+
+          {footLabel ? <p className="public-profile-side-foot">{footLabel}</p> : null}
+        </>
       )}
     </article>
   );

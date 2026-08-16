@@ -95,6 +95,7 @@ import {
   StreamerRow,
   ProfileLpRecordCard as FeatureProfileLpRecordCard,
   ProfileMetricProfileCard as FeatureProfileMetricProfileCard,
+  ProfilePlaytimeCard as FeatureProfilePlaytimeCard,
   ProfileRoleCard as FeatureProfileRoleCard,
   ProfileStreamerCast as FeatureProfileStreamerCast,
   ProfileMetricStrip as FeatureProfileMetricStrip,
@@ -164,6 +165,7 @@ import {
   type SearchableRiotIdViewModel,
   type TeamChampionAvatarViewModel,
 } from "../features/public-lol";
+import { platformTimezoneLabel, playtimeSummary, type PlaytimeBandKey } from "../features/public-lol/utils/playtime";
 import {
   activePublicLocale,
   publicI18n,
@@ -1972,6 +1974,86 @@ function metricRatio(value: number | undefined, max: number): number {
 }
 
 /** rankHistory 의 연속한 두 점 차이가 곧 LP 변동입니다. 최신 3건만 씁니다. */
+/* 플레이 시간대 — 요약(utils/playtime)을 표시 문구로 조립해 카드에 넘깁니다.
+   근거: docs/mockups/lol-profile-playtime-card.html (v2). */
+const PLAYTIME_BAND_LABEL_KEY: Record<PlaytimeBandKey, "playtimeBandDawn" | "playtimeBandMorning" | "playtimeBandDay" | "playtimeBandAfternoon" | "playtimeBandEvening" | "playtimeBandNight"> = {
+  dawn: "playtimeBandDawn",
+  morning: "playtimeBandMorning",
+  day: "playtimeBandDay",
+  afternoon: "playtimeBandAfternoon",
+  evening: "playtimeBandEvening",
+  night: "playtimeBandNight"
+};
+
+function playtimeHourText(hour: number): string {
+  /* "02–06"처럼 한 자리는 0을 붙입니다 — 목업 표기 그대로. */
+  return hour < 10 ? `0${hour}` : String(hour);
+}
+
+function playtimeRangeLabel(bandKey: PlaytimeBandKey, startHour: number): string {
+  const endHour = (startHour + 4) % 24;
+  return t().playtimeRange
+    .replace("{label}", t()[PLAYTIME_BAND_LABEL_KEY[bandKey]])
+    .replace("{start}", playtimeHourText(startHour))
+    .replace("{end}", playtimeHourText(endHour));
+}
+
+function ProfilePlaytimeSection({ profile }: { profile: PublicLolProfile }) {
+  const summary = playtimeSummary(profile.recentMatches, profile.lolPlatform);
+  const peakRate = summary.peakWinRate;
+  const bandShortLabel = (bandKey: PlaytimeBandKey, startHour: number): string =>
+    `${t()[PLAYTIME_BAND_LABEL_KEY[bandKey]]} ${playtimeHourText(startHour)}\u2013${playtimeHourText((startHour + 4) % 24)}`;
+
+  return (
+    <FeatureProfilePlaytimeCard
+      axisLabels={[t().playtimeAxisStart, "6", "12", "18", "24"]}
+      bands={summary.others.map((band) => ({
+        key: band.key,
+        label: bandShortLabel(band.key, band.startHour),
+        winRate: band.winRate,
+        games: band.games,
+        statLabel: t().playtimeBandStat
+          .replace("{rate}", String(band.winRate))
+          .replace("{games}", String(band.games))
+      }))}
+      daytime={summary.daytime}
+      footLabel={summary.totalGames > 0 && summary.thinSample
+        ? t().playtimeThinFoot
+        : summary.insight
+          ? t().playtimeInsight
+            .replace("{band}", bandShortLabel(summary.insight.band.key, summary.insight.band.startHour))
+            .replace("{diff}", String(summary.insight.diffPoints))
+          : undefined}
+      hourly={summary.hourly}
+      peakLabel={summary.peak ? playtimeRangeLabel(summary.peak.key, summary.peak.startHour) : undefined}
+      peakMetaLabel={summary.peak
+        ? summary.thinSample
+          ? t().playtimePeakMetaThin.replace("{games}", String(summary.peak.games))
+          : t().playtimePeakMeta
+            .replace("{games}", String(summary.peak.games))
+            .replace("{share}", String(summary.peakShare))
+        : undefined}
+      peakStartHour={summary.peak?.startHour}
+      peakWinRate={peakRate}
+      peakWinRateTone={peakRate === undefined || peakRate === 50 ? "flat" : peakRate > 50 ? "up" : "down"}
+      text={{
+        title: t().playtimeTitle,
+        /* 빈 상태에서 "최근 0경기"는 어색합니다 — LP 카드처럼 기간 pill 로 둡니다. */
+        pillLabel: summary.totalGames === 0
+          ? t().period30
+          : t().playtimePill
+            .replace("{count}", String(summary.totalGames))
+            .replace("{tz}", platformTimezoneLabel(profile.lolPlatform)),
+        peakZoneLabel: t().playtimePeakZone,
+        winRateLabel: t().playtimeWinRate,
+        stripAriaLabel: t().playtimeStripAria,
+        emptyTitle: t().playtimeEmptyTitle,
+        emptyDescription: t().playtimeEmptyDescription
+      }}
+    />
+  );
+}
+
 function profileLpChangeEntries(profile: PublicLolProfile): ProfileLpChangeEntry[] {
   const history = [...(profile.rankHistory ?? [])]
     .filter((point) => Number.isFinite(Date.parse(point.date)))
@@ -1998,6 +2080,54 @@ function profileLpChangeEntries(profile: PublicLolProfile): ProfileLpChangeEntry
  * 구간은 "도착 지점" 티어색으로 칠하고, 이미 지난 구간은 되돌아가 다시 칠하지
  * 않습니다. 색은 20-profile-platform.css 의 .public-profile-platform-v2 에
  * 있는 --tier-lp-* 를 씁니다(히어로 크레스트의 --tier-color 와 같은 값). */
+/* 같이 플레이한 소환사 — LP 기록 아래 독립 파츠(목업 lol-frequent-teammates §②).
+   같은 경기+같은 팀 기준 서버 집계(함께 2게임 이상만) · 행 클릭 = 해당 소환사 전적으로 이동.
+   데이터가 없으면 카드 자체를 그리지 않습니다(빈 카드 노이즈 금지). */
+function ProfileFrequentTeammatesCard({ profile }: { profile: PublicLolProfile }) {
+  const teammates = profile.frequentTeammates ?? [];
+  if (teammates.length === 0) return null;
+  return (
+    <section aria-labelledby="frequent-teammates-title" className="yoro-card public-frequent-teammates" data-testid="frequent-teammates-card">
+      <h3 id="frequent-teammates-title">
+        {t().frequentTeammatesTitle}
+        <small>{t().frequentTeammatesSample.replace("{count}", String(profile.summary.recentGames))}</small>
+      </h3>
+      <ul>
+        {teammates.map((mate) => {
+          const winRate = Math.round((mate.wins / mate.games) * 100);
+          const profileHref = localizedPublicUrlForCurrentLocale(
+            `/lol/summoners/${profile.lolPlatform}/${encodeURIComponent(`${mate.gameName}-${mate.tagLine}`)}`
+          );
+          return (
+            <li key={`${mate.gameName}#${mate.tagLine}`.toLowerCase()}>
+              <a href={profileHref}>
+                <span className="public-frequent-teammates__who">
+                  <b>{mate.gameName}<i>#{mate.tagLine}</i></b>
+                  {mate.lastPlayedAt ? (
+                    <small>
+                      {t().frequentTeammatesLast}{" "}
+                      {new Intl.DateTimeFormat(activePublicLocale === "ja" ? "ja-JP" : "ko-KR", { month: "long", day: "numeric" })
+                        .format(new Date(mate.lastPlayedAt))}
+                    </small>
+                  ) : null}
+                </span>
+                <span aria-hidden="true" className="public-frequent-teammates__bar">
+                  <i style={{ width: `${winRate}%` }} />
+                </span>
+                <span className="public-frequent-teammates__stat">
+                  <b className={winRate >= 60 ? "is-hot" : winRate <= 40 ? "is-cold" : ""}>{winRate}%</b>
+                  {t().frequentTeammatesGames.replace("{count}", String(mate.games))}
+                </span>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="public-frequent-teammates__foot">{t().frequentTeammatesFoot}</p>
+    </section>
+  );
+}
+
 function ProfileSidebarLpChart({ points }: { points: Array<{ value: number; tierKey: string }> }) {
   const gradientId = useId();
   const width = 256;
@@ -2126,6 +2256,10 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
           title: t().lpRecordTitle,
         }}
       />
+
+      <ProfilePlaytimeSection profile={profile} />
+
+      <ProfileFrequentTeammatesCard profile={profile} />
 
       <FeatureProfileRoleCard
         roles={roles}

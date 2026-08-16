@@ -768,6 +768,14 @@ type PublicLolMatchPageResponse = {
 };
 
 type PublicLolProfileResponse = {
+  /** 같이 플레이한 소환사(함께 2게임 이상, 상위 5) — puuid 비노출. */
+  frequentTeammates?: Array<{
+    gameName: string;
+    tagLine: string;
+    games: number;
+    wins: number;
+    lastPlayedAt?: string;
+  }>;
   status: "ready";
   riotId: string;
   gameName: string;
@@ -3219,6 +3227,41 @@ function publicLolMatchQueueFilter(value: unknown): PublicLolMatchQueueFilter {
     error: "지원하지 않는 전적 큐 필터입니다.",
     code: "LOL_MATCH_QUEUE_INVALID"
   });
+}
+
+/* 같이 플레이한 소환사 집계 — docs/mockups/lol-frequent-teammates.html §①.
+   이미 받아 둔 원본 매치의 참가자(같은 경기 + 같은 팀)만 사용하므로 추가 Riot 호출이 없습니다.
+   규칙: 본인·이름 없는 참가자 제외 · 함께 2게임 이상만 · 게임 수 내림차순, 동률이면 최근 순 · 상위 5명.
+   puuid 는 응답에 노출하지 않습니다(기존 보안 원칙). */
+function frequentTeammatesFromMatches(matches: RiotMatch[], targetPuuid: string): Array<{
+  gameName: string;
+  tagLine: string;
+  games: number;
+  wins: number;
+  lastPlayedAt?: string;
+}> {
+  const byId = new Map<string, { gameName: string; tagLine: string; games: number; wins: number; lastPlayedAt?: string }>();
+  for (const match of matches) {
+    const target = match.info.participants.find((item) => item.puuid === targetPuuid);
+    if (!target) continue;
+    const startedAt = matchStartedAt(match);
+    for (const mate of match.info.participants) {
+      if (mate.puuid === targetPuuid || mate.teamId !== target.teamId) continue;
+      const gameName = mate.riotIdGameName?.trim();
+      const tagLine = mate.riotIdTagline?.trim();
+      if (!gameName || !tagLine) continue;
+      const key = `${gameName}#${tagLine}`.toLowerCase();
+      const entry = byId.get(key) ?? { gameName, tagLine, games: 0, wins: 0 };
+      entry.games += 1;
+      if (target.win === true) entry.wins += 1;
+      if (startedAt && (!entry.lastPlayedAt || startedAt > entry.lastPlayedAt)) entry.lastPlayedAt = startedAt;
+      byId.set(key, entry);
+    }
+  }
+  return [...byId.values()]
+    .filter((entry) => entry.games >= 2)
+    .sort((a, b) => b.games - a.games || (b.lastPlayedAt ?? "").localeCompare(a.lastPlayedAt ?? ""))
+    .slice(0, 5);
 }
 
 function isPublicLolQueue(match: RiotMatch): boolean {
@@ -7133,6 +7176,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       },
       rankHistory,
       performanceStats: performanceStatsFromMatches(matches, account.puuid),
+      frequentTeammates: frequentTeammatesFromMatches(matches, account.puuid),
       roleAnalysis: inferMainRoleFromMatches(matches, account.puuid, 45),
       topChampions,
       recentMatches: visibleRecentMatches,

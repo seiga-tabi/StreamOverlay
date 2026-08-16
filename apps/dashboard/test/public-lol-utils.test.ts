@@ -8,6 +8,7 @@ import {
   summarizeMatches,
 } from "../src/features/public-lol/utils/match";
 import { rankScore, rankTrendLine, shortRankLabel } from "../src/features/public-lol/utils/rank";
+import { platformTimezoneLabel, playtimeSummary } from "../src/features/public-lol/utils/playtime";
 import {
   buildSuggestions,
   jpRiotIdQuery,
@@ -328,4 +329,68 @@ test("LP 추이는 랭크 큐 경기만 반영하고 다른 큐 승리로는 오
   } as PublicLolProfile);
   assert.ok(soloOnly);
   assert.equal(soloOnly.change, 2);
+});
+
+test("플레이 시간대 요약은 플랫폼 현지 시간으로 집계하고 표본 규칙을 지킨다", () => {
+  /* 근거: docs/mockups/lol-profile-playtime-card.html.
+     시간대는 뷰어가 아니라 플랫폼(UTC+9) 기준 — UTC 16:30 은 KST 01:30 이라
+     밤(22–02) 구간입니다. 자정 넘김과 날짜 경계가 이 한 케이스에 같이 걸립니다. */
+  const at = (utcIso: string, result: "win" | "loss"): PublicLolRecentMatch =>
+    ({ matchId: utcIso, result, startedAt: utcIso } as PublicLolRecentMatch);
+
+  const summary = playtimeSummary([
+    /* KST 01:30 → 밤(22–02) — UTC 로는 전날입니다 */
+    at("2026-08-10T16:30:00.000Z", "win"),
+    /* KST 23:00 → 밤 */
+    at("2026-08-10T14:00:00.000Z", "win"),
+    at("2026-08-11T14:00:00.000Z", "loss"),
+    /* KST 19:00 → 저녁(18–22) */
+    at("2026-08-10T10:00:00.000Z", "win"),
+    at("2026-08-11T10:00:00.000Z", "win"),
+    at("2026-08-12T10:00:00.000Z", "win"),
+    at("2026-08-13T10:00:00.000Z", "loss"),
+    /* KST 02:30 → 새벽(02–06) */
+    at("2026-08-10T17:30:00.000Z", "loss"),
+    /* startedAt 없음 → 집계 제외 */
+    { matchId: "no-time", result: "win" } as PublicLolRecentMatch,
+    /* KST 11:00 → 낮 */
+    at("2026-08-10T02:00:00.000Z", "win"),
+    at("2026-08-11T02:00:00.000Z", "win"),
+    at("2026-08-12T02:00:00.000Z", "win")
+  ], "kr");
+
+  assert.equal(summary.totalGames, 11);
+  assert.equal(summary.hourly[1], 1);   // KST 01시
+  assert.equal(summary.hourly[23], 2);  // KST 23시
+  assert.equal(summary.peak?.key, "evening");
+  assert.equal(summary.peak?.games, 4);
+  assert.equal(summary.thinSample, false);
+  assert.equal(summary.peakWinRate, 75);
+  assert.equal(summary.peakShare, 36);
+  assert.equal(summary.daytime, false);
+  /* others: 밤 3판(67%)·낮 3판(100%) — 게임 수 동수면 정의 순서로 낮이 먼저? 정렬은
+     games desc 안정 정렬이라 dawn→night 순서상 낮(day)이 앞입니다. */
+  assert.deepEqual(summary.others.map((band) => band.key), ["day", "night"]);
+  /* 인사이트: 낮 100% vs 저녁 75% = +25%p — 발화합니다. */
+  assert.equal(summary.insight?.band.key, "day");
+  assert.equal(summary.insight?.diffPoints, 25);
+
+  /* 표본 부족(9판): 승률 계열 전부 숨김 — 분포만 남습니다. */
+  const thin = playtimeSummary(
+    Array.from({ length: 9 }, (_, index) =>
+      at(`2026-08-1${index % 3}T10:00:00.000Z`, "win")),
+    "kr"
+  );
+  assert.equal(thin.thinSample, true);
+  assert.equal(thin.peakWinRate, undefined);
+  assert.deepEqual(thin.others, []);
+  assert.equal(thin.insight, undefined);
+
+  /* 빈 입력 */
+  const empty = playtimeSummary([], "jp1");
+  assert.equal(empty.totalGames, 0);
+  assert.equal(empty.peak, undefined);
+
+  assert.equal(platformTimezoneLabel("kr"), "KST");
+  assert.equal(platformTimezoneLabel("jp1"), "JST");
 });

@@ -1828,6 +1828,21 @@ test("공개 LoL 첫 검색은 최근 20게임만 상세 조회하고 다음 페
                 playerAugment1: 93,
                 playerAugment2: 89,
                 playerAugment3: 0
+              }, {
+                /* 같이 플레이한 소환사 집계 회귀 — 같은 팀·이름 있는 참가자 */
+                puuid: "mate-puuid",
+                teamId: 100,
+                riotIdGameName: "Mate",
+                riotIdTagline: "KR1",
+                championId: 86,
+                championName: "Garen",
+                win: true
+              }, {
+                /* 이름 없는 참가자·상대팀은 집계 제외 */
+                puuid: "anon-puuid", teamId: 100, championId: 1, championName: "Annie", win: true
+              }, {
+                puuid: "enemy-puuid", teamId: 200, riotIdGameName: "Enemy", riotIdTagline: "KR2",
+                championId: 238, championName: "Zed", win: false
               }]
             }
           };
@@ -1844,6 +1859,12 @@ test("공개 LoL 첫 검색은 최근 20게임만 상세 조회하고 다음 페
     assert.equal(matchLookups, 20);
     assert.equal(body.recentMatches.length, 20);
     assert.deepEqual(body.recentMatches[0].augments, [93, 89]);
+    /* 같이 플레이한 소환사: 같은 팀·이름 있는 참가자만(상대팀·무명 제외), puuid 비노출 */
+    assert.equal(body.frequentTeammates.length, 1);
+    assert.equal(body.frequentTeammates[0].gameName, "Mate");
+    assert.equal(body.frequentTeammates[0].games, 20);
+    assert.equal(body.frequentTeammates[0].wins, 20);
+    assert.equal("puuid" in body.frequentTeammates[0], false);
     assert.equal(body.nextRecentMatchStart, 20);
     assert.equal(body.hasMoreRecentMatches, true);
   });

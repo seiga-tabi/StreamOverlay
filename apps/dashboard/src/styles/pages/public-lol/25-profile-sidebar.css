@@ -311,4 +311,226 @@
   @container profile-side (max-width: 22rem) {
     .public-profile-metric-row { grid-template-columns: 3.75rem 2.5rem minmax(0, 1fr); }
   }
+
+  /* ── 플레이 시간대 ───────────────────────────────────────────
+     근거: docs/mockups/lol-profile-playtime-card.html (v2).
+     히어로(언제+승률 링) → 24h 스트립(peak 존) → 보조 2줄. */
+
+  /* 좁은 열에서 히어로를 한 단계 줄이는 분기가 카드 자신의 폭 기준이어야 해서
+     이 카드만 스스로 container 가 됩니다(panel 의 profile-side 는 열 수에 따라
+     카드 폭과 어긋납니다). */
+  .public-profile-playtime { container-type: inline-size; }
+
+  .public-profile-playtime-hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--yoro-space-3);
+    padding: var(--yoro-space-3);
+    border: 1px solid var(--yoro-color-border-on-dark-strong);
+    border-radius: var(--yoro-radius-sm);
+    overflow: hidden;
+  }
+
+  /* 성향 틴트 — 글자 대비를 깎지 않는 선(opacity .16)의 배경 신호입니다. */
+  .public-profile-playtime-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: .16;
+    pointer-events: none;
+  }
+
+  .public-profile-playtime-hero.is-night { border-color: color-mix(in srgb, var(--yoro-color-public-primary) 40%, transparent); }
+  .public-profile-playtime-hero.is-night::before { background: linear-gradient(120deg, var(--yoro-color-public-primary), transparent 62%); }
+  .public-profile-playtime-hero.is-day { border-color: color-mix(in srgb, var(--yoro-color-accent-gold) 35%, transparent); }
+  .public-profile-playtime-hero.is-day::before { background: linear-gradient(120deg, var(--yoro-color-accent-gold), transparent 62%); }
+
+  .public-profile-playtime-icon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.375rem;
+    height: 2.375rem;
+    border-radius: var(--yoro-radius-sm);
+    background: color-mix(in srgb, var(--yoro-color-text-on-dark) 7%, transparent);
+  }
+
+  .public-profile-playtime-icon > svg { width: 1.25rem; height: 1.25rem; }
+  .public-profile-playtime-hero.is-night .public-profile-playtime-icon { color: #b9a7ff; }
+  .public-profile-playtime-hero.is-day .public-profile-playtime-icon { color: var(--yoro-color-accent-gold); }
+
+  .public-profile-playtime-when { min-width: 0; }
+
+  .public-profile-playtime-when > b {
+    display: block;
+    font-size: 1.0625rem;
+    font-weight: var(--yoro-font-weight-black);
+    letter-spacing: -.02em;
+    line-height: 1.25;
+  }
+
+  .public-profile-playtime-when > span {
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* 승률 링 — conic-gradient 도넛. mask 미지원 구형에선 배경 원으로 강등되지만
+     중앙 숫자는 항상 보입니다(핵심 값은 텍스트). */
+  .public-profile-playtime-ring {
+    flex: none;
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    margin-left: auto;
+    border-radius: var(--yoro-radius-circle);
+  }
+
+  .public-profile-playtime-ring::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: var(--yoro-radius-circle);
+    background: conic-gradient(var(--playtime-ring-color, var(--yoro-color-rank-trend)) calc(var(--playtime-rate, 0) * 1%), color-mix(in srgb, var(--yoro-color-text-on-dark) 16%, transparent) 0);
+    mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5px));
+  }
+
+  .public-profile-playtime-ring > b {
+    font-size: var(--yoro-font-size-sm);
+    font-weight: var(--yoro-font-weight-black);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.02em;
+  }
+
+  .public-profile-playtime-ring > small {
+    position: absolute;
+    bottom: 6px;
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: .53125rem;
+  }
+
+  /* LP delta 와 같은 tone 규칙 — up 초록 / down 붉음 / flat 회색. */
+  .public-profile-playtime-ring[data-tone="down"] { --playtime-ring-color: var(--yoro-color-match-loss-accent); }
+  .public-profile-playtime-ring[data-tone="flat"] { --playtime-ring-color: var(--yoro-color-text-on-dark-muted); }
+
+  /* "주 시간대" 라벨이 존 위(-1.4em)에 뜨므로 그 높이만큼 상단 여백을 예약합니다
+     — 안 그러면 라벨이 히어로에 붙습니다(목업에서 실측한 결함). */
+  .public-profile-playtime-strip-wrap { position: relative; padding-top: 18px; }
+
+  .public-profile-playtime-strip {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 2.75rem;
+    padding: 4px 0 2px;
+  }
+
+  /* 막대는 positioned 로 — peak 존(absolute)이 DOM 앞이어도 비배치 요소 위에
+     그려져 틴트가 막대를 씻어냅니다(목업 낮 카드에서 실측). 둘 다 positioned 면
+     DOM 순서(존 → 막대)대로 막대가 위에 옵니다. */
+  .public-profile-playtime-strip > i {
+    position: relative;
+    flex: 1 1 0;
+    min-height: 2px;
+    border-radius: var(--yoro-radius-pill);
+    background: color-mix(in srgb, var(--yoro-color-text-on-dark) 28%, transparent);
+  }
+
+  .public-profile-playtime-strip > i.is-on {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--yoro-color-public-primary) 70%, #fff 12%), var(--yoro-color-public-primary));
+  }
+
+  /* 존·막대·축 눈금은 전부 h/24 하나의 좌표계를 공유합니다 — 축을 space-between
+     으로 흩으면 라벨 폭 때문에 눈금이 실제 시각에서 밀립니다(목업 실측 4.5px). */
+  .public-profile-playtime-zone {
+    position: absolute;
+    top: 0;
+    bottom: 14px;
+    border: 1px solid color-mix(in srgb, var(--yoro-color-public-primary) 35%, transparent);
+    border-radius: var(--yoro-radius-sm);
+    background: color-mix(in srgb, var(--yoro-color-public-primary) 14%, transparent);
+  }
+
+  .public-profile-playtime-zone::after {
+    content: attr(data-label);
+    position: absolute;
+    top: -1.4em;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #b9a7ff;
+    font-size: .625rem;
+    font-weight: var(--yoro-font-weight-bold);
+    white-space: nowrap;
+  }
+
+  .public-profile-playtime-hero.is-day ~ .public-profile-playtime-strip-wrap .public-profile-playtime-zone {
+    border-color: color-mix(in srgb, var(--yoro-color-accent-gold) 35%, transparent);
+    background: color-mix(in srgb, var(--yoro-color-accent-gold) 12%, transparent);
+  }
+
+  .public-profile-playtime-hero.is-day ~ .public-profile-playtime-strip-wrap .public-profile-playtime-zone::after {
+    color: var(--yoro-color-accent-gold);
+  }
+
+  .public-profile-playtime-axis {
+    position: relative;
+    height: 15px;
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: .625rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .public-profile-playtime-axis > span { position: absolute; top: 1px; transform: translateX(-50%); }
+  .public-profile-playtime-axis > span:first-child { transform: none; }
+  .public-profile-playtime-axis > span:last-child { transform: translateX(-100%); }
+
+  .public-profile-playtime-bands {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .public-profile-playtime-bands > li {
+    display: grid;
+    grid-template-columns: 4.4rem minmax(0, 1fr) 3.9rem;
+    align-items: center;
+    gap: var(--yoro-space-2);
+    font-size: var(--yoro-font-size-xs);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .public-profile-playtime-bands .zone { color: var(--yoro-color-text-on-dark-muted); white-space: nowrap; }
+
+  /* 승(초록)/패(붉음) 분할 바 — 패 구간은 남는 배경색이 맡습니다. */
+  .public-profile-playtime-bands .split {
+    display: flex;
+    height: 7px;
+    border-radius: var(--yoro-radius-pill);
+    background: color-mix(in srgb, var(--yoro-color-match-loss-accent) 45%, transparent);
+    overflow: hidden;
+  }
+
+  .public-profile-playtime-bands .split .w { background: var(--yoro-color-rank-trend); }
+
+  .public-profile-playtime-bands .stat {
+    color: var(--yoro-color-text-on-dark-muted);
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  /* 260px 급 좁은 카드 — 링·제목을 한 단계 줄여 히어로 한 줄을 지킵니다. */
+  @container (max-width: 17.5rem) {
+    .public-profile-playtime-hero { gap: var(--yoro-space-2); padding: var(--yoro-space-3); }
+    .public-profile-playtime-when > b { font-size: var(--yoro-font-size-sm); }
+    .public-profile-playtime-ring { width: 3rem; height: 3rem; }
+    .public-profile-playtime-ring > b { font-size: .78125rem; }
+    .public-profile-playtime-ring > small { bottom: 4px; font-size: .5rem; }
+  }
 }

@@ -847,7 +847,9 @@ test("LoL 프로필 플랫폼은 주요 viewport에서 내부 탐색과 문서 �
     await expect(page.locator(".public-profile-rank-section")).toHaveCount(0);
     await expect(resultsColumn.locator("#public-recent-matches")).toHaveCount(1);
     await expect(aggregatePanel).toHaveCount(1);
-    await expect(aggregatePanel.locator(".public-profile-side-card")).toHaveCount(3);
+    /* 4장 = 지표 프로파일 · LP 기록 · 플레이 시간대(2026-08-17 추가,
+       docs/mockups/lol-profile-playtime-card.html) · 포지션. */
+    await expect(aggregatePanel.locator(".public-profile-side-card")).toHaveCount(4);
     await expect(metricCard.locator(".public-profile-metric-row")).toHaveCount(5);
     // 동티어 비교 데이터가 없는 동안에는 기준선을 그리지 않습니다.
     await expect(metricCard.locator(".public-profile-metric-bar > i")).toHaveCount(0);
