@@ -19,12 +19,41 @@
       border-radius: 21px 0 0 21px !important;
     }
 
-    /* 제출 버튼은 폼 안쪽에 떠 있으므로 원형으로 두면 곡선과 부딪히지 않습니다. */
+    /* 제출 버튼은 폼 안쪽에 떠 있으므로 원형으로 두면 곡선과 부딪히지 않습니다.
+       크기는 42 였는데 모바일 touch target 기준(44×44, docs/AI_WORKFLOW.md §4)에
+       미달이었습니다(실측 42×44 — 높이는 .yoro-button 의 min-height 가 44 로
+       올려 준 값이고 폭만 42 로 남아 있었습니다). 폼 높이 56 안에 44 원형이
+       들어가므로 곡선 간섭 없이 기준을 채웁니다. */
     .public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-submit.yoro-button {
-      width: 42px !important;
-      min-width: 42px !important;
-      height: 42px !important;
+      width: 44px !important;
+      min-width: 44px !important;
+      height: 44px !important;
       border-radius: var(--yoro-radius-pill) !important;
+    }
+
+    /* 서버 칩 안에서 "JP" 가 "J…" 로 잘렸습니다.
+       실측(라벨 필요폭/가용폭): ko 19/15, ja 23/15 — 두 로케일 모두 잘리고
+       일본어가 더 심합니다. 원인은 칩 폭이 아니라 안쪽 배분입니다. 칩 54px 에서
+       좌우 padding 12 를 뺀 42px 을 `1fr 14px` 에 gap 10px 으로 나눠 라벨 몫이
+       15px 밖에 남지 않았습니다.
+
+       칩을 넓히지는 않습니다 — 위 테스트가 "서버 칩 ≤56px, 입력 ≥150px" 를
+       계약으로 고정해 두었고, 넓히면 입력창을 그만큼 빼앗기 때문입니다.
+       caret 과 gap 만 줄여 라벨에 약 28px 을 돌려줍니다. */
+    .public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-server.public-server-pill {
+      grid-template-columns: minmax(0, 1fr) 10px !important;
+      gap: 4px !important;
+    }
+
+    /* X(검색어 지우기)는 05-overrides.css 에서 38×38 로 !important 고정이라
+       실측 38×38 이었습니다 — 입력창 바로 옆이라 오조작이 쉬운 자리입니다.
+       그 파일은 데스크톱까지 함께 잡으므로 값을 바꾸지 않고, 기준이 적용되는
+       모바일 구간에서만 44 로 올립니다. 같은 legacy layer 안에서 이기려면
+       특이도가 (0,3,0) 이상이어야 해 위 규칙과 같은 형태를 씁니다. */
+    .public-dashboard-shell.public-home-shell.public-home-shared-shell .public-home-shared-clear.yoro-button {
+      width: 44px !important;
+      min-width: 44px !important;
+      height: 44px !important;
     }
   }
 }

@@ -181,6 +181,33 @@ function formatShortDate(value: string | undefined): string {
   return new Intl.DateTimeFormat(activePublicLocale === "ja" ? "ja-JP" : "ko-KR", { month: "numeric", day: "numeric" }).format(date);
 }
 
+/* LP 는 랭크 큐에서만 움직입니다. 화면이 보여 주는 티어가 어느 큐의 것인지에
+   따라 LP 를 움직일 수 있는 큐도 하나로 정해집니다. */
+const TREND_QUEUE_ID_BY_RANKED_TYPE: Partial<Record<LolRankedStats["queueType"], number>> = {
+  RANKED_SOLO_5x5: 420,
+  RANKED_FLEX_SR: 440
+};
+
+function trendQueueId(stats: LolRankedStats | undefined): number | undefined {
+  if (!stats) return undefined;
+  return TREND_QUEUE_ID_BY_RANKED_TYPE[stats.queueType];
+}
+
+/* 추정 LP 그래프에 넣을 경기만 남깁니다.
+ *
+ * 이전에는 큐를 가리지 않고 승패만 봤습니다. 그래서 솔로랭크 기록이 하나도
+ * 없어도 칼바람·일반·자유랭크 승리가 그대로 +20 으로 잡혀 LP 가 오르는 것처럼
+ * 보였습니다(사용자 신고 그대로). queueId 가 없는 경기는 큐를 확인할 수 없으니
+ * 넣지 않습니다 — 넣으면 같은 결함이 그대로 재발합니다.
+ */
+function rankedTrendMatches(
+  matches: readonly PublicLolRecentMatch[],
+  queueId: number | undefined
+): PublicLolRecentMatch[] {
+  if (queueId === undefined) return [];
+  return matches.filter((match) => match.queueId === queueId);
+}
+
 function estimatedLpDelta(match: PublicLolRecentMatch): number {
   if (match.result === "win") return 20;
   if (match.result === "loss") return -18;
@@ -268,8 +295,19 @@ export function rankTrendLine(profile: PublicLolProfile): PublicTrendLine | unde
     ...storedRankSamples.filter((point) => point.startedAtMs >= windowStart && point.startedAtMs <= windowEnd)
   ];
   const samples = historySamples.length >= 2 ? historySamples : (() => {
-    const filteredMatches = recentMatchesWithinWindow(profile.recentMatches, LP_TREND_WINDOW_MS);
-    const matches = (filteredMatches.length > 0 ? filteredMatches : profile.recentMatches.slice(0, RECENT_ANALYSIS_MATCH_LIMIT)).slice().reverse();
+    /* 화면에 표시 중인 티어가 속한 랭크 큐의 경기만 LP 를 움직입니다. */
+    const trendQueue = trendQueueId(profile.rankedStats);
+    const filteredMatches = rankedTrendMatches(
+      recentMatchesWithinWindow(profile.recentMatches, LP_TREND_WINDOW_MS),
+      trendQueue
+    );
+    /* 자르고 나서 거릅니다 — 걸러 놓고 20개를 채우면 조회 구간이 조용히
+       과거로 늘어납니다. "최근 20경기 중 랭크" 라는 원래 범위를 지킵니다. */
+    const fallbackMatches = rankedTrendMatches(
+      profile.recentMatches.slice(0, RECENT_ANALYSIS_MATCH_LIMIT),
+      trendQueue
+    );
+    const matches = (filteredMatches.length > 0 ? filteredMatches : fallbackMatches).slice().reverse();
     if (matches.length === 0 && currentRankScore <= 0) return [];
     const totalDelta = matches.reduce((sum, match) => sum + estimatedLpDelta(match), 0);
     const startingRankScore = Math.max(0, currentRankScore - totalDelta);

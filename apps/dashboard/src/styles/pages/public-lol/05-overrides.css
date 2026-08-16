@@ -858,6 +858,43 @@
   font-weight: 900;
 }
 
+/* 탭 3개인데 폰에서 가로 스크롤이 걸렸습니다. 한국어는 320px 에서만이지만
+   일본어는 라벨이 길어(サモナー·最近の検索·お気に入り) 390px 부터 넘쳤습니다
+   — 실측 초과폭 ja 390:19 / 375:34 / 360:49 / 320:89, ko 320:36.
+   동작 자체는 정상(overflow-x:auto, 스와이프로 도달 가능)이었지만 마지막 탭
+   배지가 절반만 보여 고장처럼 읽혔습니다.
+   가로 여백만 회수합니다 — min-height·아래 padding·border 는 그대로 두어
+   탭 높이(실측 44px)를 건드리지 않습니다. */
+@media (max-width: 30rem) {
+  .public-suggestion-tabs {
+    gap: 2px;
+    padding-inline: 2px;
+  }
+
+  .public-suggestion-tabs button {
+    gap: 4px;
+    padding-inline: 6px;
+  }
+
+  .public-suggestion-tabs button em {
+    min-width: 16px;
+    padding: 0 4px;
+  }
+}
+
+/* 360px 은 일본어가 아직 14px 넘쳤습니다. 글자 크기는 12px 그대로 두고
+   (읽기 쉬움 우선) 남은 여백만 더 회수합니다 — 실측 18px 확보. */
+@media (max-width: 22.5rem) {
+  .public-suggestion-tabs button {
+    padding-inline: 4px;
+  }
+
+  .public-suggestion-tabs button em {
+    min-width: 14px;
+    padding: 0 3px;
+  }
+}
+
 .public-suggestion-empty {
   display: grid;
   min-height: 76px;

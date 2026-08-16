@@ -280,3 +280,52 @@ test("랭크 점수와 추이 좌표가 유효 범위 안에 유지된다", () =
   assert.ok(trend.points.every((point) => point.x >= 52 && point.x <= 308));
   assert.ok(trend.points.every((point) => point.y >= 12 && point.y <= 140));
 });
+
+test("LP 추이는 랭크 큐 경기만 반영하고 다른 큐 승리로는 오르지 않는다", () => {
+  /* 회귀 고정 — estimatedLpDelta 가 큐를 보지 않고 승패만 봐서, 솔로랭크 기록이
+     하나도 없어도 칼바람(450)·일반(400) 승리가 +20 으로 잡혀 LP 가 오르는 것처럼
+     보였습니다. rankHistory 가 없을 때 쓰는 추정 경로에서만 나던 결함입니다. */
+  const rankedStats = {
+    queueType: "RANKED_SOLO_5x5",
+    tier: "PLATINUM",
+    rank: "I",
+    leaguePoints: 50,
+    wins: 10,
+    losses: 10,
+    winRate: 50
+  } as PublicLolProfile["rankedStats"];
+
+  const match = (matchId: string, queueId: number, result: "win" | "loss", hoursAgo: number): PublicLolRecentMatch => ({
+    matchId,
+    queueId,
+    result,
+    startedAt: new Date(Date.now() - hoursAgo * 3_600_000).toISOString()
+  } as PublicLolRecentMatch);
+
+  const base = { riotId: "tester#JP1", rankedStats, rankHistory: [] };
+
+  /* 솔로랭크 기록이 없고 칼바람·일반만 이긴 경우 — 선이 평평해야 합니다. */
+  const nonRanked = rankTrendLine({
+    ...base,
+    recentMatches: [match("m1", 450, "win", 1), match("m2", 400, "win", 2), match("m3", 450, "win", 3)]
+  } as PublicLolProfile);
+  assert.ok(nonRanked);
+  assert.equal(nonRanked.change, 0);
+  assert.deepEqual([...new Set(nonRanked.points.map((point) => point.value))].length, 1);
+
+  /* 자유랭크(440)도 솔로 티어를 움직이면 안 됩니다. */
+  const flexOnly = rankTrendLine({
+    ...base,
+    recentMatches: [match("f1", 440, "win", 1), match("f2", 440, "win", 2)]
+  } as PublicLolProfile);
+  assert.ok(flexOnly);
+  assert.equal(flexOnly.change, 0);
+
+  /* 솔로랭크(420) 경기는 그대로 반영됩니다 — 승 +20, 패 -18. */
+  const soloOnly = rankTrendLine({
+    ...base,
+    recentMatches: [match("s1", 420, "win", 1), match("s2", 420, "loss", 2), match("s3", 450, "win", 3)]
+  } as PublicLolProfile);
+  assert.ok(soloOnly);
+  assert.equal(soloOnly.change, 2);
+});

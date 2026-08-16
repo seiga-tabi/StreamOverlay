@@ -1911,6 +1911,17 @@
   align-items: stretch;
 }
 
+/* 위에서 바를 640 → 560 으로 줄일 때 위치 기준인 .public-search-wrap 은
+   .public-game-home__search 의 40rem(640px)에 그대로 남았습니다. 연관검색 패널은
+   그 wrap 을 기준으로 left:0/right:0 이라 바보다 정확히 80px 넓게 펼쳐집니다
+   (실측 1440·1024·768px 모두 Δright=80). 폰은 뷰포트가 560 보다 좁아 둘이 같은
+   폭이 되므로 데스크톱에서만 보이던 결함입니다.
+   기준을 바와 같은 값으로 맞추면 패널 폭이 따라오고, 가운데 정렬 hero 에서
+   바 자체도 80px 짜리 빈칸 없이 제자리에 놓입니다. */
+.public-game-home .public-search-wrap {
+  max-inline-size: 560px;
+}
+
 .public-game-home .public-search-form .public-search-server,
 .public-game-home .public-search-form .public-search-server .yoro-button {
   height: 56px;

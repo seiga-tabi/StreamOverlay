@@ -1276,3 +1276,121 @@ test("좁은 화면에서 문구가 글자 단위로 세로로 쪼개지지 않�
     }
   }
 });
+
+test("연관검색 패널은 검색바와 같은 폭·위치로 열린다", async ({ page }) => {
+  /* 회귀 고정 — 검색바를 640 → 560px 로 줄이면서(2026-08-16) 패널의 위치 기준인
+     .public-search-wrap 은 .public-game-home__search 의 40rem(640px)에 남았습니다.
+     패널은 그 wrap 을 기준으로 left:0/right:0 이라 바보다 정확히 80px 넓게 펼쳐졌고,
+     폰은 뷰포트가 560 보다 좁아 둘이 같아지므로 데스크톱에서만 보였습니다. */
+  await page.route("**/api/lol/suggestions**", async (route) => {
+    await json(route, {
+      suggestions: [{ gameName: "YORO QA", tagLine: "KR1", source: "recommended", lolPlatform: "kr" }]
+    });
+  });
+  await page.goto("/ko/");
+
+  const input = page.getByRole("searchbox", { name: "Riot ID 입력" });
+  await expect(input).toBeVisible();
+
+  for (const width of [1440, 1280, 1024, 768, 430, 390, 360]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await input.fill("");
+    await input.fill("YORO");
+    await expect(page.locator(".public-suggestion-panel")).toBeVisible();
+
+    const gap = await page.evaluate(() => {
+      const panel = document.querySelector(".public-suggestion-panel");
+      const form = document.querySelector(".public-search-form");
+      if (!panel || !form) return null;
+      const p = panel.getBoundingClientRect();
+      const f = form.getBoundingClientRect();
+      return { left: Math.round(p.left - f.left), right: Math.round(p.right - f.right) };
+    });
+    /* 1px 은 소수점 반올림 여유입니다. 그 이상 벌어지면 눈에 띕니다. */
+    expect(Math.abs(gap?.left ?? 999), `${width}px 왼쪽 어긋남`).toBeLessThanOrEqual(1);
+    expect(Math.abs(gap?.right ?? 999), `${width}px 오른쪽 어긋남`).toBeLessThanOrEqual(1);
+  }
+});
+
+test("모바일 검색바는 한국어·일본어 모두 터치 기준과 서버 칩 문구를 지킨다", async ({ page }) => {
+  /* 회귀 고정 — 실측으로 잡은 두 결함입니다.
+     1. 모바일 터치 타깃: X 38×38, 제출 42×44 로 44×44 기준 미달
+        (docs/AI_WORKFLOW.md §4). X 는 입력창 바로 옆이라 오조작이 쉬운 자리입니다.
+     2. 서버 칩이 54px 로 좁아 "JP" 가 "J…" 로 잘렸습니다. 칩 안이 `1fr 14px`
+        그리드에 gap 10px 이라 라벨 가용폭이 15px 뿐이었고, 필요폭은 ko 19·ja 23
+        으로 일본어가 더 심했습니다. */
+  await page.route("**/api/lol/suggestions**", async (route) => {
+    await json(route, { suggestions: [{ gameName: "YORO QA", tagLine: "KR1", source: "recommended", lolPlatform: "kr" }] });
+  });
+  await page.goto("/ko/");
+
+  const input = page.getByRole("searchbox", { name: "Riot ID 입력" });
+  await expect(input).toBeVisible();
+
+  for (const width of [430, 390, 375, 360, 320]) {
+    await page.setViewportSize({ width, height: 900 });
+    await input.fill("");
+    await input.fill("YORO");
+
+    const report = await page.evaluate(() => {
+      const form = document.querySelector(".public-search-form");
+      if (!form) return null;
+      const small: string[] = [];
+      for (const el of form.querySelectorAll<HTMLElement>("button, [role='button']")) {
+        const box = el.getBoundingClientRect();
+        if (box.width < 1 || el.hasAttribute("disabled")) continue;
+        if (Math.round(box.width) < 44 || Math.round(box.height) < 44) {
+          small.push(`${el.getAttribute("aria-label") ?? ""} ${Math.round(box.width)}x${Math.round(box.height)}`);
+        }
+      }
+      const label = document.querySelector(".public-search-server .yoro-status__label");
+      return {
+        small,
+        /* 말줄임이 걸리면 scrollWidth 가 clientWidth 를 넘습니다. */
+        chipCut: label ? label.scrollWidth > label.clientWidth + 1 : false
+      };
+    });
+
+    expect(report?.small ?? ["측정 실패"], `${width}px 터치 타깃 44px 미만`).toEqual([]);
+    expect(report?.chipCut, `${width}px 서버 칩 문구 잘림`).toBe(false);
+  }
+});
+
+test("연관검색 탭 줄은 한국어·일본어 모두 폰 폭에서 잘리지 않는다", async ({ page }) => {
+  /* 회귀 고정 — 탭은 3개뿐인데 폰에서 가로 스크롤이 걸렸습니다. 한국어는 320px
+     에서만이지만 일본어는 라벨이 길어(サモナー·最近の検索·お気に入り) 390px 부터
+     넘쳐, 마지막 배지가 절반만 보여 고장처럼 읽혔습니다.
+     실측 초과폭 — ja 390:19 / 375:34 / 360:49, ko 320:36.
+     가로 여백만 회수해 해결했으므로 탭 높이(44px)는 함께 지킵니다. */
+  await page.route("**/api/lol/suggestions**", async (route) => {
+    await json(route, { suggestions: [{ gameName: "YORO QA", tagLine: "KR1", source: "recommended", lolPlatform: "kr" }] });
+  });
+
+  for (const locale of ["ko", "ja"] as const) {
+    /* 나중에 등록한 route 가 우선합니다 — 로케일만 바꿔 같은 화면을 봅니다. */
+    await page.route("**/api/public/locale", async (route) => {
+      await json(route, { locale });
+    });
+    await page.goto(`/${locale}/`);
+
+    const input = page.getByRole("searchbox").first();
+    await expect(input).toBeVisible();
+
+    /* 320px 은 지원 하한이자 이 줄이 스크롤로 남는 구간이라 제외합니다. */
+    for (const width of [430, 414, 393, 390, 375, 360]) {
+      await page.setViewportSize({ width, height: 900 });
+      await input.fill("");
+      await input.fill("YORO");
+      await expect(page.locator(".public-suggestion-tabs")).toBeVisible();
+
+      const tabs = await page.locator(".public-suggestion-tabs").evaluate((row) => ({
+        overflow: row.scrollWidth - row.clientWidth,
+        heights: [...row.querySelectorAll("button")].map((b) => Math.round(b.getBoundingClientRect().height))
+      }));
+      expect(tabs.overflow, `${locale} ${width}px 탭 줄 넘침`).toBeLessThanOrEqual(0);
+      for (const height of tabs.heights) {
+        expect(height, `${locale} ${width}px 탭 높이`).toBeGreaterThanOrEqual(44);
+      }
+    }
+  }
+});
