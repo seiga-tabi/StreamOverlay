@@ -38,6 +38,12 @@ const LOCALIZABLE_PUBLIC_EXACT_PATHS = new Set([
   "/minecraft/patch-notes",
   "/lol/aram",
   "/patch-notes",
+  /* 미니게임 — 여기에 없으면 localizedPublicUrl 이 경로를 그대로 돌려주어
+     canonical 이 /games 가 됩니다. 서버는 /ko/games 를 주므로 같은 페이지에
+     canonical 이 둘 생깁니다. 서버 목록(apps/server/src/routing/
+     public-dashboard-routes.ts)과 짝을 맞춥니다. */
+  "/games",
+  "/games/reaction",
 ]);
 
 const LOCALIZABLE_PUBLIC_PATH_PREFIXES = [

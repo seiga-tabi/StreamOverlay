@@ -9,6 +9,8 @@ import {
   REACTION_TIER_TABLE,
   writeMiniGameBest,
 } from "../src/features/public-games/registry";
+import { gamesI18n } from "../src/features/public-games/i18n/games-i18n";
+import { gamesSeoMetadata } from "../src/features/public-games/utils/seo";
 
 function withMemoryStorage<T>(run: () => T): T {
   const store = new Map<string, string>();
@@ -76,4 +78,49 @@ test("readMiniGameBest: 저장소 접근 불가·손상 데이터는 null(fail-o
     window.localStorage.setItem("yoro.games.reaction.best.v1", "{broken json");
     assert.equal(readMiniGameBest("reaction"), null);
   });
+});
+
+test("미니게임 SEO 문구는 서버 렌더 메타와 한 글자도 다르지 않다", () => {
+  /* 서버가 준 title 을 applyGamesSeo 가 덮어쓰므로, 두 값이 다르면 크롤러가 받는
+     HTML 과 최종 DOM 이 어긋납니다. 서버 쪽 원본은
+     apps/server/src/routes/public-seo.ts 의 KOREAN_CONTENT/JAPANESE_CONTENT 이며,
+     아래 기대값은 그 파일과 같은 문구를 그대로 옮긴 것입니다. 한쪽만 고치면
+     이 테스트가 깨져 불일치를 즉시 잡습니다. */
+  const expected = {
+    ko: {
+      hub: {
+        title: "미니게임 | YORO.gg",
+        description: "게이머 반사신경 훈련장 — 반응속도 테스트로 내 LoL 티어를 확인해 보세요.",
+        canonicalUrl: "https://yoro.gg/ko/games",
+      },
+      reaction: {
+        title: "반응속도 테스트 | YORO.gg",
+        description: "초록 신호에 최대한 빨리! 5회 평균으로 LoL 티어 등급을 받아보세요.",
+        canonicalUrl: "https://yoro.gg/ko/games/reaction",
+      },
+    },
+    ja: {
+      hub: {
+        title: "ミニゲーム | YORO.gg",
+        description: "ゲーマーの反射神経トレーニング — 反応速度テストで自分のLoLティアを確認しましょう。",
+        canonicalUrl: "https://yoro.gg/ja/games",
+      },
+      reaction: {
+        title: "反応速度テスト | YORO.gg",
+        description: "緑の信号にできるだけ早く! 5回平均でLoLティア等級を確認しましょう。",
+        canonicalUrl: "https://yoro.gg/ja/games/reaction",
+      },
+    },
+  } as const;
+
+  for (const locale of ["ko", "ja"] as const) {
+    for (const page of ["hub", "reaction"] as const) {
+      assert.deepEqual(gamesSeoMetadata(page, locale), expected[locale][page], `${locale}/${page}`);
+    }
+  }
+
+  /* 화면 라벨과 SEO 제목은 일부러 다릅니다 — 네비는 짧게, 제목은 구체적으로.
+     실수로 다시 navReaction 을 제목에 물리면 여기서 걸립니다. */
+  assert.notEqual(gamesI18n.ko.navReaction, gamesI18n.ko.seoTitleReaction);
+  assert.notEqual(gamesI18n.ja.navReaction, gamesI18n.ja.seoTitleReaction);
 });

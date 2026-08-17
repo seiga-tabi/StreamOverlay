@@ -51,6 +51,13 @@ const SOCIAL_IMAGES_BY_PREFIX: readonly {
     url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-bot.png`,
     alt: { ko: "YORO Bot Discord 게임 서버 도우미 미리보기", ja: "YORO Bot Discordゲームサーバーアシスタントのプレビュー" }
   },
+  /* prefix 매칭이므로 /games/reaction 등 하위 미니게임은 자동으로 같은 이미지를
+     씁니다(팰월드 선례와 동일). 게임별 이미지가 생기면 더 긴 prefix 를 위에 둡니다. */
+  {
+    prefix: "/games",
+    url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-games.png`,
+    alt: { ko: "YORO.gg 미니게임 미리보기", ja: "YORO.gg ミニゲームのプレビュー" }
+  },
   /* LoL 생태(전적·패치 노트·팔로우·참가)와 홈은 LoL 이미지를 사이트 대표로 겸용합니다. */
   {
     prefix: "/lol",
@@ -463,7 +470,11 @@ const BREADCRUMB_SEGMENT_LABELS: Readonly<Record<string, Readonly<Record<PublicU
   "/bot/commands": { ko: "명령어 목록", ja: "コマンド一覧" },
   "/bot/game-files": { ko: "게임파일", ja: "ゲームファイル" },
   "/follow": { ko: "팔로우", ja: "フォロー" },
-  "/participation": { ko: "시청자 참여", ja: "視聴者参加" }
+  "/participation": { ko: "시청자 참여", ja: "視聴者参加" },
+  /* 미니게임 — 라벨이 있는 경로만 breadcrumb·sibling 링크에 오릅니다. 준비 중인
+     게임(registry 의 coming)은 라우트가 없으므로 여기에 넣지 않습니다. */
+  "/games": { ko: "미니게임", ja: "ミニゲーム" },
+  "/games/reaction": { ko: "반응속도 테스트", ja: "反応速度テスト" }
 };
 
 function breadcrumbStructuredData(
@@ -674,6 +685,14 @@ const KOREAN_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   "/minecraft/patch-notes": {
     title: "마인크래프트 패치 노트 준비 중 | YORO.gg",
     description: "Mojang 공식 피드 기반 Java·Bedrock 패치 노트를 준비하고 있습니다."
+  },
+  "/games": {
+    title: "미니게임 | YORO.gg",
+    description: "게이머 반사신경 훈련장 — 반응속도 테스트로 내 LoL 티어를 확인해 보세요."
+  },
+  "/games/reaction": {
+    title: "반응속도 테스트 | YORO.gg",
+    description: "초록 신호에 최대한 빨리! 5회 평균으로 LoL 티어 등급을 받아보세요."
   }
 };
 
@@ -805,6 +824,14 @@ const JAPANESE_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   "/minecraft/patch-notes": {
     title: "マインクラフト パッチノート 準備中 | YORO.gg",
     description: "Mojang公式フィードに基づくJava・Bedrockパッチノートを準備しています。"
+  },
+  "/games": {
+    title: "ミニゲーム | YORO.gg",
+    description: "ゲーマーの反射神経トレーニング — 反応速度テストで自分のLoLティアを確認しましょう。"
+  },
+  "/games/reaction": {
+    title: "反応速度テスト | YORO.gg",
+    description: "緑の信号にできるだけ早く! 5回平均でLoLティア等級を確認しましょう。"
   }
 };
 

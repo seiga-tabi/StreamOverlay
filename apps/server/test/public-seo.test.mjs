@@ -297,3 +297,52 @@ test("소셜 이미지는 게임별 경로 접두사로 매핑되고 그 외에�
   const metadata = palworldEntitySeoMetadata(route, { id: "anubis", nameKo: "아누비스", nameEn: "Anubis" });
   assert.equal(metadata.imageUrl, "https://yoro.gg/images/yorogg-og-palworld.png");
 });
+
+test("미니게임 경로는 전용 OG 이미지·metadata·breadcrumb·sitemap을 제공한다", () => {
+  const hubKo = render("/ko/games");
+  const reactionJa = render("/ja/games/reaction");
+
+  /* title·description — 문구 원본은 features/public-games/i18n/games-i18n.ts 입니다. */
+  assert.match(hubKo, /<title>미니게임 \| YORO\.gg<\/title>/u);
+  assert.match(hubKo, /<meta name="description" content="게이머 반사신경 훈련장[^"]*">/u);
+  assert.match(reactionJa, /<title>反応速度テスト \| YORO\.gg<\/title>/u);
+  assert.match(reactionJa, /<meta name="description" content="緑の信号にできるだけ早く[^"]*">/u);
+  assert.match(reactionJa, /<html lang="ja"/u);
+
+  /* OG 이미지 — prefix 매칭이라 하위 경로까지 같은 이미지를 씁니다. */
+  for (const html of [hubKo, reactionJa]) {
+    assert.match(html, /<meta property="og:image" content="https:\/\/yoro\.gg\/images\/yorogg-og-games\.png" \/>/u);
+  }
+  assert.match(hubKo, /<meta property="og:image:alt" content="YORO\.gg 미니게임 미리보기" \/>/u);
+  assert.match(reactionJa, /<meta property="og:image:alt" content="YORO\.gg ミニゲームのプレビュー" \/>/u);
+
+  /* 콘텐츠 페이지이므로 색인 대상입니다(noindex 금지). */
+  assert.doesNotMatch(hubKo, /name="robots" content="noindex"/u);
+  assert.doesNotMatch(reactionJa, /name="robots" content="noindex"/u);
+
+  /* hreflang — 지역화 라우트로 등록돼야 상호 참조가 붙습니다. */
+  assert.match(hubKo, /<link rel="alternate" hreflang="ja" href="https:\/\/yoro\.gg\/ja\/games" \/>/u);
+  assert.match(reactionJa, /<link rel="alternate" hreflang="ko" href="https:\/\/yoro\.gg\/ko\/games\/reaction" \/>/u);
+
+  /* breadcrumb — 홈 > 미니게임 > 반응속도 테스트 */
+  const script = /<script type="application\/ld\+json"[^>]*>(\{"@context":"https:\/\/schema\.org","@type":"BreadcrumbList[\s\S]*?)<\/script>/u
+    .exec(render("/ko/games/reaction"));
+  assert.ok(script, "BreadcrumbList JSON-LD가 있어야 합니다");
+  const breadcrumb = JSON.parse(script[1]);
+  assert.deepEqual(
+    breadcrumb.itemListElement.map((item) => item.item),
+    ["https://yoro.gg/ko/", "https://yoro.gg/ko/games", "https://yoro.gg/ko/games/reaction"],
+  );
+  assert.deepEqual(
+    breadcrumb.itemListElement.map((item) => item.name),
+    ["YORO.gg", "미니게임", "반응속도 테스트"],
+  );
+
+  /* sitemap — live 인 게임만. 준비 중(시각반응)은 라우트가 없어 넣지 않습니다. */
+  assert.ok(PUBLIC_SITEMAP_STATIC_PATHS.includes("/games"));
+  assert.ok(PUBLIC_SITEMAP_STATIC_PATHS.includes("/games/reaction"));
+  assert.ok(!PUBLIC_SITEMAP_STATIC_PATHS.includes("/games/visual"));
+  const sitemap = buildStaticSitemap();
+  assert.match(sitemap, /https:\/\/yoro\.gg\/ko\/games<\/loc>/u);
+  assert.match(sitemap, /https:\/\/yoro\.gg\/ja\/games\/reaction<\/loc>/u);
+});

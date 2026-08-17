@@ -6,6 +6,17 @@ export const gamesI18n = {
   ko: {
     brand: "미니게임",
     description: "게이머 반사신경 훈련장 — 반응속도 테스트로 내 LoL 티어를 확인해 보세요.",
+
+    /* SEO 문구는 서버 렌더 메타(apps/server/src/routes/public-seo.ts)와 한 글자도
+       달라선 안 됩니다 — 서버가 준 title 을 클라이언트가 덮어쓰는 구조라, 다르면
+       크롤러가 받는 값과 최종 값이 어긋납니다. 이 키가 그 단일 원본이고,
+       public-seo.ts 의 "/games"·"/games/reaction" 항목이 같은 문구를 씁니다.
+       화면 문구(brand·navReaction)와 분리한 이유는 네비 라벨은 짧아야 하고
+       검색 결과 제목은 구체적이어야 하기 때문입니다. */
+    seoTitleHub: "미니게임",
+    seoTitleReaction: "반응속도 테스트",
+    seoDescriptionHub: "게이머 반사신경 훈련장 — 반응속도 테스트로 내 LoL 티어를 확인해 보세요.",
+    seoDescriptionReaction: "초록 신호에 최대한 빨리! 5회 평균으로 LoL 티어 등급을 받아보세요.",
     skipToContent: "본문으로 이동",
     mobileMenu: "메뉴",
     openMobileMenu: "메뉴 열기",
@@ -57,10 +68,24 @@ export const gamesI18n = {
     otherGamesTitle: "다른 미니게임",
     measureNotesTitle: "측정 안내",
     measureNotes: "마우스/터치 모두 지원 · Space 키 입력 인정 · 신호 전 입력은 라운드 무효 · 기록은 이 브라우저에만 저장됩니다(서버 전송 없음).",
+
+    /* v4 풀스크린 진행 + 라운드 그래프(목업 reaction-test.html §④-1). */
+    quitLabel: "종료",
+    restPreparing: "다음 라운드 준비…",
+    deltaFirst: "첫 라운드",
+    deltaFaster: "▼ {ms}ms 빨라짐",
+    deltaSlower: "▲ {ms}ms 느려짐",
+    deltaSame: "직전과 동일",
+    chartAnnounce: "{n}회 {ms}ms",
   },
   ja: {
     brand: "ミニゲーム",
     description: "ゲーマーの反射神経トレーニング — 反応速度テストで自分のLoLティアを確認しましょう。",
+
+    seoTitleHub: "ミニゲーム",
+    seoTitleReaction: "反応速度テスト",
+    seoDescriptionHub: "ゲーマーの反射神経トレーニング — 反応速度テストで自分のLoLティアを確認しましょう。",
+    seoDescriptionReaction: "緑の信号にできるだけ早く! 5回平均でLoLティア等級を確認しましょう。",
     skipToContent: "本文へ移動",
     mobileMenu: "メニュー",
     openMobileMenu: "メニューを開く",
@@ -112,6 +137,14 @@ export const gamesI18n = {
     otherGamesTitle: "他のミニゲーム",
     measureNotesTitle: "測定について",
     measureNotes: "マウス/タッチ両対応 · Spaceキー入力対応 · 信号前の入力はラウンド無効 · 記録はこのブラウザにのみ保存されます(サーバー送信なし)。",
+
+    quitLabel: "終了",
+    restPreparing: "次のラウンド準備…",
+    deltaFirst: "最初のラウンド",
+    deltaFaster: "▼ {ms}ms 速くなった",
+    deltaSlower: "▲ {ms}ms 遅くなった",
+    deltaSame: "前回と同じ",
+    chartAnnounce: "{n}回 {ms}ms",
   },
 } as const;
 

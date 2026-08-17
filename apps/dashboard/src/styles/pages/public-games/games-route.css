@@ -400,6 +400,148 @@
 
   .games-side-note { margin: 0; padding: var(--yoro-space-2) var(--yoro-space-3) var(--yoro-space-3); color: var(--yoro-color-text-on-dark-muted); font-size: .6875rem; line-height: 1.65; }
 
+  /* ── v4: 풀스크린 진행 + 라운드 그래프(목업 §④-1) ──────────
+     대기/신호 전환에는 여전히 트랜지션 금지. 그래프 페이드 바만 장식 전환이며
+     측정 구간 밖입니다(reduced-motion 시 정지). */
+  .games-stage.is-running { position: relative; border-radius: 0; border: 0; }
+
+  /* Fullscreen API 경로 — 스테이지가 뷰포트 전체를 채우고 아레나가 남은 높이를 가집니다. */
+  .games-stage:fullscreen {
+    display: flex;
+    flex-direction: column;
+    background: var(--yoro-color-ground-surface);
+  }
+
+  .games-stage:fullscreen .games-arena { flex: 1; min-height: 0; }
+
+  /* Fullscreen 미지원 폴백 — fixed 전면 오버레이(동일 화면). */
+  .games-stage.is-overlay-fallback {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: flex;
+    flex-direction: column;
+    background: var(--yoro-color-ground-surface);
+  }
+
+  .games-stage.is-overlay-fallback .games-arena { flex: 1; min-height: 0; }
+
+  .games-fs-hud {
+    position: absolute;
+    top: var(--yoro-space-3);
+    left: var(--yoro-space-3);
+    right: var(--yoro-space-3);
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--yoro-space-2);
+    pointer-events: none;
+  }
+
+  .games-fs-round {
+    padding: .2rem .7rem;
+    border: 1px solid color-mix(in srgb, var(--yoro-color-text-on-dark) 25%, transparent);
+    border-radius: var(--yoro-radius-pill);
+    background: color-mix(in srgb, var(--yoro-color-ground-surface) 60%, transparent);
+    color: var(--yoro-color-text-on-dark);
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-bold);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .games-fs-quit {
+    pointer-events: auto;
+    min-height: var(--yoro-size-touch-target);
+    padding: .2rem .8rem;
+    border: 1px solid color-mix(in srgb, var(--yoro-color-text-on-dark) 25%, transparent);
+    border-radius: var(--yoro-radius-pill);
+    background: color-mix(in srgb, var(--yoro-color-ground-surface) 60%, transparent);
+    color: var(--yoro-color-text-on-dark-muted);
+    font: inherit;
+    font-size: var(--yoro-font-size-xs);
+    cursor: pointer;
+  }
+
+  .games-fs-quit:hover, .games-fs-quit:focus-visible { color: var(--yoro-color-text-on-dark); }
+
+  .games-arena.is-chart, .games-arena.is-rest {
+    cursor: default;
+    background:
+      radial-gradient(90% 80% at 50% 20%, color-mix(in srgb, var(--yoro-color-public-primary) 22%, transparent), transparent 62%),
+      color-mix(in srgb, var(--yoro-color-ground-surface) 80%, #000 20%);
+  }
+
+  .games-chart { width: min(32.5rem, 88%); }
+
+  .games-chart-now {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: var(--yoro-space-3);
+    margin-bottom: var(--yoro-space-2);
+  }
+
+  .games-chart-now > b { font-size: 2.375rem; font-weight: var(--yoro-font-weight-black); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+  .games-chart-now > b > small { font-size: 1rem; }
+  .games-chart-delta { font-size: var(--yoro-font-size-sm); font-weight: var(--yoro-font-weight-bold); color: var(--yoro-color-text-on-dark-muted); }
+  .games-chart-delta.is-faster { color: var(--yoro-color-rank-trend); }
+  .games-chart-delta.is-slower { color: color-mix(in srgb, var(--yoro-color-match-loss-accent) 45%, #fff 55%); }
+
+  .games-chart-plot {
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-md);
+    background: color-mix(in srgb, var(--yoro-color-ground-surface) 85%, #000 15%);
+    padding: var(--yoro-space-3) var(--yoro-space-3) var(--yoro-space-1);
+  }
+
+  .games-chart-plot svg { display: block; width: 100%; height: 9.375rem; color: color-mix(in srgb, var(--yoro-color-text-on-dark) 12%, transparent); }
+  .games-chart-line { stroke: var(--yoro-color-public-primary); }
+  .games-chart-dot { fill: var(--yoro-color-ground-surface); stroke: var(--yoro-color-public-primary); stroke-width: 2.5; }
+  .games-chart-dot.is-current { fill: var(--yoro-color-public-primary); stroke: color-mix(in srgb, var(--yoro-color-public-primary) 40%, #fff 60%); }
+
+  .games-chart-axis {
+    display: flex;
+    justify-content: space-between;
+    padding: .25rem .375rem .125rem;
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: .625rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* 그래프 표시 잔여 시간 바 — 2초 선형 축소(장식 전환 · 측정 구간 밖). */
+  .games-chart-fade {
+    display: block;
+    height: .1875rem;
+    margin-top: var(--yoro-space-3);
+    border-radius: var(--yoro-radius-pill);
+    background: color-mix(in srgb, var(--yoro-color-text-on-dark) 14%, transparent);
+    overflow: hidden;
+  }
+
+  .games-chart-fade > i {
+    display: block;
+    height: 100%;
+    border-radius: var(--yoro-radius-pill);
+    background: var(--yoro-color-public-primary);
+    animation: games-chart-fade 2s linear forwards;
+  }
+
+  @keyframes games-chart-fade {
+    from { width: 100%; }
+    to { width: 0%; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .games-chart-fade > i { animation: none; }
+  }
+
+  .games-rest-count {
+    font-size: 4rem;
+    font-weight: var(--yoro-font-weight-black);
+    font-variant-numeric: tabular-nums;
+  }
+
   .games-notfound {
     display: grid;
     justify-items: center;

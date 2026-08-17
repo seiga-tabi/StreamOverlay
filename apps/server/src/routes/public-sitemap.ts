@@ -56,7 +56,11 @@ export const PUBLIC_SITEMAP_STATIC_PATHS: readonly string[] = [
   "/minecraft",
   "/minecraft/recipes",
   "/minecraft/items",
-  "/minecraft/enchants"
+  "/minecraft/enchants",
+  /* 미니게임 — live 인 게임만 올립니다. registry 의 coming(시각반응)은 라우트가
+     없어 넣으면 404 URL 을 크롤러에게 제출하게 됩니다. */
+  "/games",
+  "/games/reaction"
 ];
 
 export type SitemapEntry = {

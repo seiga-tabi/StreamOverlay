@@ -2216,13 +2216,20 @@ function MiniGamesLabBanner() {
     <a className="public-sig-lab" data-testid="mini-games-lab-banner" href={href}>
       <span aria-hidden="true" className="public-sig-lab-icon">⚡</span>
       <span className="public-sig-lab-text">
-        <b>{t().miniGamesLabTitle}</b>
+        {/* 모바일(≤30rem)은 1행 유지를 위해 짧은 제목으로 교체하고 부제를 숨깁니다. */}
+        <b>
+          <span className="public-sig-lab-title-full">{t().miniGamesLabTitle}</span>
+          <span aria-hidden="true" className="public-sig-lab-title-short">{t().miniGamesLabTitleShort}</span>
+        </b>
         <small>{best ? t().miniGamesLabNote : t().miniGamesLabEmpty}</small>
       </span>
       {best ? (
         <span className="public-sig-lab-record">
-          <b>{Math.round(best.score)}ms{tier ? ` · ${tier.emoji} ${reactionTierLabel(tier, activePublicLocale)}` : ""}</b>
-          {t().miniGamesLabBest}
+          <b>
+            {Math.round(best.score)}ms
+            {tier ? <span className="public-sig-lab-record-tier"> · {tier.emoji}<span className="public-sig-lab-record-tiername"> {reactionTierLabel(tier, activePublicLocale)}</span></span> : null}
+          </b>
+          <small>{t().miniGamesLabBest}</small>
         </span>
       ) : null}
       <span className="public-sig-lab-cta">{t().miniGamesLabCta}</span>

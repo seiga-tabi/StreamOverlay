@@ -70,7 +70,13 @@ const PUBLIC_DASHBOARD_EXACT_PATHS = new Set([
   "/lol/aram",
   "/lol/aram/",
   "/patch-notes",
-  "/patch-notes/"
+  "/patch-notes/",
+  /* 미니게임 — 여기에 없으면 /ko/games 가 공개 라우트로 인식되지 않아
+     hreflang(alternateUrls)도 함께 빠집니다. live 인 게임만 올립니다. */
+  "/games",
+  "/games/",
+  "/games/reaction",
+  "/games/reaction/"
 ]);
 
 const NON_LOCALIZED_PUBLIC_PATHS = new Set([

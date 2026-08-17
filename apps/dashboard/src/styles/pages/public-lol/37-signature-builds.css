@@ -446,7 +446,10 @@
     font-size: 1.25rem;
   }
 
-  .public-sig-lab-text { min-width: 0; flex: 1; }
+  /* 좁은 폭 결함 수정(2026-08-17): flex:1 만 주면 기록·CTA(고정 폭)가 남긴
+     자투리 폭까지 제목이 짜부라져 글자가 세로로 흐릅니다. 기준 폭 12rem 을 줘
+     공간이 부족하면 기록·CTA 가 통째로 다음 줄로 내려가게 합니다(flex-wrap). */
+  .public-sig-lab-text { min-width: 0; flex: 1 1 12rem; }
   .public-sig-lab-text > b { display: block; font-size: var(--yoro-font-size-sm); font-weight: var(--yoro-font-weight-bold); }
   .public-sig-lab-text > small { display: block; margin-top: .0625rem; color: var(--yoro-color-text-on-dark-muted); font-size: .6875rem; }
 
@@ -459,6 +462,24 @@
   }
 
   .public-sig-lab-record > b { display: block; color: var(--yoro-color-accent-gold); font-size: var(--yoro-font-size-sm); }
+  .public-sig-lab-record > small { display: block; font-size: .6875rem; }
+  .public-sig-lab-title-short { display: none; }
+
+  /* 1행 유지(2026-08-17, 사용자 지적): 좁은 폭에서 줄바꿈 대신 모바일 축약 표기로
+     한 줄에 수납합니다 — 짧은 제목(반응속도 테스트)·부제 숨김·티어 이름 숨김(이모지만)·
+     기록 캡션 숨김. 제목은 ellipsis 로 최후 방어. */
+  @media (max-width: 30rem) {
+    .public-sig-lab { flex-wrap: nowrap; gap: var(--yoro-space-2); padding: var(--yoro-space-2) var(--yoro-space-3); }
+    .public-sig-lab-icon { width: 2.25rem; height: 2.25rem; font-size: 1rem; }
+    .public-sig-lab-text > b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .public-sig-lab-title-full { display: none; }
+    .public-sig-lab-title-short { display: inline; }
+    .public-sig-lab-text > small { display: none; }
+    .public-sig-lab-record > b { font-size: var(--yoro-font-size-xs); }
+    .public-sig-lab-record > small { display: none; }
+    .public-sig-lab-record-tiername { display: none; }
+    .public-sig-lab-cta { padding: .45rem .8rem; }
+  }
 
   .public-sig-lab-cta {
     flex: none;

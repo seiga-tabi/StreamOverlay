@@ -10,15 +10,24 @@ export type GamesSeoMetadata = {
   title: string;
 };
 
+/* 검색 결과에 나가는 문구는 화면 라벨과 다릅니다 — 네비는 짧아야 하고(반응속도),
+   제목은 구체적이어야 합니다(반응속도 테스트). 그래서 seo* 키를 따로 둡니다.
+   이 값은 서버 렌더 메타(apps/server/src/routes/public-seo.ts)와 반드시 같아야
+   합니다: 서버가 준 title 을 applyGamesSeo 가 덮어쓰므로, 다르면 크롤러가 받는
+   값과 최종 값이 어긋납니다. */
 export function gamesSeoMetadata(page: GamesPage, locale: GamesLocale): GamesSeoMetadata {
   const text = gamesI18n[locale];
   const titles: Record<GamesPage, string> = {
-    hub: text.brand,
-    reaction: text.navReaction,
+    hub: text.seoTitleHub,
+    reaction: text.seoTitleReaction,
+  };
+  const descriptions: Record<GamesPage, string> = {
+    hub: text.seoDescriptionHub,
+    reaction: text.seoDescriptionReaction,
   };
   return {
     canonicalUrl: new URL(localizedPublicUrl(gamesPathForPage(page), locale), PUBLIC_ORIGIN).href,
-    description: text.description,
+    description: descriptions[page],
     title: `${titles[page]} | YORO.gg`,
   };
 }

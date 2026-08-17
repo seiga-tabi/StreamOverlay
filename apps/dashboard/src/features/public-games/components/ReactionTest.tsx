@@ -11,22 +11,32 @@ import {
   writeMiniGameBest,
 } from "../registry";
 
-/* 반응속도 테스트 — 목업 docs/mockups/reaction-test.html v2~v3.
+/* 반응속도 테스트 — 목업 docs/mockups/reaction-test.html v4.
  *
- * 측정 정확도 규칙(목업 §측정 정확도):
+ * 진행 흐름(§④-1): 시작 → 전체 화면 → [대기(무작위) → 신호 → 그래프 2.0초 → 휴지 3.0초] ×5
+ * → 전체 화면 해제 → 결과. 그래프는 라운드마다 점을 하나씩 찍어 변화를 보여주고,
+ * 그래프·휴지 동안의 입력은 전부 무시합니다(잔여 클릭이 tooSoon 으로 번지는 사고 방지).
+ *
+ * 측정 정확도 규칙(§측정 정확도):
  * - performance.now() + pointerdown 시점(click 은 up 까지 늦음)
  * - 신호 표시는 rAF 콜백에서 타임스탬프를 찍어 페인트 시점과 정렬
- * - 대기/신호 전환에 트랜지션 금지(전환 애니메이션이 있으면 신호 인지가 늦어짐 — CSS 쪽 규칙)
+ * - 대기/신호 전환에 트랜지션 금지(CSS 쪽 규칙)
  * - 120ms 미만은 신호 예측으로 간주해 라운드 무효
  * - 백그라운드 탭 전환 시 진행 라운드 무효(visibilitychange)
+ *
+ * 전체 화면: Fullscreen API, 미지원(iOS Safari 등)은 fixed 오버레이 + 스크롤 잠금 폴백.
+ * Esc/✕ = 종료(진행 기록 무효) — 브라우저 풀스크린 Esc 와 동작을 일치시킵니다.
  */
 
 const ROUNDS = 5;
 const WAIT_MIN_MS = 1_500;
 const WAIT_MAX_MS = 4_000;
 const MIN_HUMAN_MS = 120;
+const CHART_SHOW_MS = 2_000;
+const REST_TOTAL_MS = 3_000;
 
-type Phase = "idle" | "waiting" | "go" | "tooSoon" | "result";
+type Phase = "idle" | "waiting" | "go" | "tooSoon" | "chart" | "rest" | "result";
+const RUNNING_PHASES: ReadonlySet<Phase> = new Set(["waiting", "go", "tooSoon", "chart", "rest"]);
 
 const REACTION_GAME = MINI_GAMES.find((game) => game.id === "reaction")!;
 
@@ -34,31 +44,85 @@ function formatTemplate(template: string, values: Record<string, string>): strin
   return Object.entries(values).reduce((text, [key, value]) => text.replaceAll(`{${key}}`, value), template);
 }
 
+/* 그래프 좌표 — 표본 범위에 여유를 두고 0~1 로 정규화합니다(점 1개면 중앙). */
+function chartPoints(samples: number[]): Array<{ x: number; y: number; value: number }> {
+  if (samples.length === 0) return [];
+  const min = Math.min(...samples);
+  const max = Math.max(...samples);
+  const low = min - 20;
+  const high = max + 20;
+  const span = Math.max(high - low, 1);
+  return samples.map((value, index) => ({
+    x: 52 + index * 104,
+    y: 128 - ((value - low) / span) * 106,
+    value,
+  }));
+}
+
 export function ReactionTest({ locale }: { locale: GamesLocale }) {
   const text = gamesI18n[locale];
   const [phase, setPhase] = useState<Phase>("idle");
   const [samples, setSamples] = useState<number[]>([]);
+  const [restCount, setRestCount] = useState(3);
+  const [overlayFallback, setOverlayFallback] = useState(false);
   const [best, setBest] = useState(() => readMiniGameBest(REACTION_GAME.id));
   const [bestUpdated, setBestUpdated] = useState(false);
   const [copied, setCopied] = useState(false);
-  const waitTimerRef = useRef<number | undefined>(undefined);
+  const stageRef = useRef<HTMLElement | null>(null);
+  const timerRef = useRef<number | undefined>(undefined);
+  const restTickRef = useRef<number | undefined>(undefined);
   const goAtRef = useRef(0);
   const phaseRef = useRef<Phase>("idle");
+  const intentionalExitRef = useRef(false);
   phaseRef.current = phase;
 
-  const clearWaitTimer = useCallback(() => {
-    if (waitTimerRef.current !== undefined) {
-      window.clearTimeout(waitTimerRef.current);
-      waitTimerRef.current = undefined;
+  const clearTimers = useCallback(() => {
+    if (timerRef.current !== undefined) {
+      window.clearTimeout(timerRef.current);
+      timerRef.current = undefined;
+    }
+    if (restTickRef.current !== undefined) {
+      window.clearInterval(restTickRef.current);
+      restTickRef.current = undefined;
+    }
+  }, []);
+
+  const exitImmersive = useCallback(() => {
+    setOverlayFallback(false);
+    document.body.style.removeProperty("overflow");
+    if (document.fullscreenElement) {
+      intentionalExitRef.current = true;
+      void document.exitFullscreen().catch(() => undefined);
+    }
+  }, []);
+
+  const quitRun = useCallback(() => {
+    /* 중단 = 진행 기록 무효(목업 §④-1 접근성 — 확인 없이 즉시 이탈). */
+    clearTimers();
+    exitImmersive();
+    setSamples([]);
+    setPhase("idle");
+  }, [clearTimers, exitImmersive]);
+
+  const enterImmersive = useCallback(() => {
+    const stage = stageRef.current;
+    document.body.style.overflow = "hidden";
+    if (stage?.requestFullscreen) {
+      stage.requestFullscreen({ navigationUI: "hide" }).catch(() => {
+        /* iOS Safari 등 미지원 — fixed 오버레이 폴백(동일 화면). */
+        setOverlayFallback(true);
+      });
+    } else {
+      setOverlayFallback(true);
     }
   }, []);
 
   const scheduleGo = useCallback(() => {
-    clearWaitTimer();
+    clearTimers();
     setPhase("waiting");
     const delay = WAIT_MIN_MS + Math.random() * (WAIT_MAX_MS - WAIT_MIN_MS);
-    waitTimerRef.current = window.setTimeout(() => {
-      waitTimerRef.current = undefined;
+    timerRef.current = window.setTimeout(() => {
+      timerRef.current = undefined;
       /* 페인트 시점과 측정 기준을 정렬 — rAF 콜백에서 신호 상태와 타임스탬프를 함께 찍습니다. */
       window.requestAnimationFrame(() => {
         if (phaseRef.current !== "waiting") return;
@@ -66,22 +130,7 @@ export function ReactionTest({ locale }: { locale: GamesLocale }) {
         setPhase("go");
       });
     }, delay);
-  }, [clearWaitTimer]);
-
-  useEffect(() => () => clearWaitTimer(), [clearWaitTimer]);
-
-  /* 백그라운드 탭에서는 타이머·인지 시점이 왜곡되므로 진행 중 라운드를 무효화합니다. */
-  useEffect(() => {
-    const handleVisibility = () => {
-      if (!document.hidden) return;
-      if (phaseRef.current === "waiting" || phaseRef.current === "go") {
-        clearWaitTimer();
-        setPhase("tooSoon");
-      }
-    };
-    document.addEventListener("visibilitychange", handleVisibility);
-    return () => document.removeEventListener("visibilitychange", handleVisibility);
-  }, [clearWaitTimer]);
+  }, [clearTimers]);
 
   const finishRun = useCallback((finalSamples: number[]) => {
     const average = Math.round(finalSamples.reduce((sum, value) => sum + value, 0) / finalSamples.length);
@@ -89,20 +138,93 @@ export function ReactionTest({ locale }: { locale: GamesLocale }) {
     const improved = writeMiniGameBest(REACTION_GAME, { score: average, tierKey: tier.key, at: new Date().toISOString() });
     if (improved) setBest(readMiniGameBest(REACTION_GAME.id));
     setBestUpdated(improved);
+    exitImmersive();
     setPhase("result");
-  }, []);
+  }, [exitImmersive]);
+
+  const startRest = useCallback(() => {
+    setPhase("rest");
+    setRestCount(Math.ceil(REST_TOTAL_MS / 1_000));
+    restTickRef.current = window.setInterval(() => {
+      setRestCount((count) => count - 1);
+    }, 1_000);
+    timerRef.current = window.setTimeout(() => {
+      timerRef.current = undefined;
+      if (restTickRef.current !== undefined) {
+        window.clearInterval(restTickRef.current);
+        restTickRef.current = undefined;
+      }
+      if (phaseRef.current === "rest") scheduleGo();
+    }, REST_TOTAL_MS);
+  }, [scheduleGo]);
+
+  const showChart = useCallback((nextSamples: number[]) => {
+    setPhase("chart");
+    timerRef.current = window.setTimeout(() => {
+      timerRef.current = undefined;
+      if (phaseRef.current !== "chart") return;
+      /* 마지막 라운드는 휴지 없이 결과로 — 그래프 2초 → 풀스크린 해제 → 결과(목업 흐름 ×5 → 결과). */
+      if (nextSamples.length >= ROUNDS) finishRun(nextSamples);
+      else startRest();
+    }, CHART_SHOW_MS);
+  }, [finishRun, startRest]);
+
+  useEffect(() => () => {
+    clearTimers();
+    document.body.style.removeProperty("overflow");
+  }, [clearTimers]);
+
+  /* 브라우저 Esc 로 풀스크린이 풀리면 종료와 동일하게 처리(의도한 해제는 제외). */
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (document.fullscreenElement) return;
+      if (intentionalExitRef.current) {
+        intentionalExitRef.current = false;
+        return;
+      }
+      if (RUNNING_PHASES.has(phaseRef.current)) quitRun();
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, [quitRun]);
+
+  /* 오버레이 폴백에는 브라우저 Esc 가 없으므로 직접 처리합니다. */
+  useEffect(() => {
+    if (!overlayFallback) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && RUNNING_PHASES.has(phaseRef.current)) quitRun();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [overlayFallback, quitRun]);
+
+  /* 백그라운드 탭에서는 타이머·인지 시점이 왜곡되므로 진행 중 라운드를 무효화합니다. */
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (!document.hidden) return;
+      if (phaseRef.current === "waiting" || phaseRef.current === "go") {
+        clearTimers();
+        setPhase("tooSoon");
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, [clearTimers]);
 
   const handleStageInput = useCallback(() => {
     const current = phaseRef.current;
+    /* 그래프·휴지 동안의 입력은 전부 무시(목업 §④-1 입력 게이트). */
+    if (current === "chart" || current === "rest") return;
     if (current === "idle") {
       setSamples([]);
       setBestUpdated(false);
       setCopied(false);
+      enterImmersive();
       scheduleGo();
       return;
     }
     if (current === "waiting") {
-      clearWaitTimer();
+      clearTimers();
       setPhase("tooSoon");
       return;
     }
@@ -119,11 +241,11 @@ export function ReactionTest({ locale }: { locale: GamesLocale }) {
       }
       const nextSamples = [...samples, Math.round(elapsed)];
       setSamples(nextSamples);
-      if (nextSamples.length >= ROUNDS) finishRun(nextSamples);
-      else scheduleGo();
+      showChart(nextSamples);
     }
-  }, [clearWaitTimer, finishRun, samples, scheduleGo]);
+  }, [clearTimers, enterImmersive, samples, scheduleGo, showChart]);
 
+  const running = RUNNING_PHASES.has(phase);
   const average = samples.length > 0 ? Math.round(samples.reduce((sum, value) => sum + value, 0) / samples.length) : 0;
   const resultTier = phase === "result" ? reactionTierForAverage(average) : undefined;
   const nextTier = phase === "result" ? reactionMsToNextTier(average) : undefined;
@@ -131,11 +253,29 @@ export function ReactionTest({ locale }: { locale: GamesLocale }) {
   const worstSample = samples.length > 0 ? Math.max(...samples) : undefined;
   const bestTier = best?.tierKey ? REACTION_TIER_TABLE.find((tier) => tier.key === best.tierKey) : undefined;
 
+  /* 그래프 = 방금 끝난 라운드, 휴지 = 준비 중인 다음 라운드 번호를 표시합니다. */
+  const roundNumber = phase === "chart" ? samples.length : Math.min(samples.length + 1, ROUNDS);
   const stepLabel = phase === "idle"
     ? text.stageReady
     : phase === "result"
       ? text.stageDone
-      : formatTemplate(text.stageStep, { n: String(Math.min(samples.length + 1, ROUNDS)) });
+      : formatTemplate(text.stageStep, { n: String(roundNumber) });
+
+  const lastSample = samples.at(-1);
+  const previousSample = samples.at(-2);
+  const deltaLabel = lastSample === undefined
+    ? ""
+    : previousSample === undefined
+      ? text.deltaFirst
+      : lastSample < previousSample
+        ? formatTemplate(text.deltaFaster, { ms: String(previousSample - lastSample) })
+        : lastSample > previousSample
+          ? formatTemplate(text.deltaSlower, { ms: String(lastSample - previousSample) })
+          : text.deltaSame;
+  const deltaTone = lastSample !== undefined && previousSample !== undefined
+    ? lastSample < previousSample ? "is-faster" : lastSample > previousSample ? "is-slower" : ""
+    : "";
+  const points = useMemo(() => chartPoints(samples), [samples]);
 
   const copyResult = useCallback(async () => {
     if (!resultTier) return;
@@ -155,11 +295,14 @@ export function ReactionTest({ locale }: { locale: GamesLocale }) {
       ? text.goTitle
       : phase === "tooSoon"
         ? text.tooSoonTitle
-        : phase === "result" && resultTier
-          ? `${average}ms · ${reactionTierLabel(resultTier, locale)}`
-          : "";
+        : phase === "chart" && lastSample !== undefined
+          ? formatTemplate(text.chartAnnounce, { n: String(samples.length), ms: String(lastSample) })
+          : phase === "rest"
+            ? `${restCount}`
+            : phase === "result" && resultTier
+              ? `${average}ms · ${reactionTierLabel(resultTier, locale)}`
+              : "";
 
-  /* 최고 기록 하이라이트 위치: 결과 화면은 이번 결과, 그 외에는 내 최고 기록. */
   const highlightTierKey = phase === "result" ? resultTier?.key : bestTier?.key;
   const tierRows = useMemo(() => REACTION_TIER_TABLE.map((tier) => {
     const from = REACTION_TIER_TABLE[REACTION_TIER_TABLE.indexOf(tier) - 1];
@@ -168,6 +311,13 @@ export function ReactionTest({ locale }: { locale: GamesLocale }) {
       : `${(from?.maxMs ?? 0) + 1}ms ~`;
     return { tier, range };
   }), []);
+
+  const hud = running ? (
+    <div className="games-fs-hud">
+      <span className="games-fs-round">{formatTemplate(text.stageStep, { n: String(roundNumber) })}</span>
+      <button className="games-fs-quit" onClick={quitRun} type="button">✕ {text.quitLabel} (Esc)</button>
+    </div>
+  ) : null;
 
   return (
     <div className="games-reaction">
@@ -185,11 +335,17 @@ export function ReactionTest({ locale }: { locale: GamesLocale }) {
       </div>
 
       <div className="games-reaction-cols">
-        <section className="games-stage">
-          <div className="games-stage-head">
-            <h2>{text.stageTitle}</h2>
-            <span className="games-stage-step">{stepLabel}</span>
-          </div>
+        <section
+          className={`games-stage${running ? " is-running" : ""}${running && overlayFallback ? " is-overlay-fallback" : ""}`}
+          ref={stageRef}
+        >
+          {!running ? (
+            <div className="games-stage-head">
+              <h2>{text.stageTitle}</h2>
+              <span className="games-stage-step">{stepLabel}</span>
+            </div>
+          ) : null}
+          {hud}
           <span aria-live="polite" className="games-visually-hidden">{statusText}</span>
 
           {phase === "result" && resultTier ? (
@@ -224,6 +380,53 @@ export function ReactionTest({ locale }: { locale: GamesLocale }) {
                     {copied ? text.copied : text.copyResult}
                   </button>
                 </div>
+              </div>
+            </div>
+          ) : phase === "chart" ? (
+            <div className="games-arena is-chart">
+              <div className="games-chart">
+                <div className="games-chart-now">
+                  <b>{lastSample}<small>ms</small></b>
+                  {deltaLabel ? <span className={`games-chart-delta ${deltaTone}`}>{deltaLabel}</span> : null}
+                </div>
+                <div className="games-chart-plot">
+                  <svg aria-hidden="true" preserveAspectRatio="none" viewBox="0 0 520 150">
+                    <line stroke="currentColor" strokeDasharray="4 5" x1="0" x2="520" y1="37" y2="37" />
+                    <line stroke="currentColor" strokeDasharray="4 5" x1="0" x2="520" y1="75" y2="75" />
+                    <line stroke="currentColor" strokeDasharray="4 5" x1="0" x2="520" y1="113" y2="113" />
+                    {points.length > 1 ? (
+                      <polyline
+                        className="games-chart-line"
+                        fill="none"
+                        points={points.map((point) => `${point.x},${point.y.toFixed(1)}`).join(" ")}
+                        strokeLinecap="round"
+                        strokeWidth="2.5"
+                      />
+                    ) : null}
+                    {points.map((point, index) => (
+                      <circle
+                        className={index === points.length - 1 ? "games-chart-dot is-current" : "games-chart-dot"}
+                        cx={point.x}
+                        cy={point.y.toFixed(1)}
+                        key={`${index}-${point.value}`}
+                        r={index === points.length - 1 ? 7 : 5.5}
+                      />
+                    ))}
+                  </svg>
+                  <div aria-hidden="true" className="games-chart-axis">
+                    {Array.from({ length: ROUNDS }, (_, index) => (
+                      <span key={index}>{formatTemplate(text.roundLabel, { n: String(index + 1) })}</span>
+                    ))}
+                  </div>
+                </div>
+                <span aria-hidden="true" className="games-chart-fade"><i /></span>
+              </div>
+            </div>
+          ) : phase === "rest" ? (
+            <div className="games-arena is-rest">
+              <div>
+                <div className="games-rest-count">{Math.max(restCount, 1)}</div>
+                <div className="games-arena-sub">{text.restPreparing}</div>
               </div>
             </div>
           ) : (
