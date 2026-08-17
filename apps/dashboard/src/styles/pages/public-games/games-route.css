@@ -1,0 +1,413 @@
+/*
+ * 미니게임 route 전용 stylesheet 진입점 — PublicGamesPage lazy chunk 에만 붙습니다.
+ * Valorant 패턴 복제: 신규 페이지이므로 legacy layer 없이 pages layer 단독 소유.
+ * 목업 docs/mockups/reaction-test.html v3. !important 금지, 다크 토큰만 사용.
+ *
+ * 측정 정확도 규칙: .games-arena 의 상태 전환(대기 빨강 ↔ 신호 초록)에는
+ * transition 을 걸지 않습니다 — 전환 애니메이션이 있으면 신호 인지가 늦어져
+ * 측정이 부정확해집니다(목업 §측정 화면 시각).
+ */
+
+@layer pages {
+  .games-page-section {
+    max-width: 68rem;
+    margin: 0 auto;
+    padding: var(--yoro-space-4) var(--yoro-space-3) var(--yoro-space-8);
+    color: var(--yoro-color-text-on-dark);
+  }
+
+  .games-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .games-crumb {
+    margin-bottom: var(--yoro-space-2);
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+  }
+
+  .games-crumb > b { color: color-mix(in srgb, var(--yoro-color-public-primary) 40%, #fff 60%); }
+
+  .games-hero {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: var(--yoro-space-3);
+    margin-bottom: var(--yoro-space-4);
+  }
+
+  .games-hero h1 {
+    margin: 0;
+    font-size: var(--yoro-font-size-xl);
+    font-weight: var(--yoro-font-weight-black);
+    letter-spacing: -.01em;
+  }
+
+  .games-hero p {
+    margin: .25rem 0 0;
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-sm);
+  }
+
+  .games-best-chip {
+    margin-left: auto;
+    padding: var(--yoro-space-2) var(--yoro-space-3);
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-md);
+    background: var(--yoro-color-ground-surface);
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .games-best-chip > b { color: var(--yoro-color-text-on-dark); }
+
+  /* ── 허브 ─────────────────────────────────────────────── */
+  .games-hub-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(14.5rem, 1fr));
+    gap: var(--yoro-space-3);
+  }
+
+  .games-card {
+    position: relative;
+    display: grid;
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-md);
+    background: var(--yoro-color-ground-surface);
+    overflow: hidden;
+  }
+
+  .games-card.is-coming { border-style: dashed; }
+  .games-card.is-coming .games-card-body > b { color: var(--yoro-color-text-on-dark-muted); }
+  .games-card.is-coming .games-card-art { opacity: .5; }
+
+  .games-card-art {
+    height: 6rem;
+    display: grid;
+    place-items: center;
+    font-size: 2.125rem;
+    background:
+      radial-gradient(90% 100% at 50% 0%, color-mix(in srgb, var(--yoro-color-public-primary) 30%, transparent), transparent 70%),
+      color-mix(in srgb, var(--yoro-color-ground-surface) 80%, #000 20%);
+  }
+
+  .games-card-body {
+    display: grid;
+    gap: .25rem;
+    padding: var(--yoro-space-3) var(--yoro-space-3) var(--yoro-space-3);
+  }
+
+  .games-card-body > b { font-size: var(--yoro-font-size-sm); font-weight: var(--yoro-font-weight-bold); }
+
+  .games-card-body > small {
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    line-height: 1.55;
+  }
+
+  .games-card-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--yoro-space-2);
+    margin-top: var(--yoro-space-2);
+    min-height: 1.75rem;
+  }
+
+  .games-card-record {
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-pill);
+    padding: .15rem .6rem;
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: .625rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .games-card-record > b { color: var(--yoro-color-accent-gold); }
+  .games-card-soon { color: var(--yoro-color-text-on-dark-muted); font-size: .625rem; }
+
+  .games-card-cta {
+    margin-left: auto;
+    padding: .3rem .8rem;
+    border: 0;
+    border-radius: var(--yoro-radius-sm);
+    background: var(--yoro-color-public-primary);
+    color: #fff;
+    font: inherit;
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-bold);
+    cursor: pointer;
+  }
+
+  .games-card-cta:hover, .games-card-cta:focus-visible { filter: brightness(1.1); }
+
+  .games-card-badge {
+    position: absolute;
+    top: .6rem;
+    right: .6rem;
+    z-index: 1;
+    padding: .1rem .5rem;
+    border-radius: var(--yoro-radius-pill);
+    font-size: .53125rem;
+    font-weight: var(--yoro-font-weight-bold);
+  }
+
+  .games-card-badge.is-new {
+    color: var(--yoro-color-rank-trend);
+    border: 1px solid color-mix(in srgb, var(--yoro-color-rank-trend) 40%, transparent);
+    background: color-mix(in srgb, var(--yoro-color-ground-surface) 85%, #000 15%);
+  }
+
+  .games-card-badge.is-soon {
+    color: var(--yoro-color-text-on-dark-muted);
+    border: 1px solid var(--yoro-color-border-on-dark-strong);
+    background: color-mix(in srgb, var(--yoro-color-ground-surface) 85%, #000 15%);
+  }
+
+  /* ── 반응속도: 스테이지 + 사이드 ──────────────────────── */
+  .games-reaction-cols {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--yoro-space-4);
+    align-items: start;
+  }
+
+  @media (min-width: 56.25rem) {
+    .games-reaction-cols { grid-template-columns: minmax(0, 1.6fr) minmax(15.5rem, 1fr); }
+  }
+
+  .games-stage {
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-md);
+    background: var(--yoro-color-ground-surface);
+    overflow: hidden;
+  }
+
+  .games-stage-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--yoro-space-2);
+    padding: var(--yoro-space-2) var(--yoro-space-4);
+    border-bottom: 1px solid var(--yoro-color-border-on-dark);
+  }
+
+  .games-stage-head > h2 { margin: 0; font-size: var(--yoro-font-size-sm); font-weight: var(--yoro-font-weight-bold); }
+
+  .games-stage-step {
+    padding: .1rem .6rem;
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-pill);
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .games-arena {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    min-height: 21rem;
+    margin: 0;
+    padding: var(--yoro-space-6) var(--yoro-space-4);
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: center;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .games-arena.is-idle {
+    background:
+      radial-gradient(90% 70% at 50% 18%, color-mix(in srgb, var(--yoro-color-public-primary) 24%, transparent), transparent 60%),
+      color-mix(in srgb, var(--yoro-color-ground-surface) 80%, #000 20%);
+  }
+
+  .games-arena.is-waiting {
+    background:
+      radial-gradient(100% 80% at 50% 30%, color-mix(in srgb, var(--yoro-color-match-loss-accent) 32%, transparent), transparent 70%),
+      color-mix(in srgb, var(--yoro-color-match-loss-accent) 10%, #000 90%);
+  }
+
+  .games-arena.is-go {
+    background:
+      radial-gradient(100% 80% at 50% 30%, color-mix(in srgb, var(--yoro-color-rank-trend) 38%, transparent), transparent 70%),
+      color-mix(in srgb, var(--yoro-color-rank-trend) 12%, #000 88%);
+  }
+
+  .games-arena.is-tooSoon {
+    background:
+      radial-gradient(100% 80% at 50% 30%, color-mix(in srgb, var(--yoro-color-accent-gold) 28%, transparent), transparent 70%),
+      color-mix(in srgb, var(--yoro-color-accent-gold) 9%, #000 91%);
+  }
+
+  .games-arena.is-result {
+    cursor: default;
+    background:
+      radial-gradient(90% 70% at 50% 12%, color-mix(in srgb, var(--yoro-color-public-primary) 26%, transparent), transparent 62%),
+      color-mix(in srgb, var(--yoro-color-ground-surface) 80%, #000 20%);
+  }
+
+  .games-pulse {
+    display: grid;
+    place-items: center;
+    width: 4.375rem;
+    height: 4.375rem;
+    margin: 0 auto var(--yoro-space-3);
+    border: 2px solid color-mix(in srgb, var(--yoro-color-public-primary) 50%, transparent);
+    border-radius: var(--yoro-radius-circle);
+    background: color-mix(in srgb, var(--yoro-color-public-primary) 16%, transparent);
+    font-size: 1.75rem;
+  }
+
+  .games-arena.is-waiting .games-pulse {
+    border-color: color-mix(in srgb, var(--yoro-color-match-loss-accent) 60%, transparent);
+    background: color-mix(in srgb, var(--yoro-color-match-loss-accent) 16%, transparent);
+  }
+
+  .games-arena.is-go .games-pulse {
+    border-color: color-mix(in srgb, var(--yoro-color-rank-trend) 70%, transparent);
+    background: color-mix(in srgb, var(--yoro-color-rank-trend) 20%, transparent);
+  }
+
+  .games-arena.is-tooSoon .games-pulse {
+    border-color: color-mix(in srgb, var(--yoro-color-accent-gold) 60%, transparent);
+    background: color-mix(in srgb, var(--yoro-color-accent-gold) 16%, transparent);
+  }
+
+  .games-arena-title { display: block; font-size: 1.3125rem; font-weight: var(--yoro-font-weight-black); letter-spacing: -.01em; }
+
+  .games-arena-sub {
+    display: block;
+    margin-top: .4375rem;
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    line-height: 1.6;
+  }
+
+  .games-multiline { white-space: pre-line; }
+
+  .games-arena-ms { font-size: 3.25rem; font-weight: var(--yoro-font-weight-black); font-variant-numeric: tabular-nums; letter-spacing: -.03em; }
+  .games-arena-ms > small { font-size: 1.25rem; }
+
+  .games-btn {
+    display: inline-block;
+    margin-top: var(--yoro-space-3);
+    padding: .625rem 1.5rem;
+    border: 0;
+    border-radius: var(--yoro-radius-sm);
+    background: var(--yoro-color-public-primary);
+    color: #fff;
+    font: inherit;
+    font-size: var(--yoro-font-size-sm);
+    font-weight: var(--yoro-font-weight-bold);
+    cursor: pointer;
+  }
+
+  .games-btn:hover, .games-btn:focus-visible { filter: brightness(1.1); }
+  .games-btn.is-ghost { background: transparent; border: 1px solid var(--yoro-color-border-on-dark-strong); color: var(--yoro-color-text-on-dark-muted); margin-left: var(--yoro-space-2); }
+  /* 스테이지 버튼 안의 시각적 버튼(중첩 button 금지 — span 스타일만). */
+  .games-btn-visual { pointer-events: none; }
+
+  .games-tier-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    margin-top: var(--yoro-space-2);
+    padding: .3rem .9rem;
+    border: 1px solid color-mix(in srgb, var(--yoro-color-accent-gold) 45%, transparent);
+    border-radius: var(--yoro-radius-pill);
+    background: color-mix(in srgb, var(--yoro-color-accent-gold) 14%, transparent);
+    color: var(--yoro-color-accent-gold);
+    font-size: var(--yoro-font-size-sm);
+    font-weight: var(--yoro-font-weight-bold);
+  }
+
+  .games-tries { display: flex; flex-wrap: wrap; gap: .375rem; justify-content: center; margin-top: var(--yoro-space-3); }
+
+  .games-tries > span {
+    min-width: 2.875rem;
+    padding: .3rem .25rem .25rem;
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-sm);
+    background: color-mix(in srgb, var(--yoro-color-text-on-dark) 4%, transparent);
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-bold);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .games-tries > span > i { display: block; color: var(--yoro-color-text-on-dark-muted); font-size: .53125rem; font-style: normal; font-weight: var(--yoro-font-weight-regular); }
+  .games-tries > span.is-best { border-color: color-mix(in srgb, var(--yoro-color-rank-trend) 50%, transparent); color: var(--yoro-color-rank-trend); }
+  .games-tries > span.is-worst { color: color-mix(in srgb, var(--yoro-color-match-loss-accent) 45%, #fff 55%); }
+
+  .games-result-line { margin: var(--yoro-space-3) 0 0; color: var(--yoro-color-text-on-dark-muted); font-size: var(--yoro-font-size-xs); font-variant-numeric: tabular-nums; }
+  .games-result-line > b { color: var(--yoro-color-text-on-dark); }
+  .games-result-line .is-updated { color: var(--yoro-color-rank-trend); font-weight: var(--yoro-font-weight-bold); }
+  .games-result-actions { margin-top: var(--yoro-space-1); }
+
+  /* ── 사이드 ───────────────────────────────────────────── */
+  .games-side { display: grid; gap: var(--yoro-space-3); }
+
+  .games-side-card {
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-md);
+    background: var(--yoro-color-ground-surface);
+    overflow: hidden;
+  }
+
+  .games-side-card > h3 {
+    margin: 0;
+    padding: var(--yoro-space-2) var(--yoro-space-3);
+    border-bottom: 1px solid var(--yoro-color-border-on-dark);
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-bold);
+  }
+
+  .games-tier-table { display: grid; }
+
+  .games-tier-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--yoro-space-2);
+    align-items: center;
+    padding: .3rem var(--yoro-space-3);
+    border-top: 1px solid color-mix(in srgb, var(--yoro-color-text-on-dark) 6%, transparent);
+    font-size: var(--yoro-font-size-xs);
+  }
+
+  .games-tier-row:first-child { border-top: 0; }
+  .games-tier-row > b { font-weight: var(--yoro-font-weight-bold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .games-tier-row > span { color: var(--yoro-color-text-on-dark-muted); font-size: .625rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .games-tier-row.is-me { background: color-mix(in srgb, var(--yoro-color-accent-gold) 9%, transparent); }
+  .games-tier-row.is-me > b { color: var(--yoro-color-accent-gold); }
+
+  .games-side-note { margin: 0; padding: var(--yoro-space-2) var(--yoro-space-3) var(--yoro-space-3); color: var(--yoro-color-text-on-dark-muted); font-size: .6875rem; line-height: 1.65; }
+
+  .games-notfound {
+    display: grid;
+    justify-items: center;
+    gap: var(--yoro-space-2);
+    padding: var(--yoro-space-8) var(--yoro-space-4);
+    text-align: center;
+  }
+
+  .games-notfound > strong { font-size: var(--yoro-font-size-md); }
+  .games-notfound > p { margin: 0; color: var(--yoro-color-text-on-dark-muted); font-size: var(--yoro-font-size-sm); }
+}

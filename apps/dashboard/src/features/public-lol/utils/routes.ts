@@ -16,6 +16,7 @@ const PUBLIC_PAGE_PATHS: Partial<Record<PublicMainPage, string>> = {
   valorant: "/valorant",
   minecraft: "/minecraft",
   bot: "/bot",
+  games: "/games",
   subscriptions: "/follow",
   followJoin: "/participation",
   aram: PUBLIC_ARAM_PATH,

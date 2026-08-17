@@ -263,6 +263,7 @@ import {
   saveRecentSearch,
   writeFavorites,
 } from "../features/public-lol/utils/storage";
+import { readMiniGameBest, reactionTierLabel, REACTION_TIER_TABLE } from "../features/public-games/registry";
 import { usePublicLocale } from "../features/public-lol/hooks/usePublicLocale";
 import { usePublicTheme } from "../features/public-lol/hooks/usePublicTheme";
 import {
@@ -2202,6 +2203,31 @@ function sigLocaleName(entry: { nameKo?: string; nameJa?: string } | undefined, 
   if (!entry) return fallback;
   if (activePublicLocale === "ja") return entry.nameJa ?? entry.nameKo ?? fallback;
   return entry.nameKo ?? entry.nameJa ?? fallback;
+}
+
+/* 미니게임 랩 배너(목업 reaction-test.html v3 §⑤) — 통계 탭 하단.
+ * 뷰어 본인의 브라우저 기록(localStorage)이라 남의 프로필에서도 항상 "내 기록"이며,
+ * 문구로 그 사실을 명확히 합니다. 발견 동선이 목적이라 기록이 없어도 항상 렌더합니다. */
+function MiniGamesLabBanner() {
+  const best = useMemo(() => readMiniGameBest("reaction"), []);
+  const tier = best?.tierKey ? REACTION_TIER_TABLE.find((entry) => entry.key === best.tierKey) : undefined;
+  const href = localizedPublicUrlForCurrentLocale("/games/reaction");
+  return (
+    <a className="public-sig-lab" data-testid="mini-games-lab-banner" href={href}>
+      <span aria-hidden="true" className="public-sig-lab-icon">⚡</span>
+      <span className="public-sig-lab-text">
+        <b>{t().miniGamesLabTitle}</b>
+        <small>{best ? t().miniGamesLabNote : t().miniGamesLabEmpty}</small>
+      </span>
+      {best ? (
+        <span className="public-sig-lab-record">
+          <b>{Math.round(best.score)}ms{tier ? ` · ${tier.emoji} ${reactionTierLabel(tier, activePublicLocale)}` : ""}</b>
+          {t().miniGamesLabBest}
+        </span>
+      ) : null}
+      <span className="public-sig-lab-cta">{t().miniGamesLabCta}</span>
+    </a>
+  );
 }
 
 function SignatureBuildsPanel({
@@ -6613,7 +6639,7 @@ export function PublicLolPage({
       setActiveNav("search");
       setPublicPath(legalPath);
     } else {
-      setActiveNav(page === "palworld" || page === "valorant" || page === "minecraft" ? "search" : "community");
+      setActiveNav(page === "palworld" || page === "valorant" || page === "minecraft" || page === "games" ? "search" : "community");
       const pagePath = publicPathForPage(page);
       if (pagePath) setPublicPath(pagePath);
     }
@@ -7276,13 +7302,16 @@ export function PublicLolPage({
                   ) : null}
 
                   {profileTab === "stats" ? (
-                    <SignatureBuildsPanel
-                      profile={activeProfile}
-                      onChampionPick={(championId) => {
-                        setFilters({ ...DEFAULT_MATCH_FILTERS, championId: String(championId) });
-                        setProfileTab("overview");
-                      }}
-                    />
+                    <>
+                      <SignatureBuildsPanel
+                        profile={activeProfile}
+                        onChampionPick={(championId) => {
+                          setFilters({ ...DEFAULT_MATCH_FILTERS, championId: String(championId) });
+                          setProfileTab("overview");
+                        }}
+                      />
+                      <MiniGamesLabBanner />
+                    </>
                   ) : null}
 
 	                {profileTab === "ingame" ? (

@@ -3,12 +3,14 @@ import { publicI18n, t } from "../i18n/public-lol-i18n";
 import type { PublicMainPage } from "../types/public-lol";
 import { DISCORD_SYMBOL_ICON_SRC } from "../../../shared/DiscordSymbolIcon";
 
-export type PublicGameId = "league-of-legends" | "palworld" | "valorant" | "minecraft" | "yoro-bot";
+export type PublicGameId = "league-of-legends" | "palworld" | "valorant" | "minecraft" | "yoro-bot" | "mini-games";
 
 type PublicGameOption = {
   id: PublicGameId;
-  page?: Extract<PublicMainPage, "search" | "palworld" | "valorant" | "minecraft" | "bot">;
+  page?: Extract<PublicMainPage, "search" | "palworld" | "valorant" | "minecraft" | "bot" | "games">;
   logo?: string;
+  /** logo 가 없을 때 쓰는 한 글자/이모지 마크. */
+  mark?: string;
   ko: string;
   ja: string;
   subtitleKo: string;
@@ -71,6 +73,17 @@ const games: PublicGameOption[] = [
     subtitleKo: publicI18n.ko.yoroBotSubtitle,
     subtitleJa: publicI18n.ja.yoroBotSubtitle
   },
+  /* 미니게임은 개별 게임이 아니라 카테고리 1항목 — 게임이 늘어도 선택기는 불변
+     (목업 reaction-test.html v3 §①). 로고 대신 이모지 마크를 씁니다. */
+  {
+    id: "mini-games",
+    page: "games",
+    mark: "🕹",
+    ko: publicI18n.ko.miniGames,
+    ja: publicI18n.ja.miniGames,
+    subtitleKo: publicI18n.ko.miniGamesSubtitle,
+    subtitleJa: publicI18n.ja.miniGamesSubtitle
+  },
 ];
 
 function isPublicGameId(value: string | null): value is PublicGameId {
@@ -82,10 +95,12 @@ function gameIdForPage(page: PublicMainPage): PublicGameId | undefined {
   if (page === "valorant") return "valorant";
   if (page === "minecraft") return "minecraft";
   if (page === "bot") return "yoro-bot";
+  if (page === "games") return "mini-games";
   return "league-of-legends";
 }
 
 function gameLabel(game: PublicGameOption): string {
+  if (game.id === "mini-games") return t().miniGames;
   if (game.id === "league-of-legends") return t().leagueOfLegends;
   if (game.id === "palworld") return t().palworld;
   if (game.id === "valorant") return t().valorant;
@@ -94,6 +109,7 @@ function gameLabel(game: PublicGameOption): string {
 }
 
 function gameSubtitle(game: PublicGameOption): string {
+  if (game.id === "mini-games") return t().miniGamesSubtitle;
   if (game.id === "league-of-legends") return t().leagueOfLegendsSubtitle;
   if (game.id === "palworld") return t().palworldSubtitle;
   if (game.id === "valorant") return t().valorantSubtitle;
@@ -102,6 +118,7 @@ function gameSubtitle(game: PublicGameOption): string {
 }
 
 function gameSelectionLabel(game: PublicGameOption): string {
+  if (game.id === "mini-games") return t().selectMiniGames;
   if (game.id === "league-of-legends") return t().selectLeagueOfLegends;
   if (game.id === "palworld") return t().selectPalworld;
   if (game.id === "valorant") return t().selectValorant;
@@ -247,7 +264,7 @@ export function PublicGameSelector({
                 aria-hidden="true"
               />
             ) : (
-              <span className="public-game-selector-mark is-yoro-bot" aria-hidden="true">B</span>
+              <span className={`public-game-selector-mark is-${game.id}`} aria-hidden="true">{game.mark ?? "B"}</span>
             )}
             <span className="public-game-selector-copy">
               <strong data-ko={game.ko} data-ja={game.ja}>{gameLabel(game)}</strong>

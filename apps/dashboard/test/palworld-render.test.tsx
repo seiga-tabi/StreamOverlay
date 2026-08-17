@@ -113,10 +113,12 @@ function assertPngAsset(fileName: string, width: number, height: number): void {
   assert.equal(data.readUInt32BE(20), height);
 }
 
-test("게임 선택 메뉴에는 LoL, 펠월드, 발로란트, 마인크래프트, YORO Bot 다섯 항목을 표시한다", () => {
+test("게임 선택 메뉴에는 LoL, 펠월드, 발로란트, 마인크래프트, YORO Bot, 미니게임 여섯 항목을 표시한다", () => {
   setActivePublicLocale("ko");
   const html = renderToStaticMarkup(<PublicGameSelector activePage="palworld" onPage={() => undefined} mode="tray" />);
-  assert.equal((html.match(/role="option"/g) ?? []).length, 5);
+  assert.equal((html.match(/role="option"/g) ?? []).length, 6);
+  assert.match(html, /미니게임/);
+  assert.match(html, /반응속도 · 시각반응/);
   assert.match(html, /리그 오브 레전드/);
   assert.match(html, /펠월드/);
   assert.match(html, /발로란트/);

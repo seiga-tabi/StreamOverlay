@@ -412,6 +412,64 @@
     line-height: 1.5;
   }
 
+  /* ── 미니게임 랩 배너(통계 탭 하단) — 목업 reaction-test.html v3 §⑤. ── */
+  .public-sig-lab {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--yoro-space-3);
+    margin-top: var(--yoro-space-3);
+    padding: var(--yoro-space-3) var(--yoro-space-4);
+    border: 1px solid color-mix(in srgb, var(--yoro-color-public-primary) 40%, transparent);
+    border-radius: var(--yoro-radius-md);
+    background:
+      radial-gradient(80% 120% at 90% 0%, color-mix(in srgb, var(--yoro-color-rank-trend) 14%, transparent), transparent 55%),
+      radial-gradient(60% 120% at 10% 0%, color-mix(in srgb, var(--yoro-color-public-primary) 20%, transparent), transparent 60%),
+      var(--yoro-color-ground-surface);
+    color: var(--yoro-color-text-on-dark);
+    text-decoration: none;
+  }
+
+  .public-sig-lab:hover, .public-sig-lab:focus-visible {
+    border-color: color-mix(in srgb, var(--yoro-color-public-primary) 60%, transparent);
+  }
+
+  .public-sig-lab-icon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.625rem;
+    height: 2.625rem;
+    border: 1px solid color-mix(in srgb, var(--yoro-color-public-primary) 45%, transparent);
+    border-radius: var(--yoro-radius-sm);
+    background: color-mix(in srgb, var(--yoro-color-public-primary) 16%, transparent);
+    font-size: 1.25rem;
+  }
+
+  .public-sig-lab-text { min-width: 0; flex: 1; }
+  .public-sig-lab-text > b { display: block; font-size: var(--yoro-font-size-sm); font-weight: var(--yoro-font-weight-bold); }
+  .public-sig-lab-text > small { display: block; margin-top: .0625rem; color: var(--yoro-color-text-on-dark-muted); font-size: .6875rem; }
+
+  .public-sig-lab-record {
+    flex: none;
+    text-align: right;
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: .6875rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .public-sig-lab-record > b { display: block; color: var(--yoro-color-accent-gold); font-size: var(--yoro-font-size-sm); }
+
+  .public-sig-lab-cta {
+    flex: none;
+    padding: .5rem 1rem;
+    border-radius: var(--yoro-radius-sm);
+    background: var(--yoro-color-public-primary);
+    color: #fff;
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-bold);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .public-sig-detail-wrap, .public-sig-chev { transition: none; }
   }
