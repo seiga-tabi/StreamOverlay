@@ -129,6 +129,8 @@ test("공유 메타는 기록·티어를 제목에 싣고 계정 단서를 남�
   /* 익명 기록은 이름 없이 고정 문구입니다. */
   assert.equal(ja.description, "匿名のチャレンジャーの記録 · 上位 12% · あなたも挑戦してみてください");
   assert.equal(ja.locale, "ja");
+  /* 티어 이미지에 문구가 박혀 있어 ja 는 -ja 판을 내립니다. */
+  assert.equal(ja.imageUrl, "https://yoro.gg/images/yorogg-og-reaction-master-ja.png");
 
   /* 표본이 얇아 백분위가 없으면 그 조각만 빠집니다. */
   const noPercentile = reactionShareSeoMetadata(
@@ -143,4 +145,9 @@ test("공유 메타는 기록·티어를 제목에 싣고 계정 단서를 남�
     { averageMs: 187, tierKey: "platinum", tierEmoji: "🔷", tierLabel: "플래티넘" },
   );
   assert.equal(unknownTier.imageUrl, "https://yoro.gg/images/yorogg-og-games.png");
+  const unknownTierJa = reactionShareSeoMetadata(
+    { locale: "ja", shareId: "abcd1234efgh" },
+    { averageMs: 187, tierKey: "platinum", tierEmoji: "🔷", tierLabel: "プラチナ" },
+  );
+  assert.equal(unknownTierJa.imageUrl, "https://yoro.gg/images/yorogg-og-games-ja.png");
 });

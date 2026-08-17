@@ -29,6 +29,8 @@ const DEFAULT_SOCIAL_IMAGE = `${PUBLIC_SEO_ORIGIN}/images/yorogg-og.png`;
 const SOCIAL_IMAGES_BY_PREFIX: readonly {
   prefix: string;
   url: string;
+  /** 이미지 안에 문구가 박힌 페이지는 ja 경로에 ja 판을 내립니다(없으면 url 공용). */
+  urlJa?: string;
   alt: Readonly<Record<PublicUrlLocale, string>>;
 }[] = [
   {
@@ -56,6 +58,9 @@ const SOCIAL_IMAGES_BY_PREFIX: readonly {
   {
     prefix: "/games",
     url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-games.png`,
+    /* 미니게임 OG 는 이미지에 한국어 문구가 박혀 있어 ja 경로(/ja/games …)에는
+       ja 판을 내립니다 — ja 링크가 한국어 이미지로 보이던 실사례(2026-08-17). */
+    urlJa: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-games-ja.png`,
     alt: { ko: "YORO.gg 미니게임 미리보기", ja: "YORO.gg ミニゲームのプレビュー" }
   },
   /* LoL 생태(전적·패치 노트·팔로우·참가)와 홈은 LoL 이미지를 사이트 대표로 겸용합니다. */
@@ -86,14 +91,14 @@ const HOME_SOCIAL_IMAGE = {
   alt: { ko: "YORO.gg LoL 전적 검색 미리보기", ja: "YORO.gg LoL戦績検索のプレビュー" }
 } as const;
 
-export function socialImageForPath(normalizedPath: string): {
+export function socialImageForPath(normalizedPath: string, locale: PublicUrlLocale = "ko"): {
   url: string;
   alt: Readonly<Record<PublicUrlLocale, string>>;
 } {
   if (normalizedPath === "/") return HOME_SOCIAL_IMAGE;
   const match = SOCIAL_IMAGES_BY_PREFIX.find(({ prefix }) =>
     normalizedPath === prefix || normalizedPath.startsWith(`${prefix}/`));
-  if (match) return { url: match.url, alt: match.alt };
+  if (match) return { url: locale === "ja" && match.urlJa ? match.urlJa : match.url, alt: match.alt };
   /* 법적 고지·계정 등 게임 외 화면은 기존 범용 이미지를 유지합니다. */
   return {
     url: DEFAULT_SOCIAL_IMAGE,
@@ -270,9 +275,11 @@ export function reactionShareSeoMetadata(
     ja ? "あなたも挑戦してみてください" : "나도 도전해 보세요"
   ].filter(Boolean).join(" · ");
 
+  /* 티어 이미지에도 문구가 박혀 있어 ja 는 -ja 판(ko/ja 각 9종 + 대표 이미지 제작 완료). */
+  const imageSuffix = ja ? "-ja" : "";
   const imageFile = REACTION_SHARE_IMAGE_TIERS.has(record.tierKey)
-    ? `yorogg-og-reaction-${record.tierKey}.png`
-    : "yorogg-og-games.png";
+    ? `yorogg-og-reaction-${record.tierKey}${imageSuffix}.png`
+    : `yorogg-og-games${imageSuffix}.png`;
 
   return {
     canonicalUrl: localizedPublicSeoUrl(normalizedPath, route.locale),
@@ -447,7 +454,7 @@ export function palworldEntitySeoMetadata(
     description,
     fallback: palworldEntityFallback(entity, kind, locale),
     imageAlt: name,
-    imageUrl: socialImageForPath(normalizedPath).url,
+    imageUrl: socialImageForPath(normalizedPath, locale).url,
     locale,
     openGraphType: "article",
     structuredData: [
@@ -952,7 +959,7 @@ export function publicSeoMetadataForPath(
   if (normalizedPath === "/") {
     structuredData.push({ "@context": "https://schema.org", ...(organizationStructuredData() as object) });
   }
-  const socialImage = socialImageForPath(normalizedPath);
+  const socialImage = socialImageForPath(normalizedPath, locale);
   return {
     alternateUrls: alternateUrlsForPath(normalizedPath),
     canonicalUrl,

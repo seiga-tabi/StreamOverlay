@@ -309,10 +309,10 @@ test("미니게임 경로는 전용 OG 이미지·metadata·breadcrumb·sitemap�
   assert.match(reactionJa, /<meta name="description" content="緑の信号にできるだけ早く[^"]*">/u);
   assert.match(reactionJa, /<html lang="ja"/u);
 
-  /* OG 이미지 — prefix 매칭이라 하위 경로까지 같은 이미지를 씁니다. */
-  for (const html of [hubKo, reactionJa]) {
-    assert.match(html, /<meta property="og:image" content="https:\/\/yoro\.gg\/images\/yorogg-og-games\.png" \/>/u);
-  }
+  /* OG 이미지 — prefix 매칭이라 하위 경로까지 커버하되, 이미지에 문구가 박혀 있어
+     ja 경로에는 ja 판을 내립니다(ja 링크가 한국어 이미지로 보이던 실사례). */
+  assert.match(hubKo, /<meta property="og:image" content="https:\/\/yoro\.gg\/images\/yorogg-og-games\.png" \/>/u);
+  assert.match(reactionJa, /<meta property="og:image" content="https:\/\/yoro\.gg\/images\/yorogg-og-games-ja\.png" \/>/u);
   assert.match(hubKo, /<meta property="og:image:alt" content="YORO\.gg 미니게임 미리보기" \/>/u);
   assert.match(reactionJa, /<meta property="og:image:alt" content="YORO\.gg ミニゲームのプレビュー" \/>/u);
 
