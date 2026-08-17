@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { gamesPageFromPath, GAMES_ROUTE_EVENT } from "../utils/routes";
+import { gamesPageFromPath, gamesShareIdFromPath, GAMES_ROUTE_EVENT } from "../utils/routes";
 
 export function useGamesRoute() {
   const [locationRevision, setLocationRevision] = useState(0);
@@ -16,6 +16,7 @@ export function useGamesRoute() {
 
   return {
     page: gamesPageFromPath(window.location.pathname),
+    shareId: gamesShareIdFromPath(window.location.pathname),
     locationRevision,
   };
 }

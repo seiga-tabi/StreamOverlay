@@ -20,10 +20,14 @@ export function gamesSeoMetadata(page: GamesPage, locale: GamesLocale): GamesSeo
   const titles: Record<GamesPage, string> = {
     hub: text.seoTitleHub,
     reaction: text.seoTitleReaction,
+    /* 공유 페이지의 실제 크롤러 메타(기록 표시)는 서버 렌더가 담당(Codex handoff) —
+       클라이언트 title 은 게임 제목으로 충분합니다. */
+    share: text.seoTitleReaction,
   };
   const descriptions: Record<GamesPage, string> = {
     hub: text.seoDescriptionHub,
     reaction: text.seoDescriptionReaction,
+    share: text.seoDescriptionReaction,
   };
   return {
     canonicalUrl: new URL(localizedPublicUrl(gamesPathForPage(page), locale), PUBLIC_ORIGIN).href,

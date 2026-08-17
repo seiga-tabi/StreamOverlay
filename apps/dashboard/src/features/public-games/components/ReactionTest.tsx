@@ -1,5 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { usePublicAccountLogin } from "../../../shared/public-account-login";
+import {
+  deleteMyReactionRecord,
+  fetchReactionLeaderboard,
+  submitReactionRecord,
+  type ReactionLeaderboard,
+} from "../api";
 import { gamesI18n, type GamesLocale } from "../i18n/games-i18n";
+import { gamesSharePath } from "../utils/routes";
+import { localizedPublicUrlForCurrentLocale } from "../../public-lol/utils/public-locale-path";
 import {
   MINI_GAMES,
   miniGameName,
@@ -24,8 +33,9 @@ import {
  * - 120ms 미만은 신호 예측으로 간주해 라운드 무효
  * - 백그라운드 탭 전환 시 진행 라운드 무효(visibilitychange)
  *
- * 전체 화면: Fullscreen API, 미지원(iOS Safari 등)은 fixed 오버레이 + 스크롤 잠금 폴백.
- * Esc/✕ = 종료(진행 기록 무효) — 브라우저 풀스크린 Esc 와 동작을 일치시킵니다.
+ * 진행 영역: OS 전체 화면이 아니라 웹 페이지 내부에서 스테이지가 대형 영역으로
+ * 확장됩니다(사이드 패널 숨김 + 아레나 확장 — 2026-08-17 사용자 요청으로 Fullscreen API 제거).
+ * Esc/✕ = 종료(진행 기록 무효).
  */
 
 const ROUNDS = 5;
@@ -39,6 +49,16 @@ type Phase = "idle" | "waiting" | "go" | "tooSoon" | "chart" | "rest" | "result"
 const RUNNING_PHASES: ReadonlySet<Phase> = new Set(["waiting", "go", "tooSoon", "chart", "rest"]);
 
 const REACTION_GAME = MINI_GAMES.find((game) => game.id === "reaction")!;
+/* 등록 시트의 마지막 공개 방식 선택 기억(목업 §④-2). */
+const IDENTITY_STORAGE_KEY = "yoro.games.reaction.identity.v1";
+
+function readStoredIdentity(): "public" | "anonymous" {
+  try {
+    return window.localStorage.getItem(IDENTITY_STORAGE_KEY) === "anonymous" ? "anonymous" : "public";
+  } catch {
+    return "public";
+  }
+}
 
 function formatTemplate(template: string, values: Record<string, string>): string {
   return Object.entries(values).reduce((text, [key, value]) => text.replaceAll(`{${key}}`, value), template);
@@ -64,16 +84,22 @@ export function ReactionTest({ locale }: { locale: GamesLocale }) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [samples, setSamples] = useState<number[]>([]);
   const [restCount, setRestCount] = useState(3);
-  const [overlayFallback, setOverlayFallback] = useState(false);
   const [best, setBest] = useState(() => readMiniGameBest(REACTION_GAME.id));
   const [bestUpdated, setBestUpdated] = useState(false);
   const [copied, setCopied] = useState(false);
-  const stageRef = useRef<HTMLElement | null>(null);
+  /* 기록 등록 기능은 리더보드 조회 성공 여부로 게이트(fail-closed) — null = 기능 꺼짐. */
+  const [leaderboard, setLeaderboard] = useState<ReactionLeaderboard | null>(null);
+  const [registerOpen, setRegisterOpen] = useState(false);
+  const [identity, setIdentity] = useState<"public" | "anonymous">(() => readStoredIdentity());
+  const [submitState, setSubmitState] = useState<"idle" | "busy" | "error">("idle");
+  const [shareId, setShareId] = useState<string | null>(null);
+  const [registeredRank, setRegisteredRank] = useState<number | undefined>(undefined);
+  const [shareCopied, setShareCopied] = useState(false);
+  const account = usePublicAccountLogin();
   const timerRef = useRef<number | undefined>(undefined);
   const restTickRef = useRef<number | undefined>(undefined);
   const goAtRef = useRef(0);
   const phaseRef = useRef<Phase>("idle");
-  const intentionalExitRef = useRef(false);
   phaseRef.current = phase;
 
   const clearTimers = useCallback(() => {
@@ -87,35 +113,12 @@ export function ReactionTest({ locale }: { locale: GamesLocale }) {
     }
   }, []);
 
-  const exitImmersive = useCallback(() => {
-    setOverlayFallback(false);
-    document.body.style.removeProperty("overflow");
-    if (document.fullscreenElement) {
-      intentionalExitRef.current = true;
-      void document.exitFullscreen().catch(() => undefined);
-    }
-  }, []);
-
   const quitRun = useCallback(() => {
     /* 중단 = 진행 기록 무효(목업 §④-1 접근성 — 확인 없이 즉시 이탈). */
     clearTimers();
-    exitImmersive();
     setSamples([]);
     setPhase("idle");
-  }, [clearTimers, exitImmersive]);
-
-  const enterImmersive = useCallback(() => {
-    const stage = stageRef.current;
-    document.body.style.overflow = "hidden";
-    if (stage?.requestFullscreen) {
-      stage.requestFullscreen({ navigationUI: "hide" }).catch(() => {
-        /* iOS Safari 등 미지원 — fixed 오버레이 폴백(동일 화면). */
-        setOverlayFallback(true);
-      });
-    } else {
-      setOverlayFallback(true);
-    }
-  }, []);
+  }, [clearTimers]);
 
   const scheduleGo = useCallback(() => {
     clearTimers();
@@ -138,9 +141,8 @@ export function ReactionTest({ locale }: { locale: GamesLocale }) {
     const improved = writeMiniGameBest(REACTION_GAME, { score: average, tierKey: tier.key, at: new Date().toISOString() });
     if (improved) setBest(readMiniGameBest(REACTION_GAME.id));
     setBestUpdated(improved);
-    exitImmersive();
     setPhase("result");
-  }, [exitImmersive]);
+  }, []);
 
   const startRest = useCallback(() => {
     setPhase("rest");
@@ -169,34 +171,24 @@ export function ReactionTest({ locale }: { locale: GamesLocale }) {
     }, CHART_SHOW_MS);
   }, [finishRun, startRest]);
 
-  useEffect(() => () => {
-    clearTimers();
-    document.body.style.removeProperty("overflow");
-  }, [clearTimers]);
+  useEffect(() => () => clearTimers(), [clearTimers]);
 
-  /* 브라우저 Esc 로 풀스크린이 풀리면 종료와 동일하게 처리(의도한 해제는 제외). */
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      if (document.fullscreenElement) return;
-      if (intentionalExitRef.current) {
-        intentionalExitRef.current = false;
-        return;
-      }
-      if (RUNNING_PHASES.has(phaseRef.current)) quitRun();
-    };
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, [quitRun]);
+  const refreshLeaderboard = useCallback(() => {
+    void fetchReactionLeaderboard().then((board) => setLeaderboard(board));
+  }, []);
 
-  /* 오버레이 폴백에는 브라우저 Esc 가 없으므로 직접 처리합니다. */
   useEffect(() => {
-    if (!overlayFallback) return;
+    refreshLeaderboard();
+  }, [refreshLeaderboard]);
+
+  /* Esc = 진행 중 종료(웹 내부 영역이라 브라우저 풀스크린 Esc 가 없으므로 직접 처리). */
+  useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape" && RUNNING_PHASES.has(phaseRef.current)) quitRun();
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [overlayFallback, quitRun]);
+  }, [quitRun]);
 
   /* 백그라운드 탭에서는 타이머·인지 시점이 왜곡되므로 진행 중 라운드를 무효화합니다. */
   useEffect(() => {
@@ -219,7 +211,9 @@ export function ReactionTest({ locale }: { locale: GamesLocale }) {
       setSamples([]);
       setBestUpdated(false);
       setCopied(false);
-      enterImmersive();
+      setShareId(null);
+      setRegisteredRank(undefined);
+      setShareCopied(false);
       scheduleGo();
       return;
     }
@@ -243,7 +237,7 @@ export function ReactionTest({ locale }: { locale: GamesLocale }) {
       setSamples(nextSamples);
       showChart(nextSamples);
     }
-  }, [clearTimers, enterImmersive, samples, scheduleGo, showChart]);
+  }, [clearTimers, samples, scheduleGo, showChart]);
 
   const running = RUNNING_PHASES.has(phase);
   const average = samples.length > 0 ? Math.round(samples.reduce((sum, value) => sum + value, 0) / samples.length) : 0;
@@ -288,6 +282,45 @@ export function ReactionTest({ locale }: { locale: GamesLocale }) {
       window.prompt(text.copyResult, payload);
     }
   }, [average, locale, resultTier, text]);
+
+  const submitRecord = useCallback(async () => {
+    if (samples.length < ROUNDS) return;
+    setSubmitState("busy");
+    try {
+      window.localStorage.setItem(IDENTITY_STORAGE_KEY, identity);
+    } catch {
+      /* 저장 불가(시크릿 등)는 무시 — 선택 기억만 포기합니다. */
+    }
+    try {
+      const result = await submitReactionRecord({ averageMs: average, samples, identity });
+      setShareId(result.shareId);
+      setRegisteredRank(result.rank);
+      setSubmitState("idle");
+      refreshLeaderboard();
+    } catch {
+      setSubmitState("error");
+    }
+  }, [average, identity, refreshLeaderboard, samples]);
+
+  const copyShareLink = useCallback(async () => {
+    if (!shareId) return;
+    const url = new URL(localizedPublicUrlForCurrentLocale(gamesSharePath(shareId)), window.location.origin).href;
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareCopied(true);
+    } catch {
+      window.prompt(text.copyShareLink, url);
+    }
+  }, [shareId, text]);
+
+  const deleteMyRecord = useCallback(async () => {
+    const removed = await deleteMyReactionRecord();
+    if (removed) {
+      setShareId(null);
+      setRegisteredRank(undefined);
+      refreshLeaderboard();
+    }
+  }, [refreshLeaderboard]);
 
   const statusText = phase === "waiting"
     ? text.waitTitle
@@ -334,11 +367,8 @@ export function ReactionTest({ locale }: { locale: GamesLocale }) {
         ) : null}
       </div>
 
-      <div className="games-reaction-cols">
-        <section
-          className={`games-stage${running ? " is-running" : ""}${running && overlayFallback ? " is-overlay-fallback" : ""}`}
-          ref={stageRef}
-        >
+      <div className={`games-reaction-cols${running ? " is-running" : ""}`}>
+        <section className={`games-stage${running ? " is-running" : ""}`}>
           {!running ? (
             <div className="games-stage-head">
               <h2>{text.stageTitle}</h2>
@@ -376,6 +406,17 @@ export function ReactionTest({ locale }: { locale: GamesLocale }) {
                 </p>
                 <div className="games-result-actions">
                   <button className="games-btn" onClick={() => { setPhase("idle"); setSamples([]); }} type="button">{text.retry}</button>
+                  {leaderboard ? (
+                    shareId ? (
+                      <button className="games-btn is-share" onClick={() => void copyShareLink()} type="button">
+                        {shareCopied ? text.shareLinkCopied : text.copyShareLink}
+                      </button>
+                    ) : (
+                      <button className="games-btn is-share" onClick={() => { setSubmitState("idle"); setRegisterOpen(true); }} type="button">
+                        {text.registerCta}
+                      </button>
+                    )
+                  ) : null}
                   <button className="games-btn is-ghost" onClick={() => void copyResult()} type="button">
                     {copied ? text.copied : text.copyResult}
                   </button>
@@ -390,29 +431,34 @@ export function ReactionTest({ locale }: { locale: GamesLocale }) {
                   {deltaLabel ? <span className={`games-chart-delta ${deltaTone}`}>{deltaLabel}</span> : null}
                 </div>
                 <div className="games-chart-plot">
-                  <svg aria-hidden="true" preserveAspectRatio="none" viewBox="0 0 520 150">
-                    <line stroke="currentColor" strokeDasharray="4 5" x1="0" x2="520" y1="37" y2="37" />
-                    <line stroke="currentColor" strokeDasharray="4 5" x1="0" x2="520" y1="75" y2="75" />
-                    <line stroke="currentColor" strokeDasharray="4 5" x1="0" x2="520" y1="113" y2="113" />
-                    {points.length > 1 ? (
-                      <polyline
-                        className="games-chart-line"
-                        fill="none"
-                        points={points.map((point) => `${point.x},${point.y.toFixed(1)}`).join(" ")}
-                        strokeLinecap="round"
-                        strokeWidth="2.5"
-                      />
-                    ) : null}
+                  {/* preserveAspectRatio="none" SVG 안의 circle 은 컨테이너 종횡비에 따라
+                      타원으로 찌그러집니다(모바일 실측 결함). 점은 %-좌표 HTML 오버레이로
+                      그려 항상 정원을 유지하고, 선은 non-scaling-stroke 로 굵기만 고정합니다. */}
+                  <div className="games-chart-canvas">
+                    <svg aria-hidden="true" preserveAspectRatio="none" viewBox="0 0 520 150">
+                      <line stroke="currentColor" strokeDasharray="4 5" vectorEffect="non-scaling-stroke" x1="0" x2="520" y1="37" y2="37" />
+                      <line stroke="currentColor" strokeDasharray="4 5" vectorEffect="non-scaling-stroke" x1="0" x2="520" y1="75" y2="75" />
+                      <line stroke="currentColor" strokeDasharray="4 5" vectorEffect="non-scaling-stroke" x1="0" x2="520" y1="113" y2="113" />
+                      {points.length > 1 ? (
+                        <polyline
+                          className="games-chart-line"
+                          fill="none"
+                          points={points.map((point) => `${point.x},${point.y.toFixed(1)}`).join(" ")}
+                          strokeLinecap="round"
+                          strokeWidth="2.5"
+                          vectorEffect="non-scaling-stroke"
+                        />
+                      ) : null}
+                    </svg>
                     {points.map((point, index) => (
-                      <circle
+                      <span
+                        aria-hidden="true"
                         className={index === points.length - 1 ? "games-chart-dot is-current" : "games-chart-dot"}
-                        cx={point.x}
-                        cy={point.y.toFixed(1)}
                         key={`${index}-${point.value}`}
-                        r={index === points.length - 1 ? 7 : 5.5}
+                        style={{ left: `${((point.x / 520) * 100).toFixed(2)}%`, top: `${((point.y / 150) * 100).toFixed(2)}%` }}
                       />
                     ))}
-                  </svg>
+                  </div>
                   <div aria-hidden="true" className="games-chart-axis">
                     {Array.from({ length: ROUNDS }, (_, index) => (
                       <span key={index}>{formatTemplate(text.roundLabel, { n: String(index + 1) })}</span>
@@ -488,12 +534,122 @@ export function ReactionTest({ locale }: { locale: GamesLocale }) {
               ))}
             </div>
           </section>
+          {leaderboard ? (
+            <section className="games-side-card" data-testid="reaction-leaderboard">
+              <h3>
+                {formatTemplate(text.leaderboardTitle, { count: String(Math.max(leaderboard.entries.length, 1) <= 50 ? 50 : leaderboard.entries.length) })}
+                <small>{text.leaderboardPill}</small>
+              </h3>
+              {leaderboard.entries.length === 0 ? (
+                <p className="games-side-note">{text.leaderboardEmpty}</p>
+              ) : (
+                <div className="games-lb">
+                  {leaderboard.entries.slice(0, 10).map((entry) => (
+                    <div className={`games-lb-row${leaderboard.me && entry.rank === leaderboard.me.rank ? " is-me" : ""}`} data-rank={entry.rank} key={entry.rank}>
+                      <span className="games-lb-rank">{entry.rank}</span>
+                      <span className="games-lb-name">
+                        <i aria-hidden="true" className={entry.displayName ? "" : "is-mask"}>
+                          {entry.avatarUrl ? <img alt="" src={entry.avatarUrl} /> : entry.displayName ? entry.displayName.slice(0, 1).toUpperCase() : "🎭"}
+                        </i>
+                        <b>{entry.displayName ?? formatTemplate(text.leaderboardAnonymous, { label: entry.anonymousLabel ?? "" })}</b>
+                      </span>
+                      <span className="games-lb-ms">{Math.round(entry.averageMs)}ms</span>
+                    </div>
+                  ))}
+                  {leaderboard.me && !leaderboard.entries.slice(0, 10).some((entry) => entry.rank === leaderboard.me!.rank) ? (
+                    <div className="games-lb-row is-me" data-rank={leaderboard.me.rank}>
+                      <span className="games-lb-rank">{leaderboard.me.rank}</span>
+                      <span className="games-lb-name">
+                        <i aria-hidden="true" className={leaderboard.me.displayName ? "" : "is-mask"}>
+                          {leaderboard.me.avatarUrl ? <img alt="" src={leaderboard.me.avatarUrl} /> : leaderboard.me.displayName ? leaderboard.me.displayName.slice(0, 1).toUpperCase() : "🎭"}
+                        </i>
+                        <b>{leaderboard.me.displayName ?? formatTemplate(text.leaderboardAnonymous, { label: leaderboard.me.anonymousLabel ?? "" })}</b>
+                        <small>{text.leaderboardMe}</small>
+                      </span>
+                      <span className="games-lb-ms">{Math.round(leaderboard.me.averageMs)}ms</span>
+                    </div>
+                  ) : null}
+                </div>
+              )}
+              {leaderboard.me ? (
+                <button className="games-lb-delete" onClick={() => void deleteMyRecord()} type="button">{text.leaderboardDelete}</button>
+              ) : null}
+            </section>
+          ) : null}
           <section className="games-side-card">
             <h3>{text.measureNotesTitle}</h3>
             <p className="games-side-note">{text.measureNotes}</p>
           </section>
         </aside>
       </div>
+
+      {registerOpen ? (
+        <div aria-modal="true" className="games-modal" role="dialog">
+          <button aria-label={text.registerClose} className="games-modal-scrim" onClick={() => setRegisterOpen(false)} type="button" />
+          <div className="games-sheet" data-testid="reaction-register-sheet">
+            <div className="games-sheet-head">
+              <h3>{text.registerSheetTitle}</h3>
+              <button aria-label={text.registerClose} className="games-sheet-close" onClick={() => setRegisterOpen(false)} type="button">✕</button>
+            </div>
+            <div className="games-sheet-body">
+              <div className="games-sheet-record">
+                <b>{average}<small>ms</small></b>
+                {resultTier ? <span>{resultTier.emoji} {reactionTierLabel(resultTier, locale)}</span> : null}
+              </div>
+
+              {shareId ? (
+                <>
+                  <p className="games-sheet-done">
+                    {text.registerDoneTitle}
+                    {registeredRank !== undefined ? ` · ${formatTemplate(text.registerDoneRank, { rank: String(registeredRank) })}` : ""}
+                  </p>
+                  <button className="games-btn is-share games-sheet-wide" onClick={() => void copyShareLink()} type="button">
+                    {shareCopied ? text.shareLinkCopied : text.copyShareLink}
+                  </button>
+                </>
+              ) : account.yoroConnected && account.accountUser ? (
+                <>
+                  <div className="games-id-options" role="radiogroup">
+                    <button aria-checked={identity === "public"} className={`games-id-option${identity === "public" ? " is-on" : ""}`} onClick={() => setIdentity("public")} role="radio" type="button">
+                      <span aria-hidden="true" className="games-id-radio" />
+                      <span aria-hidden="true" className="games-id-avatar">
+                        {account.accountUser.profileImageUrl ? <img alt="" src={account.accountUser.profileImageUrl} /> : account.accountUser.displayName.slice(0, 1).toUpperCase()}
+                      </span>
+                      <span className="games-id-copy">
+                        <b>{formatTemplate(text.registerPublicTitle, { name: account.accountUser.displayName })}</b>
+                        <small>{text.registerPublicNote}</small>
+                      </span>
+                    </button>
+                    <button aria-checked={identity === "anonymous"} className={`games-id-option${identity === "anonymous" ? " is-on" : ""}`} onClick={() => setIdentity("anonymous")} role="radio" type="button">
+                      <span aria-hidden="true" className="games-id-radio" />
+                      <span aria-hidden="true" className="games-id-avatar is-mask">🎭</span>
+                      <span className="games-id-copy">
+                        <b>{text.registerAnonymousTitle}</b>
+                        <small>{text.registerAnonymousNote}</small>
+                      </span>
+                    </button>
+                  </div>
+                  {submitState === "error" ? <p className="games-sheet-error">{text.registerError}</p> : null}
+                  <button className="games-btn is-twitch games-sheet-wide" disabled={submitState === "busy"} onClick={() => void submitRecord()} type="button">
+                    {submitState === "busy" ? text.registerSubmitting : text.registerSubmit}
+                  </button>
+                  <p className="games-sheet-note">{text.registerPolicy}</p>
+                </>
+              ) : (
+                <>
+                  <p className="games-sheet-note games-multiline games-sheet-center">{text.registerLoginBody}</p>
+                  <button className="games-btn is-twitch games-sheet-wide" onClick={() => account.loginWithTwitch()} type="button">
+                    {text.registerLoginButton}
+                  </button>
+                  <button className="games-btn is-ghost games-sheet-wide" onClick={() => setRegisterOpen(false)} type="button">
+                    {text.registerLater}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

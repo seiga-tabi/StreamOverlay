@@ -325,7 +325,7 @@ export function PublicGameSelector({
             aria-hidden="true"
           />
         ) : (
-          <span className="public-game-selector-mark is-yoro-bot" aria-hidden="true">B</span>
+          <span className={`public-game-selector-mark is-${selectedGame.id}`} aria-hidden="true">{selectedGame.mark ?? "B"}</span>
         )}
         <span className="public-game-selector-label" data-ko={selectedGame.ko} data-ja={selectedGame.ja}>
           {gameLabel(selectedGame)}

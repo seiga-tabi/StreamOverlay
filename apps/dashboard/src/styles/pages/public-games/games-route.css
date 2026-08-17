@@ -400,31 +400,19 @@
 
   .games-side-note { margin: 0; padding: var(--yoro-space-2) var(--yoro-space-3) var(--yoro-space-3); color: var(--yoro-color-text-on-dark-muted); font-size: .6875rem; line-height: 1.65; }
 
-  /* ── v4: 풀스크린 진행 + 라운드 그래프(목업 §④-1) ──────────
-     대기/신호 전환에는 여전히 트랜지션 금지. 그래프 페이드 바만 장식 전환이며
-     측정 구간 밖입니다(reduced-motion 시 정지). */
-  .games-stage.is-running { position: relative; border-radius: 0; border: 0; }
+  /* ── v4.1: 웹 내부 대형 영역 진행 + 라운드 그래프 ──────────
+     OS 전체 화면이 아니라 페이지 안에서 확장합니다(2026-08-17 사용자 요청으로
+     Fullscreen API 제거): 진행 중에는 사이드 패널을 숨겨 스테이지가 전폭을 쓰고,
+     아레나가 뷰포트 높이 대부분을 차지합니다. 대기/신호 전환에는 여전히 트랜지션
+     금지. 그래프 페이드 바만 장식 전환이며 측정 구간 밖입니다(reduced-motion 정지). */
+  .games-reaction-cols.is-running { grid-template-columns: minmax(0, 1fr); }
+  .games-reaction-cols.is-running .games-side { display: none; }
 
-  /* Fullscreen API 경로 — 스테이지가 뷰포트 전체를 채우고 아레나가 남은 높이를 가집니다. */
-  .games-stage:fullscreen {
-    display: flex;
-    flex-direction: column;
-    background: var(--yoro-color-ground-surface);
+  .games-stage.is-running { position: relative; }
+
+  .games-stage.is-running .games-arena {
+    min-height: clamp(24rem, 72vh, 46rem);
   }
-
-  .games-stage:fullscreen .games-arena { flex: 1; min-height: 0; }
-
-  /* Fullscreen 미지원 폴백 — fixed 전면 오버레이(동일 화면). */
-  .games-stage.is-overlay-fallback {
-    position: fixed;
-    inset: 0;
-    z-index: 80;
-    display: flex;
-    flex-direction: column;
-    background: var(--yoro-color-ground-surface);
-  }
-
-  .games-stage.is-overlay-fallback .games-arena { flex: 1; min-height: 0; }
 
   .games-fs-hud {
     position: absolute;
@@ -495,10 +483,28 @@
     padding: var(--yoro-space-3) var(--yoro-space-3) var(--yoro-space-1);
   }
 
-  .games-chart-plot svg { display: block; width: 100%; height: 9.375rem; color: color-mix(in srgb, var(--yoro-color-text-on-dark) 12%, transparent); }
+  /* 점은 HTML 오버레이 — preserveAspectRatio:none SVG 안의 circle 은 컨테이너
+     종횡비에 따라 타원으로 찌그러졌습니다(모바일 실측 결함, 2026-08-17 수정). */
+  .games-chart-canvas { position: relative; }
+  .games-chart-canvas svg { display: block; width: 100%; height: 9.375rem; color: color-mix(in srgb, var(--yoro-color-text-on-dark) 12%, transparent); }
   .games-chart-line { stroke: var(--yoro-color-public-primary); }
-  .games-chart-dot { fill: var(--yoro-color-ground-surface); stroke: var(--yoro-color-public-primary); stroke-width: 2.5; }
-  .games-chart-dot.is-current { fill: var(--yoro-color-public-primary); stroke: color-mix(in srgb, var(--yoro-color-public-primary) 40%, #fff 60%); }
+
+  .games-chart-dot {
+    position: absolute;
+    width: .75rem;
+    height: .75rem;
+    border: 2.5px solid var(--yoro-color-public-primary);
+    border-radius: var(--yoro-radius-circle);
+    background: var(--yoro-color-ground-surface);
+    transform: translate(-50%, -50%);
+  }
+
+  .games-chart-dot.is-current {
+    width: .9375rem;
+    height: .9375rem;
+    border-color: color-mix(in srgb, var(--yoro-color-public-primary) 40%, #fff 60%);
+    background: var(--yoro-color-public-primary);
+  }
 
   .games-chart-axis {
     display: flex;
@@ -541,6 +547,215 @@
     font-weight: var(--yoro-font-weight-black);
     font-variant-numeric: tabular-nums;
   }
+
+  /* ── v5: 기록 등록 시트·리더보드·공유(목업 §④-2~⑤) ── */
+  .games-btn.is-share { background: var(--yoro-color-rank-trend); color: #06251b; margin-left: var(--yoro-space-2); }
+  .games-btn.is-twitch { background: #9146ff; }
+  .games-btn:disabled { opacity: .6; cursor: default; }
+
+  .games-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: grid;
+    place-items: center;
+    padding: var(--yoro-space-4);
+  }
+
+  .games-modal-scrim {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: color-mix(in srgb, #000 55%, transparent);
+    cursor: default;
+  }
+
+  .games-sheet {
+    position: relative;
+    width: min(26rem, 100%);
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-md);
+    background: var(--yoro-color-ground-surface);
+    color: var(--yoro-color-text-on-dark);
+    overflow: hidden;
+  }
+
+  .games-sheet-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--yoro-space-2);
+    padding: var(--yoro-space-3) var(--yoro-space-4);
+    border-bottom: 1px solid var(--yoro-color-border-on-dark);
+  }
+
+  .games-sheet-head > h3 { margin: 0; font-size: var(--yoro-font-size-sm); font-weight: var(--yoro-font-weight-bold); }
+
+  .games-sheet-close {
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 1px solid var(--yoro-color-border-on-dark-strong);
+    border-radius: var(--yoro-radius-circle);
+    background: none;
+    color: var(--yoro-color-text-on-dark-muted);
+    font: inherit;
+    font-size: .6875rem;
+    cursor: pointer;
+  }
+
+  .games-sheet-body { display: grid; gap: var(--yoro-space-3); padding: var(--yoro-space-4); }
+
+  .games-sheet-record {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: var(--yoro-space-2);
+    padding-top: var(--yoro-space-1);
+  }
+
+  .games-sheet-record > b { font-size: 2.125rem; font-weight: var(--yoro-font-weight-black); font-variant-numeric: tabular-nums; }
+  .games-sheet-record > b > small { font-size: .9375rem; }
+  .games-sheet-record > span { color: var(--yoro-color-accent-gold); font-size: var(--yoro-font-size-sm); font-weight: var(--yoro-font-weight-bold); }
+
+  .games-id-options { display: grid; gap: var(--yoro-space-2); }
+
+  .games-id-option {
+    display: flex;
+    align-items: center;
+    gap: var(--yoro-space-3);
+    padding: var(--yoro-space-3);
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-md);
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .games-id-option.is-on {
+    border-color: color-mix(in srgb, var(--yoro-color-public-primary) 60%, transparent);
+    background: color-mix(in srgb, var(--yoro-color-public-primary) 8%, transparent);
+  }
+
+  .games-id-radio {
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid var(--yoro-color-border-on-dark-strong);
+    border-radius: var(--yoro-radius-circle);
+  }
+
+  .games-id-option.is-on .games-id-radio {
+    border-color: var(--yoro-color-public-primary);
+    background: radial-gradient(circle, var(--yoro-color-public-primary) 45%, transparent 50%);
+  }
+
+  .games-id-avatar {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.125rem;
+    height: 2.125rem;
+    border-radius: var(--yoro-radius-circle);
+    background: linear-gradient(135deg, #6441a5, #9146ff);
+    font-size: var(--yoro-font-size-sm);
+    font-weight: var(--yoro-font-weight-bold);
+    overflow: hidden;
+  }
+
+  .games-id-avatar > img { width: 100%; height: 100%; object-fit: cover; }
+  .games-id-avatar.is-mask { background: color-mix(in srgb, var(--yoro-color-text-on-dark) 10%, transparent); }
+
+  .games-id-copy { min-width: 0; }
+  .games-id-copy > b { display: block; font-size: var(--yoro-font-size-xs); font-weight: var(--yoro-font-weight-bold); }
+  .games-id-copy > small { display: block; margin-top: .125rem; color: var(--yoro-color-text-on-dark-muted); font-size: .625rem; line-height: 1.5; }
+
+  .games-sheet-wide { width: 100%; margin: 0; text-align: center; }
+  .games-sheet-note { margin: 0; color: var(--yoro-color-text-on-dark-muted); font-size: .625rem; line-height: 1.6; }
+  .games-sheet-center { text-align: center; font-size: var(--yoro-font-size-xs); }
+  .games-sheet-error { margin: 0; color: color-mix(in srgb, var(--yoro-color-match-loss-accent) 45%, #fff 55%); font-size: var(--yoro-font-size-xs); text-align: center; }
+  .games-sheet-done { margin: 0; text-align: center; color: var(--yoro-color-rank-trend); font-size: var(--yoro-font-size-sm); font-weight: var(--yoro-font-weight-bold); }
+
+  /* 리더보드 사이드 카드 */
+  .games-side-card > h3 > small { margin-left: var(--yoro-space-2); color: var(--yoro-color-text-on-dark-muted); font-weight: var(--yoro-font-weight-medium); font-size: .625rem; }
+  .games-lb { display: grid; }
+
+  .games-lb-row {
+    display: grid;
+    grid-template-columns: 1.75rem minmax(0, 1fr) auto;
+    gap: var(--yoro-space-2);
+    align-items: center;
+    padding: .3rem var(--yoro-space-3);
+    border-top: 1px solid color-mix(in srgb, var(--yoro-color-text-on-dark) 6%, transparent);
+    font-size: var(--yoro-font-size-xs);
+  }
+
+  .games-lb-row:first-child { border-top: 0; }
+  .games-lb-row.is-me { background: color-mix(in srgb, var(--yoro-color-public-primary) 9%, transparent); }
+  .games-lb-rank { text-align: center; color: var(--yoro-color-text-on-dark-muted); font-weight: var(--yoro-font-weight-black); font-variant-numeric: tabular-nums; }
+  .games-lb-row[data-rank="1"] .games-lb-rank { color: var(--yoro-color-accent-gold); }
+
+  .games-lb-name { display: flex; align-items: center; gap: var(--yoro-space-2); min-width: 0; }
+
+  .games-lb-name > i {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 1.375rem;
+    height: 1.375rem;
+    border-radius: var(--yoro-radius-circle);
+    background: linear-gradient(135deg, #6441a5, #9146ff);
+    font-size: .625rem;
+    font-style: normal;
+    font-weight: var(--yoro-font-weight-bold);
+    overflow: hidden;
+  }
+
+  .games-lb-name > i > img { width: 100%; height: 100%; object-fit: cover; }
+  .games-lb-name > i.is-mask { background: color-mix(in srgb, var(--yoro-color-text-on-dark) 10%, transparent); }
+  .games-lb-name > b { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: var(--yoro-font-weight-bold); }
+  .games-lb-name > small { flex: none; color: var(--yoro-color-text-on-dark-muted); font-size: .5625rem; }
+  .games-lb-ms { font-weight: var(--yoro-font-weight-bold); font-variant-numeric: tabular-nums; }
+
+  .games-lb-delete {
+    margin: var(--yoro-space-1) var(--yoro-space-3) var(--yoro-space-2);
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--yoro-color-text-on-dark-muted);
+    font: inherit;
+    font-size: .625rem;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .games-lb-delete:hover, .games-lb-delete:focus-visible { color: var(--yoro-color-text-on-dark); text-decoration: underline; }
+
+  /* 공유 페이지 */
+  .games-share { display: grid; justify-items: center; padding-top: var(--yoro-space-4); }
+
+  .games-share-card {
+    width: min(26rem, 100%);
+    display: grid;
+    gap: var(--yoro-space-3);
+    padding: var(--yoro-space-6) var(--yoro-space-4);
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-md);
+    background:
+      radial-gradient(90% 70% at 50% 0%, color-mix(in srgb, var(--yoro-color-public-primary) 22%, transparent), transparent 62%),
+      var(--yoro-color-ground-surface);
+    text-align: center;
+  }
+
+  .games-share-record { display: flex; align-items: baseline; justify-content: center; gap: var(--yoro-space-3); }
+  .games-share-record > b { font-size: 3rem; font-weight: var(--yoro-font-weight-black); font-variant-numeric: tabular-nums; letter-spacing: -.03em; }
+  .games-share-record > b > small { font-size: 1.125rem; }
+  .games-share-meta { margin: 0; color: var(--yoro-color-text-on-dark-muted); font-size: var(--yoro-font-size-xs); }
+  .games-share-cta { margin: 0 auto; }
+  .games-share-compare { margin: 0; color: var(--yoro-color-rank-trend); font-size: var(--yoro-font-size-xs); font-weight: var(--yoro-font-weight-bold); }
 
   .games-notfound {
     display: grid;

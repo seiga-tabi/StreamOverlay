@@ -8,6 +8,7 @@ import { GamesBottomTabBar } from "../features/public-games/components/GamesBott
 import { GamesHeader } from "../features/public-games/components/GamesHeader";
 import { GamesHub } from "../features/public-games/components/GamesHub";
 import { GamesNotFoundPage } from "../features/public-games/components/GamesNotFoundPage";
+import { ReactionSharePage } from "../features/public-games/components/ReactionSharePage";
 import { ReactionTest } from "../features/public-games/components/ReactionTest";
 import { useGamesRoute } from "../features/public-games/hooks/useGamesRoute";
 import { gamesI18n, type GamesLocale } from "../features/public-games/i18n/games-i18n";
@@ -20,7 +21,7 @@ const noServerLocalePreference = async (): Promise<GamesLocale | undefined> => u
 export function PublicGamesPage() {
   const { locale, changeLocale } = usePublicLocale(noServerLocalePreference);
   const { theme } = usePublicTheme();
-  const { page } = useGamesRoute();
+  const { page, shareId } = useGamesRoute();
   const text = gamesI18n[locale];
   setActivePublicLocale(locale);
 
@@ -47,6 +48,7 @@ export function PublicGamesPage() {
           {page === null ? <GamesNotFoundPage locale={locale} /> : null}
           {page === "hub" ? <GamesHub locale={locale} /> : null}
           {page === "reaction" ? <ReactionTest locale={locale} /> : null}
+          {page === "share" && shareId ? <ReactionSharePage locale={locale} shareId={shareId} /> : null}
         </section>
       </AppShellMain>
       {/* 하단 탭바는 AppShell 직계 자식 — 헤더의 backdrop-filter 가
