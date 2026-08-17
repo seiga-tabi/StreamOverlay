@@ -302,17 +302,30 @@ export function ReactionTest({ locale }: { locale: GamesLocale }) {
     : "";
   const points = useMemo(() => chartPoints(samples), [samples]);
 
-  const copyResult = useCallback(async () => {
+  /* SNS 공유 — Web Share API(모바일 네이티브 공유 시트: 카카오톡·LINE·X 등).
+     미지원 브라우저(데스크톱 일부)는 "결과+링크 클립보드 복사"로 폴백합니다.
+     링크는 등록된 기록이 있으면 공유 페이지(OG 렌더), 없으면 게임 페이지 —
+     둘 다 현재 로케일 프리픽스를 유지합니다. */
+  const shareToSns = useCallback(async () => {
     if (!resultTier) return;
-    const payload = formatTemplate(text.copyText, { ms: String(average), tier: `${resultTier.emoji} ${reactionTierLabel(resultTier, locale)}` });
+    const shareText = formatTemplate(text.snsShareText, { ms: String(average), tier: `${resultTier.emoji} ${reactionTierLabel(resultTier, locale)}` });
+    const path = shareId ? gamesSharePath(shareId) : "/games/reaction";
+    const url = new URL(localizedPublicUrlForCurrentLocale(path), window.location.origin).href;
+    if (typeof navigator.share === "function") {
+      try {
+        await navigator.share({ title: "YORO.gg", text: shareText, url });
+      } catch {
+        /* 사용자가 공유 시트를 닫음 — 오류 아님. */
+      }
+      return;
+    }
     try {
-      await navigator.clipboard.writeText(payload);
+      await navigator.clipboard.writeText(`${shareText}\n${url}`);
       setCopied(true);
     } catch {
-      /* 클립보드 API 불가(권한 등) — 복사 대신 문구를 그대로 노출합니다. */
-      window.prompt(text.copyResult, payload);
+      window.prompt(text.snsShare, `${shareText}\n${url}`);
     }
-  }, [average, locale, resultTier, text]);
+  }, [average, locale, resultTier, shareId, text]);
 
   const submitRecord = useCallback(async () => {
     if (samples.length < ROUNDS) return;
@@ -448,8 +461,8 @@ export function ReactionTest({ locale }: { locale: GamesLocale }) {
                       </button>
                     )
                   ) : null}
-                  <button className="games-btn is-ghost" onClick={() => void copyResult()} type="button">
-                    {copied ? text.copied : text.copyResult}
+                  <button className="games-btn is-ghost" onClick={() => void shareToSns()} type="button">
+                    {copied ? text.snsShareCopied : text.snsShare}
                   </button>
                 </div>
               </div>
