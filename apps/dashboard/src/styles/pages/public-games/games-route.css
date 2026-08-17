@@ -124,6 +124,7 @@
   }
 
   .games-card-record {
+    min-width: 0;
     border: 1px solid var(--yoro-color-border-on-dark);
     border-radius: var(--yoro-radius-pill);
     padding: .15rem .6rem;
@@ -140,6 +141,8 @@
 
   .games-card-cta {
     margin-left: auto;
+    flex: none;
+    white-space: nowrap;
     padding: .3rem .8rem;
     border: 0;
     border-radius: var(--yoro-radius-sm);
@@ -400,18 +403,32 @@
 
   .games-side-note { margin: 0; padding: var(--yoro-space-2) var(--yoro-space-3) var(--yoro-space-3); color: var(--yoro-color-text-on-dark-muted); font-size: .6875rem; line-height: 1.65; }
 
-  /* ── v4.1: 웹 내부 대형 영역 진행 + 라운드 그래프 ──────────
-     OS 전체 화면이 아니라 페이지 안에서 확장합니다(2026-08-17 사용자 요청으로
-     Fullscreen API 제거): 진행 중에는 사이드 패널을 숨겨 스테이지가 전폭을 쓰고,
-     아레나가 뷰포트 높이 대부분을 차지합니다. 대기/신호 전환에는 여전히 트랜지션
-     금지. 그래프 페이드 바만 장식 전환이며 측정 구간 밖입니다(reduced-motion 정지). */
-  .games-reaction-cols.is-running { grid-template-columns: minmax(0, 1fr); }
-  .games-reaction-cols.is-running .games-side { display: none; }
-
-  .games-stage.is-running { position: relative; }
+  /* ── v4.2: 웹 안 전체 화면 진행 + 라운드 그래프 ──────────
+     OS 전체 화면(Fullscreen API)이 아니라 페이지 위 전체 뷰포트 오버레이입니다
+     (2026-08-17 사용자 요청): 진행 중 스테이지가 fixed 로 화면 전체를 덮고
+     아레나가 남은 높이를 전부 씁니다. 본문 스크롤은 컴포넌트가 잠급니다.
+     대기/신호 전환에는 여전히 트랜지션 금지. 그래프 페이드 바만 장식 전환이며
+     측정 구간 밖입니다(reduced-motion 정지). */
+  .games-stage.is-running {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: flex;
+    flex-direction: column;
+    border: 0;
+    border-radius: 0;
+    background: var(--yoro-color-ground-surface);
+  }
 
   .games-stage.is-running .games-arena {
-    min-height: clamp(24rem, 72vh, 46rem);
+    flex: 1;
+    min-height: 0;
+    padding-top: max(var(--yoro-space-6), env(safe-area-inset-top));
+    padding-bottom: max(var(--yoro-space-6), env(safe-area-inset-bottom));
+  }
+
+  .games-stage.is-running .games-fs-hud {
+    top: max(var(--yoro-space-3), env(safe-area-inset-top));
   }
 
   .games-fs-hud {

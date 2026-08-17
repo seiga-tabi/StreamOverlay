@@ -33,8 +33,9 @@ import {
  * - 120ms 미만은 신호 예측으로 간주해 라운드 무효
  * - 백그라운드 탭 전환 시 진행 라운드 무효(visibilitychange)
  *
- * 진행 영역: OS 전체 화면이 아니라 웹 페이지 내부에서 스테이지가 대형 영역으로
- * 확장됩니다(사이드 패널 숨김 + 아레나 확장 — 2026-08-17 사용자 요청으로 Fullscreen API 제거).
+ * 진행 영역: OS 전체 화면(Fullscreen API)이 아니라 **웹 페이지 위 전체 뷰포트
+ * 오버레이**(position:fixed)로 확장됩니다 — 브라우저 UI 는 그대로, 페이지 안에서만
+ * 전체 화면(2026-08-17 사용자 요청 v4.2). 진행 중 본문 스크롤은 잠급니다.
  * Esc/✕ = 종료(진행 기록 무효).
  */
 
@@ -179,7 +180,10 @@ export function ReactionTest({ locale }: { locale: GamesLocale }) {
     }, CHART_SHOW_MS);
   }, [finishRun, startRest]);
 
-  useEffect(() => () => clearTimers(), [clearTimers]);
+  useEffect(() => () => {
+    clearTimers();
+    document.body.style.removeProperty("overflow");
+  }, [clearTimers]);
 
   const refreshLeaderboard = useCallback(() => {
     void fetchReactionLeaderboard().then((board) => setLeaderboard(board));
@@ -253,6 +257,12 @@ export function ReactionTest({ locale }: { locale: GamesLocale }) {
   }, [clearTimers, samples, scheduleGo, showChart]);
 
   const running = RUNNING_PHASES.has(phase);
+
+  /* 전체 뷰포트 오버레이 동안 뒤 페이지가 스크롤되지 않게 잠급니다. */
+  useEffect(() => {
+    if (running) document.body.style.overflow = "hidden";
+    else document.body.style.removeProperty("overflow");
+  }, [running]);
   const average = samples.length > 0 ? Math.round(samples.reduce((sum, value) => sum + value, 0) / samples.length) : 0;
   const resultTier = phase === "result" ? reactionTierForAverage(average) : undefined;
   const nextTier = phase === "result" ? reactionMsToNextTier(average) : undefined;

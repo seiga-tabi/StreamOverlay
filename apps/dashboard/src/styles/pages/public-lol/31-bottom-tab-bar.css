@@ -86,7 +86,8 @@
     .lol-public-game-header .public-game-header__nav-slot,
     .palworld-header .public-game-header__nav-slot,
     .valorant-header .public-game-header__nav-slot,
-    .minecraft-header .public-game-header__nav-slot {
+    .minecraft-header .public-game-header__nav-slot,
+    .games-header .public-game-header__nav-slot {
       display: none;
     }
 

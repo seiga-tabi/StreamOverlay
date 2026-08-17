@@ -44,10 +44,15 @@ const LOCALIZABLE_PUBLIC_EXACT_PATHS = new Set([
      public-dashboard-routes.ts)과 짝을 맞춥니다. */
   "/games",
   "/games/reaction",
+  "/games/ranking",
 ]);
 
 const LOCALIZABLE_PUBLIC_PATH_PREFIXES = [
   "/lol/summoners/",
+  /* 반응속도 공유 링크(/games/reaction/r/<shareId>) — 여기 없으면 ja 상태에서
+     복사한 링크에 로케일 프리픽스가 빠져 SNS 크롤러가 기본(한국어) OG 를 받습니다
+     (2026-08-17 실사례). shareId 가 가변이라 정확 목록 대신 prefix 로 커버합니다. */
+  "/games/reaction/r/",
 ];
 
 function pathOnly(value: string): string {
