@@ -1883,20 +1883,14 @@ function PublicProfileTabs({
   onChange: (tab: PublicProfileTab) => void;
   onParticipation: () => void;
 }) {
-  const openStats = () => {
-    onChange("overview");
-    window.requestAnimationFrame(() => {
-      const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-      document.getElementById("public-stats")?.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
-    });
-  };
+  /* 통계는 목업 lol-signature-builds v5 부터 사이드바 스크롤이 아니라 본문 탭입니다. */
   return (
     <nav className="public-profile-hero-nav" aria-label={t().profileSummary}>
       <button type="button" aria-current={activeTab === "overview" ? "page" : undefined} onClick={() => onChange("overview")}>{t().matchHistoryTab}</button>
       <button type="button" aria-current={activeTab === "champions" ? "page" : undefined} onClick={() => onChange("champions")}>{t().championAnalysis}</button>
       <button type="button" aria-current={activeTab === "ingame" ? "page" : undefined} onClick={() => onChange("ingame")}>{t().ingame}</button>
       <button type="button" onClick={onParticipation}>{t().participationHeaderNav}</button>
-      <button type="button" onClick={openStats}>{t().stats}</button>
+      <button type="button" aria-current={activeTab === "stats" ? "page" : undefined} onClick={() => onChange("stats")}>{t().stats}</button>
     </nav>
   );
 }
@@ -2198,10 +2192,11 @@ function ProfileSidebarLpChart({ points }: { points: Array<{ value: number; tier
   );
 }
 
-/* 시그니처 빌드 카드(2026-08-17) — 목업 docs/mockups/lol-signature-builds.html v4.
- * 아코디언: 기본은 챔피언 목록만, 클릭 시 그 챔피언의 룬 페이지별 조건부 아이템
- * 채용률을 펼칩니다(단일 펼침 — 카드 높이 폭주 방지). 데이터는 utils/match.ts 의
- * signatureBuilds 가 전담하며 추가 API 호출이 없습니다. */
+/* 시그니처 빌드 패널(2026-08-17) — 목업 docs/mockups/lol-signature-builds.html v5.
+ * 통계 탭(profileTab "stats")의 본문 대형 패널 — 챔피언 분석과 같은 영역·문법.
+ * 아코디언: 기본은 챔피언 목록(+대표 빌드 미리보기), 클릭 시 룬 페이지별 조건부
+ * 아이템 채용률을 펼칩니다(단일 펼침). 데이터는 utils/match.ts 의 signatureBuilds 가
+ * 전담하며 추가 API 호출이 없습니다. */
 
 function sigLocaleName(entry: { nameKo?: string; nameJa?: string } | undefined, fallback: string): string {
   if (!entry) return fallback;
@@ -2209,7 +2204,7 @@ function sigLocaleName(entry: { nameKo?: string; nameJa?: string } | undefined, 
   return entry.nameKo ?? entry.nameJa ?? fallback;
 }
 
-function SignatureBuildsCard({
+function SignatureBuildsPanel({
   profile,
   onChampionPick
 }: {
@@ -2218,19 +2213,32 @@ function SignatureBuildsCard({
 }) {
   const { entries, ghosts } = useMemo(() => signatureBuilds(profile), [profile]);
   const [openChampionId, setOpenChampionId] = useState<number | null>(null);
-  if (entries.length === 0) return null;
 
   const winRateTone = (winRate: number, games: number) =>
     games >= 3 ? metricToneClass(percentTone(winRate)) : metricToneClass(undefined);
 
+  const head = (
+    <div className="public-champ-head">
+      <h2>{t().sigBuildsTitle}</h2>
+      <span className="public-champ-pill">{t().champAnalysisPill.replace("{count}", String(profile.summary.recentGames))}</span>
+    </div>
+  );
+
+  if (entries.length === 0) {
+    return (
+      <section className="public-champ-panel public-sig-panel" id="public-sig-builds">
+        {head}
+        <div className="public-champ-empty">
+          <strong>{t().sigBuildsEmptyTitle}</strong>
+          <span>{t().sigBuildsEmptyDescription}</span>
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <article className="public-profile-side-card public-sig-builds">
-      <div className="public-profile-side-head">
-        <h2>{t().sigBuildsTitle}</h2>
-        <span className="public-profile-side-pill">
-          {t().sigBuildsPill.replace("{count}", String(profile.summary.recentGames))}
-        </span>
-      </div>
+    <section className="public-champ-panel public-sig-panel" id="public-sig-builds">
+      {head}
 
       <div className="public-sig-list">
         {entries.map((entry) => {
@@ -2239,6 +2247,10 @@ function SignatureBuildsCard({
           const masteryMeta = entry.masteryRank !== undefined && entry.masteryPoints !== undefined
             ? t().sigBuildsMasteryMeta.replace("{rank}", String(entry.masteryRank)).replace("{points}", formatNumber(entry.masteryPoints))
             : undefined;
+          const topGroup = entry.groups[0];
+          const previewRunes = topGroup
+            ? [sigLocaleName(topGroup.primaryStyle, ""), sigLocaleName(topGroup.secondaryStyle, "")].filter(Boolean).join("+")
+            : "";
           return (
             <div className={`public-sig-entry${open ? " is-open" : ""}`} key={entry.champion.championId}>
               <button
@@ -2255,6 +2267,23 @@ function SignatureBuildsCard({
                   <b>{championName(entry.champion)}</b>
                   <small>{[masteryMeta, gamesText(entry.games)].filter(Boolean).join(" · ")}</small>
                 </span>
+                {topGroup ? (
+                  <span aria-hidden="true" className="public-sig-preview">
+                    <span className="public-sig-preview-keystone">
+                      {topGroup.keystone?.iconUrl ? <img alt="" src={assetUrl(topGroup.keystone.iconUrl)} /> : null}
+                    </span>
+                    {topGroup.items.slice(0, 3).map((item) => (
+                      <span className="public-sig-preview-item" key={item.itemId}>
+                        {item.iconUrl ? <img alt="" src={assetUrl(item.iconUrl)} /> : null}
+                      </span>
+                    ))}
+                    <small>
+                      {sigLocaleName(topGroup.keystone, "-")}
+                      {previewRunes ? ` · ${previewRunes}` : ""}
+                      {entry.groups.length > 1 ? ` ${t().sigBuildsPreviewMore.replace("{count}", String(entry.groups.length - 1))}` : ""}
+                    </small>
+                  </span>
+                ) : null}
                 <span className="public-sig-rate">
                   <b className={winRateTone(entry.winRate, entry.games)}>{formatPercent(entry.winRate)}</b>
                   <small>{t().winRate}</small>
@@ -2264,53 +2293,57 @@ function SignatureBuildsCard({
 
               <div className="public-sig-detail-wrap" id={detailId}>
                 <div className="public-sig-detail" hidden={!open}>
-                  {entry.groups.map((group, index) => {
-                    const pickRate = Math.round((group.games / entry.games) * 100);
-                    const groupWinRate = Math.round((group.wins / group.games) * 100);
-                    return (
-                      <div className={`public-sig-build${index > 0 ? " is-alt" : ""}`} key={group.key}>
-                        <div className="public-sig-build-head">
-                          <span className="public-sig-build-no">{t().sigBuildsBuildLabel.replace("{n}", String(index + 1))}</span>
-                          <span className="public-sig-rune">
-                            <span className="public-sig-keystone">
-                              {group.keystone?.iconUrl ? <img alt="" src={assetUrl(group.keystone.iconUrl)} /> : <span>{sigLocaleName(group.keystone, "?").slice(0, 2)}</span>}
-                            </span>
-                            <span className="public-sig-rune-names">
-                              <b>{sigLocaleName(group.keystone, "-")}</b>
-                              {group.primaryStyle || group.secondaryStyle ? (
-                                <small>
-                                  {[sigLocaleName(group.primaryStyle, ""), sigLocaleName(group.secondaryStyle, "")].filter(Boolean).join(" + ")}
-                                </small>
-                              ) : null}
-                            </span>
-                          </span>
-                          <span className="public-sig-build-pick">
-                            <b>{t().sigBuildsPickStat.replace("{picked}", String(group.games)).replace("{total}", String(entry.games)).replace("{rate}", String(pickRate))}</b>
-                            <small className={winRateTone(groupWinRate, group.games)}>{t().sigBuildsPickWinRate.replace("{rate}", String(groupWinRate))}</small>
-                          </span>
-                        </div>
-                        <span aria-hidden="true" className="public-sig-build-bar"><i style={{ width: `${pickRate}%` }} /></span>
-                        {group.items.length > 0 ? (
-                          <>
-                            <span className="public-sig-items-label">{t().sigBuildsItemsLabel}</span>
-                            <div className="public-sig-items">
-                              {group.items.map((item) => (
-                                <span
-                                  className={`public-sig-item${isBootItem(item.itemId) ? " is-boots" : ""}`}
-                                  key={item.itemId}
-                                  title={sigLocaleName(item, `#${item.itemId}`)}
-                                >
-                                  <i>{item.iconUrl ? <img alt="" src={assetUrl(item.iconUrl)} /> : sigLocaleName(item, `#${item.itemId}`).slice(0, 4)}</i>
-                                  <b>{Math.round((item.games / group.games) * 100)}%</b>
-                                  <small>{item.games}/{group.games}</small>
+                  {entry.groups.length > 0 ? (
+                    <div className="public-sig-bgrid" data-solo={entry.groups.length === 1 ? "true" : undefined}>
+                      {entry.groups.map((group, index) => {
+                        const pickRate = Math.round((group.games / entry.games) * 100);
+                        const groupWinRate = Math.round((group.wins / group.games) * 100);
+                        return (
+                          <div className={`public-sig-build${index > 0 ? " is-alt" : ""}`} key={group.key}>
+                            <div className="public-sig-build-head">
+                              <span className="public-sig-build-no">{t().sigBuildsBuildLabel.replace("{n}", String(index + 1))}</span>
+                              <span className="public-sig-rune">
+                                <span className="public-sig-keystone">
+                                  {group.keystone?.iconUrl ? <img alt="" src={assetUrl(group.keystone.iconUrl)} /> : <span>{sigLocaleName(group.keystone, "?").slice(0, 2)}</span>}
                                 </span>
-                              ))}
+                                <span className="public-sig-rune-names">
+                                  <b>{sigLocaleName(group.keystone, "-")}</b>
+                                  {group.primaryStyle || group.secondaryStyle ? (
+                                    <small>
+                                      {[sigLocaleName(group.primaryStyle, ""), sigLocaleName(group.secondaryStyle, "")].filter(Boolean).join(" + ")}
+                                    </small>
+                                  ) : null}
+                                </span>
+                              </span>
+                              <span className="public-sig-build-pick">
+                                <b>{t().sigBuildsPickStat.replace("{picked}", String(group.games)).replace("{total}", String(entry.games)).replace("{rate}", String(pickRate))}</b>
+                                <small className={winRateTone(groupWinRate, group.games)}>{t().sigBuildsPickWinRate.replace("{rate}", String(groupWinRate))}</small>
+                              </span>
                             </div>
-                          </>
-                        ) : null}
-                      </div>
-                    );
-                  })}
+                            <span aria-hidden="true" className="public-sig-build-bar"><i style={{ width: `${pickRate}%` }} /></span>
+                            {group.items.length > 0 ? (
+                              <>
+                                <span className="public-sig-items-label">{t().sigBuildsItemsLabel}</span>
+                                <div className="public-sig-items">
+                                  {group.items.map((item) => (
+                                    <span
+                                      className={`public-sig-item${isBootItem(item.itemId) ? " is-boots" : ""}`}
+                                      key={item.itemId}
+                                      title={sigLocaleName(item, `#${item.itemId}`)}
+                                    >
+                                      <i>{item.iconUrl ? <img alt="" src={assetUrl(item.iconUrl)} /> : sigLocaleName(item, `#${item.itemId}`).slice(0, 4)}</i>
+                                      <b>{Math.round((item.games / group.games) * 100)}%</b>
+                                      <small>{item.games}/{group.games}</small>
+                                    </span>
+                                  ))}
+                                </div>
+                              </>
+                            ) : null}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : null}
                   {entry.otherGames > 0 ? (
                     <span className="public-sig-other">{t().sigBuildsOther.replace("{count}", String(entry.otherGames))}</span>
                   ) : null}
@@ -2342,12 +2375,12 @@ function SignatureBuildsCard({
         ))}
       </div>
 
-      <p className="public-profile-side-foot">{openChampionId === null ? t().sigBuildsFootIdle : t().sigBuildsFootOpen}</p>
-    </article>
+      <p className="public-sig-foot">{openChampionId === null ? t().sigBuildsFootIdle : t().sigBuildsFootOpen}</p>
+    </section>
   );
 }
 
-function OverviewMetricPanel({ profile, onChampionPick }: { profile: PublicLolProfile; onChampionPick: (championId: number) => void }) {
+function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
   const summary = profile.summary;
   const aggregateSummary = summarizeMatches(recentAnalysisMatches(profile));
   const aggregateGrade = aggregatePerformanceGrade(profile);
@@ -2423,8 +2456,6 @@ function OverviewMetricPanel({ profile, onChampionPick }: { profile: PublicLolPr
           title: t().rolePanelTitle,
         }}
       />
-
-      <SignatureBuildsCard onChampionPick={onChampionPick} profile={profile} />
     </section>
   );
 }
@@ -6824,7 +6855,8 @@ export function PublicLolPage({
     if (profile) {
       if (target === "champion") setProfileTab("champions");
       if (target === "ingame") setProfileTab("ingame");
-      if (target === "ranking" || target === "stats") setProfileTab("overview");
+      if (target === "stats") setProfileTab("stats");
+      if (target === "ranking") setProfileTab("overview");
     }
     const targetId = !profile || target === "search"
       ? "public-search"
@@ -7214,12 +7246,7 @@ export function PublicLolPage({
 
                   {profileTab === "overview" ? (
                     <div className="public-overview-search-layout">
-                      <OverviewMetricPanel
-                        profile={activeProfile}
-                        onChampionPick={(championId) => {
-                          setFilters({ ...DEFAULT_MATCH_FILTERS, championId: String(championId) });
-                        }}
-                      />
+                      <OverviewMetricPanel profile={activeProfile} />
                       <div className="public-overview-results-column">
                         <RecentMatches
                           profile={activeProfile}
@@ -7242,6 +7269,16 @@ export function PublicLolPage({
                       profile={activeProfile}
                       onChampionPick={(championId) => {
                         /* 챔피언 행 클릭 = 해당 챔피언으로 전적 필터 후 전적 탭 이동(기존 championFilter 재사용). */
+                        setFilters({ ...DEFAULT_MATCH_FILTERS, championId: String(championId) });
+                        setProfileTab("overview");
+                      }}
+                    />
+                  ) : null}
+
+                  {profileTab === "stats" ? (
+                    <SignatureBuildsPanel
+                      profile={activeProfile}
+                      onChampionPick={(championId) => {
                         setFilters({ ...DEFAULT_MATCH_FILTERS, championId: String(championId) });
                         setProfileTab("overview");
                       }}

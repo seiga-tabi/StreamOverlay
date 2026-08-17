@@ -1,9 +1,9 @@
-/* 시그니처 빌드 카드 — 목업 docs/mockups/lol-signature-builds.html v4.
+/* 시그니처 빌드 패널 — 목업 docs/mockups/lol-signature-builds.html v5.
  *
- * 통계 사이드바의 side-card 스택(25-profile-sidebar.css 문법)에 얹는 아코디언 카드.
- * .public-sig-* 네임스페이스를 pages layer 에서 단독 소유합니다. !important 금지.
- * 펼침/접힘은 grid-template-rows 0fr↔1fr 전환(높이 auto 애니메이션의 표준 대체) —
- * prefers-reduced-motion 에서는 전환 없이 즉시 상태가 바뀝니다.
+ * 통계 탭(profileTab "stats")의 본문 대형 패널. 패널 프레임·헤더·빈 상태는
+ * 36-champion-analysis.css 의 .public-champ-panel 문법을 공유하고, 이 파일은
+ * .public-sig-* (아코디언 목록·빌드 그룹) 만 단독 소유합니다. !important 금지.
+ * 펼침/접힘은 grid-template-rows 0fr↔1fr 전환 — reduced-motion 에서는 즉시.
  */
 
 @layer pages {
@@ -11,11 +11,12 @@
     display: flex;
     flex-direction: column;
     gap: var(--yoro-space-2);
+    padding: var(--yoro-space-3) var(--yoro-space-4);
   }
 
   .public-sig-entry {
     border: 1px solid var(--yoro-color-border-on-dark);
-    border-radius: var(--yoro-radius-sm);
+    border-radius: var(--yoro-radius-md);
     background: color-mix(in srgb, var(--yoro-color-text-on-dark) 3%, transparent);
     overflow: hidden;
   }
@@ -32,9 +33,9 @@
   .public-sig-row {
     display: flex;
     align-items: center;
-    gap: var(--yoro-space-2);
+    gap: var(--yoro-space-3);
     width: 100%;
-    min-height: var(--yoro-size-touch-target);
+    min-height: 3.5rem;
     margin: 0;
     padding: var(--yoro-space-2) var(--yoro-space-3);
     border: 0;
@@ -45,7 +46,7 @@
     cursor: pointer;
   }
 
-  .public-sig-entry.is-ghost .public-sig-row { cursor: default; }
+  .public-sig-entry.is-ghost .public-sig-row { cursor: default; min-height: var(--yoro-size-touch-target); }
 
   button.public-sig-row:hover,
   button.public-sig-row:focus-visible {
@@ -59,14 +60,14 @@
   .public-sig-ava {
     position: relative;
     flex: none;
-    width: 2.25rem;
-    height: 2.25rem;
+    width: 2.75rem;
+    height: 2.75rem;
     border-radius: var(--yoro-radius-sm);
     background: color-mix(in srgb, var(--yoro-color-text-on-dark) 10%, transparent);
     overflow: hidden;
     display: grid;
     place-items: center;
-    font-size: var(--yoro-font-size-sm);
+    font-size: var(--yoro-font-size-md);
     font-weight: var(--yoro-font-weight-bold);
   }
 
@@ -108,6 +109,56 @@
     text-overflow: ellipsis;
   }
 
+  /* 접힌 행의 대표 빌드 미리보기 — 900px 미만에서는 이름·승률을 우선하고 숨깁니다. */
+  .public-sig-preview {
+    display: none;
+    align-items: center;
+    gap: var(--yoro-space-1);
+    min-width: 0;
+    flex: 1.4;
+    color: var(--yoro-color-text-on-dark-muted);
+  }
+
+  .public-sig-preview-keystone {
+    flex: none;
+    width: 1.625rem;
+    height: 1.625rem;
+    border: 2px solid color-mix(in srgb, var(--yoro-color-accent-gold) 50%, transparent);
+    border-radius: var(--yoro-radius-circle);
+    background: color-mix(in srgb, var(--yoro-color-accent-gold) 10%, var(--yoro-color-ground-surface));
+    overflow: hidden;
+  }
+
+  .public-sig-preview-keystone > img { width: 100%; height: 100%; object-fit: cover; }
+
+  .public-sig-preview-item {
+    flex: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 1px solid var(--yoro-color-border-on-dark-strong);
+    border-radius: var(--yoro-radius-xs);
+    background: color-mix(in srgb, var(--yoro-color-text-on-dark) 8%, transparent);
+    overflow: hidden;
+    opacity: .85;
+  }
+
+  .public-sig-preview-item > img { width: 100%; height: 100%; object-fit: cover; }
+
+  .public-sig-preview > small {
+    margin-left: var(--yoro-space-1);
+    font-size: .625rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  @media (min-width: 56.25rem) {
+    .public-sig-preview { display: flex; }
+    .public-sig-entry:not(.is-ghost) .public-sig-id { flex: none; width: 12rem; }
+  }
+
+  .public-sig-entry.is-ghost .public-sig-preview { display: none; }
+
   .public-sig-rate {
     flex: none;
     text-align: right;
@@ -120,8 +171,8 @@
   /* chevron — is-open 에서 180도 회전. */
   .public-sig-chev {
     flex: none;
-    width: 1.125rem;
-    height: 1.125rem;
+    width: 1.375rem;
+    height: 1.375rem;
     border: 1px solid var(--yoro-color-border-on-dark-strong);
     border-radius: var(--yoro-radius-circle);
     position: relative;
@@ -159,7 +210,7 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    gap: var(--yoro-space-2);
+    gap: var(--yoro-space-3);
     padding-inline: var(--yoro-space-3);
     border-top: 1px solid transparent;
   }
@@ -169,12 +220,25 @@
     border-top-color: var(--yoro-color-border-on-dark);
   }
 
+  /* 빌드 그룹 그리드 — 데스크톱(64rem+)에서 1·2 그룹을 좌우 비교, 그 미만 1열.
+     그룹이 1개면(data-solo) 전폭 1열을 유지합니다. */
+  .public-sig-bgrid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--yoro-space-3);
+    align-items: start;
+  }
+
+  @media (min-width: 64rem) {
+    .public-sig-bgrid:not([data-solo]) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
   /* 빌드 그룹 — 좌측 액센트(1: 보라 / 2: 청록)로 룬→아이템이 한 단위임을 명시. */
   .public-sig-build {
     display: flex;
     flex-direction: column;
     gap: var(--yoro-space-2);
-    padding: var(--yoro-space-2) var(--yoro-space-3);
+    padding: var(--yoro-space-3);
     border: 1px solid var(--yoro-color-border-on-dark);
     border-left: 3px solid var(--yoro-color-public-primary);
     border-radius: var(--yoro-radius-sm);
@@ -200,7 +264,7 @@
     border-radius: var(--yoro-radius-pill);
     background: color-mix(in srgb, var(--yoro-color-public-primary) 14%, transparent);
     color: color-mix(in srgb, var(--yoro-color-public-primary) 40%, #fff 60%);
-    font-size: .53125rem;
+    font-size: .5625rem;
     font-weight: var(--yoro-font-weight-bold);
     letter-spacing: .05em;
     white-space: nowrap;
@@ -216,8 +280,8 @@
 
   .public-sig-keystone {
     flex: none;
-    width: 1.75rem;
-    height: 1.75rem;
+    width: 2.25rem;
+    height: 2.25rem;
     border: 2px solid color-mix(in srgb, var(--yoro-color-accent-gold) 55%, transparent);
     border-radius: var(--yoro-radius-circle);
     background: color-mix(in srgb, var(--yoro-color-accent-gold) 12%, var(--yoro-color-ground-surface));
@@ -225,7 +289,7 @@
     display: grid;
     place-items: center;
     color: var(--yoro-color-accent-gold);
-    font-size: .5rem;
+    font-size: .5625rem;
     font-weight: var(--yoro-font-weight-bold);
   }
 
@@ -235,7 +299,7 @@
 
   .public-sig-rune-names > b {
     display: block;
-    font-size: var(--yoro-font-size-xs);
+    font-size: var(--yoro-font-size-sm);
     font-weight: var(--yoro-font-weight-bold);
     white-space: nowrap;
     overflow: hidden;
@@ -245,7 +309,7 @@
   .public-sig-rune-names > small {
     display: block;
     color: var(--yoro-color-text-on-dark-muted);
-    font-size: .5625rem;
+    font-size: .625rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -258,13 +322,13 @@
     font-variant-numeric: tabular-nums;
   }
 
-  .public-sig-build-pick > b { display: block; font-size: .6875rem; font-weight: var(--yoro-font-weight-bold); white-space: nowrap; }
+  .public-sig-build-pick > b { display: block; font-size: var(--yoro-font-size-xs); font-weight: var(--yoro-font-weight-bold); white-space: nowrap; }
   .public-sig-build-pick > small { display: block; margin-top: .0625rem; font-size: .5625rem; color: var(--yoro-color-text-on-dark-muted); white-space: nowrap; }
 
   /* 그룹 채용률 바 — 0~100% 절대 스케일(정규화 금지). */
   .public-sig-build-bar {
     display: block;
-    height: .25rem;
+    height: .3125rem;
     border-radius: var(--yoro-radius-pill);
     background: color-mix(in srgb, var(--yoro-color-text-on-dark) 10%, transparent);
     overflow: hidden;
@@ -281,7 +345,7 @@
 
   .public-sig-items-label {
     color: var(--yoro-color-text-on-dark-muted);
-    font-size: .53125rem;
+    font-size: .5625rem;
     font-weight: var(--yoro-font-weight-bold);
     letter-spacing: .06em;
   }
@@ -289,22 +353,22 @@
   .public-sig-items {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--yoro-space-1);
+    gap: var(--yoro-space-2);
   }
 
-  .public-sig-item { width: 2.0625rem; flex: none; text-align: center; }
+  .public-sig-item { width: 2.625rem; flex: none; text-align: center; }
 
   .public-sig-item > i {
     display: grid;
     place-items: center;
-    width: 2.0625rem;
-    height: 2.0625rem;
+    width: 2.625rem;
+    height: 2.625rem;
     border: 1px solid var(--yoro-color-border-on-dark-strong);
     border-radius: var(--yoro-radius-sm);
     background: color-mix(in srgb, var(--yoro-color-text-on-dark) 8%, transparent);
     overflow: hidden;
     color: var(--yoro-color-text-on-dark-muted);
-    font-size: .5rem;
+    font-size: .53125rem;
     font-style: normal;
     line-height: 1.1;
   }
@@ -313,10 +377,16 @@
 
   .public-sig-item.is-boots > i { border-color: color-mix(in srgb, var(--yoro-color-public-primary) 50%, transparent); }
 
-  .public-sig-item > b { display: block; margin-top: .125rem; font-size: .5625rem; font-variant-numeric: tabular-nums; }
-  .public-sig-item > small { display: block; color: var(--yoro-color-text-on-dark-muted); font-size: .5rem; font-variant-numeric: tabular-nums; }
+  .public-sig-item > b { display: block; margin-top: .1875rem; font-size: .625rem; font-variant-numeric: tabular-nums; }
+  .public-sig-item > small { display: block; color: var(--yoro-color-text-on-dark-muted); font-size: .53125rem; font-variant-numeric: tabular-nums; }
 
-  .public-sig-other { color: var(--yoro-color-text-on-dark-muted); font-size: .625rem; }
+  /* 모바일 — 아이템 한 단계 축소. */
+  @media (max-width: 30rem) {
+    .public-sig-item, .public-sig-item > i { width: 2.25rem; }
+    .public-sig-item > i { height: 2.25rem; }
+  }
+
+  .public-sig-other { color: var(--yoro-color-text-on-dark-muted); font-size: .6875rem; }
 
   .public-sig-view {
     align-self: flex-start;
@@ -333,11 +403,13 @@
 
   .public-sig-view:hover, .public-sig-view:focus-visible { text-decoration: underline; }
 
-  /* 최협폭 — 그룹 헤더의 승률 부가 문구 숨김(목업 v4 축약 규칙). */
-  @container (max-width: 17.5rem) {
-    .public-sig-build-pick > small { display: none; }
-    .public-sig-item, .public-sig-item > i { width: 1.8125rem; }
-    .public-sig-item > i { height: 1.8125rem; }
+  .public-sig-foot {
+    margin: 0;
+    padding: var(--yoro-space-2) var(--yoro-space-4) var(--yoro-space-3);
+    border-top: 1px dashed var(--yoro-color-border-on-dark);
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: .6875rem;
+    line-height: 1.5;
   }
 
   @media (prefers-reduced-motion: reduce) {

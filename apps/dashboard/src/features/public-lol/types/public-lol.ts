@@ -548,7 +548,7 @@ export type PublicNavTarget = "search" | "ranking" | "champion" | "stats" | "ing
 
 export type PublicMainPage = "search" | "palworld" | "valorant" | "minecraft" | "bot" | "subscriptions" | "followJoin" | "aram" | "patchNotes" | "privacy" | "terms" | "contact";
 
-export type PublicProfileTab = "overview" | "champions" | "ingame";
+export type PublicProfileTab = "overview" | "champions" | "ingame" | "stats";
 
 export type PublicExpandedMatchView = "record" | "build";
 
