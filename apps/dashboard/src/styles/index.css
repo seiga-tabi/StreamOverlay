@@ -62,3 +62,5 @@
 @import "./pages/public-lol/34-aram-augments.css";
 /* 패치 노트 목록. pages layer 에서 단독 소유합니다. */
 @import "./pages/public-lol/35-patch-notes.css";
+
+@import "./pages/public-lol/36-champion-analysis.css";

@@ -266,8 +266,8 @@ import {
 import { usePublicLocale } from "../features/public-lol/hooks/usePublicLocale";
 import { usePublicTheme } from "../features/public-lol/hooks/usePublicTheme";
 import {
-  championAnalysisMax,
-  championAnalysisRows,
+  championAnalysisTableRows,
+  championSpotlights,
   filteredMatches,
   hasActiveFilters,
   kdaFromTotals,
@@ -5556,121 +5556,199 @@ function RecentMatches({
   );
 }
 
-function ChampionMastery({ profile }: { profile: PublicLolProfile }) {
-  const rows = championAnalysisRows(profile).slice(0, 5);
-  const maxMasteryPoints = championAnalysisMax(rows, (row) => row.masteryPoints);
+/* 챔피언 분석 리디자인(2026-08-17) — 목업 docs/mockups/lol-champion-analysis-redesign.html v3.
+ * legacy 의 흰 패널·파스텔 테이블(.public-panel + .public-champion-*) 대신 전적 카드·사이드바와
+ * 같은 다크 문법의 .public-champ-* 네임스페이스를 pages layer(36-champion-analysis.css)에서
+ * 단독 소유합니다. 서버 계약 변경 없음 — topChampions·championPerformance·rolePerformance 그대로. */
+
+function ChampionSplitBar({ wins, losses }: { wins: number; losses: number }) {
+  const games = wins + losses;
+  const winShare = games > 0 ? Math.round((wins / games) * 100) : 0;
   return (
-    <section id="public-champions" className="public-panel public-champion-mastery-panel">
-      <div className="public-section-head">
-        <h2  >{t().championMasteryTop5}</h2>
-        <span  >{t().masteryBasis}</span>
-      </div>
-      <div className="public-champion-top-grid">
-        {rows.length === 0 ? <p className="public-empty">{t().noData}</p> : rows.map((row, index) => {
-          const champion = row.champion;
-          const artUrl = assetUrl(champion.loadingUrl ?? champion.splashUrl ?? champion.iconUrl);
-          const performance = row.performance;
-          return (
-            <article className="public-champion-top-card" key={champion.championId}>
-              <span className="public-champion-top-rank">{row.masteryRank ?? index + 1}</span>
-              <div className="public-champion-top-art">
-                {artUrl ? <img src={artUrl} alt="" /> : <span>{championName(champion).slice(0, 1)}</span>}
-              </div>
-              <strong>{championName(champion)}</strong>
-              <small>{t().mastery} Lv.{formatNumber(row.masteryLevel)}</small>
-              <b>{formatNumber(row.masteryPoints)}</b>
-              <em className={metricToneClass(percentTone(performance?.winRate))}>{performance ? `${formatPercent(performance.winRate)} · ${gamesText(performance.games)}` : t().masteryPoint}</em>
-              <div className="public-champion-progress" aria-hidden="true">
-                <i style={{ width: barWidth(row.masteryPoints, maxMasteryPoints) }} />
-              </div>
-            </article>
-          );
-        })}
-      </div>
-    </section>
+    <span aria-hidden="true" className="public-champ-split">
+      {wins > 0 ? <i style={{ width: `${winShare}%` }}>{winsText(wins)}</i> : null}
+      {losses > 0 ? <em>{losses}{activePublicLocale === "ja" ? "敗" : "패"}</em> : null}
+    </span>
   );
 }
 
-function DetailedPerformance({ profile }: { profile: PublicLolProfile }) {
-  const rows = championAnalysisRows(profile);
-  const maxGames = championAnalysisMax(rows, (row) => row.performance?.games);
-  const maxWins = championAnalysisMax(rows, (row) => row.performance?.wins);
-  const maxKda = championAnalysisMax(rows, (row) => row.performance?.averageKda);
-  const maxCs = championAnalysisMax(rows, (row) => row.performance?.averageCsPerMinute);
-  const maxDpm = championAnalysisMax(rows, (row) => row.performance?.averageDamagePerMinute);
-  const maxMasteryPoints = championAnalysisMax(rows, (row) => row.masteryPoints);
-  return (
-    <section className="public-panel public-detail-analysis-panel">
-      <div className="public-section-head">
-        <h2  >{t().championDetailStats}</h2>
-        <span>{profile.summary.recentGames}{t().games}</span>
-      </div>
-      <div className="public-champion-analysis-table" aria-label={t().recentChampionStats}>
-        <div className="public-champion-analysis-head">
-          <span>{t().champion}</span>
-          <span>{t().gamesPlayed}</span>
-          <span>{t().wins}</span>
-          <span>{t().kda}</span>
-          <span>{t().averageCsPerMinute}</span>
-          <span>DPM</span>
-          <span>{t().masteryPoint}</span>
+function championMasteryMeta(level: number | undefined, points: number | undefined): string | undefined {
+  if (level === undefined && points === undefined) return undefined;
+  return t().champSpotMasteryMeta.replace("{level}", formatNumber(level)).replace("{points}", formatNumber(points));
+}
+
+function ChampionAnalysisPanel({
+  profile,
+  onChampionPick
+}: {
+  profile: PublicLolProfile;
+  onChampionPick: (championId: number) => void;
+}) {
+  const { active, ghosts } = championAnalysisTableRows(profile);
+  const { signature, form } = championSpotlights(profile);
+  const recentGames = profile.summary.recentGames;
+
+  const head = (
+    <div className="public-champ-head">
+      <h2>{t().championAnalysis}</h2>
+      <span className="public-champ-pill">{t().champAnalysisPill.replace("{count}", String(recentGames))}</span>
+    </div>
+  );
+
+  if (!signature && active.length === 0 && ghosts.length === 0) {
+    return (
+      <section id="public-champions" className="public-champ-panel">
+        {head}
+        <div className="public-champ-empty">
+          <strong>{t().champEmptyTitle}</strong>
+          <span>{t().champEmptyDescription}</span>
         </div>
-        {rows.length === 0 ? <p className="public-empty">{t().noData}</p> : rows.map((row) => {
-          const performance = row.performance;
-          const champion = row.champion;
-          return (
-            <article className="public-champion-analysis-row" key={champion.championId}>
-              <div className="public-champion-analysis-name">
-                {champion.iconUrl ? <img src={champion.iconUrl} alt="" /> : <span>{championName(champion).slice(0, 1)}</span>}
-                <div>
-                  <strong>{championName(champion)}</strong>
-                  <small>{t().mastery} Lv.{formatNumber(row.masteryLevel)}</small>
-                </div>
-              </div>
-              <div className="public-champion-analysis-metric">
-                <strong>{performance ? gamesText(performance.games) : "-"}</strong>
-                <span><i style={{ width: barWidth(performance?.games, maxGames) }} /></span>
-              </div>
-              <div className="public-champion-analysis-metric">
-                <strong className={metricToneClass(percentTone(performance?.winRate))}>{performance ? `${winsText(performance.wins)} · ${formatPercent(performance.winRate)}` : "-"}</strong>
-                <span><i className="win" style={{ width: barWidth(performance?.wins, maxWins) }} /></span>
-              </div>
-              <div className="public-champion-analysis-metric kda">
-                <strong>{performance ? <KdaMetricText value={performance.averageKda} /> : "-"}</strong>
-                <span><i style={{ width: barWidth(performance?.averageKda, maxKda) }} /></span>
-              </div>
-              <div className="public-champion-analysis-metric">
-                <strong className={metricToneClass(csTone(performance?.averageCsPerMinute))}>{formatDecimal(performance?.averageCsPerMinute, 1)}</strong>
-                <span><i style={{ width: barWidth(performance?.averageCsPerMinute, maxCs) }} /></span>
-              </div>
-              <div className="public-champion-analysis-metric">
-                <strong className={metricToneClass(damagePerMinuteTone(performance?.averageDamagePerMinute))}>{formatNumber(performance?.averageDamagePerMinute)}</strong>
-                <span><i style={{ width: barWidth(performance?.averageDamagePerMinute, maxDpm) }} /></span>
-              </div>
-              <div className="public-champion-analysis-metric">
-                <strong>{formatNumber(row.masteryPoints)}</strong>
-                <span><i style={{ width: barWidth(row.masteryPoints, maxMasteryPoints) }} /></span>
+      </section>
+    );
+  }
+
+  const signatureArt = signature ? assetUrl(signature.champion.iconUrl) : undefined;
+  const formArt = form ? assetUrl(form.champion.iconUrl) : undefined;
+  const signaturePerformance = signature?.performance;
+  const signatureMeta = signature ? championMasteryMeta(signature.masteryLevel, signature.masteryPoints) : undefined;
+
+  return (
+    <section id="public-champions" className="public-champ-panel">
+      {head}
+
+      {signature || form ? (
+        <div className="public-champ-spot">
+          {signature ? (
+            <article className="public-champ-spot-tile is-signature">
+              <span className="public-champ-spot-tag">{t().champSpotSignatureTag}</span>
+              {signatureArt ? <img alt="" className="public-champ-spot-art" src={signatureArt} /> : null}
+              <div className="public-champ-spot-body">
+                <b>{championName(signature.champion)}</b>
+                {signatureMeta ? <small>{signatureMeta}</small> : null}
+                {signaturePerformance ? (
+                  <span className="public-champ-spot-num">
+                    <span className="is-brand"><b>{formatPercent(signaturePerformance.winRate)}</b> {gamesText(signaturePerformance.games)}</span>
+                    <span><b className={metricToneClass(kdaTone(signaturePerformance.averageKda))}>{formatDecimal(signaturePerformance.averageKda, 1)}</b> KDA</span>
+                  </span>
+                ) : null}
               </div>
             </article>
+          ) : null}
+          {form ? (
+            <article className="public-champ-spot-tile is-form">
+              <span className="public-champ-spot-tag">{t().champSpotFormTag.replace("{count}", String(recentGames))}</span>
+              {formArt ? <img alt="" className="public-champ-spot-art" src={formArt} /> : null}
+              <div className="public-champ-spot-body">
+                <b>{championName(form.champion)}</b>
+                <small>{t().champSpotFormMeta.replace("{count}", String(form.games))}</small>
+                <span className="public-champ-spot-num">
+                  <span className="is-good"><b>{formatPercent(form.winRate)}</b> {winsText(form.wins)} {form.games - form.wins}{activePublicLocale === "ja" ? "敗" : "패"}</span>
+                  {form.averageDamagePerMinute !== undefined
+                    ? <span><b>{formatNumber(form.averageDamagePerMinute)}</b> DPM</span>
+                    : <span><b className={metricToneClass(kdaTone(form.averageKda))}>{formatDecimal(form.averageKda, 1)}</b> KDA</span>}
+                </span>
+              </div>
+            </article>
+          ) : null}
+        </div>
+      ) : null}
+
+      <div aria-label={t().recentChampionStats} className="public-champ-table">
+        <div aria-hidden="true" className="public-champ-hrow">
+          <span>#</span>
+          <span>{t().champion}</span>
+          <span>{t().champRecentWinRate}</span>
+          <span data-cell="kda">KDA</span>
+          <span data-cell="cs">{t().averageCsPerMinute}</span>
+          <span data-cell="dpm">DPM</span>
+          <span>{t().mastery}</span>
+        </div>
+        {active.map((row, index) => {
+          const performance = row.performance!;
+          const losses = performance.games - performance.wins;
+          return (
+            <button
+              className={`public-champ-row${index < 3 ? " is-top3" : ""}`}
+              key={row.champion.championId}
+              onClick={() => onChampionPick(row.champion.championId)}
+              type="button"
+            >
+              <span className="public-champ-rank">{index + 1}</span>
+              <span className="public-champ-who">
+                <span className="public-champ-ava" data-lv={row.masteryLevel !== undefined ? `Lv.${row.masteryLevel}` : undefined}>
+                  {row.champion.iconUrl ? <img alt="" src={assetUrl(row.champion.iconUrl)} /> : <span>{championName(row.champion).slice(0, 1)}</span>}
+                </span>
+                <span className="public-champ-who-id">
+                  <b>{championName(row.champion)}</b>
+                  <small>{gamesText(performance.games)}</small>
+                </span>
+              </span>
+              <span className="public-champ-wr">
+                <ChampionSplitBar losses={losses} wins={performance.wins} />
+                <small>
+                  <span className={metricToneClass(percentTone(performance.winRate))}>{formatPercent(performance.winRate)}</span>
+                  <span>{gamesText(performance.games)}{performance.games === 1 ? ` · ${t().champSampleShort}` : ""}</span>
+                </small>
+              </span>
+              <span className="public-champ-num" data-cell="kda">
+                <b className={metricToneClass(kdaTone(performance.averageKda))}>{formatDecimal(performance.averageKda, 1)}</b>
+                <i>KDA</i>
+              </span>
+              <span className="public-champ-num" data-cell="cs">
+                <b className={metricToneClass(csTone(performance.averageCsPerMinute))}>{formatDecimal(performance.averageCsPerMinute, 1)}</b>
+                <i>{t().averageCsPerMinute}</i>
+              </span>
+              <span className="public-champ-num" data-cell="dpm">
+                <b className={metricToneClass(damagePerMinuteTone(performance.averageDamagePerMinute))}>{formatNumber(performance.averageDamagePerMinute)}</b>
+                <i>DPM</i>
+              </span>
+              <span className="public-champ-mast">
+                {row.masteryLevel !== undefined ? <b>Lv.{row.masteryLevel}</b> : <b>—</b>}
+                {row.masteryPoints !== undefined ? <small>{formatNumber(row.masteryPoints)}</small> : null}
+              </span>
+            </button>
           );
         })}
+        {ghosts.map((row) => (
+          <div className="public-champ-row is-ghost" key={row.champion.championId}>
+            <span className="public-champ-rank">—</span>
+            <span className="public-champ-who">
+              <span className="public-champ-ava" data-lv={row.masteryLevel !== undefined ? `Lv.${row.masteryLevel}` : undefined}>
+                {row.champion.iconUrl ? <img alt="" src={assetUrl(row.champion.iconUrl)} /> : <span>{championName(row.champion).slice(0, 1)}</span>}
+              </span>
+              <span className="public-champ-who-id">
+                <b>{championName(row.champion)}</b>
+              </span>
+            </span>
+            <span className="public-champ-wr">
+              <span className="public-champ-ghost-note">{t().champGhostNote}</span>
+            </span>
+            <span className="public-champ-num" data-cell="kda"><b>—</b></span>
+            <span className="public-champ-num" data-cell="cs"><b>—</b></span>
+            <span className="public-champ-num" data-cell="dpm"><b>—</b></span>
+            <span className="public-champ-mast">
+              {row.masteryLevel !== undefined ? <b>Lv.{row.masteryLevel}</b> : <b>—</b>}
+              {row.masteryPoints !== undefined ? <small>{formatNumber(row.masteryPoints)}</small> : null}
+            </span>
+          </div>
+        ))}
       </div>
-      <div className="public-performance-block">
-        <h3  >{t().rolePerformance}</h3>
-        <div className="public-role-chip-list">
-          {profile.rolePerformance.length === 0 ? <p className="public-empty">{t().noData}</p> : profile.rolePerformance.map((item) => (
-            <article className="public-role-chip" key={item.role}>
-              <span>{mainRoleLabel(item.role)}</span>
-              <strong>{gamesText(item.games)}</strong>
-              <small>
-                <span className={metricToneClass(percentTone(item.winRate))}>{formatPercent(item.winRate)}</span>
-                {" · "}
-                <KdaMetricText value={item.averageKda} />
-              </small>
-            </article>
+
+      {profile.rolePerformance.length > 0 ? (
+        <div className="public-champ-roles">
+          <h3>{t().rolePerformance}</h3>
+          {profile.rolePerformance.map((item) => (
+            <div className="public-champ-role-row" key={item.role}>
+              <span className="public-champ-role-name">{mainRoleLabel(item.role)}</span>
+              <ChampionSplitBar losses={item.games - item.wins} wins={item.wins} />
+              <span className="public-champ-role-stat">
+                <b className={metricToneClass(percentTone(item.winRate))}>{formatPercent(item.winRate)}</b>
+                {" · KDA "}{formatDecimal(item.averageKda, 1)}{" · "}{gamesText(item.games)}
+              </span>
+            </div>
           ))}
         </div>
-      </div>
+      ) : null}
     </section>
   );
 }
@@ -7002,10 +7080,14 @@ export function PublicLolPage({
                   ) : null}
 
                   {profileTab === "champions" ? (
-                    <>
-                      <ChampionMastery profile={activeProfile} />
-                      <DetailedPerformance profile={activeProfile} />
-                    </>
+                    <ChampionAnalysisPanel
+                      profile={activeProfile}
+                      onChampionPick={(championId) => {
+                        /* 챔피언 행 클릭 = 해당 챔피언으로 전적 필터 후 전적 탭 이동(기존 championFilter 재사용). */
+                        setFilters({ ...DEFAULT_MATCH_FILTERS, championId: String(championId) });
+                        setProfileTab("overview");
+                      }}
+                    />
                   ) : null}
 
 	                {profileTab === "ingame" ? (

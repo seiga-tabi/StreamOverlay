@@ -146,6 +146,51 @@ export function championAnalysisMax(rows: PublicChampionAnalysisRow[], value: (r
   return Math.max(1, ...rows.map((row) => value(row) ?? 0));
 }
 
+/* 챔피언 분석 리디자인(목업 lol-champion-analysis-redesign.html v3)의 데이터 계층.
+ * 최근 성과가 있는 행(games desc)과 숙련도만 있는 ghost 행을 분리합니다 —
+ * 이전 UI 처럼 한 표에 섞으면 최근 미플레이 챔피언이 "-" 를 반복해 표가 비어 보입니다. */
+export function championAnalysisTableRows(profile: PublicLolProfile): {
+  active: PublicChampionAnalysisRow[];
+  ghosts: PublicChampionAnalysisRow[];
+} {
+  const rows = championAnalysisRows(profile);
+  const active = rows
+    .filter((row) => row.performance)
+    .sort((a, b) =>
+      (b.performance!.games - a.performance!.games) ||
+      (b.performance!.winRate - a.performance!.winRate) ||
+      ((b.masteryPoints ?? 0) - (a.masteryPoints ?? 0))
+    );
+  const ghosts = rows
+    .filter((row) => !row.performance)
+    .sort((a, b) => (b.masteryPoints ?? 0) - (a.masteryPoints ?? 0));
+  return { active, ghosts };
+}
+
+export const CHAMPION_FORM_MIN_GAMES = 3;
+
+/* 스포트라이트 — 시그니처(숙련도 1위, 항상 topChampions[0] 기준)와
+ * 최근 폼(3게임 이상 중 최고 승률, 동률이면 게임 수 많은 쪽). 표본 3게임 미만은
+ * 폼으로 세우지 않습니다(1승 0패 100% 같은 과신 방지). 시그니처와 같은 챔피언은
+ * 폼 후보에서 제외합니다 — 두 타일이 같은 챔피언이면 중복 정보라, 시그니처 타일이
+ * 이미 최근 승률을 보여주므로 폼은 그다음으로 잘 풀리는 챔피언을 세웁니다. */
+export function championSpotlights(profile: PublicLolProfile): {
+  signature?: PublicChampionAnalysisRow;
+  form?: PublicLolChampionPerformance;
+} {
+  const rows = championAnalysisRows(profile);
+  const signature = rows.find((row) => row.masteryRank === 1);
+  let form: PublicLolChampionPerformance | undefined;
+  for (const performance of profile.championPerformance) {
+    if (performance.games < CHAMPION_FORM_MIN_GAMES) continue;
+    if (signature && performance.champion.championId === signature.champion.championId) continue;
+    if (!form || performance.winRate > form.winRate || (performance.winRate === form.winRate && performance.games > form.games)) {
+      form = performance;
+    }
+  }
+  return { signature, form };
+}
+
 export function rolePerformanceFromMatches(matches: PublicLolRecentMatch[]): PublicLolRolePerformance[] {
   const grouped = new Map<string, { role: string; games: number; wins: number; kills: number; deaths: number; assists: number }>();
   for (const match of matches) {

@@ -1,0 +1,512 @@
+/* 챔피언 분석 리디자인 — 목업 docs/mockups/lol-champion-analysis-redesign.html v3.
+ *
+ * 25-profile-sidebar.css 와 같은 방식: legacy 의 .public-champion-* / .public-panel
+ * (흰 패널·파스텔 테이블 !important 오버라이드)과 섞이지 않도록 .public-champ-*
+ * 네임스페이스를 pages layer 에서 단독 소유합니다. !important 는 쓰지 않습니다.
+ *
+ * 반응형 — 모바일(<48rem): 라벨 캡슐이 붙은 챔피언 카드 / 48~64rem: 4열 축약 테이블
+ * (CS·DPM 숨김) / 64rem+: 7열 전체. 열 폭은 minmax(…, auto)로 ja 라벨 성장 허용.
+ */
+
+@layer pages {
+  .public-champ-panel {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-md);
+    background: var(--yoro-color-ground-surface);
+    color: var(--yoro-color-text-on-dark);
+    overflow: hidden;
+  }
+
+  .public-champ-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--yoro-space-3);
+    padding: var(--yoro-space-3) var(--yoro-space-4);
+    border-bottom: 1px solid var(--yoro-color-border-on-dark);
+  }
+
+  .public-champ-head > h2 {
+    margin: 0;
+    font-size: var(--yoro-font-size-md);
+    font-weight: var(--yoro-font-weight-bold);
+    letter-spacing: -.01em;
+  }
+
+  .public-champ-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: .15rem .6rem;
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-pill);
+    background: color-mix(in srgb, var(--yoro-color-text-on-dark) 5%, transparent);
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-medium);
+    white-space: nowrap;
+  }
+
+  .public-champ-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--yoro-space-1);
+    margin: var(--yoro-space-4);
+    padding: var(--yoro-space-6) var(--yoro-space-4);
+    border: 1px dashed var(--yoro-color-border-on-dark-strong);
+    border-radius: var(--yoro-radius-sm);
+    text-align: center;
+  }
+
+  .public-champ-empty > strong { font-size: var(--yoro-font-size-sm); font-weight: var(--yoro-font-weight-bold); }
+  .public-champ-empty > span { color: var(--yoro-color-text-on-dark-muted); font-size: var(--yoro-font-size-xs); }
+
+  /* ── 공용: 승/패 분할 바 — 전적 리스트의 승(파랑)/패(붉음) 색 의미를 그대로 공유. ── */
+  .public-champ-split {
+    display: flex;
+    height: 1.125rem;
+    border-radius: var(--yoro-radius-xs);
+    background: color-mix(in srgb, var(--yoro-color-match-loss-accent) 42%, transparent);
+    overflow: hidden;
+    font-size: .59375rem;
+    font-weight: var(--yoro-font-weight-bold);
+  }
+
+  .public-champ-split > i {
+    display: flex;
+    align-items: center;
+    padding-left: var(--yoro-space-2);
+    background: linear-gradient(90deg, var(--yoro-color-match-win-accent), color-mix(in srgb, var(--yoro-color-match-win-accent) 76%, #fff 10%));
+    color: var(--yoro-color-text-on-dark);
+    font-style: normal;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .public-champ-split > em {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: var(--yoro-space-2);
+    color: color-mix(in srgb, var(--yoro-color-match-loss-accent) 35%, #fff 65%);
+    font-style: normal;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  /* ── ① 스포트라이트 ─────────────────────────────────────── */
+  .public-champ-spot {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    gap: var(--yoro-space-3);
+    padding: var(--yoro-space-4);
+  }
+
+  /* 배지는 흐름 배치(column + gap) — 배지와 이름 사이 간격이 타일 높이와 무관하게
+     항상 보장됩니다(목업 v3에서 확정한 붙음 결함의 구조적 제거). */
+  .public-champ-spot-tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--yoro-space-3);
+    min-height: 7.375rem;
+    padding: var(--yoro-space-3) var(--yoro-space-4);
+    border: 1px solid var(--yoro-color-border-on-dark-strong);
+    border-radius: var(--yoro-radius-md);
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .public-champ-spot-tile.is-signature {
+    background:
+      radial-gradient(120% 140% at 85% 0%, color-mix(in srgb, var(--yoro-color-public-primary) 40%, transparent), transparent 55%),
+      color-mix(in srgb, var(--yoro-color-public-primary) 10%, var(--yoro-color-ground-surface));
+  }
+
+  .public-champ-spot-tile.is-form {
+    background:
+      radial-gradient(120% 140% at 85% 0%, color-mix(in srgb, var(--yoro-color-rank-trend) 30%, transparent), transparent 55%),
+      color-mix(in srgb, var(--yoro-color-rank-trend) 7%, var(--yoro-color-ground-surface));
+  }
+
+  .public-champ-spot-tag {
+    align-self: flex-start;
+    max-width: 100%;
+    padding: .1rem .55rem;
+    border: 1px solid color-mix(in srgb, var(--yoro-color-public-primary) 45%, transparent);
+    border-radius: var(--yoro-radius-pill);
+    background: color-mix(in srgb, var(--yoro-color-public-primary) 16%, transparent);
+    color: color-mix(in srgb, var(--yoro-color-public-primary) 45%, #fff 55%);
+    font-size: .59375rem;
+    font-weight: var(--yoro-font-weight-bold);
+    letter-spacing: .05em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .public-champ-spot-tile.is-form .public-champ-spot-tag {
+    border-color: color-mix(in srgb, var(--yoro-color-rank-trend) 40%, transparent);
+    background: color-mix(in srgb, var(--yoro-color-rank-trend) 13%, transparent);
+    color: color-mix(in srgb, var(--yoro-color-rank-trend) 55%, #fff 45%);
+  }
+
+  /* 초상은 배경 장식 — 글자와 간섭하지 않게 우상단 절대배치 + 낮은 불투명도. */
+  .public-champ-spot-art {
+    position: absolute;
+    top: -1rem;
+    right: -.75rem;
+    z-index: -1;
+    width: 6rem;
+    height: 6rem;
+    border-radius: var(--yoro-radius-circle);
+    object-fit: cover;
+    opacity: .38;
+    filter: saturate(.9);
+  }
+
+  .public-champ-spot-body { min-width: 0; margin-top: auto; }
+
+  .public-champ-spot-body > b {
+    display: block;
+    font-size: 1.0625rem;
+    font-weight: var(--yoro-font-weight-black);
+    letter-spacing: -.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .public-champ-spot-body > small {
+    display: block;
+    margin-top: .1875rem;
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .public-champ-spot-num {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: .25rem var(--yoro-space-4);
+    margin-top: .4375rem;
+    font-size: var(--yoro-font-size-xs);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .public-champ-spot-num b { font-size: var(--yoro-font-size-sm); font-weight: var(--yoro-font-weight-black); }
+  .public-champ-spot-num .is-brand { color: color-mix(in srgb, var(--yoro-color-public-primary) 45%, #fff 55%); }
+  .public-champ-spot-num .is-good { color: var(--yoro-color-rank-trend); }
+
+  /* ── ② 성과 테이블 ───────────────────────────────────────
+     모바일 기본은 카드(grid-template-areas), 48rem+ 부터 행 그리드. */
+  .public-champ-table { display: flex; flex-direction: column; }
+
+  .public-champ-hrow { display: none; }
+
+  /* 6열 균등 그리드 — 지표 캡슐 3개(각 2열)가 항상 같은 폭이 됩니다.
+     mast(숙련도)는 우상단 2열, who 가 나머지 4열을 씁니다. */
+  .public-champ-row {
+    display: grid;
+    grid-template-areas:
+      "who who who who mast mast"
+      "wr wr wr wr wr wr"
+      "kda kda cs cs dpm dpm";
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: var(--yoro-space-2) var(--yoro-space-2);
+    width: 100%;
+    margin: 0;
+    padding: var(--yoro-space-3) var(--yoro-space-4);
+    border: 0;
+    border-top: 1px solid color-mix(in srgb, var(--yoro-color-text-on-dark) 7%, transparent);
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .public-champ-row.is-ghost { cursor: default; opacity: .62; }
+
+  .public-champ-row:not(.is-ghost):hover,
+  .public-champ-row:not(.is-ghost):focus-visible {
+    background: color-mix(in srgb, var(--yoro-color-text-on-dark) 5%, transparent);
+  }
+
+  .public-champ-rank {
+    display: none;
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-bold);
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .public-champ-row.is-top3 .public-champ-rank { color: var(--yoro-color-accent-gold); }
+
+  .public-champ-who { grid-area: who; display: flex; align-items: center; gap: var(--yoro-space-3); min-width: 0; }
+
+  .public-champ-ava {
+    position: relative;
+    flex: none;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--yoro-radius-sm);
+    background: color-mix(in srgb, var(--yoro-color-text-on-dark) 10%, transparent);
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    font-size: var(--yoro-font-size-sm);
+    font-weight: var(--yoro-font-weight-bold);
+  }
+
+  .public-champ-ava > img { width: 100%; height: 100%; object-fit: cover; }
+
+  .public-champ-ava[data-lv]::after {
+    content: attr(data-lv);
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    padding: 0 .2rem;
+    border-top-left-radius: var(--yoro-radius-xs);
+    background: color-mix(in srgb, var(--yoro-color-ground-surface) 88%, #000 12%);
+    color: color-mix(in srgb, var(--yoro-color-public-primary) 40%, #fff 60%);
+    font-size: .53125rem;
+    font-weight: var(--yoro-font-weight-bold);
+    line-height: 1.5;
+  }
+
+  .public-champ-who-id { min-width: 0; }
+
+  .public-champ-who-id > b {
+    display: block;
+    font-size: var(--yoro-font-size-sm);
+    font-weight: var(--yoro-font-weight-bold);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .public-champ-who-id > small {
+    display: block;
+    margin-top: .125rem;
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .public-champ-wr { grid-area: wr; display: grid; gap: .25rem; min-width: 0; align-self: center; }
+
+  .public-champ-wr > small {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--yoro-space-2);
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: .625rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .public-champ-wr > small span { white-space: nowrap; }
+
+  .public-champ-ghost-note {
+    display: flex;
+    align-items: center;
+    height: 1.125rem;
+    padding-inline: var(--yoro-space-2);
+    border: 1px dashed var(--yoro-color-border-on-dark-strong);
+    border-radius: var(--yoro-radius-xs);
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: .625rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* 지표 셀 — 모바일에선 라벨 캡슐, 데스크톱에선 우측 정렬 숫자(라벨 숨김). */
+  .public-champ-num {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .125rem;
+    padding: .375rem .125rem .3125rem;
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-sm);
+    background: color-mix(in srgb, var(--yoro-color-text-on-dark) 4%, transparent);
+    min-width: 0;
+  }
+
+  .public-champ-num[data-cell="kda"] { grid-area: kda; }
+  .public-champ-num[data-cell="cs"] { grid-area: cs; }
+  .public-champ-num[data-cell="dpm"] { grid-area: dpm; }
+
+  .public-champ-num > b {
+    font-size: var(--yoro-font-size-sm);
+    font-weight: var(--yoro-font-weight-bold);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .public-champ-num > i {
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: .53125rem;
+    font-style: normal;
+    letter-spacing: .03em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  /* ghost 행의 지표 캡슐은 모바일에서 정보가 없으므로 감춥니다. */
+  .public-champ-row.is-ghost .public-champ-num { display: none; }
+
+  .public-champ-mast {
+    grid-area: mast;
+    align-self: center;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .public-champ-mast > b {
+    display: block;
+    color: color-mix(in srgb, var(--yoro-color-public-primary) 40%, #fff 60%);
+    font-size: var(--yoro-font-size-sm);
+    font-weight: var(--yoro-font-weight-bold);
+  }
+
+  .public-champ-mast > small {
+    display: block;
+    margin-top: .0625rem;
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: .625rem;
+  }
+
+  /* ── 48rem+: 테이블 문법(CS·DPM 은 64rem+ 에서만) ── */
+  @media (min-width: 48rem) {
+    .public-champ-hrow {
+      display: grid;
+      grid-template-columns: 1.75rem minmax(9rem, 1.2fr) minmax(10rem, 1.5fr) minmax(3.5rem, auto) minmax(6.5rem, auto);
+      gap: var(--yoro-space-3);
+      align-items: center;
+      padding: var(--yoro-space-2) var(--yoro-space-4);
+      border-bottom: 1px solid var(--yoro-color-border-on-dark);
+      color: var(--yoro-color-text-on-dark-muted);
+      font-size: .625rem;
+      font-weight: var(--yoro-font-weight-bold);
+      letter-spacing: .04em;
+    }
+
+    .public-champ-hrow > span { white-space: nowrap; }
+    .public-champ-hrow > span:nth-child(n+4) { text-align: right; }
+    .public-champ-hrow > span[data-cell="cs"],
+    .public-champ-hrow > span[data-cell="dpm"] { display: none; }
+
+    .public-champ-row {
+      grid-template-areas: "rank who wr kda mast";
+      grid-template-columns: 1.75rem minmax(9rem, 1.2fr) minmax(10rem, 1.5fr) minmax(3.5rem, auto) minmax(6.5rem, auto);
+      gap: var(--yoro-space-3);
+      align-items: center;
+      padding-block: var(--yoro-space-2);
+    }
+
+    .public-champ-row:first-of-type { border-top: 0; }
+
+    .public-champ-rank { display: block; grid-area: rank; }
+
+    .public-champ-num {
+      align-items: flex-end;
+      padding: 0;
+      border: 0;
+      background: none;
+    }
+
+    .public-champ-num[data-cell="cs"],
+    .public-champ-num[data-cell="dpm"] { display: none; }
+
+    .public-champ-num > i { display: none; }
+
+    .public-champ-row.is-ghost .public-champ-num { display: flex; }
+    .public-champ-row.is-ghost .public-champ-num[data-cell="cs"],
+    .public-champ-row.is-ghost .public-champ-num[data-cell="dpm"] { display: none; }
+  }
+
+  /* ── 64rem+: 7열 전체 ── */
+  @media (min-width: 64rem) {
+    .public-champ-hrow,
+    .public-champ-row {
+      grid-template-columns: 1.75rem minmax(9rem, 1.2fr) minmax(11rem, 1.5fr) minmax(3.5rem, auto) minmax(3.5rem, auto) minmax(3.5rem, auto) minmax(6.5rem, auto);
+    }
+
+    .public-champ-row { grid-template-areas: "rank who wr kda cs dpm mast"; }
+
+    .public-champ-hrow > span[data-cell="cs"],
+    .public-champ-hrow > span[data-cell="dpm"] { display: block; }
+
+    .public-champ-num[data-cell="cs"],
+    .public-champ-num[data-cell="dpm"] { display: flex; }
+
+    .public-champ-row.is-ghost .public-champ-num[data-cell="cs"],
+    .public-champ-row.is-ghost .public-champ-num[data-cell="dpm"] { display: flex; }
+  }
+
+  /* ── ③ 포지션 ───────────────────────────────────────────── */
+  .public-champ-roles {
+    display: grid;
+    gap: var(--yoro-space-2);
+    padding: var(--yoro-space-2) var(--yoro-space-4) var(--yoro-space-4);
+  }
+
+  .public-champ-roles > h3 {
+    margin: 0;
+    padding-top: var(--yoro-space-3);
+    border-top: 1px solid var(--yoro-color-border-on-dark);
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-bold);
+    letter-spacing: .05em;
+  }
+
+  .public-champ-role-row {
+    display: grid;
+    grid-template-columns: minmax(4.5rem, auto) minmax(6rem, 1fr) minmax(7rem, auto);
+    gap: var(--yoro-space-3);
+    align-items: center;
+  }
+
+  .public-champ-role-name {
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-bold);
+    white-space: nowrap;
+  }
+
+  .public-champ-role-stat {
+    text-align: right;
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  /* 모바일 최협폭(<24rem)에서는 포지션 수치를 아래 줄로 내립니다. */
+  @media (max-width: 24rem) {
+    .public-champ-role-row {
+      grid-template-columns: minmax(4.5rem, auto) minmax(0, 1fr);
+    }
+
+    .public-champ-role-stat {
+      grid-column: 1 / -1;
+      text-align: left;
+    }
+  }
+}
