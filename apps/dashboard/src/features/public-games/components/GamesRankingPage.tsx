@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { fetchReactionLeaderboard, type ReactionLeaderboard, type ReactionLeaderboardEntry } from "../api";
 import { gamesI18n, type GamesLocale } from "../i18n/games-i18n";
-import { MINI_GAMES, miniGameName, reactionTierLabel, REACTION_TIER_TABLE } from "../registry";
+import { MINI_GAMES, miniGameName, reactionTierLabel, REACTION_TIER_TABLE, syncMiniGameBestFromServer } from "../registry";
 import { setGamesUrl } from "../utils/routes";
 
 /* 랭킹 페이지 /games/ranking — 목업 reaction-test.html v6 §④-6.
@@ -41,6 +41,11 @@ export function GamesRankingPage({ locale }: { locale: GamesLocale }) {
     let cancelled = false;
     void fetchReactionLeaderboard(RANKING_LIMIT).then((result) => {
       if (!cancelled) setBoard(result);
+      /* 계정 기록을 로컬 캐시에 합류 — 허브·프로필 배너가 읽는 값도 함께 최신화됩니다. */
+      if (result?.me) {
+        const reaction = MINI_GAMES.find((game) => game.id === "reaction")!;
+        syncMiniGameBestFromServer(reaction, { score: result.me.averageMs, tierKey: result.me.tierKey });
+      }
     });
     return () => {
       cancelled = true;

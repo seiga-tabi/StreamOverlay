@@ -117,6 +117,21 @@ export function readMiniGameBest(gameId: string): MiniGameBest | null {
   }
 }
 
+/* 기기 간 동기화(2026-08-17) — "내 최고 기록"의 원본은 두 곳입니다:
+ * 이 브라우저(localStorage)와 계정(서버, 리더보드 me). 같은 계정을 다른 기기에서
+ * 쓰면 로컬만 보던 기존 방식은 기기마다 값이 달라집니다. 리더보드를 조회하는
+ * 시점(게임·랭킹 페이지, 등록 직후)마다 서버 기록을 로컬 캐시에 합류시켜
+ * 표시 기준을 min(로컬, 계정)으로 맞춥니다. 로컬이 더 빠른 경우는 그대로 둡니다
+ * — 이 기기에서 세운 미등록 기록이므로(자동 등록은 하지 않음, 등록은 사용자 의사).
+ * 서버 미배포·비로그인에서는 me 가 없어 아무 일도 하지 않습니다(fail-open). */
+export function syncMiniGameBestFromServer(
+  game: MiniGameDefinition,
+  server: { score: number; tierKey?: string } | undefined
+): boolean {
+  if (!server || !Number.isFinite(server.score)) return false;
+  return writeMiniGameBest(game, { score: server.score, tierKey: server.tierKey, at: new Date().toISOString() });
+}
+
 /** 더 좋은 기록일 때만 저장하고, 갱신 여부를 돌려줍니다. */
 export function writeMiniGameBest(game: MiniGameDefinition, next: MiniGameBest): boolean {
   const current = readMiniGameBest(game.id);

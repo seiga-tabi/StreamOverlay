@@ -7,6 +7,7 @@ import {
   reactionMsToNextTier,
   reactionTierForAverage,
   REACTION_TIER_TABLE,
+  syncMiniGameBestFromServer,
   writeMiniGameBest,
 } from "../src/features/public-games/registry";
 import { gamesI18n } from "../src/features/public-games/i18n/games-i18n";
@@ -61,6 +62,23 @@ test("writeMiniGameBest: 낮을수록 좋은 점수만 갱신한다", () => {
     assert.equal(readMiniGameBest("reaction")?.score, 220);
     assert.equal(writeMiniGameBest(reaction, { score: 199, tierKey: "diamond", at: "2026-08-17T00:02:00Z" }), true);
     assert.equal(readMiniGameBest("reaction")?.score, 199);
+  });
+});
+
+test("syncMiniGameBestFromServer: 계정 기록이 더 빠를 때만 로컬 캐시에 합류한다", () => {
+  withMemoryStorage(() => {
+    const reaction = MINI_GAMES.find((game) => game.id === "reaction")!;
+    // 새 기기(로컬 없음): 서버 기록 채택 → 기기 간 표시 일치.
+    assert.equal(syncMiniGameBestFromServer(reaction, { score: 180, tierKey: "master" }), true);
+    assert.equal(readMiniGameBest("reaction")?.score, 180);
+    // 서버가 더 느리면(이 기기의 미등록 신기록) 로컬 유지 — 자동 등록은 하지 않는다.
+    assert.equal(syncMiniGameBestFromServer(reaction, { score: 210, tierKey: "emerald" }), false);
+    assert.equal(readMiniGameBest("reaction")?.score, 180);
+    // 서버가 더 빠르면(다른 기기에서 갱신) 채택.
+    assert.equal(syncMiniGameBestFromServer(reaction, { score: 165, tierKey: "grandmaster" }), true);
+    assert.equal(readMiniGameBest("reaction")?.score, 165);
+    // me 없음(비로그인·서버 미배포) → 무동작.
+    assert.equal(syncMiniGameBestFromServer(reaction, undefined), false);
   });
 });
 

@@ -52,6 +52,15 @@ test("공개 페이지 URL을 Dashboard SPA 진입 경로로 허용한다", () =
     "/minecraft/enchants",
     "/minecraft/library",
     "/minecraft/patch-notes",
+    /* 미니게임 — /games/ranking 누락으로 새로고침 404 실사례(2026-08-17).
+       프런트 라우트가 늘면 이 목록과 exact/prefix 원본을 함께 갱신할 것. */
+    "/games",
+    "/games/",
+    "/games/reaction",
+    "/games/reaction/",
+    "/games/ranking",
+    "/games/ranking/",
+    "/games/reaction/r/a8x2k1",
     "/privacy",
     "/terms",
     "/contact"
@@ -67,6 +76,9 @@ test("한국어·일본어 공개 URL만 언어 prefix 아래에서 SPA 경로�
     "/ja/",
     "/ko/lol/summoners/jp/test-JP1",
     "/ja/bot/commands",
+    "/ko/games/ranking",
+    "/ja/games/ranking",
+    "/ja/games/reaction/r/a8x2k1",
     "/ko/palworld/items",
     "/ja/valorant/agents",
     "/ko/minecraft/recipes",

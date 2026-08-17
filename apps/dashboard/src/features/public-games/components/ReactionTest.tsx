@@ -17,6 +17,7 @@ import {
   reactionTierForAverage,
   reactionTierLabel,
   REACTION_TIER_TABLE,
+  syncMiniGameBestFromServer,
   writeMiniGameBest,
 } from "../registry";
 
@@ -186,7 +187,14 @@ export function ReactionTest({ locale }: { locale: GamesLocale }) {
   }, [clearTimers]);
 
   const refreshLeaderboard = useCallback(() => {
-    void fetchReactionLeaderboard().then((board) => setLeaderboard(board));
+    void fetchReactionLeaderboard().then((board) => {
+      setLeaderboard(board);
+      /* 같은 계정을 다른 기기에서 쓸 때 "내 최고 기록"이 기기마다 달라지는 문제 —
+         서버(계정) 기록을 로컬 캐시에 합류시켜 min(로컬, 계정) 기준으로 맞춥니다. */
+      if (board?.me && syncMiniGameBestFromServer(REACTION_GAME, { score: board.me.averageMs, tierKey: board.me.tierKey })) {
+        setBest(readMiniGameBest(REACTION_GAME.id));
+      }
+    });
   }, []);
 
   useEffect(() => {

@@ -72,11 +72,15 @@ const PUBLIC_DASHBOARD_EXACT_PATHS = new Set([
   "/patch-notes",
   "/patch-notes/",
   /* 미니게임 — 여기에 없으면 /ko/games 가 공개 라우트로 인식되지 않아
-     hreflang(alternateUrls)도 함께 빠집니다. live 인 게임만 올립니다. */
+     hreflang(alternateUrls)도 함께 빠집니다. live 인 게임만 올립니다.
+     프런트 목록(apps/dashboard/src/features/public-lol/utils/public-locale-path.ts)과
+     짝을 맞출 것 — /games/ranking 누락으로 새로고침 404 실사례(2026-08-17). */
   "/games",
   "/games/",
   "/games/reaction",
-  "/games/reaction/"
+  "/games/reaction/",
+  "/games/ranking",
+  "/games/ranking/"
 ]);
 
 const NON_LOCALIZED_PUBLIC_PATHS = new Set([
