@@ -1,0 +1,346 @@
+/* 시그니처 빌드 카드 — 목업 docs/mockups/lol-signature-builds.html v4.
+ *
+ * 통계 사이드바의 side-card 스택(25-profile-sidebar.css 문법)에 얹는 아코디언 카드.
+ * .public-sig-* 네임스페이스를 pages layer 에서 단독 소유합니다. !important 금지.
+ * 펼침/접힘은 grid-template-rows 0fr↔1fr 전환(높이 auto 애니메이션의 표준 대체) —
+ * prefers-reduced-motion 에서는 전환 없이 즉시 상태가 바뀝니다.
+ */
+
+@layer pages {
+  .public-sig-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--yoro-space-2);
+  }
+
+  .public-sig-entry {
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-sm);
+    background: color-mix(in srgb, var(--yoro-color-text-on-dark) 3%, transparent);
+    overflow: hidden;
+  }
+
+  .public-sig-entry.is-open {
+    border-color: color-mix(in srgb, var(--yoro-color-public-primary) 45%, transparent);
+  }
+
+  .public-sig-entry.is-ghost {
+    border-style: dashed;
+    opacity: .62;
+  }
+
+  .public-sig-row {
+    display: flex;
+    align-items: center;
+    gap: var(--yoro-space-2);
+    width: 100%;
+    min-height: var(--yoro-size-touch-target);
+    margin: 0;
+    padding: var(--yoro-space-2) var(--yoro-space-3);
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .public-sig-entry.is-ghost .public-sig-row { cursor: default; }
+
+  button.public-sig-row:hover,
+  button.public-sig-row:focus-visible {
+    background: color-mix(in srgb, var(--yoro-color-text-on-dark) 5%, transparent);
+  }
+
+  .public-sig-entry.is-open > .public-sig-row {
+    background: color-mix(in srgb, var(--yoro-color-public-primary) 8%, transparent);
+  }
+
+  .public-sig-ava {
+    position: relative;
+    flex: none;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--yoro-radius-sm);
+    background: color-mix(in srgb, var(--yoro-color-text-on-dark) 10%, transparent);
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    font-size: var(--yoro-font-size-sm);
+    font-weight: var(--yoro-font-weight-bold);
+  }
+
+  .public-sig-ava > img { width: 100%; height: 100%; object-fit: cover; }
+
+  .public-sig-ava[data-lv]::after {
+    content: attr(data-lv);
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    padding: 0 .2rem;
+    border-top-left-radius: var(--yoro-radius-xs);
+    background: color-mix(in srgb, var(--yoro-color-ground-surface) 88%, #000 12%);
+    color: color-mix(in srgb, var(--yoro-color-public-primary) 40%, #fff 60%);
+    font-size: .53125rem;
+    font-weight: var(--yoro-font-weight-bold);
+    line-height: 1.5;
+  }
+
+  .public-sig-id { min-width: 0; flex: 1; }
+
+  .public-sig-id > b {
+    display: block;
+    font-size: var(--yoro-font-size-sm);
+    font-weight: var(--yoro-font-weight-bold);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .public-sig-id > small {
+    display: block;
+    margin-top: .125rem;
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: .625rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .public-sig-rate {
+    flex: none;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .public-sig-rate > b { display: block; font-size: var(--yoro-font-size-sm); font-weight: var(--yoro-font-weight-bold); }
+  .public-sig-rate > small { display: block; color: var(--yoro-color-text-on-dark-muted); font-size: .5625rem; }
+
+  /* chevron — is-open 에서 180도 회전. */
+  .public-sig-chev {
+    flex: none;
+    width: 1.125rem;
+    height: 1.125rem;
+    border: 1px solid var(--yoro-color-border-on-dark-strong);
+    border-radius: var(--yoro-radius-circle);
+    position: relative;
+    transition: transform 200ms ease;
+  }
+
+  .public-sig-chev::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: .375rem;
+    height: .375rem;
+    border-right: 1px solid var(--yoro-color-text-on-dark-muted);
+    border-bottom: 1px solid var(--yoro-color-text-on-dark-muted);
+    transform: translate(-50%, -65%) rotate(45deg);
+  }
+
+  .public-sig-entry.is-open .public-sig-chev {
+    transform: rotate(180deg);
+    border-color: color-mix(in srgb, var(--yoro-color-public-primary) 45%, transparent);
+  }
+
+  /* 펼침 영역 — grid rows 트릭으로 높이 전환. */
+  .public-sig-detail-wrap {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 200ms ease;
+  }
+
+  .public-sig-entry.is-open > .public-sig-detail-wrap { grid-template-rows: 1fr; }
+
+  .public-sig-detail {
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: var(--yoro-space-2);
+    padding-inline: var(--yoro-space-3);
+    border-top: 1px solid transparent;
+  }
+
+  .public-sig-entry.is-open .public-sig-detail {
+    padding-block: var(--yoro-space-3);
+    border-top-color: var(--yoro-color-border-on-dark);
+  }
+
+  /* 빌드 그룹 — 좌측 액센트(1: 보라 / 2: 청록)로 룬→아이템이 한 단위임을 명시. */
+  .public-sig-build {
+    display: flex;
+    flex-direction: column;
+    gap: var(--yoro-space-2);
+    padding: var(--yoro-space-2) var(--yoro-space-3);
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-left: 3px solid var(--yoro-color-public-primary);
+    border-radius: var(--yoro-radius-sm);
+    background: color-mix(in srgb, var(--yoro-color-public-primary) 5%, transparent);
+  }
+
+  .public-sig-build.is-alt {
+    border-left-color: var(--yoro-color-match-win-accent);
+    background: color-mix(in srgb, var(--yoro-color-match-win-accent) 4%, transparent);
+  }
+
+  .public-sig-build-head {
+    display: flex;
+    align-items: center;
+    gap: var(--yoro-space-2);
+    min-width: 0;
+  }
+
+  .public-sig-build-no {
+    flex: none;
+    padding: .05rem .5rem;
+    border: 1px solid color-mix(in srgb, var(--yoro-color-public-primary) 40%, transparent);
+    border-radius: var(--yoro-radius-pill);
+    background: color-mix(in srgb, var(--yoro-color-public-primary) 14%, transparent);
+    color: color-mix(in srgb, var(--yoro-color-public-primary) 40%, #fff 60%);
+    font-size: .53125rem;
+    font-weight: var(--yoro-font-weight-bold);
+    letter-spacing: .05em;
+    white-space: nowrap;
+  }
+
+  .public-sig-build.is-alt .public-sig-build-no {
+    border-color: color-mix(in srgb, var(--yoro-color-match-win-accent) 40%, transparent);
+    background: color-mix(in srgb, var(--yoro-color-match-win-accent) 12%, transparent);
+    color: color-mix(in srgb, var(--yoro-color-match-win-accent) 45%, #fff 55%);
+  }
+
+  .public-sig-rune { display: flex; flex: 1; align-items: center; gap: var(--yoro-space-2); min-width: 0; }
+
+  .public-sig-keystone {
+    flex: none;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 2px solid color-mix(in srgb, var(--yoro-color-accent-gold) 55%, transparent);
+    border-radius: var(--yoro-radius-circle);
+    background: color-mix(in srgb, var(--yoro-color-accent-gold) 12%, var(--yoro-color-ground-surface));
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    color: var(--yoro-color-accent-gold);
+    font-size: .5rem;
+    font-weight: var(--yoro-font-weight-bold);
+  }
+
+  .public-sig-keystone > img { width: 100%; height: 100%; object-fit: cover; }
+
+  .public-sig-rune-names { min-width: 0; }
+
+  .public-sig-rune-names > b {
+    display: block;
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-bold);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .public-sig-rune-names > small {
+    display: block;
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: .5625rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .public-sig-build-pick {
+    flex: none;
+    margin-left: auto;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .public-sig-build-pick > b { display: block; font-size: .6875rem; font-weight: var(--yoro-font-weight-bold); white-space: nowrap; }
+  .public-sig-build-pick > small { display: block; margin-top: .0625rem; font-size: .5625rem; color: var(--yoro-color-text-on-dark-muted); white-space: nowrap; }
+
+  /* 그룹 채용률 바 — 0~100% 절대 스케일(정규화 금지). */
+  .public-sig-build-bar {
+    display: block;
+    height: .25rem;
+    border-radius: var(--yoro-radius-pill);
+    background: color-mix(in srgb, var(--yoro-color-text-on-dark) 10%, transparent);
+    overflow: hidden;
+  }
+
+  .public-sig-build-bar > i {
+    display: block;
+    height: 100%;
+    border-radius: var(--yoro-radius-pill);
+    background: var(--yoro-color-public-primary);
+  }
+
+  .public-sig-build.is-alt .public-sig-build-bar > i { background: var(--yoro-color-match-win-accent); }
+
+  .public-sig-items-label {
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: .53125rem;
+    font-weight: var(--yoro-font-weight-bold);
+    letter-spacing: .06em;
+  }
+
+  .public-sig-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--yoro-space-1);
+  }
+
+  .public-sig-item { width: 2.0625rem; flex: none; text-align: center; }
+
+  .public-sig-item > i {
+    display: grid;
+    place-items: center;
+    width: 2.0625rem;
+    height: 2.0625rem;
+    border: 1px solid var(--yoro-color-border-on-dark-strong);
+    border-radius: var(--yoro-radius-sm);
+    background: color-mix(in srgb, var(--yoro-color-text-on-dark) 8%, transparent);
+    overflow: hidden;
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: .5rem;
+    font-style: normal;
+    line-height: 1.1;
+  }
+
+  .public-sig-item > i > img { width: 100%; height: 100%; object-fit: cover; }
+
+  .public-sig-item.is-boots > i { border-color: color-mix(in srgb, var(--yoro-color-public-primary) 50%, transparent); }
+
+  .public-sig-item > b { display: block; margin-top: .125rem; font-size: .5625rem; font-variant-numeric: tabular-nums; }
+  .public-sig-item > small { display: block; color: var(--yoro-color-text-on-dark-muted); font-size: .5rem; font-variant-numeric: tabular-nums; }
+
+  .public-sig-other { color: var(--yoro-color-text-on-dark-muted); font-size: .625rem; }
+
+  .public-sig-view {
+    align-self: flex-start;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: color-mix(in srgb, var(--yoro-color-public-primary) 40%, #fff 60%);
+    font: inherit;
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-bold);
+    cursor: pointer;
+  }
+
+  .public-sig-view:hover, .public-sig-view:focus-visible { text-decoration: underline; }
+
+  /* 최협폭 — 그룹 헤더의 승률 부가 문구 숨김(목업 v4 축약 규칙). */
+  @container (max-width: 17.5rem) {
+    .public-sig-build-pick > small { display: none; }
+    .public-sig-item, .public-sig-item > i { width: 1.8125rem; }
+    .public-sig-item > i { height: 1.8125rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .public-sig-detail-wrap, .public-sig-chev { transition: none; }
+  }
+}

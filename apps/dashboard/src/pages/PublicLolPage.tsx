@@ -268,6 +268,8 @@ import { usePublicTheme } from "../features/public-lol/hooks/usePublicTheme";
 import {
   championAnalysisTableRows,
   championSpotlights,
+  isBootItem,
+  signatureBuilds,
   filteredMatches,
   hasActiveFilters,
   kdaFromTotals,
@@ -2196,7 +2198,156 @@ function ProfileSidebarLpChart({ points }: { points: Array<{ value: number; tier
   );
 }
 
-function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
+/* 시그니처 빌드 카드(2026-08-17) — 목업 docs/mockups/lol-signature-builds.html v4.
+ * 아코디언: 기본은 챔피언 목록만, 클릭 시 그 챔피언의 룬 페이지별 조건부 아이템
+ * 채용률을 펼칩니다(단일 펼침 — 카드 높이 폭주 방지). 데이터는 utils/match.ts 의
+ * signatureBuilds 가 전담하며 추가 API 호출이 없습니다. */
+
+function sigLocaleName(entry: { nameKo?: string; nameJa?: string } | undefined, fallback: string): string {
+  if (!entry) return fallback;
+  if (activePublicLocale === "ja") return entry.nameJa ?? entry.nameKo ?? fallback;
+  return entry.nameKo ?? entry.nameJa ?? fallback;
+}
+
+function SignatureBuildsCard({
+  profile,
+  onChampionPick
+}: {
+  profile: PublicLolProfile;
+  onChampionPick: (championId: number) => void;
+}) {
+  const { entries, ghosts } = useMemo(() => signatureBuilds(profile), [profile]);
+  const [openChampionId, setOpenChampionId] = useState<number | null>(null);
+  if (entries.length === 0) return null;
+
+  const winRateTone = (winRate: number, games: number) =>
+    games >= 3 ? metricToneClass(percentTone(winRate)) : metricToneClass(undefined);
+
+  return (
+    <article className="public-profile-side-card public-sig-builds">
+      <div className="public-profile-side-head">
+        <h2>{t().sigBuildsTitle}</h2>
+        <span className="public-profile-side-pill">
+          {t().sigBuildsPill.replace("{count}", String(profile.summary.recentGames))}
+        </span>
+      </div>
+
+      <div className="public-sig-list">
+        {entries.map((entry) => {
+          const open = openChampionId === entry.champion.championId;
+          const detailId = `public-sig-detail-${entry.champion.championId}`;
+          const masteryMeta = entry.masteryRank !== undefined && entry.masteryPoints !== undefined
+            ? t().sigBuildsMasteryMeta.replace("{rank}", String(entry.masteryRank)).replace("{points}", formatNumber(entry.masteryPoints))
+            : undefined;
+          return (
+            <div className={`public-sig-entry${open ? " is-open" : ""}`} key={entry.champion.championId}>
+              <button
+                aria-controls={detailId}
+                aria-expanded={open}
+                className="public-sig-row"
+                onClick={() => setOpenChampionId(open ? null : entry.champion.championId)}
+                type="button"
+              >
+                <span className="public-sig-ava" data-lv={entry.masteryLevel !== undefined ? `Lv.${entry.masteryLevel}` : undefined}>
+                  {entry.champion.iconUrl ? <img alt="" src={assetUrl(entry.champion.iconUrl)} /> : <span>{championName(entry.champion).slice(0, 1)}</span>}
+                </span>
+                <span className="public-sig-id">
+                  <b>{championName(entry.champion)}</b>
+                  <small>{[masteryMeta, gamesText(entry.games)].filter(Boolean).join(" · ")}</small>
+                </span>
+                <span className="public-sig-rate">
+                  <b className={winRateTone(entry.winRate, entry.games)}>{formatPercent(entry.winRate)}</b>
+                  <small>{t().winRate}</small>
+                </span>
+                <span aria-hidden="true" className="public-sig-chev" />
+              </button>
+
+              <div className="public-sig-detail-wrap" id={detailId}>
+                <div className="public-sig-detail" hidden={!open}>
+                  {entry.groups.map((group, index) => {
+                    const pickRate = Math.round((group.games / entry.games) * 100);
+                    const groupWinRate = Math.round((group.wins / group.games) * 100);
+                    return (
+                      <div className={`public-sig-build${index > 0 ? " is-alt" : ""}`} key={group.key}>
+                        <div className="public-sig-build-head">
+                          <span className="public-sig-build-no">{t().sigBuildsBuildLabel.replace("{n}", String(index + 1))}</span>
+                          <span className="public-sig-rune">
+                            <span className="public-sig-keystone">
+                              {group.keystone?.iconUrl ? <img alt="" src={assetUrl(group.keystone.iconUrl)} /> : <span>{sigLocaleName(group.keystone, "?").slice(0, 2)}</span>}
+                            </span>
+                            <span className="public-sig-rune-names">
+                              <b>{sigLocaleName(group.keystone, "-")}</b>
+                              {group.primaryStyle || group.secondaryStyle ? (
+                                <small>
+                                  {[sigLocaleName(group.primaryStyle, ""), sigLocaleName(group.secondaryStyle, "")].filter(Boolean).join(" + ")}
+                                </small>
+                              ) : null}
+                            </span>
+                          </span>
+                          <span className="public-sig-build-pick">
+                            <b>{t().sigBuildsPickStat.replace("{picked}", String(group.games)).replace("{total}", String(entry.games)).replace("{rate}", String(pickRate))}</b>
+                            <small className={winRateTone(groupWinRate, group.games)}>{t().sigBuildsPickWinRate.replace("{rate}", String(groupWinRate))}</small>
+                          </span>
+                        </div>
+                        <span aria-hidden="true" className="public-sig-build-bar"><i style={{ width: `${pickRate}%` }} /></span>
+                        {group.items.length > 0 ? (
+                          <>
+                            <span className="public-sig-items-label">{t().sigBuildsItemsLabel}</span>
+                            <div className="public-sig-items">
+                              {group.items.map((item) => (
+                                <span
+                                  className={`public-sig-item${isBootItem(item.itemId) ? " is-boots" : ""}`}
+                                  key={item.itemId}
+                                  title={sigLocaleName(item, `#${item.itemId}`)}
+                                >
+                                  <i>{item.iconUrl ? <img alt="" src={assetUrl(item.iconUrl)} /> : sigLocaleName(item, `#${item.itemId}`).slice(0, 4)}</i>
+                                  <b>{Math.round((item.games / group.games) * 100)}%</b>
+                                  <small>{item.games}/{group.games}</small>
+                                </span>
+                              ))}
+                            </div>
+                          </>
+                        ) : null}
+                      </div>
+                    );
+                  })}
+                  {entry.otherGames > 0 ? (
+                    <span className="public-sig-other">{t().sigBuildsOther.replace("{count}", String(entry.otherGames))}</span>
+                  ) : null}
+                  <button className="public-sig-view" onClick={() => onChampionPick(entry.champion.championId)} type="button">
+                    {t().sigBuildsView.replace("{name}", championName(entry.champion))}
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+        {ghosts.map((row) => (
+          <div className="public-sig-entry is-ghost" key={row.champion.championId}>
+            <div className="public-sig-row">
+              <span className="public-sig-ava" data-lv={row.masteryLevel !== undefined ? `Lv.${row.masteryLevel}` : undefined}>
+                {row.champion.iconUrl ? <img alt="" src={assetUrl(row.champion.iconUrl)} /> : <span>{championName(row.champion).slice(0, 1)}</span>}
+              </span>
+              <span className="public-sig-id">
+                <b>{championName(row.champion)}</b>
+                <small>
+                  {row.masteryRank !== undefined
+                    ? `${t().sigBuildsMasteryMeta.replace("{rank}", String(row.masteryRank)).replace("{points}", formatNumber(row.masteryPoints))} · ${t().sigBuildsNoRecent}`
+                    : t().sigBuildsNoRecent}
+                </small>
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <p className="public-profile-side-foot">{openChampionId === null ? t().sigBuildsFootIdle : t().sigBuildsFootOpen}</p>
+    </article>
+  );
+}
+
+function OverviewMetricPanel({ profile, onChampionPick }: { profile: PublicLolProfile; onChampionPick: (championId: number) => void }) {
   const summary = profile.summary;
   const aggregateSummary = summarizeMatches(recentAnalysisMatches(profile));
   const aggregateGrade = aggregatePerformanceGrade(profile);
@@ -2272,6 +2423,8 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
           title: t().rolePanelTitle,
         }}
       />
+
+      <SignatureBuildsCard onChampionPick={onChampionPick} profile={profile} />
     </section>
   );
 }
@@ -7061,7 +7214,12 @@ export function PublicLolPage({
 
                   {profileTab === "overview" ? (
                     <div className="public-overview-search-layout">
-                      <OverviewMetricPanel profile={activeProfile} />
+                      <OverviewMetricPanel
+                        profile={activeProfile}
+                        onChampionPick={(championId) => {
+                          setFilters({ ...DEFAULT_MATCH_FILTERS, championId: String(championId) });
+                        }}
+                      />
                       <div className="public-overview-results-column">
                         <RecentMatches
                           profile={activeProfile}
