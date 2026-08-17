@@ -221,6 +221,75 @@ function alternateUrlsForPath(normalizedPath: string): Readonly<Record<PublicUrl
   };
 }
 
+/* ── 반응속도 공유 링크 메타 (목업 reaction-test.html v5 §④-5) ──────────
+ *
+ * SNS 크롤러는 JS 를 실행하지 않으므로, 기록이 찍힌 미리보기는 서버가 만들어야
+ * 합니다. 티어별 고정 이미지 9종을 쓰고 없는 티어는 게임 대표 이미지로 떨어집니다.
+ *
+ * 응답 어디에도 계정 식별자를 넣지 않습니다 — 표시 이름(공개 기록) 또는 익명
+ * 표기까지만 나갑니다.
+ */
+export type ReactionShareRoute = { locale: PublicUrlLocale; shareId: string };
+
+export type ReactionShareSeoInput = {
+  averageMs: number;
+  tierKey: string;
+  tierEmoji: string;
+  tierLabel: string;
+  displayName?: string;
+  percentile?: number;
+};
+
+const REACTION_SHARE_IMAGE_TIERS = new Set([
+  "challenger", "grandmaster", "master", "diamond", "emerald",
+  "gold", "silver", "bronze", "iron"
+]);
+
+/** 공유 상세 경로 판정. id 형식이 아니면 일반 경로로 취급합니다. */
+export function reactionShareRouteForPath(pathname: string): ReactionShareRoute | undefined {
+  const locale = publicUrlLocaleFromPathname(pathname) ?? "ko";
+  const normalized = normalizePublicSeoPath(pathname);
+  const match = /^\/games\/reaction\/r\/([A-Za-z0-9_-]{8,64})$/u.exec(normalized);
+  if (!match?.[1]) return undefined;
+  return { locale, shareId: match[1] };
+}
+
+export function reactionShareSeoMetadata(
+  route: ReactionShareRoute,
+  record: ReactionShareSeoInput
+): PublicSeoMetadata {
+  const normalizedPath = `/games/reaction/r/${route.shareId}`;
+  const ja = route.locale === "ja";
+  const who = record.displayName ?? (ja ? "匿名のチャレンジャー" : "익명의 도전자");
+  const percentileText = record.percentile === undefined
+    ? undefined
+    : ja ? `上位 ${record.percentile}%` : `상위 ${record.percentile}%`;
+  const description = [
+    ja ? `${who}の記録` : `${who}의 기록`,
+    percentileText,
+    ja ? "あなたも挑戦してみてください" : "나도 도전해 보세요"
+  ].filter(Boolean).join(" · ");
+
+  const imageFile = REACTION_SHARE_IMAGE_TIERS.has(record.tierKey)
+    ? `yorogg-og-reaction-${record.tierKey}.png`
+    : "yorogg-og-games.png";
+
+  return {
+    canonicalUrl: localizedPublicSeoUrl(normalizedPath, route.locale),
+    description,
+    imageAlt: ja
+      ? `${record.averageMs}ms ${record.tierLabel} の反応速度記録`
+      : `${record.averageMs}ms ${record.tierLabel} 반응속도 기록`,
+    imageUrl: `${PUBLIC_SEO_ORIGIN}/images/${imageFile}`,
+    locale: route.locale,
+    openGraphType: "website",
+    structuredData: [],
+    title: ja
+      ? `${record.averageMs}ms · ${record.tierEmoji} ${record.tierLabel} — YORO.gg 反応速度`
+      : `${record.averageMs}ms · ${record.tierEmoji} ${record.tierLabel} — YORO.gg 반응속도`
+  };
+}
+
 export function palworldEntityRouteForPath(pathname: string): PalworldEntityRoute | undefined {
   const locale = publicUrlLocaleFromPathname(pathname) ?? "ko";
   const normalized = normalizePublicSeoPath(pathname);

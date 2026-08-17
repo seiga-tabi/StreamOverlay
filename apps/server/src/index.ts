@@ -74,6 +74,7 @@ import { GameServerStatusReadService } from "./services/game-server-status-read-
 import { DiscordBotCommandPolicyService } from "./services/discord-bot-command-policy-service.js";
 import { AdminAuditLogRepository } from "./database/repositories/admin-audit-log-repository.js";
 import { TwitchExtensionSettingsRepository } from "./database/repositories/twitch-extension-settings-repository.js";
+import { ReactionRecordsRepository } from "./database/repositories/reaction-records-repository.js";
 import { TwitchExtensionJwtVerifier } from "./security/twitch-extension-jwt.js";
 import {
   MinecraftCatalogService,
@@ -143,6 +144,10 @@ const yoroAccounts = (
   : undefined;
 const twitchExtensionSettings = postgresPool
   ? new TwitchExtensionSettingsRepository(postgresPool)
+  : undefined;
+/* DB 가 없으면 undefined — 라우트가 503 을 내고 프런트는 기록 UI 를 숨깁니다. */
+const reactionRecords = postgresPool
+  ? new ReactionRecordsRepository(postgresPool)
   : undefined;
 const twitchExtensionJwt = appConfig.twitchExtension.enabled
   ? new TwitchExtensionJwtVerifier(appConfig.twitchExtension.sharedSecret)
@@ -688,6 +693,7 @@ const server = http.createServer(createHttpHandler({
   discordManagement,
   yoroAccounts,
   twitchExtensionSettings,
+  reactionRecords,
   twitchExtensionJwt,
   discordDatabaseReady: () => databaseHealth.snapshot().ready,
   discordInternalAuth,

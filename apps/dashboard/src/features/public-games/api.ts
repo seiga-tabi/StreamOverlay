@@ -20,6 +20,9 @@ export type ReactionLeaderboard = {
   entries: ReactionLeaderboardEntry[];
   /** 로그인 사용자의 내 기록(있을 때만) — 순위권 밖이어도 옵니다. */
   me?: ReactionLeaderboardEntry & { shareId?: string; identity?: "public" | "anonymous" };
+  /** 랭킹 페이지 확장분(v6) — 서버 미지원 배포에서는 생략될 수 있습니다. */
+  total?: number;
+  tierDistribution?: Array<{ tierKey: string; count: number }>;
 };
 
 export type ReactionRecordSubmission = {
@@ -49,9 +52,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 /** 실패(미구현·네트워크·비정상 응답)는 null — 호출부가 기능 전체를 숨깁니다. */
-export async function fetchReactionLeaderboard(): Promise<ReactionLeaderboard | null> {
+export async function fetchReactionLeaderboard(limit?: number): Promise<ReactionLeaderboard | null> {
   try {
-    const response = await fetch(`${apiBase}/api/games/reaction/leaderboard`, { credentials: "include" });
+    const query = limit !== undefined ? `?limit=${limit}` : "";
+    const response = await fetch(`${apiBase}/api/games/reaction/leaderboard${query}`, { credentials: "include" });
     if (!response.ok) return null;
     const body: unknown = await response.json();
     if (!isRecord(body) || !Array.isArray(body.entries)) return null;

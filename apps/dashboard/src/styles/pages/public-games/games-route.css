@@ -757,6 +757,175 @@
   .games-share-cta { margin: 0 auto; }
   .games-share-compare { margin: 0; color: var(--yoro-color-rank-trend); font-size: var(--yoro-font-size-xs); font-weight: var(--yoro-font-weight-bold); }
 
+  /* ── v6: 랭킹 페이지(목업 §④-6) ── */
+  .games-ranking { display: grid; gap: var(--yoro-space-4); }
+
+  .games-ranking-chips { display: flex; flex-wrap: wrap; gap: var(--yoro-space-2); justify-content: center; }
+
+  .games-ranking-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--yoro-space-1);
+    padding: .375rem .9rem;
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-pill);
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-bold);
+  }
+
+  .games-ranking-chip.is-on {
+    border-color: color-mix(in srgb, var(--yoro-color-public-primary) 55%, transparent);
+    background: color-mix(in srgb, var(--yoro-color-public-primary) 12%, transparent);
+    color: var(--yoro-color-text-on-dark);
+  }
+
+  .games-ranking-chip > small { font-size: .53125rem; color: var(--yoro-color-text-on-dark-muted); font-weight: var(--yoro-font-weight-medium); }
+
+  .games-podium {
+    display: grid;
+    grid-template-columns: 1fr 1.15fr 1fr;
+    gap: var(--yoro-space-2);
+    align-items: end;
+    max-width: 35rem;
+    margin: var(--yoro-space-2) auto 0;
+    width: 100%;
+  }
+
+  .games-podium-card {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: .125rem;
+    padding: var(--yoro-space-3) var(--yoro-space-2) var(--yoro-space-3);
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-md);
+    background: var(--yoro-color-ground-surface);
+    text-align: center;
+    min-width: 0;
+  }
+
+  .games-podium-card.is-p1 {
+    border-color: color-mix(in srgb, var(--yoro-color-accent-gold) 55%, transparent);
+    background:
+      radial-gradient(80% 60% at 50% 0%, color-mix(in srgb, var(--yoro-color-accent-gold) 16%, transparent), transparent 70%),
+      var(--yoro-color-ground-surface);
+    padding-top: var(--yoro-space-5);
+  }
+
+  .games-podium-medal { position: absolute; top: -.7rem; left: 50%; transform: translateX(-50%); font-size: 1.25rem; }
+
+  .games-podium-avatar > i {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-bottom: .25rem;
+    border-radius: var(--yoro-radius-circle);
+    background: linear-gradient(135deg, #6441a5, #9146ff);
+    font-size: 1.0625rem;
+    font-style: normal;
+    font-weight: var(--yoro-font-weight-bold);
+    overflow: hidden;
+  }
+
+  .games-podium-avatar > i > img { width: 100%; height: 100%; object-fit: cover; }
+  .games-podium-avatar > i.is-mask { background: color-mix(in srgb, var(--yoro-color-text-on-dark) 10%, transparent); }
+
+  .games-podium-card > b { max-width: 100%; font-size: var(--yoro-font-size-xs); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .games-podium-ms { font-size: var(--yoro-font-size-lg); font-weight: var(--yoro-font-weight-black); font-variant-numeric: tabular-nums; }
+  .games-podium-tier { color: var(--yoro-color-accent-gold); font-size: .625rem; }
+
+  .games-ranking-table {
+    width: 100%;
+    max-width: 35rem;
+    margin: 0 auto;
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-md);
+    background: var(--yoro-color-ground-surface);
+    overflow: hidden;
+  }
+
+  .games-ranking-head {
+    display: grid;
+    grid-template-columns: 2.75rem minmax(0, 1fr) auto auto;
+    gap: var(--yoro-space-2);
+    padding: .5rem var(--yoro-space-3);
+    border-bottom: 1px solid var(--yoro-color-border-on-dark);
+    background: color-mix(in srgb, var(--yoro-color-ground-surface) 80%, #000 20%);
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: .625rem;
+    font-weight: var(--yoro-font-weight-bold);
+    letter-spacing: .05em;
+  }
+
+  .games-ranking-head > span:nth-child(n+3) { text-align: right; }
+  .games-ranking-table .games-lb-row { grid-template-columns: 2.75rem minmax(0, 1fr) auto auto; }
+  .games-ranking-tier { color: var(--yoro-color-accent-gold); font-size: .625rem; text-align: right; white-space: nowrap; }
+  .games-ranking-foot { margin: 0; padding: .5rem var(--yoro-space-3); border-top: 1px dashed var(--yoro-color-border-on-dark); color: var(--yoro-color-text-on-dark-muted); font-size: .625rem; text-align: center; }
+
+  /* 내 순위 고정 바 — 하단 탭바(모바일) 위에 sticky. */
+  .games-ranking-me {
+    position: sticky;
+    bottom: var(--yoro-space-3);
+    z-index: 5;
+    display: grid;
+    grid-template-columns: 2.75rem minmax(0, 1fr) auto auto;
+    gap: var(--yoro-space-2);
+    align-items: center;
+    width: 100%;
+    max-width: 35rem;
+    margin: 0 auto;
+    padding: var(--yoro-space-3);
+    border: 1px solid color-mix(in srgb, var(--yoro-color-public-primary) 55%, transparent);
+    border-radius: var(--yoro-radius-md);
+    background: color-mix(in srgb, var(--yoro-color-public-primary) 14%, var(--yoro-color-ground-surface));
+    font-size: var(--yoro-font-size-xs);
+    box-shadow: 0 .5rem 1.5rem color-mix(in srgb, #000 40%, transparent);
+  }
+
+  .games-ranking-me .games-lb-rank { color: color-mix(in srgb, var(--yoro-color-public-primary) 40%, #fff 60%); }
+
+  .games-ranking-me.is-cta {
+    display: block;
+    border: 1px solid color-mix(in srgb, var(--yoro-color-public-primary) 55%, transparent);
+    background: var(--yoro-color-public-primary);
+    color: #fff;
+    font: inherit;
+    font-size: var(--yoro-font-size-sm);
+    font-weight: var(--yoro-font-weight-bold);
+    text-align: center;
+    cursor: pointer;
+  }
+
+  @media (max-width: 45rem) {
+    /* 모바일 하단 탭바 위로 띄웁니다. */
+    .games-ranking-me { bottom: 5rem; }
+  }
+
+  .games-ranking-dist-row {
+    display: grid;
+    grid-template-columns: minmax(6rem, auto) minmax(0, 1fr) 2.5rem;
+    gap: var(--yoro-space-2);
+    align-items: center;
+    padding: .25rem var(--yoro-space-3);
+    font-size: .6875rem;
+    color: var(--yoro-color-text-on-dark-muted);
+  }
+
+  .games-ranking-dist .games-ranking-dist-row:last-child { padding-bottom: var(--yoro-space-3); }
+  .games-ranking-dist-row > b { font-size: .6875rem; font-weight: var(--yoro-font-weight-bold); white-space: nowrap; }
+
+  .games-ranking-dist-bar {
+    height: .375rem;
+    border-radius: var(--yoro-radius-pill);
+    background: color-mix(in srgb, var(--yoro-color-text-on-dark) 12%, transparent);
+    overflow: hidden;
+  }
+
+  .games-ranking-dist-bar > i { display: block; height: 100%; border-radius: var(--yoro-radius-pill); background: var(--yoro-color-public-primary); }
+  .games-ranking-dist-pct { text-align: right; font-variant-numeric: tabular-nums; }
+
   .games-notfound {
     display: grid;
     justify-items: center;

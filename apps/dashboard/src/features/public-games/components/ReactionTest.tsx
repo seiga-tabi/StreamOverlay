@@ -122,18 +122,26 @@ export function ReactionTest({ locale }: { locale: GamesLocale }) {
 
   const scheduleGo = useCallback(() => {
     clearTimers();
+    /* 0 = 아직 신호가 페인트되지 않음 — go 입력 가드가 예측 클릭으로 처리합니다. */
+    goAtRef.current = 0;
     setPhase("waiting");
     const delay = WAIT_MIN_MS + Math.random() * (WAIT_MAX_MS - WAIT_MIN_MS);
     timerRef.current = window.setTimeout(() => {
       timerRef.current = undefined;
-      /* 페인트 시점과 측정 기준을 정렬 — rAF 콜백에서 신호 상태와 타임스탬프를 함께 찍습니다. */
-      window.requestAnimationFrame(() => {
-        if (phaseRef.current !== "waiting") return;
-        goAtRef.current = performance.now();
-        setPhase("go");
-      });
+      if (phaseRef.current === "waiting") setPhase("go");
     }, delay);
   }, [clearTimers]);
+
+  /* 신호 시작 시각 = go "커밋 후" rAF 타임스탬프 — 초록이 페인트되는 프레임의 vsync 와
+     정렬됩니다. 이전에는 커밋 전 rAF 에서 찍어 실측 8~9ms(+표시 지연)가 매 라운드
+     과대측정됐습니다(2026-08-17 실측 보정 — 타 사이트 대비 평균이 높던 원인 일부). */
+  useEffect(() => {
+    if (phase !== "go") return;
+    const raf = window.requestAnimationFrame((frameTs) => {
+      goAtRef.current = frameTs;
+    });
+    return () => window.cancelAnimationFrame(raf);
+  }, [phase]);
 
   const finishRun = useCallback((finalSamples: number[]) => {
     const average = Math.round(finalSamples.reduce((sum, value) => sum + value, 0) / finalSamples.length);
@@ -227,6 +235,11 @@ export function ReactionTest({ locale }: { locale: GamesLocale }) {
       return;
     }
     if (current === "go") {
+      /* 커밋~페인트 사이(goAt 미기록)의 입력은 신호를 보고 누른 것일 수 없습니다. */
+      if (goAtRef.current === 0) {
+        setPhase("tooSoon");
+        return;
+      }
       const elapsed = performance.now() - goAtRef.current;
       if (elapsed < MIN_HUMAN_MS) {
         /* 신호 예측(인간 한계 미만) — 라운드 무효. */

@@ -93,7 +93,10 @@ const PUBLIC_DASHBOARD_PATH_PREFIXES = [
   // Palworld 상세는 query가 아니라 고유 URL을 가져야 검색에 색인되고 공유·북마크가 동작합니다.
   "/palworld/pals/",
   "/palworld/items/",
-  "/palworld/skills/"
+  "/palworld/skills/",
+  /* 반응속도 공유 링크 — 기록 id 마다 고유 URL 이라 prefix 로 받습니다.
+     서버 렌더 메타(OG)가 여기에 기록을 새겨야 SNS 미리보기가 살아납니다. */
+  "/games/reaction/r/"
 ];
 
 export type PublicUrlLocale = "ko" | "ja";

@@ -8,11 +8,12 @@ import {
    App 과 useGamesRoute 가 같은 이벤트로 다시 그립니다. Valorant/Palworld 패턴 복제. */
 export const GAMES_ROUTE_EVENT = "publicroutechange";
 
-export type GamesPage = "hub" | "reaction" | "share";
+export type GamesPage = "hub" | "reaction" | "ranking" | "share";
 
 const PAGE_PATHS: Record<Exclude<GamesPage, "share">, string> = {
   hub: "/games",
   reaction: "/games/reaction",
+  ranking: "/games/ranking",
 };
 
 /* 공유 링크 /games/reaction/r/<shareId> — shareId 는 서버가 발급한 불투명 토큰. */

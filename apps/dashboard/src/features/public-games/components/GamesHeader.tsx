@@ -16,6 +16,7 @@ import { gamesPathForPage, setGamesUrl, type GamesPage } from "../utils/routes";
 export const gamesNavItems: Array<{ page: GamesPage; ko: string; ja: string }> = [
   { page: "hub", ko: gamesI18n.ko.navHub, ja: gamesI18n.ja.navHub },
   { page: "reaction", ko: gamesI18n.ko.navReaction, ja: gamesI18n.ja.navReaction },
+  { page: "ranking", ko: gamesI18n.ko.navRanking, ja: gamesI18n.ja.navRanking },
 ];
 
 export function GamesNavIcon({ page }: { page: GamesPage }) {
@@ -31,6 +32,7 @@ export function GamesNavIcon({ page }: { page: GamesPage }) {
   };
 
   if (page === "hub") return <svg {...commonProps}><rect x="3" y="3" width="8" height="8" rx="2" /><rect x="13" y="3" width="8" height="8" rx="2" /><rect x="3" y="13" width="8" height="8" rx="2" /><rect x="13" y="13" width="8" height="8" rx="2" /></svg>;
+  if (page === "ranking") return <svg {...commonProps}><path d="M4 21V10m8 11V3m8 18v-7" /></svg>;
   return <svg {...commonProps}><path d="M13 2 4.5 13.5H11L9.5 22 19 10h-6.5L13 2Z" /></svg>;
 }
 

@@ -8,6 +8,7 @@ import { GamesBottomTabBar } from "../features/public-games/components/GamesBott
 import { GamesHeader } from "../features/public-games/components/GamesHeader";
 import { GamesHub } from "../features/public-games/components/GamesHub";
 import { GamesNotFoundPage } from "../features/public-games/components/GamesNotFoundPage";
+import { GamesRankingPage } from "../features/public-games/components/GamesRankingPage";
 import { ReactionSharePage } from "../features/public-games/components/ReactionSharePage";
 import { ReactionTest } from "../features/public-games/components/ReactionTest";
 import { useGamesRoute } from "../features/public-games/hooks/useGamesRoute";
@@ -48,6 +49,7 @@ export function PublicGamesPage() {
           {page === null ? <GamesNotFoundPage locale={locale} /> : null}
           {page === "hub" ? <GamesHub locale={locale} /> : null}
           {page === "reaction" ? <ReactionTest locale={locale} /> : null}
+          {page === "ranking" ? <GamesRankingPage locale={locale} /> : null}
           {page === "share" && shareId ? <ReactionSharePage locale={locale} shareId={shareId} /> : null}
         </section>
       </AppShellMain>

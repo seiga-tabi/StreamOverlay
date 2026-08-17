@@ -149,6 +149,15 @@ import { loadLolParticipationProfileSettings, saveLolParticipationProfileSetting
 import { buildRankHistory, inferMainRoleFromMatches, performanceStatsFromMatches } from "../services/lol-profile-enrichment.js";
 import type { JsonlLogger } from "../logging/jsonl-logger.js";
 import type { TwitchExtensionSettingsRepository } from "../database/repositories/twitch-extension-settings-repository.js";
+import type { ReactionRecordsRepository } from "../database/repositories/reaction-records-repository.js";
+import {
+  REACTION_SUBMIT_COOLDOWN_MS,
+  parseReactionSubmission,
+  reactionAnonymousLabel,
+  reactionPercentile,
+  reactionTierDistribution,
+  reactionTierForAverage
+} from "../services/reaction-records.js";
 import {
   TwitchExtensionJwtError,
   type TwitchExtensionPrincipal,
@@ -208,6 +217,8 @@ import {
   palworldEntityRedirectPath,
   palworldEntityRouteForPath,
   palworldEntitySeoMetadata,
+  reactionShareRouteForPath,
+  reactionShareSeoMetadata,
   publicSeoMetadataForPath,
   withLolProfileSeo,
   type PalworldSeoEntity,
@@ -2348,6 +2359,7 @@ type HttpHandlerInput = {
   discordManagement?: DiscordManagementService;
   yoroAccounts?: YoroAccountService;
   twitchExtensionSettings?: TwitchExtensionSettingsRepository;
+  reactionRecords?: ReactionRecordsRepository;
   twitchExtensionJwt?: TwitchExtensionJwtVerifier;
   discordDatabaseReady?: () => boolean;
   discordInternalAuth?: DiscordInternalAuthVerifier;
@@ -3762,6 +3774,31 @@ export function createHttpHandler(input: HttpHandlerInput) {
       } catch {
         /* 피드가 없으면 기존 고정 문구로 동작합니다 — 공유가 깨질 이유는 아닙니다. */
       }
+    }
+    /* 반응속도 공유 링크 — 기록이 찍힌 미리보기는 서버만 만들 수 있습니다.
+       삭제됐거나 없는 id 는 일반 /games/reaction 메타로 떨어뜨리고 noindex 합니다:
+       공유 id 는 임의로 만들 수 있는 URL 공간이라 색인 후보가 되면 soft 404 가
+       쌓입니다(소환사 프로필과 같은 판단). */
+    const reactionShare = reactionShareRouteForPath(pathname);
+    if (reactionShare) {
+      const shared = await reactionSharedRecord(reactionShare.shareId).catch(() => undefined);
+      const averageMs = typeof shared?.averageMs === "number" ? shared.averageMs : undefined;
+      if (averageMs === undefined) {
+        return {
+          ...publicSeoMetadataForPath(`/${reactionShare.locale}/games/reaction`),
+          canonicalUrl: localizedPublicSeoUrl(`/games/reaction/r/${reactionShare.shareId}`, reactionShare.locale),
+          robotsNoindex: true
+        };
+      }
+      const tier = reactionTierForAverage(averageMs);
+      return reactionShareSeoMetadata(reactionShare, {
+        averageMs,
+        tierKey: tier.key,
+        tierEmoji: tier.emoji,
+        tierLabel: reactionShare.locale === "ja" ? tier.labelJa : tier.labelKo,
+        ...(typeof shared?.displayName === "string" ? { displayName: shared.displayName } : {}),
+        ...(typeof shared?.percentile === "number" ? { percentile: shared.percentile } : {})
+      });
     }
     const palworldRoute = palworldEntityRouteForPath(pathname);
     if (palworldRoute) {
@@ -8006,6 +8043,94 @@ export function createHttpHandler(input: HttpHandlerInput) {
     });
   }
 
+  /* ── 반응속도 기록 헬퍼 ────────────────────────────────────────
+   * 계정당 등록 쿨다운. 프로세스 메모리라 재시작하면 풀립니다 — 남용 억제가
+   * 목적이고 단일 인스턴스 운영이라 이 수준이면 충분합니다. */
+  const reactionSubmitAvailableAt = new Map<string, number>();
+
+  /** 로그인한 사용자면 userId·표시 이름을, 아니면 undefined. */
+  async function reactionViewer(
+    req: IncomingMessage
+  ): Promise<{ userId: string; displayName?: string; avatarUrl?: string } | undefined> {
+    if (!input.yoroAccounts) return undefined;
+    const sessionCookie = requestCookie(req, YORO_SESSION_COOKIE);
+    if (!sessionCookie) return undefined;
+    const [authenticated, account] = await Promise.all([
+      input.yoroAccounts.authenticateForManagement(sessionCookie),
+      input.yoroAccounts.session(sessionCookie)
+    ]);
+    if (!authenticated) return undefined;
+    const twitch = account?.identities.find((identity) => identity.provider === "twitch");
+    return {
+      userId: authenticated.userId,
+      ...(twitch?.displayName ? { displayName: twitch.displayName } : {}),
+      ...(twitch?.avatarUrl ? { avatarUrl: twitch.avatarUrl } : {})
+    };
+  }
+
+  /**
+   * 변경 요청용. 로그인 + 신뢰 Origin 을 요구합니다.
+   *
+   * 다른 계정 mutation 과 달리 x-yoro-csrf 를 요구하지 않습니다: 세션 쿠키가
+   * SameSite=Lax 라 크로스 사이트 POST 에는 쿠키 자체가 실리지 않고, 여기에
+   * Origin 검사를 더하면 토큰 없이도 CSRF 가 성립하지 않습니다. 프런트 계약
+   * (features/public-games/api.ts)이 헤더를 보내지 않아 요구하면 전 요청이
+   * 403 이 됩니다 — 프런트가 헤더를 붙이면 이 함수도 토큰 검사를 켜야 합니다.
+   */
+  async function requireReactionViewer(req: IncomingMessage): Promise<{ userId: string; displayName?: string }> {
+    if (!stateChangingRequestHasTrustedOrigin(req)) {
+      throw new HttpRequestError(403, { error: "trusted Origin이 필요합니다.", code: "origin_denied" });
+    }
+    const viewer = await reactionViewer(req);
+    if (!viewer) {
+      throw new HttpRequestError(401, {
+        error: "YORO 계정 로그인이 필요합니다.",
+        code: "session_required"
+      });
+    }
+    return viewer;
+  }
+
+  /** 리더보드 1행. identity 에 따라 이름 또는 익명 라벨만 내보냅니다.
+      공개 기록인데 Twitch 이름을 못 찾으면(연동 해제 등) 익명 라벨로 떨어집니다 —
+      이름 없는 빈 칸을 내보내는 것보다 안전합니다. */
+  function reactionLeaderboardEntry(row: {
+    rank: number;
+    identity: "public" | "anonymous";
+    anonymousNo: number;
+    averageMs: number;
+    displayName?: string;
+  }): Record<string, unknown> {
+    const tier = reactionTierForAverage(row.averageMs);
+    const named = row.identity === "public" && row.displayName;
+    return {
+      rank: row.rank,
+      ...(named ? { displayName: row.displayName } : { anonymousLabel: reactionAnonymousLabel(row.anonymousNo) }),
+      averageMs: row.averageMs,
+      tierKey: tier.key
+    };
+  }
+
+  /** 공유 링크 응답. 계정 식별자는 어떤 형태로도 넣지 않습니다(§④-5). */
+  async function reactionSharedRecord(shareId: string): Promise<Record<string, unknown> | undefined> {
+    if (!input.reactionRecords) return undefined;
+    const record = await input.reactionRecords.findByShareId(shareId);
+    if (!record) return undefined;
+    const stats = await input.reactionRecords.stats();
+    const percentile = reactionPercentile(record.rank, stats.total);
+    const tier = reactionTierForAverage(record.averageMs);
+    const named = record.identity === "public" && record.displayName;
+    return {
+      averageMs: record.averageMs,
+      tierKey: tier.key,
+      ...(named
+        ? { displayName: record.displayName }
+        : { anonymousLabel: reactionAnonymousLabel(record.anonymousNo) }),
+      ...(percentile === undefined ? {} : { percentile }),
+      at: record.updatedAt
+    };
+  }
+
   async function yoroStreamerContext(
     req: IncomingMessage,
     mutation = false
@@ -10591,6 +10716,132 @@ export function createHttpHandler(input: HttpHandlerInput) {
             : "no-store"
         });
       }
+      /* ── 반응속도 기록·리더보드·공유 (목업 reaction-test.html v5 §④-2~④-5) ──
+       *
+       * 저장소가 없으면(로컬 DB 비활성 등) 503 입니다. 프런트는 리더보드 조회
+       * 실패 시 기록 UI 전체를 숨기므로(fail-closed), 반쯤 동작하는 화면이
+       * 남지 않습니다.
+       *
+       * 공개 응답에는 계정 식별자를 절대 싣지 않습니다(§④-5). 익명 기록은
+       * anonymousLabel 만, 공개 기록도 Twitch 표시 이름까지만 나갑니다.
+       */
+      if (url.pathname === "/api/games/reaction/leaderboard") {
+        if (req.method !== "GET") return sendJson(req, res, 405, { error: "method not allowed" });
+        if (!input.reactionRecords) {
+          return sendJson(req, res, 503, {
+            error: "반응속도 기록 저장소를 사용할 수 없습니다.",
+            code: "feature_unavailable"
+          }, noStoreHeaders());
+        }
+        const requestedLimit = Number(url.searchParams.get("limit") ?? "50");
+        const limit = Number.isSafeInteger(requestedLimit)
+          ? Math.max(1, Math.min(100, requestedLimit))
+          : 50;
+        const [rows, stats] = await Promise.all([
+          input.reactionRecords.leaderboard(limit),
+          input.reactionRecords.stats()
+        ]);
+        const entries = rows.map((row) => reactionLeaderboardEntry(row));
+
+        let me: unknown;
+        const viewer = await reactionViewer(req);
+        if (viewer) {
+          const mine = await input.reactionRecords.findByUser(viewer.userId);
+          if (mine) {
+            me = {
+              ...reactionLeaderboardEntry(mine),
+              shareId: mine.shareId,
+              identity: mine.identity
+            };
+          }
+        }
+
+        return sendJson(req, res, 200, {
+          entries,
+          ...(me ? { me } : {}),
+          total: stats.total,
+          tierDistribution: reactionTierDistribution(stats.averages)
+        }, viewer
+          /* me 가 섞이는 응답은 사용자마다 다르므로 공유 캐시에 올리면 안 됩니다. */
+          ? noStoreHeaders()
+          : { "Cache-Control": "public, max-age=60" });
+      }
+
+      if (url.pathname === "/api/games/reaction/records") {
+        if (req.method !== "POST") return sendJson(req, res, 405, { error: "method not allowed" });
+        if (!input.reactionRecords) {
+          return sendJson(req, res, 503, {
+            error: "반응속도 기록 저장소를 사용할 수 없습니다.",
+            code: "feature_unavailable"
+          }, noStoreHeaders());
+        }
+        const viewer = await requireReactionViewer(req);
+        const submission = parseReactionSubmission(await readJsonBody<unknown>(req, 4 * 1_024));
+        if (!submission) {
+          return sendJson(req, res, 400, {
+            error: "기록 형식이 올바르지 않습니다.",
+            code: "invalid_request"
+          }, noStoreHeaders());
+        }
+        /* 계정당 1분 1회 — 자동화로 리더보드를 채우는 것을 막습니다. */
+        const now = Date.now();
+        const availableAt = reactionSubmitAvailableAt.get(viewer.userId) ?? 0;
+        if (availableAt > now) {
+          return sendJson(req, res, 429, {
+            error: "기록 등록은 1분에 한 번만 가능합니다.",
+            code: "rate_limited",
+            retryAfterMs: availableAt - now
+          }, { ...noStoreHeaders(), "Retry-After": String(Math.ceil((availableAt - now) / 1_000)) });
+        }
+        reactionSubmitAvailableAt.set(viewer.userId, now + REACTION_SUBMIT_COOLDOWN_MS);
+        pruneMapToMax(reactionSubmitAvailableAt, 10_000);
+
+        const saved = await input.reactionRecords.upsert({
+          userId: viewer.userId,
+          averageMs: submission.averageMs,
+          samples: submission.samples,
+          identity: submission.identity
+        });
+        const stats = await input.reactionRecords.stats();
+        const percentile = reactionPercentile(saved.rank, stats.total);
+        return sendJson(req, res, 200, {
+          shareId: saved.shareId,
+          rank: saved.rank,
+          ...(percentile === undefined ? {} : { percentile })
+        }, noStoreHeaders());
+      }
+
+      if (url.pathname === "/api/games/reaction/records/me") {
+        if (req.method !== "DELETE") return sendJson(req, res, 405, { error: "method not allowed" });
+        if (!input.reactionRecords) {
+          return sendJson(req, res, 503, {
+            error: "반응속도 기록 저장소를 사용할 수 없습니다.",
+            code: "feature_unavailable"
+          }, noStoreHeaders());
+        }
+        const viewer = await requireReactionViewer(req);
+        await input.reactionRecords.deleteByUser(viewer.userId);
+        /* 있든 없든 204 — 존재 여부를 알려 주면 계정 탐색 단서가 됩니다. */
+        res.writeHead(204, noStoreHeaders());
+        res.end();
+        return;
+      }
+
+      if (req.method === "GET" && url.pathname.startsWith("/api/games/reaction/records/")) {
+        if (!input.reactionRecords) {
+          return sendJson(req, res, 503, {
+            error: "반응속도 기록 저장소를 사용할 수 없습니다.",
+            code: "feature_unavailable"
+          }, noStoreHeaders());
+        }
+        const shareId = decodeURIComponent(url.pathname.slice("/api/games/reaction/records/".length));
+        const shared = await reactionSharedRecord(shareId);
+        if (!shared) {
+          return sendJson(req, res, 404, { error: "기록을 찾을 수 없습니다.", code: "not_found" }, noStoreHeaders());
+        }
+        return sendJson(req, res, 200, shared, { "Cache-Control": "public, max-age=60" });
+      }
+
       if (req.method === "GET" && url.pathname === "/api/public/patch-notes") {
         if (!input.patchNotes) {
           return sendJson(req, res, 503, {

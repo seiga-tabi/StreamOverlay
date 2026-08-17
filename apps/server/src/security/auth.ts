@@ -201,6 +201,15 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
   )) return "PUBLIC";
   if (method === "GET" && pathname.startsWith("/api/palworld/")) return "PUBLIC";
   if (method === "GET" && pathname.startsWith("/api/valorant/")) return "PUBLIC";
+  /* 미니게임 기록 API — dashboard 인증이 아니라 YORO 계정 세션을 쓰므로 여기서는
+     PUBLIC 으로 통과시키고, 라우트가 직접 세션·Origin 을 검사해 401/403 을 냅니다
+     (계정 API 들이 같은 방식입니다). 리더보드·공유 조회는 비로그인도 봐야 합니다. */
+  if (
+    pathname === "/api/games/reaction/leaderboard"
+    || pathname === "/api/games/reaction/records"
+    || pathname === "/api/games/reaction/records/me"
+    || /^\/api\/games\/reaction\/records\/[A-Za-z0-9_-]{8,64}$/u.test(pathname)
+  ) return "PUBLIC";
   if (
     (method === "GET" && pathname === "/api/twitch-extension/viewer")
     || (method === "POST" && (
