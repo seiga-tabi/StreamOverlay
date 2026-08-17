@@ -2227,7 +2227,7 @@ function MiniGamesLabBanner() {
         <span className="public-sig-lab-record">
           <b>
             {Math.round(best.score)}ms
-            {tier ? <span className="public-sig-lab-record-tier"> · {tier.emoji}<span className="public-sig-lab-record-tiername"> {reactionTierLabel(tier, activePublicLocale)}</span></span> : null}
+            {tier ? <span className="public-sig-lab-record-tier"> · <i aria-hidden="true" className="games-tdot" style={{ background: tier.color }} /><span className="public-sig-lab-record-tiername"> {reactionTierLabel(tier, activePublicLocale)}</span></span> : null}
           </b>
           <small>{t().miniGamesLabBest}</small>
         </span>

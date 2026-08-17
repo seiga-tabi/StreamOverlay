@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { fetchSharedReactionRecord, type ReactionSharedRecord } from "../api";
 import { gamesI18n, type GamesLocale } from "../i18n/games-i18n";
 import { readMiniGameBest, reactionTierForAverage, reactionTierLabel, REACTION_TIER_TABLE } from "../registry";
+import { TierDot } from "./ReactionTest";
 import { setGamesUrl } from "../utils/routes";
 
 /* 공유 페이지 /games/reaction/r/<shareId> — 목업 reaction-test.html v5 §④-5.
@@ -63,7 +64,7 @@ export function ReactionSharePage({ locale, shareId }: { locale: GamesLocale; sh
       <div className="games-share-card">
         <div className="games-share-record">
           <b>{average}<small>ms</small></b>
-          <span className="games-tier-chip">{tier.emoji} {reactionTierLabel(tier, locale)}</span>
+          <span className="games-tier-chip"><TierDot tier={tier} />{reactionTierLabel(tier, locale)}</span>
         </div>
         <p className="games-share-meta">{metaParts.join(" · ")}</p>
         <button className="games-btn games-share-cta" onClick={() => setGamesUrl("/games/reaction")} type="button">

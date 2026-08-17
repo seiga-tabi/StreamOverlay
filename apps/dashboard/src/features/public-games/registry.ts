@@ -58,21 +58,24 @@ export type ReactionTier = {
   key: string;
   /** 이 티어가 되는 평균 ms 상한(포함). 마지막 항목은 Infinity. */
   maxMs: number;
+  /** SNS 공유 "텍스트"에서만 사용 — UI 표기는 color 기반 단일 배지(목업 v7.2 리뷰: 이모지 혼용 금지). */
   emoji: string;
+  /** 티어 배지 색 — UI 의 유일한 티어 시각 표기(dot/SVG). */
+  color: string;
   labelKo: string;
   labelJa: string;
 };
 
 export const REACTION_TIER_TABLE: ReactionTier[] = [
-  { key: "challenger", maxMs: 160, emoji: "🏆", labelKo: "챌린저", labelJa: "チャレンジャー" },
-  { key: "grandmaster", maxMs: 175, emoji: "🔴", labelKo: "그랜드마스터", labelJa: "グランドマスター" },
-  { key: "master", maxMs: 190, emoji: "🟣", labelKo: "마스터", labelJa: "マスター" },
-  { key: "diamond", maxMs: 205, emoji: "💎", labelKo: "다이아몬드", labelJa: "ダイヤモンド" },
-  { key: "emerald", maxMs: 220, emoji: "🟢", labelKo: "에메랄드", labelJa: "エメラルド" },
-  { key: "gold", maxMs: 240, emoji: "🥇", labelKo: "골드", labelJa: "ゴールド" },
-  { key: "silver", maxMs: 265, emoji: "🥈", labelKo: "실버", labelJa: "シルバー" },
-  { key: "bronze", maxMs: 300, emoji: "🥉", labelKo: "브론즈", labelJa: "ブロンズ" },
-  { key: "iron", maxMs: Number.POSITIVE_INFINITY, emoji: "🪨", labelKo: "아이언", labelJa: "アイアン" },
+  { key: "challenger", maxMs: 160, emoji: "🏆", color: "#f4c76c", labelKo: "챌린저", labelJa: "チャレンジャー" },
+  { key: "grandmaster", maxMs: 175, emoji: "🔴", color: "#ff8b9c", labelKo: "그랜드마스터", labelJa: "グランドマスター" },
+  { key: "master", maxMs: 190, emoji: "🟣", color: "#c9b6ff", labelKo: "마스터", labelJa: "マスター" },
+  { key: "diamond", maxMs: 205, emoji: "💎", color: "#7fc7ff", labelKo: "다이아몬드", labelJa: "ダイヤモンド" },
+  { key: "emerald", maxMs: 220, emoji: "🟢", color: "#7ee0bd", labelKo: "에메랄드", labelJa: "エメラルド" },
+  { key: "gold", maxMs: 240, emoji: "🥇", color: "#e8c77a", labelKo: "골드", labelJa: "ゴールド" },
+  { key: "silver", maxMs: 265, emoji: "🥈", color: "#cfd8e6", labelKo: "실버", labelJa: "シルバー" },
+  { key: "bronze", maxMs: 300, emoji: "🥉", color: "#d3a67c", labelKo: "브론즈", labelJa: "ブロンズ" },
+  { key: "iron", maxMs: Number.POSITIVE_INFINITY, emoji: "🪨", color: "#9aa4b5", labelKo: "아이언", labelJa: "アイアン" },
 ];
 
 export function reactionTierForAverage(averageMs: number): ReactionTier {

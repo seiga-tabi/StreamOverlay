@@ -3,6 +3,7 @@ import { fetchReactionLeaderboard, type ReactionLeaderboard, type ReactionLeader
 import { gamesI18n, type GamesLocale } from "../i18n/games-i18n";
 import { MINI_GAMES, miniGameName, reactionTierLabel, REACTION_TIER_TABLE, syncMiniGameBestFromServer } from "../registry";
 import { setGamesUrl } from "../utils/routes";
+import { TierDot } from "./ReactionTest";
 
 /* 랭킹 페이지 /games/ranking — 목업 reaction-test.html v6 §④-6.
  * TOP 3 포디움 → TOP 100 테이블 → 내 순위 고정 바 → 티어 분포.
@@ -28,9 +29,11 @@ function EntryAvatar({ entry }: { entry: ReactionLeaderboardEntry }) {
   );
 }
 
-function entryTierLabel(entry: ReactionLeaderboardEntry, locale: GamesLocale): string {
+/* 티어 표기 — 이모지 대신 색 dot 단일 배지(목업 v7.2 §⑥-1, 전 games 화면 공통). */
+function EntryTier({ entry, locale }: { entry: ReactionLeaderboardEntry; locale: GamesLocale }) {
   const tier = entry.tierKey ? REACTION_TIER_TABLE.find((item) => item.key === entry.tierKey) : undefined;
-  return tier ? `${tier.emoji} ${reactionTierLabel(tier, locale)}` : "";
+  if (!tier) return null;
+  return <><TierDot tier={tier} />{reactionTierLabel(tier, locale)}</>;
 }
 
 export function GamesRankingPage({ locale }: { locale: GamesLocale }) {
@@ -103,7 +106,7 @@ export function GamesRankingPage({ locale }: { locale: GamesLocale }) {
                 <span className="games-podium-avatar"><EntryAvatar entry={entry} /></span>
                 <b>{entryName(entry, locale)}</b>
                 <span className="games-podium-ms">{Math.round(entry.averageMs)}ms</span>
-                <span className="games-podium-tier">{entryTierLabel(entry, locale)}</span>
+                <span className="games-podium-tier"><EntryTier entry={entry} locale={locale} /></span>
               </div>
             ) : <span aria-hidden="true" key={`empty-${position}`} />)}
           </div>
@@ -125,7 +128,7 @@ export function GamesRankingPage({ locale }: { locale: GamesLocale }) {
                     {board.me && entry.rank === board.me.rank ? <small>{text.leaderboardMe}</small> : null}
                   </span>
                   <span className="games-lb-ms">{Math.round(entry.averageMs)}ms</span>
-                  <span className="games-ranking-tier">{entryTierLabel(entry, locale)}</span>
+                  <span className="games-ranking-tier"><EntryTier entry={entry} locale={locale} /></span>
                 </div>
               ))}
               <p className="games-ranking-foot">{formatTemplate(text.rankingFoot, { count: String(RANKING_LIMIT) })}</p>
@@ -142,7 +145,7 @@ export function GamesRankingPage({ locale }: { locale: GamesLocale }) {
                 {myDelta !== undefined ? <small>{formatTemplate(text.rankingMyDelta, { ms: String(myDelta) })}</small> : null}
               </span>
               <span className="games-lb-ms">{Math.round(board.me.averageMs)}ms</span>
-              <span className="games-ranking-tier">{entryTierLabel(board.me, locale)}</span>
+              <span className="games-ranking-tier"><EntryTier entry={board.me} locale={locale} /></span>
             </div>
           ) : (
             <button className="games-ranking-me is-cta" onClick={() => setGamesUrl("/games/reaction")} type="button">
@@ -164,7 +167,7 @@ export function GamesRankingPage({ locale }: { locale: GamesLocale }) {
                 const percent = Math.round((count / totalGames) * 100);
                 return (
                   <div className="games-ranking-dist-row" key={tier.key}>
-                    <b>{tier.emoji} {reactionTierLabel(tier, locale)}</b>
+                    <b><TierDot tier={tier} />{reactionTierLabel(tier, locale)}</b>
                     <span className="games-ranking-dist-bar"><i style={{ width: `${percent}%` }} /></span>
                     <span className="games-ranking-dist-pct">{percent}%</span>
                   </div>

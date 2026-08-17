@@ -28,14 +28,6 @@
     border: 0;
   }
 
-  .games-crumb {
-    margin-bottom: var(--yoro-space-2);
-    color: var(--yoro-color-text-on-dark-muted);
-    font-size: var(--yoro-font-size-xs);
-  }
-
-  .games-crumb > b { color: color-mix(in srgb, var(--yoro-color-public-primary) 40%, #fff 60%); }
-
   .games-hero {
     display: flex;
     align-items: flex-end;
@@ -56,20 +48,6 @@
     color: var(--yoro-color-text-on-dark-muted);
     font-size: var(--yoro-font-size-sm);
   }
-
-  .games-best-chip {
-    margin-left: auto;
-    padding: var(--yoro-space-2) var(--yoro-space-3);
-    border: 1px solid var(--yoro-color-border-on-dark);
-    border-radius: var(--yoro-radius-md);
-    background: var(--yoro-color-ground-surface);
-    color: var(--yoro-color-text-on-dark-muted);
-    font-size: var(--yoro-font-size-xs);
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-  }
-
-  .games-best-chip > b { color: var(--yoro-color-text-on-dark); }
 
   /* ── 허브 ─────────────────────────────────────────────── */
   .games-hub-grid {
@@ -129,7 +107,7 @@
     border-radius: var(--yoro-radius-pill);
     padding: .15rem .6rem;
     color: var(--yoro-color-text-on-dark-muted);
-    font-size: .625rem;
+    font-size: .75rem;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
     overflow: hidden;
@@ -137,7 +115,7 @@
   }
 
   .games-card-record > b { color: var(--yoro-color-accent-gold); }
-  .games-card-soon { color: var(--yoro-color-text-on-dark-muted); font-size: .625rem; }
+  .games-card-soon { color: var(--yoro-color-text-on-dark-muted); font-size: .75rem; }
 
   .games-card-cta {
     margin-left: auto;
@@ -163,7 +141,7 @@
     z-index: 1;
     padding: .1rem .5rem;
     border-radius: var(--yoro-radius-pill);
-    font-size: .53125rem;
+    font-size: .75rem;
     font-weight: var(--yoro-font-weight-bold);
   }
 
@@ -179,16 +157,74 @@
     background: color-mix(in srgb, var(--yoro-color-ground-surface) 85%, #000 15%);
   }
 
-  /* ── 반응속도: 스테이지 + 사이드 ──────────────────────── */
-  .games-reaction-cols {
+  /* ── 반응속도 v7.2: 테스트-퍼스트 히어로(목업 §④-0) ─────
+     밴드 "전체"가 시작 타깃(button)이고 중앙 박스는 시각 강조입니다 —
+     리뷰: 타깃을 중앙 존으로 좁히면 즉시성을 잃음 → 전면 타깃 복원.
+     위치 표시는 화면당 1개 원칙: 상단 내비 탭이 있으므로 breadcrumb 없음. */
+  .games-hero-band {
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--yoro-space-4);
-    align-items: start;
+    place-items: center;
+    width: 100%;
+    min-height: 17rem;
+    margin: 0 0 var(--yoro-space-4);
+    padding: var(--yoro-space-6) var(--yoro-space-4);
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-md);
+    background:
+      radial-gradient(90% 70% at 50% 18%, color-mix(in srgb, var(--yoro-color-public-primary) 24%, transparent), transparent 60%),
+      color-mix(in srgb, var(--yoro-color-ground-surface) 80%, #000 20%);
+    color: inherit;
+    font: inherit;
+    text-align: center;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
   }
 
-  @media (min-width: 56.25rem) {
-    .games-reaction-cols { grid-template-columns: minmax(0, 1.6fr) minmax(15.5rem, 1fr); }
+  .games-hero-band:hover .games-hero-start,
+  .games-hero-band:focus-visible .games-hero-start { border-color: color-mix(in srgb, var(--yoro-color-public-primary) 55%, transparent); }
+
+  .games-hero-band.is-result { cursor: default; }
+
+  /* 중앙 시작 박스 — 시각 강조 전용(타깃은 밴드 전체). */
+  .games-hero-start {
+    display: block;
+    padding: var(--yoro-space-5) var(--yoro-space-6);
+    border: 1px dashed color-mix(in srgb, var(--yoro-color-public-primary) 35%, transparent);
+    border-radius: var(--yoro-radius-md);
+  }
+
+  .games-hero-title {
+    display: block;
+    font-size: clamp(1.75rem, 5vw, 2.875rem);
+    font-weight: var(--yoro-font-weight-black);
+    letter-spacing: -.02em;
+  }
+
+  .games-hero-sub {
+    display: block;
+    margin-top: var(--yoro-space-2);
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    line-height: 1.6;
+  }
+
+  .games-hero-result { width: 100%; }
+  .games-hero-result-sub { margin-top: .125rem; color: var(--yoro-color-text-on-dark-muted); font-size: var(--yoro-font-size-xs); }
+
+  .games-next-tier { margin: var(--yoro-space-3) 0 0; color: var(--yoro-color-text-on-dark-muted); font-size: var(--yoro-font-size-xs); font-variant-numeric: tabular-nums; }
+  .games-next-tier > b { color: var(--yoro-color-accent-gold); }
+  .games-best-updated { margin: var(--yoro-space-1) 0 0; color: var(--yoro-color-rank-trend); font-size: var(--yoro-font-size-xs); font-weight: var(--yoro-font-weight-bold); }
+
+  /* 티어 배지 dot — 이모지 대신 단일 색 표기(목업 §⑥-1). */
+  .games-tdot {
+    display: inline-block;
+    width: .625rem;
+    height: .625rem;
+    margin-right: .375rem;
+    border-radius: var(--yoro-radius-circle);
+    vertical-align: baseline;
   }
 
   .games-stage {
@@ -196,27 +232,6 @@
     border-radius: var(--yoro-radius-md);
     background: var(--yoro-color-ground-surface);
     overflow: hidden;
-  }
-
-  .games-stage-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--yoro-space-2);
-    padding: var(--yoro-space-2) var(--yoro-space-4);
-    border-bottom: 1px solid var(--yoro-color-border-on-dark);
-  }
-
-  .games-stage-head > h2 { margin: 0; font-size: var(--yoro-font-size-sm); font-weight: var(--yoro-font-weight-bold); }
-
-  .games-stage-step {
-    padding: .1rem .6rem;
-    border: 1px solid var(--yoro-color-border-on-dark);
-    border-radius: var(--yoro-radius-pill);
-    color: var(--yoro-color-text-on-dark-muted);
-    font-size: var(--yoro-font-size-xs);
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
   }
 
   .games-arena {
@@ -249,10 +264,13 @@
       color-mix(in srgb, var(--yoro-color-match-loss-accent) 10%, #000 90%);
   }
 
+  /* go 는 어두운 배경+흰 글자 조합의 대비(3:1 미달)를 버리고 밝은 초록 배경 +
+     다크 텍스트로(리뷰 §⑤ — 명도차 확보, 적록색약도 밝기로 구분). 트랜지션 금지 동일. */
   .games-arena.is-go {
     background:
-      radial-gradient(100% 80% at 50% 30%, color-mix(in srgb, var(--yoro-color-rank-trend) 38%, transparent), transparent 70%),
-      color-mix(in srgb, var(--yoro-color-rank-trend) 12%, #000 88%);
+      radial-gradient(100% 80% at 50% 30%, color-mix(in srgb, #fff 22%, transparent), transparent 70%),
+      color-mix(in srgb, var(--yoro-color-rank-trend) 72%, #b7f5d8 28%);
+    color: #052e16;
   }
 
   .games-arena.is-tooSoon {
@@ -286,8 +304,8 @@
   }
 
   .games-arena.is-go .games-pulse {
-    border-color: color-mix(in srgb, var(--yoro-color-rank-trend) 70%, transparent);
-    background: color-mix(in srgb, var(--yoro-color-rank-trend) 20%, transparent);
+    border-color: color-mix(in srgb, #052e16 45%, transparent);
+    background: color-mix(in srgb, #052e16 12%, transparent);
   }
 
   .games-arena.is-tooSoon .games-pulse {
@@ -326,8 +344,8 @@
 
   .games-btn:hover, .games-btn:focus-visible { filter: brightness(1.1); }
   .games-btn.is-ghost { background: transparent; border: 1px solid var(--yoro-color-border-on-dark-strong); color: var(--yoro-color-text-on-dark-muted); margin-left: var(--yoro-space-2); }
-  /* 스테이지 버튼 안의 시각적 버튼(중첩 button 금지 — span 스타일만). */
-  .games-btn-visual { pointer-events: none; }
+  /* 골드 = 티어·기록 계열 주행동(기록 등록/공유 링크). 채움 버튼은 화면당 1개(목업 §⑥-1). */
+  .games-btn.is-gold { background: var(--yoro-color-accent-gold); color: #221703; }
 
   .games-tier-chip {
     display: inline-flex;
@@ -356,32 +374,73 @@
     font-variant-numeric: tabular-nums;
   }
 
-  .games-tries > span > i { display: block; color: var(--yoro-color-text-on-dark-muted); font-size: .53125rem; font-style: normal; font-weight: var(--yoro-font-weight-regular); }
+  .games-tries > span > i { display: block; color: var(--yoro-color-text-on-dark-muted); font-size: .75rem; font-style: normal; font-weight: var(--yoro-font-weight-regular); }
   .games-tries > span.is-best { border-color: color-mix(in srgb, var(--yoro-color-rank-trend) 50%, transparent); color: var(--yoro-color-rank-trend); }
   .games-tries > span.is-worst { color: color-mix(in srgb, var(--yoro-color-match-loss-accent) 45%, #fff 55%); }
 
-  .games-result-line { margin: var(--yoro-space-3) 0 0; color: var(--yoro-color-text-on-dark-muted); font-size: var(--yoro-font-size-xs); font-variant-numeric: tabular-nums; }
-  .games-result-line > b { color: var(--yoro-color-text-on-dark); }
-  .games-result-line .is-updated { color: var(--yoro-color-rank-trend); font-weight: var(--yoro-font-weight-bold); }
   .games-result-actions { margin-top: var(--yoro-space-1); }
 
-  /* ── 사이드 ───────────────────────────────────────────── */
-  .games-side { display: grid; gap: var(--yoro-space-3); }
+  /* ── 정보 스트립(목업 §④-0): 내 최고 / 티어 기준 / 리더보드 TOP3 ──
+     리더보드가 꺼진(fail-closed) 배포에선 is-two 로 2칸이 됩니다. */
+  .games-strip {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--yoro-space-3);
+    align-items: start;
+  }
 
-  .games-side-card {
+  @media (min-width: 48rem) {
+    .games-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .games-strip.is-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  .games-strip-cell {
     border: 1px solid var(--yoro-color-border-on-dark);
     border-radius: var(--yoro-radius-md);
     background: var(--yoro-color-ground-surface);
     overflow: hidden;
   }
 
-  .games-side-card > h3 {
+  .games-strip-cell > h3 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--yoro-space-2);
     margin: 0;
     padding: var(--yoro-space-2) var(--yoro-space-3);
     border-bottom: 1px solid var(--yoro-color-border-on-dark);
     font-size: var(--yoro-font-size-xs);
     font-weight: var(--yoro-font-weight-bold);
   }
+
+  .games-strip-link {
+    min-height: var(--yoro-size-touch-target);
+    margin: calc(var(--yoro-space-2) * -1) 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: color-mix(in srgb, var(--yoro-color-public-primary) 55%, #fff 45%);
+    font: inherit;
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-bold);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .games-strip-link:hover, .games-strip-link:focus-visible { text-decoration: underline; }
+
+  .games-strip-best {
+    display: flex;
+    align-items: baseline;
+    gap: var(--yoro-space-2);
+    padding: var(--yoro-space-3) var(--yoro-space-3) 0;
+  }
+
+  .games-strip-best > b { font-size: 1.75rem; font-weight: var(--yoro-font-weight-black); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+  .games-strip-best > b > small { font-size: .875rem; }
+  .games-strip-best-tier { color: var(--yoro-color-accent-gold); font-size: var(--yoro-font-size-xs); font-weight: var(--yoro-font-weight-bold); white-space: nowrap; }
+  .games-strip-next { display: block; padding: var(--yoro-space-1) var(--yoro-space-3) var(--yoro-space-3); color: var(--yoro-color-text-on-dark-muted); font-size: var(--yoro-font-size-xs); font-variant-numeric: tabular-nums; }
+  .games-strip-empty { display: block; padding: var(--yoro-space-3); color: var(--yoro-color-text-on-dark-muted); font-size: var(--yoro-font-size-xs); line-height: 1.6; }
 
   .games-tier-table { display: grid; }
 
@@ -397,11 +456,10 @@
 
   .games-tier-row:first-child { border-top: 0; }
   .games-tier-row > b { font-weight: var(--yoro-font-weight-bold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .games-tier-row > span { color: var(--yoro-color-text-on-dark-muted); font-size: .625rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .games-tier-row > span { color: var(--yoro-color-text-on-dark-muted); font-size: .75rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .games-tier-row.is-me { background: color-mix(in srgb, var(--yoro-color-accent-gold) 9%, transparent); }
   .games-tier-row.is-me > b { color: var(--yoro-color-accent-gold); }
 
-  .games-side-note { margin: 0; padding: var(--yoro-space-2) var(--yoro-space-3) var(--yoro-space-3); color: var(--yoro-color-text-on-dark-muted); font-size: .6875rem; line-height: 1.65; }
 
   /* ── v4.2: 웹 안 전체 화면 진행 + 라운드 그래프 ──────────
      OS 전체 화면(Fullscreen API)이 아니라 페이지 위 전체 뷰포트 오버레이입니다
@@ -470,30 +528,25 @@
 
   .games-fs-quit:hover, .games-fs-quit:focus-visible { color: var(--yoro-color-text-on-dark); }
 
-  .games-arena.is-chart, .games-arena.is-rest {
+  /* 라운드 델타(1.5초, 목업 v7.2 §④-1) — 미완성 그래프(2s)+카운트다운(3s) 폐지.
+     이번 기록+직전 대비 한 줄만 보여주고, 다음 라운드의 무작위 대기가 휴지를 겸합니다. */
+  .games-arena.is-delta {
     cursor: default;
     background:
       radial-gradient(90% 80% at 50% 20%, color-mix(in srgb, var(--yoro-color-public-primary) 22%, transparent), transparent 62%),
       color-mix(in srgb, var(--yoro-color-ground-surface) 80%, #000 20%);
   }
 
-  .games-chart { width: min(32.5rem, 88%); }
-
-  .games-chart-now {
-    display: flex;
-    align-items: baseline;
-    justify-content: center;
-    gap: var(--yoro-space-3);
-    margin-bottom: var(--yoro-space-2);
-  }
-
-  .games-chart-now > b { font-size: 2.375rem; font-weight: var(--yoro-font-weight-black); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
-  .games-chart-now > b > small { font-size: 1rem; }
+  .games-delta-ms { font-size: 2.875rem; font-weight: var(--yoro-font-weight-black); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+  .games-delta-ms > small { font-size: 1.125rem; }
   .games-chart-delta { font-size: var(--yoro-font-size-sm); font-weight: var(--yoro-font-weight-bold); color: var(--yoro-color-text-on-dark-muted); }
   .games-chart-delta.is-faster { color: var(--yoro-color-rank-trend); }
   .games-chart-delta.is-slower { color: color-mix(in srgb, var(--yoro-color-match-loss-accent) 45%, #fff 55%); }
 
-  .games-chart-plot {
+  /* 완성 그래프 — 결과 화면 전용(목업 v7.2: 그래프는 결과에서만). */
+  .games-result-plot {
+    width: min(25rem, 90%);
+    margin: var(--yoro-space-3) auto 0;
     border: 1px solid var(--yoro-color-border-on-dark);
     border-radius: var(--yoro-radius-md);
     background: color-mix(in srgb, var(--yoro-color-ground-surface) 85%, #000 15%);
@@ -503,7 +556,7 @@
   /* 점은 HTML 오버레이 — preserveAspectRatio:none SVG 안의 circle 은 컨테이너
      종횡비에 따라 타원으로 찌그러졌습니다(모바일 실측 결함, 2026-08-17 수정). */
   .games-chart-canvas { position: relative; }
-  .games-chart-canvas svg { display: block; width: 100%; height: 9.375rem; color: color-mix(in srgb, var(--yoro-color-text-on-dark) 12%, transparent); }
+  .games-chart-canvas svg { display: block; width: 100%; height: 6.5rem; color: color-mix(in srgb, var(--yoro-color-text-on-dark) 12%, transparent); }
   .games-chart-line { stroke: var(--yoro-color-public-primary); }
 
   .games-chart-dot {
@@ -515,6 +568,9 @@
     background: var(--yoro-color-ground-surface);
     transform: translate(-50%, -50%);
   }
+
+  .games-chart-dot.is-best { border-color: var(--yoro-color-rank-trend); }
+  .games-chart-dot.is-worst { border-color: color-mix(in srgb, var(--yoro-color-match-loss-accent) 55%, #fff 45%); }
 
   .games-chart-dot.is-current {
     width: .9375rem;
@@ -528,45 +584,29 @@
     justify-content: space-between;
     padding: .25rem .375rem .125rem;
     color: var(--yoro-color-text-on-dark-muted);
-    font-size: .625rem;
+    font-size: .75rem;
     font-variant-numeric: tabular-nums;
   }
 
-  /* 그래프 표시 잔여 시간 바 — 2초 선형 축소(장식 전환 · 측정 구간 밖). */
-  .games-chart-fade {
-    display: block;
-    height: .1875rem;
-    margin-top: var(--yoro-space-3);
+  /* 측정 안내 — 사이드 카드 대신 푸터 칩(목업 §④-0). */
+  .games-foot-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--yoro-space-2);
+    justify-content: center;
+    margin-top: var(--yoro-space-4);
+  }
+
+  .games-foot-chips > span {
+    padding: .3rem .75rem;
+    border: 1px solid var(--yoro-color-border-on-dark);
     border-radius: var(--yoro-radius-pill);
-    background: color-mix(in srgb, var(--yoro-color-text-on-dark) 14%, transparent);
-    overflow: hidden;
-  }
-
-  .games-chart-fade > i {
-    display: block;
-    height: 100%;
-    border-radius: var(--yoro-radius-pill);
-    background: var(--yoro-color-public-primary);
-    animation: games-chart-fade 2s linear forwards;
-  }
-
-  @keyframes games-chart-fade {
-    from { width: 100%; }
-    to { width: 0%; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .games-chart-fade > i { animation: none; }
-  }
-
-  .games-rest-count {
-    font-size: 4rem;
-    font-weight: var(--yoro-font-weight-black);
-    font-variant-numeric: tabular-nums;
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    line-height: 1.5;
   }
 
   /* ── v5: 기록 등록 시트·리더보드·공유(목업 §④-2~⑤) ── */
-  .games-btn.is-share { background: var(--yoro-color-rank-trend); color: #06251b; margin-left: var(--yoro-space-2); }
   .games-btn.is-twitch { background: #9146ff; }
   .games-btn:disabled { opacity: .6; cursor: default; }
 
@@ -618,7 +658,7 @@
     background: none;
     color: var(--yoro-color-text-on-dark-muted);
     font: inherit;
-    font-size: .6875rem;
+    font-size: .75rem;
     cursor: pointer;
   }
 
@@ -688,16 +728,15 @@
 
   .games-id-copy { min-width: 0; }
   .games-id-copy > b { display: block; font-size: var(--yoro-font-size-xs); font-weight: var(--yoro-font-weight-bold); }
-  .games-id-copy > small { display: block; margin-top: .125rem; color: var(--yoro-color-text-on-dark-muted); font-size: .625rem; line-height: 1.5; }
+  .games-id-copy > small { display: block; margin-top: .125rem; color: var(--yoro-color-text-on-dark-muted); font-size: .75rem; line-height: 1.5; }
 
   .games-sheet-wide { width: 100%; margin: 0; text-align: center; }
-  .games-sheet-note { margin: 0; color: var(--yoro-color-text-on-dark-muted); font-size: .625rem; line-height: 1.6; }
+  .games-sheet-note { margin: 0; color: var(--yoro-color-text-on-dark-muted); font-size: .75rem; line-height: 1.6; }
   .games-sheet-center { text-align: center; font-size: var(--yoro-font-size-xs); }
   .games-sheet-error { margin: 0; color: color-mix(in srgb, var(--yoro-color-match-loss-accent) 45%, #fff 55%); font-size: var(--yoro-font-size-xs); text-align: center; }
   .games-sheet-done { margin: 0; text-align: center; color: var(--yoro-color-rank-trend); font-size: var(--yoro-font-size-sm); font-weight: var(--yoro-font-weight-bold); }
 
   /* 리더보드 사이드 카드 */
-  .games-side-card > h3 > small { margin-left: var(--yoro-space-2); color: var(--yoro-color-text-on-dark-muted); font-weight: var(--yoro-font-weight-medium); font-size: .625rem; }
   .games-lb { display: grid; }
 
   .games-lb-row {
@@ -725,7 +764,7 @@
     height: 1.375rem;
     border-radius: var(--yoro-radius-circle);
     background: linear-gradient(135deg, #6441a5, #9146ff);
-    font-size: .625rem;
+    font-size: .75rem;
     font-style: normal;
     font-weight: var(--yoro-font-weight-bold);
     overflow: hidden;
@@ -734,7 +773,7 @@
   .games-lb-name > i > img { width: 100%; height: 100%; object-fit: cover; }
   .games-lb-name > i.is-mask { background: color-mix(in srgb, var(--yoro-color-text-on-dark) 10%, transparent); }
   .games-lb-name > b { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: var(--yoro-font-weight-bold); }
-  .games-lb-name > small { flex: none; color: var(--yoro-color-text-on-dark-muted); font-size: .5625rem; }
+  .games-lb-name > small { flex: none; color: var(--yoro-color-text-on-dark-muted); font-size: .75rem; }
   .games-lb-ms { font-weight: var(--yoro-font-weight-bold); font-variant-numeric: tabular-nums; }
 
   .games-lb-delete {
@@ -744,7 +783,7 @@
     background: none;
     color: var(--yoro-color-text-on-dark-muted);
     font: inherit;
-    font-size: .625rem;
+    font-size: .75rem;
     text-align: left;
     cursor: pointer;
   }
@@ -797,7 +836,7 @@
     color: var(--yoro-color-text-on-dark);
   }
 
-  .games-ranking-chip > small { font-size: .53125rem; color: var(--yoro-color-text-on-dark-muted); font-weight: var(--yoro-font-weight-medium); }
+  .games-ranking-chip > small { font-size: .75rem; color: var(--yoro-color-text-on-dark-muted); font-weight: var(--yoro-font-weight-medium); }
 
   .games-podium {
     display: grid;
@@ -851,7 +890,7 @@
 
   .games-podium-card > b { max-width: 100%; font-size: var(--yoro-font-size-xs); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .games-podium-ms { font-size: var(--yoro-font-size-lg); font-weight: var(--yoro-font-weight-black); font-variant-numeric: tabular-nums; }
-  .games-podium-tier { color: var(--yoro-color-accent-gold); font-size: .625rem; }
+  .games-podium-tier { color: var(--yoro-color-accent-gold); font-size: .75rem; }
 
   .games-ranking-table {
     width: 100%;
@@ -871,15 +910,15 @@
     border-bottom: 1px solid var(--yoro-color-border-on-dark);
     background: color-mix(in srgb, var(--yoro-color-ground-surface) 80%, #000 20%);
     color: var(--yoro-color-text-on-dark-muted);
-    font-size: .625rem;
+    font-size: .75rem;
     font-weight: var(--yoro-font-weight-bold);
     letter-spacing: .05em;
   }
 
   .games-ranking-head > span:nth-child(n+3) { text-align: right; }
   .games-ranking-table .games-lb-row { grid-template-columns: 2.75rem minmax(0, 1fr) auto auto; }
-  .games-ranking-tier { color: var(--yoro-color-accent-gold); font-size: .625rem; text-align: right; white-space: nowrap; }
-  .games-ranking-foot { margin: 0; padding: .5rem var(--yoro-space-3); border-top: 1px dashed var(--yoro-color-border-on-dark); color: var(--yoro-color-text-on-dark-muted); font-size: .625rem; text-align: center; }
+  .games-ranking-tier { color: var(--yoro-color-accent-gold); font-size: .75rem; text-align: right; white-space: nowrap; }
+  .games-ranking-foot { margin: 0; padding: .5rem var(--yoro-space-3); border-top: 1px dashed var(--yoro-color-border-on-dark); color: var(--yoro-color-text-on-dark-muted); font-size: .75rem; text-align: center; }
 
   /* 내 순위 고정 바 — 하단 탭바(모바일) 위에 sticky. */
   .games-ranking-me {
@@ -926,12 +965,12 @@
     gap: var(--yoro-space-2);
     align-items: center;
     padding: .25rem var(--yoro-space-3);
-    font-size: .6875rem;
+    font-size: .75rem;
     color: var(--yoro-color-text-on-dark-muted);
   }
 
   .games-ranking-dist .games-ranking-dist-row:last-child { padding-bottom: var(--yoro-space-3); }
-  .games-ranking-dist-row > b { font-size: .6875rem; font-weight: var(--yoro-font-weight-bold); white-space: nowrap; }
+  .games-ranking-dist-row > b { font-size: .75rem; font-weight: var(--yoro-font-weight-bold); white-space: nowrap; }
 
   .games-ranking-dist-bar {
     height: .375rem;

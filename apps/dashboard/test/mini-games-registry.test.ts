@@ -38,6 +38,13 @@ test("REACTION_TIER_TABLE: 경계값이 오름차순이고 마지막은 무한�
   assert.equal(REACTION_TIER_TABLE.at(-1)!.maxMs, Number.POSITIVE_INFINITY);
 });
 
+test("REACTION_TIER_TABLE: 티어마다 배지 색이 있고 서로 겹치지 않는다", () => {
+  /* UI 티어 표기는 색 dot 단일 배지(목업 v7.2 §⑥-1) — 색이 곧 식별자입니다. */
+  const colors = REACTION_TIER_TABLE.map((tier) => tier.color);
+  for (const color of colors) assert.match(color, /^#[0-9a-f]{6}$/i);
+  assert.equal(new Set(colors).size, colors.length);
+});
+
 test("reactionTierForAverage: 경계 포함 매핑", () => {
   assert.equal(reactionTierForAverage(160).key, "challenger");
   assert.equal(reactionTierForAverage(161).key, "grandmaster");
