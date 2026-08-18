@@ -1,6 +1,8 @@
 import type { PublicLocale } from "../../public-lol/i18n/public-lol-i18n";
 
-export type ValorantLocale = PublicLocale;
+/* en 콘텐츠가 아직 없는 섹션 — PublicLocale(en 포함)이 아니라 ko·ja 로 고정하고,
+ * 페이지 진입부에서 publicContentLocale 로 축소해 받습니다(팰월드 우선 단계). */
+export type ValorantLocale = "ko" | "ja";
 
 const ko = {
   brand: "발로란트",

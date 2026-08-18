@@ -10,13 +10,52 @@
  */
 import {
   isLocalizablePublicDashboardRoute,
+  koJaPublicUrlLocale,
   publicUrlLocaleFromPathname,
   stripPublicUrlLocalePrefix,
   type PublicUrlLocale
 } from "../routing/public-dashboard-routes.js";
 
 export const PUBLIC_SEO_ORIGIN = "https://yoro.gg";
-export const PUBLIC_SEO_LOCALES: readonly PublicUrlLocale[] = ["ko", "ja"];
+/** 서버가 메타를 내보내는 로케일 전체. 경로별로 실제 붙는 목록은 아래를 씁니다. */
+export const PUBLIC_SEO_LOCALES: readonly PublicUrlLocale[] = ["ko", "ja", "en"];
+
+const PUBLIC_SEO_KO_JA: readonly PublicUrlLocale[] = ["ko", "ja"];
+
+/**
+ * 경로별 hreflang·sitemap 대상 로케일.
+ *
+ * en 은 영어 본문이 있는 섹션(현재 팰월드)에만 붙입니다 — 번역이 없는 경로에
+ * en hreflang 을 달면 크롤러에게 존재하지 않는 페이지를 약속하는 셈입니다.
+ */
+export function publicSeoLocalesForPath(normalizedPath: string): readonly PublicUrlLocale[] {
+  return hasEnglishSeoContent(normalizedPath) ? PUBLIC_SEO_LOCALES : PUBLIC_SEO_KO_JA;
+}
+
+/**
+ * 요청 로케일을 실제로 서빙할 로케일로 접습니다.
+ *
+ * 영어 본문이 없는 섹션의 /en 은 지금까지처럼 ko 메타로 내려가고 canonical 도
+ * /ko 를 가리킵니다(중복 통합). 화면은 그대로 뜨고 색인만 한 판으로 모입니다.
+ */
+function servedSeoLocale(normalizedPath: string, requested: PublicUrlLocale): PublicUrlLocale {
+  return requested === "en" && !hasEnglishSeoContent(normalizedPath) ? "ko" : requested;
+}
+
+/**
+ * 로케일별 문구. ko·ja 는 모든 경로가 갖고, en 은 영어판이 있는 곳에만 있습니다.
+ * 없는 로케일은 ko 로 떨어집니다(빈 문구 금지).
+ */
+export type PublicSeoLocaleText = Readonly<Record<"ko" | "ja", string>> & { readonly en?: string };
+
+function localeText(text: PublicSeoLocaleText, locale: PublicUrlLocale): string {
+  return text[locale] ?? text.ko;
+}
+
+/** 문장 하나짜리 로케일 분기. `ja ? A : B` 를 3종으로 넓힌 형태입니다. */
+function t(locale: PublicUrlLocale, ko: string, ja: string, en: string): string {
+  return locale === "ja" ? ja : locale === "en" ? en : ko;
+}
 
 const DEFAULT_SOCIAL_IMAGE = `${PUBLIC_SEO_ORIGIN}/images/yorogg-og.png`;
 
@@ -31,12 +70,16 @@ const SOCIAL_IMAGES_BY_PREFIX: readonly {
   url: string;
   /** 이미지 안에 문구가 박힌 페이지는 ja 경로에 ja 판을 내립니다(없으면 url 공용). */
   urlJa?: string;
-  alt: Readonly<Record<PublicUrlLocale, string>>;
+  alt: PublicSeoLocaleText;
 }[] = [
   {
     prefix: "/palworld",
     url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-palworld.png`,
-    alt: { ko: "YORO.gg 팰월드 데이터베이스 미리보기", ja: "YORO.gg パルワールドデータベースのプレビュー" }
+    alt: {
+      ko: "YORO.gg 팰월드 데이터베이스 미리보기",
+      ja: "YORO.gg パルワールドデータベースのプレビュー",
+      en: "YORO.gg Palworld database preview"
+    }
   },
   {
     prefix: "/minecraft",
@@ -93,7 +136,7 @@ const HOME_SOCIAL_IMAGE = {
 
 export function socialImageForPath(normalizedPath: string, locale: PublicUrlLocale = "ko"): {
   url: string;
-  alt: Readonly<Record<PublicUrlLocale, string>>;
+  alt: PublicSeoLocaleText;
 } {
   if (normalizedPath === "/") return HOME_SOCIAL_IMAGE;
   const match = SOCIAL_IMAGES_BY_PREFIX.find(({ prefix }) =>
@@ -143,16 +186,29 @@ export type PublicSeoFact = {
  * crawler와 JS 실행 전 사용자가 함께 보는 본문입니다.
  * React가 mount되면 createRoot가 `#root`를 비우면서 그대로 교체됩니다.
  */
+/** 본문 소제목 아래 묶이는 한 덩어리. 능력치 표·교배 조합처럼 "목록"이 필요한
+ *  페이지가 쓰고, 안 쓰는 페이지는 지금까지처럼 facts/links 만으로 끝냅니다. */
+export type PublicSeoSection = {
+  heading: string;
+  facts?: readonly PublicSeoFact[];
+  /** 링크가 아닌 순수 나열(작업 적성·드랍 등). */
+  items?: readonly string[];
+  links?: readonly { href: string; label: string }[];
+  /** 상한을 걸어 잘라낸 경우 "전체 N개" 같은 실값 안내. */
+  note?: string;
+};
+
 export type PublicSeoFallback = {
   facts: readonly PublicSeoFact[];
   heading: string;
   links: readonly { href: string; label: string }[];
   summary: string;
+  sections?: readonly PublicSeoSection[];
 };
 
 export type PublicSeoMetadata = {
   /** hreflang 대상. 비지역화 경로는 undefined입니다. */
-  alternateUrls?: Readonly<Record<PublicUrlLocale, string>>;
+  alternateUrls?: PublicSeoAlternateUrls;
   canonicalUrl: string;
   description: string;
   fallback?: PublicSeoFallback;
@@ -179,8 +235,13 @@ export type PalworldEntityRoute = {
   locale: PublicUrlLocale;
 };
 
-/** palworld-data service의 detail 응답에서 SEO에 쓰는 필드만 구조적으로 받습니다. */
+/** palworld-data service의 detail 응답에서 SEO에 쓰는 필드만 구조적으로 받습니다.
+ *
+ * 아래 "본문용" 필드는 전부 optional 입니다 — 데이터 서비스가 없거나 스냅샷이
+ * 비어 있으면 채우지 않고, fallback 은 지금까지의 요약 문구로 자연히 떨어집니다
+ * (빈 페이지 금지). 값은 전부 화면에 이미 보이는 것과 같은 데이터입니다(cloaking 금지). */
 export type PalworldSeoEntity = {
+  descriptionEn?: string | null;
   descriptionJa?: string | null;
   descriptionKo?: string | null;
   elements?: readonly string[];
@@ -191,6 +252,41 @@ export type PalworldSeoEntity = {
   number?: number;
   rarity?: number;
   type?: string;
+  /* ── 본문용(팰) ── */
+  stats?: Readonly<Record<string, number | undefined>>;
+  workSuitabilities?: readonly { type: string; level: number }[];
+  drops?: readonly { nameKo?: string | null; nameJa?: string | null; nameEn?: string | null }[];
+  partnerSkillName?: string | null;
+  nocturnal?: boolean;
+  /** 이 팰이 나오는 부모 조합(대표 N개). */
+  breedingParents?: readonly { a: string; b: string }[];
+  breedingParentsTotal?: number;
+  /** 이 팰을 부모로 했을 때 나오는 자식(대표 N개). */
+  breedingChildren?: readonly { partner: string; child: string }[];
+  breedingChildrenTotal?: number;
+  /* ── 본문용(아이템) ── */
+  sellPrice?: number;
+  weight?: number;
+  maxStack?: number;
+  technologyLevel?: number;
+  category?: string;
+  /** 제작 재료 "이름 ×수량". */
+  craftingMaterials?: readonly { name: string; count: number }[];
+  craftingFacilities?: readonly string[];
+  /** 획득 방법 문구(이미 로케일별로 조립된 라벨). */
+  acquisitionLabels?: readonly string[];
+  /** 이 아이템을 드랍하는 팰 — 상세로 이어지는 크롤 경로. */
+  dropPals?: readonly { id: string; name: string }[];
+  dropPalsTotal?: number;
+  /* ── 본문용(스킬) ── */
+  skillType?: string;
+  element?: string;
+  power?: number;
+  cooldown?: number;
+  passiveTier?: number;
+  /** 이 스킬을 가진 팰 — 상세로 이어지는 크롤 경로. */
+  relatedPals?: readonly { id: string; name: string }[];
+  relatedPalsTotal?: number;
 };
 
 const PALWORLD_ENTITY_SEGMENTS: Readonly<Record<string, PalworldEntityKind>> = {
@@ -218,12 +314,17 @@ export function localizedPublicSeoUrl(normalizedPath: string, locale: PublicUrlL
   return new URL(localizedPath, PUBLIC_SEO_ORIGIN).href;
 }
 
-function alternateUrlsForPath(normalizedPath: string): Readonly<Record<PublicUrlLocale, string>> | undefined {
+/** 경로가 실제로 서빙하는 로케일만 담습니다(en 은 팰월드 등 영어판이 있는 곳만). */
+export type PublicSeoAlternateUrls = Readonly<Partial<Record<PublicUrlLocale, string>>>;
+
+export function publicSeoAlternateUrls(normalizedPath: string): PublicSeoAlternateUrls {
+  return Object.fromEntries(publicSeoLocalesForPath(normalizedPath)
+    .map((locale) => [locale, localizedPublicSeoUrl(normalizedPath, locale)]));
+}
+
+function alternateUrlsForPath(normalizedPath: string): PublicSeoAlternateUrls | undefined {
   if (!isLocalizablePublicDashboardRoute(normalizedPath)) return undefined;
-  return {
-    ko: localizedPublicSeoUrl(normalizedPath, "ko"),
-    ja: localizedPublicSeoUrl(normalizedPath, "ja")
-  };
+  return publicSeoAlternateUrls(normalizedPath);
 }
 
 /* ── 반응속도 공유 링크 메타 (목업 reaction-test.html v5 §④-5) ──────────
@@ -234,7 +335,8 @@ function alternateUrlsForPath(normalizedPath: string): Readonly<Record<PublicUrl
  * 응답 어디에도 계정 식별자를 넣지 않습니다 — 표시 이름(공개 기록) 또는 익명
  * 표기까지만 나갑니다.
  */
-export type ReactionShareRoute = { locale: PublicUrlLocale; shareId: string };
+/** 미니게임은 ko·ja 만 있습니다 — /en 공유 링크는 ko 판으로 봅니다. */
+export type ReactionShareRoute = { locale: "ko" | "ja"; shareId: string };
 
 export type ReactionShareSeoInput = {
   averageMs: number;
@@ -252,7 +354,7 @@ const REACTION_SHARE_IMAGE_TIERS = new Set([
 
 /** 공유 상세 경로 판정. id 형식이 아니면 일반 경로로 취급합니다. */
 export function reactionShareRouteForPath(pathname: string): ReactionShareRoute | undefined {
-  const locale = publicUrlLocaleFromPathname(pathname) ?? "ko";
+  const locale = koJaPublicUrlLocale(publicUrlLocaleFromPathname(pathname) ?? "ko");
   const normalized = normalizePublicSeoPath(pathname);
   const match = /^\/games\/reaction\/r\/([A-Za-z0-9_-]{8,64})$/u.exec(normalized);
   if (!match?.[1]) return undefined;
@@ -347,8 +449,8 @@ export function palworldEntityRedirectPath(
 }
 
 function palworldEntityName(entity: PalworldSeoEntity, locale: PublicUrlLocale): string {
-  const localized = locale === "ja" ? entity.nameJa : entity.nameKo;
-  return localized?.trim() || entity.nameEn?.trim() || entity.id;
+  const localized = locale === "ja" ? entity.nameJa : locale === "en" ? entity.nameEn : entity.nameKo;
+  return localized?.trim() || entity.nameEn?.trim() || entity.nameKo?.trim() || entity.id;
 }
 
 function palworldEntityDescription(
@@ -357,8 +459,17 @@ function palworldEntityDescription(
   locale: PublicUrlLocale
 ): string {
   const name = palworldEntityName(entity, locale);
-  const detail = (locale === "ja" ? entity.descriptionJa : entity.descriptionKo)?.trim();
+  const detail = (locale === "ja"
+    ? entity.descriptionJa
+    : locale === "en"
+      ? entity.descriptionEn
+      : entity.descriptionKo)?.trim();
   if (detail) return detail.slice(0, 160);
+  if (locale === "en") {
+    if (kind === "pal") return `Check ${name}'s stats, elements, work suitability and breeding combos in Palworld.`;
+    if (kind === "item") return `Check ${name}'s category, crafting materials and how to get it in Palworld.`;
+    return `Check the effect of the Palworld skill ${name} and the pals that have it.`;
+  }
   if (locale === "ja") {
     if (kind === "pal") return `パルワールドの${name}のステータス、属性、作業適性、配合の組み合わせを確認できます。`;
     if (kind === "item") return `パルワールドの${name}の分類、製作素材、入手方法を確認できます。`;
@@ -377,6 +488,11 @@ function palworldEntityTitle(
   const name = palworldEntityName(entity, locale);
   const english = entity.nameEn?.trim();
   const label = english && english !== name ? `${name}(${english})` : name;
+  if (locale === "en") {
+    if (kind === "pal") return `${label} Stats & Breeding | Palworld | YORO.gg`;
+    if (kind === "item") return `${label} Crafting & Drops | Palworld | YORO.gg`;
+    return `${label} Skill Effect | Palworld | YORO.gg`;
+  }
   if (locale === "ja") {
     if (kind === "pal") return `${label} ステータス・配合 | パルワールド | YORO.gg`;
     if (kind === "item") return `${label} 製作素材・入手方法 | パルワールド | YORO.gg`;
@@ -385,6 +501,244 @@ function palworldEntityTitle(
   if (kind === "pal") return `${label} 능력치·교배 | 팰월드 | YORO.gg`;
   if (kind === "item") return `${label} 제작 재료·획득처 | 팰월드 | YORO.gg`;
   return `${label} 스킬 효과 | 팰월드 | YORO.gg`;
+}
+
+/* 본문 섹션 상한 — HTML 이 무한정 커지지 않게 자릅니다. 잘린 경우 "전체 N개"를
+   실값으로 적어 두므로 크롤러도 규모를 알 수 있습니다. */
+const PALWORLD_FALLBACK_COMBO_LIMIT = 12;
+const PALWORLD_FALLBACK_LIST_LIMIT = 24;
+
+/** 능력치 라벨 — 화면(팰 상세 카드)과 같은 항목만 같은 순서로 냅니다. */
+const PALWORLD_STAT_LABELS: readonly ({ key: string } & PublicSeoLocaleText)[] = [
+  { key: "hp", ko: "HP", ja: "HP", en: "HP" },
+  { key: "attack", ko: "공격", ja: "攻撃", en: "Attack" },
+  { key: "defense", ko: "방어", ja: "防御", en: "Defense" },
+  { key: "meleeAttack", ko: "근접 공격", ja: "近接攻撃", en: "Melee attack" },
+  { key: "shotAttack", ko: "원거리 공격", ja: "遠距離攻撃", en: "Ranged attack" },
+  { key: "moveSpeed", ko: "이동 속도", ja: "移動速度", en: "Move speed" },
+  { key: "runSpeed", ko: "달리기 속도", ja: "走行速度", en: "Run speed" },
+  { key: "rideSprintSpeed", ko: "탑승 질주 속도", ja: "騎乗スプリント速度", en: "Ride sprint speed" },
+  { key: "stamina", ko: "스태미나", ja: "スタミナ", en: "Stamina" },
+  { key: "food", ko: "식사량", ja: "食事量", en: "Food" }
+];
+
+/** 작업 적성 라벨. 데이터가 영문 키로 오므로 표시명만 로케일에 맞춰 붙입니다. */
+const PALWORLD_WORK_LABELS: Readonly<Record<string, PublicSeoLocaleText>> = {
+  kindling: { ko: "불 붙이기", ja: "点火", en: "Kindling" },
+  watering: { ko: "물 주기", ja: "水やり", en: "Watering" },
+  planting: { ko: "파종", ja: "植え付け", en: "Planting" },
+  generating_electricity: { ko: "발전", ja: "発電", en: "Generating electricity" },
+  handiwork: { ko: "수작업", ja: "手作業", en: "Handiwork" },
+  gathering: { ko: "채집", ja: "採取", en: "Gathering" },
+  lumbering: { ko: "벌목", ja: "伐採", en: "Lumbering" },
+  mining: { ko: "채굴", ja: "採掘", en: "Mining" },
+  medicine_production: { ko: "약품 제작", ja: "薬品製作", en: "Medicine production" },
+  cooling: { ko: "냉각", ja: "冷却", en: "Cooling" },
+  transporting: { ko: "운반", ja: "運搬", en: "Transporting" },
+  farming: { ko: "목장", ja: "牧場", en: "Farming" }
+};
+
+function palworldWorkLabel(type: string, locale: PublicUrlLocale): string {
+  const label = PALWORLD_WORK_LABELS[type];
+  return label ? localeText(label, locale) : type;
+}
+
+/**
+ * 팰 상세 본문 섹션 — 능력치·작업 적성·교배 조합·드랍.
+ *
+ * 롱테일 데이터 사이트라 크롤러가 읽을 실데이터가 본문에 있어야 합니다(외부 SEO
+ * 리뷰 2026-08-18: 기존 본문 142자). 값은 전부 화면 카드에 이미 있는 것과 같습니다.
+ */
+function palworldPalSections(
+  entity: PalworldSeoEntity,
+  locale: PublicUrlLocale
+): PublicSeoSection[] {
+  const ja = locale === "ja";
+  const sections: PublicSeoSection[] = [];
+
+  const statFacts = PALWORLD_STAT_LABELS
+    .map((stat) => ({ label: localeText(stat, locale), value: entity.stats?.[stat.key] }))
+    .filter((fact): fact is { label: string; value: number } => typeof fact.value === "number")
+    .map((fact) => ({ label: fact.label, value: String(fact.value) }));
+  if (statFacts.length > 0) {
+    sections.push({ heading: t(locale, "능력치", "ステータス", "Base stats"), facts: statFacts });
+  }
+
+  if (entity.workSuitabilities?.length) {
+    sections.push({
+      heading: t(locale, "작업 적성", "作業適性", "Work suitability"),
+      items: entity.workSuitabilities
+        .slice(0, PALWORLD_FALLBACK_LIST_LIMIT)
+        .map((work) => `${palworldWorkLabel(work.type, locale)} Lv.${work.level}`)
+    });
+  }
+
+  if (entity.partnerSkillName) {
+    sections.push({
+      heading: t(locale, "파트너 스킬", "パートナースキル", "Partner skill"),
+      items: [entity.partnerSkillName]
+    });
+  }
+
+  const drops = (entity.drops ?? [])
+    .map((drop) => (ja ? drop.nameJa : locale === "en" ? drop.nameEn : drop.nameKo) || drop.nameEn || "")
+    .filter((name) => name.length > 0);
+  if (drops.length > 0) {
+    sections.push({
+      heading: t(locale, "드랍 아이템", "ドロップ", "Drops"),
+      items: drops.slice(0, PALWORLD_FALLBACK_LIST_LIMIT)
+    });
+  }
+
+  if (entity.breedingParents?.length) {
+    const total = entity.breedingParentsTotal ?? entity.breedingParents.length;
+    const shown = entity.breedingParents.slice(0, PALWORLD_FALLBACK_COMBO_LIMIT);
+    sections.push({
+      heading: t(locale, "이 팰이 나오는 교배 조합", "この個体が生まれる配合", "Breeding combos that produce it"),
+      items: shown.map((pair) => `${pair.a} × ${pair.b}`),
+      ...(total > shown.length
+        ? { note: t(locale, `전체 ${total}개 조합`, `全${total}件の組み合わせ`, `${total} combos in total`) }
+        : {})
+    });
+  }
+
+  if (entity.breedingChildren?.length) {
+    const total = entity.breedingChildrenTotal ?? entity.breedingChildren.length;
+    const shown = entity.breedingChildren.slice(0, PALWORLD_FALLBACK_COMBO_LIMIT);
+    sections.push({
+      heading: t(locale, "이 팰을 부모로 한 교배", "この個体を親にした配合", "Breeding with this pal as a parent"),
+      items: shown.map((pair) => `× ${pair.partner} → ${pair.child}`),
+      ...(total > shown.length
+        ? { note: t(locale, `전체 ${total}개 조합`, `全${total}件の組み合わせ`, `${total} combos in total`) }
+        : {})
+    });
+  }
+
+  return sections;
+}
+
+/**
+ * 아이템 상세 본문 — 기본 정보·제작·획득·드랍 팰.
+ *
+ * 드랍 팰은 팰 상세로 이어지는 내부 링크라 크롤 경로도 겸합니다.
+ * 값은 전부 화면 카드에 이미 있는 것과 같습니다(cloaking 금지).
+ */
+function palworldItemSections(
+  entity: PalworldSeoEntity,
+  locale: PublicUrlLocale
+): PublicSeoSection[] {
+  const ja = locale === "ja";
+  const sections: PublicSeoSection[] = [];
+
+  const basics: PublicSeoFact[] = [];
+  if (typeof entity.sellPrice === "number") {
+    basics.push({ label: t(locale, "판매가", "売却価格", "Sell price"), value: String(entity.sellPrice) });
+  }
+  if (typeof entity.weight === "number") {
+    basics.push({ label: t(locale, "무게", "重量", "Weight"), value: String(entity.weight) });
+  }
+  if (typeof entity.maxStack === "number") {
+    basics.push({ label: t(locale, "최대 보유", "最大スタック", "Max stack"), value: String(entity.maxStack) });
+  }
+  if (typeof entity.technologyLevel === "number") {
+    basics.push({ label: t(locale, "기술 레벨", "テクノロジーLv", "Technology level"), value: String(entity.technologyLevel) });
+  }
+  if (basics.length > 0) {
+    sections.push({ heading: t(locale, "기본 정보", "基本情報", "Basics"), facts: basics });
+  }
+
+  if (entity.craftingMaterials?.length) {
+    sections.push({
+      heading: t(locale, "제작 재료", "製作素材", "Crafting materials"),
+      items: entity.craftingMaterials
+        .slice(0, PALWORLD_FALLBACK_LIST_LIMIT)
+        .map((material) => `${material.name} ×${material.count}`)
+    });
+  }
+
+  if (entity.craftingFacilities?.length) {
+    sections.push({
+      heading: t(locale, "제작 시설", "製作施設", "Crafting facility"),
+      items: entity.craftingFacilities.slice(0, PALWORLD_FALLBACK_LIST_LIMIT)
+    });
+  }
+
+  if (entity.acquisitionLabels?.length) {
+    sections.push({
+      heading: t(locale, "획득 방법", "入手方法", "How to obtain"),
+      items: entity.acquisitionLabels.slice(0, PALWORLD_FALLBACK_LIST_LIMIT)
+    });
+  }
+
+  if (entity.dropPals?.length) {
+    const total = entity.dropPalsTotal ?? entity.dropPals.length;
+    const shown = entity.dropPals.slice(0, PALWORLD_FALLBACK_COMBO_LIMIT);
+    sections.push({
+      heading: t(locale, "드랍하는 팰", "ドロップするパル", "Dropped by"),
+      links: shown.map((pal) => ({ href: `/${locale}/palworld/pals/${pal.id}`, label: pal.name })),
+      ...(total > shown.length
+        ? { note: t(locale, `전체 ${total}종의 팰`, `全${total}種のパル`, `${total} pals in total`) }
+        : {})
+    });
+  }
+
+  return sections;
+}
+
+/**
+ * 스킬 상세 본문 — 기본 정보 + 이 스킬을 가진 팰.
+ *
+ * passiveEffects 의 원시 타입명(ElementResist_Normal 등)은 화면에 그대로 노출되지
+ * 않으므로 본문에도 넣지 않습니다 — 설명문(descriptionKo/Ja)이 이미 그 내용을
+ * 사람이 읽는 문장으로 담고 있고, 내부 식별자를 본문에 흘리면 cloaking 에 가깝습니다.
+ */
+function palworldSkillSections(
+  entity: PalworldSeoEntity,
+  locale: PublicUrlLocale
+): PublicSeoSection[] {
+  const ja = locale === "ja";
+  const sections: PublicSeoSection[] = [];
+
+  const basics: PublicSeoFact[] = [];
+  if (entity.skillType) {
+    basics.push({
+      label: t(locale, "종류", "種別", "Type"),
+      value: entity.skillType === "active"
+        ? t(locale, "액티브 스킬", "アクティブスキル", "Active skill")
+        : entity.skillType === "passive"
+          ? t(locale, "패시브 스킬", "パッシブスキル", "Passive skill")
+          : entity.skillType
+    });
+  }
+  if (entity.element) {
+    basics.push({ label: t(locale, "속성", "属性", "Element"), value: entity.element });
+  }
+  if (typeof entity.power === "number") {
+    basics.push({ label: t(locale, "위력", "威力", "Power"), value: String(entity.power) });
+  }
+  if (typeof entity.cooldown === "number") {
+    basics.push({ label: t(locale, "쿨타임", "クールタイム", "Cooldown"), value: String(entity.cooldown) });
+  }
+  if (typeof entity.passiveTier === "number") {
+    basics.push({ label: t(locale, "등급", "ランク", "Passive tier"), value: String(entity.passiveTier) });
+  }
+  if (basics.length > 0) {
+    sections.push({ heading: t(locale, "기본 정보", "基本情報", "Basics"), facts: basics });
+  }
+
+  if (entity.relatedPals?.length) {
+    const total = entity.relatedPalsTotal ?? entity.relatedPals.length;
+    const shown = entity.relatedPals.slice(0, PALWORLD_FALLBACK_COMBO_LIMIT);
+    sections.push({
+      heading: t(locale, "이 스킬을 가진 팰", "このスキルを持つパル", "Related Pals"),
+      links: shown.map((pal) => ({ href: `/${locale}/palworld/pals/${pal.id}`, label: pal.name })),
+      ...(total > shown.length
+        ? { note: t(locale, `전체 ${total}종의 팰`, `全${total}種のパル`, `${total} pals in total`) }
+        : {})
+    });
+  }
+
+  return sections;
 }
 
 function palworldEntityFallback(
@@ -396,41 +750,53 @@ function palworldEntityFallback(
   const ja = locale === "ja";
   const facts: PublicSeoFact[] = [];
   if (typeof entity.number === "number") {
-    facts.push({ label: ja ? "図鑑番号" : "도감 번호", value: `No.${entity.number}` });
+    facts.push({ label: t(locale, "도감 번호", "図鑑番号", "Paldeck no."), value: `No.${entity.number}` });
   }
   if (entity.elements?.length) {
-    facts.push({ label: ja ? "属性" : "속성", value: entity.elements.join(", ") });
+    facts.push({ label: t(locale, "속성", "属性", "Elements"), value: entity.elements.join(", ") });
   }
   if (typeof entity.rarity === "number") {
-    facts.push({ label: ja ? "レア度" : "희귀도", value: String(entity.rarity) });
+    facts.push({ label: t(locale, "희귀도", "レア度", "Rarity"), value: String(entity.rarity) });
   }
-  if (entity.type) {
-    facts.push({ label: ja ? "種別" : "종류", value: entity.type });
+  /* 스킬은 아래 "기본 정보" 섹션이 종류를 사람이 읽는 문구로 다시 냅니다.
+     여기서도 내면 원시값("active")과 정제값이 나란히 두 번 보입니다. */
+  if (entity.type && kind !== "skill") {
+    facts.push({ label: t(locale, "종류", "種別", "Type"), value: entity.type });
   }
-  if (entity.nameEn) {
-    facts.push({ label: ja ? "英語名" : "영문 이름", value: entity.nameEn });
+  /* 영문 이름은 ko·ja 화면에만 있는 보조 정보입니다 — en 판에서는 제목이 곧
+     영문 이름이라 같은 값이 두 번 나옵니다. */
+  if (entity.nameEn && locale !== "en") {
+    facts.push({ label: t(locale, "영문 이름", "英語名", "English name"), value: entity.nameEn });
   }
   const listPath = PALWORLD_ENTITY_LIST_PATH[kind];
   const links = [
     {
       href: `/${locale}${listPath}`,
-      label: ja
-        ? (kind === "pal" ? "パル図鑑を見る" : kind === "item" ? "アイテム一覧を見る" : "スキル一覧を見る")
-        : (kind === "pal" ? "팰 도감 보기" : kind === "item" ? "아이템 목록 보기" : "스킬 목록 보기")
+      label: kind === "pal"
+        ? t(locale, "팰 도감 보기", "パル図鑑を見る", "View Paldeck")
+        : kind === "item"
+          ? t(locale, "아이템 목록 보기", "アイテム一覧を見る", "View items")
+          : t(locale, "스킬 목록 보기", "スキル一覧を見る", "View skills")
     },
     ...(kind === "pal"
       ? [{
           href: `/${locale}/palworld/breeding`,
-          label: ja ? "配合の組み合わせを見る" : "교배 조합 보기"
+          label: t(locale, "교배 조합 보기", "配合の組み合わせを見る", "View breeding pairs")
         }]
       : []),
-    { href: `/${locale}/palworld`, label: ja ? "パルワールドデータベース" : "팰월드 데이터베이스" }
+    { href: `/${locale}/palworld`, label: t(locale, "팰월드 데이터베이스", "パルワールドデータベース", "Palworld Database") }
   ];
+  const sections = kind === "pal"
+    ? palworldPalSections(entity, locale)
+    : kind === "item"
+      ? palworldItemSections(entity, locale)
+      : palworldSkillSections(entity, locale);
   return {
     facts,
     heading: name,
     links,
-    summary: palworldEntityDescription(entity, kind, locale)
+    summary: palworldEntityDescription(entity, kind, locale),
+    ...(sections.length > 0 ? { sections } : {})
   };
 }
 
@@ -446,10 +812,7 @@ export function palworldEntitySeoMetadata(
   const description = palworldEntityDescription(entity, kind, locale);
   const name = palworldEntityName(entity, locale);
   return {
-    alternateUrls: {
-      ko: localizedPublicSeoUrl(normalizedPath, "ko"),
-      ja: localizedPublicSeoUrl(normalizedPath, "ja")
-    },
+    alternateUrls: publicSeoAlternateUrls(normalizedPath),
     canonicalUrl,
     description,
     fallback: palworldEntityFallback(entity, kind, locale),
@@ -514,7 +877,7 @@ function organizationStructuredData(): unknown {
   };
 }
 
-const BREADCRUMB_SEGMENT_LABELS: Readonly<Record<string, Readonly<Record<PublicUrlLocale, string>>>> = {
+const BREADCRUMB_SEGMENT_LABELS: Readonly<Record<string, PublicSeoLocaleText>> = {
   "/lol": { ko: "LoL 전적 검색", ja: "LoL戦績検索" },
   "/lol/aram": { ko: "증강 칼바람", ja: "オーグメントARAM" },
   "/patch-notes": { ko: "패치 노트", ja: "パッチノート" },
@@ -522,13 +885,13 @@ const BREADCRUMB_SEGMENT_LABELS: Readonly<Record<string, Readonly<Record<PublicU
      genericFallback의 sibling 링크와 breadcrumb JSON-LD가 404 URL을
      크롤러에게 제공합니다. 라벨이 없으면 두 곳 모두에서 자동으로 빠지고,
      소환사 상세 breadcrumb은 "홈 > LoL 전적 검색 > 소환사명"으로 이어집니다. */
-  "/palworld": { ko: "팰월드", ja: "パルワールド" },
-  "/palworld/pals": { ko: "팰 도감", ja: "パル図鑑" },
-  "/palworld/items": { ko: "아이템", ja: "アイテム" },
-  "/palworld/skills": { ko: "스킬", ja: "スキル" },
-  "/palworld/breeding": { ko: "교배 조합", ja: "配合組み合わせ" },
-  "/palworld/technology": { ko: "기술 해금", ja: "テクノロジー解放" },
-  "/palworld/map": { ko: "월드 지도", ja: "ワールドマップ" },
+  "/palworld": { ko: "팰월드", ja: "パルワールド", en: "Palworld" },
+  "/palworld/pals": { ko: "팰 도감", ja: "パル図鑑", en: "Paldeck" },
+  "/palworld/items": { ko: "아이템", ja: "アイテム", en: "Items" },
+  "/palworld/skills": { ko: "스킬", ja: "スキル", en: "Skills" },
+  "/palworld/breeding": { ko: "교배 조합", ja: "配合組み合わせ", en: "Breeding pairs" },
+  "/palworld/technology": { ko: "기술 해금", ja: "テクノロジー解放", en: "Technology" },
+  "/palworld/map": { ko: "월드 지도", ja: "ワールドマップ", en: "World map" },
   "/palworld/search": { ko: "통합 검색", ja: "統合検索" },
   "/valorant": { ko: "발로란트", ja: "VALORANT" },
   "/valorant/agents": { ko: "요원", ja: "エージェント" },
@@ -569,7 +932,8 @@ function breadcrumbStructuredData(
   for (const [index, segment] of segments.entries()) {
     cursor += `/${segment}`;
     const isLeaf = index === segments.length - 1;
-    const label = BREADCRUMB_SEGMENT_LABELS[cursor]?.[locale]
+    const labels = BREADCRUMB_SEGMENT_LABELS[cursor];
+    const label = (labels ? localeText(labels, locale) : undefined)
       ?? (isLeaf && leafName ? leafName : undefined);
     if (!label) continue;
     items.push({
@@ -598,10 +962,67 @@ function homeFallback(locale: PublicUrlLocale): PublicSeoFallback {
       { href: `/${locale}/lol`, label: ja ? "LoL戦績検索" : "LoL 전적 검색" },
       { href: `/${locale}/lol/aram`, label: ja ? "オーグメントARAM" : "증강 칼바람" },
       { href: `/${locale}/patch-notes`, label: ja ? "パッチノート" : "패치 노트" },
-      { href: `/${locale}/palworld`, label: ja ? "パルワールドデータベース" : "팰월드 데이터베이스" },
+      { href: `/${locale}/palworld`, label: t(locale, "팰월드 데이터베이스", "パルワールドデータベース", "Palworld Database") },
       { href: `/${locale}/palworld/pals`, label: ja ? "パル図鑑" : "팰 도감" },
       { href: `/${locale}/palworld/breeding`, label: ja ? "配合組み合わせ" : "교배 조합" },
       { href: `/${locale}/bot`, label: "YORO Bot" }
+    ]
+  };
+}
+
+/** 팰 목록 링크 상한 — 교배 페이지 본문의 크롤 경로용. 574종 전량을 넣으면
+ *  HTML 이 과하게 커지므로 상한을 두고 전체 개수를 실값으로 적습니다. */
+const PALWORLD_BREEDING_LINK_LIMIT = 60;
+
+/**
+ * 교배 페이지 본문 — 시스템 요약 + 팰 상세 내부 링크.
+ *
+ * 목적은 크롤 경로 확보입니다: 팰 상세는 sitemap 에 전량 있지만, 본문에서
+ * 이어지는 내부 링크가 없으면 크롤러가 중요도를 낮게 봅니다.
+ * pals 가 비어 오면(스냅샷 없음) 섹션을 만들지 않고 요약만 남깁니다.
+ */
+export function palworldBreedingFallback(
+  base: PublicSeoFallback,
+  locale: PublicUrlLocale,
+  pals: readonly { id: string; name: string }[],
+  totalPals: number
+): PublicSeoFallback {
+  if (pals.length === 0) return base;
+  const ja = locale === "ja";
+  const shown = pals.slice(0, PALWORLD_BREEDING_LINK_LIMIT);
+  return {
+    ...base,
+    sections: [
+      {
+        heading: t(locale, "교배 시스템", "配合の仕組み", "How breeding works"),
+        items: locale === "ja"
+          ? [
+            "2体のパルを牧場に預けるとケーキを消費して卵が生まれます。",
+            "生まれるパルは両親の配合ランクの平均で決まります。",
+            "特定の組み合わせでのみ生まれる特殊配合があります。"
+          ]
+          : locale === "en"
+            ? [
+              "Place two pals in the Breeding Farm and a cake is consumed to produce an egg.",
+              "The pal that hatches is decided by the average breeding rank of both parents.",
+              "Some pals only come from specific special combinations."
+            ]
+            : [
+              "팰 2마리를 목장에 맡기면 케이크를 소비해 알이 나옵니다.",
+              "태어나는 팰은 부모의 교배 랭크 평균으로 정해집니다.",
+              "특정 조합에서만 나오는 특수 교배가 있습니다."
+            ]
+      },
+      {
+        heading: t(locale, "팰별 교배 조합", "パル別の配合", "Breeding by Pal"),
+        links: shown.map((pal) => ({
+          href: `/${locale}/palworld/pals/${pal.id}`,
+          label: pal.name
+        })),
+        ...(totalPals > shown.length
+          ? { note: t(locale, `전체 ${totalPals}종의 팰`, `全${totalPals}種のパル`, `${totalPals} pals in total`) }
+          : {})
+      }
     ]
   };
 }
@@ -617,22 +1038,21 @@ function genericFallback(
     .filter(([routePath]) => routePath !== normalizedPath
       && routePath.startsWith(`/${normalizedPath.split("/").filter(Boolean)[0] ?? ""}`))
     .slice(0, 6)
-    .flatMap(([routePath, labels]) => {
-      const label = labels[locale];
-      return label ? [{ href: `/${locale}${routePath}`, label }] : [];
-    });
+    .map(([routePath, labels]) => ({ href: `/${locale}${routePath}`, label: localeText(labels, locale) }));
   return {
     facts: [],
     heading,
     summary: content.description,
     links: siblings.length > 0
       ? siblings
-      : [{ href: `/${locale}/`, label: ja ? "ホーム" : "홈" }]
+      : [{ href: `/${locale}/`, label: t(locale, "홈", "ホーム", "Home") }]
   };
 }
 
 const KOREAN_DEFAULT: PublicSeoContent = {
-  title: "YORO.gg",
+  /* 공유 카드에서 "YORO.gg" 단독은 무엇을 하는 사이트인지 전달하지 못합니다.
+     X 카드는 제목만 크게 보이므로 대표 기능 두 개를 제목에 싣습니다. */
+  title: "YORO.gg — LoL 전적 검색·팰월드 데이터베이스",
   description: "YORO.gg에서 League of Legends 전적 검색, 스트리머 방송 상태, 팔로우와 시청자 참여 기능을 확인하세요."
 };
 
@@ -687,7 +1107,7 @@ const KOREAN_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
     description: "YORO.gg 서비스 운영자에게 문의하세요."
   },
   "/palworld": {
-    title: "펠월드 데이터베이스 | YORO.gg",
+    title: "팰월드 데이터베이스 | YORO.gg",
     description: "Pal, 아이템, 스킬과 교배 정보를 한곳에서 확인하세요."
   },
   "/palworld/pals": {
@@ -774,7 +1194,7 @@ const KOREAN_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
 
 const JAPANESE_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   "/": {
-    title: "YORO.gg",
+    title: "YORO.gg — LoL戦績検索・パルワールドデータベース",
     description: "YORO.ggでLeague of Legendsの戦績検索、配信者のLIVE状況、フォロー、視聴者参加機能を確認できます。"
   },
   "/lol": {
@@ -911,6 +1331,48 @@ const JAPANESE_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   }
 };
 
+/* 영어 메타 — 팰월드 섹션만.
+ *
+ * 문구는 대시보드 palworld-i18n 의 en 표기(Paldeck·Breeding·Technology 등 게임
+ * 내 영문 용어)를 기준으로 맞췄습니다. 여기에 없는 경로의 /en 은 servedSeoLocale
+ * 이 ko 로 접으므로 ko 메타 + /ko canonical 로 남습니다. */
+const ENGLISH_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
+  "/palworld": {
+    title: "Palworld Database | YORO.gg",
+    description: "Pals, items, skills and breeding combinations in one place."
+  },
+  "/palworld/pals": {
+    title: "Paldeck | Palworld | YORO.gg",
+    description: "Check each Pal's elements, stats and work suitability."
+  },
+  "/palworld/breeding": {
+    title: "Breeding Pairs | Palworld | YORO.gg",
+    description: "Check breeding results of two parents, or reverse-search parent pairs."
+  },
+  "/palworld/items": {
+    title: "Items | Palworld | YORO.gg",
+    description: "Check Palworld item categories, crafting materials and details."
+  },
+  "/palworld/technology": {
+    title: "Technology | Palworld | YORO.gg",
+    description: "See which items unlock at each technology level."
+  },
+  "/palworld/skills": {
+    title: "Skills | Palworld | YORO.gg",
+    description: "Check active, partner and passive skill effects with the pals that have them."
+  },
+  "/palworld/map": {
+    title: "World Map | Palworld | YORO.gg",
+    description: "Explore field bosses, wild spawns and travel points by layer."
+  }
+};
+
+/** 영어 메타를 내보내는 경로인지. 팰월드 엔티티 상세도 포함합니다. */
+function hasEnglishSeoContent(normalizedPath: string): boolean {
+  if (ENGLISH_CONTENT[normalizedPath]) return true;
+  return palworldEntityRouteForPath(normalizedPath) !== undefined;
+}
+
 function contentForPath(
   normalizedPath: string,
   locale: PublicUrlLocale,
@@ -928,6 +1390,12 @@ function contentForPath(
         };
   }
   const table = locale === "ja" ? JAPANESE_CONTENT : KOREAN_CONTENT;
+  /* en 은 팰월드만 채워져 있어 표를 먼저 보고, 없으면 아래 ko·ja 흐름을 그대로 탑니다.
+     (servedSeoLocale 이 en 을 접어 주므로 여기까지 en 으로 오는 경로는 팰월드뿐입니다.) */
+  if (locale === "en") {
+    const english = ENGLISH_CONTENT[normalizedPath];
+    if (english) return english;
+  }
   const exact = table[normalizedPath];
   if (exact) return exact;
   if (normalizedPath.startsWith("/lol/summoners/")) {
@@ -948,8 +1416,8 @@ export function publicSeoMetadataForPath(
   pathname: string,
   options: { minecraftPatchNotesReady?: boolean } = {}
 ): PublicSeoMetadata {
-  const locale = publicUrlLocaleFromPathname(pathname) ?? "ko";
   const normalizedPath = normalizePublicSeoPath(pathname);
+  const locale = servedSeoLocale(normalizedPath, publicUrlLocaleFromPathname(pathname) ?? "ko");
   const content = contentForPath(normalizedPath, locale, options);
   const canonicalUrl = localizedPublicSeoUrl(normalizedPath, locale);
   const structuredData: unknown[] = [websiteStructuredData(locale)];
@@ -967,7 +1435,7 @@ export function publicSeoMetadataForPath(
     fallback: normalizedPath === "/"
       ? homeFallback(locale)
       : genericFallback(content, normalizedPath, locale),
-    imageAlt: socialImage.alt[locale],
+    imageAlt: localeText(socialImage.alt, locale),
     imageUrl: socialImage.url,
     locale,
     openGraphType: "website",
@@ -994,10 +1462,7 @@ export function withLolProfileSeo(
   const ja = locale === "ja";
   return {
     ...base,
-    alternateUrls: {
-      ko: localizedPublicSeoUrl(input.canonicalPath, "ko"),
-      ja: localizedPublicSeoUrl(input.canonicalPath, "ja")
-    },
+    alternateUrls: publicSeoAlternateUrls(input.canonicalPath),
     canonicalUrl: localizedPublicSeoUrl(input.canonicalPath, locale),
     description: input.description,
     fallback: {
@@ -1055,6 +1520,11 @@ function serializeStructuredData(value: unknown): string {
     .replaceAll(" ", "\\u2029");
 }
 
+/* 본문 상한. 섹션이 늘어도 HTML 이 무한정 커지지 않게 막는 마지막 가드입니다.
+   각 빌더가 이미 항목 수를 자르므로 여기까지 오는 경우는 사실상 없지만, 새 섹션이
+   추가될 때 크기 회귀가 조용히 지나가지 않도록 남겨 둡니다. */
+const PUBLIC_SEO_FALLBACK_MAX_BYTES = 30_000;
+
 function renderFallbackHtml(fallback: PublicSeoFallback): string {
   const facts = fallback.facts.length === 0
     ? ""
@@ -1066,12 +1536,33 @@ function renderFallbackHtml(fallback: PublicSeoFallback): string {
     : `<nav class="seo-fallback-links"><ul>${fallback.links
         .map((link) => `<li><a href="${escapeSeoHtml(link.href)}">${escapeSeoHtml(link.label)}</a></li>`)
         .join("")}</ul></nav>`;
-  return `<div class="seo-fallback" data-seo-fallback="true">`
+  const sections = (fallback.sections ?? [])
+    .map((section) => {
+      const sectionFacts = section.facts?.length
+        ? `<dl class="seo-fallback-facts">${section.facts
+            .map((fact) => `<dt>${escapeSeoHtml(fact.label)}</dt><dd>${escapeSeoHtml(fact.value)}</dd>`)
+            .join("")}</dl>`
+        : "";
+      const sectionItems = section.items?.length
+        ? `<ul>${section.items.map((item) => `<li>${escapeSeoHtml(item)}</li>`).join("")}</ul>`
+        : "";
+      const sectionLinks = section.links?.length
+        ? `<ul>${section.links
+            .map((link) => `<li><a href="${escapeSeoHtml(link.href)}">${escapeSeoHtml(link.label)}</a></li>`)
+            .join("")}</ul>`
+        : "";
+      const note = section.note ? `<p>${escapeSeoHtml(section.note)}</p>` : "";
+      return `<section><h2>${escapeSeoHtml(section.heading)}</h2>${sectionFacts}${sectionItems}${sectionLinks}${note}</section>`;
+    })
+    .join("");
+  const head = `<div class="seo-fallback" data-seo-fallback="true">`
     + `<h1>${escapeSeoHtml(fallback.heading)}</h1>`
     + `<p>${escapeSeoHtml(fallback.summary)}</p>`
-    + facts
-    + links
-    + `</div>`;
+    + facts;
+  const tail = links + `</div>`;
+  /* 상한을 넘으면 섹션만 버립니다 — 제목·요약·링크는 남아야 빈 페이지가 되지 않습니다. */
+  const full = head + sections + tail;
+  return Buffer.byteLength(full, "utf8") <= PUBLIC_SEO_FALLBACK_MAX_BYTES ? full : head + tail;
 }
 
 function replaceOrInsertHeadTag(html: string, matcher: RegExp, tag: string): string {
@@ -1110,8 +1601,15 @@ export function applyPublicSeoMetadata(html: string, metadata: PublicSeoMetadata
       `${prefix}${escapeSeoHtml(value)}${suffix}`
     ));
   }
-  const openGraphLocale = metadata.locale === "ja" ? "ja_JP" : "ko_KR";
-  const alternateLocale = metadata.locale === "ja" ? "ko_KR" : "ja_JP";
+  const OPEN_GRAPH_LOCALES: Readonly<Record<PublicUrlLocale, string>> = {
+    ko: "ko_KR",
+    ja: "ja_JP",
+    en: "en_US"
+  };
+  const openGraphLocale = OPEN_GRAPH_LOCALES[metadata.locale];
+  /* og:locale:alternate 는 태그 1개만 치환하므로, 지금 로케일이 아닌 판 중
+     대표 하나를 냅니다(ko 페이지는 ja, 그 외는 ko). */
+  const alternateLocale = metadata.locale === "ko" ? "ja_JP" : "ko_KR";
   const additionalTags: readonly [RegExp, string][] = [
     [/<meta\s+property="og:type"\s+content="[^"]*"\s*\/?>/iu, `<meta property="og:type" content="${metadata.openGraphType}" />`],
     [/<meta\s+property="og:site_name"\s+content="[^"]*"\s*\/?>/iu, '<meta property="og:site_name" content="YORO.gg" />'],
@@ -1131,7 +1629,11 @@ export function applyPublicSeoMetadata(html: string, metadata: PublicSeoMetadata
 
   const alternateUrls = metadata.alternateUrls;
   if (alternateUrls) {
-    // ko, ja, x-default가 서로를 상호 참조해야 Google이 언어 대안으로 인정합니다.
+    /* 서로를 상호 참조해야 Google이 언어 대안으로 인정합니다. 경로가 서빙하지 않는
+       로케일(영어판이 없는 섹션의 en)은 아예 빠집니다.
+       x-default 는 "언어가 맞지 않는 방문자에게 보일 판"이라, 영어판이 있는 경로는
+       en 이 그 자리를 맡고 나머지는 서비스 기본인 ko 가 맡습니다. */
+    const xDefaultHref = alternateUrls.en ?? alternateUrls.ko;
     const hreflangTags = [
       ...PUBLIC_SEO_LOCALES.flatMap((locale) => {
         const href = alternateUrls[locale];
@@ -1139,7 +1641,9 @@ export function applyPublicSeoMetadata(html: string, metadata: PublicSeoMetadata
           ? [`<link rel="alternate" hreflang="${locale}" href="${escapeSeoHtml(href)}" />`]
           : [];
       }),
-      `<link rel="alternate" hreflang="x-default" href="${escapeSeoHtml(alternateUrls.ko)}" />`
+      ...(xDefaultHref
+        ? [`<link rel="alternate" hreflang="x-default" href="${escapeSeoHtml(xDefaultHref)}" />`]
+        : [])
     ].join("");
     nextHtml = nextHtml.replace(/<\/head>/iu, `${hreflangTags}</head>`);
   }

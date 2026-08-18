@@ -207,6 +207,7 @@ import {
 import {
   isPublicDashboardAppRoute,
   isLocalizablePublicDashboardRoute,
+  koJaPublicUrlLocale,
   publicUrlLocaleFromPathname,
   stripPublicUrlLocalePrefix,
   type PublicUrlLocale,
@@ -217,6 +218,7 @@ import {
   palworldEntityRedirectPath,
   palworldEntityRouteForPath,
   palworldEntitySeoMetadata,
+  palworldBreedingFallback,
   reactionShareRouteForPath,
   reactionShareSeoMetadata,
   publicSeoMetadataForPath,
@@ -2097,7 +2099,8 @@ function palworldEntityIdsForSitemap(
 
 type PublicLolProfileRoute = {
   gameName: string;
-  locale: PublicUrlLocale;
+  /** LoL 화면은 ko·ja 만 있습니다 — /en 은 파서에서 ko 로 접힙니다. */
+  locale: "ko" | "ja";
   lolPlatform: string;
   platformSlug: string;
   profileSlug: string;
@@ -2118,7 +2121,8 @@ function parsePublicLolProfileSlug(value: string): { gameName: string; tagLine: 
 }
 
 function publicLolProfileRouteForPath(pathname: string): PublicLolProfileRoute | undefined {
-  const locale = publicUrlLocaleFromPathname(pathname) ?? "ko";
+  /* LoL 화면은 ko·ja 만 있어 /en 도 ko 판으로 봅니다 — canonical 도 /ko 로 모입니다. */
+  const locale = koJaPublicUrlLocale(publicUrlLocaleFromPathname(pathname) ?? "ko");
   const normalized = stripPublicUrlLocalePrefix(pathname).replace(/\/$/u, "");
   const match = /^\/lol\/summoners\/([^/]+)\/([^/]+)$/u.exec(normalized);
   if (!match?.[1] || !match[2]) return undefined;
@@ -2142,7 +2146,7 @@ function publicLolSocialImageRouteForPath(pathname: string): PublicLolSocialImag
   if (!platform || !riotId) return undefined;
   return {
     ...riotId,
-    locale: match[1] as PublicUrlLocale,
+    locale: match[1] as "ko" | "ja",
     lolPlatform: platform,
     platformSlug: lolPlatformSlug(platform),
     profileSlug: match[3],
@@ -3842,6 +3846,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
    * Palworld 엔티티 상세 URL의 데이터를 읽습니다.
    * 데이터가 없으면 undefined를 돌려 호출자가 soft 404 대신 실제 404를 내도록 합니다.
    */
+  /* 본문에 실을 교배 조합 상한. 조회는 이만큼만 가져오고, 전체 개수는 pagination
+     의 total 로 실값을 적습니다(HTML 크기 상한 유지). */
+  const PALWORLD_SEO_COMBO_LIMIT = 12;
+  /* 교배 페이지 본문에 실을 팰 링크 수. public-seo 의 상한과 같은 값입니다. */
+  const PALWORLD_SEO_BREEDING_LINKS = 60;
+
   function resolvePalworldSeoEntity(pathname: string): {
     entity?: PalworldSeoEntity;
     isEntityRoute: boolean;
@@ -3851,12 +3861,108 @@ export function createHttpHandler(input: HttpHandlerInput) {
     const palworldData = input.palworldDataService;
     if (!palworldData) return { isEntityRoute: true };
     try {
-      const entity = route.kind === "pal"
-        ? palworldData.getPal(route.id)
-        : route.kind === "item"
-          ? palworldData.getItem(route.id)
-          : palworldData.getSkill(route.id);
-      return { entity: entity as PalworldSeoEntity, isEntityRoute: true };
+      /* 로케일별 표시명. 없으면 영문으로 떨어지고, 그것도 없으면 빈 문자열이라
+         호출부에서 걸러집니다. en 은 영문 이름을 우선하고 없으면 한국어로 갑니다. */
+      const nameOf = (
+        reference: { nameKo?: string | null; nameJa?: string | null; nameEn?: string | null } | undefined
+      ): string => (route.locale === "ja"
+        ? reference?.nameJa
+        : route.locale === "en"
+          ? reference?.nameEn
+          : reference?.nameKo) || reference?.nameEn || reference?.nameKo || "";
+
+      if (route.kind === "item") {
+        const item = palworldData.getItem(route.id);
+        const dropPals = (item.dropPals ?? [])
+          .map((pal) => ({ id: pal.id, name: nameOf(pal) }))
+          .filter((pal) => pal.id && pal.name);
+        const entity: PalworldSeoEntity = {
+          ...(item as unknown as PalworldSeoEntity),
+          ...(typeof item.sellPrice === "number" ? { sellPrice: item.sellPrice } : {}),
+          ...(typeof item.weight === "number" ? { weight: item.weight } : {}),
+          ...(typeof item.maxStack === "number" ? { maxStack: item.maxStack } : {}),
+          ...(typeof item.technologyLevel === "number" ? { technologyLevel: item.technologyLevel } : {}),
+          craftingMaterials: (item.craftingMaterials ?? [])
+            .map((material) => ({ name: nameOf(material.item), count: material.quantity }))
+            .filter((material) => material.name.length > 0),
+          craftingFacilities: (item.craftingFacilities ?? [])
+            .map((facility) => nameOf(facility))
+            .filter((name) => name.length > 0),
+          acquisitionLabels: (item.acquisitionMethods ?? [])
+            .map((method) => (route.locale === "ja"
+              ? method.labelJa
+              : route.locale === "en"
+                ? method.labelEn
+                : method.labelKo) || method.labelEn || method.labelKo || "")
+            .filter((label) => label.length > 0),
+          ...(dropPals.length > 0 ? { dropPals, dropPalsTotal: dropPals.length } : {})
+        };
+        return { entity, isEntityRoute: true };
+      }
+
+      if (route.kind === "skill") {
+        const skill = palworldData.getSkill(route.id);
+        const relatedPals = (skill.relatedPals ?? [])
+          .map((related) => ({ id: related.pal?.id ?? "", name: nameOf(related.pal) }))
+          .filter((pal) => pal.id && pal.name);
+        const entity: PalworldSeoEntity = {
+          ...(skill as unknown as PalworldSeoEntity),
+          skillType: skill.type,
+          ...(skill.element ? { element: skill.element } : {}),
+          ...(typeof skill.power === "number" ? { power: skill.power } : {}),
+          ...(typeof skill.passiveTier === "number" ? { passiveTier: skill.passiveTier } : {}),
+          ...(relatedPals.length > 0
+            ? { relatedPals, relatedPalsTotal: skill.relatedPalCount ?? relatedPals.length }
+            : {})
+        };
+        return { entity, isEntityRoute: true };
+      }
+      const pal = palworldData.getPal(route.id);
+      /* 본문(fallback)에 실데이터를 싣기 위한 보강 — 능력치·작업 적성·드랍은
+         상세 응답에 이미 있고, 교배 조합만 별도 조회입니다. 조회가 실패해도
+         본문은 나머지로 성립하므로 각각 독립적으로 감쌉니다(빈 페이지 금지). */
+      let breedingParents: Array<{ a: string; b: string }> | undefined;
+      let breedingParentsTotal: number | undefined;
+      let breedingChildren: Array<{ partner: string; child: string }> | undefined;
+      let breedingChildrenTotal: number | undefined;
+      try {
+        const parents = palworldData.breedingParents({ child: pal.id, limit: PALWORLD_SEO_COMBO_LIMIT, page: 1 });
+        if (parents.state === "resolved") {
+          breedingParents = parents.items
+            .map((pair) => ({ a: nameOf(pair.parentA), b: nameOf(pair.parentB) }))
+            .filter((pair) => pair.a && pair.b);
+          breedingParentsTotal = parents.pagination?.total;
+        }
+      } catch {
+        /* 교배 스냅샷이 없는 배포에서는 이 섹션만 빠집니다. */
+      }
+      try {
+        const partners = palworldData.breedingPartners({ parent: pal.id, limit: PALWORLD_SEO_COMBO_LIMIT, page: 1 });
+        if (partners.state === "resolved") {
+          breedingChildren = partners.items
+            .map((pair) => ({
+              partner: nameOf(pair.parentA?.id === pal.id ? pair.parentB : pair.parentA),
+              child: nameOf(pair.child)
+            }))
+            .filter((pair) => pair.partner && pair.child);
+          breedingChildrenTotal = partners.pagination?.total;
+        }
+      } catch {
+        /* 위와 같음 */
+      }
+      const entity: PalworldSeoEntity = {
+        ...(pal as unknown as PalworldSeoEntity),
+        stats: pal.stats as unknown as Record<string, number | undefined>,
+        workSuitabilities: pal.workSuitabilities,
+        drops: pal.drops,
+        partnerSkillName: nameOf(pal.partnerSkill as unknown as { nameKo?: string; nameJa?: string; nameEn?: string }) || undefined,
+        nocturnal: pal.nocturnal,
+        ...(breedingParents?.length ? { breedingParents } : {}),
+        ...(breedingParentsTotal === undefined ? {} : { breedingParentsTotal }),
+        ...(breedingChildren?.length ? { breedingChildren } : {}),
+        ...(breedingChildrenTotal === undefined ? {} : { breedingChildrenTotal })
+      };
+      return { entity, isEntityRoute: true };
     } catch {
       // 존재하지 않는 id는 정상적인 404입니다. 진단 로그를 남길 사유가 아닙니다.
       return { isEntityRoute: true };
@@ -3871,7 +3977,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
        최신 패치 번호·요약·카드 이미지를 메타에 넣어야만 미리보기가 살아납니다.
        카드 URL 에 패치 버전이 들어가 새 패치마다 SNS 캐시를 자연 우회합니다.
        근거: docs/mockups/patch-share-card.html §03 */
-    const patchNotesLocale = publicUrlLocaleFromPathname(pathname) ?? "ko";
+    const patchNotesLocale = koJaPublicUrlLocale(publicUrlLocaleFromPathname(pathname) ?? "ko");
     if (stripPublicUrlLocalePrefix(pathname).replace(/\/$/u, "") === "/patch-notes" && input.patchNotes) {
       try {
         const feed = await input.patchNotes.getFeed(patchNotesLocale);
@@ -3921,6 +4027,41 @@ export function createHttpHandler(input: HttpHandlerInput) {
         ...(typeof shared?.displayName === "string" ? { displayName: shared.displayName } : {}),
         ...(typeof shared?.percentile === "number" ? { percentile: shared.percentile } : {})
       });
+    }
+    /* 교배 페이지 본문 — 팰 상세로 이어지는 내부 링크가 크롤 경로가 됩니다.
+       데이터가 없으면 기존 요약 문구 그대로입니다(빈 페이지 금지). */
+    if (
+      stripPublicUrlLocalePrefix(pathname).replace(/\/$/u, "") === "/palworld/breeding"
+      && fallback.fallback
+      && input.palworldDataService
+    ) {
+      const locale = publicUrlLocaleFromPathname(pathname) ?? "ko";
+      try {
+        /* 도감 번호 순 — 화면 기본 정렬과 같아야 본문과 목록이 어긋나지 않습니다. */
+        const list = input.palworldDataService.listPals({
+          sort: "number",
+          order: "asc",
+          page: 1,
+          limit: PALWORLD_SEO_BREEDING_LINKS
+        });
+        const pals = list.items
+          .map((pal) => ({
+            id: pal.id,
+            name: (locale === "ja" ? pal.nameJa : pal.nameKo) || pal.nameEn || pal.id
+          }))
+          .filter((pal) => pal.name.length > 0);
+        return {
+          ...fallback,
+          fallback: palworldBreedingFallback(
+            fallback.fallback,
+            locale,
+            pals,
+            list.pagination?.total ?? pals.length
+          )
+        };
+      } catch {
+        /* 스냅샷이 없으면 요약만 남깁니다. */
+      }
     }
     const palworldRoute = palworldEntityRouteForPath(pathname);
     if (palworldRoute) {

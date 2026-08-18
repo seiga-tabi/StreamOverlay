@@ -113,14 +113,14 @@ function assertPngAsset(fileName: string, width: number, height: number): void {
   assert.equal(data.readUInt32BE(20), height);
 }
 
-test("게임 선택 메뉴에는 LoL, 펠월드, 발로란트, 마인크래프트, YORO Bot, 미니게임 여섯 항목을 표시한다", () => {
+test("게임 선택 메뉴에는 LoL, 팰월드, 발로란트, 마인크래프트, YORO Bot, 미니게임 여섯 항목을 표시한다", () => {
   setActivePublicLocale("ko");
   const html = renderToStaticMarkup(<PublicGameSelector activePage="palworld" onPage={() => undefined} mode="tray" />);
   assert.equal((html.match(/role="option"/g) ?? []).length, 6);
   assert.match(html, /미니게임/);
   assert.match(html, /반응속도 · 시각반응/);
   assert.match(html, /리그 오브 레전드/);
-  assert.match(html, /펠월드/);
+  assert.match(html, /팰월드/);
   assert.match(html, /발로란트/);
   assert.match(html, /<strong[^>]*>마인크래프트<\/strong>/);
   assert.match(html, /<small[^>]*>위키·자료실<\/small>/);
@@ -159,7 +159,7 @@ test("비정규 Palworld 경로와 page 오류 경계는 원문 오류 없이 �
   assert.doesNotMatch(failed, /stack|Error:/u);
 });
 
-test("펠월드 홈 헤더에는 상단 검색이 없고 하위 페이지에는 표시한다", () => {
+test("팰월드 홈 헤더에는 상단 검색이 없고 하위 페이지에는 표시한다", () => {
   setActivePublicLocale("ko");
   const home = renderToStaticMarkup(<PalworldHeader locale="ko" onLocale={() => undefined} page="home" />);
   const child = renderToStaticMarkup(<PalworldHeader locale="ko" onLocale={() => undefined} page="pals" searchContent={<div data-testid="header-search">검색</div>} />);
@@ -172,7 +172,7 @@ test("펠월드 홈 헤더에는 상단 검색이 없고 하위 페이지에는 
   assert.doesNotMatch(home, /src="\/images\/yorogg-mark\.png"/);
 });
 
-test("펠월드 shell은 가로 overflow만 clip하고 은퇴한 hero 규칙을 되살리지 않는다", () => {
+test("팰월드 shell은 가로 overflow만 clip하고 은퇴한 hero 규칙을 되살리지 않는다", () => {
   const css = readFileSync(
     new URL("../src/styles/pages/public-palworld/14-palworld.css", import.meta.url),
     "utf8",

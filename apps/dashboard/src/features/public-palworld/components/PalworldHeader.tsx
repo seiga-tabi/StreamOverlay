@@ -179,6 +179,7 @@ export function PalworldHeader({
         accountTools={(
           <>
             <PublicLocaleSelector
+              locales={["ko", "ja", "en"]}
               locale={locale}
               onLocale={onLocale}
               open={localeMenuOpen}
@@ -288,6 +289,7 @@ export function PalworldHeader({
         )}
         mobileMenu={(
           <PublicMobileMenuSheet
+            locales={["ko", "ja", "en"]}
             accountConnected={accountConnected}
             accountUser={accountUser}
             activePage="palworld"

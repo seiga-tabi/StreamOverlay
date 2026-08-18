@@ -3,7 +3,7 @@ import "../styles/pages/public-minecraft/minecraft-route.css";
 import { AppShell, AppShellHeader, AppShellMain } from "../shared/ui/AppShell";
 import { usePublicLocale } from "../features/public-lol/hooks/usePublicLocale";
 import { usePublicTheme } from "../features/public-lol/hooks/usePublicTheme";
-import { setActivePublicLocale } from "../features/public-lol/i18n/public-lol-i18n";
+import { publicContentLocale, setActivePublicLocale } from "../features/public-lol/i18n/public-lol-i18n";
 import { MinecraftBottomTabBar } from "../features/public-minecraft/components/MinecraftBottomTabBar";
 import { MinecraftComingSoonPage } from "../features/public-minecraft/components/MinecraftComingSoonPage";
 import { MinecraftEnchantsPage } from "../features/public-minecraft/components/MinecraftEnchantsPage";
@@ -24,7 +24,9 @@ const noServerLocalePreference = async (): Promise<MinecraftLocale | undefined> 
  * 자료실·패치 노트는 3단계 handoff 전까지 준비 중 화면을 유지합니다.
  * 근거: docs/mockups/minecraft-vertical.html §01 */
 export function PublicMinecraftPage() {
-  const { locale, changeLocale } = usePublicLocale(noServerLocalePreference);
+  const { locale: rawLocale, changeLocale } = usePublicLocale(noServerLocalePreference);
+  /* en 콘텐츠가 아직 없음 — 팰월드 우선 단계의 ko 폴백. */
+  const locale = publicContentLocale(rawLocale);
   const { theme } = usePublicTheme();
   const { page } = useMinecraftRoute();
   const text = minecraftI18n[locale];

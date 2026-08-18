@@ -98,9 +98,20 @@ export {
 
 export type PalworldSortOrder = "asc" | "desc";
 
+/**
+ * 목록 정렬 기준 로케일.
+ *
+ * 응답에는 ko·ja·en 이름이 모두 실려 나가고 화면이 골라 쓰므로, 이 값이 정하는
+ * 것은 "어느 이름으로 정렬(collation)할지" 하나입니다. 데이터 계층의
+ * PALWORLD_LOCALE_COLLATORS·localizedName 은 세 로케일을 이미 지원합니다.
+ */
+export const PALWORLD_QUERY_LOCALES = ["ko", "ja", "en"] as const;
+
+export type PalworldQueryLocale = (typeof PALWORLD_QUERY_LOCALES)[number];
+
 export type PalworldPalListQuery = {
   q?: string;
-  locale?: "ko" | "ja";
+  locale?: PalworldQueryLocale;
   element?: (typeof PALWORLD_ELEMENTS)[number];
   work?: (typeof PALWORLD_WORK_TYPES)[number];
   rarity?: number;
@@ -113,7 +124,7 @@ export type PalworldPalListQuery = {
 
 export type PalworldItemListQuery = {
   q?: string;
-  locale?: "ko" | "ja";
+  locale?: PalworldQueryLocale;
   category?: (typeof PALWORLD_ITEM_CATEGORIES)[number];
   itemType?: (typeof PALWORLD_ITEM_FILTER_CATEGORIES)[number];
   rarity?: number;
@@ -128,7 +139,7 @@ export type PalworldItemListQuery = {
 
 export type PalworldTechnologyListQuery = {
   q?: string;
-  locale?: "ko" | "ja";
+  locale?: PalworldQueryLocale;
   order: PalworldSortOrder;
   page: number;
   limit: number;
@@ -136,7 +147,7 @@ export type PalworldTechnologyListQuery = {
 
 export type PalworldSkillListQuery = {
   q?: string;
-  locale?: "ko" | "ja";
+  locale?: PalworldQueryLocale;
   type?: (typeof PALWORLD_SKILL_TYPES)[number];
   element?: (typeof PALWORLD_ELEMENTS)[number];
   partnerElement?: (typeof PALWORLD_ELEMENTS)[number];
@@ -315,7 +326,7 @@ export function parsePalworldPalListQuery(params: URLSearchParams): PalworldPalL
   assertKnownKeys(params, PAL_LIST_QUERY_KEYS);
   return {
     q: optionalText(params, "q"),
-    locale: optionalEnum(params, "locale", ["ko", "ja"] as const),
+    locale: optionalEnum(params, "locale", PALWORLD_QUERY_LOCALES),
     element: optionalEnum(params, "element", PALWORLD_ELEMENTS),
     work: optionalEnum(params, "work", PALWORLD_WORK_TYPES),
     rarity: optionalRarity(params, 1),
@@ -335,7 +346,7 @@ export function parsePalworldItemListQuery(params: URLSearchParams): PalworldIte
   }
   return {
     q: optionalText(params, "q"),
-    locale: optionalEnum(params, "locale", ["ko", "ja"] as const),
+    locale: optionalEnum(params, "locale", PALWORLD_QUERY_LOCALES),
     category: optionalEnum(params, "category", PALWORLD_ITEM_CATEGORIES),
     itemType: optionalEnum(params, "itemType", PALWORLD_ITEM_FILTER_CATEGORIES),
     rarity,
@@ -354,7 +365,7 @@ export function parsePalworldTechnologyListQuery(
   assertKnownKeys(params, TECHNOLOGY_LIST_QUERY_KEYS);
   return {
     q: optionalText(params, "q"),
-    locale: optionalEnum(params, "locale", ["ko", "ja"] as const),
+    locale: optionalEnum(params, "locale", PALWORLD_QUERY_LOCALES),
     order: optionalEnum(params, "order", ["asc", "desc"] as const) ?? "asc",
     ...pagination(params, 24)
   };
@@ -364,7 +375,7 @@ export function parsePalworldSkillListQuery(params: URLSearchParams): PalworldSk
   assertKnownKeys(params, SKILL_LIST_QUERY_KEYS);
   return {
     q: optionalText(params, "q"),
-    locale: optionalEnum(params, "locale", ["ko", "ja"] as const),
+    locale: optionalEnum(params, "locale", PALWORLD_QUERY_LOCALES),
     type: optionalEnum(params, "type", PALWORLD_SKILL_TYPES),
     element: optionalEnum(params, "element", PALWORLD_ELEMENTS),
     partnerElement: optionalEnum(params, "partnerElement", PALWORLD_ELEMENTS),

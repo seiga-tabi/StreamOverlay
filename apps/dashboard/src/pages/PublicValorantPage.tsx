@@ -3,7 +3,7 @@ import "../styles/pages/public-valorant/valorant-route.css";
 import { AppShell, AppShellHeader, AppShellMain } from "../shared/ui/AppShell";
 import { usePublicLocale } from "../features/public-lol/hooks/usePublicLocale";
 import { usePublicTheme } from "../features/public-lol/hooks/usePublicTheme";
-import { setActivePublicLocale } from "../features/public-lol/i18n/public-lol-i18n";
+import { publicContentLocale, setActivePublicLocale } from "../features/public-lol/i18n/public-lol-i18n";
 import { ValorantBottomTabBar } from "../features/public-valorant/components/ValorantBottomTabBar";
 import { ValorantComingSoonPage } from "../features/public-valorant/components/ValorantComingSoonPage";
 import { ValorantHeader } from "../features/public-valorant/components/ValorantHeader";
@@ -19,7 +19,9 @@ const noServerLocalePreference = async (): Promise<ValorantLocale | undefined> =
  * 데이터 화면은 /api/valorant/* contract(Codex handoff) 이후 feature 모듈에 붙습니다.
  * 근거: docs/mockups/valorant-page-design.html §03 */
 export function PublicValorantPage() {
-  const { locale, changeLocale } = usePublicLocale(noServerLocalePreference);
+  const { locale: rawLocale, changeLocale } = usePublicLocale(noServerLocalePreference);
+  /* en 콘텐츠가 아직 없음 — 팰월드 우선 단계의 ko 폴백. */
+  const locale = publicContentLocale(rawLocale);
   const { theme } = usePublicTheme();
   const { page } = useValorantRoute();
   const text = valorantI18n[locale];

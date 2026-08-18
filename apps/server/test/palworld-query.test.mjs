@@ -121,8 +121,11 @@ test("스킬 목록 query는 종류·속성·정렬과 pagination만 허용한�
     () => parsePalworldSkillListQuery(new URLSearchParams("q=fire&redirect=https%3A%2F%2Fexample.com")),
     PalworldQueryError
   );
+  /* en 은 2026-08-18 부터 허용합니다 — 팰월드 en 화면(도감·아이템·스킬)이
+     locale 을 그대로 실어 보내는데 400 이 나면 목록이 통째로 비어 보였습니다. */
+  assert.equal(parsePalworldSkillListQuery(new URLSearchParams("locale=en")).locale, "en");
   assert.throws(
-    () => parsePalworldSkillListQuery(new URLSearchParams("locale=en")),
+    () => parsePalworldSkillListQuery(new URLSearchParams("locale=fr")),
     PalworldQueryError
   );
   for (const invalidQuery of [
@@ -295,5 +298,24 @@ test("지도 위치 query는 world·레이어·offset·limit allowlist만 허용
       () => parsePalworldMapLocationsQuery(params),
       PalworldQueryError
     );
+  }
+});
+
+test("목록 query 는 ko·ja·en 세 로케일을 받는다", () => {
+  /* locale 은 정렬 기준으로만 쓰입니다 — 응답에는 세 언어 이름이 모두 실립니다. */
+  for (const locale of ["ko", "ja", "en"]) {
+    const params = () => new URLSearchParams(`locale=${locale}`);
+    assert.equal(parsePalworldPalListQuery(params()).locale, locale);
+    assert.equal(parsePalworldItemListQuery(params()).locale, locale);
+    assert.equal(parsePalworldSkillListQuery(params()).locale, locale);
+    assert.equal(parsePalworldTechnologyListQuery(params()).locale, locale);
+  }
+  for (const parse of [
+    parsePalworldPalListQuery,
+    parsePalworldItemListQuery,
+    parsePalworldSkillListQuery,
+    parsePalworldTechnologyListQuery,
+  ]) {
+    assert.throws(() => parse(new URLSearchParams("locale=zh")), PalworldQueryError);
   }
 });

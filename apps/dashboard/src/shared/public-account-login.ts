@@ -15,7 +15,7 @@ import type { PublicTwitchAccountUser } from "./PublicTwitchAccountChip";
  * 페이지 결합 동작이 있는 헤더(팰월드·LoL 의 뷰어 Twitch 연동, Bot 의 추적 플로)는
  * 반환값을 부분 오버라이드해 사용할 수 있습니다. */
 
-export type PublicAccountLocale = "ko" | "ja";
+export type PublicAccountLocale = "ko" | "ja" | "en";
 
 const accountKo = {
   login: "로그인",
@@ -45,7 +45,21 @@ const accountJa: Record<keyof typeof accountKo, string> = {
   twitchUnavailable: "Twitch ログインは現在利用できません。",
 };
 
-export const publicAccountI18n = { ko: accountKo, ja: accountJa } as const;
+const accountEn: Record<keyof typeof accountKo, string> = {
+  login: "Log in",
+  loginMenu: "Choose a login method",
+  loginTitle: "Log in with your YORO account",
+  logout: "Log out",
+  menu: "Account menu",
+  section: "Account",
+  dashboard: "My dashboard",
+  discordLogin: "Log in with Discord",
+  twitchLogin: "Log in with Twitch",
+  twitchLoading: "Checking login…",
+  twitchUnavailable: "Twitch login is currently unavailable.",
+};
+
+export const publicAccountI18n = { ko: accountKo, ja: accountJa, en: accountEn } as const;
 
 /* 페이지가 소유한 뷰어 Twitch 세션(팔로우 채널·참가형과 공유)을 계정 UI 에 합성하는
    옵션 — 팰월드·LoL 처럼 계정 로그인과 뷰어 세션이 공존하는 화면이 사용합니다.

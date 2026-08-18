@@ -89,7 +89,8 @@ export function resolvePalworldMapLabel(
   label: PalworldMapLocalizedLabel,
   locale: PalworldLocale,
 ): string {
-  return label[locale];
+  /* 가져온 지도 라벨 데이터는 ko·ja 만 담김 — en 은 ko 폴백(서버 en 라벨은 후속). */
+  return label[locale === "en" ? "ko" : locale];
 }
 
 export function isPalworldMapLayerReady(

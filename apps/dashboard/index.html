@@ -62,10 +62,39 @@
         ];
         const isAdEligiblePath = () => {
           if (document.querySelector('meta[name="robots"][content*="noindex"]')) return false;
-          const localizedPath = window.location.pathname.replace(/^\/(?:ko|ja)(?=\/|$)/, "") || "/";
+          const localizedPath = window.location.pathname.replace(/^\/(?:ko|ja|en)(?=\/|$)/, "") || "/";
           const pathname = localizedPath.replace(/\/+$/, "") || "/";
           return publisherContentExactPaths.has(pathname)
             || publisherContentPathPrefixes.some((prefix) => pathname.startsWith(prefix));
+        };
+        const injectAdsense = () => {
+          if (document.getElementById(adsenseScriptId)) return;
+          const script = document.createElement("script");
+          script.id = adsenseScriptId;
+          script.async = true;
+          script.crossOrigin = "anonymous";
+          script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7880271953912430";
+          document.head.append(script);
+        };
+        /* 지연 로드(2026-08-18 결정): 동의가 있어도 초기 렌더 경로에서 201KB 광고
+           스크립트를 받지 않습니다. 브라우저 유휴 + 첫 상호작용(스크롤·포인터·키)
+           중 먼저 오는 쪽에서 주입하고, 상호작용이 없으면 8초 후 폴백 주입합니다. */
+        let adsenseDeferArmed = false;
+        const scheduleAdsense = () => {
+          if (adsenseDeferArmed || document.getElementById(adsenseScriptId)) return;
+          adsenseDeferArmed = true;
+          let done = false;
+          const fire = () => {
+            if (done) return;
+            done = true;
+            ["scroll", "pointerdown", "keydown", "touchstart"].forEach((type) =>
+              window.removeEventListener(type, fire));
+            const idle = window.requestIdleCallback ?? ((fn) => window.setTimeout(fn, 200));
+            idle(() => injectAdsense());
+          };
+          ["scroll", "pointerdown", "keydown", "touchstart"].forEach((type) =>
+            window.addEventListener(type, fire, { once: false, passive: true }));
+          window.setTimeout(fire, 8000);
         };
         const loadAdsense = () => {
           if (!isAdEligiblePath()) {
@@ -80,13 +109,7 @@
           } catch {
             return;
           }
-          if (document.getElementById(adsenseScriptId)) return;
-          const script = document.createElement("script");
-          script.id = adsenseScriptId;
-          script.async = true;
-          script.crossOrigin = "anonymous";
-          script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7880271953912430";
-          document.head.append(script);
+          scheduleAdsense();
         };
         const consentState = (choice) => ({
           ad_storage: choice,

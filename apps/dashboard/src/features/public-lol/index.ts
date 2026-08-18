@@ -30,6 +30,7 @@ export { ProfileSeasonBadges } from "./components/ProfileSeasonBadges";
 export { ProfileTopActions } from "./components/ProfileTopActions";
 export { PublicProfileShareButton } from "./components/PublicProfileShareButton";
 export { ProfileTopIdentity } from "./components/ProfileTopIdentity";
+export { ProfileShareActions } from "./components/ProfileShareActions";
 export { ProfileTopPanel } from "./components/ProfileTopPanel";
 export { ProfileTopSearchToolbar } from "./components/ProfileTopSearchToolbar";
 export { PlayerItemBuild } from "./components/PlayerItemBuild";
@@ -59,7 +60,6 @@ export { RecentMatchExpandedToolbar } from "./components/RecentMatchExpandedTool
 export { RecentMatchRow, recentMatchScoreGrade } from "./components/RecentMatchRow";
 export { RecentMatchesPanel } from "./components/RecentMatchesPanel";
 export { RecentMatchesSummaryStrip } from "./components/RecentMatchesSummaryStrip";
-export { RecentMatchesShareActions } from "./components/RecentMatchesShareActions";
 export { SearchForm } from "./components/SearchForm";
 export { SearchableRiotId } from "./components/SearchableRiotId";
 export { TeamChampionAvatar } from "./components/TeamChampionAvatar";
@@ -293,10 +293,13 @@ export type {
   RecentMatchesPanelText,
 } from "./components/RecentMatchesPanel";
 export type {
-  RecentMatchShareItem,
-  RecentMatchesShareActionsProps,
-  RecentMatchesShareText,
-} from "./components/RecentMatchesShareActions";
+  ProfileShareCard,
+  ProfileShareLane,
+  ProfileShareChampion,
+  ProfileShareStreamer,
+  ProfileShareActionsProps,
+  ProfileShareText,
+} from "./components/ProfileShareActions";
 export type {
   SearchFormHelpers,
   SearchFormLocalizedText,

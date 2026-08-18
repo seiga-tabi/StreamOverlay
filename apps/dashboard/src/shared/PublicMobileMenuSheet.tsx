@@ -29,6 +29,7 @@ export function PublicMobileMenuSheet({
   activePage,
   labels,
   locale,
+  locales,
   onClose,
   onGamePage,
   onLocale,
@@ -52,6 +53,8 @@ export function PublicMobileMenuSheet({
   id: string;
   labels: PublicMobileMenuLabels;
   locale: PublicLocale;
+  /** 언어 옵션 목록 — 기본 ko·ja. en 콘텐츠가 있는 섹션(팰월드)만 en 을 추가합니다. */
+  locales?: readonly PublicLocale[];
   onClose: () => void;
   onGamePage: (page: PublicMainPage) => void;
   onLocale: (locale: PublicLocale) => void;
@@ -97,6 +100,7 @@ export function PublicMobileMenuSheet({
           <PublicLocaleOptions
             ariaLabel={labels.language}
             locale={locale}
+            locales={locales}
             onLocale={onLocale}
           />
         </section>

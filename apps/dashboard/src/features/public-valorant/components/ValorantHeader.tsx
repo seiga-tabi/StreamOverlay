@@ -11,6 +11,7 @@ import type { PublicMainPage } from "../../public-lol/types/public-lol";
 import { setPublicPath } from "../../public-lol/utils/routes";
 import { publicAccountI18n, usePublicAccountLogin } from "../../../shared/public-account-login";
 import { valorantI18n, type ValorantLocale } from "../i18n/valorant-i18n";
+import { publicContentLocale } from "../../public-lol/i18n/public-lol-i18n";
 import { setValorantUrl, valorantPathForPage, type ValorantPage } from "../utils/routes";
 
 /* 상단 nav 와 하단 탭바가 공유하는 단일 원본 — 라벨·순서·활성 판정이 어긋나지 않게. */
@@ -141,7 +142,7 @@ export function ValorantHeader({
           <>
             <PublicLocaleSelector
               locale={locale}
-              onLocale={onLocale}
+              onLocale={(next) => onLocale(publicContentLocale(next))}
               open={localeMenuOpen}
               onOpenChange={(open) => {
                 setLocaleMenuOpen(open);
@@ -270,7 +271,7 @@ export function ValorantHeader({
             locale={locale}
             onClose={() => setMobileMenuOpen(false)}
             onGamePage={handleGame}
-            onLocale={onLocale}
+            onLocale={(next) => onLocale(publicContentLocale(next))}
             onDiscordLogin={loginWithDiscord}
             onDashboard={openDashboard}
             onTwitchLogin={loginWithTwitch}

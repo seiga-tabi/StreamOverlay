@@ -20,7 +20,7 @@ export const dashboardI18n = {
         operations: "운영",
         overlay: "Overlay",
         lol: "LoL 방송",
-        palworld: "펠월드",
+        palworld: "팰월드",
         system: "시스템"
       },
       loading: "화면을 불러오는 중입니다."

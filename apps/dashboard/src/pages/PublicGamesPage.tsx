@@ -3,7 +3,7 @@ import "../styles/pages/public-games/games-route.css";
 import { AppShell, AppShellHeader, AppShellMain } from "../shared/ui/AppShell";
 import { usePublicLocale } from "../features/public-lol/hooks/usePublicLocale";
 import { usePublicTheme } from "../features/public-lol/hooks/usePublicTheme";
-import { setActivePublicLocale } from "../features/public-lol/i18n/public-lol-i18n";
+import { publicContentLocale, setActivePublicLocale } from "../features/public-lol/i18n/public-lol-i18n";
 import { GamesBottomTabBar } from "../features/public-games/components/GamesBottomTabBar";
 import { GamesHeader } from "../features/public-games/components/GamesHeader";
 import { GamesHub } from "../features/public-games/components/GamesHub";
@@ -20,7 +20,9 @@ const noServerLocalePreference = async (): Promise<GamesLocale | undefined> => u
 /* 미니게임 공개 페이지 셸 — 라우팅 상태와 화면 조립만 담당합니다(모놀리스 금지).
  * 근거: docs/mockups/reaction-test.html v3 §①·§③. Valorant 셸 패턴 복제. */
 export function PublicGamesPage() {
-  const { locale, changeLocale } = usePublicLocale(noServerLocalePreference);
+  const { locale: rawLocale, changeLocale } = usePublicLocale(noServerLocalePreference);
+  /* 미니게임은 en 콘텐츠가 아직 없음 — 팰월드 우선 단계의 ko 폴백. */
+  const locale = publicContentLocale(rawLocale);
   const { theme } = usePublicTheme();
   const { page, shareId } = useGamesRoute();
   const text = gamesI18n[locale];

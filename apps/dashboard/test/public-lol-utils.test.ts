@@ -18,6 +18,11 @@ import {
   riotIdQuery
 } from "../src/features/public-lol/utils/riot-id";
 import { parseFavorites, parseRecentSearches } from "../src/features/public-lol/utils/storage";
+import {
+  normalizeShareRole,
+  profileShareLanes,
+  PROFILE_SHARE_MIN_SUB_LANE_GAMES,
+} from "../src/features/public-lol/utils/profile-share";
 import { publicPageRouteFromPath, publicPathForPage } from "../src/features/public-lol/utils/routes";
 import {
   isLocalizablePublicPath,
@@ -393,4 +398,87 @@ test("플레이 시간대 요약은 플랫폼 현지 시간으로 집계하고 �
 
   assert.equal(platformTimezoneLabel("kr"), "KST");
   assert.equal(platformTimezoneLabel("jp1"), "JST");
+});
+
+
+/* ── 프로필 공유 카드 라인 집계(목업 lol-profile-share-card.html §④·§⑤) ── */
+
+const shareChampionName = (champion: { nameKo?: string; championId: number }): string =>
+  champion.nameKo ?? `Champion ${champion.championId}`;
+
+function shareMatch(position: string, championId: number, nameKo: string, result: "win" | "loss", kda = 3): any {
+  return {
+    matchId: `M${championId}-${result}-${Math.random()}`,
+    champion: { championId, nameKo, iconUrl: `https://cdn/${championId}.png` },
+    position,
+    result,
+    kills: 5, deaths: 2, assists: 6, kda,
+    items: [], summonerSpells: [], runes: [], teams: [],
+  };
+}
+
+test("프로필 공유: 주·부 라인과 라인별 주력 챔피언 3개를 집계한다", () => {
+  const matches = [
+    ...Array.from({ length: 4 }, () => shareMatch("MIDDLE", 103, "아리", "win")),
+    ...Array.from({ length: 2 }, () => shareMatch("MIDDLE", 157, "야스오", "loss")),
+    shareMatch("MIDDLE", 238, "제드", "win"),
+    shareMatch("MIDDLE", 99, "럭스", "loss"),
+    ...Array.from({ length: 3 }, () => shareMatch("UTILITY", 412, "쓰레쉬", "win")),
+  ];
+  const lanes = profileShareLanes(
+    [
+      { role: "MIDDLE", games: 8, wins: 5, winRate: 62.5, averageKda: 3.2 },
+      { role: "UTILITY", games: 3, wins: 3, winRate: 100, averageKda: 4 },
+    ],
+    matches,
+    shareChampionName,
+  );
+
+  assert.equal(lanes.main?.role, "MIDDLE");
+  assert.equal(lanes.main?.games, 8);
+  assert.equal(lanes.main?.winRate, 63);
+  /* 판수 상위 3개만, 판수 내림차순 — 4번째(럭스)는 카드에 들어가지 않습니다. */
+  assert.deepEqual(lanes.main?.champions.map((champion) => champion.name), ["아리", "야스오", "제드"]);
+  assert.equal(lanes.main?.champions[0]?.games, 4);
+  assert.equal(lanes.main?.champions[0]?.winRate, 100);
+  assert.equal(lanes.sub?.role, "UTILITY");
+  assert.equal(lanes.sub?.champions.length, 1);
+});
+
+test("프로필 공유: 표본이 얇은 부 라인은 블록을 만들지 않는다", () => {
+  /* 목업 §⑤ — 부 라인 games < 3 이면 빈 블록 대신 생략합니다. */
+  const lanes = profileShareLanes(
+    [
+      { role: "MIDDLE", games: 9, wins: 5, winRate: 55.6, averageKda: 3 },
+      { role: "TOP", games: PROFILE_SHARE_MIN_SUB_LANE_GAMES - 1, wins: 1, winRate: 50, averageKda: 2 },
+    ],
+    [shareMatch("MIDDLE", 103, "아리", "win"), shareMatch("TOP", 86, "가렌", "loss")],
+    shareChampionName,
+  );
+  assert.equal(lanes.main?.role, "MIDDLE");
+  assert.equal(lanes.sub, undefined);
+});
+
+test("프로필 공유: rolePerformance 가 없으면 최근 경기로 라인 순위를 폴백한다", () => {
+  const lanes = profileShareLanes(
+    [],
+    [
+      ...Array.from({ length: 5 }, () => shareMatch("BOTTOM", 222, "징크스", "win")),
+      ...Array.from({ length: 3 }, () => shareMatch("MID", 103, "아리", "loss")),
+    ],
+    shareChampionName,
+  );
+  assert.equal(lanes.main?.role, "BOTTOM");
+  assert.equal(lanes.main?.winRate, 100);
+  /* MID 는 MIDDLE 로 정규화되어 한 라인으로 합쳐집니다. */
+  assert.equal(lanes.sub?.role, "MIDDLE");
+  assert.equal(lanes.sub?.games, 3);
+});
+
+test("프로필 공유: 라인 표기 정규화(MID·ADC·SUPPORT)", () => {
+  assert.equal(normalizeShareRole("MID"), "MIDDLE");
+  assert.equal(normalizeShareRole("adc"), "BOTTOM");
+  assert.equal(normalizeShareRole("SUPPORT"), "UTILITY");
+  assert.equal(normalizeShareRole("TOP"), "TOP");
+  assert.equal(normalizeShareRole(undefined), "");
 });

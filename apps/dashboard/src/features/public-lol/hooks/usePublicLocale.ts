@@ -72,7 +72,7 @@ export function usePublicLocale(loadPreference: PublicLocalePreferenceLoader) {
   }, [loadPreference, updateLocaleUrl]);
 
   useEffect(() => {
-    document.documentElement.lang = locale === "ja" ? "ja" : "ko";
+    document.documentElement.lang = locale === "ja" ? "ja" : locale === "en" ? "en" : "ko";
   }, [locale]);
 
   useEffect(() => {

@@ -69,11 +69,17 @@ test("공개 페이지 URL을 Dashboard SPA 진입 경로로 허용한다", () =
   }
 });
 
-test("한국어·일본어 공개 URL만 언어 prefix 아래에서 SPA 경로로 허용한다", () => {
+test("한국어·일본어·영어 공개 URL만 언어 prefix 아래에서 SPA 경로로 허용한다", () => {
   for (const pathname of [
     "/ko",
     "/ko/",
     "/ja/",
+    /* en(2026-08-18 · 팰월드 우선) — 팰월드 경로는 영어 메타를, 그 외는 ko 메타를 냅니다. */
+    "/en/",
+    "/en/palworld",
+    "/en/palworld/pals",
+    "/en/palworld/breeding",
+    "/en/palworld/pals/lamball",
     "/ko/lol/summoners/jp/test-JP1",
     "/ja/bot/commands",
     "/ko/games/ranking",
@@ -87,13 +93,18 @@ test("한국어·일본어 공개 URL만 언어 prefix 아래에서 SPA 경로�
   ]) {
     assert.equal(isPublicDashboardAppRoute(pathname), true, pathname);
   }
-  for (const pathname of ["/en/", "/ko/dashboard", "/ja/login", "/ko/account", "/ko/api/palworld/meta"]) {
+  for (const pathname of ["/fr/", "/en/dashboard", "/ko/dashboard", "/ja/login", "/ko/account", "/ko/api/palworld/meta"]) {
     assert.equal(isPublicDashboardAppRoute(pathname), false, pathname);
   }
   assert.equal(publicUrlLocaleFromPathname("/ja/palworld"), "ja");
   assert.equal(publicUrlLocaleFromPathname("/japanese"), undefined);
   assert.equal(stripPublicUrlLocalePrefix("/ko/palworld"), "/palworld");
   assert.equal(stripPublicUrlLocalePrefix("/ja"), "/");
+  assert.equal(stripPublicUrlLocalePrefix("/en/palworld"), "/palworld");
+  /* en 은 서빙되는 로케일입니다. 영어 본문이 없는 섹션을 ko 로 접는 판단은
+     public-seo 의 servedSeoLocale 이 맡고, 여기서는 prefix 그대로 돌려줍니다. */
+  assert.equal(publicUrlLocaleFromPathname("/en/palworld"), "en");
+  assert.equal(publicUrlLocaleFromPathname("/en/lol"), "en");
 });
 
 test("API와 Dashboard 내부 URL 및 존재하지 않는 게임 URL은 공개 SPA 경로로 오인하지 않는다", () => {

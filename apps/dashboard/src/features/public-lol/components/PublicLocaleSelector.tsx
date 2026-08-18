@@ -7,7 +7,20 @@ export type PublicLocaleSelectorProps = {
   onAutoLocale?: () => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  /** 노출할 언어 목록 — 기본 ko·ja. en 콘텐츠가 있는 섹션(팰월드)만 en 을 추가합니다. */
+  locales?: readonly PublicLocale[];
 };
+
+const DEFAULT_LOCALES: readonly PublicLocale[] = ["ko", "ja"];
+
+function localeOptionList(locales: readonly PublicLocale[]): Array<{ locale: PublicLocale; code: string; label: string }> {
+  const all: Array<{ locale: PublicLocale; code: string; label: string }> = [
+    { locale: "ko", code: "KR", label: t().languageKo },
+    { locale: "ja", code: "JP", label: t().languageJa },
+    { locale: "en", code: "EN", label: t().languageEn },
+  ];
+  return all.filter((option) => locales.includes(option.locale));
+}
 
 function applyLocale(nextLocale: PublicLocale, onLocale: (locale: PublicLocale) => void): void {
   window.localStorage.setItem("preferredLanguage", nextLocale);
@@ -21,16 +34,15 @@ export function PublicLocaleOptions({
   ariaLabel,
   locale,
   onLocale,
+  locales = DEFAULT_LOCALES,
 }: {
   ariaLabel?: string;
   locale: PublicLocale;
   onLocale: (locale: PublicLocale) => void;
+  locales?: readonly PublicLocale[];
 }) {
   const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const options: Array<{ locale: PublicLocale; code: string; label: string }> = [
-    { locale: "ko", code: "KR", label: t().languageKo },
-    { locale: "ja", code: "JP", label: t().languageJa }
-  ];
+  const options = localeOptionList(locales);
 
   function focusOption(index: number): void {
     const nextIndex = (index + options.length) % options.length;
@@ -89,7 +101,8 @@ export function PublicLocaleSelector({
   onLocale,
   onAutoLocale: _onAutoLocale,
   open: controlledOpen,
-  onOpenChange
+  onOpenChange,
+  locales = DEFAULT_LOCALES
 }: PublicLocaleSelectorProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const menuId = useId();
@@ -97,10 +110,7 @@ export function PublicLocaleSelector({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const open = controlledOpen ?? internalOpen;
-  const options: Array<{ locale: PublicLocale; code: string; label: string }> = [
-    { locale: "ko", code: "KR", label: t().languageKo },
-    { locale: "ja", code: "JP", label: t().languageJa }
-  ];
+  const options = localeOptionList(locales);
   const activeOption = options.find((option) => option.locale === locale) ?? options[0]!;
 
   function setOpen(nextOpen: boolean): void {

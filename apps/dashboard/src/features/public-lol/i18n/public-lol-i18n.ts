@@ -1,4 +1,4 @@
-export const publicI18n = {
+const publicI18nBase = {
   ko: {
     brand: "YORO.gg",
     tagline: "서버별 전적 검색과 방송 분석을 한 화면에서 확인합니다.",
@@ -13,6 +13,7 @@ export const publicI18n = {
     languageMenu: "언어 선택",
     languageKo: "한국어",
     languageJa: "일본어",
+    languageEn: "English",
     mobileMenu: "메뉴",
     summonerResults: "소환사",
     relatedSummoners: "연관 닉네임",
@@ -258,7 +259,7 @@ export const publicI18n = {
     leagueOfLegendsSubtitle: "전적 검색",
     valorant: "발로란트",
     valorantSubtitle: "경쟁전 도우미",
-    palworld: "펠월드",
+    palworld: "팰월드",
     palworldSubtitle: "데이터베이스",
     yoroBot: "YORO Bot",
     yoroBotSubtitle: "Discord 서버 도우미",
@@ -482,19 +483,22 @@ export const publicI18n = {
     shareRecordCopied: "링크를 복사했습니다.",
     shareRecordCopyFailed: "링크를 복사하지 못했습니다.",
     shareRecordText: "의 League of Legends 전적을 확인하세요.",
-    matchShareTitle: "최근 전적 공유 카드",
-    matchShareDescription: "현재 필터의 최근 최대 8경기를 한 장의 이미지로 정리합니다.",
-    matchShareDownload: "이미지 저장",
-    matchShareNative: "SNS 공유",
-    matchSharePreparing: "공유 이미지를 만드는 중입니다.",
-    matchShareSaved: "전적 이미지를 저장했습니다.",
-    matchShareShared: "전적 이미지를 공유했습니다.",
-    matchShareFailed: "공유 이미지를 만들지 못했습니다.",
-    matchShareRecentMatches: "최근 전적",
-    matchShareGeneratedBy: "YORO.GG에서 생성",
-    matchShareWins: "승",
-    matchShareLosses: "패",
-    matchShareWinRate: "승률",
+
+    /* 프로필 공유 카드(2026-08-18) — 전적 공유 카드를 대체합니다.
+       설계 원본: docs/mockups/lol-profile-share-card.html v1.3. */
+    profileShareTitle: "프로필 공유 카드",
+    profileShareDescription: "티어와 주·부 라인, 라인별 주력 챔피언을 한 장의 이미지로 정리합니다.",
+    profileShareDownload: "이미지 저장",
+    profileShareNative: "프로필 공유",
+    profileSharePreparing: "공유 이미지를 만드는 중입니다.",
+    profileShareSaved: "프로필 이미지를 저장했습니다.",
+    profileShareShared: "프로필 이미지를 공유했습니다.",
+    profileShareFailed: "공유 이미지를 만들지 못했습니다.",
+    profileShareMainLane: "주 라인",
+    profileShareSubLane: "부 라인",
+    profileShareUnranked: "언랭크",
+    profileShareSample: "최근 {count}경기 기준",
+    profileShareLive: "LIVE",
     favoriteAdded: "즐겨찾기에 추가했습니다.",
     favoriteRemoved: "즐겨찾기에서 해제했습니다.",
     premiumNoticeTitle: "프리미엄 기능 안내",
@@ -854,6 +858,7 @@ export const publicI18n = {
     languageMenu: "言語選択",
     languageKo: "韓国語",
     languageJa: "日本語",
+    languageEn: "English",
     mobileMenu: "メニュー",
     summonerResults: "サモナー",
     relatedSummoners: "関連ニックネーム",
@@ -1321,19 +1326,20 @@ export const publicI18n = {
     shareRecordCopied: "リンクをコピーしました。",
     shareRecordCopyFailed: "リンクをコピーできませんでした。",
     shareRecordText: "のLeague of Legends戦績を確認しましょう。",
-    matchShareTitle: "最近の戦績シェアカード",
-    matchShareDescription: "現在のフィルターから最近の最大8試合を1枚の画像にまとめます。",
-    matchShareDownload: "画像を保存",
-    matchShareNative: "SNSで共有",
-    matchSharePreparing: "共有画像を作成しています。",
-    matchShareSaved: "戦績画像を保存しました。",
-    matchShareShared: "戦績画像を共有しました。",
-    matchShareFailed: "共有画像を作成できませんでした。",
-    matchShareRecentMatches: "最近の戦績",
-    matchShareGeneratedBy: "YORO.GGで作成",
-    matchShareWins: "勝",
-    matchShareLosses: "敗",
-    matchShareWinRate: "勝率",
+
+    profileShareTitle: "プロフィール共有カード",
+    profileShareDescription: "ティアとメイン・サブレーン、レーン別の得意チャンピオンを1枚の画像にまとめます。",
+    profileShareDownload: "画像を保存",
+    profileShareNative: "プロフィールを共有",
+    profileSharePreparing: "共有画像を作成しています。",
+    profileShareSaved: "プロフィール画像を保存しました。",
+    profileShareShared: "プロフィール画像を共有しました。",
+    profileShareFailed: "共有画像を作成できませんでした。",
+    profileShareMainLane: "メインレーン",
+    profileShareSubLane: "サブレーン",
+    profileShareUnranked: "アンランク",
+    profileShareSample: "直近{count}試合基準",
+    profileShareLive: "LIVE",
     favoriteAdded: "お気に入りに追加しました。",
     favoriteRemoved: "お気に入りから解除しました。",
     premiumNoticeTitle: "プレミアム機能案内",
@@ -1681,11 +1687,27 @@ export const publicI18n = {
   }
 } as const;
 
+/* 영어 로케일(2026-08-18 결정) — 팰월드 우선 단계.
+ * 팰월드 섹션은 palworld-i18n 이 전량 영어를 갖고, 이 공용 테이블의 영어는
+ * 아직 ko 폴백입니다(언어 전환 UI 도 팰월드 페이지에서만 EN 을 노출).
+ * LoL 등 다른 섹션을 영어로 열 때 이 폴백을 실제 번역으로 교체합니다. */
+export const publicI18n = {
+  ...publicI18nBase,
+  en: publicI18nBase.ko
+} as const;
+
 export type PublicLocale = keyof typeof publicI18n;
 export type PublicText = (typeof publicI18n)[PublicLocale];
 export type PublicTextKey = keyof typeof publicI18n.ko;
 
 export let activePublicLocale: PublicLocale = "ko";
+
+/** 아직 en 콘텐츠가 없는 섹션(ko·ja 이중 테이블)용 축소 — en 은 ko 로 폴백합니다.
+ * 팰월드 우선 단계(2026-08-18)의 의도된 동작이며, 해당 섹션을 영어로 열 때
+ * 호출부를 실제 en 테이블로 바꾸면서 이 폴백을 제거합니다. */
+export function publicContentLocale(locale: PublicLocale): "ko" | "ja" {
+  return locale === "ja" ? "ja" : "ko";
+}
 
 export function setActivePublicLocale(locale: PublicLocale): void {
   activePublicLocale = locale;

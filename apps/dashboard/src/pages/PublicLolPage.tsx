@@ -39,6 +39,8 @@ import { LolAugmentIcon } from "../features/public-lol/components/LolAugmentIcon
 import { publicLiveText } from "../shared/public-live-streamers";
 import { streamerBuckets, type StreamerFilter } from "../features/public-lol/utils/streamers";
 import { arenaPlacementClass, isArenaQueue, matchGap, matchLanePairs, type LanePair } from "../features/public-lol/utils/match-lanes";
+import { ProfileShareActions, type ProfileShareCard, type ProfileShareLane } from "../features/public-lol/components/ProfileShareActions";
+import { normalizeShareRole, profileShareLanes } from "../features/public-lol/utils/profile-share";
 import { ArenaStandings } from "../features/public-lol/components/ArenaStandings";
 import { ProfileLinkIcon, profileLinkPlatformFromUrl, profileLinkPlatformClass } from "../components/ProfileLinkIcon";
 import { AppShell, AppShellHeader, AppShellMain, AppShellSidebar } from "../shared/ui/AppShell";
@@ -113,7 +115,6 @@ import {
   RecentMatchRow as FeatureRecentMatchRow,
   recentMatchScoreGrade,
   RecentMatchesPanel as FeatureRecentMatchesPanel,
-  RecentMatchesShareActions,
   RecentMatchesSummaryStrip,
   SearchForm as FeatureSearchForm,
   SearchableRiotId as FeatureSearchableRiotId,
@@ -155,7 +156,6 @@ import {
   type RecentMatchRowMediaItem,
   type RecentMatchRowTeamMember,
   type RecentMatchRowTeams,
-  type RecentMatchShareItem,
   type RecentMatchesPanelText,
   type RecentMatchesSummaryChampion,
   type SearchFormProps,
@@ -167,7 +167,7 @@ import {
   type TeamChampionAvatarViewModel,
 } from "../features/public-lol";
 import { platformTimezoneLabel, playtimeSummary, type PlaytimeBandKey } from "../features/public-lol/utils/playtime";
-import {
+import { publicContentLocale,
   activePublicLocale,
   publicI18n,
   publicJaText,
@@ -394,7 +394,7 @@ const FOLLOWED_LOL_RETRY_MAX_MS = 30_000;
 function publicOptionLabel(options: PublicLocalizedOption[], value: string | undefined): string {
   if (!value) return "";
   const option = options.find((item) => item.value === value);
-  return option ? option[activePublicLocale] : value;
+  return option ? option[publicContentLocale(activePublicLocale)] : value;
 }
 
 const matchBadgeLabelKeys: Record<PublicLolMatchBadgeCode, keyof typeof publicI18n.ko> = {
@@ -438,7 +438,8 @@ async function loadPublicLocalePreference(signal?: AbortSignal): Promise<PublicL
   return isPublicLocale(body.locale) ? body.locale : undefined;
 }
 
-const queueLabels: Record<PublicLocale, Record<number, string>> = {
+/* LoL 로컬 표는 ko·ja 만 유지 — en 은 publicContentLocale 축소로 ko 폴백(팰월드 우선 단계). */
+const queueLabels: Record<"ko" | "ja", Record<number, string>> = {
   ko: {
     6: "5v5 랭크",
     42: "5v5 랭크",
@@ -471,7 +472,7 @@ const queueLabels: Record<PublicLocale, Record<number, string>> = {
   }
 };
 
-const roleLabels: Record<PublicLocale, Record<string, string>> = {
+const roleLabels: Record<"ko" | "ja", Record<string, string>> = {
   ko: {
     TOP: "탑",
     JUNGLE: "정글",
@@ -535,7 +536,7 @@ function RoleIcon({ role }: { role: string | undefined }) {
   );
 }
 
-const objectiveLabels: Record<PublicLocale, Record<string, string>> = {
+const objectiveLabels: Record<"ko" | "ja", Record<string, string>> = {
   ko: {
     baron: "바론",
     champion: "킬",
@@ -863,7 +864,7 @@ function damagePerMinuteTone(value: number | undefined): MetricTone {
 
 function mainRoleLabel(role: string | undefined): string {
   if (!role) return "-";
-  return roleLabels[activePublicLocale][role.toUpperCase()] ?? role;
+  return roleLabels[publicContentLocale(activePublicLocale)][role.toUpperCase()] ?? role;
 }
 
 function championName(champion: LolChampionSummary | undefined, locale: PublicLocale = activePublicLocale): string {
@@ -901,7 +902,7 @@ function multikillLabel(value: number | undefined): string {
 function objectiveSummary(objectives: Record<string, number> | undefined): string {
   const entries = Object.entries(objectives ?? {})
     .filter(([, value]) => value > 0)
-    .map(([key, value]) => `${objectiveLabels[activePublicLocale][key] ?? key} ${value}`);
+    .map(([key, value]) => `${objectiveLabels[publicContentLocale(activePublicLocale)][key] ?? key} ${value}`);
   return entries.length > 0 ? entries.join(" · ") : "-";
 }
 
@@ -909,13 +910,13 @@ function objectiveSummaryByOrder(objectives: Record<string, number> | undefined,
   const entries = keys
     .map((key) => [key, objectives?.[key] ?? 0] as const)
     .filter(([, value]) => value > 0)
-    .map(([key, value]) => `${objectiveLabels[activePublicLocale][key] ?? key} ${value}`);
+    .map(([key, value]) => `${objectiveLabels[publicContentLocale(activePublicLocale)][key] ?? key} ${value}`);
   return entries.length > 0 ? entries.join(" · ") : "-";
 }
 
 const teamCompareObjectiveKeys = ["horde", "riftHerald", "dragon", "baron", "inhibitor", "tower"] as const;
 
-const objectiveShortLabels: Record<PublicLocale, Record<(typeof teamCompareObjectiveKeys)[number], string>> = {
+const objectiveShortLabels: Record<"ko" | "ja", Record<(typeof teamCompareObjectiveKeys)[number], string>> = {
   ko: {
     horde: "유충",
     riftHerald: "전령",
@@ -1355,13 +1356,13 @@ function publicHomeSearchPanelText(platform: LolPlatformId, locale: PublicLocale
     },
     /* LIVE 레일 문구의 단일 원본은 shared/public-live-streamers.tsx —
        LoL 홈은 등록 스트리머 데이터라 registered 변형을 씁니다. */
-    liveTitle: publicLiveText(activePublicLocale, "registeredTitle"),
-    livePrevious: publicLiveText(activePublicLocale, "previous"),
-    liveNext: publicLiveText(activePublicLocale, "next"),
-    liveViewAll: publicLiveText(activePublicLocale, "viewAll"),
-    liveWatch: publicLiveText(activePublicLocale, "watch"),
-    liveEmptyTitle: publicLiveText(activePublicLocale, "registeredEmptyTitle"),
-    liveEmptyDescription: publicLiveText(activePublicLocale, "registeredEmptyDescription"),
+    liveTitle: publicLiveText(publicContentLocale(activePublicLocale), "registeredTitle"),
+    livePrevious: publicLiveText(publicContentLocale(activePublicLocale), "previous"),
+    liveNext: publicLiveText(publicContentLocale(activePublicLocale), "next"),
+    liveViewAll: publicLiveText(publicContentLocale(activePublicLocale), "viewAll"),
+    liveWatch: publicLiveText(publicContentLocale(activePublicLocale), "watch"),
+    liveEmptyTitle: publicLiveText(publicContentLocale(activePublicLocale), "registeredEmptyTitle"),
+    liveEmptyDescription: publicLiveText(publicContentLocale(activePublicLocale), "registeredEmptyDescription"),
     primaryFeaturesTitle: {
       label: t().homePrimaryFeatures,
       ko: publicI18n.ko.homePrimaryFeatures,
@@ -2238,7 +2239,7 @@ function MiniGamesLabBanner() {
         <span className="public-sig-lab-record">
           <b>
             {Math.round(best.score)}ms
-            {tier ? <span className="public-sig-lab-record-tier"> · <i aria-hidden="true" className="games-tdot" style={{ background: tier.color }} /><span className="public-sig-lab-record-tiername"> {reactionTierLabel(tier, activePublicLocale)}</span></span> : null}
+            {tier ? <span className="public-sig-lab-record-tier"> · <i aria-hidden="true" className="games-tdot" style={{ background: tier.color }} /><span className="public-sig-lab-record-tiername"> {reactionTierLabel(tier, publicContentLocale(activePublicLocale))}</span></span> : null}
           </b>
           <small>{t().miniGamesLabBest}</small>
         </span>
@@ -4795,8 +4796,8 @@ function matchTeamCompareObjectivesViewModel(
     objectives: teamCompareObjectiveKeys.map((key): MatchTeamCompareObjectiveViewModel => ({
       key: `${team.teamId}:${key}`,
       className: `public-team-compare-objective ${key}`,
-      title: objectiveLabels[activePublicLocale][key] ?? key,
-      shortLabel: objectiveShortLabels[activePublicLocale][key],
+      title: objectiveLabels[publicContentLocale(activePublicLocale)][key] ?? key,
+      shortLabel: objectiveShortLabels[publicContentLocale(activePublicLocale)][key],
       value: team.objectives?.[key] ?? 0
     }))
   };
@@ -5122,7 +5123,7 @@ function currentGameTeamLabel(teamId: number): string {
 
 function currentGameQueueLabel(liveGame: PublicLolCurrentGame): string {
   return liveGame.queueId
-    ? queueLabels[activePublicLocale][liveGame.queueId] ?? `${t().queue} ${liveGame.queueId}`
+    ? queueLabels[publicContentLocale(activePublicLocale)][liveGame.queueId] ?? `${t().queue} ${liveGame.queueId}`
     : liveGame.gameMode ?? "-";
 }
 
@@ -5644,7 +5645,7 @@ function RecentMatches({
                   void ensureMatchRanks(match.matchId);
                 }
               }}
-              queueLabel={match.queueId ? queueLabels[activePublicLocale][match.queueId] ?? `${t().queue} ${match.queueId}` : "-"}
+              queueLabel={match.queueId ? queueLabels[publicContentLocale(activePublicLocale)][match.queueId] ?? `${t().queue} ${match.queueId}` : "-"}
               result={arena ? `arena ${arenaPlacementClass(arenaPlacement)}` : match.result}
               resultDurationLabel={formatDuration(match.durationSeconds)}
               resultLabel={arena ? t().arenaPlacement.replace("{n}", String(arenaPlacement)) : resultLabel(match.result)}
@@ -5664,27 +5665,28 @@ function RecentMatches({
   /* 그날의 종합(A안) — 로컬 날짜 경계마다 요약 바를 끼웁니다.
      요약은 보이는(필터 반영) 목록 합계 · docs/mockups/lol-daily-summary.html */
   const matchRowsWithDailySummaries = withLolDailySummaryBars(profile.recentMatches, matchRows);
-  const shareMatches: RecentMatchShareItem[] = profile.recentMatches.slice(0, 8).map((match) => {
-    const aiScore = matchAiScore(match);
-    const highlight = matchHighlightBadges(match.badges)[0]?.code;
-    return {
-      key: match.matchId,
-      result: match.result,
-      resultLabel: resultLabel(match.result),
-      championName: championName(match.champion),
-      championIconUrl: match.champion.iconUrl,
-      queueLabel: match.queueId ? queueLabels[activePublicLocale][match.queueId] ?? `${t().queue} ${match.queueId}` : "-",
-      kda: `${formatNumber(match.kills)} / ${formatNumber(match.deaths)} / ${formatNumber(match.assists)}`,
-      kdaMetric: `${formatDecimal(match.kda, 2)} KDA`,
-      grade: recentMatchScoreGrade(aiScore),
-      score: aiScore,
-      ...(highlight === "mvp" || highlight === "ace" ? { highlight } : {}),
-      itemIconUrls: fixedRecentItemSlots(match.items, 7)
-        .flatMap((item) => item?.iconUrl ? [item.iconUrl] : []),
-      durationLabel: formatDuration(match.durationSeconds),
-      startedAtLabel: formatRelativeDate(match.startedAt),
-    };
-  });
+  /* 프로필 공유 카드(2026-08-18) — 최근 경기 나열 카드를 대체합니다.
+     설계·검증: docs/mockups/lol-profile-share-card.html v1.3.
+     라인별 주력 챔피언은 이미 받은 recentMatches 집계라 서버 계약 변경이 없습니다.
+     이 패널이 받는 profile 은 필터가 반영된 뷰(profileWithMatches)라 rolePerformance
+     도 최근 경기 기준으로 재계산된 값입니다 — 카드 푸터의 "최근 N경기 기준"과 같은
+     표본이라 라인 성과·챔피언 판수가 서로 어긋나지 않습니다. */
+  const shareLaneStats = profileShareLanes(profile.rolePerformance, profile.recentMatches, championName);
+  const shareLane = (stat: typeof shareLaneStats.main): ProfileShareLane | undefined => stat
+    ? {
+      iconUrl: roleIconAssets[roleIconKey(stat.role)],
+      roleLabel: mainRoleLabel(stat.role),
+      games: stat.games,
+      winRate: stat.winRate,
+      kda: stat.kda,
+      champions: stat.champions.map((champion) => ({
+        name: champion.name,
+        iconUrl: assetUrl(champion.iconUrl),
+        games: champion.games,
+        winRate: champion.winRate,
+      })),
+    }
+    : undefined;
   const text: RecentMatchesPanelText = {
     title: {
       label: t().recentGames,
@@ -5788,6 +5790,41 @@ function RecentMatches({
   const shareMasteryChampionArtUrl = assetUrl(
     profile.topChampions[0]?.splashUrl ?? profile.topChampions[0]?.loadingUrl,
   );
+  /* 티어는 솔로랭크 우선, 없으면 자유랭크 폴백 — 둘 다 없으면 언랭크 표기(목업 §⑤). */
+  const shareRankedStats = soloRankStats(profile) ?? flexRankStats(profile) ?? profile.rankedStats;
+  const shareQueueLabel = shareRankedStats?.queueType === "RANKED_FLEX_SR"
+    ? t().flexQueue
+    : shareRankedStats?.queueType === "RANKED_SOLO_5x5" ? t().soloQueue : undefined;
+  const profileShareCard: ProfileShareCard = {
+    riotId: profile.riotId,
+    ...(shareRankedStats && shareRankedStats.queueType !== "UNRANKED"
+      ? {
+        tierLabel: rankTierLabel(shareRankedStats),
+        tierIconUrl: assetUrl(shareRankedStats.tierIconUrl),
+        leaguePoints: shareRankedStats.leaguePoints,
+        wins: shareRankedStats.wins,
+        losses: shareRankedStats.losses,
+        winRate: Math.round(shareRankedStats.winRate),
+      }
+      : {}),
+    ...(profile.summonerLevel !== undefined ? { summonerLevel: profile.summonerLevel } : {}),
+    ...(shareQueueLabel ? { queueLabel: shareQueueLabel } : {}),
+    ...(shareProfileImageUrl ? { profileImageUrl: shareProfileImageUrl } : {}),
+    ...(shareMasteryChampionArtUrl ? { masteryChampionArtUrl: shareMasteryChampionArtUrl } : {}),
+    ...(shareLane(shareLaneStats.main) ? { mainLane: shareLane(shareLaneStats.main)! } : {}),
+    ...(shareLane(shareLaneStats.sub) ? { subLane: shareLane(shareLaneStats.sub)! } : {}),
+    ...(shareStreamer
+      ? {
+        streamer: {
+          displayName: shareStreamer.twitchDisplayName,
+          isLive: shareStreamer.isLive,
+          ...(shareStreamer.twitchLogin ? { channelLabel: `twitch.tv/${shareStreamer.twitchLogin}` } : {}),
+          ...(shareStreamer.profileImageUrl ? { profileImageUrl: assetUrl(shareStreamer.profileImageUrl)! } : {}),
+          ...(shareStreamer.isLive && shareStreamer.title ? { title: shareStreamer.title } : {}),
+        },
+      }
+      : {}),
+  };
   return (
     <FeatureRecentMatchesPanel
       canLoadMore={canLoadMore}
@@ -5808,26 +5845,24 @@ function RecentMatches({
       matchRows={matchRowsWithDailySummaries}
       summaryStrip={summaryStrip}
       shareAction={(
-        <RecentMatchesShareActions
-          matches={shareMatches}
-          masteryChampionArtUrl={shareMasteryChampionArtUrl}
-          profileImageUrl={shareProfileImageUrl}
-          riotId={profile.riotId}
+        <ProfileShareActions
+          card={profileShareCard}
           text={{
-            title: t().matchShareTitle,
-            description: t().matchShareDescription,
-            download: t().matchShareDownload,
-            share: t().matchShareNative,
-            preparing: t().matchSharePreparing,
-            saved: t().matchShareSaved,
-            shared: t().matchShareShared,
-            failed: t().matchShareFailed,
-            recentMatches: t().matchShareRecentMatches,
+            title: t().profileShareTitle,
+            description: t().profileShareDescription,
+            download: t().profileShareDownload,
+            share: t().profileShareNative,
+            preparing: t().profileSharePreparing,
+            saved: t().profileShareSaved,
+            shared: t().profileShareShared,
+            failed: t().profileShareFailed,
+            mainLane: t().profileShareMainLane,
+            subLane: t().profileShareSubLane,
+            unranked: t().profileShareUnranked,
+            levelPrefix: "Lv.",
             games: t().games,
-            generatedBy: t().matchShareGeneratedBy,
-            wins: t().matchShareWins,
-            losses: t().matchShareLosses,
-            winRate: t().matchShareWinRate,
+            sampleNote: t().profileShareSample.replace("{count}", String(profile.recentMatches.length)),
+            liveBadge: t().profileShareLive,
           }}
         />
       )}

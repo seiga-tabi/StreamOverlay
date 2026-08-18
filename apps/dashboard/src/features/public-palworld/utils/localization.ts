@@ -24,6 +24,8 @@ function explicitTranslationStatus(
   field: PalworldTranslatableField,
   locale: PalworldLocale,
 ): PalworldTranslationDisplayStatus | undefined {
+  /* 영어는 원본 언어 — 서버 번역 상태 스냅샷(ko·ja)이 적용되지 않습니다. */
+  if (locale === "en") return undefined;
   return value.translation?.[field]?.[locale];
 }
 
@@ -32,6 +34,7 @@ function explicitSourceIntegrity(
   field: PalworldTranslatableField,
   locale: PalworldLocale,
 ): PalworldTranslationSourceIntegrityStatus | undefined {
+  if (locale === "en") return undefined;
   return value.translation?.[field]?.sourceIntegrity?.[locale];
 }
 
@@ -96,11 +99,13 @@ export function resolvePalworldName(
 ): PalworldLocalizedText {
   const sourceFallback = value.nameEn
     ?? (locale === "ja" ? value.nameKo : value.nameJa);
+  /* en 은 원문이 곧 표시값 — 번역 검수 배지가 붙지 않게 현지어 슬롯에 넣습니다. */
+  const localized = locale === "en" ? value.nameEn : locale === "ja" ? value.nameJa : value.nameKo;
   return resolvePalworldLocalizedText(
     value,
     "name",
     locale,
-    locale === "ja" ? value.nameJa : value.nameKo,
+    localized,
     sourceFallback,
   );
 }
@@ -113,7 +118,7 @@ export function resolvePalworldDescription(
     value,
     "description",
     locale,
-    locale === "ja" ? value.descriptionJa : value.descriptionKo,
+    locale === "en" ? value.descriptionEn : locale === "ja" ? value.descriptionJa : value.descriptionKo,
     value.descriptionEn,
   );
 }

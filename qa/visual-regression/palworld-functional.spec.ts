@@ -1686,7 +1686,7 @@ test("LoL 홈 연관 검색은 Hero와 LIVE 영역보다 위에서 포인터 입
   expect(stacking.hitInsidePanel, "LoL 연관 검색 항목이 다른 Hero 콘텐츠에 가려지면 안 됩니다.").toBe(true);
 });
 
-test("펠월드 홈은 Hero 검색과 Twitch 로그인 LIVE rail만 표시하고 게임 선택으로 LoL과 왕복 이동한다", async ({ page }) => {
+test("팰월드 홈은 Hero 검색과 Twitch 로그인 LIVE rail만 표시하고 게임 선택으로 LoL과 왕복 이동한다", async ({ page }) => {
   const errors = collectRuntimeErrors(page);
   await page.goto("/palworld");
 
@@ -3647,7 +3647,7 @@ test("통합 검색은 한국어와 일본어 이름 결과를 표시한다", as
   await assertHealthyDocument(page, errors);
 });
 
-test("PC 화면에서 모든 펠월드 페이지 본문을 중앙 정렬한다", async ({ page }) => {
+test("PC 화면에서 모든 팰월드 페이지 본문을 중앙 정렬한다", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   const routes = [
     "/palworld",
@@ -4101,6 +4101,42 @@ test("지도는 확대 후 이동 위치를 URL 동기화가 되돌리지 않고
   expect(await dispatchWheel("alt")).toBe(true);
   await expect.poll(readZoom).not.toBe(zoomBefore);
   await assertHealthyDocument(page, errors);
+});
+
+test("헤더 언어 목록은 지도 위 오버레이에 가려지지 않는다", async ({ page }) => {
+  /* 헤더(.palworld-shell-header)가 z-index 로 자체 쌓임 맥락을 만들기 때문에 언어
+     팝오버의 z-index 90 은 헤더 안에서만 유효합니다. 지도 오버레이(툴바·월드 전환·
+     확대 컨트롤 z:10, 마커 팝오버 z:50)가 루트 맥락에서 헤더와 같은 층에 놓이면
+     DOM 순서상 뒤라 팝오버 위에 그려집니다 — 2026-08-18 실사례로 "필드 보스" 칩이
+     English 행을 덮었습니다. .palworld-map-card 의 isolation 이 이를 막습니다.
+
+     쌓임 순서는 elementFromPoint 로 관측되지 않습니다(그 API 는 팝오버를 위로
+     보고했지만 실제로는 칩이 위에 그려졌습니다). 그래서 페인트 결과로 검증합니다:
+     지도 카드를 visibility 로만 숨기면 레이아웃은 그대로라 팝오버 상자도 그대로인데,
+     카드가 팝오버 위에 그려지고 있었다면 두 캡처의 픽셀이 달라집니다. */
+  /* 모바일 폭에서는 헤더의 언어 버튼이 숨고 선택이 메뉴 시트로 들어갑니다 —
+     팝오버 자체가 없어 이 검증의 대상이 아닙니다. */
+  test.skip((page.viewportSize()?.width ?? 1440) <= 768, "모바일은 메뉴 시트로 언어를 고릅니다");
+  await page.goto("/palworld/map");
+  await expect(page.getByTestId("palworld-map-image")).toBeVisible();
+  await page.getByRole("button", { name: "언어 선택" }).click();
+  const popover = page.locator(".public-locale-popover");
+  await expect(popover).toBeVisible();
+
+  /* 팝오버 배경은 불투명하므로, 모서리 라운드를 피해 안쪽만 보면 뒤 요소가 비칠
+     일이 없습니다. 즉 오버레이를 숨겼을 때 이 영역이 달라지면 위에 그려졌다는 뜻입니다. */
+  const box = (await popover.boundingBox())!;
+  const clip = { x: box.x + 10, y: box.y + 10, width: box.width - 20, height: box.height - 20 };
+  const before = await page.screenshot({ clip });
+  await page.evaluate(() => {
+    for (const overlay of document.querySelectorAll<HTMLElement>(
+      ".palworld-map-toolbar, .palworld-map-world-switcher, .palworld-map-controls, .palworld-map-wheel-hint",
+    )) {
+      overlay.style.visibility = "hidden";
+    }
+  });
+  const after = await page.screenshot({ clip });
+  expect(before.equals(after)).toBe(true);
 });
 
 test("월드 지도 이미지 오류는 페이지를 깨뜨리지 않고 재시도할 수 있다", async ({ page }) => {

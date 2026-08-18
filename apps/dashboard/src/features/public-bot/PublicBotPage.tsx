@@ -13,7 +13,7 @@ import {
   PublicLocaleSelector,
 } from "../public-lol/components/PublicLocaleSelector";
 import { usePublicLocale } from "../public-lol/hooks/usePublicLocale";
-import {
+import { publicContentLocale,
   publicI18n,
   setActivePublicLocale,
   type PublicLocale,
@@ -360,7 +360,7 @@ const botText = {
 
 export type PublicBotSection = "overview" | "gettingStarted" | "commands" | "gameFiles";
 
-type BotText = (typeof botText)[PublicLocale];
+type BotText = (typeof botText)["ko" | "ja"];
 
 const commandPageText = {
   ko: {
@@ -507,7 +507,7 @@ const commandPageText = {
   },
 } as const;
 
-type CommandPageText = (typeof commandPageText)[PublicLocale];
+type CommandPageText = (typeof commandPageText)["ko" | "ja"];
 
 type CommandAudience = "public" | "private" | "admin";
 type CommandTab = "user" | "admin";
@@ -682,7 +682,9 @@ function openTrackedYoroDashboard(): void {
 }
 
 export function PublicBotPage() {
-  const { locale, changeLocale } = usePublicLocale(noLocalePreference);
+  const { locale: rawLocale, changeLocale } = usePublicLocale(noLocalePreference);
+  /* Bot 섹션은 en 콘텐츠가 아직 없음 — 팰월드 우선 단계의 ko 폴백. */
+  const locale = publicContentLocale(rawLocale);
   const text = botText[locale];
   const commandText = commandPageText[locale];
   const activeSection = publicBotSectionFromPath(window.location.pathname);

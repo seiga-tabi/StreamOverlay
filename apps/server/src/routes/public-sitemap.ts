@@ -6,10 +6,10 @@
  * 단일 원본으로 삼아 sitemap index와 하위 sitemap을 만듭니다.
  */
 import {
-  PUBLIC_SEO_LOCALES,
   PUBLIC_SEO_ORIGIN,
   localizedPublicSeoUrl,
   palworldEntityPath,
+  publicSeoLocalesForPath,
   type PalworldEntityKind
 } from "./public-seo.js";
 
@@ -88,15 +88,24 @@ function normalizeLastmod(value: string | undefined): string | undefined {
   return parsed.toISOString();
 }
 
-/** ko/ja를 서로 alternate로 연결한 urlset을 만듭니다. */
+/**
+ * 각 로케일 판을 서로 alternate 로 연결한 urlset 을 만듭니다.
+ *
+ * 로케일 목록은 경로마다 다릅니다 — 영어 본문이 있는 팰월드는 ko·ja·en 3종,
+ * 나머지는 ko·ja 2종입니다. sitemap 이 서빙하지 않는 en URL 을 제출하면 크롤러가
+ * ko 로 통합되는 페이지를 반복해서 가져가게 됩니다.
+ * x-default 는 head 의 hreflang 과 같은 규칙으로 en 이 있으면 en 입니다.
+ */
 export function buildLocalizedUrlSetSitemap(entries: readonly SitemapEntry[]): string {
   const urls = entries.flatMap((entry) => {
     const lastmod = normalizeLastmod(entry.lastmod);
-    const alternates = PUBLIC_SEO_LOCALES.map((locale) => (
+    const locales = publicSeoLocalesForPath(entry.path);
+    const alternates = locales.map((locale) => (
       `<xhtml:link rel="alternate" hreflang="${locale}" href="${escapeXml(localizedPublicSeoUrl(entry.path, locale))}"/>`
     )).join("");
-    const xDefault = `<xhtml:link rel="alternate" hreflang="x-default" href="${escapeXml(localizedPublicSeoUrl(entry.path, "ko"))}"/>`;
-    return PUBLIC_SEO_LOCALES.map((locale) => (
+    const xDefaultLocale = locales.includes("en") ? "en" : "ko";
+    const xDefault = `<xhtml:link rel="alternate" hreflang="x-default" href="${escapeXml(localizedPublicSeoUrl(entry.path, xDefaultLocale))}"/>`;
+    return locales.map((locale) => (
       "<url>"
       + `<loc>${escapeXml(localizedPublicSeoUrl(entry.path, locale))}</loc>`
       + (lastmod ? `<lastmod>${lastmod}</lastmod>` : "")

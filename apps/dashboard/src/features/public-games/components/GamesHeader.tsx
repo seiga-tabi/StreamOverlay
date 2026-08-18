@@ -10,6 +10,7 @@ import {
   PublicTwitchAccountChip,
 } from "../../../shared/PublicTwitchAccountChip";
 import { gamesI18n, type GamesLocale } from "../i18n/games-i18n";
+import { publicContentLocale } from "../../public-lol/i18n/public-lol-i18n";
 import { gamesPathForPage, setGamesUrl, type GamesPage } from "../utils/routes";
 
 /* 상단 nav 와 하단 탭바가 공유하는 단일 원본 — Valorant 헤더 패턴 복제. */
@@ -140,7 +141,7 @@ export function GamesHeader({
           <>
             <PublicLocaleSelector
               locale={locale}
-              onLocale={onLocale}
+              onLocale={(next) => onLocale(publicContentLocale(next))}
               open={localeMenuOpen}
               onOpenChange={(open) => {
                 setLocaleMenuOpen(open);
@@ -269,7 +270,7 @@ export function GamesHeader({
             locale={locale}
             onClose={() => setMobileMenuOpen(false)}
             onGamePage={handleGame}
-            onLocale={onLocale}
+            onLocale={(next) => onLocale(publicContentLocale(next))}
             onDiscordLogin={loginWithDiscord}
             onDashboard={openDashboard}
             onTwitchLogin={loginWithTwitch}

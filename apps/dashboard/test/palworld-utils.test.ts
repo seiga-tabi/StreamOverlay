@@ -252,7 +252,7 @@ test("지도 자원 source subtype은 이름 추측 없이 15개 공개 필터�
   );
 });
 
-test("펠월드 공개 경로를 페이지 상태로 안정적으로 변환한다", () => {
+test("팰월드 공개 경로를 페이지 상태로 안정적으로 변환한다", () => {
   assert.equal(palworldPageFromPath("/palworld"), "home");
   assert.equal(palworldPageFromPath("/palworld/technology"), "technology");
   assert.equal(palworldPageFromPath("/palworld/pals/"), "pals");
@@ -975,7 +975,7 @@ test("Palworld SEO metadata는 locale과 route를 반영하고 상세 query 대�
   const technology = palworldSeoMetadata("technology", "ko");
   const search = palworldSeoMetadata("search", "ko");
   assert.equal(koreanHome.canonicalUrl, "https://yoro.gg/ko/palworld");
-  assert.match(koreanHome.title, /펠월드 데이터베이스/u);
+  assert.match(koreanHome.title, /팰월드 데이터베이스/u);
   assert.match(koreanHome.description, /Pal/u);
   assert.equal(japaneseBreeding.canonicalUrl, "https://yoro.gg/ja/palworld/breeding");
   assert.match(japaneseBreeding.title, /配合組み合わせ/u);
@@ -1550,7 +1550,7 @@ test("교배 API는 optional 성별 query를 전달하고 503 code를 보존한�
   }
 });
 
-test("LoL 게임 메뉴의 펠월드 경로 변경은 App 재평가 이벤트를 보낸다", () => {
+test("LoL 게임 메뉴의 팰월드 경로 변경은 App 재평가 이벤트를 보낸다", () => {
   const originalWindow = globalThis.window;
   let pathname = "/";
   const events: string[] = [];

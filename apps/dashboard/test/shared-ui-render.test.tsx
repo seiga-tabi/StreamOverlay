@@ -20,7 +20,7 @@ import { PublicProfileShareButton } from "../src/features/public-lol/components/
 import { MatchTeamCompare } from "../src/features/public-lol/components/MatchTeamCompare";
 import { RecentMatchBuildRuneBoard } from "../src/features/public-lol/components/RecentMatchBuildRuneBoard";
 import { RecentMatchRow } from "../src/features/public-lol/components/RecentMatchRow";
-import { RecentMatchesShareActions } from "../src/features/public-lol/components/RecentMatchesShareActions";
+import { ProfileShareActions } from "../src/features/public-lol/components/ProfileShareActions";
 import { Button } from "../src/shared/ui/Button";
 import { StatusPill } from "../src/shared/ui/Status";
 import { PublicTwitchAccountChip, PublicTwitchAccountPanel } from "../src/shared/PublicTwitchAccountChip";
@@ -810,67 +810,84 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
   assert.match(html, /public-match-card-score-description.*YORO 경기 점수 설명/u);
 });
 
-test("최근 전적 공유 기능은 현재 목록을 이미지 저장과 시스템 공유로 제공한다", () => {
+test("프로필 공유 기능은 티어·주부라인 카드를 이미지 저장과 시스템 공유로 제공한다", () => {
   const html = renderToStaticMarkup(
-    <RecentMatchesShareActions
-      riotId="YORO#JP1"
-      matches={[{
-        key: "match-1",
-        result: "win",
-        resultLabel: "승리",
-        championName: "제드",
-        championIconUrl: "https://example.com/champion.png",
+    <ProfileShareActions
+      card={{
+        riotId: "YORO#JP1",
+        tierLabel: "다이아몬드 2",
+        tierIconUrl: "https://example.com/emblem.png",
+        leaguePoints: 45,
+        wins: 132,
+        losses: 108,
+        winRate: 55,
+        summonerLevel: 312,
         queueLabel: "솔로랭크",
-        kda: "9 / 2 / 5",
-        kdaMetric: "7.00 KDA",
-        grade: "S+",
-        score: 92,
-        highlight: "mvp",
-        itemIconUrls: ["https://example.com/item.png"],
-        durationLabel: "31:39",
-        startedAtLabel: "15분 전",
-      }]}
-      masteryChampionArtUrl="https://example.com/champion-splash.jpg"
-      profileImageUrl="https://example.com/profile.png"
+        masteryChampionArtUrl: "https://example.com/champion-splash.jpg",
+        mainLane: {
+          iconUrl: "/images/roles/position-middle.svg",
+          roleLabel: "미드",
+          games: 48,
+          winRate: 58,
+          kda: 3.4,
+          champions: [{ name: "아리", iconUrl: "https://example.com/ahri.png", games: 21, winRate: 57 }],
+        },
+        subLane: {
+          iconUrl: "/images/roles/position-utility.svg",
+          roleLabel: "서포터",
+          games: 19,
+          winRate: 58,
+          kda: 3.1,
+          champions: [{ name: "쓰레쉬", games: 9, winRate: 67 }],
+        },
+        streamer: {
+          displayName: "징크스방송국",
+          channelLabel: "twitch.tv/jinxlive",
+          profileImageUrl: "https://example.com/streamer.png",
+          isLive: true,
+          title: "다이아 탈출 각!",
+        },
+      }}
       text={{
-        title: "최근 전적 공유 카드",
-        description: "현재 필터의 최근 최대 8경기를 한 장의 이미지로 정리합니다.",
+        title: "프로필 공유 카드",
+        description: "티어와 주·부 라인, 라인별 주력 챔피언을 한 장의 이미지로 정리합니다.",
         download: "이미지 저장",
-        share: "SNS 공유",
+        share: "프로필 공유",
         preparing: "공유 이미지를 만드는 중입니다.",
-        saved: "전적 이미지를 저장했습니다.",
-        shared: "전적 이미지를 공유했습니다.",
+        saved: "프로필 이미지를 저장했습니다.",
+        shared: "프로필 이미지를 공유했습니다.",
         failed: "공유 이미지를 만들지 못했습니다.",
-        recentMatches: "최근 전적",
+        mainLane: "주 라인",
+        subLane: "부 라인",
+        unranked: "언랭크",
+        levelPrefix: "Lv.",
         games: "경기",
-        generatedBy: "YORO.GG에서 생성",
-        wins: "승",
-        losses: "패",
-        winRate: "승률",
+        sampleNote: "최근 40경기 기준",
+        liveBadge: "LIVE",
       }}
     />
   );
 
   assert.match(html, /public-match-share-actions/u);
-  assert.match(html, />최근 전적 공유 카드</u);
+  assert.match(html, />프로필 공유 카드</u);
   assert.match(html, />이미지 저장</u);
-  assert.match(html, />SNS 공유</u);
+  assert.match(html, />프로필 공유</u);
   assert.match(html, /aria-live="polite"/u);
 
   const shareSource = readFileSync(
-    new URL("../src/features/public-lol/components/RecentMatchesShareActions.tsx", import.meta.url),
+    new URL("../src/features/public-lol/components/ProfileShareActions.tsx", import.meta.url),
     "utf8",
   );
-  assert.match(shareSource, /slice\(0, SHARE_CARD_MAX_MATCHES\)/u);
+  /* 목업 lol-profile-share-card.html v1.3 의 확정 사양이 코드에 살아 있는지 고정합니다. */
   assert.match(shareSource, /canvas\.toBlob/u);
-  assert.match(shareSource, /drawProfileAvatar/u);
-  assert.match(shareSource, /drawCoverImage/u);
-  assert.match(shareSource, /drawSpecialRowGlow/u);
-  assert.match(shareSource, /SHARE_CARD_LOGO_URL/u);
+  assert.match(shareSource, /const CARD_WIDTH = 1080;/u);
+  /* SNS 크롭 경계(1.91:1) 가드 — 블록이 줄어도 이 높이 아래로 내려가지 않습니다. */
+  assert.match(shareSource, /const MIN_CARD_HEIGHT = 566;/u);
+  assert.match(shareSource, /drawTrimmedEmblem/u);
+  assert.match(shareSource, /drawLaneBlock/u);
+  assert.match(shareSource, /masteryChampionArtUrl/u);
   assert.match(shareSource, /navigator\.canShare\(\{ files: \[file\] \}\)/u);
-  assert.match(shareSource, /downloadBlob\(blob, file\.name\)/u);
 });
-
 test("모바일 최근 전적은 3행으로 압축하고 등급·지표 정렬 축을 고정한다", () => {
   const cardCss = readFileSync(
     new URL("../src/styles/pages/public-lol/22-match-card.css", import.meta.url),

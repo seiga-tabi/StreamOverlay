@@ -103,17 +103,36 @@ const PUBLIC_DASHBOARD_PATH_PREFIXES = [
   "/games/reaction/r/"
 ];
 
-export type PublicUrlLocale = "ko" | "ja";
+/* en(2026-08-18): 팰월드 섹션부터 영어 콘텐츠를 서빙합니다.
+ *
+ * 유니온에 en 을 넣었다고 모든 경로가 en 을 갖는 것은 아닙니다 — en 번역이 없는
+ * 섹션(LoL 등)에 en hreflang 을 붙이면 크롤러에게 없는 페이지를 약속하게 되므로,
+ * 경로별로 어떤 로케일을 내보낼지는 public-seo.ts 의 alternateUrlsForPath 가
+ * 정합니다(팰월드만 3종, 나머지는 ko·ja). */
+export type PublicUrlLocale = "ko" | "ja" | "en";
+
+const SERVED_LOCALE_SEGMENT_PATTERN = /^\/(ko|ja|en)(?:\/|$)/u;
+
+/**
+ * 영어판이 없는 기능에서 en 요청을 ko 로 접습니다.
+ *
+ * LoL 전적·패치 노트는 ko·ja 만 있으므로, /en 으로 들어와도 한국어 판을 그대로
+ * 보여 줍니다(공백 문구 금지). 팰월드처럼 영어 콘텐츠가 있는 쪽은 이 함수를
+ * 쓰지 않습니다.
+ */
+export function koJaPublicUrlLocale(locale: PublicUrlLocale): "ko" | "ja" {
+  return locale === "ja" ? "ja" : "ko";
+}
 
 export function publicUrlLocaleFromPathname(pathname: string): PublicUrlLocale | undefined {
-  const locale = pathname.match(/^\/(ko|ja)(?:\/|$)/u)?.[1];
-  return locale === "ko" || locale === "ja" ? locale : undefined;
+  const locale = pathname.match(SERVED_LOCALE_SEGMENT_PATTERN)?.[1];
+  return locale === "ko" || locale === "ja" || locale === "en" ? locale : undefined;
 }
 
 export function stripPublicUrlLocalePrefix(pathname: string): string {
-  const locale = publicUrlLocaleFromPathname(pathname);
-  if (!locale) return pathname;
-  const stripped = pathname.slice(locale.length + 1);
+  const segment = pathname.match(SERVED_LOCALE_SEGMENT_PATTERN)?.[1];
+  if (!segment) return pathname;
+  const stripped = pathname.slice(segment.length + 1);
   return stripped ? (stripped.startsWith("/") ? stripped : `/${stripped}`) : "/";
 }
 
@@ -127,6 +146,6 @@ export function isLocalizablePublicDashboardRoute(pathname: string): boolean {
 export function isPublicDashboardAppRoute(pathname: string): boolean {
   if (PUBLIC_DASHBOARD_EXACT_PATHS.has(pathname)) return true;
   if (PUBLIC_DASHBOARD_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return true;
-  if (!publicUrlLocaleFromPathname(pathname)) return false;
+  if (!pathname.match(SERVED_LOCALE_SEGMENT_PATTERN)) return false;
   return isLocalizablePublicDashboardRoute(stripPublicUrlLocalePrefix(pathname));
 }

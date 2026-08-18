@@ -217,4 +217,105 @@ const ja: Record<PalworldGuidePage, GuideCopy> = {
   },
 };
 
-export const palworldGuideI18n: Record<PalworldLocale, Record<PalworldGuidePage, GuideCopy>> = { ko, ja };
+/* 영어 가이드(2026-08-18) — ko 판을 번안한 자체 카피. 게임 위키 복제가 아니라
+ * 이 서비스의 실제 동작 설명이라는 원칙은 동일합니다. */
+const en: Record<PalworldGuidePage, GuideCopy> = {
+  pals: {
+    leadTitle: "Paldeck — stats, work suitability and habitats in one place",
+    lead: "A catalog of every Pal's combat stats, base work suitability, drops and habitat maps, narrowed with filters. Open a card to continue to partner skills and spawn maps in the detail view.",
+    howTitle: "How to use this page",
+    how: [
+      "Search by name or Paldeck number, or combine element and work suitability filters to narrow the list.",
+      "Tap a card to open the detail view — stats, partner skill, drops and habitat map in one place.",
+      "Planning base automation? Use work suitability filters to gather only the aptitudes you need — gathering, transporting, generating power and more.",
+      "Need breeding pairs? Move to the breeding calculator to search results from parents, or parents from a target Pal.",
+    ],
+    readTitle: "How to read the data",
+    read: [
+      { term: "Work suitability level", description: "Higher numbers finish the same work faster. This is the key number for automation efficiency when assigned to your base." },
+      { term: "Element", description: "The basis of combat matchups and the trigger of some partner skills. Dual-element Pals take both elements' matchups." },
+      { term: "Habitat map", description: "Spawn areas from game data drawn on the map. Spawns with time or weather conditions may not appear even inside the shown area." },
+      { term: "Drops", description: "Items obtainable on defeat or capture. Probability figures are shown only where the source data provides them." },
+    ],
+    dataTitle: "Data source and update policy",
+    data: "We use a catalog imported and verified from game client data at build time. When the game is patched we regenerate the catalog; values absent from the source are never invented and are marked \"not provided by source data\".",
+    faqTitle: "FAQ",
+    faq: [
+      { question: "Where do I check breeding pairs?", answer: "On the breeding page in the top menu you can compute the result from two parents, or reverse-search parent pairs from a target Pal." },
+      { question: "Some values differ from what I see in game.", answer: "Right after a patch, old values may remain until the catalog is regenerated. If they still differ, the figures here are base values without in-game buff or passive modifiers." },
+      { question: "How do I reset filters?", answer: "Press the clear button on an applied filter chip, or use clear-all in the filter panel. Filter state is stored in the URL so it can be shared." },
+    ],
+  },
+  items: {
+    leadTitle: "Item catalog — gear stats linked to crafting materials",
+    lead: "A catalog of weapons, armor, materials and consumables with their stats, crafting materials and sources. Follow crafting materials in the detail view to trace where each ingredient comes from.",
+    howTitle: "How to use this page",
+    how: [
+      "Split gear, materials and consumables with the category filter, or search by name.",
+      "Open a card to see stats and crafting materials — tap an ingredient to keep tracing its sources.",
+      "When comparing gear, compare attack, defense and durability within the same category for accuracy.",
+    ],
+    readTitle: "How to read the data",
+    read: [
+      { term: "Rarity", description: "Shown as the card border color. Higher rarity raises the stat ceiling within a line, at the cost of heavier crafting materials." },
+      { term: "Attack / Defense", description: "The gear's own base values. Final in-game numbers include character stats and passive modifiers, so they can read higher." },
+      { term: "Crafting materials", description: "Quantities per single craft. Crafting stations and required technology are on the Technology page." },
+    ],
+    dataTitle: "Data source and update policy",
+    data: "We use a catalog imported and verified from game client data at build time. The patch cadence matches the Paldeck, and information absent from the source — like market prices — is never fabricated.",
+    faqTitle: "FAQ",
+    faq: [
+      { question: "Which technology unlocks this gear?", answer: "Check the required technology in the crafting section of the detail view, then see its point cost per level on the Technology page." },
+      { question: "Do you provide sell prices or market rates?", answer: "Only shop prices provided by the source data are shown. We do not collect player trading rates or publish estimates." },
+      { question: "An item I am looking for is missing.", answer: "Event or unreleased data can be excluded during catalog verification. New items from a patch are added when the catalog is regenerated." },
+    ],
+  },
+  technology: {
+    leadTitle: "Technology — plan your unlock order by level",
+    lead: "Technologies unlockable at each level with their point costs, separating regular and Ancient technology. Use this page to plan what to open first at each level.",
+    howTitle: "How to use this page",
+    how: [
+      "Follow the level timeline downward to see what unlocks in each range.",
+      "Search by name to find which level a crafting station or gear belongs to.",
+      "Tap an unlocked item on a technology card to continue to its crafting materials.",
+    ],
+    readTitle: "How to read the data",
+    read: [
+      { term: "Technology points", description: "Regular points granted on level-up. Most crafting and building technologies belong here." },
+      { term: "Ancient technology points", description: "A separate currency earned only from specific content such as boss fights. Ancient technology cards carry a badge." },
+      { term: "Unlock conditions", description: "No prerequisite tech — only character level and points. Order is free, but total points are limited, so priorities matter." },
+    ],
+    dataTitle: "Data source and update policy",
+    data: "We use a catalog imported and verified from game client data at build time. Technology tree changes from patches are reflected when the catalog is regenerated.",
+    faqTitle: "FAQ",
+    faq: [
+      { question: "What if I run out of technology points?", answer: "Besides leveling, certain in-game collectibles grant extra points. We recommend summing costs on this page to set priorities in advance." },
+      { question: "How do I tell Ancient technology apart?", answer: "By the Ancient badge on the card. The point currency differs, so avoid mixing its costs with regular technology." },
+    ],
+  },
+  skills: {
+    leadTitle: "Skill dictionary — compare power, element and cooldown",
+    lead: "A dictionary of active and passive skills compared by power, element and cooldown, linked with the Paldeck so you can see which Pals learn each skill.",
+    howTitle: "How to use this page",
+    how: [
+      "Switch between active and passive tabs, and use element filters to gather one lineage.",
+      "Compare power together with cooldown — high power with a long cooldown can mean lower real DPS.",
+      "Use passive tiers to separate positive and negative effects when setting breeding goals.",
+    ],
+    readTitle: "How to read the data",
+    read: [
+      { term: "Power", description: "The skill's base power. Actual damage multiplies the Pal's attack stat, element matchup and passive modifiers." },
+      { term: "Cooldown", description: "Reuse wait time in seconds. As important as power when planning the rotation of three skill slots in combat." },
+      { term: "Passive tier", description: "Positive effects use upward-arrow marks, negative ones downward. The reference for setting targets when passing passives through breeding." },
+    ],
+    dataTitle: "Data source and update policy",
+    data: "We use a catalog imported and verified from game client data at build time. Skill balance patches are reflected on catalog regeneration, and coefficients absent from the source are never estimated.",
+    faqTitle: "FAQ",
+    faq: [
+      { question: "How do I find Pals that learn this skill?", answer: "Skill details list learners where the data provides them, and each Pal's detail view lists its skills for the reverse direction." },
+      { question: "How do I get passives?", answer: "Captured Pals carry them at random, or parents pass them down with some probability through breeding. Plan target combinations together with the breeding calculator." },
+    ],
+  },
+};
+
+export const palworldGuideI18n: Record<PalworldLocale, Record<PalworldGuidePage, GuideCopy>> = { ko, ja, en };

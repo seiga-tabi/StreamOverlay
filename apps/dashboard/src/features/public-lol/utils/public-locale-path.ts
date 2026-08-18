@@ -1,6 +1,8 @@
 import type { PublicLocale } from "../i18n/public-lol-i18n";
 
-const PUBLIC_LOCALE_SEGMENTS = new Set<PublicLocale>(["ko", "ja"]);
+/* en(2026-08-18) — 팰월드 우선 단계. /en 프리픽스는 전 로케일화 경로에서 유효하며,
+ * en 콘텐츠가 없는 섹션은 ko 폴백으로 렌더됩니다(publicContentLocale). */
+const PUBLIC_LOCALE_SEGMENTS = new Set<PublicLocale>(["ko", "ja", "en"]);
 
 const LOCALIZABLE_PUBLIC_EXACT_PATHS = new Set([
   "/",

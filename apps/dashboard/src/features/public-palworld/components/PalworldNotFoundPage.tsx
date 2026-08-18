@@ -19,6 +19,11 @@ const text = {
     title: "ページが見つかりません。",
     description: "指定された Palworld 公開ページは存在しません。",
     home: "Palworld ホームへ移動"
+  },
+  en: {
+    title: "Page not found.",
+    description: "The requested Palworld page does not exist.",
+    home: "Go to Palworld home"
   }
 } as const;
 

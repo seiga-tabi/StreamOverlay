@@ -297,6 +297,12 @@
 
 .palworld-map-card {
   position: relative;
+  /* 지도 위 오버레이(툴바·월드 전환·확대 컨트롤 z:10, 마커 팝오버 z:50)를 카드
+     안에 가둡니다. 없으면 이들이 루트 쌓임 맥락에서 헤더(.palworld-shell-header,
+     z:10)와 같은 층에 놓이고 DOM 순서상 뒤라, 헤더 안에서 열리는 언어 선택
+     목록(z:90)을 덮습니다 — 헤더가 맥락을 만들어 90 이 그 안에서만 유효하기
+     때문입니다. 시트(.palworld-map-sheet)는 카드 밖 형제라 그대로 헤더를 덮습니다. */
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   min-inline-size: 0;
