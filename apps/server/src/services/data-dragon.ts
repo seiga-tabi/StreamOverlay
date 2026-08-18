@@ -4,6 +4,8 @@ type DataDragonChampion = {
   id: string;
   key: string;
   name: string;
+  /** 기본 스탯. 패치 비교(getChampionStatsMap)가 쓰는 값입니다. */
+  stats?: Record<string, number>;
   image?: {
     full?: string;
   };
@@ -35,6 +37,8 @@ type DataDragonItem = {
   image?: {
     full?: string;
   };
+  /** 총 구매가. 패치 비교(getItemGoldMap)가 쓰는 값입니다. */
+  gold?: { total?: number };
 };
 
 type ItemDataResponse = {
@@ -155,6 +159,33 @@ function visibleSkin(skin: DataDragonSkin): boolean {
   return Number.isInteger(skin.num) && skin.num >= 0 && skin.parentSkin === undefined;
 }
 
+/** champion.json → championId 별 기본 스탯. 값이 숫자가 아닌 항목은 버립니다. */
+function championStatsFrom(data: ChampionDataResponse): Map<number, Readonly<Record<string, number>>> {
+  const map = new Map<number, Readonly<Record<string, number>>>();
+  for (const champion of Object.values(data.data)) {
+    const championId = Number(champion.key);
+    if (!Number.isInteger(championId)) continue;
+    const stats: Record<string, number> = {};
+    for (const [stat, value] of Object.entries(champion.stats ?? {})) {
+      if (typeof value === "number" && Number.isFinite(value)) stats[stat] = value;
+    }
+    if (Object.keys(stats).length > 0) map.set(championId, Object.freeze(stats));
+  }
+  return map;
+}
+
+/** item.json → itemId 별 총 구매가. 0골드 아이템(퀘스트 완성품 등)도 그대로 둡니다. */
+function itemGoldFrom(data: ItemDataResponse): Map<number, number> {
+  const map = new Map<number, number>();
+  for (const [rawItemId, item] of Object.entries(data.data)) {
+    const itemId = Number(rawItemId);
+    const total = item.gold?.total;
+    if (!Number.isInteger(itemId) || itemId <= 0) continue;
+    if (typeof total === "number" && Number.isFinite(total)) map.set(itemId, total);
+  }
+  return map;
+}
+
 function firstDataDragonVersion(versions: string[]): string {
   const version = versions[0];
   if (!version) throw new Error("Data Dragon version list is empty");
@@ -172,6 +203,12 @@ export class DataDragonService {
   private runeMapRequests = new Map<string, Promise<Map<number, LolRuneSummary>>>();
   private itemCache = new Map<string, Map<number, LolItemSummary>>();
   private itemMapRequests = new Map<string, Promise<Map<number, LolItemSummary>>>();
+  /* 패치 비교용 원시 수치. 이름·아이콘 맵이 같은 champion.json/item.json 을 이미
+     받았다면 그 과정에서 함께 채워지므로 같은 파일을 두 번 내려받지 않습니다. */
+  private championStatsCache = new Map<string, Map<number, Readonly<Record<string, number>>>>();
+  private championStatsRequests = new Map<string, Promise<Map<number, Readonly<Record<string, number>>>>>();
+  private itemGoldCache = new Map<string, Map<number, number>>();
+  private itemGoldRequests = new Map<string, Promise<Map<number, number>>>();
 
   constructor(private readonly fetchImpl: typeof fetch = fetch) {}
 
@@ -218,6 +255,8 @@ export class DataDragonService {
       ]);
       const jaByKey = new Map(Object.values(ja?.data ?? {}).map((champion) => [champion.key, champion]));
       const map = new Map<number, ChampionMapEntry>();
+      /* 같은 응답에서 스탯도 걷어 둡니다 — 패치 비교가 champion.json 을 다시 받지 않게. */
+      this.championStatsCache.set(resolvedVersion, championStatsFrom(ko));
 
       for (const champion of Object.values(ko.data)) {
         const championId = Number(champion.key);
@@ -311,6 +350,7 @@ export class DataDragonService {
       ]);
       const jaById = new Map(Object.entries(ja?.data ?? {}).map(([itemId, item]) => [itemId, item]));
       const map = new Map<number, LolItemSummary>();
+      this.itemGoldCache.set(resolvedVersion, itemGoldFrom(ko));
 
       for (const [rawItemId, item] of Object.entries(ko.data)) {
         const itemId = Number(rawItemId);
@@ -434,6 +474,47 @@ export class DataDragonService {
       },
       skins
     };
+  }
+
+  /**
+   * 패치 비교용 챔피언 기본 스탯.
+   *
+   * 스탯은 언어와 무관하므로 ko_KR 한 판만 받습니다. 이름·아이콘 맵을 이미 받은
+   * 버전이면 그때 채워 둔 캐시를 그대로 씁니다(같은 파일 재다운로드 금지).
+   */
+  async getChampionStatsMap(version: string): Promise<Map<number, Readonly<Record<string, number>>>> {
+    const cached = this.championStatsCache.get(version);
+    if (cached) return cached;
+    const running = this.championStatsRequests.get(version);
+    if (running) return running;
+    const request = (async () => {
+      const data = await this.fetchChampionData(version, "ko_KR");
+      const map = championStatsFrom(data);
+      this.championStatsCache.set(version, map);
+      return map;
+    })().finally(() => {
+      this.championStatsRequests.delete(version);
+    });
+    this.championStatsRequests.set(version, request);
+    return request;
+  }
+
+  /** 패치 비교용 아이템 총 구매가. getChampionStatsMap 과 같은 규칙입니다. */
+  async getItemGoldMap(version: string): Promise<Map<number, number>> {
+    const cached = this.itemGoldCache.get(version);
+    if (cached) return cached;
+    const running = this.itemGoldRequests.get(version);
+    if (running) return running;
+    const request = (async () => {
+      const data = await this.fetchItemData(version, "ko_KR");
+      const map = itemGoldFrom(data);
+      this.itemGoldCache.set(version, map);
+      return map;
+    })().finally(() => {
+      this.itemGoldRequests.delete(version);
+    });
+    this.itemGoldRequests.set(version, request);
+    return request;
   }
 
   private async fetchChampionData(version: string, language: "ko_KR" | "ja_JP"): Promise<ChampionDataResponse> {

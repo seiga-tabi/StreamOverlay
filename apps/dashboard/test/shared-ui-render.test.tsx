@@ -585,8 +585,7 @@ test("Profile 상단은 중복 검색을 제거하고 스트리머 CTA 우선순
           copiedLabel="링크를 복사했습니다."
           copyFailedLabel="링크를 복사하지 못했습니다."
           label="전적 공유"
-          text="YORO.gg에서 전적을 확인하세요."
-          title="YORO#JP1 전적 | YORO.gg"
+          onNotice={() => undefined}
           url="https://yoro.gg/ko/lol/summoners/jp/YORO-JP1"
         />
       )}
@@ -647,7 +646,9 @@ test("Profile 상단은 중복 검색을 제거하고 스트리머 CTA 우선순
   assert.doesNotMatch(html, /public-ranking-shared-toolbar/u);
   assert.doesNotMatch(html, /public-profile-streamer-spotlight/u);
   assert.match(html, />League of Legends</u);
-  assert.match(html, />전적 공유</u);
+  assert.match(html, /aria-label="전적 공유"/u);
+  assert.match(html, /public-profile-share-icon/u);
+  assert.doesNotMatch(html, />전적 공유</u);
   assert.match(html, /data-share-url="https:\/\/yoro\.gg\/ko\/lol\/summoners\/jp\/YORO-JP1"/u);
   assert.doesNotMatch(html, /token=|\?/u);
   // 티어는 히어로 신원이 아니라 rankSection 이 소유합니다(프로필·티어 테스트에서 검증).
@@ -944,13 +945,14 @@ test("최근 전적 공유 기능은 현재 목록을 이미지 저장과 시스
   assert.match(shareSource, /canvas\.toBlob/u);
 });
 
-test("프로필 공유 기능은 헤더에서 버튼만 그리는 compact 모드를 지원한다", () => {
-  /* 프로필 헤더는 설명 블록 자리가 없어 버튼 1개만 그립니다(2026-08-18 배치 확정).
-     전적 리스트의 공유 카드와 클래스가 겹치지 않아야 두 기능이 섞이지 않습니다. */
+test("프로필 공유 기능은 헤더에서 아이콘 전용 compact 모드를 지원한다", () => {
+  /* 프로필 헤더에서는 모바일 줄바꿈을 막는 아이콘 버튼만 그립니다.
+     보이는 글자를 없애도 접근 가능한 이름은 유지해야 합니다. */
   const html = renderToStaticMarkup(
     <ProfileShareActions
       compact
       card={{ riotId: "YORO#JP1", tierLabel: "Diamond II" }}
+      onNotice={() => undefined}
       text={{
         title: "프로필 공유 카드",
         description: "설명",
@@ -971,8 +973,24 @@ test("프로필 공유 기능은 헤더에서 버튼만 그리는 compact 모드
     />
   );
   assert.match(html, /public-profile-share-action/u);
-  assert.match(html, />프로필 공유</u);
+  assert.match(html, /aria-label="프로필 공유"/u);
+  assert.match(html, /public-profile-share-icon/u);
+  assert.doesNotMatch(html, />프로필 공유</u);
   assert.doesNotMatch(html, /public-match-share-actions/u);
+
+  const linkShareSource = readFileSync(
+    new URL("../src/features/public-lol/components/PublicProfileShareButton.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(linkShareSource, /navigator\.clipboard\.writeText\(url\)/u);
+  assert.doesNotMatch(linkShareSource, /navigator\.share/u);
+
+  const pageSource = readFileSync(
+    new URL("../src/pages/PublicLolPage.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(pageSource, /<ToastProvider duration=\{3_500\} position="top-center">/u);
+  assert.match(pageSource, /className="public-profile-share-toast-viewport"/u);
 });
 
 test("모바일 최근 전적은 3행으로 압축하고 등급·지표 정렬 축을 고정한다", () => {

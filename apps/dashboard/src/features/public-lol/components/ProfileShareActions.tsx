@@ -77,12 +77,28 @@ export type ProfileShareText = {
   liveBadge: string;
 };
 
-export type ProfileShareActionsProps = {
+type ProfileShareActionsBaseProps = {
   card: ProfileShareCard;
   text: ProfileShareText;
-  /** 프로필 헤더처럼 설명 블록이 들어갈 자리가 없는 곳에서 버튼만 그립니다. */
-  compact?: boolean;
 };
+
+export type ProfileShareNotice = {
+  message: string;
+  tone: "info" | "success" | "danger";
+};
+
+export type ProfileShareActionsProps = ProfileShareActionsBaseProps & (
+  | {
+    /** 프로필 헤더처럼 설명 블록이 들어갈 자리가 없는 곳에서 버튼만 그립니다. */
+    compact: true;
+    /** compact 모드의 진행·완료 상태를 화면 고정 토스트로 전달합니다. */
+    onNotice: (notice: ProfileShareNotice | null) => void;
+  }
+  | {
+    compact?: false;
+    onNotice?: never;
+  }
+);
 
 type ShareStatus = "idle" | "preparing" | "saved" | "shared" | "failed";
 
@@ -620,7 +636,22 @@ function downloadBlob(blob: Blob, fileName: string): void {
   window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
 }
 
-export function ProfileShareActions({ card, text, compact }: ProfileShareActionsProps) {
+function ProfileShareIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="public-profile-share-icon"
+      fill="none"
+      focusable="false"
+      viewBox="0 0 24 24"
+    >
+      <path d="M12 16V4m0 0-4 4m4-4 4 4" />
+      <path d="M5 13v6h14v-6" />
+    </svg>
+  );
+}
+
+export function ProfileShareActions({ card, text, compact, onNotice }: ProfileShareActionsProps) {
   const [status, setStatus] = useState<ShareStatus>("idle");
   const mountedRef = useRef(false);
   const inFlightRef = useRef(false);
@@ -633,7 +664,23 @@ export function ProfileShareActions({ card, text, compact }: ProfileShareActions
   }, []);
 
   const updateStatus = (next: ShareStatus) => {
-    if (mountedRef.current) setStatus(next);
+    if (!mountedRef.current) return;
+    setStatus(next);
+    if (!onNotice) return;
+    if (next === "idle") {
+      onNotice(null);
+      return;
+    }
+    onNotice({
+      message: next === "preparing"
+        ? text.preparing
+        : next === "saved"
+          ? text.saved
+          : next === "shared"
+            ? text.shared
+            : text.failed,
+      tone: next === "preparing" ? "info" : next === "failed" ? "danger" : "success",
+    });
   };
 
   const makeBlob = async () => {
@@ -691,27 +738,23 @@ export function ProfileShareActions({ card, text, compact }: ProfileShareActions
   const busy = status === "preparing";
 
   if (compact) {
-    /* 헤더 배치 — 기존 공유 버튼과 같은 자리·같은 크기를 유지하고, 상태는 버튼
-       아래 한 줄(aria-live)로만 알립니다. */
-    /* 링크 공유 버튼(PublicProfileShareButton)과 같은 클래스·구조를 씁니다 —
-       헤더 액션 줄의 크기·정렬·상태 툴팁 스타일을 그대로 물려받습니다. */
+    /* 모바일에서도 줄바꿈이 생기지 않도록 아이콘만 표시합니다. 접근 가능한 이름은
+       aria-label/title 로 유지하고, 진행 상태는 상위 화면의 고정 토스트가 알립니다. */
     return (
       <span className="public-profile-share-action">
         <Button
+          aria-label={text.share}
           className="public-secondary-action public-profile-share-button"
           disabled={busy}
           loading={busy}
           onClick={() => void onShare()}
           size="sm"
+          title={text.share}
           type="button"
           variant="secondary"
         >
-          <span aria-hidden="true">🖼</span>
-          {text.share}
+          <ProfileShareIcon />
         </Button>
-        <span className="public-profile-share-status" role={status === "failed" ? "alert" : "status"} aria-live="polite">
-          {statusText}
-        </span>
       </span>
     );
   }

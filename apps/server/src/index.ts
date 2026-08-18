@@ -58,6 +58,7 @@ import { recordFollowerManagementEvent } from "./services/follower-event-recorde
 import { createHttpHandler } from "./routes/http-api.js";
 import { LocalPublicLolSnapshotStore } from "./services/public-lol-snapshot-store.js";
 import { LocalPatchNotesFeedStore, PatchNotesService } from "./services/patch-notes-service.js";
+import { PatchChangeSummaryService } from "./services/patch-change-summary.js";
 import { DashboardSessionStore } from "./security/auth.js";
 import { getEnabledModules } from "./modules/index.js";
 import { refreshLolProfileForEntry } from "./modules/lol-profile-enrichment.module.js";
@@ -622,6 +623,28 @@ const patchNotes = new PatchNotesService({
   store: new LocalPatchNotesFeedStore(`${appConfig.paths.state}/patch-notes`),
   dataDragonVersionsProvider: () => dataDragon.getVersions()
 });
+/* 패치 변경 요약 — 노트가 주는 dataDragonVersion 쌍으로 Data Dragon 두 판을
+   비교합니다. 이름·아이콘은 이미 받아 둔 맵을 재사용하므로 추가 다운로드는
+   직전 버전의 champion.json·item.json 뿐이고, 그것도 패치당 한 번입니다. */
+const patchChangeSummary = new PatchChangeSummaryService({
+  notesFor: async (locale) => (await patchNotes.getFeed(locale))?.notes ?? [],
+  championStats: (version) => dataDragon.getChampionStatsMap(version),
+  itemGold: (version) => dataDragon.getItemGoldMap(version),
+  championNames: async (version, locale) => {
+    const champions = await dataDragon.getChampionMap(version);
+    return new Map([...champions].map(([championId, champion]) => [championId, {
+      name: (locale === "ja" ? champion.nameJa : champion.nameKo) || champion.nameKo,
+      ...(champion.iconUrl ? { iconUrl: champion.iconUrl } : {})
+    }]));
+  },
+  itemNames: async (version, locale) => {
+    const items = await dataDragon.getItemMap(version);
+    return new Map([...items].flatMap(([itemId, item]) => {
+      const name = (locale === "ja" ? item.nameJa : item.nameKo) || item.nameKo;
+      return name ? [[itemId, { name, ...(item.iconUrl ? { iconUrl: item.iconUrl } : {}) }] as const] : [];
+    }));
+  }
+});
 const actions = new ActionDispatcher(
   twitchChat,
   store,
@@ -701,6 +724,7 @@ const server = http.createServer(createHttpHandler({
   discordBotCommandPolicy,
   adminAuditLogs,
   patchNotes,
+  patchChangeSummary,
   valorantCatalog,
   valorantPublic,
   readiness: () => {

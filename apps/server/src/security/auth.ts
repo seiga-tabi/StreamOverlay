@@ -239,7 +239,9 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
     /^\/api\/public\/participation\/sessions\/[^/]+(?:\/(?:join|cancel|check-in|rejoin|skip))?$/.test(pathname) ||
     (method === "GET" && pathname === "/api/public/aram/augments") ||
     (method === "GET" && pathname === "/api/public/patch-notes") ||
-    (method === "GET" && pathname === "/api/public/patch-notes/summary")
+    (method === "GET" && pathname === "/api/public/patch-notes/summary") ||
+    (method === "GET" && pathname === "/api/public/patch-notes/changes") ||
+    (method === "GET" && pathname === "/api/public/patch-notes/keyart")
   ) return "PUBLIC";
   if (method === "GET" && (pathname === "/api/public/twitch/auth/start" || pathname === "/api/public/twitch/auth/callback")) return "OAUTH_CALLBACK";
   if (

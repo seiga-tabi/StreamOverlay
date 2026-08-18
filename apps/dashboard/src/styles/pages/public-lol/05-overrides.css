@@ -465,31 +465,38 @@
   color: inherit !important;
 }
 
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-profile-share-button.yoro-button {
+  inline-size: var(--yoro-size-touch-target) !important;
+  min-inline-size: var(--yoro-size-touch-target) !important;
+  block-size: var(--yoro-size-touch-target) !important;
+  min-block-size: var(--yoro-size-touch-target) !important;
+  padding: 0 !important;
+  border-radius: var(--yoro-radius-md) !important;
+}
+
 .public-profile-share-button .yoro-button__label {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+  display: grid;
+  inline-size: 100%;
+  place-items: center;
 }
 
-.public-profile-share-status {
-  position: absolute;
-  z-index: 3;
-  top: calc(100% + 6px);
-  left: 50%;
-  width: max-content;
-  max-width: min(280px, 80vw);
-  transform: translateX(-50%);
-  padding: 6px 9px;
-  border-radius: var(--yoro-radius-sm);
-  background: color-mix(in srgb, var(--yoro-color-text-strong) 92%, var(--yoro-color-primary));
-  color: var(--yoro-color-text-on-dark-strong);
-  box-shadow: var(--yoro-shadow-panel);
-  font-size: var(--yoro-font-size-xs);
-  white-space: normal;
+.public-profile-share-icon {
+  display: block;
+  inline-size: var(--yoro-space-5);
+  block-size: var(--yoro-space-5);
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.public-profile-share-status:empty {
+.public-profile-share-button[data-loading="true"] .public-profile-share-icon {
   display: none;
+}
+
+.public-profile-share-toast-viewport.yoro-toast-viewport {
+  inset-block-start: max(var(--yoro-space-4), env(safe-area-inset-top));
+  z-index: var(--yoro-z-toast);
 }
 
 /* 공개 검색 X 버튼 및 연관검색 UX 정리 */

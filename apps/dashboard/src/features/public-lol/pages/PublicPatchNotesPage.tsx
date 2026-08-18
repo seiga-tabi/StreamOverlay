@@ -21,7 +21,9 @@ import {
   type PatchNotesFilterOption
 } from "../components/PatchNotesControlBar";
 import { PatchNotesMineModule } from "../components/PatchNotesMineModule";
-import { requestPatchNotes, requestPatchPlaySummary } from "../api/patch-notes";
+import { requestPatchChangeSummary, requestPatchNotes, requestPatchPlaySummary } from "../api/patch-notes";
+import { PatchChangeSummaryPanel } from "../components/PatchChangeSummaryPanel";
+import type { PatchChangeSummary } from "../types/patch-change-summary";
 import { activePublicLocale, t } from "../i18n/public-lol-i18n";
 import { readFavorites, readRecentSearches } from "../utils/storage";
 import type { SearchSuggestion } from "../types/public-lol";
@@ -368,6 +370,9 @@ export function PublicPatchNotesPage({ locale }: { locale: string }) {
   const [mineError, setMineError] = useState("");
   /* 다시 시도는 같은 소환사를 다시 받는 것이므로 시도 횟수를 effect 의 열쇠로 씁니다. */
   const [mineAttempt, setMineAttempt] = useState(0);
+  /* 패치 변경 요약(2026-08-18) — 최신 패치 하나만 받습니다. 서버가 아직 이 계약을
+     구현하지 않은 배포에서는 undefined 로 끝나고 패널이 통째로 숨습니다(fail-soft). */
+  const [changeSummary, setChangeSummary] = useState<PatchChangeSummary | undefined>();
 
   function load(): AbortController {
     const controller = new AbortController();
@@ -500,6 +505,25 @@ export function PublicPatchNotesPage({ locale }: { locale: string }) {
   /* 좁히는 조작을 하면 히어로·타일을 접고 결과만 한 줄로 보여 줍니다. */
   const searching = trimmedQuery.length > 0 || filter !== "all";
   const hero = searching ? undefined : visibleEntries[0];
+  /* 요약은 최신 패치 하나만 받습니다 — 목록의 모든 패치를 계산시키면 서버 비용이
+     패치 수만큼 늘고, 화면도 히어로 아래 한 곳에서만 씁니다. */
+  const latestPatchVersion = entries[0]?.note.patchVersion;
+
+  useEffect(() => {
+    if (!latestPatchVersion) {
+      setChangeSummary(undefined);
+      return undefined;
+    }
+    const controller = new AbortController();
+    void requestPatchChangeSummary(latestPatchVersion, feedLocale, controller.signal)
+      .then((summary) => {
+        if (!controller.signal.aborted) setChangeSummary(summary);
+      })
+      .catch(() => {
+        /* 취소 외 오류는 이미 undefined 로 닫혀 옵니다. 화면은 패널만 숨깁니다. */
+      });
+    return () => controller.abort();
+  }, [latestPatchVersion, feedLocale]);
   const tiles = searching ? [] : visibleEntries.slice(1, 1 + FEATURED_TILE_COUNT);
   const archive = searching ? visibleEntries : visibleEntries.slice(1 + FEATURED_TILE_COUNT);
 
@@ -601,6 +625,17 @@ export function PublicPatchNotesPage({ locale }: { locale: string }) {
 
           <div aria-live="polite" className="yoro-pn-stage">
             {hero ? <HeroCard entry={hero} key={hero.note.slug} maxGames={maxGames} /> : null}
+
+            {/* 변경 요약은 히어로(최신 패치) 바로 아래에만 붙습니다. 요약이 없거나
+                검색 중이거나 히어로가 그 패치가 아니면 그리지 않습니다(목업 §⑤). */}
+            {hero && changeSummary && hero.note.patchVersion === changeSummary.patchVersion ? (
+              <PatchChangeSummaryPanel
+                note={hero.note}
+                summary={changeSummary}
+                {...(hero.record ? { record: hero.record } : {})}
+                {...(hero.previousRecord ? { previousRecord: hero.previousRecord } : {})}
+              />
+            ) : null}
 
             {tiles.length > 0 ? (
               <div className="yoro-pn-tiles">

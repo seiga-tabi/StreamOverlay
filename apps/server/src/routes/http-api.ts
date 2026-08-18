@@ -6,6 +6,7 @@ import { URL } from "node:url";
 import type { Store } from "../services/store.js";
 import { loadAramAugmentCatalog } from "../services/aram-augment-catalog.js";
 import type { PatchNotesService } from "../services/patch-notes-service.js";
+import type { PatchChangeSummaryService } from "../services/patch-change-summary.js";
 import { storeParticipationRepository } from "../services/participation-repository.js";
 import { publishParticipationSnapshot as publishAtomicParticipationSnapshot } from "../services/participation-snapshot.js";
 import type { ActionDispatcher } from "../core/action-dispatcher.js";
@@ -2397,6 +2398,8 @@ type HttpHandlerInput = {
   gameServerStatusRead?: GameServerStatusReadService;
   discordBotCommandPolicy?: DiscordBotCommandPolicyService;
   patchNotes?: PatchNotesService;
+  patchChangeSummary?: PatchChangeSummaryService;
+  patchNotesSocialCard?: PatchNotesSocialCardRenderer;
   adminAuditLogs?: Pick<
     AdminAuditLogRepository,
     "list" | "beginGlobalMutation" | "completeGlobalMutation"
@@ -3603,7 +3606,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
   const publicLolPlatformMembershipCache = new Map<string, { expiresAt: number; verified: boolean }>();
   const publicLolPlatformMembershipInFlight = new Map<string, Promise<boolean>>();
   const publicLolSocialCardRenderer = new PublicLolSocialCardRenderer();
-  const patchNotesSocialCardRenderer = new PatchNotesSocialCardRenderer();
+  /* 테스트가 원격 호출 없이 이미지 경로를 검증할 수 있도록 주입 지점을 둡니다. */
+  const patchNotesSocialCardRenderer = input.patchNotesSocialCard ?? new PatchNotesSocialCardRenderer();
   const publicLolCurrentGameCache = new Map<string, { expiresAt: number; response: PublicLolCurrentGame }>();
   const publicLolCurrentGameInFlight = new Map<string, Promise<PublicLolCurrentGame>>();
   let publicLolParticipantRankCacheInvalidatedAt = 0;
@@ -7157,9 +7161,19 @@ export function createHttpHandler(input: HttpHandlerInput) {
           const participant = match.info.participants.find((item) => item.puuid === account.puuid);
           /* 승패를 모르는 경기는 표본에서 뺍니다. 추측해서 승률을 만들지 않습니다. */
           if (!participant || typeof participant.win !== "boolean") return undefined;
-          return { gameVersion: match.info.gameVersion, won: participant.win };
+          /* championId 는 이미 손에 든 participant 에 있습니다 — 최다 사용 챔피언
+             집계에 Riot 호출이 더 들지 않는 이유입니다. */
+          return {
+            gameVersion: match.info.gameVersion,
+            won: participant.win,
+            ...(typeof participant.championId === "number" ? { championId: participant.championId } : {})
+          };
         })
-        .filter((sample): sample is { gameVersion: string | undefined; won: boolean } => Boolean(sample));
+        .filter((sample): sample is {
+          gameVersion: string | undefined;
+          won: boolean;
+          championId?: number;
+        } => Boolean(sample));
 
       const summary: PatchPlaySummary = Object.freeze({
         schemaVersion: 1 as const,
@@ -11142,6 +11156,84 @@ export function createHttpHandler(input: HttpHandlerInput) {
             ? (feed.stale ? "public, max-age=60" : "public, max-age=900, stale-while-revalidate=21600")
             : (feed.stale ? "private, max-age=60" : "private, max-age=900"),
           Vary: "Accept-Language"
+        });
+      }
+      if (req.method === "GET" && url.pathname === "/api/public/patch-notes/keyart") {
+        /* 공유 카드가 키 아트를 캔버스에 그리려면 같은 origin 에서 받아야 합니다 —
+           Riot CDN 은 CORS 헤더를 주지 않아 canvas 가 오염됩니다(2026-08-18 실측).
+           대상 URL 은 이용자 입력이 아니라 우리가 수집한 노트의 imageUrl 이고,
+           공유 카드가 쓰는 것과 같은 allowlist·타임아웃·크기 상한을 지납니다. */
+        const patchVersion = url.searchParams.get("patch") ?? "";
+        if (!/^\d{1,3}\.\d{1,3}$/u.test(patchVersion)) {
+          return sendJson(req, res, 400, {
+            error: "패치 번호 형식이 올바르지 않습니다.",
+            code: "INVALID_PATCH_VERSION"
+          }, { "Cache-Control": "no-store" });
+        }
+        const keyArtLocale: PatchNoteLocale = url.searchParams.get("locale") === "ja" ? "ja" : "ko";
+        const feed = input.patchNotes ? await input.patchNotes.getFeed(keyArtLocale) : undefined;
+        const note = feed?.notes.find((candidate) => candidate.patchVersion === patchVersion);
+        /* 패치 번호가 없는 노트는 카드 모델이 만들어지지 않습니다(형식 미달). */
+        const keyArtModel = note ? patchNotesCardModel(note) : undefined;
+        const keyArt = keyArtModel
+          ? await patchNotesSocialCardRenderer.keyArt(keyArtModel).catch(() => undefined)
+          : undefined;
+        if (!keyArt) {
+          /* 키 아트가 없으면 화면은 그라디언트 폴백으로 닫힙니다 — 카드는 정상입니다. */
+          return sendJson(req, res, 404, {
+            error: "해당 패치의 키 아트가 없습니다.",
+            code: "PATCH_KEYART_NOT_FOUND"
+          }, { "Cache-Control": "public, max-age=600" });
+        }
+        const keyArtEtag = `"patch-keyart-${keyArtLocale}-${patchVersion}"`;
+        if (req.headers["if-none-match"] === keyArtEtag) {
+          res.writeHead(304, { ETag: keyArtEtag, "Cache-Control": "public, max-age=86400" });
+          res.end();
+          return true;
+        }
+        res.writeHead(200, {
+          "Content-Type": "image/png",
+          "Content-Length": String(keyArt.length),
+          ETag: keyArtEtag,
+          /* 패치 번호가 URL 에 있으므로 새 패치는 새 URL 입니다. */
+          "Cache-Control": "public, max-age=86400, stale-while-revalidate=604800"
+        });
+        res.end(keyArt);
+        return true;
+      }
+      if (req.method === "GET" && url.pathname === "/api/public/patch-notes/changes") {
+        /* 경로가 /summary 가 아니라 /changes 인 이유: summary 는 이미 패치별 개인
+           전적이 쓰고 있습니다(바로 아래). 이쪽은 공개 데이터 계산 결과라 캐시
+           정책도 반대입니다 — 누구에게나 같은 값이므로 공용 캐시에 둡니다. */
+        const patchVersion = url.searchParams.get("patch") ?? "";
+        if (!/^\d{1,3}\.\d{1,3}$/u.test(patchVersion)) {
+          return sendJson(req, res, 400, {
+            error: "패치 번호 형식이 올바르지 않습니다.",
+            code: "INVALID_PATCH_VERSION"
+          }, { "Cache-Control": "no-store" });
+        }
+        if (!input.patchChangeSummary) {
+          return sendJson(req, res, 503, {
+            error: "패치 변경 요약을 사용할 수 없습니다.",
+            code: "PATCH_CHANGES_UNAVAILABLE"
+          }, { "Cache-Control": "no-store" });
+        }
+        const requestedLocale = url.searchParams.get("locale");
+        const changesLocale: PatchNoteLocale = requestedLocale === "ja" ? "ja" : "ko";
+        const changes = await input.patchChangeSummary.summaryFor(patchVersion, changesLocale)
+          .catch(() => undefined);
+        /* 비교 경계를 못 잡았거나 변경이 0건이면 보여 줄 것이 없습니다. 프런트는
+           404 를 받으면 패널을 통째로 숨깁니다(빈 패널 금지). */
+        if (!changes) {
+          return sendJson(req, res, 404, {
+            error: "해당 패치의 변경 요약이 없습니다.",
+            code: "PATCH_CHANGES_NOT_FOUND"
+          }, { "Cache-Control": "public, max-age=600" });
+        }
+        return sendJson(req, res, 200, changes, {
+          /* locale 이 URL 에 있으므로 URL 이 응답을 결정합니다 — 공용 캐시 가능.
+             패치가 나오기 전에는 값이 바뀌지 않아 길게 잡습니다. */
+          "Cache-Control": "public, max-age=21600, stale-while-revalidate=86400"
         });
       }
       if (req.method === "GET" && url.pathname === "/api/public/patch-notes/summary") {

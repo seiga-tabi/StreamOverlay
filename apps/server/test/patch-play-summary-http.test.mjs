@@ -48,7 +48,7 @@ function createResponse() {
 }
 
 /* 실측한 gameVersion 모양을 그대로 씁니다: 같은 패치에 build 가 여러 개입니다. */
-function match(matchId, gameVersion, won, queueId = 420) {
+function match(matchId, gameVersion, won, championId = 1, queueId = 420) {
   return {
     metadata: { matchId, participants: [PUUID] },
     info: {
@@ -59,7 +59,7 @@ function match(matchId, gameVersion, won, queueId = 420) {
       mapId: 11,
       participants: [{
         puuid: PUUID,
-        championId: 1,
+        championId,
         championName: "Annie",
         teamId: 100,
         win: won,
@@ -72,13 +72,13 @@ function match(matchId, gameVersion, won, queueId = 420) {
 }
 
 const MATCHES = [
-  match("KR_1", "16.15.788.4269", true),
-  match("KR_2", "16.15.788.4269", true),
-  match("KR_3", "16.15.760.5228", false),
-  match("KR_4", "16.14.760.9485", true),
-  match("KR_5", "16.14.760.9485", false),
-  match("KR_6", "16.14.760.9485", false),
-  match("KR_7", "16.14.760.9485", false)
+  match("KR_1", "16.15.788.4269", true, 1),
+  match("KR_2", "16.15.788.4269", true, 1),
+  match("KR_3", "16.15.760.5228", false, 64),
+  match("KR_4", "16.14.760.9485", true, 78),
+  match("KR_5", "16.14.760.9485", false, 78),
+  match("KR_6", "16.14.760.9485", false, 254),
+  match("KR_7", "16.14.760.9485", false, 12)
 ];
 
 function riotClient(overrides = {}) {
@@ -135,7 +135,7 @@ test("gameVersion 의 major.minor 로 묶어 패치별 승률을 낸다", async 
   const summary = parsePatchPlaySummary(JSON.parse(res.body));
   assert.ok(summary, "shared parser 를 통과해야 한다");
   assert.equal(summary.sampledMatches, MATCHES.length);
-  assert.deepEqual(summary.patches, [
+  assert.deepEqual(summary.patches.map(({ topChampions, ...record }) => record), [
     /* 같은 패치의 build 두 개(788·760)가 한 칸으로 묶입니다. */
     { patchKey: "16.15", games: 3, wins: 2, winRate: 66.7 },
     { patchKey: "16.14", games: 4, wins: 1, winRate: 25 }
@@ -176,7 +176,13 @@ test("승패를 모르는 경기는 표본에서 뺀다", async () => {
   const summary = parsePatchPlaySummary(JSON.parse(res.body));
   assert.ok(summary);
   assert.equal(summary.sampledMatches, MATCHES.length - 1);
-  assert.deepEqual(summary.patches[0], { patchKey: "16.15", games: 2, wins: 1, winRate: 50 });
+  const { topChampions, ...record } = summary.patches[0];
+  assert.deepEqual(record, { patchKey: "16.15", games: 2, wins: 1, winRate: 50 });
+  /* 빠진 경기의 챔피언도 함께 빠집니다 — 승패를 모르니 승수도 셀 수 없습니다. */
+  assert.deepEqual(topChampions, [
+    { championId: 1, games: 1, wins: 1 },
+    { championId: 64, games: 1, wins: 0 },
+  ]);
 });
 
 test("gameVersion 이 없으면 패치를 지어내지 않는다", async () => {
@@ -225,4 +231,26 @@ test("Riot API를 쓸 수 없으면 503으로 알린다", async () => {
   assert.equal((await get(handlerWith(undefined), "/api/public/patch-notes/summary?riotId=YORO%23KR1&platform=kr")).statusCode, 503);
   const unconfigured = handlerWith(riotClient({ isConfigured: () => false }));
   assert.equal((await get(unconfigured, "/api/public/patch-notes/summary?riotId=YORO%23KR1&platform=kr")).statusCode, 503);
+});
+
+test("패치별 최다 사용 챔피언을 Riot 추가 호출 없이 함께 낸다", async () => {
+  /* championId 는 승패를 꺼내며 이미 손에 든 participant 에 있습니다 — 같은 순회에서
+     담을 뿐이라 matchIds·details 호출 수가 늘지 않아야 합니다. */
+  const riot = riotClient();
+  const res = await get(handlerWith(riot), "/api/public/patch-notes/summary?riotId=YORO%23KR1&platform=kr");
+  const summary = parsePatchPlaySummary(JSON.parse(res.body));
+  assert.ok(summary, "shared parser 를 통과해야 한다");
+  assert.deepEqual(riot.calls, { matchIds: 1, details: MATCHES.length, accounts: 1 });
+
+  const [recent, older] = summary.patches;
+  assert.deepEqual(recent.topChampions, [
+    { championId: 1, games: 2, wins: 2 },
+    { championId: 64, games: 1, wins: 0 },
+  ]);
+  /* 상위 3개까지만 — 16.14 는 네 판이지만 챔피언은 78·254·12 세 종류입니다. */
+  assert.deepEqual(older.topChampions, [
+    { championId: 78, games: 2, wins: 1 },
+    { championId: 12, games: 1, wins: 0 },
+    { championId: 254, games: 1, wins: 0 },
+  ]);
 });

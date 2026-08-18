@@ -183,6 +183,21 @@ export class PatchNotesSocialCardRenderer {
     }
   }
 
+  /**
+   * 키 아트 PNG 하나만 돌려줍니다(공유 카드 캔버스용).
+   *
+   * 브라우저가 Riot CDN 에서 직접 받아 캔버스에 그릴 수 없기 때문입니다 —
+   * cmsassets.rgpub.io 는 access-control-allow-origin 을 주지 않아
+   * canvas 가 오염(tainted)되고 toDataURL 이 막힙니다(2026-08-18 실측).
+   * 같은 origin 에서 내려주면 그 제약이 사라집니다.
+   *
+   * URL 은 이용자 입력이 아니라 우리가 수집한 노트의 imageUrl 이고, 아래
+   * loadKeyArt 의 allowlist·timeout·크기 상한·이미지 검사를 그대로 지납니다.
+   */
+  async keyArt(model: PatchNotesCardModel): Promise<Buffer | undefined> {
+    return this.loadKeyArt(model);
+  }
+
   /** 키 아트를 1200×630 cover 로 정규화합니다. 실패하면 undefined — 폴백형으로 갑니다. */
   private async loadKeyArt(model: PatchNotesCardModel): Promise<Buffer | undefined> {
     const url = model.imageUrl;

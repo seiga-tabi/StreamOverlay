@@ -39,7 +39,12 @@ import { LolAugmentIcon } from "../features/public-lol/components/LolAugmentIcon
 import { publicLiveText } from "../shared/public-live-streamers";
 import { streamerBuckets, type StreamerFilter } from "../features/public-lol/utils/streamers";
 import { arenaPlacementClass, isArenaQueue, matchGap, matchLanePairs, type LanePair } from "../features/public-lol/utils/match-lanes";
-import { ProfileShareActions, type ProfileShareCard, type ProfileShareLane } from "../features/public-lol/components/ProfileShareActions";
+import {
+  ProfileShareActions,
+  type ProfileShareCard,
+  type ProfileShareLane,
+  type ProfileShareNotice,
+} from "../features/public-lol/components/ProfileShareActions";
 import { profileShareLanes } from "../features/public-lol/utils/profile-share";
 import { RecentMatchesShareActions, type RecentMatchShareItem } from "../features/public-lol/components/RecentMatchesShareActions";
 import { ArenaStandings } from "../features/public-lol/components/ArenaStandings";
@@ -1683,7 +1688,17 @@ function ProfileTopPanel({
   tabs?: ReactNode;
 }) {
   const [activeRankQueue, setActiveRankQueue] = useState<string>();
+  const [shareNotice, setShareNotice] = useState<(ProfileShareNotice & { id: number }) | null>(null);
+  const shareNoticeSequenceRef = useRef(0);
   const refreshDisabled = loading || refreshRemaining > 0;
+  const showShareNotice = (notice: ProfileShareNotice | null) => {
+    if (!notice) {
+      setShareNotice(null);
+      return;
+    }
+    shareNoticeSequenceRef.current += 1;
+    setShareNotice({ ...notice, id: shareNoticeSequenceRef.current });
+  };
   /* 프로필 공유 카드(2026-08-18) — 기존 "전적 공유"(링크 복사) 버튼을 대체합니다.
      설계·검증: docs/mockups/lol-profile-share-card.html v1.3.
      라인별 주력 챔피언은 이미 받은 recentMatches 집계라 서버 계약 변경이 없습니다.
@@ -1848,9 +1863,6 @@ function ProfileTopPanel({
   const canonicalProfileUrl = typeof window === "undefined"
     ? `https://yoro.gg${canonicalProfilePath}`
     : new URL(canonicalProfilePath, window.location.origin).href;
-  const shareTitle = activePublicLocale === "ja"
-    ? `${profile.riotId} 戦績 | YORO.gg`
-    : `${profile.riotId} 전적 | YORO.gg`;
   return (
     <FeatureProfileTopPanel
       displayName={profile.gameName}
@@ -1904,39 +1916,56 @@ function ProfileTopPanel({
       refreshTitle={refreshCoolingDown ? `${formatCooldown(refreshRemaining)} ${t().refreshAvailableIn}` : t().refreshProfile}
       seasonBadges={null}
       shareAction={(
-        <>
-        <ProfileShareActions
-          card={profileShareCard}
-          compact
-          text={{
-            title: t().profileShareTitle,
-            description: t().profileShareDescription,
-            download: t().profileShareDownload,
-            share: t().profileShareButton,
-            preparing: t().profileSharePreparing,
-            saved: t().profileShareSaved,
-            shared: t().profileShareShared,
-            failed: t().profileShareFailed,
-            mainLane: t().profileShareMainLane,
-            subLane: t().profileShareSubLane,
-            unranked: t().profileShareUnranked,
-            levelPrefix: "Lv.",
-            games: t().games,
-            sampleNote: t().profileShareSample.replace("{count}", String(profile.recentMatches.length)),
-            liveBadge: t().profileShareLive,
-          }}
-        />
-        {/* 링크 공유는 유지 — 이미지는 SNS 확산용, 링크는 프로필로 바로 보내는 용도라
-            역할이 다릅니다(2026-08-18 사용자 결정: 두 버튼 병행). */}
-        <PublicProfileShareButton
-          copiedLabel={t().shareRecordCopied}
-          copyFailedLabel={t().shareRecordCopyFailed}
-          label={t().shareProfileLink}
-          text={`${profile.riotId}${t().shareRecordText}`}
-          title={shareTitle}
-          url={canonicalProfileUrl}
-        />
-        </>
+        <ToastProvider duration={3_500} position="top-center">
+          <ProfileShareActions
+            card={profileShareCard}
+            compact
+            onNotice={showShareNotice}
+            text={{
+              title: t().profileShareTitle,
+              description: t().profileShareDescription,
+              download: t().profileShareDownload,
+              share: t().profileShareButton,
+              preparing: t().profileSharePreparing,
+              saved: t().profileShareSaved,
+              shared: t().profileShareShared,
+              failed: t().profileShareFailed,
+              mainLane: t().profileShareMainLane,
+              subLane: t().profileShareSubLane,
+              unranked: t().profileShareUnranked,
+              levelPrefix: "Lv.",
+              games: t().games,
+              sampleNote: t().profileShareSample.replace("{count}", String(profile.recentMatches.length)),
+              liveBadge: t().profileShareLive,
+            }}
+          />
+          {/* 프로필 공유는 이미지, 링크 복사는 현재 주소를 클립보드에 저장합니다. */}
+          <PublicProfileShareButton
+            copiedLabel={t().shareRecordCopied}
+            copyFailedLabel={t().shareRecordCopyFailed}
+            label={t().shareProfileLink}
+            onNotice={showShareNotice}
+            url={canonicalProfileUrl}
+          />
+          <ToastViewport className="public-profile-share-toast-viewport">
+            {shareNotice ? (
+              <Toast
+                autoDismiss
+                key={shareNotice.id}
+                loading={shareNotice.tone === "info"}
+                onDismiss={() => {
+                  setShareNotice((current) => current?.id === shareNotice.id ? null : current);
+                }}
+                tone={shareNotice.tone}
+              >
+                <ToastTitle>{shareNotice.message}</ToastTitle>
+                {shareNotice.tone !== "info" ? (
+                  <ToastCloseButton aria-label={t().participationClose}>×</ToastCloseButton>
+                ) : null}
+              </Toast>
+            ) : null}
+          </ToastViewport>
+        </ToastProvider>
       )}
       streamerSpotlight={streamerSpotlight}
       tagLine={profile.tagLine}

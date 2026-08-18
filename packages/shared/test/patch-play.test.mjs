@@ -115,3 +115,69 @@ test("경기가 없어도 요약 자체는 유효하다", () => {
   assert.ok(parsed);
   assert.deepEqual(parsed.patches, []);
 });
+
+test("최다 사용 챔피언을 판수 내림차순 상위 3개로 담는다", () => {
+  /* championId 는 이미 손에 든 participant 에서 나옵니다 — Riot 호출이 늘지 않습니다. */
+  const [record] = patchPlayRecords([
+    { gameVersion: "16.16.1", won: true, championId: 78 },
+    { gameVersion: "16.16.1", won: false, championId: 78 },
+    { gameVersion: "16.16.1", won: true, championId: 78 },
+    { gameVersion: "16.16.1", won: true, championId: 254 },
+    { gameVersion: "16.16.1", won: false, championId: 254 },
+    { gameVersion: "16.16.1", won: true, championId: 64 },
+    { gameVersion: "16.16.1", won: true, championId: 12 },
+  ]);
+  assert.equal(record.games, 7);
+  assert.deepEqual(record.topChampions, [
+    { championId: 78, games: 3, wins: 2 },
+    { championId: 254, games: 2, wins: 1 },
+    /* 1판씩 동률이면 승수 → id 순으로 갈라 순서를 고정합니다. */
+    { championId: 12, games: 1, wins: 1 },
+  ]);
+});
+
+test("championId 가 없는 경기도 승률 표본에는 남는다", () => {
+  const [record] = patchPlayRecords([
+    { gameVersion: "16.16.1", won: true },
+    { gameVersion: "16.16.1", won: false, championId: 78 },
+  ]);
+  assert.equal(record.games, 2);
+  assert.equal(record.wins, 1);
+  assert.deepEqual(record.topChampions, [{ championId: 78, games: 1, wins: 0 }]);
+
+  /* 아무 경기도 championId 를 주지 않으면 필드 자체를 싣지 않습니다. */
+  const [bare] = patchPlayRecords([{ gameVersion: "16.16.1", won: true }]);
+  assert.equal(bare.topChampions, undefined);
+});
+
+test("topChampions 파서는 앞뒤가 맞지 않는 응답을 통째로 버린다", () => {
+  const withChampions = (topChampions) => parsePatchPlaySummary({
+    ...summary,
+    sampledMatches: 3,
+    patches: [{ patchKey: "16.16", games: 3, wins: 2, winRate: 66.7, topChampions }],
+  });
+
+  assert.equal(withChampions([{ championId: 78, games: 2, wins: 1 }])?.patches[0].topChampions.length, 1);
+  /* 필드가 없던 옛 응답도 그대로 통과합니다. */
+  assert.ok(parsePatchPlaySummary({
+    ...summary,
+    sampledMatches: 3,
+    patches: [{ patchKey: "16.16", games: 3, wins: 2, winRate: 66.7 }],
+  }));
+
+  /* 챔피언 판수 합계가 그 패치 판수를 넘을 수는 없습니다. */
+  assert.equal(withChampions([{ championId: 78, games: 3, wins: 1 }, { championId: 64, games: 2, wins: 0 }]), undefined);
+  /* 한 챔피언의 판수가 패치 판수보다 많을 수 없습니다. */
+  assert.equal(withChampions([{ championId: 78, games: 4, wins: 1 }]), undefined);
+  /* 이긴 판이 잡은 판보다 많을 수 없습니다. */
+  assert.equal(withChampions([{ championId: 78, games: 1, wins: 2 }]), undefined);
+  /* 같은 챔피언이 두 번 오면 집계가 깨진 응답입니다. */
+  assert.equal(withChampions([{ championId: 78, games: 1, wins: 1 }, { championId: 78, games: 1, wins: 0 }]), undefined);
+  /* 상위 3개 계약을 넘는 배열은 받지 않습니다. */
+  assert.equal(withChampions([
+    { championId: 1, games: 1, wins: 1 }, { championId: 2, games: 1, wins: 1 },
+    { championId: 3, games: 1, wins: 0 }, { championId: 4, games: 0, wins: 0 },
+  ]), undefined);
+  assert.equal(withChampions([{ championId: 0, games: 1, wins: 1 }]), undefined);
+  assert.equal(withChampions("nope"), undefined);
+});
