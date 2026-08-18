@@ -80,6 +80,8 @@ export type ProfileShareText = {
 export type ProfileShareActionsProps = {
   card: ProfileShareCard;
   text: ProfileShareText;
+  /** 프로필 헤더처럼 설명 블록이 들어갈 자리가 없는 곳에서 버튼만 그립니다. */
+  compact?: boolean;
 };
 
 type ShareStatus = "idle" | "preparing" | "saved" | "shared" | "failed";
@@ -618,7 +620,7 @@ function downloadBlob(blob: Blob, fileName: string): void {
   window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
 }
 
-export function ProfileShareActions({ card, text }: ProfileShareActionsProps) {
+export function ProfileShareActions({ card, text, compact }: ProfileShareActionsProps) {
   const [status, setStatus] = useState<ShareStatus>("idle");
   const mountedRef = useRef(false);
   const inFlightRef = useRef(false);
@@ -687,6 +689,32 @@ export function ProfileShareActions({ card, text }: ProfileShareActionsProps) {
           ? text.failed
           : "";
   const busy = status === "preparing";
+
+  if (compact) {
+    /* 헤더 배치 — 기존 공유 버튼과 같은 자리·같은 크기를 유지하고, 상태는 버튼
+       아래 한 줄(aria-live)로만 알립니다. */
+    /* 링크 공유 버튼(PublicProfileShareButton)과 같은 클래스·구조를 씁니다 —
+       헤더 액션 줄의 크기·정렬·상태 툴팁 스타일을 그대로 물려받습니다. */
+    return (
+      <span className="public-profile-share-action">
+        <Button
+          className="public-secondary-action public-profile-share-button"
+          disabled={busy}
+          loading={busy}
+          onClick={() => void onShare()}
+          size="sm"
+          type="button"
+          variant="secondary"
+        >
+          <span aria-hidden="true">🖼</span>
+          {text.share}
+        </Button>
+        <span className="public-profile-share-status" role={status === "failed" ? "alert" : "status"} aria-live="polite">
+          {statusText}
+        </span>
+      </span>
+    );
+  }
 
   return (
     <section className="public-match-share-actions" aria-labelledby="public-profile-share-title">

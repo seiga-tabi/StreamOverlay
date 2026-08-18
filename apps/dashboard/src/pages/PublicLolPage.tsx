@@ -40,7 +40,8 @@ import { publicLiveText } from "../shared/public-live-streamers";
 import { streamerBuckets, type StreamerFilter } from "../features/public-lol/utils/streamers";
 import { arenaPlacementClass, isArenaQueue, matchGap, matchLanePairs, type LanePair } from "../features/public-lol/utils/match-lanes";
 import { ProfileShareActions, type ProfileShareCard, type ProfileShareLane } from "../features/public-lol/components/ProfileShareActions";
-import { normalizeShareRole, profileShareLanes } from "../features/public-lol/utils/profile-share";
+import { profileShareLanes } from "../features/public-lol/utils/profile-share";
+import { RecentMatchesShareActions, type RecentMatchShareItem } from "../features/public-lol/components/RecentMatchesShareActions";
 import { ArenaStandings } from "../features/public-lol/components/ArenaStandings";
 import { ProfileLinkIcon, profileLinkPlatformFromUrl, profileLinkPlatformClass } from "../components/ProfileLinkIcon";
 import { AppShell, AppShellHeader, AppShellMain, AppShellSidebar } from "../shared/ui/AppShell";
@@ -1683,6 +1684,68 @@ function ProfileTopPanel({
 }) {
   const [activeRankQueue, setActiveRankQueue] = useState<string>();
   const refreshDisabled = loading || refreshRemaining > 0;
+  /* 프로필 공유 카드(2026-08-18) — 기존 "전적 공유"(링크 복사) 버튼을 대체합니다.
+     설계·검증: docs/mockups/lol-profile-share-card.html v1.3.
+     라인별 주력 챔피언은 이미 받은 recentMatches 집계라 서버 계약 변경이 없습니다.
+     이 패널이 받는 profile 은 필터가 반영된 뷰(profileWithMatches)라 rolePerformance
+     도 최근 경기 기준입니다 — 카드 푸터의 "최근 N경기 기준"과 같은 표본이라
+     라인 성과와 챔피언 판수가 서로 어긋나지 않습니다. */
+  const shareLaneStats = profileShareLanes(profile.rolePerformance, profile.recentMatches, championName);
+  const shareLane = (stat: typeof shareLaneStats.main): ProfileShareLane | undefined => stat
+    ? {
+      iconUrl: roleIconAssets[roleIconKey(stat.role)],
+      roleLabel: mainRoleLabel(stat.role),
+      games: stat.games,
+      winRate: stat.winRate,
+      kda: stat.kda,
+      champions: stat.champions.map((champion) => ({
+        name: champion.name,
+        iconUrl: assetUrl(champion.iconUrl),
+        games: champion.games,
+        winRate: champion.winRate,
+      })),
+    }
+    : undefined;
+  const shareCardStreamer = visibleStreamerStream(profile.twitchStream);
+  /* 티어는 솔로랭크 우선, 없으면 자유랭크 폴백 — 둘 다 없으면 언랭크 표기(목업 §⑤). */
+  const shareRankedStats = soloRankStats(profile) ?? flexRankStats(profile) ?? profile.rankedStats;
+  const shareQueueLabel = shareRankedStats?.queueType === "RANKED_FLEX_SR"
+    ? t().flexQueue
+    : shareRankedStats?.queueType === "RANKED_SOLO_5x5" ? t().soloQueue : undefined;
+  const profileShareCard: ProfileShareCard = {
+    riotId: profile.riotId,
+    ...(shareRankedStats && shareRankedStats.queueType !== "UNRANKED"
+      ? {
+        tierLabel: rankTierLabel(shareRankedStats),
+        tierIconUrl: assetUrl(shareRankedStats.tierIconUrl),
+        leaguePoints: shareRankedStats.leaguePoints,
+        wins: shareRankedStats.wins,
+        losses: shareRankedStats.losses,
+        winRate: Math.round(shareRankedStats.winRate),
+      }
+      : {}),
+    ...(profile.summonerLevel !== undefined ? { summonerLevel: profile.summonerLevel } : {}),
+    ...(shareQueueLabel ? { queueLabel: shareQueueLabel } : {}),
+    ...(assetUrl(shareCardStreamer?.profileImageUrl) ?? assetUrl(profile.profileIconUrl)
+      ? { profileImageUrl: (assetUrl(shareCardStreamer?.profileImageUrl) ?? assetUrl(profile.profileIconUrl))! }
+      : {}),
+    ...(assetUrl(profile.topChampions[0]?.splashUrl ?? profile.topChampions[0]?.loadingUrl)
+      ? { masteryChampionArtUrl: assetUrl(profile.topChampions[0]?.splashUrl ?? profile.topChampions[0]?.loadingUrl)! }
+      : {}),
+    ...(shareLane(shareLaneStats.main) ? { mainLane: shareLane(shareLaneStats.main)! } : {}),
+    ...(shareLane(shareLaneStats.sub) ? { subLane: shareLane(shareLaneStats.sub)! } : {}),
+    ...(shareCardStreamer
+      ? {
+        streamer: {
+          displayName: shareCardStreamer.twitchDisplayName,
+          isLive: shareCardStreamer.isLive,
+          ...(shareCardStreamer.twitchLogin ? { channelLabel: `twitch.tv/${shareCardStreamer.twitchLogin}` } : {}),
+          ...(shareCardStreamer.profileImageUrl ? { profileImageUrl: assetUrl(shareCardStreamer.profileImageUrl)! } : {}),
+          ...(shareCardStreamer.isLive && shareCardStreamer.title ? { title: shareCardStreamer.title } : {}),
+        },
+      }
+      : {}),
+  };
   const refreshCoolingDown = refreshRemaining > 0;
   const soloStats = soloRankStats(profile);
   const flexStats = flexRankStats(profile);
@@ -1841,14 +1904,39 @@ function ProfileTopPanel({
       refreshTitle={refreshCoolingDown ? `${formatCooldown(refreshRemaining)} ${t().refreshAvailableIn}` : t().refreshProfile}
       seasonBadges={null}
       shareAction={(
+        <>
+        <ProfileShareActions
+          card={profileShareCard}
+          compact
+          text={{
+            title: t().profileShareTitle,
+            description: t().profileShareDescription,
+            download: t().profileShareDownload,
+            share: t().profileShareButton,
+            preparing: t().profileSharePreparing,
+            saved: t().profileShareSaved,
+            shared: t().profileShareShared,
+            failed: t().profileShareFailed,
+            mainLane: t().profileShareMainLane,
+            subLane: t().profileShareSubLane,
+            unranked: t().profileShareUnranked,
+            levelPrefix: "Lv.",
+            games: t().games,
+            sampleNote: t().profileShareSample.replace("{count}", String(profile.recentMatches.length)),
+            liveBadge: t().profileShareLive,
+          }}
+        />
+        {/* 링크 공유는 유지 — 이미지는 SNS 확산용, 링크는 프로필로 바로 보내는 용도라
+            역할이 다릅니다(2026-08-18 사용자 결정: 두 버튼 병행). */}
         <PublicProfileShareButton
           copiedLabel={t().shareRecordCopied}
           copyFailedLabel={t().shareRecordCopyFailed}
-          label={t().shareRecord}
+          label={t().shareProfileLink}
           text={`${profile.riotId}${t().shareRecordText}`}
           title={shareTitle}
           url={canonicalProfileUrl}
         />
+        </>
       )}
       streamerSpotlight={streamerSpotlight}
       tagLine={profile.tagLine}
@@ -5665,28 +5753,27 @@ function RecentMatches({
   /* 그날의 종합(A안) — 로컬 날짜 경계마다 요약 바를 끼웁니다.
      요약은 보이는(필터 반영) 목록 합계 · docs/mockups/lol-daily-summary.html */
   const matchRowsWithDailySummaries = withLolDailySummaryBars(profile.recentMatches, matchRows);
-  /* 프로필 공유 카드(2026-08-18) — 최근 경기 나열 카드를 대체합니다.
-     설계·검증: docs/mockups/lol-profile-share-card.html v1.3.
-     라인별 주력 챔피언은 이미 받은 recentMatches 집계라 서버 계약 변경이 없습니다.
-     이 패널이 받는 profile 은 필터가 반영된 뷰(profileWithMatches)라 rolePerformance
-     도 최근 경기 기준으로 재계산된 값입니다 — 카드 푸터의 "최근 N경기 기준"과 같은
-     표본이라 라인 성과·챔피언 판수가 서로 어긋나지 않습니다. */
-  const shareLaneStats = profileShareLanes(profile.rolePerformance, profile.recentMatches, championName);
-  const shareLane = (stat: typeof shareLaneStats.main): ProfileShareLane | undefined => stat
-    ? {
-      iconUrl: roleIconAssets[roleIconKey(stat.role)],
-      roleLabel: mainRoleLabel(stat.role),
-      games: stat.games,
-      winRate: stat.winRate,
-      kda: stat.kda,
-      champions: stat.champions.map((champion) => ({
-        name: champion.name,
-        iconUrl: assetUrl(champion.iconUrl),
-        games: champion.games,
-        winRate: champion.winRate,
-      })),
-    }
-    : undefined;
+  const shareMatches: RecentMatchShareItem[] = profile.recentMatches.slice(0, 8).map((match) => {
+    const aiScore = matchAiScore(match);
+    const highlight = matchHighlightBadges(match.badges)[0]?.code;
+    return {
+      key: match.matchId,
+      result: match.result,
+      resultLabel: resultLabel(match.result),
+      championName: championName(match.champion),
+      championIconUrl: match.champion.iconUrl,
+      queueLabel: match.queueId ? queueLabels[publicContentLocale(activePublicLocale)][match.queueId] ?? `${t().queue} ${match.queueId}` : "-",
+      kda: `${formatNumber(match.kills)} / ${formatNumber(match.deaths)} / ${formatNumber(match.assists)}`,
+      kdaMetric: `${formatDecimal(match.kda, 2)} KDA`,
+      grade: recentMatchScoreGrade(aiScore),
+      score: aiScore,
+      ...(highlight === "mvp" || highlight === "ace" ? { highlight } : {}),
+      itemIconUrls: fixedRecentItemSlots(match.items, 7)
+        .flatMap((item) => item?.iconUrl ? [item.iconUrl] : []),
+      durationLabel: formatDuration(match.durationSeconds),
+      startedAtLabel: formatRelativeDate(match.startedAt),
+    };
+  });
   const text: RecentMatchesPanelText = {
     title: {
       label: t().recentGames,
@@ -5790,41 +5877,6 @@ function RecentMatches({
   const shareMasteryChampionArtUrl = assetUrl(
     profile.topChampions[0]?.splashUrl ?? profile.topChampions[0]?.loadingUrl,
   );
-  /* 티어는 솔로랭크 우선, 없으면 자유랭크 폴백 — 둘 다 없으면 언랭크 표기(목업 §⑤). */
-  const shareRankedStats = soloRankStats(profile) ?? flexRankStats(profile) ?? profile.rankedStats;
-  const shareQueueLabel = shareRankedStats?.queueType === "RANKED_FLEX_SR"
-    ? t().flexQueue
-    : shareRankedStats?.queueType === "RANKED_SOLO_5x5" ? t().soloQueue : undefined;
-  const profileShareCard: ProfileShareCard = {
-    riotId: profile.riotId,
-    ...(shareRankedStats && shareRankedStats.queueType !== "UNRANKED"
-      ? {
-        tierLabel: rankTierLabel(shareRankedStats),
-        tierIconUrl: assetUrl(shareRankedStats.tierIconUrl),
-        leaguePoints: shareRankedStats.leaguePoints,
-        wins: shareRankedStats.wins,
-        losses: shareRankedStats.losses,
-        winRate: Math.round(shareRankedStats.winRate),
-      }
-      : {}),
-    ...(profile.summonerLevel !== undefined ? { summonerLevel: profile.summonerLevel } : {}),
-    ...(shareQueueLabel ? { queueLabel: shareQueueLabel } : {}),
-    ...(shareProfileImageUrl ? { profileImageUrl: shareProfileImageUrl } : {}),
-    ...(shareMasteryChampionArtUrl ? { masteryChampionArtUrl: shareMasteryChampionArtUrl } : {}),
-    ...(shareLane(shareLaneStats.main) ? { mainLane: shareLane(shareLaneStats.main)! } : {}),
-    ...(shareLane(shareLaneStats.sub) ? { subLane: shareLane(shareLaneStats.sub)! } : {}),
-    ...(shareStreamer
-      ? {
-        streamer: {
-          displayName: shareStreamer.twitchDisplayName,
-          isLive: shareStreamer.isLive,
-          ...(shareStreamer.twitchLogin ? { channelLabel: `twitch.tv/${shareStreamer.twitchLogin}` } : {}),
-          ...(shareStreamer.profileImageUrl ? { profileImageUrl: assetUrl(shareStreamer.profileImageUrl)! } : {}),
-          ...(shareStreamer.isLive && shareStreamer.title ? { title: shareStreamer.title } : {}),
-        },
-      }
-      : {}),
-  };
   return (
     <FeatureRecentMatchesPanel
       canLoadMore={canLoadMore}
@@ -5845,24 +5897,26 @@ function RecentMatches({
       matchRows={matchRowsWithDailySummaries}
       summaryStrip={summaryStrip}
       shareAction={(
-        <ProfileShareActions
-          card={profileShareCard}
+        <RecentMatchesShareActions
+          matches={shareMatches}
+          masteryChampionArtUrl={shareMasteryChampionArtUrl}
+          profileImageUrl={shareProfileImageUrl}
+          riotId={profile.riotId}
           text={{
-            title: t().profileShareTitle,
-            description: t().profileShareDescription,
-            download: t().profileShareDownload,
-            share: t().profileShareNative,
-            preparing: t().profileSharePreparing,
-            saved: t().profileShareSaved,
-            shared: t().profileShareShared,
-            failed: t().profileShareFailed,
-            mainLane: t().profileShareMainLane,
-            subLane: t().profileShareSubLane,
-            unranked: t().profileShareUnranked,
-            levelPrefix: "Lv.",
+            title: t().matchShareTitle,
+            description: t().matchShareDescription,
+            download: t().matchShareDownload,
+            share: t().matchShareNative,
+            preparing: t().matchSharePreparing,
+            saved: t().matchShareSaved,
+            shared: t().matchShareShared,
+            failed: t().matchShareFailed,
+            recentMatches: t().matchShareRecentMatches,
             games: t().games,
-            sampleNote: t().profileShareSample.replace("{count}", String(profile.recentMatches.length)),
-            liveBadge: t().profileShareLive,
+            generatedBy: t().matchShareGeneratedBy,
+            wins: t().matchShareWins,
+            losses: t().matchShareLosses,
+            winRate: t().matchShareWinRate,
           }}
         />
       )}

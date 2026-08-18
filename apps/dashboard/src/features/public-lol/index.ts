@@ -60,6 +60,7 @@ export { RecentMatchExpandedToolbar } from "./components/RecentMatchExpandedTool
 export { RecentMatchRow, recentMatchScoreGrade } from "./components/RecentMatchRow";
 export { RecentMatchesPanel } from "./components/RecentMatchesPanel";
 export { RecentMatchesSummaryStrip } from "./components/RecentMatchesSummaryStrip";
+export { RecentMatchesShareActions } from "./components/RecentMatchesShareActions";
 export { SearchForm } from "./components/SearchForm";
 export { SearchableRiotId } from "./components/SearchableRiotId";
 export { TeamChampionAvatar } from "./components/TeamChampionAvatar";
@@ -300,6 +301,12 @@ export type {
   ProfileShareActionsProps,
   ProfileShareText,
 } from "./components/ProfileShareActions";
+
+export type {
+  RecentMatchShareItem,
+  RecentMatchesShareActionsProps,
+  RecentMatchesShareText,
+} from "./components/RecentMatchesShareActions";
 export type {
   SearchFormHelpers,
   SearchFormLocalizedText,
