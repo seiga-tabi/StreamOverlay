@@ -104,6 +104,12 @@ export type RiotMatchParticipant = {
   playerAugment4?: number;
   playerAugment5?: number;
   playerAugment6?: number;
+  /* 아레나(CHERRY — 큐 1700/1710/1750). 팀은 teamId 가 아니라 playerSubteamId 로
+     나뉘고(1750 은 3인×6팀), 승/패 대신 팀 순위가 결과입니다.
+     subteamPlacement 가 정식 필드이고 placement 는 초기 스키마의 잔재라 둘 다 받습니다. */
+  playerSubteamId?: number;
+  subteamPlacement?: number;
+  placement?: number;
   perks?: {
     statPerks?: {
       defense?: number;

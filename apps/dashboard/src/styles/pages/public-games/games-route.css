@@ -99,6 +99,10 @@
     gap: var(--yoro-space-2);
     margin-top: var(--yoro-space-2);
     min-height: 1.75rem;
+    /* grid(.games-card-body) 아이템은 min-width:auto(min-content)라 이 행이 내용 폭
+       아래로 줄어들지 못해, 긴 티어명(ja グランドマスター 등)일 때 기록 칩의 ellipsis
+       가 발동하지 않고 CTA 가 카드 밖으로 밀렸습니다(2026-08-18 실측 +68px@320). */
+    min-width: 0;
   }
 
   .games-card-record {

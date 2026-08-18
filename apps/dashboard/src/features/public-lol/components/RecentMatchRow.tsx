@@ -67,6 +67,10 @@ export type RecentMatchRowProps = {
   scoreGrade: string;
   scoreAriaLabel: string;
   metrics: RecentMatchRowMetric[];
+  /** 아레나 증강 6픽 — 스펠·룬과 별개의 3×2 격자 열(목업 lol-arena-match-row.html §②). */
+  loadoutGridItems?: RecentMatchRowMediaItem[];
+  /** 아레나처럼 5v5 기준 AI 스코어가 성립하지 않는 큐에서 배지를 숨깁니다. */
+  hideScore?: boolean;
   itemSlots: RecentMatchRowMediaItem[];
   trinketSlot?: RecentMatchRowMediaItem;
   itemsLabel: string;
@@ -117,6 +121,8 @@ export function RecentMatchRow({
   scoreGrade,
   scoreAriaLabel,
   metrics,
+  loadoutGridItems,
+  hideScore,
   itemSlots,
   trinketSlot,
   itemsLabel,
@@ -180,14 +186,23 @@ export function RecentMatchRow({
             {championIconUrl ? <img src={championIconUrl} alt="" /> : <span>{championFallback}</span>}
             <b aria-hidden="true">{championLevelLabel}</b>
           </span>
-          {spellItems.length > 0 ? (
+          {spellItems.length > 0 || (loadoutGridItems?.length ?? 0) > 0 ? (
             <div className="public-match-card-loadout" aria-label={summonerSpellsLabel}>
-              <div className="public-match-card-loadout-column spells">
-                {renderLoadoutItems(summonerSpellItems)}
-              </div>
-              <div className="public-match-card-loadout-column runes">
-                {renderLoadoutItems(runeItems)}
-              </div>
+              {summonerSpellItems.length > 0 ? (
+                <div className="public-match-card-loadout-column spells">
+                  {renderLoadoutItems(summonerSpellItems)}
+                </div>
+              ) : null}
+              {runeItems.length > 0 ? (
+                <div className="public-match-card-loadout-column runes">
+                  {renderLoadoutItems(runeItems)}
+                </div>
+              ) : null}
+              {loadoutGridItems && loadoutGridItems.length > 0 ? (
+                <div className="public-match-card-loadout-grid">
+                  {renderLoadoutItems(loadoutGridItems)}
+                </div>
+              ) : null}
             </div>
           ) : null}
           <div className="public-match-card-copy">
@@ -200,24 +215,26 @@ export function RecentMatchRow({
         </div>
 
         <div className="public-match-card-perf">
-          <div
-            aria-describedby={scoreDescriptionId}
-            aria-label={scoreAriaLabel}
-            className={`public-match-card-score ${scoreClassName}`}
-            data-grade={scoreGrade}
-            tabIndex={0}
-          >
-            <b>{scoreGrade}</b>
-            <span
-              className="public-match-card-score-description"
-              data-ko={scoreDescription.ko}
-              data-ja={scoreDescription.ja}
-              id={scoreDescriptionId}
-              role="tooltip"
+          {!hideScore ? (
+            <div
+              aria-describedby={scoreDescriptionId}
+              aria-label={scoreAriaLabel}
+              className={`public-match-card-score ${scoreClassName}`}
+              data-grade={scoreGrade}
+              tabIndex={0}
             >
-              {scoreDescription.label}
-            </span>
-          </div>
+              <b>{scoreGrade}</b>
+              <span
+                className="public-match-card-score-description"
+                data-ko={scoreDescription.ko}
+                data-ja={scoreDescription.ja}
+                id={scoreDescriptionId}
+                role="tooltip"
+              >
+                {scoreDescription.label}
+              </span>
+            </div>
+          ) : null}
           <div className="public-match-card-kda">
             <strong>{kdaScore}</strong>
             <div className="public-match-card-kda-summary">
@@ -273,8 +290,9 @@ export function RecentMatchRow({
 
         {teams ? (
           <div className="public-match-card-team" aria-label={teams.compositionLabel}>
-            {renderTeamLine(teams.allies, "allies", teams.alliesLabel)}
-            {renderTeamLine(teams.opponents, "opponents", teams.opponentsLabel)}
+            {teams.allies.length > 0 ? renderTeamLine(teams.allies, "allies", teams.alliesLabel) : null}
+            {/* 아레나는 상대 줄이 비어 있습니다(행에서 상대 제외 — 목업 v1.4). */}
+            {teams.opponents.length > 0 ? renderTeamLine(teams.opponents, "opponents", teams.opponentsLabel) : null}
           </div>
         ) : null}
 

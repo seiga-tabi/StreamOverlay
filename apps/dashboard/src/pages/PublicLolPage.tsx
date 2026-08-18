@@ -38,7 +38,8 @@ import { withLolDailySummaryBars } from "../features/public-lol/components/LolDa
 import { LolAugmentIcon } from "../features/public-lol/components/LolAugmentIcon";
 import { publicLiveText } from "../shared/public-live-streamers";
 import { streamerBuckets, type StreamerFilter } from "../features/public-lol/utils/streamers";
-import { matchGap, matchLanePairs, type LanePair } from "../features/public-lol/utils/match-lanes";
+import { arenaPlacementClass, isArenaQueue, matchGap, matchLanePairs, type LanePair } from "../features/public-lol/utils/match-lanes";
+import { ArenaStandings } from "../features/public-lol/components/ArenaStandings";
 import { ProfileLinkIcon, profileLinkPlatformFromUrl, profileLinkPlatformClass } from "../components/ProfileLinkIcon";
 import { AppShell, AppShellHeader, AppShellMain, AppShellSidebar } from "../shared/ui/AppShell";
 import { Button } from "../shared/ui/Button";
@@ -326,7 +327,10 @@ const SUMMONER_SPELL_FILE_BY_ID: Record<number, string> = {
   32: "SummonerSnowball",
   39: "SummonerSnowURFSnowball",
   54: "Summoner_UltBookPlaceholder",
-  55: "Summoner_UltBookSmitePlaceholder"
+  55: "Summoner_UltBookSmitePlaceholder",
+  /* 아레나 전용(2026-08-18 실측 — 미매핑으로 스펠이 숫자로 노출되던 결함). */
+  2201: "SummonerCherryHold",
+  2202: "SummonerCherryFlash"
 };
 
 type PublicLocalizedOption = {
@@ -441,6 +445,10 @@ const queueLabels: Record<PublicLocale, Record<number, string>> = {
     /* 710 = 신규 특별 랭크 모드(2026-08-17 맹금류애니비아 실데이터로 확인) */
     710: "5vs5 랭크",
     2300: "증강 칼바람",
+    /* 아레나 명칭은 cdragon queues.json 공식 표기(2026-08-18 확인). */
+    1700: "아레나",
+    1710: "아레나",
+    1750: "아레나 3x6",
     400: "일반 교차",
     420: "솔로랭크",
     430: "일반",
@@ -452,6 +460,9 @@ const queueLabels: Record<PublicLocale, Record<number, string>> = {
     42: "5v5 ランク",
     710: "5vs5 ランク",
     2300: "オーグメントARAM",
+    1700: "アリーナ",
+    1710: "アリーナ",
+    1750: "アリーナ 3x6",
     400: "ノーマルドラフト",
     420: "ソロランク",
     430: "ノーマル",
@@ -5368,6 +5379,13 @@ function RecentMatches({
           const expanded = expandedMatchId === match.matchId;
           const expandedView = expandedMatchViews[match.matchId] ?? "record";
           const highlightClass = matchHighlightClass(match.badges);
+          /* 아레나(1700/1710/1750) — placement 가 온 응답에서만 순위 문법으로 전환.
+             구 서버·구 캐시(placement 없음)는 기존 승/패 행 그대로(fail-soft,
+             목업 lol-arena-match-row.html §⑥). */
+          const arenaPlacement = isArenaQueue(match.queueId) && typeof match.placement === "number" && match.placement >= 1
+            ? Math.trunc(match.placement)
+            : undefined;
+          const arena = arenaPlacement !== undefined;
           const rankDetail = matchRanks[match.matchId];
           const rankLoading = Boolean(matchRankLoading[match.matchId]);
           const rankError = matchRankErrors[match.matchId] ?? "";
@@ -5390,19 +5408,23 @@ function RecentMatches({
             const iconUrl = summonerSpellIconUrl(spellId, dataDragonVersion);
             return {
               key: `${match.matchId}:spell:${spellId}`,
-              className: "spell",
+              className: iconUrl ? "spell" : "spell empty",
               label: `${t().summonerSpells} ${spellId}`,
-              content: iconUrl ? <img src={iconUrl} alt="" /> : spellId
+              /* 미해석 스펠은 숫자 노출 금지 — 빈 프레임 + title(목업 v1.4 §⑦). */
+              content: iconUrl ? <img src={iconUrl} alt="" /> : null
             };
           });
-          /* 증강 칼바람 픽 — 실게임 아이콘·희귀도 프레임(LolAugmentIcon), 픽 순서 배지 */
-          (match.augments ?? []).forEach((augmentId, augmentIndex) => spellItems.push({
+          /* 증강 픽 — 실게임 아이콘·희귀도 프레임(LolAugmentIcon), 픽 순서 배지.
+             아레나는 6픽이라 스펠 열이 아니라 전용 3×2 격자(loadoutGridItems)로 갑니다. */
+          const augmentItems: RecentMatchRowMediaItem[] = (match.augments ?? []).map((augmentId, augmentIndex) => ({
             key: `${match.matchId}:augment:${augmentId}:${augmentIndex}`,
             className: "augment",
-            label: `${t().aramMayhemQueue} ${augmentIndex + 1}`,
-            content: <LolAugmentIcon id={augmentId} order={augmentIndex + 1} />
+            label: `${arena ? t().arenaColAugments : t().aramMayhemQueue} ${augmentIndex + 1}`,
+            content: <LolAugmentIcon id={augmentId} order={arena ? undefined : augmentIndex + 1} />
           }));
-          playerRuneBuildSlotsViewModel(targetRunes)
+          if (!arena) spellItems.push(...augmentItems);
+          /* 아레나는 룬이 없음 — 잘못 채워진 응답이 와도 행에 그리지 않습니다(목업 v1.4). */
+          playerRuneBuildSlotsViewModel(arena ? [] : targetRunes)
             .filter((rune) => rune.iconUrl)
             .forEach((rune) => spellItems.push({
               key: `${match.matchId}:rune:${rune.key}`,
@@ -5412,7 +5434,28 @@ function RecentMatches({
             }));
           // 모든 지표 셀은 "값 위 / 라벨 아래" 한 규칙을 씁니다. 비율 지표에는 게이지를 붙여
           // 수치를 읽지 않아도 크기가 보이게 합니다.
-          const matchMetrics: RecentMatchRowMetric[] = [
+          // 아레나는 CS·시야가 무의미 → 킬관여/딜비중/받은피해(목업 §②).
+          const matchMetrics: RecentMatchRowMetric[] = arena ? [
+            {
+              key: "kill-participation",
+              label: t().killParticipation,
+              labelShort: t().matchStatKillParticipationShort,
+              ratio: match.killParticipation,
+              value: <span className={metricToneClass(percentTone(match.killParticipation))}>{formatPercent(match.killParticipation)}</span>
+            },
+            {
+              key: "damage-share",
+              label: t().matchStatDamageShare,
+              labelShort: t().matchStatDamageShareShort,
+              ratio: match.damageShare,
+              value: <span className={metricToneClass(percentTone(match.damageShare))}>{formatPercent(match.damageShare)}</span>
+            },
+            {
+              key: "damage-taken",
+              label: t().damageTaken,
+              value: <span>{match.damageTaken !== undefined ? `${(match.damageTaken / 1_000).toFixed(1)}k` : "-"}</span>
+            }
+          ] : [
             {
               key: "kill-participation",
               label: t().killParticipation,
@@ -5448,8 +5491,9 @@ function RecentMatches({
             };
           };
           // 앞 6칸은 장비, 마지막 칸은 장신구입니다. 형태를 나눠 한 덩어리로 읽히지 않게 합니다.
+          // 아레나는 장신구 슬롯이 없어 6칸 고정(목업 §②).
           const inlineItemSlots: RecentMatchRowMediaItem[] = recentItemSlots.slice(0, 6).map(itemSlotMediaItem);
-          const trinketSlot = itemSlotMediaItem(recentItemSlots[6], 6);
+          const trinketSlot = arena ? undefined : itemSlotMediaItem(recentItemSlots[6], 6);
           // 목록 응답의 teams 는 비어 있고 경기를 펼칠 때 채워집니다. 데이터가 있을 때만 그립니다.
           const compositionTeams = (hydratedMatch.teams ?? []).filter((team) => team.players.length > 0);
           const targetTeamId = compositionTeams
@@ -5464,15 +5508,35 @@ function RecentMatches({
           });
           const allyPlayers = compositionTeams.find((team) => team.teamId === targetTeamId)?.players ?? [];
           const opponentPlayers = compositionTeams.find((team) => team.teamId !== targetTeamId)?.players ?? [];
-          const teams: RecentMatchRowTeams | undefined = allyPlayers.length > 0 && opponentPlayers.length > 0
-            ? {
-              allies: allyPlayers.map((player, index) => teamMember(player, "ally", index)),
-              opponents: opponentPlayers.map((player, index) => teamMember(player, "foe", index)),
-              compositionLabel: t().matchTeamComposition,
-              alliesLabel: t().matchTeamAllies,
-              opponentsLabel: t().matchTeamOpponents
-            }
+          /* 아레나: 행에는 내 팀 3인 얼굴만 — 상대 챔피언은 행에서 제외(목업 v1.4,
+             6팀 칩은 폭 과점·겹침으로 폐기). 6팀 구도는 확장 순위표가 전담합니다. */
+          const arenaMyTeam = arena && match.arenaTeams && match.arenaTeams.length > 0
+            ? match.arenaTeams.find((team) => team.players.some((player) => player.isTarget))
             : undefined;
+          const teams: RecentMatchRowTeams | undefined = arenaMyTeam
+            ? {
+              allies: arenaMyTeam.players.map((player, index): RecentMatchRowTeamMember => ({
+                key: `${match.matchId}:arena:ally:${index}`,
+                label: player.isTarget ? `${t().matchTeamSelf} · ${championName(player.champion)}` : championName(player.champion),
+                isTarget: player.isTarget,
+                content: player.champion.iconUrl
+                  ? <img src={player.champion.iconUrl} alt="" />
+                  : <i aria-hidden="true">{championName(player.champion).slice(0, 1)}</i>
+              })),
+              opponents: [],
+              compositionLabel: t().arenaTeamsLabel,
+              alliesLabel: t().arenaMyTeam,
+              opponentsLabel: ""
+            }
+            : !arena && allyPlayers.length > 0 && opponentPlayers.length > 0
+              ? {
+                allies: allyPlayers.map((player, index) => teamMember(player, "ally", index)),
+                opponents: opponentPlayers.map((player, index) => teamMember(player, "foe", index)),
+                compositionLabel: t().matchTeamComposition,
+                alliesLabel: t().matchTeamAllies,
+                opponentsLabel: t().matchTeamOpponents
+              }
+              : undefined;
           const expandedPanelText: RecentMatchExpandedPanelText = {
             matchDetails: t().matchDetails,
             recordTab: {
@@ -5491,7 +5555,9 @@ function RecentMatches({
               ja: hideRiotIds ? publicI18n.ja.riotIdMaskOn : publicI18n.ja.riotIdMaskOff
             }
           };
-          const recordContent = (hydratedMatch.teams?.length ?? 0) > 0 ? (
+          const recordContent = arena && match.arenaTeams && match.arenaTeams.length > 0 ? (
+            <ArenaStandings hideRiotIds={hideRiotIds} teams={match.arenaTeams} />
+          ) : (hydratedMatch.teams?.length ?? 0) > 0 ? (
             <>
               <MatchLaneCompareView match={hydratedMatch} rankDetail={rankDetail} rankLoading={rankLoading} hideRiotIds={hideRiotIds} onSearchRiotId={onSearchRiotId} />
               {rankError ? <FormError role="status">{rankError}</FormError> : null}
@@ -5550,7 +5616,7 @@ function RecentMatches({
               championFallback={championName(match.champion).slice(0, 1)}
               championIconUrl={match.champion.iconUrl}
               championName={championName(match.champion)}
-              championRoleLabel={mainRoleLabel(match.position)}
+              championRoleLabel={arena ? "" : mainRoleLabel(match.position)}
               championLevelLabel={formatNumber(match.championLevel)}
               expanded={expanded}
               expandedPanel={expandedPanel}
@@ -5565,7 +5631,9 @@ function RecentMatches({
                 </>
               )}
               key={match.matchId}
-              matchAriaLabel={`${resultLabel(match.result)} · ${championName(match.champion)} · ${match.kills}/${match.deaths}/${match.assists}`}
+              hideScore={arena}
+              loadoutGridItems={arena ? augmentItems : undefined}
+              matchAriaLabel={`${arena ? t().arenaPlacement.replace("{n}", String(arenaPlacement)) : resultLabel(match.result)} · ${championName(match.champion)} · ${match.kills}/${match.deaths}/${match.assists}`}
               metrics={matchMetrics}
               onToggleExpand={() => {
                 const opening = expandedMatchId !== match.matchId;
@@ -5577,10 +5645,10 @@ function RecentMatches({
                 }
               }}
               queueLabel={match.queueId ? queueLabels[activePublicLocale][match.queueId] ?? `${t().queue} ${match.queueId}` : "-"}
-              result={match.result}
+              result={arena ? `arena ${arenaPlacementClass(arenaPlacement)}` : match.result}
               resultDurationLabel={formatDuration(match.durationSeconds)}
-              resultLabel={resultLabel(match.result)}
-              resultShortLabel={resultShortLabel(match.result)}
+              resultLabel={arena ? t().arenaPlacement.replace("{n}", String(arenaPlacement)) : resultLabel(match.result)}
+              resultShortLabel={arena ? t().arenaPlacement.replace("{n}", String(arenaPlacement)) : resultShortLabel(match.result)}
               scoreAriaLabel={`${t().aggregateGrade} ${scoreGrade}`}
               scoreClassName={metricToneClass(scoreTone(aiScore))}
               scoreGrade={scoreGrade}

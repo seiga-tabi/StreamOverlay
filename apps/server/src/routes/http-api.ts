@@ -645,10 +645,37 @@ type PublicLolMatchTeamsResponse = {
   fetchedAt: string;
 };
 
+/* 아레나(큐 1700/1710/1750) 확장 — docs/mockups/lol-arena-match-row.html §⑥ 계약.
+   프런트 타입(public-lol.ts)과 같은 모양이며, 아레나가 아니면 전부 생략합니다. */
+type PublicLolArenaTeamPlayer = {
+  riotId?: string;
+  champion: LolChampionSummary;
+  kills: number;
+  deaths: number;
+  assists: number;
+  damageDealtToChampions?: number;
+  goldEarned?: number;
+  items?: PublicLolMatchItem[];
+  augments?: number[];
+  isTarget?: boolean;
+};
+
+type PublicLolArenaTeam = {
+  /** 팀 최종 순위(1 = 우승). */
+  placement: number;
+  players: PublicLolArenaTeamPlayer[];
+};
+
 type PublicLolRecentMatch = {
   matchId: string;
   /** 증강 픽(픽 순서 유지) — 증강이 있는 모드(큐 2400 등)에서만 채워집니다. */
   augments?: number[];
+  /** 아레나: 내 팀 최종 순위(subteamPlacement). */
+  placement?: number;
+  /** 아레나: 내 팀 id(playerSubteamId). */
+  subteamId?: number;
+  /** 아레나: 순위순 전체 팀 명단. 상세(teams) 하이드레이션 시점에만 채웁니다. */
+  arenaTeams?: PublicLolArenaTeam[];
   champion: LolChampionSummary;
   queueId?: number;
   gameMode?: string;
@@ -2735,6 +2762,101 @@ async function participantRunes(
     kind: rune.kind,
     category: rune.category
   }));
+}
+
+/* ── 아레나(CHERRY) ──────────────────────────────────────────────
+ * 큐 1700/1710 은 2인 팀, 1750("아레나 3x6")은 3인×6팀입니다. 팀 구분이
+ * teamId 가 아니라 playerSubteamId 이고 결과가 승/패가 아니라 1~6위 순위라,
+ * 이 큐에서만 placement·subteamId·arenaTeams 를 채웁니다.
+ *
+ * gameMode 를 우선 보는 이유: 새 아레나 큐 id 가 추가돼도 CHERRY 로 잡힙니다
+ * (반대로 큐 id 만 보면 신규 큐를 놓칩니다). 큐 id 는 gameMode 가 비어 오는
+ * 응답을 위한 보조 조건입니다.
+ */
+const ARENA_QUEUE_IDS = new Set([1700, 1710, 1750]);
+
+function isArenaMatch(match: RiotMatch): boolean {
+  if (match.info.gameMode === "CHERRY") return true;
+  const queueId = match.info.queueId;
+  return typeof queueId === "number" && ARENA_QUEUE_IDS.has(queueId);
+}
+
+/** playerAugment1~6 중 0 이 아닌 값을 픽 순서대로. 증강 없는 모드에서는 빈 배열. */
+function participantAugments(participant: RiotMatchParticipant): number[] {
+  return [
+    participant.playerAugment1,
+    participant.playerAugment2,
+    participant.playerAugment3,
+    participant.playerAugment4,
+    participant.playerAugment5,
+    participant.playerAugment6
+  ].filter((id): id is number => typeof id === "number" && id > 0);
+}
+
+/** 팀 순위. subteamPlacement 가 정식이고 placement 는 초기 스키마의 잔재입니다. */
+function participantPlacement(participant: RiotMatchParticipant): number | undefined {
+  const placement = participant.subteamPlacement ?? participant.placement;
+  return typeof placement === "number" && placement > 0 ? placement : undefined;
+}
+
+/**
+ * 참가자 전원을 playerSubteamId 로 묶어 순위순 팀 목록을 만듭니다.
+ * 팀 내에서는 조회 대상 본인을 앞에 둡니다(프런트도 재정렬하지만, 서버가 맞춰
+ * 주면 확장 순위표를 그대로 그릴 수 있습니다).
+ */
+async function arenaTeamsFromMatch(
+  dataDragon: DataDragonService | undefined,
+  match: RiotMatch,
+  targetPuuid: string,
+  dataDragonVersion: string | undefined
+): Promise<PublicLolArenaTeam[] | undefined> {
+  if (!isArenaMatch(match)) return undefined;
+  const grouped = new Map<number, { placement: number; participants: RiotMatchParticipant[] }>();
+  for (const participant of match.info.participants) {
+    const subteamId = participant.playerSubteamId;
+    const placement = participantPlacement(participant);
+    /* 둘 중 하나라도 없으면 순위표를 만들 수 없습니다 — 반쪽짜리 팀을 내보내느니
+       필드를 생략해 프런트가 기존 승/패 문법으로 폴백하게 둡니다(fail-soft). */
+    if (typeof subteamId !== "number" || placement === undefined) return undefined;
+    const bucket = grouped.get(subteamId);
+    if (bucket) bucket.participants.push(participant);
+    else grouped.set(subteamId, { placement, participants: [participant] });
+  }
+  if (grouped.size === 0) return undefined;
+
+  const teams = await Promise.all(
+    [...grouped.values()]
+      .sort((a, b) => a.placement - b.placement)
+      .map(async (team) => ({
+        placement: team.placement,
+        players: await Promise.all(
+          [...team.participants]
+            .sort((a, b) => Number(b.puuid === targetPuuid) - Number(a.puuid === targetPuuid))
+            .map(async (participant) => {
+              const augments = participantAugments(participant);
+              /* 아레나에는 장신구(슬롯 6) 자체가 없으므로 participantItems 가
+                 돌려주는 목록에서 자연히 빠집니다 — 별도 제거가 필요 없습니다. */
+              const items = await participantItems(dataDragon, participant, dataDragonVersion);
+              return {
+                riotId: participantRiotId(participant),
+                champion: await mapChampionSummary(dataDragon, {
+                  championId: participant.championId,
+                  championName: participant.championName
+                }),
+                kills: safeMatchStat(participant.kills),
+                deaths: safeMatchStat(participant.deaths),
+                assists: safeMatchStat(participant.assists),
+                damageDealtToChampions: safeOptionalStat(participant.totalDamageDealtToChampions),
+                goldEarned: safeOptionalStat(participant.goldEarned),
+                ...(items.length > 0 ? { items } : {}),
+                ...(augments.length > 0 ? { augments } : {}),
+                ...(participant.puuid === targetPuuid ? { isTarget: true } : {})
+              } satisfies PublicLolArenaTeamPlayer;
+            })
+        )
+      }))
+  );
+  return teams;
 }
 
 function participantRiotId(participant: RiotMatchParticipant): string | undefined {
@@ -6738,17 +6860,27 @@ export function createHttpHandler(input: HttpHandlerInput) {
     const goldEarned = safeOptionalStat(participant.goldEarned);
     const visionScore = safeOptionalStat(participant.visionScore);
     /* playerAugment1~6 — 값이 있는 슬롯만 픽 순서대로. 증강 없는 큐에서는 필드 생략. */
-    const augments = [
-      participant.playerAugment1,
-      participant.playerAugment2,
-      participant.playerAugment3,
-      participant.playerAugment4,
-      participant.playerAugment5,
-      participant.playerAugment6
-    ].filter((id): id is number => typeof id === "number" && id > 0);
+    const augments = participantAugments(participant);
+    /* 아레나 필드는 전부 리스트 요약에 넣습니다.
+       arenaTeams 를 상세(teams 하이드레이션)로 미룰 수 없는 이유: 프런트가
+       PublicLolPage.tsx 에서 `match.arenaTeams` 를 읽는데, 하이드레이션 병합은
+       `{ ...match, teams: matchDetail.teams }` 로 teams 만 옮깁니다. 상세로 내리면
+       값이 UI 까지 도달하지 않습니다.
+       비아레나 경기에는 셋 다 붙지 않으므로 기존 5v5 응답 크기는 그대로입니다. */
+    const arena = isArenaMatch(match);
+    const arenaPlacement = arena ? participantPlacement(participant) : undefined;
+    const arenaSubteamId = arena && typeof participant.playerSubteamId === "number"
+      ? participant.playerSubteamId
+      : undefined;
+    const arenaTeams = arena
+      ? await arenaTeamsFromMatch(input.dataDragon, match, targetPuuid, dataDragonVersion)
+      : undefined;
     return {
       matchId: match.metadata.matchId,
       ...(augments.length > 0 ? { augments } : {}),
+      ...(arenaPlacement === undefined ? {} : { placement: arenaPlacement }),
+      ...(arenaSubteamId === undefined ? {} : { subteamId: arenaSubteamId }),
+      ...(arenaTeams ? { arenaTeams } : {}),
       champion,
       queueId: match.info.queueId,
       gameMode: match.info.gameMode,

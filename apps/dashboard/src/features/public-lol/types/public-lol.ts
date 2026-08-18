@@ -116,10 +116,39 @@ export type PublicLolMatchBadge = {
   rank?: number;
 };
 
+/* 아레나(큐 1700/1710/1750) 요약 확장 — docs/mockups/lol-arena-match-row.html §⑥ 계약.
+ * 서버가 아직 안 채우는 배포에서는 전부 undefined 이고, 그 경우 행은 기존 승/패
+ * 문법으로 폴백합니다(fail-soft). 3인×6팀·1~6위 전제는 1750(아레나 3x6) 기준이며
+ * 2인 아레나(1700·1710)도 같은 구조(팀 인원·팀 수만 다름)로 담깁니다. */
+export type PublicLolArenaTeamPlayer = {
+  riotId?: string;
+  champion: LolChampionSummary;
+  kills: number;
+  deaths: number;
+  assists: number;
+  damageDealtToChampions?: number;
+  goldEarned?: number;
+  items?: PublicLolMatchItem[];
+  augments?: number[];
+  isTarget?: boolean;
+};
+
+export type PublicLolArenaTeam = {
+  /** 팀 최종 순위(1 = 우승). */
+  placement: number;
+  players: PublicLolArenaTeamPlayer[];
+};
+
 export type PublicLolRecentMatch = {
   matchId: string;
-  /** 증강 픽(픽 순서) — 증강 칼바람(큐 2400) 등 증강 모드에서만 옵니다. */
+  /** 증강 픽(픽 순서) — 아레나·증강 칼바람 등 증강 모드에서만 옵니다. */
   augments?: number[];
+  /** 아레나: 내 팀 최종 순위(Match-V5 subteamPlacement). */
+  placement?: number;
+  /** 아레나: 내 팀 id(Match-V5 playerSubteamId). */
+  subteamId?: number;
+  /** 아레나: 순위순 전체 팀 명단 — 확장 순위표·팀 칩의 데이터원. */
+  arenaTeams?: PublicLolArenaTeam[];
   champion: LolChampionSummary;
   queueId?: number;
   gameMode?: string;

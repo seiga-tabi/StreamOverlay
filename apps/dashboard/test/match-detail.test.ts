@@ -6,6 +6,8 @@ import {
   matchGap,
   matchLanePairs,
   matchUsesFarmMetrics,
+  isArenaQueue,
+  arenaPlacementClass,
 } from "../src/features/public-lol/utils/match-lanes";
 import type { PublicLolRecentMatch } from "../src/features/public-lol/types/public-lol";
 
@@ -106,6 +108,22 @@ test("칼바람처럼 CS·시야가 의미 없는 큐를 구분한다", () => {
   assert.equal(matchUsesFarmMetrics(450), false);
   assert.equal(matchUsesFarmMetrics(2400), false);
   assert.equal(matchUsesFarmMetrics(undefined), true);
+  /* 아레나 3x6(1750)도 CS·시야 무의미 — 목업 lol-arena-match-row.html §⑥. */
+  assert.equal(matchUsesFarmMetrics(1750), false);
+});
+
+test("아레나 큐 판정과 순위 톤 클래스", () => {
+  assert.equal(isArenaQueue(1700), true);
+  assert.equal(isArenaQueue(1710), true);
+  assert.equal(isArenaQueue(1750), true);
+  assert.equal(isArenaQueue(450), false);
+  assert.equal(isArenaQueue(undefined), false);
+  /* 1위 = 골드 프레임, 상위 절반 win · 하위 loss(목업 §②). */
+  assert.equal(arenaPlacementClass(1), "win arena-first");
+  assert.equal(arenaPlacementClass(2), "win");
+  assert.equal(arenaPlacementClass(3), "win");
+  assert.equal(arenaPlacementClass(4), "loss");
+  assert.equal(arenaPlacementClass(6), "loss");
 });
 
 test("아이템 구매 시각을 분:초로 만든다", () => {

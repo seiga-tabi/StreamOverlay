@@ -140,8 +140,23 @@ export function matchGap(match: PublicLolRecentMatch): MatchGap | undefined {
   };
 }
 
-/** 칼바람·격전처럼 CS·시야가 의미 없는 큐입니다. */
-const NO_FARM_QUEUES = new Set([65, 450, 720, 920, 2400, 1200, 1300, 1700, 1710]);
+/** 칼바람·격전처럼 CS·시야가 의미 없는 큐입니다. 1750 = 아레나 3x6(2026-08-18). */
+const NO_FARM_QUEUES = new Set([65, 450, 720, 920, 2400, 1200, 1300, 1700, 1710, 1750]);
+
+/* ── 아레나(순위전) — docs/mockups/lol-arena-match-row.html ──
+ * 1700/1710 = 2인 아레나, 1750 = 아레나 3x6(3인×6팀). 승/패 대신 1~N위이며
+ * raw win 은 우승 팀만 true 라 이분법 표시가 성립하지 않습니다. */
+const ARENA_QUEUES = new Set([1700, 1710, 1750]);
+
+export function isArenaQueue(queueId: number | undefined): boolean {
+  return queueId !== undefined && ARENA_QUEUES.has(queueId);
+}
+
+/** 순위 → 행 톤. 상위 절반(6팀 기준 1~3위) win · 하위 loss, 1위는 골드 프레임 추가. */
+export function arenaPlacementClass(placement: number): string {
+  const base = placement <= 3 ? "win" : "loss";
+  return placement === 1 ? `${base} arena-first` : base;
+}
 
 export function matchUsesFarmMetrics(queueId: number | undefined): boolean {
   return queueId === undefined ? true : !NO_FARM_QUEUES.has(queueId);

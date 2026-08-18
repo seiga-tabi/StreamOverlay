@@ -1152,4 +1152,202 @@
     }
     .public-match-card-expand-icon { transition: none; }
   }
+
+  /* ══ 아레나(큐 1700/1710/1750) — 목업 docs/mockups/lol-arena-match-row.html v1.3 ══
+     승/패 대신 1~6위 순위전: placement 가 온 응답에서만 .arena(+톤 클래스)가 붙고,
+     구 데이터는 기존 승/패 문법 그대로입니다(fail-soft). */
+
+  /* 순위 배지 — 픽토그램 대신 "N위" 텍스트가 주인공(색+숫자 병기, 색 단독 신호 금지). */
+  .public-match-card.arena .public-match-card-result {
+    width: auto;
+    height: auto;
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    font-size: 1.0625rem;
+    font-weight: var(--yoro-font-weight-black);
+    letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .public-match-card.arena .public-match-card-result.win { background: none; color: var(--yoro-color-match-win-accent); }
+  .public-match-card.arena .public-match-card-result.loss { background: none; color: var(--yoro-color-match-loss-accent); }
+  .public-match-card.arena .public-match-card-result.arena-first { color: var(--yoro-color-warning); }
+
+  /* 1위 = 우승 — MVP 하이라이트와 같은 골드 프레임 관용구. */
+  .public-match-card.arena-first {
+    border-inline-start-color: var(--yoro-color-warning);
+    background:
+      linear-gradient(90deg, color-mix(in srgb, var(--yoro-color-warning) 10%, transparent), transparent 55%),
+      var(--yoro-color-ground-surface);
+  }
+
+  .public-match-card.arena-first::before { background: var(--yoro-color-warning); }
+  .public-match-card.arena-first .public-match-card-stat-bar > em { background: var(--yoro-color-warning); }
+
+  /* 증강 6픽 — 스펠 열 옆 2열(세로 3줄) 격자. 3열로 하면 챔피언명 공간을 잠식해
+     이름이 한 글자로 잘렸습니다(실측) — 2열이면 5v5 의 스펠+룬 2열과 같은 폭이라
+     행 리듬·이름 공간이 그대로입니다(목업 v1.4 갱신). 룬 열 자리를 대신합니다. */
+  .public-match-card-loadout-grid {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    gap: .1875rem;
+    align-content: center;
+  }
+
+  .public-match-card-loadout-grid .lol-augment { width: 20px; height: 20px; border-width: 1.5px; border-radius: 5px; }
+
+  /* 내 팀 3인 — 행에서 상대 챔피언 제외(목업 v1.4, 6팀 칩은 폭 과점·겹침으로 폐기).
+     기본 원형 멤버를 한 단계 키우고(1.5rem), 라벨("내 팀")은 고정폭 해제. */
+  .public-match-card.arena .public-match-card-team-line > b { width: auto; white-space: nowrap; }
+
+  .public-match-card.arena .public-match-card-team-member { width: 1.5rem; height: 1.5rem; }
+
+  .public-match-card.arena .public-match-card-team-member.is-target :is(img, i) {
+    box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--yoro-color-public-primary) 70%, transparent);
+  }
+
+  /* 내 팀 열 표시 조건 — 5v5 명단은 컨테이너 ≤1180px 에서 숨겨지는데 match-list
+     실측 최대폭이 1176px 이라 사실상 항상 숨김입니다. 내 팀 3인(~7rem)은 좁아
+     1020px 부터 전용 7열 템플릿으로 표시합니다. 5v5 행의 동작은 그대로 둡니다. */
+  @container match-list (min-width: 1044.01px) {
+    /* 챔피언 열이 이름 공간의 병목 — min 12rem 를 보장하고 잉여 폭(1fr)을 이 열이
+       흡수합니다("미스 포츈" 4자+공백 실측 58px 기준). 지표 열은 아레나 3종 라벨에
+       맞춰 13.25rem 로 양보. */
+    .public-match-card.arena .public-match-card-summary {
+      grid-template-columns:
+        minmax(6.25rem, 7.5rem)
+        minmax(12rem, 1fr)
+        8.5rem
+        13.25rem
+        7.5rem
+        7rem
+        2.75rem;
+    }
+
+    .public-match-card.arena .public-match-card-team { display: flex; }
+  }
+
+  /* ── 확장 상세 = 순위표(1위→6위 팀 그룹) ── */
+  .lol-arena-standings { display: grid; gap: var(--yoro-space-2); }
+
+  .lol-arena-team {
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-md);
+    background: var(--yoro-color-ground-surface);
+    overflow: hidden;
+  }
+
+  .lol-arena-team.is-me { border-color: color-mix(in srgb, var(--yoro-color-public-primary) 55%, transparent); }
+
+  .lol-arena-team-head {
+    display: flex;
+    align-items: center;
+    gap: var(--yoro-space-2);
+    padding: .35rem var(--yoro-space-3);
+    border-bottom: 1px solid var(--yoro-color-border-on-dark);
+    background: color-mix(in srgb, var(--yoro-color-text-on-dark) 3%, transparent);
+  }
+
+  .lol-arena-team-head > b { font-size: var(--yoro-font-size-sm); font-weight: var(--yoro-font-weight-black); font-variant-numeric: tabular-nums; }
+  .lol-arena-team-head > b.is-first { color: var(--yoro-color-warning); }
+  .lol-arena-team-head > b.is-top { color: var(--yoro-color-match-win-accent); }
+  .lol-arena-team-head > b.is-bottom { color: var(--yoro-color-match-loss-accent); }
+  .lol-arena-team-head > small { color: var(--yoro-color-text-on-dark-muted); font-size: var(--yoro-font-size-xs); font-variant-numeric: tabular-nums; }
+
+  .lol-arena-my-tag {
+    margin-left: auto;
+    padding: .05rem .5rem;
+    border: 1px solid color-mix(in srgb, var(--yoro-color-public-primary) 50%, transparent);
+    border-radius: var(--yoro-radius-pill);
+    color: color-mix(in srgb, var(--yoro-color-public-primary) 55%, #fff 45%);
+    font-size: .75rem;
+    font-weight: var(--yoro-font-weight-bold);
+    white-space: nowrap;
+  }
+
+  .lol-arena-cols,
+  .lol-arena-player {
+    display: grid;
+    grid-template-columns: minmax(9rem, 1.2fr) 5rem 4.5rem 4.5rem minmax(8rem, auto) minmax(8rem, auto);
+    align-items: center;
+    gap: var(--yoro-space-2);
+    padding: .3rem var(--yoro-space-3);
+  }
+
+  .lol-arena-cols {
+    padding-top: .35rem;
+    padding-bottom: .1rem;
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: .75rem;
+    font-weight: var(--yoro-font-weight-bold);
+    letter-spacing: .02em;
+  }
+
+  .lol-arena-cols > .is-num { text-align: right; }
+
+  .lol-arena-player { border-top: 1px solid color-mix(in srgb, var(--yoro-color-text-on-dark) 4%, transparent); font-size: var(--yoro-font-size-xs); }
+  .lol-arena-player.is-target { background: color-mix(in srgb, var(--yoro-color-public-primary) 8%, transparent); }
+
+  .lol-arena-who { display: flex; align-items: center; gap: .45rem; min-width: 0; }
+
+  .lol-arena-who :is(img, i) {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 1.625rem;
+    height: 1.625rem;
+    border-radius: var(--yoro-radius-sm);
+    background: var(--yoro-color-ground-raised);
+    font-style: normal;
+  }
+
+  .lol-arena-who-copy { min-width: 0; display: grid; }
+  .lol-arena-who-copy > b { font-weight: var(--yoro-font-weight-bold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* 딜·골드 축약은 모바일 전용(데스크톱은 전용 열이 있음). */
+  .lol-arena-who-copy > small { display: none; color: var(--yoro-color-text-on-dark-muted); font-size: .75rem; font-variant-numeric: tabular-nums; }
+
+  .lol-arena-kda { text-align: right; font-weight: var(--yoro-font-weight-bold); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .lol-arena-kda > i { color: var(--yoro-color-match-loss-accent); font-style: normal; }
+  .lol-arena-num { text-align: right; color: var(--yoro-color-text-on-dark-muted); font-variant-numeric: tabular-nums; }
+
+  /* 아이템 6칸 고정 — 미구매 칸은 빈 프레임(칸 수가 흔들리면 열 스캔이 깨짐). */
+  .lol-arena-items { display: grid; grid-template-columns: repeat(6, 1.15rem); gap: .1875rem; }
+
+  .lol-arena-items > span {
+    width: 1.15rem;
+    height: 1.15rem;
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: .25rem;
+    background: color-mix(in srgb, var(--yoro-color-text-on-dark) 5%, transparent);
+    overflow: hidden;
+  }
+
+  .lol-arena-items > span.is-empty { background: color-mix(in srgb, var(--yoro-color-text-on-dark) 2%, transparent); }
+  .lol-arena-items img { display: block; width: 100%; height: 100%; }
+
+  .lol-arena-augs { display: flex; flex-wrap: wrap; gap: .1875rem; }
+  /* 상세 밀도에 맞춘 축소판(기본 26px → 22px). */
+  .lol-arena-augs .lol-augment { width: 22px; height: 22px; border-width: 1.5px; border-radius: 6px; }
+
+  /* 모바일(목업 §④-1): 플레이어당 2줄 — 1줄 신원·KDA, 2줄 아이템 | 증강.
+     전용 열(딜량·골드)은 접고 이름 아래 축약으로 대체. 가로 스크롤 금지. */
+  @media (max-width: 48rem) {
+    .lol-arena-cols { display: none; }
+
+    .lol-arena-player {
+      grid-template-columns: auto auto minmax(0, 1fr);
+      grid-template-areas:
+        "who who kda"
+        "items augs augs";
+      row-gap: .25rem;
+    }
+
+    .lol-arena-who { grid-area: who; }
+    .lol-arena-who-copy > small { display: block; }
+    .lol-arena-kda { grid-area: kda; }
+    .lol-arena-num { display: none; }
+    .lol-arena-items { grid-area: items; }
+    .lol-arena-augs { grid-area: augs; justify-self: start; }
+  }
 }
