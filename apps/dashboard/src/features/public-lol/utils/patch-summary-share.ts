@@ -18,6 +18,7 @@ export type PatchSummaryShareText = {
   system: string;
   buff: string;
   nerf: string;
+  adjust: string;
   items: string;
   championCount: string;
   winRate: string;
@@ -38,12 +39,25 @@ export type PatchSummaryShareInput = {
   text: PatchSummaryShareText;
 };
 
-const CARD_WIDTH = 1080;
-/* 1080 / 1.91 ≈ 565.4 — SNS 크롭 경계(프로필 공유 카드와 같은 가드). */
-const MIN_CARD_HEIGHT = 566;
+/* 1200×630 고정 — 1.905:1.
+ *
+ * 예전에는 폭 1080 에 내용만큼 세로로 늘렸는데, 블록이 다 차면 1080×990(1.09:1)까지
+ * 자라 SNS 타임라인이 위아래를 잘라 냈습니다(푸터의 출처 문구까지 사라짐).
+ * 목업의 가드는 "높이 ≥ 566"이라 세로로 길어지는 쪽을 막지 못했습니다.
+ * 이제 높이를 고정하고 본문을 3단으로 놓아 모든 블록이 한 화면에 들어옵니다.
+ * 서버 OG 카드(1200×630)와도 규격이 같아집니다. */
+const CARD_WIDTH = 1200;
+const CARD_HEIGHT = 630;
 const CARD_FONT = '"Inter", "Noto Sans KR", "Noto Sans JP", Arial, sans-serif';
-const HERO_HEIGHT = 264;
-const FOOTER_HEIGHT = 76;
+/* 히어로는 남는 세로를 흡수합니다 — 높이가 고정이라 내용이 적은 패치에서
+   아래가 통째로 비지 않게 키 아트를 키웁니다. */
+const HERO_MIN_HEIGHT = 176;
+const HERO_MAX_HEIGHT = 320;
+const FOOTER_HEIGHT = 64;
+const PAD = 48;
+const COLUMN_GAP = 16;
+const COLUMN_WIDTH = (CARD_WIDTH - (PAD * 2) - (COLUMN_GAP * 2)) / 3;
+const COLUMNS_BOTTOM = CARD_HEIGHT - FOOTER_HEIGHT - 12;
 
 const COLOR = {
   bg0: "#0e1320",
@@ -152,60 +166,147 @@ function fillTextEllipsis(
   context.fillText(`${text}…`, x, y);
 }
 
+/**
+ * 키 아트는 같은 origin 프록시로 받습니다.
+ *
+ * Riot CDN(cmsassets.rgpub.io)은 access-control-allow-origin 을 주지 않아
+ * crossOrigin 로드가 실패합니다(2026-08-18 실측). 그대로 두면 히어로가 늘 빈
+ * 그라디언트로 닫혀 "이미지가 안 나온다"로 보입니다. 서버가 같은 수집 경로로
+ * 프록시하므로 URL 만 우리 쪽으로 돌립니다. 없으면 404 → 기존 폴백입니다.
+ */
+function heroArtUrl(patchVersion: string, locale: "ko" | "ja"): string {
+  const query = new URLSearchParams({ patch: patchVersion, locale });
+  return `/api/public/patch-notes/keyart?${query.toString()}`;
+}
+
 /** #RRGGBB 만 통과시킵니다 — 노트의 accentColor 는 외부 값이라 그대로 믿지 않습니다. */
 function safeAccent(value: string | undefined): string | undefined {
   return value && /^#[0-9a-f]{6}$/iu.test(value) ? value : undefined;
 }
 
+/** 패널 상자 하나 — 둥근 배경 + 제목. 반환값은 내용이 시작되는 y 입니다. */
+function drawPanel(
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  title: string,
+  tone: string = COLOR.dim,
+): number {
+  drawRoundedRect(context, x, y, width, height, 18);
+  context.fillStyle = "rgba(255, 255, 255, .03)";
+  context.fill();
+  context.strokeStyle = COLOR.line;
+  context.lineWidth = 2;
+  context.stroke();
+  context.fillStyle = tone;
+  context.font = `800 19px ${CARD_FONT}`;
+  context.fillText(title, x + 18, y + 28);
+  return y + 48;
+}
+
+/** 아이콘 + 이름 + 설명 한 줄. 열 폭 안에서 이름·설명 모두 말줄임 처리합니다. */
+function drawEntryRow(
+  context: CanvasRenderingContext2D,
+  options: {
+    x: number;
+    y: number;
+    width: number;
+    icon?: HTMLImageElement;
+    name: string;
+    detail: string;
+    tone?: string;
+  },
+): void {
+  const { x, y, width, icon, name, detail } = options;
+  const iconSize = 36;
+  if (icon) drawRoundedImage(context, icon, x + 18, y, iconSize, 9);
+  else {
+    drawRoundedRect(context, x + 18, y, iconSize, iconSize, 9);
+    context.fillStyle = "#26334a";
+    context.fill();
+  }
+  if (options.tone) {
+    /* 방향 표시 — 아이콘 왼쪽의 얇은 막대. 색 하나로 버프·너프·조정을 구분합니다. */
+    drawRoundedRect(context, x + 8, y + 4, 4, iconSize - 8, 2);
+    context.fillStyle = options.tone;
+    context.fill();
+  }
+  const textX = x + 18 + iconSize + 12;
+  const textWidth = width - (textX - x) - 16;
+  context.fillStyle = COLOR.text;
+  context.font = `850 21px ${CARD_FONT}`;
+  fillTextEllipsis(context, name, textX, y + 16, textWidth);
+  context.fillStyle = COLOR.dim;
+  context.font = `700 17px ${CARD_FONT}`;
+  fillTextEllipsis(context, detail, textX, y + 34, textWidth);
+}
+
 export async function createPatchSummaryShareBlob(input: PatchSummaryShareInput): Promise<Blob> {
   const { note, summary, record, topChampions, delta, locale, text } = input;
 
-  const buffs = summary.championChanges.filter((champion) => champion.direction === "buff").slice(0, 3);
-  const nerfs = summary.championChanges.filter((champion) => champion.direction === "nerf").slice(0, 3);
-  const systemChanges = summary.systemChanges.slice(0, 2);
+  /* 조정(강화·약화가 섞인 챔피언)은 화면 패널에 나옵니다. 카드에서만 빠지면 그
+     패치에서 가장 많이 바뀐 챔피언이 공유 이미지에서 사라집니다
+     (실측 26.16: 뽀삐 — 마나·마나성장·체력재생 ↑, 공격력 ↓). */
+  const CHAMPION_ROW_LIMIT = 5;
+  const byDirection = (["buff", "nerf", "adjust"] as const).map((direction) => ({
+    direction,
+    tone: direction === "buff" ? COLOR.buff : direction === "nerf" ? COLOR.nerf : COLOR.gold,
+    list: summary.championChanges.filter((champion) => champion.direction === direction),
+  }));
+  /* 방향마다 최소 한 자리를 먼저 잡고 남는 칸을 채웁니다 — 앞에서부터 자르면
+     버프가 많은 패치에서 조정·너프가 통째로 밀려납니다. */
+  const championRows = [
+    ...byDirection.flatMap(({ tone, list }) => list.slice(0, 1).map((champion) => ({ champion, tone }))),
+    ...byDirection.flatMap(({ tone, list }) => list.slice(1).map((champion) => ({ champion, tone }))),
+  ].slice(0, CHAMPION_ROW_LIMIT);
+  const systemChanges = summary.systemChanges.slice(0, 3);
   const items = summary.itemChanges.slice(0, 2);
   const tops = (topChampions ?? []).slice(0, 3);
 
+  /* 키 아트만 프록시를 지납니다 — Data Dragon 아이콘은 CORS 를 허용합니다. */
+  const heroUrl = summary.patchVersion ? heroArtUrl(summary.patchVersion, locale) : undefined;
   const urls = [
-    note.imageUrl,
-    ...buffs.map((champion) => champion.iconUrl),
-    ...nerfs.map((champion) => champion.iconUrl),
+    heroUrl,
+    ...championRows.map((row) => row.champion.iconUrl),
     ...items.map((item) => item.iconUrl),
     ...tops.map((champion) => champion.iconUrl),
   ].filter((url): url is string => Boolean(url));
   const loaded = await Promise.all(Array.from(new Set(urls)).map(async (url) => [url, await loadCanvasImage(url)] as const));
   const images = new Map(loaded.filter((entry): entry is readonly [string, HTMLImageElement] => Boolean(entry[1])));
 
-  /* 블록 구성에 따라 높이가 달라집니다 — 없는 블록은 자리를 차지하지 않습니다. */
-  const quoteHeight = note.summary ? 58 : 0;
-  const systemHeight = systemChanges.length > 0 ? 40 + (systemChanges.length * 34) : 0;
-  const championHeight = buffs.length > 0 || nerfs.length > 0
-    ? 40 + (Math.max(buffs.length, nerfs.length) * 56)
-    : 0;
-  const itemHeight = items.length > 0 ? 40 + (items.length * 52) : 0;
-  const mineHeight = record ? 108 : 0;
-  const bodyHeight = quoteHeight + systemHeight + championHeight + itemHeight + mineHeight;
-  const height = Math.max(MIN_CARD_HEIGHT, HERO_HEIGHT + 24 + bodyHeight + FOOTER_HEIGHT);
+  /* 세 단이 실제로 쓰는 높이를 먼저 재고, 남는 만큼 히어로에 돌려줍니다. */
+  const systemColumnHeight = systemChanges.length > 0 ? 48 + (systemChanges.length * 54) : 0;
+  const championColumnHeight = championRows.length > 0 ? 48 + (championRows.length * 50) : 0;
+  const itemsColumnHeight = items.length > 0 ? 48 + (items.length * 44) : 0;
+  const mineColumnHeight = record ? (tops.length > 0 ? 156 : 104) + (itemsColumnHeight > 0 ? 12 : 0) : 0;
+  const columnsHeight = Math.max(systemColumnHeight, championColumnHeight, itemsColumnHeight + mineColumnHeight);
+  const quoteHeight = note.summary ? 74 : 24;
+  const HERO_HEIGHT = Math.min(
+    HERO_MAX_HEIGHT,
+    Math.max(HERO_MIN_HEIGHT, COLUMNS_BOTTOM - columnsHeight - quoteHeight),
+  );
+  const COLUMNS_TOP = HERO_HEIGHT + quoteHeight;
+  const COLUMN_HEIGHT = COLUMNS_BOTTOM - COLUMNS_TOP;
 
   const canvas = document.createElement("canvas");
   canvas.width = CARD_WIDTH;
-  canvas.height = height;
+  canvas.height = CARD_HEIGHT;
   const context = canvas.getContext("2d");
   if (!context) throw new Error("patch_share_canvas_unavailable");
 
-  const background = context.createLinearGradient(0, 0, CARD_WIDTH, height);
+  const background = context.createLinearGradient(0, 0, CARD_WIDTH, CARD_HEIGHT);
   background.addColorStop(0, COLOR.bg1);
   background.addColorStop(.55, COLOR.bg0);
   background.addColorStop(1, COLOR.bg0);
   context.fillStyle = background;
-  context.fillRect(0, 0, CARD_WIDTH, height);
+  context.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
 
   /* 히어로 — 키 아트 + accentColor 틴트 + 하단 페이드.
-     키 아트(cmsassets.rgpub.io)는 CORS 헤더를 주지 않아 crossOrigin 로드가 실패합니다
-     (2026-08-18 실측: access-control-allow-origin 없음). 서버 이미지 프록시가 생기면
-     그대로 그려지고, 그 전까지는 accentColor + 브랜드 그라디언트로 닫습니다 —
+     프록시가 404 이거나 로드가 실패하면 accentColor + 브랜드 그라디언트로 닫습니다 —
      빈 검은 띠를 남기지 않습니다. */
-  const art = note.imageUrl ? images.get(note.imageUrl) : undefined;
+  const art = heroUrl ? images.get(heroUrl) : undefined;
   const accent = safeAccent(note.accentColor);
   if (art) {
     drawCoverImage(context, art, 0, 0, CARD_WIDTH, HERO_HEIGHT);
@@ -230,141 +331,116 @@ export async function createPatchSummaryShareBlob(input: PatchSummaryShareInput)
     context.fillRect(0, 0, CARD_WIDTH, HERO_HEIGHT);
   }
   const shade = context.createLinearGradient(0, 0, 0, HERO_HEIGHT);
-  shade.addColorStop(0, "rgba(14, 19, 32, .5)");
-  shade.addColorStop(.55, "rgba(14, 19, 32, .82)");
+  shade.addColorStop(0, "rgba(14, 19, 32, .48)");
+  shade.addColorStop(.55, "rgba(14, 19, 32, .8)");
   shade.addColorStop(1, COLOR.bg0);
   context.fillStyle = shade;
   context.fillRect(0, 0, CARD_WIDTH, HERO_HEIGHT);
 
+  /* 히어로가 커져도 문구는 아래에 붙어 키 아트를 가리지 않습니다. */
+  const heroTextBaseline = HERO_HEIGHT - 44;
   context.fillStyle = COLOR.gold;
-  context.font = `800 22px ${CARD_FONT}`;
-  context.fillText(text.eyebrow, 48, HERO_HEIGHT - 96);
+  context.font = `800 21px ${CARD_FONT}`;
+  context.fillText(text.eyebrow, PAD, heroTextBaseline - 58);
   context.fillStyle = COLOR.text;
-  context.font = `900 52px ${CARD_FONT}`;
-  context.fillText(summary.patchVersion, 48, HERO_HEIGHT - 44);
+  context.font = `900 54px ${CARD_FONT}`;
+  context.fillText(summary.patchVersion, PAD, heroTextBaseline);
   const versionWidth = context.measureText(summary.patchVersion).width;
   context.fillStyle = COLOR.muted;
-  context.font = `700 26px ${CARD_FONT}`;
-  fillTextEllipsis(context, text.scope, 48 + versionWidth + 16, HERO_HEIGHT - 44, CARD_WIDTH - versionWidth - 120);
+  context.font = `700 24px ${CARD_FONT}`;
+  fillTextEllipsis(context, text.scope, PAD + versionWidth + 16, heroTextBaseline, CARD_WIDTH - PAD * 2 - versionWidth - 16);
 
-  let y = HERO_HEIGHT + 24;
-
+  /* 노트 한 줄 요약 — 히어로 바로 아래 전폭. */
   if (note.summary) {
     context.fillStyle = COLOR.gold;
-    context.fillRect(48, y, 4, 36);
+    context.fillRect(PAD, HERO_HEIGHT + 18, 4, 34);
     context.fillStyle = COLOR.muted;
-    context.font = `650 23px ${CARD_FONT}`;
-    fillTextEllipsis(context, note.summary, 66, y + 25, CARD_WIDTH - 114);
-    y += quoteHeight;
+    context.font = `650 22px ${CARD_FONT}`;
+    fillTextEllipsis(context, note.summary, PAD + 18, HERO_HEIGHT + 42, CARD_WIDTH - (PAD * 2) - 18);
   }
 
-  const blockTitle = (title: string, blockY: number) => {
-    context.fillStyle = COLOR.dim;
-    context.font = `800 20px ${CARD_FONT}`;
-    context.fillText(title, 68, blockY + 30);
-  };
+  const columnX = (index: number): number => PAD + (index * (COLUMN_WIDTH + COLUMN_GAP));
 
+  /* ── 1단: 시스템 변경 ── */
   if (systemChanges.length > 0) {
-    drawRoundedRect(context, 48, y, CARD_WIDTH - 96, systemHeight - 12, 18);
-    context.fillStyle = "rgba(255, 255, 255, .03)";
-    context.fill();
-    context.strokeStyle = COLOR.line;
-    context.lineWidth = 2;
-    context.stroke();
-    blockTitle(text.system, y);
-    systemChanges.forEach((change, index) => {
-      const rowY = y + 62 + (index * 34);
+    const height = 48 + (systemChanges.length * 54);
+    let rowY = drawPanel(context, columnX(0), COLUMNS_TOP, COLUMN_WIDTH, Math.min(height, COLUMN_HEIGHT), text.system);
+    for (const change of systemChanges) {
       context.fillStyle = COLOR.text;
-      context.font = `800 24px ${CARD_FONT}`;
-      const label = patchStatLabel(change.stat, locale);
-      context.fillText(label, 68, rowY);
-      const labelWidth = context.measureText(label).width;
+      context.font = `800 21px ${CARD_FONT}`;
+      fillTextEllipsis(context, patchStatLabel(change.stat, locale), columnX(0) + 18, rowY + 8, COLUMN_WIDTH - 36);
+      /* 값과 대상 인원은 아랫줄로 내립니다 — 한 줄에 붙이면 좁은 단에서 넘칩니다. */
+      context.font = `700 19px ${CARD_FONT}`;
       context.fillStyle = COLOR.muted;
-      context.font = `700 24px ${CARD_FONT}`;
-      const fromText = `  ${change.from} → `;
-      context.fillText(fromText, 68 + labelWidth, rowY);
+      const fromText = `${change.from} → `;
+      context.fillText(fromText, columnX(0) + 18, rowY + 32);
+      const fromWidth = context.measureText(fromText).width;
       context.fillStyle = change.to > change.from ? COLOR.buff : COLOR.nerf;
-      context.font = `800 24px ${CARD_FONT}`;
-      context.fillText(String(change.to), 68 + labelWidth + context.measureText(fromText).width, rowY);
+      context.font = `800 19px ${CARD_FONT}`;
+      context.fillText(String(change.to), columnX(0) + 18 + fromWidth, rowY + 32);
+      const toWidth = context.measureText(String(change.to)).width;
       context.fillStyle = COLOR.dim;
-      context.font = `700 21px ${CARD_FONT}`;
-      context.textAlign = "right";
-      context.fillText(text.championCount.replace("{n}", String(change.championCount)), CARD_WIDTH - 68, rowY);
-      context.textAlign = "start";
-    });
-    y += systemHeight;
+      context.font = `700 17px ${CARD_FONT}`;
+      fillTextEllipsis(
+        context,
+        ` · ${text.championCount.replace("{n}", String(change.championCount))}`,
+        columnX(0) + 18 + fromWidth + toWidth,
+        rowY + 32,
+        COLUMN_WIDTH - 36 - fromWidth - toWidth,
+      );
+      rowY += 54;
+    }
   }
 
-  if (buffs.length > 0 || nerfs.length > 0) {
-    const columnWidth = (CARD_WIDTH - 96 - 16) / 2;
-    const columnHeight = championHeight - 12;
-    ([[text.buff, COLOR.buff, buffs, 48], [text.nerf, COLOR.nerf, nerfs, 48 + columnWidth + 16]] as const)
-      .forEach(([title, tone, list, x]) => {
-        drawRoundedRect(context, x, y, columnWidth, columnHeight, 18);
-        context.fillStyle = "rgba(255, 255, 255, .03)";
-        context.fill();
-        context.strokeStyle = COLOR.line;
-        context.lineWidth = 2;
-        context.stroke();
-        context.fillStyle = tone;
-        context.font = `800 20px ${CARD_FONT}`;
-        context.fillText(title, x + 20, y + 30);
-        list.forEach((champion, index) => {
-          const rowY = y + 46 + (index * 56);
-          const icon = champion.iconUrl ? images.get(champion.iconUrl) : undefined;
-          if (icon) drawRoundedImage(context, icon, x + 20, rowY, 40, 10);
-          else {
-            drawRoundedRect(context, x + 20, rowY, 40, 40, 10);
-            context.fillStyle = "#26334a";
-            context.fill();
-          }
-          context.fillStyle = COLOR.text;
-          context.font = `850 23px ${CARD_FONT}`;
-          fillTextEllipsis(context, champion.name, x + 72, rowY + 18, columnWidth - 92);
-          context.fillStyle = COLOR.dim;
-          context.font = `700 19px ${CARD_FONT}`;
-          const detail = champion.changes.slice(0, 1)
-            .map((change) => `${patchStatLabel(change.stat, locale)} ${change.from}→${change.to}`)
-            .join("");
-          fillTextEllipsis(context, detail, x + 72, rowY + 38, columnWidth - 92);
-        });
+  /* ── 2단: 챔피언 변경(버프 → 너프 → 조정) ── */
+  if (championRows.length > 0) {
+    const height = 48 + (championRows.length * 50);
+    let rowY = drawPanel(context, columnX(1), COLUMNS_TOP, COLUMN_WIDTH, Math.min(height, COLUMN_HEIGHT), text.buff + " · " + text.nerf + " · " + text.adjust);
+    for (const row of championRows) {
+      drawEntryRow(context, {
+        x: columnX(1),
+        y: rowY,
+        width: COLUMN_WIDTH,
+        ...(row.champion.iconUrl && images.get(row.champion.iconUrl)
+          ? { icon: images.get(row.champion.iconUrl)! }
+          : {}),
+        name: row.champion.name,
+        detail: row.champion.changes.slice(0, 1)
+          .map((change) => `${patchStatLabel(change.stat, locale)} ${change.from}→${change.to}`)
+          .join(""),
+        tone: row.tone,
       });
-    y += championHeight;
+      rowY += 50;
+    }
   }
 
+  /* ── 3단: 아이템 + 내 전적 ── */
+  let thirdY = COLUMNS_TOP;
   if (items.length > 0) {
-    drawRoundedRect(context, 48, y, CARD_WIDTH - 96, itemHeight - 12, 18);
-    context.fillStyle = "rgba(255, 255, 255, .03)";
-    context.fill();
-    context.strokeStyle = COLOR.line;
-    context.lineWidth = 2;
-    context.stroke();
-    blockTitle(text.items, y);
-    items.forEach((item, index) => {
-      const rowY = y + 44 + (index * 52);
-      const icon = item.iconUrl ? images.get(item.iconUrl) : undefined;
-      if (icon) drawRoundedImage(context, icon, 68, rowY, 38, 9);
-      else {
-        drawRoundedRect(context, 68, rowY, 38, 38, 9);
-        context.fillStyle = "#26334a";
-        context.fill();
-      }
-      context.fillStyle = COLOR.text;
-      context.font = `850 23px ${CARD_FONT}`;
-      fillTextEllipsis(context, item.name, 118, rowY + 17, 420);
-      context.fillStyle = COLOR.dim;
-      context.font = `700 20px ${CARD_FONT}`;
-      const detail = item.kind === "price" && item.from !== undefined && item.to !== undefined
-        ? `${item.from} → ${item.to} G`
-        : item.kind === "new" ? text.itemNew : text.itemRemoved;
-      context.fillText(detail, 118, rowY + 37);
-    });
-    y += itemHeight;
+    const height = 48 + (items.length * 44);
+    let rowY = drawPanel(context, columnX(2), thirdY, COLUMN_WIDTH, height, text.items);
+    for (const item of items) {
+      drawEntryRow(context, {
+        x: columnX(2),
+        y: rowY - 4,
+        width: COLUMN_WIDTH,
+        ...(item.iconUrl && images.get(item.iconUrl) ? { icon: images.get(item.iconUrl)! } : {}),
+        name: item.name,
+        detail: item.kind === "price" && item.from !== undefined && item.to !== undefined
+          ? `${item.from} → ${item.to} G`
+          : item.kind === "new" ? text.itemNew : text.itemRemoved,
+      });
+      rowY += 44;
+    }
+    thirdY += height + 12;
   }
 
-  if (record) {
-    const blockHeight = mineHeight - 12;
-    drawRoundedRect(context, 48, y, CARD_WIDTH - 96, blockHeight, 18);
+  if (record && thirdY < COLUMNS_BOTTOM - 60) {
+    const available = COLUMNS_BOTTOM - thirdY;
+    /* 최다 사용 챔피언까지 담으려면 156 이 필요합니다. 모자라면 승률·게이지만 남깁니다. */
+    const showTops = tops.length > 0 && available >= 156;
+    const height = Math.min(available, showTops ? 156 : 104);
+    drawRoundedRect(context, columnX(2), thirdY, COLUMN_WIDTH, height, 18);
     context.fillStyle = "rgba(155, 144, 255, .08)";
     context.fill();
     context.strokeStyle = "rgba(155, 144, 255, .35)";
@@ -372,77 +448,77 @@ export async function createPatchSummaryShareBlob(input: PatchSummaryShareInput)
     context.stroke();
 
     context.fillStyle = COLOR.dim;
-    context.font = `700 20px ${CARD_FONT}`;
-    context.fillText(text.winRate, 68, y + 30);
-    context.fillStyle = record.winRate >= 50 ? COLOR.buff : COLOR.nerf;
-    context.font = `900 38px ${CARD_FONT}`;
-    const rateText = `${record.winRate.toFixed(1)}%`;
-    context.fillText(rateText, 68, y + 70);
-    if (delta !== undefined && delta !== 0) {
-      const rateWidth = context.measureText(rateText).width;
-      context.fillStyle = delta > 0 ? COLOR.buff : COLOR.nerf;
-      context.font = `800 21px ${CARD_FONT}`;
-      context.fillText(`${delta > 0 ? "▲" : "▼"}${Math.abs(delta).toFixed(1)}%p`, 68 + rateWidth + 10, y + 70);
-    }
-    /* 승/패 게이지 — 승 파랑, 패 빨강. */
-    const losses = Math.max(0, record.games - record.wins);
-    const gaugeWidth = 250;
-    const winWidth = record.games > 0 ? (record.wins / record.games) * gaugeWidth : 0;
-    drawRoundedRect(context, 68, y + 82, gaugeWidth, 10, 5);
-    context.fillStyle = "rgba(255, 255, 255, .08)";
-    context.fill();
-    context.save();
-    drawRoundedRect(context, 68, y + 82, gaugeWidth, 10, 5);
-    context.clip();
-    context.fillStyle = COLOR.buff;
-    context.fillRect(68, y + 82, winWidth, 10);
-    context.fillStyle = COLOR.nerf;
-    context.fillRect(68 + winWidth, y + 82, gaugeWidth - winWidth, 10);
-    context.restore();
-    context.fillStyle = COLOR.dim;
     context.font = `700 19px ${CARD_FONT}`;
-    context.fillText(`${record.games}${text.games} · ${record.wins}W ${losses}L`, 332, y + 90);
+    context.fillText(text.winRate, columnX(2) + 18, thirdY + 26);
+    context.fillStyle = record.winRate >= 50 ? COLOR.buff : COLOR.nerf;
+    context.font = `900 34px ${CARD_FONT}`;
+    const rateText = `${record.winRate.toFixed(1)}%`;
+    context.fillText(rateText, columnX(2) + 18, thirdY + 62);
+    const rateWidth = context.measureText(rateText).width;
+    if (delta !== undefined && delta !== 0) {
+      context.fillStyle = delta > 0 ? COLOR.buff : COLOR.nerf;
+      context.font = `800 19px ${CARD_FONT}`;
+      context.fillText(`${delta > 0 ? "▲" : "▼"}${Math.abs(delta).toFixed(1)}%p`, columnX(2) + 18 + rateWidth + 10, thirdY + 62);
+    }
+    const losses = Math.max(0, record.games - record.wins);
+    context.fillStyle = COLOR.dim;
+    context.font = `700 17px ${CARD_FONT}`;
+    context.textAlign = "right";
+    context.fillText(`${record.games}${text.games} · ${record.wins}W ${losses}L`, columnX(2) + COLUMN_WIDTH - 18, thirdY + 62);
+    context.textAlign = "start";
 
-    /* 최다 사용 챔피언 — 계약이 아직 없는 배포에서는 이 칸이 비고, 왼쪽 수치만 남습니다. */
-    if (tops.length > 0) {
+    /* 승/패 게이지 — 승 파랑, 패 빨강. */
+    const gaugeWidth = COLUMN_WIDTH - 36;
+    const winWidth = record.games > 0 ? (record.wins / record.games) * gaugeWidth : 0;
+    context.save();
+    drawRoundedRect(context, columnX(2) + 18, thirdY + 74, gaugeWidth, 9, 5);
+    context.clip();
+    context.fillStyle = COLOR.nerf;
+    context.fillRect(columnX(2) + 18, thirdY + 74, gaugeWidth, 9);
+    context.fillStyle = COLOR.buff;
+    context.fillRect(columnX(2) + 18, thirdY + 74, winWidth, 9);
+    context.restore();
+
+    /* 최다 사용 챔피언 — 얼굴로 읽히는 자리라 이름 대신 아이콘과 성적을 냅니다
+       (좁은 단에서 이름을 넣으면 "아우렐…"처럼 잘립니다). */
+    if (showTops) {
       context.fillStyle = COLOR.dim;
-      context.font = `700 19px ${CARD_FONT}`;
-      context.fillText(text.topChampions, 560, y + 30);
+      context.font = `700 16px ${CARD_FONT}`;
+      context.fillText(text.topChampions, columnX(2) + 18, thirdY + 100);
+      /* 성적은 아이콘 옆이 아니라 아래에 둡니다 — 옆에 두면 한 칸이 60px 남짓이라
+         "7게임·…" 처럼 잘립니다(실측). 아래로 내리면 칸 폭 전체를 씁니다. */
+      const slot = (COLUMN_WIDTH - 36) / 3;
       tops.forEach((champion, index) => {
-        const x = 560 + (index * 152);
+        const x = columnX(2) + 18 + (index * slot);
         const icon = champion.iconUrl ? images.get(champion.iconUrl) : undefined;
-        if (icon) drawRoundedImage(context, icon, x, y + 44, 40, 10);
+        if (icon) drawRoundedImage(context, icon, x, thirdY + 106, 30, 8);
         else {
-          drawRoundedRect(context, x, y + 44, 40, 40, 10);
+          drawRoundedRect(context, x, thirdY + 106, 30, 30, 8);
           context.fillStyle = "#26334a";
           context.fill();
         }
         const rate = champion.games > 0 ? Math.round((champion.wins / champion.games) * 100) : 0;
-        context.fillStyle = COLOR.text;
-        context.font = `850 21px ${CARD_FONT}`;
-        fillTextEllipsis(context, champion.name ?? `#${champion.championId}`, x + 50, y + 60, 92);
         context.fillStyle = rate >= 50 ? COLOR.buff : COLOR.nerf;
-        context.font = `800 19px ${CARD_FONT}`;
-        context.fillText(`${champion.games}${text.games} · ${rate}%`, x + 50, y + 82);
+        context.font = `800 15px ${CARD_FONT}`;
+        fillTextEllipsis(context, `${champion.games}${text.games} · ${rate}%`, x, thirdY + 148, slot - 8);
       });
     }
-    y += mineHeight;
   }
 
-  const footerY = height - FOOTER_HEIGHT;
+  const footerY = CARD_HEIGHT - FOOTER_HEIGHT;
   context.fillStyle = COLOR.line;
-  context.fillRect(48, footerY, CARD_WIDTH - 96, 2);
+  context.fillRect(PAD, footerY, CARD_WIDTH - (PAD * 2), 2);
   context.fillStyle = COLOR.text;
-  context.font = `900 26px ${CARD_FONT}`;
-  context.fillText("YORO", 48, footerY + 46);
+  context.font = `900 24px ${CARD_FONT}`;
+  context.fillText("YORO", PAD, footerY + 42);
   const brandWidth = context.measureText("YORO").width;
   context.fillStyle = COLOR.brand;
-  context.fillText(".gg", 48 + brandWidth, footerY + 46);
+  context.fillText(".gg", PAD + brandWidth, footerY + 42);
   /* 출처·범위는 항상 답니다 — 이 카드는 Riot 본문 요약이 아닙니다. */
   context.textAlign = "right";
   context.fillStyle = COLOR.dim;
-  context.font = `650 19px ${CARD_FONT}`;
-  fillTextEllipsis(context, text.source, CARD_WIDTH - 48, footerY + 46, CARD_WIDTH - 320);
+  context.font = `650 18px ${CARD_FONT}`;
+  fillTextEllipsis(context, text.source, CARD_WIDTH - PAD, footerY + 42, CARD_WIDTH - 320);
   context.textAlign = "start";
 
   return new Promise((resolve, reject) => {
