@@ -1138,7 +1138,7 @@ export function YoroDashboardPage() {
           </button>
         </nav>
         <div className="yoro-dashboard-sidebar-actions">
-          <a href="/">{text.publicHome}</a>
+          <a href="/lol">{text.publicHome}</a>
           <button
             type="button"
             onClick={() => void logoutAccount(authenticated.csrfToken).then(() => {

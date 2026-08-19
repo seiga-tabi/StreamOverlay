@@ -520,11 +520,13 @@ test("교배 페이지 fallback 은 시스템 요약과 팰 상세 내부 링크
 });
 
 test("홈 title 은 무엇을 하는 사이트인지 담는다", () => {
+  /* 문구가 화면(home-i18n)과 같은지는 public-home-seo.test.mjs 가 대조합니다.
+     여기서는 "YORO.gg 단독"이 아니라 무엇을 하는 곳인지 담고 있는지만 봅니다. */
   const ko = render("/ko/");
   const ja = render("/ja/");
-  assert.match(ko, /<title>YORO\.gg — LoL 전적 검색·팰월드 데이터베이스<\/title>/u);
-  assert.match(ko, /<meta property="og:title" content="YORO\.gg — LoL 전적 검색·팰월드 데이터베이스">/u);
-  assert.match(ja, /<title>YORO\.gg — LoL戦績検索・パルワールドデータベース<\/title>/u);
+  assert.match(ko, /<title>YORO\.gg — 게임 데이터, 검색 한 번<\/title>/u);
+  assert.match(ko, /<meta property="og:title" content="YORO\.gg — 게임 데이터, 검색 한 번">/u);
+  assert.match(ja, /<title>YORO\.gg — ゲームデータ、検索ひとつで<\/title>/u);
 });
 
 test("팰월드 데이터베이스 표기는 '팰월드' 로 통일돼 있다", () => {

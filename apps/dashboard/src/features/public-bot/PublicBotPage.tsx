@@ -19,7 +19,7 @@ import { publicContentLocale,
   type PublicLocale,
 } from "../public-lol/i18n/public-lol-i18n";
 import type { PublicMainPage } from "../public-lol/types/public-lol";
-import { setPublicPath } from "../public-lol/utils/routes";
+import { PUBLIC_LOL_HOME_PATH, setPublicPath } from "../public-lol/utils/routes";
 import {
   localizedPublicUrl,
   stripPublicLocalePrefix,
@@ -673,7 +673,7 @@ function navigateGame(page: PublicMainPage): void {
     setPublicPath("/bot");
     return;
   }
-  setPublicPath("/");
+  setPublicPath(PUBLIC_LOL_HOME_PATH);
 }
 
 function openTrackedYoroDashboard(): void {

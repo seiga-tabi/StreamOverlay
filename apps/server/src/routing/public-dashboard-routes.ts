@@ -151,6 +151,10 @@ export function isLocalizablePublicDashboardRoute(pathname: string): boolean {
   return PUBLIC_DASHBOARD_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }
 
+/* 루트(/)는 한때 LoL 홈으로 302 시켰지만(같은 화면 두 URL 문제), 이제 루트에
+ * 전용 메인 홈(dashboard 의 PublicHomePage)이 있습니다 — LoL 홈의 정본은 /lol,
+ * 루트는 별개 화면이라 중복 색인 문제가 없습니다. */
+
 export function isPublicDashboardAppRoute(pathname: string): boolean {
   if (PUBLIC_DASHBOARD_EXACT_PATHS.has(pathname)) return true;
   if (PUBLIC_DASHBOARD_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return true;

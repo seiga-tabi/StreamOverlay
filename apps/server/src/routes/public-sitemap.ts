@@ -38,6 +38,7 @@ export const PALWORLD_SITEMAP_KINDS: Readonly<Record<string, PalworldEntityKind>
  * - 준비 중인 Valorant 화면과 Minecraft 자료실·패치 노트는 완성 후에만 추가합니다.
  */
 export const PUBLIC_SITEMAP_STATIC_PATHS: readonly string[] = [
+  /* 루트는 전용 메인 홈(멀티게임 검색)입니다 — LoL 홈(/lol)과 별개 화면. */
   "/",
   "/lol",
   "/lol/aram",

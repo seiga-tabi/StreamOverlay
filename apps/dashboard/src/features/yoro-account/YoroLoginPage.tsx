@@ -92,7 +92,7 @@ export function YoroLoginPage() {
           </div>
         ) : null}
         <div className="yoro-account-links">
-          <a href="/">{copy.back}</a>
+          <a href="/lol">{copy.back}</a>
           <button type="button" onClick={() => setLocale(locale === "ko" ? "ja" : "ko")}>
             {copy.language}
           </button>

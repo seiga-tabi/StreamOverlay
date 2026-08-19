@@ -29,12 +29,16 @@ import { MinecraftPageErrorBoundary } from "./features/public-minecraft/componen
 import { lazyNamed } from "./shared/lazyNamed";
 import { stripPublicLocalePrefix } from "./features/public-lol/utils/public-locale-path";
 
+const loadPublicHomePage = () => import("./pages/PublicHomePage");
+const loadPublicLolHomePage = () => import("./pages/PublicLolHomePage");
 const loadPublicLolPage = () => import("./pages/PublicLolPage");
 const loadPublicPalworldPage = () => import("./pages/PublicPalworldPage");
 const loadPublicValorantPage = () => import("./pages/PublicValorantPage");
 const loadPublicMinecraftPage = () => import("./pages/PublicMinecraftPage");
 const loadPublicGamesPage = () => import("./pages/PublicGamesPage");
 const loadPublicStreamersPage = () => import("./pages/PublicStreamersPage");
+const PublicHomePage = lazyNamed(loadPublicHomePage, "PublicHomePage");
+const PublicLolHomePage = lazyNamed(loadPublicLolHomePage, "PublicLolHomePage");
 const PublicLolPage = lazyNamed(loadPublicLolPage, "PublicLolPage");
 const PublicPalworldPage = lazyNamed(loadPublicPalworldPage, "PublicPalworldPage");
 const PublicValorantPage = lazyNamed(loadPublicValorantPage, "PublicValorantPage");
@@ -286,6 +290,8 @@ export default function App() {
   }
 
   function openPublic(): void {
+    /* 공개 화면의 시작점은 루트 홈입니다 — 루트는 이제 LoL 홈이 아니라
+       전용 메인 홈(PublicHomePage)을 렌더합니다. */
     if (surfaceForLocation() !== "public") window.history.pushState({}, "", "/");
     setSurface("public");
     clearDashboardCsrfToken();
@@ -314,13 +320,26 @@ export default function App() {
       || publicPathname === "/bot/connect/"
       || publicPathname === "/bot/dedicated-server"
       || publicPathname === "/bot/dedicated-server/";
+    /* 루트 전용 메인 홈 — LoL 홈(/lol)과 별개 화면입니다. */
+    const homePublic = publicPathname === "/" || publicPathname === "";
+    /* LoL 홈(/lol)은 리디자인된 전용 화면입니다. 전적·증강·패치노트 등
+       나머지 LoL 경로는 그대로 PublicLolPage(폴백 분기)가 담당합니다. */
+    const lolHomePublic = publicPathname === "/lol" || publicPathname === "/lol/";
     const palworldPublic = isPalworldPath(publicPathname);
     const valorantPublic = isValorantPath(publicPathname);
     const minecraftPublic = isMinecraftPath(publicPathname);
     const gamesPublic = isGamesPath(publicPathname);
     const streamersPublic = isStreamersPath(publicPathname);
     return (
-      yoroDashboard ? (
+      homePublic ? (
+        <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>
+          <PublicHomePage />
+        </Suspense>
+      ) : lolHomePublic ? (
+        <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>
+          <PublicLolHomePage />
+        </Suspense>
+      ) : yoroDashboard ? (
         <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>
           <YoroDashboardPage />
         </Suspense>

@@ -1539,7 +1539,12 @@ function cspForStaticApp(
       "base-uri 'none'",
       "object-src 'none'",
       scriptSrc,
-      "style-src 'self' 'unsafe-inline'",
+      /* 루트 홈의 명조 헤드라인과 붓글씨 마크는 Google Fonts 에서 받습니다.
+         호스트를 정확히 두 개만 엽니다 — https: 전체를 열면 임의의 외부 stylesheet 가
+         들어옵니다. font-src 가 없으면 default-src 'self' 로 떨어져 글꼴 파일 자체가
+         막히므로 함께 둡니다(실측: 열기 전에는 두 요청 모두 차단됐습니다). */
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' data: https://fonts.gstatic.com",
       "img-src 'self' data: https:",
       `connect-src ${cspConnectSrcForRequest(req)} https:`,
       "frame-src 'self' https:",

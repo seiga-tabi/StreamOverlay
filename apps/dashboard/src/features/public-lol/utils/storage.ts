@@ -65,6 +65,16 @@ export function saveRecentSearch(profile: PublicLolProfile): void {
   }
 }
 
+/* 저장값이 없을 때를 구분해야 하는 화면(루트 홈: 다크 기본)용 원시 리더. */
+export function readStoredThemeRaw(): PublicTheme | undefined {
+  try {
+    const value = window.localStorage.getItem(THEME_STORAGE_KEY);
+    return value === "dark" || value === "light" ? value : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export function readStoredTheme(): PublicTheme {
   try {
     return window.localStorage.getItem(THEME_STORAGE_KEY) === "dark" ? "dark" : "light";

@@ -1942,12 +1942,13 @@ test("공개 app shell은 crawler가 읽는 h1과 hreflang, JSON-LD를 함께 �
     });
 
     const response = createResponse();
-    await handler(createRequest("GET", "/ja/"), response);
+    /* 루트(/ja/)는 이제 /ja/lol 로 넘어가므로 shell 을 그리지 않습니다. */
+    await handler(createRequest("GET", "/ja/lol"), response);
     assert.equal(response.statusCode, 200);
     assert.match(response.body, /<html lang="ja"/u);
-    assert.match(response.body, /<link rel="alternate" hreflang="x-default" href="https:\/\/yoro\.gg\/ko\/" \/>/u);
+    assert.match(response.body, /<link rel="alternate" hreflang="x-default" href="https:\/\/yoro\.gg\/ko\/lol" \/>/u);
     assert.match(response.body, /<div id="root"><div class="seo-fallback"/u);
-    assert.match(response.body, /<h1>YORO\.gg — LoL戦績検索とパルワールドデータベース<\/h1>/u);
+    assert.match(response.body, /<h1>LoL戦績検索<\/h1>/u);
     assert.doesNotMatch(response.body, /<div id="root"><\/div>/u);
 
     // JSON-LD script도 정적 script와 같은 nonce로 치환되어야 CSP에서 실행 차단되지 않는다.

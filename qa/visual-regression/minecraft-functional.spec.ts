@@ -676,9 +676,10 @@ test("게임 선택기에서 마인크래프트로 이동하고 다시 다른 �
   const isMobile = (page.viewportSize()?.width ?? 1280) <= 768;
   test.skip(isMobile, "모바일은 통합 메뉴 시트 경로를 쓰므로 데스크톱 드롭다운만 검증합니다.");
   await mockMinecraftCatalog(page);
-  /* LoL 메인(/)은 PUBLIC_PAGE_PATHS 경유라 별도 경로 — minecraft 항목 누락 회귀 방지
-     (2026-08-14: 맵 누락으로 메인에서만 선택이 무시되던 결함) */
-  await page.goto("/");
+  /* LoL 홈(/lol)은 PUBLIC_PAGE_PATHS 경유라 별도 경로 — minecraft 항목 누락 회귀 방지
+     (2026-08-14: 맵 누락으로 메인에서만 선택이 무시되던 결함).
+     루트(/)에는 전용 메인 홈이 생겨 LoL 홈은 /lol 로 옮겼습니다. */
+  await page.goto("/lol");
   await page.getByRole("button", { name: "게임 메뉴" }).click();
   await page.getByRole("option", { name: "마인크래프트 선택" }).click();
   await expect(page).toHaveURL(/\/minecraft$/u);

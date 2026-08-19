@@ -1,0 +1,238 @@
+/* LoL 홈(/lol) — 백자·수묵 리디자인 (목업 캔버스 "YORO 홈 리디자인" page-2 구현).
+ *
+ * 토큰·공통 컴포넌트(헤더·검색 상자·방송 카드·차트·푸터·탭바)는
+ * 01-public-home.css 의 yoro-home-* 를 그대로 재사용하고, 이 파일은 LoL 홈에만
+ * 있는 조각(2행 메뉴·최근 검색 칩·데이터 카드 배치·참여 배너)만 다룹니다.
+ * 시각 규칙(팔레트·헤어라인·라운드·서체·시그니처)은 01 상단 주석을 따릅니다. */
+
+@layer home {
+  /* ── 2행: LoL 전용 메뉴 — 중앙 정렬(목업 v11) ─────────── */
+
+  .yoro-lol-subnav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 26px;
+    height: 48px;
+    max-width: 90rem;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 48px;
+    border-bottom: .5px solid var(--home-line);
+    box-sizing: border-box;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--home-sub);
+  }
+
+  .yoro-lol-subnav-item {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  .yoro-lol-subnav-item:hover { color: var(--home-ink); }
+
+  .yoro-lol-subnav-item.is-active {
+    color: var(--home-ink);
+    font-weight: 700;
+  }
+
+  .yoro-lol-subnav-tail {
+    position: absolute;
+    left: 0;
+    bottom: 5px;
+    color: var(--home-mid);
+  }
+
+  /* ── 히어로: 서브 홈 규모의 마크(목업 LolHome 400×430·76px) ── */
+
+  .yoro-lol-hero { min-height: 470px; }
+
+  .yoro-lol-home .yoro-home-mark {
+    top: 20px;
+    right: 84px;
+    width: 400px;
+    height: 430px;
+  }
+
+  .yoro-lol-home .yoro-home-mark-word { font-size: 76px; }
+
+  .yoro-lol-home .yoro-home-mark-norigae {
+    width: 16px;
+    height: 48px;
+    bottom: -28px;
+  }
+
+  .yoro-lol-home .yoro-home-mark-tail {
+    width: 220px;
+    margin-top: 20px;
+  }
+
+  .yoro-lol-home .yoro-home-hero-copy { padding-top: 54px; }
+
+  /* ── 최근 검색 · 즐겨찾기 칩(실제 localStorage 데이터) ──── */
+
+  .yoro-lol-recent-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .yoro-lol-recent-row + .yoro-lol-recent-row { margin-top: 8px; }
+
+  .yoro-lol-recent-label {
+    flex: none;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--home-mid);
+  }
+
+  .yoro-lol-recent-chips {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .yoro-lol-recent-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 44px;
+    padding: 0 14px;
+    border: .5px solid var(--home-line);
+    border-radius: 2px;
+    background: var(--home-card);
+    color: var(--home-sub);
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .yoro-lol-recent-chip:hover { border-color: var(--home-stroke); color: var(--home-ink); }
+
+  .yoro-lol-recent-tag { color: var(--home-mid); }
+
+  /* ── LoL 데이터 카드: 증강(1.2) + 패치노트(1) ──────────── */
+
+  .yoro-lol-data-cards {
+    display: flex;
+    gap: 14px;
+  }
+
+  .yoro-lol-data-card--aram { flex: 1.2; }
+
+  .yoro-lol-patch-badge {
+    font-size: 11px;
+    color: var(--home-mid);
+    border: .5px solid var(--home-line);
+    border-radius: 2px;
+    padding: 2px 7px;
+  }
+
+  /* ── 시청자 참여 배너 ─────────────────────────────────── */
+
+  .yoro-lol-participation {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 26px 30px;
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+  }
+
+  .yoro-lol-participation-body { min-width: 0; }
+
+  .yoro-lol-participation-title {
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  .yoro-lol-participation-desc {
+    font-size: 13px;
+    color: var(--home-sub);
+    word-break: keep-all;
+  }
+
+  .yoro-lol-participation-cta { margin-left: auto; }
+
+  /* ── 태블릿(48~64rem) — LolHomeTablet 기준 ─────────────── */
+
+  @media (max-width: 64rem) {
+    .yoro-lol-subnav { height: 44px; gap: 20px; padding: 0 24px; }
+
+    .yoro-lol-hero { min-height: 430px; }
+
+    .yoro-lol-home .yoro-home-mark {
+      top: 22px;
+      right: 0;
+      width: 280px;
+      height: 310px;
+    }
+
+    .yoro-lol-home .yoro-home-mark-word { font-size: 52px; }
+    .yoro-lol-home .yoro-home-mark-norigae { width: 13px; height: 38px; bottom: -24px; }
+    .yoro-lol-home .yoro-home-mark-tail { width: 150px; margin-top: 16px; }
+    .yoro-lol-home .yoro-home-hero-copy { padding-top: 42px; }
+
+    .yoro-lol-data-cards { flex-direction: column; gap: 12px; }
+    .yoro-lol-data-card--aram { flex: none; }
+
+    .yoro-lol-participation { gap: 18px; padding: 22px 24px; }
+    .yoro-lol-participation-title { font-size: 15px; }
+    .yoro-lol-participation-desc { font-size: 12px; }
+    .yoro-lol-participation-cta { min-height: 44px; padding: 0 18px; font-size: 13px; }
+  }
+
+  /* ── 모바일(<768px) — LolHomeMobile 기준: 2행 대신 하단 탭바 ── */
+
+  @media (max-width: 47.9375rem) {
+    .yoro-lol-subnav { display: none; }
+
+    .yoro-lol-hero { min-height: 0; }
+
+    /* 마크·헤드라인 크기는 01 의 모바일 규칙(168×176·36px)을 그대로 씁니다. */
+    .yoro-lol-home .yoro-home-mark {
+      top: 8px;
+      right: -22px;
+      width: 168px;
+      height: 176px;
+    }
+
+    .yoro-lol-home .yoro-home-mark-word { font-size: 36px; }
+    .yoro-lol-home .yoro-home-mark-norigae { width: 12px; height: 34px; right: -4px; bottom: -20px; }
+    .yoro-lol-home .yoro-home-mark-tail { width: 110px; margin-top: 14px; }
+    .yoro-lol-home .yoro-home-hero-copy { padding-top: 28px; }
+
+    /* 최근 검색·즐겨찾기: 가로 스크롤 한 줄(목업 흐름) */
+    .yoro-lol-recent-row { margin-top: 12px; }
+    .yoro-lol-recent-row + .yoro-lol-recent-row { margin-top: 8px; }
+
+    .yoro-lol-recent-chips {
+      overflow-x: auto;
+      scrollbar-width: none;
+      margin-right: -16px;
+      padding-right: 16px;
+    }
+
+    .yoro-lol-recent-chips::-webkit-scrollbar { display: none; }
+
+    .yoro-lol-recent-chip { padding: 0 13px; font-size: 12px; }
+
+    .yoro-lol-participation {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 20px 18px;
+    }
+
+    .yoro-lol-participation-cta {
+      margin-left: 0;
+      width: 100%;
+    }
+  }
+}

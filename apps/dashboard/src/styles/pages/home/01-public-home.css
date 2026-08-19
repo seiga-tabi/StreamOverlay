@@ -1,0 +1,1346 @@
+/* yoro.gg 루트 홈 — 백자·수묵 리디자인 (목업 캔버스 "YORO 홈 리디자인" v8 구현).
+ *
+ * 시각 규칙(목업 단일 원본):
+ * - 팔레트 11색 고정. 강조색은 승(#87A183)·패(#DC4A5E) 표기 전용.
+ *   LIVE 배지만 방송 관례색(홍옥 바탕 + 백색 글자, 테마 공통).
+ * - 경계선은 0.5px 헤어라인, 입체감은 그림자 없이 명도 차이로만.
+ * - 라운드는 2~3px(원형 아바타 제외). 그라디언트·블러·그림자 금지.
+ * - 명조(Noto Serif KR/JP)는 히어로 헤드라인 한 층에만. 마크는 붓글씨(Yuji Boku).
+ * - 숫자는 전부 tabular-nums.
+ * - 차트: 등급(서열)=수묵 명도 램프(--home-g1~4), 속성(범주)=검증된 고정색.
+ * - 검색 구역에는 애니메이션을 두지 않습니다.
+ * 브레이크포인트: <48rem 모바일(HomeMobile) · 48~64rem 태블릿(HomeTablet) ·
+ * ≥64rem 데스크톱(HomeDark 1440 기준). */
+
+@layer home {
+  .yoro-home-shell {
+    /* 다크(기본) */
+    --home-bg: #1C1D22;
+    --home-card: #252730;
+    --home-ink: #F5F6F8;
+    --home-sub: #B9C3D0;
+    --home-line: #3A404B;
+    /* 카드(--home-card) 위 12~14px 글자에 쓰이는 값이라 AA(4.5:1)를 넘겨야 합니다.
+       #7C8B9C 는 4.27:1 로 미달이었습니다(실측). 수묵 톤은 유지하고 명도만 올립니다.
+       먹빛 램프(--home-g3)는 그래프 전용이라 여기와 별개로 둡니다. */
+    --home-mid: #8795A6;
+    --home-deep: #4A5563;
+    --home-inv-bg: #F5F6F8;
+    --home-inv-ink: #1C1D22;
+    --home-stroke: #B9C3D0;
+    --home-blob1: #252730;
+    --home-blob2: #3A404B;
+    --home-win: #87A183;
+    --home-loss: #DC4A5E;
+    --home-g1: #F5F6F8;
+    --home-g2: #B9C3D0;
+    --home-g3: #7C8B9C;
+    --home-g4: #4A5563;
+    --home-serif: "Noto Serif KR", "Noto Serif JP", serif;
+    --home-brush: "Yuji Boku", "Yuji Syuku", serif;
+
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    /* 붓 마크는 일부러 오른쪽으로 흘러나갑니다(모바일에서 right: -22px). 그대로 두면
+       360px 에서 문서 폭이 382px 가 되어 페이지가 가로로 스크롤됩니다(실측).
+       hidden 이 아니라 clip 인 이유: clip 은 스크롤 컨테이너를 만들지 않아
+       내부 sticky 가 그대로 살아 있고, 세로 방향 번짐도 그대로 둡니다. */
+    overflow-x: clip;
+    background: var(--home-bg);
+    color: var(--home-ink);
+    font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+
+  .yoro-home-shell.theme-light {
+    --home-bg: #F5F6F8;
+    --home-card: #FFFFFF;
+    --home-ink: #1C1D22;
+    /* 라이트에서 이 두 값이 다크와 같은 #7C8B9C 였습니다 — 어두운 지면에서는 밝은
+       회색이 읽히지만 백자 지면(#F5F6F8) 위에서는 3.22:1 로, 본문·내비·칩·탭까지
+       23곳이 AA(4.5:1)에 미달했습니다(실측). 지면이 뒤집혔으니 먹빛도 뒤집습니다. */
+    --home-sub: #5F6E80;
+    --home-line: #E4E8ED;
+    --home-mid: #5F6E80;
+    --home-deep: #B9C3D0;
+    --home-inv-bg: #1C1D22;
+    --home-inv-ink: #F5F6F8;
+    --home-stroke: #4A5563;
+    --home-blob1: #E4E8ED;
+    --home-blob2: #B9C3D0;
+    /* 라이트에선 어두울수록 상위 등급 */
+    --home-g1: #1C1D22;
+    --home-g2: #4A5563;
+    --home-g3: #7C8B9C;
+    --home-g4: #B9C3D0;
+  }
+
+  .yoro-home-shell:lang(ja) {
+    --home-serif: "Noto Serif JP", serif;
+    font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", system-ui, sans-serif;
+  }
+
+  /* :where 로 명시도를 0으로 낮춰, 각 컴포넌트 클래스의 색 지정이 이기게 합니다. */
+  .yoro-home-shell :where(a) {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .yoro-home-shell :focus-visible {
+    outline: 2px solid var(--home-stroke);
+    outline-offset: 2px;
+  }
+
+  .yoro-home-skip {
+    position: absolute;
+    left: -999rem;
+    top: 0;
+    z-index: 30;
+    padding: .5rem .875rem;
+    background: var(--home-inv-bg);
+    color: var(--home-inv-ink);
+    font-size: .8125rem;
+    font-weight: 700;
+  }
+
+  .yoro-home-skip:focus-visible {
+    left: .5rem;
+    top: .5rem;
+  }
+
+  .yoro-home-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* ── 헤더 ─────────────────────────────────────────────── */
+
+  .yoro-home-header {
+    display: flex;
+    align-items: center;
+    gap: 2.25rem;
+    height: 64px;
+    max-width: 90rem;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 48px 0 96px;
+    border-bottom: .5px solid var(--home-line);
+    box-sizing: border-box;
+  }
+
+  .yoro-home-wordmark {
+    font-size: 17px;
+    font-weight: 900;
+    letter-spacing: .02em;
+    white-space: nowrap;
+  }
+
+  .yoro-home-wordmark span { color: var(--home-mid); }
+
+  .yoro-home-nav {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--home-sub);
+  }
+
+  .yoro-home-nav-home {
+    color: var(--home-ink);
+    font-weight: 700;
+  }
+
+  .yoro-home-nav-link:hover { color: var(--home-ink); }
+
+  .yoro-home-menu-wrap { position: relative; }
+
+  .yoro-home-games-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 36px;
+    padding: 0 12px;
+    border: .5px solid var(--home-line);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--home-ink);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .yoro-home-games-trigger[aria-expanded="true"],
+  .yoro-home-games-trigger:hover { border-color: var(--home-stroke); }
+
+  /* 게임 홈(/lol)에서 트리거는 현재 게임 이름 + 꼬리 밑줄로 바뀝니다(목업 v9). */
+  .yoro-home-games-trigger-name {
+    position: relative;
+    display: inline-block;
+  }
+
+  .yoro-home-games-trigger-tail {
+    position: absolute;
+    left: 0;
+    bottom: -7px;
+    color: var(--home-mid);
+  }
+
+  .yoro-home-menu-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 20;
+    width: 340px;
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+    background: var(--home-card);
+    overflow: hidden;
+  }
+
+  .yoro-home-menu-panel--compact {
+    left: auto;
+    right: 0;
+    width: 180px;
+  }
+
+  .yoro-home-menu-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 56px;
+    padding: 8px 16px;
+    border-bottom: .5px solid var(--home-line);
+    color: var(--home-sub);
+    box-sizing: border-box;
+  }
+
+  .yoro-home-menu-row:last-child { border-bottom: none; }
+  .yoro-home-menu-row:hover { background: var(--home-bg); }
+
+  .yoro-home-menu-row-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .yoro-home-menu-row-name {
+    position: relative;
+    display: inline-block;
+    align-self: flex-start;
+    color: var(--home-ink);
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .yoro-home-menu-row-tail {
+    position: absolute;
+    left: 0;
+    bottom: -6px;
+    color: var(--home-mid);
+  }
+
+  .yoro-home-menu-row-sub {
+    font-size: 11px;
+    color: var(--home-mid);
+  }
+
+  .yoro-home-menu-row-arrow {
+    font-size: 12px;
+    color: var(--home-mid);
+  }
+
+  .yoro-home-header-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .yoro-home-icon-button {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 2px;
+    background: transparent;
+    color: var(--home-sub);
+    cursor: pointer;
+  }
+
+  .yoro-home-icon-button:hover { color: var(--home-ink); }
+
+  .yoro-home-login-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 44px;
+    padding: 0 10px;
+    border: none;
+    background: transparent;
+    color: var(--home-sub);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .yoro-home-login-button:hover { color: var(--home-ink); }
+
+  .yoro-home-lang-option {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 16px;
+    border: none;
+    border-bottom: .5px solid var(--home-line);
+    background: transparent;
+    color: var(--home-sub);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    box-sizing: border-box;
+  }
+
+  .yoro-home-lang-option:last-child { border-bottom: none; }
+  .yoro-home-lang-option:hover { background: var(--home-bg); color: var(--home-ink); }
+  .yoro-home-lang-option.is-active { color: var(--home-ink); font-weight: 700; }
+
+  /* ── 히어로 ───────────────────────────────────────────── */
+
+  .yoro-home-main {
+    flex: 1;
+    width: 100%;
+    max-width: 90rem;
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+
+  .yoro-home-hero {
+    position: relative;
+    min-height: 500px;
+    box-sizing: border-box;
+  }
+
+  .yoro-home-mark {
+    position: absolute;
+    top: 14px;
+    right: 84px;
+    width: 440px;
+    height: 470px;
+    pointer-events: none;
+  }
+
+  .yoro-home-ink {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .yoro-home-mark-inner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .yoro-home-mark-word {
+    position: relative;
+    font-family: var(--home-brush);
+    font-size: 84px;
+    font-weight: 400;
+    line-height: 1;
+    rotate: -2deg;
+    color: var(--home-ink);
+  }
+
+  .yoro-home-mark-norigae {
+    position: absolute;
+    right: -2px;
+    bottom: -30px;
+    width: 18px;
+    height: 52px;
+    color: var(--home-mid);
+  }
+
+  .yoro-home-mark-tail {
+    margin-top: 22px;
+    width: 240px;
+    height: 14px;
+    color: var(--home-mid);
+  }
+
+  .yoro-home-hero-copy {
+    position: relative;
+    max-width: 620px;
+    padding: 58px 0 0 96px;
+    box-sizing: border-box;
+  }
+
+  .yoro-home-headline {
+    margin: 0;
+    font-family: var(--home-serif);
+    font-size: 42px;
+    line-height: 1.3;
+    font-weight: 600;
+    word-break: keep-all;
+  }
+
+  .yoro-home-headline-tail {
+    display: block;
+    margin-top: 10px;
+    color: var(--home-mid);
+    width: 200px;
+    height: 12px;
+  }
+
+  .yoro-home-hero-sub {
+    margin: 14px 0 0;
+    color: var(--home-sub);
+    font-size: 15px;
+    line-height: 1.7;
+    max-width: 460px;
+    word-break: keep-all;
+  }
+
+  .yoro-home-search { margin-top: 26px; }
+
+  .yoro-home-search-tabs {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+  }
+
+  .yoro-home-search-tab {
+    position: relative;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    border: none;
+    background: transparent;
+    color: var(--home-mid);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .yoro-home-search-tab.is-active {
+    color: var(--home-ink);
+    font-weight: 700;
+  }
+
+  .yoro-home-search-tab-tail {
+    position: absolute;
+    left: 14px;
+    bottom: 4px;
+    color: var(--home-ink);
+  }
+
+  .yoro-home-search-box {
+    display: flex;
+    align-items: center;
+    height: 60px;
+    width: 560px;
+    max-width: 100%;
+    border: .5px solid var(--home-stroke);
+    border-radius: 3px;
+    background: var(--home-card);
+    padding: 0 5px 0 18px;
+    box-sizing: border-box;
+    color: var(--home-mid);
+  }
+
+  .yoro-home-search-input {
+    flex: 1;
+    min-width: 0;
+    margin-left: 12px;
+    border: none;
+    background: transparent;
+    color: var(--home-ink);
+    font: inherit;
+    font-size: 16px;
+  }
+
+  .yoro-home-search-input::placeholder { color: var(--home-mid); }
+  .yoro-home-search-input:focus { outline: none; }
+
+  .yoro-home-server {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border-left: .5px solid var(--home-line);
+  }
+
+  .yoro-home-server-select {
+    appearance: none;
+    min-height: 44px;
+    padding: 0 22px 0 12px;
+    border: none;
+    background: transparent;
+    color: var(--home-sub);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .yoro-home-server-select option {
+    background: var(--home-card);
+    color: var(--home-ink);
+  }
+
+  .yoro-home-server-caret {
+    position: absolute;
+    right: 9px;
+    pointer-events: none;
+    color: var(--home-mid);
+  }
+
+  .yoro-home-search-submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 48px;
+    padding: 0 26px;
+    margin-left: 6px;
+    border: none;
+    border-radius: 2px;
+    background: var(--home-inv-bg);
+    color: var(--home-inv-ink);
+    font: inherit;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .yoro-home-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .yoro-home-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 16px;
+    border: .5px solid var(--home-line);
+    border-radius: 2px;
+    color: var(--home-sub);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .yoro-home-chip span { color: var(--home-mid); }
+  .yoro-home-chip:hover { border-color: var(--home-stroke); color: var(--home-ink); }
+
+  /* ── 섹션 공통 ────────────────────────────────────────── */
+
+  .yoro-home-section {
+    padding: 56px 96px 0;
+    box-sizing: border-box;
+  }
+
+  .yoro-home-section-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .yoro-home-section-norigae {
+    flex: none;
+    color: var(--home-mid);
+  }
+
+  .yoro-home-section-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  .yoro-home-section-count {
+    font-size: 13px;
+    color: var(--home-mid);
+  }
+
+  .yoro-home-section-viewall {
+    margin-left: auto;
+    font-size: 13px;
+    color: var(--home-mid);
+  }
+
+  .yoro-home-section-viewall:hover { color: var(--home-ink); }
+
+  .yoro-home-section-sub {
+    margin: -12px 0 16px 25px;
+    font-size: 13px;
+    color: var(--home-mid);
+  }
+
+  .yoro-home-outline-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 48px;
+    padding: 0 24px;
+    border: .5px solid var(--home-stroke);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--home-ink);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .yoro-home-primary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 56px;
+    padding: 0 28px;
+    border: none;
+    border-radius: 2px;
+    background: var(--home-inv-bg);
+    color: var(--home-inv-ink);
+    font: inherit;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  /* ── 지금 방송 중 ─────────────────────────────────────── */
+
+  .yoro-home-live-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .yoro-home-live-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--home-card);
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .yoro-home-live-card:hover { border-color: var(--home-stroke); }
+
+  .yoro-home-live-thumb {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    /* 썸네일 우물은 두 테마 모두 어둡습니다. 라이트에서 지면색(#F5F6F8)이었는데,
+       그 위의 흰 시청자 수(#F5F6F8)가 썸네일이 아직 안 왔거나 못 불러오면 지면과
+       같은 색이 되어 통째로 사라졌습니다(실측 1:1). text-shadow 만으로는 못 막습니다.
+       영상 자리는 원래 어두운 편이 관례이고 로딩 중 화면도 안정적입니다. */
+    background: #1C1D22;
+    border-bottom: .5px solid var(--home-line);
+    display: grid;
+    place-items: center;
+    color: var(--home-deep);
+  }
+
+  .yoro-home-live-thumb img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .yoro-home-live-badge {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 7px;
+    /* 10px 흰 글자라 바탕이 4.5:1 을 넘겨야 합니다 — #DC4A5E 는 4.05:1 로 미달이었습니다
+       (실측). 방송 관례색인 홍옥 계열은 그대로 두고 명도만 낮춥니다.
+       그래프의 패배색(--home-loss)은 글자 바탕이 아니라 별개로 둡니다. */
+    background: #C93850;
+    color: #FFFFFF;
+    border-radius: 2px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .06em;
+  }
+
+  .yoro-home-live-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 99px;
+    border: 1.5px solid #FFFFFF;
+  }
+
+  .yoro-home-live-viewers {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #F5F6F8;
+    text-shadow: 0 0 4px #1C1D22;
+  }
+
+  .yoro-home-live-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 14px;
+  }
+
+  .yoro-home-live-who {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .yoro-home-live-avatar {
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 99px;
+    border: .5px solid var(--home-line);
+    background: var(--home-bg);
+    display: grid;
+    place-items: center;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--home-sub);
+    overflow: hidden;
+  }
+
+  .yoro-home-live-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .yoro-home-live-names {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .yoro-home-live-name {
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .yoro-home-live-game {
+    font-size: 11px;
+    color: var(--home-mid);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .yoro-home-live-meta {
+    font-size: 12px;
+    color: var(--home-sub);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .yoro-home-live-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 26px 20px;
+    border: .5px dashed var(--home-line);
+    border-radius: 3px;
+  }
+
+  .yoro-home-live-empty-tiger {
+    width: 64px;
+    height: 34px;
+    color: var(--home-mid);
+  }
+
+  .yoro-home-live-empty-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .yoro-home-live-empty-sub {
+    margin: 0;
+    font-size: 12px;
+    color: var(--home-sub);
+    line-height: 1.6;
+    word-break: keep-all;
+  }
+
+  .yoro-home-live-empty .yoro-home-outline-button { margin-top: 4px; }
+
+  /* ── 게임별 데이터 ────────────────────────────────────── */
+
+  .yoro-home-game-cards {
+    display: flex;
+    gap: 12px;
+  }
+
+  .yoro-home-game-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 18px 20px 8px;
+    background: var(--home-card);
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+    box-sizing: border-box;
+    min-width: 0;
+  }
+
+  .yoro-home-game-card-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    color: var(--home-sub);
+  }
+
+  .yoro-home-game-card-name {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--home-ink);
+  }
+
+  .yoro-home-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 6px 0 10px;
+  }
+
+  .yoro-home-chart-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--home-mid);
+  }
+
+  .yoro-home-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .yoro-home-bar-name {
+    flex: none;
+    width: 38px;
+    font-size: 11px;
+    color: var(--home-sub);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* 일본어 라벨(シルバー·プリズム 등)은 38px 에서 잘립니다(실측 — シル…). */
+  .yoro-home-shell:lang(ja) .yoro-home-bar-name { width: 64px; }
+
+  .yoro-home-bar-track {
+    flex: 1;
+    height: 8px;
+    background: var(--home-bg);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+
+  .yoro-home-bar-fill { height: 100%; }
+
+  .yoro-home-bar-value {
+    flex: none;
+    width: 26px;
+    text-align: right;
+    font-size: 11px;
+    color: var(--home-sub);
+  }
+
+  .yoro-home-game-rows {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .yoro-home-game-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+    border-bottom: .5px solid var(--home-line);
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .yoro-home-game-row:last-child { border-bottom: none; }
+  .yoro-home-game-row:hover { color: var(--home-ink); }
+  .yoro-home-game-row-arrow { color: var(--home-mid); font-size: 12px; }
+
+  /* ── 교배 빠른 이동 ───────────────────────────────────── */
+
+  .yoro-home-breeding {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    max-width: 900px;
+  }
+
+  .yoro-home-breeding-picker {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 56px;
+    padding: 0 18px;
+    background: var(--home-card);
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--home-mid);
+    box-sizing: border-box;
+  }
+
+  .yoro-home-breeding-picker:hover { border-color: var(--home-stroke); color: var(--home-ink); }
+
+  .yoro-home-breeding-times {
+    font-size: 16px;
+    color: var(--home-mid);
+  }
+
+  /* ── YORO Bot ─────────────────────────────────────────── */
+
+  .yoro-home-bot {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 26px 30px;
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+  }
+
+  .yoro-home-bot-body { min-width: 0; }
+
+  .yoro-home-bot-name {
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  .yoro-home-bot-desc {
+    font-size: 13px;
+    color: var(--home-sub);
+    word-break: keep-all;
+  }
+
+  .yoro-home-bot-cta { margin-left: auto; }
+
+  /* ── 푸터 ─────────────────────────────────────────────── */
+
+  .yoro-home-footer {
+    width: 100%;
+    max-width: 90rem;
+    margin: 56px auto 0;
+    padding: 28px 96px 36px;
+    border-top: .5px solid var(--home-line);
+    box-sizing: border-box;
+  }
+
+  .yoro-home-footer-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 40px;
+  }
+
+  .yoro-home-footer-brand {
+    min-width: 0;
+    max-width: 640px;
+  }
+
+  .yoro-home-footer-wordmark {
+    font-size: 14px;
+    font-weight: 900;
+    margin-bottom: 8px;
+  }
+
+  .yoro-home-footer-wordmark span { color: var(--home-mid); }
+
+  .yoro-home-footer-legal {
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.7;
+    color: var(--home-mid);
+    word-break: keep-all;
+  }
+
+  .yoro-home-footer-links {
+    margin-left: auto;
+    display: flex;
+    gap: 28px;
+    font-size: 12px;
+    color: var(--home-sub);
+  }
+
+  .yoro-home-footer-links a:hover { color: var(--home-ink); }
+
+  .yoro-home-footer-langs {
+    margin-top: 18px;
+    font-size: 12px;
+    color: var(--home-mid);
+  }
+
+  .yoro-home-footer-lang {
+    border: none;
+    background: transparent;
+    padding: 0;
+    color: var(--home-mid);
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .yoro-home-footer-lang.is-active { color: var(--home-ink); font-weight: 700; }
+  .yoro-home-footer-lang:hover { color: var(--home-ink); }
+
+  /* ── 로그인 팝업 ──────────────────────────────────────── */
+
+  .yoro-home-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: grid;
+    place-items: center;
+    background: rgb(28 29 34 / .72);
+    padding: 16px;
+  }
+
+  .yoro-home-modal {
+    width: 360px;
+    max-width: 100%;
+    background: var(--home-card);
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+    padding: 24px 26px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-sizing: border-box;
+  }
+
+  .yoro-home-modal-head {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+
+  .yoro-home-modal-title {
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  .yoro-home-modal-close {
+    margin-left: auto;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin-right: -14px;
+    margin-top: -10px;
+    border: none;
+    background: transparent;
+    color: var(--home-mid);
+    cursor: pointer;
+  }
+
+  .yoro-home-modal-close:hover { color: var(--home-ink); }
+
+  .yoro-home-modal-desc {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--home-sub);
+    word-break: keep-all;
+  }
+
+  .yoro-home-modal-twitch {
+    width: 100%;
+    min-height: 48px;
+  }
+
+  .yoro-home-modal-fine {
+    border-top: .5px solid var(--home-line);
+    padding-top: 12px;
+  }
+
+  .yoro-home-modal-fine p {
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--home-mid);
+    word-break: keep-all;
+  }
+
+  /* ── 모바일 하단 탭바 — 목업 v12(루트 4탭)·v10(LoL 5탭) ── */
+
+  /* 데스크톱·태블릿에서는 헤더가 내비를 맡으므로 탭바는 모바일에서만 보입니다. */
+  .yoro-home-tabbar { display: none; }
+
+  .yoro-home-tabbar-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-height: 64px;
+    border: none;
+    background: transparent;
+    color: var(--home-mid);
+    font: inherit;
+    font-size: 10px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .yoro-home-tabbar-item.is-active {
+    color: var(--home-ink);
+    font-weight: 700;
+  }
+
+  .yoro-home-tabbar-tail {
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    translate: -50% 0;
+    color: var(--home-mid);
+  }
+
+  .yoro-home-tabbar-panel {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: calc(100% + 8px);
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+    background: var(--home-card);
+    overflow: hidden;
+  }
+
+  /* ── 태블릿(48~64rem) — HomeTablet 기준 ───────────────── */
+
+  @media (max-width: 64rem) {
+    .yoro-home-header { padding: 0 24px 0 40px; height: 60px; gap: 24px; }
+    .yoro-home-hero { min-height: 430px; }
+    .yoro-home-mark { top: 24px; right: 4px; width: 300px; height: 330px; }
+    .yoro-home-mark-word { font-size: 58px; }
+    .yoro-home-mark-norigae { width: 14px; height: 42px; bottom: -26px; }
+    .yoro-home-mark-tail { width: 170px; margin-top: 18px; }
+    .yoro-home-hero-copy { max-width: 470px; padding: 46px 0 0 40px; }
+    .yoro-home-headline { font-size: 34px; }
+    .yoro-home-headline-tail { width: 170px; height: 11px; margin-top: 8px; }
+    .yoro-home-hero-sub { font-size: 14px; max-width: 380px; }
+    .yoro-home-search { margin-top: 22px; }
+    .yoro-home-search-box { height: 56px; width: 430px; }
+    .yoro-home-search-submit { height: 44px; padding: 0 20px; font-size: 14px; }
+    .yoro-home-section { padding: 44px 40px 0; }
+    .yoro-home-section-title { font-size: 16px; }
+    .yoro-home-live-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .yoro-home-breeding-picker { min-height: 52px; padding: 0 16px; }
+    .yoro-home-primary-button { min-height: 52px; padding: 0 22px; font-size: 14px; }
+    .yoro-home-bot { gap: 18px; padding: 22px 24px; }
+    .yoro-home-footer { margin-top: 44px; padding: 26px 40px 30px; }
+    /* 브랜드 문구가 640px 를 고집하면 768px 에서 우측 링크가 글자 단위로 세로로
+       꺾입니다(실측). 태블릿 목업(HomeTablet·LolHomeTablet)의 440px 를 따릅니다. */
+    .yoro-home-footer-brand { max-width: 440px; }
+    .yoro-home-footer-links { gap: 18px; }
+  }
+
+  /* ── 모바일(<768px) — HomeMobile 기준. 768은 태블릿에 포함 ── */
+
+  @media (max-width: 47.9375rem) {
+    .yoro-home-header {
+      height: 52px;
+      padding: 0 16px 0 24px;
+      gap: 14px;
+    }
+
+    .yoro-home-wordmark { font-size: 15px; }
+    .yoro-home-nav { display: none; }
+    .yoro-home-header-actions { gap: 6px; }
+    .yoro-home-login-button { font-size: 12px; }
+
+    .yoro-home-hero {
+      min-height: 0;
+      padding-bottom: 0;
+    }
+
+    .yoro-home-mark {
+      top: 8px;
+      right: -22px;
+      width: 168px;
+      height: 176px;
+    }
+
+    .yoro-home-mark-word { font-size: 36px; }
+    .yoro-home-mark-norigae { width: 12px; height: 34px; right: -4px; bottom: -20px; }
+    .yoro-home-mark-tail { width: 110px; margin-top: 14px; }
+
+    .yoro-home-hero-copy {
+      max-width: none;
+      padding: 28px 16px 0 28px;
+    }
+
+    .yoro-home-headline {
+      max-width: 230px;
+      font-size: 30px;
+    }
+
+    .yoro-home-headline-tail { width: 132px; height: 10px; margin-top: 6px; }
+
+    .yoro-home-hero-sub {
+      max-width: 250px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .yoro-home-search { margin-top: 22px; }
+
+    .yoro-home-search-tab { padding: 0 14px; font-size: 13px; }
+    .yoro-home-search-tab-tail { left: 12px; }
+
+    .yoro-home-search-box {
+      width: 100%;
+      height: 56px;
+      padding: 0 4px 0 16px;
+    }
+
+    .yoro-home-search-input { margin-left: 10px; font-size: 15px; }
+    .yoro-home-search-submit { height: 44px; padding: 0 18px; font-size: 14px; margin-left: 2px; }
+
+    .yoro-home-chips { gap: 8px; margin-top: 10px; }
+    .yoro-home-chip { padding: 0 14px; }
+    .yoro-home-chip--desktop { display: none; }
+
+    .yoro-home-section { padding: 34px 16px 0 28px; }
+    .yoro-home-section-head { margin-bottom: 12px; }
+    .yoro-home-section-title { font-size: 15px; }
+
+    /* 방송 카드: 가로 스크롤(폴드에 첫 카드가 걸치는 목업 흐름) */
+    .yoro-home-live-grid {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      margin-right: -16px;
+      padding-right: 16px;
+    }
+
+    .yoro-home-live-grid::-webkit-scrollbar { display: none; }
+
+    .yoro-home-live-card {
+      flex: none;
+      width: 264px;
+      scroll-snap-align: start;
+    }
+
+    .yoro-home-live-body { gap: 7px; padding: 10px 12px; }
+    .yoro-home-live-avatar { width: 32px; height: 32px; font-size: 12px; }
+    .yoro-home-live-name { font-size: 13px; }
+
+    .yoro-home-game-cards { flex-direction: column; }
+    .yoro-home-game-card { padding: 18px 16px 8px; }
+
+    .yoro-home-section-sub { margin-left: 21px; font-size: 12px; }
+
+    .yoro-home-breeding {
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .yoro-home-breeding-picker { min-height: 52px; padding: 0 16px; }
+
+    .yoro-home-breeding .yoro-home-primary-button {
+      flex-basis: 100%;
+      min-height: 52px;
+    }
+
+    .yoro-home-bot {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 20px 18px;
+    }
+
+    .yoro-home-bot-cta {
+      margin-left: 0;
+      width: 100%;
+    }
+
+    /* 하단 탭바(64px 고정)에 푸터가 가리지 않도록 아래 여백을 확보합니다(목업 v12). */
+    .yoro-home-footer {
+      margin-top: 40px;
+      padding: 24px 16px calc(96px + env(safe-area-inset-bottom, 0px)) 28px;
+    }
+
+    .yoro-home-tabbar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 25;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      background: var(--home-card);
+      border-top: .5px solid var(--home-line);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    .yoro-home-tabbar--five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+
+    .yoro-home-footer-top {
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .yoro-home-footer-links { margin-left: 0; gap: 18px; font-size: 11px; }
+    .yoro-home-footer-langs { margin-top: 10px; font-size: 11px; }
+  }
+}

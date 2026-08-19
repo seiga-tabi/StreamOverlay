@@ -253,6 +253,7 @@ import {
   stripPublicLocalePrefix,
 } from "../features/public-lol/utils/public-locale-path";
 import {
+  PUBLIC_LOL_HOME_PATH,
   publicLegalPath,
   publicPageRouteFromPath,
   publicPathForPage,
@@ -6457,7 +6458,8 @@ export function PublicLolPage({
     const unprefixedPath = stripPublicLocalePrefix(window.location.pathname);
     const canonicalPath = isLocalizablePublicPath(unprefixedPath)
       ? localizedPublicUrl(unprefixedPath, locale)
-      : localizedPublicUrl("/", locale);
+      /* 목록에 없는 경로의 폴백입니다. 루트는 /lol 로 넘기므로 여기도 /lol 입니다. */
+      : localizedPublicUrl(PUBLIC_LOL_HOME_PATH, locale);
     const canonicalUrl = new URL(canonicalPath, window.location.origin).href;
     const canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
     const openGraphUrl = document.querySelector<HTMLMetaElement>('meta[property="og:url"]');
@@ -6804,7 +6806,7 @@ export function PublicLolPage({
     setStreamerRegisterOpen(false);
     setActiveMainPage("search");
     setActiveNav("search");
-    if (!profile) setPublicPath("/");
+    if (!profile) setPublicPath(PUBLIC_LOL_HOME_PATH);
     setSearchPanelRequest((current) => ({
       tab,
       nonce: (current?.nonce ?? 0) + 1
@@ -7065,7 +7067,7 @@ export function PublicLolPage({
     setStreamerRegisterOpen(false);
     setActiveMainPage("search");
     setActiveNav("search");
-    setPublicPath("/");
+    setPublicPath(PUBLIC_LOL_HOME_PATH);
   }
 
   function navigatePublic(target: PublicNavTarget): void {

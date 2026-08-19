@@ -147,8 +147,9 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("Public Home", async ({ page }) => {
+  /* LoL 홈입니다 — 루트(/)는 전용 메인 홈으로 바뀌었습니다. */
   const errors = collectRuntimeErrors(page);
-  await page.goto("/");
+  await page.goto("/lol");
   await expect(page.locator(".public-home-shared-shell")).toBeVisible();
   await assertStableSurface(page, errors, "public-home.png");
 });
@@ -164,7 +165,7 @@ test("메인 검색바는 서버 목록을 열고 선택한 플랫폼 색상과 
       }],
     });
   });
-  await page.goto("/ko/");
+  await page.goto("/ko/lol");
 
   const serverButton = page.getByRole("button", { name: "검색 서버" });
   await expect(serverButton).toBeVisible();
@@ -214,7 +215,7 @@ test("최근 검색과 즐겨찾기를 반복 전환해도 동일 소환사는 �
       { ...duplicate, tagLine: "sei" },
     ]));
   });
-  await page.goto("/ko/");
+  await page.goto("/ko/lol");
 
   await page.getByRole("searchbox", { name: "Riot ID 입력" }).focus();
   const panel = page.locator(".public-suggestion-panel");
@@ -235,7 +236,7 @@ test("최근 검색과 즐겨찾기를 반복 전환해도 동일 소환사는 �
 
 test("모바일 메뉴와 LoL 검색 입력은 상단 레이어·자동 확대·입력 폭을 안전하게 유지한다", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 800 });
-  await page.goto("/ko/");
+  await page.goto("/ko/lol");
 
   for (const viewport of [
     { width: 360, height: 800 },
@@ -408,7 +409,7 @@ test("모바일 하단 탭바는 주요 기기 폭에서 항목을 화면 밖으
   // 구조적으로 잘릴 수 없지만, 그 전제가 유지되는지 실제 폭에서 확인합니다.
   for (const width of [375, 390, 393, 430]) {
     await page.setViewportSize({ width, height: 844 });
-    await page.goto("/");
+    await page.goto("/lol");
     const tabBar = page.locator(".public-bottom-tab-bar");
     await expect(tabBar).toBeVisible();
 
@@ -443,7 +444,8 @@ test("일본어 홈 검색 영역은 화면 폭 안에 머물고 서버 코드�
   // 검색 폼이 화면 밖으로 나갑니다(수정 전 390px에서 폼 오른쪽 끝 483px).
   for (const width of [375, 390, 393, 430]) {
     await page.setViewportSize({ width, height: 844 });
-    await page.goto("/ja");
+    /* LoL 홈입니다 — 루트(/)는 전용 메인 홈으로 바뀌었습니다. */
+    await page.goto("/ja/lol");
     const form = page.locator(".public-home-shared-search-form");
     await expect(form).toBeVisible();
 
@@ -480,7 +482,7 @@ test("일본어 홈 검색 영역은 화면 폭 안에 머물고 서버 코드�
 
   // 일본어 글꼴은 라틴 글자가 더 넓어 4글자 코드가 44px 배지를 넘습니다.
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/ja");
+  await page.goto("/ja/lol");
   await page.locator(".public-home-shared-server").click();
   const badges = page.locator(".public-server-menu .public-server-badge");
   await expect(badges.first()).toBeVisible();
@@ -1215,7 +1217,7 @@ test("홈 히어로의 최근 검색 칩은 원터치로 재검색한다", async
       { gameName: "세이가", tagLine: "KR1", lolPlatform: "kr", source: "recent" },
     ]));
   });
-  await page.goto("/");
+  await page.goto("/lol");
   const quick = page.locator(".public-home-quick");
   await expect(quick).toBeVisible();
   await expect(quick).toContainText("최근 검색");
@@ -1289,7 +1291,7 @@ test("연관검색 패널은 검색바와 같은 폭·위치로 열린다", asyn
       suggestions: [{ gameName: "YORO QA", tagLine: "KR1", source: "recommended", lolPlatform: "kr" }]
     });
   });
-  await page.goto("/ko/");
+  await page.goto("/ko/lol");
 
   const input = page.getByRole("searchbox", { name: "Riot ID 입력" });
   await expect(input).toBeVisible();
@@ -1324,7 +1326,7 @@ test("모바일 검색바는 한국어·일본어 모두 터치 기준과 서버
   await page.route("**/api/lol/suggestions**", async (route) => {
     await json(route, { suggestions: [{ gameName: "YORO QA", tagLine: "KR1", source: "recommended", lolPlatform: "kr" }] });
   });
-  await page.goto("/ko/");
+  await page.goto("/ko/lol");
 
   const input = page.getByRole("searchbox", { name: "Riot ID 입력" });
   await expect(input).toBeVisible();
@@ -1373,7 +1375,8 @@ test("연관검색 탭 줄은 한국어·일본어 모두 폰 폭에서 잘리�
     await page.route("**/api/public/locale", async (route) => {
       await json(route, { locale });
     });
-    await page.goto(`/${locale}/`);
+    /* LoL 홈입니다 — 루트(/)는 전용 메인 홈으로 바뀌었습니다. */
+    await page.goto(`/${locale}/lol`);
 
     const input = page.getByRole("searchbox").first();
     await expect(input).toBeVisible();

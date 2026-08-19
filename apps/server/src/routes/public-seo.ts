@@ -957,14 +957,24 @@ function breadcrumbStructuredData(
   };
 }
 
+/* 크롤러가 JS 없이 읽는 본문. 화면(PublicHomePage)이 말하는 것과 같은 것을 말해야
+   합니다 — 다르면 렌더 전후가 어긋나 cloaking 으로 읽힙니다. */
 function homeFallback(locale: PublicUrlLocale): PublicSeoFallback {
   const ja = locale === "ja";
   return {
     facts: [],
-    heading: ja ? "YORO.gg — LoL戦績検索とパルワールドデータベース" : "YORO.gg — LoL 전적 검색과 팰월드 데이터베이스",
-    summary: ja
-      ? "League of Legendsの戦績検索、配信者のLIVE状況、視聴者参加機能、そしてパルワールドのパル・アイテム・スキル・配合データをまとめて確認できます。"
-      : "League of Legends 전적 검색, 스트리머 방송 상태, 시청자 참여 기능과 팰월드 팰·아이템·스킬·교배 데이터를 한곳에서 확인하세요.",
+    heading: t(
+      locale,
+      "YORO.gg — 게임 데이터, 검색 한 번",
+      "YORO.gg — ゲームデータ、検索ひとつで",
+      "YORO.gg — Game data, one search"
+    ),
+    summary: t(
+      locale,
+      "LoL 전적과 증강 칼바람, 팰월드 도감과 교배 계산까지 검색창 하나로. 방송 중인 스트리머의 판을 보고 시청자로 직접 참여하세요.",
+      "LoLの戦績とオーグメントARAM、パルワールドの図鑑と配合計算まで検索ひとつで。配信中のストリーマーの試合を見て、視聴者として参加しましょう。",
+      "LoL match history, ARAM augments, the Palworld Paldeck and breeding calculator — one search box. Watch live streamers and join their games as a viewer."
+    ),
     links: [
       { href: `/${locale}/lol`, label: ja ? "LoL戦績検索" : "LoL 전적 검색" },
       { href: `/${locale}/lol/aram`, label: ja ? "オーグメントARAM" : "증강 칼바람" },
@@ -1064,7 +1074,15 @@ const KOREAN_DEFAULT: PublicSeoContent = {
 };
 
 const KOREAN_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
-  "/": KOREAN_DEFAULT,
+  /* 루트는 전용 메인 홈입니다. 문구의 단일 원본은 대시보드
+     apps/dashboard/src/features/public-home/i18n/home-i18n.ts 의 seoTitle·seoDescription
+     이고, 서버가 크롤러에게 먼저 주는 값이라 여기로 복제했습니다. 한쪽만 고치면
+     크롤러가 받는 값과 화면이 덮어쓰는 값이 어긋납니다 —
+     test/public-home-seo.test.mjs 가 두 파일의 문구를 대조합니다. */
+  "/": {
+    title: "YORO.gg — 게임 데이터, 검색 한 번",
+    description: "LoL 전적과 증강 칼바람, 팰월드 도감과 교배 계산까지 검색창 하나로. 방송 중인 스트리머의 판을 보고 시청자로 직접 참여하세요."
+  },
   "/lol": {
     title: "LoL 전적 검색 | YORO.gg",
     description: "League of Legends 전적과 최근 게임 정보를 검색하세요."
@@ -1209,8 +1227,8 @@ const KOREAN_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
 
 const JAPANESE_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   "/": {
-    title: "YORO.gg — LoL戦績検索・パルワールドデータベース",
-    description: "YORO.ggでLeague of Legendsの戦績検索、配信者のLIVE状況、フォロー、視聴者参加機能を確認できます。"
+    title: "YORO.gg — ゲームデータ、検索ひとつで",
+    description: "LoLの戦績とオーグメントARAM、パルワールドの図鑑と配合計算まで検索ひとつで。配信中のストリーマーの試合を見て、視聴者として参加しましょう。"
   },
   "/lol": {
     title: "LoL戦績検索 | YORO.gg",
@@ -1360,6 +1378,13 @@ const JAPANESE_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
  * 내 영문 용어)를 기준으로 맞췄습니다. 여기에 없는 경로의 /en 은 servedSeoLocale
  * 이 ko 로 접으므로 ko 메타 + /ko canonical 로 남습니다. */
 const ENGLISH_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
+  /* 루트 홈은 영어 카피가 실제로 있습니다(home-i18n 의 en). 이게 없으면 /en/ 은
+     화면만 영어이고 서버는 lang=ko · canonical=/ko/ 로 말해, 크롤러가 영어 페이지를
+     한국어의 중복으로 보고 색인에서 뺍니다. */
+  "/": {
+    title: "YORO.gg — Game data, one search",
+    description: "LoL match history, ARAM augments, the Palworld Paldeck and breeding calculator — one search box. Watch live streamers and join their games as a viewer."
+  },
   "/palworld": {
     title: "Palworld Database | YORO.gg",
     description: "Pals, items, skills and breeding combinations in one place."

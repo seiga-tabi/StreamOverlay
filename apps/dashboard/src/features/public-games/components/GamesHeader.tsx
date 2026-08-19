@@ -4,7 +4,7 @@ import { PublicMobileMenuSheet } from "../../../shared/PublicMobileMenuSheet";
 import { PublicGameSelector } from "../../public-lol/components/PublicGameSelector";
 import { PublicLocaleSelector } from "../../public-lol/components/PublicLocaleSelector";
 import type { PublicMainPage } from "../../public-lol/types/public-lol";
-import { setPublicPath } from "../../public-lol/utils/routes";
+import { PUBLIC_LOL_HOME_PATH, setPublicPath } from "../../public-lol/utils/routes";
 import { publicAccountI18n, usePublicAccountLogin } from "../../../shared/public-account-login";
 import {
   PublicTwitchAccountChip,
@@ -109,7 +109,7 @@ export function GamesHeader({
       setPublicPath("/bot");
       return;
     }
-    setPublicPath("/");
+    setPublicPath(PUBLIC_LOL_HOME_PATH);
   }
 
   const navigation = (

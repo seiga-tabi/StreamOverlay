@@ -34,7 +34,9 @@ test("등급 배지는 원문이 아니라 현지화된 이름을 보여 준다"
 test("이 페이지에서 다른 기능으로 나가는 경로를 둔다", () => {
   // 본문 링크가 개인정보·약관·문의 셋뿐이었습니다.
   assert.match(page, /function AramExits/u);
-  for (const path of ['"/"', '"/participation"', '"/follow"']) {
+  /* LoL 홈은 /lol 입니다(루트는 그리로 넘깁니다) — 상수로 참조합니다. */
+  assert.match(page, /localizedPublicUrlForCurrentLocale\(PUBLIC_LOL_HOME_PATH\)/u);
+  for (const path of ['"/participation"', '"/follow"']) {
     assert.match(page, new RegExp(`localizedPublicUrlForCurrentLocale\\(${path}\\)`, "u"));
   }
   // 데이터가 준비 중일 때도 빈손으로 돌아가지 않게 합니다.

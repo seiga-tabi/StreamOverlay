@@ -68,6 +68,11 @@ export function publicLegalPath(page: PublicMainPage): string | undefined {
   return undefined;
 }
 
+/* LoL 홈의 주소는 /lol 입니다. 루트로 들어와도 서버가 여기로 넘기므로,
+   화면 안에서 이동할 때도 루트를 만들지 않습니다 — 같은 화면이 두 주소로
+   보이면 공유 링크와 색인이 갈립니다. */
+export const PUBLIC_LOL_HOME_PATH = "/lol";
+
 export function setPublicPath(pathname: string, replace = false): void {
   const nextPath = localizedPublicUrlForCurrentLocale(pathname || "/");
   const currentPath = `${window.location.pathname}${window.location.search ?? ""}${window.location.hash ?? ""}`;

@@ -9,6 +9,7 @@ import { SkeletonCard } from "../../../shared/ui/Skeleton";
 import { Badge } from "../../../shared/ui/Status";
 import { activePublicLocale, t } from "../i18n/public-lol-i18n";
 import { localizedPublicUrlForCurrentLocale } from "../utils/public-locale-path";
+import { PUBLIC_LOL_HOME_PATH } from "../utils/routes";
 
 type LoadState = "loading" | "ready" | "error";
 
@@ -28,7 +29,7 @@ function AramExits() {
       <p className="yoro-aram-exits-title" id="public-aram-exits-title">{t().aramExitsTitle}</p>
       <ul className="yoro-aram-exits">
         <li>
-          <a className="yoro-aram-exit" href={localizedPublicUrlForCurrentLocale("/")}>
+          <a className="yoro-aram-exit" href={localizedPublicUrlForCurrentLocale(PUBLIC_LOL_HOME_PATH)}>
             <b>{t().aramExitMatchTitle}</b>
             <small>{t().aramExitMatchDescription}</small>
           </a>

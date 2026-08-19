@@ -9,7 +9,7 @@ import { publicAccountI18n, usePublicAccountLogin } from "../../../shared/public
 import { PublicGameSelector } from "../../public-lol/components/PublicGameSelector";
 import { PublicLocaleSelector } from "../../public-lol/components/PublicLocaleSelector";
 import type { PublicMainPage, PublicTwitchViewerStatus } from "../../public-lol/types/public-lol";
-import { setPublicPath } from "../../public-lol/utils/routes";
+import { PUBLIC_LOL_HOME_PATH, setPublicPath } from "../../public-lol/utils/routes";
 import { palworldI18n, type PalworldLocale } from "../i18n/palworld-i18n";
 import { palworldPathForPage, setPalworldUrl, type PalworldPage } from "../utils/routes";
 
@@ -148,7 +148,7 @@ export function PalworldHeader({
       setPublicPath("/bot");
       return;
     }
-    setPublicPath("/");
+    setPublicPath(PUBLIC_LOL_HOME_PATH);
   }
 
   const navigation = (

@@ -1589,7 +1589,8 @@ test("LoL·Palworld LIVE rail은 PC 다중 카드·이동 버튼·모바일 터�
   await expect(page.getByRole("button", { name: "이전 LIVE 스트리머 보기" })).toBeVisible();
 
   await chooseGame(page, "league");
-  await expect(page).toHaveURL(/\/$/u);
+  /* LoL 홈의 주소는 /lol 입니다 — 루트는 서버가 그리로 넘깁니다. */
+  await expect(page).toHaveURL(/\/lol$/u);
   const lolRail = page.getByTestId("public-live-streamer-rail");
   await expect(lolRail.locator(".public-home-live-card")).toHaveCount(8);
   await expect(lolRail.locator(".public-home-live-preview")).toHaveCount(8);
@@ -1649,7 +1650,7 @@ test("LoL 홈 연관 검색은 Hero와 LIVE 영역보다 위에서 포인터 입
       source: "recent",
     }]));
   });
-  await page.goto("/");
+  await page.goto("/lol");
 
   const search = page.locator(".public-game-home--lol .public-home-shared-input");
   await expect(search).toBeVisible();
@@ -1739,7 +1740,8 @@ test("팰월드 홈은 Hero 검색과 Twitch 로그인 LIVE rail만 표시하고
   await assertHealthyDocument(page, errors);
 
   await chooseGame(page, "league");
-  await expect(page).toHaveURL(/\/$/u);
+  /* LoL 홈의 주소는 /lol 입니다 — 루트는 서버가 그리로 넘깁니다. */
+  await expect(page).toHaveURL(/\/lol$/u);
   await expect(page.locator(".public-home-shared-shell")).toBeVisible();
 
   await chooseGame(page, "palworld");
@@ -1752,7 +1754,7 @@ test("팰월드 홈은 Hero 검색과 Twitch 로그인 LIVE rail만 표시하고
 test("LoL의 공개 Twitch session은 Palworld 프로필과 홈 LIVE 목록에 그대로 연결된다", async ({ page }) => {
   await installConnectedTwitchFixtures(page);
   const errors = collectRuntimeErrors(page);
-  await page.goto("/");
+  await page.goto("/lol");
   if (usesMobilePublicMenu(page)) {
     const mobileMenu = await openMobilePublicMenu(page);
     await expect(mobileMenu.getByText("Pal Viewer", { exact: true })).toBeVisible();
@@ -1968,7 +1970,8 @@ test("Palworld pending Twitch 요청의 늦은 응답은 화면 전환 후 LoL �
   await followedStarted;
   palworldConnected = false;
   await chooseGame(page, "league");
-  await expect(page).toHaveURL(/\/$/u);
+  /* LoL 홈의 주소는 /lol 입니다 — 루트는 서버가 그리로 넘깁니다. */
+  await expect(page).toHaveURL(/\/lol$/u);
   releaseFollowed();
   await expect(page.locator(".public-home-shared-shell")).toBeVisible();
   await expect(page.locator(".palworld-shell")).toHaveCount(0);
@@ -2000,7 +2003,8 @@ test("Palworld OAuth marker는 기존 검색 query를 보존해 제거하고 현
 });
 
 test("LoL과 Palworld 상단 로그인은 Discord·Twitch 선택 메뉴를 동일하게 제공한다", async ({ page }) => {
-  for (const path of ["/", "/palworld"]) {
+  /* LoL 홈은 /lol 입니다 — 루트에는 전용 메인 홈이 있습니다. */
+  for (const path of ["/lol", "/palworld"]) {
     await page.goto(path);
     if (usesMobilePublicMenu(page)) {
       const mobileMenu = await openMobilePublicMenu(page);
@@ -2117,7 +2121,8 @@ test("Palworld 로그아웃은 공유 session을 제거해 LoL에서도 미로�
   }
 
   await chooseGame(page, "league");
-  await expect(page).toHaveURL(/\/$/u);
+  /* LoL 홈의 주소는 /lol 입니다 — 루트는 서버가 그리로 넘깁니다. */
+  await expect(page).toHaveURL(/\/lol$/u);
   if (usesMobilePublicMenu(page)) {
     const mobileMenu = await openMobilePublicMenu(page);
     await expect(mobileMenu.getByRole("button", { name: "Discord로 로그인" })).toBeVisible();
