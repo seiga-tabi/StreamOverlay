@@ -107,7 +107,16 @@ export function StreamerComposePage({
           <legend>{text.composeGames}</legend>
           {STREAMER_GAMES.map((game) => (
             <label className="streamers-chip streamers-chip--input" data-game={game} key={game}>
-              <input checked={games.includes(game)} onChange={() => toggleGame(game)} type="checkbox" />
+              {/* 셸 전역 터치 규칙이 모든 input 에 44px 최소 높이를 !important 로 걸어
+                  네이티브 상자가 칩을 무너뜨립니다. 입력은 접근성용으로 숨기고
+                  표시는 직접 그립니다 — 손가락 목표는 칩 라벨 전체입니다. */}
+              <input
+                checked={games.includes(game)}
+                className="yoro-u-sr-only"
+                onChange={() => toggleGame(game)}
+                type="checkbox"
+              />
+              <span aria-hidden="true" className="streamers-chip__check" />
               {text[GAME_LABEL_KEYS[game]]}
             </label>
           ))}

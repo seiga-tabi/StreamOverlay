@@ -46,6 +46,15 @@ function json(route: Route, body: unknown, status = 200) {
 
 async function installFixtures(page: Page, options: { loggedIn?: boolean; failList?: boolean } = {}) {
   const channel = options.loggedIn ? { channelUrl: "https://twitch.tv/bamtol" } : {};
+  if (options.loggedIn) {
+    /* 계정 세션 — identities 가 없으면 훅이 응답을 버리고 비로그인으로 떨어집니다. */
+    await page.route("**/api/account/session*", async (route) => json(route, {
+      authenticated: true,
+      csrfToken: "test-token",
+      authenticationProvider: "twitch",
+      identities: [{ provider: "twitch", id: "u1", login: "cookie", displayName: "쿠키맛젤리" }],
+    }));
+  }
   await page.route("**/api/public/streamers**", async (route) => {
     const url = new URL(route.request().url());
     if (options.failList) {
@@ -184,4 +193,41 @@ test("글자는 렌더된 픽셀 기준으로 AA 대비를 지킨다", async ({ 
   await expect(page.getByRole("heading", { level: 2, name: "밤톨" })).toBeVisible();
   const audit = await auditContrast(page, ".streamers-page-section");
   expect(formatFindings(audit.failures)).toEqual([]);
+});
+
+test("주력 게임 칩은 한 줄짜리 칩으로 그려지고 고른 것만 강조된다", async ({ page }) => {
+  /* 폼의 광범위 선택자(.streamers-form label · input)가 칩과 그 안의 체크박스를
+     덮어써서, 칩이 세로 블록(126×81)이 되고 체크박스가 입력 필드(92×48)로
+     부풀었던 회귀입니다. 렌더된 크기로 잠급니다. */
+  await installFixtures(page, { loggedIn: true });
+  await page.goto("/ko/streamers/new");
+
+  const chip = page.locator(".streamers-form__games .streamers-chip").first();
+  await expect(chip).toBeVisible();
+
+  const layout = await chip.evaluate((element) => {
+    const input = element.querySelector(".streamers-chip__check")!;
+    const box = element.getBoundingClientRect();
+    const inputBox = input.getBoundingClientRect();
+    return {
+      display: getComputedStyle(element).display,
+      height: Math.round(box.height),
+      inputWidth: Math.round(inputBox.width),
+      inputHeight: Math.round(inputBox.height),
+    };
+  });
+  expect(layout.display).toBe("flex");
+  /* 손가락 목표(44px)는 지키되 세로로 무너지지 않아야 합니다. */
+  expect(layout.height).toBeGreaterThanOrEqual(44);
+  expect(layout.height).toBeLessThanOrEqual(56);
+  expect(layout.inputWidth).toBeLessThanOrEqual(20);
+  expect(layout.inputHeight).toBeLessThanOrEqual(20);
+
+  /* 고르기 전에는 중립, 고르면 강조 — 목록 칩과 달리 여기서는 선택이 정보입니다. */
+  const tint = () => chip.evaluate((element) => getComputedStyle(element).backgroundColor);
+  const before = await tint();
+  /* 사용자가 누르는 것은 칩 라벨입니다 — 입력 상자는 접근성용으로 숨겨 둡니다. */
+  await chip.click();
+  await expect(chip.locator("input")).toBeChecked();
+  expect(await tint()).not.toBe(before);
 });
