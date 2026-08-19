@@ -113,6 +113,11 @@ const SOCIAL_IMAGES_BY_PREFIX: readonly {
     alt: { ko: "YORO.gg LoL 전적 검색 미리보기", ja: "YORO.gg LoL戦績検索のプレビュー" }
   },
   {
+    prefix: "/streamers",
+    url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-lol.png`,
+    alt: { ko: "YORO.gg 스트리머 추천 미리보기", ja: "YORO.gg 配信者おすすめのプレビュー" }
+  },
+  {
     prefix: "/patch-notes",
     url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-lol.png`,
     alt: { ko: "YORO.gg LoL 전적 검색 미리보기", ja: "YORO.gg LoL戦績検索のプレビュー" }
@@ -913,7 +918,9 @@ const BREADCRUMB_SEGMENT_LABELS: Readonly<Record<string, PublicSeoLocaleText>> =
   /* 미니게임 — 라벨이 있는 경로만 breadcrumb·sibling 링크에 오릅니다. 준비 중인
      게임(registry 의 coming)은 라우트가 없으므로 여기에 넣지 않습니다. */
   "/games": { ko: "미니게임", ja: "ミニゲーム" },
-  "/games/reaction": { ko: "반응속도 테스트", ja: "反応速度テスト" }
+  "/games/reaction": { ko: "반응속도 테스트", ja: "反応速度テスト" },
+  "/streamers": { ko: "스트리머 추천", ja: "配信者おすすめ" },
+  "/streamers/new": { ko: "추천 글 쓰기", ja: "おすすめを書く" }
 };
 
 function breadcrumbStructuredData(
@@ -1186,6 +1193,14 @@ const KOREAN_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
     title: "미니게임 | YORO.gg",
     description: "게이머 반사신경 훈련장 — 반응속도 테스트로 내 LoL 티어를 확인해 보세요."
   },
+  "/streamers": {
+    title: "스트리머 추천 | YORO.gg",
+    description: "시청자가 직접 추천한 스트리머를 게임별로 모았습니다. 추천 글은 누구나 읽을 수 있습니다."
+  },
+  "/streamers/new": {
+    title: "추천 글 쓰기 | YORO.gg",
+    description: "채널 주소와 주력 게임을 함께 적어 스트리머를 추천해 보세요."
+  },
   "/games/reaction": {
     title: "반응속도 테스트 | YORO.gg",
     description: "초록 신호에 최대한 빨리! 5회 평균으로 LoL 티어 등급을 받아보세요."
@@ -1324,6 +1339,14 @@ const JAPANESE_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   "/games": {
     title: "ミニゲーム | YORO.gg",
     description: "ゲーマーの反射神経トレーニング — 反応速度テストで自分のLoLティアを確認しましょう。"
+  },
+  "/streamers": {
+    title: "配信者おすすめ | YORO.gg",
+    description: "視聴者が選んだ配信者をゲーム別にまとめました。おすすめはどなたでも読めます。"
+  },
+  "/streamers/new": {
+    title: "おすすめを書く | YORO.gg",
+    description: "チャンネルURLと主なゲームを添えて配信者をおすすめできます。"
   },
   "/games/reaction": {
     title: "反応速度テスト | YORO.gg",

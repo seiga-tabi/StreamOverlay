@@ -633,3 +633,32 @@ test("en 프리픽스 공유 링크는 ko 판으로 접힌다", () => {
   });
   assert.equal(metadata.canonicalUrl, "https://yoro.gg/ko/games/reaction/r/abcd1234efgh");
 });
+
+test("스트리머 추천은 공개 라우트로 인식되고 ko·ja 메타를 낸다", () => {
+  /* 게임 선택기로 들어오는 독립 섹션입니다 — 여기 없으면 /ko/streamers 가
+     공개 라우트로 인식되지 않아 hreflang 도 함께 빠집니다(미니게임 선례). */
+  const ko = render("/ko/streamers");
+  assert.match(ko, /<title>스트리머 추천 \| YORO\.gg<\/title>/u);
+  assert.match(ko, /<link rel="alternate" hreflang="ja" href="https:\/\/yoro\.gg\/ja\/streamers" \/>/u);
+  assert.doesNotMatch(ko, /hreflang="en"/u, "en 콘텐츠가 없는 섹션에는 en 을 약속하지 않습니다");
+
+  const ja = render("/ja/streamers");
+  assert.match(ja, /<title>配信者おすすめ \| YORO\.gg<\/title>/u);
+  assert.match(ja, /<link rel="canonical" href="https:\/\/yoro\.gg\/ja\/streamers">/u);
+
+  /* 글쓰기 화면도 라우트로 살아 있어야 새로고침이 404 가 되지 않습니다. */
+  assert.match(render("/ko/streamers/new"), /<title>추천 글 쓰기 \| YORO\.gg<\/title>/u);
+});
+
+test("추천 글 상세는 prefix 로 받아 공유 링크가 살아 있다", () => {
+  const html = render("/ko/streamers/bamtol");
+  assert.match(html, /<link rel="canonical" href="https:\/\/yoro\.gg\/ko\/streamers\/bamtol">/u);
+  assert.match(html, /<meta property="og:image" content="[^"]*yorogg-og-lol\.png"/u);
+});
+
+test("정적 sitemap 에 스트리머 추천 목록이 오른다", () => {
+  const xml = buildStaticSitemap(PUBLIC_SITEMAP_STATIC_PATHS.map((path) => ({ path })));
+  assert.match(xml, /<loc>https:\/\/yoro\.gg\/ko\/streamers<\/loc>/u);
+  /* 글쓰기는 로그인 전용이라 제출하지 않습니다. */
+  assert.doesNotMatch(xml, /<loc>[^<]*\/streamers\/new<\/loc>/u);
+});

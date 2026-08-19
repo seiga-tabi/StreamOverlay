@@ -60,7 +60,10 @@ export const PUBLIC_SITEMAP_STATIC_PATHS: readonly string[] = [
   /* 미니게임 — live 인 게임만 올립니다. registry 의 coming(시각반응)은 라우트가
      없어 넣으면 404 URL 을 크롤러에게 제출하게 됩니다. */
   "/games",
-  "/games/reaction"
+  "/games/reaction",
+  /* 스트리머 추천 — 목록만 올립니다. 글 상세는 서버가 목록을 알 수 있게 된 뒤
+     (Codex handoff) 별도 sitemap 으로 붙입니다. 글쓰기 화면은 로그인 전용이라 제외. */
+  "/streamers"
 ];
 
 export type SitemapEntry = {

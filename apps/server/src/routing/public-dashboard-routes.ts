@@ -80,7 +80,13 @@ const PUBLIC_DASHBOARD_EXACT_PATHS = new Set([
   "/games/reaction",
   "/games/reaction/",
   "/games/ranking",
-  "/games/ranking/"
+  "/games/ranking/",
+  /* 스트리머 추천 게시판 — 미니게임과 같은 카테고리 섹션입니다. 글 상세는 id 마다
+     고유 URL 이라 아래 prefix 목록이 받습니다. */
+  "/streamers",
+  "/streamers/",
+  "/streamers/new",
+  "/streamers/new/"
 ]);
 
 const NON_LOCALIZED_PUBLIC_PATHS = new Set([
@@ -100,7 +106,9 @@ const PUBLIC_DASHBOARD_PATH_PREFIXES = [
   "/palworld/skills/",
   /* 반응속도 공유 링크 — 기록 id 마다 고유 URL 이라 prefix 로 받습니다.
      서버 렌더 메타(OG)가 여기에 기록을 새겨야 SNS 미리보기가 살아납니다. */
-  "/games/reaction/r/"
+  "/games/reaction/r/",
+  /* 추천 글 상세 — 공유 링크가 걸리므로 서버 렌더 메타(OG)가 필요합니다. */
+  "/streamers/"
 ];
 
 /* en(2026-08-18): 팰월드 섹션부터 영어 콘텐츠를 서빙합니다.

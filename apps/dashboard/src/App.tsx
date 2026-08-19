@@ -22,6 +22,7 @@ import { isPalworldPath } from "./features/public-palworld/utils/routes";
 import { isValorantPath } from "./features/public-valorant/utils/routes";
 import { isMinecraftPath } from "./features/public-minecraft/utils/routes";
 import { isGamesPath } from "./features/public-games/utils/routes";
+import { isStreamersPath } from "./features/public-streamers/utils/routes";
 import { PalworldPageErrorBoundary } from "./features/public-palworld/components/PalworldPageErrorBoundary";
 import { ValorantPageErrorBoundary } from "./features/public-valorant/components/ValorantPageErrorBoundary";
 import { MinecraftPageErrorBoundary } from "./features/public-minecraft/components/MinecraftPageErrorBoundary";
@@ -33,11 +34,13 @@ const loadPublicPalworldPage = () => import("./pages/PublicPalworldPage");
 const loadPublicValorantPage = () => import("./pages/PublicValorantPage");
 const loadPublicMinecraftPage = () => import("./pages/PublicMinecraftPage");
 const loadPublicGamesPage = () => import("./pages/PublicGamesPage");
+const loadPublicStreamersPage = () => import("./pages/PublicStreamersPage");
 const PublicLolPage = lazyNamed(loadPublicLolPage, "PublicLolPage");
 const PublicPalworldPage = lazyNamed(loadPublicPalworldPage, "PublicPalworldPage");
 const PublicValorantPage = lazyNamed(loadPublicValorantPage, "PublicValorantPage");
 const PublicMinecraftPage = lazyNamed(loadPublicMinecraftPage, "PublicMinecraftPage");
 const PublicGamesPage = lazyNamed(loadPublicGamesPage, "PublicGamesPage");
+const PublicStreamersPage = lazyNamed(loadPublicStreamersPage, "PublicStreamersPage");
 const PublicBotPage = lazyNamed(
   () => import("./features/public-bot/PublicBotPage"),
   "PublicBotPage",
@@ -315,6 +318,7 @@ export default function App() {
     const valorantPublic = isValorantPath(publicPathname);
     const minecraftPublic = isMinecraftPath(publicPathname);
     const gamesPublic = isGamesPath(publicPathname);
+    const streamersPublic = isStreamersPath(publicPathname);
     return (
       yoroDashboard ? (
         <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>
@@ -335,6 +339,10 @@ export default function App() {
       ) : gamesPublic ? (
         <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>
           <PublicGamesPage />
+        </Suspense>
+      ) : streamersPublic ? (
+        <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>
+          <PublicStreamersPage />
         </Suspense>
       ) : minecraftPublic ? (
         <MinecraftPageErrorBoundary>

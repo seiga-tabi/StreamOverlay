@@ -3,11 +3,11 @@ import { publicI18n, t } from "../i18n/public-lol-i18n";
 import type { PublicMainPage } from "../types/public-lol";
 import { DISCORD_SYMBOL_ICON_SRC } from "../../../shared/DiscordSymbolIcon";
 
-export type PublicGameId = "league-of-legends" | "palworld" | "valorant" | "minecraft" | "yoro-bot" | "mini-games";
+export type PublicGameId = "league-of-legends" | "palworld" | "valorant" | "minecraft" | "yoro-bot" | "mini-games" | "streamer-board";
 
 type PublicGameOption = {
   id: PublicGameId;
-  page?: Extract<PublicMainPage, "search" | "palworld" | "valorant" | "minecraft" | "bot" | "games">;
+  page?: Extract<PublicMainPage, "search" | "palworld" | "valorant" | "minecraft" | "bot" | "games" | "streamers">;
   logo?: string;
   /** logo 가 없을 때 쓰는 한 글자/이모지 마크. */
   mark?: string;
@@ -84,6 +84,17 @@ const games: PublicGameOption[] = [
     subtitleKo: publicI18n.ko.miniGamesSubtitle,
     subtitleJa: publicI18n.ja.miniGamesSubtitle
   },
+  /* 스트리머 추천도 개별 게임이 아니라 카테고리 1항목입니다 — 게임 범위는 그
+     섹션 안의 nav 가 담당합니다(목업 docs/mockups/streamer-board). */
+  {
+    id: "streamer-board",
+    page: "streamers",
+    mark: "📺",
+    ko: publicI18n.ko.streamerBoard,
+    ja: publicI18n.ja.streamerBoard,
+    subtitleKo: publicI18n.ko.streamerBoardSubtitle,
+    subtitleJa: publicI18n.ja.streamerBoardSubtitle
+  },
 ];
 
 function isPublicGameId(value: string | null): value is PublicGameId {
@@ -96,11 +107,13 @@ function gameIdForPage(page: PublicMainPage): PublicGameId | undefined {
   if (page === "minecraft") return "minecraft";
   if (page === "bot") return "yoro-bot";
   if (page === "games") return "mini-games";
+  if (page === "streamers") return "streamer-board";
   return "league-of-legends";
 }
 
 function gameLabel(game: PublicGameOption): string {
   if (game.id === "mini-games") return t().miniGames;
+  if (game.id === "streamer-board") return t().streamerBoard;
   if (game.id === "league-of-legends") return t().leagueOfLegends;
   if (game.id === "palworld") return t().palworld;
   if (game.id === "valorant") return t().valorant;

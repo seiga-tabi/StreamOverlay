@@ -113,10 +113,10 @@ function assertPngAsset(fileName: string, width: number, height: number): void {
   assert.equal(data.readUInt32BE(20), height);
 }
 
-test("게임 선택 메뉴에는 LoL, 팰월드, 발로란트, 마인크래프트, YORO Bot, 미니게임 여섯 항목을 표시한다", () => {
+test("게임 선택 메뉴에는 LoL, 팰월드, 발로란트, 마인크래프트, YORO Bot, 미니게임, 스트리머 추천 일곱 항목을 표시한다", () => {
   setActivePublicLocale("ko");
   const html = renderToStaticMarkup(<PublicGameSelector activePage="palworld" onPage={() => undefined} mode="tray" />);
-  assert.equal((html.match(/role="option"/g) ?? []).length, 6);
+  assert.equal((html.match(/role="option"/g) ?? []).length, 7);
   assert.match(html, /미니게임/);
   assert.match(html, /반응속도 · 시각반응/);
   assert.match(html, /리그 오브 레전드/);
@@ -127,6 +127,9 @@ test("게임 선택 메뉴에는 LoL, 팰월드, 발로란트, 마인크래프�
   assert.match(html, /aria-label="마인크래프트 선택"/);
   assert.match(html, /YORO Bot/);
   assert.match(html, /Discord 서버 도우미/);
+  /* 스트리머 추천도 개별 게임이 아니라 카테고리 1항목입니다(미니게임 선례). */
+  assert.match(html, /스트리머 추천/);
+  assert.match(html, /시청자 추천 · 게임별/);
   assert.match(html, /src="\/images\/games\/league-of-legends-f01a628bbea2\.png"/);
   assert.match(html, /src="\/images\/games\/palworld-a88d83f86cfe\.png"/);
   assert.match(html, /src="\/images\/games\/valorant-mark\.svg"/);

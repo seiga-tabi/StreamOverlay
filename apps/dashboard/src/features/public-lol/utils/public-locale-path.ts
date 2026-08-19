@@ -46,6 +46,8 @@ const LOCALIZABLE_PUBLIC_EXACT_PATHS = new Set([
      public-dashboard-routes.ts)과 짝을 맞춥니다. */
   "/games",
   "/games/reaction",
+  "/streamers",
+  "/streamers/new",
   "/games/ranking",
 ]);
 
