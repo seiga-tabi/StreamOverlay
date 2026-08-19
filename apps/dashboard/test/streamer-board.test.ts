@@ -7,11 +7,9 @@ import {
   streamersPageFromPath,
   streamersScopePath,
 } from "../src/features/public-streamers/utils/routes";
-import {
-  parseStreamerComment,
-  parseStreamerPost,
-  parseStreamerPostList,
-} from "../src/features/public-streamers/types/streamer-post";
+import { parseStreamerComment, parseStreamerPost, parseStreamerPostList, streamerChannelKey } from "../src/features/public-streamers/types/streamer-post";
+import { isLocalizablePublicPath, localizedPublicUrl } from "../src/features/public-lol/utils/public-locale-path";
+import { streamersSeoMetadata } from "../src/features/public-streamers/utils/seo";
 
 /* 스트리머 추천 게시판 — 목업 docs/mockups/streamer-board.
    서버 계약이 아직 없어 프런트 파서가 방어선입니다. */
@@ -48,7 +46,6 @@ const basePost = {
   live: true,
   games: ["lol"],
   tags: ["칼바람 나락"],
-  reason: "정글 동선을 설명하면서 플레이합니다.",
   votes: 142,
   commentCount: 12,
   authorName: "쿠키맛젤리",
@@ -57,7 +54,7 @@ const basePost = {
 
 test("글 파서는 필수 필드가 빠지면 그 글을 버린다", () => {
   assert.ok(parseStreamerPost(basePost));
-  for (const key of ["id", "streamerName", "reason", "authorName", "createdAt", "platform"]) {
+  for (const key of ["id", "streamerName", "authorName", "createdAt", "platform"]) {
     const broken = { ...basePost, [key]: undefined };
     assert.equal(parseStreamerPost(broken), undefined, key);
   }
@@ -127,4 +124,90 @@ test("목록 파서는 깨진 항목만 버리고 나머지를 살린다", () =>
   /* total 이 실제 개수보다 작으면 믿지 않습니다. */
   assert.equal(parseStreamerPostList({ total: 0, posts: [basePost] })?.total, 1);
   assert.equal(parseStreamerPostList({ posts: "nope" }), undefined);
+});
+
+/* 한 채널은 글 하나 — 그 판정의 기준값입니다.
+ *
+ * 사람은 같은 채널을 서로 다른 문자열로 적습니다(www, 대소문자, 끝 슬래시,
+ * 추적 query, 팝아웃 주소). 여기서 같은 키로 모이지 못하면 목록이 같은 스트리머로
+ * 갈라지고, 반대로 다른 채널이 한 키가 되면 남의 등록을 막습니다. */
+
+test("같은 트위치 채널은 표기가 달라도 한 키로 모인다", () => {
+  const expected = "twitch:bamtol";
+  for (const input of [
+    "https://twitch.tv/bamtol",
+    "https://www.twitch.tv/Bamtol",
+    "https://twitch.tv/bamtol/",
+    "https://twitch.tv/bamtol?tt_medium=share",
+    "https://www.twitch.tv/popout/BamTol/chat",
+    "twitch.tv/bamtol",
+    "  https://twitch.tv/bamtol  ",
+  ]) {
+    assert.equal(streamerChannelKey(input), expected, input);
+  }
+});
+
+test("치지직과 YouTube 도 채널 식별자만 남긴다", () => {
+  assert.equal(streamerChannelKey("https://chzzk.naver.com/live/abc123"), "chzzk:abc123");
+  assert.equal(streamerChannelKey("https://chzzk.naver.com/ABC123"), "chzzk:abc123");
+  assert.equal(streamerChannelKey("https://www.youtube.com/@Hangyeoul"), "youtube:hangyeoul");
+  assert.equal(streamerChannelKey("https://youtube.com/c/Hangyeoul"), "youtube:hangyeoul");
+  assert.equal(streamerChannelKey("https://m.youtube.com/user/Hangyeoul"), "youtube:hangyeoul");
+});
+
+test("YouTube channel id 는 대소문자를 지킨다", () => {
+  /* 이 id 는 대소문자를 구분하는 값이라, 낮춰 쓰면 서로 다른 채널이 한 키가 됩니다. */
+  assert.equal(streamerChannelKey("https://www.youtube.com/channel/UCabcDEF"), "youtube:UCabcDEF");
+  assert.notEqual(
+    streamerChannelKey("https://www.youtube.com/channel/UCabcDEF"),
+    streamerChannelKey("https://www.youtube.com/channel/UCABCdef"),
+  );
+});
+
+test("서로 다른 채널은 절대 같은 키가 되지 않는다", () => {
+  const keys = [
+    "https://twitch.tv/bamtol",
+    "https://twitch.tv/bamtol2",
+    "https://chzzk.naver.com/bamtol",
+    "https://www.youtube.com/@bamtol",
+  ].map((url) => streamerChannelKey(url));
+  assert.equal(new Set(keys).size, keys.length);
+});
+
+test("채널을 가리키지 않는 값은 키가 없다", () => {
+  for (const input of [
+    "",
+    "   ",
+    "not a url",
+    "https://twitch.tv",
+    "https://twitch.tv/",
+    "https://youtu.be/abc123",
+    "https://example.test/bamtol",
+    "javascript:alert(1)",
+  ]) {
+    assert.equal(streamerChannelKey(input), undefined, JSON.stringify(input));
+  }
+});
+
+test("글 상세 경로는 로케일이 붙는 경로다", () => {
+  /* 여기 빠져 있으면 ja 화면에서 글을 열어도 /streamers/<id> 로 가서 로케일이
+     통째로 떨어집니다 — 목록·글쓰기는 정확 목록에 있어 멀쩡한 탓에 늦게 드러납니다. */
+  assert.equal(isLocalizablePublicPath("/streamers/bamtol"), true);
+  assert.equal(isLocalizablePublicPath("/ja/streamers/bamtol"), true);
+  assert.equal(localizedPublicUrl("/streamers/bamtol", "ja"), "/ja/streamers/bamtol");
+  assert.equal(localizedPublicUrl("/ja/streamers/bamtol", "ko"), "/ko/streamers/bamtol");
+  assert.equal(localizedPublicUrl("/streamers", "ja"), "/ja/streamers");
+  assert.equal(localizedPublicUrl("/streamers?game=lol", "ja"), "/ja/streamers?game=lol");
+});
+
+test("canonical 은 그 화면의 주소를 가리킨다", () => {
+  /* 글 상세가 목록을 가리키면 크롤러는 모든 글을 목록의 중복으로 보고 내립니다. */
+  assert.equal(
+    streamersSeoMetadata("detail", "ja", "밤톨", "bamtol").canonicalUrl,
+    "https://yoro.gg/ja/streamers/bamtol",
+  );
+  assert.equal(streamersSeoMetadata("list", "ja").canonicalUrl, "https://yoro.gg/ja/streamers");
+  assert.equal(streamersSeoMetadata("compose", "ko").canonicalUrl, "https://yoro.gg/ko/streamers/new");
+  /* id 를 아직 모르는 첫 렌더에서는 목록으로 둡니다 — 없는 주소를 canonical 로 내지 않습니다. */
+  assert.equal(streamersSeoMetadata("detail", "ko").canonicalUrl, "https://yoro.gg/ko/streamers");
 });

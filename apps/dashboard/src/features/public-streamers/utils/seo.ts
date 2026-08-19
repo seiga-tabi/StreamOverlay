@@ -1,6 +1,6 @@
 import { localizedPublicUrl } from "../../public-lol/utils/public-locale-path";
 import { streamersI18n, type StreamersLocale } from "../i18n/streamers-i18n";
-import { streamersPathForPage, type StreamersPage } from "./routes";
+import { streamerPostPath, streamersPathForPage, type StreamersPage } from "./routes";
 
 const PUBLIC_ORIGIN = "https://yoro.gg";
 
@@ -17,21 +17,24 @@ export function streamersSeoMetadata(
   page: StreamersPage,
   locale: StreamersLocale,
   postTitle?: string,
+  postId?: string,
 ): StreamersSeoMetadata {
   const text = streamersI18n[locale];
   const isCompose = page === "compose";
-  /* 글 상세의 크롤러 메타(스트리머 이름·추천 이유)는 서버 렌더가 담당합니다 —
+  /* 글 상세의 크롤러 메타(스트리머 이름·주력 게임)는 서버 렌더가 담당합니다 —
      클라이언트는 이미 받은 글 제목이 있으면 그것으로 title 만 맞춥니다. */
   const title = isCompose
     ? text.seoTitleCompose
     : postTitle
       ? `${postTitle} | ${text.seoTitleList}`
       : text.seoTitleList;
+  /* canonical 은 그 화면의 주소여야 합니다. 글 상세가 목록을 가리키면 크롤러는
+     모든 글을 목록의 중복으로 보고 색인에서 내립니다. */
+  const path = page === "detail" && postId
+    ? streamerPostPath(postId)
+    : streamersPathForPage(isCompose ? "compose" : "list");
   return {
-    canonicalUrl: new URL(
-      localizedPublicUrl(streamersPathForPage(isCompose ? "compose" : "list"), locale),
-      PUBLIC_ORIGIN,
-    ).href,
+    canonicalUrl: new URL(localizedPublicUrl(path, locale), PUBLIC_ORIGIN).href,
     description: isCompose ? text.seoDescriptionCompose : text.seoDescriptionList,
     title: `${title} | YORO.gg`,
   };
@@ -42,8 +45,9 @@ export function applyStreamersSeo(
   page: StreamersPage,
   locale: StreamersLocale,
   postTitle?: string,
+  postId?: string,
 ): () => void {
-  const metadata = streamersSeoMetadata(page, locale, postTitle);
+  const metadata = streamersSeoMetadata(page, locale, postTitle, postId);
   const previousTitle = document.title;
   document.title = metadata.title;
   const existing = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');

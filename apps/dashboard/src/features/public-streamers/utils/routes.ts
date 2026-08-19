@@ -69,10 +69,17 @@ export function streamersScopePath(scope: StreamerScope): string {
   return scope === "all" ? STREAMERS_BASE_PATH : `${STREAMERS_BASE_PATH}?game=${scope}`;
 }
 
-export function setStreamersUrl(path: string): void {
+/* <a href> 에 쓰는 값. setStreamersUrl 은 이동할 때 로케일을 붙이지만, href 는
+   새 탭·링크 복사·크롤러가 그대로 씁니다 — 붙여 두지 않으면 ja 화면에서 연 링크가
+   한국어 페이지로 떨어집니다. */
+export function streamersHref(path: string): string {
   const [pathname = "", search = ""] = path.split("?", 2);
   const url = localizedPublicUrlForCurrentLocale(pathname);
-  const next = search ? `${url}?${search}` : url;
+  return search ? `${url}?${search}` : url;
+}
+
+export function setStreamersUrl(path: string): void {
+  const next = streamersHref(path);
   if (`${window.location.pathname}${window.location.search}` !== next) {
     window.history.pushState({}, "", next);
   }

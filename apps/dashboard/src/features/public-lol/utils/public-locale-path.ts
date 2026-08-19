@@ -57,6 +57,11 @@ const LOCALIZABLE_PUBLIC_PATH_PREFIXES = [
      복사한 링크에 로케일 프리픽스가 빠져 SNS 크롤러가 기본(한국어) OG 를 받습니다
      (2026-08-17 실사례). shareId 가 가변이라 정확 목록 대신 prefix 로 커버합니다. */
   "/games/reaction/r/",
+  /* 스트리머 추천 글(/streamers/<id>) — 글 id 가 가변이라 정확 목록으로는 못 덮습니다.
+     여기 없으면 ja 화면에서 글을 열어도 /streamers/<id> 로 가서 로케일이 통째로
+     떨어집니다(목록·글쓰기는 정확 목록에 있어 멀쩡한 탓에 눈에 잘 안 띕니다).
+     서버 목록(public-dashboard-routes.ts 의 PUBLIC_DASHBOARD_PATH_PREFIXES)과 짝. */
+  "/streamers/",
 ];
 
 function pathOnly(value: string): string {

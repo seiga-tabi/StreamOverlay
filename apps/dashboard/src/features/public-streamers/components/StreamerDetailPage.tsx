@@ -8,7 +8,7 @@ import {
 } from "../api/streamers";
 import { formatStreamersText, type StreamersText } from "../i18n/streamers-i18n";
 import type { StreamerGame, StreamerPostDetail } from "../types/streamer-post";
-import { setStreamersUrl, streamerPostPath, streamersPathForPage } from "../utils/routes";
+import { setStreamersUrl, streamerPostPath, streamersHref, streamersPathForPage } from "../utils/routes";
 import { StreamerAvatar } from "./StreamerAvatar";
 
 type LoadState = "loading" | "ready" | "error";
@@ -96,7 +96,9 @@ export function StreamerDetailPage({
       : result.reason === "login_required" ? text.commentsLoginRequired : text.listErrorBody);
   };
 
-  const shareUrl = new URL(streamerPostPath(postId), window.location.origin).href;
+  /* X 로 나가는 주소 — 받는 사람은 이 링크만 보고 들어옵니다. 일본어 화면에서
+     공유했으면 일본어 페이지로 열려야 하고, 크롤러가 읽는 OG 도 그 로케일입니다. */
+  const shareUrl = new URL(streamersHref(streamerPostPath(postId)), window.location.origin).href;
 
   const copyLink = async () => {
     try {
@@ -155,8 +157,6 @@ export function StreamerDetailPage({
             <button className="streamers-primary-action" onClick={onLogin} type="button">{text.loginWithTwitch}</button>
           )}
         </header>
-
-        <p className="streamers-detail__reason">{post.reason}</p>
 
         {lol ? (
           <section className="streamers-detail__profile">

@@ -1,6 +1,6 @@
 import { formatStreamersText, type StreamersText } from "../i18n/streamers-i18n";
 import type { StreamerGame, StreamerPost } from "../types/streamer-post";
-import { streamerPostPath, setStreamersUrl } from "../utils/routes";
+import { setStreamersUrl, streamerPostPath, streamersHref } from "../utils/routes";
 import { StreamerAvatar } from "./StreamerAvatar";
 
 const GAME_LABEL_KEYS: Record<StreamerGame, keyof StreamersText> = {
@@ -37,7 +37,7 @@ export function StreamerPostCard({ post, text }: { post: StreamerPost; text: Str
         <div className="streamers-card__title">
           <h2>
             <a
-              href={streamerPostPath(post.id)}
+              href={streamersHref(streamerPostPath(post.id))}
               onClick={(event) => {
                 if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
                 event.preventDefault();
@@ -69,8 +69,6 @@ export function StreamerPostCard({ post, text }: { post: StreamerPost; text: Str
             </a>
           ) : null}
         </div>
-
-        <p className="streamers-card__reason">{post.reason}</p>
 
         {!post.channelUrl ? (
           <p className="streamers-card__locked">

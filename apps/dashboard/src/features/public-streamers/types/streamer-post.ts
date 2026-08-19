@@ -41,7 +41,6 @@ export type StreamerPost = {
   games: readonly StreamerGame[];
   /** 게임 태그 외의 자유 태그(칼바람 나락 등). */
   tags: readonly string[];
-  reason: string;
   votes: number;
   commentCount: number;
   authorName: string;
@@ -105,6 +104,48 @@ function safeChannelUrl(value: unknown): string | undefined {
   }
 }
 
+/* 채널 중복 판정용 정규화 키.
+ *
+ * 한 채널은 글 하나입니다. 사람마다 주소를 다르게 적기 때문에(www 유무, 대소문자,
+ * 끝 슬래시, 추적 query) 문자열 비교로는 같은 채널을 못 잡습니다. 플랫폼과 채널
+ * 식별자만 남겨 "twitch:bamtol" 형태로 줄인 뒤 비교합니다.
+ *
+ * YouTube 의 /channel/<id> 만 대소문자를 지킵니다 — 그 id 는 대소문자를 구분하는
+ * 값이라, 낮춰 쓰면 서로 다른 채널이 같은 키가 될 수 있습니다. 나머지(트위치·치지직
+ * 이름, @핸들)는 플랫폼이 대소문자를 구분하지 않습니다. */
+export function streamerChannelKey(value: string): string | undefined {
+  const text = value.trim();
+  if (!text) return undefined;
+  let url: URL;
+  try {
+    /* 사람은 보통 "twitch.tv/이름" 처럼 scheme 없이 붙여 넣습니다. */
+    url = new URL(/^[a-z][a-z0-9+.-]*:\/\//iu.test(text) ? text : `https://${text}`);
+  } catch {
+    return undefined;
+  }
+  if (url.protocol !== "https:" && url.protocol !== "http:") return undefined;
+  const host = url.hostname.toLowerCase().replace(/^www\./u, "");
+  const segments = url.pathname.split("/").filter(Boolean);
+
+  if (host === "twitch.tv" || host.endsWith(".twitch.tv")) {
+    /* /popout/<이름>/chat 같은 부수 경로에서도 채널 이름은 첫 실제 segment 입니다. */
+    const name = segments[0] === "popout" ? segments[1] : segments[0];
+    return name ? `twitch:${name.toLowerCase()}` : undefined;
+  }
+  if (host === "chzzk.naver.com") {
+    const name = segments[0] === "live" || segments[0] === "video" ? segments[1] : segments[0];
+    return name ? `chzzk:${name.toLowerCase()}` : undefined;
+  }
+  if (host === "youtube.com" || host.endsWith(".youtube.com")) {
+    if (segments[0] === "channel" && segments[1]) return `youtube:${segments[1]}`;
+    const name = segments[0] === "c" || segments[0] === "user" ? segments[1] : segments[0];
+    if (!name) return undefined;
+    return `youtube:${name.toLowerCase().replace(/^@/u, "")}`;
+  }
+  /* youtu.be 는 영상 주소입니다 — 채널을 가리키지 않으므로 키가 없습니다. */
+  return undefined;
+}
+
 /** 프로필 이미지도 https 만 받습니다. 깨진 값은 플랫폼 마크로 떨어집니다. */
 function safeImageUrl(value: unknown): string | undefined {
   const text = typeof value === "string" ? value.trim() : "";
@@ -145,13 +186,12 @@ export function parseStreamerPost(value: unknown): StreamerPost | undefined {
   if (!isRecord(value)) return undefined;
   const id = safeText(value.id, 64);
   const streamerName = safeText(value.streamerName, 60);
-  const reason = safeText(value.reason, 600);
   const authorName = safeText(value.authorName, 40);
   const createdAt = typeof value.createdAt === "string" && Number.isFinite(Date.parse(value.createdAt))
     ? value.createdAt
     : undefined;
   const platform = STREAMER_PLATFORMS.find((candidate) => candidate === value.platform);
-  if (!id || !streamerName || !reason || !authorName || !createdAt || !platform) return undefined;
+  if (!id || !streamerName || !authorName || !createdAt || !platform) return undefined;
 
   const games = Array.isArray(value.games)
     ? STREAMER_GAMES.filter((game) => (value.games as unknown[]).includes(game))
@@ -173,7 +213,6 @@ export function parseStreamerPost(value: unknown): StreamerPost | undefined {
     live: value.live === true,
     games,
     tags,
-    reason,
     votes: counter(value.votes),
     commentCount: counter(value.commentCount),
     authorName,

@@ -478,14 +478,6 @@
     cursor: pointer;
   }
 
-  .streamers-card__reason {
-    margin: 0;
-    color: var(--streamers-ink-soft);
-    font-size: var(--yoro-font-size-md);
-    line-height: var(--yoro-line-height-relaxed);
-    text-wrap: pretty;
-  }
-
   .streamers-card__locked {
     display: flex;
     align-items: center;
@@ -619,6 +611,26 @@
 
   .streamers-state--error strong { color: #ff8b95; }
 
+  /* 중복 채널 안내 — 폼 안에서 오류로 읽혀야 하므로 표면을 낮추고 테두리를 세웁니다. */
+  .streamers-state--warn {
+    padding: var(--yoro-space-4);
+    border-color: rgb(247 90 98 / 46%);
+    background: rgb(247 90 98 / 10%);
+  }
+
+  .streamers-state--warn strong {
+    color: #ff8b95;
+    font-size: var(--yoro-font-size-md);
+  }
+
+  .streamers-state--warn a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--yoro-size-touch-target);
+    color: var(--streamers-accent-soft);
+    font-weight: var(--yoro-font-weight-medium);
+  }
+
   /* ── 상세 ──────────────────────────────────────────────────── */
   .streamers-detail__crumbs {
     display: flex;
@@ -665,14 +677,6 @@
     color: var(--streamers-ink);
     font-size: var(--yoro-font-size-xl);
     font-weight: var(--yoro-font-weight-black);
-  }
-
-  .streamers-detail__reason {
-    margin: 0;
-    color: rgb(249 250 251 / 84%);
-    font-size: var(--yoro-font-size-md);
-    line-height: var(--yoro-line-height-relaxed);
-    text-wrap: pretty;
   }
 
   .streamers-detail__profile {

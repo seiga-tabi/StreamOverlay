@@ -11,6 +11,7 @@ import {
 } from "../../../shared/PublicTwitchAccountChip";
 import { streamersI18n, type StreamersLocale } from "../i18n/streamers-i18n";
 import { publicContentLocale } from "../../public-lol/i18n/public-lol-i18n";
+import { usePublicViewerTwitch } from "../hooks/usePublicViewerTwitch";
 import {
   STREAMERS_BASE_PATH,
   STREAMER_SCOPES,
@@ -60,6 +61,7 @@ export function StreamersHeader({
   const headerRef = useRef<HTMLDivElement>(null);
   const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
   const text = streamersI18n[locale];
+  const viewerTwitch = usePublicViewerTwitch();
   const {
     accountUser,
     loginWithDiscord,
@@ -67,8 +69,17 @@ export function StreamersHeader({
     logout: handleAccountLogout,
     openDashboard,
     twitchConfigured,
+    accountConnected,
     yoroConnected,
-  } = usePublicAccountLogin();
+  } = usePublicAccountLogin({
+    /* 공개 페이지의 로그인 상태는 계정 세션과 뷰어 세션 둘입니다 — LoL 화면처럼
+       둘을 합쳐 봐야 그쪽에서 로그인한 사람이 여기서 비로그인으로 보이지 않습니다. */
+    viewerTwitch: {
+      connected: viewerTwitch.status.connected,
+      ...(viewerTwitch.status.user ? { user: viewerTwitch.status.user } : {}),
+      onDisconnect: viewerTwitch.disconnect,
+    },
+  });
   const account = publicAccountI18n[locale];
 
   const closeMenus = useCallback(() => {
@@ -165,7 +176,7 @@ export function StreamersHeader({
             />
             <PublicTwitchAccountChip
               configured={twitchConfigured}
-              connected={yoroConnected}
+              connected={accountConnected}
               dashboardLabel={account.dashboard}
               dashboardLabelJa={publicAccountI18n.ja.dashboard}
               dashboardLabelKo={publicAccountI18n.ko.dashboard}
@@ -260,7 +271,7 @@ export function StreamersHeader({
         )}
         mobileMenu={(
           <PublicMobileMenuSheet
-            accountConnected={yoroConnected}
+            accountConnected={accountConnected}
             accountUser={accountUser}
             activePage="streamers"
             id="streamers-mobile-menu"

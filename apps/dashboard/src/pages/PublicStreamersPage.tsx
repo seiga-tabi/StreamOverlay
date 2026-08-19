@@ -9,6 +9,7 @@ import { StreamersHeader } from "../features/public-streamers/components/Streame
 import { StreamerComposePage } from "../features/public-streamers/components/StreamerComposePage";
 import { StreamerDetailPage } from "../features/public-streamers/components/StreamerDetailPage";
 import { StreamerListPage } from "../features/public-streamers/components/StreamerListPage";
+import { usePublicViewerTwitch } from "../features/public-streamers/hooks/usePublicViewerTwitch";
 import { useStreamersRoute } from "../features/public-streamers/hooks/useStreamersRoute";
 import { streamersI18n, type StreamersLocale } from "../features/public-streamers/i18n/streamers-i18n";
 import { applyStreamersSeo } from "../features/public-streamers/utils/seo";
@@ -24,14 +25,24 @@ export function PublicStreamersPage() {
   const locale = publicContentLocale(rawLocale);
   const { theme } = usePublicTheme();
   const { page, postId, scope } = useStreamersRoute();
-  const { loginWithTwitch, yoroConnected } = usePublicAccountLogin();
+  const viewerTwitch = usePublicViewerTwitch();
+  /* 글·댓글·신고를 쓸 수 있는 기준은 "공개 페이지에 로그인돼 있는가" 입니다.
+     계정 세션만 보면 LoL 화면에서 Twitch 로 로그인한 사람이 여기서만 비로그인으로
+     취급돼 "로그인이 필요합니다" 를 만납니다(실사례). 두 세션을 합쳐서 봅니다. */
+  const { accountConnected, loginWithTwitch } = usePublicAccountLogin({
+    viewerTwitch: {
+      connected: viewerTwitch.status.connected,
+      ...(viewerTwitch.status.user ? { user: viewerTwitch.status.user } : {}),
+      onDisconnect: viewerTwitch.disconnect,
+    },
+  });
   const [postTitle, setPostTitle] = useState<string | undefined>();
   const text = streamersI18n[locale];
   setActivePublicLocale(locale);
 
   useEffect(
-    () => applyStreamersSeo(page ?? "list", locale, postTitle),
-    [locale, page, postTitle],
+    () => applyStreamersSeo(page ?? "list", locale, postTitle, postId ?? undefined),
+    [locale, page, postId, postTitle],
   );
 
   const handleLocale = useCallback((nextLocale: StreamersLocale) => {
@@ -60,11 +71,11 @@ export function PublicStreamersPage() {
             </div>
           ) : null}
           {page === "list" ? (
-            <StreamerListPage canPost={yoroConnected} onLogin={loginWithTwitch} scope={scope} text={text} />
+            <StreamerListPage canPost={accountConnected} onLogin={loginWithTwitch} scope={scope} text={text} />
           ) : null}
           {page === "detail" && postId ? (
             <StreamerDetailPage
-              canPost={yoroConnected}
+              canPost={accountConnected}
               onLogin={loginWithTwitch}
               onTitle={setPostTitle}
               postId={postId}
@@ -72,7 +83,7 @@ export function PublicStreamersPage() {
             />
           ) : null}
           {page === "compose" ? (
-            <StreamerComposePage canPost={yoroConnected} onLogin={loginWithTwitch} text={text} />
+            <StreamerComposePage canPost={accountConnected} onLogin={loginWithTwitch} text={text} />
           ) : null}
         </section>
       </AppShellMain>
