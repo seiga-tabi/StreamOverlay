@@ -271,8 +271,28 @@ try {
   const body = await response.text();
   const cacheControl = response.headers.get("cache-control") || "";
   const cdnCacheControl = response.headers.get("cloudflare-cdn-cache-control") || response.headers.get("cdn-cache-control") || "";
+  const cdnCacheStatus = (response.headers.get("cf-cache-status") || "").trim();
   record("runtime config response", response.ok, `HTTP ${response.status}`);
-  record("runtime config cache", /no-store/i.test(cacheControl) && /no-store/i.test(cdnCacheControl), `Cache-Control=${cacheControl || "없음"}`);
+  /* CDN 지시 헤더(Cloudflare-CDN-Cache-Control · CDN-Cache-Control)는 CDN 이 읽고
+     소비하므로 방문자 응답에는 남지 않습니다. origin 이 분명히 보내도 CDN 뒤에서는
+     관측할 수 없어, 이 헤더를 요구하면 검사가 영원히 실패합니다
+     (2026-08-19 실측: 배포 SHA 가 헤더를 넣는 코드와 같은데 응답에는 없고
+     cf-cache-status 는 BYPASS 였습니다).
+
+     그래서 지시가 아니라 결과를 봅니다 — 방문자용 Cache-Control 은 반드시
+     no-store 이고, CDN 이 이 응답을 캐시해 재사용하고 있으면 안 됩니다.
+     개인화된 런타임 설정이 CDN 에 남으면 다른 방문자에게 나갑니다. */
+  const cdnServedFromCache = /^(HIT|STALE|UPDATING|REVALIDATED)$/i.test(cdnCacheStatus);
+  record(
+    "runtime config cache",
+    /no-store/i.test(cacheControl) && !cdnServedFromCache,
+    [
+      `Cache-Control=${cacheControl || "없음"}`,
+      `cf-cache-status=${cdnCacheStatus || "없음"}`,
+      /* origin 직결로 점검할 때만 보입니다. 보이면 값도 함께 남깁니다. */
+      ...(cdnCacheControl ? [`CDN-Cache-Control=${cdnCacheControl}`] : [])
+    ].join(", ")
+  );
   record("legal runtime config", /["']?configured["']?\s*:\s*true/.test(body), "configured=true 확인");
 } catch (error) {
   record("runtime config response", false, error instanceof Error ? error.message : "요청 실패");
