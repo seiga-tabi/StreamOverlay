@@ -840,10 +840,12 @@
 
 /* YORO Bot 공개 페이지: 실제 서비스 정보 위계와 대비를 강화한 소개 화면 */
 .public-bot-shell {
+  /* 카드 지면은 대시보드 홈(31-dashboard-home.css)의 #1c232d · #161d26 과 통일합니다 —
+     이전 값(#1b202b · #171b24)은 같은 제품 안에서 셸마다 카드 색이 달랐습니다. */
   --bot-canvas: #11141b;
-  --bot-card: #1b202b;
-  --bot-card-subtle: #171b24;
-  --bot-card-raised: #202635;
+  --bot-card: #1c232d;
+  --bot-card-subtle: #161d26;
+  --bot-card-raised: #232c3c;
   --bot-border: rgba(255, 255, 255, .1);
   --bot-border-strong: rgba(255, 255, 255, .18);
   --bot-text: #f7f8fa;
@@ -858,6 +860,12 @@
   --yoro-color-product-gray-muted: var(--bot-muted);
   --yoro-color-product-gray-border: var(--bot-border);
   --yoro-color-product-gray-border-strong: var(--bot-border-strong);
+
+  /* 푸터 지면 — AppShell.css(레이어 없음)가 --yoro-color-surface(흰색 74%)로
+     칠하는 것을 토큰으로 뒤집습니다. 합성 배경 #d9dbdd 위에 다크용 글자가 놓여
+     본문 1.47:1 · 로고 1.31:1 이었습니다(실측). #0d1016 에서는 9.33:1 · 17.75:1. */
+  --yoro-app-shell-footer-background: #0d1016;
+  --yoro-app-shell-footer-border: var(--bot-border);
 }
 
 .public-dashboard-shell.public-bot-shell.yoro-app-shell {
@@ -870,6 +878,9 @@
     radial-gradient(circle at 76% 8%, color-mix(in srgb, var(--bot-violet) 13%, transparent), transparent 30rem),
     radial-gradient(circle at 8% 35%, color-mix(in srgb, var(--bot-blue) 8%, transparent), transparent 32rem),
     var(--bot-canvas) !important;
+  /* 02-legacy 의 파스텔 규칙(.public-dashboard-shell { color: #10233d !important })이
+     회색 강제 제외 후 상속으로 드러났습니다 — 다크 지면용 잉크를 같은 강도로 되돌립니다. */
+  color: var(--bot-text) !important;
 }
 
 .public-bot-main {

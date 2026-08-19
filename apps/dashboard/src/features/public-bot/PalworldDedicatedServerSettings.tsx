@@ -362,15 +362,25 @@ export function PalworldDedicatedServerSettings({ locale }: { locale: PalworldSe
         )}
       </form>
 
+      {/* 저장 동선 — 복사·다운로드가 페이지 맨 아래에만 있어(실측 7549px)
+          설정을 고친 뒤 끝까지 내려가야 했습니다. 화면 하단 고정 바로 올립니다
+          (목업 GameFiles 아트보드). */}
+      <div className="palworld-settings-savebar">
+        <div aria-live="polite" className="palworld-settings-savebar__state">
+          <strong>{changedKeys.size} {text.overrideCount}</strong>
+          <small>{text.previewDescription}</small>
+        </div>
+        <div className="palworld-settings-savebar__actions">
+          <button disabled={!canExport} onClick={() => void copyIni()} type="button">{text.copy}</button>
+          <button className="is-primary" disabled={!canExport} onClick={downloadIni} type="button">{text.download}</button>
+        </div>
+      </div>
+
       <section className="palworld-settings-preview" aria-labelledby="palworld-settings-preview-title">
         <div className="palworld-settings-preview__heading">
           <div>
             <h2 id="palworld-settings-preview-title">{text.previewTitle}</h2>
-            <p>{text.previewDescription}</p>
-          </div>
-          <div className="palworld-settings-preview__actions">
-            <button disabled={!canExport} onClick={() => void copyIni()} type="button">{text.copy}</button>
-            <button className="is-primary" disabled={!canExport} onClick={downloadIni} type="button">{text.download}</button>
+            <p>{text.secretWarning}</p>
           </div>
         </div>
         {errors.length > 0 ? <p className="palworld-settings-preview__error" role="alert">{text.invalid}</p> : null}

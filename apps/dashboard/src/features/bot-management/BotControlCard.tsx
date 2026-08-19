@@ -16,8 +16,7 @@ import {
   EmptyState,
   EmptyStateDescription,
   EmptyStateTitle,
-  SkeletonCard,
-  StatusPill
+  SkeletonCard
 } from "../../shared/ui";
 import {
   BotManagementApiError,
@@ -478,438 +477,411 @@ export function BotControlCard(props: {
   }
 
   return (
-    <Card className="bot-control-card">
-      <CardContent className="bot-control-console">
-        <header className="bot-control-hero">
-          <div className="bot-control-hero__heading">
-            <span
-              aria-hidden="true"
-              className={`bot-control-status-dot${operational ? " is-active" : ""}`}
-            />
-            <div>
-              <span className="bot-control-eyebrow">Discord Bot</span>
-              <CardTitle as="h2">{text.title}</CardTitle>
-              <CardDescription>{text.description}</CardDescription>
-            </div>
-          </div>
-          <div className="bot-control-hero__actions">
-            <StatusPill tone={operational ? "success" : "warning"}>
-              {operational ? text.statusActive : text.statusLimited}
-            </StatusPill>
-          </div>
-          <dl className="bot-control-hero__details">
-            <div>
-              <dt>Guild</dt>
-              <dd title={overview.installation.guildDisplayName}>
-                {overview.installation.guildDisplayName}
-              </dd>
-            </div>
-            <div>
-              <dt>{text.organizationStatus}</dt>
-              <dd>{text.organizationConnected}</dd>
-            </div>
-            <div>
-              <dt>{text.installationStatus}</dt>
-              <dd>{text.active}</dd>
-            </div>
-            <div>
-              <dt>{text.managementApiStatus}</dt>
-              <dd className="is-healthy">{text.managementApiHealthy}</dd>
-            </div>
-          </dl>
-        </header>
+    /* 카드 안 카드 안 카드(왼쪽 정렬선 376·410·440 세 줄)를 폅니다 — 히어로 카드와
+       Health Overview 6칸을 상태 줄 4칸으로 합치고, 탭·패널·저장 줄은 카드 밖
+       독립 블록이 됩니다(목업 §Discord Bot 제어). */
+    <section aria-label={text.title} className="bot-control-console">
+      <div aria-label={text.healthTitle} className="bot-control-ops" role="group">
+        <span className="bot-control-op" data-tone="good">
+          <i aria-hidden="true" />
+          <span className="bot-control-op__text">
+            <b>{text.installationStatus} {text.active}</b>
+            <small title={overview.installation.guildDisplayName}>
+              {overview.installation.guildDisplayName}
+            </small>
+          </span>
+        </span>
+        <span className="bot-control-op" data-tone={operational ? "good" : "warn"}>
+          <i aria-hidden="true" />
+          <span className="bot-control-op__text">
+            <b>{effectiveActiveCommandCount}{text.activeCount}</b>
+            <small>
+              {overview.globalPrefixCommandsEnabled ? text.globalEnabled : text.globalDisabledLabel}
+            </small>
+          </span>
+        </span>
+        <span className="bot-control-op" data-tone={draft.palworldStatusEnabled ? "good" : undefined}>
+          <i aria-hidden="true" />
+          <span className="bot-control-op__text">
+            <b>{text.moduleStatus} {draft.palworldStatusEnabled ? text.enabled : text.paused}</b>
+            <small>{text.module}</small>
+          </span>
+        </span>
+        <span className="bot-control-op">
+          <i aria-hidden="true" />
+          <span className="bot-control-op__text">
+            <b>revision {overview.settings.revision} · {languageLabel}</b>
+            <small>{text.configRevisionStatus}</small>
+          </span>
+        </span>
+      </div>
 
-        {!overview.globalPrefixCommandsEnabled ? (
-          <p className="bot-control-warning" role="status">{text.globalDisabled}</p>
-        ) : null}
+      {!overview.globalPrefixCommandsEnabled ? (
+        <p className="bot-control-warning" role="status">{text.globalDisabled}</p>
+      ) : null}
 
-        <div className="bot-control-section-heading">
-          <div>
-            <h3>{text.healthTitle}</h3>
-            <p>{text.healthDescription}</p>
-          </div>
-        </div>
-        <section className="bot-control-summary" aria-label={text.healthTitle}>
-          {([
-            [text.installationStatus, text.active, "installation"],
-            [text.globalCommandStatus, overview.globalPrefixCommandsEnabled ? text.enabled : text.paused, "global"],
-            [text.moduleStatus, draft.palworldStatusEnabled ? text.enabled : text.paused, "module"],
-            [text.commandStatus, `${effectiveActiveCommandCount}${text.activeCount}`, "commands"],
-            [text.languageStatus, languageLabel, "language"],
-            [text.configRevisionStatus, `revision ${overview.settings.revision}`, "revision"]
-          ] as const).map(([label, value, icon]) => (
-            <article className="bot-control-summary__item" key={icon}>
-              <span aria-hidden="true" className={`bot-control-summary__icon is-${icon}`} />
-              <div>
-                <span>{label}</span>
-                <strong>{value}</strong>
-              </div>
-            </article>
-          ))}
-        </section>
-
-        <nav className="bot-control-tabs" aria-label={text.title} role="tablist">
-          {tabs.map((tab) => (
-            <button
-              aria-controls={`bot-control-panel-${tab.id}`}
-              aria-selected={activeTab === tab.id}
-              className={activeTab === tab.id ? "is-active" : undefined}
-              id={`bot-control-tab-${tab.id}`}
-              key={tab.id}
-              role="tab"
-              type="button"
-              onClick={() => setActiveTab(tab.id)}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </nav>
-
-        {activeTab === "general" ? (
-          <section
-            aria-labelledby="bot-control-tab-general"
-            className="bot-control-panel"
-            id="bot-control-panel-general"
-            role="tabpanel"
+      <nav className="bot-control-tabs" aria-label={text.title} role="tablist">
+        {tabs.map((tab) => (
+          <button
+            aria-controls={`bot-control-panel-${tab.id}`}
+            aria-selected={activeTab === tab.id}
+            className={activeTab === tab.id ? "is-active" : undefined}
+            id={`bot-control-tab-${tab.id}`}
+            key={tab.id}
+            role="tab"
+            type="button"
+            onClick={() => setActiveTab(tab.id)}
           >
-            <div className="bot-control-panel__heading">
-              <div>
-                <h3>{text.generalTitle}</h3>
-                <p>{text.generalDescription}</p>
-              </div>
+            {tab.label}
+          </button>
+        ))}
+      </nav>
+
+      {activeTab === "general" ? (
+        <section
+          aria-labelledby="bot-control-tab-general"
+          className="bot-control-panel"
+          id="bot-control-panel-general"
+          role="tabpanel"
+        >
+          <div className="bot-control-panel__heading">
+            <div>
+              <h3>{text.generalTitle}</h3>
+              <p>{text.generalDescription}</p>
             </div>
-            <fieldset className="bot-control-panel__fieldset" disabled={disabled}>
-              <div className="bot-control-general-grid">
-                {([
-                  ["public", text.publicCommands, text.globalEnabled, draft.publicCommandsEnabled],
-                  ["module", text.moduleEnabled, text.moduleDescription, draft.palworldStatusEnabled]
-                ] as const).map(([key, title, description, checked]) => (
-                  <label className="bot-control-switch-card" key={key}>
-                    <span>
-                      <strong>{title}</strong>
-                      <small>{description}</small>
-                    </span>
-                    <span className="bot-control-switch-card__control">
-                      <span className={checked ? "is-enabled" : undefined}>
-                        {checked ? text.enabledState : text.disabledState}
-                      </span>
-                      <input
-                        checked={checked}
-                        type="checkbox"
-                        onChange={(event) => setDraft({
-                          ...draft,
-                          [key === "public" ? "publicCommandsEnabled" : "palworldStatusEnabled"]:
-                            event.target.checked
-                        })}
-                      />
-                    </span>
-                  </label>
-                ))}
-              </div>
-              <div className="bot-control-announcement-policy">
-                <label className="bot-control-switch-card">
+          </div>
+          <fieldset className="bot-control-panel__fieldset" disabled={disabled}>
+            <div className="bot-control-general-grid">
+              {([
+                ["public", text.publicCommands, text.globalEnabled, draft.publicCommandsEnabled],
+                ["module", text.moduleEnabled, text.moduleDescription, draft.palworldStatusEnabled]
+              ] as const).map(([key, title, description, checked]) => (
+                <label className="bot-control-switch-card" key={key}>
                   <span>
-                    <strong>{text.announceGuildAllow}</strong>
-                    <small>{text.announceGuildAllowDescription}</small>
-                    <small>{text.announceGuildDelegation}</small>
+                    <strong>{title}</strong>
+                    <small>{description}</small>
                   </span>
                   <span className="bot-control-switch-card__control">
-                    <span className={draft.participationAnnounceEnabled ? "is-enabled" : undefined}>
-                      {draft.participationAnnounceEnabled ? text.announceAllowed : text.announceBlocked}
+                    <span className={checked ? "is-enabled" : undefined}>
+                      {checked ? text.enabledState : text.disabledState}
                     </span>
                     <input
-                      checked={draft.participationAnnounceEnabled}
+                      checked={checked}
                       type="checkbox"
                       onChange={(event) => setDraft({
                         ...draft,
-                        participationAnnounceEnabled: event.target.checked
+                        [key === "public" ? "publicCommandsEnabled" : "palworldStatusEnabled"]:
+                          event.target.checked
                       })}
                     />
                   </span>
                 </label>
-                {!draft.participationAnnounceEnabled ? (
-                  <p className="bot-control-warning" role="status">{text.announceGuildBlockedWarning}</p>
-                ) : null}
-              </div>
-              <div className="bot-control-language">
-                <div>
-                  <h4>{text.locale}</h4>
-                  <p>{text.localeDescription}</p>
-                </div>
-                <div className="bot-control-language__grid">
-                  {([
-                    ["auto", "AUTO", text.localeAuto],
-                    ["ko", "KO", text.localeKo],
-                    ["ja", "JA", text.localeJa],
-                    ["en", "EN", text.localeEn]
-                  ] as const).map(([value, code, label]) => (
-                    <label
-                      className={`bot-control-language__option${draft.preferredLocale === value ? " is-selected" : ""}`}
-                      key={value}
-                    >
-                      <input
-                        checked={draft.preferredLocale === value}
-                        name="bot-control-locale"
-                        type="radio"
-                        value={value}
-                        onChange={() => setDraft({ ...draft, preferredLocale: value })}
-                      />
-                      <span>{code}</span>
-                      <strong>{label}</strong>
-                      <i aria-hidden="true">✓</i>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            </fieldset>
-          </section>
-        ) : null}
-
-        {activeTab === "commands" ? (
-          <section
-            aria-labelledby="bot-control-tab-commands"
-            className="bot-control-panel"
-            id="bot-control-panel-commands"
-            role="tabpanel"
-          >
-            <div className="bot-control-panel__heading">
-              <div>
-                <h3>{text.commandsTitle}</h3>
-                <p>{text.commandsDescription}</p>
-              </div>
-              <Badge>{effectiveActiveCommandCount}{text.activeCount}</Badge>
+              ))}
             </div>
-            <fieldset className="bot-control-panel__fieldset" disabled={disabled}>
-              <div className="bot-control-command-table-wrap">
-                <table className="bot-control-command-table">
-                  <thead>
-                    <tr>
-                      <th scope="col">{text.commandColumn}</th>
-                      <th scope="col">{text.descriptionColumn}</th>
-                      <th scope="col">{text.permissionColumn}</th>
-                      <th scope="col">{text.stateColumn}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {([
-                      ["statusCommandEnabled", "!yoro status", text.statusCommandDescription],
-                      ["guideCommandEnabled", "!yoro guide", text.guideCommandDescription],
-                      ["playerCommandEnabled", "!yoro player", text.playerCommandDescription]
-                    ] as const).map(([key, command, description]) => (
-                      <tr className={draft[key] ? "is-enabled" : undefined} key={key}>
-                        <th data-label={text.commandColumn} scope="row"><code>{command}</code></th>
-                        <td data-label={text.descriptionColumn}>{description}</td>
-                        <td data-label={text.permissionColumn}><Badge>{text.serverMemberPermission}</Badge></td>
-                        <td data-label={text.stateColumn}>
-                          <label className="bot-control-command-toggle">
-                            <span className={draft[key] ? "is-enabled" : undefined}>
-                              {draft[key] ? text.enabledState : text.disabledState}
-                            </span>
-                            <input
-                              aria-label={`${command}: ${draft[key] ? text.enabledState : text.disabledState}`}
-                              checked={draft[key]}
-                              type="checkbox"
-                              onChange={(event) => setDraft({ ...draft, [key]: event.target.checked })}
-                            />
-                          </label>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </fieldset>
-            <p className="bot-control-note" role="note">{text.privateCommandNotice}</p>
-          </section>
-        ) : null}
-
-        {activeTab === "preview" ? (
-          <section
-            aria-labelledby="bot-control-tab-preview"
-            className="bot-control-panel"
-            id="bot-control-panel-preview"
-            role="tabpanel"
-          >
-            <div className="bot-control-panel__heading">
-              <div>
-                <h3>{text.previewTitle}</h3>
-                <p>{text.previewDescription}</p>
-              </div>
-              <Badge>{text.previewExample}</Badge>
+            <div className="bot-control-announcement-policy">
+              <label className="bot-control-switch-card">
+                <span>
+                  <strong>{text.announceGuildAllow}</strong>
+                  <small>{text.announceGuildAllowDescription}</small>
+                  <small>{text.announceGuildDelegation}</small>
+                </span>
+                <span className="bot-control-switch-card__control">
+                  <span className={draft.participationAnnounceEnabled ? "is-enabled" : undefined}>
+                    {draft.participationAnnounceEnabled ? text.announceAllowed : text.announceBlocked}
+                  </span>
+                  <input
+                    checked={draft.participationAnnounceEnabled}
+                    type="checkbox"
+                    onChange={(event) => setDraft({
+                      ...draft,
+                      participationAnnounceEnabled: event.target.checked
+                    })}
+                  />
+                </span>
+              </label>
+              {!draft.participationAnnounceEnabled ? (
+                <p className="bot-control-warning" role="status">{text.announceGuildBlockedWarning}</p>
+              ) : null}
             </div>
-            <div className="bot-control-preview-workspace">
-              <fieldset className="bot-control-preview-settings" disabled={disabled}>
-                <legend>{text.previewSettingsTitle}</legend>
-                <p>{text.previewSettingsDescription}</p>
+            <div className="bot-control-language">
+              <div>
+                <h4>{text.locale}</h4>
+                <p>{text.localeDescription}</p>
+              </div>
+              <div className="bot-control-language__grid">
                 {([
-                  ["players", text.players],
-                  ["version", text.version],
-                  ["latency", text.latency],
-                  ["observedAt", text.observedAt]
-                ] as const).map(([key, label]) => (
-                  <label className="bot-control-preview-option" key={key}>
-                    <span>{label}</span>
+                  ["auto", "AUTO", text.localeAuto],
+                  ["ko", "KO", text.localeKo],
+                  ["ja", "JA", text.localeJa],
+                  ["en", "EN", text.localeEn]
+                ] as const).map(([value, code, label]) => (
+                  <label
+                    className={`bot-control-language__option${draft.preferredLocale === value ? " is-selected" : ""}`}
+                    key={value}
+                  >
                     <input
-                      checked={draft.statusFields[key]}
-                      type="checkbox"
-                      onChange={(event) => setDraft({
-                        ...draft,
-                        statusFields: { ...draft.statusFields, [key]: event.target.checked }
-                      })}
+                      checked={draft.preferredLocale === value}
+                      name="bot-control-locale"
+                      type="radio"
+                      value={value}
+                      onChange={() => setDraft({ ...draft, preferredLocale: value })}
                     />
+                    <span>{code}</span>
+                    <strong>{label}</strong>
+                    <i aria-hidden="true">✓</i>
                   </label>
                 ))}
-              </fieldset>
-              <div className="bot-control-discord-preview">
-                <div className="bot-control-preview-tabs" role="tablist" aria-label={text.previewTitle}>
+              </div>
+            </div>
+          </fieldset>
+        </section>
+      ) : null}
+
+      {activeTab === "commands" ? (
+        <section
+          aria-labelledby="bot-control-tab-commands"
+          className="bot-control-panel"
+          id="bot-control-panel-commands"
+          role="tabpanel"
+        >
+          <div className="bot-control-panel__heading">
+            <div>
+              <h3>{text.commandsTitle}</h3>
+              <p>{text.commandsDescription}</p>
+            </div>
+            <Badge>{effectiveActiveCommandCount}{text.activeCount}</Badge>
+          </div>
+          <fieldset className="bot-control-panel__fieldset" disabled={disabled}>
+            <div className="bot-control-command-table-wrap">
+              <table className="bot-control-command-table">
+                <thead>
+                  <tr>
+                    <th scope="col">{text.commandColumn}</th>
+                    <th scope="col">{text.descriptionColumn}</th>
+                    <th scope="col">{text.permissionColumn}</th>
+                    <th scope="col">{text.stateColumn}</th>
+                  </tr>
+                </thead>
+                <tbody>
                   {([
-                    ["status", text.previewStatusTab],
-                    ["guide", text.previewGuideTab],
-                    ["player", text.previewPlayerTab]
-                  ] as const).map(([value, label]) => (
-                    <button
-                      aria-controls="bot-control-preview-surface"
-                      aria-selected={previewCommand === value}
-                      className={previewCommand === value ? "is-active" : undefined}
-                      key={value}
-                      role="tab"
-                      type="button"
-                      onClick={() => setPreviewCommand(value)}
-                    >
-                      {label}
-                    </button>
+                    ["statusCommandEnabled", "!yoro status", text.statusCommandDescription],
+                    ["guideCommandEnabled", "!yoro guide", text.guideCommandDescription],
+                    ["playerCommandEnabled", "!yoro player", text.playerCommandDescription]
+                  ] as const).map(([key, command, description]) => (
+                    <tr className={draft[key] ? "is-enabled" : undefined} key={key}>
+                      <th data-label={text.commandColumn} scope="row"><code>{command}</code></th>
+                      <td data-label={text.descriptionColumn}>{description}</td>
+                      <td data-label={text.permissionColumn}><Badge>{text.serverMemberPermission}</Badge></td>
+                      <td data-label={text.stateColumn}>
+                        <label className="bot-control-command-toggle">
+                          <span className={draft[key] ? "is-enabled" : undefined}>
+                            {draft[key] ? text.enabledState : text.disabledState}
+                          </span>
+                          <input
+                            aria-label={`${command}: ${draft[key] ? text.enabledState : text.disabledState}`}
+                            checked={draft[key]}
+                            type="checkbox"
+                            onChange={(event) => setDraft({ ...draft, [key]: event.target.checked })}
+                          />
+                        </label>
+                      </td>
+                    </tr>
                   ))}
+                </tbody>
+              </table>
+            </div>
+          </fieldset>
+          <p className="bot-control-note" role="note">{text.privateCommandNotice}</p>
+        </section>
+      ) : null}
+
+      {activeTab === "preview" ? (
+        <section
+          aria-labelledby="bot-control-tab-preview"
+          className="bot-control-panel"
+          id="bot-control-panel-preview"
+          role="tabpanel"
+        >
+          <div className="bot-control-panel__heading">
+            <div>
+              <h3>{text.previewTitle}</h3>
+              <p>{text.previewDescription}</p>
+            </div>
+            <Badge>{text.previewExample}</Badge>
+          </div>
+          <div className="bot-control-preview-workspace">
+            <fieldset className="bot-control-preview-settings" disabled={disabled}>
+              <legend>{text.previewSettingsTitle}</legend>
+              <p>{text.previewSettingsDescription}</p>
+              {([
+                ["players", text.players],
+                ["version", text.version],
+                ["latency", text.latency],
+                ["observedAt", text.observedAt]
+              ] as const).map(([key, label]) => (
+                <label className="bot-control-preview-option" key={key}>
+                  <span>{label}</span>
+                  <input
+                    checked={draft.statusFields[key]}
+                    type="checkbox"
+                    onChange={(event) => setDraft({
+                      ...draft,
+                      statusFields: { ...draft.statusFields, [key]: event.target.checked }
+                    })}
+                  />
+                </label>
+              ))}
+            </fieldset>
+            <div className="bot-control-discord-preview">
+              <div className="bot-control-preview-tabs" role="tablist" aria-label={text.previewTitle}>
+                {([
+                  ["status", text.previewStatusTab],
+                  ["guide", text.previewGuideTab],
+                  ["player", text.previewPlayerTab]
+                ] as const).map(([value, label]) => (
+                  <button
+                    aria-controls="bot-control-preview-surface"
+                    aria-selected={previewCommand === value}
+                    className={previewCommand === value ? "is-active" : undefined}
+                    key={value}
+                    role="tab"
+                    type="button"
+                    onClick={() => setPreviewCommand(value)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <div className="bot-control-discord-shell" id="bot-control-preview-surface">
+                <div className="bot-control-discord-shell__channel">
+                  <span aria-hidden="true">#</span> {text.previewChannel}
                 </div>
-                <div className="bot-control-discord-shell" id="bot-control-preview-surface">
-                  <div className="bot-control-discord-shell__channel">
-                    <span aria-hidden="true">#</span> {text.previewChannel}
-                  </div>
-                  <div className="bot-control-discord-message">
-                    <span aria-hidden="true" className="bot-control-discord-avatar">Y</span>
-                    <div>
-                      <div className="bot-control-discord-author">
-                        <strong>YORO Bot</strong><span>BOT</span><time>16:42</time>
-                      </div>
-                      <div className="bot-control-preview__embed">
-                        {previewCommand === "status" ? (
-                          <>
-                            <strong>{preview.statusTitle}</strong>
-                            <span>{text.previewServer}</span>
-                            <dl>
-                              <div><dt>{preview.fields.status}</dt><dd>{preview.states.online}</dd></div>
-                              {draft.statusFields.players ? <div><dt>{preview.fields.players}</dt><dd>4 / 32</dd></div> : null}
-                              {draft.statusFields.version ? <div><dt>{preview.fields.version}</dt><dd>v1.0.2</dd></div> : null}
-                              {draft.statusFields.latency ? <div><dt>{preview.fields.latency}</dt><dd>42ms</dd></div> : null}
-                              {draft.statusFields.observedAt ? (
-                                <div>
-                                  <dt>{preview.fields.observedAt}</dt>
-                                  <dd>{previewLocale === "ja" ? "たった今" : previewLocale === "en" ? "Just now" : "방금 전"}</dd>
-                                </div>
-                              ) : null}
-                            </dl>
-                          </>
-                        ) : null}
-                        {previewCommand === "guide" ? (
-                          <>
-                            <strong>{preview.guideTitle}</strong>
-                            <p>{text.previewGuideBody}</p>
-                            <span className="bot-control-preview__button">{preview.guideButton}</span>
-                          </>
-                        ) : null}
-                        {previewCommand === "player" ? (
-                          <>
-                            <span className="bot-control-preview__kicker">PALWORLD PLAYER CARD</span>
-                            <strong>{preview.playerCardTitle}</strong>
-                            <div className="bot-control-preview__player">
-                              <span aria-hidden="true">80</span>
-                              <div><strong>{text.previewPlayerName}</strong><small>{text.previewPlayerLevel}</small></div>
-                            </div>
-                          </>
-                        ) : null}
-                      </div>
+                <div className="bot-control-discord-message">
+                  <span aria-hidden="true" className="bot-control-discord-avatar">Y</span>
+                  <div>
+                    <div className="bot-control-discord-author">
+                      <strong>YORO Bot</strong><span>BOT</span><time>16:42</time>
+                    </div>
+                    <div className="bot-control-preview__embed">
+                      {previewCommand === "status" ? (
+                        <>
+                          <strong>{preview.statusTitle}</strong>
+                          <span>{text.previewServer}</span>
+                          <dl>
+                            <div><dt>{preview.fields.status}</dt><dd>{preview.states.online}</dd></div>
+                            {draft.statusFields.players ? <div><dt>{preview.fields.players}</dt><dd>4 / 32</dd></div> : null}
+                            {draft.statusFields.version ? <div><dt>{preview.fields.version}</dt><dd>v1.0.2</dd></div> : null}
+                            {draft.statusFields.latency ? <div><dt>{preview.fields.latency}</dt><dd>42ms</dd></div> : null}
+                            {draft.statusFields.observedAt ? (
+                              <div>
+                                <dt>{preview.fields.observedAt}</dt>
+                                <dd>{previewLocale === "ja" ? "たった今" : previewLocale === "en" ? "Just now" : "방금 전"}</dd>
+                              </div>
+                            ) : null}
+                          </dl>
+                        </>
+                      ) : null}
+                      {previewCommand === "guide" ? (
+                        <>
+                          <strong>{preview.guideTitle}</strong>
+                          <p>{text.previewGuideBody}</p>
+                          <span className="bot-control-preview__button">{preview.guideButton}</span>
+                        </>
+                      ) : null}
+                      {previewCommand === "player" ? (
+                        <>
+                          <span className="bot-control-preview__kicker">PALWORLD PLAYER CARD</span>
+                          <strong>{preview.playerCardTitle}</strong>
+                          <div className="bot-control-preview__player">
+                            <span aria-hidden="true">80</span>
+                            <div><strong>{text.previewPlayerName}</strong><small>{text.previewPlayerLevel}</small></div>
+                          </div>
+                        </>
+                      ) : null}
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </section>
-        ) : null}
-
-        {activeTab === "advanced" ? (
-          <section
-            aria-labelledby="bot-control-tab-advanced"
-            className="bot-control-panel"
-            id="bot-control-panel-advanced"
-            role="tabpanel"
-          >
-            <div className="bot-control-panel__heading">
-              <div>
-                <h3>{text.advancedTitle}</h3>
-                <p>{text.advancedDescription}</p>
-              </div>
-            </div>
-            <fieldset className="bot-control-panel__fieldset" disabled={disabled}>
-              <label className="bot-control-switch-card">
-                <span>
-                  <strong>{text.deleteInvocation}</strong>
-                  <small>{text.deleteInvocationDescription}</small>
-                </span>
-                <span className="bot-control-switch-card__control">
-                  <span className={draft.deleteInvocationAfterReply ? "is-enabled" : undefined}>
-                    {draft.deleteInvocationAfterReply ? text.enabledState : text.disabledState}
-                  </span>
-                  <input
-                    checked={draft.deleteInvocationAfterReply}
-                    type="checkbox"
-                    onChange={(event) => setDraft({
-                      ...draft,
-                      deleteInvocationAfterReply: event.target.checked
-                    })}
-                  />
-                </span>
-              </label>
-            </fieldset>
-          </section>
-        ) : null}
-
-        {!writable ? <p className="bot-control-read-only">{text.readOnly}</p> : null}
-        <div
-          aria-live="polite"
-          className={`bot-control-footer${hasChanges ? " is-pending" : ""}`}
-        >
-          <div>
-            <small>{text.revision}: {overview.settings.revision}</small>
-            <strong className={hasChanges ? "is-pending" : undefined}>
-              {writable
-                ? hasChanges ? text.pendingState : text.savedState
-                : text.readOnlyState}
-            </strong>
           </div>
-          {writable ? (
-            <div className="bot-control-footer__actions">
-              <Button
-                disabled={!hasChanges || saving}
-                type="button"
-                variant="secondary"
-                onClick={resetDraft}
-              >
-                {text.reset}
-              </Button>
-              <Button
-                disabled={!hasChanges}
-                loading={saving}
-                loadingLabel={text.saving}
-                type="button"
-                onClick={() => void save()}
-              >
-                {text.save}
-              </Button>
+        </section>
+      ) : null}
+
+      {activeTab === "advanced" ? (
+        <section
+          aria-labelledby="bot-control-tab-advanced"
+          className="bot-control-panel"
+          id="bot-control-panel-advanced"
+          role="tabpanel"
+        >
+          <div className="bot-control-panel__heading">
+            <div>
+              <h3>{text.advancedTitle}</h3>
+              <p>{text.advancedDescription}</p>
             </div>
-          ) : null}
+          </div>
+          <fieldset className="bot-control-panel__fieldset" disabled={disabled}>
+            <label className="bot-control-switch-card">
+              <span>
+                <strong>{text.deleteInvocation}</strong>
+                <small>{text.deleteInvocationDescription}</small>
+              </span>
+              <span className="bot-control-switch-card__control">
+                <span className={draft.deleteInvocationAfterReply ? "is-enabled" : undefined}>
+                  {draft.deleteInvocationAfterReply ? text.enabledState : text.disabledState}
+                </span>
+                <input
+                  checked={draft.deleteInvocationAfterReply}
+                  type="checkbox"
+                  onChange={(event) => setDraft({
+                    ...draft,
+                    deleteInvocationAfterReply: event.target.checked
+                  })}
+                />
+              </span>
+            </label>
+          </fieldset>
+        </section>
+      ) : null}
+
+      {!writable ? <p className="bot-control-read-only">{text.readOnly}</p> : null}
+      {/* 저장 줄 — 카드 내부 꼬리가 아니라 화면 흐름의 마지막 독립 블록입니다. */}
+      <div
+        aria-live="polite"
+        className={`bot-control-footer${hasChanges ? " is-pending" : ""}`}
+      >
+        <div>
+          <small>{text.revision}: {overview.settings.revision}</small>
+          <strong className={hasChanges ? "is-pending" : undefined}>
+            {writable
+              ? hasChanges ? text.pendingState : text.savedState
+              : text.readOnlyState}
+          </strong>
         </div>
-        {error ? <p className="bot-management-error" role="alert">{error}</p> : null}
-        <p className="sr-only" aria-live="polite">{announcement}</p>
-      </CardContent>
-    </Card>
+        {writable ? (
+          <div className="bot-control-footer__actions">
+            <Button
+              disabled={!hasChanges || saving}
+              type="button"
+              variant="secondary"
+              onClick={resetDraft}
+            >
+              {text.reset}
+            </Button>
+            <Button
+              disabled={!hasChanges}
+              loading={saving}
+              loadingLabel={text.saving}
+              type="button"
+              onClick={() => void save()}
+            >
+              {text.save}
+            </Button>
+          </div>
+        ) : null}
+      </div>
+      {error ? <p className="bot-management-error" role="alert">{error}</p> : null}
+      <p className="sr-only" aria-live="polite">{announcement}</p>
+    </section>
   );
 }

@@ -44,7 +44,9 @@ test("YORO Bot 소개 페이지는 서비스형 Hero와 4개 독립 페이지 �
   assert.match(markup, /게임 서버 운영을/u);
   assert.match(markup, /더 간단하게/u);
   assert.match(markup, /YORO Bot으로 할 수 있는 것/u);
-  assert.match(markup, /Discord에서 보이는 화면/u);
+  /* 리디자인(2026-08-19): 히어로 Embed 와 같은 내용을 두 번 보여주던
+     "Discord에서 보이는 화면" 별도 섹션은 제거했습니다 — 프리뷰는 히어로 1곳. */
+  assert.doesNotMatch(markup, /Discord에서 보이는 화면/u);
   assert.match(markup, /예시 데이터/u);
   assert.match(markup, /실제 값은 등록된 서버의 REST 응답에 따라 달라집니다/u);
   assert.match(markup, /보안 중심 설계/u);

@@ -1,0 +1,1714 @@
+@layer pages {
+  /* YORO Bot 공개 4페이지 리디자인 — 목업 docs/mockups/discord-console (PublicBot·
+   * GettingStarted·Commands·GameFiles 아트보드)의 실제 반영.
+   *
+   * 2026-08-19 실측에서 확인한 결함을 고칩니다.
+   *  - 섹션 리듬: padding 72/64/48/0 · radius 20/16/0 · 배경 4종 혼재 → 56px / 16px 한 벌
+   *  - 제목 위계: h1 68/64/70.4px(사용방법은 h1 없음) · h2 48px 6회 반복
+   *    → 랜딩 h1 52px · 하위 40px · h2 32px · 카드 h3 15px
+   *  - 히어로 CTA 세로 쌓임(폭 253/158) → 한 줄 48px 통일
+   *  - 한국어 어절 끊김("게임 서 / 버") → keep-all
+   *  - 명령어 상세 3열(상세 322px, "확인합 / 니다") → 미리보기를 상세 안 2열로
+   *  - 게임파일 48개 설정 큰 카드 2열 7549px → 3열 압축 + 저장 동선 하단 고정
+   *
+   * 지면(#11141b)·푸터 결함은 legacy 원본(02-legacy·03-product-gray·05-overrides·
+   * 16-yoro-bot)에서 고쳤습니다 — !important 는 legacy layer 가 pages 를 이기므로
+   * 여기서는 덮을 수 없습니다. */
+
+  /* ── 공통: 폭·리듬·타이포 ─────────────────────────────────── */
+
+  .public-bot-main {
+    width: min(100% - 3rem, 72rem);
+    padding-block: 0 3.5rem;
+  }
+
+  .public-bot-main h1,
+  .public-bot-main h2,
+  .public-bot-main h3,
+  .public-bot-main summary,
+  .public-bot-main dt {
+    word-break: keep-all;
+  }
+
+  .public-bot-section,
+  .public-bot-message-showcase,
+  .public-bot-next,
+  .public-bot-final-cta,
+  .public-bot-page-section {
+    margin: 0;
+    padding: 3.5rem 0 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+  }
+
+  .public-bot-section + .public-bot-section,
+  .public-bot-section + .public-bot-next,
+  .public-bot-next + .public-bot-final-cta {
+    margin-top: 3.5rem;
+    border-top: 1px solid rgba(255, 255, 255, .06);
+  }
+
+  .public-bot-section__heading {
+    max-width: 44rem;
+    margin: 0 auto 1.75rem;
+    text-align: center;
+  }
+
+  .public-bot-section__heading > span,
+  .public-bot-next > .public-bot-section__heading > span {
+    display: block;
+    margin: 0;
+    color: var(--bot-violet);
+    font-size: .6875rem;
+    font-weight: 900;
+    letter-spacing: .1em;
+  }
+
+  .public-bot-section__heading h1,
+  .public-bot-section__heading h2,
+  .public-bot-next h2 {
+    margin: .5rem 0 0;
+    font-size: clamp(1.5rem, 2.4vw, 2rem);
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -.02em;
+  }
+
+  .public-bot-section__heading p,
+  .public-bot-next p {
+    max-width: none;
+    margin: .5rem 0 0;
+    color: var(--bot-muted);
+    font-size: .9rem;
+    line-height: 1.65;
+    text-wrap: pretty;
+  }
+
+  /* 버튼 — 랜딩 CTA 는 48px 한 벌. 폭이 제각각이던 primary/secondary 를 같은 문법으로. */
+  .public-bot-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .625rem;
+  }
+
+  .public-bot-button {
+    min-height: 3rem;
+    padding: 0 1.25rem;
+    border: 1px solid var(--bot-border-strong);
+    border-radius: .625rem;
+    display: inline-flex;
+    gap: .5rem;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: var(--bot-text);
+    font-size: .875rem;
+    font-weight: 800;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+
+  .public-bot-button.is-primary {
+    border-color: transparent;
+    background: linear-gradient(135deg, var(--bot-blue), var(--bot-violet));
+    color: #fff;
+  }
+
+  .public-bot-button .discord-symbol-icon {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  /* ── 랜딩 히어로 ─────────────────────────────────────────── */
+
+  .public-bot-hero {
+    margin: 0;
+    padding: 4rem 0 2.5rem;
+    border: 0;
+    border-radius: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.02fr);
+    gap: 3rem;
+    align-items: center;
+    background: none;
+  }
+
+  .public-bot-hero::before,
+  .public-bot-hero::after {
+    content: none;
+  }
+
+  .public-bot-hero__copy {
+    margin: 0;
+    max-width: none;
+    text-align: left;
+  }
+
+  .public-bot-hero .public-bot-eyebrow {
+    display: block;
+    color: var(--bot-violet);
+    font-size: .6875rem;
+    font-weight: 900;
+    letter-spacing: .1em;
+  }
+
+  .public-bot-hero h1,
+  .public-bot-hero h1.is-ja {
+    margin: .75rem 0 0;
+    font-size: clamp(2.1rem, 3.6vw, 3.25rem);
+    font-weight: 800;
+    line-height: 1.16;
+    letter-spacing: -.03em;
+    text-wrap: balance;
+  }
+
+  .public-bot-hero h1 span,
+  .public-bot-hero h1 strong {
+    display: inline;
+    font-size: inherit;
+    line-height: inherit;
+  }
+
+  .public-bot-hero h1 strong {
+    color: var(--yoro-color-brand-on-dark, #9b90ff);
+  }
+
+  .public-bot-hero__copy > p {
+    max-width: 30rem;
+    margin: 1rem 0 0;
+    color: var(--bot-muted);
+    font-size: .9375rem;
+    line-height: 1.7;
+  }
+
+  .public-bot-hero__visual {
+    display: grid;
+    gap: 0;
+  }
+
+  /* 신뢰 문구 — 히어로 밖 전체 폭 한 줄(중복 칩 3개는 마크업에서 제거했습니다). */
+  .public-bot-trust-row {
+    margin: .5rem 0 0;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, .06);
+    display: flex;
+    flex-wrap: wrap;
+    gap: .375rem 1.5rem;
+    justify-content: center;
+    color: var(--bot-muted);
+    font-size: .78rem;
+  }
+
+  .public-bot-trust-row > span {
+    display: inline-flex;
+    gap: .375rem;
+    align-items: center;
+  }
+
+  .public-bot-trust-row > span > span {
+    color: var(--bot-green);
+    font-weight: 900;
+  }
+
+  /* ── 기능 3장 — 고정 높이 240px 를 풀고 내용 높이로. ─────────── */
+
+  .public-bot-feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+    gap: .75rem;
+    align-items: start;
+  }
+
+  .public-bot-feature,
+  .public-bot-feature.is-ready {
+    min-height: 0;
+    padding: 1.25rem;
+    border: 1px solid var(--bot-border);
+    border-radius: .875rem;
+    display: grid;
+    gap: .625rem;
+    align-content: start;
+    background: var(--bot-card);
+    box-shadow: none;
+  }
+
+  .public-bot-feature__icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid color-mix(in srgb, var(--bot-violet) 30%, transparent);
+    border-radius: .6875rem;
+    display: grid;
+    place-items: center;
+    background: color-mix(in srgb, var(--bot-violet) 12%, transparent);
+    color: var(--yoro-color-brand-on-dark, #9b90ff);
+  }
+
+  .public-bot-feature h3 {
+    margin: 0;
+    font-size: .9375rem;
+    font-weight: 800;
+  }
+
+  .public-bot-feature p {
+    margin: 0;
+    color: var(--bot-muted);
+    font-size: .8125rem;
+    line-height: 1.6;
+  }
+
+  .public-bot-feature__status {
+    order: 5;
+    justify-self: start;
+    padding: .1875rem .5rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bot-green) 20%, transparent);
+    color: var(--bot-green);
+    font-size: .6875rem;
+    font-weight: 800;
+  }
+
+  /* ── 설치 5단계(랜딩) — 가로 5칸 카드. ───────────────────────── */
+
+  .public-bot-install ol {
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: .5rem;
+    list-style: none;
+  }
+
+  .public-bot-install ol li {
+    min-width: 0;
+    padding: 1rem .875rem;
+    border: 1px solid var(--bot-border);
+    border-radius: .75rem;
+    display: grid;
+    gap: .5rem;
+    background: var(--bot-card);
+  }
+
+  .public-bot-install ol li > span {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: color-mix(in srgb, var(--bot-violet) 18%, transparent);
+    color: var(--yoro-color-brand-on-dark, #9b90ff);
+    font-size: .6875rem;
+    font-weight: 900;
+  }
+
+  .public-bot-install ol li > strong {
+    font-size: .8125rem;
+    font-weight: 800;
+    line-height: 1.45;
+  }
+
+  .public-bot-install > .public-bot-text-link {
+    margin: 1.125rem auto 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  /* ── 명령어 미리보기(랜딩) — 카드 배경 대신 2열 섹션. ────────── */
+
+  .public-bot-command-preview {
+    padding: 3.5rem 0 0;
+    border: 0;
+    border-radius: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    gap: 2rem;
+    align-items: center;
+    background: none;
+  }
+
+  .public-bot-command-preview__copy {
+    max-width: none;
+  }
+
+  .public-bot-command-preview__copy h2 {
+    margin: .5rem 0 0;
+    font-size: clamp(1.5rem, 2.4vw, 2rem);
+    letter-spacing: -.02em;
+  }
+
+  .public-bot-command-preview__copy p {
+    margin: .5rem 0 0;
+    color: var(--bot-muted);
+    font-size: .9rem;
+    line-height: 1.65;
+  }
+
+  .public-bot-command-preview__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .5rem;
+  }
+
+  .public-bot-command-preview__list code {
+    padding: .75rem .875rem;
+    border: 1px solid var(--bot-border);
+    border-radius: .625rem;
+    background: var(--bot-card);
+    color: var(--bot-text);
+    font-size: .8125rem;
+    font-weight: 700;
+  }
+
+  /* ── 보안 — 카드형 배경은 이 섹션과 최종 CTA 두 곳만 남깁니다. ── */
+
+  .public-bot-security {
+    padding: 2.5rem;
+    border: 1px solid var(--bot-border);
+    border-radius: 1rem;
+    background: var(--bot-card-subtle);
+  }
+
+  .public-bot-security .public-bot-section__heading {
+    margin-bottom: 1.5rem;
+  }
+
+  .public-bot-security__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .625rem;
+  }
+
+  .public-bot-security__grid article {
+    min-width: 0;
+    margin: 0;
+    padding: .875rem 1rem;
+    border: 1px solid var(--bot-border);
+    border-radius: .75rem;
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+    gap: .75rem;
+    align-items: start;
+    background: var(--bot-card);
+  }
+
+  .public-bot-security__grid article > span {
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid color-mix(in srgb, var(--bot-violet) 30%, transparent);
+    border-radius: .625rem;
+    display: grid;
+    place-items: center;
+    background: color-mix(in srgb, var(--bot-violet) 12%, transparent);
+    color: var(--yoro-color-brand-on-dark, #9b90ff);
+  }
+
+  .public-bot-security__grid h3 {
+    margin: 0;
+    font-size: .8125rem;
+    font-weight: 800;
+  }
+
+  .public-bot-security__grid article p {
+    margin: .25rem 0 0;
+    color: var(--bot-muted);
+    font-size: .75rem;
+    line-height: 1.55;
+  }
+
+  /* ── 로드맵 — 두 카드. ───────────────────────────────────── */
+
+  .public-bot-next {
+    padding-top: 3.5rem;
+  }
+
+  .public-bot-roadmap-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .75rem;
+  }
+
+  .public-bot-roadmap-grid article {
+    min-width: 0;
+    padding: 1.25rem;
+    border: 1px solid var(--bot-border);
+    border-radius: .875rem;
+    background: var(--bot-card);
+  }
+
+  .public-bot-roadmap-grid article.is-current {
+    border-color: color-mix(in srgb, var(--bot-green) 40%, transparent);
+  }
+
+  .public-bot-roadmap-grid h3 {
+    margin: 0;
+    font-size: .9375rem;
+    font-weight: 800;
+  }
+
+  .public-bot-roadmap-grid ul {
+    margin: .625rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: .125rem;
+    list-style: none;
+  }
+
+  .public-bot-roadmap-grid li {
+    min-height: 2.5rem;
+    display: grid;
+    grid-template-columns: 1rem minmax(0, 1fr);
+    gap: .625rem;
+    align-items: center;
+    color: var(--bot-muted);
+    font-size: .8125rem;
+  }
+
+  .public-bot-roadmap-grid .is-current li > span {
+    color: var(--bot-green);
+    font-weight: 900;
+  }
+
+  .public-bot-roadmap-grid article:not(.is-current) li {
+    color: color-mix(in srgb, var(--bot-muted) 78%, var(--bot-canvas));
+  }
+
+  /* ── 최종 CTA. ───────────────────────────────────────────── */
+
+  .public-bot-final-cta {
+    margin-top: 3.5rem;
+    padding: 2.25rem 2.5rem;
+    border: 1px solid color-mix(in srgb, var(--bot-violet) 38%, transparent);
+    border-radius: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    align-items: center;
+    justify-content: space-between;
+    background:
+      linear-gradient(120deg, color-mix(in srgb, var(--bot-blue) 14%, transparent), color-mix(in srgb, var(--bot-violet) 16%, transparent)),
+      var(--bot-card-subtle);
+    text-align: left;
+  }
+
+  .public-bot-final-cta > div:first-child {
+    min-width: 0;
+    max-width: 34rem;
+  }
+
+  .public-bot-final-cta h2 {
+    margin: 0;
+    font-size: clamp(1.3rem, 2vw, 1.625rem);
+    font-weight: 700;
+    letter-spacing: -.02em;
+  }
+
+  .public-bot-final-cta p {
+    margin: .5rem 0 0;
+    color: var(--bot-muted);
+    font-size: .875rem;
+  }
+
+  .public-bot-final-cta > div:last-child {
+    display: flex;
+    flex: none;
+    flex-wrap: wrap;
+    gap: .625rem;
+    justify-content: flex-start;
+  }
+
+  /* ── 헤더 CTA — 버튼 안 줄바꿈("…YORO Bot 추 / 가") 금지. ─────── */
+
+  .public-bot-header-cta {
+    white-space: nowrap;
+  }
+
+  .public-bot-header-cta strong {
+    white-space: nowrap;
+  }
+
+  /* ── 하위 페이지 공통: 페이지 히어로(h1 40px)·FAQ 카드. ───────── */
+
+  .public-bot-page-hero,
+  .public-bot-command-docs__hero,
+  .palworld-settings-page__header {
+    margin: 0;
+    padding: 2.75rem 0 2rem;
+    border: 0;
+    border-radius: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1.5rem;
+    align-items: end;
+    background: none;
+    text-align: left;
+  }
+
+  .public-bot-command-docs__tools {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+  }
+
+  .public-bot-page-hero > div,
+  .public-bot-command-docs__hero > div {
+    min-width: 0;
+  }
+
+  .public-bot-page-hero .public-bot-eyebrow,
+  .public-bot-command-docs__hero span,
+  .palworld-settings-page__header .public-bot-eyebrow {
+    display: block;
+    color: var(--bot-violet);
+    font-size: .6875rem;
+    font-weight: 900;
+    letter-spacing: .1em;
+  }
+
+  .public-bot-page-hero h1,
+  .public-bot-command-docs__hero h1,
+  .palworld-settings-page__header h1 {
+    margin: .625rem 0 0;
+    font-size: clamp(1.8rem, 2.8vw, 2.5rem);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -.03em;
+  }
+
+  .public-bot-page-hero p,
+  .public-bot-command-docs__hero p,
+  .palworld-settings-page__header p {
+    max-width: 46rem;
+    margin: .625rem 0 0;
+    color: var(--bot-muted);
+    font-size: .9rem;
+    line-height: 1.65;
+  }
+
+  .public-bot-command-docs__hero small {
+    display: block;
+    margin-top: .5rem;
+    color: color-mix(in srgb, var(--bot-muted) 82%, var(--bot-canvas));
+    font-size: .78rem;
+  }
+
+  .public-bot-page-hero > .public-bot-button,
+  .public-bot-command-docs__hero > .public-bot-button {
+    flex: none;
+  }
+
+  .public-bot-faq {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    border: 1px solid var(--bot-border);
+    border-radius: 1rem;
+    /* legacy 가 min-height: 528px 를 강제해 카드 아래 ~280px 이 비었습니다(실측). */
+    min-height: 0;
+    background: var(--bot-card-subtle);
+  }
+
+  .public-bot-faq > h2 {
+    margin: 0 0 .875rem;
+    font-size: 1.125rem;
+    font-weight: 800;
+  }
+
+  .public-bot-faq__item {
+    border-top: 1px solid rgba(255, 255, 255, .08);
+  }
+
+  .public-bot-faq__item:first-of-type {
+    border-top: 0;
+  }
+
+  .public-bot-faq__item summary {
+    padding: .75rem 0;
+    font-size: .84rem;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .public-bot-faq__item p {
+    margin: 0 0 .75rem;
+    color: var(--bot-muted);
+    font-size: .8125rem;
+    line-height: 1.65;
+  }
+
+  .public-bot-faq__note {
+    margin: .875rem 0 0;
+    color: color-mix(in srgb, var(--bot-muted) 82%, var(--bot-canvas));
+    font-size: .75rem;
+    line-height: 1.6;
+  }
+
+  /* ── 사용방법: 진행 바 하나 + 전체 폭 1열 스텝. ───────────────── */
+
+  .public-bot-onboarding {
+    padding-top: 0;
+  }
+
+  .public-bot-onboarding__progress {
+    margin: 0 0 1.25rem;
+  }
+
+  .public-bot-onboarding__progress ol {
+    margin: 0;
+    padding: .875rem 1.25rem;
+    border: 1px solid var(--bot-border);
+    border-radius: .875rem;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: .5rem;
+    list-style: none;
+    background: var(--bot-card-subtle);
+  }
+
+  .public-bot-onboarding__progress li {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 1.375rem minmax(0, 1fr);
+    gap: .5625rem;
+    align-items: center;
+  }
+
+  .public-bot-onboarding__progress li::before,
+  .public-bot-onboarding__progress li::after {
+    content: none;
+  }
+
+  .public-bot-onboarding__progress li > span {
+    width: 1.375rem;
+    height: 1.375rem;
+    border: 0;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, .08);
+    color: var(--bot-muted);
+    font-size: .65rem;
+    font-weight: 900;
+    box-shadow: none;
+  }
+
+  .public-bot-onboarding__progress li:first-child > span {
+    background: #3f6ae4;
+    color: #fff;
+  }
+
+  .public-bot-onboarding__progress li > strong {
+    overflow: hidden;
+    color: var(--bot-muted);
+    font-size: .78rem;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-break: keep-all;
+  }
+
+  .public-bot-onboarding__progress li:first-child > strong {
+    color: var(--bot-text);
+  }
+
+  .public-bot-onboarding__layout {
+    display: block;
+  }
+
+  .public-bot-onboarding__timeline {
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: .625rem;
+    list-style: none;
+  }
+
+  /* legacy 세로 타임라인 선 — 마커와 함께 제거합니다(진행 바가 위치를 말합니다). */
+  .public-bot-onboarding__timeline::before,
+  .public-bot-onboarding__timeline::after {
+    content: none;
+  }
+
+  .public-bot-onboarding__timeline > li {
+    display: block;
+    padding: 0;
+  }
+
+  .public-bot-onboarding__timeline > li::before,
+  .public-bot-onboarding__timeline > li::after {
+    content: none;
+  }
+
+  /* 왼쪽 타임라인 점 — 상단 진행 바와 같은 위치 정보를 두 번 말하던 표시. */
+  .public-bot-onboarding__marker {
+    display: none;
+  }
+
+  .public-bot-onboarding__timeline article {
+    margin: 0;
+    padding: 1.25rem;
+    border: 1px solid var(--bot-border);
+    border-radius: .875rem;
+    display: grid;
+    grid-template-columns: 2.75rem minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+    background: var(--bot-card);
+    box-shadow: none;
+  }
+
+  .public-bot-onboarding__step-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid color-mix(in srgb, var(--bot-violet) 30%, transparent);
+    border-radius: .75rem;
+    display: grid;
+    place-items: center;
+    background: color-mix(in srgb, var(--bot-violet) 12%, transparent);
+    color: var(--yoro-color-brand-on-dark, #9b90ff);
+  }
+
+  .public-bot-onboarding__step-icon .discord-symbol-icon,
+  .public-bot-onboarding__step-icon svg {
+    width: 1.375rem;
+    height: 1.375rem;
+  }
+
+  .public-bot-onboarding__step-copy {
+    display: block;
+    min-width: 0;
+  }
+
+  .public-bot-onboarding__step-copy > span {
+    color: color-mix(in srgb, var(--bot-muted) 82%, var(--bot-canvas));
+    font-size: .6875rem;
+    font-weight: 900;
+    letter-spacing: .1em;
+  }
+
+  .public-bot-onboarding__step-copy h2 {
+    margin: .375rem 0 0;
+    font-size: 1.1875rem;
+    font-weight: 800;
+    letter-spacing: -.02em;
+  }
+
+  .public-bot-onboarding__step-copy > p {
+    margin: .5rem 0 0;
+    color: var(--bot-muted);
+    font-size: .84rem;
+    line-height: 1.65;
+  }
+
+  .public-bot-onboarding__step-copy ul {
+    margin: .75rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .375rem;
+    list-style: none;
+  }
+
+  .public-bot-onboarding__step-copy ul li {
+    padding: .3125rem .625rem;
+    border: 1px solid var(--bot-border-strong);
+    border-radius: 999px;
+    display: inline-flex;
+    gap: .375rem;
+    align-items: center;
+    color: var(--bot-muted);
+    font-size: .75rem;
+    font-weight: 700;
+  }
+
+  .public-bot-onboarding__step-copy ul li > span {
+    color: var(--bot-green);
+  }
+
+  /* 완료 결과·액션 — 3번째 열로. 좁은 폭에서는 아래로 내려갑니다. */
+  .public-bot-onboarding__step-side {
+    min-width: 0;
+    display: grid;
+    gap: .75rem;
+    align-content: start;
+  }
+
+  .public-bot-onboarding__result {
+    margin: 0;
+    padding: .75rem .875rem;
+    border: 0;
+    border-left: 3px solid var(--bot-violet);
+    border-radius: .25rem .625rem .625rem .25rem;
+    display: block;
+    background: var(--bot-card-subtle);
+  }
+
+  .public-bot-onboarding__result > span {
+    display: block;
+    color: var(--yoro-color-brand-on-dark, #9b90ff);
+    font-size: .6875rem;
+    font-weight: 900;
+    letter-spacing: .06em;
+  }
+
+  .public-bot-onboarding__result > strong {
+    display: block;
+    margin-top: .3125rem;
+    color: var(--bot-muted);
+    font-size: .8125rem;
+    font-weight: 600;
+    line-height: 1.6;
+  }
+
+  .public-bot-onboarding__timeline li:last-child .public-bot-onboarding__result {
+    border-left-color: var(--bot-green);
+  }
+
+  .public-bot-onboarding__timeline li:last-child .public-bot-onboarding__result > span {
+    color: var(--bot-green);
+  }
+
+  .public-bot-onboarding__step-side .public-bot-button {
+    min-height: 2.625rem;
+    justify-self: start;
+    font-size: .8125rem;
+  }
+
+  /* 완료 미리보기 — 오른쪽 빈 사이드가 아니라 스텝 뒤 전체 폭 2열. */
+  .public-bot-onboarding__preview {
+    margin-top: 3.5rem;
+    padding: 3.5rem 0 0;
+    border-top: 1px solid rgba(255, 255, 255, .06);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    gap: .25rem 2rem;
+    /* auto 행이 프리뷰 높이만큼 stretch 되며 왼쪽 카피가 흩어졌습니다(실측 49/82/67/100px)
+       — 행을 가운데로 묶습니다. */
+    align-content: center;
+    align-items: center;
+    background: none;
+    border-radius: 0;
+  }
+
+  .public-bot-onboarding__preview > span {
+    grid-column: 1;
+    color: var(--bot-violet);
+    font-size: .6875rem;
+    font-weight: 900;
+    letter-spacing: .1em;
+  }
+
+  .public-bot-onboarding__preview > h2 {
+    grid-column: 1;
+    margin: .5rem 0 0;
+    font-size: clamp(1.5rem, 2.4vw, 2rem);
+    font-weight: 700;
+    letter-spacing: -.02em;
+  }
+
+  .public-bot-onboarding__preview > p {
+    grid-column: 1;
+    margin: .5rem 0 0;
+    color: var(--bot-muted);
+    font-size: .9rem;
+    line-height: 1.65;
+  }
+
+  .public-bot-onboarding__preview > .public-bot-discord-preview {
+    grid-column: 2;
+    grid-row: 1 / span 4;
+  }
+
+  .public-bot-onboarding__preview > .public-bot-button {
+    grid-column: 1;
+    margin-top: 1rem;
+    justify-self: start;
+  }
+
+  .public-bot-onboarding + .public-bot-faq,
+  .public-bot-command-docs + .public-bot-faq,
+  .palworld-settings-page + .public-bot-faq {
+    margin-top: 3.5rem;
+  }
+
+  .public-bot-notice {
+    margin: 1.5rem 0 0;
+    color: color-mix(in srgb, var(--bot-muted) 82%, var(--bot-canvas));
+    font-size: .78rem;
+    line-height: 1.6;
+  }
+
+  /* ── 명령어 목록: 3열 → 2열(응답 미리보기를 상세 카드 안으로). ── */
+
+  .public-bot-command-docs {
+    padding-top: 0;
+  }
+
+  .public-bot-command-docs__tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .public-bot-command-docs__tools > p {
+    margin: 0;
+    color: color-mix(in srgb, var(--bot-muted) 82%, var(--bot-canvas));
+    font-size: .8125rem;
+  }
+
+  .public-bot-command-tabs {
+    padding: .3125rem;
+    border: 1px solid var(--bot-border);
+    border-radius: .75rem;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .25rem;
+    width: max-content;
+    background: var(--bot-card-subtle);
+  }
+
+  .public-bot-command-tabs button {
+    min-height: 2.5rem;
+    padding: 0 1.75rem;
+    border: 0;
+    border-radius: .5625rem;
+    background: transparent;
+    color: var(--bot-muted);
+    font-size: .84rem;
+    font-weight: 800;
+  }
+
+  .public-bot-command-tabs button.is-active,
+  .public-bot-command-tabs button[aria-selected="true"] {
+    background: linear-gradient(90deg, rgba(91, 55, 184, .82), rgba(108, 49, 192, .88));
+    color: #fff;
+  }
+
+  .public-bot-command-docs__layout {
+    margin-top: 1.25rem;
+    display: grid;
+    grid-template-columns: 16.5rem minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .public-bot-command-index {
+    padding: .875rem;
+    border: 1px solid var(--bot-border);
+    border-radius: .875rem;
+    background: var(--bot-card);
+  }
+
+  /* "명령 목록" 13.76px h2 가 상세 제목과 같은 레벨이던 것 — 카드 제목 크기로. */
+  .public-bot-command-index > h2 {
+    margin: 0 0 .625rem;
+    padding-inline: .25rem;
+    color: var(--bot-text);
+    font-size: .875rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .public-bot-command-index ul {
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: .25rem;
+    list-style: none;
+  }
+
+  .public-bot-command-index button {
+    width: 100%;
+    min-height: 3.75rem;
+    padding: .5625rem .75rem;
+    border: 1px solid transparent;
+    border-radius: .625rem;
+    display: grid;
+    gap: .1875rem;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+  }
+
+  .public-bot-command-index button[aria-current="true"] {
+    border-color: color-mix(in srgb, var(--bot-violet) 45%, transparent);
+    background: color-mix(in srgb, var(--bot-violet) 12%, transparent);
+  }
+
+  .public-bot-command-index button code {
+    color: var(--yoro-color-brand-on-dark, #9b90ff);
+    font-size: .78rem;
+    font-weight: 700;
+  }
+
+  .public-bot-command-index button span {
+    font-size: .8125rem;
+    font-weight: 800;
+  }
+
+  .public-bot-command-index button small {
+    color: color-mix(in srgb, var(--bot-muted) 82%, var(--bot-canvas));
+    font-size: .6875rem;
+    font-weight: 700;
+  }
+
+  .public-bot-command-detail {
+    margin: 0;
+    padding: 1.5rem;
+    border: 1px solid var(--bot-border);
+    border-radius: 1rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, .92fr);
+    gap: 1.25rem;
+    align-items: start;
+    background: var(--bot-card);
+  }
+
+  .public-bot-command-detail__copy {
+    min-width: 0;
+  }
+
+  .public-bot-command-detail h2 {
+    font-size: 1.5rem;
+    letter-spacing: -.02em;
+  }
+
+  .public-bot-command-detail__description {
+    color: var(--bot-muted);
+    font-size: .875rem;
+    line-height: 1.65;
+  }
+
+  /* ── 게임파일: 3열 압축 카드 + 저장 동선 하단 고정. ─────────── */
+
+  .palworld-settings-page {
+    padding-top: 0;
+    display: block;
+  }
+
+  .palworld-settings-page__header {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    text-align: left;
+  }
+
+  .palworld-settings-page__assurances {
+    margin-top: .75rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    justify-content: flex-start;
+  }
+
+  .palworld-settings-page__assurances span {
+    padding: .375rem .6875rem;
+    border: 1px solid var(--bot-border-strong);
+    border-radius: 999px;
+    background: none;
+    color: var(--bot-muted);
+    font-size: .75rem;
+    font-weight: 700;
+  }
+
+  .palworld-settings-security {
+    margin: 0 0 .75rem;
+    padding: .625rem .75rem;
+    border: 1px solid color-mix(in srgb, #f0a63a 40%, transparent);
+    border-radius: .6875rem;
+    background: color-mix(in srgb, #f0a63a 10%, transparent);
+    color: #f4cd8f;
+  }
+
+  .palworld-settings-security strong {
+    display: block;
+    margin-bottom: .125rem;
+    color: inherit;
+    font-size: .75rem;
+    font-weight: 800;
+  }
+
+  .palworld-settings-security p {
+    margin: 0;
+    color: inherit;
+    font-size: .75rem;
+    line-height: 1.55;
+  }
+
+  .palworld-settings-security p + p {
+    margin-top: .25rem;
+  }
+
+  .palworld-settings-paths {
+    margin: 0 0 1.5rem;
+    padding: .875rem 1rem;
+    border: 1px solid var(--bot-border);
+    border-radius: .875rem;
+    background: var(--bot-card);
+  }
+
+  .palworld-settings-paths h2 {
+    margin: 0;
+    font-size: .875rem;
+    font-weight: 800;
+  }
+
+  .palworld-settings-paths > div:first-child p {
+    margin: .375rem 0 .75rem;
+    color: var(--bot-muted);
+    font-size: .75rem;
+    line-height: 1.55;
+  }
+
+  .palworld-settings-paths__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .625rem;
+  }
+
+  .palworld-settings-paths__grid article {
+    min-width: 0;
+    padding: .875rem 1rem;
+    border: 1px solid var(--bot-border);
+    border-radius: .75rem;
+    background: var(--bot-card-subtle);
+  }
+
+  .palworld-settings-paths__grid strong {
+    display: block;
+    font-size: .8125rem;
+    font-weight: 800;
+  }
+
+  .palworld-settings-paths__grid code {
+    display: block;
+    margin-top: .5rem;
+    padding: .5625rem .6875rem;
+    border-radius: .5rem;
+    background: rgba(255, 255, 255, .06);
+    color: var(--bot-muted);
+    font-size: .71rem;
+    line-height: 1.6;
+    word-break: break-all;
+  }
+
+  .palworld-settings-paths > a {
+    display: inline-flex;
+    margin-top: .75rem;
+    color: var(--yoro-color-brand-on-dark, #9b90ff);
+    font-size: .8125rem;
+    font-weight: 800;
+  }
+
+  .palworld-settings-toolbar {
+    margin: 0 0 .875rem;
+    padding: .75rem .875rem;
+    border: 1px solid var(--bot-border);
+    border-radius: .875rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 16.25rem;
+    gap: .75rem;
+    align-items: center;
+    background: var(--bot-card-subtle);
+  }
+
+  .palworld-settings-categories {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .palworld-settings-categories legend {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .palworld-settings-categories div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .375rem;
+  }
+
+  .palworld-settings-categories button {
+    min-height: 2.25rem;
+    padding: 0 .875rem;
+    border: 1px solid var(--bot-border-strong);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--bot-muted);
+    font-size: .78rem;
+    font-weight: 800;
+  }
+
+  .palworld-settings-categories button.is-active {
+    border-color: transparent;
+    background: color-mix(in srgb, var(--bot-violet) 18%, transparent);
+    color: var(--yoro-color-brand-on-dark, #9b90ff);
+  }
+
+  .palworld-settings-search {
+    display: grid;
+    gap: .25rem;
+  }
+
+  .palworld-settings-search span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .palworld-settings-search input {
+    min-height: 2.5rem;
+    padding: 0 .75rem;
+    border: 1px solid var(--bot-border-strong);
+    border-radius: .625rem;
+    background: var(--bot-canvas);
+    color: var(--bot-text);
+    font: inherit;
+    font-size: .8125rem;
+  }
+
+  .palworld-settings-toolbar__summary {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: .625rem;
+    align-items: center;
+    color: color-mix(in srgb, var(--bot-muted) 82%, var(--bot-canvas));
+    font-size: .78rem;
+    font-weight: 700;
+  }
+
+  .palworld-settings-toolbar__summary strong {
+    color: var(--yoro-color-brand-on-dark, #9b90ff);
+  }
+
+  .palworld-settings-toolbar__summary button {
+    margin-left: auto;
+    min-height: 2.25rem;
+    padding: 0 .875rem;
+    border: 1px solid var(--bot-border-strong);
+    border-radius: .625rem;
+    background: transparent;
+    color: var(--bot-text);
+    font-size: .75rem;
+    font-weight: 800;
+  }
+
+  .palworld-settings-toolbar__summary button:disabled {
+    opacity: .45;
+  }
+
+  /* 설정 카드 — 큰 카드 2열(7549px)을 3열 압축(실측 3835px)으로. */
+  .palworld-settings-form {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .5rem;
+  }
+
+  .palworld-setting-card {
+    min-width: 0;
+    margin: 0;
+    padding: .75rem .875rem;
+    border: 1px solid var(--bot-border);
+    border-radius: .75rem;
+    display: grid;
+    gap: .375rem;
+    align-content: start;
+    background: var(--bot-card);
+    box-shadow: none;
+  }
+
+  .palworld-setting-card.is-changed {
+    border-color: color-mix(in srgb, var(--bot-violet) 50%, transparent);
+  }
+
+  .palworld-setting-card__heading {
+    display: flex;
+    gap: .5rem;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  .palworld-setting-card__heading > div {
+    display: flex;
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: .25rem .5rem;
+    align-items: baseline;
+  }
+
+  .palworld-setting-card__heading label {
+    font-size: .8125rem;
+    font-weight: 800;
+    word-break: keep-all;
+  }
+
+  .palworld-setting-card__heading code {
+    padding: 0;
+    background: none;
+    color: color-mix(in srgb, var(--bot-muted) 78%, var(--bot-canvas));
+    font-size: .656rem;
+    font-weight: 700;
+  }
+
+  .palworld-setting-card__heading > span {
+    flex: none;
+    padding: .125rem .4375rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bot-violet) 18%, transparent);
+    color: var(--yoro-color-brand-on-dark, #9b90ff);
+    font-size: .656rem;
+    font-weight: 800;
+  }
+
+  .palworld-setting-card > p {
+    margin: 0;
+    color: color-mix(in srgb, var(--bot-muted) 82%, var(--bot-canvas));
+    font-size: .71rem;
+    line-height: 1.5;
+  }
+
+  .palworld-setting-card__control {
+    display: grid;
+    gap: .3125rem;
+  }
+
+  .palworld-setting-card__control input:not([type="checkbox"]),
+  .palworld-setting-card__control select {
+    min-height: 2.5rem;
+    padding: 0 .6875rem;
+    border: 1px solid var(--bot-border-strong);
+    border-radius: .5625rem;
+    background: var(--bot-canvas);
+    color: var(--bot-text);
+    font: inherit;
+    font-size: .8125rem;
+  }
+
+  .palworld-setting-card__control small {
+    color: color-mix(in srgb, var(--bot-muted) 78%, var(--bot-canvas));
+    font-size: .6875rem;
+  }
+
+  .palworld-setting-card.is-changed .palworld-setting-card__control small {
+    color: var(--yoro-color-brand-on-dark, #9b90ff);
+    font-weight: 700;
+  }
+
+  .palworld-setting-card__reset {
+    justify-self: start;
+    min-height: 2rem;
+    padding: 0 .625rem;
+    border: 1px solid var(--bot-border-strong);
+    border-radius: .5rem;
+    background: transparent;
+    color: var(--bot-muted);
+    font-size: .6875rem;
+    font-weight: 800;
+  }
+
+  /* 저장 동선 — 7549px 아래에만 있던 복사·다운로드를 화면 하단 고정 바로. */
+  .palworld-settings-savebar {
+    position: sticky;
+    bottom: 1rem;
+    z-index: 5;
+    margin: 1rem 0 .75rem;
+    padding: .75rem 1rem;
+    border: 1px solid color-mix(in srgb, var(--bot-violet) 40%, transparent);
+    border-radius: .875rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem .875rem;
+    align-items: center;
+    background:
+      linear-gradient(120deg, color-mix(in srgb, var(--bot-blue) 12%, transparent), color-mix(in srgb, var(--bot-violet) 14%, transparent)),
+      var(--bot-card-subtle);
+  }
+
+  .palworld-settings-savebar__state {
+    min-width: 0;
+  }
+
+  .palworld-settings-savebar__state strong {
+    display: block;
+    font-size: .8125rem;
+    font-weight: 800;
+  }
+
+  .palworld-settings-savebar__state small {
+    display: block;
+    margin-top: .125rem;
+    color: var(--bot-muted);
+    font-size: .71rem;
+  }
+
+  .palworld-settings-savebar__actions {
+    margin-left: auto;
+    display: flex;
+    flex: none;
+    gap: .5rem;
+  }
+
+  .palworld-settings-savebar__actions button {
+    min-height: 2.625rem;
+    padding: 0 1rem;
+    border: 1px solid var(--bot-border-strong);
+    border-radius: .625rem;
+    background: transparent;
+    color: var(--bot-text);
+    font: inherit;
+    font-size: .8125rem;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .palworld-settings-savebar__actions button.is-primary {
+    border-color: transparent;
+    background: linear-gradient(135deg, var(--bot-blue), var(--bot-violet));
+    color: #fff;
+  }
+
+  .palworld-settings-savebar__actions button:disabled {
+    opacity: .45;
+  }
+
+  .palworld-settings-preview {
+    margin: 0;
+    padding: 1rem;
+    border: 1px solid var(--bot-border);
+    border-radius: .875rem;
+    background: var(--bot-card);
+  }
+
+  .palworld-settings-preview__heading {
+    display: block;
+  }
+
+  .palworld-settings-preview h2 {
+    margin: 0;
+    font-size: .9375rem;
+    font-weight: 800;
+  }
+
+  .palworld-settings-preview__heading p {
+    margin: .375rem 0 .75rem;
+    color: color-mix(in srgb, var(--bot-muted) 82%, var(--bot-canvas));
+    font-size: .78rem;
+  }
+
+  .palworld-settings-preview pre {
+    margin: 0;
+    padding: .875rem;
+    border: 1px solid var(--bot-border);
+    border-radius: .625rem;
+    overflow-x: auto;
+    background: var(--bot-card-subtle);
+    color: var(--bot-muted);
+    font-size: .75rem;
+    line-height: 1.7;
+  }
+
+  .palworld-settings-preview__empty {
+    margin: 0;
+    padding: 1.5rem .75rem;
+    border: 1px dashed var(--bot-border-strong);
+    border-radius: .625rem;
+    color: color-mix(in srgb, var(--bot-muted) 82%, var(--bot-canvas));
+    font-size: .78rem;
+    text-align: center;
+  }
+
+  /* ── 반응형 ─────────────────────────────────────────────── */
+
+  @media (max-width: 64rem) {
+    .public-bot-hero {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1.75rem;
+      padding-top: 2rem;
+    }
+
+    .public-bot-command-preview,
+    .public-bot-onboarding__preview {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1.25rem;
+    }
+
+    .public-bot-onboarding__preview > .public-bot-discord-preview {
+      grid-column: 1;
+      grid-row: auto;
+    }
+
+    .public-bot-install ol,
+    .public-bot-onboarding__progress ol {
+      grid-template-columns: minmax(0, 1fr);
+      gap: .625rem;
+    }
+
+    .public-bot-onboarding__timeline article {
+      grid-template-columns: 2.25rem minmax(0, 1fr);
+      gap: .75rem .875rem;
+      padding: 1rem;
+    }
+
+    .public-bot-onboarding__step-icon {
+      width: 2.25rem;
+      height: 2.25rem;
+    }
+
+    .public-bot-onboarding__step-side {
+      grid-column: 1 / -1;
+    }
+
+    .public-bot-command-docs__layout {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .public-bot-command-detail {
+      grid-template-columns: minmax(0, 1fr);
+      padding: 1rem;
+    }
+
+    .palworld-settings-form {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .palworld-settings-toolbar {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 48rem) {
+    .public-bot-section,
+    .public-bot-message-showcase,
+    .public-bot-next,
+    .public-bot-page-section {
+      padding-top: 2.5rem;
+    }
+
+    .public-bot-section + .public-bot-section,
+    .public-bot-section + .public-bot-next,
+    .public-bot-next + .public-bot-final-cta,
+    .public-bot-final-cta {
+      margin-top: 2.5rem;
+    }
+
+    .public-bot-section__heading {
+      margin-bottom: 1.25rem;
+      text-align: left;
+    }
+
+    .public-bot-hero h1,
+    .public-bot-hero h1.is-ja {
+      font-size: clamp(1.9rem, 8.6vw, 2.2rem);
+    }
+
+    .public-bot-actions {
+      flex-direction: column;
+    }
+
+    .public-bot-actions .public-bot-button {
+      width: 100%;
+    }
+
+    .public-bot-trust-row {
+      justify-content: flex-start;
+      gap: .375rem .875rem;
+      font-size: .75rem;
+    }
+
+    /* 좁은 폭 헤더 CTA — 아이콘만 남깁니다(접근성 이름은 aria-label 로 유지). */
+    .public-bot-header-cta strong {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    .public-bot-page-hero,
+    .public-bot-command-docs__hero {
+      grid-template-columns: minmax(0, 1fr);
+      align-items: start;
+      padding-block: 1.75rem 1.25rem;
+    }
+
+    .public-bot-page-hero > .public-bot-button,
+    .public-bot-command-docs__hero > .public-bot-button {
+      width: 100%;
+    }
+
+    .public-bot-security {
+      padding: 1.25rem 1rem;
+    }
+
+    .public-bot-security__grid,
+    .public-bot-roadmap-grid,
+    .public-bot-command-preview__list,
+    .palworld-settings-paths__grid,
+    .palworld-settings-form {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .public-bot-final-cta {
+      flex-direction: column;
+      align-items: stretch;
+      padding: 1.5rem 1.25rem;
+    }
+
+    .public-bot-final-cta > div:last-child {
+      flex-direction: column;
+    }
+
+    .public-bot-final-cta .public-bot-button {
+      width: 100%;
+    }
+
+    .public-bot-command-tabs {
+      width: 100%;
+    }
+
+    .public-bot-command-tabs button {
+      padding: 0 .75rem;
+    }
+
+    .public-bot-faq {
+      padding: 1.125rem 1rem;
+    }
+
+    .palworld-settings-categories div {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: .25rem;
+    }
+
+    .palworld-settings-categories button {
+      white-space: nowrap;
+    }
+
+    .palworld-settings-savebar {
+      bottom: 0;
+      flex-direction: column;
+      align-items: stretch;
+      border-radius: .875rem .875rem 0 0;
+    }
+
+    .palworld-settings-savebar__actions {
+      margin-left: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: .5rem;
+    }
+  }
+}

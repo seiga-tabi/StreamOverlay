@@ -66,3 +66,5 @@
 @import "./pages/public-lol/36-champion-analysis.css";
 
 @import "./pages/public-lol/37-signature-builds.css";
+/* Organization 콘솔(개요·Bot 제어·Palworld 서버) 리디자인. pages layer 소유. */
+@import "./pages/bot/18-bot-console-redesign.css";

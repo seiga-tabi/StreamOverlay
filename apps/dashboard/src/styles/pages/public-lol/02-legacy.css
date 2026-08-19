@@ -1155,7 +1155,7 @@
 .public-dashboard-shell.public-home-shell {
 }
 
-.public-dashboard-shell:not(.public-home-shell) {
+.public-dashboard-shell:not(.public-home-shell):not(.public-bot-shell) {
   background:
     radial-gradient(circle at 18% 8%, rgba(191, 227, 255, .64), transparent 31%),
     radial-gradient(circle at 82% 0%, rgba(213, 241, 255, .74), transparent 34%),
@@ -6760,8 +6760,9 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
   }
 }
 
-/* Public menu pages: 남아 있던 pastel 디자인 제거 */
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) {
+/* Public menu pages: 남아 있던 pastel 디자인 제거.
+   YORO Bot 셸은 자기 지면(16-yoro-bot.css #11141b)을 소유하므로 제외합니다. */
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell):not(.public-bot-shell) {
   min-height: 100dvh;
   background:
     radial-gradient(circle at 50% 0%, rgba(123, 92, 255, .14), transparent 28%),

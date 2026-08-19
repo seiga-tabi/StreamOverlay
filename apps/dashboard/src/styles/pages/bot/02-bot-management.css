@@ -1,32 +1,56 @@
 .bot-management-page {
-  --yoro-color-surface: #171f2c;
-  --yoro-color-surface-muted: #121a27;
-  --yoro-color-surface-strong: #1c2636;
-  --yoro-color-text: #dce4f1;
+  /* 팔레트는 대시보드 홈(31-dashboard-home.css --dh-*)과 통일합니다 —
+     이전 값(#171f2c · rgba(164,181,209,.14) 청회색)은 같은 셸의 홈 카드
+     (#1c232d · rgb(255 255 255 / 10%))와 화면마다 달랐습니다(2026-08-19 실측). */
+  --yoro-color-surface: #1c232d;
+  --yoro-color-surface-muted: #161d26;
+  --yoro-color-surface-strong: #232c3c;
+  --yoro-color-text: #f2f5fa;
   --yoro-color-text-strong: #f8faff;
-  --yoro-color-text-muted: #9daabd;
-  --yoro-color-border: rgb(164 181 209 / 14%);
-  --yoro-color-border-strong: rgb(154 126 255 / 34%);
+  --yoro-color-text-muted: #aab4c2;
+  --yoro-color-border: rgb(255 255 255 / 10%);
+  --yoro-color-border-strong: rgb(255 255 255 / 18%);
 
   /* Button.css 는 background:--yoro-color-primary 와 color:--yoro-color-text-strong
      을 짝지어 씁니다. 위에서 text-strong 만 흰색으로 뒤집고 primary·secondary 는
      밝은 기본값(hsl 219 100% 74% / 254 100% 81%)을 그대로 두면 밝은 배경 위 밝은
-     글자가 되어 실측 2.25:1·2.16:1 이었습니다. 색상·채도는 두고 명도만 낮춥니다. */
-  --yoro-color-primary: hsl(224 78% 52%);
-  --yoro-color-primary-strong: hsl(224 78% 44%);
+     글자가 되어 실측 2.25:1·2.16:1 이었습니다. 주 버튼은 홈의 --dh-brand-deep
+     (#3f6ae4)와 같은 값으로 맞춥니다. */
+  --yoro-color-primary: #3f6ae4;
+  --yoro-color-primary-strong: #3557c2;
   --yoro-color-secondary: hsl(253 61% 52%);
   --yoro-color-secondary-strong: hsl(253 61% 44%);
-  --surface: #101826;
-  --text: #f4f7fc;
-  --text-muted: #9daabd;
-  --line: rgb(164 181 209 / 16%);
+  --surface: #161d26;
+  --text: #f2f5fa;
+  --text-muted: #aab4c2;
+  --line: rgb(255 255 255 / 10%);
+  /* Card.css(레이어 없음)가 radius 를 이 토큰으로 읽습니다 — 목업 카드 14px. */
+  --yoro-radius-lg: .875rem;
+
+  /* StatusPill(Status.css)은 tone 글자·배경을 이 토큰 쌍으로 읽습니다. 전역 기본값은
+     밝은 표면용이라 다크 카드 위에서 success pill 이 실측 1.00:1 이었습니다 —
+     글자는 밝은 틴트, 배경은 어두운 반투명으로 뒤집습니다. danger 는 Button
+     danger 배경(흰 글자)과 공유하므로 손대지 않습니다. */
+  --yoro-color-success: #65d6a6;
+  --yoro-color-success-bg: rgb(68 187 132 / 18%);
+  --yoro-color-warning: #f4cd8f;
+  --yoro-color-warning-bg: rgb(240 166 58 / 16%);
+  --yoro-color-info: #9fb7ff;
+  --yoro-color-info-bg: rgb(111 156 255 / 16%);
 
   display: grid;
-  gap: 1.25rem;
+  gap: 1rem;
   width: min(100% - (var(--space-4) * 2), 76rem);
   margin-inline: auto;
   padding-block: var(--space-6);
   color: var(--yoro-color-text);
+}
+
+/* 임베드(대시보드 셸 안)에서는 폭 상한·중앙정렬을 해제해 본문 시작선을
+   대시보드 홈과 같은 360px 에 맞춥니다 — 이전에는 376→1352 로 16px 안쪽이라
+   사이드바에서 홈↔개요를 오갈 때 제목이 튀었습니다(실측). */
+.bot-management-page.is-embedded {
+  width: 100%;
 }
 
 .bot-management-header {
@@ -40,28 +64,27 @@
   color: var(--yoro-color-text-muted);
 }
 
+/* 제목은 대시보드 홈 h1(28px)과 같은 스케일 — 42.4px 는 같은 셸에서 1.5배였습니다. */
 .bot-management-header h1 {
-  margin: .45rem 0 0;
+  margin: .4rem 0 0;
   color: var(--yoro-color-text-strong);
-  font-size: clamp(1.8rem, 4vw, 2.65rem);
-  line-height: 1.12;
+  font-size: clamp(20px, 2.4vw, 28px);
+  letter-spacing: -.02em;
+  line-height: 1.2;
 }
 
 .bot-management-header p {
   max-width: 48rem;
-  margin: .7rem 0 0;
+  margin: .4rem 0 0;
   color: var(--yoro-color-text-muted);
+  font-size: .8125rem;
   line-height: 1.65;
 }
 
+/* 지면·잉크는 Card.css 가 --yoro-color-* 토큰으로 읽으므로 위 토큰 재정의로 충분합니다.
+   (padding·radius 는 Card.css 가 레이어 없이 소유 — 여기서 덮으면 항상 집니다.) */
 .bot-management-page .yoro-card {
-  padding: clamp(1.1rem, 2vw, 1.5rem);
-  border-color: var(--yoro-color-border);
-  border-radius: 1rem;
-  background:
-    linear-gradient(145deg, rgb(28 38 57 / 98%), rgb(20 29 43 / 98%));
-  color: var(--yoro-color-text);
-  box-shadow: 0 18px 46px rgb(0 0 0 / 14%);
+  box-shadow: none;
 }
 
 .bot-management-page .yoro-card__title {
@@ -214,22 +237,19 @@
   color: #b9ccff;
 }
 
+/* 서버 카드도 홈과 같은 단색 지면 — 화면마다 다르던 그라디언트를 걷어냅니다. */
 .bot-management-server-card {
   overflow: hidden;
   padding: 0 !important;
-  border-color: rgb(126 105 218 / 32%);
-  background:
-    radial-gradient(circle at 92% 0%, rgb(105 73 207 / 14%), transparent 30rem),
-    linear-gradient(145deg, rgb(25 35 53 / 99%), rgb(16 24 37 / 99%)) !important;
+  border-color: var(--yoro-color-border);
+  background: var(--yoro-color-surface) !important;
 }
 
 .bot-control-card {
   overflow: hidden;
   padding: 0 !important;
-  border-color: rgb(126 105 218 / 34%);
-  background:
-    radial-gradient(circle at 88% 0%, rgb(105 73 207 / 16%), transparent 28rem),
-    linear-gradient(145deg, #141b2e, #111827) !important;
+  border-color: var(--yoro-color-border);
+  background: var(--yoro-color-surface) !important;
 }
 
 .bot-control-card .yoro-card__content {

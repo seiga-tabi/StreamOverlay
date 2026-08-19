@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   BotManagementGameServer,
   BotManagementOrganization,
+  DiscordBotControlOverview,
   PalworldServerDashboardResponse,
   PalworldServerStatus,
   PalworldServerRegion
@@ -29,6 +30,7 @@ import {
   claimManagementGuild,
   createManagementGameServer,
   deleteManagementGameServer,
+  getManagementBotControl,
   getManagementConnectSession,
   getManagementPalworldRestConnection,
   getManagementSession,
@@ -172,7 +174,44 @@ const copy = {
     regionNorthAmerica: "북아메리카",
     regionSouthAmerica: "남아메리카",
     regionEurope: "유럽",
-    regionOceania: "오세아니아"
+    regionOceania: "오세아니아",
+    overviewOpsBotConnected: "Discord Bot 연결됨",
+    overviewOpsBotMissing: "Discord Bot 설치 필요",
+    overviewOpsBotMissingHint: "Bot 제어에서 설치를 확인하세요",
+    overviewOpsCommandsSuffix: "개 명령 활성",
+    overviewOpsServerNone: "등록한 게임 서버 없음",
+    overviewOpsServerNoneHint: "Palworld 서버를 등록하세요",
+    overviewOpsRevision: "설정 revision",
+    overviewOpsLastSaved: "응답 언어",
+    rowPublicCommands: "공개 명령",
+    rowPublicCommandsHint: "일반 사용자도 사용",
+    rowModule: "Palworld 상태 모듈",
+    rowModuleHint: "!yoro status · 읽기 전용",
+    rowAnnounce: "참여 모집 알림",
+    rowAnnounceHint: "스트리머가 채널을 직접 고릅니다",
+    rowLanguage: "응답 언어",
+    rowLanguageHint: "/yoro language 로도 변경 가능",
+    rowPlayersHint: "현재 / 최대",
+    rowLatencyHint: "최근 연결 검사 기준",
+    rowRestAuth: "REST 인증",
+    rowRestAuthHint: "공통 암호화 저장소에 보관",
+    stateEnabled: "사용",
+    stateDisabled: "사용 안 함",
+    stateAllowed: "허용",
+    stateBlocked: "차단",
+    stateSaved: "저장됨",
+    stateRequired: "필요",
+    languageAuto: "서버 언어",
+    languageKo: "한국어",
+    languageJa: "日本語",
+    languageEn: "English",
+    diagUrlPolicy: "주소 정책",
+    diagDnsTcp: "DNS · TCP",
+    diagTls: "TLS",
+    diagBasicAuth: "인증",
+    diagInfo: "info",
+    diagMetrics: "metrics",
+    diagSchema: "schema"
   },
   ja: {
     eyebrow: "YORO BOT MANAGEMENT",
@@ -301,7 +340,44 @@ const copy = {
     regionNorthAmerica: "北米",
     regionSouthAmerica: "南米",
     regionEurope: "ヨーロッパ",
-    regionOceania: "オセアニア"
+    regionOceania: "オセアニア",
+    overviewOpsBotConnected: "Discord Bot連携済み",
+    overviewOpsBotMissing: "Discord Botの導入が必要",
+    overviewOpsBotMissingHint: "Botコントロールで導入を確認してください",
+    overviewOpsCommandsSuffix: "件のコマンドが有効",
+    overviewOpsServerNone: "登録済みゲームサーバーなし",
+    overviewOpsServerNoneHint: "Palworldサーバーを登録してください",
+    overviewOpsRevision: "設定revision",
+    overviewOpsLastSaved: "応答言語",
+    rowPublicCommands: "公開コマンド",
+    rowPublicCommandsHint: "一般ユーザーも利用可能",
+    rowModule: "Palworld状態モジュール",
+    rowModuleHint: "!yoro status · 読み取り専用",
+    rowAnnounce: "参加募集通知",
+    rowAnnounceHint: "ストリーマーが各自チャンネルを選択",
+    rowLanguage: "応答言語",
+    rowLanguageHint: "/yoro language からも変更できます",
+    rowPlayersHint: "現在 / 最大",
+    rowLatencyHint: "直近の接続チェック基準",
+    rowRestAuth: "REST認証",
+    rowRestAuthHint: "共通暗号化ストレージに保管",
+    stateEnabled: "使用",
+    stateDisabled: "使用しない",
+    stateAllowed: "許可",
+    stateBlocked: "ブロック",
+    stateSaved: "保存済み",
+    stateRequired: "必要",
+    languageAuto: "サーバー言語",
+    languageKo: "한국어",
+    languageJa: "日本語",
+    languageEn: "English",
+    diagUrlPolicy: "アドレスポリシー",
+    diagDnsTcp: "DNS · TCP",
+    diagTls: "TLS",
+    diagBasicAuth: "認証",
+    diagInfo: "info",
+    diagMetrics: "metrics",
+    diagSchema: "schema"
   }
 } as const;
 
@@ -560,6 +636,11 @@ export function BotManagementPage({
   const [restFeedback, setRestFeedback] = useState("");
   const [deleteServerId, setDeleteServerId] = useState("");
   const [announcement, setAnnouncement] = useState("");
+  /* 개요 상태 요약 — bot-control · game-servers 두 기존 계약만 호출합니다(신규 API 없음).
+     실패하면 undefined 로 남겨 이동 카드만 보여줍니다(fail-soft, 가짜 데이터 금지). */
+  const [overviewControl, setOverviewControl] = useState<DiscordBotControlOverview>();
+  const [overviewServer, setOverviewServer] = useState<BotManagementGameServer>();
+  const [overviewRest, setOverviewRest] = useState<PalworldServerDashboardResponse>();
   const headingRef = useRef<HTMLHeadingElement>(null);
   const installRefreshInFlightRef = useRef(false);
   const Root = embedded ? "div" : "main";
@@ -646,6 +727,32 @@ export function BotManagementPage({
     void loadSession(controller.signal);
     return () => controller.abort();
   }, []);
+
+  useEffect(() => {
+    if (view !== "overview" || !organizationId) return undefined;
+    const controller = new AbortController();
+    setOverviewControl(undefined);
+    setOverviewServer(undefined);
+    setOverviewRest(undefined);
+    void (async () => {
+      const [control, gameServers] = await Promise.all([
+        getManagementBotControl(organizationId, controller.signal).catch(() => undefined),
+        listManagementGameServers(organizationId, controller.signal)
+          .then(registeredManagementServers)
+          .catch(() => undefined)
+      ]);
+      const server = gameServers?.find((candidate) => candidate.isEnabled);
+      const rest = server
+        ? await getManagementPalworldRestConnection(organizationId, server.id, controller.signal)
+          .catch(() => undefined)
+        : undefined;
+      if (controller.signal.aborted) return;
+      setOverviewControl(control);
+      setOverviewServer(server);
+      setOverviewRest(rest);
+    })();
+    return () => controller.abort();
+  }, [organizationId, view]);
 
   useEffect(() => {
     if (
@@ -1058,71 +1165,204 @@ export function BotManagementPage({
       {session?.authenticated && session.organizations.length > 0 ? (
         <>
           {botManagementViewShowsOrganizationSelector(view) ? (
-            <Card className="bot-management-organization-card">
-              <CardHeader>
-                <div>
-                  <CardTitle as="h2">{text.organization}</CardTitle>
-                  {selectedOrganization ? (
-                    <CardDescription>{selectedOrganization.displayName}</CardDescription>
-                  ) : null}
-                </div>
-                {selectedOrganization ? (
-                  <Badge>{text[selectedOrganization.role]}</Badge>
-                ) : null}
-              </CardHeader>
-              <CardContent className="bot-management-organization-content">
-                <label className="bot-management-field">
-                  <span>{text.organizationField}</span>
-                  <select
-                    value={organizationId}
-                    onChange={(event) => void selectOrganization(event.target.value)}
-                  >
-                    {session.organizations.map((organization: BotManagementOrganization) => (
-                      <option key={organization.id} value={organization.id}>
-                        {organization.displayName}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </CardContent>
-            </Card>
+            /* 조직 컨텍스트 줄 — 카드 한 장을 통째로 쓰던 선택기를 56px 한 줄로
+               접습니다(목업 §orgbar). 이름·역할·선택기가 한 baseline 에 섭니다. */
+            <div className="bot-management-orgbar">
+              <span aria-hidden="true" className="bot-management-orgbar__mark">
+                {selectedOrganization?.displayName.slice(0, 1) ?? "?"}
+              </span>
+              <span className="bot-management-orgbar__name">
+                {selectedOrganization?.displayName ?? text.organization}
+              </span>
+              {selectedOrganization ? (
+                <Badge>{text[selectedOrganization.role]}</Badge>
+              ) : null}
+              <label className="bot-management-orgbar__select">
+                <span className="sr-only">{text.organizationField}</span>
+                <select
+                  value={organizationId}
+                  onChange={(event) => void selectOrganization(event.target.value)}
+                >
+                  {session.organizations.map((organization: BotManagementOrganization) => (
+                    <option key={organization.id} value={organization.id}>
+                      {organization.displayName}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
           ) : null}
 
-          {view === "overview" && selectedOrganization ? (
-            <section
-              aria-label={text.overviewTitle}
-              className="bot-management-destinations"
-            >
-              <Card>
-                <CardHeader>
-                  <CardTitle as="h2">{text.botDestination}</CardTitle>
-                  <CardDescription>{text.botDestinationDescription}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button
-                    as="a"
-                    href={organizationManagementHref("bot", selectedOrganization.id)}
-                  >
-                    {text.botDestinationAction}
-                  </Button>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle as="h2">{text.serverDestination}</CardTitle>
-                  <CardDescription>{text.serverDestinationDescription}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button
-                    as="a"
-                    href={organizationManagementHref("servers", selectedOrganization.id)}
-                  >
-                    {text.serverDestinationAction}
-                  </Button>
-                </CardContent>
-              </Card>
-            </section>
-          ) : null}
+          {view === "overview" && selectedOrganization ? (() => {
+            /* 개요 요약 — 이동 버튼 2개뿐이던 화면을 실제 운영 상태로 채웁니다
+               (목업 §개요). 요약을 못 불러오면(fail-soft) 기존 설명·이동 카드만
+               남습니다 — 화면이 값을 지어내지 않습니다. */
+            const connection = restConnectionStatusPresentation(overviewRest, locale);
+            const opTone = (tone: StatusTone): string | undefined => tone === "success"
+              ? "good"
+              : tone === "warning" || tone === "danger" ? "warn" : undefined;
+            const settings = overviewControl?.settings;
+            const languageLabel = settings
+              ? settings.preferredLocale === "auto"
+                ? text.languageAuto
+                : settings.preferredLocale === "ko"
+                  ? text.languageKo
+                  : settings.preferredLocale === "ja" ? text.languageJa : text.languageEn
+              : "";
+            const metrics = overviewRest?.status.metrics;
+            const botHref = organizationManagementHref("bot", selectedOrganization.id);
+            const serversHref = organizationManagementHref("servers", selectedOrganization.id);
+            return (
+              <>
+                {overviewControl || overviewServer ? (
+                  <nav aria-label={text.overviewTitle} className="bot-management-ops">
+                    <a className="bot-management-op" data-tone={overviewControl?.installation ? "good" : "warn"} href={botHref}>
+                      <i aria-hidden="true" />
+                      <span className="bot-management-op__text">
+                        <b>{overviewControl?.installation ? text.overviewOpsBotConnected : text.overviewOpsBotMissing}</b>
+                        <small>
+                          {overviewControl?.installation
+                            ? overviewControl.installation.guildDisplayName
+                            : text.overviewOpsBotMissingHint}
+                        </small>
+                      </span>
+                      <span aria-hidden="true">›</span>
+                    </a>
+                    <a
+                      className="bot-management-op"
+                      data-tone={overviewServer ? opTone(connection.tone) : "warn"}
+                      href={serversHref}
+                    >
+                      <i aria-hidden="true" />
+                      <span className="bot-management-op__text">
+                        <b>{overviewServer ? overviewServer.displayName : text.overviewOpsServerNone}</b>
+                        <small>
+                          {overviewServer
+                            ? metrics
+                              ? `${connection.label} · ${metrics.currentPlayers} / ${metrics.maxPlayers}`
+                              : connection.label
+                            : text.overviewOpsServerNoneHint}
+                        </small>
+                      </span>
+                      <span aria-hidden="true">›</span>
+                    </a>
+                    {settings ? (
+                      <a className="bot-management-op" href={botHref}>
+                        <i aria-hidden="true" />
+                        <span className="bot-management-op__text">
+                          <b>{text.overviewOpsRevision} {settings.revision}</b>
+                          <small>{text.overviewOpsLastSaved} · {languageLabel}</small>
+                        </span>
+                        <span aria-hidden="true">›</span>
+                      </a>
+                    ) : null}
+                  </nav>
+                ) : null}
+                <section
+                  aria-label={text.overviewTitle}
+                  className="bot-management-destinations"
+                >
+                  <Card>
+                    <CardHeader className="bot-management-summary-head">
+                      <CardTitle as="h2">{text.botDestination}</CardTitle>
+                      {overviewControl ? (
+                        <span
+                          className="bot-management-row-tag"
+                          data-tone={overviewControl.installation ? "good" : "warn"}
+                        >
+                          {overviewControl.installation ? text.overviewOpsBotConnected : text.overviewOpsBotMissing}
+                        </span>
+                      ) : null}
+                    </CardHeader>
+                    <CardContent className="bot-management-summary-body">
+                      <p className="bot-management-summary-desc">{text.botDestinationDescription}</p>
+                      {settings ? (
+                        <ul className="bot-management-rows">
+                          <li>
+                            <span><b>{text.rowPublicCommands}</b><small>{text.rowPublicCommandsHint}</small></span>
+                            <span className="bot-management-row-tag" data-tone={settings.publicCommandsEnabled ? "good" : undefined}>
+                              {settings.publicCommandsEnabled ? text.stateEnabled : text.stateDisabled}
+                            </span>
+                          </li>
+                          <li>
+                            <span><b>{text.rowModule}</b><small>{text.rowModuleHint}</small></span>
+                            <span className="bot-management-row-tag" data-tone={settings.palworldStatusEnabled ? "good" : undefined}>
+                              {settings.palworldStatusEnabled ? text.stateEnabled : text.stateDisabled}
+                            </span>
+                          </li>
+                          <li>
+                            <span><b>{text.rowAnnounce}</b><small>{text.rowAnnounceHint}</small></span>
+                            <span className="bot-management-row-tag" data-tone={settings.participationAnnounceEnabled ? "good" : undefined}>
+                              {settings.participationAnnounceEnabled ? text.stateAllowed : text.stateBlocked}
+                            </span>
+                          </li>
+                          <li>
+                            <span><b>{text.rowLanguage}</b><small>{text.rowLanguageHint}</small></span>
+                            <span className="bot-management-row-tag">{languageLabel}</span>
+                          </li>
+                        </ul>
+                      ) : null}
+                      <Button as="a" href={botHref}>
+                        {text.botDestinationAction}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="bot-management-summary-head">
+                      <CardTitle as="h2">{text.serverDestination}</CardTitle>
+                      {overviewServer ? (
+                        <span className="bot-management-row-tag" data-tone={opTone(connection.tone)}>
+                          {connection.label}
+                        </span>
+                      ) : null}
+                    </CardHeader>
+                    <CardContent className="bot-management-summary-body">
+                      <p className="bot-management-summary-desc">{text.serverDestinationDescription}</p>
+                      {overviewServer ? (
+                        <ul className="bot-management-rows">
+                          <li>
+                            <span>
+                              <b>{overviewServer.displayName}</b>
+                              <small>{text[`region${overviewServer.region.split("_").map((part) => `${part[0]?.toUpperCase()}${part.slice(1)}`).join("")}` as keyof typeof text]}</small>
+                            </span>
+                            <span className="bot-management-row-tag" data-tone={opTone(connection.tone)}>
+                              {overviewRest?.status.state ?? connection.label}
+                            </span>
+                          </li>
+                          <li>
+                            <span><b>{text.restPlayers}</b><small>{text.rowPlayersHint}</small></span>
+                            <span className="bot-management-row-tag">
+                              {metrics ? `${metrics.currentPlayers} / ${metrics.maxPlayers}` : text.restUnknown}
+                            </span>
+                          </li>
+                          <li>
+                            <span><b>{text.restLatency}</b><small>{text.rowLatencyHint}</small></span>
+                            <span className="bot-management-row-tag">
+                              {overviewRest?.status.latencyMs !== undefined
+                                ? `${overviewRest.status.latencyMs}ms`
+                                : text.restUnknown}
+                            </span>
+                          </li>
+                          <li>
+                            <span><b>{text.rowRestAuth}</b><small>{text.rowRestAuthHint}</small></span>
+                            <span
+                              className="bot-management-row-tag"
+                              data-tone={overviewRest?.connection.configured ? "good" : "warn"}
+                            >
+                              {overviewRest?.connection.configured ? text.stateSaved : text.stateRequired}
+                            </span>
+                          </li>
+                        </ul>
+                      ) : null}
+                      <Button as="a" href={serversHref} variant="secondary">
+                        {text.serverDestinationAction}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </section>
+              </>
+            );
+          })() : null}
 
           {view === "bot" && selectedOrganization ? (
             <BotControlCard
@@ -1253,6 +1493,30 @@ export function BotManagementPage({
                           <dd data-tone={connection.tone}>{connection.label}</dd>
                         </div>
                       </dl>
+
+                      {restResponse && restResponse.status.diagnostics.length > 0 ? (
+                        /* 진단 7항목 — 문장 하나로 뭉치던 검사 결과를 칩으로 폅니다(목업 §checks). */
+                        <ul aria-label={text.restDiagnostics} className="bot-management-checks">
+                          {restResponse.status.diagnostics.map((diagnostic) => (
+                            <li
+                              className="bot-management-check"
+                              data-state={diagnostic.state}
+                              key={diagnostic.key}
+                            >
+                              <i aria-hidden="true" />
+                              {({
+                                url_policy: text.diagUrlPolicy,
+                                dns_tcp: text.diagDnsTcp,
+                                tls: text.diagTls,
+                                basic_auth: text.diagBasicAuth,
+                                info: text.diagInfo,
+                                metrics: text.diagMetrics,
+                                schema: text.diagSchema
+                              } as const)[diagnostic.key]}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
 
                       <section className="bot-management-rest-diagnostics" data-tone={connection.tone}>
                         <div>

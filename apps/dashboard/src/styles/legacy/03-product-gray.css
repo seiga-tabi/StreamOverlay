@@ -21,7 +21,7 @@
    --public-gray-* 커스텀 속성은 위 블록에 그대로 남겨, 홈 내부에서 이 값을 참조하는
    04-followers.css의 기존 규칙이 계속 동작하도록 합니다. */
 .public-lol-shell:not(.public-home-shared-shell),
-.public-dashboard-shell:not(.public-home-shared-shell),
+.public-dashboard-shell:not(.public-home-shared-shell):not(.public-bot-shell),
 .app-shell[data-page="followers"] {
   background: var(--yoro-background-product-gray-page) !important;
   color: var(--public-gray-text) !important;

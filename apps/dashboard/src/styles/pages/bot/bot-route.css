@@ -6,3 +6,5 @@
  * 문서 상단에서 이미 선언하므로 나중에 로드되어도 legacy layer 위치가 유지됩니다.
  */
 @import "./16-yoro-bot.css" layer(legacy);
+/* 공개 4페이지 리디자인. 파일 안에서 pages layer 를 선언해 legacy 를 덮습니다. */
+@import "./17-bot-public-redesign.css";

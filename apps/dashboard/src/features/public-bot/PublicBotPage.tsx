@@ -1098,17 +1098,14 @@ export function PublicBotPage() {
             <section className="public-bot-hero" id="bot-overview">
               <div className="public-bot-hero__copy">
                 <span className="public-bot-eyebrow">{text.eyebrow}</span>
+                {/* 세 span 이 블록으로 쌓이며 어절이 "게임 서 / 버" 로 끊기던 제목 —
+                    한 줄 흐름 + 강조색으로 폅니다(목업 PublicBot 아트보드). */}
                 <h1 className={locale === "ja" ? "is-ja" : undefined}>
-                  <span>{text.heroLead}</span>
-                  <strong>{text.heroAccent}</strong>
+                  <span>{text.heroLead}</span>{" "}
+                  <strong>{text.heroAccent}</strong>{" "}
                   <span>{text.heroTail}</span>
                 </h1>
                 <p>{text.heroDescription}</p>
-                <div className="public-bot-capabilities" aria-label={text.coreTitle}>
-                  {[text.heroTagStatus, text.heroTagPlayer, text.heroTagDashboard].map((item) => (
-                    <span key={item}><span aria-hidden="true">✓</span>{item}</span>
-                  ))}
-                </div>
                 <div className="public-bot-actions">
                   <a
                     aria-label={text.addBotNewTab}
@@ -1117,25 +1114,26 @@ export function PublicBotPage() {
                     rel="noopener noreferrer"
                     target="_blank"
                   >
+                    <DiscordSymbolIcon />
                     {text.addBot}
                   </a>
                   <a className="public-bot-button is-secondary" href="/dashboard">
                     {text.dashboardView}<span aria-hidden="true">→</span>
                   </a>
                 </div>
-                <div className="public-bot-trust-row">
-                  {[text.trustFree, text.trustPermission, text.trustSetup].map((item) => (
-                    <span key={item}><span aria-hidden="true">✓</span>{item}</span>
-                  ))}
-                </div>
               </div>
               <div className="public-bot-hero__visual">
                 <DiscordStatusPreview compact text={text} />
-                <div className="public-bot-connection-map" aria-hidden="true">
-                  <span>PALWORLD</span><strong>Y</strong><span>DASHBOARD</span>
-                </div>
               </div>
             </section>
+
+            {/* 신뢰 문구 — 히어로 칩 3개와 같은 내용을 두 번 말하던 체크 목록을
+                전체 폭 한 줄로 합쳤습니다. */}
+            <div className="public-bot-trust-row">
+              {[text.trustFree, text.trustPermission, text.trustSetup].map((item) => (
+                <span key={item}><span aria-hidden="true">✓</span>{item}</span>
+              ))}
+            </div>
 
             <section className="public-bot-section public-bot-overview-section" id="bot-features">
               <div className="public-bot-section__heading">
@@ -1159,38 +1157,9 @@ export function PublicBotPage() {
               </div>
             </section>
 
-            <section className="public-bot-message-showcase" id="bot-message-preview">
-              <div className="public-bot-message-showcase__copy">
-                <span className="public-bot-eyebrow">{text.previewEyebrow}</span>
-                <h2>{text.previewSectionTitle}</h2>
-                <p>{text.previewSectionDescription}</p>
-                <a className="public-bot-text-link" href={localizedPublicUrl("/bot/commands", locale)} onClick={(event) => { event.preventDefault(); setPublicPath("/bot/commands"); }}>
-                  {text.commandPreviewLink}<span aria-hidden="true">→</span>
-                </a>
-              </div>
-              <DiscordStatusPreview text={text} />
-            </section>
 
-            <section className="public-bot-section public-bot-security" id="bot-security">
-              <div className="public-bot-section__heading">
-                <span>{text.securityEyebrow}</span>
-                <h2>{text.securityTitle}</h2>
-                <p>{text.securityDescription}</p>
-              </div>
-              <div className="public-bot-security__grid">
-                {([
-                  ["lock", text.securityToken, text.securityTokenDescription],
-                  ["tenant", text.securityTenant, text.securityTenantDescription],
-                  ["permission", text.securityPermission, text.securityPermissionDescription],
-                  ["session", text.securitySession, text.securitySessionDescription],
-                ] as const).map(([icon, title, description]) => (
-                  <article key={title}>
-                    <span><BotFeatureIcon kind={icon} /></span>
-                    <div><h3>{title}</h3><p>{description}</p></div>
-                  </article>
-                ))}
-              </div>
-            </section>
+
+
 
             <section className="public-bot-section public-bot-install" id="bot-install">
               <div className="public-bot-section__heading">
@@ -1226,6 +1195,27 @@ export function PublicBotPage() {
               <div className="public-bot-command-preview__list">
                 {["!yoro status", "!yoro player", "!yoro guide", "/yoro setup", "/yoro language", "/yoro dashboard", "/yoro help"].map((command) => (
                   <code key={command}>{command}</code>
+                ))}
+              </div>
+            </section>
+
+            <section className="public-bot-section public-bot-security" id="bot-security">
+              <div className="public-bot-section__heading">
+                <span>{text.securityEyebrow}</span>
+                <h2>{text.securityTitle}</h2>
+                <p>{text.securityDescription}</p>
+              </div>
+              <div className="public-bot-security__grid">
+                {([
+                  ["lock", text.securityToken, text.securityTokenDescription],
+                  ["tenant", text.securityTenant, text.securityTenantDescription],
+                  ["permission", text.securityPermission, text.securityPermissionDescription],
+                  ["session", text.securitySession, text.securitySessionDescription],
+                ] as const).map(([icon, title, description]) => (
+                  <article key={title}>
+                    <span><BotFeatureIcon kind={icon} /></span>
+                    <div><h3>{title}</h3><p>{description}</p></div>
+                  </article>
                 ))}
               </div>
             </section>
@@ -1307,6 +1297,25 @@ export function PublicBotPage() {
           ] as const;
           return (
             <section className="public-bot-onboarding public-bot-page-section" id="bot-flow">
+              {/* 페이지 히어로 — 이 페이지에는 h1 이 없어 스텝 카드로 바로 시작했습니다
+                  (목업 GettingStarted 아트보드: 하위 페이지 h1 40px 통일). */}
+              <div className="public-bot-page-hero">
+                <div>
+                  <span className="public-bot-eyebrow">{text.installEyebrow}</span>
+                  <h1>{text.installTitle}</h1>
+                  <p>{text.installDescription}</p>
+                </div>
+                <a
+                  aria-label={text.addBotNewTab}
+                  className="public-bot-button is-primary"
+                  href={botInstallUrl()}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  <DiscordSymbolIcon />
+                  {text.addBot}
+                </a>
+              </div>
               <nav aria-label={text.flowProgressLabel} className="public-bot-onboarding__progress">
                 <ol>
                   {steps.map((step, index) => (
@@ -1340,6 +1349,9 @@ export function PublicBotPage() {
                               <li key={point}><span aria-hidden="true">✓</span>{point}</li>
                             ))}
                           </ul>
+                        </div>
+                        {/* 완료 결과·액션 — 본문 옆 3번째 열(목업 §스텝 2단 구성). */}
+                        <div className="public-bot-onboarding__step-side">
                           <div className="public-bot-onboarding__result">
                             <span>{text.flowResult}</span>
                             <strong>{step.result}</strong>
@@ -1391,25 +1403,27 @@ export function PublicBotPage() {
                     </li>
                   ))}
                 </ol>
-
-                <aside className="public-bot-onboarding__preview">
-                  <span>{text.flowPreviewEyebrow}</span>
-                  <h2>{text.flowPreviewTitle}</h2>
-                  <p>{text.flowPreviewDescription}</p>
-                  <DiscordStatusPreview compact text={text} />
-                  <a
-                    className="public-bot-button is-secondary"
-                    href={localizedPublicUrl("/bot/commands", locale)}
-                    onClick={(event) => {
-                      event.preventDefault();
-                      setPublicPath("/bot/commands");
-                    }}
-                  >
-                    {text.flowCommandsAction}
-                    <span aria-hidden="true">→</span>
-                  </a>
-                </aside>
               </div>
+
+              {/* 완료 미리보기 — 1단계 옆에서 끝나고 이후 ~390px 이 비던 사이드를
+                  마지막 단계 뒤 전체 폭 2열 섹션으로 옮겼습니다(목업 §COMPLETE). */}
+              <aside className="public-bot-onboarding__preview">
+                <span>{text.flowPreviewEyebrow}</span>
+                <h2>{text.flowPreviewTitle}</h2>
+                <p>{text.flowPreviewDescription}</p>
+                <DiscordStatusPreview compact text={text} />
+                <a
+                  className="public-bot-button is-secondary"
+                  href={localizedPublicUrl("/bot/commands", locale)}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    setPublicPath("/bot/commands");
+                  }}
+                >
+                  {text.flowCommandsAction}
+                  <span aria-hidden="true">→</span>
+                </a>
+              </aside>
               <p className="public-bot-notice" role="note">{text.setupNotice}</p>
             </section>
           );
