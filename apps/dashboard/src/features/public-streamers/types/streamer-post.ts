@@ -1,11 +1,18 @@
 /* 스트리머 추천 글 계약 — docs/mockups/streamer-board.
  *
- * 서버 계약이 아직 없으므로(prompts 로 넘길 핸드오프 대상) 타입과 파서를 여기에
- * 둡니다. 응답이 형식을 벗어나면 화면이 그 조각을 버립니다 — 패치 변경 요약이
- * 쓴 방식과 같습니다. shared 로 옮길 때 이 파일은 지웁니다.
+ * 응답이 형식을 벗어나면 화면이 그 조각을 버립니다 — 패치 변경 요약이 쓴 방식과
+ * 같습니다. 서버와 공유해야 하는 규칙(채널 정규화·길이 경계)은 여기가 아니라
+ * packages/shared/src/streamer-board.ts 에 둡니다.
  */
 
+import { streamerChannelKey } from "@streamops/shared";
+import type { LolRankTier } from "@streamops/shared";
+import { rankTierLabel } from "../../public-lol/utils/rank";
 import type { StreamerScope } from "../utils/routes";
+
+/* 채널 정규화 규칙은 서버와 공유합니다(packages/shared/src/streamer-board.ts).
+   두 벌 두면 프런트가 "중복 아님" 이라 본 채널을 서버가 409 로 막습니다. */
+export { streamerChannelKey };
 
 /** 연동된 플랫폼. twitch 만 프로필 이미지를 가져올 수 있습니다. */
 export const STREAMER_PLATFORMS = ["twitch", "chzzk", "youtube"] as const;
@@ -42,6 +49,8 @@ export type StreamerPost = {
   /** 게임 태그 외의 자유 태그(칼바람 나락 등). */
   tags: readonly string[];
   votes: number;
+  /** 이 사람이 이미 추천했는지. 비로그인은 항상 false 입니다. */
+  voted: boolean;
   commentCount: number;
   authorName: string;
   createdAt: string;
@@ -104,63 +113,44 @@ function safeChannelUrl(value: unknown): string | undefined {
   }
 }
 
-/* 채널 중복 판정용 정규화 키.
- *
- * 한 채널은 글 하나입니다. 사람마다 주소를 다르게 적기 때문에(www 유무, 대소문자,
- * 끝 슬래시, 추적 query) 문자열 비교로는 같은 채널을 못 잡습니다. 플랫폼과 채널
- * 식별자만 남겨 "twitch:bamtol" 형태로 줄인 뒤 비교합니다.
- *
- * YouTube 의 /channel/<id> 만 대소문자를 지킵니다 — 그 id 는 대소문자를 구분하는
- * 값이라, 낮춰 쓰면 서로 다른 채널이 같은 키가 될 수 있습니다. 나머지(트위치·치지직
- * 이름, @핸들)는 플랫폼이 대소문자를 구분하지 않습니다. */
-export function streamerChannelKey(value: string): string | undefined {
-  const text = value.trim();
-  if (!text) return undefined;
-  let url: URL;
-  try {
-    /* 사람은 보통 "twitch.tv/이름" 처럼 scheme 없이 붙여 넣습니다. */
-    url = new URL(/^[a-z][a-z0-9+.-]*:\/\//iu.test(text) ? text : `https://${text}`);
-  } catch {
-    return undefined;
-  }
-  if (url.protocol !== "https:" && url.protocol !== "http:") return undefined;
-  const host = url.hostname.toLowerCase().replace(/^www\./u, "");
-  const segments = url.pathname.split("/").filter(Boolean);
+/* 프로필 이미지는 서버가 받아 같은 origin 으로 다시 내보냅니다 — 시청자 브라우저가
+   Twitch CDN 에 직접 붙지 않아야 하기 때문입니다(시청자 IP 가 외부로 새지 않도록).
+   그래서 우리 아바타 경로만 받습니다. 외부 주소가 오면 쓰지 않고 플랫폼 마크로
+   떨어집니다. */
+const AVATAR_PATH_PATTERN = /^\/api\/public\/streamers\/[a-z0-9][a-z0-9_-]{0,63}\/avatar$/u;
 
-  if (host === "twitch.tv" || host.endsWith(".twitch.tv")) {
-    /* /popout/<이름>/chat 같은 부수 경로에서도 채널 이름은 첫 실제 segment 입니다. */
-    const name = segments[0] === "popout" ? segments[1] : segments[0];
-    return name ? `twitch:${name.toLowerCase()}` : undefined;
-  }
-  if (host === "chzzk.naver.com") {
-    const name = segments[0] === "live" || segments[0] === "video" ? segments[1] : segments[0];
-    return name ? `chzzk:${name.toLowerCase()}` : undefined;
-  }
-  if (host === "youtube.com" || host.endsWith(".youtube.com")) {
-    if (segments[0] === "channel" && segments[1]) return `youtube:${segments[1]}`;
-    const name = segments[0] === "c" || segments[0] === "user" ? segments[1] : segments[0];
-    if (!name) return undefined;
-    return `youtube:${name.toLowerCase().replace(/^@/u, "")}`;
-  }
-  /* youtu.be 는 영상 주소입니다 — 채널을 가리키지 않으므로 키가 없습니다. */
-  return undefined;
-}
-
-/** 프로필 이미지도 https 만 받습니다. 깨진 값은 플랫폼 마크로 떨어집니다. */
 function safeImageUrl(value: unknown): string | undefined {
   const text = typeof value === "string" ? value.trim() : "";
-  if (!text) return undefined;
-  try {
-    return new URL(text).protocol === "https:" ? text : undefined;
-  } catch {
-    return undefined;
-  }
+  return AVATAR_PATH_PATTERN.test(text) ? text : undefined;
+}
+
+const LOL_RANK_TIERS: readonly LolRankTier[] = [
+  "IRON", "BRONZE", "SILVER", "GOLD", "PLATINUM",
+  "EMERALD", "DIAMOND", "MASTER", "GRANDMASTER", "CHALLENGER", "UNRANKED",
+];
+
+function parseTierLabel(value: Record<string, unknown>): string | undefined {
+  const tier = LOL_RANK_TIERS.find((candidate) => candidate === value.tier);
+  if (!tier) return undefined;
+  const rank = safeText(value.rank, 4);
+  return rankTierLabel({
+    queueType: "RANKED_SOLO_5x5",
+    tier,
+    ...(rank ? { rank } : {}),
+    leaguePoints: counter(value.leaguePoints),
+    wins: counter(value.wins),
+    losses: counter(value.losses),
+    winRate: 0,
+    fetchedAt: new Date(0).toISOString(),
+  });
 }
 
 function parseLolProfile(value: unknown): StreamerLolProfile | undefined {
   if (!isRecord(value)) return undefined;
   const riotId = safeText(value.riotId, 60);
-  const tier = safeText(value.tier, 40);
+  /* 서버는 티어 코드(DIAMOND)와 단계(II)를 줍니다. 표기는 다른 LoL 화면과 같은
+     규칙으로 여기서 만듭니다 — 두 화면이 같은 계정을 다르게 부르면 안 됩니다. */
+  const tier = parseTierLabel(value);
   const winRate = finiteNumber(value.winRate);
   const wins = finiteNumber(value.wins);
   const losses = finiteNumber(value.losses);
@@ -214,6 +204,7 @@ export function parseStreamerPost(value: unknown): StreamerPost | undefined {
     games,
     tags,
     votes: counter(value.votes),
+    voted: value.voted === true,
     commentCount: counter(value.commentCount),
     authorName,
     createdAt,

@@ -12,10 +12,14 @@ import type { StreamerScope } from "../utils/routes";
 
 /* 스트리머 추천 게시판 API.
  *
- * 서버 구현은 handoff 대상이라, 미구현 배포(404)·네트워크 오류·형식을 벗어난
- * 응답을 모두 같은 실패로 봅니다. 목록은 "불러오지 못했습니다" 화면으로 닫고
- * 글쓰기·댓글·신고는 버튼을 비활성으로 남깁니다 — 가짜 데이터를 만들지 않습니다.
+ * 서버 구현은 아직 handoff 대상입니다(prompts/codex-streamer-board-ko.txt).
+ * 그래서 "아직 없음(404)" 과 "지금 안 됨(5xx·네트워크)" 을 구분해서 돌려줍니다 —
+ * 둘을 같은 실패로 뭉치면 영원히 성공하지 않을 요청에 "잠시 후 다시 시도" 와
+ * 재시도 버튼을 내밀게 됩니다. 어느 쪽이든 가짜 데이터는 만들지 않습니다.
  */
+
+/** 404 는 배포에 그 경로가 없다는 뜻입니다 — 재시도로 해결되지 않습니다. */
+export type StreamerApiFailure = "not_ready" | "error";
 
 export type StreamerListQuery = {
   scope: StreamerScope;
@@ -64,39 +68,54 @@ function listSearchParams(query: StreamerListQuery): string {
   return serialized ? `?${serialized}` : "";
 }
 
+export type StreamerListResult =
+  | { ok: true; list: StreamerPostList }
+  | { ok: false; reason: StreamerApiFailure };
+
 export async function fetchStreamerPosts(
   query: StreamerListQuery,
   signal?: AbortSignal,
-): Promise<StreamerPostList | undefined> {
+): Promise<StreamerListResult> {
   try {
     const response = await fetch(`${apiBase}/api/public/streamers${listSearchParams(query)}`, {
       credentials: "include",
       headers: { Accept: "application/json" },
       ...(signal ? { signal } : {}),
     });
-    if (!response.ok) return undefined;
-    return parseStreamerPostList(await readJson(response));
+    if (response.status === 404) return { ok: false, reason: "not_ready" };
+    if (!response.ok) return { ok: false, reason: "error" };
+    const list = parseStreamerPostList(await readJson(response));
+    /* 200 인데 형식이 다르면 계약이 어긋난 것입니다 — 재시도할 값어치가 있습니다. */
+    return list ? { ok: true, list } : { ok: false, reason: "error" };
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") throw error;
-    return undefined;
+    return { ok: false, reason: "error" };
   }
 }
+
+export type StreamerDetailResult =
+  | { ok: true; detail: StreamerPostDetail }
+  | { ok: false; reason: StreamerApiFailure };
 
 export async function fetchStreamerPost(
   postId: string,
   signal?: AbortSignal,
-): Promise<StreamerPostDetail | undefined> {
+): Promise<StreamerDetailResult> {
   try {
     const response = await fetch(`${apiBase}/api/public/streamers/${encodeURIComponent(postId)}`, {
       credentials: "include",
       headers: { Accept: "application/json" },
       ...(signal ? { signal } : {}),
     });
-    if (!response.ok) return undefined;
-    return parseStreamerPostDetail(await readJson(response));
+    /* 글 상세의 404 는 "글이 없음" 일 수도 있습니다. 목록이 뜨는지로 갈립니다 —
+       화면은 둘 다 "글을 찾을 수 없습니다" 로 닫으므로 여기서 나누지 않습니다. */
+    if (response.status === 404) return { ok: false, reason: "not_ready" };
+    if (!response.ok) return { ok: false, reason: "error" };
+    const detail = parseStreamerPostDetail(await readJson(response));
+    return detail ? { ok: true, detail } : { ok: false, reason: "error" };
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") throw error;
-    return undefined;
+    return { ok: false, reason: "error" };
   }
 }
 
@@ -106,7 +125,7 @@ export async function fetchStreamerPost(
  * 서버가 그 글을 알려주면 화면이 "이미 등록된 글 보기" 로 연결합니다. */
 export type StreamerMutationResult =
   | { ok: true }
-  | { ok: false; reason: "login_required" | "unavailable" }
+  | { ok: false; reason: "login_required" | StreamerApiFailure }
   | { ok: false; reason: "duplicate_channel"; existing?: StreamerChannelOwner };
 
 /** 중복 판정에 필요한 최소한만 받습니다 — 없으면 목록으로 안내합니다. */
@@ -140,10 +159,11 @@ async function mutate(path: string, body: unknown): Promise<StreamerMutationResu
       const existing = parseChannelOwner(await readJson(response));
       return { ok: false, reason: "duplicate_channel", ...(existing ? { existing } : {}) };
     }
-    if (!response.ok) return { ok: false, reason: "unavailable" };
+    if (response.status === 404) return { ok: false, reason: "not_ready" };
+    if (!response.ok) return { ok: false, reason: "error" };
     return { ok: true };
   } catch {
-    return { ok: false, reason: "unavailable" };
+    return { ok: false, reason: "error" };
   }
 }
 
@@ -157,9 +177,9 @@ export async function lookupStreamerChannel(
   channelKey: string,
   signal?: AbortSignal,
 ): Promise<StreamerChannelOwner | null | undefined> {
-  const list = await fetchStreamerPosts({ scope: "all", channelKey }, signal);
-  if (!list) return undefined;
-  const post = list.posts[0];
+  const result = await fetchStreamerPosts({ scope: "all", channelKey }, signal);
+  if (!result.ok) return undefined;
+  const post = result.list.posts[0];
   if (!post) return null;
   return { postId: post.id, streamerName: post.streamerName };
 }

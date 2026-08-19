@@ -739,6 +739,82 @@ export class TwitchApiClient {
     };
   }
 
+  /**
+   * login 기준 "지금 방송 중" 목록. 스트리머 추천 게시판의 LIVE 표시가 씁니다.
+   *
+   * 앱 토큰으로 조회합니다 — 남의 채널 상태는 공개 정보라 시청자 토큰이 필요 없고,
+   * 시청자 토큰을 쓰면 로그인한 사람에게만 LIVE 가 보이게 됩니다.
+   * 실패는 빈 집합입니다: Twitch 가 흔들려도 게시판은 그대로 떠야 합니다.
+   */
+  async getLiveLogins(logins: readonly string[]): Promise<Set<string>> {
+    const live = new Set<string>();
+    const safeLogins = [...new Set(
+      logins
+        .map((login) => login.trim().toLowerCase())
+        .filter((login) => /^[a-z0-9][a-z0-9_]{0,24}$/u.test(login))
+    )];
+    if (safeLogins.length === 0) return live;
+    const context = await this.getAppAccessContext();
+    if (!context) return live;
+
+    /* Helix 는 한 번에 100개까지 받습니다. */
+    for (let index = 0; index < safeLogins.length; index += 100) {
+      const batch = safeLogins.slice(index, index + 100);
+      const url = new URL("https://api.twitch.tv/helix/streams");
+      for (const login of batch) url.searchParams.append("user_login", login);
+      try {
+        const response = await this.requestWithAccessContext(url, { method: "GET" }, context);
+        if (!response.ok) continue;
+        const body = (await response.json()) as TwitchStreamsResponse;
+        for (const stream of body.data ?? []) {
+          if (stream.user_login) live.add(stream.user_login.toLowerCase());
+        }
+      } catch {
+        /* 이 배치만 LIVE 없이 넘어갑니다. */
+      }
+    }
+    return live;
+  }
+
+  /**
+   * login 기준 프로필. 추천 채널의 이미지를 서버가 받아 두기 위한 조회입니다
+   * (기존 fetchUserProfiles 는 id 기준이라 남의 채널을 login 으로 찾을 수 없습니다).
+   */
+  async getUserProfilesByLogins(logins: readonly string[]): Promise<Map<string, TwitchUserProfile>> {
+    const profiles = new Map<string, TwitchUserProfile>();
+    const safeLogins = [...new Set(
+      logins
+        .map((login) => login.trim().toLowerCase())
+        .filter((login) => /^[a-z0-9][a-z0-9_]{0,24}$/u.test(login))
+    )];
+    if (safeLogins.length === 0) return profiles;
+    const context = await this.getAppAccessContext();
+    if (!context) return profiles;
+
+    for (let index = 0; index < safeLogins.length; index += 100) {
+      const batch = safeLogins.slice(index, index + 100);
+      const url = new URL("https://api.twitch.tv/helix/users");
+      for (const login of batch) url.searchParams.append("login", login);
+      try {
+        const response = await this.requestWithAccessContext(url, { method: "GET" }, context);
+        if (!response.ok) continue;
+        const body = (await response.json()) as TwitchUsersResponse;
+        for (const user of body.data ?? []) {
+          if (!user?.id || !user.login) continue;
+          profiles.set(user.login.toLowerCase(), {
+            id: user.id,
+            login: user.login,
+            displayName: user.display_name,
+            profileImageUrl: this.safeHttpsUrl(user.profile_image_url)
+          });
+        }
+      } catch {
+        /* 이 배치는 이미지 없이 넘어갑니다 — 화면이 플랫폼 마크로 떨어집니다. */
+      }
+    }
+    return profiles;
+  }
+
   private async getAppAccessContext(): Promise<TwitchApiAccessContext | undefined> {
     if (!appConfig.twitch.clientId || !appConfig.twitch.clientSecret) return undefined;
     if (this.appAccessContext && this.appAccessContext.expiresAt > this.now() + APP_ACCESS_TOKEN_REFRESH_MARGIN_MS) {

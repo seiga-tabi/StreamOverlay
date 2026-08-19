@@ -6,7 +6,8 @@ import { STREAMER_PLATFORMS } from "../types/streamer-post";
 import { setStreamersUrl, streamersPathForPage, type StreamerScope } from "../utils/routes";
 import { StreamerPostCard } from "./StreamerPostCard";
 
-type LoadState = "loading" | "ready" | "error";
+/* not_ready 는 "서버에 아직 그 경로가 없음" 입니다 — 재시도 버튼을 주면 안 됩니다. */
+type LoadState = "loading" | "ready" | "error" | "not_ready";
 
 const PLATFORM_LABEL_KEYS: Record<StreamerPlatform, keyof StreamersText> = {
   twitch: "filterTwitch",
@@ -52,11 +53,11 @@ export function StreamerListPage({
             sort,
           }, controller.signal);
           if (controller.signal.aborted) return;
-          if (!result) {
-            setState("error");
+          if (!result.ok) {
+            setState(result.reason === "not_ready" ? "not_ready" : "error");
             return;
           }
-          setList(result);
+          setList(result.list);
           setState("ready");
         } catch {
           /* abort 는 다음 요청이 이어받습니다. */
@@ -179,6 +180,14 @@ export function StreamerListPage({
           <strong>{text.listError}</strong>
           <p>{text.listErrorBody}</p>
           <button onClick={() => setReloadToken((token) => token + 1)} type="button">{text.retry}</button>
+        </div>
+      ) : null}
+
+      {/* 준비 중은 오류가 아닙니다 — 다시 눌러도 달라지지 않으므로 재시도를 두지 않습니다. */}
+      {state === "not_ready" ? (
+        <div className="streamers-state" role="status">
+          <strong>{text.listNotReady}</strong>
+          <p>{text.listNotReadyBody}</p>
         </div>
       ) : null}
 

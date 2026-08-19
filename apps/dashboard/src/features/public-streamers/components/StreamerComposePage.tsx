@@ -100,7 +100,11 @@ export function StreamerComposePage({
       setNotice("");
       return;
     }
-    setNotice(result.reason === "login_required" ? text.composeLoginRequired : text.composeUnavailable);
+    /* "아직 없음" 과 "지금 안 됨" 은 사용자가 할 일이 다릅니다 — 앞은 기다리는 것이고
+       뒤는 다시 눌러 보는 것입니다. */
+    setNotice(result.reason === "login_required"
+      ? text.composeLoginRequired
+      : result.reason === "not_ready" ? text.composeUnavailable : text.composeFailed);
   };
 
   return (

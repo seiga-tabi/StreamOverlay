@@ -210,6 +210,15 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
     || pathname === "/api/games/reaction/records/me"
     || /^\/api\/games\/reaction\/records\/[A-Za-z0-9_-]{8,64}$/u.test(pathname)
   ) return "PUBLIC";
+  /* 스트리머 추천 게시판 — 미니게임 기록과 같은 방식입니다. dashboard 인증이 아니라
+     공개 로그인(YORO 계정 세션 또는 공개 Twitch 뷰어 세션)을 쓰므로 여기서는 PUBLIC 으로
+     통과시키고, 라우트가 직접 세션·Origin 을 검사해 401/403 을 냅니다. 목록과 글 조회는
+     비로그인도 봐야 합니다(채널 주소만 로그인 뒤로 갑니다). */
+  if (
+    pathname === "/api/public/streamers"
+    || /^\/api\/public\/streamers\/[a-z0-9][a-z0-9_-]{0,63}(\/(avatar|vote|comments))?$/u.test(pathname)
+    || /^\/api\/public\/streamers\/[a-z0-9][a-z0-9_-]{0,63}\/comments\/[a-z0-9][a-z0-9_-]{0,63}\/report$/u.test(pathname)
+  ) return "PUBLIC";
   if (
     (method === "GET" && pathname === "/api/twitch-extension/viewer")
     || (method === "POST" && (

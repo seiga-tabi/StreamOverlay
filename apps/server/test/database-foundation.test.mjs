@@ -44,7 +44,8 @@ test("migration manifest와 SQL checksum을 strict하게 검증한다", async ()
       "0020_yoro_riot_rso_identity",
       "0021_yoro_valorant_record_consent",
       "0022_twitch_extension_settings",
-      "0023_reaction_records"
+      "0023_reaction_records",
+      "0024_streamer_board"
     ]
   );
 

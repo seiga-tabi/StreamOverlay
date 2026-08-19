@@ -18,6 +18,7 @@ export * from "./patch-notes.js";
 export * from "./patch-play.js";
 export * from "./public-lol.js";
 export * from "./server-status.js";
+export * from "./streamer-board.js";
 export * from "./support-mail.js";
 export * from "./twitch.js";
 export * from "./twitch-extension.js";

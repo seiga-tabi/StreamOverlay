@@ -19,11 +19,14 @@ const POST_LOL = {
   games: ["lol"],
   tags: ["칼바람 나락"],
   votes: 142,
+  voted: false,
   commentCount: 2,
   authorName: "쿠키맛젤리",
   createdAt: "2026-08-19T00:00:00.000Z",
+  /* 서버가 주는 모양 그대로입니다 — 티어 표기는 프런트가 만듭니다("Diamond II"). */
   lolProfile: {
-    riotId: "밤톨#KR1", tier: "다이아 2", winRate: 57.1, wins: 24, losses: 18,
+    riotId: "밤톨#KR1", tier: "DIAMOND", rank: "II", leaguePoints: 42,
+    winRate: 57.1, wins: 24, losses: 18,
     recentResults: ["win", "win", "loss", "win", "win"],
   },
 };
@@ -36,6 +39,7 @@ const POST_PALWORLD = {
   games: ["palworld"],
   tags: [],
   votes: 98,
+  voted: false,
   commentCount: 0,
   authorName: "눈사람공장",
   createdAt: "2026-08-18T00:00:00.000Z",
@@ -45,7 +49,7 @@ function json(route: Route, body: unknown, status = 200) {
   return route.fulfill({ status, contentType: "application/json; charset=utf-8", body: JSON.stringify(body) });
 }
 
-async function installFixtures(page: Page, options: { loggedIn?: boolean; viewerOnly?: boolean; failList?: boolean; duplicateOnPost?: boolean } = {}) {
+async function installFixtures(page: Page, options: { loggedIn?: boolean; viewerOnly?: boolean; failList?: boolean; notReady?: boolean; duplicateOnPost?: boolean } = {}) {
   const channel = options.loggedIn ? { channelUrl: "https://twitch.tv/bamtol" } : {};
   if (options.loggedIn) {
     /* 계정 세션 — identities 가 없으면 훅이 응답을 버리고 비로그인으로 떨어집니다. */
@@ -71,6 +75,11 @@ async function installFixtures(page: Page, options: { loggedIn?: boolean; viewer
     const url = new URL(route.request().url());
     if (options.failList) {
       await json(route, { error: "unavailable" }, 503);
+      return;
+    }
+    if (options.notReady) {
+      /* 서버에 그 경로가 아직 없는 상태 — 배포된 라우터가 404 로 떨어뜨립니다. */
+      await json(route, { error: "not found" }, 404);
       return;
     }
     if (route.request().method() === "POST" && url.pathname.endsWith("/api/public/streamers")) {
@@ -127,6 +136,7 @@ test("비로그인 목록은 게임 표기를 보여 주고 채널 주소만 가
   /* 전적 줄은 LoL 글에만. */
   await expect(page.getByText("밤톨#KR1")).toBeVisible();
   await expect(page.getByText("솔로랭크 57.1% · 24승 18패")).toBeVisible();
+  await expect(page.getByText("Diamond II").first()).toBeVisible();
   /* 채널 주소는 두 글 모두 잠깁니다. */
   await expect(page.getByText("채널 주소 — 로그인 후 공개")).toHaveCount(2);
   expect(errors).toEqual([]);
@@ -353,4 +363,40 @@ test("일본어 화면의 중복 안내 링크도 ja 를 유지한다", async ({
   const alert = page.getByRole("alert");
   await expect(alert).toContainText("すでに登録されています");
   await expect(alert.getByRole("link")).toHaveAttribute("href", "/ja/streamers/bamtol");
+});
+
+/* ── 아직 없음과 지금 안 됨 ────────────────────────────────────
+ * 게시판 API 는 아직 서버에 없습니다(prompts/codex-streamer-board-ko.txt).
+ * 둘을 같은 실패로 뭉치면 영원히 성공하지 않을 요청에 "잠시 후 다시 시도" 와
+ * 재시도 버튼을 내밀게 됩니다. */
+
+test("서버에 게시판이 없으면 준비 중으로 알리고 재시도를 권하지 않는다", async ({ page }) => {
+  await installFixtures(page, { notReady: true });
+  await page.goto("/ko/streamers");
+
+  await expect(page.getByText("추천 게시판을 준비하고 있습니다.")).toBeVisible();
+  await expect(page.getByText("추천 글을 불러오지 못했습니다.")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "다시 시도" })).toHaveCount(0);
+});
+
+test("일시적 실패는 그대로 오류로 알리고 재시도를 남긴다", async ({ page }) => {
+  await installFixtures(page, { failList: true });
+  await page.goto("/ko/streamers");
+
+  await expect(page.getByText("추천 글을 불러오지 못했습니다.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "다시 시도" })).toBeVisible();
+  await expect(page.getByText("추천 게시판을 준비하고 있습니다.")).toHaveCount(0);
+});
+
+test("등록이 아직 없는 경로면 준비 중이라고 말한다", async ({ page }) => {
+  await installFixtures(page, { loggedIn: true, notReady: true });
+  await page.goto("/ko/streamers/new");
+  await page.getByLabel("스트리머 이름").fill("밤톨");
+  await page.getByLabel("채널 주소").fill("https://twitch.tv/saebyeok");
+  await page.locator('.streamers-form__games .streamers-chip[data-game="lol"]').click();
+  await page.getByRole("button", { name: "등록" }).click();
+
+  await expect(page.getByRole("alert")).toContainText("아직 준비 중입니다");
+  /* 쓴 내용은 그대로 남아야 합니다 — 다시 치게 만들지 않습니다. */
+  await expect(page.getByLabel("스트리머 이름")).toHaveValue("밤톨");
 });

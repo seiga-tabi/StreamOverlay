@@ -74,25 +74,44 @@ test("채널 주소는 https 이고 아는 플랫폼일 때만 링크한다", ()
   assert.equal(withUrl("javascript:alert(1)"), undefined);
 });
 
-test("프로필 이미지는 Twitch 글에서만 쓴다", () => {
-  const image = "https://static-cdn.example/bamtol.png";
+test("프로필 이미지는 Twitch 글의 같은 origin 경로만 쓴다", () => {
+  /* 서버가 Twitch 이미지를 받아 우리 경로로 다시 내보냅니다 — 시청자 브라우저가
+     Twitch CDN 에 직접 붙으면 시청자 IP 가 외부로 샙니다. */
+  const image = "/api/public/streamers/bamtol/avatar";
   assert.equal(parseStreamerPost({ ...basePost, profileImageUrl: image })?.profileImageUrl, image);
   /* 치지직·YouTube 는 연동이 없어 화면이 플랫폼 마크를 씁니다 — 값이 와도 쓰지 않습니다. */
   assert.equal(
     parseStreamerPost({ ...basePost, platform: "chzzk", profileImageUrl: image })?.profileImageUrl,
     undefined,
   );
-  assert.equal(parseStreamerPost({ ...basePost, profileImageUrl: "http://x/y.png" })?.profileImageUrl, undefined);
+  /* 외부 주소는 그대로 링크하지 않습니다. */
+  for (const outside of [
+    "https://static-cdn.jtvnw.net/bamtol.png",
+    "http://x/y.png",
+    "//evil.test/a.png",
+    "/api/public/streamers/bamtol/avatar/../../../secret",
+  ]) {
+    assert.equal(parseStreamerPost({ ...basePost, profileImageUrl: outside })?.profileImageUrl, undefined, outside);
+  }
 });
 
 test("전적 프로필은 리그 오브 레전드 글에만 붙는다", () => {
+  /* 서버는 티어 코드와 단계를 줍니다 — 표기는 다른 LoL 화면과 같은 규칙으로 만듭니다. */
   const lolProfile = {
-    riotId: "밤톨#KR1", tier: "다이아 2", winRate: 57.14, wins: 24, losses: 18,
+    riotId: "밤톨#KR1", tier: "DIAMOND", rank: "II", leaguePoints: 42,
+    winRate: 57.14, wins: 24, losses: 18,
     recentResults: ["win", "win", "loss", "win", "win", "win"],
   };
   const lolPost = parseStreamerPost({ ...basePost, lolProfile });
+  assert.equal(lolPost?.lolProfile?.tier, "Diamond II");
   assert.equal(lolPost?.lolProfile?.winRate, 57.1, "소수 한 자리로 고정합니다");
   assert.equal(lolPost?.lolProfile?.recentResults.length, 5, "최근 5경기까지");
+
+  /* 모르는 티어 값은 전적을 통째로 버립니다 — 화면에 원문 코드를 노출하지 않습니다. */
+  assert.equal(
+    parseStreamerPost({ ...basePost, lolProfile: { ...lolProfile, tier: "WOOD" } })?.lolProfile,
+    undefined,
+  );
 
   /* 다른 게임 글은 게임 표기까지입니다. */
   const palworldPost = parseStreamerPost({ ...basePost, games: ["palworld"], lolProfile });

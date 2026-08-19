@@ -184,6 +184,14 @@
       "checksumSha256": "2ee440669fe50388d0826b7ae1fbdcb6e713e29e0c598faa9898f9c7e7b2bb8b",
       "destructive": false,
       "transaction": true
+    },
+    {
+      "id": "0024_streamer_board",
+      "file": "0024_streamer_board.sql",
+      "description": "스트리머 추천 게시판 글·추천·댓글·신고 저장, 채널 정규화 키 UNIQUE",
+      "checksumSha256": "80cf79726160808d8fd7174e8bf97bc21ed8b40368da2687e484a35eb9d246c8",
+      "destructive": false,
+      "transaction": true
     }
   ]
 }

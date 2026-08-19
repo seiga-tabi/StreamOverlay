@@ -58,14 +58,14 @@ export function StreamerDetailPage({
       try {
         const result = await fetchStreamerPost(postId, controller.signal);
         if (controller.signal.aborted) return;
-        if (!result) {
+        if (!result.ok) {
           setState("error");
           onTitle(undefined);
           return;
         }
-        setDetail(result);
+        setDetail(result.detail);
         setState("ready");
-        onTitle(result.post.streamerName);
+        onTitle(result.detail.post.streamerName);
       } catch {
         /* abort */
       }
@@ -184,7 +184,10 @@ export function StreamerDetailPage({
 
         <footer className="streamers-detail__actions">
           <button
+            aria-pressed={post.voted}
             className="streamers-vote"
+            /* 추천은 계정당 1회입니다 — 이미 누른 글은 다시 부르지 않습니다. */
+            disabled={post.voted}
             onClick={() => void voteStreamerPost(post.id).then((result) => {
               if (result.ok) reload();
               else setNotice(result.reason === "login_required" ? text.commentsLoginRequired : text.listErrorBody);

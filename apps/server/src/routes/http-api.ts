@@ -150,7 +150,21 @@ import { loadLolParticipationProfileSettings, saveLolParticipationProfileSetting
 import { buildRankHistory, inferMainRoleFromMatches, performanceStatsFromMatches } from "../services/lol-profile-enrichment.js";
 import type { JsonlLogger } from "../logging/jsonl-logger.js";
 import type { TwitchExtensionSettingsRepository } from "../database/repositories/twitch-extension-settings-repository.js";
+import {
+  parseStreamerCommentDraft,
+  parseStreamerListQuery,
+  parseStreamerPostDraft,
+  parseStreamerReportReason,
+  isStreamerPostId
+} from "@streamops/shared";
 import type { ReactionRecordsRepository } from "../database/repositories/reaction-records-repository.js";
+import { StreamerBoardChannelService, twitchLoginForChannelKey } from "../services/streamer-board-channels.js";
+import {
+  StreamerChannelTakenError,
+  type StreamerBoardCommentRow,
+  type StreamerBoardPostRow,
+  type StreamerBoardRepository
+} from "../database/repositories/streamer-board-repository.js";
 import {
   REACTION_SUBMIT_COOLDOWN_MS,
   parseReactionSubmission,
@@ -2392,6 +2406,7 @@ type HttpHandlerInput = {
   yoroAccounts?: YoroAccountService;
   twitchExtensionSettings?: TwitchExtensionSettingsRepository;
   reactionRecords?: ReactionRecordsRepository;
+  streamerBoard?: StreamerBoardRepository;
   twitchExtensionJwt?: TwitchExtensionJwtVerifier;
   discordDatabaseReady?: () => boolean;
   discordInternalAuth?: DiscordInternalAuthVerifier;
@@ -8418,6 +8433,299 @@ export function createHttpHandler(input: HttpHandlerInput) {
     };
   }
 
+  /* LIVE 와 프로필 이미지는 Twitch 에만 있는 값입니다. 캐시와 실패 처리는
+     이 서비스가 갖고 있고, 여기서는 결과만 씁니다. */
+  const streamerBoardChannels = new StreamerBoardChannelService(input.twitch);
+
+  /* ── 스트리머 추천 게시판 ──────────────────────────────────────────
+   *
+   * 신원은 Twitch 계정입니다. 공개 화면의 로그인 상태가 두 가지(YORO 계정 세션과
+   * 공개 Twitch 뷰어 세션)인데 둘 다 Twitch 사용자를 주기 때문입니다. 계정 세션만
+   * 인정하면 LoL 화면에서 Twitch 로 로그인한 사람은 글쓰기 화면이 열려 있는데
+   * 저장만 401 로 실패합니다 — getPublicTwitchViewerStatus 가 두 경로를 이미
+   * 하나로 합쳐 줍니다.
+   */
+
+  /* 추천 글의 전적 요약.
+   *
+   * 리그 오브 레전드 글에만 붙습니다. 전체 프로필(getPublicLolProfile)은 경기
+   * 목록까지 만들어 무겁기 때문에, 여기서는 계정 조회 1회 + 랭크 조회 1회로 끝나는
+   * 경로만 씁니다. 그래도 목록 한 번에 여러 건이 될 수 있으므로 캐시와 상한을 둡니다 —
+   * 게시판이 커졌다고 Riot 호출이 같이 늘면 다른 화면의 예산까지 먹습니다.
+   */
+  const streamerBoardRankCache = new Map<string, { value?: LolRankedStats; expiresAt: number }>();
+  const STREAMER_BOARD_RANK_TTL_MS = 30 * 60 * 1000;
+  const STREAMER_BOARD_RANK_MAX_LOOKUPS = 6;
+  const STREAMER_BOARD_RANK_CACHE_MAX = 200;
+
+  async function streamerBoardRankedStats(
+    riotId: string,
+    budget: { remaining: number }
+  ): Promise<LolRankedStats | undefined> {
+    const key = riotId.trim().toLocaleLowerCase();
+    const cached = streamerBoardRankCache.get(key);
+    if (cached && cached.expiresAt > Date.now()) return cached.value;
+    /* 예산을 다 썼으면 이번 요청에서는 붙이지 않습니다 — 다음 요청에서 채워집니다.
+       화면은 전적 줄 없이 게임 표기까지만 그리므로 깨지지 않습니다. */
+    if (budget.remaining <= 0 || !input.riot?.isConfigured()) return cached?.value;
+
+    budget.remaining -= 1;
+    const parsed = parseRiotIdDetailed(riotId);
+    if (!parsed.ok) {
+      streamerBoardRankCache.set(key, { expiresAt: Date.now() + STREAMER_BOARD_RANK_TTL_MS });
+      return undefined;
+    }
+    const routing = publicLolRouting(undefined, input.riot);
+    const value = await (async () => {
+      const account = await input.riot?.getAccountByRiotId(parsed.gameName, parsed.tagLine, routing);
+      if (!account?.puuid) return undefined;
+      return typeof input.riot?.getRankedStatsByPuuidWithoutSummoner === "function"
+        ? input.riot.getRankedStatsByPuuidWithoutSummoner(account.puuid, undefined, routing)
+        : input.riot?.getRankedStatsByPuuid(account.puuid, undefined, routing);
+    })().catch(() => undefined);
+
+    streamerBoardRankCache.set(key, { value, expiresAt: Date.now() + STREAMER_BOARD_RANK_TTL_MS });
+    pruneMapToMax(streamerBoardRankCache, STREAMER_BOARD_RANK_CACHE_MAX);
+    return value;
+  }
+
+  /** 화면 계약에 맞춘 최소 형태. 티어 표기는 프런트가 다른 LoL 화면과 같은 규칙으로 만듭니다. */
+  async function streamerBoardLolProfile(
+    post: StreamerBoardPostRow,
+    budget: { remaining: number }
+  ): Promise<Record<string, unknown> | undefined> {
+    if (!post.riotId || !post.games.includes("lol")) return undefined;
+    const stats = await streamerBoardRankedStats(post.riotId, budget);
+    if (!stats) return undefined;
+    return {
+      riotId: post.riotId,
+      tier: stats.tier,
+      ...(stats.rank ? { rank: stats.rank } : {}),
+      leaguePoints: stats.leaguePoints,
+      wins: stats.wins,
+      losses: stats.losses,
+      winRate: stats.winRate
+    };
+  }
+
+  function requireStreamerBoard(): StreamerBoardRepository {
+    if (!input.streamerBoard) {
+      throw new HttpRequestError(503, {
+        error: "추천 게시판을 사용할 수 없습니다.",
+        code: "feature_unavailable"
+      });
+    }
+    return input.streamerBoard;
+  }
+
+  /**
+   * 지금 방송 중인 채널 키. Twitch 조회가 실패하면 빈 목록이고 화면에는 LIVE 배지가
+   * 사라질 뿐입니다 — 게시판이 Twitch 장애에 같이 넘어가지 않아야 합니다.
+   */
+  async function streamerBoardLiveChannelKeys(): Promise<string[]> {
+    if (!input.streamerBoard) return [];
+    try {
+      const channelKeys = await input.streamerBoard.twitchChannelKeys();
+      return await streamerBoardChannels.liveChannelKeys(channelKeys);
+    } catch {
+      return [];
+    }
+  }
+
+  async function streamerBoardViewer(
+    req: IncomingMessage
+  ): Promise<{ twitchUserId: string; displayName: string } | undefined> {
+    const status = await getPublicTwitchViewerStatus(req).catch(() => undefined);
+    if (!status?.connected || !status.user?.id) return undefined;
+    return {
+      twitchUserId: status.user.id,
+      displayName: status.user.displayName || status.user.login
+    };
+  }
+
+  /** 변경 요청용. 로그인 + 신뢰 Origin 을 요구합니다(반응속도 기록과 같은 규칙). */
+  async function requireStreamerBoardViewer(
+    req: IncomingMessage
+  ): Promise<{ twitchUserId: string; displayName: string }> {
+    if (!stateChangingRequestHasTrustedOrigin(req)) {
+      throw new HttpRequestError(403, { error: "trusted Origin이 필요합니다.", code: "origin_denied" });
+    }
+    const viewer = await streamerBoardViewer(req);
+    if (!viewer) {
+      throw new HttpRequestError(401, {
+        error: "Twitch 로그인이 필요합니다.",
+        code: "session_required"
+      });
+    }
+    return viewer;
+  }
+
+  /**
+   * 공개 응답 1건. channelKey 는 내부 값이라 내보내지 않고, 작성자 식별자도 넣지
+   * 않습니다(표시 이름만).
+   *
+   * channelUrl 은 로그인한 사람에게만 실립니다 — 목업의 표시 규칙입니다.
+   */
+  function streamerBoardPostPayload(
+    post: StreamerBoardPostRow,
+    options: { signedIn: boolean; live: boolean; lolProfile?: Record<string, unknown> }
+  ): Record<string, unknown> {
+    return {
+      id: post.id,
+      streamerName: post.streamerName,
+      platform: post.platform,
+      ...(options.signedIn ? { channelUrl: post.channelUrl } : {}),
+      /* 같은 origin 경로입니다 — 시청자 브라우저가 Twitch CDN 에 직접 붙지 않습니다.
+         Twitch 채널이 아니면 이미지가 없고 화면이 플랫폼 마크로 떨어집니다. */
+      ...(twitchLoginForChannelKey(post.channelKey)
+        ? { profileImageUrl: `/api/public/streamers/${post.id}/avatar` }
+        : {}),
+      live: options.live,
+      games: [...post.games],
+      tags: [...post.tags],
+      votes: post.votes,
+      voted: post.voted,
+      commentCount: post.commentCount,
+      authorName: post.authorName,
+      createdAt: post.createdAt,
+      /* 전적 줄은 리그 오브 레전드 글에만 붙습니다 — 다른 게임은 게임 표기까지입니다. */
+      ...(options.lolProfile ? { lolProfile: options.lolProfile } : {})
+    };
+  }
+
+  function streamerBoardCommentPayload(comment: StreamerBoardCommentRow): Record<string, unknown> {
+    return {
+      id: comment.id,
+      anonymous: comment.anonymous,
+      ...(comment.authorName ? { authorName: comment.authorName } : {}),
+      body: comment.body,
+      createdAt: comment.createdAt
+    };
+  }
+
+  async function getStreamerBoardList(req: IncomingMessage, url: URL): Promise<Record<string, unknown>> {
+    const board = requireStreamerBoard();
+    const query = parseStreamerListQuery(url.searchParams);
+    const viewer = await streamerBoardViewer(req);
+    /* LIVE 는 DB 에 없는 값입니다. 지금 방송 중인 채널을 먼저 받아 두고, liveOnly
+       필터일 때는 그 목록으로 좁힙니다. 조회가 실패하면 LIVE 없이 나갑니다 —
+       게시판이 Twitch 장애에 같이 넘어가지 않아야 합니다. */
+    const liveKeys = await streamerBoardLiveChannelKeys();
+    const result = await board.list(query, viewer?.twitchUserId, liveKeys);
+    const budget = { remaining: STREAMER_BOARD_RANK_MAX_LOOKUPS };
+    const posts = await Promise.all(result.posts.map(async (post) => {
+      const lolProfile = await streamerBoardLolProfile(post, budget);
+      return streamerBoardPostPayload(post, {
+        signedIn: Boolean(viewer),
+        live: liveKeys.includes(post.channelKey),
+        ...(lolProfile ? { lolProfile } : {})
+      });
+    }));
+    return { total: result.total, liveCount: result.liveCount, posts };
+  }
+
+  async function getStreamerBoardPost(req: IncomingMessage, postId: string): Promise<Record<string, unknown>> {
+    const board = requireStreamerBoard();
+    const viewer = await streamerBoardViewer(req);
+    const post = await board.findPost(postId, viewer?.twitchUserId);
+    if (!post) {
+      throw new HttpRequestError(404, { error: "추천 글을 찾을 수 없습니다.", code: "post_not_found" });
+    }
+    const [comments, liveKeys] = await Promise.all([
+      board.comments(postId),
+      streamerBoardLiveChannelKeys()
+    ]);
+    const lolProfile = await streamerBoardLolProfile(post, { remaining: 1 });
+    return {
+      post: streamerBoardPostPayload(post, {
+        signedIn: Boolean(viewer),
+        live: liveKeys.includes(post.channelKey),
+        ...(lolProfile ? { lolProfile } : {})
+      }),
+      comments: comments.map(streamerBoardCommentPayload)
+    };
+  }
+
+  /** 글의 채널 프로필 이미지. 글이 없거나 Twitch 채널이 아니면 undefined 입니다. */
+  async function streamerBoardAvatar(postId: string) {
+    if (!input.streamerBoard) return undefined;
+    const post = await input.streamerBoard.findPost(postId);
+    if (!post) return undefined;
+    return streamerBoardChannels.avatar(post.channelKey);
+  }
+
+  async function createStreamerBoardPost(req: IncomingMessage): Promise<Record<string, unknown>> {
+    const board = requireStreamerBoard();
+    const viewer = await requireStreamerBoardViewer(req);
+    const draft = parseStreamerPostDraft(await readJsonBody<unknown>(req));
+    if (!draft) {
+      throw new HttpRequestError(400, {
+        error: "채널 주소와 주력 게임을 확인해 주세요.",
+        code: "invalid_request"
+      });
+    }
+    try {
+      const post = await board.createPost(draft, viewer);
+      return { post: streamerBoardPostPayload(post, { signedIn: true, live: false }) };
+    } catch (error) {
+      if (error instanceof StreamerChannelTakenError) {
+        /* 한 채널은 글 하나입니다. 화면이 그 글로 안내할 수 있게 알려 줍니다. */
+        throw new HttpRequestError(409, {
+          error: "이미 등록된 채널입니다.",
+          code: "duplicate_channel",
+          existing: error.existing
+        });
+      }
+      throw error;
+    }
+  }
+
+  async function voteStreamerBoardPost(req: IncomingMessage, postId: string): Promise<Record<string, unknown>> {
+    const board = requireStreamerBoard();
+    const viewer = await requireStreamerBoardViewer(req);
+    const result = await board.vote(postId, viewer.twitchUserId);
+    if (!result) {
+      throw new HttpRequestError(404, { error: "추천 글을 찾을 수 없습니다.", code: "post_not_found" });
+    }
+    return { votes: result.votes, voted: true };
+  }
+
+  async function createStreamerBoardComment(
+    req: IncomingMessage,
+    postId: string
+  ): Promise<Record<string, unknown>> {
+    const board = requireStreamerBoard();
+    const viewer = await requireStreamerBoardViewer(req);
+    const draft = parseStreamerCommentDraft(await readJsonBody<unknown>(req));
+    if (!draft) {
+      throw new HttpRequestError(400, { error: "댓글 내용을 확인해 주세요.", code: "invalid_request" });
+    }
+    const comment = await board.createComment(postId, draft, viewer);
+    if (!comment) {
+      throw new HttpRequestError(404, { error: "추천 글을 찾을 수 없습니다.", code: "post_not_found" });
+    }
+    return { comment: streamerBoardCommentPayload(comment) };
+  }
+
+  async function reportStreamerBoardComment(
+    req: IncomingMessage,
+    postId: string,
+    commentId: string
+  ): Promise<Record<string, unknown>> {
+    const board = requireStreamerBoard();
+    const viewer = await requireStreamerBoardViewer(req);
+    const reason = parseStreamerReportReason(await readJsonBody<unknown>(req));
+    if (!reason) {
+      throw new HttpRequestError(400, { error: "신고 사유를 확인해 주세요.", code: "invalid_request" });
+    }
+    const accepted = await board.reportComment(postId, commentId, reason, viewer.twitchUserId);
+    if (!accepted) {
+      throw new HttpRequestError(404, { error: "댓글을 찾을 수 없습니다.", code: "comment_not_found" });
+    }
+    /* 이미 신고한 댓글인지는 알려 주지 않습니다 — 신고 여부가 새면 떠볼 수 있습니다. */
+    return { reported: true };
+  }
+
   async function yoroStreamerContext(
     req: IncomingMessage,
     mutation = false
@@ -8692,7 +9000,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
               ? publicValorantApiLimiter
           : url.pathname.startsWith("/api/twitch-extension/")
               ? twitchExtensionApiLimiter
-          : url.pathname.startsWith("/api/lol/") || url.pathname.startsWith("/api/public/twitch/") || url.pathname.startsWith("/api/public/aram/") || url.pathname.startsWith("/api/public/patch-notes") || url.pathname.startsWith("/api/public/participation/") || url.pathname === "/api/public/locale"
+          : url.pathname.startsWith("/api/lol/") || url.pathname.startsWith("/api/public/twitch/") || url.pathname.startsWith("/api/public/aram/") || url.pathname.startsWith("/api/public/patch-notes") || url.pathname.startsWith("/api/public/participation/") || url.pathname.startsWith("/api/public/streamers") || url.pathname === "/api/public/locale"
               ? publicLolApiLimiter
               : dashboardApiLimiter;
         const limited = limiter.check(limitKey);
@@ -11245,6 +11553,68 @@ export function createHttpHandler(input: HttpHandlerInput) {
           /* 개인 전적입니다. 공용 캐시에 남기지 않습니다. */
           "Cache-Control": "private, max-age=60"
         });
+      }
+      if (url.pathname === "/api/public/streamers" || url.pathname.startsWith("/api/public/streamers/")) {
+        const segments = url.pathname.slice("/api/public/streamers".length).split("/").filter(Boolean);
+        if (req.method === "GET" && segments.length === 0) {
+          /* 목록은 사람마다 다릅니다(로그인 여부로 channelUrl 이 갈리고 voted 가 붙습니다).
+             공용 캐시에 넣으면 남의 상태를 보게 됩니다. */
+          return sendJson(req, res, 200, await getStreamerBoardList(req, url), {
+            "Cache-Control": "private, no-store"
+          });
+        }
+        if (req.method === "POST" && segments.length === 0) {
+          return sendJson(req, res, 201, await createStreamerBoardPost(req), {
+            "Cache-Control": "private, no-store"
+          });
+        }
+        const postId = segments[0];
+        if (postId && isStreamerPostId(postId)) {
+          if (req.method === "GET" && segments.length === 1) {
+            return sendJson(req, res, 200, await getStreamerBoardPost(req, postId), {
+              "Cache-Control": "private, no-store"
+            });
+          }
+          if (req.method === "GET" && segments.length === 2 && segments[1] === "avatar") {
+            const avatar = await streamerBoardAvatar(postId);
+            if (!avatar) {
+              /* 이미지가 없으면 화면이 플랫폼 마크로 닫습니다 — 정상 경로입니다. */
+              return sendJson(req, res, 404, { error: "not found" }, { "Cache-Control": "public, max-age=600" });
+            }
+            if (req.headers["if-none-match"] === avatar.etag) {
+              res.writeHead(304, { ETag: avatar.etag, "Cache-Control": "public, max-age=3600" });
+              res.end();
+              return true;
+            }
+            res.writeHead(200, {
+              "Content-Type": avatar.contentType,
+              "Content-Length": String(avatar.body.length),
+              ETag: avatar.etag,
+              "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
+              ...SECURITY_HEADERS
+            });
+            res.end(avatar.body);
+            return true;
+          }
+          if (req.method === "POST" && segments.length === 2 && segments[1] === "vote") {
+            return sendJson(req, res, 200, await voteStreamerBoardPost(req, postId));
+          }
+          if (req.method === "POST" && segments.length === 2 && segments[1] === "comments") {
+            return sendJson(req, res, 201, await createStreamerBoardComment(req, postId));
+          }
+          const commentId = segments[2];
+          if (
+            req.method === "POST"
+            && segments.length === 4
+            && segments[1] === "comments"
+            && segments[3] === "report"
+            && commentId
+            && isStreamerPostId(commentId)
+          ) {
+            return sendJson(req, res, 202, await reportStreamerBoardComment(req, postId, commentId));
+          }
+        }
+        return sendJson(req, res, 404, { error: "not found" });
       }
       if (req.method === "GET" && url.pathname === "/api/public/participation/state") {
         return sendJson(req, res, 200, await getPublicParticipationState(req));

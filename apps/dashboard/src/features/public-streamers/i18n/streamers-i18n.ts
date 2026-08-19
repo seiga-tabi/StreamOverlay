@@ -55,6 +55,8 @@ export const streamersI18n = {
     listEmptyBody: "첫 추천을 남겨 보세요. 채널 주소와 주력 게임만 있으면 됩니다.",
     listError: "추천 글을 불러오지 못했습니다.",
     listErrorBody: "잠시 후 다시 시도해 주세요.",
+    listNotReady: "추천 게시판을 준비하고 있습니다.",
+    listNotReadyBody: "글 등록과 목록은 서버 작업이 끝나면 열립니다. 다른 게임 정보는 그대로 이용할 수 있습니다.",
     retry: "다시 시도",
     notFound: "찾을 수 없는 페이지입니다.",
     notFoundBody: "주소를 다시 확인하거나 목록으로 돌아가 주세요.",
@@ -105,7 +107,8 @@ export const streamersI18n = {
     composeDuplicateList: "추천 목록에서 찾기",
     composeSubmit: "등록",
     composeLoginRequired: "추천 글은 로그인 후에 쓸 수 있습니다.",
-    composeUnavailable: "추천 글 등록은 아직 준비 중입니다.",
+    composeUnavailable: "추천 글 등록은 아직 준비 중입니다. 서버 작업이 끝나면 열립니다.",
+    composeFailed: "지금은 등록하지 못했습니다. 잠시 후 다시 시도해 주세요.",
   },
   ja: {
     brand: "配信者おすすめ",
@@ -156,6 +159,8 @@ export const streamersI18n = {
     listEmptyBody: "最初のおすすめを書いてみてください。チャンネルURLと主なゲームだけで大丈夫です。",
     listError: "おすすめを読み込めませんでした。",
     listErrorBody: "しばらくしてから再試行してください。",
+    listNotReady: "おすすめ掲示板を準備しています。",
+    listNotReadyBody: "投稿と一覧はサーバー作業が終わり次第公開されます。ほかのゲーム情報はそのままご利用いただけます。",
     retry: "再試行",
     notFound: "ページが見つかりません。",
     notFoundBody: "URLを確認するか、一覧に戻ってください。",
@@ -206,7 +211,8 @@ export const streamersI18n = {
     composeDuplicateList: "おすすめ一覧から探す",
     composeSubmit: "投稿",
     composeLoginRequired: "おすすめはログイン後に書けます。",
-    composeUnavailable: "おすすめの投稿はまだ準備中です。",
+    composeUnavailable: "おすすめの投稿はまだ準備中です。サーバー作業が終わり次第公開されます。",
+    composeFailed: "現在は投稿できませんでした。しばらくしてから再試行してください。",
   },
 } as const;
 
