@@ -93,7 +93,6 @@ import {
   invalidatePublicLolMatchPageCache,
   prefetchPublicLolMatchPage,
   PublicHomeSearchPanel,
-  PublicAppHeader as FeaturePublicAppHeader,
   PublicBottomTabBar,
   PublicLocaleSelector,
   ChampionFilterSelect,
@@ -117,7 +116,6 @@ import {
   ProfileMetricStrip as FeatureProfileMetricStrip,
   ProfileTopPanel as FeatureProfileTopPanel,
   PublicProfileShareButton,
-  MatchTeamCompare as FeatureMatchTeamCompare,
   MatchBuildBoard as FeatureMatchBuildBoard,
   RecentMatchBuildRuneBoard as FeatureRecentMatchBuildRuneBoard,
   MatchTeamDetails as FeatureMatchTeamDetails,
@@ -146,10 +144,6 @@ import {
   type PublicHomeLiveStreamer,
   type PublicHomeSearchPanelText,
   type PublicSiteFooterText,
-  type MatchTeamCompareMetricViewModel,
-  type MatchTeamCompareObjectiveViewModel,
-  type MatchTeamCompareTeamViewModel,
-  type MatchTeamCompareViewModel,
   type MatchTeamDetailsTeam,
   type PlayerItemBuildSlotViewModel,
   type PlayerItemBuildViewModel,
@@ -186,8 +180,7 @@ import { publicContentLocale,
   setActivePublicLocale,
   t,
   type PublicLocale,
-  type PublicTextKey,
-} from "../features/public-lol/i18n/public-lol-i18n";
+  type PublicTextKey, publicIntlLocale, publicLocaleText, } from "../features/public-lol/i18n/public-lol-i18n";
 import type {
   PublicLolMatchParticipant,
   PublicLolMatchTeamDetail,
@@ -451,7 +444,7 @@ async function loadPublicLocalePreference(signal?: AbortSignal): Promise<PublicL
 }
 
 /* LoL 로컬 표는 ko·ja 만 유지 — en 은 publicContentLocale 축소로 ko 폴백(팰월드 우선 단계). */
-const queueLabels: Record<"ko" | "ja", Record<number, string>> = {
+const queueLabels: Record<"ko" | "ja" | "en", Record<number, string>> = {
   ko: {
     6: "5v5 랭크",
     42: "5v5 랭크",
@@ -481,10 +474,24 @@ const queueLabels: Record<"ko" | "ja", Record<number, string>> = {
     430: "ノーマル",
     440: "フレックスランク",
     450: "ランダムミッド"
+  },
+  en: {
+    6: "5v5 Ranked",
+    42: "5v5 Ranked",
+    710: "5vs5 Ranked",
+    2300: "Augment ARAM",
+    1700: "Arena",
+    1710: "Arena",
+    1750: "Arena 3x6",
+    400: "Normal Draft",
+    420: "Ranked Solo",
+    430: "Normal",
+    440: "Ranked Flex",
+    450: "ARAM"
   }
 };
 
-const roleLabels: Record<"ko" | "ja", Record<string, string>> = {
+const roleLabels: Record<"ko" | "ja" | "en", Record<string, string>> = {
   ko: {
     TOP: "탑",
     JUNGLE: "정글",
@@ -508,6 +515,18 @@ const roleLabels: Record<"ko" | "ja", Record<string, string>> = {
     SUPPORT: "サポート",
     FILL: "どこでも",
     UNKNOWN: "不明"
+  },
+  en: {
+    TOP: "Top",
+    JUNGLE: "Jungle",
+    MIDDLE: "Mid",
+    MID: "Mid",
+    BOTTOM: "ADC",
+    ADC: "ADC",
+    UTILITY: "Support",
+    SUPPORT: "Support",
+    FILL: "Fill",
+    UNKNOWN: "Unknown"
   }
 };
 
@@ -733,23 +752,26 @@ function resultLabel(result: PublicLolRecentMatch["result"]): string {
   return t().unknown;
 }
 
-/** 매치 행의 승패 배지용 1글자 라벨입니다. 한국어 승/패, 일본어 勝/敗 모두 1글자 폭이 유지됩니다. */
+/** 매치 행·공유 이미지의 승패 1글자 라벨 — 승/패·勝/敗·W/L(en 은 slice 로 만들면
+    "Victory"→"V" 가 되어 게임 관례(W/L)와 어긋나 전용 키를 씁니다). */
 function resultShortLabel(result: PublicLolRecentMatch["result"]): string {
-  return resultLabel(result).slice(0, 1);
+  if (result === "win") return t().winShort;
+  if (result === "loss") return t().lossShort;
+  return "—";
 }
 
 function formatDate(value: string | undefined): string {
   if (!value) return "-";
   const date = new Date(value);
   if (!Number.isFinite(date.getTime())) return "-";
-  return new Intl.DateTimeFormat(activePublicLocale === "ja" ? "ja-JP" : "ko-KR", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).format(date);
+  return new Intl.DateTimeFormat(publicIntlLocale(), { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).format(date);
 }
 
 function formatMatchDate(value: string | undefined): string {
   if (!value) return "-";
   const date = new Date(value);
   if (!Number.isFinite(date.getTime())) return "-";
-  return new Intl.DateTimeFormat(activePublicLocale === "ja" ? "ja-JP" : "ko-KR", {
+  return new Intl.DateTimeFormat(publicIntlLocale(), {
     year: "numeric",
     month: "2-digit",
     day: "2-digit"
@@ -760,7 +782,7 @@ function formatMatchTime(value: string | undefined): string {
   if (!value) return "-";
   const date = new Date(value);
   if (!Number.isFinite(date.getTime())) return "-";
-  return new Intl.DateTimeFormat(activePublicLocale === "ja" ? "ja-JP" : "ko-KR", {
+  return new Intl.DateTimeFormat(publicIntlLocale(), {
     hour: "2-digit",
     minute: "2-digit"
   }).format(date);
@@ -782,7 +804,7 @@ function formatRelativeDate(value: string | undefined): string {
 function formatBuildMinute(timestampMs: number | undefined): string {
   if (timestampMs === undefined || !Number.isFinite(timestampMs)) return "-";
   const minutes = Math.max(0, Math.floor(timestampMs / 60_000));
-  return activePublicLocale === "ja" ? `${minutes}分` : `${minutes}분`;
+  return publicLocaleText(`${minutes}분`, `${minutes}分`, `${minutes}m`);
 }
 
 function KdaMetricText({ value, digits = 2 }: { value: number | undefined; digits?: number }) {
@@ -876,12 +898,18 @@ function damagePerMinuteTone(value: number | undefined): MetricTone {
 
 function mainRoleLabel(role: string | undefined): string {
   if (!role) return "-";
-  return roleLabels[publicContentLocale(activePublicLocale)][role.toUpperCase()] ?? role;
+  return roleLabels[activePublicLocale][role.toUpperCase()] ?? role;
 }
 
 function championName(champion: LolChampionSummary | undefined, locale: PublicLocale = activePublicLocale): string {
   if (!champion) return "-";
   if (locale === "ja") return champion.nameJa ?? champion.nameKo ?? champion.championKey ?? `Champion ${champion.championId}`;
+  /* en — 응답에 영문 표시명이 따로 없어 Data Dragon championKey("MissFortune")를
+     대문자 경계로 띄웁니다. 아포스트로피류(Kha'Zix 등)는 근사 표기입니다. */
+  if (locale === "en") {
+    const englishName = champion.championKey?.replace(/([a-z])([A-Z])/g, "$1 $2");
+    return englishName ?? champion.nameKo ?? champion.nameJa ?? `Champion ${champion.championId}`;
+  }
   return champion.nameKo ?? champion.nameJa ?? champion.championKey ?? `Champion ${champion.championId}`;
 }
 
@@ -926,27 +954,6 @@ function objectiveSummaryByOrder(objectives: Record<string, number> | undefined,
   return entries.length > 0 ? entries.join(" · ") : "-";
 }
 
-const teamCompareObjectiveKeys = ["horde", "riftHerald", "dragon", "baron", "inhibitor", "tower"] as const;
-
-const objectiveShortLabels: Record<"ko" | "ja", Record<(typeof teamCompareObjectiveKeys)[number], string>> = {
-  ko: {
-    horde: "유충",
-    riftHerald: "전령",
-    dragon: "용",
-    baron: "바론",
-    inhibitor: "억제",
-    tower: "타워"
-  },
-  ja: {
-    horde: "グラブ",
-    riftHerald: "ヘラルド",
-    dragon: "ドラ",
-    baron: "バロン",
-    inhibitor: "インヒビ",
-    tower: "タワー"
-  }
-};
-
 function recentRecord(matches: PublicLolRecentMatch[], title: string, unit: string, value: (match: PublicLolRecentMatch) => number | undefined): PublicRecentRecord {
   const match = matches.reduce<PublicLolRecentMatch | undefined>((best, current) => {
     if (!best) return current;
@@ -972,7 +979,7 @@ function recordValue(record: PublicRecentRecord): string {
 
 function winLossText(wins: number, games: number): string {
   const losses = Math.max(0, games - wins);
-  return activePublicLocale === "ja" ? `${wins}勝 ${losses}敗` : `${wins}승 ${losses}패`;
+  return publicLocaleText(`${wins}승 ${losses}패`, `${wins}勝 ${losses}敗`, `${wins}W ${losses}L`);
 }
 
 function gamesText(games: number): string {
@@ -980,21 +987,21 @@ function gamesText(games: number): string {
 }
 
 function winsText(wins: number): string {
-  return activePublicLocale === "ja" ? `${wins}勝` : `${wins}승`;
+  return publicLocaleText(`${wins}승`, `${wins}勝`, `${wins}W`);
 }
 
 function ladderRankText(rank: number | undefined): string | undefined {
   if (!rank) return undefined;
-  return activePublicLocale === "ja" ? `${t().ladderRank} ${formatNumber(rank)}位` : `${t().ladderRank} ${formatNumber(rank)}위`;
+  return publicLocaleText(`${t().ladderRank} ${formatNumber(rank)}위`, `${t().ladderRank} ${formatNumber(rank)}位`, `${t().ladderRank} #${formatNumber(rank)}`);
 }
 
 function perMinuteText(label: string, value: number | undefined, digits?: number): string {
   const formatted = digits === undefined ? formatNumber(value) : formatDecimal(value, digits);
-  return activePublicLocale === "ja" ? `分あたり${label} ${formatted}` : `분당 ${label} ${formatted}`;
+  return publicLocaleText(`분당 ${label} ${formatted}`, `分あたり${label} ${formatted}`, `${label}/min ${formatted}`);
 }
 
 function killParticipationText(value: number | undefined): string {
-  return activePublicLocale === "ja" ? `キル関与 ${formatPercent(value)}` : `킬 관여 ${formatPercent(value)}`;
+  return publicLocaleText(`킬 관여 ${formatPercent(value)}`, `キル関与 ${formatPercent(value)}`, `Kill participation ${formatPercent(value)}`);
 }
 
 function analysisRoleTitle(role: string | undefined): string {
@@ -1010,8 +1017,8 @@ function analysisRoleBody(sampleSize: number, confidence: number): string {
 }
 
 function analysisMasteryTitle(champion: LolChampionSummary | undefined): string {
-  if (!champion) return activePublicLocale === "ja" ? "チャンピオン熟練度データがありません。" : "챔피언 숙련도 데이터가 없습니다.";
-  return activePublicLocale === "ja" ? `${championName(champion)}の熟練度が高いです。` : `${championName(champion)} 숙련도가 높습니다.`;
+  if (!champion) return publicLocaleText("챔피언 숙련도 데이터가 없습니다.", "チャンピオン熟練度データがありません。", "No champion mastery data.");
+  return publicLocaleText(`${championName(champion)} 숙련도가 높습니다.`, `${championName(champion)}の熟練度が高いです。`, `High mastery on ${championName(champion)}.`);
 }
 
 function analysisMasteryBody(champion: LolChampionSummary): string {
@@ -1021,7 +1028,7 @@ function analysisMasteryBody(champion: LolChampionSummary): string {
 }
 
 function analysisRecentTitle(winRate: number): string {
-  return activePublicLocale === "ja" ? `最近の勝率は${winRate}%です。` : `최근 전적 승률은 ${winRate}%입니다.`;
+  return publicLocaleText(`최근 전적 승률은 ${winRate}%입니다.`, `最近の勝率は${winRate}%です。`, `Recent win rate is ${winRate}%.`);
 }
 
 function analysisRecentBody(profile: PublicLolProfile): string {
@@ -1031,8 +1038,8 @@ function analysisRecentBody(profile: PublicLolProfile): string {
 }
 
 function analysisChampionTitle(item: PublicLolChampionPerformance | undefined): string {
-  if (!item) return activePublicLocale === "ja" ? "最近のチャンピオン成績データがありません。" : "최근 챔피언 성과 데이터가 없습니다.";
-  return activePublicLocale === "ja" ? `最近は${championName(item.champion)}の成績が最も多いです。` : `최근에는 ${championName(item.champion)} 성과가 가장 많습니다.`;
+  if (!item) return publicLocaleText("최근 챔피언 성과 데이터가 없습니다.", "最近のチャンピオン成績データがありません。", "No recent champion performance data.");
+  return publicLocaleText(`최근에는 ${championName(item.champion)} 성과가 가장 많습니다.`, `最近は${championName(item.champion)}の成績が最も多いです。`, `${championName(item.champion)} has the most recent games.`);
 }
 
 function analysisChampionBody(item: PublicLolChampionPerformance): string {
@@ -1042,8 +1049,8 @@ function analysisChampionBody(item: PublicLolChampionPerformance): string {
 }
 
 function analysisRolePerformanceTitle(item: PublicLolRolePerformance | undefined): string {
-  if (!item) return activePublicLocale === "ja" ? "ロール別詳細データがありません。" : "포지션별 상세 데이터가 없습니다.";
-  return activePublicLocale === "ja" ? `${mainRoleLabel(item.role)}のサンプルが最も多いです。` : `${mainRoleLabel(item.role)} 포지션 표본이 가장 많습니다.`;
+  if (!item) return publicLocaleText("포지션별 상세 데이터가 없습니다.", "ロール別詳細データがありません。", "No per-role detail data.");
+  return publicLocaleText(`${mainRoleLabel(item.role)} 포지션 표본이 가장 많습니다.`, `${mainRoleLabel(item.role)}のサンプルが最も多いです。`, `${mainRoleLabel(item.role)} has the largest sample.`);
 }
 
 function analysisRolePerformanceBody(item: PublicLolRolePerformance): string {
@@ -1737,8 +1744,8 @@ function profileHeroRankQueue(
   stats: LolRankedStats | undefined,
 ): ProfileHeroRankQueue {
   const ranked = Boolean(stats) && stats?.tier !== "UNRANKED";
-  const winLabel = activePublicLocale === "ja" ? "勝" : "승";
-  const lossLabel = activePublicLocale === "ja" ? "敗" : "패";
+  const winLabel = publicLocaleText("승", "勝", "W");
+  const lossLabel = publicLocaleText("패", "敗", "L");
   if (!ranked || !stats) {
     return {
       id,
@@ -1784,8 +1791,8 @@ function ProfileRecentSummaryBar({ profile }: { profile: PublicLolProfile }) {
   if (!summary || summary.recentGames <= 0) return null;
   const games = summary.recentGames;
   const losses = Math.max(0, games - summary.recentWins);
-  const winLabel = activePublicLocale === "ja" ? "勝" : "승";
-  const lossLabel = activePublicLocale === "ja" ? "敗" : "패";
+  const winLabel = publicLocaleText("승", "勝", "W");
+  const lossLabel = publicLocaleText("패", "敗", "L");
   const per = (total: number) => (total / games).toFixed(1);
   return (
     <div className="public-hero-summary-bar">
@@ -2261,7 +2268,7 @@ function RankSummaryPanel({ profile }: { profile: PublicLolProfile }) {
     <section className="public-panel public-rank-summary-panel">
       <div className="public-section-head">
         <h2  >{t().soloRank}</h2>
-        <span>{stats ? `${stats.wins}${activePublicLocale === "ja" ? "勝" : "승"} ${stats.losses}${activePublicLocale === "ja" ? "敗" : "패"}` : t().noData}</span>
+        <span>{stats ? `${stats.wins}${publicLocaleText("승", "勝", "W")} ${stats.losses}${publicLocaleText("패", "敗", "L")}` : t().noData}</span>
       </div>
       <div className="public-rank-summary-main">
         {tierIcon ? <img src={tierIcon} alt="" /> : <div className="public-rank-fallback">{stats?.tier?.slice(0, 1) ?? "U"}</div>}
@@ -2450,7 +2457,7 @@ function ProfileFrequentTeammatesCard({ profile }: { profile: PublicLolProfile }
                   {mate.lastPlayedAt ? (
                     <small>
                       {t().frequentTeammatesLast}{" "}
-                      {new Intl.DateTimeFormat(activePublicLocale === "ja" ? "ja-JP" : "ko-KR", { month: "long", day: "numeric" })
+                      {new Intl.DateTimeFormat(publicIntlLocale(), { month: "long", day: "numeric" })
                         .format(new Date(mate.lastPlayedAt))}
                     </small>
                   ) : null}
@@ -2672,7 +2679,7 @@ function SignatureBuildsPanel({
                   <b className={winRateTone(entry.winRate, entry.games)}>{formatPercent(entry.winRate)}</b>
                   <small>
                     <span className="is-win">{winsText(entry.wins)}</span>{" "}
-                    <span className="is-loss">{entry.games - entry.wins}{activePublicLocale === "ja" ? "敗" : "패"}</span>
+                    <span className="is-loss">{entry.games - entry.wins}{publicLocaleText("패", "敗", "L")}</span>
                   </small>
                 </span>
                 <span aria-hidden="true" className="public-sig-chev" />
@@ -2779,7 +2786,7 @@ function SignatureBuildsPanel({
 function ProfileRecentChampionsSideCard({ profile }: { profile: PublicLolProfile }) {
   const champions = profile.championPerformance.slice(0, 3);
   if (champions.length === 0) return null;
-  const lossLabel = activePublicLocale === "ja" ? "敗" : "패";
+  const lossLabel = publicLocaleText("패", "敗", "L");
   return (
     <article className="public-profile-side-card public-profile-recent-champs">
       <div className="public-profile-side-head">
@@ -3172,111 +3179,8 @@ function PublicMatchFilterBar({
   );
 }
 
-function PublicAppHeader({
-  locale,
-  profile,
-  twitchStatus,
-  activePage,
-  activeTarget,
-  showSearch = true,
-  showFilters = true,
-  query,
-  loading,
-  platform,
-  platformOptions,
-  suggestions,
-  recentSearches = [],
-  favorites = [],
-  searchPanelRequest,
-  filters,
-  champions,
-  onHome,
-  onQuery,
-  onPlatformChange,
-  onClear,
-  onSubmit,
-  onPickSuggestion,
-  onPage,
-  onLocale,
-  onAutoLocale,
-  onTwitchLogin,
-  onStreamerRegister,
-  onStreamerRecord,
-  onTwitchLogout,
-  onFilters,
-  onResetFilters
-}: {
-  locale: PublicLocale;
-  profile: PublicLolProfile | null;
-  twitchStatus: PublicTwitchViewerStatus;
-  activePage: PublicMainPage;
-  activeTarget: PublicNavTarget;
-  showSearch?: boolean;
-  showFilters?: boolean;
-  query: string;
-  loading: boolean;
-  platform: LolPlatformId;
-  platformOptions: readonly SearchFormPlatformOption[];
-  suggestions: SearchSuggestion[];
-  recentSearches?: SearchSuggestion[];
-  favorites?: PublicFavorite[];
-  searchPanelRequest?: SearchFormPanelRequest;
-  filters: PublicMatchFilters;
-  champions: LolChampionSummary[];
-  onHome: () => void;
-  onQuery: (value: string) => void;
-  onPlatformChange: (platform: LolPlatformId) => void;
-  onClear: () => void;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
-  onPickSuggestion: (suggestion: SearchSuggestion) => void;
-  onPage: (page: PublicMainPage) => void;
-  onLocale: (locale: PublicLocale) => void;
-  onAutoLocale: () => void;
-  onTwitchLogin: () => void;
-  onStreamerRegister: () => void;
-  onStreamerRecord: () => void;
-  onTwitchLogout: () => void;
-  onFilters: (filters: PublicMatchFilters) => void;
-  onResetFilters: () => void;
-}) {
-  return (
-    <FeaturePublicAppHeader
-      locale={locale}
-      twitchStatus={twitchStatus}
-      activePage={activePage}
-      activeTarget={activeTarget}
-      showSearch={showSearch}
-      showFilters={showFilters}
-      filterActive={hasActiveFilters(filters)}
-      searchContent={showSearch ? (
-        <SearchForm
-          query={query}
-          loading={loading}
-          platform={platform}
-          platformOptions={platformOptions}
-          onQuery={onQuery}
-          onPlatformChange={onPlatformChange}
-          onClear={onClear}
-          onSubmit={onSubmit}
-          suggestions={suggestions}
-          recentSearches={recentSearches}
-          favorites={favorites}
-          panelRequest={searchPanelRequest}
-          onPickSuggestion={onPickSuggestion}
-        />
-      ) : undefined}
-      filterContent={<PublicFilterPanel filters={filters} champions={champions} onChange={onFilters} onReset={onResetFilters} />}
-      onHome={onHome}
-      onPage={onPage}
-      onLocale={onLocale}
-      onAutoLocale={onAutoLocale}
-      onTwitchLogin={onTwitchLogin}
-      onStreamerRegister={onStreamerRegister}
-      onStreamerRecord={onStreamerRecord}
-      onTwitchLogout={onTwitchLogout}
-    />
-  );
-}
+/* 상단바는 HomeHeader 한 벌로 통일 — 구 PublicAppHeader 래퍼는 제거했습니다
+   (docs/handoffs/2026-08-21-app-header-shared-prompt.md). */
 
 function PublicStreamerRegistrationScreen({
   status,
@@ -4276,7 +4180,7 @@ function formatPublicDateTime(value: string | undefined): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString(activePublicLocale === "ja" ? "ja-JP" : "ko-KR", {
+  return date.toLocaleString(publicIntlLocale(), {
     month: "2-digit",
     day: "2-digit",
     hour: "2-digit",
@@ -4758,7 +4662,7 @@ function runeTreeColumnViewModel(
       ? style.slots.slice(1)
       : style.slots
     : [];
-  const title = style?.name ?? runeName(styleRune) ?? (kind === "primary" ? (activePublicLocale === "ja" ? "メインルーン" : "주 룬") : (activePublicLocale === "ja" ? "サブルーン" : "부 룬"));
+  const title = style?.name ?? runeName(styleRune) ?? (kind === "primary" ? publicLocaleText("주 룬", "メインルーン", "Primary rune") : publicLocaleText("부 룬", "サブルーン", "Secondary rune"));
   const styleIcon = dataDragonRuneAssetUrl(style?.icon) ?? styleRune?.iconUrl;
 
   const rows: RecentMatchBuildRuneRow[] = runeSlots.length ? runeSlots.map((slot, slotIndex) => ({
@@ -4808,7 +4712,7 @@ function runeShardColumnViewModel(runes: PublicLolMatchParticipant["runes"]): Re
       .map((rune) => [rune.category, rune])
   );
   const categories: Array<PublicStatShardOption["category"]> = ["offense", "flex", "defense"];
-  const shardTitle = activePublicLocale === "ja" ? "ステータスシャード" : "능력치 파편";
+  const shardTitle = publicLocaleText("능력치 파편", "ステータスシャード", "Stat shards");
   return {
     key: "rune-column:shards",
     className: "public-match-rune-column shards",
@@ -4916,7 +4820,7 @@ function recentMatchBuildViewModel({
       ja: publicI18n.ja.items
     },
     skillBuildLabel: {
-      label: activePublicLocale === "ja" ? "スキルビルド" : "스킬 빌드",
+      label: publicLocaleText("스킬 빌드", "スキルビルド", "Skill build"),
       ko: publicI18n.ko.matchBuildTab,
       ja: publicI18n.ja.matchBuildTab
     },
@@ -4925,7 +4829,7 @@ function recentMatchBuildViewModel({
       ko: publicI18n.ko.runes,
       ja: publicI18n.ja.runes
     },
-    skillOrderLabel: activePublicLocale === "ja" ? "スキル順" : "스킬 순서",
+    skillOrderLabel: publicLocaleText("스킬 순서", "スキル順", "Skill order"),
     noDataLabel: t().noData,
     participants: participants.map((participant) => {
       const key = buildParticipantKey(participant);
@@ -5077,13 +4981,16 @@ function RecentMatchBuildPanel({
   );
 }
 
+/* 와드(장신구, Riot slot 6)는 항상 마지막 칸입니다(후속 §1-3) — 접힌 행의
+   trinketSlot 분리와 같은 규칙. 순서를 다시 섞으면 10명의 와드가 네 번째에
+   끼어들어 열이 어긋납니다. 빈 칸은 자리를 지킵니다(세로 정렬). */
 function fixedTeamItemSlots(items: PublicLolMatchParticipant["items"]): Array<PublicLolMatchParticipant["items"][number] | undefined> {
   const slots = Array<PublicLolMatchParticipant["items"][number] | undefined>(7).fill(undefined);
   items.forEach((item, index) => {
     const slot = item.slot >= 0 && item.slot < slots.length ? item.slot : index;
     if (slot >= 0 && slot < slots.length && !slots[slot] && item.itemId > 0) slots[slot] = item;
   });
-  return [0, 1, 2, 6, 3, 4, 5].map((slot) => slots[slot]);
+  return [0, 1, 2, 3, 4, 5, 6].map((slot) => slots[slot]);
 }
 
 function playerItemBuildSlotsViewModel(
@@ -5225,88 +5132,7 @@ function riotIdAwardBadgeViewModels(badges?: PublicLolMatchBadge[]): SearchableR
   }));
 }
 
-function teamCompareTeams(match: PublicLolRecentMatch): [PublicLolMatchTeamDetail, PublicLolMatchTeamDetail] | undefined {
-  if (match.teams.length < 2) return undefined;
-  const ally = match.teams.find((team) => team.players.some((player) => player.isTarget));
-  const enemy = match.teams.find((team) => team !== ally);
-  if (ally && enemy) return [enemy, ally];
-  const fallbackLeft = match.teams[0];
-  const fallbackRight = match.teams[1];
-  if (!fallbackLeft || !fallbackRight) return undefined;
-  return [fallbackLeft, fallbackRight];
-}
-
-function teamComparePercent(value: number, total: number): number {
-  if (total <= 0) return 50;
-  if (value <= 0) return 0;
-  return Math.max(12, Math.min(88, (value / total) * 100));
-}
-
-function matchTeamCompareObjectivesViewModel(
-  team: PublicLolMatchTeamDetail,
-  side: "left" | "right"
-): MatchTeamCompareTeamViewModel {
-  return {
-    side,
-    label: teamLabel(team),
-    resultSummary: `${resultLabel(team.result)} · ${team.kills}/${team.deaths}/${team.assists}`,
-    objectivesAriaLabel: `${teamLabel(team)} ${t().objectives}`,
-    objectives: teamCompareObjectiveKeys.map((key): MatchTeamCompareObjectiveViewModel => ({
-      key: `${team.teamId}:${key}`,
-      className: `public-team-compare-objective ${key}`,
-      title: objectiveLabels[publicContentLocale(activePublicLocale)][key] ?? key,
-      shortLabel: objectiveShortLabels[publicContentLocale(activePublicLocale)][key],
-      value: team.objectives?.[key] ?? 0
-    }))
-  };
-}
-
-function matchTeamCompareMetricViewModel(
-  key: string,
-  label: string,
-  leftValue: number,
-  rightValue: number
-): MatchTeamCompareMetricViewModel {
-  const total = Math.max(0, leftValue) + Math.max(0, rightValue);
-  const leftWidth = teamComparePercent(leftValue, total);
-  const rightWidth = total <= 0 ? 50 : Math.max(0, 100 - leftWidth);
-  return {
-    key,
-    label,
-    leftValueLabel: formatNumber(leftValue),
-    rightValueLabel: formatNumber(rightValue),
-    leftWidth,
-    rightWidth
-  };
-}
-
-function matchTeamCompareViewModel(match: PublicLolRecentMatch): MatchTeamCompareViewModel | undefined {
-  const teams = teamCompareTeams(match);
-  if (!teams) return undefined;
-  const [leftTeam, rightTeam] = teams;
-  return {
-    ariaLabel: t().teamDetails,
-    tabsLabel: t().teamComparisonTabs,
-    objectivesLabel: t().objectives,
-    leftTeam: matchTeamCompareObjectivesViewModel(leftTeam, "left"),
-    rightTeam: matchTeamCompareObjectivesViewModel(rightTeam, "right"),
-    metrics: [
-      matchTeamCompareMetricViewModel("damage", t().totalDamage, leftTeam.damageDealtToChampions, rightTeam.damageDealtToChampions),
-      matchTeamCompareMetricViewModel(
-        "vision",
-        t().vision,
-        leftTeam.players.reduce((sum, player) => sum + (player.visionScore ?? 0), 0),
-        rightTeam.players.reduce((sum, player) => sum + (player.visionScore ?? 0), 0)
-      ),
-      matchTeamCompareMetricViewModel("gold", t().totalGold, leftTeam.goldEarned, rightTeam.goldEarned)
-    ]
-  };
-}
-
-function MatchTeamCompare({ match }: { match: PublicLolRecentMatch }) {
-  const viewModel = matchTeamCompareViewModel(match);
-  return viewModel ? <FeatureMatchTeamCompare viewModel={viewModel} /> : null;
-}
+/* 팀 비교 뷰모델·컴포넌트는 후속 §1-4 에서 제거했습니다. */
 
 function searchableRiotIdViewModel({
   riotId,
@@ -5422,10 +5248,8 @@ function MatchTeamDetails({
 }) {
   if (match.teams.length === 0) return null;
   const maxDamage = matchTeamTotal(match, (player) => player.damageDealtToChampions);
-  const maxCs = matchTeamTotal(match, (player) => player.cs);
-  const maxVision = matchTeamTotal(match, (player) => player.visionScore);
   const dataDragonVersion = recentMatchDataDragonVersion(match);
-  const teams: MatchTeamDetailsTeam[] = match.teams.map((team, teamIndex) => {
+  const teams: MatchTeamDetailsTeam[] = match.teams.map((team) => {
     const teamRankStats = team.players.map((player, index) => matchRankForPlayer(rankDetail, team.teamId, player, index));
     const tierSummary = rankLoading
       ? t().tierLoading
@@ -5470,6 +5294,7 @@ function MatchTeamDetails({
           },
           streamerBadge: visibleStreamer && streamerBadgeTitle ? {
             title: streamerBadgeTitle,
+            live: visibleStreamer.isLive
           } : undefined,
           riotId: searchableRiotIdViewModel({
             riotId: hideRiotIds ? undefined : player.riotId,
@@ -5491,31 +5316,48 @@ function MatchTeamDetails({
               value: player.damageDealtToChampions,
               total: maxDamage,
               tone: "damage",
-              label: t().totalDamage,
+              label: t().teamColDamage,
               labelClassName: metricToneClass(teamShareTone(player.damageShare))
             }),
-            cs: publicTeamMetricStatViewModel({
-              value: player.cs,
-              total: maxCs,
-              tone: "cs",
-              label: activePublicLocale === "ja" ? `CS · ${formatDecimal(player.csPerMinute, 1)}/分` : `CS · ${formatDecimal(player.csPerMinute, 1)}/분`,
-              labelClassName: metricToneClass(csTone(player.csPerMinute))
-            }),
-            vision: publicTeamMetricStatViewModel({
-              value: player.visionScore,
-              total: maxVision,
-              tone: "vision",
-              label: `${t().vision} · ${activePublicLocale === "ja" ? `${formatDecimal(player.visionScorePerMinute, 2)}/分` : `${formatDecimal(player.visionScorePerMinute, 2)}/분`}`
-            })
+            /* CS·시야는 값 + 보조 줄 한 셀(목업 §2-3) — 트랙은 피해량에만 둡니다. */
+            csVision: {
+              value: formatNumber(player.cs),
+              sub: `${formatDecimal(player.csPerMinute, 1)}${t().matchStatPerMinuteSuffix} · ${t().vision} ${formatNumber(player.visionScore)}`
+            },
+            /* 모바일 두 줄 카드의 아랫줄 — 지표를 숨기지 않고 되살립니다(목업 모바일). */
+            mobileMetrics: {
+              label: (
+                <>
+                  {t().teamColDamage} <b>{formatNumber(player.damageDealtToChampions)}</b>
+                  {" · CS "}<b>{formatNumber(player.cs)}</b>
+                  {` · ${t().vision} `}<b>{formatNumber(player.visionScore)}</b>
+                </>
+              ),
+              fillWidth: barWidth(player.damageDealtToChampions, maxDamage)
+            }
           }
         };
       }),
-      compareAfter: teamIndex === 0 && match.teams.length > 1 ? <MatchTeamCompare match={match} /> : undefined
+      /* 팀 비교 막대는 후속 §1-4 에서 삭제 — 요약 4칸(MatchGapStrip)과 같은 값의
+         중복이었고 두 팀 카드 사이의 흐름을 끊었습니다. */
     };
   });
 
   return (
-    <FeatureMatchTeamDetails ariaLabel={t().teamDetails} kdaLabel={t().kda} onSearchRiotId={onSearchRiotId} teams={teams} />
+    <FeatureMatchTeamDetails
+      ariaLabel={t().teamDetails}
+      columns={{
+        champion: t().teamColChampion,
+        summoner: t().teamColSummoner,
+        kda: t().kda,
+        damage: t().teamColDamage,
+        csVision: t().teamColCsVision,
+        items: t().arenaColItems
+      }}
+      kdaLabel={t().kda}
+      onSearchRiotId={onSearchRiotId}
+      teams={teams}
+    />
   );
 }
 
@@ -5527,7 +5369,7 @@ function currentGameTeamLabel(teamId: number): string {
 
 function currentGameQueueLabel(liveGame: PublicLolCurrentGame): string {
   return liveGame.queueId
-    ? queueLabels[publicContentLocale(activePublicLocale)][liveGame.queueId] ?? `${t().queue} ${liveGame.queueId}`
+    ? queueLabels[activePublicLocale][liveGame.queueId] ?? `${t().queue} ${liveGame.queueId}`
     : liveGame.gameMode ?? "-";
 }
 
@@ -5739,7 +5581,7 @@ function IngamePanel({
                                 <b>{formatPercent(stats.winRate)}</b>
                                 <small>
                                   <span className="is-win">{winsText(stats.wins)}</span>{" "}
-                                  <span className="is-loss">{stats.losses}{activePublicLocale === "ja" ? "敗" : "패"}</span>
+                                  <span className="is-loss">{stats.losses}{publicLocaleText("패", "敗", "L")}</span>
                                 </small>
                               </>
                             ) : (
@@ -5820,9 +5662,10 @@ function RecentMatches({
   }, [profile.riotId, profile.refreshAvailableAt]);
 
   async function ensureMatchDetail(match: PublicLolRecentMatch): Promise<void> {
+    /* 목록 응답의 teams 는 행 표기용 '경량 요약'(아이템·지표 없음)이라 상세 로드
+       완료의 증거가 아닙니다 — detail 캐시만 가드 기준으로 삼습니다. */
     if (
-      (match.teams?.length ?? 0) > 0
-      || matchDetails[match.matchId]
+      matchDetails[match.matchId]
       || matchDetailLoading[match.matchId]
       || matchDetailControllers.current.has(match.matchId)
     ) return;
@@ -6069,7 +5912,9 @@ function RecentMatches({
           };
           const recordContent = arena && match.arenaTeams && match.arenaTeams.length > 0 ? (
             <ArenaStandings hideRiotIds={hideRiotIds} teams={match.arenaTeams} />
-          ) : (hydratedMatch.teams?.length ?? 0) > 0 ? (
+          /* 목록의 경량 teams(행 표기용)로는 상세 테이블을 그리지 않습니다 —
+             아이템·지표가 비어 부실 표가 잠깐 보입니다. detail 도착 기준. */
+          ) : matchDetail && (hydratedMatch.teams?.length ?? 0) > 0 ? (
             <div className="public-md-record">
               <MatchGapStrip match={hydratedMatch} />
               <MatchTeamDetails match={hydratedMatch} rankDetail={rankDetail} rankLoading={rankLoading} hideRiotIds={hideRiotIds} onSearchRiotId={onSearchRiotId} />
@@ -6185,7 +6030,7 @@ function RecentMatches({
                   void ensureMatchRanks(match.matchId);
                 }
               }}
-              queueLabel={match.queueId ? queueLabels[publicContentLocale(activePublicLocale)][match.queueId] ?? `${t().queue} ${match.queueId}` : "-"}
+              queueLabel={match.queueId ? queueLabels[activePublicLocale][match.queueId] ?? `${t().queue} ${match.queueId}` : "-"}
               result={arena ? `arena ${arenaPlacementClass(arenaPlacement)}` : match.result}
               resultDurationLabel={formatDuration(match.durationSeconds)}
               resultLabel={arena ? t().arenaPlacement.replace("{n}", String(arenaPlacement)) : resultLabel(match.result)}
@@ -6217,7 +6062,7 @@ function RecentMatches({
       resultLabel: resultLabel(match.result),
       championName: championName(match.champion),
       championIconUrl: match.champion.iconUrl,
-      queueLabel: match.queueId ? queueLabels[publicContentLocale(activePublicLocale)][match.queueId] ?? `${t().queue} ${match.queueId}` : "-",
+      queueLabel: match.queueId ? queueLabels[activePublicLocale][match.queueId] ?? `${t().queue} ${match.queueId}` : "-",
       kda: `${formatNumber(match.kills)} / ${formatNumber(match.deaths)} / ${formatNumber(match.assists)}`,
       kdaMetric: `${formatDecimal(match.kda, 2)} KDA`,
       grade: recentMatchScoreGrade(aiScore),
@@ -6297,8 +6142,8 @@ function RecentMatches({
       losses={recentLosses}
       text={{
         winRateLabel: t().matchSummaryRecentWinRate,
-        winsLabel: t().win.slice(0, 1),
-        lossesLabel: t().loss.slice(0, 1),
+        winsLabel: t().winShort,
+        lossesLabel: t().lossShort,
         averageKdaLabel: t().matchSummaryAverageKda,
         topChampionsLabel: t().matchSummaryTopChampions
       }}
@@ -6320,9 +6165,9 @@ function RecentMatches({
     <>
       <b>{profile.summary.recentGames}{t().games}</b>
       <span aria-hidden="true" className="public-match-filter-summary-dot" />
-      <span className="public-match-filter-summary-win">{recentWins}{t().win.slice(0, 1)}</span>
+      <span className="public-match-filter-summary-win">{recentWins}{t().winShort}</span>
       {" "}
-      <span className="public-match-filter-summary-loss">{recentLosses}{t().loss.slice(0, 1)}</span>
+      <span className="public-match-filter-summary-loss">{recentLosses}{t().lossShort}</span>
       <span aria-hidden="true" className="public-match-filter-summary-dot" />
       {t().winRate} <b>{formatPercent(profile.summary.recentWinRate)}</b>
       <span aria-hidden="true" className="public-match-filter-summary-dot" />
@@ -6415,7 +6260,7 @@ function ChampionWinLossLine({ wins, losses, winRate }: { wins: number; losses: 
     <small className="public-champ-wl">
       <b>{formatPercent(winRate)}</b>
       {wins > 0 ? <span className="is-win">{winsText(wins)}</span> : null}
-      {losses > 0 ? <span className="is-loss">{losses}{activePublicLocale === "ja" ? "敗" : "패"}</span> : null}
+      {losses > 0 ? <span className="is-loss">{losses}{publicLocaleText("패", "敗", "L")}</span> : null}
     </small>
   );
 }
@@ -6528,7 +6373,7 @@ function ChampionAnalysisPanel({
                   <span>
                     <b>{formatPercent(form.winRate)}</b>{" "}
                     <small className="is-win">{winsText(form.wins)}</small>{" "}
-                    <small className="is-loss">{form.games - form.wins}{activePublicLocale === "ja" ? "敗" : "패"}</small>
+                    <small className="is-loss">{form.games - form.wins}{publicLocaleText("패", "敗", "L")}</small>
                   </span>
                   {form.averageDamagePerMinute !== undefined
                     ? <span><b>{formatNumber(form.averageDamagePerMinute)}</b> <small>DPM</small></span>
@@ -7700,41 +7545,21 @@ export function PublicLolPage({
         skipLinkLabel={t().skipToContent}
         variant="public"
       >
-        <AppShellHeader as="div">
-          <PublicAppHeader
+        {/* 상단바는 HomeHeader 한 벌(공용 규격 프롬프트 §2) — 화면별 헤더를 두지 않습니다. */}
+        <AppShellHeader as="div" className="yoro-home-chrome">
+          <HomeHeader
+            accountName={twitchStatus.user?.displayName}
+            activeGame="lol"
+            connected={twitchStatus.connected}
             locale={locale}
-            profile={profile}
-            twitchStatus={twitchStatus}
-            activePage={activeMainPage}
-            activeTarget={activeNav}
-            onHome={() => changeMainPage("search")}
-            showSearch={false}
-            showFilters={false}
-            query={query}
-            loading={loading}
-            platform={selectedLolPlatform}
-            platformOptions={platformOptions}
-            suggestions={visibleSuggestions}
-            recentSearches={recentSearches}
-            favorites={favorites}
-            searchPanelRequest={searchPanelRequest}
-            filters={filters}
-            champions={availableChampions}
-            onQuery={setQuery}
-            onPlatformChange={changeLolPlatform}
-            onClear={clearSearch}
-            onSubmit={(event) => void submit(event)}
-            onPickSuggestion={pickSuggestion}
-            onPage={navigateFromMenu}
+            onDashboard={() => window.location.assign("/dashboard")}
             onLocale={changeLocale}
-            onAutoLocale={autoDetectLocale}
-            onTwitchLogin={startTwitchLogin}
-            onStreamerRegister={openStreamerRegisterScreen}
-            onStreamerRecord={openStreamerRecord}
-            onTwitchLogout={() => void disconnectTwitchViewer()}
-            onFilters={setFilters}
-            onResetFilters={() => setFilters(DEFAULT_MATCH_FILTERS)}
+            onLoginOpen={startTwitchLogin}
+            onLogout={() => void disconnectTwitchViewer()}
+            onToggleTheme={toggleTheme}
+            text={homeI18n[locale]}
           />
+          <LolSubnav active="none" text={lolHomeI18n[locale]} />
         </AppShellHeader>
         <AppShellMain className="public-app-main" id="public-streamer-register-main">
           <PublicStreamerRegistrationScreen
@@ -7763,41 +7588,22 @@ export function PublicLolPage({
         skipLinkLabel={t().skipToContent}
         variant="public"
       >
-        <AppShellHeader as="div" className="public-home-shared-header">
-          <PublicAppHeader
+        {/* 검색 랜딩도 같은 HomeHeader 한 벌 — 본문에 큰 검색 패널이 있어 헤더
+            컴팩트 검색바(searchSlot)는 넣지 않습니다(공용 규격 프롬프트 §3). */}
+        <AppShellHeader as="div" className="yoro-home-chrome public-home-shared-header">
+          <HomeHeader
+            accountName={twitchStatus.user?.displayName}
+            activeGame="lol"
+            connected={twitchStatus.connected}
             locale={locale}
-            profile={profile}
-            twitchStatus={twitchStatus}
-            activePage={activeMainPage}
-            activeTarget={activeNav}
-            onHome={() => changeMainPage("search")}
-            showSearch={false}
-            showFilters={false}
-            query={query}
-            loading={loading}
-            platform={selectedLolPlatform}
-            platformOptions={platformOptions}
-            suggestions={visibleSuggestions}
-            recentSearches={recentSearches}
-            favorites={favorites}
-            searchPanelRequest={searchPanelRequest}
-            filters={filters}
-            champions={availableChampions}
-            onQuery={setQuery}
-            onPlatformChange={changeLolPlatform}
-            onClear={clearSearch}
-            onSubmit={(event) => void submit(event)}
-            onPickSuggestion={pickSuggestion}
-            onPage={navigateFromMenu}
+            onDashboard={() => window.location.assign("/dashboard")}
             onLocale={changeLocale}
-            onAutoLocale={autoDetectLocale}
-            onTwitchLogin={startTwitchLogin}
-            onStreamerRegister={openStreamerRegisterScreen}
-            onStreamerRecord={openStreamerRecord}
-            onTwitchLogout={() => void disconnectTwitchViewer()}
-            onFilters={setFilters}
-            onResetFilters={() => setFilters(DEFAULT_MATCH_FILTERS)}
+            onLoginOpen={startTwitchLogin}
+            onLogout={() => void disconnectTwitchViewer()}
+            onToggleTheme={toggleTheme}
+            text={homeI18n[locale]}
           />
+          <LolSubnav active="none" text={lolHomeI18n[locale]} />
         </AppShellHeader>
         <AppShellMain className="public-home-shared-main" id="public-search-main">
           <PublicHomeSearchPanel
@@ -7865,39 +7671,49 @@ export function PublicLolPage({
         skipLinkLabel={t().skipToContent}
         variant="public"
       >
-        <AppShellHeader as="div" className="public-standard-header-frame">
-          <PublicAppHeader
+        {/* 메뉴 페이지(스트리머·참여·칼바람·패치 노트 …)도 HomeHeader 한 벌 +
+            2행 LoL 메뉴. 검색바는 컴팩트 슬롯으로 유지합니다(공용 규격 프롬프트 §3). */}
+        <AppShellHeader as="div" className="yoro-home-chrome public-standard-header-frame">
+          <HomeHeader
+            accountName={twitchStatus.user?.displayName}
+            activeGame="lol"
+            connected={twitchStatus.connected}
             locale={locale}
-            profile={profile}
-            twitchStatus={twitchStatus}
-            activePage={activeMainPage}
-            activeTarget={activeNav}
-            onHome={() => changeMainPage("search")}
-            showFilters={false}
-            query={query}
-            loading={loading}
-            platform={selectedLolPlatform}
-            platformOptions={platformOptions}
-            suggestions={visibleSuggestions}
-            recentSearches={recentSearches}
-            favorites={favorites}
-            searchPanelRequest={searchPanelRequest}
-            filters={filters}
-            champions={availableChampions}
-            onQuery={setQuery}
-            onPlatformChange={changeLolPlatform}
-            onClear={clearSearch}
-            onSubmit={(event) => void submit(event)}
-            onPickSuggestion={pickSuggestion}
-            onPage={navigateFromMenu}
+            onDashboard={() => window.location.assign("/dashboard")}
             onLocale={changeLocale}
-            onAutoLocale={autoDetectLocale}
-            onTwitchLogin={startTwitchLogin}
-            onStreamerRegister={openStreamerRegisterScreen}
-            onStreamerRecord={openStreamerRecord}
-            onTwitchLogout={() => void disconnectTwitchViewer()}
-            onFilters={setFilters}
-            onResetFilters={() => setFilters(DEFAULT_MATCH_FILTERS)}
+            onLoginOpen={startTwitchLogin}
+            onLogout={() => void disconnectTwitchViewer()}
+            onToggleTheme={toggleTheme}
+            searchSlot={(
+              <div className="yoro-home-header-search">
+                <SearchForm
+                  loading={loading}
+                  platform={selectedLolPlatform}
+                  platformOptions={platformOptions}
+                  onClear={clearSearch}
+                  onPickSuggestion={pickSuggestion}
+                  onQuery={setQuery}
+                  onPlatformChange={changeLolPlatform}
+                  onSubmit={(event) => void submit(event)}
+                  query={query}
+                  suggestions={visibleSuggestions}
+                  recentSearches={recentSearches}
+                  favorites={favorites}
+                  panelRequest={searchPanelRequest}
+                />
+              </div>
+            )}
+            text={homeI18n[locale]}
+          />
+          <LolSubnav
+            active={
+              activeMainPage === "subscriptions" ? "streamers"
+                : activeMainPage === "followJoin" ? "participation"
+                  : activeMainPage === "aram" ? "aram"
+                    : activeMainPage === "patchNotes" ? "patchNotes"
+                      : "none"
+            }
+            text={lolHomeI18n[locale]}
           />
         </AppShellHeader>
         <AppShellMain className="public-app-main" id="public-main">

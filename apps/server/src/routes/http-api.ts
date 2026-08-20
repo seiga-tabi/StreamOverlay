@@ -3146,6 +3146,49 @@ async function publicLolMatchParticipantDetail(
   };
 }
 
+/* 목록 행의 아군/상대 2열용 경량 팀 요약 — publicLolMatchTeams(상세)의 축소판.
+   목록을 만들 때 매치 JSON 이 이미 손에 있어 추가 Riot 호출 없이 채웁니다.
+   아이템·룬·지표·시청 스트림 매핑은 응답 크기 때문에 빼고(빈 배열), 그 값들은
+   기존대로 /api/lol/match-detail 이 행 펼침 시 하이드레이션으로 내려줍니다.
+   (프런트 요청 — docs/handoffs 12차 Codex 핸드오프 항목을 사용자 지시로 반영.) */
+async function publicLolMatchTeamsListSummary(
+  dataDragon: DataDragonService | undefined,
+  match: RiotMatch,
+  targetPuuid: string
+): Promise<PublicLolMatchTeamDetail[]> {
+  const teamIds = [...new Set(match.info.participants.map((participant) => participant.teamId).filter((teamId): teamId is number => teamId !== undefined))]
+    .sort((a, b) => a - b);
+  return Promise.all(teamIds.map(async (teamId): Promise<PublicLolMatchTeamDetail> => {
+    const teamStats = participantTeamDetailStats(match, teamId);
+    const teamInfo = match.info.teams?.find((team) => team.teamId === teamId);
+    const players = (await Promise.all(match.info.participants
+      .filter((participant) => participant.teamId === teamId)
+      .map(async (participant): Promise<PublicLolMatchParticipant> => ({
+        participantId: safeOptionalStat(participant.participantId),
+        riotId: participantRiotId(participant),
+        isTarget: participant.puuid === targetPuuid,
+        champion: await mapChampionSummary(dataDragon, {
+          championId: participant.championId,
+          championName: participant.championName
+        }),
+        position: participant.individualPosition || participant.teamPosition,
+        kills: safeMatchStat(participant.kills),
+        deaths: safeMatchStat(participant.deaths),
+        assists: safeMatchStat(participant.assists),
+        kda: participantKda(participant),
+        items: [],
+        summonerSpells: [],
+        runes: []
+      }))))
+      .sort((a, b) => publicLolRoleOrder(a.position) - publicLolRoleOrder(b.position));
+    return {
+      ...teamStats,
+      result: teamInfo?.win === true ? "win" : teamInfo?.win === false ? "loss" : "unknown",
+      players
+    };
+  }));
+}
+
 async function publicLolMatchTeams(
   dataDragon: DataDragonService | undefined,
   dataDragonVersion: string | undefined,
@@ -7126,7 +7169,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
         assists: safeMatchStat(opponent.assists),
         kda: participantKda(opponent)
       } : undefined,
-      teams: []
+      /* 행의 아군/상대 2열(경량 요약) — 아레나는 arenaTeams 가 전담하므로 비웁니다.
+         풀 팀 상세(아이템·지표·시청 스트림)는 기존대로 match-detail 하이드레이션. */
+      teams: arena ? [] : await publicLolMatchTeamsListSummary(input.dataDragon, match, targetPuuid)
     };
   }
 

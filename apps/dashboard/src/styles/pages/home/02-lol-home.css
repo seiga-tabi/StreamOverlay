@@ -195,18 +195,19 @@
 
     .yoro-lol-hero { min-height: 0; }
 
-    /* 마크·헤드라인 크기는 01 의 모바일 규칙(168×176·36px)을 그대로 씁니다. */
+    /* 마크·문구 크기는 01 의 모바일 규칙(132×140·30px·padding-right 112px)과
+       같은 수를 씁니다 — 둘 다 오른쪽 기준이라 간격 10px 가 폭과 무관합니다. */
     .yoro-lol-home .yoro-home-mark {
-      top: 8px;
-      right: -22px;
-      width: 168px;
-      height: 176px;
+      top: 6px;
+      right: -30px;
+      width: 132px;
+      height: 140px;
     }
 
-    .yoro-lol-home .yoro-home-mark-word { font-size: 36px; }
-    .yoro-lol-home .yoro-home-mark-norigae { width: 12px; height: 34px; right: -4px; bottom: -20px; }
-    .yoro-lol-home .yoro-home-mark-tail { width: 110px; margin-top: 14px; }
-    .yoro-lol-home .yoro-home-hero-copy { padding-top: 28px; }
+    .yoro-lol-home .yoro-home-mark-word { font-size: 30px; }
+    .yoro-lol-home .yoro-home-mark-norigae { width: 11px; height: 30px; right: -4px; bottom: -24px; }
+    .yoro-lol-home .yoro-home-mark-tail { width: 88px; margin-top: 14px; }
+    .yoro-lol-home .yoro-home-hero-copy { padding: 28px 112px 0 28px; }
 
     /* 최근 검색·즐겨찾기: 가로 스크롤 한 줄(목업 흐름) */
     .yoro-lol-recent-row { margin-top: 12px; }

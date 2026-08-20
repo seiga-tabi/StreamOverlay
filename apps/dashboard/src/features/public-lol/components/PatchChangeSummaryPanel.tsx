@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { PatchNote, PatchPlayRecord } from "@streamops/shared";
 import { Button } from "../../../shared/ui/Button";
 import { activePublicLocale, t } from "../i18n/public-lol-i18n";
+import { riotLocaleUrl } from "../pages/PublicPatchNotesPage";
 import { patchStatLabel, type PatchChangeSummary, type PatchChampionChange } from "../types/patch-change-summary";
 import { createPatchSummaryShareBlob, type PatchSummaryShareText } from "../utils/patch-summary-share";
 
@@ -182,14 +183,23 @@ export function PatchChangeSummaryPanel({ note, summary, record, previousRecord,
           </p>
         ) : null}
 
+        <p aria-hidden="true" className="yoro-pn-summary-legend">
+          <span data-direction="buff">{t().patchSummaryBuff}</span>
+          <span data-direction="nerf">{t().patchSummaryNerf}</span>
+          <span data-direction="adjust">{t().patchSummaryAdjust}</span>
+          <small>{t().patchSummaryColorLegend}</small>
+        </p>
+
         {summary.systemChanges.length > 0 ? (
           <div className="yoro-pn-summary-group">
             <h4>{t().patchSummarySystem}</h4>
             {summary.systemChanges.map((change) => (
               <p className="yoro-pn-summary-sys" key={`${change.stat}:${change.from}:${change.to}`}>
                 <b>{patchStatLabel(change.stat, localeKey())}</b>
+                {/* 시스템 변경에는 서버 판정이 없습니다 — 증감으로 유추해 칠하면
+                    절반이 뒤집힙니다(마법 저항력 26→33 은 너프). 무채로 둡니다(보강 §2). */}
                 <span className="yoro-pn-summary-delta">
-                  {change.from} → <em data-tone={change.to > change.from ? "good" : "bad"}>{change.to}</em>
+                  {change.from} → <em>{change.to}</em>
                 </span>
                 <small>{t().patchSummaryChampionCount.replace("{n}", String(change.championCount))}</small>
               </p>
@@ -212,7 +222,19 @@ export function PatchChangeSummaryPanel({ note, summary, record, previousRecord,
                 <span className="yoro-pn-summary-tag" data-direction={champion.direction}>
                   {directionLabel(champion.direction)}
                 </span>
-                <small>{champion.changes.slice(0, 3).map(statLine).join(" · ")}</small>
+                <small className="yoro-pn-summary-stats">
+                  {champion.changes.slice(0, 3).map((change, index) => (
+                    <span key={change.stat}>
+                      {index > 0 ? " · " : ""}
+                      {patchStatLabel(change.stat, localeKey())}
+                      {" "}
+                      <span className="yoro-pn-num-from">{change.from}</span>
+                      {" → "}
+                      {/* 스탯별 개별 판정은 응답에 없어 행 판정(direction) 색을 씁니다. */}
+                      <em className="yoro-pn-num-to" data-direction={champion.direction}>{change.to}</em>
+                    </span>
+                  ))}
+                </small>
               </div>
             ))}
             {hiddenChampions > 0 ? (
@@ -230,11 +252,16 @@ export function PatchChangeSummaryPanel({ note, summary, record, previousRecord,
                   ? <img alt="" decoding="async" loading="lazy" src={item.iconUrl} />
                   : <i aria-hidden="true">{item.name.slice(0, 1)}</i>}
                 <b>{item.name}</b>
-                <span className="yoro-pn-summary-tag" data-direction={item.kind === "new" ? "buff" : item.kind === "removed" ? "nerf" : item.to !== undefined && item.from !== undefined && item.to > item.from ? "nerf" : "buff"}>
+                <span className="yoro-pn-summary-tag">
                   {item.kind === "new" ? t().patchSummaryItemNew : item.kind === "removed" ? t().patchSummaryItemRemoved : t().patchSummaryItemPrice}
                 </span>
                 {item.kind === "price" && item.from !== undefined && item.to !== undefined ? (
-                  <small>{`${item.from} → ${item.to} G`}</small>
+                  <small className="yoro-pn-summary-stats">
+                    <span className="yoro-pn-num-from">{item.from}</span>
+                    {" → "}
+                    <em className="yoro-pn-num-to" data-direction={item.to > item.from ? "nerf" : "buff"}>{item.to}</em>
+                    {" G"}
+                  </small>
                 ) : null}
               </div>
             ))}
@@ -306,7 +333,7 @@ export function PatchChangeSummaryPanel({ note, summary, record, previousRecord,
           {" "}
           {/* .yoro-pn-link 는 카드 전체를 덮는 stretched-link(::after inset:0)라
               패널 안에서 쓰면 공유 버튼을 가려 누를 수 없게 됩니다(2026-08-18 실측). */}
-          <a className="yoro-pn-summary-link" href={note.url} rel="noopener noreferrer" target="_blank">
+          <a className="yoro-pn-summary-link" href={riotLocaleUrl(note.url)} rel="noopener noreferrer" target="_blank">
             {t().patchSummaryOriginalLink}
           </a>
         </p>

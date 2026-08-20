@@ -1,5 +1,9 @@
-/* LoL 프로필을 스트리머 상태와 전적 탐색이 연결된 하나의 플랫폼 화면으로 구성합니다. */
-.public-profile-platform-v2 {
+/* LoL 프로필을 스트리머 상태와 전적 탐색이 연결된 하나의 플랫폼 화면으로 구성합니다.
+   .yoro-pn-page(패치 노트)는 셸에 platform-v2 클래스가 없어 이 팔레트가 닿지 않던
+   디자인 섬이었습니다 — 같은 토큰을 받도록 선택자만 잇습니다(수묵 리스킨 §3-1).
+   값을 복사해 두 곳에 두지 않습니다. */
+.public-profile-platform-v2,
+.yoro-pn-page {
   /* 수묵 리스킨(목업 yoro-home-redesign page-4) — 홈(/)·/lol·/follow 와 같은
      백자·수묵 팔레트. 화면 전체가 이 토큰을 참조하므로 여기 한 곳만 바꿉니다. */
   --public-gray-page: #1c1d22;
@@ -75,6 +79,8 @@
   --tier-lp-master: #b57ff0;
   --tier-lp-grandmaster: #ea6560;
   --tier-lp-challenger: #f0c264;
+  /* 상세 ACE 배지 글자(후속 §1-5) — 다크는 티어 은색과 같은 값. */
+  --award-ace-ink: #b3bcc5;
 
   /* ── 지면·표면 ramp 재매핑(목업 page-4) ─────────────────────────
      22-match-card·25-profile-sidebar 등이 참조하는 ground 계열(navy
@@ -134,7 +140,9 @@
    셀 클래스(theme-light)와 usePublicTheme 의 <html data-public-theme> 를
    모두 지원합니다(둘 다 같은 토글이 세팅). */
 .public-profile-platform-v2.theme-light,
-:root[data-public-theme="light"] .public-profile-platform-v2 {
+:root[data-public-theme="light"] .public-profile-platform-v2,
+.theme-light .yoro-pn-page,
+:root[data-public-theme="light"] .yoro-pn-page {
   --public-gray-page: #f5f6f8;
   --public-gray-page-deep: #eceef2;
   --public-gray-surface: #ffffff;
@@ -175,6 +183,8 @@
   --tier-lp-master: #af74ef;
   --tier-lp-grandmaster: #ea6560;
   --tier-lp-challenger: #be8512;
+  /* 흰 카드 4.99:1 — --tier-lp-silver(#8392a0)는 3.19:1 로 9px 글자에 부족. */
+  --award-ace-ink: #64717f;
 
   /* 프로필 표면은 전부 먹→백자로 뒤집혔으므로 on-dark 텍스트 계열도 함께
      반전합니다(-muted 는 위의 --public-gray-muted 참조로 이미 반전됨). */
@@ -223,6 +233,19 @@
 .public-profile-platform-v2.public-dashboard-shell .yoro-button[data-variant="primary"]:hover,
 .public-profile-platform-v2.public-dashboard-shell .public-twitch-login-chip:not(.connected):hover {
   background: color-mix(in srgb, var(--yoro-color-public-primary) 82%, #f5f6f8) !important;
+}
+
+/* 패치 노트(.yoro-pn-page)의 primary 버튼도 같은 #6259ef !important 대상이라
+   여기서 상쇄합니다 — 목업 .out-btn(배경 없음 · 진한 외곽선). !important 는
+   legacy(04-followers)의 기존 강제를 이기기 위한 상쇄로, 신규 증설이 아닙니다. */
+.public-dashboard-shell .yoro-pn-page .yoro-button[data-variant="primary"] {
+  border-color: var(--public-gray-border-strong) !important;
+  background: none !important;
+  color: var(--public-gray-text) !important;
+}
+
+.public-dashboard-shell .yoro-pn-page .yoro-button[data-variant="primary"]:hover {
+  background: color-mix(in srgb, var(--public-gray-text) 6%, transparent) !important;
 }
 
 /* 세컨더리(연보라 채움) → 목업의 스트로크 테두리 버튼. */
@@ -536,9 +559,7 @@
 .public-profile-platform-v2.public-dashboard-shell.public-profile-shared-shell .public-aggregate-hero,
 .public-profile-platform-v2.public-dashboard-shell.public-profile-shared-shell .public-lp-chart,
 .public-profile-platform-v2.public-dashboard-shell.public-profile-shared-shell .public-match-expanded,
-.public-profile-platform-v2.public-dashboard-shell.public-profile-shared-shell .public-team-card,
-.public-profile-platform-v2.public-dashboard-shell.public-profile-shared-shell .public-team-player,
-.public-profile-platform-v2.public-dashboard-shell.public-profile-shared-shell .public-team-stat,
+/* 상세 리디자인: 팀 카드·행·지표는 이 반투명 카드 문법을 벗어납니다(41-ink 소유). */
 .public-profile-platform-v2.public-dashboard-shell.public-profile-shared-shell .public-match-expanded-tabs {
   border-color: var(--public-gray-border) !important;
   background: color-mix(in srgb, var(--public-gray-surface) 72%, transparent) !important;
@@ -550,13 +571,14 @@
 .public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-card,
 .public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-card.ally,
 .public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-card.enemy {
+  /* 상세 리디자인(목업 §2-5): 카드 배경 없음 — r3·헤어라인은 41-ink 소유. */
   border-color: var(--public-gray-border) !important;
-  background: var(--public-gray-surface) !important;
+  background: none !important;
 }
 
 .public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-head {
   border-color: var(--public-gray-border) !important;
-  background: color-mix(in srgb, var(--public-gray-surface-strong) 85%, transparent) !important;
+  background: var(--profile-row-wash) !important;
 }
 
 /* 팀명은 본문색, 결과 단어만 승/패 전용색(마크업 public-team-result). */
@@ -572,70 +594,49 @@
 .public-profile-platform-v2 .public-team-result.loss { color: var(--graph-loss-ink); }
 
 .public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-player {
+  /* 상세 리디자인(목업 §2-4): 행 배경 없음 — 본인 행만 무채 워시. */
   border-top-color: var(--public-gray-border) !important;
-  background: color-mix(in srgb, var(--public-gray-surface) 72%, transparent) !important;
+  background: none !important;
+}
+
+.public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-player.target {
+  background: var(--profile-row-wash) !important;
 }
 
 /* MVP=먹금, ACE=은빛 — 왼쪽에서 잦아드는 wash(목업 v25 규칙). */
-.public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-player.highlight-mvp {
-  background:
-    linear-gradient(90deg, rgba(199, 161, 92, .16), rgba(199, 161, 92, 0) 42%),
-    color-mix(in srgb, var(--public-gray-surface) 72%, transparent) !important;
-}
-
+.public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-player.highlight-mvp,
 .public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-player.highlight-ace {
-  background:
-    linear-gradient(90deg, rgba(185, 195, 208, .14), rgba(185, 195, 208, 0) 42%),
-    color-mix(in srgb, var(--public-gray-surface) 72%, transparent) !important;
+  /* 상세 리디자인: 수상 강조는 행 wash 가 아니라 MVP/ACE 칩이 맡습니다. */
+  background: none !important;
 }
 
-/* MVP/ACE 배지 — 채움형 노랑/빨강 대신 테두리형 먹금/은빛(목업 v25). */
+.public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-player.target.highlight-mvp,
+.public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-player.target.highlight-ace {
+  background: var(--profile-row-wash) !important;
+}
+
+/* MVP/ACE 배지 — 후속 §1-5: 무채 원칙의 예외 둘. 화면 전체에 최대 2개뿐이라
+   본인 행 탐색을 방해하지 않고, 색이 없으면 존재가 안 보였습니다.
+   면은 8% 틴트까지만 — glow·애니메이션은 계속 금지(방송 안정성). */
 .public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded :is(.public-match-badge.mvp, .public-riot-award-badge.mvp) {
-  border-color: var(--yoro-color-accent-gold) !important;
-  background: transparent !important;
+  border-color: color-mix(in srgb, var(--yoro-color-accent-gold) 55%, var(--public-gray-border)) !important;
+  background: color-mix(in srgb, var(--yoro-color-accent-gold) 8%, transparent) !important;
   color: var(--yoro-color-accent-gold) !important;
   box-shadow: none !important;
   -webkit-text-fill-color: var(--yoro-color-accent-gold) !important;
 }
 
 .public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded :is(.public-match-badge.ace, .public-riot-award-badge.ace) {
-  border-color: var(--public-gray-muted) !important;
-  background: transparent !important;
-  color: var(--public-gray-muted) !important;
+  border-color: color-mix(in srgb, var(--award-ace-ink) 55%, var(--public-gray-border)) !important;
+  background: color-mix(in srgb, var(--award-ace-ink) 8%, transparent) !important;
+  color: var(--award-ace-ink) !important;
   box-shadow: none !important;
-  -webkit-text-fill-color: var(--public-gray-muted) !important;
+  -webkit-text-fill-color: var(--award-ace-ink) !important;
 }
 
-/* 지표 바 — 아군=청회, 상대=심회(목업 v28 피해량 바 규칙). */
-.public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-card.ally .public-team-stat.metric-bar .public-team-stat-fill {
-  background: rgba(185, 195, 208, .26) !important;
-}
-
-.public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-card.enemy .public-team-stat.metric-bar .public-team-stat-fill {
-  background: rgba(74, 85, 99, .55) !important;
-}
-
-/* 팀 비교(총피해량·시야·골드·오브젝트) — 05 의 회색 그라데이션·빨강/파랑
-   그라데이션 바를 같은 v28 문법(아군=청회·상대=심회, 평면)으로 통일합니다. */
-.public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-compare {
-  border-color: var(--public-gray-border) !important;
-  background: var(--public-gray-surface-strong) !important;
-}
-
-.public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-compare-track i.left {
-  background: rgba(74, 85, 99, .9) !important;
-}
-
-.public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-compare-track i.right {
-  background: rgba(185, 195, 208, .38) !important;
-}
-
-.public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-compare-label.left strong {
-  color: var(--public-gray-muted) !important;
-}
-
-.public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-compare-label.right strong {
-  color: var(--public-gray-text) !important;
+/* 지표 트랙 채움 — 진영 구분 없이 무채 --graph-fill 하나(목업 §2-3). */
+.public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-card .public-team-stat.metric-bar .public-team-stat-fill {
+  background: var(--graph-fill) !important;
 }
 
 .public-profile-platform-v2 .public-profile-shared-main.yoro-app-shell__main {

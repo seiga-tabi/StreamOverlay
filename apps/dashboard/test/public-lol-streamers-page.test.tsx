@@ -177,8 +177,8 @@ test("2행 메뉴와 하단 탭바는 스트리머 항목을 활성(꼬리 밑�
   assert.match(subnav, /yoro-lol-subnav-item is-active"[^>]*href="\/ko\/follow"/u);
   assert.match(subnav, /aria-current="page"/u);
   assert.match(subnav, /yoro-lol-subnav-tail/u);
-  /* 홈은 활성 아니고 메인 홈(/) 링크 유지 */
-  assert.match(subnav, /href="\/ko\/"/u);
+  /* 홈은 활성 아니고 LoL 홈(/lol) 링크(2026-08-20 변경) */
+  assert.match(subnav, /href="\/ko\/lol"/u);
 
   const tabbar = renderToStaticMarkup(<LolBottomTabBar active="streamers" text={lolHomeI18n.ko} />);
   assert.match(tabbar, /is-active"[^>]*href="\/ko\/follow"/u);

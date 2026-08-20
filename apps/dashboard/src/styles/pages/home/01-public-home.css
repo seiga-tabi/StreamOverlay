@@ -193,6 +193,10 @@
   .yoro-home-games-trigger[aria-expanded="true"],
   .yoro-home-games-trigger:hover { border-color: var(--home-stroke); }
 
+  /* 게임 선택 상태(LoL 화면 전부)는 상시 진한 테두리 — 공용 상단바 규격 §3.
+     활성 여부는 마크업의 게임 이름(.yoro-home-games-trigger-name) 존재로 판단합니다. */
+  .yoro-home-games-trigger:has(.yoro-home-games-trigger-name) { border-color: var(--home-stroke); }
+
   /* 게임 홈(/lol)에서 트리거는 현재 게임 이름 + 꼬리 밑줄로 바뀝니다(목업 v9). */
   .yoro-home-games-trigger-name {
     position: relative;
@@ -1201,6 +1205,8 @@
 
   @media (max-width: 64rem) {
     .yoro-home-header { padding: 0 24px 0 40px; height: 60px; gap: 24px; }
+    .yoro-home-nav { gap: 18px; }
+    .yoro-home-wordmark { font-size: 16px; }
     .yoro-home-hero { min-height: 430px; }
     .yoro-home-mark { top: 24px; right: 4px; width: 300px; height: 330px; }
     .yoro-home-mark-word { font-size: 58px; }
@@ -1230,9 +1236,16 @@
 
   @media (max-width: 47.9375rem) {
     .yoro-home-header {
+      justify-content: space-between;
       height: 52px;
       padding: 0 16px 0 24px;
       gap: 14px;
+    }
+
+    /* 지구본만 모바일 17 — 달은 전 폭 16(공용 규격 §3). */
+    .yoro-home-icon-button svg[viewBox="0 0 16 16"][width="18"] {
+      width: 17px;
+      height: 17px;
     }
 
     .yoro-home-wordmark { font-size: 15px; }
@@ -1245,31 +1258,35 @@
       padding-bottom: 0;
     }
 
+    /* 마크는 오른쪽 기준(왼쪽 끝 = 오른쪽에서 132−30 = 102px), 문구도 부모의
+       padding-right(112px)로 오른쪽 기준 — 두 상자가 같은 기준선을 쓰므로
+       간격 10px 가 화면 폭과 무관하게 유지됩니다(모바일 히어로 겹침 수정).
+       문구에 고정 max-width 를 주면 좁은 폭에서 마크를 파고듭니다 — 금지. */
     .yoro-home-mark {
-      top: 8px;
-      right: -22px;
-      width: 168px;
-      height: 176px;
+      top: 6px;
+      right: -30px;
+      width: 132px;
+      height: 140px;
     }
 
-    .yoro-home-mark-word { font-size: 36px; }
-    .yoro-home-mark-norigae { width: 12px; height: 34px; right: -4px; bottom: -20px; }
-    .yoro-home-mark-tail { width: 110px; margin-top: 14px; }
+    .yoro-home-mark-word { font-size: 30px; }
+    .yoro-home-mark-norigae { width: 11px; height: 30px; right: -4px; bottom: -24px; }
+    .yoro-home-mark-tail { width: 88px; margin-top: 14px; }
 
     .yoro-home-hero-copy {
       max-width: none;
-      padding: 28px 16px 0 28px;
+      padding: 28px 112px 0 28px;
     }
 
     .yoro-home-headline {
-      max-width: 230px;
       font-size: 30px;
     }
 
     .yoro-home-headline-tail { width: 132px; height: 10px; margin-top: 6px; }
 
     .yoro-home-hero-sub {
-      max-width: 250px;
+      /* 태블릿 블록(≤64rem)의 380px 를 해제 — 폭은 부모 padding-right 가 정합니다. */
+      max-width: none;
       font-size: 13px;
       line-height: 1.6;
     }

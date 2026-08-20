@@ -1,5 +1,5 @@
 import type { LolRankedStats } from "@streamops/shared";
-import { activePublicLocale, t } from "../i18n/public-lol-i18n";
+import { publicIntlLocale, activePublicLocale, t } from "../i18n/public-lol-i18n";
 import type {
   PublicLolProfile,
   PublicLolRecentMatch,
@@ -178,7 +178,7 @@ function formatShortDate(value: string | undefined): string {
   if (!value) return "-";
   const date = new Date(value);
   if (!Number.isFinite(date.getTime())) return "-";
-  return new Intl.DateTimeFormat(activePublicLocale === "ja" ? "ja-JP" : "ko-KR", { month: "numeric", day: "numeric" }).format(date);
+  return new Intl.DateTimeFormat(publicIntlLocale(), { month: "numeric", day: "numeric" }).format(date);
 }
 
 /* LP 는 랭크 큐에서만 움직입니다. 화면이 보여 주는 티어가 어느 큐의 것인지에

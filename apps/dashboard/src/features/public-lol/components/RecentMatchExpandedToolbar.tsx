@@ -71,6 +71,10 @@ export function RecentMatchExpandedToolbar({
 
       >
         {text.maskToggle.label}
+        {/* 26×14 스위치 — 상태는 aria-pressed 가, 시각은 is-active 가 말합니다(목업 §2-5). */}
+        <span className="public-md-mask-switch" aria-hidden="true">
+          <i />
+        </span>
       </button>
     </div>
   );

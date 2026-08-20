@@ -1025,13 +1025,6 @@
   .public-profile-platform-v2 .public-suggestion-panel button[data-tier="grandmaster"] .public-suggestion-rank-copy > span { color: var(--tier-lp-grandmaster); }
   .public-profile-platform-v2 .public-suggestion-panel button[data-tier="challenger"] .public-suggestion-rank-copy > span { color: var(--tier-lp-challenger); }
 
-  /* ── 펼침 팀 비교 탭 활성 — 보라 테두리 대신 필터 칩과 같은 먹빛 테두리. */
-  .public-profile-platform-v2 .public-team-compare-tabs button[aria-selected="true"] {
-    border-color: var(--public-gray-muted);
-    background: color-mix(in srgb, var(--public-gray-text) 8%, transparent);
-    color: var(--public-gray-text);
-  }
-
   /* ── 좁은 행(≤720px 컨테이너)에서도 큐 라벨 유지 — 목업 모바일 행은
      결과·큐·시간 세 정보를 모두 보입니다(22 는 큐를 접었음). */
   @container match-list (max-width: 720px) {

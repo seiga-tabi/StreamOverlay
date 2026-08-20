@@ -38,12 +38,12 @@ test("LoL 홈 헤더의 게임 트리거는 '리그 오브 레전드' 활성 상
   assert.doesNotMatch(html, /aria-current="page"/u);
 });
 
-test("2행 LoL 메뉴는 실제 5항목(홈·스트리머·시청자 참여·증강 칼바람·패치노트)이고 홈은 메인 홈으로 나간다", () => {
+test("2행 LoL 메뉴는 실제 5항목(홈·스트리머·시청자 참여·증강 칼바람·패치노트)이고 홈은 LoL 홈으로 간다", () => {
   const html = renderToStaticMarkup(<LolSubnav text={lolHomeI18n.ko} />);
   assert.match(html, /yoro-lol-subnav/u);
   assert.match(html, /yoro-lol-subnav-tail/u);
-  /* 홈 버튼은 메인 홈(/)으로 나가는 출구입니다. */
-  assert.match(html, /href="\/ko\/"/u);
+  /* 홈 버튼은 LoL 홈(/lol)으로 갑니다(2026-08-20 변경) — 메인 홈 출구는 1행 헤더가 담당. */
+  assert.match(html, /href="\/ko\/lol"/u);
   assert.match(html, />홈</u);
   assert.match(html, /\/follow/u);
   assert.match(html, /스트리머/u);

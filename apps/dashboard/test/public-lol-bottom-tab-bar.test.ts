@@ -2,8 +2,10 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
+/* 상단바는 HomeHeader 한 벌로 통일(2026-08-21 공용 규격) — 구 PublicAppHeader 는
+   삭제됐고, 같은 가드를 HomeHeader 소스에 겁니다. */
 const appHeader = readFileSync(
-  new URL("../src/features/public-lol/components/PublicAppHeader.tsx", import.meta.url),
+  new URL("../src/features/public-home/components/HomeHeader.tsx", import.meta.url),
   "utf8"
 );
 const lolPage = readFileSync(

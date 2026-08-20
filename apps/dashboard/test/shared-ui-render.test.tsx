@@ -4,7 +4,8 @@ import test from "node:test";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ChampionFilterSelect } from "../src/features/public-lol/components/ChampionFilterSelect";
-import { PublicAppHeader } from "../src/features/public-lol/components/PublicAppHeader";
+import { HomeHeader } from "../src/features/public-home/components/HomeHeader";
+import { homeI18n } from "../src/features/public-home/i18n/home-i18n";
 import { PublicHomeSearchPanel, type PublicHomeSearchPanelText } from "../src/features/public-lol/components/PublicHomeSearchPanel";
 import { PublicSiteFooter } from "../src/features/public-lol/components/PublicSiteFooter";
 import { ProfileMetricStrip } from "../src/features/public-lol/components/ProfileMetricStrip";
@@ -17,7 +18,6 @@ import { ProfileTopIdentity } from "../src/features/public-lol/components/Profil
 import { ProfileStreamerCast } from "../src/features/public-lol/components/ProfileStreamerCast";
 import { ProfileTopPanel } from "../src/features/public-lol/components/ProfileTopPanel";
 import { PublicProfileShareButton } from "../src/features/public-lol/components/PublicProfileShareButton";
-import { MatchTeamCompare } from "../src/features/public-lol/components/MatchTeamCompare";
 import { RecentMatchBuildRuneBoard } from "../src/features/public-lol/components/RecentMatchBuildRuneBoard";
 import { RecentMatchRow } from "../src/features/public-lol/components/RecentMatchRow";
 import { ProfileShareActions } from "../src/features/public-lol/components/ProfileShareActions";
@@ -182,52 +182,34 @@ test("공통 account chip이 미로그인 상태에서 Discord·Twitch 로그인
   assert.doesNotMatch(html, /Twitch ログアウト/);
 });
 
-test("LoL PublicAppHeader가 공통 Twitch account chip으로 기존 프로필을 표시한다", () => {
+test("공용 상단바(HomeHeader)는 연결된 계정 이름과 활성 게임 트리거를 표시한다", () => {
+  /* 상단바는 HomeHeader 한 벌(2026-08-21 공용 규격) — 구 PublicAppHeader 렌더
+     검증을 대체합니다. 연결 시 로그인 버튼 대신 계정 이름 메뉴, LoL 화면에서는
+     게임 트리거가 '리그 오브 레전드' + 꼬리 밑줄 활성 상태여야 합니다. */
   const html = renderToStaticMarkup(
-    <PublicAppHeader
-      activePage="search"
-      activeTarget="search"
-      filterActive={false}
+    <HomeHeader
+      accountName="YORO"
+      activeGame="lol"
+      connected
       locale="ko"
-      onAutoLocale={() => undefined}
-      onHome={() => undefined}
+      onDashboard={() => undefined}
       onLocale={() => undefined}
-      onPage={() => undefined}
-      onStreamerRecord={() => undefined}
-      onStreamerRegister={() => undefined}
-      onTwitchLogin={() => undefined}
-      onTwitchLogout={() => undefined}
-      showFilters={false}
-      showSearch={false}
-      twitchStatus={{
-        configured: true,
-        connected: true,
-        missingScopes: [],
-        requiredScopes: ["user:read:follows", "user:read:subscriptions"],
-        user: {
-          id: "viewer-1",
-          login: "yorogg",
-          displayName: "YORO",
-          profileImageUrl: "https://example.com/avatar.png"
-        }
-      }}
+      onLoginOpen={() => undefined}
+      onLogout={() => undefined}
+      onToggleTheme={() => undefined}
+      text={homeI18n.ko}
     />
   );
 
-  assert.match(html, /public-twitch-login-chip connected/);
-  assert.match(html, /aria-expanded="false"/);
-  assert.match(html, /src="https:\/\/example\.com\/avatar\.png"/);
-  assert.match(html, />YORO</);
-  assert.match(html, /class="public-game-header__brand-logo" src="\/images\/yorogg-home-logo\.webp" alt="YORO\.gg"/);
-  assert.doesNotMatch(html, /src="\/images\/yorogg-mark\.png"/);
-  assert.match(html, /data-testid="lol-primary-nav"/u);
-  /* 커뮤니티가 있던 자리를 패치 노트가 이어받았습니다. */
-  assert.match(html, /홈[\s\S]*스트리머[\s\S]*참여[\s\S]*칼바람[\s\S]*패치 노트/u);
-  assert.match(html, /aria-current="page"[^>]*data-ko="홈"/u);
-  assert.match(html, /data-ko="메뉴" data-ja="メニュー"/u);
-  assert.match(html, /aria-haspopup="dialog"/u);
-  assert.match(html, /aria-label="메뉴 열기"/u);
-  assert.match(html, /aria-label="주 메뉴"/u);
+  assert.match(html, /yoro-home-header/u);
+  assert.match(html, />YORO</u);
+  assert.doesNotMatch(html, />로그인</u);
+  assert.match(html, /yoro-home-games-trigger-name/u);
+  assert.match(html, /리그 오브 레전드/u);
+  assert.match(html, /yoro-home-games-trigger-tail/u);
+  /* 공용 규격 §3 — 지구본 18(속성 기준), 달 16. */
+  assert.match(html, /width="18"/u);
+  assert.match(html, /width="16"/u);
 });
 
 test("모바일 통합 메뉴는 게임·언어·계정 로그인을 중첩 팝오버 없이 렌더링한다", () => {
@@ -1106,14 +1088,7 @@ test("LoL 모바일 상단바는 스크롤 방향에 따라 탐색·검색 행�
   )?.[1] ?? "";
   assert.doesNotMatch(hiddenChromeBlock, /display:\s*none/u);
 
-  const headerSource = readFileSync(
-    new URL("../src/features/public-lol/components/PublicAppHeader.tsx", import.meta.url),
-    "utf8",
-  );
-  assert.match(headerSource, /const delta = currentScrollY - lastScrollY/u);
-  assert.match(headerSource, /delta > MOBILE_CHROME_DELTA_THRESHOLD/u);
-  assert.match(headerSource, /delta < -MOBILE_CHROME_DELTA_THRESHOLD/u);
-  assert.match(headerSource, /mobileChromeScrolled \? "mobile-chrome-scrolled"/u);
+  /* 스크롤 접힘 크롬 로직은 구 PublicAppHeader 와 함께 은퇴했습니다(상단바 통일). */
 });
 
 test("전적 상세 룬 보드는 읽기 전용 이미지의 선택과 드래그를 막는다", () => {
@@ -1150,44 +1125,22 @@ test("전적 상세 룬 보드는 읽기 전용 이미지의 선택과 드래그
   assert.equal((html.match(/draggable="false"/g) ?? []).length, 2);
 });
 
-test("경기 상세 팀 비교는 피해량·시야·골드·오브젝트를 전환 탭으로 제공한다", () => {
-  const team = (side: "left" | "right", label: string) => ({
-    side,
-    label,
-    resultSummary: "승리 · 20/10/30",
-    objectivesAriaLabel: `${label} 오브젝트`,
-    objectives: [{
-      key: `${side}:dragon`,
-      className: "public-team-compare-objective dragon",
-      title: "드래곤",
-      shortLabel: "용",
-      value: 3
-    }]
-  });
-  const metric = (key: string, label: string) => ({
-    key,
-    label,
-    leftValueLabel: "40,000",
-    rightValueLabel: "35,000",
-    leftWidth: 54,
-    rightWidth: 46
-  });
-  const html = renderToStaticMarkup(
-    <MatchTeamCompare
-      viewModel={{
-        ariaLabel: "팀 상세",
-        tabsLabel: "팀 지표 선택",
-        objectivesLabel: "오브젝트",
-        leftTeam: team("left", "상대 팀"),
-        rightTeam: team("right", "아군 팀"),
-        metrics: [metric("damage", "피해량"), metric("vision", "시야"), metric("gold", "골드")]
-      }}
-    />
+test("전적 상세에 팀 비교 막대를 렌더하지 않는다", () => {
+  /* 후속 §1-4 회귀 가드 — 비교 막대는 요약 4칸과 같은 값의 중복이라 삭제했습니다.
+     컴포넌트·뷰모델·CSS 어디에도 .public-team-compare 가 되살아나면 안 됩니다. */
+  const page = readFileSync(new URL("../src/pages/PublicLolPage.tsx", import.meta.url), "utf8");
+  assert.equal(/<MatchTeamCompare\b/u.test(page), false);
+  assert.equal(/compareAfter:/u.test(page), false);
+  const section = readFileSync(
+    new URL("../src/features/public-lol/components/MatchTeamDetailsTeamSection.tsx", import.meta.url),
+    "utf8",
   );
-
-  assert.match(html, /role="tablist" aria-label="팀 지표 선택"/u);
-  assert.equal((html.match(/role="tab"/gu) ?? []).length, 4);
-  assert.match(html, /aria-selected="true"[^>]*>피해량</u);
+  assert.equal(section.includes("compareAfter"), false);
+  const ink = readFileSync(
+    new URL("../src/styles/pages/public-lol/41-ink-match-detail.css", import.meta.url),
+    "utf8",
+  );
+  assert.equal(/\.public-team-compare\b/u.test(ink), false);
 });
 
 test("프로필 사이드바 지표 카드는 비교 기준이 없으면 기준선 없이 값만 알린다", () => {

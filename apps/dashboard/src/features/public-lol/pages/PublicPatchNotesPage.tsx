@@ -9,7 +9,7 @@ import {
 } from "@streamops/shared";
 import { Button } from "../../../shared/ui/Button";
 import { EmptyState, EmptyStateActions, EmptyStateDescription, EmptyStateIcon, EmptyStateTitle } from "../../../shared/ui/EmptyState";
-import { PageHeader, PageHeaderDescription, PageHeaderEyebrow, PageHeaderStatus, PageHeaderTitle } from "../../../shared/ui/PageHeader";
+import { NorigaeMark, TailUnderline } from "../../public-home/components/HomeMarks";
 import { SkeletonCard } from "../../../shared/ui/Skeleton";
 import { Badge } from "../../../shared/ui/Status";
 import {
@@ -24,7 +24,7 @@ import { PatchNotesMineModule } from "../components/PatchNotesMineModule";
 import { requestPatchChangeSummary, requestPatchNotes, requestPatchPlaySummary } from "../api/patch-notes";
 import { PatchChangeSummaryPanel } from "../components/PatchChangeSummaryPanel";
 import type { PatchChangeSummary } from "../types/patch-change-summary";
-import { activePublicLocale, t } from "../i18n/public-lol-i18n";
+import { publicIntlLocale, activePublicLocale, t } from "../i18n/public-lol-i18n";
 import { readFavorites, readRecentSearches } from "../utils/storage";
 import type { SearchSuggestion } from "../types/public-lol";
 
@@ -44,7 +44,7 @@ type PatchEntry = {
 };
 
 function localeTag(): string {
-  return activePublicLocale === "ja" ? "ja-JP" : "ko-KR";
+  return publicIntlLocale();
 }
 
 /** 화면이 쓰는 언어를 Riot 목록의 언어 열쇠로 바꿉니다. */
@@ -108,14 +108,18 @@ function storedTargets(): PatchNoteTarget[] {
   return unique;
 }
 
-/**
- * Riot 이 썸네일에서 뽑아 준 대표 색을 CSS 로 흘려보냅니다.
- *
- * shared parser 가 `#RRGGBB` 만 통과시키므로 임의 문자열이 style 로 들어가지 않습니다.
- * 색이 없으면 아무것도 넘기지 않고 CSS 기본값을 쓰게 둡니다.
- */
-function accentStyle(note: PatchNote): Record<string, string> {
-  return note.accentColor ? { "--pn-k": note.accentColor } : {};
+/* accentColor(--pn-k) 경로는 제거했습니다 — Riot 썸네일에서 뽑은 임의 색이라
+   화면마다 달라져 팔레트를 무너뜨립니다(패치 노트 보강 §1). 색이 필요하던
+   자리(플레이 표식·hover)는 고정 잉크 색을 씁니다. */
+
+/** 원문 링크를 화면 언어의 Riot 로케일로 엽니다 — 목록 로케일(ko 폴백)과 무관하게
+    /ko-kr/ ↔ /ja-jp/ ↔ /en-us/ 경로 조각만 바꿉니다(보강 §3 프런트 몫).
+    en 문서가 없을 때의 404 확인(HEAD/화이트리스트)은 Codex 핸드오프에 적었습니다. */
+const RIOT_LOCALE_PATH = { ko: "/ko-kr/", ja: "/ja-jp/", en: "/en-us/" } as const;
+
+export function riotLocaleUrl(url: string): string {
+  const target = RIOT_LOCALE_PATH[activePublicLocale] ?? RIOT_LOCALE_PATH.ko;
+  return url.replace(/\/(?:ko-kr|ja-jp|en-us)\//, target);
 }
 
 /** 표본이 이보다 적으면 승률을 참고용으로 표시합니다 — 3판 2승의 66.7%를 과신하지 않게. */
@@ -210,20 +214,25 @@ function HeroCard({ entry, maxGames }: { entry: PatchEntry; maxGames: number }) 
     : undefined;
 
   return (
-    <article className="yoro-pn-hero" style={accentStyle(note)}>
+    <article className="yoro-pn-hero">
+      {/* 일러스트가 카드를 꽉 채우고, 글자가 놓이는 왼쪽만 가로 스크림으로 덮습니다
+          (리스킨 §3-6 — 268×151 박스는 그림을 우표만 하게 만들어 번복됨). 이미지가
+          없으면 히어로는 카드색 단색으로 남고 스크림도 그리지 않습니다. */}
       {note.imageUrl ? (
-        <img
-          alt=""
-          aria-hidden="true"
-          className="yoro-pn-hero-art"
-          decoding="async"
-          height={720}
-          loading="eager"
-          src={note.imageUrl}
-          width={1280}
-        />
+        <>
+          <img
+            alt=""
+            aria-hidden="true"
+            className="yoro-pn-hero-art"
+            decoding="async"
+            height={720}
+            loading="eager"
+            src={note.imageUrl}
+            width={1280}
+          />
+          <span aria-hidden="true" className="yoro-pn-hero-scrim" />
+        </>
       ) : null}
-      <span aria-hidden="true" className="yoro-pn-hero-scrim" />
       <div className="yoro-pn-hero-body">
         <p className="yoro-pn-hero-eyebrow">
           <span>{t().patchNotesLatest}</span>
@@ -238,7 +247,7 @@ function HeroCard({ entry, maxGames }: { entry: PatchEntry; maxGames: number }) 
         ) : null}
         {/* 카드 전체가 원문으로 가는 링크입니다. 읽는 이름은 제목입니다. */}
         <h2 className="yoro-pn-hero-title">
-          <a className="yoro-pn-link" href={note.url} rel="noopener noreferrer" target="_blank">
+          <a className="yoro-pn-link" href={riotLocaleUrl(note.url)} rel="noopener noreferrer" target="_blank">
             {note.title}
             <span className="yoro-u-sr-only">{` — ${t().patchNotesNewTab}`}</span>
           </a>
@@ -265,7 +274,7 @@ function FeaturedTile({ entry }: { entry: PatchEntry }) {
   const { note, record } = entry;
 
   return (
-    <article className="yoro-pn-tile" style={accentStyle(note)}>
+    <article className="yoro-pn-tile">
       {note.imageUrl ? (
         <img
           alt=""
@@ -290,7 +299,7 @@ function FeaturedTile({ entry }: { entry: PatchEntry }) {
         ) : null}
       </p>
       <h3 className="yoro-pn-tile-num">
-        <a className="yoro-pn-link" href={note.url} rel="noopener noreferrer" target="_blank">
+        <a className="yoro-pn-link" href={riotLocaleUrl(note.url)} rel="noopener noreferrer" target="_blank">
           {note.patchVersion ?? note.title}
           <span className="yoro-u-sr-only">{` ${note.title} — ${t().patchNotesNewTab}`}</span>
         </a>
@@ -304,7 +313,7 @@ function ArchiveRow({ entry, maxGames, showMine }: { entry: PatchEntry; maxGames
   const { note, record, gapDays } = entry;
 
   return (
-    <article className={record ? "yoro-pn-row is-played" : "yoro-pn-row"} style={accentStyle(note)}>
+    <article className={record ? "yoro-pn-row is-played" : "yoro-pn-row"}>
       <span aria-hidden="true" className="yoro-pn-node" />
       {record ? <span className="yoro-u-sr-only">{t().patchNotesPlayedMark}</span> : null}
       {note.imageUrl ? (
@@ -323,7 +332,7 @@ function ArchiveRow({ entry, maxGames, showMine }: { entry: PatchEntry; maxGames
       <div className="yoro-pn-row-body">
         {/* 반복되는 원문 제목 대신 요약이 앞에 옵니다. 원문 제목은 바로 아래 남깁니다. */}
         <h3 className="yoro-pn-row-title">
-          <a className="yoro-pn-link" href={note.url} rel="noopener noreferrer" target="_blank">
+          <a className="yoro-pn-link" href={riotLocaleUrl(note.url)} rel="noopener noreferrer" target="_blank">
             {note.summary || note.title}
             <span className="yoro-u-sr-only">{` ${note.title} — ${t().patchNotesNewTab}`}</span>
           </a>
@@ -539,21 +548,31 @@ export function PublicPatchNotesPage({ locale }: { locale: string }) {
 
   return (
     <section aria-labelledby="public-patch-notes-title" className="yoro-pn-page">
-      <PageHeader layout="split">
-        <PageHeaderEyebrow>{t().patchNotesEyebrow}</PageHeaderEyebrow>
-        <PageHeaderTitle as="h1" id="public-patch-notes-title">{t().patchNotesTitle}</PageHeaderTitle>
-        <PageHeaderDescription>{t().patchNotesDescription}</PageHeaderDescription>
+      {/* 페이지 머리 — 노리개 + 명조 제목 + 붓 밑줄(목업 LolPatchNotes · 리스킨 §3-4).
+          공유 PageHeader 클래스를 재스타일하면 다른 페이지가 함께 바뀌므로 전용 마크업. */}
+      <header className="yoro-pn-head">
+        <NorigaeMark className="yoro-pn-head-norigae" height={34} width={16} />
+        <div className="yoro-pn-head-copy">
+          <p className="yoro-pn-head-eyebrow">{t().patchNotesEyebrow}</p>
+          <h1 className="yoro-pn-head-title" id="public-patch-notes-title">
+            <span className="yoro-pn-head-title-word">
+              {t().patchNotesTitle}
+              <TailUnderline className="yoro-pn-head-tail" height={9} width={96} />
+            </span>
+          </h1>
+          <p className="yoro-pn-head-desc">{t().patchNotesDescription}</p>
+        </div>
         {feed ? (
-          <PageHeaderStatus>
+          <div className="yoro-pn-head-status">
             <Badge tone={feed.stale ? "warning" : "success"}>
               {feed.stale ? t().patchNotesStale : t().patchNotesFresh}
             </Badge>
             <span className="yoro-pn-updated">
               {`${t().patchNotesUpdated} ${formatFetchedAt(feed.fetchedAt)}`}
             </span>
-          </PageHeaderStatus>
+          </div>
         ) : null}
-      </PageHeader>
+      </header>
 
       {state === "loading" ? (
         <div aria-busy="true" aria-label={t().patchNotesLoading} className="yoro-pn-loading" role="status">
@@ -624,6 +643,7 @@ export function PublicPatchNotesPage({ locale }: { locale: string }) {
           ) : null}
 
           <div aria-live="polite" className="yoro-pn-stage">
+            <div className="yoro-pn-main">
             {hero ? <HeroCard entry={hero} key={hero.note.slug} maxGames={maxGames} /> : null}
 
             {/* 변경 요약은 히어로(최신 패치) 바로 아래에만 붙습니다. 요약이 없거나
@@ -643,6 +663,12 @@ export function PublicPatchNotesPage({ locale }: { locale: string }) {
               </div>
             ) : null}
 
+            </div>
+
+            {/* 사이드바(300px) — 아카이브 줄과 출처를 오른쪽 열로(목업 사이드바 §3-5).
+                같은 데이터를 옆으로 옮겼을 뿐 새 데이터가 아닙니다. 좁은 폭에서는
+                본문 아래로 흐릅니다(§4). */}
+            <aside className="yoro-pn-side">
             {archive.length > 0 ? (
               <div className="yoro-pn-archive">
                 {searching ? null : <p className="yoro-pn-archive-title">{t().patchNotesArchiveTitle}</p>}
@@ -668,6 +694,9 @@ export function PublicPatchNotesPage({ locale }: { locale: string }) {
                 </div>
               </div>
             ) : null}
+            {/* 출처를 숨기지 않습니다 — 사이드바 카드로 항상 둡니다. */}
+            <p className="yoro-pn-attribution">{t().patchNotesAttribution}</p>
+            </aside>
           </div>
 
           {feed.notes.length > 0 && visibleEntries.length === 0 ? (
@@ -677,8 +706,6 @@ export function PublicPatchNotesPage({ locale }: { locale: string }) {
             </EmptyState>
           ) : null}
 
-          {/* 출처를 숨기지 않습니다. 목록 아래에 항상 둡니다. */}
-          <p className="yoro-pn-attribution">{t().patchNotesAttribution}</p>
         </>
       ) : null}
     </section>

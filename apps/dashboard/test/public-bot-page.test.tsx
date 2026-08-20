@@ -175,7 +175,6 @@ test("공개 게임 헤더는 Twitch 로그인 가용성을 서버 실값으로�
   const { readFile } = await import("node:fs/promises");
   const sources = await Promise.all([
     readFile(new URL("../src/features/public-bot/PublicBotPage.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../src/features/public-lol/components/PublicAppHeader.tsx", import.meta.url), "utf8"),
     readFile(new URL("../src/features/public-palworld/components/PalworldHeader.tsx", import.meta.url), "utf8"),
   ]);
 

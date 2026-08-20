@@ -7,7 +7,7 @@ import { Input } from "../../../shared/ui/Form";
 import { PageHeader, PageHeaderDescription, PageHeaderEyebrow, PageHeaderStatus, PageHeaderTitle } from "../../../shared/ui/PageHeader";
 import { SkeletonCard } from "../../../shared/ui/Skeleton";
 import { Badge } from "../../../shared/ui/Status";
-import { activePublicLocale, t } from "../i18n/public-lol-i18n";
+import { publicIntlLocale, activePublicLocale, t } from "../i18n/public-lol-i18n";
 import { localizedPublicUrlForCurrentLocale } from "../utils/public-locale-path";
 import { PUBLIC_LOL_HOME_PATH } from "../utils/routes";
 
@@ -101,12 +101,12 @@ export function PublicAramPage({ augmentStats, onFilterAugment }: {
   }, []);
 
   const visibleAugments = useMemo(() => {
-    const normalizedQuery = query.trim().toLocaleLowerCase(activePublicLocale === "ja" ? "ja-JP" : "ko-KR");
+    const normalizedQuery = query.trim().toLocaleLowerCase(publicIntlLocale());
     return (catalog?.augments ?? []).filter((augment) => {
       if (rarity !== "all" && augment.rarity !== rarity) return false;
       if (!normalizedQuery) return true;
       return [augment.id, augment.nameKo, augment.nameJa, augment.descriptionKo, augment.descriptionJa]
-        .some((value) => value.toLocaleLowerCase(activePublicLocale === "ja" ? "ja-JP" : "ko-KR").includes(normalizedQuery));
+        .some((value) => value.toLocaleLowerCase(publicIntlLocale()).includes(normalizedQuery));
     });
   }, [catalog, query, rarity]);
 

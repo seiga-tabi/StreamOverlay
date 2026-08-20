@@ -1591,17 +1591,22 @@
     min-width: calc(var(--yoro-space-12) + var(--yoro-space-6)) !important;
   }
 
+  /* ── 전적 상세 · 모바일 두 줄 카드(목업 LolMatchExpandedMobile) ──────────
+     8열 표를 [티어|아바타|이름·KDA / 지표+트랙|아이템] 두 줄로 접습니다.
+     지표(피해량·CS·시야)는 숨기지 않고 .public-team-mobile-metrics 가 아랫줄에
+     되살립니다. 기존 !important 는 02-legacy 의 720px 격자 강제를 계속 눌러야
+     해서 유지하고 값만 교체했습니다 — 신규 !important 는 없습니다. */
   .public-profile-shared-shell .public-team-detail,
   .public-profile-shared-shell .public-team-player-list {
-    gap: var(--yoro-space-1) !important;
+    gap: var(--yoro-space-0) !important;
   }
 
   .public-profile-shared-shell .public-team-card,
   .public-profile-shared-shell.theme-dark .public-team-card {
     overflow: hidden !important;
     border: var(--yoro-size-sr-only) solid var(--public-gray-border) !important;
-    border-radius: var(--yoro-radius-sm) !important;
-    background: var(--public-gray-surface-strong) !important;
+    border-radius: 3px !important;
+    background: none !important;
   }
 
   .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-profile-tabs {
@@ -1617,181 +1622,116 @@
 
   .public-profile-shared-shell .public-team-head {
     min-height: var(--yoro-size-touch-target) !important;
-    padding: var(--yoro-space-2) !important;
+    padding: var(--yoro-space-2) var(--yoro-space-3) !important;
     border-bottom: var(--yoro-size-sr-only) solid var(--public-gray-border) !important;
   }
 
   .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player {
-    grid-template-columns:
-      minmax(var(--yoro-space-0), 1fr)
-      calc(
-        var(--yoro-space-5) + var(--yoro-space-5) + var(--yoro-space-5) + var(--yoro-space-5) +
-        var(--yoro-space-1) + var(--yoro-space-1) + var(--yoro-space-1)
-      ) !important;
-    grid-template-rows: auto !important;
+    grid-template-areas:
+      "rank avatar copy copy"
+      "metrics metrics metrics items" !important;
+    grid-template-columns: 28px 36px minmax(var(--yoro-space-0), 1fr) auto !important;
+    grid-template-rows: auto auto !important;
     align-items: center !important;
-    gap: var(--yoro-space-1) !important;
-    min-height: calc(var(--yoro-space-10) + var(--yoro-space-3)) !important;
-    padding: var(--yoro-space-2) !important;
+    gap: var(--yoro-space-2) var(--yoro-space-2) !important;
+    height: auto !important;
+    min-height: var(--yoro-space-0) !important;
+    padding: var(--yoro-space-2) var(--yoro-space-3) !important;
     border-top: var(--yoro-size-sr-only) solid var(--public-gray-border) !important;
     background: transparent !important;
   }
 
-  .public-profile-shared-shell .public-team-player-main {
-    grid-template-columns: var(--yoro-space-10) calc(var(--yoro-space-10) + var(--yoro-space-1) - var(--yoro-size-sr-only) - var(--yoro-size-sr-only)) minmax(var(--yoro-space-0), 1fr) !important;
-    gap: var(--yoro-space-1) !important;
-    min-width: var(--yoro-space-0) !important;
+  .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player.target {
+    background: var(--profile-row-wash) !important;
   }
 
-  .public-profile-shared-shell .public-team-player-main .public-team-champion-avatar {
-    width: var(--yoro-space-10) !important;
-    height: var(--yoro-space-10) !important;
+  .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player > .public-team-rank-badge {
+    grid-area: rank !important;
+    min-width: 28px !important;
+    height: 18px !important;
+    font-size: 9px !important;
   }
 
-  .public-profile-shared-shell .public-team-loadout-build {
-    grid-template-columns: repeat(2, var(--yoro-space-5)) !important;
-    width: calc(var(--yoro-space-10) + var(--yoro-space-1) - var(--yoro-size-sr-only) - var(--yoro-size-sr-only)) !important;
-    column-gap: calc(var(--yoro-space-1) - var(--yoro-size-sr-only) - var(--yoro-size-sr-only)) !important;
-    row-gap: var(--yoro-space-1) !important;
+  .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player > .public-team-champion-avatar {
+    grid-area: avatar !important;
+    width: 36px !important;
+    height: 36px !important;
   }
 
-  .public-profile-shared-shell .public-team-spell-build,
-  .public-profile-shared-shell .public-team-rune-build {
-    grid-template-rows: repeat(2, var(--yoro-space-5)) !important;
-    gap: var(--yoro-space-1) !important;
+  /* 스펠·룬 2×2 는 좁은 폭에서 접습니다 — 빌드 탭이 전담(목업 모바일). */
+  .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player > .public-team-loadout-build {
+    display: none !important;
   }
 
-  .public-profile-shared-shell .public-team-spell-slot,
-  .public-profile-shared-shell .public-team-spell-empty,
-  .public-profile-shared-shell .public-team-rune-slot,
-  .public-profile-shared-shell .public-team-rune-empty {
-    width: var(--yoro-space-5) !important;
-    min-width: var(--yoro-space-5) !important;
-    height: var(--yoro-space-5) !important;
-    min-height: var(--yoro-space-5) !important;
-    border-radius: var(--yoro-radius-xs) !important;
-  }
-
-  .public-profile-shared-shell .public-team-player-copy,
-  .public-profile-shared-shell .public-team-player-id-line {
+  .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player-copy {
+    grid-area: copy !important;
     width: 100% !important;
     min-width: var(--yoro-space-0) !important;
   }
 
-  .public-profile-shared-shell .public-team-player-id-line {
-    display: grid !important;
-    grid-template-columns: max-content max-content minmax(var(--yoro-space-0), 1fr) !important;
-    grid-template-rows:
-      calc(var(--yoro-size-touch-target) - var(--yoro-space-5))
-      var(--yoro-space-5) !important;
-    column-gap: calc(var(--yoro-space-1) - var(--yoro-size-sr-only) - var(--yoro-size-sr-only)) !important;
-    row-gap: var(--yoro-space-0) !important;
-    align-items: stretch !important;
-  }
-
-  .public-profile-shared-shell .public-team-player-id-line .public-team-rank-badge {
-    min-width: var(--yoro-space-5) !important;
-    max-width: var(--yoro-space-6) !important;
-    padding-inline: var(--yoro-space-1) !important;
-  }
-
-  .public-profile-shared-shell .public-team-player-id-line > .public-team-rank-badge:not(.streamer-tier-badge) {
-    grid-column: 1 !important;
-    grid-row: 1 !important;
-    align-self: center !important;
-  }
-
-  .public-profile-shared-shell .public-team-player-id-line > .streamer-tier-badge {
-    grid-column: 2 !important;
-    grid-row: 1 !important;
-    align-self: center !important;
-  }
-
-  .public-profile-shared-shell .public-team-player-id-stack {
-    display: grid !important;
-    grid-column: 3 !important;
-    grid-row: 1 / 3 !important;
-    grid-template-columns: minmax(var(--yoro-space-0), 1fr) !important;
-    grid-template-rows:
-      calc(var(--yoro-size-touch-target) - var(--yoro-space-5))
-      var(--yoro-space-5) !important;
-    align-items: stretch !important;
-    gap: var(--yoro-space-0) !important;
-    min-width: var(--yoro-space-0) !important;
-    min-height: var(--yoro-size-touch-target) !important;
-  }
-
-  .public-profile-shared-shell .public-team-player-id-stack .public-riot-id-static,
-  .public-profile-shared-shell .public-team-player-id-stack .public-riot-id-link {
-    display: grid !important;
-    grid-column: 1 !important;
-    grid-row: 1 / 3 !important;
-    grid-template-columns: minmax(var(--yoro-space-0), 1fr) auto !important;
-    grid-template-rows:
-      calc(var(--yoro-size-touch-target) - var(--yoro-space-5))
-      var(--yoro-space-5) !important;
+  .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player-id-line {
+    display: flex !important;
     align-items: center !important;
-    gap: var(--yoro-space-1) !important;
+    gap: var(--yoro-space-2) !important;
     min-width: var(--yoro-space-0) !important;
-    min-height: var(--yoro-size-touch-target) !important;
-    padding-block: var(--yoro-space-0) !important;
-    overflow: hidden !important;
-    font-size: var(--yoro-font-size-xs) !important;
   }
 
-  .public-profile-shared-shell .public-team-player-id-stack .public-riot-name {
-    grid-column: 1 !important;
-    grid-row: 1 !important;
-    align-self: center !important;
+  .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player-id-stack {
+    flex: 1 1 auto !important;
     min-width: var(--yoro-space-0) !important;
-    line-height: var(--yoro-line-height-tight) !important;
   }
 
-  .public-profile-shared-shell .public-team-player-id-stack .public-riot-tag-badge,
-  .public-profile-shared-shell .public-team-player-id-stack .public-riot-award-badges {
-    grid-column: 2 !important;
-    grid-row: 1 !important;
-    align-self: center !important;
-  }
-
+  /* KDA 는 윗줄 오른쪽 — 표의 KDA 열 대신 mobile-kda 가 보입니다. */
+  /* 후속 §2: KDA 는 모바일도 한 줄 — `5/6/1` + 11px `KDA 1.00`. */
   .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-mobile-kda {
-    grid-column: 1 / -1 !important;
-    grid-row: 2 !important;
-    align-self: center !important;
-    justify-self: start !important;
+    display: flex !important;
+    flex: 0 0 auto !important;
+    align-items: baseline !important;
     gap: var(--yoro-space-1) !important;
     margin: var(--yoro-space-0) !important;
+    margin-left: auto !important;
     color: var(--public-gray-muted) !important;
-    font-size: var(--yoro-font-size-xs) !important;
+    font-size: 11px !important;
     line-height: var(--yoro-line-height-tight) !important;
-    pointer-events: none !important;
-    z-index: var(--yoro-z-base) !important;
+    text-align: right !important;
+    white-space: nowrap !important;
   }
 
-  .public-profile-shared-shell .public-team-mobile-kda strong {
+  .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-mobile-kda strong {
     color: var(--public-gray-text) !important;
   }
 
-  .public-profile-shared-shell .public-team-player > .public-team-stat {
+  .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player > .public-team-stat {
     display: none !important;
   }
 
-  .public-profile-shared-shell .public-team-item-build {
-    grid-column: 2 !important;
-    grid-row: 1 !important;
-    grid-template-columns: repeat(4, var(--yoro-space-5)) !important;
-    gap: var(--yoro-space-1) !important;
-    width: calc(
-      var(--yoro-space-5) + var(--yoro-space-5) + var(--yoro-space-5) + var(--yoro-space-5) +
-      var(--yoro-space-1) + var(--yoro-space-1) + var(--yoro-space-1)
-    ) !important;
+  /* 아랫줄 지표 — 값 텍스트 + 2px 피해량 트랙(41-ink 의 데스크톱 규격 공유). */
+  .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player > .public-team-mobile-metrics {
+    display: block !important;
+    grid-area: metrics !important;
+    min-width: var(--yoro-space-0) !important;
   }
 
-  .public-profile-shared-shell .public-team-item-slot,
-  .public-profile-shared-shell .public-team-item-empty {
-    width: var(--yoro-space-5) !important;
-    height: var(--yoro-space-5) !important;
-    border-radius: var(--yoro-radius-xs) !important;
+  /* 와드(마지막 칸)는 5px 더 벌립니다(후속 §2 — 데스크톱 6px 의 축소판). */
+  .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-item-build {
+    grid-area: items !important;
+    grid-template-columns: repeat(6, 15px) 20px !important;
+    gap: 3px !important;
+    width: auto !important;
+    align-self: end !important;
+  }
+
+  .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-item-build > :last-child {
+    justify-self: end !important;
+    /* 와드 원형 — 위 item-slot r2 !important(02-legacy r5 상쇄용)를 마지막 칸만 되돌립니다. */
+    border-radius: 99px !important;
+  }
+
+  .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-item-slot,
+  .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-item-empty {
+    width: 15px !important;
+    height: 15px !important;
+    border-radius: 2px !important;
   }
 }
 
@@ -1820,22 +1760,8 @@
     grid-column: 4 !important;
   }
 
-  .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player {
-    grid-template-columns:
-      minmax(var(--yoro-space-0), 1fr)
-      calc(
-        var(--yoro-space-4) + var(--yoro-space-4) + var(--yoro-space-4) +
-        var(--yoro-space-1) + var(--yoro-space-1)
-      ) !important;
-  }
-
-  .public-profile-shared-shell .public-team-item-build {
-    grid-template-columns: repeat(3, var(--yoro-space-4)) !important;
-    width: calc(
-      var(--yoro-space-4) + var(--yoro-space-4) + var(--yoro-space-4) +
-      var(--yoro-space-1) + var(--yoro-space-1)
-    ) !important;
-  }
+  /* 상세 리디자인: 두 줄 카드의 아이템 15px 7칸(123px)은 360px 에서도 넘치지
+     않아 22.5rem 전용 축소 격자를 제거했습니다(48rem 블록 규격이 그대로 적용). */
 }
 
 /* 스크린샷 기준 전적 카드: 결과 색상, 정보 위계, 모바일 고밀도 배치를 한 카드 안에 유지합니다. */
@@ -2400,53 +2326,6 @@
   color: var(--yoro-color-text-on-dark) !important;
 }
 
-/* 상세 팀 비교는 한 번에 한 지표만 보여 시선 이동을 줄입니다. */
-.public-profile-shared-shell .public-team-compare {
-  grid-template-areas:
-    "tabs tabs tabs"
-    "leftLabel bars rightLabel"
-    "leftObjectives bars rightObjectives";
-}
-
-.public-profile-shared-shell .public-team-compare-tabs {
-  grid-area: tabs;
-  grid-column: 1 / -1;
-  display: flex;
-  gap: var(--yoro-space-1);
-  min-width: var(--yoro-space-0);
-  padding: var(--yoro-space-1);
-  overflow-x: auto;
-  border: var(--yoro-size-sr-only) solid var(--yoro-color-border-on-dark);
-  border-radius: var(--yoro-radius-md);
-  background: var(--public-gray-surface);
-  scrollbar-width: thin;
-}
-
-.public-profile-shared-shell .public-team-compare-tabs button {
-  min-height: calc(var(--yoro-size-touch-target) - var(--yoro-space-2));
-  padding-inline: var(--yoro-space-3);
-  border: var(--yoro-size-sr-only) solid transparent;
-  border-radius: var(--yoro-radius-sm);
-  background: transparent;
-  color: var(--yoro-color-text-on-dark-muted);
-  font: inherit;
-  font-size: var(--yoro-font-size-xs);
-  font-weight: var(--yoro-font-weight-black);
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.public-profile-shared-shell .public-team-compare-tabs button[aria-selected="true"] {
-  border-color: var(--yoro-color-primary);
-  background: color-mix(in srgb, var(--yoro-color-primary) 22%, var(--public-gray-surface-strong));
-  color: var(--yoro-color-text-on-dark);
-}
-
-.public-profile-shared-shell .public-team-compare-tabs button:focus-visible {
-  outline: var(--yoro-focus-ring-width) solid var(--yoro-color-focus-ring);
-  outline-offset: var(--yoro-focus-ring-offset);
-}
-
 @media (max-width: 64rem) {
   .public-profile-shared-shell .public-profile-streamer-spotlight {
     grid-template-columns: minmax(var(--yoro-space-0), 1fr) auto;
@@ -2463,16 +2342,6 @@
 }
 
 @media (max-width: 56.25rem) {
-  .public-profile-shared-shell .public-team-compare {
-    grid-template-columns: minmax(var(--yoro-space-0), 1fr);
-    grid-template-areas:
-      "tabs"
-      "leftLabel"
-      "bars"
-      "leftObjectives"
-      "rightObjectives"
-      "rightLabel";
-  }
 }
 
 @media (max-width: 48rem) {
@@ -2507,34 +2376,6 @@
 
   .public-profile-shared-shell .public-matches-panel .public-match-meta {
     display: none !important;
-  }
-
-  .public-profile-shared-shell .public-team-compare-tabs {
-    margin-inline: calc(var(--yoro-space-2) * -1);
-    padding-inline: var(--yoro-space-2);
-    border-inline: var(--yoro-space-0);
-    border-radius: var(--yoro-space-0);
-  }
-
-  .public-profile-shared-shell .public-team-compare {
-    grid-template-columns: repeat(2, minmax(var(--yoro-space-0), 1fr));
-    grid-template-areas:
-      "tabs tabs"
-      "leftLabel rightLabel"
-      "bars bars";
-  }
-
-  .public-profile-shared-shell .public-team-compare.objectives-active {
-    grid-template-areas:
-      "tabs tabs"
-      "leftLabel rightLabel"
-      "leftObjectives leftObjectives"
-      "rightObjectives rightObjectives"
-      "bars bars";
-  }
-
-  .public-profile-shared-shell .public-team-compare.objectives-active .public-team-compare-objectives {
-    display: grid;
   }
 }
 

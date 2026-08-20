@@ -8,9 +8,10 @@ import { TailUnderline } from "./HomeMarks";
  * 게임이 늘어도 헤더 폭이 변하지 않고 패널에 행만 추가됩니다.
  * 언어는 지구본 아이콘 하나로 통합, 활성 게임 표시는 시그니처 꼬리 밑줄. */
 
+/* 공용 상단바 규격 §3: 지구본 데스크톱·태블릿 18, 모바일 17(모바일은 CSS 로 축소). */
 function GlobeIcon() {
   return (
-    <svg aria-hidden="true" fill="none" height="17" stroke="currentColor" strokeWidth="1" viewBox="0 0 16 16" width="17">
+    <svg aria-hidden="true" fill="none" height="18" stroke="currentColor" strokeWidth="1" viewBox="0 0 16 16" width="18">
       <circle cx="8" cy="8" r="6" />
       <path d="M2 8 L 14 8" />
       <path d="M8 2 C 5.8 4, 5.8 12, 8 14 C 10.2 12, 10.2 4, 8 2" />

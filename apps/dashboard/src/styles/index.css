@@ -73,5 +73,7 @@
 @import "./pages/public-lol/39-ink-ingame.css";
 /* 전적검색 로딩(진행 헤어라인 + 스켈레톤). pages layer 를 파일 안에서 선언합니다. */
 @import "./pages/public-lol/40-ink-loading.css";
+@import "./pages/public-lol/41-ink-match-detail.css";
+@import "./pages/public-lol/42-ink-patch-notes.css";
 /* Organization 콘솔(개요·Bot 제어·Palworld 서버) 리디자인. pages layer 소유. */
 @import "./pages/bot/18-bot-console-redesign.css";

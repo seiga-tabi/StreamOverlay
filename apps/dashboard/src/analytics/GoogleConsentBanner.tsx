@@ -15,7 +15,7 @@ type ConsentCopy = {
   title: string;
 };
 
-const COPY: Record<"ko" | "ja", ConsentCopy> = {
+const COPY: Record<"ko" | "ja" | "en", ConsentCopy> = {
   ko: {
     accept: "모두 허용",
     description: "YORO.gg는 서비스 이용 통계와 광고 제공을 위해 Google Analytics 및 AdSense를 사용합니다. 허용하기 전에는 관련 저장 기능을 사용하지 않습니다.",
@@ -29,14 +29,23 @@ const COPY: Record<"ko" | "ja", ConsentCopy> = {
     label: "分析・広告Cookie設定",
     reject: "すべて拒否",
     title: "分析・広告Cookie設定"
+  },
+  en: {
+    accept: "Allow all",
+    description: "YORO.gg uses Google Analytics and AdSense for usage statistics and advertising. Related storage stays off until you allow it.",
+    label: "Analytics & ad cookie settings",
+    reject: "Reject all",
+    title: "Analytics & ad cookie settings"
   }
 };
 
-function currentLocale(): "ko" | "ja" {
+function currentLocale(): "ko" | "ja" | "en" {
   if (typeof document === "undefined") return "ko";
   if (typeof window !== "undefined" && /^\/ja(?:\/|$)/u.test(window.location.pathname)) return "ja";
+  if (typeof window !== "undefined" && /^\/en(?:\/|$)/u.test(window.location.pathname)) return "en";
   if (typeof window !== "undefined" && /^\/ko(?:\/|$)/u.test(window.location.pathname)) return "ko";
-  return document.documentElement.lang.toLowerCase().startsWith("ja") ? "ja" : "ko";
+  const lang = document.documentElement.lang.toLowerCase();
+  return lang.startsWith("ja") ? "ja" : lang.startsWith("en") ? "en" : "ko";
 }
 
 function shouldShowConsentBanner(): boolean {
@@ -47,7 +56,7 @@ function shouldShowConsentBanner(): boolean {
 
 export function GoogleConsentBanner() {
   const [visible, setVisible] = useState(() => shouldShowConsentBanner());
-  const [locale, setLocale] = useState<"ko" | "ja">(() => currentLocale());
+  const [locale, setLocale] = useState<"ko" | "ja" | "en">(() => currentLocale());
   const text = COPY[locale];
 
   useEffect(() => {

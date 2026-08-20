@@ -516,9 +516,7 @@
 .public-dashboard-shell .public-match-filter-bar,
 .public-dashboard-shell .public-match-row,
 .public-dashboard-shell .public-match-expanded,
-.public-dashboard-shell .public-team-card,
-.public-dashboard-shell .public-team-player,
-.public-dashboard-shell .public-team-stat,
+/* 상세 리디자인: .public-team-card/-player/-stat 은 41-ink-match-detail 소유. */
 .public-dashboard-shell .public-match-expanded-tabs,
 .public-dashboard-shell .public-subscriptions-card,
 .public-dashboard-shell .public-subscription-row,
@@ -566,9 +564,6 @@
 .public-profile-shared-shell .public-aggregate-hero,
 .public-profile-shared-shell .public-lp-chart,
 .public-profile-shared-shell .public-match-expanded,
-.public-profile-shared-shell .public-team-card,
-.public-profile-shared-shell .public-team-player,
-.public-profile-shared-shell .public-team-stat,
 .public-profile-shared-shell .public-match-expanded-tabs {
   border-color: var(--public-gray-border) !important;
   background: rgba(52, 58, 64, .58) !important;

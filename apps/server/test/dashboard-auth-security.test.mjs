@@ -2399,7 +2399,20 @@ test("공개 LoL 전적 API는 실제 경기 상세 지표를 응답한다", asy
 	    assert.equal(body.recentMatches[0].team.objectives.dragon, 3);
 	    assert.equal(body.recentMatches[0].opponent.riotId, "EnemyMid#JP1");
 	    assert.deepEqual(body.recentMatches[0].badges.map((badge) => badge.code), ["mvp", "unstoppable", "tenacity", "damage_carry"]);
-    assert.deepEqual(body.recentMatches[0].teams, []);
+    /* 목록 응답의 teams — 행의 아군/상대 2열용 '경량 요약'(2026-08-20, 사용자 지시).
+       아이템·룬·지표는 비우고 신원·챔피언·KDA 만 담는다. 풀 상세는 match-detail. */
+    const listTeams = body.recentMatches[0].teams;
+    assert.equal(listTeams.length, 2);
+    assert.deepEqual(listTeams.map((team) => team.teamId), [100, 200]);
+    assert.equal(listTeams[0].players.length, 2);
+    const listTarget = listTeams[0].players.find((player) => player.isTarget);
+    assert.equal(listTarget.riotId, "HideOnBush#KR1");
+    assert.equal(listTarget.champion.championId, 103);
+    assert.equal(listTarget.kills, 8);
+    assert.deepEqual(listTarget.items, []);
+    assert.deepEqual(listTarget.summonerSpells, []);
+    assert.deepEqual(listTarget.runes, []);
+    assert.equal(listTarget.twitchStream, undefined);
 
     const detailReq = createRequest(
       "GET",

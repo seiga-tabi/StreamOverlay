@@ -595,11 +595,10 @@
 }
 
 .public-dashboard-shell:not(.public-home-shell) .public-kda strong,
-.public-dashboard-shell:not(.public-home-shell) .public-team-stat.kda strong,
-.public-dashboard-shell:not(.public-home-shell) .public-team-stat strong,
-.public-dashboard-shell:not(.public-home-shell) .public-team-player-main .public-riot-name,
 .public-dashboard-shell:not(.public-home-shell) .public-opponent-cell .public-riot-name {
-  color: #f2f6ff !important;
+  /* 상세 리디자인: 팀 상세(.public-team-*) 선택자를 목록에서 뺐습니다 — 하드코딩
+     #f2f6ff 는 라이트 테마에서 흰 글자로 남습니다. 소유는 41-ink-match-detail.css. */
+  color: var(--public-gray-text, #f2f6ff) !important;
 }
 
 .public-dashboard-shell:not(.public-home-shell) .public-team-stat span {
@@ -1472,10 +1471,8 @@
 }
 
 .public-dashboard-shell .public-match-row small,
-.public-dashboard-shell .public-match-row span,
-.public-dashboard-shell .public-team-player-meta small,
-.public-dashboard-shell .public-team-head span,
-.public-dashboard-shell .public-team-head small {
+.public-dashboard-shell .public-match-row span {
+  /* 상세 리디자인: 팀 머리·행 메타는 41-ink-match-detail 소유(목록에서 제외). */
   color: var(--seiga-pastel-muted) !important;
 }
 
@@ -1487,62 +1484,13 @@
 }
 
 .public-dashboard-shell .public-match-inline-items span,
-.public-dashboard-shell .public-team-item-slot,
-.public-dashboard-shell .public-team-spell-slot,
-.public-dashboard-shell .public-team-rune-slot,
-.public-dashboard-shell .public-match-inline-items span.empty,
-.public-dashboard-shell .public-team-item-empty,
-.public-dashboard-shell .public-team-spell-empty,
-.public-dashboard-shell .public-team-rune-empty {
+.public-dashboard-shell .public-match-inline-items span.empty {
   border-color: rgba(126, 177, 223, .44) !important;
   background: rgba(255, 255, 255, .74) !important;
 }
 
-.public-dashboard-shell .public-team-card,
-.public-dashboard-shell:not(.public-home-shell) .public-team-card,
-.public-dashboard-shell.theme-dark .public-team-card {
-  border-color: rgba(126, 177, 223, .46) !important;
-  background: rgba(255, 255, 255, .78) !important;
-  color: var(--seiga-pastel-text) !important;
-}
-
-.public-dashboard-shell .public-team-card.ally,
-.public-dashboard-shell:not(.public-home-shell) .public-team-card.ally {
-  border-color: rgba(57, 202, 150, .42) !important;
-  background: linear-gradient(180deg, rgba(235, 255, 249, .88), rgba(255, 255, 255, .82)) !important;
-}
-
-.public-dashboard-shell .public-team-card.enemy,
-.public-dashboard-shell:not(.public-home-shell) .public-team-card.enemy {
-  border-color: rgba(255, 128, 160, .42) !important;
-  background: linear-gradient(180deg, rgba(255, 238, 242, .88), rgba(255, 255, 255, .82)) !important;
-}
-
-.public-dashboard-shell .public-team-player,
-.public-dashboard-shell:not(.public-home-shell) .public-team-player {
-  border-color: rgba(126, 177, 223, .28) !important;
-  background: rgba(255, 255, 255, .54) !important;
-}
-
-.public-dashboard-shell .public-team-player.target {
-  background: linear-gradient(90deg, rgba(191, 227, 255, .72), rgba(255, 255, 255, .58)) !important;
-}
-
-.public-dashboard-shell .public-team-stat {
-  background: rgba(224, 238, 255, .8) !important;
-  color: var(--seiga-pastel-text) !important;
-}
-
-.public-dashboard-shell .public-team-stat strong,
-.public-dashboard-shell .public-team-stat.kda strong,
-.public-dashboard-shell.theme-dark .public-team-stat.kda strong {
-  color: var(--seiga-pastel-heading) !important;
-}
-
-.public-dashboard-shell .public-team-stat span,
-.public-dashboard-shell .public-team-stat.kda span {
-  color: var(--seiga-pastel-muted) !important;
-}
+/* 파스텔 팀 카드·행·지표 리스킨(!important 18건)이 있던 자리 — 상세 리디자인으로
+   41-ink-match-detail.css 가 소유합니다. */
 
 .public-dashboard-shell .public-riot-tag-badge,
 .public-dashboard-shell.theme-dark .public-riot-tag-badge {
@@ -1830,186 +1778,20 @@
   color: #ffffff !important;
 }
 
-.public-dashboard-shell:not(.public-home-shell) .public-team-card,
-.public-dashboard-shell.theme-dark .public-team-card {
-  border-color: rgba(126, 177, 223, .48) !important;
-  background: rgba(255, 255, 255, .86) !important;
-  color: var(--seiga-pastel-text) !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-card.ally {
-  border-color: rgba(39, 190, 142, .46) !important;
-  background: linear-gradient(180deg, rgba(232, 255, 249, .9), rgba(255, 255, 255, .86)) !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-card.enemy {
-  border-color: rgba(255, 128, 160, .46) !important;
-  background: linear-gradient(180deg, rgba(255, 238, 243, .9), rgba(255, 255, 255, .86)) !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-head,
-.public-dashboard-shell:not(.public-home-shell) .public-ingame-team-head,
-.public-dashboard-shell:not(.public-home-shell) .public-champion-analysis-head {
-  border-color: rgba(126, 177, 223, .38) !important;
-  background:
-    linear-gradient(180deg, rgba(191, 227, 255, .9), rgba(213, 241, 255, .7)) !important;
-  color: var(--seiga-pastel-heading) !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-card.ally .public-team-head strong {
-  color: #08785d !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-card.enemy .public-team-head strong {
-  color: #d43f61 !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-head span,
-.public-dashboard-shell:not(.public-home-shell) .public-team-head small,
-.public-dashboard-shell:not(.public-home-shell) .public-team-head-summary small,
-.public-dashboard-shell:not(.public-home-shell) .public-opponent-cell > span,
-.public-dashboard-shell:not(.public-home-shell) .public-opponent-cell small {
-  color: #526984 !important;
-  text-shadow: none !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-head em {
-  border-color: rgba(79, 124, 255, .42) !important;
-  background: rgba(255, 255, 255, .72) !important;
-  color: #245fbb !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-player {
-  border-top-color: rgba(126, 177, 223, .3) !important;
-  background: rgba(255, 255, 255, .58) !important;
-  color: var(--seiga-pastel-text) !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-player.target {
-  background:
-    linear-gradient(90deg, rgba(191, 227, 255, .74), rgba(255, 255, 255, .64)) !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-player.highlight-mvp {
-  background:
-    linear-gradient(90deg, rgba(255, 247, 219, .92), rgba(255, 255, 255, .68)) !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-player.highlight-ace {
-  background:
-    linear-gradient(90deg, rgba(255, 232, 238, .92), rgba(255, 255, 255, .68)) !important;
-}
+/* 파스텔 팀 카드·행 리스킨(!important 26건)이 있던 자리 — 상세 리디자인으로
+   41-ink-match-detail.css 가 소유합니다(헤어라인 카드·본인 행 무채 워시). */
 
 .public-dashboard-shell:not(.public-home-shell) .public-kda strong,
-.public-dashboard-shell:not(.public-home-shell) .public-team-stat.kda strong,
-.public-dashboard-shell:not(.public-home-shell) .public-team-stat strong,
-.public-dashboard-shell:not(.public-home-shell) .public-team-player-main .public-riot-name,
-.public-dashboard-shell:not(.public-home-shell) .public-team-player-main .public-riot-id-static,
-.public-dashboard-shell:not(.public-home-shell) .public-team-player-main .public-riot-id-link,
 .public-dashboard-shell:not(.public-home-shell) .public-opponent-cell .public-riot-name {
   color: var(--seiga-pastel-heading) !important;
   text-shadow: none !important;
 }
 
-.public-dashboard-shell:not(.public-home-shell) .public-team-player-main .public-riot-id-static.streamer .public-riot-name,
-.public-dashboard-shell:not(.public-home-shell) .public-team-player-main .public-riot-id-link.streamer .public-riot-name {
-  background: linear-gradient(135deg, #6d42ff 0%, #bc36d6 48%, #2080dd 100%) !important;
-  background-clip: text !important;
-  color: transparent !important;
-  -webkit-background-clip: text !important;
-}
+/* 파스텔 팀 지표 상자·스트리머 보라 그라데이션(!important 30건)이 있던 자리 —
+   41-ink-match-detail.css 가 소유합니다(값 + 2px 트랙 · 무채 이름). */
 
-.public-dashboard-shell:not(.public-home-shell) .public-team-player-meta small,
-.public-dashboard-shell:not(.public-home-shell) .public-team-stat span,
-.public-dashboard-shell:not(.public-home-shell) .public-team-stat.kda span {
-  color: #5d7190 !important;
-  text-shadow: none !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-stat {
-  border: 1px solid rgba(126, 177, 223, .34) !important;
-  background: rgba(223, 242, 255, .82) !important;
-  color: var(--seiga-pastel-text) !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-stat.kda {
-  background: rgba(229, 244, 255, .9) !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-stat .metric-tone-excellent {
-  color: #0ea371 !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-stat .metric-tone-good {
-  color: #2563eb !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-stat .metric-tone-neutral {
-  color: #526984 !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-stat .metric-tone-warning {
-  color: #d97706 !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-stat .metric-tone-bad {
-  color: #e11d48 !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-item-slot,
-.public-dashboard-shell:not(.public-home-shell) .public-team-item-empty,
-.public-dashboard-shell:not(.public-home-shell) .public-team-spell-slot,
-.public-dashboard-shell:not(.public-home-shell) .public-team-spell-empty,
-.public-dashboard-shell:not(.public-home-shell) .public-team-rune-slot,
-.public-dashboard-shell:not(.public-home-shell) .public-team-rune-empty {
-  border-color: rgba(126, 177, 223, .44) !important;
-  background: rgba(255, 255, 255, .76) !important;
-  color: #526984 !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-compare {
-  border-color: rgba(126, 177, 223, .5) !important;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, .94), rgba(232, 246, 255, .86)) !important;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .58);
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-compare-label strong {
-  color: var(--seiga-pastel-heading) !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-compare-label.left strong {
-  color: #d43f61 !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-compare-label.right strong {
-  color: #245fbb !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-compare-label span,
-.public-dashboard-shell:not(.public-home-shell) .public-team-compare-objective {
-  color: #526984 !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-compare-objective i {
-  border-color: rgba(126, 177, 223, .42) !important;
-  background: rgba(255, 255, 255, .82) !important;
-  color: #245fbb !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-compare-objective b {
-  color: var(--seiga-pastel-heading) !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-compare-track {
-  border-color: rgba(126, 177, 223, .5) !important;
-  background: rgba(213, 241, 255, .72) !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-compare-track em {
-  color: #ffffff !important;
-  text-shadow: 0 1px 5px rgba(15, 23, 42, .48);
-}
+/* 파스텔 팀 비교 카드(!important 14건)가 있던 자리 — 6px 무채 막대 + 5:5
+   기준선은 41-ink-match-detail.css 소유. */
 
 /* 종합 성과 카드 파스텔 톤 보정 */
 .public-dashboard-shell:not(.public-home-shell) .public-aggregate-card {
@@ -2496,59 +2278,8 @@
 
 /* 상단 메뉴 바깥 컨테이너 배경 제거 */
 
-.public-dashboard-shell:not(.public-home-shell) .public-team-stat.metric-bar {
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-  border-color: rgba(126, 177, 223, .42) !important;
-  background: rgba(223, 242, 255, .86) !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-stat.metric-bar .public-team-stat-fill {
-  position: absolute;
-  inset: 0 auto 0 0;
-  z-index: 0;
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  opacity: .95;
-  pointer-events: none;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-stat.metric-bar.damage .public-team-stat-fill {
-  background: linear-gradient(90deg, rgba(96, 165, 250, .32), rgba(45, 212, 191, .22));
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-stat.metric-bar.cs .public-team-stat-fill {
-  background: linear-gradient(90deg, rgba(34, 197, 94, .28), rgba(191, 227, 255, .2));
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-stat.metric-bar.vision .public-team-stat-fill {
-  background: linear-gradient(90deg, rgba(45, 212, 191, .26), rgba(213, 241, 255, .22));
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-team-stat.metric-bar strong,
-.public-dashboard-shell:not(.public-home-shell) .public-team-stat.metric-bar span {
-  position: relative;
-  z-index: 1;
-}
-
-.public-dashboard-shell.theme-dark:not(.public-home-shell) .public-team-stat.metric-bar {
-  border-color: rgba(96, 165, 250, .24) !important;
-  background: rgba(15, 23, 42, .68) !important;
-}
-
-.public-dashboard-shell.theme-dark:not(.public-home-shell) .public-team-stat.metric-bar.damage .public-team-stat-fill {
-  background: linear-gradient(90deg, rgba(96, 165, 250, .28), rgba(45, 212, 191, .16));
-}
-
-.public-dashboard-shell.theme-dark:not(.public-home-shell) .public-team-stat.metric-bar.cs .public-team-stat-fill {
-  background: linear-gradient(90deg, rgba(34, 197, 94, .26), rgba(96, 165, 250, .12));
-}
-
-.public-dashboard-shell.theme-dark:not(.public-home-shell) .public-team-stat.metric-bar.vision .public-team-stat-fill {
-  background: linear-gradient(90deg, rgba(45, 212, 191, .22), rgba(96, 165, 250, .12));
-}
+/* 파스텔/다크 지표 상자(.metric-bar 채움 12규칙)가 있던 자리 — 상세 리디자인으로
+   41-ink-match-detail.css 가 소유합니다(상자 없음 · 값 + 2px 트랙). */
 
 /* 전적 빌드 탭 파스텔 톤 보정 */
 .public-dashboard-shell:not(.public-home-shell) .public-match-build-panel {
@@ -5884,13 +5615,7 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
 }
 
 .public-profile-shared-shell .public-match-inline-items span,
-.public-profile-shared-shell .public-match-inline-items span.empty,
-.public-profile-shared-shell .public-team-item-slot,
-.public-profile-shared-shell .public-team-spell-slot,
-.public-profile-shared-shell .public-team-rune-slot,
-.public-profile-shared-shell .public-team-item-empty,
-.public-profile-shared-shell .public-team-spell-empty,
-.public-profile-shared-shell .public-team-rune-empty {
+.public-profile-shared-shell .public-match-inline-items span.empty {
   border-color: rgba(119, 131, 169, .28) !important;
   background: rgba(4, 7, 15, .68) !important;
 }
@@ -5907,9 +5632,7 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
   color: #f3f6ff !important;
 }
 
-.public-profile-shared-shell .public-team-card,
-.public-profile-shared-shell .public-team-player,
-.public-profile-shared-shell .public-team-stat,
+/* 상세 리디자인: 팀 카드·행·지표는 41-ink-match-detail 소유(목록에서 제외). */
 .public-profile-shared-shell .public-match-expanded-tabs {
   border-color: rgba(119, 131, 169, .24) !important;
   background: rgba(12, 17, 31, .82) !important;

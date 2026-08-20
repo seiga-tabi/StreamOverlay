@@ -1,0 +1,400 @@
+/* 패치 노트 수묵 리스킨 — 캔버스 page-5(LolPatchNotes/-Light/-Ja/-Mobile/-MobileLight).
+ *
+ * 소유권: .yoro-pn-* 의 "표면 규격"(카드·칩·버튼·radius·격자·페이지 머리·히어로
+ * 일러스트·사이드바·모바일)은 이 파일이 소유합니다 — 41-ink-match-detail.css 가
+ * 전적 상세에서 성공한 방식 그대로, 1,584줄짜리 35-patch-notes.css 안에서 새
+ * 규격을 구분할 수 없어 새 파일을 골랐습니다. 35 는 구조(격자 내부·게이지·모듈
+ * 동작)와 토큰 치환만 남습니다. 팔레트는 20-profile-platform.css 의 토큰 다리
+ * (.yoro-pn-page)로 옵니다 — 여기서 색 값을 새로 만들지 않습니다.
+ *
+ * radius 는 3(카드) / 2(칩·버튼) / 99px(아바타·원형)만 씁니다. !important 금지.
+ */
+
+@layer pages {
+  /* ── 페이지 머리 — 노리개 + 명조 제목 + 붓 밑줄(목업 머리 3겹) ─────── */
+  /* 페이지 루트 글자색 — 셸(product-gray)의 밝은 본문색 상속을 끊습니다.
+     라이트 지면 위 흰 글자로 제목이 통째로 사라지던 원인. */
+  .yoro-pn-page {
+    color: var(--public-gray-text);
+  }
+
+  .yoro-pn-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .yoro-pn-head-norigae {
+    flex: none;
+    margin-top: 4px;
+    color: var(--public-gray-muted);
+  }
+
+  .yoro-pn-head-copy {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .yoro-pn-head-eyebrow {
+    margin: 0;
+    color: var(--public-gray-muted);
+    font-size: 11px;
+    letter-spacing: .08em;
+  }
+
+  .yoro-pn-head-title {
+    margin: 6px 0 0;
+    font-size: 26px;
+    font-weight: 700;
+    /* 명조 한 층 — 홈 히어로와 같은 스택(01-public-home 의 --home-serif 관례).
+       이 페이지는 홈 셸 밖이라 변수 fallback 으로 같은 스택을 받습니다. */
+    font-family: var(--home-serif, "Noto Serif KR", "Noto Serif JP", serif);
+    line-height: 1.2;
+  }
+
+  .yoro-pn-head-title-word {
+    position: relative;
+    display: inline-block;
+  }
+
+  .yoro-pn-head-tail {
+    position: absolute;
+    left: 0;
+    bottom: -10px;
+    color: var(--public-gray-border-strong);
+  }
+
+  .yoro-pn-head-desc {
+    margin: 18px 0 0;
+    color: var(--public-gray-muted);
+    font-size: 13px;
+  }
+
+  .yoro-pn-head-status {
+    flex: none;
+    display: grid;
+    justify-items: end;
+    gap: 6px;
+    text-align: right;
+  }
+
+  /* ── 카드 문법 — 전부 surface · .5px 헤어라인 · r3 (목업 .panel) ────── */
+  .yoro-pn-hero,
+  .yoro-pn-summary,
+  .yoro-pn-tile,
+  .yoro-pn-mine-module,
+  .yoro-pn-trend,
+  .yoro-pn-archive {
+    border: .5px solid var(--public-gray-border);
+    border-radius: 3px;
+    background: var(--public-gray-surface);
+    color: var(--public-gray-text);
+    box-shadow: none;
+  }
+
+  /* 아카이브(사이드바 카드)만 목록 패널 — 내부 행은 헤어라인 구분(§3-3). */
+
+  /* ── 칩·버튼 — 44px · r2 · .5px · 무채. 활성은 진한 테두리 + 700 ─────── */
+  .yoro-pn-chip,
+  .yoro-pn-bar-search {
+    min-height: 44px;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
+    background: none;
+    color: var(--public-gray-muted);
+    font-weight: 500;
+    box-shadow: none;
+  }
+
+  .yoro-pn-chip[aria-pressed="true"],
+  .yoro-pn-chip.is-active {
+    border-color: var(--public-gray-border-strong);
+    background: none;
+    color: var(--public-gray-text);
+    font-weight: 700;
+  }
+
+  /* 공용 버튼(요약 공유·내 변화 보기·재시도)도 이 페이지 문법으로 — 채운
+     보라(#6259ef)의 자리였습니다. 배경 없음 + 진한 외곽선(목업 .out-btn). */
+  .yoro-pn-page .yoro-button {
+    min-height: 44px;
+    border: .5px solid var(--public-gray-border-strong);
+    border-radius: 2px;
+    background: none;
+    color: var(--public-gray-text);
+    font-size: 13px;
+    font-weight: 800;
+    box-shadow: none;
+  }
+
+  .yoro-pn-page .yoro-button:hover:not(:disabled) {
+    border-color: var(--public-gray-text);
+    background: color-mix(in srgb, var(--public-gray-text) 6%, transparent);
+    color: var(--public-gray-text);
+  }
+
+  /* 판정 태그 — 글자·테두리만, 배경 틴트 금지(보강 §2 표 유지). */
+  .yoro-pn-summary-tag[data-direction="buff"],
+  .yoro-pn-summary-tag[data-direction="nerf"],
+  .yoro-pn-summary-tag[data-direction="adjust"] {
+    background: none;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
+  }
+
+  .yoro-pn-summary-tag[data-direction="buff"] { border-color: color-mix(in srgb, var(--graph-win-ink) 40%, var(--public-gray-border)); }
+  .yoro-pn-summary-tag[data-direction="nerf"] { border-color: color-mix(in srgb, var(--graph-loss-ink) 40%, var(--public-gray-border)); }
+
+  /* 상태 배지(최신/저장본)도 이 페이지에서는 무채 칩 문법(목업 tag).
+     Status.css 는 레이어 밖이라 직접 속성으로는 못 이깁니다 — 배지가 읽는
+     커스텀 프로퍼티를 이 스코프에서 갈아끼웁니다. */
+  .yoro-pn-head-status {
+    /* tone(success/warning) 색 토큰 자체를 이 스코프에서 무채로 — Status.css 의
+       [data-tone] 선언은 레이어 밖이라 status 변수를 직접 덮을 수 없습니다. */
+    --yoro-color-success: var(--public-gray-border-strong);
+    --yoro-color-success-bg: transparent;
+    --yoro-color-warning: var(--public-gray-border-strong);
+    --yoro-color-warning-bg: transparent;
+    --yoro-radius-md: 2px;
+  }
+
+  .yoro-pn-head-status .yoro-badge {
+    --yoro-status-text: var(--public-gray-text);
+  }
+
+  /* 타일은 일러스트가 전면 배경인 그림 카드 — 글자는 테마와 무관하게 밝은 잉크
+     고정입니다(어두운 스크림 위). 토큰이 라이트에서 먹색으로 뒤집히면 그림 위에서
+     사라져, 여기만 예외 hex 를 남깁니다(보고 사유). */
+  .yoro-pn-tile {
+    color: #f5f6f8;
+  }
+
+  .yoro-pn-tile .yoro-pn-link,
+  .yoro-pn-tile h3 { color: #f5f6f8; }
+
+  /* 알약 잔재 — 배지류는 r2 무채 칩. */
+  .yoro-pn-mine-badge {
+    border-radius: 2px;
+    border: .5px solid var(--public-gray-border);
+    background: none;
+    color: var(--public-gray-muted);
+  }
+
+  /* Riot 요약 인용 — 색 레일·틴트 금지, 왼쪽 헤어라인 하나(§3-3). */
+  .yoro-pn-summary-quote {
+    border-left: .5px solid var(--public-gray-border);
+    border-inline-start: .5px solid var(--public-gray-border);
+    background: none;
+    padding-left: 14px;
+    padding-inline-start: 14px;
+    border-radius: 0;
+  }
+
+  /* ── 본문 격자 — 1fr | 300px 사이드바(목업 §3-5) ────────────────────── */
+  .yoro-pn-stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 20px;
+    align-items: start;
+  }
+
+  .yoro-pn-main {
+    min-width: 0;
+    display: grid;
+    gap: var(--yoro-space-4, 16px);
+  }
+
+  .yoro-pn-side {
+    min-width: 0;
+    display: grid;
+    gap: 16px;
+  }
+
+  /* 사이드바 목록 — 행 44px 헤어라인, 명조 버전 번호(목업 패치 목록).
+     제목·요약은 시각적으로 접지만 anchor 텍스트로 남아 행 전체가 링크입니다. */
+  .yoro-pn-side .yoro-pn-archive {
+    padding: 14px 16px;
+  }
+
+  .yoro-pn-side .yoro-pn-archive-title {
+    margin: 0 0 6px;
+    color: var(--public-gray-text);
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .yoro-pn-side .yoro-pn-group + .yoro-pn-group { margin-top: 0; }
+
+  .yoro-pn-side .yoro-pn-season {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin: 10px 0 2px;
+    color: var(--public-gray-muted);
+    font-size: 11px;
+  }
+
+  .yoro-pn-side .yoro-pn-season b { color: var(--public-gray-text); font-size: 12px; }
+
+  .yoro-pn-side .yoro-pn-row,
+  .yoro-pn-side .yoro-pn-row.is-played {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    border-top: .5px solid var(--public-gray-border);
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  /* 옛 축 장식(점·썸네일)은 사이드바 목록에서 접습니다 — 목업에 없습니다. */
+  .yoro-pn-side .yoro-pn-node,
+  .yoro-pn-side .yoro-pn-row-art { display: none; }
+
+  .yoro-pn-side .yoro-pn-row-num {
+    flex: none;
+    margin: 0;
+    min-width: 46px;
+    font-family: var(--home-serif, "Noto Serif KR", "Noto Serif JP", serif);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--public-gray-muted);
+  }
+
+  .yoro-pn-side .yoro-pn-group:first-of-type .yoro-pn-row-num,
+  .yoro-pn-side .yoro-pn-row:hover .yoro-pn-row-num { color: var(--public-gray-text); }
+
+  /* 제목(anchor 포함)은 접근성 텍스트로만 — stretched link 가 행 전체를 덮습니다. */
+  .yoro-pn-side .yoro-pn-row-body {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  /* stretched link(::after)의 기준을 행으로 되돌립니다 — body 가 clip 돼도
+     ::after 는 .yoro-pn-row(relative) 전체를 덮습니다. */
+
+  .yoro-pn-side .yoro-pn-row-when {
+    flex: 1;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin: 0;
+    color: var(--public-gray-muted);
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .yoro-pn-side .yoro-pn-row-when em { display: none; }
+
+  .yoro-pn-side .yoro-pn-row-norate { margin: 0; flex: none; color: var(--public-gray-muted); font-size: 11px; }
+
+  /* 사이드바 게이지는 %p 숫자 폭만 — 행 높이에 맞춰 축소. */
+  .yoro-pn-side .yoro-pn-gauge { flex: none; }
+
+  /* 출처 — 사이드바 카드. */
+  .yoro-pn-side .yoro-pn-attribution {
+    margin: 0;
+    padding: 14px 16px;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 3px;
+    background: var(--public-gray-surface);
+    color: var(--public-gray-muted);
+    font-size: 11px;
+    line-height: 1.55;
+  }
+
+  /* ── 히어로 — 일러스트가 카드를 채우고 가로 스크림이 왼쪽만 덮습니다(§3-6) ── */
+  .yoro-pn-hero { isolation: isolate; overflow: hidden; }
+
+  .yoro-pn-hero-art {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: 0;
+    object-fit: cover;
+  }
+
+  .yoro-pn-hero-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background:
+      /* 가로 — 왼쪽 30%는 카드색 100%(밝은 일러스트에서도 글자 보장), 84%부터 원본 */
+      linear-gradient(90deg,
+        var(--public-gray-surface) 0%,
+        var(--public-gray-surface) 30%,
+        color-mix(in srgb, var(--public-gray-surface) 86%, transparent) 48%,
+        color-mix(in srgb, var(--public-gray-surface) 55%, transparent) 66%,
+        color-mix(in srgb, var(--public-gray-surface) 14%, transparent) 84%,
+        transparent 96%),
+      /* 바닥 — 하단 지표 줄이 그림 위에서도 읽히도록 */
+      linear-gradient(0deg,
+        color-mix(in srgb, var(--public-gray-surface) 62%, transparent) 0%,
+        transparent 34%);
+  }
+
+  .yoro-pn-hero-body {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* 번호는 명조로 무게를 만듭니다(목업 — 84px 산세리프 대신 서체). */
+  .yoro-pn-hero-num {
+    font-family: var(--home-serif, "Noto Serif KR", "Noto Serif JP", serif);
+    font-size: 56px;
+    font-weight: 700;
+    letter-spacing: -.01em;
+    line-height: 1;
+    color: var(--public-gray-text);
+  }
+
+  .yoro-pn-hero-eyebrow,
+  .yoro-pn-hero-sum { color: var(--public-gray-muted); }
+
+  .yoro-pn-hero-title,
+  .yoro-pn-hero-cta { color: var(--public-gray-text); }
+
+  /* 본문 글자는 스크림이 진한 왼쪽 축 안에만 — 오른쪽 그림 자리를 지킵니다. */
+  .yoro-pn-hero-title,
+  .yoro-pn-hero-sum,
+  .yoro-pn-hero-eyebrow,
+  .yoro-pn-hero-num { max-width: min(520px, 58%); }
+
+  /* ── 모바일(≤48rem) — 1열 + 히어로 일러스트 상단 전폭 16:9 띠 ───────── */
+  @media (max-width: 48rem) {
+    .yoro-pn-stage { grid-template-columns: minmax(0, 1fr); }
+
+    .yoro-pn-hero { display: block; }
+
+    .yoro-pn-hero-art {
+      position: static;
+      display: block;
+      aspect-ratio: 16 / 9;
+      height: auto;
+      border-bottom: .5px solid var(--public-gray-border);
+    }
+
+    /* 글자와 겹치지 않으므로 스크림이 필요 없습니다(목업 모바일). */
+    .yoro-pn-hero-scrim { display: none; }
+
+    .yoro-pn-hero-title,
+    .yoro-pn-hero-sum,
+    .yoro-pn-hero-eyebrow,
+    .yoro-pn-hero-num { max-width: none; }
+  }
+}

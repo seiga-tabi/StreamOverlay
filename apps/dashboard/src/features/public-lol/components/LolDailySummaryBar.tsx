@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { publicI18n, t, activePublicLocale } from "../i18n/public-lol-i18n";
+import { publicIntlLocale, publicI18n, t, activePublicLocale } from "../i18n/public-lol-i18n";
 import type { PublicLolRecentMatch } from "../types/public-lol";
 
 /* 전적 리스트의 "그날의 종합"(A안) — 로컬 날짜 경계마다 슬림 요약 바를 끼웁니다.
@@ -106,7 +106,7 @@ function summaryAverageKda(matches: readonly PublicLolRecentMatch[]): number | "
 }
 
 function dayLabel(summary: LolDailySummary): { title: string; date: string } {
-  const locale = activePublicLocale === "ja" ? "ja-JP" : "ko-KR";
+  const locale = publicIntlLocale();
   const date = new Intl.DateTimeFormat(locale, { month: "long", day: "numeric", weekday: "short" })
     .format(summary.date);
   if (summary.dayOffset === 0) return { title: t().dailyToday, date };
@@ -122,8 +122,8 @@ function winRateToneClass(percent: number): string {
 
 export function LolDailySummaryBar({ summary }: { summary: LolDailySummary }) {
   const label = dayLabel(summary);
-  const winInitial = t().win.slice(0, 1);
-  const lossInitial = t().loss.slice(0, 1);
+  const winInitial = t().winShort;
+  const lossInitial = t().lossShort;
   const kda = summary.averageKda;
   return (
     <div

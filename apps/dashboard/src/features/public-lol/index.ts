@@ -11,7 +11,6 @@ export {
   searchSuggestions,
 } from "./api/lol";
 export { PublicHomeSearchPanel } from "./components/PublicHomeSearchPanel";
-export { PublicAppHeader } from "./components/PublicAppHeader";
 export { PublicBottomTabBar } from "./components/PublicBottomTabBar";
 export { PublicHeaderMenu } from "./components/PublicHeaderMenu";
 export { PublicLocaleSelector } from "./components/PublicLocaleSelector";
@@ -42,9 +41,6 @@ export { rankTierLabel } from "./utils/rank";
 export { platformTimezoneLabel, playtimeSummary } from "./utils/playtime";
 export type { PlaytimeBandKey, PlaytimeSummary } from "./utils/playtime";
 export { RankOverviewMetricRow } from "./components/RankOverviewMetricRow";
-export { MatchTeamCompare } from "./components/MatchTeamCompare";
-export { MatchTeamMetricRow } from "./components/MatchTeamMetricRow";
-export { MatchTeamObjectiveRow } from "./components/MatchTeamObjectiveRow";
 export { MatchTeamDetails } from "./components/MatchTeamDetails";
 export { MatchTeamDetailsTeamSection } from "./components/MatchTeamDetailsTeamSection";
 export { MatchTeamHeader } from "./components/MatchTeamHeader";
@@ -137,21 +133,6 @@ export type {
   RankOverviewMetricRowProps,
   RankOverviewMetricRowViewModel,
 } from "./components/RankOverviewMetricRow";
-export type {
-  MatchTeamCompareMetricViewModel,
-  MatchTeamCompareObjectiveViewModel,
-  MatchTeamCompareProps,
-  MatchTeamCompareTeamViewModel,
-  MatchTeamCompareViewModel,
-} from "./components/MatchTeamCompare";
-export type {
-  MatchTeamMetricRowProps,
-  MatchTeamMetricRowViewModel,
-} from "./components/MatchTeamMetricRow";
-export type {
-  MatchTeamObjectiveRowProps,
-  MatchTeamObjectiveRowViewModel,
-} from "./components/MatchTeamObjectiveRow";
 export type {
   MatchTeamDetailsPlayer,
   MatchTeamDetailsProps,

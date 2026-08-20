@@ -63,9 +63,8 @@
 .public-dashboard-shell.public-profile-shared-shell .public-aggregate-hero,
 .public-dashboard-shell.public-profile-shared-shell .public-lp-chart,
 .public-dashboard-shell.public-profile-shared-shell .public-match-expanded,
-.public-dashboard-shell.public-profile-shared-shell .public-team-card,
-.public-dashboard-shell.public-profile-shared-shell .public-team-player,
-.public-dashboard-shell.public-profile-shared-shell .public-team-stat,
+/* .public-team-card/-player/-stat 은 41-ink-match-detail.css 가 단독 소유합니다
+   (상세 리디자인 — 채운 상자·카드 배경 제거). 여기 목록에서 뺐습니다. */
 .public-dashboard-shell.public-profile-shared-shell .public-match-expanded-tabs {
   border-color: var(--public-gray-border) !important;
   background: rgba(52, 58, 64, .58) !important;
@@ -225,38 +224,17 @@
   box-shadow: none !important;
 }
 
-/* 공개 상세 전적 팀 테이블 정리 */
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player > .public-team-stat.kda {
-  border: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player > .public-team-stat.kda strong {
-  color: var(--public-gray-text) !important;
-  text-shadow: none !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player > .public-team-stat.kda span {
-  color: var(--public-gray-muted) !important;
-  text-shadow: none !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player-main .public-riot-id-static.streamer .public-riot-name,
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player-main .public-riot-id-link.streamer .public-riot-name {
+/* 공개 상세 전적 팀 테이블 — 행·배지·지표 규격은 41-ink-match-detail.css 가
+   단독 소유합니다(상세 리디자인). 스트리머 보라 알약·본인 행 그라데이션·채운
+   지표 상자를 만들던 !important 32건을 여기서 제거했습니다. */
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-riot-id-static.streamer .public-riot-name,
+.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-riot-id-link.streamer .public-riot-name {
   background: none !important;
   background-clip: border-box !important;
   color: var(--public-gray-text) !important;
   text-shadow: none !important;
   -webkit-background-clip: border-box !important;
   -webkit-text-fill-color: var(--public-gray-text) !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-rank-badge.streamer-tier-badge {
-  border: 1px solid rgba(196, 181, 253, .45) !important;
-  background: rgba(124, 58, 237, .78) !important;
-  color: #ffffff !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18) !important;
 }
 
 /* 공개 프로필 상단 액션/티어 표시 정리 */
@@ -1142,126 +1120,9 @@
   color: #f8f9fa !important;
 }
 
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-card {
-  overflow: hidden;
-  border-color: rgba(248, 249, 250, .18) !important;
-  background: rgba(43, 48, 53, .9) !important;
-  color: #f8f9fa !important;
-  box-shadow: inset 0 1px 0 rgba(248, 249, 250, .08) !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-card.enemy {
-  border-color: rgba(248, 113, 113, .34) !important;
-  background:
-    linear-gradient(90deg, rgba(185, 28, 28, .16), rgba(43, 48, 53, .92) 28%, rgba(43, 48, 53, .9)) !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-card.ally {
-  border-color: rgba(52, 211, 153, .34) !important;
-  background:
-    linear-gradient(90deg, rgba(4, 120, 87, .16), rgba(43, 48, 53, .92) 28%, rgba(43, 48, 53, .9)) !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-head {
-  border-color: rgba(248, 249, 250, .16) !important;
-  background: rgba(33, 37, 41, .68) !important;
-  color: #f8f9fa !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-card.enemy .public-team-head strong {
-  color: #ff7b8a !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-card.ally .public-team-head strong {
-  color: #5eead4 !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-head span,
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-head small,
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-head-summary small {
-  color: rgba(248, 249, 250, .74) !important;
-  text-shadow: none !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-head em {
-  border-color: rgba(248, 249, 250, .22) !important;
-  background: rgba(52, 58, 64, .74) !important;
-  color: #e9ecef !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player {
-  border-top-color: rgba(248, 249, 250, .12) !important;
-  background: rgba(52, 58, 64, .5) !important;
-  color: #f8f9fa !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player.target {
-  background:
-    linear-gradient(90deg, rgba(255, 243, 205, .22), rgba(52, 58, 64, .54) 34%, rgba(52, 58, 64, .46)) !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player.highlight-mvp {
-  background:
-    linear-gradient(90deg, rgba(245, 158, 11, .22), rgba(52, 58, 64, .54) 34%, rgba(52, 58, 64, .46)) !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player.highlight-ace {
-  background:
-    linear-gradient(90deg, rgba(244, 63, 94, .2), rgba(52, 58, 64, .54) 34%, rgba(52, 58, 64, .46)) !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player-main .public-riot-id-static,
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player-main .public-riot-id-link,
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player-main .public-riot-name,
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-stat strong,
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-stat.kda strong,
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-mobile-kda strong {
-  color: #f8f9fa !important;
-  text-shadow: none !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player-meta small,
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-stat span,
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-stat.kda span,
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-mobile-kda span {
-  color: rgba(248, 249, 250, .68) !important;
-  text-shadow: none !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-stat.metric-bar,
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player > .public-team-stat:not(.kda) {
-  border-color: rgba(248, 249, 250, .18) !important;
-  background: rgba(33, 37, 41, .56) !important;
-  color: #f8f9fa !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-stat.metric-bar.damage .public-team-stat-fill {
-  background: linear-gradient(90deg, rgba(96, 165, 250, .34), rgba(45, 212, 191, .16)) !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-stat.metric-bar.cs .public-team-stat-fill {
-  background: linear-gradient(90deg, rgba(52, 211, 153, .3), rgba(96, 165, 250, .12)) !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-stat.metric-bar.vision .public-team-stat-fill {
-  background: linear-gradient(90deg, rgba(125, 92, 255, .3), rgba(96, 165, 250, .12)) !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-item-slot,
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-item-empty,
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-spell-slot,
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-spell-empty,
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-rune-slot,
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-rune-empty {
-  border-color: rgba(248, 249, 250, .16) !important;
-  background: rgba(33, 37, 41, .46) !important;
-  color: rgba(248, 249, 250, .78) !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-rank-badge {
-  color: #17202a !important;
-  text-shadow: none !important;
-}
+/* 팀 카드·머리·선수 행·지표·아이템 칸·티어 배지의 채움/그라데이션 !important
+   84건이 있던 자리입니다 — 상세 리디자인으로 41-ink-match-detail.css 가 단독
+   소유합니다(외곽선 칩·헤어라인 행·값+2px 트랙). */
 
 .public-home-shared-shell .public-home-shared-search-card .public-home-shared-field.public-search-field,
 .public-home-shared-shell .public-home-shared-search-card .public-home-shared-field.public-search-field.yoro-form-field,
@@ -2269,144 +2130,9 @@
   filter: saturate(1.08) contrast(1.08) !important;
 }
 
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-card {
-  border-color: rgba(248, 249, 250, .24) !important;
-  background: rgba(52, 58, 64, .98) !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-card.enemy {
-  border-color: rgba(255, 107, 107, .58) !important;
-  background:
-    linear-gradient(90deg, rgba(134, 46, 46, .72), rgba(52, 58, 64, .98) 28%, rgba(52, 58, 64, .98)) !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-card.ally {
-  border-color: rgba(56, 217, 169, .58) !important;
-  background:
-    linear-gradient(90deg, rgba(8, 127, 91, .66), rgba(52, 58, 64, .98) 28%, rgba(52, 58, 64, .98)) !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-player {
-  border-top-color: rgba(248, 249, 250, .18) !important;
-  background: rgba(73, 80, 87, .86) !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-player.highlight-mvp {
-  background:
-    linear-gradient(90deg, rgba(250, 176, 5, .34), rgba(73, 80, 87, .9) 34%, rgba(73, 80, 87, .86)) !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-player.highlight-ace {
-  background:
-    linear-gradient(90deg, rgba(240, 62, 62, .34), rgba(73, 80, 87, .9) 34%, rgba(73, 80, 87, .86)) !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-player-main .public-riot-id-static,
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-player-main .public-riot-id-link,
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-riot-name,
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-stat strong {
-  color: #ffffff !important;
-  font-weight: 950 !important;
-  -webkit-text-fill-color: #ffffff !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-player-meta small,
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-stat span {
-  color: rgba(248, 249, 250, .84) !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-riot-tag-badge {
-  min-width: 34px !important;
-  max-width: 76px !important;
-  height: 20px !important;
-  border-color: rgba(222, 226, 230, .72) !important;
-  background: rgba(222, 226, 230, .94) !important;
-  color: #212529 !important;
-  font-size: 10px !important;
-  font-weight: 950 !important;
-  -webkit-text-fill-color: #212529 !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-riot-award-badge {
-  height: 20px !important;
-  min-width: 34px !important;
-  padding: 0 7px !important;
-  opacity: 1 !important;
-  font-size: 10px !important;
-  font-weight: 950 !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-riot-award-badge.mvp {
-  border-color: rgba(255, 224, 102, .9) !important;
-  background: rgba(255, 212, 59, .96) !important;
-  color: #212529 !important;
-  -webkit-text-fill-color: #212529 !important;
-  box-shadow: none !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-riot-award-badge.ace {
-  border-color: rgba(255, 168, 168, .9) !important;
-  background: rgba(255, 107, 107, .96) !important;
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
-  box-shadow: none !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-compare {
-  border-color: rgba(248, 249, 250, .24) !important;
-  background:
-    linear-gradient(180deg, rgba(52, 58, 64, .98), rgba(43, 48, 53, .98)) !important;
-  color: #f8f9fa !important;
-  box-shadow: inset 0 1px 0 rgba(248, 249, 250, .08) !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-compare-label strong {
-  color: #f8f9fa !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-compare-label.left strong {
-  color: #ff8787 !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-compare-label.right strong {
-  color: #74c0fc !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-compare-label span,
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-compare-objective {
-  color: rgba(248, 249, 250, .82) !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-compare-objective i {
-  border-color: rgba(248, 249, 250, .2) !important;
-  background: rgba(73, 80, 87, .72) !important;
-  color: #e9ecef !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-compare-objective b {
-  color: #ffffff !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-compare-track {
-  border-color: rgba(248, 249, 250, .18) !important;
-  background: rgba(33, 37, 41, .86) !important;
-  box-shadow: none !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-compare-track i.left {
-  background: linear-gradient(90deg, rgba(240, 62, 62, .94), rgba(255, 107, 107, .76)) !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-compare-track i.right {
-  background: linear-gradient(90deg, rgba(77, 171, 247, .76), rgba(92, 124, 250, .94)) !important;
-}
-
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-compare-track b,
-.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-compare-track em {
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
-  text-shadow: none !important;
-}
+/* .public-match-expanded 경유 팀 카드·행·배지·비교 막대의 채움/그라데이션
+   !important 60여 건이 있던 자리입니다 — 41-ink-match-detail.css 로 소유 이전.
+   (award/tag 배지 크기·색 강제도 함께 제거 — 무채 외곽선 칩 규격은 41-ink.) */
 
 .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-match-build-panel {
   border-color: rgba(248, 249, 250, .24) !important;

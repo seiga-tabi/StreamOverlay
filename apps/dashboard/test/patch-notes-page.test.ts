@@ -52,8 +52,11 @@ test("응답은 화면이 쓰기 전에 shared parser를 한 번 더 통과한�
 test("원문 링크는 Riot 도메인만 통과하고 새 창에서 안전하게 열린다", () => {
   assert.match(page, /rel="noopener noreferrer"/u);
   assert.match(page, /target="_blank"/u);
-  // 링크 자체는 파서가 검증한 note.url 만 씁니다.
-  assert.match(page, /href=\{note\.url\}/u);
+  /* 링크는 파서가 검증한 note.url 에서 로케일 경로 조각만 화면 언어로 바꿉니다
+     (패치 노트 보강 §3 — /ko-kr/ ↔ /ja-jp/ ↔ /en-us/). 임의 URL 을 만들지 않습니다. */
+  assert.match(page, /href=\{riotLocaleUrl\(note\.url\)\}/u);
+  assert.match(page, /RIOT_LOCALE_PATH = \{ ko: "\/ko-kr\/", ja: "\/ja-jp\/", en: "\/en-us\/" \} as const;/u);
+  assert.match(page, /url\.replace\(\/\\\/\(\?:ko-kr\|ja-jp\|en-us\)\\\/\/,/u);
   assert.equal(parsePatchNotesFeed({
     schemaVersion: 1,
     locale: "ko",
@@ -131,10 +134,12 @@ test("히어로·타일·아카이브 세 층으로 나눈다", () => {
   assert.match(page, /const searching = trimmedQuery\.length > 0 \|\| filter !== "all";/u);
 });
 
-test("패치 색은 Riot 이 준 값만 CSS 로 흘려보낸다", () => {
-  // 임의 문자열이 style 로 들어가면 CSS 를 밖에서 쓰게 됩니다.
-  assert.match(page, /function accentStyle/u);
-  assert.match(page, /note\.accentColor \? \{ "--pn-k": note\.accentColor \} : \{\}/u);
+test("패치 색(accentColor)은 화면에 흘리지 않는다", () => {
+  /* 2026-08-21 보강 §1 — Riot 썸네일 임의 색이 화면마다 팔레트를 무너뜨려
+     accentStyle(--pn-k) 경로를 은퇴시켰습니다. parser 의 #RRGGBB 검증은
+     응답 위생을 위해 그대로 두되, UI 는 그 값을 쓰지 않습니다. */
+  assert.equal(/function accentStyle/u.test(page), false);
+  assert.equal(page.includes('"--pn-k"'), false); // style 객체 키로 주입되지 않음(주석 언급은 허용)
   assert.equal(parsePatchNote({
     slug: "a",
     title: "t",
@@ -149,13 +154,21 @@ test("패치 색은 Riot 이 준 값만 CSS 로 흘려보낸다", () => {
     url: "https://www.leagueoflegends.com/ko-kr/news/a",
     accentColor: "#341a1c"
   })?.accentColor, "#341a1c");
-  // 색을 못 받은 패치도 있으므로 CSS 에 기본값이 있어야 합니다.
-  assert.match(css, /--pn-k: #3b4bd8;/u);
+  // CSS 에서도 임의 색 변수(--pn-k)가 완전히 사라졌는지 고정합니다.
+  assert.equal(/var\(--pn-k\)/u.test(css), false);
 });
 
-test("아카이브는 자체 표면 위에 올린다", () => {
-  // 공개 페이지 배경이 중간 회색이라 그 위에 글자를 직접 얹으면 실측 1.43:1 까지 떨어집니다.
-  assert.match(css, /\.yoro-pn-archive \{[\s\S]*background: var\(--pn-surface\);/u);
+test("아카이브는 자체 표면 위에 올린다", async () => {
+  /* 수묵 리스킨(2026-08-21): 사설 --pn-surface 는 은퇴했고 표면 규격은
+     42-ink-patch-notes.css 의 카드 문법(수묵 surface 토큰)이 소유합니다. */
+  const inkCss = await readFile(
+    new URL("../src/styles/pages/public-lol/42-ink-patch-notes.css", import.meta.url),
+    "utf8",
+  );
+  assert.match(inkCss, /\.yoro-pn-archive \{[\s\S]{0,240}background: var\(--public-gray-surface\);/u);
+  // 사설 팔레트가 되살아나지 않게 고정합니다.
+  assert.equal(css.includes("--pn-surface:"), false);
+  assert.equal(css.includes("--pn-accent"), false);
 });
 
 test("커뮤니티가 있던 nav 자리를 패치 노트가 이어받는다", () => {
