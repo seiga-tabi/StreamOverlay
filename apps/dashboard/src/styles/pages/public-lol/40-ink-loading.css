@@ -1,0 +1,209 @@
+/* 전적검색 로딩 화면(목업 page-4 "검색 중 — 데스크톱/모바일"·"갱신 중").
+ *
+ * 원칙 하나 — 로딩 화면과 완성 화면의 레이아웃이 같아야 합니다. 전면 오버레이
+ * 대신 같은 프로필 셸 위에 2px 진행 헤어라인과 자리표시(스켈레톤)만 그립니다.
+ * 스켈레톤 토큰(--profile-sk/--profile-sk-hi)은 20-profile-platform.css 의
+ * 테마 블록이 소유합니다.
+ */
+@layer pages {
+  /* ── 진행 헤어라인 — 2행 메뉴 바로 아래 2px. 항상 자리를 차지해 두고
+     로딩 중에만 트랙과 세그먼트를 보입니다(도착 순간 2px 이동 방지). */
+  .public-profile-progress {
+    position: relative;
+    flex: none;
+    height: 2px;
+    overflow: hidden;
+    background: transparent;
+  }
+
+  .public-profile-progress.is-active { background: var(--public-gray-surface); }
+
+  .public-profile-progress > i { display: none; }
+
+  .public-profile-progress.is-active > i {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    width: 38%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, var(--public-gray-muted), transparent);
+    animation: public-profile-progress-flow 1.4s linear infinite;
+  }
+
+  /* 세그먼트 폭 38% 기준: 자기 폭만큼 왼쪽 밖에서 출발해 오른쪽 밖(100/38≒263%)까지. */
+  @keyframes public-profile-progress-flow {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(263%); }
+  }
+
+  /* ── 스켈레톤 블록 — 카드 위 1.25:1. 자리는 알리되 읽으려 들지 않는 밝기(목업). */
+  .public-skel {
+    display: inline-block;
+    border-radius: 2px;
+    background: linear-gradient(100deg, var(--profile-sk) 0%, var(--profile-sk-hi) 38%, var(--profile-sk) 66%);
+    background-size: 200% 100%;
+    animation: public-skel-sheen 1.8s linear infinite;
+  }
+
+  .public-skel--circle {
+    border-radius: 99px;
+    background: var(--profile-sk);
+    animation: none;
+  }
+
+  @keyframes public-skel-sheen {
+    from { background-position: 120% 0; }
+    to { background-position: -80% 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .public-skel { animation: none; }
+
+    .public-profile-progress.is-active > i {
+      animation: none;
+      left: 31%;
+    }
+  }
+
+  /* ── 검색 중 스켈레톤 레이아웃 — 완성 화면과 같은 자리·같은 크기.
+     부모가 flex/grid 셀이면 min-width:auto 가 자리표시의 min-content 만큼
+     지면을 밀 수 있어, 컨테이너 폭으로 고정하고 넘치는 조각은 잘라냅니다. */
+  .public-profile-skel {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  /* 고정폭 자리표시가 좁은 폭에서 지면을 밀지 않도록 — 블록은 컨테이너에 맞춰
+     줄고, 패널은 넘치는 조각을 잘라냅니다(스켈레톤은 읽을 내용이 없습니다). */
+  .public-profile-skel .public-skel { max-width: 100%; }
+
+  .public-profile-skel-panel {
+    overflow: hidden;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 3px;
+    background: var(--public-gray-surface);
+  }
+
+  .public-profile-skel-head { display: flex; align-items: center; gap: 1.25rem; }
+
+  .public-profile-skel-avatar { flex: none; width: 4.5rem; height: 4.5rem; }
+
+  .public-profile-skel-name { flex: 1; min-width: 0; }
+
+  .public-profile-skel-name-bars { display: flex; align-items: center; gap: .5rem; }
+
+  .public-profile-skel-status {
+    display: flex;
+    align-items: center;
+    gap: .4375rem;
+    margin: .5rem 0 0;
+    color: var(--public-gray-muted);
+    font-size: .75rem;
+  }
+
+  .public-profile-skel-actions { display: flex; flex: none; align-items: center; gap: .625rem; }
+
+  .public-profile-skel-ranks {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .75rem;
+    margin-top: 1.625rem;
+  }
+
+  .public-profile-skel-rank { display: flex; flex-direction: column; padding: 1rem 1.125rem; }
+
+  .public-profile-skel-rank-row { display: flex; align-items: center; gap: .75rem; margin-top: .75rem; }
+
+  .public-profile-skel-rank-copy { display: flex; flex: 1; flex-direction: column; gap: .375rem; min-width: 0; }
+
+  .public-profile-skel-rank > .public-skel:last-child { margin-top: .875rem; }
+
+  .public-profile-skel-summary {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: .75rem;
+    padding: .8125rem 1.125rem;
+  }
+
+  /* 탭(실물 .public-profile-hero-nav)이 히어로 밖에 서므로 간격만 잡아 줍니다. */
+  .public-profile-skel > .public-profile-hero-nav { margin-top: 1.5rem; }
+
+  .public-profile-skel-body { display: flex; align-items: flex-start; gap: 1.5rem; margin-top: 2.25rem; }
+
+  .public-profile-skel-main { flex: 1; min-width: 0; }
+
+  .public-profile-skel-side { display: flex; flex: none; flex-direction: column; gap: 1rem; width: 20.75rem; }
+
+  .public-profile-skel-side > .public-profile-skel-panel { display: flex; flex-direction: column; padding: 1rem 1.125rem; }
+
+  .public-profile-skel-strip { display: flex; align-items: center; gap: 1.25rem; padding: .875rem 1.125rem; }
+
+  .public-profile-skel-strip-chips { display: flex; gap: .5rem; margin-left: auto; }
+
+  /* 필터 칩 실물 — 44px 터치 타깃을 유지하되 아직 누를 수 없는 흐린 상태. */
+  .public-profile-skel-chips { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-top: .75rem; }
+
+  .public-profile-skel-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--yoro-size-touch-target);
+    padding: 0 1rem;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
+    color: var(--public-gray-muted);
+    font-size: .8125rem;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: .6;
+  }
+
+  .public-profile-skel-rows { display: flex; flex-direction: column; gap: .625rem; margin-top: 1rem; }
+
+  .public-profile-skel-row { display: flex; align-items: center; gap: 1.125rem; padding: .875rem 1.125rem; }
+
+  .public-profile-skel-row.is-dim { opacity: .55; }
+
+  .public-profile-skel-row-result { display: flex; flex: none; flex-direction: column; gap: .3125rem; width: 4.75rem; }
+
+  .public-profile-skel-row-copy { display: flex; flex: 0 1 auto; flex-direction: column; gap: .3125rem; min-width: 0; }
+
+  .public-profile-skel-items { display: flex; align-items: center; gap: .25rem; }
+
+  .public-profile-skel-row-teams { display: flex; flex: none; gap: .625rem; margin-left: auto; }
+
+  .public-profile-skel-team { width: 4.625rem; height: 3.75rem; }
+
+  /* ── 갱신 중(이미 본 프로필) — 화면을 비우지 않습니다. 티어 엠블럼·랭크
+     카드는 그대로 두고, 새로 오는 값(최근 20경기 요약 바)만 흐립니다. */
+  .public-profile-hero.is-refreshing .public-hero-summary-bar { opacity: .5; }
+
+  /* 완성 화면(.public-overview-search-layout)과 같은 84rem 에서 사이드바를
+     본문 아래로 내립니다 — 스켈레톤만 2열로 남으면 지면이 옆으로 넘칩니다. */
+  @media (max-width: 84rem) {
+    .public-profile-skel-body { flex-direction: column; }
+
+    .public-profile-skel-side { width: 100%; }
+  }
+
+  /* ── 모바일(<768px) — 랭크 카드 1열, 행 스켈레톤 2줄 구조(목업 390px). */
+  @media (max-width: 47.9375rem) {
+    .public-profile-skel-desktop { display: none; }
+
+    .public-profile-skel-head { flex-wrap: wrap; }
+
+    .public-profile-skel-actions { width: 100%; }
+
+    .public-profile-skel-actions > .public-skel:first-child { flex: 1; }
+
+    .public-profile-skel-ranks { grid-template-columns: minmax(0, 1fr); }
+
+    .public-profile-skel-body { margin-top: 1.25rem; }
+
+    .public-profile-skel-team { width: 2.875rem; height: 1.625rem; }
+  }
+}

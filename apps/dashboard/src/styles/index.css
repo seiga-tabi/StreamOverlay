@@ -71,5 +71,7 @@
 @import "./pages/public-lol/38-ink-profile.css";
 /* 인게임 탭 수묵 리디자인 — 신설 .public-ingame-board 네임스페이스 단독 소유. */
 @import "./pages/public-lol/39-ink-ingame.css";
+/* 전적검색 로딩(진행 헤어라인 + 스켈레톤). pages layer 를 파일 안에서 선언합니다. */
+@import "./pages/public-lol/40-ink-loading.css";
 /* Organization 콘솔(개요·Bot 제어·Palworld 서버) 리디자인. pages layer 소유. */
 @import "./pages/bot/18-bot-console-redesign.css";

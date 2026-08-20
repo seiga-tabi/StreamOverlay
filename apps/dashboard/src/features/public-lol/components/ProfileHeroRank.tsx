@@ -42,6 +42,21 @@ export type ProfileHeroRankText = {
   unrankedTitle: string;
   viewRecentMatchesLabel: string;
   lpTrendLabel: string;
+  /** 숙련도 챔피언 블록 제목(목업 §2-7). masteryChampions 가 있을 때만 씁니다. */
+  masteryTitle?: string;
+};
+
+/* 숙련도 챔피언 행(목업 §2-7) — 숙련도 응답에는 판수가 없고 대체 경로에는
+   레벨·점수가 없으므로, 없는 쪽 라벨은 호출부가 아예 넘기지 않습니다. */
+export type ProfileHeroMasteryChampion = {
+  key: string;
+  name: string;
+  iconUrl?: string;
+  fallbackLabel: string;
+  /** "M7" — 숙련도 레벨 칩. 대체 경로에는 없습니다. */
+  levelLabel?: string;
+  /** "214,305점" 또는 "215게임" — 있는 쪽 하나만. */
+  detailLabel?: string;
 };
 
 export type ProfileHeroRankProps = {
@@ -50,6 +65,8 @@ export type ProfileHeroRankProps = {
   text: ProfileHeroRankText;
   /** LP 추이 스파크라인. 없거나 표본이 부족하면 해당 칸을 그리지 않습니다. */
   trend?: ProfileHeroRankTrend;
+  /** 숙련도 top3(목업 §2-7) — 스트리머 3열 격자의 네 번째 칸. 비면 블록 미렌더. */
+  masteryChampions?: ProfileHeroMasteryChampion[];
   onSelectQueue: (id: string) => void;
   onViewRecentMatches?: () => void;
 };
@@ -93,6 +110,10 @@ function LpSparkline({ trend }: { trend: ProfileHeroRankTrend }) {
     <svg
       aria-label={trend.ariaLabel}
       className="public-profile-hero-sparkline"
+      /* 카드 폭 전체를 쓰도록 viewBox 를 비율 무시로 늘립니다(목업 §2-4) —
+         점 좌표를 컨테이너 폭으로 재계산하지 않아 리사이즈에 안정적입니다.
+         선 굵기는 vector-effect 가 2px 로 고정합니다. */
+      preserveAspectRatio="none"
       role="img"
       viewBox={`0 0 ${SPARKLINE_WIDTH} ${SPARKLINE_HEIGHT}`}
     >
@@ -160,11 +181,23 @@ function WinRateDonut({ percent, label }: { percent: number; label: string }) {
   );
 }
 
+/* 언랭크 크레스트 — 특정 엠블럼 대신 같은 슬롯에 중립 육각 실루엣(목업 §2-3).
+   없는 티어를 색으로 암시하지 않도록 무채(--deep 계열)만 씁니다. */
+function UnrankedCrestSilhouette() {
+  return (
+    <svg aria-hidden="true" fill="none" height="38" viewBox="0 0 40 44" width="34">
+      <path d="M20 2 L37 12 V30 L20 42 L3 30 V12 Z" stroke="var(--public-gray-border-strong, #4a5563)" strokeWidth="1.5" />
+      <path d="M20 10 L29 16 V26 L20 32 L11 26 V16 Z" stroke="var(--public-gray-border, #3a404b)" strokeWidth="1" />
+    </svg>
+  );
+}
+
 export function ProfileHeroRank({
   queues,
   activeQueueId,
   text,
   trend,
+  masteryChampions,
   onSelectQueue,
   onViewRecentMatches,
 }: ProfileHeroRankProps) {
@@ -188,10 +221,12 @@ export function ProfileHeroRank({
         >
           <span className="public-hero-rank-card-queue">{queue.label}</span>
           <span className="public-hero-rank-card-row">
-            <span className="public-profile-hero-crest">
-              {queue.ranked && queue.tierIconUrl
-                ? <img src={queue.tierIconUrl} alt="" />
-                : <b aria-hidden="true">{queue.tierFallbackLabel}</b>}
+            <span className={`public-profile-hero-crest${queue.ranked ? "" : " is-unranked"}`}>
+              {queue.ranked
+                ? (queue.tierIconUrl
+                  ? <img src={queue.tierIconUrl} alt="" />
+                  : <b aria-hidden="true">{queue.tierFallbackLabel}</b>)
+                : <UnrankedCrestSilhouette />}
             </span>
             {queue.ranked ? <WinRateDonut percent={queue.winRate} label={`${queue.winRate}%`} /> : null}
             <span className="public-hero-rank-card-copy">
@@ -203,6 +238,8 @@ export function ProfileHeroRank({
                   <em>{queue.wins}{queue.winsLabel}</em>
                   {" "}
                   <i>{queue.losses}{queue.lossesLabel}</i>
+                  {/* 도넛을 접는 컴팩트 규격에서만 CSS 로 노출됩니다(§2-7). */}
+                  <span aria-hidden="true" className="public-hero-rank-card-rate"> · {queue.winRate}%</span>
                 </span>
               ) : (
                 <span className="public-hero-rank-card-record">{queue.unrankedDescription ?? queue.recordCaption}</span>
@@ -233,6 +270,25 @@ export function ProfileHeroRank({
           ) : null}
         </section>
       ))}
+      {masteryChampions && masteryChampions.length > 0 && text.masteryTitle ? (
+        <section className="public-hero-rank-card public-hero-mastery-card">
+          <span className="public-hero-rank-card-queue">{text.masteryTitle}</span>
+          <ul className="public-hero-mastery-list">
+            {masteryChampions.slice(0, 3).map((champion) => (
+              <li key={champion.key}>
+                {champion.iconUrl
+                  ? <img alt="" src={champion.iconUrl} />
+                  : <i aria-hidden="true">{champion.fallbackLabel}</i>}
+                <span className="public-hero-mastery-copy">
+                  <b>{champion.name}</b>
+                  {champion.detailLabel ? <small>{champion.detailLabel}</small> : null}
+                </span>
+                {champion.levelLabel ? <em>{champion.levelLabel}</em> : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </div>
   );
 }

@@ -1316,18 +1316,155 @@ function SearchForm(props: Omit<SearchFormProps<SearchSuggestion>, "helpers" | "
   );
 }
 
-function SeigaSearchLoader() {
+/* 검색 로딩 스피너(12px 선 아이콘) — 상태는 아이콘이 아니라 문장이 말합니다(목업 "검색 중"). */
+function SkeletonSpinnerIcon({ size = 12 }: { size?: number }) {
   return (
-    <div className="public-search-loading-overlay" role="status" aria-live="polite" aria-label={t().searching}>
-      <div className="public-search-loading-card">
-        <div className="seiga-logo-loader" aria-hidden="true">
-          <div className="loader-aura" />
-          <div className="loader-ring ring-outer" />
-          <div className="loader-ring ring-inner" />
-          <div className="loader-scan" />
-          <img className="seiga-mark" src="/images/yorogg-mark.png" alt="" />
+    <svg aria-hidden="true" fill="none" height={size} stroke="currentColor" strokeLinecap="round" strokeWidth="1.6" viewBox="0 0 24 24" width={size}>
+      <path d="M12 3 a 9 9 0 0 1 9 9" opacity=".9" />
+      <circle cx="12" cy="12" r="9" opacity=".25" />
+    </svg>
+  );
+}
+
+/* 처음 여는 프로필은 티어를 모릅니다 — 특정 엠블럼 대신 같은 40×44 자리에
+   중립 육각 실루엣만 둡니다(목업 "검색 중" §티어 ①). */
+function SkeletonTierSilhouette() {
+  return (
+    <svg aria-hidden="true" fill="none" height="44" viewBox="0 0 40 44" width="40">
+      <path d="M20 2 L37 12 V30 L20 42 L3 30 V12 Z" stroke="var(--profile-sk-hi)" strokeWidth="1.5" />
+      <path d="M20 10 L29 16 V26 L20 32 L11 26 V16 Z" stroke="var(--profile-sk)" strokeWidth="1" />
+    </svg>
+  );
+}
+
+/* 검색 중 스켈레톤 — 목업 page-4 "검색 중 — 데스크톱/모바일". 완성 화면과 같은
+   자리·같은 크기의 자리표시(전면 오버레이 금지). 탭은 데이터 없이도 그릴 수
+   있으니 실물을 그리고, 스켈레톤 블록은 스크린리더가 읽지 않게 aria-hidden. */
+function ProfileSearchSkeleton({ riotId }: { riotId: string }) {
+  const statusText = riotId ? `${t().searchLoadingStatus} · ${riotId}` : t().searchLoadingStatus;
+  const queueChips = [t().allQueues, t().normalQueue, t().soloQueue, t().flexQueue, t().ranked5v5, t().arenaQueue, t().aramQueue];
+  const rankCard = (key: number) => (
+    <div className="public-profile-skel-panel public-profile-skel-rank" key={key}>
+      <span className="public-skel" style={{ width: "3.875rem", height: ".6875rem" }} />
+      <div className="public-profile-skel-rank-row">
+        <SkeletonTierSilhouette />
+        <span className="public-skel public-skel--circle" style={{ width: "3rem", height: "3rem" }} />
+        <div className="public-profile-skel-rank-copy">
+          <span className="public-skel" style={{ width: "6.75rem", height: "1rem" }} />
+          <span className="public-skel" style={{ width: "9.25rem", height: ".75rem" }} />
         </div>
-        <strong  >{t().searching}</strong>
+      </div>
+      <span className="public-skel" style={{ width: "100%", height: "2.25rem" }} />
+    </div>
+  );
+  const matchRow = (key: number, dim: boolean) => (
+    <div className={`public-profile-skel-panel public-profile-skel-row${dim ? " is-dim" : ""}`} key={key}>
+      <div className="public-profile-skel-row-result">
+        <span className="public-skel" style={{ width: "2.875rem", height: ".9375rem" }} />
+        <span className="public-skel" style={{ width: "3.875rem", height: ".6875rem" }} />
+        <span className="public-skel public-profile-skel-desktop" style={{ width: "4.375rem", height: ".6875rem" }} />
+      </div>
+      <span className="public-skel public-skel--circle" style={{ width: "2.75rem", height: "2.75rem", flex: "none" }} />
+      <div className="public-profile-skel-row-copy">
+        <span className="public-skel" style={{ width: "5.375rem", height: ".9375rem" }} />
+        <span className="public-skel" style={{ width: "6.5rem", height: ".6875rem" }} />
+      </div>
+      <div className="public-profile-skel-row-copy public-profile-skel-desktop">
+        <span className="public-skel" style={{ width: "7rem", height: ".75rem" }} />
+        <span className="public-skel" style={{ width: "6rem", height: ".6875rem" }} />
+      </div>
+      <div aria-hidden="true" className="public-profile-skel-items public-profile-skel-desktop">
+        {[0, 1, 2, 3, 4, 5].map((slot) => (
+          <span className="public-skel" key={slot} style={{ width: "1.25rem", height: "1.25rem" }} />
+        ))}
+        <span className="public-skel public-skel--circle" style={{ width: "1.25rem", height: "1.25rem", marginLeft: ".375rem" }} />
+      </div>
+      <div className="public-profile-skel-row-teams">
+        <span className="public-skel public-profile-skel-team public-profile-skel-desktop" />
+        <span className="public-skel public-profile-skel-team" />
+      </div>
+    </div>
+  );
+  return (
+    <div className="public-profile-skel">
+      <div className="public-profile-skel-head">
+        <span aria-hidden="true" className="public-skel public-skel--circle public-profile-skel-avatar" />
+        <div className="public-profile-skel-name">
+          <div aria-hidden="true" className="public-profile-skel-name-bars">
+            <span className="public-skel" style={{ width: "9.5rem", height: "1.5rem" }} />
+            <span className="public-skel" style={{ width: "3.25rem", height: ".9375rem" }} />
+            <span className="public-skel" style={{ width: "2.125rem", height: "1.125rem" }} />
+          </div>
+          {/* 상태는 스피너가 아니라 문장으로 — 무엇을 기다리는지 여기서 읽힙니다. */}
+          <p aria-live="polite" className="public-profile-skel-status" role="status">
+            <SkeletonSpinnerIcon />
+            {statusText}
+          </p>
+        </div>
+        <div aria-hidden="true" className="public-profile-skel-actions">
+          <span className="public-skel" style={{ width: "2.75rem", height: "2.75rem" }} />
+          <span className="public-skel" style={{ width: "2.75rem", height: "2.75rem" }} />
+          <span className="public-skel" style={{ width: "2.75rem", height: "2.75rem" }} />
+          <span className="public-skel" style={{ width: "6.75rem", height: "2.75rem" }} />
+        </div>
+      </div>
+
+      <div aria-hidden="true" className="public-profile-skel-ranks">
+        {[0, 1, 2].map((index) => rankCard(index))}
+      </div>
+
+      <div aria-hidden="true" className="public-profile-skel-panel public-profile-skel-summary">
+        <span className="public-skel" style={{ width: "4.125rem", height: ".6875rem" }} />
+        <span className="public-skel" style={{ width: "2.625rem", height: ".875rem" }} />
+        <span className="public-skel" style={{ width: "5.375rem", height: ".75rem" }} />
+        <span className="public-skel public-profile-skel-desktop" style={{ width: "10.5rem", height: ".75rem" }} />
+        <span className="public-skel public-profile-skel-desktop" style={{ width: "4.875rem", height: ".75rem" }} />
+      </div>
+
+      {/* 탭은 실물 — 자리가 잡혀 있어야 도착 순간 덜 튑니다(목업). */}
+      <PublicProfileTabs activeTab="overview" onChange={() => undefined} />
+
+      <div className="public-profile-skel-body">
+        <div className="public-profile-skel-main">
+          <div aria-hidden="true" className="public-profile-skel-panel public-profile-skel-strip">
+            <span className="public-skel public-skel--circle" style={{ width: "3.25rem", height: "3.25rem", flex: "none" }} />
+            <div className="public-profile-skel-row-copy">
+              <span className="public-skel" style={{ width: "5.25rem", height: ".875rem" }} />
+              <span className="public-skel" style={{ width: "3.875rem", height: ".6875rem" }} />
+            </div>
+            <div className="public-profile-skel-strip-chips public-profile-skel-desktop">
+              <span className="public-skel" style={{ width: "8rem", height: "1.625rem" }} />
+              <span className="public-skel" style={{ width: "8rem", height: "1.625rem" }} />
+              <span className="public-skel" style={{ width: "8rem", height: "1.625rem" }} />
+            </div>
+          </div>
+
+          {/* 필터 칩은 실물이되 아직 누를 수 없는 상태 — 44px 터치 타깃 유지. */}
+          <div aria-hidden="true" className="public-profile-skel-chips">
+            {queueChips.map((label) => (
+              <span className="public-profile-skel-chip" key={label}>{label}</span>
+            ))}
+          </div>
+
+          <div aria-hidden="true" className="public-profile-skel-rows">
+            {matchRow(0, false)}
+            {matchRow(1, false)}
+            {matchRow(2, true)}
+          </div>
+        </div>
+
+        <div aria-hidden="true" className="public-profile-skel-side">
+          <div className="public-profile-skel-panel">
+            <span className="public-skel" style={{ width: "4.625rem", height: ".875rem" }} />
+            <span className="public-skel" style={{ width: "100%", height: "2.75rem", marginTop: ".75rem" }} />
+            <span className="public-skel" style={{ width: "100%", height: "2.75rem", marginTop: ".625rem" }} />
+          </div>
+          <div className="public-profile-skel-panel">
+            <span className="public-skel" style={{ width: "5.75rem", height: ".875rem" }} />
+            <span className="public-skel" style={{ width: "100%", height: "2.125rem", marginTop: ".75rem" }} />
+            <span className="public-skel" style={{ width: "100%", height: "2.125rem", marginTop: ".625rem" }} />
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -1867,19 +2004,10 @@ function ProfileTopPanel({
       gameName={registeredStreamerStream.gameName}
       isInGame={profile.liveGame.isLive}
       isLive={registeredStreamerStream.isLive}
-      links={supportingProfileLinks}
       onOpenIngame={onOpenIngame}
       onOpenParticipation={onOpenParticipation}
       participationOpen={participationOpen}
       previewUrl={safeTwitchStreamPreviewUrl(registeredStreamerStream.thumbnailUrl)}
-      renderLinkIcon={(link) => (
-        <ProfileLinkIcon
-          href={link.url}
-          label={link.label}
-          platform={profileLinkPlatformClass(link.platform, link.url)}
-          url={link.url}
-        />
-      )}
       text={{
         ingameLabel: t().ingame,
         ingameNotice: t().streamerIngameNotice,
@@ -1943,11 +2071,28 @@ function ProfileTopPanel({
       rankSection={(
         <FeatureProfileHeroRank
           activeQueueId={selectedRankQueueId}
+          /* 숙련도 top3(목업 §2-7) — 스트리머 3열 격자의 네 번째 칸. hero 배경
+             아트(masteryChampionArt)와 같은 profile.topChampions 를 씁니다.
+             숙련도 응답이면 레벨 칩+점수, 최근 경기 대체면 판수만 — 없는 쪽은
+             줄 자체를 그리지 않습니다. */
+          masteryChampions={registeredStreamerStream
+            ? profile.topChampions.slice(0, 3).map((champion) => ({
+              key: String(champion.championId),
+              name: championName(champion),
+              fallbackLabel: championName(champion).slice(0, 1).toUpperCase(),
+              ...(assetUrl(champion.iconUrl) ? { iconUrl: assetUrl(champion.iconUrl)! } : {}),
+              ...(champion.masteryLevel !== undefined ? { levelLabel: `M${champion.masteryLevel}` } : {}),
+              ...(champion.masteryPoints !== undefined
+                ? { detailLabel: `${formatNumber(champion.masteryPoints)}${t().masteryPointsSuffix}` }
+                : champion.games !== undefined ? { detailLabel: gamesText(champion.games) } : {}),
+            }))
+            : undefined}
           onSelectQueue={setActiveRankQueue}
           onViewRecentMatches={() => document.getElementById("public-recent-matches")?.scrollIntoView({ behavior: "smooth", block: "start" })}
           queues={rankQueues}
           text={{
             lpTrendLabel: `${t().rankLpTrendLabel} · ${t().period30}`,
+            masteryTitle: t().masteryChampionsTitle,
             queueSwitcherLabel: t().rankQueueSwitcher,
             unrankedTitle: t().rankUnrankedTitle,
             viewRecentMatchesLabel: t().rankViewRecentMatches,
@@ -5835,7 +5980,11 @@ function RecentMatches({
           const inlineItemSlots: RecentMatchRowMediaItem[] = recentItemSlots.slice(0, 6).map(itemSlotMediaItem);
           const trinketSlot = arena ? undefined : itemSlotMediaItem(recentItemSlots[6], 6);
           // 목록 응답의 teams 는 비어 있고 경기를 펼칠 때 채워집니다. 데이터가 있을 때만 그립니다.
-          const compositionTeams = (hydratedMatch.teams ?? []).filter((team) => team.players.length > 0);
+          /* 행의 팀원 2열은 '목록 응답'의 teams 만 씁니다(목업 "전적 행 — 네 가지
+             수정" §2-2·§4). hydratedMatch(펼침 시 detail 병합)를 쓰면 펼쳐 본
+             행에만 팀 열이 생겨 행마다 격자가 어긋납니다 — 목록 응답에 팀
+             요약이 오면 모든 행이 한꺼번에 채워집니다. */
+          const compositionTeams = (match.teams ?? []).filter((team) => team.players.length > 0);
           const targetTeamId = compositionTeams
             .find((team) => team.players.some((player) => player.isTarget))?.teamId;
           /* 팀원 열에 Riot ID 병기(목업 v30) — 가리기 ON이면 마스킹, 없으면 챔피언명. */
@@ -7241,6 +7390,14 @@ export function PublicLolPage({
     setLoading(true);
     setError("");
     setMoreMatchesError("");
+    if (!options.refresh) {
+      /* 검색 시작 즉시 프로필 셸로 전환합니다 — 로딩 화면과 완성 화면의 레이아웃이
+         같아야 하므로(목업 "검색 중") 옛 메뉴 화면 위 오버레이 대신 프로필 셸의
+         스켈레톤을 그립니다. 검색바에는 방금 요청한 Riot ID 를 남깁니다. */
+      setActiveMainPage("search");
+      setActiveNav("search");
+      setQuery(riotId);
+    }
     try {
       const result = await searchProfile(riotId, {
         refresh: options.refresh,
@@ -7672,7 +7829,11 @@ export function PublicLolPage({
     );
   }
 
-  if (activeMainPage !== "search" || !profile) {
+  /* 조기 반환은 두 상황만 담당합니다 — ① 검색이 아닌 메뉴 페이지, ② 검색
+     랜딩(프로필도 로딩도 없는 상태). "검색 중인데 아직 프로필이 없는" 상태는
+     아래 프로필 셸로 보내 스켈레톤을 그립니다(목업 "검색 중" — 로딩 화면과
+     완성 화면의 레이아웃이 같아야 데이터 도착 순간 화면이 튀지 않습니다). */
+  if (activeMainPage !== "search" || (!profile && !loading)) {
     return (
       <AppShell
         className={`public-lol-shell public-dashboard-shell theme-${theme}`}
@@ -7717,7 +7878,6 @@ export function PublicLolPage({
           />
         </AppShellHeader>
         <AppShellMain className="public-app-main" id="public-main">
-          {loading ? <SeigaSearchLoader /> : null}
           <div className="public-profile-layout">
             <div className="public-dashboard-content-grid">
               <section className="public-dashboard-center">
@@ -7735,11 +7895,13 @@ export function PublicLolPage({
   }
 
   const activeProfile = visibleProfile ?? profile;
-  const favoriteActive = isFavoriteProfile(favorites, profile);
+  const favoriteActive = profile ? isFavoriteProfile(favorites, profile) : false;
 
   return (
     <AppShell
-      className={`public-lol-shell public-dashboard-shell public-profile-shared-shell ${activeProfile ? "public-profile-platform-v2" : ""} theme-${theme}`}
+      /* platform-v2 는 프로필 유무와 무관하게 상시 — 먹 팔레트가 로딩 중에도
+         적용되어야 데이터 도착 순간 지면색이 뒤집히지 않습니다(목업 "검색 중"). */
+      className={`public-lol-shell public-dashboard-shell public-profile-shared-shell public-profile-platform-v2 theme-${theme}`}
       mainId="public-profile-main"
       sidebarMode="none"
       skipLinkLabel={t().skipToContent}
@@ -7779,19 +7941,27 @@ export function PublicLolPage({
           text={homeI18n[locale]}
         />
         <LolSubnav active="none" text={lolHomeI18n[locale]} />
+        {/* 진행 헤어라인 — 2행 메뉴 바로 아래 2px. 항상 렌더해 두고(도착 순간
+            2px 이동 방지) 로딩 중에만 트랙·세그먼트를 보입니다(목업 "검색 중"). */}
+        <div aria-hidden="true" className={`public-profile-progress${loading ? " is-active" : ""}`}><i /></div>
       </AppShellHeader>
       <AppShellMain className="public-profile-shared-main" id="public-profile-main">
         <div className="public-profile-layout">
           <div className="public-dashboard-content-grid">
             <section className="public-dashboard-center">
               {activeMainPage === "search" ? (
+                !activeProfile ? (
+                  /* 검색 중 + 프로필 없음 = 처음 여는 프로필. 같은 셸 안에서
+                     스켈레톤만 그립니다(§3-2). 검색바에는 입력값이 남아 있습니다. */
+                  <ProfileSearchSkeleton riotId={query} />
+                ) : (
                 <>
                   <ProfileTopPanel
                     profile={activeProfile}
                     loading={loading}
                     favoriteActive={favoriteActive}
                     refreshRemaining={refreshRemaining}
-                    onRefresh={() => void runSearch(profile.riotId, { refresh: true })}
+                    onRefresh={() => void runSearch(activeProfile.riotId, { refresh: true })}
                     onOpenParticipation={() => changeMainPage("followJoin")}
                     onOpenIngame={() => setProfileTab("ingame")}
                     participationOpen={Boolean(publicParticipation?.streamers.some((streamer) => (
@@ -7862,6 +8032,7 @@ export function PublicLolPage({
 
                   <PublicMoreFeatures />
                 </>
+                )
               ) : (
                 <>
                   <PublicProfileErrorState error={error} />

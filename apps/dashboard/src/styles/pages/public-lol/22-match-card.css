@@ -157,20 +157,9 @@
     margin-bottom: var(--yoro-space-3);
   }
 
-  /* 데스크톱에서는 목록을 훑는 동안 필터가 따라옵니다.
-     sticky 는 viewport scroll 기준이므로 여기만 media query 를 씁니다. */
-  @media (min-width: 48.0625rem) {
-    .public-match-filter-panel {
-      position: sticky;
-      z-index: var(--yoro-z-sticky);
-      top: calc(var(--public-game-header-total-height, var(--yoro-space-12)) + var(--yoro-size-touch-target) + var(--yoro-space-2));
-      padding: var(--yoro-space-2);
-      border: 1px solid var(--yoro-color-border-on-dark);
-      border-radius: var(--yoro-radius-md);
-      background: color-mix(in srgb, var(--yoro-color-ground-surface) 92%, transparent);
-      backdrop-filter: blur(var(--yoro-space-2));
-    }
-  }
+  /* 필터는 본문과 함께 스크롤합니다(목업 "전적 행 — 네 가지 수정" §①) —
+     sticky + 92% 반투명 배경은 아래 행이 비쳐 보여 걷어냈습니다. 스티키가
+     다시 필요해지면 불투명 배경 + 하단 헤어라인으로 재설계합니다. */
 
   .public-match-filter-controls {
     display: flex;
@@ -409,25 +398,46 @@
 
   .public-match-card-summary {
     display: grid;
-    /* track 은 내용에 맞춰 상한을 두고, 남는 폭은 fr 로 한 열에 몰아주는 대신
-       justify-content: space-between 으로 열 사이에 균등 분배합니다.
-       track 폭이 행마다 동일하므로 열 정렬은 흔들리지 않고,
-       그룹 사이 여백만 화면 폭에 따라 함께 늘어납니다. */
+    /* 목업 "전적 행 — 네 가지 수정" 격자 — 모든 행이 이 고정 트랙을 공유해야
+       세로줄이 맞습니다. 트랙 합 752px + gap 18×5 = 842px.
+       마지막 트랙만 minmax(28px, 1fr) — 캐럿이 오른쪽 끝에서 남는 폭을
+       흡수합니다(고정 28px 로 두면 본문이 넓을 때 캐럿이 행 안쪽에 뜹니다). */
     grid-template-columns:
-      minmax(6.25rem, 7.5rem)  /* 1 결과 */
-      minmax(11rem, 12.5rem)   /* 2 챔피언 */
-      8.5rem                   /* 3 성과 */
-      14.5rem                  /* 4 지표 */
-      7.5rem                   /* 5 아이템 */
-      9rem                     /* 6 팀 구성 */
-      2.75rem;                 /* 7 확장 */
-    justify-content: space-between;
+      7rem                     /* 1 결과·큐·시간(112px, 3줄) */
+      11rem                    /* 2 챔피언(176px) — 3과 병합 셀 */
+      7.25rem                  /* 3 KDA·평점(116px) */
+      9.5rem                   /* 4 CS·시야·킬관여(152px) */
+      10.5rem                  /* 5 팀원 2열(168px = 78+12+78) */
+      minmax(1.75rem, 1fr);    /* 6 펼침 캐럿 */
     align-items: center;
-    /* 목업 §F: gap 18px · padding 14px 18px. */
+    /* 목업: gap 18px · padding 14px 18px. */
     column-gap: 1.125rem;
     row-gap: var(--yoro-space-2);
     padding: .875rem 1.125rem;
     cursor: pointer;
+  }
+
+  /* 팀 구성이 아직 없는 행(목록 API teams 빈 배열) — 트랙을 남기지 않고 접어
+     남는 폭을 캐럿 트랙(1fr)이 가져갑니다. 빈 칸을 남기면 세로줄이 어긋납니다. */
+  .public-match-card-summary:not(:has(.public-match-card-team)) {
+    grid-template-columns: 7rem 11rem 7.25rem 9.5rem minmax(1.75rem, 1fr);
+  }
+
+  /* 병합 셀(트랙 2–3) — 안쪽 트랙(176px 116px)과 column-gap(18px)은 바깥
+     격자와 같은 값이어야 챔피언/평점 경계가 행마다 밀리지 않습니다.
+     아이템 줄은 두 칸 아래 전폭(310px)에 깔립니다(§2-4). */
+  .public-match-card-champ-block {
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: 11rem 7.25rem;
+    column-gap: 1.125rem;
+    row-gap: .375rem;
+    align-items: center;
+  }
+
+  .public-match-card-champ-block > .public-match-card-items {
+    grid-column: 1 / -1;
+    justify-self: start;
   }
 
   /* 1 결과 */
@@ -466,11 +476,13 @@
   }
 
   .public-match-card-outcome small {
+    /* 말줄임에 기대지 않고 폭(112px)으로 해결합니다(목업 §2-5). 절대 날짜처럼
+       그래도 넘치는 문자열만 경기시간이 다음 줄로 내려갑니다(두 줄 분리). */
+    display: flex;
+    flex-wrap: wrap;
     color: var(--yoro-color-text-on-dark-muted);
     font-size: var(--yoro-font-size-xs);
     font-variant-numeric: tabular-nums;
-    overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
   }
 
@@ -712,11 +724,12 @@
     font-size: var(--yoro-font-size-xs);
   }
 
-  /* 4 지표 — 값 위 / 라벨 아래 한 규칙 */
+  /* 4 지표 — 값 위 / 라벨 아래 한 규칙. 트랙이 152px 로 좁아져 2열
+     (셋째 지표는 둘째 줄로 흐름 — 목업 CS 셀의 2줄 구조)입니다. */
   .public-match-card-stats {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--yoro-space-3);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--yoro-space-2) var(--yoro-space-3);
   }
 
   .public-match-card-stats > span {
@@ -766,28 +779,29 @@
   .public-match-card.win .public-match-card-stat-bar > em { background: var(--yoro-color-match-win-accent); }
   .public-match-card.loss .public-match-card-stat-bar > em { background: var(--yoro-color-match-loss-accent); }
 
-  /* 5 아이템 — 장비는 사각, 장신구는 원형으로 형태를 나눕니다. */
+  /* 아이템 줄 — 장비는 사각, 장신구는 원형으로 형태를 나눕니다. */
   .public-match-card-items {
     display: flex;
     align-items: center;
-    justify-self: center;
     /* 트링킷은 왼쪽 6px 이격(목업). */
     gap: 6px;
   }
 
-  /* 목업 §F: 20px 정사각 한 줄 6칸, radius 2px, .5px 헤어라인. */
+  /* 목업 §2-4: 24px 정사각 한 줄 6칸(gap 4px), radius 2px, .5px 헤어라인 —
+     아이템 줄이 병합 셀 아래 전폭(310px)을 쓰므로 칸이 20→24px 로 커졌습니다.
+     스펠·룬·mini(18px)는 그대로입니다. */
   .public-match-card-item-grid {
     display: grid;
-    grid-template-columns: repeat(6, 1.25rem);
-    grid-auto-rows: 1.25rem;
-    gap: .1875rem;
+    grid-template-columns: repeat(6, 1.5rem);
+    grid-auto-rows: 1.5rem;
+    gap: .25rem;
   }
 
   .public-match-card-item-grid > span,
   .public-match-card-trinket {
     display: block;
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 1.5rem;
+    height: 1.5rem;
     border: .5px solid var(--yoro-color-border-on-dark);
     box-sizing: border-box;
     overflow: hidden;
@@ -817,56 +831,57 @@
     outline-offset: var(--yoro-focus-ring-offset);
   }
 
-  /* 6 팀 구성 — 윗줄 아군, 아랫줄 상대. 챔피언은 원형이라 아이템 격자와 구분됩니다. */
-  /* 팀원 열 — 목업 v30: 아군/상대 세로 두 열, 미니 아바타 + Riot ID(말줄임) 병기. */
+  /* 5 팀원 2열 — 목업 §2-2: 아군 5 · 상대 5, 열 78px + gap 12px + 78px = 168px.
+     항목은 mini 18px 원형 + 이름 56px 말줄임(9px). 라벨은 열 폭을 밀어 접고
+     aria-label(compositionLabel)이 대신 읽힙니다. */
   .public-match-card-team {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    justify-self: center;
-    gap: var(--yoro-space-3);
+    display: grid;
+    grid-template-columns: 4.875rem 4.875rem;
+    align-items: start;
+    justify-self: start;
+    gap: .75rem;
   }
 
   .public-match-card-team-line {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 2px;
+    gap: 3px;
   }
 
   .public-match-card-team-line > b {
-    flex: none;
-    color: var(--yoro-color-text-on-dark-muted);
-    font-size: var(--yoro-font-size-xs);
-    font-weight: var(--yoro-font-weight-medium);
+    display: none;
   }
 
   .public-match-card-team-member {
     display: flex;
     flex: none;
     align-items: center;
-    gap: var(--yoro-space-1);
+    gap: .25rem;
   }
 
   .public-match-card-team-member :is(img, i) {
     display: grid;
     flex: none;
     place-items: center;
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 1.125rem;
+    height: 1.125rem;
+    border: .5px solid var(--yoro-color-border-on-dark);
     border-radius: var(--yoro-radius-circle);
+    box-sizing: border-box;
     background: var(--yoro-color-ground-raised);
     font-style: normal;
-    font-size: var(--yoro-font-size-xs);
-    opacity: .8;
+    font-size: .5rem;
+    font-weight: var(--yoro-font-weight-bold);
+    opacity: .85;
   }
 
   .public-match-card-team-name {
-    max-width: 4.5rem;
+    max-width: 3.5rem;
     overflow: hidden;
     color: var(--yoro-color-text-on-dark-muted);
     font-style: normal;
-    font-size: 0.625rem;
+    font-size: .5625rem;
     white-space: nowrap;
     text-overflow: ellipsis;
   }
@@ -997,54 +1012,31 @@
   }
 
   /* ── 반응형 축약 ─────────────────────────────────────────── */
-  /* 목업 §F: 본문 폭 ~1000px(1440 화면의 결과 열)에서도 팀원 2열이 보여야
-     합니다 — 예전 1180 임계에서 팀을 접는 대신, 트랙을 목업 폭
-     (결과 76~80 · KDA 116 · 지표 128~160)으로 줄여 팀 열 자리를 만듭니다.
-     min 합 ≈ 871px + gap 72 + padding 36 = 979px. 접기는 980 이하부터입니다. */
-  @container match-list (max-width: 1180px) {
-    .public-match-card-summary {
-      column-gap: var(--yoro-space-3);
-      grid-template-columns:
-        minmax(4.75rem, 5.5rem)
-        minmax(9rem, 10.5rem)
-        7.25rem
-        minmax(9rem, 10rem)
-        auto
-        auto
-        2.75rem;
-    }
-    /* 지표는 목업처럼 2줄(세 번째 지표 접기) — 분당 CS 보조 문구도 함께. */
-    .public-match-card-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .public-match-card-stats > span:nth-child(3) { display: none; }
-    .public-match-card-stat-suffix { display: none; }
-  }
-
-  /* 이 구간의 하한은 container 721px 입니다. 그 폭에서 track 합과 gap,
-     좌우 padding 을 더한 값이 container 를 넘으면 카드가 늘어나 페이지에
-     가로 스크롤이 생기므로 gap 까지 함께 줄입니다. */
-  @container match-list (max-width: 980px) {
+  /* 좁아질 때의 규칙(목업 §2-3): 팀원(168) → CS(152) 순서로 접고, 접힌
+     트랙은 템플릿에서 제거해 남은 열이 자리를 나눠 갖습니다(빈 칸 금지).
+     임계 878 = 트랙 합 752 + gap 90 + padding 36. 아이템은 병합 셀 안이라
+     접기 후보가 아닙니다. */
+  @container match-list (max-width: 877px) {
     .public-match-card-team { display: none; }
-    .public-match-card-summary {
-      column-gap: var(--yoro-space-3);
-      grid-template-columns:
-        minmax(5rem, 6.5rem)
-        minmax(7.5rem, 13rem)
-        7.25rem
-        9.5rem
-        6.75rem
-        2.75rem;
+
+    .public-match-card-summary,
+    .public-match-card-summary:not(:has(.public-match-card-team)) {
+      grid-template-columns: 7rem 11rem 7.25rem 9.5rem minmax(1.75rem, 1fr);
     }
-    .public-match-card-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .public-match-card-stats > span:nth-child(3) { display: none; }
   }
 
   /* 모바일 — 세로로 쌓지 않고 겹쳐 3행 80px 로 압축합니다.
      3·4열은 고정 폭입니다. 행마다 grid 가 따로 계산되므로 auto 로 두면
      KDA 자릿수에 따라 등급 배지의 x 좌표가 행마다 흔들립니다. */
   @container match-list (max-width: 720px) {
+    /* 병합 셀은 데스크톱 전용 — 풀어서 자식들이 이 압축 격자의 직접 자식이
+       되게 합니다. */
+    .public-match-card-champ-block { display: contents; }
+
     /* 등급을 오른쪽 묶음에서 떼어 행 가운데 열에 세웁니다.
        오른쪽에는 KDA 와 확장 버튼만 남아 여백이 생깁니다. */
-    .public-match-card-summary {
+    .public-match-card-summary,
+    .public-match-card-summary:not(:has(.public-match-card-team)) {
       grid-template-columns: 2.25rem minmax(0, 1fr) 2rem 4.25rem 2.75rem;
       grid-template-rows: auto auto auto;
       gap: .1875rem .375rem;
@@ -1211,7 +1203,8 @@
   /* 360px 급에서는 이름 줄이 먼저 눌립니다. 오른쪽 고정 열과 배지 여백을 조금씩 줄여
      5글자 챔피언 이름까지 잘리지 않게 합니다. */
   @container match-list (max-width: 400px) {
-    .public-match-card-summary {
+    .public-match-card-summary,
+    .public-match-card-summary:not(:has(.public-match-card-team)) {
       grid-template-columns: 2.25rem minmax(0, 1fr) 2rem 3.75rem 2.75rem;
       gap: .1875rem .3125rem;
     }
@@ -1282,26 +1275,10 @@
     box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--yoro-color-public-primary) 70%, transparent);
   }
 
-  /* 내 팀 열 표시 조건 — 5v5 명단은 컨테이너 ≤1180px 에서 숨겨지는데 match-list
-     실측 최대폭이 1176px 이라 사실상 항상 숨김입니다. 내 팀 3인(~7rem)은 좁아
-     1020px 부터 전용 7열 템플릿으로 표시합니다. 5v5 행의 동작은 그대로 둡니다. */
-  @container match-list (min-width: 1044.01px) {
-    /* 챔피언 열이 이름 공간의 병목 — min 12rem 를 보장하고 잉여 폭(1fr)을 이 열이
-       흡수합니다("미스 포츈" 4자+공백 실측 58px 기준). 지표 열은 아레나 3종 라벨에
-       맞춰 13.25rem 로 양보. */
-    .public-match-card.arena .public-match-card-summary {
-      grid-template-columns:
-        minmax(6.25rem, 7.5rem)
-        minmax(12rem, 1fr)
-        8.5rem
-        13.25rem
-        7.5rem
-        7rem
-        2.75rem;
-    }
-
-    .public-match-card.arena .public-match-card-team { display: flex; }
-  }
+  /* 아레나 행도 공통 격자를 씁니다(목업 §2-3 — 모든 행이 같은 트랙이어야
+     세로줄이 맞습니다). 내 팀 3인은 공통 팀원 열(168px) 왼쪽 열에 들어가고,
+     표시/접힘도 공통 877 규칙을 따릅니다. */
+  .public-match-card.arena .public-match-card-team { grid-template-columns: minmax(0, 1fr); }
 
   /* ── 확장 상세 = 순위표(1위→6위 팀 그룹) ── */
   .lol-arena-standings { display: grid; gap: var(--yoro-space-2); }

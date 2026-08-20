@@ -187,6 +187,11 @@ export function RecentMatchRow({
           <span className="yoro-u-sr-only">{resultLabel}</span>
         </div>
 
+        {/* 병합 셀(목업 "전적 행 — 네 가지 수정" §2-3·2-4) — 챔피언·KDA 두 칸이
+            바깥 격자의 트랙 2–3(176px+116px)을 span 2 로 차지하고, 아이템이 그
+            아래 전폭 한 줄로 깔립니다. 모바일(≤720)에서는 display: contents 로
+            풀려 기존 3행 압축 격자가 그대로 동작합니다. */}
+        <div className="public-match-card-champ-block">
         {/* 포지션은 모바일에서 접히므로 title 로도 남깁니다. */}
         <div className={`public-match-card-champion ${highlightClass}`} title={String(championRoleLabel)}>
           <span className="public-match-card-portrait">
@@ -250,24 +255,6 @@ export function RecentMatchRow({
           </div>
         </div>
 
-        <div className="public-match-card-stats">
-          {metrics.map((metric) => (
-            <span key={metric.key}>
-              <strong>{metric.value}</strong>
-              <small title={metric.title}>
-                <i className="public-match-card-stat-label">{metric.label}</i>
-                {metric.labelShort ? <i className="public-match-card-stat-label-short">{metric.labelShort}</i> : null}
-                {metric.labelSuffix ? <i className="public-match-card-stat-suffix">{metric.labelSuffix}</i> : null}
-              </small>
-              {typeof metric.ratio === "number" ? (
-                <span aria-hidden="true" className="public-match-card-stat-bar">
-                  <em style={{ width: `${Math.max(0, Math.min(100, metric.ratio))}%` }} />
-                </span>
-              ) : null}
-            </span>
-          ))}
-        </div>
-
         <div className="public-match-card-items" aria-label={itemsLabel}>
           <span className="public-match-card-item-grid">
             {itemSlots.map((item) => (
@@ -293,6 +280,25 @@ export function RecentMatchRow({
               {trinketSlot.content}
             </span>
           ) : null}
+        </div>
+        </div>
+
+        <div className="public-match-card-stats">
+          {metrics.map((metric) => (
+            <span key={metric.key}>
+              <strong>{metric.value}</strong>
+              <small title={metric.title}>
+                <i className="public-match-card-stat-label">{metric.label}</i>
+                {metric.labelShort ? <i className="public-match-card-stat-label-short">{metric.labelShort}</i> : null}
+                {metric.labelSuffix ? <i className="public-match-card-stat-suffix">{metric.labelSuffix}</i> : null}
+              </small>
+              {typeof metric.ratio === "number" ? (
+                <span aria-hidden="true" className="public-match-card-stat-bar">
+                  <em style={{ width: `${Math.max(0, Math.min(100, metric.ratio))}%` }} />
+                </span>
+              ) : null}
+            </span>
+          ))}
         </div>
 
         {teams ? (

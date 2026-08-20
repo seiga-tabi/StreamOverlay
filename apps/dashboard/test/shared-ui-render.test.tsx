@@ -558,11 +558,9 @@ test("Profile 상단은 중복 검색을 제거하고 스트리머 CTA 우선순
           gameName="League of Legends"
           isInGame
           isLive
-          links={[{ id: "discord", url: "https://discord.gg/yoro", label: "Discord", platform: "discord" }]}
           onOpenParticipation={() => undefined}
           participationOpen
           previewUrl="https://static-cdn.jtvnw.net/previews-ttv/live_user_yoro-640x360.jpg"
-          renderLinkIcon={(link) => <a href={link.url}>{link.label}</a>}
           text={{
             ingameLabel: "인게임",
             ingameNotice: "지금 랭크 게임 중입니다",
@@ -630,7 +628,8 @@ test("Profile 상단은 중복 검색을 제거하고 스트리머 CTA 우선순
   assert.match(html, /public-profile-hero-name[\s\S]*public-profile-hero-channel[^>]*href="https:\/\/www\.twitch\.tv\/yoro"[\s\S]*>YORO Live</u);
   // LIVE 는 색 단독이 아니라 문자와 시청자 수로도 전달합니다.
   assert.match(html, /public-profile-hero-live-pill[^>]*>[\s\S]*LIVE · 125/u);
-  assert.match(html, /href="https:\/\/discord\.gg\/yoro"/u);
+  // 방송 카드에는 링크 아이콘(X·YouTube·Discord)이 없습니다(목업 §2-5).
+  assert.doesNotMatch(html, /public-profile-hero-cast-links/u);
   assert.match(html, />참여 신청</u);
   // 목업 §D 액션 순서: Twitch 보기(스트로크 강조)가 첫 번째, 참여가 그 뒤입니다.
   assert.ok(html.indexOf(">Twitch<") < html.indexOf("참여 신청"));
@@ -640,6 +639,8 @@ test("Profile 상단은 중복 검색을 제거하고 스트리머 CTA 우선순
   // 썸네일은 안전 검증을 통과한 공식 CDN URL 만 들어옵니다.
   assert.match(html, /src="https:\/\/static-cdn\.jtvnw\.net\/previews-ttv\/live_user_yoro-640x360\.jpg"/u);
   assert.match(html, /public-profile-hero-cast-thumb[\s\S]*<i aria-hidden="true">LIVE<\/i>/u);
+  assert.match(html, /public-profile-hero-cast-overlay is-uptime[^>]*>1시간 30분째/u);
+  assert.match(html, /public-profile-hero-cast-overlay is-viewers[\s\S]*125명 시청/u);
   // 인게임 상태는 방송 카드의 상태줄(승색 점)로 전달됩니다(목업 §D).
   assert.match(html, /public-profile-hero-cast-status[\s\S]*지금 랭크 게임 중입니다/u);
   assert.doesNotMatch(html, /public-ranking-shared-toolbar/u);
@@ -782,13 +783,14 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
   assert.equal((html.match(/아이템\d/g) ?? []).length, 6);
   assert.match(html, /class="public-match-card-trinket [^"]*"[^>]*>장신구0</u);
 
-  // 시선 순서: 결과 → 챔피언 → 성과 → 지표 → 아이템 → 팀 구성 → 확장
+  // 시선 순서(목업 "전적 행 — 네 가지 수정"): 결과 → 병합 셀(챔피언·KDA·아이템) → CS 지표 → 팀 구성 → 확장
   const order = [
     "public-match-card-outcome",
+    "public-match-card-champ-block",
     "public-match-card-champion",
     "public-match-card-perf",
-    "public-match-card-stats",
     "public-match-card-items",
+    "public-match-card-stats",
     "public-match-card-team",
     "public-match-card-expand",
   ].map((name) => html.indexOf(name));
@@ -1012,11 +1014,12 @@ test("모바일 최근 전적은 3행으로 압축하고 등급·지표 정렬 �
   assert.match(cardCss, /\.public-match-card-loadout\s*\{[\s\S]*?display:\s*flex/u);
   assert.match(cardCss, /\.public-match-card-loadout-column\s*\{[\s\S]*?display:\s*grid[\s\S]*?grid-template-rows:\s*repeat\(2, 1\.25rem\)/u);
 
-  // 남는 폭을 한 열에 몰아주는 대신 열 사이에 균등 분배합니다.
-  // track 폭이 행마다 동일해야 열 정렬이 흔들리지 않으므로 track 에는 상한을 둡니다.
-  assert.match(cardCss, /\.public-match-card-summary\s*\{[\s\S]*?justify-content:\s*space-between/u);
-  assert.match(cardCss, /\.public-match-card-summary\s*\{[\s\S]*?minmax\(11rem, 12\.5rem\)\s*\/\* 2 챔피언/u);
-  // 그룹 사이 여백은 목업 §F 의 18px(1.125rem)입니다.
+  // 목업 "전적 행 — 네 가지 수정": 모든 행이 같은 고정 트랙을 공유합니다
+  // (112/176/116/152/168 + 캐럿 minmax(28px,1fr)) — 세로줄이 행마다 같은 자리에서 끊깁니다.
+  assert.match(cardCss, /\.public-match-card-summary\s*\{[\s\S]*?7rem[\s\S]*?11rem[\s\S]*?7\.25rem[\s\S]*?9\.5rem[\s\S]*?10\.5rem[\s\S]*?minmax\(1\.75rem, 1fr\)/u);
+  // 병합 셀(트랙 2–3)의 안쪽 트랙·gap 은 바깥 격자와 같은 값이어야 합니다.
+  assert.match(cardCss, /\.public-match-card-champ-block\s*\{[\s\S]*?grid-column:\s*span 2[\s\S]*?grid-template-columns:\s*11rem 7\.25rem[\s\S]*?column-gap:\s*1\.125rem/u);
+  // 그룹 사이 여백은 목업의 18px(1.125rem)입니다.
   assert.match(cardCss, /\.public-match-card-summary\s*\{[\s\S]*?column-gap:\s*1\.125rem/u);
   for (const group of ["champion", "perf", "stats", "items"]) {
     assert.match(cardCss, new RegExp(`\\.public-match-card-${group}\\s*\\{[\\s\\S]*?gap:\\s*var\\(--yoro-space-3\\)`, "u"));
@@ -1024,15 +1027,17 @@ test("모바일 최근 전적은 3행으로 압축하고 등급·지표 정렬 �
 
   // 반응형 기준은 viewport 가 아니라 리스트 컨테이너 폭입니다.
   assert.match(cardCss, /\.public-matches-panel\s*\{[\s\S]*?container-type:\s*inline-size[\s\S]*?container-name:\s*match-list/u);
-  // 목업 §F: 팀원 2열은 본문 폭 ~1052px 에서도 보여야 하므로 접힘 임계는 980 이하입니다.
-  assert.match(cardCss, /@container match-list \(max-width: 980px\)[\s\S]*?\.public-match-card-team\s*\{\s*display:\s*none/u);
-  assert.match(cardCss, /@container match-list \(max-width: 980px\)[\s\S]*?\.public-match-card-stats > span:nth-child\(3\)\s*\{\s*display:\s*none/u);
-  // 980 구간의 하한은 container 721px 입니다. track 합이 그 폭을 넘지 않도록 gap 도 함께 줄입니다.
-  assert.match(cardCss, /@container match-list \(max-width: 980px\)[\s\S]*?column-gap:\s*var\(--yoro-space-3\)/u);
+  // 접힘 임계 878 = 트랙 합 752 + gap 90 + padding 36(목업 §2-3). 접힌 트랙은
+  // 폭을 남기지 않고 템플릿에서 제거해 남은 열이 자리를 나눠 갖습니다.
+  assert.match(cardCss, /@container match-list \(max-width: 877px\)[\s\S]*?\.public-match-card-team\s*\{\s*display:\s*none/u);
+  assert.match(cardCss, /@container match-list \(max-width: 877px\)[\s\S]*?grid-template-columns:\s*7rem 11rem 7\.25rem 9\.5rem minmax\(1\.75rem, 1fr\)/u);
 
   const mobile = cardCss.slice(cardCss.indexOf("@container match-list (max-width: 720px)"));
   // 3·4·5열은 고정 폭이라 KDA 자릿수와 무관하게 등급 배지 x 좌표가 행마다 같습니다.
-  assert.match(mobile, /\.public-match-card-summary\s*\{[\s\S]*?grid-template-columns:\s*2\.25rem minmax\(0, 1fr\) 2rem 4\.25rem 2\.75rem/u);
+  // 팀 없음 5트랙 오버라이드(:has)보다 우선하도록 셀렉터 그룹으로 선언합니다.
+  assert.match(mobile, /\.public-match-card-summary(,\s*\.public-match-card-summary:not\(:has\(\.public-match-card-team\)\))?\s*\{[\s\S]*?grid-template-columns:\s*2\.25rem minmax\(0, 1fr\) 2rem 4\.25rem 2\.75rem/u);
+  // 병합 셀은 모바일에서 풀려 기존 3행 압축 격자가 그대로 동작합니다.
+  assert.match(mobile, /\.public-match-card-champ-block\s*\{\s*display:\s*contents/u);
   // 세로로 쌓지 않고 겹치기 위해 챔피언 셀을 풀어 각각 배치합니다.
   assert.match(mobile, /\.public-match-card-champion\s*\{\s*display:\s*contents/u);
   assert.match(mobile, /\.public-match-card-portrait\s*\{\s*grid-column:\s*1;\s*grid-row:\s*1 \/ span 2/u);

@@ -193,6 +193,9 @@ export function ProfileTopPanel({
         masteryChampionArt ? "has-mastery-art" : "",
         streamerSpotlight ? "has-streamer" : "",
         streamerSpotlight?.isLive ? "is-live" : "",
+        /* 갱신 중(이미 본 프로필) — 화면을 비우지 않고 엠블럼·랭크 카드는 그대로,
+           새로 오는 값(요약 바)만 흐립니다(목업 "갱신 중 — 이미 본 프로필"). */
+        loading ? "is-refreshing" : "",
       ].filter(Boolean).join(" ")}
       id="public-ranking"
     >

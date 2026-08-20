@@ -1,4 +1,4 @@
-import { Fragment, type ReactNode } from "react";
+import { Fragment } from "react";
 
 export type ProfileStreamerCastLink = {
   id?: string;
@@ -40,9 +40,7 @@ export type ProfileStreamerCastProps = {
   channelUrl?: string;
   isInGame: boolean;
   participationOpen: boolean;
-  links?: ProfileStreamerCastLink[];
   text: ProfileStreamerCastText;
-  renderLinkIcon?: (link: ProfileStreamerCastLink) => ReactNode;
   onOpenParticipation?: () => void;
   onOpenIngame?: () => void;
 };
@@ -63,12 +61,11 @@ function TwitchIcon() {
   );
 }
 
-function VideoOffIcon() {
+function PlaySilhouetteIcon() {
   return (
-    <svg aria-hidden="true" focusable="false" height="18" viewBox="0 0 24 24" width="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M10.5 5H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2.5" />
-      <path d="M16 9.5V8a1 1 0 0 1 1-1h.5l4-2.5v11l-4-2.5" />
-      <path d="M2 2l20 20" />
+    <svg aria-hidden="true" fill="none" focusable="false" height="32" stroke="var(--public-gray-border-strong, #4a5563)" strokeWidth="1.2" viewBox="0 0 30 30" width="32">
+      <circle cx="15" cy="15" r="11" />
+      <path d="M12.5 10.5 L 20 15 L 12.5 19.5 Z" />
     </svg>
   );
 }
@@ -83,53 +80,51 @@ export function ProfileStreamerCast({
   channelUrl,
   isInGame,
   participationOpen,
-  links,
   text,
-  renderLinkIcon,
   onOpenParticipation,
   onOpenIngame,
 }: ProfileStreamerCastProps) {
-  const meta = [gameName, uptimeLabel].filter(Boolean);
+  /* 라이브면 경과·시청자는 미리보기 위 오버레이가 맡고, 오프라인이면
+     "2일 전 방송" 같은 경과만 메타 줄에 남습니다(목업 §2-6). */
+  const meta = (isLive ? [gameName] : [gameName, uptimeLabel]).filter(Boolean);
 
   return (
     <section className={`public-profile-hero-cast ${isLive ? "is-live" : "is-offline"}`} aria-live="polite">
-      <div className="public-profile-hero-cast-head">
-        <span>{isLive ? text.liveHeading : text.offlineHeading}</span>
-        <span className="public-profile-hero-cast-viewers">
-          <ViewersIcon />
-          {isLive && viewersLabel ? viewersLabel : text.offlineLabel}
-        </span>
-      </div>
-
-      <div className="public-profile-hero-cast-media">
-        <span className={`public-profile-hero-cast-thumb ${isLive ? "" : "is-offline"}`}>
-          {previewUrl ? (
-            <img alt="" src={previewUrl} />
-          ) : (
-            /* 오프라인 채널은 Twitch가 미리보기 URL을 주지 않아 거의 항상 이 분기입니다.
-               빈 배경색만 남기는 대신 "왜 비어 있는지"를 아이콘+캡션으로 설명합니다. */
-            <span aria-hidden="true" className="public-profile-hero-cast-thumb-empty">
-              <VideoOffIcon />
-              <span>{text.previewUnavailableLabel}</span>
-            </span>
-          )}
-          {isLive ? <i aria-hidden="true">{text.liveBadge}</i> : null}
-          <span className="yoro-u-sr-only">{text.thumbnailLabel}</span>
-        </span>
-        <span className="public-profile-hero-cast-copy">
-          {title ? <span className="public-profile-hero-cast-title">{title}</span> : null}
-          {meta.length > 0 ? (
-            <span className="public-profile-hero-cast-meta">
-              {meta.map((entry, index) => (
-                <Fragment key={`${entry}:${index}`}>
-                  {index > 0 ? <b aria-hidden="true">·</b> : null}
-                  <span>{entry}</span>
-                </Fragment>
-              ))}
-            </span>
-          ) : null}
-        </span>
-      </div>
+      {/* 미리보기 — 카드 폭 전체 16:9(목업). 오프라인도 같은 크기의 빈 프레임에
+          재생 실루엣만 둔다 — 크기가 상태를 말하게 하지 않습니다. */}
+      <span className={`public-profile-hero-cast-thumb ${isLive ? "" : "is-offline"}`}>
+        {previewUrl ? (
+          <img alt="" src={previewUrl} />
+        ) : (
+          <span aria-hidden="true" className="public-profile-hero-cast-thumb-empty">
+            <PlaySilhouetteIcon />
+          </span>
+        )}
+        {isLive ? <i aria-hidden="true">{text.liveBadge}</i> : null}
+        {isLive && uptimeLabel ? (
+          <em className="public-profile-hero-cast-overlay is-uptime">{uptimeLabel}</em>
+        ) : null}
+        {isLive && viewersLabel ? (
+          <em className="public-profile-hero-cast-overlay is-viewers">
+            <ViewersIcon />
+            {viewersLabel}
+          </em>
+        ) : null}
+        <span className="yoro-u-sr-only">{text.thumbnailLabel}</span>
+      </span>
+      <span className="public-profile-hero-cast-copy">
+        {title ? <span className="public-profile-hero-cast-title">{title}</span> : null}
+        {meta.length > 0 ? (
+          <span className="public-profile-hero-cast-meta">
+            {meta.map((entry, index) => (
+              <Fragment key={`${entry}:${index}`}>
+                {index > 0 ? <b aria-hidden="true">·</b> : null}
+                <span>{entry}</span>
+              </Fragment>
+            ))}
+          </span>
+        ) : null}
+      </span>
 
       {/* 상태줄(목업 §D) — 승색 점 + "게임 중 · 참여 대기열 열림". 데이터 있을 때만. */}
       {isInGame || participationOpen ? (
@@ -170,13 +165,6 @@ export function ProfileStreamerCast({
           <button className="public-profile-hero-cast-action" onClick={onOpenIngame} type="button">
             {text.ingameViewLabel ?? text.ingameLabel}
           </button>
-        ) : null}
-        {links?.length && renderLinkIcon ? (
-          <span className="public-profile-hero-cast-links">
-            {links.map((link, index) => (
-              <span key={`${link.id ?? link.url}:${index}`}>{renderLinkIcon(link)}</span>
-            ))}
-          </span>
         ) : null}
       </div>
     </section>

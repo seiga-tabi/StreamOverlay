@@ -5,6 +5,17 @@
 body {
   margin: 0;
   font-family: var(--yoro-font-family-base);
+  /* 스크립트 실행 전 흰 화면 방지(목업 "스크립트 실행 전 — 서버 본문") —
+     base 코트로 먹 지면을 깔아 SEO 폴백 본문이 완성 화면과 같은 지면 위에서
+     읽히게 합니다. 각 화면 셸이 자기 배경을 그 위에 다시 칠합니다. */
+  background: #1c1d22;
+  color: #f5f6f8;
+}
+
+/* 라이트 테마 사용자는 스크립트가 붙인 테마 속성을 따라 백자 지면으로. */
+:root[data-public-theme="light"] body {
+  background: #f5f6f8;
+  color: #1c1d22;
 }
 
 :root:lang(ja) body {

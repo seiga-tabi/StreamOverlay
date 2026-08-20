@@ -38,6 +38,11 @@
   --profile-win-fill: var(--yoro-color-match-win-accent);
   --profile-loss-fill: var(--yoro-color-match-loss-accent);
   --profile-bar-neutral: var(--graph-fill);
+
+  /* 로딩 스켈레톤 블록(40-ink-loading.css) — 카드 위 1.25:1. 자리를 알리되
+     읽으려 들지 않는 밝기(목업 "검색 중"). sk-hi 는 흐르는 밝은 띠. */
+  --profile-sk: #31353f;
+  --profile-sk-hi: #3b404b;
   --profile-row-wash: rgba(245, 246, 248, .04);
   /* 인게임 팀 표식(승패색 금지 — 무채 사각): 다크 아군=백자, 상대=심회. */
   --profile-team-ally: #b9c3d0;
@@ -184,6 +189,10 @@
   /* 탭 3종 막대 — 채움·무채 막대는 위 라이트 채움/램프 참조가 따라오고,
      본인 행 워시만 여기서 반전합니다. */
   --profile-row-wash: rgba(28, 29, 34, .045);
+
+  /* 스켈레톤 라이트 — 흰 카드 위 같은 1.2:1 안팎. */
+  --profile-sk: #e9edf2;
+  --profile-sk-hi: #f3f5f8;
 
   /* 인게임 팀 표식 — 라이트는 뒤집어 아군=심회, 상대=백자(목업 ingame-map). */
   --profile-team-ally: #4a5563;

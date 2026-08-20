@@ -299,33 +299,37 @@
 
   .public-profile-hero-top { min-width: 0; }
 
-  /* 스트리머 상단 격자(목업 §D) — [방송 카드 | 솔로 확장 | 자유·5:5 스택]
-     = 1.25fr : (1.05fr + .85fr). 방송 카드가 첫 칸입니다. */
+  /* 스트리머 상단 격자(목업 §2-7) — [방송 1.3fr | 솔로/자유 1fr | 5:5/숙련도 1fr].
+     솔로 확대 규칙을 없애고 세 랭크 카드를 같은 컴팩트 규격으로 통일합니다. */
   .public-profile-hero-top.has-cast {
     display: grid;
-    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1.9fr);
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 2fr);
     gap: .75rem;
     align-items: stretch;
   }
 
+  /* 카드 4개(솔로·자유·5:5·숙련도)를 세로 우선으로 2×2 에 흘립니다 —
+     열2 = 솔로/자유, 열3 = 5:5/숙련도(목업). 행 높이가 같아 카드 높이도 같습니다. */
   .public-profile-hero-top.has-cast .public-profile-hero-rank--cards {
-    grid-template-columns: minmax(0, 1.05fr) minmax(0, .85fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: repeat(2, minmax(0, 1fr));
+    grid-auto-flow: column;
     gap: .75rem;
   }
 
-  /* 솔로 확장 카드 — 좌열 전체 높이, 도넛 64px·티어명 18px(목업). */
-  .public-profile-hero-top.has-cast .public-hero-rank-card:first-child { grid-row: 1 / -1; }
-  .public-profile-hero-top.has-cast .public-hero-rank-card:first-child .public-profile-hero-donut { width: 4rem; height: 4rem; }
-  .public-profile-hero-top.has-cast .public-hero-rank-card:first-child .public-hero-rank-card-tier { font-size: 1.125rem; }
+  /* 숙련도 블록이 없으면(topChampions 빈 배열) 5:5 가 열을 다 씁니다(§2-7). */
+  .public-profile-hero-top.has-cast .public-hero-rank-card:nth-child(3):last-child { grid-row: 1 / -1; }
 
-  /* 자유·5:5 컴팩트 카드 — 12px 14px 패딩, 크레스트 26px, 티어 14px,
-     도넛·승급 게이지 접기(목업 컴팩트 셀). */
-  .public-profile-hero-top.has-cast .public-hero-rank-card:nth-child(n+2) { padding: .75rem .875rem; }
-  .public-profile-hero-top.has-cast .public-hero-rank-card:nth-child(n+2) .public-profile-hero-crest { width: 1.625rem; height: 1.8125rem; }
-  .public-profile-hero-top.has-cast .public-hero-rank-card:nth-child(n+2) .public-profile-hero-donut { display: none; }
-  .public-profile-hero-top.has-cast .public-hero-rank-card:nth-child(n+2) .public-hero-rank-card-tier { font-size: .875rem; }
-  .public-profile-hero-top.has-cast .public-hero-rank-card:nth-child(n+2) .public-profile-hero-goal { display: none; }
+  /* 컴팩트 규격(목업 실측) — 패딩 12×14, 크레스트 48, 티어 14/800, 기록 11px,
+     도넛은 접고 기록 줄 끝 승률 텍스트로 대체, 스파크라인 20px. */
+  .public-profile-hero-top.has-cast .public-hero-rank-card { padding: .75rem .875rem; }
+  .public-profile-hero-top.has-cast .public-hero-rank-card .public-profile-hero-crest { width: 3rem; height: 3rem; }
+  .public-profile-hero-top.has-cast .public-hero-rank-card .public-profile-hero-donut { display: none; }
+  .public-profile-hero-top.has-cast .public-hero-rank-card .public-hero-rank-card-rate { display: inline; }
+  .public-profile-hero-top.has-cast .public-hero-rank-card .public-hero-rank-card-tier { font-size: .875rem; }
+  .public-profile-hero-top.has-cast .public-hero-rank-card .public-hero-rank-card-record { font-size: .6875rem; }
+  .public-profile-hero-top.has-cast .public-hero-rank-card .public-profile-hero-goal { display: none; }
+  .public-profile-hero-top.has-cast .public-hero-rank-card .public-profile-hero-sparkline { height: 1.25rem; }
 
   .public-profile-hero-rank {
     display: grid;
@@ -413,19 +417,21 @@
   .public-profile-hero-tier.is-unranked .public-profile-hero-tier-copy { grid-area: copy; }
   .public-profile-hero-tier.is-unranked .public-profile-hero-ghost { grid-area: ghost; }
 
+  /* 크레스트는 투명(목업 §2-1) — 티어 이미지 자체가 색을 갖고 있어 뒤 틴트가
+     외곽을 흐리고 라이트에서 카드와 겹칩니다. --tier-color 는 글자색으로만. */
   .public-profile-hero-crest {
     display: grid;
     place-items: center;
     flex: none;
     width: var(--yoro-space-12);
     height: var(--yoro-space-12);
-    border: 1px solid color-mix(in srgb, var(--tier-color) 32%, transparent);
-    border-radius: var(--yoro-radius-lg);
-    background: color-mix(in srgb, var(--tier-color) 14%, transparent);
+    border: 0;
+    background: none;
     color: var(--tier-color);
   }
 
-  .public-profile-hero-crest > img { width: 2.5rem; height: 2.5rem; display: block; object-fit: contain; }
+  /* 이미지는 고정 px 가 아니라 슬롯 100% — 슬롯만 바꾸면 따라옵니다(§2-2). */
+  .public-profile-hero-crest > img { width: 100%; height: 100%; display: block; object-fit: contain; }
 
   .public-profile-hero-crest > b {
     font-size: var(--yoro-font-size-lg);
@@ -672,11 +678,13 @@
 
   .public-profile-hero-live-pill.is-offline > i { background: var(--yoro-color-ground-muted); animation: none; }
 
+  /* 미리보기가 카드 상단 전폭에 붙으므로 카드 패딩은 0, 모서리는 카드가 자릅니다(§2-6). */
   .public-profile-hero-cast {
     display: flex;
     flex-direction: column;
-    gap: var(--yoro-space-2);
-    padding: var(--yoro-space-3);
+    gap: .625rem;
+    padding: 0;
+    overflow: hidden;
     border: 1px solid color-mix(in srgb, var(--yoro-color-match-loss-accent) 30%, transparent);
     border-radius: var(--yoro-radius-md);
     background:
@@ -719,15 +727,18 @@
     font-weight: var(--yoro-font-weight-medium);
   }
 
-  .public-profile-hero-cast-media { display: grid; grid-template-columns: 9rem minmax(0, 1fr); gap: var(--yoro-space-2); }
-
+  /* 카드 폭 전체를 쓰는 16:9 블록(§2-6) — 고정 높이 대신 aspect-ratio 로 자리를
+     미리 잡아 이미지가 없어도 카드 높이가 튀지 않습니다(CLS 방지). */
   .public-profile-hero-cast-thumb {
     position: relative;
+    display: block;
+    width: 100%;
     aspect-ratio: 16 / 9;
     overflow: hidden;
-    border: 1px solid var(--yoro-color-border-on-dark);
-    border-radius: var(--yoro-radius-sm);
-    background: var(--yoro-color-ground-raised);
+    border: 0;
+    border-bottom: .5px solid var(--public-gray-border, var(--yoro-color-border-on-dark));
+    border-radius: 0;
+    background: var(--yoro-color-ground);
   }
 
   .public-profile-hero-cast-thumb > img { width: 100%; height: 100%; display: block; object-fit: cover; }
@@ -736,51 +747,59 @@
   /* previewUrl 이 없을 때(오프라인 채널 대부분) 배경색만 있는 빈 박스 대신
      "왜 비어 있는지"를 아이콘+짧은 캡션으로 보여줍니다. */
   .public-profile-hero-cast-thumb-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: var(--yoro-space-1);
+    display: grid;
+    place-items: center;
     width: 100%;
     height: 100%;
-    background:
-      repeating-linear-gradient(135deg, color-mix(in srgb, var(--yoro-color-text-on-dark) 3%, transparent) 0 .5rem, transparent .5rem 1rem),
-      var(--yoro-color-ground-raised);
-    color: var(--yoro-color-text-on-dark-muted);
-  }
-
-  .public-profile-hero-cast-thumb-empty > span {
-    padding-inline: var(--yoro-space-1);
-    font-size: var(--yoro-font-size-xs);
-    font-weight: var(--yoro-font-weight-medium);
-    text-align: center;
-    line-height: var(--yoro-line-height-tight);
+    background: var(--yoro-color-ground);
   }
 
   .public-profile-hero-cast-thumb > i {
     position: absolute;
-    left: .3rem;
-    top: .3rem;
+    left: .625rem;
+    top: .625rem;
     padding: .05rem .3rem;
     border-radius: var(--yoro-radius-xs);
     background: var(--yoro-color-match-loss-accent);
-    color: var(--yoro-color-text-on-dark);
+    color: #f5f6f8;
     font-style: normal;
     font-size: var(--yoro-font-size-xs);
     font-weight: var(--yoro-font-weight-bold);
     letter-spacing: .04em;
   }
 
-  .public-profile-hero-cast-copy { display: flex; flex-direction: column; gap: .25rem; min-width: 0; }
+  /* 경과·시청자 오버레이(§2-6) — 흰 글자 11px/700, 각 10px 안쪽. */
+  .public-profile-hero-cast-overlay {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+    color: #f5f6f8;
+    font-style: normal;
+    font-size: .6875rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .55);
+  }
 
+  .public-profile-hero-cast-overlay.is-uptime { top: .625rem; right: .625rem; }
+  .public-profile-hero-cast-overlay.is-viewers { right: .625rem; bottom: .625rem; }
+
+  .public-profile-hero-cast-copy {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+    min-width: 0;
+    padding: .125rem .875rem 0;
+  }
+
+  /* 목업은 제목 한 줄 말줄임(13px/700). */
   .public-profile-hero-cast-title {
-    display: -webkit-box;
     overflow: hidden;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    font-size: var(--yoro-font-size-sm);
-    font-weight: var(--yoro-font-weight-bold);
-    line-height: 1.35;
+    font-size: .8125rem;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   /* 구분점 간격은 gap 으로 줍니다. 문자열 공백은 JSX 에서 잘려 붙어 보입니다. */
@@ -910,10 +929,16 @@
 
   @container profile-hero (max-width: 820px) {
     .public-profile-hero-art { width: 34%; }
-    /* 2열을 유지하면 랭크와 방송이 둘 다 눌립니다 — 세로 스택으로. */
+    /* 2열을 유지하면 랭크와 방송이 둘 다 눌립니다 — 세로 스택으로.
+       위 3열 규격의 2×2 세로 흘림(auto-flow: column)도 함께 풀어야
+       카드가 좁은 2열로 찌그러지지 않습니다. */
     .public-profile-hero-top.has-cast { grid-template-columns: minmax(0, 1fr); }
-    .public-profile-hero-top.has-cast .public-profile-hero-rank--cards { grid-template-rows: none; }
-    .public-profile-hero-top.has-cast .public-hero-rank-card:first-child { grid-row: auto; }
+    .public-profile-hero-top.has-cast .public-profile-hero-rank--cards {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: none;
+      grid-auto-flow: row;
+    }
+    .public-profile-hero-top.has-cast .public-hero-rank-card:nth-child(3):last-child { grid-row: auto; }
     .public-profile-hero-rank { grid-template-columns: minmax(0, 1fr); }
     /* 가로 스크롤은 항목이 잘리고 스크롤바가 드러납니다. 큐가 3개뿐이니 3열로 나눕니다. */
     .public-profile-hero-queues { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--yoro-space-1); }
@@ -957,7 +982,6 @@
     .public-profile-hero-body { padding: var(--yoro-space-3); gap: var(--yoro-space-3); }
     .public-profile-hero-rank { gap: var(--yoro-space-3); }
     /* 전폭 16:9 로 눕히면 390px 에서 썸네일 하나가 190px 를 먹습니다. */
-    .public-profile-hero-cast-media { grid-template-columns: 6.5rem minmax(0, 1fr); }
     .public-profile-hero-actions { flex-wrap: wrap; }
     .public-profile-hero-actions .public-profile-hero-fetched { flex-basis: 100%; text-align: right; }
 
@@ -971,8 +995,8 @@
       grid-template-areas: "crest copy" "ghost ghost";
       gap: var(--yoro-space-3);
     }
-    .public-profile-hero-crest { grid-area: crest; width: var(--yoro-space-10); height: var(--yoro-space-10); border-radius: var(--yoro-radius-md); }
-    .public-profile-hero-crest > img { width: 2rem; height: 2rem; }
+    .public-profile-hero-crest { grid-area: crest; width: var(--yoro-space-10); height: var(--yoro-space-10); border: 0; background: none; }
+    .public-profile-hero-crest > img { width: 100%; height: 100%; }
     .public-profile-hero-tier-copy { grid-area: copy; }
     .public-profile-hero-tier-name { font-size: var(--yoro-font-size-md); }
     .public-profile-hero-goal-track { max-width: none; }
@@ -1032,23 +1056,27 @@
     min-width: 0;
   }
 
+  /* 일반 프로필 3열 카드 — 슬롯 56px(목업 §2-2). 스트리머(has-cast)는 48px 로 줄입니다. */
   .public-hero-rank-card .public-profile-hero-crest {
     flex: none;
     display: grid;
     place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
+    width: 3.5rem;
+    height: 3.5rem;
   }
 
   .public-hero-rank-card .public-profile-hero-crest img { width: 100%; height: 100%; object-fit: contain; }
 
+  /* fallback 배지는 슬롯보다 커지지 않게 상속(§2-3 — 고정 40px 가 26px 슬롯을
+     넘어 옆 글자를 덮던 결함). */
   .public-hero-rank-card .public-profile-hero-crest b {
     display: grid;
     place-items: center;
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 100%;
+    height: 100%;
     border: 2px solid var(--tier-color);
     border-radius: var(--yoro-radius-sm);
+    box-sizing: border-box;
     color: var(--tier-color);
     font-size: var(--yoro-font-size-md);
   }
@@ -1081,6 +1109,9 @@
     font-variant-numeric: tabular-nums;
   }
 
+  /* 도넛 대체 승률 텍스트(§2-7) — has-cast 컴팩트 규격에서만 CSS 로 켭니다. */
+  .public-hero-rank-card-rate { display: none; }
+
   /* 승/패 전용색 — 기록 안 숫자만. */
   /* 13px 굵은 승패 글자 — 채움색이 아니라 글자용 ink(그래프 대비 규격). */
   .public-hero-rank-card-record em { color: var(--graph-win-ink, var(--yoro-color-match-win-accent)); font-style: normal; font-weight: var(--yoro-font-weight-bold); }
@@ -1105,7 +1136,91 @@
   .public-hero-rank-card-trend-label b[data-tone="down"] { color: var(--graph-loss-ink, var(--yoro-color-match-loss-accent)); }
   .public-hero-rank-card-trend-label b[data-tone="flat"] { color: var(--public-gray-muted, var(--yoro-color-text-on-dark-muted)); }
 
-  .public-hero-rank-card-trend .public-profile-hero-sparkline { width: 100%; height: 2.75rem; }
+  .public-hero-rank-card-trend .public-profile-hero-sparkline {
+    width: 100%;
+    /* 537줄의 max-width 11rem 이 카드 안에서도 살아 그래프를 176px 로 잘랐습니다(§2-4). */
+    max-width: none;
+    height: 2.75rem;
+  }
+
+  /* 언랭크 카드의 "최근 게임 보기" — 폭 100% 아웃라인. border-box 가 없으면
+     패딩만큼 카드 밖으로 나갑니다(목업 §2-3 실측). */
+  .public-hero-rank-card .public-profile-hero-ghost {
+    width: 100%;
+    margin-top: auto;
+    box-sizing: border-box;
+    text-align: center;
+  }
+
+  /* ── 숙련도 챔피언 블록(목업 §2-7) — 3열 격자의 네 번째 칸 ── */
+  .public-hero-mastery-card { gap: .5625rem; }
+
+  .public-hero-mastery-list {
+    display: flex;
+    flex-direction: column;
+    gap: .5625rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .public-hero-mastery-list > li {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    min-width: 0;
+  }
+
+  .public-hero-mastery-list > li > :is(img, i) {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: .5px solid var(--public-gray-border, var(--yoro-color-border-on-dark));
+    border-radius: 99px;
+    box-sizing: border-box;
+    background: var(--public-gray-page, var(--yoro-color-ground));
+    color: var(--public-gray-muted, var(--yoro-color-text-on-dark-muted));
+    font-style: normal;
+    font-size: .6875rem;
+    font-weight: 800;
+    object-fit: cover;
+    overflow: hidden;
+  }
+
+  .public-hero-mastery-copy {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: .125rem;
+    min-width: 0;
+  }
+
+  .public-hero-mastery-copy > b {
+    overflow: hidden;
+    font-size: .75rem;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .public-hero-mastery-copy > small {
+    color: var(--public-gray-muted, var(--yoro-color-text-on-dark-muted));
+    font-size: .6875rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .public-hero-mastery-list > li > em {
+    flex: none;
+    padding: 2px 7px;
+    border: .5px solid var(--public-gray-border, var(--yoro-color-border-on-dark));
+    border-radius: 2px;
+    color: var(--public-gray-muted, var(--yoro-color-text-on-dark-muted));
+    font-style: normal;
+    font-size: .625rem;
+    font-weight: 800;
+  }
 
   /* 좁은 폭: 세로 스택(모바일 목업은 2×2 그리드지만 카드 내용이 좁아
      한 열이 가독에 유리 — 셀 구성은 동일). */
