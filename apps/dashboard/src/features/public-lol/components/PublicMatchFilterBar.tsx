@@ -33,8 +33,8 @@ export type PublicMatchFilterBarText = {
   flexQueue: ReactNode;
   ranked5v5: ReactNode;
   normalQueue: ReactNode;
+  arenaQueue: ReactNode;
   aramQueue: ReactNode;
-  aramMayhemQueue: ReactNode;
   allChampions: ReactNode;
   periodAll: ReactNode;
   period7: ReactNode;
@@ -68,14 +68,15 @@ export function PublicMatchFilterBar({
   onReset
 }: PublicMatchFilterBarProps) {
   // 자주 쓰는 큐는 select 를 열지 않고 한 번에 전환할 수 있도록 칩으로 노출합니다.
+  /* 칩 순서는 목업 v23 — 전체·일반·솔로·자유·5:5·아레나·칼바람. */
   const queueChips: Array<{ value: string; label: ReactNode }> = [
     { value: "all", label: text.allQueues },
+    { value: "normal", label: text.normalQueue },
     { value: "solo", label: text.soloQueue },
     { value: "flex", label: text.flexQueue },
     { value: "ranked5v5", label: text.ranked5v5 },
-    { value: "normal", label: text.normalQueue },
-    { value: "aram", label: text.aramQueue },
-    { value: "aramMayhem", label: text.aramMayhemQueue }
+    { value: "arena", label: text.arenaQueue },
+    { value: "aram", label: text.aramQueue }
   ];
 
   return (

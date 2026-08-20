@@ -44,6 +44,9 @@ export type HomeText = {
   liveTodayRecord: string;
   liveWins: string;
   liveLosses: string;
+  liveGameLol: string;
+  liveGamePal: string;
+  gamePatchBadge: string;
   liveEmptyTitle: string;
   liveEmptyDescription: string;
   liveEmptyCta: string;
@@ -123,6 +126,9 @@ export const homeI18n: Record<HomeLocale, HomeText> = {
     liveTodayRecord: "오늘",
     liveWins: "{count}승",
     liveLosses: "{count}패",
+    liveGameLol: "LoL",
+    liveGamePal: "팰월드",
+    gamePatchBadge: "패치 {version}",
     liveEmptyTitle: "지금은 방송 중인 스트리머가 없습니다",
     liveEmptyDescription: "팔로우한 스트리머가 방송을 켜면 이 자리에 먼저 표시됩니다.",
     liveEmptyCta: "스트리머 둘러보기",
@@ -200,6 +206,9 @@ export const homeI18n: Record<HomeLocale, HomeText> = {
     liveTodayRecord: "本日",
     liveWins: "{count}勝",
     liveLosses: "{count}敗",
+    liveGameLol: "LoL",
+    liveGamePal: "パルワールド",
+    gamePatchBadge: "パッチ {version}",
     liveEmptyTitle: "現在配信中のストリーマーはいません",
     liveEmptyDescription: "フォロー中のストリーマーが配信を始めると、ここに表示されます。",
     liveEmptyCta: "ストリーマーを見る",
@@ -277,6 +286,9 @@ export const homeI18n: Record<HomeLocale, HomeText> = {
     liveTodayRecord: "Today",
     liveWins: "{count}W",
     liveLosses: "{count}L",
+    liveGameLol: "LoL",
+    liveGamePal: "Palworld",
+    gamePatchBadge: "Patch {version}",
     liveEmptyTitle: "No streamers are live right now",
     liveEmptyDescription: "When streamers you follow go live, they show up here first.",
     liveEmptyCta: "Browse streamers",

@@ -966,3 +966,153 @@
     .public-profile-hero .public-profile-streamer-spotlight { margin: 0 var(--yoro-space-3) var(--yoro-space-3); }
   }
 }
+
+@layer pages {
+  /* ── 랭크 3카드(목업 page-4 v21~v22) ─────────────────────────
+     큐 전환 세그먼트를 대체합니다. 카드 = 큐명·크레스트·도넛·티어명(티어색)·
+     LP·승패·(솔로) 분절 스파크라인. 티어색은 위 [data-tier] --tier-color 승계. */
+  .public-profile-hero-rank--cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--yoro-space-3);
+    align-items: stretch;
+  }
+
+  .public-hero-rank-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--yoro-space-2);
+    min-width: 0;
+    padding: var(--yoro-space-3) var(--yoro-space-4);
+    border: 1px solid var(--public-gray-border, var(--yoro-color-border-on-dark));
+    border-radius: var(--yoro-radius-md);
+    background: color-mix(in srgb, var(--public-gray-surface, #252730) 72%, transparent);
+  }
+
+  .public-hero-rank-card-queue {
+    color: var(--public-gray-muted, var(--yoro-color-text-on-dark-muted));
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-medium);
+  }
+
+  .public-hero-rank-card-row {
+    display: flex;
+    align-items: center;
+    gap: var(--yoro-space-3);
+    min-width: 0;
+  }
+
+  .public-hero-rank-card .public-profile-hero-crest {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .public-hero-rank-card .public-profile-hero-crest img { width: 100%; height: 100%; object-fit: contain; }
+
+  .public-hero-rank-card .public-profile-hero-crest b {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 2px solid var(--tier-color);
+    border-radius: var(--yoro-radius-sm);
+    color: var(--tier-color);
+    font-size: var(--yoro-font-size-md);
+  }
+
+  .public-hero-rank-card .public-profile-hero-donut { flex: none; width: 3rem; height: 3rem; }
+
+  .public-hero-rank-card-copy {
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+    min-width: 0;
+  }
+
+  /* 티어명은 티어색 — 목업 v21. */
+  .public-hero-rank-card-tier {
+    color: var(--tier-color);
+    font-size: var(--yoro-font-size-md);
+    font-weight: var(--yoro-font-weight-black);
+    line-height: var(--yoro-line-height-tight);
+  }
+
+  .public-hero-rank-card.is-unranked .public-hero-rank-card-tier {
+    color: var(--public-gray-muted, var(--yoro-color-text-on-dark-muted));
+  }
+
+  .public-hero-rank-card-record {
+    color: var(--public-gray-muted, var(--yoro-color-text-on-dark-muted));
+    font-size: var(--yoro-font-size-xs);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* 승/패 전용색 — 기록 안 숫자만. */
+  .public-hero-rank-card-record em { color: var(--yoro-color-match-win-accent); font-style: normal; font-weight: var(--yoro-font-weight-bold); }
+  .public-hero-rank-card-record i { color: var(--yoro-color-match-loss-accent); font-style: normal; font-weight: var(--yoro-font-weight-bold); }
+
+  .public-hero-rank-card-trend {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+    margin-top: auto;
+  }
+
+  .public-hero-rank-card-trend-label {
+    display: flex;
+    align-items: baseline;
+    gap: var(--yoro-space-2);
+    color: var(--public-gray-muted, var(--yoro-color-text-on-dark-muted));
+    font-size: var(--yoro-font-size-xs);
+  }
+
+  .public-hero-rank-card-trend-label b[data-tone="up"] { color: var(--yoro-color-match-win-accent); }
+  .public-hero-rank-card-trend-label b[data-tone="down"] { color: var(--yoro-color-match-loss-accent); }
+  .public-hero-rank-card-trend-label b[data-tone="flat"] { color: var(--public-gray-muted, var(--yoro-color-text-on-dark-muted)); }
+
+  .public-hero-rank-card-trend .public-profile-hero-sparkline { width: 100%; height: 2.75rem; }
+
+  /* 좁은 폭: 세로 스택(모바일 목업은 2×2 그리드지만 카드 내용이 좁아
+     한 열이 가독에 유리 — 셀 구성은 동일). */
+  @container profile-hero (max-width: 47rem) {
+    .public-profile-hero-rank--cards { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  @supports not (container-type: inline-size) {
+    @media (max-width: 47rem) {
+      .public-profile-hero-rank--cards { grid-template-columns: minmax(0, 1fr); }
+    }
+  }
+}
+
+@layer pages {
+  /* 최근 20경기 요약 바 — 목업 page-4: 랭크 3카드 아래 전폭 한 줄. */
+  .public-hero-summary-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--yoro-space-2) var(--yoro-space-4);
+    margin-top: var(--yoro-space-3);
+    padding: var(--yoro-space-3) var(--yoro-space-4);
+    border: 1px solid var(--public-gray-border, var(--yoro-color-border-on-dark));
+    border-radius: var(--yoro-radius-md);
+    background: color-mix(in srgb, var(--public-gray-surface, #252730) 72%, transparent);
+    color: var(--public-gray-muted, var(--yoro-color-text-on-dark-muted));
+    font-size: var(--yoro-font-size-sm);
+  }
+
+  .public-hero-summary-bar b {
+    color: var(--public-gray-text, var(--yoro-color-text-on-dark));
+    font-weight: var(--yoro-font-weight-black);
+  }
+
+  .public-hero-summary-bar-label { font-size: var(--yoro-font-size-xs); }
+
+  .public-hero-summary-bar-record em { color: var(--yoro-color-match-win-accent); font-style: normal; font-weight: var(--yoro-font-weight-bold); }
+  .public-hero-summary-bar-record i { color: var(--yoro-color-match-loss-accent); font-style: normal; font-weight: var(--yoro-font-weight-bold); }
+
+  .public-hero-summary-bar-dot { color: var(--public-gray-muted, var(--yoro-color-text-on-dark-muted)); }
+}

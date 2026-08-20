@@ -15,6 +15,7 @@ export type RecentMatchExpandedPanelText = RecentMatchExpandedToolbarText;
 export type RecentMatchExpandedPanelProps = {
   activeView: RecentMatchExpandedPanelView;
   hideRiotIds: boolean;
+  replayAction?: ReactNode;
   content: ReactNode;
   text: RecentMatchExpandedPanelText;
   onRecord: () => void;
@@ -25,6 +26,7 @@ export type RecentMatchExpandedPanelProps = {
 export function RecentMatchExpandedPanel({
   activeView,
   hideRiotIds,
+  replayAction,
   content,
   text,
   onRecord,
@@ -36,6 +38,7 @@ export function RecentMatchExpandedPanel({
       <RecentMatchExpandedToolbar
         activeView={activeView}
         hideRiotIds={hideRiotIds}
+        replayAction={replayAction}
         onBuild={onBuild}
         onRecord={onRecord}
         onToggleMask={onToggleMask}

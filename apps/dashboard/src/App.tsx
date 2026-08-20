@@ -31,6 +31,7 @@ import { stripPublicLocalePrefix } from "./features/public-lol/utils/public-loca
 
 const loadPublicHomePage = () => import("./pages/PublicHomePage");
 const loadPublicLolHomePage = () => import("./pages/PublicLolHomePage");
+const loadPublicLolStreamersPage = () => import("./pages/PublicLolStreamersPage");
 const loadPublicLolPage = () => import("./pages/PublicLolPage");
 const loadPublicPalworldPage = () => import("./pages/PublicPalworldPage");
 const loadPublicValorantPage = () => import("./pages/PublicValorantPage");
@@ -39,6 +40,7 @@ const loadPublicGamesPage = () => import("./pages/PublicGamesPage");
 const loadPublicStreamersPage = () => import("./pages/PublicStreamersPage");
 const PublicHomePage = lazyNamed(loadPublicHomePage, "PublicHomePage");
 const PublicLolHomePage = lazyNamed(loadPublicLolHomePage, "PublicLolHomePage");
+const PublicLolStreamersPage = lazyNamed(loadPublicLolStreamersPage, "PublicLolStreamersPage");
 const PublicLolPage = lazyNamed(loadPublicLolPage, "PublicLolPage");
 const PublicPalworldPage = lazyNamed(loadPublicPalworldPage, "PublicPalworldPage");
 const PublicValorantPage = lazyNamed(loadPublicValorantPage, "PublicValorantPage");
@@ -325,6 +327,8 @@ export default function App() {
     /* LoL 홈(/lol)은 리디자인된 전용 화면입니다. 전적·증강·패치노트 등
        나머지 LoL 경로는 그대로 PublicLolPage(폴백 분기)가 담당합니다. */
     const lolHomePublic = publicPathname === "/lol" || publicPathname === "/lol/";
+    /* 팔로우 스트리머(/follow)도 리디자인된 전용 화면입니다. */
+    const lolStreamersPublic = publicPathname === "/follow" || publicPathname === "/follow/";
     const palworldPublic = isPalworldPath(publicPathname);
     const valorantPublic = isValorantPath(publicPathname);
     const minecraftPublic = isMinecraftPath(publicPathname);
@@ -338,6 +342,10 @@ export default function App() {
       ) : lolHomePublic ? (
         <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>
           <PublicLolHomePage />
+        </Suspense>
+      ) : lolStreamersPublic ? (
+        <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>
+          <PublicLolStreamersPage />
         </Suspense>
       ) : yoroDashboard ? (
         <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>

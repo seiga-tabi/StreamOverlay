@@ -815,6 +815,31 @@ export class TwitchApiClient {
     return profiles;
   }
 
+  /**
+   * 채널의 지난 방송(아카이브) 목록. 경기 → 다시보기 점프에 씁니다.
+   *
+   * 앱 토큰으로 조회합니다 — 남의 채널 아카이브는 공개 정보이고, 시청자 토큰을 쓰면
+   * 로그인한 사람에게만 다시보기 버튼이 보이게 됩니다.
+   * 실패는 빈 배열입니다: Twitch 가 흔들려도 전적 화면은 그대로 떠야 합니다.
+   */
+  async getArchiveVideosByUserId(userId: string, limit = 100): Promise<unknown> {
+    if (!/^\d{1,32}$/u.test(userId)) return { data: [] };
+    const context = await this.getAppAccessContext();
+    if (!context) return { data: [] };
+    const url = new URL("https://api.twitch.tv/helix/videos");
+    url.searchParams.set("user_id", userId);
+    url.searchParams.set("type", "archive");
+    url.searchParams.set("sort", "time");
+    url.searchParams.set("first", String(Math.min(100, Math.max(1, Math.trunc(limit)))));
+    try {
+      const response = await this.requestWithAccessContext(url, { method: "GET" }, context);
+      if (!response.ok) return { data: [] };
+      return await response.json();
+    } catch {
+      return { data: [] };
+    }
+  }
+
   private async getAppAccessContext(): Promise<TwitchApiAccessContext | undefined> {
     if (!appConfig.twitch.clientId || !appConfig.twitch.clientSecret) return undefined;
     if (this.appAccessContext && this.appAccessContext.expiresAt > this.now() + APP_ACCESS_TOKEN_REFRESH_MARGIN_MS) {

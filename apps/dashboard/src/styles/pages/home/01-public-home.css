@@ -13,7 +13,10 @@
  * ≥64rem 데스크톱(HomeDark 1440 기준). */
 
 @layer home {
-  .yoro-home-shell {
+  /* .yoro-home-chrome — 전적 상세처럼 홈 셸 밖에서 헤더·탭바만 빌려 쓰는 래퍼.
+     토큰·지면·타이포만 공유하고 min-height 같은 페이지 레이아웃은 셸 전용입니다. */
+  .yoro-home-shell,
+  .yoro-home-chrome {
     /* 다크(기본) */
     --home-bg: #1C1D22;
     --home-card: #252730;
@@ -39,14 +42,6 @@
     --home-serif: "Noto Serif KR", "Noto Serif JP", serif;
     --home-brush: "Yuji Boku", "Yuji Syuku", serif;
 
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    /* 붓 마크는 일부러 오른쪽으로 흘러나갑니다(모바일에서 right: -22px). 그대로 두면
-       360px 에서 문서 폭이 382px 가 되어 페이지가 가로로 스크롤됩니다(실측).
-       hidden 이 아니라 clip 인 이유: clip 은 스크롤 컨테이너를 만들지 않아
-       내부 sticky 가 그대로 살아 있고, 세로 방향 번짐도 그대로 둡니다. */
-    overflow-x: clip;
     background: var(--home-bg);
     color: var(--home-ink);
     font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
@@ -55,7 +50,21 @@
     line-height: 1.5;
   }
 
-  .yoro-home-shell.theme-light {
+  .yoro-home-shell {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    /* 붓 마크는 일부러 오른쪽으로 흘러나갑니다(모바일에서 right: -22px). 그대로 두면
+       360px 에서 문서 폭이 382px 가 되어 페이지가 가로로 스크롤됩니다(실측).
+       hidden 이 아니라 clip 인 이유: clip 은 스크롤 컨테이너를 만들지 않아
+       내부 sticky 가 그대로 살아 있고, 세로 방향 번짐도 그대로 둡니다. */
+    overflow-x: clip;
+  }
+
+  /* 전적 상세의 크롬은 셸이 아니라 래퍼라, 셸 루트(.theme-light) 아래에서도
+     같은 스왑 하나로 반전합니다(목업 라이트 규칙). */
+  .yoro-home-shell.theme-light,
+  .theme-light .yoro-home-chrome {
     --home-bg: #F5F6F8;
     --home-card: #FFFFFF;
     --home-ink: #1C1D22;
@@ -84,12 +93,12 @@
   }
 
   /* :where 로 명시도를 0으로 낮춰, 각 컴포넌트 클래스의 색 지정이 이기게 합니다. */
-  .yoro-home-shell :where(a) {
+  :is(.yoro-home-shell, .yoro-home-chrome) :where(a) {
     color: inherit;
     text-decoration: none;
   }
 
-  .yoro-home-shell :focus-visible {
+  :is(.yoro-home-shell, .yoro-home-chrome) :focus-visible {
     outline: 2px solid var(--home-stroke);
     outline-offset: 2px;
   }
@@ -779,6 +788,17 @@
     text-overflow: ellipsis;
   }
 
+  /* 승/패 전용색 — 목업 §지금 방송 중 하단 줄(승=청자, 패=홍옥). */
+  .yoro-home-live-win {
+    color: var(--home-win);
+    font-weight: 700;
+  }
+
+  .yoro-home-live-loss {
+    color: var(--home-loss);
+    font-weight: 700;
+  }
+
   .yoro-home-live-empty {
     display: flex;
     flex-direction: column;
@@ -830,6 +850,11 @@
     min-width: 0;
   }
 
+  /* 목업 §게임별 데이터 — 좌우 비대칭 폭(LoL 1.4 : 팰월드 1). */
+  .yoro-home-game-card.is-wide {
+    flex: 1.4;
+  }
+
   .yoro-home-game-card-head {
     display: flex;
     align-items: center;
@@ -842,6 +867,15 @@
     font-size: 15px;
     font-weight: 800;
     color: var(--home-ink);
+  }
+
+  /* 패치 버전 배지 — 목업 LoL 카드 제목 옆("패치 25.16"). */
+  .yoro-home-game-card-badge {
+    padding: 2px 7px;
+    border: .5px solid var(--home-line);
+    border-radius: 2px;
+    color: var(--home-mid);
+    font-size: 11px;
   }
 
   .yoro-home-chart {

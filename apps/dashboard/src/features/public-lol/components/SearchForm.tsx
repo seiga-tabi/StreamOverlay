@@ -238,6 +238,8 @@ export function SearchForm<TSuggestion extends SearchFormSuggestion>({
         key={`${source}:${suggestion.lolPlatform ?? platform}:${riotId}`}
         aria-label={`${riotId} ${sourceLabel}`}
         title={sourceLabel}
+        /* 티어명을 티어색으로 칠하는 CSS 훅(목업 연관 패널 — 우측 티어명+LP). */
+        data-tier={rankedStats?.tier ? rankedStats.tier.toLocaleLowerCase() : "unranked"}
         onClick={() => handlePickSuggestion(suggestion)}
       >
         <span className="public-suggestion-avatar">

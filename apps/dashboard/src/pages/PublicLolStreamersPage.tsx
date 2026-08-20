@@ -1,53 +1,50 @@
 import { useCallback, useEffect, useState } from "react";
 import "../styles/pages/home/01-public-home.css";
 import "../styles/pages/home/02-lol-home.css";
+import "../styles/pages/home/03-lol-streamers.css";
 import { usePublicLocale } from "../features/public-lol/hooks/usePublicLocale";
 import { setActivePublicLocale, type PublicLocale } from "../features/public-lol/i18n/public-lol-i18n";
 import { usePublicViewerTwitchSession } from "../shared/usePublicViewerTwitchSession";
 import { HomeHeader } from "../features/public-home/components/HomeHeader";
-import {
-  HomeFooter,
-  HomeLiveSection,
-  HomeLoginModal
-} from "../features/public-home/components/HomeSections";
-import {
-  LolDataSection,
-  LolHomeHero,
-  LolParticipationBanner,
-  LolSubnav
-} from "../features/public-home/components/LolHomeSections";
+import { HomeFooter, HomeLoginModal } from "../features/public-home/components/HomeSections";
+import { LolSubnav } from "../features/public-home/components/LolHomeSections";
+import { StreamersBody, StreamersPageHead } from "../features/public-home/components/LolStreamersSections";
 import { LolBottomTabBar } from "../features/public-home/components/HomeTabBar";
 import { useHomeTheme } from "../features/public-home/hooks/useHomeTheme";
 import { homeI18n } from "../features/public-home/i18n/home-i18n";
 import { lolHomeI18n } from "../features/public-home/i18n/lol-home-i18n";
-import { applyLolHomeSeo } from "../features/public-home/utils/seo";
+import { lolStreamersI18n } from "../features/public-home/i18n/lol-streamers-i18n";
+import { applyLolStreamersSeo } from "../features/public-home/utils/seo";
 
 const noServerLocalePreference = async (): Promise<PublicLocale | undefined> => undefined;
 
-/* LoL 홈(/lol) — 목업 캔버스 "YORO 홈 리디자인" page-2 구현.
- * 루트 홈과 같은 백자·수묵 시스템, 같은 공통 컴포넌트(헤더·방송 카드·푸터·로그인 팝업).
- * 다른 점: 상단바 2행(중앙 정렬 LoL 메뉴), LoL 단일 검색 + 최근 검색·즐겨찾기,
- * 증강 칼바람·패치노트 카드, 시청자 참여 배너, 모바일 하단 5탭.
- * 전적·증강·패치노트 등 세부 화면은 기존 PublicLolPage 라우트가 그대로 담당합니다. */
-export function PublicLolHomePage() {
+/* LoL 스트리머(/follow) — 목업 캔버스 "YORO 홈 리디자인" page-3 구현.
+ * 홈 계열과 같은 공통 컴포넌트(헤더·2행 메뉴·방송 카드·푸터·하단 탭·로그인 팝업)에
+ * 이 화면 전용 조각(페이지 헤드·필터 칩·랭크 배지·오프라인 행)을 얹습니다.
+ * 데이터는 기존 계약 그대로: 뷰어 Twitch 세션 + 팔로우 LoL 채널. */
+export function PublicLolStreamersPage() {
   const { locale, changeLocale } = usePublicLocale(noServerLocalePreference);
   const { theme, toggleTheme } = useHomeTheme();
   const [loginOpen, setLoginOpen] = useState(false);
   const homeText = homeI18n[locale];
-  const text = lolHomeI18n[locale];
+  const lolText = lolHomeI18n[locale];
+  const text = lolStreamersI18n[locale];
   setActivePublicLocale(locale);
 
   const {
     disconnectTwitch,
     followedChannels,
+    retryTwitch,
     startTwitchLogin,
+    twitchError,
+    twitchLoading,
     twitchStatus
   } = usePublicViewerTwitchSession({
     loginReturnTo: () => `${window.location.pathname}${window.location.search}`,
     needsFollowedChannels: true
   });
 
-  useEffect(() => applyLolHomeSeo(locale), [locale]);
+  useEffect(() => applyLolStreamersSeo(locale), [locale]);
 
   const handleLocale = useCallback((next: PublicLocale) => {
     setActivePublicLocale(next);
@@ -55,8 +52,8 @@ export function PublicLolHomePage() {
   }, [changeLocale]);
 
   return (
-    <div className={`yoro-home-shell yoro-lol-home theme-${theme}`}>
-      <a className="yoro-home-skip" href="#yoro-lol-home-main">{homeText.skipToContent}</a>
+    <div className={`yoro-home-shell yoro-lol-home yoro-streamers-page theme-${theme}`}>
+      <a className="yoro-home-skip" href="#yoro-streamers-main">{homeText.skipToContent}</a>
       <HomeHeader
         accountName={twitchStatus.user?.displayName}
         activeGame="lol"
@@ -69,21 +66,29 @@ export function PublicLolHomePage() {
         onToggleTheme={toggleTheme}
         text={homeText}
       />
-      <LolSubnav text={text} />
-      <main className="yoro-home-main" id="yoro-lol-home-main">
-        <LolHomeHero homeText={homeText} locale={locale} text={text} />
-        <HomeLiveSection
-          connected={twitchStatus.connected}
-          followedChannels={followedChannels}
-          onLoginOpen={() => setLoginOpen(true)}
-          text={homeText}
-          variant="lol"
+      <LolSubnav active="streamers" text={lolText} />
+      <main className="yoro-home-main" id="yoro-streamers-main">
+        <StreamersPageHead
+          count={twitchStatus.connected && followedChannels ? followedChannels.channels.length : undefined}
+          loading={twitchLoading}
+          onRefresh={() => void retryTwitch()}
+          text={text}
         />
-        <LolDataSection homeText={homeText} locale={locale} text={text} />
-        <LolParticipationBanner text={text} />
+        <StreamersBody
+          configured={twitchStatus.configured}
+          connected={twitchStatus.connected}
+          error={twitchError}
+          followed={followedChannels}
+          homeText={homeText}
+          loading={twitchLoading}
+          locale={locale}
+          onLoginOpen={() => setLoginOpen(true)}
+          onRetry={() => void retryTwitch()}
+          text={text}
+        />
       </main>
       <HomeFooter locale={locale} onLocale={handleLocale} text={homeText} />
-      <LolBottomTabBar text={text} />
+      <LolBottomTabBar active="streamers" text={lolText} />
       <HomeLoginModal
         onClose={() => setLoginOpen(false)}
         onTwitchLogin={startTwitchLogin}
@@ -94,4 +99,4 @@ export function PublicLolHomePage() {
   );
 }
 
-export default PublicLolHomePage;
+export default PublicLolStreamersPage;

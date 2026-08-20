@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 export type RecentMatchExpandedToolbarLocalizedText = {
   label: string;
   ko: string;
@@ -16,6 +18,8 @@ export type RecentMatchExpandedToolbarText = {
 export type RecentMatchExpandedToolbarProps = {
   activeView: RecentMatchExpandedToolbarView;
   hideRiotIds: boolean;
+  /* 다시보기 링크 — 모바일은 행의 액션 열이 접히므로 여기가 유일한 진입점입니다. */
+  replayAction?: ReactNode;
   text: RecentMatchExpandedToolbarText;
   onRecord: () => void;
   onBuild: () => void;
@@ -25,6 +29,7 @@ export type RecentMatchExpandedToolbarProps = {
 export function RecentMatchExpandedToolbar({
   activeView,
   hideRiotIds,
+  replayAction,
   text,
   onRecord,
   onBuild,
@@ -56,6 +61,7 @@ export function RecentMatchExpandedToolbar({
           {text.buildTab.label}
         </button>
       </div>
+      {replayAction}
       <button
         type="button"
         className={`public-md-mask ${hideRiotIds ? "is-active" : ""}`}

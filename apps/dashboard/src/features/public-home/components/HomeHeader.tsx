@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { PublicLocale } from "../../public-lol/i18n/public-lol-i18n";
 import { localizedPublicUrlForCurrentLocale } from "../../public-lol/utils/public-locale-path";
 import type { HomeText } from "../i18n/home-i18n";
@@ -153,7 +153,7 @@ export function HomeGamesMenuRows({ text, activeGame }: { text: HomeText; active
   );
 }
 
-export function HomeHeader({ text, locale, onLocale, onToggleTheme, accountName, connected, onLoginOpen, onLogout, onDashboard, activeGame }: {
+export function HomeHeader({ text, locale, onLocale, onToggleTheme, accountName, connected, onLoginOpen, onLogout, onDashboard, activeGame, searchSlot }: {
   text: HomeText;
   locale: PublicLocale;
   onLocale: (locale: PublicLocale) => void;
@@ -165,6 +165,8 @@ export function HomeHeader({ text, locale, onLocale, onToggleTheme, accountName,
   onDashboard: () => void;
   /* 게임 홈(예: /lol)에서는 게임 트리거가 현재 게임 이름 + 꼬리 밑줄로 바뀝니다(목업 v9). */
   activeGame?: HomeActiveGame;
+  /* 전적 상세 헤더의 컴팩트 검색바(목업 v26) — 우측 묶음 맨 앞에 놓입니다. */
+  searchSlot?: ReactNode;
 }) {
   const [openMenu, setOpenMenu] = useState<"games" | "lang" | "account" | null>(null);
   const rootRef = useRef<HTMLElement>(null);
@@ -233,6 +235,7 @@ export function HomeHeader({ text, locale, onLocale, onToggleTheme, accountName,
         <a className="yoro-home-nav-link" href={localizedPublicUrlForCurrentLocale("/bot")}>{text.navBot}</a>
       </nav>
       <div className="yoro-home-header-actions">
+        {searchSlot}
         <div className="yoro-home-menu-wrap">
           <button
             aria-expanded={openMenu === "lang"}

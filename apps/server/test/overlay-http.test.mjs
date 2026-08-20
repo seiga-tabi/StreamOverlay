@@ -1946,9 +1946,12 @@ test("공개 app shell은 crawler가 읽는 h1과 hreflang, JSON-LD를 함께 �
     await handler(createRequest("GET", "/ja/lol"), response);
     assert.equal(response.statusCode, 200);
     assert.match(response.body, /<html lang="ja"/u);
-    assert.match(response.body, /<link rel="alternate" hreflang="x-default" href="https:\/\/yoro\.gg\/ko\/lol" \/>/u);
+    /* /lol 은 영어 카피가 생겨 en 을 서빙합니다 — x-default 는 "언어가 맞지 않는
+       방문자에게 보일 판"이라 영어판이 있으면 그쪽입니다(팰월드와 같은 규칙). */
+    assert.match(response.body, /<link rel="alternate" hreflang="en" href="https:\/\/yoro\.gg\/en\/lol" \/>/u);
+    assert.match(response.body, /<link rel="alternate" hreflang="x-default" href="https:\/\/yoro\.gg\/en\/lol" \/>/u);
     assert.match(response.body, /<div id="root"><div class="seo-fallback"/u);
-    assert.match(response.body, /<h1>LoL戦績検索<\/h1>/u);
+    assert.match(response.body, /<h1>YORO\.gg — LoL戦績、検索ひとつで<\/h1>/u);
     assert.doesNotMatch(response.body, /<div id="root"><\/div>/u);
 
     // JSON-LD script도 정적 script와 같은 nonce로 치환되어야 CSP에서 실행 차단되지 않는다.

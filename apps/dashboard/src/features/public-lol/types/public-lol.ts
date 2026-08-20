@@ -156,6 +156,9 @@ export type PublicLolRecentMatch = {
   mapId?: number;
   startedAt?: string;
   durationSeconds?: number;
+  /* 다시보기 점프 지점(서버 twitch-vod-index). 스트리머 연동 프로필이고 그 경기를
+     담은 Twitch 아카이브가 남아 있을 때만 옵니다 — 없으면 버튼을 그리지 않습니다. */
+  replay?: { vodId: string; offsetSeconds: number };
   result: "win" | "loss" | "unknown";
   kills: number;
   deaths: number;
@@ -583,7 +586,7 @@ export type PublicExpandedMatchView = "record" | "build";
 
 export type PublicTheme = "light" | "dark";
 
-export type MatchQueueFilter = "all" | "solo" | "flex" | "ranked5v5" | "normal" | "aram" | "aramMayhem";
+export type MatchQueueFilter = "all" | "solo" | "flex" | "ranked5v5" | "normal" | "arena" | "aram" | "aramMayhem";
 
 export type MatchPeriodFilter = "all" | "7d" | "30d";
 

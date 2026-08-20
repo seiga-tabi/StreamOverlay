@@ -360,9 +360,7 @@ export type {
 } from "./components/StreamerPanels";
 export { streamerBuckets, type StreamerBuckets, type StreamerFilter } from "./utils/streamers";
 
-export { MatchLaneCompare } from "./components/MatchLaneCompare";
-export type { LaneRowView, LaneSideView, MatchGapCard, MatchLaneCompareText } from "./components/MatchLaneCompare";
 export { MatchBuildBoard } from "./components/MatchBuildBoard";
 export type { BuildItemStep, BuildParticipantChip, BuildSkillRow, MatchBuildBoardProps } from "./components/MatchBuildBoard";
-export { buildTimestampLabel, matchGap, matchLanePairs, matchUsesFarmMetrics } from "./utils/match-lanes";
-export type { LanePair, MatchGap } from "./utils/match-lanes";
+export { buildTimestampLabel, matchGap, matchUsesFarmMetrics } from "./utils/match-lanes";
+export type { MatchGap } from "./utils/match-lanes";

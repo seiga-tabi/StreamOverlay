@@ -30,6 +30,8 @@ export type RecentMatchRowMetric = {
 export type RecentMatchRowTeamMember = {
   key: string;
   label: string;
+  /* 아이콘 옆에 표기되는 Riot ID(마스킹 반영) — 목업 v30. 없으면 아이콘만. */
+  name?: string;
   isTarget?: boolean;
   content: ReactNode;
 };
@@ -75,6 +77,9 @@ export type RecentMatchRowProps = {
   trinketSlot?: RecentMatchRowMediaItem;
   itemsLabel: string;
   teams?: RecentMatchRowTeams;
+  /* 다시보기 링크(목업 v27 행 ⑦ 액션) — 스트리머 프로필에서 VOD 가 잡힌 경기만.
+     확장 캐럿과 같은 액션 열에 세로로 붙습니다. */
+  replayAction?: ReactNode;
   expandAriaLabel: string;
   expandedPanel?: ReactNode;
   onToggleExpand: () => void;
@@ -127,6 +132,7 @@ export function RecentMatchRow({
   trinketSlot,
   itemsLabel,
   teams,
+  replayAction,
   expandAriaLabel,
   expandedPanel,
   onToggleExpand
@@ -152,6 +158,7 @@ export function RecentMatchRow({
           title={member.label}
         >
           {member.content}
+          {member.name ? <em className="public-match-card-team-name">{member.name}</em> : null}
         </span>
       ))}
     </div>
@@ -296,20 +303,24 @@ export function RecentMatchRow({
           </div>
         ) : null}
 
-        <button
-          type="button"
-          className="public-match-card-expand"
-          aria-expanded={expanded}
-          aria-label={expandAriaLabel}
-          onClick={(event) => {
-            // 요약 영역 핸들러와 중복 실행되지 않도록 버튼에서 전파를 끊습니다.
-            event.stopPropagation();
-            onToggleExpand();
-          }}
-        >
-          <span aria-hidden="true" className="public-match-card-expand-icon" />
-          <span className="public-match-card-expand-label" role="tooltip">{expandAriaLabel}</span>
-        </button>
+        {/* 액션 열 — grid 자식 수(7)를 유지하려고 다시보기와 캐럿을 한 셀에 묶습니다. */}
+        <div className="public-match-card-actions">
+          {replayAction}
+          <button
+            type="button"
+            className="public-match-card-expand"
+            aria-expanded={expanded}
+            aria-label={expandAriaLabel}
+            onClick={(event) => {
+              // 요약 영역 핸들러와 중복 실행되지 않도록 버튼에서 전파를 끊습니다.
+              event.stopPropagation();
+              onToggleExpand();
+            }}
+          >
+            <span aria-hidden="true" className="public-match-card-expand-icon" />
+            <span className="public-match-card-expand-label" role="tooltip">{expandAriaLabel}</span>
+          </button>
+        </div>
       </div>
 
       {expanded ? expandedPanel : null}

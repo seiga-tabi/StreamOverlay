@@ -159,6 +159,7 @@ import {
 } from "@streamops/shared";
 import type { ReactionRecordsRepository } from "../database/repositories/reaction-records-repository.js";
 import { StreamerBoardChannelService, twitchLoginForChannelKey } from "../services/streamer-board-channels.js";
+import { TwitchVodIndex, parseTwitchVods, type MatchReplay } from "../services/twitch-vod-index.js";
 import {
   StreamerChannelTakenError,
   type StreamerBoardCommentRow,
@@ -700,6 +701,9 @@ type PublicLolRecentMatch = {
   mapId?: number;
   startedAt?: string;
   durationSeconds?: number;
+  /* 다시보기 점프 지점. 스트리머로 연동된 프로필이고 그 경기를 담은 아카이브가
+     남아 있을 때만 붙습니다 — 없으면 화면이 버튼을 그리지 않습니다. */
+  replay?: MatchReplay;
   result: "win" | "loss" | "unknown";
   kills: number;
   deaths: number;
@@ -4443,6 +4447,35 @@ export function createHttpHandler(input: HttpHandlerInput) {
     });
   }
 
+  /* 경기 → 다시보기 점프. 목록은 채널별로 캐시하고 실패는 "없음"으로 떨어집니다. */
+  const twitchVodIndex = new TwitchVodIndex({
+    videosFor: async (twitchUserId) =>
+      parseTwitchVods(await input.twitch?.getArchiveVideosByUserId(twitchUserId))
+  });
+
+  /**
+   * 경기 목록에 다시보기 지점을 붙입니다.
+   *
+   * 스트리머로 연동되지 않은 프로필은 그냥 원본을 돌려줍니다 — 대부분의 프로필이
+   * 여기에 해당하므로 Twitch 를 부르지도 않습니다.
+   */
+  async function withPublicLolReplays(
+    matches: PublicLolRecentMatch[],
+    gameName: string,
+    tagLine: string
+  ): Promise<PublicLolRecentMatch[]> {
+    if (matches.length === 0 || !input.twitch) return matches;
+    const stream = await buildPublicLolTwitchStream(gameName, tagLine).catch(() => undefined);
+    if (!stream?.twitchUserId) return matches;
+    const replays = await twitchVodIndex
+      .replaysFor(stream.twitchUserId, matches.map((match) => match.startedAt))
+      .catch(() => matches.map(() => undefined));
+    return matches.map((match, index) => {
+      const replay = replays[index];
+      return replay ? { ...match, replay } : match;
+    });
+  }
+
   async function buildPublicLolTwitchStream(gameName: string, tagLine: string): Promise<PublicLolTwitchStream | undefined> {
     const riotIdKey = normalizeRiotIdKey(gameName, tagLine);
     const candidates = new Map<string, PublicLolTwitchCandidate>();
@@ -7494,7 +7527,13 @@ export function createHttpHandler(input: HttpHandlerInput) {
     const matchContentResolvedAt = Date.now();
     const matches = matchPage.rawMatches;
 
-    const visibleRecentMatches = matchPage.recentMatches;
+    /* 프로필 첫 화면의 경기 목록에도 다시보기를 붙입니다 — 더 보기로 받은 다음
+       페이지에만 버튼이 생기면 같은 목록에서 행마다 달라 보입니다. */
+    const visibleRecentMatches = await withPublicLolReplays(
+      matchPage.recentMatches,
+      account.gameName || parsed.gameName,
+      account.tagLine || parsed.tagLine
+    );
     const recentWins = visibleRecentMatches.filter((match) => match.result === "win").length;
     const recentKills = visibleRecentMatches.reduce((sum, match) => sum + match.kills, 0);
     const recentDeaths = visibleRecentMatches.reduce((sum, match) => sum + match.deaths, 0);
@@ -7755,6 +7794,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
       routing,
       queueFilter
     );
+    const recentMatches = await withPublicLolReplays(
+      matchPage.recentMatches,
+      account.gameName || parsed.gameName,
+      account.tagLine || parsed.tagLine
+    );
     const response: PublicLolMatchPageResponse = {
       status: "ready",
       riotId: `${account.gameName || parsed.gameName}#${account.tagLine || parsed.tagLine}`,
@@ -7762,7 +7806,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       tagLine: account.tagLine || parsed.tagLine,
       accountRegion: routing.accountRegion,
       lolPlatform: routing.lolPlatform,
-      recentMatches: matchPage.recentMatches,
+      recentMatches,
       recentMatchStart: matchPage.recentMatchStart,
       nextRecentMatchStart: matchPage.nextRecentMatchStart,
       hasMoreRecentMatches: matchPage.hasMoreRecentMatches,
@@ -7772,7 +7816,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
       type: "public_lol.match_page_built",
       queueFilter,
       recentMatchStart: matchPage.recentMatchStart,
-      matchCount: matchPage.recentMatches.length,
+      matchCount: recentMatches.length,
+      replayCount: recentMatches.filter((match) => match.replay).length,
       identitySource: canReuseVerifiedIdentity ? "profile_cache" : "riot_api",
       durationMs: Date.now() - startedAt
     });

@@ -1,3 +1,10 @@
+import "../styles/pages/home/01-public-home.css";
+import "../styles/pages/home/02-lol-home.css";
+import { HomeHeader } from "../features/public-home/components/HomeHeader";
+import { LolSubnav } from "../features/public-home/components/LolHomeSections";
+import { LolBottomTabBar } from "../features/public-home/components/HomeTabBar";
+import { homeI18n } from "../features/public-home/i18n/home-i18n";
+import { lolHomeI18n } from "../features/public-home/i18n/lol-home-i18n";
 import { Fragment, useEffect, useId, useMemo, useRef, useState, type FormEvent, type MouseEvent, type ReactNode } from "react";
 import {
   normalizeLolPlatformId,
@@ -38,7 +45,7 @@ import { withLolDailySummaryBars } from "../features/public-lol/components/LolDa
 import { LolAugmentIcon } from "../features/public-lol/components/LolAugmentIcon";
 import { publicLiveText } from "../shared/public-live-streamers";
 import { streamerBuckets, type StreamerFilter } from "../features/public-lol/utils/streamers";
-import { arenaPlacementClass, isArenaQueue, matchGap, matchLanePairs, type LanePair } from "../features/public-lol/utils/match-lanes";
+import { arenaPlacementClass, isArenaQueue, matchGap } from "../features/public-lol/utils/match-lanes";
 import {
   ProfileShareActions,
   type ProfileShareCard,
@@ -113,7 +120,6 @@ import {
   MatchTeamCompare as FeatureMatchTeamCompare,
   MatchBuildBoard as FeatureMatchBuildBoard,
   RecentMatchBuildRuneBoard as FeatureRecentMatchBuildRuneBoard,
-  MatchLaneCompare as FeatureMatchLaneCompare,
   MatchTeamDetails as FeatureMatchTeamDetails,
   LpTrendLineChart,
   RecentMatchBuildPanel as FeatureRecentMatchBuildPanel,
@@ -144,8 +150,6 @@ import {
   type MatchTeamCompareObjectiveViewModel,
   type MatchTeamCompareTeamViewModel,
   type MatchTeamCompareViewModel,
-  type LaneSideView,
-  type MatchGapCard,
   type MatchTeamDetailsTeam,
   type PlayerItemBuildSlotViewModel,
   type PlayerItemBuildViewModel,
@@ -1191,6 +1195,15 @@ function publicTeamMetricStatViewModel({
   };
 }
 
+/* Twitch 링크 t 파라미터("1h02m03s") — 서버 twitch-vod-index 와 같은 표기입니다. */
+function replayTimestampParam(offsetSeconds: number): string {
+  const safe = Math.max(0, Math.trunc(offsetSeconds));
+  const hours = Math.floor(safe / 3600);
+  const minutes = Math.floor((safe % 3600) / 60);
+  const seconds = safe % 60;
+  return `${hours}h${String(minutes).padStart(2, "0")}m${String(seconds).padStart(2, "0")}s`;
+}
+
 function playerDisplayName(player: PublicLolMatchParticipant): string {
   return player.riotId ?? championName(player.champion);
 }
@@ -1626,6 +1639,44 @@ function profileHeroRankQueue(
   };
 }
 
+/* 최근 20경기 요약 바 — 목업 page-4: 랭크 3카드 아래 전폭 한 줄.
+   [최근 N경기 | 승률 | X승 Y패 | · KDA · K/D/A | · 킬관여]. 승/패만 전용색. */
+function ProfileRecentSummaryBar({ profile }: { profile: PublicLolProfile }) {
+  const summary = profile.summary;
+  if (!summary || summary.recentGames <= 0) return null;
+  const games = summary.recentGames;
+  const losses = Math.max(0, games - summary.recentWins);
+  const winLabel = activePublicLocale === "ja" ? "勝" : "승";
+  const lossLabel = activePublicLocale === "ja" ? "敗" : "패";
+  const per = (total: number) => (total / games).toFixed(1);
+  return (
+    <div className="public-hero-summary-bar">
+      <span className="public-hero-summary-bar-label">{gamesText(games)}</span>
+      <b>{formatPercent(summary.recentWinRate)}</b>
+      <span className="public-hero-summary-bar-record">
+        <em>{summary.recentWins}{winLabel}</em>
+        {" "}
+        <i>{losses}{lossLabel}</i>
+      </span>
+      {summary.averageKda !== undefined ? (
+        <>
+          <span aria-hidden="true" className="public-hero-summary-bar-dot">·</span>
+          <span>
+            KDA <b>{summary.averageKda.toFixed(2)}</b>
+            {` · ${per(summary.totalKills)} / ${per(summary.totalDeaths)} / ${per(summary.totalAssists)}`}
+          </span>
+        </>
+      ) : null}
+      {summary.averageKillParticipation !== undefined ? (
+        <>
+          <span aria-hidden="true" className="public-hero-summary-bar-dot">·</span>
+          <span>{t().killParticipation} {formatPercent(summary.averageKillParticipation)}</span>
+        </>
+      ) : null}
+    </div>
+  );
+}
+
 function profileHeroRankQueues(profile: PublicLolProfile): ProfileHeroRankQueue[] {
   return [
     profileHeroRankQueue("solo", t().soloRank, soloRankStats(profile)),
@@ -1878,10 +1929,12 @@ function ProfileTopPanel({
       onRefresh={onRefresh}
       onToggleFavorite={onToggleFavorite}
       mainRoleLabel={profile.roleAnalysis ? mainRoleLabel(profile.roleAnalysis.mainRole) : undefined}
+      serverChipLabel={PUBLIC_LOL_PLATFORM_OPTIONS.find((option) => option.id === normalizeLolPlatformId(profile.lolPlatform))?.code}
       profileIconUrl={streamerProfileIconUrl ?? assetUrl(profile.profileIconUrl)}
       profileMetaLabel={undefined}
       profileLinks={<ProfileLinkIcons links={profileLinks} />}
       rankSection={(
+        <>
         <FeatureProfileHeroRank
           activeQueueId={selectedRankQueueId}
           onSelectQueue={setActiveRankQueue}
@@ -1895,6 +1948,8 @@ function ProfileTopPanel({
           }}
           trend={heroTrend}
         />
+        <ProfileRecentSummaryBar profile={profile} />
+        </>
       )}
       channelAriaLabel={registeredStreamerStream ? `${registeredStreamerStream.twitchDisplayName} · ${t().streamerWatch}` : undefined}
       liveStatus={registeredStreamerStream ? {
@@ -1905,6 +1960,14 @@ function ProfileTopPanel({
       } : undefined}
       channelName={registeredStreamerStream?.twitchDisplayName}
       channelUrl={registeredStreamerStream?.channelUrl}
+      recentFormLabel={registeredStreamerStream ? t().recent20Games : undefined}
+      recentFormResults={registeredStreamerStream
+        ? (profile.recentMatches ?? [])
+          .filter((entry): entry is typeof entry & { result: "win" | "loss" } =>
+            entry.result === "win" || entry.result === "loss")
+          .slice(0, 10)
+          .map((entry) => entry.result)
+        : undefined}
       streamerCast={streamerCast}
       summonerLevelAriaLabel={profile.summonerLevel ? `${t().profileSummonerLevel} ${profile.summonerLevel}` : undefined}
       summonerLevelLabel={profile.summonerLevel ? `Lv.${formatNumber(profile.summonerLevel)}` : undefined}
@@ -2007,20 +2070,18 @@ function PublicMoreFeatures() {
 
 function PublicProfileTabs({
   activeTab,
-  onChange,
-  onParticipation
+  onChange
 }: {
   activeTab: PublicProfileTab;
   onChange: (tab: PublicProfileTab) => void;
-  onParticipation: () => void;
 }) {
-  /* 통계는 목업 lol-signature-builds v5 부터 사이드바 스크롤이 아니라 본문 탭입니다. */
+  /* 통계는 목업 lol-signature-builds v5 부터 사이드바 스크롤이 아니라 본문 탭입니다.
+     참여는 프로필 탭이 아니라 상단 메뉴(시청자 참여)가 전담합니다 — 목업 v25. */
   return (
     <nav className="public-profile-hero-nav" aria-label={t().profileSummary}>
       <button type="button" aria-current={activeTab === "overview" ? "page" : undefined} onClick={() => onChange("overview")}>{t().matchHistoryTab}</button>
       <button type="button" aria-current={activeTab === "champions" ? "page" : undefined} onClick={() => onChange("champions")}>{t().championAnalysis}</button>
       <button type="button" aria-current={activeTab === "ingame" ? "page" : undefined} onClick={() => onChange("ingame")}>{t().ingame}</button>
-      <button type="button" onClick={onParticipation}>{t().participationHeaderNav}</button>
       <button type="button" aria-current={activeTab === "stats" ? "page" : undefined} onClick={() => onChange("stats")}>{t().stats}</button>
     </nav>
   );
@@ -2722,12 +2783,12 @@ function PublicFilterPanel({
         <span  >{t().queueFilter}</span>
         <select value={filters.queue} onChange={(event) => onChange({ ...filters, queue: event.target.value as MatchQueueFilter })}>
           <option value="all">{t().allQueues}</option>
+          <option value="normal">{t().normalQueue}</option>
           <option value="solo">{t().soloQueue}</option>
           <option value="flex">{t().flexQueue}</option>
           <option value="ranked5v5">{t().ranked5v5}</option>
-          <option value="normal">{t().normalQueue}</option>
+          <option value="arena">{t().arenaQueue}</option>
           <option value="aram">{t().aramQueue}</option>
-          <option value="aramMayhem">{t().aramMayhemQueue}</option>
         </select>
       </label>
       <ChampionFilterSelect
@@ -2808,8 +2869,8 @@ function PublicMatchFilterBar({
     flexQueue: t().flexQueue,
     ranked5v5: t().ranked5v5,
     normalQueue: t().normalQueue,
+    arenaQueue: t().arenaQueue,
     aramQueue: t().aramQueue,
-    aramMayhemQueue: t().aramMayhemQueue,
     allChampions: t().allChampions,
     periodAll: t().periodAll,
     period7: t().period7,
@@ -5028,103 +5089,42 @@ function teamChampionAvatarViewModel(
   };
 }
 
-function MatchLaneCompareView({
-  match,
-  rankDetail,
-  rankLoading,
-  hideRiotIds,
-  onSearchRiotId
-}: {
-  match: PublicLolRecentMatch;
-  rankDetail?: PublicLolMatchRankResponse;
-  rankLoading?: boolean;
-  hideRiotIds: boolean;
-  onSearchRiotId: (riotId: string) => void;
-}) {
-  const pairs = matchLanePairs(match);
+/* 팀 격차 스트립 — 골드·딜·오브젝트 격차와 내 순위(목업 v28 요약 카드).
+   기존 라인 비교의 gap 카드 문법(public-md-gap)을 그대로 승계합니다. */
+type MatchGapCard = { key: string; label: string; tone?: "up" | "down" | "flat"; value: string };
+
+function MatchGapStrip({ match }: { match: PublicLolRecentMatch }) {
   const gap = matchGap(match);
-  if (pairs.length === 0) return null;
-
-  const positionLabel = (position: LanePair["position"], index: number) =>
-    position === "UNKNOWN" ? String(index + 1) : mainRoleLabel(position);
-
-  const side = (
-    player: PublicLolMatchParticipant | undefined,
-    teamId: number,
-    index: number
-  ): LaneSideView | undefined => {
-    if (!player) return undefined;
-    const rankedStats = matchRankForPlayer(rankDetail, teamId, player, index);
-    const name = hideRiotIds ? t().riotIdMasked : player.riotId ?? championName(player.champion);
-    return {
-      championIcon: player.champion.iconUrl
-        ? <img alt="" src={assetUrl(player.champion.iconUrl)} />
-        : undefined,
-      championName: championName(player.champion),
-      isTarget: player.isTarget,
-      /* slot 6은 장신구(와드)입니다. 라인 비교의 남는 폭은 장비 6칸 기준으로
-         계산돼 있어(44rem 부근에서 7칸이면 넘칩니다) 장신구는 뺍니다. */
-      items: player.items
-        .filter((item) => item.slot !== 6 && item.iconUrl)
-        .map((item) => ({
-          key: `${match.matchId}:lane-item:${teamId}:${index}:${item.slot}:${item.itemId}`,
-          iconUrl: assetUrl(item.iconUrl as string),
-          label: activePublicLocale === "ja" ? item.nameJa ?? item.nameKo : item.nameKo ?? item.nameJa
-        })),
-      kdaLabel: `${player.kills}/${player.deaths}/${player.assists}`,
-      name,
-      onSearch: !hideRiotIds && player.riotId ? () => onSearchRiotId(player.riotId as string) : undefined,
-      rankLabel: rankedStats ? rankTierLabel(rankedStats) : undefined,
-      rankShortLabel: matchRankBadgeLabel(rankedStats, rankLoading),
-      rankTier: rankedStats?.tier ? rankedStats.tier.toLocaleLowerCase() : "unranked"
-    };
-  };
-
-  const allyTeamId = match.teams.find((team) => team.players.some((player) => player.isTarget))?.teamId
-    ?? match.teams[0]?.teamId ?? 100;
-  const enemyTeamId = match.teams.find((team) => team.teamId !== allyTeamId)?.teamId ?? 200;
-
+  if (!gap) return null;
   const signed = (value: number) => `${value > 0 ? "+" : ""}${formatNumber(value)}`;
   const tone = (value: number) => (value > 0 ? "up" as const : value < 0 ? "down" as const : "flat" as const);
-  const gapCards: MatchGapCard[] = gap
-    ? [
-      { key: "gold", label: t().goldGap, tone: tone(gap.gold), value: signed(gap.gold) },
-      { key: "damage", label: t().damageGap, tone: tone(gap.damage), value: signed(gap.damage) },
-      {
-        key: "objective",
-        label: t().objectiveGap,
-        tone: tone(gap.objectives.ally - gap.objectives.enemy),
-        value: `${formatNumber(gap.objectives.ally)} : ${formatNumber(gap.objectives.enemy)}`
-      },
-      ...(gap.myRank
-        ? [{
-          key: "rank",
-          label: t().myTeamRank,
-          value: t().teamRankValue.replace("{rank}", String(gap.myRank)).replace("{total}", String(gap.teamSize))
-        }]
-        : [])
-    ]
-    : [];
-
+  const gapCards: MatchGapCard[] = [
+    { key: "gold", label: t().goldGap, tone: tone(gap.gold), value: signed(gap.gold) },
+    { key: "damage", label: t().damageGap, tone: tone(gap.damage), value: signed(gap.damage) },
+    {
+      key: "objective",
+      label: t().objectiveGap,
+      tone: tone(gap.objectives.ally - gap.objectives.enemy),
+      value: `${formatNumber(gap.objectives.ally)} : ${formatNumber(gap.objectives.enemy)}`
+    },
+    ...(gap.myRank
+      ? [{
+        key: "rank",
+        label: t().myTeamRank,
+        value: t().teamRankValue.replace("{rank}", String(gap.myRank)).replace("{total}", String(gap.teamSize))
+      }]
+      : [])
+  ];
+  if (gapCards.length === 0) return null;
   return (
-    <FeatureMatchLaneCompare
-      gapCards={gapCards}
-      rows={pairs.map((pair, index) => ({
-        ally: side(pair.ally, allyTeamId, index),
-        damageShare: pair.damageShare,
-        enemy: side(pair.enemy, enemyTeamId, index),
-        goldShare: pair.goldShare,
-        key: `${match.matchId}:lane:${pair.position}:${index}`,
-        positionLabel: positionLabel(pair.position, index)
-      }))}
-      text={{
-        ariaLabel: t().matchLaneCompare,
-        damageLabel: t().damage,
-        emptySlotLabel: t().noData,
-        goldLabel: t().gold,
-        itemsLabel: t().items
-      }}
-    />
+    <dl className="public-md-gap">
+      {gapCards.map((card) => (
+        <div key={card.key}>
+          <dt>{card.label}</dt>
+          <dd data-tone={card.tone ?? "flat"}>{card.value}</dd>
+        </div>
+      ))}
+    </dl>
   );
 }
 
@@ -5156,8 +5156,15 @@ function MatchTeamDetails({
     return {
       key: `${match.matchId}:${team.teamId}`,
       className: `public-team-card ${team.players.some((player) => player.isTarget) ? "ally" : "enemy"}`,
-      label: teamLabel(team),
-      resultSummary: `${resultLabel(team.result)} · ${team.kills}/${team.deaths}/${team.assists}`,
+      /* 목업 v28 팀 헤더는 진영명(블루/레드) — 아군 여부는 테두리 대신 본인 행 강조로 구분. */
+      label: team.teamId === 100 ? t().blueTeam : team.teamId === 200 ? t().redTeam : teamLabel(team),
+      /* 결과 단어만 승/패 전용색 — 합계 KDA 는 무채(목업 v28 팀 헤더). */
+      resultSummary: (
+        <>
+          <b className={`public-team-result ${team.result}`}>{resultLabel(team.result)}</b>
+          {` · ${team.kills}/${team.deaths}/${team.assists}`}
+        </>
+      ),
       summary: (
         <>
           {t().totalGold} {formatNumber(team.goldEarned)} · {t().totalDamage} {formatNumber(team.damageDealtToChampions)} · {t().totalKill} {formatNumber(team.kills)}
@@ -5617,9 +5624,13 @@ function RecentMatches({
           const compositionTeams = (hydratedMatch.teams ?? []).filter((team) => team.players.length > 0);
           const targetTeamId = compositionTeams
             .find((team) => team.players.some((player) => player.isTarget))?.teamId;
+          /* 팀원 열에 Riot ID 병기(목업 v30) — 가리기 ON이면 마스킹, 없으면 챔피언명. */
+          const teamMemberName = (riotId: string | undefined, fallback: string): string =>
+            hideRiotIds ? maskedRiotIdName(riotId, fallback) : splitRiotId(riotId, fallback).name;
           const teamMember = (player: PublicLolMatchParticipant, side: string, index: number): RecentMatchRowTeamMember => ({
             key: `${match.matchId}:${side}:${index}:${player.champion.championId}`,
             label: player.isTarget ? `${t().matchTeamSelf} · ${championName(player.champion)}` : championName(player.champion),
+            name: teamMemberName(player.riotId, championName(player.champion)),
             isTarget: player.isTarget,
             content: player.champion.iconUrl
               ? <img src={player.champion.iconUrl} alt="" />
@@ -5637,6 +5648,7 @@ function RecentMatches({
               allies: arenaMyTeam.players.map((player, index): RecentMatchRowTeamMember => ({
                 key: `${match.matchId}:arena:ally:${index}`,
                 label: player.isTarget ? `${t().matchTeamSelf} · ${championName(player.champion)}` : championName(player.champion),
+                name: teamMemberName(player.riotId, championName(player.champion)),
                 isTarget: player.isTarget,
                 content: player.champion.iconUrl
                   ? <img src={player.champion.iconUrl} alt="" />
@@ -5677,10 +5689,11 @@ function RecentMatches({
           const recordContent = arena && match.arenaTeams && match.arenaTeams.length > 0 ? (
             <ArenaStandings hideRiotIds={hideRiotIds} teams={match.arenaTeams} />
           ) : (hydratedMatch.teams?.length ?? 0) > 0 ? (
-            <>
-              <MatchLaneCompareView match={hydratedMatch} rankDetail={rankDetail} rankLoading={rankLoading} hideRiotIds={hideRiotIds} onSearchRiotId={onSearchRiotId} />
+            <div className="public-md-record">
+              <MatchGapStrip match={hydratedMatch} />
+              <MatchTeamDetails match={hydratedMatch} rankDetail={rankDetail} rankLoading={rankLoading} hideRiotIds={hideRiotIds} onSearchRiotId={onSearchRiotId} />
               {rankError ? <FormError role="status">{rankError}</FormError> : null}
-            </>
+            </div>
           ) : detailLoading ? (
             <SkeletonCard loadingLabel={t().matchDetailLoading} size="md">
               <SkeletonText lines={4} />
@@ -5697,9 +5710,36 @@ function RecentMatches({
               </EmptyStateActions>
             </EmptyState>
           ) : null;
+          /* 다시보기(목업 v27 행 ⑦ + v34 구현 노트) — 서버가 replay 를 준 경기만.
+             행 요약은 클릭이 확장 토글이라 전파를 끊습니다. */
+          const replayHref = match.replay
+            ? `https://www.twitch.tv/videos/${encodeURIComponent(match.replay.vodId)}?t=${replayTimestampParam(match.replay.offsetSeconds)}`
+            : undefined;
+          const rowReplayAction = replayHref ? (
+            <a
+              className="public-match-card-replay"
+              href={replayHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={t().watchReplay}
+              title={t().watchReplay}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <svg aria-hidden="true" fill="none" height="12" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 16 16" width="12">
+                <path d="M4.5 2.5 L 12.5 8 L 4.5 13.5 Z" />
+              </svg>
+            </a>
+          ) : undefined;
+          const panelReplayAction = replayHref ? (
+            <a className="public-md-replay" href={replayHref} rel="noopener noreferrer" target="_blank">
+              {t().watchReplay}
+              <span aria-hidden="true"> ↗</span>
+            </a>
+          ) : undefined;
           const expandedPanel = expanded ? (
             <FeatureRecentMatchExpandedPanel
               activeView={expandedView}
+              replayAction={panelReplayAction}
               content={expandedView === "record" ? recordContent : (
                 <RecentMatchBuildPanel
                   match={match}
@@ -5739,6 +5779,7 @@ function RecentMatches({
               championLevelLabel={formatNumber(match.championLevel)}
               expanded={expanded}
               expandedPanel={expandedPanel}
+              replayAction={rowReplayAction}
               expandAriaLabel={expanded ? t().collapseMatch : t().expandMatch}
               highlightClass={highlightClass}
               itemSlots={inlineItemSlots}
@@ -5767,7 +5808,8 @@ function RecentMatches({
               result={arena ? `arena ${arenaPlacementClass(arenaPlacement)}` : match.result}
               resultDurationLabel={formatDuration(match.durationSeconds)}
               resultLabel={arena ? t().arenaPlacement.replace("{n}", String(arenaPlacement)) : resultLabel(match.result)}
-              resultShortLabel={arena ? t().arenaPlacement.replace("{n}", String(arenaPlacement)) : resultShortLabel(match.result)}
+              /* 목업 행 결과열은 배지가 아니라 전용색 단어(승리/패배) — 축약형 대신 전체 라벨. */
+              resultShortLabel={arena ? t().arenaPlacement.replace("{n}", String(arenaPlacement)) : resultLabel(match.result)}
               scoreAriaLabel={`${t().aggregateGrade} ${scoreGrade}`}
               scoreClassName={metricToneClass(scoreTone(aiScore))}
               scoreGrade={scoreGrade}
@@ -6846,6 +6888,18 @@ export function PublicLolPage({
     }, 0);
   }
 
+  /* 헤더 메뉴·하단 탭의 '홈'은 루트 메인 홈(/)으로 나갑니다 — LoL 홈(/lol)이 아니라.
+     경로가 바뀌면 App 이 publicroutechange 로 재평가해 PublicHomePage 를 그립니다.
+     증강 필터 → 전적처럼 화면 안에서 검색 뷰로 돌아오는 흐름은 이 함수를 거치지 않고
+     changeMainPage("search")를 그대로 씁니다(로고 클릭도 LoL 홈 유지). */
+  function navigateFromMenu(page: PublicMainPage): void {
+    if (page === "search") {
+      setPublicPath("/");
+      return;
+    }
+    changeMainPage(page);
+  }
+
   async function disconnectTwitchViewer(): Promise<void> {
     await logoutPublicTwitch();
     setTwitchStatus({
@@ -7208,7 +7262,7 @@ export function PublicLolPage({
             onClear={clearSearch}
             onSubmit={(event) => void submit(event)}
             onPickSuggestion={pickSuggestion}
-            onPage={changeMainPage}
+            onPage={navigateFromMenu}
             onLocale={changeLocale}
             onAutoLocale={autoDetectLocale}
             onTwitchLogin={startTwitchLogin}
@@ -7230,8 +7284,8 @@ export function PublicLolPage({
             }}
           />
         </AppShellMain>
-        <PublicBottomTabBar activePage={activeMainPage} activeTarget={activeNav} onPage={changeMainPage} />
-        <PublicSiteFooter onPage={changeMainPage} text={publicSiteFooterText()} />
+        <PublicBottomTabBar activePage={activeMainPage} activeTarget={activeNav} onPage={navigateFromMenu} />
+        <PublicSiteFooter onPage={navigateFromMenu} text={publicSiteFooterText()} />
         <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
       </AppShell>
     );
@@ -7271,7 +7325,7 @@ export function PublicLolPage({
             onClear={clearSearch}
             onSubmit={(event) => void submit(event)}
             onPickSuggestion={pickSuggestion}
-            onPage={changeMainPage}
+            onPage={navigateFromMenu}
             onLocale={changeLocale}
             onAutoLocale={autoDetectLocale}
             onTwitchLogin={startTwitchLogin}
@@ -7287,7 +7341,7 @@ export function PublicLolPage({
             liveLoading={followedLoading || twitchOAuthSettling}
             liveStreamers={homeLiveStreamers}
             loading={loading}
-            onPage={changeMainPage}
+            onPage={navigateFromMenu}
             onShowStreamers={() => changeMainPage("subscriptions")}
             searchForm={
               <SearchForm
@@ -7328,8 +7382,8 @@ export function PublicLolPage({
             text={publicHomeSearchPanelText(selectedLolPlatform, locale)}
           />
         </AppShellMain>
-        <PublicBottomTabBar activePage={activeMainPage} activeTarget={activeNav} onPage={changeMainPage} />
-        <PublicSiteFooter onPage={changeMainPage} text={publicSiteFooterText()} />
+        <PublicBottomTabBar activePage={activeMainPage} activeTarget={activeNav} onPage={navigateFromMenu} />
+        <PublicSiteFooter onPage={navigateFromMenu} text={publicSiteFooterText()} />
         <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
       </AppShell>
     );
@@ -7368,7 +7422,7 @@ export function PublicLolPage({
             onClear={clearSearch}
             onSubmit={(event) => void submit(event)}
             onPickSuggestion={pickSuggestion}
-            onPage={changeMainPage}
+            onPage={navigateFromMenu}
             onLocale={changeLocale}
             onAutoLocale={autoDetectLocale}
             onTwitchLogin={startTwitchLogin}
@@ -7390,8 +7444,8 @@ export function PublicLolPage({
             </div>
           </div>
         </AppShellMain>
-        <PublicBottomTabBar activePage={activeMainPage} activeTarget={activeNav} onPage={changeMainPage} />
-        <PublicSiteFooter onPage={changeMainPage} text={publicSiteFooterText()} />
+        <PublicBottomTabBar activePage={activeMainPage} activeTarget={activeNav} onPage={navigateFromMenu} />
+        <PublicSiteFooter onPage={navigateFromMenu} text={publicSiteFooterText()} />
         <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
       </AppShell>
     );
@@ -7408,40 +7462,40 @@ export function PublicLolPage({
       skipLinkLabel={t().skipToContent}
       variant="public"
     >
-      <AppShellHeader as="div" className="public-profile-shared-header public-standard-header-frame">
-        <PublicAppHeader
+      {/* 상단 크롬 — 목업 page-4: 홈 헤더(컴팩트 검색바 포함) + 2행 LoL 메뉴(활성 없음). */}
+      <AppShellHeader as="div" className="yoro-home-chrome public-profile-ink-chrome">
+        <HomeHeader
+          accountName={twitchStatus.user?.displayName}
+          activeGame="lol"
+          connected={twitchStatus.connected}
           locale={locale}
-          profile={profile}
-          twitchStatus={twitchStatus}
-          activePage={activeMainPage}
-          activeTarget={activeNav}
-          onHome={() => changeMainPage("search")}
-          showFilters={false}
-          query={query}
-          loading={loading}
-          platform={selectedLolPlatform}
-          platformOptions={platformOptions}
-          suggestions={visibleSuggestions}
-          recentSearches={recentSearches}
-          favorites={favorites}
-          searchPanelRequest={searchPanelRequest}
-          filters={filters}
-          champions={availableChampions}
-          onQuery={setQuery}
-          onPlatformChange={changeLolPlatform}
-          onClear={clearSearch}
-          onSubmit={(event) => void submit(event)}
-          onPickSuggestion={pickSuggestion}
-          onPage={changeMainPage}
+          onDashboard={() => window.location.assign("/dashboard")}
           onLocale={changeLocale}
-          onAutoLocale={autoDetectLocale}
-          onTwitchLogin={startTwitchLogin}
-          onStreamerRegister={openStreamerRegisterScreen}
-          onStreamerRecord={openStreamerRecord}
-          onTwitchLogout={() => void disconnectTwitchViewer()}
-          onFilters={setFilters}
-          onResetFilters={() => setFilters(DEFAULT_MATCH_FILTERS)}
+          onLoginOpen={startTwitchLogin}
+          onLogout={() => void disconnectTwitchViewer()}
+          onToggleTheme={toggleTheme}
+          searchSlot={(
+            <div className="yoro-home-header-search">
+              <SearchForm
+                loading={loading}
+                platform={selectedLolPlatform}
+                platformOptions={platformOptions}
+                onClear={clearSearch}
+                onPickSuggestion={pickSuggestion}
+                onQuery={setQuery}
+                onPlatformChange={changeLolPlatform}
+                onSubmit={(event) => void submit(event)}
+                query={query}
+                suggestions={visibleSuggestions}
+                recentSearches={recentSearches}
+                favorites={favorites}
+                panelRequest={searchPanelRequest}
+              />
+            </div>
+          )}
+          text={homeI18n[locale]}
         />
+        <LolSubnav active="none" text={lolHomeI18n[locale]} />
       </AppShellHeader>
       <AppShellMain className="public-profile-shared-main" id="public-profile-main">
         <div className="public-profile-layout">
@@ -7461,7 +7515,7 @@ export function PublicLolPage({
                       && streamer.twitchUserId === activeProfile.twitchStream?.twitchUserId
                     )))}
                     onToggleFavorite={toggleFavorite}
-                    tabs={<PublicProfileTabs activeTab={profileTab} onChange={setProfileTab} onParticipation={() => changeMainPage("followJoin")} />}
+                    tabs={<PublicProfileTabs activeTab={profileTab} onChange={setProfileTab} />}
                   />
                   <PublicProfileErrorState error={error} />
 
@@ -7530,8 +7584,11 @@ export function PublicLolPage({
       {/* 하단 탭바는 헤더가 아니라 AppShell 직계 자식으로 둡니다 — 전적검색 결과
           헤더의 backdrop-filter가 position:fixed 의 기준(containing block)을
           가로채 탭바를 화면 하단이 아닌 상단바 밑에 붙였습니다. */}
-      <PublicBottomTabBar activePage={activeMainPage} activeTarget={activeNav} onPage={changeMainPage} />
-      <PublicSiteFooter onPage={changeMainPage} text={publicSiteFooterText()} />
+      {/* 모바일 하단 탭바 — 목업 page-4 크롬(홈·스트리머·참여·칼바람·패치노트, 활성 없음). */}
+      <div className="yoro-home-chrome public-profile-ink-tabbar">
+        <LolBottomTabBar active="none" text={lolHomeI18n[locale]} />
+      </div>
+      <PublicSiteFooter onPage={navigateFromMenu} text={publicSiteFooterText()} />
       <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
     </AppShell>
   );

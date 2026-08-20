@@ -22,22 +22,30 @@ function fill(template: string, value: string): string {
 
 /* ── 2행: LoL 전용 메뉴(중앙 정렬) — 목업 v11 ─────────────── */
 
-export function LolSubnav({ text }: { text: LolHomeText }) {
-  const items: Array<{ href: string; label: string }> = [
-    { href: "/follow", label: text.tabStreamers },
-    { href: "/participation", label: text.tabParticipation },
-    { href: "/lol/aram", label: text.tabAram },
-    { href: "/patch-notes", label: text.tabPatchNotes }
+export type LolSubnavItem = "home" | "streamers" | "participation" | "aram" | "patchNotes";
+
+/* 홈 항목은 항상 메인 홈(/)으로 나가는 출구입니다(2026-08-19 결정) — 그래서 활성이어도
+   aria-current 는 붙이지 않습니다. 다른 항목의 활성 표시는 시그니처 꼬리 밑줄. */
+/* active="none" — 전적 상세처럼 2행 어디에도 속하지 않는 화면(목업: 활성 항목 없음). */
+export function LolSubnav({ text, active = "home" }: { text: LolHomeText; active?: LolSubnavItem | "none" }) {
+  const items: Array<{ id: LolSubnavItem; href: string; label: string; tailWidth: number }> = [
+    { id: "home", href: "/", label: text.tabHome, tailWidth: 30 },
+    { id: "streamers", href: "/follow", label: text.tabStreamers, tailWidth: 40 },
+    { id: "participation", href: "/participation", label: text.tabParticipation, tailWidth: 48 },
+    { id: "aram", href: "/lol/aram", label: text.tabAram, tailWidth: 48 },
+    { id: "patchNotes", href: "/patch-notes", label: text.tabPatchNotes, tailWidth: 40 }
   ];
   return (
     <nav aria-label={text.subnavLabel} className="yoro-lol-subnav">
-      <a aria-current="page" className="yoro-lol-subnav-item is-active" href={localizedPublicUrlForCurrentLocale("/lol")}>
-        {text.tabHome}
-        <TailUnderline className="yoro-lol-subnav-tail" height={6} width={30} />
-      </a>
       {items.map((item) => (
-        <a className="yoro-lol-subnav-item" href={localizedPublicUrlForCurrentLocale(item.href)} key={item.href}>
+        <a
+          aria-current={item.id === active && item.id !== "home" ? "page" : undefined}
+          className={`yoro-lol-subnav-item${item.id === active ? " is-active" : ""}`}
+          href={localizedPublicUrlForCurrentLocale(item.href)}
+          key={item.id}
+        >
           {item.label}
+          {item.id === active ? <TailUnderline className="yoro-lol-subnav-tail" height={6} width={item.tailWidth} /> : null}
         </a>
       ))}
     </nav>
@@ -190,7 +198,9 @@ export function LolHomeHero({ text, homeText, locale }: {
 
 /* ── LoL 데이터: 증강 칼바람 + 패치노트 ───────────────────── */
 
-const RARITY_ORDER: readonly AramAugmentRarity[] = ["silver", "gold", "prismatic", "legend"];
+/* 상위 등급부터 — 차트 규칙 "밝을수록 상위 등급"(다크 기준). 루트 홈 카드와 같은
+   순서·같은 램프 방향이어야 두 화면이 어긋나지 않습니다. */
+const RARITY_ORDER: readonly AramAugmentRarity[] = ["legend", "prismatic", "gold", "silver"];
 
 function rarityText(text: HomeText, rarity: AramAugmentRarity): string {
   if (rarity === "silver") return text.raritySilver;

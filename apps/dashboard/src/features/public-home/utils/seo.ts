@@ -1,6 +1,7 @@
 import { localizedPublicUrl } from "../../public-lol/utils/public-locale-path";
 import { homeI18n, type HomeLocale } from "../i18n/home-i18n";
 import { lolHomeI18n } from "../i18n/lol-home-i18n";
+import { lolStreamersI18n } from "../i18n/lol-streamers-i18n";
 
 const PUBLIC_ORIGIN = "https://yoro.gg";
 
@@ -49,4 +50,9 @@ export function applyHomeSeo(locale: HomeLocale): () => void {
 export function applyLolHomeSeo(locale: HomeLocale): () => void {
   const text = lolHomeI18n[locale];
   return applySeo(locale, "/lol", text.seoTitle, text.seoDescription);
+}
+
+export function applyLolStreamersSeo(locale: HomeLocale): () => void {
+  const text = lolStreamersI18n[locale];
+  return applySeo(locale, "/follow", text.seoTitle, text.seoDescription);
 }

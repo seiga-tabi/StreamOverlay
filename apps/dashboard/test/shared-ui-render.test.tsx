@@ -724,11 +724,16 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
       championRoleLabel="미드"
       expanded={false}
       expandAriaLabel="경기 상세 펼치기"
+      replayAction={(
+        <a className="public-match-card-replay" href="https://www.twitch.tv/videos/111?t=0h05m00s" aria-label="다시보기">
+          <svg aria-hidden="true" viewBox="0 0 16 16" width="12" height="12"><path d="M4.5 2.5 L 12.5 8 L 4.5 13.5 Z" /></svg>
+        </a>
+      )}
       highlightClass="highlight-mvp"
       itemSlots={Array.from({ length: 6 }, (_, index) => ({ key: `item-${index}`, label: `아이템 ${index + 1}`, focusable: true, content: `아이템${index}` }))}
       itemsLabel="아이템"
       teams={{
-        allies: Array.from({ length: 5 }, (_, index) => ({ key: `ally-${index}`, label: `아군${index}`, isTarget: index === 0, content: `아군${index}` })),
+        allies: Array.from({ length: 5 }, (_, index) => ({ key: `ally-${index}`, label: `아군${index}`, name: `아군아이디${index}`, isTarget: index === 0, content: `아군${index}` })),
         opponents: Array.from({ length: 5 }, (_, index) => ({ key: `foe-${index}`, label: `상대${index}`, content: `상대${index}` })),
         compositionLabel: "참가 챔피언",
         alliesLabel: "아군",
@@ -803,6 +808,11 @@ test("최근 전적 행이 모바일 카드에 필요한 다국어 정보와 로
   // 팀 구성은 아군 5 / 상대 5 이고 본인만 강조합니다.
   assert.equal((html.match(/public-match-card-team-member/gu) ?? []).length, 10);
   assert.equal((html.match(/public-match-card-team-member is-target/gu) ?? []).length, 1);
+  // 다시보기(목업 v27 행 ⑦) — 액션 열 래퍼 안에서 캐럿과 한 셀에 놓입니다.
+  assert.match(html, /public-match-card-actions[^>]*><a class="public-match-card-replay" href="https:\/\/www\.twitch\.tv\/videos\/111\?t=0h05m00s"/u);
+  // 팀원 열에 Riot ID 병기(목업 v30) — name 이 있는 멤버만 이름 노드를 그립니다.
+  assert.equal((html.match(/public-match-card-team-name/gu) ?? []).length, 5);
+  assert.match(html, /<em class="public-match-card-team-name">아군아이디0<\/em>/u);
 
   assert.match(html, /public-match-card-expand-label" role="tooltip">경기 상세 펼치기/u);
   assert.match(html, /aria-expanded="false"/u);
@@ -1030,8 +1040,11 @@ test("모바일 최근 전적은 3행으로 압축하고 등급·지표 정렬 �
   assert.match(mobile, /\.public-match-card-perf\s*\{\s*display:\s*contents/u);
   assert.match(mobile, /\.public-match-card-score\s*\{[\s\S]*?grid-column:\s*3;\s*grid-row:\s*1 \/ span 2[\s\S]*?justify-self:\s*center/u);
   assert.match(mobile, /\.public-match-card-kda\s*\{\s*grid-column:\s*4;\s*grid-row:\s*1 \/ span 2/u);
-  // 상세 버튼 열은 44px 입니다. 좁게 두면 touch target 최소 폭 때문에 열 밖으로 번집니다.
-  assert.match(mobile, /\.public-match-card-expand\s*\{\s*grid-column:\s*5[\s\S]*?width:\s*var\(--yoro-size-touch-target\)/u);
+  // 액션 열(다시보기+캐럿 래퍼)은 5열에 서고, 캐럿은 44px 터치 타깃을 지킵니다.
+  assert.match(mobile, /\.public-match-card-actions\s*\{\s*grid-column:\s*5;\s*grid-row:\s*1 \/ span 2/u);
+  assert.match(mobile, /\.public-match-card-expand\s*\{\s*width:\s*var\(--yoro-size-touch-target\)/u);
+  // 모바일 컴팩트 행은 다시보기를 접습니다 — 펼침 툴바가 진입점입니다(목업 v28).
+  assert.match(mobile, /\.public-match-card-replay\s*\{\s*display:\s*none/u);
   // MVP·ACE 는 챔피언 이름 바로 옆.
   assert.match(mobile, /\.public-match-card-highlight\s*\{\s*margin-left:\s*0/u);
   // 지표는 4~5열 안에만 놓아 카드 가장자리에 밀착하지 않습니다.

@@ -162,6 +162,6 @@ test("match-ranks API는 Shared schema를 벗어난 응답을 티어 섹션 오�
 
 test("match-ranks 오류는 전적 상세를 유지하고 티어 섹션에 안전하게 안내한다", () => {
   const source = readFileSync(new URL("../src/pages/PublicLolPage.tsx", import.meta.url), "utf8");
-  assert.match(source, /<MatchLaneCompareView[\s\S]*\{rankError \? <FormError role="status">\{rankError\}<\/FormError> : null\}/u);
+  assert.match(source, /<MatchTeamDetails[\s\S]*\{rankError \? <FormError role="status">\{rankError\}<\/FormError> : null\}/u);
   assert.match(source, /setMatchRankErrors\(\(current\) => \(\{ \.\.\.current, \[matchId\]: t\(\)\.tierUnavailable \}\)\)/u);
 });

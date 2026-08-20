@@ -23,13 +23,16 @@ const tabBarCss = readFileSync(
 test("하단 탭바는 헤더가 아니라 AppShell 직계 자식으로 렌더링한다", () => {
   assert.doesNotMatch(appHeader, /<PublicBottomTabBar/u);
 
+  /* 전적검색 결과 분기는 목업 page-4 크롬(LolBottomTabBar)으로 전환했습니다(2026-08-20). */
   const renderCount = lolPage.match(/<PublicBottomTabBar\b/gu)?.length ?? 0;
-  assert.equal(renderCount, 4, "AppShell 4개 분기(등록·홈 검색·비검색·전적검색 결과) 모두에 탭바가 있어야 합니다");
+  assert.equal(renderCount, 3, "AppShell 3개 분기(등록·홈 검색·비검색)에 기존 탭바가 있어야 합니다");
+  assert.match(lolPage, /<LolBottomTabBar active="none" text=\{lolHomeI18n\[locale\]\} \/>/u);
 
   for (const match of lolPage.matchAll(/<PublicBottomTabBar\b[^/]*\/>/gu)) {
     assert.match(match[0], /activePage=\{activeMainPage\}/u);
     assert.match(match[0], /activeTarget=\{activeNav\}/u);
-    assert.match(match[0], /onPage=\{changeMainPage\}/u);
+    /* 홈 메뉴는 루트 메인 홈(/)으로 나가는 navigateFromMenu 를 씁니다(2026-08-19). */
+    assert.match(match[0], /onPage=\{navigateFromMenu\}/u);
   }
 });
 

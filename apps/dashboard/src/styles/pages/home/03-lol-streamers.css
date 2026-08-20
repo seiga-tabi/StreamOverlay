@@ -1,0 +1,274 @@
+/* LoL 스트리머(/follow) — 백자·수묵 리디자인 (목업 캔버스 "YORO 홈 리디자인" page-3 구현).
+ *
+ * 토큰·공통 조각(헤더·2행 메뉴·방송 카드 골격·푸터·하단 탭바)은 01/02 파일의
+ * yoro-home-* / yoro-lol-* 를 그대로 재사용하고, 이 파일은 이 화면 전용 조각
+ * (페이지 헤드·필터 칩·랭크 배지·오프라인 행·카드 액션)만 다룹니다.
+ * 시각 규칙(팔레트·헤어라인·라운드·시그니처)은 01 상단 주석을 따릅니다. */
+
+@layer home {
+  /* ── 페이지 헤드 ──────────────────────────────────────── */
+
+  .yoro-streamers-headwrap { padding-top: 44px; }
+
+  .yoro-streamers-head { margin-bottom: 0; }
+
+  .yoro-streamers-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 800;
+  }
+
+  .yoro-streamers-refresh {
+    margin-left: auto;
+    min-height: 44px;
+    padding: 0 18px;
+    gap: 6px;
+    font-size: 13px;
+  }
+
+  .yoro-streamers-refresh:disabled {
+    color: var(--home-mid);
+    border-color: var(--home-line);
+    cursor: default;
+  }
+
+  .yoro-streamers-sub {
+    margin: 10px 0 0 25px;
+    font-size: 13px;
+    color: var(--home-mid);
+    word-break: keep-all;
+  }
+
+  /* ── 필터 바 ──────────────────────────────────────────── */
+
+  .yoro-streamers-filterwrap { padding-top: 22px; }
+
+  .yoro-streamers-filters {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .yoro-streamers-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 44px;
+    padding: 0 16px;
+    border: .5px solid var(--home-line);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--home-sub);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .yoro-streamers-filter:hover { border-color: var(--home-stroke); color: var(--home-ink); }
+
+  .yoro-streamers-filter.is-active {
+    border-color: var(--home-stroke);
+    color: var(--home-ink);
+    font-weight: 700;
+  }
+
+  .yoro-streamers-filter-count {
+    color: var(--home-mid);
+    font-weight: 700;
+  }
+
+  /* 방송 관례색 점 — LIVE 배지와 같은 홍옥(대비 보정값). */
+  .yoro-streamers-live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 99px;
+    background: #C93850;
+  }
+
+  .yoro-streamers-sort { margin-left: auto; }
+
+  /* ── 지금 방송 중 카드 ────────────────────────────────── */
+
+  .yoro-streamers-live-count { position: static; }
+
+  .yoro-streamers-live-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .yoro-streamers-card .yoro-home-live-who { align-items: center; }
+
+  .yoro-streamers-rank-badge {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border: .5px solid var(--home-line);
+    border-radius: 2px;
+    color: var(--home-sub);
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .yoro-streamers-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .yoro-streamers-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-height: 36px;
+    padding: 0 12px;
+    border: .5px solid var(--home-line);
+    border-radius: 2px;
+    color: var(--home-sub);
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .yoro-streamers-action:hover { border-color: var(--home-stroke); color: var(--home-ink); }
+
+  .yoro-streamers-ext { color: var(--home-mid); }
+
+  .yoro-streamers-unlinked {
+    font-size: 11px;
+    color: var(--home-mid);
+    white-space: nowrap;
+  }
+
+  /* ── 오프라인 행 ──────────────────────────────────────── */
+
+  .yoro-streamers-offline-head { margin-bottom: 6px; }
+
+  .yoro-streamers-rows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .yoro-streamers-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 64px;
+    padding: 0 4px;
+    border-bottom: .5px solid var(--home-line);
+  }
+
+  .yoro-streamers-row:last-child { border-bottom: none; }
+
+  .yoro-streamers-row-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .yoro-streamers-row-name {
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .yoro-streamers-row-link { display: block; min-width: 0; }
+  .yoro-streamers-row-link:hover .yoro-streamers-row-name { color: var(--home-sub); }
+
+  .yoro-streamers-row-meta {
+    font-size: 11px;
+    color: var(--home-mid);
+  }
+
+  .yoro-streamers-more-wrap {
+    display: flex;
+    justify-content: center;
+    margin-top: 8px;
+  }
+
+  .yoro-streamers-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 22px;
+    border: .5px solid var(--home-line);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--home-sub);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .yoro-streamers-more:hover { border-color: var(--home-stroke); color: var(--home-ink); }
+  .yoro-streamers-more[aria-expanded="true"] svg { rotate: 180deg; }
+
+  .yoro-streamers-loading {
+    margin: 0;
+    font-size: 13px;
+    color: var(--home-mid);
+  }
+
+  /* ── 태블릿(48~64rem) — LolStreamersTablet 기준 ────────── */
+
+  @media (max-width: 64rem) {
+    .yoro-streamers-headwrap { padding-top: 34px; }
+    .yoro-streamers-title { font-size: 20px; }
+    .yoro-streamers-sub { margin-left: 23px; font-size: 12px; }
+    .yoro-streamers-refresh { padding: 0 16px; }
+    .yoro-streamers-filterwrap { padding-top: 18px; }
+    .yoro-streamers-filter { padding: 0 14px; font-size: 12px; }
+    .yoro-streamers-live-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .yoro-streamers-row { gap: 12px; min-height: 62px; }
+  }
+
+  /* ── 모바일(<768px) — LolStreamersMobile 기준 ──────────── */
+
+  @media (max-width: 47.9375rem) {
+    .yoro-streamers-headwrap { padding-top: 26px; }
+    .yoro-streamers-title { font-size: 18px; }
+    .yoro-streamers-sub { margin-left: 22px; font-size: 12px; }
+    .yoro-streamers-refresh { min-height: 40px; padding: 0 13px; font-size: 12px; gap: 5px; }
+    .yoro-streamers-filterwrap { padding-top: 16px; }
+
+    /* 필터: 가로 스크롤 한 줄 */
+    .yoro-streamers-filters {
+      gap: 7px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      margin-right: -16px;
+      padding-right: 16px;
+    }
+
+    .yoro-streamers-filters::-webkit-scrollbar { display: none; }
+    .yoro-streamers-filter { flex: none; }
+    .yoro-streamers-sort { margin-left: 0; }
+
+    /* 목록 페이지라 홈의 가로 스크롤 레일 대신 전폭 세로 스택 */
+    .yoro-streamers-live-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .yoro-streamers-card .yoro-streamers-action { flex: 1; }
+
+    .yoro-streamers-row { gap: 11px; min-height: 60px; padding: 0; }
+    .yoro-streamers-row .yoro-streamers-actions { display: none; }
+    .yoro-streamers-row-name { font-size: 13px; }
+    .yoro-streamers-row-meta { font-size: 10px; }
+  }
+}

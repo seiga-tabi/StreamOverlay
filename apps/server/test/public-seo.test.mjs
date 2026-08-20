@@ -47,12 +47,13 @@ test("팰월드는 ko·ja·en·x-default hreflang을 상호 참조로 노출한�
 });
 
 test("영어 본문이 없는 섹션에는 en hreflang을 붙이지 않는다", () => {
-  /* 없는 페이지를 크롤러에게 약속하지 않기 위해서입니다. LoL 은 ko·ja 만 있습니다. */
-  const html = render("/ko/lol");
-  assert.match(html, /<link rel="alternate" hreflang="ko" href="https:\/\/yoro\.gg\/ko\/lol" \/>/u);
-  assert.match(html, /<link rel="alternate" hreflang="ja" href="https:\/\/yoro\.gg\/ja\/lol" \/>/u);
+  /* 없는 페이지를 크롤러에게 약속하지 않기 위해서입니다. 증강 칼바람은 ko·ja 만 있습니다
+     (LoL 홈 /lol 은 영어 카피가 생겨 en 을 냅니다 — 아래 테스트가 따로 봅니다). */
+  const html = render("/ko/lol/aram");
+  assert.match(html, /<link rel="alternate" hreflang="ko" href="https:\/\/yoro\.gg\/ko\/lol\/aram" \/>/u);
+  assert.match(html, /<link rel="alternate" hreflang="ja" href="https:\/\/yoro\.gg\/ja\/lol\/aram" \/>/u);
   assert.doesNotMatch(html, /hreflang="en"/u);
-  assert.match(html, /<link rel="alternate" hreflang="x-default" href="https:\/\/yoro\.gg\/ko\/lol" \/>/u);
+  assert.match(html, /<link rel="alternate" hreflang="x-default" href="https:\/\/yoro\.gg\/ko\/lol\/aram" \/>/u);
 });
 
 test("팰월드 /en 은 영어 메타와 자기 canonical 을 낸다", () => {
@@ -68,10 +69,19 @@ test("팰월드 /en 은 영어 메타와 자기 canonical 을 낸다", () => {
 test("영어 본문이 없는 섹션의 /en 은 ko 메타로 접히고 canonical 도 /ko 를 가리킨다", () => {
   /* 번역이 없는 화면을 en 으로 색인시키면 중복 페이지가 늘어납니다. 동작은 그대로
      두고 색인만 ko 한 판으로 모읍니다. */
-  const html = render("/en/lol");
+  const html = render("/en/lol/aram");
   assert.match(html, /<html lang="ko"/u);
-  assert.match(html, /<link rel="canonical" href="https:\/\/yoro\.gg\/ko\/lol">/u);
+  assert.match(html, /<link rel="canonical" href="https:\/\/yoro\.gg\/ko\/lol\/aram">/u);
   assert.doesNotMatch(html, /hreflang="en"/u);
+});
+
+test("영어 카피가 생긴 화면은 en 을 서빙한다", () => {
+  /* 루트 홈·LoL 홈·LoL 스트리머는 화면이 실제로 영어를 그립니다. 서버가 ko 로 접으면
+     화면만 영어이고 메타는 한국어가 되어, 크롤러가 중복으로 보고 색인에서 뺍니다. */
+  const html = render("/en/lol");
+  assert.match(html, /<html lang="en"/u);
+  assert.match(html, /<link rel="canonical" href="https:\/\/yoro\.gg\/en\/lol">/u);
+  assert.match(html, /<link rel="alternate" hreflang="en" href="https:\/\/yoro\.gg\/en\/lol" \/>/u);
 });
 
 test("hreflang은 비지역화 경로에는 붙지 않는다", () => {
@@ -324,8 +334,8 @@ test("엔티티 sitemap은 팰월드 3개 로케일 URL을 만든다", () => {
 });
 
 test("정적 sitemap 은 영어 본문이 없는 경로에 en URL 을 제출하지 않는다", () => {
-  const xml = buildLocalizedUrlSetSitemap([{ path: "/lol" }, { path: "/palworld" }]);
-  assert.doesNotMatch(xml, /<loc>https:\/\/yoro\.gg\/en\/lol<\/loc>/u);
+  const xml = buildLocalizedUrlSetSitemap([{ path: "/lol/aram" }, { path: "/palworld" }]);
+  assert.doesNotMatch(xml, /<loc>https:\/\/yoro\.gg\/en\/lol\/aram<\/loc>/u);
   assert.match(xml, /<loc>https:\/\/yoro\.gg\/en\/palworld<\/loc>/u);
   assert.equal((xml.match(/<url>/gu) ?? []).length, 5);
 });

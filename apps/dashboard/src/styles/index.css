@@ -66,5 +66,8 @@
 @import "./pages/public-lol/36-champion-analysis.css";
 
 @import "./pages/public-lol/37-signature-builds.css";
+
+/* 프로필 수묵 리스킨 — 20-profile-platform 토큰을 마지막에 덮습니다. */
+@import "./pages/public-lol/38-ink-profile.css";
 /* Organization 콘솔(개요·Bot 제어·Palworld 서버) 리디자인. pages layer 소유. */
 @import "./pages/bot/18-bot-console-redesign.css";

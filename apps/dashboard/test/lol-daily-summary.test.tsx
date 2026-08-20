@@ -121,6 +121,15 @@ test("증강 칼바람 필터는 실측 큐 2300 만 매칭한다", async () => 
   assert.equal(queueMatchesFilter(match({ queueId: 2400 }), "all"), true);
 });
 
+test("아레나 필터는 1700/1710/1750 큐만 매칭한다", async () => {
+  const { queueMatchesFilter } = await import("../src/features/public-lol/utils/match");
+  assert.equal(queueMatchesFilter(match({ queueId: 1700 }), "arena"), true);
+  assert.equal(queueMatchesFilter(match({ queueId: 1710 }), "arena"), true);
+  assert.equal(queueMatchesFilter(match({ queueId: 1750 }), "arena"), true);
+  assert.equal(queueMatchesFilter(match({ queueId: 450 }), "arena"), false);
+  assert.equal(queueMatchesFilter(match({ queueId: 2300 }), "arena"), false);
+});
+
 test("증강 역필터는 해당 증강을 픽한 경기만 남긴다", async () => {
   const { filteredMatches } = await import("../src/features/public-lol/utils/match");
   const profile = { recentMatches: [

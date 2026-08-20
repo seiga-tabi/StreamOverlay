@@ -1083,9 +1083,12 @@ const KOREAN_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
     title: "YORO.gg — 게임 데이터, 검색 한 번",
     description: "LoL 전적과 증강 칼바람, 팰월드 도감과 교배 계산까지 검색창 하나로. 방송 중인 스트리머의 판을 보고 시청자로 직접 참여하세요."
   },
+  /* 문구의 단일 원본은 대시보드 public-home/i18n/lol-home-i18n.ts 의 seoTitle·seoDescription 입니다.
+     서버가 크롤러에게 먼저 주는 값이라 여기로 복제했고, 두 곳이 어긋나면
+     test/public-home-seo.test.mjs 가 먼저 깨집니다. */
   "/lol": {
-    title: "LoL 전적 검색 | YORO.gg",
-    description: "League of Legends 전적과 최근 게임 정보를 검색하세요."
+    title: "YORO.gg — LoL 전적, 검색 한 번",
+    description: "LoL 전적 검색과 증강 칼바람 도감, 패치노트까지 한 화면에서. 방송 중인 스트리머의 판을 보고 시청자로 직접 참여하세요."
   },
   "/lol/aram": {
     title: "증강 칼바람 | YORO.gg",
@@ -1095,9 +1098,12 @@ const KOREAN_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
     title: "LoL 패치 노트 | YORO.gg",
     description: "리그 오브 레전드 패치 노트를 최신순으로 모아 봅니다. 본문은 Riot Games 원문에서 확인하세요."
   },
+  /* 문구의 단일 원본은 대시보드 public-home/i18n/lol-streamers-i18n.ts 의 seoTitle·seoDescription 입니다.
+     서버가 크롤러에게 먼저 주는 값이라 여기로 복제했고, 두 곳이 어긋나면
+     test/public-home-seo.test.mjs 가 먼저 깨집니다. */
   "/follow": {
-    title: "팔로우 중인 스트리머 | YORO.gg",
-    description: "Twitch에서 팔로우 중인 스트리머의 방송 상태를 확인하세요."
+    title: "YORO.gg — 팔로우한 LoL 스트리머",
+    description: "Twitch에서 팔로우한 LoL 스트리머의 방송 상태와 전적을 한 화면에서 확인하세요."
   },
   "/participation": {
     title: "시청자 참여 | YORO.gg",
@@ -1231,8 +1237,8 @@ const JAPANESE_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
     description: "LoLの戦績とオーグメントARAM、パルワールドの図鑑と配合計算まで検索ひとつで。配信中のストリーマーの試合を見て、視聴者として参加しましょう。"
   },
   "/lol": {
-    title: "LoL戦績検索 | YORO.gg",
-    description: "League of Legendsの戦績と最近のゲーム情報を検索できます。"
+    title: "YORO.gg — LoL戦績、検索ひとつで",
+    description: "LoLの戦績検索、オーグメントARAM図鑑、パッチノートまでひとつの画面で。配信中のストリーマーの試合を見て、視聴者として参加しましょう。"
   },
   "/lol/aram": {
     title: "オーグメントARAM | YORO.gg",
@@ -1243,8 +1249,8 @@ const JAPANESE_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
     description: "リーグ・オブ・レジェンドのパッチノートを新しい順にまとめます。本文はRiot Gamesの原文でご確認ください。"
   },
   "/follow": {
-    title: "フォロー中の配信者 | YORO.gg",
-    description: "Twitchでフォロー中の配信者のLIVE状況を確認できます。"
+    title: "YORO.gg — フォロー中のLoLストリーマー",
+    description: "TwitchでフォローしたLoLストリーマーの配信状況と戦績をひとつの画面で確認できます。"
   },
   "/participation": {
     title: "視聴者参加 | YORO.gg",
@@ -1384,6 +1390,16 @@ const ENGLISH_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   "/": {
     title: "YORO.gg — Game data, one search",
     description: "LoL match history, ARAM augments, the Palworld Paldeck and breeding calculator — one search box. Watch live streamers and join their games as a viewer."
+  },
+  "/lol": {
+    title: "YORO.gg — LoL stats, one search",
+    description: "LoL match history, the ARAM augment dex and patch notes in one place. Watch live streamers and join their games as a viewer."
+  },
+  /* /follow 는 noindex 이지만(개인화 화면) 언어는 맞아야 합니다 — 없으면 /en/follow 가
+     한국어 메타와 lang=ko 로 렌더됩니다. */
+  "/follow": {
+    title: "YORO.gg — Followed LoL streamers",
+    description: "Live status and match history for the LoL streamers you follow on Twitch, all in one place."
   },
   "/palworld": {
     title: "Palworld Database | YORO.gg",

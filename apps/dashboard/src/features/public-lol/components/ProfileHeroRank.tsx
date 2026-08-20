@@ -167,100 +167,71 @@ export function ProfileHeroRank({
   onSelectQueue,
   onViewRecentMatches,
 }: ProfileHeroRankProps) {
-  const active = queues.find((queue) => queue.id === activeQueueId) ?? queues[0];
-  if (!active) return null;
+  /* 목업 page-4(v21~v22): 큐 전환 세그먼트 대신 솔로/자유/5:5 세 카드를 나란히.
+     각 카드 = 큐명 · 티어 크레스트(티어색) · 승률 도넛(승=청자/패=홍옥) ·
+     티어명(티어색) · LP·승패 기록 · (표본이 있는 큐만) 분절 LP 스파크라인.
+     LP 추이(rankHistory)는 현재 솔로 랭크 기준 단일 시계열이라 솔로 카드에만
+     그립니다 — 큐별 시계열은 서버 확장 대상(핸드오프 기록). onSelectQueue 와
+     activeQueueId 는 호출부 호환을 위해 받지만 카드형에서는 쓰지 않습니다. */
+  void activeQueueId;
+  void onSelectQueue;
+  if (queues.length === 0) return null;
 
   return (
-    <div className="public-profile-hero-rank">
-      <div className="public-profile-hero-queues" role="group" aria-label={text.queueSwitcherLabel}>
-        {queues.map((queue) => (
-          <button
-            aria-pressed={queue.id === active.id}
-            className="public-profile-hero-queue"
-            data-tier={queue.ranked ? queue.tierKey : "unranked"}
-            key={queue.id}
-            onClick={() => onSelectQueue(queue.id)}
-            type="button"
-          >
-            <i aria-hidden="true" />
-            <span>{queue.label}</span>
-            <small>{queue.segmentValue}</small>
-          </button>
-        ))}
-      </div>
-
-      <div aria-live="polite" className="public-profile-hero-rank-body">
-        {active.ranked ? (
-          <div className="public-profile-hero-tier" data-tier={active.tierKey}>
+    <div aria-label={text.queueSwitcherLabel} className="public-profile-hero-rank public-profile-hero-rank--cards" role="group">
+      {queues.map((queue) => (
+        <section
+          className={`public-hero-rank-card${queue.ranked ? "" : " is-unranked"}`}
+          data-tier={queue.ranked ? queue.tierKey : "unranked"}
+          key={queue.id}
+        >
+          <span className="public-hero-rank-card-queue">{queue.label}</span>
+          <span className="public-hero-rank-card-row">
             <span className="public-profile-hero-crest">
-              {active.tierIconUrl
-                ? <img src={active.tierIconUrl} alt="" />
-                : <b aria-hidden="true">{active.tierFallbackLabel}</b>}
+              {queue.ranked && queue.tierIconUrl
+                ? <img src={queue.tierIconUrl} alt="" />
+                : <b aria-hidden="true">{queue.tierFallbackLabel}</b>}
             </span>
-
-            <span className="public-profile-hero-tier-copy">
-              <span className="public-profile-hero-queue-name">{active.label}</span>
-              <span className="public-profile-hero-tier-name">
-                {active.rankLabel}
-                {active.leaguePointsLabel ? <em>{active.leaguePointsLabel}</em> : null}
-              </span>
-              {active.goal ? (
+            {queue.ranked ? <WinRateDonut percent={queue.winRate} label={`${queue.winRate}%`} /> : null}
+            <span className="public-hero-rank-card-copy">
+              <b className="public-hero-rank-card-tier">{queue.ranked ? queue.rankLabel : text.unrankedTitle}</b>
+              {queue.ranked ? (
+                <span className="public-hero-rank-card-record">
+                  {queue.leaguePointsLabel}
+                  {" · "}
+                  <em>{queue.wins}{queue.winsLabel}</em>
+                  {" "}
+                  <i>{queue.losses}{queue.lossesLabel}</i>
+                </span>
+              ) : (
+                <span className="public-hero-rank-card-record">{queue.unrankedDescription ?? queue.recordCaption}</span>
+              )}
+              {queue.ranked && queue.goal ? (
                 <span className="public-profile-hero-goal">
-                  <span>{active.goal.label}</span>
+                  <span>{queue.goal.label}</span>
                   <span aria-hidden="true" className="public-profile-hero-goal-track">
-                    <em style={{ width: `${Math.max(0, Math.min(100, active.goal.percent))}%` }} />
+                    <em style={{ width: `${Math.max(0, Math.min(100, queue.goal.percent))}%` }} />
                   </span>
                 </span>
               ) : null}
             </span>
-
-            {/* record(도넛+승패)와 trend(LP 추이)를 한 그룹으로 둡니다. 넓은 화면에서는
-                display:contents 로 지워져 각자 다른 grid-area(1행 옆 / 2행 전체)를
-                받고, 좁은 화면에서는 실제 flex 행으로 살아나 둘을 나란히 묶습니다. */}
-            <span className="public-profile-hero-metrics">
-              <span className="public-profile-hero-record">
-                <WinRateDonut percent={active.winRate} label={`${active.winRate}%`} />
-                <span className="public-profile-hero-record-copy">
-                  <strong>
-                    <em>{active.wins}{active.winsLabel}</em>
-                    {" "}
-                    <i>{active.losses}{active.lossesLabel}</i>
-                  </strong>
-                  <span>{active.recordCaption}</span>
-                </span>
+          </span>
+          {queue.id === "solo" && trend && trend.points.length > 1 ? (
+            <span className="public-hero-rank-card-trend">
+              <span className="public-hero-rank-card-trend-label">
+                {text.lpTrendLabel}
+                <b data-tone={trend.changeTone}>{trend.changeLabel}</b>
               </span>
-
-              {trend && trend.points.length > 1 ? (
-                <span className="public-profile-hero-trend">
-                  <span>{text.lpTrendLabel}</span>
-                  <LpSparkline trend={trend} />
-                  <span className="public-profile-hero-trend-foot">
-                    <b data-tone={trend.changeTone}>{trend.changeLabel}</b>
-                  </span>
-                </span>
-              ) : null}
+              <LpSparkline trend={trend} />
             </span>
-          </div>
-        ) : (
-          <div className="public-profile-hero-tier is-unranked" data-tier="unranked">
-            <span className="public-profile-hero-crest">
-              <b aria-hidden="true">{active.tierFallbackLabel}</b>
-            </span>
-            <span className="public-profile-hero-tier-copy">
-              <span className="public-profile-hero-queue-name">{active.label}</span>
-              <span className="public-profile-hero-tier-name">{text.unrankedTitle}</span>
-              {active.unrankedDescription
-                ? <span className="public-profile-hero-unranked-note">{active.unrankedDescription}</span>
-                : null}
-            </span>
-            {onViewRecentMatches ? (
-              <button className="public-profile-hero-ghost" type="button" onClick={onViewRecentMatches}>
-                {text.viewRecentMatchesLabel}
-              </button>
-            ) : null}
-          </div>
-        )}
-      </div>
+          ) : null}
+          {!queue.ranked && onViewRecentMatches ? (
+            <button className="public-profile-hero-ghost" type="button" onClick={onViewRecentMatches}>
+              {text.viewRecentMatchesLabel}
+            </button>
+          ) : null}
+        </section>
+      ))}
     </div>
   );
 }

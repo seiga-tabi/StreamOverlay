@@ -810,39 +810,42 @@
   }
 
   /* 6 팀 구성 — 윗줄 아군, 아랫줄 상대. 챔피언은 원형이라 아이템 격자와 구분됩니다. */
+  /* 팀원 열 — 목업 v30: 아군/상대 세로 두 열, 미니 아바타 + Riot ID(말줄임) 병기. */
   .public-match-card-team {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: flex-start;
     justify-self: center;
-    gap: var(--yoro-space-1);
+    gap: var(--yoro-space-3);
   }
 
   .public-match-card-team-line {
     display: flex;
-    align-items: center;
-    gap: var(--yoro-space-1);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
   }
 
   .public-match-card-team-line > b {
     flex: none;
-    width: 1.75rem;
     color: var(--yoro-color-text-on-dark-muted);
     font-size: var(--yoro-font-size-xs);
     font-weight: var(--yoro-font-weight-medium);
   }
 
   .public-match-card-team-member {
-    display: block;
+    display: flex;
     flex: none;
-    width: 1.25rem;
-    height: 1.25rem;
+    align-items: center;
+    gap: var(--yoro-space-1);
   }
 
   .public-match-card-team-member :is(img, i) {
     display: grid;
+    flex: none;
     place-items: center;
-    width: 100%;
-    height: 100%;
+    width: 1.25rem;
+    height: 1.25rem;
     border-radius: var(--yoro-radius-circle);
     background: var(--yoro-color-ground-raised);
     font-style: normal;
@@ -850,10 +853,60 @@
     opacity: .8;
   }
 
+  .public-match-card-team-name {
+    max-width: 4.5rem;
+    overflow: hidden;
+    color: var(--yoro-color-text-on-dark-muted);
+    font-style: normal;
+    font-size: 0.625rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .public-match-card-team-member.is-target .public-match-card-team-name {
+    color: var(--yoro-color-text-on-dark);
+    font-weight: var(--yoro-font-weight-bold);
+  }
+
   .public-match-card-team-member.is-target :is(img, i) {
     opacity: 1;
     outline: 1.5px solid var(--yoro-color-public-primary);
     outline-offset: 1px;
+  }
+
+  /* 7 액션 열 — 캐럿 + (스트리머 프로필) 다시보기. grid 자식 수를 늘리지 않도록
+     한 셀에 세로로 쌓습니다(목업 v27 행 ⑦). */
+  .public-match-card-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-self: end;
+    gap: .375rem;
+  }
+
+  /* 다시보기(VOD 점프) — 그 경기를 담은 Twitch 아카이브가 있을 때만 렌더됩니다. */
+  .public-match-card-replay {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 1.75rem;
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-sm);
+    background: color-mix(in srgb, var(--yoro-color-text-on-dark) 4%, transparent);
+    color: var(--yoro-color-text-on-dark-muted);
+    transition:
+      background var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
+      color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard);
+  }
+
+  .public-match-card-replay:hover {
+    background: color-mix(in srgb, var(--yoro-color-text-on-dark) 10%, transparent);
+    color: var(--yoro-color-text-on-dark);
+  }
+
+  .public-match-card-replay:focus-visible {
+    outline: var(--yoro-focus-ring-width) solid var(--yoro-color-focus-ring);
+    outline-offset: var(--yoro-focus-ring-offset);
   }
 
   /* 7 확장 */
@@ -1045,10 +1098,16 @@
        legacy 가 button[aria-label] 에 min-width 44px 를 !important 로 걸어 두므로
        열도 44px 로 잡습니다. 2rem 으로 두면 버튼이 열 밖으로 6px 씩 번져
        KDA 와 맞닿고 카드 오른쪽 padding 도 넘습니다. */
-    .public-match-card-expand {
+    .public-match-card-actions {
       grid-column: 5;
       grid-row: 1 / span 2;
       justify-self: center;
+    }
+
+    /* 모바일 컴팩트 행은 다시보기를 접습니다 — 확장 후 상세에서 접근(목업 v28). */
+    .public-match-card-replay { display: none; }
+
+    .public-match-card-expand {
       width: var(--yoro-size-touch-target);
       height: var(--yoro-size-touch-target);
     }
@@ -1201,7 +1260,7 @@
      기본 원형 멤버를 한 단계 키우고(1.5rem), 라벨("내 팀")은 고정폭 해제. */
   .public-match-card.arena .public-match-card-team-line > b { width: auto; white-space: nowrap; }
 
-  .public-match-card.arena .public-match-card-team-member { width: 1.5rem; height: 1.5rem; }
+  .public-match-card.arena .public-match-card-team-member :is(img, i) { width: 1.5rem; height: 1.5rem; }
 
   .public-match-card.arena .public-match-card-team-member.is-target :is(img, i) {
     box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--yoro-color-public-primary) 70%, transparent);

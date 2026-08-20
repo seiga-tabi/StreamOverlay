@@ -1,109 +1,9 @@
-import type { PublicLolMatchParticipant, PublicLolMatchTeamDetail, PublicLolRecentMatch } from "../types/public-lol";
+import type { PublicLolMatchTeamDetail, PublicLolRecentMatch } from "../types/public-lol";
 
-/* 전적 상세의 라인 1:1 매칭과 팀 격차 계산.
+/* 전적 상세의 팀 격차 계산과 큐 판별.
  *
- * 기존 화면은 우리 팀 5명을 세로로, 상대 5명을 그 아래 따로 나열해서
- * "내 미드 vs 상대 미드"를 보려면 화면을 위아래로 오가며 눈으로 맞춰야 했습니다.
- * 상세를 펼치는 이유 1순위가 그 비교이므로 같은 포지션끼리 한 행에 놓습니다.
- */
-
-const LANE_ORDER = ["TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"] as const;
-
-export type LanePosition = (typeof LANE_ORDER)[number];
-
-export type LanePair = {
-  position: LanePosition | "UNKNOWN";
-  ally?: PublicLolMatchParticipant;
-  enemy?: PublicLolMatchParticipant;
-  /** 두 사람 사이의 비율(0~100). 상대가 없으면 100입니다. */
-  damageShare: { ally: number; enemy: number };
-  goldShare: { ally: number; enemy: number };
-};
-
-function normalizedPosition(value: string | undefined): LanePosition | "UNKNOWN" {
-  if (!value) return "UNKNOWN";
-  const upper = value.toUpperCase();
-  if (upper === "MID") return "MIDDLE";
-  if (upper === "ADC" || upper === "BOT") return "BOTTOM";
-  if (upper === "SUPPORT") return "UTILITY";
-  return (LANE_ORDER as readonly string[]).includes(upper) ? upper as LanePosition : "UNKNOWN";
-}
-
-/** 두 값의 비율. 둘 다 0이면 50:50 으로 둡니다(막대가 사라지지 않게). */
-function ratio(left: number, right: number): { ally: number; enemy: number } {
-  const total = Math.max(0, left) + Math.max(0, right);
-  if (total <= 0) return { ally: 50, enemy: 50 };
-  return {
-    ally: Math.round((Math.max(0, left) / total) * 100),
-    enemy: Math.round((Math.max(0, right) / total) * 100),
-  };
-}
-
-function allyTeam(match: PublicLolRecentMatch): PublicLolMatchTeamDetail | undefined {
-  return match.teams.find((team) => team.players.some((player) => player.isTarget));
-}
-
-/**
- * 같은 포지션끼리 짝지어 반환합니다.
- * 포지션 정보가 없는 큐(칼바람 등)는 순서대로 짝짓습니다.
- */
-export function matchLanePairs(match: PublicLolRecentMatch): LanePair[] {
-  const ally = allyTeam(match) ?? match.teams[0];
-  const enemy = match.teams.find((team) => team !== ally);
-  if (!ally) return [];
-
-  const allyPlayers = [...ally.players];
-  const enemyPlayers = [...(enemy?.players ?? [])];
-  const hasPositions = allyPlayers.some((player) => normalizedPosition(player.position) !== "UNKNOWN");
-
-  if (!hasPositions) {
-    // 칼바람처럼 포지션이 없으면 명단 순서대로 맞춥니다.
-    return allyPlayers.map((player, index) => {
-      const foe = enemyPlayers[index];
-      return {
-        position: "UNKNOWN" as const,
-        ally: player,
-        enemy: foe,
-        damageShare: ratio(player.damageDealtToChampions ?? 0, foe?.damageDealtToChampions ?? 0),
-        goldShare: ratio(player.goldEarned ?? 0, foe?.goldEarned ?? 0),
-      };
-    });
-  }
-
-  const takeByPosition = (players: PublicLolMatchParticipant[], position: LanePosition) => {
-    const index = players.findIndex((player) => normalizedPosition(player.position) === position);
-    return index >= 0 ? players.splice(index, 1)[0] : undefined;
-  };
-
-  const pairs: LanePair[] = LANE_ORDER.map((position) => {
-    const a = takeByPosition(allyPlayers, position);
-    const e = takeByPosition(enemyPlayers, position);
-    return {
-      position,
-      ally: a,
-      enemy: e,
-      damageShare: ratio(a?.damageDealtToChampions ?? 0, e?.damageDealtToChampions ?? 0),
-      goldShare: ratio(a?.goldEarned ?? 0, e?.goldEarned ?? 0),
-    };
-  });
-
-  // 포지션이 비어 남은 사람은 뒤에 순서대로 붙입니다.
-  const leftovers = Math.max(allyPlayers.length, enemyPlayers.length);
-  for (let index = 0; index < leftovers; index += 1) {
-    const a = allyPlayers[index];
-    const e = enemyPlayers[index];
-    if (!a && !e) continue;
-    pairs.push({
-      position: "UNKNOWN",
-      ally: a,
-      enemy: e,
-      damageShare: ratio(a?.damageDealtToChampions ?? 0, e?.damageDealtToChampions ?? 0),
-      goldShare: ratio(a?.goldEarned ?? 0, e?.goldEarned ?? 0),
-    });
-  }
-
-  return pairs.filter((pair) => pair.ally || pair.enemy);
-}
+ * 라인 1:1 비교(matchLanePairs)는 목업 v28 에서 블루/레드 팀 상세로 대체되어
+ * 제거했습니다 — 격차 스트립(matchGap)과 큐 판별 유틸만 남습니다. */
 
 export type MatchGap = {
   gold: number;
@@ -113,6 +13,10 @@ export type MatchGap = {
   myRank?: number;
   teamSize: number;
 };
+
+function allyTeam(match: PublicLolRecentMatch): PublicLolMatchTeamDetail | undefined {
+  return match.teams.find((team) => team.players.some((player) => player.isTarget)) ?? match.teams[0];
+}
 
 const OBJECTIVE_KEYS = ["baron", "dragon", "tower", "inhibitor", "riftHerald", "horde", "atakhan"] as const;
 

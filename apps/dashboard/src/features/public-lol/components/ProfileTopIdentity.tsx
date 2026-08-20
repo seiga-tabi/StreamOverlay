@@ -14,6 +14,10 @@ export type ProfileTopIdentityViewModel = {
   tagLine: string;
   displayName?: string;
   displayTagLabel?: string;
+  /* 이름 줄 오른쪽 서버 칩(목업: "KR") — 없으면 그리지 않습니다. */
+  serverChipLabel?: string;
+  /* 이름 아래 "최근 갱신 N분 전" 한 줄(목업 프로필 헤드). */
+  fetchedAtText?: string;
   profileMetaLabel?: string;
   profileIconUrl?: string;
   avatarFallbackLabel: string;
@@ -29,6 +33,9 @@ export type ProfileTopIdentityViewModel = {
   topChampionsLabel?: string;
   streamerStatus?: "live" | "offline";
   streamerStatusLabel?: string;
+  /** 이름 아래 최근 폼 줄(목업 스트리머 변형) — 최신 경기부터 W/L 순서. */
+  recentFormResults?: ReadonlyArray<"win" | "loss">;
+  recentFormLabel?: string;
 };
 
 export type ProfileTopIdentityProps = {
@@ -83,6 +90,15 @@ export function ProfileTopIdentity({
         <h1 className="public-profile-hero-name">
           <span className="public-riot-name">{titleName}</span>
           <span className="public-riot-tag">{titleTag}</span>
+          {identity.streamerStatus === "live" ? (
+            <span className="public-profile-hero-live-flag">
+              <i aria-hidden="true" />
+              LIVE
+            </span>
+          ) : null}
+          {identity.serverChipLabel ? (
+            <span className="public-profile-hero-server">{identity.serverChipLabel}</span>
+          ) : null}
           {identity.channelName ? (
             identity.channelUrl ? (
               <a
@@ -103,6 +119,21 @@ export function ProfileTopIdentity({
             )
           ) : null}
         </h1>
+        {identity.fetchedAtText ? (
+          <div className="public-profile-hero-fetched-line">{identity.fetchedAtText}</div>
+        ) : null}
+        {identity.recentFormResults && identity.recentFormResults.length > 0 ? (
+          <div className="public-profile-hero-form">
+            {identity.recentFormLabel ? (
+              <span className="public-profile-hero-form-label">{identity.recentFormLabel}</span>
+            ) : null}
+            {identity.recentFormResults.map((result, index) => (
+              <i key={index} className={`is-${result}`} aria-hidden="true">
+                {result === "win" ? "W" : "L"}
+              </i>
+            ))}
+          </div>
+        ) : null}
         <div className="public-profile-hero-traits">
           {identity.mainRoleLabel ? (
             <span className="public-profile-hero-trait">

@@ -3,8 +3,8 @@ import type { PalworldElement } from "@streamops/shared";
 import { parseAramAugmentCatalog, type AramAugmentRarity } from "@streamops/shared";
 import type { PublicLocale } from "../../public-lol/i18n/public-lol-i18n";
 import type { PublicTwitchFollowedLolChannel, PublicTwitchFollowedLolResponse } from "../../public-lol/types/public-lol";
-import { rankLabel } from "../../public-lol/utils/rank";
 import { localizedPublicUrlForCurrentLocale } from "../../public-lol/utils/public-locale-path";
+import { rankTierLabel } from "../../public-lol/utils/rank";
 import { safeTwitchStreamPreviewUrl } from "../../public-twitch/stream-preview";
 import { getPalworldPals } from "../../public-palworld/api/palworld";
 import { elementLabel } from "../../public-palworld/utils/labels";
@@ -58,10 +58,31 @@ function PlayGlyph() {
   );
 }
 
-function LiveCard({ channel, text }: { channel: PublicTwitchFollowedLolChannel; text: HomeText }) {
+/* 서브라인 = 게임 축약 · 방송 제목 (목업 "LoL · 솔로 랭크"). 축약 표가 모르는
+   게임은 원문 그대로 둡니다. */
+function liveGameShort(gameName: string | undefined, text: HomeText): string {
+  if (!gameName) return text.liveGameLol;
+  if (gameName === "League of Legends") return text.liveGameLol;
+  if (gameName === "Palworld") return text.liveGamePal;
+  return gameName;
+}
+
+type LiveCardVariant = "root" | "lol";
+
+function LiveCard({ channel, text, variant }: {
+  channel: PublicTwitchFollowedLolChannel;
+  text: HomeText;
+  variant: LiveCardVariant;
+}) {
   const preview = safeTwitchStreamPreviewUrl(channel.thumbnailUrl);
   const channelUrl = channel.channelUrl ?? (channel.twitchLogin ? `https://www.twitch.tv/${channel.twitchLogin}` : undefined);
-  const metaLine = channel.rankedStats ? rankLabel(channel.rankedStats) : channel.riotId ?? channel.gameName ?? "League of Legends";
+  /* LoL 홈 카드(확장형)는 LoL 전용 화면이라 게임 축약을 빼고 방송 제목만 씁니다
+     (목업 page-2 §지금 방송 중). 루트 홈은 게임 축약 · 제목. */
+  const gameLine = variant === "lol"
+    ? channel.title ?? liveGameShort(channel.gameName, text)
+    : channel.title
+      ? `${liveGameShort(channel.gameName, text)} · ${channel.title}`
+      : liveGameShort(channel.gameName, text);
   const card = (
     <>
       <div className="yoro-home-live-thumb">
@@ -82,10 +103,21 @@ function LiveCard({ channel, text }: { channel: PublicTwitchFollowedLolChannel; 
           </span>
           <span className="yoro-home-live-names">
             <span className="yoro-home-live-name">{channel.twitchDisplayName}</span>
-            <span className="yoro-home-live-game">{channel.gameName ?? "League of Legends"}</span>
+            <span className="yoro-home-live-game">{gameLine}</span>
           </span>
         </div>
-        <div className="yoro-home-live-meta">{metaLine}</div>
+        {/* 하단 줄 — 승/패 전용색 강조(목업 §지금 방송 중). rankedStats 는 시즌
+            누적이라 목업 예시의 "오늘" 라벨은 붙이지 않습니다(사실이 아닌 표기 금지). */}
+        {channel.rankedStats ? (
+          <div className="yoro-home-live-meta">
+            {variant === "lol" ? <>{rankTierLabel(channel.rankedStats)}{" · "}</> : null}
+            <span className="yoro-home-live-win">{fill(text.liveWins, formatCount(channel.rankedStats.wins))}</span>
+            {" "}
+            <span className="yoro-home-live-loss">{fill(text.liveLosses, formatCount(channel.rankedStats.losses))}</span>
+          </div>
+        ) : channel.riotId ? (
+          <div className="yoro-home-live-meta">{channel.riotId}</div>
+        ) : null}
       </div>
     </>
   );
@@ -103,11 +135,12 @@ function LiveCard({ channel, text }: { channel: PublicTwitchFollowedLolChannel; 
   );
 }
 
-export function HomeLiveSection({ text, connected, followedChannels, onLoginOpen }: {
+export function HomeLiveSection({ text, connected, followedChannels, onLoginOpen, variant = "root" }: {
   text: HomeText;
   connected: boolean;
   followedChannels: PublicTwitchFollowedLolResponse | null;
   onLoginOpen: () => void;
+  variant?: LiveCardVariant;
 }) {
   const liveChannels = (followedChannels?.channels ?? []).filter((channel) => channel.isLive);
 
@@ -123,7 +156,7 @@ export function HomeLiveSection({ text, connected, followedChannels, onLoginOpen
       {liveChannels.length > 0 ? (
         <div className="yoro-home-live-grid">
           {liveChannels.slice(0, 4).map((channel) => (
-            <LiveCard channel={channel} key={channel.twitchUserId || channel.twitchLogin} text={text} />
+            <LiveCard channel={channel} key={channel.twitchUserId || channel.twitchLogin} text={text} variant={variant} />
           ))}
         </div>
       ) : (
@@ -191,7 +224,9 @@ const ELEMENT_COLORS: Record<PalworldElement, string> = {
   neutral: "#8B93A0"
 };
 
-const RARITY_ORDER: readonly AramAugmentRarity[] = ["silver", "gold", "prismatic", "legend"];
+/* 상위 등급부터 — 목업 차트 규칙 "밝을수록 상위 등급"(다크 기준). 색은 순서대로
+   --home-g1(최상위)~g4 를 받으므로 서열 내림차순이어야 램프 방향이 맞습니다. */
+const RARITY_ORDER: readonly AramAugmentRarity[] = ["legend", "prismatic", "gold", "silver"];
 
 function rarityText(text: HomeText, rarity: AramAugmentRarity): string {
   if (rarity === "silver") return text.raritySilver;
@@ -200,17 +235,22 @@ function rarityText(text: HomeText, rarity: AramAugmentRarity): string {
   return text.rarityLegend;
 }
 
-function GameCard({ icon, name, chart, rows }: {
+function GameCard({ icon, name, badge, wide, chart, rows }: {
   icon: React.ReactNode;
   name: string;
+  /* 목업 LoL 카드 제목 옆 패치 버전 배지. */
+  badge?: string;
+  /* 목업 §게임별 데이터의 좌우 비대칭 폭(LoL 쪽이 1.4). */
+  wide?: boolean;
   chart: React.ReactNode;
   rows: Array<{ href: string; label: string }>;
 }) {
   return (
-    <div className="yoro-home-game-card">
+    <div className={`yoro-home-game-card${wide ? " is-wide" : ""}`}>
       <div className="yoro-home-game-card-head">
         {icon}
         <span className="yoro-home-game-card-name">{name}</span>
+        {badge ? <span className="yoro-home-game-card-badge">{badge}</span> : null}
       </div>
       {chart}
       <div className="yoro-home-game-rows">
@@ -249,6 +289,7 @@ function PalCardIcon() {
 
 export function HomeGameDataSection({ text, locale }: { text: HomeText; locale: PublicLocale }) {
   const [rarityCounts, setRarityCounts] = useState<Array<{ rarity: AramAugmentRarity; count: number }> | null>(null);
+  const [patchVersion, setPatchVersion] = useState<string | null>(null);
   const [elementCounts, setElementCounts] = useState<Array<{ element: PalworldElement; count: number }> | null>(null);
 
   /* 실패 시 차트만 조용히 생략합니다 — 홈의 핵심(검색)은 데이터 없이도 동작해야 합니다. */
@@ -264,6 +305,7 @@ export function HomeGameDataSection({ text, locale }: { text: HomeText; locale: 
         if (!response.ok) return;
         const catalog = parseAramAugmentCatalog(await response.json());
         if (!catalog || catalog.augments.length === 0) return;
+        if (catalog.dataVersion) setPatchVersion(catalog.dataVersion);
         const counts = new Map<AramAugmentRarity, number>();
         for (const augment of catalog.augments) {
           counts.set(augment.rarity, (counts.get(augment.rarity) ?? 0) + 1);
@@ -309,8 +351,10 @@ export function HomeGameDataSection({ text, locale }: { text: HomeText; locale: 
               title={text.chartLolTitle}
             />
           ) : null}
+          badge={patchVersion ? text.gamePatchBadge.replace("{version}", patchVersion) : undefined}
           icon={<LolCardIcon />}
           name={text.lolCardName}
+          wide
           rows={[
             { href: localizedPublicUrlForCurrentLocale("/lol"), label: text.rowLolSearch },
             { href: localizedPublicUrlForCurrentLocale("/lol/aram"), label: text.rowLolAram },

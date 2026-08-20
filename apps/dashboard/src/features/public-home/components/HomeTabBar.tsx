@@ -160,31 +160,33 @@ export function HomeBottomTabBar({ text, connected, onLoginOpen }: {
   );
 }
 
-/* LoL 홈: 실서비스 하단 탭 구성(홈·스트리머·참여·칼바람·패치노트)을 수묵 스타일로. */
-export function LolBottomTabBar({ text }: { text: LolHomeText }) {
+export type LolTabItem = "home" | "streamers" | "participation" | "aram" | "patchNotes";
+
+/* LoL 하단 탭: 실서비스 탭 구성(홈·스트리머·참여·칼바람·패치노트)을 수묵 스타일로.
+ * 홈 탭은 메인 홈(/)으로 나가는 출구입니다(2026-08-19 결정 — 활성이어도 aria-current
+ * 없음) — 모바일에선 헤더 nav 가 숨겨져 이 탭이 메인 홈으로 가는 유일한 경로입니다. */
+export function LolBottomTabBar({ text, active = "home" }: { text: LolHomeText; active?: LolTabItem | "none" }) {
+  const items: Array<{ id: LolTabItem; href: string; label: string; icon: React.ReactNode }> = [
+    { id: "home", href: "/", label: text.tabHome, icon: <HouseIcon /> },
+    { id: "streamers", href: "/follow", label: text.tabStreamers, icon: <MonitorIcon /> },
+    { id: "participation", href: "/participation", label: text.tabParticipationShort, icon: <PersonPlusIcon /> },
+    { id: "aram", href: "/lol/aram", label: text.tabAramShort, icon: <StarIcon /> },
+    { id: "patchNotes", href: "/patch-notes", label: text.tabPatchNotes, icon: <DocIcon /> }
+  ];
   return (
     <nav aria-label={text.subnavLabel} className="yoro-home-tabbar yoro-home-tabbar--five">
-      <a aria-current="page" className="yoro-home-tabbar-item is-active" href={localizedPublicUrlForCurrentLocale("/lol")}>
-        <HouseIcon />
-        <span>{text.tabHome}</span>
-        <TabActiveMark />
-      </a>
-      <a className="yoro-home-tabbar-item" href={localizedPublicUrlForCurrentLocale("/follow")}>
-        <MonitorIcon />
-        <span>{text.tabStreamers}</span>
-      </a>
-      <a className="yoro-home-tabbar-item" href={localizedPublicUrlForCurrentLocale("/participation")}>
-        <PersonPlusIcon />
-        <span>{text.tabParticipationShort}</span>
-      </a>
-      <a className="yoro-home-tabbar-item" href={localizedPublicUrlForCurrentLocale("/lol/aram")}>
-        <StarIcon />
-        <span>{text.tabAramShort}</span>
-      </a>
-      <a className="yoro-home-tabbar-item" href={localizedPublicUrlForCurrentLocale("/patch-notes")}>
-        <DocIcon />
-        <span>{text.tabPatchNotes}</span>
-      </a>
+      {items.map((item) => (
+        <a
+          aria-current={item.id === active && item.id !== "home" ? "page" : undefined}
+          className={`yoro-home-tabbar-item${item.id === active ? " is-active" : ""}`}
+          href={localizedPublicUrlForCurrentLocale(item.href)}
+          key={item.id}
+        >
+          {item.icon}
+          <span>{item.label}</span>
+          {item.id === active ? <TabActiveMark /> : null}
+        </a>
+      ))}
     </nav>
   );
 }

@@ -35,6 +35,8 @@ export type ProfileTopStreamerSpotlight = {
 };
 
 export type ProfileTopPanelProps = {
+  /* 이름 줄 서버 칩(목업 프로필 헤드) — 예: "KR". */
+  serverChipLabel?: string;
   gameName: string;
   tagLine: string;
   displayName?: string;
@@ -68,6 +70,9 @@ export type ProfileTopPanelProps = {
   channelUrl?: string;
   channelAriaLabel?: string;
   liveStatus?: { isLive: boolean; label: string };
+  /** 이름 아래 최근 폼 줄(목업 스트리머 변형) — 최신 경기부터 W/L 순서. */
+  recentFormResults?: ReadonlyArray<"win" | "loss">;
+  recentFormLabel?: string;
   /** 히어로 하단에 붙는 프로필 탭. */
   tabs?: ReactNode;
   text: ProfileTopPanelText;
@@ -112,6 +117,7 @@ function defaultProfileLinksLabel(): string {
 }
 
 export function ProfileTopPanel({
+  serverChipLabel,
   favoriteActionLabel,
   favoriteActive,
   favoriteAriaLabel,
@@ -138,6 +144,8 @@ export function ProfileTopPanel({
   channelName,
   channelUrl,
   liveStatus,
+  recentFormLabel,
+  recentFormResults,
   seasonBadges,
   shareAction,
   streamerCast,
@@ -202,6 +210,10 @@ export function ProfileTopPanel({
           mainRoleLabel,
           profileIconUrl,
           profileMetaLabel,
+          serverChipLabel,
+          fetchedAtText,
+          recentFormLabel,
+          recentFormResults,
           streamerStatus: streamerSpotlight ? (streamerSpotlight.isLive ? "live" : "offline") : undefined,
           streamerStatusLabel: streamerSpotlight?.statusLabel,
           summonerLevelAriaLabel,
