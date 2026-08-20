@@ -11,6 +11,9 @@ const publicI18nBase = {
     /* 숙련도 챔피언 블록(목업 스트리머 상단 §2-7). */
     masteryChampionsTitle: "숙련도 챔피언",
     masteryPointsSuffix: "점",
+    /* 챔피언 필터 빈 목록(목업 §2-5). */
+    championFilterEmptyTitle: "이 조건에 맞는 챔피언이 없습니다",
+    championFilterEmptyHint: "큐 또는 기간 필터를 넓혀 보세요",
     refreshLoadingStatus: "최신 전적을 가져오는 중",
     bootPreparing: "화면을 준비하는 중입니다",
     clearSearch: "검색어 지우기",
@@ -526,7 +529,7 @@ const publicI18nBase = {
     shareRecordText: "의 League of Legends 전적을 확인하세요.",
 
     matchShareTitle: "최근 전적 공유 카드",
-    matchShareDescription: "현재 필터의 최근 최대 8경기를 한 장의 이미지로 정리합니다.",
+    matchShareDescription: "현재 필터의 최근 최대 20경기를 한 장의 이미지로 정리합니다.",
     matchShareDownload: "이미지 저장",
     matchShareNative: "SNS 공유",
     matchSharePreparing: "공유 이미지를 만드는 중입니다.",
@@ -926,6 +929,8 @@ const publicI18nBase = {
     searchLoadingStatus: "戦績を読み込み中",
     masteryChampionsTitle: "熟練度チャンピオン",
     masteryPointsSuffix: "点",
+    championFilterEmptyTitle: "この条件に合うチャンピオンがありません",
+    championFilterEmptyHint: "キューまたは期間フィルターを広げてください",
     refreshLoadingStatus: "最新の戦績を取得中",
     bootPreparing: "画面を準備しています",
     clearSearch: "検索語を削除",
@@ -1436,7 +1441,7 @@ const publicI18nBase = {
     shareRecordText: "のLeague of Legends戦績を確認しましょう。",
 
     matchShareTitle: "最近の戦績シェアカード",
-    matchShareDescription: "現在のフィルターから最近の最大8試合を1枚の画像にまとめます。",
+    matchShareDescription: "現在のフィルターから最近の最大20試合を1枚の画像にまとめます。",
     matchShareDownload: "画像を保存",
     matchShareNative: "SNSで共有",
     matchSharePreparing: "共有画像を作成しています。",

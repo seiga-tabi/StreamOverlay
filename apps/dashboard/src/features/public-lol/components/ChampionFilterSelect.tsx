@@ -5,6 +5,10 @@ export type ChampionFilterOption = {
   label: ReactNode;
   iconUrl?: string;
   fallbackLabel?: string;
+  /* 목업 §2-4 — championPerformance 에서 이어 붙인 값. 없는 챔피언은 메타 줄을
+     비웁니다(0 이나 "-" 로 채우지 않음). */
+  games?: number;
+  winRate?: number;
 };
 
 export type ChampionFilterSelectProps = {
@@ -14,6 +18,13 @@ export type ChampionFilterSelectProps = {
   labelJa: string;
   allLabel: ReactNode;
   options: ChampionFilterOption[];
+  /** "게임" — 메타 줄의 경기수 접미(기존 t().games). */
+  gamesSuffix?: string;
+  /** "모든 챔피언" 행의 전체 경기수. 승률은 붙이지 않습니다(요약 줄이 이미 말함). */
+  allGames?: number;
+  /** 빈 목록(필터에 걸린 경기가 없어 챔피언이 없음) 안내 — 목업 §2-5. */
+  emptyTitle?: string;
+  emptyHint?: string;
   onChange: (value: string) => void;
 };
 
@@ -24,6 +35,10 @@ export function ChampionFilterSelect({
   labelJa,
   allLabel,
   options,
+  gamesSuffix,
+  allGames,
+  emptyTitle,
+  emptyHint,
   onChange
 }: ChampionFilterSelectProps) {
   const [open, setOpen] = useState(false);
@@ -33,7 +48,12 @@ export function ChampionFilterSelect({
   const labelId = useId();
   const selectedValueId = useId();
   const listboxId = useId();
-  const allOption: ChampionFilterOption = { value: "all", label: allLabel, fallbackLabel: "∞" };
+  const allOption: ChampionFilterOption = {
+    value: "all",
+    label: allLabel,
+    fallbackLabel: "∞",
+    ...(allGames !== undefined ? { games: allGames } : {}),
+  };
   const allOptions = [allOption, ...options];
   const selectedOption = allOptions.find((option) => option.value === value) ?? allOption;
 
@@ -127,7 +147,18 @@ export function ChampionFilterSelect({
           ref={listRef}
           role="listbox"
         >
-          {allOptions.map((option) => (
+          {options.length === 0 ? (
+            /* 빈 목록(목업 §2-5) — 필터에 걸린 경기가 없어 챔피언이 하나도 없습니다.
+               "모든 챔피언" 한 줄만 남기면 고장처럼 보여, 이유를 문장으로 말합니다. */
+            <div className="public-champion-filter-empty" role="presentation">
+              <svg aria-hidden="true" fill="none" height="20" stroke="var(--public-gray-border-strong, #4a5563)" strokeWidth="1.2" viewBox="0 0 20 20" width="20">
+                <circle cx="9" cy="9" r="6" />
+                <path d="M13.5 13.5 L 18 18" />
+              </svg>
+              <span>{emptyTitle}</span>
+              <small>{emptyHint}</small>
+            </div>
+          ) : allOptions.map((option) => (
             <button
               aria-selected={option.value === selectedOption.value}
               className="public-champion-filter-option"
@@ -140,8 +171,26 @@ export function ChampionFilterSelect({
             >
               <ChampionFilterMedia option={option} />
               <strong>{option.label}</strong>
+              {/* 경기수 · 승률(목업 §2-4) — 값이 있는 챔피언만. 승률만 전용색. */}
+              {option.games !== undefined ? (
+                <span className="public-champion-filter-meta">
+                  {option.games}{gamesSuffix}
+                  {option.winRate !== undefined ? (
+                    <>
+                      {" · "}
+                      <em className={option.winRate >= 50 ? "is-win" : "is-loss"}>
+                        {Math.round(option.winRate)}%
+                      </em>
+                    </>
+                  ) : null}
+                </span>
+              ) : null}
               <span className="public-champion-filter-check" aria-hidden="true">
-                {option.value === selectedOption.value ? "✓" : ""}
+                {option.value === selectedOption.value ? (
+                  <svg fill="none" height="8" stroke="currentColor" strokeWidth="1.4" viewBox="0 0 12 9" width="11">
+                    <path d="M1 4.6 L 4.4 8 L 11 1" />
+                  </svg>
+                ) : null}
               </span>
             </button>
           ))}

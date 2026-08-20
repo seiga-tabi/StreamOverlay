@@ -139,19 +139,9 @@ function LpSparkline({ trend }: { trend: ProfileHeroRankTrend }) {
           y2={segment.to.y.toFixed(1)}
         />
       ))}
-      {coords.slice(1, -1).map((point, index) => (
-        point.tierKey !== coords[index]!.tierKey ? (
-          <circle
-            className="tier-change"
-            cx={point.x.toFixed(1)}
-            cy={point.y.toFixed(1)}
-            key={`change-${index}`}
-            r="3.5"
-            stroke={tierLpColor(point.tierKey)}
-          />
-        ) : null
-      ))}
-      <circle className="head" cx={last.x.toFixed(1)} cy={last.y.toFixed(1)} r="3" fill={tierLpColor(last.tierKey)} />
+      {/* 점은 그리지 않는다 — 선만(그래프 대비 규격 §3-1 갱신판). 44px 카드에서는
+          끝점·티어 변동점이 선보다 먼저 읽혀 추이를 가립니다. 티어 변동은 세그먼트
+          색 전환이 그대로 전달합니다. 사이드바 LP 기록 그래프는 커서 점을 남깁니다. */}
     </svg>
   );
 }

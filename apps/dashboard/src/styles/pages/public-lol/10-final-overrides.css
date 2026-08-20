@@ -941,10 +941,16 @@
   background: color-mix(in srgb, var(--yoro-color-text-on-dark) 6%, transparent) !important;
 }
 
-.public-dashboard-shell .public-champion-filter-select .public-champion-filter-trigger:focus-visible,
-.public-dashboard-shell .public-champion-filter-select .public-champion-filter-option:focus-visible {
+.public-dashboard-shell .public-champion-filter-select .public-champion-filter-trigger:focus-visible {
   outline: var(--yoro-focus-ring-width) solid var(--yoro-color-focus-ring) !important;
   outline-offset: var(--yoro-focus-ring-offset);
+}
+
+/* 옵션 포커스는 배경이 아니라 외곽선(목업 §2-1) — 포커스와 선택이 같은 표현이면
+   화살표로 훑을 때 지금 어디인지 알 수 없습니다. */
+.public-dashboard-shell .public-champion-filter-select .public-champion-filter-option:focus-visible {
+  outline: 1px solid var(--public-gray-muted) !important;
+  outline-offset: -1px;
 }
 
 .public-dashboard-shell .public-champion-filter-select .public-champion-filter-trigger strong,
@@ -994,47 +1000,56 @@
   position: absolute;
   z-index: var(--yoro-z-overlay);
   inset-block-start: calc(100% + var(--yoro-space-1));
-  inset-inline: var(--yoro-space-0);
+  /* 목업 §2-3 — 트리거 폭(147px)에서 분리해 이름이 잘리지 않는 288px 로.
+     화면 오른쪽 끝에서는 max-width 가 잘림을 막습니다. */
+  inset-inline-start: 0;
+  inset-inline-end: auto;
+  width: 18rem;
+  max-width: min(18rem, calc(100vw - 2rem));
   display: grid;
-  gap: var(--yoro-space-1);
+  gap: var(--yoro-space-0);
   max-height: var(--yoro-size-champion-filter-menu-max-height);
-  padding: var(--yoro-space-2);
+  padding: 4px;
   overflow-x: hidden;
   overflow-y: auto;
-  border: var(--yoro-size-sr-only) solid var(--public-gray-border-strong);
-  border-radius: var(--yoro-radius-md);
-  background: var(--public-gray-surface-strong);
-  box-shadow: var(--yoro-shadow-panel);
+  /* 목업 패널 문법(§2-2) — r3 · --card · .5px --line · 그림자 없음. */
+  border: .5px solid var(--public-gray-border);
+  border-radius: 3px;
+  background: var(--public-gray-surface);
+  box-shadow: none;
   overscroll-behavior: contain;
-  scrollbar-color: var(--yoro-color-border-strong) var(--public-gray-surface-strong);
+  scrollbar-color: var(--public-gray-border) var(--public-gray-surface);
   scrollbar-gutter: stable;
 }
 
 .public-dashboard-shell .public-champion-filter-select .public-champion-filter-option {
   display: grid !important;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   gap: var(--yoro-space-2) !important;
   align-items: center !important;
   width: 100% !important;
   min-width: var(--yoro-space-0) !important;
   min-height: var(--yoro-size-touch-target) !important;
-  padding: var(--yoro-space-1) var(--yoro-space-2) !important;
+  padding: 0 10px !important;
   border: 0 !important;
-  border-radius: var(--yoro-radius-sm) !important;
+  border-radius: 2px !important;
   background: transparent !important;
-  color: var(--public-gray-text) !important;
+  color: var(--public-gray-muted) !important;
   box-shadow: var(--yoro-shadow-none) !important;
   text-align: start;
 }
 
 .public-dashboard-shell .public-champion-filter-select .public-champion-filter-option:hover,
 .public-dashboard-shell .public-champion-filter-select .public-champion-filter-option:focus-visible {
-  background: var(--public-gray-surface) !important;
+  background: var(--public-gray-page) !important;
 }
 
+/* 선택은 색이 아니라 무게와 체크(목업 §2-1) — hover 와 같은 배경이라도
+   글자 700 + 체크로 구분됩니다. 보라(--yoro-color-secondary-strong)는 걷어냅니다. */
 .public-dashboard-shell .public-champion-filter-select .public-champion-filter-option[aria-selected="true"] {
-  background: var(--yoro-color-secondary-strong) !important;
-  color: var(--yoro-color-text-on-dark) !important;
+  background: var(--public-gray-page) !important;
+  color: var(--public-gray-text) !important;
+  font-weight: 700;
 }
 
 /* Public app header: 45rem 이하의 한 줄 도구 모음과 스크롤 내비게이션 */

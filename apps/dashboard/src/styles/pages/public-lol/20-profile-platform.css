@@ -2281,8 +2281,9 @@
     "status status";
   gap: var(--yoro-space-2) var(--yoro-space-3);
   align-items: center;
-  /* 목업 문법: 그라데이션 없는 먹 표면 + 헤어라인. */
-  background: var(--public-gray-surface-strong);
+  /* 목업 문법: 그라데이션 없는 먹 표면 + 헤어라인 — 다른 패널과 같은
+     --card(#252730, 라이트 #FFFFFF). surface-strong(#21232B)은 목록·행과 어긋납니다. */
+  background: var(--public-gray-surface);
 }
 
 .public-profile-platform-v2 .public-match-share-actions > div:first-child {

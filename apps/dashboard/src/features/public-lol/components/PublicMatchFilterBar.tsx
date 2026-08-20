@@ -18,6 +18,9 @@ export type PublicMatchFilterChampionOption = {
   label: ReactNode;
   iconUrl?: string;
   fallbackLabel?: string;
+  /* 목업 §2-4 — championPerformance 에서 이어 붙인 경기수·승률(없으면 미표기). */
+  games?: number;
+  winRate?: number;
 };
 
 export type PublicMatchFilterBarText = {
@@ -39,12 +42,19 @@ export type PublicMatchFilterBarText = {
   periodAll: ReactNode;
   period7: ReactNode;
   period30: ReactNode;
+  /** "게임" — 챔피언 목록 메타 줄 접미(기존 t().games). */
+  gamesSuffix?: string;
+  /** 빈 챔피언 목록 안내 2줄(목업 §2-5). */
+  championsEmptyTitle?: string;
+  championsEmptyHint?: string;
 };
 
 export type PublicMatchFilterBarProps = {
   filters: PublicMatchFilterBarFilters;
   filterActive: boolean;
   championOptions: PublicMatchFilterChampionOption[];
+  /** "모든 챔피언" 행에 붙는 전체 경기수(승률은 붙이지 않음 — 요약 줄 소관). */
+  championAllGames?: number;
   text: PublicMatchFilterBarText;
   /** 필터 적용 결과 한 줄 요약. aria-live 로 읽힙니다. */
   resultSummary?: ReactNode;
@@ -58,6 +68,7 @@ export type PublicMatchFilterBarProps = {
 export function PublicMatchFilterBar({
   filters,
   filterActive,
+  championAllGames,
   championOptions,
   text,
   resultSummary,
@@ -95,7 +106,11 @@ export function PublicMatchFilterBar({
           ))}
         </div>
         <ChampionFilterSelect
+          allGames={championAllGames}
           allLabel={text.allChampions}
+          emptyHint={text.championsEmptyHint}
+          emptyTitle={text.championsEmptyTitle}
+          gamesSuffix={text.gamesSuffix}
           label={text.championFilter.label}
           labelJa={text.championFilter.ja}
           labelKo={text.championFilter.ko}

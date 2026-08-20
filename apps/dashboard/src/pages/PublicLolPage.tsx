@@ -3081,23 +3081,37 @@ function PublicFilterPanel({
 function PublicMatchFilterBar({
   filters,
   champions,
+  championPerformance,
+  totalGames,
   onChange,
   onReset,
   resultSummary
 }: {
   filters: PublicMatchFilters;
   champions: LolChampionSummary[];
+  /* 목업 §2-4 — 목록 행의 경기수·승률. profile.championPerformance(주력 챔피언
+     칩과 같은 배열, 모집단 동일)를 championId 로 이어 붙입니다. 서버 계약 불변. */
+  championPerformance?: PublicLolChampionPerformance[];
+  totalGames?: number;
   onChange: (filters: PublicMatchFilters) => void;
   onReset: () => void;
   resultSummary?: ReactNode;
 }) {
   const filterActive = hasActiveFilters(filters);
-  const championOptions = champions.map((champion) => ({
-    value: String(champion.championId),
-    label: championName(champion),
-    iconUrl: assetUrl(champion.iconUrl),
-    fallbackLabel: championName(champion).slice(0, 1)
-  }));
+  const performanceById = new Map(
+    (championPerformance ?? []).map((entry) => [entry.champion.championId, entry]),
+  );
+  const championOptions = champions.map((champion) => {
+    const performance = performanceById.get(champion.championId);
+    return {
+      value: String(champion.championId),
+      label: championName(champion),
+      iconUrl: assetUrl(champion.iconUrl),
+      fallbackLabel: championName(champion).slice(0, 1),
+      /* 값이 없는 챔피언은 필드를 아예 두지 않아 메타 줄이 비워집니다. */
+      ...(performance ? { games: performance.games, winRate: performance.winRate } : {}),
+    };
+  });
   const text: PublicMatchFilterBarText = {
     filter: {
       label: t().filter,
@@ -3136,10 +3150,14 @@ function PublicMatchFilterBar({
     periodAll: t().periodAll,
     period7: t().period7,
     period30: t().period30,
-    queueGroupLabel: t().matchFilterQueueGroup
+    queueGroupLabel: t().matchFilterQueueGroup,
+    gamesSuffix: t().games,
+    championsEmptyTitle: t().championFilterEmptyTitle,
+    championsEmptyHint: t().championFilterEmptyHint
   };
   return (
     <FeaturePublicMatchFilterBar
+      championAllGames={totalGames}
       championOptions={championOptions}
       filterActive={filterActive}
       filters={filters}
@@ -6188,7 +6206,9 @@ function RecentMatches({
   /* 그날의 종합(A안) — 로컬 날짜 경계마다 요약 바를 끼웁니다.
      요약은 보이는(필터 반영) 목록 합계 · docs/mockups/lol-daily-summary.html */
   const matchRowsWithDailySummaries = withLolDailySummaryBars(profile.recentMatches, matchRows);
-  const shareMatches: RecentMatchShareItem[] = profile.recentMatches.slice(0, 8).map((match) => {
+  /* 공유 이미지는 요약(20경기)과 같은 수를 담습니다(목업 §2-7) — 현재 필터
+     목록이 이미 갖고 있는 20경기를 그대로 쓰는 것이라 새 데이터가 아닙니다. */
+  const shareMatches: RecentMatchShareItem[] = profile.recentMatches.slice(0, 20).map((match) => {
     const aiScore = matchAiScore(match);
     const highlight = matchHighlightBadges(match.badges)[0]?.code;
     return {
@@ -6321,9 +6341,11 @@ function RecentMatches({
       filterBar={(
         <PublicMatchFilterBar
           champions={champions}
+          championPerformance={profile.championPerformance}
           filters={filters}
           onChange={onFilters}
           onReset={onResetFilters}
+          totalGames={profile.summary.recentGames}
           /* 프래그먼트는 내용이 없어도 truthy — 빈 요약 컨테이너가 렌더되지 않게 조건부로 합칩니다. */
           resultSummary={augmentFilterNotice ? <>{filterResultSummary}{augmentFilterNotice}</> : filterResultSummary}
         />
@@ -6355,6 +6377,7 @@ function RecentMatches({
             wins: t().matchShareWins,
             losses: t().matchShareLosses,
             winRate: t().matchShareWinRate,
+            recordTitle: t().matchRecordTab,
           }}
         />
       )}

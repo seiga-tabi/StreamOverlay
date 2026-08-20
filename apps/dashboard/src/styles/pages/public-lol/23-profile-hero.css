@@ -542,7 +542,6 @@
      달라서 클래스 하나로 고정할 수 없음) — 여기서는 굵기 등 색 이외의 값만 잡습니다. */
   .public-profile-hero-sparkline { display: block; width: 100%; max-width: 11rem; height: 2.75rem; }
   .public-profile-hero-sparkline .area { opacity: .28; }
-  .public-profile-hero-sparkline .tier-change { fill: var(--yoro-color-ground); stroke-width: 2; }
 
   .public-profile-hero-trend-foot {
     color: var(--yoro-color-text-on-dark-muted);
