@@ -6,6 +6,9 @@ export type RecentMatchesSummaryChampion = {
   iconUrl?: string;
   fallbackLabel: string;
   metaLabel: string;
+  /* 칩 안 승률만 전용색(목업 §3-2). 50% 이상 청자, 미만 홍옥. */
+  winRateLabel?: string;
+  winRateTone?: "win" | "loss";
 };
 
 export type RecentMatchesSummaryStripText = {
@@ -92,6 +95,9 @@ export function RecentMatchesSummaryStrip({
                     : <i aria-hidden="true">{champion.fallbackLabel}</i>}
                   <b>{champion.name}</b>
                   <small>{champion.metaLabel}</small>
+                  {champion.winRateLabel
+                    ? <em className={champion.winRateTone === "loss" ? "is-loss" : "is-win"}>{champion.winRateLabel}</em>
+                    : null}
                 </span>
               ))}
             </div>

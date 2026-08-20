@@ -178,7 +178,8 @@ export const SIGNATURE_BUILD_MIN_GAMES = 2;
 export const SIGNATURE_BUILD_MAX_CHAMPIONS = 3;
 export const SIGNATURE_BUILD_MAX_GHOSTS = 2;
 const SIGNATURE_BUILD_MAX_GROUPS = 2;
-const SIGNATURE_BUILD_MAX_ITEMS = 5;
+/* 빌드 카드의 아이템 슬롯 수 — UI 가 미구매 슬롯(점선)을 같은 수로 패딩합니다. */
+export const SIGNATURE_BUILD_MAX_ITEMS = 5;
 /* 트링킷(장신구) 슬롯 — 빌드가 아니므로 집계에서 제외합니다. */
 const TRINKET_SLOT = 6;
 

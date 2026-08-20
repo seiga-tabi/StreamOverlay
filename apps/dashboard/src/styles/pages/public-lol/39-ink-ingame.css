@@ -1,0 +1,471 @@
+/* 인게임 — 목업 "LoL 탭 리디자인"(인게임 · 게임 중 / 대기·확인·오류 / 모바일).
+ *
+ * .public-ingame-board 이하는 이 파일이 pages layer 에서 단독 소유하는 신설
+ * 네임스페이스입니다. 02-legacy 의 .public-ingame-panel/-empty 파스텔
+ * !important 58건과 셀렉터를 공유하지 않으므로 !important 가 필요 없습니다.
+ *
+ * 팔레트는 .public-profile-platform-v2 토큰만 씁니다(20-profile-platform.css).
+ * 팀 표식은 승패색이 아니라 무채(--profile-team-ally/--profile-team-enemy,
+ * 라이트에서 반전)입니다.
+ */
+
+@layer pages {
+  .public-ingame-board {
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+    color: var(--public-gray-text);
+  }
+
+  /* ── 상태 카드(헤드 + 4칸 분할 | 빈 상태) ── */
+  .public-ingame-status {
+    border: .5px solid var(--public-gray-border);
+    border-radius: 3px;
+    background: var(--public-gray-surface);
+    overflow: hidden;
+  }
+
+  .public-ingame-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5rem .75rem;
+    padding: 1rem 1.125rem;
+  }
+
+  /* 빈 상태(게임 중 아님·확인·오류)에서는 헤드 아래 분할선(목업). */
+  .public-ingame-board:not(.live) .public-ingame-head {
+    padding-block: .9375rem;
+    border-bottom: .5px solid var(--public-gray-border);
+  }
+
+  .public-ingame-head > h2 {
+    margin: 0;
+    font-size: .9375rem;
+    font-weight: 800;
+    letter-spacing: -.01em;
+  }
+
+  .public-ingame-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
+    color: var(--public-gray-muted);
+    font-size: .6875rem;
+    font-weight: 700;
+  }
+
+  .public-ingame-state > i {
+    width: 6px;
+    height: 6px;
+    border-radius: 99px;
+    background: var(--public-gray-muted);
+  }
+
+  /* LIVE(게임 중)만 홍옥 — 방송 관례색. 나머지 상태는 무채. */
+  .public-ingame-state.live {
+    border-color: color-mix(in srgb, var(--profile-loss-fill) 55%, transparent);
+    /* 11px 굵은 글자 — 채움색이 아니라 글자용 ink(그래프 대비 규격). */
+    color: var(--graph-loss-ink);
+    font-weight: 800;
+    letter-spacing: .06em;
+  }
+
+  .public-ingame-state.live > i { background: var(--yoro-color-match-loss-accent); }
+
+  .public-ingame-state.unavailable {
+    border-color: color-mix(in srgb, var(--profile-loss-fill) 55%, transparent);
+    color: var(--graph-loss-ink);
+  }
+
+  .public-ingame-state.unavailable > i { background: var(--yoro-color-match-loss-accent); }
+
+  .public-ingame-auto,
+  .public-ingame-meta {
+    color: var(--public-gray-muted);
+    font-size: .6875rem;
+  }
+
+  .public-ingame-meta { margin-left: auto; text-align: right; }
+
+  /* ── 4칸 분할(경과·큐·인원·평균 티어) — 카드 4장 대신 분할선 한 줄. ── */
+  .public-ingame-facts {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding: 0 1.125rem .9375rem;
+  }
+
+  .public-ingame-fact { min-width: 0; padding: 0 1.125rem; border-left: .5px solid var(--public-gray-border); }
+  .public-ingame-fact:first-child { padding-left: 0; border-left: 0; }
+  .public-ingame-fact:last-child { padding-right: 0; }
+
+  .public-ingame-fact > span {
+    display: block;
+    color: var(--public-gray-muted);
+    font-size: .625rem;
+    font-weight: 700;
+  }
+
+  .public-ingame-fact > strong {
+    display: block;
+    margin-top: 7px;
+    font-size: .875rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .public-ingame-fact.is-elapsed > strong {
+    margin-top: 5px;
+    font-size: 1.375rem;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .public-ingame-fact > strong > small {
+    margin-left: 4px;
+    color: var(--public-gray-muted);
+    font-size: .6875rem;
+    font-weight: 400;
+  }
+
+  /* ── 빈 상태(게임 중 아님·확인 중·조회 불가) — 먹판 + 붓선(목업). ── */
+  .public-ingame-idle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .625rem;
+    padding: 2.875rem 1.125rem;
+    text-align: center;
+  }
+
+  .public-ingame-ink {
+    width: 11rem;
+    height: 3.25rem;
+    color: var(--public-gray-border);
+  }
+
+  .public-ingame-idle > strong {
+    font-size: 1.0625rem;
+    font-weight: 800;
+    letter-spacing: -.01em;
+  }
+
+  .public-ingame-idle > small {
+    color: var(--public-gray-muted);
+    font-size: .75rem;
+  }
+
+  .public-ingame-idle-actions {
+    display: flex;
+    align-items: center;
+    gap: .625rem;
+    margin-top: 6px;
+  }
+
+  /* 목업 out-btn 규격 — .public-profile-hero-refresh 와 같은 스트로크 아웃라인. */
+  .public-ingame-recheck {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: var(--yoro-size-touch-target);
+    padding: 0 1.125rem;
+    border: .5px solid var(--public-gray-muted);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--public-gray-text);
+    font: inherit;
+    font-size: .8125rem;
+    font-weight: 800;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .public-ingame-recheck:hover {
+    background: color-mix(in srgb, var(--public-gray-text) 6%, transparent);
+  }
+
+  .public-ingame-recheck:focus-visible {
+    outline: var(--yoro-focus-ring-width) solid var(--yoro-color-focus-ring);
+    outline-offset: var(--yoro-focus-ring-offset);
+  }
+
+  /* 확인 중 진행 바 — 3px 헤어라인 트랙 + 심회 채움 스윕(reduced motion 정지). */
+  .public-ingame-progress {
+    display: block;
+    width: min(20rem, 70%);
+    height: 3px;
+    margin-top: 6px;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
+    background: var(--public-gray-page);
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  .public-ingame-progress > i {
+    display: block;
+    width: 38%;
+    height: 100%;
+    background: var(--yoro-color-public-primary);
+    animation: public-ingame-progress-sweep 1.6s ease-in-out infinite alternate;
+  }
+
+  @keyframes public-ingame-progress-sweep {
+    from { translate: 0; }
+    to { translate: 160%; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .public-ingame-progress > i { animation: none; }
+  }
+
+  /* ── 팀 2열 — 파랑/빨강 배경 없이 먹판 + 라벨 앞 무채 사각 표식. ── */
+  .public-ingame-sides {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .75rem;
+  }
+
+  .public-ingame-side {
+    min-width: 0;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 3px;
+    background: var(--public-gray-surface);
+    overflow: hidden;
+  }
+
+  .public-ingame-side-head {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .8125rem 1rem;
+  }
+
+  .public-ingame-side-mark {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border: .5px solid var(--profile-team-ally);
+    background: var(--profile-team-ally);
+    box-sizing: border-box;
+  }
+
+  .public-ingame-side.is-enemy .public-ingame-side-mark {
+    border-color: var(--profile-team-enemy);
+    background: var(--profile-team-enemy);
+  }
+
+  .public-ingame-side-head > b { font-size: .8125rem; font-weight: 800; }
+
+  .public-ingame-side-head > span {
+    min-width: 0;
+    color: var(--public-gray-muted);
+    font-size: .6875rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .public-ingame-side-chip {
+    flex: none;
+    margin-left: auto;
+    padding: 1px 7px;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
+    color: var(--public-gray-muted);
+    font-size: .625rem;
+    font-style: normal;
+    font-weight: 700;
+  }
+
+  /* 상대 팀 보기 토글 — 모바일 전용(데스크톱은 두 팀이 항상 펼쳐짐). */
+  .public-ingame-enemy-toggle { display: none; }
+
+  .public-ingame-cols {
+    display: grid;
+    grid-template-columns: 2.375rem minmax(0, 1fr) 2.625rem minmax(3.25rem, auto) minmax(4rem, auto);
+    gap: .625rem;
+    align-items: center;
+    padding: 0 1rem .4375rem;
+    color: var(--public-gray-muted);
+    font-size: .625rem;
+    font-weight: 700;
+  }
+
+  .public-ingame-cols > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .public-ingame-cols > span[data-cell="tier"],
+  .public-ingame-cols > span[data-cell="record"] { text-align: right; }
+
+  .public-ingame-row {
+    display: grid;
+    grid-template-columns: 2.375rem minmax(0, 1fr) 2.625rem minmax(3.25rem, auto) minmax(4rem, auto);
+    gap: .625rem;
+    align-items: center;
+    padding: .5625rem 1rem;
+    border-top: .5px solid var(--public-gray-border);
+  }
+
+  /* 본인 행 — 채움 대신 4% 워시(라이트는 먹 4.5%)와 '나' 칩. */
+  .public-ingame-row.is-target { background: var(--profile-row-wash); }
+
+  .public-ingame-champ {
+    display: grid;
+    place-items: center;
+    width: 2.125rem;
+    height: 2.125rem;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 99px;
+    background: var(--public-gray-page);
+    color: var(--public-gray-muted);
+    font-size: .75rem;
+    font-weight: 800;
+    overflow: hidden;
+  }
+
+  .public-ingame-champ > img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
+
+  .public-ingame-name { min-width: 0; }
+
+  .public-ingame-name-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .public-ingame-name-line .public-riot-id-link,
+  .public-ingame-name-line .public-riot-id-static {
+    display: block;
+    min-width: 0;
+    border: 0;
+    background: none;
+    padding: 0;
+    color: var(--public-gray-text);
+    font-size: .75rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+  }
+
+  .public-ingame-name-line .public-riot-id-static { cursor: default; }
+  .public-ingame-name-line .public-riot-id-link:hover { color: var(--public-gray-muted); }
+  .public-ingame-row.is-target .public-riot-id-link,
+  .public-ingame-row.is-target .public-riot-id-static { font-weight: 800; }
+
+  .public-ingame-me {
+    flex: none;
+    padding: 1px 6px;
+    border: .5px solid var(--public-gray-muted);
+    border-radius: 2px;
+    color: var(--public-gray-text);
+    font-size: .5625rem;
+    font-style: normal;
+    font-weight: 700;
+  }
+
+  .public-ingame-name > small {
+    display: block;
+    margin-top: 2px;
+    color: var(--public-gray-muted);
+    font-size: .6875rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* 티어 열이 보이는 폭에서는 이름 줄의 티어 병합을 접습니다. */
+  .public-ingame-name-tier { display: none; }
+
+  /* 스펠 2칸 — 17px 헤어라인 사각. 룬 데이터가 없어 룬 원은 그리지 않습니다. */
+  .public-ingame-spells { display: flex; gap: 3px; }
+
+  .public-ingame-spells > i {
+    width: 1.0625rem;
+    height: 1.0625rem;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
+    background: var(--public-gray-page);
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  .public-ingame-spells > i > img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+  .public-ingame-tier { text-align: right; font-variant-numeric: tabular-nums; }
+
+  .public-ingame-tier > b { display: block; font-size: .75rem; font-weight: 700; }
+  .public-ingame-tier > b.is-unranked { color: var(--public-gray-muted); }
+
+  .public-ingame-tier > small {
+    display: block;
+    margin-top: 2px;
+    color: var(--public-gray-muted);
+    font-size: .6875rem;
+  }
+
+  .public-ingame-record {
+    text-align: right;
+    font-size: .6875rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .public-ingame-record > b { display: block; font-size: .8125rem; font-weight: 800; }
+
+  .public-ingame-record > small { display: block; margin-top: 2px; color: var(--public-gray-muted); }
+  .public-ingame-record .is-win { color: var(--graph-win-ink); font-weight: 700; }
+  .public-ingame-record .is-loss { color: var(--graph-loss-ink); font-weight: 700; }
+  .public-ingame-record > small.is-none { color: var(--public-gray-muted); }
+
+  /* ── 모바일(<48rem): 팀 세로 스택 + 상대 팀 접기 + 티어 열 병합(목업). ── */
+  @media (max-width: 47.9375rem) {
+    .public-ingame-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: .75rem; }
+    .public-ingame-fact:nth-child(odd) { padding-left: 0; border-left: 0; }
+    .public-ingame-fact:nth-child(even) { padding-right: 0; }
+
+    .public-ingame-sides { grid-template-columns: minmax(0, 1fr); }
+
+    .public-ingame-enemy-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex: none;
+      min-height: 2rem;
+      padding: 0 .5625rem;
+      border: .5px solid var(--public-gray-border);
+      border-radius: 2px;
+      background: transparent;
+      color: var(--public-gray-muted);
+      font: inherit;
+      font-size: .6875rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .public-ingame-enemy-toggle[aria-expanded="true"] > svg { rotate: 180deg; }
+
+    .public-ingame-side.is-enemy .public-ingame-side-chip { display: none; }
+    .public-ingame-side.is-enemy.is-collapsed :is(.public-ingame-cols, .public-ingame-rows) { display: none; }
+
+    .public-ingame-cols { display: none; }
+
+    .public-ingame-row {
+      grid-template-columns: 1.875rem minmax(0, 1fr) 2.625rem minmax(3.25rem, auto);
+      padding-inline: .875rem;
+    }
+
+    .public-ingame-champ { width: 1.875rem; height: 1.875rem; font-size: .6875rem; }
+
+    /* 티어 열을 접고 이름 줄에 병합합니다. */
+    .public-ingame-tier { display: none; }
+    .public-ingame-name-tier { display: inline; }
+  }
+}

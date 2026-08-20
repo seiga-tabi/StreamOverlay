@@ -64,7 +64,9 @@ export type ProfileTopPanelProps = {
   shareAction?: ReactNode;
   /** 큐 세그먼트 + 티어 상세. 랭크 정보를 히어로가 단독으로 소유합니다. */
   rankSection?: ReactNode;
-  /** 등록 스트리머의 방송 카드. 랭크와 같은 행에 놓여 히어로 높이를 늘리지 않습니다. */
+  /** 랭크 격자 아래 전폭으로 붙는 최근 20경기 요약 바(목업 §B). */
+  summaryBar?: ReactNode;
+  /** 등록 스트리머의 방송 카드 — 목업 격자(1.25fr 1.05fr .85fr)의 첫 칸입니다. */
   streamerCast?: ReactNode;
   channelName?: string;
   channelUrl?: string;
@@ -148,6 +150,7 @@ export function ProfileTopPanel({
   recentFormResults,
   seasonBadges,
   shareAction,
+  summaryBar,
   streamerCast,
   streamerSpotlight,
   summonerLevelAriaLabel,
@@ -229,10 +232,14 @@ export function ProfileTopPanel({
       {rankSection || streamerCast ? (
         <>
           <span aria-hidden="true" className="public-profile-hero-rule" />
-          {/* 방송 카드는 랭크와 같은 행에 놓입니다. 행을 늘리지 않아야 히어로가 커지지 않습니다. */}
-          <div className={`public-profile-hero-body${streamerCast ? " has-cast" : ""}`}>
-            {rankSection}
-            {streamerCast}
+          {/* 목업 상단 격자: 스트리머면 [방송 카드 | 솔로 확장 | 자유·5:5 스택]
+             (1.25fr 1.05fr .85fr), 아니면 랭크 3카드. 요약 바는 격자 밖 전폭. */}
+          <div className="public-profile-hero-body">
+            <div className={`public-profile-hero-top${streamerCast ? " has-cast" : ""}`}>
+              {streamerCast}
+              {rankSection}
+            </div>
+            {summaryBar}
           </div>
         </>
       ) : null}

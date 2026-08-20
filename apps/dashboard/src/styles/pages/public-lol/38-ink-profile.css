@@ -25,6 +25,37 @@
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 12'%3E%3Cpath d='M2 5.5 C 50 1.5, 100 11, 176 5.2 C 120 8.4, 55 7.5, 2 9 Z'/%3E%3C/svg%3E") no-repeat center / contain;
   }
 
+  /* 프로필 탭 스트립 — 모바일(<48rem)은 가로 스크롤 대신 4칸 균등 분할
+     (목업 LoL 탭 리디자인 모바일 보드). 축약 라벨은 챔피언 분석 탭만. */
+  .public-profile-platform-v2 .public-profile-hero-nav .public-profile-tab-short { display: none; }
+
+  @media (max-width: 47.9375rem) {
+    .public-profile-platform-v2 .public-profile-hero-nav {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0;
+      overflow: visible;
+    }
+
+    .public-profile-platform-v2 .public-profile-hero-nav button {
+      justify-content: center;
+      min-height: var(--yoro-size-touch-target);
+      padding-inline: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .public-profile-platform-v2 .public-profile-hero-nav .public-profile-tab-full { display: none; }
+    .public-profile-platform-v2 .public-profile-hero-nav .public-profile-tab-short { display: inline; }
+
+    /* 꼬리 밑줄도 칸 중앙으로. */
+    .public-profile-platform-v2 .public-profile-hero-nav button[aria-current="page"]::after {
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+
   /* 행 MVP·ACE 배지 — 채움 그라데이션 대신 테두리형 먹금/은빛(목업 v25).
      22-match-card 와 같은 pages layer 에서 뒤 import 로 덮습니다. */
   .public-profile-platform-v2 .public-match-card-highlight.mvp {
@@ -52,8 +83,8 @@
     line-height: 1.2;
   }
 
-  .public-profile-platform-v2 .public-match-card-result.win { background: transparent; color: var(--yoro-color-match-win-accent); }
-  .public-profile-platform-v2 .public-match-card-result.loss { background: transparent; color: var(--yoro-color-match-loss-accent); }
+  .public-profile-platform-v2 .public-match-card-result.win { background: transparent; color: var(--graph-win-ink); }
+  .public-profile-platform-v2 .public-match-card-result.loss { background: transparent; color: var(--graph-loss-ink); }
   .public-profile-platform-v2 .public-match-card-result.unknown { background: transparent; color: var(--public-gray-muted); }
 
   @container match-list (min-width: 721px) {
@@ -163,6 +194,10 @@
     background: transparent;
   }
 
+  /* 마스터리 아트는 액션 줄 뒤로(목업 §3-1 z-order) — 버튼 위로 올라오면 안 됩니다. */
+  .public-profile-platform-v2 .public-profile-hero-art { z-index: 0; }
+  .public-profile-platform-v2 .public-profile-hero-identity { position: relative; z-index: 1; }
+
   /* ── 전적 갱신 — 목업 out-btn: 채움 없는 스트로크 아웃라인(44px · radius 2 · 13/800). */
   .public-profile-platform-v2 .public-profile-hero-refresh {
     gap: .375rem;
@@ -234,20 +269,24 @@
     border-color: var(--public-gray-border);
   }
 
-  /* 우측 LIVE·시청자 pill — 홍옥 워시 대신 채움형(홈 LIVE 배지 문법). */
+  /* 우측 방송 상태 칩(목업 §3-1) — 헤어라인 칩 + 5px 점.
+     오프라인은 무채 점, 방송 중이면 홍옥 점(채움 금지 — 갱신 목업). */
   .public-profile-platform-v2 .public-profile-hero-live-pill {
-    border: 0;
-    border-radius: 2px;
-    background: #c93850;
-    color: #fff;
-  }
-
-  .public-profile-platform-v2 .public-profile-hero-live-pill > i { background: #fff; }
-
-  .public-profile-platform-v2 .public-profile-hero-live-pill.is-offline {
+    min-height: 0;
+    padding: 3px 9px;
     border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
     background: transparent;
     color: var(--public-gray-muted);
+    font-size: .6875rem;
+    font-weight: 700;
+  }
+
+  .public-profile-platform-v2 .public-profile-hero-live-pill > i {
+    width: 5px;
+    height: 5px;
+    background: var(--yoro-color-match-loss-accent);
+    animation: none;
   }
 
   .public-profile-platform-v2 .public-profile-hero-live-pill.is-offline > i {
@@ -271,8 +310,8 @@
     font-variant-numeric: tabular-nums;
   }
 
-  .public-profile-platform-v2 .public-profile-hero-form > i.is-win { color: var(--yoro-color-match-win-accent); }
-  .public-profile-platform-v2 .public-profile-hero-form > i.is-loss { color: var(--yoro-color-match-loss-accent); }
+  .public-profile-platform-v2 .public-profile-hero-form > i.is-win { color: var(--graph-win-ink); }
+  .public-profile-platform-v2 .public-profile-hero-form > i.is-loss { color: var(--graph-loss-ink); }
 
   /* ── 방송 카드 — 목업 캐스트 보드: 홍옥 그라데이션 대신 헤어라인 먹 카드. */
   .public-profile-platform-v2 .public-profile-hero-cast,
@@ -283,6 +322,43 @@
   }
 
   .public-profile-platform-v2 .public-profile-hero-cast-viewers { color: var(--public-gray-text); }
+
+  /* 상태줄(목업 §D) — 승색 점 + "게임 중 · 참여 대기열 열림". */
+  .public-profile-platform-v2 .public-profile-hero-cast-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 .875rem;
+    color: var(--public-gray-muted);
+    font-size: .6875rem;
+  }
+
+  .public-profile-platform-v2 .public-profile-hero-cast-status > i {
+    flex: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 99px;
+    background: var(--yoro-color-match-win-accent);
+  }
+
+  /* 목업 cast-btn 규격 — 40px · 0 14px · 12/700, 3개 균등(flex 1). */
+  .public-profile-platform-v2 .public-profile-hero-cast-actions {
+    display: flex;
+    gap: .5rem;
+    padding: .625rem .875rem .875rem;
+  }
+
+  .public-profile-platform-v2 .public-profile-hero-cast-action {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 2.5rem;
+    padding: 0 .875rem;
+    font-size: .75rem;
+    white-space: nowrap;
+  }
 
   /* 목업 cast-btn — 채움 없는 헤어라인, 주 동작(Twitch 보기)만 스트로크 강조. */
   .public-profile-platform-v2 .public-profile-hero-cast-action,
@@ -354,15 +430,16 @@
     color: var(--public-gray-muted);
   }
 
-  /* ── 02-legacy 의 slate 게이지 트랙 → 먹 트랙(백자 7% 워시 + 헤어라인 스트로크). */
+  /* ── 02-legacy 의 slate 게이지 트랙 → 그래프 전용 트랙(--graph-track).
+     백자 7% 워시는 카드 대비 1.2:1 로 사실상 보이지 않았습니다(그래프 대비 규격). */
   .public-profile-platform-v2 .public-profile-metric-bar,
   .public-profile-platform-v2 .public-role-track,
   .public-profile-platform-v2 .public-role-win-list div div,
   .public-profile-platform-v2 .public-champion-progress,
   .public-profile-platform-v2 .public-champion-analysis-metric > span,
   .public-profile-platform-v2 .public-aggregate-winrate .track {
-    background: color-mix(in srgb, var(--public-gray-text) 7%, transparent);
-    stroke: var(--public-gray-border);
+    background: var(--graph-track);
+    stroke: var(--graph-track);
   }
 
   .public-profile-platform-v2 .public-role-win-label b { color: var(--public-gray-text); }
@@ -374,9 +451,10 @@
     box-shadow: none;
   }
 
-  /* ── 플레이 시간대 막대 — 단일 지표는 수묵 단색(그라데이션 금지). */
+  /* ── 플레이 시간대 막대 — 단일 지표는 수묵 단색(그라데이션 금지).
+     심회 #4A5563 은 카드 대비 1.96:1 — 그래프 채움 단계로 올립니다. */
   .public-profile-platform-v2 .public-profile-playtime-strip > i.is-on {
-    background: var(--yoro-color-public-primary);
+    background: var(--graph-fill);
   }
 
   /* ── 아바타 폴백(펼침 선수 행·검색 제안·챔피언 셀 공통) —
@@ -396,13 +474,446 @@
     color: var(--public-gray-muted);
   }
 
-  /* ── 큐 필터 칩 활성 — 심회 채움+그림자 대신 먹빛 테두리(목업 필터 칩 규칙,
-     스트리머 화면과 공통). 라이트에서도 같은 문법으로 뒤집힙니다. */
+  /* ── 필터 행(목업 §E·§3-3 qchip 규격) ─────────────────────────
+     칩 = 44px · 0 16px · .5px --line · radius 2 · 13/500(활성만 --stroke+ink+700).
+     칩 묶음 래퍼의 카드 스킨은 걷어냅니다(목업은 맨 칩 나열). */
+  .public-profile-platform-v2 .public-match-filter-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5rem;
+  }
+
+  .public-profile-platform-v2 .public-match-queue-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+
+  .public-profile-platform-v2 .public-match-queue-chips button {
+    min-height: var(--yoro-size-touch-target);
+    padding: 0 1rem;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--public-gray-muted);
+    font-size: .8125rem;
+    font-weight: 500;
+    box-shadow: none;
+  }
+
+  .public-profile-platform-v2 .public-match-queue-chips button:hover {
+    color: var(--public-gray-text);
+    background: color-mix(in srgb, var(--public-gray-text) 5%, transparent);
+  }
+
   .public-profile-platform-v2 .public-match-queue-chips button[aria-pressed="true"] {
-    border: .5px solid var(--public-gray-muted);
+    border-color: var(--public-gray-muted);
     background: transparent;
     color: var(--public-gray-text);
+    font-weight: 700;
     box-shadow: none;
+  }
+
+  /* 챔피언·기간 드롭다운도 같은 qchip 규격 — 챔피언 필터부터 우측 정렬(목업).
+     라벨 스팬("챔피언 필터"/"기간 필터")은 목업에 없어 접습니다. */
+  .public-profile-platform-v2 .public-match-filter-controls > .public-champion-filter-select { margin-left: auto; }
+  .public-profile-platform-v2 .public-champion-filter-select > span,
+  .public-profile-platform-v2 .public-match-filter-select > span { display: none; }
+
+  .public-profile-platform-v2 .public-champion-filter-trigger,
+  .public-profile-platform-v2 .public-match-filter-select {
+    min-height: var(--yoro-size-touch-target);
+    padding: 0 1rem;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--public-gray-muted);
+    font-size: .8125rem;
+    font-weight: 500;
+    box-shadow: none;
+  }
+
+  .public-profile-platform-v2 .public-match-filter-select select {
+    background: transparent;
+    color: var(--public-gray-text);
+    font-size: .8125rem;
+  }
+
+  /* 필터 초기화 — 걸린 필터가 없으면 점선 테두리 + --mid 로 흐리게(목업). */
+  .public-profile-platform-v2 .public-match-filter-reset {
+    min-height: var(--yoro-size-touch-target);
+    padding: 0 1rem;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--public-gray-muted);
+    font-size: .8125rem;
+    font-weight: 500;
+    box-shadow: none;
+  }
+
+  .public-profile-platform-v2 .public-match-filter-reset:disabled {
+    border-style: dashed;
+    color: color-mix(in srgb, var(--public-gray-muted) 62%, transparent);
+  }
+
+  .public-profile-platform-v2 .public-match-filter-reset:not(:disabled) {
+    border-color: var(--public-gray-muted);
+    color: var(--public-gray-text);
+    font-weight: 700;
+  }
+
+  /* ── 최근 게임 요약(목업 §3-2) — 도넛 52px · 승패 14/800 · KDA 18/800 ·
+     세로 헤어라인 · 주력 챔피언 칩(승률만 전용색). ── */
+  .public-profile-platform-v2 .public-match-summary-strip {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.25rem;
+    padding: .875rem 1.125rem;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 3px;
+    background: var(--public-gray-surface);
+  }
+
+  .public-profile-platform-v2 .public-match-summary-donut { width: 3.25rem; height: 3.25rem; }
+
+  .public-profile-platform-v2 .public-match-summary-rate-copy strong {
+    font-size: .875rem;
+    font-weight: 800;
+  }
+
+  .public-profile-platform-v2 .public-match-summary-rate-copy > span {
+    color: var(--public-gray-muted);
+    font-size: .6875rem;
+  }
+
+  .public-profile-platform-v2 .public-match-summary-divider {
+    width: 0;
+    height: 2.25rem;
+    border-left: .5px solid var(--public-gray-border);
+    background: none;
+  }
+
+  .public-profile-platform-v2 .public-match-summary-kda > b {
+    font-size: 1.125rem;
+    font-weight: 800;
+    letter-spacing: -.02em;
+  }
+
+  .public-profile-platform-v2 .public-match-summary-kda > span {
+    color: var(--public-gray-muted);
+    font-size: .6875rem;
+  }
+
+  .public-profile-platform-v2 .public-match-summary-champions { margin-left: auto; }
+
+  .public-profile-platform-v2 .public-match-summary-champion {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px 4px 5px;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--public-gray-muted);
+    font-size: .6875rem;
+  }
+
+  .public-profile-platform-v2 .public-match-summary-champion > :is(img, i) {
+    width: 1.25rem;
+    height: 1.25rem;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 99px;
+    background: var(--public-gray-page);
+    object-fit: cover;
+    font-style: normal;
+    display: grid;
+    place-items: center;
+    font-size: .5625rem;
+    font-weight: 800;
+    overflow: hidden;
+  }
+
+  .public-profile-platform-v2 .public-match-summary-champion > b {
+    color: var(--public-gray-text);
+    font-weight: 700;
+  }
+
+  .public-profile-platform-v2 .public-match-summary-champion > em {
+    font-style: normal;
+    font-weight: 700;
+  }
+
+  .public-profile-platform-v2 .public-match-summary-champion > em.is-win { color: var(--graph-win-ink); }
+  .public-profile-platform-v2 .public-match-summary-champion > em.is-loss { color: var(--graph-loss-ink); }
+
+  /* ── 공유 카드(목업 §3-4) — 좌측 제목 13/800 + 설명 11 --mid. ── */
+  .public-profile-platform-v2 .public-match-share-actions {
+    padding: .8125rem 1.125rem;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 3px;
+  }
+
+  .public-profile-platform-v2 .public-match-share-actions strong { font-size: .8125rem; font-weight: 800; }
+
+  /* ── 더 많은 기능(목업 §3-6) — 패널 + sec-head + qchip 묶음. ── */
+  .public-profile-platform-v2 .public-more-links {
+    padding: .9375rem 1.125rem;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 3px;
+    background: var(--public-gray-surface);
+  }
+
+  .public-profile-platform-v2 .public-more-links-head {
+    display: flex;
+    align-items: center;
+    gap: .625rem;
+  }
+
+  .public-profile-platform-v2 .public-more-links-head > h2 {
+    margin: 0;
+    font-size: .875rem;
+    font-weight: 800;
+  }
+
+  .public-profile-platform-v2 .public-more-links-head > button {
+    margin-left: auto;
+    min-height: 2rem;
+    padding: 0 .5rem;
+    border: 0;
+    background: none;
+    color: var(--public-gray-muted);
+    font: inherit;
+    font-size: .6875rem;
+    cursor: pointer;
+  }
+
+  .public-profile-platform-v2 .public-more-links-head > button:hover { color: var(--public-gray-text); }
+
+  .public-profile-platform-v2 .public-more-links-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-top: .75rem;
+  }
+
+  .public-profile-platform-v2 .public-more-links-chips > a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--yoro-size-touch-target);
+    padding: 0 1rem;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
+    color: var(--public-gray-muted);
+    font-size: .8125rem;
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .public-profile-platform-v2 .public-more-links-chips > a:hover {
+    color: var(--public-gray-text);
+    background: color-mix(in srgb, var(--public-gray-text) 5%, transparent);
+  }
+
+  /* ── 사이드바(목업 §2H·§3-7) ──────────────────────────────── */
+
+  /* LP 기록 큐 3종 탭 — 각 칸 44px, 큐 이름 + 그 큐의 30일 증감. 선택만 --stroke. */
+  .public-profile-platform-v2 .public-profile-lp-queues {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    margin-bottom: .75rem;
+  }
+
+  .public-profile-platform-v2 .public-profile-lp-queues > button {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    min-height: var(--yoro-size-touch-target);
+    padding: 0 .5625rem;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--public-gray-muted);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .public-profile-platform-v2 .public-profile-lp-queues > button > span {
+    font-size: .6875rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .public-profile-platform-v2 .public-profile-lp-queues > button > b {
+    font-size: .75rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .public-profile-platform-v2 .public-profile-lp-queues > button > b[data-tone="up"] { color: var(--graph-win-ink); }
+  .public-profile-platform-v2 .public-profile-lp-queues > button > b[data-tone="down"] { color: var(--graph-loss-ink); }
+  .public-profile-platform-v2 .public-profile-lp-queues > button > b[data-tone="flat"] { color: var(--public-gray-muted); }
+
+  .public-profile-platform-v2 .public-profile-lp-queues > button.is-active {
+    border-color: var(--public-gray-muted);
+    color: var(--public-gray-text);
+  }
+
+  .public-profile-platform-v2 .public-profile-lp-queues > button.is-active > span { font-weight: 700; }
+
+  .public-profile-platform-v2 .public-profile-lp-queues > button:focus-visible {
+    outline: var(--yoro-focus-ring-width) solid var(--yoro-color-focus-ring);
+    outline-offset: var(--yoro-focus-ring-offset);
+  }
+
+  /* 최근 챔피언 — 행 52px, 아바타 32px 원형, 우측 N승 M패 전용색, 행 사이 헤어라인. */
+  .public-profile-platform-v2 .public-profile-recent-champs ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .public-profile-platform-v2 .public-profile-recent-champs li {
+    display: flex;
+    align-items: center;
+    gap: .625rem;
+    min-height: 3.25rem;
+    border-bottom: .5px solid var(--public-gray-border);
+  }
+
+  .public-profile-platform-v2 .public-profile-recent-champs li:last-child { border-bottom: 0; }
+
+  .public-profile-platform-v2 .public-profile-recent-champs__ava {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 99px;
+    background: var(--public-gray-page);
+    color: var(--public-gray-muted);
+    font-size: .75rem;
+    font-weight: 800;
+    overflow: hidden;
+  }
+
+  .public-profile-platform-v2 .public-profile-recent-champs__ava > img {
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    object-fit: cover;
+  }
+
+  .public-profile-platform-v2 .public-profile-recent-champs__who { min-width: 0; flex: 1; }
+
+  .public-profile-platform-v2 .public-profile-recent-champs__who > b {
+    display: block;
+    font-size: .8125rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .public-profile-platform-v2 .public-profile-recent-champs__who > small {
+    display: block;
+    margin-top: 2px;
+    color: var(--public-gray-muted);
+    font-size: .6875rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .public-profile-platform-v2 .public-profile-recent-champs__rec {
+    flex: none;
+    font-size: .75rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .public-profile-platform-v2 .public-profile-recent-champs__rec em { color: var(--graph-win-ink); font-style: normal; }
+  .public-profile-platform-v2 .public-profile-recent-champs__rec i { color: var(--graph-loss-ink); font-style: normal; }
+
+  /* 최근 20경기 지표 — 등급 배지는 먹금 테두리형(채움 금지), 막대 4px 무채. */
+  .public-profile-platform-v2 .public-profile-metric-grade {
+    padding: 2px 8px;
+    border: .5px solid var(--yoro-color-accent-gold);
+    border-radius: 2px;
+    background: transparent;
+  }
+
+  .public-profile-platform-v2 .public-profile-metric-grade > b {
+    color: var(--yoro-color-accent-gold);
+    font-size: .6875rem;
+    font-weight: 800;
+  }
+
+  .public-profile-platform-v2 .public-profile-metric-grade > small {
+    color: var(--yoro-color-accent-gold);
+    opacity: 1;
+    font-weight: 700;
+  }
+
+  .public-profile-platform-v2 .public-profile-metric-bar {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--graph-track);
+  }
+
+  .public-profile-platform-v2 .public-profile-metric-bar > em {
+    border-radius: 2px;
+    background: var(--graph-fill);
+  }
+
+  /* 플레이 시간대 — 도넛·막대 전부 무채(목업 §3-7). 아이콘·존 상자·승률 분할
+     행은 목업에 없어 접습니다(24h 막대는 피크 구간만 --sub). */
+  .public-profile-platform-v2 .public-profile-playtime-icon { display: none; }
+  .public-profile-platform-v2 .public-profile-playtime-zone { display: none; }
+  .public-profile-platform-v2 .public-profile-playtime-bands { display: none; }
+
+  .public-profile-platform-v2 .public-profile-playtime-ring::before {
+    background: conic-gradient(
+      var(--graph-ink) calc(var(--playtime-rate, 0) * 1%),
+      var(--graph-track) 0
+    );
+  }
+
+  /* 24h 막대 — 빈 시간=트랙 · 게임 있는 시간(is-on, 위)=채움 · 피크=ink.
+     헤어라인색(--line)은 막대에 쓰지 않습니다(그래프 대비 규격). */
+  .public-profile-platform-v2 .public-profile-playtime-strip > i {
+    border-radius: 0;
+    background: var(--graph-track);
+  }
+
+  .public-profile-platform-v2 .public-profile-playtime-strip > i.is-peak {
+    background: var(--graph-ink);
+  }
+
+  /* 포지션 — 아이콘 접고 분할 막대(승/패 솔리드)로. 패 42% 알파는 트랙색에
+     따라 대비가 1.5:1 까지 떨어져 솔리드로 바꿉니다(그래프 대비 규격). */
+  .public-profile-platform-v2 .public-profile-role > i { display: none; }
+
+  .public-profile-platform-v2 .public-profile-role-bar > span {
+    height: 5px;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
+    background: var(--profile-loss-fill);
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  .public-profile-platform-v2 .public-profile-role-bar > span > em {
+    background: var(--profile-win-fill);
   }
 
   /* ── 검색 연관 패널(목업 검색바 보드) ─────────────────────────

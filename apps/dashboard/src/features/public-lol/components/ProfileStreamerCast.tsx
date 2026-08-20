@@ -19,6 +19,10 @@ export type ProfileStreamerCastText = {
   participationLabel: string;
   ingameLabel: string;
   ingameNotice: string;
+  /** 액션 3번째 버튼 라벨(목업 "인게임 보기"). 없으면 ingameLabel 로 대체합니다. */
+  ingameViewLabel?: string;
+  /** 상태줄의 "참여 대기열 열림". participationOpen 일 때만 씁니다. */
+  participationOpenLabel?: string;
   thumbnailLabel: string;
   /** previewUrl 이 없을 때(오프라인 채널 대부분) 썸네일 안에 보이는 캡션. */
   previewUnavailableLabel: string;
@@ -127,34 +131,24 @@ export function ProfileStreamerCast({
         </span>
       </div>
 
-      {/* 인게임은 방송 중일 때만, 그리고 실제로 게임 중일 때만 한 줄로 나타납니다. */}
-      {isInGame ? (
-        <div className="public-profile-hero-cast-ingame">
+      {/* 상태줄(목업 §D) — 승색 점 + "게임 중 · 참여 대기열 열림". 데이터 있을 때만. */}
+      {isInGame || participationOpen ? (
+        <div className="public-profile-hero-cast-status">
           <i aria-hidden="true" />
-          <b>{text.ingameLabel}</b>
-          <span>{text.ingameNotice}</span>
-          {onOpenIngame ? (
-            <button className="public-profile-hero-cast-ghost" type="button" onClick={onOpenIngame}>
-              {text.ingameLabel}
-            </button>
-          ) : null}
+          <span>
+            {[isInGame ? text.ingameNotice : null, participationOpen ? text.participationOpenLabel : null]
+              .filter(Boolean)
+              .join(" · ")}
+          </span>
         </div>
       ) : null}
 
+      {/* 목업 §D 액션 3종 — Twitch 보기(스트로크 강조) · 참여 대기열 · 인게임 보기. */}
       <div className="public-profile-hero-cast-actions">
-        {onOpenParticipation ? (
-          <button
-            className={`public-profile-hero-cast-action${participationOpen ? " is-primary" : ""}`}
-            onClick={onOpenParticipation}
-            type="button"
-          >
-            {text.participationLabel}
-          </button>
-        ) : null}
         {channelUrl ? (
           <a
             aria-label={text.watchAriaLabel}
-            className={`public-profile-hero-cast-action is-twitch${participationOpen ? "" : " is-primary"}`}
+            className="public-profile-hero-cast-action is-twitch is-primary"
             href={channelUrl}
             rel="noreferrer"
             target="_blank"
@@ -162,6 +156,20 @@ export function ProfileStreamerCast({
             <TwitchIcon />
             {text.watchLabel}
           </a>
+        ) : null}
+        {onOpenParticipation ? (
+          <button
+            className="public-profile-hero-cast-action"
+            onClick={onOpenParticipation}
+            type="button"
+          >
+            {text.participationLabel}
+          </button>
+        ) : null}
+        {onOpenIngame ? (
+          <button className="public-profile-hero-cast-action" onClick={onOpenIngame} type="button">
+            {text.ingameViewLabel ?? text.ingameLabel}
+          </button>
         ) : null}
         {links?.length && renderLinkIcon ? (
           <span className="public-profile-hero-cast-links">

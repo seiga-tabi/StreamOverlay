@@ -69,5 +69,7 @@
 
 /* 프로필 수묵 리스킨 — 20-profile-platform 토큰을 마지막에 덮습니다. */
 @import "./pages/public-lol/38-ink-profile.css";
+/* 인게임 탭 수묵 리디자인 — 신설 .public-ingame-board 네임스페이스 단독 소유. */
+@import "./pages/public-lol/39-ink-ingame.css";
 /* Organization 콘솔(개요·Bot 제어·Palworld 서버) 리디자인. pages layer 소유. */
 @import "./pages/bot/18-bot-console-redesign.css";

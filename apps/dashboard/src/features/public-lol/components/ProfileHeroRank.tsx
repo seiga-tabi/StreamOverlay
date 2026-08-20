@@ -111,6 +111,7 @@ function LpSparkline({ trend }: { trend: ProfileHeroRankTrend }) {
           stroke={tierLpColor(segment.to.tierKey)}
           strokeLinecap="round"
           strokeWidth="2"
+          vectorEffect="non-scaling-stroke"
           x1={segment.from.x.toFixed(1)}
           x2={segment.to.x.toFixed(1)}
           y1={segment.from.y.toFixed(1)}

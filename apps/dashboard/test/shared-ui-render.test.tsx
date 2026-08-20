@@ -623,7 +623,7 @@ test("Profile 상단은 중복 검색을 제거하고 스트리머 CTA 우선순
 
   // 방송 카드는 새 행이 아니라 랭크와 같은 행(body)에 놓입니다.
   assert.match(html, /public-profile-hero has-streamer is-live/u);
-  assert.match(html, /public-profile-hero-body has-cast/u);
+  assert.match(html, /public-profile-hero-top has-cast/u);
   assert.match(html, /public-profile-hero-avatar is-streamer is-live/u);
   assert.match(html, /<span class="yoro-u-sr-only">LIVE NOW<\/span>/u);
   // 소환사 신원과 Twitch 채널이 같은 줄에서 이어집니다.
@@ -632,17 +632,16 @@ test("Profile 상단은 중복 검색을 제거하고 스트리머 CTA 우선순
   assert.match(html, /public-profile-hero-live-pill[^>]*>[\s\S]*LIVE · 125/u);
   assert.match(html, /href="https:\/\/discord\.gg\/yoro"/u);
   assert.match(html, />참여 신청</u);
-  // 참여가 열려 있으면 참여가 주 버튼이고 Twitch 가 그 뒤에 옵니다.
-  assert.ok(html.indexOf("참여 신청") < html.indexOf(">Twitch<"));
-  assert.match(html, /public-profile-hero-cast-action is-primary[^>]*>참여 신청</u);
+  // 목업 §D 액션 순서: Twitch 보기(스트로크 강조)가 첫 번째, 참여가 그 뒤입니다.
+  assert.ok(html.indexOf(">Twitch<") < html.indexOf("참여 신청"));
+  assert.match(html, /aria-label="Twitch에서 보기"[^>]*class="public-profile-hero-cast-action is-twitch is-primary"/u);
   // Twitch 버튼 라벨은 좁은 폭에서 넘치지 않도록 짧게 두고 설명은 aria-label 로 보냅니다.
-  assert.match(html, /aria-label="Twitch에서 보기"[^>]*class="public-profile-hero-cast-action is-twitch"/u);
   assert.doesNotMatch(html, />Twitch에서 보기</u);
   // 썸네일은 안전 검증을 통과한 공식 CDN URL 만 들어옵니다.
   assert.match(html, /src="https:\/\/static-cdn\.jtvnw\.net\/previews-ttv\/live_user_yoro-640x360\.jpg"/u);
   assert.match(html, /public-profile-hero-cast-thumb[\s\S]*<i aria-hidden="true">LIVE<\/i>/u);
-  // 인게임은 방송 카드 안에서만 한 줄로 추가됩니다.
-  assert.match(html, /public-profile-hero-cast-ingame[\s\S]*지금 랭크 게임 중입니다/u);
+  // 인게임 상태는 방송 카드의 상태줄(승색 점)로 전달됩니다(목업 §D).
+  assert.match(html, /public-profile-hero-cast-status[\s\S]*지금 랭크 게임 중입니다/u);
   assert.doesNotMatch(html, /public-ranking-shared-toolbar/u);
   assert.doesNotMatch(html, /public-profile-streamer-spotlight/u);
   assert.match(html, />League of Legends</u);
@@ -1017,15 +1016,16 @@ test("모바일 최근 전적은 3행으로 압축하고 등급·지표 정렬 �
   // track 폭이 행마다 동일해야 열 정렬이 흔들리지 않으므로 track 에는 상한을 둡니다.
   assert.match(cardCss, /\.public-match-card-summary\s*\{[\s\S]*?justify-content:\s*space-between/u);
   assert.match(cardCss, /\.public-match-card-summary\s*\{[\s\S]*?minmax\(11rem, 12\.5rem\)\s*\/\* 2 챔피언/u);
-  // 그룹 내부 여백(12px)과 그룹 사이 여백(column-gap 16px + 분배분)의 위계를 유지합니다.
-  assert.match(cardCss, /\.public-match-card-summary\s*\{[\s\S]*?column-gap:\s*var\(--yoro-space-4\)/u);
+  // 그룹 사이 여백은 목업 §F 의 18px(1.125rem)입니다.
+  assert.match(cardCss, /\.public-match-card-summary\s*\{[\s\S]*?column-gap:\s*1\.125rem/u);
   for (const group of ["champion", "perf", "stats", "items"]) {
     assert.match(cardCss, new RegExp(`\\.public-match-card-${group}\\s*\\{[\\s\\S]*?gap:\\s*var\\(--yoro-space-3\\)`, "u"));
   }
 
   // 반응형 기준은 viewport 가 아니라 리스트 컨테이너 폭입니다.
   assert.match(cardCss, /\.public-matches-panel\s*\{[\s\S]*?container-type:\s*inline-size[\s\S]*?container-name:\s*match-list/u);
-  assert.match(cardCss, /@container match-list \(max-width: 1180px\)[\s\S]*?\.public-match-card-team\s*\{\s*display:\s*none/u);
+  // 목업 §F: 팀원 2열은 본문 폭 ~1052px 에서도 보여야 하므로 접힘 임계는 980 이하입니다.
+  assert.match(cardCss, /@container match-list \(max-width: 980px\)[\s\S]*?\.public-match-card-team\s*\{\s*display:\s*none/u);
   assert.match(cardCss, /@container match-list \(max-width: 980px\)[\s\S]*?\.public-match-card-stats > span:nth-child\(3\)\s*\{\s*display:\s*none/u);
   // 980 구간의 하한은 container 721px 입니다. track 합이 그 폭을 넘지 않도록 gap 도 함께 줄입니다.
   assert.match(cardCss, /@container match-list \(max-width: 980px\)[\s\S]*?column-gap:\s*var\(--yoro-space-3\)/u);

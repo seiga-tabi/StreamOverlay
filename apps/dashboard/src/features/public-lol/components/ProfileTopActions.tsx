@@ -60,6 +60,20 @@ export function ProfileTopActions({
             {actions.liveStatus.label}
           </span>
         ) : null}
+        {/* 목업 §3-1 순서: 상태 칩 → 공유·링크 복사 → 즐겨찾기 별 → 전적 갱신. */}
+        {shareAction}
+
+        <button
+          aria-label={actions.favoriteAriaLabel}
+          aria-pressed={actions.favoriteActive}
+          className="public-profile-hero-icon-button"
+          onClick={onToggleFavorite}
+          title={actions.favoriteActionLabel}
+          type="button"
+        >
+          <StarIcon />
+        </button>
+
         <button
           className={`public-profile-hero-refresh${actions.refreshCoolingDown ? " is-cooldown" : ""}`}
           disabled={actions.refreshDisabled}
@@ -77,19 +91,6 @@ export function ProfileTopActions({
               ? actions.refreshCooldownLabel
               : actions.loading ? actions.refreshLoadingLabel : actions.refreshButtonLabel}
           </strong>
-        </button>
-
-        {shareAction}
-
-        <button
-          aria-label={actions.favoriteAriaLabel}
-          aria-pressed={actions.favoriteActive}
-          className="public-profile-hero-icon-button"
-          onClick={onToggleFavorite}
-          title={actions.favoriteActionLabel}
-          type="button"
-        >
-          <StarIcon />
         </button>
 
         {actions.profileLinks.length ? (

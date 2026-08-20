@@ -103,21 +103,27 @@ export type ProfileLpRecordCardText = {
 
 export type ProfileLpRecordCardProps = {
   currentLabel: string;
+  /** 현재 티어의 소문자 키("diamond" 등) — 헤드라인을 그 큐의 티어색으로 칠합니다(목업 §3-7). */
+  currentTierKey?: string;
   changeLabel?: string;
   changeTone?: "up" | "down" | "flat";
   recordCount: number;
   chart?: ReactNode;
   entries: ProfileLpChangeEntry[];
+  /** 큐 3종(솔로·자유·5:5) 전환 탭(목업 §3-7). 헤드 바로 아래에 놓입니다. */
+  queueTabs?: ReactNode;
   text: ProfileLpRecordCardText;
 };
 
 export function ProfileLpRecordCard({
   currentLabel,
+  currentTierKey,
   changeLabel,
   changeTone = "flat",
   recordCount,
   chart,
   entries,
+  queueTabs,
   text,
 }: ProfileLpRecordCardProps) {
   const empty = recordCount === 0;
@@ -129,6 +135,8 @@ export function ProfileLpRecordCard({
         <span className="public-profile-side-pill">{text.periodLabel}</span>
       </div>
 
+      {queueTabs}
+
       {empty ? (
         <div className="public-profile-side-empty">
           <strong>{text.emptyTitle}</strong>
@@ -137,7 +145,7 @@ export function ProfileLpRecordCard({
       ) : (
         <>
           <div className="public-profile-lp-headline">
-            <strong>{currentLabel}</strong>
+            <strong style={currentTierKey ? { color: `var(--tier-lp-${currentTierKey})` } : undefined}>{currentLabel}</strong>
             {changeLabel ? <span className="public-profile-lp-delta" data-tone={changeTone}>{changeLabel}</span> : null}
             <small>{recordCount}{text.recordCountLabel}</small>
           </div>
@@ -377,14 +385,18 @@ export function ProfilePlaytimeCard({
                   />
                 );
               })}
-              {hourly.map((count, hour) => (
-                <i
-                  /* 시간별 막대라 시(hour)가 곧 안정된 key 입니다. */
-                  key={hour}
-                  className={count > 0 ? "is-on" : ""}
-                  style={{ height: count > 0 ? `${Math.max(18, Math.round((count / maxHourly) * 100))}%` : undefined }}
-                />
-              ))}
+              {hourly.map((count, hour) => {
+                /* 목업 §3-7: 피크 구간 막대만 --sub 로 밝게, 나머지는 --line. */
+                const inPeak = zones.some((zone) => hour >= zone.startHour && hour < zone.startHour + zone.span);
+                return (
+                  <i
+                    /* 시간별 막대라 시(hour)가 곧 안정된 key 입니다. */
+                    key={hour}
+                    className={`${count > 0 ? "is-on" : ""}${inPeak ? " is-peak" : ""}`}
+                    style={{ height: count > 0 ? `${Math.max(18, Math.round((count / maxHourly) * 100))}%` : undefined }}
+                  />
+                );
+              })}
             </div>
             <div aria-hidden="true" className="public-profile-playtime-axis">
               {axisLabels.map((label, index) => (

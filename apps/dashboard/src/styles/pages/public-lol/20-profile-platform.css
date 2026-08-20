@@ -11,10 +11,37 @@
   --public-gray-text: #f5f6f8;
   --public-gray-muted: #b9c3d0;
 
-  /* 승=청자·패=홍옥(승패 데이터 전용색). 홍옥은 목업 #DC4A5E 의 카드 위
-     대비(3.7:1)를 4.5:1 로 보정한 #E4606F. */
-  --yoro-color-match-win-accent: #87a183;
+  /* 승=녹·패=홍옥(승패 데이터 전용색 — '채움'용). 기존 청자 #87A183 은 OKLCH
+     채도 0.05 로 홍옥(0.16)의 1/3이라 같은 자리에서 눌려 보였고, 흰 카드 위
+     2.82:1 로 라이트에서 무너졌습니다. 채도를 패색에 맞춘 #63C375(카드 6.80:1)로
+     올립니다. 홍옥은 목업 #DC4A5E 의 카드 위 대비를 보정한 #E4606F(4.39:1). */
+  --yoro-color-match-win-accent: #63c375;
   --yoro-color-match-loss-accent: #e4606f;
+
+  /* 승패 '글자'용(그래프 대비 규격 아트보드) — 11~13px 굵은 글자(N승 M패 ·
+     +18 LP · LIVE · 오류)는 채움색이 아니라 이 값을 씁니다. 다크 승 글자는
+     채움과 같은 값(6.80:1), 패 글자는 카드 위 4.5:1 을 넘도록 한 단계 밝게. */
+  --graph-win-ink: #63c375;
+  --graph-loss-ink: #e97180;
+
+  /* 그래프 전용 무채 램프(그래프 대비 규격 아트보드) — 헤어라인(--line)·본문
+     보조 텍스트(--sub) 토큰을 데이터 마크에 재사용하지 않습니다.
+     track = 막대·도넛의 빈 트랙(카드 1.34:1), fill = 무채 데이터 채움
+     (카드 4.03:1 / 트랙 3.01:1), ink = 피크·강조 데이터(카드 8.35:1). */
+  --graph-track: #363c46;
+  --graph-fill: #7a8698;
+  --graph-ink: #b9c3d0;
+
+  /* 탭 3종(챔피언 분석·인게임·통계) 리디자인 토큰 — 막대 '채움'은 위의 승패
+     채움(테마별 값)을 그대로 따라갑니다. bar-neutral 은 채용률처럼 승패가
+     아닌 단일 지표 막대의 무채 채움 — 그래프 램프의 fill 을 씁니다. */
+  --profile-win-fill: var(--yoro-color-match-win-accent);
+  --profile-loss-fill: var(--yoro-color-match-loss-accent);
+  --profile-bar-neutral: var(--graph-fill);
+  --profile-row-wash: rgba(245, 246, 248, .04);
+  /* 인게임 팀 표식(승패색 금지 — 무채 사각): 다크 아군=백자, 상대=심회. */
+  --profile-team-ally: #b9c3d0;
+  --profile-team-enemy: #4a5563;
 
   /* 목업(page-4)에는 보라 강조가 없습니다 — 강조는 무채+티어색+승패색뿐.
      프로필 화면의 97개 public-primary 사용처(활성 칩·본인 표시·버튼 등)를
@@ -59,13 +86,15 @@
   --yoro-color-border-on-dark-strong: var(--public-gray-border-strong);
   --yoro-color-divider-on-dark: var(--public-gray-border-strong);
 
-  /* 상승 추세 teal → 청자(상승=청자/하락=홍옥 규칙). 면 채움은 목업이
-     선만 그리므로(폴리라인) 잔광 수준으로만 남깁니다. */
-  --yoro-color-rank-trend: #87a183;
-  --yoro-color-rank-trend-area: color-mix(in srgb, #87a183 10%, transparent);
+  /* 상승 추세 teal → 승 글자색(상승=승색/하락=홍옥 규칙). 12~13px 굵은
+     글자("+18 LP")에 주로 쓰이므로 ink 단계를 따릅니다 — 라이트에서
+     --graph-win-ink 가 재정의되면 이 참조도 함께 뒤집힙니다. 면 채움은
+     목업이 선만 그리므로(폴리라인) 잔광 수준으로만 남깁니다. */
+  --yoro-color-rank-trend: var(--graph-win-ink);
+  --yoro-color-rank-trend-area: color-mix(in srgb, var(--yoro-color-match-win-accent) 10%, transparent);
 
-  /* 성과 지표 색 — 잘함=청자·나쁨=홍옥·최고=먹금. */
-  --yoro-color-match-score-good: #87a183;
+  /* 성과 지표 색 — 잘함=승색·나쁨=홍옥·최고=먹금. */
+  --yoro-color-match-score-good: #63c375;
   --yoro-color-match-score-bad: #e4606f;
   --yoro-color-match-score-best: #c7a15c;
 
@@ -94,11 +123,13 @@
   background: var(--public-gray-page) !important;
 }
 
-/* ── 라이트 테마(목업 profile-light-note) — 토큰 반전 스왑 하나.
-   홈 라이트와 같은 값: 백자 지면 #F5F6F8 · 백색 카드 · #E4E8ED 헤어라인,
-   서브 먹빛은 홈과 같은 AA 보정 #5F6E80. 승색(청자)·티어색은 테마 공통,
-   홍옥·먹금은 백자 지면 대비로 어둡게 보정합니다. */
-.public-profile-platform-v2.theme-light {
+/* ── 라이트 테마(목업 profile-light-note·LoL 탭 리디자인 light-map) —
+   토큰 반전 스왑 하나. 홈 라이트와 같은 값: 백자 지면 #F5F6F8 · 백색 카드 ·
+   #E4E8ED 헤어라인, 서브 먹빛은 홈과 같은 AA 보정 #5F6E80. 티어색은 테마 공통.
+   셀 클래스(theme-light)와 usePublicTheme 의 <html data-public-theme> 를
+   모두 지원합니다(둘 다 같은 토글이 세팅). */
+.public-profile-platform-v2.theme-light,
+:root[data-public-theme="light"] .public-profile-platform-v2 {
   --public-gray-page: #f5f6f8;
   --public-gray-page-deep: #eceef2;
   --public-gray-surface: #ffffff;
@@ -108,12 +139,37 @@
   --public-gray-text: #1c1d22;
   --public-gray-muted: #5f6e80;
 
-  /* 홍옥 — 다크 보정 #E4606F 는 백자 위 3.0:1 이라, 홈 LIVE 배지의
-     보정값 #C93850(백자 위 5.0:1)로 어둡게 뒤집습니다. */
-  --yoro-color-match-loss-accent: #c93850;
+  /* 승패색 — 백자 위에서도 채움용/글자용 두 단계(그래프 대비 규격 아트보드):
+     채움(막대·도넛·점)은 흰 카드 위 3:1 을 넘는 원색, 11~13px 굵은 글자
+     (N승 M패·LIVE·오류)는 4.5:1 을 넘는 ink 단계를 씁니다. */
+  --yoro-color-match-win-accent: #2e9848;  /* 채움 3.68:1 */
+  --yoro-color-match-loss-accent: #dc4a5e; /* 채움 4.05:1 */
+  --graph-win-ink: #1d8139;  /* 글자 4.94:1 */
+  --graph-loss-ink: #c0394a; /* 글자 5.35:1 */
 
-  /* 먹금 — #C7A15C 는 백색 위 2.3:1. 어두운 먹금으로. */
-  --yoro-color-accent-gold: #8a6f3c;
+  /* 그래프 무채 램프 라이트 — track 1.19:1 · fill 3.94:1(트랙 3.32:1) ·
+     ink 5.85:1. 명도만 옮기고 채도는 올리지 않습니다(수묵 기조). */
+  --graph-track: #e7ecf1;
+  --graph-fill: #6f8299;
+  --graph-ink: #5a6675;
+
+  /* 먹금 — #C7A15C 는 백색 위 2.3:1. 등급 배지 3.5:1 을 넘는 어두운 먹금으로. */
+  --yoro-color-accent-gold: #8a6b2e;
+
+  /* 티어색 라이트 단계(그래프 대비 규격 아트보드) — 다크 기준 티어색은 흰
+     배경에서 무너집니다(다이아 #6DB6F0 = 2.19:1). 같은 hue 에서 명도만 내려
+     3.2:1 로 맞춘 값. 히어로는 23-profile-hero.css(pages layer)가 같은
+     변수를 다시 정의하므로 그쪽 라이트 블록과 값을 함께 관리합니다. */
+  --tier-lp-iron: #8d8d8d;
+  --tier-lp-bronze: #bf8355;
+  --tier-lp-silver: #8392a0;
+  --tier-lp-gold: #b18b1c;
+  --tier-lp-platinum: #389f96;
+  --tier-lp-emerald: #3ea267;
+  --tier-lp-diamond: #2b95e9;
+  --tier-lp-master: #af74ef;
+  --tier-lp-grandmaster: #ea6560;
+  --tier-lp-challenger: #be8512;
 
   /* 프로필 표면은 전부 먹→백자로 뒤집혔으므로 on-dark 텍스트 계열도 함께
      반전합니다(-muted 는 위의 --public-gray-muted 참조로 이미 반전됨). */
@@ -124,6 +180,14 @@
   /* 공통 푸터 글자(product-gray 계열) — 백자 지면 위 먹빛으로. */
   --yoro-color-product-gray-text: #1c1d22;
   --yoro-color-product-gray-muted: #5f6e80;
+
+  /* 탭 3종 막대 — 채움·무채 막대는 위 라이트 채움/램프 참조가 따라오고,
+     본인 행 워시만 여기서 반전합니다. */
+  --profile-row-wash: rgba(28, 29, 34, .045);
+
+  /* 인게임 팀 표식 — 라이트는 뒤집어 아군=심회, 상대=백자(목업 ingame-map). */
+  --profile-team-ally: #4a5563;
+  --profile-team-enemy: #b9c3d0;
 }
 
 /* 05/10-overrides 의 .public-dashboard-shell.public-profile-shared-shell(2클래스)
@@ -173,6 +237,17 @@
   border-radius: 2px !important;
 }
 
+/* 탭 3종 무채 규칙 — metricToneClass 호출은 남기고 색만 걷습니다(목업 §지표).
+   위 metric-tone 재매핑(!important)이 홍옥/먹금을 다시 칠하므로 같은 legacy
+   layer 뒤에서 이 자리들만 무채로 고정합니다. */
+.public-profile-platform-v2 .public-sig-rate > b {
+  color: var(--public-gray-text) !important;
+}
+
+.public-profile-platform-v2 .public-sig-build-pick > small {
+  color: var(--public-gray-muted) !important;
+}
+
 /* tertiary(백색 채움 — 더보기 등) → 목업 '경기 더 보기' 스트로크 아웃라인. */
 .public-profile-platform-v2.public-dashboard-shell .yoro-button[data-variant="tertiary"] {
   border-color: var(--public-gray-border-strong) !important;
@@ -182,6 +257,58 @@
 
 .public-profile-platform-v2.public-dashboard-shell .yoro-button[data-variant="tertiary"]:hover {
   background: color-mix(in srgb, var(--public-gray-text) 8%, transparent) !important;
+}
+
+/* 공유 카드 버튼 2개(목업 §3-4) — 이미지 저장·SNS 공유 둘 다 out-btn(700).
+   위 CTA 재매핑(primary=먹 채움)을 같은 legacy 뒤에서 아웃라인으로 되돌립니다. */
+.public-profile-platform-v2 .public-match-share-buttons .yoro-button {
+  min-height: var(--yoro-size-touch-target) !important;
+  padding: 0 1.125rem !important;
+  border: .5px solid var(--public-gray-muted) !important;
+  border-radius: 2px !important;
+  background: transparent !important;
+  color: var(--public-gray-text) !important;
+  font-size: .8125rem !important;
+  font-weight: 700 !important;
+  box-shadow: none !important;
+}
+
+.public-profile-platform-v2 .public-match-share-buttons .yoro-button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--public-gray-text) 6%, transparent) !important;
+}
+
+/* '경기 더 보기'(목업 §G) — 48px · 0 26px · .5px --line · radius 2 · 13/700 ·
+   --sub + 아래 캐럿, 가운데 정렬. Button 기본(unlayered)과 위 tertiary
+   !important 를 이기려면 여기(!important)에서 확정해야 합니다. */
+.public-profile-platform-v2 .public-match-more {
+  display: flex;
+  justify-content: center;
+}
+
+.public-profile-platform-v2 .public-match-more .yoro-button {
+  min-height: 3rem !important;
+  padding: 0 1.625rem !important;
+  border: .5px solid var(--public-gray-border) !important;
+  border-radius: 2px !important;
+  background: transparent !important;
+  color: var(--public-gray-muted) !important;
+  font-size: .8125rem !important;
+  font-weight: 700 !important;
+  box-shadow: none !important;
+}
+
+.public-profile-platform-v2 .public-match-more .yoro-button:hover:not(:disabled) {
+  color: var(--public-gray-text) !important;
+}
+
+.public-profile-platform-v2 .public-match-more .yoro-button::after {
+  content: "";
+  width: .375rem;
+  height: .375rem;
+  margin-left: 6px;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
 }
 
 /* ── 상단 크롬 컴팩트 검색바(목업 v26) — legacy 검색 스킨 무력화 ─────
@@ -360,7 +487,8 @@
 }
 
 .public-profile-platform-v2.public-dashboard-shell .metric-tone-bad {
-  color: var(--yoro-color-match-loss-accent) !important;
+  /* 12px 안팎 굵은 글자 — 채움색(4.39:1)이 아니라 글자용 ink(4.5:1 이상). */
+  color: var(--graph-loss-ink) !important;
 }
 
 /* ── 먹 표면 오버라이드(목업 page-4) ─────────────────────────────
@@ -431,8 +559,8 @@
 }
 
 .public-profile-platform-v2 .public-team-result { font-weight: var(--yoro-font-weight-bold); }
-.public-profile-platform-v2 .public-team-result.win { color: var(--yoro-color-match-win-accent); }
-.public-profile-platform-v2 .public-team-result.loss { color: var(--yoro-color-match-loss-accent); }
+.public-profile-platform-v2 .public-team-result.win { color: var(--graph-win-ink); }
+.public-profile-platform-v2 .public-team-result.loss { color: var(--graph-loss-ink); }
 
 .public-profile-platform-v2.public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-match-expanded .public-team-player {
   border-top-color: var(--public-gray-border) !important;
@@ -2612,4 +2740,41 @@
     height: var(--yoro-space-8) !important;
     min-height: var(--yoro-space-8) !important;
   }
+}
+
+/* ── 지표 막대 트랙 — 02-legacy 2399 가 slate 파랑(rgba(92,111,137,.78))을
+   !important 로 칠해 pages layer(38-ink)의 --graph-track 을 이깁니다.
+   legacy 후순위인 이 파일에서만 !important 로 상쇄할 수 있습니다(그래프 대비
+   규격: 트랙 위 채움 대비 3:1 은 트랙이 --graph-track 일 때만 성립). */
+.public-profile-platform-v2.public-dashboard-shell:not(.public-home-shell) .public-profile-metric-bar {
+  background: var(--graph-track) !important;
+}
+
+/* ── LP 추이 선(legacy .public-lp-chart / .public-rank-mini-chart) —
+   01-core 의 티어색(teal·파랑 계열)을 이 화면의 --tier-lp-* 램프로 재배선합니다.
+   라이트 블록이 --tier-lp-* 를 재정의하므로 두 테마가 함께 따라옵니다. */
+.public-profile-platform-v2 :is(.public-lp-chart, .public-rank-mini-chart) {
+  --public-lp-line-color: var(--tier-lp-unranked);
+  --public-lp-glow-color: transparent;
+}
+
+.public-profile-platform-v2 :is(.public-lp-chart, .public-rank-mini-chart).tier-iron { --public-lp-line-color: var(--tier-lp-iron); }
+.public-profile-platform-v2 :is(.public-lp-chart, .public-rank-mini-chart).tier-bronze { --public-lp-line-color: var(--tier-lp-bronze); }
+.public-profile-platform-v2 :is(.public-lp-chart, .public-rank-mini-chart).tier-silver { --public-lp-line-color: var(--tier-lp-silver); }
+.public-profile-platform-v2 :is(.public-lp-chart, .public-rank-mini-chart).tier-gold { --public-lp-line-color: var(--tier-lp-gold); }
+.public-profile-platform-v2 :is(.public-lp-chart, .public-rank-mini-chart).tier-platinum { --public-lp-line-color: var(--tier-lp-platinum); }
+.public-profile-platform-v2 :is(.public-lp-chart, .public-rank-mini-chart).tier-emerald { --public-lp-line-color: var(--tier-lp-emerald); }
+.public-profile-platform-v2 :is(.public-lp-chart, .public-rank-mini-chart).tier-diamond { --public-lp-line-color: var(--tier-lp-diamond); }
+.public-profile-platform-v2 :is(.public-lp-chart, .public-rank-mini-chart).tier-master { --public-lp-line-color: var(--tier-lp-master); }
+.public-profile-platform-v2 :is(.public-lp-chart, .public-rank-mini-chart).tier-grandmaster { --public-lp-line-color: var(--tier-lp-grandmaster); }
+.public-profile-platform-v2 :is(.public-lp-chart, .public-rank-mini-chart).tier-challenger { --public-lp-line-color: var(--tier-lp-challenger); }
+
+/* LP 추이 선 굵기 — 그래프 대비 규격: 얇은 대각선은 안티에일리어싱으로 실측
+   대비보다 흐려 보이므로 렌더 2px 로 고정합니다. 10-final-overrides(legacy)가
+   --yoro-size-rank-line-stroke 를 !important 로 걸어 두어, legacy 후순위인
+   이 파일에서만 !important 로 상쇄할 수 있습니다. non-scaling-stroke 로
+   viewBox 축소 시에도 2px 를 유지합니다. */
+.public-profile-platform-v2 .public-lp-chart .public-lp-line-stroke {
+  stroke-width: 2px !important;
+  vector-effect: non-scaling-stroke;
 }

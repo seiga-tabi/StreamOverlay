@@ -126,8 +126,8 @@
     text-overflow: ellipsis;
   }
 
-  .public-md-gap dd[data-tone="up"] { color: var(--yoro-color-match-win-accent); }
-  .public-md-gap dd[data-tone="down"] { color: var(--yoro-color-match-loss-accent); }
+  .public-md-gap dd[data-tone="up"] { color: var(--graph-win-ink, var(--yoro-color-match-win-accent)); }
+  .public-md-gap dd[data-tone="down"] { color: var(--graph-loss-ink, var(--yoro-color-match-loss-accent)); }
 
   /* ── 빌드 ──────────────────────────────────────────────── */
   /* 누구 빌드인지 스크롤해도 보이게 붙여 둡니다. */

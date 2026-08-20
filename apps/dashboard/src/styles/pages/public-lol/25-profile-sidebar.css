@@ -175,7 +175,7 @@
 
   .public-profile-lp-delta { font-size: var(--yoro-font-size-sm); font-weight: var(--yoro-font-weight-bold); font-variant-numeric: tabular-nums; }
   .public-profile-lp-delta[data-tone="up"] { color: var(--yoro-color-rank-trend); }
-  .public-profile-lp-delta[data-tone="down"] { color: var(--yoro-color-match-loss-accent); }
+  .public-profile-lp-delta[data-tone="down"] { color: var(--graph-loss-ink, var(--yoro-color-match-loss-accent)); }
   .public-profile-lp-delta[data-tone="flat"] { color: var(--yoro-color-text-on-dark-muted); }
 
   .public-profile-lp-headline > small {
@@ -216,7 +216,7 @@
   .public-profile-lp-log .date { color: var(--yoro-color-text-on-dark-muted); }
   .public-profile-lp-log .delta { font-weight: var(--yoro-font-weight-bold); }
   .public-profile-lp-log .delta[data-tone="up"] { color: var(--yoro-color-rank-trend); }
-  .public-profile-lp-log .delta[data-tone="down"] { color: var(--yoro-color-match-loss-accent); }
+  .public-profile-lp-log .delta[data-tone="down"] { color: var(--graph-loss-ink, var(--yoro-color-match-loss-accent)); }
   .public-profile-lp-log .delta[data-tone="flat"] { color: var(--yoro-color-text-on-dark-muted); }
   .public-profile-lp-log .range { color: var(--yoro-color-text-on-dark-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -525,11 +525,12 @@
     display: flex;
     height: 7px;
     border-radius: var(--yoro-radius-pill);
-    background: color-mix(in srgb, var(--yoro-color-match-loss-accent) 45%, transparent);
+    /* 승패 분할 바 — 알파 합성 대신 솔리드(그래프 대비 규격). */
+    background: var(--profile-loss-fill, var(--yoro-color-match-loss-accent));
     overflow: hidden;
   }
 
-  .public-profile-playtime-bands .split .w { background: var(--yoro-color-rank-trend); }
+  .public-profile-playtime-bands .split .w { background: var(--profile-win-fill, var(--yoro-color-match-win-accent)); }
 
   .public-profile-playtime-bands .stat {
     color: var(--yoro-color-text-on-dark-muted);
@@ -594,11 +595,12 @@
     inline-size: calc(var(--yoro-space-8) + var(--yoro-space-3));
     block-size: var(--yoro-space-1);
     border-radius: var(--yoro-radius-pill);
-    background: color-mix(in srgb, var(--yoro-color-match-loss-accent) 45%, transparent);
+    /* 승패 분할 바 — 알파 합성 대신 솔리드(그래프 대비 규격). */
+    background: var(--profile-loss-fill, var(--yoro-color-match-loss-accent));
     overflow: hidden;
   }
 
-  .public-frequent-teammates__bar i { display: block; block-size: 100%; background: var(--yoro-color-rank-trend); }
+  .public-frequent-teammates__bar i { display: block; block-size: 100%; background: var(--profile-win-fill, var(--yoro-color-match-win-accent)); }
 
   .public-frequent-teammates__stat {
     flex: none;
@@ -610,7 +612,7 @@
 
   .public-frequent-teammates__stat b { display: block; font-size: var(--yoro-font-size-sm); }
   .public-frequent-teammates__stat b.is-hot { color: var(--yoro-color-rank-trend); }
-  .public-frequent-teammates__stat b.is-cold { color: var(--yoro-color-match-loss-accent); }
+  .public-frequent-teammates__stat b.is-cold { color: var(--graph-loss-ink, var(--yoro-color-match-loss-accent)); }
 
   /* 260px 급 좁은 카드 — 링·제목을 한 단계 줄여 히어로 한 줄을 지킵니다. */
   @container (max-width: 17.5rem) {

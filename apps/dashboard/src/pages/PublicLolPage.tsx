@@ -282,6 +282,7 @@ import {
   championAnalysisTableRows,
   championSpotlights,
   isBootItem,
+  SIGNATURE_BUILD_MAX_ITEMS,
   signatureBuilds,
   filteredMatches,
   hasActiveFilters,
@@ -1725,6 +1726,7 @@ function ProfileTopPanel({
   refreshRemaining,
   onRefresh,
   onOpenParticipation,
+  onOpenIngame,
   participationOpen,
   onToggleFavorite,
   tabs
@@ -1735,6 +1737,8 @@ function ProfileTopPanel({
   refreshRemaining: number;
   onRefresh: () => void;
   onOpenParticipation: () => void;
+  /** 방송 카드 '인게임 보기'(목업 §D) — 인게임 탭으로 전환합니다. */
+  onOpenIngame?: () => void;
   participationOpen: boolean;
   onToggleFavorite: () => void;
   tabs?: ReactNode;
@@ -1864,6 +1868,7 @@ function ProfileTopPanel({
       isInGame={profile.liveGame.isLive}
       isLive={registeredStreamerStream.isLive}
       links={supportingProfileLinks}
+      onOpenIngame={onOpenIngame}
       onOpenParticipation={onOpenParticipation}
       participationOpen={participationOpen}
       previewUrl={safeTwitchStreamPreviewUrl(registeredStreamerStream.thumbnailUrl)}
@@ -1878,6 +1883,8 @@ function ProfileTopPanel({
       text={{
         ingameLabel: t().ingame,
         ingameNotice: t().streamerIngameNotice,
+        ingameViewLabel: t().castIngameView,
+        participationOpenLabel: t().participationOpen,
         liveBadge: "LIVE",
         liveHeading: t().streamerCastLive,
         offlineHeading: t().streamerCastRecent,
@@ -1934,7 +1941,6 @@ function ProfileTopPanel({
       profileMetaLabel={undefined}
       profileLinks={<ProfileLinkIcons links={profileLinks} />}
       rankSection={(
-        <>
         <FeatureProfileHeroRank
           activeQueueId={selectedRankQueueId}
           onSelectQueue={setActiveRankQueue}
@@ -1948,9 +1954,8 @@ function ProfileTopPanel({
           }}
           trend={heroTrend}
         />
-        <ProfileRecentSummaryBar profile={profile} />
-        </>
       )}
+      summaryBar={<ProfileRecentSummaryBar profile={profile} />}
       channelAriaLabel={registeredStreamerStream ? `${registeredStreamerStream.twitchDisplayName} · ${t().streamerWatch}` : undefined}
       liveStatus={registeredStreamerStream ? {
         isLive: registeredStreamerStream.isLive,
@@ -2039,31 +2044,31 @@ function ProfileTopPanel({
   );
 }
 
+/* 더 많은 기능(목업 §3-6) — 죽은 기능 소개 대신 다른 화면 진입 칩 묶음.
+   '접기'는 실제로 접히는 토글입니다. */
 function PublicMoreFeatures() {
-  const features = [
-    { title: t().aiFeatureTitle, body: t().aiFeatureBody, action: t().viewAnalysis },
-    { title: t().positionFeatureTitle, body: t().positionFeatureBody, action: t().checkFeature },
-    { title: t().overlayFeatureTitle, body: t().overlayFeatureBody, action: t().createFeature },
-    { title: t().shareFeatureTitle, body: t().shareFeatureBody, action: t().createFeature }
+  const [folded, setFolded] = useState(false);
+  const chips = [
+    { key: "participation", label: t().moreFeatureParticipation, href: "/participation" },
+    { key: "aram", label: t().moreFeatureAram, href: "/lol/aram" },
+    { key: "patch-notes", label: t().moreFeaturePatchNotes, href: "/patch-notes" },
+    { key: "streamers", label: t().moreFeatureStreamers, href: "/follow" },
   ];
   return (
-    <section id="public-more-features" className="public-panel public-more-features">
-      <div className="public-section-head">
-        <h2  >{t().moreFeatures}</h2>
-        <span  >{t().folded}</span>
+    <section className="public-more-links" id="public-more-features">
+      <div className="public-more-links-head">
+        <h2>{t().moreFeatures}</h2>
+        <button aria-expanded={!folded} onClick={() => setFolded((current) => !current)} type="button">
+          {t().folded}
+        </button>
       </div>
-      <div className="public-more-feature-grid">
-        {features.map((feature, index) => (
-          <article key={feature.title}>
-            <span aria-hidden="true">{index + 1}</span>
-            <div>
-              <strong>{feature.title}</strong>
-              <p>{feature.body}</p>
-              <button type="button">{feature.action}</button>
-            </div>
-          </article>
-        ))}
-      </div>
+      {!folded ? (
+        <div className="public-more-links-chips">
+          {chips.map((chip) => (
+            <a href={localizedPublicUrlForCurrentLocale(chip.href)} key={chip.key}>{chip.label}</a>
+          ))}
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -2080,7 +2085,11 @@ function PublicProfileTabs({
   return (
     <nav className="public-profile-hero-nav" aria-label={t().profileSummary}>
       <button type="button" aria-current={activeTab === "overview" ? "page" : undefined} onClick={() => onChange("overview")}>{t().matchHistoryTab}</button>
-      <button type="button" aria-current={activeTab === "champions" ? "page" : undefined} onClick={() => onChange("champions")}>{t().championAnalysis}</button>
+      <button type="button" aria-current={activeTab === "champions" ? "page" : undefined} onClick={() => onChange("champions")}>
+        {/* 모바일 4칸 균등 분할(목업)에서 잘리지 않게 축약 표기로 교체합니다. */}
+        <span className="public-profile-tab-full">{t().championAnalysis}</span>
+        <span aria-hidden="true" className="public-profile-tab-short">{t().champion}</span>
+      </button>
       <button type="button" aria-current={activeTab === "ingame" ? "page" : undefined} onClick={() => onChange("ingame")}>{t().ingame}</button>
       <button type="button" aria-current={activeTab === "stats" ? "page" : undefined} onClick={() => onChange("stats")}>{t().stats}</button>
     </nav>
@@ -2361,6 +2370,7 @@ function ProfileSidebarLpChart({ points }: { points: Array<{ value: number; tier
           stroke={colorOf(segment.to.tierKey)}
           strokeLinecap="round"
           strokeWidth="2"
+          vectorEffect="non-scaling-stroke"
           x1={segment.from.x.toFixed(1)}
           x2={segment.to.x.toFixed(1)}
           y1={segment.from.y.toFixed(1)}
@@ -2405,7 +2415,12 @@ function MiniGamesLabBanner() {
   const href = localizedPublicUrlForCurrentLocale("/games/reaction");
   return (
     <a className="public-sig-lab" data-testid="mini-games-lab-banner" href={href}>
-      <span aria-hidden="true" className="public-sig-lab-icon">⚡</span>
+      {/* 이모지 금지 규칙 — 목업의 16px 그리드 선 아이콘(stroke 1.2)으로 대체. */}
+      <span aria-hidden="true" className="public-sig-lab-icon">
+        <svg fill="none" height="16" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.2" viewBox="0 0 24 24" width="16">
+          <path d="M13 2 L 5 13 h 6 l -1 9 8 -11 h -6 z" />
+        </svg>
+      </span>
       <span className="public-sig-lab-text">
         {/* 모바일(≤30rem)은 1행 유지를 위해 짧은 제목으로 교체하고 부제를 숨깁니다. */}
         <b>
@@ -2510,7 +2525,10 @@ function SignatureBuildsPanel({
                 ) : null}
                 <span className="public-sig-rate">
                   <b className={winRateTone(entry.winRate, entry.games)}>{formatPercent(entry.winRate)}</b>
-                  <small>{t().winRate}</small>
+                  <small>
+                    <span className="is-win">{winsText(entry.wins)}</span>{" "}
+                    <span className="is-loss">{entry.games - entry.wins}{activePublicLocale === "ja" ? "敗" : "패"}</span>
+                  </small>
                 </span>
                 <span aria-hidden="true" className="public-sig-chev" />
               </button>
@@ -2553,11 +2571,17 @@ function SignatureBuildsPanel({
                                     <span
                                       className={`public-sig-item${isBootItem(item.itemId) ? " is-boots" : ""}`}
                                       key={item.itemId}
-                                      title={sigLocaleName(item, `#${item.itemId}`)}
+                                      title={`${sigLocaleName(item, `#${item.itemId}`)} · ${Math.round((item.games / group.games) * 100)}% (${item.games}/${group.games})`}
                                     >
                                       <i>{item.iconUrl ? <img alt="" src={assetUrl(item.iconUrl)} /> : sigLocaleName(item, `#${item.itemId}`).slice(0, 4)}</i>
                                       <b>{Math.round((item.games / group.games) * 100)}%</b>
                                       <small>{item.games}/{group.games}</small>
+                                    </span>
+                                  ))}
+                                  {/* 미구매 슬롯 — 점선 테두리 빈 칸으로 패딩(목업). */}
+                                  {Array.from({ length: Math.max(0, SIGNATURE_BUILD_MAX_ITEMS - group.items.length) }, (_, slot) => (
+                                    <span aria-hidden="true" className="public-sig-item is-empty" key={`empty:${slot}`}>
+                                      <i />
                                     </span>
                                   ))}
                                 </div>
@@ -2568,12 +2592,14 @@ function SignatureBuildsPanel({
                       })}
                     </div>
                   ) : null}
-                  {entry.otherGames > 0 ? (
-                    <span className="public-sig-other">{t().sigBuildsOther.replace("{count}", String(entry.otherGames))}</span>
-                  ) : null}
-                  <button className="public-sig-view" onClick={() => onChampionPick(entry.champion.championId)} type="button">
-                    {t().sigBuildsView.replace("{name}", championName(entry.champion))}
-                  </button>
+                  <div className="public-sig-detail-foot">
+                    {entry.otherGames > 0 ? (
+                      <span className="public-sig-other">{t().sigBuildsOther.replace("{count}", String(entry.otherGames))}</span>
+                    ) : null}
+                    <button className="public-sig-view" onClick={() => onChampionPick(entry.champion.championId)} type="button">
+                      {t().sigBuildsView.replace("{name}", championName(entry.champion))}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -2604,6 +2630,48 @@ function SignatureBuildsPanel({
   );
 }
 
+/* 사이드바 최근 챔피언(목업 §2H) — 행 52px · 아바타 32px 원형 · 우측 N승 M패 전용색. */
+function ProfileRecentChampionsSideCard({ profile }: { profile: PublicLolProfile }) {
+  const champions = profile.championPerformance.slice(0, 3);
+  if (champions.length === 0) return null;
+  const lossLabel = activePublicLocale === "ja" ? "敗" : "패";
+  return (
+    <article className="public-profile-side-card public-profile-recent-champs">
+      <div className="public-profile-side-head">
+        <h2>{t().recentChampionsTitle}</h2>
+        <span className="public-profile-side-pill">{gamesText(profile.summary.recentGames)}</span>
+      </div>
+      <ul>
+        {champions.map((entry) => {
+          const losses = entry.games - entry.wins;
+          return (
+            <li key={entry.champion.championId}>
+              <span className="public-profile-recent-champs__ava">
+                {entry.champion.iconUrl
+                  ? <img alt="" src={assetUrl(entry.champion.iconUrl)} />
+                  : <span>{championName(entry.champion).slice(0, 1)}</span>}
+              </span>
+              <span className="public-profile-recent-champs__who">
+                <b>{championName(entry.champion)}</b>
+                <small>{gamesText(entry.games)} · KDA {formatDecimal(entry.averageKda, 1)}</small>
+              </span>
+              <span className="public-profile-recent-champs__rec">
+                {entry.wins > 0 ? <em>{winsText(entry.wins)}</em> : null}
+                {" "}
+                {losses > 0 ? <i>{losses}{lossLabel}</i> : null}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+    </article>
+  );
+}
+
+/* LP 기록 큐 탭(목업 §3-7) — 탭 자체가 큐별 30일 증감이라 고르기 전에도 비교됩니다.
+   rankHistory 가 솔로 단일 시계열이라(§4) 자유·5:5 는 증감 "—" + 빈 상태만 둡니다. */
+type LpRecordQueueId = "solo" | "flex" | "ranked5v5";
+
 function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
   const summary = profile.summary;
   const aggregateSummary = summarizeMatches(recentAnalysisMatches(profile));
@@ -2613,6 +2681,15 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
   const soloStats = soloRankStats(profile) ?? profile.rankedStats;
   const lpEntries = profileLpChangeEntries(profile);
   const mainRole = profile.roleAnalysis?.mainRole;
+  const [lpQueue, setLpQueue] = useState<LpRecordQueueId>("solo");
+  const lpQueueDefs: Array<{ id: LpRecordQueueId; label: string; stats?: LolRankedStats }> = [
+    { id: "solo", label: t().soloRank, stats: soloStats },
+    { id: "flex", label: t().flexRank, stats: flexRankStats(profile) },
+    { id: "ranked5v5", label: t().ranked5v5, stats: ranked5v5Stats(profile) },
+  ];
+  const lpSelected = lpQueueDefs.find((queue) => queue.id === lpQueue) ?? lpQueueDefs[0]!;
+  const lpSelectedRanked = lpSelected.stats !== undefined && lpSelected.stats.tier !== "UNRANKED";
+  const lpSoloSelected = lpQueue === "solo";
 
   const metrics: ProfileMetricRow[] = [
     { key: "kda", label: t().kda, value: formatDecimal(summary.averageKda, 2), ratio: metricRatio(summary.averageKda, METRIC_SCALE_MAX.kda) },
@@ -2635,6 +2712,63 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
 
   return (
     <section id="public-stats" className="public-overview-dashboard-panel">
+      {/* 목업 §2H 순서: LP 기록 → 플레이 시간대 → 최근 20경기 지표 →
+          함께 플레이 → 최근 챔피언 → 포지션. */}
+      <FeatureProfileLpRecordCard
+        changeLabel={lpSoloSelected && trend
+          ? (trend.change === 0 ? t().lpNoChange : `${trend.change > 0 ? "+" : ""}${trend.change} LP`)
+          : undefined}
+        changeTone={lpSoloSelected && trend ? (trend.change > 0 ? "up" : trend.change < 0 ? "down" : "flat") : "flat"}
+        chart={lpSoloSelected && trend && trend.points.length > 1 ? (
+          <ProfileSidebarLpChart points={trend.points.map((point) => ({ value: point.value, tierKey: tierKeyFromScore(point.value) }))} />
+        ) : undefined}
+        currentLabel={lpSelectedRanked && lpSelected.stats
+          ? `${rankTierLabel(lpSelected.stats)} ${lpSelected.stats.leaguePoints} LP`
+          : t().unranked}
+        currentTierKey={lpSelectedRanked && lpSelected.stats ? lpSelected.stats.tier.toLocaleLowerCase() : undefined}
+        entries={lpSoloSelected ? lpEntries : []}
+        queueTabs={(
+          <div aria-label={t().rankQueueSwitcher} className="public-profile-lp-queues" role="tablist">
+            {lpQueueDefs.map((queue) => {
+              const active = queue.id === lpQueue;
+              /* 큐별 30일 증감 — rankHistory 가 솔로 단일 시계열이라(§4)
+                 자유·5:5 는 "—" 를 둡니다. 가짜 수치를 만들지 않습니다. */
+              const delta = queue.id === "solo" && trend
+                ? (trend.change === 0 ? "0 LP" : `${trend.change > 0 ? "+" : ""}${trend.change} LP`)
+                : undefined;
+              const deltaTone = queue.id === "solo" && trend
+                ? (trend.change > 0 ? "up" : trend.change < 0 ? "down" : "flat")
+                : "flat";
+              return (
+                <button
+                  aria-selected={active}
+                  className={active ? "is-active" : ""}
+                  key={queue.id}
+                  onClick={() => setLpQueue(queue.id)}
+                  role="tab"
+                  type="button"
+                >
+                  <span>{queue.label}</span>
+                  {delta !== undefined
+                    ? <b data-tone={deltaTone}>{delta}</b>
+                    : <b data-tone="flat">—</b>}
+                </button>
+              );
+            })}
+          </div>
+        )}
+        recordCount={lpSoloSelected ? trend?.sampleCount ?? 0 : 0}
+        text={{
+          emptyDescription: t().lpRecordEmptyDescription,
+          emptyTitle: t().lpRecordEmptyTitle,
+          periodLabel: t().period30,
+          recordCountLabel: t().lpRecordCount,
+          title: t().lpRecordTitle,
+        }}
+      />
+
+      <ProfilePlaytimeSection profile={profile} />
+
       <FeatureProfileMetricProfileCard
         grade={aggregateGrade}
         gradeClassName={metricToneClass(scoreTone(aggregateScore))}
@@ -2649,27 +2783,9 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
         }}
       />
 
-      <FeatureProfileLpRecordCard
-        changeLabel={trend ? (trend.change === 0 ? t().lpNoChange : `${trend.change > 0 ? "+" : ""}${trend.change} LP`) : undefined}
-        changeTone={trend ? (trend.change > 0 ? "up" : trend.change < 0 ? "down" : "flat") : "flat"}
-        chart={trend && trend.points.length > 1 ? (
-          <ProfileSidebarLpChart points={trend.points.map((point) => ({ value: point.value, tierKey: tierKeyFromScore(point.value) }))} />
-        ) : undefined}
-        currentLabel={soloStats ? `${rankTierLabel(soloStats)} ${soloStats.leaguePoints} LP` : t().unranked}
-        entries={lpEntries}
-        recordCount={trend?.sampleCount ?? 0}
-        text={{
-          emptyDescription: t().lpRecordEmptyDescription,
-          emptyTitle: t().lpRecordEmptyTitle,
-          periodLabel: t().period30,
-          recordCountLabel: t().lpRecordCount,
-          title: t().lpRecordTitle,
-        }}
-      />
-
-      <ProfilePlaytimeSection profile={profile} />
-
       <ProfileFrequentTeammatesCard profile={profile} />
+
+      <ProfileRecentChampionsSideCard profile={profile} />
 
       <FeatureProfileRoleCard
         roles={roles}
@@ -5252,132 +5368,230 @@ function currentGameQueueLabel(liveGame: PublicLolCurrentGame): string {
     : liveGame.gameMode ?? "-";
 }
 
-function IngamePanel({ profile, onSearchRiotId }: { profile: PublicLolProfile; onSearchRiotId: (riotId: string) => void }) {
+/* 인게임 — 목업 "LoL 탭 리디자인"(인게임 · 게임 중 / 대기·확인·오류 보드).
+ *
+ * 클래스는 .public-ingame-board 이하 신설 네임스페이스입니다 — 02-legacy 의
+ * .public-ingame-panel/-empty/-teams 파스텔 !important 58건과 셀렉터를 아예
+ * 공유하지 않아, 39-ink-ingame.css 가 pages layer 에서 !important 없이 단독
+ * 소유합니다(§4 소유자 전략).
+ *
+ * 데이터 사실(목업과 의도적으로 다른 부분):
+ * - 룬: PublicLolCurrentGameParticipant 에 runes 가 없어 룬 원을 그리지 않습니다.
+ * - 챔피언 레벨·포지션: 실시간 데이터에 없어 배지·라벨을 만들지 않습니다.
+ * - '최근 20경기' 칸: rankedStats 는 해당 큐 시즌 누적이라 '시즌 전적'으로 표기. */
+function IngamePanel({
+  profile,
+  onSearchRiotId,
+  onRecheck
+}: {
+  profile: PublicLolProfile;
+  onSearchRiotId: (riotId: string) => void;
+  onRecheck?: () => void;
+}) {
   const liveGame = profile.liveGame;
   const isLive = liveGame?.isLive === true;
   const isChecking = liveGame?.status === "checking";
   const isUnavailable = liveGame?.status === "unavailable";
+  const state = isLive ? "live" : isChecking ? "checking" : isUnavailable ? "unavailable" : "offline";
   const participants = liveGame?.participants ?? [];
-  const teamIds = [...new Set(participants.map((participant) => participant.teamId))].sort((a, b) => a - b);
+  /* 목업은 아군 팀을 항상 왼쪽(먼저)에 둡니다. */
+  const allyTeamId = participants.find((participant) => participant.isTarget)?.teamId;
+  const teamIds = [...new Set(participants.map((participant) => participant.teamId))]
+    .sort((a, b) => (a === allyTeamId ? -1 : b === allyTeamId ? 1 : a - b));
   const spellVersion = profileDataDragonVersion(profile);
-  const averageTier = averageTierLabel(participants.map((participant) => participant.rankedStats));
   const expectedParticipants = Math.max(10, participants.length);
+  const platformLabel = liveGame?.lolPlatform ?? profile.lolPlatform;
+  /* 모바일: 상대 팀은 접혀 있고 토글로 펼칩니다(목업 모바일 보드). */
+  const [enemyOpen, setEnemyOpen] = useState(false);
+
   return (
-    <section id="public-ingame" className={`public-panel public-ingame-panel ${isLive ? "live" : isChecking ? "checking" : isUnavailable ? "unavailable" : "offline"}`} aria-busy={isChecking}>
-      <div className="public-ingame-status-head">
-        <div>
-          <h2  >{t().currentGameStatus}</h2>
-          <span className={`public-ingame-live-state ${isLive ? "live" : isChecking ? "checking" : isUnavailable ? "unavailable" : "offline"}`} role={isChecking ? "status" : undefined}>
-            <i />
+    <section aria-busy={isChecking} className={`public-ingame-board ${state}`} id="public-ingame">
+      <div className="public-ingame-status">
+        <div className="public-ingame-head">
+          <h2>{t().currentGameStatus}</h2>
+          <span className={`public-ingame-state ${state}`} role={isChecking ? "status" : undefined}>
+            <i aria-hidden="true" />
             {isLive ? t().currentlyInGame : isChecking ? t().currentGameChecking : isUnavailable ? t().currentGameUnavailable : t().notInGame}
           </span>
+          <span className="public-ingame-auto">{t().ingameAutoRefresh}</span>
+          <small className="public-ingame-meta">
+            {t().currentGameUpdated} {formatRelativeDate(liveGame?.fetchedAt)} · {t().currentGamePlatform} {platformLabel}
+          </small>
         </div>
-        <small>{t().currentGameUpdated} {formatRelativeDate(liveGame?.fetchedAt)}</small>
-      </div>
-      {!isLive ? (
-        <div className="public-ingame-empty">
-          <strong  >
-            {isChecking ? t().currentGameChecking : isUnavailable ? t().currentGameUnavailable : t().notInGame}
-          </strong>
+
+        {!isLive ? (
+        <div className="public-ingame-idle">
+          {/* 수묵 붓선(목업) — 흰 그라데이션 박스 자리의 장식. */}
+          <svg aria-hidden="true" className="public-ingame-ink" viewBox="0 0 220 60">
+            <path d="M8 42 C 60 10, 120 52, 212 20" fill="none" stroke="currentColor" strokeWidth="1" />
+            <path d="M16 50 C 70 26, 130 58, 206 32" fill="none" opacity=".6" stroke="currentColor" strokeWidth=".6" />
+          </svg>
+          <strong>{isChecking ? t().currentGameChecking : isUnavailable ? t().currentGameUnavailable : t().notInGame}</strong>
           {isChecking ? <small>{t().currentGameCheckingDetail}</small> : null}
           {isUnavailable ? <small>{t().currentGameUnavailableDetail}</small> : null}
-          <small>{t().currentGamePlatform} {liveGame?.lolPlatform ?? profile.lolPlatform}</small>
-          <small>{t().fetchedAt} {formatDate(liveGame?.fetchedAt)}</small>
+          <small>{t().currentGamePlatform} {platformLabel} · {t().fetchedAt} {formatDate(liveGame?.fetchedAt)}</small>
+          {isChecking ? (
+            <span aria-hidden="true" className="public-ingame-progress"><i /></span>
+          ) : (
+            <div className="public-ingame-idle-actions">
+              <button className="public-ingame-recheck" onClick={() => onRecheck?.()} type="button">
+                <svg aria-hidden="true" fill="none" height="13" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2" viewBox="0 0 24 24" width="13">
+                  <path d="M20 11A8 8 0 0 0 6.3 6.3L3 9" />
+                  <path d="M3 4v5h5" />
+                  <path d="M4 13a8 8 0 0 0 13.7 4.7L21 15" />
+                  <path d="M21 20v-5h-5" />
+                </svg>
+                {t().matchListRetry}
+              </button>
+            </div>
+          )}
         </div>
-      ) : (
-        <>
-          <div className="public-ingame-summary">
-            <div className="public-ingame-summary-card">
-              <span>{t().currentGameMode}</span>
-              <strong>{currentGameQueueLabel(liveGame)}</strong>
-              <small>{liveGame.gameMode ?? "-"}</small>
-            </div>
-            <div className="public-ingame-summary-card">
-              <span>{t().currentGameParticipants}</span>
-              <strong>{participants.length} / {expectedParticipants}</strong>
-              <small>{t().currentGameReady}</small>
-            </div>
-            <div className="public-ingame-summary-card">
+        ) : (
+          /* 상태 헤드 4칸 — 카드 4장 대신 분할선 한 줄, 경과만 22px(목업). */
+          <div className="public-ingame-facts">
+            <div className="public-ingame-fact is-elapsed">
               <span>{t().currentGameDuration}</span>
               <strong>{formatDuration(liveGame.gameLengthSeconds)}</strong>
-              <small>{t().currentlyInGame}</small>
             </div>
-            <div className="public-ingame-summary-card">
+            <div className="public-ingame-fact">
+              <span>{t().currentGameMode}</span>
+              <strong>{currentGameQueueLabel(liveGame)}</strong>
+            </div>
+            <div className="public-ingame-fact">
+              <span>{t().currentGameParticipants}</span>
+              <strong>
+                {participants.length} / {expectedParticipants}
+                {participants.length >= expectedParticipants ? <small>{t().ingameAllConnected}</small> : null}
+              </strong>
+            </div>
+            <div className="public-ingame-fact">
               <span>{t().currentGameAverageTier}</span>
-              <strong>{averageTier}</strong>
-              <small>{t().currentGamePlatform} {liveGame.lolPlatform ?? profile.lolPlatform}</small>
+              <strong>{averageTierLabel(participants.map((participant) => participant.rankedStats))}</strong>
             </div>
           </div>
-          <div className="public-ingame-teams">
-            {teamIds.map((teamId) => (
-              <article className={teamId === 100 ? "blue" : teamId === 200 ? "red" : ""} key={`current-game:${teamId}`}>
-                <div className="public-ingame-team-head">
-                  <strong>{currentGameTeamLabel(teamId)}</strong>
-                  <span>{participants.filter((participant) => participant.teamId === teamId).length}/5</span>
-                </div>
-                <div className="public-ingame-table-head">
-                  <span>{t().summonerResults}</span>
-                  <span>{t().champion}</span>
-                  <span>{t().summonerSpells}</span>
-                  <span>{t().tier}</span>
-                </div>
-                <div className="public-ingame-player-list">
-                  {participants.filter((participant) => participant.teamId === teamId).map((participant, index) => {
-                    const spellIcons = participant.summonerSpells
-                      .map((spellId) => ({ spellId, iconUrl: summonerSpellIconUrl(spellId, spellVersion) }))
-                      .slice(0, 2);
-                    return (
-                      <div className={participant.isTarget ? "target" : ""} key={`${teamId}:${participant.riotId ?? participant.champion.championId}:${index}`}>
-                        <div className="public-ingame-summoner-cell">
-                          {participant.champion.iconUrl ? <img src={participant.champion.iconUrl} alt="" /> : <span>{championName(participant.champion).slice(0, 1)}</span>}
-                          <div>
-                            <SearchableRiotId riotId={participant.riotId} fallback={participant.isTarget ? profile.riotId : championName(participant.champion)} onSearch={onSearchRiotId} />
-                            {participant.profileIconUrl ? <small><img src={assetUrl(participant.profileIconUrl)} alt="" /> {participant.bot ? t().currentGameBot : t().currentGameReady}</small> : null}
-                          </div>
-                        </div>
-                        <div className="public-ingame-champion-cell">
-                          <strong>{championName(participant.champion)}</strong>
-                          <small>{participant.isTarget ? t().currentlyInGame : t().currentGameReady}</small>
-                        </div>
-                        <div className="public-ingame-spell-cell">
-                          {spellIcons.length > 0 ? spellIcons.map((spell) => (
-                            <span key={`${participant.riotId ?? index}:spell:${spell.spellId}`}>
-                              {spell.iconUrl ? <img src={spell.iconUrl} alt="" /> : spell.spellId}
+        )}
+      </div>
+
+      {isLive ? (
+        <div className="public-ingame-sides">
+            {teamIds.map((teamId) => {
+              const isAlly = allyTeamId !== undefined && teamId === allyTeamId;
+              const members = participants.filter((participant) => participant.teamId === teamId);
+              const sideAverageTier = averageTierLabel(members.map((participant) => participant.rankedStats));
+              const collapsed = !isAlly && !enemyOpen;
+              return (
+                <article
+                  className={`public-ingame-side ${isAlly ? "is-ally" : "is-enemy"}${collapsed ? " is-collapsed" : ""}`}
+                  key={`current-game:${teamId}`}
+                >
+                  <div className="public-ingame-side-head">
+                    <i aria-hidden="true" className="public-ingame-side-mark" />
+                    <b>{allyTeamId === undefined ? currentGameTeamLabel(teamId) : isAlly ? t().allyTeam : t().enemyTeam}</b>
+                    <span>{members.length}/5 · {t().currentGameAverageTier} {sideAverageTier}</span>
+                    <em className="public-ingame-side-chip">{currentGameTeamLabel(teamId)}</em>
+                    {!isAlly ? (
+                      <button
+                        aria-expanded={enemyOpen}
+                        className="public-ingame-enemy-toggle"
+                        onClick={() => setEnemyOpen((current) => !current)}
+                        type="button"
+                      >
+                        {t().enemyTeam}
+                        <svg aria-hidden="true" fill="none" height="5" stroke="currentColor" strokeWidth="1" viewBox="0 0 8 5" width="8">
+                          <path d="M1 1 L 4 4 L 7 1" />
+                        </svg>
+                      </button>
+                    ) : null}
+                  </div>
+                  <div aria-hidden="true" className="public-ingame-cols">
+                    <span>{t().champion}</span>
+                    <span>{t().summonerResults}</span>
+                    <span>{t().ingameSpellsShort}</span>
+                    <span data-cell="tier">{t().tier}</span>
+                    <span data-cell="record">{t().ingameSeasonRecord}</span>
+                  </div>
+                  <div className="public-ingame-rows">
+                    {members.map((participant, index) => {
+                      const spellIcons = participant.summonerSpells
+                        .map((spellId) => ({ spellId, iconUrl: summonerSpellIconUrl(spellId, spellVersion) }))
+                        .slice(0, 2);
+                      const stats = participant.rankedStats;
+                      const hasRecord = stats !== undefined && stats.tier !== "UNRANKED" && stats.wins + stats.losses > 0;
+                      return (
+                        <div
+                          className={`public-ingame-row${participant.isTarget ? " is-target" : ""}`}
+                          key={`${teamId}:${participant.riotId ?? participant.champion.championId}:${index}`}
+                        >
+                          <span className="public-ingame-champ">
+                            {participant.champion.iconUrl
+                              ? <img alt="" src={participant.champion.iconUrl} />
+                              : <span>{championName(participant.champion).slice(0, 1)}</span>}
+                          </span>
+                          <span className="public-ingame-name">
+                            <span className="public-ingame-name-line">
+                              <SearchableRiotId
+                                fallback={participant.isTarget ? profile.riotId : championName(participant.champion)}
+                                onSearch={onSearchRiotId}
+                                riotId={participant.riotId}
+                              />
+                              {participant.isTarget ? <em className="public-ingame-me">{t().matchTeamSelf}</em> : null}
                             </span>
-                          )) : (
-                            <>
-                              <span>-</span>
-                              <span>-</span>
-                            </>
-                          )}
+                            <small>
+                              {championName(participant.champion)}
+                              {participant.bot ? ` · ${t().currentGameBot}` : ""}
+                              {/* 모바일(<48rem)은 티어 열이 접히므로 여기로 병합합니다(목업 모바일). */}
+                              {stats && stats.tier !== "UNRANKED"
+                                ? <span className="public-ingame-name-tier"> · {matchRankBadgeLabel(stats)} {stats.leaguePoints} LP</span>
+                                : <span className="public-ingame-name-tier"> · {t().unranked}</span>}
+                            </small>
+                          </span>
+                          <span className="public-ingame-spells">
+                            {spellIcons.length > 0 ? spellIcons.map((spell) => (
+                              <i key={`${participant.riotId ?? index}:spell:${spell.spellId}`}>
+                                {spell.iconUrl ? <img alt="" src={spell.iconUrl} /> : null}
+                              </i>
+                            )) : (
+                              <>
+                                <i />
+                                <i />
+                              </>
+                            )}
+                          </span>
+                          <span className="public-ingame-tier">
+                            {stats && stats.tier !== "UNRANKED" ? (
+                              <>
+                                <b>{matchRankBadgeLabel(stats)}</b>
+                                <small>{stats.leaguePoints} LP</small>
+                              </>
+                            ) : (
+                              <>
+                                <b className="is-unranked">{t().unranked}</b>
+                                <small>—</small>
+                              </>
+                            )}
+                          </span>
+                          <span className="public-ingame-record">
+                            {hasRecord ? (
+                              <>
+                                <b>{formatPercent(stats.winRate)}</b>
+                                <small>
+                                  <span className="is-win">{winsText(stats.wins)}</span>{" "}
+                                  <span className="is-loss">{stats.losses}{activePublicLocale === "ja" ? "敗" : "패"}</span>
+                                </small>
+                              </>
+                            ) : (
+                              <small className="is-none">{t().unknown}</small>
+                            )}
+                          </span>
                         </div>
-                        <div className="public-ingame-rank-cell">
-                          <span className={rankTierClass(participant.rankedStats, participant.rankedStats ? "ready" : "unknown")}>{matchRankBadgeLabel(participant.rankedStats)}</span>
-                          <small>{rankLabel(participant.rankedStats)}</small>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </article>
-            ))}
-          </div>
-          <div className="public-ingame-bottom-summary">
-            <div>
-              <span>{t().currentGamePlatform}</span>
-              <strong>{liveGame.lolPlatform ?? profile.lolPlatform}</strong>
-            </div>
-            <div>
-              <span>{t().currentGameUpdated}</span>
-              <strong>{formatDate(liveGame.fetchedAt)}</strong>
-            </div>
-            <div>
-              <span>{t().currentGameAverageTier}</span>
-              <strong>{averageTier}</strong>
-            </div>
-          </div>
-        </>
-      )}
+                      );
+                    })}
+                  </div>
+                </article>
+              );
+            })}
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -5902,7 +6116,10 @@ function RecentMatches({
       name: championName(entry.champion),
       iconUrl: assetUrl(entry.champion.iconUrl),
       fallbackLabel: championName(entry.champion).slice(0, 1),
-      metaLabel: `${entry.games}${t().games} ${formatPercent(entry.winRate)}`
+      metaLabel: `${entry.games}${t().games}`,
+      /* 목업 §3-2: 칩 안 승률만 전용색. */
+      winRateLabel: formatPercent(entry.winRate),
+      winRateTone: entry.winRate >= 50 ? "win" as const : "loss" as const
     }));
   const summaryStrip = profile.summary.recentGames > 0 ? (
     <RecentMatchesSummaryStrip
@@ -6007,14 +6224,27 @@ function RecentMatches({
  * 같은 다크 문법의 .public-champ-* 네임스페이스를 pages layer(36-champion-analysis.css)에서
  * 단독 소유합니다. 서버 계약 변경 없음 — topChampions·championPerformance·rolePerformance 그대로. */
 
+/* 목업(LoL 탭 리디자인): 6px 트랙 — 승(청자 채움) + 패(홍옥 42%) 분할.
+ * 수치·승패 글자는 막대 안이 아니라 아래 줄(ChampionWinLossLine)에 둡니다. */
 function ChampionSplitBar({ wins, losses }: { wins: number; losses: number }) {
   const games = wins + losses;
   const winShare = games > 0 ? Math.round((wins / games) * 100) : 0;
   return (
     <span aria-hidden="true" className="public-champ-split">
-      {wins > 0 ? <i style={{ width: `${winShare}%` }}>{winsText(wins)}</i> : null}
-      {losses > 0 ? <em>{losses}{activePublicLocale === "ja" ? "敗" : "패"}</em> : null}
+      <i style={{ width: `${winShare}%` }} />
+      <em />
     </span>
+  );
+}
+
+/* 막대 아래 줄 — % 무채 800 + N승(청자)/M패(홍옥) 글자(승패 데이터 전용색). */
+function ChampionWinLossLine({ wins, losses, winRate }: { wins: number; losses: number; winRate: number }) {
+  return (
+    <small className="public-champ-wl">
+      <b>{formatPercent(winRate)}</b>
+      {wins > 0 ? <span className="is-win">{winsText(wins)}</span> : null}
+      {losses > 0 ? <span className="is-loss">{losses}{activePublicLocale === "ja" ? "敗" : "패"}</span> : null}
+    </small>
   );
 }
 
@@ -6033,11 +6263,32 @@ function ChampionAnalysisPanel({
   const { active, ghosts } = championAnalysisTableRows(profile);
   const { signature, form } = championSpotlights(profile);
   const recentGames = profile.summary.recentGames;
+  /* 정렬 칩(목업 §챔피언 표) — 기본은 게임 수 순(championAnalysisTableRows),
+     누르면 승률순으로 재정렬합니다. */
+  const [sortByWinRate, setSortByWinRate] = useState(false);
+  const sortedActive = useMemo(() => sortByWinRate
+    ? [...active].sort((a, b) =>
+      (b.performance!.winRate - a.performance!.winRate) ||
+      (b.performance!.games - a.performance!.games))
+    : active, [active, sortByWinRate]);
 
   const head = (
     <div className="public-champ-head">
       <h2>{t().championAnalysis}</h2>
       <span className="public-champ-pill">{t().champAnalysisPill.replace("{count}", String(recentGames))}</span>
+      {active.length > 1 ? (
+        <button
+          aria-pressed={sortByWinRate}
+          className="public-champ-sort"
+          onClick={() => setSortByWinRate((current) => !current)}
+          type="button"
+        >
+          {t().champSortWinRate}
+          <svg aria-hidden="true" fill="none" height="5" stroke="currentColor" strokeWidth="1" viewBox="0 0 8 5" width="8">
+            <path d="M1 1 L 4 4 L 7 1" />
+          </svg>
+        </button>
+      ) : null}
     </div>
   );
 
@@ -6067,33 +6318,56 @@ function ChampionAnalysisPanel({
           {signature ? (
             <article className="public-champ-spot-tile is-signature">
               <span className="public-champ-spot-tag">{t().champSpotSignatureTag}</span>
-              {signatureArt ? <img alt="" className="public-champ-spot-art" src={signatureArt} /> : null}
               <div className="public-champ-spot-body">
-                <b>{championName(signature.champion)}</b>
-                {signatureMeta ? <small>{signatureMeta}</small> : null}
+                <span className="public-champ-spot-ava">
+                  {signatureArt ? <img alt="" src={signatureArt} /> : <span>{championName(signature.champion).slice(0, 1)}</span>}
+                </span>
+                <span className="public-champ-spot-id">
+                  <b>{championName(signature.champion)}</b>
+                  {signatureMeta ? <small>{signatureMeta}</small> : null}
+                </span>
                 {signaturePerformance ? (
                   <span className="public-champ-spot-num">
-                    <span className="is-brand"><b>{formatPercent(signaturePerformance.winRate)}</b> {gamesText(signaturePerformance.games)}</span>
-                    <span><b className={metricToneClass(kdaTone(signaturePerformance.averageKda))}>{formatDecimal(signaturePerformance.averageKda, 1)}</b> KDA</span>
+                    <span><b>{formatPercent(signaturePerformance.winRate)}</b> <small>{gamesText(signaturePerformance.games)}</small></span>
+                    <span><b>{formatDecimal(signaturePerformance.averageKda, 1)}</b> <small>KDA</small></span>
                   </span>
                 ) : null}
               </div>
+              {/* 챔피언 아트 대신 우상단 수묵 선(목업) — 정보를 가리지 않는 장식. */}
+              <svg aria-hidden="true" className="public-champ-spot-ink" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" fill="none" r="34" stroke="currentColor" strokeWidth=".7" />
+                <path d="M22 62 C 40 30, 62 26, 80 40" fill="none" stroke="currentColor" strokeWidth=".7" />
+                <path d="M26 74 C 46 46, 68 40, 84 52" fill="none" stroke="currentColor" strokeWidth=".7" />
+              </svg>
             </article>
           ) : null}
           {form ? (
             <article className="public-champ-spot-tile is-form">
               <span className="public-champ-spot-tag">{t().champSpotFormTag.replace("{count}", String(recentGames))}</span>
-              {formArt ? <img alt="" className="public-champ-spot-art" src={formArt} /> : null}
               <div className="public-champ-spot-body">
-                <b>{championName(form.champion)}</b>
-                <small>{t().champSpotFormMeta.replace("{count}", String(form.games))}</small>
+                <span className="public-champ-spot-ava">
+                  {formArt ? <img alt="" src={formArt} /> : <span>{championName(form.champion).slice(0, 1)}</span>}
+                </span>
+                <span className="public-champ-spot-id">
+                  <b>{championName(form.champion)}</b>
+                  <small>{t().champSpotFormMeta.replace("{count}", String(form.games))}</small>
+                </span>
                 <span className="public-champ-spot-num">
-                  <span className="is-good"><b>{formatPercent(form.winRate)}</b> {winsText(form.wins)} {form.games - form.wins}{activePublicLocale === "ja" ? "敗" : "패"}</span>
+                  <span>
+                    <b>{formatPercent(form.winRate)}</b>{" "}
+                    <small className="is-win">{winsText(form.wins)}</small>{" "}
+                    <small className="is-loss">{form.games - form.wins}{activePublicLocale === "ja" ? "敗" : "패"}</small>
+                  </span>
                   {form.averageDamagePerMinute !== undefined
-                    ? <span><b>{formatNumber(form.averageDamagePerMinute)}</b> DPM</span>
-                    : <span><b className={metricToneClass(kdaTone(form.averageKda))}>{formatDecimal(form.averageKda, 1)}</b> KDA</span>}
+                    ? <span><b>{formatNumber(form.averageDamagePerMinute)}</b> <small>DPM</small></span>
+                    : <span><b>{formatDecimal(form.averageKda, 1)}</b> <small>KDA</small></span>}
                 </span>
               </div>
+              <svg aria-hidden="true" className="public-champ-spot-ink" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" fill="none" r="34" stroke="currentColor" strokeWidth=".7" />
+                <path d="M30 30 L 70 70" fill="none" stroke="currentColor" strokeWidth=".7" />
+                <path d="M70 30 L 30 70" fill="none" stroke="currentColor" strokeWidth=".7" />
+              </svg>
             </article>
           ) : null}
         </div>
@@ -6109,7 +6383,7 @@ function ChampionAnalysisPanel({
           <span data-cell="dpm">DPM</span>
           <span>{t().mastery}</span>
         </div>
-        {active.map((row, index) => {
+        {sortedActive.map((row, index) => {
           const performance = row.performance!;
           const losses = performance.games - performance.wins;
           return (
@@ -6126,26 +6400,23 @@ function ChampionAnalysisPanel({
                 </span>
                 <span className="public-champ-who-id">
                   <b>{championName(row.champion)}</b>
-                  <small>{gamesText(performance.games)}</small>
+                  <small>{gamesText(performance.games)}{performance.games === 1 ? ` · ${t().champSampleShort}` : ""}</small>
                 </span>
               </span>
               <span className="public-champ-wr">
                 <ChampionSplitBar losses={losses} wins={performance.wins} />
-                <small>
-                  <span className={metricToneClass(percentTone(performance.winRate))}>{formatPercent(performance.winRate)}</span>
-                  <span>{gamesText(performance.games)}{performance.games === 1 ? ` · ${t().champSampleShort}` : ""}</span>
-                </small>
+                <ChampionWinLossLine losses={losses} winRate={performance.winRate} wins={performance.wins} />
               </span>
               <span className="public-champ-num" data-cell="kda">
-                <b className={metricToneClass(kdaTone(performance.averageKda))}>{formatDecimal(performance.averageKda, 1)}</b>
+                <b>{formatDecimal(performance.averageKda, 1)}</b>
                 <i>KDA</i>
               </span>
               <span className="public-champ-num" data-cell="cs">
-                <b className={metricToneClass(csTone(performance.averageCsPerMinute))}>{formatDecimal(performance.averageCsPerMinute, 1)}</b>
+                <b>{formatDecimal(performance.averageCsPerMinute, 1)}</b>
                 <i>{t().averageCsPerMinute}</i>
               </span>
               <span className="public-champ-num" data-cell="dpm">
-                <b className={metricToneClass(damagePerMinuteTone(performance.averageDamagePerMinute))}>{formatNumber(performance.averageDamagePerMinute)}</b>
+                <b>{formatNumber(performance.averageDamagePerMinute)}</b>
                 <i>DPM</i>
               </span>
               <span className="public-champ-mast">
@@ -6155,46 +6426,53 @@ function ChampionAnalysisPanel({
             </button>
           );
         })}
-        {ghosts.map((row) => (
-          <div className="public-champ-row is-ghost" key={row.champion.championId}>
-            <span className="public-champ-rank">—</span>
-            <span className="public-champ-who">
-              <span className="public-champ-ava" data-lv={row.masteryLevel !== undefined ? `Lv.${row.masteryLevel}` : undefined}>
-                {row.champion.iconUrl ? <img alt="" src={assetUrl(row.champion.iconUrl)} /> : <span>{championName(row.champion).slice(0, 1)}</span>}
+        {/* 숙련도만 있는 챔피언 — 빈 값 행 반복 대신 칩 한 줄로 접습니다(목업). */}
+        {ghosts.length > 0 ? (
+          <div className="public-champ-ghost-strip">
+            <span className="public-champ-ghost-label">{t().champGhostNote}</span>
+            {ghosts.map((row) => (
+              <span className="public-champ-ghost-chip" key={row.champion.championId}>
+                <span className="public-champ-ghost-ava">
+                  {row.champion.iconUrl ? <img alt="" src={assetUrl(row.champion.iconUrl)} /> : <span>{championName(row.champion).slice(0, 1)}</span>}
+                </span>
+                {championName(row.champion)}
+                {row.masteryLevel !== undefined ? ` Lv.${row.masteryLevel}` : ""}
+                {row.masteryPoints !== undefined ? ` · ${formatNumber(row.masteryPoints)}` : ""}
               </span>
-              <span className="public-champ-who-id">
-                <b>{championName(row.champion)}</b>
-              </span>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
+/* 포지션별 최근 성과 — 목업(LoL 탭 리디자인)은 표 안 세로 4줄 대신 독립
+ * 패널의 4열 그리드로 스캔선을 하나로 모읍니다. */
+function ChampionRolesPanel({ profile }: { profile: PublicLolProfile }) {
+  if (profile.rolePerformance.length === 0) return null;
+  const mainRole = profile.roleAnalysis?.mainRole;
+  return (
+    <section className="public-champ-panel public-champ-roles-panel">
+      <div className="public-champ-head">
+        <h2>{t().rolePerformance}</h2>
+        <span className="public-champ-pill">{t().champAnalysisPill.replace("{count}", String(profile.summary.recentGames))}</span>
+      </div>
+      <div className="public-champ-roles-grid">
+        {profile.rolePerformance.map((item) => (
+          <div className="public-champ-role-cell" key={item.role}>
+            <span className="public-champ-role-name">
+              <b>{mainRoleLabel(item.role)}</b>
+              {mainRole !== undefined && item.role === mainRole ? <i>{t().mainRole}</i> : null}
             </span>
-            <span className="public-champ-wr">
-              <span className="public-champ-ghost-note">{t().champGhostNote}</span>
-            </span>
-            <span className="public-champ-num" data-cell="kda"><b>—</b></span>
-            <span className="public-champ-num" data-cell="cs"><b>—</b></span>
-            <span className="public-champ-num" data-cell="dpm"><b>—</b></span>
-            <span className="public-champ-mast">
-              {row.masteryLevel !== undefined ? <b>Lv.{row.masteryLevel}</b> : <b>—</b>}
-              {row.masteryPoints !== undefined ? <small>{formatNumber(row.masteryPoints)}</small> : null}
+            <ChampionSplitBar losses={item.games - item.wins} wins={item.wins} />
+            <span className="public-champ-role-stat">
+              <b>{formatPercent(item.winRate)}</b>
+              {" · KDA "}{formatDecimal(item.averageKda, 1)}{" · "}{gamesText(item.games)}
             </span>
           </div>
         ))}
       </div>
-
-      {profile.rolePerformance.length > 0 ? (
-        <div className="public-champ-roles">
-          <h3>{t().rolePerformance}</h3>
-          {profile.rolePerformance.map((item) => (
-            <div className="public-champ-role-row" key={item.role}>
-              <span className="public-champ-role-name">{mainRoleLabel(item.role)}</span>
-              <ChampionSplitBar losses={item.games - item.wins} wins={item.wins} />
-              <span className="public-champ-role-stat">
-                <b className={metricToneClass(percentTone(item.winRate))}>{formatPercent(item.winRate)}</b>
-                {" · KDA "}{formatDecimal(item.averageKda, 1)}{" · "}{gamesText(item.games)}
-              </span>
-            </div>
-          ))}
-        </div>
-      ) : null}
     </section>
   );
 }
@@ -6324,6 +6602,8 @@ export function PublicLolPage({
   const loadMoreInFlightKeyRef = useRef<string | undefined>(undefined);
   const queueFilterAbortRef = useRef<AbortController | undefined>(undefined);
   const queueFilterSequenceRef = useRef(0);
+  /* 인게임 실시간 상태 재확인 — 30초 폴링 effect 가 채우고, 탭의 버튼이 호출합니다. */
+  const liveStateRecheckRef = useRef<(() => void) | null>(null);
   const [recentSearches, setRecentSearches] = useState<SearchSuggestion[]>(() => readRecentSearches());
   const [favorites, setFavorites] = useState<PublicFavorite[]>(() => readFavorites());
   const { theme, toggleTheme } = usePublicTheme();
@@ -6585,11 +6865,14 @@ export function PublicLolPage({
         // 실시간 상태 갱신 실패는 전적 화면 사용을 막지 않습니다.
       }
     };
+    /* 인게임 탭의 '다시 시도' 버튼(목업)에서 즉시 재확인할 수 있게 노출합니다. */
+    liveStateRecheckRef.current = () => void syncStreamerStatus();
     const timer = window.setInterval(() => {
       void syncStreamerStatus();
     }, 30_000);
     void syncStreamerStatus();
     return () => {
+      liveStateRecheckRef.current = null;
       controller.abort();
       window.clearInterval(timer);
     };
@@ -7510,6 +7793,7 @@ export function PublicLolPage({
                     refreshRemaining={refreshRemaining}
                     onRefresh={() => void runSearch(profile.riotId, { refresh: true })}
                     onOpenParticipation={() => changeMainPage("followJoin")}
+                    onOpenIngame={() => setProfileTab("ingame")}
                     participationOpen={Boolean(publicParticipation?.streamers.some((streamer) => (
                       streamer.isOpen
                       && streamer.twitchUserId === activeProfile.twitchStream?.twitchUserId
@@ -7540,14 +7824,17 @@ export function PublicLolPage({
                   ) : null}
 
                   {profileTab === "champions" ? (
-                    <ChampionAnalysisPanel
-                      profile={activeProfile}
-                      onChampionPick={(championId) => {
-                        /* 챔피언 행 클릭 = 해당 챔피언으로 전적 필터 후 전적 탭 이동(기존 championFilter 재사용). */
-                        setFilters({ ...DEFAULT_MATCH_FILTERS, championId: String(championId) });
-                        setProfileTab("overview");
-                      }}
-                    />
+                    <>
+                      <ChampionAnalysisPanel
+                        profile={activeProfile}
+                        onChampionPick={(championId) => {
+                          /* 챔피언 행 클릭 = 해당 챔피언으로 전적 필터 후 전적 탭 이동(기존 championFilter 재사용). */
+                          setFilters({ ...DEFAULT_MATCH_FILTERS, championId: String(championId) });
+                          setProfileTab("overview");
+                        }}
+                      />
+                      <ChampionRolesPanel profile={activeProfile} />
+                    </>
                   ) : null}
 
                   {profileTab === "stats" ? (
@@ -7565,7 +7852,11 @@ export function PublicLolPage({
 
 	                {profileTab === "ingame" ? (
 	                  <>
-		                    <IngamePanel profile={activeProfile} onSearchRiotId={searchRiotId} />
+		                    <IngamePanel
+		                      onRecheck={() => liveStateRecheckRef.current?.()}
+		                      onSearchRiotId={searchRiotId}
+		                      profile={activeProfile}
+		                    />
 	                  </>
                   ) : null}
 

@@ -3264,35 +3264,39 @@
   gap: 6px 14px;
   margin-top: 10px;
   padding: 9px 16px;
-  /* 색은 토큰만 사용 — 프로필(platform-v2)의 수묵 재매핑이 그대로 흘러듭니다. */
-  border: 1px solid var(--yoro-color-border-on-dark) !important;
-  border-radius: 3px;
-  background: var(--yoro-color-ground-surface) !important;
+  /* 색은 토큰만 사용 — 프로필(platform-v2)의 수묵 재매핑이 그대로 흘러듭니다.
+     목업 §3-5: 카드가 아니라 행 사이 헤어라인 줄 — 아래 선 하나만 둡니다. */
+  padding: 9px 18px;
+  border: 0 !important;
+  border-bottom: .5px solid var(--yoro-color-border-on-dark) !important;
+  border-radius: 0;
+  background: transparent !important;
   color: var(--yoro-color-text-on-dark-muted) !important;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .public-match-day-summary:first-child { margin-top: 0; }
 
-.public-match-day-summary__date strong { color: var(--yoro-color-text-on-dark); font-weight: 800; }
+.public-match-day-summary__date strong { color: var(--yoro-color-text-on-dark); font-size: 13px; font-weight: 800; }
 .public-match-day-summary__date small { color: var(--yoro-color-text-on-dark-muted); font-weight: 600; margin-left: 6px; font-size: 12px; }
 
-.public-match-day-summary__record .is-win { color: var(--yoro-color-match-win-accent); font-weight: 800; }
-.public-match-day-summary__record .is-loss { color: var(--yoro-color-match-loss-accent); font-weight: 800; }
+.public-match-day-summary__record .is-win { color: var(--graph-win-ink, var(--yoro-color-match-win-accent)); font-weight: 800; }
+.public-match-day-summary__record .is-loss { color: var(--graph-loss-ink, var(--yoro-color-match-loss-accent)); font-weight: 800; }
 
 .public-match-day-summary__sep { width: 1px; height: 14px; background: var(--yoro-color-border-on-dark-strong); }
 
 .public-match-day-summary__rate { font-weight: 800; color: var(--yoro-color-text-on-dark); }
-.public-match-day-summary__rate.is-hot { color: var(--yoro-color-match-win-accent); }
-.public-match-day-summary__rate.is-cold { color: var(--yoro-color-match-loss-accent); }
+.public-match-day-summary__rate.is-hot { color: var(--graph-win-ink, var(--yoro-color-match-win-accent)); }
+.public-match-day-summary__rate.is-cold { color: var(--graph-loss-ink, var(--yoro-color-match-loss-accent)); }
 
 .public-match-day-summary__kda b { color: var(--yoro-color-text-on-dark); font-weight: 800; }
 
 .public-match-day-summary__dots { display: flex; gap: 3px; margin-left: auto; }
 .public-match-day-summary__dots i {
+  /* 목업 §3-5: 14×4px · radius 1 · 시간순(왼쪽이 이른 경기). */
   width: 14px;
-  height: 6px;
-  border-radius: 3px;
+  height: 4px;
+  border-radius: 1px;
   background: var(--yoro-color-border-on-dark-strong);
 }
 .public-match-day-summary__dots i.is-win { background: var(--yoro-color-match-win-accent); }

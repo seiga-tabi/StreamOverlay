@@ -1874,7 +1874,7 @@
 }
 
 .public-profile-shared-shell .public-matches-panel .public-kda strong .deaths {
-  color: var(--yoro-color-match-loss-accent) !important;
+  color: var(--graph-loss-ink, var(--yoro-color-match-loss-accent)) !important;
 }
 
 @media (max-width: 48rem) {
