@@ -1302,30 +1302,32 @@
   }
 }
 
-/* 최근 경기 상세의 최종 배치 보정 */
+/* 최근 경기 상세의 최종 배치 보정 — 한 줄 행(목업 「전적 상세 — 선수 줄
+   재구성」)에서는 이름을 시각 높이대로 두고(줄 높이는 아이템 두 줄이 정함),
+   검색 버튼의 히트 영역만 ::before 로 44px 까지 넓힙니다. 아래로는 KDA 줄을
+   덮습니다 — KDA 는 표시용 텍스트라(pointer-events 없음) 탭이 검색으로 갑니다. */
 @media (max-width: 48rem) {
   .public-dashboard-shell:not(.public-home-shell) .public-team-player-id-stack {
-    display: grid !important;
-    grid-template-columns: minmax(var(--yoro-space-0), 1fr) !important;
-    grid-template-rows:
-      calc(var(--yoro-size-touch-target) - var(--yoro-space-4))
-      var(--yoro-space-4) !important;
-    align-items: stretch !important;
-    gap: var(--yoro-space-0) !important;
+    display: block !important;
     width: 100% !important;
     min-width: var(--yoro-space-0) !important;
-    min-height: var(--yoro-size-touch-target) !important;
+    min-height: var(--yoro-space-0) !important;
   }
 
   .public-dashboard-shell:not(.public-home-shell) .public-team-player-id-stack > .public-riot-id-static,
   .public-dashboard-shell:not(.public-home-shell) .public-team-player-id-stack > .public-riot-id-link {
-    grid-column: 1 !important;
-    grid-row: 1 / 3 !important;
-    align-items: flex-start !important;
+    position: relative !important;
+    align-items: center !important;
+    max-width: 100% !important;
     min-width: var(--yoro-space-0) !important;
-    min-height: var(--yoro-size-touch-target) !important;
-    padding-block: var(--yoro-space-1) var(--yoro-space-4) !important;
-    overflow: hidden !important;
+    min-height: var(--yoro-space-0) !important;
+    padding-block: var(--yoro-space-0) !important;
+  }
+
+  .public-dashboard-shell:not(.public-home-shell) .public-team-player-id-stack > .public-riot-id-link::before {
+    content: "" !important;
+    position: absolute !important;
+    inset: -13px 0 !important;
   }
 
   .public-dashboard-shell:not(.public-home-shell) .public-team-player-id-stack .public-riot-name {
@@ -1333,22 +1335,6 @@
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
-  }
-
-  .public-dashboard-shell:not(.public-home-shell) .public-team-mobile-kda {
-    grid-column: 1 !important;
-    grid-row: 2 !important;
-    display: inline-flex !important;
-    align-items: baseline !important;
-    justify-content: flex-start !important;
-    align-self: center !important;
-    justify-self: start !important;
-    gap: var(--yoro-space-1) !important;
-    margin: var(--yoro-space-0) !important;
-    line-height: var(--yoro-line-height-tight) !important;
-    pointer-events: none !important;
-    white-space: nowrap !important;
-    z-index: var(--yoro-z-base) !important;
   }
 }
 
@@ -1591,11 +1577,12 @@
     min-width: calc(var(--yoro-space-12) + var(--yoro-space-6)) !important;
   }
 
-  /* ── 전적 상세 · 모바일 두 줄 카드(목업 LolMatchExpandedMobile) ──────────
-     8열 표를 [티어|아바타|이름·KDA / 지표+트랙|아이템] 두 줄로 접습니다.
-     지표(피해량·CS·시야)는 숨기지 않고 .public-team-mobile-metrics 가 아랫줄에
-     되살립니다. 기존 !important 는 02-legacy 의 720px 격자 강제를 계속 눌러야
-     해서 유지하고 값만 교체했습니다 — 신규 !important 는 없습니다. */
+  /* ── 전적 상세 · 모바일 한 줄 행(목업 「전적 상세 — 선수 줄 재구성」) ────
+     8열 표를 [티어 28 | 챔피언 36 | 스펠·룬 40 | 이름·KDA 1fr | 아이템 4+3]
+     한 줄로 접습니다. 딜·CS 는 행에서 뺍니다(사용자 결정 2026-08-21) —
+     데스크톱 8열 표와 빌드 탭에는 남습니다. 기존 !important 는 02-legacy 의
+     720px 격자 강제를 계속 눌러야 해서 유지하고 값만 교체했습니다 —
+     신규 !important 는 없습니다. */
   .public-profile-shared-shell .public-team-detail,
   .public-profile-shared-shell .public-team-player-list {
     gap: var(--yoro-space-0) !important;
@@ -1627,16 +1614,20 @@
   }
 
   .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player {
+    /* 챔피언 36 · 로드아웃 40(스펠16+8+룬16) · [티어칩+이름 / KDA] · 아이템 78.
+       티어 칩은 Riot ID 왼쪽, 같은 줄(사용자 지시 2026-08-21) — KDA 줄이
+       칩+이름 폭을 통째로 씁니다. */
     grid-template-areas:
-      "rank avatar copy copy"
-      "metrics metrics metrics items" !important;
-    grid-template-columns: 28px 36px minmax(var(--yoro-space-0), 1fr) auto !important;
+      "avatar loadout rank copy items"
+      "avatar loadout kda kda items" !important;
+    grid-template-columns: 36px auto auto minmax(var(--yoro-space-0), 1fr) auto !important;
     grid-template-rows: auto auto !important;
     align-items: center !important;
-    gap: var(--yoro-space-2) var(--yoro-space-2) !important;
+    /* --td-* 변수는 아래 22.5rem 블록이 좁은 폭에서만 줄입니다(신규 !important 없이). */
+    gap: 2px var(--td-row-gap, var(--yoro-space-2)) !important;
     height: auto !important;
     min-height: var(--yoro-space-0) !important;
-    padding: var(--yoro-space-2) var(--yoro-space-3) !important;
+    padding: var(--yoro-space-2) var(--td-row-pad, var(--yoro-space-3)) !important;
     border-top: var(--yoro-size-sr-only) solid var(--public-gray-border) !important;
     background: transparent !important;
   }
@@ -1647,6 +1638,7 @@
 
   .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player > .public-team-rank-badge {
     grid-area: rank !important;
+    align-self: center !important;
     min-width: 28px !important;
     height: 18px !important;
     font-size: 9px !important;
@@ -1658,42 +1650,45 @@
     height: 36px !important;
   }
 
-  /* 스펠·룬 2×2 는 좁은 폭에서 접습니다 — 빌드 탭이 전담(목업 모바일). */
+  /* 스펠·룬은 행에 되살립니다(해부도 ③) — 스펠 세로 2칸 | 룬 세로 2칸.
+     데스크톱 행은 여전히 룬을 접습니다(41-ink — 빌드 탭 전담). */
   .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player > .public-team-loadout-build {
-    display: none !important;
+    grid-area: loadout !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, 16px) !important;
+    grid-auto-flow: column !important;
+    /* 스펠|룬 사이는 슬롯 세로 간격과 같은 2px — 이름 열에 6px 를 돌려줍니다
+       (사용자 지시 2026-08-21). */
+    gap: 2px !important;
+    width: auto !important;
   }
 
-  .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player-copy {
-    grid-area: copy !important;
-    width: 100% !important;
-    min-width: var(--yoro-space-0) !important;
-  }
-
+  /* 이름 래퍼 두 겹을 contents 로 풀어 이름 스택(copy 영역)과 KDA(kda 영역)를
+     행 격자에 직접 놓습니다(마크업 불변). */
+  .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player-copy,
   .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player-id-line {
-    display: flex !important;
-    align-items: center !important;
-    gap: var(--yoro-space-2) !important;
-    min-width: var(--yoro-space-0) !important;
+    display: contents !important;
   }
 
   .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player-id-stack {
-    flex: 1 1 auto !important;
+    grid-area: copy !important;
+    align-self: center !important;
     min-width: var(--yoro-space-0) !important;
   }
 
-  /* KDA 는 윗줄 오른쪽 — 표의 KDA 열 대신 mobile-kda 가 보입니다. */
-  /* 후속 §2: KDA 는 모바일도 한 줄 — `5/6/1` + 11px `KDA 1.00`. */
+  /* KDA 는 이름 아래 두 번째 행 — `5/6/1` + 11px `KDA 1.00`.
+     탭은 이름 검색 버튼의 확장 히트 영역(위 보정 블록 ::before)으로 갑니다. */
   .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-mobile-kda {
+    grid-area: kda !important;
     display: flex !important;
-    flex: 0 0 auto !important;
+    pointer-events: none !important;
     align-items: baseline !important;
     gap: var(--yoro-space-1) !important;
     margin: var(--yoro-space-0) !important;
-    margin-left: auto !important;
+    justify-self: start !important;
     color: var(--public-gray-muted) !important;
     font-size: 11px !important;
     line-height: var(--yoro-line-height-tight) !important;
-    text-align: right !important;
     white-space: nowrap !important;
   }
 
@@ -1705,37 +1700,47 @@
     display: none !important;
   }
 
-  /* 아랫줄 지표 — 값 텍스트 + 2px 피해량 트랙(41-ink 의 데스크톱 규격 공유). */
+  /* 딜·CS 는 모바일 상세 행에서 뺍니다(사용자 결정 2026-08-21 — §7 보고). */
   .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player > .public-team-mobile-metrics {
-    display: block !important;
-    grid-area: metrics !important;
-    min-width: var(--yoro-space-0) !important;
+    display: none !important;
   }
 
-  /* 와드(마지막 칸)는 5px 더 벌립니다(후속 §2 — 데스크톱 6px 의 축소판). */
+  /* 아이템 4열 2행 — 와드는 항상 7번째 슬롯(fixedTeamItemSlots)이라 1행 4열에
+     명시 배치하면 나머지 여섯이 빈 칸(1행 1–3, 2행 1–3)을 차례로 채웁니다. */
   .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-item-build {
     grid-area: items !important;
-    grid-template-columns: repeat(6, 15px) 20px !important;
-    gap: 3px !important;
+    grid-template-columns: repeat(4, var(--td-item, 18px)) !important;
+    grid-auto-rows: var(--td-item, 18px) !important;
+    gap: 2px !important;
     width: auto !important;
-    align-self: end !important;
+    align-self: center !important;
   }
 
-  .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-item-build > :last-child {
-    justify-self: end !important;
-    /* 와드 원형 — 위 item-slot r2 !important(02-legacy r5 상쇄용)를 마지막 칸만 되돌립니다. */
+  .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-item-build > :nth-child(7) {
+    grid-column: 4 !important;
+    grid-row: 1 !important;
+    /* 와드 원형 — 아래 item-slot r2 !important(02-legacy r5 상쇄용)를 이 칸만 되돌립니다. */
     border-radius: 99px !important;
   }
 
   .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-item-slot,
   .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-item-empty {
-    width: 15px !important;
-    height: 15px !important;
+    width: var(--td-item, 18px) !important;
+    height: var(--td-item, 18px) !important;
     border-radius: 2px !important;
   }
 }
 
 @media (max-width: 22.5rem) {
+  /* 상세 선수 줄 — 360px 에서는 이름 열이 37px 로 붕괴해 KDA 가 아이템을
+     침범합니다. 고정 구역·간격을 한 단계 줄여 이름 열에 ~69px 를 돌려줍니다.
+     변수 선언이라 위 48rem 블록의 기존 !important 값이 그대로 소비합니다. */
+  .public-profile-shared-shell.public-dashboard-shell:not(.public-home-shell) .public-team-player {
+    --td-row-gap: 6px;
+    --td-row-pad: var(--yoro-space-2);
+    --td-item: 15px;
+  }
+
   .public-profile-shared-shell .public-match-summary {
     grid-template-columns:
       calc(var(--yoro-space-12) + var(--yoro-space-5))

@@ -1,5 +1,6 @@
 import { MatchTeamDetailsPlayerRow, type MatchTeamDetailsPlayerRowViewModel } from "./MatchTeamDetailsPlayerRow";
 import { MatchTeamHeader, type MatchTeamHeaderViewModel } from "./MatchTeamHeader";
+import type { ReactNode } from "react";
 
 export type MatchTeamDetailsColumnLabels = {
   champion: string;
@@ -13,6 +14,8 @@ export type MatchTeamDetailsColumnLabels = {
 export type MatchTeamDetailsTeamSectionViewModel = {
   key: string;
   className: string;
+  /* 검색한 사람이 없는 팀 — 모바일에서 헤더 한 줄로 접을 수 있습니다(목업 §3-1). */
+  enemy?: boolean;
   label: MatchTeamHeaderViewModel["label"];
   resultSummary: MatchTeamHeaderViewModel["resultSummary"];
   summary: MatchTeamHeaderViewModel["summary"];
@@ -24,6 +27,9 @@ export type MatchTeamDetailsTeamSectionProps = {
   kdaLabel: string;
   columns: MatchTeamDetailsColumnLabels;
   team: MatchTeamDetailsTeamSectionViewModel;
+  collapsed?: boolean;
+  toggleLabel?: ReactNode;
+  onToggleCollapsed?: () => void;
   onSearchRiotId: (riotId: string) => void;
 };
 
@@ -31,11 +37,19 @@ export function MatchTeamDetailsTeamSection({
   kdaLabel,
   columns,
   team,
+  collapsed = false,
+  toggleLabel,
+  onToggleCollapsed,
   onSearchRiotId
 }: MatchTeamDetailsTeamSectionProps) {
   return (
-    <section className={team.className}>
+    <section className={`${team.className}${collapsed ? " is-collapsed" : ""}`}>
         <MatchTeamHeader
+          toggle={onToggleCollapsed ? {
+            expanded: !collapsed,
+            label: toggleLabel,
+            onToggle: onToggleCollapsed
+          } : undefined}
           viewModel={{
             label: team.label,
             resultSummary: team.resultSummary,

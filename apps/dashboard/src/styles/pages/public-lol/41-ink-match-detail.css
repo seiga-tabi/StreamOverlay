@@ -237,15 +237,34 @@
     box-shadow: none;
   }
 
+  /* 스트리머 표식(§2-5) — 점 대신 12px 트위치 마크. legacy(01-core:4956)의
+     right/bottom -3px 자리는 그대로 쓰고 규격만 덮습니다. */
   .public-profile-platform-v2 .public-team-detail .public-team-champion-avatar em {
-    border-color: var(--public-gray-surface);
-    background: var(--public-gray-border-strong);
-    box-shadow: none;
+    width: 12px;
+    height: 12px;
+    border: 0;
+    border-radius: 2px;
+    /* 1px 링이 초상화와 판을 갈라 줍니다 — 어떤 챔피언 그림 위에서도 형태가 삽니다. */
+    box-shadow: 0 0 0 1px var(--public-gray-surface);
+    background:
+      url("/images/brand/twitch-glitch-purple.0a7bc78f69becd1d.png") center / 9px 9px no-repeat,
+      var(--public-gray-surface);
+    /* 브랜드 보라를 수묵 톤으로 — 칩에서 쓰던 규칙 그대로(위 streamer-tier-badge). */
+    filter: grayscale(1) brightness(1.35);
   }
 
+  .public-profile-platform-v2.theme-light .public-team-detail .public-team-champion-avatar em,
+  :root[data-public-theme="light"] .public-profile-platform-v2 .public-team-detail .public-team-champion-avatar em {
+    filter: grayscale(1) brightness(.7);
+  }
+
+  /* 방송 중이면 링만 홍옥 — 12px 안에 5px 점을 더 두기엔 좁아
+     live dot 이 쓰던 색을 링으로 옮깁니다. */
   .public-profile-platform-v2 .public-team-detail .public-team-champion-avatar.live em {
-    background: var(--yoro-color-match-loss-accent);
-    box-shadow: none;
+    background:
+      url("/images/brand/twitch-glitch-purple.0a7bc78f69becd1d.png") center / 9px 9px no-repeat,
+      var(--public-gray-surface);
+    box-shadow: 0 0 0 1px var(--yoro-color-match-loss-accent);
   }
 
   /* ── 스펠 열 22px — 룬 2칸은 행에서 접습니다(빌드 탭 전담, 목업 §2-4) ── */
@@ -364,41 +383,15 @@
     background: var(--graph-fill);
   }
 
-  /* 데스크톱에서 모바일 전용 요소는 접습니다. */
+  /* 데스크톱에서 모바일 전용 요소는 접습니다. 딜·CS(mobile-metrics)는 모바일
+     행에서도 빠져(사용자 결정 2026-08-21, 10-final) 이제 어디에도 보이지 않습니다. */
   .public-profile-platform-v2 .public-team-detail .public-team-mobile-kda,
   .public-profile-platform-v2 .public-team-detail .public-team-mobile-metrics {
     display: none;
   }
 
-  /* 모바일 아랫줄 지표(10-final 48rem 블록이 display 를 되살립니다). */
-  .public-profile-platform-v2 .public-team-detail .public-team-mobile-metrics-label {
-    display: block;
-    color: var(--public-gray-muted);
-    font-size: 11px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .public-profile-platform-v2 .public-team-detail .public-team-mobile-metrics-label b {
-    color: var(--public-gray-text);
-    font-size: 12px;
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .public-profile-platform-v2 .public-team-detail .public-team-mobile-metrics-track {
-    display: block;
-    height: 2px;
-    margin-top: 7px;
-    background: var(--graph-track);
-  }
-
-  .public-profile-platform-v2 .public-team-detail .public-team-mobile-metrics-track > i {
-    display: block;
-    height: 2px;
-    background: var(--graph-fill);
-  }
+  /* 상대 팀 접기 토글 — 모바일 전용(데스크톱은 두 팀이 항상 펼쳐짐, 39-ink 문법). */
+  .public-profile-platform-v2 .public-team-head-toggle { display: none; }
 
   /* ── 아이템 — 20px · r2 · .5px 헤어라인, 7칸 한 줄 우측 정렬.
      마지막 칸(와드·장신구)은 6px 더 벌려 앞 6칸과 갈라 둡니다(후속 §1-3). */
@@ -429,6 +422,61 @@
      8열 열-이름 줄은 두 줄 카드에서 의미가 없어 함께 접습니다. ─────────── */
   @media (max-width: 48rem) {
     .public-profile-platform-v2 .public-team-columns {
+      display: none;
+    }
+
+    /* 룬 2칸 되살림(§2-2) — 데스크톱 행은 여전히 빌드 탭 전담입니다.
+       스펠은 사각(r2), 룬은 원형(r99) — 16px 에서 모양으로 가릅니다. */
+    .public-profile-platform-v2 .public-team-detail .public-team-rune-build {
+      display: grid;
+      grid-template-rows: repeat(2, 16px);
+      gap: 2px;
+    }
+
+    .public-profile-platform-v2 .public-team-detail .public-team-rune-slot,
+    .public-profile-platform-v2 .public-team-detail .public-team-rune-empty {
+      width: 16px;
+      min-width: 16px;
+      height: 16px;
+      min-height: 16px;
+      overflow: hidden;
+      border: .5px solid var(--public-gray-border);
+      border-radius: 99px;
+      background: var(--public-gray-page);
+    }
+
+    /* 표식이 아바타 모서리로 갔으니(§2-5) 이름 옆 18px 칩은 접습니다(§2-6)
+       — 이름 열이 그만큼 온전히 이름에 쓰입니다. 데스크톱은 그대로. */
+    .public-profile-platform-v2 .public-team-rank-badge.streamer-tier-badge { display: none; }
+
+    /* 상대 팀 접기(§3-1) — 접힌 머리에도 승패·팀 KDA(resultSummary)는 남습니다.
+       전역 a11y 규칙이 버튼을 44px 로 세우므로, 음수 margin-block 으로 머리
+       높이 기여만 28px 로 줄여 머리를 44px 한 줄로 유지합니다(히트는 44px). */
+    .public-profile-platform-v2 .public-team-head-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex: none;
+      margin-block: calc(var(--yoro-space-2) * -1);
+      margin-left: auto;
+      min-height: 2rem;
+      padding: 0 .5625rem;
+      border: .5px solid var(--public-gray-border);
+      border-radius: 2px;
+      background: transparent;
+      color: var(--public-gray-muted);
+      font: inherit;
+      font-size: .6875rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .public-profile-platform-v2 .public-team-head-toggle[aria-expanded="true"] > svg { rotate: 180deg; }
+
+    /* 토글이 오른쪽 끝을 차지하므로 접힌 카드 머리는 라벨+승패만 남깁니다. */
+    .public-profile-platform-v2 .public-team-card.is-collapsed .public-team-player-list,
+    .public-profile-platform-v2 .public-team-card.is-collapsed .public-team-head-summary,
+    .public-profile-platform-v2 .public-team-card.is-collapsed .public-team-head em {
       display: none;
     }
   }

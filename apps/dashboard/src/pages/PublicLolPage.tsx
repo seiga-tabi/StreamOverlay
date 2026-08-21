@@ -5245,6 +5245,9 @@ function MatchTeamDetails({
   if (match.teams.length === 0) return null;
   const maxDamage = matchTeamTotal(match, (player) => player.damageDealtToChampions);
   const dataDragonVersion = recentMatchDataDragonVersion(match);
+  /* 본인 팀이 식별될 때만 상대 팀을 접을 수 있게 표시합니다(목업 §3-1) —
+     대상이 없는 경기에서 두 팀을 모두 접어 버리지 않기 위한 가드입니다. */
+  const hasTargetTeam = match.teams.some((team) => team.players.some((player) => player.isTarget));
   const teams: MatchTeamDetailsTeam[] = match.teams.map((team) => {
     const teamRankStats = team.players.map((player, index) => matchRankForPlayer(rankDetail, team.teamId, player, index));
     const tierSummary = rankLoading
@@ -5252,9 +5255,11 @@ function MatchTeamDetails({
       : rankDetail
         ? `${t().averageTier} ${averageTierLabel(teamRankStats)}`
         : t().tierUnavailable;
+    const isAllyTeam = team.players.some((player) => player.isTarget);
     return {
       key: `${match.matchId}:${team.teamId}`,
-      className: `public-team-card ${team.players.some((player) => player.isTarget) ? "ally" : "enemy"}`,
+      className: `public-team-card ${isAllyTeam ? "ally" : "enemy"}`,
+      enemy: hasTargetTeam && !isAllyTeam,
       /* 목업 v28 팀 헤더는 진영명(블루/레드) — 아군 여부는 테두리 대신 본인 행 강조로 구분. */
       label: team.teamId === 100 ? t().blueTeam : team.teamId === 200 ? t().redTeam : teamLabel(team),
       /* 결과 단어만 승/패 전용색 — 합계 KDA 는 무채(목업 v28 팀 헤더). */
@@ -5299,8 +5304,11 @@ function MatchTeamDetails({
             streamer: hideRiotIds ? undefined : player.twitchStream
           }),
           mobileKda: {
+            /* 모바일 한 줄 행은 "KDA" 글자 없이 수치만 — 이름 열(≈65px)에서
+               라벨이 아이템 열을 침범했습니다(사용자 지시 2026-08-21).
+               맥락은 aria-label(kdaLabel)이 계속 알립니다. */
             score: `${player.kills}/${player.deaths}/${player.assists}`,
-            metric: <KdaMetricText value={player.kda} />
+            metric: <span className={metricToneClass(kdaTone(player.kda))}>{formatDecimal(player.kda, 2)}</span>
           },
           itemBuild: <PlayerItemBuild items={player.items} itemKey={`${match.matchId}:${team.teamId}:${player.riotId ?? championName(player.champion)}`} />,
           kda: {
@@ -5350,6 +5358,7 @@ function MatchTeamDetails({
         csVision: t().teamColCsVision,
         items: t().arenaColItems
       }}
+      enemyToggleLabel={t().enemyTeam}
       kdaLabel={t().kda}
       onSearchRiotId={onSearchRiotId}
       teams={teams}

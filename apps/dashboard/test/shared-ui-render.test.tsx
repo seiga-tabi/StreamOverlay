@@ -986,7 +986,7 @@ test("프로필 공유 기능은 헤더에서 아이콘 전용 compact 모드를
   assert.match(pageSource, /className="public-profile-share-toast-viewport"/u);
 });
 
-test("모바일 최근 전적은 3행으로 압축하고 등급·지표 정렬 축을 고정한다", () => {
+test("모바일 최근 전적은 스트립 + 본문 한 행으로 접고 세 묶음 정렬 축을 고정한다", () => {
   const cardCss = readFileSync(
     new URL("../src/styles/pages/public-lol/22-match-card.css", import.meta.url),
     "utf8",
@@ -1015,42 +1015,42 @@ test("모바일 최근 전적은 3행으로 압축하고 등급·지표 정렬 �
   assert.match(cardCss, /@container match-list \(max-width: 877px\)[\s\S]*?grid-template-columns:\s*7rem 11rem 7\.25rem 9\.5rem minmax\(1\.75rem, 1fr\)/u);
 
   const mobile = cardCss.slice(cardCss.indexOf("@container match-list (max-width: 720px)"));
-  // 3·4·5열은 고정 폭이라 KDA 자릿수와 무관하게 등급 배지 x 좌표가 행마다 같습니다.
-  // 팀 없음 5트랙 오버라이드(:has)보다 우선하도록 셀렉터 그룹으로 선언합니다.
-  assert.match(mobile, /\.public-match-card-summary(,\s*\.public-match-card-summary:not\(:has\(\.public-match-card-team\)\))?\s*\{[\s\S]*?grid-template-columns:\s*2\.25rem minmax\(0, 1fr\) 2rem 4\.25rem 2\.75rem/u);
-  // 병합 셀은 모바일에서 풀려 기존 3행 압축 격자가 그대로 동작합니다.
+  /* 모바일(목업 「전적 행 — 모바일 재배치」, 2026-08-21 최신본 — 결정 1~4 반영):
+     스트립(결과·큐·날짜·캐럿) 26px + 본문 한 행. 세 묶음(초상화+로드아웃 ·
+     KDA 62 고정 · 아이템 3×2+와드)이 1fr 여백 두 칸으로 카드 폭에 벌어진다. */
+  assert.match(mobile, /\.public-match-card-summary(,\s*\.public-match-card-summary:not\(:has\(\.public-match-card-team\)\))?\s*\{[\s\S]*?grid-template-columns:[\s\S]*?2\.25rem[\s\S]*?auto[\s\S]*?minmax\(var\(--yoro-space-0\), 1fr\)[\s\S]*?3\.875rem[\s\S]*?minmax\(var\(--yoro-space-0\), 1fr\)[\s\S]*?auto;[\s\S]*?grid-template-rows:\s*auto auto/u);
+  // 병합 셀은 모바일에서 풀려 압축 격자가 그대로 동작합니다.
   assert.match(mobile, /\.public-match-card-champ-block\s*\{\s*display:\s*contents/u);
-  // 세로로 쌓지 않고 겹치기 위해 챔피언 셀을 풀어 각각 배치합니다.
   assert.match(mobile, /\.public-match-card-champion\s*\{\s*display:\s*contents/u);
-  assert.match(mobile, /\.public-match-card-portrait\s*\{\s*grid-column:\s*1;\s*grid-row:\s*1 \/ span 2/u);
-  // 등급은 행 가운데 열에 홀로 세워 오른쪽에 여백을 만듭니다.
+  assert.match(mobile, /\.public-match-card-portrait\s*\{\s*grid-column:\s*1;\s*grid-row:\s*2/u);
   assert.match(mobile, /\.public-match-card-perf\s*\{\s*display:\s*contents/u);
-  assert.match(mobile, /\.public-match-card-score\s*\{[\s\S]*?grid-column:\s*3;\s*grid-row:\s*1 \/ span 2[\s\S]*?justify-self:\s*center/u);
-  assert.match(mobile, /\.public-match-card-kda\s*\{\s*grid-column:\s*4;\s*grid-row:\s*1 \/ span 2/u);
-  // 액션 열(다시보기+캐럿 래퍼)은 5열에 서고, 캐럿은 44px 터치 타깃을 지킵니다.
-  assert.match(mobile, /\.public-match-card-actions\s*\{\s*grid-column:\s*5;\s*grid-row:\s*1 \/ span 2/u);
-  assert.match(mobile, /\.public-match-card-expand\s*\{\s*width:\s*var\(--yoro-size-touch-target\)/u);
+  // 결과·큐·날짜 스트립 — 카드 좌우 끝까지, 아래 헤어라인, 오른쪽 44px 는 캐럿 자리.
+  assert.match(mobile, /\.public-match-card-outcome\s*\{[\s\S]*?grid-column:\s*1 \/ -1;\s*grid-row:\s*1[\s\S]*?padding-inline:\s*var\(--yoro-space-3\) 2\.75rem;[\s\S]*?border-block-end:\s*\.5px solid var\(--public-gray-border\)/u);
+  assert.match(mobile, /\.public-match-card-outcome > small\s*\{\s*margin-inline-start:\s*auto/u);
+  // 챔피언 이름은 뺀다(결정 4) — copy 는 contents 로 풀어 MVP·ACE 배지만 남긴다.
+  assert.match(mobile, /\.public-match-card-copy\s*\{\s*display:\s*contents/u);
+  assert.match(mobile, /\.public-match-card-copy > strong,\s*\.public-match-card-role\s*\{\s*display:\s*none/u);
+  assert.match(mobile, /\.public-match-card-highlight\s*\{[\s\S]*?grid-column:\s*3;\s*grid-row:\s*2/u);
+  // KDA 는 62px 고정 열 가운데 — 자릿수가 달라도 열이 안 흔들린다.
+  assert.match(mobile, /\.public-match-card-kda\s*\{[\s\S]*?grid-column:\s*4;\s*grid-row:\s*2;\s*align-items:\s*center/u);
+  // 캐럿은 스트립 오른쪽 끝 절대 배치(결정 3) — 버튼은 44px 터치 타깃 유지.
+  assert.match(mobile, /\.public-match-card-actions\s*\{[\s\S]*?position:\s*absolute;[\s\S]*?inset-block-start:\s*0;[\s\S]*?block-size:\s*1\.625rem/u);
+  // 버튼 상자는 스트립(26px 래퍼)에 맞추고, 터치 44px 는 ::before 로 아래로만 넓힌다.
+  assert.match(mobile, /\.public-match-card-expand\s*\{[\s\S]*?inline-size:\s*100%;\s*block-size:\s*100%/u);
+  assert.match(mobile, /\.public-match-card-expand::before\s*\{[\s\S]*?inset-block:\s*0 -1\.125rem/u);
   // 모바일 컴팩트 행은 다시보기를 접습니다 — 펼침 툴바가 진입점입니다(목업 v28).
   assert.match(mobile, /\.public-match-card-replay\s*\{\s*display:\s*none/u);
-  // MVP·ACE 는 챔피언 이름 바로 옆.
-  assert.match(mobile, /\.public-match-card-highlight\s*\{\s*margin-left:\s*0/u);
-  // 지표는 4~5열 안에만 놓아 카드 가장자리에 밀착하지 않습니다.
-  assert.match(mobile, /\.public-match-card-stats\s*\{\s*grid-column:\s*4 \/ 6;\s*grid-row:\s*3/u);
-  // 아이템 격자는 stretch 로 두어야 유연한 슬롯이 0 폭으로 붕괴하지 않습니다.
-  assert.match(mobile, /\.public-match-card-items\s*\{[\s\S]*?justify-self:\s*stretch/u);
-  // 폭이 좁아지면 보조 문구·게이지·후행 지표 순으로 덜어냅니다.
-  assert.match(mobile, /\.public-match-card-stat-bar\s*\{\s*display:\s*none/u);
-  // 긴 라벨 대신 짧은 라벨로 바꿔 본문 최소 12px 를 지키면서 폭을 확보합니다.
-  assert.match(mobile, /\.public-match-card-stat-label\s*\{\s*display:\s*none/u);
-  assert.match(mobile, /\.public-match-card-stat-label-short\s*\{\s*display:\s*inline/u);
-  // 큐와 포지션은 390px 에서 접고 title 로 남깁니다.
-  assert.match(mobile, /\.public-match-card-role\s*\{\s*display:\s*none/u);
+  // 수치 3종(관여·CS·딜)은 행에서 뺀다(결정 1) — CS·딜은 펼침 패널 선수 줄에 남습니다.
+  assert.match(mobile, /\.public-match-card-stats\s*\{\s*display:\s*none/u);
+  // 아이템 20px 3×2 + 와드 — 오른쪽 묶음 끝맞춤, 격자 폭 고정.
+  assert.match(mobile, /\.public-match-card-items\s*\{[\s\S]*?grid-column:\s*6;\s*grid-row:\s*2;\s*justify-self:\s*end/u);
+  assert.match(mobile, /\.public-match-card-item-grid\s*\{[\s\S]*?grid-template-columns:\s*repeat\(3, 1\.25rem\)/u);
   assert.match(mobile, /\.public-match-card-outcome-line strong\s*\{\s*display:\s*none/u);
-  // 모바일은 3행 높이를 아이템 한 줄에 맞추기 위해 주문을 가로로 두고 룬은 접습니다.
-  assert.match(mobile, /\.public-match-card-loadout-column\s*\{[\s\S]*?grid-auto-flow:\s*column/u);
-  assert.match(mobile, /\.public-match-card-loadout \.runes\s*\{\s*display:\s*none/u);
-  // 확장 버튼은 44px 터치 타깃을 지키고, 카드 전체도 토글 영역입니다.
-  assert.match(mobile, /\.public-match-card-expand\s*\{[\s\S]*?height:\s*var\(--yoro-size-touch-target\)/u);
+  // 스펠 2행 + 룬 2행을 되살린다(결정 2) — 사각(스펠)·원형(룬)이 형태로 갈린다.
+  assert.match(mobile, /\.public-match-card-loadout-column\s*\{[\s\S]*?grid-template-rows:\s*repeat\(2, 1rem\);[\s\S]*?grid-auto-flow:\s*row/u);
+  assert.match(mobile, /\.public-match-card-loadout \.runes\s*\{\s*display:\s*grid/u);
+  // 래퍼(.public-match-card-actions)가 44×26 을 정한다 — 카드 전체도 토글 영역입니다.
+  assert.match(mobile, /\.public-match-card-actions\s*\{[\s\S]*?inline-size:\s*var\(--yoro-size-touch-target\);[\s\S]*?block-size:\s*1\.625rem/u);
   assert.match(cardCss, /\.public-match-card-summary\s*\{[\s\S]*?cursor:\s*pointer/u);
   // 필터 칩은 모바일에서 44px 터치 타깃을 지킵니다.
   assert.match(mobile, /\.public-match-queue-chips button\s*\{\s*min-height:\s*var\(--yoro-size-touch-target\)/u);

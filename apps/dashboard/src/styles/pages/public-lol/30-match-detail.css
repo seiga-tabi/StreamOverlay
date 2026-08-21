@@ -356,25 +356,53 @@
     font-weight: var(--yoro-font-weight-black);
   }
 
-  /* 모바일(목업 LolMatchExpandedMobile): 탭 2등분, 가리기 전체 폭 — 셋 다 44px. */
+  /* 모바일(목업 「전적 상세 — 선수 줄 재구성」): 탭·가리기 한 줄(96→44),
+     격차 4칸은 가로 스크롤 칩 스트립(66→44). 버튼 44px 규격은 유지합니다. */
   @media (max-width: 48rem) {
-    .public-md-tabs {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      width: 100%;
-      gap: var(--yoro-space-2);
-    }
+    .public-md-toolbar { flex-wrap: nowrap; }
 
+    .public-md-tabs { display: flex; width: auto; gap: var(--yoro-space-1); }
+
+    /* 한 줄 유지 — 라벨(「ニックネームを隠す」)은 줄이지 않고 여백만 줄입니다. */
+    .public-md-tab,
     .public-md-mask {
-      justify-content: space-between;
-      width: 100%;
-      margin-left: 0;
+      padding: 0 var(--yoro-space-3);
     }
 
-    .public-md-replay {
-      width: 100%;
-      margin-left: 0;
+    .public-md-mask { width: auto; margin-left: auto; }
+
+    .public-md-replay { width: 100%; margin-left: 0; }
+
+    .public-md-gap {
+      display: flex;
+      gap: var(--yoro-space-2);
+      padding: var(--yoro-space-1) 0;
+      /* 칩이 스스로 테두리를 가지므로 위아래 헤어라인은 뺍니다. */
+      border-top: 0;
+      border-bottom: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+      /* 스트립이 카드 오른쪽 끝까지 흐르게 — 마지막 칩이 잘려 보이는 것이
+         스크롤 신호입니다. */
+      margin-inline-end: calc(var(--yoro-space-3) * -1);
+      padding-inline-end: var(--yoro-space-3);
     }
+
+    .public-md-gap::-webkit-scrollbar { display: none; }
+
+    .public-md-gap > div {
+      display: flex;
+      flex: none;
+      align-items: baseline;
+      gap: var(--yoro-space-2);
+      min-height: 30px;
+      padding: 5px 10px;
+      border: .5px solid var(--public-gray-border);
+      border-radius: 2px;
+    }
+
+    /* 세로 쌓임용 위 여백은 칩 한 줄에서는 어긋남만 만듭니다. */
+    .public-md-gap dd { margin: 0; }
   }
 
   /* ── 반응형 ────────────────────────────────────────────── */

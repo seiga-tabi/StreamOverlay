@@ -1,4 +1,4 @@
-import { useId, type ReactNode } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 
 export type RecentMatchRowLocalizedText = {
   label: ReactNode;
@@ -138,6 +138,18 @@ export function RecentMatchRow({
   onToggleExpand
 }: RecentMatchRowProps) {
   const scoreDescriptionId = useId();
+  const rootRef = useRef<HTMLElement>(null);
+  const wasExpanded = useRef(expanded);
+  /* 행이 화면 아래쪽에 있으면 펼친 내용이 화면 밖에서 열립니다 — 펼칠 때 행을
+     화면 위쪽으로 올립니다(목업 §3-2). sticky 크롬만큼은 scroll-margin-top
+     (22-match-card.css)이 비켜 줍니다. */
+  useEffect(() => {
+    if (expanded && !wasExpanded.current) {
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      rootRef.current?.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
+    }
+    wasExpanded.current = expanded;
+  }, [expanded]);
   const summonerSpellItems = spellItems.filter((item) => item.className !== "rune");
   const runeItems = spellItems.filter((item) => item.className === "rune");
   const highlight = highlightBadge(highlightClass);
@@ -168,6 +180,7 @@ export function RecentMatchRow({
     <article
       aria-label={matchAriaLabel}
       className={`public-match-card ${result} ${highlightClass} ${expanded ? "expanded" : ""}`}
+      ref={rootRef}
     >
       {/* 요약 영역 전체가 확장 토글입니다. 실제 button 은 아래에 그대로 남아
           aria-expanded 와 키보드 탐색 순서를 유지합니다. */}

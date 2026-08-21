@@ -316,6 +316,9 @@
 
   .public-match-card {
     position: relative;
+    /* 펼칠 때 행을 화면 위로 올리는 scrollIntoView(RecentMatchRow, 목업 §3-2)가
+       sticky 크롬(게임 헤더 + 프로필 탭 + 필터 바)에 가려지지 않게 비켜 둡니다. */
+    scroll-margin-top: calc(var(--public-game-header-total-height, var(--yoro-space-12)) + var(--yoro-size-touch-target) + var(--yoro-size-touch-target) + var(--yoro-space-3));
     /* tooltip 이 카드 아래로 8px 잘리던 문제 때문에 clipping 을 풀었습니다.
        모서리 처리는 각 자식이 스스로 radius 를 갖도록 바꿨습니다. */
     overflow: visible;
@@ -1025,102 +1028,163 @@
     }
   }
 
-  /* 모바일 — 세로로 쌓지 않고 겹쳐 3행 80px 로 압축합니다.
-     3·4열은 고정 폭입니다. 행마다 grid 가 따로 계산되므로 auto 로 두면
-     KDA 자릿수에 따라 등급 배지의 x 좌표가 행마다 흔들립니다. */
+  /* 모바일 — 목업 「전적 행 — 모바일 재배치 · A안(KDA 세로 가운데)」(2026-08-21 확정).
+     결과·큐·날짜는 행 위 스트립 한 줄로 올라가고, 본문은 초상화 36px 행 하나에
+     이름 · KDA(세로 가운데) · 펼침 버튼만 남습니다. 수치 3종은 접습니다(§3). */
   @container match-list (max-width: 720px) {
     /* 병합 셀은 데스크톱 전용 — 풀어서 자식들이 이 압축 격자의 직접 자식이
        되게 합니다. */
     .public-match-card-champ-block { display: contents; }
 
-    /* 등급을 오른쪽 묶음에서 떼어 행 가운데 열에 세웁니다.
-       오른쪽에는 KDA 와 확장 버튼만 남아 여백이 생깁니다. */
     .public-match-card-summary,
     .public-match-card-summary:not(:has(.public-match-card-team)) {
-      grid-template-columns: 2.25rem minmax(0, 1fr) 2rem 4.25rem 2.75rem;
-      grid-template-rows: auto auto auto;
-      gap: .1875rem .375rem;
-      padding: var(--yoro-space-2) var(--yoro-space-3);
+      /* 초상화 36 · 로드아웃 40 · [여백] · KDA 62 · [여백] · 아이템 92.
+         1fr 두 칸이 남는 폭을 반씩 먹어 세 묶음이 카드 폭에 벌어진다.
+         가운데만 고정 폭이라 KDA 자릿수(4/7/2 vs 11/3/14)가 달라도 열이 안 흔들린다. */
+      grid-template-columns:
+        2.25rem                          /* 1 초상화 36 */
+        auto                             /* 2 스펠+룬 40 */
+        minmax(var(--yoro-space-0), 1fr) /* 3 여백 (MVP·ACE 가 여기 선다) */
+        3.875rem                         /* 4 KDA 62 */
+        minmax(var(--yoro-space-0), 1fr) /* 5 여백 */
+        auto;                            /* 6 아이템+와드 92 */
+      grid-template-rows: auto auto;     /* 1 스트립 · 2 본문 */
+      align-items: center;
+      column-gap: var(--yoro-space-2);   /* 8 */
+      row-gap: var(--yoro-space-1);      /* 4 */
+      padding: var(--yoro-space-2) var(--yoro-space-3);  /* 8 12 */
     }
 
     .public-match-card-champion { display: contents; }
 
-    .public-match-card-portrait { grid-column: 1; grid-row: 1 / span 2; }
     .public-match-card-portrait > :is(img, span) { width: 2.25rem; height: 2.25rem; }
     .public-match-card-portrait > b { min-width: 1rem; height: 1rem; font-size: var(--yoro-font-size-xs); }
 
-    .public-match-card-copy {
-      grid-column: 2;
-      grid-row: 1;
-      flex-wrap: nowrap;
-      gap: var(--yoro-space-1);
-    }
-
-    .public-match-card-copy > strong { flex: 0 1 auto; }
-    /* 390px 에서 한 줄에 담을 수 있는 폭이 130px 뿐이라, 포지션과 큐는 접습니다.
-       포지션은 챔피언 셀 title 로, 큐는 바로 위 필터 칩과 펼침 패널에서 확인합니다. */
+    /* 챔피언 이름·포지션은 뺀다(사용자 결정 4, 2026-08-21) — 초상화가 곧
+       챔피언이고, 펼치면 상세 선수 줄에 이름이 있다. copy 를 통째로 숨기면
+       MVP·ACE 배지까지 사라지므로 contents 로 풀고 글자만 접는다. */
+    .public-match-card-copy { display: contents; }
+    .public-match-card-copy > strong,
     .public-match-card-role { display: none; }
     .public-match-card-outcome-line strong { display: none; }
-    /* MVP·ACE 는 챔피언 이름 바로 옆에 붙습니다. */
-    .public-match-card-highlight { margin-left: 0; }
 
-    .public-match-card-outcome {
-      grid-column: 2;
+    /* MVP·ACE 는 왼쪽 묶음 끝, 여백 트랙에 선다 — 없는 행에서는 자리를 안 먹는다. */
+    .public-match-card-highlight {
+      grid-column: 3;
       grid-row: 2;
-      flex-direction: row;
-      align-items: center;
-      gap: .3rem;
-      flex-wrap: nowrap;
+      justify-self: start;
+      margin-inline: 0;
     }
 
-    .public-match-card-outcome-line { flex: none; gap: .3rem; }
+    /* 스트립은 카드 좌우 끝까지 닿아야 하므로 요약의 padding 을 음수 margin 으로
+       상쇄한다. margin-block-end .25rem + row-gap .25rem = 본문 위 8px. */
+    .public-match-card-outcome {
+      grid-column: 1 / -1;
+      grid-row: 1;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      flex-wrap: nowrap;
+      gap: .5625rem;                                     /* 9 */
+      block-size: 1.625rem;                              /* 26 */
+      margin:
+        calc(var(--yoro-space-2) * -1)
+        calc(var(--yoro-space-3) * -1)
+        var(--yoro-space-1);
+      /* 오른쪽 44px 는 캐럿 자리 — 버튼 폭(--yoro-size-touch-target)과 같은
+         값이어야 시간이 버튼 밑으로 들어가지 않는다. */
+      padding-inline: var(--yoro-space-3) 2.75rem;
+      border-block-end: .5px solid var(--public-gray-border);
+    }
+
+    .public-match-card-outcome-line {
+      flex: none;
+      display: flex;
+      align-items: baseline;
+      gap: .5625rem;
+    }
+
+    /* 결과와 큐를 나누는 세로 획. 큐가 없는 행에서는 저절로 사라진다.
+       (color·font-size 는 아래 규칙, 노출 여부는 38-ink-profile:1201 이 소유.) */
+    .public-match-card-outcome-line > strong {
+      border-inline-start: .5px solid var(--public-gray-border);
+      padding-inline-start: .5625rem;
+    }
+
     .public-match-card-outcome-line strong {
       color: var(--yoro-color-text-on-dark-muted);
       font-size: var(--yoro-font-size-xs);
     }
+
+    /* 날짜·시간은 스트립 오른쪽 끝. */
+    .public-match-card-outcome > small { margin-inline-start: auto; }
     .public-match-card-result { width: 1.125rem; height: 1.125rem; border-radius: .25rem; }
 
     /* 등급과 KDA 를 각각 독립 열에 놓기 위해 묶음을 풉니다.
        3~5열이 고정 폭이라 KDA 자릿수와 무관하게 등급 x 좌표가 행마다 같습니다. */
     .public-match-card-perf { display: contents; }
 
-    .public-match-card-score {
-      grid-column: 3;
-      grid-row: 1 / span 2;
-      justify-self: center;
-      width: 2rem;
-      height: 2rem;
-      border-radius: var(--yoro-radius-xs);
-    }
-    .public-match-card-score > b { font-size: var(--yoro-font-size-sm); }
+    /* 등급 배지는 38-ink-profile:105 가 접습니다 — 죽은 배치 규칙은 제거(A안). */
 
+    /* KDA 두 줄, 62px 고정 열 가운데 정렬 — 열 명분 목록에서 열이 안 흔들린다. */
     .public-match-card-kda {
       grid-column: 4;
-      grid-row: 1 / span 2;
-      align-items: flex-end;
+      grid-row: 2;
+      align-items: center;
       min-width: 0;
     }
     .public-match-card-kda > strong { font-size: var(--yoro-font-size-sm); }
 
-    /* 카드 전체가 확장 토글이지만 버튼도 눌러지는 모양을 유지합니다.
-       legacy 가 button[aria-label] 에 min-width 44px 를 !important 로 걸어 두므로
-       열도 44px 로 잡습니다. 2rem 으로 두면 버튼이 열 밖으로 6px 씩 번져
-       KDA 와 맞닿고 카드 오른쪽 padding 도 넘습니다. */
+    /* 캐럿은 스트립 안에 선다(사용자 결정 3, 2026-08-21). 격자에서 빼내 카드
+       오른쪽 위에 절대 배치 — .public-match-card 는 이미 position: relative.
+       폭 44 는 스트립이 오른쪽에 비워 둔 폭(padding-inline 끝값 2.75rem)과
+       같은 숫자여야 한다. 버튼 상자는 26px 로 스트립에 맞추고, 터치 44px 는
+       ::before 로 아래로만 넓힌다 — 위로 넓히면 앞 카드(첫 행에서는 필터 패널)
+       위에 투명 띠가 얹혀 그쪽 탭을 가로챈다. 아래는 이 카드의 본문이고 본문
+       전체가 이미 같은 펼침 토글이라 무해하다. */
     .public-match-card-actions {
-      grid-column: 5;
-      grid-row: 1 / span 2;
-      justify-self: center;
+      position: absolute;
+      inset-block-start: 0;
+      inset-inline-end: 0;
+      z-index: var(--yoro-z-raised);
+      display: grid;
+      place-items: center;
+      inline-size: var(--yoro-size-touch-target);   /* 44 */
+      block-size: 1.625rem;                          /* 26 — 스트립 높이 */
     }
 
     /* 모바일 컴팩트 행은 다시보기를 접습니다 — 확장 후 상세에서 접근(목업 v28). */
     .public-match-card-replay { display: none; }
 
     .public-match-card-expand {
-      width: var(--yoro-size-touch-target);
-      height: var(--yoro-size-touch-target);
+      /* 폭 44 는 유지해야 한다 — legacy 의 button[aria-label] min-width 44
+         !important(10-final:867)를 pages 에서는 이길 수 없다.
+         높이도 뷰포트 ≤45rem 에서는 같은 블록의 `.public-dashboard-shell button
+         { min-height: 44 !important }` 가 44 로 되세운다(§4 의 「.yoro-button 에만
+         걸린다」는 분석이 틀렸다 — 일반 button 선택자가 먼저 있다). 그래서 높이를
+         26 으로 믿는 대신, 글리프를 위쪽 26px 대역에 고정한다: 버튼이 26(패널만
+         좁힘)이든 44(실제 폰)든 캐럿은 항상 시간 줄과 같은 높이에 선다.
+         늘어난 아래쪽은 이 카드의 본문 토글 위라 무해하다. */
+      inline-size: 100%;
+      block-size: 100%;
+      align-content: start;
+      padding: .5rem 0 0;                   /* 8 + 글리프 10/2 = 스트립 가운데 13 */
+      /* 26px 스트립 안에서는 목업처럼 맨 캐럿만 보인다 — 테두리·배경을 벗긴다. */
+      border: 0;
+      border-radius: 0;
+      background: none;
     }
 
-    .public-match-card-outcome small { flex: none; }
+    .public-match-card-expand:hover { background: none; }
+
+    /* 터치 타깃 44px 는 아래로만 넓힌다. 26 + 18 = 44. */
+    .public-match-card-expand::before {
+      content: "";
+      position: absolute;
+      /* 아래쪽만 음수 — 바깥으로 18px 넓어진다. */
+      inset-block: 0 -1.125rem;
+      inset-inline: 0;
+    }
 
     /* 등급 tooltip 은 좁은 폭에서 카드 오른쪽 끝에 맞춰 접습니다.
        가운데 정렬을 유지하면 viewport 밖으로 넘칩니다. */
@@ -1132,57 +1196,53 @@
       white-space: normal;
     }
 
-    /* 3행 높이를 아이템 한 줄에 맞추기 위해 주문은 가로로 둡니다. */
-    .public-match-card-loadout { grid-column: 1; grid-row: 3; gap: .125rem; }
-    .public-match-card-loadout-column {
-      grid-template-rows: 1.125rem;
-      grid-auto-flow: column;
-      grid-auto-columns: 1.125rem;
-      gap: .125rem;
+    /* 스펠 2행 + 룬 2행을 되살린다(사용자 결정 2, 2026-08-21) — 좁은 폭에서
+       열을 눕히고 룬을 접던 규칙을 되돌린다. 16px 에서 사각(스펠)·원형(룬)이
+       형태로 갈리는 것이 이 구역의 유일한 구분 신호다(원형은 base 규칙 소유). */
+    .public-match-card-portrait { grid-column: 1; grid-row: 2; }
+    .public-match-card-loadout {
+      grid-column: 2;
+      grid-row: 2;
+      display: flex;
+      gap: var(--yoro-space-2);            /* 8 — 스펠 열과 룬 열 사이 */
     }
-    .public-match-card-loadout :is(span, img) { width: 1.125rem; height: 1.125rem; }
-    .public-match-card-loadout .runes { display: none; }   /* 룬은 펼침 패널에서 확인 */
+    .public-match-card-loadout-column {
+      grid-template-rows: repeat(2, 1rem); /* 16 · 16 */
+      grid-auto-flow: row;
+      gap: .125rem;                        /* 2 */
+    }
+    .public-match-card-loadout .runes { display: grid; }
+    .public-match-card-loadout :is(span, img) { width: 1rem; height: 1rem; }
 
-    /* 360px 처럼 아주 좁은 폭에서도 넘치지 않도록 장비 칸은 남은 폭에 맞춰 줄어듭니다.
-       고정 px 로 두면 이웃 열을 침범합니다. */
+    /* 아이템 20px 3×2 + 와드 20 원형 — 묶음 폭 92 고정이라 좁은 폭에서도
+       격자 모양이 유지되고, 빈 슬롯도 자리를 지켜 열이 안 어긋난다.
+       (선택자에 champ-block 을 두는 이유: 데스크톱 병합셀 규칙
+       `.public-match-card-champ-block > .public-match-card-items`(1/-1)와 같은
+       특이도가 아니면 배치가 진다 — 병합 셀은 contents 로 풀려도 부모다.) */
+    .public-match-card-champ-block > .public-match-card-items,
     .public-match-card-items {
-      grid-column: 2 / 4;
-      grid-row: 3;
-      /* 데스크톱의 justify-self: center 가 남으면 shrink-to-fit 이 되어
-         유연한 아이템 격자가 0 폭으로 붕괴합니다. */
-      justify-self: stretch;
-      min-width: 0;
-      gap: var(--yoro-space-1);
+      grid-column: 6;
+      grid-row: 2;
+      justify-self: end;
+      gap: var(--yoro-space-2);            /* 8 — 아이템 격자와 와드 사이 */
     }
     .public-match-card-item-grid {
-      flex: 1;
-      min-width: 0;
-      max-width: 8.75rem;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      grid-auto-rows: auto;
-      gap: .125rem;
+      flex: none;
+      max-width: none;
+      grid-template-columns: repeat(3, 1.25rem);   /* 20 × 3 */
+      grid-auto-rows: 1.25rem;
+      gap: .125rem;                                 /* 2 */
     }
     .public-match-card-item-grid > span {
-      width: auto;
-      height: auto;
-      aspect-ratio: 1;
+      width: 1.25rem;
+      height: 1.25rem;
+      aspect-ratio: auto;
     }
-    .public-match-card-trinket { width: 1.1875rem; height: 1.1875rem; }
+    .public-match-card-trinket { width: 1.25rem; height: 1.25rem; }
 
-    /* 지표는 3열 안에만 놓아 위쪽 KDA 와 오른쪽 끝을 맞춥니다.
-       4열까지 넘기면 카드 가장자리에 밀착해 보입니다. */
-    .public-match-card-stats {
-      grid-column: 4 / 6;
-      grid-row: 3;
-      display: flex;
-      justify-content: flex-end;
-      gap: var(--yoro-space-2);
-    }
-    .public-match-card-stats > span { flex-direction: row; align-items: baseline; gap: .2rem; }
-    .public-match-card-stat-bar { display: none; }          /* 게이지는 세로 공간을 먹습니다 */
-    .public-match-card-stat-label { display: none; }        /* 긴 라벨 대신 짧은 라벨을 씁니다 */
-    .public-match-card-stat-label-short { display: inline; }
-    .public-match-card-stats > span:nth-child(3) { display: none; }
+    /* 킬 관여·CS·딜 비중은 행에서 뺀다(사용자 결정 1, 2026-08-21).
+       CS·딜은 펼침 패널 선수 줄에 남고, 킬 관여는 모바일에서 사라진다 — §7 보고. */
+    .public-match-card-stats { display: none; }
 
     /* 요약 스트립·필터 */
     .public-match-summary-strip {
@@ -1200,16 +1260,10 @@
     .public-match-skeleton-row { height: 5rem; }
   }
 
-  /* 360px 급에서는 이름 줄이 먼저 눌립니다. 오른쪽 고정 열과 배지 여백을 조금씩 줄여
-     5글자 챔피언 이름까지 잘리지 않게 합니다. */
+  /* 새 격자는 세 묶음 폭이 고정이고 1fr 여백만 줄어듭니다 — 좁은 폭용 격자
+     재정의는 필요 없고, MVP·ACE 배지 여백만 남깁니다. */
   @container match-list (max-width: 400px) {
-    .public-match-card-summary,
-    .public-match-card-summary:not(:has(.public-match-card-team)) {
-      grid-template-columns: 2.25rem minmax(0, 1fr) 2rem 3.75rem 2.75rem;
-      gap: .1875rem .3125rem;
-    }
     .public-match-card-highlight { padding-inline: .2rem; }
-    .public-match-card-stats { gap: var(--yoro-space-1); }
   }
 
   @media (prefers-reduced-motion: reduce) {
