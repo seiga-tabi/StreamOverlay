@@ -27,7 +27,9 @@ import { PalworldPageErrorBoundary } from "./features/public-palworld/components
 import { ValorantPageErrorBoundary } from "./features/public-valorant/components/ValorantPageErrorBoundary";
 import { MinecraftPageErrorBoundary } from "./features/public-minecraft/components/MinecraftPageErrorBoundary";
 import { lazyNamed } from "./shared/lazyNamed";
-import { stripPublicLocalePrefix } from "./features/public-lol/utils/public-locale-path";
+import { publicLocaleFromPathname, stripPublicLocalePrefix } from "./features/public-lol/utils/public-locale-path";
+import { HomeRouteFallback } from "./features/public-home/components/HomeRouteFallback";
+import { LolRouteFallback } from "./features/public-home/components/LolRouteFallback";
 
 const loadPublicHomePage = () => import("./pages/PublicHomePage");
 const loadPublicLolHomePage = () => import("./pages/PublicLolHomePage");
@@ -301,6 +303,8 @@ export default function App() {
 
   if (surface === "public") {
     const publicPathname = stripPublicLocalePrefix(window.location.pathname);
+    /* 라우트 폴백의 문구 로케일 — 경로 접두사(/ko·/ja·/en)에서 구합니다. */
+    const publicLocale = publicLocaleFromPathname(window.location.pathname) ?? "ko";
     const yoroDashboard = isYoroDashboardPath(window.location.pathname);
     const yoroLogin = window.location.pathname === "/login"
       || window.location.pathname === "/login/";
@@ -336,15 +340,17 @@ export default function App() {
     const streamersPublic = isStreamersPath(publicPathname);
     return (
       homePublic ? (
-        <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>
+        /* 흰 SkeletonCard 널판 대신 실물 크롬·히어로 + 본문 스켈레톤(목업 홈 로딩).
+           폴백에서도 히어로 검색이 완전히 동작합니다. */
+        <Suspense fallback={<HomeRouteFallback locale={publicLocale} />}>
           <PublicHomePage />
         </Suspense>
       ) : lolHomePublic ? (
-        <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>
+        <Suspense fallback={<LolRouteFallback active="home" locale={publicLocale} />}>
           <PublicLolHomePage />
         </Suspense>
       ) : lolStreamersPublic ? (
-        <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>
+        <Suspense fallback={<LolRouteFallback active="streamers" locale={publicLocale} />}>
           <PublicLolStreamersPage />
         </Suspense>
       ) : yoroDashboard ? (
@@ -414,7 +420,9 @@ export default function App() {
           </Suspense>
         </PalworldPageErrorBoundary>
       ) : (
-        <Suspense fallback={<div role="status" aria-live="polite" data-ko={dashboardI18n.ko.app.loading} data-ja={dashboardI18n.ja.app.loading} aria-label={currentText.app.loading} />}>
+        /* 이전에는 빈 <div> 라 로딩 중 아무것도 보이지 않았습니다 — 실물 LolChrome
+           + 본문 골격 스켈레톤(목업 앱 로딩). */
+        <Suspense fallback={<LolRouteFallback active="none" locale={publicLocale} />}>
           <PublicLolPage onOpenAdmin={openAdmin} />
         </Suspense>
       )

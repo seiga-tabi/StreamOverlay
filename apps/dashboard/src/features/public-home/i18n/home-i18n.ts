@@ -83,6 +83,8 @@ export type HomeText = {
   loginDescription: string;
   loginTwitchCta: string;
   loginFinePrint: string;
+  /** 라우트 폴백 상태 문구 — App.tsx 의 Suspense 폴백이 씁니다. */
+  loading: string;
   seoTitle: string;
   seoDescription: string;
 };
@@ -165,6 +167,7 @@ export const homeI18n: Record<HomeLocale, HomeText> = {
     loginDescription: "Twitch 계정으로 yoro.gg에 로그인합니다. 팔로우한 스트리머의 방송 상태와 시청자 참여 기능이 연결됩니다.",
     loginTwitchCta: "Twitch로 계속하기",
     loginFinePrint: "로그인하면 이용약관과 개인정보처리방침에 동의하는 것으로 간주됩니다. 방송인 기능은 로그인 후 방송인 등록에서 활성화합니다.",
+    loading: "화면을 불러오는 중입니다.",
     seoTitle: "YORO.gg — 게임 데이터, 검색 한 번",
     seoDescription: "LoL 전적과 증강 칼바람, 팰월드 도감과 교배 계산까지 검색창 하나로. 방송 중인 스트리머의 판을 보고 시청자로 직접 참여하세요."
   },
@@ -245,6 +248,7 @@ export const homeI18n: Record<HomeLocale, HomeText> = {
     loginDescription: "Twitchアカウントでyoro.ggにログインします。フォロー中のストリーマーの配信状況と視聴者参加機能が連携されます。",
     loginTwitchCta: "Twitchで続ける",
     loginFinePrint: "ログインすると利用規約とプライバシーポリシーに同意したものとみなされます。配信者機能はログイン後、配信者登録から有効化します。",
+    loading: "画面を読み込んでいます。",
     seoTitle: "YORO.gg — ゲームデータ、検索ひとつで",
     seoDescription: "LoLの戦績とオーグメントARAM、パルワールドの図鑑と配合計算まで検索ひとつで。配信中のストリーマーの試合を見て、視聴者として参加しましょう。"
   },
@@ -325,6 +329,7 @@ export const homeI18n: Record<HomeLocale, HomeText> = {
     loginDescription: "Log in to yoro.gg with your Twitch account to connect live status and viewer participation for streamers you follow.",
     loginTwitchCta: "Continue with Twitch",
     loginFinePrint: "By logging in you agree to the Terms and Privacy Policy. Streamer features are enabled from streamer registration after login.",
+    loading: "Loading this page.",
     seoTitle: "YORO.gg — Game data, one search",
     seoDescription: "LoL match history, ARAM augments, the Palworld Paldeck and breeding calculator — one search box. Watch live streamers and join their games as a viewer."
   }

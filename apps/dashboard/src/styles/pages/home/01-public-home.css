@@ -46,6 +46,9 @@
     --home-g2: #B9C3D0;
     --home-g3: #7C8B9C;
     --home-g4: #4A5563;
+    /* 스켈레톤 두 단계 — 라우트 폴백·로딩 분기 전용(목업 홈 로딩). */
+    --home-sk: #31353F;
+    --home-sk-hi: #3B404B;
     --home-serif: "Noto Serif KR", "Noto Serif JP", serif;
     --home-brush: "Yuji Boku", "Yuji Syuku", serif;
 
@@ -98,6 +101,8 @@
     --home-stroke: #4A5563;
     --home-blob1: #E4E8ED;
     --home-blob2: #B9C3D0;
+    --home-sk: #EBEEF2;
+    --home-sk-hi: #E1E5EB;
     /* 라이트에선 어두울수록 상위 등급 */
     --home-g1: #1C1D22;
     --home-g2: #4A5563;
@@ -903,6 +908,8 @@
   }
 
   .yoro-home-chart {
+    /* 차트 도착 전에도 높이를 예약해 아래 섹션이 밀리지 않게(실측 127px, 로딩 §2-6). */
+    min-height: 127px;
     display: flex;
     flex-direction: column;
     gap: 7px;
@@ -1413,5 +1420,91 @@
 
     .yoro-home-footer-links { margin-left: 0; gap: 18px; font-size: 11px; }
     .yoro-home-footer-langs { margin-top: 10px; font-size: 11px; }
+  }
+}
+
+@layer home {
+  /* ── 라우트 폴백 스켈레톤(목업 「홈 로딩」·「앱 로딩」) ─────────────
+     조각은 명도 두 단계뿐 — 브랜드색·승패색 금지, 애니메이션 없음
+     (검색 구역 무애니메이션 규칙과 같은 이유). radius 는 2 / 99px 만. */
+  .yoro-home-sk {
+    display: block;
+    border-radius: 2px;
+    background: linear-gradient(100deg, var(--home-sk), var(--home-sk-hi));
+  }
+
+  .yoro-home-sk-avatar {
+    flex: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 99px;
+  }
+
+  .yoro-home-sk-thumb {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+  }
+
+  .yoro-home-live-card--sk {
+    display: grid;
+    gap: 10px;
+  }
+
+  .yoro-home-live-card-sk-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 0 2px 6px;
+  }
+
+  .yoro-home-live-card-sk-lines {
+    flex: 1;
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .yoro-home-chart--sk {
+    display: grid;
+    gap: 10px;
+    align-content: start;
+  }
+
+  /* 개수 자리 스켈레톤(지금 방송 중 머리) — 실제 개수를 아직 모릅니다. */
+  .yoro-home-section-count-sk {
+    width: 34px;
+    height: 12px;
+    align-self: center;
+  }
+
+  /* 상태 문구 — 본문 아래 한 줄 가운데(--home-sub: 다크 9.44 · 라이트 5.41). */
+  .yoro-home-fallback-status {
+    margin: 26px 0 34px;
+    color: var(--home-sub);
+    font-size: 11px;
+    text-align: center;
+  }
+
+  /* LoL 계열 폴백 본문 — 크롬 아래 minmax(0,1fr) | 300px 골격(목업 앱 로딩). */
+  .yoro-lol-fallback-stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 20px;
+    align-items: start;
+    width: min(100%, 1320px);
+    margin: 24px auto 0;
+    padding: 0 24px;
+    box-sizing: border-box;
+  }
+
+  .yoro-lol-fallback-main,
+  .yoro-lol-fallback-side {
+    display: grid;
+    gap: 14px;
+    min-width: 0;
+  }
+
+  @media (max-width: 48rem) {
+    .yoro-lol-fallback-stage { grid-template-columns: minmax(0, 1fr); }
   }
 }

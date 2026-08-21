@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import "../styles/pages/home/01-public-home.css";
 import { usePublicLocale } from "../features/public-lol/hooks/usePublicLocale";
 import { setActivePublicLocale, type PublicLocale } from "../features/public-lol/i18n/public-lol-i18n";
 import { usePublicViewerTwitchSession } from "../shared/usePublicViewerTwitchSession";
@@ -34,6 +33,7 @@ export function PublicHomePage() {
     disconnectTwitch,
     followedChannels,
     startTwitchLogin,
+    twitchLoading,
     twitchStatus
   } = usePublicViewerTwitchSession({
     loginReturnTo: () => `${window.location.pathname}${window.location.search}`,
@@ -66,6 +66,7 @@ export function PublicHomePage() {
         <HomeLiveSection
           connected={twitchStatus.connected}
           followedChannels={followedChannels}
+          loading={twitchLoading}
           onLoginOpen={() => setLoginOpen(true)}
           text={text}
         />

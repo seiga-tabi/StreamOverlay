@@ -10,40 +10,30 @@ import { getPalworldPals } from "../../public-palworld/api/palworld";
 import { elementLabel } from "../../public-palworld/utils/labels";
 import type { HomeText } from "../i18n/home-i18n";
 import { NorigaeMark, SleepingTiger } from "./HomeMarks";
+import {
+  formatCount,
+  GameCard,
+  HomeChartSkeleton,
+  HomeLiveCardSkeleton,
+  LolCardIcon,
+  PalCardIcon,
+  SectionHead
+} from "./HomeStaticSections";
+
+/* 정적 섹션(교배·Bot·푸터)은 HomeStaticSections 로 옮겼습니다 — 라우트 폴백이
+   lazy 청크 없이 같은 실물을 그리기 위한 분리. 기존 사용처 호환을 위해 재수출합니다. */
+export { HomeBreedingSection, HomeBotSection, HomeFooter } from "./HomeStaticSections";
 
 /* 홈 하위 섹션 — 목업 v8 HomeDark §3~§7.
  * 데이터는 전부 기존 계약을 사용합니다: 팔로우 방송(공개 Twitch 뷰어 API),
  * 증강 카탈로그(/api/public/aram/augments), 팰 속성 집계(팰 목록 응답의 facets).
  * 새 endpoint 나 mock 데이터를 만들지 않습니다. */
 
-function formatCount(count: number): string {
-  return count.toLocaleString("en-US");
-}
-
 function fill(template: string, count: string): string {
   return template.replace("{count}", count);
 }
 
 /* ── 지금 방송 중 ─────────────────────────────────────────── */
-
-function SectionHead({ title, count, viewAllHref, viewAllLabel, countSuffix }: {
-  title: string;
-  count?: number;
-  viewAllHref?: string;
-  viewAllLabel?: string;
-  countSuffix?: string;
-}) {
-  return (
-    <div className="yoro-home-section-head">
-      <NorigaeMark className="yoro-home-section-norigae" height={28} width={14} />
-      <h2 className="yoro-home-section-title">{title}</h2>
-      {count !== undefined ? <span className="yoro-home-section-count">{formatCount(count)}{countSuffix}</span> : null}
-      {viewAllHref && viewAllLabel ? (
-        <a className="yoro-home-section-viewall" href={viewAllHref}>{viewAllLabel} <span aria-hidden="true">&#8594;</span></a>
-      ) : null}
-    </div>
-  );
-}
 
 function LiveDot() {
   return <span aria-hidden="true" className="yoro-home-live-dot" />;
@@ -135,10 +125,12 @@ function LiveCard({ channel, text, variant }: {
   );
 }
 
-export function HomeLiveSection({ text, connected, followedChannels, onLoginOpen, variant = "root" }: {
+export function HomeLiveSection({ text, connected, followedChannels, loading = false, onLoginOpen, variant = "root" }: {
   text: HomeText;
   connected: boolean;
   followedChannels: PublicTwitchFollowedLolResponse | null;
+  /** 팔로우 조회가 진행 중인 동안 true — 빈 상태 문구를 미리 보이지 않게(거짓 빈 상태 수정). */
+  loading?: boolean;
   onLoginOpen: () => void;
   variant?: LiveCardVariant;
 }) {
@@ -153,7 +145,13 @@ export function HomeLiveSection({ text, connected, followedChannels, onLoginOpen
         viewAllHref={localizedPublicUrlForCurrentLocale("/follow")}
         viewAllLabel={text.liveViewAll}
       />
-      {liveChannels.length > 0 ? (
+      {loading && liveChannels.length === 0 ? (
+        /* 조회 중에는 스켈레톤 — 끝나기 전의 빈 배열로 "방송 중인 스트리머가
+           없습니다"를 먼저 말하던 문제의 수정점(로딩 화면 프롬프트 §2-5). */
+        <div className="yoro-home-live-grid">
+          {[0, 1, 2, 3].map((index) => <HomeLiveCardSkeleton key={index} />)}
+        </div>
+      ) : liveChannels.length > 0 ? (
         <div className="yoro-home-live-grid">
           {liveChannels.slice(0, 4).map((channel) => (
             <LiveCard channel={channel} key={channel.twitchUserId || channel.twitchLogin} text={text} variant={variant} />
@@ -235,62 +233,14 @@ function rarityText(text: HomeText, rarity: AramAugmentRarity): string {
   return text.rarityLegend;
 }
 
-function GameCard({ icon, name, badge, wide, chart, rows }: {
-  icon: React.ReactNode;
-  name: string;
-  /* 목업 LoL 카드 제목 옆 패치 버전 배지. */
-  badge?: string;
-  /* 목업 §게임별 데이터의 좌우 비대칭 폭(LoL 쪽이 1.4). */
-  wide?: boolean;
-  chart: React.ReactNode;
-  rows: Array<{ href: string; label: string }>;
-}) {
-  return (
-    <div className={`yoro-home-game-card${wide ? " is-wide" : ""}`}>
-      <div className="yoro-home-game-card-head">
-        {icon}
-        <span className="yoro-home-game-card-name">{name}</span>
-        {badge ? <span className="yoro-home-game-card-badge">{badge}</span> : null}
-      </div>
-      {chart}
-      <div className="yoro-home-game-rows">
-        {rows.map((row) => (
-          <a className="yoro-home-game-row" href={row.href} key={row.href}>
-            <span>{row.label}</span>
-            <span aria-hidden="true" className="yoro-home-game-row-arrow">&#8594;</span>
-          </a>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function LolCardIcon() {
-  return (
-    <svg aria-hidden="true" fill="none" height="22" stroke="currentColor" strokeWidth="1.2" viewBox="0 0 26 26" width="22">
-      <path d="M6 20 L 13 4 L 20 20" />
-      <path d="M9 15 h8" />
-      <path d="M4 22 h18" />
-    </svg>
-  );
-}
-
-function PalCardIcon() {
-  return (
-    <svg aria-hidden="true" fill="none" height="22" stroke="currentColor" strokeWidth="1.2" viewBox="0 0 26 26" width="22">
-      <circle cx="13" cy="12" r="7" />
-      <path d="M8 7 L 5 3" />
-      <path d="M18 7 L 21 3" />
-      <circle cx="10.5" cy="11" fill="currentColor" r=".8" stroke="none" />
-      <circle cx="15.5" cy="11" fill="currentColor" r=".8" stroke="none" />
-    </svg>
-  );
-}
-
 export function HomeGameDataSection({ text, locale }: { text: HomeText; locale: PublicLocale }) {
   const [rarityCounts, setRarityCounts] = useState<Array<{ rarity: AramAugmentRarity; count: number }> | null>(null);
   const [patchVersion, setPatchVersion] = useState<string | null>(null);
   const [elementCounts, setElementCounts] = useState<Array<{ element: PalworldElement; count: number }> | null>(null);
+  /* 차트 fetch 가 끝났는지(성공·실패 무관). 끝나기 전에는 스켈레톤을, 끝난 뒤
+     데이터가 없으면 빈 높이만 남깁니다 — 영원히 로딩처럼 보이지 않게(§2-6). */
+  const [aramSettled, setAramSettled] = useState(false);
+  const [palSettled, setPalSettled] = useState(false);
 
   /* 실패 시 차트만 조용히 생략합니다 — 홈의 핵심(검색)은 데이터 없이도 동작해야 합니다. */
   useEffect(() => {
@@ -316,6 +266,8 @@ export function HomeGameDataSection({ text, locale }: { text: HomeText; locale: 
         if (data.length > 0) setRarityCounts(data);
       } catch {
         /* 차트 생략 */
+      } finally {
+        if (!controller.signal.aborted) setAramSettled(true);
       }
     })();
     void (async () => {
@@ -328,6 +280,8 @@ export function HomeGameDataSection({ text, locale }: { text: HomeText; locale: 
         if (entries.length > 0) setElementCounts(entries);
       } catch {
         /* 차트 생략 */
+      } finally {
+        if (!controller.signal.aborted) setPalSettled(true);
       }
     })();
     return () => controller.abort();
@@ -350,7 +304,7 @@ export function HomeGameDataSection({ text, locale }: { text: HomeText; locale: 
               }))}
               title={text.chartLolTitle}
             />
-          ) : null}
+          ) : aramSettled ? null : <HomeChartSkeleton />}
           badge={patchVersion ? text.gamePatchBadge.replace("{version}", patchVersion) : undefined}
           icon={<LolCardIcon />}
           name={text.lolCardName}
@@ -374,7 +328,7 @@ export function HomeGameDataSection({ text, locale }: { text: HomeText; locale: 
               }))}
               title={text.chartPalTitle}
             />
-          ) : null}
+          ) : palSettled ? null : <HomeChartSkeleton />}
           icon={<PalCardIcon />}
           name={text.palCardName}
           rows={[
@@ -389,92 +343,6 @@ export function HomeGameDataSection({ text, locale }: { text: HomeText; locale: 
 }
 
 /* ── 교배 빠른 이동 ───────────────────────────────────────── */
-
-export function HomeBreedingSection({ text }: { text: HomeText }) {
-  const breedingHref = localizedPublicUrlForCurrentLocale("/palworld/breeding");
-  return (
-    <section className="yoro-home-section">
-      <SectionHead title={text.breedingTitle} />
-      <p className="yoro-home-section-sub">{text.breedingSub}</p>
-      <div className="yoro-home-breeding">
-        <a className="yoro-home-breeding-picker" href={breedingHref}>
-          <span>{text.breedingPickerPlaceholder}</span>
-          <svg aria-hidden="true" fill="none" height="6" stroke="currentColor" strokeWidth="1" viewBox="0 0 8 5" width="9">
-            <path d="M1 1 L 4 4 L 7 1" />
-          </svg>
-        </a>
-        <span aria-hidden="true" className="yoro-home-breeding-times">&#215;</span>
-        <a className="yoro-home-breeding-picker" href={breedingHref}>
-          <span>{text.breedingPickerPlaceholder}</span>
-          <svg aria-hidden="true" fill="none" height="6" stroke="currentColor" strokeWidth="1" viewBox="0 0 8 5" width="9">
-            <path d="M1 1 L 4 4 L 7 1" />
-          </svg>
-        </a>
-        <a className="yoro-home-primary-button" href={breedingHref}>
-          {text.breedingCta} <span aria-hidden="true">&#8594;</span>
-        </a>
-      </div>
-    </section>
-  );
-}
-
-/* ── YORO Bot ─────────────────────────────────────────────── */
-
-export function HomeBotSection({ text }: { text: HomeText }) {
-  return (
-    <section className="yoro-home-section">
-      <div className="yoro-home-bot">
-        <NorigaeMark className="yoro-home-section-norigae" height={28} width={14} />
-        <div className="yoro-home-bot-body">
-          <div className="yoro-home-bot-name">{text.botName}</div>
-          <div className="yoro-home-bot-desc">{text.botDescription}</div>
-        </div>
-        <a className="yoro-home-outline-button yoro-home-bot-cta" href={localizedPublicUrlForCurrentLocale("/bot")}>
-          {text.botCta}
-        </a>
-      </div>
-    </section>
-  );
-}
-
-/* ── 푸터 ─────────────────────────────────────────────────── */
-
-export function HomeFooter({ text, locale, onLocale }: {
-  text: HomeText;
-  locale: PublicLocale;
-  onLocale: (locale: PublicLocale) => void;
-}) {
-  return (
-    <footer className="yoro-home-footer">
-      <div className="yoro-home-footer-top">
-        <div className="yoro-home-footer-brand">
-          <div className="yoro-home-footer-wordmark">YORO<span>.GG</span></div>
-          <p className="yoro-home-footer-legal">{text.footerLegal}</p>
-        </div>
-        <nav aria-label={text.footerContact} className="yoro-home-footer-links">
-          <a href={localizedPublicUrlForCurrentLocale("/terms")}>{text.footerTerms}</a>
-          <a href={localizedPublicUrlForCurrentLocale("/privacy")}>{text.footerPrivacy}</a>
-          <a href={localizedPublicUrlForCurrentLocale("/contact")}>{text.footerContact}</a>
-        </nav>
-      </div>
-      <div className="yoro-home-footer-langs">
-        {([["ko", "한국어"], ["ja", "日本語"], ["en", "English"]] as Array<[PublicLocale, string]>).map(([code, label], index) => (
-          <span key={code}>
-            {index > 0 ? <span aria-hidden="true" className="yoro-home-footer-lang-sep">&#8202;·&#8202;</span> : null}
-            <button
-              aria-current={locale === code ? "true" : undefined}
-              className={`yoro-home-footer-lang${locale === code ? " is-active" : ""}`}
-              onClick={() => onLocale(code)}
-              type="button"
-            >
-              {label}
-            </button>
-          </span>
-        ))}
-      </div>
-    </footer>
-  );
-}
 
 /* ── 로그인 팝업 — 목업 v8 LoginModal ─────────────────────── */
 

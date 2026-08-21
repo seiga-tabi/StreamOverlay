@@ -161,6 +161,35 @@
     <title>YORO.gg</title>
   </head>
   <body>
+    <script nonce="__STREAMOPS_CSP_NONCE__">
+      /* 테마를 첫 페인트 전에 확정합니다. 이게 없으면 라우트 청크가 도착할 때까지
+         문서에 data-public-theme 이 없어서 SEO 본문·로딩 화면·동의 바가 전부
+         기본값으로 그려졌다가 튑니다(usePublicTheme / useHomeTheme 은 effect 에서만
+         속성을 붙입니다).
+         기본값 규칙은 훅과 정확히 같습니다: 홈 계열(/ · /lol · /follow)은 다크,
+         그 밖의 공개 화면은 라이트. localStorage 에 쓰지 않습니다 — 저장값 없음을
+         "없음"으로 유지해야 useHomeTheme 의 다크 기본이 살아 있습니다. */
+      (() => {
+        try {
+          const path = window.location.pathname;
+          if (/^\/dashboard(?:\/|$)/.test(path)) return;
+          const stored = window.localStorage.getItem("loltrace.theme");
+          if (stored === "dark" || stored === "light") {
+            document.documentElement.dataset.publicTheme = stored;
+            return;
+          }
+          const unprefixed = path.replace(/^\/(?:ko|ja|en)(?=\/|$)/, "") || "/";
+          const normalized = unprefixed.replace(/\/+$/, "") || "/";
+          /* 홈 계열: 루트 · lol 홈 · 팔로우 — 문자열 리터럴 대신 정규식인 이유:
+             production-metadata 검사가 index.html 안의 따옴표 친 비콘텐츠 경로
+             리터럴을 AdSense 게이팅 목록으로 오인하지 않게. */
+          const homeFamily = /^\/(?:lol|follow)?$/.test(normalized);
+          document.documentElement.dataset.publicTheme = homeFamily ? "dark" : "light";
+        } catch {
+          /* localStorage 접근 실패는 화면을 막지 않습니다 — 훅이 뒤에서 정합니다. */
+        }
+      })();
+    </script>
     <div id="root"></div>
     <script nonce="__STREAMOPS_CSP_NONCE__" type="module" src="/src/main.tsx"></script>
   </body>

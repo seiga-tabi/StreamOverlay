@@ -1,5 +1,3 @@
-import "../styles/pages/home/01-public-home.css";
-import "../styles/pages/home/02-lol-home.css";
 import { LolChrome, lolSubnavActive } from "../features/public-home/components/LolChrome";
 import { LolBottomTabBar } from "../features/public-home/components/HomeTabBar";
 import { lolHomeI18n } from "../features/public-home/i18n/lol-home-i18n";

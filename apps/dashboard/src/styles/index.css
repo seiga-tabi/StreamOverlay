@@ -15,6 +15,11 @@
 @import "./shared/public-game-chrome.css" layer(legacy);
 @import "./shared/public-game-home.css" layer(home);
 @import "./shared/google-consent.css" layer(legacy);
+/* 홈 크롬·히어로 CSS 는 라우트 폴백(HomeRouteFallback/LolRouteFallback)이 lazy
+   청크보다 먼저 필요로 하므로 eager 로 둡니다(로딩 화면 프롬프트 §2-2). 두 파일
+   모두 자체 @layer home 선언이라 import 위치는 캐스케이드에 영향이 없습니다. */
+@import "./pages/home/01-public-home.css";
+@import "./pages/home/02-lol-home.css";
 @import "./pages/discord/15-discord-setup.css" layer(legacy);
 /* YORO Bot 공개 route CSS는 PublicBotPage lazy chunk가 소유합니다.
    -> styles/pages/bot/bot-route.css */
