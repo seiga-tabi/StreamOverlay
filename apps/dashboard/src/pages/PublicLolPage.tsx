@@ -1,9 +1,7 @@
 import "../styles/pages/home/01-public-home.css";
 import "../styles/pages/home/02-lol-home.css";
-import { HomeHeader } from "../features/public-home/components/HomeHeader";
-import { LolSubnav } from "../features/public-home/components/LolHomeSections";
+import { LolChrome, lolSubnavActive } from "../features/public-home/components/LolChrome";
 import { LolBottomTabBar } from "../features/public-home/components/HomeTabBar";
-import { homeI18n } from "../features/public-home/i18n/home-i18n";
 import { lolHomeI18n } from "../features/public-home/i18n/lol-home-i18n";
 import { Fragment, useEffect, useId, useMemo, useRef, useState, type FormEvent, type MouseEvent, type ReactNode } from "react";
 import {
@@ -56,7 +54,7 @@ import { profileShareLanes } from "../features/public-lol/utils/profile-share";
 import { RecentMatchesShareActions, type RecentMatchShareItem } from "../features/public-lol/components/RecentMatchesShareActions";
 import { ArenaStandings } from "../features/public-lol/components/ArenaStandings";
 import { ProfileLinkIcon, profileLinkPlatformFromUrl, profileLinkPlatformClass } from "../components/ProfileLinkIcon";
-import { AppShell, AppShellHeader, AppShellMain, AppShellSidebar } from "../shared/ui/AppShell";
+import { AppShell, AppShellMain, AppShellSidebar } from "../shared/ui/AppShell";
 import { Button } from "../shared/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../shared/ui/Card";
 import { EmptyState, EmptyStateActions, EmptyStateDescription, EmptyStateIcon, EmptyStateTitle } from "../shared/ui/EmptyState";
@@ -3179,8 +3177,8 @@ function PublicMatchFilterBar({
   );
 }
 
-/* 상단바는 HomeHeader 한 벌로 통일 — 구 PublicAppHeader 래퍼는 제거했습니다
-   (docs/handoffs/2026-08-21-app-header-shared-prompt.md). */
+/* 상단바는 LolChrome(1행 HomeHeader + 2행 LolSubnav) 한 벌로 통일 — 구
+   PublicAppHeader 래퍼는 제거했습니다(docs/handoffs/2026-08-21-app-header-shared-prompt.md). */
 
 function PublicStreamerRegistrationScreen({
   status,
@@ -7545,22 +7543,17 @@ export function PublicLolPage({
         skipLinkLabel={t().skipToContent}
         variant="public"
       >
-        {/* 상단바는 HomeHeader 한 벌(공용 규격 프롬프트 §2) — 화면별 헤더를 두지 않습니다. */}
-        <AppShellHeader as="div" className="yoro-home-chrome">
-          <HomeHeader
-            accountName={twitchStatus.user?.displayName}
-            activeGame="lol"
-            connected={twitchStatus.connected}
-            locale={locale}
-            onDashboard={() => window.location.assign("/dashboard")}
-            onLocale={changeLocale}
-            onLoginOpen={startTwitchLogin}
-            onLogout={() => void disconnectTwitchViewer()}
-            onToggleTheme={toggleTheme}
-            text={homeI18n[locale]}
-          />
-          <LolSubnav active="none" text={lolHomeI18n[locale]} />
-        </AppShellHeader>
+        {/* 상단바는 LolChrome 한 벌(통합 프롬프트 §2-1) — 화면별 헤더를 두지 않습니다. */}
+        <LolChrome
+          accountName={twitchStatus.user?.displayName}
+          active="none"
+          connected={twitchStatus.connected}
+          locale={locale}
+          onLocale={changeLocale}
+          onLoginOpen={startTwitchLogin}
+          onLogout={() => void disconnectTwitchViewer()}
+          onToggleTheme={toggleTheme}
+        />
         <AppShellMain className="public-app-main" id="public-streamer-register-main">
           <PublicStreamerRegistrationScreen
             status={twitchStatus}
@@ -7588,23 +7581,19 @@ export function PublicLolPage({
         skipLinkLabel={t().skipToContent}
         variant="public"
       >
-        {/* 검색 랜딩도 같은 HomeHeader 한 벌 — 본문에 큰 검색 패널이 있어 헤더
+        {/* 검색 랜딩도 같은 LolChrome 한 벌 — 본문에 큰 검색 패널이 있어 헤더
             컴팩트 검색바(searchSlot)는 넣지 않습니다(공용 규격 프롬프트 §3). */}
-        <AppShellHeader as="div" className="yoro-home-chrome public-home-shared-header">
-          <HomeHeader
-            accountName={twitchStatus.user?.displayName}
-            activeGame="lol"
-            connected={twitchStatus.connected}
-            locale={locale}
-            onDashboard={() => window.location.assign("/dashboard")}
-            onLocale={changeLocale}
-            onLoginOpen={startTwitchLogin}
-            onLogout={() => void disconnectTwitchViewer()}
-            onToggleTheme={toggleTheme}
-            text={homeI18n[locale]}
-          />
-          <LolSubnav active="none" text={lolHomeI18n[locale]} />
-        </AppShellHeader>
+        <LolChrome
+          accountName={twitchStatus.user?.displayName}
+          active="none"
+          className="public-home-shared-header"
+          connected={twitchStatus.connected}
+          locale={locale}
+          onLocale={changeLocale}
+          onLoginOpen={startTwitchLogin}
+          onLogout={() => void disconnectTwitchViewer()}
+          onToggleTheme={toggleTheme}
+        />
         <AppShellMain className="public-home-shared-main" id="public-search-main">
           <PublicHomeSearchPanel
             liveLoading={followedLoading || twitchOAuthSettling}
@@ -7665,57 +7654,48 @@ export function PublicLolPage({
   if (activeMainPage !== "search" || (!profile && !loading)) {
     return (
       <AppShell
-        className={`public-lol-shell public-dashboard-shell theme-${theme}`}
+        /* 패치 노트·시청자 참여·증강 칼바람은 전적 프로필과 같은 수묵 셸(platform-v2)을
+           씁니다 — 셸 지면이 테마를 따라 뒤집히고(20-profile-platform.css), 상단 컴팩트
+           검색바가 프로필과 같은 잉크 규격을 받습니다. 다른 메뉴 페이지는 각자 리스킨
+           문서가 소유합니다. */
+        className={`public-lol-shell public-dashboard-shell${["patchNotes", "followJoin", "aram"].includes(activeMainPage) ? " public-profile-platform-v2" : ""} theme-${theme}`}
         mainId="public-main"
         sidebarMode="none"
         skipLinkLabel={t().skipToContent}
         variant="public"
       >
-        {/* 메뉴 페이지(스트리머·참여·칼바람·패치 노트 …)도 HomeHeader 한 벌 +
-            2행 LoL 메뉴. 검색바는 컴팩트 슬롯으로 유지합니다(공용 규격 프롬프트 §3). */}
-        <AppShellHeader as="div" className="yoro-home-chrome public-standard-header-frame">
-          <HomeHeader
-            accountName={twitchStatus.user?.displayName}
-            activeGame="lol"
-            connected={twitchStatus.connected}
-            locale={locale}
-            onDashboard={() => window.location.assign("/dashboard")}
-            onLocale={changeLocale}
-            onLoginOpen={startTwitchLogin}
-            onLogout={() => void disconnectTwitchViewer()}
-            onToggleTheme={toggleTheme}
-            searchSlot={(
-              <div className="yoro-home-header-search">
-                <SearchForm
-                  loading={loading}
-                  platform={selectedLolPlatform}
-                  platformOptions={platformOptions}
-                  onClear={clearSearch}
-                  onPickSuggestion={pickSuggestion}
-                  onQuery={setQuery}
-                  onPlatformChange={changeLolPlatform}
-                  onSubmit={(event) => void submit(event)}
-                  query={query}
-                  suggestions={visibleSuggestions}
-                  recentSearches={recentSearches}
-                  favorites={favorites}
-                  panelRequest={searchPanelRequest}
-                />
-              </div>
-            )}
-            text={homeI18n[locale]}
-          />
-          <LolSubnav
-            active={
-              activeMainPage === "subscriptions" ? "streamers"
-                : activeMainPage === "followJoin" ? "participation"
-                  : activeMainPage === "aram" ? "aram"
-                    : activeMainPage === "patchNotes" ? "patchNotes"
-                      : "none"
-            }
-            text={lolHomeI18n[locale]}
-          />
-        </AppShellHeader>
+        {/* 메뉴 페이지(스트리머·참여·칼바람·패치 노트 …)도 상단바 한 벌(LolChrome).
+            검색바는 컴팩트 슬롯으로 유지합니다(공용 규격 프롬프트 §3). */}
+        <LolChrome
+          accountName={twitchStatus.user?.displayName}
+          active={lolSubnavActive(activeMainPage)}
+          className="public-standard-header-frame"
+          connected={twitchStatus.connected}
+          locale={locale}
+          onLocale={changeLocale}
+          onLoginOpen={startTwitchLogin}
+          onLogout={() => void disconnectTwitchViewer()}
+          onToggleTheme={toggleTheme}
+          searchSlot={(
+            <div className="yoro-home-header-search">
+              <SearchForm
+                loading={loading}
+                platform={selectedLolPlatform}
+                platformOptions={platformOptions}
+                onClear={clearSearch}
+                onPickSuggestion={pickSuggestion}
+                onQuery={setQuery}
+                onPlatformChange={changeLolPlatform}
+                onSubmit={(event) => void submit(event)}
+                query={query}
+                suggestions={visibleSuggestions}
+                recentSearches={recentSearches}
+                favorites={favorites}
+                panelRequest={searchPanelRequest}
+              />
+            </div>
+          )}
+        />
         <AppShellMain className="public-app-main" id="public-main">
           <div className="public-profile-layout">
             <div className="public-dashboard-content-grid">
@@ -7746,44 +7726,40 @@ export function PublicLolPage({
       skipLinkLabel={t().skipToContent}
       variant="public"
     >
-      {/* 상단 크롬 — 목업 page-4: 홈 헤더(컴팩트 검색바 포함) + 2행 LoL 메뉴(활성 없음). */}
-      <AppShellHeader as="div" className="yoro-home-chrome public-profile-ink-chrome">
-        <HomeHeader
-          accountName={twitchStatus.user?.displayName}
-          activeGame="lol"
-          connected={twitchStatus.connected}
-          locale={locale}
-          onDashboard={() => window.location.assign("/dashboard")}
-          onLocale={changeLocale}
-          onLoginOpen={startTwitchLogin}
-          onLogout={() => void disconnectTwitchViewer()}
-          onToggleTheme={toggleTheme}
-          searchSlot={(
-            <div className="yoro-home-header-search">
-              <SearchForm
-                loading={loading}
-                platform={selectedLolPlatform}
-                platformOptions={platformOptions}
-                onClear={clearSearch}
-                onPickSuggestion={pickSuggestion}
-                onQuery={setQuery}
-                onPlatformChange={changeLolPlatform}
-                onSubmit={(event) => void submit(event)}
-                query={query}
-                suggestions={visibleSuggestions}
-                recentSearches={recentSearches}
-                favorites={favorites}
-                panelRequest={searchPanelRequest}
-              />
-            </div>
-          )}
-          text={homeI18n[locale]}
-        />
-        <LolSubnav active="none" text={lolHomeI18n[locale]} />
+      {/* 상단 크롬 — 목업 page-4: LolChrome 한 벌(컴팩트 검색바 포함, 2행 활성 없음). */}
+      <LolChrome
+        accountName={twitchStatus.user?.displayName}
+        active="none"
+        connected={twitchStatus.connected}
+        locale={locale}
+        onLocale={changeLocale}
+        onLoginOpen={startTwitchLogin}
+        onLogout={() => void disconnectTwitchViewer()}
+        onToggleTheme={toggleTheme}
+        searchSlot={(
+          <div className="yoro-home-header-search">
+            <SearchForm
+              loading={loading}
+              platform={selectedLolPlatform}
+              platformOptions={platformOptions}
+              onClear={clearSearch}
+              onPickSuggestion={pickSuggestion}
+              onQuery={setQuery}
+              onPlatformChange={changeLolPlatform}
+              onSubmit={(event) => void submit(event)}
+              query={query}
+              suggestions={visibleSuggestions}
+              recentSearches={recentSearches}
+              favorites={favorites}
+              panelRequest={searchPanelRequest}
+            />
+          </div>
+        )}
+      >
         {/* 진행 헤어라인 — 2행 메뉴 바로 아래 2px. 항상 렌더해 두고(도착 순간
             2px 이동 방지) 로딩 중에만 트랙·세그먼트를 보입니다(목업 "검색 중"). */}
         <div aria-hidden="true" className={`public-profile-progress${loading ? " is-active" : ""}`}><i /></div>
-      </AppShellHeader>
+      </LolChrome>
       <AppShellMain className="public-profile-shared-main" id="public-profile-main">
         <div className="public-profile-layout">
           <div className="public-dashboard-content-grid">

@@ -83,7 +83,8 @@ test("legacy !important를 피하는 새 이름만 쓴다", () => {
   assert.equal(page.includes("<CardTitle"), false);
   assert.equal(page.includes("<CardDescription>"), false);
   assert.match(page, /className="yoro-pn-hero-title"/u);
-  assert.match(page, /className="yoro-pn-row-title"/u);
+  /* 사이드바 행 제목은 사용성 §2-1-7 에서 sr-only 링크로 접혔습니다 — 행 우측 값이 새 이름. */
+  assert.match(page, /className="yoro-pn-row-delta"/u);
   assert.match(page, /className="yoro-pn-tile-sum"/u);
 });
 
@@ -102,11 +103,12 @@ test("스타일은 pages layer 안에 있고 !important 를 쓰지 않는다", (
 
 test("이미지는 자리를 먼저 잡고 히어로만 먼저 받아온다", () => {
   // 히어로는 첫 화면이라 즉시, 나머지는 lazy 입니다.
+  // (행 썸네일 .yoro-pn-row-art 는 폭 0 이라 사용성 §2-1 에서 은퇴했습니다.)
   assert.match(page, /className="yoro-pn-hero-art"[\s\S]{0,140}loading="eager"/u);
   assert.match(page, /className="yoro-pn-tile-art"[\s\S]{0,140}loading="lazy"/u);
-  assert.match(page, /className="yoro-pn-row-art"[\s\S]{0,160}loading="lazy"/u);
+  assert.equal(page.includes('className="yoro-pn-row-art"'), false);
   // width/height 를 주지 않으면 이미지가 도착할 때 레이아웃이 밀립니다.
-  for (const pair of [/height=\{720\}[\s\S]{0,80}width=\{1280\}/u, /height=\{360\}[\s\S]{0,80}width=\{640\}/u, /height=\{30\}[\s\S]{0,80}width=\{52\}/u]) {
+  for (const pair of [/height=\{720\}[\s\S]{0,80}width=\{1280\}/u, /height=\{360\}[\s\S]{0,80}width=\{640\}/u]) {
     assert.match(page, pair);
   }
 });
@@ -118,9 +120,13 @@ test("카드 전체가 클릭 영역이지만 tab 정지점은 하나다", () =>
   assert.match(page, /aria-hidden="true" className="yoro-pn-hero-cta"/u);
 });
 
-test("좁은 화면에서는 시간 축을 접고 색 띠만 남긴다", () => {
+test("시간 축 장식은 은퇴했고 reduced-motion 을 존중한다", () => {
+  /* 축 선(.yoro-pn-list::before)·축 점(.yoro-pn-node)은 폭 0 장식이라 사용성
+     §2-1 에서 DOM 째 은퇴했습니다 — 규칙이 다시 살아나면 회귀입니다. */
+  const rules = css.replace(/\/\*[\s\S]*?\*\//gu, "");
+  assert.equal(/\.yoro-pn-node\s*\{/u.test(rules), false);
+  assert.equal(/\.yoro-pn-list::before\s*\{/u.test(rules), false);
   assert.match(css, /@media \(max-width: 52rem\)/u);
-  assert.match(css, /\.yoro-pn-list::before \{\s*display: none;/u);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/u);
 });
 
@@ -204,7 +210,9 @@ test("노트와 전적은 Data Dragon major.minor 로만 이어진다", () => {
 });
 
 test("기록이 없는 패치에는 숫자를 만들어 넣지 않는다", () => {
-  assert.match(page, /record\s*\?\s*<WinRateGauge[\s\S]{0,120}yoro-pn-row-norate/u);
+  /* 행 우측은 변화가 있을 때만 %p, 없으면 — 한 글자(사용성 §2-1-4 — 「플레이 없음」 반복 은퇴). */
+  assert.match(page, /delta === undefined \? "—" : signed\(delta\)/u);
+  assert.equal(page.includes('className="yoro-pn-row-norate"'), false);
   // 표본 수를 밝히지 않으면 20경기 승률이 전체 승률로 읽힙니다. 소환사 칩 안에 답니다.
   assert.match(mineModule, /patchNotesSampleShort\.replace\("\{count\}"/u);
   // 기록이 없으면 표본 문구를 붙이지 않습니다.
@@ -270,8 +278,14 @@ test("빠른 필터는 결과가 있는 것만 내고 개수를 함께 보여 �
   assert.match(page, /if \(played > 0\)/u);
   assert.match(bar, /<b>\{option\.count\}<\/b>/u);
   assert.match(bar, /aria-pressed=\{filter === option\.value\}/u);
-  // 고른 필터가 사라지면 전체로 되돌립니다.
-  assert.match(page, /if \(!filterOptions\.some\(\(option\) => option\.value === filter\)\) setFilter\("all"\);/u);
+  // 고른 필터가 사라지면 전체로 되돌립니다 — 시즌 셀렉트 값도 유효 목록에
+  // 포함해야 시즌을 고르는 순간 전체로 튕기지 않습니다(사용성 §2-2-5).
+  assert.match(page, /const valid = filterOptions\.some\(\(option\) => option\.value === filter\)\s*\|\|\s*seasonOptions\.some\(\(option\) => `season:\$\{option\.season\}` === filter\);/u);
+  assert.match(page, /if \(!valid\) setFilter\("all"\);/u);
+  // 시즌은 칩이 아니라 셀렉트 하나 — .slice\(0, 2\) 로 시즌이 잘리면 회귀입니다.
+  assert.equal(page.includes(".slice(0, 2)"), false);
+  assert.match(bar, /className="yoro-pn-season-select"/u);
+  assert.match(bar, /patchNotesSeasonAll/u);
   // 좁히는 조작이면 히어로·타일을 접습니다.
   assert.match(page, /trimmedQuery\.length > 0 \|\| filter !== "all"/u);
 });

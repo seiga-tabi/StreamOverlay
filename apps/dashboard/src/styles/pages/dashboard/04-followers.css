@@ -479,29 +479,8 @@
   color: #6c757d !important;
 }
 
-.public-dashboard-shell .public-suggestion-panel,
-.public-dashboard-shell .public-search-wrap .public-suggestion-list,
-.public-home-shared-shell .public-home-shared-search .public-suggestion-panel,
-.public-home-shared-shell .public-home-shared-search .public-suggestion-list {
-  border-color: var(--public-gray-border) !important;
-  background: rgba(73, 80, 87, .96) !important;
-  color: var(--public-gray-text) !important;
-  box-shadow: 0 22px 48px rgba(33, 37, 41, .2) !important;
-}
-
-.public-dashboard-shell .public-suggestion-list button,
-.public-home-shared-shell .public-home-shared-search .public-suggestion-list button {
-  border-color: rgba(222, 226, 230, .18) !important;
-  background: transparent !important;
-  color: var(--public-gray-text) !important;
-}
-
-.public-dashboard-shell .public-suggestion-list button:hover,
-.public-dashboard-shell .public-suggestion-list button:focus-visible,
-.public-home-shared-shell .public-home-shared-search .public-suggestion-list button:hover,
-.public-home-shared-shell .public-home-shared-search .public-suggestion-list button:focus-visible {
-  background: rgba(248, 249, 250, .14) !important;
-}
+/* 연관 검색 패널 표면(배경·그림자·행 색)은 38-ink-profile.css 가 단독 소유합니다
+   — 회색 반투명 !important 스킨은 걷어냈습니다(연관 패널 프롬프트 §2-6). */
 
 .public-dashboard-shell .public-panel,
 .public-dashboard-shell .public-profile-tabs,

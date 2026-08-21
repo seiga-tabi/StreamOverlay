@@ -33,12 +33,18 @@ export function targetKey(target: PatchNoteTarget): string {
  * 한 존에 패치 필터와 개인 전적 기능이 섞여 검색창이 Riot ID 검색처럼 읽히던
  * 문제의 수정점 — docs/mockups/lol-patch-notes-search-redesign.html §①.
  */
+export type PatchNotesSeasonOption = {
+  season: string;
+  count: number;
+};
+
 export function PatchNotesControlBar({
   query,
   onQuery,
   resultCount,
   filter,
   filterOptions,
+  seasonOptions,
   onFilter
 }: {
   query: string;
@@ -46,8 +52,11 @@ export function PatchNotesControlBar({
   resultCount: number;
   filter: PatchNotesFilter;
   filterOptions: PatchNotesFilterOption[];
+  /** 시즌은 칩이 아니라 셀렉트 하나로 — 시즌이 쌓여도 줄이 길어지지 않습니다(사용성 §2-2). */
+  seasonOptions: PatchNotesSeasonOption[];
   onFilter: (value: PatchNotesFilter) => void;
 }) {
+  const seasonValue = filter.startsWith("season:") ? filter : "all";
   return (
     <div className="yoro-pn-bar">
       {/* 결과 수를 입력창 안에 두어야 "무엇의 개수"인지 붙어 읽힙니다. */}
@@ -75,7 +84,9 @@ export function PatchNotesControlBar({
         <span className="yoro-pn-bar-count">{`${resultCount}${t().patchNotesCount}`}</span>
       </div>
 
-      {filterOptions.length > 1 ? (
+      {/* 고를 것이 실제로 있을 때만 필터 줄을 냅니다 — 칩이 하나뿐이고 시즌도
+          하나 이하면 필터가 의미가 없습니다(이전 filterOptions.length > 1 가드의 계승). */}
+      {filterOptions.length > 1 || seasonOptions.length > 1 ? (
         <div aria-label={t().patchNotesFilterLabel} className="yoro-pn-bar-chips" role="group">
           {filterOptions.map((option) => (
             <button
@@ -90,6 +101,24 @@ export function PatchNotesControlBar({
               <b>{option.count}</b>
             </button>
           ))}
+          {seasonOptions.length > 0 ? (
+            <select
+              aria-label={t().patchNotesSeasonSelectLabel}
+              className="yoro-pn-season-select"
+              onChange={(event) => {
+                const value = event.currentTarget.value;
+                onFilter(value === "all" ? "all" : (value as PatchNotesFilter));
+              }}
+              value={seasonValue}
+            >
+              <option value="all">{t().patchNotesSeasonAll}</option>
+              {seasonOptions.map((option) => (
+                <option key={option.season} value={`season:${option.season}`}>
+                  {`${t().patchNotesFilterSeason.replace("{season}", option.season)} (${option.count})`}
+                </option>
+              ))}
+            </select>
+          ) : null}
         </div>
       ) : null}
     </div>

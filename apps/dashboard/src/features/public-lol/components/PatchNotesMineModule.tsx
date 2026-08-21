@@ -242,7 +242,12 @@ export function PatchNotesMineModule({
               `/lol/summoners/${target.lolPlatform}/${encodeURIComponent(`${target.gameName}-${target.tagLine}`)}`
             )}
           >
-            {`${t().patchNotesMineProfile} ↗`}
+            {t().patchNotesMineProfile}
+            {/* 외부 이동 표시 — 글리프(↗)는 폰트마다 정렬이 달라 stroke SVG 로(사용성 §2-4). */}
+            <svg aria-hidden="true" fill="none" height="11" stroke="currentColor" strokeWidth="1.2" viewBox="0 0 12 12" width="11">
+              <path d="M3 9 L 9 3" />
+              <path d="M4.5 3 H 9 V 7.5" />
+            </svg>
           </a>
           <button className="yoro-pn-mine-dismiss" onClick={onDismiss} type="button">
             {t().patchNotesMineDismiss}

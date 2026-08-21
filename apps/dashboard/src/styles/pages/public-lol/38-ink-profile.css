@@ -1,8 +1,10 @@
 /* LoL 프로필 수묵 리스킨 보조 — 목업 yoro-home-redesign page-4.
  *
  * 팔레트 토큰과 승/패 강조색은 소유자인 20-profile-platform.css 에서 정의합니다.
- * 이 파일은 활성 프로필 탭의 붓 꼬리 시그니처만 담당합니다 — 23-profile-hero.css
- * 의 2px 밑줄을 같은 pages layer 에서 뒤 import 로 대체합니다.
+ * 이 파일은 활성 프로필 탭의 붓 꼬리 시그니처와 **검색 연관 패널
+ * (.public-suggestion-*)의 표면 규격**을 담당합니다 — 패널 표면은 목업 page-4
+ * LolHeaderSearch/-Light/-Ja 기준으로 이 파일이 단독 소유합니다(연관 패널
+ * 프롬프트 §2-6). legacy 7파일의 표면 선언은 걷어냈고 구조만 남았습니다.
  */
 
 @layer pages {
@@ -964,54 +966,223 @@
     background: var(--profile-win-fill);
   }
 
-  /* ── 검색 연관 패널(목업 검색바 보드) ─────────────────────────
-     탭 활성 = 보라 바 대신 먹빛(꼬리 밑줄은 mask 지원 시), 티어 뱃지 =
-     채움 pill 대신 티어색 아웃라인, 우측 티어명 = 티어색 텍스트. */
-  .public-profile-platform-v2 .public-suggestion-tabs {
-    border-bottom-color: var(--public-gray-border);
-    background: transparent;
-  }
-
-  .public-profile-platform-v2 .public-suggestion-tabs button.active {
-    border-bottom-color: var(--public-gray-muted);
+  /* ── 검색 연관 패널 — 이 파일이 표면을 단독 소유합니다 ─────────────
+     목업 page-4 LolHeaderSearch/-Light/-Ja. legacy 8파일에 흩어져 있던
+     .public-suggestion-* 표면(배경·radius·그림자·글자색·행 규격)은 여기 한 곳으로
+     모았습니다(연관 패널 프롬프트 §2-6). 색은 전부 토큰 — 고정 hex·rgba 금지.
+     legacy 쪽 !important 는 해당 파일에서 지웠고, 남은 legacy normal 선언은
+     layer 순서(legacy < pages)로 여기가 이깁니다. */
+  .public-search-wrap .public-suggestion-panel {
+    border: .5px solid var(--public-gray-border);
+    border-radius: 3px;
+    background: var(--public-gray-surface);
     color: var(--public-gray-text);
+    box-shadow: none;
+    backdrop-filter: none;
   }
 
-  @supports (mask: url("data:image/svg+xml,%3Csvg/%3E")) {
-    .public-profile-platform-v2 .public-suggestion-tabs button.active {
-      position: relative;
-      border-bottom-color: transparent;
-    }
-
-    .public-profile-platform-v2 .public-suggestion-tabs button.active::after {
-      content: "";
-      position: absolute;
-      bottom: 0;
-      left: var(--yoro-space-2);
-      width: 2.25rem;
-      height: .375rem;
-      background: var(--public-gray-muted);
-      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 12'%3E%3Cpath d='M2 5.5 C 50 1.5, 100 11, 176 5.2 C 120 8.4, 55 7.5, 2 9 Z'/%3E%3C/svg%3E") no-repeat center / contain;
-    }
-  }
-
-  .public-profile-platform-v2 .public-suggestion-rank {
-    border: .5px solid color-mix(in srgb, currentColor 55%, transparent);
-    border-radius: 2px;
+  /* 탭 줄 — 40px · gap 18 · 12/500. 활성만 잉크 + 700 + 꼬리 밑줄(TailUnderline). */
+  .public-search-wrap .public-suggestion-tabs {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    min-height: 40px;
+    padding: 0 14px;
+    border-bottom: .5px solid var(--public-gray-border);
     background: transparent;
+    overflow-x: auto;
+  }
+
+  .public-search-wrap .public-suggestion-tabs button {
+    position: relative;
+    display: inline-flex;
+    flex: 0 0 auto;
+    gap: 5px;
+    align-items: center;
+    min-height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--public-gray-muted);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .public-search-wrap .public-suggestion-tabs button.active {
+    color: var(--public-gray-text);
+    font-weight: 700;
+  }
+
+  .public-search-wrap .public-suggestion-tabs button em {
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    color: var(--public-gray-muted);
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 700;
+  }
+
+  .public-suggestion-tab-tail {
+    position: absolute;
+    bottom: 3px;
+    left: 0;
     color: var(--public-gray-muted);
   }
 
-  .public-profile-platform-v2 .public-suggestion-rank.iron { color: var(--tier-lp-iron); }
-  .public-profile-platform-v2 .public-suggestion-rank.bronze { color: var(--tier-lp-bronze); }
-  .public-profile-platform-v2 .public-suggestion-rank.silver { color: var(--tier-lp-silver); }
-  .public-profile-platform-v2 .public-suggestion-rank.gold { color: var(--tier-lp-gold); }
-  .public-profile-platform-v2 .public-suggestion-rank.platinum { color: var(--tier-lp-platinum); }
-  .public-profile-platform-v2 .public-suggestion-rank.emerald { color: var(--tier-lp-emerald); }
-  .public-profile-platform-v2 .public-suggestion-rank.diamond { color: var(--tier-lp-diamond); }
-  .public-profile-platform-v2 .public-suggestion-rank.master { color: var(--tier-lp-master); }
-  .public-profile-platform-v2 .public-suggestion-rank.grandmaster { color: var(--tier-lp-grandmaster); }
-  .public-profile-platform-v2 .public-suggestion-rank.challenger { color: var(--tier-lp-challenger); }
+  /* 구역 제목 — 10/700 · 자간 .06em (목업 제목 줄). */
+  .public-search-wrap .public-suggestion-title {
+    min-height: 0;
+    padding: 10px 14px 4px;
+    border-bottom: 0;
+    color: var(--public-gray-muted);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .06em;
+  }
+
+  /* 소환사 행 — 52px · 사이 헤어라인 · 아바타 30 원형 · 크레스트 18×20. */
+  .public-search-wrap .public-suggestion-list {
+    gap: 0;
+    padding: 0;
+    background: transparent;
+  }
+
+  .public-search-wrap .public-suggestion-list button {
+    grid-template-columns: 30px 22px minmax(0, 1fr) max-content;
+    gap: 10px;
+    min-height: 52px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 0;
+    color: var(--public-gray-text);
+  }
+
+  .public-search-wrap .public-suggestion-list button + button {
+    border-top: .5px solid var(--public-gray-border);
+  }
+
+  /* 즐겨찾기 행만 별 열이 하나 더 있습니다 — 4열 격자에 5번째 자식이 오면
+     둘째 줄로 흘러 행이 부풀므로 별 자리를 격자에 넣어 줍니다(행 통일 §2-2). */
+  .public-search-wrap .public-suggestion-list button:has(.public-suggestion-favorite-mark) {
+    grid-template-columns: 30px 22px minmax(0, 1fr) max-content 13px;
+  }
+
+  .public-search-wrap .public-suggestion-list button:hover,
+  .public-search-wrap .public-suggestion-list button:focus-visible {
+    border-color: var(--public-gray-border);
+    background: color-mix(in srgb, var(--public-gray-text) 4%, transparent);
+  }
+
+  .public-search-wrap .public-suggestion-avatar {
+    width: 30px;
+    height: 30px;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 99px;
+    background: var(--public-gray-page);
+    color: var(--public-gray-muted);
+    font-size: 12px;
+    font-weight: 800;
+    box-shadow: none;
+  }
+
+  /* 티어 칸 — 실제 티어 엠블럼 이미지(있을 때). 크레스트 폴백의 기본색은
+     Unranked 무채 단계이고, 랭크가 있으면 아래 data-tier 훅이 티어색으로 덮습니다. */
+  .public-search-wrap .public-suggestion-tier {
+    display: grid;
+    place-items: center;
+    color: var(--public-gray-border-strong);
+  }
+
+  .public-search-wrap .public-suggestion-tier img {
+    display: block;
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+  }
+
+  .public-search-wrap .public-suggestion-name span {
+    color: var(--public-gray-text);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .public-search-wrap .public-suggestion-name strong {
+    color: var(--public-gray-muted);
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .public-search-wrap .public-suggestion-rank-copy {
+    display: grid;
+    gap: 1px;
+    min-width: 0;
+    text-align: right;
+  }
+
+  .public-search-wrap .public-suggestion-rank-copy > span {
+    color: var(--public-gray-muted);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .public-search-wrap .public-suggestion-rank-copy small {
+    color: var(--public-gray-muted);
+    font-size: 10px;
+    font-weight: 500;
+  }
+
+  /* 즐겨찾기 표식 — stroke 별 13px, 즐겨찾기 행에서만 렌더(§2-5·행 통일 §2-2). */
+  .public-search-wrap .public-suggestion-favorite-mark {
+    display: inline-grid;
+    width: auto;
+    height: auto;
+    place-items: center;
+    border-radius: 0;
+    color: var(--public-gray-muted);
+  }
+
+  .public-search-wrap .public-suggestion-favorite-mark svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  /* 빈 상태 — 별 22px --deep(= border-strong 단계) + 13px 문구. */
+  .public-search-wrap .public-suggestion-empty {
+    display: grid;
+    gap: 8px;
+    justify-items: center;
+    min-height: 76px;
+    padding: 18px;
+    color: var(--public-gray-muted);
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  .public-search-wrap .public-suggestion-empty-icon {
+    display: inline-grid;
+    color: var(--public-gray-border-strong);
+  }
+
+  /* 최근 검색·즐겨찾기 탭도 소환사 탭과 같은 52px 행입니다 — "티어·LP 가 없는
+     데이터라 칩"이라던 앞선 전제가 사실이 아니어서(여덟 항목 전부 아이콘·티어 보유)
+     칩 분기(§2-4)는 은퇴했습니다. 위 공통 행 규칙이 세 탭을 함께 그립니다
+     (탭 행 통일 프롬프트 §2-1 — 이 문서가 앞선 §2-4 를 대체). */
+
+  /* 티어 크레스트·우측 티어명 색 — data-tier 훅(티어 토큰은 platform-v2 스코프). */
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="iron"] .public-suggestion-tier { color: var(--tier-lp-iron); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="bronze"] .public-suggestion-tier { color: var(--tier-lp-bronze); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="silver"] .public-suggestion-tier { color: var(--tier-lp-silver); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="gold"] .public-suggestion-tier { color: var(--tier-lp-gold); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="platinum"] .public-suggestion-tier { color: var(--tier-lp-platinum); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="emerald"] .public-suggestion-tier { color: var(--tier-lp-emerald); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="diamond"] .public-suggestion-tier { color: var(--tier-lp-diamond); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="master"] .public-suggestion-tier { color: var(--tier-lp-master); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="grandmaster"] .public-suggestion-tier { color: var(--tier-lp-grandmaster); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="challenger"] .public-suggestion-tier { color: var(--tier-lp-challenger); }
 
   /* 우측 티어명 — 목업은 티어색 텍스트, LP 는 회. Unranked 는 무채. */
   .public-profile-platform-v2 .public-suggestion-panel button[data-tier="iron"] .public-suggestion-rank-copy > span { color: var(--tier-lp-iron); }

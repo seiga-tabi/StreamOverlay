@@ -26,6 +26,12 @@
   /* accentColor(--pn-k) 는 은퇴했습니다 — Riot 썸네일 임의 색(보강 §1).
      플레이 표식·hover 는 아래에서 고정 잉크 색을 씁니다. */
 
+  /* 페이지 머리 아래 22px(목업) — 소환사 모듈·검색바 어느 쪽이 오든 같은 간격.
+     인접 형제의 margin-top(검색바 16px)과는 collapse 로 22 가 이깁니다(사용성 §2-3). */
+  .yoro-pn-head {
+    margin-block-end: 22px;
+  }
+
   .yoro-pn-loading {
     min-width: 0;
     display: grid;
@@ -65,7 +71,7 @@
   .yoro-pn-hero {
     position: relative;
     min-width: 0;
-    border-radius: var(--yoro-radius-xl, 24px);
+    /* radius·테두리·표면은 42-ink-patch-notes.css 카드 문법(r3)이 소유합니다. */
     display: grid;
     isolation: isolate;
     background: var(--public-gray-surface);
@@ -110,7 +116,7 @@
 
   .yoro-pn-hero-eyebrow em {
     padding: 2px 8px;
-    border-radius: var(--yoro-radius-pill, 999px);
+    border-radius: 99px;
     background: color-mix(in srgb, var(--public-gray-text) 10%, transparent);
     font-size: 11px;
     font-style: normal;
@@ -219,8 +225,9 @@
     display: flex;
     height: 10px;
     max-inline-size: 100%;
-    border-radius: var(--yoro-radius-pill, 999px);
-    background: rgb(20 23 31 / 12%);
+    border-radius: 99px;
+    /* 잉크 워시 — 흰 카드 시절의 고정 먹색(은퇴한 --pn-ink)을 테마 추종 잉크로(2차 §2-2). */
+    background: color-mix(in srgb, var(--public-gray-text) 12%, transparent);
     overflow: hidden;
   }
 
@@ -263,9 +270,7 @@
     gap: 10px 16px;
     margin-block-end: 10px;
     padding: 10px 16px;
-    border: 1px solid var(--yoro-color-border, rgb(148 163 196 / 16%));
-    border-radius: 12px;
-    background: var(--public-gray-surface);
+    /* 테두리·radius·표면은 42 카드 문법(r3·.5px 헤어라인)이 소유합니다. */
   }
 
   .yoro-pn-trend-copy { margin: 0; }
@@ -284,7 +289,7 @@
     inline-size: 10px;
     min-block-size: 3px;
     border-radius: 3px;
-    background: rgb(20 23 31 / 22%);
+    background: color-mix(in srgb, var(--public-gray-text) 22%, transparent);
   }
 
   .yoro-pn-trend-bars > i[data-tone="good"] { background: var(--graph-win-ink); }
@@ -295,7 +300,7 @@
     position: absolute;
     inset: -2px auto -2px 50%;
     width: 2px;
-    background: rgb(20 23 31 / 38%);
+    background: color-mix(in srgb, var(--public-gray-text) 38%, transparent);
   }
 
   .yoro-pn-gauge.is-hero .yoro-pn-gauge-mid {
@@ -344,7 +349,7 @@
     min-width: 0;
     min-height: 13rem;
     padding: var(--yoro-space-4, 16px);
-    border-radius: var(--yoro-radius-lg, 16px);
+    /* radius 는 42 카드 문법(r3)이 소유합니다. */
     display: grid;
     gap: var(--yoro-space-1, 4px);
     align-content: end;
@@ -402,7 +407,7 @@
     display: inline-flex;
     align-items: center;
     padding: 2px 8px 4px;
-    border-radius: var(--yoro-radius-pill, 999px);
+    border-radius: 99px;
     background: rgb(15 107 60 / 88%);
     color: var(--graph-win-ink);
     text-shadow: none;
@@ -454,9 +459,7 @@
     min-width: 0;
     margin-top: var(--yoro-space-2, 8px);
     padding: var(--yoro-space-4, 16px);
-    border: 1px solid var(--yoro-color-border, rgb(33 37 41 / 14%));
-    border-radius: var(--yoro-radius-lg, 16px);
-    background: var(--public-gray-surface);
+    /* 테두리·radius·표면은 42 카드 문법(r3·.5px 헤어라인)이 소유합니다. */
   }
 
   .yoro-pn-archive-title {
@@ -475,13 +478,7 @@
   }
 
   /* 세로 축이 2주 주기를 눈에 보이게 만듭니다. */
-  .yoro-pn-list::before {
-    position: absolute;
-    inset: 12px auto 12px 17px;
-    width: 2px;
-    background: rgb(20 23 31 / 16%);
-    content: "";
-  }
+  /* 시간 축 장식(.yoro-pn-list::before) — 사용성 §2-1 에서 은퇴(요소가 DOM 에서 사라짐). */
 
   .yoro-pn-group {
     min-width: 0;
@@ -514,7 +511,7 @@
     min-width: 0;
     padding: 12px 14px 12px 36px;
     border: 1px solid transparent;
-    border-radius: var(--yoro-radius-md, 12px);
+    border-radius: 2px;
     display: grid;
     grid-template-columns: 52px 4.2rem minmax(0, 1fr) 8.5rem 9rem;
     gap: var(--yoro-space-3, 12px);
@@ -524,39 +521,13 @@
 
   /* hover 는 패치별 임의 색 대신 잉크 워시 한 겹(보강 §1). */
   .yoro-pn-row:hover {
-    border-color: rgb(20 23 31 / 30%);
-    background: rgb(20 23 31 / 4%);
+    border-color: color-mix(in srgb, var(--public-gray-text) 30%, transparent);
+    background: color-mix(in srgb, var(--public-gray-text) 4%, transparent);
   }
 
-  /* 축 위의 점. 채워져 있으면 내가 플레이한 패치입니다. */
-  .yoro-pn-node {
-    position: absolute;
-    top: 50%;
-    left: 14px;
-    width: 8px;
-    height: 8px;
-    margin-top: -4px;
-    border: 1.5px solid rgb(20 23 31 / 34%);
-    border-radius: var(--yoro-radius-circle, 50%);
-    background: var(--public-gray-surface);
-  }
+  /* 축 점(.yoro-pn-node) — 사용성 §2-1 에서 은퇴. */
 
-  .yoro-pn-row.is-played .yoro-pn-node {
-    left: 11px;
-    width: 14px;
-    height: 14px;
-    margin-top: -7px;
-    border: 0;
-    background: rgb(20 23 31 / 78%);
-    box-shadow: 0 0 0 4px rgb(20 23 31 / 14%);
-  }
-
-  .yoro-pn-row-art {
-    width: 52px;
-    height: 30px;
-    border-radius: var(--yoro-radius-xs, 6px);
-    object-fit: cover;
-  }
+  /* 행 썸네일(.yoro-pn-row-art) — 사용성 §2-1 에서 은퇴. */
 
   .yoro-pn-row-num {
     margin: 0;
@@ -568,34 +539,7 @@
     line-height: 1;
   }
 
-  .yoro-pn-row-body {
-    min-width: 0;
-    display: grid;
-    gap: 1px;
-  }
-
-  /* 원문 제목은 열 줄 내내 같은 글자입니다. 구분되는 요약을 앞에 둡니다. */
-  .yoro-pn-row-title {
-    min-width: 0;
-    margin: 0;
-    color: var(--public-gray-text);
-    font-size: var(--yoro-font-size-sm, 14px);
-    font-weight: 700;
-    line-height: 1.4;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .yoro-pn-row-source {
-    min-width: 0;
-    margin: 0;
-    color: var(--public-gray-muted);
-    font-size: var(--yoro-font-size-xs, 12px);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+  /* 행 제목 묶음(.yoro-pn-row-body/-title/-source) — 사이드바에서 은퇴(§2-1-7). */
 
   .yoro-pn-row-when {
     margin: 0;
@@ -612,17 +556,7 @@
     font-weight: 800;
   }
 
-  .yoro-pn-row-when em {
-    font-size: 11px;
-    font-style: normal;
-    opacity: .82;
-  }
-
-  .yoro-pn-row-norate {
-    margin: 0;
-    color: var(--public-gray-muted);
-    font-size: 11px;
-  }
+  /* 버전 병기(em)·「플레이 없음」(.yoro-pn-row-norate) — 은퇴(§2-1-4). */
 
   /* ── 컨트롤 바: 검색 · 빠른 필터 · 소환사를 한 줄에 ──
    *
@@ -634,14 +568,12 @@
     min-width: 0;
     max-width: 100%;
     margin-top: var(--yoro-space-4, 16px);
-    padding: 8px;
-    border: 1px solid var(--yoro-color-border, rgb(33 37 41 / 14%));
-    border-radius: var(--yoro-radius-lg, 16px);
     display: flex;
     flex-wrap: wrap;
     gap: var(--yoro-space-2, 8px);
     align-items: center;
-    background: var(--public-gray-surface);
+    /* 카드 표면(패딩·테두리·radius·배경)은 벗겼습니다 — 42 가 r0·무표면을
+       소유합니다(2차 §2-2: 검색칸·칩은 지면 위 요소들). */
   }
 
   .yoro-pn-bar-search {
@@ -649,12 +581,10 @@
     min-width: 0;
     min-height: 44px;
     padding: 0 10px 0 12px;
-    border: 1px solid var(--yoro-color-border, rgb(33 37 41 / 14%));
-    border-radius: var(--yoro-radius-md, 12px);
     display: flex;
     gap: var(--yoro-space-2, 8px);
     align-items: center;
-    background: rgb(20 23 31 / 4%);
+    /* 테두리·radius·배경은 42 칩 문법(r2·.5px·무배경)이 소유합니다. */
   }
 
   .yoro-pn-bar-search:focus-within {
@@ -689,8 +619,8 @@
   .yoro-pn-bar-count {
     flex: none;
     padding: 2px 8px;
-    border-radius: var(--yoro-radius-pill, 999px);
-    background: rgb(20 23 31 / 10%);
+    border-radius: 99px;
+    background: color-mix(in srgb, var(--public-gray-text) 10%, transparent);
     color: var(--public-gray-muted);
     font-size: var(--yoro-font-size-xs, 12px);
     font-variant-numeric: tabular-nums;
@@ -712,17 +642,17 @@
   }
 
   /* 좁은 화면에서 칩이 잘릴 때 오른쪽이 흐려져 "더 있다"가 읽힙니다. */
-  @supports (mask-image: linear-gradient(90deg, #000, transparent)) {
+  @supports (mask-image: linear-gradient(90deg, black, transparent)) {
     .yoro-pn-bar-chips {
-      mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 18px), transparent 100%);
+      /* 마스크는 알파만 쓰므로 색은 무엇이든 같습니다 — hex 잔재만 키워드로. */
+      mask-image: linear-gradient(90deg, black 0, black calc(100% - 18px), transparent 100%);
     }
   }
 
   .yoro-pn-chip {
     min-height: 44px;
     padding: 0 12px;
-    border: 1px solid var(--yoro-color-border, rgb(33 37 41 / 14%));
-    border-radius: var(--yoro-radius-pill, 999px);
+    /* 테두리·radius 는 42 칩 문법(r2·.5px)이 소유합니다. */
     display: inline-flex;
     gap: 6px;
     align-items: center;
@@ -753,7 +683,7 @@
   .yoro-pn-chip i {
     width: 7px;
     height: 7px;
-    border-radius: var(--yoro-radius-circle, 50%);
+    border-radius: 50%;
     background: var(--public-gray-border-strong);
   }
 
@@ -772,12 +702,12 @@
 
   /* 아바타·Riot ID·표본을 한 덩어리로 묶습니다.
      이 버튼은 다크 표면(.yoro-pn-mine-module) 위에만 놓입니다. 라이트 카드용
-     --pn-ink(#14171f)를 쓰던 동안 실측 1.14:1 로 글자가 배경에 묻혔습니다. */
+     은퇴한 라이트 잉크(--pn-ink)를 쓰던 동안 실측 1.14:1 로 글자가 배경에 묻혔습니다. */
   .yoro-pn-who {
     min-height: 44px;
     padding: 4px 12px 4px 5px;
     border: 1px solid rgb(148 163 196 / 28%);
-    border-radius: var(--yoro-radius-pill, 999px);
+    border-radius: 99px;
     display: inline-flex;
     gap: 8px;
     align-items: center;
@@ -794,7 +724,7 @@
   .yoro-pn-who img {
     width: 30px;
     height: 30px;
-    border-radius: var(--yoro-radius-circle, 50%);
+    border-radius: 50%;
     object-fit: cover;
   }
 
@@ -810,7 +740,7 @@
     line-height: 1.25;
   }
 
-  /* 트리거 안의 보조 문구도 다크 표면 기준입니다(#5b6472 일 때 실측 2.64:1).
+  /* 트리거 안의 보조 문구도 다크 표면 기준입니다(옛 라이트 회청색일 때 실측 2.64:1).
      --pn-mine-muted 는 모듈이 정의하고 여기로 상속됩니다. */
   .yoro-pn-who small {
     color: var(--public-gray-muted);
@@ -831,8 +761,8 @@
     z-index: 20;
     min-width: 15rem;
     padding: 5px;
-    border: 1px solid var(--yoro-color-border, rgb(33 37 41 / 14%));
-    border-radius: var(--yoro-radius-md, 12px);
+    border: 1px solid var(--public-gray-border);
+    border-radius: 3px;
     display: grid;
     gap: 2px;
     background: var(--public-gray-surface);
@@ -843,7 +773,7 @@
     min-height: 44px;
     padding: 5px 8px;
     border: 0;
-    border-radius: var(--yoro-radius-sm, 8px);
+    border-radius: 2px;
     display: flex;
     gap: 8px;
     align-items: center;
@@ -862,7 +792,7 @@
   .yoro-pn-who-menu img {
     width: 26px;
     height: 26px;
-    border-radius: var(--yoro-radius-circle, 50%);
+    border-radius: 50%;
   }
 
   .yoro-pn-who-menu b {
@@ -881,7 +811,7 @@
     min-height: 44px;
     margin-top: 2px;
     padding: 5px 8px;
-    border-top: 1px solid var(--yoro-color-border, rgb(33 37 41 / 14%));
+    border-top: 1px solid var(--public-gray-border);
     display: flex;
     align-items: center;
     color: var(--public-gray-text);
@@ -895,7 +825,7 @@
     margin-left: auto;
     padding: 0 16px;
     border: 1px solid rgb(59 75 216 / 34%);
-    border-radius: var(--yoro-radius-pill, 999px);
+    border-radius: 99px;
     display: inline-flex;
     align-items: center;
     color: var(--public-gray-text);
@@ -917,7 +847,7 @@
     margin-left: auto;
     padding: 0 14px;
     border: 1px solid rgb(148 163 196 / 28%);
-    border-radius: var(--yoro-radius-pill, 999px);
+    border-radius: 99px;
     display: inline-flex;
     gap: 8px;
     align-items: center;
@@ -961,7 +891,7 @@
     margin: var(--yoro-space-4, 16px) 0 0;
     padding: 10px 14px;
     border: 1px solid rgb(138 82 0 / 34%);
-    border-radius: var(--yoro-radius-md, 12px);
+    border-radius: 3px;
     background: rgb(255 249 235 / 94%);
     color: var(--public-gray-muted);
     font-size: var(--yoro-font-size-sm, 14px);
@@ -973,8 +903,8 @@
     min-width: 0;
     margin: var(--yoro-space-6, 24px) 0 0;
     padding: 12px 14px;
-    border: 1px solid var(--yoro-color-border, rgb(33 37 41 / 14%));
-    border-radius: var(--yoro-radius-md, 12px);
+    border: 1px solid var(--public-gray-border);
+    border-radius: 3px;
     background: var(--public-gray-surface);
     color: var(--public-gray-text);
     font-size: var(--yoro-font-size-xs, 12px);
@@ -1013,64 +943,10 @@
       min-width: 13rem;
     }
 
-    .yoro-pn-list::before {
-      display: none;
-    }
+    /* 축 장식·노드·썸네일·제목 묶음·「플레이 없음」의 모바일 보정은 은퇴 —
+       해당 요소들이 DOM 에서 사라졌습니다(사용성 §2-1). 행 규격은 42 소유. */
 
-    .yoro-pn-season {
-      padding-left: 0;
-    }
-
-    .yoro-pn-row {
-      padding: 12px 14px 12px 16px;
-      grid-template-columns: 3.6rem minmax(0, 1fr);
-      gap: var(--yoro-space-2, 8px);
-      align-items: start;
-    }
-
-    .yoro-pn-node {
-      inset: 12px auto 12px 0;
-      width: 4px;
-      height: auto;
-      margin-top: 0;
-      border: 0;
-      border-radius: var(--yoro-radius-pill, 999px);
-      background: rgb(20 23 31 / 78%);
-      opacity: .4;
-    }
-
-    .yoro-pn-row.is-played .yoro-pn-node {
-      inset: 12px auto 12px 0;
-      width: 4px;
-      height: auto;
-      margin-top: 0;
-      box-shadow: none;
-      opacity: 1;
-    }
-
-    .yoro-pn-row-art,
-    .yoro-pn-row-source,
-    .yoro-pn-row-norate {
-      display: none;
-    }
-
-    .yoro-pn-row-title {
-      white-space: normal;
-    }
-
-    .yoro-pn-row-when {
-      grid-column: 2;
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--yoro-space-2, 8px);
-    }
-
-    .yoro-pn-row .yoro-pn-gauge {
-      grid-column: 1 / -1;
-      grid-template-columns: minmax(0, 1fr) auto auto;
-      gap: var(--yoro-space-2, 8px);
-      align-items: center;
-    }
+    /* 행 안 게이지는 은퇴 — 행 우측은 %p 텍스트 하나(사용성 §2-1-5). */
 
     .yoro-pn-tile {
       min-height: 11rem;
@@ -1108,16 +984,8 @@
   gap: 10px 14px;
   margin-block-end: 10px;
   padding: 12px 16px;
-  border: 1px solid rgba(123, 92, 255, .22);
-  border-radius: 12px;
-
-  /* 이전에는 gradient 한 겹만 깔았습니다. 시작 색이 rgba(...,.09) 라 모듈 왼쪽
-     40% 는 사실상 투명이었고, 뒤에 깔린 밝은 페이지 표면이 그대로 비쳤습니다.
-     실측하면 같은 모듈 안에서 밝기가 L=0.26(좌) → L=0.017(우) 로 약 15배
-     달라져, 어떤 단일 글자색도 양끝에서 동시에 AA 를 넘길 수 없었습니다.
-     불투명 베이스를 깔고 accent 는 그 위 tint 로만 얹습니다. */
-  background-color: var(--public-gray-surface-strong);
-  background-image: linear-gradient(90deg, rgba(123, 92, 255, .14), transparent 55%);
+  /* 테두리·radius·표면은 42 카드 문법(r3·.5px·surface)이 소유합니다 — 보라
+     테두리·gradient 는 42 의 background 축약이 이미 무효화하던 사문이라 지웁니다. */
 }
 
 .yoro-pn-mine-copy,
@@ -1159,17 +1027,14 @@
 .yoro-pn-mine-form { display: flex; gap: 8px; align-items: center; }
 .yoro-pn-mine-form select,
 .yoro-pn-mine-form input {
-  min-height: 40px;
   padding: 0 12px;
-  border: 1px solid rgba(148, 163, 196, .25);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--public-gray-text) 5%, transparent);
   color: var(--public-gray-text);
   font-size: 13px;
+  /* 높이(44px)·테두리·radius·배경은 42(r2·.5px 헤어라인·무배경)가 소유합니다. */
 }
 .yoro-pn-mine-form input { width: 176px; }
 
-/* 지정한 적이 없어 브라우저 기본값(#757575)이 그대로 쓰였습니다 — 다크 입력창
+/* 지정한 적이 없어 브라우저 기본 중간 회색이 그대로 쓰였습니다 — 다크 입력창
    위에서 실측 2.89:1 이라 "다른 소환사 검색" 안내가 거의 읽히지 않았습니다.
    opacity:1 은 Firefox 가 placeholder 를 반투명하게 낮추는 것을 막습니다. */
 .yoro-pn-mine-form input::placeholder {
@@ -1179,7 +1044,7 @@
   opacity: 1;
 }
 
-/* #e15b6d 는 모듈 밝은 쪽에서 실측 4.10:1 로 AA 에 살짝 못 미쳤습니다. */
+/* 옛 홍옥 고정값은 모듈 밝은 쪽에서 실측 4.10:1 로 AA 에 살짝 못 미쳤습니다. */
 .yoro-pn-mine-error { margin: 0; color: var(--graph-loss-ink); font-size: 12.5px; }
 
 .yoro-pn-mine-recent { margin: 0; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; color: var(--pn-mine-muted); font-size: 12px; }
@@ -1232,9 +1097,7 @@
    아니라 우리가 계산한 기본 스탯·아이템 비교 결과이며, 푸터가 그 범위와
    원문 링크를 항상 답니다. ══ */
 .yoro-pn-summary {
-  border: 1px solid rgb(20 23 31 / 10%);
-  border-radius: var(--yoro-radius-lg, 16px);
-  background: var(--public-gray-surface);
+  /* 테두리·radius·표면은 42 카드 문법(r3·.5px 헤어라인)이 소유합니다. */
   overflow: hidden;
 }
 
@@ -1243,7 +1106,7 @@
   align-items: center;
   gap: 10px;
   padding: 14px 16px;
-  border-bottom: 1px solid rgb(20 23 31 / 8%);
+  border-bottom: .5px solid var(--public-gray-border);
 }
 
 .yoro-pn-summary-head h3 {
@@ -1256,7 +1119,7 @@
 
 .yoro-pn-summary-ver {
   padding: 2px 8px;
-  border-radius: var(--yoro-radius-pill, 999px);
+  border-radius: 99px;
   background: color-mix(in srgb, var(--public-gray-text) 8%, transparent);
   color: var(--public-gray-text);
   font-size: 12px;
@@ -1286,9 +1149,7 @@
 .yoro-pn-summary-quote b { color: var(--public-gray-text); font-weight: 800; }
 
 .yoro-pn-summary-group {
-  border: 1px solid rgb(20 23 31 / 8%);
-  border-radius: var(--yoro-radius-md, 12px);
-  background: rgb(20 23 31 / 2%);
+  /* 카드 아님 — 테두리·radius·배경은 42(r0·위 헤어라인·무배경)가 소유합니다. */
   padding: 10px 12px;
 }
 
@@ -1353,7 +1214,7 @@
   font-size: 13px;
 }
 
-.yoro-pn-summary-chg + .yoro-pn-summary-chg { border-top: 1px solid rgb(20 23 31 / 6%); }
+.yoro-pn-summary-chg + .yoro-pn-summary-chg { border-top: .5px solid var(--public-gray-border); }
 
 .yoro-pn-summary-chg :is(img, i) {
   display: grid;
@@ -1361,8 +1222,7 @@
   flex: none;
   inline-size: 28px;
   block-size: 28px;
-  border-radius: var(--yoro-radius-sm, 8px);
-  background: rgb(20 23 31 / 8%);
+  /* radius·배경은 42(r2·지면색 홀더)가 소유합니다. */
   color: var(--public-gray-muted);
   font-style: normal;
   font-weight: 800;
@@ -1374,7 +1234,7 @@
 .yoro-pn-summary-tag {
   flex: none;
   padding: 1px 7px;
-  border-radius: var(--yoro-radius-sm, 6px);
+  /* radius 는 42(r2 — 「가격」 등 방향 없는 변형 포함)가 소유합니다. */
   font-size: 11.5px;
   font-weight: 850;
 }
@@ -1390,7 +1250,7 @@
 }
 
 .yoro-pn-summary-tag[data-direction="adjust"] {
-  background: rgb(20 23 31 / 8%);
+  /* 배경 틴트는 42 판정 태그 규칙(무배경·헤어라인)이 소유합니다. */
   color: var(--public-gray-muted);
 }
 
@@ -1430,8 +1290,8 @@
   display: flex;
   margin-top: 8px;
   block-size: 10px;
-  border-radius: var(--yoro-radius-pill, 999px);
-  background: rgb(20 23 31 / 12%);
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--public-gray-text) 12%, transparent);
   overflow: hidden;
 }
 
@@ -1448,8 +1308,8 @@
   align-items: center;
   gap: 7px;
   padding: 6px 8px;
-  border: 1px solid rgb(20 23 31 / 10%);
-  border-radius: var(--yoro-radius-md, 10px);
+  border: .5px solid var(--public-gray-border);
+  border-radius: 2px;
   background: color-mix(in srgb, var(--public-gray-text) 10%, transparent);
 }
 
@@ -1464,8 +1324,7 @@
   flex: none;
   inline-size: 34px;
   block-size: 34px;
-  border-radius: var(--yoro-radius-sm, 8px);
-  background: rgb(20 23 31 / 8%);
+  /* radius·배경은 42(r2·지면색 홀더)가 소유합니다. */
   font-style: normal;
   font-weight: 800;
 }
@@ -1532,6 +1391,8 @@
   .yoro-pn-mine-form { grid-column: 1 / -1; justify-self: stretch; }
   .yoro-pn-mine-form input { flex: 1; width: auto; min-width: 0; }
   .yoro-pn-mine-dismiss { min-height: 44px; }
+  /* 전적 상세도 모바일 터치 타깃 44px(사용성 §2-4·§3). */
+  .yoro-pn-mine-profile { min-height: 44px; }
   .yoro-pn-trend-bars { margin-inline-start: 0; }
 
 }

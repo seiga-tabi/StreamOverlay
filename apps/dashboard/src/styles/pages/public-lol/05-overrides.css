@@ -5,7 +5,9 @@
    YORO Bot 셸도 제외합니다: 16-yoro-bot.css 가 자기 지면(#11141b)을 선언하는데
    이 규칙의 특이성이 더 높아 회색이 이겨 본문 대비가 1.63~2.30:1 로 떨어졌습니다. */
 .public-dashboard-shell:not(.public-home-shell):not(.palworld-shell):not(.valorant-shell):not(.minecraft-shell):not(.public-bot-shell):not(.streamers-shell):not(.public-profile-platform-v2),
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell):not(.palworld-shell):not(.valorant-shell):not(.minecraft-shell):not(.public-bot-shell):not(.streamers-shell),
+/* 두 번째 갈래도 platform-v2 를 제외합니다 — 1·3번째만 제외해, 수묵 셸(platform-v2)을
+   공유하는 패치 노트가 이 회색 그라데이션을 되받는 구멍이 있었습니다. */
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell):not(.palworld-shell):not(.valorant-shell):not(.minecraft-shell):not(.public-bot-shell):not(.streamers-shell):not(.public-profile-platform-v2),
 .public-dashboard-shell.public-profile-shared-shell:not(.public-profile-platform-v2) {
   background:
     radial-gradient(circle at 50% 0%, rgba(248, 249, 250, .18), transparent 30%),
@@ -793,137 +795,11 @@
 /* 검색 제안 패널 소환사 / 최근 검색 / 즐겨찾기 탭
    .public-profile-tabs(전적·챔피언 분석 등 프로필 탭)와 같은 "밑줄形" 활성 표시를 사용해
    사이트 전체의 탭 시각 언어와 맞춥니다. 채워진 pill 배경 대신 #7a5cff 밑줄만 사용합니다. */
-.public-suggestion-tabs {
-  display: flex;
-  align-items: center;
-  gap: var(--yoro-space-1);
-  padding: 4px 4px 0;
-  border-bottom: 1px solid rgba(222, 226, 230, .14);
-  background: rgba(33, 37, 41, .34);
-  overflow-x: auto;
-}
-
-.public-suggestion-tabs button {
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 34px;
-  padding: 0 var(--yoro-space-2) var(--yoro-space-1);
-  border: 0;
-  border-bottom: 2px solid transparent;
-  border-radius: 0;
-  background: transparent;
-  color: rgba(248, 249, 250, .68);
-  font-size: 12px;
-  font-weight: 800;
-  white-space: nowrap;
-}
-
-.public-suggestion-tabs button:hover,
-.public-suggestion-tabs button:focus-visible {
-  color: #f8f9fa;
-}
-
-.public-suggestion-tabs button.active {
-  border-bottom-color: #7a5cff;
-  color: #ffffff;
-}
-
-.public-suggestion-tabs button em {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 6px;
-  border-radius: 999px;
-  background: rgba(248, 249, 250, .12);
-  color: inherit;
-  font-size: 10px;
-  font-style: normal;
-  font-weight: 900;
-}
-
-/* 탭 3개인데 폰에서 가로 스크롤이 걸렸습니다. 한국어는 320px 에서만이지만
-   일본어는 라벨이 길어(サモナー·最近の検索·お気に入り) 390px 부터 넘쳤습니다
-   — 실측 초과폭 ja 390:19 / 375:34 / 360:49 / 320:89, ko 320:36.
-   동작 자체는 정상(overflow-x:auto, 스와이프로 도달 가능)이었지만 마지막 탭
-   배지가 절반만 보여 고장처럼 읽혔습니다.
-   가로 여백만 회수합니다 — min-height·아래 padding·border 는 그대로 두어
-   탭 높이(실측 44px)를 건드리지 않습니다. */
-@media (max-width: 30rem) {
-  .public-suggestion-tabs {
-    gap: 2px;
-    padding-inline: 2px;
-  }
-
-  .public-suggestion-tabs button {
-    gap: 4px;
-    padding-inline: 6px;
-  }
-
-  .public-suggestion-tabs button em {
-    min-width: 16px;
-    padding: 0 4px;
-  }
-}
-
-/* 360px 은 일본어가 아직 14px 넘쳤습니다. 글자 크기는 12px 그대로 두고
-   (읽기 쉬움 우선) 남은 여백만 더 회수합니다 — 실측 18px 확보. */
-@media (max-width: 22.5rem) {
-  .public-suggestion-tabs button {
-    padding-inline: 4px;
-  }
-
-  .public-suggestion-tabs button em {
-    min-width: 14px;
-    padding: 0 3px;
-  }
-}
-
-.public-suggestion-empty {
-  display: grid;
-  min-height: 76px;
-  place-items: center;
-  padding: 18px;
-  color: rgba(248, 249, 250, .64);
-  font-size: 13px;
-  font-weight: 700;
-  text-align: center;
-}
-
+/* 연관 검색 패널의 탭·빈 상태·즐겨찾기 표식 표면은 38-ink-profile.css 가 단독
+   소유합니다 — 옛 다크 탭 줄·보라 활성 바·금색 ★ 스킨과 좁은 폭 보정은
+   은퇴했습니다(연관 패널 프롬프트 §2-6). 구조만 남깁니다. */
 .public-suggestion-list button {
   position: relative;
-}
-
-.public-suggestion-favorite-mark {
-  display: inline-grid;
-  width: 24px;
-  height: 24px;
-  place-items: center;
-  border-radius: 999px;
-  color: #ffd43b;
-  font-size: 14px;
-  line-height: 1;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-list button {
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-favorite-mark {
-  grid-area: mark;
-  justify-self: end;
-}
-
-.public-home-shared-shell .public-home-shared-search .public-suggestion-tabs,
-.public-home-shared-shell .public-home-shared-search .public-suggestion-title,
-.public-home-shared-shell .public-home-shared-search .public-suggestion-empty,
-.public-dashboard-shell .public-suggestion-tabs,
-.public-dashboard-shell .public-suggestion-title,
-.public-dashboard-shell .public-suggestion-empty {
-  border-color: rgba(222, 226, 230, .14) !important;
 }
 
 /* 전적 프로필 상단 그레이 톤 및 갱신 버튼 가독성 보정 */
@@ -2764,18 +2640,9 @@
   -webkit-text-fill-color: #ffffff !important;
 }
 
-.public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-panel {
-  width: 100% !important;
-  min-width: min(100vw - 32px, 560px) !important;
-  max-width: min(100vw - 32px, 720px) !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-list button {
-  grid-template-columns: 46px 60px minmax(220px, 1fr) minmax(112px, max-content) 24px !important;
-  grid-template-areas: "avatar tier name rank mark" !important;
-  gap: 12px !important;
-}
-
+/* 상단바 슬롯 패널의 지오메트리는 02-lol-home.css(400px·우변 정렬), 행 규격은
+   38-ink-profile.css(52px 행·30px 아바타)가 소유합니다 — 560px 강제 폭과
+   75px 행 격자(!important)는 은퇴했습니다(연관 패널 프롬프트 §2-6). */
 .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-name {
   min-width: 0 !important;
 }
@@ -2786,53 +2653,14 @@
   max-width: 100% !important;
 }
 
-.public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-rank-copy {
-  min-width: 112px !important;
-}
-
 @media (max-width: 760px) {
-  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-panel {
-    display: flex !important;
-    flex-direction: column;
-    min-width: min(100vw - 24px, 100%) !important;
-    max-width: min(100vw - 24px, 100%) !important;
-    overflow: hidden !important;
-    overscroll-behavior: contain;
-  }
-
-  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-list {
-    flex: 1 1 auto;
-    min-height: var(--yoro-space-0) !important;
-    max-height: calc(var(--yoro-size-touch-target) + var(--yoro-space-8) + var(--yoro-size-touch-target) + var(--yoro-space-8) + var(--yoro-space-4)) !important;
-    overflow-y: auto !important;
-    overscroll-behavior-y: contain;
-    scrollbar-gutter: stable;
-    touch-action: pan-y;
-    -webkit-overflow-scrolling: touch;
-  }
-
+  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-list,
   .public-home-shared-shell .public-home-shared-search .public-suggestion-list {
-    max-height: calc(var(--yoro-size-touch-target) + var(--yoro-space-8) + var(--yoro-size-touch-target) + var(--yoro-space-8) + var(--yoro-space-4)) !important;
     overflow-y: auto !important;
     overscroll-behavior-y: contain;
     scrollbar-gutter: stable;
     touch-action: pan-y;
     -webkit-overflow-scrolling: touch;
-  }
-
-  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-list button {
-    grid-template-columns:
-      var(--yoro-space-10)
-      var(--yoro-space-8)
-      minmax(var(--yoro-space-12), 1fr)
-      minmax(calc(var(--yoro-space-12) + var(--yoro-space-6)), max-content)
-      var(--yoro-space-6) !important;
-    grid-template-areas: "avatar tier name rank mark" !important;
-    gap: var(--yoro-space-2) !important;
-  }
-
-  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-rank-copy {
-    min-width: calc(var(--yoro-space-12) + var(--yoro-space-6)) !important;
   }
 }
 

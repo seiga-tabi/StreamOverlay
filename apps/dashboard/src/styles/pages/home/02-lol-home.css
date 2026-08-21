@@ -303,7 +303,9 @@
 
   .yoro-home-header-search .public-search-icon-button:hover { color: var(--home-ink); }
 
-  /* 서버 메뉴·연관 패널 — 크롬(먹) 문법으로. 헤더 아래로 뜹니다. */
+  /* 서버 메뉴·연관 패널 — 크롬(먹) 문법으로. 헤더 아래로 뜹니다.
+     연관 패널 폭은 목업 LolHeaderSearch 의 400(좁은 폭은 화면-32) · 우변 정렬.
+     표면 상세(탭·행·칩)는 38-ink-profile.css 가 소유합니다. */
   .yoro-home-header-search .public-server-menu,
   .yoro-home-header-search .public-suggestion-panel {
     position: absolute;
@@ -311,7 +313,7 @@
     right: 0;
     left: auto;
     z-index: 60;
-    width: 340px;
+    width: min(400px, calc(100vw - 32px));
     border: .5px solid var(--home-line);
     border-radius: 3px;
     background: var(--home-card);
@@ -319,6 +321,9 @@
   }
 
   .yoro-home-header-search .public-server-menu { width: 240px; max-height: 420px; overflow-y: auto; }
+
+  /* 연관 패널은 목업 LolHeaderSearch 가 그림자 없음 — 서버 메뉴만 그림자 유지. */
+  .yoro-home-header-search .public-suggestion-panel { box-shadow: none; }
 
   /* ── 태블릿(48~64rem, 목업 search-note): 평소엔 돋보기 아이콘만, 탭하면
      확장됩니다. 접힌 상태에서 투명한 입력창이 44px 아이콘 칸 전체를 덮어

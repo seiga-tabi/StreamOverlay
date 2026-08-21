@@ -3006,9 +3006,7 @@ code {
   padding: 0;
 }
 
-.public-suggestion-title {
-  border-bottom: 1px solid rgba(255, 255, 255, .08);
-}
+/* 제목 표면(글자·헤어라인)은 38-ink-profile.css 소유. */
 
 .public-suggestion-list {
   display: grid;
@@ -3031,10 +3029,7 @@ code {
   display: grid;
   place-items: center;
   overflow: hidden;
-  background: linear-gradient(135deg, #334155, #5b55ff);
-  color: #fff;
-  font-size: 18px;
-  font-weight: 950;
+  /* 표면(배경·글자)은 38-ink-profile.css 소유. */
 }
 
 .public-suggestion-avatar img {
@@ -3043,40 +3038,8 @@ code {
   object-fit: cover;
 }
 
-.public-suggestion-rank {
-  display: inline-grid;
-  place-items: center;
-  background: #6aaefb;
-  color: #0b2547;
-  font-weight: 950;
-  line-height: 1;
-}
-
-.public-suggestion-rank.iron,
-.public-suggestion-rank.bronze,
-.public-suggestion-rank.silver,
-.public-suggestion-rank.unranked,
-.public-suggestion-rank.platform {
-  background: #92a0b8;
-  color: #111827;
-}
-
-.public-suggestion-rank.gold,
-.public-suggestion-rank.platinum {
-  background: #f5c35d;
-  color: #2a1c05;
-}
-
-.public-suggestion-rank.emerald {
-}
-
-.public-suggestion-rank.diamond,
-.public-suggestion-rank.master,
-.public-suggestion-rank.grandmaster,
-.public-suggestion-rank.challenger {
-  background: #72b7ff;
-  color: #08294f;
-}
+/* 티어 뱃지 채움 스킨은 은퇴했습니다 — 티어 자리는 크레스트 SVG(SearchForm)와
+   38-ink-profile.css 의 data-tier 색 훅이 담당합니다. */
 
 .public-suggestion-name {
   display: flex;
@@ -6567,11 +6530,7 @@ code {
     height: 40px;
   }
 
-  .public-suggestion-rank {
-    min-width: 36px;
-    min-height: 23px;
-    font-size: 14px;
-  }
+  /* .public-suggestion-rank 뱃지는 은퇴 — 티어 자리는 크레스트 SVG(38-ink). */
 
   .public-suggestion-name {
     gap: 5px;
@@ -6834,130 +6793,22 @@ code {
   border-color: #5f73dc;
 }
 
+/* 연관 패널 지오메트리만 여기서 — 표면(색·radius·그림자·행 규격)은
+   38-ink-profile.css 가 단독 소유합니다(연관 패널 프롬프트 §2-6). */
 .public-suggestion-panel {
   top: calc(100% + 12px);
   right: 0;
   left: 0;
   min-height: 0;
   max-height: min(390px, calc(100vh - 190px));
-  border: 1px solid rgba(210, 220, 238, .96);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, .98);
-  box-shadow: 0 22px 50px rgba(32, 45, 75, .16);
-  backdrop-filter: blur(18px);
-}
-
-.public-suggestion-title {
-  min-height: 36px;
-  padding: 10px 14px 8px;
-  border-bottom-color: #e8eef8;
-  color: #647086;
-  font-size: 13px;
-  font-weight: 950;
 }
 
 .public-suggestion-list {
-  gap: 4px;
   max-height: calc(min(390px, calc(100vh - 190px)) - 37px);
-  padding: 8px;
-  scrollbar-color: rgba(99, 116, 150, .42) rgba(229, 234, 245, .8);
-}
-
-.public-suggestion-list button {
-  grid-template-columns: 44px 42px minmax(0, 1fr);
-  gap: 10px;
-  min-height: 58px;
-  padding: 7px 8px;
-  border-radius: 8px;
-  color: #172033;
-}
-
-.public-suggestion-list button:hover {
-  border-color: #dbe6ff;
-  background: #f4f7ff;
-}
-
-.public-suggestion-avatar {
-  width: 42px;
-  height: 42px;
-  border-radius: 8px;
-  box-shadow: 0 8px 18px rgba(58, 76, 113, .12);
-}
-
-.public-suggestion-rank {
-  min-width: 38px;
-  min-height: 24px;
-  padding: 3px 7px;
-  border-radius: 8px;
-  font-size: 13px;
-}
-
-.public-suggestion-rank.iron {
-  background: #7f8a9d;
-  color: #101827;
-}
-
-.public-suggestion-rank.bronze {
-  background: #b9794b;
-  color: #fff7ed;
-}
-
-.public-suggestion-rank.silver {
-  background: #aeb9c8;
-  color: #172033;
-}
-
-.public-suggestion-rank.gold {
-  background: #f0bd48;
-  color: #2a1c05;
-}
-
-.public-suggestion-rank.platinum {
-  background: #5ccdbd;
-  color: #062f32;
-}
-
-.public-suggestion-rank.emerald {
-  background: #48c98a;
-  color: #052d1a;
-}
-
-.public-suggestion-rank.diamond {
-  background: #72b7ff;
-  color: #08294f;
-}
-
-.public-suggestion-rank.master {
-  background: #b58cff;
-  color: #25104c;
-}
-
-.public-suggestion-rank.grandmaster {
-  background: #ff7b8b;
-  color: #4a0713;
-}
-
-.public-suggestion-rank.challenger {
-  background: linear-gradient(135deg, #8fd3ff, #f7d976);
-  color: #09243f;
-}
-
-.public-suggestion-rank.unranked,
-.public-suggestion-rank.platform {
-  background: #94a3b8;
-  color: #111827;
-}
-
-.public-suggestion-name span {
-  color: #1f2937;
-  font-size: 16px;
-  font-weight: 950;
 }
 
 .public-suggestion-name strong {
-  color: #7a8397;
-  font-size: 14px;
-  font-weight: 900;
+  flex: 0 0 auto;
 }
 
 .public-server-menu {
@@ -11431,37 +11282,7 @@ code {
   color: #e5eefb;
 }
 
-.public-dashboard-shell.theme-dark .public-suggestion-panel {
-  border-color: #26344c;
-  background: rgba(16, 24, 39, .98);
-  box-shadow: 0 22px 50px rgba(0, 0, 0, .38);
-}
-
-.public-dashboard-shell.theme-dark .public-suggestion-title {
-  border-bottom-color: #24324a;
-  color: #9fb0c8;
-}
-
-.public-dashboard-shell.theme-dark .public-suggestion-list {
-  scrollbar-color: rgba(120, 139, 170, .55) rgba(15, 23, 42, .8);
-}
-
-.public-dashboard-shell.theme-dark .public-suggestion-list button {
-  color: #e5eefb;
-}
-
-.public-dashboard-shell.theme-dark .public-suggestion-list button:hover {
-  border-color: #2f4c7c;
-  background: #182842;
-}
-
-.public-dashboard-shell.theme-dark .public-suggestion-name span {
-  color: #eef5ff;
-}
-
-.public-dashboard-shell.theme-dark .public-suggestion-name strong {
-  color: #9fb0c8;
-}
+/* theme-dark 남색 연관 패널 스킨은 은퇴 — 표면은 38-ink-profile.css 소유(§2-6). */
 
 .public-dashboard-shell.theme-dark .public-sidebar nav button,
 .public-dashboard-shell.theme-dark .public-sidebar-favorites button,
@@ -12002,76 +11823,63 @@ code {
   text-shadow: none;
 }
 
-.public-team-rank-badge,
-.public-suggestion-rank {
+.public-team-rank-badge {
   box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .1);
 }
 
-.public-team-rank-badge.iron,
-.public-suggestion-rank.iron {
+.public-team-rank-badge.iron {
   background: #7f8a9d;
   color: #101827;
 }
 
-.public-team-rank-badge.bronze,
-.public-suggestion-rank.bronze {
+.public-team-rank-badge.bronze {
   background: #b9794b;
   color: #fff7ed;
 }
 
-.public-team-rank-badge.silver,
-.public-suggestion-rank.silver {
+.public-team-rank-badge.silver {
   background: #aeb9c8;
   color: #172033;
 }
 
-.public-team-rank-badge.gold,
-.public-suggestion-rank.gold {
+.public-team-rank-badge.gold {
   background: #f0bd48;
   color: #2a1c05;
 }
 
-.public-team-rank-badge.platinum,
-.public-suggestion-rank.platinum {
+.public-team-rank-badge.platinum {
   background: #5ccdbd;
   color: #062f32;
 }
 
-.public-team-rank-badge.emerald,
-.public-suggestion-rank.emerald {
+.public-team-rank-badge.emerald {
   background: #48c98a;
   color: #052d1a;
 }
 
-.public-team-rank-badge.diamond,
-.public-suggestion-rank.diamond {
+.public-team-rank-badge.diamond {
   background: #72b7ff;
   color: #08294f;
 }
 
-.public-team-rank-badge.master,
-.public-suggestion-rank.master {
+.public-team-rank-badge.master {
   background: #b58cff;
   color: #25104c;
 }
 
-.public-team-rank-badge.grandmaster,
-.public-suggestion-rank.grandmaster {
+.public-team-rank-badge.grandmaster {
   background: #ff7b8b;
   color: #4a0713;
 }
 
-.public-team-rank-badge.challenger,
-.public-suggestion-rank.challenger {
+.public-team-rank-badge.challenger {
   background: linear-gradient(135deg, #8fd3ff, #f7d976);
   color: #09243f;
 }
 
 .public-team-rank-badge.unranked,
 .public-team-rank-badge.unknown,
-.public-team-rank-badge.loading,
-.public-suggestion-rank.unranked,
-.public-suggestion-rank.platform {
+.public-team-rank-badge.loading {
   background: #94a3b8;
   color: #111827;
 }

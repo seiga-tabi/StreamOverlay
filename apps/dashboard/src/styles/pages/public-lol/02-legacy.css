@@ -250,33 +250,7 @@
   overscroll-behavior: contain;
 }
 
-.public-dashboard-shell:not(.public-home-shell) .public-suggestion-panel {
-  border-color: rgba(93, 110, 145, .42);
-  background: rgba(10, 17, 31, .98);
-  box-shadow: 0 22px 50px rgba(2, 6, 23, .42);
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-suggestion-title {
-  border-bottom-color: rgba(93, 110, 145, .34);
-  color: #9fb0c8;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-suggestion-list button {
-  color: #e5edf9;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-suggestion-list button:hover {
-  border-color: rgba(96, 165, 250, .36);
-  background: rgba(30, 42, 68, .94);
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-suggestion-name span {
-  color: #f2f6ff;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-suggestion-name strong {
-  color: #9fb0c8;
-}
+/* 연관 검색 패널 표면은 38-ink-profile.css 소유 — 남색 스킨은 은퇴했습니다. */
 
 .public-dashboard-shell:not(.public-home-shell) .public-refresh-button,
 .public-dashboard-shell:not(.public-home-shell) .public-match-more button {
@@ -1257,37 +1231,7 @@
   background: var(--seiga-pastel-accent) !important;
 }
 
-.public-dashboard-shell .public-suggestion-panel,
-.public-dashboard-shell.public-home-shell .public-home-search-stage .public-suggestion-panel {
-  border-color: rgba(113, 154, 255, .42) !important;
-  background: rgba(255, 255, 255, .96) !important;
-  color: var(--seiga-pastel-text) !important;
-  box-shadow: 0 24px 58px rgba(55, 96, 164, .18) !important;
-}
-
-.public-dashboard-shell .public-suggestion-title,
-.public-dashboard-shell.public-home-shell .public-home-search-stage .public-suggestion-title {
-  border-bottom-color: rgba(126, 177, 223, .36) !important;
-  color: var(--seiga-pastel-muted) !important;
-}
-
-.public-dashboard-shell .public-suggestion-list button,
-.public-dashboard-shell.public-home-shell .public-home-search-stage .public-suggestion-list button {
-  color: var(--seiga-pastel-text) !important;
-}
-
-.public-dashboard-shell .public-suggestion-list button:hover,
-.public-dashboard-shell.public-home-shell .public-home-search-stage .public-suggestion-list button:hover {
-  background: rgba(213, 241, 255, .68) !important;
-}
-
-.public-dashboard-shell .public-suggestion-name span,
-.public-dashboard-shell.public-home-shell .public-home-search-stage .public-suggestion-name span,
-.public-dashboard-shell .public-suggestion-name strong,
-.public-dashboard-shell.public-home-shell .public-home-search-stage .public-suggestion-name strong {
-  color: var(--seiga-pastel-heading) !important;
-  text-shadow: none !important;
-}
+/* 연관 검색 패널 표면은 38-ink-profile.css 소유 — 파스텔 스킨은 은퇴했습니다. */
 
 .public-dashboard-shell .public-panel,
 .public-dashboard-shell:not(.public-home-shell) .public-panel,
@@ -4153,6 +4097,8 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
   background: rgba(255, 255, 255, .05);
 }
 
+/* 검색 랜딩 연관 패널 — 지오메트리만 여기서. 표면(색·radius·그림자·행 규격)은
+   38-ink-profile.css 가 단독 소유합니다(연관 패널 프롬프트 §2-6 — 보라 스킨 은퇴). */
 .public-home-shared-search .public-suggestion-panel {
   top: calc(100% + 8px);
   right: 64px;
@@ -4160,88 +4106,10 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
   z-index: 20;
   min-height: auto;
   max-height: min(390px, 46vh);
-  border: 1px solid rgba(147, 132, 255, .34) !important;
-  border-radius: 20px;
-  background:
-    radial-gradient(circle at 18% 0%, rgba(132, 93, 255, .22), transparent 38%),
-    linear-gradient(180deg, rgba(15, 18, 36, .96), rgba(7, 10, 24, .98)) !important;
-  color: rgba(241, 245, 255, .94) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .08),
-    0 0 0 1px rgba(107, 87, 255, .16),
-    0 24px 60px rgba(0, 0, 0, .56),
-    0 0 42px rgba(109, 86, 255, .2) !important;
-  backdrop-filter: blur(22px) saturate(130%);
-}
-
-.public-home-shared-search .public-suggestion-title {
-  min-height: 44px;
-  padding: 12px 22px 10px;
-  border-bottom: 1px solid rgba(147, 132, 255, .18) !important;
-  color: rgba(205, 214, 240, .76) !important;
-  font-size: 14px;
-  font-weight: 850;
 }
 
 .public-home-shared-search .public-suggestion-list {
-  gap: 6px;
   max-height: min(332px, 38vh);
-  padding: 12px;
-  scrollbar-color: rgba(137, 109, 255, .54) rgba(255, 255, 255, .08);
-}
-
-.public-home-shared-search .public-suggestion-list button {
-  grid-template-columns: 46px auto minmax(0, 1fr);
-  gap: 14px;
-  min-height: 62px;
-  padding: 9px 14px;
-  border: 1px solid transparent;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, .035) !important;
-  color: rgba(241, 245, 255, .94) !important;
-}
-
-.public-home-shared-search .public-suggestion-list button:hover,
-.public-home-shared-search .public-suggestion-list button:focus-visible {
-  border-color: rgba(145, 105, 255, .5);
-  background:
-    linear-gradient(135deg, rgba(126, 92, 255, .2), rgba(70, 93, 255, .12)) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .08),
-    0 12px 28px rgba(0, 0, 0, .22);
-}
-
-.public-home-shared-search .public-suggestion-avatar {
-  width: 44px;
-  height: 44px;
-  border: 1px solid rgba(168, 149, 255, .34);
-  border-radius: 12px;
-  background:
-    radial-gradient(circle at 34% 22%, rgba(255, 255, 255, .3), transparent 30%),
-    linear-gradient(135deg, #1b2444, #7458ff) !important;
-  box-shadow: 0 0 18px rgba(118, 88, 255, .26);
-}
-
-.public-home-shared-search .public-suggestion-rank {
-  min-width: 44px;
-  min-height: 30px;
-  border-radius: 999px;
-  font-size: 14px;
-  letter-spacing: 0;
-}
-
-.public-home-shared-search .public-suggestion-name span {
-  color: #ffffff !important;
-  font-size: 20px;
-  font-weight: 900;
-  text-shadow: none !important;
-}
-
-.public-home-shared-search .public-suggestion-name strong {
-  color: rgba(211, 218, 240, .72) !important;
-  font-size: 18px;
-  font-weight: 850;
-  text-shadow: none !important;
 }
 
 .public-home-live-section {
@@ -5211,34 +5079,10 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
   color: rgba(255, 255, 255, .82) !important;
 }
 
-.public-profile-shared-shell .public-ranking-shared-search .public-suggestion-panel,
+/* 연관 검색 패널 표면(radius 14 남색 !important)은 38-ink-profile.css 소유로
+   이관했습니다 — overflow:hidden 만 유지합니다(모서리 클리핑). */
 .public-profile-shared-shell .public-suggestion-panel {
   overflow: hidden;
-  border: 1px solid rgba(119, 131, 169, .3) !important;
-  border-radius: 14px !important;
-  background:
-    linear-gradient(180deg, rgba(13, 18, 34, .98), rgba(9, 13, 25, .98)) !important;
-  color: #f3f6ff !important;
-  box-shadow: 0 22px 62px rgba(0, 0, 0, .42) !important;
-  backdrop-filter: blur(18px);
-}
-
-.public-profile-shared-shell .public-suggestion-title {
-  border-bottom-color: rgba(119, 131, 169, .24) !important;
-  color: rgba(199, 207, 229, .76) !important;
-}
-
-.public-profile-shared-shell .public-suggestion-list button {
-  color: #f3f6ff !important;
-}
-
-.public-profile-shared-shell .public-suggestion-list button:hover {
-  background: rgba(122, 101, 255, .14) !important;
-}
-
-.public-profile-shared-shell .public-suggestion-name strong,
-.public-profile-shared-shell .public-suggestion-name span {
-  color: #f3f6ff !important;
 }
 
 .public-profile-shared-shell .public-profile-tabs {
@@ -5993,6 +5837,8 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
   box-shadow: none !important;
 }
 
+/* 검색 랜딩 연관 패널 — 붙은 드롭다운 지오메트리와 5행 제한만 여기서.
+   표면(색·radius·행 규격)은 38-ink-profile.css 가 단독 소유합니다(§2-6). */
 .public-home-shared-shell .public-home-shared-search .public-suggestion-panel {
   top: calc(100% + 1px);
   right: 0;
@@ -6001,149 +5847,15 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
   min-height: 0;
   max-height: none;
   overflow: hidden;
-  border: 1px solid var(--home-border) !important;
-  border-top: 0 !important;
-  border-radius: 0 0 16px 16px !important;
-  background: rgba(11, 11, 17, .98) !important;
-  color: var(--home-text) !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, .18) !important;
-  backdrop-filter: none !important;
-}
-
-.public-home-shared-shell .public-home-shared-search .public-suggestion-title {
-  display: block !important;
-  padding: 12px 18px 10px;
-  border-bottom: 1px solid rgba(38, 42, 54, .86);
-  color: var(--home-secondary) !important;
-  font-size: 13px !important;
-  font-weight: 700 !important;
 }
 
 .public-home-shared-shell .public-home-shared-search .public-suggestion-list {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 0;
   max-height: 388px;
-  padding: 0;
   overflow-y: auto;
-}
-
-.public-home-shared-shell .public-home-shared-search .public-suggestion-list button {
-  grid-template-columns: 48px 54px minmax(0, 1fr) minmax(104px, auto) 24px;
-  grid-template-areas:
-    "avatar tier name rank mark";
-  align-items: center;
-  gap: 14px;
-  min-height: 76px;
-  padding: 12px 18px;
-  border: 0;
-  border-bottom: 1px solid rgba(38, 42, 54, .74);
-  border-radius: 0;
-  background: transparent !important;
-  color: var(--home-text) !important;
-  box-shadow: none !important;
 }
 
 .public-home-shared-shell .public-home-shared-search .public-suggestion-list button:nth-of-type(n+6) {
   display: none !important;
-}
-
-.public-home-shared-shell .public-home-shared-search .public-suggestion-list button:hover,
-.public-home-shared-shell .public-home-shared-search .public-suggestion-list button:focus-visible {
-  border-color: rgba(38, 42, 54, .74);
-  background: rgba(245, 245, 247, .06) !important;
-  box-shadow: none !important;
-}
-
-.public-home-shared-shell .public-home-shared-search .public-suggestion-avatar {
-  grid-area: avatar;
-  width: 48px;
-  height: 48px;
-  border: 0;
-  border-radius: 14px;
-  background: var(--home-card) !important;
-  box-shadow: none !important;
-}
-
-.public-home-shared-shell .public-home-shared-search .public-suggestion-tier {
-  grid-area: tier;
-  display: grid;
-  place-items: center;
-  width: 54px;
-  height: 54px;
-  overflow: hidden;
-}
-
-.public-home-shared-shell .public-home-shared-search .public-suggestion-tier img {
-  display: block;
-  width: 54px;
-  height: 54px;
-  object-fit: contain;
-}
-
-.public-home-shared-shell .public-home-shared-search .public-suggestion-name {
-  grid-area: name;
-  gap: 4px;
-  min-width: 0;
-}
-
-.public-home-shared-shell .public-home-shared-search .public-suggestion-name span {
-  color: var(--home-text) !important;
-  font-size: 15px !important;
-  font-weight: 600 !important;
-  text-shadow: none !important;
-}
-
-.public-home-shared-shell .public-home-shared-search .public-suggestion-name strong {
-  color: var(--home-secondary) !important;
-  font-size: 12px !important;
-  font-weight: 500 !important;
-  text-shadow: none !important;
-}
-
-.public-home-shared-shell .public-home-shared-search .public-suggestion-rank {
-  display: inline-grid;
-  gap: 1px;
-  place-items: center;
-  min-width: 42px;
-  min-height: 0;
-  padding: 6px 8px;
-  border: 0 !important;
-  border-radius: 10px;
-  background: rgba(245, 245, 247, .06) !important;
-  color: var(--home-secondary) !important;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.public-home-shared-shell .public-home-shared-search .public-suggestion-rank small {
-  color: var(--home-secondary);
-  font-size: 11px;
-  font-weight: 500;
-}
-
-.public-home-shared-shell .public-home-shared-search .public-suggestion-rank-copy {
-  grid-area: rank;
-  display: grid;
-  justify-items: end;
-  gap: 3px;
-  min-width: 0;
-  color: var(--home-text);
-  font-size: 14px;
-  font-weight: 700;
-  text-align: right;
-}
-
-.public-home-shared-shell .public-home-shared-search .public-suggestion-rank-copy small {
-  color: var(--home-secondary);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.public-home-shared-shell .public-home-shared-search .public-suggestion-favorite-mark {
-  grid-area: mark;
-  justify-self: end;
-  align-self: center;
 }
 
 @media (max-width: 1180px) {
@@ -6198,35 +5910,7 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
     padding: 0 !important;
   }
 
-  .public-home-shared-shell .public-home-shared-search .public-suggestion-list {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .public-home-shared-shell .public-home-shared-search .public-suggestion-list button {
-    grid-template-columns: 44px 32px minmax(0, 1fr) minmax(72px, auto) 24px;
-    grid-template-areas: "avatar tier name rank mark";
-    gap: 8px;
-    min-height: 68px;
-    padding: 12px;
-    border-right: 0;
-    border-bottom: 1px solid rgba(38, 42, 54, .74);
-  }
-
-  .public-home-shared-shell .public-home-shared-search .public-suggestion-avatar {
-    width: 44px;
-    height: 44px;
-  }
-
-  .public-home-shared-shell .public-home-shared-search .public-suggestion-tier,
-  .public-home-shared-shell .public-home-shared-search .public-suggestion-tier img {
-    width: 32px;
-    height: 32px;
-  }
-
-  .public-home-shared-shell .public-home-shared-search .public-suggestion-rank-copy {
-    font-size: 12px;
-  }
-
+  /* 연관 패널 행 규격은 38-ink-profile.css 소유 — 모바일 재배치 잔재는 은퇴. */
 }
 
 .public-profile-shared-shell .public-profile-top-main .public-ranking-shared-toolbar {
@@ -6484,8 +6168,10 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
 }
 
 /* Public menu pages: 남아 있던 pastel 디자인 제거.
-   YORO Bot 셸은 자기 지면(16-yoro-bot.css #11141b)을 소유하므로 제외합니다. */
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell):not(.public-bot-shell) {
+   YORO Bot 셸은 자기 지면(16-yoro-bot.css #11141b)을 소유하므로 제외합니다.
+   수묵 셸(platform-v2 — 패치 노트)도 제외합니다: 지면은 20-profile-platform.css 의
+   테마 토큰(var(--public-gray-page))이 소유합니다. */
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell):not(.public-bot-shell):not(.public-profile-platform-v2) {
   min-height: 100dvh;
   background:
     radial-gradient(circle at 50% 0%, rgba(123, 92, 255, .14), transparent 28%),
@@ -6493,139 +6179,21 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
   color: #f5f5f7 !important;
 }
 
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-app-main,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-profile-layout,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-dashboard-content-grid,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-dashboard-center {
+/* 수묵 셸(platform-v2 — 패치 노트·시청자 참여)은 제외합니다: 흰 글자를 강제하면
+   라이트 백자 지면에서 제목이 사라집니다. 글자색은 20-profile-platform.css 의
+   테마 토큰(var(--public-gray-text))이 소유합니다. */
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell):not(.public-profile-platform-v2) .public-app-main,
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell):not(.public-profile-platform-v2) .public-profile-layout,
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell):not(.public-profile-platform-v2) .public-dashboard-content-grid,
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell):not(.public-profile-platform-v2) .public-dashboard-center {
   color: #f5f5f7 !important;
 }
 
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-suggestion-panel {
-  border-color: rgba(119, 131, 169, .3) !important;
-  background: rgba(10, 15, 29, .98) !important;
-  color: #f5f5f7 !important;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, .48) !important;
-}
+/* 연관 검색 패널 표면은 38-ink-profile.css 가 단독 소유합니다 — 메뉴 페이지의
+   남색 패널 스킨은 은퇴했습니다(연관 패널 프롬프트 §2-6). */
 
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-suggestion-title {
-  border-bottom-color: rgba(119, 131, 169, .24) !important;
-  color: rgba(199, 207, 229, .72) !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-suggestion-list button {
-  background: transparent !important;
-  color: rgba(241, 245, 255, .94) !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-suggestion-list button:hover,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-suggestion-list button:focus-visible {
-  background: rgba(126, 92, 255, .16) !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-suggestion-name span,
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-suggestion-name strong {
-  color: #f5f5f7 !important;
-  text-shadow: none !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-list {
-  padding: 0 !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-list button {
-  align-items: center;
-  min-height: 72px !important;
-  padding: 10px 14px !important;
-  overflow: hidden;
-  border-right: 0 !important;
-  border-bottom: 1px solid rgba(119, 131, 169, .22) !important;
-  border-left: 0 !important;
-  border-radius: 0 !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-list button:last-child {
-  border-bottom: 0 !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-avatar {
-  grid-area: avatar;
-  width: 44px !important;
-  height: 44px !important;
-  border-radius: 10px !important;
-  background: rgba(245, 245, 247, .08) !important;
-  box-shadow: none !important;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-tier {
-  grid-area: tier;
-  display: grid;
-  place-items: center;
-  width: 54px;
-  height: 54px;
-  overflow: hidden;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-tier img {
-  display: block;
-  width: 54px;
-  height: 54px;
-  object-fit: contain;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-tier .public-suggestion-rank {
-  min-width: 42px;
-  min-height: 26px;
-  padding: 5px 8px;
-  border: 0 !important;
-  border-radius: 10px;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-name {
-  grid-area: name;
-  display: grid;
-  gap: 3px;
-  align-items: center;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-name span {
-  min-width: 0;
-  overflow: hidden;
-  color: #f5f5f7 !important;
-  font-size: 14px !important;
-  font-weight: 800 !important;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-name strong {
-  min-width: 0;
-  overflow: hidden;
-  color: rgba(199, 207, 229, .72) !important;
-  font-size: 12px !important;
-  font-weight: 700 !important;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-rank-copy {
-  grid-area: rank;
-  display: grid;
-  justify-items: end;
-  gap: 3px;
-  color: #f5f5f7;
-  font-size: 13px;
-  font-weight: 800;
-  line-height: 1.2;
-  text-align: right;
-}
-
-.public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-rank-copy small {
-  color: rgba(199, 207, 229, .72);
-  font-size: 11px;
-  font-weight: 700;
-}
+/* 상단바 슬롯 연관 패널의 행·아바타·티어·이름 규격(72px 행·44px r10 아바타)은
+   은퇴했습니다 — 표면·행 규격은 38-ink-profile.css 가 단독 소유합니다(§2-6). */
 
 .public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell) .public-subscriptions-page {
   width: min(1180px, calc(100% - 48px)) !important;
@@ -6787,25 +6355,4 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
   text-shadow: none !important;
 }
 
-@media (max-width: 760px) {
-
-  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-list button {
-    min-height: 72px !important;
-    padding: 10px 12px !important;
-  }
-
-  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-avatar {
-    width: 40px !important;
-    height: 40px !important;
-  }
-
-  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-tier,
-  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-tier img {
-    width: 30px;
-    height: 30px;
-  }
-
-  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-rank-copy {
-    font-size: 12px;
-  }
-}
+/* (모바일 슬롯 패널 행 규격도 38-ink-profile.css 소유 — 72px 재배치는 은퇴.) */

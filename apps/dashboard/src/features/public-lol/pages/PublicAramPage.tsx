@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { parseAramAugmentCatalog, type AramAugmentCatalog, type AramAugmentRarity } from "@streamops/shared";
+import { NorigaeMark, TailUnderline } from "../../public-home/components/HomeMarks";
 import { Button } from "../../../shared/ui/Button";
 import { Card, CardContent, CardHeader } from "../../../shared/ui/Card";
 import { EmptyState, EmptyStateActions, EmptyStateDescription, EmptyStateIcon, EmptyStateTitle } from "../../../shared/ui/EmptyState";
 import { Input } from "../../../shared/ui/Form";
-import { PageHeader, PageHeaderDescription, PageHeaderEyebrow, PageHeaderStatus, PageHeaderTitle } from "../../../shared/ui/PageHeader";
 import { SkeletonCard } from "../../../shared/ui/Skeleton";
 import { Badge } from "../../../shared/ui/Status";
 import { publicIntlLocale, activePublicLocale, t } from "../i18n/public-lol-i18n";
@@ -12,6 +12,26 @@ import { localizedPublicUrlForCurrentLocale } from "../utils/public-locale-path"
 import { PUBLIC_LOL_HOME_PATH } from "../utils/routes";
 
 type LoadState = "loading" | "ready" | "error";
+
+/* 준비 중 아이콘 — ◇ 글리프는 폰트마다 모양·정렬이 달라 stroke SVG 로(전환 §2-6). */
+function CrystalIcon() {
+  return (
+    <svg aria-hidden="true" fill="none" height="24" stroke="currentColor" strokeWidth="1.2" viewBox="0 0 24 24" width="24">
+      <path d="M12 2 L 19 7 V 15 L 12 22 L 5 15 V 7 Z" />
+      <path d="M12 6 L 15.5 8.6 V 13.6 L 12 17.4 L 8.5 13.6 V 8.6 Z" opacity=".55" strokeWidth="1" />
+    </svg>
+  );
+}
+
+/* 「이 증강 쓴 경기」 화살표 — → 글리프 대신 stroke SVG(전환 §2-6). */
+function JumpArrowIcon() {
+  return (
+    <svg aria-hidden="true" fill="none" height="10" stroke="currentColor" strokeWidth="1.2" viewBox="0 0 12 12" width="10">
+      <path d="M1.5 6 H 10" />
+      <path d="M6.5 2.5 L 10 6 L 6.5 9.5" />
+    </svg>
+  );
+}
 
 /* 등급 배지에 "silver" 같은 원문 값이 그대로 보이고 있었습니다. */
 function rarityLabel(value: AramAugmentRarity): string {
@@ -112,16 +132,27 @@ export function PublicAramPage({ augmentStats, onFilterAugment }: {
 
   return (
     <section className="public-aram-page" aria-labelledby="public-aram-title">
-      <PageHeader layout="split">
-        <PageHeaderEyebrow>{t().aramEyebrow}</PageHeaderEyebrow>
-        <PageHeaderTitle as="h1" id="public-aram-title">{t().aramTitle}</PageHeaderTitle>
-        <PageHeaderDescription>{t().aramDescription}</PageHeaderDescription>
-        <PageHeaderStatus>
+      {/* 페이지 머리 — 노리개 + 명조 제목 + 붓 밑줄(목업 LolAram · 전환 §2-4).
+          공유 PageHeader 를 재스타일하면 다른 화면이 함께 바뀌므로 전용 마크업
+          (패치 노트 .yoro-pn-head 와 같은 방식). 마크는 HomeMarks 재사용. */}
+      <header className="yoro-aram-head">
+        <NorigaeMark className="yoro-aram-head-norigae" height={34} width={16} />
+        <div className="yoro-aram-head-copy">
+          <p className="yoro-aram-head-eyebrow">{t().aramEyebrow}</p>
+          <h1 className="yoro-aram-head-title" id="public-aram-title">
+            <span className="yoro-aram-head-title-word">
+              {t().aramTitle}
+              <TailUnderline className="yoro-aram-head-tail" height={9} width={118} />
+            </span>
+          </h1>
+          <p className="yoro-aram-head-desc">{t().aramDescription}</p>
+        </div>
+        <div className="yoro-aram-head-status">
           <Badge tone={catalog?.status === "ready" ? "success" : "neutral"}>
             {catalog?.status === "ready" ? t().aramReady : t().aramPreparing}
           </Badge>
-        </PageHeaderStatus>
-      </PageHeader>
+        </div>
+      </header>
 
       {state === "loading" ? (
         <div className="public-aram-loading" role="status" aria-label={t().aramLoading} aria-busy="true">
@@ -143,7 +174,7 @@ export function PublicAramPage({ augmentStats, onFilterAugment }: {
 
       {state === "ready" && catalog?.status === "preparing" ? (
         <EmptyState variant="default" as="div">
-          <EmptyStateIcon aria-hidden="true">◇</EmptyStateIcon>
+          <EmptyStateIcon aria-hidden="true"><CrystalIcon /></EmptyStateIcon>
           <EmptyStateTitle as="h2">{t().aramPreparingTitle}</EmptyStateTitle>
           <EmptyStateDescription>{t().aramPreparingDescription}</EmptyStateDescription>
         </EmptyState>
@@ -167,7 +198,9 @@ export function PublicAramPage({ augmentStats, onFilterAugment }: {
                   key={value}
                   type="button"
                   size="sm"
-                  variant={rarity === value ? "primary" : "secondary"}
+                  /* 채운(primary 보라) 버튼 금지 — 활성은 CSS 가 aria-pressed 로
+                     진한 테두리 + 700 만 줍니다(전환 §2-2, 목업 qchip 문법). */
+                  variant="tertiary"
                   aria-pressed={rarity === value}
                   onClick={() => setRarity(value)}
                 >
@@ -225,7 +258,8 @@ export function PublicAramPage({ augmentStats, onFilterAugment }: {
                             onClick={() => onFilterAugment(augment.cdragonId as number)}
                             type="button"
                           >
-                            {t().aramMineJump.replace("{count}", String(stat.picks))} →
+                            {t().aramMineJump.replace("{count}", String(stat.picks))}
+                            <JumpArrowIcon />
                           </button>
                         ) : null}
                       </p>

@@ -1,8 +1,30 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import type { LolPlatformId, LolRankedStats } from "@streamops/shared";
+import { TailUnderline } from "../../public-home/components/HomeMarks";
 import { Button } from "../../../shared/ui/Button";
 import { FormControl, FormField, FormLabel, Input } from "../../../shared/ui/Form";
 import { StatusPill } from "../../../shared/ui/Status";
+
+/* 즐겨찾기 표식·빈 상태 공용 별 — ★ 글리프는 폰트마다 모양·baseline 이 달라
+   정렬이 흔들리고 currentColor 를 못 받습니다(연관 패널 프롬프트 §2-5). */
+function StarIcon({ size = 14 }: { size?: number }) {
+  return (
+    <svg aria-hidden="true" fill="none" height={size} stroke="currentColor" strokeWidth="1.2" viewBox="0 0 16 16" width={size}>
+      <path d="M8 1.8 L 9.9 5.9 14.3 6.4 11 9.4 11.9 13.8 8 11.6 4.1 13.8 5 9.4 1.7 6.4 6.1 5.9 Z" />
+    </svg>
+  );
+}
+
+/* 티어 크레스트 — 목업 LolHeaderSearch 의 18×20 스트로크 방패(바깥 2 · 안쪽 1/55%).
+   색은 CSS 의 data-tier 훅(38-ink-profile.css)이 티어색으로 칠합니다. */
+function TierCrestIcon() {
+  return (
+    <svg aria-hidden="true" fill="none" height="20" stroke="currentColor" viewBox="0 0 18 20" width="18">
+      <path d="M9 1.5 L 16 4.5 V 10 C 16 14.5, 13 17.5, 9 19 C 5 17.5, 2 14.5, 2 10 V 4.5 Z" strokeWidth="2" />
+      <path d="M9 4.5 L 13.2 6.3 V 9.9 C 13.2 12.8, 11.5 14.9, 9 16 C 6.5 14.9, 4.8 12.8, 4.8 9.9 V 6.3 Z" opacity=".55" strokeWidth="1" />
+    </svg>
+  );
+}
 
 export type SearchFormVariant = "legacy" | "homeShared" | "rankingShared";
 export type SearchFormPanelTab = "summoners" | "recent" | "favorites";
@@ -245,12 +267,11 @@ export function SearchForm<TSuggestion extends SearchFormSuggestion>({
         <span className="public-suggestion-avatar">
           {suggestion.profileIconUrl ? <img src={helpers.assetUrl(suggestion.profileIconUrl)} alt="" /> : suggestion.gameName.slice(0, 1).toUpperCase()}
         </span>
+        {/* 티어 자리 — 실제 티어 엠블럼 이미지(사용자 요청). 이미지가 없는
+            Unranked 등은 무채 크레스트 폴백으로 자리를 지킵니다. 티어명은 우측
+            rank-copy 가 이미 말하므로 이 칸은 장식입니다. */}
         <span className="public-suggestion-tier" aria-hidden="true">
-          {tierIconUrl ? (
-            <img src={tierIconUrl} alt="" />
-          ) : (
-            <span className={helpers.rankBadgeClass(rankedStats)}>{shortLabel}</span>
-          )}
+          {tierIconUrl ? <img alt="" decoding="async" loading="lazy" src={tierIconUrl} /> : <TierCrestIcon />}
         </span>
         <span className="public-suggestion-name">
           <span>{suggestion.gameName}</span>
@@ -260,7 +281,7 @@ export function SearchForm<TSuggestion extends SearchFormSuggestion>({
           <span>{tierLabel}</span>
           {lpLabel ? <small>{lpLabel}</small> : null}
         </span>
-        {source === "favorites" ? <span className="public-suggestion-favorite-mark" aria-hidden="true">★</span> : null}
+        {source === "favorites" ? <span className="public-suggestion-favorite-mark" aria-hidden="true"><StarIcon /></span> : null}
       </button>
     );
   };
@@ -433,15 +454,19 @@ export function SearchForm<TSuggestion extends SearchFormSuggestion>({
               >
                 <span  >{tab.label.label}</span>
                 <em>{tab.count}</em>
+                {/* 활성 탭 꼬리 밑줄 — 홈 문법(HomeMarks 재사용, 연관 패널 프롬프트 §2-3). */}
+                {resolvedPanelTab === tab.key ? <TailUnderline className="public-suggestion-tab-tail" height={6} width={30} /> : null}
               </button>
             ))}
           </div>
           <div className="public-suggestion-title"  >{activePanelLabel.label}</div>
-          <div key={resolvedPanelTab} className="public-suggestion-list" role="listbox" aria-label={text.relatedSummoners}>
+          {/* data-tab — 최근·즐겨찾기 탭을 홈 칩 규격으로 그리는 CSS 훅(38-ink-profile.css). */}
+          <div key={resolvedPanelTab} className="public-suggestion-list" data-tab={resolvedPanelTab} role="listbox" aria-label={text.relatedSummoners}>
             {activePanelItems.length > 0 ? (
               activePanelItems.map((suggestion) => renderSuggestionButton(suggestion, resolvedPanelTab))
             ) : (
               <div className="public-suggestion-empty" role="status"  >
+                <span aria-hidden="true" className="public-suggestion-empty-icon"><StarIcon size={22} /></span>
                 {activeEmptyText.label}
               </div>
             )}

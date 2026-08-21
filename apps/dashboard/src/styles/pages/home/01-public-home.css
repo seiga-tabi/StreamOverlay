@@ -14,9 +14,16 @@
 
 @layer home {
   /* .yoro-home-chrome — 전적 상세처럼 홈 셸 밖에서 헤더·탭바만 빌려 쓰는 래퍼.
-     토큰·지면·타이포만 공유하고 min-height 같은 페이지 레이아웃은 셸 전용입니다. */
+     토큰·지면·타이포만 공유하고 min-height 같은 페이지 레이아웃은 셸 전용입니다.
+     .yoro-pn-page — 패치 노트 본문. 수묵 스코프는 색(20-profile-platform.css)과
+     서체(여기) 둘인데 1차 리스킨이 색만 이어 본문이 Inter 로 남았습니다(2차 §2-1).
+     스택을 복사하지 않고 선택자만 잇습니다 — 지면·글자색은 값이 같고
+     (--home-bg/-ink = --public-gray-page/-text), 배경은 legacy !important 가 계속
+     소유하므로 실질 변화는 서체·tabular-nums 뿐입니다. */
   .yoro-home-shell,
-  .yoro-home-chrome {
+  .yoro-home-chrome,
+  .yoro-pn-page,
+  .public-aram-page {
     /* 다크(기본) */
     --home-bg: #1C1D22;
     --home-card: #252730;
@@ -50,6 +57,11 @@
     line-height: 1.5;
   }
 
+  /* 패치 노트 본문은 스코프를 잇기 전 줄간격이 normal 이었고 구성 요소가 각자
+     line-height 를 소유합니다(35/42). 스택만 잇고 줄간격은 되돌립니다 — 위 블록에
+     1.5 를 그대로 두면 패치 노트의 기존 세로 리듬이 전부 밀립니다(2차 §2-1 예외). */
+  .yoro-pn-page { line-height: normal; }
+
   .yoro-home-shell {
     min-height: 100vh;
     display: flex;
@@ -62,9 +74,15 @@
   }
 
   /* 전적 상세의 크롬은 셸이 아니라 래퍼라, 셸 루트(.theme-light) 아래에서도
-     같은 스왑 하나로 반전합니다(목업 라이트 규칙). */
+     같은 스왑 하나로 반전합니다(목업 라이트 규칙). 패치 노트 본문은 셸 클래스와
+     usePublicTheme 의 <html data-public-theme> 를 모두 지원합니다
+     (20-profile-platform.css 라이트 블록과 같은 페어). */
   .yoro-home-shell.theme-light,
-  .theme-light .yoro-home-chrome {
+  .theme-light .yoro-home-chrome,
+  .theme-light .yoro-pn-page,
+  :root[data-public-theme="light"] .yoro-pn-page,
+  .theme-light .public-aram-page,
+  :root[data-public-theme="light"] .public-aram-page {
     --home-bg: #F5F6F8;
     --home-card: #FFFFFF;
     --home-ink: #1C1D22;
@@ -87,7 +105,9 @@
     --home-g4: #B9C3D0;
   }
 
-  .yoro-home-shell:lang(ja) {
+  .yoro-home-shell:lang(ja),
+  .yoro-pn-page:lang(ja),
+  .public-aram-page:lang(ja) {
     --home-serif: "Noto Serif JP", serif;
     font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", system-ui, sans-serif;
   }

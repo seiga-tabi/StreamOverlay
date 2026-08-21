@@ -1,6 +1,24 @@
-/* 부유 카드 대신 전폭 슬림 바 — 본문 카드를 덮는 면적을 최소화하고
-   모바일에서 화면 1/3을 차지하던 높이를 줄입니다. */
+/* 분석·광고 동의 바 — 수묵 문법(목업 page-1 「동의 바 (전 화면 공통)」).
+ *
+ * 이 배너는 main.tsx 에서 App 의 형제로 마운트되어 앱 셸(.yoro-app-shell /
+ * .yoro-home-shell) 밖에 있습니다. 그래서 수묵 팔레트의 두 다리
+ * (20-profile-platform.css 의 --public-gray-* · 01-public-home.css 의 서체)가
+ * 여기까지 흘러오지 않습니다 — var() 참조가 전부 빈 값으로 떨어집니다.
+ * 다른 화면과 달리 **값을 이 파일에 지역 정의(--consent-*)하는 것이 옳은**
+ * 이유입니다. 테마 신호는 배너가 볼 수 있는 유일한 것인
+ * :root[data-public-theme] 를 씁니다.
+ *
+ * 라이트가 기본값입니다 — data-public-theme 이 아직 안 붙은 첫 페인트에는
+ * 백자(라이트) 바가 나오고, 속성이 붙는 즉시 테마를 따라갑니다.
+ */
 .google-consent-banner {
+  /* 수묵 라이트 팔레트(01-public-home 라이트 스왑과 같은 값) */
+  --consent-surface: #ffffff;
+  --consent-line: #e4e8ed;
+  --consent-text: #1c1d22;
+  --consent-muted: #5a6675;
+  --consent-stroke: #4a5563;
+
   position: fixed;
   right: 0;
   bottom: 0;
@@ -11,12 +29,30 @@
   justify-content: space-between;
   gap: var(--yoro-space-5);
   width: 100%;
-  padding-block: var(--space-3);
-  padding-inline: clamp(var(--yoro-space-6), 3vw, var(--yoro-space-10));
-  border-block-start: 1px solid var(--line-strong);
-  color: var(--text);
-  background: var(--surface-strong);
-  box-shadow: var(--panel-shadow);
+  /* 띠는 카드가 아닙니다 — 배경·위 헤어라인 하나로 층을 나누고 그림자·radius 없음.
+     좌우 padding 은 상단바와 같은 축(96/48). */
+  padding: 12px 48px 12px 96px;
+  border-block-start: .5px solid var(--consent-line);
+  border-radius: 0;
+  color: var(--consent-text);
+  background: var(--consent-surface);
+  box-shadow: none;
+  font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 수묵 다크 팔레트(20-profile-platform 다크와 같은 값) */
+:root[data-public-theme="dark"] .google-consent-banner {
+  --consent-surface: #252730;
+  --consent-line: #3a404b;
+  --consent-text: #f5f6f8;
+  --consent-muted: #b9c3d0;
+  --consent-stroke: #b9c3d0;
+}
+
+/* 일본어 — 셸 안에서는 01-public-home.css:lang(ja) 가 하는 일을 배너에도. */
+.google-consent-banner:lang(ja) {
+  font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", system-ui, sans-serif;
 }
 
 .google-consent-banner__copy {
@@ -25,43 +61,48 @@
 
 .google-consent-banner__copy strong {
   display: inline;
-  margin-inline-end: var(--space-2);
-  color: var(--text-strong);
-  font-size: .9375rem;
+  margin-inline-end: var(--yoro-space-2, 8px);
+  color: var(--consent-text);
+  font-size: 13px;
+  font-weight: 800;
   line-height: 1.4;
 }
 
 .google-consent-banner__copy p {
   display: inline;
   margin: 0;
-  color: var(--muted);
-  font-size: .8125rem;
-  line-height: 1.5;
+  color: var(--consent-muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.55;
   overflow-wrap: anywhere;
 }
 
 .google-consent-banner__actions {
   display: flex;
   flex: 0 0 auto;
-  gap: var(--space-2);
+  gap: 8px;
 }
 
 .google-consent-banner__button {
-  min-height: 2.75rem;
-  padding-inline: var(--space-4);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-md);
+  min-height: 44px;
+  padding: 0 18px;
+  border: .5px solid var(--consent-stroke);
+  border-radius: 2px;
+  background: none;
+  color: var(--consent-text);
   font: inherit;
+  font-size: 13px;
   font-weight: 800;
   cursor: pointer;
   transition:
     background var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
-    border-color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
-    transform var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard);
+    border-color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard);
 }
 
+/* 이 팔레트는 표면을 띄우지 않습니다 — hover 는 테두리만 진하게. */
 .google-consent-banner__button:hover {
-  transform: translateY(-1px);
+  border-color: var(--consent-text);
 }
 
 .google-consent-banner__button:focus-visible {
@@ -69,23 +110,33 @@
   box-shadow: var(--yoro-shadow-focus);
 }
 
-.google-consent-banner__button--primary {
-  border-color: var(--brand-strong);
-  color: var(--yoro-color-text-on-dark);
-  background: var(--brand-strong);
-}
-
+/* 두 버튼은 같은 무게입니다(사용자 결정, 2026-08-21 확정) — 동의 화면에서
+   한쪽만 눈에 띄게 만드는 것은 선택을 유도하는 것이 됩니다. --primary /
+   --secondary 클래스는 마크업 훅으로만 남기고 시각 차이를 두지 않습니다. */
+.google-consent-banner__button--primary,
 .google-consent-banner__button--secondary {
-  color: var(--text-strong);
-  background: var(--surface-muted);
+  border-color: var(--consent-stroke);
+  background: none;
+  color: var(--consent-text);
 }
 
 @media (max-width: 40rem) {
   .google-consent-banner {
     align-items: stretch;
     flex-direction: column;
-    gap: var(--space-2);
-    padding: var(--space-3);
+    gap: 10px;
+    padding: 12px 16px;
+  }
+
+  /* 좁은 폭에서는 제목·설명을 두 줄로 쌓습니다 — 한 줄 이어 붙이면 읽기 어렵습니다. */
+  .google-consent-banner__copy strong,
+  .google-consent-banner__copy p {
+    display: block;
+    margin-inline-end: 0;
+  }
+
+  .google-consent-banner__copy strong {
+    margin-block-end: 2px;
   }
 
   .google-consent-banner__actions {
@@ -95,6 +146,14 @@
 
   .google-consent-banner__button {
     min-width: 0;
-    padding-inline: var(--space-2);
+    padding: 0 8px;
+  }
+
+  /* 모바일 하단 탭바(홈 .yoro-home-tabbar 64px+안전영역 · LoL
+     .public-bottom-tab-bar 56px+안전영역) 위로 배너를 올립니다 — 탭바가 있는
+     화면에서만. 탭바 파일을 고치지 않고 배너 쪽에서 해결합니다(한 파일 제약). */
+  :root:has(.yoro-home-tabbar) .google-consent-banner,
+  :root:has(.public-bottom-tab-bar) .google-consent-banner {
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px));
   }
 }

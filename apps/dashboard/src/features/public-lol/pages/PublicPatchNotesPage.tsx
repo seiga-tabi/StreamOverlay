@@ -309,47 +309,41 @@ function FeaturedTile({ entry }: { entry: PatchEntry }) {
   );
 }
 
-function ArchiveRow({ entry, maxGames, showMine }: { entry: PatchEntry; maxGames: number; showMine: boolean }) {
-  const { note, record, gapDays } = entry;
+/** 사이드바 행의 날짜 — 목업 `08.12`. 숫자만이라 로케일 표기와 무관합니다. */
+function formatMonthDay(value: string): string {
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return "";
+  return `${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
+}
+
+/* 사이드바 행 — 번호·MM.DD·우측 %p(또는 —) 세 값만(사용성 §2-1-4·5).
+ * 제목은 본문 히어로·요약 카드가 보여 주므로 sr-only 링크 텍스트로만 남기고,
+ * 폭 0 이던 .yoro-pn-node·.yoro-pn-row-art 와 「플레이 없음」 반복은 지웠습니다.
+ * 행 전체가 stretched link(.yoro-pn-link::after) 로 그 패치 원문으로 갑니다. */
+function ArchiveRow({ entry }: { entry: PatchEntry }) {
+  const { note, record, previousRecord } = entry;
+  const delta = record && previousRecord
+    ? Math.round((record.winRate - previousRecord.winRate) * 10) / 10
+    : undefined;
 
   return (
     <article className={record ? "yoro-pn-row is-played" : "yoro-pn-row"}>
-      <span aria-hidden="true" className="yoro-pn-node" />
       {record ? <span className="yoro-u-sr-only">{t().patchNotesPlayedMark}</span> : null}
-      {note.imageUrl ? (
-        <img
-          alt=""
-          aria-hidden="true"
-          className="yoro-pn-row-art"
-          decoding="async"
-          height={30}
-          loading="lazy"
-          src={note.imageUrl}
-          width={52}
-        />
-      ) : null}
-      <p className="yoro-pn-row-num">{note.patchVersion ?? "—"}</p>
-      <div className="yoro-pn-row-body">
-        {/* 반복되는 원문 제목 대신 요약이 앞에 옵니다. 원문 제목은 바로 아래 남깁니다. */}
-        <h3 className="yoro-pn-row-title">
-          <a className="yoro-pn-link" href={riotLocaleUrl(note.url)} rel="noopener noreferrer" target="_blank">
-            {note.summary || note.title}
-            <span className="yoro-u-sr-only">{` ${note.title} — ${t().patchNotesNewTab}`}</span>
-          </a>
-        </h3>
-        <p className="yoro-pn-row-source">{note.title}</p>
-      </div>
-      <p className="yoro-pn-row-when">
-        <time dateTime={note.publishedAt}>{formatShortDate(note.publishedAt)}</time>
-        {gapDays === undefined ? null : <span>{t().patchNotesGapDays.replace("{days}", String(gapDays))}</span>}
-        {note.dataDragonVersion ? <em>{note.dataDragonVersion}</em> : null}
+      <p className="yoro-pn-row-num">
+        <a className="yoro-pn-link" href={riotLocaleUrl(note.url)} rel="noopener noreferrer" target="_blank">
+          {note.patchVersion ?? "—"}
+          <span className="yoro-u-sr-only">{` ${note.title} — ${t().patchNotesNewTab}`}</span>
+        </a>
       </p>
-      {/* 개인 전적 미표시 상태에서는 빈 값 문구를 아예 그리지 않습니다 — 60줄 "기록 없음" 노이즈의 수정점 */}
-      {record
-        ? <WinRateGauge maxGames={maxGames} record={record} size="row" />
-        : showMine
-          ? <p className="yoro-pn-row-norate">{t().patchNotesNotPlayed}</p>
-          : null}
+      <p className="yoro-pn-row-when">
+        <time dateTime={note.publishedAt}>{formatMonthDay(note.publishedAt)}</time>
+      </p>
+      <p
+        className="yoro-pn-row-delta"
+        data-tone={delta === undefined || delta === 0 ? undefined : delta > 0 ? "good" : "bad"}
+      >
+        {delta === undefined ? "—" : signed(delta)}
+      </p>
     </article>
   );
 }
@@ -468,7 +462,8 @@ export function PublicPatchNotesPage({ locale }: { locale: string }) {
 
   const trimmedQuery = query.trim();
 
-  /* 빠른 필터. 개수까지 함께 보여 주어야 누르기 전에 결과 규모를 압니다. */
+  /* 빠른 필터 칩은 전체·내가 플레이한 둘만 — 시즌은 아래 셀렉트가 전부 맡습니다
+     (사용성 §2-2: 칩 .slice(0,2) 로는 시즌 13·14 의 43개 패치에 도달할 수 없었음). */
   const filterOptions = useMemo<PatchNotesFilterOption[]>(() => {
     const options: PatchNotesFilterOption[] = [
       { value: "all", label: t().patchNotesFilterAll, count: entries.length }
@@ -477,28 +472,29 @@ export function PublicPatchNotesPage({ locale }: { locale: string }) {
     if (played > 0) {
       options.push({ value: "played", label: t().patchNotesFilterPlayed, count: played });
     }
+    return options;
+  }, [entries]);
+
+  /* 시즌 셀렉트 — 데이터에 있는 모든 시즌(최신순). 시즌이 몇 개든 한 그릇입니다. */
+  const seasonOptions = useMemo(() => {
     const seasons = new Map<string, number>();
     for (const entry of entries) {
       const season = seasonOf(entry.note);
       if (season) seasons.set(season, (seasons.get(season) ?? 0) + 1);
     }
-    /* 시즌이 여러 개면 최근 두 개만 칩으로 냅니다. 나머지는 아카이브 머리글이 맡습니다. */
-    for (const [season, count] of [...seasons.entries()]
+    return [...seasons.entries()]
       .sort((a, b) => Number(b[0]) - Number(a[0]))
-      .slice(0, 2)) {
-      options.push({
-        value: `season:${season}`,
-        label: t().patchNotesFilterSeason.replace("{season}", season),
-        count
-      });
-    }
-    return options;
+      .map(([season, count]) => ({ season, count }));
   }, [entries]);
 
-  /* 고른 필터가 사라지면(소환사를 바꿔 기록이 없어지는 등) 전체로 되돌립니다. */
+  /* 고른 필터가 사라지면(소환사를 바꿔 기록이 없어지는 등) 전체로 되돌립니다.
+     셀렉트의 시즌 값도 유효 목록에 포함합니다 — 빼먹으면 시즌을 고르는 순간
+     이 가드가 전체로 되돌립니다(사용성 §2-2-5). */
   useEffect(() => {
-    if (!filterOptions.some((option) => option.value === filter)) setFilter("all");
-  }, [filterOptions, filter]);
+    const valid = filterOptions.some((option) => option.value === filter)
+      || seasonOptions.some((option) => `season:${option.season}` === filter);
+    if (!valid) setFilter("all");
+  }, [filterOptions, seasonOptions, filter]);
 
   const visibleEntries = useMemo(() => {
     const normalized = trimmedQuery.toLocaleLowerCase(localeTag());
@@ -535,6 +531,26 @@ export function PublicPatchNotesPage({ locale }: { locale: string }) {
   }, [latestPatchVersion, feedLocale]);
   const tiles = searching ? [] : visibleEntries.slice(1, 1 + FEATURED_TILE_COUNT);
   const archive = searching ? visibleEntries : visibleEntries.slice(1 + FEATURED_TILE_COUNT);
+
+  /* 시즌 접기(사용성 §2-1) — 54행 2,770px 통짜 목록의 수정점. 현재 시즌만 펼치고
+     나머지는 44px 한 줄로 접습니다. 검색 중에는 접지 않습니다(평면 목록 유지). */
+  const seasonGroups = useMemo(() => {
+    const groups: Array<{ season: string | undefined; entries: PatchEntry[] }> = [];
+    for (const entry of archive) {
+      const season = seasonOf(entry.note);
+      const last = groups[groups.length - 1];
+      if (last && last.season === season) last.entries.push(entry);
+      else groups.push({ season, entries: [entry] });
+    }
+    return groups;
+  }, [archive]);
+  /* season → 열림 여부. 기록이 없으면 첫 그룹(현재 시즌)만 기본 열림. */
+  const [seasonToggles, setSeasonToggles] = useState<Record<string, boolean>>({});
+  /* season → 4행 제한 해제 여부(「모두 보기」). */
+  const [seasonShowAll, setSeasonShowAll] = useState<Record<string, boolean>>({});
+
+  /* 펼친 시즌도 처음에는 4행만 — 목업 사이드바가 4행인 이유(§2-1-3). */
+  const INITIAL_SEASON_ROWS = 4;
 
   /* 시즌이 바뀌는 첫 줄에만 머리글을 답니다. */
   const seasonCounts = useMemo(() => {
@@ -630,6 +646,7 @@ export function PublicPatchNotesPage({ locale }: { locale: string }) {
                 onQuery={setQuery}
                 query={query}
                 resultCount={visibleEntries.length}
+                seasonOptions={seasonOptions}
               />
             </>
           ) : null}
@@ -672,26 +689,73 @@ export function PublicPatchNotesPage({ locale }: { locale: string }) {
             {archive.length > 0 ? (
               <div className="yoro-pn-archive">
                 {searching ? null : <p className="yoro-pn-archive-title">{t().patchNotesArchiveTitle}</p>}
-                <div className="yoro-pn-list">
-                  {archive.map((entry, index) => {
-                    const season = seasonOf(entry.note);
-                    const previousSeason = index > 0 ? seasonOf(archive[index - 1]!.note) : undefined;
-                    const showSeason = !searching && season !== undefined && season !== previousSeason;
-                    return (
+                {searching ? (
+                  /* 검색 중에는 접지 않습니다 — 평면 결과 목록, 시즌 머리글 없음(§2-1). */
+                  <div className="yoro-pn-list">
+                    {archive.map((entry) => (
                       <div className="yoro-pn-group" key={entry.note.slug}>
-                        {showSeason ? (
-                          <p className="yoro-pn-season">
-                            <b>{t().patchNotesSeason.replace("{season}", season)}</b>
-                            <small>
-                              {t().patchNotesSeasonCount.replace("{count}", String(seasonCounts.get(season) ?? 0))}
-                            </small>
-                          </p>
-                        ) : null}
-                        <ArchiveRow entry={entry} maxGames={maxGames} showMine={Boolean(target)} />
+                        <ArchiveRow entry={entry} />
                       </div>
-                    );
-                  })}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="yoro-pn-list">
+                    {seasonGroups.map((group, groupIndex) => {
+                      const season = group.season;
+                      /* 시즌을 못 읽은 노트는 접을 단위가 없어 그대로 폅니다. */
+                      const open = season === undefined
+                        ? true
+                        : seasonToggles[season] ?? groupIndex === 0;
+                      const showAll = season === undefined ? true : seasonShowAll[season] ?? false;
+                      const rows = showAll ? group.entries : group.entries.slice(0, INITIAL_SEASON_ROWS);
+                      const hiddenCount = group.entries.length - rows.length;
+                      const seasonLabel = season === undefined
+                        ? ""
+                        : t().patchNotesSeason.replace("{season}", season);
+                      return (
+                        <section className="yoro-pn-group" key={season ?? `no-season-${groupIndex}`}>
+                          {season === undefined ? null : (
+                            <button
+                              aria-expanded={open}
+                              className="yoro-pn-season-toggle"
+                              onClick={() => setSeasonToggles((current) => ({ ...current, [season]: !open }))}
+                              type="button"
+                            >
+                              <svg
+                                aria-hidden="true"
+                                className="yoro-pn-season-caret"
+                                data-open={open ? "true" : undefined}
+                                fill="none"
+                                height="10"
+                                stroke="currentColor"
+                                strokeWidth="1.2"
+                                viewBox="0 0 10 10"
+                                width="10"
+                              >
+                                <path d="M3 1.5 L 7.5 5 L 3 8.5" />
+                              </svg>
+                              <b>{seasonLabel}</b>
+                              <small>
+                                {t().patchNotesSeasonCount.replace("{count}", String(seasonCounts.get(season) ?? group.entries.length))}
+                              </small>
+                            </button>
+                          )}
+                          {open ? rows.map((entry) => <ArchiveRow entry={entry} key={entry.note.slug} />) : null}
+                          {open && hiddenCount > 0 && season !== undefined ? (
+                            <button
+                              className="yoro-pn-season-more"
+                              onClick={() => setSeasonShowAll((current) => ({ ...current, [season]: true }))}
+                              type="button"
+                            >
+                              {/* 새 i18n 키 없이 기존 키 조합 — "시즌 26 · 16개 패치 더보기" */}
+                              {`${seasonLabel} · ${t().patchNotesSeasonCount.replace("{count}", String(group.entries.length))} ${t().loadMoreMatches}`}
+                            </button>
+                          ) : null}
+                        </section>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             ) : null}
             {/* 출처를 숨기지 않습니다 — 사이드바 카드로 항상 둡니다. */}

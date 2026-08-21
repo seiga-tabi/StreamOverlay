@@ -5,9 +5,8 @@ import "../styles/pages/home/03-lol-streamers.css";
 import { usePublicLocale } from "../features/public-lol/hooks/usePublicLocale";
 import { setActivePublicLocale, type PublicLocale } from "../features/public-lol/i18n/public-lol-i18n";
 import { usePublicViewerTwitchSession } from "../shared/usePublicViewerTwitchSession";
-import { HomeHeader } from "../features/public-home/components/HomeHeader";
 import { HomeFooter, HomeLoginModal } from "../features/public-home/components/HomeSections";
-import { LolSubnav } from "../features/public-home/components/LolHomeSections";
+import { LolChrome } from "../features/public-home/components/LolChrome";
 import { StreamersBody, StreamersPageHead } from "../features/public-home/components/LolStreamersSections";
 import { LolBottomTabBar } from "../features/public-home/components/HomeTabBar";
 import { useHomeTheme } from "../features/public-home/hooks/useHomeTheme";
@@ -54,19 +53,16 @@ export function PublicLolStreamersPage() {
   return (
     <div className={`yoro-home-shell yoro-lol-home yoro-streamers-page theme-${theme}`}>
       <a className="yoro-home-skip" href="#yoro-streamers-main">{homeText.skipToContent}</a>
-      <HomeHeader
+      <LolChrome
         accountName={twitchStatus.user?.displayName}
-        activeGame="lol"
+        active="streamers"
         connected={twitchStatus.connected}
         locale={locale}
-        onDashboard={() => window.location.assign("/dashboard")}
         onLocale={handleLocale}
         onLoginOpen={() => setLoginOpen(true)}
         onLogout={() => void disconnectTwitch()}
         onToggleTheme={toggleTheme}
-        text={homeText}
       />
-      <LolSubnav active="streamers" text={lolText} />
       <main className="yoro-home-main" id="yoro-streamers-main">
         <StreamersPageHead
           count={twitchStatus.connected && followedChannels ? followedChannels.channels.length : undefined}

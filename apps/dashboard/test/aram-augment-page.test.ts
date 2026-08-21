@@ -43,17 +43,21 @@ test("이 페이지에서 다른 기능으로 나가는 경로를 둔다", () =>
   assert.match(page, /catalog\?\.status === "preparing" \? <AramExits \/> : null/u);
 });
 
-test("등급을 색 띠로 구분하고 숫자 등급도 미리 받는다", () => {
+test("등급색은 표식 외곽선·글자로 말하고 숫자 등급도 미리 받는다", () => {
+  /* 수묵 전환(§2-3): 4px 좌측 색 레일은 은퇴 — 등급 표식이 같은 정보를 말합니다.
+     문자열·숫자 등급 페어는 계속 함께 둡니다(실데이터가 0/1/2/4 네 단계). */
   const rules = css.replace(/\/\*[\s\S]*?\*\//gu, "");
-  assert.match(rules, /\.public-aram-card::before/u);
+  assert.equal(rules.includes(".public-aram-card::before"), false);
   for (const selector of [
-    /\.rarity-silver::before,\s*\n\s*\.public-aram-card\.rarity-0::before/u,
-    /\.rarity-gold::before,\s*\n\s*\.public-aram-card\.rarity-1::before/u,
-    /\.rarity-prismatic::before,\s*\n\s*\.public-aram-card\.rarity-2::before/u,
-    /\.rarity-legend::before,\s*\n\s*\.public-aram-card\.rarity-4::before/u
+    /\.rarity-silver,\s*\n\s*\.public-aram-card\.rarity-0 \{ --aram-r: var\(--aram-r-silver\); \}/u,
+    /\.rarity-gold,\s*\n\s*\.public-aram-card\.rarity-1 \{ --aram-r: var\(--aram-r-gold\); \}/u,
+    /\.rarity-prismatic,\s*\n\s*\.public-aram-card\.rarity-2 \{ --aram-r: var\(--aram-r-prismatic\); \}/u,
+    /\.rarity-legend,\s*\n\s*\.public-aram-card\.rarity-4 \{ --aram-r: var\(--aram-r-legend\); \}/u
   ]) {
     assert.match(rules, selector);
   }
+  /* 라이트 단계(§2-3 신규) — 흰 카드 위 4.5:1 을 넘는 값이 네 등급 모두 있어야 합니다. */
+  assert.match(rules, /\.theme-light \.public-aram-page[\s\S]*?--aram-r-silver:[\s\S]*?--aram-r-gold:[\s\S]*?--aram-r-prismatic:[\s\S]*?--aram-r-legend:/u);
 });
 
 test("보정 CSS는 pages layer에서 !important 없이 44px를 지킨다", () => {

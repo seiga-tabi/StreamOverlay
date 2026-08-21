@@ -196,13 +196,15 @@ test("스트리머 참여 화면은 방송인 직접 컨트롤 콕핏(체크인 
   assert.match(css, /participation-management-page \{[\s\S]{0,400}--info:\s*hsl\(/u);
 });
 
-test("모바일 공개 검색 결과는 두 항목 이후 목록 내부에서 스크롤한다", async () => {
+test("모바일 공개 검색 결과는 목록 내부에서 스크롤한다", async () => {
+  /* 연관 패널 리스킨(38-ink 소유) 이후: 행 높이 공식(touch-target 합) 대신
+     고정 max-height(01-core·02-legacy)와 05 의 모바일 overflow-y 가 담당합니다. */
   const lolCss = await readFile(
     new URL("../src/styles/pages/public-lol/05-overrides.css", import.meta.url),
     "utf8"
   );
-  const lolFinalCss = await readFile(
-    new URL("../src/styles/pages/public-lol/10-final-overrides.css", import.meta.url),
+  const coreCss = await readFile(
+    new URL("../src/styles/legacy/01-core.css", import.meta.url),
     "utf8"
   );
   const palworldCss = await readFile(
@@ -210,9 +212,9 @@ test("모바일 공개 검색 결과는 두 항목 이후 목록 내부에서 �
     "utf8"
   );
 
-  assert.match(lolCss, /public-home-shared-search \.public-suggestion-list[\s\S]*?max-height:[\s\S]*?--yoro-size-touch-target[\s\S]*?--yoro-size-touch-target[\s\S]*?overflow-y:\s*auto/u);
-  assert.match(lolFinalCss, /public-suggestion-list button[\s\S]*?grid-template-rows:[\s\S]*?min-height:[\s\S]*?--yoro-size-touch-target/u);
-  assert.match(lolCss, /public-search-wrap \.public-suggestion-list[\s\S]*?max-height:[\s\S]*?--yoro-size-touch-target[\s\S]*?--yoro-size-touch-target[\s\S]*?overflow-y:\s*auto/u);
+  assert.match(lolCss, /public-home-shared-search \.public-suggestion-list[\s\S]*?overflow-y:\s*auto/u);
+  assert.match(lolCss, /public-search-wrap \.public-suggestion-list[\s\S]*?overflow-y:\s*auto/u);
+  assert.match(coreCss, /\.public-suggestion-list \{[\s\S]*?max-height:/u);
   assert.match(palworldCss, /\.palworld-autocomplete[\s\S]*?max-block-size:[\s\S]*?--yoro-size-touch-target[\s\S]*?--yoro-size-touch-target[\s\S]*?overflow-y:\s*auto/u);
   assert.match(palworldCss, /\.palworld-autocomplete-copy[\s\S]*?\.palworld-autocomplete-heading strong/u);
 });

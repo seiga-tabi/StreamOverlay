@@ -116,8 +116,14 @@
   }
 
   /* 공용 버튼(요약 공유·내 변화 보기·재시도)도 이 페이지 문법으로 — 채운
-     보라(#6259ef)의 자리였습니다. 배경 없음 + 진한 외곽선(목업 .out-btn). */
+     보라(#6259ef)의 자리였습니다. 배경 없음 + 진한 외곽선(목업 .out-btn).
+     Button.css 는 레이어 밖(JS import)이라 아래 border-radius: 2px 선언은
+     항상 집니다(2차 §1-3 — 실측 12px 의 원인). 속성 경쟁 대신 Button.css 가
+     읽는 radius 토큰을 이 스코프에서 갈아끼웁니다(head-status 배지와 같은 방식). */
   .yoro-pn-page .yoro-button {
+    --yoro-radius-md: 2px;
+    --yoro-radius-lg: 2px;
+
     min-height: 44px;
     border: .5px solid var(--public-gray-border-strong);
     border-radius: 2px;
@@ -134,7 +140,88 @@
     color: var(--public-gray-text);
   }
 
-  /* 판정 태그 — 글자·테두리만, 배경 틴트 금지(보강 §2 표 유지). */
+  /* ── 2차(§2-2) — 35 의 옛 카드 잔재를 목업 규격으로 ─────────────────── */
+
+  /* 검색+필터 줄은 카드가 아닙니다 — 검색칸·칩이 지면 위에 바로 놓입니다
+     (목업 LolPatchNotes 검색+필터 줄). 흰 바 시절의 패딩·테두리·표면을 벗깁니다. */
+  .yoro-pn-bar {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+  }
+
+  /* 요약 소그룹도 카드가 아닙니다 — 구분은 위 헤어라인 하나(목업 요약 패널). */
+  .yoro-pn-summary-group {
+    border: 0;
+    border-top: .5px solid var(--public-gray-border);
+    border-radius: 0;
+    background: none;
+  }
+
+  /* 해제 버튼 — 알약 잔재를 r2 로. */
+  .yoro-pn-mine-dismiss { border-radius: 2px; }
+
+  /* 전적 상세 — 59×15 맨몸 링크였던 주 동작을 「해제」와 같은 높이의 외곽선
+     버튼으로(사용성 §2-4). 주 동작이므로 border-strong + 800, 해제는 border + 500. */
+  .yoro-pn-mine-profile {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    min-height: 36px;
+    padding: 0 14px;
+    border: .5px solid var(--public-gray-border-strong);
+    border-radius: 2px;
+    color: var(--public-gray-text);
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .yoro-pn-mine-profile:hover {
+    border-color: var(--public-gray-text);
+    background: color-mix(in srgb, var(--public-gray-text) 6%, transparent);
+  }
+
+  /* 시즌 셀렉트 — 칩과 같은 규격(44px · r2 · 헤어라인 · 13/500)이라 한 줄에서
+     형제로 보입니다(사용성 §2-2-3). */
+  .yoro-pn-season-select {
+    min-height: 44px;
+    padding: 0 12px;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
+    background: none;
+    color: var(--public-gray-muted);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  /* (아카이브 행 썸네일은 사용성 §2-1 에서 DOM 째 은퇴했습니다.) */
+
+  /* 내 전적 모듈의 서버 select·검색 input — r2 · 헤어라인 · 배경 없음 ·
+     터치 타깃 44px(AI_WORKFLOW §4). 검색줄 input 은 .yoro-pn-bar-search 상자가
+     외곽선을 소유하므로 여기 포함하지 않습니다. */
+  .yoro-pn-mine-form select,
+  .yoro-pn-mine-form input {
+    min-height: 44px;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
+    background: none;
+  }
+
+  /* 챔피언·아이템 아이콘(요약 변경 행·최다 사용) — r2 · 지면색 홀더.
+     .yoro-pn-who 아바타(원형)는 그대로 둡니다. */
+  .yoro-pn-summary-chg :is(img, i),
+  .yoro-pn-summary-top :is(img, i) {
+    border-radius: 2px;
+    background: var(--public-gray-page);
+  }
+
+  /* 판정 태그 — 글자·테두리만, 배경 틴트 금지(보강 §2 표 유지).
+     기본 선택자를 함께 넓혀 「가격」 같은 방향 없는 변형도 r2 를 받습니다(2차 §2-2). */
+  .yoro-pn-summary-tag {
+    border-radius: 2px;
+  }
+
   .yoro-pn-summary-tag[data-direction="buff"],
   .yoro-pn-summary-tag[data-direction="nerf"],
   .yoro-pn-summary-tag[data-direction="adjust"] {
@@ -226,16 +313,58 @@
 
   .yoro-pn-side .yoro-pn-group + .yoro-pn-group { margin-top: 0; }
 
-  .yoro-pn-side .yoro-pn-season {
+  /* 시즌 접기(사용성 §2-1) — 머리는 44px 토글 버튼. 접힌 시즌은 이 한 줄이 전부. */
+  .yoro-pn-side .yoro-pn-season-toggle {
     display: flex;
-    align-items: baseline;
     gap: 8px;
-    margin: 10px 0 2px;
+    align-items: center;
+    width: 100%;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    border-top: .5px solid var(--public-gray-border);
+    background: none;
     color: var(--public-gray-muted);
     font-size: 11px;
+    cursor: pointer;
+    text-align: left;
   }
 
-  .yoro-pn-side .yoro-pn-season b { color: var(--public-gray-text); font-size: 12px; }
+  .yoro-pn-side .yoro-pn-group:first-of-type .yoro-pn-season-toggle { border-top: 0; }
+
+  .yoro-pn-side .yoro-pn-season-toggle b { color: var(--public-gray-text); font-size: 12px; }
+  .yoro-pn-side .yoro-pn-season-toggle small { margin-left: auto; font-size: 11px; }
+
+  .yoro-pn-season-caret {
+    flex: none;
+    color: var(--public-gray-muted);
+    transition: rotate .12s ease;
+  }
+
+  .yoro-pn-season-caret[data-open] { rotate: 90deg; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .yoro-pn-season-caret { transition: none; }
+  }
+
+  /* 「시즌 N 패치 M개 더보기」 — 4행 이후를 여는 텍스트 버튼(§2-1-3). */
+  .yoro-pn-side .yoro-pn-season-more {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 0 0 18px;
+    border: 0;
+    border-top: .5px solid var(--public-gray-border);
+    background: none;
+    color: var(--public-gray-muted);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .yoro-pn-side .yoro-pn-season-more:hover { color: var(--public-gray-text); }
 
   .yoro-pn-side .yoro-pn-row,
   .yoro-pn-side .yoro-pn-row.is-played {
@@ -244,17 +373,13 @@
     align-items: center;
     gap: 10px;
     min-height: 44px;
-    padding: 0;
+    padding: 0 0 0 18px;
     border: 0;
     border-top: .5px solid var(--public-gray-border);
     border-radius: 0;
     background: none;
     box-shadow: none;
   }
-
-  /* 옛 축 장식(점·썸네일)은 사이드바 목록에서 접습니다 — 목업에 없습니다. */
-  .yoro-pn-side .yoro-pn-node,
-  .yoro-pn-side .yoro-pn-row-art { display: none; }
 
   .yoro-pn-side .yoro-pn-row-num {
     flex: none;
@@ -266,23 +391,7 @@
     color: var(--public-gray-muted);
   }
 
-  .yoro-pn-side .yoro-pn-group:first-of-type .yoro-pn-row-num,
   .yoro-pn-side .yoro-pn-row:hover .yoro-pn-row-num { color: var(--public-gray-text); }
-
-  /* 제목(anchor 포함)은 접근성 텍스트로만 — stretched link 가 행 전체를 덮습니다. */
-  .yoro-pn-side .yoro-pn-row-body {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    padding: 0;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-  }
-
-  /* stretched link(::after)의 기준을 행으로 되돌립니다 — body 가 clip 돼도
-     ::after 는 .yoro-pn-row(relative) 전체를 덮습니다. */
 
   .yoro-pn-side .yoro-pn-row-when {
     flex: 1;
@@ -296,12 +405,18 @@
     overflow: hidden;
   }
 
-  .yoro-pn-side .yoro-pn-row-when em { display: none; }
+  /* 우측 승률 변화 — %p 또는 —(사용성 §2-1-5). 판정 색은 그래프 잉크 단계. */
+  .yoro-pn-row-delta {
+    flex: none;
+    margin: 0;
+    color: var(--public-gray-muted);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+  }
 
-  .yoro-pn-side .yoro-pn-row-norate { margin: 0; flex: none; color: var(--public-gray-muted); font-size: 11px; }
-
-  /* 사이드바 게이지는 %p 숫자 폭만 — 행 높이에 맞춰 축소. */
-  .yoro-pn-side .yoro-pn-gauge { flex: none; }
+  .yoro-pn-row-delta[data-tone="good"] { color: var(--graph-win-ink); }
+  .yoro-pn-row-delta[data-tone="bad"] { color: var(--graph-loss-ink); }
 
   /* 출처 — 사이드바 카드. */
   .yoro-pn-side .yoro-pn-attribution {

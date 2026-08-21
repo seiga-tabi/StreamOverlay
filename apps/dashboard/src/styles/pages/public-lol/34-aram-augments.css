@@ -1,10 +1,14 @@
 @layer pages {
-  /* 증강 칼바람 보정.
+  /* 증강 칼바람 수묵 전환 — 목업 page-7 LolAram/-Light/-Ja/-Mobile/-MobileLight.
    *
    * 21-aram.css 는 legacy layer 지만 !important 가 하나도 없어 pages layer 에서
    * 그대로 이길 수 있습니다. 새 이름은 .yoro-aram-* 만 씁니다.
    *
-   * 근거: docs/mockups/aram-augment-page-v4.html
+   * 공유 컴포넌트(Card·Button·Input·Badge)는 레이어 밖(JS import)이라 속성으로는
+   * 못 이깁니다 — 전부 토큰 구동이므로 이 스코프에서 그 토큰만 갈아끼웁니다
+   * (42-ink-patch-notes 의 .yoro-pn-page .yoro-button 과 같은 방식, !important 0 유지).
+   * 팔레트는 20-profile-platform.css 의 토큰 다리(.public-aram-page)에서,
+   * 서체는 01-public-home.css 의 다리에서 옵니다 — 여기서 값을 새로 만들지 않습니다.
    */
 
   .public-aram-page {
@@ -17,65 +21,261 @@
     --aram-r-legend: #c96bd8;
   }
 
-  /* 등급을 글자가 아니라 형태로 구분합니다. 게임 안에서는 색으로 즉시 구분됩니다. */
-  .public-aram-card {
+  /* 라이트 단계(전환 §2-3 — 이전에는 아예 없어 흰 카드 위 1.81~3.19:1 로 무너짐).
+     티어 램프와 같은 방법: 같은 hue 에서 명도만 낮춰 흰 카드 4.5:1 이상. */
+  .theme-light .public-aram-page,
+  :root[data-public-theme="light"] .public-aram-page {
+    --aram-r-silver: #6a7889;
+    --aram-r-gold: #9a6f14;
+    --aram-r-prismatic: #2a7f7d;
+    --aram-r-legend: #8a3e99;
+  }
+
+  /* ── 페이지 머리 — 노리개 + 명조 제목 + 붓 밑줄(목업 머리 3겹, §2-4) ───── */
+  .yoro-aram-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .yoro-aram-head-norigae {
+    flex: none;
+    margin-top: 4px;
+    color: var(--public-gray-muted);
+  }
+
+  .yoro-aram-head-copy {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .yoro-aram-head-eyebrow {
+    margin: 0;
+    color: var(--public-gray-muted);
+    font-size: 11px;
+    letter-spacing: .08em;
+  }
+
+  .yoro-aram-head-title {
+    margin: 6px 0 0;
+    font-size: 26px;
+    font-weight: 700;
+    font-family: var(--home-serif, "Noto Serif KR", "Noto Serif JP", serif);
+    line-height: 1.2;
+  }
+
+  .yoro-aram-head-title-word {
     position: relative;
-    padding-left: var(--yoro-space-4, 16px);
-    overflow: hidden;
+    display: inline-block;
   }
 
-  .public-aram-card::before {
+  .yoro-aram-head-tail {
     position: absolute;
-    inset: 0 auto 0 0;
-    width: 4px;
-    background: var(--aram-r-silver);
-    content: "";
+    left: 0;
+    bottom: -10px;
+    color: var(--public-gray-border-strong);
   }
 
-  .public-aram-card.rarity-silver::before,
-  .public-aram-card.rarity-0::before {
-    background: var(--aram-r-silver);
+  .yoro-aram-head-desc {
+    margin: 18px 0 0;
+    color: var(--public-gray-muted);
+    font-size: 13px;
   }
 
-  .public-aram-card.rarity-gold::before,
-  .public-aram-card.rarity-1::before {
-    background: var(--aram-r-gold);
+  /* 상태 태그 — 20px · r2 · 외곽선. 사용 가능은 승색 잉크, 준비 중은 무채(§2-4). */
+  .yoro-aram-head-status {
+    flex: none;
   }
 
-  .public-aram-card.rarity-prismatic::before,
-  .public-aram-card.rarity-2::before {
-    background: var(--aram-r-prismatic);
+  /* Status.css(레이어 밖)가 --yoro-status-* 훅을 요소에 직접 선언하므로 훅 대신
+     그 훅이 참조하는 토큰을 갈아끼웁니다(42 head-status 와 같은 방식). */
+  .yoro-aram-head-status .yoro-badge {
+    --yoro-space-8: 20px;
+    --yoro-space-2: 0px;
+    --yoro-space-3: 7px;
+    --yoro-font-size-sm: 10px;
+    --yoro-font-weight-bold: 800;
+    --yoro-radius-md: 2px;
+    --yoro-color-success: var(--graph-win-ink);
+    --yoro-color-success-bg: transparent;
+    --yoro-color-surface-muted: transparent;
+    --yoro-color-border: var(--public-gray-border);
+    --yoro-color-text-muted: var(--public-gray-muted);
   }
+
+  /* ── 격자 — 데스크톱 4열 · gap 12(목업 §격자) ──────────────────────── */
+  .public-aram-grid,
+  .public-aram-loading {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  /* ── 증강 카드 — 먹 표면 · .5px 헤어라인 · r3 · padding 14(§2-2).
+     Card.css 는 레이어 밖이라 훅 토큰으로만 조정합니다. 좌측 4px 색 레일은
+     은퇴했습니다 — 등급 표식(외곽선+글자색)이 같은 정보를 이미 말합니다. */
+  .public-aram-page .yoro-card {
+    --yoro-card-border-width: .5px;
+    --yoro-card-border-color: var(--public-gray-border);
+    --yoro-card-background: var(--public-gray-surface);
+    --yoro-radius-lg: 3px;
+    --yoro-space-4: 14px;
+
+    color: var(--public-gray-text);
+    box-shadow: none;
+  }
+
+  .public-aram-card {
+    min-width: 0;
+  }
+
+  /* 카드별 등급색 — 표식·아이콘 테두리가 함께 씁니다. 숫자 키 fallback 유지. */
+  .public-aram-card { --aram-r: var(--aram-r-silver); }
+
+  .public-aram-card.rarity-silver,
+  .public-aram-card.rarity-0 { --aram-r: var(--aram-r-silver); }
+
+  .public-aram-card.rarity-gold,
+  .public-aram-card.rarity-1 { --aram-r: var(--aram-r-gold); }
+
+  .public-aram-card.rarity-prismatic,
+  .public-aram-card.rarity-2 { --aram-r: var(--aram-r-prismatic); }
 
   /* 실제 데이터의 네 번째 등급(rarity 4, 25개). 스키마에 아직 없습니다. */
-  .public-aram-card.rarity-legend::before,
-  .public-aram-card.rarity-4::before {
-    background: linear-gradient(180deg, var(--aram-r-legend), #7c5cf0);
-  }
+  .public-aram-card.rarity-legend,
+  .public-aram-card.rarity-4 { --aram-r: var(--aram-r-legend); }
 
-  /* 등급 배지도 같은 색 계열로 묶어 카드 안에서 한 번 더 읽히게 합니다. */
+  /* 등급 표식 — 채우지 않고 외곽선 + 글자만 등급색(전적 상세 티어 배지 문법, §2-3).
+     --yoro-status-* 훅은 Status.css(레이어 밖)가 요소에 직접 선언해 못 이기므로,
+     훅이 참조하는 neutral 토큰(surface-muted/border/text-muted)을 갈아끼웁니다. */
   .public-aram-card .yoro-badge {
-    border: 1px solid currentcolor;
-    background: transparent;
+    --yoro-space-8: 20px;
+    --yoro-space-2: 0px;
+    --yoro-space-3: 7px;
+    --yoro-font-size-sm: 10px;
+    --yoro-font-weight-bold: 800;
+    --yoro-radius-md: 2px;
+    --yoro-color-surface-muted: transparent;
+    --yoro-color-border: color-mix(in srgb, var(--aram-r) 45%, var(--public-gray-border));
+    --yoro-color-text-muted: var(--aram-r);
+
+    justify-self: start;
   }
 
-  .public-aram-card.rarity-gold .yoro-badge,
-  .public-aram-card.rarity-1 .yoro-badge {
-    color: #8a5200;
+  /* 아이콘 — 44×44 · r2 · 지면색 바탕 + 헤어라인(원형 아님, §2-2). */
+  .public-aram-card-icon {
+    flex-basis: 44px;
+    width: 44px;
+    height: 44px;
+    padding: 3px;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
+    background: var(--public-gray-page);
+    box-sizing: border-box;
   }
 
-  .public-aram-card.rarity-prismatic .yoro-badge,
-  .public-aram-card.rarity-2 .yoro-badge {
-    color: #0f6b68;
+  /* ── 이름·설명 — 04-followers !important 를 피한 전용 이름 유지(§2-5) ── */
+  .yoro-aram-name {
+    margin: 0;
+    color: var(--public-gray-text);
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
   }
 
-  .public-aram-card.rarity-legend .yoro-badge,
-  .public-aram-card.rarity-4 .yoro-badge {
-    color: #7b2f8a;
+  .yoro-aram-desc {
+    margin: var(--yoro-space-1, 4px) 0 0;
+    color: var(--public-gray-muted);
+    font-size: 12px;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
   }
 
-  /* 이 페이지에서 나갈 곳이 privacy·terms·contact 뿐이었습니다.
-     증강을 찾아 들어온 사람이 다른 기능을 만날 경로를 둡니다. */
+  /* ── 도구줄 — 검색칸이 남는 폭을 먹고 등급 필터가 옆에(목업 도구줄) ──── */
+  .public-aram-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+
+  /* 검색칸 — r2 · 배경 없음 · 헤어라인 · 44px. Form.css 는 레이어 밖이라 토큰만. */
+  .public-aram-toolbar .yoro-input {
+    --yoro-radius-md: 2px;
+    --yoro-color-border: var(--public-gray-border);
+    --yoro-color-surface-strong: transparent;
+    --yoro-color-text: var(--public-gray-text);
+    --yoro-color-text-muted: var(--public-gray-muted);
+
+    flex: 1 1 300px;
+    width: auto;
+    min-width: 300px;
+    font-size: 13px;
+  }
+
+  .public-aram-toolbar > label,
+  .public-aram-toolbar > .yoro-form-field {
+    flex: 1 1 300px;
+    min-width: 300px;
+  }
+
+  .public-aram-rarity {
+    flex: none;
+    padding-block-end: 0;
+  }
+
+  /* 등급 필터 — 44px · r2 · 헤어라인. 활성만 진한 테두리 + 700, 채움 금지(§2-2).
+     Button.css(레이어 밖)가 읽는 토큰을 버튼 요소 스코프에서 갈아끼웁니다. */
+  .public-aram-rarity .yoro-button {
+    --yoro-radius-md: 2px;
+    --yoro-color-border-strong: var(--public-gray-border);
+    --yoro-color-surface-strong: transparent;
+    --yoro-color-surface-muted: color-mix(in srgb, var(--public-gray-text) 6%, transparent);
+    --yoro-color-text-strong: var(--public-gray-muted);
+    --yoro-font-weight-bold: 500;
+    --yoro-shadow-soft: none;
+
+    font-size: 13px;
+  }
+
+  .public-aram-rarity .yoro-button[aria-pressed="true"] {
+    --yoro-color-border-strong: var(--public-gray-border-strong);
+    --yoro-color-text-strong: var(--public-gray-text);
+    --yoro-font-weight-bold: 700;
+  }
+
+  /* ── 「내 전적」 배지 + 경기 점프(결합 ②③ — 로직 무변경, 표면만) ────── */
+  .yoro-aram-mine {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: .5px solid var(--public-gray-border);
+    color: var(--graph-win-ink);
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .yoro-aram-mine-jump {
+    display: inline-flex;
+    gap: 5px;
+    align-items: center;
+    margin-left: 10px;
+    min-height: 30px;
+    padding: 0 10px;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
+    background: none;
+    color: var(--public-gray-text);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .yoro-aram-mine-jump:hover {
+    border-color: var(--public-gray-border-strong);
+  }
+
+  /* ── 이어서 볼 만한 것 — 먹 카드 문법으로(§1-3 흰 카드 잔재 정리) ────── */
   .yoro-aram-exits {
     min-width: 0;
     margin: 0;
@@ -90,20 +290,19 @@
     min-width: 0;
     min-height: 44px;
     padding: 12px 14px;
-    border: 1px solid var(--yoro-color-border, rgb(33 37 41 / 14%));
-    border-radius: 12px;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 3px;
     display: grid;
     gap: 3px;
     align-content: center;
-    background: var(--yoro-color-surface-strong, rgb(255 255 255 / 92%));
-    /* 카드 표면이 밝은데 상위에서 밝은 글자색을 물려받아 제목이 보이지 않았습니다. */
-    color: #14171f;
+    background: var(--public-gray-surface);
+    color: var(--public-gray-text);
     text-decoration: none;
   }
 
   .yoro-aram-exit:hover,
   .yoro-aram-exit:focus-visible {
-    border-color: var(--yoro-color-border-strong, rgb(88 101 242 / 45%));
+    border-color: var(--public-gray-border-strong);
   }
 
   .yoro-aram-exit > b {
@@ -112,17 +311,14 @@
   }
 
   .yoro-aram-exit > small {
-    /* 실측 4.5 로 경계였습니다. 토큰이 문맥마다 달라지므로 고정값으로 여유를 둡니다. */
-    color: #4a5160;
+    color: var(--public-gray-muted);
     font-size: 11.5px;
     line-height: 1.5;
   }
 
   .yoro-aram-exits-title {
     margin: 0 0 var(--yoro-space-2, 8px);
-    /* 페이지 배경이 중간 회색이라 밝은 글자로는 4.5 에 닿지 않습니다(흰색도 미달).
-       관리자 화면과 같은 이유로 어두운 쪽으로 내립니다. */
-    color: #14171a;
+    color: var(--public-gray-muted);
     font-size: 12px;
     font-weight: 800;
     letter-spacing: .04em;
@@ -133,28 +329,56 @@
     margin-top: var(--yoro-space-4, 16px);
   }
 
-  /* 증강 효과 설명 — 이 페이지의 본문입니다.
-   *
-   * 공유 CardDescription 을 쓰면 04-followers.css:690 의
-   * `.public-dashboard-shell .yoro-card__description { ... !important }` 에 걸려
-   * 카드 배경과 같은 밝기가 됩니다(렌더 픽셀 실측 1.03:1).
-   * legacy !important 는 pages layer 로 이길 수 없으므로 새 이름을 씁니다.
-   */
-  /* 이름도 04-followers.css:671 의 !important 에 걸려 같은 밝기가 됩니다. */
-  .yoro-aram-name {
-    margin: 0;
-    color: #14171f;
-    font-size: var(--yoro-font-size-md, 16px);
-    font-weight: 800;
-    line-height: 1.35;
-    overflow-wrap: anywhere;
+  /* ── 반응형 — 태블릿 2열(4열은 카드가 짓눌림 · 판단 기록), 모바일 1열(§3) ── */
+  @media (max-width: 64rem) {
+    .public-aram-grid,
+    .public-aram-loading {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 
-  .yoro-aram-desc {
-    margin: var(--yoro-space-1, 4px) 0 0;
-    color: #23272f;
-    font-size: var(--yoro-font-size-sm, 14px);
-    line-height: 1.6;
-    overflow-wrap: anywhere;
+  @media (max-width: 48rem) {
+    .public-aram-grid,
+    .public-aram-loading {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    /* 카드 안 — 아이콘 40px 왼쪽, 등급 표식 18px(목업 모바일). */
+    .public-aram-card-icon {
+      flex-basis: 40px;
+      width: 40px;
+      height: 40px;
+    }
+
+    .public-aram-card .yoro-badge {
+      --yoro-space-8: 18px;
+    }
+
+    /* 검색칸 전폭 한 줄 · 44px 유지. 등급 필터 줄만 가로 스크롤 허용(21-aram
+       overflow-x 유지) — 다섯 칸이 390px 에 안 들어갑니다. */
+    .public-aram-toolbar .yoro-input,
+    .public-aram-toolbar > label,
+    .public-aram-toolbar > .yoro-form-field {
+      flex: 1 1 100%;
+      min-width: 0;
+    }
+
+    .public-aram-rarity {
+      max-width: 100%;
+      overflow-x: auto;
+    }
+
+    /* 「이어서 볼 만한 것」 3열 → 1열 · 각 56px(§3). */
+    .yoro-aram-exits {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .yoro-aram-exit {
+      min-height: 56px;
+    }
+
+    .yoro-aram-mine-jump {
+      min-height: 32px;
+    }
   }
 }

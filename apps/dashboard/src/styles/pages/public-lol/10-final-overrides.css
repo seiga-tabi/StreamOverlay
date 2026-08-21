@@ -2465,86 +2465,15 @@
   min-width: 15rem !important;
 }
 
-/* 모바일 연관검색은 이름과 랭크를 한 정보 열에 쌓아 긴 KO/JA ID가 행을 밀어내지 않게 합니다. */
+/* 모바일 연관검색의 2단 행 재배치는 은퇴했습니다 — 행 규격(52px 단일 행·말줄임)은
+   38-ink-profile.css 가 소유하고, 좁은 폭 폭 제한은 02-lol-home.css 의
+   min(400px, 100vw - 32px) 이 담당합니다(연관 패널 프롬프트 §2-6·§3). */
 @media (max-width: 47.5rem) {
   .public-home-shared-shell .public-home-shared-search .public-suggestion-list,
   .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-list {
     min-width: var(--yoro-space-0) !important;
     max-width: 100% !important;
     overflow-x: hidden !important;
-  }
-
-  .public-home-shared-shell .public-home-shared-search .public-suggestion-list button,
-  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-list button {
-    grid-template-columns:
-      var(--yoro-space-10)
-      var(--yoro-space-8)
-      minmax(var(--yoro-space-0), 1fr)
-      var(--yoro-space-6) !important;
-    grid-template-rows: minmax(var(--yoro-space-6), auto) minmax(var(--yoro-space-5), auto);
-    grid-template-areas:
-      "avatar tier name mark"
-      "avatar tier rank mark" !important;
-    gap: var(--yoro-space-1) var(--yoro-space-2) !important;
-    box-sizing: border-box;
-    width: 100% !important;
-    min-height: calc(var(--yoro-size-touch-target) + var(--yoro-space-8)) !important;
-    min-width: var(--yoro-space-0) !important;
-    max-width: 100% !important;
-    padding-block: var(--yoro-space-3) !important;
-    overflow: visible !important;
-  }
-
-  .public-home-shared-shell .public-home-shared-search .public-suggestion-list button > *,
-  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-list button > * {
-    min-width: var(--yoro-space-0) !important;
-    max-width: 100% !important;
-  }
-
-  .public-home-shared-shell .public-home-shared-search .public-suggestion-name,
-  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-name {
-    display: flex !important;
-    align-self: end;
-    gap: var(--yoro-space-1);
-    align-items: baseline;
-    overflow: hidden;
-    line-height: 1.25;
-  }
-
-  .public-home-shared-shell .public-home-shared-search .public-suggestion-name span,
-  .public-home-shared-shell .public-home-shared-search .public-suggestion-name strong,
-  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-name span,
-  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-name strong,
-  .public-home-shared-shell .public-home-shared-search .public-suggestion-rank-copy > span,
-  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-rank-copy > span {
-    display: block !important;
-    min-width: var(--yoro-space-0) !important;
-    max-width: 100% !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .public-home-shared-shell .public-home-shared-search .public-suggestion-rank-copy,
-  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-rank-copy {
-    display: flex !important;
-    grid-area: rank;
-    align-self: start;
-    align-items: baseline;
-    justify-self: stretch;
-    justify-content: flex-start;
-    gap: var(--yoro-space-1);
-    min-width: var(--yoro-space-0) !important;
-    max-width: 100% !important;
-    overflow: hidden;
-    line-height: 1.25;
-    text-align: start;
-    white-space: nowrap;
-  }
-
-  .public-home-shared-shell .public-home-shared-search .public-suggestion-rank-copy small,
-  .public-dashboard-shell:not(.public-home-shell) .public-search-wrap .public-suggestion-rank-copy small {
-    flex: 0 0 auto;
   }
 }
 
