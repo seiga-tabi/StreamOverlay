@@ -247,6 +247,7 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
     (pathname === "/api/public/participation/cancel" && method === "POST") ||
     /^\/api\/public\/participation\/sessions\/[^/]+(?:\/(?:join|cancel|check-in|rejoin|skip))?$/.test(pathname) ||
     (method === "GET" && pathname === "/api/public/aram/augments") ||
+    (method === "GET" && pathname === "/api/public/game-boxart") ||
     (method === "GET" && pathname === "/api/public/patch-notes") ||
     (method === "GET" && pathname === "/api/public/patch-notes/summary") ||
     (method === "GET" && pathname === "/api/public/patch-notes/changes") ||

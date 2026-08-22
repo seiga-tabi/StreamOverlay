@@ -727,6 +727,9 @@
 
   .public-profile-platform-v2 .public-more-links-head > h2 {
     margin: 0;
+    /* legacy 파스텔(.public-dashboard-shell { color: #10233d !important })이
+       상속으로 먹 카드까지 따라옵니다 — 자기 색을 명시(글자 대비 감사 A-1). */
+    color: var(--public-gray-text);
     font-size: .875rem;
     font-weight: 800;
   }
@@ -1173,28 +1176,28 @@
      (탭 행 통일 프롬프트 §2-1 — 이 문서가 앞선 §2-4 를 대체). */
 
   /* 티어 크레스트·우측 티어명 색 — data-tier 훅(티어 토큰은 platform-v2 스코프). */
-  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="iron"] .public-suggestion-tier { color: var(--tier-lp-iron); }
-  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="bronze"] .public-suggestion-tier { color: var(--tier-lp-bronze); }
-  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="silver"] .public-suggestion-tier { color: var(--tier-lp-silver); }
-  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="gold"] .public-suggestion-tier { color: var(--tier-lp-gold); }
-  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="platinum"] .public-suggestion-tier { color: var(--tier-lp-platinum); }
-  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="emerald"] .public-suggestion-tier { color: var(--tier-lp-emerald); }
-  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="diamond"] .public-suggestion-tier { color: var(--tier-lp-diamond); }
-  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="master"] .public-suggestion-tier { color: var(--tier-lp-master); }
-  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="grandmaster"] .public-suggestion-tier { color: var(--tier-lp-grandmaster); }
-  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="challenger"] .public-suggestion-tier { color: var(--tier-lp-challenger); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="iron"] .public-suggestion-tier { color: var(--tier-ink-iron, var(--tier-lp-iron)); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="bronze"] .public-suggestion-tier { color: var(--tier-ink-bronze, var(--tier-lp-bronze)); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="silver"] .public-suggestion-tier { color: var(--tier-ink-silver, var(--tier-lp-silver)); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="gold"] .public-suggestion-tier { color: var(--tier-ink-gold, var(--tier-lp-gold)); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="platinum"] .public-suggestion-tier { color: var(--tier-ink-platinum, var(--tier-lp-platinum)); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="emerald"] .public-suggestion-tier { color: var(--tier-ink-emerald, var(--tier-lp-emerald)); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="diamond"] .public-suggestion-tier { color: var(--tier-ink-diamond, var(--tier-lp-diamond)); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="master"] .public-suggestion-tier { color: var(--tier-ink-master, var(--tier-lp-master)); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="grandmaster"] .public-suggestion-tier { color: var(--tier-ink-grandmaster, var(--tier-lp-grandmaster)); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="challenger"] .public-suggestion-tier { color: var(--tier-ink-challenger, var(--tier-lp-challenger)); }
 
   /* 우측 티어명 — 목업은 티어색 텍스트, LP 는 회. Unranked 는 무채. */
-  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="iron"] .public-suggestion-rank-copy > span { color: var(--tier-lp-iron); }
-  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="bronze"] .public-suggestion-rank-copy > span { color: var(--tier-lp-bronze); }
-  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="silver"] .public-suggestion-rank-copy > span { color: var(--tier-lp-silver); }
-  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="gold"] .public-suggestion-rank-copy > span { color: var(--tier-lp-gold); }
-  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="platinum"] .public-suggestion-rank-copy > span { color: var(--tier-lp-platinum); }
-  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="emerald"] .public-suggestion-rank-copy > span { color: var(--tier-lp-emerald); }
-  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="diamond"] .public-suggestion-rank-copy > span { color: var(--tier-lp-diamond); }
-  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="master"] .public-suggestion-rank-copy > span { color: var(--tier-lp-master); }
-  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="grandmaster"] .public-suggestion-rank-copy > span { color: var(--tier-lp-grandmaster); }
-  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="challenger"] .public-suggestion-rank-copy > span { color: var(--tier-lp-challenger); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="iron"] .public-suggestion-rank-copy > span { color: var(--tier-ink-iron, var(--tier-lp-iron)); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="bronze"] .public-suggestion-rank-copy > span { color: var(--tier-ink-bronze, var(--tier-lp-bronze)); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="silver"] .public-suggestion-rank-copy > span { color: var(--tier-ink-silver, var(--tier-lp-silver)); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="gold"] .public-suggestion-rank-copy > span { color: var(--tier-ink-gold, var(--tier-lp-gold)); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="platinum"] .public-suggestion-rank-copy > span { color: var(--tier-ink-platinum, var(--tier-lp-platinum)); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="emerald"] .public-suggestion-rank-copy > span { color: var(--tier-ink-emerald, var(--tier-lp-emerald)); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="diamond"] .public-suggestion-rank-copy > span { color: var(--tier-ink-diamond, var(--tier-lp-diamond)); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="master"] .public-suggestion-rank-copy > span { color: var(--tier-ink-master, var(--tier-lp-master)); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="grandmaster"] .public-suggestion-rank-copy > span { color: var(--tier-ink-grandmaster, var(--tier-lp-grandmaster)); }
+  .public-profile-platform-v2 .public-suggestion-panel button[data-tier="challenger"] .public-suggestion-rank-copy > span { color: var(--tier-ink-challenger, var(--tier-lp-challenger)); }
 
   /* ── 좁은 행(≤720px 컨테이너)에서도 큐 라벨 유지 — 목업 모바일 행은
      결과·큐·시간 세 정보를 모두 보입니다(22 는 큐를 접었음). */

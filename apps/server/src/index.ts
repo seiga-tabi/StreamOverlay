@@ -56,6 +56,7 @@ import {
 } from "./services/palworld-server-status-config.js";
 import { recordFollowerManagementEvent } from "./services/follower-event-recorder.js";
 import { createHttpHandler } from "./routes/http-api.js";
+import { GameBoxartService } from "./services/game-boxart.js";
 import { LocalPublicLolSnapshotStore } from "./services/public-lol-snapshot-store.js";
 import { LocalPatchNotesFeedStore, PatchNotesService } from "./services/patch-notes-service.js";
 import { PatchChangeSummaryService } from "./services/patch-change-summary.js";
@@ -604,6 +605,7 @@ const streamerFollowerAuth = new StreamerFollowerAuthService(
 );
 const publicTwitchAuth = new PublicTwitchAuthService(new PublicTwitchViewerSessionStore(), new TwitchOAuthStateStore());
 const twitch = new TwitchApiClient(twitchAuth);
+const gameBoxart = new GameBoxartService(twitch);
 const twitchChat = new TwitchChatService(new TwitchAuthChatTokenProvider(twitchAuth), logger, store);
 const riotApiKeyStore = new LocalJsonRiotApiKeyStore();
 const riot = new RiotApiClient(riotApiKeyStore);
@@ -697,6 +699,7 @@ const server = http.createServer(createHttpHandler({
   store,
   actions,
   twitch,
+  gameBoxart,
   riot,
   dataDragon,
   profileRepository: lolProfileRepository,

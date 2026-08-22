@@ -44,26 +44,40 @@ test("홈 헤더는 확장형 게임 드롭다운 트리거와 지구본·테마
   assert.doesNotMatch(html, /리그 오브 레전드/u);
 });
 
-test("홈 히어로는 명조 헤드라인·붓글씨 마크·통합 검색·퀵 칩을 갖춘다", () => {
-  const ko = renderToStaticMarkup(<HomeHero locale="ko" text={homeI18n.ko} />);
+test("홈 히어로는 명조 헤드라인과 게임 카테고리 3:4 포스터 격자를 갖춘다", () => {
+  /* 목업 「카테고리 선택」 — 검색 폼·붓글씨 마크 대신 네 게임 타일. 타일은
+     <a> 이고(이동이지 선택이 아님) 표시는 hover/focus 의 테두리·꼬리 밑줄뿐. */
+  const ko = renderToStaticMarkup(<HomeHero text={homeI18n.ko} />);
   assert.match(ko, /게임 데이터, 검색 한 번/u);
-  assert.match(ko, /yoro-home-mark-word/u);
-  assert.match(ko, /yoro-home-mark-norigae/u);
   assert.match(ko, /yoro-home-headline-tail/u);
-  assert.match(ko, /LoL 소환사/u);
-  assert.match(ko, /팰 도감/u);
-  assert.match(ko, /소환사명#태그/u);
-  assert.match(ko, /팰 교배 계산/u);
-  assert.match(ko, /증강 칼바람/u);
-  /* 서버 선택은 실제 select — KR·JP·NA·EUW. */
-  assert.match(ko, /<option[^>]*>KR<\/option>/u);
-  assert.match(ko, /<option[^>]*>EUW<\/option>/u);
+  assert.match(ko, /yoro-home-hero--cats/u);
+  // 네 게임 이름과 로케일 프리픽스 경로.
+  assert.match(ko, /리그 오브 레전드/u);
+  assert.match(ko, /팰월드/u);
+  assert.match(ko, /발로란트/u);
+  assert.match(ko, /마인크래프트/u);
+  assert.match(ko, /href="\/ko\/lol"/u);
+  assert.match(ko, /href="\/ko\/palworld"/u);
+  assert.match(ko, /href="\/ko\/valorant"/u);
+  assert.match(ko, /href="\/ko\/minecraft"/u);
+  // 타일 4장 — LoL·팰월드는 키아트 <picture>(안 A), 나머지 둘은 마크 타일.
+  // --mark 변형이 substring 으로 겹치지 않게 클래스 경계까지 본다.
+  assert.equal((ko.match(/yoro-home-cat-art[" ]/gu) ?? []).length, 4);
+  assert.equal((ko.match(/yoro-home-cat-art--mark/gu) ?? []).length, 2);
+  assert.equal((ko.match(/<picture>/gu) ?? []).length, 2);
+  // 그림은 장식 — 접근성 이름은 옆의 게임 이름 글자가 맡습니다.
+  assert.match(ko, /<img alt=""/u);
+  // 검색 폼과 붓글씨 마크가 사라졌는지 — /lol 히어로 전용으로 남습니다.
+  assert.doesNotMatch(ko, /yoro-home-search-box/u);
+  assert.doesNotMatch(ko, /yoro-home-mark-word/u);
 
-  const ja = renderToStaticMarkup(<HomeHero locale="ja" text={homeI18n.ja} />);
+  /* 로케일 프리픽스는 currentPublicLocale() 이 정합니다 — window 가 없는 SSR
+     테스트에서는 ko 폴백이라, ja 는 문구만 단언합니다. */
+  const ja = renderToStaticMarkup(<HomeHero text={homeI18n.ja} />);
   assert.match(ja, /ゲームデータ、検索ひとつで/u);
-  assert.match(ja, /LoLサモナー/u);
-  assert.match(ja, /パル図鑑/u);
-  assert.match(ja, /パル配合計算/u);
+  assert.match(ja, /リーグ・オブ・レジェンド/u);
+  assert.match(ja, /パルワールド/u);
+  assert.match(ja, /ヴァロラント|VALORANT|バロラント/u);
 });
 
 test("지금 방송 중은 로그인 전 상태에서 잠든 백호 빈 상태와 로그인 CTA를 보여준다", () => {

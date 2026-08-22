@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { PublicLocale } from "../../public-lol/i18n/public-lol-i18n";
 import { localizedPublicUrlForCurrentLocale } from "../../public-lol/utils/public-locale-path";
+import {
+  PUBLIC_GAME_HOME_IMAGES,
+  type PublicGameHomeImageVariant
+} from "../../../shared/PublicGameHome";
 import type { HomeText } from "../i18n/home-i18n";
 import { TailUnderline } from "./HomeMarks";
 
@@ -44,7 +48,7 @@ function CaretIcon({ open }: { open?: boolean }) {
   );
 }
 
-function LolIcon() {
+export function LolIcon() {
   return (
     <svg aria-hidden="true" fill="none" height="22" stroke="currentColor" strokeWidth="1.2" viewBox="0 0 26 26" width="22">
       <path d="M6 20 L 13 4 L 20 20" />
@@ -54,7 +58,7 @@ function LolIcon() {
   );
 }
 
-function PalIcon() {
+export function PalIcon() {
   return (
     <svg aria-hidden="true" fill="none" height="22" stroke="currentColor" strokeWidth="1.2" viewBox="0 0 26 26" width="22">
       <circle cx="13" cy="12" r="7" />
@@ -66,7 +70,7 @@ function PalIcon() {
   );
 }
 
-function ValorantIcon() {
+export function ValorantIcon() {
   return (
     <svg aria-hidden="true" fill="none" height="22" stroke="currentColor" strokeWidth="1.2" viewBox="0 0 26 26" width="22">
       <path d="M4 5 L 13 21 L 22 5" />
@@ -75,7 +79,7 @@ function ValorantIcon() {
   );
 }
 
-function MinecraftIcon() {
+export function MinecraftIcon() {
   return (
     <svg aria-hidden="true" fill="none" height="22" stroke="currentColor" strokeWidth="1.2" viewBox="0 0 26 26" width="22">
       <path d="M5 9 L 13 4 L 21 9 L 21 18 L 13 23 L 5 18 Z" />
@@ -116,40 +120,71 @@ const LOCALE_OPTIONS: ReadonlyArray<{ locale: PublicLocale; label: string }> = [
 
 export type HomeActiveGame = "lol";
 
+export type HomeGameKey = "lol" | "palworld" | "valorant" | "minecraft";
+
+/* 게임 목록의 단일 원본 — 헤더 드롭다운·모바일 게임 패널·홈 히어로 카테고리
+ * 격자가 같은 데이터를 공유합니다(목업 카테고리 선택). 순서는 목업 순서.
+ * art: 3:4 타일에 담을 키아트(안 A — 기존 mobile 키아트 크롭). null 이면
+ * 자체 제작 마크 타일로 그립니다. 트위치 박스아트(안 B)가 들어오면 이 슬롯만
+ * 갈아 끼웁니다(§handoff). */
+export const HOME_GAMES: ReadonlyArray<{
+  key: HomeGameKey;
+  path: string;
+  name: (text: HomeText) => string;
+  sub: (text: HomeText) => string;
+  icon: () => ReactNode;
+  art: PublicGameHomeImageVariant | null;
+}> = [
+  {
+    key: "lol",
+    path: "/lol",
+    name: (text) => text.gameLolName,
+    sub: (text) => text.gameLolSub,
+    icon: () => <LolIcon />,
+    art: PUBLIC_GAME_HOME_IMAGES.lol.mobile
+  },
+  {
+    key: "palworld",
+    path: "/palworld",
+    name: (text) => text.gamePalName,
+    sub: (text) => text.gamePalSub,
+    icon: () => <PalIcon />,
+    art: PUBLIC_GAME_HOME_IMAGES.palworld.mobile
+  },
+  {
+    key: "valorant",
+    path: "/valorant",
+    name: (text) => text.gameValorantName,
+    sub: (text) => text.gameValorantSub,
+    icon: () => <ValorantIcon />,
+    art: null
+  },
+  {
+    key: "minecraft",
+    path: "/minecraft",
+    name: (text) => text.gameMinecraftName,
+    sub: (text) => text.gameMinecraftSub,
+    icon: () => <MinecraftIcon />,
+    art: null
+  }
+];
+
 /* 게임 메뉴 행 목록 — 헤더 드롭다운과 모바일 하단 탭바의 게임 패널이 같은 데이터를
  * 공유합니다. 활성 게임(현재 게임 홈)은 시그니처 꼬리 밑줄로 표시합니다. */
 export function HomeGamesMenuRows({ text, activeGame }: { text: HomeText; activeGame?: HomeActiveGame }) {
   return (
     <>
-      <GameMenuRow
-        active={activeGame === "lol"}
-        arrow
-        href={localizedPublicUrlForCurrentLocale("/lol")}
-        icon={<LolIcon />}
-        name={text.gameLolName}
-        sub={text.gameLolSub}
-      />
-      <GameMenuRow
-        arrow
-        href={localizedPublicUrlForCurrentLocale("/palworld")}
-        icon={<PalIcon />}
-        name={text.gamePalName}
-        sub={text.gamePalSub}
-      />
-      <GameMenuRow
-        arrow
-        href={localizedPublicUrlForCurrentLocale("/valorant")}
-        icon={<ValorantIcon />}
-        name={text.gameValorantName}
-        sub={text.gameValorantSub}
-      />
-      <GameMenuRow
-        arrow
-        href={localizedPublicUrlForCurrentLocale("/minecraft")}
-        icon={<MinecraftIcon />}
-        name={text.gameMinecraftName}
-        sub={text.gameMinecraftSub}
-      />
+      {HOME_GAMES.map((game) => (
+        <GameMenuRow
+          active={activeGame === game.key}
+          arrow
+          href={localizedPublicUrlForCurrentLocale(game.path)}
+          icon={game.icon()}
+          key={game.key}
+          name={game.name(text)}
+          sub={game.sub(text)}
+        />
+      ))}
     </>
   );
 }

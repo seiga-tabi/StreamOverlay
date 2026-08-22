@@ -242,9 +242,11 @@
     color: var(--yoro-color-text-on-dark-muted);
   }
 
+  /* 채움과 글리프가 같은 변수면 무채 먹에서 겹칩니다(글자 대비 감사 A-5)
+     — 채움은 20% 혼합 그대로, 글리프·글자는 본문 잉크로. */
   .public-profile-role.is-main > i {
     background: color-mix(in srgb, var(--yoro-color-public-primary) 20%, transparent);
-    color: var(--yoro-color-public-primary);
+    color: var(--yoro-color-text-on-dark);
   }
 
   .public-profile-role-name { grid-area: name; display: flex; align-items: baseline; gap: var(--yoro-space-1); min-width: 0; }
@@ -254,7 +256,7 @@
     padding: .05rem .3rem;
     border-radius: var(--yoro-radius-xs);
     background: color-mix(in srgb, var(--yoro-color-public-primary) 20%, transparent);
-    color: var(--yoro-color-public-primary);
+    color: var(--yoro-color-text-on-dark);
     font-size: var(--yoro-font-size-xs);
     font-weight: var(--yoro-font-weight-bold);
   }

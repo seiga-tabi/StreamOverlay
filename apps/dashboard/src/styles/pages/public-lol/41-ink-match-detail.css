@@ -147,16 +147,16 @@
   }
 
   /* 티어 글자색 — hero 랭크 카드와 같은 --tier-lp-* 램프(라이트 값 자동). */
-  .public-profile-platform-v2 .public-team-detail .public-team-rank-badge.iron { color: var(--tier-lp-iron); }
-  .public-profile-platform-v2 .public-team-detail .public-team-rank-badge.bronze { color: var(--tier-lp-bronze); }
-  .public-profile-platform-v2 .public-team-detail .public-team-rank-badge.silver { color: var(--tier-lp-silver); }
-  .public-profile-platform-v2 .public-team-detail .public-team-rank-badge.gold { color: var(--tier-lp-gold); }
-  .public-profile-platform-v2 .public-team-detail .public-team-rank-badge.platinum { color: var(--tier-lp-platinum); }
-  .public-profile-platform-v2 .public-team-detail .public-team-rank-badge.emerald { color: var(--tier-lp-emerald); }
-  .public-profile-platform-v2 .public-team-detail .public-team-rank-badge.diamond { color: var(--tier-lp-diamond); }
-  .public-profile-platform-v2 .public-team-detail .public-team-rank-badge.master { color: var(--tier-lp-master); }
-  .public-profile-platform-v2 .public-team-detail .public-team-rank-badge.grandmaster { color: var(--tier-lp-grandmaster); }
-  .public-profile-platform-v2 .public-team-detail .public-team-rank-badge.challenger { color: var(--tier-lp-challenger); }
+  .public-profile-platform-v2 .public-team-detail .public-team-rank-badge.iron { color: var(--tier-ink-iron, var(--tier-lp-iron)); }
+  .public-profile-platform-v2 .public-team-detail .public-team-rank-badge.bronze { color: var(--tier-ink-bronze, var(--tier-lp-bronze)); }
+  .public-profile-platform-v2 .public-team-detail .public-team-rank-badge.silver { color: var(--tier-ink-silver, var(--tier-lp-silver)); }
+  .public-profile-platform-v2 .public-team-detail .public-team-rank-badge.gold { color: var(--tier-ink-gold, var(--tier-lp-gold)); }
+  .public-profile-platform-v2 .public-team-detail .public-team-rank-badge.platinum { color: var(--tier-ink-platinum, var(--tier-lp-platinum)); }
+  .public-profile-platform-v2 .public-team-detail .public-team-rank-badge.emerald { color: var(--tier-ink-emerald, var(--tier-lp-emerald)); }
+  .public-profile-platform-v2 .public-team-detail .public-team-rank-badge.diamond { color: var(--tier-ink-diamond, var(--tier-lp-diamond)); }
+  .public-profile-platform-v2 .public-team-detail .public-team-rank-badge.master { color: var(--tier-ink-master, var(--tier-lp-master)); }
+  .public-profile-platform-v2 .public-team-detail .public-team-rank-badge.grandmaster { color: var(--tier-ink-grandmaster, var(--tier-lp-grandmaster)); }
+  .public-profile-platform-v2 .public-team-detail .public-team-rank-badge.challenger { color: var(--tier-ink-challenger, var(--tier-lp-challenger)); }
 
   /* 스트리머 표식 — 무채 외곽선 칩. 방송 중일 때만 5px 점(기존 LIVE 색). */
   .public-profile-platform-v2 .public-team-detail .public-team-rank-badge.streamer-tier-badge {

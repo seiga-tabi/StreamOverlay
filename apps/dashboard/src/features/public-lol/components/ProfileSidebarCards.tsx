@@ -145,7 +145,8 @@ export function ProfileLpRecordCard({
       ) : (
         <>
           <div className="public-profile-lp-headline">
-            <strong style={currentTierKey ? { color: `var(--tier-lp-${currentTierKey})` } : undefined}>{currentLabel}</strong>
+            {/* 글자는 그래픽 램프(--tier-lp-*, 3.2:1)가 아니라 잉크 램프(감사 A-3). */}
+            <strong style={currentTierKey ? { color: `var(--tier-ink-${currentTierKey}, var(--tier-lp-${currentTierKey}))` } : undefined}>{currentLabel}</strong>
             {changeLabel ? <span className="public-profile-lp-delta" data-tone={changeTone}>{changeLabel}</span> : null}
             <small>{recordCount}{text.recordCountLabel}</small>
           </div>

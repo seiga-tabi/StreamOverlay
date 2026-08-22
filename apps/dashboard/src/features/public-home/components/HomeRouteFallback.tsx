@@ -19,9 +19,9 @@ import {
 /* 메인 홈 라우트 폴백 — 목업 「홈 로딩」 4장(다크/라이트 × 데스크톱/모바일).
  *
  * 흰 SkeletonCard 널판(#root 전폭) 대신, 완성 화면과 같은 크롬·히어로를 실물로
- * 먼저 그립니다. 홈은 데이터를 거의 기다리지 않습니다 — 히어로 검색 폼은
- * window.location.assign 순수 이동이라 청크 도착 전에도 완전히 동작합니다.
- * 스켈레톤은 데이터가 들어올 자리(방송 카드·차트)에만 둡니다.
+ * 먼저 그립니다. 홈은 데이터를 거의 기다리지 않습니다 — 히어로의 게임 카테고리
+ * 타일은 평범한 <a href> 라 청크 도착 전에도 완전히 동작합니다(키아트 2장은
+ * eager 로 바로 요청). 스켈레톤은 데이터가 들어올 자리(방송 카드·차트)에만 둡니다.
  *
  * 테마: 부트 스크립트(index.html)가 첫 페인트 전에 붙인 data-public-theme 을
  * 읽습니다 — 홈 계열 기본 다크(useHomeTheme 과 같은 규칙). 로그인 상태는 아직
@@ -50,7 +50,7 @@ export function HomeRouteFallback({ locale = "ko" }: { locale?: PublicLocale }) 
         text={text}
       />
       <main className="yoro-home-main">
-        <HomeHero locale={locale} text={text} />
+        <HomeHero text={text} />
 
         {/* 지금 방송 중 — 머리(제목·전체 보기)는 실물, 개수는 아직 모르므로 생략,
             카드 4장은 스켈레톤. */}

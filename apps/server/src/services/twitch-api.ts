@@ -840,6 +840,29 @@ export class TwitchApiClient {
     }
   }
 
+  /**
+   * 홈 카테고리 타일의 게임 메타(helix/games) — 앱 토큰 조회.
+   * 게임 박스아트는 공개 정보이고, 실패는 빈 배열입니다: Twitch 가 흔들려도
+   * 홈은 자체 키아트·마크 타일로 그대로 떠야 합니다(fail-soft).
+   */
+  async getGamesByNames(names: readonly string[]): Promise<unknown> {
+    const valid = names
+      .filter((name) => typeof name === "string" && name.trim().length > 0 && name.length <= 100)
+      .slice(0, 20);
+    if (valid.length === 0) return { data: [] };
+    const context = await this.getAppAccessContext();
+    if (!context) return { data: [] };
+    const url = new URL("https://api.twitch.tv/helix/games");
+    for (const name of valid) url.searchParams.append("name", name);
+    try {
+      const response = await this.requestWithAccessContext(url, { method: "GET" }, context);
+      if (!response.ok) return { data: [] };
+      return await response.json();
+    } catch {
+      return { data: [] };
+    }
+  }
+
   private async getAppAccessContext(): Promise<TwitchApiAccessContext | undefined> {
     if (!appConfig.twitch.clientId || !appConfig.twitch.clientSecret) return undefined;
     if (this.appAccessContext && this.appAccessContext.expiresAt > this.now() + APP_ACCESS_TOKEN_REFRESH_MARGIN_MS) {

@@ -6,7 +6,7 @@ export type PublicGameHomeLocalizedText = {
   ja: string;
 };
 
-type PublicGameHomeImageVariant = {
+export type PublicGameHomeImageVariant = {
   avif: string;
   webp: string;
   jpg: string;

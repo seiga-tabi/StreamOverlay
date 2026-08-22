@@ -25,6 +25,22 @@
   .public-profile-hero [data-tier="challenger"] { --tier-color: #f0c264; }
   .public-profile-hero [data-tier="unranked"] { --tier-color: var(--yoro-color-ground-muted); }
 
+  /* 티어 "글자" 램프(글자 대비 감사 A-3) — --tier-color 는 점·막대·테두리
+     그래픽(3:1)에 남기고, 티어 이름·크레스트 글자는 --tier-ink 를 씁니다.
+     값은 20-profile-platform.css 의 --tier-ink-* 가 단일 원본(라이트 스왑 포함).
+     아래 라이트 블록이 --tier-lp-* 를 다시 정의하듯 여기서도 매핑만 겁니다. */
+  .public-profile-hero { --tier-ink: var(--tier-color); }
+  .public-profile-hero [data-tier="iron"] { --tier-ink: var(--tier-ink-iron, var(--tier-color)); }
+  .public-profile-hero [data-tier="bronze"] { --tier-ink: var(--tier-ink-bronze, var(--tier-color)); }
+  .public-profile-hero [data-tier="silver"] { --tier-ink: var(--tier-ink-silver, var(--tier-color)); }
+  .public-profile-hero [data-tier="gold"] { --tier-ink: var(--tier-ink-gold, var(--tier-color)); }
+  .public-profile-hero [data-tier="platinum"] { --tier-ink: var(--tier-ink-platinum, var(--tier-color)); }
+  .public-profile-hero [data-tier="emerald"] { --tier-ink: var(--tier-ink-emerald, var(--tier-color)); }
+  .public-profile-hero [data-tier="diamond"] { --tier-ink: var(--tier-ink-diamond, var(--tier-color)); }
+  .public-profile-hero [data-tier="master"] { --tier-ink: var(--tier-ink-master, var(--tier-color)); }
+  .public-profile-hero [data-tier="grandmaster"] { --tier-ink: var(--tier-ink-grandmaster, var(--tier-color)); }
+  .public-profile-hero [data-tier="challenger"] { --tier-ink: var(--tier-ink-challenger, var(--tier-color)); }
+
   /* LP 추이 그래프는 구간마다 다른 티어 색을 동시에 써야 해서, 위 --tier-color 와 별도로
      티어별 값을 전부 노출해 둡니다(같은 hex). 골드→플래티넘처럼 승급 구간이 섞여도
      JS 가 표본별 tierKey 로 필요한 색을 바로 골라 씁니다. */
@@ -427,7 +443,7 @@
     height: var(--yoro-space-12);
     border: 0;
     background: none;
-    color: var(--tier-color);
+    color: var(--tier-ink, var(--tier-color));
   }
 
   /* 이미지는 고정 px 가 아니라 슬롯 100% — 슬롯만 바꾸면 따라옵니다(§2-2). */
@@ -448,7 +464,7 @@
   }
 
   .public-profile-hero-tier-name {
-    color: var(--tier-color);
+    color: var(--tier-ink, var(--tier-color));
     font-size: var(--yoro-font-size-lg);
     font-weight: var(--yoro-font-weight-bold);
     letter-spacing: -.02em;
@@ -1076,7 +1092,7 @@
     border: 2px solid var(--tier-color);
     border-radius: var(--yoro-radius-sm);
     box-sizing: border-box;
-    color: var(--tier-color);
+    color: var(--tier-ink, var(--tier-color));
     font-size: var(--yoro-font-size-md);
   }
 
@@ -1091,7 +1107,7 @@
 
   /* 티어명은 티어색 — 목업 v21. */
   .public-hero-rank-card-tier {
-    color: var(--tier-color);
+    color: var(--tier-ink, var(--tier-color));
     font-size: var(--yoro-font-size-md);
     /* 목업 800 — black(900) 토큰 대신 고정값(ja black 도 800과 일치). */
     font-weight: 800;

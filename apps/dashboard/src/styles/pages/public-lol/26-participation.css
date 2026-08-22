@@ -64,7 +64,8 @@
   .public-participation-tag[data-tone="brand"] {
     border-color: transparent;
     background: color-mix(in srgb, var(--yoro-color-public-primary) 24%, transparent);
-    color: var(--yoro-color-public-primary);
+    /* 채움과 같은 변수를 글자에 쓰면 무채 먹에서 겹칩니다(감사 A-5 동형). */
+    color: var(--yoro-color-text-on-dark);
   }
 
   /* 조작 요소는 모두 44×44 이상입니다(AGENTS.md 기준). */
@@ -519,7 +520,8 @@
     height: 2rem;
     border-radius: var(--yoro-radius-sm);
     background: color-mix(in srgb, var(--yoro-color-public-primary) 20%, transparent);
-    color: var(--yoro-color-public-primary);
+    /* 채움과 같은 변수를 글리프에 쓰면 무채 먹에서 겹칩니다(글자 대비 감사 A-5). */
+    color: var(--yoro-color-text-on-dark);
   }
 
   .public-participation-join-head-icon svg { width: 1.05rem; height: 1.05rem; }
@@ -665,6 +667,8 @@
 
   .public-participation-qhead > h3 {
     margin: 0;
+    /* legacy 파스텔(#10233d !important) 상속 차단 — 자기 색 명시(감사 A-1 동형). */
+    color: var(--yoro-color-text-on-dark);
     font-size: var(--yoro-font-size-sm);
     font-weight: var(--yoro-font-weight-black);
     letter-spacing: -.01em;

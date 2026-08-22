@@ -409,7 +409,9 @@
     padding: 2px 8px 4px;
     border-radius: 99px;
     background: rgb(15 107 60 / 88%);
-    color: var(--graph-win-ink);
+    /* 채움이 테마 무관 진녹/진홍 상수라, 같은 계열 잉크(--graph-*-ink)를 글자에
+       쓰면 라이트 1.09:1 까지 무너집니다 — 채움 위 글자는 상수 백자(≥5:1). */
+    color: #f5f6f8;
     text-shadow: none;
     overflow: hidden;
   }
@@ -425,7 +427,6 @@
 
   .yoro-pn-tile-rate[data-tone="bad"] {
     background: rgb(163 36 51 / 88%);
-    color: var(--graph-loss-ink);
   }
 
   .yoro-pn-tile-num {

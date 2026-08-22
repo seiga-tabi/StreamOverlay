@@ -461,6 +461,68 @@
     word-break: keep-all;
   }
 
+  /* ── 게임 카테고리 격자(목업 「카테고리 선택」) — 루트 홈 전용 modifier.
+     .yoro-home-hero / .yoro-home-hero-copy 의 원래 규칙은 /lol 히어로가 쓰므로
+     --cats 스코프에서만 덮습니다. 그림은 원색, 그림 밖은 수묵: 표시는 테두리와
+     꼬리 밑줄뿐이고 그림 위에 아무것도 얹지 않습니다. 애니메이션 없음(목업 규칙). */
+  .yoro-home-hero--cats { min-height: auto; }   /* 500px 고정 해제 — 마크가 없다 */
+
+  /* 격자 폭은 hero-copy 의 좌우 패딩이 정합니다 — 마크 자리이던 우측 여백 회수. */
+  .yoro-home-hero--cats .yoro-home-hero-copy {
+    max-width: none;
+    padding: 54px 96px 48px;
+  }
+
+  .yoro-home-cats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin: 34px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .yoro-home-cat { display: block; color: inherit; text-decoration: none; }
+
+  .yoro-home-cat-art {
+    display: block;
+    position: relative;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+    background: var(--home-card);
+  }
+
+  /* 785×717·780×820 을 3:4 에 cover — 높이를 맞추고 좌우를 깎습니다(X 축만 의미). */
+  .yoro-home-cat-art img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 50%;
+  }
+
+  /* 아트 없는 게임(발로란트·마인크래프트)은 먹 지면 위 자체 제작 마크. */
+  .yoro-home-cat-art--mark {
+    display: grid;
+    place-items: center;
+    color: var(--home-mid);
+  }
+
+  .yoro-home-cat-art--mark svg { width: 38%; height: auto; }
+
+  .yoro-home-cat-name { display: block; margin-top: 10px; font-size: 15px; font-weight: 800; }
+
+  /* 꼬리 밑줄 자리는 항상 예약 — opacity 로만 켜고 꺼서 부제가 안 튑니다. */
+  .yoro-home-cat-tail { display: block; margin-top: 5px; width: 112px; height: 8px; color: var(--home-mid); opacity: 0; }
+  .yoro-home-cat-sub { display: block; margin-top: 3px; color: var(--home-sub); font-size: 12px; word-break: keep-all; }
+
+  .yoro-home-cat:hover .yoro-home-cat-art,
+  .yoro-home-cat:focus-visible .yoro-home-cat-art { border-color: var(--home-stroke); }
+  .yoro-home-cat:hover .yoro-home-cat-tail,
+  .yoro-home-cat:focus-visible .yoro-home-cat-tail { opacity: 1; }
+
   .yoro-home-search { margin-top: 26px; }
 
   .yoro-home-search-tabs {
@@ -1240,6 +1302,8 @@
     .yoro-home-mark-norigae { width: 14px; height: 42px; bottom: -26px; }
     .yoro-home-mark-tail { width: 170px; margin-top: 18px; }
     .yoro-home-hero-copy { max-width: 470px; padding: 46px 0 0 40px; }
+    .yoro-home-hero--cats .yoro-home-hero-copy { max-width: none; padding: 46px 40px 40px; }
+    .yoro-home-cats { gap: 14px; margin-top: 28px; }
     .yoro-home-headline { font-size: 34px; }
     .yoro-home-headline-tail { width: 170px; height: 11px; margin-top: 8px; }
     .yoro-home-hero-sub { font-size: 14px; max-width: 380px; }
@@ -1304,6 +1368,13 @@
       max-width: none;
       padding: 28px 112px 0 28px;
     }
+
+    /* 오른쪽 112px 는 붓글씨 마크 자리 — 격자 히어로에는 마크가 없으므로 회수.
+       /lol 히어로는 마크를 계속 쓰니 원래 값 유지. */
+    .yoro-home-hero--cats .yoro-home-hero-copy { padding: 26px 16px 28px 28px; }
+    .yoro-home-cats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 24px; }
+    .yoro-home-cat-name { margin-top: 8px; font-size: 14px; }
+    .yoro-home-cat-sub { font-size: 11px; }
 
     .yoro-home-headline {
       font-size: 30px;

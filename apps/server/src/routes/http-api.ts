@@ -5,6 +5,7 @@ import path from "node:path";
 import { URL } from "node:url";
 import type { Store } from "../services/store.js";
 import { loadAramAugmentCatalog } from "../services/aram-augment-catalog.js";
+import type { GameBoxartService } from "../services/game-boxart.js";
 import type { PatchNotesService } from "../services/patch-notes-service.js";
 import type { PatchChangeSummaryService } from "../services/patch-change-summary.js";
 import { storeParticipationRepository } from "../services/participation-repository.js";
@@ -1629,6 +1630,9 @@ function contentTypeFor(filePath: string): string {
   if (ext === ".gif") return "image/gif";
   if (ext === ".jpg" || ext === ".jpeg") return "image/jpeg";
   if (ext === ".webp") return "image/webp";
+  /* 홈 히어로 키아트가 avif 우선(<picture>) — octet-stream 폴백이면 일부
+     브라우저가 이미지를 그리지 않거나 페인트를 미룹니다(2026-08-22 실측). */
+  if (ext === ".avif") return "image/avif";
   if (ext === ".ico") return "image/x-icon";
   if (ext === ".wav") return "audio/wav";
   if (ext === ".mp3") return "audio/mpeg";
@@ -2422,6 +2426,7 @@ type HttpHandlerInput = {
   gameServerStatusRead?: GameServerStatusReadService;
   discordBotCommandPolicy?: DiscordBotCommandPolicyService;
   patchNotes?: PatchNotesService;
+  gameBoxart?: GameBoxartService;
   patchChangeSummary?: PatchChangeSummaryService;
   patchNotesSocialCard?: PatchNotesSocialCardRenderer;
   adminAuditLogs?: Pick<
@@ -9095,7 +9100,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
               ? publicValorantApiLimiter
           : url.pathname.startsWith("/api/twitch-extension/")
               ? twitchExtensionApiLimiter
-          : url.pathname.startsWith("/api/lol/") || url.pathname.startsWith("/api/public/twitch/") || url.pathname.startsWith("/api/public/aram/") || url.pathname.startsWith("/api/public/patch-notes") || url.pathname.startsWith("/api/public/participation/") || url.pathname.startsWith("/api/public/streamers") || url.pathname === "/api/public/locale"
+          : url.pathname.startsWith("/api/lol/") || url.pathname.startsWith("/api/public/twitch/") || url.pathname.startsWith("/api/public/aram/") || url.pathname.startsWith("/api/public/patch-notes") || url.pathname.startsWith("/api/public/participation/") || url.pathname.startsWith("/api/public/streamers") || url.pathname === "/api/public/locale" || url.pathname === "/api/public/game-boxart"
               ? publicLolApiLimiter
               : dashboardApiLimiter;
         const limited = limiter.check(limitKey);
@@ -11532,6 +11537,21 @@ export function createHttpHandler(input: HttpHandlerInput) {
         return sendJson(req, res, 200, shared, { "Cache-Control": "public, max-age=60" });
       }
 
+      if (req.method === "GET" && url.pathname === "/api/public/game-boxart") {
+        /* 홈 카테고리 타일의 트위치 박스아트(안 B). 실패·미구성은 null — 프런트가
+           자체 키아트·마크 타일로 폴백하므로 이 응답이 화면을 막지 않습니다. */
+        if (!input.gameBoxart) {
+          return sendJson(req, res, 200, { games: [] }, { "Cache-Control": "public, max-age=300" });
+        }
+        const games = await input.gameBoxart.getBoxart();
+        const anyHit = games.some((game) => game.boxArtUrl !== null);
+        return sendJson(req, res, 200, { games }, {
+          /* 박스아트는 사실상 불변 — 성공은 공용 캐시 1h, 실패는 5m 뒤 재시도. */
+          "Cache-Control": anyHit
+            ? "public, max-age=3600, stale-while-revalidate=86400"
+            : "public, max-age=300"
+        });
+      }
       if (req.method === "GET" && url.pathname === "/api/public/patch-notes") {
         if (!input.patchNotes) {
           return sendJson(req, res, 503, {

@@ -62,7 +62,7 @@ export function PublicHomePage() {
         text={text}
       />
       <main className="yoro-home-main" id="yoro-home-main">
-        <HomeHero locale={locale} text={text} />
+        <HomeHero text={text} />
         <HomeLiveSection
           connected={twitchStatus.connected}
           followedChannels={followedChannels}
