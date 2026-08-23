@@ -2383,13 +2383,11 @@
 .public-dashboard-shell:not(.public-home-shell) .public-participation-streamer-meta .yoro-metric,
 .public-dashboard-shell:not(.public-home-shell) .public-participation-current,
 .public-dashboard-shell:not(.public-home-shell) .public-participation-rejoin-note,
-.public-dashboard-shell:not(.public-home-shell) .public-participation-shared-empty.yoro-empty-state {
-  border-color: rgba(248, 249, 250, .18) !important;
-  border-radius: 14px !important;
-  background: rgba(33, 37, 41, .34) !important;
-  color: #f8f9fa !important;
-  box-shadow: none !important;
-}
+/* 참여 화면 EmptyState 의 옛 파스텔기 강제(어두운 스크림 34% · radius 14 ·
+   흰 글자)는 걷었습니다 — 라이트에서 중간 회색 판이 되어 설명이 2.37:1 이었고
+   반경도 수묵 어휘(3)와 어긋났습니다. 표면·테두리·글자는 26-participation.css 의
+   --yoro-empty-state-* 훅이 소유합니다(2026-08-23). 이 클래스는 참여 화면 전용이라
+   다른 화면에 영향이 없습니다. */
 
 .public-dashboard-shell:not(.public-home-shell) .public-participation-form {
   gap: 14px !important;

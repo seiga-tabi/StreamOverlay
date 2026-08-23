@@ -29,8 +29,9 @@
     align-items: center;
     gap: var(--yoro-space-1);
     padding: .125rem .4375rem;
-    border: 1px solid var(--yoro-color-border-on-dark);
-    border-radius: var(--yoro-radius-pill);
+    /* 알약(999) → 외곽선 칩(2) — 목업 반경 어휘는 3·2·99 셋뿐입니다. */
+    border: .5px solid var(--yoro-color-border-on-dark);
+    border-radius: 2px;
     color: var(--yoro-color-text-on-dark-muted);
     font-size: var(--yoro-font-size-xs);
     font-weight: var(--yoro-font-weight-bold);
@@ -80,8 +81,8 @@
     min-width: var(--yoro-size-touch-target);
     min-height: var(--yoro-size-touch-target);
     padding: 0 var(--yoro-space-2);
-    border: 1px solid var(--yoro-color-border-on-dark);
-    border-radius: var(--yoro-radius-sm);
+    border: .5px solid var(--yoro-color-border-on-dark);
+    border-radius: 2px;
     background: transparent;
     color: var(--yoro-color-text-on-dark);
     font: inherit;
@@ -177,24 +178,16 @@
     align-items: center;
     gap: var(--yoro-space-3);
     padding: var(--yoro-space-3);
-    border: 1px solid var(--yoro-color-border-on-dark);
-    border-radius: var(--yoro-radius-lg);
-    background: linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--yoro-color-public-primary) 14%, var(--yoro-color-ground-surface)),
-      var(--yoro-color-ground-surface)
-    );
+    /* 목업 수묵 어휘 — 반경 3(카드) · .5px 헤어라인 · 평면 먹 표면.
+       135° 그라데이션은 이 스코프에서 --yoro-color-public-primary 가 무채 먹이라
+       색으로도 안 읽히고 표면만 얼룩졌습니다(2026-08-23 실측). */
+    border: .5px solid var(--yoro-color-border-on-dark);
+    border-radius: 3px;
+    background: var(--yoro-color-ground-surface);
     overflow: hidden;
   }
 
-  /* 히어로 느낌의 은은한 글로우 — 카드 모서리를 벗어나지 않도록 overflow:hidden 안에서만 둡니다. */
-  .public-participation-switcher::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 85% -10%, color-mix(in srgb, var(--yoro-color-public-primary) 30%, transparent), transparent 60%);
-    pointer-events: none;
-  }
+  /* 히어로 글로우는 걷었습니다 — 목업은 평면 먹 표면입니다(2026-08-23). */
 
   .public-participation-switcher > * {
     position: relative;
@@ -256,9 +249,9 @@
     gap: var(--yoro-space-1) var(--yoro-space-3);
     min-height: 4.5rem;
     padding: var(--yoro-space-3);
-    border: 1px solid var(--yoro-color-border-on-dark);
-    border-radius: var(--yoro-radius-lg);
-    background: linear-gradient(160deg, var(--yoro-color-ground-surface), var(--yoro-color-ground));
+    border: .5px solid var(--yoro-color-border-on-dark);
+    border-radius: 3px;
+    background: var(--yoro-color-ground-surface);
     color: var(--yoro-color-text-on-dark);
     font: inherit;
     text-align: start;
@@ -358,8 +351,8 @@
     flex-direction: column;
     gap: var(--yoro-space-2);
     padding: var(--yoro-space-3);
-    border: 1px solid color-mix(in srgb, var(--yoro-color-public-primary) 55%, transparent);
-    border-radius: var(--yoro-radius-lg);
+    border: .5px solid color-mix(in srgb, var(--yoro-color-public-primary) 55%, transparent);
+    border-radius: 3px;
     background: linear-gradient(
       180deg,
       color-mix(in srgb, var(--yoro-color-public-primary) 12%, var(--yoro-color-ground-surface)),
@@ -470,8 +463,8 @@
   .public-participation-mine-metrics > div {
     min-width: 0;
     padding: var(--yoro-space-1) var(--yoro-space-2);
-    border: 1px solid var(--yoro-color-border-on-dark);
-    border-radius: var(--yoro-radius-sm);
+    border: .5px solid var(--yoro-color-border-on-dark);
+    border-radius: 2px;
     background: var(--yoro-color-ground);
   }
 
@@ -504,8 +497,8 @@
     display: grid;
     gap: var(--yoro-space-1);
     padding: var(--yoro-space-3);
-    border: 1px solid var(--yoro-color-border-on-dark);
-    border-radius: var(--yoro-radius-sm);
+    border: .5px solid var(--yoro-color-border-on-dark);
+    border-radius: 2px;
     background: var(--yoro-color-ground);
   }
 
@@ -562,8 +555,8 @@
     justify-content: center;
     width: 100%;
     min-height: var(--yoro-size-touch-target);
-    border: 1px solid color-mix(in srgb, var(--yoro-color-match-loss-accent) 45%, transparent);
-    border-radius: var(--yoro-radius-sm);
+    border: .5px solid color-mix(in srgb, var(--yoro-color-match-loss-accent) 45%, transparent);
+    border-radius: 2px;
     background: transparent;
     color: var(--yoro-color-match-loss-accent);
     font: inherit;
@@ -582,8 +575,8 @@
     flex-direction: column;
     gap: var(--yoro-space-4);
     padding: var(--yoro-space-4);
-    border: 1px solid var(--yoro-color-border-on-dark);
-    border-radius: var(--yoro-radius-lg);
+    border: .5px solid var(--yoro-color-border-on-dark);
+    border-radius: 3px;
     background: var(--yoro-color-ground-surface);
   }
 
@@ -601,7 +594,7 @@
     flex: none;
     width: 2rem;
     height: 2rem;
-    border-radius: var(--yoro-radius-sm);
+    border-radius: 2px;
     background: color-mix(in srgb, var(--yoro-color-public-primary) 20%, transparent);
     /* 채움과 같은 변수를 글리프에 쓰면 무채 먹에서 겹칩니다(글자 대비 감사 A-5). */
     color: var(--yoro-color-text-on-dark);
@@ -635,8 +628,8 @@
     width: 100%;
     min-height: 3rem;
     padding: 0 var(--yoro-space-3);
-    border: 1.5px solid var(--yoro-color-border-on-dark-strong);
-    border-radius: var(--yoro-radius-md);
+    border: .5px solid var(--yoro-color-border-on-dark-strong);
+    border-radius: 2px;
     background: var(--yoro-color-ground);
     color: var(--yoro-color-text-on-dark);
     font: inherit;
@@ -672,8 +665,8 @@
     min-height: var(--yoro-size-touch-target);
     min-height: 3.4rem;
     padding: var(--yoro-space-1) .125rem;
-    border: 1.5px solid var(--yoro-color-border-on-dark);
-    border-radius: var(--yoro-radius-md);
+    border: .5px solid var(--yoro-color-border-on-dark);
+    border-radius: 2px;
     background: var(--yoro-color-ground);
     color: var(--yoro-color-text-on-dark-muted);
     font: inherit;
@@ -711,7 +704,7 @@
     min-height: var(--yoro-size-touch-target);
     min-height: 3.25rem;
     border: none;
-    border-radius: var(--yoro-radius-md);
+    border-radius: 2px;
     /* hsl(252 100% 68%) 위의 흰 글자는 약 3.0:1 로 본문 기준(4.5:1)에 못 미칩니다.
        두 그라디언트 끝 모두 배경 명도를 낮춰 대비를 확보합니다(실측 각각 6.0·4.66 이상). */
     background: linear-gradient(
@@ -737,8 +730,8 @@
     flex-direction: column;
     gap: var(--yoro-space-2);
     padding: var(--yoro-space-3);
-    border: 1px solid var(--yoro-color-border-on-dark);
-    border-radius: var(--yoro-radius-md);
+    border: .5px solid var(--yoro-color-border-on-dark);
+    border-radius: 3px;
     background: var(--yoro-color-ground-surface);
   }
 
@@ -746,6 +739,31 @@
     display: flex;
     align-items: center;
     gap: var(--yoro-space-2);
+  }
+
+  /* legacy 파스텔(#10233d !important) 상속 차단 — 자기 색을 안 정한 요소만
+     물려받습니다. qhead > h3·qname·is-viewer qpos 와 같은 처리(2026-08-23 실측:
+     「참여 등록」 1.06:1 · 방송인 이름 1.07:1). */
+  .public-participation-join-head h3,
+  .public-participation-switcher-who > b,
+  .public-participation-mine-copy > b {
+    color: var(--yoro-color-text-on-dark);
+  }
+
+  /* §2-2 EmptyState 는 공용 컴포넌트가 라이트 기준 색(--yoro-color-text-strong)과
+     어두운 스크림 표면(rgba(33,37,41,.34))을 기본값으로 씁니다 — 공용 CSS 를
+     고치지 않고 이 스코프에서 훅 변수만 넘깁니다. 표면까지 넘겨야 라이트에서
+     중간 회색 판 위에 글자가 얹히지 않습니다(2026-08-23 실측: 설명 2.37:1). */
+  .public-participation-shell .yoro-empty-state {
+    /* EmptyState.css 는 비레이어(JS import)라 layered 규칙으로는 못 이깁니다 —
+       컴포넌트가 읽는 반경 토큰을 이 요소에서만 갈아끼웁니다(카드 3px). */
+    --yoro-radius-lg: 3px;
+
+    --yoro-empty-state-surface: var(--yoro-color-ground-surface);
+    --yoro-empty-state-background: var(--yoro-color-ground-surface);
+    --yoro-empty-state-border: var(--yoro-color-border-on-dark);
+    --yoro-empty-state-title: var(--yoro-color-text-on-dark);
+    --yoro-empty-state-description: var(--yoro-color-text-on-dark-muted);
   }
 
   .public-participation-qhead > h3 {
@@ -762,8 +780,8 @@
   .public-participation-qempty {
     margin: 0;
     padding: var(--yoro-space-3);
-    border: 1px dashed var(--yoro-color-border-on-dark-strong);
-    border-radius: var(--yoro-radius-sm);
+    border: .5px dashed var(--yoro-color-border-on-dark-strong);
+    border-radius: 2px;
     color: var(--yoro-color-text-on-dark-muted);
     font-size: var(--yoro-font-size-xs);
     text-align: center;
@@ -802,8 +820,8 @@
   .public-participation-qrow {
     min-block-size: 3.25rem;
     padding: 0 var(--yoro-space-4);
-    border: 1px solid transparent;
-    border-radius: var(--yoro-radius-sm);
+    border: .5px solid transparent;
+    border-radius: 2px;
     background: var(--yoro-color-ground);
   }
 
@@ -967,8 +985,8 @@
     justify-content: center;
     width: 100%;
     min-height: var(--yoro-size-touch-target);
-    border: 1px solid var(--yoro-color-border-on-dark);
-    border-radius: var(--yoro-radius-sm);
+    border: .5px solid var(--yoro-color-border-on-dark);
+    border-radius: 2px;
     background: transparent;
     color: var(--yoro-color-text-on-dark);
     font: inherit;

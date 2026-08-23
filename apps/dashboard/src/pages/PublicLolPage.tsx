@@ -3587,7 +3587,11 @@ function PublicParticipationJoinPage({
 
   return (
     <section className={`public-participation-shell ${selectedStreamer && viewerActive ? "has-side" : ""}`}>
-      {!error && status.configured && !status.connected ? (
+      {/* 방송인이 이미 선택된 화면(?session= 링크 등)에서는 참여 등록 패널이 로그인
+          안내를 담당합니다 — 그때 이 배너까지 그리면 Twitch 로그인 버튼이 두 개가
+          됩니다(2026-08-23 운영 실측). 방송인이 없을 때는 여기가 유일한 진입점이라
+          그대로 남깁니다. */}
+      {!error && status.configured && !status.connected && !selectedStreamer ? (
         <EmptyState className="public-participation-shared-empty" variant="streamer">
           <EmptyStateIcon><TwitchGlitchIcon /></EmptyStateIcon>
           <EmptyStateTitle as="h3">{t().participationLoginDiscoveryTitle}</EmptyStateTitle>
