@@ -52,7 +52,10 @@ test("시청자 참여 화면은 신청·취소 두 동작만 두고 체크인 �
     "participationSelectStreamerDescription",
     "participationRiotIdExample",
     "participationAutoRefresh",
-    "participationNotificationsDescription",
+    /* participationNotificationsDescription 는 이 목록에서 빠졌습니다 —
+       목업 「LoL 시청자 참여」(2026-08-23)가 내 상태 아래 「상태 알림」 패널
+       한 장을 되살렸습니다. 알림은 화면을 봐서는 알 수 없는 동작(브라우저 권한)이라
+       이 화면의 「설명문 금지」 규칙의 유일한 예외입니다. 나머지는 그대로 금지. */
     "participationJourneyTitle",
     "participationRulesTitle",
   ]) {

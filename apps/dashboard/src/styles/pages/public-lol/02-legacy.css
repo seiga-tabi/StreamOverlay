@@ -1122,13 +1122,21 @@
   --seiga-pastel-accent: #4f7cff;
   --seiga-pastel-accent-strong: #305fe8;
   --seiga-pastel-shadow: 0 22px 70px rgba(79, 124, 255, .14);
+}
+
+/* 파스텔 글자색 강제는 변수 블록에서 분리 — 팰월드 셸은 제외합니다(2026-08-22
+   수묵 홈: 글자색은 팰월드가 소유, 먹 지면 위 남빛 #10233d 는 1.06:1). */
+.public-dashboard-shell:not(.palworld-shell) {
   color: var(--seiga-pastel-text) !important;
 }
 
 .public-dashboard-shell.public-home-shell {
 }
 
-.public-dashboard-shell:not(.public-home-shell):not(.public-bot-shell) {
+/* 팰월드 셸 제외(2026-08-22 수묵 홈) — 지면은 팰월드가 소유합니다.
+   수묵 셸(platform-v2)도 명시 제외: :not() 특이도 상승이 platform-v2 지면
+   상쇄를 역전시키지 않게(2026-08-23). */
+.public-dashboard-shell:not(.public-home-shell):not(.public-bot-shell):not(.palworld-shell):not(.public-profile-platform-v2) {
   background:
     radial-gradient(circle at 18% 8%, rgba(191, 227, 255, .64), transparent 31%),
     radial-gradient(circle at 82% 0%, rgba(213, 241, 255, .74), transparent 34%),
@@ -6170,8 +6178,10 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
 /* Public menu pages: 남아 있던 pastel 디자인 제거.
    YORO Bot 셸은 자기 지면(16-yoro-bot.css #11141b)을 소유하므로 제외합니다.
    수묵 셸(platform-v2 — 패치 노트)도 제외합니다: 지면은 20-profile-platform.css 의
-   테마 토큰(var(--public-gray-page))이 소유합니다. */
-.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell):not(.public-bot-shell):not(.public-profile-platform-v2) {
+   테마 토큰(var(--public-gray-page))이 소유합니다.
+   팰월드 셸도 제외합니다: 수묵 홈 전환(2026-08-22) 후 지면은 reset.css 의
+   먹(#1c1d22)을 그대로 쓰고, 보라 글로우는 목업에 없습니다. */
+.public-dashboard-shell:not(.public-home-shell):not(.public-profile-shared-shell):not(.public-bot-shell):not(.public-profile-platform-v2):not(.palworld-shell) {
   min-height: 100dvh;
   background:
     radial-gradient(circle at 50% 0%, rgba(123, 92, 255, .14), transparent 28%),

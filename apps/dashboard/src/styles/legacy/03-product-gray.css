@@ -20,8 +20,13 @@
    뒤에 오는 home layer에서는 덮을 수 없습니다. 따라서 선택자에서 제외해야 합니다.
    --public-gray-* 커스텀 속성은 위 블록에 그대로 남겨, 홈 내부에서 이 값을 참조하는
    04-followers.css의 기존 규칙이 계속 동작하도록 합니다. */
-.public-lol-shell:not(.public-home-shared-shell),
-.public-dashboard-shell:not(.public-home-shared-shell):not(.public-bot-shell),
+/* 팰월드 셸도 제외(2026-08-22 수묵 홈): 지면·글자색은 팰월드가 소유합니다 —
+   이 회색 지면 !important 가 홈의 투명 지면을 layer 역전으로 덮고 있었습니다.
+   수묵 셸(platform-v2 — 패치노트·증강 칼바람·시청자 참여)도 명시 제외합니다:
+   :not() 추가로 오른 특이도가 platform-v2 의 지면 상쇄(동률·후순서 승)를
+   역전시켜 세 화면이 회색으로 회귀했었습니다(2026-08-23 실측). */
+.public-lol-shell:not(.public-home-shared-shell):not(.palworld-shell):not(.public-profile-platform-v2),
+.public-dashboard-shell:not(.public-home-shared-shell):not(.public-bot-shell):not(.palworld-shell):not(.public-profile-platform-v2),
 .app-shell[data-page="followers"] {
   background: var(--yoro-background-product-gray-page) !important;
   color: var(--public-gray-text) !important;

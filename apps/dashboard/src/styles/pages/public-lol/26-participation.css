@@ -43,21 +43,25 @@
     color: var(--yoro-color-match-loss-accent);
   }
 
+  /* 진행 상태 셋만 색을 갖습니다(목업 §색). 채운 알약 대신 외곽선 + 글자색이라
+     채움과 글자가 겹칠 일이 없고, 대기열 대다수인 「신청 대기」는 무채로 남습니다. */
   .public-participation-tag[data-tone="good"] {
-    border-color: transparent;
-    background: color-mix(in srgb, var(--yoro-color-match-win-accent) 20%, transparent);
-    color: var(--yoro-color-match-win-accent);
+    border-color: color-mix(in srgb, var(--graph-win-ink, var(--yoro-color-match-win-accent)) 45%, var(--yoro-color-border-on-dark));
+    background: none;
+    /* 채움용 원색(3:1 기준)을 글자에 쓰면 라이트에서 3.41:1 — 글자용 ink 단계로
+       (20-profile-platform.css:158-165 의 채움/글자 두 단계 규칙). */
+    color: var(--graph-win-ink, var(--yoro-color-match-win-accent));
   }
 
   .public-participation-tag[data-tone="info"] {
-    border-color: transparent;
-    background: color-mix(in srgb, var(--yoro-color-public-primary) 22%, transparent);
-    color: var(--yoro-color-public-primary);
+    border-color: color-mix(in srgb, var(--tier-ink-diamond) 45%, var(--yoro-color-border-on-dark));
+    background: none;
+    color: var(--tier-ink-diamond);
   }
 
   .public-participation-tag[data-tone="warn"] {
-    border-color: transparent;
-    background: color-mix(in srgb, var(--yoro-color-accent-gold) 24%, transparent);
+    border-color: color-mix(in srgb, var(--yoro-color-accent-gold) 50%, var(--yoro-color-border-on-dark));
+    background: none;
     color: var(--yoro-color-accent-gold);
   }
 
@@ -405,18 +409,36 @@
     gap: var(--yoro-space-3);
   }
 
+  /* 큰 숫자 + 작은 단위 + 꼬리 밑줄(목업). "#" 기호는 쓰지 않습니다. */
   .public-participation-mine-number {
     position: relative;
-    font-size: 2.75rem;
-    font-weight: var(--yoro-font-weight-black);
-    letter-spacing: -.05em;
+    display: flex;
+    align-items: baseline;
+    gap: .25rem;
     line-height: 1;
-    font-variant-numeric: tabular-nums;
-    color: var(--yoro-color-public-primary);
+    color: var(--yoro-color-text-on-dark);
   }
 
-  .public-participation-mine[data-phase="soon"] .public-participation-mine-number {
-    color: var(--yoro-color-accent-gold);
+  .public-participation-mine-number > span {
+    font-family: var(--home-serif, "Noto Serif KR", "Noto Serif JP", serif);
+    font-size: 2.75rem;
+    font-weight: var(--yoro-font-weight-bold);
+    letter-spacing: -.03em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .public-participation-mine-number > em {
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-sm);
+    font-style: normal;
+    font-weight: var(--yoro-font-weight-bold);
+  }
+
+  .public-participation-mine-tail {
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-end: -.5rem;
+    color: var(--yoro-color-border-on-dark-strong);
   }
 
   .public-participation-mine-copy { min-width: 0; }
@@ -440,7 +462,8 @@
     position: relative;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--yoro-space-1);
+    /* 네 칸 2×2(목업) — 서버 summary 의 waiting·checkedIn 을 함께 보여 줍니다. */
+    gap: .875rem;
     margin: 0;
   }
 
@@ -463,6 +486,9 @@
 
   .public-participation-mine-metrics dd {
     margin: 0;
+    /* legacy 파스텔(#10233d !important) 상속 차단 — 자기 색 명시(qname 과 같은 이유).
+       지표 값이 먹 지면에서 1.07:1 이었습니다(2026-08-23 실측). */
+    color: var(--yoro-color-text-on-dark);
     font-size: var(--yoro-font-size-sm);
     font-weight: var(--yoro-font-weight-black);
     letter-spacing: -.02em;
@@ -471,6 +497,63 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
+  /* 상태 알림 안내 — 문구는 이미 있었고 렌더만 빠져 있었습니다. */
+  .public-participation-mine-notice {
+    position: relative;
+    display: grid;
+    gap: var(--yoro-space-1);
+    padding: var(--yoro-space-3);
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-sm);
+    background: var(--yoro-color-ground);
+  }
+
+  .public-participation-mine-notice > b {
+    color: var(--yoro-color-text-on-dark);
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-black);
+  }
+
+  .public-participation-mine-notice > span {
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    line-height: var(--yoro-line-height-relaxed);
+  }
+
+  /* 로그인 전 — 버튼만 두면 왜 필요한지 말하지 않습니다(목업 「참여 · 로그인 전」). */
+  .public-participation-login {
+    display: grid;
+    justify-items: center;
+    gap: var(--yoro-space-2);
+    padding: var(--yoro-space-5) var(--yoro-space-4);
+    text-align: center;
+  }
+
+  .public-participation-login-icon {
+    display: grid;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-circle);
+    color: var(--yoro-color-text-on-dark-muted);
+  }
+
+  .public-participation-login > b {
+    color: var(--yoro-color-text-on-dark);
+    font-size: var(--yoro-font-size-sm);
+    font-weight: var(--yoro-font-weight-black);
+  }
+
+  .public-participation-login > span {
+    max-inline-size: 22rem;
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    line-height: var(--yoro-line-height-relaxed);
+  }
+
+  .public-participation-login .yoro-button { margin-block-start: var(--yoro-space-1); }
 
   .public-participation-cancel {
     position: relative;
@@ -695,14 +778,30 @@
     list-style: none;
   }
 
+  /* 열 머리 — 행과 같은 5트랙(목업). 값이 어느 칸인지 글자가 말합니다. */
+  .public-participation-qcols,
+  .public-participation-qrow {
+    display: grid;
+    grid-template-columns: 2.125rem minmax(0, 1fr) 8.25rem 6rem 3.25rem;
+    align-items: center;
+    gap: .875rem;
+  }
+
+  .public-participation-qcols {
+    min-block-size: 1.875rem;
+    padding: 0 var(--yoro-space-4);
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: .6875rem;
+    font-weight: var(--yoro-font-weight-bold);
+  }
+
+  .public-participation-qcols > :last-child { text-align: end; }
+
   /* 이름과 보조 정보가 한 행에 들어갑니다. 두 줄로 쌓으면 행 높이가 두 배가 되고
      대기열에서 내 위치를 찾는 데 그만큼 스크롤이 늘어납니다. */
   .public-participation-qrow {
-    display: grid;
-    grid-template-columns: 1.375rem minmax(0, 1fr) auto auto;
-    align-items: center;
-    gap: var(--yoro-space-2);
-    padding: .4375rem var(--yoro-space-2);
+    min-block-size: 3.25rem;
+    padding: 0 var(--yoro-space-4);
     border: 1px solid transparent;
     border-radius: var(--yoro-radius-sm);
     background: var(--yoro-color-ground);
@@ -717,23 +816,118 @@
   }
 
   .public-participation-qname {
+    display: flex;
+    align-items: center;
+    gap: .5625rem;
     min-width: 0;
+    /* legacy 파스텔(#10233d !important) 상속 차단 — 자기 색 명시
+       (같은 파일 qhead > h3 와 같은 이유. 이름이 안 막혀 1.06:1 이었습니다). */
+    color: var(--yoro-color-text-on-dark);
     font-size: var(--yoro-font-size-xs);
     font-weight: var(--yoro-font-weight-bold);
+  }
+
+  .public-participation-qname > b {
+    min-width: 0;
+    font-weight: inherit;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
+  /* 대기열 응답에 아바타 이미지가 없어 이름 첫 글자를 씁니다(호출부 주석 참조). */
+  .public-participation-qavatar {
+    display: grid;
+    place-items: center;
+    flex: none;
+    inline-size: 1.625rem;
+    block-size: 1.625rem;
+    overflow: hidden;
+    border: 1px solid var(--yoro-color-border-on-dark);
+    border-radius: var(--yoro-radius-circle);
+    background: var(--yoro-color-ground-raised);
+    color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-black);
+  }
+
+  .public-participation-qavatar > img { inline-size: 100%; block-size: 100%; object-fit: cover; }
+
+  /* 티어·포지션 — 색은 티어 글자에만, 포지션은 무채(목업 §색). */
   .public-participation-qdetail {
+    display: flex;
+    align-items: baseline;
+    gap: .3125rem;
+    min-width: 0;
     color: var(--yoro-color-text-on-dark-muted);
     font-size: var(--yoro-font-size-xs);
     white-space: nowrap;
   }
 
+  .public-participation-qdetail > b {
+    font-weight: var(--yoro-font-weight-bold);
+    color: var(--tier-ink-unranked);
+  }
+
+  .public-participation-qdetail > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .public-participation-qdetail > b[data-tier="iron"] { color: var(--tier-ink-iron); }
+  .public-participation-qdetail > b[data-tier="bronze"] { color: var(--tier-ink-bronze); }
+  .public-participation-qdetail > b[data-tier="silver"] { color: var(--tier-ink-silver); }
+  .public-participation-qdetail > b[data-tier="gold"] { color: var(--tier-ink-gold); }
+  .public-participation-qdetail > b[data-tier="platinum"] { color: var(--tier-ink-platinum); }
+  .public-participation-qdetail > b[data-tier="emerald"] { color: var(--tier-ink-emerald); }
+  .public-participation-qdetail > b[data-tier="diamond"] { color: var(--tier-ink-diamond); }
+  .public-participation-qdetail > b[data-tier="master"] { color: var(--tier-ink-master); }
+  .public-participation-qdetail > b[data-tier="grandmaster"] { color: var(--tier-ink-grandmaster); }
+  .public-participation-qdetail > b[data-tier="challenger"] { color: var(--tier-ink-challenger); }
+
+  /* 상태가 없는 행도 칸은 남습니다 — 열이 어긋나지 않게. */
+  .public-participation-qstatus {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
+
+  /* 좁은 폭에서는 고정 트랙 셋(132+96+52)이 이름 칸을 0 으로 눌러 행이 넘칩니다
+     (실측 360px 에서 102px 초과). 티어·포지션을 이름 아래로 접어 3열로 세웁니다 —
+     정보는 그대로 두고 자리만 바꿉니다. */
+  @media (max-width: 47.9375rem) {
+    .public-participation-qcols { display: none; }
+
+    .public-participation-qrow {
+      grid-template-columns: 2.125rem minmax(0, 1fr) auto;
+      gap: .625rem var(--yoro-space-2);
+      padding: var(--yoro-space-2) var(--yoro-space-3);
+    }
+
+    .public-participation-qpos { grid-row: 1 / span 2; }
+
+    .public-participation-qdetail {
+      grid-column: 2;
+      grid-row: 2;
+    }
+
+    .public-participation-qstatus {
+      grid-column: 3;
+      grid-row: 1;
+      justify-content: flex-end;
+    }
+
+    .public-participation-qchamps {
+      grid-column: 3;
+      grid-row: 2;
+    }
+  }
+
   .public-participation-qchamps {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: .125rem;
   }
 
@@ -744,23 +938,19 @@
     background: var(--yoro-color-ground-raised);
   }
 
-  .public-participation-qrow[data-tone="info"] {
-    border-color: color-mix(in srgb, var(--yoro-color-public-primary) 40%, transparent);
-    background: color-mix(in srgb, var(--yoro-color-public-primary) 9%, var(--yoro-color-ground));
-  }
-
-  .public-participation-qrow[data-tone="warn"] {
-    border-color: color-mix(in srgb, var(--yoro-color-accent-gold) 45%, transparent);
-    background: color-mix(in srgb, var(--yoro-color-accent-gold) 10%, var(--yoro-color-ground));
-  }
-
+  /* 내 행만 표시한다 — 색이 아니라 헤어라인 + 무채 워시(사용자 결정 2026-08-23).
+     대기열이 20줄까지 늘어나면 색이 조금만 많아져도 내 순번을 못 찾습니다.
+     상태 색은 사라지지 않고 같은 행의 상태 칩이 그대로 말합니다. */
   .public-participation-qrow.is-viewer {
-    border-color: color-mix(in srgb, var(--yoro-color-public-primary) 60%, transparent);
-    background: color-mix(in srgb, var(--yoro-color-public-primary) 14%, var(--yoro-color-ground));
+    border-color: var(--yoro-color-border-on-dark-strong);
+    background:
+      linear-gradient(var(--profile-row-wash), var(--profile-row-wash)),
+      var(--yoro-color-ground);
   }
 
+  /* 내 순번은 대기열에서 제일 먼저 찾는 글자입니다 — 채움색을 글자에 쓰지 않습니다. */
   .public-participation-qrow.is-viewer .public-participation-qpos {
-    color: var(--yoro-color-public-primary);
+    color: var(--yoro-color-text-on-dark);
   }
 
   .public-participation-qgap {

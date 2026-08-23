@@ -84,15 +84,18 @@
      그래픽 램프(3:1 기준)로 남기고, 티어 이름·배지 글자는 이 --tier-ink-* 를
      씁니다. 다크는 어두운 지면이라 그래픽 값이 이미 4.5:1 을 넘어 같은 값. */
   --tier-ink-unranked: var(--yoro-color-ground-muted);
-  --tier-ink-iron: #8d8d8d;
-  --tier-ink-bronze: #c08558;
+  /* iron·bronze·grandmaster 는 아주 조금 밝힙니다 — 참여 대기열의 「내 행」에는
+     무채 워시가 깔려 배경이 카드보다 밝고, 그만큼 대비가 내려갑니다(4.14/4.40/4.27).
+     보정 후 워시 위에서도 4.5:1 을 넘습니다. 나머지 단계는 두 배경 모두 통과. */
+  --tier-ink-iron: #949494;
+  --tier-ink-bronze: #c1875b;
   --tier-ink-silver: #b3bcc5;
   --tier-ink-gold: #e5c15a;
   --tier-ink-platinum: #58c4bb;
   --tier-ink-emerald: #4fbc7c;
   --tier-ink-diamond: #6db6f0;
   --tier-ink-master: #b57ff0;
-  --tier-ink-grandmaster: #ea6560;
+  --tier-ink-grandmaster: #eb6e69;
   --tier-ink-challenger: #f0c264;
   /* 상세 ACE 배지 글자(후속 §1-5) — 다크는 티어 은색과 같은 값. */
   --award-ace-ink: #b3bcc5;

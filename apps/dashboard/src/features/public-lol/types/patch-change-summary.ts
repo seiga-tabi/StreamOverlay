@@ -149,29 +149,33 @@ export function parsePatchChangeSummary(value: unknown): PatchChangeSummary | un
 }
 
 /* Data Dragon 스탯 키 → 화면 라벨. 서버가 키만 보내고 라벨은 화면이 붙입니다
-   (언어를 서버 응답에 섞지 않기 위해서입니다). 모르는 키는 키 그대로 씁니다. */
-const STAT_LABELS: Record<string, { ko: string; ja: string }> = {
-  hp: { ko: "체력", ja: "体力" },
-  hpperlevel: { ko: "레벨당 체력", ja: "レベルごとの体力" },
-  mp: { ko: "마나", ja: "マナ" },
-  mpperlevel: { ko: "레벨당 마나", ja: "レベルごとのマナ" },
-  movespeed: { ko: "이동 속도", ja: "移動速度" },
-  armor: { ko: "방어력", ja: "物理防御" },
-  armorperlevel: { ko: "레벨당 방어력", ja: "レベルごとの物理防御" },
-  spellblock: { ko: "마법 저항력", ja: "魔法防御" },
-  spellblockperlevel: { ko: "레벨당 마법 저항력", ja: "レベルごとの魔法防御" },
-  attackrange: { ko: "사거리", ja: "攻撃距離" },
-  hpregen: { ko: "체력 재생", ja: "体力回復" },
-  hpregenperlevel: { ko: "레벨당 체력 재생", ja: "レベルごとの体力回復" },
-  mpregen: { ko: "마나 재생", ja: "マナ回復" },
-  mpregenperlevel: { ko: "레벨당 마나 재생", ja: "レベルごとのマナ回復" },
-  crit: { ko: "치명타", ja: "クリティカル" },
-  attackdamage: { ko: "공격력", ja: "攻撃力" },
-  attackdamageperlevel: { ko: "레벨당 공격력", ja: "レベルごとの攻撃力" },
-  attackspeed: { ko: "공격 속도", ja: "攻撃速度" },
-  attackspeedperlevel: { ko: "레벨당 공격 속도", ja: "レベルごとの攻撃速度" },
+   (언어를 서버 응답에 섞지 않기 위해서입니다). 모르는 키는 키 그대로 씁니다.
+   en 은 Riot 영문 클라이언트 표기를 따릅니다(2026-08-23: 없어서 ko 로 떨어져
+   /en 패치 노트에 「마법 저항력」이 그대로 보였습니다). */
+const STAT_LABELS: Record<string, { ko: string; ja: string; en: string }> = {
+  hp: { ko: "체력", ja: "体力", en: "Health" },
+  hpperlevel: { ko: "레벨당 체력", ja: "レベルごとの体力", en: "Health per level" },
+  mp: { ko: "마나", ja: "マナ", en: "Mana" },
+  mpperlevel: { ko: "레벨당 마나", ja: "レベルごとのマナ", en: "Mana per level" },
+  movespeed: { ko: "이동 속도", ja: "移動速度", en: "Move speed" },
+  armor: { ko: "방어력", ja: "物理防御", en: "Armor" },
+  armorperlevel: { ko: "레벨당 방어력", ja: "レベルごとの物理防御", en: "Armor per level" },
+  spellblock: { ko: "마법 저항력", ja: "魔法防御", en: "Magic resist" },
+  spellblockperlevel: { ko: "레벨당 마법 저항력", ja: "レベルごとの魔法防御", en: "Magic resist per level" },
+  attackrange: { ko: "사거리", ja: "攻撃距離", en: "Attack range" },
+  hpregen: { ko: "체력 재생", ja: "体力回復", en: "Health regen" },
+  hpregenperlevel: { ko: "레벨당 체력 재생", ja: "レベルごとの体力回復", en: "Health regen per level" },
+  mpregen: { ko: "마나 재생", ja: "マナ回復", en: "Mana regen" },
+  mpregenperlevel: { ko: "레벨당 마나 재생", ja: "レベルごとのマナ回復", en: "Mana regen per level" },
+  crit: { ko: "치명타", ja: "クリティカル", en: "Critical strike" },
+  attackdamage: { ko: "공격력", ja: "攻撃力", en: "Attack damage" },
+  attackdamageperlevel: { ko: "레벨당 공격력", ja: "レベルごとの攻撃力", en: "Attack damage per level" },
+  attackspeed: { ko: "공격 속도", ja: "攻撃速度", en: "Attack speed" },
+  attackspeedperlevel: { ko: "레벨당 공격 속도", ja: "レベルごとの攻撃速度", en: "Attack speed per level" },
 };
 
-export function patchStatLabel(stat: string, locale: "ko" | "ja"): string {
+export type PatchStatLabelLocale = "ko" | "ja" | "en";
+
+export function patchStatLabel(stat: string, locale: PatchStatLabelLocale): string {
   return STAT_LABELS[stat]?.[locale] ?? stat;
 }

@@ -167,7 +167,13 @@ export function PalworldSearchForm({
   return (
     <form className={`palworld-search-form is-${variant}`} onSubmit={submit} ref={formRef} role="search" data-testid={`${variant}-search`}>
       <div className="palworld-search-control">
-        <span className="palworld-search-icon" aria-hidden="true">⌕</span>
+        {/* 글리프(⌕)는 글꼴 따라 크기·정렬이 흔들립니다 — 아이콘은 SVG(UI 규칙). */}
+        <span className="palworld-search-icon" aria-hidden="true">
+          <svg fill="none" height="16" stroke="currentColor" strokeWidth="1.2" viewBox="0 0 16 16" width="16">
+            <circle cx="7" cy="7" r="4.5" />
+            <path d="M10.5 10.5 L 14 14" />
+          </svg>
+        </span>
         <input
           type="search"
           maxLength={PALWORLD_SEARCH_MAX_LENGTH}

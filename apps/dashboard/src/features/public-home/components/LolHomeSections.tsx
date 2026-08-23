@@ -1,11 +1,12 @@
-import { useEffect, useState, type FormEvent } from "react";
-import type { LolPlatformId } from "@streamops/shared";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import type { LolPlatformId, LolRankedStats } from "@streamops/shared";
 import { normalizeLolPlatformId, parseAramAugmentCatalog, type AramAugmentRarity, type PatchNotesFeed } from "@streamops/shared";
 import { requestPatchNotes } from "../../public-lol/api/patch-notes";
-import type { PublicLocale } from "../../public-lol/i18n/public-lol-i18n";
+import { publicI18n, type PublicLocale } from "../../public-lol/i18n/public-lol-i18n";
 import type { SearchSuggestion } from "../../public-lol/types/public-lol";
 import { localizedPublicUrlForCurrentLocale } from "../../public-lol/utils/public-locale-path";
-import { publicSummonerPath, riotIdQuery } from "../../public-lol/utils/riot-id";
+import { shortRankLabel } from "../../public-lol/utils/rank";
+import { buildSuggestions, normalizeSuggestionKey, publicSummonerPath, riotIdQuery } from "../../public-lol/utils/riot-id";
 import { readFavorites, readRecentSearches } from "../../public-lol/utils/storage";
 import type { HomeText } from "../i18n/home-i18n";
 import type { LolHomeText } from "../i18n/lol-home-i18n";
@@ -85,6 +86,44 @@ function FavStarIcon() {
   );
 }
 
+/* 홈 모듈은 same-origin 상대경로 관례(HomeSections 의 fetch 와 동일) —
+   api/client(apiBase)는 import.meta.env 를 만져 SSR 테스트에서 못 씁니다. */
+function suggestionAssetUrl(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  return url;
+}
+
+async function fetchHomeSuggestions(query: string, signal: AbortSignal, platform: LolPlatformId): Promise<SearchSuggestion[]> {
+  const params = new URLSearchParams({ q: query, platform });
+  const response = await fetch(`/api/lol/suggestions?${params.toString()}`, {
+    credentials: "same-origin",
+    headers: { Accept: "application/json" },
+    signal
+  });
+  if (!response.ok) return [];
+  const body = await response.json() as { suggestions?: SearchSuggestion[] };
+  return Array.isArray(body.suggestions) ? body.suggestions : [];
+}
+
+/* SearchForm 연관 패널과 같은 티어 표기(Platinum II 등) — 문구는 데이터 표기라 로케일 무관. */
+function suggestionTierLabel(stats: LolRankedStats | undefined, fallbackLabel: string): string {
+  if (!stats) return fallbackLabel;
+  if (stats.tier === "UNRANKED") return "Unranked";
+  const tierLabel = stats.tier
+    .toLocaleLowerCase()
+    .replace(/(^|_)([a-z])/g, (_, separator: string, letter: string) => `${separator ? " " : ""}${letter.toLocaleUpperCase()}`);
+  return `${tierLabel}${stats.rank ? ` ${stats.rank}` : ""}`.trim();
+}
+
+function TierCrestFallbackIcon() {
+  return (
+    <svg aria-hidden="true" fill="none" height="20" stroke="currentColor" strokeWidth="1.1" viewBox="0 0 20 22" width="18">
+      <path d="M10 1.5 L18.5 6.5 V15.5 L10 20.5 L1.5 15.5 V6.5 Z" />
+      <path d="M10 6 L14.5 8.7 V13.3 L10 16 L5.5 13.3 V8.7 Z" opacity=".55" />
+    </svg>
+  );
+}
+
 function suggestionHref(item: SearchSuggestion): string {
   return localizedPublicUrlForCurrentLocale(
     publicSummonerPath(`${item.gameName}#${item.tagLine}`, normalizeLolPlatformId(item.lolPlatform))
@@ -123,11 +162,63 @@ export function LolHomeHero({ text, homeText, locale }: {
   /* localStorage 는 렌더 밖 세상이라 마운트 후 한 번 읽습니다(SSR·테스트 안전). */
   const [recent, setRecent] = useState<SearchSuggestion[]>([]);
   const [favorites, setFavorites] = useState<SearchSuggestion[]>([]);
+  /* 연관 검색 패널 — 전적 상단바 검색과 같은 계약(원격 /api/lol/suggestions +
+     저장 목록 병합, 250ms 디바운스·중단). 화면 문구는 기존 publicI18n 키 재사용. */
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [remoteSuggestions, setRemoteSuggestions] = useState<SearchSuggestion[]>([]);
+  const searchWrapRef = useRef<HTMLDivElement>(null);
+  const panelText = publicI18n[locale];
+  const trimmedQuery = query.trim();
 
   useEffect(() => {
-    setRecent(readRecentSearches().slice(0, 3));
-    setFavorites(readFavorites().slice(0, 3));
+    setRecent(readRecentSearches().slice(0, 5));
+    setFavorites(readFavorites().slice(0, 5));
   }, []);
+
+  const storedSuggestions = useMemo(() => {
+    const unique = new Map<string, SearchSuggestion>();
+    for (const suggestion of [...favorites, ...recent]) {
+      const key = normalizeSuggestionKey(suggestion);
+      if (!unique.has(key)) unique.set(key, suggestion);
+    }
+    return [...unique.values()];
+  }, [favorites, recent]);
+
+  const liveSuggestions = useMemo(
+    () => (trimmedQuery ? buildSuggestions(query, storedSuggestions, remoteSuggestions, server).slice(0, 6) : []),
+    [trimmedQuery, query, storedSuggestions, remoteSuggestions, server]
+  );
+
+  useEffect(() => {
+    if (trimmedQuery.length < 2) {
+      setRemoteSuggestions([]);
+      return undefined;
+    }
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => {
+      void fetchHomeSuggestions(trimmedQuery, controller.signal, server)
+        .then(setRemoteSuggestions)
+        .catch((suggestionError) => {
+          if (suggestionError instanceof DOMException && suggestionError.name === "AbortError") return;
+          setRemoteSuggestions([]);
+        });
+    }, 250);
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [trimmedQuery, server]);
+
+  useEffect(() => {
+    if (!panelOpen) return undefined;
+    function handlePointerDown(event: PointerEvent): void {
+      if (searchWrapRef.current && event.target instanceof Node && !searchWrapRef.current.contains(event.target)) {
+        setPanelOpen(false);
+      }
+    }
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [panelOpen]);
 
   function submit(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
@@ -140,6 +231,72 @@ export function LolHomeHero({ text, homeText, locale }: {
     window.location.assign(localizedPublicUrlForCurrentLocale(publicSummonerPath(withTag, option.id)));
   }
 
+  const favoriteKeys = useMemo(() => new Set(favorites.map(normalizeSuggestionKey)), [favorites]);
+
+  const renderSuggestionRow = (item: SearchSuggestion) => {
+    const rankedStats = item.rankedStats;
+    const tierIconUrl = suggestionAssetUrl(rankedStats?.tierIconUrl);
+    const tierLabel = suggestionTierLabel(rankedStats, shortRankLabel(rankedStats, "—"));
+    const lpLabel = rankedStats && rankedStats.tier !== "UNRANKED" ? `${rankedStats.leaguePoints}LP` : undefined;
+    const starred = favoriteKeys.has(normalizeSuggestionKey(item));
+    return (
+      <button
+        key={`${item.lolPlatform ?? server}:${item.gameName}#${item.tagLine}`}
+        onClick={() => window.location.assign(suggestionHref(item))}
+        role="option"
+        type="button"
+      >
+        <span className="yoro-lol-suggest-avatar" aria-hidden="true">
+          {item.profileIconUrl ? (
+            /* 패널은 열릴 때만 마운트되고 행이 6개뿐이라 lazy 이점이 없습니다.
+               일부 응답의 아바타 경로(/cdn/…)는 서버에 없어 404 — 깨진 그림 대신
+               이니셜 폴백으로 떨어뜨립니다. */
+            <img
+              alt=""
+              decoding="async"
+              onError={(event) => {
+                event.currentTarget.hidden = true;
+                event.currentTarget.parentElement?.append(item.gameName.slice(0, 1).toUpperCase());
+              }}
+              src={suggestionAssetUrl(item.profileIconUrl)}
+            />
+          ) : item.gameName.slice(0, 1).toUpperCase()}
+        </span>
+        <span className="yoro-lol-suggest-tier" aria-hidden="true">
+          {tierIconUrl ? <img alt="" decoding="async" src={tierIconUrl} /> : <TierCrestFallbackIcon />}
+        </span>
+        <span className="yoro-lol-suggest-name">
+          <span>{item.gameName}</span>
+          <strong>#{item.tagLine}</strong>
+        </span>
+        <span className="yoro-lol-suggest-rank">
+          <span>{tierLabel}</span>
+          {lpLabel ? <small>{lpLabel}</small> : null}
+        </span>
+        {starred ? <span aria-hidden="true" className="yoro-lol-suggest-star"><FavStarIcon /></span> : null}
+      </button>
+    );
+  };
+
+  /* 타이핑 중에는 연관 목록, 빈 입력 포커스에는 즐겨찾기·최근 — 전적 상단바 패널과
+     같은 진입 문법을 히어로 한 상자에 눌러 담습니다(탭 대신 소제목 두 줄). */
+  const idleFavorites = favorites.slice(0, 5);
+  const idleRecent = recent.filter((item) => !favoriteKeys.has(normalizeSuggestionKey(item))).slice(0, 5);
+  const panelBody = trimmedQuery
+    ? (liveSuggestions.length > 0 ? (
+      <div className="yoro-lol-suggest-list" role="listbox" aria-label={panelText.relatedSummoners}>
+        {liveSuggestions.map(renderSuggestionRow)}
+      </div>
+    ) : null)
+    : (idleFavorites.length > 0 || idleRecent.length > 0 ? (
+      <div className="yoro-lol-suggest-list" role="listbox" aria-label={panelText.relatedSummoners}>
+        {idleFavorites.length > 0 ? <div className="yoro-lol-suggest-title">{panelText.favoritesTitle}</div> : null}
+        {idleFavorites.map(renderSuggestionRow)}
+        {idleRecent.length > 0 ? <div className="yoro-lol-suggest-title">{panelText.recentSearch}</div> : null}
+        {idleRecent.map(renderSuggestionRow)}
+      </div>
+    ) : null);
+
   return (
     <section className="yoro-home-hero yoro-lol-hero">
       <HomeSignatureMark />
@@ -149,13 +306,22 @@ export function LolHomeHero({ text, homeText, locale }: {
         <p className="yoro-home-hero-sub">{text.heroSub}</p>
 
         <form className="yoro-home-search" onSubmit={submit}>
+          <div className="yoro-lol-searchwrap" ref={searchWrapRef}>
           <div className="yoro-home-search-box">
             <SearchIcon />
             <input
+              aria-expanded={panelOpen && panelBody !== null}
               aria-label={homeText.tabLol}
               autoComplete="off"
               className="yoro-home-search-input"
-              onChange={(event) => setQuery(event.currentTarget.value)}
+              onChange={(event) => {
+                setQuery(event.currentTarget.value);
+                setPanelOpen(true);
+              }}
+              onFocus={() => setPanelOpen(true)}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") setPanelOpen(false);
+              }}
               placeholder={homeText.searchPlaceholderLol}
               value={query}
             />
@@ -176,9 +342,11 @@ export function LolHomeHero({ text, homeText, locale }: {
             </label>
             <button className="yoro-home-search-submit" type="submit">{homeText.searchLabel}</button>
           </div>
+          {panelOpen && panelBody ? <div className="yoro-lol-suggest">{panelBody}</div> : null}
+          </div>
 
-          <SuggestionChips items={recent} label={text.recentLabel} />
-          <SuggestionChips items={favorites} label={text.favoritesLabel} withStar />
+          <SuggestionChips items={recent.slice(0, 3)} label={text.recentLabel} />
+          <SuggestionChips items={favorites.slice(0, 3)} label={text.favoritesLabel} withStar />
 
           <div className="yoro-home-chips">
             <a className="yoro-home-chip" href={localizedPublicUrlForCurrentLocale("/lol/aram")}>

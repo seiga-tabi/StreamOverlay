@@ -23,7 +23,7 @@ import { usePublicLocale } from "../features/public-lol/hooks/usePublicLocale";
 import { usePublicTheme } from "../features/public-lol/hooks/usePublicTheme";
 import { setActivePublicLocale } from "../features/public-lol/i18n/public-lol-i18n";
 import { PalworldBottomTabBar } from "../features/public-palworld/components/PalworldBottomTabBar";
-import { PalworldHeader } from "../features/public-palworld/components/PalworldHeader";
+import { PalworldChrome } from "../features/public-palworld/components/PalworldChrome";
 import { PalworldHome } from "../features/public-palworld/components/PalworldHome";
 import { PalworldNotFoundPage } from "../features/public-palworld/components/PalworldNotFoundPage";
 import { PalworldSearchForm } from "../features/public-palworld/components/PalworldSearchForm";
@@ -80,7 +80,7 @@ const SkillDetailModal = lazyNamed(loadPalworldDeferredPages, "SkillDetailModal"
 
 export function PublicPalworldPage() {
   const { locale, changeLocale } = usePublicLocale(noServerLocalePreference);
-  const { theme } = usePublicTheme();
+  const { theme, toggleTheme } = usePublicTheme();
   const { page, params } = usePalworldRoute();
   const knownPage = isKnownPalworldPagePath(window.location.pathname);
   const text = palworldI18n[locale];
@@ -263,16 +263,19 @@ export function PublicPalworldPage() {
       skipLinkLabel={text.skipToContent}
       variant="public"
     >
-      <AppShellHeader as="div" className="palworld-shell-header">
-        <PalworldHeader
-          locale={locale}
-          onLocale={handleLocale}
-          onTwitchLogout={() => void disconnectTwitch()}
-          page={page}
-          searchContent={headerSearch}
-          twitchStatus={twitchStatus}
-        />
-      </AppShellHeader>
+      {/* 메인 홈과 같은 상단바 한 벌(1행 HomeHeader + 2행 팰월드 메뉴) —
+          사용자 요청 2026-08-22. 구 PalworldHeader 는 palworldNavItems 원본으로만 남습니다. */}
+      <PalworldChrome
+        accountName={twitchStatus.user?.displayName}
+        connected={twitchStatus.connected}
+        locale={locale}
+        onLocale={handleLocale}
+        onLoginOpen={startTwitchLogin}
+        onLogout={() => void disconnectTwitch()}
+        onToggleTheme={toggleTheme}
+        page={page}
+        searchSlot={headerSearch}
+      />
       <AppShellMain className="palworld-main" data-page-frame={pageFrame} id="palworld-main">
         {!knownPage ? <PalworldNotFoundPage locale={locale} /> : null}
         {knownPage ? <Suspense fallback={(

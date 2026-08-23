@@ -21,7 +21,7 @@ import type {
 import { PALWORLD_WORK_SUITABILITY_TYPES } from "@streamops/shared";
 import { PublicGameSelector } from "../src/features/public-lol/components/PublicGameSelector";
 import { setActivePublicLocale } from "../src/features/public-lol/i18n/public-lol-i18n";
-import { PalworldHeader } from "../src/features/public-palworld/components/PalworldHeader";
+import { PalworldChrome, PalworldSubnav } from "../src/features/public-palworld/components/PalworldChrome";
 import { PalworldHome } from "../src/features/public-palworld/components/PalworldHome";
 import {
   PalworldHomeDataStatus,
@@ -162,17 +162,36 @@ test("비정규 Palworld 경로와 page 오류 경계는 원문 오류 없이 �
   assert.doesNotMatch(failed, /stack|Error:/u);
 });
 
-test("팰월드 홈 헤더에는 상단 검색이 없고 하위 페이지에는 표시한다", () => {
+test("팰월드 상단바는 메인 홈 크롬(1행)과 팰월드 2행 메뉴 한 벌이다", () => {
+  /* 사용자 요청 2026-08-22 — LolChrome 과 같은 조립: yoro-home-chrome 1행 +
+     .yoro-lol-subnav(크롬 공용 클래스) 2행. 홈에는 헤더 검색이 없고 하위
+     페이지에만 searchSlot 로 붙는다. */
   setActivePublicLocale("ko");
-  const home = renderToStaticMarkup(<PalworldHeader locale="ko" onLocale={() => undefined} page="home" />);
-  const child = renderToStaticMarkup(<PalworldHeader locale="ko" onLocale={() => undefined} page="pals" searchContent={<div data-testid="header-search">검색</div>} />);
-  assert.doesNotMatch(home, /data-testid="header-search"/);
-  assert.match(child, /data-testid="header-search"/);
-  assert.match(home, /class="public-game-header palworld-header" data-home="true"/);
-  assert.match(child, /data-testid="palworld-secondary-nav"/);
-  assert.match(child, /aria-current="page"[^>]*data-ko="Pal 도감"/);
-  assert.match(home, /class="public-game-header__brand-logo" src="\/images\/yorogg-home-logo\.webp" alt="YORO\.gg"/);
-  assert.doesNotMatch(home, /src="\/images\/yorogg-mark\.png"/);
+  const noop = () => undefined;
+  const chrome = (page: "home" | "pals", searchSlot?: React.ReactNode) => renderToStaticMarkup(
+    <PalworldChrome
+      connected={false}
+      locale="ko"
+      onLocale={noop}
+      onLoginOpen={noop}
+      onLogout={noop}
+      onToggleTheme={noop}
+      page={page}
+      searchSlot={searchSlot}
+    />,
+  );
+  const home = chrome("home");
+  const child = chrome("pals", <div data-testid="header-search">검색</div>);
+  assert.match(home, /yoro-home-chrome palworld-chrome/u);
+  assert.match(home, /yoro-home-header/u);
+  assert.doesNotMatch(home, /data-testid="header-search"/u);
+  assert.match(child, /yoro-home-header-search/u);
+  assert.match(child, /data-testid="header-search"/u);
+  // 2행 — 팰월드 메뉴 7종이 수묵 subnav 문법으로, 활성엔 aria-current + 꼬리 밑줄.
+  assert.match(home, /class="yoro-lol-subnav"/u);
+  assert.match(child, /aria-current="page"[^>]*data-ko="Pal 도감"/u);
+  assert.match(child, /yoro-lol-subnav-tail/u);
+  assert.match(home, /href="\/ko\/palworld\/breeding"/u);
 });
 
 test("팰월드 shell은 가로 overflow만 clip하고 은퇴한 hero 규칙을 되살리지 않는다", () => {
@@ -189,18 +208,19 @@ test("팰월드 shell은 가로 overflow만 clip하고 은퇴한 hero 규칙을 
 });
 
 test("Palworld 2행 메뉴는 한국어·일본어 7개 순서와 기술 해금 활성 상태를 유지한다", () => {
-  const korean = renderToStaticMarkup(<PalworldHeader locale="ko" onLocale={() => undefined} page="technology" searchContent={<div data-testid="header-search">검색</div>} />);
-  const japanese = renderToStaticMarkup(<PalworldHeader locale="ja" onLocale={() => undefined} page="home" />);
-  const skills = renderToStaticMarkup(<PalworldHeader locale="ko" onLocale={() => undefined} page="skills" searchContent={<div data-testid="header-search">검색</div>} />);
-  const map = renderToStaticMarkup(<PalworldHeader locale="ko" onLocale={() => undefined} page="map" searchContent={<div data-testid="header-search">검색</div>} />);
-  assert.equal((korean.match(/<nav[^>]*data-testid="palworld-secondary-nav"[\s\S]*?<button/gu) ?? []).length > 0, true);
+  /* 구 PalworldHeader → PalworldSubnav(홈 크롬 2행)로 이관 — 계약(7개·순서·활성)은 동일. */
+  const sub = (locale: "ko" | "ja", page: "home" | "technology" | "skills" | "map") =>
+    renderToStaticMarkup(<PalworldSubnav locale={locale} page={page} />);
+  const korean = sub("ko", "technology");
+  const japanese = sub("ja", "home");
+  assert.match(korean, /class="yoro-lol-subnav"/u);
   assert.equal((korean.match(/data-ko="(?:홈|Pal 도감|교배 조합|아이템|기술 해금|스킬|지도)"/gu) ?? []).length, 7);
   assert.match(korean, /홈[\s\S]*Pal 도감[\s\S]*교배 조합[\s\S]*아이템[\s\S]*기술 해금[\s\S]*스킬[\s\S]*지도/u);
   assert.match(korean, /aria-current="page"[^>]*data-ko="기술 해금"/u);
   assert.doesNotMatch(korean, /data-ko="스트리머"/u);
   assert.match(japanese, /ホーム[\s\S]*パル図鑑[\s\S]*配合組み合わせ[\s\S]*アイテム[\s\S]*技術解放[\s\S]*スキル[\s\S]*マップ/u);
-  assert.match(skills, /aria-current="page"[^>]*data-ko="스킬"/u);
-  assert.match(map, /aria-current="page"[^>]*data-ko="지도"/u);
+  assert.match(sub("ko", "skills"), /aria-current="page"[^>]*data-ko="스킬"/u);
+  assert.match(sub("ko", "map"), /aria-current="page"[^>]*data-ko="지도"/u);
 });
 
 test("스킬 카드와 상세는 설명·수치·관련 Pal과 영어 원문 fallback을 다국어로 표시한다", () => {
@@ -668,34 +688,32 @@ test("스킬 페이지의 기본 탭은 액티브이며 game data 속성 아이�
   assert.match(japanese, /アクティブスキル[\s\S]*パッシブスキル[\s\S]*パートナースキル/u);
 });
 
-test("Palworld 헤더는 공유 Twitch 프로필과 Dashboard·로그아웃 메뉴를 렌더한다", () => {
-  const html = renderToStaticMarkup(<PalworldHeader
+test("Palworld 상단바는 연결된 계정명과 Dashboard·로그아웃 메뉴를 렌더한다", () => {
+  /* 구 PalworldHeader 계정 칩 → 홈 크롬(HomeHeader) 계정 메뉴로 이관 —
+     연결 시 계정명 버튼, 미연결 시 로그인 버튼(메인 홈과 동일 규격). */
+  const noop = () => undefined;
+  const connected = renderToStaticMarkup(<PalworldChrome
+    accountName="Pal Viewer"
+    connected
     locale="ko"
-    onLocale={() => undefined}
+    onLocale={noop}
+    onLoginOpen={noop}
+    onLogout={noop}
+    onToggleTheme={noop}
     page="home"
-    twitchStatus={{
-      connected: true,
-      configured: true,
-      requiredScopes: ["user:read:follows", "user:read:subscriptions"],
-      missingScopes: [],
-      user: { id: "viewer-1", login: "pal_viewer", displayName: "Pal Viewer", profileImageUrl: "https://static-cdn.jtvnw.net/profile.png" },
-      streamerRiotRequest: {
-        id: "request-1",
-        twitchUserId: "viewer-1",
-        twitchLogin: "pal_viewer",
-        twitchDisplayName: "Pal Viewer",
-        riotGameName: "Viewer",
-        riotTagLine: "JP1",
-        status: "approved",
-        requestedAt: "2026-07-22T00:00:00.000Z",
-        updatedAt: "2026-07-22T00:00:00.000Z",
-        dashboardEnabled: true,
-      },
-    }}
   />);
-  assert.match(html, /class="public-twitch-login-chip connected"/u);
-  assert.match(html, /src="https:\/\/static-cdn\.jtvnw\.net\/profile\.png"/u);
-  assert.match(html, /Pal Viewer/u);
+  assert.match(connected, /Pal Viewer/u);
+  assert.doesNotMatch(connected, />로그인</u);
+  const anonymous = renderToStaticMarkup(<PalworldChrome
+    connected={false}
+    locale="ko"
+    onLocale={noop}
+    onLoginOpen={noop}
+    onLogout={noop}
+    onToggleTheme={noop}
+    page="home"
+  />);
+  assert.match(anonymous, />로그인</u);
 });
 
 test("Palworld 홈은 실제 경로의 기능 대시보드와 로그인 CTA가 있는 LIVE rail을 렌더한다", () => {
@@ -779,10 +797,14 @@ test("Palworld 홈 데이터 현황과 업데이트는 meta의 실제 수·relea
   assert.match(dataStatus, /181/u);
   assert.match(dataStatus, /842/u);
   assert.match(dataStatus, /32,761/u);
-  assert.match(dataStatus, /1\.0\.1/u);
+  /* 릴리스·검증일 카드는 데이터 현황에서 삭제(수묵 홈 §5-3) — 같은 값을 바로 옆
+     「최신 업데이트」 패널이 말합니다. 여기 다시 생기면 중복 회귀입니다. */
+  assert.doesNotMatch(dataStatus, /1\.0\.1/u);
+  assert.doesNotMatch(dataStatus, /palworld-home-data-metadata/u);
   assert.doesNotMatch(dataStatus, /\+\d+/u);
   assert.match(updates, /最新アップデート/u);
   assert.match(updates, /検証済みデータ/u);
+  assert.match(updates, /1\.0\.1/u);
   assert.match(updates, /dateTime="2026-07-22T00:00:00\.000Z"/u);
   assert.doesNotMatch(updates, /2024\.05|新しいパル|パッチ/u);
 });

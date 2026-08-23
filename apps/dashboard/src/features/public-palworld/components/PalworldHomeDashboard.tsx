@@ -571,16 +571,8 @@ export function PalworldHomeDataStatus({
           ))}
         </dl>
       </div>
-      <div className="palworld-home-data-metadata">
-        <div>
-          <small>{palworldI18n[locale].dataVersion}</small>
-          <strong>{meta.data.metadata.release ?? meta.data.metadata.gameVersion}</strong>
-        </div>
-        <div>
-          <small>{palworldI18n[locale].homeLastVerified}</small>
-          <strong>{formatVerifiedAt(locale, meta.data.metadata.verifiedAt)}</strong>
-        </div>
-      </div>
+      {/* 「데이터 버전 / 마지막 검증일」 카드는 삭제(§목업 데이터 현황) —
+          바로 옆 「최신 업데이트」 패널이 같은 값을 말합니다. */}
     </section>
   );
 }

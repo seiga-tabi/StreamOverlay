@@ -1,6 +1,6 @@
 import type { PatchNote, PatchPlayRecord } from "@streamops/shared";
 import type { PatchTopChampion } from "../components/PatchChangeSummaryPanel";
-import { patchStatLabel, type PatchChangeSummary } from "../types/patch-change-summary";
+import { patchStatLabel, type PatchChangeSummary, type PatchStatLabelLocale } from "../types/patch-change-summary";
 
 /* 패치 요약 공유 카드(캔버스) — 목업 docs/mockups/lol-patch-summary-share.html v1.2 §③.
  *
@@ -35,7 +35,7 @@ export type PatchSummaryShareInput = {
   record?: PatchPlayRecord;
   topChampions?: readonly PatchTopChampion[];
   delta?: number;
-  locale: "ko" | "ja";
+  locale: PatchStatLabelLocale;
   text: PatchSummaryShareText;
 };
 
@@ -174,8 +174,10 @@ function fillTextEllipsis(
  * 그라디언트로 닫혀 "이미지가 안 나온다"로 보입니다. 서버가 같은 수집 경로로
  * 프록시하므로 URL 만 우리 쪽으로 돌립니다. 없으면 404 → 기존 폴백입니다.
  */
-function heroArtUrl(patchVersion: string, locale: "ko" | "ja"): string {
-  const query = new URLSearchParams({ patch: patchVersion, locale });
+function heroArtUrl(patchVersion: string, locale: PatchStatLabelLocale): string {
+  /* 키 아트는 노트 피드에서 오고 피드는 ko·ja 뿐입니다 — en 은 ko 아트로 떨어뜨립니다
+     (영문 피드는 서버 작업, docs/handoffs/2026-08-23-patch-notes-en-locale-handoff.md). */
+  const query = new URLSearchParams({ patch: patchVersion, locale: locale === "ja" ? "ja" : "ko" });
   return `/api/public/patch-notes/keyart?${query.toString()}`;
 }
 

@@ -228,6 +228,15 @@
   padding: clamp(var(--yoro-space-4), 3vw, var(--yoro-space-10)) !important;
 }
 
+/* 홈 프레임만 — 상단바(.yoro-home-header, max-width 90rem)와 같은 자[尺]
+   (후속 §2-1). 위 clamp 패딩의 기존 !important 를 상쇄하는 것이라 여기도
+   !important — 신규 증설이 아닙니다. 좌 96/우 48 여백은 본문 안 섹션
+   (히어로 카피 96px 등)이 갖습니다(/ko/lol 과 같은 방식). */
+.palworld-main[data-page-frame="home"] {
+  max-inline-size: 90rem;
+  padding: 0 !important;
+}
+
 .palworld-main[data-page-frame="catalog"] {
   inline-size: min(100%, 84rem);
 }
@@ -6524,4 +6533,75 @@
   margin: var(--yoro-space-1) 0 var(--yoro-space-2);
   color: var(--yoro-color-ground-muted);
   font-size: var(--yoro-font-size-sm);
+}
+
+/* ── 홈 상단바(yoro-home-chrome) 채택 후 헤더 검색 컴팩트 규격 ─────────
+   래퍼 .yoro-home-header-search 의 프레임(우측 정렬·연관 패널 위치)은
+   02-lol-home.css 크롬 공용 규칙이 담당하고, 여기서는 팰월드 검색 폼을
+   그 프레임에 맞는 36px 컴팩트로만 줄입니다. */
+.yoro-home-header-search .palworld-search-form { inline-size: 300px; }
+
+.yoro-home-header-search .palworld-search-control {
+  min-block-size: 36px;
+  border: .5px solid var(--home-line, var(--yoro-color-border-on-dark));
+  border-radius: 2px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.yoro-home-header-search .palworld-search-control input {
+  min-block-size: 34px;
+  font-size: 12px;
+}
+
+.yoro-home-header-search .palworld-search-submit {
+  min-block-size: 28px;
+  padding-inline: 10px;
+  border: .5px solid var(--home-line, var(--yoro-color-border-on-dark));
+  border-radius: 2px;
+  /* 크롬 안은 무채 — 원색 버튼은 수묵 상단바에서 혼자 튑니다. */
+  background: transparent;
+  color: inherit;
+  font-size: 12px;
+}
+
+.yoro-home-header-search .palworld-autocomplete {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  left: auto;
+  z-index: 60;
+  inline-size: min(400px, calc(100vw - 32px));
+}
+
+@media (max-width: 47.9375rem) {
+  .yoro-home-header-search .palworld-search-form { inline-size: 100%; }
+}
+
+/* ── 파스텔 글자 강제(02-legacy)에서 팰월드를 제외한 뒤 드러난 저대비 셋
+   (2026-08-22 실측 — 색은 스스로 명시해야 합니다). ───────────────────── */
+
+/* 푸터 링크·법적 고지 — 다크 지면(#1a2130) 위 라이트 잉크 상속이 1.1:1 이었습니다. */
+.palworld-shell .public-game-footer,
+.palworld-shell .public-game-footer a,
+.palworld-shell .public-game-footer .public-site-footer-nav a {
+  color: var(--yoro-color-text-on-dark-muted);
+}
+
+.palworld-shell .public-game-footer a:hover {
+  color: var(--yoro-color-text-on-dark);
+}
+
+/* 패널 헤더 상태 배지(검증된 데이터·일부 데이터) — tone 채움 위 tone 글자가
+   1.0~1.1:1. Status.css(비레이어)는 요소의 --yoro-status-* 를 직접 선언하므로
+   훅이 참조하는 깊은 톤 토큰을 조상에서 스왑합니다(42-ink 패치노트와 같은 기법).
+   수묵: 상태는 색이 아니라 글자가 말합니다. */
+.palworld-home-dashboard-panel__header,
+.palworld-home-release {
+  --yoro-color-success: var(--yoro-color-text-on-dark-muted);
+  --yoro-color-success-bg: transparent;
+  --yoro-color-warning: var(--yoro-color-text-on-dark-muted);
+  --yoro-color-warning-bg: transparent;
+  --yoro-color-danger: var(--yoro-color-text-on-dark-muted);
+  --yoro-color-danger-bg: transparent;
 }

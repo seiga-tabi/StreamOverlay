@@ -239,6 +239,116 @@
 }
 
 @layer home {
+  /* ── 히어로 연관 검색 패널 — 상단바 패널(LolSearchSuggest)과 같은 행 문법
+     (52px 행 · 아바타 30 · 티어 엠블럼 22 · 이름 1fr · 티어명 우측 · ★ 13)을
+     홈 토큰으로 옮긴 것. 검색 구역 무애니메이션 원칙 그대로. ───────────── */
+  .yoro-lol-searchwrap {
+    position: relative;
+    width: 560px;
+    max-width: 100%;
+  }
+
+  .yoro-lol-searchwrap .yoro-home-search-box { width: 100%; }
+
+  .yoro-lol-suggest {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    left: 0;
+    z-index: 40;
+    padding: 4px 0 6px;
+    border: .5px solid var(--home-stroke);
+    border-radius: 3px;
+    background: var(--home-card);
+  }
+
+  .yoro-lol-suggest-title {
+    padding: 9px 16px 3px;
+    color: var(--home-mid);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .08em;
+  }
+
+  .yoro-lol-suggest-list button {
+    display: grid;
+    grid-template-columns: 30px 22px minmax(0, 1fr) max-content;
+    gap: 10px;
+    align-items: center;
+    width: 100%;
+    min-height: 52px;
+    padding: 6px 16px;
+    border: 0;
+    background: none;
+    color: var(--home-ink);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  /* 즐겨찾기 행은 ★ 열이 하나 더 — 자리 예약으로 이름 폭이 안 튑니다. */
+  .yoro-lol-suggest-list button:has(.yoro-lol-suggest-star) {
+    grid-template-columns: 30px 22px minmax(0, 1fr) max-content 13px;
+  }
+
+  .yoro-lol-suggest-list button + button { border-top: .5px solid var(--home-line); }
+
+  .yoro-lol-suggest-list button:hover,
+  .yoro-lol-suggest-list button:focus-visible {
+    background: color-mix(in srgb, var(--home-ink) 5%, transparent);
+  }
+
+  .yoro-lol-suggest-avatar {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    overflow: hidden;
+    border: .5px solid var(--home-line);
+    border-radius: 99px;
+    background: var(--home-card);
+    color: var(--home-mid);
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .yoro-lol-suggest-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+  .yoro-lol-suggest-tier {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    color: var(--home-mid);
+  }
+
+  .yoro-lol-suggest-tier img { width: 22px; height: 22px; object-fit: contain; }
+
+  .yoro-lol-suggest-name {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    min-width: 0;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .yoro-lol-suggest-name > span { overflow: hidden; text-overflow: ellipsis; }
+  .yoro-lol-suggest-name > strong { flex: none; color: var(--home-mid); font-size: 12px; font-weight: 600; }
+
+  .yoro-lol-suggest-rank {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1px;
+  }
+
+  .yoro-lol-suggest-rank > span { color: var(--home-sub); font-size: 12px; font-weight: 700; }
+  .yoro-lol-suggest-rank > small { color: var(--home-mid); font-size: 11px; }
+
+  .yoro-lol-suggest-star { display: grid; place-items: center; color: var(--home-mid); }
+
   /* ── 전적 상세 상단 크롬(목업 page-4) ─────────────────────────
      .yoro-home-chrome 래퍼 안에서 홈 헤더+2행 메뉴를 그대로 쓰고,
      우측 묶음 맨 앞의 컴팩트 검색바(목업 v26)만 여기서 규격화합니다. */
@@ -328,6 +438,14 @@
   /* ── 태블릿(48~64rem, 목업 search-note): 평소엔 돋보기 아이콘만, 탭하면
      확장됩니다. 접힌 상태에서 투명한 입력창이 44px 아이콘 칸 전체를 덮어
      탭 한 번으로 입력 포커스(=확장)까지 이어집니다 — 검색 구역 무애니메이션. */
+  @media (max-width: 64rem) {
+    .yoro-lol-searchwrap { width: 430px; }
+  }
+
+  @media (max-width: 47.9375rem) {
+    .yoro-lol-searchwrap { width: 100%; }
+  }
+
   @media (min-width: 48rem) and (max-width: 64rem) {
     .yoro-home-header-search .public-search-form:not(:focus-within) {
       position: relative;

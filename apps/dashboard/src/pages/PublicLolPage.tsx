@@ -3364,13 +3364,20 @@ function publicParticipationRowStatus(
   return undefined;
 }
 
-/** "Platinum II · 미드" 한 줄. 티어가 없으면 확인 대기로 둡니다. */
-function publicParticipationRowDetail(item: PublicParticipationQueueItem): string {
-  const tier = !item.rankedStats || item.rankedStats.tier === "UNRANKED"
-    ? t().participationRankPending
-    : rankTierLabel(item.rankedStats);
+/** 티어·포지션 칸의 조각들. 한 줄로 합치지 않는 이유는 티어에만 색을 주기
+    때문입니다(목업 §색 — 색은 행이 아니라 티어 글자와 상태 칩에만). */
+function publicParticipationRowDetail(item: PublicParticipationQueueItem): {
+  tierLabel: string;
+  tierKey?: string;
+  roleLabel?: string;
+} {
+  const ranked = !item.rankedStats || item.rankedStats.tier === "UNRANKED" ? undefined : item.rankedStats;
   const role = item.preferredRole ?? item.requestedRole;
-  return role ? `${tier} · ${publicParticipationRoleLabel(role)}` : tier;
+  return {
+    tierLabel: ranked ? rankTierLabel(ranked) : t().participationRankPending,
+    ...(ranked ? { tierKey: ranked.tier.toLocaleLowerCase() } : {}),
+    ...(role ? { roleLabel: publicParticipationRoleLabel(role) } : {})
+  };
 }
 
 function PublicParticipationJoinPage({
@@ -3650,6 +3657,7 @@ function PublicParticipationJoinPage({
             canCancel={canCancelViewerQueue(viewerEntry.status)}
             cancelling={cancelling}
             capacityLabel={`${formatNumber(participation?.summary.active ?? 0)} / ${formatNumber(maxQueueSize)}`}
+            checkedInLabel={formatNumber(participation?.summary.checkedIn ?? 0)}
             currentPlayerLabel={currentParticipantLabel}
             notificationsEnabled={notificationPermission === "granted"}
             onCancel={() => setPendingAction("cancel")}
@@ -3661,10 +3669,16 @@ function PublicParticipationJoinPage({
               cancelLabel: t().participationCancel,
               cancellingLabel: t().participationCancelling,
               capacityLabel: t().participationCapacityLabel,
+              checkedInLabel: t().participationCheckedInLabel,
               currentPlayerLabel: t().participationCurrentPlayerLabel,
+              notificationsDescription: t().participationNotificationsDescription,
+              notificationsTitle: t().participationNotificationsTitle,
               notifyOffLabel: t().participationNotificationsEnable,
               notifyOnLabel: t().participationNotificationsEnabled,
+              positionUnit: t().participationPositionUnit,
+              waitingLabel: t().participationWaitingLabel,
             }}
+            waitingLabel={formatNumber(participation?.summary.waiting ?? 0)}
           />
         </div>
       ) : null}
@@ -3738,7 +3752,18 @@ function PublicParticipationJoinPage({
               </button>
             </>
           ) : (
-            <Button type="button" onClick={onLogin}>{t().twitchViewerLogin}</Button>
+            /* 로그인 버튼만 있으면 왜 필요한지 말하지 않습니다(목업 「참여 · 로그인 전」). */
+            <div className="public-participation-login">
+              <span aria-hidden="true" className="public-participation-login-icon">
+                <svg fill="none" height="20" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2" viewBox="0 0 24 24" width="20">
+                  <rect height="11" rx="2" width="18" x="3" y="11" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+              </span>
+              <b>{t().participationLoginRequiredTitle}</b>
+              <span>{t().participationLoginRequiredBody}</span>
+              <Button type="button" onClick={onLogin}>{t().twitchViewerLogin}</Button>
+            </div>
           )}
         </form>
       ) : null}
@@ -3751,15 +3776,19 @@ function PublicParticipationJoinPage({
           onToggle={() => setQueueExpanded((current) => !current)}
           rows={visibleQueue.map((item) => {
             const rowStatus = publicParticipationRowStatus(item.status);
+            const name = item.isViewer ? t().participationViewerBadge : item.twitchUserName;
             return {
+              /* 아바타 이미지는 대기열 응답에 없습니다 — 스트리머 전환 바와 같은
+                 방식으로 이름 첫 글자를 씁니다(가짜 이미지를 만들지 않습니다). */
+              avatar: name.slice(0, 1).toLocaleUpperCase(),
               champions: (item.topChampions ?? []).slice(0, 2).map((champion) => ({
                 iconUrl: champion.iconUrl ? assetUrl(champion.iconUrl) : undefined,
                 key: String(champion.championId),
               })),
-              detail: publicParticipationRowDetail(item),
+              ...publicParticipationRowDetail(item),
               isViewer: item.isViewer,
               key: `${item.position}-${item.twitchUserName}`,
-              name: item.isViewer ? t().participationViewerBadge : item.twitchUserName,
+              name,
               position: item.position,
               statusLabel: item.isViewer && viewerPhase
                 ? publicParticipationPhaseLabel(viewerPhase)
@@ -3768,6 +3797,12 @@ function PublicParticipationJoinPage({
             };
           })}
           text={{
+            colChampion: t().champion,
+            colOrder: t().participationQueueColOrder,
+            colStatus: t().participationQueueColStatus,
+            /* 「티어 · 포지션」은 기존 두 키의 조합입니다 — 새 키를 만들지 않습니다. */
+            colTier: `${t().tier} · ${t().rolePanelTitle}`,
+            colViewer: t().participationQueueColViewer,
             emptyLabel: t().participationQueueEmpty,
             gapLabel: "⋯",
             lessLabel: t().participationQueueShowLess,

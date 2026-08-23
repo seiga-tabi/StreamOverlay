@@ -118,7 +118,7 @@ const LOCALE_OPTIONS: ReadonlyArray<{ locale: PublicLocale; label: string }> = [
   { locale: "en", label: "English" }
 ];
 
-export type HomeActiveGame = "lol";
+export type HomeActiveGame = "lol" | "palworld";
 
 export type HomeGameKey = "lol" | "palworld" | "valorant" | "minecraft";
 
@@ -252,9 +252,9 @@ export function HomeHeader({ text, locale, onLocale, onToggleTheme, accountName,
             onClick={() => toggle("games")}
             type="button"
           >
-            {activeGame === "lol" ? (
+            {activeGame ? (
               <span className="yoro-home-games-trigger-name">
-                {text.gameLolName}
+                {HOME_GAMES.find((game) => game.key === activeGame)?.name(text) ?? text.navGames}
                 <TailUnderline className="yoro-home-games-trigger-tail" height={6} width={56} />
               </span>
             ) : (

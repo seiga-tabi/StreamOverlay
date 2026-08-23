@@ -3,7 +3,7 @@ import type { PatchNote, PatchPlayRecord } from "@streamops/shared";
 import { Button } from "../../../shared/ui/Button";
 import { activePublicLocale, t } from "../i18n/public-lol-i18n";
 import { riotLocaleUrl } from "../pages/PublicPatchNotesPage";
-import { patchStatLabel, type PatchChangeSummary, type PatchChampionChange } from "../types/patch-change-summary";
+import { patchStatLabel, type PatchChangeSummary, type PatchChampionChange, type PatchStatLabelLocale } from "../types/patch-change-summary";
 import { createPatchSummaryShareBlob, type PatchSummaryShareText } from "../utils/patch-summary-share";
 
 /* 패치 변경 요약 패널 — 목업 docs/mockups/lol-patch-summary-share.html v1.2 §②.
@@ -46,8 +46,12 @@ export type PatchChangeSummaryPanelProps = {
 const PANEL_CHAMPION_LIMIT = 5;
 const PANEL_ITEM_LIMIT = 4;
 
-function localeKey(): "ko" | "ja" {
-  return activePublicLocale === "ja" ? "ja" : "ko";
+/* 스탯 라벨의 언어 열쇠. 화면 언어를 그대로 씁니다 — 세 언어 모두 라벨이 있습니다.
+   (챔피언·아이템 이름은 서버가 Data Dragon 언어로 보내므로 여기 대상이 아닙니다.) */
+function localeKey(): PatchStatLabelLocale {
+  if (activePublicLocale === "ja") return "ja";
+  if (activePublicLocale === "en") return "en";
+  return "ko";
 }
 
 function directionLabel(direction: PatchChampionChange["direction"]): string {
