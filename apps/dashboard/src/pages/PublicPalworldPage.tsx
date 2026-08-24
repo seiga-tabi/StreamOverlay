@@ -48,7 +48,6 @@ import {
   palworldPageFromPath,
   palworldPathForPage,
   palworldSpawnPeriodFromParams,
-  palworldTwitchReturnTo,
   palworldUrl,
   setPalworldUrl,
   withQueryParam,
@@ -57,6 +56,7 @@ import {
 import { applyPalworldSeo } from "../features/public-palworld/utils/seo";
 import { trackEntityView, trackInternalLinkClick } from "../analytics/google-analytics";
 import { usePublicViewerTwitchSession } from "../shared/usePublicViewerTwitchSession";
+import { usePublicAccountLogin } from "../shared/public-account-login";
 
 const noServerLocalePreference = async (): Promise<PalworldLocale | undefined> => undefined;
 const loadPalworldDeferredPages = () =>
@@ -91,13 +91,19 @@ export function PublicPalworldPage() {
     disconnectTwitch,
     followedChannels,
     retryTwitch,
-    startTwitchLogin,
     twitchError,
     twitchLoading,
     twitchStatus,
   } = usePublicViewerTwitchSession({
-    loginReturnTo: () => palworldTwitchReturnTo(window.location.pathname, window.location.search),
     needsFollowedChannels: page === "home",
+  });
+  const account = usePublicAccountLogin({
+    viewerTwitch: {
+      connected: twitchStatus.connected,
+      ...(twitchStatus.user ? { user: twitchStatus.user } : {}),
+      onDisconnect: disconnectTwitch
+    },
+    tracking: { linkContext: "palworld_account" }
   });
   const focusPalId = page === "map" ? palworldFocusPalFromParams(params) : undefined;
   const routeQuery = params.toString();
@@ -266,12 +272,12 @@ export function PublicPalworldPage() {
       {/* 메인 홈과 같은 상단바 한 벌(1행 HomeHeader + 2행 팰월드 메뉴) —
           사용자 요청 2026-08-22. 구 PalworldHeader 는 palworldNavItems 원본으로만 남습니다. */}
       <PalworldChrome
-        accountName={twitchStatus.user?.displayName}
-        connected={twitchStatus.connected}
+        accountName={account.accountUser?.displayName}
+        connected={account.yoroConnected}
         locale={locale}
         onLocale={handleLocale}
-        onLoginOpen={startTwitchLogin}
-        onLogout={() => void disconnectTwitch()}
+        onLoginOpen={account.loginWithTwitch}
+        onLogout={account.logout}
         onToggleTheme={toggleTheme}
         page={page}
         searchSlot={headerSearch}
@@ -298,7 +304,7 @@ export function PublicPalworldPage() {
             onOpenItem={openItemPage}
             onOpenPal={openPalPage}
             onSearch={navigateSearch}
-            onTwitchLogin={startTwitchLogin}
+            onTwitchLogin={account.loginWithTwitch}
             twitchConfigured={twitchStatus.configured}
             twitchConnected={twitchStatus.connected}
           />

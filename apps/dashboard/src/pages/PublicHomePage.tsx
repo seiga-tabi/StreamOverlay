@@ -16,6 +16,7 @@ import { HomeBottomTabBar } from "../features/public-home/components/HomeTabBar"
 import { useHomeTheme } from "../features/public-home/hooks/useHomeTheme";
 import { homeI18n } from "../features/public-home/i18n/home-i18n";
 import { applyHomeSeo } from "../features/public-home/utils/seo";
+import { usePublicAccountLogin } from "../shared/public-account-login";
 
 const noServerLocalePreference = async (): Promise<PublicLocale | undefined> => undefined;
 
@@ -32,12 +33,18 @@ export function PublicHomePage() {
   const {
     disconnectTwitch,
     followedChannels,
-    startTwitchLogin,
     twitchLoading,
     twitchStatus
   } = usePublicViewerTwitchSession({
-    loginReturnTo: () => `${window.location.pathname}${window.location.search}`,
     needsFollowedChannels: true
+  });
+  const account = usePublicAccountLogin({
+    viewerTwitch: {
+      connected: twitchStatus.connected,
+      ...(twitchStatus.user ? { user: twitchStatus.user } : {}),
+      onDisconnect: disconnectTwitch
+    },
+    tracking: { linkContext: "home_account" }
   });
 
   useEffect(() => applyHomeSeo(locale), [locale]);
@@ -51,13 +58,13 @@ export function PublicHomePage() {
     <div className={`yoro-home-shell theme-${theme}`}>
       <a className="yoro-home-skip" href="#yoro-home-main">{text.skipToContent}</a>
       <HomeHeader
-        accountName={twitchStatus.user?.displayName}
-        connected={twitchStatus.connected}
+        accountName={account.accountUser?.displayName}
+        connected={account.yoroConnected}
         locale={locale}
-        onDashboard={() => window.location.assign("/dashboard")}
+        onDashboard={account.openDashboard}
         onLocale={handleLocale}
         onLoginOpen={() => setLoginOpen(true)}
-        onLogout={() => void disconnectTwitch()}
+        onLogout={account.logout}
         onToggleTheme={toggleTheme}
         text={text}
       />
@@ -76,13 +83,13 @@ export function PublicHomePage() {
       </main>
       <HomeFooter locale={locale} onLocale={handleLocale} text={text} />
       <HomeBottomTabBar
-        connected={twitchStatus.connected}
+        connected={account.yoroConnected}
         onLoginOpen={() => setLoginOpen(true)}
         text={text}
       />
       <HomeLoginModal
         onClose={() => setLoginOpen(false)}
-        onTwitchLogin={startTwitchLogin}
+        onTwitchLogin={account.loginWithTwitch}
         open={loginOpen}
         text={text}
       />

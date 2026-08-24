@@ -12,6 +12,7 @@ import { homeI18n } from "../features/public-home/i18n/home-i18n";
 import { lolHomeI18n } from "../features/public-home/i18n/lol-home-i18n";
 import { lolStreamersI18n } from "../features/public-home/i18n/lol-streamers-i18n";
 import { applyLolStreamersSeo } from "../features/public-home/utils/seo";
+import { usePublicAccountLogin } from "../shared/public-account-login";
 
 const noServerLocalePreference = async (): Promise<PublicLocale | undefined> => undefined;
 
@@ -32,13 +33,19 @@ export function PublicLolStreamersPage() {
     disconnectTwitch,
     followedChannels,
     retryTwitch,
-    startTwitchLogin,
     twitchError,
     twitchLoading,
     twitchStatus
   } = usePublicViewerTwitchSession({
-    loginReturnTo: () => `${window.location.pathname}${window.location.search}`,
     needsFollowedChannels: true
+  });
+  const account = usePublicAccountLogin({
+    viewerTwitch: {
+      connected: twitchStatus.connected,
+      ...(twitchStatus.user ? { user: twitchStatus.user } : {}),
+      onDisconnect: disconnectTwitch
+    },
+    tracking: { linkContext: "lol_streamers_account" }
   });
 
   useEffect(() => applyLolStreamersSeo(locale), [locale]);
@@ -52,13 +59,13 @@ export function PublicLolStreamersPage() {
     <div className={`yoro-home-shell yoro-lol-home yoro-streamers-page theme-${theme}`}>
       <a className="yoro-home-skip" href="#yoro-streamers-main">{homeText.skipToContent}</a>
       <LolChrome
-        accountName={twitchStatus.user?.displayName}
+        accountName={account.accountUser?.displayName}
         active="streamers"
-        connected={twitchStatus.connected}
+        connected={account.yoroConnected}
         locale={locale}
         onLocale={handleLocale}
         onLoginOpen={() => setLoginOpen(true)}
-        onLogout={() => void disconnectTwitch()}
+        onLogout={account.logout}
         onToggleTheme={toggleTheme}
       />
       <main className="yoro-home-main" id="yoro-streamers-main">
@@ -85,7 +92,7 @@ export function PublicLolStreamersPage() {
       <LolBottomTabBar active="streamers" text={lolText} />
       <HomeLoginModal
         onClose={() => setLoginOpen(false)}
-        onTwitchLogin={startTwitchLogin}
+        onTwitchLogin={account.loginWithTwitch}
         open={loginOpen}
         text={homeText}
       />

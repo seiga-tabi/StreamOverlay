@@ -9,16 +9,15 @@ import {
   logoutPublicTwitch,
   peekPublicTwitchFollowedChannels,
   peekPublicTwitchStatus,
-  publicTwitchLoginUrl,
 } from "../features/public-twitch/api";
 import { useViewerTwitchOAuthReturn } from "./useViewerTwitchOAuthReturn";
 
 /* 뷰어 Twitch 세션의 단일 원본 훅 — 팰월드 페이지가 소유하던 배선을 그대로 옮겼습니다.
  *
  * 담당 범위: status 조회(중복 요청 병합·abort), 팔로우 채널 조회, OAuth 복귀 settling
- * (쿼리 정리 → 캐시 무효화 → 재조회 → 350ms 후 확정 재조회), 로그인 시작, 해제, 재시도.
- * 페이지는 이 훅의 반환값만 소비합니다 — 게임별로 다른 것은 팔로우 채널이 필요한
- * 화면 조건(needsFollowedChannels)과 로그인 복귀 경로(loginReturnTo)뿐입니다. */
+ * (쿼리 정리 → 캐시 무효화 → 재조회 → 350ms 후 확정 재조회), 해제, 재시도.
+ * 로그인 시작은 Dashboard와 같은 yoro_session을 발급하는 usePublicAccountLogin이
+ * 담당합니다. 이 훅은 팔로우 채널이 필요한 화면 조건만 받습니다. */
 
 const EMPTY_TWITCH_STATUS: PublicTwitchViewerStatus = {
   connected: false,
@@ -27,11 +26,9 @@ const EMPTY_TWITCH_STATUS: PublicTwitchViewerStatus = {
   missingScopes: [],
 };
 
-export function usePublicViewerTwitchSession({ loginReturnTo, needsFollowedChannels }: {
+export function usePublicViewerTwitchSession({ needsFollowedChannels }: {
   /* 팔로우 채널 목록이 실제로 쓰이는 화면에서만 true — 불필요한 조회를 막습니다. */
   needsFollowedChannels: boolean;
-  /* 뷰어 OAuth 로그인 후 돌아올 경로(게임별 allowlist 규칙은 호출부 소유). */
-  loginReturnTo: () => string;
 }) {
   const [twitchStatus, setTwitchStatus] = useState<PublicTwitchViewerStatus>(
     () => peekPublicTwitchStatus() ?? EMPTY_TWITCH_STATUS,
@@ -166,13 +163,6 @@ export function usePublicViewerTwitchSession({ loginReturnTo, needsFollowedChann
     if (twitchStatus.connected && !followedChannels && !followedError) void refreshFollowedChannels();
   }, [followedChannels, followedError, needsFollowedChannels, refreshFollowedChannels, twitchStatus.connected]);
 
-  /* loginReturnTo 는 렌더마다 새 함수여도 무방 — ref 로 최신 것을 들고 클릭 시점에만 호출. */
-  const loginReturnToRef = useRef(loginReturnTo);
-  loginReturnToRef.current = loginReturnTo;
-  const startTwitchLogin = useCallback(() => {
-    window.location.href = publicTwitchLoginUrl(loginReturnToRef.current());
-  }, []);
-
   const disconnectTwitch = useCallback(async () => {
     if (logoutInFlightRef.current) return;
     logoutInFlightRef.current = true;
@@ -217,7 +207,6 @@ export function usePublicViewerTwitchSession({ loginReturnTo, needsFollowedChann
     disconnectTwitch,
     followedChannels,
     retryTwitch,
-    startTwitchLogin,
     twitchError,
     twitchLoading,
     twitchStatus,

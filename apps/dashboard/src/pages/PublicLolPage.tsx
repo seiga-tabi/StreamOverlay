@@ -33,10 +33,10 @@ import {
   logoutPublicTwitch,
   peekPublicTwitchFollowedChannels,
   peekPublicTwitchStatus,
-  publicTwitchLoginUrl,
 } from "../features/public-twitch/api";
 import { safeTwitchStreamPreviewUrl } from "../features/public-twitch/stream-preview";
 import { useViewerTwitchOAuthReturn } from "../shared/useViewerTwitchOAuthReturn";
+import { usePublicAccountLogin } from "../shared/public-account-login";
 import { withLolDailySummaryBars } from "../features/public-lol/components/LolDailySummaryBar";
 import { LolAugmentIcon } from "../features/public-lol/components/LolAugmentIcon";
 import { publicLiveText } from "../shared/public-live-streamers";
@@ -6749,6 +6749,14 @@ export function PublicLolPage({
       missingScopes: []
     }
   ));
+  const publicAccount = usePublicAccountLogin({
+    viewerTwitch: {
+      connected: twitchStatus.connected,
+      ...(twitchStatus.user ? { user: twitchStatus.user } : {}),
+      onDisconnect: disconnectPublicTwitchViewer
+    },
+    tracking: { linkContext: "viewer_login" }
+  });
   const [followedLol, setFollowedLol] = useState<PublicTwitchFollowedLolResponse | null>(
     () => peekPublicTwitchFollowedChannels() ?? null,
   );
@@ -7213,12 +7221,7 @@ export function PublicLolPage({
   }
 
   function startTwitchLogin(): void {
-    const params = new URLSearchParams(window.location.search);
-    params.delete("viewer_twitch");
-    const query = params.toString();
-    const returnTo = `${window.location.pathname}${query ? `?${query}` : ""}`;
-    trackGoogleAnalyticsEvent("twitch_click", { link_context: "viewer_login" });
-    window.location.href = publicTwitchLoginUrl(returnTo);
+    publicAccount.loginWithTwitch();
   }
 
   function openStreamerRegisterScreen(): void {
@@ -7306,6 +7309,10 @@ export function PublicLolPage({
   }
 
   async function disconnectTwitchViewer(): Promise<void> {
+    await publicAccount.logout();
+  }
+
+  async function disconnectPublicTwitchViewer(): Promise<void> {
     await logoutPublicTwitch();
     setTwitchStatus({
       connected: false,
@@ -7652,9 +7659,9 @@ export function PublicLolPage({
       >
         {/* 상단바는 LolChrome 한 벌(통합 프롬프트 §2-1) — 화면별 헤더를 두지 않습니다. */}
         <LolChrome
-          accountName={twitchStatus.user?.displayName}
+          accountName={publicAccount.accountUser?.displayName}
           active="none"
-          connected={twitchStatus.connected}
+          connected={publicAccount.yoroConnected}
           locale={locale}
           onLocale={changeLocale}
           onLoginOpen={startTwitchLogin}
@@ -7691,10 +7698,10 @@ export function PublicLolPage({
         {/* 검색 랜딩도 같은 LolChrome 한 벌 — 본문에 큰 검색 패널이 있어 헤더
             컴팩트 검색바(searchSlot)는 넣지 않습니다(공용 규격 프롬프트 §3). */}
         <LolChrome
-          accountName={twitchStatus.user?.displayName}
+          accountName={publicAccount.accountUser?.displayName}
           active="none"
           className="public-home-shared-header"
-          connected={twitchStatus.connected}
+          connected={publicAccount.yoroConnected}
           locale={locale}
           onLocale={changeLocale}
           onLoginOpen={startTwitchLogin}
@@ -7774,10 +7781,10 @@ export function PublicLolPage({
         {/* 메뉴 페이지(스트리머·참여·칼바람·패치 노트 …)도 상단바 한 벌(LolChrome).
             검색바는 컴팩트 슬롯으로 유지합니다(공용 규격 프롬프트 §3). */}
         <LolChrome
-          accountName={twitchStatus.user?.displayName}
+          accountName={publicAccount.accountUser?.displayName}
           active={lolSubnavActive(activeMainPage)}
           className="public-standard-header-frame"
-          connected={twitchStatus.connected}
+          connected={publicAccount.yoroConnected}
           locale={locale}
           onLocale={changeLocale}
           onLoginOpen={startTwitchLogin}
@@ -7835,9 +7842,9 @@ export function PublicLolPage({
     >
       {/* 상단 크롬 — 목업 page-4: LolChrome 한 벌(컴팩트 검색바 포함, 2행 활성 없음). */}
       <LolChrome
-        accountName={twitchStatus.user?.displayName}
+        accountName={publicAccount.accountUser?.displayName}
         active="none"
-        connected={twitchStatus.connected}
+        connected={publicAccount.yoroConnected}
         locale={locale}
         onLocale={changeLocale}
         onLoginOpen={startTwitchLogin}

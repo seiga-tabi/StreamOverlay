@@ -68,7 +68,7 @@ export const publicAccountI18n = { ko: accountKo, ja: accountJa, en: accountEn }
 export type PublicViewerTwitchLink = {
   connected: boolean;
   user?: { login: string; displayName: string; profileImageUrl?: string };
-  onDisconnect?: () => void;
+  onDisconnect?: () => void | Promise<void>;
 };
 
 export function usePublicAccountLogin(options?: {
@@ -129,15 +129,13 @@ export function usePublicAccountLogin(options?: {
     trackGoogleAnalyticsEvent("twitch_click", { link_context: linkContext });
     window.location.assign(accountOAuthUrl("twitch", "login", returnPath));
   };
-  const logout = () => {
-    void (async () => {
-      try {
-        if (yoroConnected) await yoroAccount.logout();
-        if (viewerTwitch?.connected) viewerTwitch.onDisconnect?.();
-      } catch {
-        /* 로그아웃 실패 시 연결 표시를 유지해 다시 시도할 수 있게 합니다. */
-      }
-    })();
+  const logout = async (): Promise<void> => {
+    try {
+      if (yoroConnected) await yoroAccount.logout();
+      if (viewerTwitch?.connected) await viewerTwitch.onDisconnect?.();
+    } catch {
+      /* 로그아웃 실패 시 연결 표시를 유지해 다시 시도할 수 있게 합니다. */
+    }
   };
 
   return {

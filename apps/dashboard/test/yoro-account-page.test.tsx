@@ -118,3 +118,30 @@ test("Twitch 계정 OAuth 완료 표시는 성공 handoff만 식별한다", asyn
   assert.equal(isTwitchAccountOAuthReturn("?account=oauth_failed"), false);
   assert.equal(isTwitchAccountOAuthReturn("?viewer_twitch=connected"), false);
 });
+
+test("리디자인 공개 화면은 YORO 계정 세션으로 로그인하고 Dashboard 표시를 판정한다", async () => {
+  const routeSources = await Promise.all([
+    "PublicHomePage.tsx",
+    "PublicLolHomePage.tsx",
+    "PublicLolStreamersPage.tsx",
+    "PublicPalworldPage.tsx",
+    "PublicLolPage.tsx"
+  ].map((file) => readFile(new URL(`../src/pages/${file}`, import.meta.url), "utf8")));
+
+  for (const source of routeSources) {
+    assert.match(source, /usePublicAccountLogin/u);
+    assert.match(source, /\.yoroConnected/u);
+  }
+  assert.match(routeSources[0], /onTwitchLogin=\{account\.loginWithTwitch\}/u);
+  assert.match(routeSources[1], /onTwitchLogin=\{account\.loginWithTwitch\}/u);
+  assert.match(routeSources[2], /onTwitchLogin=\{account\.loginWithTwitch\}/u);
+  assert.match(routeSources[3], /onLoginOpen=\{account\.loginWithTwitch\}/u);
+  assert.match(routeSources[4], /publicAccount\.loginWithTwitch\(\)/u);
+  assert.doesNotMatch(routeSources[4], /publicTwitchLoginUrl/u);
+
+  const viewerSessionHook = await readFile(
+    new URL("../src/shared/usePublicViewerTwitchSession.ts", import.meta.url),
+    "utf8"
+  );
+  assert.doesNotMatch(viewerSessionHook, /publicTwitchLoginUrl|startTwitchLogin/u);
+});
