@@ -63,8 +63,19 @@ export function publicSummonerPath(riotId: string, platform: LolPlatformId = DEF
   return `${PUBLIC_SUMMONER_ROUTE_PREFIX}${lolPlatformSlug(platform)}/${encodeURIComponent(`${parsed.gameName}-${parsed.tagLine}`)}`;
 }
 
+export function publicSummonerTokenPath(profileToken: string, platform: LolPlatformId): string {
+  const token = profileToken.trim();
+  if (!/^[A-Za-z0-9_-]{40,512}$/u.test(token)) return "/";
+  return `${PUBLIC_SUMMONER_ROUTE_PREFIX}${lolPlatformSlug(platform)}/~${token}`;
+}
+
 export type PublicSummonerRoute = {
   riotId: string;
+  profileToken?: undefined;
+  lolPlatform: LolPlatformId;
+} | {
+  riotId?: undefined;
+  profileToken: string;
   lolPlatform: LolPlatformId;
 };
 
@@ -81,6 +92,12 @@ export function publicSummonerRouteFromPath(pathname: string = window.location.p
     decoded = decodeURIComponent(slug).trim().normalize("NFKC").replace(/＃/g, "#");
   } catch {
     return undefined;
+  }
+  if (decoded.startsWith("~")) {
+    const profileToken = decoded.slice(1);
+    return /^[A-Za-z0-9_-]{40,512}$/u.test(profileToken)
+      ? { profileToken, lolPlatform }
+      : undefined;
   }
   if (decoded.includes("#")) {
     const riotId = riotIdQuery(decoded, lolPlatform);

@@ -41,3 +41,4 @@ __pycache__/
 # Twitch Extension 정적 번들 산출물
 apps/dashboard/dist-twitch-extension/
 apps/dashboard/twitch-extension.zip
+/.ai/

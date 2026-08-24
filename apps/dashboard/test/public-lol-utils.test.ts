@@ -14,6 +14,7 @@ import {
   jpRiotIdQuery,
   publicSummonerPath,
   publicSummonerRouteFromPath,
+  publicSummonerTokenPath,
   riotIdFromPublicSummonerPath,
   riotIdQuery
 } from "../src/features/public-lol/utils/riot-id";
@@ -75,6 +76,19 @@ test("공개 소환사 경로를 동일한 Riot ID로 왕복 변환한다", () =
     lolPlatform: "kr"
   });
   assert.equal(publicSummonerRouteFromPath("/lol/summoners/invalid/test-NA1"), undefined);
+});
+
+test("암호화된 전적 공유 token 경로에는 Riot ID가 없고 token만 왕복한다", () => {
+  const token = "A".repeat(64);
+  const path = publicSummonerTokenPath(token, "kr");
+  assert.equal(path, `/lol/summoners/kr/~${token}`);
+  assert.doesNotMatch(path, /Hide|KR1/u);
+  assert.deepEqual(publicSummonerRouteFromPath(`/ko${path}`), {
+    profileToken: token,
+    lolPlatform: "kr",
+  });
+  assert.equal(riotIdFromPublicSummonerPath(path), undefined);
+  assert.equal(publicSummonerTokenPath("not-a-token", "kr"), "/");
 });
 
 test("서버별 Riot ID 입력은 명시적인 태그를 보존하고 JP 레거시 입력만 호환한다", () => {

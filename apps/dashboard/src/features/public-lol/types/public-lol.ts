@@ -503,6 +503,8 @@ export type PublicRecentChampionSummary = {
 
 export type PublicLolProfile = {
   status: "ready";
+  /** Riot ID 평문 대신 공유 URL에 넣는 서버 발급 authenticated token입니다. */
+  profileToken: string;
   riotId: string;
   gameName: string;
   tagLine: string;

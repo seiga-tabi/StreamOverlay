@@ -70,6 +70,7 @@ import {
   type LolRankedStats,
   type LolRole,
   type LolRoleAnalysis,
+  type LolPlatformId,
   type LolRoutingContext,
   type ParticipationChatLocale,
   type ParticipationEntry,
@@ -129,6 +130,10 @@ import {
 import type { DataDragonService, LolChampionAbilitySummary, LolRuneSummary } from "../services/data-dragon.js";
 import type { LolProfileCacheEntry, LolProfileRepository } from "../services/lol-profile-store.js";
 import type { PublicLolSnapshotStore } from "../services/public-lol-snapshot-store.js";
+import {
+  decryptPublicLolProfileLink,
+  encryptPublicLolProfileLink,
+} from "../services/public-lol-profile-link.js";
 import {
   PublicLolSocialCardRenderer,
   buildPublicLolSocialSummary,
@@ -459,7 +464,7 @@ const PALWORLD_DATA_UNAVAILABLE_RESPONSE = {
   message: "Palworld 데이터를 사용할 수 없습니다."
 } as const;
 
-function publicLolProfileCacheHeaders(payload: PublicLolProfileResponse, refresh: boolean): Record<string, string> {
+function publicLolProfileCacheHeaders(payload: PublicLolProfileHttpResponse, refresh: boolean): Record<string, string> {
   if (refresh) return noStoreHeaders();
   return publicLolCacheHeaders("profile", payload, "public, max-age=30, stale-while-revalidate=120");
 }
@@ -897,6 +902,11 @@ type PublicLolProfileResponse = {
   rolePerformance: PublicLolRolePerformance[];
   fetchedAt: string;
   refreshAvailableAt?: string;
+};
+
+type PublicLolProfileHttpResponse = PublicLolProfileResponse & {
+  /** 주소창에 Riot ID 평문을 남기지 않는 서버 발급 authenticated token입니다. */
+  profileToken: string;
 };
 
 type PublicLolProfileDynamicResponse = {
@@ -2170,6 +2180,31 @@ function parsePublicLolProfileSlug(value: string): { gameName: string; tagLine: 
   return parsed.ok ? { gameName: parsed.gameName, tagLine: parsed.tagLine } : undefined;
 }
 
+function publicLolProfileToken(value: { riotId: string; lolPlatform: string }): string {
+  const lolPlatform = normalizeLolPlatformId(value.lolPlatform);
+  if (!lolPlatform) throw new Error("PUBLIC_LOL_PROFILE_LINK_INPUT_INVALID");
+  return encryptPublicLolProfileLink(
+    { riotId: value.riotId, lolPlatform },
+    appConfig.twitch.tokenEncryptionKey,
+    appConfig.nodeEnv,
+  );
+}
+
+function publicLolProfileFromToken(token: string): { riotId: string; lolPlatform: LolPlatformId } {
+  return decryptPublicLolProfileLink(
+    token,
+    appConfig.twitch.tokenEncryptionKey,
+    appConfig.nodeEnv,
+  );
+}
+
+function withPublicLolProfileToken(profile: PublicLolProfileResponse): PublicLolProfileHttpResponse {
+  return {
+    ...profile,
+    profileToken: publicLolProfileToken(profile),
+  };
+}
+
 function publicLolProfileRouteForPath(pathname: string): PublicLolProfileRoute | undefined {
   /* LoL 화면은 ko·ja 만 있어 /en 도 ko 판으로 봅니다 — canonical 도 /ko 로 모입니다. */
   const locale = koJaPublicUrlLocale(publicUrlLocaleFromPathname(pathname) ?? "ko");
@@ -2177,14 +2212,33 @@ function publicLolProfileRouteForPath(pathname: string): PublicLolProfileRoute |
   const match = /^\/lol\/summoners\/([^/]+)\/([^/]+)$/u.exec(normalized);
   if (!match?.[1] || !match[2]) return undefined;
   const platform = normalizeLolPlatformId(match[1]);
-  const riotId = parsePublicLolProfileSlug(match[2]);
+  let riotId: { gameName: string; tagLine: string } | undefined;
+  let profileSlug = match[2];
+  if (profileSlug.startsWith("~")) {
+    try {
+      const linked = publicLolProfileFromToken(profileSlug.slice(1));
+      if (linked.lolPlatform !== platform) return undefined;
+      const parsed = parseRiotIdDetailed(linked.riotId);
+      if (parsed.ok) riotId = { gameName: parsed.gameName, tagLine: parsed.tagLine };
+    } catch {
+      return undefined;
+    }
+  } else {
+    riotId = parsePublicLolProfileSlug(profileSlug);
+    if (platform && riotId) {
+      profileSlug = `~${publicLolProfileToken({
+        riotId: `${riotId.gameName}#${riotId.tagLine}`,
+        lolPlatform: platform,
+      })}`;
+    }
+  }
   if (!platform || !riotId) return undefined;
   return {
     ...riotId,
     locale,
     lolPlatform: platform,
     platformSlug: lolPlatformSlug(platform),
-    profileSlug: match[2],
+    profileSlug,
   };
 }
 
@@ -4202,7 +4256,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         { label: ja ? "サーバー" : "서버", value: route.platformSlug.toUpperCase() },
       ];
       return withLolProfileSeo(fallback, {
-        canonicalPath: `/lol/summoners/${route.platformSlug}/${safeProfileSlug}`,
+        canonicalPath: `/lol/summoners/${route.platformSlug}/${route.profileSlug}`,
         description: summary.description,
         facts,
         heading: summary.riotId,
@@ -11480,8 +11534,36 @@ export function createHttpHandler(input: HttpHandlerInput) {
       }
       if (req.method === "GET" && url.pathname === "/api/lol/profile") {
         const refresh = url.searchParams.get("refresh") === "1" || url.searchParams.get("refresh") === "true";
-        const routing = publicLolRouting(url.searchParams.get("platform"), input.riot);
-        const profile = await getPublicLolProfile(url.searchParams.get("riotId") ?? "", routing, { refresh });
+        const rawRiotId = url.searchParams.get("riotId")?.trim() ?? "";
+        const profileToken = url.searchParams.get("token")?.trim() ?? "";
+        if (Boolean(rawRiotId) === Boolean(profileToken)) {
+          throw new HttpRequestError(400, {
+            error: "Riot ID 또는 profile token 중 하나만 입력해야 합니다.",
+            code: "LOL_PROFILE_LINK_INPUT_INVALID",
+          });
+        }
+        let routing = publicLolRouting(url.searchParams.get("platform"), input.riot);
+        let resolvedRiotId = rawRiotId;
+        if (profileToken) {
+          let linked: ReturnType<typeof publicLolProfileFromToken>;
+          try {
+            linked = publicLolProfileFromToken(profileToken);
+          } catch {
+            throw new HttpRequestError(400, {
+              error: "전적 공유 링크가 올바르지 않거나 만료되었습니다.",
+              code: "LOL_PROFILE_LINK_INVALID",
+            });
+          }
+          if (url.searchParams.has("platform") && routing.lolPlatform !== linked.lolPlatform) {
+            throw new HttpRequestError(400, {
+              error: "전적 공유 링크의 서버 정보가 일치하지 않습니다.",
+              code: "LOL_PROFILE_LINK_PLATFORM_MISMATCH",
+            });
+          }
+          routing = publicLolRouting(linked.lolPlatform, input.riot);
+          resolvedRiotId = linked.riotId;
+        }
+        const profile = withPublicLolProfileToken(await getPublicLolProfile(resolvedRiotId, routing, { refresh }));
         return sendJson(req, res, 200, profile, publicLolProfileCacheHeaders(profile, refresh));
       }
       if (req.method === "GET" && url.pathname === "/api/lol/profile-state") {

@@ -151,6 +151,28 @@ test("Twitch 가 없어도 경기 목록은 그대로 나간다", async () => {
   assert.equal(result.json.recentMatches[0].replay, undefined);
 });
 
+test("프로필 API가 암호화 공유 token을 발급하고 붙여 넣은 token을 복원한다", async () => {
+  const handler = handlerWith();
+  const first = await get(handler, "/api/lol/profile?riotId=%EB%B0%A4%ED%86%A8%23KR1&platform=kr");
+  assert.equal(first.status, 200);
+  assert.match(first.json.profileToken, /^[A-Za-z0-9_-]{40,512}$/u);
+  assert.doesNotMatch(first.json.profileToken, /%EB%B0%A4|KR1|밤톨/u);
+
+  const restored = await get(handler, `/api/lol/profile?token=${first.json.profileToken}&platform=kr`);
+  assert.equal(restored.status, 200);
+  assert.equal(restored.json.riotId, "밤톨#KR1");
+  assert.equal(restored.json.profileToken, first.json.profileToken);
+
+  const mismatched = await get(handler, `/api/lol/profile?token=${first.json.profileToken}&platform=jp`);
+  assert.equal(mismatched.status, 400);
+  assert.equal(mismatched.json.code, "LOL_PROFILE_LINK_PLATFORM_MISMATCH");
+
+  const tampered = `${first.json.profileToken.slice(0, -1)}${first.json.profileToken.endsWith("A") ? "B" : "A"}`;
+  const invalid = await get(handler, `/api/lol/profile?token=${tampered}&platform=kr`);
+  assert.equal(invalid.status, 400);
+  assert.equal(invalid.json.code, "LOL_PROFILE_LINK_INVALID");
+});
+
 test("연동된 스트리머의 경기에는 다시보기 지점이 붙는다", async () => {
   /* 참여 큐에 Riot ID 가 등록된 계정을 스트리머로 봅니다(기존 매칭 경로). */
   const store = {

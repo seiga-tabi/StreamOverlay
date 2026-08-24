@@ -84,9 +84,11 @@ export async function readPublicApiErrorMessage(response: Response): Promise<str
 
 export async function searchProfile(
   riotId: string,
-  options: { refresh?: boolean; signal?: AbortSignal; platform?: LolPlatformId } = {}
+  options: { refresh?: boolean; signal?: AbortSignal; platform?: LolPlatformId; profileToken?: string } = {}
 ): Promise<PublicLolProfile> {
-  const params = new URLSearchParams({ riotId });
+  const params = new URLSearchParams();
+  if (options.profileToken) params.set("token", options.profileToken);
+  else params.set("riotId", riotId);
   if (options.platform) params.set("platform", options.platform);
   if (options.refresh) params.set("refresh", "1");
   const response = await fetch(`${apiBase}/api/lol/profile?${params.toString()}`, {

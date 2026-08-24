@@ -230,6 +230,7 @@ import {
   normalizedTagLine,
   publicSummonerPath,
   publicSummonerRouteFromPath,
+  publicSummonerTokenPath,
   riotIdQuery,
   searchTextForMatch,
   splitRiotIdText,
@@ -2048,7 +2049,7 @@ function ProfileTopPanel({
 
   const normalizedPlatform = normalizeLolPlatformId(profile.lolPlatform) ?? DEFAULT_PUBLIC_LOL_PLATFORM;
   const canonicalProfilePath = localizedPublicUrlForCurrentLocale(
-    publicSummonerPath(profile.riotId, normalizedPlatform),
+    publicSummonerTokenPath(profile.profileToken, normalizedPlatform),
   );
   const canonicalProfileUrl = typeof window === "undefined"
     ? `https://yoro.gg${canonicalProfilePath}`
@@ -6713,7 +6714,7 @@ export function PublicLolPage({
   );
   const [query, setQuery] = useState(() => initialRouteRiotId ?? "");
   const [profile, setProfile] = useState<PublicLolProfile | null>(null);
-  const [loading, setLoading] = useState(() => Boolean(initialRouteRiotId));
+  const [loading, setLoading] = useState(() => Boolean(initialSummonerRoute));
   const [loadingMoreMatches, setLoadingMoreMatches] = useState(false);
   const [moreMatchesError, setMoreMatchesError] = useState("");
   const [error, setError] = useState("");
@@ -7033,8 +7034,12 @@ export function PublicLolPage({
         return;
       }
       setSelectedLolPlatform(summonerRoute.lolPlatform);
-      setQuery(summonerRoute.riotId);
-      void runSearch(summonerRoute.riotId, { replaceUrl, platform: summonerRoute.lolPlatform });
+      setQuery(summonerRoute.riotId ?? "");
+      void runSearch(summonerRoute.riotId ?? "", {
+        replaceUrl,
+        platform: summonerRoute.lolPlatform,
+        profileToken: summonerRoute.profileToken,
+      });
     };
     loadFromPath(true);
     const handlePopState = () => {
@@ -7345,11 +7350,17 @@ export function PublicLolPage({
 
   async function runSearch(
     value: string,
-    options: { updateUrl?: boolean; replaceUrl?: boolean; refresh?: boolean; platform?: LolPlatformId } = {}
+    options: {
+      updateUrl?: boolean;
+      replaceUrl?: boolean;
+      refresh?: boolean;
+      platform?: LolPlatformId;
+      profileToken?: string;
+    } = {}
   ): Promise<void> {
     const requestedPlatform = options.platform ?? selectedLolPlatform;
-    const riotId = riotIdQuery(value, requestedPlatform);
-    if (!riotId) return;
+    const riotId = options.profileToken ? "" : riotIdQuery(value, requestedPlatform);
+    if (!riotId && !options.profileToken) return;
     const updateUrl = options.updateUrl !== false;
     profileSearchAbortRef.current?.abort();
     loadMoreAbortRef.current?.abort();
@@ -7362,7 +7373,7 @@ export function PublicLolPage({
     setLoadingMoreMatches(false);
     setLoadingQueueMatches(false);
     setQueueMatchPages({});
-    if (options.refresh) invalidatePublicLolMatchPageCache(riotId, requestedPlatform);
+    if (options.refresh && riotId) invalidatePublicLolMatchPageCache(riotId, requestedPlatform);
     const controller = new AbortController();
     const requestSequence = profileSearchSequenceRef.current + 1;
     profileSearchAbortRef.current = controller;
@@ -7371,18 +7382,18 @@ export function PublicLolPage({
     setError("");
     setMoreMatchesError("");
     if (!options.refresh) {
-      /* 검색 시작 즉시 프로필 셸로 전환합니다 — 로딩 화면과 완성 화면의 레이아웃이
-         같아야 하므로(목업 "검색 중") 옛 메뉴 화면 위 오버레이 대신 프로필 셸의
-         스켈레톤을 그립니다. 검색바에는 방금 요청한 Riot ID 를 남깁니다. */
+      /* 검색 시작 즉시 프로필 셸로 전환합니다 — 암호화 링크로 들어오면 Riot ID는
+         서버가 token을 해독한 응답을 받은 뒤에만 검색바에 표시합니다. */
       setActiveMainPage("search");
       setActiveNav("search");
-      setQuery(riotId);
+      if (riotId) setQuery(riotId);
     }
     try {
       const result = await searchProfile(riotId, {
         refresh: options.refresh,
         signal: controller.signal,
-        platform: requestedPlatform
+        platform: requestedPlatform,
+        profileToken: options.profileToken,
       });
       if (requestSequence !== profileSearchSequenceRef.current) return;
       setProfile((current) => options.refresh
@@ -7397,7 +7408,7 @@ export function PublicLolPage({
       setQuery(result.riotId);
       const resultPlatform = normalizeLolPlatformId(result.lolPlatform) ?? requestedPlatform;
       setSelectedLolPlatform(resultPlatform);
-      if (updateUrl) setPublicPath(publicSummonerPath(result.riotId, resultPlatform), options.replaceUrl);
+      if (updateUrl) setPublicPath(publicSummonerTokenPath(result.profileToken, resultPlatform), options.replaceUrl);
       saveRecentSearch(result);
       setRecentSearches(readRecentSearches());
       setFavorites((current) => {
