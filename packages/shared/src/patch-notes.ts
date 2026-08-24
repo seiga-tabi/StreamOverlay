@@ -5,8 +5,14 @@
  * 본문은 Riot 의 저작물이므로 복제하지 않습니다.
  */
 
-export const PATCH_NOTE_LOCALES = ["ko", "ja"] as const;
+export const PATCH_NOTE_LOCALES = ["ko", "ja", "en"] as const;
 export type PatchNoteLocale = (typeof PATCH_NOTE_LOCALES)[number];
+
+/** 외부 입력과 캐시의 locale을 수집 허용 목록으로 좁힙니다. */
+export function isPatchNoteLocale(value: unknown): value is PatchNoteLocale {
+  return typeof value === "string"
+    && (PATCH_NOTE_LOCALES as readonly string[]).includes(value);
+}
 
 export const PATCH_NOTES_MAX_ITEMS = 60;
 
@@ -177,8 +183,7 @@ export function parsePatchNotesFeed(value: unknown): PatchNotesFeed | undefined 
   if (keys !== "fetchedAt,locale,notes,schemaVersion,stale") return undefined;
   if (
     value.schemaVersion !== 1
-    || typeof value.locale !== "string"
-    || !(PATCH_NOTE_LOCALES as readonly string[]).includes(value.locale)
+    || !isPatchNoteLocale(value.locale)
     || typeof value.fetchedAt !== "string"
     || !Number.isFinite(Date.parse(value.fetchedAt))
     || typeof value.stale !== "boolean"
@@ -198,7 +203,7 @@ export function parsePatchNotesFeed(value: unknown): PatchNotesFeed | undefined 
 
   return Object.freeze({
     schemaVersion: 1,
-    locale: value.locale as PatchNoteLocale,
+    locale: value.locale,
     fetchedAt: new Date(value.fetchedAt).toISOString(),
     stale: value.stale,
     notes: Object.freeze(notes)

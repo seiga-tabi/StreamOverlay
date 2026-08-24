@@ -5,8 +5,9 @@
  * 우리는 그 카드가 이미 보여 주는 값(제목·발행일·한 줄 요약·썸네일·원문 링크)만
  * 옮깁니다. 본문은 Riot 저작물이므로 가져오지 않고 원문으로 보냅니다.
  *
- * 실측(2026-08-09): ko-kr 424KB / ja-jp 432KB, blade type "articleCardGrid" 에
- * 170건, 최신순 정렬, slug 는 두 언어가 동일.
+ * 실측(2026-08-24): ko-kr 424KB / ja-jp 432KB / en-us 410KB, blade type
+ * "articleCardGrid" 에 en-us 171건, 최신순 정렬, en-us와 ko-kr slug 교집합은
+ * 166/171건. 세 언어 모두 같은 파서 구조를 씁니다.
  */
 
 import {
@@ -20,10 +21,17 @@ import {
 
 const PATCH_NOTES_ORIGIN = "https://www.leagueoflegends.com";
 
-/** 수집 대상은 이 두 URL 로 고정입니다. 외부 입력으로 바뀌지 않습니다. */
+/** 수집 대상은 이 세 URL 로 고정입니다. 외부 입력으로 바뀌지 않습니다. */
 export const PATCH_NOTE_SOURCE_PATHS: Readonly<Record<PatchNoteLocale, string>> = Object.freeze({
   ko: "/ko-kr/news/tags/patch-notes/",
-  ja: "/ja-jp/news/tags/patch-notes/"
+  ja: "/ja-jp/news/tags/patch-notes/",
+  en: "/en-us/news/tags/patch-notes/"
+});
+
+const SOURCE_ACCEPT_LANGUAGE: Readonly<Record<PatchNoteLocale, string>> = Object.freeze({
+  ko: "ko-KR",
+  ja: "ja-JP",
+  en: "en-US"
 });
 
 export function patchNoteSourceUrl(locale: PatchNoteLocale): string {
@@ -178,7 +186,7 @@ export async function fetchPatchNotes(
     redirect: "follow",
     headers: {
       accept: "text/html",
-      "accept-language": locale === "ko" ? "ko-KR" : "ja-JP",
+      "accept-language": SOURCE_ACCEPT_LANGUAGE[locale],
       "user-agent": SOURCE_USER_AGENT
     },
     signal: AbortSignal.timeout(SOURCE_TIMEOUT_MS)

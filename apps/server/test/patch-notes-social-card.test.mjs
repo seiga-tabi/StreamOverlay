@@ -4,6 +4,7 @@ import sharp from "sharp";
 
 const {
   PatchNotesSocialCardRenderer,
+  cardDateLabel,
   latestPatchNoteWithVersion,
   patchNotesCardModel,
   wrapSummaryLines,
@@ -61,6 +62,21 @@ test("요약 줄바꿈은 최대 2줄 — 한국어는 단어 경계, 일본어�
   const long = wrapSummaryLines("가".repeat(200), 20);
   assert.equal(long.length, 2);
   assert.ok(long[1].endsWith("…"));
+});
+
+test("영어 카드 날짜는 en-US 형식이고 발행 기준 시간대는 Asia/Seoul이다", () => {
+  /* 18:00Z는 서울 기준 다음 날입니다. locale만 바뀌고 기준 시각은 유지해야 합니다. */
+  assert.equal(cardDateLabel("2026-08-11T18:00:00.000Z", "en"), "8/12/2026");
+});
+
+test("영어 카드도 폴백형 1200×630 PNG를 만든다", async () => {
+  const renderer = new PatchNotesSocialCardRenderer(async () => {
+    throw new Error("이 테스트에서는 원격을 호출하면 안 됩니다.");
+  });
+  const body = await renderer.render(patchNotesCardModel(note({ imageUrl: undefined })), "en");
+  const metadata = await sharp(body).metadata();
+  assert.equal(metadata.width, 1200);
+  assert.equal(metadata.height, 630);
 });
 
 test("키 아트가 없으면 폴백형으로 1200×630 PNG를 만든다", async () => {

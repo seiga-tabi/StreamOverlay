@@ -3,7 +3,6 @@ import {
   patchKeyFromDataDragonVersion,
   type PatchNote,
   type PatchNotesFeed,
-  type PatchNoteLocale,
   type PatchPlayRecord,
   type PatchPlaySummary
 } from "@streamops/shared";
@@ -21,7 +20,7 @@ import {
   type PatchNotesFilterOption
 } from "../components/PatchNotesControlBar";
 import { PatchNotesMineModule } from "../components/PatchNotesMineModule";
-import { requestPatchChangeSummary, requestPatchNotes, requestPatchPlaySummary } from "../api/patch-notes";
+import { patchNoteLocale, requestPatchChangeSummary, requestPatchNotes, requestPatchPlaySummary } from "../api/patch-notes";
 import { PatchChangeSummaryPanel } from "../components/PatchChangeSummaryPanel";
 import type { PatchChangeSummary } from "../types/patch-change-summary";
 import { publicIntlLocale, activePublicLocale, t } from "../i18n/public-lol-i18n";
@@ -45,11 +44,6 @@ type PatchEntry = {
 
 function localeTag(): string {
   return publicIntlLocale();
-}
-
-/** 화면이 쓰는 언어를 Riot 목록의 언어 열쇠로 바꿉니다. */
-function patchNoteLocale(locale: string): PatchNoteLocale {
-  return locale === "ja" ? "ja" : "ko";
 }
 
 function formatPublishedDate(value: string): string {

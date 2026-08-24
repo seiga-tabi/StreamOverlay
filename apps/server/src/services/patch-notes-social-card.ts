@@ -26,6 +26,16 @@ const GOLD = "#f2c14e";
 const GOLD_INK = "#241a02";
 const NAVY = "#0b1420";
 const HEX_COLOR = /^#[0-9a-f]{6}$/u;
+const CARD_DATE_LOCALES: Readonly<Record<PatchNoteLocale, string>> = Object.freeze({
+  ko: "ko-KR",
+  ja: "ja-JP",
+  en: "en-US",
+});
+const CARD_TITLE_LABELS: Readonly<Record<PatchNoteLocale, string>> = Object.freeze({
+  ko: "LoL 패치 노트",
+  ja: "LoLパッチノート",
+  en: "LoL Patch Notes",
+});
 
 type SharpFactory = typeof import("sharp")["default"];
 
@@ -105,11 +115,11 @@ export function wrapSummaryLines(summary: string, maxPerLine: number): readonly 
   return lines;
 }
 
-function cardDateLabel(publishedAt: string, locale: PatchNoteLocale): string {
+export function cardDateLabel(publishedAt: string, locale: PatchNoteLocale): string {
   const time = Date.parse(publishedAt);
   if (!Number.isFinite(time)) return "";
   const date = new Date(time);
-  return date.toLocaleDateString(locale === "ja" ? "ja-JP" : "ko-KR", {
+  return date.toLocaleDateString(CARD_DATE_LOCALES[locale], {
     year: "numeric",
     month: "numeric",
     day: "numeric",
@@ -260,7 +270,7 @@ export class PatchNotesSocialCardRenderer {
         <text x="88" y="86" text-anchor="middle" fill="${GOLD_INK}" font-family="${fontFamily}" font-size="26" font-weight="900">Y</text>
         <text x="128" y="86" fill="#f8f9fa" font-family="${fontFamily}" font-size="30" font-weight="900">YORO.gg</text>
         <line x1="286" y1="60" x2="286" y2="92" stroke="#f8f9fa" stroke-opacity="0.3"/>
-        <text x="306" y="85" fill="#f8f9fa" fill-opacity="0.75" font-family="${fontFamily}" font-size="24" font-weight="700">${ja ? "LoLパッチノート" : "LoL 패치 노트"}</text>
+        <text x="306" y="85" fill="#f8f9fa" fill-opacity="0.75" font-family="${fontFamily}" font-size="24" font-weight="700">${CARD_TITLE_LABELS[locale]}</text>
         <text x="66" y="212" fill="${GOLD}" font-family="${fontFamily}" font-size="26" font-weight="900" letter-spacing="6">PATCH NOTES</text>
         <text x="60" y="352" fill="#ffffff" font-family="${fontFamily}" font-size="148" font-weight="900" letter-spacing="-2">${svgText(model.patchVersion)}</text>
         ${summaryLines.map((line, index) => (

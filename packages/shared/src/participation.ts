@@ -78,6 +78,7 @@ export type LolChampionSummary = {
   championKey?: string;
   nameKo: string;
   nameJa?: string;
+  nameEn?: string;
   iconUrl?: string;
   splashUrl?: string;
   loadingUrl?: string;
@@ -86,6 +87,7 @@ export type LolChampionSummary = {
   skinNum?: number;
   skinNameKo?: string;
   skinNameJa?: string;
+  skinNameEn?: string;
   masteryLevel?: number;
   masteryPoints?: number;
   games?: number;
@@ -95,6 +97,7 @@ export type LolChampionSkinOption = {
   skinNum: number;
   nameKo: string;
   nameJa?: string;
+  nameEn?: string;
   splashUrl: string;
   loadingUrl: string;
 };
@@ -104,6 +107,7 @@ export type LolRecentMatchChampion = {
   championKey?: string;
   nameKo: string;
   nameJa?: string;
+  nameEn?: string;
   iconUrl?: string;
   splashUrl?: string;
   loadingUrl?: string;

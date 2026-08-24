@@ -337,6 +337,7 @@ import {
 } from "../services/yoro-account-service.js";
 import {
   isManagementOrganizationId,
+  isPatchNoteLocale,
   parseCreatePalworldGameServerInput,
   patchPlayRecords,
   PATCH_PLAY_SAMPLE_LIMIT,
@@ -582,6 +583,7 @@ type PublicLolMatchItem = {
   iconUrl?: string;
   nameKo?: string;
   nameJa?: string;
+  nameEn?: string;
 };
 
 type PublicLolMatchParticipant = {
@@ -645,6 +647,7 @@ type PublicLolMatchBuildSkillEvent = {
   timestampMs: number;
   nameKo?: string;
   nameJa?: string;
+  nameEn?: string;
   iconUrl?: string;
 };
 
@@ -1918,6 +1921,11 @@ function publicLocalePreference(req: IncomingMessage): PublicLocalePreference {
   return { locale: "ko", source: "fallback" };
 }
 
+/** 패치 노트 수집기로 들어갈 수 있는 locale을 shared 허용 목록으로 좁힙니다. */
+function patchNoteLocaleFrom(value: string | null): PatchNoteLocale | undefined {
+  return isPatchNoteLocale(value) ? value : undefined;
+}
+
 function parseContentDisposition(value: string | undefined): { name?: string; filename?: string } {
   if (!value) return {};
   const name = /(?:^|;\s*)name="([^"]*)"/i.exec(value)?.[1];
@@ -2679,7 +2687,8 @@ async function participantItems(
         ...item,
         iconUrl: summary?.iconUrl ?? item.iconUrl,
         nameKo: summary?.nameKo,
-        nameJa: summary?.nameJa
+        nameJa: summary?.nameJa,
+        nameEn: summary?.nameEn
       };
     });
   } catch {
@@ -2715,42 +2724,49 @@ const STAT_SHARD_SUMMARIES: Record<number, LolRuneSummary> = {
     runeId: 5008,
     nameKo: "적응형 능력치",
     nameJa: "アダプティブフォース",
+    nameEn: "Adaptive Force",
     iconUrl: "https://ddragon.leagueoflegends.com/cdn/img/perk-images/StatMods/StatModsAdaptiveForceIcon.png"
   },
   5005: {
     runeId: 5005,
     nameKo: "공격 속도",
     nameJa: "攻撃速度",
+    nameEn: "Attack Speed",
     iconUrl: "https://ddragon.leagueoflegends.com/cdn/img/perk-images/StatMods/StatModsAttackSpeedIcon.png"
   },
   5007: {
     runeId: 5007,
     nameKo: "스킬 가속",
     nameJa: "スキルヘイスト",
+    nameEn: "Ability Haste",
     iconUrl: "https://ddragon.leagueoflegends.com/cdn/img/perk-images/StatMods/StatModsCDRScalingIcon.png"
   },
   5001: {
     runeId: 5001,
     nameKo: "체력 증가",
     nameJa: "体力増加",
+    nameEn: "Health Scaling",
     iconUrl: "https://ddragon.leagueoflegends.com/cdn/img/perk-images/StatMods/StatModsHealthScalingIcon.png"
   },
   5011: {
     runeId: 5011,
     nameKo: "체력",
     nameJa: "体力",
+    nameEn: "Health",
     iconUrl: "https://ddragon.leagueoflegends.com/cdn/img/perk-images/StatMods/StatModsHealthScalingIcon.png"
   },
   5002: {
     runeId: 5002,
     nameKo: "방어력",
     nameJa: "物理防御",
+    nameEn: "Armor",
     iconUrl: "https://ddragon.leagueoflegends.com/cdn/img/perk-images/StatMods/StatModsArmorIcon.png"
   },
   5003: {
     runeId: 5003,
     nameKo: "마법 저항력",
     nameJa: "魔法防御",
+    nameEn: "Magic Resist",
     iconUrl: "https://ddragon.leagueoflegends.com/cdn/img/perk-images/StatMods/StatModsMagicResIcon.png"
   }
 };
@@ -3505,6 +3521,7 @@ function profileRecentMatchesForCache(matches: PublicLolRecentMatch[]): LolProfi
     championKey: match.champion.championKey,
     nameKo: match.champion.nameKo,
     nameJa: match.champion.nameJa,
+    nameEn: match.champion.nameEn,
     iconUrl: match.champion.iconUrl,
     splashUrl: match.champion.splashUrl,
     loadingUrl: match.champion.loadingUrl,
@@ -4067,26 +4084,31 @@ export function createHttpHandler(input: HttpHandlerInput) {
        최신 패치 번호·요약·카드 이미지를 메타에 넣어야만 미리보기가 살아납니다.
        카드 URL 에 패치 버전이 들어가 새 패치마다 SNS 캐시를 자연 우회합니다.
        근거: docs/mockups/patch-share-card.html §03 */
-    const patchNotesLocale = koJaPublicUrlLocale(publicUrlLocaleFromPathname(pathname) ?? "ko");
+    const patchNotesLocale = patchNoteLocaleFrom(publicUrlLocaleFromPathname(pathname) ?? "ko") ?? "ko";
     if (stripPublicUrlLocalePrefix(pathname).replace(/\/$/u, "") === "/patch-notes" && input.patchNotes) {
       try {
         const feed = await input.patchNotes.getFeed(patchNotesLocale);
         const latest = latestPatchNoteWithVersion(feed);
         if (latest?.patchVersion) {
-          const ja = patchNotesLocale === "ja";
+          const titles: Readonly<Record<PatchNoteLocale, string>> = {
+            ko: `LoL 패치 ${latest.patchVersion} | YORO.gg`,
+            ja: `LoL パッチ ${latest.patchVersion} | YORO.gg`,
+            en: `LoL Patch ${latest.patchVersion} | YORO.gg`,
+          };
+          const imageAlts: Readonly<Record<PatchNoteLocale, string>> = {
+            ko: `LoL 패치 ${latest.patchVersion} 미리보기`,
+            ja: `LoL パッチ ${latest.patchVersion} プレビュー`,
+            en: `LoL Patch ${latest.patchVersion} preview`,
+          };
           return {
             ...fallback,
-            title: ja
-              ? `LoL パッチ ${latest.patchVersion} | YORO.gg`
-              : `LoL 패치 ${latest.patchVersion} | YORO.gg`,
+            title: titles[patchNotesLocale],
             description: latest.summary ?? fallback.description,
             imageUrl: new URL(
               `/social/patch-notes/${patchNotesLocale}/${latest.patchVersion}.png`,
               "https://yoro.gg",
             ).href,
-            imageAlt: ja
-              ? `LoL パッチ ${latest.patchVersion} プレビュー`
-              : `LoL 패치 ${latest.patchVersion} 미리보기`,
+            imageAlt: imageAlts[patchNotesLocale],
           };
         }
       } catch {
@@ -4210,9 +4232,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
     res: ServerResponse,
     pathname: string,
   ): Promise<boolean> {
-    const match = /^\/social\/patch-notes\/(ko|ja)\/(\d{1,2}\.\d{1,2})\.png$/u.exec(pathname);
+    const match = /^\/social\/patch-notes\/(ko|ja|en)\/(\d{1,2}\.\d{1,2})\.png$/u.exec(pathname);
     if (!match?.[1] || !match[2]) return false;
-    const locale = match[1] as "ko" | "ja";
+    const locale = match[1] as PatchNoteLocale;
     const version = match[2];
     const sendFallback = async () => {
       await sendStaticFile(
@@ -8091,6 +8113,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
           timestampMs: event.timestampMs,
           nameKo: ability?.nameKo,
           nameJa: ability?.nameJa,
+          nameEn: ability?.nameEn,
           iconUrl: ability?.iconUrl
         };
       });
@@ -11637,9 +11660,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
         }
         const requested = url.searchParams.get("locale");
         /* 목록에 없는 값은 무시하고 방문자 언어로 되돌립니다. 임의 값이 수집기로 들어가지 않습니다. */
-        const explicitLocale = requested === "ko" || requested === "ja" ? requested : undefined;
+        const explicitLocale = patchNoteLocaleFrom(requested);
         const locale: PatchNoteLocale = explicitLocale
-          ?? (publicLocalePreference(req).locale === "ja" ? "ja" : "ko");
+          ?? publicLocalePreference(req).locale;
         const feed = await input.patchNotes.getFeed(locale);
         if (!feed) {
           return sendJson(req, res, 503, {
@@ -11669,7 +11692,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
             code: "INVALID_PATCH_VERSION"
           }, { "Cache-Control": "no-store" });
         }
-        const keyArtLocale: PatchNoteLocale = url.searchParams.get("locale") === "ja" ? "ja" : "ko";
+        const keyArtLocale = patchNoteLocaleFrom(url.searchParams.get("locale")) ?? "ko";
         const feed = input.patchNotes ? await input.patchNotes.getFeed(keyArtLocale) : undefined;
         const note = feed?.notes.find((candidate) => candidate.patchVersion === patchVersion);
         /* 패치 번호가 없는 노트는 카드 모델이 만들어지지 않습니다(형식 미달). */
@@ -11717,8 +11740,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
             code: "PATCH_CHANGES_UNAVAILABLE"
           }, { "Cache-Control": "no-store" });
         }
-        const requestedLocale = url.searchParams.get("locale");
-        const changesLocale: PatchNoteLocale = requestedLocale === "ja" ? "ja" : "ko";
+        const changesLocale = patchNoteLocaleFrom(url.searchParams.get("locale")) ?? "ko";
         const changes = await input.patchChangeSummary.summaryFor(patchVersion, changesLocale)
           .catch(() => undefined);
         /* 비교 경계를 못 잡았거나 변경이 0건이면 보여 줄 것이 없습니다. 프런트는

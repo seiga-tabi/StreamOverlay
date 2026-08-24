@@ -21,6 +21,11 @@ export const PUBLIC_SEO_ORIGIN = "https://yoro.gg";
 export const PUBLIC_SEO_LOCALES: readonly PublicUrlLocale[] = ["ko", "ja", "en"];
 
 const PUBLIC_SEO_KO_JA: readonly PublicUrlLocale[] = ["ko", "ja"];
+const SEO_LANGUAGE_TAGS: Readonly<Record<PublicUrlLocale, string>> = Object.freeze({
+  ko: "ko-KR",
+  ja: "ja-JP",
+  en: "en-US",
+});
 
 /**
  * 경로별 hreflang·sitemap 대상 로케일.
@@ -120,7 +125,11 @@ const SOCIAL_IMAGES_BY_PREFIX: readonly {
   {
     prefix: "/patch-notes",
     url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-lol.png`,
-    alt: { ko: "YORO.gg LoL 전적 검색 미리보기", ja: "YORO.gg LoL戦績検索のプレビュー" }
+    alt: {
+      ko: "YORO.gg LoL 전적 검색 미리보기",
+      ja: "YORO.gg LoL戦績検索のプレビュー",
+      en: "YORO.gg LoL patch notes preview",
+    }
   },
   {
     prefix: "/follow",
@@ -833,7 +842,7 @@ export function palworldEntitySeoMetadata(
         "@type": "Article",
         headline: title,
         description,
-        inLanguage: locale === "ja" ? "ja-JP" : "ko-KR",
+        inLanguage: SEO_LANGUAGE_TAGS[locale],
         mainEntityOfPage: canonicalUrl,
         about: {
           "@type": "Thing",
@@ -858,7 +867,7 @@ function websiteStructuredData(locale: PublicUrlLocale): unknown {
     "@type": "WebSite",
     name: "YORO.gg",
     url: `${PUBLIC_SEO_ORIGIN}/${locale}/`,
-    inLanguage: locale === "ja" ? "ja-JP" : "ko-KR",
+    inLanguage: SEO_LANGUAGE_TAGS[locale],
     potentialAction: {
       "@type": "SearchAction",
       target: {
@@ -885,7 +894,7 @@ function organizationStructuredData(): unknown {
 const BREADCRUMB_SEGMENT_LABELS: Readonly<Record<string, PublicSeoLocaleText>> = {
   "/lol": { ko: "LoL 전적 검색", ja: "LoL戦績検索" },
   "/lol/aram": { ko: "증강 칼바람", ja: "オーグメントARAM" },
-  "/patch-notes": { ko: "패치 노트", ja: "パッチノート" },
+  "/patch-notes": { ko: "패치 노트", ja: "パッチノート", en: "Patch notes" },
   /* "/lol/summoners"(목록)는 실제 라우트가 없어 404입니다 — 여기 두면
      genericFallback의 sibling 링크와 breadcrumb JSON-LD가 404 URL을
      크롤러에게 제공합니다. 라벨이 없으면 두 곳 모두에서 자동으로 빠지고,
@@ -978,7 +987,7 @@ function homeFallback(locale: PublicUrlLocale): PublicSeoFallback {
     links: [
       { href: `/${locale}/lol`, label: ja ? "LoL戦績検索" : "LoL 전적 검색" },
       { href: `/${locale}/lol/aram`, label: ja ? "オーグメントARAM" : "증강 칼바람" },
-      { href: `/${locale}/patch-notes`, label: ja ? "パッチノート" : "패치 노트" },
+      { href: `/${locale}/patch-notes`, label: t(locale, "패치 노트", "パッチノート", "Patch notes") },
       { href: `/${locale}/palworld`, label: t(locale, "팰월드 데이터베이스", "パルワールドデータベース", "Palworld Database") },
       { href: `/${locale}/palworld/pals`, label: ja ? "パル図鑑" : "팰 도감" },
       { href: `/${locale}/palworld/breeding`, label: ja ? "配合組み合わせ" : "교배 조합" },
@@ -1378,7 +1387,7 @@ const JAPANESE_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   }
 };
 
-/* 영어 메타 — 팰월드 섹션만.
+/* 영어 메타 — 실제 영어 본문이 있는 경로만.
  *
  * 문구는 대시보드 palworld-i18n 의 en 표기(Paldeck·Breeding·Technology 등 게임
  * 내 영문 용어)를 기준으로 맞췄습니다. 여기에 없는 경로의 /en 은 servedSeoLocale
@@ -1394,6 +1403,10 @@ const ENGLISH_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   "/lol": {
     title: "YORO.gg — LoL stats, one search",
     description: "LoL match history, the ARAM augment dex and patch notes in one place. Watch live streamers and join their games as a viewer."
+  },
+  "/patch-notes": {
+    title: "LoL Patch Notes | YORO.gg",
+    description: "Browse League of Legends patch notes from newest to oldest. Read the full notes on the original Riot Games page."
   },
   /* /follow 는 noindex 이지만(개인화 화면) 언어는 맞아야 합니다 — 없으면 /en/follow 가
      한국어 메타와 lang=ko 로 렌더됩니다. */
@@ -1454,8 +1467,8 @@ function contentForPath(
         };
   }
   const table = locale === "ja" ? JAPANESE_CONTENT : KOREAN_CONTENT;
-  /* en 은 팰월드만 채워져 있어 표를 먼저 보고, 없으면 아래 ko·ja 흐름을 그대로 탑니다.
-     (servedSeoLocale 이 en 을 접어 주므로 여기까지 en 으로 오는 경로는 팰월드뿐입니다.) */
+  /* en 은 실제 영어 본문이 있는 경로만 채웁니다. 나머지는 servedSeoLocale 이 ko 로
+     접으므로 아래 ko·ja 흐름을 그대로 탑니다. */
   if (locale === "en") {
     const english = ENGLISH_CONTENT[normalizedPath];
     if (english) return english;
@@ -1550,7 +1563,7 @@ export function withLolProfileSeo(
         "@type": "ProfilePage",
         name: input.title,
         description: input.description,
-        inLanguage: ja ? "ja-JP" : "ko-KR",
+        inLanguage: SEO_LANGUAGE_TAGS[locale],
         mainEntity: {
           "@type": "Person",
           name: input.heading

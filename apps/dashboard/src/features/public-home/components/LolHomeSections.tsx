@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import type { LolPlatformId, LolRankedStats } from "@streamops/shared";
 import { normalizeLolPlatformId, parseAramAugmentCatalog, type AramAugmentRarity, type PatchNotesFeed } from "@streamops/shared";
-import { requestPatchNotes } from "../../public-lol/api/patch-notes";
+import { patchNoteLocale, requestPatchNotes } from "../../public-lol/api/patch-notes";
 import { publicI18n, type PublicLocale } from "../../public-lol/i18n/public-lol-i18n";
 import type { SearchSuggestion } from "../../public-lol/types/public-lol";
 import { localizedPublicUrlForCurrentLocale } from "../../public-lol/utils/public-locale-path";
@@ -431,7 +431,7 @@ export function LolDataSection({ text, homeText, locale }: {
     })();
     void (async () => {
       try {
-        setPatchFeed(await requestPatchNotes(locale === "ja" ? "ja" : "ko", controller.signal));
+        setPatchFeed(await requestPatchNotes(patchNoteLocale(locale), controller.signal));
       } catch {
         /* 패치 행 생략 — 전체 패치노트 링크는 항상 남습니다. */
       }

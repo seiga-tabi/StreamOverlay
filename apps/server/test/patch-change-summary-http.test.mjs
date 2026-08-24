@@ -75,11 +75,11 @@ function handlerWith(options = {}) {
         : new Map([[78, { mp: 280, attackdamage: 60 }]])),
       itemGold: async (version) => new Map([[3068, version === "16.16.1" ? 2800 : 2700]]),
       championNames: async (_version, locale) => new Map([[78, {
-        name: locale === "ja" ? "ポッピー" : "뽀삐",
+        name: { ko: "뽀삐", ja: "ポッピー", en: "Poppy" }[locale],
         iconUrl: "https://ddragon.leagueoflegends.com/cdn/16.16.1/img/champion/Poppy.png",
       }]]),
       itemNames: async (_version, locale) => new Map([[3068, {
-        name: locale === "ja" ? "サンファイア・イージス" : "태양불꽃 방패",
+        name: { ko: "태양불꽃 방패", ja: "サンファイア・イージス", en: "Sunfire Aegis" }[locale],
       }]]),
     });
   return createHttpHandler({
@@ -120,6 +120,10 @@ test("요약은 계약 형태로 나가고 언어는 이름에만 반영된다",
     ja.json.championChanges[0].changes.map((change) => change.stat).sort(),
     ["attackdamage", "mp"],
   );
+
+  const en = await get(handler, "/api/public/patch-notes/changes?patch=26.16&locale=en");
+  assert.equal(en.json.championChanges[0].name, "Poppy");
+  assert.equal(en.json.itemChanges[0].name, "Sunfire Aegis");
 });
 
 test("locale 이 없거나 모르는 값이면 ko 로 떨어진다", async () => {
@@ -127,6 +131,10 @@ test("locale 이 없거나 모르는 값이면 ko 로 떨어진다", async () =>
   assert.equal((await get(handler, "/api/public/patch-notes/changes?patch=26.16")).json.championChanges[0].name, "뽀삐");
   assert.equal(
     (await get(handler, "/api/public/patch-notes/changes?patch=26.16&locale=fr")).json.championChanges[0].name,
+    "뽀삐",
+  );
+  assert.equal(
+    (await get(handler, "/api/public/patch-notes/changes?patch=26.16&locale=../ko")).json.championChanges[0].name,
     "뽀삐",
   );
 });
@@ -274,4 +282,20 @@ test("키 아트는 같은 origin PNG 로 나가고 ETag 로 재전송을 막는
   assert.equal(notModified.body, "");
   /* 두 번째 요청은 캐시에서 나오므로 원격을 다시 부르지 않습니다. */
   assert.equal(handler.fetches.length, 1);
+});
+
+test("영어 키 아트 locale을 허용하고 허용 목록 밖 값은 ko로 닫는다", async () => {
+  const english = await getBinary(
+    keyArtHandler(),
+    "/api/public/patch-notes/keyart?patch=26.16&locale=en",
+  );
+  assert.equal(english.status, 200);
+  assert.match(english.headers.ETag, /patch-keyart-en-26\.16/u);
+
+  const invalid = await getBinary(
+    keyArtHandler(),
+    "/api/public/patch-notes/keyart?patch=26.16&locale=..%2Fko",
+  );
+  assert.equal(invalid.status, 200);
+  assert.match(invalid.headers.ETag, /patch-keyart-ko-26\.16/u);
 });

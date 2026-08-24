@@ -12,6 +12,7 @@ const { PatchNotesService } = await import("../dist/services/patch-notes-service
 const fixtureDirectory = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "fixtures");
 const koHtml = readFileSync(path.join(fixtureDirectory, "patch-notes-ko.html"), "utf8");
 const jaHtml = readFileSync(path.join(fixtureDirectory, "patch-notes-ja.html"), "utf8");
+const enHtml = readFileSync(path.join(fixtureDirectory, "patch-notes-en.html"), "utf8");
 
 const previousAuthConfig = {
   localNoAuth: appConfig.security.localNoAuth,
@@ -64,7 +65,11 @@ function handlerWith(patchNotes) {
 function servingService(htmlByLocale) {
   return new PatchNotesService({
     fetchImpl: async (url) => new Response(
-      url.includes("/ja-jp/") ? htmlByLocale.ja : htmlByLocale.ko,
+      url.includes("/ja-jp/")
+        ? htmlByLocale.ja
+        : url.includes("/en-us/")
+          ? htmlByLocale.en
+          : htmlByLocale.ko,
       { status: 200, headers: { "content-type": "text/html" } }
     )
   });
@@ -99,12 +104,13 @@ test("목록을 돌려주고 캐시 헤더를 붙인다", async () => {
   assert.match(body.notes[0].url, /^https:\/\/www\.leagueoflegends\.com\//u);
 });
 
-test("locale 은 ko·ja 만 받고 나머지는 방문자 언어로 되돌린다", async () => {
-  const handler = handlerWith(servingService({ ko: koHtml, ja: jaHtml }));
+test("locale 은 ko·ja·en만 받고 나머지는 방문자 언어로 되돌린다", async () => {
+  const handler = handlerWith(servingService({ ko: koHtml, ja: jaHtml, en: enHtml }));
   assert.equal(JSON.parse((await get(handler, "/api/public/patch-notes?locale=ja")).body).locale, "ja");
   assert.equal(JSON.parse((await get(handler, "/api/public/patch-notes?locale=ko")).body).locale, "ko");
+  assert.equal(JSON.parse((await get(handler, "/api/public/patch-notes?locale=en")).body).locale, "en");
   /* 임의 값이 수집기로 흘러 들어가지 않습니다. */
-  for (const bad of ["en", "../../etc", "ko-kr", ""]) {
+  for (const bad of ["de", "../ko", "../../etc", "ko-kr", ""]) {
     const res = await get(handler, `/api/public/patch-notes?locale=${encodeURIComponent(bad)}`);
     assert.equal(res.statusCode, 200);
     assert.equal(JSON.parse(res.body).locale, "ko", bad);
@@ -118,6 +124,14 @@ test("일본어 요청에는 일본어 제목이 나간다", async () => {
   const body = JSON.parse((await get(handler, "/api/public/patch-notes?locale=ja")).body);
   assert.equal(body.notes[0].title, "リーグ・オブ・レジェンド パッチノート 26.15");
   assert.match(body.notes[0].url, /\/ja-jp\//u);
+});
+
+test("영어 요청에는 영어 제목과 영어 원문 URL이 나간다", async () => {
+  const handler = handlerWith(servingService({ ko: koHtml, ja: jaHtml, en: enHtml }));
+  const body = JSON.parse((await get(handler, "/api/public/patch-notes?locale=en")).body);
+  assert.equal(body.locale, "en");
+  assert.equal(body.notes[0].title, "League of Legends Patch 26.15 Notes");
+  assert.match(body.notes[0].url, /\/en-us\//u);
 });
 
 test("아직 한 번도 못 받아왔으면 503 이고 캐시하지 않는다", async () => {
@@ -233,8 +247,12 @@ test("패치 카드 이미지는 버전 키 immutable 로 나가고, 모르는 �
     assert.equal(unknown.statusCode, 200);
     assert.equal(unknown.headers["Cache-Control"], "no-store");
 
+    const english = await get(handler, "/social/patch-notes/en/26.16.png");
+    assert.equal(english.headers["Content-Type"], "image/png");
+    assert.match(english.headers.ETag, /patch-social-en-26\.16/u);
+
     /* 형식 밖 경로는 카드 라우트가 아닙니다. */
-    const invalid = await get(handler, "/social/patch-notes/en/26.16.png");
+    const invalid = await get(handler, "/social/patch-notes/de/26.16.png");
     assert.notEqual(invalid.headers["Content-Type"], "image/png");
   } finally {
     appConfig.paths.dashboardStatic = previousStatic;
@@ -271,6 +289,38 @@ test("패치 노트 HTML 공유 메타는 최신 패치 번호·요약·버전 �
     assert.match(res.body, /LoL 패치 26\.16 \| YORO\.gg/u);
     assert.match(res.body, /챔피언과 체계 업데이트/u);
     assert.match(res.body, /https:\/\/yoro\.gg\/social\/patch-notes\/ko\/26\.16\.png/u);
+  } finally {
+    appConfig.paths.dashboardStatic = previousStatic;
+  }
+});
+
+test("영어 패치 노트 HTML 공유 메타는 영어 피드와 영어 카드 URL을 쓴다", async () => {
+  const { mkdtempSync, writeFileSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const previousStatic = appConfig.paths.dashboardStatic;
+  const dir = mkdtempSync(path.join(tmpdir(), "patch-seo-en-"));
+  writeFileSync(
+    path.join(dir, "index.html"),
+    '<!doctype html><html lang="ko"><head><meta name="description" content="home">'
+    + '<link rel="canonical" href="https://yoro.gg/">'
+    + '<meta property="og:title" content="home"><meta property="og:description" content="home">'
+    + '<meta property="og:url" content="https://yoro.gg/"><meta property="og:image" content="home">'
+    + '<meta name="twitter:title" content="home"><meta name="twitter:description" content="home">'
+    + '<title>YORO.gg</title></head><div id="root"></div>'
+  );
+  appConfig.paths.dashboardStatic = dir;
+  try {
+    const englishNote = {
+      ...cardNote,
+      title: "League of Legends Patch 26.16 Notes",
+      summary: "Champion and system updates, ninjas in Classic, and more!",
+      url: "https://www.leagueoflegends.com/en-us/news/game-updates/league-of-legends-patch-26-16-notes",
+    };
+    const res = await get(handlerWith(fakePatchNotes([englishNote])), "/en/patch-notes");
+    assert.equal(res.statusCode, 200);
+    assert.match(res.body, /LoL Patch 26\.16 \| YORO\.gg/u);
+    assert.match(res.body, /Champion and system updates/u);
+    assert.match(res.body, /https:\/\/yoro\.gg\/social\/patch-notes\/en\/26\.16\.png/u);
   } finally {
     appConfig.paths.dashboardStatic = previousStatic;
   }

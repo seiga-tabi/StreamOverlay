@@ -94,6 +94,7 @@ import { ValorantPublicService } from "./services/valorant-public-service.js";
 import {
   PALWORLD_SERVER_SAFE_REGISTRATION_POLICY,
   toSafeErrorMessage,
+  type PatchNoteLocale,
   type PalworldServerAvailabilityErrorCode,
   type PalworldServerRegistrationPolicy
 } from "@streamops/shared";
@@ -630,6 +631,14 @@ const patchNotes = new PatchNotesService({
   store: new LocalPatchNotesFeedStore(`${appConfig.paths.state}/patch-notes`),
   dataDragonVersionsProvider: () => dataDragon.getVersions()
 });
+
+function patchChangeDisplayName(
+  locale: PatchNoteLocale,
+  names: Readonly<Record<PatchNoteLocale, string | undefined>>,
+): string | undefined {
+  return names[locale] ?? names.ko;
+}
+
 /* 패치 변경 요약 — 노트가 주는 dataDragonVersion 쌍으로 Data Dragon 두 판을
    비교합니다. 이름·아이콘은 이미 받아 둔 맵을 재사용하므로 추가 다운로드는
    직전 버전의 champion.json·item.json 뿐이고, 그것도 패치당 한 번입니다. */
@@ -640,14 +649,22 @@ const patchChangeSummary = new PatchChangeSummaryService({
   championNames: async (version, locale) => {
     const champions = await dataDragon.getChampionMap(version);
     return new Map([...champions].map(([championId, champion]) => [championId, {
-      name: (locale === "ja" ? champion.nameJa : champion.nameKo) || champion.nameKo,
+      name: patchChangeDisplayName(locale, {
+        ko: champion.nameKo,
+        ja: champion.nameJa,
+        en: champion.nameEn,
+      }) ?? champion.nameKo,
       ...(champion.iconUrl ? { iconUrl: champion.iconUrl } : {})
     }]));
   },
   itemNames: async (version, locale) => {
     const items = await dataDragon.getItemMap(version);
     return new Map([...items].flatMap(([itemId, item]) => {
-      const name = (locale === "ja" ? item.nameJa : item.nameKo) || item.nameKo;
+      const name = patchChangeDisplayName(locale, {
+        ko: item.nameKo,
+        ja: item.nameJa,
+        en: item.nameEn,
+      });
       return name ? [[itemId, { name, ...(item.iconUrl ? { iconUrl: item.iconUrl } : {}) }] as const] : [];
     }));
   }

@@ -84,6 +84,27 @@ test("영어 카피가 생긴 화면은 en 을 서빙한다", () => {
   assert.match(html, /<link rel="alternate" hreflang="en" href="https:\/\/yoro\.gg\/en\/lol" \/>/u);
 });
 
+test("LoL 패치 노트는 ko·ja·en hreflang과 locale별 canonical을 유지한다", () => {
+  const english = render("/en/patch-notes");
+  assert.match(english, /<html lang="en"/u);
+  assert.match(english, /<title>LoL Patch Notes \| YORO\.gg<\/title>/u);
+  assert.match(english, /Browse League of Legends patch notes from newest to oldest/u);
+  assert.match(english, /<link rel="canonical" href="https:\/\/yoro\.gg\/en\/patch-notes">/u);
+  assert.match(english, /hreflang="ko" href="https:\/\/yoro\.gg\/ko\/patch-notes"/u);
+  assert.match(english, /hreflang="ja" href="https:\/\/yoro\.gg\/ja\/patch-notes"/u);
+  assert.match(english, /hreflang="en" href="https:\/\/yoro\.gg\/en\/patch-notes"/u);
+  assert.match(english, /hreflang="x-default" href="https:\/\/yoro\.gg\/en\/patch-notes"/u);
+  assert.match(english, /"inLanguage":"en-US"/u);
+  assert.match(english, /"name":"Patch notes","item":"https:\/\/yoro\.gg\/en\/patch-notes"/u);
+
+  const korean = publicSeoMetadataForPath("/ko/patch-notes");
+  const japanese = publicSeoMetadataForPath("/ja/patch-notes");
+  assert.equal(korean.title, "LoL 패치 노트 | YORO.gg");
+  assert.equal(korean.canonicalUrl, "https://yoro.gg/ko/patch-notes");
+  assert.equal(japanese.title, "LoLパッチノート | YORO.gg");
+  assert.equal(japanese.canonicalUrl, "https://yoro.gg/ja/patch-notes");
+});
+
 test("hreflang은 비지역화 경로에는 붙지 않는다", () => {
   const html = render("/login");
   assert.doesNotMatch(html, /hreflang/u);

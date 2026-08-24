@@ -66,6 +66,17 @@ const JA_NOTES: PatchNote[] = [{
   imageUrl: "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/a-1920x1080.jpg"
 }];
 
+const EN_NOTES: PatchNote[] = [{
+  slug: "league-of-legends-patch-26-15-notes",
+  title: "League of Legends Patch 26.15 Notes",
+  summary: "Season 3 begins. Wait... what year is it?!",
+  publishedAt: "2026-07-28T18:00:00.000Z",
+  patchVersion: "26.15",
+  dataDragonVersion: "16.15.1",
+  url: "https://www.leagueoflegends.com/en-us/news/game-updates/league-of-legends-patch-26-15-notes",
+  imageUrl: "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/a-1920x1080.jpg"
+}];
+
 const transparentPng = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
   "base64"
@@ -103,7 +114,7 @@ const SUMMARY: PatchPlaySummary = {
   ]
 };
 
-/* 화면이 어떤 언어를 요청했는지 기록합니다. Riot 은 ko-kr·ja-jp 를 따로 서비스합니다. */
+/* 화면이 어떤 언어를 요청했는지 기록합니다. Riot 은 ko-kr·ja-jp·en-us 를 따로 서비스합니다. */
 const requestedLocales: string[] = [];
 
 type Fixtures = {
@@ -392,6 +403,19 @@ test("일본어에서는 Riot 의 ja 원문이 그대로 나온다", async ({ pa
   await expect(page.locator(".yoro-pn-hero-title")).toContainText("リーグ・オブ・レジェンド パッチノート 26.15");
   const href = await page.locator(".yoro-pn-link").first().getAttribute("href");
   expect(href).toContain("/ja-jp/");
+});
+
+test("영어에서는 en 목록을 요청하고 한국어 데이터를 남기지 않는다", async ({ page }) => {
+  await installFixtures(page, feed({ locale: "en", notes: EN_NOTES }));
+  await page.goto("/en/patch-notes");
+
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Patch notes");
+  await expect(page.locator(".yoro-pn-hero-title")).toContainText("League of Legends Patch 26.15 Notes");
+  expect(requestedLocales).toContain("en");
+  const pageText = await page.locator(".yoro-pn-page").innerText();
+  expect(pageText).not.toMatch(/[가-힣]/u);
+  const href = await page.locator(".yoro-pn-link").first().getAttribute("href");
+  expect(href).toContain("/en-us/");
 });
 
 test("기록이 있는 패치에만 승률 게이지가 붙고 기준선이 함께 그려진다", async ({ page }) => {

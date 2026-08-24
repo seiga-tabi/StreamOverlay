@@ -422,6 +422,7 @@ export class LolProfileEnrichmentService {
         championKey: champion.championKey,
         nameKo: champion.nameKo,
         nameJa: champion.nameJa,
+        nameEn: champion.nameEn,
         iconUrl: champion.iconUrl,
         splashUrl: champion.splashUrl,
         loadingUrl: champion.loadingUrl,

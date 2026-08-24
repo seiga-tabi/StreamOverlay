@@ -69,6 +69,7 @@ type ChampionMapEntry = {
   championKey: string;
   nameKo: string;
   nameJa?: string;
+  nameEn?: string;
   iconUrl?: string;
   splashUrl?: string;
   loadingUrl?: string;
@@ -80,12 +81,14 @@ type ChampionSkinEntry = {
   skinNum: number;
   skinNameKo: string;
   skinNameJa?: string;
+  skinNameEn?: string;
 };
 
 export type LolRuneSummary = {
   runeId: number;
   nameKo?: string;
   nameJa?: string;
+  nameEn?: string;
   iconUrl?: string;
 };
 
@@ -93,6 +96,7 @@ export type LolItemSummary = {
   itemId: number;
   nameKo?: string;
   nameJa?: string;
+  nameEn?: string;
   iconUrl?: string;
 };
 
@@ -101,6 +105,7 @@ export type LolChampionAbilitySummary = {
   key: "Q" | "W" | "E" | "R";
   nameKo?: string;
   nameJa?: string;
+  nameEn?: string;
   iconUrl?: string;
 };
 
@@ -111,18 +116,21 @@ const FALLBACK_RUNE_SUMMARIES: LolRuneSummary[] = [
     runeId: 8136,
     nameKo: "좀비 와드",
     nameJa: "ゾンビワード",
+    nameEn: "Zombie Ward",
     iconUrl: `${DATA_DRAGON_BASE}/cdn/img/perk-images/Styles/Domination/ZombieWard/ZombieWard.png`
   },
   {
     runeId: 8138,
     nameKo: "사냥의 증표",
     nameJa: "目玉コレクター",
+    nameEn: "Eyeball Collection",
     iconUrl: `${DATA_DRAGON_BASE}/cdn/img/perk-images/Styles/Domination/EyeballCollection/EyeballCollection.png`
   },
   {
     runeId: 8120,
     nameKo: "유령 포로",
     nameJa: "ゴーストポロ",
+    nameEn: "Ghost Poro",
     iconUrl: `${DATA_DRAGON_BASE}/cdn/img/perk-images/Styles/Domination/GhostPoro/GhostPoro.png`
   }
 ];
@@ -249,11 +257,13 @@ export class DataDragonService {
     if (running) return running;
 
     const request = (async () => {
-      const [ko, ja] = await Promise.all([
+      const [ko, ja, en] = await Promise.all([
         this.fetchChampionData(resolvedVersion, "ko_KR"),
-        this.fetchChampionData(resolvedVersion, "ja_JP").catch(() => undefined)
+        this.fetchChampionData(resolvedVersion, "ja_JP").catch(() => undefined),
+        this.fetchChampionData(resolvedVersion, "en_US").catch(() => undefined)
       ]);
       const jaByKey = new Map(Object.values(ja?.data ?? {}).map((champion) => [champion.key, champion]));
+      const enByKey = new Map(Object.values(en?.data ?? {}).map((champion) => [champion.key, champion]));
       const map = new Map<number, ChampionMapEntry>();
       /* 같은 응답에서 스탯도 걷어 둡니다 — 패치 비교가 champion.json 을 다시 받지 않게. */
       this.championStatsCache.set(resolvedVersion, championStatsFrom(ko));
@@ -266,6 +276,7 @@ export class DataDragonService {
           championKey: champion.id,
           nameKo: champion.name,
           nameJa: jaByKey.get(champion.key)?.name,
+          nameEn: enByKey.get(champion.key)?.name,
           ...championImageUrls(resolvedVersion, champion.id, champion.image?.full)
         });
       }
@@ -287,15 +298,23 @@ export class DataDragonService {
     if (running) return running;
 
     const request = (async () => {
-      const [ko, ja] = await Promise.all([
+      const [ko, ja, en] = await Promise.all([
         this.fetchRuneData(resolvedVersion, "ko_KR"),
-        this.fetchRuneData(resolvedVersion, "ja_JP").catch(() => undefined)
+        this.fetchRuneData(resolvedVersion, "ja_JP").catch(() => undefined),
+        this.fetchRuneData(resolvedVersion, "en_US").catch(() => undefined)
       ]);
       const jaById = new Map<number, DataDragonRuneStyle | DataDragonRune>();
+      const enById = new Map<number, DataDragonRuneStyle | DataDragonRune>();
       for (const style of ja ?? []) {
         jaById.set(style.id, style);
         for (const slot of style.slots ?? []) {
           for (const rune of slot.runes ?? []) jaById.set(rune.id, rune);
+        }
+      }
+      for (const style of en ?? []) {
+        enById.set(style.id, style);
+        for (const slot of style.slots ?? []) {
+          for (const rune of slot.runes ?? []) enById.set(rune.id, rune);
         }
       }
 
@@ -303,10 +322,12 @@ export class DataDragonService {
       const addEntry = (entry: DataDragonRuneStyle | DataDragonRune): void => {
         if (!Number.isFinite(entry.id)) return;
         const jaEntry = jaById.get(entry.id);
+        const enEntry = enById.get(entry.id);
         map.set(entry.id, {
           runeId: entry.id,
           nameKo: entry.name,
           nameJa: jaEntry?.name,
+          nameEn: enEntry?.name,
           iconUrl: entry.icon ? `${DATA_DRAGON_BASE}/cdn/img/${entry.icon}` : undefined
         });
       };
@@ -344,11 +365,13 @@ export class DataDragonService {
     if (running) return running;
 
     const request = (async () => {
-      const [ko, ja] = await Promise.all([
+      const [ko, ja, en] = await Promise.all([
         this.fetchItemData(resolvedVersion, "ko_KR"),
-        this.fetchItemData(resolvedVersion, "ja_JP").catch(() => undefined)
+        this.fetchItemData(resolvedVersion, "ja_JP").catch(() => undefined),
+        this.fetchItemData(resolvedVersion, "en_US").catch(() => undefined)
       ]);
       const jaById = new Map(Object.entries(ja?.data ?? {}).map(([itemId, item]) => [itemId, item]));
+      const enById = new Map(Object.entries(en?.data ?? {}).map(([itemId, item]) => [itemId, item]));
       const map = new Map<number, LolItemSummary>();
       this.itemGoldCache.set(resolvedVersion, itemGoldFrom(ko));
 
@@ -360,6 +383,7 @@ export class DataDragonService {
           itemId,
           nameKo: item.name,
           nameJa: jaById.get(rawItemId)?.name,
+          nameEn: enById.get(rawItemId)?.name,
           iconUrl: `${DATA_DRAGON_BASE}/cdn/${resolvedVersion}/img/item/${imageName}`
         });
       }
@@ -383,17 +407,20 @@ export class DataDragonService {
     const map = await this.getChampionMap(resolvedVersion);
     const champion = map.get(championId);
     if (!champion) return [];
-    const [ko, ja] = await Promise.all([
+    const [ko, ja, en] = await Promise.all([
       this.fetchChampionDetail(resolvedVersion, "ko_KR", champion.championKey),
-      this.fetchChampionDetail(resolvedVersion, "ja_JP", champion.championKey).catch(() => undefined)
+      this.fetchChampionDetail(resolvedVersion, "ja_JP", champion.championKey).catch(() => undefined),
+      this.fetchChampionDetail(resolvedVersion, "en_US", champion.championKey).catch(() => undefined)
     ]);
     const jaBySpellId = new Map((ja?.spells ?? []).map((spell) => [spell.id, spell]));
+    const enBySpellId = new Map((en?.spells ?? []).map((spell) => [spell.id, spell]));
     const keys = ["Q", "W", "E", "R"] as const;
     return (ko?.spells ?? []).slice(0, 4).map((spell, index) => ({
       slot: index + 1,
       key: keys[index] ?? "Q",
       nameKo: spell.name,
       nameJa: jaBySpellId.get(spell.id)?.name,
+      nameEn: enBySpellId.get(spell.id)?.name,
       iconUrl: spell.image?.full ? `${DATA_DRAGON_BASE}/cdn/${resolvedVersion}/img/spell/${spell.image.full}` : undefined
     }));
   }
@@ -423,6 +450,7 @@ export class DataDragonService {
           skinNum: requestedSkinNum !== undefined ? skinNum : selectedSkin?.skinNum,
           skinNameKo: selectedSkin?.skinNameKo,
           skinNameJa: selectedSkin?.skinNameJa,
+          skinNameEn: selectedSkin?.skinNameEn,
           masteryLevel: input.masteryLevel,
           masteryPoints: input.masteryPoints,
           games: input.games
@@ -448,21 +476,25 @@ export class DataDragonService {
     const champion = map.get(championId);
     if (!champion) throw new Error(`Data Dragon champion not found: ${championId}`);
 
-    const [ko, ja] = await Promise.all([
+    const [ko, ja, en] = await Promise.all([
       this.fetchChampionDetail(version, "ko_KR", champion.championKey),
-      this.fetchChampionDetail(version, "ja_JP", champion.championKey).catch(() => undefined)
+      this.fetchChampionDetail(version, "ja_JP", champion.championKey).catch(() => undefined),
+      this.fetchChampionDetail(version, "en_US", champion.championKey).catch(() => undefined)
     ]);
     const jaSkinsByNum = new Map((ja?.skins ?? []).filter(visibleSkin).map((skin) => [skin.num, skin]));
+    const enSkinsByNum = new Map((en?.skins ?? []).filter(visibleSkin).map((skin) => [skin.num, skin]));
     const skins = (ko?.skins ?? [])
       .filter(visibleSkin)
       .sort((a, b) => a.num - b.num)
       .map((skin) => {
         const jaSkin = jaSkinsByNum.get(skin.num);
+        const enSkin = enSkinsByNum.get(skin.num);
         const urls = championImageUrls(version, champion.championKey, undefined, skin.num);
         return {
           skinNum: skin.num,
           nameKo: skin.num === 0 ? champion.nameKo : skin.name,
           nameJa: skin.num === 0 ? champion.nameJa : jaSkin?.name,
+          nameEn: skin.num === 0 ? champion.nameEn : enSkin?.name,
           splashUrl: urls.splashUrl ?? `${DATA_DRAGON_BASE}/cdn/img/champion/splash/${champion.championKey}_${skin.num}.jpg`,
           loadingUrl: urls.loadingUrl ?? `${DATA_DRAGON_BASE}/cdn/img/champion/loading/${champion.championKey}_${skin.num}.jpg`
         };
@@ -517,19 +549,19 @@ export class DataDragonService {
     return request;
   }
 
-  private async fetchChampionData(version: string, language: "ko_KR" | "ja_JP"): Promise<ChampionDataResponse> {
+  private async fetchChampionData(version: string, language: "ko_KR" | "ja_JP" | "en_US"): Promise<ChampionDataResponse> {
     const response = await this.fetchImpl(`${DATA_DRAGON_BASE}/cdn/${version}/data/${language}/champion.json`);
     if (!response.ok) throw new Error(`Data Dragon champion lookup failed: ${response.status}`);
     return (await response.json()) as ChampionDataResponse;
   }
 
-  private async fetchRuneData(version: string, language: "ko_KR" | "ja_JP"): Promise<DataDragonRuneStyle[]> {
+  private async fetchRuneData(version: string, language: "ko_KR" | "ja_JP" | "en_US"): Promise<DataDragonRuneStyle[]> {
     const response = await this.fetchImpl(`${DATA_DRAGON_BASE}/cdn/${version}/data/${language}/runesReforged.json`);
     if (!response.ok) throw new Error(`Data Dragon rune lookup failed: ${response.status}`);
     return (await response.json()) as DataDragonRuneStyle[];
   }
 
-  private async fetchItemData(version: string, language: "ko_KR" | "ja_JP"): Promise<ItemDataResponse> {
+  private async fetchItemData(version: string, language: "ko_KR" | "ja_JP" | "en_US"): Promise<ItemDataResponse> {
     const response = await this.fetchImpl(`${DATA_DRAGON_BASE}/cdn/${version}/data/${language}/item.json`);
     if (!response.ok) throw new Error(`Data Dragon item lookup failed: ${response.status}`);
     return (await response.json()) as ItemDataResponse;
@@ -537,21 +569,24 @@ export class DataDragonService {
 
   private async getSkinEntry(version: string, championKey: string, skinNum: number): Promise<ChampionSkinEntry | undefined> {
     if (skinNum === 0) return undefined;
-    const [ko, ja] = await Promise.all([
+    const [ko, ja, en] = await Promise.all([
       this.fetchChampionDetail(version, "ko_KR", championKey),
-      this.fetchChampionDetail(version, "ja_JP", championKey).catch(() => undefined)
+      this.fetchChampionDetail(version, "ja_JP", championKey).catch(() => undefined),
+      this.fetchChampionDetail(version, "en_US", championKey).catch(() => undefined)
     ]);
     const koSkin = ko?.skins?.find((skin) => skin.num === skinNum && visibleSkin(skin));
     if (!koSkin) return undefined;
     const jaSkin = ja?.skins?.find((skin) => skin.num === skinNum && visibleSkin(skin));
+    const enSkin = en?.skins?.find((skin) => skin.num === skinNum && visibleSkin(skin));
     return {
       skinNum,
       skinNameKo: koSkin.name,
-      skinNameJa: jaSkin?.name
+      skinNameJa: jaSkin?.name,
+      skinNameEn: enSkin?.name
     };
   }
 
-  private async fetchChampionDetail(version: string, language: "ko_KR" | "ja_JP", championKey: string): Promise<DataDragonChampion | undefined> {
+  private async fetchChampionDetail(version: string, language: "ko_KR" | "ja_JP" | "en_US", championKey: string): Promise<DataDragonChampion | undefined> {
     const cacheKey = `${version}:${language}:${championKey}`;
     if (this.championDetailCache.has(cacheKey)) return this.championDetailCache.get(cacheKey);
     const running = this.championDetailRequests.get(cacheKey);

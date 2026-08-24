@@ -61,7 +61,7 @@ test("랭크 이력은 저장된 계산값 대신 티어·단계·LP로 점수�
   assert.equal(history?.[0]?.rankScore, 1855);
 });
 
-test("DataDragonService는 championId를 ko_KR/ja_JP 이름과 챔피언 이미지로 매핑한다", async () => {
+test("DataDragonService는 championId를 ko_KR/ja_JP/en_US 이름과 챔피언 이미지로 매핑한다", async () => {
   const fetchImpl = async (url) => {
     const target = String(url);
     if (target.endsWith("/api/versions.json")) return new Response(JSON.stringify(["16.12.1"]), { status: 200 });
@@ -71,6 +71,9 @@ test("DataDragonService는 championId를 ko_KR/ja_JP 이름과 챔피언 이미�
     if (target.includes("/ja_JP/champion.json")) {
       return new Response(JSON.stringify({ data: { Aatrox: { id: "Aatrox", key: "266", name: "エイトロックス", image: { full: "Aatrox.png" } } } }), { status: 200 });
     }
+    if (target.includes("/en_US/champion.json")) {
+      return new Response(JSON.stringify({ data: { Aatrox: { id: "Aatrox", key: "266", name: "Aatrox", image: { full: "Aatrox.png" } } } }), { status: 200 });
+    }
     return new Response("not found", { status: 404 });
   };
 
@@ -79,6 +82,7 @@ test("DataDragonService는 championId를 ko_KR/ja_JP 이름과 챔피언 이미�
 
   assert.equal(champion.nameKo, "아트록스");
   assert.equal(champion.nameJa, "エイトロックス");
+  assert.equal(champion.nameEn, "Aatrox");
   assert.equal(champion.iconUrl, "https://ddragon.leagueoflegends.com/cdn/16.12.1/img/champion/Aatrox.png");
   assert.equal(champion.splashUrl, "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aatrox_0.jpg");
   assert.equal(champion.loadingUrl, "https://ddragon.leagueoflegends.com/cdn/img/champion/loading/Aatrox_0.jpg");
@@ -124,9 +128,10 @@ test("DataDragonService는 동시 챔피언 매핑에서 Data Dragon 조회를 �
   assert.equal(calls.filter((url) => url.endsWith("/api/versions.json")).length, 1);
   assert.equal(calls.filter((url) => url.includes("/ko_KR/champion.json")).length, 1);
   assert.equal(calls.filter((url) => url.includes("/ja_JP/champion.json")).length, 1);
+  assert.equal(calls.filter((url) => url.includes("/en_US/champion.json")).length, 1);
 });
 
-test("DataDragonService는 전적 아이템 ID를 공식 한국어·일본어 이름으로 매핑한다", async () => {
+test("DataDragonService는 전적 아이템 ID를 공식 한국어·일본어·영어 이름으로 매핑한다", async () => {
   const fetchImpl = async (url) => {
     const target = String(url);
     if (target.endsWith("/api/versions.json")) return new Response(JSON.stringify(["16.12.1"]), { status: 200 });
@@ -144,6 +149,13 @@ test("DataDragonService는 전적 아이템 ID를 공식 한국어·일본어 �
         }
       }), { status: 200 });
     }
+    if (target.includes("/en_US/item.json")) {
+      return new Response(JSON.stringify({
+        data: {
+          "3157": { name: "Zhonya's Hourglass", image: { full: "3157.png" } }
+        }
+      }), { status: 200 });
+    }
     return new Response("not found", { status: 404 });
   };
 
@@ -152,6 +164,7 @@ test("DataDragonService는 전적 아이템 ID를 공식 한국어·일본어 �
 
   assert.equal(item.nameKo, "존야의 모래시계");
   assert.equal(item.nameJa, "ゾーニャの砂時計");
+  assert.equal(item.nameEn, "Zhonya's Hourglass");
   assert.equal(item.iconUrl, "https://ddragon.leagueoflegends.com/cdn/16.12.1/img/item/3157.png");
   assert.deepEqual(unknown, { itemId: 999999 });
 });
@@ -190,11 +203,17 @@ test("DataDragonService는 설정된 skin number로 챔피언 스플래시와 �
     if (target.includes("/ja_JP/champion.json")) {
       return new Response(JSON.stringify({ data: { Ahri: { id: "Ahri", key: "103", name: "アーリ", image: { full: "Ahri.png" } } } }), { status: 200 });
     }
+    if (target.includes("/en_US/champion.json")) {
+      return new Response(JSON.stringify({ data: { Ahri: { id: "Ahri", key: "103", name: "Ahri", image: { full: "Ahri.png" } } } }), { status: 200 });
+    }
     if (target.includes("/ko_KR/champion/Ahri.json")) {
       return new Response(JSON.stringify({ data: { Ahri: { id: "Ahri", key: "103", name: "아리", skins: [{ num: 0, name: "default" }, { num: 27, name: "영혼의 꽃 아리" }] } } }), { status: 200 });
     }
     if (target.includes("/ja_JP/champion/Ahri.json")) {
       return new Response(JSON.stringify({ data: { Ahri: { id: "Ahri", key: "103", name: "アーリ", skins: [{ num: 0, name: "default" }, { num: 27, name: "精霊の花祭りアーリ" }] } } }), { status: 200 });
+    }
+    if (target.includes("/en_US/champion/Ahri.json")) {
+      return new Response(JSON.stringify({ data: { Ahri: { id: "Ahri", key: "103", name: "Ahri", skins: [{ num: 0, name: "default" }, { num: 27, name: "Spirit Blossom Ahri" }] } } }), { status: 200 });
     }
     return new Response("not found", { status: 404 });
   };
@@ -205,6 +224,7 @@ test("DataDragonService는 설정된 skin number로 챔피언 스플래시와 �
   assert.equal(champion.skinNum, 27);
   assert.equal(champion.skinNameKo, "영혼의 꽃 아리");
   assert.equal(champion.skinNameJa, "精霊の花祭りアーリ");
+  assert.equal(champion.skinNameEn, "Spirit Blossom Ahri");
   assert.equal(champion.splashUrl, "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ahri_27.jpg");
   assert.equal(champion.loadingUrl, "https://ddragon.leagueoflegends.com/cdn/img/champion/loading/Ahri_27.jpg");
 
@@ -214,9 +234,11 @@ test("DataDragonService는 설정된 skin number로 챔피언 스플래시와 �
 
   const options = await service.getChampionSkinOptions(103);
   assert.equal(options.champion.nameKo, "아리");
+  assert.equal(options.champion.nameEn, "Ahri");
   assert.equal(options.skins[0].skinNum, 0);
   assert.equal(options.skins[0].nameKo, "아리");
   assert.equal(options.skins[1].skinNum, 27);
+  assert.equal(options.skins[1].nameEn, "Spirit Blossom Ahri");
   assert.equal(options.skins[1].splashUrl, "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ahri_27.jpg");
 });
 

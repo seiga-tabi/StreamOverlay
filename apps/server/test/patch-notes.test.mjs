@@ -14,6 +14,7 @@ import { LocalPatchNotesFeedStore, PatchNotesService } from "../dist/services/pa
 const fixtureDirectory = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "fixtures");
 const koHtml = readFileSync(path.join(fixtureDirectory, "patch-notes-ko.html"), "utf8");
 const jaHtml = readFileSync(path.join(fixtureDirectory, "patch-notes-ja.html"), "utf8");
+const enHtml = readFileSync(path.join(fixtureDirectory, "patch-notes-en.html"), "utf8");
 const DDRAGON_VERSIONS = ["16.15.1", "16.14.1", "16.13.1"];
 
 function htmlResponse(html, init = {}) {
@@ -48,6 +49,14 @@ test("일본어 목록도 같은 slug 로 이어진다", () => {
   assert.match(ja[0].url, /\/ja-jp\//u);
 });
 
+test("영어 목록도 같은 slug와 영어 원문 URL로 이어진다", () => {
+  const ko = patchNotesFromSourceHtml(koHtml, DDRAGON_VERSIONS);
+  const en = patchNotesFromSourceHtml(enHtml, DDRAGON_VERSIONS);
+  assert.deepEqual(en.map((note) => note.slug), ko.map((note) => note.slug));
+  assert.equal(en[0].title, "League of Legends Patch 26.15 Notes");
+  assert.match(en[0].url, /\/en-us\//u);
+});
+
 test("Data Dragon 버전을 몰라도 나머지는 그대로 수집한다", () => {
   const notes = patchNotesFromSourceHtml(koHtml, []);
   assert.equal(notes.length, 3);
@@ -73,9 +82,23 @@ test("구조가 바뀌거나 비면 빈 목록을 돌려준다", () => {
   );
 });
 
-test("수집 URL 은 두 개로 고정되어 있다", () => {
+test("수집 URL 은 세 개로 고정되어 있다", () => {
   assert.equal(patchNoteSourceUrl("ko"), "https://www.leagueoflegends.com/ko-kr/news/tags/patch-notes/");
   assert.equal(patchNoteSourceUrl("ja"), "https://www.leagueoflegends.com/ja-jp/news/tags/patch-notes/");
+  assert.equal(patchNoteSourceUrl("en"), "https://www.leagueoflegends.com/en-us/news/tags/patch-notes/");
+});
+
+test("영어 수집 요청은 en-US Accept-Language를 보낸다", async () => {
+  let acceptLanguage;
+  const notes = await fetchPatchNotes("en", {
+    fetchImpl: async (_url, init) => {
+      acceptLanguage = init?.headers?.["accept-language"];
+      return htmlResponse(enHtml);
+    },
+    dataDragonVersions: DDRAGON_VERSIONS,
+  });
+  assert.equal(acceptLanguage, "en-US");
+  assert.equal(notes[0].title, "League of Legends Patch 26.15 Notes");
 });
 
 test("응답이 비정상이면 캐시를 덮지 않도록 실패시킨다", async () => {
@@ -190,10 +213,12 @@ test("마지막 성공본은 디스크에 남아 재기동 뒤에도 쓰인다",
     const store = new LocalPatchNotesFeedStore(directory);
     const writer = new PatchNotesService({
       store,
-      fetchImpl: async () => htmlResponse(koHtml),
+      fetchImpl: async (url) => htmlResponse(String(url).includes("/en-us/") ? enHtml : koHtml),
       dataDragonVersions: DDRAGON_VERSIONS
     });
     await writer.getFeed("ko");
+    await writer.getFeed("en");
+    assert.equal(JSON.parse(readFileSync(path.join(directory, "en.json"), "utf8")).locale, "en");
 
     const reader = new PatchNotesService({
       store,
@@ -204,6 +229,7 @@ test("마지막 성공본은 디스크에 남아 재기동 뒤에도 쓰인다",
     const restored = await reader.getFeed("ko");
     assert.equal(restored.notes.length, 3);
     assert.equal(restored.stale, true, "저장본은 언제나 stale 로 표시한다");
+    assert.equal((await reader.getFeed("en")).locale, "en");
 
     /* 손상된 저장본은 조용히 무시합니다. */
     writeFileSync(path.join(directory, "ja.json"), "{ broken");

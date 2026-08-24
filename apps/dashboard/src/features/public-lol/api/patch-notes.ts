@@ -1,4 +1,5 @@
 import {
+  isPatchNoteLocale,
   parsePatchNotesFeed,
   parsePatchPlaySummary,
   type PatchNoteLocale,
@@ -7,6 +8,11 @@ import {
 } from "@streamops/shared";
 import { t } from "../i18n/public-lol-i18n";
 import { parsePatchChangeSummary, type PatchChangeSummary } from "../types/patch-change-summary";
+
+/** 화면 언어를 Riot 목록 언어로 좁힙니다. 허용 목록 밖이면 한국어로 닫습니다. */
+export function patchNoteLocale(locale: string): PatchNoteLocale {
+  return isPatchNoteLocale(locale) ? locale : "ko";
+}
 
 /**
  * 패치 노트 목록을 받아옵니다.
@@ -18,8 +24,8 @@ export async function requestPatchNotes(
   locale: PatchNoteLocale,
   signal: AbortSignal
 ): Promise<PatchNotesFeed> {
-  /* Riot 은 ko-kr·ja-jp 를 따로 서비스합니다. 언어가 바뀌면 목록도 다시 받아야 합니다. */
-  const response = await fetch(`/api/public/patch-notes?locale=${locale === "ja" ? "ja" : "ko"}`, {
+  /* Riot 은 ko-kr·ja-jp·en-us 를 따로 서비스합니다. 언어가 바뀌면 목록도 다시 받아야 합니다. */
+  const response = await fetch(`/api/public/patch-notes?locale=${locale}`, {
     credentials: "same-origin",
     headers: { Accept: "application/json" },
     signal
@@ -71,7 +77,7 @@ export async function requestPatchChangeSummary(
   locale: PatchNoteLocale,
   signal: AbortSignal
 ): Promise<PatchChangeSummary | undefined> {
-  const query = new URLSearchParams({ patch: patchVersion, locale: locale === "ja" ? "ja" : "ko" });
+  const query = new URLSearchParams({ patch: patchVersion, locale });
   try {
     const response = await fetch(`/api/public/patch-notes/changes?${query.toString()}`, {
       credentials: "same-origin",

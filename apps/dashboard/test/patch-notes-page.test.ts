@@ -39,9 +39,10 @@ const stylesIndex = await readFile(
 test("응답은 화면이 쓰기 전에 shared parser를 한 번 더 통과한다", () => {
   // 서버가 이미 검증하지만, 검증되지 않은 값으로 링크와 이미지를 만들지 않습니다.
   assert.match(api, /parsePatchNotesFeed\(await response\.json\(\)\)/u);
-  // Riot 은 ko-kr·ja-jp 를 따로 서비스합니다. 언어는 호출 시점의 전역이 아니라 인자로 받습니다.
+  // Riot 은 ko-kr·ja-jp·en-us 를 따로 서비스합니다. 언어는 호출 시점의 전역이 아니라 인자로 받습니다.
   assert.match(api, /export async function requestPatchNotes\(\s*locale: PatchNoteLocale/u);
-  assert.match(api, /locale=\$\{locale === "ja" \? "ja" : "ko"\}/u);
+  assert.match(api, /locale=\$\{locale\}/u);
+  assert.match(api, /isPatchNoteLocale\(locale\) \? locale : "ko"/u);
   // 요청한 언어와 다른 목록이 오면 화면에 올리지 않습니다.
   assert.match(api, /feed\.locale !== locale/u);
   // 언어가 바뀌면 목록을 다시 받아야 합니다.
