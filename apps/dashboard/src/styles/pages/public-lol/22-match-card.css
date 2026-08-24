@@ -889,6 +889,25 @@
     text-overflow: ellipsis;
   }
 
+  /* 이름이 새 탭 전적 링크일 때(사용자 요청 2026-08-24). 이 줄은 컨테이너 878px
+     이상에서만 보이므로 마우스 대상입니다 — 밑줄은 hover·focus 에서만 켜서
+     10픽셀 남짓한 글씨가 평소에 지저분해지지 않게 합니다. */
+  .public-match-card-team-name.is-link {
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .public-match-card-team-name.is-link:hover {
+    color: var(--yoro-color-text-on-dark);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .public-match-card-team-name.is-link:focus-visible {
+    outline: var(--yoro-focus-ring-width) solid var(--yoro-color-focus-ring);
+    outline-offset: var(--yoro-focus-ring-offset);
+  }
+
   .public-match-card-team-member.is-target .public-match-card-team-name {
     color: var(--yoro-color-text-on-dark);
     font-weight: var(--yoro-font-weight-bold);

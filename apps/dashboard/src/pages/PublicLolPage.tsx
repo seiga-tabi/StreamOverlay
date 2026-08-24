@@ -5173,19 +5173,29 @@ function searchableRiotIdViewModel({
   riotId,
   fallback,
   badges,
-  streamer
+  streamer,
+  lolPlatform
 }: {
   riotId: string | undefined;
   fallback: string;
   badges?: PublicLolMatchBadge[];
   streamer?: PublicLolTwitchStream;
+  /* 주면 이름이 그 사람 전적 페이지로 가는 새 탭 링크가 됩니다(전적 행).
+     같은 경기의 참가자는 같은 플랫폼이라 이 프로필의 플랫폼을 그대로 씁니다.
+     주지 않으면 지금처럼 화면 안에서 검색합니다(현재 게임 패널). */
+  lolPlatform?: string;
 }): SearchableRiotIdViewModel {
   const display = splitRiotId(riotId, fallback);
   const visibleStreamer = visibleStreamerStream(streamer);
+  const href = riotId && lolPlatform
+    ? localizedPublicUrlForCurrentLocale(
+        publicSummonerPath(riotId, normalizeLolPlatformId(lolPlatform) ?? DEFAULT_PUBLIC_LOL_PLATFORM)
+      )
+    : undefined;
   const title = riotId
     ? visibleStreamer
       ? `${t().twitchStreamer} · ${visibleStreamer.isLive ? t().twitchOnlineShort : t().twitchOfflineShort} · ${riotId}`
-      : `${t().search}: ${riotId}`
+      : `${href ? t().openProfileNewTab : t().search}: ${riotId}`
     : undefined;
   return {
     kind: riotId ? "button" : "static",
@@ -5193,6 +5203,7 @@ function searchableRiotIdViewModel({
     name: display.name,
     tag: display.tag,
     riotId,
+    href,
     title,
     badges: riotIdAwardBadgeViewModels(badges)
   };
@@ -5203,6 +5214,8 @@ function SearchableRiotId(props: {
   fallback: string;
   badges?: PublicLolMatchBadge[];
   streamer?: PublicLolTwitchStream;
+  /* 주면 이름이 새 탭 전적 링크가 됩니다 — searchableRiotIdViewModel 참고. */
+  lolPlatform?: string;
   onSearch: (riotId: string) => void;
 }) {
   const viewModel = searchableRiotIdViewModel(props);
@@ -5273,12 +5286,15 @@ function MatchTeamDetails({
   rankDetail,
   rankLoading,
   hideRiotIds,
+  lolPlatform,
   onSearchRiotId
 }: {
   match: PublicLolRecentMatch;
   rankDetail?: PublicLolMatchRankResponse;
   rankLoading?: boolean;
   hideRiotIds: boolean;
+  /* 참가자 이름을 새 탭 전적 링크로 만들 플랫폼(사용자 요청 2026-08-24). */
+  lolPlatform?: string;
   onSearchRiotId: (riotId: string) => void;
 }) {
   if (match.teams.length === 0) return null;
@@ -5340,7 +5356,8 @@ function MatchTeamDetails({
             riotId: hideRiotIds ? undefined : player.riotId,
             fallback: hideRiotIds ? maskedRiotIdName(player.riotId, playerDisplayName(player)) : playerDisplayName(player),
             badges: playerHighlightBadges,
-            streamer: hideRiotIds ? undefined : player.twitchStream
+            streamer: hideRiotIds ? undefined : player.twitchStream,
+            lolPlatform
           }),
           mobileKda: {
             /* 모바일 한 줄 행은 "KDA" 글자 없이 수치만 — 이름 열(≈65px)에서
@@ -5450,6 +5467,10 @@ function IngamePanel({
   const spellVersion = profileDataDragonVersion(profile);
   const expectedParticipants = Math.max(10, participants.length);
   const platformLabel = liveGame?.lolPlatform ?? profile.lolPlatform;
+  /* 이름 링크에 쓸 플랫폼. platformLabel 은 화면 표시용이라 알 수 없는 값이 올 수
+     있고, 그대로 넘기면 publicSummonerPath 의 기본값(jp1)으로 조용히 새어
+     엉뚱한 서버의 전적을 엽니다 — 그럴 때는 이 프로필의 플랫폼으로 떨어뜨립니다. */
+  const linkPlatform = normalizeLolPlatformId(platformLabel) ? platformLabel : profile.lolPlatform;
   /* 모바일: 상대 팀은 접혀 있고 토글로 펼칩니다(목업 모바일 보드). */
   const [enemyOpen, setEnemyOpen] = useState(false);
 
@@ -5580,6 +5601,7 @@ function IngamePanel({
                             <span className="public-ingame-name-line">
                               <SearchableRiotId
                                 fallback={participant.isTarget ? profile.riotId : championName(participant.champion)}
+                                lolPlatform={linkPlatform}
                                 onSearch={onSearchRiotId}
                                 riotId={participant.riotId}
                               />
@@ -5895,10 +5917,22 @@ function RecentMatches({
           /* 팀원 열에 Riot ID 병기(목업 v30) — 가리기 ON이면 마스킹, 없으면 챔피언명. */
           const teamMemberName = (riotId: string | undefined, fallback: string): string =>
             hideRiotIds ? maskedRiotIdName(riotId, fallback) : splitRiotId(riotId, fallback).name;
+          /* 이름 → 그 사람 전적(새 탭). 가리기 ON 이면 링크도 함께 없앱니다 —
+             마스킹된 이름 옆에 진짜 Riot ID 가 담긴 주소를 남기면 가리기가 무의미해집니다. */
+          const teamMemberLink = (riotId: string | undefined): Pick<RecentMatchRowTeamMember, "nameHref" | "nameTitle"> =>
+            hideRiotIds || !riotId
+              ? {}
+              : {
+                nameHref: localizedPublicUrlForCurrentLocale(
+                  publicSummonerPath(riotId, normalizeLolPlatformId(profile.lolPlatform) ?? DEFAULT_PUBLIC_LOL_PLATFORM)
+                ),
+                nameTitle: `${t().openProfileNewTab}: ${riotId}`
+              };
           const teamMember = (player: PublicLolMatchParticipant, side: string, index: number): RecentMatchRowTeamMember => ({
             key: `${match.matchId}:${side}:${index}:${player.champion.championId}`,
             label: player.isTarget ? `${t().matchTeamSelf} · ${championName(player.champion)}` : championName(player.champion),
             name: teamMemberName(player.riotId, championName(player.champion)),
+            ...teamMemberLink(player.riotId),
             isTarget: player.isTarget,
             content: player.champion.iconUrl
               ? <img src={player.champion.iconUrl} alt="" />
@@ -5917,6 +5951,7 @@ function RecentMatches({
                 key: `${match.matchId}:arena:ally:${index}`,
                 label: player.isTarget ? `${t().matchTeamSelf} · ${championName(player.champion)}` : championName(player.champion),
                 name: teamMemberName(player.riotId, championName(player.champion)),
+                ...teamMemberLink(player.riotId),
                 isTarget: player.isTarget,
                 content: player.champion.iconUrl
                   ? <img src={player.champion.iconUrl} alt="" />
@@ -5961,7 +5996,7 @@ function RecentMatches({
           ) : matchDetail && (hydratedMatch.teams?.length ?? 0) > 0 ? (
             <div className="public-md-record">
               <MatchGapStrip match={hydratedMatch} />
-              <MatchTeamDetails match={hydratedMatch} rankDetail={rankDetail} rankLoading={rankLoading} hideRiotIds={hideRiotIds} onSearchRiotId={onSearchRiotId} />
+              <MatchTeamDetails match={hydratedMatch} rankDetail={rankDetail} rankLoading={rankLoading} hideRiotIds={hideRiotIds} lolPlatform={profile.lolPlatform} onSearchRiotId={onSearchRiotId} />
               {rankError ? <FormError role="status">{rankError}</FormError> : null}
             </div>
           ) : detailLoading ? (

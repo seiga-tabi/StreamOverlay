@@ -434,3 +434,64 @@ test("TwitchApiClient는 429 이후 Ratelimit-Reset까지 다음 요청을 지�
   assert.equal(result.followers[0]?.userName, "Alpha");
   assert.equal(calls.length, 3);
 });
+
+test("TwitchApiClient는 아카이브 성공 빈 목록과 실패 사유를 구분한다", async () => {
+  const previousClientId = appConfig.twitch.clientId;
+  const previousClientSecret = appConfig.twitch.clientSecret;
+  const previousFetch = globalThis.fetch;
+  try {
+    appConfig.twitch.clientId = "";
+    appConfig.twitch.clientSecret = "";
+    const unconfigured = new TwitchApiClient();
+    assert.deepEqual(await unconfigured.getArchiveVideosByUserId("55"), {
+      state: "failed",
+      reason: "no_app_context"
+    });
+    assert.deepEqual(await unconfigured.getArchiveVideosByUserId("../55"), {
+      state: "failed",
+      reason: "invalid_user_id"
+    });
+
+    appConfig.twitch.clientId = "client-id";
+    appConfig.twitch.clientSecret = "client-secret";
+    let videoMode = "empty";
+    globalThis.fetch = async (url) => {
+      const target = new URL(String(url));
+      if (target.hostname === "id.twitch.tv") {
+        return jsonResponse({ access_token: "app-token", expires_in: 3600, scope: [] });
+      }
+      if (videoMode === "http") return jsonResponse({ error: "unavailable" }, 503);
+      if (videoMode === "network") throw new Error("network down");
+      if (videoMode === "malformed") return jsonResponse({ data: "not-an-array" });
+      return jsonResponse({ data: [] });
+    };
+    const client = new TwitchApiClient();
+    assert.deepEqual(await client.getArchiveVideosByUserId("55"), {
+      state: "ready",
+      status: 200,
+      count: 0,
+      payload: { data: [] }
+    });
+
+    videoMode = "http";
+    assert.deepEqual(await client.getArchiveVideosByUserId("55"), {
+      state: "failed",
+      reason: "http_503",
+      status: 503
+    });
+    videoMode = "network";
+    assert.deepEqual(await client.getArchiveVideosByUserId("55"), {
+      state: "failed",
+      reason: "network_error"
+    });
+    videoMode = "malformed";
+    assert.deepEqual(await client.getArchiveVideosByUserId("55"), {
+      state: "failed",
+      reason: "network_error"
+    });
+  } finally {
+    appConfig.twitch.clientId = previousClientId;
+    appConfig.twitch.clientSecret = previousClientSecret;
+    globalThis.fetch = previousFetch;
+  }
+});

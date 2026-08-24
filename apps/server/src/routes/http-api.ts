@@ -104,7 +104,12 @@ import {
   type TwitchExtensionSettingsResponse
 } from "@streamops/shared";
 import type { TwitchAuthService } from "../services/twitch-auth.js";
-import { TwitchFollowerLookupError, type TwitchApiClient, type TwitchStreamStatus } from "../services/twitch-api.js";
+import {
+  TwitchFollowerLookupError,
+  type TwitchApiClient,
+  type TwitchArchiveVideosFailureReason,
+  type TwitchStreamStatus
+} from "../services/twitch-api.js";
 import {
   StreamerFollowerAuthError,
   type StreamerFollowerAuthService
@@ -456,6 +461,15 @@ const PALWORLD_DATA_UNAVAILABLE_RESPONSE = {
 function publicLolProfileCacheHeaders(payload: PublicLolProfileResponse, refresh: boolean): Record<string, string> {
   if (refresh) return noStoreHeaders();
   return publicLolCacheHeaders("profile", payload, "public, max-age=30, stale-while-revalidate=120");
+}
+
+function twitchUserLogKey(twitchUserId: string): string {
+  return crypto
+    .createHash("sha256")
+    .update("public-lol-vod-v1\0", "utf8")
+    .update(twitchUserId, "utf8")
+    .digest("hex")
+    .slice(0, 16);
 }
 
 function publicLolCacheHeaders(
@@ -4495,10 +4509,55 @@ export function createHttpHandler(input: HttpHandlerInput) {
     });
   }
 
-  /* 경기 → 다시보기 점프. 목록은 채널별로 캐시하고 실패는 "없음"으로 떨어집니다. */
+  /* 경기 → 다시보기 점프. 정상적인 빈 목록과 일시 실패의 캐시 수명을 분리합니다. */
   const twitchVodIndex = new TwitchVodIndex({
-    videosFor: async (twitchUserId) =>
-      parseTwitchVods(await input.twitch?.getArchiveVideosByUserId(twitchUserId))
+    videosFor: async (twitchUserId) => {
+      const twitchUserKey = twitchUserLogKey(twitchUserId);
+      let result;
+      try {
+        result = await input.twitch!.getArchiveVideosByUserId(twitchUserId);
+      } catch {
+        const reason: TwitchArchiveVideosFailureReason = "network_error";
+        input.logger?.event?.({
+          type: "twitch.archive_videos_request",
+          twitchUserKey,
+          state: "failed",
+          reason
+        });
+        return { state: "failed" as const, reason };
+      }
+      if (result.state === "failed") {
+        input.logger?.event?.({
+          type: "twitch.archive_videos_request",
+          twitchUserKey,
+          state: "failed",
+          reason: result.reason,
+          ...(result.status === undefined ? {} : { status: result.status })
+        });
+        return { state: "failed" as const, reason: result.reason };
+      }
+      const vods = parseTwitchVods(result.payload);
+      input.logger?.event?.({
+        type: "twitch.archive_videos_request",
+        twitchUserKey,
+        state: "ready",
+        reason: "http_200",
+        status: result.status,
+        archiveCount: result.count,
+        usableVodCount: vods.length
+      });
+      return { state: "ready" as const, vods };
+    },
+    onLoad: ({ twitchUserId, state, vodCount, cacheTtlMs, reason }) => {
+      input.logger?.event?.({
+        type: "twitch.vod_index_loaded",
+        twitchUserKey: twitchUserLogKey(twitchUserId),
+        state,
+        vodCount,
+        cacheTtlMs,
+        ...(reason === undefined ? {} : { reason })
+      });
+    }
   });
 
   /**
@@ -4515,9 +4574,26 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (matches.length === 0 || !input.twitch) return matches;
     const stream = await buildPublicLolTwitchStream(gameName, tagLine).catch(() => undefined);
     if (!stream?.twitchUserId) return matches;
-    const replays = await twitchVodIndex
-      .replaysFor(stream.twitchUserId, matches.map((match) => match.startedAt))
-      .catch(() => matches.map(() => undefined));
+    let replays: (MatchReplay | undefined)[];
+    try {
+      replays = await twitchVodIndex.replaysFor(
+        stream.twitchUserId,
+        matches.map((match) => match.startedAt)
+      );
+    } catch {
+      input.logger?.event?.({
+        type: "public_lol.replays_failed",
+        twitchUserKey: twitchUserLogKey(stream.twitchUserId),
+        reason: "index_error"
+      });
+      replays = matches.map(() => undefined);
+    }
+    input.logger?.event?.({
+      type: "public_lol.replays_matched",
+      twitchUserKey: twitchUserLogKey(stream.twitchUserId),
+      matchedCount: replays.filter((replay) => replay !== undefined).length,
+      totalMatches: matches.length
+    });
     return matches.map((match, index) => {
       const replay = replays[index];
       return replay ? { ...match, replay } : match;

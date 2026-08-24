@@ -9,6 +9,8 @@ import assert from "node:assert/strict";
 
 const {
   REPLAY_LEAD_IN_SECONDS,
+  VOD_LIST_FAILURE_TTL_MS,
+  VOD_LIST_TTL_MS,
   TwitchVodIndex,
   parseTwitchVodDuration,
   parseTwitchVods,
@@ -37,7 +39,19 @@ test("duration 표기를 초로 바꾼다", () => {
 test("아카이브만 후보로 삼고 형식이 깨진 항목은 버린다", () => {
   const parsed = parseTwitchVods({
     data: [
-      { id: "111", created_at: "2026-08-19T10:00:00Z", duration: "2h", type: "archive" },
+      {
+        id: "111",
+        stream_id: "987654321",
+        user_id: "55",
+        user_login: "bamtol",
+        user_name: "밤톨",
+        title: "솔로 랭크",
+        created_at: "2026-08-19T10:00:00Z",
+        published_at: "2026-08-19T10:04:00Z",
+        duration: "2h",
+        type: "archive",
+        url: "https://www.twitch.tv/videos/111"
+      },
       /* 하이라이트·업로드는 방송 시각과 무관합니다. */
       { id: "222", created_at: "2026-08-19T10:00:00Z", duration: "2h", type: "highlight" },
       { id: "333", created_at: "2026-08-19T10:00:00Z", duration: "2h", type: "upload" },
@@ -51,6 +65,7 @@ test("아카이브만 후보로 삼고 형식이 깨진 항목은 버린다", ()
   });
   assert.deepEqual(parsed.map((entry) => entry.id), ["111"]);
   assert.equal(parsed[0].durationSeconds, 7200);
+  assert.equal(parsed[0].createdAt, "2026-08-19T10:00:00Z", "published_at이 아니라 방송 created_at을 써야 합니다");
 
   /* 응답이 형식을 벗어나면 빈 목록입니다 — 던지지 않습니다. */
   for (const broken of [undefined, null, {}, { data: null }, { data: "x" }, []]) {
@@ -115,13 +130,17 @@ test("t 파라미터 표기", () => {
 
 test("VOD 목록은 채널별로 캐시하고 실패해도 화면을 막지 않는다", async () => {
   let calls = 0;
+  let now = 1_000;
+  const loads = [];
   const start = Date.parse("2026-08-19T10:00:00.000Z");
   const index = new TwitchVodIndex({
     videosFor: async (twitchUserId) => {
       calls += 1;
-      if (twitchUserId === "999") throw new Error("twitch down");
-      return [vod("111", new Date(start).toISOString(), 7200)];
-    }
+      if (twitchUserId === "999") return { state: "failed", reason: "http_503" };
+      return { state: "ready", vods: [vod("111", new Date(start).toISOString(), 7200)] };
+    },
+    now: () => now,
+    onLoad: (result) => loads.push(result)
   });
 
   const first = await index.replayFor("55", new Date(start + HOUR).toISOString());
@@ -140,15 +159,47 @@ test("VOD 목록은 채널별로 캐시하고 실패해도 화면을 막지 않�
 
   /* Twitch 가 흔들려도 던지지 않습니다 — 버튼만 사라집니다. */
   assert.equal(await index.replayFor("999", new Date(start).toISOString()), undefined);
-  /* "없음"도 캐시합니다. */
+  /* 실패도 짧게 캐시해 연속 재시도를 막습니다. */
   const callsAfterFailure = calls;
   assert.equal(await index.replayFor("999", new Date(start).toISOString()), undefined);
   assert.equal(calls, callsAfterFailure);
+  assert.deepEqual(loads.at(-1), {
+    twitchUserId: "999",
+    state: "failed",
+    vodCount: 0,
+    cacheTtlMs: VOD_LIST_FAILURE_TTL_MS,
+    reason: "http_503"
+  });
+
+  /* 30초가 지나면 실패를 다시 확인합니다 — 기존 10분 고정 문제의 회귀 방지입니다. */
+  now += VOD_LIST_FAILURE_TTL_MS + 1;
+  assert.equal(await index.replayFor("999", new Date(start).toISOString()), undefined);
+  assert.equal(calls, callsAfterFailure + 1);
 
   /* 채널 id 형식이 아니면 조회 자체를 하지 않습니다. */
   assert.equal(await index.replayFor("../evil", new Date(start).toISOString()), undefined);
   assert.deepEqual(await index.replaysFor("", [new Date(start).toISOString()]), [undefined]);
-  assert.equal(calls, callsAfterFailure);
+  assert.equal(calls, callsAfterFailure + 1);
+});
+
+test("성공한 빈 VOD 목록은 정상 TTL로 캐시한다", async () => {
+  let calls = 0;
+  let now = 5_000;
+  const index = new TwitchVodIndex({
+    videosFor: async () => {
+      calls += 1;
+      return { state: "ready", vods: [] };
+    },
+    now: () => now
+  });
+  const at = "2026-08-19T10:00:00.000Z";
+  assert.equal(await index.replayFor("77", at), undefined);
+  now += VOD_LIST_FAILURE_TTL_MS + 1;
+  assert.equal(await index.replayFor("77", at), undefined);
+  assert.equal(calls, 1, "정상 빈 목록은 실패 TTL 뒤에도 캐시되어야 합니다");
+  now += VOD_LIST_TTL_MS;
+  assert.equal(await index.replayFor("77", at), undefined);
+  assert.equal(calls, 2);
 });
 
 test("동시에 같은 채널을 물어도 한 번만 조회한다", async () => {
@@ -158,7 +209,7 @@ test("동시에 같은 채널을 물어도 한 번만 조회한다", async () =>
     videosFor: async () => {
       calls += 1;
       await new Promise((resolve) => setTimeout(resolve, 5));
-      return [vod("111", new Date(start).toISOString(), 7200)];
+      return { state: "ready", vods: [vod("111", new Date(start).toISOString(), 7200)] };
     }
   });
   const at = new Date(start + HOUR).toISOString();

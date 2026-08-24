@@ -32,6 +32,10 @@ export type RecentMatchRowTeamMember = {
   label: string;
   /* 아이콘 옆에 표기되는 Riot ID(마스킹 반영) — 목업 v30. 없으면 아이콘만. */
   name?: string;
+  /* 이름을 누르면 그 사람 전적이 새 탭에서 열립니다(사용자 요청 2026-08-24).
+     가리기 ON 이거나 Riot ID 가 없는 참가자는 주지 않아 평문으로 남습니다. */
+  nameHref?: string;
+  nameTitle?: string;
   isTarget?: boolean;
   content: ReactNode;
 };
@@ -170,7 +174,23 @@ export function RecentMatchRow({
           title={member.label}
         >
           {member.content}
-          {member.name ? <em className="public-match-card-team-name">{member.name}</em> : null}
+          {member.name ? (
+            member.nameHref ? (
+              <a
+                className="public-match-card-team-name is-link"
+                href={member.nameHref}
+                rel="noopener noreferrer"
+                target="_blank"
+                title={member.nameTitle}
+                /* 요약 영역 전체가 펼침 토글이라 전파를 끊습니다(다시보기 링크와 같은 처리). */
+                onClick={(event) => event.stopPropagation()}
+              >
+                {member.name}
+              </a>
+            ) : (
+              <em className="public-match-card-team-name">{member.name}</em>
+            )
+          ) : null}
         </span>
       ))}
     </div>

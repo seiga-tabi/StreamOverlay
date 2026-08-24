@@ -870,6 +870,14 @@
     min-width: var(--yoro-size-touch-target) !important;
   }
 
+  /* 현재 게임 참가자 이름은 button 에서 새 탭 링크로 바뀌었습니다(2026-08-24).
+     위 button 규칙에서 빠지면서 이 이름만 44px 터치 규격을 잃습니다.
+     전적 상세의 같은 클래스는 .public-team-player-id-stack 쪽 ::before 히트
+     영역(§1321)이 담당하므로 여기 대상이 아닙니다. */
+  .public-dashboard-shell .public-ingame-name-line > a.public-riot-id-link {
+    min-height: var(--yoro-size-touch-target) !important;
+  }
+
   .public-profile-shared-top.yoro-card,
   .public-profile-shared-top.details-open.yoro-card,
   .public-profile-shared-top.details-collapsed.yoro-card {

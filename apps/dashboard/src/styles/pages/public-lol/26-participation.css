@@ -38,10 +38,13 @@
     white-space: nowrap;
   }
 
+  /* 채움용 원색(--yoro-color-match-loss-accent, 3:1 기준)을 자기 22% 틴트 위
+     글자로 쓰고 있어 다크 3.29:1 · 라이트 3.03:1 이었습니다(2026-08-23 실측).
+     good·info·warn 과 같은 외곽선 칩으로 맞추고 글자는 ink 단계로. */
   .public-participation-tag[data-tone="live"] {
-    border-color: transparent;
-    background: color-mix(in srgb, var(--yoro-color-match-loss-accent) 22%, transparent);
-    color: var(--yoro-color-match-loss-accent);
+    border-color: color-mix(in srgb, var(--graph-loss-ink, var(--yoro-color-match-loss-accent)) 45%, var(--yoro-color-border-on-dark));
+    background: none;
+    color: var(--graph-loss-ink, var(--yoro-color-match-loss-accent));
   }
 
   /* 진행 상태 셋만 색을 갖습니다(목업 §색). 채운 알약 대신 외곽선 + 글자색이라
@@ -421,7 +424,9 @@
   }
 
   .public-participation-mine-number > em {
-    color: var(--yoro-color-text-on-dark-muted);
+    /* 이 카드는 12% 틴트라 지면(#f5f6f8)보다 어둡습니다. muted 를 그대로 쓰면
+       라이트에서 4.35:1 로 내려가 본문 잉크 쪽으로 한 단계 당깁니다(5.39:1). */
+    color: color-mix(in srgb, var(--yoro-color-text-on-dark) 18%, var(--yoro-color-text-on-dark-muted));
     font-size: var(--yoro-font-size-sm);
     font-style: normal;
     font-weight: var(--yoro-font-weight-bold);
@@ -447,7 +452,9 @@
 
   .public-participation-mine-copy > span {
     display: block;
-    color: var(--yoro-color-text-on-dark-muted);
+    /* 이 카드는 12% 틴트라 지면(#f5f6f8)보다 어둡습니다. muted 를 그대로 쓰면
+       라이트에서 4.35:1 로 내려가 본문 잉크 쪽으로 한 단계 당깁니다(5.39:1). */
+    color: color-mix(in srgb, var(--yoro-color-text-on-dark) 18%, var(--yoro-color-text-on-dark-muted));
     font-size: var(--yoro-font-size-xs);
   }
 
@@ -555,10 +562,13 @@
     justify-content: center;
     width: 100%;
     min-height: var(--yoro-size-touch-target);
-    border: .5px solid color-mix(in srgb, var(--yoro-color-match-loss-accent) 45%, transparent);
+    /* 내 상태 패널의 틴트 위라 채움용 원색이 3.48~3.56:1 이었습니다 — 글자용 ink 로. */
+    border: .5px solid color-mix(in srgb, var(--graph-loss-ink, var(--yoro-color-match-loss-accent)) 45%, transparent);
     border-radius: 2px;
-    background: transparent;
-    color: var(--yoro-color-match-loss-accent);
+    /* 「곧 내 차례」 패널은 금빛 틴트라 투명 배경이면 대비가 4.09:1 로 내려갑니다
+       — 같은 패널의 지표 칸과 같은 지면을 깔아 틴트에서 떼어냅니다. */
+    background: var(--yoro-color-ground);
+    color: var(--graph-loss-ink, var(--yoro-color-match-loss-accent));
     font: inherit;
     font-size: var(--yoro-font-size-xs);
     font-weight: var(--yoro-font-weight-bold);

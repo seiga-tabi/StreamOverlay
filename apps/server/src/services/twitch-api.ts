@@ -46,6 +46,25 @@ export type TwitchStreamStatus = {
   thumbnailUrl?: string;
 };
 
+export type TwitchArchiveVideosFailureReason =
+  | "invalid_user_id"
+  | "no_app_context"
+  | `http_${number}`
+  | "network_error";
+
+export type TwitchArchiveVideosResult =
+  | {
+      state: "ready";
+      status: 200;
+      count: number;
+      payload: { data: unknown[] };
+    }
+  | {
+      state: "failed";
+      reason: TwitchArchiveVideosFailureReason;
+      status?: number;
+    };
+
 type TwitchStreamsResponse = {
   data?: Array<{
     id: string;
@@ -820,12 +839,18 @@ export class TwitchApiClient {
    *
    * 앱 토큰으로 조회합니다 — 남의 채널 아카이브는 공개 정보이고, 시청자 토큰을 쓰면
    * 로그인한 사람에게만 다시보기 버튼이 보이게 됩니다.
-   * 실패는 빈 배열입니다: Twitch 가 흔들려도 전적 화면은 그대로 떠야 합니다.
+   * 성공한 빈 목록과 요청 실패를 구분합니다. 호출자는 실패를 짧게 캐시하되 전적
+   * 화면은 그대로 제공해야 합니다.
    */
-  async getArchiveVideosByUserId(userId: string, limit = 100): Promise<unknown> {
-    if (!/^\d{1,32}$/u.test(userId)) return { data: [] };
-    const context = await this.getAppAccessContext();
-    if (!context) return { data: [] };
+  async getArchiveVideosByUserId(userId: string, limit = 100): Promise<TwitchArchiveVideosResult> {
+    if (!/^\d{1,32}$/u.test(userId)) return { state: "failed", reason: "invalid_user_id" };
+    let context: TwitchApiAccessContext | undefined;
+    try {
+      context = await this.getAppAccessContext();
+    } catch {
+      return { state: "failed", reason: "network_error" };
+    }
+    if (!context) return { state: "failed", reason: "no_app_context" };
     const url = new URL("https://api.twitch.tv/helix/videos");
     url.searchParams.set("user_id", userId);
     url.searchParams.set("type", "archive");
@@ -833,10 +858,17 @@ export class TwitchApiClient {
     url.searchParams.set("first", String(Math.min(100, Math.max(1, Math.trunc(limit)))));
     try {
       const response = await this.requestWithAccessContext(url, { method: "GET" }, context);
-      if (!response.ok) return { data: [] };
-      return await response.json();
+      if (!response.ok) {
+        return { state: "failed", reason: `http_${response.status}`, status: response.status };
+      }
+      const payload = await response.json() as unknown;
+      if (!payload || typeof payload !== "object" || !Array.isArray((payload as { data?: unknown }).data)) {
+        return { state: "failed", reason: "network_error" };
+      }
+      const data = (payload as { data: unknown[] }).data;
+      return { state: "ready", status: 200, count: data.length, payload: { data } };
     } catch {
-      return { data: [] };
+      return { state: "failed", reason: "network_error" };
     }
   }
 

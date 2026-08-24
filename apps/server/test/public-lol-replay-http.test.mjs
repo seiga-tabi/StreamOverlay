@@ -113,12 +113,12 @@ function fakeRiot() {
   };
 }
 
-function handlerWith({ twitch, store = {} } = {}) {
+function handlerWith({ twitch, store = {}, logger } = {}) {
   return createHttpHandler({
     store: { getParticipationQueue: () => [], ...store },
     twitchAuth: {},
     actions: { async dispatchOne() {} },
-    logger: { event: () => {}, error: () => {} },
+    logger: logger ?? { event: () => {}, error: () => {} },
     riot: fakeRiot(),
     ...(twitch ? { twitch } : {})
   });
@@ -130,7 +130,7 @@ test("스트리머로 연동되지 않은 프로필에는 Twitch 를 부르지 �
   const twitch = {
     async getArchiveVideosByUserId() {
       calls += 1;
-      return { data: [] };
+      return { state: "ready", status: 200, count: 0, payload: { data: [] } };
     }
   };
   const result = await get(handlerWith({ twitch }), "/api/lol/matches?riotId=%EB%B0%A4%ED%86%A8%23KR1&platform=kr");
@@ -159,14 +159,16 @@ test("연동된 스트리머의 경기에는 다시보기 지점이 붙는다", 
     }]
   };
   let asked;
+  const events = [];
   const twitch = {
     async getArchiveVideosByUserId(userId) {
       asked = userId;
-      return { data: [{ id: "9001", created_at: VOD_START, duration: "3h", type: "archive" }] };
+      const data = [{ id: "9001", created_at: VOD_START, duration: "3h", type: "archive" }];
+      return { state: "ready", status: 200, count: data.length, payload: { data } };
     }
   };
   const result = await get(
-    handlerWith({ twitch, store }),
+    handlerWith({ twitch, store, logger: { event: (event) => events.push(event), error: () => {} } }),
     "/api/lol/matches?riotId=%EB%B0%A4%ED%86%A8%23KR1&platform=kr"
   );
   assert.equal(result.status, 200);
@@ -176,6 +178,20 @@ test("연동된 스트리머의 경기에는 다시보기 지점이 붙는다", 
   assert.equal(replay.vodId, "9001");
   /* 방송 시작 1시간 뒤 경기 — 밴픽 끝자락부터 보이도록 조금 당깁니다. */
   assert.equal(replay.offsetSeconds, 3600 - 30);
+  const archiveEvent = events.find((event) => event.type === "twitch.archive_videos_request");
+  assert.equal(archiveEvent.state, "ready");
+  assert.equal(archiveEvent.archiveCount, 1);
+  assert.match(archiveEvent.twitchUserKey, /^[a-f0-9]{16}$/u);
+  assert.notEqual(archiveEvent.twitchUserKey, "55", "원본 Twitch user id를 로그에 남기면 안 됩니다");
+  assert.deepEqual(
+    events.find((event) => event.type === "public_lol.replays_matched"),
+    {
+      type: "public_lol.replays_matched",
+      twitchUserKey: archiveEvent.twitchUserKey,
+      matchedCount: 1,
+      totalMatches: 1
+    }
+  );
 });
 
 test("아카이브 조회가 실패해도 경기 목록은 살아 있다", async () => {
@@ -188,16 +204,22 @@ test("아카이브 조회가 실패해도 경기 목록은 살아 있다", async
       twitchDisplayName: "밤톨"
     }]
   };
+  const events = [];
   const twitch = {
     async getArchiveVideosByUserId() {
-      throw new Error("twitch down");
+      return { state: "failed", reason: "http_503", status: 503 };
     }
   };
   const result = await get(
-    handlerWith({ twitch, store }),
+    handlerWith({ twitch, store, logger: { event: (event) => events.push(event), error: () => {} } }),
     "/api/lol/matches?riotId=%EB%B0%A4%ED%86%A8%23KR1&platform=kr"
   );
   assert.equal(result.status, 200);
   assert.equal(result.json.recentMatches.length, 1);
   assert.equal(result.json.recentMatches[0].replay, undefined);
+  const archiveEvent = events.find((event) => event.type === "twitch.archive_videos_request");
+  assert.equal(archiveEvent.reason, "http_503");
+  assert.equal(archiveEvent.status, 503);
+  assert.equal(events.find((event) => event.type === "twitch.vod_index_loaded")?.cacheTtlMs, 30_000);
+  assert.equal(events.find((event) => event.type === "public_lol.replays_matched")?.matchedCount, 0);
 });

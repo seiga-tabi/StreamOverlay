@@ -26,6 +26,10 @@ export type MatchReplay = {
   offsetSeconds: number;
 };
 
+export type TwitchVodFetchResult =
+  | { state: "ready"; vods: TwitchVod[] }
+  | { state: "failed"; reason: string };
+
 /** 경기 시작 직전부터 보여 주는 편이 실제로 쓸모 있습니다(로딩·밴픽 끝자락). */
 export const REPLAY_LEAD_IN_SECONDS = 30;
 
@@ -113,13 +117,22 @@ export function replayTimestampParam(offsetSeconds: number): string {
 }
 
 export type TwitchVodIndexDeps = {
-  /** 채널의 지난 방송 목록. 실패는 빈 배열로 떨어뜨립니다. */
-  videosFor: (twitchUserId: string) => Promise<TwitchVod[]>;
+  /** 성공한 빈 목록과 실패를 구분해 실패 캐시가 오래 남지 않게 합니다. */
+  videosFor: (twitchUserId: string) => Promise<TwitchVodFetchResult>;
+  onLoad?: (result: {
+    twitchUserId: string;
+    state: TwitchVodFetchResult["state"];
+    vodCount: number;
+    cacheTtlMs: number;
+    reason?: string;
+  }) => void;
   now?: () => number;
 };
 
 /** VOD 목록은 방송이 끝날 때만 늘어납니다 — 자주 물을 값이 아닙니다. */
-const VOD_LIST_TTL_MS = 10 * 60 * 1000;
+export const VOD_LIST_TTL_MS = 10 * 60 * 1000;
+/** 일시 실패를 "아카이브 없음"처럼 오래 고정하지 않습니다. */
+export const VOD_LIST_FAILURE_TTL_MS = 30 * 1000;
 const VOD_CACHE_MAX = 200;
 
 export class TwitchVodIndex {
@@ -155,10 +168,23 @@ export class TwitchVodIndex {
     if (pending) return pending;
 
     const request = this.deps.videosFor(twitchUserId)
-      .catch(() => [] as TwitchVod[])
-      .then((vods) => {
-        /* 빈 결과도 캐시합니다 — 아카이브가 없는 채널을 매번 물어보지 않습니다. */
-        this.cache.set(twitchUserId, { vods, expiresAt: this.now() + VOD_LIST_TTL_MS });
+      .catch((): TwitchVodFetchResult => ({ state: "failed", reason: "network_error" }))
+      .then((result) => {
+        const vods = result.state === "ready" ? result.vods : [];
+        const cacheTtlMs = result.state === "ready" ? VOD_LIST_TTL_MS : VOD_LIST_FAILURE_TTL_MS;
+        try {
+          this.deps.onLoad?.({
+            twitchUserId,
+            state: result.state,
+            vodCount: vods.length,
+            cacheTtlMs,
+            ...(result.state === "failed" ? { reason: result.reason } : {})
+          });
+        } catch {
+          /* 진단 기록 실패가 다시보기 계산을 막아서는 안 됩니다. */
+        }
+        /* 정상적인 빈 목록은 오래, 일시 실패는 짧게 캐시합니다. */
+        this.cache.set(twitchUserId, { vods, expiresAt: this.now() + cacheTtlMs });
         while (this.cache.size > VOD_CACHE_MAX) {
           const oldest = this.cache.keys().next().value;
           if (oldest === undefined) break;
