@@ -5860,7 +5860,10 @@ function RecentMatches({
               label: t().matchStatDamageShare,
               labelShort: t().matchStatDamageShareShort,
               ratio: match.damageShare,
-              value: <span className={metricToneClass(percentTone(match.damageShare))}>{formatPercent(match.damageShare)}</span>
+              /* 5인 지분에 승률용 percentTone(70/55/45/35)을 쓰면 excellent·good·
+                 neutral 이 구조적으로 안 나옵니다(운영 19행 실측: bad 17 · warning 2).
+                 펼침 패널 선수 줄과 같은 teamShareTone(23/17/12)으로 맞춥니다. */
+              value: <span className={metricToneClass(teamShareTone(match.damageShare))}>{formatPercent(match.damageShare)}</span>
             },
             {
               key: "damage-taken",
@@ -5887,7 +5890,10 @@ function RecentMatches({
               label: t().matchStatDamageShare,
               labelShort: t().matchStatDamageShareShort,
               ratio: match.damageShare,
-              value: <span className={metricToneClass(percentTone(match.damageShare))}>{formatPercent(match.damageShare)}</span>
+              /* 5인 지분에 승률용 percentTone(70/55/45/35)을 쓰면 excellent·good·
+                 neutral 이 구조적으로 안 나옵니다(운영 19행 실측: bad 17 · warning 2).
+                 펼침 패널 선수 줄과 같은 teamShareTone(23/17/12)으로 맞춥니다. */
+              value: <span className={metricToneClass(teamShareTone(match.damageShare))}>{formatPercent(match.damageShare)}</span>
             }
           ];
           const itemSlotMediaItem = (item: PublicLolRecentMatch["items"][number] | undefined, index: number): RecentMatchRowMediaItem => {

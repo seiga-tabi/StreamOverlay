@@ -999,8 +999,15 @@ test("모바일 최근 전적은 스트립 + 본문 한 행으로 접고 세 묶
   // 목업 "전적 행 — 네 가지 수정": 모든 행이 같은 고정 트랙을 공유합니다
   // (112/176/116/152/168 + 캐럿 minmax(28px,1fr)) — 세로줄이 행마다 같은 자리에서 끊깁니다.
   assert.match(cardCss, /\.public-match-card-summary\s*\{[\s\S]*?7rem[\s\S]*?11rem[\s\S]*?7\.25rem[\s\S]*?9\.5rem[\s\S]*?10\.5rem[\s\S]*?minmax\(1\.75rem, 1fr\)/u);
-  // 병합 셀(트랙 2–3)의 안쪽 트랙·gap 은 바깥 격자와 같은 값이어야 합니다.
-  assert.match(cardCss, /\.public-match-card-champ-block\s*\{[\s\S]*?grid-column:\s*span 2[\s\S]*?grid-template-columns:\s*11rem 7\.25rem[\s\S]*?column-gap:\s*1\.125rem/u);
+  /* 병합 셀(트랙 2–3)의 안쪽 트랙 합과 gap 은 바깥 격자와 같아야 합니다.
+     2026-08-24: KDA 를 행 세로 중앙에 세우려고 안쪽만 194/98 로 다시 나눴습니다
+     (176+18+116 = 194+18+98 = 310 — 바깥 트랙은 그대로). 아이템 묶음 실측
+     193.9px 가 왼쪽 칸에 들어가야 KDA 가 두 줄을 차지할 수 있습니다. */
+  assert.match(cardCss, /\.public-match-card-champ-block\s*\{[\s\S]*?grid-column:\s*span 2[\s\S]*?grid-template-columns:\s*12\.125rem 6\.125rem[\s\S]*?column-gap:\s*1\.125rem/u);
+  // KDA 는 챔피언 줄과 아이템 줄을 통째로 차지하고 그 안에서 세로 가운데에 섭니다.
+  assert.match(cardCss, /\.public-match-card-champ-block > \.public-match-card-perf\s*\{[\s\S]*?grid-column:\s*2;\s*grid-row:\s*1 \/ span 2;\s*align-self:\s*center/u);
+  // MVP·ACE 는 지표가 셋뿐이라 비어 있던 네 번째 칸(= CS 아래)에 왼쪽 맞춤으로 놓입니다.
+  assert.match(cardCss, /\.public-match-card-stats > \.public-match-card-highlight\s*\{[\s\S]*?align-self:\s*start;\s*justify-self:\s*start/u);
   // 그룹 사이 여백은 목업의 18px(1.125rem)입니다.
   assert.match(cardCss, /\.public-match-card-summary\s*\{[\s\S]*?column-gap:\s*1\.125rem/u);
   for (const group of ["champion", "perf", "stats", "items"]) {
@@ -1027,7 +1034,8 @@ test("모바일 최근 전적은 스트립 + 본문 한 행으로 접고 세 묶
   // 결과·큐·날짜 스트립 — 카드 좌우 끝까지, 아래 헤어라인, 오른쪽 44px 는 캐럿 자리.
   assert.match(mobile, /\.public-match-card-outcome\s*\{[\s\S]*?grid-column:\s*1 \/ -1;\s*grid-row:\s*1[\s\S]*?padding-inline:\s*var\(--yoro-space-3\) 2\.75rem;[\s\S]*?border-block-end:\s*\.5px solid var\(--public-gray-border\)/u);
   assert.match(mobile, /\.public-match-card-outcome > small\s*\{\s*margin-inline-start:\s*auto/u);
-  // 챔피언 이름은 뺀다(결정 4) — copy 는 contents 로 풀어 MVP·ACE 배지만 남긴다.
+  // 챔피언 이름은 뺀다(결정 4). (배지는 2026-08-24 에 stats 로 옮겨갔고 copy 는 비었지만,
+  // diff 를 좁게 두려고 contents 로 남겨 둡니다 — 아래 배지 배치는 카드 격자 기준입니다.)
   assert.match(mobile, /\.public-match-card-copy\s*\{\s*display:\s*contents/u);
   assert.match(mobile, /\.public-match-card-copy > strong,\s*\.public-match-card-role\s*\{\s*display:\s*none/u);
   assert.match(mobile, /\.public-match-card-highlight\s*\{[\s\S]*?grid-column:\s*3;\s*grid-row:\s*2/u);
@@ -1040,8 +1048,11 @@ test("모바일 최근 전적은 스트립 + 본문 한 행으로 접고 세 묶
   assert.match(mobile, /\.public-match-card-expand::before\s*\{[\s\S]*?inset-block:\s*0 -1\.125rem/u);
   // 모바일 컴팩트 행은 다시보기를 접습니다 — 펼침 툴바가 진입점입니다(목업 v28).
   assert.match(mobile, /\.public-match-card-replay\s*\{\s*display:\s*none/u);
-  // 수치 3종(관여·CS·딜)은 행에서 뺀다(결정 1) — CS·딜은 펼침 패널 선수 줄에 남습니다.
-  assert.match(mobile, /\.public-match-card-stats\s*\{\s*display:\s*none/u);
+  /* 수치 3종(관여·CS·딜)은 행에서 뺀다(결정 1) — CS·딜은 펼침 패널 선수 줄에 남습니다.
+     2026-08-24: MVP·ACE 배지가 stats 안으로 옮겨가, 블록을 통째로 숨기면 배지까지
+     사라집니다. contents 로 풀고 배지 아닌 자식만 접습니다. */
+  assert.match(mobile, /\.public-match-card-stats\s*\{\s*display:\s*contents/u);
+  assert.match(mobile, /\.public-match-card-stats > span:not\(\.public-match-card-highlight\)\s*\{\s*display:\s*none/u);
   // 아이템 20px 3×2 + 와드 — 오른쪽 묶음 끝맞춤, 격자 폭 고정.
   assert.match(mobile, /\.public-match-card-items\s*\{[\s\S]*?grid-column:\s*6;\s*grid-row:\s*2;\s*justify-self:\s*end/u);
   assert.match(mobile, /\.public-match-card-item-grid\s*\{[\s\S]*?grid-template-columns:\s*repeat\(3, 1\.25rem\)/u);

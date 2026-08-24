@@ -253,9 +253,6 @@ export function RecentMatchRow({
           <div className="public-match-card-copy">
             <strong>{championName}</strong>
             <span className="public-match-card-role">{championRoleLabel}</span>
-            {highlight ? (
-              <span className={`public-match-card-highlight ${highlight.className}`}>{highlight.label}</span>
-            ) : null}
           </div>
         </div>
 
@@ -332,6 +329,12 @@ export function RecentMatchRow({
               ) : null}
             </span>
           ))}
+          {/* MVP·ACE — 지표가 셋뿐이라 늘 비어 있던 네 번째 칸(= CS 아래)에 들어갑니다.
+              모바일에서는 이 블록이 contents 로 풀려 배지만 카드 격자로 나갑니다
+              (22-match-card 의 720px 블록). */}
+          {highlight ? (
+            <span className={`public-match-card-highlight ${highlight.className}`}>{highlight.label}</span>
+          ) : null}
         </div>
 
         {teams ? (
