@@ -6039,7 +6039,25 @@ function RecentMatches({
               <svg aria-hidden="true" fill="none" height="12" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 16 16" width="12">
                 <path d="M4.5 2.5 L 12.5 8 L 4.5 13.5 Z" />
               </svg>
+              {t().watchReplay}
             </a>
+          ) : undefined;
+          /* 다시보기가 없는 행(일반 유저·아카이브 없음)은 그 칸에 라인 아이콘을 놓습니다.
+             포지션이 없는 큐(아레나)나 fill/unknown 은 자산이 없어 그대로 빕니다. */
+          const laneIconSrc = arena ? undefined : roleIconAssets[roleIconKey(match.position)];
+          const rowLaneMark = !replayHref && laneIconSrc ? (
+            /* aria-hidden — 데스크톱 행에는 포지션 텍스트(.public-match-card-role)가
+               이미 있어 읽어 주면 중복입니다. 모바일 상세용은 아래에서 이름을 줍니다. */
+            <img aria-hidden="true" alt="" className="public-match-card-lane" src={laneIconSrc} />
+          ) : undefined;
+          const panelLaneMark = !replayHref && laneIconSrc ? (
+            /* 모바일 행에는 포지션 텍스트가 없어 중복이 아닙니다 — 접근성 이름을 줍니다. */
+            <img
+              alt={mainRoleLabel(match.position)}
+              className="public-md-lane"
+              src={laneIconSrc}
+              title={mainRoleLabel(match.position)}
+            />
           ) : undefined;
           const panelReplayAction = replayHref ? (
             <a className="public-md-replay" href={replayHref} rel="noopener noreferrer" target="_blank">
@@ -6050,6 +6068,7 @@ function RecentMatches({
           const expandedPanel = expanded ? (
             <FeatureRecentMatchExpandedPanel
               activeView={expandedView}
+              laneMark={panelLaneMark}
               replayAction={panelReplayAction}
               content={expandedView === "record" ? recordContent : (
                 <RecentMatchBuildPanel
@@ -6090,6 +6109,7 @@ function RecentMatches({
               championLevelLabel={formatNumber(match.championLevel)}
               expanded={expanded}
               expandedPanel={expandedPanel}
+              laneMark={rowLaneMark}
               replayAction={rowReplayAction}
               expandAriaLabel={expanded ? t().collapseMatch : t().expandMatch}
               highlightClass={highlightClass}

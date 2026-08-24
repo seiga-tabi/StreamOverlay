@@ -82,8 +82,10 @@ export type RecentMatchRowProps = {
   itemsLabel: string;
   teams?: RecentMatchRowTeams;
   /* 다시보기 링크(목업 v27 행 ⑦ 액션) — 스트리머 프로필에서 VOD 가 잡힌 경기만.
-     확장 캐럿과 같은 액션 열에 세로로 붙습니다. */
+     확장 캐럿과 같은 액션 열, 캐럿 왼쪽 칸에 섭니다. */
   replayAction?: ReactNode;
+  /* 다시보기가 없는 행의 라인 표식. 다시보기와 같은 칸을 쓰며 둘이 같이 서지 않습니다. */
+  laneMark?: ReactNode;
   expandAriaLabel: string;
   expandedPanel?: ReactNode;
   onToggleExpand: () => void;
@@ -137,6 +139,7 @@ export function RecentMatchRow({
   itemsLabel,
   teams,
   replayAction,
+  laneMark,
   expandAriaLabel,
   expandedPanel,
   onToggleExpand
@@ -345,9 +348,11 @@ export function RecentMatchRow({
           </div>
         ) : null}
 
-        {/* 액션 열 — grid 자식 수(7)를 유지하려고 다시보기와 캐럿을 한 셀에 묶습니다. */}
+        {/* 액션 열 — 격자 두 칸. 왼쪽에 다시보기(또는 라인 표식), 오른쪽에 캐럿을
+            못 박아 왼쪽이 비어도 캐럿 x 좌표가 행마다 같습니다. */}
         <div className="public-match-card-actions">
           {replayAction}
+          {laneMark}
           <button
             type="button"
             className="public-match-card-expand"

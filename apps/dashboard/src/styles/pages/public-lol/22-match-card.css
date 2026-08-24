@@ -941,29 +941,66 @@
     outline-offset: 1px;
   }
 
-  /* 7 액션 열 — 캐럿 + (스트리머 프로필) 다시보기. grid 자식 수를 늘리지 않도록
-     한 셀에 세로로 쌓습니다(목업 v27 행 ⑦). */
+  /* 7 액션 열 — 캐럿 + (스트리머) 다시보기 / (그 외) 라인 아이콘.
+     격자 두 칸으로 나눠 캐럿을 둘째 칸에 못 박습니다 — 왼쪽이 비어도
+     캐럿 x 좌표가 행마다 같습니다(flex + margin-left: auto 로는 안 됩니다). */
   .public-match-card-actions {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--yoro-size-touch-target);
     align-items: center;
-    justify-self: end;
-    gap: .375rem;
+    /* justify-self 를 주지 않습니다(기본 stretch) — end 로 두면 상자가 내용만큼
+       줄어 1fr 칸이 0 이 되고, 다시보기·라인이 캐럿에 붙어 버립니다. */
   }
 
-  /* 다시보기(VOD 점프) — 그 경기를 담은 Twitch 아카이브가 있을 때만 렌더됩니다. */
+  /* 다시보기와 라인은 캐럿을 뺀 남은 칸의 가로·세로 가운데에 섭니다. */
+  .public-match-card-actions > :is(.public-match-card-replay, .public-match-card-lane) {
+    grid-column: 1;
+    justify-self: center;
+  }
+
+  /* 캐럿은 열을 못 박습니다 — 왼쪽이 비어도 자리가 안 흔들립니다. */
+  .public-match-card-actions > .public-match-card-expand {
+    grid-column: 2;
+    justify-self: end;
+  }
+
+  /* 다시보기(VOD 점프) — 그 경기를 담은 Twitch 아카이브가 있을 때만 렌더됩니다.
+     높이는 옆 캐럿과 같은 44px — 터치 타깃 기준을 넘고, 펼침 툴바의
+     알약(.public-md-replay, 44px)과도 높이가 통일됩니다. */
   .public-match-card-replay {
-    display: grid;
-    place-items: center;
-    width: 2.75rem;
-    height: 1.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--yoro-space-1);
+    height: var(--yoro-size-touch-target);
+    padding: 0 var(--yoro-space-3);
     border: 1px solid var(--yoro-color-border-on-dark);
     border-radius: var(--yoro-radius-sm);
     background: color-mix(in srgb, var(--yoro-color-text-on-dark) 4%, transparent);
     color: var(--yoro-color-text-on-dark-muted);
+    font-size: var(--yoro-font-size-xs);
+    font-weight: var(--yoro-font-weight-bold);
+    white-space: nowrap;
+    text-decoration: none;
     transition:
       background var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard),
       color var(--yoro-motion-duration-fast) var(--yoro-motion-ease-standard);
+  }
+
+  .public-match-card-replay > svg { flex: none; }
+
+  /* 라인 표식 — 버튼이 아니라 그림이라 테두리·배경 없이 놓습니다.
+     Riot 원본은 금빛(#c8aa6e)인데 같은 행의 MVP 배지 금빛과 뜻이 섞이므로
+     무채로 내립니다 — 41-ink-match-detail:177 이 Twitch 마크에 쓰는 방법입니다. */
+  .public-match-card-lane {
+    width: 1.75rem;
+    height: 1.75rem;
+    filter: grayscale(1) brightness(1.35);
+  }
+
+  .public-profile-platform-v2.theme-light .public-match-card-lane,
+  :root[data-public-theme="light"] .public-profile-platform-v2 .public-match-card-lane {
+    filter: grayscale(1) brightness(.7);
   }
 
   .public-match-card-replay:hover {
@@ -1195,8 +1232,10 @@
       block-size: 1.625rem;                          /* 26 — 스트립 높이 */
     }
 
-    /* 모바일 컴팩트 행은 다시보기를 접습니다 — 확장 후 상세에서 접근(목업 v28). */
-    .public-match-card-replay { display: none; }
+    /* 모바일 컴팩트 행은 다시보기·라인을 접습니다 — 펼침 상세에서 접근(목업 v28).
+       스트립 오른쪽 44×26 은 캐럿 하나가 씁니다. */
+    .public-match-card-replay,
+    .public-match-card-lane { display: none; }
 
     .public-match-card-expand {
       /* 폭 44 는 유지해야 한다 — legacy 의 button[aria-label] min-width 44

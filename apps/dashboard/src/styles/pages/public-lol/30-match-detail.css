@@ -108,9 +108,26 @@
     outline-offset: var(--yoro-focus-ring-offset);
   }
 
-  /* 다시보기가 auto 마진을 가져가면 마스크는 그 옆에 붙습니다. */
+  /* 라인 표식 — 다시보기 알약과 같은 자리, 같은 44px 높이. 알약이 아니라
+     그림이라 테두리·배경 없이 놓습니다(다시보기가 없는 경기에만 섭니다). */
+  .public-md-lane {
+    flex: none;
+    inline-size: var(--yoro-size-touch-target);
+    block-size: var(--yoro-size-touch-target);
+    margin-left: auto;
+    padding: .5rem;
+    filter: grayscale(1) brightness(1.35);
+  }
+
+  .public-profile-platform-v2.theme-light .public-md-lane,
+  :root[data-public-theme="light"] .public-profile-platform-v2 .public-md-lane {
+    filter: grayscale(1) brightness(.7);
+  }
+
+  /* 다시보기·라인이 auto 마진을 가져가면 마스크는 그 옆에 붙습니다. */
   .public-md-replay + .public-md-mask,
-  .public-md-replay ~ .public-md-mask { margin-left: 0; }
+  .public-md-replay ~ .public-md-mask,
+  .public-md-lane ~ .public-md-mask { margin-left: 0; }
 
   .public-md-tab.is-active,
   .public-md-mask.is-active {

@@ -20,6 +20,8 @@ export type RecentMatchExpandedToolbarProps = {
   hideRiotIds: boolean;
   /* 다시보기 링크 — 모바일은 행의 액션 열이 접히므로 여기가 유일한 진입점입니다. */
   replayAction?: ReactNode;
+  /* 다시보기가 없을 때 같은 자리에 서는 라인 표식. 둘이 같이 오지 않습니다. */
+  laneMark?: ReactNode;
   text: RecentMatchExpandedToolbarText;
   onRecord: () => void;
   onBuild: () => void;
@@ -30,6 +32,7 @@ export function RecentMatchExpandedToolbar({
   activeView,
   hideRiotIds,
   replayAction,
+  laneMark,
   text,
   onRecord,
   onBuild,
@@ -62,6 +65,7 @@ export function RecentMatchExpandedToolbar({
         </button>
       </div>
       {replayAction}
+      {laneMark}
       <button
         type="button"
         className={`public-md-mask ${hideRiotIds ? "is-active" : ""}`}
