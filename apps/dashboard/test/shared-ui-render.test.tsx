@@ -1047,7 +1047,7 @@ test("모바일 최근 전적은 스트립 + 본문 한 행으로 접고 세 묶
   assert.match(mobile, /\.public-match-card-expand\s*\{[\s\S]*?inline-size:\s*100%;\s*block-size:\s*100%/u);
   assert.match(mobile, /\.public-match-card-expand::before\s*\{[\s\S]*?inset-block:\s*0 -1\.125rem/u);
   // 모바일 컴팩트 행은 다시보기를 접습니다 — 펼침 툴바가 진입점입니다(목업 v28).
-  assert.match(mobile, /\.public-match-card-replay\s*\{\s*display:\s*none/u);
+  assert.match(mobile, /\.public-match-card-replay,\s*\.public-match-card-lane\s*\{\s*display:\s*none/u);
   /* 수치 3종(관여·CS·딜)은 행에서 뺀다(결정 1) — CS·딜은 펼침 패널 선수 줄에 남습니다.
      2026-08-24: MVP·ACE 배지가 stats 안으로 옮겨가, 블록을 통째로 숨기면 배지까지
      사라집니다. contents 로 풀고 배지 아닌 자식만 접습니다. */

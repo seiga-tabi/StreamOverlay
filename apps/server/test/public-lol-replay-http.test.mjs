@@ -109,18 +109,22 @@ function fakeRiot() {
     },
     async getRankedStatsByPuuid() {
       return undefined;
+    },
+    async getChampionMasteryTopByPuuid() {
+      return [];
     }
   };
 }
 
-function handlerWith({ twitch, store = {}, logger } = {}) {
+function handlerWith({ twitch, store = {}, logger, publicLolSnapshotStore } = {}) {
   return createHttpHandler({
     store: { getParticipationQueue: () => [], ...store },
     twitchAuth: {},
     actions: { async dispatchOne() {} },
     logger: logger ?? { event: () => {}, error: () => {} },
     riot: fakeRiot(),
-    ...(twitch ? { twitch } : {})
+    ...(twitch ? { twitch } : {}),
+    ...(publicLolSnapshotStore ? { publicLolSnapshotStore } : {})
   });
 }
 
@@ -192,6 +196,62 @@ test("연동된 스트리머의 경기에는 다시보기 지점이 붙는다", 
       totalMatches: 1
     }
   );
+});
+
+test("승인 전 스냅샷을 복원해도 등록된 스트리머의 다시보기를 다시 결합한다", async () => {
+  /* 승인 전 만들어진 프로필 스냅샷에는 replay 가 없습니다. 승인 뒤 메모리 캐시가
+     비워지거나 서버가 재기동돼도 이 스냅샷 때문에 버튼이 계속 숨지 않아야 합니다. */
+  const errors = [];
+  const beforeApproval = await get(
+    handlerWith({ logger: { event: () => {}, error: (error) => errors.push(error) } }),
+    "/api/lol/profile?riotId=%EB%B0%A4%ED%86%A8%23KR1&platform=kr"
+  );
+  assert.equal(beforeApproval.status, 200, JSON.stringify(errors));
+  assert.equal(beforeApproval.json.recentMatches[0]?.replay, undefined);
+
+  const publicLolSnapshotStore = {
+    async load() {
+      return {
+        puuid: "puuid-1",
+        fetchedAt: beforeApproval.json.fetchedAt,
+        payload: beforeApproval.json
+      };
+    },
+    async save() {}
+  };
+  const store = {
+    getParticipationQueue: () => [],
+    listApprovedStreamerRiotIds: () => [{
+      id: "request-1",
+      twitchUserId: "55",
+      twitchLogin: "bamtol",
+      twitchDisplayName: "밤톨",
+      riotGameName: "밤톨",
+      riotTagLine: "KR1",
+      normalizedRiotId: "밤톨#kr1",
+      status: "approved",
+      accountRole: "main"
+    }]
+  };
+  let calls = 0;
+  const twitch = {
+    async getArchiveVideosByUserId() {
+      calls += 1;
+      const data = [{ id: "9001", created_at: VOD_START, duration: "3h", type: "archive" }];
+      return { state: "ready", status: 200, count: data.length, payload: { data } };
+    }
+  };
+
+  const afterApproval = await get(
+    handlerWith({ twitch, store, publicLolSnapshotStore }),
+    "/api/lol/profile?riotId=%EB%B0%A4%ED%86%A8%23KR1&platform=kr"
+  );
+  assert.equal(afterApproval.status, 200);
+  assert.equal(calls, 1, "복원 시 승인된 Twitch 채널의 아카이브를 조회해야 합니다");
+  assert.deepEqual(afterApproval.json.recentMatches[0]?.replay, {
+    vodId: "9001",
+    offsetSeconds: 3600 - 30
+  });
 });
 
 test("아카이브 조회가 실패해도 경기 목록은 살아 있다", async () => {

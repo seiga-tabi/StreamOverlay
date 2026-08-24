@@ -4622,6 +4622,29 @@ export function createHttpHandler(input: HttpHandlerInput) {
     });
   }
 
+  /**
+   * 디스크 스냅샷의 전적은 그대로 재사용하되 다시보기만 현재 등록 상태로 갱신합니다.
+   *
+   * 스트리머 승인 전 저장된 스냅샷에는 replay 가 없습니다. 승인 처리로 메모리 캐시를
+   * 비운 뒤 그 스냅샷을 그대로 복원하면 프로필을 새로 만들 때의 Twitch 결합 단계를
+   * 건너뛰므로, 승인된 스트리머인데도 다시보기 버튼이 계속 보이지 않게 됩니다.
+   * 반대로 등록이 해제된 뒤에는 예전 replay 를 남기지 않도록 먼저 제거하고 다시 계산합니다.
+   */
+  async function withFreshPublicLolSnapshotReplays(
+    response: PublicLolProfileResponse
+  ): Promise<PublicLolProfileResponse> {
+    if (!input.twitch || response.recentMatches.length === 0) return response;
+    const matchesWithoutReplays = response.recentMatches.map((match) => (
+      match.replay ? { ...match, replay: undefined } : match
+    ));
+    const recentMatches = await withPublicLolReplays(
+      matchesWithoutReplays,
+      response.gameName,
+      response.tagLine
+    );
+    return { ...response, recentMatches };
+  }
+
   async function buildPublicLolTwitchStream(gameName: string, tagLine: string): Promise<PublicLolTwitchStream | undefined> {
     const riotIdKey = normalizeRiotIdKey(gameName, tagLine);
     const candidates = new Map<string, PublicLolTwitchCandidate>();
@@ -7862,8 +7885,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
         const fetchedAtMs = Date.parse(snapshot.fetchedAt);
         const ageMs = Date.now() - fetchedAtMs;
         if (ageMs >= -5 * 60_000 && ageMs < PUBLIC_LOL_PROFILE_STALE_TTL_MS) {
+          const restoredResponse = await withFreshPublicLolSnapshotReplays(snapshot.payload);
           cached = {
-            response: snapshot.payload,
+            response: restoredResponse,
             expiresAt: fetchedAtMs + PUBLIC_LOL_PROFILE_CACHE_TTL_MS,
             staleUntil: fetchedAtMs + PUBLIC_LOL_PROFILE_STALE_TTL_MS
           };
