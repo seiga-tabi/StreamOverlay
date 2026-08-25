@@ -716,11 +716,11 @@ test("Palworld 상단바는 연결된 계정명과 Dashboard·로그아웃 메�
   assert.match(anonymous, />로그인</u);
 });
 
-test("Palworld 홈은 실제 경로의 기능 대시보드와 로그인 CTA가 있는 LIVE rail을 렌더한다", () => {
+test("Palworld 홈은 실제 경로의 기능 대시보드와 로그인 CTA가 있는 「지금 방송 중」을 렌더한다", () => {
   const html = renderToStaticMarkup(<PalworldHome
+    followedChannels={null}
     liveError={false}
     liveLoading={false}
-    liveStreamers={[]}
     locale="ko"
     onLiveRetry={() => undefined}
     onNavigate={() => undefined}
@@ -738,14 +738,18 @@ test("Palworld 홈은 실제 경로의 기능 대시보드와 로그인 CTA가 �
   assert.match(html, /href="\/ko\/palworld\/map"/u);
   assert.match(html, /href="\/ko\/palworld\/technology"/u);
   assert.doesNotMatch(html, /palworld-home-primary-card__arrow/u);
-  assert.match(html, /팔로우 중인 LIVE 스트리머/u);
-  assert.match(html, /Twitch 로그인 후 팔로우 중인 스트리머의 방송 상태를 확인할 수 있습니다/u);
-  assert.match(html, /data-testid="public-live-streamer-rail"/u);
+  /* 2026-08-25: LIVE 구획을 LoL 홈과 같은 HomeLiveSection 으로 교체(사용자 요청).
+     제목·빈 상태·로그인 CTA 문구가 homeI18n 단일 원본이 되고, 레거시 rail
+     (.public-game-home__live-strip / public-live-streamer-rail)은 팰월드 홈에서 사라집니다. */
+  assert.match(html, /지금 방송 중/u);
+  assert.match(html, /yoro-home-live-empty/u);
+  assert.match(html, /Twitch로 로그인/u);
+  assert.doesNotMatch(html, /data-testid="public-live-streamer-rail"/u);
+  assert.doesNotMatch(html, /public-game-home__live-strip/u);
   assert.match(html, /public-game-home__hero-grid public-game-home__hero-grid--centered/u);
-  assert.match(html, /public-game-home__live-strip/u);
   assert.ok(
-    html.indexOf("public-game-home__hero") < html.indexOf("public-game-home__live-strip")
-      && html.indexOf("public-game-home__live-strip") < html.indexOf("palworld-home-dashboard"),
+    html.indexOf("public-game-home__hero") < html.indexOf("yoro-home-live-empty")
+      && html.indexOf("yoro-home-live-empty") < html.indexOf("palworld-home-dashboard"),
   );
 });
 

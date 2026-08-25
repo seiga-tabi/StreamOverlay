@@ -58,7 +58,7 @@
   flex: none;
   place-items: center;
   inline-size: var(--yoro-size-touch-target);
-  color: var(--palworld-accent);
+  color: var(--home-ink);
   font-size: var(--yoro-font-size-xl);
 }
 
@@ -290,7 +290,7 @@
 }
 
 .palworld-page-heading > div > span {
-  color: var(--palworld-accent);
+  color: var(--home-ink);
   font-size: var(--yoro-font-size-xs);
   font-weight: var(--yoro-font-weight-black);
   letter-spacing: .14em;
@@ -2285,7 +2285,7 @@
   min-block-size: var(--yoro-size-touch-target);
   gap: var(--yoro-space-1);
   background: linear-gradient(145deg, var(--palworld-accent-soft), var(--palworld-sky-soft));
-  color: var(--palworld-accent);
+  color: var(--home-ink);
 }
 
 .palworld-media-fallback.is-item {
@@ -2739,7 +2739,7 @@
 
 .palworld-item-reference-copy strong {
   overflow: hidden;
-  color: var(--palworld-accent);
+  color: var(--home-ink);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -2901,7 +2901,7 @@
 }
 
 .palworld-breeding-combination-result .palworld-breeding-combination-copy strong {
-  color: var(--palworld-accent);
+  color: var(--home-ink);
 }
 
 .palworld-breeding-result .palworld-section-title {
@@ -3199,7 +3199,7 @@
 
 .palworld-breeding-empty-kicker {
   margin: var(--yoro-space-0);
-  color: var(--palworld-accent);
+  color: var(--home-ink);
   font-size: var(--yoro-font-size-xs);
   font-weight: var(--yoro-font-weight-black);
   letter-spacing: .08em;
@@ -3246,7 +3246,7 @@
   block-size: 2rem;
   border-radius: 50%;
   background: var(--palworld-accent-soft);
-  color: var(--palworld-accent);
+  color: var(--home-ink);
   font-size: var(--yoro-font-size-xs);
   font-weight: var(--yoro-font-weight-black);
 }
@@ -3318,7 +3318,7 @@
 
 .palworld-direct-parent-summary > span,
 .palworld-direct-result-connector {
-  color: var(--palworld-accent);
+  color: var(--home-ink);
   font-size: var(--yoro-font-size-xl);
   font-weight: var(--yoro-font-weight-black);
   text-align: center;
@@ -3476,7 +3476,7 @@
   border: thin solid color-mix(in srgb, var(--palworld-accent) 48%, transparent);
   border-radius: var(--yoro-radius-pill);
   background: var(--palworld-accent-soft);
-  color: var(--palworld-accent);
+  color: var(--home-ink);
   font-size: var(--yoro-font-size-lg);
 }
 
@@ -3703,7 +3703,7 @@
 .palworld-breeding-combination-symbol {
   display: grid;
   place-items: center;
-  color: var(--palworld-accent);
+  color: var(--home-ink);
   font-size: var(--yoro-font-size-xl);
   font-weight: var(--yoro-font-weight-black);
 }
@@ -3946,7 +3946,7 @@
 
 .palworld-condensation-work li > span {
   flex: 0 0 auto;
-  color: var(--palworld-accent);
+  color: var(--home-ink);
   font-variant-numeric: tabular-nums;
   font-weight: var(--yoro-font-weight-bold);
   white-space: nowrap;
@@ -4207,7 +4207,7 @@
 }
 
 .palworld-pal-location-kicker {
-  color: var(--palworld-accent);
+  color: var(--home-ink);
   font-size: var(--yoro-font-size-xs);
   font-weight: var(--yoro-font-weight-black);
   letter-spacing: .08em;
@@ -4552,7 +4552,7 @@
 }
 
 .palworld-pal-location-footer summary {
-  color: var(--palworld-accent);
+  color: var(--home-ink);
   cursor: pointer;
   font-weight: var(--yoro-font-weight-bold);
 }
@@ -4574,7 +4574,7 @@
   border: thin solid var(--yoro-color-border-strong);
   border-radius: 50%;
   background: var(--yoro-color-surface-strong);
-  color: var(--palworld-accent);
+  color: var(--home-ink);
   font-size: var(--yoro-font-size-xl);
 }
 
@@ -4804,7 +4804,7 @@
 }
 
 .palworld-detail-number {
-  color: var(--palworld-accent);
+  color: var(--home-ink);
   font-weight: var(--yoro-font-weight-black);
 }
 
@@ -5038,7 +5038,7 @@
   border: thin solid var(--yoro-color-border-strong);
   border-radius: var(--yoro-radius-pill);
   background: var(--yoro-color-surface-muted);
-  color: var(--palworld-accent);
+  color: var(--home-ink);
   cursor: pointer;
   font-weight: var(--yoro-font-weight-bold);
   overflow-wrap: anywhere;
@@ -5101,7 +5101,7 @@
 
 .palworld-footer a:hover,
 .palworld-footer a:focus-visible {
-  color: var(--palworld-accent);
+  color: var(--home-ink);
 }
 
 .palworld-sr-version {
@@ -6585,11 +6585,11 @@
 .palworld-shell .public-game-footer,
 .palworld-shell .public-game-footer a,
 .palworld-shell .public-game-footer .public-site-footer-nav a {
-  color: var(--yoro-color-text-on-dark-muted);
+  color: var(--home-sub);
 }
 
 .palworld-shell .public-game-footer a:hover {
-  color: var(--yoro-color-text-on-dark);
+  color: var(--home-ink);
 }
 
 /* 패널 헤더 상태 배지(검증된 데이터·일부 데이터) — tone 채움 위 tone 글자가
@@ -6598,10 +6598,10 @@
    수묵: 상태는 색이 아니라 글자가 말합니다. */
 .palworld-home-dashboard-panel__header,
 .palworld-home-release {
-  --yoro-color-success: var(--yoro-color-text-on-dark-muted);
+  --yoro-color-success: var(--home-sub);
   --yoro-color-success-bg: transparent;
-  --yoro-color-warning: var(--yoro-color-text-on-dark-muted);
+  --yoro-color-warning: var(--home-sub);
   --yoro-color-warning-bg: transparent;
-  --yoro-color-danger: var(--yoro-color-text-on-dark-muted);
+  --yoro-color-danger: var(--home-sub);
   --yoro-color-danger-bg: transparent;
 }

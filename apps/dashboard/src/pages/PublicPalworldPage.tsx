@@ -35,7 +35,6 @@ import {
   resetPalworldReleaseObservation,
 } from "../features/public-palworld/api/palworld";
 import { usePalworldRoute } from "../features/public-palworld/hooks/usePalworldRoute";
-import { palworldHomeLiveStreamerCards } from "../features/public-palworld/utils/streamers";
 import {
   isKnownPalworldPagePath,
   isPalworldEntityListPath,
@@ -158,10 +157,6 @@ export function PublicPalworldPage() {
     changeLocale(nextLocale);
   }, [changeLocale]);
 
-  const liveStreamers = useMemo(
-    () => palworldHomeLiveStreamerCards(followedChannels?.channels ?? [], locale),
-    [followedChannels, locale],
-  );
 
   const navigateSearch = useCallback((query: string) => {
     const normalized = query.trim();
@@ -263,7 +258,11 @@ export function PublicPalworldPage() {
 
   return (
     <AppShell
-      className={`public-lol-shell public-dashboard-shell palworld-shell theme-${theme}`}
+      /* 수묵 지면으로 이관(2026-08-25) — public-lol-shell·public-dashboard-shell 을 빼고
+         yoro-home-shell 로 갈아탑니다. palworld-shell 은 팰월드 전용 CSS 6,607줄이
+         걸려 있어 남깁니다. yoro-palworld-home 은 LoL 의 yoro-lol-home 과 같은
+         게임별 층입니다. */
+      className={`yoro-home-shell yoro-palworld-home palworld-shell theme-${theme}`}
       mainId="palworld-main"
       sidebarMode="drawer"
       skipLinkLabel={text.skipToContent}
@@ -295,9 +294,9 @@ export function PublicPalworldPage() {
         )}>
         {page === "home" ? (
           <PalworldHome
+            followedChannels={followedChannels}
             liveError={twitchError}
             liveLoading={twitchLoading}
-            liveStreamers={liveStreamers}
             locale={locale}
             onLiveRetry={() => void retryTwitch()}
             onNavigate={navigatePalworldHref}

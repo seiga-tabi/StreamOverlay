@@ -46,8 +46,14 @@ export class PalworldPageErrorBoundary extends Component<
       ? "ja"
       : "ko";
     const localized = text[locale];
+    /* 셸과 같은 수묵 지면·테마를 씁니다(2026-08-25). class 컴포넌트라 usePublicTheme 를
+       못 쓰므로, hook 이 써 두는 <html data-public-theme> 를 위 locale 과 같은 방식으로
+       읽습니다 — 테마 클래스가 없으면 오류 화면만 라이트에서 먹빛으로 남습니다. */
+    const theme = typeof document !== "undefined" && document.documentElement.dataset.publicTheme === "light"
+      ? "light"
+      : "dark";
     return (
-      <main className="public-lol-shell public-dashboard-shell palworld-shell" id="palworld-main">
+      <main className={`yoro-home-shell yoro-palworld-home palworld-shell theme-${theme}`} id="palworld-main">
         <EmptyState variant="error" role="alert">
           <EmptyStateIcon>!</EmptyStateIcon>
           <EmptyStateTitle data-ko={text.ko.title} data-ja={text.ja.title}>

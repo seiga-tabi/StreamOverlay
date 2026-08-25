@@ -1452,6 +1452,16 @@ async function assertHealthyDocument(page: Page, errors: string[]): Promise<void
   expect(errors, "console 또는 page runtime 오류가 없어야 합니다.").toEqual([]);
 }
 
+/* 2026-08-25: 팰월드 홈의 LIVE 구획을 LoL 홈과 같은 HomeLiveSection(.yoro-home-*)으로
+   통일했습니다(사용자 요청). 레거시 rail(PublicFollowedLiveRail / testid
+   public-live-streamer-rail)은 이제 어느 화면도 렌더하지 않습니다 — 카드 상한도
+   rail 의 무제한 가로 스크롤에서 격자 4장으로 바뀌었습니다. */
+function liveSection(page: Page) {
+  return page.locator(".yoro-home-section").filter({
+    has: page.locator(".yoro-home-live-grid, .yoro-home-live-empty"),
+  });
+}
+
 async function chooseGame(page: Page, game: "league" | "palworld"): Promise<void> {
   const optionName = game === "league" ? "리그 오브 레전드 선택" : "Palworld 선택";
   if ((page.viewportSize()?.width ?? 1440) <= 768) {
@@ -1566,65 +1576,61 @@ test("LoL·Palworld LIVE rail은 PC 다중 카드·이동 버튼·모바일 터�
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/palworld");
 
-  const rail = page.getByTestId("public-live-streamer-rail");
-  await expect(rail.locator(".public-home-live-card")).toHaveCount(8);
-  const cardMetrics = await rail.evaluate((element) => {
-    const cards = Array.from(element.querySelectorAll<HTMLElement>(".public-home-live-card"));
-    const railRect = element.getBoundingClientRect();
-    const gap = Number.parseFloat(getComputedStyle(element).columnGap);
+  const grid = liveSection(page).locator(".yoro-home-live-grid");
+  /* HomeLiveSection 은 라이브 채널을 4장까지만 격자로 보여 줍니다(slice(0, 4)) —
+     8명을 넣어도 4장입니다. 가로 스크롤 rail 과 이동 버튼은 없어졌습니다. */
+  await expect(grid.locator(".yoro-home-live-card")).toHaveCount(4);
+  const cardMetrics = await grid.evaluate((element) => {
+    const cards = Array.from(element.querySelectorAll<HTMLElement>(".yoro-home-live-card"));
+    const gridRect = element.getBoundingClientRect();
     return {
       cardWidth: cards[0]?.getBoundingClientRect().width ?? 0,
-      railWidth: railRect.width,
-      thirdCardStartsInside: (cards[2]?.getBoundingClientRect().left ?? railRect.right) < railRect.right - 1,
+      gridWidth: gridRect.width,
+      allCardsInside: cards.every((card) => card.getBoundingClientRect().right <= gridRect.right + 1),
+      hasHorizontalOverflow: element.scrollWidth > element.clientWidth + 1,
     };
   });
-  expect(cardMetrics.cardWidth).toBeLessThan(cardMetrics.railWidth / 2);
-  expect(cardMetrics.thirdCardStartsInside).toBe(true);
-
-  const nextButton = page.getByRole("button", { name: "다음 LIVE 스트리머 보기" });
-  await expect(nextButton).toBeVisible();
-  const initialScrollLeft = await rail.evaluate((element) => element.scrollLeft);
-  await nextButton.click();
-  await expect.poll(() => rail.evaluate((element) => element.scrollLeft)).toBeGreaterThan(initialScrollLeft);
-  await expect(page.getByRole("button", { name: "이전 LIVE 스트리머 보기" })).toBeVisible();
+  expect(cardMetrics.cardWidth).toBeLessThan(cardMetrics.gridWidth / 2);
+  expect(cardMetrics.allCardsInside).toBe(true);
+  expect(cardMetrics.hasHorizontalOverflow).toBe(false);
+  await expect(page.getByRole("button", { name: "다음 LIVE 스트리머 보기" })).toHaveCount(0);
 
   await chooseGame(page, "league");
   /* LoL 홈의 주소는 /lol 입니다 — 루트는 서버가 그리로 넘깁니다. */
   await expect(page).toHaveURL(/\/lol$/u);
-  const lolRail = page.getByTestId("public-live-streamer-rail");
-  await expect(lolRail.locator(".public-home-live-card")).toHaveCount(8);
-  await expect(lolRail.locator(".public-home-live-preview")).toHaveCount(8);
-  const lolCardMetrics = await lolRail.evaluate((element) => {
-    const firstCard = element.querySelector<HTMLElement>(".public-home-live-card");
-    const preview = firstCard?.querySelector<HTMLElement>(".public-home-live-preview");
-    const livePill = firstCard?.querySelector<HTMLElement>(".public-home-live-pill");
-    const title = firstCard?.querySelector<HTMLElement>("strong");
-    const description = firstCard?.querySelector<HTMLElement>("small");
+  const lolGrid = liveSection(page).locator(".yoro-home-live-grid");
+  await expect(lolGrid.locator(".yoro-home-live-card")).toHaveCount(4);
+  await expect(lolGrid.locator(".yoro-home-live-thumb")).toHaveCount(4);
+  const lolCardMetrics = await lolGrid.evaluate((element) => {
+    const firstCard = element.querySelector<HTMLElement>(".yoro-home-live-card");
+    const preview = firstCard?.querySelector<HTMLElement>(".yoro-home-live-thumb");
+    const livePill = firstCard?.querySelector<HTMLElement>(".yoro-home-live-badge");
+    const title = firstCard?.querySelector<HTMLElement>(".yoro-home-live-name");
+    const description = firstCard?.querySelector<HTMLElement>(".yoro-home-live-game");
     return {
       cardWidth: firstCard?.getBoundingClientRect().width ?? 0,
       cardHeight: firstCard?.getBoundingClientRect().height ?? 0,
       contentFits: (firstCard?.scrollHeight ?? 0) <= (firstCard?.clientHeight ?? 0) + 1,
       livePillClearsPreview: Boolean(livePill && preview && livePill.getBoundingClientRect().bottom <= preview.getBoundingClientRect().top),
       previewRatio: preview ? preview.getBoundingClientRect().width / preview.getBoundingClientRect().height : 0,
-      railWidth: element.getBoundingClientRect().width,
+      gridWidth: element.getBoundingClientRect().width,
       titleColor: title ? getComputedStyle(title).color : "",
       descriptionColor: description ? getComputedStyle(description).color : "",
     };
   });
   expect(lolCardMetrics.cardHeight).toBeGreaterThan(0);
-  expect(lolCardMetrics.cardWidth).toBeLessThan(lolCardMetrics.railWidth / 2);
+  expect(lolCardMetrics.cardWidth).toBeLessThan(lolCardMetrics.gridWidth / 2);
   expect(lolCardMetrics.contentFits).toBe(true);
-  expect(lolCardMetrics.livePillClearsPreview).toBe(true);
+  /* 수묵 카드의 LIVE 배지는 썸네일 「위에 겹쳐」 놓입니다(rail 은 분리 배치였습니다). */
+  expect(lolCardMetrics.livePillClearsPreview).toBe(false);
   expect(Math.abs(lolCardMetrics.previewRatio - (16 / 9))).toBeLessThan(0.02);
   expect(lolCardMetrics.titleColor).not.toBe("rgba(0, 0, 0, 0)");
   expect(lolCardMetrics.descriptionColor).not.toBe("rgba(0, 0, 0, 0)");
   expect(lolCardMetrics.titleColor).not.toBe(lolCardMetrics.descriptionColor);
-  const lolNextButton = page.getByRole("button", { name: "다음 LIVE 스트리머 보기" });
-  await expect(lolNextButton).toBeVisible();
+  await expect(page.getByRole("button", { name: "다음 LIVE 스트리머 보기" })).toHaveCount(0);
 
   await page.setViewportSize({ width: 390, height: 844 });
-  await expect(lolNextButton).toBeHidden();
-  const mobileMetrics = await lolRail.evaluate((element) => {
+  const mobileMetrics = await lolGrid.evaluate((element) => {
     const style = getComputedStyle(element);
     return {
       hasHorizontalOverflow: element.scrollWidth > element.clientWidth,
@@ -1633,12 +1639,8 @@ test("LoL·Palworld LIVE rail은 PC 다중 카드·이동 버튼·모바일 터�
       touchAction: style.touchAction,
     };
   });
-  expect(mobileMetrics).toMatchObject({
-    hasHorizontalOverflow: true,
-    overflowX: "auto",
-    scrollSnapType: "inline mandatory",
-    touchAction: "pan-x pan-y",
-  });
+  /* 모바일에서도 격자입니다 — 가로 스크롤 스냅 rail 이 아닙니다. */
+  expect(mobileMetrics.hasHorizontalOverflow).toBe(false);
 });
 
 test("LoL 홈 연관 검색은 Hero와 LIVE 영역보다 위에서 포인터 입력을 받는다", async ({ page }) => {
@@ -1701,9 +1703,9 @@ test("팰월드 홈은 Hero 검색과 Twitch 로그인 LIVE rail만 표시하고
     await expect(page.getByTestId("palworld-secondary-nav").getByRole("button", { name: "홈" })).toHaveAttribute("aria-current", "page");
   }
   await expect(page.locator(".palworld-hero-meta, .palworld-shortcuts, .palworld-summary")).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: "팔로우 중인 LIVE 스트리머" })).toBeVisible();
-  await expect(page.getByText("Twitch 로그인 후 팔로우 중인 스트리머의 방송 상태를 확인할 수 있습니다.")).toBeVisible();
-  await expect(page.getByTestId("public-live-streamer-rail").getByRole("button", { name: "Twitch 로그인" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "지금 방송 중" })).toBeVisible();
+  await expect(page.getByText("Twitch로 로그인하면 팔로우한 스트리머의 방송이 여기에 표시됩니다.")).toBeVisible();
+  await expect(liveSection(page).getByRole("button", { name: "Twitch로 로그인" })).toBeVisible();
   if (usesMobilePublicMenu(page)) {
     /* 모바일 주 메뉴 = 하단 탭바 5칸(핵심 4 + 더보기). 나머지 3개는 더보기 시트. */
     await expect(page.getByTestId("palworld-bottom-tab-bar").getByRole("button")).toHaveCount(5);
@@ -1795,9 +1797,9 @@ test("LoL의 공개 Twitch session은 Palworld 프로필과 홈 LIVE 목록에 �
     await page.keyboard.press("Escape");
     await expect(page.getByRole("menu", { name: "계정 메뉴" })).toHaveCount(0);
   }
-  await expect(page.getByTestId("public-live-streamer-rail").getByText("Live Pal", { exact: true })).toBeVisible();
-  await expect(page.getByTestId("public-live-streamer-rail").getByText("Offline Pal", { exact: true })).toHaveCount(0);
-  await expect(page.getByTestId("public-live-streamer-rail").getByText("중복 Live Pal", { exact: true })).toHaveCount(0);
+  await expect(liveSection(page).locator(".yoro-home-live-name").getByText("Live Pal", { exact: true })).toBeVisible();
+  await expect(liveSection(page).getByText("Offline Pal", { exact: true })).toHaveCount(0);
+  await expect(liveSection(page).getByText("중복 Live Pal", { exact: true })).toHaveCount(0);
 
   await expect(page.getByText(/Riot ID|랭크|전적 보기/u)).toHaveCount(0);
   await expect(page.getByRole("button", { name: "전체 보기" })).toHaveCount(0);
@@ -1823,7 +1825,7 @@ test("Palworld 하위 데이터 페이지는 Twitch 상태만 조회하고 홈 �
   await homeNav.click();
   await expect(page).toHaveURL(/\/palworld$/u);
   await expect.poll(() => fixture.followedRequestCount()).toBe(1);
-  await expect(page.getByTestId("public-live-streamer-rail").getByText("Live Pal", { exact: true })).toBeVisible();
+  await expect(liveSection(page).locator(".yoro-home-live-name").getByText("Live Pal", { exact: true })).toBeVisible();
 });
 
 test("Twitch 상태 API 오류는 미설정으로 오표시하지 않고 Palworld 홈 검색과 분리된다", async ({ page }) => {
@@ -1831,7 +1833,7 @@ test("Twitch 상태 API 오류는 미설정으로 오표시하지 않고 Palworl
     await route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: "unavailable" }) });
   });
   await page.goto("/palworld");
-  await expect(page.getByTestId("public-live-streamer-rail").getByRole("alert")).toContainText("Twitch 방송 상태를 불러오지 못했습니다.");
+  await expect(liveSection(page).getByRole("alert")).toContainText("Twitch 방송 상태를 불러오지 못했습니다.");
   await expect(page.getByText("Twitch 기능이 설정되지 않았습니다.")).toHaveCount(0);
   const search = page.getByTestId("hero-search").getByRole("searchbox");
   await search.fill("펭킹");
@@ -1845,7 +1847,7 @@ test("Twitch 팔로우 API 오류가 발생해도 Palworld 홈 검색은 계속 
     await route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: "unavailable" }) });
   });
   await page.goto("/palworld");
-  await expect(page.getByTestId("public-live-streamer-rail").getByRole("alert")).toContainText("Twitch 방송 상태를 불러오지 못했습니다.");
+  await expect(liveSection(page).getByRole("alert")).toContainText("Twitch 방송 상태를 불러오지 못했습니다.");
   const search = page.getByTestId("hero-search").getByRole("searchbox");
   await search.fill("펭킹");
   const option = page.getByTestId("hero-search").getByRole("option", { name: /펭킹/u });
@@ -4261,7 +4263,7 @@ for (const viewport of publicChromeResponsiveViewports) {
       );
       expect(productToolsOverlap, `${viewport.width}px에서 게임 선택과 헤더 도구가 겹치지 않아야 합니다.`).toBe(false);
     }
-    await expect(page.getByTestId("public-live-streamer-rail").locator(".public-home-live-card")).toHaveCount(1);
+    await expect(liveSection(page).locator(".yoro-home-live-card")).toHaveCount(1);
     await assertHealthyDocument(page, errors);
 
     /* 모바일(≤48rem)에서는 상단 가로 nav 가 하단 고정 탭바로 대체됩니다

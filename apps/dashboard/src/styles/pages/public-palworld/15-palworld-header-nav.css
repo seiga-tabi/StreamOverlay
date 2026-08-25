@@ -49,7 +49,7 @@
     border: 0;
     border-radius: var(--yoro-radius-md);
     background: transparent;
-    color: var(--yoro-color-text-on-dark);
+    color: var(--home-ink);
     font-size: var(--yoro-font-size-sm);
     text-align: left;
     cursor: pointer;
@@ -58,7 +58,7 @@
   .palworld-more-menu__item .public-header-menu-icon {
     inline-size: var(--yoro-space-4);
     block-size: var(--yoro-space-4);
-    color: var(--yoro-color-text-on-dark-muted);
+    color: var(--home-sub);
   }
 
   .palworld-more-menu__item:hover {

@@ -2,10 +2,12 @@
    히어로부터 하단 기능 카드까지를 하나의 다크 지면으로 잇습니다.
    아래 --public-home-* 값을 설정한 shell 안에서만 다크로 전환되고,
    설정하지 않은 화면은 각 사용처의 var() fallback인 기존 라이트 값을 씁니다.
-   팰월드 셸은 지면이 다크로 전환되어(02-legacy.css) 같은 토큰을 공유합니다 —
-   라이트 fallback 이 남으면 LIVE 스트립·로그인 카드가 흰 카드로 뜹니다. */
-.public-home-shared-shell,
-.palworld-shell {
+   팰월드는 수묵 지면(yoro-home-shell)으로 옮겼습니다(2026-08-25) — 이 레거시
+   지면의 소비자는 이제 LoL 검색 빈 화면 하나입니다(PublicLolPage.tsx:7703).
+   여기 있던 .palworld-shell 을 뺍니다: --public-home-* 는 테마와 무관한 고정
+   다크라, 팰월드 라이트에서 카드가 먹빛(#252730)으로 남아 42곳이 1.13:1 이
+   됐습니다(실측). 팰월드 지면·표면은 16-palworld-ink.css 가 --home-* 로 줍니다. */
+.public-home-shared-shell {
   --public-home-ground: var(--yoro-color-ground);
   --public-home-panel: var(--yoro-color-ground-surface);
   --public-home-panel-raised: var(--yoro-color-ground-raised);
@@ -2010,17 +2012,12 @@
    /lol 검색 랜딩이 함께 쓰므로 스코프 없는 수정 금지(§1-1). 라이트는 이번
    범위 밖(팰월드 라우트에 라이트 자체가 아직 없음 — §2). */
 
-/* ── 셸: 색 글로우 제거(§3-3-1) — 홈 화면에서만. 지면은 reset.css 가 body 에
-   깐 먹(#1c1d22)을 그대로 쓰므로 다시 칠하지 않습니다(--yoro-color-bg 는
-   라이트 근백색이라 쓰면 안 됩니다 — 후속 §2-4 실측). */
-.palworld-shell:has(.palworld-main[data-page-frame="home"]) {
-  /* AppShell.css(비레이어)가 .yoro-app-shell 에 var(--yoro-color-bg)(라이트
-     근백색)를 칠합니다 — 레이어로는 못 이기므로 변수 자체를 투명으로 스왑해
-     body 의 먹(#1c1d22, reset.css)이 그대로 비치게 합니다. */
-  --yoro-color-bg: transparent;
-
-  background: transparent;
-}
+/* ── 셸 지면 규칙은 제거했습니다(2026-08-25, 수묵 지면 이관).
+   여기서 --yoro-color-bg 를 transparent 로 스왑해 body 의 먹(reset.css)이
+   비치게 하던 규칙이 있었는데, 팰월드가 yoro-home-shell 로 옮겨간 뒤에는
+   라이트에서 지면이 먹빛으로 남아 표제가 안 보이는 원인이 됩니다(실측).
+   같은 비레이어 AppShell 문제는 16-palworld-ink.css 가 --yoro-color-bg 를
+   var(--home-bg) 로 스왑해 테마를 따라가게 처리합니다. */
 
 /* ── §3-1 히어로 정렬을 좌측 96px 비대칭 축으로. 카드 표현(24px 모서리·
    지면색 채움)도 함께 걷습니다 — /ko/lol 처럼 「카드」가 아니라 지면 위 글
@@ -2128,9 +2125,11 @@
   min-block-size: 48px;
   border: 0;
   border-radius: 2px;
-  /* 반전 칩 — 밝은 지면에 먹글자(목업). */
-  background: var(--yoro-color-text-on-dark);
-  color: var(--yoro-color-ground);
+  /* 반전 칩 — 지면을 뒤집어 먹/백을 맞바꿉니다(목업).
+     2026-08-25: 다크 고정 토큰(text-on-dark/ground)에서 이크의 반전 짝으로
+     바꿨습니다 — 라이트에서 먹 채움 위 먹 글자가 돼 1.07:1 이었습니다(실측). */
+  background: var(--home-inv-bg);
+  color: var(--home-inv-ink);
   font-weight: 700;
 }
 

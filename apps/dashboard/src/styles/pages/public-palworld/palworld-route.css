@@ -9,3 +9,6 @@
 @import "./14-palworld.css" layer(legacy);
 /* 상단바 리디자인: 태블릿 nav 보정 + 하단 탭바 더보기 시트. pages layer 소유. */
 @import "./15-palworld-header-nav.css";
+/* 수묵 지면 이관 접합층(2026-08-25). 자체 @layer home 선언이라 import 위치는
+   캐스케이드에 영향이 없고, legacy 의 14-palworld.css 를 이깁니다. */
+@import "./16-palworld-ink.css";

@@ -1,0 +1,249 @@
+/* 팰월드 — 수묵 지면(yoro-home-shell) 이관 접합층 (목업 page-9, 2026-08-25).
+ *
+ * LoL 의 02-lol-home.css 와 같은 게임별 층입니다: 지면·토큰·타이포는
+ * 01-public-home.css 가 소유하고, 여기에는 팰월드에만 필요한 접합만 둡니다.
+ * layer 는 home — legacy 의 14-palworld.css 를 이길 수 있어야 합니다.
+ */
+@layer home {
+  /* AppShell.css 의 `.yoro-app-shell` 은 레이어 밖이라 font-family·background·color
+     세 줄이 모든 레이어를 이깁니다. 메인 홈·LoL 홈은 평범한 div 를 쓰기 때문에 이
+     충돌이 없지만, 팰월드는 AppShell 을 씁니다 — 그래서 셸 클래스만 갈아서는
+     본문이 Inter 로, 글자가 라이트 남색으로 남습니다(실측).
+     레이어로는 못 이기므로 그 세 줄이 읽는 토큰 자체를 이 셸에서 수묵 값으로
+     바꿉니다. public-game-home.css:2016 이 홈 화면 한 곳에 쓰던 수법을 셸 전체로
+     넓힌 것입니다(같은 파일이 그 이유를 주석으로 남겨 두었습니다). */
+  .yoro-palworld-home {
+    /* 01-public-home.css:57 과 같은 스택 — 지면이 소유한 값이라 여기서는 토큰만
+       갈아 끼웁니다(:lang(ja) 는 아래에서 :117 과 같은 짝으로). */
+    --yoro-font-family-base:
+      Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+    --yoro-color-bg: var(--home-bg);
+    --yoro-color-text: var(--home-ink);
+  }
+
+  .yoro-palworld-home:lang(ja) {
+    --yoro-font-family-base:
+      "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", system-ui, sans-serif;
+  }
+
+  /* ── 색 토큰 이관(§3-3) ────────────────────────────────────────
+     팰월드 CSS 6,607줄은 전역 --yoro-color-* (라이트 고정 팔레트)로 쓰여 있어,
+     지면만 먹으로 바뀌자 표면이 따라오지 않았습니다 — 다크 도감에서 흰 카드 위
+     흰 글자 100건, 지도 14건(실측). 호출부 330여 곳을 각각 고치는 대신 셸
+     스코프에서 토큰을 갈아 끼웁니다: 한 곳에서 검토·되돌리기가 되고, 라이트도
+     같은 스왑 하나로 따라옵니다.
+     맥락은 균일합니다 — text-* 는 62/62·52/52 가 전부 `color:`, surface-* 는
+     전부 `background:`, border 는 전부 테두리(실측). 그래서 토큰 단위 매핑이
+     자리별 판단과 어긋나지 않습니다. 유일한 판단은 보조 글자의 sub/mid 인데,
+     라이트에서는 두 값이 같고(#5F6E80) 다크에서만 갈립니다 — 이크 지면 자신이
+     라벨·단위에 mid(28곳)를, 설명문에 sub(18곳)를 쓰므로 기본을 mid 로 두고
+     카드 설명문만 아래에서 sub 로 올립니다. */
+  .yoro-palworld-home {
+    /* 글자 */
+    --yoro-color-text: var(--home-ink);
+    --yoro-color-text-strong: var(--home-ink);
+    --yoro-color-text-muted: var(--home-mid);
+    /* --yoro-color-text-on-dark(-muted) 는 매핑하지 않습니다. 팰월드에서 이 토큰의
+       사용처는 대부분 초록 채움 위 백색 글자(§4-A, 4.64:1)와 지도 핀의 흰 테두리라
+       두 테마 모두 밝아야 합니다 — --home-ink 로 접으면 라이트에서 채움 위 글자가
+       먹빛이 돼 사라집니다. 지면 위 글자였던 푸터·내비 몇 곳만 호출부에서 바꿉니다. */
+
+    /* 표면 — 수묵은 평면입니다. 층은 명도가 아니라 헤어라인이 나눕니다. */
+    --yoro-color-surface: var(--home-card);
+    --yoro-color-surface-strong: var(--home-card);
+    --yoro-color-surface-muted: var(--home-card);
+    /* 이름은 지면이지만 팰월드에서는 5곳 전부 `color:` 입니다(#AEBACC — 먹 지면용
+       보조 글자). 지면으로 매핑하면 글자가 배경과 같아져 1.0:1 이 됩니다(실측). */
+    --yoro-color-ground-muted: var(--home-sub);
+
+    /* 선 — 기본은 line, 강조는 stroke(이크 지면이 쓰는 두 단계). */
+    --yoro-color-border: var(--home-line);
+    --yoro-color-border-on-dark: var(--home-line);
+    --yoro-color-border-strong: var(--home-stroke);
+
+    /* 톤 틴트 — 전역 값은 라이트 고정 틴트라, 위에서 표면을 먹으로 바꾸자
+       color-mix() 로 이 틴트를 섞는 자리(희소도 칩 20여 곳)가 진흙이 됐습니다
+       (다크 실측 1.22~1.72:1). 틴트를 지면에서 다시 만들어 테마를 따라가게 합니다. */
+    --yoro-color-success-bg: color-mix(in srgb, var(--yoro-color-success) 16%, var(--home-card));
+    --yoro-color-info-bg: color-mix(in srgb, var(--yoro-color-info) 16%, var(--home-card));
+    --yoro-color-warning-bg: color-mix(in srgb, var(--yoro-color-warning) 16%, var(--home-card));
+    --yoro-color-danger-bg: color-mix(in srgb, var(--yoro-color-danger) 16%, var(--home-card));
+
+    /* ── 레거시 지면 분리 뒤처리(§3-4) ─────────────────────────────
+       public-game-home.css 의 토큰 선택자에서 .palworld-shell 을 뺐지만, 같은
+       파일에 팰월드 스코프 규칙이 191곳 남아 --public-home-* 를 계속 참조합니다.
+       토큰이 없어지면 각 사용처의 var() fallback(= 기존 라이트 값)으로 떨어져
+       다크에서 카드가 흰색이 됩니다(실측 42곳 1.08:1). 이크 값으로 이어 줍니다 —
+       이제 테마를 따라갑니다(그 파일의 고정 다크와 달리). */
+    --public-home-ground: var(--home-bg);
+    --public-home-panel: var(--home-card);
+    --public-home-panel-raised: var(--home-card);
+    --public-home-panel-border: var(--home-line);
+    --public-home-panel-border-strong: var(--home-stroke);
+    --public-home-text: var(--home-ink);
+    --public-home-text-muted: var(--home-mid);
+
+    /* 공용 EmptyState·푸터는 레이어 밖이라 토큰으로만 닿습니다. */
+    --yoro-empty-state-surface: var(--home-card);
+    --yoro-empty-state-background: var(--home-card);
+    --yoro-empty-state-border: var(--home-line);
+    --yoro-empty-state-text: var(--home-ink);
+    --yoro-empty-state-title: var(--home-ink);
+    --yoro-empty-state-description: var(--home-sub);
+    --yoro-empty-state-icon-background: var(--home-bg);
+    --yoro-app-shell-footer-background: var(--home-bg);
+    --yoro-app-shell-footer-border: var(--home-line);
+
+    /* 푸터 로고는 public-game-chrome.css:495 가 이 고정 토큰(먹 지면용 밝은 회색)을
+       씁니다 — 라이트 백자 위에서 1.03:1 이었습니다(실측). */
+    --yoro-color-product-gray-text: var(--home-ink);
+    --yoro-color-product-gray-surface-strong: var(--home-card);
+  }
+
+  /* §4 결정 A — 초록은 팰월드의 단 하나뿐인 강조색으로 남기되 채움·선 전용입니다.
+     실측: --yoro-color-success(#167E60)는 다크 카드 위 2.97:1 · 다크 지면 3.35:1 로
+     글자로 못 씁니다(라이트는 5.02/4.64 로 되지만 테마마다 규칙이 갈리면 지킬 수
+     없습니다). 새 hex 추가가 금지돼 다크용 밝은 초록을 만들 수도 없습니다.
+     채움 위 백색 글자는 4.64:1 로 두 테마 공통으로 성립합니다.
+     그래서 희소도·상태 칩의 글자는 tone 색이 아니라 먹이 말합니다. */
+  .yoro-palworld-home .palworld-item-card__rarity,
+  .yoro-palworld-home .palworld-technology-card__rarity,
+  .yoro-palworld-home [class*="rarity"] > .yoro-status__label,
+  .yoro-palworld-home .yoro-status__label {
+    color: var(--home-ink);
+  }
+
+  /* 팰월드 홈 본문은 이크 지면 위의 「글」입니다. 공용 히어로·기능 카드가 쓰는
+     --yoro-color-text-on-dark 는 다크 전제라, 라이트에서 52곳이 1.03:1 이 됐습니다
+     (실측). 히어로 클래스(.public-game-home__*)는 /lol 검색 랜딩과 공용이므로
+     스코프 없는 수정이 금지돼 있어(§3-4) 팰월드 안에서만 토큰을 바꿉니다.
+     초록 채움 버튼(.palworld-search-submit)은 이 스코프 밖이라 백색 글자를
+     그대로 유지합니다(§4-A, 4.64:1). */
+  .yoro-palworld-home .public-game-home__copy,
+  .yoro-palworld-home .public-game-home__section-header,
+  .yoro-palworld-home .public-game-home__feature-copy,
+  .yoro-palworld-home [class^="palworld-home-"],
+  .yoro-palworld-home [class*=" palworld-home-"] {
+    --yoro-color-text-on-dark: var(--home-ink);
+    --yoro-color-text-on-dark-muted: var(--home-sub);
+  }
+
+  /* ── 반지름(§3-3) ───────────────────────────────────────────────
+     수묵의 모서리는 세 가지뿐입니다 — 카드 3px · 칩 2px · 원형 99px
+     (01-public-home.css 실측: 3px 10곳 · 2px 9곳 · 99px 3곳).
+     팰월드는 6~24px 스케일을 83곳에서 씁니다. 자리마다 새로 정하는 대신 기존
+     스케일 축을 그대로 씁니다 — xs·sm(6·8px)은 작은 조작, md·lg·xl(12·16·24px)은
+     표면이라, 그 구분이 이미 칩/카드 구분입니다. 어긋나는 자리만 아래에서 잡습니다.
+     pill·circle 은 원형이라 건드리지 않습니다. */
+  .yoro-palworld-home {
+    --yoro-radius-xs: 2px;
+    --yoro-radius-sm: 2px;
+    --yoro-radius-md: 3px;
+    --yoro-radius-lg: 3px;
+    --yoro-radius-xl: 3px;
+  }
+
+  /* 표면 스케일을 쓰지만 실제로는 칩·버튼인 자리 — 2px 로 내립니다.
+     (팝오버·툴팁·미디어 프레임·컨트롤 묶음은 표면이라 3px 그대로 둡니다.) */
+  .yoro-palworld-home :is(
+    .palworld-autocomplete > button,
+    .palworld-picker-list > button,
+    .palworld-map-period-filter button,
+    .palworld-map-world-switcher button,
+    .palworld-map-wheel-hint,
+    .palworld-pal-filter-option,
+    .palworld-item-reference-button,
+    .palworld-selected-pal-button,
+    .palworld-breeding-pal-button:not(.is-hero)
+  ) {
+    border-radius: 2px;
+  }
+
+  /* ── 목업 골격(§3-5) ─────────────────────────────────────────────
+     기준: page-9 PalworldHomeInk(다크)·InkLight·InkMobile 실측.
+     1440 기준 구획 padding 0 96px → 내용 1248, 주요 기능 : 빠른 탐색 = 1.55 : 1,
+     gap 14 → 750.1 / 483.9. 패널 padding 22px 26px → 카드 격자 698.1, gap 12 →
+     카드 224.7. 목업의 클래스 이름(.panel·.cards)은 가져오지 않고 값만 옮깁니다.
+     간격·크기 토큰 체계는 그대로 두고(§3-3) 이 골격 수치만 직접 씁니다 —
+     96·14·22·26·224.7 은 토큰 스케일에 없는 목업 고유 값입니다. */
+  .yoro-palworld-home .palworld-home-content {
+    padding-inline: 96px;
+  }
+
+  /* 「지금 방송 중」은 LoL 홈과 같은 HomeLiveSection(.yoro-home-section)인데, 그 구획은
+     자기 인셋 96px 을 이미 갖습니다. 위 컨테이너 인셋과 겹치면 192px 이 되어 상자가
+     LoL(1421px) 보다 173px 좁아졌습니다(실측 1248). 여기서는 컨테이너가 인셋을
+     맡으므로 구획의 좌우만 0 으로 돌립니다 — 위 여백(56px)은 그대로입니다. */
+  .yoro-palworld-home .palworld-home-content > .yoro-home-section {
+    padding-inline: 0;
+  }
+
+  .yoro-palworld-home .palworld-home-dashboard-main {
+    grid-template-columns: 1.55fr 1fr;
+    gap: 14px;
+  }
+
+  .yoro-palworld-home .palworld-home-primary-features,
+  .yoro-palworld-home .palworld-home-quick-explore,
+  .yoro-palworld-home .palworld-home-dashboard-panel {
+    padding: 22px 26px;
+  }
+
+  /* 카드 안쪽 — 지표 줄이 카드 바닥에 붙으므로 아래 패딩은 0 입니다. */
+  .yoro-palworld-home .palworld-home-primary-card__copy {
+    padding: 14px 14px 0;
+  }
+
+  .yoro-palworld-home .palworld-home-primary-card__copy > strong {
+    font-size: 14px;
+    font-weight: 800;
+  }
+
+  .yoro-palworld-home .palworld-home-primary-card__copy > small {
+    font-size: 11px;
+    line-height: 1.6;
+  }
+
+  .yoro-palworld-home .palworld-home-primary-card__metric {
+    padding: 10px 14px;
+  }
+
+  /* 모바일(InkMobile 390)에서는 인셋을 지면 여백으로 되돌립니다 — 96px 을 두면
+     카드가 198px 로 줄어 목업의 한 장 폭이 무너집니다. */
+  @media (max-width: 63.9375rem) {
+    .yoro-palworld-home .palworld-home-content {
+      padding-inline: var(--yoro-space-3);
+    }
+
+    .yoro-palworld-home .palworld-home-dashboard-main {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  /* 대시보드 패널·빠른 검색·LIVE 구획은 --yoro-color-product-gray-field-text
+     (고정 먹 #212529)를 「표면」으로 씁니다 — 이름은 글자색이지만 실제 용도가
+     배경입니다(이전 다크 전용 이크 작업의 잔재, public-game-home.css 10곳).
+     테마를 안 따라가서 라이트에서 패널이 통째로 먹빛이 되고 그 위 먹 글자가
+     안 읽혔습니다. 그 세 구획 안에서만 이크 카드로 잇습니다 — 히어로 검색 필드는
+     같은 토큰을 진짜 글자색으로 쓰므로 스코프에서 뺍니다. */
+  .yoro-palworld-home :is(
+    .palworld-home-dashboard,
+    .palworld-home-quick-search,
+    .public-game-home__live
+  ) {
+    --yoro-color-product-gray-field-text: var(--home-card);
+  }
+
+  /* 공용 버튼(.yoro-button)은 --yoro-color-primary(#7AA9FF)·secondary(#B59EFF)를
+     채움으로 쓰고 그 위에 --yoro-color-text-strong 을 얹습니다 — 새 지면에서
+     2.17:1 · 2.09:1 이고 도감에서만 29곳입니다(실측).
+     Button.css 는 레이어 밖이라 규칙으로는 못 이깁니다(.yoro-app-shell 과 같은 함정) —
+     그래서 그 두 줄이 읽는 토큰을 이 셸에서 갈아 끼웁니다. 채움을 헤어라인 색으로
+     내리면 먹 글자가 다크 9:1 · 라이트 15:1 로 읽히고, 테두리도 같은 토큰이라
+     경계가 살아납니다. 수묵은 원색 채움이 아니라 농담과 선으로 층을 만듭니다.
+     초록 채움 하나(.palworld-search-submit)는 .yoro-button 이 아니라 그대로입니다. */
+  .yoro-palworld-home {
+    --yoro-color-primary: var(--home-line);
+    --yoro-color-secondary: var(--home-line);
+  }
+}

@@ -243,7 +243,11 @@ function QuickExploreVisual({ children }: { children: ReactNode }) {
 }
 
 function formatMetric(locale: PalworldLocale, count: number, unit: "items" | "pairs" | "worlds"): string {
-  const formatted = count.toLocaleString(locale === "ja" ? "ja-JP" : "ko-KR");
+  const formatted = count.toLocaleString(locale === "ja" ? "ja-JP" : locale === "en" ? "en-US" : "ko-KR");
+  /* 영어는 수량 첨자를 쓰지 않습니다(목업 page-9 PalworldHomeInkI18n 의 영어 카드는
+     숫자만입니다). 이 분기가 없으면 en 이 아래 한국어 갈래로 흘러 「287종」·「2개 월드」가
+     영어 화면에 나옵니다 — 기존 i18n 도 filterOptionCount 를 en 에서 "{count}" 로 둡니다. */
+  if (locale === "en") return formatted;
   if (locale === "ja") {
     if (unit === "pairs") return `${formatted}件`;
     if (unit === "worlds") return `${formatted}ワールド`;

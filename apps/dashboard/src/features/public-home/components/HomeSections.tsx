@@ -134,7 +134,21 @@ export function HomeLiveSection({ text, connected, followedChannels, loading = f
   onLoginOpen: () => void;
   variant?: LiveCardVariant;
 }) {
-  const liveChannels = (followedChannels?.channels ?? []).filter((channel) => channel.isLive);
+  /* twitchUserId 중복 제거 — 같은 채널이 두 번 오면 React 가 같은 key 로 두 자식을
+     그려 경고를 내고(실측: "two children with the same key, `55`") 목록에도 두 번
+     보입니다. 팰월드가 쓰던 rail 은 utils/streamers.ts 의 uniqueFollowedTwitchChannels
+     로 걸렀는데, 2026-08-25 에 이 컴포넌트로 합치면서 그 보장이 빠졌습니다.
+     먼저 온 항목을 남깁니다(기존 rail 과 같은 규칙). */
+  const liveChannels = (() => {
+    const unique = new Map<string, PublicTwitchFollowedLolChannel>();
+    for (const channel of followedChannels?.channels ?? []) {
+      if (!channel.isLive) continue;
+      const id = channel.twitchUserId?.trim() || channel.twitchLogin;
+      if (!id || unique.has(id)) continue;
+      unique.set(id, channel);
+    }
+    return [...unique.values()];
+  })();
 
   return (
     <section className="yoro-home-section">
