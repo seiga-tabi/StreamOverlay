@@ -72,6 +72,11 @@ test("공통 YORO Dashboard는 로그인 사용자용 진입점과 KO·JA 문구
   assert.match(source, /yoro-dh-card-text/u);
   assert.match(source, /DiscordSetupPage/u);
   assert.match(source, /BotManagementPage/u);
+  assert.match(source, /<LolChrome/u);
+  assert.match(source, /<AuthRequiredState/u);
+  assert.match(source, /if \(account\.loading\)/u);
+  assert.match(source, /if \(!authenticated && discordSetupActive\)/u);
+  assert.match(source, /if \(!authenticated\)/u);
   assert.match(source, /스트리머 이용 상태/u);
   assert.match(source, /ストリーマー利用状況/u);
   assert.match(source, /시청자 참여/u);
@@ -126,6 +131,8 @@ test("공통 YORO Dashboard는 로그인 사용자용 진입점과 KO·JA 문구
     css,
     /\.yoro-dashboard-settings-actions[\s\S]*?position:\s*sticky/u
   );
+  assert.match(css, /\.yoro-dashboard-entry\s*\{/u);
+  assert.doesNotMatch(css, /\.yoro-dashboard-entry\s+(?:a|section)\b/u);
 });
 
 test("Dashboard 홈은 상태별로 다른 화면을 보여 주고 지표를 링크로 만든다", async () => {

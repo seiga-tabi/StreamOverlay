@@ -237,10 +237,6 @@
   font-size: var(--yoro-font-size-sm);
 }
 
-.yoro-account-empty {
-  text-align: center;
-}
-
 @media (max-width: 40rem) {
   .yoro-account-page {
     padding: 1rem;

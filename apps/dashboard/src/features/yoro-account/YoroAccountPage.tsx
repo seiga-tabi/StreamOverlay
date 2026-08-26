@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { DiscordSymbolIcon } from "../../shared/DiscordSymbolIcon";
+import { AuthRequiredState } from "../../shared/ui/AuthRequiredState";
 import { detectDashboardLocale, type DashboardLocale } from "../../i18n";
+import { LolChrome } from "../public-home/components/LolChrome";
 import {
   accountOAuthUrl,
   getAccountSession,
@@ -25,6 +27,7 @@ const text = {
     logout: "로그아웃",
     dashboard: "Bot Dashboard",
     loginRequired: "YORO.gg 로그인이 필요합니다.",
+    loginDescription: "Discord 또는 Twitch 계정으로 로그인하면 연결된 계정을 확인하고 관리할 수 있습니다.",
     login: "로그인",
     loading: "계정 정보를 불러오는 중입니다.",
     failed: "계정 정보를 불러오지 못했습니다.",
@@ -55,6 +58,7 @@ const text = {
     logout: "ログアウト",
     dashboard: "Bot Dashboard",
     loginRequired: "YORO.gg へのログインが必要です。",
+    loginDescription: "Discord または Twitch アカウントでログインすると、連携アカウントを確認・管理できます。",
     login: "ログイン",
     loading: "アカウント情報を読み込んでいます。",
     failed: "アカウント情報を読み込めませんでした。",
@@ -78,6 +82,7 @@ export function YoroAccountPage({ embedded = false }: { embedded?: boolean }) {
   const [session, setSession] = useState<YoroAccountSession>();
   const [error, setError] = useState("");
   const [busyProvider, setBusyProvider] = useState<YoroIdentityProvider>();
+  const [authTheme, setAuthTheme] = useState<"dark" | "light">("dark");
   const copy = text[locale];
   const Root = embedded ? "div" : "main";
 
@@ -129,6 +134,36 @@ export function YoroAccountPage({ embedded = false }: { embedded?: boolean }) {
     }
   }
 
+  if (session && !session.authenticated) {
+    const loginHref = "/login?return_to=/account/connections";
+    const authRequiredState = (
+      <AuthRequiredState
+        description={{ ko: text.ko.loginDescription, ja: text.ja.loginDescription }}
+        locale={locale}
+        loginHref={loginHref}
+        loginLabel={{ ko: text.ko.login, ja: text.ja.login }}
+        title={{ ko: text.ko.loginRequired, ja: text.ja.loginRequired }}
+      />
+    );
+
+    if (embedded) return authRequiredState;
+
+    return (
+      <div className={`yoro-home-shell yoro-lol-home theme-${authTheme}`}>
+        <LolChrome
+          active="none"
+          connected={false}
+          locale={locale}
+          onLocale={(nextLocale) => setLocale(nextLocale === "ja" ? "ja" : "ko")}
+          onLoginOpen={() => window.location.assign(loginHref)}
+          onLogout={() => undefined}
+          onToggleTheme={() => setAuthTheme((current) => current === "dark" ? "light" : "dark")}
+        />
+        {authRequiredState}
+      </div>
+    );
+  }
+
   return (
     <Root className={`yoro-account-page ${embedded ? "is-embedded" : ""}`}>
       {!embedded ? (
@@ -150,14 +185,6 @@ export function YoroAccountPage({ embedded = false }: { embedded?: boolean }) {
           </p>
         ) : null}
         {error ? <p className="yoro-account-error" role="alert">{error}</p> : null}
-        {session && !session.authenticated ? (
-          <div className="yoro-account-empty">
-            <p>{copy.loginRequired}</p>
-            <a className="yoro-account-primary-action" href="/login?return_to=/account/connections">
-              {copy.login}
-            </a>
-          </div>
-        ) : null}
         {session?.authenticated ? (
           <>
             <div className="yoro-connections">

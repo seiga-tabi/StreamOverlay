@@ -67,7 +67,41 @@ test("YORO 계정 페이지는 Discord·Twitch 로그인과 Riot opt-in 연결�
   assert.match(markup, /Discord와 Twitch는 로그인 수단/u);
   assert.match(source, /Riot PUUID와 Riot ID/u);
   assert.match(source, /identities\.has\("twitch"\) \? "login" : "link_identity"/u);
+  assert.match(source, /if \(session && !session\.authenticated\)/u);
+  assert.match(source, /if \(embedded\) return authRequiredState/u);
+  assert.match(source, /<LolChrome/u);
+  assert.match(source, /<AuthRequiredState/u);
+  assert.match(source, /連携アカウントを確認・管理できます/u);
+  assert.doesNotMatch(source, /yoro-account-empty/u);
   assert.doesNotMatch(markup, /providerSubject/u);
+});
+
+test("공용 로그인 필요 상태는 EmptyState와 Button으로 KO·JA 문구를 렌더한다", async () => {
+  const { AuthRequiredState } = await import("../src/shared/ui/AuthRequiredState");
+  const markup = renderToStaticMarkup(
+    <AuthRequiredState
+      description={{ ko: "계정 설명", ja: "アカウント説明" }}
+      locale="ko"
+      loginHref="/login?return_to=/account/connections"
+      loginLabel={{ ko: "로그인", ja: "ログイン" }}
+      title={{ ko: "로그인이 필요합니다.", ja: "ログインが必要です。" }}
+    />
+  );
+  const css = await readFile(
+    new URL("../src/shared/ui/AuthRequiredState.css", import.meta.url),
+    "utf8"
+  );
+
+  assert.match(markup, /yoro-auth-required-state__container/u);
+  assert.match(markup, /yoro-empty-state/u);
+  assert.match(markup, /yoro-button/u);
+  assert.match(markup, /data-ko="로그인이 필요합니다\."/u);
+  assert.match(markup, /data-ja="ログインが必要です。"/u);
+  assert.match(markup, /href="\/login\?return_to=\/account\/connections"/u);
+  assert.match(css, /padding-block:\s*clamp\(/u);
+  assert.match(css, /max-width:\s*42rem/u);
+  assert.doesNotMatch(css, /min-height:\s*100vh/u);
+  assert.doesNotMatch(css, /place-items:\s*center/u);
 });
 
 test("공개 헤더용 계정 선택기는 두 계정 연결 시 Twitch identity를 우선한다", async () => {

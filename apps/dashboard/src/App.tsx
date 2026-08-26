@@ -27,9 +27,10 @@ import { PalworldPageErrorBoundary } from "./features/public-palworld/components
 import { ValorantPageErrorBoundary } from "./features/public-valorant/components/ValorantPageErrorBoundary";
 import { MinecraftPageErrorBoundary } from "./features/public-minecraft/components/MinecraftPageErrorBoundary";
 import { lazyNamed } from "./shared/lazyNamed";
-import { publicLocaleFromPathname, stripPublicLocalePrefix } from "./features/public-lol/utils/public-locale-path";
+import { isLocalizablePublicPath, publicLocaleFromPathname, stripPublicLocalePrefix } from "./features/public-lol/utils/public-locale-path";
 import { HomeRouteFallback } from "./features/public-home/components/HomeRouteFallback";
 import { LolRouteFallback } from "./features/public-home/components/LolRouteFallback";
+import { PublicNotFoundPage } from "./features/public-home/components/PublicNotFoundPage";
 
 const loadPublicHomePage = () => import("./pages/PublicHomePage");
 const loadPublicLolHomePage = () => import("./pages/PublicLolHomePage");
@@ -419,12 +420,14 @@ export default function App() {
             <PublicPalworldPage />
           </Suspense>
         </PalworldPageErrorBoundary>
-      ) : (
+      ) : isLocalizablePublicPath(window.location.pathname) ? (
         /* 이전에는 빈 <div> 라 로딩 중 아무것도 보이지 않았습니다 — 실물 LolChrome
            + 본문 골격 스켈레톤(목업 앱 로딩). */
         <Suspense fallback={<LolRouteFallback active="none" locale={publicLocale} />}>
           <PublicLolPage onOpenAdmin={openAdmin} />
         </Suspense>
+      ) : (
+        <PublicNotFoundPage locale={publicLocale} />
       )
     );
   }

@@ -228,7 +228,7 @@ test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => 
   try {
     writeFileSync(
       path.join(dir, "index.html"),
-      "<!doctype html><head><meta name=\"description\" content=\"home\"><link rel=\"canonical\" href=\"https://yoro.gg/\"><meta property=\"og:title\" content=\"home\"><meta property=\"og:description\" content=\"home\"><meta property=\"og:url\" content=\"https://yoro.gg/\"><meta name=\"twitter:title\" content=\"home\"><meta name=\"twitter:description\" content=\"home\"><script nonce=\"__STREAMOPS_CSP_NONCE__\" src=\"/dashboard/config.js\"></script><title>YORO.gg</title></head><div id=\"root\"></div>"
+      "<!doctype html><html lang=\"ko\"><head><meta name=\"description\" content=\"home\"><link rel=\"canonical\" href=\"https://yoro.gg/\"><meta property=\"og:title\" content=\"home\"><meta property=\"og:description\" content=\"home\"><meta property=\"og:url\" content=\"https://yoro.gg/\"><meta name=\"twitter:title\" content=\"home\"><meta name=\"twitter:description\" content=\"home\"><script nonce=\"__STREAMOPS_CSP_NONCE__\" src=\"/dashboard/config.js\"></script><title>YORO.gg</title></head><body><div id=\"root\"></div></body></html>"
     );
     appConfig.paths.dashboardStatic = dir;
     const handler = createHttpHandler({
@@ -322,8 +322,37 @@ test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => 
     const unknownPalworldRes = createResponse();
     await handler(createRequest("GET", "/palworld/not-a-real-page"), unknownPalworldRes);
     assert.equal(unknownPalworldRes.statusCode, 404);
-    assert.match(unknownPalworldRes.headers["Content-Type"], /application\/json/);
-    assert.doesNotMatch(unknownPalworldRes.body, /<!doctype html>/i);
+    assert.match(unknownPalworldRes.headers["Content-Type"], /text\/html/);
+    assert.equal(unknownPalworldRes.headers["Cache-Control"], "no-store");
+    assert.equal(unknownPalworldRes.headers["X-Robots-Tag"], "noindex, nofollow");
+    assert.match(unknownPalworldRes.body, /<!doctype html>/i);
+    assert.match(unknownPalworldRes.body, /<title>페이지를 찾을 수 없습니다 \| YORO\.gg<\/title>/);
+    assert.match(unknownPalworldRes.body, /<meta name="robots" content="noindex, nofollow" \/>/);
+    const notFoundNonce = /script-src 'nonce-([^']+)'/.exec(
+      unknownPalworldRes.headers["Content-Security-Policy"],
+    )?.[1];
+    assert.ok(notFoundNonce);
+    assert.match(unknownPalworldRes.body, new RegExp(`nonce="${notFoundNonce}"`));
+
+    const japaneseNotFoundRes = createResponse();
+    await handler(createRequest("GET", "/ja/not-a-real-page"), japaneseNotFoundRes);
+    assert.equal(japaneseNotFoundRes.statusCode, 404);
+    assert.match(japaneseNotFoundRes.body, /<html lang="ja">/);
+    assert.match(japaneseNotFoundRes.body, /<title>ページが見つかりません \| YORO\.gg<\/title>/);
+
+    const headNotFoundRes = createResponse();
+    await handler(createRequest("HEAD", "/not-a-real-page"), headNotFoundRes);
+    assert.equal(headNotFoundRes.statusCode, 404);
+    assert.match(headNotFoundRes.headers["Content-Type"], /text\/html/);
+    assert.equal(headNotFoundRes.body, "");
+
+    for (const pathname of ["/api/not-a-real-page", "/internal/not-a-real-page", "/images/not-a-real-file.png"]) {
+      const jsonNotFoundRes = createResponse();
+      await handler(createRequest("GET", pathname), jsonNotFoundRes);
+      assert.equal(jsonNotFoundRes.statusCode, 404, pathname);
+      assert.match(jsonNotFoundRes.headers["Content-Type"], /application\/json/, pathname);
+      assert.doesNotMatch(jsonNotFoundRes.body, /<!doctype html>/i, pathname);
+    }
   } finally {
     appConfig.paths.dashboardStatic = previousDashboardStatic;
     rmSync(dir, { recursive: true, force: true });
@@ -1844,7 +1873,10 @@ test("/tts 경로는 제거되어 안전한 404로 응답한다", async () => {
   await handler(req, res);
 
   assert.equal(res.statusCode, 404);
-  assert.doesNotMatch(res.body, /<html|stack|\.streamops/i);
+  assert.match(res.headers["Content-Type"], /text\/html/);
+  assert.equal(res.headers["X-Robots-Tag"], "noindex, nofollow");
+  assert.match(res.body, /<html/i);
+  assert.doesNotMatch(res.body, /stack|\.streamops/i);
 });
 
 test("정적 파일 경로의 잘못된 URL 인코딩은 400으로 응답한다", async () => {

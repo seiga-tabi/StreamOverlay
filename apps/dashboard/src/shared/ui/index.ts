@@ -17,6 +17,8 @@ export type {
   AppShellSidebarProps,
   AppShellVariant,
 } from "./AppShell";
+export { AuthRequiredState } from "./AuthRequiredState";
+export type { AuthRequiredStateProps } from "./AuthRequiredState";
 export { Button } from "./Button";
 export type { ButtonProps, ButtonRootRenderProps, ButtonSize, ButtonVariant } from "./Button";
 export {

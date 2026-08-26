@@ -7,12 +7,14 @@ import {
 } from "react";
 import { DiscordSymbolIcon } from "../../shared/DiscordSymbolIcon";
 import { TwitchGlitchIcon } from "../../shared/TwitchGlitchIcon";
-import { setDashboardLocale } from "../../i18n";
+import { detectDashboardLocale, setDashboardLocale, type DashboardLocale } from "../../i18n";
+import { AuthRequiredState } from "../../shared/ui/AuthRequiredState";
 import { FollowersPage, safeFollowerOAuthUrl } from "../../pages/FollowersPage";
 import { MyRiotAccountPage } from "../../pages/MyRiotAccountPage";
 import type { DashboardStreamerInfo } from "../../api/client";
 import { BotManagementPage } from "../bot-management/BotManagementPage";
 import { DiscordSetupPage } from "../discord-onboarding/DiscordSetupPage";
+import { LolChrome } from "../public-home/components/LolChrome";
 import type {
   BotManagementGameServer,
   DiscordBotControlOverview,
@@ -533,6 +535,8 @@ export function YoroDashboardPage() {
   const [permissionOpening, setPermissionOpening] = useState(false);
   const [riotIdDraft, setRiotIdDraft] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [authLocale, setAuthLocale] = useState<DashboardLocale>(() => detectDashboardLocale());
+  const [authTheme, setAuthTheme] = useState<"dark" | "light">("dark");
   const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
   const page = yoroDashboardPageFromPath(window.location.pathname);
@@ -1008,15 +1012,27 @@ export function YoroDashboardPage() {
   }
 
   if (!authenticated) {
+    const loginHref = "/login?return_to=/dashboard";
+
     return (
-      <main className="yoro-dashboard-entry">
-        <section>
-          <span>YORO DASHBOARD</span>
-          <h1>{text.loginTitle}</h1>
-          <p>{text.loginDescription}</p>
-          <a href="/login?return_to=/dashboard">{text.login}</a>
-        </section>
-      </main>
+      <div className={`yoro-home-shell yoro-lol-home theme-${authTheme}`}>
+        <LolChrome
+          active="none"
+          connected={false}
+          locale={authLocale}
+          onLocale={(nextLocale) => setAuthLocale(nextLocale === "ja" ? "ja" : "ko")}
+          onLoginOpen={() => window.location.assign(loginHref)}
+          onLogout={() => undefined}
+          onToggleTheme={() => setAuthTheme((current) => current === "dark" ? "light" : "dark")}
+        />
+        <AuthRequiredState
+          description={{ ko: copy.ko.loginDescription, ja: copy.ja.loginDescription }}
+          locale={authLocale}
+          loginHref={loginHref}
+          loginLabel={{ ko: copy.ko.login, ja: copy.ja.login }}
+          title={{ ko: copy.ko.loginTitle, ja: copy.ja.loginTitle }}
+        />
+      </div>
     );
   }
 

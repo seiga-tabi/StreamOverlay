@@ -3931,6 +3931,54 @@ export function createHttpHandler(input: HttpHandlerInput) {
   }
 
   /**
+   * 공개 라우트 화이트리스트 밖의 GET/HEAD 요청에 SPA 404 화면을 제공합니다.
+   * index.html의 nonce 기반 CSP는 유지하되 실제 HTTP status는 404로 고정합니다.
+   */
+  async function sendPublicNotFoundPage(
+    req: IncomingMessage,
+    res: ServerResponse,
+    pathname: string,
+  ): Promise<void> {
+    const filePath = path.resolve(appConfig.paths.dashboardStatic, "index.html");
+    try {
+      const locale = publicUrlLocaleFromPathname(pathname) ?? "ko";
+      const title = locale === "ja"
+        ? "ページが見つかりません | YORO.gg"
+        : locale === "en"
+          ? "Page not found | YORO.gg"
+          : "페이지를 찾을 수 없습니다 | YORO.gg";
+      const description = locale === "ja"
+        ? "URLが正しくないか、ページが移動した可能性があります。"
+        : locale === "en"
+          ? "The URL may be incorrect, or the page may have moved."
+          : "잘못된 URL이거나 페이지가 이동되었을 수 있습니다.";
+      const cspNonce = crypto.randomBytes(18).toString("base64url");
+      const html = (await fs.readFile(filePath, "utf8"))
+        .replace(/<html\s+lang="[^"]*"/u, `<html lang="${locale}"`)
+        .replace(/<title>[^<]*<\/title>/u, `<title>${title}</title>`)
+        .replace(
+          /(<meta\s+name="description"\s+content=")[^"]*("\s*\/?>)/u,
+          `$1${description}$2`,
+        )
+        .replaceAll(/<meta\s+name="robots"[^>]*>/giu, "")
+        .replace(/<\/head>/iu, '<meta name="robots" content="noindex, nofollow" /></head>')
+        .replaceAll(DASHBOARD_CSP_NONCE_PLACEHOLDER, cspNonce);
+      res.writeHead(404, {
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "no-store",
+        ...staticSecurityHeaders(req, filePath, "/dashboard", cspNonce),
+        "X-Robots-Tag": "noindex, nofollow",
+      });
+      res.end(req.method === "HEAD" ? undefined : html);
+    } catch {
+      sendJson(req, res, 404, { error: "not found" }, {
+        "Cache-Control": "no-store",
+        "X-Robots-Tag": "noindex, nofollow",
+      });
+    }
+  }
+
+  /**
    * sitemap index와 하위 sitemap을 응답합니다.
    * Palworld 하위 sitemap은 data service가 준비된 경우에만 index에 넣어
    * 크롤러가 빈 sitemap을 반복해서 받지 않게 합니다.
@@ -12787,6 +12835,13 @@ export function createHttpHandler(input: HttpHandlerInput) {
         return sendJson(req, res, 200, await getTwitchStatus());
       }
 
+      if (
+        (req.method === "GET" || req.method === "HEAD")
+        && !url.pathname.startsWith("/api/")
+        && !url.pathname.startsWith("/internal/")
+      ) {
+        return sendPublicNotFoundPage(req, res, url.pathname);
+      }
       return sendJson(req, res, 404, { error: "not found" });
     } catch (error) {
       if (error instanceof HttpRequestError) return sendJson(req, res, error.status, error.payload);

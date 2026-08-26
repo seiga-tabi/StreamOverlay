@@ -1,0 +1,57 @@
+.yoro-auth-required-state {
+  flex: 1 0 auto;
+  width: 100%;
+  padding-block: clamp(3.5rem, 12vh, 8rem);
+  padding-inline: clamp(1rem, 4vw, 3rem);
+  color: var(--home-ink, var(--yoro-color-text));
+  background: var(--home-bg, var(--yoro-color-bg));
+  box-sizing: border-box;
+}
+
+.yoro-auth-required-state__container {
+  width: 100%;
+  max-width: 42rem;
+  margin-inline: auto;
+}
+
+.yoro-auth-required-state__card {
+  --yoro-empty-state-background: var(--home-card, var(--yoro-color-surface));
+  --yoro-empty-state-border: var(--home-line, var(--yoro-color-border));
+  --yoro-empty-state-accent: var(--home-sub, var(--yoro-color-text-muted));
+  --yoro-empty-state-icon-background: var(--home-bg, var(--yoro-color-surface-muted));
+  --yoro-empty-state-title: var(--home-ink, var(--yoro-color-text-strong));
+  --yoro-empty-state-description: var(--home-sub, var(--yoro-color-text-muted));
+  gap: clamp(0.75rem, 2vw, 1rem);
+  padding: clamp(2rem, 6vw, 3.5rem);
+  border-radius: 3px;
+  box-shadow: none;
+}
+
+.yoro-auth-required-state__card .yoro-empty-state__icon {
+  border-radius: 50%;
+}
+
+.yoro-auth-required-state__card .yoro-button {
+  border-color: var(--home-ink, var(--yoro-color-primary));
+  border-radius: 3px;
+  color: var(--home-bg, var(--yoro-color-bg));
+  background: var(--home-ink, var(--yoro-color-primary));
+  box-shadow: none;
+}
+
+.yoro-auth-required-state__card .yoro-button:not([aria-disabled="true"]):hover {
+  border-color: var(--home-sub, var(--yoro-color-primary-strong));
+  background: var(--home-sub, var(--yoro-color-primary-strong));
+  box-shadow: none;
+}
+
+@media (max-width: 40rem) {
+  .yoro-auth-required-state {
+    padding-block: clamp(2.5rem, 10vh, 4.5rem);
+  }
+
+  .yoro-auth-required-state__card .yoro-empty-state__actions,
+  .yoro-auth-required-state__card .yoro-button {
+    width: 100%;
+  }
+}
