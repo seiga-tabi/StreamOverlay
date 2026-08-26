@@ -7727,22 +7727,25 @@ export function PublicLolPage({
             onPage={navigateFromMenu}
             onShowStreamers={() => changeMainPage("subscriptions")}
             searchForm={
-              <SearchForm
-                loading={loading}
-                platform={selectedLolPlatform}
-                platformOptions={platformOptions}
-                onClear={clearSearch}
-                onPickSuggestion={pickSuggestion}
-                onQuery={setQuery}
-                onPlatformChange={changeLolPlatform}
-                onSubmit={(event) => void submit(event)}
-                query={query}
-                suggestions={visibleSuggestions}
-                recentSearches={recentSearches}
-                favorites={favorites}
-                panelRequest={searchPanelRequest}
-                variant="homeShared"
-              />
+              <>
+                <SearchForm
+                  loading={loading}
+                  platform={selectedLolPlatform}
+                  platformOptions={platformOptions}
+                  onClear={clearSearch}
+                  onPickSuggestion={pickSuggestion}
+                  onQuery={setQuery}
+                  onPlatformChange={changeLolPlatform}
+                  onSubmit={(event) => void submit(event)}
+                  query={query}
+                  suggestions={visibleSuggestions}
+                  recentSearches={recentSearches}
+                  favorites={favorites}
+                  panelRequest={searchPanelRequest}
+                  variant="homeShared"
+                />
+                {error ? <p className="public-error">{error}</p> : null}
+              </>
             }
             searchQuickPicks={storedSuggestions.length > 0 ? (
               /* 재방문 지름길 — 즐겨찾기(★ 우선)·최근 검색을 검색바 아래 원터치 칩으로.
