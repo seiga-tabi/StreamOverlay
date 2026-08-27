@@ -260,13 +260,15 @@ export function YoroAccountPage({ embedded = false }: { embedded?: boolean }) {
             </div>
           </>
         ) : null}
-        <button
-          className="yoro-account-language"
-          type="button"
-          onClick={() => setLocale(locale === "ko" ? "ja" : "ko")}
-        >
-          {copy.language}
-        </button>
+        {!embedded ? (
+          <button
+            className="yoro-account-language"
+            type="button"
+            onClick={() => setLocale(locale === "ko" ? "ja" : "ko")}
+          >
+            {copy.language}
+          </button>
+        ) : null}
       </section>
     </Root>
   );

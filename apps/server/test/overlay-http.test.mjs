@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import zlib, { brotliDecompressSync, gunzipSync } from "node:zlib";
 
 const { createHttpHandler } = await import("../dist/routes/http-api.js");
 const { appConfig } = await import("../dist/config.js");
@@ -617,6 +618,131 @@ test("favicon, ads.txt와 Riot 제품 검증 파일은 dashboard public asset으
     assert.equal(riotVerificationHeadResponse.statusCode, 200);
     assert.equal(riotVerificationHeadResponse.headers["Content-Type"], "text/plain; charset=utf-8");
     assert.equal(riotVerificationHeadResponse.body, "");
+  } finally {
+    appConfig.paths.dashboardStatic = previousDashboardStatic;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("정적 텍스트 자산은 br 우선으로 압축하고 바이너리·identity·HEAD·304 동작을 보존한다", async () => {
+  const previousDashboardStatic = appConfig.paths.dashboardStatic;
+  const dir = mkdtempSync(path.join(tmpdir(), "streamops-static-compression-"));
+  try {
+    const assetsDir = path.join(dir, "assets");
+    mkdirSync(assetsDir, { recursive: true });
+    const cssBody = Buffer.from(".stream-overlay{color:#123456;background:#abcdef}\n".repeat(4_000));
+    const pngBody = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    writeFileSync(path.join(assetsDir, "index-test.css"), cssBody);
+    writeFileSync(path.join(assetsDir, "favicon.png"), pngBody);
+    writeFileSync(
+      path.join(dir, "index.html"),
+      "<!doctype html><script nonce=\"__STREAMOPS_CSP_NONCE__\"></script>"
+    );
+    appConfig.paths.dashboardStatic = dir;
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      actions: {
+        async dispatchOne() {}
+      }
+    });
+
+    const brotliResponse = createBinaryResponse();
+    await handler(
+      createRequest("GET", "/dashboard/assets/index-test.css", undefined, { "accept-encoding": "gzip, br" }),
+      brotliResponse
+    );
+    assert.equal(brotliResponse.statusCode, 200);
+    assert.equal(brotliResponse.headers["Content-Encoding"], "br");
+    assert.equal(brotliResponse.headers["Content-Length"], String(brotliResponse.body.length));
+    assert.equal(brotliResponse.headers.Vary, "Accept-Encoding");
+    assert.deepEqual(brotliDecompressSync(brotliResponse.body), cssBody);
+    assert.ok(brotliResponse.body.length < cssBody.length);
+
+    const gzipResponse = createBinaryResponse();
+    await handler(
+      createRequest("GET", "/dashboard/assets/index-test.css", undefined, { "accept-encoding": "gzip" }),
+      gzipResponse
+    );
+    assert.equal(gzipResponse.headers["Content-Encoding"], "gzip");
+    assert.equal(gzipResponse.headers["Content-Length"], String(gzipResponse.body.length));
+    assert.deepEqual(gunzipSync(gzipResponse.body), cssBody);
+
+    const disabledBrotliResponse = createBinaryResponse();
+    await handler(
+      createRequest("GET", "/dashboard/assets/index-test.css", undefined, { "accept-encoding": "br;q=0, gzip;q=1" }),
+      disabledBrotliResponse
+    );
+    assert.equal(disabledBrotliResponse.headers["Content-Encoding"], "gzip");
+
+    const identityResponse = createBinaryResponse();
+    await handler(
+      createRequest("GET", "/dashboard/assets/index-test.css", undefined, { "accept-encoding": "identity" }),
+      identityResponse
+    );
+    assert.equal(identityResponse.headers["Content-Encoding"], undefined);
+    assert.equal(identityResponse.headers["Content-Length"], String(cssBody.length));
+    assert.deepEqual(identityResponse.body, cssBody);
+
+    const headResponse = createBinaryResponse();
+    await handler(
+      createRequest("HEAD", "/dashboard/assets/index-test.css", undefined, { "accept-encoding": "gzip, br" }),
+      headResponse
+    );
+    assert.equal(headResponse.headers["Content-Encoding"], "br");
+    assert.equal(headResponse.headers["Content-Length"], String(brotliResponse.body.length));
+    assert.equal(headResponse.body.length, 0);
+
+    const imageResponse = createBinaryResponse();
+    await handler(
+      createRequest("GET", "/dashboard/assets/favicon.png", undefined, { "accept-encoding": "gzip, br" }),
+      imageResponse
+    );
+    assert.equal(imageResponse.headers["Content-Encoding"], undefined);
+    assert.equal(imageResponse.headers["Content-Length"], String(pngBody.length));
+    assert.deepEqual(imageResponse.body, pngBody);
+
+    const notModifiedResponse = createBinaryResponse();
+    await handler(
+      createRequest("GET", "/dashboard/assets/index-test.css", undefined, {
+        "accept-encoding": "gzip, br",
+        "if-none-match": identityResponse.headers.ETag
+      }),
+      notModifiedResponse
+    );
+    assert.equal(notModifiedResponse.statusCode, 304);
+    assert.equal(notModifiedResponse.headers["Content-Encoding"], undefined);
+    assert.equal(notModifiedResponse.body.length, 0);
+
+    const compressionFailureBody = Buffer.from("압축 실패 시 원본 응답을 유지합니다.\n".repeat(100));
+    writeFileSync(path.join(assetsDir, "compression-failure.css"), compressionFailureBody);
+    const originalBrotliCompress = zlib.brotliCompress;
+    try {
+      zlib.brotliCompress = (_buffer, _options, callback) => callback(new Error("의도한 압축 실패"));
+      const compressionFailureResponse = createBinaryResponse();
+      await handler(
+        createRequest("GET", "/dashboard/assets/compression-failure.css", undefined, { "accept-encoding": "br" }),
+        compressionFailureResponse
+      );
+      assert.equal(compressionFailureResponse.statusCode, 200);
+      assert.equal(compressionFailureResponse.headers["Content-Encoding"], undefined);
+      assert.equal(compressionFailureResponse.headers["Content-Length"], String(compressionFailureBody.length));
+      assert.deepEqual(compressionFailureResponse.body, compressionFailureBody);
+    } finally {
+      zlib.brotliCompress = originalBrotliCompress;
+    }
+
+    const firstHtmlResponse = createBinaryResponse();
+    const secondHtmlResponse = createBinaryResponse();
+    await handler(createRequest("GET", "/dashboard/", undefined, { "accept-encoding": "br" }), firstHtmlResponse);
+    await handler(createRequest("GET", "/dashboard/", undefined, { "accept-encoding": "br" }), secondHtmlResponse);
+    const firstHtml = brotliDecompressSync(firstHtmlResponse.body).toString("utf8");
+    const secondHtml = brotliDecompressSync(secondHtmlResponse.body).toString("utf8");
+    assert.equal(firstHtmlResponse.headers["Content-Encoding"], "br");
+    assert.equal(secondHtmlResponse.headers["Content-Encoding"], "br");
+    assert.doesNotMatch(firstHtml, /__STREAMOPS_CSP_NONCE__/u);
+    assert.doesNotMatch(secondHtml, /__STREAMOPS_CSP_NONCE__/u);
+    assert.notEqual(firstHtml, secondHtml);
   } finally {
     appConfig.paths.dashboardStatic = previousDashboardStatic;
     rmSync(dir, { recursive: true, force: true });

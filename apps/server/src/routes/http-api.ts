@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { URL } from "node:url";
+import zlib from "node:zlib";
 import type { Store } from "../services/store.js";
 import { loadAramAugmentCatalog } from "../services/aram-augment-catalog.js";
 import type { GameBoxartService } from "../services/game-boxart.js";
@@ -2270,6 +2271,14 @@ async function sendStaticFile(
   mountPath?: "/admin" | "/dashboard",
   transformText?: (text: string) => string
 ): Promise<void> {
+  const compressibleExtensions = new Set([".js", ".mjs", ".css", ".html", ".svg", ".json", ".txt", ".xml"]);
+  const compressionCacheMaxEntries = 200;
+  type StaticContentEncoding = "br" | "gzip";
+  type SendStaticFileWithCache = typeof sendStaticFile & {
+    compressionCache?: Map<string, Buffer>;
+  };
+  const compressionCache = ((sendStaticFile as SendStaticFileWithCache).compressionCache ??= new Map<string, Buffer>());
+
   try {
     const stat = await fs.stat(filePath);
     if (!stat.isFile()) throw new Error("not found");
@@ -2291,7 +2300,10 @@ async function sendStaticFile(
       "Cache-Control": cacheControl,
       ...(cspNonce ? {} : { "ETag": etag, "Last-Modified": lastModified }),
       ...staticSecurityHeaders(req, filePath, mountPath, cspNonce),
-      ...extraHeaders
+      ...extraHeaders,
+      "Vary": extraHeaders.Vary
+        ? `${extraHeaders.Vary}, Accept-Encoding`
+        : "Accept-Encoding"
     };
     if (!cspNonce && isNotModified(req, etag, stat.mtime)) {
       res.writeHead(304, baseHeaders);
@@ -2311,12 +2323,75 @@ async function sendStaticFile(
       : transformedText !== undefined
         ? Buffer.from(transformedText, "utf8")
       : fileBody;
-    res.writeHead(200, baseHeaders);
+    let responseBody: Buffer = body;
+    let contentEncoding: StaticContentEncoding | undefined;
+    if (compressibleExtensions.has(path.extname(filePath).toLowerCase())) {
+      const acceptEncodingHeader = req.headers["accept-encoding"];
+      const acceptEncoding = Array.isArray(acceptEncodingHeader)
+        ? acceptEncodingHeader.join(",")
+        : acceptEncodingHeader ?? "";
+      const acceptedEncodings = new Map<string, number>();
+      for (const value of acceptEncoding.split(",")) {
+        const [rawEncoding, ...parameters] = value.trim().toLowerCase().split(";");
+        if (!rawEncoding) continue;
+        const qualityParameter = parameters.find((parameter) => parameter.trim().startsWith("q="));
+        const parsedQuality = qualityParameter
+          ? Number.parseFloat(qualityParameter.trim().slice(2))
+          : 1;
+        const quality = Number.isFinite(parsedQuality) ? Math.max(0, Math.min(1, parsedQuality)) : 0;
+        acceptedEncodings.set(rawEncoding, Math.max(acceptedEncodings.get(rawEncoding) ?? 0, quality));
+      }
+      const acceptsEncoding = (encoding: StaticContentEncoding): boolean =>
+        (acceptedEncodings.get(encoding) ?? acceptedEncodings.get("*") ?? 0) > 0;
+      contentEncoding = acceptsEncoding("br")
+        ? "br"
+        : acceptsEncoding("gzip")
+          ? "gzip"
+          : undefined;
+
+      if (contentEncoding) {
+        try {
+          const cacheKey = `${filePath}\0${stat.mtimeMs}\0${contentEncoding}`;
+          const cachedBody = cspNonce ? undefined : compressionCache.get(cacheKey);
+          if (cachedBody) {
+            compressionCache.delete(cacheKey);
+            compressionCache.set(cacheKey, cachedBody);
+            responseBody = cachedBody;
+          } else {
+            responseBody = await new Promise<Buffer>((resolve, reject) => {
+              const onCompressed = (error: Error | null, result: Buffer): void => {
+                if (error) reject(error);
+                else resolve(result);
+              };
+              if (contentEncoding === "br") {
+                zlib.brotliCompress(body, {
+                  params: { [zlib.constants.BROTLI_PARAM_QUALITY]: 5 }
+                }, onCompressed);
+              } else {
+                zlib.gzip(body, onCompressed);
+              }
+            });
+            if (!cspNonce) {
+              compressionCache.set(cacheKey, responseBody);
+              pruneMapToMax(compressionCache, compressionCacheMaxEntries);
+            }
+          }
+        } catch {
+          contentEncoding = undefined;
+          responseBody = body;
+        }
+      }
+    }
+    res.writeHead(200, {
+      ...baseHeaders,
+      "Content-Length": String(responseBody.length),
+      ...(contentEncoding ? { "Content-Encoding": contentEncoding } : {})
+    });
     if (req.method === "HEAD") {
       res.end();
       return;
     }
-    res.end(body);
+    res.end(responseBody);
   } catch {
     res.writeHead(404, { "Content-Type": "application/json; charset=utf-8", ...SECURITY_HEADERS });
     res.end(req.method === "HEAD" ? undefined : JSON.stringify({ error: "not found" }));

@@ -171,14 +171,11 @@ const copy = {
     settingsAccount: "현재 계정",
     settingsSynced: "계정 동기화",
     settingsSyncedDescription: "저장한 설정은 로그인한 모든 기기에 안전하게 적용됩니다.",
-    generalSettings: "일반 설정",
-    generalSettingsDescription: "Dashboard에서 사용할 기본 표시 언어를 선택합니다.",
     dashboardSettings: "Dashboard 설정",
     dashboardSettingsDescription: "로그인 직후 처음 표시할 화면을 지정합니다.",
     accessibilitySettings: "접근성",
     accessibilitySettingsDescription: "화면 움직임을 줄여 더 편안하게 이용할 수 있습니다.",
     language: "표시 언어",
-    languageDescription: "Dashboard 메뉴와 안내 문구에 적용됩니다.",
     languageKo: "한국어",
     languageJa: "日本語",
     startPage: "기본 Dashboard 화면",
@@ -309,14 +306,11 @@ const copy = {
     settingsAccount: "現在のアカウント",
     settingsSynced: "アカウント同期",
     settingsSyncedDescription: "保存した設定はログイン中のすべての端末に安全に反映されます。",
-    generalSettings: "一般設定",
-    generalSettingsDescription: "Dashboardで使用する表示言語を選択します。",
     dashboardSettings: "Dashboard設定",
     dashboardSettingsDescription: "ログイン直後に最初に表示する画面を指定します。",
     accessibilitySettings: "アクセシビリティ",
     accessibilitySettingsDescription: "画面の動きを抑え、より快適に利用できます。",
     language: "表示言語",
-    languageDescription: "Dashboardのメニューと案内文に適用されます。",
     languageKo: "한국어",
     languageJa: "日本語",
     startPage: "既定のDashboard画面",
@@ -1010,8 +1004,10 @@ export function YoroDashboardPage() {
         onLogout={() => void logoutAccount(authenticated.csrfToken).then(() => {
           window.location.assign("/login");
         })}
+        onNavigate={selectDashboardPage}
         onPublicHome={() => window.location.assign("/lol")}
         onToggleTheme={() => setDashboardTheme((current) => current === "dark" ? "light" : "dark")}
+        page={dashboardTopLevelPage(page)}
       />
       <div className="yoro-dashboard-body">
       <aside
@@ -1020,21 +1016,17 @@ export function YoroDashboardPage() {
         id="yoro-dashboard-navigation"
       >
         <nav aria-label={text.brand}>
-          {(["overview", "account"] as UnifiedDashboardPage[]).map((item) => (
-            <button
-              aria-current={page === item ? "page" : undefined}
-              className={page === item ? "active" : ""}
-              key={item}
-              onClick={() => selectDashboardPage(item)}
-              type="button"
-            >
-              <span className="yoro-dashboard-nav-text">{text[item]}</span>
-              {navBadge(item)}
-            </button>
-          ))}
           <span className="yoro-dashboard-nav-label">{text.organizationGroup}</span>
+          <button
+            aria-current={page === "organizations" ? "page" : undefined}
+            className={page === "organizations" ? "active" : ""}
+            onClick={() => selectDashboardPage("organizations")}
+            type="button"
+          >
+            <span className="yoro-dashboard-nav-text">{text.organizations}</span>
+            {navBadge("organizations")}
+          </button>
           {([
-            "organizations",
             "organizationBot",
             "organizationServers"
           ] as UnifiedDashboardPage[]).map((item) => (
@@ -1050,8 +1042,16 @@ export function YoroDashboardPage() {
             </button>
           ))}
           <span className="yoro-dashboard-nav-label">{text.streamingGroup}</span>
+          <button
+            aria-current={page === "streaming" ? "page" : undefined}
+            className={page === "streaming" ? "active" : ""}
+            onClick={() => selectDashboardPage("streaming")}
+            type="button"
+          >
+            <span className="yoro-dashboard-nav-text">{text.streaming}</span>
+            {navBadge("streaming")}
+          </button>
           {([
-            "streaming",
             "streamingParticipation",
             "streamingFollowers",
             "streamingRiot"
@@ -1067,17 +1067,6 @@ export function YoroDashboardPage() {
               {navBadge(item)}
             </button>
           ))}
-          <span className="yoro-dashboard-nav-label">
-            {text.settings}
-          </span>
-          <button
-            aria-current={page === "settings" ? "page" : undefined}
-            className={page === "settings" ? "active" : ""}
-            onClick={() => selectDashboardPage("settings")}
-            type="button"
-          >
-            <span className="yoro-dashboard-nav-text">{text.settings}</span>
-          </button>
         </nav>
       </aside>
       <main className="yoro-dashboard-main">
@@ -1573,31 +1562,6 @@ export function YoroDashboardPage() {
             </header>
             <div className="yoro-dashboard-settings-layout">
               <div className="yoro-dashboard-settings-groups">
-                <section className="yoro-dashboard-settings-group">
-                  <header>
-                    <span aria-hidden="true" className="yoro-dashboard-settings-icon">文</span>
-                    <div>
-                      <h2>{text.generalSettings}</h2>
-                      <p>{text.generalSettingsDescription}</p>
-                    </div>
-                  </header>
-                  <label className="yoro-dashboard-setting-row">
-                    <span>
-                      <strong>{text.language}</strong>
-                      <small>{text.languageDescription}</small>
-                    </span>
-                    <select
-                      value={draft.locale}
-                      onChange={(event) => changePreferences({
-                        locale: event.target.value as "ko" | "ja"
-                      })}
-                    >
-                      <option value="ko">{text.languageKo}</option>
-                      <option value="ja">{text.languageJa}</option>
-                    </select>
-                  </label>
-                </section>
-
                 <section className="yoro-dashboard-settings-group">
                   <header>
                     <span aria-hidden="true" className="yoro-dashboard-settings-icon">⌂</span>

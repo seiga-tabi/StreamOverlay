@@ -105,7 +105,8 @@ test("공통 YORO Dashboard는 로그인 사용자용 진입점과 KO·JA 문구
   assert.match(chromeSource, /<HomeHeader/u);
   assert.match(chromeSource, /공개 홈/u);
   assert.match(chromeSource, /公開ホーム/u);
-  assert.doesNotMatch(chromeSource, /dashboard-subnav/u);
+  assert.match(chromeSource, /<DashboardSubnav/u);
+  assert.match(chromeSource, /yoro-lol-subnav/u);
   assert.match(bottomBarSource, /data-testid="dashboard-bottom-tab-bar"/u);
   assert.equal((bottomBarMarkup.match(/<button/g) ?? []).length, 5);
   assert.match(bottomBarMarkup, /aria-current="page"/u);
@@ -128,6 +129,9 @@ test("공통 YORO Dashboard는 로그인 사용자용 진입점과 KO·JA 문구
   assert.equal(source.includes("配信自動化"), false);
   assert.equal(source.includes("Overlay 관리"), false);
   assert.equal(source.includes("localStorage.setItem"), false);
+  // 상단 1행(HomeHeader)의 언어 선택과 중복되던 개인 설정의 언어 드롭다운 제거
+  assert.equal(source.includes("generalSettings"), false);
+  assert.equal(/<select\s*\n\s*value=\{draft\.locale\}/u.test(source), false);
 
   const css = await readFile(
     new URL("../src/styles/pages/account/18-yoro-dashboard.css", import.meta.url),
