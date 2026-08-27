@@ -1,22 +1,31 @@
+.yoro-account-page:not(.is-embedded, .yoro-home-chrome) {
+  /* 이 스타일시트를 공유하는 로그인 route용 기본값입니다. 연결 계정 standalone
+     route는 yoro-home-chrome, embedded route는 Dashboard 셸의 --home-*를 읽습니다. */
+  --home-bg: #1C1D22;
+  --home-card: #252730;
+  --home-ink: #F5F6F8;
+  --home-sub: #B9C3D0;
+  --home-line: #3A404B;
+  --home-mid: #8795A6;
+  --home-win: #87A183;
+  --home-loss: #DC4A5E;
+}
+
 .yoro-account-page {
   min-height: 100vh;
   padding: clamp(1.25rem, 4vw, 3rem);
-  color: var(--yoro-color-product-gray-text);
-  background:
-    radial-gradient(circle at 50% 0%, rgb(88 101 242 / .16), transparent 38rem),
-    var(--yoro-background-product-gray-page);
+  color: var(--home-ink);
+  background: var(--home-bg);
+  font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
 }
 
 .yoro-account-brand {
   display: block;
   width: fit-content;
   margin: 0 auto clamp(1.5rem, 5vw, 3.5rem);
-
-  /* 이 워드마크는 지면 상단 중앙 — --yoro-background-product-gray-page 의
-     radial highlight(50% -12%, 흰색 20%)가 가장 센 자리입니다. 그 자리 배경이
-     rgb(138,146,172)까지 올라와 상속색 #f8f9fa 로는 실측 2.93:1 로 large text
-     기준 3:1 에 못 미쳤습니다. 지면 디자인은 그대로 두고 글자만 순백으로 둡니다. */
-  color: #fff;
+  color: var(--home-ink);
   font-size: 1.5rem;
   font-weight: 900;
   font-style: italic;
@@ -25,116 +34,115 @@
 }
 
 .yoro-account-panel {
-  width: min(100%, 46rem);
+  width: min(100%, 44rem);
   margin-inline: auto;
-  padding: clamp(1.5rem, 5vw, 3rem);
-  border: 1px solid var(--yoro-color-product-gray-border);
-  border-radius: var(--yoro-radius-xl);
-  background: var(--yoro-color-product-gray-surface-strong);
-  box-shadow: var(--yoro-shadow-panel);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .yoro-account-panel__header {
-  max-width: 38rem;
-  margin: 0 auto var(--yoro-space-6);
+  max-width: 34rem;
+  margin: 0 auto 1.5rem;
   text-align: center;
 }
 
 .yoro-account-panel__header > span {
-  /* 이 페이지 지면은 어두운 중간 회색이라 --yoro-color-primary(hsl 219 100% 74%)
-     로는 실측 3.95:1 입니다. 같은 계열에서 명도만 올립니다. */
-  color: #9dc0ff;
+  color: var(--home-mid);
   font-size: var(--yoro-font-size-xs);
   font-weight: 800;
   letter-spacing: .14em;
 }
 
 .yoro-account-panel__header h1 {
-  margin: var(--yoro-space-3) 0;
-  font-size: clamp(2rem, 6vw, 3.4rem);
-  line-height: 1.08;
-  letter-spacing: -.04em;
+  margin: .5rem 0 .375rem;
+  color: var(--home-ink);
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -.01em;
 }
 
 .yoro-account-panel__header p,
 .yoro-login-option small,
 .yoro-connection-card p {
-  color: var(--yoro-color-product-gray-muted);
+  color: var(--home-sub);
+}
+
+.yoro-account-panel__header p {
+  margin: 0;
+  font-size: .8125rem;
 }
 
 .yoro-login-options,
 .yoro-connections {
   display: grid;
-  gap: var(--yoro-space-3);
-}
-
-.yoro-login-option__icon.is-riot {
-  background: #d13639;
-  color: #fff;
-  font-weight: 800;
+  gap: .625rem;
 }
 
 .yoro-account-consent-note {
-  color: var(--yoro-color-product-gray-muted);
-  font-size: 0.875rem;
-  line-height: 1.6;
-  margin: 0;
+  margin: 1.125rem 0 0;
+  padding: .875rem;
+  border: .5px dashed var(--home-line);
+  border-radius: 3px;
+  color: var(--home-sub);
+  font-size: .75rem;
+  line-height: 1.7;
+  text-align: center;
 }
 
 .yoro-account-consent-note a {
-  /* 위와 같은 이유 — 실측 4.08:1. */
-  color: #9dc0ff;
-  text-underline-offset: 0.2em;
+  color: var(--home-sub) !important;
+  text-decoration: underline !important;
+  text-underline-offset: .2em;
 }
 
 .yoro-login-option,
 .yoro-connection-card {
   display: grid;
-  grid-template-columns: 3rem minmax(0, 1fr) auto;
+  grid-template-columns: 2.75rem minmax(0, 1fr) auto;
   align-items: center;
-  gap: var(--yoro-space-4);
+  gap: .875rem;
   min-width: 0;
-  padding: var(--yoro-space-4);
-  border: 1px solid var(--yoro-color-product-gray-border);
-  border-radius: var(--yoro-radius-lg);
-  color: inherit;
-  background: var(--yoro-color-product-gray-surface);
+  padding: 1rem;
+  border: .5px solid var(--home-line);
+  border-radius: 3px;
+  color: var(--home-ink);
+  background: var(--home-card);
   text-decoration: none;
 }
 
 .yoro-login-option {
-  grid-template-columns: 3rem minmax(0, 1fr);
+  grid-template-columns: 2.75rem minmax(0, 1fr);
   transition: border-color 160ms ease, transform 160ms ease;
 }
 
 .yoro-login-option:hover {
-  border-color: var(--yoro-color-primary);
+  border-color: var(--home-mid);
   transform: translateY(-1px);
 }
 
 .yoro-login-option__icon {
   display: grid;
-  width: 3rem;
-  height: 3rem;
+  width: 2.75rem;
+  height: 2.75rem;
   place-items: center;
   overflow: hidden;
-  border-radius: var(--yoro-radius-md);
-  color: #fff;
-  background: #5865f2;
-  font-size: 1.25rem;
-  font-weight: 900;
+  border: .5px solid var(--home-line);
+  border-radius: 3px;
+  color: var(--home-ink);
+  background: transparent;
+  font-size: .875rem;
+  font-weight: 800;
 }
 
 .yoro-login-option__icon svg,
 .yoro-login-option__icon img {
-  width: 2rem;
-  height: 2rem;
+  width: 1.75rem;
+  height: 1.75rem;
   object-fit: contain;
-}
-
-.yoro-login-option.is-twitch .yoro-login-option__icon,
-.yoro-login-option__icon.is-twitch {
-  background: #9146ff;
 }
 
 .yoro-login-option strong,
@@ -153,25 +161,47 @@
 .yoro-connection-card a,
 .yoro-connection-card button {
   display: inline-flex;
-  min-height: 2.75rem;
+  min-height: 2.5rem;
   align-items: center;
   justify-content: center;
-  padding: .7rem 1rem;
-  border: 1px solid var(--yoro-color-product-gray-border-strong);
-  border-radius: var(--yoro-radius-md);
-  color: inherit;
-  background: var(--yoro-color-product-gray-surface);
+  padding: .5rem 1rem;
+  border: .5px solid var(--home-line);
+  border-radius: 3px;
+  background: transparent;
   font: inherit;
+  font-size: .8125rem;
   font-weight: 700;
   text-decoration: none;
+  white-space: nowrap;
   cursor: pointer;
+}
+
+.yoro-account-actions button,
+.yoro-connection-card button {
+  color: var(--home-ink);
+}
+
+/* Dashboard의 후순위 home 레이어가 공통 앵커 색을 상속값으로 되돌리므로,
+   embedded 계정 화면의 액션 링크만 계정 전용 색을 명시합니다. */
+.yoro-account-actions a,
+.yoro-connection-card a {
+  color: var(--home-ink) !important;
+}
+
+.yoro-connection-card a.is-required-action {
+  border-color: var(--home-loss);
+  color: var(--home-loss) !important;
 }
 
 .yoro-account-primary-action {
   width: 100%;
-  border-color: transparent;
-  color: #fff;
-  background: var(--yoro-color-primary-strong);
+  color: var(--home-ink);
+}
+
+.yoro-account-actions button:disabled,
+.yoro-connection-card button:disabled {
+  opacity: .48;
+  cursor: not-allowed;
 }
 
 .yoro-account-links,
@@ -179,46 +209,42 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: var(--yoro-space-3);
-  margin-top: var(--yoro-space-6);
+  gap: .75rem;
+  margin-top: 1.375rem;
 }
 
 .yoro-account-links a,
 .yoro-account-links button,
 .yoro-account-language {
   border: 0;
-  color: var(--yoro-color-product-gray-muted);
+  color: var(--home-sub);
   background: transparent;
   font: inherit;
   text-decoration: underline;
+  text-underline-offset: .2em;
   cursor: pointer;
 }
 
 .yoro-account-language {
   display: block;
-  margin: var(--yoro-space-5) auto 0;
+  margin: 1.25rem auto 0;
+}
+
+.yoro-account-error,
+.yoro-account-success {
+  padding: .75rem;
+  border: .5px solid var(--home-line);
+  border-radius: 3px;
+  color: var(--home-ink);
+  text-align: center;
 }
 
 .yoro-account-error {
-  padding: var(--yoro-space-3);
-  border: 1px solid color-mix(in srgb, var(--yoro-color-danger) 55%, transparent);
-  border-radius: var(--yoro-radius-md);
-
-  /* 위와 같은 이유 — 라이트 표면용 danger(hsl 344 67% 42%)를 어두운 패널에
-     올려 실측 1.95:1 이었습니다. 테두리는 그대로 두고 글자만 올립니다.
-     패널이 rgb(46,52,58)로 꽤 밝아 #f4555f 로도 3.78:1 에 그칩니다.
-     단독 /account 는 지면이 더 밝아(#ff7a82 로 3.75:1) 한 단계 더 올립니다 —
-     이 값이면 embedded 6.87:1, 단독 5.16:1 로 양쪽 다 통과합니다. */
-  color: #ffa8ad;
-  text-align: center;
+  border-style: dashed;
 }
 
 .yoro-account-success {
-  padding: var(--yoro-space-3);
-  border: 1px solid color-mix(in srgb, var(--yoro-color-success) 55%, transparent);
-  border-radius: var(--yoro-radius-md);
-  color: var(--yoro-color-success);
-  text-align: center;
+  color: var(--home-win);
 }
 
 .yoro-connection-card h2,
@@ -226,28 +252,39 @@
   margin: 0;
 }
 
+.yoro-connection-card h2 {
+  color: var(--home-ink);
+  font-size: .875rem;
+  font-weight: 700;
+}
+
+.yoro-connection-card p {
+  font-size: .75rem;
+}
+
 .yoro-connection-card strong {
   display: block;
   margin: .2rem 0;
-
-  /* 이 카드는 어두운 패널 위에 있는데 --yoro-color-success 는 라이트 표면용
-     짙은 초록(hsl 163 70% 29%)이라 실측 1.81:1 이었습니다. 다른 다크 화면이
-     이미 검증해 쓰는 밝은 초록으로 맞춥니다. */
-  color: #65d6a6;
-  font-size: var(--yoro-font-size-sm);
+  color: var(--home-mid);
+  font-size: .75rem;
+  font-weight: 700;
 }
 
-@media (max-width: 40rem) {
+.yoro-connection-card strong.is-connected {
+  color: var(--home-win);
+}
+
+.yoro-connection-card strong.is-disconnected {
+  color: var(--home-mid);
+}
+
+@media (max-width: 30rem) {
   .yoro-account-page {
     padding: 1rem;
   }
 
-  .yoro-account-panel {
-    padding: 1.25rem;
-  }
-
   .yoro-connection-card {
-    grid-template-columns: 3rem minmax(0, 1fr);
+    grid-template-columns: 2.75rem minmax(0, 1fr);
   }
 
   .yoro-connection-card > a,

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { DiscordSymbolIcon } from "../../shared/DiscordSymbolIcon";
+import { TwitchGlitchIcon } from "../../shared/TwitchGlitchIcon";
 import { AuthRequiredState } from "../../shared/ui/AuthRequiredState";
 import { detectDashboardLocale, type DashboardLocale } from "../../i18n";
 import { LolChrome } from "../public-home/components/LolChrome";
@@ -165,7 +166,7 @@ export function YoroAccountPage({ embedded = false }: { embedded?: boolean }) {
   }
 
   return (
-    <Root className={`yoro-account-page ${embedded ? "is-embedded" : ""}`}>
+    <Root className={`yoro-account-page ${embedded ? "is-embedded" : "yoro-home-chrome"}`}>
       {!embedded ? (
         <a className="yoro-account-brand" href="/bot" aria-label="YORO.gg">YORO.gg</a>
       ) : null}
@@ -203,11 +204,17 @@ export function YoroAccountPage({ embedded = false }: { embedded?: boolean }) {
                 return (
                   <article className="yoro-connection-card" key={provider}>
                     <span className={`yoro-login-option__icon is-${provider}`}>
-                      {provider === "discord" ? <DiscordSymbolIcon /> : provider === "twitch" ? "T" : "R"}
+                      {provider === "discord"
+                        ? <DiscordSymbolIcon />
+                        : provider === "twitch"
+                          ? <TwitchGlitchIcon />
+                          : "R"}
                     </span>
                     <div>
                       <h2>{copy[provider]}</h2>
-                      <strong>{identity ? copy.connected : copy.notConnected}</strong>
+                      <strong className={identity ? "is-connected" : "is-disconnected"}>
+                        {identity ? copy.connected : copy.notConnected}
+                      </strong>
                       {identity ? <p>{identity.displayName}</p> : null}
                       {provider === "riot" && !identity ? (
                         <p>{riotNeedsTwitch ? copy.riotTwitchRequired : copy.riotConsent}</p>
@@ -222,7 +229,10 @@ export function YoroAccountPage({ embedded = false }: { embedded?: boolean }) {
                         {copy.unlink}
                       </button>
                     ) : (
-                      <a href={connectionUrl}>
+                      <a
+                        className={provider === "riot" ? "is-required-action" : undefined}
+                        href={connectionUrl}
+                      >
                         {riotNeedsTwitch ? copy.riotReconnectTwitch : copy.connect}
                       </a>
                     )}
