@@ -5,3 +5,7 @@
  * 없이 pages layer 단독 소유입니다(LoL의 !important 지층을 만들지 않습니다).
  */
 @import "./01-valorant.css";
+/* 수묵 지면(yoro-home-shell) 접합층 — AppShell.css/Button.css/EmptyState.css가
+   레이어 없이 로드되어 이기는 문제를 셸 스코프 토큰 교체로 해결합니다.
+   자체 @layer home 선언이라 import 위치는 캐스케이드에 영향이 없습니다. */
+@import "./02-valorant-ink.css";

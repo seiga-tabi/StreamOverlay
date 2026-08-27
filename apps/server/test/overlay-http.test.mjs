@@ -2004,3 +2004,77 @@ test("공개 app shell은 crawler가 읽는 h1과 hreflang, JSON-LD를 함께 �
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("Palworld 허브 app shell은 데이터 서비스의 실제 목록을 fallback 본문에 담는다", async () => {
+  const previousDashboardStatic = appConfig.paths.dashboardStatic;
+  const dir = mkdtempSync(path.join(tmpdir(), "streamops-palworld-hub-seo-"));
+  const queryLog = [];
+  const response = (items, total) => ({ items, pagination: { total } });
+  const palworldDataService = {
+    listPals(query) {
+      queryLog.push(["pals", query]);
+      return response([{ id: "lamball", nameKo: "도로롱", nameJa: "モコロン", nameEn: "Lamball" }], 574);
+    },
+    listItems(query) {
+      queryLog.push(["items", query]);
+      return response([{ id: "pal-sphere", nameKo: "팰 스피어", nameJa: "パルスフィア", nameEn: "Pal Sphere" }], 1_847);
+    },
+    listSkills(query) {
+      queryLog.push(["skills", query]);
+      return response([{ id: "air-cannon", nameKo: "공기 대포", nameJa: "エアーキャノン", nameEn: "Air Cannon" }], 566);
+    },
+    listTechnologyUnlocks(query) {
+      queryLog.push(["technology", query]);
+      return response([{
+        id: "primitive-workbench",
+        kind: "building",
+        nameKo: "원시적인 작업대",
+        nameJa: "原始的な作業台",
+        technologyLevel: 1
+      }], 312);
+    }
+  };
+  try {
+    writeFileSync(
+      path.join(dir, "index.html"),
+      "<!doctype html><html lang=\"ko\"><head><meta name=\"description\" content=\"home\"><link rel=\"canonical\" href=\"https://yoro.gg/\"><meta property=\"og:title\" content=\"home\"><meta property=\"og:description\" content=\"home\"><meta property=\"og:url\" content=\"https://yoro.gg/\"><meta name=\"twitter:title\" content=\"home\"><meta name=\"twitter:description\" content=\"home\"><script nonce=\"__STREAMOPS_CSP_NONCE__\" src=\"/dashboard/config.js\"></script><title>YORO.gg</title></head><body><div id=\"root\"></div></body></html>"
+    );
+    appConfig.paths.dashboardStatic = dir;
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      actions: { async dispatchOne() {} },
+      palworldDataService
+    });
+    const cases = [
+      ["/ko/palworld/pals", "등록된 팰</dt><dd>574종", "도로롱"],
+      ["/ja/palworld/items", "登録アイテム</dt><dd>1847件", "パルスフィア"],
+      ["/en/palworld/skills", "Registered skills</dt><dd>566", "Air Cannon"],
+      ["/ko/palworld/technology", "기술 해금 항목</dt><dd>312개", "원시적인 작업대"]
+    ];
+    for (const [pathname, fact, name] of cases) {
+      const res = createResponse();
+      await handler(createRequest("GET", pathname), res);
+      assert.equal(res.statusCode, 200, pathname);
+      assert.match(res.body, new RegExp(fact, "u"), pathname);
+      assert.match(res.body, new RegExp(name, "u"), pathname);
+    }
+    assert.deepEqual(queryLog.map(([kind, query]) => [kind, query.sort, query.order, query.page, query.limit]), [
+      ["pals", "number", "asc", 1, 30],
+      ["items", "name", "asc", 1, 30],
+      ["skills", "name", "asc", 1, 30],
+      ["technology", undefined, "asc", 1, 30]
+    ]);
+
+    /* 특정 스냅샷 조회가 실패해도 일반 제목·요약 fallback은 사라지지 않습니다. */
+    palworldDataService.listItems = () => { throw new Error("스냅샷 없음"); };
+    const fallbackResponse = createResponse();
+    await handler(createRequest("GET", "/ko/palworld/items"), fallbackResponse);
+    assert.equal(fallbackResponse.statusCode, 200);
+    assert.match(fallbackResponse.body, /<h1>아이템<\/h1>/u);
+    assert.doesNotMatch(fallbackResponse.body, /등록된 아이템/u);
+  } finally {
+    appConfig.paths.dashboardStatic = previousDashboardStatic;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});

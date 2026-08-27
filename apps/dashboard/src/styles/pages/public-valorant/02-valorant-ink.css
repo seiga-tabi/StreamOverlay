@@ -1,0 +1,42 @@
+/* 발로란트 — 수묵 지면(yoro-home-shell) 접합층.
+ *
+ * Palworld의 16-palworld-ink.css와 같은 결함 수정입니다: shared/ui/AppShell.tsx가
+ * AppShell.css를 layer 없이(JS import) 불러오므로, 그 파일의
+ * `.yoro-app-shell { background: var(--yoro-color-bg); color: var(--yoro-color-text); }`
+ * 세 줄은 어떤 @layer 규칙보다도 특이성과 무관하게 이깁니다. 발로란트는 AppShell을
+ * 쓰므로(팰월드와 동일) 셸 클래스(.valorant-shell.theme-light 등)만 바꿔서는 배경·
+ * 글자색이 전혀 반응하지 않았습니다 — 다크/라이트 토글을 눌러도 화면이 그대로였던
+ * 원인입니다(실측: --yoro-color-bg/--yoro-color-text는 전역 라이트 고정 토큰이라
+ * 테마 전환과 무관).
+ *
+ * 같은 이유로 shared/ui/Button.css·EmptyState.css도 JS import라 레이어 밖입니다 —
+ * 발로란트 화면(ComingSoon/NotFound)은 EmptyState·Button만으로 구성돼 있어 이
+ * 두 컴포넌트가 읽는 토큰도 함께 갈아 끼웁니다.
+ */
+@layer home {
+  .valorant-shell {
+    --yoro-color-bg: var(--home-bg);
+    --yoro-color-text: var(--home-ink);
+    --yoro-color-surface: var(--home-card);
+    --yoro-color-surface-strong: var(--home-card);
+    --yoro-color-surface-muted: var(--home-card);
+    --yoro-color-border: var(--home-line);
+    --yoro-color-border-strong: var(--home-stroke);
+    --yoro-app-shell-footer-background: var(--home-bg);
+    --yoro-app-shell-footer-border: var(--home-line);
+
+    /* EmptyState(ComingSoon/NotFound)가 읽는 훅 — 레이어 밖이라 토큰으로만 닿습니다. */
+    --yoro-empty-state-surface: var(--home-card);
+    --yoro-empty-state-background: var(--home-card);
+    --yoro-empty-state-border: var(--home-line);
+    --yoro-empty-state-text: var(--home-ink);
+    --yoro-empty-state-title: var(--home-ink);
+    --yoro-empty-state-description: var(--home-sub);
+    --yoro-empty-state-icon-background: var(--home-bg);
+
+    /* Button.css의 primary/secondary 채움 — 팰월드와 동일하게 헤어라인 색으로
+       내려 수묵 톤(원색 채움이 아니라 농담·선)을 따라가게 합니다. */
+    --yoro-color-primary: var(--home-line);
+    --yoro-color-secondary: var(--home-line);
+  }
+}

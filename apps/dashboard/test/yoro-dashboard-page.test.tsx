@@ -102,10 +102,10 @@ test("공통 YORO Dashboard는 로그인 사용자용 진입점과 KO·JA 문구
   assert.match(source, /className="yoro-dashboard-mobile-detail-links"/u);
   assert.match(source, /window\.location\.assign\("\/lol"\)/u);
   assert.doesNotMatch(source, /yoro-dashboard-sidebar/u);
-  assert.match(chromeSource, /className="yoro-lol-subnav dashboard-subnav"/u);
   assert.match(chromeSource, /<HomeHeader/u);
   assert.match(chromeSource, /공개 홈/u);
   assert.match(chromeSource, /公開ホーム/u);
+  assert.doesNotMatch(chromeSource, /dashboard-subnav/u);
   assert.match(bottomBarSource, /data-testid="dashboard-bottom-tab-bar"/u);
   assert.equal((bottomBarMarkup.match(/<button/g) ?? []).length, 5);
   assert.match(bottomBarMarkup, /aria-current="page"/u);

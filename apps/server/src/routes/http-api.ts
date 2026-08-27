@@ -246,6 +246,10 @@ import {
   palworldEntityRouteForPath,
   palworldEntitySeoMetadata,
   palworldBreedingFallback,
+  palworldItemsFallback,
+  palworldPalsFallback,
+  palworldSkillsFallback,
+  palworldTechnologyFallback,
   reactionShareRouteForPath,
   reactionShareSeoMetadata,
   publicSeoMetadataForPath,
@@ -4060,6 +4064,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
   const PALWORLD_SEO_COMBO_LIMIT = 12;
   /* 교배 페이지 본문에 실을 팰 링크 수. public-seo 의 상한과 같은 값입니다. */
   const PALWORLD_SEO_BREEDING_LINKS = 60;
+  /* Palworld 목록 허브 fallback에 실을 대표 항목 수. public-seo 상한과 같습니다. */
+  const PALWORLD_SEO_HUB_ITEMS = 30;
 
   function resolvePalworldSeoEntity(pathname: string): {
     entity?: PalworldSeoEntity;
@@ -4275,6 +4281,119 @@ export function createHttpHandler(input: HttpHandlerInput) {
         };
       } catch {
         /* 스냅샷이 없으면 요약만 남깁니다. */
+      }
+    }
+    /* Palworld 목록 허브 본문 — 화면과 같은 정렬의 첫 항목과 실제 전체 개수를
+       사용합니다. 각 도메인 스냅샷이 없으면 기존 요약으로 안전하게 돌아갑니다. */
+    const normalizedPalworldHubPath = stripPublicUrlLocalePrefix(pathname).replace(/\/$/u, "");
+    const palworldHubLocale = publicUrlLocaleFromPathname(pathname) ?? "ko";
+    const palworldHubName = (
+      reference: { nameKo?: string | null; nameJa?: string | null; nameEn?: string | null }
+    ): string => (palworldHubLocale === "ja"
+      ? reference.nameJa
+      : palworldHubLocale === "en"
+        ? reference.nameEn
+        : reference.nameKo) || reference.nameEn || reference.nameKo || "";
+    if (normalizedPalworldHubPath === "/palworld/pals" && fallback.fallback && input.palworldDataService) {
+      try {
+        const list = input.palworldDataService.listPals({
+          locale: palworldHubLocale,
+          sort: "number",
+          order: "asc",
+          page: 1,
+          limit: PALWORLD_SEO_HUB_ITEMS
+        });
+        const pals = list.items
+          .map((pal) => ({ id: pal.id, name: palworldHubName(pal) }))
+          .filter((pal) => pal.name.length > 0);
+        return {
+          ...fallback,
+          fallback: palworldPalsFallback(
+            fallback.fallback,
+            palworldHubLocale,
+            pals,
+            list.pagination?.total ?? pals.length
+          )
+        };
+      } catch {
+        /* 팰 스냅샷이 없으면 기존 요약만 남깁니다. */
+      }
+    }
+    if (normalizedPalworldHubPath === "/palworld/items" && fallback.fallback && input.palworldDataService) {
+      try {
+        const list = input.palworldDataService.listItems({
+          locale: palworldHubLocale,
+          sort: "name",
+          order: "asc",
+          page: 1,
+          limit: PALWORLD_SEO_HUB_ITEMS
+        });
+        const items = list.items
+          .map((item) => ({ id: item.id, name: palworldHubName(item) }))
+          .filter((item) => item.name.length > 0);
+        return {
+          ...fallback,
+          fallback: palworldItemsFallback(
+            fallback.fallback,
+            palworldHubLocale,
+            items,
+            list.pagination?.total ?? items.length
+          )
+        };
+      } catch {
+        /* 아이템 스냅샷이 없으면 기존 요약만 남깁니다. */
+      }
+    }
+    if (normalizedPalworldHubPath === "/palworld/skills" && fallback.fallback && input.palworldDataService) {
+      try {
+        const list = input.palworldDataService.listSkills({
+          locale: palworldHubLocale,
+          sort: "name",
+          order: "asc",
+          page: 1,
+          limit: PALWORLD_SEO_HUB_ITEMS
+        });
+        const skills = list.items
+          .map((skill) => ({ id: skill.id, name: palworldHubName(skill) }))
+          .filter((skill) => skill.name.length > 0);
+        return {
+          ...fallback,
+          fallback: palworldSkillsFallback(
+            fallback.fallback,
+            palworldHubLocale,
+            skills,
+            list.pagination?.total ?? skills.length
+          )
+        };
+      } catch {
+        /* 스킬 스냅샷이 없으면 기존 요약만 남깁니다. */
+      }
+    }
+    if (normalizedPalworldHubPath === "/palworld/technology" && fallback.fallback && input.palworldDataService) {
+      try {
+        const list = input.palworldDataService.listTechnologyUnlocks({
+          locale: palworldHubLocale,
+          order: "asc",
+          page: 1,
+          limit: PALWORLD_SEO_HUB_ITEMS
+        });
+        const unlocks = list.items
+          .map((unlock) => ({
+            name: palworldHubName(unlock.kind === "item" ? unlock.item : unlock),
+            technologyLevel: unlock.technologyLevel
+          }))
+          .filter((unlock) => unlock.name.length > 0);
+        return {
+          ...fallback,
+          fallback: palworldTechnologyFallback(
+            fallback.fallback,
+            palworldHubLocale,
+            unlocks,
+            list.pagination?.total ?? unlocks.length
+          )
+        };
+      } catch {
+        /* 기술 데이터가 없으면 기존 요약만 남깁니다. */
       }
     }
     const palworldRoute = palworldEntityRouteForPath(pathname);

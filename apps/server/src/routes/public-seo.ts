@@ -999,6 +999,9 @@ function homeFallback(locale: PublicUrlLocale): PublicSeoFallback {
 /** 팰 목록 링크 상한 — 교배 페이지 본문의 크롤 경로용. 574종 전량을 넣으면
  *  HTML 이 과하게 커지므로 상한을 두고 전체 개수를 실값으로 적습니다. */
 const PALWORLD_BREEDING_LINK_LIMIT = 60;
+/** Palworld 허브 본문에 실을 대표 항목 수. 화면의 첫 목록보다 조금 넓게 잡되
+ *  30KB HTML 상한 안에서 상세 페이지 크롤 경로를 충분히 제공합니다. */
+const PALWORLD_HUB_LIST_LIMIT = 30;
 
 /**
  * 교배 페이지 본문 — 시스템 요약 + 팰 상세 내부 링크.
@@ -1053,6 +1056,206 @@ export function palworldBreedingFallback(
   };
 }
 
+type PalworldSeoListEntry = Readonly<{ id: string; name: string }>;
+
+/** 팰 도감 허브 본문 — 도감 번호순 대표 팰과 실제 전체 등록 수. */
+export function palworldPalsFallback(
+  base: PublicSeoFallback,
+  locale: PublicUrlLocale,
+  pals: readonly PalworldSeoListEntry[],
+  totalPals: number
+): PublicSeoFallback {
+  if (pals.length === 0) return base;
+  const shown = pals.slice(0, PALWORLD_HUB_LIST_LIMIT);
+  return {
+    ...base,
+    facts: [
+      ...base.facts,
+      {
+        label: t(locale, "등록된 팰", "登録パル", "Registered pals"),
+        value: t(locale, `${totalPals}종`, `${totalPals}種`, String(totalPals))
+      }
+    ],
+    sections: [{
+      heading: t(locale, "대표 팰", "代表パル", "Featured pals"),
+      links: shown.map((pal) => ({
+        href: `/${locale}${palworldEntityPath("pal", pal.id)}`,
+        label: pal.name
+      })),
+      note: t(locale, `전체 ${totalPals}종의 팰`, `全${totalPals}種のパル`, `${totalPals} pals in total`)
+    }]
+  };
+}
+
+/** 아이템 허브 본문 — 이름순 대표 아이템과 실제 전체 등록 수. */
+export function palworldItemsFallback(
+  base: PublicSeoFallback,
+  locale: PublicUrlLocale,
+  items: readonly PalworldSeoListEntry[],
+  totalItems: number
+): PublicSeoFallback {
+  if (items.length === 0) return base;
+  const shown = items.slice(0, PALWORLD_HUB_LIST_LIMIT);
+  return {
+    ...base,
+    facts: [
+      ...base.facts,
+      {
+        label: t(locale, "등록된 아이템", "登録アイテム", "Registered items"),
+        value: t(locale, `${totalItems}개`, `${totalItems}件`, String(totalItems))
+      }
+    ],
+    sections: [{
+      heading: t(locale, "대표 아이템", "代表アイテム", "Featured items"),
+      links: shown.map((item) => ({
+        href: `/${locale}${palworldEntityPath("item", item.id)}`,
+        label: item.name
+      })),
+      note: t(locale, `전체 ${totalItems}개 아이템`, `全${totalItems}件のアイテム`, `${totalItems} items in total`)
+    }]
+  };
+}
+
+/** 스킬 허브 본문 — 이름순 대표 스킬과 실제 전체 등록 수. */
+export function palworldSkillsFallback(
+  base: PublicSeoFallback,
+  locale: PublicUrlLocale,
+  skills: readonly PalworldSeoListEntry[],
+  totalSkills: number
+): PublicSeoFallback {
+  if (skills.length === 0) return base;
+  const shown = skills.slice(0, PALWORLD_HUB_LIST_LIMIT);
+  return {
+    ...base,
+    facts: [
+      ...base.facts,
+      {
+        label: t(locale, "등록된 스킬", "登録スキル", "Registered skills"),
+        value: t(locale, `${totalSkills}개`, `${totalSkills}件`, String(totalSkills))
+      }
+    ],
+    sections: [{
+      heading: t(locale, "대표 스킬", "代表スキル", "Featured skills"),
+      links: shown.map((skill) => ({
+        href: `/${locale}${palworldEntityPath("skill", skill.id)}`,
+        label: skill.name
+      })),
+      note: t(locale, `전체 ${totalSkills}개 스킬`, `全${totalSkills}件のスキル`, `${totalSkills} skills in total`)
+    }]
+  };
+}
+
+/** 기술 해금 허브 본문 — 기술 레벨순 대표 항목과 실제 전체 등록 수. */
+export function palworldTechnologyFallback(
+  base: PublicSeoFallback,
+  locale: PublicUrlLocale,
+  unlocks: readonly { name: string; technologyLevel: number }[],
+  totalUnlocks: number
+): PublicSeoFallback {
+  if (unlocks.length === 0) return base;
+  const shown = unlocks.slice(0, PALWORLD_HUB_LIST_LIMIT);
+  return {
+    ...base,
+    facts: [
+      ...base.facts,
+      {
+        label: t(locale, "기술 해금 항목", "テクノロジー解放項目", "Technology unlocks"),
+        value: t(locale, `${totalUnlocks}개`, `${totalUnlocks}件`, String(totalUnlocks))
+      }
+    ],
+    sections: [{
+      heading: t(locale, "대표 기술 해금", "主なテクノロジー解放", "Featured technology unlocks"),
+      facts: shown.map((unlock) => ({
+        label: unlock.name,
+        value: t(
+          locale,
+          `레벨 ${unlock.technologyLevel}`,
+          `レベル ${unlock.technologyLevel}`,
+          `Level ${unlock.technologyLevel}`
+        )
+      })),
+      note: t(
+        locale,
+        `전체 ${totalUnlocks}개 기술 해금 항목`,
+        `全${totalUnlocks}件のテクノロジー解放項目`,
+        `${totalUnlocks} technology unlocks in total`
+      )
+    }]
+  };
+}
+
+/** Bot 사용방법 화면과 같은 5단계 연결 흐름. en 콘텐츠는 아직 없어 ko로 접힙니다. */
+function botGettingStartedFallback(base: PublicSeoFallback, locale: PublicUrlLocale): PublicSeoFallback {
+  return {
+    ...base,
+    sections: [{
+      heading: t(locale, "YORO Bot 5단계 연결 순서", "YORO Bot 5ステップ連携手順", "YORO Bot 5단계 연결 순서"),
+      items: [
+        t(locale, "YORO Bot 추가 — YORO Bot을 관리할 Discord 서버에 초대합니다.", "YORO Botを追加 — YORO Botを管理するDiscordサーバーへ招待します。", "YORO Bot 추가 — YORO Bot을 관리할 Discord 서버에 초대합니다."),
+        t(locale, "로그인 및 Organization 연결 — Discord로 로그인하고 관리할 서버를 Organization에 연결합니다.", "ログインとOrganization連携 — Discordでログインし、管理するサーバーをOrganizationへ連携します。", "로그인 및 Organization 연결 — Discord로 로그인하고 관리할 서버를 Organization에 연결합니다."),
+        t(locale, "Palworld REST 연결 — Dashboard에서 게임 서버의 읽기 전용 REST 연결을 확인합니다.", "Palworld REST連携 — Dashboardでゲームサーバーの読み取り専用REST接続を確認します。", "Palworld REST 연결 — Dashboard에서 게임 서버의 읽기 전용 REST 연결을 확인합니다."),
+        t(locale, "사용할 명령 활성화 — Discord Bot 제어에서 서버 구성원에게 제공할 명령을 선택합니다.", "利用コマンドを有効化 — Discord Bot制御からサーバーメンバーに提供するコマンドを選択します。", "사용할 명령 활성화 — Discord Bot 제어에서 서버 구성원에게 제공할 명령을 선택합니다."),
+        t(locale, "Discord에서 사용 시작 — 영어 명령을 입력해 첫 서버 상태를 확인합니다.", "Discordで利用開始 — 英語コマンドを入力して最初のサーバー状態を確認します。", "Discord에서 사용 시작 — 영어 명령을 입력해 첫 서버 상태를 확인합니다.")
+      ]
+    }]
+  };
+}
+
+/** 명령어 화면의 user·admin 탭에 실제 표시되는 명령과 설명. */
+function botCommandsFallback(base: PublicSeoFallback, locale: PublicUrlLocale): PublicSeoFallback {
+  return {
+    ...base,
+    sections: [
+      {
+        heading: t(locale, "유저 명령어", "ユーザーコマンド", "유저 명령어"),
+        facts: [
+          { label: "/yoro status", value: t(locale, "Palworld 서버의 온라인 상태와 핵심 지표를 확인합니다.", "Palworldサーバーのオンライン状態と主要指標を確認します。", "Palworld 서버의 온라인 상태와 핵심 지표를 확인합니다.") },
+          { label: "/yoro player", value: t(locale, "현재 접속자 목록을 보거나 게임 내 닉네임으로 공개 프로필을 검색합니다.", "現在の接続者一覧を確認し、ゲーム内ニックネームから公開プロフィールを検索します。", "현재 접속자 목록을 보거나 게임 내 닉네임으로 공개 프로필을 검색합니다.") },
+          { label: "/yoro guide", value: t(locale, "Palworld 전용 서버의 REST 설정과 YORO 연결 순서를 확인합니다.", "Palworld専用サーバーのREST設定とYORO連携手順を確認します。", "Palworld 전용 서버의 REST 설정과 YORO 연결 순서를 확인합니다.") },
+          { label: "/yoro dashboard", value: t(locale, "고정된 YORO Dashboard 주소를 실행자에게만 제공합니다.", "固定されたYORO Dashboardアドレスを実行者だけに提供します。", "고정된 YORO Dashboard 주소를 실행자에게만 제공합니다.") },
+          { label: "/yoro help", value: t(locale, "현재 Dashboard에서 활성화된 명령만 언어에 맞춰 보여줍니다.", "Dashboardで現在有効なコマンドだけを言語に合わせて表示します。", "현재 Dashboard에서 활성화된 명령만 언어에 맞춰 보여줍니다.") }
+        ]
+      },
+      {
+        heading: t(locale, "관리자 명령어", "管理者コマンド", "관리자 명령어"),
+        facts: [
+          { label: "/yoro setup", value: t(locale, "Discord 서버와 YORO Organization을 연결하는 일회용 설정 흐름을 시작합니다.", "DiscordサーバーとYORO Organizationを連携するワンタイム設定を開始します。", "Discord 서버와 YORO Organization을 연결하는 일회용 설정 흐름을 시작합니다.") },
+          { label: "/yoro language locale:<auto|ko|ja|en>", value: t(locale, "이 Discord 서버에서 YORO Bot이 전송하는 메시지 언어를 변경합니다.", "このDiscordサーバーでYORO Botが送信するメッセージ言語を変更します。", "이 Discord 서버에서 YORO Bot이 전송하는 메시지 언어를 변경합니다.") }
+        ]
+      }
+    ]
+  };
+}
+
+/** PalWorldSettings.ini 생성·설치 화면과 같은 핵심 안내. */
+function botGameFilesFallback(base: PublicSeoFallback, locale: PublicUrlLocale): PublicSeoFallback {
+  return {
+    ...base,
+    sections: [
+      {
+        heading: t(locale, "전용 서버 설정 만들기", "専用サーバー設定を作成", "전용 서버 설정 만들기"),
+        items: [
+          t(locale, "필요한 옵션만 조정해 PalWorldSettings.ini 파일을 만드세요. 모든 작업은 이 브라우저 안에서만 처리됩니다.", "必要なオプションだけを調整して PalWorldSettings.ini を作成できます。すべての処理はこのブラウザ内だけで行われます。", "필요한 옵션만 조정해 PalWorldSettings.ini 파일을 만드세요. 모든 작업은 이 브라우저 안에서만 처리됩니다."),
+          t(locale, "입력값은 YORO 서버로 전송하거나 계정에 저장하지 않습니다.", "入力値をYOROサーバーへ送信したり、アカウントへ保存したりしません。", "입력값은 YORO 서버로 전송하거나 계정에 저장하지 않습니다."),
+          t(locale, "게임 업데이트의 기본값 변경 영향을 줄이기 위해 변경한 옵션만 생성합니다.", "ゲーム更新によるデフォルト値変更の影響を抑えるため、変更したオプションだけを生成します。", "게임 업데이트의 기본값 변경 영향을 줄이기 위해 변경한 옵션만 생성합니다.")
+        ]
+      },
+      {
+        heading: t(locale, "파일 적용 위치", "ファイルの配置先", "파일 적용 위치"),
+        items: [
+          t(locale, "서버를 한 번 실행해 설정 디렉터리를 만든 뒤 서버를 종료하고 파일을 교체하세요. DefaultPalWorldSettings.ini를 직접 수정해도 적용되지 않습니다.", "サーバーを一度起動して設定ディレクトリを作成し、サーバーを停止してからファイルを置き換えてください。DefaultPalWorldSettings.iniを直接編集しても反映されません。", "서버를 한 번 실행해 설정 디렉터리를 만든 뒤 서버를 종료하고 파일을 교체하세요. DefaultPalWorldSettings.ini를 직접 수정해도 적용되지 않습니다."),
+          "Windows: steamapps\\common\\PalServer\\Pal\\Saved\\Config\\WindowsServer\\PalWorldSettings.ini",
+          "Linux: steamapps/common/PalServer/Pal/Saved/Config/LinuxServer/PalWorldSettings.ini"
+        ]
+      },
+      {
+        heading: t(locale, "공개 포트 보안", "公開ポートのセキュリティ", "공개 포트 보안"),
+        items: [t(locale, "REST API와 RCON은 기본적으로 비활성 상태입니다. 활성화하더라도 인터넷에 직접 노출하지 말고 방화벽, VPN 또는 접근 제어 프록시를 사용하세요.", "REST APIとRCONはデフォルトで無効です。有効にする場合もインターネットへ直接公開せず、ファイアウォール、VPN、またはアクセス制御プロキシを使用してください。", "REST API와 RCON은 기본적으로 비활성 상태입니다. 활성화하더라도 인터넷에 직접 노출하지 말고 방화벽, VPN 또는 접근 제어 프록시를 사용하세요.")]
+      }
+    ]
+  };
+}
+
 function genericFallback(
   content: PublicSeoContent,
   normalizedPath: string,
@@ -1073,6 +1276,19 @@ function genericFallback(
       ? siblings
       : [{ href: `/${locale}/`, label: t(locale, "홈", "ホーム", "Home") }]
   };
+}
+
+function fallbackForPath(
+  content: PublicSeoContent,
+  normalizedPath: string,
+  locale: PublicUrlLocale
+): PublicSeoFallback {
+  if (normalizedPath === "/") return homeFallback(locale);
+  const base = genericFallback(content, normalizedPath, locale);
+  if (normalizedPath === "/bot/getting-started") return botGettingStartedFallback(base, locale);
+  if (normalizedPath === "/bot/commands") return botCommandsFallback(base, locale);
+  if (normalizedPath === "/bot/game-files") return botGameFilesFallback(base, locale);
+  return base;
 }
 
 const KOREAN_DEFAULT: PublicSeoContent = {
@@ -1509,9 +1725,7 @@ export function publicSeoMetadataForPath(
     alternateUrls: alternateUrlsForPath(normalizedPath),
     canonicalUrl,
     description: content.description,
-    fallback: normalizedPath === "/"
-      ? homeFallback(locale)
-      : genericFallback(content, normalizedPath, locale),
+    fallback: fallbackForPath(content, normalizedPath, locale),
     imageAlt: localeText(socialImage.alt, locale),
     imageUrl: socialImage.url,
     locale,

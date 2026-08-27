@@ -7,11 +7,14 @@ export function usePublicTheme() {
 
   useEffect(() => {
     document.documentElement.dataset.publicTheme = theme;
-    saveStoredTheme(theme);
   }, [theme]);
 
   const toggleTheme = (): void => {
-    setTheme((current) => current === "dark" ? "light" : "dark");
+    setTheme((current) => {
+      const next = current === "dark" ? "light" : "dark";
+      saveStoredTheme(next);
+      return next;
+    });
   };
 
   return { theme, toggleTheme };

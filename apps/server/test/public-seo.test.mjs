@@ -7,6 +7,10 @@ const {
   palworldEntityRedirectPath,
   palworldEntityRouteForPath,
   palworldEntitySeoMetadata,
+  palworldItemsFallback,
+  palworldPalsFallback,
+  palworldSkillsFallback,
+  palworldTechnologyFallback,
   publicSeoMetadataForPath,
   palworldBreedingFallback,
   reactionShareRouteForPath,
@@ -548,6 +552,77 @@ test("교배 페이지 fallback 은 시스템 요약과 팰 상세 내부 링크
 
   /* 스냅샷이 없으면 원본 그대로(빈 페이지 금지). */
   assert.deepEqual(palworldBreedingFallback(base, "ko", [], 0), base);
+});
+
+test("Palworld 허브 fallback은 실제 전체 개수와 대표 상세 링크를 낸다", () => {
+  const base = {
+    facts: [],
+    heading: "목록",
+    summary: "요약",
+    links: [{ href: "/ko/palworld", label: "팰월드" }]
+  };
+  const entries = Array.from({ length: 35 }, (_, index) => ({
+    id: `entry-${index + 1}`,
+    name: index === 0 ? "<대표 & 항목>" : `항목 ${index + 1}`
+  }));
+
+  const pals = palworldPalsFallback(base, "ko", entries, 574);
+  assert.deepEqual(pals.facts, [{ label: "등록된 팰", value: "574종" }]);
+  assert.equal(pals.sections[0].links.length, 30);
+  assert.deepEqual(pals.sections[0].links[0], {
+    href: "/ko/palworld/pals/entry-1",
+    label: "<대표 & 항목>"
+  });
+  assert.equal(pals.sections[0].note, "전체 574종의 팰");
+  assert.deepEqual(pals.links, base.links, "기존 형제 링크를 유지해야 합니다");
+
+  const items = palworldItemsFallback(base, "ja", entries.slice(0, 2), 1_847);
+  assert.deepEqual(items.facts, [{ label: "登録アイテム", value: "1847件" }]);
+  assert.equal(items.sections[0].links[0].href, "/ja/palworld/items/entry-1");
+
+  const skills = palworldSkillsFallback(base, "en", entries.slice(0, 2), 566);
+  assert.deepEqual(skills.facts, [{ label: "Registered skills", value: "566" }]);
+  assert.equal(skills.sections[0].links[0].href, "/en/palworld/skills/entry-1");
+
+  const technology = palworldTechnologyFallback(base, "ko", [
+    { name: "원시 작업대", technologyLevel: 1 },
+    { name: "나무 상자", technologyLevel: 2 }
+  ], 312);
+  assert.deepEqual(technology.facts, [{ label: "기술 해금 항목", value: "312개" }]);
+  assert.deepEqual(technology.sections[0].facts, [
+    { label: "원시 작업대", value: "레벨 1" },
+    { label: "나무 상자", value: "레벨 2" }
+  ]);
+
+  /* 목록 데이터가 없으면 기존 제목·요약·형제 링크를 그대로 보존합니다. */
+  assert.deepEqual(palworldPalsFallback(base, "ko", [], 0), base);
+
+  /* 동적 이름은 기존 renderFallbackHtml의 escapeSeoHtml 경로를 반드시 탑니다. */
+  const metadata = publicSeoMetadataForPath("/ko/palworld/pals");
+  const html = applyPublicSeoMetadata(APP_SHELL, { ...metadata, fallback: pals });
+  assert.match(html, /&lt;대표 &amp; 항목&gt;/u);
+  assert.doesNotMatch(html, /<대표 & 항목>/u);
+});
+
+test("Bot 콘텐츠 경로는 화면과 같은 ko·ja 안내를 raw HTML fallback에 담는다", () => {
+  const gettingStartedKo = render("/ko/bot/getting-started");
+  assert.match(gettingStartedKo, /YORO Bot 5단계 연결 순서/u);
+  assert.match(gettingStartedKo, /Palworld REST 연결 — Dashboard에서 게임 서버의 읽기 전용 REST 연결을 확인합니다\./u);
+  assert.match(gettingStartedKo, /사용할 명령 활성화/u);
+  assert.match(gettingStartedKo, /href="\/ko\/bot\/commands"/u, "기존 형제 링크를 유지해야 합니다");
+
+  const commandsJa = render("/ja/bot/commands");
+  assert.match(commandsJa, /ユーザーコマンド/u);
+  assert.match(commandsJa, /<dt>\/yoro status<\/dt><dd>Palworldサーバーのオンライン状態と主要指標を確認します。<\/dd>/u);
+  assert.match(commandsJa, /\/yoro dashboard/u);
+  assert.match(commandsJa, /\/yoro help/u);
+  assert.match(commandsJa, /管理者コマンド/u);
+
+  const gameFilesKo = render("/ko/bot/game-files");
+  assert.match(gameFilesKo, /PalWorldSettings\.ini 파일을 만드세요/u);
+  assert.match(gameFilesKo, /DefaultPalWorldSettings\.ini를 직접 수정해도 적용되지 않습니다/u);
+  assert.match(gameFilesKo, /WindowsServer\\PalWorldSettings\.ini/u);
+  assert.match(gameFilesKo, /REST API와 RCON은 기본적으로 비활성 상태입니다/u);
 });
 
 test("홈 title 은 무엇을 하는 사이트인지 담는다", () => {

@@ -1010,10 +1010,8 @@ export function YoroDashboardPage() {
         onLogout={() => void logoutAccount(authenticated.csrfToken).then(() => {
           window.location.assign("/login");
         })}
-        onNavigate={selectDashboardPage}
         onPublicHome={() => window.location.assign("/lol")}
         onToggleTheme={() => setDashboardTheme((current) => current === "dark" ? "light" : "dark")}
-        page={dashboardTopLevelPage(page)}
       />
       <div className="yoro-dashboard-body">
       <aside
