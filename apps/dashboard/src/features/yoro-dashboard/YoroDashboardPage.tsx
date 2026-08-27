@@ -1,7 +1,6 @@
 import {
   useEffect,
   useMemo,
-  useRef,
   useState,
   type FormEvent
 } from "react";
@@ -48,6 +47,11 @@ import {
   updateYoroRiotId,
   type YoroStreamerStatus
 } from "./api";
+import { DashboardBottomTabBar } from "./DashboardBottomTabBar";
+import {
+  DashboardChrome,
+  type DashboardTopLevelPage
+} from "./DashboardChrome";
 import { ParticipationManagementPage } from "./ParticipationManagementPage";
 
 type UnifiedDashboardPage =
@@ -74,10 +78,6 @@ const copy = {
     streamingFollowers: "Followers",
     streamingRiot: "Riot ID",
     settings: "개인 설정",
-    publicHome: "YORO.gg",
-    logout: "로그아웃",
-    openMenu: "Dashboard 메뉴 열기",
-    closeMenu: "Dashboard 메뉴 닫기",
     loginTitle: "YORO.gg 로그인이 필요합니다.",
     loginDescription: "Discord 또는 Twitch 계정으로 로그인하면 공통 Dashboard를 이용할 수 있습니다.",
     login: "로그인",
@@ -216,10 +216,6 @@ const copy = {
     streamingFollowers: "Followers",
     streamingRiot: "Riot ID",
     settings: "個人設定",
-    publicHome: "YORO.gg",
-    logout: "ログアウト",
-    openMenu: "Dashboardメニューを開く",
-    closeMenu: "Dashboardメニューを閉じる",
     loginTitle: "YORO.gg へのログインが必要です。",
     loginDescription: "Discord または Twitch アカウントでログインすると共通Dashboardを利用できます。",
     login: "ログイン",
@@ -429,6 +425,21 @@ const organizationPages = new Set<UnifiedDashboardPage>([
   "organizationServers"
 ]);
 
+function dashboardTopLevelPage(page: UnifiedDashboardPage): DashboardTopLevelPage {
+  if (
+    page === "organizations"
+    || page === "organizationBot"
+    || page === "organizationServers"
+  ) return "organizations";
+  if (
+    page === "streaming"
+    || page === "streamingParticipation"
+    || page === "streamingFollowers"
+    || page === "streamingRiot"
+  ) return "streaming";
+  return page;
+}
+
 function organizationSearch(search: string): string {
   const organizationId = new URLSearchParams(search).get("organization");
   return organizationId
@@ -534,11 +545,9 @@ export function YoroDashboardPage() {
   const [applying, setApplying] = useState(false);
   const [permissionOpening, setPermissionOpening] = useState(false);
   const [riotIdDraft, setRiotIdDraft] = useState("");
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authLocale, setAuthLocale] = useState<DashboardLocale>(() => detectDashboardLocale());
   const [authTheme, setAuthTheme] = useState<"dark" | "light">("dark");
-  const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
-  const sidebarRef = useRef<HTMLElement>(null);
+  const [dashboardTheme, setDashboardTheme] = useState<"dark" | "light">("dark");
   const page = yoroDashboardPageFromPath(window.location.pathname);
   const search = new URLSearchParams(window.location.search);
   const setupToken = search.get("setup") ?? "";
@@ -579,45 +588,6 @@ export function YoroDashboardPage() {
     document.documentElement.dataset.reducedMotion =
       preferences.reducedMotion ? "true" : "false";
   }, [preferences]);
-
-  useEffect(() => {
-    if (!mobileMenuOpen) return undefined;
-    const sidebar = sidebarRef.current;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    const focusable = Array.from(
-      sidebar?.querySelectorAll<HTMLElement>(
-        'a[href], button:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      ) ?? []
-    );
-    focusable[0]?.focus();
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        setMobileMenuOpen(false);
-        window.setTimeout(() => mobileMenuButtonRef.current?.focus(), 0);
-        return;
-      }
-      if (event.key !== "Tab" || focusable.length === 0) return;
-      const first = focusable[0];
-      const last = focusable.at(-1);
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last?.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first?.focus();
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [mobileMenuOpen]);
 
   useEffect(() => {
     if (!authenticated || page !== "overview") return undefined;
@@ -954,15 +924,7 @@ export function YoroDashboardPage() {
     }] : [])
   ];
 
-  function closeMobileMenu(restoreFocus = true): void {
-    setMobileMenuOpen(false);
-    if (restoreFocus) {
-      window.setTimeout(() => mobileMenuButtonRef.current?.focus(), 0);
-    }
-  }
-
   function selectDashboardPage(nextPage: UnifiedDashboardPage): void {
-    closeMobileMenu(false);
     navigate(nextPage);
   }
 
@@ -1037,62 +999,28 @@ export function YoroDashboardPage() {
   }
 
   return (
-    <div className="yoro-dashboard-shell" data-page={page}>
-      <header className="yoro-dashboard-mobile-bar">
-        <a className="yoro-dashboard-brand" href="/dashboard">{text.brand}</a>
-        <button
-          aria-controls="yoro-dashboard-navigation"
-          aria-expanded={mobileMenuOpen}
-          aria-label={mobileMenuOpen ? text.closeMenu : text.openMenu}
-          className="yoro-dashboard-menu-button"
-          onClick={() => setMobileMenuOpen((open) => !open)}
-          ref={mobileMenuButtonRef}
-          type="button"
-        >
-          <span aria-hidden="true" />
-          <span aria-hidden="true" />
-          <span aria-hidden="true" />
-        </button>
-      </header>
-      <button
-        aria-label={text.closeMenu}
-        className={`yoro-dashboard-backdrop${mobileMenuOpen ? " is-open" : ""}`}
-        onClick={() => closeMobileMenu()}
-        tabIndex={-1}
-        type="button"
+    <div
+      className={`yoro-dashboard-shell yoro-home-shell theme-${dashboardTheme}`}
+      data-page={page}
+    >
+      <DashboardChrome
+        accountName={identity?.displayName ?? text.unavailable}
+        locale={locale}
+        onLocale={(nextLocale) => changePreferences({ locale: nextLocale })}
+        onLogout={() => void logoutAccount(authenticated.csrfToken).then(() => {
+          window.location.assign("/login");
+        })}
+        onNavigate={selectDashboardPage}
+        onPublicHome={() => window.location.assign("/lol")}
+        onToggleTheme={() => setDashboardTheme((current) => current === "dark" ? "light" : "dark")}
+        page={dashboardTopLevelPage(page)}
       />
+      <div className="yoro-dashboard-body">
       <aside
         aria-label={text.brand}
-        className={`yoro-dashboard-sidebar${mobileMenuOpen ? " is-open" : ""}`}
+        className="yoro-dashboard-groupnav"
         id="yoro-dashboard-navigation"
-        ref={sidebarRef}
       >
-        <div className="yoro-dashboard-sidebar-heading">
-          <a className="yoro-dashboard-brand" href="/dashboard">{text.brand}</a>
-          <button
-            aria-label={text.closeMenu}
-            className="yoro-dashboard-sidebar-close"
-            onClick={() => closeMobileMenu()}
-            type="button"
-          >
-            <span aria-hidden="true">×</span>
-          </button>
-        </div>
-        <div className="yoro-dashboard-profile">
-          {identity?.avatarUrl ? (
-            <img alt="" src={identity.avatarUrl} />
-          ) : (
-            <span aria-hidden="true">
-              {identity?.provider === "discord"
-                ? <DiscordSymbolIcon />
-                : <TwitchGlitchIcon />}
-            </span>
-          )}
-          <div>
-            <strong>{identity?.displayName}</strong>
-            <small>{identity?.provider === "discord" ? "Discord" : "Twitch"}</small>
-          </div>
-        </div>
         <nav aria-label={text.brand}>
           {(["overview", "account"] as UnifiedDashboardPage[]).map((item) => (
             <button
@@ -1153,17 +1081,6 @@ export function YoroDashboardPage() {
             <span className="yoro-dashboard-nav-text">{text.settings}</span>
           </button>
         </nav>
-        <div className="yoro-dashboard-sidebar-actions">
-          <a href="/lol">{text.publicHome}</a>
-          <button
-            type="button"
-            onClick={() => void logoutAccount(authenticated.csrfToken).then(() => {
-              window.location.assign("/login");
-            })}
-          >
-            {text.logout}
-          </button>
-        </div>
       </aside>
       <main className="yoro-dashboard-main">
         {page === "overview" ? (
@@ -1438,6 +1355,20 @@ export function YoroDashboardPage() {
               <h1>{text.streamerTitle}</h1>
               <p>{text.streamerDescription}</p>
             </header>
+            <nav
+              aria-label={text.streamingGroup}
+              className="yoro-dashboard-mobile-detail-links"
+            >
+              {([
+                "streamingParticipation",
+                "streamingFollowers",
+                "streamingRiot"
+              ] as UnifiedDashboardPage[]).map((item) => (
+                <button key={item} onClick={() => navigate(item)} type="button">
+                  {text[item]}
+                </button>
+              ))}
+            </nav>
             {streamerFailed ? (
               <div className="yoro-dashboard-state-card" role="alert">
                 <strong>{text.streamerLoadFailed}</strong>
@@ -1774,6 +1705,12 @@ export function YoroDashboardPage() {
           </section>
         ) : null}
       </main>
+      </div>
+      <DashboardBottomTabBar
+        locale={locale}
+        onNavigate={selectDashboardPage}
+        page={dashboardTopLevelPage(page)}
+      />
     </div>
   );
 }

@@ -53,11 +53,25 @@ test("공통 YORO Dashboard는 로그인 사용자용 진입점과 KO·JA 문구
   const { YoroDashboardPage } = await import(
     "../src/features/yoro-dashboard/YoroDashboardPage"
   );
+  const { DashboardBottomTabBar } = await import(
+    "../src/features/yoro-dashboard/DashboardBottomTabBar"
+  );
   const source = await readFile(
     new URL("../src/features/yoro-dashboard/YoroDashboardPage.tsx", import.meta.url),
     "utf8"
   );
+  const chromeSource = await readFile(
+    new URL("../src/features/yoro-dashboard/DashboardChrome.tsx", import.meta.url),
+    "utf8"
+  );
+  const bottomBarSource = await readFile(
+    new URL("../src/features/yoro-dashboard/DashboardBottomTabBar.tsx", import.meta.url),
+    "utf8"
+  );
   const markup = renderToStaticMarkup(<YoroDashboardPage />);
+  const bottomBarMarkup = renderToStaticMarkup(
+    <DashboardBottomTabBar locale="ko" onNavigate={() => undefined} page="overview" />
+  );
 
   assert.match(markup, /Dashboard를 불러오는 중입니다/u);
   assert.match(source, /연결 계정/u);
@@ -82,9 +96,21 @@ test("공통 YORO Dashboard는 로그인 사용자용 진입점과 KO·JA 문구
   assert.match(source, /시청자 참여/u);
   assert.match(source, /視聴者参加/u);
   assert.match(source, /ParticipationManagementPage/u);
-  assert.match(source, /Dashboard 메뉴 열기/u);
-  assert.match(source, /Dashboardメニューを開く/u);
-  assert.match(source, /aria-controls="yoro-dashboard-navigation"/u);
+  assert.match(source, /<DashboardChrome/u);
+  assert.match(source, /className="yoro-dashboard-groupnav"/u);
+  assert.match(source, /<DashboardBottomTabBar/u);
+  assert.match(source, /className="yoro-dashboard-mobile-detail-links"/u);
+  assert.match(source, /window\.location\.assign\("\/lol"\)/u);
+  assert.doesNotMatch(source, /yoro-dashboard-sidebar/u);
+  assert.match(chromeSource, /className="yoro-lol-subnav dashboard-subnav"/u);
+  assert.match(chromeSource, /<HomeHeader/u);
+  assert.match(chromeSource, /공개 홈/u);
+  assert.match(chromeSource, /公開ホーム/u);
+  assert.match(bottomBarSource, /data-testid="dashboard-bottom-tab-bar"/u);
+  assert.equal((bottomBarMarkup.match(/<button/g) ?? []).length, 5);
+  assert.match(bottomBarMarkup, /aria-current="page"/u);
+  assert.match(bottomBarMarkup, /연결 계정/u);
+  assert.match(bottomBarMarkup, /Organization/u);
   assert.match(source, /moderator:read:followers/u);
   assert.doesNotMatch(source, /streamingPermissions/u);
   assert.match(source, /onClick=\{\(\) => void openFollowerPermission\(\)\}/u);
@@ -107,17 +133,19 @@ test("공통 YORO Dashboard는 로그인 사용자용 진입점과 KO·JA 문구
     new URL("../src/styles/pages/account/18-yoro-dashboard.css", import.meta.url),
     "utf8"
   );
-  assert.match(css, /grid-template-columns:\s*288px minmax\(0, 1fr\)/u);
-  // 브랜드 링크는 글자 높이(ko 25px · ja 32px)로만 잡히던 것을 44px 로 세웁니다.
-  assert.match(css, /\.yoro-dashboard-brand\s*\{[\s\S]*?min-height:\s*44px/u);
+  assert.match(css, /\.yoro-dashboard-body\s*\{[\s\S]*?display:\s*flex/u);
+  assert.match(css, /\.yoro-dashboard-groupnav\s*\{[\s\S]*?flex:\s*0 0 220px/u);
   assert.match(
     css,
-    /\.yoro-dashboard-main[\s\S]*?margin-inline:\s*auto/u
+    /\.yoro-dashboard-main[\s\S]*?max-width:\s*1220px/u
   );
   assert.match(
     css,
-    /\.yoro-dashboard-sidebar\.is-open[\s\S]*?transform:\s*translateX\(0\)/u
+    /@media \(max-width:\s*47\.9375rem\)[\s\S]*?\.yoro-dashboard-groupnav\s*\{[\s\S]*?display:\s*none/u
   );
+  assert.match(css, /--public-bottom-tab-bar-height:\s*calc\(64px/u);
+  assert.match(css, /\.yoro-dashboard-mobile-detail-links[\s\S]*?display:\s*grid/u);
+  assert.doesNotMatch(css, /\.yoro-dashboard-sidebar/u);
   assert.match(css, /@media \(prefers-reduced-motion:\s*reduce\)/u);
   assert.match(
     css,
@@ -204,6 +232,10 @@ test("Dashboard 홈은 상태별로 다른 화면을 보여 주고 지표를 링
     /\.yoro-dashboard-(metrics|quick-start|summary-grid|next)\b/u.test(cssRules),
     false
   );
+  assert.match(css, /--dh-surface:\s*var\(--home-card\)/u);
+  assert.match(css, /--dh-brand-deep:\s*var\(--home-loss\)/u);
+  assert.match(css, /\.yoro-dh-kpi\s*\{[\s\S]*?border:\s*\.5px solid var\(--dh-line\)[\s\S]*?border-radius:\s*3px/u);
+  assert.doesNotMatch(css, /#9b90ff|#1c232d|#161d26/iu);
   // 조작 요소는 44px 를 지킵니다.
   assert.match(css, /\.yoro-dh-action\s*\{[\s\S]*?min-height:\s*44px/u);
   assert.match(css, /\.yoro-dh-card-list > li\s*\{[\s\S]*?min-height:\s*44px/u);

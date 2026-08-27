@@ -1,31 +1,21 @@
 /*
  * 발로란트 공개 페이지 — pages layer 단독 소유.
  *
- * 아이덴티티는 컷 코너(clip-path)와 대문자 자간으로만 표현하고, 간격·라운드·
- * 타이포는 기존 --yoro-* 토큰을 그대로 씁니다. 레드는 포인트에만 씁니다.
- * clip-path 는 border·box-shadow 까지 잘라내므로 4방향 drop-shadow(filter)로
- * 테두리를 그립니다. 근거: docs/mockups/valorant-page-design.html §04·§08
+ * 메인 홈의 수묵 토큰과 헤어라인 문법을 그대로 따릅니다. 발로란트 레드는
+ * 상태·키커 같은 의미 있는 포인트에만 --home-loss 로 사용합니다.
+ * 근거: docs/mockups/valorant-redesign-v2.html
  */
 
-.valorant-shell .public-game-header,
-.valorant-shell .public-bottom-tab-bar,
-.valorant-shell .public-bottom-sheet,
-.public-bottom-sheet--valorant {
+.valorant-shell .public-bottom-tab-bar {
   --public-game-accent: var(--yoro-color-valorant-primary);
 }
 
 .valorant-main {
   min-inline-size: 0;
+  color: var(--home-ink);
 }
 
 .valorant-page-section {
-  /* 발로란트 표면은 게임 아이덴티티 색 — 사이트 라이트/다크 테마를 따르지 않습니다.
-     셸(.public-dashboard-shell)은 어두운 배경용 밝은 제목색을 상속시키므로, 밝은
-     테마 surface 토큰을 배경으로 쓰면 흰 글씨/흰 카드 충돌이 납니다(§04 매핑 표). */
-  --valorant-surface: #16222e;
-  --valorant-ink: #f8f9fa;
-  --valorant-ink-muted: #a7b0bd;
-  --valorant-line: hsl(210 17% 88% / 0.16);
   display: grid;
   gap: var(--yoro-space-6);
   inline-size: 100%;
@@ -34,42 +24,24 @@
   padding: var(--yoro-space-5) var(--yoro-space-4) var(--yoro-space-8);
 }
 
-.valorant-cut {
-  --valorant-cut-line: var(--valorant-line);
-  --valorant-cut-size: 12px;
-  clip-path: polygon(
-    0 0,
-    100% 0,
-    100% calc(100% - var(--valorant-cut-size)),
-    calc(100% - var(--valorant-cut-size)) 100%,
-    0 100%
-  );
-  filter:
-    drop-shadow(1px 0 0 var(--valorant-cut-line))
-    drop-shadow(-1px 0 0 var(--valorant-cut-line))
-    drop-shadow(0 1px 0 var(--valorant-cut-line))
-    drop-shadow(0 -1px 0 var(--valorant-cut-line));
-}
-
 .valorant-home {
   display: grid;
   gap: var(--yoro-space-6);
 }
 
 .valorant-hero {
-  --valorant-cut-size: 14px;
   display: grid;
   gap: var(--yoro-space-3);
   justify-items: start;
   padding: clamp(1.25rem, 3vw, 2rem);
-  background:
-    linear-gradient(120deg, hsl(355 100% 64% / 0.12), transparent 55%),
-    var(--valorant-surface);
-  color: var(--valorant-ink);
+  border: .5px solid var(--home-line);
+  border-radius: 3px;
+  background: var(--home-card);
+  color: var(--home-ink);
 }
 
 .valorant-hero__kicker {
-  color: var(--yoro-color-valorant-primary);
+  color: var(--home-loss);
   font-size: var(--yoro-font-size-xs);
   font-weight: 800;
   letter-spacing: 0.22em;
@@ -85,14 +57,15 @@
 .valorant-hero > p {
   margin: 0;
   max-inline-size: 40rem;
-  color: var(--valorant-ink-muted);
+  color: var(--home-sub);
   font-size: var(--yoro-font-size-sm);
 }
 
 .valorant-hero__status {
   padding: var(--yoro-space-1) var(--yoro-space-3);
-  border: thin dashed var(--yoro-color-valorant-primary);
-  color: var(--yoro-color-valorant-primary);
+  border: .5px dashed var(--home-loss);
+  border-radius: 3px;
+  color: var(--home-loss);
   font-size: var(--yoro-font-size-xs);
   font-weight: 700;
 }
@@ -119,8 +92,10 @@
   gap: var(--yoro-space-2);
   justify-items: start;
   padding: var(--yoro-space-4);
-  background: var(--valorant-surface);
-  color: var(--valorant-ink);
+  border: .5px solid var(--home-line);
+  border-radius: 3px;
+  background: var(--home-card);
+  color: var(--home-ink);
 }
 
 /* FAQ — 준비 단계의 빈 지면을 확정 사실 문답으로 채우는 섹션 */
@@ -137,8 +112,10 @@
 
 .valorant-faq__item {
   padding: var(--yoro-space-4);
-  background: var(--valorant-surface);
-  color: var(--valorant-ink);
+  border: .5px solid var(--home-line);
+  border-radius: 3px;
+  background: var(--home-card);
+  color: var(--home-ink);
 }
 
 .valorant-faq__item > summary {
@@ -150,13 +127,13 @@
 }
 
 .valorant-faq__item > summary:focus-visible {
-  outline: 2px solid var(--yoro-color-valorant-primary);
+  outline: 2px solid var(--home-stroke);
   outline-offset: 2px;
 }
 
 .valorant-faq__item > p {
   margin: var(--yoro-space-3) 0 0;
-  color: var(--valorant-ink-muted, inherit);
+  color: var(--home-sub);
   line-height: 1.6;
 }
 
@@ -165,8 +142,9 @@
   display: inline-flex;
   align-items: center;
   padding: var(--yoro-space-1) var(--yoro-space-2);
-  border: thin solid var(--yoro-color-valorant-primary);
-  color: var(--yoro-color-valorant-primary);
+  border: .5px solid var(--home-line);
+  border-radius: 3px;
+  color: var(--home-mid);
   font-size: var(--yoro-font-size-xs);
   font-weight: 800;
   letter-spacing: .02em;
@@ -180,17 +158,18 @@
 
 .valorant-model-card > p {
   margin: 0;
-  color: var(--valorant-ink-muted);
+  color: var(--home-sub);
   font-size: var(--yoro-font-size-sm);
 }
 
-/* 셸 회색 위 맨글자는 묻힙니다 — 정책 노트도 네이비 카드로 만듭니다. */
+/* 정책 경계는 홈 카드 위 헤어라인으로 구분합니다. */
 .valorant-policy-note {
   margin: 0;
   padding: var(--yoro-space-3);
-  border: thin dashed var(--valorant-line);
-  background: var(--valorant-surface);
-  color: var(--valorant-ink-muted);
+  border: .5px dashed var(--home-line);
+  border-radius: 3px;
+  background: var(--home-card);
+  color: var(--home-sub);
   font-size: var(--yoro-font-size-sm);
 }
 

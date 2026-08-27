@@ -18,7 +18,7 @@ export function ValorantHome({ locale }: { locale: ValorantLocale }) {
 
   return (
     <div className="valorant-home">
-      <section aria-labelledby="valorant-hero-title" className="valorant-hero valorant-cut">
+      <section aria-labelledby="valorant-hero-title" className="valorant-hero">
         <span aria-hidden="true" className="valorant-hero__kicker">{text.heroKicker}</span>
         <h1
           className="valorant-hero__title"
@@ -46,7 +46,7 @@ export function ValorantHome({ locale }: { locale: ValorantLocale }) {
         </h2>
         <div className="valorant-models__grid">
           {models.map((model) => (
-            <article className="valorant-model-card valorant-cut" key={model.key}>
+            <article className="valorant-model-card" key={model.key}>
               {/* 세 모델은 병렬 제공 방식이라 순번 대신 접근 조건을 라벨로 보여줍니다. */}
               <span className="valorant-model-card__badge">{model.badge}</span>
               <h3>{model.title}</h3>
@@ -69,7 +69,7 @@ export function ValorantHome({ locale }: { locale: ValorantLocale }) {
           { key: "search", question: text.faqSearchQuestion, answer: text.faqSearchAnswer },
           { key: "privacy", question: text.faqPrivacyQuestion, answer: text.faqPrivacyAnswer },
         ] as const).map((entry) => (
-          <details className="valorant-faq__item valorant-cut" key={entry.key}>
+          <details className="valorant-faq__item" key={entry.key}>
             <summary>{entry.question}</summary>
             <p>{entry.answer}</p>
           </details>

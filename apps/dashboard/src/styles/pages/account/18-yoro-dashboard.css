@@ -1,143 +1,56 @@
 .yoro-dashboard-shell {
   min-height: 100vh;
-  display: grid;
-  grid-template-columns: 288px minmax(0, 1fr);
   overflow-x: clip;
-  background:
-    radial-gradient(circle at 72% 6%, rgb(92 66 190 / 12%), transparent 32rem),
-    var(--color-background, #0f141b);
-  color: var(--color-text, #f5f7fb);
+  background: var(--home-bg);
+  color: var(--home-ink);
 }
 
-.yoro-dashboard-mobile-bar,
-.yoro-dashboard-backdrop {
-  display: none;
+.yoro-dashboard-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: stretch;
 }
 
-.yoro-dashboard-sidebar {
+.yoro-dashboard-groupnav {
+  flex: 0 0 220px;
+  min-width: 0;
+  padding: 24px 16px;
+  border-right: .5px solid var(--home-line);
+  background: var(--home-bg);
+}
+
+.yoro-dashboard-groupnav nav {
   position: sticky;
-  top: 0;
-  height: 100vh;
-  padding: 30px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 26px;
-  border-right: 1px solid rgb(255 255 255 / 10%);
-  background:
-    linear-gradient(180deg, rgb(13 20 42 / 98%), rgb(12 18 35 / 98%));
-}
-
-.yoro-dashboard-sidebar-heading {
-  min-width: 0;
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.yoro-dashboard-sidebar-close {
-  display: none;
-}
-
-/* 링크 높이가 글자 높이(ko 25px · ja 32px)로만 잡혀 터치 타깃 44px 을 못 채웠습니다.
-   글자 크기는 그대로 두고 상자만 44px 로 세웁니다. */
-.yoro-dashboard-brand {
-  min-width: 0;
-  min-height: 44px;
-  overflow: hidden;
-  display: block;
-  line-height: 44px;
-  color: inherit;
-  /* 21px 에서는 일본어 글꼴로 "YORO.gg Dashboard" 가 232px 이 되어
-     사이드바(223px)와 모바일 바(226px) 양쪽에서 잘렸습니다. */
-  font-size: 19px;
-  font-weight: 900;
-  text-decoration: none;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.yoro-dashboard-profile {
-  min-width: 0;
+  top: 24px;
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr);
-  gap: 12px;
-  align-items: center;
-}
-
-.yoro-dashboard-profile > img,
-.yoro-dashboard-profile > span {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  object-fit: cover;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  background: rgb(255 255 255 / 8%);
-}
-
-.yoro-dashboard-profile svg,
-.yoro-dashboard-profile .discord-symbol-icon {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
-}
-
-.yoro-dashboard-profile div {
-  min-width: 0;
-}
-
-.yoro-dashboard-profile strong,
-.yoro-dashboard-profile small {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.yoro-dashboard-profile small {
-  margin-top: 3px;
-  color: #aab4c2;
-}
-
-.yoro-dashboard-sidebar nav {
-  display: grid;
-  gap: 8px;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  gap: 4px;
 }
 
 .yoro-dashboard-nav-label {
-  margin: 15px 12px 3px;
-  color: #9f83ff;
+  margin: 14px 8px 4px;
+  color: var(--home-mid);
   font-size: 11px;
-  font-weight: 900;
-  letter-spacing: .08em;
+  font-weight: 800;
+  letter-spacing: .06em;
 }
 
-.yoro-dashboard-sidebar nav button,
-.yoro-dashboard-sidebar-actions button,
-.yoro-dashboard-sidebar-actions a {
-  min-height: 48px;
-  padding: 0 16px;
-  border: 0;
-  border-radius: 10px;
-  color: inherit;
-  background: transparent;
-  font: inherit;
-  font-weight: 700;
-  text-align: left;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-/* 메뉴 이름 옆 상태 표시. 이름이 길어도 표시가 밀려나지 않게 잡습니다. */
-.yoro-dashboard-sidebar nav button {
+.yoro-dashboard-groupnav nav button {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 10px;
+  border: .5px solid transparent;
+  border-radius: 3px;
   display: flex;
   gap: 8px;
   align-items: center;
+  color: var(--home-sub);
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
 }
 
 .yoro-dashboard-nav-text {
@@ -154,51 +67,46 @@
 }
 
 .yoro-dashboard-nav-dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: #8f9aae;
+  background: var(--home-mid);
 }
 
 .yoro-dashboard-nav-dot[data-tone="live"] {
-  background: #f4555f;
+  background: var(--home-loss);
 }
 
 .yoro-dashboard-nav-note {
-  color: #8f9aae;
+  padding: 1px 7px;
+  border-radius: 999px;
+  color: var(--home-mid);
+  background: var(--home-card);
   font-size: 11px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
-.yoro-dashboard-sidebar nav button.active .yoro-dashboard-nav-note {
-  color: rgb(255 255 255 / 78%);
+.yoro-dashboard-groupnav nav button.active .yoro-dashboard-nav-note {
+  color: var(--home-sub);
 }
 
-.yoro-dashboard-sidebar nav button:hover,
-.yoro-dashboard-sidebar nav button:focus-visible,
-.yoro-dashboard-sidebar nav button.active {
-  background: linear-gradient(90deg, rgb(91 55 184 / 82%), rgb(108 49 192 / 88%));
-  color: #fff;
-}
-
-.yoro-dashboard-sidebar-actions {
-  margin-top: auto;
-  display: grid;
-  gap: 4px;
-}
-
-.yoro-dashboard-sidebar-actions a {
-  display: flex;
-  align-items: center;
+.yoro-dashboard-groupnav nav button:hover,
+.yoro-dashboard-groupnav nav button:focus-visible,
+.yoro-dashboard-groupnav nav button.active {
+  border-color: var(--home-line);
+  background: var(--home-card);
+  color: var(--home-ink);
 }
 
 .yoro-dashboard-main {
+  flex: 1;
   min-width: 0;
-  width: min(100%, 1440px);
+  width: 100%;
+  max-width: 1220px;
   margin-inline: auto;
-  padding: 48px clamp(24px, 5vw, 72px);
+  padding: 32px 40px 60px;
 }
 
 /* Dashboard 홈(.yoro-dh-*)은 pages layer 의 31-dashboard-home.css 가 소유합니다. */
@@ -216,7 +124,7 @@
 
 .yoro-dashboard-settings header p,
 .yoro-dashboard-streaming > header p {
-  color: #b8c1ce;
+  color: var(--home-sub);
 }
 
 .yoro-dashboard-streamer-grid {
@@ -229,12 +137,12 @@
 .yoro-dashboard-application {
   min-width: 0;
   padding: 24px;
-  border: 1px solid rgb(142 123 255 / 18%);
-  border-radius: 16px;
+  border: .5px solid var(--home-line);
+  border-radius: 3px;
   display: flex;
   gap: 18px;
   align-items: center;
-  background: linear-gradient(145deg, rgb(27 35 60 / 94%), rgb(22 29 50 / 92%));
+  background: var(--home-card);
 }
 
 .yoro-dashboard-state-card > svg,
@@ -261,11 +169,11 @@
 .yoro-dashboard-state-card p,
 .yoro-dashboard-application p {
   margin-top: 7px;
-  color: #aeb8ca;
+  color: var(--home-sub);
 }
 
 .yoro-dashboard-status {
-  color: #65d6a6;
+  color: var(--home-win);
   white-space: nowrap;
 }
 
@@ -275,10 +183,10 @@
 .yoro-dashboard-application button {
   min-height: 44px;
   padding: 0 16px;
-  border: 1px solid rgb(151 120 255 / 35%);
-  border-radius: 10px;
-  color: #fff;
-  background: linear-gradient(90deg, #6842c4, #7a3fd1);
+  border: .5px solid var(--home-loss);
+  border-radius: 3px;
+  color: var(--home-inv-ink);
+  background: var(--home-loss);
   font: inherit;
   font-weight: 800;
   text-decoration: none;
@@ -303,28 +211,28 @@
 .yoro-dashboard-application input {
   min-height: 46px;
   padding: 0 13px;
-  border: 1px solid rgb(255 255 255 / 16%);
-  border-radius: 10px;
+  border: .5px solid var(--home-line);
+  border-radius: 3px;
   color: inherit;
-  background: rgb(9 15 29 / 78%);
+  background: var(--home-bg);
   font: inherit;
 }
 
 .yoro-dashboard-announcement {
   margin: 0;
-  color: #bca8ff;
+  color: var(--home-sub);
 }
 
 .yoro-dashboard-settings > button {
   min-height: 44px;
   padding: 0 16px;
-  border: 0;
-  border-radius: 10px;
+  border: .5px solid var(--home-loss);
+  border-radius: 3px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  background: #5d84f4;
+  color: var(--home-inv-ink);
+  background: var(--home-loss);
   font: inherit;
   font-weight: 800;
   text-decoration: none;
@@ -338,36 +246,19 @@
 }
 
 .yoro-dashboard-settings-hero {
-  position: relative;
-  isolation: isolate;
   min-width: 0;
   padding: clamp(26px, 3vw, 42px);
-  border: 1px solid rgb(142 123 255 / 22%);
-  border-radius: 22px;
+  border: .5px solid var(--home-line);
+  border-radius: 3px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(420px, .9fr);
   gap: 32px;
   align-items: end;
-  overflow: hidden;
-  background:
-    radial-gradient(circle at 88% 18%, rgb(111 74 215 / 25%), transparent 24rem),
-    linear-gradient(135deg, #1b2436, #171d2a 58%, #171a29);
-  box-shadow: 0 24px 64px rgb(0 0 0 / 20%);
-}
-
-.yoro-dashboard-settings-hero::after {
-  position: absolute;
-  z-index: -1;
-  inset: auto -80px -130px auto;
-  width: 320px;
-  height: 320px;
-  border: 1px solid rgb(151 120 255 / 14%);
-  border-radius: 50%;
-  content: "";
+  background: var(--home-card);
 }
 
 .yoro-dashboard-settings-eyebrow {
-  color: #8fb0ff;
+  color: var(--home-loss);
   font-size: 12px;
   font-weight: 900;
   letter-spacing: .13em;
@@ -394,12 +285,11 @@
 .yoro-dashboard-settings-hero-summary > div {
   min-width: 0;
   padding: 16px;
-  border: 1px solid rgb(255 255 255 / 9%);
-  border-radius: 14px;
+  border: .5px solid var(--home-line);
+  border-radius: 3px;
   display: grid;
   gap: 7px;
-  background: rgb(8 13 24 / 34%);
-  backdrop-filter: blur(12px);
+  background: var(--home-bg);
 }
 
 .yoro-dashboard-settings-hero-summary dt,
@@ -408,7 +298,7 @@
 }
 
 .yoro-dashboard-settings-hero-summary dt {
-  color: #98a5b8;
+  color: var(--home-mid);
   font-size: 12px;
   font-weight: 700;
 }
@@ -437,10 +327,9 @@
 .yoro-dashboard-settings-group,
 .yoro-dashboard-settings-preview {
   min-width: 0;
-  border: 1px solid rgb(255 255 255 / 9%);
-  border-radius: 18px;
-  background: #171e28;
-  box-shadow: 0 16px 38px rgb(0 0 0 / 13%);
+  border: .5px solid var(--home-line);
+  border-radius: 3px;
+  background: var(--home-card);
 }
 
 .yoro-dashboard-settings-group {
@@ -463,7 +352,7 @@
 .yoro-dashboard-settings-group header p,
 .yoro-dashboard-settings-preview > p {
   margin: 5px 0 0;
-  color: #9da9ba;
+  color: var(--home-sub);
   font-size: 14px;
   line-height: 1.6;
 }
@@ -473,12 +362,12 @@
   flex: 0 0 42px;
   width: 42px;
   height: 42px;
-  border: 1px solid rgb(151 120 255 / 35%);
-  border-radius: 12px;
+  border: .5px solid var(--home-line);
+  border-radius: 3px;
   display: grid;
   place-items: center;
-  background: rgb(112 73 213 / 16%);
-  color: #bdaaff;
+  background: var(--home-bg);
+  color: var(--home-sub);
   font-size: 15px;
   font-weight: 900;
 }
@@ -487,13 +376,13 @@
   min-width: 0;
   min-height: 86px;
   padding: 16px 18px;
-  border: 1px solid rgb(255 255 255 / 8%);
-  border-radius: 14px;
+  border: .5px solid var(--home-line);
+  border-radius: 3px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(210px, 260px);
   gap: 24px;
   align-items: center;
-  background: #111821;
+  background: var(--home-bg);
 }
 
 .yoro-dashboard-setting-row > span:first-child {
@@ -503,11 +392,11 @@
 }
 
 .yoro-dashboard-setting-row strong {
-  color: #f7f8fb;
+  color: var(--home-ink);
 }
 
 .yoro-dashboard-setting-row small {
-  color: #929fb1;
+  color: var(--home-mid);
   line-height: 1.55;
 }
 
@@ -515,17 +404,17 @@
   width: 100%;
   min-height: 46px;
   padding: 0 38px 0 12px;
-  border: 1px solid rgb(255 255 255 / 14%);
-  border-radius: 11px;
+  border: .5px solid var(--home-line);
+  border-radius: 3px;
   color: inherit;
-  background: #0d141d;
+  background: var(--home-bg);
   font: inherit;
   font-weight: 750;
 }
 
 .yoro-dashboard-setting-row select:focus-visible,
 .yoro-dashboard-toggle-control input:focus-visible + .yoro-dashboard-toggle-track {
-  outline: 3px solid rgb(151 120 255 / 45%);
+  outline: 2px solid var(--home-stroke);
   outline-offset: 2px;
 }
 
@@ -539,7 +428,7 @@
 
 .yoro-dashboard-toggle-status {
   pointer-events: none;
-  color: #a9b4c4;
+  color: var(--home-sub);
   font-size: 13px;
   font-weight: 850;
 }
@@ -559,9 +448,9 @@
   position: relative;
   width: 50px;
   height: 28px;
-  border: 1px solid rgb(255 255 255 / 15%);
+  border: .5px solid var(--home-line);
   border-radius: 999px;
-  background: #2b3442;
+  background: var(--home-deep);
   cursor: pointer;
   transition: background .2s ease, border-color .2s ease;
 }
@@ -573,15 +462,14 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #f8f9fc;
-  box-shadow: 0 3px 8px rgb(0 0 0 / 24%);
+  background: var(--home-ink);
   content: "";
   transition: transform .2s ease;
 }
 
 .yoro-dashboard-toggle-control input:checked + .yoro-dashboard-toggle-track {
-  border-color: rgb(151 120 255 / 55%);
-  background: #7657df;
+  border-color: var(--home-loss);
+  background: var(--home-loss);
 }
 
 .yoro-dashboard-toggle-control input:checked + .yoro-dashboard-toggle-track::after {
@@ -592,9 +480,7 @@
   position: sticky;
   top: 24px;
   padding: 24px;
-  background:
-    radial-gradient(circle at 90% 10%, rgb(113 76 219 / 20%), transparent 13rem),
-    #141b25;
+  background: var(--home-card);
 }
 
 .yoro-dashboard-settings-preview-mark {
@@ -613,7 +499,7 @@
 .yoro-dashboard-settings-preview dl > div {
   min-width: 0;
   padding: 15px 0;
-  border-bottom: 1px solid rgb(255 255 255 / 8%);
+  border-bottom: .5px solid var(--home-line);
   display: flex;
   gap: 16px;
   align-items: center;
@@ -626,13 +512,13 @@
 }
 
 .yoro-dashboard-settings-preview dt {
-  color: #98a5b8;
+  color: var(--home-mid);
   font-size: 13px;
 }
 
 .yoro-dashboard-settings-preview dd {
   overflow: hidden;
-  color: #f7f8fb;
+  color: var(--home-ink);
   font-weight: 850;
   text-align: right;
   text-overflow: ellipsis;
@@ -641,19 +527,19 @@
 
 .yoro-dashboard-settings-sync-note {
   padding: 16px;
-  border: 1px solid rgb(101 214 166 / 20%);
-  border-radius: 13px;
+  border: .5px solid var(--home-line);
+  border-radius: 3px;
   display: grid;
   gap: 5px;
-  background: rgb(42 141 101 / 10%);
+  background: var(--home-bg);
 }
 
 .yoro-dashboard-settings-sync-note strong {
-  color: #70dbad;
+  color: var(--home-win);
 }
 
 .yoro-dashboard-settings-sync-note span {
-  color: #a4b2c0;
+  color: var(--home-sub);
   font-size: 13px;
   line-height: 1.55;
 }
@@ -664,15 +550,13 @@
   z-index: 10;
   min-width: 0;
   padding: 14px 16px;
-  border: 1px solid rgb(255 255 255 / 12%);
-  border-radius: 15px;
+  border: .5px solid var(--home-line);
+  border-radius: 3px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
   gap: 10px;
   align-items: center;
-  background: rgb(16 22 31 / 91%);
-  box-shadow: 0 18px 44px rgb(0 0 0 / 30%);
-  backdrop-filter: blur(18px);
+  background: var(--home-card);
 }
 
 .yoro-dashboard-settings-actions > div {
@@ -688,26 +572,26 @@
 }
 
 .yoro-dashboard-settings-actions > div span {
-  color: #70dbad;
+  color: var(--home-win);
   font-size: 13px;
 }
 
 .yoro-dashboard-settings-actions button {
   min-height: 44px;
   padding: 0 18px;
-  border: 1px solid rgb(255 255 255 / 12%);
-  border-radius: 11px;
-  color: #dce3ee;
-  background: #202a37;
+  border: .5px solid var(--home-line);
+  border-radius: 3px;
+  color: var(--home-ink);
+  background: var(--home-bg);
   font: inherit;
   font-weight: 850;
   cursor: pointer;
 }
 
 .yoro-dashboard-settings-actions button.is-primary {
-  border-color: transparent;
-  color: #fff;
-  background: linear-gradient(135deg, #6389f5, #7957e6);
+  border-color: var(--home-loss);
+  color: var(--home-inv-ink);
+  background: var(--home-loss);
 }
 
 .yoro-dashboard-settings-actions button:disabled {
@@ -720,8 +604,12 @@
   padding: 24px;
   display: grid;
   place-items: center;
-  background: #0f141b;
-  color: #f5f7fb;
+  background: var(--home-bg, var(--color-background));
+  color: var(--home-ink, var(--color-text));
+}
+
+.yoro-dashboard-mobile-detail-links {
+  display: none;
 }
 
 .yoro-account-page.is-embedded,
@@ -731,41 +619,31 @@
   background: transparent;
 }
 
-/* 결함 수정 — Riot ID 관리의 AppShell 그리드·히어로 배경 오버라이드는
-   shared/app-shell-page-overrides.css(layer 없음)로 옮겼습니다. shared/ui/AppShell.css가
-   layer 없이 로드돼, 여기(layer(legacy))에 있으면 특이성이 훨씬 높아도 항상 졌습니다.
-
-   리디자인 — 대시보드 나머지 화면(스트리밍 설정 카드·대시보드 홈)이 쓰는 다크
-   팔레트를 이 페이지에도 그대로 입힙니다. shared/ui의 Card·Button·Status·Metric은
-   전부 --yoro-color-* 토큰을 통해 렌더링되므로, 이 페이지 스코프에서 토큰 값만
-   다시 정의하면 새 컴포넌트를 만들지 않고도 다크 테마가 전체에 반영됩니다
-   (참여 관리 화면에서 쓴 것과 같은 패턴). 흰 글자 대비는 각 배경색에 대해 실측
-   4.5:1 이상을 확인했습니다(#6842c4 6.64:1 · #7a3fd1 6.07:1 · danger 텍스트로 쓰는
-   --yoro-color-bg 값 자체가 danger 배경과 5.55:1). */
+/* Riot ID 공유 컴포넌트도 Dashboard 셸의 백자·수묵 토큰을 읽도록 연결합니다. */
 .yoro-dashboard-shell[data-page="streamingRiot"] .my-riot-account-shell {
-  --yoro-color-bg: #0f141b;
-  --yoro-color-surface: #1a2130;
-  --yoro-color-surface-muted: #161d26;
-  --yoro-color-surface-strong: #1c232d;
-  --yoro-color-text: #f5f7fb;
-  --yoro-color-text-strong: #f5f7fb;
-  --yoro-color-text-muted: #b8c1ce;
-  --yoro-color-border: rgb(255 255 255 / .1);
-  --yoro-color-border-strong: rgb(142 123 255 / .28);
-  --yoro-color-primary: #6842c4;
-  --yoro-color-primary-strong: #5636a8;
-  --yoro-color-secondary: #7a3fd1;
-  --yoro-color-secondary-strong: #6830b0;
-  --yoro-color-success: #65d6a6;
-  --yoro-color-success-bg: rgb(101 214 166 / .16);
-  --yoro-color-warning: #f0a63a;
-  --yoro-color-warning-bg: rgb(240 166 58 / .16);
-  --yoro-color-danger: #f4555f;
-  --yoro-color-danger-bg: rgb(244 85 95 / .16);
-  --yoro-color-info: #5d84f4;
-  --yoro-color-info-bg: rgb(93 132 244 / .16);
+  --yoro-color-bg: var(--home-bg);
+  --yoro-color-surface: var(--home-card);
+  --yoro-color-surface-muted: var(--home-bg);
+  --yoro-color-surface-strong: var(--home-card);
+  --yoro-color-text: var(--home-ink);
+  --yoro-color-text-strong: var(--home-ink);
+  --yoro-color-text-muted: var(--home-sub);
+  --yoro-color-border: var(--home-line);
+  --yoro-color-border-strong: var(--home-stroke);
+  --yoro-color-primary: var(--home-loss);
+  --yoro-color-primary-strong: var(--home-loss);
+  --yoro-color-secondary: var(--home-loss);
+  --yoro-color-secondary-strong: var(--home-loss);
+  --yoro-color-success: var(--home-win);
+  --yoro-color-success-bg: color-mix(in srgb, var(--home-win) 16%, transparent);
+  --yoro-color-warning: var(--home-mid);
+  --yoro-color-warning-bg: var(--home-card);
+  --yoro-color-danger: var(--home-loss);
+  --yoro-color-danger-bg: color-mix(in srgb, var(--home-loss) 16%, transparent);
+  --yoro-color-info: var(--home-sub);
+  --yoro-color-info-bg: var(--home-card);
 
-  color-scheme: dark;
+  color-scheme: normal;
 }
 
 /* 위 primary/secondary 값은 "흰 글자를 얹는 배경"으로만 검증했습니다. 그런데 공유
@@ -777,11 +655,11 @@
    규칙보다도 우선합니다. EmptyState 는 변수를 .yoro-empty-state 자기 자신에 선언해
    조상에서 준 값도 덮습니다. 일반 선언으로는 이길 수 없습니다. */
 .yoro-dashboard-shell[data-page="streamingRiot"] .my-riot-account-shell .yoro-page-header__eyebrow {
-  color: #b9a7ff !important;
+  color: var(--home-loss) !important;
 }
 
 .yoro-dashboard-shell[data-page="streamingRiot"] .my-riot-account-shell .yoro-empty-state {
-  --yoro-empty-state-accent: #b9a7ff !important;
+  --yoro-empty-state-accent: var(--home-loss) !important;
 }
 
 /* ── 정체성 히어로 — 대표 Riot ID를 한 번만 크게 보여줍니다 ── */
@@ -791,9 +669,9 @@
   align-items: center;
   gap: var(--yoro-space-4);
   padding: var(--yoro-space-5);
-  border: thin solid var(--yoro-color-border-strong);
-  border-radius: var(--yoro-radius-xl);
-  background: linear-gradient(145deg, rgb(27 35 60 / .96), rgb(22 29 50 / .96));
+  border: .5px solid var(--home-line);
+  border-radius: 3px;
+  background: var(--home-card);
 }
 
 .my-riot-identity-mark {
@@ -803,8 +681,8 @@
   inline-size: var(--yoro-space-12);
   block-size: var(--yoro-space-12);
   border-radius: var(--yoro-radius-circle);
-  background: linear-gradient(135deg, #6842c4, #7a3fd1);
-  color: #fff;
+  background: var(--home-loss);
+  color: var(--home-inv-ink);
   font-size: var(--yoro-font-size-xl);
   font-weight: var(--yoro-font-weight-black);
 }
@@ -847,7 +725,7 @@
   min-block-size: calc(var(--yoro-space-12) * 2.5);
   align-content: center;
   background: var(--yoro-color-surface-strong);
-  box-shadow: var(--yoro-shadow-sm);
+  box-shadow: none;
 }
 
 .my-riot-connected-card {
@@ -905,7 +783,7 @@
   border: thin solid color-mix(in srgb, var(--yoro-color-secondary) 46%, transparent);
   border-radius: var(--yoro-radius-circle);
   background: color-mix(in srgb, var(--yoro-color-secondary) 18%, var(--yoro-color-surface));
-  color: #fff;
+  color: var(--home-inv-ink);
   font-size: var(--yoro-font-size-xl);
   font-weight: var(--yoro-font-weight-black);
 }
@@ -931,9 +809,7 @@
 
 .my-riot-account-row.is-main {
   border-color: color-mix(in srgb, var(--yoro-color-secondary) 46%, var(--yoro-color-border));
-  background:
-    radial-gradient(circle at 88% 20%, color-mix(in srgb, var(--yoro-color-secondary) 22%, transparent), transparent 12rem),
-    var(--yoro-color-surface-strong);
+  background: var(--yoro-color-surface-strong);
 }
 
 .my-riot-account-row.is-pending {
@@ -1053,7 +929,7 @@
   padding: var(--yoro-space-4);
   border: thin dashed var(--yoro-color-border-strong);
   border-radius: var(--yoro-radius-lg);
-  background: rgb(255 255 255 / .02);
+  background: var(--home-card);
 }
 
 @media (max-width: 70rem) {
@@ -1126,17 +1002,14 @@
   animation-duration: .01ms !important;
 }
 
-@media (max-width: 1100px) and (min-width: 801px) {
-  .yoro-dashboard-shell {
-    grid-template-columns: 264px minmax(0, 1fr);
-  }
-
-  .yoro-dashboard-sidebar {
-    padding-inline: 20px;
+@media (max-width: 64rem) and (min-width: 48rem) {
+  .yoro-dashboard-groupnav {
+    flex-basis: 180px;
+    padding: 18px 12px;
   }
 
   .yoro-dashboard-main {
-    padding-inline: 32px;
+    padding: 24px 24px 48px;
   }
 
   .yoro-dashboard-settings-hero,
@@ -1149,129 +1022,43 @@
   }
 }
 
-@media (max-width: 800px) {
+@media (max-width: 47.9375rem) {
   .yoro-dashboard-shell {
+    --public-bottom-tab-bar-height: calc(64px + env(safe-area-inset-bottom));
+  }
+
+  .yoro-dashboard-body {
     display: block;
   }
 
-  .yoro-dashboard-mobile-bar {
-    position: sticky;
-    top: 0;
-    z-index: 60;
-    min-height: 64px;
-    padding: 10px 16px;
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid rgb(255 255 255 / 10%);
-    background: rgb(12 18 35 / 94%);
-    box-shadow: 0 12px 28px rgb(0 0 0 / 18%);
-    backdrop-filter: blur(16px);
-  }
-
-  .yoro-dashboard-mobile-bar .yoro-dashboard-brand {
-    font-size: 17px;
-  }
-
-  .yoro-dashboard-menu-button,
-  .yoro-dashboard-sidebar-close {
-    flex: 0 0 44px;
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    border: 1px solid rgb(255 255 255 / 13%);
-    border-radius: 12px;
-    display: grid;
-    place-items: center;
-    color: #fff;
-    background: rgb(255 255 255 / 7%);
-    cursor: pointer;
-  }
-
-  .yoro-dashboard-menu-button {
-    align-content: center;
-    gap: 5px;
-  }
-
-  .yoro-dashboard-menu-button > span {
-    width: 20px;
-    height: 2px;
-    border-radius: 999px;
-    display: block;
-    background: currentcolor;
-  }
-
-  .yoro-dashboard-sidebar-close {
-    font-size: 28px;
-    line-height: 1;
-  }
-
-  .yoro-dashboard-menu-button:focus-visible,
-  .yoro-dashboard-sidebar-close:focus-visible {
-    outline: 3px solid rgb(151 120 255 / 55%);
-    outline-offset: 2px;
-  }
-
-  .yoro-dashboard-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 70;
-    width: 100%;
-    height: 100%;
-    padding: 0;
-    border: 0;
-    display: block;
-    visibility: hidden;
-    background: rgb(2 6 16 / 70%);
-    opacity: 0;
-    cursor: default;
-    transition:
-      opacity .24s ease,
-      visibility 0s linear .24s;
-  }
-
-  .yoro-dashboard-backdrop.is-open {
-    visibility: visible;
-    opacity: 1;
-    transition-delay: 0s;
-  }
-
-  .yoro-dashboard-sidebar {
-    position: fixed;
-    inset: 0 auto 0 0;
-    z-index: 80;
-    width: min(86vw, 336px);
-    height: 100dvh;
-    padding: 24px 20px;
-    visibility: hidden;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    box-shadow: 24px 0 54px rgb(0 0 0 / 36%);
-    transform: translateX(-102%);
-    transition:
-      transform .28s cubic-bezier(.22, 1, .36, 1),
-      visibility 0s linear .28s;
-  }
-
-  .yoro-dashboard-sidebar.is-open {
-    visibility: visible;
-    transform: translateX(0);
-    transition-delay: 0s;
-  }
-
-  .yoro-dashboard-sidebar nav {
-    grid-template-columns: 1fr;
-  }
-
-  .yoro-dashboard-sidebar-actions {
-    grid-template-columns: 1fr;
+  .yoro-dashboard-groupnav {
+    display: none;
   }
 
   .yoro-dashboard-main {
     width: min(100%, 760px);
     margin-inline: auto;
-    padding: 28px 16px 48px;
+    padding: 20px 16px calc(var(--public-bottom-tab-bar-height) + 26px);
+  }
+
+  .yoro-dashboard-mobile-detail-links {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .yoro-dashboard-mobile-detail-links button {
+    min-width: 0;
+    min-height: 44px;
+    padding: 6px 8px;
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+    background: var(--home-card);
+    color: var(--home-ink);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
   }
 
   .yoro-dashboard-settings {
@@ -1345,8 +1132,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .yoro-dashboard-backdrop,
-  .yoro-dashboard-sidebar {
-    transition-duration: .01ms;
+  .yoro-dashboard-toggle-track,
+  .yoro-dashboard-toggle-track::after {
+    transition: none;
   }
 }

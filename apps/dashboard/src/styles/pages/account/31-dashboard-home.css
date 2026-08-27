@@ -7,24 +7,21 @@
    * 두 번 말하고 있었습니다. 상태에 따라 무엇을 보여 줄지 갈라내기 위해
    * 새 이름(.yoro-dh-*)으로 다시 짭니다.
    *
-   * 색은 이 화면이 이미 쓰던 어두운 hex 팔레트를 그대로 씁니다.
-   * 전역 --yoro-color-* 는 밝은 배경 기준이라 여기서는 맞지 않습니다.
+   * 색과 카드 문법은 메인 홈의 --home-* 토큰을 그대로 씁니다.
    */
   .yoro-dh {
-    --dh-surface: #1c232d;
-    --dh-surface-2: #161d26;
-    --dh-line: rgb(255 255 255 / 10%);
-    --dh-line-strong: rgb(255 255 255 / 18%);
-    --dh-text: #f2f5fa;
-    --dh-muted: #aab4c2;
-    --dh-dim: #8b96a8;
-    --dh-brand: #9b90ff;
-    /* 쓰이는 두 곳(.yoro-dh-action.is-primary, .is-now .yoro-dh-step-mark)이
-       모두 흰 글자 배경입니다. #5d84f4 는 흰 글자와 실측 3.46:1 이었습니다. */
-    --dh-brand-deep: #3f6ae4;
-    --dh-good: #65d6a6;
-    --dh-live: #f4555f;
-    --dh-warn: #f0a63a;
+    --dh-surface: var(--home-card);
+    --dh-surface-2: var(--home-bg);
+    --dh-line: var(--home-line);
+    --dh-line-strong: var(--home-stroke);
+    --dh-text: var(--home-ink);
+    --dh-muted: var(--home-sub);
+    --dh-dim: var(--home-mid);
+    --dh-brand: var(--home-loss);
+    --dh-brand-deep: var(--home-loss);
+    --dh-good: var(--home-win);
+    --dh-live: var(--home-loss);
+    --dh-warn: var(--home-mid);
 
     display: grid;
     gap: 16px;
@@ -48,7 +45,7 @@
     display: grid;
     place-items: center;
     object-fit: cover;
-    background: rgb(255 255 255 / 8%);
+    background: var(--home-card);
   }
 
   .yoro-dh-top svg,
@@ -92,8 +89,8 @@
     min-width: 0;
     min-height: 56px;
     padding: 10px 14px;
-    border: 1px solid var(--dh-line);
-    border-radius: 12px;
+    border: .5px solid var(--dh-line);
+    border-radius: 3px;
     display: grid;
     grid-template-columns: 10px minmax(0, 1fr) auto;
     gap: 10px;
@@ -108,7 +105,7 @@
 
   .yoro-dh-op:hover,
   .yoro-dh-op:focus-visible {
-    border-color: rgb(155 144 255 / 55%);
+    border-color: var(--home-stroke);
   }
 
   .yoro-dh-op > i {
@@ -160,8 +157,8 @@
     min-width: 0;
     min-height: 72px;
     padding: 11px 14px;
-    border: 1px solid var(--dh-line);
-    border-radius: 12px;
+    border: .5px solid var(--dh-line);
+    border-radius: 3px;
     display: grid;
     align-content: center;
     gap: 2px;
@@ -175,7 +172,7 @@
 
   .yoro-dh-kpi:hover,
   .yoro-dh-kpi:focus-visible {
-    border-color: rgb(155 144 255 / 55%);
+    border-color: var(--home-stroke);
   }
 
   .yoro-dh-kpi > span,
@@ -211,11 +208,11 @@
      모두 끝나면 이 카드는 렌더링되지 않습니다. */
   .yoro-dh-setup {
     padding: 16px;
-    border: 1px solid rgb(155 144 255 / 45%);
-    border-radius: 16px;
+    border: .5px solid var(--dh-line);
+    border-radius: 3px;
     display: grid;
     gap: 12px;
-    background: linear-gradient(180deg, rgb(94 78 214 / 14%), rgb(28 35 45 / 96%));
+    background: var(--dh-surface);
   }
 
   .yoro-dh-setup-head {
@@ -251,7 +248,7 @@
     min-width: 0;
     padding: 8px 10px;
     border: 1px solid transparent;
-    border-radius: 11px;
+    border-radius: 3px;
     display: grid;
     grid-template-columns: 26px minmax(0, 1fr) auto;
     gap: 10px;
@@ -264,8 +261,8 @@
   }
 
   .yoro-dh-steps > li.is-now {
-    border-color: rgb(155 144 255 / 45%);
-    background: linear-gradient(180deg, rgb(94 78 214 / 18%), var(--dh-surface-2));
+    border-color: var(--home-loss);
+    background: var(--dh-surface-2);
   }
 
   .yoro-dh-step-mark {
@@ -274,14 +271,14 @@
     border-radius: 50%;
     display: grid;
     place-items: center;
-    background: rgb(255 255 255 / 8%);
+    background: var(--home-card);
     color: var(--dh-dim);
     font-size: 11px;
     font-weight: 900;
   }
 
   .yoro-dh-steps > li.is-done .yoro-dh-step-mark {
-    background: rgb(68 187 132 / 20%);
+    background: color-mix(in srgb, var(--home-win) 20%, transparent);
     color: var(--dh-good);
   }
 
@@ -331,8 +328,8 @@
   .yoro-dh-card {
     min-width: 0;
     padding: 14px 16px;
-    border: 1px solid var(--dh-line);
-    border-radius: 14px;
+    border: .5px solid var(--dh-line);
+    border-radius: 3px;
     display: grid;
     gap: 8px;
     align-content: start;
@@ -373,7 +370,7 @@
   }
 
   .yoro-dh-card-list > li + li {
-    border-top: 1px solid rgb(255 255 255 / 7%);
+    border-top: .5px solid var(--dh-line);
   }
 
   .yoro-dh-card-list > li > svg,
@@ -387,11 +384,11 @@
   .yoro-dh-card-mark {
     width: 24px;
     height: 24px;
-    border-radius: 7px;
+    border-radius: 3px;
     display: grid;
     place-items: center;
     overflow: hidden;
-    background: rgb(255 255 255 / 8%);
+    background: var(--home-bg);
     color: var(--dh-muted);
     font-size: 11px;
     font-weight: 900;
@@ -428,8 +425,8 @@
   .yoro-dh-empty {
     margin: 0;
     padding: 16px 12px;
-    border: 1px dashed var(--dh-line-strong);
-    border-radius: 11px;
+    border: .5px dashed var(--dh-line-strong);
+    border-radius: 3px;
     color: var(--dh-dim);
     font-size: 12px;
     text-align: center;
@@ -441,7 +438,7 @@
     flex: none;
     min-width: 0;
     padding: 3px 8px;
-    border: 1px solid var(--dh-line-strong);
+    border: .5px solid var(--dh-line-strong);
     border-radius: 999px;
     display: inline-flex;
     align-items: center;
@@ -453,13 +450,13 @@
 
   .yoro-dh-tag[data-tone="good"] {
     border-color: transparent;
-    background: rgb(68 187 132 / 20%);
+    background: color-mix(in srgb, var(--home-win) 20%, transparent);
     color: var(--dh-good);
   }
 
   .yoro-dh-tag[data-tone="warn"] {
     border-color: transparent;
-    background: rgb(240 166 58 / 20%);
+    background: var(--home-card);
     color: var(--dh-warn);
   }
 
@@ -467,8 +464,8 @@
     flex: none;
     min-height: 44px;
     padding: 0 14px;
-    border: 1px solid var(--dh-line-strong);
-    border-radius: 10px;
+    border: .5px solid var(--dh-line-strong);
+    border-radius: 3px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -494,7 +491,7 @@
 
   .yoro-dh-alert {
     margin: 0;
-    color: #ff9ba1;
+    color: var(--home-loss);
     font-size: 12px;
   }
 
@@ -526,6 +523,22 @@
     .yoro-dh-top > span[aria-hidden] {
       width: 40px;
       height: 40px;
+    }
+  }
+
+  /* Dashboard 모바일 탭바는 공용 5칸 골격을 쓰되 수묵 지면과 활성 꼬리색을 잇습니다. */
+  .yoro-dashboard-shell .dashboard-bottom-tab-bar {
+    --public-game-accent: var(--home-loss);
+    --public-game-chrome-text-muted: var(--home-sub);
+
+    border-block-start: .5px solid var(--home-line);
+    background: var(--home-bg);
+    backdrop-filter: none;
+  }
+
+  @media (min-width: 48rem) {
+    .yoro-dashboard-shell .dashboard-bottom-tab-bar {
+      display: none;
     }
   }
 }

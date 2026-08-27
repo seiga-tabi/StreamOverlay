@@ -4,8 +4,9 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { setActivePublicLocale } from "../src/features/public-lol/i18n/public-lol-i18n";
 import { ValorantBottomTabBar } from "../src/features/public-valorant/components/ValorantBottomTabBar";
+import { ValorantChrome } from "../src/features/public-valorant/components/ValorantChrome";
 import { ValorantComingSoonPage } from "../src/features/public-valorant/components/ValorantComingSoonPage";
-import { ValorantHeader, valorantNavItems } from "../src/features/public-valorant/components/ValorantHeader";
+import { valorantNavItems } from "../src/features/public-valorant/components/ValorantHeader";
 import { ValorantHome } from "../src/features/public-valorant/components/ValorantHome";
 import { ValorantNotFoundPage } from "../src/features/public-valorant/components/ValorantNotFoundPage";
 import {
@@ -68,19 +69,28 @@ test("발로란트 데이터 화면은 정직한 준비 중 상태와 홈 복귀
   assert.match(ranked, /익명으로 표시됩니다/u);
 });
 
-test("발로란트 헤더 nav는 5개 항목과 활성 상태를 유지하고 게임 선택기에 발로란트가 있다", () => {
+test("발로란트 크롬은 HomeHeader와 5개 서브내비 항목 및 활성 상태를 유지한다", () => {
   setActivePublicLocale("ko");
   assert.equal(valorantNavItems.length, 5);
   const markup = renderToStaticMarkup(
-    <ValorantHeader locale="ko" onLocale={() => undefined} page="agents" />,
+    <ValorantChrome
+      connected={false}
+      locale="ko"
+      onLocale={() => undefined}
+      onLoginOpen={() => undefined}
+      onLogout={() => undefined}
+      onToggleTheme={() => undefined}
+      page="agents"
+    />,
   );
-  assert.match(markup, /data-testid="valorant-secondary-nav"/u);
+  assert.match(markup, /class="yoro-home-header"/u);
+  assert.match(markup, /class="yoro-lol-subnav"/u);
   for (const item of valorantNavItems) {
     assert.match(markup, new RegExp(`data-ko="${item.ko}"`, "u"));
     assert.match(markup, new RegExp(`data-ja="${item.ja}"`, "u"));
   }
   assert.match(markup, /aria-current="page"[^>]*data-ko="요원"|data-ko="요원"[^>]*aria-current="page"/u);
-  assert.match(markup, /발로란트/u);
+  assert.match(markup, /yoro-home-games-trigger-name[^>]*>발로란트/u);
   assert.doesNotMatch(markup, /src="https?:\/\//u);
 });
 

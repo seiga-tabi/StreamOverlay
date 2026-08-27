@@ -1,17 +1,18 @@
 import { useCallback, useEffect } from "react";
 import "../styles/pages/public-valorant/valorant-route.css";
-import { AppShell, AppShellHeader, AppShellMain } from "../shared/ui/AppShell";
+import { AppShell, AppShellMain } from "../shared/ui/AppShell";
 import { usePublicLocale } from "../features/public-lol/hooks/usePublicLocale";
 import { usePublicTheme } from "../features/public-lol/hooks/usePublicTheme";
 import { publicContentLocale, setActivePublicLocale } from "../features/public-lol/i18n/public-lol-i18n";
 import { ValorantBottomTabBar } from "../features/public-valorant/components/ValorantBottomTabBar";
+import { ValorantChrome } from "../features/public-valorant/components/ValorantChrome";
 import { ValorantComingSoonPage } from "../features/public-valorant/components/ValorantComingSoonPage";
-import { ValorantHeader } from "../features/public-valorant/components/ValorantHeader";
 import { ValorantHome } from "../features/public-valorant/components/ValorantHome";
 import { ValorantNotFoundPage } from "../features/public-valorant/components/ValorantNotFoundPage";
 import { useValorantRoute } from "../features/public-valorant/hooks/useValorantRoute";
 import { valorantI18n, type ValorantLocale } from "../features/public-valorant/i18n/valorant-i18n";
 import { applyValorantSeo } from "../features/public-valorant/utils/seo";
+import { usePublicAccountLogin } from "../shared/public-account-login";
 
 const noServerLocalePreference = async (): Promise<ValorantLocale | undefined> => undefined;
 
@@ -22,9 +23,10 @@ export function PublicValorantPage() {
   const { locale: rawLocale, changeLocale } = usePublicLocale(noServerLocalePreference);
   /* en 콘텐츠가 아직 없음 — 팰월드 우선 단계의 ko 폴백. */
   const locale = publicContentLocale(rawLocale);
-  const { theme } = usePublicTheme();
+  const { theme, toggleTheme } = usePublicTheme();
   const { page } = useValorantRoute();
   const text = valorantI18n[locale];
+  const account = usePublicAccountLogin();
   setActivePublicLocale(locale);
 
   useEffect(() => applyValorantSeo(page ?? "home", locale), [locale, page]);
@@ -36,15 +38,22 @@ export function PublicValorantPage() {
 
   return (
     <AppShell
-      className={`public-lol-shell public-dashboard-shell valorant-shell theme-${theme}`}
+      className={`yoro-home-shell valorant-shell theme-${theme}`}
       mainId="valorant-main"
       sidebarMode="drawer"
       skipLinkLabel={text.skipToContent}
       variant="public"
     >
-      <AppShellHeader as="div" className="valorant-shell-header">
-        <ValorantHeader locale={locale} onLocale={handleLocale} page={page} />
-      </AppShellHeader>
+      <ValorantChrome
+        accountName={account.accountUser?.displayName}
+        connected={account.yoroConnected}
+        locale={locale}
+        onLocale={handleLocale}
+        onLoginOpen={account.loginWithTwitch}
+        onLogout={account.logout}
+        onToggleTheme={toggleTheme}
+        page={page}
+      />
       <AppShellMain className="valorant-main" id="valorant-main">
         <section aria-label={text.brand} className="valorant-page-section">
           {page === null ? <ValorantNotFoundPage locale={locale} /> : null}
