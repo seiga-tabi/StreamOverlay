@@ -380,9 +380,11 @@ export function FollowersPage({ dataSource }: { dataSource?: FollowersDataSource
                       </button>
                     ))}
                   </div>
-                  <span className="follower-directory-count">
-                    {sortedDirectoryFollowers.length}{t.directory.resultUnit}
-                  </span>
+                  {(directoryQuery.trim() !== "" || directoryStatus !== "all") ? (
+                    <span className="follower-directory-count">
+                      {sortedDirectoryFollowers.length}{t.directory.resultUnit}
+                    </span>
+                  ) : null}
                 </div>
 
                 {pagedDirectoryFollowers.length === 0 ? (
