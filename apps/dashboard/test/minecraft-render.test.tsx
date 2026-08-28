@@ -4,6 +4,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { setActivePublicLocale } from "../src/features/public-lol/i18n/public-lol-i18n";
 import { MinecraftBottomTabBar } from "../src/features/public-minecraft/components/MinecraftBottomTabBar";
+import { MinecraftChrome } from "../src/features/public-minecraft/components/MinecraftChrome";
 import { MinecraftComingSoonPage } from "../src/features/public-minecraft/components/MinecraftComingSoonPage";
 import { MinecraftEnchantsPage } from "../src/features/public-minecraft/components/MinecraftEnchantsPage";
 import { MinecraftHeader, minecraftNavItems, minecraftTabItems } from "../src/features/public-minecraft/components/MinecraftHeader";
@@ -151,6 +152,31 @@ test("아이템 이미지는 버전 고정 allowlist URL만 만들고 잘못된 
   );
   assert.doesNotMatch(fallback, /<img|https?:\/\//u);
   assert.match(fallback, />차단</u);
+});
+
+test("마인크래프트 크롬은 HomeHeader와 6개 서브내비 항목 및 활성 상태를 유지한다", () => {
+  setActivePublicLocale("ko");
+  assert.equal(minecraftNavItems.length, 6);
+  const markup = renderToStaticMarkup(
+    <MinecraftChrome
+      connected={false}
+      locale="ko"
+      onLocale={() => undefined}
+      onLoginOpen={() => undefined}
+      onLogout={() => undefined}
+      onToggleTheme={() => undefined}
+      page="recipes"
+    />,
+  );
+  assert.match(markup, /class="yoro-home-header"/u);
+  assert.match(markup, /class="yoro-lol-subnav"/u);
+  for (const item of minecraftNavItems) {
+    assert.match(markup, new RegExp(`data-ko="${item.ko}"`, "u"));
+    assert.match(markup, new RegExp(`data-ja="${item.ja}"`, "u"));
+  }
+  assert.match(markup, /aria-current="page"[^>]*data-ko="조합법"|data-ko="조합법"[^>]*aria-current="page"/u);
+  assert.match(markup, /yoro-home-games-trigger-name[^>]*>마인크래프트/u);
+  assert.doesNotMatch(markup, /src="https?:\/\//u);
 });
 
 test("마인크래프트 헤더 nav는 6개, 탭바는 5칸이며 게임 선택기에 마인크래프트가 있다", () => {

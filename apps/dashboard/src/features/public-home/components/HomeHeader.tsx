@@ -118,7 +118,7 @@ const LOCALE_OPTIONS: ReadonlyArray<{ locale: PublicLocale; label: string }> = [
   { locale: "en", label: "English" }
 ];
 
-export type HomeActiveGame = "lol" | "palworld" | "valorant";
+export type HomeActiveGame = "lol" | "palworld" | "valorant" | "minecraft";
 
 export type HomeGameKey = "lol" | "palworld" | "valorant" | "minecraft";
 
