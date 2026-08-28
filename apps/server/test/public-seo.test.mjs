@@ -3,6 +3,9 @@ import assert from "node:assert/strict";
 
 const {
   applyPublicSeoMetadata,
+  palworldBreedingPath,
+  palworldBreedingRouteForPath,
+  palworldBreedingSeoMetadata,
   palworldEntityPath,
   palworldEntityRedirectPath,
   palworldEntityRouteForPath,
@@ -17,11 +20,15 @@ const {
   reactionShareSeoMetadata,
 } = await import("../dist/routes/public-seo.js");
 const {
+  PALWORLD_BREEDING_PAIRS_PER_SITEMAP,
   PUBLIC_SITEMAP_STATIC_PATHS,
+  buildPalworldBreedingSitemap,
   buildLocalizedUrlSetSitemap,
   buildPalworldEntitySitemap,
   buildSitemapIndex,
   buildStaticSitemap,
+  palworldBreedingSitemapPaths,
+  palworldBreedingSitemapShard,
 } = await import("../dist/routes/public-sitemap.js");
 
 const APP_SHELL = '<!doctype html><html lang="ko"><head>'
@@ -86,6 +93,11 @@ test("영어 카피가 생긴 화면은 en 을 서빙한다", () => {
   assert.match(html, /<html lang="en"/u);
   assert.match(html, /<link rel="canonical" href="https:\/\/yoro\.gg\/en\/lol">/u);
   assert.match(html, /<link rel="alternate" hreflang="en" href="https:\/\/yoro\.gg\/en\/lol" \/>/u);
+  /* raw HTML fallback 본문(크롤러가 JS 실행 전 보는 화면)도 실제 en 화면 문구와
+     일치해야 합니다 — 형제 링크가 한국어로 새면 실제 화면(ARAM augments)과
+     어긋나는 cloaking 신호가 됩니다. */
+  assert.match(html, />ARAM augments<\/a>/u);
+  assert.doesNotMatch(html, /증강 칼바람/u);
 });
 
 test("LoL 패치 노트는 ko·ja·en hreflang과 locale별 canonical을 유지한다", () => {
@@ -356,6 +368,80 @@ test("엔티티 sitemap은 팰월드 3개 로케일 URL을 만든다", () => {
   assert.equal((xml.match(/<url>/gu) ?? []).length, 6);
   /* head 의 hreflang 과 같은 규칙 — 영어판이 있으면 x-default 도 en 입니다. */
   assert.match(xml, /hreflang="x-default" href="https:\/\/yoro\.gg\/en\/palworld\/pals\/lamball"/u);
+});
+
+test("교배 조합 경로는 부모 순서를 정규화하고 성별 조건 조합을 구분한다", () => {
+  const pair = {
+    parentA: { id: "wixen", nameKo: "마호" },
+    parentB: { id: "katress", nameKo: "캐티메이지" },
+    child: { id: "wixen-noct", nameKo: "마호 녹트" },
+    isSpecial: true,
+    genderCondition: { parentA: "female", parentB: "male" },
+  };
+  assert.equal(
+    palworldBreedingPath(pair),
+    "/palworld/breeding/katress/wixen/wixen-noct/male-female",
+  );
+  assert.deepEqual(
+    palworldBreedingRouteForPath(
+      "/ja/palworld/breeding/katress/wixen/wixen-noct/male-female",
+    ),
+    {
+      childId: "wixen-noct",
+      locale: "ja",
+      parentAId: "katress",
+      parentBId: "wixen",
+      parentAGender: "male",
+      parentBGender: "female",
+    },
+  );
+  assert.equal(
+    palworldBreedingRouteForPath("/ko/palworld/breeding/../wixen/child"),
+    undefined,
+  );
+});
+
+test("교배 sitemap은 41,329개 조합을 3개 shard로 나누고 로케일 URL을 만든다", () => {
+  assert.equal(PALWORLD_BREEDING_PAIRS_PER_SITEMAP, 16_666);
+  assert.deepEqual(palworldBreedingSitemapPaths(41_329), [
+    "/sitemap-palworld-breeding.xml",
+    "/sitemap-palworld-breeding-2.xml",
+    "/sitemap-palworld-breeding-3.xml",
+  ]);
+  assert.equal(palworldBreedingSitemapShard("/sitemap-palworld-breeding.xml"), 0);
+  assert.equal(palworldBreedingSitemapShard("/sitemap-palworld-breeding-3.xml"), 2);
+  assert.equal(palworldBreedingSitemapShard("/sitemap-palworld-breeding-1.xml"), undefined);
+
+  const xml = buildPalworldBreedingSitemap([{
+    parentA: { id: "lamball" },
+    parentB: { id: "cattiva" },
+    child: { id: "lifmunk" },
+    isSpecial: false,
+  }], "2026-08-01T00:00:00.000Z");
+  assert.match(xml, /<loc>https:\/\/yoro\.gg\/ko\/palworld\/breeding\/cattiva\/lamball\/lifmunk<\/loc>/u);
+  assert.match(xml, /<loc>https:\/\/yoro\.gg\/ja\/palworld\/breeding\/cattiva\/lamball\/lifmunk<\/loc>/u);
+  assert.match(xml, /<loc>https:\/\/yoro\.gg\/en\/palworld\/breeding\/cattiva\/lamball\/lifmunk<\/loc>/u);
+  assert.equal((xml.match(/<url>/gu) ?? []).length, 3);
+});
+
+test("개별 교배 metadata와 fallback은 실제 조합 데이터를 안전하게 escape한다", () => {
+  const pair = {
+    parentA: { id: "lamball", nameKo: "도로롱 <script>" },
+    parentB: { id: "cattiva", nameKo: "까부냥 & 친구" },
+    child: { id: "lifmunk", nameKo: "초롱이" },
+    isSpecial: false,
+  };
+  const route = palworldBreedingRouteForPath(
+    "/ko/palworld/breeding/cattiva/lamball/lifmunk",
+  );
+  assert.ok(route);
+  const html = applyPublicSeoMetadata(APP_SHELL, palworldBreedingSeoMetadata(route, pair));
+  assert.match(html, /교배 결과: 초롱이 \| YORO\.gg<\/title>/u);
+  assert.match(html, /도로롱 &lt;script&gt;/u);
+  assert.match(html, /까부냥 &amp; 친구/u);
+  assert.doesNotMatch(html, /도로롱 <script>/u);
+  assert.match(html, /<link rel="canonical" href="https:\/\/yoro\.gg\/ko\/palworld\/breeding\/cattiva\/lamball\/lifmunk">/u);
+  assert.match(html, /data-seo-fallback="true"/u);
 });
 
 test("정적 sitemap 은 영어 본문이 없는 경로에 en URL 을 제출하지 않는다", () => {

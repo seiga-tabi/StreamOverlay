@@ -54,11 +54,13 @@ import {
 import {
   isKnownPalworldPagePath,
   isPalworldPath,
+  palworldBreedingDetailFromPath,
   palworldCondensationStarsFromParams,
   palworldDetailSelectionFromParams,
   palworldFocusPalFromParams,
   palworldPageFromPath,
   palworldPathForPage,
+  palworldRouteParams,
   palworldSpawnPeriodFromParams,
   palworldTwitchReturnTo,
   palworldUrl,
@@ -263,6 +265,10 @@ test("팰월드 공개 경로를 페이지 상태로 안정적으로 변환한�
   assert.equal(palworldPageFromPath("/palworld/search"), "search");
   assert.equal(palworldPageFromPath("/ko/palworld/pals"), "pals");
   assert.equal(palworldPageFromPath("/ja/palworld/breeding/"), "breeding");
+  assert.equal(
+    palworldPageFromPath("/en/palworld/breeding/cattiva/lamball/lifmunk"),
+    "breeding",
+  );
   assert.equal(palworldPathForPage("pals"), "/palworld/pals");
   assert.equal(palworldPathForPage("technology"), "/palworld/technology");
   assert.equal(palworldPathForPage("map"), "/palworld/map");
@@ -274,9 +280,38 @@ test("팰월드 공개 경로를 페이지 상태로 안정적으로 변환한�
   assert.equal(isPalworldPath("/lol/summoners/jp/test-JP1"), false);
   assert.equal(isKnownPalworldPagePath("/palworld/breeding"), true);
   assert.equal(isKnownPalworldPagePath("/palworld/breeding/"), true);
+  assert.equal(
+    isKnownPalworldPagePath("/ko/palworld/breeding/katress/wixen/wixen-noct/male-female"),
+    true,
+  );
   assert.equal(isKnownPalworldPagePath("/palworld/streamers"), false);
   assert.equal(palworldPageFromPath("/palworld/streamers"), "home");
   assert.equal(isKnownPalworldPagePath("/palworld/not-a-page"), false);
+});
+
+test("교배 상세 경로는 기존 계산기 부모·성별 선택 상태로 연결된다", () => {
+  assert.deepEqual(
+    palworldBreedingDetailFromPath(
+      "/ko/palworld/breeding/katress/wixen/wixen-noct/male-female",
+    ),
+    {
+      childId: "wixen-noct",
+      parentAId: "katress",
+      parentBId: "wixen",
+      parentAGender: "male",
+      parentBGender: "female",
+    },
+  );
+  assert.equal(
+    palworldBreedingDetailFromPath("/palworld/breeding/katress/wixen/wixen-noct/any-any"),
+    null,
+  );
+  const params = palworldRouteParams(
+    "/ja/palworld/breeding/katress/wixen/wixen-noct/male-female",
+    "?child=old&type=special&page=3&safe=kept",
+  );
+  assert.equal(params.toString(), "safe=kept&parentA=katress&parentB=wixen&parentAGender=male&parentBGender=female");
+  assert.equal(parsePalworldBreedingQuery(params).ok, true);
 });
 
 test("지도 focusPal query는 단일 canonical Pal ID만 허용한다", () => {

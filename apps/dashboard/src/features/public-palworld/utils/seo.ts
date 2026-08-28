@@ -63,7 +63,10 @@ export function applyPalworldSeo(
   locale: PalworldLocale,
   pathname: string = typeof window === "undefined" ? "/" : window.location.pathname
 ): () => void {
-  if (/^(?:\/(?:ko|ja))?\/palworld\/(?:pals|items|skills)\/[^/]+\/?$/u.test(pathname)) {
+  if (
+    /^(?:\/(?:ko|ja|en))?\/palworld\/(?:pals|items|skills)\/[^/]+\/?$/u.test(pathname)
+    || /^(?:\/(?:ko|ja|en))?\/palworld\/breeding\/[^/]+\/[^/]+\/[^/]+(?:\/(?:male|female)-(?:male|female))?\/?$/u.test(pathname)
+  ) {
     return () => {};
   }
   const metadata = palworldSeoMetadata(page, locale);

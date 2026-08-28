@@ -243,6 +243,9 @@ import {
 import {
   applyPublicSeoMetadata,
   localizedPublicSeoUrl,
+  palworldBreedingPath,
+  palworldBreedingRouteForPath,
+  palworldBreedingSeoMetadata,
   palworldEntityRedirectPath,
   palworldEntityRouteForPath,
   palworldEntitySeoMetadata,
@@ -256,16 +259,21 @@ import {
   publicSeoMetadataForPath,
   withLolProfileSeo,
   type PalworldSeoEntity,
+  type PalworldSeoBreedingPair,
   type PublicSeoFact,
   type PublicSeoMetadata,
 } from "./public-seo.js";
 import {
   PALWORLD_SITEMAP_KINDS,
+  PALWORLD_BREEDING_PAIRS_PER_SITEMAP,
   PUBLIC_SITEMAP_PATHS,
   SITEMAP_MAX_URLS,
+  buildPalworldBreedingSitemap,
   buildPalworldEntitySitemap,
   buildSitemapIndex,
   buildStaticSitemap,
+  palworldBreedingSitemapPaths,
+  palworldBreedingSitemapShard,
 } from "./public-sitemap.js";
 import type { PalworldEntityKind } from "./public-seo.js";
 import {
@@ -3858,6 +3866,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
   const publicLolMatchDetailCache = new Map<string, { expiresAt: number; match: RiotMatch }>();
   const patchPlaySummaryCache = new Map<string, { expiresAt: number; summary: PatchPlaySummary }>();
   const patchPlaySummaryInFlight = new Map<string, Promise<PatchPlaySummary>>();
+  /* 큰 교배 sitemap은 data revision별·shard별로 한 번만 직렬화합니다. */
+  const publicSitemapCache = new Map<string, string>();
   const publicLolMatchDetailInFlight = new Map<string, Promise<RiotMatch | null>>();
   const publicTwitchFollowedCache = new Map<string, {
     expiresAt: number;
@@ -4057,6 +4067,39 @@ export function createHttpHandler(input: HttpHandlerInput) {
     }
   }
 
+  /** 일시적인 교배 데이터 장애에는 빈 shell 대신 기존 교배 fallback을 담은 503을 냅니다. */
+  async function sendPalworldBreedingUnavailablePage(
+    req: IncomingMessage,
+    res: ServerResponse,
+    pathname: string
+  ): Promise<void> {
+    const filePath = path.resolve(appConfig.paths.dashboardStatic, "index.html");
+    const locale = publicUrlLocaleFromPathname(pathname) ?? "ko";
+    try {
+      const metadata = {
+        ...publicSeoMetadataForPath(`/${locale}/palworld/breeding`),
+        robotsNoindex: true
+      };
+      const cspNonce = crypto.randomBytes(18).toString("base64url");
+      const html = applyPublicSeoMetadata(await fs.readFile(filePath, "utf8"), metadata)
+        .replaceAll(DASHBOARD_CSP_NONCE_PLACEHOLDER, cspNonce);
+      res.writeHead(503, {
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "no-store",
+        "Retry-After": "600",
+        "X-Robots-Tag": "noindex, nofollow",
+        ...staticSecurityHeaders(req, filePath, "/dashboard", cspNonce)
+      });
+      res.end(req.method === "HEAD" ? undefined : html);
+    } catch {
+      sendJson(req, res, 503, PALWORLD_DATA_UNAVAILABLE_RESPONSE, {
+        "Cache-Control": "no-store",
+        "Retry-After": "600",
+        "X-Robots-Tag": "noindex, nofollow"
+      });
+    }
+  }
+
   /**
    * sitemap index와 하위 sitemap을 응답합니다.
    * Palworld 하위 sitemap은 data service가 준비된 경우에만 index에 넣어
@@ -4064,15 +4107,17 @@ export function createHttpHandler(input: HttpHandlerInput) {
    */
   function sendPublicSitemap(req: IncomingMessage, res: ServerResponse, pathname: string): boolean {
     const palworldData = input.palworldDataService;
-    const dataVersion = (() => {
+    const palworldMeta = (() => {
       if (!palworldData) return undefined;
       try {
-        const metadata = palworldData.meta().metadata as { generatedAt?: unknown } | undefined;
-        return typeof metadata?.generatedAt === "string" ? metadata.generatedAt : undefined;
+        return palworldData.meta();
       } catch {
         return undefined;
       }
     })();
+    const generatedAt = (palworldMeta?.metadata as { generatedAt?: unknown } | undefined)?.generatedAt;
+    const dataVersion = typeof generatedAt === "string" ? generatedAt : undefined;
+    const breedingPairCount = palworldMeta?.counts.breedingPairs ?? 0;
     const respond = (body: string): boolean => {
       res.writeHead(200, {
         "Content-Type": "application/xml; charset=utf-8",
@@ -4090,7 +4135,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
           ? [
               { path: PUBLIC_SITEMAP_PATHS.pals, lastmod: dataVersion },
               { path: PUBLIC_SITEMAP_PATHS.items, lastmod: dataVersion },
-              { path: PUBLIC_SITEMAP_PATHS.skills, lastmod: dataVersion }
+              { path: PUBLIC_SITEMAP_PATHS.skills, lastmod: dataVersion },
+              ...palworldBreedingSitemapPaths(breedingPairCount)
+                .map((path) => ({ path, lastmod: dataVersion }))
             ]
           : [])
       ];
@@ -4100,6 +4147,54 @@ export function createHttpHandler(input: HttpHandlerInput) {
       return respond(buildStaticSitemap(undefined, {
         minecraftPatchNotesReady: input.minecraftPatchNotes?.hasReadyData() === true
       }));
+    }
+    const breedingShard = palworldBreedingSitemapShard(pathname);
+    if (breedingShard !== undefined) {
+      const breedingPaths = palworldBreedingSitemapPaths(breedingPairCount);
+      if (!palworldData || breedingShard >= breedingPaths.length) {
+        res.writeHead(404, {
+          "Content-Type": "application/json; charset=utf-8",
+          ...securityHeadersForRequest(req)
+        });
+        res.end(req.method === "HEAD" ? undefined : JSON.stringify({ error: "not found" }));
+        return true;
+      }
+      try {
+        const cacheKey = `${dataVersion ?? "unknown"}\0${pathname}\0${breedingPairCount}`;
+        const cached = publicSitemapCache.get(cacheKey);
+        if (cached !== undefined) return respond(cached);
+        const offset = breedingShard * PALWORLD_BREEDING_PAIRS_PER_SITEMAP;
+        const page = palworldData.listBreedingPairs({
+          offset,
+          limit: PALWORLD_BREEDING_PAIRS_PER_SITEMAP
+        });
+        const expectedCount = Math.min(
+          PALWORLD_BREEDING_PAIRS_PER_SITEMAP,
+          breedingPairCount - offset
+        );
+        if (page.total !== breedingPairCount || page.items.length !== expectedCount) {
+          throw new TypeError("Palworld 교배 sitemap 범위와 runtime metadata가 일치하지 않습니다.");
+        }
+        const body = buildPalworldBreedingSitemap(page.items, dataVersion);
+        publicSitemapCache.set(cacheKey, body);
+        /* shard 하나가 최대 약 28MB라 최근 1개만 process memory에 두고,
+           반복 요청 캐시는 기존 1시간 HTTP/CDN 정책에 맡깁니다. */
+        pruneMapToMax(publicSitemapCache, 1);
+        return respond(body);
+      } catch (error) {
+        input.logger?.error({
+          type: "public_seo.sitemap_failed",
+          errorCode: "breeding_sitemap_unavailable",
+          error: toSafeErrorMessage(error)
+        });
+        res.writeHead(503, {
+          "Content-Type": "application/json; charset=utf-8",
+          "Retry-After": "600",
+          ...securityHeadersForRequest(req)
+        });
+        res.end(req.method === "HEAD" ? undefined : JSON.stringify({ error: "sitemap unavailable" }));
+        return true;
+      }
     }
     const kind = PALWORLD_SITEMAP_KINDS[pathname];
     if (!kind) return false;
@@ -4141,6 +4236,49 @@ export function createHttpHandler(input: HttpHandlerInput) {
   const PALWORLD_SEO_BREEDING_LINKS = 60;
   /* Palworld 목록 허브 fallback에 실을 대표 항목 수. public-seo 상한과 같습니다. */
   const PALWORLD_SEO_HUB_ITEMS = 30;
+
+  function resolvePalworldBreedingSeoPair(pathname: string): {
+    dataUnavailable: boolean;
+    isBreedingRoute: boolean;
+    pair?: PalworldSeoBreedingPair;
+  } {
+    const route = palworldBreedingRouteForPath(pathname);
+    if (!route) return { dataUnavailable: false, isBreedingRoute: false };
+    const palworldData = input.palworldDataService;
+    if (!palworldData) return { dataUnavailable: true, isBreedingRoute: true };
+    try {
+      const response = palworldData.breeding({
+        parentA: route.parentAId,
+        parentB: route.parentBId,
+        ...(route.parentAGender === undefined ? {} : { parentAGender: route.parentAGender }),
+        ...(route.parentBGender === undefined ? {} : { parentBGender: route.parentBGender })
+      });
+      if (response.state === "data_unavailable") {
+        return { dataUnavailable: true, isBreedingRoute: true };
+      }
+      if (response.state !== "resolved" || !response.result) {
+        return { dataUnavailable: false, isBreedingRoute: true };
+      }
+      if (response.result.child.id !== route.childId) {
+        return { dataUnavailable: false, isBreedingRoute: true };
+      }
+      return {
+        dataUnavailable: false,
+        isBreedingRoute: true,
+        pair: response.result
+      };
+    } catch (error) {
+      if (error instanceof PalworldRecordNotFoundError) {
+        return { dataUnavailable: false, isBreedingRoute: true };
+      }
+      input.logger?.error({
+        type: "public_seo.breeding_detail_failed",
+        errorCode: "breeding_detail_unavailable",
+        error: toSafeErrorMessage(error)
+      });
+      return { dataUnavailable: true, isBreedingRoute: true };
+    }
+  }
 
   function resolvePalworldSeoEntity(pathname: string): {
     entity?: PalworldSeoEntity;
@@ -4322,6 +4460,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
         ...(typeof shared?.displayName === "string" ? { displayName: shared.displayName } : {}),
         ...(typeof shared?.percentile === "number" ? { percentile: shared.percentile } : {})
       });
+    }
+    const breedingRoute = palworldBreedingRouteForPath(pathname);
+    if (breedingRoute) {
+      const resolved = resolvePalworldBreedingSeoPair(pathname);
+      if (resolved.pair) return palworldBreedingSeoMetadata(breedingRoute, resolved.pair);
     }
     /* 교배 페이지 본문 — 팰 상세로 이어지는 내부 링크가 크롤 경로가 됩니다.
        데이터가 없으면 기존 요약 문구 그대로입니다(빈 페이지 금지). */
@@ -9453,6 +9596,23 @@ export function createHttpHandler(input: HttpHandlerInput) {
           });
         }
         if (url.pathname === "/" || isPublicDashboardAppRoute(url.pathname)) {
+          const breedingPair = resolvePalworldBreedingSeoPair(url.pathname);
+          if (breedingPair.isBreedingRoute && !breedingPair.pair) {
+            if (breedingPair.dataUnavailable) {
+              await sendPalworldBreedingUnavailablePage(req, res, url.pathname);
+              return;
+            }
+            return sendPublicNotFound(req, res, url.pathname);
+          }
+          if (breedingPair.pair) {
+            const locale = publicUrlLocaleFromPathname(url.pathname);
+            const canonicalPath = palworldBreedingPath(breedingPair.pair);
+            if (locale && stripPublicUrlLocalePrefix(url.pathname).replace(/\/$/u, "") !== canonicalPath) {
+              return sendPermanentRedirect(res, `/${locale}${canonicalPath}`, {
+                "Cache-Control": "public, max-age=3600"
+              });
+            }
+          }
           const palworldEntity = resolvePalworldSeoEntity(url.pathname);
           if (palworldEntity.isEntityRoute && !palworldEntity.entity) {
             // 존재하지 않는 엔티티에 200을 주면 soft 404가 되어 같은 패턴 URL 전체의

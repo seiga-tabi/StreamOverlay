@@ -101,6 +101,7 @@ export class PalworldBreedingEngine {
   private readonly specialRulesByPair: ReadonlyMap<string, readonly PalworldBreedingSpecialRule[]>;
   private readonly reverseIndex: ReadonlyMap<string, readonly PalworldBreedingEnginePair[]>;
   private readonly partnersIndex: ReadonlyMap<string, readonly PalworldBreedingEnginePair[]>;
+  private readonly resolvedPairs: readonly PalworldBreedingEnginePair[];
 
   constructor(snapshot: unknown) {
     const artifact = assertPalworldBreedingArtifact(snapshot);
@@ -129,6 +130,7 @@ export class PalworldBreedingEngine {
 
     const reverseIndex = new Map<string, PalworldBreedingEnginePair[]>();
     const partnersIndex = new Map<string, PalworldBreedingEnginePair[]>();
+    const resolvedPairs: PalworldBreedingEnginePair[] = [];
     let pairCount = 0;
     for (let parentAIndex = 0; parentAIndex < this.parameters.length; parentAIndex += 1) {
       const parentA = this.parameters[parentAIndex]!;
@@ -141,6 +143,7 @@ export class PalworldBreedingEngine {
             ? resolution.alternatives
             : [];
         for (const pair of pairs) {
+          resolvedPairs.push(pair);
           reverseIndex.set(pair.childId, [...(reverseIndex.get(pair.childId) ?? []), pair]);
           partnersIndex.set(pair.parentAId, [...(partnersIndex.get(pair.parentAId) ?? []), pair]);
           if (pair.parentBId !== pair.parentAId) {
@@ -150,6 +153,7 @@ export class PalworldBreedingEngine {
         }
       }
     }
+    this.resolvedPairs = resolvedPairs.sort(pairOrder);
     for (const [childId, pairs] of reverseIndex) {
       reverseIndex.set(childId, [...pairs].sort(pairOrder));
     }
@@ -229,5 +233,10 @@ export class PalworldBreedingEngine {
 
   partners(parentId: string): PalworldBreedingEnginePair[] {
     return [...(this.partnersIndex.get(parentId) ?? [])];
+  }
+
+  /** sitemap처럼 전체 조합을 순회하는 소비자가 결정적인 범위만 읽도록 합니다. */
+  pairs(offset: number, limit: number): PalworldBreedingEnginePair[] {
+    return this.resolvedPairs.slice(offset, offset + limit);
   }
 }

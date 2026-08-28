@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { PALWORLD_ROUTE_EVENT, palworldPageFromPath } from "../utils/routes";
+import { PALWORLD_ROUTE_EVENT, palworldPageFromPath, palworldRouteParams } from "../utils/routes";
 
 export function usePalworldRoute() {
   const [locationRevision, setLocationRevision] = useState(0);
@@ -16,7 +16,7 @@ export function usePalworldRoute() {
 
   return {
     page: palworldPageFromPath(window.location.pathname),
-    params: new URLSearchParams(window.location.search),
+    params: palworldRouteParams(window.location.pathname, window.location.search),
     locationRevision,
   };
 }

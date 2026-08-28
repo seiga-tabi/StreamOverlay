@@ -8,18 +8,23 @@
 import {
   PUBLIC_SEO_ORIGIN,
   localizedPublicSeoUrl,
+  palworldBreedingPath,
   palworldEntityPath,
   publicSeoLocalesForPath,
+  type PalworldSeoBreedingPair,
   type PalworldEntityKind
 } from "./public-seo.js";
 
 /** sitemap 하나에 담는 URL 상한. 규격 상한(50,000)보다 낮게 잡아 응답 크기를 억제합니다. */
 export const SITEMAP_MAX_URLS = 20_000;
+/** 교배 상세는 ko·ja·en 3개 URL이 생기므로 shard당 논리 조합 수를 50,000/3으로 제한합니다. */
+export const PALWORLD_BREEDING_PAIRS_PER_SITEMAP = 16_666;
 
 export const PUBLIC_SITEMAP_PATHS = {
   index: "/sitemap.xml",
   static: "/sitemap-static.xml",
   pals: "/sitemap-palworld-pals.xml",
+  breeding: "/sitemap-palworld-breeding.xml",
   items: "/sitemap-palworld-items.xml",
   skills: "/sitemap-palworld-skills.xml"
 } as const;
@@ -163,5 +168,37 @@ export function buildPalworldEntitySitemap(
 ): string {
   return buildLocalizedUrlSetSitemap(
     ids.slice(0, SITEMAP_MAX_URLS).map((id) => ({ path: palworldEntityPath(kind, id), lastmod }))
+  );
+}
+
+/** 첫 shard는 요청된 고정 파일명을 유지하고, 두 번째부터 번호를 붙입니다. */
+export function palworldBreedingSitemapPaths(totalPairs: number): string[] {
+  if (!Number.isSafeInteger(totalPairs) || totalPairs <= 0) return [];
+  const count = Math.ceil(totalPairs / PALWORLD_BREEDING_PAIRS_PER_SITEMAP);
+  return Array.from({ length: count }, (_value, index) => (
+    index === 0
+      ? PUBLIC_SITEMAP_PATHS.breeding
+      : `/sitemap-palworld-breeding-${index + 1}.xml`
+  ));
+}
+
+/** 알려진 교배 sitemap shard 경로를 0-based shard 번호로 해석합니다. */
+export function palworldBreedingSitemapShard(pathname: string): number | undefined {
+  if (pathname === PUBLIC_SITEMAP_PATHS.breeding) return 0;
+  const match = /^\/sitemap-palworld-breeding-([2-9][0-9]*)\.xml$/u.exec(pathname);
+  if (!match?.[1]) return undefined;
+  const number = Number(match[1]);
+  return Number.isSafeInteger(number) ? number - 1 : undefined;
+}
+
+export function buildPalworldBreedingSitemap(
+  pairs: readonly PalworldSeoBreedingPair[],
+  lastmod?: string
+): string {
+  if (pairs.length > PALWORLD_BREEDING_PAIRS_PER_SITEMAP) {
+    throw new RangeError("교배 sitemap shard의 조합 수가 상한을 초과했습니다.");
+  }
+  return buildLocalizedUrlSetSitemap(
+    pairs.map((pair) => ({ path: palworldBreedingPath(pair), lastmod }))
   );
 }

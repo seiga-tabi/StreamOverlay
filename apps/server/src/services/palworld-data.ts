@@ -500,7 +500,7 @@ function pageItems<T>(items: readonly T[], page: number, pageSize: number): T[] 
 
 type PalworldBreedingResolver = Pick<
   PalworldBreedingEngine,
-  "pairCount" | "resolve" | "parents" | "partners"
+  "pairCount" | "resolve" | "parents" | "partners" | "pairs"
 >;
 
 function snapshotBreedingPairKey(parentAId: string, parentBId: string): string {
@@ -561,6 +561,8 @@ function snapshotGenderMatches(
 class PalworldSnapshotBreedingIndex implements PalworldBreedingResolver {
   readonly pairCount: number;
 
+  private readonly resolvedPairs: readonly PalworldBreedingEnginePair[];
+
   private readonly pairsByParents: ReadonlyMap<
     string,
     readonly PalworldBreedingPair[]
@@ -576,6 +578,7 @@ class PalworldSnapshotBreedingIndex implements PalworldBreedingResolver {
 
   constructor(pairs: readonly PalworldBreedingPair[]) {
     this.pairCount = pairs.length;
+    const resolvedPairs: PalworldBreedingEnginePair[] = [];
     const pairsByParents = new Map<string, PalworldBreedingPair[]>();
     const pairsByChild = new Map<string, PalworldBreedingEnginePair[]>();
     const pairsBySelectedParent = new Map<string, PalworldBreedingEnginePair[]>();
@@ -602,6 +605,7 @@ class PalworldSnapshotBreedingIndex implements PalworldBreedingResolver {
           ? {}
           : { parentBGender: pair.genderCondition.parentB })
       };
+      resolvedPairs.push(indexedPair);
       pairsByChild.set(pair.child.id, [
         ...(pairsByChild.get(pair.child.id) ?? []),
         indexedPair
@@ -617,6 +621,7 @@ class PalworldSnapshotBreedingIndex implements PalworldBreedingResolver {
         ]);
       }
     }
+    this.resolvedPairs = resolvedPairs.sort(snapshotBreedingPairOrder);
     this.pairsByParents = pairsByParents;
     this.pairsByChild = new Map(
       [...pairsByChild.entries()].map(([childId, childPairs]) => [
@@ -669,6 +674,10 @@ class PalworldSnapshotBreedingIndex implements PalworldBreedingResolver {
 
   partners(parentId: string): PalworldBreedingEnginePair[] {
     return [...(this.pairsBySelectedParent.get(parentId) ?? [])];
+  }
+
+  pairs(offset: number, limit: number): PalworldBreedingEnginePair[] {
+    return this.resolvedPairs.slice(offset, offset + limit);
   }
 }
 
@@ -1353,6 +1362,31 @@ export class PalworldDataService {
           ? "not_found"
           : "resolved",
       metadata: this.snapshot.metadata
+    };
+  }
+
+  /**
+   * 전체 교배 조합을 sitemap shard 단위로 읽습니다.
+   * API 목록 제한과 무관한 서버 내부 경로이며, 한 요청이 전체 41,329건을 복제하지
+   * 않도록 offset/limit 범위만 공개 응답 형태로 변환합니다.
+   */
+  listBreedingPairs(input: { offset: number; limit: number }): {
+    items: PalworldBreedingPair[];
+    total: number;
+  } {
+    if (
+      !Number.isSafeInteger(input.offset)
+      || input.offset < 0
+      || !Number.isSafeInteger(input.limit)
+      || input.limit < 1
+      || input.limit > 50_000
+    ) {
+      throw new RangeError("교배 조합 조회 범위가 올바르지 않습니다.");
+    }
+    return {
+      items: (this.breedingEngine?.pairs(input.offset, input.limit) ?? [])
+        .map((pair) => this.enginePair(pair)),
+      total: this.breedingEngine?.pairCount ?? 0
     };
   }
 

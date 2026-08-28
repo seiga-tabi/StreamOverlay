@@ -134,6 +134,9 @@ test("성별 조건은 부모 순서와 함께 교환되고 불일치 조건은 
 
 test("reverse index는 시작 시 precompute되며 전체 unordered 부모 조합을 보존한다", () => {
   assert.equal(engine.pairCount, 41_329);
+  assert.equal(engine.pairs(0, 50_000).length, 41_329);
+  assert.deepEqual(engine.pairs(0, 2), engine.pairs(0, 2));
+  assert.equal(engine.pairs(41_328, 2).length, 1);
   const anubisParents = engine.parents("anubis");
   assert.equal(anubisParents.length, 234);
   assert.ok(anubisParents.every((pair) => pair.childId === "anubis"));

@@ -18,6 +18,13 @@ export type PalworldDetailSelection =
   | { type: "pal"; id: string }
   | { type: "item"; id: string }
   | { type: "skill"; id: string };
+export type PalworldBreedingDetail = {
+  childId: string;
+  parentAId: string;
+  parentBId: string;
+  parentAGender?: "male" | "female";
+  parentBGender?: "male" | "female";
+};
 
 const PAGE_PATHS: Record<PalworldPage, string> = {
   home: "/palworld",
@@ -70,6 +77,51 @@ export function palworldDetailFromPath(pathname: string): PalworldDetailSelectio
     return null;
   }
   return PALWORLD_PUBLIC_ID_PATTERN.test(id) ? { type, id } : null;
+}
+
+/** 서버의 색인 가능한 교배 URL을 기존 교배 계산기 선택 상태로 해석합니다. */
+export function palworldBreedingDetailFromPath(pathname: string): PalworldBreedingDetail | null {
+  const match = /^\/palworld\/breeding\/([^/]+)\/([^/]+)\/([^/]+)(?:\/(male|female)-(male|female))?$/u
+    .exec(normalizePath(pathname));
+  if (!match?.[1] || !match[2] || !match[3]) return null;
+  let parentAId: string;
+  let parentBId: string;
+  let childId: string;
+  try {
+    parentAId = decodeURIComponent(match[1]);
+    parentBId = decodeURIComponent(match[2]);
+    childId = decodeURIComponent(match[3]);
+  } catch {
+    return null;
+  }
+  if (![parentAId, parentBId, childId].every((id) => PALWORLD_PUBLIC_ID_PATTERN.test(id))) {
+    return null;
+  }
+  const parentAGender = match[4] as "male" | "female" | undefined;
+  const parentBGender = match[5] as "male" | "female" | undefined;
+  return {
+    childId,
+    parentAId,
+    parentBId,
+    ...(parentAGender === undefined ? {} : { parentAGender }),
+    ...(parentBGender === undefined ? {} : { parentBGender })
+  };
+}
+
+export function palworldRouteParams(pathname: string, search: string): URLSearchParams {
+  const params = new URLSearchParams(search);
+  const breeding = palworldBreedingDetailFromPath(pathname);
+  if (!breeding) return params;
+  for (const key of [
+    "mode", "parentA", "parentB", "parentAGender", "parentBGender", "child", "type", "page"
+  ]) {
+    params.delete(key);
+  }
+  params.set("parentA", breeding.parentAId);
+  params.set("parentB", breeding.parentBId);
+  if (breeding.parentAGender) params.set("parentAGender", breeding.parentAGender);
+  if (breeding.parentBGender) params.set("parentBGender", breeding.parentBGender);
+  return params;
 }
 
 export function palworldDetailPath(type: PalworldDetailSelection["type"], id: string): string {
@@ -129,7 +181,8 @@ export function shouldOpenDetailInPlace(event: {
 
 export function isKnownPalworldPagePath(pathname: string): boolean {
   return Object.values(PAGE_PATHS).includes(normalizePath(pathname))
-    || palworldDetailFromPath(pathname) !== null;
+    || palworldDetailFromPath(pathname) !== null
+    || palworldBreedingDetailFromPath(pathname) !== null;
 }
 
 export function palworldPageFromPath(pathname: string): PalworldPage {
@@ -138,7 +191,8 @@ export function palworldPageFromPath(pathname: string): PalworldPage {
   if (entry) return entry[0];
   // 상세 URL은 목록 page 위에 modal로 열립니다.
   const detail = palworldDetailFromPath(pathname);
-  return detail ? ENTITY_PAGE_BY_KIND[detail.type] : "home";
+  if (detail) return ENTITY_PAGE_BY_KIND[detail.type];
+  return palworldBreedingDetailFromPath(pathname) ? "breeding" : "home";
 }
 
 export function palworldPathForPage(page: PalworldPage): string {
@@ -248,7 +302,11 @@ export function palworldDetailSelectionFromLocation(
 export function palworldTwitchReturnTo(pathname: string, search = ""): string {
   const locale = publicLocaleFromPathname(pathname);
   const path = normalizePath(pathname);
-  if (!Object.values(PAGE_PATHS).includes(path) && palworldDetailFromPath(pathname) === null) {
+  if (
+    !Object.values(PAGE_PATHS).includes(path)
+    && palworldDetailFromPath(pathname) === null
+    && palworldBreedingDetailFromPath(pathname) === null
+  ) {
     return locale ? localizedPublicUrl(PAGE_PATHS.home, locale) : PAGE_PATHS.home;
   }
   const params = new URLSearchParams(search);

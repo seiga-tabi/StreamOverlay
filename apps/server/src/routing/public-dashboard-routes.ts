@@ -102,6 +102,7 @@ const PUBLIC_DASHBOARD_PATH_PREFIXES = [
   "/lol/summoners/",
   // Palworld 상세는 query가 아니라 고유 URL을 가져야 검색에 색인되고 공유·북마크가 동작합니다.
   "/palworld/pals/",
+  "/palworld/breeding/",
   "/palworld/items/",
   "/palworld/skills/",
   /* 반응속도 공유 링크 — 기록 id 마다 고유 URL 이라 prefix 로 받습니다.

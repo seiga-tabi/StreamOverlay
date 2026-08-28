@@ -140,6 +140,22 @@ test("runtime meta는 고정 catalog의 Pal·아이템·스킬 coverage와 분�
   });
 });
 
+test("교배 sitemap 범위 조회는 전체 41,329건을 결정적으로 나눈다", () => {
+  const first = service.listBreedingPairs({ offset: 0, limit: 2 });
+  const firstAgain = service.listBreedingPairs({ offset: 0, limit: 2 });
+  const tail = service.listBreedingPairs({ offset: 41_328, limit: 2 });
+  assert.equal(first.total, 41_329);
+  assert.equal(first.items.length, 2);
+  assert.deepEqual(first.items, firstAgain.items);
+  assert.equal(tail.total, 41_329);
+  assert.equal(tail.items.length, 1);
+  assert.notEqual(first.items[0]?.id, tail.items[0]?.id);
+  assert.throws(
+    () => service.listBreedingPairs({ offset: -1, limit: 1 }),
+    /조회 범위/u,
+  );
+});
+
 test("활성 Pal 287종과 상세 스킬 이름은 공식 한국어·일본어 locale을 유지한다", () => {
   const palSummaries = service.listPals({
     sort: "number",

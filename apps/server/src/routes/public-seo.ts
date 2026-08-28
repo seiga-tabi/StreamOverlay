@@ -249,6 +249,35 @@ export type PalworldEntityRoute = {
   locale: PublicUrlLocale;
 };
 
+export type PalworldBreedingSeoGender = "male" | "female";
+
+export type PalworldBreedingRoute = {
+  childId: string;
+  locale: PublicUrlLocale;
+  parentAId: string;
+  parentBId: string;
+  parentAGender?: PalworldBreedingSeoGender;
+  parentBGender?: PalworldBreedingSeoGender;
+};
+
+export type PalworldSeoBreedingPair = {
+  child: PalworldSeoBreedingPal;
+  genderCondition?: {
+    parentA: PalworldBreedingSeoGender | "any";
+    parentB: PalworldBreedingSeoGender | "any";
+  };
+  isSpecial: boolean;
+  parentA: PalworldSeoBreedingPal;
+  parentB: PalworldSeoBreedingPal;
+};
+
+type PalworldSeoBreedingPal = {
+  id: string;
+  nameEn?: string | null;
+  nameJa?: string | null;
+  nameKo?: string | null;
+};
+
 /** palworld-data service의 detail 응답에서 SEO에 쓰는 필드만 구조적으로 받습니다.
  *
  * 아래 "본문용" 필드는 전부 optional 입니다 — 데이터 서비스가 없거나 스냅샷이
@@ -432,6 +461,74 @@ export function palworldEntityRouteForPath(pathname: string): PalworldEntityRout
 
 export function palworldEntityPath(kind: PalworldEntityKind, id: string): string {
   return `${PALWORLD_ENTITY_LIST_PATH[kind]}/${encodeURIComponent(id)}`;
+}
+
+function orderedPalworldBreedingPair(pair: PalworldSeoBreedingPair): PalworldSeoBreedingPair {
+  if (pair.parentA.id <= pair.parentB.id) return pair;
+  return {
+    ...pair,
+    parentA: pair.parentB,
+    parentB: pair.parentA,
+    ...(pair.genderCondition === undefined
+      ? {}
+      : {
+          genderCondition: {
+            parentA: pair.genderCondition.parentB,
+            parentB: pair.genderCondition.parentA
+          }
+        })
+  };
+}
+
+/**
+ * 부모·자식의 기존 public ID를 그대로 쓰는 교배 조합 canonical 경로입니다.
+ * 부모는 순서가 결과에 영향을 주지 않으므로 정렬하고, 성별에 따라 결과가 갈리는
+ * 특수 조합만 마지막 segment를 붙여 모든 조합 URL을 충돌 없이 유지합니다.
+ */
+export function palworldBreedingPath(pair: PalworldSeoBreedingPair): string {
+  const ordered = orderedPalworldBreedingPair(pair);
+  const segments = [ordered.parentA.id, ordered.parentB.id, ordered.child.id]
+    .map((id) => encodeURIComponent(id));
+  const condition = ordered.genderCondition;
+  if (
+    condition
+    && condition.parentA !== "any"
+    && condition.parentB !== "any"
+  ) {
+    segments.push(`${condition.parentA}-${condition.parentB}`);
+  }
+  return `/palworld/breeding/${segments.join("/")}`;
+}
+
+/** 조작된 교배 상세 경로를 데이터 조회 전에 엄격한 public ID/성별 형태로 제한합니다. */
+export function palworldBreedingRouteForPath(pathname: string): PalworldBreedingRoute | undefined {
+  const locale = publicUrlLocaleFromPathname(pathname) ?? "ko";
+  const normalized = normalizePublicSeoPath(pathname);
+  const match = /^\/palworld\/breeding\/([^/]+)\/([^/]+)\/([^/]+)(?:\/(male|female)-(male|female))?$/u.exec(normalized);
+  if (!match?.[1] || !match[2] || !match[3]) return undefined;
+  let parentAId: string;
+  let parentBId: string;
+  let childId: string;
+  try {
+    parentAId = decodeURIComponent(match[1]);
+    parentBId = decodeURIComponent(match[2]);
+    childId = decodeURIComponent(match[3]);
+  } catch {
+    return undefined;
+  }
+  if (![parentAId, parentBId, childId].every((id) => PALWORLD_PUBLIC_ID_PATTERN.test(id))) {
+    return undefined;
+  }
+  const parentAGender = match[4] as PalworldBreedingSeoGender | undefined;
+  const parentBGender = match[5] as PalworldBreedingSeoGender | undefined;
+  return {
+    childId,
+    locale,
+    parentAId,
+    parentBId,
+    ...(parentAGender === undefined ? {} : { parentAGender }),
+    ...(parentBGender === undefined ? {} : { parentBGender })
+  };
 }
 
 /**
@@ -861,6 +958,113 @@ export function palworldEntitySeoMetadata(
   };
 }
 
+function palworldBreedingPalName(
+  pal: PalworldSeoBreedingPal,
+  locale: PublicUrlLocale
+): string {
+  const localized = locale === "ja" ? pal.nameJa : locale === "en" ? pal.nameEn : pal.nameKo;
+  return localized?.trim() || pal.nameEn?.trim() || pal.nameKo?.trim() || pal.id;
+}
+
+/** 실제 부모·자식 데이터가 들어간 개별 교배 조합 metadata와 SSR fallback입니다. */
+export function palworldBreedingSeoMetadata(
+  route: PalworldBreedingRoute,
+  pair: PalworldSeoBreedingPair
+): PublicSeoMetadata {
+  const ordered = orderedPalworldBreedingPair(pair);
+  const { locale } = route;
+  const parentAName = palworldBreedingPalName(ordered.parentA, locale);
+  const parentBName = palworldBreedingPalName(ordered.parentB, locale);
+  const childName = palworldBreedingPalName(ordered.child, locale);
+  const normalizedPath = palworldBreedingPath(ordered);
+  const canonicalUrl = localizedPublicSeoUrl(normalizedPath, locale);
+  const title = t(
+    locale,
+    `${parentAName} + ${parentBName} 교배 결과: ${childName} | YORO.gg`,
+    `${parentAName} + ${parentBName} 配合結果: ${childName} | YORO.gg`,
+    `${parentAName} + ${parentBName} Breeding Result: ${childName} | YORO.gg`
+  );
+  const description = t(
+    locale,
+    `팰월드 교배 조합 ${parentAName} + ${parentBName}의 결과는 ${childName}입니다. 부모 조합과 교배 결과를 YORO.gg에서 확인하세요.`,
+    `パルワールドで${parentAName}と${parentBName}を配合すると${childName}が生まれます。親の組み合わせと配合結果をYORO.ggで確認できます。`,
+    `Breeding ${parentAName} with ${parentBName} produces ${childName} in Palworld. Check the parent pair and breeding result on YORO.gg.`
+  );
+  const gender = ordered.genderCondition;
+  const genderValue = gender && gender.parentA !== "any" && gender.parentB !== "any"
+    ? `${gender.parentA} + ${gender.parentB}`
+    : undefined;
+  const heading = `${parentAName} + ${parentBName} → ${childName}`;
+  return {
+    alternateUrls: publicSeoAlternateUrls(normalizedPath),
+    canonicalUrl,
+    description,
+    fallback: {
+      facts: [
+        { label: t(locale, "부모 A", "親A", "Parent A"), value: parentAName },
+        { label: t(locale, "부모 B", "親B", "Parent B"), value: parentBName },
+        { label: t(locale, "교배 결과", "配合結果", "Breeding result"), value: childName },
+        {
+          label: t(locale, "교배 종류", "配合タイプ", "Breeding type"),
+          value: ordered.isSpecial
+            ? t(locale, "특수 교배", "特殊配合", "Special breeding")
+            : t(locale, "일반 교배", "通常配合", "Normal breeding")
+        },
+        ...(genderValue === undefined
+          ? []
+          : [{ label: t(locale, "성별 조건", "性別条件", "Gender condition"), value: genderValue }])
+      ],
+      heading,
+      links: [
+        {
+          href: `/${locale}${palworldEntityPath("pal", ordered.parentA.id)}`,
+          label: parentAName
+        },
+        {
+          href: `/${locale}${palworldEntityPath("pal", ordered.parentB.id)}`,
+          label: parentBName
+        },
+        {
+          href: `/${locale}${palworldEntityPath("pal", ordered.child.id)}`,
+          label: childName
+        },
+        {
+          href: `/${locale}/palworld/breeding`,
+          label: t(locale, "교배 계산기", "配合計算機", "Breeding calculator")
+        }
+      ],
+      summary: description
+    },
+    imageAlt: heading,
+    imageUrl: socialImageForPath(normalizedPath, locale).url,
+    locale,
+    openGraphType: "article",
+    structuredData: [
+      websiteStructuredData(locale),
+      breadcrumbStructuredData(normalizedPath, locale, heading),
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        headline: title,
+        description,
+        inLanguage: SEO_LANGUAGE_TAGS[locale],
+        mainEntityOfPage: canonicalUrl,
+        about: {
+          "@type": "Thing",
+          name: heading
+        },
+        isPartOf: {
+          "@type": "WebSite",
+          name: "YORO.gg",
+          url: PUBLIC_SEO_ORIGIN
+        },
+        publisher: organizationStructuredData()
+      }
+    ],
+    title
+  };
+}
+
 function websiteStructuredData(locale: PublicUrlLocale): unknown {
   return {
     "@context": "https://schema.org",
@@ -892,8 +1096,8 @@ function organizationStructuredData(): unknown {
 }
 
 const BREADCRUMB_SEGMENT_LABELS: Readonly<Record<string, PublicSeoLocaleText>> = {
-  "/lol": { ko: "LoL 전적 검색", ja: "LoL戦績検索" },
-  "/lol/aram": { ko: "증강 칼바람", ja: "オーグメントARAM" },
+  "/lol": { ko: "LoL 전적 검색", ja: "LoL戦績検索", en: "LoL stats" },
+  "/lol/aram": { ko: "증강 칼바람", ja: "オーグメントARAM", en: "ARAM augments" },
   "/patch-notes": { ko: "패치 노트", ja: "パッチノート", en: "Patch notes" },
   /* "/lol/summoners"(목록)는 실제 라우트가 없어 404입니다 — 여기 두면
      genericFallback의 sibling 링크와 breadcrumb JSON-LD가 404 URL을
@@ -985,12 +1189,12 @@ function homeFallback(locale: PublicUrlLocale): PublicSeoFallback {
       "LoL match history, ARAM augments, the Palworld Paldeck and breeding calculator — one search box. Watch live streamers and join their games as a viewer."
     ),
     links: [
-      { href: `/${locale}/lol`, label: ja ? "LoL戦績検索" : "LoL 전적 검색" },
-      { href: `/${locale}/lol/aram`, label: ja ? "オーグメントARAM" : "증강 칼바람" },
+      { href: `/${locale}/lol`, label: t(locale, "LoL 전적 검색", "LoL戦績検索", "LoL stats") },
+      { href: `/${locale}/lol/aram`, label: t(locale, "증강 칼바람", "オーグメントARAM", "ARAM augments") },
       { href: `/${locale}/patch-notes`, label: t(locale, "패치 노트", "パッチノート", "Patch notes") },
       { href: `/${locale}/palworld`, label: t(locale, "팰월드 데이터베이스", "パルワールドデータベース", "Palworld Database") },
-      { href: `/${locale}/palworld/pals`, label: ja ? "パル図鑑" : "팰 도감" },
-      { href: `/${locale}/palworld/breeding`, label: ja ? "配合組み合わせ" : "교배 조합" },
+      { href: `/${locale}/palworld/pals`, label: t(locale, "팰 도감", "パル図鑑", "Paldeck") },
+      { href: `/${locale}/palworld/breeding`, label: t(locale, "교배 조합", "配合組み合わせ", "Breeding pairs") },
       { href: `/${locale}/bot`, label: "YORO Bot" }
     ]
   };
@@ -1663,7 +1867,8 @@ const ENGLISH_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
 /** 영어 메타를 내보내는 경로인지. 팰월드 엔티티 상세도 포함합니다. */
 function hasEnglishSeoContent(normalizedPath: string): boolean {
   if (ENGLISH_CONTENT[normalizedPath]) return true;
-  return palworldEntityRouteForPath(normalizedPath) !== undefined;
+  return palworldEntityRouteForPath(normalizedPath) !== undefined
+    || palworldBreedingRouteForPath(normalizedPath) !== undefined;
 }
 
 function contentForPath(
@@ -1750,7 +1955,6 @@ export function withLolProfileSeo(
   }
 ): PublicSeoMetadata {
   const { locale } = base;
-  const ja = locale === "ja";
   return {
     ...base,
     alternateUrls: publicSeoAlternateUrls(input.canonicalPath),
@@ -1761,9 +1965,9 @@ export function withLolProfileSeo(
       heading: input.heading,
       summary: input.description,
       links: [
-        { href: `/${locale}/lol`, label: ja ? "LoL戦績検索" : "LoL 전적 검색" },
-        { href: `/${locale}/lol/aram`, label: ja ? "オーグメントARAM" : "증강 칼바람" },
-        { href: `/${locale}/`, label: ja ? "ホーム" : "홈" }
+        { href: `/${locale}/lol`, label: t(locale, "LoL 전적 검색", "LoL戦績検索", "LoL stats") },
+        { href: `/${locale}/lol/aram`, label: t(locale, "증강 칼바람", "オーグメントARAM", "ARAM augments") },
+        { href: `/${locale}/`, label: t(locale, "홈", "ホーム", "Home") }
       ]
     },
     imageAlt: input.imageAlt,

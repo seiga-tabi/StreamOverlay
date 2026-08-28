@@ -2,6 +2,7 @@ import test, { beforeEach } from "node:test";
 import assert from "node:assert/strict";
 
 const { createHttpHandler } = await import("../dist/routes/http-api.js");
+const { palworldBreedingPath } = await import("../dist/routes/public-seo.js");
 const { loadPalworldDataService } = await import("../dist/services/palworld-data.js");
 const { resetSecurityRateLimiters } = await import("../dist/security/rate-limit.js");
 const { requiredHttpPrincipal } = await import("../dist/security/auth.js");
@@ -132,6 +133,48 @@ test("펠월드 공개 API는 인증 없이 meta와 cache header를 제공한다
   }
   assert.equal(body.gates.imageAssets.readyImages, 287);
   assert.equal(body.gates.imageAssets.fallbackPals, 0);
+});
+
+test("교배 sitemap index와 개별 SSR URL은 실제 runtime 조합을 제공한다", async () => {
+  const handler = createHandler();
+  const indexResponse = createResponse();
+  await handler(createRequest("GET", "/sitemap.xml"), indexResponse);
+  assert.equal(indexResponse.statusCode, 200);
+  assert.match(indexResponse.body, /sitemap-palworld-breeding\.xml/u);
+  assert.match(indexResponse.body, /sitemap-palworld-breeding-2\.xml/u);
+  assert.match(indexResponse.body, /sitemap-palworld-breeding-3\.xml/u);
+
+  const pair = palworldDataService.listBreedingPairs({ offset: 0, limit: 1 }).items[0];
+  assert.ok(pair);
+  const pathname = `/ko${palworldBreedingPath(pair)}`;
+  const detailResponse = createResponse();
+  await handler(createRequest("GET", pathname), detailResponse);
+  assert.equal(detailResponse.statusCode, 200);
+  assert.match(detailResponse.headers["Content-Type"], /text\/html/u);
+  assert.match(detailResponse.body, /교배 결과/u);
+  assert.match(detailResponse.body, /data-seo-fallback="true"/u);
+  assert.match(
+    detailResponse.body,
+    new RegExp(`<link rel="canonical" href="https://yoro\\.gg${pathname}"\\s*/?>`, "u"),
+  );
+
+  const invalidResponse = createResponse();
+  await handler(
+    createRequest("GET", "/ko/palworld/breeding/lamball/lamball/not-the-child"),
+    invalidResponse,
+  );
+  assert.equal(invalidResponse.statusCode, 404);
+
+  const unavailableHandler = createHttpHandler({
+    store: {},
+    twitchAuth: {},
+    actions: { async dispatchOne() {} },
+  });
+  const unavailableResponse = createResponse();
+  await unavailableHandler(createRequest("GET", pathname), unavailableResponse);
+  assert.equal(unavailableResponse.statusCode, 503);
+  assert.equal(unavailableResponse.headers["X-Robots-Tag"], "noindex, nofollow");
+  assert.match(unavailableResponse.body, /data-seo-fallback="true"/u);
 });
 
 test("모든 Palworld 공개 endpoint의 header와 최상위 release identity가 일치한다", async () => {
