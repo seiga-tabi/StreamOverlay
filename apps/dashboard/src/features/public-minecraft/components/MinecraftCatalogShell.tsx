@@ -81,13 +81,14 @@ export function MinecraftCatalogShell({
         >
           <input
             aria-label={text.searchLabel}
+            className="pixel-corner-sm"
             maxLength={MINECRAFT_SEARCH_MAX_LENGTH}
             onChange={(event) => setDraft(event.target.value)}
             placeholder={text.searchPlaceholder}
             type="search"
             value={draft}
           />
-          <button type="submit">{text.homeSearchSubmit}</button>
+          <button className="pixel-corner-sm" type="submit">{text.homeSearchSubmit}</button>
         </form>
       </header>
       {filters}

@@ -145,6 +145,7 @@ import {
   latestPatchNoteWithVersion,
   patchNotesCardModel,
 } from "../services/patch-notes-social-card.js";
+import { HomeSocialCardRenderer } from "../services/home-social-card.js";
 import { appConfig, legalRuntimeConfigReady } from "../config.js";
 import type { TwitchEventSubClient } from "../services/twitch-eventsub-client.js";
 import { rankedEmblemAssetPath } from "../services/ranked-emblems.js";
@@ -3855,6 +3856,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
   const publicLolSocialCardRenderer = new PublicLolSocialCardRenderer();
   /* 테스트가 원격 호출 없이 이미지 경로를 검증할 수 있도록 주입 지점을 둡니다. */
   const patchNotesSocialCardRenderer = input.patchNotesSocialCard ?? new PatchNotesSocialCardRenderer();
+  const homeSocialCardRenderer = new HomeSocialCardRenderer();
   const publicLolCurrentGameCache = new Map<string, { expiresAt: number; response: PublicLolCurrentGame }>();
   const publicLolCurrentGameInFlight = new Map<string, Promise<PublicLolCurrentGame>>();
   let publicLolParticipantRankCacheInvalidatedAt = 0;
@@ -4788,6 +4790,51 @@ export function createHttpHandler(input: HttpHandlerInput) {
         error: toSafeErrorMessage(error),
       });
       await sendFallback();
+      return true;
+    }
+  }
+
+  /* /social/home/<locale>.png — yoro.gg 를 그냥 공유했을 때(홈 og:image) 나오는
+     대표 이미지. 이전에는 정적 PNG 1장을 ko/ja/en 전부가 공유해 다국어가 전혀
+     반영되지 않았습니다(실측 확인) — 로케일별 실텍스트를 굽는 동적 이미지로 전환. */
+  async function sendHomeSocialImage(
+    req: IncomingMessage,
+    res: ServerResponse,
+    pathname: string,
+  ): Promise<boolean> {
+    const match = /^\/social\/home\/(ko|ja|en)\.png$/u.exec(pathname);
+    if (!match?.[1]) return false;
+    const locale = match[1] as PublicUrlLocale;
+    try {
+      const body = await homeSocialCardRenderer.render(locale);
+      const etag = `"home-social-${locale}"`;
+      const headers = {
+        "Content-Type": "image/png",
+        "Content-Length": String(body.length),
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "ETag": etag,
+        ...securityHeadersForRequest(req),
+      };
+      if (req.headers["if-none-match"]?.split(",").map((value) => value.trim()).includes(etag)) {
+        res.writeHead(304, headers);
+        res.end();
+        return true;
+      }
+      res.writeHead(200, headers);
+      res.end(req.method === "HEAD" ? undefined : body);
+      return true;
+    } catch (error) {
+      input.logger?.error({
+        type: "home.social_image_failed",
+        errorCode: "render_failed",
+        error: toSafeErrorMessage(error),
+      });
+      await sendStaticFile(
+        req,
+        res,
+        path.resolve(appConfig.paths.dashboardStatic, "images", "yorogg-og.png"),
+        { "Cache-Control": "no-store" },
+      );
       return true;
     }
   }
@@ -9657,6 +9704,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         }
         if (await sendPublicLolSocialImage(req, res, url.pathname)) return;
         if (await sendPatchNotesSocialImage(req, res, url.pathname)) return;
+        if (await sendHomeSocialImage(req, res, url.pathname)) return;
         if (await sendPublicSitemap(req, res, url.pathname)) return;
         if (await sendPublicDashboardAsset(req, res, url.pathname)) return;
         // 기존 `?pal=` 상세 query는 고유 URL로 영구 이전합니다. 두 URL이 같은 내용을

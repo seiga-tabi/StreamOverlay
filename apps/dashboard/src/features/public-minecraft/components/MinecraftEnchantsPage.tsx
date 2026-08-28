@@ -22,24 +22,24 @@ function EnchantCard({ enchant, locale, namesById }: {
     return known ? resolveMinecraftName(known, locale).text : minecraftNameFromId(id);
   });
   return (
-    <article className="minecraft-enchant-card" data-testid="minecraft-enchant-card">
+    <article className="minecraft-enchant-card pixel-corner" data-testid="minecraft-enchant-card">
       <h2 className="minecraft-enchant-card__title">
         <MinecraftItemImage decorative fallbackText={name.text} id="enchanted_book" label={name.text} />
         <MinecraftName fallback={name.fallback} locale={locale} text={name.text} />
-        <span className="minecraft-pill">
+        <span className="minecraft-pill pixel-corner-sm">
           {formatMinecraftTemplate(text.enchantMaxLevel, { count: enchant.maxLevel })}
         </span>
       </h2>
       <div className="minecraft-enchant-card__chips">
         {categoryLabel
-          ? <span className="minecraft-chip is-category">{categoryLabel}</span>
-          : <span className="minecraft-chip is-category"><code>{enchant.categoryId}</code></span>}
-        {enchant.discoverable ? <span className="minecraft-chip">{text.enchantFromTable}</span> : null}
+          ? <span className="minecraft-chip pixel-corner-sm is-category">{categoryLabel}</span>
+          : <span className="minecraft-chip pixel-corner-sm is-category"><code>{enchant.categoryId}</code></span>}
+        {enchant.discoverable ? <span className="minecraft-chip pixel-corner-sm">{text.enchantFromTable}</span> : null}
         {enchant.tradeable
-          ? <span className="minecraft-chip">{text.enchantFromTrade}</span>
-          : <span className="minecraft-chip">{text.enchantNotTradeable}</span>}
-        {enchant.treasureOnly ? <span className="minecraft-chip">{text.enchantTreasure}</span> : null}
-        {enchant.curse ? <span className="minecraft-chip is-warning">{text.enchantCurse}</span> : null}
+          ? <span className="minecraft-chip pixel-corner-sm">{text.enchantFromTrade}</span>
+          : <span className="minecraft-chip pixel-corner-sm">{text.enchantNotTradeable}</span>}
+        {enchant.treasureOnly ? <span className="minecraft-chip pixel-corner-sm">{text.enchantTreasure}</span> : null}
+        {enchant.curse ? <span className="minecraft-chip pixel-corner-sm is-warning">{text.enchantCurse}</span> : null}
       </div>
       {incompatibleNames.length > 0 ? (
         <dl className="minecraft-recipe-card__facts">

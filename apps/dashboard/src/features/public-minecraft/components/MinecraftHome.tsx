@@ -84,7 +84,7 @@ export function MinecraftHome({ locale }: { locale: MinecraftLocale }) {
 
   return (
     <div className="minecraft-home">
-      <section aria-labelledby="minecraft-hero-title" className="minecraft-hero minecraft-grass-top">
+      <section aria-labelledby="minecraft-hero-title" className="minecraft-hero pixel-corner">
         <span aria-hidden="true" className="minecraft-hero__kicker">{text.heroKicker}</span>
         <h1
           className="minecraft-hero__title"
@@ -108,18 +108,20 @@ export function MinecraftHome({ locale }: { locale: MinecraftLocale }) {
         >
           <input
             aria-label={text.searchLabel}
+            className="pixel-corner-sm"
             maxLength={MINECRAFT_SEARCH_MAX_LENGTH}
             onChange={(event) => setQuery(event.target.value)}
             placeholder={text.homeSearchPlaceholder}
             type="search"
             value={query}
           />
-          <button type="submit">{text.homeSearchSubmit}</button>
+          <button className="pixel-corner-sm" type="submit">{text.homeSearchSubmit}</button>
         </form>
         <div aria-label={text.homeScopeLabel} className="minecraft-hero__scope" role="group">
           {SCOPES.map((candidate) => (
             <button
               aria-pressed={scope === candidate}
+              className="pixel-corner-sm"
               key={candidate}
               onClick={() => setScope(candidate)}
               type="button"
@@ -134,7 +136,7 @@ export function MinecraftHome({ locale }: { locale: MinecraftLocale }) {
           </p>
         ) : (
           <span
-            className="minecraft-hero__status"
+            className="minecraft-hero__status pixel-corner-sm"
             data-ja={minecraftI18n.ja.heroStatus}
             data-ko={minecraftI18n.ko.heroStatus}
           >
@@ -146,7 +148,7 @@ export function MinecraftHome({ locale }: { locale: MinecraftLocale }) {
       <nav aria-label={text.homeCoreLabel} className="minecraft-core">
         {coreCards.map((card) => (
           <a
-            className="minecraft-core-card"
+            className="minecraft-core-card pixel-corner"
             href={minecraftPathForPage(card.page)}
             key={card.page}
             onClick={cardClick(card.page)}
@@ -168,26 +170,26 @@ export function MinecraftHome({ locale }: { locale: MinecraftLocale }) {
       </nav>
 
       <div className="minecraft-aux">
-        <a className="minecraft-aux-card" href={minecraftPathForPage("library")} onClick={cardClick("library")}>
+        <a className="minecraft-aux-card pixel-corner" href={minecraftPathForPage("library")} onClick={cardClick("library")}>
           <span className="minecraft-aux-card__copy">
             <strong>{text.catLibraryTitle}</strong>
             <p>{text.catLibraryDescription}</p>
           </span>
-          <span className="minecraft-aux-card__badge">{text.comingSoonBadge}</span>
+          <span className="minecraft-aux-card__badge pixel-corner-sm">{text.comingSoonBadge}</span>
         </a>
-        <a className="minecraft-aux-card" href={minecraftPathForPage("patchNotes")} onClick={cardClick("patchNotes")}>
+        <a className="minecraft-aux-card pixel-corner" href={minecraftPathForPage("patchNotes")} onClick={cardClick("patchNotes")}>
           <span className="minecraft-aux-card__copy">
             <strong>{text.catPatchTitle}</strong>
             <p>{text.catPatchDescription}</p>
           </span>
-          <span className="minecraft-aux-card__badge">{text.comingSoonBadge}</span>
+          <span className="minecraft-aux-card__badge pixel-corner-sm">{text.comingSoonBadge}</span>
         </a>
-        <article className="minecraft-aux-card is-dim">
+        <article className="minecraft-aux-card pixel-corner is-dim">
           <span className="minecraft-aux-card__copy">
             <strong>{text.catMobsTitle}</strong>
             <p>{text.catMobsDescription}</p>
           </span>
-          <span className="minecraft-aux-card__badge is-next">{text.catMobsPhase}</span>
+          <span className="minecraft-aux-card__badge pixel-corner-sm is-next">{text.catMobsPhase}</span>
         </article>
       </div>
 

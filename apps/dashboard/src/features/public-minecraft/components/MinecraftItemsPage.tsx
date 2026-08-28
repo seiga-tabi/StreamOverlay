@@ -17,8 +17,8 @@ function ItemRow({ enchants, item, locale }: {
   const text = minecraftI18n[locale];
   const name = resolveMinecraftName(item.name, locale);
   return (
-    <li className="minecraft-item-row" data-testid="minecraft-item-row">
-      <span className="minecraft-item-row__slot">
+    <li className="minecraft-item-row pixel-corner" data-testid="minecraft-item-row">
+      <span className="minecraft-item-row__slot pixel-corner-sm">
         <MinecraftItemImage decorative fallbackText={name.text} id={item.id} label={name.text} />
       </span>
       <MinecraftName fallback={name.fallback} locale={locale} text={name.text} />
@@ -38,7 +38,7 @@ function ItemRow({ enchants, item, locale }: {
           <summary>{formatMinecraftTemplate(text.itemEnchants, { count: enchants.length })}</summary>
           <span className="minecraft-item-row__enchant-chips">
             {enchants.map((enchant) => (
-              <span className="minecraft-chip" key={enchant.id}>
+              <span className="minecraft-chip pixel-corner-sm" key={enchant.id}>
                 {resolveMinecraftName(enchant.name, locale).text}
               </span>
             ))}

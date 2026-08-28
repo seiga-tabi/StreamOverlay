@@ -1,23 +1,54 @@
 /*
  * Minecraft route 전용 stylesheet — PublicMinecraftPage lazy chunk 에만 붙습니다.
- * 발로란트 선례를 따릅니다: layer 없이 단독 소유하고, 셸(.public-dashboard-shell)이
- * 어두운 배경용 밝은 글자색을 상속시키므로 게임 고유 다크 팔레트를 자체 정의합니다.
- * 블록 감성은 모티브 수준(잔디 스트립·각진 카드) — docs/mockups/minecraft-vertical.html §07.
+ * 발로란트 선례를 따라 메인 홈 토큰과 헤어라인 문법을 접합합니다.
+ * 블록 감성은 계단형 챔퍼와 픽셀 도트만으로 유지합니다.
+ * 근거: docs/mockups/minecraft-home-redesign-v3.html
  */
+
+.minecraft-shell,
+.public-bottom-sheet--minecraft {
+  --home-bg: #1C1D22;
+  --home-card: #252730;
+  --home-ink: #F5F6F8;
+  --home-sub: #B9C3D0;
+  --home-line: #3A404B;
+  --home-mid: #8795A6;
+  --home-stroke: #5F6E80;
+  --home-win: #87A183;
+  --home-loss: #DC4A5E;
+
+  --yoro-color-bg: var(--home-bg);
+  --yoro-color-text: var(--home-ink);
+  --yoro-color-surface: var(--home-card);
+  --yoro-color-surface-strong: var(--home-card);
+  --yoro-color-surface-muted: var(--home-card);
+  --yoro-color-border: var(--home-line);
+  --yoro-color-border-strong: var(--home-stroke);
+  --yoro-color-primary: var(--home-line);
+  --yoro-color-secondary: var(--home-line);
+  --yoro-color-danger: var(--home-loss);
+  --yoro-app-shell-footer-background: var(--home-bg);
+  --yoro-app-shell-footer-border: var(--home-line);
+  --yoro-empty-state-surface: var(--home-card);
+  --yoro-empty-state-background: var(--home-card);
+  --yoro-empty-state-border: var(--home-line);
+  --yoro-empty-state-text: var(--home-ink);
+  --yoro-empty-state-title: var(--home-ink);
+  --yoro-empty-state-description: var(--home-sub);
+  --yoro-empty-state-icon-background: var(--home-bg);
+}
 
 .minecraft-shell .public-game-header,
 .minecraft-shell .public-bottom-tab-bar,
 .minecraft-shell .public-bottom-sheet,
 .public-bottom-sheet--minecraft {
-  --public-game-accent: #6cc349;
+  --public-game-accent: var(--home-win);
 }
 
-/* 셸 기본 규칙이 복합 셀렉터(0,2,0)로 배경을 지정하므로 특이도를 맞춰 이긴다.
-   yoro.gg 다크 셸(.public-dashboard-shell.theme-dark)과 같은 블루 네이비 계열 —
-   gradient 뒤에 solid #0f1724 를 깔아 computed background-color 도 보장한다. */
+/* 셸 기본 규칙이 복합 셀렉터(0,2,0)로 배경을 지정하므로 특이도를 맞춥니다. */
 .public-dashboard-shell.minecraft-shell,
 .minecraft-shell .minecraft-page-section {
-  background: linear-gradient(180deg, #111827 0, #0f1724 100%) #0f1724;
+  background: var(--home-bg);
 }
 
 .minecraft-main {
@@ -32,13 +63,13 @@
 }
 
 .minecraft-page-section {
-  --minecraft-accent: #6cc349;
-  --minecraft-xp: #80c71f;
-  --minecraft-edge: #0b0f16;
-  --minecraft-surface: #182132;
-  --minecraft-ink: #e8edf5;
-  --minecraft-ink-muted: #9aa8bd;
-  --minecraft-line: #28334a;
+  --minecraft-accent: var(--home-win);
+  --minecraft-xp: var(--home-win);
+  --minecraft-edge: var(--home-line);
+  --minecraft-surface: var(--home-card);
+  --minecraft-ink: var(--home-ink);
+  --minecraft-ink-muted: var(--home-sub);
+  --minecraft-line: var(--home-line);
 
   /* 본문 컨테이너 — 발로란트와 동일 규격(78rem 중앙 + 좌우 gutter).
      다른 게임 홈과 달리 전폭으로 퍼지던 문제의 수정점입니다. */
@@ -49,6 +80,47 @@
   color: var(--minecraft-ink);
 }
 
+/* 큰 카드와 작은 슬롯·조작 요소가 공유하는 픽셀 계단형 모서리입니다. */
+.pixel-corner {
+  position: relative;
+  clip-path: polygon(
+    0 8px, 8px 8px, 8px 0,
+    calc(100% - 8px) 0, calc(100% - 8px) 8px, 100% 8px,
+    100% calc(100% - 8px), calc(100% - 8px) calc(100% - 8px), calc(100% - 8px) 100%,
+    8px 100%, 8px calc(100% - 8px), 0 calc(100% - 8px)
+  );
+}
+
+.pixel-corner-sm {
+  clip-path: polygon(
+    0 4px, 4px 4px, 4px 0,
+    calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px,
+    100% calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%,
+    4px 100%, 4px calc(100% - 4px), 0 calc(100% - 4px)
+  );
+}
+
+/* 8px 챔퍼의 시작과 끝을 4px 도트로 짚습니다. */
+.pixel-corner::before,
+.pixel-corner::after {
+  content: "";
+  position: absolute;
+  inline-size: 4px;
+  block-size: 4px;
+  background: var(--home-line);
+  pointer-events: none;
+}
+
+.pixel-corner::before {
+  inset-block-start: 0;
+  inset-inline-start: 0;
+}
+
+.pixel-corner::after {
+  inset-inline-end: 0;
+  inset-block-end: 0;
+}
+
 @media (max-width: 48rem) {
   /* 하단 탭바가 본문 끝(푸터·더 보기)을 가리지 않게 여백을 예약합니다. */
   .minecraft-page-section {
@@ -57,39 +129,16 @@
 }
 
 .minecraft-hero {
-  position: relative;
   overflow: hidden;
-  padding: calc(var(--yoro-space-8) + 14px) var(--yoro-space-6) var(--yoro-space-8);
-  border: 2px solid var(--minecraft-edge);
-  border-radius: 0;
+  padding: var(--yoro-space-8) var(--yoro-space-6);
+  border: .5px solid var(--minecraft-line);
   background: var(--minecraft-surface);
-  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, .09), inset -2px -2px 0 rgba(0, 0, 0, .45);
   text-align: center;
-}
-
-/* 픽셀 디스플레이 타이포 근사 — 하드 섀도(픽셀 폰트 도입 전 단계) */
-.minecraft-hero__title,
-.minecraft-core-card__count,
-.minecraft-catalog__head > h1 {
-  text-shadow: 2px 2px 0 rgba(0, 0, 0, .55);
 }
 
 /* 실제 게임 텍스처를 또렷한 도트로 — 브라우저 보간 금지 */
 .minecraft-item-swatch__image {
   image-rendering: pixelated;
-}
-
-/* 잔디 블록 모티브 — 상단 잔디+흙 레이어 스트립(단일 의사요소, 2층 배경) */
-.minecraft-grass-top::before {
-  content: "";
-  position: absolute;
-  inset-inline: 0;
-  inset-block-start: 0;
-  block-size: 18px;
-  image-rendering: pixelated;
-  background:
-    linear-gradient(90deg, #6cc349 0 12%, #7fd35b 12% 22%, #6cc349 22% 47%, #5cb43e 47% 58%, #6cc349 58% 79%, #7fd35b 79% 88%, #6cc349 88%) top / 100% 11px no-repeat,
-    linear-gradient(90deg, #7a5433 0 18%, #614226 18% 41%, #7a5433 41% 66%, #614226 66% 83%, #7a5433 83%) bottom / 100% 7px no-repeat;
 }
 
 .minecraft-hero__kicker {
@@ -118,8 +167,7 @@
 .minecraft-hero__status {
   display: inline-block;
   padding: var(--yoro-space-1) var(--yoro-space-3);
-  border: 2px solid var(--minecraft-edge);
-  border-radius: 0;
+  border: .5px solid var(--minecraft-line);
   color: var(--minecraft-accent);
   font-size: var(--yoro-font-size-sm);
   font-weight: var(--yoro-font-weight-bold);
@@ -137,13 +185,11 @@
   min-inline-size: 0;
   min-block-size: 2.75rem;
   padding: 0 var(--yoro-space-4);
-  border: 2px solid var(--minecraft-edge);
+  border: .5px solid var(--minecraft-line);
   border-inline-end: 0;
-  border-radius: 0;
-  background: #0d1420;
+  background: var(--home-bg);
   color: var(--minecraft-ink);
   font-size: var(--yoro-font-size-md);
-  box-shadow: inset 2px 2px 0 rgba(0, 0, 0, .55), inset 0 -2px 0 rgba(255, 255, 255, .06);
 }
 
 .minecraft-hero__search > input[type="search"]::placeholder {
@@ -166,21 +212,18 @@
 .minecraft-hero__scope > button {
   min-block-size: 2.25rem;
   padding: 0 var(--yoro-space-3);
-  border: 2px solid var(--minecraft-edge);
-  border-radius: 0;
-  background: #131b2a;
+  border: .5px solid var(--minecraft-line);
+  background: var(--home-bg);
   color: var(--minecraft-ink-muted);
   font-size: var(--yoro-font-size-xs);
   font-weight: var(--yoro-font-weight-black);
-  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .06);
   cursor: pointer;
 }
 
 .minecraft-hero__scope > button[aria-pressed="true"] {
-  background: var(--minecraft-accent);
-  color: #10230b;
-  text-shadow: 1px 1px 0 rgba(255, 255, 255, .2);
-  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, .35), inset -2px -2px 0 #4e9634;
+  border-color: var(--home-win);
+  background: var(--home-win);
+  color: var(--home-bg);
 }
 
 .minecraft-hero__scope > button:focus-visible {
@@ -216,22 +259,23 @@
   gap: var(--yoro-space-2);
   align-content: start;
   padding: var(--yoro-space-5);
-  border: 2px solid var(--minecraft-edge);
-  border-radius: 0;
+  border: .5px solid var(--minecraft-line);
   background: var(--minecraft-surface);
-  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, .09), inset -2px -2px 0 rgba(0, 0, 0, .45);
   text-decoration: none;
   transition: border-color 120ms ease;
 }
 
-/* 코어 카드 아이콘 슬롯 — 인벤토리 파임 베벨 */
+/* 코어 카드 아이콘 슬롯 — 홈 지면 위의 픽셀 슬롯 */
 .minecraft-core-card__head .minecraft-item-swatch {
   inline-size: 2.125rem;
   block-size: 2.125rem;
-  border: 2px solid var(--minecraft-edge);
-  border-radius: 0;
-  background: #151d2d;
-  box-shadow: inset 2px 2px 0 rgba(0, 0, 0, .55), inset -2px -2px 0 rgba(255, 255, 255, .07);
+  border: .5px solid var(--minecraft-line);
+  background: var(--home-bg);
+}
+
+.minecraft-core-card__head .minecraft-item-swatch__image {
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
 }
 
 .minecraft-core-card:hover,
@@ -251,13 +295,20 @@
 }
 
 .minecraft-core-card__head > h3 {
+  min-inline-size: 0;
   margin: 0;
   color: var(--minecraft-ink);
   font-size: var(--yoro-font-size-md);
+  line-height: 2.125rem;
+  overflow-wrap: anywhere;
 }
 
 .minecraft-core-card__count {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
   color: var(--minecraft-xp);
+  font-family: "SF Mono", "Courier New", monospace;
   font-size: var(--yoro-font-size-2xl);
   font-weight: var(--yoro-font-weight-black);
   font-variant-numeric: tabular-nums;
@@ -265,7 +316,7 @@
 }
 
 .minecraft-core-card__count > small {
-  margin-inline-start: 2px;
+  margin-inline-start: 0;
   color: var(--minecraft-ink-muted);
   font-size: var(--yoro-font-size-xs);
   font-weight: var(--yoro-font-weight-bold);
@@ -281,7 +332,7 @@
   position: absolute;
   inset-block-start: var(--yoro-space-4);
   inset-inline-end: var(--yoro-space-4);
-  color: #5b6a83;
+  color: var(--home-mid);
   font-weight: var(--yoro-font-weight-black);
 }
 
@@ -297,15 +348,14 @@
 }
 
 .minecraft-aux-card {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--yoro-space-3);
   min-block-size: 2.75rem;
   padding: var(--yoro-space-3) var(--yoro-space-4);
-  border: 2px solid var(--minecraft-edge);
-  border-radius: 0;
+  border: .5px solid var(--minecraft-line);
   background: var(--minecraft-surface);
-  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, .09), inset -2px -2px 0 rgba(0, 0, 0, .45);
   text-decoration: none;
   transition: border-color 120ms ease;
 }
@@ -344,10 +394,9 @@ a.minecraft-aux-card:focus-visible {
 .minecraft-aux-card__badge {
   margin-inline-start: auto;
   padding: 2px var(--yoro-space-2);
-  border: thin solid rgba(255, 180, 84, .4);
-  border-radius: 0;
-  background: rgba(255, 180, 84, .13);
-  color: #ffb454;
+  border: .5px solid var(--home-line);
+  background: var(--home-bg);
+  color: var(--home-mid);
   font-size: var(--yoro-font-size-xs);
   font-weight: var(--yoro-font-weight-black);
   white-space: nowrap;
@@ -356,7 +405,7 @@ a.minecraft-aux-card:focus-visible {
 
 .minecraft-aux-card__badge.is-next {
   border-color: var(--minecraft-line);
-  background: #212b3d;
+  background: var(--home-bg);
   color: var(--minecraft-ink-muted);
 }
 
@@ -365,7 +414,7 @@ a.minecraft-aux-card:focus-visible {
   display: grid;
   gap: var(--yoro-space-1);
   padding-block-start: var(--yoro-space-4);
-  border-block-start: thin solid var(--minecraft-line);
+  border-block-start: .5px solid var(--minecraft-line);
 }
 
 .minecraft-unofficial-note {
@@ -414,13 +463,11 @@ a.minecraft-aux-card:focus-visible {
   min-inline-size: 0;
   min-block-size: 2.75rem;
   padding: 0 var(--yoro-space-4);
-  border: 2px solid var(--minecraft-edge);
+  border: .5px solid var(--minecraft-line);
   border-inline-end: 0;
-  border-radius: 0;
-  background: #0d1420;
+  background: var(--home-bg);
   color: var(--minecraft-ink);
   font-size: var(--yoro-font-size-md);
-  box-shadow: inset 2px 2px 0 rgba(0, 0, 0, .55), inset 0 -2px 0 rgba(255, 255, 255, .06);
 }
 
 .minecraft-catalog__search > input[type="search"]::placeholder {
@@ -439,33 +486,31 @@ a.minecraft-aux-card:focus-visible {
 }
 
 .minecraft-catalog__count {
+  display: flex;
+  align-items: baseline;
   color: var(--minecraft-xp);
-  text-shadow: 1px 1px 0 rgba(0, 0, 0, .6);
   font-size: var(--yoro-font-size-sm);
   font-weight: var(--yoro-font-weight-bold);
   font-variant-numeric: tabular-nums;
 }
 
-/* MC 버튼 — 그린 CTA: 하드 텍스트 섀도 + 하단 어두운 에지, hover 1px 하강 */
+/* 검색 버튼 — 홈 카드와 헤어라인을 쓰고 상태색은 포커스에만 사용합니다. */
 .minecraft-catalog__search > button,
 .minecraft-hero__search > button {
   min-inline-size: 4.5rem;
   min-block-size: 2.75rem;
-  border: 2px solid var(--minecraft-edge);
-  border-radius: 0;
-  background: var(--minecraft-accent);
-  color: #10230b;
+  border: .5px solid var(--minecraft-line);
+  background: var(--home-card);
+  color: var(--minecraft-ink);
   font-size: var(--yoro-font-size-sm);
   font-weight: var(--yoro-font-weight-black);
-  text-shadow: 1px 1px 0 rgba(255, 255, 255, .25);
-  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, .35), inset -2px -3px 0 #4e9634;
   cursor: pointer;
 }
 
 .minecraft-catalog__search > button:hover,
 .minecraft-hero__search > button:hover {
-  translate: 0 1px;
-  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, .35), inset -2px -2px 0 #4e9634;
+  border-color: var(--home-win);
+  color: var(--home-win);
 }
 
 .minecraft-catalog__search > button:focus-visible,
@@ -482,7 +527,7 @@ a.minecraft-aux-card:focus-visible {
 
 .minecraft-type-row__missing {
   margin: 0;
-  color: #66748c;
+  color: var(--home-mid);
   font-size: var(--yoro-font-size-xs);
 }
 
@@ -495,21 +540,18 @@ a.minecraft-aux-card:focus-visible {
 .minecraft-type-chips > button {
   min-block-size: 2.75rem;
   padding: 0 var(--yoro-space-3);
-  border: 2px solid var(--minecraft-edge);
-  border-radius: 0;
-  background: #131b2a;
+  border: .5px solid var(--minecraft-line);
+  background: var(--home-bg);
   color: var(--minecraft-ink);
   font-size: var(--yoro-font-size-sm);
-  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .06);
   cursor: pointer;
 }
 
 .minecraft-type-chips > button.active {
-  background: var(--minecraft-accent);
-  color: #10230b;
+  border-color: var(--home-win);
+  background: var(--home-win);
+  color: var(--home-bg);
   font-weight: var(--yoro-font-weight-black);
-  text-shadow: 1px 1px 0 rgba(255, 255, 255, .2);
-  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, .35), inset -2px -2px 0 #4e9634;
 }
 
 .minecraft-type-chips > button:disabled {
@@ -546,7 +588,7 @@ a.minecraft-aux-card:focus-visible {
 }
 
 .minecraft-catalog__more > p[role="alert"] {
-  color: var(--yoro-color-danger, #ff7a7a);
+  color: var(--home-loss);
 }
 
 /* 이름 + EN fallback 배지 */
@@ -554,7 +596,13 @@ a.minecraft-aux-card:focus-visible {
   display: inline-flex;
   align-items: center;
   gap: var(--yoro-space-2);
+  min-inline-size: 0;
   color: var(--minecraft-ink);
+}
+
+.minecraft-name > strong {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
 }
 
 /* 실제 게임 텍스처 + CDN 장애·미제공 항목용 자체 fallback */
@@ -564,9 +612,9 @@ a.minecraft-aux-card:focus-visible {
   justify-content: center;
   inline-size: 1.875rem;
   block-size: 1.875rem;
-  border-radius: var(--yoro-radius-sm);
-  background: hsl(var(--minecraft-tile-hue, 0) 35% 30%);
-  color: #f2f5f4;
+  border: .5px solid var(--home-line);
+  background: var(--home-bg);
+  color: var(--home-ink);
   font-size: var(--yoro-font-size-xs);
   font-weight: var(--yoro-font-weight-bold);
   overflow: hidden;
@@ -594,9 +642,8 @@ a.minecraft-aux-card:focus-visible {
   display: inline-grid;
   gap: 2px;
   padding: 5px;
-  border: 2px solid var(--minecraft-edge);
-  border-radius: 0;
-  background: #212b3d;
+  border: .5px solid var(--minecraft-line);
+  background: var(--home-bg);
   flex: none;
 }
 
@@ -605,28 +652,28 @@ a.minecraft-aux-card:focus-visible {
   gap: 2px;
 }
 
-/* MC 인벤토리 슬롯 베벨 — 각진 셀, 위 어둡고 아래 밝은 안쪽 음영 */
+/* MC 인벤토리 슬롯 — 작은 계단형 챔퍼와 헤어라인만 사용합니다. */
 .minecraft-craft-cell {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   inline-size: 1.875rem;
   block-size: 1.875rem;
-  border: 2px solid var(--minecraft-edge);
-  background: #151d2d;
-  box-shadow: inset 2px 2px 0 rgba(0, 0, 0, .55), inset -2px -2px 0 rgba(255, 255, 255, .07);
+  border: .5px solid var(--minecraft-line);
+  background: var(--home-card);
   flex: none;
 }
 
 .minecraft-craft-cell .minecraft-item-swatch {
   inline-size: 1.25rem;
   block-size: 1.25rem;
-  border-radius: 0;
+  border: 0;
+  background: transparent;
   font-size: .5625rem;
 }
 
 .minecraft-craft-arrow {
-  color: #5b6a83;
+  color: var(--home-mid);
   font-size: var(--yoro-font-size-xl);
   font-weight: var(--yoro-font-weight-black);
 }
@@ -637,17 +684,16 @@ a.minecraft-aux-card:focus-visible {
   justify-content: center;
   inline-size: 2.75rem;
   block-size: 2.75rem;
-  border: 2px solid var(--minecraft-accent);
-  border-radius: 0;
-  background: #151d2d;
-  box-shadow: inset 2px 2px 0 rgba(0, 0, 0, .55), inset -2px -2px 0 rgba(255, 255, 255, .07), 0 0 0 2px rgba(108, 195, 73, .25);
+  border: .5px solid var(--home-win);
+  background: var(--home-card);
   flex: none;
 }
 
 .minecraft-craft-out > .minecraft-item-swatch {
   inline-size: 1.75rem;
   block-size: 1.75rem;
-  border-radius: 0;
+  border: 0;
+  background: transparent;
 }
 
 /* shapeless — 슬롯 나열(그리드 자리) */
@@ -655,9 +701,8 @@ a.minecraft-aux-card:focus-visible {
   display: inline-flex;
   gap: 2px;
   padding: 5px;
-  border: 2px solid var(--minecraft-edge);
-  border-radius: 0;
-  background: #212b3d;
+  border: .5px solid var(--minecraft-line);
+  background: var(--home-bg);
   flex-wrap: wrap;
   max-inline-size: 7.5rem;
   flex: none;
@@ -682,7 +727,7 @@ a.minecraft-aux-card:focus-visible {
   align-items: center;
   min-block-size: 44px;
   padding: 0 var(--yoro-space-3);
-  border: 2px solid var(--minecraft-line);
+  border: .5px solid var(--minecraft-line);
   color: var(--minecraft-ink-muted);
   font-size: var(--yoro-font-size-sm);
   font-weight: var(--yoro-font-weight-bold);
@@ -690,7 +735,7 @@ a.minecraft-aux-card:focus-visible {
 }
 
 .minecraft-recipe-group__variants > summary:focus-visible {
-  outline: 2px solid var(--minecraft-green, #6cc349);
+  outline: 2px solid var(--home-win);
   outline-offset: 2px;
 }
 
@@ -699,17 +744,16 @@ a.minecraft-aux-card:focus-visible {
   gap: var(--yoro-space-2);
 }
 
-/* 가로형 컴팩트 카드 — 픽셀 표면(각·2px 프레임·좌상광 베벨), 높이 통일 */
+/* 가로형 컴팩트 카드 — 홈 카드 위 픽셀 계단형 실루엣, 높이 통일 */
 .minecraft-recipe-card {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--yoro-space-3);
   min-block-size: 8rem;
   padding: var(--yoro-space-3);
-  border: 2px solid var(--minecraft-edge);
-  border-radius: 0;
+  border: .5px solid var(--minecraft-line);
   background: var(--minecraft-surface);
-  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, .09), inset -2px -2px 0 rgba(0, 0, 0, .45);
 }
 
 .minecraft-recipe-card__body {
@@ -725,19 +769,21 @@ a.minecraft-aux-card:focus-visible {
   gap: var(--yoro-space-2);
   margin: 0;
   font-size: var(--yoro-font-size-sm);
+  line-height: 2.125rem;
 }
 
 .minecraft-recipe-card__count {
+  display: flex;
+  align-items: baseline;
   color: var(--minecraft-xp);
+  font-family: "SF Mono", "Courier New", monospace;
   font-weight: var(--yoro-font-weight-black);
   font-variant-numeric: tabular-nums;
-  text-shadow: 1px 1px 0 rgba(0, 0, 0, .6);
 }
 
 .minecraft-recipe-card__shapeless {
   padding: 0 var(--yoro-space-2);
-  border: thin dashed #4c5568;
-  border-radius: 0;
+  border: .5px dashed var(--home-line);
   color: var(--minecraft-ink-muted);
   font-size: var(--yoro-font-size-xs);
 }
@@ -781,15 +827,14 @@ a.minecraft-aux-card:focus-visible {
 }
 
 .minecraft-item-row {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--yoro-space-2);
   min-block-size: 3rem;
   padding: var(--yoro-space-1) var(--yoro-space-3);
-  border: 2px solid var(--minecraft-edge);
-  border-radius: 0;
+  border: .5px solid var(--minecraft-line);
   background: var(--minecraft-surface);
-  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, .09), inset -2px -2px 0 rgba(0, 0, 0, .45);
   flex-wrap: wrap;
 }
 
@@ -799,16 +844,16 @@ a.minecraft-aux-card:focus-visible {
   justify-content: center;
   inline-size: 2.125rem;
   block-size: 2.125rem;
-  border: 2px solid var(--minecraft-edge);
-  background: #151d2d;
-  box-shadow: inset 2px 2px 0 rgba(0, 0, 0, .55), inset -2px -2px 0 rgba(255, 255, 255, .07);
+  border: .5px solid var(--minecraft-line);
+  background: var(--home-bg);
   flex: none;
 }
 
 .minecraft-item-row__slot .minecraft-item-swatch {
   inline-size: 1.375rem;
   block-size: 1.375rem;
-  border-radius: 0;
+  border: 0;
+  background: transparent;
 }
 
 /* ID 는 보조 위계 — 이름을 지배하던 전폭 막대 결함의 수정점 */
@@ -818,7 +863,7 @@ a.minecraft-aux-card:focus-visible {
   padding: 0;
   border: 0;
   background: transparent;
-  color: #66748c;
+  color: var(--home-mid);
   font-size: var(--yoro-font-size-xs);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -882,21 +927,19 @@ a.minecraft-aux-card:focus-visible {
   gap: var(--yoro-space-4);
 }
 
-/* MC 인벤토리 툴팁 문법 — 보라 이중 프레임 + 짙은 배경 + 연보라 이름 */
+/* 인챈트 카드 — 홈 카드 문법 안에서 상태색을 절제해 사용합니다. */
 .minecraft-enchant-card {
+  position: relative;
   display: grid;
   gap: var(--yoro-space-3);
   align-content: start;
   padding: var(--yoro-space-4);
-  border: 2px solid #8b5cf6;
-  border-radius: 0;
-  outline: 2px solid #100a1e;
-  background: #161028;
+  border: .5px solid var(--home-line);
+  background: var(--home-card);
 }
 
 .minecraft-enchant-card .minecraft-name > strong {
-  color: #cdb4ff;
-  text-shadow: 1px 1px 0 rgba(0, 0, 0, .7);
+  color: var(--home-ink);
 }
 
 .minecraft-enchant-card__title {
@@ -916,14 +959,12 @@ a.minecraft-aux-card:focus-visible {
 
 .minecraft-pill {
   padding: 2px var(--yoro-space-2);
-  border: 2px solid var(--minecraft-edge);
-  border-radius: 0;
-  background: var(--minecraft-xp);
-  color: #142200;
+  border: .5px solid var(--home-win);
+  background: transparent;
+  color: var(--home-win);
   font-size: var(--yoro-font-size-xs);
   font-weight: var(--yoro-font-weight-black);
   font-variant-numeric: tabular-nums;
-  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .4);
 }
 
 .minecraft-chip.is-category {
@@ -941,16 +982,15 @@ a.minecraft-aux-card:focus-visible {
 
 .minecraft-chip {
   padding: 2px var(--yoro-space-2);
-  border: thin solid #3d4763;
-  border-radius: 0;
+  border: .5px solid var(--home-line);
   color: var(--minecraft-ink-muted);
   font-size: var(--yoro-font-size-xs);
   font-variant-numeric: tabular-nums;
 }
 
 .minecraft-chip.is-warning {
-  border-color: rgba(255, 122, 122, .5);
-  color: #ff9d9d;
+  border-color: var(--home-loss);
+  color: var(--home-loss);
 }
 
 /* 위키 홈 — 실데이터 상태·카테고리 링크 */
@@ -983,28 +1023,24 @@ a.minecraft-aux-card:focus-visible {
 .minecraft-patch-editions > button {
   min-block-size: 2.75rem;
   padding: 0 var(--yoro-space-4);
-  border: 2px solid var(--minecraft-edge);
-  border-radius: 0;
-  background: #131b2a;
+  border: .5px solid var(--minecraft-line);
+  background: var(--home-bg);
   color: var(--minecraft-ink-muted);
   font-size: var(--yoro-font-size-sm);
   font-weight: var(--yoro-font-weight-black);
-  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .06);
   cursor: pointer;
 }
 
 .minecraft-patch-editions > button.active.is-java {
-  background: var(--minecraft-accent);
-  color: #10230b;
-  text-shadow: 1px 1px 0 rgba(255, 255, 255, .2);
-  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, .35), inset -2px -2px 0 #4e9634;
+  border-color: var(--home-win);
+  background: var(--home-win);
+  color: var(--home-bg);
 }
 
 .minecraft-patch-editions > button.active.is-bedrock {
-  background: #8ab4f8;
-  color: #0c1a33;
-  text-shadow: 1px 1px 0 rgba(255, 255, 255, .25);
-  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, .4), inset -2px -2px 0 #5a86d4;
+  border-color: var(--home-win);
+  background: var(--home-win);
+  color: var(--home-bg);
 }
 
 .minecraft-patch-editions > button:focus-visible {
@@ -1026,25 +1062,23 @@ a.minecraft-aux-card:focus-visible {
 
 .minecraft-patch-year {
   margin: var(--yoro-space-2) 0 0;
-  color: #66748c;
+  color: var(--home-mid);
   font-size: var(--yoro-font-size-xs);
   font-weight: var(--yoro-font-weight-black);
   letter-spacing: .08em;
 }
 
 .minecraft-patch {
+  position: relative;
   display: grid;
   gap: var(--yoro-space-2);
   padding: var(--yoro-space-4);
-  border: 2px solid var(--minecraft-edge);
-  border-radius: 0;
+  border: .5px solid var(--minecraft-line);
   background: var(--minecraft-surface);
-  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, .09), inset -2px -2px 0 rgba(0, 0, 0, .45);
 }
 
 .minecraft-patch.is-latest {
-  border-color: #8b5cf6;
-  outline: 2px solid #100a1e;
+  border-color: var(--home-win);
 }
 
 .minecraft-patch__head {
@@ -1056,38 +1090,36 @@ a.minecraft-aux-card:focus-visible {
 
 .minecraft-patch__latest {
   padding: 1px var(--yoro-space-2);
-  border: 2px solid var(--minecraft-edge);
-  background: #8b5cf6;
-  color: #fff;
+  border: .5px solid var(--home-win);
+  background: transparent;
+  color: var(--home-win);
   font-size: var(--yoro-font-size-xs);
   font-weight: var(--yoro-font-weight-black);
   letter-spacing: .08em;
-  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .3);
 }
 
 .minecraft-patch__version {
   margin: 0;
   font-size: var(--yoro-font-size-lg);
   font-variant-numeric: tabular-nums;
-  text-shadow: 1px 1px 0 rgba(0, 0, 0, .55);
 }
 
 .minecraft-patch__type {
   padding: 1px var(--yoro-space-2);
-  border: 2px solid var(--minecraft-edge);
+  border: .5px solid var(--home-line);
   font-size: var(--yoro-font-size-xs);
   font-weight: var(--yoro-font-weight-black);
 }
 
 .minecraft-patch__type.is-release {
-  background: var(--minecraft-xp);
-  color: #142200;
-  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .4);
+  border-color: var(--home-win);
+  background: transparent;
+  color: var(--home-win);
 }
 
 .minecraft-patch__type.is-snapshot,
 .minecraft-patch__type.is-preview {
-  background: #313b52;
+  background: var(--home-bg);
   color: var(--minecraft-ink-muted);
 }
 
@@ -1136,7 +1168,7 @@ a.minecraft-aux-card:focus-visible {
 
 .minecraft-patch__foot > span {
   margin-inline-start: auto;
-  color: #66748c;
+  color: var(--home-mid);
   font-size: var(--yoro-font-size-xs);
 }
 
@@ -1147,7 +1179,7 @@ a.minecraft-aux-card:focus-visible {
   gap: var(--yoro-space-6);
   margin-block-start: var(--yoro-space-6);
   padding-block-start: var(--yoro-space-5);
-  border-block-start: thin solid var(--minecraft-line);
+  border-block-start: .5px solid var(--minecraft-line);
 }
 
 .minecraft-patch-guide h3 {
@@ -1172,7 +1204,7 @@ a.minecraft-aux-card:focus-visible {
 .minecraft-patch-guide > div > p { margin: 0; color: var(--minecraft-ink-muted); font-size: var(--yoro-font-size-sm); }
 
 .minecraft-patch-guide__faq {
-  border-block-start: thin solid var(--minecraft-line);
+  border-block-start: .5px solid var(--minecraft-line);
   padding-block: var(--yoro-space-1);
 }
 
@@ -1227,6 +1259,6 @@ a.minecraft-aux-card:focus-visible {
 
 .minecraft-patch-pending-note {
   margin: 0;
-  color: #66748c;
+  color: var(--home-mid);
   font-size: var(--yoro-font-size-xs);
 }

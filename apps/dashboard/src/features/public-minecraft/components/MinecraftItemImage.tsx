@@ -43,7 +43,7 @@ export function MinecraftItemImage({
   return (
     <span
       {...accessibility}
-      className="minecraft-item-swatch"
+      className="minecraft-item-swatch pixel-corner-sm"
       style={{ "--minecraft-tile-hue": minecraftTileHue(id) } as CSSProperties}
       title={decorative ? undefined : label}
     >

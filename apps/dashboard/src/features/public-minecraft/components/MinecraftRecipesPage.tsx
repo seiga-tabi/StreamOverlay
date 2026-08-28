@@ -33,7 +33,7 @@ function CraftSlot({ locale, reference }: {
   reference: MinecraftItemReference | null;
 }) {
   return (
-    <span className={`minecraft-craft-cell${reference ? "" : " is-empty"}`}>
+    <span className={`minecraft-craft-cell pixel-corner-sm${reference ? "" : " is-empty"}`}>
       {reference ? <ItemSwatch locale={locale} reference={reference} /> : null}
     </span>
   );
@@ -59,9 +59,9 @@ function RecipeCard({ locale, recipe }: { locale: MinecraftLocale; recipe: Minec
     })
     .join(" · ");
   return (
-    <article className="minecraft-recipe-card" data-testid="minecraft-recipe-card">
+    <article className="minecraft-recipe-card pixel-corner" data-testid="minecraft-recipe-card">
       {recipe.shape ? (
-        <span aria-label={text.recipeGridLabel} className="minecraft-craft-grid" role="img">
+        <span aria-label={text.recipeGridLabel} className="minecraft-craft-grid pixel-corner-sm" role="img">
           {normalizedShape(recipe.shape).map((row, rowIndex) => (
             <span className="minecraft-craft-grid__row" key={rowIndex}>
               {row.map((cell, cellIndex) => (
@@ -71,14 +71,14 @@ function RecipeCard({ locale, recipe }: { locale: MinecraftLocale; recipe: Minec
           ))}
         </span>
       ) : (
-        <span className="minecraft-craft-shapeless__tiles">
+        <span className="minecraft-craft-shapeless__tiles pixel-corner-sm">
           {recipe.ingredients.map((entry) => (
             <CraftSlot key={entry.item.id} locale={locale} reference={entry.item} />
           ))}
         </span>
       )}
       <span aria-hidden="true" className="minecraft-craft-arrow">→</span>
-      <span className="minecraft-craft-out" title={`${text.recipeResult}: ${result.text} ×${recipe.result.count}`}>
+      <span className="minecraft-craft-out pixel-corner-sm" title={`${text.recipeResult}: ${result.text} ×${recipe.result.count}`}>
         <ItemSwatch locale={locale} reference={recipe.result.item} />
       </span>
       <div className="minecraft-recipe-card__body">
@@ -86,7 +86,7 @@ function RecipeCard({ locale, recipe }: { locale: MinecraftLocale; recipe: Minec
           <MinecraftName fallback={result.fallback} locale={locale} text={result.text} />
         </h2>
         {recipe.result.count > 1 ? <span className="minecraft-recipe-card__count">×{recipe.result.count}</span> : null}
-        {!recipe.shape ? <span className="minecraft-recipe-card__shapeless">{text.recipeShapeless}</span> : null}
+        {!recipe.shape ? <span className="minecraft-recipe-card__shapeless pixel-corner-sm">{text.recipeShapeless}</span> : null}
         <span className="minecraft-recipe-card__ingredients" title={ingredientLine}>
           <span className="yoro-u-sr-only">{text.recipeIngredients}: </span>
           {ingredientLine}
@@ -137,7 +137,7 @@ export function MinecraftRecipesPage({ locale }: { locale: MinecraftLocale }) {
           <div aria-label={text.recipeTypeFilterLabel} className="minecraft-type-chips" role="group">
             <button
               aria-pressed={type === "all"}
-              className={type === "all" ? "active" : ""}
+              className={`pixel-corner-sm${type === "all" ? " active" : ""}`}
               onClick={() => setType("all")}
               type="button"
             >
@@ -146,7 +146,7 @@ export function MinecraftRecipesPage({ locale }: { locale: MinecraftLocale }) {
             {providedTypes.map((candidate) => (
               <button
                 aria-pressed={type === candidate}
-                className={type === candidate ? "active" : ""}
+                className={`pixel-corner-sm${type === candidate ? " active" : ""}`}
                 key={candidate}
                 onClick={() => setType(candidate)}
                 type="button"
@@ -185,7 +185,9 @@ export function MinecraftRecipesPage({ locale }: { locale: MinecraftLocale }) {
             <div className="minecraft-recipe-group" key={representative.id}>
               <RecipeCard locale={locale} recipe={representative} />
               <details className="minecraft-recipe-group__variants">
-                <summary>{formatMinecraftTemplate(text.recipeVariantToggle, { count: variants.length })}</summary>
+                <summary className="pixel-corner-sm">
+                  {formatMinecraftTemplate(text.recipeVariantToggle, { count: variants.length })}
+                </summary>
                 {variants.map((variant) => (
                   <RecipeCard key={variant.id} locale={locale} recipe={variant} />
                 ))}

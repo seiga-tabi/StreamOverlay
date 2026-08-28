@@ -165,20 +165,29 @@ const SOCIAL_IMAGES_BY_PREFIX: readonly {
   }
 ];
 
-const HOME_SOCIAL_IMAGE = {
-  url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-lol.png`,
-  alt: {
-    ko: "YORO.gg LoL 전적 검색 미리보기",
-    ja: "YORO.gg LoL戦績検索のプレビュー",
-    en: "YORO.gg game data preview"
-  }
-} as const;
+/* 홈 대표 이미지는 로케일별 동적 렌더링(/social/home/<locale>.png)을 씁니다 —
+ * 이전 정적 PNG 1장을 ko/ja/en 전부가 공유해 다국어가 전혀 반영되지 않던 문제의
+ * 수정점입니다(실측 확인, docs/mockups/yorogg-home-og-redesign-v1.html 승인).
+ * 렌더러: apps/server/src/services/home-social-card.ts */
+const HOME_SOCIAL_IMAGE_ALT: PublicSeoLocaleText = {
+  ko: "YORO.gg — 게임 데이터, 검색 한 번",
+  ja: "YORO.gg — ゲームデータ、検索ひとつで",
+  en: "YORO.gg — Game data, one search away"
+};
+
+function homeSocialImage(locale: PublicUrlLocale): { url: string; alt: PublicSeoLocaleText } {
+  const servedLocale = locale === "en" ? "en" : locale === "ja" ? "ja" : "ko";
+  return {
+    url: `${PUBLIC_SEO_ORIGIN}/social/home/${servedLocale}.png`,
+    alt: HOME_SOCIAL_IMAGE_ALT
+  };
+}
 
 export function socialImageForPath(normalizedPath: string, locale: PublicUrlLocale = "ko"): {
   url: string;
   alt: PublicSeoLocaleText;
 } {
-  if (normalizedPath === "/") return HOME_SOCIAL_IMAGE;
+  if (normalizedPath === "/") return homeSocialImage(locale);
   const match = SOCIAL_IMAGES_BY_PREFIX.find(({ prefix }) =>
     normalizedPath === prefix || normalizedPath.startsWith(`${prefix}/`));
   if (match) return { url: locale === "ja" && match.urlJa ? match.urlJa : match.url, alt: match.alt };

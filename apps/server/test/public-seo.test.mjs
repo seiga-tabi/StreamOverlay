@@ -649,10 +649,16 @@ test("소셜 이미지는 게임별 경로 접두사로 매핑되고 그 외에�
   assert.equal(image("/ko/minecraft/recipes"), "https://yoro.gg/images/yorogg-og-minecraft.png");
   assert.equal(image("/valorant/agents"), "https://yoro.gg/images/yorogg-og-valorant.png");
   assert.equal(image("/bot/commands"), "https://yoro.gg/images/yorogg-og-bot.png");
-  /* LoL 생태와 홈은 LoL 이미지를 사이트 대표로 겸용합니다. */
-  for (const path of ["/", "/lol", "/lol/aram", "/patch-notes", "/follow", "/participation"]) {
+  /* LoL 생태는 LoL 이미지를 대표로 겸용합니다. 홈은 별도 동적 렌더링(로케일별
+     실텍스트, home-social-card.ts)을 쓰므로 분리해 검증합니다. */
+  for (const path of ["/lol", "/lol/aram", "/patch-notes", "/follow", "/participation"]) {
     assert.equal(image(path), "https://yoro.gg/images/yorogg-og-lol.png", path);
   }
+  /* 홈은 정적 이미지 대신 로케일별 동적 렌더링을 씁니다 — 이전엔 ko/ja/en 전부가
+     같은 한국어 텍스트 박힌 정적 PNG를 공유해 다국어가 반영되지 않았습니다. */
+  assert.equal(publicSeoMetadataForPath("/").imageUrl, "https://yoro.gg/social/home/ko.png");
+  assert.equal(publicSeoMetadataForPath("/ja").imageUrl, "https://yoro.gg/social/home/ja.png");
+  assert.equal(publicSeoMetadataForPath("/en").imageUrl, "https://yoro.gg/social/home/en.png");
   /* 게임 외 화면은 기존 범용 이미지 유지 — 접두사 오탐(/bottle 류)도 범용으로. */
   for (const path of ["/privacy", "/terms", "/contact", "/bottle"]) {
     assert.equal(image(path), "https://yoro.gg/images/yorogg-og.png", path);

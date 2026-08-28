@@ -54,11 +54,11 @@ function PatchCard({ entry, isLatest, locale }: {
      목록 상단 안내 1회로 대신합니다(노이즈 축소, 정직성 유지). */
   if (!summarized) {
     return (
-      <article className={`minecraft-patch is-compact${isLatest ? " is-latest" : ""}`} data-testid="minecraft-patch-card">
+      <article className={`minecraft-patch pixel-corner is-compact${isLatest ? " is-latest" : ""}`} data-testid="minecraft-patch-card">
         <header className="minecraft-patch__head">
-          {isLatest ? <span className="minecraft-patch__latest">{text.patchLatest}</span> : null}
+          {isLatest ? <span className="minecraft-patch__latest pixel-corner-sm">{text.patchLatest}</span> : null}
           <h2 className="minecraft-patch__version">{entry.version}</h2>
-          <span className={`minecraft-patch__type is-${entry.type}`}>{typeLabel}</span>
+          <span className={`minecraft-patch__type pixel-corner-sm is-${entry.type}`}>{typeLabel}</span>
           <time className="minecraft-patch__date" dateTime={entry.publishedAt}>
             {formatPatchDate(entry.publishedAt, locale)}
           </time>
@@ -69,11 +69,11 @@ function PatchCard({ entry, isLatest, locale }: {
   }
 
   return (
-    <article className={`minecraft-patch${isLatest ? " is-latest" : ""}`} data-testid="minecraft-patch-card">
+    <article className={`minecraft-patch pixel-corner${isLatest ? " is-latest" : ""}`} data-testid="minecraft-patch-card">
       <header className="minecraft-patch__head">
-        {isLatest ? <span className="minecraft-patch__latest">{text.patchLatest}</span> : null}
+        {isLatest ? <span className="minecraft-patch__latest pixel-corner-sm">{text.patchLatest}</span> : null}
         <h2 className="minecraft-patch__version">{entry.version}</h2>
-        <span className={`minecraft-patch__type is-${entry.type}`}>{typeLabel}</span>
+        <span className={`minecraft-patch__type pixel-corner-sm is-${entry.type}`}>{typeLabel}</span>
         <time className="minecraft-patch__date" dateTime={entry.publishedAt}>
           {formatPatchDate(entry.publishedAt, locale)}
         </time>
@@ -172,7 +172,7 @@ export function MinecraftPatchNotesPage({ locale }: { locale: MinecraftLocale })
           {MINECRAFT_PATCH_EDITIONS.map((candidate) => (
             <button
               aria-pressed={edition === candidate}
-              className={`${edition === candidate ? "active" : ""} is-${candidate}`}
+              className={`pixel-corner-sm${edition === candidate ? " active" : ""} is-${candidate}`}
               key={candidate}
               onClick={() => changeEdition(candidate)}
               type="button"
@@ -186,13 +186,13 @@ export function MinecraftPatchNotesPage({ locale }: { locale: MinecraftLocale })
         {text.patchLead}
       </p>
       <div aria-label={text.patchTypeLabel} className="minecraft-type-chips" role="group">
-        <button aria-pressed={type === "all"} className={type === "all" ? "active" : ""} onClick={() => setType("all")} type="button">
+        <button aria-pressed={type === "all"} className={`pixel-corner-sm${type === "all" ? " active" : ""}`} onClick={() => setType("all")} type="button">
           {text.patchTypeAll}
         </button>
         {editionTypes.map((candidate) => (
           <button
             aria-pressed={type === candidate}
-            className={type === candidate ? "active" : ""}
+            className={`pixel-corner-sm${type === candidate ? " active" : ""}`}
             key={candidate}
             onClick={() => setType(candidate)}
             type="button"

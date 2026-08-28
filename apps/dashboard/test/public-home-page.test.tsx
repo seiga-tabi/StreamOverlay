@@ -48,7 +48,7 @@ test("홈 히어로는 명조 헤드라인과 게임 카테고리 3:4 포스터 
   /* 목업 「카테고리 선택」 — 검색 폼·붓글씨 마크 대신 네 게임 타일. 타일은
      <a> 이고(이동이지 선택이 아님) 표시는 hover/focus 의 테두리·꼬리 밑줄뿐. */
   const ko = renderToStaticMarkup(<HomeHero text={homeI18n.ko} />);
-  assert.match(ko, /게임 데이터, 검색 한 번/u);
+  assert.match(ko, /LoL 전적부터 팰월드 도감까지, 검색 한 번으로/u);
   assert.match(ko, /yoro-home-headline-tail/u);
   assert.match(ko, /yoro-home-hero--cats/u);
   // 네 게임 이름과 로케일 프리픽스 경로.
@@ -74,7 +74,7 @@ test("홈 히어로는 명조 헤드라인과 게임 카테고리 3:4 포스터 
   /* 로케일 프리픽스는 currentPublicLocale() 이 정합니다 — window 가 없는 SSR
      테스트에서는 ko 폴백이라, ja 는 문구만 단언합니다. */
   const ja = renderToStaticMarkup(<HomeHero text={homeI18n.ja} />);
-  assert.match(ja, /ゲームデータ、検索ひとつで/u);
+  assert.match(ja, /LoL戦績からパルワールド図鑑まで、検索ひとつで/u);
   assert.match(ja, /リーグ・オブ・レジェンド/u);
   assert.match(ja, /パルワールド/u);
   assert.match(ja, /ヴァロラント|VALORANT|バロラント/u);
