@@ -12,58 +12,57 @@
   align-items: stretch;
 }
 
-.yoro-dashboard-groupnav {
-  flex: 0 0 220px;
-  min-width: 0;
-  padding: 24px 16px;
-  border-right: .5px solid var(--home-line);
-  background: var(--home-bg);
-}
-
-.yoro-dashboard-groupnav nav {
-  position: sticky;
-  top: 24px;
-  display: grid;
-  gap: 4px;
-}
-
-.yoro-dashboard-nav-label {
-  margin: 14px 8px 4px;
-  color: var(--home-mid);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: .06em;
-}
-
-.yoro-dashboard-groupnav nav button {
-  width: 100%;
-  min-height: 44px;
-  padding: 0 10px;
-  border: .5px solid transparent;
-  border-radius: 3px;
+/* 그룹 3행 세부 메뉴(pill 탭) — 예전 좌측 사이드바 groupnav 를 대체합니다
+   (v2 목업 dashboard-subnav-detail-v2.html 승인). 1행(.yoro-home-header)·
+   2행(.yoro-lol-subnav)과 동일한 규칙(max-width:90rem 중앙 정렬)으로 좌우 경계를
+   맞춥니다 — 01-public-home.css/02-lol-home.css 실제 값 그대로. */
+.yoro-dashboard-detail-subnav {
   display: flex;
-  gap: 8px;
   align-items: center;
+  gap: 8px;
+  max-width: 90rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: 12px 48px;
+  overflow-x: auto;
+  box-sizing: border-box;
+  border-bottom: .5px solid var(--home-line);
+}
+
+.yoro-dashboard-detail-subnav-item {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: .5px solid var(--home-line);
+  border-radius: 999px;
+  background: var(--home-bg);
   color: var(--home-sub);
-  background: transparent;
   font: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  text-align: left;
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
   cursor: pointer;
 }
 
-.yoro-dashboard-nav-text {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.yoro-dashboard-detail-subnav-item:hover,
+.yoro-dashboard-detail-subnav-item:focus-visible {
+  border-color: var(--home-line);
+  background: var(--home-card);
+  color: var(--home-ink);
 }
 
-.yoro-dashboard-nav-dot,
-.yoro-dashboard-nav-note {
+.yoro-dashboard-detail-subnav-item.is-active {
+  border-color: var(--home-win);
+  background: var(--home-card);
+  color: var(--home-ink);
+}
+
+.yoro-dashboard-detail-subnav-item .yoro-dashboard-nav-dot,
+.yoro-dashboard-detail-subnav-item .yoro-dashboard-nav-note {
   flex: none;
-  margin-left: auto;
 }
 
 .yoro-dashboard-nav-dot {
@@ -81,23 +80,15 @@
   padding: 1px 7px;
   border-radius: 999px;
   color: var(--home-mid);
-  background: var(--home-card);
+  background: var(--home-bg);
   font-size: 11px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
-.yoro-dashboard-groupnav nav button.active .yoro-dashboard-nav-note {
+.yoro-dashboard-detail-subnav-item.is-active .yoro-dashboard-nav-note {
   color: var(--home-sub);
-}
-
-.yoro-dashboard-groupnav nav button:hover,
-.yoro-dashboard-groupnav nav button:focus-visible,
-.yoro-dashboard-groupnav nav button.active {
-  border-color: var(--home-line);
-  background: var(--home-card);
-  color: var(--home-ink);
 }
 
 .yoro-dashboard-main {
@@ -608,10 +599,6 @@
   color: var(--home-ink, var(--color-text));
 }
 
-.yoro-dashboard-mobile-detail-links {
-  display: none;
-}
-
 .yoro-account-page.is-embedded,
 .bot-management-page.is-embedded {
   min-height: auto;
@@ -1003,11 +990,6 @@
 }
 
 @media (max-width: 64rem) and (min-width: 48rem) {
-  .yoro-dashboard-groupnav {
-    flex-basis: 180px;
-    padding: 18px 12px;
-  }
-
   .yoro-dashboard-main {
     padding: 24px 24px 48px;
   }
@@ -1031,34 +1013,14 @@
     display: block;
   }
 
-  .yoro-dashboard-groupnav {
-    display: none;
+  .yoro-dashboard-detail-subnav {
+    padding: 10px 16px;
   }
 
   .yoro-dashboard-main {
     width: min(100%, 760px);
     margin-inline: auto;
     padding: 20px 16px calc(var(--public-bottom-tab-bar-height) + 26px);
-  }
-
-  .yoro-dashboard-mobile-detail-links {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px;
-  }
-
-  .yoro-dashboard-mobile-detail-links button {
-    min-width: 0;
-    min-height: 44px;
-    padding: 6px 8px;
-    border: .5px solid var(--home-line);
-    border-radius: 3px;
-    background: var(--home-card);
-    color: var(--home-ink);
-    font: inherit;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
   }
 
   .yoro-dashboard-settings {

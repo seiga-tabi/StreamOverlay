@@ -97,16 +97,20 @@ test("공통 YORO Dashboard는 로그인 사용자용 진입점과 KO·JA 문구
   assert.match(source, /視聴者参加/u);
   assert.match(source, /ParticipationManagementPage/u);
   assert.match(source, /<DashboardChrome/u);
-  assert.match(source, /className="yoro-dashboard-groupnav"/u);
+  assert.match(source, /detailNav=\{/u);
+  assert.match(source, /<DashboardDetailSubnav/u);
   assert.match(source, /<DashboardBottomTabBar/u);
-  assert.match(source, /className="yoro-dashboard-mobile-detail-links"/u);
   assert.match(source, /window\.location\.assign\("\/lol"\)/u);
   assert.doesNotMatch(source, /yoro-dashboard-sidebar/u);
+  assert.doesNotMatch(source, /className="yoro-dashboard-groupnav"/u);
+  assert.doesNotMatch(source, /className="yoro-dashboard-mobile-detail-links"/u);
   assert.match(chromeSource, /<HomeHeader/u);
   assert.match(chromeSource, /공개 홈/u);
   assert.match(chromeSource, /公開ホーム/u);
   assert.match(chromeSource, /<DashboardSubnav/u);
   assert.match(chromeSource, /yoro-lol-subnav/u);
+  assert.match(chromeSource, /export function DashboardDetailSubnav/u);
+  assert.match(chromeSource, /yoro-dashboard-detail-subnav/u);
   assert.match(bottomBarSource, /data-testid="dashboard-bottom-tab-bar"/u);
   assert.equal((bottomBarMarkup.match(/<button/g) ?? []).length, 5);
   assert.match(bottomBarMarkup, /aria-current="page"/u);
@@ -138,17 +142,15 @@ test("공통 YORO Dashboard는 로그인 사용자용 진입점과 KO·JA 문구
     "utf8"
   );
   assert.match(css, /\.yoro-dashboard-body\s*\{[\s\S]*?display:\s*flex/u);
-  assert.match(css, /\.yoro-dashboard-groupnav\s*\{[\s\S]*?flex:\s*0 0 220px/u);
+  assert.match(css, /\.yoro-dashboard-detail-subnav\s*\{[\s\S]*?max-width:\s*90rem/u);
+  assert.match(css, /\.yoro-dashboard-detail-subnav-item\s*\{/u);
   assert.match(
     css,
     /\.yoro-dashboard-main[\s\S]*?max-width:\s*1220px/u
   );
-  assert.match(
-    css,
-    /@media \(max-width:\s*47\.9375rem\)[\s\S]*?\.yoro-dashboard-groupnav\s*\{[\s\S]*?display:\s*none/u
-  );
+  assert.doesNotMatch(css, /\.yoro-dashboard-groupnav/u);
+  assert.doesNotMatch(css, /\.yoro-dashboard-mobile-detail-links/u);
   assert.match(css, /--public-bottom-tab-bar-height:\s*calc\(64px/u);
-  assert.match(css, /\.yoro-dashboard-mobile-detail-links[\s\S]*?display:\s*grid/u);
   assert.doesNotMatch(css, /\.yoro-dashboard-sidebar/u);
   assert.match(css, /@media \(prefers-reduced-motion:\s*reduce\)/u);
   assert.match(

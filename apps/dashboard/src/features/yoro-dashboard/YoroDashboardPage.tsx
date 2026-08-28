@@ -2,7 +2,8 @@ import {
   useEffect,
   useMemo,
   useState,
-  type FormEvent
+  type FormEvent,
+  type ReactNode
 } from "react";
 import { DiscordSymbolIcon } from "../../shared/DiscordSymbolIcon";
 import { TwitchGlitchIcon } from "../../shared/TwitchGlitchIcon";
@@ -50,6 +51,8 @@ import {
 import { DashboardBottomTabBar } from "./DashboardBottomTabBar";
 import {
   DashboardChrome,
+  DashboardDetailSubnav,
+  type DashboardDetailNavItem,
   type DashboardTopLevelPage
 } from "./DashboardChrome";
 import { ParticipationManagementPage } from "./ParticipationManagementPage";
@@ -432,6 +435,41 @@ function dashboardTopLevelPage(page: UnifiedDashboardPage): DashboardTopLevelPag
     || page === "streamingRiot"
   ) return "streaming";
   return page;
+}
+
+/* 그룹별 3행 세부 메뉴 항목 — v2 목업 승인에 따라 좌측 사이드바를 대체합니다.
+   세부 메뉴가 없는 그룹(홈/연결계정/개인설정)은 빈 배열을 돌려줘
+   DashboardDetailSubnav 자체가 렌더링되지 않습니다. */
+function dashboardDetailNavItems(
+  topLevel: DashboardTopLevelPage,
+  navBadge: (item: UnifiedDashboardPage) => ReactNode
+): DashboardDetailNavItem[] {
+  if (topLevel === "organizations") {
+    return ([
+      "organizations",
+      "organizationBot",
+      "organizationServers"
+    ] as const).map((item) => ({
+      page: item,
+      ko: copy.ko[item],
+      ja: copy.ja[item],
+      badge: navBadge(item)
+    }));
+  }
+  if (topLevel === "streaming") {
+    return ([
+      "streaming",
+      "streamingParticipation",
+      "streamingFollowers",
+      "streamingRiot"
+    ] as const).map((item) => ({
+      page: item,
+      ko: copy.ko[item],
+      ja: copy.ja[item],
+      badge: navBadge(item)
+    }));
+  }
+  return [];
 }
 
 function organizationSearch(search: string): string {
@@ -999,6 +1037,15 @@ export function YoroDashboardPage() {
     >
       <DashboardChrome
         accountName={identity?.displayName ?? text.unavailable}
+        detailNav={(
+          <DashboardDetailSubnav
+            activePage={page}
+            items={dashboardDetailNavItems(dashboardTopLevelPage(page), navBadge)}
+            label={text.brand}
+            locale={locale}
+            onNavigate={(nextPage) => selectDashboardPage(nextPage as UnifiedDashboardPage)}
+          />
+        )}
         locale={locale}
         onLocale={(nextLocale) => changePreferences({ locale: nextLocale })}
         onLogout={() => void logoutAccount(authenticated.csrfToken).then(() => {
@@ -1010,65 +1057,6 @@ export function YoroDashboardPage() {
         page={dashboardTopLevelPage(page)}
       />
       <div className="yoro-dashboard-body">
-      <aside
-        aria-label={text.brand}
-        className="yoro-dashboard-groupnav"
-        id="yoro-dashboard-navigation"
-      >
-        <nav aria-label={text.brand}>
-          <span className="yoro-dashboard-nav-label">{text.organizationGroup}</span>
-          <button
-            aria-current={page === "organizations" ? "page" : undefined}
-            className={page === "organizations" ? "active" : ""}
-            onClick={() => selectDashboardPage("organizations")}
-            type="button"
-          >
-            <span className="yoro-dashboard-nav-text">{text.organizations}</span>
-            {navBadge("organizations")}
-          </button>
-          {([
-            "organizationBot",
-            "organizationServers"
-          ] as UnifiedDashboardPage[]).map((item) => (
-            <button
-              aria-current={page === item ? "page" : undefined}
-              className={page === item ? "active" : ""}
-              key={item}
-              onClick={() => selectDashboardPage(item)}
-              type="button"
-            >
-              <span className="yoro-dashboard-nav-text">{text[item]}</span>
-              {navBadge(item)}
-            </button>
-          ))}
-          <span className="yoro-dashboard-nav-label">{text.streamingGroup}</span>
-          <button
-            aria-current={page === "streaming" ? "page" : undefined}
-            className={page === "streaming" ? "active" : ""}
-            onClick={() => selectDashboardPage("streaming")}
-            type="button"
-          >
-            <span className="yoro-dashboard-nav-text">{text.streaming}</span>
-            {navBadge("streaming")}
-          </button>
-          {([
-            "streamingParticipation",
-            "streamingFollowers",
-            "streamingRiot"
-          ] as UnifiedDashboardPage[]).map((item) => (
-            <button
-              aria-current={page === item ? "page" : undefined}
-              className={page === item ? "active" : ""}
-              key={item}
-              onClick={() => selectDashboardPage(item)}
-              type="button"
-            >
-              <span className="yoro-dashboard-nav-text">{text[item]}</span>
-              {navBadge(item)}
-            </button>
-          ))}
-        </nav>
-      </aside>
       <main className="yoro-dashboard-main">
         {page === "overview" ? (
           <div className="yoro-dh">
@@ -1342,20 +1330,6 @@ export function YoroDashboardPage() {
               <h1>{text.streamerTitle}</h1>
               <p>{text.streamerDescription}</p>
             </header>
-            <nav
-              aria-label={text.streamingGroup}
-              className="yoro-dashboard-mobile-detail-links"
-            >
-              {([
-                "streamingParticipation",
-                "streamingFollowers",
-                "streamingRiot"
-              ] as UnifiedDashboardPage[]).map((item) => (
-                <button key={item} onClick={() => navigate(item)} type="button">
-                  {text[item]}
-                </button>
-              ))}
-            </nav>
             {streamerFailed ? (
               <div className="yoro-dashboard-state-card" role="alert">
                 <strong>{text.streamerLoadFailed}</strong>

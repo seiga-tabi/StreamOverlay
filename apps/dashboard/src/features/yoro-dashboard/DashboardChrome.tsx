@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { AppShellHeader } from "../../shared/ui/AppShell";
 import { HomeHeader } from "../public-home/components/HomeHeader";
 import { TailUnderline } from "../public-home/components/HomeMarks";
@@ -73,13 +74,57 @@ export function DashboardSubnav({ locale, activeGroup, onNavigate }: {
   );
 }
 
+/* 그룹 3행 세부 메뉴(pill 탭) — v2 목업(dashboard-subnav-detail-v2.html) 승인.
+   1·2행과 동일하게 max-width:90rem 중앙 정렬로 통일합니다(18-yoro-dashboard.css
+   .yoro-dashboard-detail-subnav). 세부 메뉴가 없는 그룹(홈/연결계정/개인설정)은
+   items가 비어 있어 이 컴포넌트를 아예 렌더링하지 않습니다. */
+export type DashboardDetailNavItem = {
+  page: string;
+  ko: string;
+  ja: string;
+  badge?: ReactNode;
+};
+
+export function DashboardDetailSubnav({ items, activePage, locale, onNavigate, label }: {
+  items: readonly DashboardDetailNavItem[];
+  activePage: string;
+  locale: DashboardLocale;
+  onNavigate: (page: string) => void;
+  label: string;
+}) {
+  if (items.length === 0) return null;
+  return (
+    <nav aria-label={label} className="yoro-dashboard-detail-subnav">
+      {items.map((item) => {
+        const active = item.page === activePage;
+        return (
+          <button
+            aria-current={active ? "page" : undefined}
+            className={`yoro-dashboard-detail-subnav-item${active ? " is-active" : ""}`}
+            key={item.page}
+            onClick={() => onNavigate(item.page)}
+            type="button"
+          >
+            {item.badge}
+            {locale === "ja" ? item.ja : item.ko}
+          </button>
+        );
+      })}
+    </nav>
+  );
+}
+
 /* Dashboard 상단바는 1행(HomeHeader, 메인 홈과 완전히 동일한 컴포넌트 재사용 —
  * 지구본 아이콘 언어 선택도 포함) + 2행(DashboardSubnav, 사이드바 최상위 5개
  * 그룹을 이동)으로 구성합니다. 좌측 groupnav(사이드바)는 각 그룹의 하위 항목
  * (Organization/스트리머 세부 메뉴, 개인 설정)만 남기고, 최상위 그룹 자체의
  * 진입점은 여기 2행이 담당합니다(2026-08-27 사용자 요청 — "사이드바 메뉴를
  * 상단 2행으로 옮기고"). 모바일 하단 탭바(DashboardBottomTabBar)는 계속
- * dashboardTopLevelNavItems/DashboardTopLevelPage를 재사용합니다. */
+ * dashboardTopLevelNavItems/DashboardTopLevelPage를 재사용합니다.
+ *
+ * 세부 메뉴(Organization/스트리머 그룹 안의 개요·Discord Bot 제어 등)는 v2
+ * 목업 승인에 따라 좌측 사이드바에서 3행(DashboardDetailSubnav)으로 마저
+ * 이동했습니다(2026-08-28) — detailNav 슬롯으로 그룹별 항목을 주입합니다. */
 export function DashboardChrome({
   page,
   accountName,
@@ -88,7 +133,8 @@ export function DashboardChrome({
   onLogout,
   onNavigate,
   onPublicHome,
-  onToggleTheme
+  onToggleTheme,
+  detailNav
 }: {
   page: DashboardTopLevelPage | null;
   accountName?: string;
@@ -98,6 +144,7 @@ export function DashboardChrome({
   onNavigate: (page: DashboardTopLevelPage) => void;
   onPublicHome: () => void;
   onToggleTheme: () => void;
+  detailNav?: ReactNode;
 }) {
   const homeText = {
     ...homeI18n[locale],
@@ -118,6 +165,7 @@ export function DashboardChrome({
         text={homeText}
       />
       <DashboardSubnav activeGroup={page} locale={locale} onNavigate={onNavigate} />
+      {detailNav}
     </AppShellHeader>
   );
 }
