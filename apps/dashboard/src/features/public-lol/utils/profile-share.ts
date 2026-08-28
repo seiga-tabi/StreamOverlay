@@ -37,6 +37,16 @@ export function normalizeShareRole(role: string | undefined): string {
 /** 부 라인으로 인정하는 최소 표본 — 이보다 적으면 카드에서 블록을 생략합니다(목업 §⑤). */
 export const PROFILE_SHARE_MIN_SUB_LANE_GAMES = 3;
 
+/** 5라인 분포 스트립 표기 순서(목업 lol-social-card-v4 §"라인 분포") — 게임 내 관례 순서. */
+export const PROFILE_SHARE_LANE_ORDER = ["TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"] as const;
+
+export type ProfileShareLaneDistributionEntry = {
+  role: string;
+  games: number;
+  wins: number;
+  winRate: number;
+};
+
 /**
  * rolePerformance(서버 집계)로 주·부 라인을 정하고, 각 라인의 주력 챔피언을
  * 최근 경기에서 집계합니다. rolePerformance 가 비어 있으면 최근 경기만으로
@@ -113,4 +123,53 @@ export function profileShareLanes(
   const subCandidate = ranked[1] ? toLane(ranked[1]) : undefined;
   const sub = subCandidate && subCandidate.games >= PROFILE_SHARE_MIN_SUB_LANE_GAMES ? subCandidate : undefined;
   return { main, sub };
+}
+
+/**
+ * 5라인(탑·정글·미드·바텀·서포트) 전체 분포를 게임 관례 순서로 돌려줍니다.
+ * rolePerformance 에 없는 라인은 games=0 항목으로 채워 스트립에서 "안 하는 라인"임을
+ * 정직하게 보여줍니다(목업 lol-social-card-v4 §"라인 분포 스트립").
+ */
+export function profileShareLaneDistribution(
+  rolePerformance: PublicLolRolePerformance[],
+): ProfileShareLaneDistributionEntry[] {
+  const byRole = new Map(
+    rolePerformance
+      .map((entry) => ({ role: normalizeShareRole(entry.role), games: entry.games, wins: entry.wins, winRate: Math.round(entry.winRate) }))
+      .filter((entry) => entry.role && entry.role !== "UNKNOWN")
+      .map((entry) => [entry.role, entry] as const),
+  );
+  return PROFILE_SHARE_LANE_ORDER.map((role) => byRole.get(role) ?? { role, games: 0, wins: 0, winRate: 0 });
+}
+
+/**
+ * 라인 구분 없이 전체 최근 경기에서 챔피언별 판수를 집계해 상위 N개를 돌려줍니다
+ * (목업 §"주력 챔피언" — 기존에 라인 블록 안에서만 라인별로 나누던 챔피언 집계를
+ * 카드 상단에 통합 노출하기 위한 함수, byRole 집계는 profileShareLanes 와 같은
+ * 소스인 recentMatches 를 재사용합니다).
+ */
+export function profileShareTopChampions(
+  recentMatches: PublicLolRecentMatch[],
+  championName: (champion: PublicLolRecentMatch["champion"]) => string,
+  limit = 3,
+): ProfileShareLaneChampion[] {
+  const byChampion = new Map<number, ProfileShareLaneChampion>();
+  for (const match of recentMatches) {
+    const championId = match.champion.championId;
+    const champion = byChampion.get(championId) ?? {
+      championId,
+      name: championName(match.champion),
+      iconUrl: match.champion.iconUrl,
+      games: 0,
+      wins: 0,
+      winRate: 0,
+    };
+    champion.games += 1;
+    if (match.result === "win") champion.wins += 1;
+    champion.winRate = Math.round((champion.wins / champion.games) * 100);
+    byChampion.set(championId, champion);
+  }
+  return [...byChampion.values()]
+    .sort((a, b) => (b.games - a.games) || (b.winRate - a.winRate))
+    .slice(0, limit);
 }

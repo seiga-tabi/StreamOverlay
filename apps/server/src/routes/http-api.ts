@@ -243,6 +243,8 @@ import {
 import {
   applyPublicSeoMetadata,
   localizedPublicSeoUrl,
+  patchNotesDetailRouteForPath,
+  patchNotesDetailSeoMetadata,
   palworldBreedingPath,
   palworldBreedingRouteForPath,
   palworldBreedingSeoMetadata,
@@ -270,6 +272,7 @@ import {
   SITEMAP_MAX_URLS,
   buildPalworldBreedingSitemap,
   buildPalworldEntitySitemap,
+  buildPatchNotesSitemap,
   buildSitemapIndex,
   buildStaticSitemap,
   palworldBreedingSitemapPaths,
@@ -4100,12 +4103,52 @@ export function createHttpHandler(input: HttpHandlerInput) {
     }
   }
 
+  /** 패치 피드가 일시적으로 없을 때 허브 fallback을 담은 재시도 가능한 503을 냅니다. */
+  async function sendPatchNotesUnavailablePage(
+    req: IncomingMessage,
+    res: ServerResponse,
+    pathname: string
+  ): Promise<void> {
+    const filePath = path.resolve(appConfig.paths.dashboardStatic, "index.html");
+    const locale = publicUrlLocaleFromPathname(pathname) === "ja" ? "ja" : "ko";
+    try {
+      const metadata = {
+        ...publicSeoMetadataForPath(`/${locale}/patch-notes`),
+        robotsNoindex: true
+      };
+      const cspNonce = crypto.randomBytes(18).toString("base64url");
+      const html = applyPublicSeoMetadata(await fs.readFile(filePath, "utf8"), metadata)
+        .replaceAll(DASHBOARD_CSP_NONCE_PLACEHOLDER, cspNonce);
+      res.writeHead(503, {
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "no-store",
+        "Retry-After": "600",
+        "X-Robots-Tag": "noindex, nofollow",
+        ...staticSecurityHeaders(req, filePath, "/dashboard", cspNonce)
+      });
+      res.end(req.method === "HEAD" ? undefined : html);
+    } catch {
+      sendJson(req, res, 503, {
+        error: "PATCH_NOTES_UNAVAILABLE",
+        message: "패치 노트를 사용할 수 없습니다."
+      }, {
+        "Cache-Control": "no-store",
+        "Retry-After": "600",
+        "X-Robots-Tag": "noindex, nofollow"
+      });
+    }
+  }
+
   /**
    * sitemap index와 하위 sitemap을 응답합니다.
    * Palworld 하위 sitemap은 data service가 준비된 경우에만 index에 넣어
    * 크롤러가 빈 sitemap을 반복해서 받지 않게 합니다.
    */
-  function sendPublicSitemap(req: IncomingMessage, res: ServerResponse, pathname: string): boolean {
+  async function sendPublicSitemap(
+    req: IncomingMessage,
+    res: ServerResponse,
+    pathname: string
+  ): Promise<boolean> {
     const palworldData = input.palworldDataService;
     const palworldMeta = (() => {
       if (!palworldData) return undefined;
@@ -4131,6 +4174,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (pathname === PUBLIC_SITEMAP_PATHS.index) {
       const children = [
         { path: PUBLIC_SITEMAP_PATHS.static },
+        ...(input.patchNotes ? [{ path: PUBLIC_SITEMAP_PATHS.patchNotesDetail }] : []),
         ...(palworldData
           ? [
               { path: PUBLIC_SITEMAP_PATHS.pals, lastmod: dataVersion },
@@ -4147,6 +4191,34 @@ export function createHttpHandler(input: HttpHandlerInput) {
       return respond(buildStaticSitemap(undefined, {
         minecraftPatchNotesReady: input.minecraftPatchNotes?.hasReadyData() === true
       }));
+    }
+    if (pathname === PUBLIC_SITEMAP_PATHS.patchNotesDetail) {
+      if (!input.patchNotes) {
+        res.writeHead(404, {
+          "Content-Type": "application/json; charset=utf-8",
+          ...securityHeadersForRequest(req)
+        });
+        res.end(req.method === "HEAD" ? undefined : JSON.stringify({ error: "not found" }));
+        return true;
+      }
+      try {
+        const feed = await input.patchNotes.getFeed("ko");
+        if (!feed) throw new TypeError("패치 노트 피드를 사용할 수 없습니다.");
+        return respond(buildPatchNotesSitemap(feed.notes));
+      } catch (error) {
+        input.logger?.error({
+          type: "public_seo.sitemap_failed",
+          errorCode: "patch_notes_sitemap_unavailable",
+          error: toSafeErrorMessage(error)
+        });
+        res.writeHead(503, {
+          "Content-Type": "application/json; charset=utf-8",
+          "Retry-After": "600",
+          ...securityHeadersForRequest(req)
+        });
+        res.end(req.method === "HEAD" ? undefined : JSON.stringify({ error: "sitemap unavailable" }));
+        return true;
+      }
     }
     const breedingShard = palworldBreedingSitemapShard(pathname);
     if (breedingShard !== undefined) {
@@ -9585,7 +9657,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         }
         if (await sendPublicLolSocialImage(req, res, url.pathname)) return;
         if (await sendPatchNotesSocialImage(req, res, url.pathname)) return;
-        if (sendPublicSitemap(req, res, url.pathname)) return;
+        if (await sendPublicSitemap(req, res, url.pathname)) return;
         if (await sendPublicDashboardAsset(req, res, url.pathname)) return;
         // 기존 `?pal=` 상세 query는 고유 URL로 영구 이전합니다. 두 URL이 같은 내용을
         // 제공하면 중복 색인이 되고 canonical 신호가 흩어집니다.
@@ -9594,6 +9666,59 @@ export function createHttpHandler(input: HttpHandlerInput) {
           return sendPermanentRedirect(res, palworldEntityTarget, {
             "Cache-Control": "public, max-age=3600"
           });
+        }
+        const patchNotesDetailRoute = patchNotesDetailRouteForPath(url.pathname);
+        if (patchNotesDetailRoute) {
+          if (!input.patchNotes) {
+            await sendPatchNotesUnavailablePage(req, res, url.pathname);
+            return;
+          }
+          let feed: Awaited<ReturnType<PatchNotesService["getFeed"]>>;
+          try {
+            feed = await input.patchNotes.getFeed(patchNotesDetailRoute.locale);
+          } catch (error) {
+            input.logger?.error({
+              type: "public_seo.patch_notes_detail_failed",
+              errorCode: "patch_notes_feed_unavailable",
+              error: toSafeErrorMessage(error)
+            });
+          }
+          if (!feed) {
+            await sendPatchNotesUnavailablePage(req, res, url.pathname);
+            return;
+          }
+          const note = feed.notes.find((candidate) => (
+            candidate.patchVersion === patchNotesDetailRoute.patchVersion
+          ));
+          if (!note) return sendPublicNotFound(req, res, url.pathname);
+          let changes: Awaited<ReturnType<PatchChangeSummaryService["summaryFor"]>>;
+          if (input.patchChangeSummary) {
+            try {
+              const resolved = await input.patchChangeSummary.summaryFor(
+                patchNotesDetailRoute.patchVersion,
+                patchNotesDetailRoute.locale
+              );
+              if (resolved?.patchVersion === patchNotesDetailRoute.patchVersion) changes = resolved;
+            } catch (error) {
+              /* 변경 비교는 부분 데이터입니다. 실패해도 유효한 패치 상세는 원문 링크와
+                 공개일을 포함한 기본 fallback으로 계속 서빙합니다. */
+              input.logger?.error({
+                type: "public_seo.patch_notes_detail_failed",
+                errorCode: "patch_change_summary_unavailable",
+                error: toSafeErrorMessage(error)
+              });
+            }
+          }
+          const seoMetadata = patchNotesDetailSeoMetadata(patchNotesDetailRoute, note, changes);
+          await sendStaticFile(
+            req,
+            res,
+            path.resolve(appConfig.paths.dashboardStatic, "index.html"),
+            undefined,
+            "/dashboard",
+            (html) => applyPublicSeoMetadata(html, seoMetadata)
+          );
+          return;
         }
         if (url.pathname === "/" || isPublicDashboardAppRoute(url.pathname)) {
           const breedingPair = resolvePalworldBreedingSeoPair(url.pathname);

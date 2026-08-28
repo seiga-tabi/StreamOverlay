@@ -13,7 +13,8 @@ export type RecentMatchShareItem = {
   grade: string;
   score: number;
   highlight?: "mvp" | "ace";
-  itemIconUrls: string[];
+  /** 7슬롯 고정(장비 6 + 장신구 1) — 빈 슬롯은 undefined로 유지합니다. */
+  itemIconUrls: Array<string | undefined>;
   durationLabel: string;
   startedAtLabel: string;
 };
@@ -48,10 +49,11 @@ export type RecentMatchesShareActionsProps = {
 type ShareStatus = "idle" | "preparing" | "saved" | "shared" | "failed";
 
 const SHARE_CARD_WIDTH = 1080;
-const SHARE_CARD_MAX_MATCHES = 20;
-/* 목업 LolShareCard — 좌우 여백 64, 행 74px, 2열 간격 44. */
+/* 필터 결과 상위 10경기 고정 — "필터에 따른 10게임을 항상 보여주도록" 요청 반영. */
+const SHARE_CARD_MAX_MATCHES = 10;
+/* 목업 LolShareCard — 좌우 여백 64, 행 90px(아이템 칸 포함으로 74→90 확장), 2열 간격 44. */
 const SHARE_CARD_MARGIN = 64;
-const SHARE_CARD_ROW_HEIGHT = 74;
+const SHARE_CARD_ROW_HEIGHT = 90;
 const SHARE_CARD_COLUMN_GAP = 44;
 const SHARE_CARD_BODY_FONT = 'Pretendard, "Noto Sans KR", "Noto Sans JP", sans-serif';
 const SHARE_CARD_SERIF_FONT = '"Noto Serif KR", "Noto Serif JP", serif';
@@ -194,6 +196,26 @@ function drawCircularImage(
   context.restore();
 }
 
+/* 아이템 슬롯의 둥근 테두리 — 프로필 공유 카드(ProfileShareActions)의 동명 헬퍼와
+   같은 알고리즘이지만 이 파일은 독립 모듈이라 별도로 둡니다. */
+function drawRoundedRect(
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number,
+): void {
+  const safeRadius = Math.min(radius, width / 2, height / 2);
+  context.beginPath();
+  context.moveTo(x + safeRadius, y);
+  context.arcTo(x + width, y, x + width, y + height, safeRadius);
+  context.arcTo(x + width, y + height, x, y + height, safeRadius);
+  context.arcTo(x, y + height, x, y, safeRadius);
+  context.arcTo(x, y, x + width, y, safeRadius);
+  context.closePath();
+}
+
 function loadCanvasImage(url: string): Promise<HTMLImageElement | undefined> {
   return new Promise((resolve) => {
     const image = new Image();
@@ -219,6 +241,7 @@ async function loadShareImages(
 ): Promise<Map<string, HTMLImageElement>> {
   const urls = Array.from(new Set([
     ...matches.map((match) => match.championIconUrl),
+    ...matches.flatMap((match) => match.itemIconUrls),
     ...additionalUrls,
   ].filter((url): url is string => Boolean(url))));
   const loaded = await Promise.all(urls.map(async (url) => [url, await loadCanvasImage(url)] as const));
@@ -239,8 +262,8 @@ export async function createRecentMatchesShareBlob(
     masteryChampionArtUrl?: string;
   } = {},
 ): Promise<Blob> {
-  /* 목업 LolShareCard — 20경기 전부(10 × 2열). 요약이 20경기라 말하면
-     그림도 20경기를 보여야 합니다. 적으면 있는 만큼만 그리고 높이를 줄입니다. */
+  /* 목업 LolShareCard — 필터 결과 상위 10경기(5 × 2열). 적으면 있는 만큼만
+     그리고 높이를 줄입니다. */
   const matches = sourceMatches.slice(0, SHARE_CARD_MAX_MATCHES);
   if (matches.length === 0) throw new Error("share_matches_empty");
 
@@ -390,18 +413,22 @@ export async function createRecentMatchesShareBlob(
   context.font = `800 25px ${SHARE_CARD_BODY_FONT}`;
   context.fillText(text.recordTitle ?? text.recentMatches, margin + 28, sectionTop + 24);
 
-  /* 행 트랙(두 열 공통): 승패 30 · 아바타 44 · 이름 1fr · KDA 104(우) · 평점 56(우), gap 14. */
+  /* 행 트랙(두 열 공통): 승패 30 · 아바타 44 · 이름 1fr · KDA 104(우) · 평점 56(우), gap 14.
+     행 높이가 90px 으로 늘어난 만큼 위쪽 52px 은 기존 요약 줄, 아래 32px 은 아이템 6칸. */
   const trackGap = 14;
   const kdaWidth = 104;
   const gradeWidth = 56;
   const nameTrackWidth = columnWidth - 30 - 44 - kdaWidth - gradeWidth - trackGap * 4;
+  const itemIconSize = 22;
+  const itemIconGap = 6;
 
   matches.forEach((match, index) => {
     const column = Math.floor(index / rowsPerColumn);
     const rowIndex = index % rowsPerColumn;
     const x = margin + column * (columnWidth + SHARE_CARD_COLUMN_GAP);
     const y = rowsTop + rowIndex * SHARE_CARD_ROW_HEIGHT;
-    const centerY = y + SHARE_CARD_ROW_HEIGHT / 2;
+    /* 요약 줄(승패·아바타·이름·KDA·평점)은 행 상단 52px 안에서 중앙 정렬합니다. */
+    const summaryCenterY = y + 26;
     const isLastRow = rowIndex === rowsPerColumn - 1;
 
     /* 아래 1px 헤어라인(열 마지막 행은 선 없음). 둥근 카드·색 레일 없음. */
@@ -414,27 +441,27 @@ export async function createRecentMatchesShareBlob(
     const resultColor = match.result === "win" ? theme.win : match.result === "loss" ? theme.loss : theme.mid;
     context.fillStyle = resultColor;
     context.font = `800 22px ${SHARE_CARD_BODY_FONT}`;
-    context.fillText(match.resultLabel.slice(0, 1) || "—", x, centerY + 8);
+    context.fillText(match.resultLabel.slice(0, 1) || "—", x, summaryCenterY + 8);
 
     /* 아바타 44 원형. */
     const avatarX = x + 30 + trackGap;
     const avatarCenterX = avatarX + 22;
     const championImage = match.championIconUrl ? imageMap.get(match.championIconUrl) : undefined;
     if (championImage) {
-      drawCircularImage(context, championImage, avatarCenterX, centerY, 22);
+      drawCircularImage(context, championImage, avatarCenterX, summaryCenterY, 22);
     } else {
       context.beginPath();
-      context.arc(avatarCenterX, centerY, 22, 0, Math.PI * 2);
+      context.arc(avatarCenterX, summaryCenterY, 22, 0, Math.PI * 2);
       context.fillStyle = theme.card;
       context.fill();
       context.fillStyle = theme.mid;
       context.textAlign = "center";
       context.font = `800 17px ${SHARE_CARD_BODY_FONT}`;
-      context.fillText(match.championName.slice(0, 1), avatarCenterX, centerY + 6);
+      context.fillText(match.championName.slice(0, 1), avatarCenterX, summaryCenterY + 6);
       context.textAlign = "start";
     }
     context.beginPath();
-    context.arc(avatarCenterX, centerY, 22, 0, Math.PI * 2);
+    context.arc(avatarCenterX, summaryCenterY, 22, 0, Math.PI * 2);
     context.strokeStyle = theme.line;
     context.lineWidth = 1;
     context.stroke();
@@ -443,10 +470,10 @@ export async function createRecentMatchesShareBlob(
     const nameX = avatarX + 44 + trackGap;
     context.fillStyle = theme.ink;
     context.font = `700 23px ${SHARE_CARD_BODY_FONT}`;
-    context.fillText(match.championName, nameX, centerY - 4, nameTrackWidth);
+    context.fillText(match.championName, nameX, summaryCenterY - 4, nameTrackWidth);
     context.fillStyle = theme.mid;
     context.font = `500 17px ${SHARE_CARD_BODY_FONT}`;
-    context.fillText(`${match.queueLabel} · ${match.durationLabel}`, nameX, centerY + 20, nameTrackWidth);
+    context.fillText(`${match.queueLabel} · ${match.durationLabel}`, nameX, summaryCenterY + 20, nameTrackWidth);
 
     /* KDA 우측 정렬 — 데스 숫자만 패색. */
     const kdaRight = x + columnWidth - gradeWidth - trackGap;
@@ -465,13 +492,13 @@ export async function createRecentMatchesShareBlob(
       let drawX = kdaRight - totalWidth;
       for (const segment of segments) {
         context.fillStyle = segment.color;
-        context.fillText(segment.text, drawX, centerY + 8);
+        context.fillText(segment.text, drawX, summaryCenterY + 8);
         drawX += context.measureText(segment.text).width;
       }
     } else {
       context.fillStyle = theme.ink;
       context.textAlign = "right";
-      context.fillText(match.kda, kdaRight, centerY + 8, kdaWidth);
+      context.fillText(match.kda, kdaRight, summaryCenterY + 8, kdaWidth);
       context.textAlign = "start";
     }
 
@@ -480,8 +507,32 @@ export async function createRecentMatchesShareBlob(
     context.fillStyle = theme.sub;
     context.font = `500 20px ${SHARE_CARD_BODY_FONT}`;
     context.textAlign = "right";
-    context.fillText(gradeText, x + columnWidth, centerY + 7, gradeWidth);
+    context.fillText(gradeText, x + columnWidth, summaryCenterY + 7, gradeWidth);
     context.textAlign = "start";
+
+    /* 아이템 6칸(장비) — 요약 줄 아래, 아바타와 같은 x축에서 시작해 정렬을 맞춥니다.
+       비어 있는 슬롯은 헤어라인 테두리만 그려 실제 빌드의 빈 칸을 정직하게 보여줍니다. */
+    const itemsY = y + SHARE_CARD_ROW_HEIGHT - 12 - itemIconSize;
+    const equipmentSlots = match.itemIconUrls.slice(0, 6);
+    equipmentSlots.forEach((iconUrl, slotIndex) => {
+      const slotX = avatarX + slotIndex * (itemIconSize + itemIconGap);
+      const itemImage = iconUrl ? imageMap.get(iconUrl) : undefined;
+      if (itemImage) {
+        context.save();
+        drawRoundedRect(context, slotX, itemsY, itemIconSize, itemIconSize, 5);
+        context.clip();
+        context.drawImage(itemImage, slotX, itemsY, itemIconSize, itemIconSize);
+        context.restore();
+      } else {
+        drawRoundedRect(context, slotX, itemsY, itemIconSize, itemIconSize, 5);
+        context.fillStyle = theme.card;
+        context.fill();
+      }
+      drawRoundedRect(context, slotX, itemsY, itemIconSize, itemIconSize, 5);
+      context.strokeStyle = theme.line;
+      context.lineWidth = 1;
+      context.stroke();
+    });
   });
 
   /* 꼬리 — 헤어라인 + 좌 안내 / 우 날짜. */

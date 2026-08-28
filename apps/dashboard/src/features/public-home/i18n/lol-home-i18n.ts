@@ -68,7 +68,7 @@ export const lolHomeI18n: Record<PublicLocale, LolHomeText> = {
     participationDescription: "방송 중인 스트리머의 대기열에 등록하고, 순서가 오면 같은 판에서 플레이합니다.",
     participationCta: "참여 페이지로",
     seoTitle: "YORO.gg — LoL 전적, 검색 한 번",
-    seoDescription: "LoL 전적 검색과 증강 칼바람 도감, 패치노트까지 한 화면에서. 방송 중인 스트리머의 판을 보고 시청자로 직접 참여하세요."
+    seoDescription: "Riot ID로 League of Legends 소환사의 랭크와 최근 경기, 챔피언 숙련도와 포지션 성향을 확인하세요. 증강 칼바람 도감과 패치 노트를 함께 살펴보고, 방송 중인 LoL 스트리머와 시청자 참여 기회도 찾을 수 있습니다."
   },
   ja: {
     subnavLabel: "LoLメニュー",
@@ -98,7 +98,7 @@ export const lolHomeI18n: Record<PublicLocale, LolHomeText> = {
     participationDescription: "配信中のストリーマーのキューに登録し、順番が来たら同じ試合でプレイします。",
     participationCta: "参加ページへ",
     seoTitle: "YORO.gg — LoL戦績、検索ひとつで",
-    seoDescription: "LoLの戦績検索、オーグメントARAM図鑑、パッチノートまでひとつの画面で。配信中のストリーマーの試合を見て、視聴者として参加しましょう。"
+    seoDescription: "Riot IDからLeague of Legendsサモナーのランク、最近の試合、チャンピオン熟練度、ロール傾向を確認できます。オーグメントARAM図鑑とパッチノートもあわせて閲覧し、配信中のLoLストリーマーや視聴者参加の機会を探せます。"
   },
   en: {
     subnavLabel: "LoL menu",

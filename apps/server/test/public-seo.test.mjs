@@ -10,6 +10,9 @@ const {
   palworldEntityRedirectPath,
   palworldEntityRouteForPath,
   palworldEntitySeoMetadata,
+  patchNotesDetailPath,
+  patchNotesDetailRouteForPath,
+  patchNotesDetailSeoMetadata,
   palworldItemsFallback,
   palworldPalsFallback,
   palworldSkillsFallback,
@@ -25,11 +28,38 @@ const {
   buildPalworldBreedingSitemap,
   buildLocalizedUrlSetSitemap,
   buildPalworldEntitySitemap,
+  buildPatchNotesSitemap,
   buildSitemapIndex,
   buildStaticSitemap,
   palworldBreedingSitemapPaths,
   palworldBreedingSitemapShard,
 } = await import("../dist/routes/public-sitemap.js");
+
+const PATCH_NOTE_FIXTURE = {
+  slug: "patch-26-17-notes",
+  title: "리그 오브 레전드 26.17 패치 노트",
+  summary: "Riot 목록 요약",
+  publishedAt: "2026-08-26T00:00:00.000Z",
+  patchVersion: "26.17",
+  dataDragonVersion: "16.17.1",
+  url: "https://www.leagueoflegends.com/ko-kr/news/game-updates/patch-26-17-notes/",
+};
+
+const PATCH_CHANGES_FIXTURE = {
+  patchVersion: "26.17",
+  comparedVersions: ["16.16.1", "16.17.1"],
+  systemChanges: [{ stat: "armor", from: 20, to: 21, championCount: 5 }],
+  championChanges: [
+    { championId: 1, name: "애니", direction: "buff", changes: [{ stat: "hp", from: 500, to: 520 }] },
+    { championId: 2, name: "올라프", direction: "nerf", changes: [{ stat: "armor", from: 35, to: 33 }] },
+    { championId: 3, name: "갈리오", direction: "adjust", changes: [{ stat: "movespeed", from: 335, to: 340 }] },
+  ],
+  itemChanges: [
+    { itemId: 1001, name: "롱소드", kind: "price", from: 350, to: 400 },
+    { itemId: 1002, name: "새 아이템", kind: "new" },
+  ],
+  skillChangesIncluded: false,
+};
 
 const APP_SHELL = '<!doctype html><html lang="ko"><head>'
   + '<meta name="description" content="home">'
@@ -57,14 +87,14 @@ test("팰월드는 ko·ja·en·x-default hreflang을 상호 참조로 노출한�
   assert.match(html, /<html lang="ja"/u);
 });
 
-test("영어 본문이 없는 섹션에는 en hreflang을 붙이지 않는다", () => {
-  /* 없는 페이지를 크롤러에게 약속하지 않기 위해서입니다. 증강 칼바람은 ko·ja 만 있습니다
-     (LoL 홈 /lol 은 영어 카피가 생겨 en 을 냅니다 — 아래 테스트가 따로 봅니다). */
-  const html = render("/ko/lol/aram");
-  assert.match(html, /<link rel="alternate" hreflang="ko" href="https:\/\/yoro\.gg\/ko\/lol\/aram" \/>/u);
-  assert.match(html, /<link rel="alternate" hreflang="ja" href="https:\/\/yoro\.gg\/ja\/lol\/aram" \/>/u);
+test("영어 본문이 없는 경로에는 en hreflang을 붙이지 않는다", () => {
+  /* 없는 페이지를 크롤러에게 약속하지 않기 위해서입니다. 시청자 참여는 아직 ko·ja만
+     있습니다(영어 카피가 생긴 정적 경로는 아래 전수 테스트가 따로 봅니다). */
+  const html = render("/ko/participation");
+  assert.match(html, /<link rel="alternate" hreflang="ko" href="https:\/\/yoro\.gg\/ko\/participation" \/>/u);
+  assert.match(html, /<link rel="alternate" hreflang="ja" href="https:\/\/yoro\.gg\/ja\/participation" \/>/u);
   assert.doesNotMatch(html, /hreflang="en"/u);
-  assert.match(html, /<link rel="alternate" hreflang="x-default" href="https:\/\/yoro\.gg\/ko\/lol\/aram" \/>/u);
+  assert.match(html, /<link rel="alternate" hreflang="x-default" href="https:\/\/yoro\.gg\/ko\/participation" \/>/u);
 });
 
 test("팰월드 /en 은 영어 메타와 자기 canonical 을 낸다", () => {
@@ -80,10 +110,58 @@ test("팰월드 /en 은 영어 메타와 자기 canonical 을 낸다", () => {
 test("영어 본문이 없는 섹션의 /en 은 ko 메타로 접히고 canonical 도 /ko 를 가리킨다", () => {
   /* 번역이 없는 화면을 en 으로 색인시키면 중복 페이지가 늘어납니다. 동작은 그대로
      두고 색인만 ko 한 판으로 모읍니다. */
-  const html = render("/en/lol/aram");
+  const html = render("/en/participation");
   assert.match(html, /<html lang="ko"/u);
-  assert.match(html, /<link rel="canonical" href="https:\/\/yoro\.gg\/ko\/lol\/aram">/u);
+  assert.match(html, /<link rel="canonical" href="https:\/\/yoro\.gg\/ko\/participation">/u);
   assert.doesNotMatch(html, /hreflang="en"/u);
+});
+
+const NEW_ENGLISH_STATIC_PAGES = {
+  "/bot": "YORO Bot | Discord Game Server Assistant",
+  "/bot/commands": "Commands | YORO Bot",
+  "/bot/game-files": "Palworld Game Files | YORO Bot",
+  "/bot/getting-started": "Getting Started | YORO Bot",
+  "/games": "Mini-games | YORO.gg",
+  "/games/reaction": "Reaction Time Test | YORO.gg",
+  "/lol/aram": "Augment ARAM | YORO.gg",
+  "/minecraft": "Minecraft Wiki | YORO.gg",
+  "/minecraft/enchants": "Minecraft Enchantments | YORO.gg",
+  "/minecraft/items": "Minecraft Items | YORO.gg",
+  "/minecraft/patch-notes": "Minecraft Patch Notes | YORO.gg",
+  "/minecraft/recipes": "Minecraft Recipes | YORO.gg",
+  "/streamers": "Streamer Recommendations | YORO.gg",
+};
+
+test("새 영어 정적 페이지 13개는 en lang·자기 canonical·en hreflang·영문 fallback을 낸다", () => {
+  for (const [path, title] of Object.entries(NEW_ENGLISH_STATIC_PAGES)) {
+    const metadata = publicSeoMetadataForPath(`/en${path}`, {
+      minecraftPatchNotesReady: path === "/minecraft/patch-notes",
+    });
+    const html = applyPublicSeoMetadata(APP_SHELL, metadata);
+    assert.equal(metadata.locale, "en", path);
+    assert.equal(metadata.title, title, path);
+    assert.equal(metadata.canonicalUrl, `https://yoro.gg/en${path}`, path);
+    assert.equal(metadata.alternateUrls?.en, `https://yoro.gg/en${path}`, path);
+    assert.match(html, /<html lang="en"/u, path);
+    assert.match(html, new RegExp(`<link rel="canonical" href="https://yoro\\.gg/en${path}">`, "u"), path);
+    assert.match(html, new RegExp(`hreflang="en" href="https://yoro\\.gg/en${path}"`, "u"), path);
+    assert.doesNotMatch(html, /[가-힣]/u, `${path} fallback에 한국어가 남았습니다`);
+  }
+});
+
+test("정적 페이지 23개의 KO·JA·EN description은 120~160자다", () => {
+  const paths = [...PUBLIC_SITEMAP_STATIC_PATHS, "/minecraft/patch-notes"];
+  assert.equal(paths.length, 23);
+  for (const path of paths) {
+    for (const locale of ["ko", "ja", "en"]) {
+      const metadata = publicSeoMetadataForPath(`/${locale}${path === "/" ? "/" : path}`, {
+        minecraftPatchNotesReady: path === "/minecraft/patch-notes",
+      });
+      const length = [...metadata.description].length;
+      assert.ok(length >= 120, `${locale}${path} description이 ${length}자로 너무 짧습니다`);
+      assert.ok(length <= 160, `${locale}${path} description이 ${length}자로 너무 깁니다`);
+    }
+  }
 });
 
 test("영어 카피가 생긴 화면은 en 을 서빙한다", () => {
@@ -96,7 +174,7 @@ test("영어 카피가 생긴 화면은 en 을 서빙한다", () => {
   /* raw HTML fallback 본문(크롤러가 JS 실행 전 보는 화면)도 실제 en 화면 문구와
      일치해야 합니다 — 형제 링크가 한국어로 새면 실제 화면(ARAM augments)과
      어긋나는 cloaking 신호가 됩니다. */
-  assert.match(html, />ARAM augments<\/a>/u);
+  assert.match(html, />Augment ARAM<\/a>/u);
   assert.doesNotMatch(html, /증강 칼바람/u);
 });
 
@@ -104,7 +182,7 @@ test("LoL 패치 노트는 ko·ja·en hreflang과 locale별 canonical을 유지�
   const english = render("/en/patch-notes");
   assert.match(english, /<html lang="en"/u);
   assert.match(english, /<title>LoL Patch Notes \| YORO\.gg<\/title>/u);
-  assert.match(english, /Browse League of Legends patch notes from newest to oldest/u);
+  assert.match(english, /Browse League of Legends patch notes by season/u);
   assert.match(english, /<link rel="canonical" href="https:\/\/yoro\.gg\/en\/patch-notes">/u);
   assert.match(english, /hreflang="ko" href="https:\/\/yoro\.gg\/ko\/patch-notes"/u);
   assert.match(english, /hreflang="ja" href="https:\/\/yoro\.gg\/ja\/patch-notes"/u);
@@ -119,6 +197,75 @@ test("LoL 패치 노트는 ko·ja·en hreflang과 locale별 canonical을 유지�
   assert.equal(korean.canonicalUrl, "https://yoro.gg/ko/patch-notes");
   assert.equal(japanese.title, "LoLパッチノート | YORO.gg");
   assert.equal(japanese.canonicalUrl, "https://yoro.gg/ja/patch-notes");
+});
+
+test("LoL 패치 상세 slug는 점과 하이픈을 엄격하게 왕복 변환한다", () => {
+  assert.equal(patchNotesDetailPath("26.17"), "/patch-notes/26-17");
+  assert.deepEqual(
+    patchNotesDetailRouteForPath("/ja/patch-notes/26-17"),
+    { locale: "ja", patchVersion: "26.17" },
+  );
+  assert.equal(patchNotesDetailRouteForPath("/en/patch-notes/26-17"), undefined);
+  assert.equal(patchNotesDetailRouteForPath("/ko/patch-notes/26.17"), undefined);
+  assert.equal(patchNotesDetailRouteForPath("/ko/patch-notes/26-17/extra"), undefined);
+  assert.throws(() => patchNotesDetailPath("26-17"), /패치 번호 형식/u);
+});
+
+test("LoL 패치 상세 metadata와 fallback은 자체 계산 변경 데이터만 나열한다", () => {
+  const route = patchNotesDetailRouteForPath("/ko/patch-notes/26-17");
+  assert.ok(route);
+  const metadata = patchNotesDetailSeoMetadata(route, PATCH_NOTE_FIXTURE, PATCH_CHANGES_FIXTURE);
+  assert.equal(metadata.title, "LoL 패치 26.17 변경사항 | YORO.gg");
+  assert.equal(metadata.description, "챔피언 3종 변경 · 아이템 2종 변경 · 26.17 패치 요약");
+  assert.equal(metadata.canonicalUrl, "https://yoro.gg/ko/patch-notes/26-17");
+  assert.deepEqual(Object.keys(metadata.alternateUrls).sort(), ["ja", "ko"]);
+  assert.equal(metadata.robotsNoindex, undefined);
+
+  const html = applyPublicSeoMetadata(APP_SHELL, metadata);
+  assert.match(html, /애니 · 버프/u);
+  assert.match(html, /올라프 · 너프/u);
+  assert.match(html, /롱소드 · 가격 변경/u);
+  assert.match(html, /<dt>시스템 변경<\/dt><dd>1<\/dd>/u);
+  assert.match(html, /정확한 스킬 변경 및 상세 설명은 Riot 공식 패치노트를 확인하세요/u);
+  assert.match(html, /Riot 공식 패치노트 원문 보기/u);
+  /* Riot 목록의 title·summary는 새 fallback 본문에 복제하지 않습니다. */
+  assert.doesNotMatch(html, /Riot 목록 요약/u);
+  assert.doesNotMatch(html, /리그 오브 레전드 26\.17 패치 노트/u);
+  assert.doesNotMatch(html, /hreflang="en"/u);
+});
+
+test("변경 비교가 없는 유효한 패치는 noindex 없이 기본 정보와 원문 링크를 제공한다", () => {
+  const route = patchNotesDetailRouteForPath("/ja/patch-notes/26-17");
+  assert.ok(route);
+  const metadata = patchNotesDetailSeoMetadata(route, PATCH_NOTE_FIXTURE, undefined);
+  assert.equal(metadata.robotsNoindex, undefined);
+  assert.equal(metadata.fallback.facts.length, 2);
+  const html = applyPublicSeoMetadata(APP_SHELL, metadata);
+  assert.match(html, /<html lang="ja"/u);
+  assert.match(html, /2026-08-26/u);
+  assert.match(html, /Riot公式パッチノートを見る/u);
+  assert.doesNotMatch(html, /name="robots"/u);
+  assert.doesNotMatch(html, /チャンピオン強化/u);
+});
+
+test("LoL 패치 상세 fallback은 Data Dragon 이름의 HTML을 escape한다", () => {
+  const route = patchNotesDetailRouteForPath("/ko/patch-notes/26-17");
+  assert.ok(route);
+  const maliciousChanges = {
+    ...PATCH_CHANGES_FIXTURE,
+    championChanges: [{
+      ...PATCH_CHANGES_FIXTURE.championChanges[0],
+      name: "애니 <script>alert(1)</script>",
+    }],
+    itemChanges: [{ ...PATCH_CHANGES_FIXTURE.itemChanges[0], name: "검 & <script>" }],
+  };
+  const html = applyPublicSeoMetadata(
+    APP_SHELL,
+    patchNotesDetailSeoMetadata(route, PATCH_NOTE_FIXTURE, maliciousChanges),
+  );
+  assert.match(html, /애니 &lt;script&gt;alert\(1\)&lt;\/script&gt; · 버프/u);
+  assert.match(html, /검 &amp; &lt;script&gt; · 가격 변경/u);
+  assert.doesNotMatch(html, /애니 <script>|검 & <script>/u);
 });
 
 test("hreflang은 비지역화 경로에는 붙지 않는다", () => {
@@ -166,7 +313,7 @@ test("마인크래프트 실데이터 경로는 고유 metadata를 제공하고 
   const ko = publicSeoMetadataForPath("/ko/minecraft/recipes");
   const ja = publicSeoMetadataForPath("/ja/minecraft/enchants");
   assert.equal(ko.title, "마인크래프트 조합법 | YORO.gg");
-  assert.match(ko.description, /제작 조합법/u);
+  assert.match(ko.description, /마인크래프트 조합법/u);
   assert.equal(ko.robotsNoindex, undefined);
   assert.equal(ja.title, "マインクラフト エンチャント | YORO.gg");
   assert.equal(ja.canonicalUrl, "https://yoro.gg/ja/minecraft/enchants");
@@ -344,6 +491,23 @@ test("정적 sitemap은 ko·ja URL과 hreflang alternate를 함께 담는다", (
   assert.doesNotMatch(xml, /<loc>[^<]*\?/u);
 });
 
+test("LoL 패치 상세 sitemap은 최대 60개를 ko·ja와 노트별 lastmod로 나열한다", () => {
+  const notes = Array.from({ length: 61 }, (_value, index) => ({
+    ...PATCH_NOTE_FIXTURE,
+    slug: `patch-26-${index + 1}`,
+    patchVersion: `26.${index + 1}`,
+    publishedAt: new Date(Date.UTC(2026, 0, index + 1)).toISOString(),
+  }));
+  const xml = buildPatchNotesSitemap(notes);
+  assert.equal((xml.match(/<url>/gu) ?? []).length, 120);
+  assert.match(xml, /<loc>https:\/\/yoro\.gg\/ko\/patch-notes\/26-1<\/loc>/u);
+  assert.match(xml, /<loc>https:\/\/yoro\.gg\/ja\/patch-notes\/26-60<\/loc>/u);
+  assert.doesNotMatch(xml, /patch-notes\/26-61/u);
+  assert.doesNotMatch(xml, /\/en\/patch-notes/u);
+  assert.match(xml, /<lastmod>2026-01-01T00:00:00\.000Z<\/lastmod>/u);
+  assert.match(xml, /<lastmod>2026-03-01T00:00:00\.000Z<\/lastmod>/u);
+});
+
 test("행동·개인화·법적 고지 화면은 noindex로 제공한다", () => {
   for (const pathname of [
     "/login",
@@ -445,8 +609,8 @@ test("개별 교배 metadata와 fallback은 실제 조합 데이터를 안전하
 });
 
 test("정적 sitemap 은 영어 본문이 없는 경로에 en URL 을 제출하지 않는다", () => {
-  const xml = buildLocalizedUrlSetSitemap([{ path: "/lol/aram" }, { path: "/palworld" }]);
-  assert.doesNotMatch(xml, /<loc>https:\/\/yoro\.gg\/en\/lol\/aram<\/loc>/u);
+  const xml = buildLocalizedUrlSetSitemap([{ path: "/participation" }, { path: "/palworld" }]);
+  assert.doesNotMatch(xml, /<loc>https:\/\/yoro\.gg\/en\/participation<\/loc>/u);
   assert.match(xml, /<loc>https:\/\/yoro\.gg\/en\/palworld<\/loc>/u);
   assert.equal((xml.match(/<url>/gu) ?? []).length, 5);
 });
@@ -509,9 +673,9 @@ test("미니게임 경로는 전용 OG 이미지·metadata·breadcrumb·sitemap�
 
   /* title·description — 문구 원본은 features/public-games/i18n/games-i18n.ts 입니다. */
   assert.match(hubKo, /<title>미니게임 \| YORO\.gg<\/title>/u);
-  assert.match(hubKo, /<meta name="description" content="게이머 반사신경 훈련장[^"]*">/u);
+  assert.match(hubKo, /<meta name="description" content="YORO\.gg 미니게임에서[^"]*">/u);
   assert.match(reactionJa, /<title>反応速度テスト \| YORO\.gg<\/title>/u);
-  assert.match(reactionJa, /<meta name="description" content="緑の信号にできるだけ早く[^"]*">/u);
+  assert.match(reactionJa, /<meta name="description" content="画面が緑色に変わった瞬間[^"]*">/u);
   assert.match(reactionJa, /<html lang="ja"/u);
 
   /* OG 이미지 — prefix 매칭이라 하위 경로까지 커버하되, 이미지에 문구가 박혀 있어
@@ -828,13 +992,13 @@ test("en 프리픽스 공유 링크는 ko 판으로 접힌다", () => {
   assert.equal(metadata.canonicalUrl, "https://yoro.gg/ko/games/reaction/r/abcd1234efgh");
 });
 
-test("스트리머 추천은 공개 라우트로 인식되고 ko·ja 메타를 낸다", () => {
+test("스트리머 추천은 공개 라우트로 인식되고 ko·ja·en 메타를 낸다", () => {
   /* 게임 선택기로 들어오는 독립 섹션입니다 — 여기 없으면 /ko/streamers 가
      공개 라우트로 인식되지 않아 hreflang 도 함께 빠집니다(미니게임 선례). */
   const ko = render("/ko/streamers");
   assert.match(ko, /<title>스트리머 추천 \| YORO\.gg<\/title>/u);
   assert.match(ko, /<link rel="alternate" hreflang="ja" href="https:\/\/yoro\.gg\/ja\/streamers" \/>/u);
-  assert.doesNotMatch(ko, /hreflang="en"/u, "en 콘텐츠가 없는 섹션에는 en 을 약속하지 않습니다");
+  assert.match(ko, /hreflang="en" href="https:\/\/yoro\.gg\/en\/streamers"/u);
 
   const ja = render("/ja/streamers");
   assert.match(ja, /<title>配信者おすすめ \| YORO\.gg<\/title>/u);

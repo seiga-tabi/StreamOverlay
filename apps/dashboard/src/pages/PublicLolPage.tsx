@@ -46,9 +46,10 @@ import {
   ProfileShareActions,
   type ProfileShareCard,
   type ProfileShareLane,
+  type ProfileShareLaneDistributionItem,
   type ProfileShareNotice,
 } from "../features/public-lol/components/ProfileShareActions";
-import { profileShareLanes } from "../features/public-lol/utils/profile-share";
+import { profileShareLaneDistribution, profileShareLanes, profileShareTopChampions } from "../features/public-lol/utils/profile-share";
 import { RecentMatchesShareActions, type RecentMatchShareItem } from "../features/public-lol/components/RecentMatchesShareActions";
 import { ArenaStandings } from "../features/public-lol/components/ArenaStandings";
 import { ProfileLinkIcon, profileLinkPlatformFromUrl, profileLinkPlatformClass } from "../components/ProfileLinkIcon";
@@ -1903,6 +1904,22 @@ function ProfileTopPanel({
      도 최근 경기 기준입니다 — 카드 푸터의 "최근 N경기 기준"과 같은 표본이라
      라인 성과와 챔피언 판수가 서로 어긋나지 않습니다. */
   const shareLaneStats = profileShareLanes(profile.rolePerformance, profile.recentMatches, championName);
+  /* 라인 분포 스트립(5라인) + 통합 주력 챔피언 — 목업 lol-social-card-v4 §"프로필 공유 카드
+     재설계". 기존 shareLaneStats 와 같은 소스(rolePerformance·recentMatches)를 재사용합니다. */
+  const shareLaneDistribution: ProfileShareLaneDistributionItem[] = profileShareLaneDistribution(profile.rolePerformance)
+    .map((entry) => ({
+      iconUrl: roleIconAssets[roleIconKey(entry.role)],
+      roleLabel: mainRoleLabel(entry.role),
+      games: entry.games,
+      winRate: entry.winRate,
+    }));
+  const shareTopChampions = profileShareTopChampions(profile.recentMatches, championName, 3)
+    .map((champion) => ({
+      name: champion.name,
+      iconUrl: assetUrl(champion.iconUrl),
+      games: champion.games,
+      winRate: champion.winRate,
+    }));
   const shareLane = (stat: typeof shareLaneStats.main): ProfileShareLane | undefined => stat
     ? {
       iconUrl: roleIconAssets[roleIconKey(stat.role)],
@@ -1944,6 +1961,8 @@ function ProfileTopPanel({
     ...(assetUrl(profile.topChampions[0]?.splashUrl ?? profile.topChampions[0]?.loadingUrl)
       ? { masteryChampionArtUrl: assetUrl(profile.topChampions[0]?.splashUrl ?? profile.topChampions[0]?.loadingUrl)! }
       : {}),
+    ...(shareLaneDistribution.length > 0 ? { laneDistribution: shareLaneDistribution } : {}),
+    ...(shareTopChampions.length > 0 ? { topChampions: shareTopChampions } : {}),
     ...(shareLane(shareLaneStats.main) ? { mainLane: shareLane(shareLaneStats.main)! } : {}),
     ...(shareLane(shareLaneStats.sub) ? { subLane: shareLane(shareLaneStats.sub)! } : {}),
     ...(shareCardStreamer
@@ -2155,6 +2174,8 @@ function ProfileTopPanel({
               games: t().games,
               sampleNote: t().profileShareSample.replace("{count}", String(profile.recentMatches.length)),
               liveBadge: t().profileShareLive,
+              laneDistributionTitle: t().profileShareLaneDistribution,
+              topChampionsTitle: t().profileShareTopChampions,
             }}
           />
           {/* 프로필 공유는 이미지, 링크 복사는 현재 주소를 클립보드에 저장합니다. */}
@@ -6157,9 +6178,10 @@ function RecentMatches({
   /* 그날의 종합(A안) — 로컬 날짜 경계마다 요약 바를 끼웁니다.
      요약은 보이는(필터 반영) 목록 합계 · docs/mockups/lol-daily-summary.html */
   const matchRowsWithDailySummaries = withLolDailySummaryBars(profile.recentMatches, matchRows);
-  /* 공유 이미지는 요약(20경기)과 같은 수를 담습니다(목업 §2-7) — 현재 필터
-     목록이 이미 갖고 있는 20경기를 그대로 쓰는 것이라 새 데이터가 아닙니다. */
-  const shareMatches: RecentMatchShareItem[] = profile.recentMatches.slice(0, 20).map((match) => {
+  /* 공유 이미지는 필터 결과 상위 10경기를 담습니다(요청: "필터에 따른 10게임을
+     항상 보여주도록") — 20경기 전부 담던 이전 값에서 축소, 현재 필터 목록이
+     이미 갖고 있는 값을 슬라이스만 하는 것이라 새 데이터가 아닙니다. */
+  const shareMatches: RecentMatchShareItem[] = profile.recentMatches.slice(0, 10).map((match) => {
     const aiScore = matchAiScore(match);
     const highlight = matchHighlightBadges(match.badges)[0]?.code;
     return {
@@ -6174,8 +6196,9 @@ function RecentMatches({
       grade: recentMatchScoreGrade(aiScore),
       score: aiScore,
       ...(highlight === "mvp" || highlight === "ace" ? { highlight } : {}),
-      itemIconUrls: fixedRecentItemSlots(match.items, 7)
-        .flatMap((item) => item?.iconUrl ? [item.iconUrl] : []),
+      /* 7슬롯(장비 6 + 장신구 1) 그대로 유지 — 빈 슬롯을 제거하면 캔버스에서
+         아이템 위치가 밀려 실제 빌드와 다르게 보입니다. */
+      itemIconUrls: fixedRecentItemSlots(match.items, 7).map((item) => item?.iconUrl),
       durationLabel: formatDuration(match.durationSeconds),
       startedAtLabel: formatRelativeDate(match.startedAt),
     };

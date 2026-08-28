@@ -42,6 +42,14 @@ export type ProfileShareStreamer = {
   title?: string;
 };
 
+export type ProfileShareLaneDistributionItem = {
+  /** 라인 아이콘 SVG 경로(/images/roles/position-*.svg). */
+  iconUrl?: string;
+  roleLabel: string;
+  games: number;
+  winRate: number;
+};
+
 export type ProfileShareCard = {
   riotId: string;
   tierLabel?: string;
@@ -54,6 +62,10 @@ export type ProfileShareCard = {
   queueLabel?: string;
   profileImageUrl?: string;
   masteryChampionArtUrl?: string;
+  /** 5라인(탑·정글·미드·바텀·서포트) 분포 스트립 — 안 하는 라인도 games=0 으로 포함. */
+  laneDistribution?: ProfileShareLaneDistributionItem[];
+  /** 라인 구분 없는 통합 주력 챔피언 상위 N개 — 카드 상단에 노출. */
+  topChampions?: ProfileShareChampion[];
   mainLane?: ProfileShareLane;
   subLane?: ProfileShareLane;
   streamer?: ProfileShareStreamer;
@@ -75,6 +87,10 @@ export type ProfileShareText = {
   games: string;
   sampleNote: string;
   liveBadge: string;
+  /** "라인 분포" 스트립 제목. */
+  laneDistributionTitle: string;
+  /** "주력 챔피언" 섹션 제목. */
+  topChampionsTitle: string;
 };
 
 type ProfileShareActionsBaseProps = {
@@ -108,17 +124,22 @@ const MIN_CARD_HEIGHT = 566;
 const CARD_FONT = '"Inter", "Noto Sans KR", "Noto Sans JP", Arial, sans-serif';
 const LANE_BLOCK_HEIGHT = 196;
 const FOOTER_HEIGHT = 78;
+/* 라인 분포 스트립(5칸) + 주력 챔피언(3칸) — 목업 lol-social-card-v4 §"프로필 공유 카드 재설계". */
+const LANE_DISTRIBUTION_HEIGHT = 158;
+const TOP_CHAMPIONS_HEIGHT = 108;
 
+/* 메인 홈 디자인 시스템(--home-*) 다크 톤 — RecentMatchesShareActions.tsx 의
+   SHARE_CARD_THEMES.dark 와 동일한 값(사이트 전체 공유 카드 톤 통일). Canvas API 는
+   CSS 커스텀 프로퍼티를 읽지 못해 hex 값을 그대로 복제합니다(출처: 01-public-home.css). */
 const COLOR = {
-  bg0: "#0e1320",
-  bg1: "#171e30",
-  text: "#f2f5fa",
-  muted: "#a9b4c9",
-  dim: "#7f8ba2",
+  bg: "#1c1d22",
+  card: "#252730",
+  ink: "#f5f6f8",
+  sub: "#b9c3d0",
+  mid: "#7c8b9c",
   line: "rgba(255, 255, 255, .09)",
-  brand: "#9b90ff",
-  win: "#3b95fb",
-  gold: "#f0c25f",
+  win: "#63c375",
+  loss: "#e97180",
   twitch: "#a970ff",
   live: "#eb0400",
 } as const;
@@ -319,20 +340,20 @@ function drawLaneBlock(
   const width = CARD_WIDTH - 96;
   const height = LANE_BLOCK_HEIGHT - 20;
 
-  drawRoundedRect(context, x, y, width, height, 24);
-  context.fillStyle = isMain ? "rgba(155, 144, 255, .07)" : "rgba(255, 255, 255, .03)";
+  drawRoundedRect(context, x, y, width, height, 3);
+  context.fillStyle = COLOR.card;
   context.fill();
-  context.strokeStyle = isMain ? "rgba(155, 144, 255, .45)" : COLOR.line;
-  context.lineWidth = 2;
+  context.strokeStyle = COLOR.line;
+  context.lineWidth = 1;
   context.stroke();
 
-  /* 태그 pill — 주 라인은 브랜드 채움, 부 라인은 회색. */
+  /* 태그 pill — 주 라인은 헤어라인 채움(진한 카드 톤), 부 라인은 옅은 채움. 브랜드색 없음. */
   context.font = `900 20px ${CARD_FONT}`;
   const tagWidth = context.measureText(tagLabel).width + 36;
-  drawRoundedRect(context, x + 26, y + 22, tagWidth, 38, 19);
-  context.fillStyle = isMain ? COLOR.brand : "rgba(255, 255, 255, .1)";
+  drawRoundedRect(context, x + 26, y + 22, tagWidth, 38, 4);
+  context.fillStyle = isMain ? COLOR.ink : "rgba(255, 255, 255, .1)";
   context.fill();
-  context.fillStyle = isMain ? "#14102e" : COLOR.muted;
+  context.fillStyle = isMain ? COLOR.bg : COLOR.sub;
   context.textAlign = "center";
   context.fillText(tagLabel, x + 26 + (tagWidth / 2), y + 48);
   context.textAlign = "start";
@@ -347,7 +368,7 @@ function drawLaneBlock(
     context.restore();
     roleX += 48;
   }
-  context.fillStyle = COLOR.text;
+  context.fillStyle = COLOR.ink;
   context.font = `900 29px ${CARD_FONT}`;
   context.fillText(lane.roleLabel, roleX, y + 50);
 
@@ -358,14 +379,14 @@ function drawLaneBlock(
   const gamesLabel = `${lane.games}${text.games}`;
   const kdaLabel = ` · KDA ${lane.kda.toFixed(1)}`;
   const rateLabel = ` · ${lane.winRate}%`;
-  context.fillStyle = COLOR.muted;
+  context.fillStyle = COLOR.sub;
   context.fillText(kdaLabel, statsRight, y + 48);
   const kdaWidth = context.measureText(kdaLabel).width;
   context.fillStyle = COLOR.win;
   context.font = `800 22px ${CARD_FONT}`;
   context.fillText(rateLabel, statsRight - kdaWidth, y + 48);
   const rateWidth = context.measureText(rateLabel).width;
-  context.fillStyle = COLOR.muted;
+  context.fillStyle = COLOR.sub;
   context.font = `700 22px ${CARD_FONT}`;
   context.fillText(gamesLabel, statsRight - kdaWidth - rateWidth, y + 48);
   context.textAlign = "start";
@@ -376,20 +397,20 @@ function drawLaneBlock(
   lane.champions.slice(0, 3).forEach((champion, index) => {
     const slotX = x + 26 + (index * (slotWidth + slotGap));
     const slotY = y + 76;
-    drawRoundedRect(context, slotX, slotY, slotWidth, 72, 18);
-    context.fillStyle = "rgba(0, 0, 0, .22)";
+    drawRoundedRect(context, slotX, slotY, slotWidth, 72, 3);
+    context.fillStyle = COLOR.bg;
     context.fill();
     context.strokeStyle = COLOR.line;
-    context.lineWidth = 2;
+    context.lineWidth = 1;
     context.stroke();
 
     const iconImage = champion.iconUrl ? images.get(champion.iconUrl) : undefined;
-    if (iconImage) drawRoundedImage(context, iconImage, slotX + 18, slotY + 17, 38, 10);
+    if (iconImage) drawRoundedImage(context, iconImage, slotX + 18, slotY + 17, 38, 3);
     else {
-      drawRoundedRect(context, slotX + 18, slotY + 17, 38, 38, 10);
-      context.fillStyle = "#26334a";
+      drawRoundedRect(context, slotX + 18, slotY + 17, 38, 38, 3);
+      context.fillStyle = COLOR.card;
       context.fill();
-      context.fillStyle = COLOR.text;
+      context.fillStyle = COLOR.ink;
       context.font = `800 20px ${CARD_FONT}`;
       context.textAlign = "center";
       context.fillText(champion.name.slice(0, 1), slotX + 37, slotY + 44);
@@ -398,10 +419,10 @@ function drawLaneBlock(
 
     const copyX = slotX + 68;
     const copyWidth = slotWidth - 84;
-    context.fillStyle = COLOR.text;
+    context.fillStyle = COLOR.ink;
     context.font = `850 23px ${CARD_FONT}`;
     fillTextEllipsis(context, champion.name, copyX, slotY + 32, copyWidth);
-    context.fillStyle = COLOR.dim;
+    context.fillStyle = COLOR.mid;
     context.font = `700 20px ${CARD_FONT}`;
     const gamesText = `${champion.games}${text.games} · `;
     context.fillText(gamesText, copyX, slotY + 57);
@@ -413,18 +434,140 @@ function drawLaneBlock(
   return y + LANE_BLOCK_HEIGHT;
 }
 
+/** 5라인 분포 스트립 — 각 칸 아이콘·게임수·승률, 표본 없는 라인은 흐리게(목업 §"라인 분포"). */
+function drawLaneDistribution(
+  context: CanvasRenderingContext2D,
+  images: Map<string, HTMLImageElement>,
+  items: ProfileShareLaneDistributionItem[],
+  title: string,
+  gamesLabel: string,
+  y: number,
+): number {
+  const x = 48;
+  const width = CARD_WIDTH - 96;
+  const height = LANE_DISTRIBUTION_HEIGHT - 16;
+
+  drawRoundedRect(context, x, y, width, height, 3);
+  context.fillStyle = COLOR.card;
+  context.fill();
+  context.strokeStyle = COLOR.line;
+  context.lineWidth = 1;
+  context.stroke();
+
+  context.fillStyle = COLOR.mid;
+  context.font = `800 17px ${CARD_FONT}`;
+  context.fillText(title, x + 22, y + 34);
+
+  const cellCount = items.length;
+  const cellWidth = (width - 44) / cellCount;
+  const iconSize = 32;
+  items.forEach((item, index) => {
+    const cellCenterX = x + 22 + cellWidth * index + cellWidth / 2;
+    const hasGames = item.games > 0;
+    context.save();
+    if (!hasGames) context.globalAlpha = .35;
+
+    drawRoundedRect(context, cellCenterX - iconSize / 2, y + 52, iconSize, iconSize, 3);
+    context.fillStyle = COLOR.bg;
+    context.fill();
+    context.strokeStyle = COLOR.line;
+    context.lineWidth = 1;
+    context.stroke();
+    const roleIcon = item.iconUrl ? images.get(item.iconUrl) : undefined;
+    if (roleIcon) {
+      context.save();
+      context.filter = "brightness(1.6)";
+      context.drawImage(roleIcon, cellCenterX - 9, y + 61, 18, 18);
+      context.restore();
+    }
+
+    context.textAlign = "center";
+    context.fillStyle = COLOR.ink;
+    context.font = `900 20px ${CARD_FONT}`;
+    context.fillText(`${item.games}${gamesLabel}`, cellCenterX, y + 108);
+    context.fillStyle = hasGames ? (item.winRate >= 50 ? COLOR.win : COLOR.loss) : COLOR.mid;
+    context.font = `700 15px ${CARD_FONT}`;
+    context.fillText(hasGames ? `${item.winRate}%` : "-", cellCenterX, y + 130);
+    context.textAlign = "start";
+    context.restore();
+  });
+
+  return y + LANE_DISTRIBUTION_HEIGHT;
+}
+
+/** 라인 구분 없는 통합 주력 챔피언 상위 N개를 카드 상단에 노출(목업 §"주력 챔피언"). */
+function drawTopChampions(
+  context: CanvasRenderingContext2D,
+  images: Map<string, HTMLImageElement>,
+  champions: ProfileShareChampion[],
+  title: string,
+  gamesLabel: string,
+  y: number,
+): number {
+  if (champions.length === 0) return y;
+  const x = 48;
+  const width = CARD_WIDTH - 96;
+  const cardHeight = TOP_CHAMPIONS_HEIGHT - 16 - 26;
+  const gap = 12;
+  const cardWidth = (width - gap * (champions.length - 1)) / champions.length;
+
+  context.fillStyle = COLOR.mid;
+  context.font = `800 17px ${CARD_FONT}`;
+  context.fillText(title, x, y + 18);
+
+  const cardTop = y + 26;
+  champions.forEach((champion, index) => {
+    const cardX = x + index * (cardWidth + gap);
+    drawRoundedRect(context, cardX, cardTop, cardWidth, cardHeight, 3);
+    context.fillStyle = COLOR.card;
+    context.fill();
+    context.strokeStyle = COLOR.line;
+    context.lineWidth = 1;
+    context.stroke();
+
+    const iconSize = 40;
+    const iconImage = champion.iconUrl ? images.get(champion.iconUrl) : undefined;
+    if (iconImage) drawRoundedImage(context, iconImage, cardX + 10, cardTop + (cardHeight - iconSize) / 2, iconSize, 3);
+    else {
+      drawRoundedRect(context, cardX + 10, cardTop + (cardHeight - iconSize) / 2, iconSize, iconSize, 3);
+      context.fillStyle = COLOR.bg;
+      context.fill();
+    }
+
+    const copyX = cardX + 10 + iconSize + 10;
+    const copyWidth = cardWidth - iconSize - 30;
+    context.fillStyle = COLOR.ink;
+    context.font = `800 17px ${CARD_FONT}`;
+    fillTextEllipsis(context, champion.name, copyX, cardTop + cardHeight / 2 - 4, copyWidth);
+    context.fillStyle = COLOR.mid;
+    context.font = `600 14px ${CARD_FONT}`;
+    const gamesText = `${champion.games}${gamesLabel} · `;
+    context.fillText(gamesText, copyX, cardTop + cardHeight / 2 + 16);
+    context.fillStyle = champion.winRate >= 50 ? COLOR.win : COLOR.loss;
+    context.font = `700 14px ${CARD_FONT}`;
+    context.fillText(`${champion.winRate}%`, copyX + context.measureText(gamesText).width, cardTop + cardHeight / 2 + 16);
+  });
+
+  return y + TOP_CHAMPIONS_HEIGHT;
+}
+
 export async function createProfileShareBlob(card: ProfileShareCard, text: ProfileShareText): Promise<Blob> {
   const images = await loadCardImages(card);
   const lanes: Array<{ lane: ProfileShareLane; tag: string; main: boolean }> = [];
   if (card.mainLane) lanes.push({ lane: card.mainLane, tag: text.mainLane, main: true });
   if (card.subLane) lanes.push({ lane: card.subLane, tag: text.subLane, main: false });
+  const hasLaneDistribution = Boolean(card.laneDistribution && card.laneDistribution.length > 0);
+  const hasTopChampions = Boolean(card.topChampions && card.topChampions.length > 0);
 
   const streamer = card.streamer;
   const showStreamTitle = Boolean(streamer?.isLive && streamer.title);
   /* 스트리머 헤더 높이 — LIVE 배지 하단이 y=170 이라 제목 박스를 186 부터 그립니다
      (실측: 152 에서 시작하면 배지와 겹쳤습니다). 제목이 없으면 배지 아래 여백만. */
   const headerHeight = streamer ? (showStreamTitle ? 262 : 190) : 268;
-  const bodyHeight = headerHeight + (lanes.length * LANE_BLOCK_HEIGHT) + FOOTER_HEIGHT + 12;
+  const bodyHeight = headerHeight
+    + (hasLaneDistribution ? LANE_DISTRIBUTION_HEIGHT : 0)
+    + (hasTopChampions ? TOP_CHAMPIONS_HEIGHT : 0)
+    + (lanes.length * LANE_BLOCK_HEIGHT) + FOOTER_HEIGHT + 12;
   const height = Math.max(MIN_CARD_HEIGHT, bodyHeight);
 
   const canvas = document.createElement("canvas");
@@ -433,12 +576,9 @@ export async function createProfileShareBlob(card: ProfileShareCard, text: Profi
   const context = canvas.getContext("2d");
   if (!context) throw new Error("share_canvas_unavailable");
 
-  /* 배경: 기본 그라디언트 → 숙련도 1위 스플래시 → 가독성 오버레이(목업 v1.2). */
-  const background = context.createLinearGradient(0, 0, CARD_WIDTH, height);
-  background.addColorStop(0, COLOR.bg1);
-  background.addColorStop(.55, COLOR.bg0);
-  background.addColorStop(1, COLOR.bg0);
-  context.fillStyle = background;
+  /* 배경: 메인 홈 톤 단색 — 그림자·그라디언트 없음(--home-bg). 숙련도 1위 스플래시가
+     있으면 상단에만 얹고 가독성 오버레이로 하단을 배경색에 맞춥니다. */
+  context.fillStyle = COLOR.bg;
   context.fillRect(0, 0, CARD_WIDTH, height);
 
   const splash = card.masteryChampionArtUrl ? images.get(card.masteryChampionArtUrl) : undefined;
@@ -450,10 +590,10 @@ export async function createProfileShareBlob(card: ProfileShareCard, text: Profi
     context.restore();
 
     const shade = context.createLinearGradient(0, 0, 0, splashHeight);
-    shade.addColorStop(0, "rgba(14, 19, 32, .62)");
-    shade.addColorStop(.34, "rgba(17, 22, 36, .88)");
-    shade.addColorStop(.58, COLOR.bg0);
-    shade.addColorStop(1, COLOR.bg0);
+    shade.addColorStop(0, "rgba(28, 29, 34, .62)");
+    shade.addColorStop(.34, "rgba(28, 29, 34, .88)");
+    shade.addColorStop(.58, COLOR.bg);
+    shade.addColorStop(1, COLOR.bg);
     context.fillStyle = shade;
     context.fillRect(0, 0, CARD_WIDTH, splashHeight);
   }
@@ -474,9 +614,9 @@ export async function createProfileShareBlob(card: ProfileShareCard, text: Profi
     else {
       context.beginPath();
       context.arc(centerX, centerY, 62, 0, Math.PI * 2);
-      context.fillStyle = "#18223a";
+      context.fillStyle = COLOR.card;
       context.fill();
-      context.fillStyle = COLOR.text;
+      context.fillStyle = COLOR.ink;
       context.font = `900 40px ${CARD_FONT}`;
       context.textAlign = "center";
       context.fillText(streamer.displayName.slice(0, 1).toUpperCase(), centerX, centerY + 14);
@@ -485,7 +625,7 @@ export async function createProfileShareBlob(card: ProfileShareCard, text: Profi
     if (streamer.isLive) {
       context.font = `900 19px ${CARD_FONT}`;
       const liveWidth = context.measureText(text.liveBadge).width + 26;
-      drawRoundedRect(context, centerX - (liveWidth / 2), centerY + 52, liveWidth, 30, 10);
+      drawRoundedRect(context, centerX - (liveWidth / 2), centerY + 52, liveWidth, 30, 4);
       context.fillStyle = COLOR.live;
       context.fill();
       context.fillStyle = "#ffffff";
@@ -494,7 +634,7 @@ export async function createProfileShareBlob(card: ProfileShareCard, text: Profi
       context.textAlign = "start";
     }
 
-    context.fillStyle = COLOR.text;
+    context.fillStyle = COLOR.ink;
     context.font = `900 36px ${CARD_FONT}`;
     fillTextEllipsis(context, streamer.displayName, 196, 82, 420);
     if (streamer.channelLabel) {
@@ -507,12 +647,12 @@ export async function createProfileShareBlob(card: ProfileShareCard, text: Profi
     const emblem = card.tierIconUrl ? images.get(card.tierIconUrl) : undefined;
     if (emblem) drawTrimmedEmblem(context, emblem, 664, 26, 120);
     context.textAlign = "right";
-    context.fillStyle = COLOR.gold;
+    context.fillStyle = COLOR.ink;
     context.font = `900 28px ${CARD_FONT}`;
     const tierText = card.tierLabel ?? text.unranked;
     const lpSuffix = card.leaguePoints !== undefined ? ` · ${card.leaguePoints.toLocaleString()} LP` : "";
     fillTextEllipsis(context, `${tierText}${lpSuffix}`, CARD_WIDTH - 48, 76, 260);
-    context.fillStyle = COLOR.muted;
+    context.fillStyle = COLOR.sub;
     context.font = `700 21px ${CARD_FONT}`;
     const record = card.wins !== undefined && card.losses !== undefined
       ? `${card.wins}W ${card.losses}L${card.winRate !== undefined ? ` · ${card.winRate}%` : ""}`
@@ -521,13 +661,13 @@ export async function createProfileShareBlob(card: ProfileShareCard, text: Profi
     context.textAlign = "start";
 
     if (showStreamTitle && streamer.title) {
-      drawRoundedRect(context, 48, 186, CARD_WIDTH - 96, 56, 16);
-      context.fillStyle = "rgba(255, 255, 255, .04)";
+      drawRoundedRect(context, 48, 186, CARD_WIDTH - 96, 56, 3);
+      context.fillStyle = COLOR.card;
       context.fill();
       context.strokeStyle = COLOR.line;
-      context.lineWidth = 2;
+      context.lineWidth = 1;
       context.stroke();
-      context.fillStyle = COLOR.muted;
+      context.fillStyle = COLOR.sub;
       context.font = `650 23px ${CARD_FONT}`;
       fillTextEllipsis(context, streamer.title, 72, 222, CARD_WIDTH - 144);
     }
@@ -541,17 +681,17 @@ export async function createProfileShareBlob(card: ProfileShareCard, text: Profi
     }
 
     const copyX = 356;
-    context.fillStyle = COLOR.text;
+    context.fillStyle = COLOR.ink;
     context.font = `900 42px ${CARD_FONT}`;
     fillTextEllipsis(context, card.riotId, copyX, 108, CARD_WIDTH - copyX - 56);
 
-    context.fillStyle = COLOR.gold;
+    context.fillStyle = COLOR.ink;
     context.font = `900 34px ${CARD_FONT}`;
     const tierText = card.tierLabel ?? text.unranked;
     context.fillText(tierText, copyX, 158);
     if (card.leaguePoints !== undefined) {
       const tierWidth = context.measureText(tierText).width;
-      context.fillStyle = COLOR.text;
+      context.fillStyle = COLOR.sub;
       context.font = `800 30px ${CARD_FONT}`;
       context.fillText(` · ${card.leaguePoints.toLocaleString()} LP`, copyX + tierWidth, 158);
     }
@@ -560,7 +700,7 @@ export async function createProfileShareBlob(card: ProfileShareCard, text: Profi
     let statX = copyX;
     if (card.wins !== undefined && card.losses !== undefined) {
       const record = `${card.wins}W ${card.losses}L · `;
-      context.fillStyle = COLOR.muted;
+      context.fillStyle = COLOR.sub;
       context.fillText(record, statX, 196);
       statX += context.measureText(record).width;
       if (card.winRate !== undefined) {
@@ -577,25 +717,32 @@ export async function createProfileShareBlob(card: ProfileShareCard, text: Profi
       const levelText = statX === copyX
         ? `${text.levelPrefix}${card.summonerLevel}`
         : ` · ${text.levelPrefix}${card.summonerLevel}`;
-      context.fillStyle = COLOR.muted;
+      context.fillStyle = COLOR.sub;
       context.fillText(levelText, statX, 196);
     }
 
     if (card.queueLabel) {
       context.font = `800 20px ${CARD_FONT}`;
       const queueWidth = context.measureText(card.queueLabel).width + 36;
-      drawRoundedRect(context, copyX, 216, queueWidth, 36, 18);
+      drawRoundedRect(context, copyX, 216, queueWidth, 36, 3);
       context.strokeStyle = COLOR.line;
-      context.lineWidth = 2;
+      context.lineWidth = 1;
       context.stroke();
-      context.fillStyle = COLOR.dim;
+      context.fillStyle = COLOR.mid;
       context.textAlign = "center";
       context.fillText(card.queueLabel, copyX + (queueWidth / 2), 241);
       context.textAlign = "start";
     }
   }
 
-  let laneY = headerHeight;
+  let sectionY = headerHeight;
+  if (hasLaneDistribution) {
+    sectionY = drawLaneDistribution(context, images, card.laneDistribution!, text.laneDistributionTitle, text.games, sectionY);
+  }
+  if (hasTopChampions) {
+    sectionY = drawTopChampions(context, images, card.topChampions!, text.topChampionsTitle, text.games, sectionY);
+  }
+  let laneY = sectionY;
   for (const entry of lanes) {
     laneY = drawLaneBlock(context, images, entry.lane, entry.tag, entry.main, laneY, text);
   }
@@ -603,16 +750,14 @@ export async function createProfileShareBlob(card: ProfileShareCard, text: Profi
   /* 푸터 — 로고 · 표본 안내 · 생성일. */
   const footerY = height - FOOTER_HEIGHT;
   context.fillStyle = COLOR.line;
-  context.fillRect(48, footerY, CARD_WIDTH - 96, 2);
-  context.fillStyle = COLOR.text;
+  context.fillRect(48, footerY, CARD_WIDTH - 96, 1);
+  context.fillStyle = COLOR.ink;
   context.font = `900 26px ${CARD_FONT}`;
-  context.fillText("YORO", 48, footerY + 48);
-  const brandWidth = context.measureText("YORO").width;
-  context.fillStyle = COLOR.brand;
-  context.fillText(".gg", 48 + brandWidth, footerY + 48);
-  context.fillStyle = COLOR.dim;
+  context.fillText("YORO.gg", 48, footerY + 48);
+  const brandWidth = context.measureText("YORO.gg").width;
+  context.fillStyle = COLOR.mid;
   context.font = `650 21px ${CARD_FONT}`;
-  context.fillText(text.sampleNote, 48 + brandWidth + context.measureText(".gg").width + 22, footerY + 48);
+  context.fillText(text.sampleNote, 48 + brandWidth + 22, footerY + 48);
   context.textAlign = "right";
   context.fillText(new Date().toISOString().slice(0, 10).replace(/-/g, "."), CARD_WIDTH - 48, footerY + 48);
   context.textAlign = "start";

@@ -2051,6 +2051,136 @@ test("공개 sitemap route는 index와 정적 sitemap을 생성한다", async ()
   assert.equal(missingEntitySitemap.statusCode, 404);
 });
 
+test("패치 상세 sitemap은 서비스가 있을 때만 index에 등록되고 ko·ja URL을 제공한다", async () => {
+  const patchNotes = {
+    async getFeed() {
+      return {
+        schemaVersion: 1,
+        locale: "ko",
+        fetchedAt: "2026-08-28T00:00:00.000Z",
+        stale: false,
+        notes: [{
+          slug: "patch-26-17-notes",
+          title: "26.17 패치 노트",
+          publishedAt: "2026-08-26T00:00:00.000Z",
+          patchVersion: "26.17",
+          url: "https://www.leagueoflegends.com/ko-kr/news/game-updates/patch-26-17-notes/",
+        }],
+      };
+    },
+  };
+  const handler = createHttpHandler({
+    store: {},
+    twitchAuth: {},
+    actions: { async dispatchOne() {} },
+    patchNotes,
+  });
+
+  const indexResponse = createResponse();
+  await handler(createRequest("GET", "/sitemap.xml"), indexResponse);
+  assert.equal(indexResponse.statusCode, 200);
+  assert.match(indexResponse.body, /sitemap-lol-patch-notes\.xml/u);
+
+  const detailResponse = createResponse();
+  await handler(createRequest("GET", "/sitemap-lol-patch-notes.xml"), detailResponse);
+  assert.equal(detailResponse.statusCode, 200);
+  assert.match(detailResponse.body, /https:\/\/yoro\.gg\/ko\/patch-notes\/26-17/u);
+  assert.match(detailResponse.body, /https:\/\/yoro\.gg\/ja\/patch-notes\/26-17/u);
+  assert.doesNotMatch(detailResponse.body, /\/en\/patch-notes\/26-17/u);
+  assert.match(detailResponse.body, /2026-08-26T00:00:00\.000Z/u);
+});
+
+test("LoL 패치 상세 route는 정상·부분 실패·404·503을 fail-closed로 구분한다", async () => {
+  const previousDashboardStatic = appConfig.paths.dashboardStatic;
+  const dir = mkdtempSync(path.join(tmpdir(), "streamops-patch-detail-"));
+  const appShell = "<!doctype html><html lang=\"ko\"><head><meta name=\"description\" content=\"home\"><link rel=\"canonical\" href=\"https://yoro.gg/\"><meta property=\"og:title\" content=\"home\"><meta property=\"og:description\" content=\"home\"><meta property=\"og:url\" content=\"https://yoro.gg/\"><meta name=\"twitter:title\" content=\"home\"><meta name=\"twitter:description\" content=\"home\"><script nonce=\"__STREAMOPS_CSP_NONCE__\" src=\"/dashboard/config.js\"></script><title>YORO.gg</title></head><body><div id=\"root\"></div></body></html>";
+  const note = {
+    slug: "patch-26-17-notes",
+    title: "리그 오브 레전드 26.17 패치 노트",
+    summary: "Riot 목록 요약",
+    publishedAt: "2026-08-26T00:00:00.000Z",
+    patchVersion: "26.17",
+    dataDragonVersion: "16.17.1",
+    url: "https://www.leagueoflegends.com/ko-kr/news/game-updates/patch-26-17-notes/",
+  };
+  const patchNotes = {
+    async getFeed(locale) {
+      return {
+        schemaVersion: 1,
+        locale,
+        fetchedAt: "2026-08-28T00:00:00.000Z",
+        stale: false,
+        notes: [note],
+      };
+    },
+  };
+  const actions = { async dispatchOne() {} };
+  try {
+    writeFileSync(path.join(dir, "index.html"), appShell);
+    appConfig.paths.dashboardStatic = dir;
+
+    const completeHandler = createHttpHandler({
+      store: {}, twitchAuth: {}, actions, patchNotes,
+      patchChangeSummary: {
+        async summaryFor() {
+          return {
+            patchVersion: "26.17",
+            comparedVersions: ["16.16.1", "16.17.1"],
+            systemChanges: [{ stat: "armor", from: 20, to: 21, championCount: 5 }],
+            championChanges: [{
+              championId: 1,
+              name: "애니",
+              direction: "buff",
+              changes: [{ stat: "hp", from: 500, to: 520 }],
+            }],
+            itemChanges: [{ itemId: 1001, name: "롱소드", kind: "price", from: 350, to: 400 }],
+            skillChangesIncluded: false,
+          };
+        },
+      },
+    });
+    const complete = createResponse();
+    await completeHandler(createRequest("GET", "/ko/patch-notes/26-17"), complete);
+    assert.equal(complete.statusCode, 200);
+    assert.match(complete.body, /<title>LoL 패치 26\.17 변경사항 \| YORO\.gg<\/title>/u);
+    assert.match(complete.body, /애니 · 버프/u);
+    assert.match(complete.body, /롱소드 · 가격 변경/u);
+
+    /* 변경 요약 서비스가 없어도 유효한 피드 노트는 기본 정보로 안전하게 남습니다. */
+    const partialHandler = createHttpHandler({ store: {}, twitchAuth: {}, actions, patchNotes });
+    const partial = createResponse();
+    await partialHandler(createRequest("GET", "/ja/patch-notes/26-17"), partial);
+    assert.equal(partial.statusCode, 200);
+    assert.match(partial.body, /2026-08-26/u);
+    assert.match(partial.body, /Riot公式パッチノートを見る/u);
+    assert.doesNotMatch(partial.body, /name="robots"/u);
+
+    const missing = createResponse();
+    await completeHandler(createRequest("GET", "/ko/patch-notes/26-18"), missing);
+    assert.equal(missing.statusCode, 404);
+    assert.equal(missing.headers["X-Robots-Tag"], "noindex, nofollow");
+
+    const unavailableHandler = createHttpHandler({ store: {}, twitchAuth: {}, actions });
+    const unavailable = createResponse();
+    await unavailableHandler(createRequest("GET", "/ko/patch-notes/26-17"), unavailable);
+    assert.equal(unavailable.statusCode, 503);
+    assert.equal(unavailable.headers["Retry-After"], "600");
+    assert.equal(unavailable.headers["X-Robots-Tag"], "noindex, nofollow");
+
+    const emptyFeedHandler = createHttpHandler({
+      store: {}, twitchAuth: {}, actions,
+      patchNotes: { async getFeed() { return undefined; } },
+    });
+    const emptyFeed = createResponse();
+    await emptyFeedHandler(createRequest("GET", "/ko/patch-notes/26-17"), emptyFeed);
+    assert.equal(emptyFeed.statusCode, 503);
+    assert.equal(emptyFeed.headers["Retry-After"], "600");
+  } finally {
+    appConfig.paths.dashboardStatic = previousDashboardStatic;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("Palworld 상세 query URL은 고유 경로로 영구 이전되고 없는 엔티티는 404다", async () => {
   const previousDashboardStatic = appConfig.paths.dashboardStatic;
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-palworld-entity-"));

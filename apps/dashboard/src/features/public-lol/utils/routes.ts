@@ -2,6 +2,7 @@ import type { PublicMainPage } from "../types/public-lol";
 import {
   localizedPublicUrlForCurrentLocale,
   notifyPublicRouteChange,
+  publicLocaleFromPathname,
   stripPublicLocalePrefix,
 } from "./public-locale-path";
 
@@ -34,6 +35,14 @@ export type PublicPageRoute = {
   postId?: string;
 };
 
+/** 서버의 `/patch-notes/26-17` 상세 경로를 기존 목록이 쓰는 `26.17`로 복원합니다. */
+export function patchNotesDetailFromPath(pathname: string): string | null {
+  const locale = publicLocaleFromPathname(pathname);
+  if (locale !== "ko" && locale !== "ja") return null;
+  const match = /^\/patch-notes\/(\d{1,3}-\d{1,3})$/u.exec(normalizedPublicPath(pathname));
+  return match?.[1] ? match[1].replace("-", ".") : null;
+}
+
 function normalizedPublicPath(pathname: string): string {
   pathname = stripPublicLocalePrefix(pathname);
   if (!pathname || pathname === "/") return "/";
@@ -41,6 +50,7 @@ function normalizedPublicPath(pathname: string): string {
 }
 
 export function publicPageRouteFromPath(pathname: string = window.location.pathname): PublicPageRoute | undefined {
+  if (patchNotesDetailFromPath(pathname)) return { page: "patchNotes" };
   const normalized = normalizedPublicPath(pathname);
   const legalRoute = legalPageFromPublicPath(normalized);
   if (legalRoute) return { page: legalRoute };

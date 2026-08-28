@@ -97,6 +97,7 @@ export function stripPublicLocalePrefix(pathname: string): string {
 export function isLocalizablePublicPath(pathname: string): boolean {
   const normalized = normalizePublicPath(stripPublicLocalePrefix(pathOnly(pathname)));
   return LOCALIZABLE_PUBLIC_EXACT_PATHS.has(normalized)
+    || /^\/patch-notes\/\d{1,3}-\d{1,3}$/u.test(normalized)
     || LOCALIZABLE_PUBLIC_PATH_PREFIXES.some((prefix) => normalized.startsWith(prefix));
 }
 
@@ -106,7 +107,11 @@ export function localizedPublicUrl(value: string, locale: PublicLocale): string 
     return value;
   }
   const unprefixed = stripPublicLocalePrefix(pathname);
-  const localizedPath = unprefixed === "/" ? `/${locale}/` : `/${locale}${unprefixed}`;
+  /* 패치 상세는 서버·sitemap 모두 ko·ja만 서빙합니다. en 전환은 ko 상세로 접습니다. */
+  const servedLocale = locale === "en" && /^\/patch-notes\/\d{1,3}-\d{1,3}$/u.test(unprefixed)
+    ? "ko"
+    : locale;
+  const localizedPath = unprefixed === "/" ? `/${servedLocale}/` : `/${servedLocale}${unprefixed}`;
   return `${localizedPath}${suffixOnly(value)}`;
 }
 

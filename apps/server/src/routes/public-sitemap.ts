@@ -8,12 +8,14 @@
 import {
   PUBLIC_SEO_ORIGIN,
   localizedPublicSeoUrl,
+  patchNotesDetailPath,
   palworldBreedingPath,
   palworldEntityPath,
   publicSeoLocalesForPath,
   type PalworldSeoBreedingPair,
   type PalworldEntityKind
 } from "./public-seo.js";
+import { PATCH_NOTES_MAX_ITEMS, type PatchNote } from "@streamops/shared";
 
 /** sitemap 하나에 담는 URL 상한. 규격 상한(50,000)보다 낮게 잡아 응답 크기를 억제합니다. */
 export const SITEMAP_MAX_URLS = 20_000;
@@ -23,6 +25,7 @@ export const PALWORLD_BREEDING_PAIRS_PER_SITEMAP = 16_666;
 export const PUBLIC_SITEMAP_PATHS = {
   index: "/sitemap.xml",
   static: "/sitemap-static.xml",
+  patchNotesDetail: "/sitemap-lol-patch-notes.xml",
   pals: "/sitemap-palworld-pals.xml",
   breeding: "/sitemap-palworld-breeding.xml",
   items: "/sitemap-palworld-items.xml",
@@ -159,6 +162,27 @@ export function buildStaticSitemap(
   return buildLocalizedUrlSetSitemap(
     publicSitemapStaticPaths(options).map((path) => ({ path, lastmod }))
   );
+}
+
+/** 패치 피드의 공개일을 각 URL lastmod로 유지하는 ko·ja 상세 sitemap입니다. */
+export function buildPatchNotesSitemap(
+  notes: readonly PatchNote[],
+  lastmod?: string
+): string {
+  const seen = new Set<string>();
+  const entries: SitemapEntry[] = [];
+  for (const note of notes.slice(0, PATCH_NOTES_MAX_ITEMS)) {
+    const patchVersion = note.patchVersion;
+    if (!patchVersion || !/^\d{1,3}\.\d{1,3}$/u.test(patchVersion) || seen.has(patchVersion)) continue;
+    seen.add(patchVersion);
+    entries.push({
+      path: patchNotesDetailPath(patchVersion),
+      /* 피드 공개일이 URL별 신호의 원본이고, optional 값은 공개일이 비정상인
+         직접 호출 fixture에서만 안전한 fallback으로 씁니다. */
+      lastmod: Number.isFinite(Date.parse(note.publishedAt)) ? note.publishedAt : lastmod
+    });
+  }
+  return buildLocalizedUrlSetSitemap(entries);
 }
 
 export function buildPalworldEntitySitemap(

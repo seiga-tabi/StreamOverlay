@@ -24,7 +24,11 @@ import {
   profileShareLanes,
   PROFILE_SHARE_MIN_SUB_LANE_GAMES,
 } from "../src/features/public-lol/utils/profile-share";
-import { publicPageRouteFromPath, publicPathForPage } from "../src/features/public-lol/utils/routes";
+import {
+  patchNotesDetailFromPath,
+  publicPageRouteFromPath,
+  publicPathForPage,
+} from "../src/features/public-lol/utils/routes";
 import {
   isLocalizablePublicPath,
   localizedPublicUrl,
@@ -104,6 +108,11 @@ test("공개 페이지 경로를 페이지 상태와 왕복 변환한다", () =>
   assert.equal(publicPageRouteFromPath("/ja/lol/aram")?.page, "aram");
   assert.equal(publicPageRouteFromPath("/patch-notes")?.page, "patchNotes");
   assert.equal(publicPageRouteFromPath("/ja/patch-notes")?.page, "patchNotes");
+  assert.equal(patchNotesDetailFromPath("/ko/patch-notes/26-17"), "26.17");
+  assert.equal(publicPageRouteFromPath("/ja/patch-notes/26-17")?.page, "patchNotes");
+  assert.equal(patchNotesDetailFromPath("/en/patch-notes/26-17"), null);
+  assert.equal(patchNotesDetailFromPath("/ko/patch-notes/26.17"), null);
+  assert.equal(patchNotesDetailFromPath("/ko/patch-notes/26-17/extra"), null);
   /* 커뮤니티는 걷어냈습니다. 앱이 아니라 서버가 308 로 넘깁니다. */
   assert.equal(publicPageRouteFromPath("/community/server"), undefined);
   assert.equal(publicPageRouteFromPath("/community/posts/post%201"), undefined);
@@ -127,6 +136,8 @@ test("공개 언어 URL은 경로·query·hash를 보존하고 비공개 경로�
   );
   assert.equal(localizedPublicUrl("/dashboard", "ja"), "/dashboard");
   assert.equal(localizedPublicUrl("/api/palworld/meta", "ko"), "/api/palworld/meta");
+  assert.equal(localizedPublicUrl("/ja/patch-notes/26-17", "ko"), "/ko/patch-notes/26-17");
+  assert.equal(localizedPublicUrl("/ja/patch-notes/26-17", "en"), "/ko/patch-notes/26-17");
   assert.equal(isLocalizablePublicPath("/ja/bot/commands"), true);
   assert.equal(isLocalizablePublicPath("/ja/dashboard"), false);
 });

@@ -383,6 +383,12 @@
     box-shadow: none;
   }
 
+  /* 패치 상세 URL 진입 시 기존 목록 행 안에서 대상만 또렷하게 표시합니다. */
+  .yoro-pn-side .yoro-pn-row.is-focused {
+    background: color-mix(in srgb, var(--public-gray-border-strong) 12%, transparent);
+    box-shadow: inset 3px 0 0 var(--public-gray-border-strong);
+  }
+
   .yoro-pn-side .yoro-pn-row-num {
     flex: none;
     margin: 0;

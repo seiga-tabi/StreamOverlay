@@ -141,6 +141,23 @@ test("히어로·타일·아카이브 세 층으로 나눈다", () => {
   assert.match(page, /const searching = trimmedQuery\.length > 0 \|\| filter !== "all";/u);
 });
 
+test("패치 상세 URL은 기존 목록을 유지하며 대상 버전을 필터·강조·스크롤한다", async () => {
+  const routes = await readFile(
+    new URL("../src/features/public-lol/utils/routes.ts", import.meta.url),
+    "utf8",
+  );
+  const inkCss = await readFile(
+    new URL("../src/styles/pages/public-lol/42-ink-patch-notes.css", import.meta.url),
+    "utf8",
+  );
+  assert.match(routes, /export function patchNotesDetailFromPath/u);
+  assert.match(page, /patchNotesDetailFromPath\(window\.location\.pathname\)/u);
+  assert.match(page, /useState\(\(\) => focusedPatchVersion \?\? ""\)/u);
+  assert.match(page, /data-patch-version=\{note\.patchVersion\}/u);
+  assert.match(page, /scrollIntoView\(\{ behavior: "smooth", block: "center" \}\)/u);
+  assert.match(inkCss, /\.yoro-pn-side \.yoro-pn-row\.is-focused/u);
+});
+
 test("패치 색(accentColor)은 화면에 흘리지 않는다", () => {
   /* 2026-08-21 보강 §1 — Riot 썸네일 임의 색이 화면마다 팔레트를 무너뜨려
      accentStyle(--pn-k) 경로를 은퇴시켰습니다. parser 의 #RRGGBB 검증은

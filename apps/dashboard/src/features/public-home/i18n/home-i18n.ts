@@ -169,7 +169,7 @@ export const homeI18n: Record<HomeLocale, HomeText> = {
     loginFinePrint: "로그인하면 이용약관과 개인정보처리방침에 동의하는 것으로 간주됩니다. 방송인 기능은 로그인 후 방송인 등록에서 활성화합니다.",
     loading: "화면을 불러오는 중입니다.",
     seoTitle: "YORO.gg — 게임 데이터, 검색 한 번",
-    seoDescription: "LoL 전적과 증강 칼바람, 팰월드 도감과 교배 계산까지 검색창 하나로. 방송 중인 스트리머의 판을 보고 시청자로 직접 참여하세요."
+    seoDescription: "YORO.gg에서 LoL 전적과 최근 경기, 증강 칼바람 정보를 검색하고 팰월드 도감·아이템·스킬·교배 조합을 살펴보세요. 방송 중인 스트리머의 게임을 확인하고 시청자 참여 기능으로 함께 플레이할 기회도 찾을 수 있습니다."
   },
   ja: {
     skipToContent: "本文へスキップ",
@@ -250,7 +250,7 @@ export const homeI18n: Record<HomeLocale, HomeText> = {
     loginFinePrint: "ログインすると利用規約とプライバシーポリシーに同意したものとみなされます。配信者機能はログイン後、配信者登録から有効化します。",
     loading: "画面を読み込んでいます。",
     seoTitle: "YORO.gg — ゲームデータ、検索ひとつで",
-    seoDescription: "LoLの戦績とオーグメントARAM、パルワールドの図鑑と配合計算まで検索ひとつで。配信中のストリーマーの試合を見て、視聴者として参加しましょう。"
+    seoDescription: "YORO.ggでは、LoLの戦績・最近の試合・オーグメントARAMを検索し、パルワールドの図鑑、アイテム、スキル、配合組み合わせをまとめて確認できます。配信中のストリーマーの試合を見つけ、視聴者参加機能から一緒にプレイする機会も気軽に探せます。"
   },
   en: {
     skipToContent: "Skip to content",

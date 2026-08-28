@@ -25,6 +25,7 @@ import { PatchChangeSummaryPanel } from "../components/PatchChangeSummaryPanel";
 import type { PatchChangeSummary } from "../types/patch-change-summary";
 import { publicIntlLocale, activePublicLocale, t } from "../i18n/public-lol-i18n";
 import { readFavorites, readRecentSearches } from "../utils/storage";
+import { patchNotesDetailFromPath } from "../utils/routes";
 import type { SearchSuggestion } from "../types/public-lol";
 
 type LoadState = "loading" | "ready" | "error";
@@ -314,14 +315,18 @@ function formatMonthDay(value: string): string {
  * 제목은 본문 히어로·요약 카드가 보여 주므로 sr-only 링크 텍스트로만 남기고,
  * 폭 0 이던 .yoro-pn-node·.yoro-pn-row-art 와 「플레이 없음」 반복은 지웠습니다.
  * 행 전체가 stretched link(.yoro-pn-link::after) 로 그 패치 원문으로 갑니다. */
-function ArchiveRow({ entry }: { entry: PatchEntry }) {
+function ArchiveRow({ entry, focused = false }: { entry: PatchEntry; focused?: boolean }) {
   const { note, record, previousRecord } = entry;
   const delta = record && previousRecord
     ? Math.round((record.winRate - previousRecord.winRate) * 10) / 10
     : undefined;
 
   return (
-    <article className={record ? "yoro-pn-row is-played" : "yoro-pn-row"}>
+    <article
+      aria-current={focused ? "page" : undefined}
+      className={`${record ? "yoro-pn-row is-played" : "yoro-pn-row"}${focused ? " is-focused" : ""}`}
+      data-patch-version={note.patchVersion}
+    >
       {record ? <span className="yoro-u-sr-only">{t().patchNotesPlayedMark}</span> : null}
       <p className="yoro-pn-row-num">
         <a className="yoro-pn-link" href={riotLocaleUrl(note.url)} rel="noopener noreferrer" target="_blank">
@@ -348,7 +353,9 @@ export function PublicPatchNotesPage({ locale }: { locale: string }) {
   const [state, setState] = useState<LoadState>("loading");
   const [feed, setFeed] = useState<PatchNotesFeed>();
   const [error, setError] = useState("");
-  const [query, setQuery] = useState("");
+  const [focusedPatchVersion] = useState(() => patchNotesDetailFromPath(window.location.pathname));
+  /* 상세 URL은 새 화면을 만들지 않고 기존 검색 필터로 해당 패치 한 건을 드러냅니다. */
+  const [query, setQuery] = useState(() => focusedPatchVersion ?? "");
   const [filter, setFilter] = useState<PatchNotesFilter>("all");
   /* 이 화면은 저장소를 읽기만 합니다. 아무것도 새로 저장하지 않습니다. */
   const [storedTargetList] = useState<PatchNoteTarget[]>(() => storedTargets());
@@ -500,6 +507,16 @@ export function PublicPatchNotesPage({ locale }: { locale: string }) {
         .some((value) => value?.toLocaleLowerCase(localeTag()).includes(normalized));
     });
   }, [entries, trimmedQuery, filter]);
+
+  useEffect(() => {
+    if (!focusedPatchVersion || state !== "ready" || visibleEntries.length === 0) return undefined;
+    const frame = window.requestAnimationFrame(() => {
+      document.querySelector<HTMLElement>(
+        `[data-patch-version="${focusedPatchVersion}"]`
+      )?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [focusedPatchVersion, state, visibleEntries]);
 
   /* 좁히는 조작을 하면 히어로·타일을 접고 결과만 한 줄로 보여 줍니다. */
   const searching = trimmedQuery.length > 0 || filter !== "all";
@@ -688,7 +705,7 @@ export function PublicPatchNotesPage({ locale }: { locale: string }) {
                   <div className="yoro-pn-list">
                     {archive.map((entry) => (
                       <div className="yoro-pn-group" key={entry.note.slug}>
-                        <ArchiveRow entry={entry} />
+                        <ArchiveRow entry={entry} focused={entry.note.patchVersion === focusedPatchVersion} />
                       </div>
                     ))}
                   </div>
@@ -734,7 +751,13 @@ export function PublicPatchNotesPage({ locale }: { locale: string }) {
                               </small>
                             </button>
                           )}
-                          {open ? rows.map((entry) => <ArchiveRow entry={entry} key={entry.note.slug} />) : null}
+                          {open ? rows.map((entry) => (
+                            <ArchiveRow
+                              entry={entry}
+                              focused={entry.note.patchVersion === focusedPatchVersion}
+                              key={entry.note.slug}
+                            />
+                          )) : null}
                           {open && hiddenCount > 0 && season !== undefined ? (
                             <button
                               className="yoro-pn-season-more"

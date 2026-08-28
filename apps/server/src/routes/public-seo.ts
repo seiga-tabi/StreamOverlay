@@ -15,6 +15,8 @@ import {
   stripPublicUrlLocalePrefix,
   type PublicUrlLocale
 } from "../routing/public-dashboard-routes.js";
+import type { PatchNote } from "@streamops/shared";
+import type { PatchChangeSummary } from "../services/patch-change-summary.js";
 
 export const PUBLIC_SEO_ORIGIN = "https://yoro.gg";
 /** 서버가 메타를 내보내는 로케일 전체. 경로별로 실제 붙는 목록은 아래를 씁니다. */
@@ -30,7 +32,7 @@ const SEO_LANGUAGE_TAGS: Readonly<Record<PublicUrlLocale, string>> = Object.free
 /**
  * 경로별 hreflang·sitemap 대상 로케일.
  *
- * en 은 영어 본문이 있는 섹션(현재 팰월드)에만 붙입니다 — 번역이 없는 경로에
+ * en 은 영어 본문이 있는 경로에만 붙입니다 — 번역이 없는 경로에
  * en hreflang 을 달면 크롤러에게 존재하지 않는 페이지를 약속하는 셈입니다.
  */
 export function publicSeoLocalesForPath(normalizedPath: string): readonly PublicUrlLocale[] {
@@ -89,7 +91,11 @@ const SOCIAL_IMAGES_BY_PREFIX: readonly {
   {
     prefix: "/minecraft",
     url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-minecraft.png`,
-    alt: { ko: "YORO.gg 마인크래프트 위키 미리보기", ja: "YORO.gg マインクラフト Wiki のプレビュー" }
+    alt: {
+      ko: "YORO.gg 마인크래프트 위키 미리보기",
+      ja: "YORO.gg マインクラフト Wiki のプレビュー",
+      en: "YORO.gg Minecraft Wiki preview"
+    }
   },
   {
     prefix: "/valorant",
@@ -99,7 +105,11 @@ const SOCIAL_IMAGES_BY_PREFIX: readonly {
   {
     prefix: "/bot",
     url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-bot.png`,
-    alt: { ko: "YORO Bot Discord 게임 서버 도우미 미리보기", ja: "YORO Bot Discordゲームサーバーアシスタントのプレビュー" }
+    alt: {
+      ko: "YORO Bot Discord 게임 서버 도우미 미리보기",
+      ja: "YORO Bot Discordゲームサーバーアシスタントのプレビュー",
+      en: "YORO Bot Discord game server assistant preview"
+    }
   },
   /* prefix 매칭이므로 /games/reaction 등 하위 미니게임은 자동으로 같은 이미지를
      씁니다(팰월드 선례와 동일). 게임별 이미지가 생기면 더 긴 prefix 를 위에 둡니다. */
@@ -109,18 +119,30 @@ const SOCIAL_IMAGES_BY_PREFIX: readonly {
     /* 미니게임 OG 는 이미지에 한국어 문구가 박혀 있어 ja 경로(/ja/games …)에는
        ja 판을 내립니다 — ja 링크가 한국어 이미지로 보이던 실사례(2026-08-17). */
     urlJa: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-games-ja.png`,
-    alt: { ko: "YORO.gg 미니게임 미리보기", ja: "YORO.gg ミニゲームのプレビュー" }
+    alt: {
+      ko: "YORO.gg 미니게임 미리보기",
+      ja: "YORO.gg ミニゲームのプレビュー",
+      en: "YORO.gg mini-games preview"
+    }
   },
   /* LoL 생태(전적·패치 노트·팔로우·참가)와 홈은 LoL 이미지를 사이트 대표로 겸용합니다. */
   {
     prefix: "/lol",
     url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-lol.png`,
-    alt: { ko: "YORO.gg LoL 전적 검색 미리보기", ja: "YORO.gg LoL戦績検索のプレビュー" }
+    alt: {
+      ko: "YORO.gg LoL 전적 검색 미리보기",
+      ja: "YORO.gg LoL戦績検索のプレビュー",
+      en: "YORO.gg LoL stats preview"
+    }
   },
   {
     prefix: "/streamers",
     url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-lol.png`,
-    alt: { ko: "YORO.gg 스트리머 추천 미리보기", ja: "YORO.gg 配信者おすすめのプレビュー" }
+    alt: {
+      ko: "YORO.gg 스트리머 추천 미리보기",
+      ja: "YORO.gg 配信者おすすめのプレビュー",
+      en: "YORO.gg streamer recommendations preview"
+    }
   },
   {
     prefix: "/patch-notes",
@@ -145,7 +167,11 @@ const SOCIAL_IMAGES_BY_PREFIX: readonly {
 
 const HOME_SOCIAL_IMAGE = {
   url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-lol.png`,
-  alt: { ko: "YORO.gg LoL 전적 검색 미리보기", ja: "YORO.gg LoL戦績検索のプレビュー" }
+  alt: {
+    ko: "YORO.gg LoL 전적 검색 미리보기",
+    ja: "YORO.gg LoL戦績検索のプレビュー",
+    en: "YORO.gg game data preview"
+  }
 } as const;
 
 export function socialImageForPath(normalizedPath: string, locale: PublicUrlLocale = "ko"): {
@@ -260,6 +286,11 @@ export type PalworldBreedingRoute = {
   parentBGender?: PalworldBreedingSeoGender;
 };
 
+export type PatchNotesDetailRoute = {
+  locale: "ko" | "ja";
+  patchVersion: string;
+};
+
 export type PalworldSeoBreedingPair = {
   child: PalworldSeoBreedingPal;
   genderCondition?: {
@@ -350,6 +381,26 @@ const PALWORLD_PUBLIC_ID_PATTERN = /^[a-z0-9][a-z0-9_-]{0,79}$/u;
 export function normalizePublicSeoPath(pathname: string): string {
   const unprefixed = stripPublicUrlLocalePrefix(pathname);
   return unprefixed !== "/" && unprefixed.endsWith("/") ? unprefixed.slice(0, -1) : unprefixed;
+}
+
+/** 패치 번호를 sitemap·canonical에서 쓰는 URL-safe 경로로 바꿉니다. */
+export function patchNotesDetailPath(patchVersion: string): string {
+  if (!/^\d{1,3}\.\d{1,3}$/u.test(patchVersion)) {
+    throw new TypeError("패치 번호 형식이 올바르지 않습니다.");
+  }
+  return `/patch-notes/${patchVersion.replace(".", "-")}`;
+}
+
+/**
+ * `/ko/patch-notes/26-17` 형태만 상세 경로로 인정합니다.
+ * 상세 콘텐츠가 없는 en이나 추가 segment, 점 표기 입력은 모두 거부합니다.
+ */
+export function patchNotesDetailRouteForPath(pathname: string): PatchNotesDetailRoute | undefined {
+  const locale = publicUrlLocaleFromPathname(pathname);
+  if (locale !== "ko" && locale !== "ja") return undefined;
+  const match = /^\/patch-notes\/(\d{1,3}-\d{1,3})$/u.exec(normalizePublicSeoPath(pathname));
+  if (!match?.[1]) return undefined;
+  return { locale, patchVersion: match[1].replace("-", ".") };
 }
 
 export function localizedPublicSeoUrl(normalizedPath: string, locale: PublicUrlLocale): string {
@@ -1065,6 +1116,160 @@ export function palworldBreedingSeoMetadata(
   };
 }
 
+function patchChangeDirectionLabel(
+  locale: "ko" | "ja",
+  direction: "buff" | "nerf" | "adjust"
+): string {
+  if (locale === "ja") {
+    return direction === "buff" ? "強化" : direction === "nerf" ? "弱体化" : "調整";
+  }
+  return direction === "buff" ? "버프" : direction === "nerf" ? "너프" : "조정";
+}
+
+function patchItemChangeLabel(
+  locale: "ko" | "ja",
+  kind: "price" | "new" | "removed"
+): string {
+  if (locale === "ja") {
+    return kind === "price" ? "価格変更" : kind === "new" ? "追加" : "削除";
+  }
+  return kind === "price" ? "가격 변경" : kind === "new" ? "추가" : "제거";
+}
+
+/** Riot 본문이 아닌 Data Dragon 비교 결과로 패치 상세 metadata와 fallback을 만듭니다. */
+export function patchNotesDetailSeoMetadata(
+  route: PatchNotesDetailRoute,
+  note: PatchNote,
+  changes: PatchChangeSummary | undefined
+): PublicSeoMetadata {
+  const { locale, patchVersion } = route;
+  const normalizedPath = patchNotesDetailPath(patchVersion);
+  const canonicalUrl = localizedPublicSeoUrl(normalizedPath, locale);
+  const title = t(
+    locale,
+    `LoL 패치 ${patchVersion} 변경사항 | YORO.gg`,
+    `LoL パッチ ${patchVersion} 変更点 | YORO.gg`,
+    ""
+  );
+  const championCount = changes?.championChanges.length ?? 0;
+  const itemCount = changes?.itemChanges.length ?? 0;
+  const description = changes
+    ? t(
+        locale,
+        `챔피언 ${championCount}종 변경 · 아이템 ${itemCount}종 변경 · ${patchVersion} 패치 요약`,
+        `チャンピオン${championCount}体変更 · アイテム${itemCount}種変更 · パッチ${patchVersion}まとめ`,
+        ""
+      )
+    : t(
+        locale,
+        `LoL ${patchVersion} 패치의 공개 데이터 기반 변경 요약과 Riot 공식 패치노트를 확인하세요.`,
+        `LoL パッチ${patchVersion}の公開データに基づく変更概要とRiot公式パッチノートを確認できます。`,
+        ""
+      );
+  const buffCount = changes?.championChanges.filter((change) => change.direction === "buff").length ?? 0;
+  const nerfCount = changes?.championChanges.filter((change) => change.direction === "nerf").length ?? 0;
+  const adjustCount = changes?.championChanges.filter((change) => change.direction === "adjust").length ?? 0;
+  const representativeChanges = changes
+    ? [
+        ...changes.championChanges.map((change) => (
+          `${change.name} · ${patchChangeDirectionLabel(locale, change.direction)}`
+        )),
+        ...changes.itemChanges.map((change) => (
+          `${change.name} · ${patchItemChangeLabel(locale, change.kind)}`
+        ))
+      ].slice(0, 20)
+    : [];
+  const publishedDate = Number.isFinite(Date.parse(note.publishedAt))
+    ? new Date(note.publishedAt).toISOString().slice(0, 10)
+    : note.publishedAt;
+  const fallbackFacts: PublicSeoFact[] = [
+    { label: t(locale, "패치", "パッチ", ""), value: patchVersion },
+    { label: t(locale, "공개일", "公開日", ""), value: publishedDate },
+    ...(changes
+      ? [
+          { label: t(locale, "시스템 변경", "システム変更", ""), value: String(changes.systemChanges.length) },
+          { label: t(locale, "챔피언 버프", "チャンピオン強化", ""), value: String(buffCount) },
+          { label: t(locale, "챔피언 너프", "チャンピオン弱体化", ""), value: String(nerfCount) },
+          { label: t(locale, "챔피언 조정", "チャンピオン調整", ""), value: String(adjustCount) },
+          { label: t(locale, "아이템 변경", "アイテム変更", ""), value: String(itemCount) }
+        ]
+      : [])
+  ];
+  const footer = t(
+    locale,
+    "정확한 스킬 변경 및 상세 설명은 Riot 공식 패치노트를 확인하세요.",
+    "正確なスキル変更と詳細説明はRiot公式パッチノートをご確認ください。",
+    ""
+  );
+  return {
+    alternateUrls: {
+      ko: localizedPublicSeoUrl(normalizedPath, "ko"),
+      ja: localizedPublicSeoUrl(normalizedPath, "ja")
+    },
+    canonicalUrl,
+    description,
+    fallback: {
+      facts: fallbackFacts,
+      heading: title.replace(" | YORO.gg", ""),
+      links: [
+        { href: `/${locale}/patch-notes`, label: t(locale, "전체 패치 노트", "パッチノート一覧", "") },
+        { href: note.url, label: t(locale, "Riot 공식 패치노트 원문 보기", "Riot公式パッチノートを見る", "") }
+      ],
+      summary: changes
+        ? description
+        : t(
+            locale,
+            "이 패치는 유효합니다. 비교 가능한 Data Dragon 변경 요약은 없으며 Riot 원문 링크를 제공합니다.",
+            "このパッチは有効です。比較可能なData Dragon変更概要はなく、Riot原文へのリンクを案内します。",
+            ""
+          ),
+      sections: [
+        ...(representativeChanges.length > 0
+          ? [{
+              heading: t(locale, "대표 변경 항목", "主な変更項目", ""),
+              items: representativeChanges,
+              ...(championCount + itemCount > representativeChanges.length
+                ? {
+                    note: t(
+                      locale,
+                      `전체 ${championCount + itemCount}개 중 상위 ${representativeChanges.length}개`,
+                      `全${championCount + itemCount}件中${representativeChanges.length}件を表示`,
+                      ""
+                    )
+                  }
+                : {})
+            }]
+          : []),
+        {
+          heading: t(locale, "상세 안내", "詳細案内", ""),
+          links: [{ href: note.url, label: t(locale, "Riot 공식 패치노트", "Riot公式パッチノート", "") }],
+          note: footer
+        }
+      ]
+    },
+    imageAlt: t(locale, `LoL 패치 ${patchVersion} 변경사항`, `LoL パッチ ${patchVersion} 変更点`, ""),
+    imageUrl: socialImageForPath(normalizedPath, locale).url,
+    locale,
+    openGraphType: "article",
+    structuredData: [
+      websiteStructuredData(locale),
+      breadcrumbStructuredData(normalizedPath, locale, patchVersion),
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        headline: title,
+        description,
+        datePublished: note.publishedAt,
+        inLanguage: SEO_LANGUAGE_TAGS[locale],
+        mainEntityOfPage: canonicalUrl,
+        isPartOf: { "@type": "WebSite", name: "YORO.gg", url: PUBLIC_SEO_ORIGIN },
+        publisher: organizationStructuredData()
+      }
+    ],
+    title
+  };
+}
+
 function websiteStructuredData(locale: PublicUrlLocale): unknown {
   return {
     "@context": "https://schema.org",
@@ -1097,7 +1302,7 @@ function organizationStructuredData(): unknown {
 
 const BREADCRUMB_SEGMENT_LABELS: Readonly<Record<string, PublicSeoLocaleText>> = {
   "/lol": { ko: "LoL 전적 검색", ja: "LoL戦績検索", en: "LoL stats" },
-  "/lol/aram": { ko: "증강 칼바람", ja: "オーグメントARAM", en: "ARAM augments" },
+  "/lol/aram": { ko: "증강 칼바람", ja: "オーグメントARAM", en: "Augment ARAM" },
   "/patch-notes": { ko: "패치 노트", ja: "パッチノート", en: "Patch notes" },
   /* "/lol/summoners"(목록)는 실제 라우트가 없어 404입니다 — 여기 두면
      genericFallback의 sibling 링크와 breadcrumb JSON-LD가 404 URL을
@@ -1116,24 +1321,24 @@ const BREADCRUMB_SEGMENT_LABELS: Readonly<Record<string, PublicSeoLocaleText>> =
   "/valorant/weapons": { ko: "무기", ja: "武器" },
   "/valorant/maps": { ko: "맵", ja: "マップ" },
   "/valorant/ranked": { ko: "랭킹", ja: "ランキング" },
-  "/minecraft": { ko: "마인크래프트", ja: "マインクラフト" },
-  "/minecraft/recipes": { ko: "조합법", ja: "レシピ" },
-  "/minecraft/items": { ko: "아이템", ja: "アイテム" },
-  "/minecraft/enchants": { ko: "인챈트", ja: "エンチャント" },
-  "/minecraft/library": { ko: "자료실", ja: "資料室" },
-  "/minecraft/patch-notes": { ko: "패치 노트", ja: "パッチノート" },
-  "/bot": { ko: "YORO Bot", ja: "YORO Bot" },
-  "/bot/getting-started": { ko: "사용방법", ja: "使い方" },
-  "/bot/commands": { ko: "명령어 목록", ja: "コマンド一覧" },
-  "/bot/game-files": { ko: "게임파일", ja: "ゲームファイル" },
+  "/minecraft": { ko: "마인크래프트", ja: "マインクラフト", en: "Minecraft" },
+  "/minecraft/recipes": { ko: "조합법", ja: "レシピ", en: "Recipes" },
+  "/minecraft/items": { ko: "아이템", ja: "アイテム", en: "Items" },
+  "/minecraft/enchants": { ko: "인챈트", ja: "エンチャント", en: "Enchantments" },
+  "/minecraft/library": { ko: "자료실", ja: "資料室", en: "Library" },
+  "/minecraft/patch-notes": { ko: "패치 노트", ja: "パッチノート", en: "Patch notes" },
+  "/bot": { ko: "YORO Bot", ja: "YORO Bot", en: "YORO Bot" },
+  "/bot/getting-started": { ko: "사용방법", ja: "使い方", en: "Getting started" },
+  "/bot/commands": { ko: "명령어 목록", ja: "コマンド一覧", en: "Commands" },
+  "/bot/game-files": { ko: "게임파일", ja: "ゲームファイル", en: "Game files" },
   "/follow": { ko: "팔로우", ja: "フォロー" },
   "/participation": { ko: "시청자 참여", ja: "視聴者参加" },
   /* 미니게임 — 라벨이 있는 경로만 breadcrumb·sibling 링크에 오릅니다. 준비 중인
      게임(registry 의 coming)은 라우트가 없으므로 여기에 넣지 않습니다. */
-  "/games": { ko: "미니게임", ja: "ミニゲーム" },
-  "/games/reaction": { ko: "반응속도 테스트", ja: "反応速度テスト" },
-  "/streamers": { ko: "스트리머 추천", ja: "配信者おすすめ" },
-  "/streamers/new": { ko: "추천 글 쓰기", ja: "おすすめを書く" }
+  "/games": { ko: "미니게임", ja: "ミニゲーム", en: "Mini-games" },
+  "/games/reaction": { ko: "반응속도 테스트", ja: "反応速度テスト", en: "Reaction time test" },
+  "/streamers": { ko: "스트리머 추천", ja: "配信者おすすめ", en: "Streamer recommendations" },
+  "/streamers/new": { ko: "추천 글 쓰기", ja: "おすすめを書く", en: "Write a recommendation" }
 };
 
 function breadcrumbStructuredData(
@@ -1184,8 +1389,8 @@ function homeFallback(locale: PublicUrlLocale): PublicSeoFallback {
     ),
     summary: t(
       locale,
-      "LoL 전적과 증강 칼바람, 팰월드 도감과 교배 계산까지 검색창 하나로. 방송 중인 스트리머의 판을 보고 시청자로 직접 참여하세요.",
-      "LoLの戦績とオーグメントARAM、パルワールドの図鑑と配合計算まで検索ひとつで。配信中のストリーマーの試合を見て、視聴者として参加しましょう。",
+      "YORO.gg에서 LoL 전적과 최근 경기, 증강 칼바람 정보를 검색하고 팰월드 도감·아이템·스킬·교배 조합을 살펴보세요. 방송 중인 스트리머의 게임을 확인하고 시청자 참여 기능으로 함께 플레이할 기회도 찾을 수 있습니다.",
+      "YORO.ggでは、LoLの戦績・最近の試合・オーグメントARAMを検索し、パルワールドの図鑑、アイテム、スキル、配合組み合わせをまとめて確認できます。配信中のストリーマーの試合を見つけ、視聴者参加機能から一緒にプレイする機会も気軽に探せます。",
       "LoL match history, ARAM augments, the Palworld Paldeck and breeding calculator — one search box. Watch live streamers and join their games as a viewer."
     ),
     links: [
@@ -1388,18 +1593,18 @@ export function palworldTechnologyFallback(
   };
 }
 
-/** Bot 사용방법 화면과 같은 5단계 연결 흐름. en 콘텐츠는 아직 없어 ko로 접힙니다. */
+/** Bot 사용방법 화면과 같은 5단계 연결 흐름. */
 function botGettingStartedFallback(base: PublicSeoFallback, locale: PublicUrlLocale): PublicSeoFallback {
   return {
     ...base,
     sections: [{
-      heading: t(locale, "YORO Bot 5단계 연결 순서", "YORO Bot 5ステップ連携手順", "YORO Bot 5단계 연결 순서"),
+      heading: t(locale, "YORO Bot 5단계 연결 순서", "YORO Bot 5ステップ連携手順", "Connect YORO Bot in five steps"),
       items: [
-        t(locale, "YORO Bot 추가 — YORO Bot을 관리할 Discord 서버에 초대합니다.", "YORO Botを追加 — YORO Botを管理するDiscordサーバーへ招待します。", "YORO Bot 추가 — YORO Bot을 관리할 Discord 서버에 초대합니다."),
-        t(locale, "로그인 및 Organization 연결 — Discord로 로그인하고 관리할 서버를 Organization에 연결합니다.", "ログインとOrganization連携 — Discordでログインし、管理するサーバーをOrganizationへ連携します。", "로그인 및 Organization 연결 — Discord로 로그인하고 관리할 서버를 Organization에 연결합니다."),
-        t(locale, "Palworld REST 연결 — Dashboard에서 게임 서버의 읽기 전용 REST 연결을 확인합니다.", "Palworld REST連携 — Dashboardでゲームサーバーの読み取り専用REST接続を確認します。", "Palworld REST 연결 — Dashboard에서 게임 서버의 읽기 전용 REST 연결을 확인합니다."),
-        t(locale, "사용할 명령 활성화 — Discord Bot 제어에서 서버 구성원에게 제공할 명령을 선택합니다.", "利用コマンドを有効化 — Discord Bot制御からサーバーメンバーに提供するコマンドを選択します。", "사용할 명령 활성화 — Discord Bot 제어에서 서버 구성원에게 제공할 명령을 선택합니다."),
-        t(locale, "Discord에서 사용 시작 — 영어 명령을 입력해 첫 서버 상태를 확인합니다.", "Discordで利用開始 — 英語コマンドを入力して最初のサーバー状態を確認します。", "Discord에서 사용 시작 — 영어 명령을 입력해 첫 서버 상태를 확인합니다.")
+        t(locale, "YORO Bot 추가 — YORO Bot을 관리할 Discord 서버에 초대합니다.", "YORO Botを追加 — YORO Botを管理するDiscordサーバーへ招待します。", "Add YORO Bot — invite it to the Discord server you want to manage."),
+        t(locale, "로그인 및 Organization 연결 — Discord로 로그인하고 관리할 서버를 Organization에 연결합니다.", "ログインとOrganization連携 — Discordでログインし、管理するサーバーをOrganizationへ連携します。", "Sign in and connect an Organization — sign in with Discord and link the server you manage."),
+        t(locale, "Palworld REST 연결 — Dashboard에서 게임 서버의 읽기 전용 REST 연결을 확인합니다.", "Palworld REST連携 — Dashboardでゲームサーバーの読み取り専用REST接続を確認します。", "Connect Palworld REST — verify the game server's read-only REST connection in the Dashboard."),
+        t(locale, "사용할 명령 활성화 — Discord Bot 제어에서 서버 구성원에게 제공할 명령을 선택합니다.", "利用コマンドを有効化 — Discord Bot制御からサーバーメンバーに提供するコマンドを選択します。", "Enable commands — choose which commands server members can use in Discord Bot controls."),
+        t(locale, "Discord에서 사용 시작 — 영어 명령을 입력해 첫 서버 상태를 확인합니다.", "Discordで利用開始 — 英語コマンドを入力して最初のサーバー状態を確認します。", "Start in Discord — enter an English command to check your first server status response.")
       ]
     }]
   };
@@ -1411,20 +1616,20 @@ function botCommandsFallback(base: PublicSeoFallback, locale: PublicUrlLocale): 
     ...base,
     sections: [
       {
-        heading: t(locale, "유저 명령어", "ユーザーコマンド", "유저 명령어"),
+        heading: t(locale, "유저 명령어", "ユーザーコマンド", "User commands"),
         facts: [
-          { label: "/yoro status", value: t(locale, "Palworld 서버의 온라인 상태와 핵심 지표를 확인합니다.", "Palworldサーバーのオンライン状態と主要指標を確認します。", "Palworld 서버의 온라인 상태와 핵심 지표를 확인합니다.") },
-          { label: "/yoro player", value: t(locale, "현재 접속자 목록을 보거나 게임 내 닉네임으로 공개 프로필을 검색합니다.", "現在の接続者一覧を確認し、ゲーム内ニックネームから公開プロフィールを検索します。", "현재 접속자 목록을 보거나 게임 내 닉네임으로 공개 프로필을 검색합니다.") },
-          { label: "/yoro guide", value: t(locale, "Palworld 전용 서버의 REST 설정과 YORO 연결 순서를 확인합니다.", "Palworld専用サーバーのREST設定とYORO連携手順を確認します。", "Palworld 전용 서버의 REST 설정과 YORO 연결 순서를 확인합니다.") },
-          { label: "/yoro dashboard", value: t(locale, "고정된 YORO Dashboard 주소를 실행자에게만 제공합니다.", "固定されたYORO Dashboardアドレスを実行者だけに提供します。", "고정된 YORO Dashboard 주소를 실행자에게만 제공합니다.") },
-          { label: "/yoro help", value: t(locale, "현재 Dashboard에서 활성화된 명령만 언어에 맞춰 보여줍니다.", "Dashboardで現在有効なコマンドだけを言語に合わせて表示します。", "현재 Dashboard에서 활성화된 명령만 언어에 맞춰 보여줍니다.") }
+          { label: "/yoro status", value: t(locale, "Palworld 서버의 온라인 상태와 핵심 지표를 확인합니다.", "Palworldサーバーのオンライン状態と主要指標を確認します。", "Check a Palworld server's online status and key metrics.") },
+          { label: "/yoro player", value: t(locale, "현재 접속자 목록을 보거나 게임 내 닉네임으로 공개 프로필을 검색합니다.", "現在の接続者一覧を確認し、ゲーム内ニックネームから公開プロフィールを検索します。", "View connected players or find a public profile by its exact in-game nickname.") },
+          { label: "/yoro guide", value: t(locale, "Palworld 전용 서버의 REST 설정과 YORO 연결 순서를 확인합니다.", "Palworld専用サーバーのREST設定とYORO連携手順を確認します。", "Review REST settings and the YORO connection steps for a Palworld dedicated server.") },
+          { label: "/yoro dashboard", value: t(locale, "고정된 YORO Dashboard 주소를 실행자에게만 제공합니다.", "固定されたYORO Dashboardアドレスを実行者だけに提供します。", "Send the fixed YORO Dashboard address only to the person running the command.") },
+          { label: "/yoro help", value: t(locale, "현재 Dashboard에서 활성화된 명령만 언어에 맞춰 보여줍니다.", "Dashboardで現在有効なコマンドだけを言語に合わせて表示します。", "Show only the commands currently enabled in the Dashboard, in the selected language.") }
         ]
       },
       {
-        heading: t(locale, "관리자 명령어", "管理者コマンド", "관리자 명령어"),
+        heading: t(locale, "관리자 명령어", "管理者コマンド", "Administrator commands"),
         facts: [
-          { label: "/yoro setup", value: t(locale, "Discord 서버와 YORO Organization을 연결하는 일회용 설정 흐름을 시작합니다.", "DiscordサーバーとYORO Organizationを連携するワンタイム設定を開始します。", "Discord 서버와 YORO Organization을 연결하는 일회용 설정 흐름을 시작합니다.") },
-          { label: "/yoro language locale:<auto|ko|ja|en>", value: t(locale, "이 Discord 서버에서 YORO Bot이 전송하는 메시지 언어를 변경합니다.", "このDiscordサーバーでYORO Botが送信するメッセージ言語を変更します。", "이 Discord 서버에서 YORO Bot이 전송하는 메시지 언어를 변경합니다.") }
+          { label: "/yoro setup", value: t(locale, "Discord 서버와 YORO Organization을 연결하는 일회용 설정 흐름을 시작합니다.", "DiscordサーバーとYORO Organizationを連携するワンタイム設定を開始します。", "Start the one-time setup flow that links a Discord server to a YORO Organization.") },
+          { label: "/yoro language locale:<auto|ko|ja|en>", value: t(locale, "이 Discord 서버에서 YORO Bot이 전송하는 메시지 언어를 변경합니다.", "このDiscordサーバーでYORO Botが送信するメッセージ言語を変更します。", "Change the language YORO Bot uses for messages in this Discord server.") }
         ]
       }
     ]
@@ -1437,24 +1642,24 @@ function botGameFilesFallback(base: PublicSeoFallback, locale: PublicUrlLocale):
     ...base,
     sections: [
       {
-        heading: t(locale, "전용 서버 설정 만들기", "専用サーバー設定を作成", "전용 서버 설정 만들기"),
+        heading: t(locale, "전용 서버 설정 만들기", "専用サーバー設定を作成", "Create dedicated server settings"),
         items: [
-          t(locale, "필요한 옵션만 조정해 PalWorldSettings.ini 파일을 만드세요. 모든 작업은 이 브라우저 안에서만 처리됩니다.", "必要なオプションだけを調整して PalWorldSettings.ini を作成できます。すべての処理はこのブラウザ内だけで行われます。", "필요한 옵션만 조정해 PalWorldSettings.ini 파일을 만드세요. 모든 작업은 이 브라우저 안에서만 처리됩니다."),
-          t(locale, "입력값은 YORO 서버로 전송하거나 계정에 저장하지 않습니다.", "入力値をYOROサーバーへ送信したり、アカウントへ保存したりしません。", "입력값은 YORO 서버로 전송하거나 계정에 저장하지 않습니다."),
-          t(locale, "게임 업데이트의 기본값 변경 영향을 줄이기 위해 변경한 옵션만 생성합니다.", "ゲーム更新によるデフォルト値変更の影響を抑えるため、変更したオプションだけを生成します。", "게임 업데이트의 기본값 변경 영향을 줄이기 위해 변경한 옵션만 생성합니다.")
+          t(locale, "필요한 옵션만 조정해 PalWorldSettings.ini 파일을 만드세요. 모든 작업은 이 브라우저 안에서만 처리됩니다.", "必要なオプションだけを調整して PalWorldSettings.ini を作成できます。すべての処理はこのブラウザ内だけで行われます。", "Adjust only the options you need to create PalWorldSettings.ini. All processing stays in this browser."),
+          t(locale, "입력값은 YORO 서버로 전송하거나 계정에 저장하지 않습니다.", "入力値をYOROサーバーへ送信したり、アカウントへ保存したりしません。", "Your input is not sent to YORO servers or saved to an account."),
+          t(locale, "게임 업데이트의 기본값 변경 영향을 줄이기 위해 변경한 옵션만 생성합니다.", "ゲーム更新によるデフォルト値変更の影響を抑えるため、変更したオプションだけを生成します。", "Only changed options are generated, reducing the effect of default changes in game updates.")
         ]
       },
       {
-        heading: t(locale, "파일 적용 위치", "ファイルの配置先", "파일 적용 위치"),
+        heading: t(locale, "파일 적용 위치", "ファイルの配置先", "Where to install the file"),
         items: [
-          t(locale, "서버를 한 번 실행해 설정 디렉터리를 만든 뒤 서버를 종료하고 파일을 교체하세요. DefaultPalWorldSettings.ini를 직접 수정해도 적용되지 않습니다.", "サーバーを一度起動して設定ディレクトリを作成し、サーバーを停止してからファイルを置き換えてください。DefaultPalWorldSettings.iniを直接編集しても反映されません。", "서버를 한 번 실행해 설정 디렉터리를 만든 뒤 서버를 종료하고 파일을 교체하세요. DefaultPalWorldSettings.ini를 직접 수정해도 적용되지 않습니다."),
+          t(locale, "서버를 한 번 실행해 설정 디렉터리를 만든 뒤 서버를 종료하고 파일을 교체하세요. DefaultPalWorldSettings.ini를 직접 수정해도 적용되지 않습니다.", "サーバーを一度起動して設定ディレクトリを作成し、サーバーを停止してからファイルを置き換えてください。DefaultPalWorldSettings.iniを直接編集しても反映されません。", "Run the server once to create its configuration directory, stop it, then replace the file. Editing DefaultPalWorldSettings.ini directly has no effect."),
           "Windows: steamapps\\common\\PalServer\\Pal\\Saved\\Config\\WindowsServer\\PalWorldSettings.ini",
           "Linux: steamapps/common/PalServer/Pal/Saved/Config/LinuxServer/PalWorldSettings.ini"
         ]
       },
       {
-        heading: t(locale, "공개 포트 보안", "公開ポートのセキュリティ", "공개 포트 보안"),
-        items: [t(locale, "REST API와 RCON은 기본적으로 비활성 상태입니다. 활성화하더라도 인터넷에 직접 노출하지 말고 방화벽, VPN 또는 접근 제어 프록시를 사용하세요.", "REST APIとRCONはデフォルトで無効です。有効にする場合もインターネットへ直接公開せず、ファイアウォール、VPN、またはアクセス制御プロキシを使用してください。", "REST API와 RCON은 기본적으로 비활성 상태입니다. 활성화하더라도 인터넷에 직접 노출하지 말고 방화벽, VPN 또는 접근 제어 프록시를 사용하세요.")]
+        heading: t(locale, "공개 포트 보안", "公開ポートのセキュリティ", "Public port security"),
+        items: [t(locale, "REST API와 RCON은 기본적으로 비활성 상태입니다. 활성화하더라도 인터넷에 직접 노출하지 말고 방화벽, VPN 또는 접근 제어 프록시를 사용하세요.", "REST APIとRCONはデフォルトで無効です。有効にする場合もインターネットへ直接公開せず、ファイアウォール、VPN、またはアクセス制御プロキシを使用してください。", "REST API and RCON are disabled by default. If enabled, do not expose them directly to the internet; use a firewall, VPN, or access-controlled proxy.")]
       }
     ]
   };
@@ -1510,22 +1715,22 @@ const KOREAN_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
      test/public-home-seo.test.mjs 가 두 파일의 문구를 대조합니다. */
   "/": {
     title: "YORO.gg — 게임 데이터, 검색 한 번",
-    description: "LoL 전적과 증강 칼바람, 팰월드 도감과 교배 계산까지 검색창 하나로. 방송 중인 스트리머의 판을 보고 시청자로 직접 참여하세요."
+    description: "YORO.gg에서 LoL 전적과 최근 경기, 증강 칼바람 정보를 검색하고 팰월드 도감·아이템·스킬·교배 조합을 살펴보세요. 방송 중인 스트리머의 게임을 확인하고 시청자 참여 기능으로 함께 플레이할 기회도 찾을 수 있습니다."
   },
   /* 문구의 단일 원본은 대시보드 public-home/i18n/lol-home-i18n.ts 의 seoTitle·seoDescription 입니다.
      서버가 크롤러에게 먼저 주는 값이라 여기로 복제했고, 두 곳이 어긋나면
      test/public-home-seo.test.mjs 가 먼저 깨집니다. */
   "/lol": {
     title: "YORO.gg — LoL 전적, 검색 한 번",
-    description: "LoL 전적 검색과 증강 칼바람 도감, 패치노트까지 한 화면에서. 방송 중인 스트리머의 판을 보고 시청자로 직접 참여하세요."
+    description: "Riot ID로 League of Legends 소환사의 랭크와 최근 경기, 챔피언 숙련도와 포지션 성향을 확인하세요. 증강 칼바람 도감과 패치 노트를 함께 살펴보고, 방송 중인 LoL 스트리머와 시청자 참여 기회도 찾을 수 있습니다."
   },
   "/lol/aram": {
     title: "증강 칼바람 | YORO.gg",
-    description: "증강 칼바람의 증강 정보와 조합 데이터를 확인하세요."
+    description: "League of Legends 증강 칼바람에서 사용할 수 있는 증강을 이름과 설명으로 검색하고 실버·골드·프리즘·레전드 등급별로 필터링하세요. 각 증강의 효과와 아이콘을 확인하고, 검색한 소환사의 최근 경기에서 선택한 증강 기록도 함께 살펴볼 수 있습니다."
   },
   "/patch-notes": {
     title: "LoL 패치 노트 | YORO.gg",
-    description: "리그 오브 레전드 패치 노트를 최신순으로 모아 봅니다. 본문은 Riot Games 원문에서 확인하세요."
+    description: "League of Legends 패치 노트를 최신순으로 시즌별 확인하세요. 패치 번호나 제목으로 목록을 검색하고, 소환사 Riot ID를 입력하면 각 패치 기간에 플레이한 최근 경기와 승률을 함께 볼 수 있습니다. 전체 변경 내용은 연결된 Riot Games 공식 원문에서 확인합니다."
   },
   /* 문구의 단일 원본은 대시보드 public-home/i18n/lol-streamers-i18n.ts 의 seoTitle·seoDescription 입니다.
      서버가 크롤러에게 먼저 주는 값이라 여기로 복제했고, 두 곳이 어긋나면
@@ -1540,19 +1745,19 @@ const KOREAN_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   },
   "/bot": {
     title: "YORO Bot | Discord 게임 서버 도우미",
-    description: "Discord 서버와 게임 서버 운영 기능을 안전하게 연결하는 YORO Bot을 확인하세요."
+    description: "YORO Bot으로 Palworld 서버 상태, 접속 인원, 버전과 응답 시간을 Discord에서 확인하세요. Organization과 읽기 전용 REST 연결, 공개 명령은 Web Dashboard에서 관리하며 설정과 AdminPassword는 Discord에 노출하지 않습니다."
   },
   "/bot/getting-started": {
     title: "사용방법 | YORO Bot",
-    description: "Bot 초대부터 Organization, Palworld REST와 Discord Bot 제어 연결까지 순서대로 확인하세요."
+    description: "YORO Bot을 Discord에 초대하고 로그인한 뒤 관리할 서버를 Organization에 연결하는 과정을 확인하세요. Web Dashboard에서 Palworld 서버의 읽기 전용 REST 연결을 검증하고, 구성원에게 제공할 명령을 활성화해 첫 서버 상태를 조회할 수 있습니다."
   },
   "/bot/commands": {
     title: "명령어 목록 | YORO Bot",
-    description: "YORO Bot의 일반 사용자, 작성자와 관리자 명령 및 활성화 조건을 확인하세요."
+    description: "YORO Bot의 /yoro status, player, guide, dashboard, help와 관리자용 setup, language 명령을 확인하세요. 공개·비공개 응답 방식, 필요한 권한과 Dashboard 활성화 조건, 접두사 명령 별칭까지 실제 제공 범위에 맞춰 안내합니다."
   },
   "/bot/game-files": {
     title: "Palworld 게임파일 | YORO Bot",
-    description: "검증된 PalWorldSettings.ini를 브라우저에서 만들고 안전하게 설치하는 방법을 확인하세요."
+    description: "Palworld 서버에 필요 옵션만 선택해 PalWorldSettings.ini를 브라우저에서 만들고 Windows·Linux 설치 위치를 확인하세요. 입력값은 YORO 서버나 계정에 저장되지 않으며, REST API와 RCON을 직접 노출하지 않는 방화벽·VPN 원칙을 안내합니다."
   },
   "/privacy": {
     title: "개인정보 처리방침 | YORO.gg",
@@ -1568,31 +1773,31 @@ const KOREAN_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   },
   "/palworld": {
     title: "팰월드 데이터베이스 | YORO.gg",
-    description: "Pal, 아이템, 스킬과 교배 정보를 한곳에서 확인하세요."
+    description: "Palworld의 Pal 도감, 아이템, 액티브·파트너·패시브 스킬과 기술 해금 정보를 한곳에서 확인하세요. 부모 Pal 두 마리의 교배 결과와 원하는 자식의 부모 조합을 검색하고, 필드 보스·야생 스폰·이동 지점이 표시된 월드 지도도 함께 탐색할 수 있습니다."
   },
   "/palworld/pals": {
     title: "Pal 도감 | YORO.gg",
-    description: "Palworld Pal의 속성, 능력치, 작업 적성과 상세 정보를 확인하세요."
+    description: "Palworld Pal 도감에서 각 Pal의 도감 번호와 속성, 희귀도, 체력·공격·방어 능력치와 작업 적성을 확인하세요. 파트너 스킬과 드랍 아이템, 해당 Pal이 태어나는 부모 교배 조합, 부모로 사용했을 때 나오는 자식 조합까지 상세 페이지에서 함께 살펴볼 수 있습니다."
   },
   "/palworld/breeding": {
     title: "교배 조합 | YORO.gg",
-    description: "Palworld 일반·특수 교배 결과와 부모 조합을 확인하세요."
+    description: "Palworld 교배 계산기에서 부모 Pal 두 마리를 선택해 태어나는 자식을 확인하거나, 원하는 자식 Pal을 기준으로 가능한 부모 조합을 역검색하세요. 일반 교배와 특정 조합에서만 성립하는 특수 교배를 구분하고, 각 조합의 부모·자식 도감 상세 정보로 바로 이동할 수 있습니다."
   },
   "/palworld/items": {
     title: "아이템 | YORO.gg",
-    description: "Palworld 아이템의 분류, 제작 재료와 상세 정보를 확인하세요."
+    description: "Palworld 아이템을 이름과 분류로 찾고 판매가, 무게, 최대 보유 수량과 기술 해금 레벨을 확인하세요. 각 아이템의 제작 재료와 제작 시설, 획득 방법을 살펴보고 해당 아이템을 드랍하는 Pal의 도감 상세 페이지까지 연결해 필요한 제작·수집 정보를 한곳에서 확인할 수 있습니다."
   },
   "/palworld/technology": {
     title: "Palworld 기술 해금 | YORO.gg",
-    description: "기술 레벨별로 해금되는 Palworld 아이템을 확인하세요."
+    description: "Palworld 기술 해금 목록을 레벨별로 살펴보고 각 단계에서 제작할 수 있게 되는 아이템과 건축물을 확인하세요. 기술 이름이나 아이템을 검색해 필요한 해금 레벨을 빠르게 찾고, 제작에 필요한 상세 정보가 제공되는 아이템 데이터베이스와 함께 성장·거점 계획을 정리할 수 있습니다."
   },
   "/palworld/skills": {
     title: "Palworld 스킬 | YORO.gg",
-    description: "액티브·파트너·패시브 스킬의 효과와 관련 Pal을 확인하세요."
+    description: "Palworld의 액티브 스킬, 파트너 스킬과 패시브 스킬을 이름과 종류로 찾아보세요. 속성, 위력, 쿨타임, 패시브 등급과 효과 설명을 확인하고, 각 스킬을 보유한 Pal 목록에서 도감 상세 페이지로 이동해 능력치·작업 적성·교배 조합 등 관련 정보를 함께 살펴볼 수 있습니다."
   },
   "/palworld/map": {
     title: "Palworld 월드 지도 | YORO.gg",
-    description: "필드 보스·야생 스폰과 이동·수집 위치를 레이어별로 탐색하세요."
+    description: "Palworld 월드 지도에서 필드 보스와 야생 Pal 스폰, 빠른 이동 지점과 수집 위치를 레이어별로 탐색하세요. 필요한 위치 유형만 켜고 끄며 지도를 확대·이동할 수 있고, 표시된 Pal의 이름과 위치 정보를 확인해 도감·교배 데이터와 함께 탐험 및 포획 계획에 활용할 수 있습니다."
   },
   "/palworld/search": {
     title: "Palworld 통합 검색 | YORO.gg",
@@ -1620,19 +1825,19 @@ const KOREAN_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   },
   "/minecraft": {
     title: "마인크래프트 위키 | YORO.gg",
-    description: "Java 마인크래프트 아이템, 조합법과 인챈트 카탈로그를 확인하세요."
+    description: "Java Edition 마인크래프트 위키에서 아이템 이름이나 영문 ID를 검색하고 제작 조합법, 묶음 수와 내구도, 적용 가능한 인챈트 정보를 확인하세요. 3×3 제작대 재료 배치와 인챈트 최대 레벨·상충 관계를 카탈로그별로 살펴보고 필요한 항목을 빠르게 찾을 수 있습니다."
   },
   "/minecraft/recipes": {
     title: "마인크래프트 조합법 | YORO.gg",
-    description: "Java 마인크래프트 제작 조합법과 재료 배치를 검색하세요."
+    description: "Java Edition 마인크래프트 조합법을 결과 아이템 이름이나 영문 ID로 검색하고 제작, 제련, 양조, 대장장이와 석재 절단 유형별로 살펴보세요. 3×3 제작대 그리드 재료 배치, 자유 배치 여부와 사용할 수 있는 재료 변형을 확인해 원하는 아이템의 제작 방법을 찾을 수 있습니다."
   },
   "/minecraft/items": {
     title: "마인크래프트 아이템 | YORO.gg",
-    description: "Java 마인크래프트 아이템의 영문 ID, 묶음 수와 내구도를 확인하세요."
+    description: "Java Edition 마인크래프트 아이템 카탈로그를 이름이나 영문 ID로 검색하세요. 블록·도구·재료 등 각 항목의 이미지와 최대 묶음 수, 내구도 및 적용 가능한 인챈트 수를 확인하고, 조합법 데이터와 함께 필요한 아이템의 식별자와 기본 속성을 빠르게 비교할 수 있습니다."
   },
   "/minecraft/enchants": {
     title: "마인크래프트 인챈트 | YORO.gg",
-    description: "Java 마인크래프트 인챈트의 최대 레벨과 배타 관계를 확인하세요."
+    description: "Java Edition 마인크래프트 인챈트를 이름으로 검색하고 각 효과의 최대 레벨, 저주·보물 전용 여부와 주민 거래 가능 여부를 확인하세요. 함께 적용할 수 없는 인챈트의 상충 관계와 인챈트 테이블·거래 획득 경로를 살펴보고 장비에 맞는 조합을 정리할 수 있습니다."
   },
   "/minecraft/library": {
     title: "마인크래프트 자료실 준비 중 | YORO.gg",
@@ -1644,11 +1849,11 @@ const KOREAN_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   },
   "/games": {
     title: "미니게임 | YORO.gg",
-    description: "게이머 반사신경 훈련장 — 반응속도 테스트로 내 LoL 티어를 확인해 보세요."
+    description: "YORO.gg 미니게임에서 초록 신호 순간 클릭하는 반응속도 테스트에 도전하세요. 다섯 번 측정한 평균으로 LoL 티어를 확인하고, 최고 기록은 브라우저에 저장할 수 있습니다. Twitch 로그인 후 공개 또는 익명으로 기록을 등록해 리더보드와 공유 페이지에서도 비교할 수 있습니다."
   },
   "/streamers": {
     title: "스트리머 추천 | YORO.gg",
-    description: "시청자가 직접 추천한 스트리머를 게임별로 모았습니다. 추천 글은 누구나 읽을 수 있습니다."
+    description: "시청자가 직접 작성한 스트리머 추천 글을 전체·한국·일본 범위와 게임별로 모아 살펴보세요. 채널 링크, 주력 게임과 추천 이유가 담긴 글은 로그인 없이 읽을 수 있고, Twitch로 로그인하면 새로운 스트리머를 추천하거나 기존 글에 댓글과 좋아요를 남길 수 있습니다."
   },
   "/streamers/new": {
     title: "추천 글 쓰기 | YORO.gg",
@@ -1656,26 +1861,26 @@ const KOREAN_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   },
   "/games/reaction": {
     title: "반응속도 테스트 | YORO.gg",
-    description: "초록 신호에 최대한 빨리! 5회 평균으로 LoL 티어 등급을 받아보세요."
+    description: "화면이 초록색으로 바뀌는 순간 마우스·터치·Space로 반응하는 테스트를 다섯 번 진행하고 평균에 맞는 LoL 티어를 확인하세요. 신호 전 입력은 무효 처리되며, 최고 기록은 브라우저에 저장됩니다. 로그인하면 공개 또는 익명으로 등록해 리더보드와 공유 링크에서 비교할 수 있습니다."
   }
 };
 
 const JAPANESE_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   "/": {
     title: "YORO.gg — ゲームデータ、検索ひとつで",
-    description: "LoLの戦績とオーグメントARAM、パルワールドの図鑑と配合計算まで検索ひとつで。配信中のストリーマーの試合を見て、視聴者として参加しましょう。"
+    description: "YORO.ggでは、LoLの戦績・最近の試合・オーグメントARAMを検索し、パルワールドの図鑑、アイテム、スキル、配合組み合わせをまとめて確認できます。配信中のストリーマーの試合を見つけ、視聴者参加機能から一緒にプレイする機会も気軽に探せます。"
   },
   "/lol": {
     title: "YORO.gg — LoL戦績、検索ひとつで",
-    description: "LoLの戦績検索、オーグメントARAM図鑑、パッチノートまでひとつの画面で。配信中のストリーマーの試合を見て、視聴者として参加しましょう。"
+    description: "Riot IDからLeague of Legendsサモナーのランク、最近の試合、チャンピオン熟練度、ロール傾向を確認できます。オーグメントARAM図鑑とパッチノートもあわせて閲覧し、配信中のLoLストリーマーや視聴者参加の機会を探せます。"
   },
   "/lol/aram": {
     title: "オーグメントARAM | YORO.gg",
-    description: "オーグメントARAMのオーグメント情報と組み合わせデータを確認できます。"
+    description: "League of LegendsのオーグメントARAMで利用できるオーグメントを名前や説明から検索し、シルバー・ゴールド・プリズム・レジェンドのレアリティ別に絞り込めます。各効果とアイコンを確認し、検索したサモナーが最近の試合で選んだオーグメント記録もあわせて閲覧できます。"
   },
   "/patch-notes": {
     title: "LoLパッチノート | YORO.gg",
-    description: "リーグ・オブ・レジェンドのパッチノートを新しい順にまとめます。本文はRiot Gamesの原文でご確認ください。"
+    description: "League of Legendsのパッチノートを最新バージョンからシーズン別に確認できます。パッチ番号やタイトルで一覧を検索し、サモナーのRiot IDを入力すると各パッチ期間にプレイした最近の試合と勝率も表示します。変更内容の全文はリンク先のRiot Games公式原文でご確認ください。"
   },
   "/follow": {
     title: "YORO.gg — フォロー中のLoLストリーマー",
@@ -1687,19 +1892,19 @@ const JAPANESE_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   },
   "/bot": {
     title: "YORO Bot | Discordゲームサーバーアシスタント",
-    description: "Discordサーバーとゲームサーバー運用機能を安全に連携するYORO Botを確認できます。"
+    description: "YORO Botを使ってPalworld専用サーバーのオンライン状態、接続人数、ゲームバージョン、応答時間をDiscordから確認できます。Organization、読み取り専用REST接続、公開コマンドの有効化はWeb Dashboardで管理し、機密設定やAdminPasswordをDiscordへ公開しません。"
   },
   "/bot/getting-started": {
     title: "使い方 | YORO Bot",
-    description: "Bot招待からOrganization、Palworld REST、Discord Bot制御の連携まで順番に確認できます。"
+    description: "YORO BotをDiscordサーバーへ招待し、ログイン後に管理対象サーバーをOrganizationへ連携する手順を順番に確認できます。Web DashboardでPalworld専用サーバーの読み取り専用REST接続を検証し、メンバーへ提供するコマンドを有効化して、最初のサーバー状態を取得できます。"
   },
   "/bot/commands": {
     title: "コマンド一覧 | YORO Bot",
-    description: "YORO Botの一般ユーザー、実行者、管理者コマンドと有効化条件を確認できます。"
+    description: "YORO Botの/yoro status、player、guide、dashboard、helpと、管理者向けsetup、languageコマンドをまとめて確認できます。公開・非公開の応答方式、必要な権限、Dashboardでの有効化条件、prefix commandの別名まで、実際の提供範囲に沿って案内します。"
   },
   "/bot/game-files": {
     title: "Palworldゲームファイル | YORO Bot",
-    description: "検証済みPalWorldSettings.iniをブラウザで作成し、安全に設置する方法を確認できます。"
+    description: "Palworld専用サーバーに必要な項目だけを選び、PalWorldSettings.iniをブラウザ内で作成してWindows・Linuxの配置先を確認できます。入力値はYOROサーバーやアカウントに保存されず、REST APIとRCONを直接公開しないファイアウォール・VPNの安全対策も案内します。"
   },
   "/privacy": {
     title: "プライバシーポリシー | YORO.gg",
@@ -1715,31 +1920,31 @@ const JAPANESE_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   },
   "/palworld": {
     title: "パルワールドデータベース | YORO.gg",
-    description: "パル、アイテム、スキル、配合情報をまとめて確認できます。"
+    description: "パルワールドのパル図鑑、アイテム、アクティブ・パートナー・パッシブスキル、テクノロジー解放情報をまとめて確認できます。親パル2体の配合結果や目的の子パルを生む親の組み合わせを検索し、フィールドボス・野生スポーン・移動地点を載せたワールドマップも探索できます。"
   },
   "/palworld/pals": {
     title: "パル図鑑 | YORO.gg",
-    description: "パルの属性、ステータス、作業適性、詳細情報を確認できます。"
+    description: "パルワールドのパル図鑑で、各パルの図鑑番号、属性、レアリティ、HP・攻撃・防御ステータス、作業適性を確認できます。パートナースキルやドロップアイテム、そのパルが生まれる親の配合組み合わせ、親として使った場合に生まれる子パルまで詳細ページでまとめて閲覧できます。"
   },
   "/palworld/breeding": {
     title: "配合組み合わせ | YORO.gg",
-    description: "パルワールドの通常・特殊配合結果と親の組み合わせを確認できます。"
+    description: "パルワールド配合計算機で親パル2体を選び、生まれる子パルを確認できます。目的の子パルから可能な親の組み合わせを逆検索し、通常配合と特定の組み合わせだけで成立する特殊配合を区別して閲覧できます。各組み合わせの親・子パル図鑑にもそのまま移動できます。"
   },
   "/palworld/items": {
     title: "アイテム | YORO.gg",
-    description: "パルワールドのアイテム分類、製作素材、詳細情報を確認できます。"
+    description: "パルワールドのアイテムを名前やカテゴリーから探し、売却価格、重量、最大スタック数、テクノロジー解放レベルを確認できます。各アイテムの製作素材・製作施設・入手方法を調べ、ドロップするパルの図鑑詳細へ移動して、製作と収集に必要な情報をまとめて閲覧できます。"
   },
   "/palworld/technology": {
     title: "テクノロジー解放 | YORO.gg",
-    description: "テクノロジーレベルごとに解放されるアイテムを確認できます。"
+    description: "パルワールドのテクノロジー解放一覧をレベル別に見ながら、各段階で製作可能になるアイテムや建築物を確認できます。テクノロジー名やアイテムを検索して必要な解放レベルをすぐに探し、製作素材などの詳細を掲載するアイテムデータベースとあわせて拠点づくりや成長計画に活用できます。"
   },
   "/palworld/skills": {
     title: "パルワールドスキル | YORO.gg",
-    description: "アクティブ・パートナー・パッシブスキルの効果と関連パルを確認できます。"
+    description: "パルワールドのアクティブスキル、パートナースキル、パッシブスキルを名前や種類から検索できます。属性、威力、クールタイム、パッシブランクと効果説明を確認し、各スキルを持つパルの一覧から図鑑詳細へ移動して、ステータス・作業適性・配合組み合わせもあわせて閲覧できます。"
   },
   "/palworld/map": {
     title: "パルワールドワールドマップ | YORO.gg",
-    description: "フィールドボス、野生スポーン、移動・収集地点をレイヤー別に探索できます。"
+    description: "パルワールドのワールドマップで、フィールドボス、野生パルのスポーン、ファストトラベル地点、収集場所をレイヤー別に探索できます。必要な地点の種類だけを表示して地図を拡大・移動し、マーカーに表示されるパル名と位置情報を図鑑・配合データとあわせて冒険や捕獲計画に活用できます。"
   },
   "/palworld/search": {
     title: "パルワールド統合検索 | YORO.gg",
@@ -1767,19 +1972,19 @@ const JAPANESE_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   },
   "/minecraft": {
     title: "マインクラフト Wiki | YORO.gg",
-    description: "Java版マインクラフトのアイテム、レシピ、エンチャントカタログを確認できます。"
+    description: "Java EditionのマインクラフトWikiで、アイテム名や英語IDを検索し、クラフトレシピ、スタック数、耐久値、適用できるエンチャントを確認できます。3×3作業台の素材配置と、エンチャントの最大レベル・排他関係をカタログ別に調べ、必要な項目をすばやく見つけられます。"
   },
   "/minecraft/recipes": {
     title: "マインクラフト レシピ | YORO.gg",
-    description: "Java版マインクラフトのクラフトレシピと材料配置を検索できます。"
+    description: "Java Editionのマインクラフトレシピを、完成アイテム名や英語IDから検索できます。クラフト、精錬、醸造、鍛冶、石切の種類別に絞り込み、3×3作業台グリッドの素材配置、自由配置の有無、利用できる素材バリエーションを確認して、目的のアイテムの作り方を探せます。"
   },
   "/minecraft/items": {
     title: "マインクラフト アイテム | YORO.gg",
-    description: "Java版マインクラフトのアイテムID、スタック数、耐久値を確認できます。"
+    description: "Java Editionのマインクラフトアイテムカタログを、名前や英語IDから検索できます。ブロック・道具・素材など各項目の画像、最大スタック数、耐久値、適用可能なエンチャント数を確認し、レシピデータとあわせて必要なアイテムの識別子と基本性能をすばやく比較できます。"
   },
   "/minecraft/enchants": {
     title: "マインクラフト エンチャント | YORO.gg",
-    description: "Java版マインクラフトのエンチャント最大レベルと排他関係を確認できます。"
+    description: "Java Editionのマインクラフトエンチャントを名前から検索し、各効果の最大レベル、呪い・宝物限定の区分、村人との取引可否を確認できます。同時に付与できないエンチャントの排他関係と、エンチャントテーブル・取引による入手経路を調べ、装備に合う組み合わせを整理できます。"
   },
   "/minecraft/library": {
     title: "マインクラフト 資料室 準備中 | YORO.gg",
@@ -1791,11 +1996,11 @@ const JAPANESE_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   },
   "/games": {
     title: "ミニゲーム | YORO.gg",
-    description: "ゲーマーの反射神経トレーニング — 反応速度テストで自分のLoLティアを確認しましょう。"
+    description: "YORO.ggのミニゲームで、画面が緑になった瞬間にクリックする反応速度テストへ挑戦できます。5回の測定平均からLoLティアを判定し、自己ベストはこのブラウザに保存できます。Twitchログイン後は公開または匿名で記録を登録し、リーダーボードや共有ページでも比較できます。"
   },
   "/streamers": {
     title: "配信者おすすめ | YORO.gg",
-    description: "視聴者が選んだ配信者をゲーム別にまとめました。おすすめはどなたでも読めます。"
+    description: "視聴者が投稿した配信者のおすすめ記事を、すべて・韓国・日本の範囲とゲーム別にまとめて閲覧できます。チャンネルリンク、主なゲーム、おすすめ理由を記載した記事はログインなしで読めます。Twitchでログインすると新しい配信者を推薦し、既存の記事へコメントやいいねを追加できます。"
   },
   "/streamers/new": {
     title: "おすすめを書く | YORO.gg",
@@ -1803,15 +2008,15 @@ const JAPANESE_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   },
   "/games/reaction": {
     title: "反応速度テスト | YORO.gg",
-    description: "緑の信号にできるだけ早く! 5回平均でLoLティア等級を確認しましょう。"
+    description: "画面が緑色に変わった瞬間にマウス・タッチ・Spaceで反応するテストを5回行い、平均記録に対応するLoLティアを確認できます。信号前の入力はそのラウンドが無効になり、自己ベストはブラウザへ保存されます。ログイン後は公開または匿名で記録を登録し、ランキングや共有リンクで比較できます。"
   }
 };
 
 /* 영어 메타 — 실제 영어 본문이 있는 경로만.
  *
- * 문구는 대시보드 palworld-i18n 의 en 표기(Paldeck·Breeding·Technology 등 게임
- * 내 영문 용어)를 기준으로 맞췄습니다. 여기에 없는 경로의 /en 은 servedSeoLocale
- * 이 ko 로 접으므로 ko 메타 + /ko canonical 로 남습니다. */
+ * 문구는 각 화면이 실제 제공하는 데이터와 대시보드 i18n의 영문 용어를 기준으로
+ * 맞췄습니다. 여기에 없는 경로의 /en은 servedSeoLocale이 ko로 접으므로
+ * ko 메타 + /ko canonical로 남습니다. */
 const ENGLISH_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   /* 루트 홈은 영어 카피가 실제로 있습니다(home-i18n 의 en). 이게 없으면 /en/ 은
      화면만 영어이고 서버는 lang=ko · canonical=/ko/ 로 말해, 크롤러가 영어 페이지를
@@ -1826,7 +2031,7 @@ const ENGLISH_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   },
   "/patch-notes": {
     title: "LoL Patch Notes | YORO.gg",
-    description: "Browse League of Legends patch notes from newest to oldest. Read the full notes on the original Riot Games page."
+    description: "Browse League of Legends patch notes by season, search by patch number or title, and open the full change list on the original Riot Games page."
   },
   /* /follow 는 noindex 이지만(개인화 화면) 언어는 맞아야 합니다 — 없으면 /en/follow 가
      한국어 메타와 lang=ko 로 렌더됩니다. */
@@ -1836,31 +2041,83 @@ const ENGLISH_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   },
   "/palworld": {
     title: "Palworld Database | YORO.gg",
-    description: "Pals, items, skills and breeding combinations in one place."
+    description: "Browse the Paldeck, items, skills, technology unlocks, breeding pairs, field bosses, wild spawns, and travel points in one Palworld database."
   },
   "/palworld/pals": {
     title: "Paldeck | Palworld | YORO.gg",
-    description: "Check each Pal's elements, stats and work suitability."
+    description: "Browse Paldeck numbers, elements, stats, work suitability, partner skills, drops, and parent or child breeding combinations for each Pal."
   },
   "/palworld/breeding": {
     title: "Breeding Pairs | Palworld | YORO.gg",
-    description: "Check breeding results of two parents, or reverse-search parent pairs."
+    description: "Select two parent Pals to find their child, or reverse-search every available parent pair for a desired child, including special breeding pairs."
   },
   "/palworld/items": {
     title: "Items | Palworld | YORO.gg",
-    description: "Check Palworld item categories, crafting materials and details."
+    description: "Search Palworld items by name or category and check sell price, weight, stack size, technology level, crafting materials, facilities, and drop Pals."
   },
   "/palworld/technology": {
     title: "Technology | Palworld | YORO.gg",
-    description: "See which items unlock at each technology level."
+    description: "Browse Palworld technology unlocks by level, search for an item or building, and connect each unlock to the item details needed for crafting plans."
   },
   "/palworld/skills": {
     title: "Skills | Palworld | YORO.gg",
-    description: "Check active, partner and passive skill effects with the pals that have them."
+    description: "Search active, partner, and passive skills, compare element, power, cooldown, tier, and effects, and find every Pal associated with each skill."
   },
   "/palworld/map": {
     title: "World Map | Palworld | YORO.gg",
-    description: "Explore field bosses, wild spawns and travel points by layer."
+    description: "Explore Palworld field bosses, wild Pal spawns, fast-travel points, and collection locations by map layer, with marker names for planning routes."
+  },
+  "/lol/aram": {
+    title: "Augment ARAM | YORO.gg",
+    description: "Search Augment ARAM effects by name or description, filter by Silver, Gold, Prismatic, or Legend rarity, and review augments used in recent matches."
+  },
+  "/bot": {
+    title: "YORO Bot | Discord Game Server Assistant",
+    description: "Check Palworld server status, players, game version, and latency in Discord while managing Organizations, read-only REST access, and commands in the Dashboard."
+  },
+  "/bot/getting-started": {
+    title: "Getting Started | YORO Bot",
+    description: "Follow the setup from inviting YORO Bot and linking a Discord server to an Organization through verifying read-only Palworld REST access and enabling commands."
+  },
+  "/bot/commands": {
+    title: "Commands | YORO Bot",
+    description: "Review YORO Bot status, player, guide, dashboard, help, setup, and language commands with response visibility, permissions, aliases, and activation rules."
+  },
+  "/bot/game-files": {
+    title: "Palworld Game Files | YORO Bot",
+    description: "Create PalWorldSettings.ini in your browser, check Windows and Linux install paths, and review firewall, VPN, REST API, and RCON security guidance."
+  },
+  "/minecraft": {
+    title: "Minecraft Wiki | YORO.gg",
+    description: "Search the Java Edition Minecraft Wiki for item IDs, crafting recipes, stack sizes, durability, enchantments, material grids, and incompatibilities."
+  },
+  "/minecraft/recipes": {
+    title: "Minecraft Recipes | YORO.gg",
+    description: "Search Java Edition Minecraft recipes by result or ID, filter crafting and processing types, and inspect shaped grids, shapeless recipes, and material variants."
+  },
+  "/minecraft/items": {
+    title: "Minecraft Items | YORO.gg",
+    description: "Search the Java Edition Minecraft item catalog by name or ID and compare item images, maximum stack size, durability, and applicable enchantment counts."
+  },
+  "/minecraft/enchants": {
+    title: "Minecraft Enchantments | YORO.gg",
+    description: "Search Java Edition Minecraft enchantments and check maximum levels, curses, treasure status, trade availability, acquisition methods, and incompatible effects."
+  },
+  "/minecraft/patch-notes": {
+    title: "Minecraft Patch Notes | YORO.gg",
+    description: "Browse Java Edition Minecraft releases and snapshots in chronological order, filter by release type, and open each version's complete notes on the official source."
+  },
+  "/games": {
+    title: "Mini-games | YORO.gg",
+    description: "Try a five-round reaction time test, receive a LoL-style tier from your average, save your personal best, and compare registered public or anonymous scores."
+  },
+  "/games/reaction": {
+    title: "Reaction Time Test | YORO.gg",
+    description: "React to the green signal with a mouse, touch, or Space over five rounds, see your average and LoL-style tier, then save or register your best score."
+  },
+  "/streamers": {
+    title: "Streamer Recommendations | YORO.gg",
+    description: "Browse viewer-written streamer recommendations by region and game, open channel links and reasons to watch, or sign in with Twitch to post, comment, and like."
   }
 };
 
@@ -1877,15 +2134,22 @@ function contentForPath(
   options: { minecraftPatchNotesReady?: boolean } = {}
 ): PublicSeoContent {
   if (normalizedPath === "/minecraft/patch-notes" && options.minecraftPatchNotesReady) {
-    return locale === "ja"
-      ? {
-          title: "マインクラフト パッチノート | YORO.gg",
-          description: "Mojang公式配布メタデータに基づくJava版パッチ履歴を新しい順に確認できます。"
-        }
-      : {
-          title: "마인크래프트 패치 노트 | YORO.gg",
-          description: "Mojang 공식 배포 메타데이터 기반 Java Edition 패치 이력을 최신순으로 확인하세요."
-        };
+    if (locale === "ja") {
+      return {
+        title: "マインクラフト パッチノート | YORO.gg",
+        description: "Mojang公式ランチャーの配布メタデータに基づき、Java Editionの正式リリースとスナップショットを新しい順に確認できます。リリース種別で一覧を絞り込み、各バージョンの公開日とYORO.ggが作成したハイライトを読み、変更内容の全文はリンク先の公式パッチノートで確認できます。"
+      };
+    }
+    if (locale === "en") {
+      return {
+        title: "Minecraft Patch Notes | YORO.gg",
+        description: "Browse Java Edition releases and snapshots from Mojang metadata, filter by type, read YORO.gg highlights, and open each version's complete official notes."
+      };
+    }
+    return {
+      title: "마인크래프트 패치 노트 | YORO.gg",
+      description: "Mojang 공식 런처 메타데이터를 바탕으로 Java Edition 정식 릴리스와 스냅샷 이력을 최신순으로 확인하세요. 유형별로 목록을 필터링하고 각 버전의 공개일과 YORO.gg가 작성한 하이라이트를 읽은 뒤, 전체 변경 내용은 연결된 공식 패치 노트에서 확인할 수 있습니다."
+    };
   }
   const table = locale === "ja" ? JAPANESE_CONTENT : KOREAN_CONTENT;
   /* en 은 실제 영어 본문이 있는 경로만 채웁니다. 나머지는 servedSeoLocale 이 ko 로
