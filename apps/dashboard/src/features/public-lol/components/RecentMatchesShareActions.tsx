@@ -51,10 +51,9 @@ type ShareStatus = "idle" | "preparing" | "saved" | "shared" | "failed";
 const SHARE_CARD_WIDTH = 1080;
 /* 필터 결과 상위 10경기 고정 — "필터에 따른 10게임을 항상 보여주도록" 요청 반영. */
 const SHARE_CARD_MAX_MATCHES = 10;
-/* 목업 LolShareCard — 좌우 여백 64, 행 90px(아이템 칸 포함으로 74→90 확장), 2열 간격 44. */
+/* 목업 LolShareCard — 좌우 여백 64, 행 90px(v3: 단일 컬럼, 아이템 6칸 같은 줄 배치). */
 const SHARE_CARD_MARGIN = 64;
 const SHARE_CARD_ROW_HEIGHT = 90;
-const SHARE_CARD_COLUMN_GAP = 44;
 const SHARE_CARD_BODY_FONT = 'Pretendard, "Noto Sans KR", "Noto Sans JP", sans-serif';
 const SHARE_CARD_SERIF_FONT = '"Noto Serif KR", "Noto Serif JP", serif';
 const SHARE_CARD_BRUSH_FONT = '"Yuji Boku", "Yuji Syuku", serif';
@@ -172,12 +171,13 @@ function drawCoverImage(
   y: number,
   width: number,
   height: number,
+  anchor: "center" | "top" = "center",
 ): void {
   const scale = Math.max(width / image.width, height / image.height);
   const sourceWidth = width / scale;
   const sourceHeight = height / scale;
   const sourceX = (image.width - sourceWidth) / 2;
-  const sourceY = (image.height - sourceHeight) / 2;
+  const sourceY = anchor === "top" ? 0 : (image.height - sourceHeight) / 2;
   context.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, x, y, width, height);
 }
 
@@ -262,8 +262,10 @@ export async function createRecentMatchesShareBlob(
     masteryChampionArtUrl?: string;
   } = {},
 ): Promise<Blob> {
-  /* 목업 LolShareCard — 필터 결과 상위 10경기(5 × 2열). 적으면 있는 만큼만
-     그리고 높이를 줄입니다. */
+  /* v3 리디자인 — 경기 기록을 좌우 2열이 아니라 위→아래 한 줄씩(단일 컬럼)으로
+     바꾸고(요청 반영), SNS 만족도 분석(피드 크롭 안전 비율 + 스캔 밀도) 결과에
+     따라 행 높이를 압축(1080×1220 2열 → 1080×1427 1열)해 인스타그램 권장
+     4:5 비율에 근접시켰습니다. 승인 문서: docs/mockups/recent-matches-share-redesign-v1.html(v3). */
   const matches = sourceMatches.slice(0, SHARE_CARD_MAX_MATCHES);
   if (matches.length === 0) throw new Error("share_matches_empty");
 
@@ -271,8 +273,8 @@ export async function createRecentMatchesShareBlob(
   const width = SHARE_CARD_WIDTH;
   const margin = SHARE_CARD_MARGIN;
   const contentWidth = width - margin * 2;
-  const columnWidth = (contentWidth - SHARE_CARD_COLUMN_GAP) / 2;
-  const rowsPerColumn = Math.ceil(matches.length / 2);
+  const rowCount = matches.length;
+  const rowHeight = SHARE_CARD_ROW_HEIGHT;
 
   /* 구역 좌표 — 좌우 64 여백, 구역 간격 56/48/52(목업). */
   const headTop = 64;
@@ -283,7 +285,7 @@ export async function createRecentMatchesShareBlob(
   const summaryHeight = 1 + 30 + 36 + 8 + 19 + 30 + 1;
   const sectionTop = summaryTop + summaryHeight + 48;
   const rowsTop = sectionTop + 30 + 22;
-  const rowsBottom = rowsTop + rowsPerColumn * SHARE_CARD_ROW_HEIGHT;
+  const rowsBottom = rowsTop + rowCount * rowHeight;
   const footerTop = rowsBottom + 52;
   const height = footerTop + 1 + 28 + 21 + 56;
 
@@ -305,39 +307,67 @@ export async function createRecentMatchesShareBlob(
   context.fillStyle = theme.bg;
   context.fillRect(0, 0, width, height);
 
-  /* 머리 오른쪽 — 먹 얼룩 두 겹 + 챔피언 아트, 왼쪽 46% 는 불투명하게 덮어
-     글자를 지킵니다(목업 헤더). */
+  /* 히어로 — 챔피언 아트를 헤더 전체 폭 배경으로 채우고, 텍스트(좌측)가 있는
+     영역만 블러(14px)+반투명 어둠으로 덮어 가독성을 지킵니다(v3, 패치노트
+     공유 카드와 동일 문법). 이미지가 없으면 먹 얼룩 폴백을 그대로 유지합니다. */
   const headerHeight = headBottom + 60;
+  const masteryChampionArt = options.masteryChampionArtUrl
+    ? imageMap.get(options.masteryChampionArtUrl)
+    : undefined;
   context.save();
   context.beginPath();
   context.rect(0, 0, width, headerHeight);
   context.clip();
-  drawInkBlob(context, width - 250, 210, 310, 250, -0.12, theme.blob1);
-  drawInkBlob(context, width - 240, 246, 200, 150, 0.18, theme.blob2);
-  const masteryChampionArt = options.masteryChampionArtUrl
-    ? imageMap.get(options.masteryChampionArtUrl)
-    : undefined;
   if (masteryChampionArt) {
-    context.save();
-    context.globalAlpha = .8;
-    context.beginPath();
-    context.ellipse(width - 240, 246, 200, 150, 0.18, 0, Math.PI * 2);
-    context.clip();
-    drawCoverImage(context, masteryChampionArt, width - 460, 80, 440, 340);
-    context.restore();
+    drawCoverImage(context, masteryChampionArt, 0, 0, width, headerHeight, "top");
+  } else {
+    drawInkBlob(context, width - 250, 210, 310, 250, -0.12, theme.blob1);
+    drawInkBlob(context, width - 240, 246, 200, 150, 0.18, theme.blob2);
   }
-  const heroShade = context.createLinearGradient(0, 0, width, 0);
-  heroShade.addColorStop(0, theme.bg);
-  heroShade.addColorStop(.46, theme.bg);
-  heroShade.addColorStop(.62, `${theme.bg}db`);
-  heroShade.addColorStop(.92, `${theme.bg}26`);
-  heroShade.addColorStop(1, `${theme.bg}00`);
-  context.fillStyle = heroShade;
-  context.fillRect(0, 0, width, headerHeight);
   context.restore();
+
+  if (masteryChampionArt) {
+    const textZoneWidth = Math.min(620, width * 0.58);
+    const blurCanvas = document.createElement("canvas");
+    blurCanvas.width = width;
+    blurCanvas.height = headerHeight;
+    const blurContext = blurCanvas.getContext("2d");
+    if (blurContext) {
+      blurContext.filter = "blur(14px)";
+      drawCoverImage(blurContext, masteryChampionArt, -20, -20, width + 40, headerHeight + 40, "top");
+      context.save();
+      context.beginPath();
+      context.rect(0, 0, textZoneWidth, headerHeight);
+      context.clip();
+      context.drawImage(blurCanvas, 0, 0);
+      const shade = context.createLinearGradient(0, 0, textZoneWidth, 0);
+      shade.addColorStop(0, `${theme.bg}d1`);
+      shade.addColorStop(0.75, `${theme.bg}a8`);
+      shade.addColorStop(1, `${theme.bg}1f`);
+      context.fillStyle = shade;
+      context.fillRect(0, 0, textZoneWidth, headerHeight);
+      context.restore();
+    }
+    const bottomShade = context.createLinearGradient(0, headerHeight - 60, 0, headerHeight);
+    bottomShade.addColorStop(0, `${theme.bg}00`);
+    bottomShade.addColorStop(1, theme.bg);
+    context.fillStyle = bottomShade;
+    context.fillRect(0, headerHeight - 60, width, 60);
+  } else {
+    const heroShade = context.createLinearGradient(0, 0, width, 0);
+    heroShade.addColorStop(0, theme.bg);
+    heroShade.addColorStop(.46, theme.bg);
+    heroShade.addColorStop(.62, `${theme.bg}db`);
+    heroShade.addColorStop(.92, `${theme.bg}26`);
+    heroShade.addColorStop(1, `${theme.bg}00`);
+    context.fillStyle = heroShade;
+    context.fillRect(0, 0, width, headerHeight);
+  }
 
   /* 붓 워드마크 — YORO(Yuji Boku 46px) + .GG(무채 22/800). 보라·파랑 없음. */
   context.textAlign = "start";
+  context.shadowColor = masteryChampionArt ? "rgba(0,0,0,0.5)" : "transparent";
+  context.shadowBlur = masteryChampionArt ? 8 : 0;
   context.fillStyle = theme.ink;
   context.font = `46px ${SHARE_CARD_BRUSH_FONT}`;
   context.fillText("YORO", margin, headTop + 42);
@@ -357,13 +387,15 @@ export async function createRecentMatchesShareBlob(
   const riotTag = hashIndex > 0 ? riotId.slice(hashIndex) : "";
   context.fillStyle = theme.ink;
   context.font = `700 54px ${SHARE_CARD_SERIF_FONT}`;
-  const nameWidth = Math.min(context.measureText(riotName).width, contentWidth - 160);
-  context.fillText(riotName, margin, nameTop + 48, contentWidth - 160);
+  const nameWidth = Math.min(context.measureText(riotName).width, contentWidth - 460);
+  context.fillText(riotName, margin, nameTop + 48, contentWidth - 460);
   if (riotTag) {
     context.fillStyle = theme.mid;
     context.font = `700 28px ${SHARE_CARD_BODY_FONT}`;
     context.fillText(riotTag, margin + nameWidth + 12, nameTop + 48, 150);
   }
+  context.shadowColor = "transparent";
+  context.shadowBlur = 0;
   drawBrushUnderline(context, margin, nameTop + 54 + 8, Math.max(nameWidth, 160), "#4a5563");
 
   /* 요약 — 위아래 헤어라인 사이 padding 30(목업). 평균 KDA 는 공유 데이터에
@@ -407,115 +439,106 @@ export async function createRecentMatchesShareBlob(
     { text: "%", color: theme.mid, small: true },
   ]);
 
-  /* 경기 기록 — 노리개 섹션 표시(홈 문법) + 10 × 2열. */
+  /* 경기 기록 — 노리개 섹션 표시(홈 문법) + 단일 컬럼(v3). */
   drawNorigaeMark(context, margin, sectionTop, theme.mid);
   context.fillStyle = theme.ink;
   context.font = `800 25px ${SHARE_CARD_BODY_FONT}`;
   context.fillText(text.recordTitle ?? text.recentMatches, margin + 28, sectionTop + 24);
 
-  /* 행 트랙(두 열 공통): 승패 30 · 아바타 44 · 이름 1fr · KDA 104(우) · 평점 56(우), gap 14.
-     행 높이가 90px 으로 늘어난 만큼 위쪽 52px 은 기존 요약 줄, 아래 32px 은 아이템 6칸. */
-  const trackGap = 14;
-  const kdaWidth = 104;
-  const gradeWidth = 56;
-  const nameTrackWidth = columnWidth - 30 - 44 - kdaWidth - gradeWidth - trackGap * 4;
+  /* 단일 컬럼 트랙: 승패 30 · 아바타 36 · 이름 1fr · 아이템 6칸 · KDA · 등급.
+     폭이 contentWidth 전체라 이름/큐 뒤에 아이템을 같은 줄에 나란히 배치합니다(v2/v3). */
+  const trackGap = 16;
+  const kdaWidth = 120;
+  const gradeWidth = 40;
   const itemIconSize = 22;
-  const itemIconGap = 6;
+  const itemIconGap = 5;
+  const avatarRadius = 18;
+  const itemsBlockWidth = itemIconSize * 6 + itemIconGap * 5;
+  const nameTrackWidth = contentWidth - 30 - avatarRadius * 2 - itemsBlockWidth - kdaWidth - gradeWidth - trackGap * 5;
+  const gradeColorFor = (grade: string): string => {
+    const normalized = grade.trim().toUpperCase();
+    if (normalized.startsWith("S")) return "#d8b36a";
+    if (normalized.startsWith("A")) return theme.win;
+    return theme.mid;
+  };
 
   matches.forEach((match, index) => {
-    const column = Math.floor(index / rowsPerColumn);
-    const rowIndex = index % rowsPerColumn;
-    const x = margin + column * (columnWidth + SHARE_CARD_COLUMN_GAP);
-    const y = rowsTop + rowIndex * SHARE_CARD_ROW_HEIGHT;
-    /* 요약 줄(승패·아바타·이름·KDA·평점)은 행 상단 52px 안에서 중앙 정렬합니다. */
-    const summaryCenterY = y + 26;
-    const isLastRow = rowIndex === rowsPerColumn - 1;
+    const x = margin;
+    const y = rowsTop + index * rowHeight;
+    const rowCenterY = y + rowHeight / 2;
+    const isLastRow = index === rowCount - 1;
 
-    /* 아래 1px 헤어라인(열 마지막 행은 선 없음). 둥근 카드·색 레일 없음. */
+    /* MVP/ACE 하이라이트 — 배경 tint + 테두리로 카드 전체 폭을 강조합니다. */
+    if (match.highlight) {
+      drawRoundedRect(context, x - 8, y + 2, contentWidth + 8, rowHeight - 8, 8);
+      context.fillStyle = match.highlight === "mvp" ? "rgba(216,179,106,0.10)" : "rgba(99,195,117,0.08)";
+      context.fill();
+      context.strokeStyle = match.highlight === "mvp" ? "rgba(216,179,106,0.4)" : "rgba(99,195,117,0.35)";
+      context.lineWidth = 1;
+      context.stroke();
+    }
     if (!isLastRow) {
       context.fillStyle = theme.line;
-      context.fillRect(x, y + SHARE_CARD_ROW_HEIGHT - 1, columnWidth, 1);
+      context.fillRect(x, y + rowHeight - 1, contentWidth, 1);
     }
 
     /* 승/패 글자 — 전용색 두 가지에만. */
     const resultColor = match.result === "win" ? theme.win : match.result === "loss" ? theme.loss : theme.mid;
     context.fillStyle = resultColor;
     context.font = `800 22px ${SHARE_CARD_BODY_FONT}`;
-    context.fillText(match.resultLabel.slice(0, 1) || "—", x, summaryCenterY + 8);
+    context.fillText(match.resultLabel.slice(0, 1) || "—", x, rowCenterY + 8);
 
-    /* 아바타 44 원형. */
+    /* 아바타 원형 — MVP/ACE 는 강조 테두리 + 원형 배지. */
     const avatarX = x + 30 + trackGap;
-    const avatarCenterX = avatarX + 22;
+    const avatarCenterX = avatarX + avatarRadius;
     const championImage = match.championIconUrl ? imageMap.get(match.championIconUrl) : undefined;
     if (championImage) {
-      drawCircularImage(context, championImage, avatarCenterX, summaryCenterY, 22);
+      drawCircularImage(context, championImage, avatarCenterX, rowCenterY, avatarRadius);
     } else {
       context.beginPath();
-      context.arc(avatarCenterX, summaryCenterY, 22, 0, Math.PI * 2);
+      context.arc(avatarCenterX, rowCenterY, avatarRadius, 0, Math.PI * 2);
       context.fillStyle = theme.card;
       context.fill();
       context.fillStyle = theme.mid;
       context.textAlign = "center";
-      context.font = `800 17px ${SHARE_CARD_BODY_FONT}`;
-      context.fillText(match.championName.slice(0, 1), avatarCenterX, summaryCenterY + 6);
+      context.font = `800 15px ${SHARE_CARD_BODY_FONT}`;
+      context.fillText(match.championName.slice(0, 1), avatarCenterX, rowCenterY + 5);
       context.textAlign = "start";
     }
     context.beginPath();
-    context.arc(avatarCenterX, summaryCenterY, 22, 0, Math.PI * 2);
-    context.strokeStyle = theme.line;
-    context.lineWidth = 1;
+    context.arc(avatarCenterX, rowCenterY, avatarRadius, 0, Math.PI * 2);
+    context.strokeStyle = match.highlight === "mvp" ? "#d8b36a" : match.highlight === "ace" ? theme.win : theme.line;
+    context.lineWidth = match.highlight ? 2.5 : 1;
     context.stroke();
-
-    /* 이름(23/700) · 큐·시간(17 --mid). */
-    const nameX = avatarX + 44 + trackGap;
-    context.fillStyle = theme.ink;
-    context.font = `700 23px ${SHARE_CARD_BODY_FONT}`;
-    context.fillText(match.championName, nameX, summaryCenterY - 4, nameTrackWidth);
-    context.fillStyle = theme.mid;
-    context.font = `500 17px ${SHARE_CARD_BODY_FONT}`;
-    context.fillText(`${match.queueLabel} · ${match.durationLabel}`, nameX, summaryCenterY + 20, nameTrackWidth);
-
-    /* KDA 우측 정렬 — 데스 숫자만 패색. */
-    const kdaRight = x + columnWidth - gradeWidth - trackGap;
-    const kdaParts = match.kda.split("/").map((part) => part.trim());
-    context.font = `800 23px ${SHARE_CARD_BODY_FONT}`;
-    if (kdaParts.length === 3) {
-      const segments: Array<{ text: string; color: string }> = [
-        { text: kdaParts[0]!, color: theme.ink },
-        { text: "/", color: theme.mid },
-        { text: kdaParts[1]!, color: theme.loss },
-        { text: "/", color: theme.mid },
-        { text: kdaParts[2]!, color: theme.ink },
-      ];
-      let totalWidth = 0;
-      for (const segment of segments) totalWidth += context.measureText(segment.text).width;
-      let drawX = kdaRight - totalWidth;
-      for (const segment of segments) {
-        context.fillStyle = segment.color;
-        context.fillText(segment.text, drawX, summaryCenterY + 8);
-        drawX += context.measureText(segment.text).width;
-      }
-    } else {
-      context.fillStyle = theme.ink;
-      context.textAlign = "right";
-      context.fillText(match.kda, kdaRight, summaryCenterY + 8, kdaWidth);
+    if (match.highlight) {
+      const badgeX = avatarCenterX + 12;
+      const badgeY = rowCenterY + 12;
+      context.beginPath();
+      context.arc(badgeX, badgeY, 8, 0, Math.PI * 2);
+      context.fillStyle = match.highlight === "mvp" ? "#d8b36a" : theme.win;
+      context.fill();
+      context.fillStyle = theme.bg;
+      context.font = `800 9px ${SHARE_CARD_BODY_FONT}`;
+      context.textAlign = "center";
+      context.fillText(match.highlight === "mvp" ? "M" : "A", badgeX, badgeY + 3);
       context.textAlign = "start";
     }
 
-    /* 평점(kdaMetric 의 수치) 우측 정렬. */
-    const gradeText = match.kdaMetric.split(" ")[0] ?? match.kdaMetric;
-    context.fillStyle = theme.sub;
-    context.font = `500 20px ${SHARE_CARD_BODY_FONT}`;
-    context.textAlign = "right";
-    context.fillText(gradeText, x + columnWidth, summaryCenterY + 7, gradeWidth);
-    context.textAlign = "start";
+    /* 이름(21/700) · 큐·시간(15 --mid). */
+    const nameX = avatarX + avatarRadius * 2 + trackGap;
+    context.fillStyle = theme.ink;
+    context.font = `700 21px ${SHARE_CARD_BODY_FONT}`;
+    context.fillText(match.championName, nameX, rowCenterY - 6, nameTrackWidth);
+    context.fillStyle = theme.mid;
+    context.font = `500 15px ${SHARE_CARD_BODY_FONT}`;
+    context.fillText(`${match.queueLabel} · ${match.durationLabel}`, nameX, rowCenterY + 15, nameTrackWidth);
 
-    /* 아이템 6칸(장비) — 요약 줄 아래, 아바타와 같은 x축에서 시작해 정렬을 맞춥니다.
-       비어 있는 슬롯은 헤어라인 테두리만 그려 실제 빌드의 빈 칸을 정직하게 보여줍니다. */
-    const itemsY = y + SHARE_CARD_ROW_HEIGHT - 12 - itemIconSize;
+    /* 아이템 6칸 — 이름 오른쪽, 같은 줄에 나란히 배치(단일 컬럼이라 폭이 남음). */
+    const itemsX = nameX + nameTrackWidth + trackGap;
+    const itemsY = rowCenterY - itemIconSize / 2;
     const equipmentSlots = match.itemIconUrls.slice(0, 6);
     equipmentSlots.forEach((iconUrl, slotIndex) => {
-      const slotX = avatarX + slotIndex * (itemIconSize + itemIconGap);
+      const slotX = itemsX + slotIndex * (itemIconSize + itemIconGap);
       const itemImage = iconUrl ? imageMap.get(iconUrl) : undefined;
       if (itemImage) {
         context.save();
@@ -533,6 +556,53 @@ export async function createRecentMatchesShareBlob(
       context.lineWidth = 1;
       context.stroke();
     });
+
+    /* KDA — 아이템 블록 오른쪽, 우측 정렬(데스만 패색). */
+    const kdaRight = itemsX + itemsBlockWidth + trackGap + kdaWidth;
+    const kdaParts = match.kda.split("/").map((part) => part.trim());
+    context.font = `800 21px ${SHARE_CARD_BODY_FONT}`;
+    if (kdaParts.length === 3) {
+      const segments: Array<{ text: string; color: string }> = [
+        { text: kdaParts[0]!, color: theme.ink },
+        { text: "/", color: theme.mid },
+        { text: kdaParts[1]!, color: theme.loss },
+        { text: "/", color: theme.mid },
+        { text: kdaParts[2]!, color: theme.ink },
+      ];
+      let totalWidth = 0;
+      for (const segment of segments) totalWidth += context.measureText(segment.text).width;
+      let drawX = kdaRight - totalWidth;
+      for (const segment of segments) {
+        context.fillStyle = segment.color;
+        context.fillText(segment.text, drawX, rowCenterY - 6);
+        drawX += context.measureText(segment.text).width;
+      }
+    } else {
+      context.fillStyle = theme.ink;
+      context.textAlign = "right";
+      context.fillText(match.kda, kdaRight, rowCenterY - 6, kdaWidth);
+      context.textAlign = "start";
+    }
+    const gradeText = match.kdaMetric.split(" ")[0] ?? match.kdaMetric;
+    context.fillStyle = theme.sub;
+    context.font = `500 14px ${SHARE_CARD_BODY_FONT}`;
+    context.textAlign = "right";
+    context.fillText(gradeText, kdaRight, rowCenterY + 15, kdaWidth);
+    context.textAlign = "start";
+
+    /* 등급 배지 — 맨 오른쪽 원형(S=골드, A=초록, 그 외 무채). */
+    const gradeColor = gradeColorFor(match.grade);
+    const gradeCx = x + contentWidth - gradeWidth / 2;
+    context.beginPath();
+    context.arc(gradeCx, rowCenterY, 15, 0, Math.PI * 2);
+    context.strokeStyle = gradeColor;
+    context.lineWidth = 1.6;
+    context.stroke();
+    context.fillStyle = gradeColor;
+    context.font = `800 16px ${SHARE_CARD_BODY_FONT}`;
+    context.textAlign = "center";
+    context.fillText(match.grade, gradeCx, rowCenterY + 5);
+    context.textAlign = "start";
   });
 
   /* 꼬리 — 헤어라인 + 좌 안내 / 우 날짜. */
