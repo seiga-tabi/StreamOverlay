@@ -4722,7 +4722,29 @@ export function createHttpHandler(input: HttpHandlerInput) {
          임의 문자열로 무한히 만들 수 있는 URL 공간이 전부 색인 후보가 되면
          Search Console에 soft 404·"크롤링됨-색인 생성 안 됨"이 쌓입니다.
          실제로 조회되어 캐시에 남은 프로필만 색인을 허용합니다. */
-      if (!profile) return { ...fallback, robotsNoindex: true };
+      if (!profile) {
+        /* 첫 SSR 요청은 기존처럼 즉시 noindex fallback을 반환하되, 형식이 검증된
+           Riot ID만 기존 프로필 빌드 경로로 비동기 예열합니다. 이 빌드는
+           publicLolProfileInFlight dedup과 RiotApiClient의 전역 limiter를 그대로
+           통과하며, 실패는 다음 응답에 영향을 주지 않도록 여기서 삼킵니다. */
+        const parsed = parseRiotIdDetailed(`${route.gameName}#${route.tagLine}`);
+        if (parsed.ok) {
+          const routing = publicLolRouting(route.lolPlatform, input.riot);
+          const key = publicLolProfileCacheKey(parsed.gameName, parsed.tagLine, routing.lolPlatform);
+          void startPublicLolProfileBuild(
+            key,
+            `${parsed.gameName}#${parsed.tagLine}`,
+            routing,
+          ).catch((error) => {
+            input.logger?.error({
+              type: "public_lol.social_metadata_background_build_failed",
+              riotIdKey: key,
+              error: toSafeErrorMessage(error),
+            });
+          });
+        }
+        return { ...fallback, robotsNoindex: true };
+      }
       const summary = buildPublicLolSocialSummary(profile, route.locale);
       const safeProfileSlug = encodeURIComponent(`${route.gameName}-${route.tagLine}`);
       const ja = route.locale === "ja";
