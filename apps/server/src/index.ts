@@ -726,6 +726,7 @@ const server = http.createServer(createHttpHandler({
   publicTwitchAuth,
   eventSub: twitchEventSub,
   logger,
+  events,
   refreshLolProfile: (entryId, streamerId) => refreshLolProfileForEntry(moduleContext, entryId, streamerId),
   sessions,
   supportMailbox,

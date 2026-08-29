@@ -112,6 +112,9 @@ function fakeRiot() {
     },
     async getChampionMasteryTopByPuuid() {
       return [];
+    },
+    routingStatus() {
+      return { lolPlatform: "kr" };
     }
   };
 }
@@ -304,4 +307,161 @@ test("아카이브 조회가 실패해도 경기 목록은 살아 있다", async
   assert.equal(archiveEvent.status, 503);
   assert.equal(events.find((event) => event.type === "twitch.vod_index_loaded")?.cacheTtlMs, 30_000);
   assert.equal(events.find((event) => event.type === "public_lol.replays_matched")?.matchedCount, 0);
+});
+
+test("참여 큐에 새로 등록된 스트리머는 캐시가 살아 있어도 이벤트로 즉시 다시보기가 붙는다", async () => {
+  /* 결함 재현(2026-08-28 실사용자 보고): 프로필이 먼저 캐시된 뒤(참여 큐가 비어
+     Twitch 연동이 없는 상태) 참여 신청(채팅 명령 포함)으로 twitchUserId가
+     새로 매칭돼도, EventBus 구독이 캐시를 무효화하지 않으면 캐시 TTL(10분)이
+     끝날 때까지 다시보기 버튼이 나타나지 않는다. */
+  const { EventBus } = await import("../dist/core/event-bus.js");
+  const events = new EventBus();
+  const participationQueue = [];
+  const store = { getParticipationQueue: () => participationQueue };
+  let archiveCalls = 0;
+  const twitch = {
+    async getArchiveVideosByUserId(userId) {
+      archiveCalls += 1;
+      const data = [{ id: "9001", created_at: VOD_START, duration: "3h", type: "archive" }];
+      return { state: "ready", status: 200, count: data.length, payload: { data } };
+    }
+  };
+  const handler = createHttpHandler({
+    store,
+    twitchAuth: {},
+    actions: { async dispatchOne() {} },
+    logger: { event: () => {}, error: () => {} },
+    riot: fakeRiot(),
+    twitch,
+    events
+  });
+
+  const beforeJoin = await get(handler, "/api/lol/matches?riotId=%EB%B0%A4%ED%86%A8%23KR1&platform=kr");
+  assert.equal(beforeJoin.status, 200);
+  assert.equal(beforeJoin.json.recentMatches[0]?.replay, undefined, "참여 전에는 연동이 없어 다시보기가 없어야 합니다");
+  assert.equal(archiveCalls, 0);
+
+  /* 참여 신청 접수 — 채팅 명령(!join)을 포함해 모든 참여 경로가 이 이벤트를
+     발행한다(participation.module.ts::emitEntryCreated). */
+  participationQueue.push({
+    riotGameName: "밤톨",
+    riotTagLine: "KR1",
+    twitchUserId: "55",
+    twitchLogin: "bamtol",
+    twitchDisplayName: "밤톨"
+  });
+  events.emit({
+    type: "participation.entryCreated",
+    id: "event-1",
+    entryId: "part-1",
+    twitchUserId: "55",
+    twitchUserName: "밤톨",
+    riotGameName: "밤톨",
+    riotTagLine: "KR1",
+    createdAt: new Date().toISOString()
+  });
+
+  const afterJoin = await get(handler, "/api/lol/matches?riotId=%EB%B0%A4%ED%86%A8%23KR1&platform=kr");
+  assert.equal(afterJoin.status, 200);
+  assert.ok(afterJoin.json.recentMatches[0]?.replay, "이벤트로 캐시가 무효화돼 다시보기가 즉시 붙어야 합니다");
+  assert.equal(afterJoin.json.recentMatches[0].replay.vodId, "9001");
+  assert.equal(archiveCalls, 1, "무효화 후 재조회에서만 아카이브를 다시 불러야 합니다");
+});
+
+test("참여 취소된 스트리머는 캐시가 살아 있어도 이벤트로 즉시 다시보기가 사라진다", async () => {
+  /* 반대 방향 결함(2026-08-29 개선 방안 점검): 참여를 취소해도 캐시가
+     무효화되지 않으면, 캐시 TTL이 끝날 때까지 다시보기 버튼이 계속 남아
+     있었다. participation.entryRemoved 이벤트(채팅 !cancel 경로 포함)로
+     캐시를 즉시 비운다. */
+  const { EventBus } = await import("../dist/core/event-bus.js");
+  const events = new EventBus();
+  let participationQueue = [{
+    riotGameName: "밤톨",
+    riotTagLine: "KR1",
+    twitchUserId: "55",
+    twitchLogin: "bamtol",
+    twitchDisplayName: "밤톨"
+  }];
+  const store = {
+    getParticipationQueue: () => participationQueue,
+    getActiveParticipationQueue: () => participationQueue
+  };
+  let archiveCalls = 0;
+  const twitch = {
+    async getArchiveVideosByUserId() {
+      archiveCalls += 1;
+      const data = [{ id: "9001", created_at: VOD_START, duration: "3h", type: "archive" }];
+      return { state: "ready", status: 200, count: data.length, payload: { data } };
+    }
+  };
+  const handler = createHttpHandler({
+    store,
+    twitchAuth: {},
+    actions: { async dispatchOne() {} },
+    logger: { event: () => {}, error: () => {} },
+    riot: fakeRiot(),
+    twitch,
+    events
+  });
+
+  const beforeCancel = await get(handler, "/api/lol/matches?riotId=%EB%B0%A4%ED%86%A8%23KR1&platform=kr");
+  assert.equal(beforeCancel.status, 200);
+  assert.ok(beforeCancel.json.recentMatches[0]?.replay, "취소 전에는 다시보기가 붙어 있어야 합니다");
+  assert.equal(archiveCalls, 1);
+
+  /* 채팅 명령(!cancel)을 포함한 취소 처리 — 참여 큐에서 제거되고 이벤트가
+     발행된다(participation.module.ts::emitEntryRemoved). */
+  participationQueue = [];
+  events.emit({
+    type: "participation.entryRemoved",
+    id: "event-2",
+    entryId: "part-1",
+    twitchUserId: "55",
+    riotGameName: "밤톨",
+    riotTagLine: "KR1",
+    reason: "cancelled",
+    createdAt: new Date().toISOString()
+  });
+
+  const afterCancel = await get(handler, "/api/lol/matches?riotId=%EB%B0%A4%ED%86%A8%23KR1&platform=kr");
+  assert.equal(afterCancel.status, 200);
+  assert.equal(afterCancel.json.recentMatches[0]?.replay, undefined, "취소 후에는 이벤트로 캐시가 무효화돼 다시보기가 즉시 사라져야 합니다");
+  assert.equal(archiveCalls, 1, "연동이 없으면 아카이브를 다시 조회하지 않아야 합니다");
+});
+
+test("buildPublicLolTwitchStream은 getActiveParticipationQueue를 써서 취소된 엔트리를 후보에서 제외한다", async () => {
+  /* getParticipationQueue(전체, cancelled 포함)를 쓰면 취소 후에도 candidate가
+     남는 반대 방향 결함이 재발한다 — getActiveParticipationQueue가 실제로
+     호출되는지 직접 확인한다. */
+  let activeCalls = 0;
+  let allCalls = 0;
+  const store = {
+    getParticipationQueue: () => {
+      allCalls += 1;
+      return [{
+        riotGameName: "밤톨",
+        riotTagLine: "KR1",
+        twitchUserId: "55",
+        twitchLogin: "bamtol",
+        twitchDisplayName: "밤톨"
+      }];
+    },
+    getActiveParticipationQueue: () => {
+      activeCalls += 1;
+      return [];
+    }
+  };
+  const twitch = {
+    async getArchiveVideosByUserId() {
+      throw new Error("active 큐가 비었으면 호출되면 안 됩니다");
+    }
+  };
+  const result = await get(
+    handlerWith({ twitch, store }),
+    "/api/lol/matches?riotId=%EB%B0%A4%ED%86%A8%23KR1&platform=kr"
+  );
+  assert.equal(result.status, 200);
+  assert.equal(result.json.recentMatches[0]?.replay, undefined, "active 큐가 비었으므로 다시보기가 없어야 합니다");
+  assert.ok(activeCalls > 0, "getActiveParticipationQueue가 호출돼야 합니다");
+  assert.equal(allCalls, 0, "getActiveParticipationQueue가 있으면 getParticipationQueue(전체)는 쓰지 않아야 합니다");
 });

@@ -97,6 +97,8 @@ import {
   type GlobalAdminAuditAction,
   type StreamerProfileLink,
   type StreamerRiotIdentity,
+  type ParticipationEntryCreatedInternalEvent,
+  type ParticipationEntryRemovedInternalEvent,
   type StreamerRiotIdRequest,
   type StreamerRiotIdRequestListItem,
   type StreamerRiotIdRequestListResponse,
@@ -148,6 +150,7 @@ import {
 import { HomeSocialCardRenderer } from "../services/home-social-card.js";
 import { appConfig, legalRuntimeConfigReady } from "../config.js";
 import type { TwitchEventSubClient } from "../services/twitch-eventsub-client.js";
+import type { EventBus } from "../core/event-bus.js";
 import { rankedEmblemAssetPath } from "../services/ranked-emblems.js";
 import { getRewardMappingSummaries } from "../modules/rewards.module.js";
 import {
@@ -2580,6 +2583,12 @@ type HttpHandlerInput = {
   eventSub?: TwitchEventSubClient;
   logger?: Pick<JsonlLogger, "error"> & Partial<Pick<JsonlLogger, "event">>;
   refreshLolProfile?: (entryId: string, streamerId?: string) => Promise<boolean>;
+  /* 참여 큐(채팅 명령 !join 포함) 등록이 다시보기 후보(twitchUserId)를 바꿀 때
+     공개 LoL 프로필 캐시를 무효화하기 위한 구독 대상. index.ts가 봇 모듈과
+     공유하는 전역 EventBus를 그대로 넘긴다 — 별도 이벤트 버스를 새로 만들지
+     않는다(실사용자 보고: 참여 신청으로 연동된 스트리머의 다시보기 버튼이
+     캐시가 자연 만료될 때까지 나타나지 않던 결함, 2026-08-28). */
+  events?: EventBus;
   sessions?: DashboardSessionStore;
   supportMailbox?: SupportMailboxStore;
   readiness?: ReadinessCheck;
@@ -5219,7 +5228,13 @@ export function createHttpHandler(input: HttpHandlerInput) {
   async function buildPublicLolTwitchStream(gameName: string, tagLine: string): Promise<PublicLolTwitchStream | undefined> {
     const riotIdKey = normalizeRiotIdKey(gameName, tagLine);
     const candidates = new Map<string, PublicLolTwitchCandidate>();
-    const participationQueue = typeof input.store.getParticipationQueue === "function" ? input.store.getParticipationQueue() : [];
+    /* getActiveParticipationQueue — 취소/스킵된(cancelled/skipped) 엔트리는
+       다시보기 후보에서 제외한다. getParticipationQueue(전체)를 쓰면 참여를
+       취소한 뒤에도 그 twitchUserId가 계속 candidate로 남아 다시보기가
+       사라지지 않는 반대 방향 결함이 생긴다(2026-08-29 개선 방안 점검). */
+    const participationQueue = typeof input.store.getActiveParticipationQueue === "function"
+      ? input.store.getActiveParticipationQueue()
+      : typeof input.store.getParticipationQueue === "function" ? input.store.getParticipationQueue() : [];
 
     for (const entry of participationQueue) {
       if (!entry.riotGameName || !entry.riotTagLine) continue;
@@ -6480,7 +6495,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
         throw new HttpRequestError(409, { error: "현재 참가자 처리가 끝난 뒤 다음 참가자를 선정해 주세요.", code: "CURRENT_PARTICIPANT_ACTIVE" });
       }
     } else {
-      input.store.markParticipant(entryIds[0]!, body.status as ParticipationStatus, streamerId);
+      const updatedEntry = input.store.markParticipant(entryIds[0]!, body.status as ParticipationStatus, streamerId);
+      if (updatedEntry) invalidatePublicLolProfileCachesForRiotId(updatedEntry.riotGameName, updatedEntry.riotTagLine);
     }
     await broadcastParticipationQueue(input, "dashboard.lol_operations.entry_status", streamerId);
     return input.store.getParticipationState(streamerId);
@@ -7216,6 +7232,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (targetGame === "lol" && input.refreshLolProfile && saved.entry.profileStatus !== "ready") {
       void input.refreshLolProfile(saved.entry.id, streamerState.scopeStreamerId).catch(() => undefined);
     }
+    if (targetGame === "lol") {
+      invalidatePublicLolProfileCachesForRiotId(saved.entry.riotGameName, saved.entry.riotTagLine);
+    }
     const state = await getPublicParticipationState(req, status, streamerState.selectedStreamerId, selectedSession?.publicSessionId);
     return {
       ok: true,
@@ -7258,6 +7277,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         : "취소할 참여 신청을 찾지 못했습니다.";
       throw new HttpRequestError(result.reason === "in_game" ? 409 : 404, { error });
     }
+    invalidatePublicLolProfileCachesForRiotId(result.entry.riotGameName, result.entry.riotTagLine);
     await broadcastParticipationQueue(
       { store: input.store, actions: input.actions },
       "public.participation_cancel",
@@ -7545,6 +7565,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (session.game === "lol" && input.refreshLolProfile && saved.entry.profileStatus !== "ready") {
       void input.refreshLolProfile(saved.entry.id, principal.channelId).catch(() => undefined);
     }
+    if (session.game === "lol") {
+      invalidatePublicLolProfileCachesForRiotId(saved.entry.riotGameName, saved.entry.riotTagLine);
+    }
     return {
       ok: true,
       alreadyJoined: false,
@@ -7569,6 +7592,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         code: result.reason === "in_game" ? "CANCEL_NOT_AVAILABLE" : "PARTICIPATION_NOT_FOUND"
       });
     }
+    invalidatePublicLolProfileCachesForRiotId(result.entry.riotGameName, result.entry.riotTagLine);
     await broadcastParticipationQueue(
       { store: input.store, actions: input.actions },
       "twitch.extension_participation_cancel",
@@ -7616,6 +7640,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         code: result.reason === "not_selected" ? "SKIP_NOT_AVAILABLE" : "PARTICIPATION_NOT_FOUND"
       });
     }
+    invalidatePublicLolProfileCachesForRiotId(result.entry.riotGameName, result.entry.riotTagLine);
     await broadcastParticipationQueue(
       { store: input.store, actions: input.actions },
       "public.participation_skip",
@@ -8375,9 +8400,35 @@ export function createHttpHandler(input: HttpHandlerInput) {
 
   function invalidatePublicLolProfileCachesForStreamer(request: StreamerRiotIdRequest | undefined): void {
     if (!request?.riotGameName || !request.riotTagLine) return;
-    const routing = publicLolRouting(input.riot?.routingStatus().lolPlatform, input.riot);
-    invalidatePublicLolProfileCaches(publicLolProfileCacheKey(request.riotGameName, request.riotTagLine, routing.lolPlatform));
+    invalidatePublicLolProfileCachesForRiotId(request.riotGameName, request.riotTagLine);
   }
+
+  /* 승인된 스트리머(StreamerRiotIdRequest)가 아니라도 참여 큐 등록으로 다시보기
+     후보(buildPublicLolTwitchStream의 participation 소스)가 바뀌는 경로가 있다 —
+     참여 신청/변경 시 이 함수로 캐시를 무효화하지 않으면, 이미 캐시된(최대 24h)
+     프로필에는 새로 연결된 twitchUserId가 반영되지 않아 다시보기 버튼이
+     그 시간 동안 나타나지 않는다(실사용자 보고, 2026-08-28). */
+  function invalidatePublicLolProfileCachesForRiotId(gameName: string | undefined, tagLine: string | undefined): void {
+    if (!gameName || !tagLine) return;
+    const routing = publicLolRouting(input.riot?.routingStatus().lolPlatform, input.riot);
+    invalidatePublicLolProfileCaches(publicLolProfileCacheKey(gameName, tagLine, routing.lolPlatform));
+  }
+
+  /* 채팅 명령(!join)을 포함한 모든 참여 신청 경로가 이 이벤트를 발행한다
+     (participation.module.ts::emitEntryCreated) — 웹/Extension 참여 신청의
+     직접 호출(위 두 지점)과 달리 채팅 경로는 http-api.ts와 완전히 분리된
+     봇 모듈이라 직접 호출할 수 없어, 이미 존재하는 전역 EventBus 구독으로
+     커버한다(lol-profile-enrichment.module.ts와 같은 패턴). */
+  input.events?.on<ParticipationEntryCreatedInternalEvent>("participation.entryCreated", (event) => {
+    invalidatePublicLolProfileCachesForRiotId(event.riotGameName, event.riotTagLine);
+  });
+
+  /* 채팅 명령(!cancel 등)으로 참여를 취소/거절할 때도 같은 이유로 EventBus
+     구독이 필요하다 — 웹/Extension/대시보드 경로는 위에서 직접 호출로
+     커버했다(2026-08-29 개선 방안 점검). */
+  input.events?.on<ParticipationEntryRemovedInternalEvent>("participation.entryRemoved", (event) => {
+    invalidatePublicLolProfileCachesForRiotId(event.riotGameName, event.riotTagLine);
+  });
 
   function startPublicLolProfileBuild(key: string, riotId: string, routing: LolRoutingContext): Promise<PublicLolProfileResponse> {
     const running = publicLolProfileInFlight.get(key);
@@ -13342,6 +13393,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         }
         const updated = input.store.markParticipant(body.entryId.trim(), body.status as ParticipationStatus, compatibilityStreamerId);
         if (!updated) return sendJson(req, res, 404, { error: "시참 entry를 찾을 수 없습니다." });
+        invalidatePublicLolProfileCachesForRiotId(updated.riotGameName, updated.riotTagLine);
         await input.store.flushRuntimeState();
         return sendJson(req, res, 200, input.store.getParticipationState(compatibilityStreamerId));
       }

@@ -191,6 +191,29 @@ function emitEntryCreated(ctx: ModuleContext, entry: ParticipationEntry, streame
   });
 }
 
+/* 취소/스킵/거절로 참여 큐에서 빠질 때 다시보기 후보 캐시를 무효화할 수 있도록
+   http-api.ts가 구독하는 이벤트를 발행한다(2026-08-29, 개선 방안 점검 결과 —
+   기존에는 참여 취소 시 캐시 무효화가 전혀 없어, 취소한 뒤에도 다시보기
+   버튼이 캐시 TTL 동안 계속 남아 있는 반대 방향 결함이 있었다). */
+function emitEntryRemoved(
+  ctx: ModuleContext,
+  entry: ParticipationEntry,
+  reason: "cancelled" | "skipped" | "rejected",
+  streamerId?: string
+): void {
+  ctx.events.emit({
+    type: "participation.entryRemoved",
+    id: newId("event"),
+    entryId: entry.id,
+    streamerId,
+    twitchUserId: entry.twitchUserId,
+    riotGameName: entry.riotGameName,
+    riotTagLine: entry.riotTagLine,
+    reason,
+    createdAt: nowIso()
+  });
+}
+
 async function resolveRiotAccount(ctx: ModuleContext, entry: ParticipationEntry) {
   let lastError: unknown;
 
@@ -228,6 +251,7 @@ async function verifyPendingParticipation(
 
     if (!account) {
       const rejected = ctx.store.markParticipant(entry.id, "rejected", streamerId);
+      if (rejected) emitEntryRemoved(ctx, rejected, "rejected", streamerId);
       ctx.logger.event({
         type: "participation.verification_rejected",
         reason: "riot_account_not_found",
@@ -251,6 +275,7 @@ async function verifyPendingParticipation(
     }, streamerId);
     if (duplicate) {
       const rejected = ctx.store.markParticipant(entry.id, "rejected", streamerId);
+      if (rejected) emitEntryRemoved(ctx, rejected, "rejected", streamerId);
       ctx.logger.event({
         type: "participation.verification_rejected",
         reason: duplicate.reason,
@@ -545,6 +570,7 @@ async function handleCancel(ctx: ModuleContext, settings: ParticipationSettingsF
   }
 
   ctx.logger.event({ type: "participation.cancelled", entry: logEntry(result.entry, event.broadcasterUserId) });
+  emitEntryRemoved(ctx, result.entry, "cancelled", event.broadcasterUserId);
   await publishState(ctx, settings, {
     reason: "participation.cancelled",
     streamerId: event.broadcasterUserId

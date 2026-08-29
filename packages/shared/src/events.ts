@@ -8,6 +8,7 @@ export type InternalEvent =
   | TwitchRaidInternalEvent
   | TwitchFollowInternalEvent
   | ParticipationEntryCreatedInternalEvent
+  | ParticipationEntryRemovedInternalEvent
   | SystemInternalEvent;
 
 export type TwitchChatMessageFragment =
@@ -123,6 +124,21 @@ export type ParticipationEntryCreatedInternalEvent = {
   riotTagLine: string;
   riotPuuid?: string;
   requestedRole?: string;
+  createdAt: string;
+};
+
+/* 취소/스킵/거절로 참여 큐에서 빠지는 모든 종료 상태를 하나로 묶는다 — 다시보기
+   후보 무효화 관점에서는 "더 이상 active 하지 않다"만 중요하고 사유는 중요하지
+   않다(2026-08-29, buildPublicLolTwitchStream 개선). */
+export type ParticipationEntryRemovedInternalEvent = {
+  type: "participation.entryRemoved";
+  id: string;
+  entryId: string;
+  streamerId?: string;
+  twitchUserId: string;
+  riotGameName?: string;
+  riotTagLine?: string;
+  reason: "cancelled" | "skipped" | "rejected";
   createdAt: string;
 };
 
