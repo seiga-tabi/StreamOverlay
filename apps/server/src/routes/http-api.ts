@@ -944,6 +944,18 @@ function isPublicLolProfileSnapshot(value: unknown): value is PublicLolProfileRe
   if (!Array.isArray(record.championPerformance) || !Array.isArray(record.rolePerformance)) return false;
   if (!record.summary || typeof record.summary !== "object" || Array.isArray(record.summary)) return false;
   if (!record.liveGame || typeof record.liveGame !== "object" || Array.isArray(record.liveGame)) return false;
+  if (record.frequentTeammates !== undefined && (!Array.isArray(record.frequentTeammates)
+    || !record.frequentTeammates.every((teammate) => {
+      if (!teammate || typeof teammate !== "object" || Array.isArray(teammate)) return false;
+      const item = teammate as Record<string, unknown>;
+      return typeof item.gameName === "string"
+        && typeof item.tagLine === "string"
+        && typeof item.games === "number"
+        && Number.isFinite(item.games)
+        && typeof item.wins === "number"
+        && Number.isFinite(item.wins)
+        && (item.lastPlayedAt === undefined || typeof item.lastPlayedAt === "string");
+    }))) return false;
   return record.recentMatches.every((match) => {
     if (!match || typeof match !== "object" || Array.isArray(match)) return false;
     const item = match as Record<string, unknown>;
@@ -4718,6 +4730,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         canonicalPath: `/lol/summoners/${route.platformSlug}/${route.profileSlug}`,
         description: summary.description,
         facts,
+        frequentTeammates: profile.frequentTeammates?.map(({ gameName, tagLine }) => ({ gameName, tagLine })),
         heading: summary.riotId,
         imageAlt: summary.imageAlt,
         imageUrl: new URL(

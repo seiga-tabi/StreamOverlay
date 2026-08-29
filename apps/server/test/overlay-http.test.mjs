@@ -367,6 +367,12 @@ test("cache된 소환사 전적은 동적 SNS 메타데이터와 immutable 공�
   const fetchedAt = new Date().toISOString();
   let riotCalls = 0;
   const profile = {
+    frequentTeammates: [
+      { gameName: "YongsikKwak", tagLine: "5165", games: 8, wins: 5, puuid: "secret-snapshot-puuid" },
+      { gameName: "Dthree", tagLine: "3333", games: 7, wins: 4 },
+      { gameName: "LEST", tagLine: "3223", games: 5, wins: 3 },
+      { gameName: "zonbi", tagLine: "1581", games: 4, wins: 2 },
+    ],
     status: "ready",
     riotId: "Faker#KR1",
     gameName: "Faker",
@@ -453,6 +459,10 @@ test("cache된 소환사 전적은 동적 SNS 메타데이터와 immutable 공�
     assert.ok(canonicalPath, "canonical은 암호화된 전적 공유 경로여야 합니다");
     assert.doesNotMatch(canonicalPath, /Faker|KR1/u);
     assert.match(pageRes.body, /최근 10게임 · 7승 3패 · 승률 70%/);
+    assert.match(pageRes.body, /<h2>함께 플레이한 소환사<\/h2>/u);
+    assert.match(pageRes.body, /href="\/ko\/lol\/summoners\/kr\/YongsikKwak-5165">YongsikKwak#5165<\/a>/u);
+    assert.match(pageRes.body, /href="\/ko\/lol\/summoners\/kr\/zonbi-1581">zonbi#1581<\/a>/u);
+    assert.doesNotMatch(pageRes.body, /secret-snapshot-puuid|puuid/u);
     const imageUrl = /<meta property="og:image" content="https:\/\/yoro\.gg([^\"]+)"/.exec(pageRes.body)?.[1];
     assert.ok(imageUrl);
 
@@ -462,6 +472,8 @@ test("cache된 소환사 전적은 동적 SNS 메타데이터와 immutable 공�
     assert.match(japanesePageRes.body, /<title>Faker#KR1 · Challenger 1,234 LP \| YORO\.gg<\/title>/);
     assert.match(japanesePageRes.body, /<meta property="og:locale" content="ja_JP"/);
     assert.match(japanesePageRes.body, /直近10試合 · 7勝 3敗 · 勝率70%/);
+    assert.match(japanesePageRes.body, /<h2>一緒にプレイしたサモナー<\/h2>/u);
+    assert.match(japanesePageRes.body, /href="\/ja\/lol\/summoners\/kr\/Dthree-3333">Dthree#3333<\/a>/u);
 
     const encryptedPageRes = createResponse();
     await handler(createRequest("GET", canonicalPath), encryptedPageRes);

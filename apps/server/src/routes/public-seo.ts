@@ -2221,6 +2221,7 @@ export function withLolProfileSeo(
     canonicalPath: string;
     description: string;
     facts: readonly PublicSeoFact[];
+    frequentTeammates?: readonly { gameName: string; tagLine: string }[];
     heading: string;
     imageAlt: string;
     imageUrl: string;
@@ -2228,6 +2229,11 @@ export function withLolProfileSeo(
   }
 ): PublicSeoMetadata {
   const { locale } = base;
+  const profilePathPrefix = input.canonicalPath.slice(0, input.canonicalPath.lastIndexOf("/"));
+  const teammateLinks = (input.frequentTeammates ?? []).slice(0, 5).map((teammate) => ({
+    href: `/${locale}${profilePathPrefix}/${encodeURIComponent(`${teammate.gameName}-${teammate.tagLine}`)}`,
+    label: `${teammate.gameName}#${teammate.tagLine}`
+  }));
   return {
     ...base,
     alternateUrls: publicSeoAlternateUrls(input.canonicalPath),
@@ -2241,7 +2247,15 @@ export function withLolProfileSeo(
         { href: `/${locale}/lol`, label: t(locale, "LoL 전적 검색", "LoL戦績検索", "LoL stats") },
         { href: `/${locale}/lol/aram`, label: t(locale, "증강 칼바람", "オーグメントARAM", "ARAM augments") },
         { href: `/${locale}/`, label: t(locale, "홈", "ホーム", "Home") }
-      ]
+      ],
+      ...(teammateLinks.length > 0
+        ? {
+            sections: [{
+              heading: t(locale, "함께 플레이한 소환사", "一緒にプレイしたサモナー", "Frequently played with"),
+              links: teammateLinks
+            }]
+          }
+        : {})
     },
     imageAlt: input.imageAlt,
     imageUrl: input.imageUrl,

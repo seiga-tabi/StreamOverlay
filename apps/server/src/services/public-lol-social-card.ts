@@ -8,6 +8,13 @@ export type PublicLolSocialProfile = {
   gameName: string;
   tagLine: string;
   lolPlatform: string;
+  frequentTeammates?: readonly {
+    gameName: string;
+    tagLine: string;
+    games: number;
+    wins: number;
+    lastPlayedAt?: string;
+  }[];
   profileIconUrl?: string;
   streamerProfileImageUrl?: string;
   rankedStats?: LolRankedStats;

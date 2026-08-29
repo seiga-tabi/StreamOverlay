@@ -21,6 +21,7 @@ const {
   palworldBreedingFallback,
   reactionShareRouteForPath,
   reactionShareSeoMetadata,
+  withLolProfileSeo,
 } = await import("../dist/routes/public-seo.js");
 const {
   PALWORLD_BREEDING_PAIRS_PER_SITEMAP,
@@ -626,6 +627,77 @@ test("robotsNoindex metadata는 noindex 메타를 주입하고, 기본 페이지
   // strip이 동작해 재적용해도 중복되지 않습니다.
   const reapplied = applyPublicSeoMetadata(blocked, { ...metadata, robotsNoindex: true });
   assert.equal((reapplied.match(/name="robots"/gu) ?? []).length, 1);
+});
+
+test("LoL 소환사 fallback은 팀메이트 내부 링크를 최대 5개만 안전하게 렌더링한다", () => {
+  const base = publicSeoMetadataForPath("/ko/lol/summoners/kr/Faker-KR1");
+  const common = {
+    canonicalPath: "/lol/summoners/kr/Faker-KR1",
+    description: "최근 10게임 · 7승 3패 · 승률 70%",
+    facts: [{ label: "랭크", value: "Challenger I" }],
+    heading: "Faker#KR1",
+    imageAlt: "Faker#KR1의 League of Legends 전적 카드",
+    imageUrl: "https://yoro.gg/social/lol/ko/kr/Faker-KR1/revision.png",
+    title: "Faker#KR1 · Challenger I | YORO.gg",
+  };
+  const frequentTeammates = [
+    { gameName: "YongsikKwak", tagLine: "5165", puuid: "secret-puuid-marker" },
+    { gameName: "Dthree", tagLine: "3333" },
+    { gameName: "LEST", tagLine: "3223" },
+    { gameName: "zonbi", tagLine: "1581" },
+    { gameName: "<script>alert(1)</script>", tagLine: "TABI" },
+    { gameName: "sixth", tagLine: "0006" },
+  ];
+  const metadata = withLolProfileSeo(base, { ...common, frequentTeammates });
+
+  assert.deepEqual(metadata.fallback.links, [
+    { href: "/ko/lol", label: "LoL 전적 검색" },
+    { href: "/ko/lol/aram", label: "증강 칼바람" },
+    { href: "/ko/", label: "홈" },
+  ], "withLolProfileSeo의 기존 정적 링크를 유지해야 합니다");
+  assert.equal(metadata.fallback.sections.length, 1);
+  assert.equal(metadata.fallback.sections[0].heading, "함께 플레이한 소환사");
+  assert.equal(metadata.fallback.sections[0].links.length, 5);
+  assert.deepEqual(metadata.fallback.sections[0].links[0], {
+    href: "/ko/lol/summoners/kr/YongsikKwak-5165",
+    label: "YongsikKwak#5165",
+  });
+  assert.equal(
+    metadata.fallback.sections[0].links[4].href,
+    "/ko/lol/summoners/kr/%3Cscript%3Ealert(1)%3C%2Fscript%3E-TABI",
+  );
+
+  const html = applyPublicSeoMetadata(APP_SHELL, metadata);
+  assert.match(html, /<h2>함께 플레이한 소환사<\/h2>/u);
+  assert.match(html, /href="\/ko\/lol\/summoners\/kr\/YongsikKwak-5165">YongsikKwak#5165<\/a>/u);
+  assert.match(html, /&lt;script&gt;alert\(1\)&lt;\/script&gt;#TABI/u);
+  assert.doesNotMatch(html, /<script>alert\(1\)<\/script>|secret-puuid-marker|sixth-0006/u);
+
+  const japanese = withLolProfileSeo(
+    publicSeoMetadataForPath("/ja/lol/summoners/kr/Faker-KR1"),
+    { ...common, frequentTeammates: frequentTeammates.slice(0, 1) },
+  );
+  assert.equal(japanese.fallback.sections[0].heading, "一緒にプレイしたサモナー");
+  assert.equal(japanese.fallback.sections[0].links[0].href, "/ja/lol/summoners/kr/YongsikKwak-5165");
+});
+
+test("LoL 소환사 fallback은 팀메이트가 없으면 빈 섹션을 만들지 않는다", () => {
+  const base = publicSeoMetadataForPath("/ko/lol/summoners/kr/Faker-KR1");
+  const common = {
+    canonicalPath: "/lol/summoners/kr/Faker-KR1",
+    description: "최근 전적",
+    facts: [],
+    heading: "Faker#KR1",
+    imageAlt: "전적 카드",
+    imageUrl: "https://yoro.gg/images/yorogg-og-lol.png",
+    title: "Faker#KR1 | YORO.gg",
+  };
+  const absent = withLolProfileSeo(base, common);
+  const empty = withLolProfileSeo(base, { ...common, frequentTeammates: [] });
+
+  assert.equal(absent.fallback.sections, undefined);
+  assert.equal(empty.fallback.sections, undefined);
+  assert.doesNotMatch(applyPublicSeoMetadata(APP_SHELL, empty), /함께 플레이한 소환사/u);
 });
 
 test("fallback 링크와 breadcrumb은 라우트가 없는 /lol/summoners 목록을 가리키지 않는다", () => {
