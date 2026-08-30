@@ -30,6 +30,9 @@ import { lazyNamed } from "./shared/lazyNamed";
 import { isLocalizablePublicPath, publicLocaleFromPathname, stripPublicLocalePrefix } from "./features/public-lol/utils/public-locale-path";
 import { HomeRouteFallback } from "./features/public-home/components/HomeRouteFallback";
 import { LolRouteFallback } from "./features/public-home/components/LolRouteFallback";
+import { MinecraftRouteFallback } from "./features/public-home/components/MinecraftRouteFallback";
+import { ValorantRouteFallback } from "./features/public-home/components/ValorantRouteFallback";
+import { PalworldRouteFallback } from "./features/public-home/components/PalworldRouteFallback";
 import { PublicNotFoundPage } from "./features/public-home/components/PublicNotFoundPage";
 
 const loadPublicHomePage = () => import("./pages/PublicHomePage");
@@ -380,43 +383,19 @@ export default function App() {
         </Suspense>
       ) : minecraftPublic ? (
         <MinecraftPageErrorBoundary>
-          <Suspense fallback={(
-            <SkeletonCard
-              className="minecraft-page-section"
-              data-ko={dashboardI18n.ko.app.loading}
-              data-ja={dashboardI18n.ja.app.loading}
-              loadingLabel={currentText.app.loading}
-              size="lg"
-            />
-          )}>
+          <Suspense fallback={<MinecraftRouteFallback locale={publicLocale} />}>
             <PublicMinecraftPage />
           </Suspense>
         </MinecraftPageErrorBoundary>
       ) : valorantPublic ? (
         <ValorantPageErrorBoundary>
-          <Suspense fallback={(
-            <SkeletonCard
-              className="valorant-page-section"
-              data-ko={dashboardI18n.ko.app.loading}
-              data-ja={dashboardI18n.ja.app.loading}
-              loadingLabel={currentText.app.loading}
-              size="lg"
-            />
-          )}>
+          <Suspense fallback={<ValorantRouteFallback locale={publicLocale} />}>
             <PublicValorantPage />
           </Suspense>
         </ValorantPageErrorBoundary>
       ) : palworldPublic ? (
         <PalworldPageErrorBoundary>
-          <Suspense fallback={(
-            <SkeletonCard
-              className="palworld-page-section"
-              data-ko={dashboardI18n.ko.app.loading}
-              data-ja={dashboardI18n.ja.app.loading}
-              loadingLabel={currentText.app.loading}
-              size="lg"
-            />
-          )}>
+          <Suspense fallback={<PalworldRouteFallback locale={publicLocale} />}>
             <PublicPalworldPage />
           </Suspense>
         </PalworldPageErrorBoundary>
