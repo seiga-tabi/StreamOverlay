@@ -15,8 +15,6 @@ import type { PublicTwitchAccountUser } from "./PublicTwitchAccountChip";
  * 페이지 결합 동작이 있는 헤더(팰월드·LoL 의 뷰어 Twitch 연동, Bot 의 추적 플로)는
  * 반환값을 부분 오버라이드해 사용할 수 있습니다. */
 
-export type PublicAccountLocale = "ko" | "ja" | "en";
-
 const accountKo = {
   login: "로그인",
   loginMenu: "로그인 방법 선택",

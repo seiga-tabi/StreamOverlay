@@ -142,10 +142,6 @@ export function championAnalysisRows(profile: PublicLolProfile): PublicChampionA
   });
 }
 
-export function championAnalysisMax(rows: PublicChampionAnalysisRow[], value: (row: PublicChampionAnalysisRow) => number | undefined): number {
-  return Math.max(1, ...rows.map((row) => value(row) ?? 0));
-}
-
 /* 챔피언 분석 리디자인(목업 lol-champion-analysis-redesign.html v3)의 데이터 계층.
  * 최근 성과가 있는 행(games desc)과 숙련도만 있는 ghost 행을 분리합니다 —
  * 이전 UI 처럼 한 표에 섞으면 최근 미플레이 챔피언이 "-" 를 반복해 표가 비어 보입니다. */

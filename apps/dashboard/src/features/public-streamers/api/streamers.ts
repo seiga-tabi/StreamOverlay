@@ -2,12 +2,10 @@ import { apiBase } from "../../../api/client";
 import {
   parseStreamerPostDetail,
   parseStreamerPostList,
-  type StreamerComment,
   type StreamerPlatform,
   type StreamerPostDetail,
   type StreamerPostList,
 } from "../types/streamer-post";
-import { parseStreamerComment } from "../types/streamer-post";
 import type { StreamerScope } from "../utils/routes";
 
 /* 스트리머 추천 게시판 API.
@@ -204,9 +202,4 @@ export function reportStreamerComment(
 
 export function voteStreamerPost(postId: string): Promise<StreamerMutationResult> {
   return mutate(`/api/public/streamers/${encodeURIComponent(postId)}/vote`, {});
-}
-
-/** 낙관적 렌더용 — 서버가 돌려준 댓글이 없을 때는 목록을 다시 부릅니다. */
-export function parseCreatedComment(value: unknown): StreamerComment | undefined {
-  return parseStreamerComment(value);
 }

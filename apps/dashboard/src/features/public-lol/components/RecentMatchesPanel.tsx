@@ -108,9 +108,39 @@ export function RecentMatchesPanel({
       <div className="public-match-list" aria-busy={initialLoading || undefined}>
         {initialLoading ? (
           // 행 높이를 미리 확보해 스피너 교체 시 발생하던 레이아웃 점프를 없앱니다.
+          // 실제 완성 행의 실루엣(승패·아바타·이름·KDA·아이템·팀리스트·화살표)을
+          // 반영한 스켈레톤 — 목업: docs/mockups/lol-match-row-skeleton-redesign-v1.html.
           <div className="public-match-skeleton-list" role="status" aria-label={String(text.loadingMoreMatches)}>
             {Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => (
-              <span aria-hidden="true" className="public-match-skeleton-row" key={index} />
+              <div aria-hidden="true" className="public-match-skeleton-row" key={index}>
+                <div className="public-match-skeleton-outcome">
+                  <span className="public-match-skeleton-block" />
+                  <span className="public-match-skeleton-block" />
+                </div>
+                <span className="public-match-skeleton-avatar" />
+                <div className="public-match-skeleton-name">
+                  <span className="public-match-skeleton-block" />
+                  <span className="public-match-skeleton-block" />
+                </div>
+                <div className="public-match-skeleton-kda">
+                  <span className="public-match-skeleton-block" />
+                  <span className="public-match-skeleton-block" />
+                </div>
+                <div className="public-match-skeleton-stats">
+                  <span className="public-match-skeleton-block" />
+                  <span className="public-match-skeleton-block" />
+                </div>
+                <div className="public-match-skeleton-items">
+                  {Array.from({ length: 6 }, (_, itemIndex) => (
+                    <span className="public-match-skeleton-item" key={itemIndex} />
+                  ))}
+                </div>
+                <div className="public-match-skeleton-team">
+                  <span className="public-match-skeleton-block" />
+                  <span className="public-match-skeleton-block" />
+                </div>
+                <span className="public-match-skeleton-expand" />
+              </div>
             ))}
           </div>
         ) : loadError ? (

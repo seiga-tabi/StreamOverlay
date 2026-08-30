@@ -254,5 +254,3 @@ export const gamesI18n = {
     rankingEmpty: "まだ登録された記録がありません — 最初の主役になりましょう!",
   },
 } as const;
-
-export type GamesText = (typeof gamesI18n)["ko"];

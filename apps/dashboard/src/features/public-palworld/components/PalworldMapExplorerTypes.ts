@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import type { PalworldLocale } from "../i18n/palworld-i18n";
 import { PALWORLD_MAP_COLLECTIBLE_TYPE_IDS } from "../utils/map-collectible-types";
 
@@ -69,20 +68,6 @@ export type PalworldMapLayerGroup = {
   label: PalworldMapLocalizedLabel;
   collapsed?: boolean;
   layers: readonly PalworldMapLayerOption[];
-};
-
-export type PalworldMapVisibleLocation = {
-  id: string;
-  layerId: PalworldMapReadyLayerId;
-  title: PalworldMapLocalizedLabel;
-  layerLabel: PalworldMapLocalizedLabel;
-  description?: PalworldMapLocalizedLabel;
-  media?: ReactNode;
-  metadata?: readonly {
-    label: PalworldMapLocalizedLabel;
-    value: ReactNode;
-  }[];
-  selected?: boolean;
 };
 
 export function resolvePalworldMapLabel(

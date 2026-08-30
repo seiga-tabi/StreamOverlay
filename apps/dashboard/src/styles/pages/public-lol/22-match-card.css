@@ -284,26 +284,147 @@
     background: var(--yoro-color-text-on-dark-muted);
   }
 
-  /* ── 로딩 스켈레톤 ───────────────────────────────────────── */
+  /* ── 로딩 스켈레톤(실제 행 실루엣 반영) ───────────────────────
+     목업: docs/mockups/lol-match-row-skeleton-redesign-v1.html.
+     완성 행 트랙(승패·아바타·이름·KDA·CS·아이템6칸·팀리스트·화살표)을
+     그대로 반영해 로딩 중에도 무엇이 채워질지 미리 보여줍니다. */
   .public-match-skeleton-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--yoro-space-1);
+    display: block;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 3px;
+    overflow: hidden;
+    background: var(--public-gray-surface);
   }
 
-  /* 실제 행 높이를 그대로 차지해 스피너 교체 시 발생하던 레이아웃 점프를 없앱니다. */
   .public-match-skeleton-row {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: var(--yoro-space-4);
+    padding: var(--yoro-space-3) var(--yoro-space-4);
     height: 4.5rem;
-    border-radius: var(--yoro-radius-md);
+    box-sizing: border-box;
+  }
+
+  .public-match-skeleton-row + .public-match-skeleton-row {
+    border-top: .5px solid var(--public-gray-border);
+  }
+
+  .public-match-skeleton-block {
+    display: block;
+    border-radius: 2px;
     background: linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--yoro-color-text-on-dark) 4%, transparent) 25%,
-      color-mix(in srgb, var(--yoro-color-text-on-dark) 9%, transparent) 37%,
-      color-mix(in srgb, var(--yoro-color-text-on-dark) 4%, transparent) 63%
+      100deg,
+      var(--public-gray-surface-strong),
+      color-mix(in srgb, var(--public-gray-surface-strong) 55%, var(--public-gray-border))
     );
     background-size: 400% 100%;
     animation: public-match-skeleton-shimmer 1.4s ease infinite;
+  }
+
+  .public-match-skeleton-outcome {
+    flex: none;
+    display: grid;
+    gap: var(--yoro-space-2);
+    width: 3.5rem;
+  }
+
+  .public-match-skeleton-outcome .public-match-skeleton-block:first-child { width: 60%; height: .875rem; }
+  .public-match-skeleton-outcome .public-match-skeleton-block:last-child { width: 90%; height: .625rem; }
+
+  .public-match-skeleton-avatar {
+    flex: none;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--yoro-radius-circle);
+    background: linear-gradient(
+      100deg,
+      var(--public-gray-surface-strong),
+      color-mix(in srgb, var(--public-gray-surface-strong) 55%, var(--public-gray-border))
+    );
+    background-size: 400% 100%;
+    animation: public-match-skeleton-shimmer 1.4s ease infinite;
+  }
+
+  .public-match-skeleton-name {
+    flex: none;
+    display: grid;
+    gap: var(--yoro-space-2);
+    width: 6rem;
+  }
+
+  .public-match-skeleton-name .public-match-skeleton-block:first-child { width: 80%; height: .875rem; }
+  .public-match-skeleton-name .public-match-skeleton-block:last-child { width: 56%; height: .625rem; }
+
+  .public-match-skeleton-kda {
+    flex: none;
+    display: grid;
+    gap: var(--yoro-space-2);
+    width: 5.625rem;
+  }
+
+  .public-match-skeleton-kda .public-match-skeleton-block:first-child { width: 70%; height: 1rem; }
+  .public-match-skeleton-kda .public-match-skeleton-block:last-child { width: 50%; height: .625rem; }
+
+  .public-match-skeleton-stats {
+    flex: none;
+    display: grid;
+    gap: var(--yoro-space-2);
+    width: 4.375rem;
+  }
+
+  .public-match-skeleton-stats .public-match-skeleton-block:first-child { width: 60%; height: .875rem; }
+  .public-match-skeleton-stats .public-match-skeleton-block:last-child { width: 80%; height: .625rem; }
+
+  .public-match-skeleton-items {
+    flex: none;
+    display: flex;
+    gap: var(--yoro-space-1);
+  }
+
+  .public-match-skeleton-item {
+    display: block;
+    width: 1.375rem;
+    height: 1.375rem;
+    border-radius: 5px;
+    background: linear-gradient(
+      100deg,
+      var(--public-gray-surface-strong),
+      color-mix(in srgb, var(--public-gray-surface-strong) 55%, var(--public-gray-border))
+    );
+    background-size: 400% 100%;
+    animation: public-match-skeleton-shimmer 1.4s ease infinite;
+  }
+
+  .public-match-skeleton-team {
+    flex: 1;
+    min-width: 0;
+    display: grid;
+    gap: var(--yoro-space-2);
+  }
+
+  .public-match-skeleton-team .public-match-skeleton-block:first-child { width: 70%; height: .5625rem; }
+  .public-match-skeleton-team .public-match-skeleton-block:last-child { width: 55%; height: .5625rem; }
+
+  .public-match-skeleton-expand {
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 2px;
+    background: linear-gradient(
+      100deg,
+      var(--public-gray-surface-strong),
+      color-mix(in srgb, var(--public-gray-surface-strong) 55%, var(--public-gray-border))
+    );
+    background-size: 400% 100%;
+    animation: public-match-skeleton-shimmer 1.4s ease infinite;
+  }
+
+  @media (max-width: 40rem) {
+    .public-match-skeleton-items,
+    .public-match-skeleton-team,
+    .public-match-skeleton-stats {
+      display: none;
+    }
   }
 
   @keyframes public-match-skeleton-shimmer {
@@ -1358,7 +1479,10 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .public-match-skeleton-row,
+    .public-match-skeleton-block,
+    .public-match-skeleton-avatar,
+    .public-match-skeleton-item,
+    .public-match-skeleton-expand,
     .public-match-card > .public-match-expanded,
     .public-match-card:is(.highlight-mvp, .highlight-ace)::after {
       animation: none;

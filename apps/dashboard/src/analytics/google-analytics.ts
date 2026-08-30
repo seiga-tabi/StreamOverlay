@@ -334,15 +334,6 @@ export function trackInternalLinkClick(input: {
   });
 }
 
-/** 단순 조회인지 도구로 쓰이는지 구분합니다. */
-export function trackFilterUse(input: { filterKey: string; surface: string; value?: string }): void {
-  trackGoogleAnalyticsEvent("filter_use", {
-    filter_key: input.filterKey,
-    surface: input.surface,
-    value: input.value?.slice(0, 60)
-  });
-}
-
 function analyticsCollectionDisabledByBrowser(): boolean {
   const privacyNavigator = navigator as Navigator & {
     globalPrivacyControl?: boolean;

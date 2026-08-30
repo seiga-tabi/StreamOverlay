@@ -9,7 +9,6 @@ import type { MatchTeamDetailsPlayerRowViewModel } from "./MatchTeamDetailsPlaye
 
 export type MatchTeamDetailsPlayer = MatchTeamDetailsPlayerRowViewModel;
 export type MatchTeamDetailsTeam = MatchTeamDetailsTeamSectionViewModel;
-export type MatchTeamDetailsColumns = MatchTeamDetailsColumnLabels;
 
 export type MatchTeamDetailsProps = {
   ariaLabel: string;
@@ -22,9 +21,10 @@ export type MatchTeamDetailsProps = {
 };
 
 export function MatchTeamDetails({ ariaLabel, kdaLabel, columns, teams, enemyToggleLabel, onSearchRiotId }: MatchTeamDetailsProps) {
-  /* 모바일은 상대 팀을 접은 채 시작합니다(목업 §3-1). 접힘 CSS 와 토글 버튼이
-     모두 ≤48rem 안에만 있어 데스크톱은 이 상태와 무관하게 항상 펼쳐집니다. */
-  const [enemyOpen, setEnemyOpen] = useState(false);
+  /* 모바일 상대 팀 접힘 CSS와 토글 버튼은 ≤48rem 안에만 있어 데스크톱은 이
+     상태와 무관하게 항상 펼쳐집니다. 기본값은 펼침(사용자 요청 2026-08-30) —
+     상대 팀 정보를 바로 확인할 수 있도록, 접고 싶을 때만 토글합니다. */
+  const [enemyOpen, setEnemyOpen] = useState(true);
 
   if (teams.length === 0) return null;
 

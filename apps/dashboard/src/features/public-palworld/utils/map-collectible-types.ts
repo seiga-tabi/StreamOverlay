@@ -78,8 +78,6 @@ export const PALWORLD_MAP_COLLECTIBLE_TYPE_IDS = [
   ...PALWORLD_MAP_LOCATION_TYPE_IDS,
 ] as const;
 
-export type PalworldMapStatueTypeId =
-  (typeof PALWORLD_MAP_STATUE_TYPE_IDS)[number];
 export type PalworldMapEggTypeId =
   (typeof PALWORLD_MAP_EGG_TYPE_IDS)[number];
 export type PalworldMapResourceTypeId =
