@@ -327,7 +327,14 @@ export async function createRecentMatchesShareBlob(
   context.restore();
 
   if (masteryChampionArt) {
-    const textZoneWidth = Math.min(620, width * 0.58);
+    /* 블러 → 선명 전환 구간(220px)을 두어 경계가 뚝 끊기지 않고 자연스럽게
+       "흐려짐 → 점점 선명해짐"으로 이어지도록 합니다(목업: recent-matches-share-hero-blur-edge-v1.html).
+       하드 클립 대신 블러 레이어 자체를 destination-in 그라디언트 마스크로
+       알파 1→0 전환시켜 합성합니다. */
+    const textZoneWidth = Math.min(560, width * 0.52);
+    const transitionWidth = 220;
+    const maskEnd = textZoneWidth + transitionWidth;
+
     const blurCanvas = document.createElement("canvas");
     blurCanvas.width = width;
     blurCanvas.height = headerHeight;
@@ -335,18 +342,24 @@ export async function createRecentMatchesShareBlob(
     if (blurContext) {
       blurContext.filter = "blur(14px)";
       drawCoverImage(blurContext, masteryChampionArt, -20, -20, width + 40, headerHeight + 40, "top");
-      context.save();
-      context.beginPath();
-      context.rect(0, 0, textZoneWidth, headerHeight);
-      context.clip();
+
+      blurContext.globalCompositeOperation = "destination-in";
+      const mask = blurContext.createLinearGradient(0, 0, maskEnd, 0);
+      mask.addColorStop(0, "rgba(0,0,0,1)");
+      mask.addColorStop(textZoneWidth / maskEnd, "rgba(0,0,0,1)");
+      mask.addColorStop(1, "rgba(0,0,0,0)");
+      blurContext.fillStyle = mask;
+      blurContext.fillRect(0, 0, width, headerHeight);
+      blurContext.globalCompositeOperation = "source-over";
+
       context.drawImage(blurCanvas, 0, 0);
-      const shade = context.createLinearGradient(0, 0, textZoneWidth, 0);
+
+      const shade = context.createLinearGradient(0, 0, maskEnd, 0);
       shade.addColorStop(0, `${theme.bg}d1`);
-      shade.addColorStop(0.75, `${theme.bg}a8`);
-      shade.addColorStop(1, `${theme.bg}1f`);
+      shade.addColorStop((textZoneWidth / maskEnd) * 0.85, `${theme.bg}a8`);
+      shade.addColorStop(1, `${theme.bg}00`);
       context.fillStyle = shade;
-      context.fillRect(0, 0, textZoneWidth, headerHeight);
-      context.restore();
+      context.fillRect(0, 0, maskEnd, headerHeight);
     }
     const bottomShade = context.createLinearGradient(0, headerHeight - 60, 0, headerHeight);
     bottomShade.addColorStop(0, `${theme.bg}00`);

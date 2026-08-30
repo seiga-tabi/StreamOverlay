@@ -35,10 +35,14 @@
 }
 
 .yoro-toast {
-  --yoro-toast-background: var(--yoro-color-surface-strong);
-  --yoro-toast-border: var(--yoro-color-border-strong);
-  --yoro-toast-text: var(--yoro-color-text);
-  --yoro-toast-accent: var(--yoro-color-text-muted);
+  /* 홈 디자인 시스템(헤어라인 카드) 문법으로 통일 — 목업:
+     docs/mockups/lol-profile-share-toast-redesign-v1.html.
+     스코프별로 토큰 이름이 다릅니다(홈: --home-*, LoL 공개 프로필: --public-gray-*)
+     — 둘 다 없는 화면(대시보드 설정 등)은 기존 --yoro-color-* 로 안전하게 폴백합니다. */
+  --yoro-toast-background: var(--home-card, var(--public-gray-surface, var(--yoro-color-surface-strong)));
+  --yoro-toast-border: var(--home-line, var(--public-gray-border, var(--yoro-color-border-strong)));
+  --yoro-toast-text: var(--home-ink, var(--public-gray-text, var(--yoro-color-text)));
+  --yoro-toast-accent: var(--home-sub, var(--public-gray-muted, var(--yoro-color-text-muted)));
 
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
@@ -46,12 +50,12 @@
   min-inline-size: 0;
   gap: var(--yoro-space-3);
   padding: var(--yoro-space-4);
-  border: thin solid var(--yoro-toast-border);
-  border-inline-start: var(--yoro-space-1) solid var(--yoro-toast-accent);
-  border-radius: var(--yoro-radius-lg);
+  border: .5px solid var(--yoro-toast-border);
+  border-inline-start: 2px solid var(--yoro-toast-accent);
+  border-radius: 3px;
   background: var(--yoro-toast-background);
   color: var(--yoro-toast-text);
-  box-shadow: var(--yoro-shadow-panel);
+  box-shadow: none;
   font-family: var(--yoro-font-family-base);
   line-height: var(--yoro-line-height-base);
   outline: none;
@@ -64,27 +68,20 @@
 }
 
 .yoro-toast[data-tone="info"] {
-  --yoro-toast-background: var(--yoro-color-info-bg);
-  --yoro-toast-border: var(--yoro-color-info);
-  --yoro-toast-accent: var(--yoro-color-info);
+  --yoro-toast-accent: var(--home-sub, var(--public-gray-muted, var(--yoro-color-info)));
 }
 
 .yoro-toast[data-tone="success"] {
-  --yoro-toast-background: var(--yoro-color-success-bg);
-  --yoro-toast-border: var(--yoro-color-success);
-  --yoro-toast-accent: var(--yoro-color-success);
+  --yoro-toast-accent: var(--home-win, var(--yoro-color-success));
 }
 
 .yoro-toast[data-tone="warning"] {
-  --yoro-toast-background: var(--yoro-color-warning-bg);
-  --yoro-toast-border: var(--yoro-color-warning);
-  --yoro-toast-accent: var(--yoro-color-warning);
+  --yoro-toast-accent: var(--home-mid, var(--public-gray-muted, var(--yoro-color-warning)));
 }
 
 .yoro-toast[data-tone="danger"] {
-  --yoro-toast-background: var(--yoro-color-danger-bg);
-  --yoro-toast-border: var(--yoro-color-danger);
-  --yoro-toast-accent: var(--yoro-color-danger);
+  --yoro-toast-accent: var(--home-loss, var(--yoro-color-danger));
+  --yoro-toast-text: var(--home-loss, var(--yoro-color-danger));
 }
 
 .yoro-toast[data-state="closing"],
@@ -104,7 +101,7 @@
 .yoro-toast__title {
   grid-column: 1;
   min-inline-size: 0;
-  color: var(--yoro-color-text-strong);
+  color: var(--home-ink, var(--public-gray-text, var(--yoro-color-text-strong)));
   font-size: var(--yoro-font-size-md);
   font-weight: var(--yoro-font-weight-bold);
   line-height: var(--yoro-line-height-tight);
@@ -116,7 +113,7 @@
   grid-column: 1;
   min-inline-size: 0;
   margin: var(--yoro-space-1) var(--yoro-space-0) var(--yoro-space-0);
-  color: var(--yoro-color-text-muted);
+  color: var(--home-sub, var(--public-gray-muted, var(--yoro-color-text-muted)));
   font-size: var(--yoro-font-size-sm);
   line-height: var(--yoro-line-height-relaxed);
   overflow-wrap: anywhere;
@@ -129,11 +126,11 @@
   justify-content: center;
   min-inline-size: var(--yoro-size-touch-target);
   min-block-size: var(--yoro-size-touch-target);
-  border: thin solid var(--yoro-color-border);
-  border-radius: var(--yoro-radius-md);
-  background: var(--yoro-color-surface-muted);
-  color: var(--yoro-color-text);
-  box-shadow: var(--yoro-shadow-none);
+  border: .5px solid var(--home-line, var(--public-gray-border, var(--yoro-color-border)));
+  border-radius: 3px;
+  background: transparent;
+  color: var(--home-sub, var(--public-gray-muted, var(--yoro-color-text)));
+  box-shadow: none;
   cursor: pointer;
   font-family: var(--yoro-font-family-base);
   font-size: var(--yoro-font-size-sm);
@@ -156,14 +153,14 @@
   grid-column: 3;
   grid-row: 1 / span 2;
   padding: var(--yoro-space-2);
-  border-radius: var(--yoro-radius-circle);
+  border-radius: 3px;
 }
 
 .yoro-toast__action:hover:not(:disabled),
 .yoro-toast__close-button:hover:not(:disabled) {
   border-color: var(--yoro-toast-accent);
-  background: var(--yoro-color-surface-strong);
-  color: var(--yoro-color-text-strong);
+  background: var(--home-bg, var(--public-gray-page, var(--yoro-color-surface-strong)));
+  color: var(--home-ink, var(--public-gray-text, var(--yoro-color-text-strong)));
 }
 
 .yoro-toast__action:focus-visible,
