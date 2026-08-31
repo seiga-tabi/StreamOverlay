@@ -25,8 +25,12 @@ const i18n = {
     loadFailed: "등록 요청을 불러오지 못했습니다.",
     resolveFailed: "등록 요청 처리에 실패했습니다.",
     dashboardAccessFailed: "대시보드 사용 권한 변경에 실패했습니다.",
+    grantAdminFailed: "관리자 권한 부여에 실패했습니다.",
+    revokeAdminFailed: "관리자 권한 회수에 실패했습니다.",
     resolved: "등록 요청을 처리했습니다.",
     dashboardAccessUpdated: "대시보드 사용 권한을 변경했습니다.",
+    grantAdminDone: "관리자 권한을 부여했습니다.",
+    revokeAdminDone: "관리자 권한을 회수했습니다.",
     pending: "대기",
     approved: "승인됨",
     rejected: "거절됨",
@@ -45,6 +49,8 @@ const i18n = {
     reject: "거절",
     dashboardEnable: "대시보드 허용",
     dashboardDisable: "대시보드 차단",
+    grantAdmin: "관리자 권한 부여",
+    revokeAdmin: "관리자 권한 회수",
     loading: "불러오는 중",
     none: "없음",
     search: "Twitch 또는 Riot ID 검색",
@@ -57,6 +63,12 @@ const i18n = {
     confirmRejectTitle: "신청 거절",
     confirmRejectBody: "사유는 감사 기록에 남습니다. 신청자가 다시 신청할 때 참고합니다.",
     confirmReject: "거절합니다",
+    confirmGrantAdminTitle: "관리자 권한 부여",
+    confirmGrantAdminBody: "이 계정에 스트리머 승인 관리 권한을 부여합니다. 부여된 계정은 대시보드에서 다른 스트리머의 등록 요청을 승인/거절할 수 있게 됩니다. 신중하게 결정하세요.",
+    confirmGrantAdmin: "부여합니다",
+    confirmRevokeAdminTitle: "관리자 권한 회수",
+    confirmRevokeAdminBody: "이 계정의 관리자 권한을 즉시 회수합니다. 회수 즉시 그 계정으로 발급된 관리자 세션도 모두 끊깁니다.",
+    confirmRevokeAdmin: "회수합니다",
     cancel: "취소",
     reasonLabel: "거절 사유 (필수)",
     reasonPlaceholder: "사유를 입력하세요",
@@ -73,8 +85,12 @@ const i18n = {
     loadFailed: "登録申請を読み込めませんでした。",
     resolveFailed: "登録申請の処理に失敗しました。",
     dashboardAccessFailed: "ダッシュボード利用権限の変更に失敗しました。",
+    grantAdminFailed: "管理者権限の付与に失敗しました。",
+    revokeAdminFailed: "管理者権限の剥奪に失敗しました。",
     resolved: "登録申請を処理しました。",
     dashboardAccessUpdated: "ダッシュボード利用権限を変更しました。",
+    grantAdminDone: "管理者権限を付与しました。",
+    revokeAdminDone: "管理者権限を剥奪しました。",
     pending: "待機",
     approved: "承認済み",
     rejected: "拒否済み",
@@ -93,6 +109,8 @@ const i18n = {
     reject: "拒否",
     dashboardEnable: "利用を許可",
     dashboardDisable: "利用を停止",
+    grantAdmin: "管理者権限を付与",
+    revokeAdmin: "管理者権限を剥奪",
     loading: "読み込み中",
     none: "なし",
     search: "Twitch または Riot ID を検索",
@@ -105,6 +123,12 @@ const i18n = {
     confirmRejectTitle: "申請を拒否",
     confirmRejectBody: "理由は監査記録に残ります。再申請時の参考になります。",
     confirmReject: "拒否します",
+    confirmGrantAdminTitle: "管理者権限を付与",
+    confirmGrantAdminBody: "このアカウントに配信者承認の管理権限を付与します。権限を付与されたアカウントは、ダッシュボードで他の配信者の登録申請を承認・拒否できるようになります。慎重に判断してください。",
+    confirmGrantAdmin: "付与します",
+    confirmRevokeAdminTitle: "管理者権限を剥奪",
+    confirmRevokeAdminBody: "このアカウントの管理者権限を直ちに剥奪します。剥奪すると、このアカウントに発行済みの管理者セッションもすべて終了します。",
+    confirmRevokeAdmin: "剥奪します",
     cancel: "キャンセル",
     reasonLabel: "拒否理由 (必須)",
     reasonPlaceholder: "理由を入力してください",
@@ -140,7 +164,13 @@ function apiErrorDetail(error: unknown, path: string, fallback: string): string 
   return error.message.replace(new RegExp(`^${escapedPath} failed: \\d+(?: - )?`), "");
 }
 
-export function StreamerRiotRequestsPage({ snapshot }: { snapshot: DashboardSnapshot }) {
+export function StreamerRiotRequestsPage({
+  snapshot,
+  permissions
+}: {
+  snapshot: DashboardSnapshot;
+  permissions: readonly string[] | undefined;
+}) {
   const [requests, setRequests] = useState<AdminStreamerRiotIdRequest[]>(snapshot.streamerRiotIdRequests ?? []);
   const [loading, setLoading] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -152,7 +182,12 @@ export function StreamerRiotRequestsPage({ snapshot }: { snapshot: DashboardSnap
     request: AdminStreamerRiotIdRequest;
     decision: "approved" | "rejected";
   }>();
+  const [pendingAdminAction, setPendingAdminAction] = useState<{
+    request: AdminStreamerRiotIdRequest;
+    granting: boolean;
+  }>();
   const [reason, setReason] = useState("");
+  const isFullAdmin = permissions === undefined;
 
   const pendingCount = requests.filter((request) => request.status === "pending").length;
   const approvedCount = requests.filter((request) => request.status === "approved").length;
@@ -215,6 +250,24 @@ export function StreamerRiotRequestsPage({ snapshot }: { snapshot: DashboardSnap
     }
   }
 
+  async function updateAdminAccess(requestId: string, granting: boolean) {
+    const path = `/api/participation/streamer-riot-id-requests/${granting ? "grant-admin" : "revoke-admin"}`;
+    setBusyId(requestId);
+    setMessage("");
+    try {
+      const result = await apiPost<{ request: AdminStreamerRiotIdRequest; requests: AdminStreamerRiotIdRequest[] }>(
+        path,
+        { requestId }
+      );
+      setRequests(result.requests);
+      setMessage(granting ? t.grantAdminDone : t.revokeAdminDone);
+    } catch (error) {
+      setMessage(apiErrorDetail(error, path, granting ? t.grantAdminFailed : t.revokeAdminFailed));
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   async function confirmPendingAction(): Promise<void> {
     if (!pendingAction) return;
     const { request, decision } = pendingAction;
@@ -222,6 +275,13 @@ export function StreamerRiotRequestsPage({ snapshot }: { snapshot: DashboardSnap
     setPendingAction(undefined);
     setReason("");
     await resolveRequest(request.id, decision, note);
+  }
+
+  async function confirmPendingAdminAction(): Promise<void> {
+    if (!pendingAdminAction) return;
+    const { request, granting } = pendingAdminAction;
+    setPendingAdminAction(undefined);
+    await updateAdminAccess(request.id, granting);
   }
 
   /* 현재 화면은 하위 호환 무인자 응답을 사용합니다. 서버 pagination UI 연결 전까지
@@ -365,6 +425,26 @@ export function StreamerRiotRequestsPage({ snapshot }: { snapshot: DashboardSnap
                       {request.dashboardEnabled ? t.dashboardDisable : t.dashboardEnable}
                     </button>
                   ) : null}
+                  {isFullAdmin && request.status === "approved" && request.accountRole !== "sub" && !request.isAdmin ? (
+                    <button
+                      className="secondary compact-button yoro-ar-action is-approve is-grant-admin"
+                      disabled={busyId === request.id}
+                      onClick={() => setPendingAdminAction({ request, granting: true })}
+                      type="button"
+                    >
+                      {t.grantAdmin}
+                    </button>
+                  ) : null}
+                  {isFullAdmin && request.isAdmin === true ? (
+                    <button
+                      className="secondary compact-button danger yoro-ar-action is-reject is-revoke-admin"
+                      disabled={busyId === request.id}
+                      onClick={() => setPendingAdminAction({ request, granting: false })}
+                      type="button"
+                    >
+                      {t.revokeAdmin}
+                    </button>
+                  ) : null}
                 </div>
                 {/* 저장된 거절 사유가 어디에도 보이지 않았습니다. */}
                 {request.note ? (
@@ -429,6 +509,29 @@ export function StreamerRiotRequestsPage({ snapshot }: { snapshot: DashboardSnap
             </label>
           ) : null}
         </AdminConfirmDialog>
+      ) : null}
+
+      {pendingAdminAction ? (
+        <AdminConfirmDialog
+          busy={busyId === pendingAdminAction.request.id}
+          cancelLabel={t.cancel}
+          confirmLabel={pendingAdminAction.granting ? t.confirmGrantAdmin : t.confirmRevokeAdmin}
+          description={pendingAdminAction.granting ? t.confirmGrantAdminBody : t.confirmRevokeAdminBody}
+          onCancel={() => setPendingAdminAction(undefined)}
+          onConfirm={() => void confirmPendingAdminAction()}
+          summary={[
+            {
+              label: t.twitchAccount,
+              value: `${pendingAdminAction.request.twitchDisplayName} (@${pendingAdminAction.request.twitchLogin})`
+            },
+            {
+              label: t.riotId,
+              value: `${pendingAdminAction.request.riotGameName}#${pendingAdminAction.request.riotTagLine}`
+            }
+          ]}
+          title={pendingAdminAction.granting ? t.confirmGrantAdminTitle : t.confirmRevokeAdminTitle}
+          tone={pendingAdminAction.granting ? "primary" : "danger"}
+        />
       ) : null}
     </>
   );

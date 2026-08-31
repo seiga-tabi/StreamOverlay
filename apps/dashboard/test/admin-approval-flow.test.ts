@@ -37,6 +37,19 @@ test("상태별로 가능한 조작만 노출한다", () => {
   assert.match(page, /request\.status === "rejected" \? t\.reapprove : t\.approve/u);
 });
 
+test("full_admin에게만 관리자 권한 부여·회수 조작을 노출한다", () => {
+  assert.match(page, /const isFullAdmin = permissions === undefined/u);
+  assert.match(page, /isFullAdmin && request\.status === "approved" && request\.accountRole !== "sub" && !request\.isAdmin/u);
+  assert.match(page, /isFullAdmin && request\.isAdmin === true/u);
+});
+
+test("관리자 권한 조작은 확인 후 정확한 API 경로로 전송한다", () => {
+  assert.match(page, /setPendingAdminAction\(\{ request, granting: true \}\)/u);
+  assert.match(page, /setPendingAdminAction\(\{ request, granting: false \}\)/u);
+  assert.match(page, /granting \? "grant-admin" : "revoke-admin"/u);
+  assert.match(page, /onConfirm=\{\(\) => void confirmPendingAdminAction\(\)\}/u);
+});
+
 test("저장된 거절 사유를 목록에 보여 준다", () => {
   assert.match(page, /request\.note \?/u);
   assert.match(page, /yoro-ar-note/u);
@@ -81,7 +94,9 @@ test("한국어·일본어 문구를 함께 관리한다", () => {
     ["승인으로 변경", "承認に変更"],
     ["승인합니다", "承認します"],
     ["거절합니다", "拒否します"],
-    ["Twitch 또는 Riot ID 검색", "Twitch または Riot ID を検索"]
+    ["Twitch 또는 Riot ID 검색", "Twitch または Riot ID を検索"],
+    ["관리자 권한 부여", "管理者権限を付与"],
+    ["관리자 권한 회수", "管理者権限を剥奪"]
   ]) {
     assert.equal(page.includes(ko), true, ko);
     assert.equal(page.includes(ja), true, ja);

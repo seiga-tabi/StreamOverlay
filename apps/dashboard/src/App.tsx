@@ -443,7 +443,9 @@ export default function App() {
     <Layout accountLabel={adminAccountLabel} page={page} permissions={adminPermissions} setPage={changeDashboardPage} locale={dashboardLocale} onLocaleChange={changeDashboardLocale} onLogout={authRequired ? logout : undefined} onPublicHome={openPublic}>
       <Suspense fallback={<div className="card loading-card" data-ko={dashboardI18n.ko.app.loading} data-ja={dashboardI18n.ja.app.loading}>{currentText.app.loading}</div>}>
         {page === "events" ? <EventsPage snapshot={snapshot} /> : null}
-        {page === "streamerRiotRequests" ? <StreamerRiotRequestsPage snapshot={snapshot} /> : null}
+        {page === "streamerRiotRequests" ? (
+          <StreamerRiotRequestsPage snapshot={snapshot} permissions={adminPermissions} />
+        ) : null}
         {page === "supportInbox" ? <SupportInboxPage /> : null}
         {page === "settings" ? <SettingsPage /> : null}
       </Suspense>

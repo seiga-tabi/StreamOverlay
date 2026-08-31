@@ -732,6 +732,21 @@
     color: var(--home-loss);
   }
 
+  /* 관리자 권한 조작은 승인·거절과 같은 의미 계열을 유지하되 별도 액션임을 구분합니다. */
+  .yoro-admin-shell .yoro-ar-action.is-grant-admin,
+  .yoro-admin-shell .yoro-ar-action.is-grant-admin:hover:not(:disabled) {
+    border-color: var(--home-win);
+    background: transparent;
+    color: var(--home-win);
+  }
+
+  .yoro-admin-shell .yoro-ar-action.is-revoke-admin,
+  .yoro-admin-shell .yoro-ar-action.is-revoke-admin:hover:not(:disabled) {
+    border-color: var(--home-loss);
+    background: var(--home-bg);
+    color: var(--home-loss);
+  }
+
   .yoro-admin-shell .yoro-ar-action:disabled {
     opacity: .5;
     cursor: default;
