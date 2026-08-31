@@ -1,10 +1,13 @@
 -- 관리자 권한 부여·회수 감사 action 추가.
 -- packages/shared/src/admin-audit.ts 의 GLOBAL_ADMIN_AUDIT_ACTIONS 와 1:1 로 맞춥니다.
 --
--- 0019 는 action 과 safe_metadata 를 컬럼 인라인 CHECK 로 선언했고 Postgres 는
--- 그런 제약에 <table>_<column>_check 이름을 붙입니다. 이름이 다르면(수동 변경 등)
--- DROP 이 실패해 migration 이 중단됩니다 — 옛 제약이 남아 새 action INSERT 가
--- 조용히 거부되는 것보다 안전합니다.
+-- 0019 는 action 과 safe_metadata 를 컬럼 인라인 CHECK 로 선언했습니다. safe_metadata
+-- 의 CHECK는 action 컬럼까지 함께 참조하는 다중 컬럼 조건이라, Postgres는 이를
+-- <column>_check가 아니라 테이블 단위 이름(admin_audit_logs_check)으로 자동
+-- 명명합니다(단일 컬럼만 참조하는 action 쪽은 admin_audit_logs_action_check로
+-- 정상적으로 명명됨). 실제 배포에서 \d admin_audit_logs 로 확인된 이름을 그대로
+-- 사용합니다 — 이름이 다르면(수동 변경 등) DROP 이 실패해 migration 이 중단되는
+-- 편이, 옛 제약이 남아 새 action INSERT 가 조용히 거부되는 것보다 안전합니다.
 --
 -- 기존 두 action 의 metadata 규칙은 그대로 옮기고, 새 action 은 granted(boolean)
 -- 하나만 허용합니다. 부여·회수는 full_admin 만 호출할 수 있어 actor 계정 id 가
@@ -23,10 +26,10 @@ ALTER TABLE admin_audit_logs
   );
 
 ALTER TABLE admin_audit_logs
-  DROP CONSTRAINT admin_audit_logs_safe_metadata_check;
+  DROP CONSTRAINT admin_audit_logs_check;
 
 ALTER TABLE admin_audit_logs
-  ADD CONSTRAINT admin_audit_logs_safe_metadata_check CHECK (
+  ADD CONSTRAINT admin_audit_logs_check CHECK (
     jsonb_typeof(safe_metadata) = 'object'
     AND octet_length(safe_metadata::TEXT) <= 1024
     AND (

@@ -197,7 +197,7 @@
       "id": "0025_admin_audit_admin_access",
       "file": "0025_admin_audit_admin_access.sql",
       "description": "관리자 감사 로그에 스트리머 관리자 권한 부여·회수 action 추가",
-      "checksumSha256": "7368f55b7ffde520732f09a06c8eade5f282541874ea5825935594771473d450",
+      "checksumSha256": "30bf4057c6fe4dfb6d318034946e258aa20e8e41bafe583dade2c6e2c53718a3",
       "destructive": false,
       "transaction": true
     }
