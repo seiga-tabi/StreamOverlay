@@ -13,6 +13,7 @@ export type HomeText = {
   navBot: string;
   navLogin: string;
   navDashboard: string;
+  navStreamerAdmin: string;
   navLogout: string;
   langMenuLabel: string;
   themeToggleLabel: string;
@@ -97,6 +98,7 @@ export const homeI18n: Record<HomeLocale, HomeText> = {
     navBot: "YORO Bot",
     navLogin: "로그인",
     navDashboard: "대시보드",
+    navStreamerAdmin: "스트리머 관리",
     navLogout: "로그아웃",
     langMenuLabel: "언어 선택",
     themeToggleLabel: "라이트/다크 테마 전환",
@@ -178,6 +180,7 @@ export const homeI18n: Record<HomeLocale, HomeText> = {
     navBot: "YORO Bot",
     navLogin: "ログイン",
     navDashboard: "ダッシュボード",
+    navStreamerAdmin: "配信者管理",
     navLogout: "ログアウト",
     langMenuLabel: "言語を選択",
     themeToggleLabel: "ライト/ダークテーマ切り替え",
@@ -259,6 +262,7 @@ export const homeI18n: Record<HomeLocale, HomeText> = {
     navBot: "YORO Bot",
     navLogin: "Log in",
     navDashboard: "Dashboard",
+    navStreamerAdmin: "Streamer Management",
     navLogout: "Log out",
     langMenuLabel: "Select language",
     themeToggleLabel: "Toggle light/dark theme",

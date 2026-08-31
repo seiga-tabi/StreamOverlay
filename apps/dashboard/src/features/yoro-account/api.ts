@@ -4,6 +4,7 @@ export type YoroAuthenticationProvider = "discord" | "twitch";
 export type YoroIdentityProvider = YoroAuthenticationProvider | "riot";
 
 export const YORO_DASHBOARD_PATH = "/dashboard";
+export const YORO_STREAMER_ADMIN_PATH = "/admin/riot-id-requests";
 export const TWITCH_ACCOUNT_CONNECTED_RESULT = "twitch_connected";
 
 export type YoroAccountIdentity = {
@@ -39,6 +40,9 @@ export type YoroAccountSession =
         riotRsoAvailable: boolean;
         riotRsoRequiresTwitchAuthentication: boolean;
       };
+      /* 관리자 콘솔(admin_accounts)에 활성 등록된 Twitch identity를 가진 계정이면
+         true. 상단바 프로필 메뉴의 "스트리머 관리" 항목 노출 여부에만 쓰입니다. */
+      isStreamerAdmin?: boolean;
     };
 
 function accountApiBase(): string {
@@ -48,6 +52,10 @@ function accountApiBase(): string {
 
 export function openYoroDashboard(): void {
   window.location.assign(YORO_DASHBOARD_PATH);
+}
+
+export function openYoroStreamerAdmin(): void {
+  window.location.assign(YORO_STREAMER_ADMIN_PATH);
 }
 
 export function accountOAuthUrl(

@@ -34,6 +34,8 @@ export function LolChrome({
   locale,
   accountName,
   connected,
+  isStreamerAdmin,
+  onStreamerAdmin,
   searchSlot,
   onLocale,
   onLoginOpen,
@@ -46,6 +48,8 @@ export function LolChrome({
   locale: PublicLocale;
   accountName?: string;
   connected: boolean;
+  isStreamerAdmin?: boolean;
+  onStreamerAdmin?: () => void;
   /* 전적 상세·메뉴 페이지의 컴팩트 검색바 — HomeHeader searchSlot 로 그대로 전달. */
   searchSlot?: ReactNode;
   onLocale: (locale: PublicLocale) => void;
@@ -63,11 +67,13 @@ export function LolChrome({
         accountName={accountName}
         activeGame="lol"
         connected={connected}
+        isStreamerAdmin={isStreamerAdmin}
         locale={locale}
         onDashboard={() => window.location.assign("/dashboard")}
         onLocale={onLocale}
         onLoginOpen={onLoginOpen}
         onLogout={onLogout}
+        onStreamerAdmin={onStreamerAdmin}
         onToggleTheme={onToggleTheme}
         searchSlot={searchSlot}
         text={homeI18n[locale]}

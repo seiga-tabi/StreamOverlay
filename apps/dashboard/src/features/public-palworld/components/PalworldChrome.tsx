@@ -62,6 +62,8 @@ export function PalworldChrome({
   locale,
   accountName,
   connected,
+  isStreamerAdmin,
+  onStreamerAdmin,
   searchSlot,
   onLocale,
   onLoginOpen,
@@ -72,6 +74,8 @@ export function PalworldChrome({
   locale: PalworldLocale;
   accountName?: string;
   connected: boolean;
+  isStreamerAdmin?: boolean;
+  onStreamerAdmin?: () => void;
   /* 하위 페이지의 컴팩트 검색바 — HomeHeader searchSlot 로 그대로 전달(홈은 없음). */
   searchSlot?: ReactNode;
   onLocale: (locale: PalworldLocale) => void;
@@ -85,11 +89,13 @@ export function PalworldChrome({
         accountName={accountName}
         activeGame="palworld"
         connected={connected}
+        isStreamerAdmin={isStreamerAdmin}
         locale={locale}
         onDashboard={() => window.location.assign("/dashboard")}
         onLocale={onLocale}
         onLoginOpen={onLoginOpen}
         onLogout={onLogout}
+        onStreamerAdmin={onStreamerAdmin}
         onToggleTheme={onToggleTheme}
         searchSlot={searchSlot ? <div className="yoro-home-header-search">{searchSlot}</div> : undefined}
         text={homeI18n[locale]}

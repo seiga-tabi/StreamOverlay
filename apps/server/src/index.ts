@@ -590,6 +590,9 @@ const valorantPublic = valorantCatalog
     })
   : undefined;
 yoroAccounts?.setValorantVisibilityInvalidator((userId) => valorantPublic?.invalidateUser(userId));
+yoroAccounts?.setStreamerAdminLookup(
+  (twitchUserId) => store.findActiveAdminAccountByTwitchUserId(twitchUserId) !== undefined
+);
 const sessions = new DashboardSessionStore();
 const events = new EventBus();
 const twitchTokenStore = new LocalJsonTwitchTokenStore(

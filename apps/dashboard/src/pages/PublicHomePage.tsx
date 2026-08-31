@@ -60,11 +60,13 @@ export function PublicHomePage() {
       <HomeHeader
         accountName={account.accountUser?.displayName}
         connected={account.yoroConnected}
+        isStreamerAdmin={account.isStreamerAdmin}
         locale={locale}
         onDashboard={account.openDashboard}
         onLocale={handleLocale}
         onLoginOpen={() => setLoginOpen(true)}
         onLogout={account.logout}
+        onStreamerAdmin={account.openStreamerAdmin}
         onToggleTheme={toggleTheme}
         text={text}
       />

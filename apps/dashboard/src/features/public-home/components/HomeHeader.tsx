@@ -189,7 +189,7 @@ export function HomeGamesMenuRows({ text, activeGame }: { text: HomeText; active
   );
 }
 
-export function HomeHeader({ text, locale, onLocale, onToggleTheme, accountName, connected, onLoginOpen, onLogout, onDashboard, activeGame, searchSlot }: {
+export function HomeHeader({ text, locale, onLocale, onToggleTheme, accountName, connected, onLoginOpen, onLogout, onDashboard, isStreamerAdmin, onStreamerAdmin, activeGame, searchSlot }: {
   text: HomeText;
   locale: PublicLocale;
   onLocale: (locale: PublicLocale) => void;
@@ -199,6 +199,10 @@ export function HomeHeader({ text, locale, onLocale, onToggleTheme, accountName,
   onLoginOpen: () => void;
   onLogout: () => void;
   onDashboard: () => void;
+  /* 관리자 콘솔(admin_accounts)에 활성 등록된 계정일 때만 true — 프로필 드롭다운에
+     "스트리머 관리" 항목을 추가로 보여줍니다. */
+  isStreamerAdmin?: boolean;
+  onStreamerAdmin?: () => void;
   /* 게임 홈(예: /lol)에서는 게임 트리거가 현재 게임 이름 + 꼬리 밑줄로 바뀝니다(목업 v9). */
   activeGame?: HomeActiveGame;
   /* 전적 상세 헤더의 컴팩트 검색바(목업 v26) — 우측 묶음 맨 앞에 놓입니다. */
@@ -328,6 +332,19 @@ export function HomeHeader({ text, locale, onLocale, onToggleTheme, accountName,
                 <button className="yoro-home-lang-option" onClick={onDashboard} role="menuitem" type="button">
                   {text.navDashboard}
                 </button>
+                {isStreamerAdmin && onStreamerAdmin ? (
+                  <button
+                    className="yoro-home-lang-option yoro-home-lang-option--admin"
+                    onClick={() => {
+                      setOpenMenu(null);
+                      onStreamerAdmin();
+                    }}
+                    role="menuitem"
+                    type="button"
+                  >
+                    {text.navStreamerAdmin}
+                  </button>
+                ) : null}
                 <button
                   className="yoro-home-lang-option"
                   onClick={() => {

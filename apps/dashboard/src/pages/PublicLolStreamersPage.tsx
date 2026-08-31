@@ -62,10 +62,12 @@ export function PublicLolStreamersPage() {
         accountName={account.accountUser?.displayName}
         active="streamers"
         connected={account.yoroConnected}
+        isStreamerAdmin={account.isStreamerAdmin}
         locale={locale}
         onLocale={handleLocale}
         onLoginOpen={() => setLoginOpen(true)}
         onLogout={account.logout}
+        onStreamerAdmin={account.openStreamerAdmin}
         onToggleTheme={toggleTheme}
       />
       <main className="yoro-home-main" id="yoro-streamers-main">

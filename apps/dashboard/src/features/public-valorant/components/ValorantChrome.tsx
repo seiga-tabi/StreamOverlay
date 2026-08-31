@@ -58,6 +58,8 @@ export function ValorantChrome({
   locale,
   accountName,
   connected,
+  isStreamerAdmin,
+  onStreamerAdmin,
   onLocale,
   onLoginOpen,
   onLogout,
@@ -67,6 +69,8 @@ export function ValorantChrome({
   locale: ValorantLocale;
   accountName?: string;
   connected: boolean;
+  isStreamerAdmin?: boolean;
+  onStreamerAdmin?: () => void;
   onLocale: (locale: ValorantLocale) => void;
   onLoginOpen: () => void;
   onLogout: () => void;
@@ -78,11 +82,13 @@ export function ValorantChrome({
         accountName={accountName}
         activeGame="valorant"
         connected={connected}
+        isStreamerAdmin={isStreamerAdmin}
         locale={locale}
         onDashboard={() => window.location.assign("/dashboard")}
         onLocale={(nextLocale) => onLocale(publicContentLocale(nextLocale))}
         onLoginOpen={onLoginOpen}
         onLogout={onLogout}
+        onStreamerAdmin={onStreamerAdmin}
         onToggleTheme={onToggleTheme}
         text={homeI18n[locale]}
       />

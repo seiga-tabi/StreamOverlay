@@ -62,6 +62,8 @@ export function MinecraftChrome({
   locale,
   accountName,
   connected,
+  isStreamerAdmin,
+  onStreamerAdmin,
   onLocale,
   onLoginOpen,
   onLogout,
@@ -71,6 +73,8 @@ export function MinecraftChrome({
   locale: MinecraftLocale;
   accountName?: string;
   connected: boolean;
+  isStreamerAdmin?: boolean;
+  onStreamerAdmin?: () => void;
   onLocale: (locale: MinecraftLocale) => void;
   onLoginOpen: () => void;
   onLogout: () => void;
@@ -82,11 +86,13 @@ export function MinecraftChrome({
         accountName={accountName}
         activeGame="minecraft"
         connected={connected}
+        isStreamerAdmin={isStreamerAdmin}
         locale={locale}
         onDashboard={() => window.location.assign("/dashboard")}
         onLocale={(nextLocale) => onLocale(publicContentLocale(nextLocale))}
         onLoginOpen={onLoginOpen}
         onLogout={onLogout}
+        onStreamerAdmin={onStreamerAdmin}
         onToggleTheme={onToggleTheme}
         text={homeI18n[locale]}
       />

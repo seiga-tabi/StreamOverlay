@@ -66,10 +66,12 @@ export function PublicLolHomePage() {
         accountName={account.accountUser?.displayName}
         active="home"
         connected={account.yoroConnected}
+        isStreamerAdmin={account.isStreamerAdmin}
         locale={locale}
         onLocale={handleLocale}
         onLoginOpen={() => setLoginOpen(true)}
         onLogout={account.logout}
+        onStreamerAdmin={account.openStreamerAdmin}
         onToggleTheme={toggleTheme}
       />
       <main className="yoro-home-main" id="yoro-lol-home-main">

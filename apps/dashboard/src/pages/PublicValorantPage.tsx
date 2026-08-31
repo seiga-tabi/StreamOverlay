@@ -47,10 +47,12 @@ export function PublicValorantPage() {
       <ValorantChrome
         accountName={account.accountUser?.displayName}
         connected={account.yoroConnected}
+        isStreamerAdmin={account.isStreamerAdmin}
         locale={locale}
         onLocale={handleLocale}
         onLoginOpen={account.loginWithTwitch}
         onLogout={account.logout}
+        onStreamerAdmin={account.openStreamerAdmin}
         onToggleTheme={toggleTheme}
         page={page}
       />

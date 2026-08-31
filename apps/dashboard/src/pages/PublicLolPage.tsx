@@ -7698,10 +7698,12 @@ export function PublicLolPage({
           accountName={publicAccount.accountUser?.displayName}
           active="none"
           connected={publicAccount.yoroConnected}
+          isStreamerAdmin={publicAccount.isStreamerAdmin}
           locale={locale}
           onLocale={changeLocale}
           onLoginOpen={startTwitchLogin}
           onLogout={() => void disconnectTwitchViewer()}
+          onStreamerAdmin={publicAccount.openStreamerAdmin}
           onToggleTheme={toggleTheme}
         />
         <AppShellMain className="public-app-main" id="public-streamer-register-main">
@@ -7738,10 +7740,12 @@ export function PublicLolPage({
           active="none"
           className="public-home-shared-header"
           connected={publicAccount.yoroConnected}
+          isStreamerAdmin={publicAccount.isStreamerAdmin}
           locale={locale}
           onLocale={changeLocale}
           onLoginOpen={startTwitchLogin}
           onLogout={() => void disconnectTwitchViewer()}
+          onStreamerAdmin={publicAccount.openStreamerAdmin}
           onToggleTheme={toggleTheme}
         />
         <AppShellMain className="public-home-shared-main" id="public-search-main">
@@ -7824,10 +7828,12 @@ export function PublicLolPage({
           active={lolSubnavActive(activeMainPage)}
           className="public-standard-header-frame"
           connected={publicAccount.yoroConnected}
+          isStreamerAdmin={publicAccount.isStreamerAdmin}
           locale={locale}
           onLocale={changeLocale}
           onLoginOpen={startTwitchLogin}
           onLogout={() => void disconnectTwitchViewer()}
+          onStreamerAdmin={publicAccount.openStreamerAdmin}
           onToggleTheme={toggleTheme}
           searchSlot={(
             <div className="yoro-home-header-search">
@@ -7884,10 +7890,12 @@ export function PublicLolPage({
         accountName={publicAccount.accountUser?.displayName}
         active="none"
         connected={publicAccount.yoroConnected}
+        isStreamerAdmin={publicAccount.isStreamerAdmin}
         locale={locale}
         onLocale={changeLocale}
         onLoginOpen={startTwitchLogin}
         onLogout={() => void disconnectTwitchViewer()}
+        onStreamerAdmin={publicAccount.openStreamerAdmin}
         onToggleTheme={toggleTheme}
         searchSlot={(
           <div className="yoro-home-header-search">

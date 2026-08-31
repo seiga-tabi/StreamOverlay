@@ -109,6 +109,11 @@ export type PublicYoroAccountSession = {
     riotRsoAvailable: boolean;
     riotRsoRequiresTwitchAuthentication: boolean;
   }>;
+  /* 공개 계정이 연결한 Twitch identity가 관리자 콘솔(admin_accounts)에 활성 등록되어
+     있으면 true. 상단바 프로필 메뉴에 "스트리머 관리" 항목을 보여줄지 여부에만
+     쓰이며, 세부 permissions는 노출하지 않습니다(그건 관리자 콘솔 자체 인증이 담당).
+     조회 실패/미배선 시 fail-closed로 항상 false/생략됩니다. */
+  isStreamerAdmin?: boolean;
 };
 
 type AuthenticatedSession = {
@@ -379,6 +384,11 @@ export function clearYoroCookie(name: typeof YORO_OAUTH_COOKIE | typeof YORO_SES
 export class YoroAccountService {
   private valorantVisibilityInvalidator?: (userId: string) => void;
 
+  /* 늦은 주입 — index.ts 에서 Store 생성 이후 배선합니다(store 는 YoroAccountService
+     보다 나중에 만들어져 생성자 주입이 불가합니다). 미배선 시 session() 은
+     isStreamerAdmin 을 항상 생략합니다(fail-closed). */
+  private streamerAdminLookup?: (twitchUserId: string) => boolean;
+
   private cleanupTimer?: NodeJS.Timeout;
 
   constructor(
@@ -611,6 +621,16 @@ export class YoroAccountService {
       repository.getUserPreferences(authenticated.userId)
     ]);
     const safeIdentities = identities.map(publicYoroIdentity);
+    const twitchIdentity = identities.find((identity) => identity.provider === "twitch");
+    let isStreamerAdmin: boolean | undefined;
+    if (twitchIdentity && this.streamerAdminLookup) {
+      try {
+        isStreamerAdmin = this.streamerAdminLookup(twitchIdentity.providerSubject);
+      } catch {
+        // 조회 실패는 fail-closed — 관리자 메뉴를 실수로 노출하지 않습니다.
+        isStreamerAdmin = false;
+      }
+    }
     return {
       authenticated: true,
       csrfToken: authenticated.csrfToken,
@@ -626,7 +646,8 @@ export class YoroAccountService {
             || Date.now() - authenticated.authenticatedAt.getTime()
               > RECENT_AUTHENTICATION_MS
           )
-      }
+      },
+      ...(isStreamerAdmin !== undefined ? { isStreamerAdmin } : {})
     };
   }
 
@@ -649,6 +670,10 @@ export class YoroAccountService {
 
   setValorantVisibilityInvalidator(invalidator: (userId: string) => void): void {
     this.valorantVisibilityInvalidator = invalidator;
+  }
+
+  setStreamerAdminLookup(lookup: (twitchUserId: string) => boolean): void {
+    this.streamerAdminLookup = lookup;
   }
 
   async updateValorantRecordConsent(input: {

@@ -359,6 +359,26 @@
 
   .yoro-home-lang-option:last-child { border-bottom: none; }
   .yoro-home-lang-option:hover { background: var(--home-bg); color: var(--home-ink); }
+
+  /* 관리자 콘솔 진입 항목(프로필 메뉴 "스트리머 관리") — 승색(--home-win) 강조.
+     목업: profile-menu-streamer-admin-mockup.html.
+     --home-win 원본(#87A183)은 다크 카드(--home-card #252730) 대비 5.28:1 로 AA를
+     통과하지만, 라이트 카드(#FFFFFF) 위에서는 2.82:1 로 미달(실측)이라 텍스트 색으로
+     그대로 쓸 수 없습니다. 전역 --home-win 은 배경색 등 다른 용도로도 널리 쓰여 값을
+     바꾸면 영향 범위가 넓으므로, 이 항목 전용의 로컬 변수로 라이트에서만 명도를
+     낮춥니다(다크는 원본 유지). */
+  .yoro-home-lang-option--admin {
+    --yoro-admin-entry-ink: var(--home-win);
+    color: var(--yoro-admin-entry-ink);
+  }
+  .yoro-home-lang-option--admin:hover {
+    background: color-mix(in srgb, var(--yoro-admin-entry-ink) 12%, var(--home-bg));
+    color: var(--yoro-admin-entry-ink);
+  }
+  .yoro-home-shell.theme-light .yoro-home-lang-option--admin,
+  .theme-light .yoro-home-chrome .yoro-home-lang-option--admin {
+    --yoro-admin-entry-ink: #657862;
+  }
   .yoro-home-lang-option.is-active { color: var(--home-ink); font-weight: 700; }
 
   /* ── 히어로 ───────────────────────────────────────────── */

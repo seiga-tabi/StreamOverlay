@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { trackGoogleAnalyticsEvent } from "../analytics/google-analytics";
 import { getPublicTwitchStatus, peekPublicTwitchStatus } from "../features/public-twitch/api";
-import { accountOAuthUrl, openYoroDashboard } from "../features/yoro-account/api";
+import { accountOAuthUrl, openYoroDashboard, openYoroStreamerAdmin } from "../features/yoro-account/api";
 import {
   authenticatedYoroIdentity,
   useYoroAccountSession,
@@ -79,6 +79,8 @@ export function usePublicAccountLogin(options?: {
   const yoroAccount = useYoroAccountSession();
   const yoroIdentity = authenticatedYoroIdentity(yoroAccount.session);
   const yoroConnected = yoroAccount.session?.authenticated === true;
+  const isStreamerAdmin = yoroAccount.session?.authenticated === true
+    && yoroAccount.session.isStreamerAdmin === true;
   const accountUser: PublicTwitchAccountUser | undefined = yoroIdentity
     ? {
       displayName: yoroIdentity.displayName,
@@ -140,10 +142,12 @@ export function usePublicAccountLogin(options?: {
     accountUser,
     /* 뷰어 세션이 있으면 칩의 connected 는 두 세션의 합성입니다. */
     accountConnected: yoroConnected || viewerTwitch?.connected === true,
+    isStreamerAdmin,
     loginWithDiscord,
     loginWithTwitch,
     logout,
     openDashboard: openYoroDashboard,
+    openStreamerAdmin: openYoroStreamerAdmin,
     twitchConfigured,
     yoroConnected,
   };
