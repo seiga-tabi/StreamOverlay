@@ -124,7 +124,7 @@ import {
   publicTwitchViewerSessionCookie,
   publicTwitchViewerSessionIdFromRequest
 } from "../services/public-twitch-auth.js";
-import { RiotApiHttpError, RiotRateLimitError, type RiotApiClient, type RiotCurrentGameInfo, type RiotMatch, type RiotMatchParticipant, type RiotMatchTimeline } from "../services/riot-api.js";
+import { isAbortError, RiotApiHttpError, RiotRateLimitError, RiotRequestAbortedError, type RiotApiClient, type RiotCurrentGameInfo, type RiotMatch, type RiotMatchParticipant, type RiotMatchTimeline } from "../services/riot-api.js";
 import {
   PalworldServerMonitorInputError,
   PalworldServerMonitorRateLimitError,
@@ -3869,6 +3869,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
     response: PublicLolProfileResponse;
   }>();
   const publicLolProfileInFlight = new Map<string, Promise<PublicLolProfileResponse>>();
+  const publicLolProfileInFlightRefCount = new Map<string, number>();
+  const publicLolProfileInFlightController = new Map<string, AbortController>();
   const publicLolProfileRefreshAvailableAt = new Map<string, number>();
   const publicLolProfileCacheGeneration = new Map<string, number>();
   const publicLolProfilePuuidCache = new Map<string, string>();
@@ -3883,6 +3885,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
   let publicLolParticipantRankCacheInvalidatedAt = 0;
   const publicLolMatchPageCache = new Map<string, { expiresAt: number; response: PublicLolMatchPageResponse }>();
   const publicLolMatchPageInFlight = new Map<string, Promise<PublicLolMatchPageResponse>>();
+  const publicLolMatchPageInFlightRefCount = new Map<string, number>();
+  const publicLolMatchPageInFlightController = new Map<string, AbortController>();
   const publicLolMatchRankCache = new Map<string, { expiresAt: number; response: PublicLolMatchRankResponse }>();
   const publicLolMatchRankInFlight = new Map<string, Promise<PublicLolMatchRankResponse>>();
   const publicLolMatchBuildCache = new Map<string, { expiresAt: number; response: PublicLolMatchBuildResponse }>();
@@ -8042,7 +8046,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
     dataDragonVersion: string | undefined,
     matchCount = PUBLIC_LOL_PROFILE_MATCH_COUNT,
     routing?: LolRoutingContext,
-    queueFilter: PublicLolMatchQueueFilter = "all"
+    queueFilter: PublicLolMatchQueueFilter = "all",
+    signal?: AbortSignal
   ): Promise<{
     rawMatches: RiotMatch[];
     recentMatches: PublicLolRecentMatch[];
@@ -8060,11 +8065,23 @@ export function createHttpHandler(input: HttpHandlerInput) {
       matchCount + 1,
       queueIds,
       safeStart,
-      routing
-    ).catch(() => []);
+      routing,
+      signal
+    ).catch((error) => {
+      if (isAbortError(error)) throw error;
+      return [];
+    });
+    if (signal?.aborted) throw new RiotRequestAbortedError("public_lol.match_page");
+    /* 매치 상세 조회(getPublicLolMatchDetail)는 matchId 단위로 여러 검색이 공유하는
+       in-flight dedup 캐시를 씁니다(publicLolMatchDetailInFlight) — 이 검색이
+       취소돼도 다른 사용자가 같은 매치를 기다리고 있을 수 있으므로, 여기에는
+       signal을 전파하지 않습니다(설계상 의도적 미전파, 4-5절). 대신 결과를
+       기다리는 이 호출자 쪽에서 완료 즉시 abort 여부를 확인해 이후 단계를
+       건너뜁니다. */
     const detailResults = await Promise.all(
       matchIds.slice(0, matchCount).map((matchId) => getPublicLolMatchDetail(matchId, routing).catch(() => null))
     );
+    if (signal?.aborted) throw new RiotRequestAbortedError("public_lol.match_page");
     const fetchedDetails = detailResults.filter((match): match is RiotMatch => Boolean(match));
     /* ID 는 있는데 상세가 전부 실패하면(레이트 리밋·상류 장애) 빈 목록으로 위장하지 않습니다 —
        "전적 없음"이 아니라 오류+재시도가 맞습니다. 큐 필터로 0이 되는 정상 경우와 구분합니다. */
@@ -8267,18 +8284,31 @@ export function createHttpHandler(input: HttpHandlerInput) {
     };
   }
 
-  async function buildPublicLolProfile(rawRiotId: string, routing: LolRoutingContext): Promise<PublicLolProfileResponse> {
+  async function buildPublicLolProfile(rawRiotId: string, routing: LolRoutingContext, signal?: AbortSignal): Promise<PublicLolProfileResponse> {
     const startedAt = Date.now();
     const parsed = parseRiotIdDetailed(rawRiotId);
     if (!parsed.ok) throw new HttpRequestError(400, { error: parsed.message, code: parsed.code });
     if (!input.riot) throw new HttpRequestError(503, { error: "Riot API client를 사용할 수 없습니다." });
     if (!input.riot.isConfigured()) throw new HttpRequestError(503, { error: "Riot API key가 설정되어 있지 않습니다." });
 
-    const account = await input.riot.getAccountByRiotId(parsed.gameName, parsed.tagLine, routing).catch((error) => {
+    const account = await input.riot.getAccountByRiotId(parsed.gameName, parsed.tagLine, routing, signal).catch((error) => {
+      /* 취소는 Riot API 오류가 아닙니다 — HttpRequestError(502)로 감싸면 상위에서
+         "Riot 오류"로 오분류되어 불필요한 로그/응답을 만듭니다. 그대로 던져
+         라우트 핸들러의 isAbortError 가드가 조용히 처리하게 둡니다. */
+      if (isAbortError(error)) throw error;
       throw new HttpRequestError(502, { error: publicLolErrorMessage(error) });
     });
+    if (signal?.aborted) throw new RiotRequestAbortedError("public_lol.profile_build");
     if (!account?.puuid) throw new HttpRequestError(404, { error: "Riot 계정을 찾지 못했습니다." });
+    /* requirePublicLolPlatformMembership(→ getSummonerByPuuid)에는 signal을
+       전파하지 않습니다 — publicLolPlatformMembershipInFlight가 puuid 단위로
+       공유하는 dedup 캐시라서, 다른 소환사 검색과 신원 확인 단계가 겹치면
+       (동일 puuid를 다른 라우트/사용자가 동시에 조회) 이 요청의 취소가 그
+       공유 결과까지 오염시킬 수 있습니다(getMatch/getMatchTimeline과 동일한
+       설계 원칙 — 4-5절). 큐 소비 비용도 이 호출 하나뿐이라 상대적으로
+       작습니다. */
     await requirePublicLolPlatformMembership(account.puuid, routing);
+    if (signal?.aborted) throw new RiotRequestAbortedError("public_lol.profile_build");
     const accountResolvedAt = Date.now();
 
     const existingProfile = input.profileRepository?.getByPuuid(account.puuid) ?? input.profileRepository?.getByRiotId(account.gameName || parsed.gameName, account.tagLine || parsed.tagLine);
@@ -8288,8 +8318,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
     publicLolProfilePuuidCache.set(responseCacheKey, account.puuid);
     pruneMapToMax(publicLolProfilePuuidCache, PUBLIC_LOL_PROFILE_CACHE_MAX * 2);
     const rankedQueuesRequest: Promise<PublicLolRankedQueues> = typeof input.riot.getRankedQueueStatsByPuuid === "function"
-      ? input.riot.getRankedQueueStatsByPuuid(account.puuid, routing).catch((): PublicLolRankedQueues => ({}))
-      : input.riot.getRankedStatsByPuuid(account.puuid, undefined, routing).then((stats): PublicLolRankedQueues => ({
+      ? input.riot.getRankedQueueStatsByPuuid(account.puuid, routing, signal).catch((): PublicLolRankedQueues => ({}))
+      : input.riot.getRankedStatsByPuuid(account.puuid, undefined, routing, signal).then((stats): PublicLolRankedQueues => ({
         solo: stats?.queueType === "RANKED_SOLO_5x5" ? stats : undefined,
         flex: stats?.queueType === "RANKED_FLEX_SR" ? stats : undefined,
         ranked5v5: stats?.queueType === "RANKED_TEAM_5x5" ? stats : undefined,
@@ -8298,9 +8328,10 @@ export function createHttpHandler(input: HttpHandlerInput) {
     const dataDragonVersionRequest = dataDragonLatestVersion(input.dataDragon);
     const [rankedQueues, mastery, dataDragonVersion] = await Promise.all([
       rankedQueuesRequest,
-      input.riot.getChampionMasteryTopByPuuid(account.puuid, PUBLIC_LOL_PROFILE_TOP_CHAMPION_COUNT, routing).catch(() => []),
+      input.riot.getChampionMasteryTopByPuuid(account.puuid, PUBLIC_LOL_PROFILE_TOP_CHAMPION_COUNT, routing, signal).catch(() => []),
       dataDragonVersionRequest
     ]);
+    if (signal?.aborted) throw new RiotRequestAbortedError("public_lol.profile_build");
     const coreDataResolvedAt = Date.now();
     const rankedStats = rankedQueues.primary;
     const topChampionsRequest = Promise.all(mastery.slice(0, PUBLIC_LOL_PROFILE_TOP_CHAMPION_COUNT).map((champion) => mapChampionSummary(input.dataDragon, {
@@ -8309,10 +8340,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
       masteryPoints: champion.championPoints
     })));
     const [matchPage, topChampions, resolvedProfileIconUrl] = await Promise.all([
-      buildPublicLolMatchPageForAccount(account, 0, dataDragonVersion, PUBLIC_LOL_PROFILE_INITIAL_MATCH_COUNT, routing),
+      buildPublicLolMatchPageForAccount(account, 0, dataDragonVersion, PUBLIC_LOL_PROFILE_INITIAL_MATCH_COUNT, routing, "all", signal),
       topChampionsRequest,
       profileIconUrl(input.dataDragon, rankedStats?.profileIconId)
     ]);
+    if (signal?.aborted) throw new RiotRequestAbortedError("public_lol.profile_build");
     const matchContentResolvedAt = Date.now();
     const matches = matchPage.rawMatches;
 
@@ -8452,31 +8484,77 @@ export function createHttpHandler(input: HttpHandlerInput) {
     invalidatePublicLolProfileCachesForRiotId(event.riotGameName, event.riotTagLine);
   });
 
-  function startPublicLolProfileBuild(key: string, riotId: string, routing: LolRoutingContext): Promise<PublicLolProfileResponse> {
-    const running = publicLolProfileInFlight.get(key);
-    if (running) return running;
-    const cacheGeneration = publicLolProfileCacheGeneration.get(key) ?? 0;
-    const request = buildPublicLolProfile(riotId, routing)
-      .then((response) => {
-        if ((publicLolProfileCacheGeneration.get(key) ?? 0) === cacheGeneration) {
-          const now = Date.now();
-          publicLolProfileCache.set(key, {
-            response,
-            expiresAt: now + PUBLIC_LOL_PROFILE_CACHE_TTL_MS,
-            staleUntil: now + PUBLIC_LOL_PROFILE_STALE_TTL_MS
-          });
-          pruneMapToMax(publicLolProfileCache, PUBLIC_LOL_PROFILE_CACHE_MAX);
-        }
-        return response;
-      })
-      .finally(() => {
-        publicLolProfileInFlight.delete(key);
+  function startPublicLolProfileBuild(key: string, riotId: string, routing: LolRoutingContext, signal?: AbortSignal): Promise<PublicLolProfileResponse> {
+    let sharedBuild = publicLolProfileInFlight.get(key);
+    if (!sharedBuild) {
+      /* 이 빌드 전용 AbortController를 하나 만들어 "이 프로필을 기다리는
+         마지막 consumer까지 전부 취소했을 때만" 실제로 취소되게 합니다 —
+         reference count 방식(정책 4-5절). 한 명이 취소해도 다른 소비자가
+         남아있으면 빌드는 계속 진행되고, 전원이 취소하면 buildPublicLolProfile
+         내부의 signal.aborted 체크가 실제로 발동해 좀비 요청을 막습니다. */
+      const buildController = new AbortController();
+      publicLolProfileInFlightController.set(key, buildController);
+      const cacheGeneration = publicLolProfileCacheGeneration.get(key) ?? 0;
+      sharedBuild = buildPublicLolProfile(riotId, routing, buildController.signal)
+        .then((response) => {
+          if ((publicLolProfileCacheGeneration.get(key) ?? 0) === cacheGeneration) {
+            const now = Date.now();
+            publicLolProfileCache.set(key, {
+              response,
+              expiresAt: now + PUBLIC_LOL_PROFILE_CACHE_TTL_MS,
+              staleUntil: now + PUBLIC_LOL_PROFILE_STALE_TTL_MS
+            });
+            pruneMapToMax(publicLolProfileCache, PUBLIC_LOL_PROFILE_CACHE_MAX);
+          }
+          return response;
+        })
+        .finally(() => {
+          publicLolProfileInFlight.delete(key);
+          publicLolProfileInFlightRefCount.delete(key);
+          publicLolProfileInFlightController.delete(key);
+        });
+      publicLolProfileInFlight.set(key, sharedBuild);
+      publicLolProfileInFlightRefCount.set(key, 0);
+    }
+    if (!signal) return sharedBuild;
+
+    publicLolProfileInFlightRefCount.set(key, (publicLolProfileInFlightRefCount.get(key) ?? 0) + 1);
+    const callerSpecific = sharedBuild;
+    const buildController = publicLolProfileInFlightController.get(key);
+    let released = false;
+    const releaseRef = () => {
+      if (released) return;
+      released = true;
+      const remaining = (publicLolProfileInFlightRefCount.get(key) ?? 1) - 1;
+      if (remaining <= 0) {
+        publicLolProfileInFlightRefCount.delete(key);
+        /* 이 빌드를 기다리던 signal 보유 consumer가 전부 취소했습니다 —
+           남아있는 유일한 대기자가 없다는 뜻이므로 실제 빌드를 중단시킵니다. */
+        buildController?.abort();
+      } else {
+        publicLolProfileInFlightRefCount.set(key, remaining);
+      }
+    };
+
+    return new Promise<PublicLolProfileResponse>((resolve, reject) => {
+      if (signal.aborted) {
+        releaseRef();
+        reject(new RiotRequestAbortedError("public_lol.profile_build"));
+        return;
+      }
+      const onAbort = () => {
+        releaseRef();
+        reject(new RiotRequestAbortedError("public_lol.profile_build"));
+      };
+      signal.addEventListener("abort", onAbort, { once: true });
+      callerSpecific.then(resolve, reject).finally(() => {
+        signal.removeEventListener("abort", onAbort);
+        releaseRef();
       });
-    publicLolProfileInFlight.set(key, request);
-    return request;
+    });
   }
 
-  async function getPublicLolProfile(rawRiotId: string, routing: LolRoutingContext, options: { refresh?: boolean } = {}): Promise<PublicLolProfileResponse> {
+  async function getPublicLolProfile(rawRiotId: string, routing: LolRoutingContext, options: { refresh?: boolean; signal?: AbortSignal } = {}): Promise<PublicLolProfileResponse> {
     const parsed = parseRiotIdDetailed(rawRiotId);
     if (!parsed.ok) throw new HttpRequestError(400, { error: parsed.message, code: parsed.code });
     const key = publicLolProfileCacheKey(parsed.gameName, parsed.tagLine, routing.lolPlatform);
@@ -8565,14 +8643,15 @@ export function createHttpHandler(input: HttpHandlerInput) {
       return withPublicLolRefreshState(cached.response, key);
     }
     if (cached) publicLolProfileCache.delete(key);
-    return withPublicLolRefreshState(await startPublicLolProfileBuild(key, riotId, routing), key);
+    return withPublicLolRefreshState(await startPublicLolProfileBuild(key, riotId, routing, options.signal), key);
   }
 
   async function buildPublicLolMatchPage(
     rawRiotId: string,
     start: number,
     routing: LolRoutingContext,
-    queueFilter: PublicLolMatchQueueFilter = "all"
+    queueFilter: PublicLolMatchQueueFilter = "all",
+    signal?: AbortSignal
   ): Promise<PublicLolMatchPageResponse> {
     const startedAt = Date.now();
     const parsed = parseRiotIdDetailed(rawRiotId);
@@ -8595,11 +8674,14 @@ export function createHttpHandler(input: HttpHandlerInput) {
           gameName: cachedProfile.response.gameName,
           tagLine: cachedProfile.response.tagLine
         }
-      : await input.riot.getAccountByRiotId(parsed.gameName, parsed.tagLine, routing).catch((error) => {
+      : await input.riot.getAccountByRiotId(parsed.gameName, parsed.tagLine, routing, signal).catch((error) => {
+          if (isAbortError(error)) throw error;
           throw new HttpRequestError(502, { error: publicLolErrorMessage(error) });
         });
+    if (signal?.aborted) throw new RiotRequestAbortedError("public_lol.match_page");
     if (!account?.puuid) throw new HttpRequestError(404, { error: "Riot 계정을 찾지 못했습니다." });
     if (!canReuseVerifiedIdentity) await requirePublicLolPlatformMembership(account.puuid, routing);
+    if (signal?.aborted) throw new RiotRequestAbortedError("public_lol.match_page");
 
     const dataDragonVersion = await dataDragonLatestVersion(input.dataDragon);
     const matchPage = await buildPublicLolMatchPageForAccount(
@@ -8608,8 +8690,10 @@ export function createHttpHandler(input: HttpHandlerInput) {
       dataDragonVersion,
       PUBLIC_LOL_PROFILE_MATCH_COUNT,
       routing,
-      queueFilter
+      queueFilter,
+      signal
     );
+    if (signal?.aborted) throw new RiotRequestAbortedError("public_lol.match_page");
     const recentMatches = await withPublicLolReplays(
       matchPage.recentMatches,
       account.gameName || parsed.gameName,
@@ -8644,7 +8728,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
     rawRiotId: string,
     start: number,
     routing: LolRoutingContext,
-    queueFilter: PublicLolMatchQueueFilter = "all"
+    queueFilter: PublicLolMatchQueueFilter = "all",
+    signal?: AbortSignal
   ): Promise<PublicLolMatchPageResponse> {
     const parsed = parseRiotIdDetailed(rawRiotId);
     if (!parsed.ok) throw new HttpRequestError(400, { error: parsed.message, code: parsed.code });
@@ -8654,23 +8739,63 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (cached && cached.expiresAt > Date.now()) return cached.response;
     if (cached) publicLolMatchPageCache.delete(cacheKey);
 
-    const running = publicLolMatchPageInFlight.get(cacheKey);
-    if (running) return running;
-
-    const request = buildPublicLolMatchPage(`${parsed.gameName}#${parsed.tagLine}`, safeStart, routing, queueFilter)
-      .then((response) => {
-        publicLolMatchPageCache.set(cacheKey, {
-          response,
-          expiresAt: Date.now() + PUBLIC_LOL_PROFILE_CACHE_TTL_MS
+    let sharedRequest = publicLolMatchPageInFlight.get(cacheKey);
+    if (!sharedRequest) {
+      /* startPublicLolProfileBuild와 동일한 reference-count 방식 —
+         마지막 signal 보유 consumer까지 전부 취소해야 실제로 취소됩니다. */
+      const pageController = new AbortController();
+      publicLolMatchPageInFlightController.set(cacheKey, pageController);
+      sharedRequest = buildPublicLolMatchPage(`${parsed.gameName}#${parsed.tagLine}`, safeStart, routing, queueFilter, pageController.signal)
+        .then((response) => {
+          publicLolMatchPageCache.set(cacheKey, {
+            response,
+            expiresAt: Date.now() + PUBLIC_LOL_PROFILE_CACHE_TTL_MS
+          });
+          pruneMapToMax(publicLolMatchPageCache, PUBLIC_LOL_MATCH_CACHE_MAX);
+          return response;
+        })
+        .finally(() => {
+          publicLolMatchPageInFlight.delete(cacheKey);
+          publicLolMatchPageInFlightRefCount.delete(cacheKey);
+          publicLolMatchPageInFlightController.delete(cacheKey);
         });
-        pruneMapToMax(publicLolMatchPageCache, PUBLIC_LOL_MATCH_CACHE_MAX);
-        return response;
-      })
-      .finally(() => {
-        publicLolMatchPageInFlight.delete(cacheKey);
+      publicLolMatchPageInFlight.set(cacheKey, sharedRequest);
+      publicLolMatchPageInFlightRefCount.set(cacheKey, 0);
+    }
+    if (!signal) return sharedRequest;
+
+    publicLolMatchPageInFlightRefCount.set(cacheKey, (publicLolMatchPageInFlightRefCount.get(cacheKey) ?? 0) + 1);
+    const callerSpecific = sharedRequest;
+    const pageController = publicLolMatchPageInFlightController.get(cacheKey);
+    let released = false;
+    const releaseRef = () => {
+      if (released) return;
+      released = true;
+      const remaining = (publicLolMatchPageInFlightRefCount.get(cacheKey) ?? 1) - 1;
+      if (remaining <= 0) {
+        publicLolMatchPageInFlightRefCount.delete(cacheKey);
+        pageController?.abort();
+      } else {
+        publicLolMatchPageInFlightRefCount.set(cacheKey, remaining);
+      }
+    };
+
+    return new Promise<PublicLolMatchPageResponse>((resolve, reject) => {
+      if (signal.aborted) {
+        releaseRef();
+        reject(new RiotRequestAbortedError("public_lol.match_page"));
+        return;
+      }
+      const onAbort = () => {
+        releaseRef();
+        reject(new RiotRequestAbortedError("public_lol.match_page"));
+      };
+      signal.addEventListener("abort", onAbort, { once: true });
+      callerSpecific.then(resolve, reject).finally(() => {
+        signal.removeEventListener("abort", onAbort);
+        releaseRef();
       });
-    publicLolMatchPageInFlight.set(cacheKey, request);
-    return request;
+    });
   }
 
   async function buildPublicLolMatchRanks(matchId: string): Promise<PublicLolMatchRankResponse> {
@@ -9736,8 +9861,27 @@ export function createHttpHandler(input: HttpHandlerInput) {
     const url = new URL(req.url, "http://localhost");
     const ip = clientIp(req);
 
+    /* 클라이언트가 검색을 취소하면(예: 다음 검색으로 이전 fetch를 abort) TCP
+       연결이 끊기고 req가 'close'를 발생시킵니다. 응답을 이미 다 보낸 정상
+       완료 시에도 'close'가 뜨므로 res.writableEnded로 구분해, 아직 응답을
+       못 보낸 상태에서만 실제 취소로 간주합니다. 이 signal을
+       buildPublicLolProfile 등 하위 파이프라인까지 그대로 전달해 더 이상
+       필요 없어진 Riot API 호출이 rate-limit 큐를 계속 소비하지 않게 합니다.
+       테스트 더블(plain object mock)은 EventEmitter가 아닐 수 있어 req.on이
+       없을 때는 안전하게 건너뜁니다 — 이 경우 signal은 그냥 항상 미체결 상태로
+       남아(정상 동작, 취소 감지만 비활성) 기존 테스트에 영향을 주지 않습니다. */
+    const requestAbortController = new AbortController();
+    const onRequestClose = () => {
+      if (!res.writableEnded) requestAbortController.abort();
+    };
+    const supportsCloseEvent = typeof (req as { on?: unknown }).on === "function"
+      && typeof (req as { off?: unknown }).off === "function";
+    if (supportsCloseEvent) req.on("close", onRequestClose);
+    const requestSignal = requestAbortController.signal;
+
     if (shouldRedirectToHttps(req, url.pathname)) {
       sendHttpsRedirect(res, req.url);
+      if (supportsCloseEvent) req.off("close", onRequestClose);
       return;
     }
 
@@ -12224,7 +12368,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
           routing = publicLolRouting(linked.lolPlatform, input.riot);
           resolvedRiotId = linked.riotId;
         }
-        const profile = withPublicLolProfileToken(await getPublicLolProfile(resolvedRiotId, routing, { refresh }));
+        const profile = withPublicLolProfileToken(await getPublicLolProfile(resolvedRiotId, routing, { refresh, signal: requestSignal }));
         return sendJson(req, res, 200, profile, publicLolProfileCacheHeaders(profile, refresh));
       }
       if (req.method === "GET" && url.pathname === "/api/lol/profile-state") {
@@ -12238,7 +12382,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
           url.searchParams.get("riotId") ?? "",
           publicLolMatchStart(url.searchParams.get("start")),
           routing,
-          queueFilter
+          queueFilter,
+          requestSignal
         );
         return sendJson(req, res, 200, page, publicLolCacheHeaders("matches", page));
       }
@@ -13507,6 +13652,10 @@ export function createHttpHandler(input: HttpHandlerInput) {
           domain: error.domain
         }, { "Cache-Control": "no-store" });
       }
+      /* 사용자가 검색을 취소해 클라이언트 연결이 이미 끊긴 상태입니다 — Riot API
+         장애가 아니므로 오류 로그·5xx 응답 모두 의미가 없습니다(응답을 받을
+         상대가 없음). 운영 로그/알림 노이즈를 만들지 않도록 조용히 종료합니다. */
+      if (isAbortError(error) || requestSignal.aborted) return;
       input.logger?.error({
         type: "http_api.unhandled_error",
         path: url.pathname,
@@ -13514,6 +13663,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
         error: toSafeErrorMessage(error)
       });
       return sendJson(req, res, 500, { error: "서버 내부 오류" });
+    } finally {
+      if (supportsCloseEvent) req.off("close", onRequestClose);
     }
   };
 }

@@ -226,6 +226,25 @@ export class RiotRateLimitError extends Error {
   }
 }
 
+/* 사용자가 검색을 취소해 더 이상 필요 없어진 요청임을 나타내는 전용 에러입니다.
+   Riot API 장애(429/5xx/네트워크/timeout)와 명확히 구분해, 취소를 오류 로그·재시도·
+   운영 경고로 오인하지 않도록 합니다 — isAbortError()로 판별합니다. */
+export class RiotRequestAbortedError extends Error {
+  constructor(readonly route?: string, readonly host?: string) {
+    super("Riot API request was aborted by the caller");
+    this.name = "RiotRequestAbortedError";
+  }
+}
+
+/* AbortSignal에 의한 취소인지 판별하는 단일 원본입니다. fetch()가 자체적으로
+   반환하는 표준 DOMException("AbortError")과, 이 파일에서 만드는
+   RiotRequestAbortedError를 모두 인식합니다. */
+export function isAbortError(error: unknown): boolean {
+  if (error instanceof RiotRequestAbortedError) return true;
+  if (error instanceof Error && error.name === "AbortError") return true;
+  return false;
+}
+
 export class RiotApiHttpError extends Error {
   constructor(
     readonly status: number,
@@ -260,12 +279,22 @@ type RiotRequestLimiterOptions = {
   windows?: RiotRateLimitWindow[];
   maxQueueSize?: number;
   now?: () => number;
+  /* 큐 대기 상한(ms) — 검색을 여러 번 반복해 취소된 이전 요청들이 큐에 쌓이면
+     새 검색이 계속 뒤로 밀리다 결국 응답이 오지 않는 문제의 완화책입니다.
+     대기가 이 값을 넘으면 빠르게 명확한 오류로 실패시켜, 다음 요청이 밀리지
+     않고 클라이언트가 즉시 재시도할 수 있게 합니다(근본 해결인 요청 취소 전파는
+     더 큰 리스크의 후속 작업으로 분리). */
+  maxQueueWaitMs?: number;
 };
 
 type RiotQueuedRequest<T> = {
   run: () => Promise<T>;
   resolve: (value: T) => void;
   reject: (error: unknown) => void;
+  enqueuedAt: number;
+  /* 큐 대기 중 abort 시 waiter를 즉시 제거하기 위한 정리 콜백 —
+     addEventListener("abort", ...)의 리스너 해제까지 함께 수행합니다. */
+  cleanupAbortListener?: () => void;
 };
 
 type RiotRateLimitBucket = {
@@ -317,6 +346,7 @@ export class RiotRequestLimiter {
   private readonly enabled: boolean;
   private readonly windows: RiotRateLimitWindow[];
   private readonly maxQueueSize: number;
+  private readonly maxQueueWaitMs: number;
   private readonly now: () => number;
   private readonly maxWindowMs: number;
 
@@ -327,18 +357,37 @@ export class RiotRequestLimiter {
       .filter((window): window is RiotRateLimitWindow => Boolean(window))
       .sort((a, b) => a.windowMs - b.windowMs);
     this.maxQueueSize = Math.max(1, Math.trunc(options.maxQueueSize ?? 500));
+    /* 기본 12초 — 공개 전적 검색 페이지가 사용자에게 보여주는 로딩 타임아웃보다
+       짧게 잡아, 화면이 무한 로딩으로 보이기 전에 명확한 오류로 끝나게 합니다. */
+    this.maxQueueWaitMs = Math.max(1, Math.trunc(options.maxQueueWaitMs ?? 12_000));
     this.now = options.now ?? (() => Date.now());
     this.maxWindowMs = Math.max(...this.windows.map((window) => window.windowMs), 0);
   }
 
-  schedule<T>(host: string, run: () => Promise<T>): Promise<T> {
+  schedule<T>(host: string, run: () => Promise<T>, signal?: AbortSignal): Promise<T> {
+    /* 4-1. 이미 취소된 signal이면 queue에 넣지 않고 Riot API도 호출하지 않습니다. */
+    if (signal?.aborted) {
+      return Promise.reject(new RiotRequestAbortedError(undefined, host));
+    }
     if (!this.enabled || this.windows.length === 0) return run();
     const bucket = this.bucketFor(host);
     if (bucket.queue.length >= this.maxQueueSize) {
       return Promise.reject(new RiotRateLimitError("Riot API request queue is full", undefined, undefined, host));
     }
     return new Promise<T>((resolve, reject) => {
-      bucket.queue.push({ run, resolve, reject } as RiotQueuedRequest<unknown>);
+      const item: RiotQueuedRequest<unknown> = { run, resolve, reject, enqueuedAt: this.now() } as RiotQueuedRequest<unknown>;
+      if (signal) {
+        /* 4-2. 큐 대기 중 abort되면 waiter를 큐에서 제거하고 listener를 정리합니다.
+           뒤에 있는 정상 요청은 이 항목 제거의 영향을 받지 않고 그대로 진행됩니다. */
+        const onAbort = () => {
+          const index = bucket.queue.indexOf(item);
+          if (index >= 0) bucket.queue.splice(index, 1);
+          item.reject(new RiotRequestAbortedError(undefined, host));
+        };
+        signal.addEventListener("abort", onAbort, { once: true });
+        item.cleanupAbortListener = () => signal.removeEventListener("abort", onAbort);
+      }
+      bucket.queue.push(item);
       this.drain(bucket);
     });
   }
@@ -404,12 +453,25 @@ export class RiotRequestLimiter {
     if (bucket.timer) return;
     while (bucket.queue.length > 0) {
       const now = this.now();
+      /* 대기 상한 초과 항목을 실행 전에 걸러냅니다 — 취소된 이전 검색의 잔여
+         호출이 큐 앞쪽에 쌓여 있으면 정상 요청까지 함께 계속 밀리므로, 여기서
+         빠르게 실패시켜 뒤에 있는 새 요청이 즉시 진행되게 합니다. */
+      while (bucket.queue.length > 0 && now - bucket.queue[0]!.enqueuedAt > this.maxQueueWaitMs) {
+        const stale = bucket.queue.shift()!;
+        stale.cleanupAbortListener?.();
+        stale.reject(new RiotRateLimitError("Riot API request queue wait timed out", undefined, undefined, bucket.host));
+      }
+      if (bucket.queue.length === 0) return;
       if (!this.canStart(bucket, now)) {
-        this.scheduleDrain(bucket, this.nextDelayMs(bucket, now));
+        const rateLimitDelayMs = this.nextDelayMs(bucket, now);
+        const oldestEnqueuedAt = bucket.queue[0]!.enqueuedAt;
+        const staleDelayMs = Math.max(1, this.maxQueueWaitMs - (now - oldestEnqueuedAt) + 1);
+        this.scheduleDrain(bucket, Math.min(rateLimitDelayMs, staleDelayMs));
         return;
       }
       const item = bucket.queue.shift();
       if (!item) return;
+      item.cleanupAbortListener?.();
       bucket.startedAt.push(now);
       void item.run().then(item.resolve, item.reject);
     }
@@ -619,19 +681,29 @@ export class RiotApiClient {
     return this.credentialStatus();
   }
 
-  private async fetchJson<T>(url: string, route: string): Promise<T | null> {
+  private async fetchJson<T>(url: string, route: string, signal?: AbortSignal): Promise<T | null> {
     const host = safeHost(url);
-    await this.rateLimiter.schedule(host, async () => undefined);
+    /* rate-limit 큐 진입 전/대기 중 취소를 여기서 그대로 반영합니다 —
+       queue waiter가 signal.aborted를 감지하면 RiotRequestAbortedError로 reject됩니다. */
+    await this.rateLimiter.schedule(host, async () => undefined, signal);
     let response: Response;
+    /* 사용자 취소(signal)와 자체 타임아웃을 하나의 signal로 합칩니다 — 어느 쪽이
+       먼저 발생해도 fetch가 즉시 중단됩니다. */
+    const combinedSignal = signal
+      ? AbortSignal.any([signal, AbortSignal.timeout(appConfig.riot.apiTimeoutMs)])
+      : AbortSignal.timeout(appConfig.riot.apiTimeoutMs);
     try {
       const apiKey = this.apiKey;
       response = await fetch(url, {
-        signal: AbortSignal.timeout(appConfig.riot.apiTimeoutMs),
+        signal: combinedSignal,
         headers: {
           "X-Riot-Token": apiKey
         }
       });
     } catch (error) {
+      /* 사용자 취소로 인한 abort는 네트워크 장애가 아닙니다 — 별도 타입으로
+         구분해 상위에서 오류 로그·재시도·운영 경고로 오인하지 않게 합니다. */
+      if (signal?.aborted) throw new RiotRequestAbortedError(route, host);
       throw new RiotApiNetworkError(route, host, causeMessage(error), causeCode(error));
     }
     if (response.status === 404) return null;
@@ -644,44 +716,44 @@ export class RiotApiClient {
     return (await response.json()) as T;
   }
 
-  async getAccountByRiotId(gameName: string, tagLine: string, routing?: LolRoutingContext): Promise<RiotAccount | null> {
+  async getAccountByRiotId(gameName: string, tagLine: string, routing?: LolRoutingContext, signal?: AbortSignal): Promise<RiotAccount | null> {
     if (!this.isConfigured()) return null;
     const url = `https://${this.routing(routing).accountRegion}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`;
-    return this.fetchJson<RiotAccount>(url, "account.by_riot_id");
+    return this.fetchJson<RiotAccount>(url, "account.by_riot_id", signal);
   }
 
-  async getSummonerByPuuid(puuid: string, routing?: LolRoutingContext): Promise<RiotSummoner | null> {
+  async getSummonerByPuuid(puuid: string, routing?: LolRoutingContext, signal?: AbortSignal): Promise<RiotSummoner | null> {
     if (!this.isConfigured()) return null;
     const url = `https://${this.routing(routing).lolPlatform}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${encodeURIComponent(puuid)}`;
-    return this.fetchJson<RiotSummoner>(url, "summoner.by_puuid");
+    return this.fetchJson<RiotSummoner>(url, "summoner.by_puuid", signal);
   }
 
-  async getLeagueEntriesBySummonerId(summonerId: string, routing?: LolRoutingContext): Promise<RiotLeagueEntry[]> {
+  async getLeagueEntriesBySummonerId(summonerId: string, routing?: LolRoutingContext, signal?: AbortSignal): Promise<RiotLeagueEntry[]> {
     if (!this.isConfigured()) return [];
     const url = `https://${this.routing(routing).lolPlatform}.api.riotgames.com/lol/league/v4/entries/by-summoner/${encodeURIComponent(summonerId)}`;
-    return (await this.fetchJson<RiotLeagueEntry[]>(url, "league.entries")) ?? [];
+    return (await this.fetchJson<RiotLeagueEntry[]>(url, "league.entries", signal)) ?? [];
   }
 
-  async getLeagueEntriesByPuuid(puuid: string, routing?: LolRoutingContext): Promise<RiotLeagueEntry[]> {
+  async getLeagueEntriesByPuuid(puuid: string, routing?: LolRoutingContext, signal?: AbortSignal): Promise<RiotLeagueEntry[]> {
     if (!this.isConfigured()) return [];
     const url = `https://${this.routing(routing).lolPlatform}.api.riotgames.com/lol/league/v4/entries/by-puuid/${encodeURIComponent(puuid)}`;
-    return (await this.fetchJson<RiotLeagueEntry[]>(url, "league.entries_by_puuid")) ?? [];
+    return (await this.fetchJson<RiotLeagueEntry[]>(url, "league.entries_by_puuid", signal)) ?? [];
   }
 
-  async getLeagueById(leagueId: string, routing?: LolRoutingContext): Promise<RiotLeagueList | null> {
+  async getLeagueById(leagueId: string, routing?: LolRoutingContext, signal?: AbortSignal): Promise<RiotLeagueList | null> {
     if (!this.isConfigured()) return null;
     const url = `https://${this.routing(routing).lolPlatform}.api.riotgames.com/lol/league/v4/leagues/${encodeURIComponent(leagueId)}`;
-    return this.fetchJson<RiotLeagueList>(url, "league.by_id");
+    return this.fetchJson<RiotLeagueList>(url, "league.by_id", signal);
   }
 
-  async getChampionMasteryTopByPuuid(puuid: string, count = 3, routing?: LolRoutingContext): Promise<RiotChampionMastery[]> {
+  async getChampionMasteryTopByPuuid(puuid: string, count = 3, routing?: LolRoutingContext, signal?: AbortSignal): Promise<RiotChampionMastery[]> {
     if (!this.isConfigured()) return [];
     const safeCount = Math.max(1, Math.min(10, Math.trunc(count)));
     const url = `https://${this.routing(routing).lolPlatform}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${encodeURIComponent(puuid)}/top?count=${safeCount}`;
-    return (await this.fetchJson<RiotChampionMastery[]>(url, "champion_mastery.top")) ?? [];
+    return (await this.fetchJson<RiotChampionMastery[]>(url, "champion_mastery.top", signal)) ?? [];
   }
 
-  async getRecentMatchIdsByPuuid(puuid: string, count = 20, queueIds: number[] = [], start = 0, routing?: LolRoutingContext): Promise<string[]> {
+  async getRecentMatchIdsByPuuid(puuid: string, count = 20, queueIds: number[] = [], start = 0, routing?: LolRoutingContext, signal?: AbortSignal): Promise<string[]> {
     if (!this.isConfigured()) return [];
     const accountRegion = this.routing(routing).accountRegion;
     const safeStart = Math.max(0, Math.min(1000, Math.trunc(start)));
@@ -691,13 +763,14 @@ export class RiotApiClient {
       .filter((queueId) => queueId > 0);
     if (safeQueueIds.length === 0) {
       const url = `https://${accountRegion}.api.riotgames.com/lol/match/v5/matches/by-puuid/${encodeURIComponent(puuid)}/ids?start=${safeStart}&count=${safeCount}`;
-      return (await this.fetchJson<string[]>(url, "match.ids")) ?? [];
+      return (await this.fetchJson<string[]>(url, "match.ids", signal)) ?? [];
     }
 
     const ids = new Set<string>();
     for (const queueId of safeQueueIds) {
+      if (signal?.aborted) throw new RiotRequestAbortedError("match.ids", accountRegion);
       const url = `https://${accountRegion}.api.riotgames.com/lol/match/v5/matches/by-puuid/${encodeURIComponent(puuid)}/ids?start=${safeStart}&count=${safeCount}&queue=${queueId}`;
-      for (const matchId of await this.fetchJson<string[]>(url, "match.ids") ?? []) {
+      for (const matchId of await this.fetchJson<string[]>(url, "match.ids", signal) ?? []) {
         ids.add(matchId);
         if (ids.size >= safeCount) return [...ids];
       }
@@ -717,24 +790,24 @@ export class RiotApiClient {
     return this.fetchJson<RiotMatchTimeline>(url, "match.timeline");
   }
 
-  async getCurrentGameByPuuid(puuid: string, routing?: LolRoutingContext): Promise<RiotCurrentGameInfo | null> {
+  async getCurrentGameByPuuid(puuid: string, routing?: LolRoutingContext, signal?: AbortSignal): Promise<RiotCurrentGameInfo | null> {
     if (!this.isConfigured()) return null;
     const url = `https://${this.routing(routing).lolPlatform}.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${encodeURIComponent(puuid)}`;
-    return this.fetchJson<RiotCurrentGameInfo>(url, "spectator.active_game");
+    return this.fetchJson<RiotCurrentGameInfo>(url, "spectator.active_game", signal);
   }
 
-  async getLadderRankByPuuid(puuid: string, queuePriority: readonly RiotRankedQueueType[] = RANKED_QUEUE_PRIORITY, routing?: LolRoutingContext): Promise<number | undefined> {
+  async getLadderRankByPuuid(puuid: string, queuePriority: readonly RiotRankedQueueType[] = RANKED_QUEUE_PRIORITY, routing?: LolRoutingContext, signal?: AbortSignal): Promise<number | undefined> {
     if (!this.isConfigured()) return undefined;
     const [summoner, entries] = await Promise.all([
-      this.getSummonerByPuuid(puuid, routing),
-      this.getLeagueEntriesByPuuid(puuid, routing)
+      this.getSummonerByPuuid(puuid, routing, signal),
+      this.getLeagueEntriesByPuuid(puuid, routing, signal)
     ]);
     const rankedEntry = queuePriority
       .map((queueType) => entries.find((entry) => entry.queueType === queueType))
       .find(Boolean);
     if (!rankedEntry?.leagueId) return undefined;
 
-    const league = await this.getLeagueById(rankedEntry.leagueId, routing);
+    const league = await this.getLeagueById(rankedEntry.leagueId, routing, signal);
     const targetSummonerId = rankedEntry.summonerId ?? summoner?.id;
     const sorted = [...(league?.entries ?? [])].sort(compareLeagueEntries);
     const index = sorted.findIndex((entry) => (
@@ -749,11 +822,11 @@ export class RiotApiClient {
     return higherEntries.length + 1;
   }
 
-  async getRankedStatsByPuuid(puuid: string, queuePriority: readonly RiotRankedQueueType[] = RANKED_QUEUE_PRIORITY, routing?: LolRoutingContext): Promise<LolRankedStats | undefined> {
+  async getRankedStatsByPuuid(puuid: string, queuePriority: readonly RiotRankedQueueType[] = RANKED_QUEUE_PRIORITY, routing?: LolRoutingContext, signal?: AbortSignal): Promise<LolRankedStats | undefined> {
     if (!this.isConfigured()) return undefined;
     const [summoner, entries] = await Promise.all([
-      this.getSummonerByPuuid(puuid, routing),
-      this.getLeagueEntriesByPuuid(puuid, routing)
+      this.getSummonerByPuuid(puuid, routing, signal),
+      this.getLeagueEntriesByPuuid(puuid, routing, signal)
     ]);
 
     const rankedEntry = queuePriority
@@ -770,21 +843,22 @@ export class RiotApiClient {
   async getRankedStatsByPuuidWithoutSummoner(
     puuid: string,
     queuePriority: readonly RiotRankedQueueType[] = RANKED_QUEUE_PRIORITY,
-    routing?: LolRoutingContext
+    routing?: LolRoutingContext,
+    signal?: AbortSignal
   ): Promise<LolRankedStats | undefined> {
     if (!this.isConfigured()) return undefined;
-    const entries = await this.getLeagueEntriesByPuuid(puuid, routing);
+    const entries = await this.getLeagueEntriesByPuuid(puuid, routing, signal);
     const rankedEntry = queuePriority
       .map((queueType) => entries.find((entry) => entry.queueType === queueType))
       .find(Boolean);
     return rankedEntry ? rankedStatsFromEntry(rankedEntry, null) : undefined;
   }
 
-  async getRankedQueueStatsByPuuid(puuid: string, routing?: LolRoutingContext): Promise<{ solo?: LolRankedStats; flex?: LolRankedStats; ranked5v5?: LolRankedStats; primary?: LolRankedStats }> {
+  async getRankedQueueStatsByPuuid(puuid: string, routing?: LolRoutingContext, signal?: AbortSignal): Promise<{ solo?: LolRankedStats; flex?: LolRankedStats; ranked5v5?: LolRankedStats; primary?: LolRankedStats }> {
     if (!this.isConfigured()) return {};
     const [summoner, entries] = await Promise.all([
-      this.getSummonerByPuuid(puuid, routing),
-      this.getLeagueEntriesByPuuid(puuid, routing)
+      this.getSummonerByPuuid(puuid, routing, signal),
+      this.getLeagueEntriesByPuuid(puuid, routing, signal)
     ]);
     const soloEntry = entries.find((entry) => entry.queueType === "RANKED_SOLO_5x5");
     const flexEntry = entries.find((entry) => entry.queueType === "RANKED_FLEX_SR");

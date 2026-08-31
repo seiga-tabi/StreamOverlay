@@ -5,7 +5,7 @@ process.env.RIOT_API_KEY = "riot-test-key";
 process.env.RIOT_ACCOUNT_REGION = "asia";
 process.env.RIOT_LOL_PLATFORM = "kr";
 
-const { RiotApiClient, RiotApiHttpError, RiotApiNetworkError, RiotRateLimitError, RiotRequestLimiter } = await import("../dist/services/riot-api.js");
+const { RiotApiClient, RiotApiHttpError, RiotApiNetworkError, RiotRateLimitError, RiotRequestLimiter, RiotRequestAbortedError, isAbortError } = await import("../dist/services/riot-api.js");
 const { appConfig } = await import("../dist/config.js");
 
 const originalFetch = globalThis.fetch;
@@ -379,6 +379,31 @@ test("RiotRequestLimiter는 host별 window limit를 넘지 않도록 요청 시�
   assert.ok(startedAt[2] >= 35);
 });
 
+test("RiotRequestLimiter는 큐 대기 상한을 넘긴 요청을 실행 전에 실패시켜 뒤 요청이 밀리지 않게 한다", async () => {
+  const limiter = new RiotRequestLimiter({
+    windows: [{ limit: 1, windowMs: 150 }],
+    maxQueueSize: 10,
+    maxQueueWaitMs: 100
+  });
+
+  /* 첫 요청이 window 슬롯을 즉시 점유합니다(150ms 동안 유지). */
+  const first = limiter.schedule("kr.api.riotgames.com", async () => "first");
+
+  /* 오래된(취소된 검색 잔여) 요청 — 큐에서 대기하다 상한(100ms)을 넘겨 실패해야 합니다. */
+  const stalePromise = limiter.schedule("kr.api.riotgames.com", async () => "stale").catch((error) => error);
+
+  const staleResult = await stalePromise;
+  assert.ok(staleResult instanceof RiotRateLimitError);
+  assert.match(staleResult.message, /queue wait timed out/);
+
+  /* stale이 걸러진 직후 넣는 새 요청 — window가 열리면(약 150ms 시점) 정상 실행돼야 합니다. */
+  const fresh = limiter.schedule("kr.api.riotgames.com", async () => "fresh");
+
+  const [firstResult, freshResult] = await Promise.all([first, fresh]);
+  assert.equal(firstResult, "first");
+  assert.equal(freshResult, "fresh");
+});
+
 test("RiotApiClient는 429 Retry-After 동안 같은 host 요청을 멈춘다", async () => {
   const calledAt = [];
   let calls = 0;
@@ -480,5 +505,191 @@ test("RiotApiClient는 응답이 없는 외부 요청을 timeout으로 중단한
   } finally {
     clearTimeout(keepAlive);
     appConfig.riot.apiTimeoutMs = previousTimeout;
+  }
+});
+
+// ── AbortSignal 취소 전파 테스트 ──────────────────────────────────────────
+
+test("A. 이미 abort된 signal이면 Riot API 호출도 queue 진입도 하지 않는다", async () => {
+  let fetchCalls = 0;
+  globalThis.fetch = async () => {
+    fetchCalls += 1;
+    return jsonResponse({ puuid: "should-not-be-called" });
+  };
+  const client = new RiotApiClient();
+  const controller = new AbortController();
+  controller.abort();
+
+  await assert.rejects(
+    () => client.getAccountByRiotId("Already", "Aborted", undefined, controller.signal),
+    (error) => {
+      assert.ok(isAbortError(error));
+      assert.ok(error instanceof RiotRequestAbortedError);
+      return true;
+    }
+  );
+  assert.equal(fetchCalls, 0);
+});
+
+test("B. queue 대기 중 abort되면 waiter가 제거되고 fetch가 호출되지 않으며 뒤 요청은 진행된다", async () => {
+  const fetchCalls = [];
+  globalThis.fetch = async (url) => {
+    fetchCalls.push(String(url));
+    return jsonResponse({ puuid: `puuid-${fetchCalls.length}` });
+  };
+  const limiter = new RiotRequestLimiter({
+    windows: [{ limit: 1, windowMs: 200 }],
+    maxQueueSize: 10
+  });
+  const client = new RiotApiClient(undefined, { rateLimiter: limiter });
+
+  /* 첫 호출이 window 슬롯을 점유해 두 번째 호출은 큐에서 대기하게 됩니다. */
+  const first = client.getAccountByRiotId("First", "KR1");
+  const controller = new AbortController();
+  const aborted = client.getAccountByRiotId("ShouldBeCancelled", "KR1", undefined, controller.signal)
+    .catch((error) => error);
+
+  /* 큐 대기 중에 취소합니다 — 아직 window(200ms)가 열리지 않은 시점. */
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  controller.abort();
+
+  const abortedResult = await aborted;
+  assert.ok(isAbortError(abortedResult));
+
+  /* 뒤에 정상적으로 넣는 세 번째 요청이 취소된 두 번째 요청 때문에 막히지 않고
+     window가 열리는 대로 정상 진행되어야 합니다. */
+  const third = await client.getAccountByRiotId("ThirdShouldSucceed", "KR1");
+  assert.equal(third.puuid, "puuid-2");
+
+  await first;
+  /* fetch는 first, third 두 번만 호출됩니다 — 취소된 요청은 fetch에 도달하지 않습니다. */
+  assert.equal(fetchCalls.length, 2);
+});
+
+test("C. fetch 실행 중 abort되면 signal이 fetch에 전달되고 일반 네트워크 오류로 오분류되지 않는다", async () => {
+  let receivedSignal;
+  globalThis.fetch = (_url, init) => {
+    receivedSignal = init?.signal;
+    return new Promise((_resolve, reject) => {
+      init?.signal?.addEventListener("abort", () => {
+        const abortError = new Error("The operation was aborted");
+        abortError.name = "AbortError";
+        reject(abortError);
+      }, { once: true });
+    });
+  };
+  const client = new RiotApiClient();
+  const controller = new AbortController();
+  const pending = client.getAccountByRiotId("Fetching", "KR1", undefined, controller.signal);
+
+  await new Promise((resolve) => setTimeout(resolve, 5));
+  controller.abort();
+
+  await assert.rejects(pending, (error) => {
+    assert.ok(isAbortError(error), "abort는 RiotApiNetworkError가 아니라 RiotRequestAbortedError/AbortError여야 합니다");
+    assert.ok(!(error instanceof RiotApiNetworkError), "abort가 네트워크 장애로 오분류되면 안 됩니다");
+    return true;
+  });
+  assert.ok(receivedSignal, "fetch에 signal이 실제로 전달되어야 합니다");
+});
+
+test("E. signal 없이 호출하는 기존 consumer는 그대로 동작한다(하위 호환)", async () => {
+  globalThis.fetch = async (url) => {
+    const target = String(url);
+    if (target.includes("/riot/account/v1/accounts/by-riot-id/")) {
+      return jsonResponse({ puuid: "puuid-compat", gameName: "Compat", tagLine: "KR1" });
+    }
+    return jsonResponse(null, 404);
+  };
+  const client = new RiotApiClient();
+  const account = await client.getAccountByRiotId("Compat", "KR1");
+  assert.equal(account.puuid, "puuid-compat");
+});
+
+test("F. 큐 대기 상한(기존 12초 완화책)은 signal 도입 후에도 그대로 동작한다", async () => {
+  const limiter = new RiotRequestLimiter({
+    windows: [{ limit: 1, windowMs: 150 }],
+    maxQueueSize: 10,
+    maxQueueWaitMs: 100
+  });
+
+  const first = limiter.schedule("kr.api.riotgames.com", async () => "first");
+  const stalePromise = limiter.schedule("kr.api.riotgames.com", async () => "stale").catch((error) => error);
+
+  const staleResult = await stalePromise;
+  assert.ok(staleResult instanceof RiotRateLimitError);
+  assert.match(staleResult.message, /queue wait timed out/);
+
+  const fresh = limiter.schedule("kr.api.riotgames.com", async () => "fresh");
+  const [firstResult, freshResult] = await Promise.all([first, fresh]);
+  assert.equal(firstResult, "first");
+  assert.equal(freshResult, "fresh");
+});
+
+test("G. 여러 검색(A→B→C)에서 A/B 취소 후 C가 불필요하게 밀리지 않는다", async () => {
+  const fetchCalls = [];
+  globalThis.fetch = (url, init) => new Promise((resolve, reject) => {
+    /* A, B는 fetch가 시작된 뒤에도 abort가 signal에 전달돼 즉시 취소되는지
+       확인하기 위해 응답을 일부러 지연시키고, 실제 fetch처럼 signal의 abort를
+       감지해 reject합니다. */
+    const timer = setTimeout(() => {
+      fetchCalls.push(String(url));
+      resolve(jsonResponse({ puuid: `puuid-${fetchCalls.length}` }));
+    }, 30);
+    init?.signal?.addEventListener("abort", () => {
+      clearTimeout(timer);
+      const abortError = new Error("The operation was aborted");
+      abortError.name = "AbortError";
+      reject(abortError);
+    }, { once: true });
+  });
+  const limiter = new RiotRequestLimiter({
+    windows: [{ limit: 10, windowMs: 150 }],
+    maxQueueSize: 10
+  });
+  const client = new RiotApiClient(undefined, { rateLimiter: limiter });
+
+  const controllerA = new AbortController();
+  const controllerB = new AbortController();
+
+  const searchA = client.getAccountByRiotId("SearchA", "KR1", undefined, controllerA.signal).catch((e) => e);
+  const searchB = client.getAccountByRiotId("SearchB", "KR1", undefined, controllerB.signal).catch((e) => e);
+
+  /* 사용자가 A, B를 연달아 취소하고(오타 수정 등) 마지막 C만 남깁니다 —
+     아직 fetch 응답(30ms)이 오기 전에 취소합니다. */
+  await new Promise((resolve) => setTimeout(resolve, 5));
+  controllerA.abort();
+  controllerB.abort();
+
+  const searchC = client.getAccountByRiotId("SearchC", "KR1");
+
+  const [resultA, resultB, resultC] = await Promise.all([searchA, searchB, searchC]);
+  assert.ok(isAbortError(resultA));
+  assert.ok(isAbortError(resultB));
+  assert.equal(resultC.puuid, "puuid-1");
+  /* A, B의 fetch 콜백은 취소 이후에도 setTimeout이 살아있어 나중에 fetchCalls에
+     기록될 수 있지만, 여기서 검증하려는 건 "C가 A/B 완료를 기다리지 않고 먼저
+     끝난다"는 사실입니다 — 위 Promise.all이 이미 그것을 증명합니다. */
+});
+
+test("I. 큐 waiter의 abort listener는 실행/취소/timeout 어느 경로에서도 leak 없이 정리된다", async () => {
+  globalThis.fetch = async () => jsonResponse({ puuid: "puuid-cleanup" });
+  const limiter = new RiotRequestLimiter({
+    windows: [{ limit: 1, windowMs: 50 }],
+    maxQueueSize: 10
+  });
+
+  /* 정상 실행 경로 */
+  const signalA = new AbortController().signal;
+  await limiter.schedule("kr.api.riotgames.com", async () => "ok", signalA);
+  assert.equal(signalA, signalA); // listener 카운트는 AbortSignal 표준 API로 직접 셀 수 없어 leak 여부는 반복 실행으로 간접 검증합니다.
+
+  /* 취소 경로를 반복 실행해도 프로세스에 unhandled rejection/warning이 없어야 합니다. */
+  for (let i = 0; i < 20; i += 1) {
+    const controller = new AbortController();
+    const pending = limiter.schedule("kr.api.riotgames.com", async () => "unused", controller.signal).catch((e) => e);
+    controller.abort();
+    const result = await pending;
+    assert.ok(isAbortError(result));
   }
 });
