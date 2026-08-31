@@ -116,6 +116,21 @@ test("관리자 감사 metadata는 action별 키와 enum 값만 허용하고 raw
     noteProvided: false,
     adminAccountLabel: "변경 가능한 라벨"
   }), { decision: "approved", noteProvided: false });
+
+  /* 관리자 권한 부여·회수: granted(boolean) 하나만 허용 — full_admin 전용이라
+     actor adminAccountId도 싣지 않습니다(DB CHECK와 동일한 규칙). */
+  assert.deepEqual(parseAdminAuditLogMetadata("streamer.admin_access.updated", { granted: true }), { granted: true });
+  assert.deepEqual(parseAdminAuditLogMetadata("streamer.admin_access.updated", { granted: false }), { granted: false });
+  assert.equal(parseAdminAuditLogMetadata("streamer.admin_access.updated", {}), undefined);
+  assert.equal(parseAdminAuditLogMetadata("streamer.admin_access.updated", { granted: "yes" }), undefined);
+  assert.equal(parseAdminAuditLogMetadata("streamer.admin_access.updated", {
+    granted: true,
+    adminAccountId: "3b525f40-90b7-4b6e-b2ef-e083f66cda86"
+  }), undefined);
+  assert.deepEqual(sanitizeAdminAuditLogMetadata("streamer.admin_access.updated", {
+    granted: true,
+    twitchUserId: "식별자는 metadata에 남기지 않음"
+  }), { granted: true });
 });
 
 test("관리자 감사 로그 parser는 bounded offset pagination을 exact하게 검증한다", () => {

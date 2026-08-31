@@ -192,6 +192,14 @@
       "checksumSha256": "80cf79726160808d8fd7174e8bf97bc21ed8b40368da2687e484a35eb9d246c8",
       "destructive": false,
       "transaction": true
+    },
+    {
+      "id": "0025_admin_audit_admin_access",
+      "file": "0025_admin_audit_admin_access.sql",
+      "description": "관리자 감사 로그에 스트리머 관리자 권한 부여·회수 action 추가",
+      "checksumSha256": "7368f55b7ffde520732f09a06c8eade5f282541874ea5825935594771473d450",
+      "destructive": false,
+      "transaction": true
     }
   ]
 }

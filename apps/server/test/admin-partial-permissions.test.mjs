@@ -128,6 +128,34 @@ test("서브 관리자 계정 토큰으로 로그인하면 permissions가 실린
   });
 }));
 
+test("서브 관리자 세션 쿠키로 auth/status를 재확인하면 permissions와 계정 정보가 함께 내려온다", () => withTempStore(async (store) => {
+  await withAuthConfig(async () => {
+    const tokenHash = store.hashAdminToken("sub-account-token-status");
+    const account = store.createAdminAccount({ label: "김운영", tokenHash, permissions: ["streamer_approval"] });
+    const { handler } = handlerFor(store);
+
+    const loginRes = await login(handler, "sub-account-token-status");
+    assert.equal(loginRes.statusCode, 200);
+    const sessionCookie = cookieHeader(loginRes.headers["Set-Cookie"]);
+
+    /* 페이지 새로고침 시나리오: 로그인 응답 없이 세션 쿠키만으로 status를 재확인한다.
+       여기서 permissions가 빠지면 프론트가 full_admin으로 오인한다. */
+    const statusReq = createRequest("GET", "/api/dashboard/auth/status", undefined, {
+      origin: DASHBOARD_ORIGIN,
+      cookie: sessionCookie
+    });
+    const statusRes = createResponse();
+    await handler(statusReq, statusRes);
+    assert.equal(statusRes.statusCode, 200, statusRes.body);
+    const body = JSON.parse(statusRes.body);
+    assert.equal(body.authenticated, true);
+    assert.equal(body.role, "admin");
+    assert.deepEqual(body.permissions, ["streamer_approval"]);
+    assert.equal(body.adminAccountId, account.id);
+    assert.equal(body.adminAccountLabel, "김운영");
+  });
+}));
+
 test("서브 관리자는 부여된 권한(streamer_approval) 엔드포인트만 통과하고 그 외는 403이다", () => withTempStore(async (store) => {
   await withAuthConfig(async () => {
     const tokenHash = store.hashAdminToken("sub-account-token-bbb");
@@ -357,6 +385,20 @@ test("기존 full_admin 토큰 로그인은 permissions 없이(전체 권한) �
     const auditRes = createResponse();
     await handler(auditReq, auditRes);
     assert.notEqual(auditRes.statusCode, 403);
+
+    /* 세션 재확인(auth/status)에서도 full_admin은 permissions 필드가 생략돼야
+       한다 — 로그인 응답과 같은 하위호환 계약. */
+    const statusReq = createRequest("GET", "/api/dashboard/auth/status", undefined, {
+      origin: DASHBOARD_ORIGIN,
+      cookie: sessionCookie
+    });
+    const statusRes = createResponse();
+    await handler(statusReq, statusRes);
+    assert.equal(statusRes.statusCode, 200, statusRes.body);
+    const statusBody = JSON.parse(statusRes.body);
+    assert.equal(statusBody.authenticated, true);
+    assert.equal(Object.hasOwn(statusBody, "permissions"), false);
+    assert.equal(Object.hasOwn(statusBody, "adminAccountId"), false);
   });
 }));
 

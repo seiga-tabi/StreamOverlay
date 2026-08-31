@@ -18,7 +18,11 @@ export type OrganizationAuditAction = typeof ORGANIZATION_AUDIT_ACTIONS[number];
 
 export const GLOBAL_ADMIN_AUDIT_ACTIONS = [
   "streamer.riot_id_request.resolved",
-  "streamer.dashboard_access.updated"
+  "streamer.dashboard_access.updated",
+  /* 승인된 스트리머(twitchUserId)에게 관리자 권한(streamer_approval)을 부여·회수.
+     DB CHECK 제약(apps/server/migrations/0025_admin_audit_admin_access.sql)과
+     반드시 같이 갱신해야 합니다. */
+  "streamer.admin_access.updated"
 ] as const;
 export type GlobalAdminAuditAction = typeof GLOBAL_ADMIN_AUDIT_ACTIONS[number];
 
@@ -73,7 +77,8 @@ const ACTION_TARGET_TYPE: Readonly<Record<AdminAuditAction, AdminAuditTargetType
   "discord.bot.settings.updated": "discord_bot_control",
   "discord.bot.response_locale.updated": "discord_bot_control",
   "streamer.riot_id_request.resolved": "streamer_riot_id_request",
-  "streamer.dashboard_access.updated": "streamer_riot_id_request"
+  "streamer.dashboard_access.updated": "streamer_riot_id_request",
+  "streamer.admin_access.updated": "streamer_riot_id_request"
 });
 
 const ADMIN_AUDIT_ACTION_SET = new Set<string>(ADMIN_AUDIT_ACTIONS);
@@ -152,7 +157,9 @@ function metadataRecord(
         ? ["decision", "noteProvided", "adminAccountId"]
         : action === "streamer.dashboard_access.updated"
           ? ["dashboardEnabled", "noteProvided", "adminAccountId"]
-          : [];
+          : action === "streamer.admin_access.updated"
+            ? ["granted"]
+            : [];
   if (exact && !Object.keys(record).every((key) => allowedKeys.includes(key))) return undefined;
 
   const metadata: Record<string, AdminAuditLogMetadataValue> = {};
@@ -190,6 +197,12 @@ function metadataRecord(
       if (!boundedNonBlankText(record.adminAccountId, 100)) return undefined;
       metadata.adminAccountId = record.adminAccountId;
     }
+  }
+  if (action === "streamer.admin_access.updated") {
+    /* 부여/회수는 full_admin만 호출할 수 있어 actor adminAccountId가 존재하지
+       않습니다 — 허용 키를 granted 하나로 고정해 DB CHECK와 1:1로 맞춥니다. */
+    if (typeof record.granted !== "boolean") return undefined;
+    metadata.granted = record.granted;
   }
   return metadata;
 }

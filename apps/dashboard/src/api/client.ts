@@ -34,6 +34,11 @@ export type DashboardAuthStatus = {
   configured?: boolean;
   authenticated: boolean;
   role?: "admin" | "streamer";
+  /* 서브 관리자(부분 권한) 세션에만 존재. 없으면 full_admin.
+     실제 인가는 서버가 강제하므로 프론트에서는 표시 용도로만 사용한다. */
+  permissions?: readonly string[];
+  adminAccountId?: string;
+  adminAccountLabel?: string;
   csrfToken?: string;
   expiresAt?: string;
   streamer?: DashboardStreamerInfo;

@@ -1700,6 +1700,21 @@ function matchAdminAccountByToken(store: Store, candidate: string): AdminAccount
   return store.findAdminAccountByTokenHash(tokenHash);
 }
 
+/* CLI나 다른 프로세스가 admin-accounts.json을 바꿨을 수 있으므로 부여 상태를
+   판정하기 직전에 디스크를 다시 읽습니다. 경량 store stub은 메서드가 없어도
+   조용히 넘어갑니다. */
+function reloadAdminAccounts(store: Store): void {
+  if (typeof store.reloadAdminAccountState === "function") store.reloadAdminAccountState();
+}
+
+/* twitchUserId에 부여된 활성 관리자 권한 조회. Twitch OAuth 로그인 승격과 관리자
+   목록의 isAdmin 표시가 같은 판정을 쓰도록 이 함수 하나로 모읍니다. store가 이
+   메서드를 갖추지 않은 경량 테스트 stub이면 "부여 없음"으로 봅니다. */
+function activeTwitchAdminAccount(store: Store, twitchUserId: string | undefined): AdminAccount | undefined {
+  if (!twitchUserId || typeof store.findActiveAdminAccountByTwitchUserId !== "function") return undefined;
+  return store.findActiveAdminAccountByTwitchUserId(twitchUserId);
+}
+
 /* 서브 계정 세션은 발급 뒤에도 계정 상태 파일을 매 인증 요청마다 다시
    확인합니다. 비활성화되거나 파일에서 삭제된 계정을 감지하면 해당 계정으로
    발급한 세션을 전부 회수해, 현재 요청부터 401로 닫히게 합니다. */
@@ -6054,7 +6069,10 @@ export function createHttpHandler(input: HttpHandlerInput) {
       updatedAt: request.updatedAt,
       ...(request.reviewedAt ? { reviewedAt: request.reviewedAt } : {}),
       ...(note ? { note } : {}),
-      verification: streamerRiotIdVerificationSummary(request)
+      verification: streamerRiotIdVerificationSummary(request),
+      /* twitchUserId는 목록에 노출하지 않고 부여 여부만 내립니다 — 부여/회수는
+         requestId로 호출하고 서버가 내부에서 twitchUserId를 조회합니다. */
+      isAdmin: Boolean(activeTwitchAdminAccount(input.store, request.twitchUserId))
     };
   }
 
@@ -12208,6 +12226,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
               : appConfig.security.localNoAuth || Boolean(appConfig.security.dashboardAuthToken),
             authenticated: true,
             role: principal.role,
+            /* 서브 관리자 세션 재확인(새로고침) 시에도 로그인 응답과 동일하게
+               permissions를 내려 프론트가 full_admin으로 오인하지 않게 한다.
+               full_admin은 undefined라 JSON에서 생략된다(하위호환). */
+            permissions: principal.permissions,
+            adminAccountId: principal.adminAccountId,
+            adminAccountLabel: principal.adminAccountLabel,
             streamer: streamer ? publicStreamerDashboardInfo(streamer) : undefined,
             csrfToken: principal.method === "session" ? principal.csrfToken : undefined
           });
@@ -12232,6 +12256,43 @@ export function createHttpHandler(input: HttpHandlerInput) {
               csrfToken: session.csrfToken,
               expiresAt: new Date(session.expiresAt).toISOString()
             }, { "Set-Cookie": dashboardSessionCookie(session) });
+          }
+        }
+        /* 관리자 콘솔(admin surface)에서의 Twitch OAuth 승격. 관리자가 승인된
+           스트리머에게 권한을 부여해 두었으면, 그 Twitch 계정의 공개 뷰어 세션만으로
+           별도 토큰 없이 부분 권한 admin 세션을 발급합니다.
+           스트리머 surface의 streamer 세션을 admin으로 "대체"하지 않는 이유:
+           authenticateDashboardRequest는 surface와 role이 다른 세션을 무시하므로
+           대체하면 스트리머 대시보드가 영구 미인증이 되고 매 status 폴링마다 새
+           admin 세션을 찍는 루프가 됩니다. 쿠키가 role별로 분리돼 있어 두 세션은
+           공존합니다. 뷰어 세션 쿠키가 없으면 Twitch 상태 조회 자체를 건너뜁니다. */
+        if (surface === "admin" && input.publicTwitchAuth) {
+          const viewerSessionId = publicTwitchViewerSessionIdFromRequest(req);
+          if (viewerSessionId && typeof input.store.findActiveAdminAccountByTwitchUserId === "function") {
+            const publicTwitchStatus = await input.publicTwitchAuth.getStatus(viewerSessionId);
+            if (publicTwitchStatus.connected && publicTwitchStatus.user) {
+              reloadAdminAccounts(input.store);
+              const grantedAccount = activeTwitchAdminAccount(input.store, publicTwitchStatus.user.id);
+              if (grantedAccount) {
+                const session = sessions.create({
+                  role: "admin",
+                  permissions: grantedAccount.permissions,
+                  adminAccountId: grantedAccount.id,
+                  adminAccountLabel: grantedAccount.label
+                });
+                return sendJson(req, res, 200, {
+                  required: !appConfig.security.localNoAuth,
+                  configured: appConfig.security.localNoAuth || Boolean(appConfig.security.dashboardAuthToken),
+                  authenticated: true,
+                  role: "admin",
+                  permissions: grantedAccount.permissions,
+                  adminAccountId: grantedAccount.id,
+                  adminAccountLabel: grantedAccount.label,
+                  csrfToken: session.csrfToken,
+                  expiresAt: new Date(session.expiresAt).toISOString()
+                }, { "Set-Cookie": dashboardSessionCookie(session) });
+              }
+            }
           }
         }
         return sendJson(req, res, 200, {
@@ -13240,6 +13301,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         if (auth.principal.type !== "DASHBOARD_ADMIN" || !principalHasAdminPermission(auth.principal, "streamer_approval")) {
           return sendJson(req, res, 403, { error: "관리자 권한이 필요합니다." });
         }
+        reloadAdminAccounts(input.store);
         return sendJson(req, res, 200, streamerRiotIdRequestListResponse(url));
       }
       if (req.method === "GET" && url.pathname === "/api/participation/profile-settings") return sendJson(req, res, 200, loadLolParticipationProfileSettings());
@@ -13441,6 +13503,88 @@ export function createHttpHandler(input: HttpHandlerInput) {
         invalidatePublicLolProfileCachesForStreamer(request);
         return sendJson(req, res, 200, {
           request: streamerRiotIdRequestListItem(request),
+          requests: listStreamerRiotIdRequests().map(streamerRiotIdRequestListItem)
+        });
+      }
+
+      if (
+        req.method === "POST"
+        && (
+          url.pathname === "/api/participation/streamer-riot-id-requests/grant-admin"
+          || url.pathname === "/api/participation/streamer-riot-id-requests/revoke-admin"
+        )
+      ) {
+        const granting = url.pathname.endsWith("/grant-admin");
+        /* 권한 상승 방지 — permissions 배열이 있는 부분 권한 관리자(CLI 서브 계정,
+           Twitch 부여 계정 모두)는 다른 계정에 권한을 뿌릴 수 없습니다.
+           auth.ts의 ADMIN_PERMISSION_API_RULES에 이 경로를 등록하지 않아 인증
+           계층에서 먼저 403이 나지만, 여기서도 full_admin(permissions === undefined)
+           만 통과시켜 화이트리스트 실수와 무관하게 fail-closed로 유지합니다.
+           principalHasAdminPermission은 부분 권한 관리자도 통과시키므로 쓰지 않습니다. */
+        if (
+          auth.principal.type !== "DASHBOARD_ADMIN"
+          || auth.principal.role !== "admin"
+          || auth.principal.permissions !== undefined
+        ) {
+          return sendJson(req, res, 403, { error: "전체 관리자 권한이 필요합니다.", code: "FULL_ADMIN_REQUIRED" });
+        }
+        if (
+          typeof input.store.grantAdminAccountToTwitchUser !== "function"
+          || typeof input.store.revokeAdminAccountFromTwitchUser !== "function"
+        ) {
+          return sendJson(req, res, 503, { error: "관리자 계정 저장소를 사용할 수 없습니다.", code: "ADMIN_ACCOUNTS_UNAVAILABLE" });
+        }
+        const body = await readJsonBody<{ requestId?: unknown }>(req);
+        if (typeof body.requestId !== "string" || !body.requestId.trim()) {
+          return sendJson(req, res, 400, { error: "requestId는 문자열이어야 합니다." });
+        }
+        /* twitchUserId는 클라이언트가 보내지 않습니다 — requestId로 서버가 내부 조회해
+           개인식별 정보를 응답·요청 어디에도 싣지 않습니다. */
+        const targetRequest = listStreamerRiotIdRequests().find((candidate) => candidate.id === body.requestId);
+        if (!targetRequest) return sendJson(req, res, 404, { error: "등록 요청을 찾을 수 없습니다." });
+        if (granting) {
+          if (isSubStreamerRiotAccount(targetRequest)) {
+            return sendJson(req, res, 400, {
+              error: "관리자 권한은 대표 계정 요청에서만 부여할 수 있습니다.",
+              code: "ADMIN_GRANT_MAIN_ACCOUNT_ONLY"
+            });
+          }
+          if (targetRequest.status !== "approved") {
+            return sendJson(req, res, 400, {
+              error: "승인된 등록 요청에만 관리자 권한을 부여할 수 있습니다.",
+              code: "ADMIN_GRANT_REQUIRES_APPROVAL"
+            });
+          }
+        }
+        reloadAdminAccounts(input.store);
+        const audit = await beginGlobalAdminAudit(
+          auth.principal,
+          "streamer.admin_access.updated",
+          targetRequest.id,
+          { granted: granting }
+        );
+        let account: AdminAccount | undefined;
+        try {
+          account = granting
+            ? input.store.grantAdminAccountToTwitchUser({
+                twitchUserId: targetRequest.twitchUserId,
+                label: targetRequest.twitchDisplayName || targetRequest.twitchLogin,
+                /* 부여 범위는 streamer_approval 고정 — 권한 종류 선택은 이번 범위 밖입니다. */
+                permissions: ["streamer_approval"]
+              })
+            : input.store.revokeAdminAccountFromTwitchUser(targetRequest.twitchUserId);
+        } catch (error) {
+          await completeGlobalAdminAudit(audit, "failed");
+          throw error;
+        }
+        await completeGlobalAdminAudit(audit, "succeeded");
+        /* 회수 즉시 그 계정으로 발급된 admin 세션을 전부 끊습니다. 다음 인증 요청의
+           revokeInactiveAdminAccountSessions를 기다리지 않아 회수가 곧바로 효력을 냅니다. */
+        if (!granting && account) {
+          sessions.revokeByAdminAccountId(account.id);
+        }
+        return sendJson(req, res, 200, {
+          request: streamerRiotIdRequestListItem(targetRequest),
           requests: listStreamerRiotIdRequests().map(streamerRiotIdRequestListItem)
         });
       }

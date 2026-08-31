@@ -92,13 +92,18 @@ export type StorePersistenceFailure = {
   error: string;
 };
 
-/* 관리자 부분 권한 계정. 평문 토큰은 어디에도 저장하지 않고 sha256 해시만
-   보관합니다(CLI가 발급 시 토큰을 1회만 출력) — 다른 시크릿과 동일한
-   "저장은 해시만" 원칙입니다. */
+/* 관리자 부분 권한 계정. 두 종류가 같은 배열·같은 상태 파일에 공존하며
+   tokenHash / twitchUserId 중 정확히 하나만 채워집니다.
+   - tokenHash 계정: CLI가 발급한 정적 토큰으로 로그인. 평문 토큰은 어디에도
+     저장하지 않고 sha256 해시만 보관합니다(다른 시크릿과 동일한 "저장은
+     해시만" 원칙).
+   - twitchUserId 계정: 관리자가 승인된 스트리머에게 부여한 권한. 별도 토큰이
+     없고 그 Twitch 계정의 OAuth 로그인 자체가 인증입니다. */
 export type AdminAccount = {
   id: string;
   label: string;
-  tokenHash: string;
+  tokenHash?: string;
+  twitchUserId?: string;
   permissions: AdminPermission[];
   createdAt: string;
   disabled?: boolean;
@@ -1391,14 +1396,26 @@ export class Store {
         const id = optionalString(record?.id);
         const label = adminAccountLabel(record?.label);
         const tokenHash = optionalString(record?.tokenHash);
+        const twitchUserId = optionalString(record?.twitchUserId);
         const createdAt = optionalString(record?.createdAt);
         const permissions = Array.isArray(record?.permissions)
           ? [...new Set(record.permissions.filter(isAdminPermission))]
           : undefined;
-        if (!id || !label || !tokenHash || !createdAt || !permissions) {
+        /* tokenHash와 twitchUserId 중 정확히 하나만 있어야 합니다 — 둘 다 없으면
+           로그인 경로가 없는 계정이고, 둘 다 있으면 어느 쪽으로 매칭해야 할지
+           모호해 fail-closed로 파일 전체를 거부합니다. */
+        if (!id || !label || !createdAt || !permissions || Boolean(tokenHash) === Boolean(twitchUserId)) {
           throw new Error("관리자 계정 상태 파일에 올바르지 않은 레코드가 있습니다.");
         }
-        accounts.push({ id, label, tokenHash, permissions, createdAt, disabled: record?.disabled === true });
+        accounts.push({
+          id,
+          label,
+          ...(tokenHash ? { tokenHash } : {}),
+          ...(twitchUserId ? { twitchUserId } : {}),
+          permissions,
+          createdAt,
+          disabled: record?.disabled === true
+        });
       }
       this.adminAccounts = accounts;
       this.clearPersistenceFailure("admin_accounts");
@@ -1486,6 +1503,74 @@ export class Store {
     return account && !account.disabled
       ? { ...account, permissions: [...account.permissions] }
       : undefined;
+  }
+
+  /* Twitch 계정에 부여된 활성 관리자 권한. 비활성화(disabled) 레코드는 부여가
+     없는 것과 동일하게 취급해 로그인 승격과 목록 표시가 같은 판정을 씁니다. */
+  findActiveAdminAccountByTwitchUserId(twitchUserId: string): AdminAccount | undefined {
+    const normalized = twitchUserId.trim();
+    if (!normalized) return undefined;
+    const account = this.adminAccounts.find((candidate) => candidate.twitchUserId === normalized);
+    return account && !account.disabled
+      ? { ...account, permissions: [...account.permissions] }
+      : undefined;
+  }
+
+  /* 승인된 스트리머의 Twitch 계정에 관리자 권한을 부여합니다. 이미 활성 부여가
+     있으면 그대로 반환하고(idempotent), 비활성화된 부여가 남아 있으면 새 레코드를
+     만들지 않고 다시 활성화해 twitchUserId당 레코드가 하나만 유지되게 합니다. */
+  grantAdminAccountToTwitchUser(input: { twitchUserId: string; label: string; permissions: AdminPermission[] }): AdminAccount {
+    const twitchUserId = input.twitchUserId.trim();
+    if (!twitchUserId) throw new Error("twitchUserId는 비어 있을 수 없습니다.");
+    const label = adminAccountLabel(input.label) ?? adminAccountLabel(`twitch:${twitchUserId}`);
+    if (!label) throw new Error("label은 비어 있지 않은 100자 이하의 제어문자 없는 문자열이어야 합니다.");
+    if (!input.permissions.length || !input.permissions.every(isAdminPermission)) {
+      throw new Error(`permissions는 알려진 값을 최소 1개 포함해야 합니다: ${ADMIN_PERMISSIONS.join(", ")}`);
+    }
+    const existingIndex = this.adminAccounts.findIndex((account) => account.twitchUserId === twitchUserId);
+    const existing = existingIndex >= 0 ? this.adminAccounts[existingIndex]! : undefined;
+    if (existing && existing.disabled !== true) {
+      return { ...existing, permissions: [...existing.permissions] };
+    }
+    const account: AdminAccount = existing
+      ? { ...existing, label, permissions: [...new Set(input.permissions)], disabled: false }
+      : {
+          id: crypto.randomUUID(),
+          label,
+          twitchUserId,
+          permissions: [...new Set(input.permissions)],
+          createdAt: nowIso()
+        };
+    const previousState = this.adminAccounts;
+    this.adminAccounts = existing
+      ? previousState.map((candidate, index) => (index === existingIndex ? account : candidate))
+      : [...previousState, account];
+    try {
+      this.persistAdminAccountState({ throwOnFailure: true });
+    } catch (error) {
+      this.adminAccounts = previousState;
+      throw error;
+    }
+    return { ...account, permissions: [...account.permissions] };
+  }
+
+  /* Twitch 계정의 관리자 권한을 회수합니다. 레코드를 제거하고 제거된 계정을
+     반환해 호출부가 그 adminAccountId로 발급된 세션을 즉시 끊을 수 있게 합니다.
+     부여가 없으면 undefined(idempotent). */
+  revokeAdminAccountFromTwitchUser(twitchUserId: string): AdminAccount | undefined {
+    const normalized = twitchUserId.trim();
+    if (!normalized) return undefined;
+    const removed = this.adminAccounts.find((account) => account.twitchUserId === normalized);
+    if (!removed) return undefined;
+    const previousState = this.adminAccounts;
+    this.adminAccounts = previousState.filter((account) => account.twitchUserId !== normalized);
+    try {
+      this.persistAdminAccountState({ throwOnFailure: true });
+    } catch (error) {
+      this.adminAccounts = previousState;
+      throw error;
+    }
+    return { ...removed, permissions: [...removed.permissions] };
   }
 
   setAdminAccountDisabled(id: string, disabled: boolean): AdminAccount | undefined {

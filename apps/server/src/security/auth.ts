@@ -442,6 +442,9 @@ const ADMIN_PERMISSION_API_RULES: Record<AdminPermission, StreamerDashboardRule[
     { method: "GET", path: "/api/participation/streamer-riot-id-requests" },
     { method: "POST", path: "/api/participation/streamer-riot-id-requests/resolve" },
     { method: "POST", path: "/api/participation/streamer-riot-id-requests/dashboard-access" }
+    /* grant-admin / revoke-admin(관리자 권한 부여·회수)은 의도적으로 등록하지
+       않습니다 — 부분 권한 관리자가 다른 계정에 권한을 뿌리는 권한 상승을 막기
+       위해 full_admin(permissions === undefined)만 호출할 수 있어야 합니다. */
   ]
 };
 

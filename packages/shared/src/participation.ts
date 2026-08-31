@@ -393,6 +393,10 @@ export type StreamerRiotIdRequestListItem = Pick<
   | "note"
 > & {
   verification: StreamerRiotIdVerificationSummary;
+  /** 이 요청의 Twitch 계정에 관리자 권한(streamer_approval)이 부여돼 있는지.
+      twitchUserId 자체는 노출하지 않고 부여 여부만 내려 "부여/회수" 버튼을 토글합니다.
+      서버는 항상 내려주지만 오래된 fixture와의 호환을 위해 optional로 둡니다. */
+  isAdmin?: boolean;
 };
 
 export type StreamerRiotIdRequestListPagination = {
@@ -517,7 +521,8 @@ function parseStreamerRiotIdRequestListItem(value: unknown): StreamerRiotIdReque
     "updatedAt",
     "reviewedAt",
     "note",
-    "verification"
+    "verification",
+    "isAdmin"
   ]);
   if (
     !record
@@ -534,6 +539,7 @@ function parseStreamerRiotIdRequestListItem(value: unknown): StreamerRiotIdReque
     || !streamerRiotIdListIsoTimestamp(record.updatedAt)
     || (record.reviewedAt !== undefined && !streamerRiotIdListIsoTimestamp(record.reviewedAt))
     || (record.note !== undefined && !streamerRiotIdListString(record.note, 1_000))
+    || (record.isAdmin !== undefined && typeof record.isAdmin !== "boolean")
   ) return undefined;
   const verification = parseStreamerRiotIdVerification(record.verification);
   if (!verification) return undefined;
@@ -551,7 +557,8 @@ function parseStreamerRiotIdRequestListItem(value: unknown): StreamerRiotIdReque
     updatedAt: record.updatedAt,
     ...(record.reviewedAt !== undefined ? { reviewedAt: record.reviewedAt as string } : {}),
     ...(record.note !== undefined ? { note: record.note as string } : {}),
-    verification
+    verification,
+    ...(record.isAdmin !== undefined ? { isAdmin: record.isAdmin as boolean } : {})
   };
 }
 
