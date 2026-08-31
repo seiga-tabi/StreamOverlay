@@ -817,7 +817,8 @@ test("Store는 손상된 tenant·runtime 상태 파일을 후속 변경으로 �
     assert.deepEqual(store.getReadiness().loadStates, {
       followers: "not_loaded",
       streamer_riot_ids: "corrupted",
-      runtime: "corrupted"
+      runtime: "corrupted",
+      admin_accounts: "not_loaded"
     });
   } finally {
     rmSync(dir, { recursive: true, force: true });

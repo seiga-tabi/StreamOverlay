@@ -39,6 +39,7 @@ const globalRow = {
   safe_metadata: {
     decision: "rejected",
     noteProvided: true,
+    adminAccountLabel: "김운영",
     note: "원문 거절 사유는 내려보내지 않음"
   },
   outcome: "succeeded",
@@ -113,7 +114,7 @@ test("감사 로그 repository는 global outcome과 안전한 action metadata만
     action: "streamer.riot_id_request.resolved",
     targetType: "streamer_riot_id_request",
     targetReference: "77".repeat(32),
-    metadata: { decision: "rejected", noteProvided: true },
+    metadata: { decision: "rejected", noteProvided: true, adminAccountLabel: "김운영" },
     outcome: "succeeded",
     createdAt: "2026-08-07T23:59:00.000Z",
     completedAt: "2026-08-07T23:59:01.000Z"

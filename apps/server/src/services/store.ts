@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
+import { ADMIN_PERMISSIONS, type AdminPermission } from "../security/auth.js";
 import type {
   BotStatus,
   FollowerActivity,
@@ -68,6 +69,7 @@ export type StoreOptions = {
   followerStatePath?: string;
   streamerRiotIdStatePath?: string;
   runtimeStatePath?: string;
+  adminAccountStatePath?: string;
   onPersistenceError?: (failure: StorePersistenceFailure) => void;
 };
 
@@ -84,10 +86,22 @@ type UnassignedLegacyFollowerState = ScopedFollowerState & {
 };
 
 export type StorePersistenceFailure = {
-  scope: "followers" | "streamer_riot_ids" | "runtime";
+  scope: "followers" | "streamer_riot_ids" | "runtime" | "admin_accounts";
   operation: "load" | "save" | "readiness";
   filePath: string;
   error: string;
+};
+
+/* 관리자 부분 권한 계정. 평문 토큰은 어디에도 저장하지 않고 sha256 해시만
+   보관합니다(CLI가 발급 시 토큰을 1회만 출력) — 다른 시크릿과 동일한
+   "저장은 해시만" 원칙입니다. */
+export type AdminAccount = {
+  id: string;
+  label: string;
+  tokenHash: string;
+  permissions: AdminPermission[];
+  createdAt: string;
+  disabled?: boolean;
 };
 
 export type StoreReadiness = {
@@ -247,6 +261,21 @@ function normalizedNonNegativeInteger(value: unknown): number {
 
 function optionalString(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value : undefined;
+}
+
+function adminAccountLabel(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.trim();
+  return normalized
+    && normalized.length <= 100
+    && !/[\u0000-\u001f\u007f]/u.test(normalized)
+    ? normalized
+    : undefined;
+}
+
+function isAdminPermission(value: unknown): value is AdminPermission {
+  return typeof value === "string"
+    && ADMIN_PERMISSIONS.some((permission) => permission === value);
 }
 
 function optionalNumber(value: unknown): number | undefined {
@@ -645,11 +674,13 @@ export class Store {
   private runtimePersistTask?: Promise<void>;
   private runtimePersistLastError?: { generation: number; error: Error };
   private streamerRiotIdRequests: StreamerRiotIdRequest[] = [];
+  private adminAccounts: AdminAccount[] = [];
   private readonly persistenceFailures = new Map<string, StorePersistenceFailure>();
   private readonly persistenceLoadStates: Record<StorePersistenceFailure["scope"], PersistenceLoadState> = {
     followers: "not_loaded",
     streamer_riot_ids: "not_loaded",
-    runtime: "not_loaded"
+    runtime: "not_loaded",
+    admin_accounts: "not_loaded"
   };
   private readonly twitchStreamLiveStatusByUserId = new Map<string, TwitchStreamLiveStatus>();
   private twitchEventSubStatus: TwitchEventSubStatus = {
@@ -680,6 +711,7 @@ export class Store {
     this.loadFollowerState();
     this.loadStreamerRiotIdState();
     this.loadRuntimeState();
+    this.reloadAdminAccountState();
   }
 
   private scopedFollowerState(broadcasterUserId: string, create = true): ScopedFollowerState | undefined {
@@ -757,7 +789,8 @@ export class Store {
     const paths = [
       ["followers", this.options.followerStatePath],
       ["streamer_riot_ids", this.options.streamerRiotIdStatePath],
-      ["runtime", this.options.runtimeStatePath]
+      ["runtime", this.options.runtimeStatePath],
+      ["admin_accounts", this.options.adminAccountStatePath]
     ].filter((entry): entry is [StorePersistenceFailure["scope"], string] => Boolean(entry[1]));
     let statePathsWritable = true;
     for (const [scope, filePath] of paths) {
@@ -1312,6 +1345,132 @@ export class Store {
       this.streamerRiotIdRequests = previousState;
       throw error;
     }
+  }
+
+  reloadAdminAccountState(): void {
+    if (!this.options.adminAccountStatePath) return;
+    try {
+      const raw = fs.readFileSync(this.options.adminAccountStatePath, "utf8");
+      const parsed = objectRecord(JSON.parse(raw));
+      if (parsed?.version !== 1 || !Array.isArray(parsed.accounts)) {
+        throw new Error("관리자 계정 상태 파일 schema가 올바르지 않습니다.");
+      }
+      const accounts: AdminAccount[] = [];
+      for (const value of parsed.accounts) {
+        const record = objectRecord(value);
+        const id = optionalString(record?.id);
+        const label = adminAccountLabel(record?.label);
+        const tokenHash = optionalString(record?.tokenHash);
+        const createdAt = optionalString(record?.createdAt);
+        const permissions = Array.isArray(record?.permissions)
+          ? [...new Set(record.permissions.filter(isAdminPermission))]
+          : undefined;
+        if (!id || !label || !tokenHash || !createdAt || !permissions) {
+          throw new Error("관리자 계정 상태 파일에 올바르지 않은 레코드가 있습니다.");
+        }
+        accounts.push({ id, label, tokenHash, permissions, createdAt, disabled: record?.disabled === true });
+      }
+      this.adminAccounts = accounts;
+      this.clearPersistenceFailure("admin_accounts");
+    } catch (error) {
+      this.adminAccounts = [];
+      const missingStateFile = this.isMissingStateFile(error);
+      if (!missingStateFile) {
+        this.markPersistenceLoadFailure("admin_accounts", error);
+        this.reportPersistenceFailure({ scope: "admin_accounts", operation: "load", filePath: this.options.adminAccountStatePath, error: toSafeErrorMessage(error) });
+      } else {
+        this.clearPersistenceFailure("admin_accounts");
+      }
+    }
+  }
+
+  private persistAdminAccountState(options: { throwOnFailure?: boolean } = {}): void {
+    if (!this.options.adminAccountStatePath) return;
+    this.assertPersistenceAvailable("admin_accounts");
+    const tmpPath = `${this.options.adminAccountStatePath}.${process.pid}.${Date.now()}.tmp`;
+    try {
+      const dir = path.dirname(this.options.adminAccountStatePath);
+      fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+      const payload = { version: 1, accounts: this.adminAccounts };
+      fs.writeFileSync(tmpPath, `${JSON.stringify(payload, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
+      fs.renameSync(tmpPath, this.options.adminAccountStatePath);
+      this.clearPersistenceFailure("admin_accounts");
+    } catch (error) {
+      try {
+        fs.rmSync(tmpPath, { force: true });
+      } catch {
+        /* 임시 파일 정리 실패보다 원래 영속화 오류를 우선 보고합니다. */
+      }
+      this.reportPersistenceFailure({ scope: "admin_accounts", operation: "save", filePath: this.options.adminAccountStatePath, error: toSafeErrorMessage(error) });
+      if (options.throwOnFailure) throw error;
+    }
+  }
+
+  /* 평문 토큰은 절대 저장하지 않습니다 — CLI가 발급 시 1회만 출력하고,
+     이후에는 이 해시로만 매칭합니다(다른 시크릿 비교와 동일한 원칙이나,
+     timingSafeEqual 대신 해시 비교라 길이 유출 걱정 없이 Map 조회가
+     가능합니다). */
+  hashAdminToken(token: string): string {
+    return crypto.createHash("sha256").update(token, "utf8").digest("hex");
+  }
+
+  createAdminAccount(input: { label: string; tokenHash: string; permissions: AdminPermission[] }): AdminAccount {
+    const label = adminAccountLabel(input.label);
+    if (!label) throw new Error("label은 비어 있지 않은 100자 이하의 제어문자 없는 문자열이어야 합니다.");
+    if (!input.permissions.length || !input.permissions.every(isAdminPermission)) {
+      throw new Error(`permissions는 알려진 값을 최소 1개 포함해야 합니다: ${ADMIN_PERMISSIONS.join(", ")}`);
+    }
+    if (this.adminAccounts.some((account) => account.tokenHash === input.tokenHash)) {
+      throw new Error("이미 등록된 토큰입니다.");
+    }
+    const account: AdminAccount = {
+      id: crypto.randomUUID(),
+      label,
+      tokenHash: input.tokenHash,
+      permissions: [...new Set(input.permissions)],
+      createdAt: nowIso()
+    };
+    const previousState = this.adminAccounts;
+    this.adminAccounts = [...previousState, account];
+    try {
+      this.persistAdminAccountState({ throwOnFailure: true });
+    } catch (error) {
+      this.adminAccounts = previousState;
+      throw error;
+    }
+    return account;
+  }
+
+  listAdminAccounts(): AdminAccount[] {
+    return this.adminAccounts.map((account) => ({ ...account, permissions: [...account.permissions] }));
+  }
+
+  listActiveAdminAccountIds(): string[] {
+    return this.adminAccounts
+      .filter((account) => account.disabled !== true)
+      .map((account) => account.id);
+  }
+
+  findAdminAccountByTokenHash(tokenHash: string): AdminAccount | undefined {
+    const account = this.adminAccounts.find((candidate) => candidate.tokenHash === tokenHash);
+    return account && !account.disabled
+      ? { ...account, permissions: [...account.permissions] }
+      : undefined;
+  }
+
+  setAdminAccountDisabled(id: string, disabled: boolean): AdminAccount | undefined {
+    const index = this.adminAccounts.findIndex((account) => account.id === id);
+    if (index < 0) return undefined;
+    const previousState = this.adminAccounts;
+    const updated: AdminAccount = { ...previousState[index]!, disabled };
+    this.adminAccounts = previousState.map((account, i) => (i === index ? updated : account));
+    try {
+      this.persistAdminAccountState({ throwOnFailure: true });
+    } catch (error) {
+      this.adminAccounts = previousState;
+      throw error;
+    }
+    return updated;
   }
 
   private loadRuntimeState(): void {

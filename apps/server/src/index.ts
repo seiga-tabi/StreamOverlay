@@ -502,6 +502,7 @@ const store = new Store({
   followerStatePath: `${appConfig.paths.state}/followers.json`,
   streamerRiotIdStatePath: `${appConfig.paths.state}/streamer-riot-ids.json`,
   runtimeStatePath: `${appConfig.paths.state}/runtime-state.json`,
+  adminAccountStatePath: `${appConfig.paths.state}/admin-accounts.json`,
   onPersistenceError: (failure) => {
     logger.error({
       type: "store.persistence_failed",

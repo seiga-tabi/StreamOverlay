@@ -95,6 +95,10 @@ function boundedText(value: unknown, maximum: number): value is string {
     && !/[\u0000-\u001f\u007f]/u.test(value);
 }
 
+function boundedNonBlankText(value: unknown, maximum: number): value is string {
+  return boundedText(value, maximum) && value.trim().length > 0;
+}
+
 function canonicalTimestamp(value: unknown): value is string {
   if (!boundedText(value, 64)) return false;
   const timestamp = Date.parse(value);
@@ -145,7 +149,7 @@ function metadataRecord(
     : action === "discord.bot.response_locale.updated"
       ? ["revision", "preferredLocale", "source"]
       : action === "streamer.riot_id_request.resolved"
-        ? ["decision", "noteProvided"]
+        ? ["decision", "noteProvided", "adminAccountLabel"]
         : action === "streamer.dashboard_access.updated"
           ? ["dashboardEnabled", "noteProvided"]
           : [];
@@ -171,6 +175,10 @@ function metadataRecord(
     if (typeof record.noteProvided !== "boolean") return undefined;
     metadata.decision = record.decision;
     metadata.noteProvided = record.noteProvided;
+    if (record.adminAccountLabel !== undefined) {
+      if (!boundedNonBlankText(record.adminAccountLabel, 100)) return undefined;
+      metadata.adminAccountLabel = record.adminAccountLabel;
+    }
   }
   if (action === "streamer.dashboard_access.updated") {
     if (typeof record.dashboardEnabled !== "boolean" || typeof record.noteProvided !== "boolean") {

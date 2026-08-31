@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { URL } from "node:url";
 import zlib from "node:zlib";
-import type { Store } from "../services/store.js";
+import type { AdminAccount, Store } from "../services/store.js";
 import { loadAramAugmentCatalog } from "../services/aram-augment-catalog.js";
 import type { GameBoxartService } from "../services/game-boxart.js";
 import type { PatchNotesService } from "../services/patch-notes-service.js";
@@ -218,8 +218,10 @@ import {
   clientIp,
   dashboardSessionCookie,
   dashboardSessionIdFromRequest,
+  principalHasAdminPermission,
   stateChangingRequestHasTrustedOrigin,
   tokenMatches,
+  type AdminPermission,
   type AuthPrincipal,
   type DashboardRole
 } from "../security/auth.js";
@@ -1674,6 +1676,52 @@ function tokenMatchesDashboardAuth(candidate: string): boolean {
   const tokenBuffer = Buffer.from(token);
   if (candidateBuffer.byteLength !== tokenBuffer.byteLength) return false;
   return crypto.timingSafeEqual(candidateBuffer, tokenBuffer);
+}
+
+/* 부분 권한 관리자(서브 계정) 로그인 매칭 — full_admin 토큰과 별개로,
+   Store에 등록된 계정의 토큰 해시와 일치하면 그 계정의 permissions로
+   세션을 발급합니다. 평문 토큰은 이 비교 목적으로만 잠깐 해시되고
+   저장되지 않습니다. store가 이 메서드를 갖추지 않은 경량 테스트 stub인
+   경우도 있어(예: `store: {}`), 그 경우엔 서브 계정 로그인 자체를 지원하지
+   않는 것으로 보고 조용히 실패시킵니다 — full_admin 토큰 로그인 경로는
+   store와 무관하게 그대로 동작합니다. */
+function matchAdminAccountByToken(store: Store, candidate: string): AdminAccount | undefined {
+  if (!candidate) return undefined;
+  if (typeof store.hashAdminToken !== "function" || typeof store.findAdminAccountByTokenHash !== "function") {
+    return undefined;
+  }
+  /* CLI나 다른 프로세스의 Store가 같은 상태 파일을 변경했을 수 있으므로
+     토큰을 찾기 직전에 디스크 상태를 다시 읽습니다. 경량 store stub은 이
+     메서드가 없어도 기존 full_admin 경로를 그대로 사용할 수 있습니다. */
+  if (typeof store.reloadAdminAccountState === "function") {
+    store.reloadAdminAccountState();
+  }
+  const tokenHash = store.hashAdminToken(candidate);
+  return store.findAdminAccountByTokenHash(tokenHash);
+}
+
+/* 서브 계정 세션은 발급 뒤에도 계정 상태 파일을 매 인증 요청마다 다시
+   확인합니다. 비활성화되거나 파일에서 삭제된 계정을 감지하면 해당 계정으로
+   발급한 세션을 전부 회수해, 현재 요청부터 401로 닫히게 합니다. */
+function revokeInactiveAdminAccountSessions(
+  req: IncomingMessage,
+  store: Store,
+  sessions: DashboardSessionStore
+): void {
+  const principal = authenticateDashboardRequest(req, sessions);
+  if (
+    principal?.type !== "DASHBOARD_ADMIN"
+    || principal.method !== "session"
+    || !principal.adminAccountId
+    || typeof store.reloadAdminAccountState !== "function"
+    || typeof store.listActiveAdminAccountIds !== "function"
+  ) return;
+
+  store.reloadAdminAccountState();
+  const activeAccountIds = new Set(store.listActiveAdminAccountIds());
+  if (!activeAccountIds.has(principal.adminAccountId)) {
+    sessions.revokeByAdminAccountId(principal.adminAccountId);
+  }
 }
 
 function contentTypeFor(filePath: string): string {
@@ -10456,6 +10504,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         return sendJson(req, res, 404, { error: "not found" });
       }
 
+      revokeInactiveAdminAccountSessions(req, input.store, sessions);
       const auth = authorizeHttpRequest(req, url.pathname, sessions);
       if (!auth.ok) {
         return sendJson(req, res, auth.status, { error: auth.message, code: auth.code });
@@ -12918,19 +12967,28 @@ export function createHttpHandler(input: HttpHandlerInput) {
         const body = await readJsonBody<{ token?: unknown }>(req);
         const token = typeof body.token === "string" ? body.token : "";
         const authenticated = tokenMatchesDashboardAuth(token);
-        if (!authenticated) {
+        /* full_admin 토큰이 아니면 서브(부분 권한) 관리자 계정 토큰인지 확인합니다.
+           서브 계정이 disabled 되었거나 존재하지 않으면 findAdminAccountByTokenHash가
+           undefined를 반환해 자연스럽게 인증 실패로 이어집니다. */
+        const adminAccount = !authenticated && token ? matchAdminAccountByToken(input.store, token) : undefined;
+        if (!authenticated && !adminAccount) {
           return sendJson(req, res, 401, {
             required: !appConfig.security.localNoAuth,
             configured: appConfig.security.localNoAuth || Boolean(appConfig.security.dashboardAuthToken),
             authenticated: false
           });
         }
-        const session = sessions.create({ role: "admin" });
+        const session = sessions.create(
+          adminAccount
+            ? { role: "admin", permissions: adminAccount.permissions, adminAccountId: adminAccount.id, adminAccountLabel: adminAccount.label }
+            : { role: "admin" }
+        );
         return sendJson(req, res, 200, {
           required: !appConfig.security.localNoAuth,
           configured: appConfig.security.localNoAuth || Boolean(appConfig.security.dashboardAuthToken),
           authenticated: true,
           role: "admin",
+          permissions: adminAccount?.permissions,
           csrfToken: session.csrfToken,
           expiresAt: new Date(session.expiresAt).toISOString()
         }, { "Set-Cookie": dashboardSessionCookie(session) });
@@ -13179,7 +13237,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         });
       }
       if (req.method === "GET" && url.pathname === "/api/participation/streamer-riot-id-requests") {
-        if (auth.principal.type !== "DASHBOARD_ADMIN" || auth.principal.role !== "admin") {
+        if (auth.principal.type !== "DASHBOARD_ADMIN" || !principalHasAdminPermission(auth.principal, "streamer_approval")) {
           return sendJson(req, res, 403, { error: "관리자 권한이 필요합니다." });
         }
         return sendJson(req, res, 200, streamerRiotIdRequestListResponse(url));
@@ -13266,7 +13324,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       }
 
       if (req.method === "POST" && url.pathname === "/api/participation/streamer-riot-id-requests/resolve") {
-        if (auth.principal.type !== "DASHBOARD_ADMIN" || auth.principal.role !== "admin") {
+        if (auth.principal.type !== "DASHBOARD_ADMIN" || !principalHasAdminPermission(auth.principal, "streamer_approval")) {
           return sendJson(req, res, 403, { error: "관리자 권한이 필요합니다." });
         }
         const body = await readJsonBody<{ requestId?: unknown; decision?: unknown; note?: unknown }>(req);
@@ -13288,7 +13346,15 @@ export function createHttpHandler(input: HttpHandlerInput) {
           auth.principal,
           "streamer.riot_id_request.resolved",
           beforeRequest.id,
-          { decision: body.decision, noteProvided: Boolean(note) }
+          {
+            decision: body.decision,
+            noteProvided: Boolean(note),
+            /* 부분 권한 서브 계정이 처리한 건은 라벨을 남겨 세션ID만으로는
+               구분 안 되는 "누가"를 감사로그에서 바로 알아볼 수 있게 합니다. */
+            ...(auth.principal.type === "DASHBOARD_ADMIN" && auth.principal.adminAccountLabel
+              ? { adminAccountLabel: auth.principal.adminAccountLabel }
+              : {})
+          }
         );
         let request: StreamerRiotIdRequest | undefined;
         try {
@@ -13323,7 +13389,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       }
 
       if (req.method === "POST" && url.pathname === "/api/participation/streamer-riot-id-requests/dashboard-access") {
-        if (auth.principal.type !== "DASHBOARD_ADMIN" || auth.principal.role !== "admin") {
+        if (auth.principal.type !== "DASHBOARD_ADMIN" || !principalHasAdminPermission(auth.principal, "streamer_approval")) {
           return sendJson(req, res, 403, { error: "관리자 권한이 필요합니다." });
         }
         const body = await readJsonBody<{ requestId?: unknown; dashboardEnabled?: unknown; note?: unknown }>(req);

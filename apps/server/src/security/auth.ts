@@ -5,10 +5,36 @@ import { appConfig, originAllowed } from "../config.js";
 export type PrincipalType = "PUBLIC" | "DASHBOARD_ADMIN" | "OAUTH_CALLBACK";
 export type DashboardRole = "admin" | "streamer";
 
+/* 관리자 부분 권한의 단일 원본. 저장 파일·CLI·HTTP 인가가 모두 이 목록을
+   참조해야 새 권한을 추가할 때 한 계층만 빠지는 일을 막을 수 있습니다. */
+export const ADMIN_PERMISSIONS = ["streamer_approval"] as const;
+export type AdminPermission = typeof ADMIN_PERMISSIONS[number];
+
 export type AuthPrincipal =
   | { type: "PUBLIC" }
-  | { type: "DASHBOARD_ADMIN"; method: "session" | "token"; role: DashboardRole; sessionId?: string; csrfToken?: string; twitchUserId?: string }
+  | {
+      type: "DASHBOARD_ADMIN";
+      method: "session" | "token";
+      role: DashboardRole;
+      sessionId?: string;
+      csrfToken?: string;
+      twitchUserId?: string;
+      /* undefined = 전체 권한(기존 단일 관리자 토큰/세션과 100% 하위호환).
+         배열이 있으면 그 목록에 있는 권한만 허용되는 "부분 권한 관리자"입니다. */
+      permissions?: readonly AdminPermission[];
+      adminAccountId?: string;
+      adminAccountLabel?: string;
+    }
   | { type: "OAUTH_CALLBACK" };
+
+/* principal이 특정 관리 업무를 수행할 권한이 있는지 판단하는 단일 원본입니다.
+   호출부에서 `role !== "admin"` 같은 산발적 체크 대신 이 함수를 씁니다. */
+export function principalHasAdminPermission(principal: AuthPrincipal, permission: AdminPermission): boolean {
+  if (principal.type !== "DASHBOARD_ADMIN" || principal.role !== "admin") return false;
+  if (!principal.permissions) return true;
+  return principal.permissions.includes(permission);
+}
+
 
 export type AuthFailureCode =
   | "AUTH_REQUIRED"
@@ -26,6 +52,11 @@ export type DashboardSession = {
   expiresAt: number;
   role: DashboardRole;
   twitchUserId?: string;
+  /* 서브 관리자 계정으로 로그인한 세션에만 채워집니다 — 기존 단일
+     관리자 토큰/세션은 undefined(전체 권한) 그대로 유지됩니다. */
+  permissions?: readonly AdminPermission[];
+  adminAccountId?: string;
+  adminAccountLabel?: string;
 };
 
 export const DASHBOARD_SESSION_COOKIE = "streamops_dashboard_session";
@@ -38,14 +69,17 @@ const MAX_DASHBOARD_SESSIONS = 10_000;
 export class DashboardSessionStore {
   private readonly sessions = new Map<string, DashboardSession>();
 
-  create(input: { role?: DashboardRole; twitchUserId?: string } = {}): DashboardSession {
+  create(input: { role?: DashboardRole; twitchUserId?: string; permissions?: readonly AdminPermission[]; adminAccountId?: string; adminAccountLabel?: string } = {}): DashboardSession {
     this.prune();
     const session: DashboardSession = {
       id: crypto.randomBytes(32).toString("base64url"),
       csrfToken: crypto.randomBytes(32).toString("base64url"),
       expiresAt: Date.now() + appConfig.security.dashboardSessionTtlMs,
       role: input.role ?? "admin",
-      twitchUserId: input.twitchUserId
+      twitchUserId: input.twitchUserId,
+      permissions: input.permissions,
+      adminAccountId: input.adminAccountId,
+      adminAccountLabel: input.adminAccountLabel
     };
     this.sessions.set(session.id, session);
     while (this.sessions.size > MAX_DASHBOARD_SESSIONS) {
@@ -77,6 +111,18 @@ export class DashboardSessionStore {
     let revoked = 0;
     for (const [id, session] of this.sessions) {
       if (session.role !== "streamer" || session.twitchUserId !== normalizedUserId) continue;
+      this.sessions.delete(id);
+      revoked += 1;
+    }
+    return revoked;
+  }
+
+  revokeByAdminAccountId(adminAccountId: string): number {
+    const normalizedAccountId = adminAccountId.trim();
+    if (!normalizedAccountId) return 0;
+    let revoked = 0;
+    for (const [id, session] of this.sessions) {
+      if (session.adminAccountId !== normalizedAccountId) continue;
       this.sessions.delete(id);
       revoked += 1;
     }
@@ -182,7 +228,10 @@ export function authenticateDashboardRequest(req: IncomingMessage, sessions: Das
       role: session.role,
       sessionId: session.id,
       csrfToken: session.csrfToken,
-      twitchUserId: session.twitchUserId
+      twitchUserId: session.twitchUserId,
+      permissions: session.permissions,
+      adminAccountId: session.adminAccountId,
+      adminAccountLabel: session.adminAccountLabel
     };
   }
   return undefined;
@@ -376,6 +425,40 @@ export function streamerDashboardRequestAllowed(method: string | undefined, path
   });
 }
 
+/* 모든 관리자(부분 권한 포함)에게 항상 허용되는 기본 엔드포인트 — 세션
+   조회/로그아웃처럼 권한과 무관하게 필요한 것만 담습니다. */
+const ADMIN_BASELINE_API_RULES: StreamerDashboardRule[] = [
+  { method: "GET", path: "/api/dashboard/auth/status" },
+  { method: "POST", path: "/api/dashboard/auth/logout" }
+];
+
+/* 부분 권한(permissions 배열이 있는) 관리자가 그 권한으로 접근 가능한
+   엔드포인트 화이트리스트입니다. 새 AdminPermission을 추가할 때마다 여기에도
+   대응하는 규칙을 등록해야 합니다 — 등록을 빠뜨리면 그 권한은 사실상 아무
+   엔드포인트도 열어주지 못하는 방향으로 fail-closed 됩니다(반대로 열리는
+   방향의 실수보다 안전). */
+const ADMIN_PERMISSION_API_RULES: Record<AdminPermission, StreamerDashboardRule[]> = {
+  streamer_approval: [
+    { method: "GET", path: "/api/participation/streamer-riot-id-requests" },
+    { method: "POST", path: "/api/participation/streamer-riot-id-requests/resolve" },
+    { method: "POST", path: "/api/participation/streamer-riot-id-requests/dashboard-access" }
+  ]
+};
+
+function adminSubAccountRequestAllowed(method: string | undefined, pathname: string, permissions: readonly AdminPermission[]): boolean {
+  const requestMethod = method ?? "GET";
+  const matchesRule = (rule: StreamerDashboardRule): boolean => {
+    if (rule.method && rule.method !== requestMethod) return false;
+    if (rule.path && rule.path === pathname) return true;
+    return Boolean(rule.prefix && (pathname === rule.prefix || pathname.startsWith(`${rule.prefix}/`)));
+  };
+  if (ADMIN_BASELINE_API_RULES.some(matchesRule)) return true;
+  return permissions.some((permission) => (
+    Object.hasOwn(ADMIN_PERMISSION_API_RULES, permission)
+    && ADMIN_PERMISSION_API_RULES[permission].some(matchesRule)
+  ));
+}
+
 export function authorizeHttpRequest(req: IncomingMessage, pathname: string, sessions: DashboardSessionStore): AuthResult {
   const required = requiredHttpPrincipal(req.method, pathname);
   if (required === "PUBLIC") return { ok: true, principal: { type: "PUBLIC" } };
@@ -396,6 +479,9 @@ export function authorizeHttpRequest(req: IncomingMessage, pathname: string, ses
   }
   if (principal.type === "DASHBOARD_ADMIN" && principal.role === "streamer" && !streamerDashboardRequestAllowed(req.method, pathname)) {
     return { ok: false, status: 403, code: "FORBIDDEN", message: "streamer dashboard role is not allowed for this endpoint" };
+  }
+  if (principal.type === "DASHBOARD_ADMIN" && principal.role === "admin" && principal.permissions && !adminSubAccountRequestAllowed(req.method, pathname, principal.permissions)) {
+    return { ok: false, status: 403, code: "FORBIDDEN", message: "admin sub-account permissions do not allow this endpoint" };
   }
   return { ok: true, principal };
 }

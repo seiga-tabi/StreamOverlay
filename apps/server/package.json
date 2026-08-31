@@ -8,6 +8,7 @@
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "start": "node dist/index.js",
+    "admin:accounts": "tsx src/scripts/manage-admin-accounts.ts",
     "validate:config": "tsx src/scripts/validate-config.ts",
     "validate:runtime": "tsx src/scripts/validate-runtime-config.ts",
     "config:check": "node --import tsx src/scripts/check-yoro-config.ts check",
