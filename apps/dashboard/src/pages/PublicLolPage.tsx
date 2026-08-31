@@ -7554,7 +7554,9 @@ export function PublicLolPage({
     if (profile && normalizeLolPlatformId(profile.lolPlatform) !== platform) {
       setProfile(null);
       setFilters(DEFAULT_MATCH_FILTERS);
-      setPublicPath("/", true);
+      /* 사이트 루트("/")가 아니라 LoL 홈으로 이동해야 합니다 — "/"로 보내면
+         메인 홈으로 튕겨 나가는 회귀가 있었습니다(resetHome()과 동일하게 맞춤). */
+      setPublicPath(PUBLIC_LOL_HOME_PATH, true);
     }
   }
 

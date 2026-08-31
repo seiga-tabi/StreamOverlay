@@ -280,3 +280,554 @@
     }
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * 관리자 콘솔 리디자인 v3 (승인 스냅샷:
+ * .ai/growth/design-snapshots/admin-console-redesign-v3-2026-08-31.md)
+ *
+ * 메인 홈과 같은 수묵 토큰·1행+2행 상단바로 옮깁니다. 관리자 콘솔은 다크 전용이라
+ * (스냅샷 "스코프 밖" 항목) .yoro-home-shell 같은 홈 스코프에 얹지 않고 여기서
+ * --home-* 를 다크 값으로 직접 선언합니다 — 라이트 재선언은 두지 않습니다.
+ * --home-win 만 스냅샷 지시대로 홈(#87A183)보다 밝은 #9BC98D 를 씁니다.
+ * 라운드 2~3px, 그림자·그라디언트 없음, --home-loss 는 거절 액션에만.
+ * ───────────────────────────────────────────────────────────────────────── */
+@layer pages {
+  .yoro-admin-shell {
+    --home-bg: #1C1D22;
+    --home-card: #252730;
+    --home-ink: #F5F6F8;
+    --home-sub: #B9C3D0;
+    --home-line: #3A404B;
+    --home-mid: #8795A6;
+    --home-deep: #4A5563;
+    --home-win: #9BC98D;
+    --home-loss: #DC4A5E;
+
+    min-height: 100vh;
+    background: var(--home-bg);
+    color: var(--home-ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── 1행: 워드마크 + ADMIN 킥커 / 계정칩 + 로그아웃 ─────── */
+
+  .yoro-admin-chrome {
+    position: sticky;
+    top: 0;
+    z-index: 70;
+    background: var(--home-bg);
+  }
+
+  .yoro-admin-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 64px;
+    max-width: 90rem;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 48px;
+    border-bottom: .5px solid var(--home-line);
+    box-sizing: border-box;
+  }
+
+  .yoro-admin-wordmark {
+    flex: 0 0 auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--home-ink);
+    font: inherit;
+    font-size: 17px;
+    font-weight: 900;
+    letter-spacing: .02em;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .yoro-admin-wordmark span { color: var(--home-mid); }
+
+  .yoro-admin-kicker {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    height: 20px;
+    padding: 0 6px;
+    border: .5px solid var(--home-line);
+    border-radius: 2px;
+    color: var(--home-mid);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .12em;
+  }
+
+  .yoro-admin-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    margin-left: auto;
+  }
+
+  .yoro-admin-account {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .yoro-admin-avatar {
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border: .5px solid var(--home-line);
+    border-radius: 50%;
+    background: var(--home-card);
+    color: var(--home-sub);
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .yoro-admin-account-name {
+    overflow: hidden;
+    max-width: 12rem;
+    color: var(--home-ink);
+    font-size: 13px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* 권한 태그 — full_admin 은 승색, 부분 권한은 중간톤. 둘 다 지면 대비 4.5 이상. */
+  .yoro-admin-permission {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    height: 20px;
+    padding: 0 7px;
+    border: .5px solid currentcolor;
+    border-radius: 2px;
+    font-size: 10.5px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .yoro-admin-permission.is-full { color: var(--home-win); }
+  .yoro-admin-permission.is-partial { color: var(--home-mid); }
+
+  .yoro-admin-logout {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 4px;
+    border: 0;
+    background: transparent;
+    color: var(--home-sub);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .yoro-admin-logout:hover { color: var(--home-ink); }
+
+  /* ── 2행: 서브네비(중앙 정렬, 활성 항목 밑줄) ──────────── */
+
+  .yoro-admin-subnav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 26px;
+    height: 48px;
+    max-width: 90rem;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 48px;
+    overflow-x: auto;
+    border-bottom: .5px solid var(--home-line);
+    box-sizing: border-box;
+    color: var(--home-sub);
+    font-size: 13px;
+    font-weight: 500;
+    scrollbar-width: none;
+  }
+
+  .yoro-admin-subnav::-webkit-scrollbar { display: none; }
+
+  .yoro-admin-subnav-item {
+    position: relative;
+    display: inline-flex;
+    flex: 0 0 auto;
+    gap: 6px;
+    align-items: center;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  a.yoro-admin-subnav-item:hover { color: var(--home-ink); }
+
+  .yoro-admin-subnav-item.is-active {
+    color: var(--home-ink);
+    font-weight: 700;
+  }
+
+  .yoro-admin-subnav-item.is-active::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 5px;
+    left: 0;
+    height: 2px;
+    background: var(--home-mid);
+  }
+
+  /* 잠금 항목 — 서브 관리자 세션에 그 화면의 권한이 없을 때. 클릭은 컴포넌트에서
+     무시하고, 비활성 버튼과 달리 초점은 받게 두어 안내(title)에 키보드로 닿습니다. */
+  .yoro-admin-subnav-item.is-locked {
+    color: var(--home-deep);
+    cursor: not-allowed;
+  }
+
+  .yoro-admin-lock-dot {
+    flex: 0 0 auto;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--home-deep);
+  }
+
+  .yoro-admin-wordmark:focus-visible,
+  .yoro-admin-logout:focus-visible,
+  .yoro-admin-subnav-item:focus-visible {
+    outline: 2px solid var(--home-mid);
+    outline-offset: 2px;
+  }
+
+  /* 언어 선택 팝오버 — 버튼 자체는 legacy 의 !important 가 소유하고, 값만
+     08-shell.css 에서 --home-* 로 넘겼습니다. 팝오버는 여기서 다룹니다. */
+  .yoro-admin-shell .dashboard-locale-button { border-radius: 3px; }
+
+  .yoro-admin-shell .dashboard-locale-popover {
+    border-color: var(--home-line);
+    border-radius: 3px;
+    background: var(--home-card);
+    box-shadow: none;
+  }
+
+  .yoro-admin-shell .dashboard-locale-popover button { color: var(--home-sub); }
+
+  .yoro-admin-shell .dashboard-locale-popover button:hover,
+  .yoro-admin-shell .dashboard-locale-popover button.active {
+    background: var(--home-bg);
+    color: var(--home-ink);
+  }
+
+  /* ── 본문 지면 ──────────────────────────────────────────── */
+
+  .yoro-admin-shell .app-main {
+    width: 100%;
+    max-width: 90rem;
+    min-height: 0;
+    margin: 0 auto;
+    padding: 28px 48px 0;
+    box-sizing: border-box;
+  }
+
+  .yoro-admin-shell .content-shell { width: 100%; }
+
+  /* 지면이 회색에서 다크로 바뀌었습니다. 이 파일 위쪽의 .page-title-row .muted
+     (#14171a) 는 회색 지면 기준이라 다크에서는 사실상 보이지 않습니다. */
+  .yoro-admin-shell .page-title-row h1,
+  .yoro-admin-shell .page-header h1 { color: var(--home-ink); }
+
+  .yoro-admin-shell .page-title-row .muted,
+  .yoro-admin-shell .page-header .muted { color: var(--home-sub); }
+
+  .yoro-admin-shell .queue-status {
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+    background: var(--home-card);
+    color: var(--home-sub);
+  }
+
+  /* ── 스트리머 승인: 요약 카드 3개 ───────────────────────── */
+
+  .yoro-admin-shell .participation-summary { gap: 10px; }
+
+  .yoro-admin-shell .participation-summary div {
+    padding: 14px 16px;
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+    background: var(--home-card);
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .yoro-admin-shell .participation-summary span {
+    color: var(--home-mid);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .yoro-admin-shell .participation-summary strong {
+    margin-top: 8px;
+    color: var(--home-ink);
+    font-size: 28px;
+    font-weight: 800;
+  }
+
+  /* ── 스트리머 승인: 목록 도구 ───────────────────────────── */
+
+  /* 목록을 감싸던 흰 유리 카드는 걷어냅니다 — 카드 단위는 요청 하나입니다. */
+  .yoro-admin-shell .streamer-riot-requests-card {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .yoro-admin-shell .form-message {
+    padding: 10px 12px;
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+    background: var(--home-card);
+    color: var(--home-sub);
+    font-size: 12.5px;
+  }
+
+  .yoro-admin-shell .yoro-ar-search {
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+    background: var(--home-card);
+    color: var(--home-ink);
+  }
+
+  .yoro-admin-shell .yoro-ar-search::placeholder { color: var(--home-mid); }
+
+  .yoro-admin-shell .yoro-ar-filter {
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+    background: transparent;
+    color: var(--home-sub);
+  }
+
+  .yoro-admin-shell .yoro-ar-filter[aria-pressed="true"] {
+    border-color: var(--home-mid);
+    background: var(--home-card);
+    color: var(--home-ink);
+  }
+
+  .yoro-admin-shell .yoro-ar-filter > b { color: var(--home-mid); }
+
+  .yoro-admin-shell .yoro-ar-empty { color: var(--home-sub); }
+
+  .yoro-admin-shell .yoro-ar-note {
+    border-radius: 3px;
+    background: var(--home-bg);
+    color: var(--home-sub);
+  }
+
+  /* ── 스트리머 승인: 요청 카드 ───────────────────────────── */
+
+  .yoro-admin-shell .yoro-ar-card {
+    position: relative;
+    padding: 14px 14px 14px 18px;
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+    background: var(--home-card);
+  }
+
+  /* 좌측 3px 상태 바 — 대기는 중간톤, 승인은 승색, 거절은 패색. */
+  .yoro-admin-shell .yoro-ar-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 3px;
+    background: var(--home-mid);
+  }
+
+  .yoro-admin-shell .yoro-ar-card.approved::before { background: var(--home-win); }
+  .yoro-admin-shell .yoro-ar-card.rejected::before { background: var(--home-loss); }
+
+  .yoro-admin-shell .yoro-ar-card span,
+  .yoro-admin-shell .yoro-ar-card small {
+    color: var(--home-mid);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .02em;
+  }
+
+  .yoro-admin-shell .yoro-ar-card strong {
+    color: var(--home-ink);
+    font-size: 13.5px;
+    font-weight: 700;
+  }
+
+  .yoro-admin-shell .yoro-ar-card strong small {
+    color: var(--home-mid);
+    font-size: 11px;
+  }
+
+  .yoro-admin-shell .yoro-ar-card .access-enabled { color: var(--home-win); }
+  .yoro-admin-shell .yoro-ar-card .access-disabled { color: var(--home-mid); }
+
+  /* 아바타도 span 이라 위 라벨 규칙에 걸립니다 — 뒤에서 되돌립니다. */
+  .yoro-admin-shell .streamer-riot-request-avatar {
+    width: 34px;
+    height: 34px;
+    border: .5px solid var(--home-line);
+    background: var(--home-bg);
+    color: var(--home-sub);
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  /* ── 스트리머 승인: 액션 버튼 ───────────────────────────── */
+
+  .yoro-admin-shell .yoro-ar-action {
+    min-height: 44px;
+    padding: 0 14px;
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+    background: transparent;
+    color: var(--home-sub);
+    font-size: 12.5px;
+    font-weight: 700;
+    box-shadow: none;
+  }
+
+  .yoro-admin-shell .yoro-ar-action:hover:not(:disabled) {
+    border-color: var(--home-mid);
+    background: var(--home-bg);
+    color: var(--home-ink);
+  }
+
+  /* 승인 = 꽉 찬 반전 버튼. */
+  .yoro-admin-shell .yoro-ar-action.is-approve,
+  .yoro-admin-shell .yoro-ar-action.is-approve:hover:not(:disabled) {
+    border-color: var(--home-ink);
+    background: var(--home-ink);
+    color: var(--home-bg);
+  }
+
+  /* 거절 = 패색 아웃라인(테두리·글자만). 강조색은 여기에만 씁니다. */
+  .yoro-admin-shell .yoro-ar-action.is-reject,
+  .yoro-admin-shell .yoro-ar-action.is-reject:hover:not(:disabled) {
+    border-color: var(--home-loss);
+    background: transparent;
+    color: var(--home-loss);
+  }
+
+  .yoro-admin-shell .yoro-ar-action:disabled {
+    opacity: .5;
+    cursor: default;
+  }
+
+  /* ── 확인 모달도 같은 토큰으로 ──────────────────────────── */
+
+  .yoro-admin-shell .yoro-ac {
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+    background: var(--home-card);
+    color: var(--home-ink);
+    box-shadow: none;
+  }
+
+  .yoro-admin-shell .yoro-ac > p { color: var(--home-sub); }
+
+  .yoro-admin-shell .yoro-ac-summary {
+    border-radius: 3px;
+    background: var(--home-bg);
+  }
+
+  .yoro-admin-shell .yoro-ac-summary dt,
+  .yoro-admin-shell .yoro-ac-field > span,
+  .yoro-admin-shell .yoro-ac-count { color: var(--home-mid); }
+
+  .yoro-admin-shell .yoro-ac-preset,
+  .yoro-admin-shell .yoro-ac textarea {
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+    color: var(--home-sub);
+  }
+
+  .yoro-admin-shell .yoro-ac textarea {
+    background: var(--home-bg);
+    color: var(--home-ink);
+  }
+
+  .yoro-admin-shell .yoro-ac-preset[aria-pressed="true"] {
+    border-color: var(--home-mid);
+    background: var(--home-bg);
+    color: var(--home-ink);
+  }
+
+  .yoro-admin-shell .yoro-ac-button {
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+    color: var(--home-sub);
+  }
+
+  .yoro-admin-shell .yoro-ac-button.is-primary {
+    border-color: var(--home-ink);
+    background: var(--home-ink);
+    color: var(--home-bg);
+  }
+
+  .yoro-admin-shell .yoro-ac-button.is-danger {
+    border-color: var(--home-loss);
+    background: transparent;
+    color: var(--home-loss);
+  }
+
+  /* ── 반응형 — 홈과 같은 브레이크포인트 ──────────────────── */
+
+  @media (max-width: 64rem) {
+    .yoro-admin-header { height: 60px; padding: 0 24px; }
+    .yoro-admin-subnav { height: 44px; gap: 20px; padding: 0 24px; }
+    .yoro-admin-shell .app-main { padding: 22px 24px 0; }
+  }
+
+  @media (max-width: 47.9375rem) {
+    .yoro-admin-header {
+      height: auto;
+      min-height: 60px;
+      flex-wrap: wrap;
+      padding: 8px 16px;
+    }
+
+    /* 좁은 폭에서 중앙 정렬은 현재 항목을 화면 밖으로 밀어냅니다(가로 스크롤).
+       왼쪽부터 채우고 스크롤로 이어 봅니다. */
+    .yoro-admin-subnav {
+      justify-content: flex-start;
+      gap: 18px;
+      padding: 0 16px;
+    }
+
+    .yoro-admin-header-actions {
+      gap: 8px;
+      width: 100%;
+      margin-left: 0;
+    }
+
+    .yoro-admin-account-name { max-width: 7rem; }
+
+    .yoro-admin-shell .app-main { padding: 18px 16px 0; }
+
+    .yoro-admin-shell .yoro-ar-card { padding: 12px 12px 12px 16px; }
+  }
+}

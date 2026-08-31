@@ -57,3 +57,23 @@
     }
   }
 }
+
+@layer legacy {
+  /* 검색 실패 알림(.public-error) — 홈 다크 표면용 재정의.
+   *
+   * .public-error 자체는 legacy/01-core.css 두 곳(다크/라이트 각각)에 정의돼
+   * 있고 밝은 배경(#fff1f2)·진한 빨강 글씨(color !important)를 씁니다.
+   * 새 홈 히어로(어두운 표면, .public-home-shared-shell) 위에 얹히면 그
+   * 알림 배너만 밝은 legacy 색으로 튀어나와, 화면 전체가 구디자인으로
+   * 바뀐 것처럼 보입니다(재현: 존재하지 않는 Riot ID 검색).
+   *
+   * 이 파일이 01-core.css보다 뒤에 import 되어(index.css) 같은 legacy
+   * layer 안에서 캐스케이드 순서로 이깁니다. 01-core.css의 color 선언이
+   * !important라 여기도 !important로 맞춥니다.
+   */
+  .public-home-shared-shell .public-error {
+    border-color: color-mix(in srgb, var(--home-loss) 45%, transparent);
+    background: color-mix(in srgb, var(--home-loss) 12%, var(--home-card));
+    color: var(--home-loss) !important;
+  }
+}

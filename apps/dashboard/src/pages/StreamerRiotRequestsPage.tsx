@@ -301,7 +301,9 @@ export function StreamerRiotRequestsPage({ snapshot }: { snapshot: DashboardSnap
         {visibleRequests.length > 0 ? (
           <div className="streamer-riot-requests-list">
             {visibleRequests.map((request) => (
-              <article className={`streamer-riot-request-row ${request.status}`} key={request.id}>
+              /* yoro-ar-card = 홈 토큰 카드형(좌측 3px 상태 바). 구조(grid)와 하위
+                 선택자는 기존 streamer-riot-request-row 를 그대로 씁니다. */
+              <article className={`streamer-riot-request-row yoro-ar-card ${request.status}`} key={request.id}>
                 <div className="streamer-riot-request-user">
                   <span className="streamer-riot-request-avatar">
                     {request.twitchProfileImageUrl ? <img src={request.twitchProfileImageUrl} alt="" /> : request.twitchDisplayName.slice(0, 1).toUpperCase()}
@@ -335,7 +337,7 @@ export function StreamerRiotRequestsPage({ snapshot }: { snapshot: DashboardSnap
                       거절된 요청에 "승인"이 그대로 활성이던 것을 바꿉니다. */}
                   {request.status === "approved" ? null : (
                     <button
-                      className="secondary compact-button"
+                      className="secondary compact-button yoro-ar-action is-approve"
                       disabled={busyId === request.id}
                       onClick={() => setPendingAction({ request, decision: "approved" })}
                     >
@@ -344,7 +346,7 @@ export function StreamerRiotRequestsPage({ snapshot }: { snapshot: DashboardSnap
                   )}
                   {request.status === "rejected" ? null : (
                     <button
-                      className="secondary compact-button danger"
+                      className="secondary compact-button danger yoro-ar-action is-reject"
                       disabled={busyId === request.id}
                       onClick={() => {
                         setReason("");
@@ -356,7 +358,7 @@ export function StreamerRiotRequestsPage({ snapshot }: { snapshot: DashboardSnap
                   )}
                   {request.status === "approved" ? (
                     <button
-                      className={`secondary compact-button ${request.dashboardEnabled ? "danger" : ""}`}
+                      className={`secondary compact-button yoro-ar-action ${request.dashboardEnabled ? "danger is-reject" : ""}`}
                       disabled={busyId === request.id}
                       onClick={() => void updateDashboardAccess(request.id, !request.dashboardEnabled)}
                     >

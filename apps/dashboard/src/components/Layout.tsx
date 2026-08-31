@@ -1,71 +1,15 @@
-import { useState, type ReactNode } from "react";
-import { dashboardI18n, type DashboardLocale } from "../i18n";
-import { pageAllowed, type Page } from "../routing/dashboard-routes";
+import { type ReactNode } from "react";
+import { AdminConsoleChrome } from "./AdminConsoleChrome";
+import { type DashboardLocale } from "../i18n";
+import { type Page } from "../routing/dashboard-routes";
 
 export type { Page } from "../routing/dashboard-routes";
 
-const navSections: Array<{ key: keyof typeof dashboardI18n.ko.app.navGroups; items: Page[] }> = [
-  { key: "lol", items: ["streamerRiotRequests"] },
-  { key: "operations", items: ["events"] },
-  { key: "system", items: ["supportInbox", "settings"] }
-];
-
-function DashboardLocaleSelector({
-  locale,
-  onLocaleChange
-}: {
-  locale: DashboardLocale;
-  onLocaleChange: (locale: DashboardLocale) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const text = dashboardI18n[locale].app;
-  const options: Array<{ locale: DashboardLocale; code: string; label: string }> = [
-    { locale: "ko", code: "KR", label: text.languageKo },
-    { locale: "ja", code: "JP", label: text.languageJa }
-  ];
-  const activeCode = locale === "ja" ? "JP" : "KR";
-
-  function selectLocale(nextLocale: DashboardLocale): void {
-    onLocaleChange(nextLocale);
-    setOpen(false);
-  }
-
-  return (
-    <div className="public-locale-menu dashboard-locale-menu">
-      <button
-        type="button"
-        className="public-locale-button dashboard-locale-button"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        aria-label={text.languageMenu}
-        onClick={() => setOpen((value) => !value)}
-      >
-        <span className="public-globe-icon" aria-hidden="true"><span /></span>
-        <strong>{activeCode}</strong>
-        <i aria-hidden="true" />
-      </button>
-      {open ? (
-        <div className="public-locale-popover dashboard-locale-popover" role="menu" aria-label={text.language}>
-          {options.map((option) => (
-            <button
-              key={option.locale}
-              type="button"
-              className={option.locale === locale ? "active" : ""}
-              role="menuitemradio"
-              aria-checked={option.locale === locale}
-              aria-label={`${option.code} ${option.label}`}
-              onClick={() => selectLocale(option.locale)}
-            >
-              <strong>{option.code}</strong>
-              <em aria-hidden="true">✓</em>
-            </button>
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
+/* 관리자 콘솔 셸 — 좌측 사이드바(app-sidebar/nav-group)를 걷어내고 메인 홈과 같은
+   1행+2행 상단바로 바꿨습니다(admin-console-redesign-v3 승인 스펙).
+   .yoro-admin-shell 이 홈 토큰(--home-*)을 다크 값으로 선언하는 스코프이고,
+   app-shell 은 legacy 의 일본어 서체 규칙(.app-shell[data-locale="ja"])과 본문
+   페이지 스타일을 계속 쓰기 위해 함께 답니다. */
 export function Layout({
   page,
   setPage,
@@ -73,6 +17,8 @@ export function Layout({
   onLocaleChange,
   onLogout,
   onPublicHome,
+  permissions,
+  accountLabel,
   children
 }: {
   page: Page;
@@ -81,75 +27,27 @@ export function Layout({
   onLocaleChange: (locale: DashboardLocale) => void;
   onLogout?: () => void;
   onPublicHome?: () => void;
+  permissions?: readonly string[];
+  accountLabel?: string;
   children: ReactNode;
 }) {
-  const uiText = dashboardI18n[locale];
-  const visibleNavSections = navSections
-    .map((section) => ({
-      ...section,
-      items: section.items.filter(pageAllowed)
-    }))
-    .filter((section) => section.items.length > 0);
-  const topActions = (
-    <div className="top-actions dashboard-menu-actions">
-      <DashboardLocaleSelector locale={locale} onLocaleChange={onLocaleChange} />
-      {onPublicHome ? <button className="secondary top-action" onClick={onPublicHome} data-ko={dashboardI18n.ko.app.publicHome} data-ja={dashboardI18n.ja.app.publicHome}>{uiText.app.publicHome}</button> : null}
-      {onLogout ? <button className="secondary top-action" onClick={onLogout} data-ko={dashboardI18n.ko.app.logout} data-ja={dashboardI18n.ja.app.logout}>{uiText.app.logout}</button> : null}
-      <span className="top-chip" data-ko={dashboardI18n.ko.app.liveSafety} data-ja={dashboardI18n.ja.app.liveSafety}>{uiText.app.liveSafety}</span>
-    </div>
-  );
-
   return (
-    <div className={`app-shell app-shell-${page}`} data-locale={locale} data-page={page} lang={locale === "ja" ? "ja" : "ko"}>
-      <aside className="app-sidebar">
-        <div className="brand-block">
-          <img className="brand-logo" src="/images/yorogg-topbar-logo.webp" alt="YORO.gg" />
-        </div>
-        <div className="sidebar-profile">
-          <span data-ko={dashboardI18n.ko.app.workspaceKicker} data-ja={dashboardI18n.ja.app.workspaceKicker}>{uiText.app.workspaceKicker}</span>
-          <strong
-            data-ko={dashboardI18n.ko.app.workspaceLabel}
-            data-ja={dashboardI18n.ja.app.workspaceLabel}
-          >
-            {uiText.app.workspaceLabel}
-          </strong>
-          <p
-            data-ko={dashboardI18n.ko.app.workspaceDescription}
-            data-ja={dashboardI18n.ja.app.workspaceDescription}
-          >
-            {uiText.app.workspaceDescription}
-          </p>
-        </div>
-        <nav aria-label={uiText.app.navLabel}>
-          {visibleNavSections.map((section) => (
-            <div className="nav-group" key={section.key}>
-              <div
-                className="nav-section-title"
-                data-ko={dashboardI18n.ko.app.navGroups[section.key]}
-                data-ja={dashboardI18n.ja.app.navGroups[section.key]}
-              >
-                {uiText.app.navGroups[section.key]}
-              </div>
-              <div className="nav-group-items">
-                {section.items.map((item) => (
-                  <button
-                    key={item}
-                    className={`nav-item ${page === item ? "active" : ""}`}
-                    aria-current={page === item ? "page" : undefined}
-                    data-ko={dashboardI18n.ko.pages[item].label}
-                    data-ja={dashboardI18n.ja.pages[item].label}
-                    onClick={() => setPage(item)}
-                  >
-                    <span className="nav-marker" />
-                    <span data-ko={dashboardI18n.ko.pages[item].label} data-ja={dashboardI18n.ja.pages[item].label}>{uiText.pages[item].label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
-        </nav>
-        {topActions}
-      </aside>
+    <div
+      className={`yoro-admin-shell app-shell app-shell-${page}`}
+      data-locale={locale}
+      data-page={page}
+      lang={locale === "ja" ? "ja" : "ko"}
+    >
+      <AdminConsoleChrome
+        accountLabel={accountLabel}
+        locale={locale}
+        onLocaleChange={onLocaleChange}
+        onLogout={onLogout}
+        onPublicHome={onPublicHome}
+        page={page}
+        permissions={permissions}
+        setPage={setPage}
+      />
       <main className="app-main">
         <section className="content-shell">{children}</section>
       </main>

@@ -14,7 +14,9 @@ import { SkeletonCard } from "./shared/ui/Skeleton";
 import {
   dashboardPageFromPath,
   defaultDashboardPage,
+  firstPermittedPage,
   pageAllowed,
+  pagePermitted,
   setDashboardPath,
   type Page
 } from "./routing/dashboard-routes";
@@ -115,6 +117,11 @@ export default function App() {
   const [authState, setAuthState] = useState<AuthState>(() => surfaceForLocation() === "admin" ? "checking" : "login");
   const [authErrorKey, setAuthErrorKey] = useState<AuthErrorKey>("");
   const [loginDisabled, setLoginDisabled] = useState(false);
+  /* 세션의 관리자 계정 정보 — 서버가 auth/status 로 내려주지만 지금까지 버려지고
+     있었습니다. permissions 가 undefined 면 full_admin, 배열이면 서브 관리자라
+     화이트리스트 밖 메뉴를 잠급니다(표시 전용, 인가는 서버가 강제). */
+  const [adminPermissions, setAdminPermissions] = useState<readonly string[] | undefined>(undefined);
+  const [adminAccountLabel, setAdminAccountLabel] = useState<string | undefined>(undefined);
   const [routeRevision, setRouteRevision] = useState(0);
   const currentText = dashboardI18n[dashboardLocale];
   const authError = authErrorKey ? currentText.authPage[authErrorKey] : "";
@@ -205,17 +212,21 @@ export default function App() {
       if (!status.required || status.authenticated) {
         if ((status.role ?? "admin") !== "admin") {
           clearDashboardCsrfToken();
+          clearAdminAccount();
           setLoginDisabled(false);
           setAuthErrorKey("adminOnly");
           setAuthState("login");
           return;
         }
+        setAdminPermissions(status.permissions);
+        setAdminAccountLabel(status.adminAccountLabel);
         setAuthErrorKey("");
         setLoginDisabled(false);
         setAuthState("authenticated");
         return;
       }
       clearDashboardCsrfToken();
+      clearAdminAccount();
       setLoginDisabled(status.configured === false);
       setAuthErrorKey(status.configured === false ? "notConfigured" : "");
       setAuthState("login");
@@ -248,19 +259,29 @@ export default function App() {
 
   useEffect(() => {
     if (authState !== "authenticated") return;
-    if (!pageAllowed(page)) {
+    if (!pagePermitted(page, adminPermissions)) {
       const pathPage = dashboardPageFromPath(window.location.pathname);
-      const nextPage = pageAllowed(pathPage) ? pathPage : defaultDashboardPage();
+      /* 서브 관리자가 잠긴 경로로 직접 들어온 경우 권한이 있는 첫 화면으로
+         되돌립니다. 권한이 하나도 매칭되지 않으면 기본 화면을 그대로 둡니다
+         (서버가 403 을 돌려주고 화면이 오류 상태를 보여줍니다). */
+      const nextPage = pagePermitted(pathPage, adminPermissions)
+        ? pathPage
+        : firstPermittedPage(adminPermissions) ?? defaultDashboardPage();
       setPage(nextPage);
       setDashboardPath(nextPage, true);
     }
-  }, [authState, page]);
+  }, [adminPermissions, authState, page]);
 
   function changeDashboardPage(nextPage: Page): void {
-    if (!pageAllowed(nextPage)) return;
+    if (!pageAllowed(nextPage) || !pagePermitted(nextPage, adminPermissions)) return;
     setPage(nextPage);
     setDashboardPath(nextPage);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function clearAdminAccount(): void {
+    setAdminPermissions(undefined);
+    setAdminAccountLabel(undefined);
   }
 
   async function login(token: string): Promise<void> {
@@ -276,6 +297,8 @@ export default function App() {
         setAuthErrorKey("adminOnly");
         return;
       }
+      setAdminPermissions(status.permissions);
+      setAdminAccountLabel(status.adminAccountLabel);
       setLoginDisabled(false);
       setAuthState("authenticated");
     } catch {
@@ -286,6 +309,7 @@ export default function App() {
   function logout(): void {
     void logoutDashboardSession();
     clearDashboardCsrfToken();
+    clearAdminAccount();
     setSnapshot(initialSnapshot);
     setAuthState(authRequired ? "login" : "authenticated");
   }
@@ -416,7 +440,7 @@ export default function App() {
   }
 
   return (
-    <Layout page={page} setPage={changeDashboardPage} locale={dashboardLocale} onLocaleChange={changeDashboardLocale} onLogout={authRequired ? logout : undefined} onPublicHome={openPublic}>
+    <Layout accountLabel={adminAccountLabel} page={page} permissions={adminPermissions} setPage={changeDashboardPage} locale={dashboardLocale} onLocaleChange={changeDashboardLocale} onLogout={authRequired ? logout : undefined} onPublicHome={openPublic}>
       <Suspense fallback={<div className="card loading-card" data-ko={dashboardI18n.ko.app.loading} data-ja={dashboardI18n.ja.app.loading}>{currentText.app.loading}</div>}>
         {page === "events" ? <EventsPage snapshot={snapshot} /> : null}
         {page === "streamerRiotRequests" ? <StreamerRiotRequestsPage snapshot={snapshot} /> : null}

@@ -1,11 +1,13 @@
-/* Dashboard 앱 공통: 좌측 관리자 메뉴를 방송 운영용 상단 고정 메뉴로 정리 */
+/* Dashboard 앱 공통: 좌측 관리자 메뉴를 방송 운영용 상단 고정 메뉴로 정리.
+ *
+ * 2026-08-31: 관리자 콘솔이 사이드바 대신 1행+2행 상단바(.yoro-admin-chrome)로
+ * 바뀌면서 이 파일의 .app-sidebar, .nav-item, .top-bar 규칙은 매칭되는 DOM 이
+ * 없습니다. 지면(보라 그라디언트)과 언어 버튼만 홈 토큰(--home-*)으로 넘겼습니다 —
+ * !important 는 legacy layer 가 pages layer 를 이기므로 값 자체를 여기서 바꿉니다.
+ * 실제 지면·타이포는 pages/account/33-admin-console.css 의 .yoro-admin-shell 참조. */
 .app-shell {
   display: block !important;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at 50% 0%, rgba(123, 92, 255, .14), transparent 34%),
-    linear-gradient(180deg, #868e96 0%, #727b84 42%, #5f676f 100%) !important;
-  color: #f8f9fa;
 }
 
 .app-sidebar {
@@ -149,9 +151,9 @@
 
 .dashboard-locale-button,
 .top-action {
-  border-color: rgba(248, 249, 250, .16) !important;
-  background: rgba(33, 37, 41, .58) !important;
-  color: #f8f9fa !important;
+  border-color: var(--home-line, rgba(248, 249, 250, .16)) !important;
+  background: var(--home-card, rgba(33, 37, 41, .58)) !important;
+  color: var(--home-ink, #f8f9fa) !important;
   box-shadow: none !important;
 }
 

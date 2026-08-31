@@ -23,6 +23,16 @@ export const dashboardI18n = {
         palworld: "팰월드",
         system: "시스템"
       },
+      /* 관리자 콘솔 1행+2행 상단바 (admin-console-redesign-v3). */
+      adminNavLabel: "관리자 메뉴",
+      adminAccountFallback: "관리자",
+      permissionFull: "전체 권한",
+      /* 부분 권한이 2개 이상이거나 아래 표에 없는 키일 때의 요약 표기. */
+      permissionCount: "권한 {count}개",
+      permissionLocked: "권한 없음",
+      permissionLabels: {
+        streamer_approval: "스트리머 승인 권한"
+      },
       loading: "화면을 불러오는 중입니다."
     },
     authPage: {
@@ -41,10 +51,11 @@ export const dashboardI18n = {
       backToPublic: "전적 검색으로 돌아가기"
     },
     pages: {
-      events: { label: "이벤트 로그", short: "이벤트" },
-      streamerRiotRequests: { label: "Riot ID 승인", short: "Riot ID" },
-      supportInbox: { label: "문의 메일", short: "메일" },
-      settings: { label: "시스템 설정", short: "설정" }
+      /* nav 는 관리자 콘솔 2행 서브네비 전용 문구입니다(승인된 스펙의 항목명). */
+      events: { label: "이벤트 로그", short: "이벤트", nav: "이벤트" },
+      streamerRiotRequests: { label: "Riot ID 승인", short: "Riot ID", nav: "스트리머 승인" },
+      supportInbox: { label: "문의 메일", short: "메일", nav: "고객 지원함" },
+      settings: { label: "시스템 설정", short: "설정", nav: "개인 설정" }
     },
     dashboard: {
       eyebrow: "실시간 모니터링",
@@ -218,6 +229,14 @@ export const dashboardI18n = {
         palworld: "パルワールド",
         system: "システム"
       },
+      adminNavLabel: "管理者メニュー",
+      adminAccountFallback: "管理者",
+      permissionFull: "全権限",
+      permissionCount: "権限{count}件",
+      permissionLocked: "権限がありません",
+      permissionLabels: {
+        streamer_approval: "配信者承認権限"
+      },
       loading: "画面を読み込んでいます。"
     },
     authPage: {
@@ -236,10 +255,10 @@ export const dashboardI18n = {
       backToPublic: "戦績検索に戻る"
     },
     pages: {
-      events: { label: "イベントログ", short: "イベント" },
-      streamerRiotRequests: { label: "Riot ID 承認", short: "Riot ID" },
-      supportInbox: { label: "お問い合わせメール", short: "メール" },
-      settings: { label: "システム設定", short: "設定" }
+      events: { label: "イベントログ", short: "イベント", nav: "イベント" },
+      streamerRiotRequests: { label: "Riot ID 承認", short: "Riot ID", nav: "配信者承認" },
+      supportInbox: { label: "お問い合わせメール", short: "メール", nav: "カスタマーサポート" },
+      settings: { label: "システム設定", short: "設定", nav: "個人設定" }
     },
     dashboard: {
       eyebrow: "リアルタイム監視",
