@@ -86,29 +86,36 @@ test("관리자 감사 metadata는 action별 키와 enum 값만 허용하고 raw
   assert.deepEqual(parseAdminAuditLogMetadata("streamer.riot_id_request.resolved", {
     decision: "approved",
     noteProvided: false,
-    adminAccountLabel: "김운영"
+    adminAccountId: "3b525f40-90b7-4b6e-b2ef-e083f66cda86"
   }), {
     decision: "approved",
     noteProvided: false,
-    adminAccountLabel: "김운영"
+    adminAccountId: "3b525f40-90b7-4b6e-b2ef-e083f66cda86"
   });
-  for (const adminAccountLabel of ["", "   ", "운영\u0000자", "가".repeat(101)]) {
-    const metadata = { decision: "approved", noteProvided: false, adminAccountLabel };
+  for (const adminAccountId of ["", "   ", "account\u0000id", "a".repeat(101)]) {
+    const metadata = { decision: "approved", noteProvided: false, adminAccountId };
     assert.equal(parseAdminAuditLogMetadata("streamer.riot_id_request.resolved", metadata), undefined);
     assert.equal(sanitizeAdminAuditLogMetadata("streamer.riot_id_request.resolved", metadata), undefined);
   }
   assert.deepEqual(parseAdminAuditLogMetadata("streamer.dashboard_access.updated", {
     dashboardEnabled: false,
-    noteProvided: false
+    noteProvided: false,
+    adminAccountId: "3b525f40-90b7-4b6e-b2ef-e083f66cda86"
   }), {
     dashboardEnabled: false,
-    noteProvided: false
+    noteProvided: false,
+    adminAccountId: "3b525f40-90b7-4b6e-b2ef-e083f66cda86"
   });
   assert.equal(parseAdminAuditLogMetadata("streamer.dashboard_access.updated", {
     dashboardEnabled: false,
     noteProvided: false,
-    adminAccountLabel: "추가하면 안 됨"
+    adminAccountLabel: "변경 가능한 라벨은 추가하면 안 됨"
   }), undefined);
+  assert.deepEqual(sanitizeAdminAuditLogMetadata("streamer.riot_id_request.resolved", {
+    decision: "approved",
+    noteProvided: false,
+    adminAccountLabel: "변경 가능한 라벨"
+  }), { decision: "approved", noteProvided: false });
 });
 
 test("관리자 감사 로그 parser는 bounded offset pagination을 exact하게 검증한다", () => {

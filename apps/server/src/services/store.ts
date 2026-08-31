@@ -108,6 +108,7 @@ export type StoreReadiness = {
   ok: boolean;
   checks: Record<string, boolean>;
   errors: string[];
+  warnings: string[];
   loadStates: Record<StorePersistenceFailure["scope"], PersistenceLoadState>;
 };
 
@@ -758,7 +759,12 @@ export class Store {
   }
 
   private reportPersistenceFailure(failure: StorePersistenceFailure): void {
+    const alreadyFailed = this.persistenceFailures.has(failure.scope);
     this.persistenceFailures.set(failure.scope, failure);
+    /* 서브 관리자 계정 파일은 인증 요청마다 다시 읽으므로 같은 장애가
+       지속되는 동안에는 첫 상태 전이만 보고합니다. 정상 로드로 failure가
+       지워진 뒤 재발하면 다시 1회 보고됩니다. */
+    if (failure.scope === "admin_accounts" && alreadyFailed) return;
     this.options.onPersistenceError?.(failure);
   }
 
@@ -786,14 +792,14 @@ export class Store {
   }
 
   getReadiness(): StoreReadiness {
-    const paths = [
+    const requiredPaths = [
       ["followers", this.options.followerStatePath],
       ["streamer_riot_ids", this.options.streamerRiotIdStatePath],
-      ["runtime", this.options.runtimeStatePath],
-      ["admin_accounts", this.options.adminAccountStatePath]
+      ["runtime", this.options.runtimeStatePath]
     ].filter((entry): entry is [StorePersistenceFailure["scope"], string] => Boolean(entry[1]));
+    const adminAccountPath = this.options.adminAccountStatePath;
     let statePathsWritable = true;
-    for (const [scope, filePath] of paths) {
+    for (const [scope, filePath] of requiredPaths) {
       try {
         const dir = path.dirname(filePath);
         fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
@@ -808,15 +814,39 @@ export class Store {
         });
       }
     }
-    const errors = [...this.persistenceFailures.values()].map((failure) => `${failure.scope}:${failure.operation}`);
+    let adminAccountStatePathWritable = true;
+    if (adminAccountPath) {
+      try {
+        const dir = path.dirname(adminAccountPath);
+        fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+        fs.accessSync(dir, fs.constants.W_OK);
+      } catch (error) {
+        adminAccountStatePathWritable = false;
+        this.reportPersistenceFailure({
+          scope: "admin_accounts",
+          operation: "readiness",
+          filePath: adminAccountPath,
+          error: toSafeErrorMessage(error)
+        });
+      }
+    }
+    const failures = [...this.persistenceFailures.values()];
+    const errors = failures
+      .filter((failure) => failure.scope !== "admin_accounts")
+      .map((failure) => `${failure.scope}:${failure.operation}`);
+    const warnings = failures
+      .filter((failure) => failure.scope === "admin_accounts")
+      .map((failure) => `${failure.scope}:${failure.operation}`);
     return {
       ok: statePathsWritable && errors.length === 0,
       checks: {
-        statePathsConfigured: paths.length > 0,
+        statePathsConfigured: requiredPaths.length > 0 || Boolean(adminAccountPath),
         statePathsWritable,
-        persistenceHealthy: errors.length === 0
+        persistenceHealthy: errors.length === 0,
+        adminAccountsHealthy: adminAccountStatePathWritable && warnings.length === 0
       },
       errors,
+      warnings,
       loadStates: { ...this.persistenceLoadStates }
     };
   }

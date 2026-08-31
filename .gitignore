@@ -42,6 +42,11 @@ __pycache__/
 apps/dashboard/dist-twitch-extension/
 apps/dashboard/twitch-extension.zip
 /.ai/
+!/.ai/
+/.ai/*
+!/.ai/orchestrator/
+!/.ai/policy/
+!/.ai/schemas/
 /AGENTS.md.backup-20260825-165218
 /HEARTBEAT.md
 /IDENTITY.md
@@ -52,3 +57,4 @@ apps/dashboard/twitch-extension.zip
 /AGENTS.md
 /.hermes-backup/config.yaml.20260826-085805
 /.hermes-backup/SOUL.md.20260826-085805
+/.ai/

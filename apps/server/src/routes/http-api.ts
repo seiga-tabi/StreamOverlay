@@ -13349,10 +13349,10 @@ export function createHttpHandler(input: HttpHandlerInput) {
           {
             decision: body.decision,
             noteProvided: Boolean(note),
-            /* 부분 권한 서브 계정이 처리한 건은 라벨을 남겨 세션ID만으로는
-               구분 안 되는 "누가"를 감사로그에서 바로 알아볼 수 있게 합니다. */
-            ...(auth.principal.type === "DASHBOARD_ADMIN" && auth.principal.adminAccountLabel
-              ? { adminAccountLabel: auth.principal.adminAccountLabel }
+            /* 사람이 변경할 수 있는 라벨 대신 안정적인 계정 ID를 남겨
+               서브 관리자 mutation의 attribution을 일관되게 보존합니다. */
+            ...(auth.principal.type === "DASHBOARD_ADMIN" && auth.principal.adminAccountId
+              ? { adminAccountId: auth.principal.adminAccountId }
               : {})
           }
         );
@@ -13410,7 +13410,13 @@ export function createHttpHandler(input: HttpHandlerInput) {
           auth.principal,
           "streamer.dashboard_access.updated",
           beforeRequest.id,
-          { dashboardEnabled: body.dashboardEnabled, noteProvided: Boolean(note) }
+          {
+            dashboardEnabled: body.dashboardEnabled,
+            noteProvided: Boolean(note),
+            ...(auth.principal.type === "DASHBOARD_ADMIN" && auth.principal.adminAccountId
+              ? { adminAccountId: auth.principal.adminAccountId }
+              : {})
+          }
         );
         let request: StreamerRiotIdRequest | undefined;
         try {

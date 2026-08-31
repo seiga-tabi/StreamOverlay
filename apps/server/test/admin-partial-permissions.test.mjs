@@ -248,13 +248,13 @@ test("다른 Store 인스턴스가 계정을 비활성화하면 다음 요청에
   });
 }));
 
-test("실제 감사 repository를 쓰는 서브 계정 resolve는 label을 safe_metadata에 보존한다", () => withTempStore(async (store) => {
+test("서브 계정의 resolve와 dashboard-access 감사 metadata는 안정적인 account ID를 보존한다", () => withTempStore(async (store) => {
   await withAuthConfig(async () => {
     const previousDatabaseEnabled = appConfig.database.enabled;
     appConfig.database.enabled = true;
     try {
-      const token = "sub-account-token-audit-label";
-      store.createAdminAccount({
+      const token = "sub-account-token-audit-id";
+      const account = store.createAdminAccount({
         label: "김운영",
         tokenHash: store.hashAdminToken(token),
         permissions: ["streamer_approval"]
@@ -294,13 +294,34 @@ test("실제 감사 repository를 쓰는 서브 계정 resolve는 label을 safe_
       await handler(resolveRequest, resolveResponse);
       assert.equal(resolveResponse.statusCode, 200, resolveResponse.body);
 
-      const insert = queries.find(({ text }) => text.includes("INSERT INTO admin_audit_logs"));
-      assert.ok(insert);
-      assert.deepEqual(JSON.parse(insert.values[6]), {
-        decision: "approved",
-        noteProvided: false,
-        adminAccountLabel: "김운영"
-      });
+      const dashboardAccessRequest = createRequest(
+        "POST",
+        "/api/participation/streamer-riot-id-requests/dashboard-access",
+        { requestId: pending.id, dashboardEnabled: false },
+        {
+          origin: DASHBOARD_ORIGIN,
+          cookie: cookieHeader(loginResponse.headers["Set-Cookie"]),
+          "x-streamops-csrf": csrfFromLoginBody(loginResponse)
+        }
+      );
+      const dashboardAccessResponse = createResponse();
+      await handler(dashboardAccessRequest, dashboardAccessResponse);
+      assert.equal(dashboardAccessResponse.statusCode, 200, dashboardAccessResponse.body);
+
+      const inserts = queries.filter(({ text }) => text.includes("INSERT INTO admin_audit_logs"));
+      assert.equal(inserts.length, 2);
+      assert.deepEqual(inserts.map((insert) => JSON.parse(insert.values[6])), [
+        {
+          decision: "approved",
+          noteProvided: false,
+          adminAccountId: account.id
+        },
+        {
+          dashboardEnabled: false,
+          noteProvided: false,
+          adminAccountId: account.id
+        }
+      ]);
     } finally {
       appConfig.database.enabled = previousDatabaseEnabled;
     }

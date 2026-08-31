@@ -825,6 +825,61 @@ test("Store는 손상된 tenant·runtime 상태 파일을 후속 변경으로 �
   }
 });
 
+test("admin_accounts 장애는 readiness를 무너뜨리지 않고 상태 전이마다 한 번만 보고한다", () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "streamops-admin-accounts-optional-readiness-"));
+  const filePath = path.join(dir, "admin-accounts.json");
+  const validState = `${JSON.stringify({
+    version: 1,
+    accounts: [{
+      id: "stable-admin-account-id",
+      label: "감사 관리자",
+      tokenHash: "a".repeat(64),
+      permissions: ["streamer_approval"],
+      createdAt: "2026-08-31T00:00:00.000Z"
+    }]
+  })}\n`;
+  const failures = [];
+  try {
+    writeFileSync(filePath, validState, { mode: 0o600 });
+    const store = new Store({
+      adminAccountStatePath: filePath,
+      onPersistenceError(failure) {
+        failures.push(failure);
+      }
+    });
+    assert.deepEqual(store.listActiveAdminAccountIds(), ["stable-admin-account-id"]);
+
+    writeFileSync(filePath, "{ invalid json\n", { mode: 0o600 });
+    store.reloadAdminAccountState();
+    store.reloadAdminAccountState();
+    store.reloadAdminAccountState();
+
+    const failedReadiness = store.getReadiness();
+    assert.equal(failedReadiness.ok, true);
+    assert.equal(failedReadiness.checks.persistenceHealthy, true);
+    assert.equal(failedReadiness.checks.adminAccountsHealthy, false);
+    assert.deepEqual(failedReadiness.errors, []);
+    assert.deepEqual(failedReadiness.warnings, ["admin_accounts:load"]);
+    assert.equal(failedReadiness.loadStates.admin_accounts, "corrupted");
+    assert.deepEqual(store.listActiveAdminAccountIds(), []);
+    assert.equal(failures.length, 1);
+
+    writeFileSync(filePath, validState, { mode: 0o600 });
+    store.reloadAdminAccountState();
+    const recoveredReadiness = store.getReadiness();
+    assert.equal(recoveredReadiness.checks.adminAccountsHealthy, true);
+    assert.deepEqual(recoveredReadiness.warnings, []);
+    assert.deepEqual(store.listActiveAdminAccountIds(), ["stable-admin-account-id"]);
+
+    writeFileSync(filePath, "{ invalid again\n", { mode: 0o600 });
+    store.reloadAdminAccountState();
+    assert.equal(failures.length, 2);
+    assert.deepEqual(store.listActiveAdminAccountIds(), []);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("Store는 빈 파일과 schema 불일치를 손상 상태로 구분하고 정상 domain은 계속 사용할 수 있다", () => {
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-domain-state-schema-"));
   const streamerPath = path.join(dir, "streamer-riot-ids.json");

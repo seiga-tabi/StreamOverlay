@@ -149,9 +149,9 @@ function metadataRecord(
     : action === "discord.bot.response_locale.updated"
       ? ["revision", "preferredLocale", "source"]
       : action === "streamer.riot_id_request.resolved"
-        ? ["decision", "noteProvided", "adminAccountLabel"]
+        ? ["decision", "noteProvided", "adminAccountId"]
         : action === "streamer.dashboard_access.updated"
-          ? ["dashboardEnabled", "noteProvided"]
+          ? ["dashboardEnabled", "noteProvided", "adminAccountId"]
           : [];
   if (exact && !Object.keys(record).every((key) => allowedKeys.includes(key))) return undefined;
 
@@ -175,9 +175,9 @@ function metadataRecord(
     if (typeof record.noteProvided !== "boolean") return undefined;
     metadata.decision = record.decision;
     metadata.noteProvided = record.noteProvided;
-    if (record.adminAccountLabel !== undefined) {
-      if (!boundedNonBlankText(record.adminAccountLabel, 100)) return undefined;
-      metadata.adminAccountLabel = record.adminAccountLabel;
+    if (record.adminAccountId !== undefined) {
+      if (!boundedNonBlankText(record.adminAccountId, 100)) return undefined;
+      metadata.adminAccountId = record.adminAccountId;
     }
   }
   if (action === "streamer.dashboard_access.updated") {
@@ -186,6 +186,10 @@ function metadataRecord(
     }
     metadata.dashboardEnabled = record.dashboardEnabled;
     metadata.noteProvided = record.noteProvided;
+    if (record.adminAccountId !== undefined) {
+      if (!boundedNonBlankText(record.adminAccountId, 100)) return undefined;
+      metadata.adminAccountId = record.adminAccountId;
+    }
   }
   return metadata;
 }
