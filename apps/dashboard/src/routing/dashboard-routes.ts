@@ -1,5 +1,6 @@
 export const DASHBOARD_PAGES = [
   "streamerRiotRequests",
+  "streamerProfiles",
   "events",
   "supportInbox",
   "settings",
@@ -9,6 +10,7 @@ export type Page = (typeof DASHBOARD_PAGES)[number];
 
 export const ADMIN_ALLOWED_PAGES: Page[] = [
   "streamerRiotRequests",
+  "streamerProfiles",
   "events",
   "supportInbox",
   "settings",
@@ -16,6 +18,7 @@ export const ADMIN_ALLOWED_PAGES: Page[] = [
 
 const ADMIN_PAGE_PATHS: Partial<Record<Page, string>> = {
   streamerRiotRequests: "/admin/riot-id-requests",
+  streamerProfiles: "/admin/streamer-profiles",
   events: "/admin/events",
   supportInbox: "/admin/support",
   settings: "/admin/settings",
@@ -42,6 +45,7 @@ export function pageAllowed(page: Page): boolean {
    새 AdminPermission 을 서버에 추가할 때 이 표도 함께 갱신해야 합니다. */
 export const ADMIN_PAGE_PERMISSIONS: Record<Page, readonly string[]> = {
   streamerRiotRequests: ["streamer_approval"],
+  streamerProfiles: ["streamer_profiles:write"],
   events: [],
   supportInbox: [],
   settings: [],

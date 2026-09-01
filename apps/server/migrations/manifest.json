@@ -200,6 +200,14 @@
       "checksumSha256": "30bf4057c6fe4dfb6d318034946e258aa20e8e41bafe583dade2c6e2c53718a3",
       "destructive": false,
       "transaction": true
+    },
+    {
+      "id": "0026_streamer_official_profiles",
+      "file": "0026_streamer_official_profiles.sql",
+      "description": "관리자 등록 스트리머 공식 프로필·고정 URL·비활성 상태 확장",
+      "checksumSha256": "121e30dd1b9f0565a87c27a1958aac976aec5b023b9d8aa7b34c3d15aebc316f",
+      "destructive": false,
+      "transaction": true
     }
   ]
 }

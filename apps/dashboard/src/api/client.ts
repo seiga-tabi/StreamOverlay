@@ -104,6 +104,17 @@ export async function apiPost<T>(path: string, body: unknown): Promise<T> {
   return (await response.json()) as T;
 }
 
+export async function apiPut<T>(path: string, body: unknown): Promise<T> {
+  const response = await fetch(`${API_BASE}${path}`, {
+    method: "PUT",
+    credentials: "include",
+    headers: { "Content-Type": "application/json", ...surfaceHeaders(), ...csrfHeaders() },
+    body: JSON.stringify(body)
+  });
+  if (!response.ok) throw await responseError(path, response);
+  return (await response.json()) as T;
+}
+
 export async function apiDelete<T>(path: string): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
     method: "DELETE",

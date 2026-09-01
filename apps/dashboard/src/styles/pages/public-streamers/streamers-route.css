@@ -385,6 +385,12 @@
     color: #ff8b95;
   }
 
+  .streamers-tag[data-official="true"] {
+    border-color: rgb(245 184 65 / 45%);
+    background: rgb(245 184 65 / 14%);
+    color: #ffd984;
+  }
+
   /* 붉은 틴트 배경 위에서 --streamers-live 는 4.15:1 로 AA 미달이었습니다(실측).
      글자만 밝은 톤으로 올리고 점은 강한 빨강을 유지합니다. */
   .streamers-tag[data-live="true"] {
@@ -677,6 +683,54 @@
     color: var(--streamers-ink);
     font-size: var(--yoro-font-size-xl);
     font-weight: var(--yoro-font-weight-black);
+  }
+
+  .streamers-detail__badges {
+    display: flex;
+    align-items: center;
+    gap: var(--yoro-space-2);
+    flex-wrap: wrap;
+  }
+
+  .streamers-detail__live {
+    display: flex;
+    align-items: center;
+    gap: var(--yoro-space-3);
+    padding: var(--yoro-space-4);
+    border: thin solid var(--streamers-line);
+    border-radius: var(--yoro-radius-md);
+    background: var(--streamers-surface-sunken);
+  }
+
+  .streamers-detail__live > span {
+    width: .75rem;
+    height: .75rem;
+    border-radius: var(--yoro-radius-circle);
+    background: var(--streamers-ink-dim);
+    flex: 0 0 auto;
+  }
+
+  .streamers-detail__live[data-live="true"] {
+    border-color: rgb(247 90 98 / 42%);
+    background: rgb(247 90 98 / 10%);
+  }
+
+  .streamers-detail__live[data-live="true"] > span {
+    background: var(--streamers-live);
+    box-shadow: 0 0 0 .3rem rgb(247 90 98 / 13%);
+  }
+
+  .streamers-detail__live div {
+    display: grid;
+    gap: var(--yoro-space-1);
+  }
+
+  .streamers-detail__live strong { color: var(--streamers-ink); }
+
+  .streamers-detail__live p {
+    margin: 0;
+    color: var(--streamers-ink-soft);
+    font-size: var(--yoro-font-size-sm);
   }
 
   .streamers-detail__profile {
@@ -1038,6 +1092,38 @@
     font-size: var(--yoro-font-size-sm);
     font-weight: var(--yoro-font-weight-medium);
     cursor: pointer;
+  }
+
+  /* 공식 프로필은 밝은 테마에서도 같은 정보 위계를 유지합니다. */
+  .streamers-shell.theme-light .streamers-page-section {
+    --streamers-surface: #fff;
+    --streamers-surface-sunken: #f4f6fa;
+    --streamers-surface-raised: #eef1f6;
+    --streamers-line: rgb(24 32 48 / 16%);
+    --streamers-ink: #172033;
+    --streamers-ink-soft: rgb(23 32 51 / 78%);
+    --streamers-ink-dim: rgb(23 32 51 / 58%);
+    --streamers-accent-soft: #5b42d6;
+  }
+
+  .streamers-shell.theme-light .streamers-detail__profile,
+  .streamers-shell.theme-light .streamers-detail__actions,
+  .streamers-shell.theme-light .streamers-comments__composer,
+  .streamers-shell.theme-light .streamers-share__row,
+  .streamers-shell.theme-light .streamers-report-dialog__reasons label {
+    border-color: var(--streamers-line);
+  }
+
+  .streamers-shell.theme-light .streamers-detail__rate span,
+  .streamers-shell.theme-light .streamers-checkbox,
+  .streamers-shell.theme-light .streamers-report-dialog__reasons label {
+    color: var(--streamers-ink-soft);
+  }
+
+  .streamers-shell.theme-light .streamers-tag[data-official="true"] {
+    border-color: rgb(166 111 0 / 38%);
+    background: rgb(245 184 65 / 20%);
+    color: #765000;
   }
 
   .streamers-report-dialog__actions button[data-danger="true"] {

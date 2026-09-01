@@ -10,6 +10,7 @@ const { DashboardSessionStore } = await import("../dist/security/auth.js");
 const { resetSecurityRateLimiters } = await import("../dist/security/rate-limit.js");
 const { Store } = await import("../dist/services/store.js");
 const { PUBLIC_TWITCH_VIEWER_SESSION_COOKIE } = await import("../dist/services/public-twitch-auth.js");
+const { YORO_SESSION_COOKIE } = await import("../dist/services/yoro-account-service.js");
 
 const DASHBOARD_ORIGIN = "http://localhost:3000";
 const FULL_ADMIN_TOKEN = "full_admin_token_for_twitch_grant_tests_1234567890";
@@ -190,6 +191,19 @@ async function adminStatusWithTwitchLogin(handler) {
   return res;
 }
 
+/* YORO 계정 세션만 들고 관리자 콘솔 status를 확인하는 요청. */
+async function adminStatusWithYoroLogin(handler, sessionCookie = "yoro-session-cookie") {
+  const req = createRequest("GET", "/api/dashboard/auth/status?surface=admin", undefined, {
+    origin: DASHBOARD_ORIGIN,
+    cookie: `${YORO_SESSION_COOKIE}=${sessionCookie}`,
+    "x-streamops-dashboard-surface": "admin"
+  });
+  const res = createResponse();
+  await handler(req, res);
+  assert.equal(res.statusCode, 200, res.body);
+  return res;
+}
+
 async function streamerStatusWithTwitchLogin(handler) {
   const req = createRequest("GET", "/api/dashboard/auth/status?surface=streamer", undefined, {
     origin: DASHBOARD_ORIGIN,
@@ -255,6 +269,62 @@ test("full_admin이 승인된 스트리머에게 grant-admin하면 Twitch 로그
     /* 스트리머 surface는 그대로 streamer 세션 — 두 세션은 공존한다 */
     const streamerStatus = await streamerStatusWithTwitchLogin(handler);
     assert.equal(JSON.parse(streamerStatus.body).role, "streamer");
+  });
+}));
+
+test("YORO 계정 세션의 Twitch identity로도 권한이 제한된 admin 세션이 발급된다", () => withTempStore(async (store) => {
+  await withAuthConfig(async () => {
+    const grantedAccount = store.grantAdminAccountToTwitchUser({
+      twitchUserId: STREAMER_TWITCH_USER_ID,
+      label: "YORO 연결 관리자",
+      permissions: ["streamer_approval"]
+    });
+    const seenCookies = [];
+    let viewerStatusCalls = 0;
+    const { handler } = handlerFor(store, {
+      publicTwitchAuth: {
+        async getStatus() {
+          viewerStatusCalls += 1;
+          return { connected: false, configured: true, requiredScopes: [], missingScopes: [] };
+        }
+      },
+      yoroAccounts: {
+        async twitchUserIdForSession(cookieValue) {
+          seenCookies.push(cookieValue);
+          return STREAMER_TWITCH_USER_ID;
+        }
+      }
+    });
+
+    const statusRes = await adminStatusWithYoroLogin(handler);
+    const statusBody = JSON.parse(statusRes.body);
+    assert.equal(statusBody.authenticated, true);
+    assert.equal(statusBody.role, "admin");
+    assert.deepEqual(statusBody.permissions, ["streamer_approval"]);
+    assert.equal(statusBody.adminAccountId, grantedAccount.id);
+    assert.equal(statusBody.adminAccountLabel, "YORO 연결 관리자");
+    assert.equal(typeof statusBody.csrfToken, "string");
+    assert.match(cookieHeader(statusRes.headers["Set-Cookie"]), /^streamops_admin_session=/u);
+    assert.deepEqual(seenCookies, ["yoro-session-cookie"]);
+    assert.equal(viewerStatusCalls, 0);
+  });
+}));
+
+test("YORO 계정의 Twitch 미연결·관리자 미부여·세션 조회 실패는 안전하게 미인증으로 남는다", () => withTempStore(async (store) => {
+  await withAuthConfig(async () => {
+    for (const result of [undefined, "999000999", new Error("session lookup failed")]) {
+      const { handler } = handlerFor(store, {
+        yoroAccounts: {
+          async twitchUserIdForSession() {
+            if (result instanceof Error) throw result;
+            return result;
+          }
+        }
+      });
+      const statusRes = await adminStatusWithYoroLogin(handler);
+      assert.equal(JSON.parse(statusRes.body).authenticated, false);
+      assert.equal(statusRes.headers["Set-Cookie"], undefined);
+    }
   });
 }));
 

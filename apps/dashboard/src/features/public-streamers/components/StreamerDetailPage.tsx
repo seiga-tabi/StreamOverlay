@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import {
   createStreamerComment,
+  fetchStreamerOfficialProfile,
   fetchStreamerPost,
   reportStreamerComment,
   voteStreamerPost,
   type StreamerReportReason,
 } from "../api/streamers";
 import { formatStreamersText, type StreamersText } from "../i18n/streamers-i18n";
-import type { StreamerGame, StreamerPostDetail } from "../types/streamer-post";
-import { setStreamersUrl, streamerPostPath, streamersHref, streamersPathForPage } from "../utils/routes";
+import type { StreamerGame, StreamerPost, StreamerPostDetail } from "../types/streamer-post";
+import { setStreamersUrl, streamerOfficialProfilePath, streamerPostPath, streamersHref, streamersPathForPage, type StreamerOfficialRoute } from "../utils/routes";
 import { StreamerAvatar } from "./StreamerAvatar";
 
 type LoadState = "loading" | "ready" | "error";
@@ -18,6 +19,12 @@ const GAME_LABEL_KEYS: Record<StreamerGame, keyof StreamersText> = {
   valorant: "scopeValorant",
   palworld: "scopePalworld",
   minecraft: "scopeMinecraft",
+};
+
+const PLATFORM_LABEL_KEYS: Record<StreamerPost["platform"], keyof StreamersText> = {
+  twitch: "filterTwitch",
+  chzzk: "filterChzzk",
+  youtube: "filterYoutube",
 };
 
 const REPORT_REASONS: Array<{ value: StreamerReportReason; key: keyof StreamersText }> = [
@@ -32,12 +39,14 @@ export function StreamerDetailPage({
   onLogin,
   onTitle,
   postId,
+  officialProfile,
   text,
 }: {
   canPost: boolean;
   onLogin: () => void;
   onTitle: (title: string | undefined) => void;
-  postId: string;
+  postId?: string;
+  officialProfile?: StreamerOfficialRoute;
   text: StreamersText;
 }) {
   const [state, setState] = useState<LoadState>("loading");
@@ -56,7 +65,11 @@ export function StreamerDetailPage({
     setState("loading");
     void (async () => {
       try {
-        const result = await fetchStreamerPost(postId, controller.signal);
+        const result = officialProfile
+          ? await fetchStreamerOfficialProfile(officialProfile.platform, officialProfile.seoSlug, controller.signal)
+          : postId
+            ? await fetchStreamerPost(postId, controller.signal)
+            : { ok: false as const, reason: "not_ready" as const };
         if (controller.signal.aborted) return;
         if (!result.ok) {
           setState("error");
@@ -71,14 +84,15 @@ export function StreamerDetailPage({
       }
     })();
     return () => controller.abort();
-  }, [onTitle, postId, reloadToken]);
+  }, [officialProfile?.platform, officialProfile?.seoSlug, onTitle, postId, reloadToken]);
 
   const reload = () => setReloadToken((token) => token + 1);
 
   const submitComment = async () => {
     const body = commentBody.trim();
-    if (!body) return;
-    const result = await createStreamerComment(postId, { body, anonymous });
+    const targetPostId = detail?.post.id;
+    if (!body || !targetPostId) return;
+    const result = await createStreamerComment(targetPostId, { body, anonymous });
     if (result.ok) {
       setCommentBody("");
       reload();
@@ -88,8 +102,9 @@ export function StreamerDetailPage({
   };
 
   const submitReport = async () => {
-    if (!reportTarget) return;
-    const result = await reportStreamerComment(postId, reportTarget, reportReason);
+    const targetPostId = detail?.post.id;
+    if (!reportTarget || !targetPostId) return;
+    const result = await reportStreamerComment(targetPostId, reportTarget, reportReason);
     setReportTarget(undefined);
     setNotice(result.ok
       ? text.reportOnce
@@ -98,7 +113,10 @@ export function StreamerDetailPage({
 
   /* X 로 나가는 주소 — 받는 사람은 이 링크만 보고 들어옵니다. 일본어 화면에서
      공유했으면 일본어 페이지로 열려야 하고, 크롤러가 읽는 OG 도 그 로케일입니다. */
-  const shareUrl = new URL(streamersHref(streamerPostPath(postId)), window.location.origin).href;
+  const detailPath = officialProfile
+    ? streamerOfficialProfilePath(officialProfile.platform, officialProfile.seoSlug)
+    : postId ? streamerPostPath(postId) : streamersPathForPage("list");
+  const shareUrl = new URL(streamersHref(detailPath), window.location.origin).href;
 
   const copyLink = async () => {
     try {
@@ -142,6 +160,10 @@ export function StreamerDetailPage({
           />
           <div>
             <h1>{post.streamerName}</h1>
+            <div className="streamers-detail__badges">
+              <span className="streamers-tag" data-platform={post.platform}>{text[PLATFORM_LABEL_KEYS[post.platform]]}</span>
+              {post.registeredByAdmin ? <span className="streamers-tag" data-official="true">{text.officialBadge}</span> : null}
+            </div>
             <div className="streamers-card__chips">
               {post.games.map((game) => (
                 <span className="streamers-chip" data-game={game} key={game}><i aria-hidden="true" />{text[GAME_LABEL_KEYS[game]]}</span>
@@ -157,6 +179,16 @@ export function StreamerDetailPage({
             <button className="streamers-primary-action" onClick={onLogin} type="button">{text.loginWithTwitch}</button>
           )}
         </header>
+
+        {post.officialProfile?.liveStatusSupported ? (
+          <section className="streamers-detail__live" data-live={post.live}>
+            <span aria-hidden="true" />
+            <div>
+              <strong>{post.live ? text.liveNow : text.liveOffline}</strong>
+              <p>{post.live ? text.liveNowBody : text.liveOfflineBody}</p>
+            </div>
+          </section>
+        ) : null}
 
         {lol ? (
           <section className="streamers-detail__profile">

@@ -3,7 +3,7 @@ import "../styles/pages/public-streamers/streamers-route.css";
 import { AppShell, AppShellHeader, AppShellMain } from "../shared/ui/AppShell";
 import { usePublicLocale } from "../features/public-lol/hooks/usePublicLocale";
 import { usePublicTheme } from "../features/public-lol/hooks/usePublicTheme";
-import { publicContentLocale, setActivePublicLocale } from "../features/public-lol/i18n/public-lol-i18n";
+import { setActivePublicLocale } from "../features/public-lol/i18n/public-lol-i18n";
 import { usePublicAccountLogin } from "../shared/public-account-login";
 import { StreamersHeader } from "../features/public-streamers/components/StreamersHeader";
 import { StreamerComposePage } from "../features/public-streamers/components/StreamerComposePage";
@@ -13,7 +13,7 @@ import { usePublicViewerTwitch } from "../features/public-streamers/hooks/usePub
 import { useStreamersRoute } from "../features/public-streamers/hooks/useStreamersRoute";
 import { streamersI18n, type StreamersLocale } from "../features/public-streamers/i18n/streamers-i18n";
 import { applyStreamersSeo } from "../features/public-streamers/utils/seo";
-import { setStreamersUrl, streamersPathForPage } from "../features/public-streamers/utils/routes";
+import { setStreamersUrl, streamerOfficialProfilePath, streamersPathForPage } from "../features/public-streamers/utils/routes";
 
 const noServerLocalePreference = async (): Promise<StreamersLocale | undefined> => undefined;
 
@@ -21,10 +21,9 @@ const noServerLocalePreference = async (): Promise<StreamersLocale | undefined> 
  * 근거: docs/mockups/streamer-board. 미니게임 셸 패턴 복제. */
 export function PublicStreamersPage() {
   const { locale: rawLocale, changeLocale } = usePublicLocale(noServerLocalePreference);
-  /* en 콘텐츠는 아직 팰월드만 있습니다 — 그 외는 ko 폴백. */
-  const locale = publicContentLocale(rawLocale);
+  const locale = rawLocale;
   const { theme } = usePublicTheme();
-  const { page, postId, scope } = useStreamersRoute();
+  const { page, postId, officialProfile, scope } = useStreamersRoute();
   const viewerTwitch = usePublicViewerTwitch();
   /* 글·댓글·신고를 쓸 수 있는 기준은 "공개 페이지에 로그인돼 있는가" 입니다.
      계정 세션만 보면 LoL 화면에서 Twitch 로 로그인한 사람이 여기서만 비로그인으로
@@ -41,8 +40,15 @@ export function PublicStreamersPage() {
   setActivePublicLocale(locale);
 
   useEffect(
-    () => applyStreamersSeo(page ?? "list", locale, postTitle, postId ?? undefined),
-    [locale, page, postId, postTitle],
+    () => applyStreamersSeo(
+      page ?? "list",
+      locale,
+      postTitle,
+      officialProfile
+        ? streamerOfficialProfilePath(officialProfile.platform, officialProfile.seoSlug)
+        : postId ?? undefined,
+    ),
+    [locale, officialProfile?.platform, officialProfile?.seoSlug, page, postId, postTitle],
   );
 
   const handleLocale = useCallback((nextLocale: StreamersLocale) => {
@@ -73,12 +79,13 @@ export function PublicStreamersPage() {
           {page === "list" ? (
             <StreamerListPage canPost={accountConnected} onLogin={loginWithTwitch} scope={scope} text={text} />
           ) : null}
-          {page === "detail" && postId ? (
+          {page === "detail" && (postId || officialProfile) ? (
             <StreamerDetailPage
               canPost={accountConnected}
               onLogin={loginWithTwitch}
               onTitle={setPostTitle}
-              postId={postId}
+              {...(postId ? { postId } : {})}
+              {...(officialProfile ? { officialProfile } : {})}
               text={text}
             />
           ) : null}

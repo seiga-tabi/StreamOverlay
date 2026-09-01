@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   STREAMERS_ROUTE_EVENT,
   streamerPostIdFromPath,
+  streamerOfficialProfileFromPath,
   streamerScopeFromSearch,
   streamersPageFromPath,
 } from "../utils/routes";
@@ -22,6 +23,7 @@ export function useStreamersRoute() {
   return {
     page: streamersPageFromPath(window.location.pathname),
     postId: streamerPostIdFromPath(window.location.pathname),
+    officialProfile: streamerOfficialProfileFromPath(window.location.pathname),
     scope: streamerScopeFromSearch(window.location.search),
     locationRevision,
   };

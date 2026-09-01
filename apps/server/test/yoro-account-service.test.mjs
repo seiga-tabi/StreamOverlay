@@ -197,6 +197,95 @@ test("Riot RSO 연결 가능 상태는 오래된 Twitch 인증에도 재인증�
   });
 });
 
+test("관리자 승격용 Twitch identity 조회는 credential 없이 providerSubject만 반환한다", async () => {
+  const userId = "22222222-2222-4222-8222-222222222222";
+  const sessionToken = "session_value_abcdefghijklmnopqrstuvwxyz123456";
+  const csrfToken = "csrf_value_abcdefghijklmnopqrstuvwxyz123456";
+  const twitchUserId = "777000777";
+  const crypto = await import("node:crypto");
+  const csrfHash = crypto.createHash("sha256").update(csrfToken).digest();
+  const queries = [];
+  const pool = {
+    async query(text) {
+      queries.push(text);
+      if (text.includes("UPDATE yoro_sessions session")) {
+        return { rows: [{
+          id: "11111111-1111-4111-8111-111111111111",
+          user_id: userId,
+          csrf_token_hash: csrfHash,
+          authentication_provider: "twitch",
+          authenticated_at: new Date()
+        }] };
+      }
+      if (text.includes("FROM external_identities identity")) {
+        return { rows: [{
+          user_id: userId,
+          provider: "twitch",
+          provider_subject: twitchUserId,
+          display_name: "Twitch 사용자",
+          avatar_reference: null,
+          connected_at: new Date("2026-08-10T00:00:00.000Z"),
+          last_authenticated_at: new Date("2026-08-10T00:00:00.000Z"),
+          valorant_record_consent: false
+        }] };
+      }
+      throw new Error(`unexpected query: ${text}`);
+    }
+  };
+  const service = new YoroAccountService(pool);
+
+  assert.equal(
+    await service.twitchUserIdForSession(`${sessionToken}.${csrfToken}`),
+    twitchUserId
+  );
+  assert.equal(
+    queries.some((query) => query.includes("yoro_twitch_viewer_credentials")),
+    false
+  );
+});
+
+test("관리자 승격용 Twitch identity 조회는 최근 Twitch 직접 인증만 허용한다", async () => {
+  const sessionToken = "session_value_abcdefghijklmnopqrstuvwxyz123456";
+  const csrfToken = "csrf_value_abcdefghijklmnopqrstuvwxyz123456";
+  const crypto = await import("node:crypto");
+  const csrfHash = crypto.createHash("sha256").update(csrfToken).digest();
+
+  for (const session of [
+    { authenticationProvider: "discord", authenticatedAt: new Date() },
+    {
+      authenticationProvider: "twitch",
+      authenticatedAt: new Date(Date.now() - 16 * 60 * 1_000)
+    }
+  ]) {
+    let identityLookupCount = 0;
+    const pool = {
+      async query(text) {
+        if (text.includes("UPDATE yoro_sessions session")) {
+          return { rows: [{
+            id: "11111111-1111-4111-8111-111111111111",
+            user_id: "22222222-2222-4222-8222-222222222222",
+            csrf_token_hash: csrfHash,
+            authentication_provider: session.authenticationProvider,
+            authenticated_at: session.authenticatedAt
+          }] };
+        }
+        if (text.includes("FROM external_identities identity")) {
+          identityLookupCount += 1;
+          return { rows: [] };
+        }
+        throw new Error(`unexpected query: ${text}`);
+      }
+    };
+    const service = new YoroAccountService(pool);
+
+    assert.equal(
+      await service.twitchUserIdForSession(`${sessionToken}.${csrfToken}`),
+      undefined
+    );
+    assert.equal(identityLookupCount, 0);
+  }
+});
+
 test("Riot RSO callback은 동일 Twitch session과 /accounts/me를 확인한 뒤 token을 폐기한다", async () => {
   await withRiotRsoConfig(async () => {
     const userId = "22222222-2222-4222-8222-222222222222";

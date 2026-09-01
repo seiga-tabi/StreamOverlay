@@ -651,6 +651,22 @@ export class YoroAccountService {
     };
   }
 
+  /** 최근 Twitch 직접 인증 세션에 연결된 Twitch identity의 twitchUserId만 반환합니다.
+      관리자 승격 판정 전용이며 Twitch credential은 조회하지 않습니다. */
+  async twitchUserIdForSession(cookieValue?: string): Promise<string | undefined> {
+    const authenticated = await this.authenticate(cookieValue);
+    if (!authenticated) return undefined;
+    if (
+      authenticated.authenticationProvider !== "twitch"
+      || Date.now() - authenticated.authenticatedAt.getTime()
+        > RECENT_AUTHENTICATION_MS
+    ) return undefined;
+    const identities = await new YoroAccountRepository(this.pool).listIdentities(
+      authenticated.userId
+    );
+    return identities.find((identity) => identity.provider === "twitch")?.providerSubject;
+  }
+
   async updatePreferences(input: {
     sessionCookie?: string;
     csrfToken?: string;

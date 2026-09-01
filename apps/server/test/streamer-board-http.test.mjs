@@ -1,5 +1,8 @@
 import test, { after, before } from "node:test";
 import assert from "node:assert/strict";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 
 /* 스트리머 추천 게시판 API 계약 — 계약 원본 packages/shared/src/streamer-board.ts.
  *
@@ -14,6 +17,11 @@ const { createHttpHandler } = await import("../dist/routes/http-api.js");
 const { appConfig } = await import("../dist/config.js");
 const { requiredHttpPrincipal } = await import("../dist/security/auth.js");
 const { StreamerChannelTakenError } = await import("../dist/database/repositories/streamer-board-repository.js");
+const { SafeDatabaseError } = await import("../dist/database/errors.js");
+const { DashboardSessionStore } = await import("../dist/security/auth.js");
+const { resetSecurityRateLimiters } = await import("../dist/security/rate-limit.js");
+const { Store } = await import("../dist/services/store.js");
+const { PUBLIC_TWITCH_VIEWER_SESSION_COOKIE } = await import("../dist/services/public-twitch-auth.js");
 
 const previousAuthConfig = {
   localNoAuth: appConfig.security.localNoAuth,
@@ -46,6 +54,15 @@ const POST = {
   commentCount: 1,
   authorName: "쿠키맛젤리",
   createdAt: "2026-08-19T00:00:00.000Z",
+  registeredByAdmin: false,
+  active: true,
+};
+
+const OFFICIAL_POST = {
+  ...POST,
+  id: "official-bamtol",
+  registeredByAdmin: true,
+  officialProfile: { handle: "bamtol", seoSlug: "bamtol", liveStatusSupported: true },
 };
 
 function createRequest(method, url, body, headers = {}) {
@@ -54,6 +71,7 @@ function createRequest(method, url, body, headers = {}) {
     method,
     url,
     headers: { origin: TRUSTED_ORIGIN, "content-type": "application/json", ...headers },
+    socket: { remoteAddress: "127.0.0.1" },
     async *[Symbol.asyncIterator]() {
       if (payload) yield Buffer.from(payload);
     },
@@ -98,6 +116,30 @@ function fakeBoard(overrides = {}) {
     async findPost(postId, viewer) {
       this.calls.push(["findPost", postId, viewer]);
       return postId === POST.id ? POST : undefined;
+    },
+    async findOfficialProfile(platform, seoSlug, viewer) {
+      this.calls.push(["findOfficialProfile", platform, seoSlug, viewer]);
+      return platform === "twitch" && seoSlug === "bamtol" ? OFFICIAL_POST : undefined;
+    },
+    async listOfficialProfiles() {
+      this.calls.push(["listOfficialProfiles"]);
+      return [OFFICIAL_POST];
+    },
+    async createOfficialProfile(draft) {
+      this.calls.push(["createOfficialProfile", draft]);
+      return { ...OFFICIAL_POST, ...draft, officialProfile: draft.officialProfile };
+    },
+    async updateOfficialProfile(postId, draft) {
+      this.calls.push(["updateOfficialProfile", postId, draft]);
+      return postId === OFFICIAL_POST.id ? { ...OFFICIAL_POST, ...draft } : undefined;
+    },
+    async deactivateOfficialProfile(postId) {
+      this.calls.push(["deactivateOfficialProfile", postId]);
+      return postId === OFFICIAL_POST.id ? { ...OFFICIAL_POST, active: false } : undefined;
+    },
+    async reactivateOfficialProfile(postId) {
+      this.calls.push(["reactivateOfficialProfile", postId]);
+      return postId === OFFICIAL_POST.id ? { ...OFFICIAL_POST, active: true } : undefined;
     },
     async comments() {
       return [
@@ -159,10 +201,55 @@ test("게시판 경로는 공개로 통과시키고 세션 검사는 라우트�
   assert.equal(requiredHttpPrincipal("GET", "/api/public/streamers"), "PUBLIC");
   assert.equal(requiredHttpPrincipal("POST", "/api/public/streamers"), "PUBLIC");
   assert.equal(requiredHttpPrincipal("GET", "/api/public/streamers/bamtol"), "PUBLIC");
+  assert.equal(requiredHttpPrincipal("GET", "/api/public/streamers/profile/twitch/bamtol"), "PUBLIC");
   assert.equal(requiredHttpPrincipal("POST", "/api/public/streamers/bamtol/vote"), "PUBLIC");
   assert.equal(requiredHttpPrincipal("POST", "/api/public/streamers/bamtol/comments/c1/report"), "PUBLIC");
   /* 경로 모양이 다르면 공개 대상이 아닙니다. */
   assert.notEqual(requiredHttpPrincipal("GET", "/api/public/streamers/BAMTOL!/secret"), "PUBLIC");
+});
+
+test("공식 프로필 고정 URL API는 관리자 등록 메타데이터와 기존 댓글을 함께 돌려준다", async () => {
+  const { handler, board } = handlerWith();
+  const result = await call(handler, "GET", "/api/public/streamers/profile/twitch/bamtol");
+  assert.equal(result.status, 200);
+  assert.equal(result.json.post.registeredByAdmin, true);
+  assert.deepEqual(result.json.post.officialProfile, OFFICIAL_POST.officialProfile);
+  assert.equal(result.json.post.channelUrl, POST.channelUrl, "공식 프로필 채널은 비로그인에도 공개됩니다");
+  assert.equal(result.json.comments.length, 2);
+  assert.ok(board.calls.some(([name]) => name === "findOfficialProfile"));
+});
+
+test("관리자 공식 프로필 API는 생성·수정·비활성화를 지원하고 플랫폼별 라이브 정책을 강제한다", async () => {
+  const { handler, board } = handlerWith();
+  const listed = await call(handler, "GET", "/api/dashboard/streamer-profiles");
+  assert.equal(listed.status, 200);
+  assert.equal(listed.json.profiles.length, 1);
+
+  const created = await call(handler, "POST", "/api/dashboard/streamer-profiles", {
+    streamerName: "한겨울",
+    platform: "chzzk",
+    handle: "Hangyeoul",
+    games: ["palworld"],
+    liveStatusSupported: true,
+  });
+  assert.equal(created.status, 201);
+  const createCall = board.calls.find(([name]) => name === "createOfficialProfile");
+  assert.equal(createCall[1].channelKey, "chzzk:hangyeoul");
+  assert.equal(createCall[1].officialProfile.seoSlug, "hangyeoul");
+  assert.equal(createCall[1].officialProfile.liveStatusSupported, false, "치지직은 요청값과 무관하게 false입니다");
+
+  const updated = await call(handler, "PUT", `/api/dashboard/streamer-profiles/${OFFICIAL_POST.id}`, {
+    streamerName: "밤톨 새 이름",
+    platform: "twitch",
+    handle: "BamTol",
+    games: ["lol"],
+  });
+  assert.equal(updated.status, 200);
+  assert.equal(board.calls.find(([name]) => name === "updateOfficialProfile")[2].officialProfile.liveStatusSupported, true);
+
+  const deactivated = await call(handler, "DELETE", `/api/dashboard/streamer-profiles/${OFFICIAL_POST.id}`);
+  assert.equal(deactivated.status, 200);
+  assert.equal(deactivated.json.profile.active, false);
 });
 
 test("비로그인 목록은 게임 표기를 주고 채널 주소만 가린다", async () => {

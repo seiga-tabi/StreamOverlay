@@ -1,6 +1,6 @@
 import { formatStreamersText, type StreamersText } from "../i18n/streamers-i18n";
 import type { StreamerGame, StreamerPost } from "../types/streamer-post";
-import { setStreamersUrl, streamerPostPath, streamersHref } from "../utils/routes";
+import { setStreamersUrl, streamerOfficialProfilePath, streamerPostPath, streamersHref } from "../utils/routes";
 import { StreamerAvatar } from "./StreamerAvatar";
 
 const GAME_LABEL_KEYS: Record<StreamerGame, keyof StreamersText> = {
@@ -19,6 +19,9 @@ const PLATFORM_LABEL_KEYS: Record<StreamerPost["platform"], keyof StreamersText>
 /** 채널 주소는 로그인 뒤에만 옵니다 — 없으면 잠금 줄로 닫습니다(빈 자리 금지). */
 export function StreamerPostCard({ post, text }: { post: StreamerPost; text: StreamersText }) {
   const lol = post.lolProfile;
+  const detailPath = post.officialProfile
+    ? streamerOfficialProfilePath(post.platform, post.officialProfile.seoSlug)
+    : streamerPostPath(post.id);
   return (
     <article className="streamers-card">
       <div className="streamers-card__votes">
@@ -37,17 +40,18 @@ export function StreamerPostCard({ post, text }: { post: StreamerPost; text: Str
         <div className="streamers-card__title">
           <h2>
             <a
-              href={streamersHref(streamerPostPath(post.id))}
+              href={streamersHref(detailPath)}
               onClick={(event) => {
                 if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
                 event.preventDefault();
-                setStreamersUrl(streamerPostPath(post.id));
+                setStreamersUrl(detailPath);
               }}
             >
               {post.streamerName}
             </a>
           </h2>
           <span className="streamers-tag" data-platform={post.platform}>{text[PLATFORM_LABEL_KEYS[post.platform]]}</span>
+          {post.registeredByAdmin ? <span className="streamers-tag" data-official="true">{text.officialBadge}</span> : null}
           {post.live ? <span className="streamers-tag" data-live="true">{text.live}</span> : null}
         </div>
 

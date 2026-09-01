@@ -2,6 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   isStreamersPath,
+  streamerOfficialProfileFromPath,
+  streamerOfficialProfilePath,
   streamerPostIdFromPath,
   streamerScopeFromSearch,
   streamersPageFromPath,
@@ -19,7 +21,12 @@ test("경로는 목록·상세·글쓰기만 인식하고 나머지는 404 로 �
   assert.equal(streamersPageFromPath("/ko/streamers/"), "list");
   assert.equal(streamersPageFromPath("/ja/streamers/new"), "compose");
   assert.equal(streamersPageFromPath("/streamers/bamtol"), "detail");
+  assert.equal(streamersPageFromPath("/streamers/post/bamtol"), "detail");
+  assert.equal(streamersPageFromPath("/en/streamers/twitch/BamTol"), "detail");
   assert.equal(streamerPostIdFromPath("/ko/streamers/bamtol"), "bamtol");
+  assert.equal(streamerPostIdFromPath("/ko/streamers/post/bamtol"), "bamtol");
+  assert.deepEqual(streamerOfficialProfileFromPath("/en/streamers/twitch/BamTol"), { platform: "twitch", seoSlug: "bamtol" });
+  assert.equal(streamerOfficialProfilePath("youtube", "UCabcDEF0123"), "/streamers/youtube/UCabcDEF0123");
   /* 글쓰기 경로가 글 id 로 잡히면 상세가 되어 버립니다. */
   assert.equal(streamerPostIdFromPath("/streamers/new"), null);
   /* 조작된 경로를 그대로 조회에 넘기지 않습니다. */
@@ -93,6 +100,30 @@ test("프로필 이미지는 Twitch 글의 같은 origin 경로만 쓴다", () =
   ]) {
     assert.equal(parseStreamerPost({ ...basePost, profileImageUrl: outside })?.profileImageUrl, undefined, outside);
   }
+});
+
+test("공식 프로필 조각은 안전하게 파싱하고 실시간 미지원 플랫폼 값을 강제로 끈다", () => {
+  const twitch = parseStreamerPost({
+    ...basePost,
+    registeredByAdmin: true,
+    officialProfile: { handle: "bamtol", seoSlug: "bamtol", liveStatusSupported: true },
+  });
+  assert.equal(twitch?.registeredByAdmin, true);
+  assert.equal(twitch?.officialProfile?.liveStatusSupported, true);
+
+  const chzzk = parseStreamerPost({
+    ...basePost,
+    platform: "chzzk",
+    registeredByAdmin: true,
+    officialProfile: { handle: "hangyeoul", seoSlug: "hangyeoul", liveStatusSupported: true },
+  });
+  assert.equal(chzzk?.officialProfile?.liveStatusSupported, false);
+  assert.equal(chzzk?.live, false, "치지직은 조작된 live=true도 렌더링하지 않습니다");
+
+  const malformed = parseStreamerPost({ ...basePost, registeredByAdmin: true, officialProfile: { handle: "bad/path" } });
+  assert.ok(malformed, "공식 프로필 조각이 깨져도 게시글은 유지합니다");
+  assert.equal(malformed?.registeredByAdmin, false);
+  assert.equal(malformed?.officialProfile, undefined);
 });
 
 test("전적 프로필은 리그 오브 레전드 글에만 붙는다", () => {
@@ -211,10 +242,10 @@ test("채널을 가리키지 않는 값은 키가 없다", () => {
 test("글 상세 경로는 로케일이 붙는 경로다", () => {
   /* 여기 빠져 있으면 ja 화면에서 글을 열어도 /streamers/<id> 로 가서 로케일이
      통째로 떨어집니다 — 목록·글쓰기는 정확 목록에 있어 멀쩡한 탓에 늦게 드러납니다. */
-  assert.equal(isLocalizablePublicPath("/streamers/bamtol"), true);
-  assert.equal(isLocalizablePublicPath("/ja/streamers/bamtol"), true);
-  assert.equal(localizedPublicUrl("/streamers/bamtol", "ja"), "/ja/streamers/bamtol");
-  assert.equal(localizedPublicUrl("/ja/streamers/bamtol", "ko"), "/ko/streamers/bamtol");
+  assert.equal(isLocalizablePublicPath("/streamers/post/bamtol"), true);
+  assert.equal(isLocalizablePublicPath("/ja/streamers/twitch/bamtol"), true);
+  assert.equal(localizedPublicUrl("/streamers/post/bamtol", "ja"), "/ja/streamers/post/bamtol");
+  assert.equal(localizedPublicUrl("/ja/streamers/twitch/bamtol", "en"), "/en/streamers/twitch/bamtol");
   assert.equal(localizedPublicUrl("/streamers", "ja"), "/ja/streamers");
   assert.equal(localizedPublicUrl("/streamers?game=lol", "ja"), "/ja/streamers?game=lol");
 });
@@ -223,7 +254,11 @@ test("canonical 은 그 화면의 주소를 가리킨다", () => {
   /* 글 상세가 목록을 가리키면 크롤러는 모든 글을 목록의 중복으로 보고 내립니다. */
   assert.equal(
     streamersSeoMetadata("detail", "ja", "밤톨", "bamtol").canonicalUrl,
-    "https://yoro.gg/ja/streamers/bamtol",
+    "https://yoro.gg/ja/streamers/post/bamtol",
+  );
+  assert.equal(
+    streamersSeoMetadata("detail", "en", "Bamtol", "/streamers/twitch/bamtol").canonicalUrl,
+    "https://yoro.gg/en/streamers/twitch/bamtol",
   );
   assert.equal(streamersSeoMetadata("list", "ja").canonicalUrl, "https://yoro.gg/ja/streamers");
   assert.equal(streamersSeoMetadata("compose", "ko").canonicalUrl, "https://yoro.gg/ko/streamers/new");

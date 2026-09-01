@@ -76,6 +76,10 @@ const StreamerRiotRequestsPage = lazyNamed(
   () => import("./pages/StreamerRiotRequestsPage"),
   "StreamerRiotRequestsPage",
 );
+const StreamerProfilesPage = lazyNamed(
+  () => import("./pages/StreamerProfilesPage"),
+  "StreamerProfilesPage",
+);
 const SettingsPage = lazyNamed(() => import("./pages/SettingsPage"), "SettingsPage");
 const SupportInboxPage = lazyNamed(() => import("./pages/SupportInboxPage"), "SupportInboxPage");
 
@@ -446,6 +450,7 @@ export default function App() {
         {page === "streamerRiotRequests" ? (
           <StreamerRiotRequestsPage snapshot={snapshot} permissions={adminPermissions} />
         ) : null}
+        {page === "streamerProfiles" ? <StreamerProfilesPage /> : null}
         {page === "supportInbox" ? <SupportInboxPage /> : null}
         {page === "settings" ? <SettingsPage /> : null}
       </Suspense>

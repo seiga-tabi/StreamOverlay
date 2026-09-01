@@ -30,6 +30,7 @@ export const STREAMER_TAG_MAX = 24;
 export const STREAMER_TAGS_MAX = 4;
 export const STREAMER_COMMENT_MAX = 600;
 export const STREAMER_SEARCH_MAX = 60;
+export const STREAMER_HANDLE_MAX = 80;
 /** 목록 한 번에 내려주는 최대 글 수. */
 export const STREAMER_LIST_LIMIT = 60;
 
@@ -128,6 +129,69 @@ export function streamerCanonicalChannelUrl(channelKey: string): string | undefi
   return /^UC[A-Za-z0-9_-]{10,}$/u.test(handle)
     ? `https://www.youtube.com/channel/${encoded}`
     : `https://www.youtube.com/@${encoded}`;
+}
+
+export type StreamerOfficialProfile = {
+  handle: string;
+  seoSlug: string;
+  liveStatusSupported: boolean;
+};
+
+export type StreamerOfficialProfileDraft = {
+  streamerName: string;
+  platform: StreamerPlatform;
+  channelKey: string;
+  channelUrl: string;
+  games: readonly StreamerGame[];
+  officialProfile: StreamerOfficialProfile;
+};
+
+/** 관리자 입력의 플랫폼·핸들을 기존 채널 URL 정규화 규칙으로 검증합니다. */
+export function streamerOfficialChannelKey(
+  platform: StreamerPlatform,
+  handle: string
+): string | undefined {
+  const normalizedHandle = boundedText(handle, STREAMER_HANDLE_MAX);
+  if (!normalizedHandle || normalizedHandle.includes("/")) return undefined;
+  const candidate = platform === "twitch"
+    ? `https://www.twitch.tv/${encodeURIComponent(normalizedHandle)}`
+    : platform === "chzzk"
+      ? `https://chzzk.naver.com/${encodeURIComponent(normalizedHandle)}`
+      : /^UC[A-Za-z0-9_-]{10,}$/u.test(normalizedHandle)
+        ? `https://www.youtube.com/channel/${encodeURIComponent(normalizedHandle)}`
+        : `https://www.youtube.com/@${encodeURIComponent(normalizedHandle.replace(/^@/u, ""))}`;
+  const channelKey = streamerChannelKey(candidate);
+  return streamerPlatformFromChannelKey(channelKey ?? "") === platform ? channelKey : undefined;
+}
+
+/** 공식 프로필 생성·수정 요청. 라이브 연동은 1차 범위에서 Twitch만 허용합니다. */
+export function parseStreamerOfficialProfileDraft(value: unknown): StreamerOfficialProfileDraft | undefined {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return undefined;
+  const body = value as Record<string, unknown>;
+  const streamerName = boundedText(body.streamerName, STREAMER_NAME_MAX);
+  const platform = STREAMER_PLATFORMS.find((candidate) => candidate === body.platform);
+  const handleInput = boundedText(body.handle, STREAMER_HANDLE_MAX);
+  if (!streamerName || !platform || !handleInput) return undefined;
+  const channelKey = streamerOfficialChannelKey(platform, handleInput);
+  const channelUrl = channelKey ? streamerCanonicalChannelUrl(channelKey) : undefined;
+  const handle = channelKey ? streamerChannelHandle(channelKey) : undefined;
+  if (!channelKey || !channelUrl || !handle) return undefined;
+  if (!Array.isArray(body.games)) return undefined;
+  const games = STREAMER_GAMES.filter((game) => (body.games as unknown[]).includes(game));
+  if (games.length === 0) return undefined;
+  return {
+    streamerName,
+    platform,
+    channelKey,
+    channelUrl,
+    games,
+    officialProfile: {
+      handle,
+      seoSlug: handle,
+      /* YouTube 라이브 감지는 이번 1차 범위에서 비활성입니다. */
+      liveStatusSupported: platform === "twitch"
+    }
+  };
 }
 
 export type StreamerPostDraft = {

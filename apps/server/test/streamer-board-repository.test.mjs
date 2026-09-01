@@ -25,10 +25,8 @@ if (!DATABASE_URL) {
   const { StreamerBoardRepository, StreamerChannelTakenError } =
     await import("../dist/database/repositories/streamer-board-repository.js");
 
-  const migration = await readFile(
-    fileURLToPath(new URL("../migrations/0024_streamer_board.sql", import.meta.url)),
-    "utf8"
-  );
+  const migration = await readFile(fileURLToPath(new URL("../migrations/0024_streamer_board.sql", import.meta.url)), "utf8");
+  const officialProfilesMigration = await readFile(fileURLToPath(new URL("../migrations/0026_streamer_official_profiles.sql", import.meta.url)), "utf8");
 
   const pool = new Pool({ connectionString: DATABASE_URL });
   const board = new StreamerBoardRepository(pool);
@@ -52,6 +50,7 @@ if (!DATABASE_URL) {
 
   test.before(async () => {
     await pool.query(migration);
+    await pool.query(officialProfilesMigration);
   });
 
   test.after(async () => {

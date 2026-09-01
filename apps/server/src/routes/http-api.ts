@@ -169,15 +169,21 @@ import type { TwitchExtensionSettingsRepository } from "../database/repositories
 import {
   parseStreamerCommentDraft,
   parseStreamerListQuery,
+  parseStreamerOfficialProfileDraft,
   parseStreamerPostDraft,
   parseStreamerReportReason,
-  isStreamerPostId
+  isStreamerPostId,
+  streamerChannelHandle,
+  streamerOfficialChannelKey,
+  STREAMER_PLATFORMS,
+  type StreamerPlatform
 } from "@streamops/shared";
 import type { ReactionRecordsRepository } from "../database/repositories/reaction-records-repository.js";
 import { StreamerBoardChannelService, twitchLoginForChannelKey } from "../services/streamer-board-channels.js";
 import { TwitchVodIndex, parseTwitchVods, type MatchReplay } from "../services/twitch-vod-index.js";
 import {
   StreamerChannelTakenError,
+  StreamerOfficialProfileTakenError,
   type StreamerBoardCommentRow,
   type StreamerBoardPostRow,
   type StreamerBoardRepository
@@ -219,6 +225,7 @@ import {
   dashboardSessionCookie,
   dashboardSessionIdFromRequest,
   principalHasAdminPermission,
+  principalHasPermission,
   stateChangingRequestHasTrustedOrigin,
   tokenMatches,
   type AdminPermission,
@@ -265,6 +272,7 @@ import {
   reactionShareRouteForPath,
   reactionShareSeoMetadata,
   publicSeoMetadataForPath,
+  withStreamerOfficialProfileSeo,
   withLolProfileSeo,
   type PalworldSeoEntity,
   type PalworldSeoBreedingPair,
@@ -281,6 +289,7 @@ import {
   buildPatchNotesSitemap,
   buildSitemapIndex,
   buildStaticSitemap,
+  buildStreamerProfilesSitemap,
   palworldBreedingSitemapPaths,
   palworldBreedingSitemapShard,
 } from "./public-sitemap.js";
@@ -4267,6 +4276,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       const children = [
         { path: PUBLIC_SITEMAP_PATHS.static },
         ...(input.patchNotes ? [{ path: PUBLIC_SITEMAP_PATHS.patchNotesDetail }] : []),
+        ...(input.streamerBoard ? [{ path: PUBLIC_SITEMAP_PATHS.streamerProfiles }] : []),
         ...(palworldData
           ? [
               { path: PUBLIC_SITEMAP_PATHS.pals, lastmod: dataVersion },
@@ -4283,6 +4293,32 @@ export function createHttpHandler(input: HttpHandlerInput) {
       return respond(buildStaticSitemap(undefined, {
         minecraftPatchNotesReady: input.minecraftPatchNotes?.hasReadyData() === true
       }));
+    }
+    if (pathname === PUBLIC_SITEMAP_PATHS.streamerProfiles) {
+      if (!input.streamerBoard) return false;
+      try {
+        const profiles = await input.streamerBoard.listOfficialProfiles();
+        return respond(buildStreamerProfilesSitemap(profiles
+          .filter((profile) => profile.active && profile.officialProfile)
+          .map((profile) => ({
+            platform: profile.platform,
+            seoSlug: profile.officialProfile?.seoSlug ?? "",
+            lastmod: profile.createdAt
+          }))));
+      } catch (error) {
+        input.logger?.error({
+          type: "public_seo.sitemap_failed",
+          errorCode: "streamer_profiles_sitemap_unavailable",
+          error: toSafeErrorMessage(error)
+        });
+        res.writeHead(503, {
+          "Content-Type": "application/json; charset=utf-8",
+          "Retry-After": "600",
+          ...securityHeadersForRequest(req)
+        });
+        res.end(req.method === "HEAD" ? undefined : JSON.stringify({ error: "sitemap unavailable" }));
+        return true;
+      }
     }
     if (pathname === PUBLIC_SITEMAP_PATHS.patchNotesDetail) {
       if (!input.patchNotes) {
@@ -4561,10 +4597,112 @@ export function createHttpHandler(input: HttpHandlerInput) {
     }
   }
 
-  async function resolvePublicSeoMetadata(pathname: string): Promise<PublicSeoMetadata> {
+  function streamerOfficialProfileRouteForPath(pathname: string): {
+    platform: StreamerPlatform;
+    seoSlug: string;
+    canonicalPath: string;
+  } | undefined {
+    const normalized = stripPublicUrlLocalePrefix(pathname).replace(/\/$/u, "");
+    const match = /^\/streamers\/(twitch|chzzk|youtube)\/([^/]+)$/u.exec(normalized);
+    if (!match?.[1] || !match[2]) return undefined;
+    let decoded: string;
+    try {
+      decoded = decodeURIComponent(match[2]);
+    } catch {
+      return undefined;
+    }
+    const platform = match[1] as StreamerPlatform;
+    const channelKey = streamerOfficialChannelKey(platform, decoded);
+    const seoSlug = channelKey ? streamerChannelHandle(channelKey) : undefined;
+    if (!seoSlug) return undefined;
+    return {
+      platform,
+      seoSlug,
+      canonicalPath: `/streamers/${platform}/${encodeURIComponent(seoSlug)}`
+    };
+  }
+
+  /**
+   * 공식 프로필 조회. "없음"(정상 조회, 결과 없음)과 "조회 실패"를 구분합니다 —
+   * DB 장애를 404 로 내면 검색엔진이 멀쩡한 URL 을 색인에서 지웁니다.
+   */
+  async function lookupStreamerOfficialProfile(
+    route: { platform: StreamerPlatform; seoSlug: string }
+  ): Promise<{ ok: true; profile: StreamerBoardPostRow | undefined } | { ok: false }> {
+    if (!input.streamerBoard) return { ok: true, profile: undefined };
+    try {
+      return { ok: true, profile: await input.streamerBoard.findOfficialProfile(route.platform, route.seoSlug) };
+    } catch (error) {
+      input.logger?.error({
+        type: "public_seo.streamer_profile_lookup_failed",
+        errorCode: error instanceof SafeDatabaseError ? error.code : "streamer_profile_unavailable",
+        error: toSafeErrorMessage(error)
+      });
+      return { ok: false };
+    }
+  }
+
+  /** 공식 프로필 조회가 장애로 실패하면 soft 404 대신 재시도 가능한 503 을 냅니다. */
+  async function sendStreamerProfileUnavailablePage(
+    req: IncomingMessage,
+    res: ServerResponse,
+    pathname: string
+  ): Promise<void> {
+    const filePath = path.resolve(appConfig.paths.dashboardStatic, "index.html");
+    const locale = publicUrlLocaleFromPathname(pathname) ?? "ko";
+    try {
+      const metadata = {
+        ...publicSeoMetadataForPath(`/${locale}/streamers`),
+        robotsNoindex: true
+      };
+      const cspNonce = crypto.randomBytes(18).toString("base64url");
+      const html = applyPublicSeoMetadata(await fs.readFile(filePath, "utf8"), metadata)
+        .replaceAll(DASHBOARD_CSP_NONCE_PLACEHOLDER, cspNonce);
+      res.writeHead(503, {
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "no-store",
+        "Retry-After": "600",
+        "X-Robots-Tag": "noindex, nofollow",
+        ...staticSecurityHeaders(req, filePath, "/dashboard", cspNonce)
+      });
+      res.end(req.method === "HEAD" ? undefined : html);
+    } catch {
+      sendJson(req, res, 503, {
+        error: "STREAMER_PROFILE_UNAVAILABLE",
+        message: "공식 프로필을 잠시 불러올 수 없습니다."
+      }, {
+        "Cache-Control": "no-store",
+        "Retry-After": "600",
+        "X-Robots-Tag": "noindex, nofollow"
+      });
+    }
+  }
+
+  async function resolvePublicSeoMetadata(
+    pathname: string,
+    /* 호출부가 같은 요청에서 이미 조회했으면 다시 묻지 않습니다. */
+    preloaded?: { officialProfile: StreamerBoardPostRow | undefined }
+  ): Promise<PublicSeoMetadata> {
     const fallback = publicSeoMetadataForPath(pathname, {
       minecraftPatchNotesReady: input.minecraftPatchNotes?.hasReadyData() === true
     });
+    const officialRoute = streamerOfficialProfileRouteForPath(pathname);
+    if (officialRoute && input.streamerBoard) {
+      const profile = preloaded
+        ? preloaded.officialProfile
+        : await input.streamerBoard
+          .findOfficialProfile(officialRoute.platform, officialRoute.seoSlug)
+          .catch(() => undefined);
+      if (profile?.officialProfile) {
+        return withStreamerOfficialProfileSeo(fallback, {
+          canonicalPath: officialRoute.canonicalPath,
+          streamerName: profile.streamerName,
+          platform: profile.platform,
+          channelUrl: profile.channelUrl,
+          games: profile.games
+        });
+      }
+    }
     /* 패치 노트 공유 카드 — SNS 크롤러는 JS 를 실행하지 않으므로 서버가
        최신 패치 번호·요약·카드 이미지를 메타에 넣어야만 미리보기가 살아납니다.
        카드 URL 에 패치 버전이 들어가 새 패치마다 SNS 캐시를 자연 우회합니다.
@@ -9634,13 +9772,15 @@ export function createHttpHandler(input: HttpHandlerInput) {
       id: post.id,
       streamerName: post.streamerName,
       platform: post.platform,
-      ...(options.signedIn ? { channelUrl: post.channelUrl } : {}),
+      ...(options.signedIn || post.registeredByAdmin ? { channelUrl: post.channelUrl } : {}),
       /* 같은 origin 경로입니다 — 시청자 브라우저가 Twitch CDN 에 직접 붙지 않습니다.
          Twitch 채널이 아니면 이미지가 없고 화면이 플랫폼 마크로 떨어집니다. */
       ...(twitchLoginForChannelKey(post.channelKey)
         ? { profileImageUrl: `/api/public/streamers/${post.id}/avatar` }
         : {}),
-      live: options.live,
+      live: options.live && (!post.registeredByAdmin || post.officialProfile?.liveStatusSupported === true),
+      registeredByAdmin: post.registeredByAdmin,
+      ...(post.officialProfile ? { officialProfile: post.officialProfile } : {}),
       games: [...post.games],
       tags: [...post.tags],
       votes: post.votes,
@@ -9704,6 +9844,128 @@ export function createHttpHandler(input: HttpHandlerInput) {
       }),
       comments: comments.map(streamerBoardCommentPayload)
     };
+  }
+
+  async function getStreamerOfficialProfile(
+    req: IncomingMessage,
+    platform: StreamerPlatform,
+    seoSlug: string
+  ): Promise<Record<string, unknown>> {
+    const board = requireStreamerBoard();
+    const viewer = await streamerBoardViewer(req);
+    const post = await board.findOfficialProfile(platform, seoSlug, viewer?.twitchUserId);
+    if (!post) {
+      throw new HttpRequestError(404, { error: "공식 프로필을 찾을 수 없습니다.", code: "profile_not_found" });
+    }
+    const [comments, liveKeys] = await Promise.all([
+      board.comments(post.id),
+      post.officialProfile?.liveStatusSupported ? streamerBoardLiveChannelKeys() : Promise.resolve([])
+    ]);
+    const lolProfile = await streamerBoardLolProfile(post, { remaining: 1 });
+    return {
+      post: streamerBoardPostPayload(post, {
+        signedIn: true,
+        live: post.officialProfile?.liveStatusSupported === true && liveKeys.includes(post.channelKey),
+        ...(lolProfile ? { lolProfile } : {})
+      }),
+      comments: comments.map(streamerBoardCommentPayload)
+    };
+  }
+
+  function officialProfileAdminPayload(post: StreamerBoardPostRow): Record<string, unknown> {
+    return {
+      id: post.id,
+      streamerName: post.streamerName,
+      platform: post.platform,
+      channelUrl: post.channelUrl,
+      games: [...post.games],
+      registeredByAdmin: post.registeredByAdmin,
+      officialProfile: post.officialProfile,
+      active: post.active,
+      createdAt: post.createdAt
+    };
+  }
+
+  function requireOfficialProfileAdmin(principal: AuthPrincipal): StreamerBoardRepository {
+    if (!principalHasPermission(principal, "streamer_profiles:write")) {
+      throw new HttpRequestError(403, { error: "공식 프로필 관리 권한이 필요합니다.", code: "FORBIDDEN" });
+    }
+    return requireStreamerBoard();
+  }
+
+  async function handleOfficialProfileAdminApi(
+    req: IncomingMessage,
+    res: ServerResponse,
+    url: URL,
+    principal: AuthPrincipal
+  ): Promise<boolean> {
+    const base = "/api/dashboard/streamer-profiles";
+    if (url.pathname !== base && !url.pathname.startsWith(`${base}/`)) return false;
+    const board = requireOfficialProfileAdmin(principal);
+    /* 하위 경로는 `{id}` 와 `{id}/reactivate` 두 모양뿐입니다. */
+    const [rawId, action, ...rest] = url.pathname === base ? [] : url.pathname.slice(base.length + 1).split("/");
+    const postId = rawId && isStreamerPostId(rawId) ? rawId : undefined;
+    if ((rawId !== undefined && !postId) || rest.length > 0 || (action !== undefined && action !== "reactivate")) {
+      sendJson(req, res, 404, { error: "not found" }, noStoreHeaders());
+      return true;
+    }
+    if (req.method === "GET" && !postId) {
+      const profiles = await board.listOfficialProfiles();
+      sendJson(req, res, 200, { profiles: profiles.map(officialProfileAdminPayload) }, noStoreHeaders());
+      return true;
+    }
+    if (req.method === "PUT" && postId && action === "reactivate") {
+      const profile = await board.reactivateOfficialProfile(postId);
+      if (!profile) {
+        sendJson(req, res, 404, { error: "비활성 공식 프로필을 찾을 수 없습니다.", code: "profile_not_found" }, noStoreHeaders());
+        return true;
+      }
+      sendJson(req, res, 200, { profile: officialProfileAdminPayload(profile) }, noStoreHeaders());
+      return true;
+    }
+    if (action !== undefined) {
+      sendJson(req, res, 405, { error: "method not allowed" }, noStoreHeaders());
+      return true;
+    }
+    if ((req.method === "POST" && !postId) || (req.method === "PUT" && postId)) {
+      const draft = parseStreamerOfficialProfileDraft(await readJsonBody<unknown>(req));
+      if (!draft) {
+        sendJson(req, res, 400, { error: "스트리머 이름, 플랫폼, 핸들, 게임을 확인해 주세요.", code: "invalid_request" }, noStoreHeaders());
+        return true;
+      }
+      try {
+        const profile = postId
+          ? await board.updateOfficialProfile(postId, draft)
+          : await board.createOfficialProfile(draft);
+        if (!profile) {
+          sendJson(req, res, 404, { error: "공식 프로필을 찾을 수 없습니다.", code: "profile_not_found" }, noStoreHeaders());
+          return true;
+        }
+        sendJson(req, res, postId ? 200 : 201, { profile: officialProfileAdminPayload(profile) }, noStoreHeaders());
+        return true;
+      } catch (error) {
+        if (error instanceof StreamerOfficialProfileTakenError || error instanceof StreamerChannelTakenError) {
+          sendJson(req, res, 409, {
+            error: "이미 등록된 채널 또는 공식 프로필 URL입니다.",
+            code: "duplicate_profile",
+            existing: error.existing
+          }, noStoreHeaders());
+          return true;
+        }
+        throw error;
+      }
+    }
+    if (req.method === "DELETE" && postId) {
+      const profile = await board.deactivateOfficialProfile(postId);
+      if (!profile) {
+        sendJson(req, res, 404, { error: "활성 공식 프로필을 찾을 수 없습니다.", code: "profile_not_found" }, noStoreHeaders());
+        return true;
+      }
+      sendJson(req, res, 200, { profile: officialProfileAdminPayload(profile) }, noStoreHeaders());
+      return true;
+    }
+    sendJson(req, res, 405, { error: "method not allowed" }, noStoreHeaders());
+    return true;
   }
 
   /** 글의 채널 프로필 이미지. 글이 없거나 Twitch 채널이 아니면 undefined 입니다. */
@@ -10067,6 +10329,24 @@ export function createHttpHandler(input: HttpHandlerInput) {
           return;
         }
         if (url.pathname === "/" || isPublicDashboardAppRoute(url.pathname)) {
+          const officialProfileRoute = streamerOfficialProfileRouteForPath(url.pathname);
+          let officialProfile: StreamerBoardPostRow | undefined;
+          if (officialProfileRoute) {
+            const lookup = await lookupStreamerOfficialProfile(officialProfileRoute);
+            if (!lookup.ok) {
+              await sendStreamerProfileUnavailablePage(req, res, url.pathname);
+              return;
+            }
+            if (!lookup.profile) return sendPublicNotFound(req, res, url.pathname);
+            officialProfile = lookup.profile;
+            const locale = publicUrlLocaleFromPathname(url.pathname);
+            const requestedPath = stripPublicUrlLocalePrefix(url.pathname).replace(/\/$/u, "");
+            if (locale && requestedPath !== officialProfileRoute.canonicalPath) {
+              return sendPermanentRedirect(res, `/${locale}${officialProfileRoute.canonicalPath}`, {
+                "Cache-Control": "public, max-age=3600"
+              });
+            }
+          }
           const breedingPair = resolvePalworldBreedingSeoPair(url.pathname);
           if (breedingPair.isBreedingRoute && !breedingPair.pair) {
             if (breedingPair.dataUnavailable) {
@@ -10090,7 +10370,10 @@ export function createHttpHandler(input: HttpHandlerInput) {
             // 크롤 신뢰도가 떨어집니다.
             return sendPublicNotFound(req, res, url.pathname);
           }
-          const seoMetadata = await resolvePublicSeoMetadata(url.pathname);
+          const seoMetadata = await resolvePublicSeoMetadata(
+            url.pathname,
+            officialProfileRoute ? { officialProfile } : undefined
+          );
           const noindexHeaders = seoMetadata.robotsNoindex
             ? { "X-Robots-Tag": "noindex, nofollow" }
             : undefined;
@@ -12260,9 +12543,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
             }, { "Set-Cookie": dashboardSessionCookie(session) });
           }
         }
-        /* 관리자 콘솔(admin surface)에서의 Twitch OAuth 승격. 관리자가 승인된
-           스트리머에게 권한을 부여해 두었으면, 그 Twitch 계정의 공개 뷰어 세션만으로
-           별도 토큰 없이 부분 권한 admin 세션을 발급합니다.
+        /* 관리자 콘솔(admin surface)에서의 Twitch identity 승격. 관리자가 승인된
+           스트리머에게 권한을 부여해 두었으면, 그 Twitch 계정의 공개 뷰어 세션 또는
+           YORO 계정 세션에 연결된 Twitch identity로 별도 토큰 없이 부분 권한 admin
+           세션을 발급합니다. 공개 뷰어 세션을 먼저 확인하고 실패할 때 YORO 세션을
+           fallback으로 확인합니다.
            스트리머 surface의 streamer 세션을 admin으로 "대체"하지 않는 이유:
            authenticateDashboardRequest는 surface와 role이 다른 세션을 무시하므로
            대체하면 스트리머 대시보드가 영구 미인증이 되고 매 status 폴링마다 새
@@ -12297,6 +12582,34 @@ export function createHttpHandler(input: HttpHandlerInput) {
             }
           }
         }
+        if (surface === "admin" && input.yoroAccounts) {
+          const twitchUserId = await input.yoroAccounts
+            .twitchUserIdForSession(requestCookie(req, YORO_SESSION_COOKIE))
+            .catch(() => undefined);
+          if (twitchUserId) {
+            reloadAdminAccounts(input.store);
+            const grantedAccount = activeTwitchAdminAccount(input.store, twitchUserId);
+            if (grantedAccount) {
+              const session = sessions.create({
+                role: "admin",
+                permissions: grantedAccount.permissions,
+                adminAccountId: grantedAccount.id,
+                adminAccountLabel: grantedAccount.label
+              });
+              return sendJson(req, res, 200, {
+                required: !appConfig.security.localNoAuth,
+                configured: appConfig.security.localNoAuth || Boolean(appConfig.security.dashboardAuthToken),
+                authenticated: true,
+                role: "admin",
+                permissions: grantedAccount.permissions,
+                adminAccountId: grantedAccount.id,
+                adminAccountLabel: grantedAccount.label,
+                csrfToken: session.csrfToken,
+                expiresAt: new Date(session.expiresAt).toISOString()
+              }, { "Set-Cookie": dashboardSessionCookie(session) });
+            }
+          }
+        }
         return sendJson(req, res, 200, {
           required: !appConfig.security.localNoAuth,
           configured: surface === "streamer"
@@ -12320,6 +12633,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         }
       }
       if (await handlePalworldServerDashboardApi(req, res, url, auth.principal)) return;
+      if (await handleOfficialProfileAdminApi(req, res, url, auth.principal)) return;
       if (url.pathname === "/api/admin/audit-logs" && req.method === "GET") {
         if (auth.principal.type !== "DASHBOARD_ADMIN" || auth.principal.role !== "admin") {
           return sendJson(req, res, 403, {
@@ -12802,6 +13116,18 @@ export function createHttpHandler(input: HttpHandlerInput) {
         }
         if (req.method === "POST" && segments.length === 0) {
           return sendJson(req, res, 201, await createStreamerBoardPost(req), {
+            "Cache-Control": "private, no-store"
+          });
+        }
+        if (req.method === "GET" && segments.length === 3 && segments[0] === "profile") {
+          const platform = STREAMER_PLATFORMS.find((candidate) => candidate === segments[1]);
+          const decodedSlug = decodeUrlPathSegment(segments[2] ?? "");
+          const channelKey = platform && decodedSlug
+            ? streamerOfficialChannelKey(platform, decodedSlug)
+            : undefined;
+          const seoSlug = channelKey ? streamerChannelHandle(channelKey) : undefined;
+          if (!platform || !seoSlug) return sendJson(req, res, 404, { error: "not found" });
+          return sendJson(req, res, 200, await getStreamerOfficialProfile(req, platform, seoSlug), {
             "Cache-Control": "private, no-store"
           });
         }

@@ -7,7 +7,7 @@ export type DashboardRole = "admin" | "streamer";
 
 /* 관리자 부분 권한의 단일 원본. 저장 파일·CLI·HTTP 인가가 모두 이 목록을
    참조해야 새 권한을 추가할 때 한 계층만 빠지는 일을 막을 수 있습니다. */
-export const ADMIN_PERMISSIONS = ["streamer_approval"] as const;
+export const ADMIN_PERMISSIONS = ["streamer_approval", "streamer_profiles:write"] as const;
 export type AdminPermission = typeof ADMIN_PERMISSIONS[number];
 
 export type AuthPrincipal =
@@ -33,6 +33,11 @@ export function principalHasAdminPermission(principal: AuthPrincipal, permission
   if (principal.type !== "DASHBOARD_ADMIN" || principal.role !== "admin") return false;
   if (!principal.permissions) return true;
   return principal.permissions.includes(permission);
+}
+
+/** 신규 인가 호출부의 공통 이름. 기존 함수는 하위 호환을 위해 유지합니다. */
+export function principalHasPermission(principal: AuthPrincipal, permission: AdminPermission): boolean {
+  return principalHasAdminPermission(principal, permission);
 }
 
 
@@ -265,6 +270,7 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
      비로그인도 봐야 합니다(채널 주소만 로그인 뒤로 갑니다). */
   if (
     pathname === "/api/public/streamers"
+    || /^\/api\/public\/streamers\/profile\/(twitch|chzzk|youtube)\/[^/]{1,240}$/u.test(pathname)
     || /^\/api\/public\/streamers\/[a-z0-9][a-z0-9_-]{0,63}(\/(avatar|vote|comments))?$/u.test(pathname)
     || /^\/api\/public\/streamers\/[a-z0-9][a-z0-9_-]{0,63}\/comments\/[a-z0-9][a-z0-9_-]{0,63}\/report$/u.test(pathname)
   ) return "PUBLIC";
@@ -445,6 +451,12 @@ const ADMIN_PERMISSION_API_RULES: Record<AdminPermission, StreamerDashboardRule[
     /* grant-admin / revoke-admin(관리자 권한 부여·회수)은 의도적으로 등록하지
        않습니다 — 부분 권한 관리자가 다른 계정에 권한을 뿌리는 권한 상승을 막기
        위해 full_admin(permissions === undefined)만 호출할 수 있어야 합니다. */
+  ],
+  "streamer_profiles:write": [
+    { method: "GET", path: "/api/dashboard/streamer-profiles" },
+    { method: "POST", path: "/api/dashboard/streamer-profiles" },
+    { method: "PUT", prefix: "/api/dashboard/streamer-profiles" },
+    { method: "DELETE", prefix: "/api/dashboard/streamer-profiles" }
   ]
 };
 

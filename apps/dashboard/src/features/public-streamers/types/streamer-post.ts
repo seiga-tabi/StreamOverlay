@@ -5,7 +5,7 @@
  * packages/shared/src/streamer-board.ts 에 둡니다.
  */
 
-import { streamerChannelKey } from "@streamops/shared";
+import { streamerChannelHandle, streamerChannelKey, streamerOfficialChannelKey } from "@streamops/shared";
 import type { LolRankTier } from "@streamops/shared";
 import { rankTierLabel } from "../../public-lol/utils/rank";
 import type { StreamerScope } from "../utils/routes";
@@ -36,6 +36,12 @@ export type StreamerLolProfile = {
   recentResults: readonly ("win" | "loss")[];
 };
 
+export type StreamerOfficialProfile = {
+  handle: string;
+  seoSlug: string;
+  liveStatusSupported: boolean;
+};
+
 export type StreamerPost = {
   id: string;
   streamerName: string;
@@ -55,6 +61,8 @@ export type StreamerPost = {
   authorName: string;
   createdAt: string;
   lolProfile?: StreamerLolProfile;
+  registeredByAdmin: boolean;
+  officialProfile?: StreamerOfficialProfile;
 };
 
 export type StreamerComment = {
@@ -172,6 +180,24 @@ function parseLolProfile(value: unknown): StreamerLolProfile | undefined {
   };
 }
 
+function parseOfficialProfile(
+  value: unknown,
+  platform: StreamerPlatform
+): StreamerOfficialProfile | undefined {
+  if (!isRecord(value)) return undefined;
+  const handle = safeText(value.handle, 80);
+  const seoSlug = safeText(value.seoSlug, 80);
+  if (!handle || !seoSlug) return undefined;
+  const channelKey = streamerOfficialChannelKey(platform, handle);
+  if (!channelKey || streamerChannelHandle(channelKey) !== seoSlug) return undefined;
+  return {
+    handle,
+    seoSlug,
+    /* 서버가 잘못된 값을 보내도 치지직·YouTube 실시간 UI는 열리지 않습니다. */
+    liveStatusSupported: platform === "twitch" && value.liveStatusSupported === true,
+  };
+}
+
 export function parseStreamerPost(value: unknown): StreamerPost | undefined {
   if (!isRecord(value)) return undefined;
   const id = safeText(value.id, 64);
@@ -193,6 +219,10 @@ export function parseStreamerPost(value: unknown): StreamerPost | undefined {
   /* 프로필 이미지는 twitch 에서만 옵니다 — 다른 플랫폼이 보내와도 쓰지 않습니다. */
   const profileImageUrl = platform === "twitch" ? safeImageUrl(value.profileImageUrl) : undefined;
   const lolProfile = games.includes("lol") ? parseLolProfile(value.lolProfile) : undefined;
+  const officialProfile = value.registeredByAdmin === true
+    ? parseOfficialProfile(value.officialProfile, platform)
+    : undefined;
+  const registeredByAdmin = Boolean(officialProfile);
 
   return {
     id,
@@ -200,7 +230,7 @@ export function parseStreamerPost(value: unknown): StreamerPost | undefined {
     platform,
     ...(channelUrl ? { channelUrl } : {}),
     ...(profileImageUrl ? { profileImageUrl } : {}),
-    live: value.live === true,
+    live: value.live === true && (!registeredByAdmin || officialProfile?.liveStatusSupported === true),
     games,
     tags,
     votes: counter(value.votes),
@@ -209,6 +239,8 @@ export function parseStreamerPost(value: unknown): StreamerPost | undefined {
     authorName,
     createdAt,
     ...(lolProfile ? { lolProfile } : {}),
+    registeredByAdmin,
+    ...(officialProfile ? { officialProfile } : {}),
   };
 }
 

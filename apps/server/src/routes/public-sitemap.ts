@@ -29,7 +29,8 @@ export const PUBLIC_SITEMAP_PATHS = {
   pals: "/sitemap-palworld-pals.xml",
   breeding: "/sitemap-palworld-breeding.xml",
   items: "/sitemap-palworld-items.xml",
-  skills: "/sitemap-palworld-skills.xml"
+  skills: "/sitemap-palworld-skills.xml",
+  streamerProfiles: "/sitemap-streamer-profiles.xml"
 } as const;
 
 export const PALWORLD_SITEMAP_KINDS: Readonly<Record<string, PalworldEntityKind>> = {
@@ -162,6 +163,19 @@ export function buildStaticSitemap(
   return buildLocalizedUrlSetSitemap(
     publicSitemapStaticPaths(options).map((path) => ({ path, lastmod }))
   );
+}
+
+export function buildStreamerProfilesSitemap(
+  profiles: readonly {
+    platform: "twitch" | "chzzk" | "youtube";
+    seoSlug: string;
+    lastmod?: string;
+  }[]
+): string {
+  return buildLocalizedUrlSetSitemap(profiles.slice(0, SITEMAP_MAX_URLS).map((profile) => ({
+    path: `/streamers/${profile.platform}/${encodeURIComponent(profile.seoSlug)}`,
+    ...(profile.lastmod ? { lastmod: profile.lastmod } : {})
+  })));
 }
 
 /** 패치 피드의 공개일을 각 URL lastmod로 유지하는 ko·ja 상세 sitemap입니다. */

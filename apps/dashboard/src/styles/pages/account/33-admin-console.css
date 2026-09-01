@@ -752,6 +752,122 @@
     cursor: default;
   }
 
+  /* ── 공식 프로필 관리 ───────────────────────────────────── */
+  .yoro-admin-shell .streamer-profiles-admin {
+    display: grid;
+    gap: 18px;
+  }
+
+  .yoro-admin-shell .streamer-profile-admin-form {
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) 150px minmax(180px, 1fr);
+    gap: 14px;
+    padding: 18px;
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+    background: var(--home-card);
+  }
+
+  .yoro-admin-shell .streamer-profile-admin-form label,
+  .yoro-admin-shell .streamer-profile-admin-form fieldset {
+    display: grid;
+    gap: 7px;
+    margin: 0;
+    color: var(--home-sub);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .yoro-admin-shell .streamer-profile-admin-form input,
+  .yoro-admin-shell .streamer-profile-admin-form select {
+    min-height: 44px;
+    padding: 0 12px;
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+    background: var(--home-bg);
+    color: var(--home-ink);
+    font: inherit;
+  }
+
+  .yoro-admin-shell .streamer-profile-admin-form fieldset {
+    grid-column: 1 / -1;
+    padding: 12px;
+    border: .5px solid var(--home-line);
+  }
+
+  .yoro-admin-shell .streamer-profile-admin-form fieldset div,
+  .yoro-admin-shell .streamer-profile-admin-form__actions,
+  .yoro-admin-shell .streamer-profile-admin-card__tags,
+  .yoro-admin-shell .streamer-profile-admin-card__actions {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex-wrap: wrap;
+  }
+
+  .yoro-admin-shell .streamer-profile-admin-form fieldset label {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 0 10px;
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+    background: var(--home-bg);
+  }
+
+  .yoro-admin-shell .streamer-profile-admin-form fieldset input { min-height: auto; }
+
+  .yoro-admin-shell .streamer-profile-admin-form__actions { grid-column: 1 / -1; }
+
+  .yoro-admin-shell .streamer-profile-admin-form__actions button,
+  .yoro-admin-shell .streamer-profile-admin-card__actions button {
+    min-height: 44px;
+    padding: 0 14px;
+    border: .5px solid var(--home-ink);
+    border-radius: 3px;
+    background: var(--home-ink);
+    color: var(--home-bg);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .yoro-admin-shell .streamer-profile-admin-form__actions button[data-secondary="true"],
+  .yoro-admin-shell .streamer-profile-admin-card__actions button {
+    background: transparent;
+    color: var(--home-ink);
+  }
+
+  .yoro-admin-shell .streamer-profile-admin-list { display: grid; gap: 10px; }
+
+  .yoro-admin-shell .streamer-profile-admin-card {
+    display: grid;
+    grid-template-columns: minmax(170px, .8fr) minmax(260px, 1.4fr) minmax(200px, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    padding: 15px 16px;
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+    background: var(--home-card);
+  }
+
+  .yoro-admin-shell .streamer-profile-admin-card.is-inactive { opacity: .58; }
+
+  .yoro-admin-shell .streamer-profile-admin-card > div { display: grid; gap: 5px; }
+  .yoro-admin-shell .streamer-profile-admin-card strong,
+  .yoro-admin-shell .streamer-profile-admin-card a { color: var(--home-ink); }
+  .yoro-admin-shell .streamer-profile-admin-card span,
+  .yoro-admin-shell .streamer-profile-admin-card small { color: var(--home-mid); font-size: 11px; }
+  .yoro-admin-shell .streamer-profile-admin-card__tags span,
+  .yoro-admin-shell .streamer-profile-admin-card__tags b { padding: 5px 8px; border: .5px solid var(--home-line); border-radius: 3px; }
+  .yoro-admin-shell .streamer-profile-admin-card__actions button[data-danger="true"] { border-color: var(--home-loss); color: var(--home-loss); }
+
+  @media (max-width: 860px) {
+    .yoro-admin-shell .streamer-profile-admin-form { grid-template-columns: 1fr; }
+    .yoro-admin-shell .streamer-profile-admin-form fieldset,
+    .yoro-admin-shell .streamer-profile-admin-form__actions { grid-column: auto; }
+    .yoro-admin-shell .streamer-profile-admin-card { grid-template-columns: 1fr; }
+  }
+
   /* ── 확인 모달도 같은 토큰으로 ──────────────────────────── */
 
   .yoro-admin-shell .yoro-ac {

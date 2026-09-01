@@ -10,7 +10,6 @@ import {
   PublicTwitchAccountChip,
 } from "../../../shared/PublicTwitchAccountChip";
 import { streamersI18n, type StreamersLocale } from "../i18n/streamers-i18n";
-import { publicContentLocale } from "../../public-lol/i18n/public-lol-i18n";
 import { usePublicViewerTwitch } from "../hooks/usePublicViewerTwitch";
 import {
   STREAMERS_BASE_PATH,
@@ -22,12 +21,12 @@ import {
 
 /* 이 섹션의 nav 는 게임 범위입니다 — 상단 nav 와 하단 탭바가 같은 원본을 씁니다.
    근거: docs/mockups/streamer-board (게임 선택기로 들어오는 독립 섹션). */
-export const streamerScopeItems: Array<{ scope: StreamerScope; ko: string; ja: string }> = [
-  { scope: "all", ko: streamersI18n.ko.scopeAll, ja: streamersI18n.ja.scopeAll },
-  { scope: "lol", ko: streamersI18n.ko.scopeLol, ja: streamersI18n.ja.scopeLol },
-  { scope: "valorant", ko: streamersI18n.ko.scopeValorant, ja: streamersI18n.ja.scopeValorant },
-  { scope: "palworld", ko: streamersI18n.ko.scopePalworld, ja: streamersI18n.ja.scopePalworld },
-  { scope: "minecraft", ko: streamersI18n.ko.scopeMinecraft, ja: streamersI18n.ja.scopeMinecraft },
+export const streamerScopeItems: Array<{ scope: StreamerScope; ko: string; ja: string; en: string }> = [
+  { scope: "all", ko: streamersI18n.ko.scopeAll, ja: streamersI18n.ja.scopeAll, en: streamersI18n.en.scopeAll },
+  { scope: "lol", ko: streamersI18n.ko.scopeLol, ja: streamersI18n.ja.scopeLol, en: streamersI18n.en.scopeLol },
+  { scope: "valorant", ko: streamersI18n.ko.scopeValorant, ja: streamersI18n.ja.scopeValorant, en: streamersI18n.en.scopeValorant },
+  { scope: "palworld", ko: streamersI18n.ko.scopePalworld, ja: streamersI18n.ja.scopePalworld, en: streamersI18n.en.scopePalworld },
+  { scope: "minecraft", ko: streamersI18n.ko.scopeMinecraft, ja: streamersI18n.ja.scopeMinecraft, en: streamersI18n.en.scopeMinecraft },
 ];
 
 export function StreamerScopeIcon({ scope }: { scope: StreamerScope }) {
@@ -145,11 +144,12 @@ export function StreamersHeader({
             aria-current={active ? "page" : undefined}
             data-ko={item.ko}
             data-ja={item.ja}
+            data-en={item.en}
             onClick={() => setStreamersUrl(streamersScopePath(item.scope))}
             key={item.scope}
           >
             <StreamerScopeIcon scope={item.scope} />
-            <strong>{locale === "ja" ? item.ja : item.ko}</strong>
+            <strong>{item[locale]}</strong>
           </button>
         );
       })}
@@ -163,7 +163,7 @@ export function StreamersHeader({
           <>
             <PublicLocaleSelector
               locale={locale}
-              onLocale={(next) => onLocale(publicContentLocale(next))}
+              onLocale={onLocale}
               open={localeMenuOpen}
               onOpenChange={(open) => {
                 setLocaleMenuOpen(open);
@@ -264,7 +264,7 @@ export function StreamersHeader({
             <svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path d="M4 7h16M4 12h16M4 17h16" />
             </svg>
-            <strong data-ko={streamersI18n.ko.mobileMenu} data-ja={streamersI18n.ja.mobileMenu}>
+            <strong data-en={streamersI18n.en.mobileMenu} data-ko={streamersI18n.ko.mobileMenu} data-ja={streamersI18n.ja.mobileMenu}>
               {text.mobileMenu}
             </strong>
           </button>
@@ -292,7 +292,7 @@ export function StreamersHeader({
             locale={locale}
             onClose={() => setMobileMenuOpen(false)}
             onGamePage={handleGame}
-            onLocale={(next) => onLocale(publicContentLocale(next))}
+            onLocale={onLocale}
             onDiscordLogin={loginWithDiscord}
             onDashboard={openDashboard}
             onTwitchLogin={loginWithTwitch}

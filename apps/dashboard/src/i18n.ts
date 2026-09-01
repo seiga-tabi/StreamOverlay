@@ -31,7 +31,8 @@ export const dashboardI18n = {
       permissionCount: "권한 {count}개",
       permissionLocked: "권한 없음",
       permissionLabels: {
-        streamer_approval: "스트리머 승인 권한"
+        streamer_approval: "스트리머 승인 권한",
+        "streamer_profiles:write": "공식 프로필 관리 권한"
       },
       loading: "화면을 불러오는 중입니다."
     },
@@ -57,6 +58,7 @@ export const dashboardI18n = {
       /* nav 는 관리자 콘솔 2행 서브네비 전용 문구입니다(승인된 스펙의 항목명). */
       events: { label: "이벤트 로그", short: "이벤트", nav: "이벤트" },
       streamerRiotRequests: { label: "Riot ID 승인", short: "Riot ID", nav: "스트리머 승인" },
+      streamerProfiles: { label: "공식 프로필", short: "프로필", nav: "공식 프로필" },
       supportInbox: { label: "문의 메일", short: "메일", nav: "고객 지원함" },
       settings: { label: "시스템 설정", short: "설정", nav: "개인 설정" }
     },
@@ -238,7 +240,8 @@ export const dashboardI18n = {
       permissionCount: "権限{count}件",
       permissionLocked: "権限がありません",
       permissionLabels: {
-        streamer_approval: "配信者承認権限"
+        streamer_approval: "配信者承認権限",
+        "streamer_profiles:write": "公式プロフィール管理権限"
       },
       loading: "画面を読み込んでいます。"
     },
@@ -263,6 +266,7 @@ export const dashboardI18n = {
     pages: {
       events: { label: "イベントログ", short: "イベント", nav: "イベント" },
       streamerRiotRequests: { label: "Riot ID 承認", short: "Riot ID", nav: "配信者承認" },
+      streamerProfiles: { label: "公式プロフィール", short: "プロフィール", nav: "公式プロフィール" },
       supportInbox: { label: "お問い合わせメール", short: "メール", nav: "カスタマーサポート" },
       settings: { label: "システム設定", short: "設定", nav: "個人設定" }
     },

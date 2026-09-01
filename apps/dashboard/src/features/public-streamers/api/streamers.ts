@@ -117,6 +117,30 @@ export async function fetchStreamerPost(
   }
 }
 
+export async function fetchStreamerOfficialProfile(
+  platform: StreamerPlatform,
+  seoSlug: string,
+  signal?: AbortSignal,
+): Promise<StreamerDetailResult> {
+  try {
+    const response = await fetch(
+      `${apiBase}/api/public/streamers/profile/${platform}/${encodeURIComponent(seoSlug)}`,
+      {
+        credentials: "include",
+        headers: { Accept: "application/json" },
+        ...(signal ? { signal } : {}),
+      },
+    );
+    if (response.status === 404) return { ok: false, reason: "not_ready" };
+    if (!response.ok) return { ok: false, reason: "error" };
+    const detail = parseStreamerPostDetail(await readJson(response));
+    return detail ? { ok: true, detail } : { ok: false, reason: "error" };
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") throw error;
+    return { ok: false, reason: "error" };
+  }
+}
+
 /* 아래 네 개는 변경 요청이라 실패를 호출부가 구분해야 합니다(로그인 필요 vs 그 외).
  *
  * duplicate_channel 은 등록에만 나옵니다 — 같은 채널이 이미 올라와 있다는 뜻이고,

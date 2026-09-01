@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import type { QueryResult } from "pg";
 import {
   STREAMER_LIST_LIMIT,
   isStreamerPostId,
@@ -6,6 +7,8 @@ import {
   type StreamerGame,
   type StreamerListQuery,
   type StreamerPlatform,
+  type StreamerOfficialProfile,
+  type StreamerOfficialProfileDraft,
   type StreamerPostDraft,
   type StreamerReportReason
 } from "@streamops/shared";
@@ -37,6 +40,9 @@ export type StreamerBoardPostRow = {
   createdAt: string;
   /** 요청자가 이미 추천했는지. 로그인하지 않았으면 false 입니다. */
   voted: boolean;
+  registeredByAdmin: boolean;
+  officialProfile?: StreamerOfficialProfile;
+  active: boolean;
 };
 
 export type StreamerBoardCommentRow = {
@@ -65,6 +71,13 @@ export class StreamerChannelTakenError extends Error {
   }
 }
 
+export class StreamerOfficialProfileTakenError extends Error {
+  constructor(readonly existing: StreamerBoardChannelOwner) {
+    super("official profile URL or channel already registered");
+    this.name = "StreamerOfficialProfileTakenError";
+  }
+}
+
 type PostDbRow = {
   id: string;
   channel_key: string;
@@ -79,6 +92,11 @@ type PostDbRow = {
   author_display_name: string;
   created_at: Date;
   voted: boolean;
+  registered_by_admin: boolean;
+  official_handle: string | null;
+  seo_slug: string | null;
+  live_status_supported: boolean;
+  active: boolean;
 };
 
 type CommentDbRow = {
@@ -90,7 +108,8 @@ type CommentDbRow = {
 };
 
 const POST_FIELDS = `id, channel_key, streamer_name, platform, channel_url,
-       games, tags, riot_id, vote_count, comment_count, author_display_name, created_at`;
+       games, tags, riot_id, vote_count, comment_count, author_display_name, created_at,
+       registered_by_admin, official_handle, seo_slug, live_status_supported, active`;
 
 /** 같은 열 목록의 별칭 붙은 형태. 두 곳이 어긋나면 조회가 조용히 열을 잃습니다. */
 const POST_COLUMNS = POST_FIELDS.replaceAll(/\b(?=[a-z_]+\b)/gu, "p.");
@@ -129,7 +148,18 @@ function toPost(row: PostDbRow): StreamerBoardPostRow {
     commentCount: row.comment_count,
     authorName: row.author_display_name,
     createdAt: row.created_at.toISOString(),
-    voted: row.voted === true
+    voted: row.voted === true,
+    registeredByAdmin: row.registered_by_admin === true,
+    ...(row.registered_by_admin && row.official_handle && row.seo_slug
+      ? {
+          officialProfile: {
+            handle: row.official_handle,
+            seoSlug: row.seo_slug,
+            liveStatusSupported: row.live_status_supported === true
+          }
+        }
+      : {}),
+    active: row.active === true
   };
 }
 
@@ -159,7 +189,7 @@ export class StreamerBoardRepository {
     liveChannelKeys: readonly string[] = []
   ): Promise<{ posts: StreamerBoardPostRow[]; total: number; liveCount: number }> {
     const viewer = viewerTwitchUserId ? requireTwitchUserId(viewerTwitchUserId) : null;
-    const conditions: string[] = [];
+    const conditions: string[] = ["p.active = TRUE"];
     const values: unknown[] = [viewer];
 
     if (query.game) {
@@ -233,6 +263,8 @@ export class StreamerBoardRepository {
       this.queryable,
       `SELECT channel_key FROM streamer_posts
         WHERE platform = 'twitch'
+          AND active = TRUE
+          AND (NOT registered_by_admin OR live_status_supported)
         ORDER BY vote_count DESC, created_at DESC
         LIMIT $1`,
       [limit]
@@ -251,11 +283,163 @@ export class StreamerBoardRepository {
                  WHERE v.post_id = p.id AND v.voter_twitch_user_id = $2
               )) AS voted
          FROM streamer_posts p
-        WHERE p.id = $1`,
+        WHERE p.id = $1 AND p.active = TRUE`,
       [postId, viewer]
     );
     const row = result.rows[0];
     return row ? toPost(row) : undefined;
+  }
+
+  async findOfficialProfile(
+    platform: StreamerPlatform,
+    seoSlug: string,
+    viewerTwitchUserId?: string
+  ): Promise<StreamerBoardPostRow | undefined> {
+    const viewer = viewerTwitchUserId ? requireTwitchUserId(viewerTwitchUserId) : null;
+    const result = await repositoryQuery<PostDbRow>(
+      this.queryable,
+      `SELECT ${POST_COLUMNS},
+              ($3::TEXT IS NOT NULL AND EXISTS (
+                SELECT 1 FROM streamer_post_votes v
+                 WHERE v.post_id = p.id AND v.voter_twitch_user_id = $3
+              )) AS voted
+         FROM streamer_posts p
+        WHERE p.platform = $1 AND p.seo_slug = $2
+          AND p.registered_by_admin = TRUE AND p.active = TRUE`,
+      [platform, seoSlug, viewer]
+    );
+    const row = result.rows[0];
+    return row ? toPost(row) : undefined;
+  }
+
+  async listOfficialProfiles(): Promise<StreamerBoardPostRow[]> {
+    const result = await repositoryQuery<PostDbRow>(
+      this.queryable,
+      `SELECT ${POST_COLUMNS}, FALSE AS voted
+         FROM streamer_posts p
+        WHERE p.registered_by_admin = TRUE
+        ORDER BY p.active DESC, p.updated_at DESC, p.created_at DESC
+        LIMIT 500`,
+      []
+    );
+    return result.rows.map(toPost);
+  }
+
+  async createOfficialProfile(draft: StreamerOfficialProfileDraft): Promise<StreamerBoardPostRow> {
+    const result = await repositoryQuery<PostDbRow>(
+      this.queryable,
+      `INSERT INTO streamer_posts
+         (id, channel_key, platform, channel_url, streamer_name, games, tags,
+          author_twitch_user_id, author_display_name, registered_by_admin,
+          official_handle, seo_slug, live_status_supported, active)
+       VALUES ($1, $2, $3, $4, $5, $6::TEXT[], '{}', '0', 'YORO.gg',
+               TRUE, $7, $8, $9, TRUE)
+       ON CONFLICT DO NOTHING
+       RETURNING ${POST_FIELDS}, FALSE AS voted`,
+      [
+        generateId(), draft.channelKey, draft.platform, draft.channelUrl,
+        draft.streamerName, [...draft.games], draft.officialProfile.handle,
+        draft.officialProfile.seoSlug, draft.officialProfile.liveStatusSupported
+      ]
+    );
+    const row = result.rows[0];
+    if (row) return toPost(row);
+    throw await this.officialProfileTaken(draft.channelKey, draft.platform, draft.officialProfile.seoSlug);
+  }
+
+  async updateOfficialProfile(
+    postId: string,
+    draft: StreamerOfficialProfileDraft
+  ): Promise<StreamerBoardPostRow | undefined> {
+    const id = requirePostId(postId);
+    let result: QueryResult<PostDbRow>;
+    try {
+      result = await repositoryQuery<PostDbRow>(
+        this.queryable,
+        `UPDATE streamer_posts p
+            SET channel_key = $2, platform = $3, channel_url = $4, streamer_name = $5,
+                games = $6::TEXT[], official_handle = $7, seo_slug = $8,
+                live_status_supported = $9, updated_at = NOW()
+          WHERE p.id = $1 AND p.registered_by_admin = TRUE
+            AND NOT EXISTS (
+              SELECT 1 FROM streamer_posts other
+               WHERE other.id <> p.id
+                 AND (other.channel_key = $2 OR (
+                   other.registered_by_admin = TRUE
+                   AND other.platform = $3 AND other.seo_slug = $8
+                 ))
+            )
+         RETURNING ${POST_FIELDS}, FALSE AS voted`,
+        [
+          id, draft.channelKey, draft.platform, draft.channelUrl, draft.streamerName,
+          [...draft.games], draft.officialProfile.handle, draft.officialProfile.seoSlug,
+          draft.officialProfile.liveStatusSupported
+        ]
+      );
+    } catch (error) {
+      /* NOT EXISTS 검사와 다른 트랜잭션의 삽입·수정 사이에 끼면 UNIQUE 제약이
+         마지막 판정을 합니다. 그 경합은 다른 중복과 같은 409 이지 500 이 아닙니다. */
+      if (error instanceof SafeDatabaseError && error.code === "DATABASE_CONFLICT") {
+        throw await this.officialProfileTaken(draft.channelKey, draft.platform, draft.officialProfile.seoSlug);
+      }
+      throw error;
+    }
+    const row = result.rows[0];
+    if (row) return toPost(row);
+    const current = await repositoryQuery<{ exists: boolean }>(
+      this.queryable,
+      "SELECT EXISTS(SELECT 1 FROM streamer_posts WHERE id = $1 AND registered_by_admin = TRUE) AS exists",
+      [id]
+    );
+    if (current.rows[0]?.exists) {
+      throw await this.officialProfileTaken(draft.channelKey, draft.platform, draft.officialProfile.seoSlug);
+    }
+    return undefined;
+  }
+
+  async deactivateOfficialProfile(postId: string): Promise<StreamerBoardPostRow | undefined> {
+    const id = requirePostId(postId);
+    const result = await repositoryQuery<PostDbRow>(
+      this.queryable,
+      `UPDATE streamer_posts p SET active = FALSE, updated_at = NOW()
+        WHERE p.id = $1 AND p.registered_by_admin = TRUE AND p.active = TRUE
+       RETURNING ${POST_FIELDS}, FALSE AS voted`,
+      [id]
+    );
+    const row = result.rows[0];
+    return row ? toPost(row) : undefined;
+  }
+
+  /** 비활성화의 반대. 이미 활성이거나 공식 프로필이 아니면 undefined — 라우트가 404 로 옮깁니다. */
+  async reactivateOfficialProfile(postId: string): Promise<StreamerBoardPostRow | undefined> {
+    const id = requirePostId(postId);
+    const result = await repositoryQuery<PostDbRow>(
+      this.queryable,
+      `UPDATE streamer_posts p SET active = TRUE, updated_at = NOW()
+        WHERE p.id = $1 AND p.registered_by_admin = TRUE AND p.active = FALSE
+       RETURNING ${POST_FIELDS}, FALSE AS voted`,
+      [id]
+    );
+    const row = result.rows[0];
+    return row ? toPost(row) : undefined;
+  }
+
+  private async officialProfileTaken(
+    channelKey: string,
+    platform: StreamerPlatform,
+    seoSlug: string
+  ): Promise<StreamerOfficialProfileTakenError> {
+    const existing = await repositoryQuery<{ id: string; streamer_name: string }>(
+      this.queryable,
+      `SELECT id, streamer_name FROM streamer_posts
+        WHERE channel_key = $1 OR (registered_by_admin = TRUE AND platform = $2 AND seo_slug = $3)
+        ORDER BY registered_by_admin DESC LIMIT 1`,
+      [channelKey, platform, seoSlug]
+    );
+    return new StreamerOfficialProfileTakenError({
+      postId: existing.rows[0]?.id ?? "",
+      streamerName: existing.rows[0]?.streamer_name ?? ""
+    });
   }
 
   async comments(postId: string): Promise<StreamerBoardCommentRow[]> {
@@ -263,8 +447,9 @@ export class StreamerBoardRepository {
     const result = await repositoryQuery<CommentDbRow>(
       this.queryable,
       `SELECT id, author_display_name, anonymous, body, created_at
-         FROM streamer_comments
-        WHERE post_id = $1
+         FROM streamer_comments c
+        WHERE c.post_id = $1
+          AND EXISTS (SELECT 1 FROM streamer_posts p WHERE p.id = c.post_id AND p.active = TRUE)
         ORDER BY created_at ASC
         LIMIT 200`,
       [postId]
@@ -319,7 +504,7 @@ export class StreamerBoardRepository {
     const inserted = await repositoryQuery<{ post_id: string }>(
       this.queryable,
       `INSERT INTO streamer_post_votes (post_id, voter_twitch_user_id)
-       SELECT $1, $2 WHERE EXISTS (SELECT 1 FROM streamer_posts WHERE id = $1)
+       SELECT $1, $2 WHERE EXISTS (SELECT 1 FROM streamer_posts WHERE id = $1 AND active = TRUE)
        ON CONFLICT DO NOTHING
        RETURNING post_id`,
       [id, voter]
@@ -328,7 +513,7 @@ export class StreamerBoardRepository {
       /* 이미 눌렀거나 글이 없습니다 — 현재 값을 그대로 돌려줍니다. */
       const current = await repositoryQuery<{ vote_count: number }>(
         this.queryable,
-        "SELECT vote_count FROM streamer_posts WHERE id = $1",
+        "SELECT vote_count FROM streamer_posts WHERE id = $1 AND active = TRUE",
         [id]
       );
       const row = current.rows[0];
@@ -354,7 +539,7 @@ export class StreamerBoardRepository {
       this.queryable,
       `INSERT INTO streamer_comments
          (id, post_id, author_twitch_user_id, author_display_name, anonymous, body)
-       SELECT $1, $2, $3, $4, $5, $6 WHERE EXISTS (SELECT 1 FROM streamer_posts WHERE id = $2)
+       SELECT $1, $2, $3, $4, $5, $6 WHERE EXISTS (SELECT 1 FROM streamer_posts WHERE id = $2 AND active = TRUE)
        RETURNING id, author_display_name, anonymous, body, created_at`,
       [generateId(), id, authorId, author.displayName, draft.anonymous, draft.body]
     );

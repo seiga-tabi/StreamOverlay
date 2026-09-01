@@ -17,7 +17,7 @@ export function streamersSeoMetadata(
   page: StreamersPage,
   locale: StreamersLocale,
   postTitle?: string,
-  postId?: string,
+  detailPathOrPostId?: string,
 ): StreamersSeoMetadata {
   const text = streamersI18n[locale];
   const isCompose = page === "compose";
@@ -30,8 +30,8 @@ export function streamersSeoMetadata(
       : text.seoTitleList;
   /* canonical 은 그 화면의 주소여야 합니다. 글 상세가 목록을 가리키면 크롤러는
      모든 글을 목록의 중복으로 보고 색인에서 내립니다. */
-  const path = page === "detail" && postId
-    ? streamerPostPath(postId)
+  const path = page === "detail" && detailPathOrPostId
+    ? detailPathOrPostId.startsWith("/") ? detailPathOrPostId : streamerPostPath(detailPathOrPostId)
     : streamersPathForPage(isCompose ? "compose" : "list");
   return {
     canonicalUrl: new URL(localizedPublicUrl(path, locale), PUBLIC_ORIGIN).href,
@@ -45,9 +45,9 @@ export function applyStreamersSeo(
   page: StreamersPage,
   locale: StreamersLocale,
   postTitle?: string,
-  postId?: string,
+  detailPathOrPostId?: string,
 ): () => void {
-  const metadata = streamersSeoMetadata(page, locale, postTitle, postId);
+  const metadata = streamersSeoMetadata(page, locale, postTitle, detailPathOrPostId);
   const previousTitle = document.title;
   document.title = metadata.title;
   const existing = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');

@@ -3,6 +3,7 @@ import {
   notifyPublicRouteChange,
   stripPublicLocalePrefix,
 } from "../../public-lol/utils/public-locale-path";
+import { streamerChannelHandle, streamerOfficialChannelKey, type StreamerPlatform } from "@streamops/shared";
 
 /* 스트리머 추천 게시판 경로.
  *
@@ -24,7 +25,11 @@ const COMPOSE_PATH = "/streamers/new";
 
 /* 글 id 는 서버가 발급하는 불투명 토큰입니다. 조작된 경로를 그대로 조회에
    넘기지 않도록 형식을 여기서 고정합니다(팰월드 엔티티 id 선례). */
-const DETAIL_PATH_PATTERN = /^\/streamers\/([a-z0-9][a-z0-9_-]{0,63})$/u;
+const DETAIL_PATH_PATTERN = /^\/streamers\/post\/([a-z0-9][a-z0-9_-]{0,63})$/u;
+const LEGACY_DETAIL_PATH_PATTERN = /^\/streamers\/([a-z0-9][a-z0-9_-]{0,63})$/u;
+const OFFICIAL_PATH_PATTERN = /^\/streamers\/(twitch|chzzk|youtube)\/([^/]+)$/u;
+
+export type StreamerOfficialRoute = { platform: StreamerPlatform; seoSlug: string };
 
 function normalizePath(pathname: string): string {
   const stripped = stripPublicLocalePrefix(pathname);
@@ -40,7 +45,23 @@ export function isStreamersPath(pathname: string): boolean {
 export function streamerPostIdFromPath(pathname: string): string | null {
   const path = normalizePath(pathname);
   if (path === COMPOSE_PATH) return null;
-  return DETAIL_PATH_PATTERN.exec(path)?.[1] ?? null;
+  return DETAIL_PATH_PATTERN.exec(path)?.[1] ?? LEGACY_DETAIL_PATH_PATTERN.exec(path)?.[1] ?? null;
+}
+
+export function streamerOfficialProfileFromPath(pathname: string): StreamerOfficialRoute | null {
+  const path = normalizePath(pathname);
+  const match = OFFICIAL_PATH_PATTERN.exec(path);
+  if (!match?.[1] || !match[2]) return null;
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(match[2]);
+  } catch {
+    return null;
+  }
+  const platform = match[1] as StreamerPlatform;
+  const channelKey = streamerOfficialChannelKey(platform, decoded);
+  const seoSlug = channelKey ? streamerChannelHandle(channelKey) : undefined;
+  return seoSlug ? { platform, seoSlug } : null;
 }
 
 /** 알 수 없는 /streamers/* 는 null — 셸이 404 화면을 그립니다. */
@@ -48,7 +69,7 @@ export function streamersPageFromPath(pathname: string): StreamersPage | null {
   const path = normalizePath(pathname);
   if (path === STREAMERS_BASE_PATH) return "list";
   if (path === COMPOSE_PATH) return "compose";
-  return streamerPostIdFromPath(path) ? "detail" : null;
+  return streamerPostIdFromPath(path) || streamerOfficialProfileFromPath(path) ? "detail" : null;
 }
 
 export function streamersPathForPage(page: StreamersPage): string {
@@ -56,7 +77,11 @@ export function streamersPathForPage(page: StreamersPage): string {
 }
 
 export function streamerPostPath(postId: string): string {
-  return `${STREAMERS_BASE_PATH}/${postId}`;
+  return `${STREAMERS_BASE_PATH}/post/${postId}`;
+}
+
+export function streamerOfficialProfilePath(platform: StreamerPlatform, seoSlug: string): string {
+  return `${STREAMERS_BASE_PATH}/${platform}/${encodeURIComponent(seoSlug)}`;
 }
 
 /** 범위는 query 로 둡니다 — 경로를 늘리면 글 상세 id 와 형태가 겹칩니다. */

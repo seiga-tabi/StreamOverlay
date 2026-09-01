@@ -2133,8 +2133,66 @@ const ENGLISH_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
 /** 영어 메타를 내보내는 경로인지. 팰월드 엔티티 상세도 포함합니다. */
 function hasEnglishSeoContent(normalizedPath: string): boolean {
   if (ENGLISH_CONTENT[normalizedPath]) return true;
+  if (/^\/streamers\/(twitch|chzzk|youtube)\/[^/]+$/u.test(normalizedPath)) return true;
   return palworldEntityRouteForPath(normalizedPath) !== undefined
     || palworldBreedingRouteForPath(normalizedPath) !== undefined;
+}
+
+/** 관리자 등록 공식 프로필의 고정 URL 메타데이터입니다. */
+export function withStreamerOfficialProfileSeo(
+  base: PublicSeoMetadata,
+  input: {
+    canonicalPath: string;
+    streamerName: string;
+    platform: "twitch" | "chzzk" | "youtube";
+    channelUrl: string;
+    games: readonly string[];
+  }
+): PublicSeoMetadata {
+  const { locale } = base;
+  const platformLabel = input.platform === "chzzk" ? "CHZZK" : input.platform === "youtube" ? "YouTube" : "Twitch";
+  const gameNames = input.games.join(", ");
+  const description = t(
+    locale,
+    `${input.streamerName}의 YORO.gg 공식 스트리머 프로필입니다. ${platformLabel} 채널과 주력 게임${gameNames ? `(${gameNames})` : ""}, 시청자 댓글과 추천을 확인하세요.`,
+    `${input.streamerName}のYORO.gg公式配信者プロフィールです。${platformLabel}チャンネル、主なゲーム${gameNames ? `（${gameNames}）` : ""}、視聴者コメントとおすすめを確認できます。`,
+    `${input.streamerName}'s official YORO.gg streamer profile. View the ${platformLabel} channel, main games${gameNames ? ` (${gameNames})` : ""}, viewer comments, and recommendations.`
+  );
+  const title = `${input.streamerName} | ${t(locale, "공식 스트리머 프로필", "公式配信者プロフィール", "Official streamer profile")} | YORO.gg`;
+  return {
+    ...base,
+    alternateUrls: publicSeoAlternateUrls(input.canonicalPath),
+    canonicalUrl: localizedPublicSeoUrl(input.canonicalPath, locale),
+    title,
+    description,
+    fallback: {
+      heading: input.streamerName,
+      summary: description,
+      facts: [
+        { label: t(locale, "플랫폼", "プラットフォーム", "Platform"), value: platformLabel },
+        { label: t(locale, "주력 게임", "主なゲーム", "Main games"), value: gameNames || "-" },
+        { label: t(locale, "프로필", "プロフィール", "Profile"), value: t(locale, "관리자 등록 공식 프로필", "管理者登録の公式プロフィール", "Admin-registered official profile") }
+      ],
+      links: [
+        { href: `/${locale}/streamers`, label: t(locale, "스트리머 목록", "配信者一覧", "Streamer list") },
+        { href: input.channelUrl, label: t(locale, "채널 열기", "チャンネルを開く", "Open channel") }
+      ]
+    },
+    openGraphType: "profile",
+    structuredData: [
+      ...base.structuredData,
+      {
+        "@context": "https://schema.org",
+        "@type": "ProfilePage",
+        mainEntity: {
+          "@type": "Person",
+          name: input.streamerName,
+          url: localizedPublicSeoUrl(input.canonicalPath, locale),
+          sameAs: input.channelUrl
+        }
+      }
+    ]
+  };
 }
 
 function contentForPath(
