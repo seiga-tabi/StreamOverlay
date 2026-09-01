@@ -765,6 +765,14 @@ function formatDate(value: string | undefined): string {
   return new Intl.DateTimeFormat(publicIntlLocale(), { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).format(date);
 }
 
+function formatLpLogDate(value: string): string {
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return "-";
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${month}/${day}`;
+}
+
 function formatMatchDate(value: string | undefined): string {
   if (!value) return "-";
   const date = new Date(value);
@@ -2434,7 +2442,7 @@ function profileLpChangeEntries(profile: PublicLolProfile): ProfileLpChangeEntry
     if (delta === 0) continue;
     entries.push({
       key: `${current.date}:${index}`,
-      dateLabel: formatDate(current.date).split(" ")[0] ?? formatDate(current.date),
+      dateLabel: formatLpLogDate(current.date),
       delta,
       deltaLabel: `${delta > 0 ? "+" : ""}${delta} LP`,
       rangeLabel: `${previous.leaguePoints} → ${current.leaguePoints} LP`,
