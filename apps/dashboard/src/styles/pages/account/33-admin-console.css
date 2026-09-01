@@ -588,6 +588,82 @@
 
   /* ── 스트리머 승인: 목록 도구 ───────────────────────────── */
 
+  .yoro-admin-shell .yoro-ar-register-card {
+    display: grid;
+    grid-template-columns: minmax(180px, .7fr) minmax(0, 1.5fr);
+    gap: 18px;
+    align-items: end;
+    padding: 18px;
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+    background: var(--home-card);
+  }
+
+  .yoro-admin-shell .yoro-ar-register-copy {
+    display: grid;
+    gap: 6px;
+  }
+
+  .yoro-admin-shell .yoro-ar-register-copy h2,
+  .yoro-admin-shell .yoro-ar-register-copy p { margin: 0; }
+
+  .yoro-admin-shell .yoro-ar-register-copy h2 {
+    color: var(--home-ink);
+    font-size: 16px;
+  }
+
+  .yoro-admin-shell .yoro-ar-register-copy p {
+    color: var(--home-sub);
+    font-size: 12.5px;
+    line-height: 1.55;
+  }
+
+  .yoro-admin-shell .yoro-ar-register-form {
+    display: grid;
+    grid-template-columns: minmax(140px, .8fr) minmax(180px, 1fr) auto;
+    gap: 10px;
+    align-items: end;
+  }
+
+  .yoro-admin-shell .yoro-ar-register-form label {
+    display: grid;
+    gap: 7px;
+    color: var(--home-sub);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .yoro-admin-shell .yoro-ar-register-form input,
+  .yoro-admin-shell .yoro-ar-register-submit {
+    min-height: 44px;
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+    font: inherit;
+  }
+
+  .yoro-admin-shell .yoro-ar-register-form input {
+    min-width: 0;
+    padding: 0 12px;
+    background: var(--home-bg);
+    color: var(--home-ink);
+  }
+
+  .yoro-admin-shell .yoro-ar-register-form input::placeholder { color: var(--home-mid); }
+
+  .yoro-admin-shell .yoro-ar-register-submit {
+    padding: 0 18px;
+    border-color: var(--home-ink);
+    background: var(--home-ink);
+    color: var(--home-bg);
+    font-size: 12.5px;
+    font-weight: 800;
+  }
+
+  .yoro-admin-shell .yoro-ar-register-submit:disabled {
+    opacity: .5;
+    cursor: default;
+  }
+
   /* 목록을 감싸던 흰 유리 카드는 걷어냅니다 — 카드 단위는 요청 하나입니다. */
   .yoro-admin-shell .streamer-riot-requests-card {
     padding: 0;
@@ -967,6 +1043,7 @@
     .yoro-admin-header { height: 60px; padding: 0 24px; }
     .yoro-admin-subnav { height: 44px; gap: 20px; padding: 0 24px; }
     .yoro-admin-shell .app-main { padding: 22px 24px 0; }
+    .yoro-admin-shell .yoro-ar-register-card { grid-template-columns: 1fr; }
   }
 
   @media (max-width: 47.9375rem) {
@@ -994,6 +1071,8 @@
     .yoro-admin-account-name { max-width: 7rem; }
 
     .yoro-admin-shell .app-main { padding: 18px 16px 0; }
+
+    .yoro-admin-shell .yoro-ar-register-form { grid-template-columns: 1fr; }
 
     .yoro-admin-shell .yoro-ar-card { padding: 12px 12px 12px 16px; }
   }

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  parseRiotIdDetailed,
   parseStreamerRiotIdRequestListResponse,
   type StreamerRiotIdRequest,
   type StreamerRiotIdRequestListItem
@@ -21,6 +22,17 @@ const i18n = {
   ko: {
     title: "스트리머 Riot ID 승인",
     description: "Twitch 로그인 사용자가 신청한 Riot ID를 확인하고 승인하면 공개 전적의 팔로우 방송인 목록에 연결됩니다.",
+    directRegisterTitle: "스트리머 직접 등록",
+    directRegisterDescription: "Twitch 계정과 Riot ID를 확인해 신청 절차 없이 즉시 승인합니다.",
+    twitchLoginLabel: "Twitch 로그인명",
+    twitchLoginPlaceholder: "예: streamer_login",
+    riotIdLabel: "Riot ID",
+    riotIdPlaceholder: "예: HideOnBush#KR1",
+    directRegister: "등록",
+    directRegistering: "등록 중",
+    directRegisterDone: "스트리머를 직접 등록했습니다.",
+    directRegisterFailed: "스트리머 직접 등록에 실패했습니다.",
+    invalidRiotId: "Riot ID를 gameName#tagLine 형식으로 입력하세요.",
     empty: "처리할 등록 요청이 없습니다.",
     loadFailed: "등록 요청을 불러오지 못했습니다.",
     resolveFailed: "등록 요청 처리에 실패했습니다.",
@@ -81,6 +93,17 @@ const i18n = {
   ja: {
     title: "配信者 Riot ID 承認",
     description: "Twitchログインユーザーが申請した Riot ID を確認し、承認すると公開戦績のフォロー配信者一覧に連携されます。",
+    directRegisterTitle: "配信者を直接登録",
+    directRegisterDescription: "Twitch アカウントと Riot ID を確認し、申請なしですぐに承認します。",
+    twitchLoginLabel: "Twitch ログイン名",
+    twitchLoginPlaceholder: "例: streamer_login",
+    riotIdLabel: "Riot ID",
+    riotIdPlaceholder: "例: HideOnBush#KR1",
+    directRegister: "登録",
+    directRegistering: "登録中",
+    directRegisterDone: "配信者を直接登録しました。",
+    directRegisterFailed: "配信者の直接登録に失敗しました。",
+    invalidRiotId: "Riot ID を gameName#tagLine 形式で入力してください。",
     empty: "処理する登録申請はありません。",
     loadFailed: "登録申請を読み込めませんでした。",
     resolveFailed: "登録申請の処理に失敗しました。",
@@ -174,6 +197,9 @@ export function StreamerRiotRequestsPage({
   const [requests, setRequests] = useState<AdminStreamerRiotIdRequest[]>(snapshot.streamerRiotIdRequests ?? []);
   const [loading, setLoading] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [registering, setRegistering] = useState(false);
+  const [directTwitchLogin, setDirectTwitchLogin] = useState("");
+  const [directRiotId, setDirectRiotId] = useState("");
   const [message, setMessage] = useState("");
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | AdminStreamerRiotIdRequest["status"]>("pending");
@@ -268,6 +294,37 @@ export function StreamerRiotRequestsPage({
     }
   }
 
+  async function registerStreamerDirectly(event: React.FormEvent<HTMLFormElement>): Promise<void> {
+    event.preventDefault();
+    const parsedRiotId = parseRiotIdDetailed(directRiotId);
+    if (!parsedRiotId.ok) {
+      setMessage(t.invalidRiotId);
+      return;
+    }
+    const path = "/api/participation/streamer-riot-id-requests/admin-register";
+    setRegistering(true);
+    setMessage("");
+    try {
+      const result = await apiPost<{ request: AdminStreamerRiotIdRequest; requests: AdminStreamerRiotIdRequest[] }>(
+        path,
+        {
+          twitchLogin: directTwitchLogin.trim().toLowerCase(),
+          riotGameName: parsedRiotId.gameName,
+          riotTagLine: parsedRiotId.tagLine
+        }
+      );
+      setRequests(result.requests);
+      setDirectTwitchLogin("");
+      setDirectRiotId("");
+      setStatusFilter("approved");
+      setMessage(t.directRegisterDone);
+    } catch (error) {
+      setMessage(apiErrorDetail(error, path, t.directRegisterFailed));
+    } finally {
+      setRegistering(false);
+    }
+  }
+
   async function confirmPendingAction(): Promise<void> {
     if (!pendingAction) return;
     const { request, decision } = pendingAction;
@@ -315,6 +372,45 @@ export function StreamerRiotRequestsPage({
         </div>
         <span className="queue-status neutral">{loading ? t.loading : `${t.pending} ${pendingCount}`}</span>
       </div>
+
+      <section className="card yoro-ar-register-card" aria-labelledby="yoro-ar-register-title">
+        <div className="yoro-ar-register-copy">
+          <h2 id="yoro-ar-register-title">{t.directRegisterTitle}</h2>
+          <p>{t.directRegisterDescription}</p>
+        </div>
+        <form className="yoro-ar-register-form" onSubmit={(event) => void registerStreamerDirectly(event)}>
+          <label htmlFor="yoro-ar-twitch-login">
+            <span>{t.twitchLoginLabel}</span>
+            <input
+              autoComplete="off"
+              id="yoro-ar-twitch-login"
+              maxLength={25}
+              onChange={(event) => setDirectTwitchLogin(event.target.value)}
+              pattern="[A-Za-z0-9_]{1,25}"
+              placeholder={t.twitchLoginPlaceholder}
+              required
+              type="text"
+              value={directTwitchLogin}
+            />
+          </label>
+          <label htmlFor="yoro-ar-riot-id">
+            <span>{t.riotIdLabel}</span>
+            <input
+              autoComplete="off"
+              id="yoro-ar-riot-id"
+              maxLength={64}
+              onChange={(event) => setDirectRiotId(event.target.value)}
+              placeholder={t.riotIdPlaceholder}
+              required
+              type="text"
+              value={directRiotId}
+            />
+          </label>
+          <button className="yoro-ar-register-submit" disabled={registering} type="submit">
+            {registering ? t.directRegistering : t.directRegister}
+          </button>
+        </form>
+      </section>
 
       <div className="participation-summary">
         <div><span>{t.pendingCount}</span><strong>{pendingCount}</strong></div>

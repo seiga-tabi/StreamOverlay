@@ -13767,6 +13767,118 @@ export function createHttpHandler(input: HttpHandlerInput) {
         return sendJson(req, res, 200, saved);
       }
 
+      if (req.method === "POST" && url.pathname === "/api/participation/streamer-riot-id-requests/admin-register") {
+        if (auth.principal.type !== "DASHBOARD_ADMIN" || !principalHasPermission(auth.principal, "streamer_approval")) {
+          return sendJson(req, res, 403, { error: "관리자 권한이 필요합니다." });
+        }
+        const body = await readJsonBody<{
+          twitchLogin?: unknown;
+          riotGameName?: unknown;
+          riotTagLine?: unknown;
+        }>(req);
+        const twitchLogin = typeof body.twitchLogin === "string"
+          ? body.twitchLogin.trim().toLowerCase()
+          : "";
+        if (!/^[a-z0-9][a-z0-9_]{0,24}$/u.test(twitchLogin)) {
+          return sendJson(req, res, 400, {
+            error: "Twitch 로그인명은 영문 소문자, 숫자, 밑줄로 1~25자 이내여야 합니다.",
+            code: "invalid_twitch_login"
+          });
+        }
+        if (typeof body.riotGameName !== "string" || typeof body.riotTagLine !== "string") {
+          return sendJson(req, res, 400, {
+            error: "Riot ID는 gameName과 tagLine 문자열이어야 합니다.",
+            code: "invalid_riot_id"
+          });
+        }
+        const parsedRiotId = parseRiotIdDetailed(`${body.riotGameName}#${body.riotTagLine}`);
+        if (!parsedRiotId.ok) {
+          return sendJson(req, res, 400, { error: parsedRiotId.message, code: "invalid_riot_id" });
+        }
+        if (!input.twitch || typeof input.twitch.getUserProfilesByLogins !== "function") {
+          return sendJson(req, res, 503, {
+            error: "Twitch 계정 확인 서비스를 사용할 수 없습니다.",
+            code: "twitch_lookup_unavailable"
+          });
+        }
+        const profiles = await input.twitch.getUserProfilesByLogins([twitchLogin]);
+        const twitchProfile = profiles.get(twitchLogin);
+        if (!twitchProfile) {
+          return sendJson(req, res, 400, {
+            error: "Twitch 계정을 찾을 수 없습니다.",
+            code: "twitch_user_not_found"
+          });
+        }
+
+        /* 기존 DB CHECK가 resolved action의 metadata 키를 decision·noteProvided로
+           제한하므로 새 구분 필드를 싣지 않습니다. targetIdentifier는 실제 저장을
+           시작하기 전에 감사 row를 만들 수 있는 안정적인 입력 조합을 사용합니다. */
+        const audit = await beginGlobalAdminAudit(
+          auth.principal,
+          "streamer.riot_id_request.resolved",
+          `admin-register:${twitchProfile.id}:${normalizeRiotIdKey(parsedRiotId.gameName, parsedRiotId.tagLine)}`,
+          { decision: "approved", noteProvided: true }
+        );
+        let request: StreamerRiotIdRequest | undefined;
+        let previousApprovedRequests: StreamerRiotIdRequest[] = [];
+        try {
+          const beforeRequests = listStreamerRiotIdRequests();
+          const normalizedKey = normalizeRiotIdKey(parsedRiotId.gameName, parsedRiotId.tagLine);
+          const conflict = beforeRequests.find((row) =>
+            row.status !== "rejected"
+            && row.normalizedRiotId === normalizedKey
+            && row.twitchUserId !== twitchProfile.id
+          );
+          if (conflict) {
+            throw new HttpRequestError(409, {
+              error: "이미 다른 스트리머가 등록한 Riot ID입니다.",
+              code: "riot_id_taken"
+            });
+          }
+          previousApprovedRequests = beforeRequests.filter((candidate) =>
+            candidate.twitchUserId === twitchProfile.id
+            && candidate.status === "approved"
+            && !isSubStreamerRiotAccount(candidate)
+          );
+          const pending = upsertStreamerRiotIdRequest({
+            twitchUserId: twitchProfile.id,
+            twitchLogin: twitchProfile.login || twitchLogin,
+            twitchDisplayName: twitchProfile.displayName || twitchProfile.login || twitchLogin,
+            twitchProfileImageUrl: twitchProfile.profileImageUrl,
+            riotGameName: parsedRiotId.gameName,
+            riotTagLine: parsedRiotId.tagLine
+          });
+          /* 같은 승인 row의 재등록은 upsert가 그대로 돌려줍니다. 다시 resolve하면
+             기존 dashboardEnabled가 false로 초기화되므로 승인 상태는 건드리지 않아
+             재시도를 실제로 idempotent하게 유지합니다. */
+          request = pending.status === "approved"
+            ? pending
+            : resolveStreamerRiotIdRequest({
+                requestId: pending.id,
+                decision: "approved",
+                reviewer: auth.principal.adminAccountId ?? "dashboard",
+                note: "관리자 직접 등록"
+              });
+        } catch (error) {
+          await completeGlobalAdminAudit(audit, "failed");
+          throw error;
+        }
+        if (!request) {
+          await completeGlobalAdminAudit(audit, "failed");
+          throw new HttpRequestError(500, {
+            error: "스트리머 직접 등록 결과를 불러오지 못했습니다.",
+            code: "streamer_registration_failed"
+          });
+        }
+        await completeGlobalAdminAudit(audit, "succeeded");
+        invalidatePublicLolProfileCachesForStreamer(request);
+        for (const previousRequest of previousApprovedRequests) invalidatePublicLolProfileCachesForStreamer(previousRequest);
+        return sendJson(req, res, 200, {
+          request: streamerRiotIdRequestListItem(request),
+          requests: listStreamerRiotIdRequests().map(streamerRiotIdRequestListItem)
+        });
+      }
+
       if (req.method === "POST" && url.pathname === "/api/participation/streamer-riot-id-requests/resolve") {
         if (auth.principal.type !== "DASHBOARD_ADMIN" || !principalHasAdminPermission(auth.principal, "streamer_approval")) {
           return sendJson(req, res, 403, { error: "관리자 권한이 필요합니다." });

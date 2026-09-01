@@ -96,9 +96,23 @@ test("한국어·일본어 문구를 함께 관리한다", () => {
     ["거절합니다", "拒否します"],
     ["Twitch 또는 Riot ID 검색", "Twitch または Riot ID を検索"],
     ["관리자 권한 부여", "管理者権限を付与"],
-    ["관리자 권한 회수", "管理者権限を剥奪"]
+    ["관리자 권한 회수", "管理者権限を剥奪"],
+    ["스트리머 직접 등록", "配信者を直接登録"],
+    ["등록 중", "登録中"]
   ]) {
     assert.equal(page.includes(ko), true, ko);
     assert.equal(page.includes(ja), true, ja);
   }
+});
+
+test("관리자 직접 등록 폼은 검증된 Riot ID를 신규 API로 전송하고 승인 목록을 표시한다", () => {
+  assert.match(page, /parseRiotIdDetailed\(directRiotId\)/u);
+  assert.match(page, /\/api\/participation\/streamer-riot-id-requests\/admin-register/u);
+  assert.match(page, /twitchLogin: directTwitchLogin\.trim\(\)\.toLowerCase\(\)/u);
+  assert.match(page, /riotGameName: parsedRiotId\.gameName/u);
+  assert.match(page, /riotTagLine: parsedRiotId\.tagLine/u);
+  assert.match(page, /setStatusFilter\("approved"\)/u);
+  assert.match(page, /htmlFor="yoro-ar-twitch-login"/u);
+  assert.match(page, /htmlFor="yoro-ar-riot-id"/u);
+  assert.match(css, /\.yoro-ar-register-submit[\s\S]*?min-height:\s*44px/u);
 });

@@ -446,6 +446,7 @@ const ADMIN_BASELINE_API_RULES: StreamerDashboardRule[] = [
 const ADMIN_PERMISSION_API_RULES: Record<AdminPermission, StreamerDashboardRule[]> = {
   streamer_approval: [
     { method: "GET", path: "/api/participation/streamer-riot-id-requests" },
+    { method: "POST", path: "/api/participation/streamer-riot-id-requests/admin-register" },
     { method: "POST", path: "/api/participation/streamer-riot-id-requests/resolve" },
     { method: "POST", path: "/api/participation/streamer-riot-id-requests/dashboard-access" }
     /* grant-admin / revoke-admin(관리자 권한 부여·회수)은 의도적으로 등록하지
