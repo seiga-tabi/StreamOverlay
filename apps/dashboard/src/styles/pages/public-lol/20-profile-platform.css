@@ -16,6 +16,11 @@
   --public-gray-text: #f5f6f8;
   --public-gray-muted: #b9c3d0;
 
+  --yoro-color-surface: var(--public-gray-surface);
+  --yoro-color-surface-muted: var(--public-gray-surface-strong);
+  --yoro-color-text: var(--public-gray-text);
+  --yoro-color-border: var(--public-gray-border);
+
   /* 지표 「잘함」 전용 글자색. 승리 초록(--graph-win-ink)과 뜻도 채도도 다릅니다 —
      저건 승패, 이건 이 판에서 그 지표를 잘했는가입니다. 밝은 형광은 흰 배경에서
      무너지므로 라이트에는 다른 값을 둡니다(아래 라이트 토큰 블록). */
@@ -176,6 +181,11 @@
   --public-gray-border-strong: #cfd6de;
   --public-gray-text: #1c1d22;
   --public-gray-muted: #5f6e80;
+
+  --yoro-color-surface: var(--public-gray-surface);
+  --yoro-color-surface-muted: var(--public-gray-surface-strong);
+  --yoro-color-text: var(--public-gray-text);
+  --yoro-color-border: var(--public-gray-border);
 
   /* 지표 「잘함」 — 다크의 형광(#3dff88)은 흰 카드 위 1.3:1 로 무너집니다. */
   --metric-hi-ink: #00803a;   /* 카드 #ffffff 위 5.06:1 */

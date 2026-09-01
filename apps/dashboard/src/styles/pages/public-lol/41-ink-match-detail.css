@@ -102,6 +102,77 @@
     box-shadow: none;
   }
 
+  /* 상세 데이터가 도착하기 전에는 진영을 추측하지 않고 같은 8열 표에 10행을
+     이어 붙입니다. SkeletonCard의 상태 전달은 유지하되 외형은 표 셸이 맡습니다. */
+  .public-profile-platform-v2 .public-team-loading-skeleton.yoro-skeleton-card {
+    gap: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    color: inherit;
+    font-family: inherit;
+  }
+
+  .public-profile-platform-v2 .public-team-loading-card .public-team-player-skeleton {
+    display: grid;
+  }
+
+  .public-profile-platform-v2 .public-team-player-skeleton .public-team-skeleton-rank {
+    inline-size: 26px;
+    block-size: 20px;
+    border-radius: 2px;
+  }
+
+  .public-profile-platform-v2 .public-team-player-skeleton .public-team-skeleton-avatar {
+    inline-size: 40px;
+    block-size: 40px;
+    border-radius: 6px;
+  }
+
+  .public-profile-platform-v2 .public-team-player-skeleton .public-team-skeleton-spell {
+    inline-size: 18px;
+    block-size: 18px;
+    border-radius: 3px;
+  }
+
+  .public-profile-platform-v2 .public-team-player-skeleton .public-team-skeleton-name {
+    inline-size: 64%;
+    block-size: 12px;
+    border-radius: 4px;
+  }
+
+  .public-profile-platform-v2 .public-team-player-skeleton .public-team-skeleton-kda {
+    inline-size: 40px;
+    block-size: 12px;
+    margin-inline: auto;
+    border-radius: 4px;
+  }
+
+  .public-profile-platform-v2 .public-team-player-skeleton .public-team-skeleton-damage {
+    inline-size: 70px;
+    block-size: 10px;
+    border-radius: 4px;
+  }
+
+  .public-profile-platform-v2 .public-team-player-skeleton .public-team-skeleton-cs {
+    inline-size: 46px;
+    block-size: 12px;
+    border-radius: 4px;
+  }
+
+  .public-profile-platform-v2 .public-team-player-skeleton .public-team-skeleton-items {
+    display: flex;
+    justify-content: flex-end;
+    gap: 3px;
+  }
+
+  .public-profile-platform-v2 .public-team-player-skeleton .public-team-skeleton-item {
+    inline-size: 22px;
+    block-size: 22px;
+    border-radius: 3px;
+  }
+
   /* 본인 행 — 무채 워시 + 아바타 테두리 + 이름 800. 그라데이션 금지(목업 §2-4). */
   .public-profile-platform-v2 .public-team-detail .public-team-player.target {
     background: var(--profile-row-wash);
@@ -423,6 +494,34 @@
   @media (max-width: 48rem) {
     .public-profile-platform-v2 .public-team-columns {
       display: none;
+    }
+
+    .public-profile-platform-v2 .public-team-player-skeleton .public-team-skeleton-rank { grid-area: rank; }
+    .public-profile-platform-v2 .public-team-player-skeleton .public-team-skeleton-avatar {
+      grid-area: avatar;
+      inline-size: 36px;
+      block-size: 36px;
+    }
+    .public-profile-platform-v2 .public-team-player-skeleton .public-team-skeleton-spell { grid-area: loadout; }
+    .public-profile-platform-v2 .public-team-player-skeleton .public-team-skeleton-name-cell { grid-area: copy; }
+    .public-profile-platform-v2 .public-team-player-skeleton .public-team-skeleton-name { inline-size: 100%; }
+    .public-profile-platform-v2 .public-team-player-skeleton .public-team-skeleton-kda {
+      grid-area: kda;
+      margin-inline: 0;
+    }
+    .public-profile-platform-v2 .public-team-player-skeleton .public-team-skeleton-damage,
+    .public-profile-platform-v2 .public-team-player-skeleton .public-team-skeleton-cs {
+      display: none;
+    }
+    .public-profile-platform-v2 .public-team-player-skeleton .public-team-skeleton-items {
+      display: grid;
+      grid-area: items;
+      grid-template-columns: repeat(4, 18px);
+      gap: 2px;
+    }
+    .public-profile-platform-v2 .public-team-player-skeleton .public-team-skeleton-item {
+      inline-size: 18px;
+      block-size: 18px;
     }
 
     /* 룬 2칸 되살림(§2-2) — 데스크톱 행은 여전히 빌드 탭 전담입니다.

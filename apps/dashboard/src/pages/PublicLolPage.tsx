@@ -5303,6 +5303,51 @@ function MatchGapStrip({ match }: { match: PublicLolRecentMatch }) {
   );
 }
 
+function MatchTeamRowSkeleton({ index }: { index: number }) {
+  const itemCount = 3 + (index % 4);
+
+  return (
+    <div aria-hidden="true" className="public-team-player public-team-player-skeleton">
+      <Skeleton className="public-team-skeleton-rank" />
+      <Skeleton className="public-team-skeleton-avatar" />
+      <Skeleton className="public-team-skeleton-spell" />
+      <div className="public-team-skeleton-name-cell">
+        <Skeleton className="public-team-skeleton-name" />
+      </div>
+      <Skeleton className="public-team-skeleton-kda" />
+      <Skeleton className="public-team-skeleton-damage" />
+      <Skeleton className="public-team-skeleton-cs" />
+      <div className="public-team-skeleton-items">
+        {Array.from({ length: itemCount }, (_, itemIndex) => (
+          <Skeleton className="public-team-skeleton-item" key={itemIndex} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MatchTeamDetailLoadingSkeleton({ loadingLabel }: { loadingLabel: string }) {
+  return (
+    <SkeletonCard className="public-team-detail public-team-loading-skeleton" loadingLabel={loadingLabel} size="md">
+      <div className="public-team-card public-team-loading-card">
+        <div className="public-team-columns" aria-hidden="true">
+          <span className="col-champion">{t().teamColChampion}</span>
+          <span className="col-summoner">{t().teamColSummoner}</span>
+          <span className="col-kda">{t().kda}</span>
+          <span className="col-damage">{t().teamColDamage}</span>
+          <span className="col-cs-vision">{t().teamColCsVision}</span>
+          <span className="col-items">{t().arenaColItems}</span>
+        </div>
+        <div className="public-team-player-list">
+          {Array.from({ length: 10 }, (_, index) => (
+            <MatchTeamRowSkeleton index={index} key={index} />
+          ))}
+        </div>
+      </div>
+    </SkeletonCard>
+  );
+}
+
 function MatchTeamDetails({
   match,
   rankDetail,
@@ -6028,9 +6073,7 @@ function RecentMatches({
               {rankError ? <FormError role="status">{rankError}</FormError> : null}
             </div>
           ) : detailLoading ? (
-            <SkeletonCard loadingLabel={t().matchDetailLoading} size="md">
-              <SkeletonText lines={4} />
-            </SkeletonCard>
+            <MatchTeamDetailLoadingSkeleton loadingLabel={t().matchDetailLoading} />
           ) : detailError ? (
             <EmptyState as="div" variant="error">
               <EmptyStateIcon>!</EmptyStateIcon>
