@@ -392,6 +392,23 @@
   box-shadow: 0 12px 28px rgba(104, 130, 224, .2);
 }
 
+.auth-form button.secondary {
+  border-color: var(--line-strong);
+  background: rgba(255, 255, 255, .7);
+  color: var(--text-strong);
+  box-shadow: none;
+}
+
+.auth-form button.secondary:hover:not(:disabled) {
+  border-color: rgba(79, 120, 232, .28);
+  background: rgba(122, 167, 255, .12);
+}
+
+.auth-token-form {
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+}
+
 .app-sidebar {
   border-right: 1px solid var(--line);
 }

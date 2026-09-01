@@ -570,7 +570,9 @@ test("공개 Twitch OAuth는 Palworld 허용 경로와 안전한 query를 복귀
       "/ko/patch-notes",
       "/ja/palworld/search?q=%E3%83%91%E3%83%AB",
       "/dashboard",
-      "/dashboard/seiga/key"
+      "/dashboard/seiga/key",
+      "/admin",
+      "/admin/events"
     ];
 
     for (const returnTo of allowedPaths) {

@@ -38,8 +38,11 @@ export const dashboardI18n = {
     authPage: {
       eyebrow: "관리자 로그인",
       title: "StreamOps 접근 인증",
-      description: "서버에 설정된 dashboard token을 입력해야 방송 운영 화면에 접근할 수 있습니다.",
-      tokenLabel: "Dashboard token",
+      description: "관리자 권한을 부여받은 Twitch 계정으로 로그인하세요. 전체 관리자는 토큰 로그인을 사용할 수 있습니다.",
+      loginWithTwitch: "Twitch로 로그인",
+      tokenLoginToggle: "토큰으로 로그인",
+      twitchAdminRequired: "Twitch 로그인은 완료되었지만 이 계정에 관리자 권한이 없습니다.",
+      tokenLabel: "Dashboard token (full_admin 전용)",
       placeholder: "DASHBOARD_AUTH_TOKEN",
       login: "로그인",
       checking: "확인 중",
@@ -47,7 +50,7 @@ export const dashboardI18n = {
       unavailable: "인증 상태를 확인하지 못했습니다. 서버 연결을 확인해주세요.",
       notConfigured: "서버에 DASHBOARD_AUTH_TOKEN이 설정되지 않아 로그인이 잠겨 있습니다.",
       adminOnly: "관리자 페이지는 dashboard token으로 다시 로그인해야 합니다.",
-      hint: "서버 환경 변수 DASHBOARD_AUTH_TOKEN에 설정한 값과 동일해야 합니다.",
+      hint: "토큰 로그인은 full_admin 전용입니다. 서버 환경 변수 DASHBOARD_AUTH_TOKEN에 설정한 값을 입력하세요.",
       backToPublic: "전적 검색으로 돌아가기"
     },
     pages: {
@@ -242,8 +245,11 @@ export const dashboardI18n = {
     authPage: {
       eyebrow: "管理者ログイン",
       title: "StreamOps アクセス認証",
-      description: "サーバーに設定された dashboard token を入力すると配信運用画面にアクセスできます。",
-      tokenLabel: "Dashboard token",
+      description: "管理者権限が付与された Twitch アカウントでログインしてください。全権管理者はトークンログインを利用できます。",
+      loginWithTwitch: "Twitchでログイン",
+      tokenLoginToggle: "トークンでログイン",
+      twitchAdminRequired: "Twitch ログインは完了しましたが、このアカウントには管理者権限がありません。",
+      tokenLabel: "Dashboard token（full_admin 専用）",
       placeholder: "DASHBOARD_AUTH_TOKEN",
       login: "ログイン",
       checking: "確認中",
@@ -251,7 +257,7 @@ export const dashboardI18n = {
       unavailable: "認証状態を確認できませんでした。サーバー接続を確認してください。",
       notConfigured: "サーバーに DASHBOARD_AUTH_TOKEN が設定されていないためログインはロックされています。",
       adminOnly: "管理者ページは dashboard token で再ログインしてください。",
-      hint: "サーバー環境変数 DASHBOARD_AUTH_TOKEN に設定した値と同じである必要があります。",
+      hint: "トークンログインは full_admin 専用です。サーバー環境変数 DASHBOARD_AUTH_TOKEN に設定した値を入力してください。",
       backToPublic: "戦績検索に戻る"
     },
     pages: {

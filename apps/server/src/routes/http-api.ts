@@ -1565,9 +1565,11 @@ function publicTwitchReturnUrlForRequest(req: IncomingMessage, requestedPath: st
     return fallback;
   }
   const dashboardPath = returnUrl.pathname === "/dashboard" || returnUrl.pathname.startsWith("/dashboard/");
+  const adminPath = returnUrl.pathname === "/admin" || returnUrl.pathname.startsWith("/admin/");
   const publicPath = stripPublicUrlLocalePrefix(returnUrl.pathname);
   if (
     !dashboardPath
+    && !adminPath
     && !PUBLIC_TWITCH_PALWORLD_RETURN_PATHS.has(returnUrl.pathname)
     && !isLocalizablePublicDashboardRoute(publicPath)
   ) {
