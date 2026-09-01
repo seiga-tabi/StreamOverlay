@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { apiDelete, apiGet, apiPost, apiPut, DashboardApiError } from "../api/client";
 import { AdminConfirmDialog } from "../components/AdminConfirmDialog";
+import { parseStreamerHandleInput } from "../features/public-streamers/utils/official-profile-input";
 import { createDashboardLocaleProxy } from "../i18n";
 
 type Platform = "twitch" | "chzzk" | "youtube";
@@ -163,6 +164,12 @@ export function StreamerProfilesPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  function changeHandle(value: string) {
+    const parsed = parseStreamerHandleInput(value);
+    setHandle(parsed.handle);
+    if (parsed.platform) setPlatform(parsed.platform);
+  }
+
   async function save() {
     if (!streamerName.trim() || !handle.trim() || games.length === 0) {
       setMessage(t.required);
@@ -211,7 +218,7 @@ export function StreamerProfilesPage() {
       <section className="streamer-profile-admin-form">
         <label>{t.name}<input maxLength={60} onChange={(event) => setStreamerName(event.target.value)} value={streamerName} /></label>
         <label>{t.platform}<select onChange={(event) => setPlatform(event.target.value as Platform)} value={platform}>{PLATFORMS.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
-        <label>{t.handle}<input maxLength={80} onChange={(event) => setHandle(event.target.value)} value={handle} /></label>
+        <label>{t.handle}<input maxLength={80} onChange={(event) => changeHandle(event.target.value)} value={handle} /></label>
         {games.includes("lol") ? <label>{t.riotId}<input maxLength={60} onChange={(event) => setRiotId(event.target.value)} placeholder={t.riotIdPlaceholder} value={riotId} /></label> : null}
         <fieldset><legend>{t.games}</legend><div>{GAMES.map((game) => <label key={game}><input checked={games.includes(game)} onChange={(event) => setGames((current) => event.target.checked ? [...new Set([...current, game])] : current.filter((item) => item !== game))} type="checkbox" />{game}</label>)}</div></fieldset>
         <div className="streamer-profile-admin-form__actions"><button disabled={busy} onClick={() => void save()} type="button">{editingId ? t.update : t.create}</button>{editingId ? <button data-secondary="true" disabled={busy} onClick={resetForm} type="button">{t.cancelEdit}</button> : null}</div>

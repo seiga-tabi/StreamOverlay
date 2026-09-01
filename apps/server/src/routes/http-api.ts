@@ -13914,6 +13914,19 @@ export function createHttpHandler(input: HttpHandlerInput) {
         );
         let request: StreamerRiotIdRequest | undefined;
         try {
+          if (body.decision === "approved" && !isSubStreamerRiotAccount(beforeRequest)) {
+            const conflict = beforeRequests.find((row) =>
+              row.status !== "rejected"
+              && row.normalizedRiotId === beforeRequest.normalizedRiotId
+              && row.twitchUserId !== beforeRequest.twitchUserId
+            );
+            if (conflict) {
+              throw new HttpRequestError(409, {
+                error: "이미 다른 스트리머가 등록한 Riot ID입니다.",
+                code: "riot_id_taken"
+              });
+            }
+          }
           request = resolveStreamerRiotIdRequest({
             requestId: body.requestId,
             decision: body.decision,

@@ -142,6 +142,80 @@ test("Riot ID 승인·거절은 Store 변경 전에 전역 감사를 시작하�
   });
 });
 
+test("다른 스트리머가 선점한 Riot ID는 대표 승인을 막되 거절은 허용한다", async () => {
+  await withDatabaseAdminAuth(async () => {
+    const approved = streamerRequest({
+      id: "streamer-request-approved",
+      twitchUserId: "111111111",
+      twitchLogin: "approved_streamer",
+      status: "approved",
+      dashboardEnabled: true,
+      reviewedAt: NOW
+    });
+    let pending = streamerRequest({
+      id: "streamer-request-pending",
+      twitchUserId: "222222222",
+      twitchLogin: "pending_streamer"
+    });
+    let resolveCalls = 0;
+    const auditOutcomes = [];
+    const handler = createHttpHandler({
+      store: {
+        listStreamerRiotIdRequests() {
+          return [{ ...approved }, { ...pending }];
+        },
+        resolveStreamerRiotIdRequest(input) {
+          resolveCalls += 1;
+          pending = { ...pending, status: input.decision, reviewedAt: NOW };
+          return { ...pending };
+        }
+      },
+      twitchAuth: {},
+      actions: { async dispatchOne() {} },
+      discordDatabaseReady: () => true,
+      adminAuditLogs: {
+        async list() {
+          return { logs: [], page: { from: NOW, to: NOW, offset: 0, limit: 50, hasMore: false, truncated: false } };
+        },
+        async beginGlobalMutation() {
+          return { mutationId: "33333333-3333-4333-8333-333333333333" };
+        },
+        async completeGlobalMutation(input) {
+          auditOutcomes.push(input.outcome);
+        }
+      }
+    });
+
+    const blocked = await send(
+      handler,
+      "/api/participation/streamer-riot-id-requests/resolve",
+      { requestId: pending.id, decision: "approved" }
+    );
+
+    assert.equal(blocked.statusCode, 409);
+    assert.deepEqual(JSON.parse(blocked.body), {
+      error: "이미 다른 스트리머가 등록한 Riot ID입니다.",
+      code: "riot_id_taken"
+    });
+    assert.equal(resolveCalls, 0);
+    assert.equal(approved.status, "approved");
+    assert.equal(pending.status, "pending");
+    assert.deepEqual(auditOutcomes, ["failed"]);
+
+    const rejected = await send(
+      handler,
+      "/api/participation/streamer-riot-id-requests/resolve",
+      { requestId: pending.id, decision: "rejected" }
+    );
+
+    assert.equal(rejected.statusCode, 200);
+    assert.equal(resolveCalls, 1);
+    assert.equal(approved.status, "approved");
+    assert.equal(pending.status, "rejected");
+    assert.deepEqual(auditOutcomes, ["failed", "succeeded"]);
+  });
+});
+
 test("대시보드 접근 변경도 별도 action으로 감사하고 DB 감사 시작 실패 시 Store를 변경하지 않는다", async () => {
   await withDatabaseAdminAuth(async () => {
     let storeCalls = 0;
