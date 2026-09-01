@@ -61,6 +61,7 @@ const POST = {
 const OFFICIAL_POST = {
   ...POST,
   id: "official-bamtol",
+  riotId: "밤톨#KR1",
   registeredByAdmin: true,
   officialProfile: { handle: "bamtol", seoSlug: "bamtol", liveStatusSupported: true },
 };
@@ -224,28 +225,45 @@ test("관리자 공식 프로필 API는 생성·수정·비활성화를 지원�
   const listed = await call(handler, "GET", "/api/dashboard/streamer-profiles");
   assert.equal(listed.status, 200);
   assert.equal(listed.json.profiles.length, 1);
+  assert.equal(listed.json.profiles[0].riotId, "밤톨#KR1");
 
   const created = await call(handler, "POST", "/api/dashboard/streamer-profiles", {
     streamerName: "한겨울",
     platform: "chzzk",
     handle: "Hangyeoul",
     games: ["palworld"],
+    riotId: "무시됨#KR1",
     liveStatusSupported: true,
   });
   assert.equal(created.status, 201);
   const createCall = board.calls.find(([name]) => name === "createOfficialProfile");
   assert.equal(createCall[1].channelKey, "chzzk:hangyeoul");
   assert.equal(createCall[1].officialProfile.seoSlug, "hangyeoul");
+  assert.equal(createCall[1].riotId, undefined, "LoL이 아니면 Riot ID를 버립니다");
   assert.equal(createCall[1].officialProfile.liveStatusSupported, false, "치지직은 요청값과 무관하게 false입니다");
+
+  const createdWithoutRiotId = await call(handler, "POST", "/api/dashboard/streamer-profiles", {
+    streamerName: "선택 입력 테스트",
+    platform: "twitch",
+    handle: "OptionalRiotId",
+    games: ["lol"],
+    riotId: "   ",
+  });
+  assert.equal(createdWithoutRiotId.status, 201, "LoL 프로필도 Riot ID 없이 등록할 수 있습니다");
+  const optionalCreateCall = board.calls.filter(([name]) => name === "createOfficialProfile").at(-1);
+  assert.equal(optionalCreateCall[1].riotId, undefined);
 
   const updated = await call(handler, "PUT", `/api/dashboard/streamer-profiles/${OFFICIAL_POST.id}`, {
     streamerName: "밤톨 새 이름",
     platform: "twitch",
     handle: "BamTol",
     games: ["lol"],
+    riotId: "새밤톨#KR1",
   });
   assert.equal(updated.status, 200);
-  assert.equal(board.calls.find(([name]) => name === "updateOfficialProfile")[2].officialProfile.liveStatusSupported, true);
+  const updateCall = board.calls.find(([name]) => name === "updateOfficialProfile");
+  assert.equal(updateCall[2].officialProfile.liveStatusSupported, true);
+  assert.equal(updateCall[2].riotId, "새밤톨#KR1");
 
   const deactivated = await call(handler, "DELETE", `/api/dashboard/streamer-profiles/${OFFICIAL_POST.id}`);
   assert.equal(deactivated.status, 200);

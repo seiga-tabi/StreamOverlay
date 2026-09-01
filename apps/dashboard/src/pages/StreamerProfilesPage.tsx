@@ -12,6 +12,7 @@ type OfficialProfile = {
   platform: Platform;
   channelUrl: string;
   games: readonly Game[];
+  riotId?: string;
   officialProfile: { handle: string; seoSlug: string; liveStatusSupported: boolean };
   active: boolean;
 };
@@ -27,6 +28,8 @@ const i18n = {
     handle: "플랫폼 핸들",
     platform: "플랫폼",
     games: "주력 게임",
+    riotId: "Riot ID (LoL, 선택)",
+    riotIdPlaceholder: "게임명#KR1",
     create: "공식 프로필 등록",
     update: "변경 저장",
     cancelEdit: "편집 취소",
@@ -58,6 +61,8 @@ const i18n = {
     handle: "プラットフォームハンドル",
     platform: "プラットフォーム",
     games: "主なゲーム",
+    riotId: "Riot ID（LoL、任意）",
+    riotIdPlaceholder: "ゲーム名#KR1",
     create: "公式プロフィールを登録",
     update: "変更を保存",
     cancelEdit: "編集をキャンセル",
@@ -95,6 +100,7 @@ function isProfile(value: unknown): value is OfficialProfile {
     && PLATFORMS.includes(row.platform as Platform)
     && typeof row.channelUrl === "string"
     && Array.isArray(row.games)
+    && (row.riotId === undefined || typeof row.riotId === "string")
     && typeof row.active === "boolean"
     && typeof official === "object" && official !== null
     && typeof (official as Record<string, unknown>).handle === "string"
@@ -114,6 +120,7 @@ export function StreamerProfilesPage() {
   const [platform, setPlatform] = useState<Platform>("twitch");
   const [handle, setHandle] = useState("");
   const [games, setGames] = useState<Game[]>(["lol"]);
+  const [riotId, setRiotId] = useState("");
   const [editingId, setEditingId] = useState<string>();
   const [deactivateTarget, setDeactivateTarget] = useState<OfficialProfile>();
   const [loading, setLoading] = useState(true);
@@ -143,6 +150,7 @@ export function StreamerProfilesPage() {
     setPlatform("twitch");
     setHandle("");
     setGames(["lol"]);
+    setRiotId("");
   }
 
   function edit(profile: OfficialProfile) {
@@ -151,6 +159,7 @@ export function StreamerProfilesPage() {
     setPlatform(profile.platform);
     setHandle(profile.officialProfile.handle);
     setGames([...profile.games]);
+    setRiotId(profile.riotId ?? "");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -161,7 +170,7 @@ export function StreamerProfilesPage() {
     }
     setBusy(true);
     setMessage("");
-    const body = { streamerName, platform, handle, games };
+    const body = { streamerName, platform, handle, games, riotId: riotId.trim() || undefined };
     try {
       if (editingId) await apiPut(`/api/dashboard/streamer-profiles/${editingId}`, body);
       else await apiPost("/api/dashboard/streamer-profiles", body);
@@ -203,6 +212,7 @@ export function StreamerProfilesPage() {
         <label>{t.name}<input maxLength={60} onChange={(event) => setStreamerName(event.target.value)} value={streamerName} /></label>
         <label>{t.platform}<select onChange={(event) => setPlatform(event.target.value as Platform)} value={platform}>{PLATFORMS.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
         <label>{t.handle}<input maxLength={80} onChange={(event) => setHandle(event.target.value)} value={handle} /></label>
+        {games.includes("lol") ? <label>{t.riotId}<input maxLength={60} onChange={(event) => setRiotId(event.target.value)} placeholder={t.riotIdPlaceholder} value={riotId} /></label> : null}
         <fieldset><legend>{t.games}</legend><div>{GAMES.map((game) => <label key={game}><input checked={games.includes(game)} onChange={(event) => setGames((current) => event.target.checked ? [...new Set([...current, game])] : current.filter((item) => item !== game))} type="checkbox" />{game}</label>)}</div></fieldset>
         <div className="streamer-profile-admin-form__actions"><button disabled={busy} onClick={() => void save()} type="button">{editingId ? t.update : t.create}</button>{editingId ? <button data-secondary="true" disabled={busy} onClick={resetForm} type="button">{t.cancelEdit}</button> : null}</div>
       </section>
@@ -215,7 +225,7 @@ export function StreamerProfilesPage() {
           <article className={`streamer-profile-admin-card${profile.active ? "" : " is-inactive"}`} key={profile.id}>
             <div><span>{profile.platform}</span><strong>{profile.streamerName}</strong><small>@{profile.officialProfile.handle}</small></div>
             <div><span>{t.officialUrl}</span><a href={`/streamers/${profile.platform}/${encodeURIComponent(profile.officialProfile.seoSlug)}`} rel="noreferrer" target="_blank">{`/streamers/${profile.platform}/${profile.officialProfile.seoSlug}`}</a></div>
-            <div className="streamer-profile-admin-card__tags">{profile.games.map((game) => <span key={game}>{game}</span>)}<span>{profile.officialProfile.liveStatusSupported ? t.liveEnabled : t.staticOnly}</span><b>{profile.active ? t.active : t.inactive}</b></div>
+            <div className="streamer-profile-admin-card__tags">{profile.games.map((game) => <span key={game}>{game}</span>)}{profile.riotId ? <span>{profile.riotId}</span> : null}<span>{profile.officialProfile.liveStatusSupported ? t.liveEnabled : t.staticOnly}</span><b>{profile.active ? t.active : t.inactive}</b></div>
             {profile.active ? <div className="streamer-profile-admin-card__actions"><button onClick={() => edit(profile)} type="button">{t.edit}</button><button data-danger="true" onClick={() => setDeactivateTarget(profile)} type="button">{t.deactivate}</button></div> : null}
           </article>
         ))}

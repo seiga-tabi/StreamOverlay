@@ -229,10 +229,11 @@ if (!DATABASE_URL) {
   });
 
   test("공식 프로필은 만들고 고치고 끄고 다시 켤 수 있다", async () => {
-    const created = await board.createOfficialProfile(officialDraft("official"));
+    const created = await board.createOfficialProfile(officialDraft("official", { riotId: "Official#KR1" }));
     assert.equal(created.registeredByAdmin, true);
     assert.equal(created.active, true);
     assert.equal(created.authorName, "YORO.gg");
+    assert.equal(created.riotId, "Official#KR1");
     assert.deepEqual(created.officialProfile, { handle: "official", seoSlug: "official", liveStatusSupported: true });
     assert.equal((await board.findOfficialProfile("twitch", "official"))?.id, created.id);
 
@@ -243,6 +244,7 @@ if (!DATABASE_URL) {
     }));
     assert.equal(updated?.streamerName, "새 이름");
     assert.deepEqual(updated?.games, ["palworld"]);
+    assert.equal(updated?.riotId, undefined, "LoL을 빼면 공식 프로필의 Riot ID도 비웁니다");
     assert.equal(updated?.officialProfile?.liveStatusSupported, false);
     assert.equal(await board.updateOfficialProfile("nosuchpost", officialDraft("nosuch")), undefined, "없는 글은 undefined — 라우트가 404 로 옮깁니다");
 
@@ -270,6 +272,53 @@ if (!DATABASE_URL) {
     assert.equal(await board.updateOfficialProfile(community.id, officialDraft("community")), undefined);
   });
 
+  test("시청자 추천 글은 공식 프로필로 승격되고 참여 데이터와 기존 Riot ID를 보존한다", async () => {
+    const community = await board.createPost(
+      draft({
+        channelKey: "twitch:promoted",
+        channelUrl: "https://www.twitch.tv/promoted",
+        streamerName: "승격 전 이름",
+        riotId: "Viewer#KR1",
+      }),
+      AUTHOR
+    );
+    await board.vote(community.id, AUTHOR.twitchUserId);
+    await board.vote(community.id, OTHER.twitchUserId);
+    await board.createComment(community.id, { body: "첫 댓글", anonymous: false }, AUTHOR);
+    await board.createComment(community.id, { body: "둘째 댓글", anonymous: true }, OTHER);
+
+    const promoted = await board.createOfficialProfile(officialDraft("promoted", {
+      streamerName: "승격 후 공식 이름",
+    }));
+    assert.equal(promoted.id, community.id, "새 행 대신 기존 추천 글을 승격합니다");
+    assert.equal(promoted.registeredByAdmin, true);
+    assert.equal(promoted.streamerName, "승격 후 공식 이름");
+    assert.deepEqual(promoted.tags, ["칼바람 나락"]);
+    assert.equal(promoted.riotId, "Viewer#KR1", "관리자가 비워 둔 Riot ID는 기존 값을 보존합니다");
+    assert.equal(promoted.votes, 2);
+    assert.equal(promoted.commentCount, 2);
+    assert.equal(promoted.authorName, "YORO.gg", "승격 후에는 시청자가 아닌 공식 작성자로 바뀝니다");
+
+    await assert.rejects(
+      () => board.createOfficialProfile(officialDraft("promoted")),
+      expectOfficialTaken(community.id)
+    );
+
+    const communityWithOverride = await board.createPost(
+      draft({
+        channelKey: "twitch:promoted-override",
+        channelUrl: "https://www.twitch.tv/promoted-override",
+        riotId: "ViewerOld#KR1",
+      }),
+      AUTHOR
+    );
+    const overridden = await board.createOfficialProfile(officialDraft("promoted-override", {
+      riotId: "AdminNew#JP1",
+    }));
+    assert.equal(overridden.id, communityWithOverride.id);
+    assert.equal(overridden.riotId, "AdminNew#JP1", "관리자가 입력한 Riot ID는 기존 값을 대체합니다");
+  });
+
   test("공식 URL 과 채널은 겹칠 수 없고, 꺼진 프로필의 URL 도 예약이 유지된다", async () => {
     const first = await board.createOfficialProfile(officialDraft("slug-a"));
 
@@ -281,13 +330,6 @@ if (!DATABASE_URL) {
       })),
       expectOfficialTaken(first.id)
     );
-
-    /* 추천 글이 이미 가진 채널 — 그 추천 글을 알려 줍니다. */
-    const community = await board.createPost(
-      draft({ channelKey: "twitch:owned", channelUrl: "https://www.twitch.tv/owned" }),
-      AUTHOR
-    );
-    await assert.rejects(() => board.createOfficialProfile(officialDraft("owned")), expectOfficialTaken(community.id));
 
     /* 수정으로 다른 공식 프로필의 URL 을 가져갈 수 없습니다. */
     const second = await board.createOfficialProfile(officialDraft("slug-b"));

@@ -143,6 +143,7 @@ export type StreamerOfficialProfileDraft = {
   channelKey: string;
   channelUrl: string;
   games: readonly StreamerGame[];
+  riotId?: string;
   officialProfile: StreamerOfficialProfile;
 };
 
@@ -179,12 +180,14 @@ export function parseStreamerOfficialProfileDraft(value: unknown): StreamerOffic
   if (!Array.isArray(body.games)) return undefined;
   const games = STREAMER_GAMES.filter((game) => (body.games as unknown[]).includes(game));
   if (games.length === 0) return undefined;
+  const riotId = games.includes("lol") ? boundedText(body.riotId, STREAMER_RIOT_ID_MAX) : undefined;
   return {
     streamerName,
     platform,
     channelKey,
     channelUrl,
     games,
+    ...(riotId ? { riotId } : {}),
     officialProfile: {
       handle,
       seoSlug: handle,

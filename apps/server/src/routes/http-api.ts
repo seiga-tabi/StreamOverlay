@@ -9931,6 +9931,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       platform: post.platform,
       channelUrl: post.channelUrl,
       games: [...post.games],
+      ...(post.riotId ? { riotId: post.riotId } : {}),
       registeredByAdmin: post.registeredByAdmin,
       officialProfile: post.officialProfile,
       active: post.active,

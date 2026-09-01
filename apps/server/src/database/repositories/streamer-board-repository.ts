@@ -326,22 +326,47 @@ export class StreamerBoardRepository {
   }
 
   async createOfficialProfile(draft: StreamerOfficialProfileDraft): Promise<StreamerBoardPostRow> {
-    const result = await repositoryQuery<PostDbRow>(
-      this.queryable,
-      `INSERT INTO streamer_posts
-         (id, channel_key, platform, channel_url, streamer_name, games, tags,
-          author_twitch_user_id, author_display_name, registered_by_admin,
-          official_handle, seo_slug, live_status_supported, active)
-       VALUES ($1, $2, $3, $4, $5, $6::TEXT[], '{}', '0', 'YORO.gg',
-               TRUE, $7, $8, $9, TRUE)
-       ON CONFLICT DO NOTHING
-       RETURNING ${POST_FIELDS}, FALSE AS voted`,
-      [
-        generateId(), draft.channelKey, draft.platform, draft.channelUrl,
-        draft.streamerName, [...draft.games], draft.officialProfile.handle,
-        draft.officialProfile.seoSlug, draft.officialProfile.liveStatusSupported
-      ]
-    );
+    let result: QueryResult<PostDbRow>;
+    try {
+      result = await repositoryQuery<PostDbRow>(
+        this.queryable,
+        `INSERT INTO streamer_posts
+           (id, channel_key, platform, channel_url, streamer_name, games, tags, riot_id,
+            author_twitch_user_id, author_display_name, registered_by_admin,
+            official_handle, seo_slug, live_status_supported, active)
+         VALUES ($1, $2, $3, $4, $5, $6::TEXT[], '{}', $7, '0', 'YORO.gg',
+                 TRUE, $8, $9, $10, TRUE)
+         ON CONFLICT (channel_key) DO UPDATE SET
+           platform = EXCLUDED.platform,
+           channel_url = EXCLUDED.channel_url,
+           streamer_name = EXCLUDED.streamer_name,
+           games = EXCLUDED.games,
+           riot_id = COALESCE(EXCLUDED.riot_id, streamer_posts.riot_id),
+           author_twitch_user_id = '0',
+           author_display_name = 'YORO.gg',
+           registered_by_admin = TRUE,
+           official_handle = EXCLUDED.official_handle,
+           seo_slug = EXCLUDED.seo_slug,
+           live_status_supported = EXCLUDED.live_status_supported,
+           active = TRUE,
+           updated_at = NOW()
+         WHERE streamer_posts.registered_by_admin = FALSE
+         RETURNING ${POST_FIELDS}, FALSE AS voted`,
+        [
+          generateId(), draft.channelKey, draft.platform, draft.channelUrl,
+          draft.streamerName, [...draft.games], draft.riotId ?? null,
+          draft.officialProfile.handle, draft.officialProfile.seoSlug,
+          draft.officialProfile.liveStatusSupported
+        ]
+      );
+    } catch (error) {
+      /* 승격 또는 삽입과 다른 트랜잭션의 공식 URL 변경이 겹치면 UNIQUE 제약이
+         마지막 판정을 합니다. 실제 중복만 기존 409 예외로 통일합니다. */
+      if (error instanceof SafeDatabaseError && error.code === "DATABASE_CONFLICT") {
+        throw await this.officialProfileTaken(draft.channelKey, draft.platform, draft.officialProfile.seoSlug);
+      }
+      throw error;
+    }
     const row = result.rows[0];
     if (row) return toPost(row);
     throw await this.officialProfileTaken(draft.channelKey, draft.platform, draft.officialProfile.seoSlug);
@@ -358,22 +383,22 @@ export class StreamerBoardRepository {
         this.queryable,
         `UPDATE streamer_posts p
             SET channel_key = $2, platform = $3, channel_url = $4, streamer_name = $5,
-                games = $6::TEXT[], official_handle = $7, seo_slug = $8,
-                live_status_supported = $9, updated_at = NOW()
+                games = $6::TEXT[], riot_id = $7, official_handle = $8, seo_slug = $9,
+                live_status_supported = $10, updated_at = NOW()
           WHERE p.id = $1 AND p.registered_by_admin = TRUE
             AND NOT EXISTS (
               SELECT 1 FROM streamer_posts other
                WHERE other.id <> p.id
                  AND (other.channel_key = $2 OR (
                    other.registered_by_admin = TRUE
-                   AND other.platform = $3 AND other.seo_slug = $8
+                   AND other.platform = $3 AND other.seo_slug = $9
                  ))
             )
          RETURNING ${POST_FIELDS}, FALSE AS voted`,
         [
           id, draft.channelKey, draft.platform, draft.channelUrl, draft.streamerName,
-          [...draft.games], draft.officialProfile.handle, draft.officialProfile.seoSlug,
-          draft.officialProfile.liveStatusSupported
+          [...draft.games], draft.riotId ?? null, draft.officialProfile.handle,
+          draft.officialProfile.seoSlug, draft.officialProfile.liveStatusSupported
         ]
       );
     } catch (error) {
