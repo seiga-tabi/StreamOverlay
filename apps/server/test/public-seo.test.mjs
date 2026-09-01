@@ -715,16 +715,17 @@ test("소셜 이미지는 게임별 경로 접두사로 매핑되고 그 외에�
   /* 회귀 고정 — 전 페이지가 범용 이미지 1장을 공유하면 X(제목·설명 미표시)에서
      어떤 페이지를 공유해도 동일하게 보입니다. docs/mockups/sns-link-previews.html §02. */
   const image = (pathname) => publicSeoMetadataForPath(pathname).imageUrl;
-  assert.equal(image("/palworld"), "https://yoro.gg/images/yorogg-og-palworld.png");
-  assert.equal(image("/ja/palworld/breeding"), "https://yoro.gg/images/yorogg-og-palworld.png");
-  assert.equal(image("/minecraft"), "https://yoro.gg/images/yorogg-og-minecraft.png");
-  assert.equal(image("/ko/minecraft/recipes"), "https://yoro.gg/images/yorogg-og-minecraft.png");
-  assert.equal(image("/valorant/agents"), "https://yoro.gg/images/yorogg-og-valorant.png");
-  assert.equal(image("/bot/commands"), "https://yoro.gg/images/yorogg-og-bot.png");
+  assert.equal(image("/palworld"), "https://yoro.gg/social/game/palworld.png");
+  assert.equal(image("/ja/palworld/breeding"), "https://yoro.gg/social/game/palworld.png");
+  assert.equal(image("/en/palworld/pals"), "https://yoro.gg/social/game/palworld.png");
+  assert.equal(image("/minecraft"), "https://yoro.gg/social/game/minecraft.png");
+  assert.equal(image("/ko/minecraft/recipes"), "https://yoro.gg/social/game/minecraft.png");
+  assert.equal(image("/valorant/agents"), "https://yoro.gg/social/game/valorant.png");
+  assert.equal(image("/bot/commands"), "https://yoro.gg/social/game/bot.png");
   /* LoL 생태는 LoL 이미지를 대표로 겸용합니다. 홈은 별도 동적 렌더링(로케일별
      실텍스트, home-social-card.ts)을 쓰므로 분리해 검증합니다. */
   for (const path of ["/lol", "/lol/aram", "/patch-notes", "/follow", "/participation"]) {
-    assert.equal(image(path), "https://yoro.gg/images/yorogg-og-lol.png", path);
+    assert.equal(image(path), "https://yoro.gg/social/game/lol.png", path);
   }
   /* 홈은 정적 이미지 대신 로케일별 동적 렌더링을 씁니다 — 이전엔 ko/ja/en 전부가
      같은 한국어 텍스트 박힌 정적 PNG를 공유해 다국어가 반영되지 않았습니다. */
@@ -742,7 +743,7 @@ test("소셜 이미지는 게임별 경로 접두사로 매핑되고 그 외에�
   /* Palworld 엔티티 상세도 팰월드 이미지를 씁니다. */
   const route = palworldEntityRouteForPath("/palworld/pals/anubis");
   const metadata = palworldEntitySeoMetadata(route, { id: "anubis", nameKo: "아누비스", nameEn: "Anubis" });
-  assert.equal(metadata.imageUrl, "https://yoro.gg/images/yorogg-og-palworld.png");
+  assert.equal(metadata.imageUrl, "https://yoro.gg/social/game/palworld.png");
 });
 
 test("미니게임 경로는 전용 OG 이미지·metadata·breadcrumb·sitemap을 제공한다", () => {
@@ -1089,7 +1090,7 @@ test("스트리머 추천은 공개 라우트로 인식되고 ko·ja·en 메타�
 test("추천 글 상세는 prefix 로 받아 공유 링크가 살아 있다", () => {
   const html = render("/ko/streamers/bamtol");
   assert.match(html, /<link rel="canonical" href="https:\/\/yoro\.gg\/ko\/streamers\/bamtol">/u);
-  assert.match(html, /<meta property="og:image" content="[^"]*yorogg-og-lol\.png"/u);
+  assert.match(html, /<meta property="og:image" content="https:\/\/yoro\.gg\/social\/game\/lol\.png"/u);
 });
 
 test("정적 sitemap 에 스트리머 추천 목록이 오른다", () => {

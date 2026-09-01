@@ -148,6 +148,7 @@ import {
   patchNotesCardModel,
 } from "../services/patch-notes-social-card.js";
 import { HomeSocialCardRenderer } from "../services/home-social-card.js";
+import { GameSocialCardRenderer, type GameSocialCardKey } from "../services/game-social-card.js";
 import { appConfig, legalRuntimeConfigReady } from "../config.js";
 import type { TwitchEventSubClient } from "../services/twitch-eventsub-client.js";
 import type { EventBus } from "../core/event-bus.js";
@@ -2689,6 +2690,7 @@ type HttpHandlerInput = {
   discordBotCommandPolicy?: DiscordBotCommandPolicyService;
   patchNotes?: PatchNotesService;
   gameBoxart?: GameBoxartService;
+  gameSocialCard?: Pick<GameSocialCardRenderer, "render">;
   patchChangeSummary?: PatchChangeSummaryService;
   patchNotesSocialCard?: PatchNotesSocialCardRenderer;
   adminAuditLogs?: Pick<
@@ -3954,6 +3956,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
   /* 테스트가 원격 호출 없이 이미지 경로를 검증할 수 있도록 주입 지점을 둡니다. */
   const patchNotesSocialCardRenderer = input.patchNotesSocialCard ?? new PatchNotesSocialCardRenderer();
   const homeSocialCardRenderer = new HomeSocialCardRenderer();
+  const gameSocialCardRenderer = input.gameSocialCard ?? new GameSocialCardRenderer(input.gameBoxart);
   const publicLolCurrentGameCache = new Map<string, { expiresAt: number; response: PublicLolCurrentGame }>();
   const publicLolCurrentGameInFlight = new Map<string, Promise<PublicLolCurrentGame>>();
   let publicLolParticipantRankCacheInvalidatedAt = 0;
@@ -5086,6 +5089,55 @@ export function createHttpHandler(input: HttpHandlerInput) {
         path.resolve(appConfig.paths.dashboardStatic, "images", "yorogg-og.png"),
         { "Cache-Control": "no-store" },
       );
+      return true;
+    }
+  }
+
+  /* 박스아트 합성 성공 결과는 24시간 캐시하고, 그라디언트 fallback 은 5분 뒤
+     재시도합니다. 항상 그라디언트만 쓰는 bot 은 24시간 캐시하며, 실제 PNG 해시를 ETag에 넣습니다. */
+  async function sendGameSocialImage(
+    req: IncomingMessage,
+    res: ServerResponse,
+    pathname: string,
+  ): Promise<boolean> {
+    const match = /^\/social\/game\/(palworld|minecraft|valorant|lol|bot)\.png$/u.exec(pathname);
+    if (!match?.[1]) return false;
+    const key = match[1] as GameSocialCardKey;
+    const sendFallback = async () => {
+      await sendStaticFile(
+        req,
+        res,
+        path.resolve(appConfig.paths.dashboardStatic, "images", `yorogg-og-${key}.png`),
+        { "Cache-Control": "no-store" },
+      );
+    };
+    try {
+      const body = await gameSocialCardRenderer.render(key);
+      const revision = crypto.createHash("sha256").update(body).digest("hex").slice(0, 16);
+      const etag = `"game-social-${key}-${revision}"`;
+      const headers = {
+        "Content-Type": "image/png",
+        "Content-Length": String(body.length),
+        "Cache-Control": "public, max-age=86400, stale-while-revalidate=604800",
+        "ETag": etag,
+        ...securityHeadersForRequest(req),
+      };
+      if (req.headers["if-none-match"]?.split(",").map((value) => value.trim()).includes(etag)) {
+        res.writeHead(304, headers);
+        res.end();
+        return true;
+      }
+      res.writeHead(200, headers);
+      res.end(req.method === "HEAD" ? undefined : body);
+      return true;
+    } catch (error) {
+      input.logger?.error({
+        type: "game.social_image_failed",
+        errorCode: "render_failed",
+        key,
+        error: toSafeErrorMessage(error),
+      });
+      await sendFallback();
       return true;
     }
   }
@@ -10265,6 +10317,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         if (await sendPublicLolSocialImage(req, res, url.pathname)) return;
         if (await sendPatchNotesSocialImage(req, res, url.pathname)) return;
         if (await sendHomeSocialImage(req, res, url.pathname)) return;
+        if (await sendGameSocialImage(req, res, url.pathname)) return;
         if (await sendPublicSitemap(req, res, url.pathname)) return;
         if (await sendPublicDashboardAsset(req, res, url.pathname)) return;
         // 기존 `?pal=` 상세 query는 고유 URL로 영구 이전합니다. 두 URL이 같은 내용을

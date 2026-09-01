@@ -251,7 +251,7 @@ test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => 
     assert.equal(res.headers.ETag, undefined);
     assert.match(res.body, /<title>LoL 소환사 전적 \| YORO\.gg<\/title>/);
     assert.match(res.body, /<link rel="canonical" href="https:\/\/yoro\.gg\/ko\/lol\/summoners\/jp\/%E3%81%9B%E3%81%84%E3%81%8C-sei">/);
-    assert.match(res.body, /<meta property="og:image" content="https:\/\/yoro\.gg\/images\/yorogg-og-lol\.png"/);
+    assert.match(res.body, /<meta property="og:image" content="https:\/\/yoro\.gg\/social\/game\/lol\.png"/);
     assert.match(res.body, /<meta name="twitter:card" content="summary_large_image"/);
     const nonce = /script-src 'nonce-([^']+)'/.exec(res.headers["Content-Security-Policy"])?.[1];
     assert.ok(nonce);

@@ -66,7 +66,7 @@ function t(locale: PublicUrlLocale, ko: string, ja: string, en: string): string 
 
 const DEFAULT_SOCIAL_IMAGE = `${PUBLIC_SEO_ORIGIN}/images/yorogg-og.png`;
 
-/* 게임별 정적 소셜 이미지 (1200×630, docs/mockups/sns-link-previews.html §02 기준).
+/* 게임별 동적 소셜 이미지 (1200×630, docs/mockups/social-share-image-only-v5.html 기준).
  *
  * X(Twitter)는 카드에서 제목·설명을 표시하지 않으므로 이미지 자체가 페이지 정체성을
  * 전달해야 하고, 전 페이지가 범용 이미지 1장을 공유하면 게임별 링크가 전부 동일하게
@@ -81,7 +81,7 @@ const SOCIAL_IMAGES_BY_PREFIX: readonly {
 }[] = [
   {
     prefix: "/palworld",
-    url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-palworld.png`,
+    url: `${PUBLIC_SEO_ORIGIN}/social/game/palworld.png`,
     alt: {
       ko: "YORO.gg 팰월드 데이터베이스 미리보기",
       ja: "YORO.gg パルワールドデータベースのプレビュー",
@@ -90,7 +90,7 @@ const SOCIAL_IMAGES_BY_PREFIX: readonly {
   },
   {
     prefix: "/minecraft",
-    url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-minecraft.png`,
+    url: `${PUBLIC_SEO_ORIGIN}/social/game/minecraft.png`,
     alt: {
       ko: "YORO.gg 마인크래프트 위키 미리보기",
       ja: "YORO.gg マインクラフト Wiki のプレビュー",
@@ -99,12 +99,12 @@ const SOCIAL_IMAGES_BY_PREFIX: readonly {
   },
   {
     prefix: "/valorant",
-    url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-valorant.png`,
+    url: `${PUBLIC_SEO_ORIGIN}/social/game/valorant.png`,
     alt: { ko: "YORO.gg 발로란트 전적·도감 미리보기", ja: "YORO.gg VALORANT 戦績・データベースのプレビュー" }
   },
   {
     prefix: "/bot",
-    url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-bot.png`,
+    url: `${PUBLIC_SEO_ORIGIN}/social/game/bot.png`,
     alt: {
       ko: "YORO Bot Discord 게임 서버 도우미 미리보기",
       ja: "YORO Bot Discordゲームサーバーアシスタントのプレビュー",
@@ -128,7 +128,7 @@ const SOCIAL_IMAGES_BY_PREFIX: readonly {
   /* LoL 생태(전적·패치 노트·팔로우·참가)와 홈은 LoL 이미지를 사이트 대표로 겸용합니다. */
   {
     prefix: "/lol",
-    url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-lol.png`,
+    url: `${PUBLIC_SEO_ORIGIN}/social/game/lol.png`,
     alt: {
       ko: "YORO.gg LoL 전적 검색 미리보기",
       ja: "YORO.gg LoL戦績検索のプレビュー",
@@ -137,7 +137,7 @@ const SOCIAL_IMAGES_BY_PREFIX: readonly {
   },
   {
     prefix: "/streamers",
-    url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-lol.png`,
+    url: `${PUBLIC_SEO_ORIGIN}/social/game/lol.png`,
     alt: {
       ko: "YORO.gg 스트리머 추천 미리보기",
       ja: "YORO.gg 配信者おすすめのプレビュー",
@@ -146,7 +146,7 @@ const SOCIAL_IMAGES_BY_PREFIX: readonly {
   },
   {
     prefix: "/patch-notes",
-    url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-lol.png`,
+    url: `${PUBLIC_SEO_ORIGIN}/social/game/lol.png`,
     alt: {
       ko: "YORO.gg LoL 전적 검색 미리보기",
       ja: "YORO.gg LoL戦績検索のプレビュー",
@@ -155,12 +155,12 @@ const SOCIAL_IMAGES_BY_PREFIX: readonly {
   },
   {
     prefix: "/follow",
-    url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-lol.png`,
+    url: `${PUBLIC_SEO_ORIGIN}/social/game/lol.png`,
     alt: { ko: "YORO.gg LoL 전적 검색 미리보기", ja: "YORO.gg LoL戦績検索のプレビュー" }
   },
   {
     prefix: "/participation",
-    url: `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-lol.png`,
+    url: `${PUBLIC_SEO_ORIGIN}/social/game/lol.png`,
     alt: { ko: "YORO.gg LoL 전적 검색 미리보기", ja: "YORO.gg LoL戦績検索のプレビュー" }
   }
 ];

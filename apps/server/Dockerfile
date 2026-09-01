@@ -44,8 +44,10 @@ COPY packages/shared/package.json ./packages/shared/package.json
 COPY apps/server/package.json ./apps/server/package.json
 COPY apps/dashboard/package.json ./apps/dashboard/package.json
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends fonts-noto-cjk \
+  && apt-get install -y --no-install-recommends fontconfig fonts-noto-cjk \
   && rm -rf /var/lib/apt/lists/*
+COPY apps/server/assets/fonts/yuji-boku.ttf /usr/share/fonts/truetype/yuji-boku/yuji-boku.ttf
+RUN fc-cache -f
 RUN npm ci --omit=dev --include-workspace-root=false --workspace @streamops/shared --workspace @streamops/server
 COPY --from=build /app/packages/shared/dist ./packages/shared/dist
 COPY --from=build /app/apps/server/dist ./apps/server/dist
