@@ -22,7 +22,7 @@ if (!DATABASE_URL) {
   test.skip("저장소 SQL — STREAMER_BOARD_TEST_DATABASE_URL 이 없어 건너뜁니다", () => {});
 } else {
   const { Pool } = await import("pg");
-  const { StreamerBoardRepository, StreamerChannelTakenError } =
+  const { StreamerBoardRepository, StreamerChannelTakenError, StreamerOfficialProfileTakenError } =
     await import("../dist/database/repositories/streamer-board-repository.js");
 
   const migration = await readFile(fileURLToPath(new URL("../migrations/0024_streamer_board.sql", import.meta.url)), "utf8");
@@ -47,6 +47,27 @@ if (!DATABASE_URL) {
   }
 
   const listAll = { liveOnly: false, platforms: [], sort: "votes" };
+
+  /* 관리자 등록 공식 프로필 초안 — handle 하나로 채널 키·URL·slug 를 함께 맞춥니다. */
+  function officialDraft(handle, overrides = {}) {
+    return {
+      streamerName: `${handle} 공식`,
+      platform: "twitch",
+      channelKey: `twitch:${handle}`,
+      channelUrl: `https://www.twitch.tv/${handle}`,
+      games: ["lol"],
+      officialProfile: { handle, seoSlug: handle, liveStatusSupported: true },
+      ...overrides,
+    };
+  }
+
+  function expectOfficialTaken(expectedPostId) {
+    return (error) => {
+      assert.ok(error instanceof StreamerOfficialProfileTakenError, String(error));
+      assert.equal(error.existing.postId, expectedPostId);
+      return true;
+    };
+  }
 
   test.before(async () => {
     await pool.query(migration);
@@ -205,6 +226,104 @@ if (!DATABASE_URL) {
                                    author_twitch_user_id, author_display_name)
        VALUES ('Bad-ID!', 'twitch:w', 'twitch', 'https://www.twitch.tv/w', 'w', ARRAY['lol'], '1', 'a')`
     ), /streamer_posts_id_check/u);
+  });
+
+  test("공식 프로필은 만들고 고치고 끄고 다시 켤 수 있다", async () => {
+    const created = await board.createOfficialProfile(officialDraft("official"));
+    assert.equal(created.registeredByAdmin, true);
+    assert.equal(created.active, true);
+    assert.equal(created.authorName, "YORO.gg");
+    assert.deepEqual(created.officialProfile, { handle: "official", seoSlug: "official", liveStatusSupported: true });
+    assert.equal((await board.findOfficialProfile("twitch", "official"))?.id, created.id);
+
+    const updated = await board.updateOfficialProfile(created.id, officialDraft("official", {
+      streamerName: "새 이름",
+      games: ["palworld"],
+      officialProfile: { handle: "official", seoSlug: "official", liveStatusSupported: false },
+    }));
+    assert.equal(updated?.streamerName, "새 이름");
+    assert.deepEqual(updated?.games, ["palworld"]);
+    assert.equal(updated?.officialProfile?.liveStatusSupported, false);
+    assert.equal(await board.updateOfficialProfile("nosuchpost", officialDraft("nosuch")), undefined, "없는 글은 undefined — 라우트가 404 로 옮깁니다");
+
+    const deactivated = await board.deactivateOfficialProfile(created.id);
+    assert.equal(deactivated?.active, false);
+    assert.equal(await board.findOfficialProfile("twitch", "official"), undefined, "꺼진 프로필은 공개 URL 에서 사라집니다");
+    assert.equal(await board.deactivateOfficialProfile(created.id), undefined, "이미 꺼진 프로필은 다시 끌 수 없습니다");
+    assert.ok(
+      (await board.listOfficialProfiles()).some((post) => post.id === created.id && post.active === false),
+      "관리자 목록에는 꺼진 프로필도 남습니다"
+    );
+
+    const reactivated = await board.reactivateOfficialProfile(created.id);
+    assert.equal(reactivated?.active, true);
+    assert.equal((await board.findOfficialProfile("twitch", "official"))?.id, created.id);
+    assert.equal(await board.reactivateOfficialProfile(created.id), undefined, "이미 켜진 프로필은 다시 켤 수 없습니다");
+
+    /* 추천 글은 공식 프로필 API 로 만질 수 없습니다. */
+    const community = await board.createPost(
+      draft({ channelKey: "twitch:community", channelUrl: "https://www.twitch.tv/community" }),
+      AUTHOR
+    );
+    assert.equal(await board.deactivateOfficialProfile(community.id), undefined);
+    assert.equal(await board.reactivateOfficialProfile(community.id), undefined);
+    assert.equal(await board.updateOfficialProfile(community.id, officialDraft("community")), undefined);
+  });
+
+  test("공식 URL 과 채널은 겹칠 수 없고, 꺼진 프로필의 URL 도 예약이 유지된다", async () => {
+    const first = await board.createOfficialProfile(officialDraft("slug-a"));
+
+    /* 같은 공식 URL(platform + seo_slug) — 채널이 달라도 막힙니다. */
+    await assert.rejects(
+      () => board.createOfficialProfile(officialDraft("slug-a", {
+        channelKey: "twitch:slug-a-other",
+        channelUrl: "https://www.twitch.tv/slug-a-other",
+      })),
+      expectOfficialTaken(first.id)
+    );
+
+    /* 추천 글이 이미 가진 채널 — 그 추천 글을 알려 줍니다. */
+    const community = await board.createPost(
+      draft({ channelKey: "twitch:owned", channelUrl: "https://www.twitch.tv/owned" }),
+      AUTHOR
+    );
+    await assert.rejects(() => board.createOfficialProfile(officialDraft("owned")), expectOfficialTaken(community.id));
+
+    /* 수정으로 다른 공식 프로필의 URL 을 가져갈 수 없습니다. */
+    const second = await board.createOfficialProfile(officialDraft("slug-b"));
+    await assert.rejects(
+      () => board.updateOfficialProfile(second.id, officialDraft("slug-a")),
+      expectOfficialTaken(first.id)
+    );
+    assert.equal((await board.findOfficialProfile("twitch", "slug-b"))?.id, second.id, "실패한 수정은 아무것도 바꾸지 않습니다");
+
+    /* 비활성화 뒤에도 같은 URL 은 다른 프로필에 재사용되지 않습니다(migration 0026). */
+    await board.deactivateOfficialProfile(first.id);
+    await assert.rejects(
+      () => board.createOfficialProfile(officialDraft("slug-a", {
+        channelKey: "twitch:slug-a-again",
+        channelUrl: "https://www.twitch.tv/slug-a-again",
+      })),
+      expectOfficialTaken(first.id)
+    );
+  });
+
+  test("동시에 같은 공식 URL 로 고쳐도 하나만 성공하고 나머지는 중복으로 답한다", async () => {
+    /* NOT EXISTS 검사는 둘 다 통과할 수 있습니다 — 마지막 판정은 UNIQUE 제약이 하고,
+       그 23505 는 500 이 아니라 다른 중복과 같은 예외여야 합니다. */
+    const left = await board.createOfficialProfile(officialDraft("race-left"));
+    const right = await board.createOfficialProfile(officialDraft("race-right"));
+    const attempts = await Promise.allSettled([
+      board.updateOfficialProfile(left.id, officialDraft("race-target")),
+      board.updateOfficialProfile(right.id, officialDraft("race-target")),
+    ]);
+    assert.equal(attempts.filter((result) => result.status === "fulfilled").length, 1);
+    const rejected = attempts.filter((result) => result.status === "rejected");
+    assert.equal(rejected.length, 1);
+    assert.ok(rejected[0].reason instanceof StreamerOfficialProfileTakenError, String(rejected[0].reason));
+    const winner = attempts.find((result) => result.status === "fulfilled").value;
+    assert.equal(rejected[0].reason.existing.postId, winner.id, "막힌 쪽은 이긴 프로필을 안내합니다");
+    assert.equal((await board.findOfficialProfile("twitch", "race-target"))?.id, winner.id);
   });
 
   test("글을 지우면 딸린 추천·댓글·신고가 함께 사라진다", async () => {

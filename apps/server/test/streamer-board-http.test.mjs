@@ -250,7 +250,198 @@ test("관리자 공식 프로필 API는 생성·수정·비활성화를 지원�
   const deactivated = await call(handler, "DELETE", `/api/dashboard/streamer-profiles/${OFFICIAL_POST.id}`);
   assert.equal(deactivated.status, 200);
   assert.equal(deactivated.json.profile.active, false);
+
+  const reactivated = await call(handler, "PUT", `/api/dashboard/streamer-profiles/${OFFICIAL_POST.id}/reactivate`);
+  assert.equal(reactivated.status, 200);
+  assert.equal(reactivated.json.profile.active, true);
+  assert.deepEqual(board.calls.at(-1), ["reactivateOfficialProfile", OFFICIAL_POST.id]);
+
+  /* 재활성화는 비활성 공식 프로필에만 — 없는 글은 404 입니다. */
+  assert.equal((await call(handler, "PUT", "/api/dashboard/streamer-profiles/nosuchpost/reactivate")).status, 404);
+  /* 모르는 하위 경로와 잘못된 메서드는 저장소에 닿지 않습니다. */
+  const before = board.calls.length;
+  assert.equal((await call(handler, "PUT", `/api/dashboard/streamer-profiles/${OFFICIAL_POST.id}/unknown`)).status, 404);
+  assert.equal((await call(handler, "PUT", `/api/dashboard/streamer-profiles/${OFFICIAL_POST.id}/reactivate/extra`)).status, 404);
+  assert.equal((await call(handler, "GET", `/api/dashboard/streamer-profiles/${OFFICIAL_POST.id}/reactivate`)).status, 405);
+  assert.equal(board.calls.length, before);
 });
+
+test("공식 프로필 페이지는 조회 실패와 없음을 구분한다 — DB 장애는 503, 없음은 404, 성공은 한 번만 조회", async () => {
+  const failing = fakeBoard({
+    async findOfficialProfile() {
+      throw new SafeDatabaseError("DATABASE_UNAVAILABLE", true);
+    },
+  });
+  const unavailable = await call(handlerWith({ board: failing }).handler, "GET", "/streamers/twitch/bamtol");
+  assert.equal(unavailable.status, 503, "장애를 404 로 내면 검색엔진이 URL 을 지웁니다");
+  assert.equal(unavailable.headers["Retry-After"], "600");
+  assert.equal(unavailable.headers["Cache-Control"], "no-store");
+  assert.match(unavailable.headers["X-Robots-Tag"], /noindex/u);
+
+  const { handler, board } = handlerWith();
+  const missing = await call(handler, "GET", "/streamers/twitch/nobody");
+  assert.equal(missing.status, 404);
+  assert.equal(missing.json.code, "NOT_FOUND");
+
+  const found = await call(handler, "GET", "/streamers/twitch/bamtol");
+  assert.equal(found.status, 200);
+  assert.equal(
+    board.calls.filter(([name, , seoSlug]) => name === "findOfficialProfile" && seoSlug === "bamtol").length,
+    1,
+    "SEO 메타데이터가 같은 프로필을 다시 조회하면 안 됩니다"
+  );
+});
+
+/* ── 권한 경계 — localNoAuth 가 아닌 실제 세션으로 봅니다 ───────────────────── */
+
+const DASHBOARD_TOKEN = "full_admin_token_for_streamer_profile_tests_1234567890";
+const STREAMER_TWITCH_USER_ID = "777000777";
+const VIEWER_SESSION_ID = "viewer-session-777";
+const PROFILES_PATH = "/api/dashboard/streamer-profiles";
+
+async function withSessionAuth(run) {
+  const previous = {
+    token: appConfig.security.dashboardAuthToken,
+    localNoAuth: appConfig.security.localNoAuth,
+    nodeEnv: appConfig.nodeEnv,
+    sessionTtl: appConfig.security.dashboardSessionTtlMs,
+    databaseEnabled: appConfig.database.enabled,
+  };
+  const dir = mkdtempSync(path.join(tmpdir(), "streamer-profiles-auth-test-"));
+  resetSecurityRateLimiters();
+  appConfig.security.dashboardAuthToken = DASHBOARD_TOKEN;
+  appConfig.security.localNoAuth = false;
+  appConfig.nodeEnv = "development";
+  appConfig.security.dashboardSessionTtlMs = 60_000;
+  appConfig.database.enabled = false;
+  try {
+    const store = new Store({
+      adminAccountStatePath: path.join(dir, "admin-accounts.json"),
+      streamerRiotIdStatePath: path.join(dir, "streamer-riot-ids.json"),
+    });
+    const board = fakeBoard();
+    const handler = createHttpHandler({
+      store,
+      twitchAuth: {},
+      actions: { async dispatchOne() {} },
+      sessions: new DashboardSessionStore(),
+      riot: {
+        isConfigured() { return false; },
+        routingStatus() {
+          return { configured: false, source: "default", accountRegion: "asia", lolPlatform: "kr" };
+        },
+      },
+      publicTwitchAuth: {
+        async getStatus(sessionId) {
+          if (sessionId !== VIEWER_SESSION_ID) return { connected: false, configured: true, requiredScopes: [], missingScopes: [] };
+          return {
+            connected: true,
+            configured: true,
+            requiredScopes: [],
+            missingScopes: [],
+            user: { id: STREAMER_TWITCH_USER_ID, login: "granted_streamer", displayName: "Granted Streamer" },
+          };
+        },
+      },
+      streamerBoard: board,
+    });
+    await run({ store, board, handler });
+  } finally {
+    appConfig.security.dashboardAuthToken = previous.token;
+    appConfig.security.localNoAuth = previous.localNoAuth;
+    appConfig.nodeEnv = previous.nodeEnv;
+    appConfig.security.dashboardSessionTtlMs = previous.sessionTtl;
+    appConfig.database.enabled = previous.databaseEnabled;
+    resetSecurityRateLimiters();
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+function cookieHeader(setCookie) {
+  const value = Array.isArray(setCookie) ? setCookie[0] : setCookie;
+  assert.equal(typeof value, "string");
+  return value.split(";")[0];
+}
+
+/* 부분 권한 관리자 계정을 만들고 로그인한 세션(cookie·csrf)을 돌려줍니다. */
+async function loginSubAdmin(store, handler, permissions) {
+  const token = `sub-admin-${permissions.join("-").replaceAll(":", "_")}-token-1234567890`;
+  store.createAdminAccount({ label: "서브 운영자", tokenHash: store.hashAdminToken(token), permissions });
+  const login = await call(handler, "POST", "/api/dashboard/auth/check", { token });
+  assert.equal(login.status, 200, login.raw);
+  assert.deepEqual(login.json.permissions, permissions);
+  return { cookie: cookieHeader(login.headers["Set-Cookie"]), csrf: login.json.csrfToken, surface: "admin" };
+}
+
+/* 승인·대시보드 허용된 스트리머의 Twitch 로그인으로 streamer role 세션을 얻습니다. */
+async function loginStreamer(store, handler) {
+  const created = store.upsertStreamerRiotIdRequest({
+    twitchUserId: STREAMER_TWITCH_USER_ID,
+    twitchLogin: "granted_streamer",
+    twitchDisplayName: "Granted Streamer",
+    riotGameName: "Granted Streamer",
+    riotTagLine: "KR1",
+  });
+  assert.ok(store.resolveStreamerRiotIdRequest({ requestId: created.id, decision: "approved", reviewer: "test" }));
+  assert.ok(store.setStreamerRiotIdDashboardEnabled({ requestId: created.id, dashboardEnabled: true, reviewer: "test" }));
+  const status = await call(handler, "GET", "/api/dashboard/auth/status?surface=streamer", undefined, {
+    cookie: `${PUBLIC_TWITCH_VIEWER_SESSION_COOKIE}=${VIEWER_SESSION_ID}`,
+    "x-streamops-dashboard-surface": "streamer",
+  });
+  assert.equal(status.status, 200, status.raw);
+  assert.equal(status.json.role, "streamer");
+  return { cookie: cookieHeader(status.headers["Set-Cookie"]), csrf: status.json.csrfToken, surface: "streamer" };
+}
+
+function callAs(handler, session, method, url, body) {
+  return call(handler, method, url, body, {
+    cookie: session.cookie,
+    "x-streamops-csrf": session.csrf,
+    "x-streamops-dashboard-surface": session.surface,
+  });
+}
+
+test("streamer_profiles:write 가 없는 관리자는 공식 프로필 API 전부에서 403 이고 저장소에 닿지 않는다", () => withSessionAuth(async ({ store, board, handler }) => {
+  const approvalOnly = await loginSubAdmin(store, handler, ["streamer_approval"]);
+  const draft = { streamerName: "한겨울", platform: "chzzk", handle: "Hangyeoul", games: ["palworld"] };
+  const attempts = [
+    ["GET", PROFILES_PATH],
+    ["POST", PROFILES_PATH, draft],
+    ["PUT", `${PROFILES_PATH}/${OFFICIAL_POST.id}`, draft],
+    ["PUT", `${PROFILES_PATH}/${OFFICIAL_POST.id}/reactivate`],
+    ["DELETE", `${PROFILES_PATH}/${OFFICIAL_POST.id}`],
+  ];
+  for (const [method, url, body] of attempts) {
+    const result = await callAs(handler, approvalOnly, method, url, body);
+    assert.equal(result.status, 403, `${method} ${url}: ${result.raw}`);
+    assert.equal(result.json.code, "FORBIDDEN");
+  }
+  assert.equal(board.calls.length, 0, "권한 검사가 저장소 호출보다 먼저여야 합니다");
+
+  /* 같은 구조에서 권한이 있는 관리자는 통과한다 — 위 403 이 설정 오류가 아니라는 대조군입니다. */
+  const writer = await loginSubAdmin(store, handler, ["streamer_profiles:write"]);
+  const listed = await callAs(handler, writer, "GET", PROFILES_PATH);
+  assert.equal(listed.status, 200, listed.raw);
+  assert.equal(listed.json.profiles.length, 1);
+  const reactivated = await callAs(handler, writer, "PUT", `${PROFILES_PATH}/${OFFICIAL_POST.id}/reactivate`);
+  assert.equal(reactivated.status, 200, reactivated.raw);
+}));
+
+test("스트리머 role 세션은 공식 프로필 API 를 호출할 수 없다(403)", () => withSessionAuth(async ({ store, board, handler }) => {
+  const streamer = await loginStreamer(store, handler);
+  const draft = { streamerName: "한겨울", platform: "chzzk", handle: "Hangyeoul", games: ["palworld"] };
+  for (const [method, url, body] of [
+    ["GET", PROFILES_PATH],
+    ["POST", PROFILES_PATH, draft],
+    ["PUT", `${PROFILES_PATH}/${OFFICIAL_POST.id}`, draft],
+    ["PUT", `${PROFILES_PATH}/${OFFICIAL_POST.id}/reactivate`],
+    ["DELETE", `${PROFILES_PATH}/${OFFICIAL_POST.id}`],
+  ]) {
+    const result = await callAs(handler, streamer, method, url, body);
+    assert.equal(result.status, 403, `${method} ${url}: ${result.raw}`);
+  }
+  assert.equal(board.calls.length, 0);
+}));
 
 test("비로그인 목록은 게임 표기를 주고 채널 주소만 가린다", async () => {
   const { handler } = handlerWith();
