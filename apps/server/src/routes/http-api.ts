@@ -13951,8 +13951,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
             ? input.store.grantAdminAccountToTwitchUser({
                 twitchUserId: targetRequest.twitchUserId,
                 label: targetRequest.twitchDisplayName || targetRequest.twitchLogin,
-                /* 부여 범위는 streamer_approval 고정 — 권한 종류 선택은 이번 범위 밖입니다. */
-                permissions: ["streamer_approval"]
+                /* 관리자 권한 부여는 스트리머 승인 관리 + 공식 프로필 관리 권한을
+                   함께 부여합니다 — 개별 권한 선택 UI는 이번 범위 밖입니다. */
+                permissions: ["streamer_approval", "streamer_profiles:write"]
               })
             : input.store.revokeAdminAccountFromTwitchUser(targetRequest.twitchUserId);
         } catch (error) {

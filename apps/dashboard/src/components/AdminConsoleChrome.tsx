@@ -3,8 +3,8 @@ import { dashboardI18n, type DashboardLocale } from "../i18n";
 import {
   ADMIN_ALLOWED_PAGES,
   dashboardPathForPage,
-  pageAllowed,
   pagePermitted,
+  pageVisible,
   type Page
 } from "../routing/dashboard-routes";
 
@@ -119,7 +119,7 @@ export function AdminConsoleChrome({
   const accountName = accountLabel?.trim() || uiText.app.adminAccountFallback;
   const permissionTag = permissionTagText(locale, permissions);
   const lockedTitle = uiText.app.permissionLocked;
-  const navItems = ADMIN_ALLOWED_PAGES.filter(pageAllowed);
+  const navItems = ADMIN_ALLOWED_PAGES.filter((item) => pageVisible(item, permissions));
 
   const wordmark = (
     <>

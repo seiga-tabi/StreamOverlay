@@ -19,6 +19,7 @@ const VIEWER_SESSION_ID = "viewer-session-777";
 const GRANT_PATH = "/api/participation/streamer-riot-id-requests/grant-admin";
 const REVOKE_PATH = "/api/participation/streamer-riot-id-requests/revoke-admin";
 const LIST_PATH = "/api/participation/streamer-riot-id-requests";
+const PROFILES_PATH = "/api/dashboard/streamer-profiles";
 
 function createRequest(method, url, body, headers = {}) {
   return {
@@ -216,10 +217,24 @@ async function streamerStatusWithTwitchLogin(handler) {
   return res;
 }
 
-test("full_admin이 승인된 스트리머에게 grant-admin하면 Twitch 로그인만으로 streamer_approval admin 세션이 발급된다", () => withTempStore(async (store, paths) => {
+test("full_admin이 승인된 스트리머에게 grant-admin하면 승인 관리와 공식 프로필 관리가 가능한 admin 세션이 발급된다", () => withTempStore(async (store, paths) => {
   await withAuthConfig(async () => {
     const request = seedApprovedStreamer(store);
-    const { handler } = handlerFor(store);
+    const createdProfiles = [];
+    const { handler } = handlerFor(store, {
+      streamerBoard: {
+        async createOfficialProfile(draft) {
+          createdProfiles.push(draft);
+          return {
+            id: "official-granted-streamer",
+            ...draft,
+            registeredByAdmin: true,
+            active: true,
+            createdAt: "2026-09-01T00:00:00.000Z"
+          };
+        }
+      }
+    });
     const fullAdmin = await loginWithToken(handler, FULL_ADMIN_TOKEN);
 
     /* 부여 전: 목록은 isAdmin=false, Twitch 로그인은 관리자 콘솔에서 미인증 */
@@ -243,7 +258,7 @@ test("full_admin이 승인된 스트리머에게 grant-admin하면 Twitch 로그
     assert.equal(persisted.accounts.length, 1);
     assert.equal(persisted.accounts[0].twitchUserId, STREAMER_TWITCH_USER_ID);
     assert.equal(Object.hasOwn(persisted.accounts[0], "tokenHash"), false);
-    assert.deepEqual(persisted.accounts[0].permissions, ["streamer_approval"]);
+    assert.deepEqual(persisted.accounts[0].permissions, ["streamer_approval", "streamer_profiles:write"]);
 
     /* 중복 부여는 idempotent — 같은 계정 id, 에러 없음 */
     const againRes = await postAs(handler, GRANT_PATH, { requestId: request.id }, fullAdmin);
@@ -255,7 +270,7 @@ test("full_admin이 승인된 스트리머에게 grant-admin하면 Twitch 로그
     const statusBody = JSON.parse(statusRes.body);
     assert.equal(statusBody.authenticated, true);
     assert.equal(statusBody.role, "admin");
-    assert.deepEqual(statusBody.permissions, ["streamer_approval"]);
+    assert.deepEqual(statusBody.permissions, ["streamer_approval", "streamer_profiles:write"]);
     assert.equal(statusBody.adminAccountId, persisted.accounts[0].id);
     assert.equal(statusBody.adminAccountLabel, "Granted Streamer");
     assert.equal(typeof statusBody.csrfToken, "string");
@@ -265,6 +280,18 @@ test("full_admin이 승인된 스트리머에게 grant-admin하면 Twitch 로그
     /* 승격된 세션은 streamer_approval 엔드포인트를 통과한다 */
     const listAsGranted = await getAs(handler, LIST_PATH, grantedSession);
     assert.equal(listAsGranted.statusCode, 200, listAsGranted.body);
+
+    /* 같은 세션은 streamer_profiles:write 인가를 통과해 공식 프로필을 등록할 수 있다. */
+    const createProfile = await postAs(handler, PROFILES_PATH, {
+      streamerName: "부여된 스트리머",
+      platform: "twitch",
+      handle: "granted_streamer",
+      games: ["lol"],
+      riotId: "Granted Streamer#KR1"
+    }, grantedSession);
+    assert.equal(createProfile.statusCode, 201, createProfile.body);
+    assert.equal(createdProfiles.length, 1);
+    assert.equal(JSON.parse(createProfile.body).profile.streamerName, "부여된 스트리머");
 
     /* 스트리머 surface는 그대로 streamer 세션 — 두 세션은 공존한다 */
     const streamerStatus = await streamerStatusWithTwitchLogin(handler);
