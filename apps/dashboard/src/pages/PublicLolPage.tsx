@@ -292,6 +292,7 @@ import {
   RECENT_ANALYSIS_MATCH_LIMIT,
   averageTierLabel,
   matchRankBadgeLabel,
+  normalizedRankHistoryScore,
   rankBadgeClass,
   rankLabel,
   rankScore,
@@ -2438,7 +2439,7 @@ function profileLpChangeEntries(profile: PublicLolProfile): ProfileLpChangeEntry
     const current = history[index];
     const previous = history[index - 1];
     if (!current || !previous) continue;
-    const delta = current.leaguePoints - previous.leaguePoints;
+    const delta = normalizedRankHistoryScore(current) - normalizedRankHistoryScore(previous);
     if (delta === 0) continue;
     entries.push({
       key: `${current.date}:${index}`,

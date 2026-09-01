@@ -114,7 +114,7 @@ function rankScoreFromParts(tier: string, rank: string | undefined, leaguePoints
     + Math.max(0, Math.trunc(leaguePoints));
 }
 
-function normalizedRankHistoryScore(point: NonNullable<PublicLolProfile["rankHistory"]>[number]): number {
+export function normalizedRankHistoryScore(point: NonNullable<PublicLolProfile["rankHistory"]>[number]): number {
   if (typeof point.tier === "string" && Number.isFinite(point.leaguePoints)) {
     return rankScoreFromParts(point.tier, point.rank, point.leaguePoints);
   }
