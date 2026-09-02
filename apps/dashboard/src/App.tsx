@@ -35,6 +35,7 @@ import { LolRouteFallback } from "./features/public-home/components/LolRouteFall
 import { MinecraftRouteFallback } from "./features/public-home/components/MinecraftRouteFallback";
 import { ValorantRouteFallback } from "./features/public-home/components/ValorantRouteFallback";
 import { PalworldRouteFallback } from "./features/public-home/components/PalworldRouteFallback";
+import { StreamersRouteFallback } from "./features/public-home/components/StreamersRouteFallback";
 import { PublicNotFoundPage } from "./features/public-home/components/PublicNotFoundPage";
 
 const loadPublicHomePage = () => import("./pages/PublicHomePage");
@@ -406,7 +407,7 @@ export default function App() {
           <PublicGamesPage />
         </Suspense>
       ) : streamersPublic ? (
-        <Suspense fallback={<SkeletonCard loadingLabel={currentText.app.loading} size="lg" />}>
+        <Suspense fallback={<StreamersRouteFallback locale={publicLocale} />}>
           <PublicStreamersPage />
         </Suspense>
       ) : minecraftPublic ? (
