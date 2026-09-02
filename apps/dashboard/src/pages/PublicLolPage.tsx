@@ -38,7 +38,6 @@ import { useViewerTwitchOAuthReturn } from "../shared/useViewerTwitchOAuthReturn
 import { usePublicAccountLogin } from "../shared/public-account-login";
 import { withLolDailySummaryBars } from "../features/public-lol/components/LolDailySummaryBar";
 import { LolAugmentIcon } from "../features/public-lol/components/LolAugmentIcon";
-import { publicLiveText } from "../shared/public-live-streamers";
 import { streamerBuckets, type StreamerFilter } from "../features/public-lol/utils/streamers";
 import { arenaPlacementClass, isArenaQueue, matchGap } from "../features/public-lol/utils/match-lanes";
 import {
@@ -88,7 +87,6 @@ import {
   getPublicLolProfileDynamicState,
   invalidatePublicLolMatchPageCache,
   prefetchPublicLolMatchPage,
-  PublicHomeSearchPanel,
   PublicBottomTabBar,
   PublicLocaleSelector,
   ChampionFilterSelect,
@@ -139,8 +137,6 @@ import {
   type ProfileTopIdentityChampion,
   type PublicMatchFilterBarText,
   type ProfileTopPanelText,
-  type PublicHomeLiveStreamer,
-  type PublicHomeSearchPanelText,
   type PublicSiteFooterText,
   type MatchTeamDetailsTeam,
   type PlayerItemBuildSlotViewModel,
@@ -1490,110 +1486,6 @@ function ProfileSearchSkeleton({ riotId }: { riotId: string }) {
       </div>
     </div>
   );
-}
-
-function publicHomeSearchPanelText(platform: LolPlatformId, locale: PublicLocale): PublicHomeSearchPanelText {
-  const option = PUBLIC_LOL_PLATFORM_OPTIONS.find((candidate) => candidate.id === platform) ?? PUBLIC_LOL_PLATFORM_OPTIONS[0]!;
-  const platformLabel = {
-    ...option.label,
-    label: locale === "ja" ? option.label.ja : option.label.ko
-  };
-  return {
-    eyebrow: {
-      label: "YORO.gg",
-      ko: "YORO.gg",
-      ja: "YORO.gg",
-    },
-    title: {
-      label: t().homeSearchTitle,
-      ko: publicI18n.ko.homeSearchTitle,
-      ja: publicI18n.ja.homeSearchTitle,
-    },
-    description: {
-      label: t().homeSearchDescription,
-      ko: publicI18n.ko.homeSearchDescription,
-      ja: publicI18n.ja.homeSearchDescription,
-    },
-    loadingStatus: {
-      label: t().searching,
-      ko: publicI18n.ko.searching,
-      ja: publicI18n.ja.searching,
-    },
-    readyStatus: {
-      label: platformLabel.label,
-      ko: platformLabel.ko,
-      ja: platformLabel.ja,
-    },
-    guideTitle: {
-      label: t().searchNav,
-      ko: publicI18n.ko.searchNav,
-      ja: publicI18n.ja.searchNav,
-    },
-    guideDescription: {
-      label: t().searchPlaceholder,
-      ko: publicI18n.ko.searchPlaceholder,
-      ja: publicI18n.ja.searchPlaceholder,
-    },
-    /* LIVE 레일 문구의 단일 원본은 shared/public-live-streamers.tsx —
-       LoL 홈은 등록 스트리머 데이터라 registered 변형을 씁니다. */
-    liveTitle: publicLiveText(publicContentLocale(activePublicLocale), "registeredTitle"),
-    livePrevious: publicLiveText(publicContentLocale(activePublicLocale), "previous"),
-    liveNext: publicLiveText(publicContentLocale(activePublicLocale), "next"),
-    liveViewAll: publicLiveText(publicContentLocale(activePublicLocale), "viewAll"),
-    liveWatch: publicLiveText(publicContentLocale(activePublicLocale), "watch"),
-    liveEmptyTitle: publicLiveText(publicContentLocale(activePublicLocale), "registeredEmptyTitle"),
-    liveEmptyDescription: publicLiveText(publicContentLocale(activePublicLocale), "registeredEmptyDescription"),
-    primaryFeaturesTitle: {
-      label: t().homePrimaryFeatures,
-      ko: publicI18n.ko.homePrimaryFeatures,
-      ja: publicI18n.ja.homePrimaryFeatures,
-    },
-    participationTitle: {
-      label: t().homeParticipationTitle,
-      ko: publicI18n.ko.homeParticipationTitle,
-      ja: publicI18n.ja.homeParticipationTitle,
-    },
-    participationDescription: {
-      label: t().homeParticipationDescription,
-      ko: publicI18n.ko.homeParticipationDescription,
-      ja: publicI18n.ja.homeParticipationDescription,
-    },
-    aramTitle: {
-      label: t().homeAramTitle,
-      ko: publicI18n.ko.homeAramTitle,
-      ja: publicI18n.ja.homeAramTitle,
-    },
-    aramDescription: {
-      label: t().homeAramDescription,
-      ko: publicI18n.ko.homeAramDescription,
-      ja: publicI18n.ja.homeAramDescription,
-    },
-    patchNotesTitle: {
-      label: t().homePatchNotesTitle,
-      ko: publicI18n.ko.homePatchNotesTitle,
-      ja: publicI18n.ja.homePatchNotesTitle,
-    },
-    patchNotesDescription: {
-      label: t().homePatchNotesDescription,
-      ko: publicI18n.ko.homePatchNotesDescription,
-      ja: publicI18n.ja.homePatchNotesDescription,
-    },
-    streamerTitle: {
-      label: t().homeStreamerTitle,
-      ko: publicI18n.ko.homeStreamerTitle,
-      ja: publicI18n.ja.homeStreamerTitle,
-    },
-    streamerDescription: {
-      label: t().homeStreamerDescription,
-      ko: publicI18n.ko.homeStreamerDescription,
-      ja: publicI18n.ja.homeStreamerDescription,
-    },
-    additionalFeaturesTitle: {
-      label: t().homeAdditionalFeatures,
-      ko: publicI18n.ko.homeAdditionalFeatures,
-      ja: publicI18n.ja.homeAdditionalFeatures,
-    },
-  };
 }
 
 function SummaryCards({ profile }: { profile: PublicLolProfile }) {
@@ -7043,35 +6935,6 @@ export function PublicLolPage({
     [query, storedSuggestions, remoteSuggestions, selectedLolPlatform]
   );
   const visibleSuggestions = query.trim() && query.trim() !== profile?.riotId ? suggestions : [];
-  const homeLiveStreamers = useMemo<PublicHomeLiveStreamer[]>(() => {
-    const streamers = new Map<string, PublicHomeLiveStreamer>();
-    for (const channel of followedLol?.channels ?? []) {
-      if (!channel.isLive) continue;
-      const key = channel.twitchUserId || channel.riotId || channel.twitchLogin;
-      if (!key || streamers.has(key)) continue;
-      streamers.set(key, {
-        id: key,
-        name: channel.twitchDisplayName,
-        nameJa: channel.twitchDisplayName,
-        primaryMeta: channel.rankedStats ? rankLabel(channel.rankedStats) : channel.riotId ?? channel.gameName ?? "League of Legends",
-        primaryMetaJa: channel.rankedStats ? rankLabel(channel.rankedStats) : channel.riotId ?? channel.gameName ?? "League of Legends",
-        secondaryMeta: channel.viewerCount !== undefined ? `${formatNumber(channel.viewerCount)} ${t().twitchViewers}` : channel.title,
-        secondaryMetaJa: channel.viewerCount !== undefined ? `${formatNumber(channel.viewerCount)} ${t().twitchViewers}` : channel.title,
-        server: channel.riotTagLine ? `${channel.riotTagLine} Server` : "JP Server",
-        avatarLabel: channel.twitchDisplayName.slice(0, 1),
-        avatarUrl: assetUrl(channel.profileImageUrl),
-        previewLabel: locale === "ja"
-          ? `${channel.twitchDisplayName}の配信プレビュー`
-          : `${channel.twitchDisplayName} 방송 미리보기`,
-        previewUrl: safeTwitchStreamPreviewUrl(channel.thumbnailUrl),
-        channelUrl: channel.channelUrl ?? (channel.twitchLogin ? `https://www.twitch.tv/${channel.twitchLogin}` : undefined),
-        statusLabel: "LIVE",
-        statusKo: "LIVE",
-        statusJa: "LIVE",
-      });
-    }
-    return [...streamers.values()].slice(0, 12);
-  }, [followedLol, locale]);
   const matchSourceProfile = useMemo(() => {
     if (!profile) return null;
     const queuePage = filters.queue === "all" ? undefined : queueMatchPages[filters.queue];
@@ -7936,91 +7799,9 @@ export function PublicLolPage({
     );
   }
 
-  if (!profile && activeMainPage === "search" && !loading) {
-    return (
-      <AppShell
-        className={`public-lol-shell public-dashboard-shell public-home-shell public-home-shared-shell theme-${theme}`}
-        mainId="public-search-main"
-        sidebarMode="none"
-        skipLinkLabel={t().skipToContent}
-        variant="public"
-      >
-        {/* 검색 랜딩도 같은 LolChrome 한 벌 — 본문에 큰 검색 패널이 있어 헤더
-            컴팩트 검색바(searchSlot)는 넣지 않습니다(공용 규격 프롬프트 §3). */}
-        <LolChrome
-          accountName={publicAccount.accountUser?.displayName}
-          active="none"
-          className="public-home-shared-header"
-          connected={publicAccount.yoroConnected}
-          isStreamerAdmin={publicAccount.isStreamerAdmin}
-          locale={locale}
-          onLocale={changeLocale}
-          onLoginOpen={startTwitchLogin}
-          onLogout={() => void disconnectTwitchViewer()}
-          onStreamerAdmin={publicAccount.openStreamerAdmin}
-          onToggleTheme={toggleTheme}
-        />
-        <AppShellMain className="public-home-shared-main" id="public-search-main">
-          <PublicHomeSearchPanel
-            liveLoading={followedLoading || twitchOAuthSettling}
-            liveStreamers={homeLiveStreamers}
-            loading={loading}
-            onPage={navigateFromMenu}
-            onShowStreamers={() => changeMainPage("subscriptions")}
-            searchForm={
-              <>
-                <SearchForm
-                  loading={loading}
-                  platform={selectedLolPlatform}
-                  platformOptions={platformOptions}
-                  onClear={clearSearch}
-                  onPickSuggestion={pickSuggestion}
-                  onQuery={setQuery}
-                  onPlatformChange={changeLolPlatform}
-                  onSubmit={(event) => void submit(event)}
-                  query={query}
-                  suggestions={visibleSuggestions}
-                  recentSearches={recentSearches}
-                  favorites={favorites}
-                  panelRequest={searchPanelRequest}
-                  variant="homeShared"
-                />
-                {error ? <p className="public-error">{error}</p> : null}
-              </>
-            }
-            searchQuickPicks={storedSuggestions.length > 0 ? (
-              /* 재방문 지름길 — 즐겨찾기(★ 우선)·최근 검색을 검색바 아래 원터치 칩으로.
-                 localStorage 기존 데이터만 사용 · 목업 lol-home-game-selector-redesign §③ */
-              <div aria-label={t().homeQuickLabel} className="public-home-quick" role="group">
-                <span className="public-home-quick__label">{t().homeQuickLabel}</span>
-                {storedSuggestions.slice(0, 4).map((suggestion) => {
-                  const key = normalizeSuggestionKey(suggestion);
-                  const starred = favorites.some((favorite) => normalizeSuggestionKey(favorite) === key);
-                  return (
-                    <button key={key} onClick={() => pickSuggestion(suggestion)} type="button">
-                      {starred ? <i aria-hidden="true">★</i> : null}
-                      {suggestion.gameName}
-                      <em>#{suggestion.tagLine}</em>
-                    </button>
-                  );
-                })}
-              </div>
-            ) : undefined}
-            text={publicHomeSearchPanelText(selectedLolPlatform, locale)}
-          />
-        </AppShellMain>
-        <PublicBottomTabBar activePage={activeMainPage} activeTarget={activeNav} onPage={navigateFromMenu} />
-        <PublicSiteFooter onPage={navigateFromMenu} text={publicSiteFooterText()} />
-        <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
-      </AppShell>
-    );
-  }
-
-  /* 조기 반환은 두 상황만 담당합니다 — ① 검색이 아닌 메뉴 페이지, ② 검색
-     랜딩(프로필도 로딩도 없는 상태). "검색 중인데 아직 프로필이 없는" 상태는
-     아래 프로필 셸로 보내 스켈레톤을 그립니다(목업 "검색 중" — 로딩 화면과
-     완성 화면의 레이아웃이 같아야 데이터 도착 순간 화면이 튀지 않습니다). */
-  if (activeMainPage !== "search" || (!profile && !loading)) {
+  /* 검색이 아닌 메뉴 페이지만 조기 반환합니다. 검색 화면은 프로필 유무나
+     로딩·실패 상태와 관계없이 아래 통합 프로필 셸을 유지합니다. */
+  if (activeMainPage !== "search") {
     return (
       <AppShell
         /* 패치 노트·시청자 참여·증강 칼바람·법률 문서(약관·방침·문의)는 전적 프로필과
@@ -8143,9 +7924,15 @@ export function PublicLolPage({
             <section className="public-dashboard-center">
               {activeMainPage === "search" ? (
                 !activeProfile ? (
-                  /* 검색 중 + 프로필 없음 = 처음 여는 프로필. 같은 셸 안에서
-                     스켈레톤만 그립니다(§3-2). 검색바에는 입력값이 남아 있습니다. */
-                  <ProfileSearchSkeleton riotId={query} />
+                  error && !loading ? (
+                    /* 검색 실패: 같은 프로필 셸(검색바 포함) 안에서 에러만 보여줍니다.
+                       구버전 홈 패널로 이동하지 않습니다. */
+                    <PublicProfileErrorState error={error} />
+                  ) : (
+                    /* 검색 중 + 프로필 없음 = 처음 여는 프로필. 같은 셸 안에서
+                       스켈레톤만 그립니다(§3-2). 검색바에는 입력값이 남아 있습니다. */
+                    <ProfileSearchSkeleton riotId={query} />
+                  )
                 ) : (
                 <>
                   <ProfileTopPanel

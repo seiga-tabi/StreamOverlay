@@ -6,7 +6,6 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { ChampionFilterSelect } from "../src/features/public-lol/components/ChampionFilterSelect";
 import { HomeHeader } from "../src/features/public-home/components/HomeHeader";
 import { homeI18n } from "../src/features/public-home/i18n/home-i18n";
-import { PublicHomeSearchPanel, type PublicHomeSearchPanelText } from "../src/features/public-lol/components/PublicHomeSearchPanel";
 import { PublicSiteFooter } from "../src/features/public-lol/components/PublicSiteFooter";
 import { ProfileMetricStrip } from "../src/features/public-lol/components/ProfileMetricStrip";
 import {
@@ -402,88 +401,6 @@ test("공개 게임 Header frame은 1행 product·search·tools와 2행 navigati
   assert.match(html, /public-game-header__primary-row[\s\S]*public-game-header__search-slot[\s\S]*SEARCH[\s\S]*FILTER[\s\S]*public-game-header__tools[\s\S]*TOOLS/u);
   assert.match(html, /public-game-header__secondary-row[\s\S]*public-game-header__nav-slot[\s\S]*NAV/u);
   assert.match(html, /data-search="true"/u);
-});
-
-test("LoL 홈은 공통 LIVE rail로 기존 스트리머 카드와 전체 보기 동작을 유지한다", () => {
-  const localized = (label: string) => ({ label, ko: label, ja: `JA ${label}` });
-  const text: PublicHomeSearchPanelText = {
-    eyebrow: localized("전적 검색"),
-    title: localized("YORO.gg"),
-    description: localized("소환사 검색"),
-    loadingStatus: localized("불러오는 중"),
-    readyStatus: localized("준비 완료"),
-    guideTitle: localized("검색 안내"),
-    guideDescription: localized("Riot ID를 입력하세요"),
-    liveTitle: localized("팔로우 중인 LIVE 스트리머"),
-    livePrevious: localized("이전 LIVE 스트리머"),
-    liveNext: localized("다음 LIVE 스트리머"),
-    liveViewAll: localized("전체 보기"),
-    liveWatch: localized("방송 보기"),
-    liveEmptyTitle: localized("LIVE 방송 없음"),
-    liveEmptyDescription: localized("방송이 시작되면 표시됩니다"),
-    primaryFeaturesTitle: localized("YORO.gg에서 참여해보세요"),
-    participationTitle: localized("커뮤니티 참여"),
-    participationDescription: localized("참여 방송을 확인하세요"),
-    aramTitle: localized("증강 칼바람"),
-    aramDescription: localized("증강 데이터를 확인하세요"),
-    communityTitle: localized("커뮤니티"),
-    communityDescription: localized("함께 플레이할 팀을 찾으세요"),
-    additionalFeaturesTitle: localized("더 둘러보기"),
-    streamerTitle: localized("스트리머"),
-    streamerDescription: localized("등록된 스트리머를 확인하세요"),
-  };
-  const html = renderToStaticMarkup(
-    <PublicHomeSearchPanel
-      liveLoading={false}
-      liveStreamers={[{
-        id: "streamer-1",
-        name: "LoL Streamer",
-        primaryMeta: "League of Legends",
-        avatarLabel: "L",
-        previewLabel: "LoL Streamer 방송 미리보기",
-        previewUrl: "https://static-cdn.jtvnw.net/previews-ttv/live_user_lol_streamer-640x360.jpg",
-        channelUrl: "https://www.twitch.tv/lol_streamer",
-        statusLabel: "LIVE",
-      }]}
-      loading={false}
-      onPage={() => undefined}
-      onShowStreamers={() => undefined}
-      searchForm={<form aria-label="소환사 검색" />}
-      text={text}
-    />
-  );
-
-  assert.match(html, /data-testid="public-live-streamer-rail"/u);
-  assert.match(html, /public-game-home__hero-grid public-game-home__hero-grid--centered/u);
-  assert.match(html, /public-game-home__live-strip/u);
-  assert.match(html, /class="public-game-home__picture"/u);
-  assert.match(html, /\/images\/public-home\/lol\/mobile\.[a-f0-9]{16}\.avif/u);
-  assert.doesNotMatch(html, /public-game-home__eyebrow/u);
-  assert.match(html, /<h1 id="public-lol-home-title"[\s\S]*YORO\.gg<\/h1>/u);
-  assert.match(html, /LoL Streamer/u);
-  assert.match(html, /public-home-live-card--preview/u);
-  assert.match(html, /alt="LoL Streamer 방송 미리보기"/u);
-  assert.match(html, /live_user_lol_streamer-640x360\.jpg/u);
-  assert.match(html, /League of Legends/u);
-  assert.match(html, /href="https:\/\/www\.twitch\.tv\/lol_streamer"/u);
-  assert.match(html, /전체 보기/u);
-  assert.doesNotMatch(html, /검색 실패|표시할 데이터가 없습니다/u);
-  const homeCss = readFileSync(
-    new URL("../src/styles/shared/public-game-home.css", import.meta.url),
-    "utf8",
-  );
-  assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-rail\s*\{[\s\S]*?grid-auto-columns:\s*17\.5rem/u);
-  assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-card\s*\{[\s\S]*?grid-template-rows:\s*repeat\(6,\s*auto\)/u);
-  assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-card\s*\{[\s\S]*?aspect-ratio:\s*auto/u);
-  assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-card\s*\{[\s\S]*?gap:\s*var\(--yoro-space-3\)/u);
-  assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-card > \.public-home-live-action\s*\{[\s\S]*?margin:\s*0/u);
-  assert.match(homeCss, /\.public-game-home__live-strip \.public-home-live-pill\.yoro-status\s*\{[\s\S]*?position:\s*static;[\s\S]*?grid-row:\s*1/u);
-  assert.match(homeCss, /\.public-game-home__hero:has\(\.public-suggestion-panel\),\s*\.public-game-home__hero:has\(\.palworld-autocomplete\)\s*\{[\s\S]*?z-index:\s*var\(--yoro-z-dropdown\)/u);
-  assert.match(homeCss, /@media \(max-width:\s*64rem\)\s*\{[\s\S]*?\.public-game-home__hero-grid:not\(\.public-game-home__hero-grid--centered\)/u);
-  assert.ok(
-    html.indexOf("public-game-home__hero") < html.indexOf("public-game-home__live-strip")
-      && html.indexOf("public-game-home__live-strip") < html.indexOf("YORO.gg에서 참여해보세요")
-  );
 });
 
 test("챔피언 필터가 선택된 챔피언 이미지와 목록형 선택 접근성 정보를 출력한다", () => {

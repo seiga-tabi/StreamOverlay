@@ -10,7 +10,6 @@ export {
   searchProfile,
   searchSuggestions,
 } from "./api/lol";
-export { PublicHomeSearchPanel } from "./components/PublicHomeSearchPanel";
 export { PublicBottomTabBar } from "./components/PublicBottomTabBar";
 export { PublicHeaderMenu } from "./components/PublicHeaderMenu";
 export { PublicLocaleSelector } from "./components/PublicLocaleSelector";
@@ -254,11 +253,6 @@ export type {
   RecentMatchesSummaryStripProps,
   RecentMatchesSummaryStripText,
 } from "./components/RecentMatchesSummaryStrip";
-export type {
-  PublicHomeLiveStreamer,
-  PublicHomeSearchPanelLocalizedText,
-  PublicHomeSearchPanelText,
-} from "./components/PublicHomeSearchPanel";
 export type {
   ChampionFilterOption,
   ChampionFilterSelectProps,

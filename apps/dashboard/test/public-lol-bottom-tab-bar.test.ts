@@ -27,7 +27,7 @@ test("하단 탭바는 헤더가 아니라 AppShell 직계 자식으로 렌더�
 
   /* 전적검색 결과 분기는 목업 page-4 크롬(LolBottomTabBar)으로 전환했습니다(2026-08-20). */
   const renderCount = lolPage.match(/<PublicBottomTabBar\b/gu)?.length ?? 0;
-  assert.equal(renderCount, 3, "AppShell 3개 분기(등록·홈 검색·비검색)에 기존 탭바가 있어야 합니다");
+  assert.equal(renderCount, 2, "AppShell 2개 조기 반환 분기(등록·비검색)에 기존 탭바가 있어야 합니다");
   assert.match(lolPage, /<LolBottomTabBar active="none" text=\{lolHomeI18n\[locale\]\} \/>/u);
 
   for (const match of lolPage.matchAll(/<PublicBottomTabBar\b[^/]*\/>/gu)) {
@@ -36,6 +36,12 @@ test("하단 탭바는 헤더가 아니라 AppShell 직계 자식으로 렌더�
     /* 홈 메뉴는 루트 메인 홈(/)으로 나가는 navigateFromMenu 를 씁니다(2026-08-19). */
     assert.match(match[0], /onPage=\{navigateFromMenu\}/u);
   }
+});
+
+test("검색 실패와 빈 초기 검색은 구 홈이 아니라 통합 프로필 셸에서 처리한다", () => {
+  assert.doesNotMatch(lolPage, /if \(!profile && activeMainPage === "search" && !loading\)/u);
+  assert.match(lolPage, /if \(activeMainPage !== "search"\) \{/u);
+  assert.match(lolPage, /error && !loading \? \([\s\S]*?<PublicProfileErrorState error=\{error\} \/>[\s\S]*?<ProfileSearchSkeleton riotId=\{query\} \/>/u);
 });
 
 /* 본문 여백을 main 에 걸면 전적검색 결과 화면에서만 무효가 됩니다 — 그 main 에는
