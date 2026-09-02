@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { useId, useRef, type KeyboardEvent } from "react";
 
 export type ProfileHeroRankQueue = {
   id: string;
@@ -42,6 +42,16 @@ export type ProfileHeroRankText = {
   unrankedTitle: string;
   viewRecentMatchesLabel: string;
   lpTrendLabel: string;
+  /** 오른쪽 절반 안내 제목("LP 추이") — 기간 접미사가 없는 짧은 형태입니다. */
+  lpTrendTitle: string;
+  /** 랭크는 있지만 시계열이 솔로 전용이라 그릴 그래프가 없는 큐(자유·5v5). */
+  lpTrendSoloOnlyNote: string;
+  /** 언랭크 큐 — "없음"이 아니라 "아직 없음"임을 구분합니다(목업 §1-A). */
+  lpTrendAfterPlacementNote: string;
+  /** 솔로랭크인데도 rankHistory 표본이 2개 미만이라 선을 그릴 수 없는 경우. */
+  lpTrendNoSamplesNote: string;
+  /** 좌측 절반의 승률 줄 접두("승률"). 도넛을 뺀 자리를 텍스트가 대신합니다(§1-A). */
+  winRateLabel: string;
   /** 숙련도 챔피언 블록 제목(목업 §2-7). masteryChampions 가 있을 때만 씁니다. */
   masteryTitle?: string;
 };
@@ -146,31 +156,6 @@ function LpSparkline({ trend }: { trend: ProfileHeroRankTrend }) {
   );
 }
 
-const DONUT_RADIUS = 27;
-const DONUT_CIRCUMFERENCE = 2 * Math.PI * DONUT_RADIUS;
-
-function WinRateDonut({ percent, label }: { percent: number; label: string }) {
-  const safe = Math.max(0, Math.min(100, percent));
-  return (
-    <span className="public-profile-hero-donut">
-      <svg viewBox="0 0 60 60" aria-hidden="true" focusable="false">
-        <circle className="track" cx="30" cy="30" r={DONUT_RADIUS} fill="none" strokeWidth="5" />
-        <circle
-          className="value"
-          cx="30"
-          cy="30"
-          r={DONUT_RADIUS}
-          fill="none"
-          strokeWidth="5"
-          strokeLinecap="round"
-          strokeDasharray={`${((DONUT_CIRCUMFERENCE * safe) / 100).toFixed(1)} ${DONUT_CIRCUMFERENCE.toFixed(1)}`}
-        />
-      </svg>
-      <b aria-hidden="true">{label}</b>
-    </span>
-  );
-}
-
 /* 언랭크 크레스트 — 특정 엠블럼 대신 같은 슬롯에 중립 육각 실루엣(목업 §2-3).
    없는 티어를 색으로 암시하지 않도록 무채(--deep 계열)만 씁니다. */
 function UnrankedCrestSilhouette() {
@@ -179,6 +164,87 @@ function UnrankedCrestSilhouette() {
       <path d="M20 2 L37 12 V30 L20 42 L3 30 V12 Z" stroke="var(--public-gray-border-strong, #4a5563)" strokeWidth="1.5" />
       <path d="M20 10 L29 16 V26 L20 32 L11 26 V16 Z" stroke="var(--public-gray-border, #3a404b)" strokeWidth="1" />
     </svg>
+  );
+}
+
+/* 탭 패널 내부 — 좌우 반반(목업 §1-A).
+   왼쪽: 크레스트(위) → 티어명 → LP → 승패 → 승률 → 다음 티어 게이지.
+   오른쪽: LP 추이 스파크라인. 그릴 표본이 없는 큐는 같은 자리에 사유 한 줄 +
+   "최근 게임 보기" 버튼을 둡니다 — 절반을 비워 두면 "데이터가 깨졌나"로 읽힙니다. */
+function RankQueuePanelBody({
+  queue,
+  trend,
+  text,
+  onViewRecentMatches,
+}: {
+  queue: ProfileHeroRankQueue;
+  trend?: ProfileHeroRankTrend;
+  text: ProfileHeroRankText;
+  onViewRecentMatches?: () => void;
+}) {
+  /* rankHistory 는 지금도 솔로 단일 시계열입니다 — 자유·5v5 탭에는 그릴 그래프가 없습니다. */
+  const hasTrend = queue.id === "solo" && trend !== undefined && trend.points.length > 1;
+  const emptyNote = !queue.ranked
+    ? text.lpTrendAfterPlacementNote
+    : queue.id === "solo" ? text.lpTrendNoSamplesNote : text.lpTrendSoloOnlyNote;
+
+  return (
+    <div className="public-hero-rank-split">
+      <div className="public-hero-rank-main">
+        <span className={`public-profile-hero-crest${queue.ranked ? "" : " is-unranked"}`}>
+          {queue.ranked
+            ? (queue.tierIconUrl
+              ? <img src={queue.tierIconUrl} alt="" />
+              : <b aria-hidden="true">{queue.tierFallbackLabel}</b>)
+            : <UnrankedCrestSilhouette />}
+        </span>
+        <b className="public-hero-rank-card-tier">{queue.ranked ? queue.rankLabel : text.unrankedTitle}</b>
+        <span className="public-hero-rank-detail">
+          {queue.ranked ? (
+            <>
+              <span className="public-hero-rank-lp">{queue.leaguePointsLabel}</span>
+              <span className="public-hero-rank-card-record">
+                <em>{queue.wins}{queue.winsLabel}</em>
+                {" "}
+                <i>{queue.losses}{queue.lossesLabel}</i>
+              </span>
+              <span className="public-hero-rank-card-record">{text.winRateLabel} {queue.winRate}%</span>
+            </>
+          ) : (
+            <span className="public-hero-rank-card-record">{queue.unrankedDescription ?? queue.recordCaption}</span>
+          )}
+        </span>
+        {queue.ranked && queue.goal ? (
+          <span className="public-profile-hero-goal">
+            <span>{queue.goal.label}</span>
+            <span aria-hidden="true" className="public-profile-hero-goal-track">
+              <em style={{ width: `${Math.max(0, Math.min(100, queue.goal.percent))}%` }} />
+            </span>
+          </span>
+        ) : null}
+      </div>
+      <div className={`public-hero-rank-side${hasTrend ? "" : " is-note"}`}>
+        {hasTrend && trend ? (
+          <span className="public-hero-rank-card-trend">
+            <span className="public-hero-rank-card-trend-label">
+              {text.lpTrendLabel}
+              <b data-tone={trend.changeTone}>{trend.changeLabel}</b>
+            </span>
+            <LpSparkline trend={trend} />
+          </span>
+        ) : (
+          <div className="public-hero-rank-side-empty">
+            <span className="public-hero-rank-side-title">{text.lpTrendTitle}</span>
+            <span className="public-hero-rank-side-note">{emptyNote}</span>
+            {onViewRecentMatches ? (
+              <button className="public-profile-hero-ghost" type="button" onClick={onViewRecentMatches}>
+                {text.viewRecentMatchesLabel}
+              </button>
+            ) : null}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -191,75 +257,93 @@ export function ProfileHeroRank({
   onSelectQueue,
   onViewRecentMatches,
 }: ProfileHeroRankProps) {
-  /* 목업 page-4(v21~v22): 큐 전환 세그먼트 대신 솔로/자유/5:5 세 카드를 나란히.
-     각 카드 = 큐명 · 티어 크레스트(티어색) · 승률 도넛(승=청자/패=홍옥) ·
-     티어명(티어색) · LP·승패 기록 · (표본이 있는 큐만) 분절 LP 스파크라인.
-     LP 추이(rankHistory)는 현재 솔로 랭크 기준 단일 시계열이라 솔로 카드에만
-     그립니다 — 큐별 시계열은 서버 확장 대상(핸드오프 기록). onSelectQueue 와
-     activeQueueId 는 호출부 호환을 위해 받지만 카드형에서는 쓰지 않습니다. */
-  void activeQueueId;
-  void onSelectQueue;
+  /* 목업 profile-hero-tabs-performance-v1(v3) §1: 솔로/자유/5v5 3열 병렬 카드를
+     탭 전환 하나로 바꿉니다. 카드 3개가 1개로 줄면서 생긴 가로 여백은 히어로가
+     퍼포먼스 지표 패널에 넘깁니다(호출부에서 형제로 붙습니다).
+     새 상태를 만들지 않고 이미 받아 두던 activeQueueId / onSelectQueue 를 씁니다. */
+  const baseId = useId();
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
   if (queues.length === 0) return null;
 
+  const foundIndex = queues.findIndex((queue) => queue.id === activeQueueId);
+  const activeIndex = foundIndex >= 0 ? foundIndex : 0;
+  const tabId = (id: string) => `${baseId}-rank-tab-${id}`;
+  const panelId = (id: string) => `${baseId}-rank-panel-${id}`;
+
+  const moveFocus = (index: number) => {
+    const next = (index + queues.length) % queues.length;
+    const queue = queues[next];
+    if (!queue) return;
+    onSelectQueue(queue.id);
+    /* 버튼 노드는 재렌더 뒤에도 그대로라 동기 focus 로 충분합니다. */
+    tabRefs.current[next]?.focus();
+  };
+
+  const onTablistKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "ArrowLeft") moveFocus(activeIndex - 1);
+    else if (event.key === "ArrowRight") moveFocus(activeIndex + 1);
+    else if (event.key === "Home") moveFocus(0);
+    else if (event.key === "End") moveFocus(queues.length - 1);
+    else return;
+    event.preventDefault();
+  };
+
   return (
-    <div aria-label={text.queueSwitcherLabel} className="public-profile-hero-rank public-profile-hero-rank--cards" role="group">
-      {queues.map((queue) => (
-        <section
-          className={`public-hero-rank-card${queue.ranked ? "" : " is-unranked"}`}
-          data-tier={queue.ranked ? queue.tierKey : "unranked"}
-          key={queue.id}
+    <div className="public-profile-hero-rank public-profile-hero-rank--tabs">
+      <section className="public-hero-rank-card public-hero-rank-tabs-card" data-tier={queues[activeIndex]?.ranked ? queues[activeIndex]?.tierKey : "unranked"}>
+        {/* 탭 버튼은 [점 + 큐 이름] 한 줄뿐입니다 — 선택된 큐의 LP 는 바로 아래
+            패널 왼쪽 절반에 크게 있어 탭에 다시 적으면 같은 숫자가 두 번 나옵니다(§1-B). */}
+        <div
+          aria-label={text.queueSwitcherLabel}
+          className="public-hero-rank-tablist"
+          onKeyDown={onTablistKeyDown}
+          role="tablist"
         >
-          <span className="public-hero-rank-card-queue">{queue.label}</span>
-          <span className="public-hero-rank-card-row">
-            <span className={`public-profile-hero-crest${queue.ranked ? "" : " is-unranked"}`}>
-              {queue.ranked
-                ? (queue.tierIconUrl
-                  ? <img src={queue.tierIconUrl} alt="" />
-                  : <b aria-hidden="true">{queue.tierFallbackLabel}</b>)
-                : <UnrankedCrestSilhouette />}
-            </span>
-            {queue.ranked ? <WinRateDonut percent={queue.winRate} label={`${queue.winRate}%`} /> : null}
-            <span className="public-hero-rank-card-copy">
-              <b className="public-hero-rank-card-tier">{queue.ranked ? queue.rankLabel : text.unrankedTitle}</b>
-              {queue.ranked ? (
-                <span className="public-hero-rank-card-record">
-                  {queue.leaguePointsLabel}
-                  {" · "}
-                  <em>{queue.wins}{queue.winsLabel}</em>
-                  {" "}
-                  <i>{queue.losses}{queue.lossesLabel}</i>
-                  {/* 도넛을 접는 컴팩트 규격에서만 CSS 로 노출됩니다(§2-7). */}
-                  <span aria-hidden="true" className="public-hero-rank-card-rate"> · {queue.winRate}%</span>
-                </span>
-              ) : (
-                <span className="public-hero-rank-card-record">{queue.unrankedDescription ?? queue.recordCaption}</span>
-              )}
-              {queue.ranked && queue.goal ? (
-                <span className="public-profile-hero-goal">
-                  <span>{queue.goal.label}</span>
-                  <span aria-hidden="true" className="public-profile-hero-goal-track">
-                    <em style={{ width: `${Math.max(0, Math.min(100, queue.goal.percent))}%` }} />
-                  </span>
-                </span>
-              ) : null}
-            </span>
-          </span>
-          {queue.id === "solo" && trend && trend.points.length > 1 ? (
-            <span className="public-hero-rank-card-trend">
-              <span className="public-hero-rank-card-trend-label">
-                {text.lpTrendLabel}
-                <b data-tone={trend.changeTone}>{trend.changeLabel}</b>
-              </span>
-              <LpSparkline trend={trend} />
-            </span>
-          ) : null}
-          {!queue.ranked && onViewRecentMatches ? (
-            <button className="public-profile-hero-ghost" type="button" onClick={onViewRecentMatches}>
-              {text.viewRecentMatchesLabel}
-            </button>
-          ) : null}
-        </section>
-      ))}
+          {queues.map((queue, index) => {
+            const selected = index === activeIndex;
+            return (
+              <button
+                aria-controls={panelId(queue.id)}
+                aria-selected={selected}
+                className={`public-hero-rank-tab${queue.ranked ? "" : " is-unranked"}`}
+                data-tier={queue.ranked ? queue.tierKey : "unranked"}
+                id={tabId(queue.id)}
+                key={queue.id}
+                onClick={() => onSelectQueue(queue.id)}
+                ref={(node) => { tabRefs.current[index] = node; }}
+                role="tab"
+                tabIndex={selected ? 0 : -1}
+                type="button"
+              >
+                <i aria-hidden="true" />
+                <span>{queue.label}</span>
+              </button>
+            );
+          })}
+        </div>
+        {/* 큐마다 패널 높이가 달라 전환 시 레이아웃이 튀지 않도록 최소 높이를 겁니다(§1-C). */}
+        <div className="public-hero-rank-panels">
+          {queues.map((queue, index) => (
+            <div
+              aria-labelledby={tabId(queue.id)}
+              className="public-hero-rank-panel"
+              data-tier={queue.ranked ? queue.tierKey : "unranked"}
+              hidden={index !== activeIndex}
+              id={panelId(queue.id)}
+              key={queue.id}
+              role="tabpanel"
+              tabIndex={0}
+            >
+              <RankQueuePanelBody
+                onViewRecentMatches={onViewRecentMatches}
+                queue={queue}
+                text={text}
+                trend={trend}
+              />
+            </div>
+          ))}
+        </div>
+      </section>
       {masteryChampions && masteryChampions.length > 0 && text.masteryTitle ? (
         <section className="public-hero-rank-card public-hero-mastery-card">
           <span className="public-hero-rank-card-queue">{text.masteryTitle}</span>

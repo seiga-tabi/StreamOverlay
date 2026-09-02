@@ -102,6 +102,7 @@ import {
   ParticipationStreamerPicks,
   ParticipationStreamerSwitcher,
   ProfileHeroRank as FeatureProfileHeroRank,
+  ProfilePerformanceRadar as FeatureProfilePerformanceRadar,
   StreamerFilterBar,
   StreamerLiveCard,
   StreamerRow,
@@ -130,6 +131,7 @@ import {
   readPublicApiErrorMessage as readErrorMessage,
   type ParticipationStreamerOption,
   type ProfileHeroRankQueue,
+  type ProfilePerformanceMetric,
   type StreamerChannelView,
   type ProfileLpChangeEntry,
   type ProfileMetricRow,
@@ -270,6 +272,7 @@ import { readMiniGameBest, reactionTierLabel, REACTION_TIER_TABLE } from "../fea
 import { usePublicLocale } from "../features/public-lol/hooks/usePublicLocale";
 import { usePublicTheme } from "../features/public-lol/hooks/usePublicTheme";
 import {
+  averageNumbers,
   championAnalysisTableRows,
   championSpotlights,
   isBootItem,
@@ -1848,6 +1851,90 @@ function profileHeroRankTrend(profile: PublicLolProfile): ProfileHeroRankTrend |
   };
 }
 
+/** 레이더 다각형이 성립하는 최소 축 수 — 아래 빈 상태 문구도 이 기준을 따릅니다. */
+const PERFORMANCE_MIN_AXES = 3;
+/* 표본 하한(목업 §2 빈 상태 1). 2경기로도 평균은 나오지만 그 평균은 지표가 아니라
+   잡음이라 아예 값을 만들지 않습니다 — 평점 중앙 숫자도 함께 비웁니다. */
+const PERFORMANCE_MIN_SAMPLE = 3;
+
+/* 히어로 퍼포먼스 지표(목업 profile-hero-tabs-performance-v1 §2) — 전부 클라이언트 집계입니다.
+   표본은 통계 탭과 같은 recentAnalysisMatches(최근 20경기)를 써서 같은 화면 안에서
+   "최근 20경기"의 뜻이 두 개가 되지 않게 합니다. 평점은 기존 averageAiScore(0~100)를
+   그대로 쓰고 표시만 10점 만점으로 바꿉니다 — 계산식은 건드리지 않습니다(§8). */
+function profilePerformanceMetrics(profile: PublicLolProfile): ProfilePerformanceMetric[] {
+  const sampled = recentAnalysisMatches(profile);
+  const matches = sampled.length >= PERFORMANCE_MIN_SAMPLE ? sampled : [];
+  const summary = summarizeMatches(matches);
+  /* summary 에 있는 시야 값은 분당이 아닌 총합이라 이 축만 직접 평균을 냅니다. */
+  const visionScorePerMinute = averageNumbers(matches.map((match) => match.visionScorePerMinute), 2);
+  const score = matches.length > 0 ? averageAiScore(profile) : undefined;
+  const dash = t().metricUnavailable;
+  return [
+    {
+      key: "score",
+      label: t().performanceScoreMetric,
+      lead: true,
+      max: 100,
+      display: score === undefined ? dash : (score / 10).toFixed(1),
+      ...(score === undefined ? {} : { value: score }),
+    },
+    {
+      key: "kill-participation",
+      label: t().killParticipation,
+      axisLabel: t().metricKillParticipationShort,
+      max: METRIC_SCALE_MAX.killParticipation,
+      display: summary.averageKillParticipation === undefined ? dash : formatPercent(summary.averageKillParticipation),
+      ...(summary.averageKillParticipation === undefined ? {} : { value: summary.averageKillParticipation }),
+    },
+    {
+      key: "damage-share",
+      label: t().matchStatDamageShare,
+      axisLabel: t().metricDamageShareShort,
+      max: METRIC_SCALE_MAX.damageShare,
+      display: summary.averageDamageShare === undefined ? dash : formatPercent(summary.averageDamageShare, 1),
+      ...(summary.averageDamageShare === undefined ? {} : { value: summary.averageDamageShare }),
+    },
+    {
+      key: "damage-per-minute",
+      label: t().metricDpm,
+      max: METRIC_SCALE_MAX.damagePerMinute,
+      display: summary.averageDamagePerMinute === undefined ? dash : formatNumber(summary.averageDamagePerMinute),
+      ...(summary.averageDamagePerMinute === undefined ? {} : { value: summary.averageDamagePerMinute }),
+    },
+    {
+      key: "cs-per-minute",
+      label: t().perMinuteCs,
+      max: METRIC_SCALE_MAX.csPerMinute,
+      display: summary.averageCsPerMinute === undefined ? dash : formatDecimal(summary.averageCsPerMinute, 1),
+      ...(summary.averageCsPerMinute === undefined ? {} : { value: summary.averageCsPerMinute }),
+    },
+    {
+      key: "gold-per-minute",
+      label: t().metricGpm,
+      max: METRIC_SCALE_MAX.goldPerMinute,
+      display: summary.averageGoldPerMinute === undefined ? dash : formatNumber(summary.averageGoldPerMinute),
+      ...(summary.averageGoldPerMinute === undefined ? {} : { value: summary.averageGoldPerMinute }),
+    },
+    {
+      key: "vision-score-per-minute",
+      label: t().metricVspm,
+      max: METRIC_SCALE_MAX.visionScorePerMinute,
+      display: visionScorePerMinute === undefined ? dash : formatDecimal(visionScorePerMinute, 2),
+      ...(visionScorePerMinute === undefined ? {} : { value: visionScorePerMinute }),
+    },
+  ];
+}
+
+/* 패널 하단 캡션 — 축이 빠졌으면 어떤 지표가 왜 빠졌는지 이름으로 말해 줍니다.
+   "차트가 5각형인데 이유를 모르겠다"가 목업 검증에서 나온 실제 오독입니다. */
+function profilePerformanceFootNote(metrics: ProfilePerformanceMetric[]): string {
+  const axes = metrics.filter((metric) => !metric.lead);
+  const missing = axes.filter((metric) => metric.value === undefined);
+  if (axes.length - missing.length < PERFORMANCE_MIN_AXES) return t().performanceFootNoteEmpty;
+  if (missing.length > 0) return `${t().performanceFootNotePartial} ${missing.map((metric) => metric.label).join(", ")}`;
+  return t().performanceFootNote;
+}
+
 function profileHeroTopChampions(profile: PublicLolProfile): ProfileTopIdentityChampion[] {
   return profile.championPerformance.slice(0, 3).map((entry) => ({
     key: String(entry.champion.championId),
@@ -2074,6 +2161,9 @@ function ProfileTopPanel({
     ? activeRankQueue ?? defaultRankQueueId
     : defaultRankQueueId;
   const heroTrend = profileHeroRankTrend(profile);
+  /* 퍼포먼스 지표는 큐가 아니라 최근 20경기(큐 무관) 집계라 탭 전환과 무관합니다 —
+     패널 헤더의 "큐 구분 없음" 캡션이 그 사실을 고정으로 알립니다(목업 §1-C). */
+  const performanceMetrics = profilePerformanceMetrics(profile);
 
   const normalizedPlatform = normalizeLolPlatformId(profile.lolPlatform) ?? DEFAULT_PUBLIC_LOL_PLATFORM;
   const canonicalProfilePath = localizedPublicUrlForCurrentLocale(
@@ -2124,12 +2214,33 @@ function ProfileTopPanel({
           queues={rankQueues}
           text={{
             lpTrendLabel: `${t().rankLpTrendLabel} · ${t().period30}`,
+            lpTrendTitle: t().rankLpTrendLabel,
+            lpTrendAfterPlacementNote: t().rankLpTrendAfterPlacement,
+            lpTrendNoSamplesNote: t().rankLpTrendNoSamples,
+            lpTrendSoloOnlyNote: t().rankLpTrendSoloOnly,
             masteryTitle: t().masteryChampionsTitle,
             queueSwitcherLabel: t().rankQueueSwitcher,
             unrankedTitle: t().rankUnrankedTitle,
             viewRecentMatchesLabel: t().rankViewRecentMatches,
+            winRateLabel: t().winRate,
           }}
           trend={heroTrend}
+        />
+      )}
+      performanceSection={(
+        <FeatureProfilePerformanceRadar
+          metrics={performanceMetrics}
+          text={{
+            title: t().performanceMetricsTitle,
+            scope: t().performanceScope,
+            scoreLabel: t().performanceScoreLabel,
+            scoreScaleSuffix: t().performanceScoreScale,
+            emptyTitle: t().performanceEmptyTitle,
+            emptyDescription: t().performanceEmptyDescription,
+            radarAriaLabel: t().performanceRadarAriaLabel,
+            emptyRadarAriaLabel: t().performanceEmptyAriaLabel,
+            footNote: profilePerformanceFootNote(performanceMetrics),
+          }}
         />
       )}
       summaryBar={<ProfileRecentSummaryBar profile={profile} />}
@@ -2342,6 +2453,11 @@ const METRIC_SCALE_MAX = {
   csPerMinute: 10,
   damageShare: 40,
   visionScore: 40,
+  /* 히어로 퍼포먼스 레이더 3축(목업 §2) — 위 5개와 같은 성격의 "스케일 기준"이며
+     만점이 아닙니다. 동티어 백분위로 바꾸려면 서버 작업이 필요합니다. */
+  damagePerMinute: 1200,
+  goldPerMinute: 600,
+  visionScorePerMinute: 2,
 } as const;
 
 function metricRatio(value: number | undefined, max: number): number {

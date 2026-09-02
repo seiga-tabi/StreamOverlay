@@ -19,6 +19,7 @@ export { ChampionFilterSelect } from "./components/ChampionFilterSelect";
 export { PublicSiteFooter } from "./components/PublicSiteFooter";
 export { ProfileMetricCardItem } from "./components/ProfileMetricCardItem";
 export { ProfileHeroRank } from "./components/ProfileHeroRank";
+export { ProfilePerformanceRadar } from "./components/ProfilePerformanceRadar";
 export { ProfileMetricStrip } from "./components/ProfileMetricStrip";
 export { ProfileLpRecordCard, ProfileMetricProfileCard, ProfilePlaytimeCard, ProfileRoleCard } from "./components/ProfileSidebarCards";
 export { ProfileStreamerCast } from "./components/ProfileStreamerCast";
@@ -232,6 +233,11 @@ export type {
   ProfileHeroRankText,
   ProfileHeroRankTrend,
 } from "./components/ProfileHeroRank";
+export type {
+  ProfilePerformanceMetric,
+  ProfilePerformanceRadarProps,
+  ProfilePerformanceRadarText,
+} from "./components/ProfilePerformanceRadar";
 export type {
   ProfileTopIdentityChampion,
 } from "./components/ProfileTopIdentity";

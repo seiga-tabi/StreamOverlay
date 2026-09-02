@@ -64,6 +64,9 @@ export type ProfileTopPanelProps = {
   shareAction?: ReactNode;
   /** 큐 세그먼트 + 티어 상세. 랭크 정보를 히어로가 단독으로 소유합니다. */
   rankSection?: ReactNode;
+  /** 랭크 탭 옆(일반) 또는 아래(스트리머)에 붙는 퍼포먼스 지표 패널.
+      랭크 카드 3개가 탭 1개로 줄면서 생긴 자리를 씁니다(목업 §4·§5). */
+  performanceSection?: ReactNode;
   /** 랭크 격자 아래 전폭으로 붙는 최근 20경기 요약 바(목업 §B). */
   summaryBar?: ReactNode;
   /** 등록 스트리머의 방송 카드 — 목업 격자(1.25fr 1.05fr .85fr)의 첫 칸입니다. */
@@ -133,6 +136,7 @@ export function ProfileTopPanel({
   onRefresh,
   onOpenParticipation,
   onToggleFavorite,
+  performanceSection,
   profileMetaLabel,
   profileIconUrl,
   profileLinks,
@@ -235,12 +239,13 @@ export function ProfileTopPanel({
       {rankSection || streamerCast ? (
         <>
           <span aria-hidden="true" className="public-profile-hero-rule" />
-          {/* 목업 상단 격자: 스트리머면 [방송 카드 | 솔로 확장 | 자유·5:5 스택]
-             (1.25fr 1.05fr .85fr), 아니면 랭크 3카드. 요약 바는 격자 밖 전폭. */}
+          {/* 목업 상단 격자: 스트리머면 [방송 1.3fr | (랭크 탭 · 숙련도) / 퍼포먼스 2fr],
+             아니면 [랭크 탭 1fr | 퍼포먼스 1.5fr]. 요약 바는 격자 밖 전폭. */}
           <div className="public-profile-hero-body">
-            <div className={`public-profile-hero-top${streamerCast ? " has-cast" : ""}`}>
+            <div className={`public-profile-hero-top${streamerCast ? " has-cast" : ""}${performanceSection ? " has-performance" : ""}`}>
               {streamerCast}
               {rankSection}
+              {performanceSection}
             </div>
             {summaryBar}
           </div>
