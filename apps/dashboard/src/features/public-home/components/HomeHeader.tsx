@@ -272,6 +272,7 @@ export function HomeHeader({ text, locale, onLocale, onToggleTheme, accountName,
             </div>
           ) : null}
         </div>
+        <a className="yoro-home-nav-link" href={localizedPublicUrlForCurrentLocale("/streamers")}>{text.navStreamers}</a>
         <a className="yoro-home-nav-link" href={localizedPublicUrlForCurrentLocale("/bot")}>{text.navBot}</a>
       </nav>
       <div className="yoro-home-header-actions">

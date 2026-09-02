@@ -1,14 +1,8 @@
 import { formatStreamersText, type StreamersText } from "../i18n/streamers-i18n";
-import type { StreamerGame, StreamerPost } from "../types/streamer-post";
+import type { StreamerPost } from "../types/streamer-post";
 import { setStreamersUrl, streamerOfficialProfilePath, streamerPostPath, streamersHref } from "../utils/routes";
 import { StreamerAvatar } from "./StreamerAvatar";
-
-const GAME_LABEL_KEYS: Record<StreamerGame, keyof StreamersText> = {
-  lol: "scopeLol",
-  valorant: "scopeValorant",
-  palworld: "scopePalworld",
-  minecraft: "scopeMinecraft",
-};
+import { GAME_LABEL_KEYS, StreamerCardMedia } from "./StreamerCardMedia";
 
 const PLATFORM_LABEL_KEYS: Record<StreamerPost["platform"], keyof StreamersText> = {
   twitch: "filterTwitch",
@@ -84,24 +78,44 @@ export function StreamerPostCard({ post, text }: { post: StreamerPost; text: Str
           </p>
         ) : null}
 
-        {/* 전적 줄은 리그 오브 레전드 글에만 붙습니다 — 다른 게임은 게임 표기까지입니다. */}
+        {/* 전적 줄은 리그 오브 레전드 글에만 붙습니다 — 다른 게임은 게임 표기까지입니다.
+            티어 표기는 우측 비주얼 슬롯으로 옮겼고 이 자리는 승률 게이지가 씁니다. */}
         {lol ? (
           <div className="streamers-card__rank">
-            <span className="streamers-rank-tier">{lol.tier}</span>
             <strong>{lol.riotId}</strong>
-            <span className="streamers-rank-record">
-              {`${text.soloRank} ${lol.winRate.toFixed(1)}% · ${formatStreamersText(text.winsLosses, { wins: lol.wins, losses: lol.losses })}`}
+            <span className="streamers-rank-meter">
+              <small>{text.soloRank}</small>
+              {/* 서버 winRate 는 정수입니다 — 소수 자리를 만들어 붙이지 않습니다. */}
+              <span
+                aria-label={formatStreamersText(text.winRateAria, {
+                  rate: Math.round(lol.winRate),
+                  wins: lol.wins,
+                  losses: lol.losses,
+                })}
+                className="streamers-rank-bar"
+                role="img"
+              >
+                <i style={{ width: `${Math.round(lol.winRate)}%` }} />
+              </span>
+              <b>{`${Math.round(lol.winRate)}%`}</b>
+              <span className="streamers-rank-record">
+                {formatStreamersText(text.winsLosses, { wins: lol.wins, losses: lol.losses })}
+              </span>
             </span>
+            {/* 최근 경기 결과는 서버가 아직 싣지 않습니다 — 빈 자리 대신 이유를 적습니다. */}
             {lol.recentResults.length > 0 ? (
               <span aria-label={formatStreamersText(text.recentGames, { count: lol.recentResults.length })} className="streamers-rank-form">
                 {lol.recentResults.map((result, index) => (
                   <i data-result={result} key={`${result}-${index}`} />
                 ))}
               </span>
-            ) : null}
+            ) : (
+              <span className="streamers-rank-empty">{text.noRecentGames}</span>
+            )}
           </div>
         ) : null}
       </div>
+      <StreamerCardMedia post={post} text={text} />
       <div className="streamers-card__meta">
         <span>{post.authorName}</span>
         <span>{`${text.comments} ${post.commentCount}`}</span>

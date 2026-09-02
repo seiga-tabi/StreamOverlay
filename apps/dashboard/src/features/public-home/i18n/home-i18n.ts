@@ -10,6 +10,7 @@ export type HomeText = {
   skipToContent: string;
   navHome: string;
   navGames: string;
+  navStreamers: string;
   navBot: string;
   navLogin: string;
   navDashboard: string;
@@ -95,6 +96,7 @@ export const homeI18n: Record<HomeLocale, HomeText> = {
     skipToContent: "본문으로 건너뛰기",
     navHome: "홈",
     navGames: "게임",
+    navStreamers: "스트리머",
     navBot: "YORO Bot",
     navLogin: "로그인",
     navDashboard: "대시보드",
@@ -177,6 +179,7 @@ export const homeI18n: Record<HomeLocale, HomeText> = {
     skipToContent: "本文へスキップ",
     navHome: "ホーム",
     navGames: "ゲーム",
+    navStreamers: "配信者",
     navBot: "YORO Bot",
     navLogin: "ログイン",
     navDashboard: "ダッシュボード",
@@ -259,6 +262,7 @@ export const homeI18n: Record<HomeLocale, HomeText> = {
     skipToContent: "Skip to content",
     navHome: "Home",
     navGames: "Games",
+    navStreamers: "Streamers",
     navBot: "YORO Bot",
     navLogin: "Log in",
     navDashboard: "Dashboard",

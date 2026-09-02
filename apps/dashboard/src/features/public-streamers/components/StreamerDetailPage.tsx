@@ -199,10 +199,11 @@ export function StreamerDetailPage({
             <div className="streamers-detail__profile-body">
               <span className="streamers-rank-tier" data-large="true">{lol.tier}</span>
               <div className="streamers-detail__rate">
-                <strong>{`${lol.winRate.toFixed(1)}%`}</strong>
+                {/* 서버 winRate 는 정수라 소수 한 자리는 항상 .0 입니다 — 목록 카드와 표기를 맞춥니다. */}
+                <strong>{`${Math.round(lol.winRate)}%`}</strong>
                 <span>{formatStreamersText(text.winsLosses, { wins: lol.wins, losses: lol.losses })}</span>
                 <span className="streamers-detail__bar">
-                  <i style={{ width: `${lol.winRate}%` }} />
+                  <i style={{ width: `${Math.round(lol.winRate)}%` }} />
                 </span>
               </div>
               {lol.recentResults.length > 0 ? (

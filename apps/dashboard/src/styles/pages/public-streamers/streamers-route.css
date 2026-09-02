@@ -1,33 +1,106 @@
 /*
  * 스트리머 추천 게시판 route 전용 stylesheet — PublicStreamersPage lazy chunk 에만 붙습니다.
- * 미니게임 패턴 복제: 신규 페이지이므로 legacy layer 없이 pages layer 단독 소유.
- * 목업 docs/mockups/streamer-board. !important 금지, 다크 토큰만 사용.
+ * 근거: docs/mockups/streamer-board-redesign-v1.html (작업 B 톤 전환 + 작업 C 비주얼 슬롯).
  *
- * 이 섹션은 공개 다크 지면(--yoro-color-ground) 위에 놓입니다. 카드 표면과 테두리는
- * 공개 셸이 이미 쓰는 값(#1a2130 / rgba(249,250,251,.14) / 16px)을 그대로 씁니다 —
- * 실측으로 맞춘 값이라 다른 공개 페이지와 나란히 놓아도 어긋나지 않습니다.
+ * 이 지면은 더 이상 자체 남색 표면과 보라 강조를 쓰지 않습니다.
+ * 메인 홈(01-public-home.css)의 --home-* 값을 그대로 받아, 경계는 .5px 헤어라인,
+ * 라운드는 2~3px, 그림자와 그라디언트는 없음, 강조는 "추천 글 쓰기" 한 곳만입니다.
+ * --streamers-* 는 기존 선택자를 살리기 위한 별칭이며 값의 원본은 --home-* 입니다.
  */
+
+/* 셸 토큰과 공용 크롬(PublicGameHeaderFrame) 오버라이드는 layer 밖에 둡니다 —
+   public-game-chrome.css 가 unlayered 라 @layer pages 안에서는 이기지 못합니다.
+   minecraft-route.css 가 같은 이유로 같은 위치에 있습니다. */
+.streamers-shell {
+  --home-bg: #1C1D22;
+  --home-card: #252730;
+  --home-ink: #F5F6F8;
+  --home-sub: #B9C3D0;
+  --home-line: #3A404B;
+  --home-mid: #8795A6;
+  --home-deep: #4A5563;
+  --home-inv-bg: #F5F6F8;
+  --home-inv-ink: #1C1D22;
+  --home-stroke: #B9C3D0;
+  --home-win: #87A183;
+  --home-loss: #DC4A5E;
+  /* 흰 글자를 얹는 홍옥 — #DC4A5E 는 흰 글자 대비 4.05:1 로 미달이라 홈 LIVE 배지가
+     쓰는 값(01-public-home.css §.yoro-home-live-badge)을 그대로 씁니다. */
+  --home-live-bg: #C93850;
+  --home-serif: "Noto Serif KR", "Noto Serif JP", serif;
+
+  /* AppShell.css 는 JS import 라 layer 밖이고 `.yoro-app-shell { background: var(--yoro-color-bg) }`
+     세 줄이 어떤 @layer 규칙보다 먼저 이깁니다 — 팰월드·발로란트·마인크래프트와 같은
+     방식으로 셸이 읽는 토큰 자체를 갈아 끼웁니다(그러지 않으면 테마 토글이 먹지 않습니다). */
+  --yoro-color-bg: var(--home-bg);
+  --yoro-color-text: var(--home-ink);
+  --yoro-color-surface: var(--home-card);
+  --yoro-color-surface-strong: var(--home-card);
+  --yoro-color-surface-muted: var(--home-card);
+  --yoro-color-border: var(--home-line);
+  --yoro-color-border-strong: var(--home-stroke);
+  --yoro-app-shell-footer-background: var(--home-bg);
+  --yoro-app-shell-footer-border: var(--home-line);
+
+  font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+.streamers-shell.theme-light {
+  --home-bg: #F5F6F8;
+  --home-card: #FFFFFF;
+  --home-ink: #1C1D22;
+  --home-sub: #5F6E80;
+  --home-line: #E4E8ED;
+  --home-mid: #5F6E80;
+  --home-deep: #B9C3D0;
+  --home-inv-bg: #1C1D22;
+  --home-inv-ink: #F5F6F8;
+  --home-stroke: #4A5563;
+}
+
+.streamers-shell:lang(ja) {
+  --home-serif: "Noto Serif JP", serif;
+
+  font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", system-ui, sans-serif;
+}
+
+/* 셸 기본 규칙이 복합 셀렉터(0,2,0)로 배경을 지정하므로 특이도를 맞춥니다. */
+.public-dashboard-shell.streamers-shell {
+  background: var(--home-bg);
+}
+
+.streamers-shell .public-game-header,
+.streamers-shell .public-bottom-tab-bar,
+.streamers-shell .public-bottom-sheet {
+  --public-game-accent: var(--home-ink);
+  --public-game-chrome-surface: var(--home-bg);
+  --public-game-chrome-surface-muted: var(--home-card);
+  --public-game-chrome-border: var(--home-line);
+  --public-game-chrome-border-strong: var(--home-stroke);
+  --public-game-chrome-text: var(--home-ink);
+  --public-game-chrome-text-muted: var(--home-mid);
+}
 
 @layer pages {
   .streamers-page-section {
-    --streamers-surface: #1a2130;
-    --streamers-surface-sunken: #151b27;
-    --streamers-surface-raised: #232c3c;
-    --streamers-line: rgb(249 250 251 / 14%);
-    --streamers-ink: #f9fafb;
-    --streamers-ink-soft: rgb(249 250 251 / 78%);
-    --streamers-ink-dim: rgb(249 250 251 / 50%);
-    --streamers-accent: #7c5cff;
-    --streamers-accent-strong: #6259ef;
-    --streamers-accent-soft: #b59eff;
-    --streamers-live: #f75a62;
-    --streamers-good: #57cfc0;
-    --streamers-win: #4a9df9;
+    /* 값의 원본은 위 --home-* 입니다. 아래 별칭은 기존 선택자를 그대로 살리기 위한 것입니다. */
+    --streamers-surface: var(--home-card);
+    --streamers-surface-sunken: var(--home-bg);
+    --streamers-line: var(--home-line);
+    --streamers-ink: var(--home-ink);
+    --streamers-ink-soft: var(--home-sub);
+    --streamers-ink-dim: var(--home-mid);
+    --streamers-win: var(--home-win);
+    --streamers-loss: var(--home-loss);
 
     max-width: 74rem;
     margin: 0 auto;
     padding: var(--yoro-space-8) var(--yoro-space-4) var(--yoro-space-12);
     min-width: 0;
+    background: var(--home-bg);
+    color: var(--home-ink);
   }
 
   .streamers-page {
@@ -44,23 +117,28 @@
     flex-wrap: wrap;
   }
 
+  /* 명조는 이 한 층에만 — 홈 히어로 헤드라인과 같은 규칙(01-public-home.css §시각 규칙). */
   .streamers-page__head h1 {
-    margin: 0 0 var(--yoro-space-2);
+    margin: 0 0 var(--yoro-space-3);
     color: var(--streamers-ink);
-    font-size: var(--yoro-font-size-2xl);
-    font-weight: var(--yoro-font-weight-black);
-    letter-spacing: -.02em;
+    font-family: var(--home-serif);
+    font-size: 1.875rem;
+    font-weight: 600;
+    line-height: 1.3;
+    word-break: keep-all;
   }
 
   .streamers-page__head p {
     margin: 0;
     max-width: 44rem;
-    color: rgb(249 250 251 / 68%);
+    color: var(--home-sub);
     font-size: var(--yoro-font-size-md);
     line-height: var(--yoro-line-height-relaxed);
+    word-break: keep-all;
     text-wrap: pretty;
   }
 
+  /* 지면에서 유일한 강조 — "지금 취해야 할 행동" 하나에만 홍옥을 씁니다. */
   .streamers-primary-action {
     display: inline-flex;
     align-items: center;
@@ -68,20 +146,21 @@
     gap: var(--yoro-space-2);
     min-height: var(--yoro-size-touch-target);
     padding: 0 var(--yoro-space-5);
-    border: thin solid transparent;
-    border-radius: var(--yoro-radius-sm);
-    background: var(--streamers-accent-strong);
+    border: .5px solid transparent;
+    border-radius: 2px;
+    background: var(--home-live-bg);
     color: #fff;
     font-size: var(--yoro-font-size-sm);
-    font-weight: var(--yoro-font-weight-black);
+    font-weight: 800;
     text-decoration: none;
     cursor: pointer;
   }
 
   .streamers-primary-action[data-locked="true"] {
-    background: var(--streamers-surface-raised);
+    background: transparent;
     border-color: var(--streamers-line);
     color: var(--streamers-ink-dim);
+    font-weight: 700;
     cursor: default;
   }
 
@@ -95,8 +174,8 @@
     display: grid;
     gap: var(--yoro-space-4);
     padding: var(--yoro-space-4);
-    border: thin solid var(--streamers-line);
-    border-radius: var(--yoro-radius-lg);
+    border: .5px solid var(--streamers-line);
+    border-radius: 3px;
     background: var(--streamers-surface);
   }
 
@@ -106,8 +185,8 @@
     gap: var(--yoro-space-3);
     min-height: 3.25rem;
     padding: 0 var(--yoro-space-4);
-    border: thin solid rgb(249 250 251 / 18%);
-    border-radius: var(--yoro-radius-md);
+    border: .5px solid var(--home-stroke);
+    border-radius: 2px;
     background: var(--streamers-surface-sunken);
     color: var(--streamers-ink-dim);
   }
@@ -129,16 +208,17 @@
   }
 
   .streamers-search input::placeholder {
-    color: rgb(249 250 251 / 42%);
+    color: var(--streamers-ink-dim);
   }
 
   .streamers-search input:focus-visible {
     outline: none;
   }
 
+  /* 그림자는 지면에서 전부 걷어냈지만 포커스 표시는 남깁니다 — 홈 셸과 같은 윤곽선 링. */
   .streamers-search:focus-within {
-    border-color: var(--streamers-accent);
-    box-shadow: var(--yoro-shadow-focus);
+    outline: 2px solid var(--home-stroke);
+    outline-offset: 2px;
   }
 
   .streamers-filters__row {
@@ -169,34 +249,30 @@
     gap: var(--yoro-space-2);
     min-height: var(--yoro-size-touch-target);
     padding: 0 var(--yoro-space-4);
-    border: thin solid var(--streamers-line);
-    border-radius: var(--yoro-radius-pill);
-    background: var(--streamers-surface-raised);
-    color: rgb(249 250 251 / 72%);
+    border: .5px solid var(--streamers-line);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--home-sub);
     font-family: inherit;
     font-size: var(--yoro-font-size-sm);
-    font-weight: var(--yoro-font-weight-medium);
+    font-weight: 500;
     cursor: pointer;
   }
 
+  /* 눌린 상태는 색이 아니라 경계와 굵기로 말합니다 — 지면의 강조는 한 곳뿐입니다. */
   .streamers-toggle[aria-pressed="true"] {
-    border-color: var(--streamers-accent);
-    background: rgb(124 92 255 / 18%);
-    color: var(--streamers-accent-soft);
-    font-weight: var(--yoro-font-weight-bold);
+    border-color: var(--home-stroke);
+    background: transparent;
+    color: var(--streamers-ink);
+    font-weight: 700;
   }
 
+  /* LIVE 는 상태 표시라 색이 곧 뜻입니다 — 점만 방송 관례색으로 남깁니다. */
   .streamers-toggle[data-live="true"] i {
-    width: .4375rem;
-    height: .4375rem;
+    width: .3125rem;
+    height: .3125rem;
     border-radius: var(--yoro-radius-circle);
-    background: currentcolor;
-  }
-
-  .streamers-toggle[data-live="true"][aria-pressed="true"] {
-    border-color: rgb(247 90 98 / 48%);
-    background: rgb(247 90 98 / 16%);
-    color: var(--streamers-live);
+    background: var(--home-live-bg);
   }
 
   .streamers-sort {
@@ -206,15 +282,21 @@
   }
 
   .streamers-sort select {
+    appearance: none;
     min-height: var(--yoro-size-touch-target);
     padding: 0 var(--yoro-space-3);
-    border: thin solid var(--streamers-line);
-    border-radius: var(--yoro-radius-sm);
-    background: var(--streamers-surface-raised);
-    color: var(--streamers-ink);
+    border: .5px solid var(--streamers-line);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--home-sub);
     font-family: inherit;
     font-size: var(--yoro-font-size-sm);
-    font-weight: var(--yoro-font-weight-bold);
+    font-weight: 700;
+  }
+
+  .streamers-sort select option {
+    background: var(--streamers-surface);
+    color: var(--streamers-ink);
   }
 
   /* ── 로그인 안내 ───────────────────────────────────────────── */
@@ -224,10 +306,10 @@
     gap: var(--yoro-space-3);
     margin: 0;
     padding: var(--yoro-space-4);
-    border: thin solid rgb(124 92 255 / 34%);
-    border-radius: var(--yoro-radius-md);
-    background: rgb(124 92 255 / 10%);
-    color: rgb(249 250 251 / 82%);
+    border: .5px solid var(--streamers-line);
+    border-radius: 3px;
+    background: var(--streamers-surface);
+    color: var(--streamers-ink-soft);
     font-size: var(--yoro-font-size-sm);
     line-height: var(--yoro-line-height-base);
     flex-wrap: wrap;
@@ -236,7 +318,7 @@
   .streamers-login-banner svg {
     width: 1.125rem;
     height: 1.125rem;
-    color: var(--streamers-accent-soft);
+    color: var(--streamers-ink-dim);
     flex: 0 0 auto;
   }
 
@@ -248,13 +330,13 @@
   .streamers-login-banner button {
     min-height: var(--yoro-size-touch-target);
     padding: 0 var(--yoro-space-4);
-    border: 0;
-    border-radius: var(--yoro-radius-sm);
-    background: var(--streamers-accent-strong);
-    color: #fff;
+    border: .5px solid var(--home-stroke);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--streamers-ink);
     font-family: inherit;
     font-size: var(--yoro-font-size-sm);
-    font-weight: var(--yoro-font-weight-black);
+    font-weight: 700;
     cursor: pointer;
   }
 
@@ -264,61 +346,66 @@
     gap: var(--yoro-space-3);
   }
 
+  /* 4열(투표/아바타/본문/메타) → 5열. 미디어는 고정 6rem 이라 본문(1fr)만 늘고 줄어듭니다. */
   .streamers-card {
     display: grid;
-    grid-template-columns: 3.5rem 3.5rem minmax(0, 1fr) auto;
+    grid-template-columns: 3.5rem 3.5rem minmax(0, 1fr) 6rem auto;
     align-items: start;
     gap: var(--yoro-space-4);
     padding: var(--yoro-space-5);
-    border: thin solid var(--streamers-line);
-    border-radius: var(--yoro-radius-lg);
+    border: .5px solid var(--streamers-line);
+    border-radius: 3px;
     background: var(--streamers-surface);
+  }
+
+  /* 게임 태그가 하나도 없는 글은 슬롯을 그리지 않습니다 — 빈 6rem 을 남기지 않도록
+     그때만 4열로 돌아갑니다. */
+  .streamers-card:not(:has(.streamers-media)) {
+    grid-template-columns: 3.5rem 3.5rem minmax(0, 1fr) auto;
+  }
+
+  .streamers-card:hover {
+    border-color: var(--home-stroke);
   }
 
   .streamers-card__votes {
     display: grid;
     justify-items: center;
     gap: var(--yoro-space-1);
-    color: var(--streamers-good);
+    color: var(--streamers-ink-dim);
   }
 
   .streamers-card__votes svg {
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 1.125rem;
+    height: 1.125rem;
   }
 
   .streamers-card__votes strong {
     color: var(--streamers-ink);
     font-size: var(--yoro-font-size-lg);
-    font-weight: var(--yoro-font-weight-black);
+    font-weight: 800;
   }
 
   .streamers-card__votes span {
-    color: rgb(249 250 251 / 48%);
+    color: var(--streamers-ink-dim);
     font-size: var(--yoro-font-size-xs);
   }
 
+  /* 아바타는 홈 방송 카드와 같은 규격 — 지면색 원판 + 헤어라인. 플랫폼은 옆의
+     태그가 이미 말하고 있어 원색을 겹쳐 쓸 자리가 아닙니다. */
   .streamers-avatar {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: var(--streamers-avatar-size, 3.5rem);
     height: var(--streamers-avatar-size, 3.5rem);
+    border: .5px solid var(--streamers-line);
     border-radius: var(--yoro-radius-circle);
-    background: linear-gradient(150deg, #4b5566 0%, #2f394d 100%);
-    color: rgb(249 250 251 / 50%);
+    background: var(--streamers-surface-sunken);
+    color: var(--streamers-ink-soft);
     object-fit: cover;
     flex: 0 0 auto;
-  }
-
-  .streamers-avatar[data-platform="chzzk"] {
-    background: #00c17c;
-    color: #06231a;
-  }
-
-  .streamers-avatar[data-platform="youtube"] {
-    background: #f03;
-    color: #fff;
+    box-sizing: border-box;
   }
 
   .streamers-avatar svg {
@@ -342,7 +429,7 @@
   .streamers-card__title h2 {
     margin: 0;
     font-size: var(--yoro-font-size-lg);
-    font-weight: var(--yoro-font-weight-bold);
+    font-weight: 700;
   }
 
   .streamers-card__title a {
@@ -350,8 +437,9 @@
     text-decoration: none;
   }
 
+  /* 링크 표시는 색이 아니라 밑줄로 합니다 — 이 지면에서 색은 강조 하나뿐입니다. */
   .streamers-card__title a:hover {
-    color: var(--streamers-accent-soft);
+    text-decoration: underline;
   }
 
   .streamers-tag {
@@ -360,51 +448,38 @@
     gap: var(--yoro-space-1);
     min-height: 1.5rem;
     padding: 0 var(--yoro-space-2);
-    border: thin solid rgb(249 250 251 / 16%);
-    border-radius: var(--yoro-radius-xs);
-    color: rgb(249 250 251 / 62%);
+    border: .5px solid var(--streamers-line);
+    border-radius: 2px;
+    color: var(--streamers-ink-dim);
     font-size: var(--yoro-font-size-xs);
-    font-weight: var(--yoro-font-weight-bold);
+    font-weight: 700;
   }
 
-  .streamers-tag[data-platform="twitch"] {
-    border-color: rgb(145 70 255 / 42%);
-    background: rgb(145 70 255 / 18%);
-    color: #c4a6ff;
-  }
-
-  .streamers-tag[data-platform="chzzk"] {
-    border-color: rgb(0 255 163 / 34%);
-    background: rgb(0 255 163 / 14%);
-    color: #5fe3b6;
-  }
-
-  .streamers-tag[data-platform="youtube"] {
-    border-color: rgb(255 70 85 / 38%);
-    background: rgb(255 70 85 / 14%);
-    color: #ff8b95;
-  }
-
+  /* 공식 프로필은 "관리자가 보증한 자리" — 프로필 메뉴의 관리자 항목과 같은 승색 용법. */
   .streamers-tag[data-official="true"] {
-    border-color: rgb(245 184 65 / 45%);
-    background: rgb(245 184 65 / 14%);
-    color: #ffd984;
+    border-color: var(--home-win);
+    color: var(--home-win);
   }
 
-  /* 붉은 틴트 배경 위에서 --streamers-live 는 4.15:1 로 AA 미달이었습니다(실측).
-     글자만 밝은 톤으로 올리고 점은 강한 빨강을 유지합니다. */
+  /* LIVE 배지는 01-public-home.css 의 .yoro-home-live-badge 규격 그대로(테마 공통). */
   .streamers-tag[data-live="true"] {
     border-color: transparent;
-    background: rgb(247 90 98 / 16%);
-    color: #ff8b95;
+    background: var(--home-live-bg);
+    color: #fff;
+    font-size: .625rem;
+    font-weight: 800;
+    letter-spacing: .06em;
   }
 
+  /* reset 의 `*` 는 pseudo-element 를 잡지 못하므로 여기서 직접 지정합니다 —
+     content-box 로 두면 테두리가 더해져 점이 5px 가 아니라 8px 로 커집니다. */
   .streamers-tag[data-live="true"]::before {
     content: "";
-    width: .375rem;
-    height: .375rem;
+    width: .3125rem;
+    height: .3125rem;
+    border: 1.5px solid #fff;
     border-radius: var(--yoro-radius-circle);
-    background: var(--streamers-live);
+    box-sizing: border-box;
   }
 
   .streamers-card__chips {
@@ -420,61 +495,32 @@
     gap: var(--yoro-space-2);
     min-height: 1.875rem;
     padding: 0 var(--yoro-space-3);
-    border: thin solid var(--streamers-line);
-    border-radius: var(--yoro-radius-sm);
-    background: var(--streamers-surface-raised);
-    color: rgb(249 250 251 / 72%);
+    border: .5px solid var(--streamers-line);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--home-sub);
     font-size: var(--yoro-font-size-xs);
-    font-weight: var(--yoro-font-weight-medium);
+    font-weight: 500;
     text-decoration: none;
   }
 
+  .streamers-chip:hover {
+    border-color: var(--home-stroke);
+    color: var(--streamers-ink);
+  }
+
+  /* 게임 원색은 칩에서 뺐습니다 — 크롬이 아니라 카드 우측 "그림"이 그 색을 씁니다. */
   .streamers-chip i {
-    width: .875rem;
-    height: .875rem;
-    border-radius: var(--yoro-radius-xs);
-    background: currentcolor;
-  }
-
-  .streamers-chip[data-game="lol"] {
-    border-color: rgb(124 92 255 / 30%);
-    background: rgb(124 92 255 / 14%);
-    color: #c4a6ff;
-  }
-
-  .streamers-chip[data-game="lol"] i { background: #b02a37; }
-
-  .streamers-chip[data-game="valorant"] {
-    border-color: rgb(255 70 85 / 32%);
-    background: rgb(255 70 85 / 12%);
-    color: #ff8b95;
-  }
-
-  .streamers-chip[data-game="valorant"] i { background: #ff4655; }
-
-  .streamers-chip[data-game="palworld"] {
-    border-color: rgb(95 227 182 / 30%);
-    background: rgb(15 107 60 / 28%);
-    color: #5fe3b6;
-  }
-
-  .streamers-chip[data-game="palworld"] i { background: #2f8f5b; }
-
-  .streamers-chip[data-game="minecraft"] {
-    border-color: rgb(139 195 74 / 30%);
-    background: rgb(91 140 58 / 24%);
-    color: #b7dd8a;
-  }
-
-  .streamers-chip[data-game="minecraft"] i { background: #5b8c3a; }
-
-  .streamers-chip--link {
-    color: var(--streamers-accent-soft);
+    width: .625rem;
+    height: .625rem;
+    border-radius: 1px;
+    background: var(--streamers-ink-dim);
   }
 
   .streamers-chip--link svg {
     width: .8125rem;
     height: .8125rem;
+    color: var(--streamers-ink-dim);
   }
 
   .streamers-chip--input {
@@ -490,8 +536,8 @@
     gap: var(--yoro-space-3);
     margin: 0;
     padding: var(--yoro-space-3) var(--yoro-space-4);
-    border: thin dashed rgb(249 250 251 / 22%);
-    border-radius: var(--yoro-radius-sm);
+    border: .5px dashed var(--streamers-line);
+    border-radius: 2px;
     background: var(--streamers-surface-sunken);
     color: var(--streamers-ink-dim);
     font-size: var(--yoro-font-size-sm);
@@ -503,13 +549,14 @@
     flex: 0 0 auto;
   }
 
+  /* 전적 줄 — 티어 칩은 미디어 슬롯으로 갔고, 그 자리에 승률 게이지가 들어옵니다. */
   .streamers-card__rank {
     display: flex;
     align-items: center;
-    gap: var(--yoro-space-4);
+    gap: var(--yoro-space-3) var(--yoro-space-4);
     padding: var(--yoro-space-3) var(--yoro-space-4);
-    border: thin solid rgb(249 250 251 / 10%);
-    border-radius: var(--yoro-radius-sm);
+    border: .5px solid var(--streamers-line);
+    border-radius: 2px;
     background: var(--streamers-surface-sunken);
     flex-wrap: wrap;
   }
@@ -517,7 +564,49 @@
   .streamers-card__rank strong {
     color: var(--streamers-ink);
     font-size: var(--yoro-font-size-sm);
-    font-weight: var(--yoro-font-weight-medium);
+    font-weight: 700;
+    flex: none;
+  }
+
+  .streamers-rank-meter {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--yoro-space-2);
+  }
+
+  .streamers-rank-meter small {
+    color: var(--streamers-ink-dim);
+    font-size: var(--yoro-font-size-xs);
+  }
+
+  /* 승/패 2분할 막대 — wins/losses 로 지금 그릴 수 있는 유일한 그래프입니다.
+     색 두 개는 홈이 승패에만 허용한 --home-win / --home-loss 그대로입니다. */
+  .streamers-rank-bar {
+    position: relative;
+    width: 8.5rem;
+    height: .375rem;
+    border-radius: 2px;
+    background: var(--home-loss);
+    overflow: hidden;
+    flex: none;
+  }
+
+  .streamers-rank-bar i {
+    position: absolute;
+    inset: 0 auto 0 0;
+    display: block;
+    background: var(--home-win);
+  }
+
+  .streamers-rank-meter b {
+    color: var(--streamers-ink);
+    font-size: var(--yoro-font-size-sm);
+    font-weight: 800;
+  }
+
+  .streamers-rank-record {
+    color: var(--streamers-ink-dim);
+    font-size: var(--yoro-font-size-sm);
   }
 
   .streamers-rank-tier {
@@ -525,22 +614,17 @@
     align-items: center;
     min-height: 1.625rem;
     padding: 0 var(--yoro-space-3);
-    border-radius: var(--yoro-radius-xs);
-    background: rgb(117 190 250 / 16%);
-    color: #75befa;
+    border: .5px solid var(--streamers-line);
+    border-radius: 2px;
+    color: var(--home-sub);
     font-size: var(--yoro-font-size-xs);
-    font-weight: var(--yoro-font-weight-bold);
+    font-weight: 700;
   }
 
   .streamers-rank-tier[data-large="true"] {
     min-height: 2.25rem;
     padding: 0 var(--yoro-space-4);
     font-size: var(--yoro-font-size-md);
-  }
-
-  .streamers-rank-record {
-    color: rgb(249 250 251 / 58%);
-    font-size: var(--yoro-font-size-sm);
   }
 
   .streamers-rank-form {
@@ -550,6 +634,7 @@
     margin-left: auto;
   }
 
+  /* 승/패는 홈의 전용색 두 개 — 여기서만 색이 정보입니다. */
   .streamers-rank-form i {
     width: .5rem;
     height: .5rem;
@@ -557,27 +642,143 @@
     background: var(--streamers-win);
   }
 
-  .streamers-rank-form i[data-result="loss"] { background: var(--streamers-live); }
+  .streamers-rank-form i[data-result="loss"] { background: var(--streamers-loss); }
 
   .streamers-rank-form[data-large="true"] i {
     width: .6875rem;
     height: .6875rem;
   }
 
+  /* 최근 경기 결과는 서버가 아직 싣지 않습니다 — 막대 자리를 빈 채로 두지 않고
+     이유를 적습니다(목업 §v2 빈 상태). */
+  .streamers-rank-empty {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.875rem;
+    margin-left: auto;
+    padding: 0 var(--yoro-space-3);
+    border: .5px dashed var(--streamers-line);
+    border-radius: 2px;
+    color: var(--streamers-ink-dim);
+    font-size: var(--yoro-font-size-xs);
+  }
+
+  /* ── 카드 비주얼 슬롯 ──────────────────────────────────────── */
+  .streamers-media {
+    display: grid;
+    grid-column: 4;
+    justify-items: center;
+    gap: var(--yoro-space-2);
+    width: 6rem;
+    /* 티어·게임 색은 이 요소에서만 삽니다 — 아래 data-* 가 덮어씁니다. */
+    --tier-color: var(--home-mid);
+    --game-mark: var(--home-mid);
+  }
+
+  /* 티어 색 — 23-profile-hero.css §티어별 강조색 실측값 그대로.
+     이 색은 도형(3:1) 전용입니다. 티어 이름 글자는 --home-ink 를 씁니다. */
+  .streamers-media[data-tier="iron"] { --tier-color: #8d8d8d; }
+  .streamers-media[data-tier="bronze"] { --tier-color: #c08558; }
+  .streamers-media[data-tier="silver"] { --tier-color: #b3bcc5; }
+  .streamers-media[data-tier="gold"] { --tier-color: #e5c15a; }
+  .streamers-media[data-tier="platinum"] { --tier-color: #58c4bb; }
+  .streamers-media[data-tier="emerald"] { --tier-color: #4fbc7c; }
+  .streamers-media[data-tier="diamond"] { --tier-color: #6db6f0; }
+  .streamers-media[data-tier="master"] { --tier-color: #b57ff0; }
+  .streamers-media[data-tier="grandmaster"] { --tier-color: #ea6560; }
+  .streamers-media[data-tier="challenger"] { --tier-color: #f0c264; }
+
+  /* 게임 마크 색 — 이전 .streamers-chip[data-game] i 가 쓰던 값 그대로입니다.
+     칩에서 뺀 원색을 여기서만 되살립니다: 이 자리는 크롬이 아니라 "그림"이고,
+     후속 작업에서 총천연색 박스아트 사진이 그대로 들어올 자리이기 때문입니다. */
+  .streamers-media[data-game="lol"] { --game-mark: #b02a37; }
+  .streamers-media[data-game="valorant"] { --game-mark: #ff4655; }
+  .streamers-media[data-game="palworld"] { --game-mark: #2f8f5b; }
+  .streamers-media[data-game="minecraft"] { --game-mark: #5b8c3a; }
+
+  /* 액자 하나로 티어 엠블럼과 박스아트를 같이 받습니다 — 두 카드가 같은 자리에
+     같은 크기의 그림을 갖는 유일한 방법입니다. 비율은 박스아트 원본 285x380. */
+  .streamers-media__frame {
+    display: grid;
+    place-items: center;
+    width: 6rem;
+    aspect-ratio: 285 / 380;
+    border: .5px solid var(--streamers-line);
+    border-radius: 2px;
+    background: var(--streamers-surface-sunken);
+    overflow: hidden;
+  }
+
+  .streamers-media__emblem {
+    width: 3rem;
+    height: 3rem;
+    color: var(--tier-color);
+  }
+
+  .streamers-media__art {
+    width: 2.75rem;
+    height: 2.75rem;
+    color: var(--game-mark);
+  }
+
+  /* 면 하나만 옅게 채워 도형이 선화로만 보이지 않게 합니다(그라디언트 아님). */
+  .streamers-media__art .fill {
+    fill: currentcolor;
+    fill-opacity: .16;
+  }
+
+  /* 캡션 높이를 고정해 티어(2줄)와 게임명(1줄) 카드의 슬롯 높이를 맞춥니다. */
+  .streamers-media__cap {
+    display: grid;
+    justify-items: center;
+    gap: 1px;
+    min-height: 2.25rem;
+    text-align: center;
+  }
+
+  /* 가나단표기 — 티어 칩보다 한 단 올린 강조. 글자는 티어색이 아니라 본문색입니다
+     (백자 지면에서 밝은 티어색 글자는 대비가 무너집니다). */
+  .streamers-media__tier {
+    color: var(--streamers-ink);
+    font-size: var(--yoro-font-size-sm);
+    font-weight: 800;
+    letter-spacing: -.01em;
+    white-space: nowrap;
+  }
+
+  .streamers-media__lp {
+    color: var(--streamers-ink-dim);
+    font-size: var(--yoro-font-size-xs);
+    font-weight: 500;
+  }
+
+  .streamers-media__game {
+    color: var(--home-sub);
+    font-size: var(--yoro-font-size-xs);
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .streamers-media__hint {
+    color: var(--streamers-ink-dim);
+    font-size: .625rem;
+    font-weight: 500;
+  }
+
   .streamers-card__meta {
     display: grid;
+    grid-column: -2 / -1;
     justify-items: end;
     gap: var(--yoro-space-1);
-    /* .45 는 카드 배경(#1a2130) 위에서 4.21:1 로 AA 미달이었습니다(실측). */
-    color: rgb(249 250 251 / 62%);
+    color: var(--streamers-ink-dim);
     font-size: var(--yoro-font-size-xs);
     white-space: nowrap;
   }
 
   .streamers-card__meta span:first-child {
-    color: rgb(249 250 251 / 72%);
+    color: var(--home-sub);
     font-size: var(--yoro-font-size-sm);
-    font-weight: var(--yoro-font-weight-medium);
+    font-weight: 500;
   }
 
   /* ── 상태 ──────────────────────────────────────────────────── */
@@ -587,8 +788,8 @@
     gap: var(--yoro-space-2);
     margin: 0;
     padding: var(--yoro-space-6);
-    border: thin solid var(--streamers-line);
-    border-radius: var(--yoro-radius-lg);
+    border: .5px solid var(--streamers-line);
+    border-radius: 3px;
     background: var(--streamers-surface);
     color: var(--streamers-ink-soft);
     font-size: var(--yoro-font-size-sm);
@@ -597,7 +798,7 @@
   .streamers-state strong {
     color: var(--streamers-ink);
     font-size: var(--yoro-font-size-lg);
-    font-weight: var(--yoro-font-weight-bold);
+    font-weight: 700;
   }
 
   .streamers-state p { margin: 0; }
@@ -605,27 +806,27 @@
   .streamers-state button {
     min-height: var(--yoro-size-touch-target);
     padding: 0 var(--yoro-space-4);
-    border: thin solid var(--streamers-line);
-    border-radius: var(--yoro-radius-sm);
-    background: var(--streamers-surface-raised);
+    border: .5px solid var(--home-stroke);
+    border-radius: 2px;
+    background: transparent;
     color: var(--streamers-ink);
     font-family: inherit;
     font-size: var(--yoro-font-size-sm);
-    font-weight: var(--yoro-font-weight-medium);
+    font-weight: 700;
     cursor: pointer;
   }
 
-  .streamers-state--error strong { color: #ff8b95; }
+  .streamers-state--error strong { color: var(--home-loss); }
 
-  /* 중복 채널 안내 — 폼 안에서 오류로 읽혀야 하므로 표면을 낮추고 테두리를 세웁니다. */
+  /* 중복 채널 안내 — 폼 안에서 오류로 읽혀야 하므로 테두리를 세웁니다. */
   .streamers-state--warn {
     padding: var(--yoro-space-4);
-    border-color: rgb(247 90 98 / 46%);
-    background: rgb(247 90 98 / 10%);
+    border-color: var(--home-loss);
+    background: var(--streamers-surface-sunken);
   }
 
   .streamers-state--warn strong {
-    color: #ff8b95;
+    color: var(--home-loss);
     font-size: var(--yoro-font-size-md);
   }
 
@@ -633,8 +834,9 @@
     display: inline-flex;
     align-items: center;
     min-height: var(--yoro-size-touch-target);
-    color: var(--streamers-accent-soft);
-    font-weight: var(--yoro-font-weight-medium);
+    color: var(--streamers-ink);
+    font-weight: 700;
+    text-decoration: underline;
   }
 
   /* ── 상세 ──────────────────────────────────────────────────── */
@@ -649,9 +851,10 @@
   .streamers-detail__crumbs button {
     border: 0;
     background: none;
-    color: var(--streamers-accent-soft);
+    color: var(--home-sub);
     font-family: inherit;
     font-size: inherit;
+    text-decoration: underline;
     cursor: pointer;
   }
 
@@ -659,8 +862,8 @@
     display: grid;
     gap: var(--yoro-space-5);
     padding: var(--yoro-space-6);
-    border: thin solid var(--streamers-line);
-    border-radius: var(--yoro-radius-lg);
+    border: .5px solid var(--streamers-line);
+    border-radius: 3px;
     background: var(--streamers-surface);
   }
 
@@ -681,8 +884,11 @@
   .streamers-detail__post h1 {
     margin: 0;
     color: var(--streamers-ink);
+    font-family: var(--home-serif);
     font-size: var(--yoro-font-size-xl);
-    font-weight: var(--yoro-font-weight-black);
+    font-weight: 600;
+    line-height: 1.3;
+    word-break: keep-all;
   }
 
   .streamers-detail__badges {
@@ -697,8 +903,8 @@
     align-items: center;
     gap: var(--yoro-space-3);
     padding: var(--yoro-space-4);
-    border: thin solid var(--streamers-line);
-    border-radius: var(--yoro-radius-md);
+    border: .5px solid var(--streamers-line);
+    border-radius: 2px;
     background: var(--streamers-surface-sunken);
   }
 
@@ -711,13 +917,11 @@
   }
 
   .streamers-detail__live[data-live="true"] {
-    border-color: rgb(247 90 98 / 42%);
-    background: rgb(247 90 98 / 10%);
+    border-color: var(--home-live-bg);
   }
 
   .streamers-detail__live[data-live="true"] > span {
-    background: var(--streamers-live);
-    box-shadow: 0 0 0 .3rem rgb(247 90 98 / 13%);
+    background: var(--home-live-bg);
   }
 
   .streamers-detail__live div {
@@ -737,8 +941,8 @@
     display: grid;
     gap: var(--yoro-space-4);
     padding: var(--yoro-space-5);
-    border: thin solid rgb(249 250 251 / 10%);
-    border-radius: var(--yoro-radius-md);
+    border: .5px solid var(--streamers-line);
+    border-radius: 2px;
     background: var(--streamers-surface-sunken);
   }
 
@@ -753,7 +957,7 @@
     margin: 0;
     color: var(--streamers-ink);
     font-size: var(--yoro-font-size-md);
-    font-weight: var(--yoro-font-weight-bold);
+    font-weight: 700;
   }
 
   .streamers-detail__profile-head span {
@@ -778,19 +982,19 @@
   .streamers-detail__rate strong {
     color: var(--streamers-ink);
     font-size: var(--yoro-font-size-lg);
-    font-weight: var(--yoro-font-weight-black);
+    font-weight: 800;
   }
 
   .streamers-detail__rate span {
-    color: rgb(249 250 251 / 60%);
+    color: var(--streamers-ink-dim);
     font-size: var(--yoro-font-size-sm);
   }
 
   .streamers-detail__bar {
     display: block;
     height: .5rem;
-    border-radius: var(--yoro-radius-xs);
-    background: var(--streamers-live);
+    border-radius: 2px;
+    background: var(--streamers-loss);
     overflow: hidden;
   }
 
@@ -805,7 +1009,7 @@
     align-items: center;
     gap: var(--yoro-space-3);
     padding-top: var(--yoro-space-2);
-    border-top: thin solid rgb(249 250 251 / 8%);
+    border-top: .5px solid var(--streamers-line);
     flex-wrap: wrap;
   }
 
@@ -816,20 +1020,25 @@
     gap: var(--yoro-space-2);
     min-height: var(--yoro-size-touch-target);
     padding: 0 var(--yoro-space-4);
-    border: thin solid var(--streamers-line);
-    border-radius: var(--yoro-radius-sm);
-    background: var(--streamers-surface-raised);
+    border: .5px solid var(--streamers-line);
+    border-radius: 2px;
+    background: transparent;
     color: var(--streamers-ink-soft);
     font-family: inherit;
     font-size: var(--yoro-font-size-sm);
-    font-weight: var(--yoro-font-weight-bold);
+    font-weight: 700;
     cursor: pointer;
   }
 
   .streamers-vote {
-    border-color: rgb(87 207 192 / 40%);
-    background: rgb(87 207 192 / 14%);
-    color: var(--streamers-good);
+    border-color: var(--home-stroke);
+    color: var(--streamers-ink);
+  }
+
+  .streamers-vote:disabled {
+    border-color: var(--streamers-line);
+    color: var(--streamers-ink-dim);
+    cursor: default;
   }
 
   .streamers-vote svg {
@@ -848,15 +1057,15 @@
     display: grid;
     gap: var(--yoro-space-3);
     padding: var(--yoro-space-4);
-    border: thin solid var(--streamers-line);
-    border-radius: var(--yoro-radius-md);
+    border: .5px solid var(--streamers-line);
+    border-radius: 2px;
     background: var(--streamers-surface-sunken);
   }
 
   .streamers-share strong {
     color: var(--streamers-ink);
     font-size: var(--yoro-font-size-md);
-    font-weight: var(--yoro-font-weight-bold);
+    font-weight: 700;
   }
 
   .streamers-share__rows {
@@ -869,8 +1078,8 @@
     gap: var(--yoro-space-1);
     min-height: 3.5rem;
     padding: var(--yoro-space-3) var(--yoro-space-4);
-    border: thin solid rgb(249 250 251 / 12%);
-    border-radius: var(--yoro-radius-md);
+    border: .5px solid var(--streamers-line);
+    border-radius: 2px;
     background: var(--streamers-surface);
     color: var(--streamers-ink);
     font-family: inherit;
@@ -880,13 +1089,12 @@
   }
 
   .streamers-share__row[data-primary="true"] {
-    border-color: rgb(249 250 251 / 22%);
-    background: #000;
+    border-color: var(--home-stroke);
   }
 
   .streamers-share__row span {
     font-size: var(--yoro-font-size-sm);
-    font-weight: var(--yoro-font-weight-bold);
+    font-weight: 700;
   }
 
   .streamers-share__row small {
@@ -906,8 +1114,8 @@
     display: grid;
     gap: var(--yoro-space-4);
     padding: var(--yoro-space-5);
-    border: thin solid var(--streamers-line);
-    border-radius: var(--yoro-radius-lg);
+    border: .5px solid var(--streamers-line);
+    border-radius: 3px;
     background: var(--streamers-surface);
   }
 
@@ -915,23 +1123,23 @@
     margin: 0;
     color: var(--streamers-ink);
     font-size: var(--yoro-font-size-md);
-    font-weight: var(--yoro-font-weight-bold);
+    font-weight: 700;
   }
 
   .streamers-comments__composer {
     display: grid;
     gap: var(--yoro-space-3);
     padding: var(--yoro-space-4);
-    border: thin solid rgb(249 250 251 / 12%);
-    border-radius: var(--yoro-radius-md);
+    border: .5px solid var(--streamers-line);
+    border-radius: 2px;
     background: var(--streamers-surface-sunken);
   }
 
   .streamers-comments__composer textarea {
     width: 100%;
     padding: var(--yoro-space-3);
-    border: thin solid var(--streamers-line);
-    border-radius: var(--yoro-radius-sm);
+    border: .5px solid var(--streamers-line);
+    border-radius: 2px;
     background: var(--streamers-surface);
     color: var(--streamers-ink);
     font-family: inherit;
@@ -954,27 +1162,29 @@
     align-items: center;
     gap: var(--yoro-space-2);
     min-height: var(--yoro-size-touch-target);
-    color: rgb(249 250 251 / 78%);
+    color: var(--streamers-ink-soft);
     font-size: var(--yoro-font-size-sm);
-    font-weight: var(--yoro-font-weight-medium);
+    font-weight: 500;
     cursor: pointer;
   }
 
+  /* 지면의 홍옥은 "추천 글 쓰기" 한 곳뿐이라, 나머지 확정 버튼은 홈의 반전 버튼을 씁니다. */
   .streamers-comments__composer-actions button {
     min-height: var(--yoro-size-touch-target);
     padding: 0 var(--yoro-space-5);
-    border: 0;
-    border-radius: var(--yoro-radius-sm);
-    background: var(--streamers-accent-strong);
-    color: #fff;
+    border: .5px solid transparent;
+    border-radius: 2px;
+    background: var(--home-inv-bg);
+    color: var(--home-inv-ink);
     font-family: inherit;
     font-size: var(--yoro-font-size-sm);
-    font-weight: var(--yoro-font-weight-black);
+    font-weight: 800;
     cursor: pointer;
   }
 
   .streamers-comments__composer-actions button:disabled {
-    background: var(--streamers-surface-raised);
+    border-color: var(--streamers-line);
+    background: transparent;
     color: var(--streamers-ink-dim);
     cursor: not-allowed;
   }
@@ -1004,26 +1214,26 @@
   .streamers-comments__meta strong {
     color: var(--streamers-ink);
     font-size: var(--yoro-font-size-sm);
-    font-weight: var(--yoro-font-weight-bold);
+    font-weight: 700;
   }
 
   .streamers-report {
     margin-left: auto;
     min-height: 1.625rem;
     padding: 0 var(--yoro-space-2);
-    border: thin solid rgb(249 250 251 / 12%);
-    border-radius: var(--yoro-radius-xs);
+    border: .5px solid var(--streamers-line);
+    border-radius: 2px;
     background: none;
-    color: rgb(249 250 251 / 45%);
+    color: var(--streamers-ink-dim);
     font-family: inherit;
     font-size: var(--yoro-font-size-xs);
-    font-weight: var(--yoro-font-weight-medium);
+    font-weight: 500;
     cursor: pointer;
   }
 
   .streamers-report:hover {
-    border-color: rgb(247 90 98 / 40%);
-    color: var(--streamers-live);
+    border-color: var(--home-loss);
+    color: var(--home-loss);
   }
 
   /* ── 신고 ──────────────────────────────────────────────────── */
@@ -1031,15 +1241,15 @@
     display: grid;
     gap: var(--yoro-space-3);
     padding: var(--yoro-space-5);
-    border: thin solid var(--streamers-line);
-    border-radius: var(--yoro-radius-lg);
+    border: .5px solid var(--streamers-line);
+    border-radius: 3px;
     background: var(--streamers-surface);
   }
 
   .streamers-report-dialog strong {
     color: var(--streamers-ink);
     font-size: var(--yoro-font-size-md);
-    font-weight: var(--yoro-font-weight-bold);
+    font-weight: 700;
   }
 
   .streamers-report-dialog__reasons {
@@ -1053,19 +1263,18 @@
     gap: var(--yoro-space-3);
     min-height: var(--yoro-size-touch-target);
     padding: 0 var(--yoro-space-3);
-    border: thin solid rgb(249 250 251 / 12%);
-    border-radius: var(--yoro-radius-sm);
-    color: rgb(249 250 251 / 72%);
+    border: .5px solid var(--streamers-line);
+    border-radius: 2px;
+    color: var(--home-sub);
     font-size: var(--yoro-font-size-sm);
-    font-weight: var(--yoro-font-weight-medium);
+    font-weight: 500;
     cursor: pointer;
   }
 
   .streamers-report-dialog__reasons label:has(input:checked) {
-    border-color: rgb(124 92 255 / 44%);
-    background: rgb(124 92 255 / 16%);
-    color: #c4a6ff;
-    font-weight: var(--yoro-font-weight-bold);
+    border-color: var(--home-stroke);
+    color: var(--streamers-ink);
+    font-weight: 700;
   }
 
   .streamers-report-dialog p {
@@ -1084,62 +1293,48 @@
   .streamers-report-dialog__actions button {
     min-height: var(--yoro-size-touch-target);
     padding: 0 var(--yoro-space-4);
-    border: thin solid var(--streamers-line);
-    border-radius: var(--yoro-radius-sm);
-    background: var(--streamers-surface-raised);
-    color: rgb(249 250 251 / 72%);
+    border: .5px solid var(--streamers-line);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--home-sub);
     font-family: inherit;
     font-size: var(--yoro-font-size-sm);
-    font-weight: var(--yoro-font-weight-medium);
+    font-weight: 500;
     cursor: pointer;
   }
 
-  /* 공식 프로필은 밝은 테마에서도 같은 정보 위계를 유지합니다. */
-  .streamers-shell.theme-light .streamers-page-section {
-    --streamers-surface: #fff;
-    --streamers-surface-sunken: #f4f6fa;
-    --streamers-surface-raised: #eef1f6;
-    --streamers-line: rgb(24 32 48 / 16%);
-    --streamers-ink: #172033;
-    --streamers-ink-soft: rgb(23 32 51 / 78%);
-    --streamers-ink-dim: rgb(23 32 51 / 58%);
-    --streamers-accent-soft: #5b42d6;
-  }
-
-  .streamers-shell.theme-light .streamers-detail__profile,
-  .streamers-shell.theme-light .streamers-detail__actions,
-  .streamers-shell.theme-light .streamers-comments__composer,
-  .streamers-shell.theme-light .streamers-share__row,
-  .streamers-shell.theme-light .streamers-report-dialog__reasons label {
-    border-color: var(--streamers-line);
-  }
-
-  .streamers-shell.theme-light .streamers-detail__rate span,
-  .streamers-shell.theme-light .streamers-checkbox,
-  .streamers-shell.theme-light .streamers-report-dialog__reasons label {
-    color: var(--streamers-ink-soft);
-  }
-
-  .streamers-shell.theme-light .streamers-tag[data-official="true"] {
-    border-color: rgb(166 111 0 / 38%);
-    background: rgb(245 184 65 / 20%);
-    color: #765000;
-  }
-
   .streamers-report-dialog__actions button[data-danger="true"] {
-    border-color: rgb(247 90 98 / 50%);
-    background: rgb(247 90 98 / 18%);
-    color: var(--streamers-live);
-    font-weight: var(--yoro-font-weight-black);
+    border-color: var(--home-loss);
+    color: var(--home-loss);
+    font-weight: 800;
   }
+
+  /* ── 라이트 테마 ───────────────────────────────────────────── */
+  /* 백자 지면(#FFFFFF 카드) 위에서 --home-win 원본은 2.82:1 로 미달입니다 —
+     01-public-home.css 가 관리자 항목에 쓰는 라이트 전용 값을 그대로 씁니다. */
+  .streamers-shell.theme-light .streamers-tag[data-official="true"] {
+    border-color: #657862;
+    color: #657862;
+  }
+
+  /* 티어 도형색도 지면이 뒤집히면 함께 뒤집습니다 —
+     23-public-lol/23-profile-hero.css §라이트 티어색 실측값 그대로. */
+  .streamers-shell.theme-light .streamers-media[data-tier="bronze"] { --tier-color: #bf8355; }
+  .streamers-shell.theme-light .streamers-media[data-tier="silver"] { --tier-color: #8392a0; }
+  .streamers-shell.theme-light .streamers-media[data-tier="gold"] { --tier-color: #b18b1c; }
+  .streamers-shell.theme-light .streamers-media[data-tier="platinum"] { --tier-color: #389f96; }
+  .streamers-shell.theme-light .streamers-media[data-tier="emerald"] { --tier-color: #3ea267; }
+  .streamers-shell.theme-light .streamers-media[data-tier="diamond"] { --tier-color: #2b95e9; }
+  .streamers-shell.theme-light .streamers-media[data-tier="master"] { --tier-color: #af74ef; }
+  .streamers-shell.theme-light .streamers-media[data-tier="challenger"] { --tier-color: #be8512; }
 
   /* ── 등록 폼 ───────────────────────────────────────────────── */
   .streamers-form {
     display: grid;
     gap: var(--yoro-space-5);
     padding: var(--yoro-space-6);
-    border: thin solid var(--streamers-line);
-    border-radius: var(--yoro-radius-lg);
+    border: .5px solid var(--streamers-line);
+    border-radius: 3px;
     background: var(--streamers-surface);
   }
 
@@ -1155,7 +1350,7 @@
   .streamers-form label > span {
     color: var(--streamers-ink);
     font-size: var(--yoro-font-size-sm);
-    font-weight: var(--yoro-font-weight-bold);
+    font-weight: 700;
   }
 
   /* 체크박스는 제외합니다 — 같은 규칙이 칩 안의 체크박스를 입력 필드로 만들어
@@ -1166,8 +1361,8 @@
     width: 100%;
     min-height: 3rem;
     padding: var(--yoro-space-3) var(--yoro-space-4);
-    border: thin solid rgb(249 250 251 / 18%);
-    border-radius: var(--yoro-radius-sm);
+    border: .5px solid var(--home-stroke);
+    border-radius: 2px;
     background: var(--streamers-surface-sunken);
     color: var(--streamers-ink);
     font-family: inherit;
@@ -1207,7 +1402,7 @@
     padding: 0 0 var(--yoro-space-2);
     color: var(--streamers-ink);
     font-size: var(--yoro-font-size-sm);
-    font-weight: var(--yoro-font-weight-bold);
+    font-weight: 700;
   }
 
   /* 체크 표시는 직접 그립니다 — 셸 전역 터치 규칙이 모든 input 에 44px 최소
@@ -1217,16 +1412,15 @@
     position: relative;
     width: 1rem;
     height: 1rem;
-    border: .125rem solid rgb(249 250 251 / 34%);
-    /* 16px 상자에 --yoro-radius-xs(6px)를 주면 라디오처럼 보입니다. */
-    border-radius: .25rem;
+    border: .125rem solid var(--streamers-line);
+    border-radius: 2px;
     box-sizing: border-box;
     flex: 0 0 auto;
   }
 
   .streamers-form__games .streamers-chip[data-game]:has(input:checked) .streamers-chip__check {
-    border-color: var(--streamers-accent);
-    background: var(--streamers-accent);
+    border-color: var(--home-inv-bg);
+    background: var(--home-inv-bg);
   }
 
   .streamers-form__games .streamers-chip[data-game]:has(input:checked) .streamers-chip__check::after {
@@ -1235,7 +1429,7 @@
     left: .25rem;
     width: .25rem;
     height: .5rem;
-    border: solid #fff;
+    border: solid var(--home-inv-ink);
     border-width: 0 .125rem .125rem 0;
     transform: rotate(45deg);
     content: "";
@@ -1243,24 +1437,22 @@
 
   /* 네이티브 상자가 안 보이므로 포커스 링은 칩이 받습니다. */
   .streamers-chip--input:has(input:focus-visible) {
-    outline: none;
-    box-shadow: var(--yoro-shadow-focus);
+    outline: 2px solid var(--home-stroke);
+    outline-offset: 2px;
   }
 
-  /* 폼의 게임 칩은 고르기 전에는 중립입니다 — 목록 칩과 달리 여기서는 선택 상태가
-     정보이므로, data-game 틴트를 끄고 고른 것만 강조합니다(목업 글쓰기 아트보드).
-     선택 규칙이 이 중립 규칙보다 특이성이 높아야 하므로 같은 형태로 씁니다. */
+  /* 폼의 게임 칩은 고르기 전에는 중립입니다 — 선택 상태가 정보이므로 고른 것만
+     굵기와 경계로 세웁니다(색은 지면의 강조 하나로 아낍니다). */
   .streamers-form__games .streamers-chip[data-game] {
     border-color: var(--streamers-line);
-    background: var(--streamers-surface-raised);
-    color: rgb(249 250 251 / 72%);
+    background: transparent;
+    color: var(--home-sub);
   }
 
   .streamers-form__games .streamers-chip[data-game]:has(input:checked) {
-    border-color: rgb(124 92 255 / 44%);
-    background: rgb(124 92 255 / 16%);
-    color: #c4a6ff;
-    font-weight: var(--yoro-font-weight-bold);
+    border-color: var(--home-stroke);
+    color: var(--streamers-ink);
+    font-weight: 700;
   }
 
   .streamers-form__actions {
@@ -1269,31 +1461,32 @@
     justify-content: flex-end;
     gap: var(--yoro-space-2);
     padding-top: var(--yoro-space-2);
-    border-top: thin solid rgb(249 250 251 / 10%);
+    border-top: .5px solid var(--streamers-line);
   }
 
   .streamers-form__actions button {
     min-height: var(--yoro-size-touch-target);
     padding: 0 var(--yoro-space-5);
-    border: thin solid var(--streamers-line);
-    border-radius: var(--yoro-radius-sm);
-    background: var(--streamers-surface-raised);
-    color: rgb(249 250 251 / 72%);
+    border: .5px solid var(--streamers-line);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--home-sub);
     font-family: inherit;
     font-size: var(--yoro-font-size-sm);
-    font-weight: var(--yoro-font-weight-medium);
+    font-weight: 500;
     cursor: pointer;
   }
 
   .streamers-form__actions button[data-primary="true"] {
     border-color: transparent;
-    background: var(--streamers-accent-strong);
-    color: #fff;
-    font-weight: var(--yoro-font-weight-black);
+    background: var(--home-inv-bg);
+    color: var(--home-inv-ink);
+    font-weight: 800;
   }
 
   .streamers-form__actions button:disabled {
-    background: var(--streamers-surface-raised);
+    border-color: var(--streamers-line);
+    background: transparent;
     color: var(--streamers-ink-dim);
     cursor: not-allowed;
   }
@@ -1304,7 +1497,8 @@
       padding: var(--yoro-space-5) var(--yoro-space-4) var(--yoro-space-10);
     }
 
-    .streamers-card {
+    .streamers-card,
+    .streamers-card:not(:has(.streamers-media)) {
       grid-template-columns: 2.75rem minmax(0, 1fr) auto;
       gap: var(--yoro-space-3);
       padding: var(--yoro-space-4);
@@ -1328,10 +1522,35 @@
       justify-items: start;
     }
 
+    /* 미디어 슬롯은 본문 아래 가로 띠로 내려가고 액자는 6rem → 3.5rem 으로 줄입니다. */
+    .streamers-media {
+      grid-column: 1 / -1;
+      grid-auto-flow: column;
+      justify-content: start;
+      justify-items: start;
+      align-items: center;
+      gap: var(--yoro-space-3);
+      width: auto;
+    }
+
+    .streamers-media__frame { width: 3.5rem; }
+    .streamers-media__emblem { width: 1.875rem; height: 1.875rem; }
+    .streamers-media__art { width: 1.625rem; height: 1.625rem; }
+
+    .streamers-media__cap {
+      justify-items: start;
+      min-height: 0;
+      text-align: left;
+    }
+
+    .streamers-media__game { text-align: left; }
+
     .streamers-form__row {
       grid-template-columns: minmax(0, 1fr);
     }
 
-    .streamers-rank-form { margin-left: 0; }
+    .streamers-rank-bar { width: 6.5rem; }
+    .streamers-rank-form,
+    .streamers-rank-empty { margin-left: 0; }
   }
 }

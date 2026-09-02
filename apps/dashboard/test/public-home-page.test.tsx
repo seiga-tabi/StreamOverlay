@@ -37,6 +37,8 @@ test("홈 헤더는 확장형 게임 드롭다운 트리거와 지구본·테마
   assert.match(html, /yoro-home-games-trigger/u);
   assert.match(html, /게임/u);
   assert.match(html, /YORO Bot/u);
+  /* 1행 순서는 [홈] [게임 ▾] [스트리머] [봇] — 스트리머는 봇 바로 왼쪽입니다. */
+  assert.match(html, /<a class="yoro-home-nav-link" href="\/ko\/streamers">스트리머<\/a><a class="yoro-home-nav-link" href="\/ko\/bot">/u);
   assert.match(html, /언어 선택/u);
   assert.match(html, /라이트\/다크 테마 전환/u);
   assert.match(html, /로그인/u);

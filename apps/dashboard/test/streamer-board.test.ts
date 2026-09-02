@@ -135,6 +135,9 @@ test("전적 프로필은 리그 오브 레전드 글에만 붙는다", () => {
   };
   const lolPost = parseStreamerPost({ ...basePost, lolProfile });
   assert.equal(lolPost?.lolProfile?.tier, "Diamond II");
+  /* 표기만 남기면 카드가 티어 엠블럼 색을 고를 수 없습니다 — 원본 코드와 LP도 보존합니다. */
+  assert.equal(lolPost?.lolProfile?.tierCode, "DIAMOND");
+  assert.equal(lolPost?.lolProfile?.leaguePoints, 42);
   assert.equal(lolPost?.lolProfile?.winRate, 57.1, "소수 한 자리로 고정합니다");
   assert.equal(lolPost?.lolProfile?.recentResults.length, 5, "최근 5경기까지");
 

@@ -54,6 +54,12 @@ export const streamersI18n = {
     soloRank: "솔로랭크",
     winsLosses: "{wins}승 {losses}패",
     recentGames: "최근 {count}경기",
+    /* 승률 막대는 그림이라 값을 읽어 주지 않습니다 — 스크린 리더용 문장을 따로 둡니다. */
+    winRateAria: "승률 {rate}%, {wins}승 {losses}패",
+    rankLp: "{lp} LP",
+    /* 서버가 아직 match history 를 싣지 않습니다 — 빈 자리 대신 이유를 적습니다. */
+    noRecentGames: "최근 경기 기록 없음",
+    noRankData: "전적 없음",
 
     listLoading: "추천 글을 불러오는 중입니다.",
     listEmpty: "아직 등록된 추천 글이 없습니다.",
@@ -163,6 +169,10 @@ export const streamersI18n = {
     soloRank: "ソロランク",
     winsLosses: "{wins}勝 {losses}敗",
     recentGames: "直近{count}試合",
+    winRateAria: "勝率 {rate}%、{wins}勝 {losses}敗",
+    rankLp: "{lp} LP",
+    noRecentGames: "直近の試合記録なし",
+    noRankData: "戦績なし",
 
     listLoading: "おすすめを読み込んでいます。",
     listEmpty: "まだ登録されたおすすめがありません。",
@@ -268,6 +278,10 @@ export const streamersI18n = {
     soloRank: "Solo queue",
     winsLosses: "{wins}W {losses}L",
     recentGames: "Last {count} games",
+    winRateAria: "{rate}% win rate, {wins}W {losses}L",
+    rankLp: "{lp} LP",
+    noRecentGames: "No recent games",
+    noRankData: "No ranked data",
     listLoading: "Loading streamer recommendations.",
     listEmpty: "No recommendations have been posted yet.",
     listEmptyBody: "Be the first to recommend a streamer with their channel URL and main games.",

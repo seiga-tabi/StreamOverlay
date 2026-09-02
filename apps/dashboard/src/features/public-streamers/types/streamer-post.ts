@@ -28,6 +28,10 @@ export const STREAMER_GAMES: readonly StreamerGame[] = ["lol", "valorant", "palw
 export type StreamerLolProfile = {
   riotId: string;
   tier: string;
+  /* 표기(tier)는 rankTierLabel 이 접은 문자열이라 티어 엠블럼 색을 고를 수 없습니다.
+     서버가 이미 보내 주는 원본 코드를 함께 남겨 카드가 색을 직접 고릅니다. */
+  tierCode: LolRankTier;
+  leaguePoints: number;
   /** 0~100. */
   winRate: number;
   wins: number;
@@ -137,20 +141,28 @@ const LOL_RANK_TIERS: readonly LolRankTier[] = [
   "EMERALD", "DIAMOND", "MASTER", "GRANDMASTER", "CHALLENGER", "UNRANKED",
 ];
 
-function parseTierLabel(value: Record<string, unknown>): string | undefined {
+/* 표기와 코드를 같이 돌려줍니다 — 표기만 남기면 카드가 티어 색을 고를 수 없습니다. */
+function parseTier(
+  value: Record<string, unknown>
+): { label: string; code: LolRankTier; leaguePoints: number } | undefined {
   const tier = LOL_RANK_TIERS.find((candidate) => candidate === value.tier);
   if (!tier) return undefined;
   const rank = safeText(value.rank, 4);
-  return rankTierLabel({
-    queueType: "RANKED_SOLO_5x5",
-    tier,
-    ...(rank ? { rank } : {}),
-    leaguePoints: counter(value.leaguePoints),
-    wins: counter(value.wins),
-    losses: counter(value.losses),
-    winRate: 0,
-    fetchedAt: new Date(0).toISOString(),
-  });
+  const leaguePoints = counter(value.leaguePoints);
+  return {
+    label: rankTierLabel({
+      queueType: "RANKED_SOLO_5x5",
+      tier,
+      ...(rank ? { rank } : {}),
+      leaguePoints,
+      wins: counter(value.wins),
+      losses: counter(value.losses),
+      winRate: 0,
+      fetchedAt: new Date(0).toISOString(),
+    }),
+    code: tier,
+    leaguePoints,
+  };
 }
 
 function parseLolProfile(value: unknown): StreamerLolProfile | undefined {
@@ -158,7 +170,7 @@ function parseLolProfile(value: unknown): StreamerLolProfile | undefined {
   const riotId = safeText(value.riotId, 60);
   /* 서버는 티어 코드(DIAMOND)와 단계(II)를 줍니다. 표기는 다른 LoL 화면과 같은
      규칙으로 여기서 만듭니다 — 두 화면이 같은 계정을 다르게 부르면 안 됩니다. */
-  const tier = parseTierLabel(value);
+  const tier = parseTier(value);
   const winRate = finiteNumber(value.winRate);
   const wins = finiteNumber(value.wins);
   const losses = finiteNumber(value.losses);
@@ -172,7 +184,9 @@ function parseLolProfile(value: unknown): StreamerLolProfile | undefined {
     : [];
   return {
     riotId,
-    tier,
+    tier: tier.label,
+    tierCode: tier.code,
+    leaguePoints: tier.leaguePoints,
     winRate: Math.round(winRate * 10) / 10,
     wins: Math.trunc(wins),
     losses: Math.trunc(losses),
