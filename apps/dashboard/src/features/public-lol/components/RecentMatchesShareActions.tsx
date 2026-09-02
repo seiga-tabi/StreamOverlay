@@ -51,7 +51,7 @@ type ShareStatus = "idle" | "preparing" | "saved" | "shared" | "failed";
 const SHARE_CARD_WIDTH = 1080;
 /* 필터 결과 상위 10경기 고정 — "필터에 따른 10게임을 항상 보여주도록" 요청 반영. */
 const SHARE_CARD_MAX_MATCHES = 10;
-/* 목업 LolShareCard — 좌우 여백 64, 행 90px(v3: 단일 컬럼, 아이템 6칸 같은 줄 배치). */
+/* 목업 LolShareCard — 좌우 여백 64, 행 90px(최종 B안: 단일 컬럼, 아이템 원형 6개). */
 const SHARE_CARD_MARGIN = 64;
 const SHARE_CARD_ROW_HEIGHT = 90;
 const SHARE_CARD_BODY_FONT = 'Pretendard, "Noto Sans KR", "Noto Sans JP", sans-serif';
@@ -62,6 +62,10 @@ const SHARE_CARD_BRUSH_FONT = '"Yuji Boku", "Yuji Syuku", serif';
 type ShareCardTheme = {
   bg: string; card: string; blob1: string; blob2: string; line: string;
   ink: string; sub: string; mid: string; win: string; loss: string;
+  row: {
+    win: string; loss: string; mvp: string; ace: string;
+    mvpLine: string; aceLine: string;
+  };
 };
 
 const SHARE_CARD_THEMES: Record<"dark" | "light", ShareCardTheme> = {
@@ -69,11 +73,19 @@ const SHARE_CARD_THEMES: Record<"dark" | "light", ShareCardTheme> = {
     bg: "#1c1d22", card: "#252730", blob1: "#23252e", blob2: "#2b2f3a",
     line: "#3a404b", ink: "#f5f6f8", sub: "#b9c3d0", mid: "#7c8b9c",
     win: "#63c375", loss: "#e97180",
+    row: {
+      win: "#1B1E39", loss: "#301C22", mvp: "#2F2C29", ace: "#222C29",
+      mvpLine: "rgba(216,179,106,0.50)", aceLine: "rgba(99,195,117,0.45)",
+    },
   },
   light: {
     bg: "#f5f6f8", card: "#ffffff", blob1: "#edf0f4", blob2: "#e2e7ed",
     line: "#e4e8ed", ink: "#1c1d22", sub: "#5a6675", mid: "#7c8b9c",
     win: "#1d8139", loss: "#c0394a",
+    row: {
+      win: "#E9F3FB", loss: "#F8EEF1", mvp: "#EFEADF", ace: "#E4EDE9",
+      mvpLine: "rgba(176,134,48,0.55)", aceLine: "rgba(29,129,57,0.45)",
+    },
   },
 };
 
@@ -154,6 +166,10 @@ async function waitForShareFonts(): Promise<void> {
       Promise.all([
         document.fonts.load(`46px ${SHARE_CARD_BRUSH_FONT}`, "YORO"),
         document.fonts.load(`700 54px ${SHARE_CARD_SERIF_FONT}`, "가"),
+        document.fonts.load(`800 21px ${SHARE_CARD_BODY_FONT}`, "가"),
+        document.fonts.load(`700 21px ${SHARE_CARD_BODY_FONT}`, "가Hg0"),
+        document.fonts.load(`500 15px ${SHARE_CARD_BODY_FONT}`, "가Hg0"),
+        document.fonts.load(`500 14px ${SHARE_CARD_BODY_FONT}`, "가Hg0"),
         document.fonts.ready,
       ]),
       new Promise((resolve) => window.setTimeout(resolve, 2_500)),
@@ -196,7 +212,7 @@ function drawCircularImage(
   context.restore();
 }
 
-/* 아이템 슬롯의 둥근 테두리 — 프로필 공유 카드(ProfileShareActions)의 동명 헬퍼와
+/* 행 배경의 둥근 테두리 — 프로필 공유 카드(ProfileShareActions)의 동명 헬퍼와
    같은 알고리즘이지만 이 파일은 독립 모듈이라 별도로 둡니다. */
 function drawRoundedRect(
   context: CanvasRenderingContext2D,
@@ -214,6 +230,59 @@ function drawRoundedRect(
   context.arcTo(x, y + height, x, y, safeRadius);
   context.arcTo(x, y, x + width, y, safeRadius);
   context.closePath();
+}
+
+const LEADING_PROBE = "Hg";
+const INK_PROBE = "한H0";
+const LINE_INK_GAP = 3.5;
+type ShareTextMetrics = { ascent: number; descent: number };
+const shareTextMetricCache = new Map<string, ShareTextMetrics>();
+
+function probeShareTextMetrics(
+  context: CanvasRenderingContext2D,
+  font: string,
+  probe: string,
+): ShareTextMetrics {
+  const key = `${font}\u0000${probe}`;
+  const cached = shareTextMetricCache.get(key);
+  if (cached) return cached;
+
+  const previousFont = context.font;
+  context.font = font;
+  const metrics = context.measureText(probe);
+  context.font = previousFont;
+  const measured = {
+    ascent: metrics.actualBoundingBoxAscent,
+    descent: metrics.actualBoundingBoxDescent,
+  };
+  shareTextMetricCache.set(key, measured);
+  return measured;
+}
+
+function twoLineBaselines(
+  context: CanvasRenderingContext2D,
+  centerY: number,
+  topFonts: string[],
+  bottomFonts: string[],
+): { top: number; bottom: number } {
+  const maxMetric = (fonts: string[], probe: string, key: keyof ShareTextMetrics) => (
+    fonts.reduce(
+      (maximum, font) => Math.max(maximum, probeShareTextMetrics(context, font, probe)[key]),
+      0,
+    )
+  );
+  const topInkAscent = maxMetric(topFonts, INK_PROBE, "ascent");
+  const topLeadDescent = maxMetric(topFonts, LEADING_PROBE, "descent");
+  const bottomInkAscent = maxMetric(bottomFonts, INK_PROBE, "ascent");
+  const bottomInkDescent = maxMetric(bottomFonts, INK_PROBE, "descent");
+  const lineGap = topLeadDescent + LINE_INK_GAP + bottomInkAscent;
+  const blockHeight = topInkAscent + lineGap + bottomInkDescent;
+  const topBaseline = centerY - blockHeight / 2 + topInkAscent;
+
+  return {
+    top: Math.round(topBaseline),
+    bottom: Math.round(topBaseline + lineGap),
+  };
 }
 
 function loadCanvasImage(url: string): Promise<HTMLImageElement | undefined> {
@@ -458,16 +527,33 @@ export async function createRecentMatchesShareBlob(
   context.font = `800 25px ${SHARE_CARD_BODY_FONT}`;
   context.fillText(text.recordTitle ?? text.recentMatches, margin + 28, sectionTop + 24);
 
-  /* 단일 컬럼 트랙: 승패 30 · 아바타 36 · 이름 1fr · 아이템 6칸 · KDA · 등급.
-     폭이 contentWidth 전체라 이름/큐 뒤에 아이템을 같은 줄에 나란히 배치합니다(v2/v3). */
+  /* 확정 B안 트랙: 승패 30 · 아바타 36 · 이름 210 · KDA 1fr ·
+     아이템 원형 6개 · 등급 52. KDA 트랙이 남는 폭을 흡수합니다. */
   const trackGap = 16;
-  const kdaWidth = 120;
-  const gradeWidth = 40;
-  const itemIconSize = 22;
-  const itemIconGap = 5;
+  const resultWidth = 30;
   const avatarRadius = 18;
-  const itemsBlockWidth = itemIconSize * 6 + itemIconGap * 5;
-  const nameTrackWidth = contentWidth - 30 - avatarRadius * 2 - itemsBlockWidth - kdaWidth - gradeWidth - trackGap * 5;
+  const itemCircleRadius = 17;
+  const itemCircleGap = 8;
+  const nameTrackWidth = 210;
+  const gradeWidth = 52;
+  const gradeBadgeRadius = 23;
+  const gradeFont = 22;
+  const itemsBlockWidth = itemCircleRadius * 2 * 6 + itemCircleGap * 5;
+  const kdaTrackWidth = contentWidth
+    - resultWidth
+    - avatarRadius * 2
+    - nameTrackWidth
+    - itemsBlockWidth
+    - gradeWidth
+    - trackGap * 5;
+  const twoLineTopFonts = [
+    `700 21px ${SHARE_CARD_BODY_FONT}`,
+    `800 21px ${SHARE_CARD_BODY_FONT}`,
+  ];
+  const twoLineBottomFonts = [
+    `500 15px ${SHARE_CARD_BODY_FONT}`,
+    `500 14px ${SHARE_CARD_BODY_FONT}`,
+  ];
   const gradeColorFor = (grade: string): string => {
     const normalized = grade.trim().toUpperCase();
     if (normalized.startsWith("S")) return "#d8b36a";
@@ -479,20 +565,27 @@ export async function createRecentMatchesShareBlob(
     const x = margin;
     const y = rowsTop + index * rowHeight;
     const rowCenterY = y + rowHeight / 2;
-    const isLastRow = index === rowCount - 1;
+    const twoLine = twoLineBaselines(context, rowCenterY, twoLineTopFonts, twoLineBottomFonts);
 
-    /* MVP/ACE 하이라이트 — 배경 tint + 테두리로 카드 전체 폭을 강조합니다. */
-    if (match.highlight) {
-      drawRoundedRect(context, x - 8, y + 2, contentWidth + 8, rowHeight - 8, 8);
-      context.fillStyle = match.highlight === "mvp" ? "rgba(216,179,106,0.10)" : "rgba(99,195,117,0.08)";
+    /* 모든 행에 결과 tint를 적용하되 MVP/ACE는 전용 강조색과 테두리만 배타 적용합니다. */
+    const rowBackground: { fill: string; stroke?: string } | undefined = match.highlight === "mvp"
+      ? { fill: theme.row.mvp, stroke: theme.row.mvpLine }
+      : match.highlight === "ace"
+        ? { fill: theme.row.ace, stroke: theme.row.aceLine }
+        : match.result === "win"
+          ? { fill: theme.row.win }
+          : match.result === "loss"
+            ? { fill: theme.row.loss }
+            : undefined;
+    if (rowBackground) {
+      drawRoundedRect(context, x - 18, y + 4, contentWidth + 36, rowHeight - 8, 10);
+      context.fillStyle = rowBackground.fill;
       context.fill();
-      context.strokeStyle = match.highlight === "mvp" ? "rgba(216,179,106,0.4)" : "rgba(99,195,117,0.35)";
-      context.lineWidth = 1;
-      context.stroke();
-    }
-    if (!isLastRow) {
-      context.fillStyle = theme.line;
-      context.fillRect(x, y + rowHeight - 1, contentWidth, 1);
+      if (rowBackground.stroke) {
+        context.strokeStyle = rowBackground.stroke;
+        context.lineWidth = 1.4;
+        context.stroke();
+      }
     }
 
     /* 승/패 글자 — 전용색 두 가지에만. */
@@ -502,7 +595,7 @@ export async function createRecentMatchesShareBlob(
     context.fillText(match.resultLabel.slice(0, 1) || "—", x, rowCenterY + 8);
 
     /* 아바타 원형 — MVP/ACE 는 강조 테두리 + 원형 배지. */
-    const avatarX = x + 30 + trackGap;
+    const avatarX = x + resultWidth + trackGap;
     const avatarCenterX = avatarX + avatarRadius;
     const championImage = match.championIconUrl ? imageMap.get(match.championIconUrl) : undefined;
     if (championImage) {
@@ -541,37 +634,14 @@ export async function createRecentMatchesShareBlob(
     const nameX = avatarX + avatarRadius * 2 + trackGap;
     context.fillStyle = theme.ink;
     context.font = `700 21px ${SHARE_CARD_BODY_FONT}`;
-    context.fillText(match.championName, nameX, rowCenterY - 6, nameTrackWidth);
+    context.fillText(match.championName, nameX, twoLine.top, nameTrackWidth);
     context.fillStyle = theme.mid;
     context.font = `500 15px ${SHARE_CARD_BODY_FONT}`;
-    context.fillText(`${match.queueLabel} · ${match.durationLabel}`, nameX, rowCenterY + 15, nameTrackWidth);
+    context.fillText(`${match.queueLabel} · ${match.durationLabel}`, nameX, twoLine.bottom, nameTrackWidth);
 
-    /* 아이템 6칸 — 이름 오른쪽, 같은 줄에 나란히 배치(단일 컬럼이라 폭이 남음). */
-    const itemsX = nameX + nameTrackWidth + trackGap;
-    const itemsY = rowCenterY - itemIconSize / 2;
-    const equipmentSlots = match.itemIconUrls.slice(0, 6);
-    equipmentSlots.forEach((iconUrl, slotIndex) => {
-      const slotX = itemsX + slotIndex * (itemIconSize + itemIconGap);
-      const itemImage = iconUrl ? imageMap.get(iconUrl) : undefined;
-      if (itemImage) {
-        context.save();
-        drawRoundedRect(context, slotX, itemsY, itemIconSize, itemIconSize, 5);
-        context.clip();
-        context.drawImage(itemImage, slotX, itemsY, itemIconSize, itemIconSize);
-        context.restore();
-      } else {
-        drawRoundedRect(context, slotX, itemsY, itemIconSize, itemIconSize, 5);
-        context.fillStyle = theme.card;
-        context.fill();
-      }
-      drawRoundedRect(context, slotX, itemsY, itemIconSize, itemIconSize, 5);
-      context.strokeStyle = theme.line;
-      context.lineWidth = 1;
-      context.stroke();
-    });
-
-    /* KDA — 아이템 블록 오른쪽, 우측 정렬(데스만 패색). */
-    const kdaRight = itemsX + itemsBlockWidth + trackGap + kdaWidth;
+    /* KDA — 이름 오른쪽의 가변 트랙에서 중앙 정렬(데스만 패색). */
+    const kdaX = nameX + nameTrackWidth + trackGap;
+    const kdaCenterX = kdaX + kdaTrackWidth / 2;
     const kdaParts = match.kda.split("/").map((part) => part.trim());
     context.font = `800 21px ${SHARE_CARD_BODY_FONT}`;
     if (kdaParts.length === 3) {
@@ -584,37 +654,71 @@ export async function createRecentMatchesShareBlob(
       ];
       let totalWidth = 0;
       for (const segment of segments) totalWidth += context.measureText(segment.text).width;
-      let drawX = kdaRight - totalWidth;
+      let drawX = kdaCenterX - totalWidth / 2;
       for (const segment of segments) {
         context.fillStyle = segment.color;
-        context.fillText(segment.text, drawX, rowCenterY - 6);
+        context.fillText(segment.text, drawX, twoLine.top);
         drawX += context.measureText(segment.text).width;
       }
     } else {
       context.fillStyle = theme.ink;
-      context.textAlign = "right";
-      context.fillText(match.kda, kdaRight, rowCenterY - 6, kdaWidth);
+      context.textAlign = "center";
+      context.fillText(match.kda, kdaCenterX, twoLine.top, kdaTrackWidth);
       context.textAlign = "start";
     }
     const gradeText = match.kdaMetric.split(" ")[0] ?? match.kdaMetric;
     context.fillStyle = theme.sub;
     context.font = `500 14px ${SHARE_CARD_BODY_FONT}`;
-    context.textAlign = "right";
-    context.fillText(gradeText, kdaRight, rowCenterY + 15, kdaWidth);
+    context.textAlign = "center";
+    context.fillText(gradeText, kdaCenterX, twoLine.bottom, kdaTrackWidth);
     context.textAlign = "start";
+
+    /* 아이템 6개 — KDA 오른쪽에서 등급 배지와 같은 원형 문법으로 렌더링합니다. */
+    const itemsX = kdaX + kdaTrackWidth + trackGap;
+    const equipmentSlots = match.itemIconUrls.slice(0, 6);
+    equipmentSlots.forEach((iconUrl, slotIndex) => {
+      const circleCenterX = itemsX
+        + itemCircleRadius
+        + slotIndex * (itemCircleRadius * 2 + itemCircleGap);
+      const itemImage = iconUrl ? imageMap.get(iconUrl) : undefined;
+      if (itemImage) {
+        context.save();
+        context.beginPath();
+        context.arc(circleCenterX, rowCenterY, itemCircleRadius, 0, Math.PI * 2);
+        context.clip();
+        context.drawImage(
+          itemImage,
+          circleCenterX - itemCircleRadius,
+          rowCenterY - itemCircleRadius,
+          itemCircleRadius * 2,
+          itemCircleRadius * 2,
+        );
+        context.restore();
+      } else {
+        context.beginPath();
+        context.arc(circleCenterX, rowCenterY, itemCircleRadius, 0, Math.PI * 2);
+        context.fillStyle = theme.card;
+        context.fill();
+      }
+      context.beginPath();
+      context.arc(circleCenterX, rowCenterY, itemCircleRadius, 0, Math.PI * 2);
+      context.strokeStyle = theme.line;
+      context.lineWidth = 1.2;
+      context.stroke();
+    });
 
     /* 등급 배지 — 맨 오른쪽 원형(S=골드, A=초록, 그 외 무채). */
     const gradeColor = gradeColorFor(match.grade);
     const gradeCx = x + contentWidth - gradeWidth / 2;
     context.beginPath();
-    context.arc(gradeCx, rowCenterY, 15, 0, Math.PI * 2);
+    context.arc(gradeCx, rowCenterY, gradeBadgeRadius, 0, Math.PI * 2);
     context.strokeStyle = gradeColor;
     context.lineWidth = 1.6;
     context.stroke();
     context.fillStyle = gradeColor;
-    context.font = `800 16px ${SHARE_CARD_BODY_FONT}`;
+    context.font = `800 ${gradeFont}px ${SHARE_CARD_BODY_FONT}`;
     context.textAlign = "center";
-    context.fillText(match.grade, gradeCx, rowCenterY + 5);
+    context.fillText(match.grade, gradeCx, rowCenterY + gradeFont * 0.34);
     context.textAlign = "start";
   });
 
@@ -696,7 +800,7 @@ export function RecentMatchesShareActions({
       const blob = await makeBlob();
       const file = new File([blob], shareCardFileName(riotId), { type: "image/png" });
       if (typeof navigator.share === "function" && typeof navigator.canShare === "function" && navigator.canShare({ files: [file] })) {
-        await navigator.share({ title: text.title, text: text.description, files: [file] });
+        await navigator.share({ files: [file] });
         updateStatus("shared");
         return;
       }

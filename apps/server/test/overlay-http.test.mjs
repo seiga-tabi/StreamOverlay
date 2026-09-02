@@ -7,6 +7,7 @@ import zlib, { brotliDecompressSync, gunzipSync } from "node:zlib";
 
 const { createHttpHandler } = await import("../dist/routes/http-api.js");
 const { appConfig } = await import("../dist/config.js");
+const { encryptPublicLolProfileLink } = await import("../dist/services/public-lol-profile-link.js");
 const { PUBLIC_TWITCH_VIEWER_SESSION_COOKIE } = await import("../dist/services/public-twitch-auth.js");
 const { Store } = await import("../dist/services/store.js");
 
@@ -455,9 +456,9 @@ test("cache된 소환사 전적은 동적 SNS 메타데이터와 immutable 공�
     assert.match(pageRes.body, /<meta property="og:image:alt" content="Faker#KR1의 League of Legends 전적 카드"/);
     assert.match(pageRes.body, /<meta name="twitter:card" content="summary_large_image"/);
     assert.match(pageRes.body, /<meta name="twitter:image" content="https:\/\/yoro\.gg\/social\/lol\/ko\/kr\/Faker-KR1\/[a-f0-9]{16}\.png"/);
-    const canonicalPath = /<link rel="canonical" href="https:\/\/yoro\.gg(\/ko\/lol\/summoners\/kr\/~[A-Za-z0-9_-]+)"/.exec(pageRes.body)?.[1];
-    assert.ok(canonicalPath, "canonical은 암호화된 전적 공유 경로여야 합니다");
-    assert.doesNotMatch(canonicalPath, /Faker|KR1/u);
+    const canonicalPath = "/ko/lol/summoners/kr/Faker-KR1";
+    const canonicalPattern = new RegExp(`<link rel="canonical" href="https://yoro\\.gg${canonicalPath}">`);
+    assert.match(pageRes.body, canonicalPattern);
     assert.match(pageRes.body, /최근 10게임 · 7승 3패 · 승률 70%/);
     assert.match(pageRes.body, /<h2>함께 플레이한 소환사<\/h2>/u);
     assert.match(pageRes.body, /href="\/ko\/lol\/summoners\/kr\/YongsikKwak-5165">YongsikKwak#5165<\/a>/u);
@@ -475,11 +476,17 @@ test("cache된 소환사 전적은 동적 SNS 메타데이터와 immutable 공�
     assert.match(japanesePageRes.body, /<h2>一緒にプレイしたサモナー<\/h2>/u);
     assert.match(japanesePageRes.body, /href="\/ja\/lol\/summoners\/kr\/Dthree-3333">Dthree#3333<\/a>/u);
 
+    const encryptedToken = encryptPublicLolProfileLink(
+      { riotId: "Faker#KR1", lolPlatform: "kr" },
+      appConfig.twitch.tokenEncryptionKey,
+      appConfig.nodeEnv,
+    );
+    const encryptedPath = `/ko/lol/summoners/kr/~${encryptedToken}`;
     const encryptedPageRes = createResponse();
-    await handler(createRequest("GET", canonicalPath), encryptedPageRes);
+    await handler(createRequest("GET", encryptedPath), encryptedPageRes);
     assert.equal(encryptedPageRes.statusCode, 200);
     assert.match(encryptedPageRes.body, /<title>Faker#KR1 · Challenger 1,234 LP \| YORO\.gg<\/title>/);
-    assert.match(encryptedPageRes.body, new RegExp(`href="https://yoro\\.gg${canonicalPath}"`));
+    assert.match(encryptedPageRes.body, canonicalPattern);
 
     const imageRes = createBinaryResponse();
     await handler(createRequest("GET", imageUrl), imageRes);

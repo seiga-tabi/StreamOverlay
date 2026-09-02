@@ -126,7 +126,7 @@ export function PatchChangeSummaryPanel({ note, summary, record, previousRecord,
         && typeof navigator.share === "function"
         && typeof navigator.canShare === "function"
         && navigator.canShare({ files: [file] })) {
-        await navigator.share({ title: t().patchSummaryTitle, text: note.title, files: [file] });
+        await navigator.share({ files: [file] });
         if (mountedRef.current) setStatus("shared");
         return;
       }

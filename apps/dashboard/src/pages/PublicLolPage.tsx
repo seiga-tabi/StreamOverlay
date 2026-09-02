@@ -7524,7 +7524,7 @@ export function PublicLolPage({
       setQuery(result.riotId);
       const resultPlatform = normalizeLolPlatformId(result.lolPlatform) ?? requestedPlatform;
       setSelectedLolPlatform(resultPlatform);
-      if (updateUrl) setPublicPath(publicSummonerTokenPath(result.profileToken, resultPlatform), options.replaceUrl);
+      if (updateUrl) setPublicPath(publicSummonerPath(result.riotId, resultPlatform), options.replaceUrl);
       saveRecentSearch(result);
       setRecentSearches(readRecentSearches());
       setFavorites((current) => {

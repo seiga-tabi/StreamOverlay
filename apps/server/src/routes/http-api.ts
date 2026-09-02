@@ -2332,14 +2332,9 @@ function publicLolProfileRouteForPath(pathname: string): PublicLolProfileRoute |
     }
   } else {
     riotId = parsePublicLolProfileSlug(profileSlug);
-    if (platform && riotId) {
-      profileSlug = `~${publicLolProfileToken({
-        riotId: `${riotId.gameName}#${riotId.tagLine}`,
-        lolPlatform: platform,
-      })}`;
-    }
   }
   if (!platform || !riotId) return undefined;
+  profileSlug = encodeURIComponent(`${riotId.gameName}-${riotId.tagLine}`);
   return {
     ...riotId,
     locale,

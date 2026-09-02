@@ -854,7 +854,7 @@ export function ProfileShareActions({ card, text, compact, onNotice }: ProfileSh
       const blob = await makeBlob();
       const file = new File([blob], profileShareFileName(card.riotId), { type: "image/png" });
       if (typeof navigator.share === "function" && typeof navigator.canShare === "function" && navigator.canShare({ files: [file] })) {
-        await navigator.share({ title: text.title, text: text.description, files: [file] });
+        await navigator.share({ files: [file] });
         updateStatus("shared");
         return;
       }
