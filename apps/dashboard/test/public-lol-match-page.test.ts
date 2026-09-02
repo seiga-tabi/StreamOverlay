@@ -165,3 +165,16 @@ test("match-ranks 오류는 전적 상세를 유지하고 티어 섹션에 안�
   assert.match(source, /<MatchTeamDetails[\s\S]*\{rankError \? <FormError role="status">\{rankError\}<\/FormError> : null\}/u);
   assert.match(source, /setMatchRankErrors\(\(current\) => \(\{ \.\.\.current, \[matchId\]: t\(\)\.tierUnavailable \}\)\)/u);
 });
+
+test("프로필에서 LoL 서버를 바꾸면 같은 Riot ID를 새 서버에서 다시 검색한다", () => {
+  const source = readFileSync(new URL("../src/pages/PublicLolPage.tsx", import.meta.url), "utf8");
+  const start = source.indexOf("function changeLolPlatform");
+  const end = source.indexOf("function clearSearch", start);
+
+  assert.notEqual(start, -1);
+  assert.notEqual(end, -1);
+  const changeLolPlatformSource = source.slice(start, end);
+
+  assert.match(changeLolPlatformSource, /void runSearch\(profile\.riotId, \{ platform \}\);/u);
+  assert.doesNotMatch(changeLolPlatformSource, /setPublicPath\(/u);
+});

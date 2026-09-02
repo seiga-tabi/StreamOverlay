@@ -112,6 +112,11 @@ test("랭크 영역은 3열 병렬 카드가 아니라 tablist 로 렌더하고 
   assert.doesNotMatch(tabRow, /48 LP/u);
   /* 터치 타깃을 줄이지 않습니다. */
   assert.match(HERO_CSS, /\.public-hero-rank-tab \{[^}]*min-height: var\(--yoro-size-touch-target\)/u);
+  /* v4 — 점과 큐 이름 사이 여백은 gap 하나로만 넓힙니다(.4rem → .625rem).
+     padding 과 점 지름은 그대로여야 점의 x 좌표가 움직이지 않습니다. */
+  assert.match(HERO_CSS, /\.public-hero-rank-tab \{[^}]*gap: \.625rem/u);
+  assert.match(HERO_CSS, /\.public-hero-rank-tab \{[^}]*padding: \.3rem \.6rem/u);
+  assert.match(HERO_CSS, /\.public-hero-rank-tab > i \{[^}]*width: \.5rem/u);
 });
 
 /** 선택된 탭의 큐 id — 렌더 결과에서 aria-selected="true" 인 버튼 하나를 찾습니다. */
@@ -150,7 +155,7 @@ test("탭 패널은 좌우 반반이고 승률 도넛 대신 승률 텍스트를
   assert.match(html, /public-hero-rank-split/u);
   assert.match(html, /public-hero-rank-main/u);
   assert.match(html, /public-hero-rank-side/u);
-  /* 왼쪽 절반: 크레스트 → 티어명 → LP → 승패 → 승률 → 게이지. */
+  /* 왼쪽 절반은 v4 에서 4블록입니다 — 크레스트 / [티어명 · LP] / [승패 · 승률] / 게이지. */
   assert.match(html, /public-hero-rank-lp[^>]*>48 LP/u);
   assert.match(html, /승률 55%/u);
   assert.match(html, /public-profile-hero-goal-track/u);
@@ -161,6 +166,71 @@ test("탭 패널은 좌우 반반이고 승률 도넛 대신 승률 텍스트를
   /* 좌우 반반 격자와, 좁은 폭에서 세로로 풀리는 규칙이 함께 있어야 합니다. */
   assert.match(HERO_CSS, /\.public-hero-rank-split \{[^}]*grid-template-columns: minmax\(0, 1fr\) minmax\(0, 1fr\)/u);
   assert.match(HERO_CSS, /@container profile-hero \(max-width: 47rem\)[^@]*\.public-hero-rank-split \{ grid-template-columns: minmax\(0, 1fr\)/u);
+});
+
+/** 왼쪽 절반(크레스트~게이지)만 잘라 냅니다 — 오른쪽 절반의 "LP 추이 · 30일" 이
+ *  구분점 단언에 섞이지 않도록 하기 위함입니다. */
+function mainHalf(panel: string): string {
+  const start = panel.indexOf("public-hero-rank-main");
+  const end = panel.indexOf("public-hero-rank-side");
+  assert.ok(start >= 0 && end > start, "왼쪽 절반을 찾지 못했습니다");
+  return panel.slice(start, end);
+}
+
+test("v4 — 왼쪽 절반은 [크레스트][티어명·LP][승패·승률][게이지] 4블록 순서다", () => {
+  const main = mainHalf(panelMarkup(renderRank("solo"), "solo"));
+  /* 블록 순서 자체를 고정합니다. */
+  assert.match(
+    main,
+    /public-profile-hero-crest[\s\S]*public-hero-rank-line is-tier[\s\S]*public-hero-rank-line public-hero-rank-record[\s\S]*public-profile-hero-goal/u,
+  );
+  /* ② 티어명과 LP 는 래퍼 하나 안의 형제입니다(별도 줄이 아님). */
+  assert.match(main, /class="public-hero-rank-line is-tier"><b class="public-hero-rank-card-tier">에메랄드 II<\/b><span class="public-hero-rank-lp">48 LP<\/span><\/span>/u);
+  /* ③ 승패와 승률도 래퍼 하나 안의 형제입니다. */
+  assert.match(main, /class="public-hero-rank-line public-hero-rank-record">.*62승.*51패.*승률 55%.*<\/span><\/span>/u);
+  /* 구분점(·)은 로케일 문자열이 아니라 CSS ::before 여야 폭에 따라 켜고 끌 수 있습니다. */
+  assert.doesNotMatch(main, /·/u);
+  assert.match(HERO_CSS, /\.public-hero-rank-line > \* \+ \*::before \{[^}]*content: "·"/u);
+  /* ① 크레스트는 4.5rem → 5.75rem(92px). */
+  assert.match(HERO_CSS, /\.public-hero-rank-main \.public-profile-hero-crest \{ width: 5\.75rem; height: 5\.75rem; \}/u);
+  /* 줄 수가 줄어든 만큼 블록 간격을 되돌립니다(.3rem → .6rem). */
+  assert.match(HERO_CSS, /\.public-hero-rank-main \{[^}]*gap: \.6rem/u);
+});
+
+test("v4 — 값이 하나뿐인 언랭크 큐에서는 구분점이 매칭되지 않는다", () => {
+  const main = mainHalf(panelMarkup(renderRank("ranked5v5"), "ranked5v5"));
+  /* 언랭크는 LP 형제가 없으므로 * + * 가 걸리지 않아 점이 자동으로 사라집니다. */
+  assert.match(main, /class="public-hero-rank-line is-tier"><b class="public-hero-rank-card-tier">언랭크<\/b><\/span>/u);
+  assert.doesNotMatch(main, /public-hero-rank-lp/u);
+  /* 승패·승률 줄도 없고 설명 한 줄만 남습니다. */
+  assert.doesNotMatch(main, /public-hero-rank-record/u);
+  assert.match(main, /이번 시즌 배치 경기 기록이 없습니다/u);
+});
+
+test("v4 — 스트리머 좁은 폭 분기는 마크업이 아니라 CSS 로만 갈린다", () => {
+  /* 같은 컴포넌트가 폭에 따라 다른 마크업을 내지 않습니다 — 컴포넌트에 폭 조건이 없어야 합니다. */
+  const source = readFileSync(
+    fileURLToPath(new URL("../src/features/public-lol/components/ProfileHeroRank.tsx", import.meta.url)),
+    "utf8",
+  );
+  assert.doesNotMatch(source, /matchMedia|ResizeObserver|clientWidth|offsetWidth/u);
+
+  /* 스트리머(has-cast)에서만 승패·승률이 두 줄로 갈리고 티어 줄의 점이 빠집니다(§5-A). */
+  assert.match(HERO_CSS, /\.public-profile-hero-top\.has-cast \.public-hero-rank-record \{ flex-direction: column/u);
+  assert.match(HERO_CSS, /\.public-profile-hero-top\.has-cast \.public-hero-rank-line\.is-tier > \* \+ \*::before \{ content: none; \}/u);
+  assert.match(HERO_CSS, /\.public-profile-hero-top\.has-cast \.public-hero-rank-main \.public-profile-hero-crest \{ width: 4\.25rem; height: 4\.25rem; \}/u);
+
+  /* 붕괴점에서 반반이 풀려 폭이 회복되면 다시 한 줄 구성으로 되돌립니다. */
+  assert.match(
+    HERO_CSS,
+    /@container profile-hero \(max-width: 47rem\)[^@]*\.public-profile-hero-top\.has-cast \.public-hero-rank-record \{ flex-direction: row/u,
+  );
+  /* container query 는 specificity 를 더하지 않으므로, 복원 규칙은 compact 규칙과
+     똑같은 선택자여야 뒤 순서로 덮입니다(.is-tier 를 빠뜨리면 점이 안 돌아옵니다). */
+  assert.match(
+    HERO_CSS,
+    /@container profile-hero \(max-width: 47rem\)[^@]*\.public-profile-hero-top\.has-cast \.public-hero-rank-line\.is-tier > \* \+ \*::before,\s*\.public-profile-hero-top\.has-cast \.public-hero-rank-record > \* \+ \*::before \{ content: "·"/u,
+  );
 });
 
 test("언랭크 탭은 오른쪽 절반을 비우지 않고 '아직 없음' 사유와 최근 게임 보기를 둔다", () => {

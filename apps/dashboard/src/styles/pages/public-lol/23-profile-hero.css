@@ -340,12 +340,26 @@
   .public-profile-hero-top.has-cast.has-performance > .public-profile-hero-rank--tabs { grid-column: 2; grid-row: 1; }
   .public-profile-hero-top.has-cast.has-performance > .public-hero-performance { grid-column: 2; grid-row: 2; }
 
-  /* 컴팩트 규격(목업 §5) — 패딩 12×14, 크레스트 3.25rem, 스파크라인 56px,
+  /* 컴팩트 규격(목업 §5) — 패딩 12×14, 크레스트 4.25rem(v4), 스파크라인 56px,
      다음 티어 게이지 숨김. 좌우 반반 구조와 탭 줄은 일반 규격과 같습니다. */
   .public-profile-hero-top.has-cast .public-hero-rank-card { padding: .75rem .875rem; }
-  .public-profile-hero-top.has-cast .public-hero-rank-main .public-profile-hero-crest { width: 3.25rem; height: 3.25rem; }
+  /* v4 §5-A ① — 3.25rem(52px) → 4.25rem(68px). 절반 폭 ≈148px 의 46% 라
+     일반 유저(92 / 203px)와 같은 비율로 앵커가 유지됩니다. */
+  .public-profile-hero-top.has-cast .public-hero-rank-main .public-profile-hero-crest { width: 4.25rem; height: 4.25rem; }
+  /* 블록이 하나 더 많으므로(승패·승률 분리) 간격만 한 단계 줄입니다. */
+  .public-profile-hero-top.has-cast .public-hero-rank-main { gap: .45rem; }
   .public-profile-hero-top.has-cast .public-hero-rank-card .public-hero-rank-card-tier { font-size: .875rem; }
   .public-profile-hero-top.has-cast .public-hero-rank-card .public-hero-rank-card-record { font-size: .6875rem; }
+  .public-profile-hero-top.has-cast .public-hero-rank-card .public-hero-rank-lp { font-size: .75rem; }
+  /* v4 §5-A ② — 이 폭에서는 티어명 줄의 구분점을 뺍니다. ja 최상위
+     ("グランドマスター" 8자 + 4자리 LP)는 점을 넣으면 145.5px 로 넘쳐 줄바꿈되고,
+     그때 둘째 줄이 "· 1,247 LP" 로 시작해 더 나빠집니다. 점 대신 간격과
+     크기·굵기·색 대비만으로 두 값을 가릅니다. */
+  .public-profile-hero-top.has-cast .public-hero-rank-line.is-tier > * + *::before { content: none; }
+  /* v4 §5-A ③④ — 승패와 승률을 한 줄로 묶으면 이 폭에서 줄바꿈됩니다.
+     "깨진 한 줄"보다 "의도한 두 줄"이 낫습니다. 마크업 분기가 아니라 여기 한 줄로 풉니다. */
+  .public-profile-hero-top.has-cast .public-hero-rank-record { flex-direction: column; gap: .1rem; }
+  .public-profile-hero-top.has-cast .public-hero-rank-record > * + *::before { content: none; }
   .public-profile-hero-top.has-cast .public-hero-rank-main .public-profile-hero-goal { display: none; }
   .public-profile-hero-top.has-cast .public-hero-rank-side .public-profile-hero-sparkline { height: 3.5rem; }
   .public-profile-hero-top.has-cast .public-hero-rank-panels { min-height: 8.25rem; }
@@ -1071,11 +1085,14 @@
   }
 
   /* 탭 버튼은 [점 + 큐 이름] 한 줄. LP·언랭크 보조값은 패널 안에 이미 있습니다(§1-B).
-     줄이 하나 줄어도 터치 타깃 44px 는 유지합니다. */
+     줄이 하나 줄어도 터치 타깃 44px 는 유지합니다.
+     v4: 점과 큐 이름이 붙어 보이던 문제를 gap 하나로만 풉니다(.4rem → .625rem, +3.6px).
+     padding-left(.6rem)와 점 지름(.5rem)은 그대로라 점의 x 좌표는 움직이지 않고,
+     flex row 특성상 늘어난 폭은 전부 뒤따르는 <span> 에만 반영됩니다. */
   .public-hero-rank-tab {
     display: flex;
     align-items: center;
-    gap: .4rem;
+    gap: .625rem;
     min-height: var(--yoro-size-touch-target);
     padding: .3rem .6rem;
     border: 1px solid transparent;
@@ -1158,37 +1175,60 @@
 
   .public-hero-rank-split > * { min-width: 0; }
 
+  /* v4 §4-A — 왼쪽 절반을 "텍스트 5줄"에서 4블록으로 묶습니다.
+     크레스트 / [티어명 · LP] / [승패 · 승률] / 게이지. 줄 수가 줄며 확보된 세로는
+     전부 블록 사이 여백(.3rem → .6rem)으로 되돌려 "빽빽한 목록"이 아니라
+     "앵커 + 두 줄 + 게이지"로 읽히게 합니다. 표시되는 값은 하나도 빠지지 않습니다. */
   .public-hero-rank-main {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: .3rem;
+    gap: .6rem;
     text-align: center;
   }
 
-  /* 3열 카드에서 56px 이던 크레스트를 절반 폭 안에서 72px 로 키웁니다(§1-A). */
-  .public-hero-rank-main .public-profile-hero-crest { width: 4.5rem; height: 4.5rem; }
+  /* 크레스트는 왼쪽 절반의 시각 앵커입니다 — v3 4.5rem(72px) → v4 5.75rem(92px).
+     절반 폭이 ≈203px 이므로 92px 는 폭의 45%. 텍스트가 줄어든 자리를 앵커가 가져갑니다. */
+  .public-hero-rank-main .public-profile-hero-crest { width: 5.75rem; height: 5.75rem; }
   /* 언랭크 실루엣은 고정 34×38 로 그려져 확대된 슬롯 안에서 혼자 작게 남습니다 —
      슬롯을 채우도록 상속시킵니다(랭크 크레스트와 눈높이를 맞추기 위함). */
   .public-hero-rank-main .public-profile-hero-crest > svg { width: 100%; height: 100%; }
   .public-hero-rank-main .public-hero-rank-card-tier { font-size: 1.0625rem; }
 
-  .public-hero-rank-detail {
+  /* 한 줄 블록 공통(§4-A) — baseline 정렬이라 크기가 다른 두 값이 같은 밑선에 앉습니다. */
+  .public-hero-rank-line {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: .1rem;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    gap: .4rem;
     min-width: 0;
   }
 
+  /* 구분점은 별도 요소가 아니라 두 번째 값의 ::before 입니다 — DOM 도 로케일 문자열도
+     늘리지 않고, 값이 하나뿐인 언랭크 큐에서는 * + * 가 매칭되지 않아 자동으로 사라집니다. */
+  .public-hero-rank-line > * + *::before {
+    content: "·";
+    margin-inline-end: .4rem;
+    color: var(--public-gray-muted, var(--yoro-color-text-on-dark-muted));
+    font-weight: var(--yoro-font-weight-regular);
+  }
+
+  /* 티어명 ↔ LP 위계는 크기 · 굵기 · 색 셋으로 줍니다. LP 까지 티어색으로 두면
+     한 줄 안에서 같은 색 두 덩어리가 되어 "한 값"으로 뭉쳐 읽힙니다(§4-A ②). */
   .public-hero-rank-lp {
-    color: var(--tier-ink, var(--tier-color));
+    color: var(--public-gray-text, var(--yoro-color-text-on-dark));
     font-size: var(--yoro-font-size-sm);
     font-weight: var(--yoro-font-weight-bold);
     font-variant-numeric: tabular-nums;
   }
 
-  .public-hero-rank-main .public-profile-hero-goal { width: 100%; margin-top: .35rem; }
+  /* 승패 · 승률 — 일반 유저(넓은 절반 ≈203px)는 한 줄. 좁은 폭 분기는 has-cast 쪽에. */
+  .public-hero-rank-record { flex-direction: row; }
+
+  /* 블록 간격이 .3rem → .6rem 으로 커졌으므로 게이지에만 얹던 추가 여백은 줄입니다
+     (합계 .65rem → .75rem 로 4블록이 같은 리듬을 갖습니다). */
+  .public-hero-rank-main .public-profile-hero-goal { width: 100%; margin-top: .15rem; }
   .public-hero-rank-main .public-profile-hero-goal-track { max-width: none; }
 
   /* 그래프가 있는 쪽은 세로 가운데, 안내문만 있는 쪽은 왼쪽 첫 줄에 맞춰 위 정렬합니다 —
@@ -1664,6 +1704,13 @@
     }
     .public-hero-rank-panels,
     .public-profile-hero-top.has-cast .public-hero-rank-panels { min-height: 0; }
+    /* 반반이 풀리며 왼쪽 블록이 카드 전폭(≈334px)으로 회복되므로 스트리머도
+       일반 유저와 같은 한 줄 구성으로 되돌립니다(§5-A 각주).
+       container query 는 specificity 를 더하지 않으므로 위 compact 규칙과
+       똑같은 선택자로 적어(뒤 순서 우선) 확실히 덮습니다. */
+    .public-profile-hero-top.has-cast .public-hero-rank-record { flex-direction: row; gap: .4rem; }
+    .public-profile-hero-top.has-cast .public-hero-rank-line.is-tier > * + *::before,
+    .public-profile-hero-top.has-cast .public-hero-rank-record > * + *::before { content: "·"; margin-inline-end: .4rem; }
     .public-hero-performance-body,
     .public-profile-hero-top.has-cast .public-hero-performance-body { grid-template-columns: minmax(0, 1fr); gap: var(--yoro-space-3); }
   }
@@ -1682,6 +1729,9 @@
       }
       .public-hero-rank-panels,
       .public-profile-hero-top.has-cast .public-hero-rank-panels { min-height: 0; }
+      .public-profile-hero-top.has-cast .public-hero-rank-record { flex-direction: row; gap: .4rem; }
+      .public-profile-hero-top.has-cast .public-hero-rank-line.is-tier > * + *::before,
+      .public-profile-hero-top.has-cast .public-hero-rank-record > * + *::before { content: "·"; margin-inline-end: .4rem; }
       .public-hero-performance-body,
       .public-profile-hero-top.has-cast .public-hero-performance-body { grid-template-columns: minmax(0, 1fr); gap: var(--yoro-space-3); }
     }

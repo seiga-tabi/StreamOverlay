@@ -315,6 +315,53 @@ test("Public Profile", async ({ page }) => {
   await assertStableSurface(page, errors, "public-profile.png");
 });
 
+test("프로필에서 서버를 바꾸면 같은 Riot ID를 새 서버에서 다시 검색한다", async ({ page }) => {
+  const profileRequests: Array<{ platform: string | null; riotId: string | null }> = [];
+  await page.route("**/api/lol/profile**", async (route) => {
+    const url = new URL(route.request().url());
+    const platform = url.searchParams.get("platform");
+    const riotId = url.searchParams.get("riotId");
+    profileRequests.push({ platform, riotId });
+
+    if (platform === "euw1") {
+      await route.fulfill({
+        status: 404,
+        contentType: "application/json; charset=utf-8",
+        body: JSON.stringify({ code: "LOL_PROFILE_NOT_ON_PLATFORM" }),
+      });
+      return;
+    }
+
+    await json(route, {
+      ...profileFixture,
+      lolPlatform: platform ?? "jp1",
+      profileToken: "a".repeat(40),
+    });
+  });
+
+  await page.goto("/lol/summoners/jp/YORO%20QA-JP1");
+  await expect(page.locator(".public-profile-shared-shell")).toBeVisible();
+
+  const serverButton = page.getByRole("button", { name: "검색 서버" });
+  await serverButton.click();
+  await page.getByRole("option", { name: /KR 한국 서버/u }).click();
+
+  await expect.poll(() => profileRequests.some((request) => (
+    request.platform === "kr" && request.riotId === "YORO QA#JP1"
+  ))).toBe(true);
+  await expect(page).toHaveURL(/\/lol\/summoners\/kr\/YORO%20QA-JP1$/u);
+  await expect(page.locator(".public-profile-shared-shell")).toBeVisible();
+  await expect(page.locator(".public-home-shared-shell")).toHaveCount(0);
+
+  await serverButton.click();
+  await page.getByRole("option", { name: /EUW 유럽 서부/u }).click();
+
+  await expect.poll(() => profileRequests.some((request) => (
+    request.platform === "euw1" && request.riotId === "YORO QA#JP1"
+  ))).toBe(true);
+  await expect(page.getByText("선택한 서버에서 해당 소환사를 찾을 수 없습니다.", { exact: true })).toBeVisible();
+});
+
 test("모바일 LoL 상단 검색 줄은 스크롤 방향에 따라 접히고 하단 탭바는 고정된다", async ({ page }) => {
   test.skip((page.viewportSize()?.width ?? 1440) > 768, "모바일 상단바 전용 검증");
 
