@@ -22,7 +22,6 @@ const rankText: ProfileHeroRankText = {
   viewRecentMatchesLabel: "최근 게임 보기",
   lpTrendLabel: "LP 추이 · 30일",
   lpTrendTitle: "LP 추이",
-  lpTrendSoloOnlyNote: "LP 추이 그래프는 솔로랭크에서만 제공됩니다.",
   lpTrendAfterPlacementNote: "랭크 배치를 마치면 LP 추이가 여기에 표시됩니다.",
   lpTrendNoSamplesNote: "LP 추이를 그릴 기록이 아직 부족합니다.",
   winRateLabel: "승률",
@@ -84,15 +83,19 @@ const trend: ProfileHeroRankTrend = {
   ],
 };
 
-function renderRank(activeQueueId: string) {
+function renderRank(
+  activeQueueId: string,
+  rankQueues = queues,
+  rankTrend: ProfileHeroRankTrend | null = trend,
+) {
   return renderToStaticMarkup(
     <ProfileHeroRank
       activeQueueId={activeQueueId}
       onSelectQueue={() => undefined}
       onViewRecentMatches={() => undefined}
-      queues={queues}
+      queues={rankQueues}
       text={rankText}
-      trend={trend}
+      trend={rankTrend ?? undefined}
     />
   );
 }
@@ -134,7 +137,7 @@ function panelMarkup(html: string, queueId: string): string {
   return chunk;
 }
 
-test("탭 선택은 activeQueueId 를 따라가고 선택된 패널만 보인다", () => {
+test("탭 선택은 activeQueueId 를 따라가고 모든 랭크 큐에서 표본이 있으면 그래프를 그린다", () => {
   const solo = renderRank("solo");
   assert.equal(selectedTabId(solo), "solo");
   /* 비활성 패널은 hidden, 활성 패널은 hidden 없이 나옵니다. */
@@ -144,10 +147,16 @@ test("탭 선택은 activeQueueId 를 따라가고 선택된 패널만 보인다
   const flex = renderRank("flex");
   assert.equal(selectedTabId(flex), "flex");
   assert.match(flex, /class="public-hero-rank-panel"[^>]*hidden=""[^>]*id="[^"]*rank-panel-solo"/u);
-  /* 솔로 탭에만 있던 스파크라인이 자유랭크 패널에서는 안내 문구로 바뀝니다. */
+  /* trend는 선택된 큐의 데이터이므로 컴포넌트가 큐 종류로 다시 제한하지 않습니다. */
   assert.match(panelMarkup(solo, "solo"), /public-profile-hero-sparkline/u);
-  assert.doesNotMatch(panelMarkup(flex, "flex"), /public-profile-hero-sparkline/u);
-  assert.match(panelMarkup(flex, "flex"), /LP 추이 그래프는 솔로랭크에서만 제공됩니다/u);
+  assert.match(panelMarkup(flex, "flex"), /public-profile-hero-sparkline/u);
+
+  const ranked5v5 = renderRank("ranked5v5", [
+    queues[0]!,
+    queues[1]!,
+    rankedQueue("ranked5v5", "5v5 랭크", "gold"),
+  ]);
+  assert.match(panelMarkup(ranked5v5, "ranked5v5"), /public-profile-hero-sparkline/u);
 });
 
 test("탭 패널은 좌우 반반이고 승률 도넛 대신 승률 텍스트를 쓴다", () => {
@@ -234,7 +243,7 @@ test("v4 — 스트리머 좁은 폭 분기는 마크업이 아니라 CSS 로만
 });
 
 test("언랭크 탭은 오른쪽 절반을 비우지 않고 '아직 없음' 사유와 최근 게임 보기를 둔다", () => {
-  const rendered = renderRank("ranked5v5");
+  const rendered = renderRank("ranked5v5", queues, null);
   assert.equal(selectedTabId(rendered), "ranked5v5");
   const html = panelMarkup(rendered, "ranked5v5");
   assert.match(html, /랭크 배치를 마치면 LP 추이가 여기에 표시됩니다/u);

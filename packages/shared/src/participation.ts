@@ -73,6 +73,12 @@ export type LolRankHistoryPoint = {
   rankScore: number;
 };
 
+export type LolRankHistoryByQueue = {
+  solo?: LolRankHistoryPoint[];
+  flex?: LolRankHistoryPoint[];
+  ranked5v5?: LolRankHistoryPoint[];
+};
+
 export type LolChampionSummary = {
   championId: number;
   championKey?: string;
@@ -304,7 +310,7 @@ export type ParticipationStreamerProfile = {
   rankedStats?: LolRankedStats;
   performanceStats?: LolPerformanceStats;
   recentMatches?: LolRecentMatchChampion[];
-  rankHistory?: LolRankHistoryPoint[];
+  rankHistory?: LolRankHistoryByQueue;
 };
 
 export type StreamerRiotIdRequestStatus = "pending" | "approved" | "rejected";

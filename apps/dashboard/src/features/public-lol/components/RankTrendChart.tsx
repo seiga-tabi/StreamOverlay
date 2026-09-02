@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { t } from "../i18n/public-lol-i18n";
 import type { PublicLolProfile } from "../types/public-lol";
-import { rankTrendLine } from "../utils/rank";
+import { rankTrendLine, type PublicLolRankQueueId } from "../utils/rank";
 
 export type RankTrendChartProps = {
   profile: PublicLolProfile;
+  queueId: PublicLolRankQueueId;
   compact?: boolean;
 };
 
-export function LpTrendLineChart({ profile, compact = false }: RankTrendChartProps) {
+export function LpTrendLineChart({ profile, queueId, compact = false }: RankTrendChartProps) {
   const [activePointKey, setActivePointKey] = useState<string>();
-  const trend = rankTrendLine(profile);
+  const trend = rankTrendLine(profile, queueId);
   if (!trend) return <p className="public-empty">{t().noData}</p>;
   const latestPoint = trend.points[trend.points.length - 1];
   const activePoint = trend.points.find((point) => point.key === activePointKey);

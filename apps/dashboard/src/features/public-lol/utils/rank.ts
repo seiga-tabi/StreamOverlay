@@ -1,4 +1,4 @@
-import type { LolRankedStats } from "@streamops/shared";
+import type { LolRankedStats, LolRankHistoryPoint } from "@streamops/shared";
 import { publicIntlLocale, activePublicLocale, t } from "../i18n/public-lol-i18n";
 import type {
   PublicLolProfile,
@@ -114,7 +114,23 @@ function rankScoreFromParts(tier: string, rank: string | undefined, leaguePoints
     + Math.max(0, Math.trunc(leaguePoints));
 }
 
-export function normalizedRankHistoryScore(point: NonNullable<PublicLolProfile["rankHistory"]>[number]): number {
+export type PublicLolRankQueueId = "solo" | "flex" | "ranked5v5";
+
+const RANKED_QUEUE_TYPE_BY_ID: Record<PublicLolRankQueueId, LolRankedStats["queueType"]> = {
+  solo: "RANKED_SOLO_5x5",
+  flex: "RANKED_FLEX_SR",
+  ranked5v5: "RANKED_TEAM_5x5"
+};
+
+export function rankedStatsForQueue(
+  profile: PublicLolProfile,
+  queueId: PublicLolRankQueueId
+): LolRankedStats | undefined {
+  return profile.rankedQueues?.[queueId]
+    ?? (profile.rankedStats?.queueType === RANKED_QUEUE_TYPE_BY_ID[queueId] ? profile.rankedStats : undefined);
+}
+
+export function normalizedRankHistoryScore(point: LolRankHistoryPoint): number {
   if (typeof point.tier === "string" && Number.isFinite(point.leaguePoints)) {
     return rankScoreFromParts(point.tier, point.rank, point.leaguePoints);
   }
@@ -185,7 +201,10 @@ function formatShortDate(value: string | undefined): string {
    따라 LP 를 움직일 수 있는 큐도 하나로 정해집니다. */
 const TREND_QUEUE_ID_BY_RANKED_TYPE: Partial<Record<LolRankedStats["queueType"], number>> = {
   RANKED_SOLO_5x5: 420,
-  RANKED_FLEX_SR: 440
+  RANKED_FLEX_SR: 440,
+  /* Riot 공식 queues.json의 42는 폐기된 이전 모드입니다. 복귀한 5v5 랭크는
+     서버·전적 필터가 실데이터로 확인한 710을 사용합니다. */
+  RANKED_TEAM_5x5: 710
 };
 
 function trendQueueId(stats: LolRankedStats | undefined): number | undefined {
@@ -263,18 +282,19 @@ function recentMatchesWithinWindow(matches: PublicLolRecentMatch[], windowMs: nu
   });
 }
 
-export function rankTrendLine(profile: PublicLolProfile): PublicTrendLine | undefined {
+export function rankTrendLine(profile: PublicLolProfile, queueId: PublicLolRankQueueId): PublicTrendLine | undefined {
   const windowEnd = Date.now();
   const windowStart = windowEnd - LP_TREND_WINDOW_MS;
-  const currentRankScore = rankScore(profile.rankedStats);
+  const currentRankedStats = rankedStatsForQueue(profile, queueId);
+  const currentRankScore = rankScore(currentRankedStats);
 
-  const storedRankSamples = (profile.rankHistory ?? [])
+  const storedRankSamples = (profile.rankHistory?.[queueId] ?? [])
     .map((point, index) => {
       const startedAtMs = Date.parse(point.date);
       const value = normalizedRankHistoryScore(point);
       if (!Number.isFinite(startedAtMs) || !Number.isFinite(value)) return undefined;
       return {
-        key: `${profile.riotId}:rank-history:${point.date}:${index}`,
+        key: `${profile.riotId}:${queueId}:rank-history:${point.date}:${index}`,
         value,
         label: rankTrendPointLabel(value),
         result: "unknown" as PublicLolRecentMatch["result"],
@@ -296,7 +316,7 @@ export function rankTrendLine(profile: PublicLolProfile): PublicTrendLine | unde
   ];
   const samples = historySamples.length >= 2 ? historySamples : (() => {
     /* 화면에 표시 중인 티어가 속한 랭크 큐의 경기만 LP 를 움직입니다. */
-    const trendQueue = trendQueueId(profile.rankedStats);
+    const trendQueue = trendQueueId(currentRankedStats);
     const filteredMatches = rankedTrendMatches(
       recentMatchesWithinWindow(profile.recentMatches, LP_TREND_WINDOW_MS),
       trendQueue

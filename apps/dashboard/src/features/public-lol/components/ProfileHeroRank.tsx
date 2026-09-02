@@ -44,11 +44,9 @@ export type ProfileHeroRankText = {
   lpTrendLabel: string;
   /** 오른쪽 절반 안내 제목("LP 추이") — 기간 접미사가 없는 짧은 형태입니다. */
   lpTrendTitle: string;
-  /** 랭크는 있지만 시계열이 솔로 전용이라 그릴 그래프가 없는 큐(자유·5v5). */
-  lpTrendSoloOnlyNote: string;
   /** 언랭크 큐 — "없음"이 아니라 "아직 없음"임을 구분합니다(목업 §1-A). */
   lpTrendAfterPlacementNote: string;
-  /** 솔로랭크인데도 rankHistory 표본이 2개 미만이라 선을 그릴 수 없는 경우. */
+  /** 랭크는 있지만 rankHistory 표본이 2개 미만이라 선을 그릴 수 없는 경우. */
   lpTrendNoSamplesNote: string;
   /** 좌측 절반의 승률 줄 접두("승률"). 도넛을 뺀 자리를 텍스트가 대신합니다(§1-A). */
   winRateLabel: string;
@@ -185,11 +183,10 @@ function RankQueuePanelBody({
   text: ProfileHeroRankText;
   onViewRecentMatches?: () => void;
 }) {
-  /* rankHistory 는 지금도 솔로 단일 시계열입니다 — 자유·5v5 탭에는 그릴 그래프가 없습니다. */
-  const hasTrend = queue.id === "solo" && trend !== undefined && trend.points.length > 1;
+  const hasTrend = trend !== undefined && trend.points.length > 1;
   const emptyNote = !queue.ranked
     ? text.lpTrendAfterPlacementNote
-    : queue.id === "solo" ? text.lpTrendNoSamplesNote : text.lpTrendSoloOnlyNote;
+    : text.lpTrendNoSamplesNote;
 
   return (
     <div className="public-hero-rank-split">

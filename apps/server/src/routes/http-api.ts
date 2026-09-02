@@ -67,7 +67,7 @@ import {
   type LolAutomationSettings,
   type LolOperationsState,
   type LolPerformanceStats,
-  type LolRankHistoryPoint,
+  type LolRankHistoryByQueue,
   type LolRankedStats,
   type LolRole,
   type LolRoleAnalysis,
@@ -164,7 +164,7 @@ import {
   type LolGameMonitorConfig
 } from "../modules/lol-game-monitor.module.js";
 import { loadLolParticipationProfileSettings, saveLolParticipationProfileSettings, type LolParticipationProfileSettings } from "../modules/lol-profile-enrichment.module.js";
-import { buildRankHistory, inferMainRoleFromMatches, performanceStatsFromMatches } from "../services/lol-profile-enrichment.js";
+import { buildRankHistoryByQueue, inferMainRoleFromMatches, performanceStatsFromMatches } from "../services/lol-profile-enrichment.js";
 import type { JsonlLogger } from "../logging/jsonl-logger.js";
 import type { TwitchExtensionSettingsRepository } from "../database/repositories/twitch-extension-settings-repository.js";
 import {
@@ -659,7 +659,7 @@ type PublicLolMatchParticipant = {
 
 type PublicLolMatchTeamDetail = {
   teamId: number;
-  result: "win" | "loss" | "unknown";
+  result: "win" | "loss" | "remake" | "unknown";
   kills: number;
   deaths: number;
   assists: number;
@@ -692,7 +692,7 @@ type PublicLolMatchBuildParticipant = {
   participantId?: number;
   riotId?: string;
   teamId?: number;
-  result: "win" | "loss" | "unknown";
+  result: "win" | "loss" | "remake" | "unknown";
   champion: LolChampionSummary;
   score: number;
   items: PublicLolMatchItem[];
@@ -759,7 +759,7 @@ type PublicLolRecentMatch = {
   /* 다시보기 점프 지점. 스트리머로 연동된 프로필이고 그 경기를 담은 아카이브가
      남아 있을 때만 붙습니다 — 없으면 화면이 버튼을 그리지 않습니다. */
   replay?: MatchReplay;
-  result: "win" | "loss" | "unknown";
+  result: "win" | "loss" | "remake" | "unknown";
   kills: number;
   deaths: number;
   assists: number;
@@ -905,7 +905,7 @@ type PublicLolProfileResponse = {
     flex?: LolRankedStats;
     ranked5v5?: LolRankedStats;
   };
-  rankHistory?: LolRankHistoryPoint[];
+  rankHistory?: LolRankHistoryByQueue;
   twitchStream?: PublicLolTwitchStream;
   performanceStats?: LolPerformanceStats;
   roleAnalysis?: LolRoleAnalysis;
@@ -3433,6 +3433,9 @@ async function publicLolMatchTeamsListSummary(
   return Promise.all(teamIds.map(async (teamId): Promise<PublicLolMatchTeamDetail> => {
     const teamStats = participantTeamDetailStats(match, teamId);
     const teamInfo = match.info.teams?.find((team) => team.teamId === teamId);
+    const gameEndedInEarlySurrender = match.info.participants.some((participant) => (
+      participant.teamId === teamId && participant.gameEndedInEarlySurrender === true
+    ));
     const players = (await Promise.all(match.info.participants
       .filter((participant) => participant.teamId === teamId)
       .map(async (participant): Promise<PublicLolMatchParticipant> => ({
@@ -3455,7 +3458,9 @@ async function publicLolMatchTeamsListSummary(
       .sort((a, b) => publicLolRoleOrder(a.position) - publicLolRoleOrder(b.position));
     return {
       ...teamStats,
-      result: teamInfo?.win === true ? "win" : teamInfo?.win === false ? "loss" : "unknown",
+      result: gameEndedInEarlySurrender
+        ? "remake"
+        : teamInfo?.win === true ? "win" : teamInfo?.win === false ? "loss" : "unknown",
       players
     };
   }));
@@ -3473,13 +3478,18 @@ async function publicLolMatchTeams(
   const teams = await Promise.all(teamIds.map(async (teamId): Promise<PublicLolMatchTeamDetail> => {
     const teamStats = participantTeamDetailStats(match, teamId);
     const teamInfo = match.info.teams?.find((team) => team.teamId === teamId);
+    const gameEndedInEarlySurrender = match.info.participants.some((participant) => (
+      participant.teamId === teamId && participant.gameEndedInEarlySurrender === true
+    ));
     const players = (await Promise.all(match.info.participants
       .filter((participant) => participant.teamId === teamId)
       .map((participant) => publicLolMatchParticipantDetail(dataDragon, dataDragonVersion, match, participant, teamStats, targetPuuid, streamerByRiotId))))
       .sort((a, b) => publicLolRoleOrder(a.position) - publicLolRoleOrder(b.position));
     return {
       ...teamStats,
-      result: teamInfo?.win === true ? "win" : teamInfo?.win === false ? "loss" : "unknown",
+      result: gameEndedInEarlySurrender
+        ? "remake"
+        : teamInfo?.win === true ? "win" : teamInfo?.win === false ? "loss" : "unknown",
       players
     };
   }));
@@ -3538,7 +3548,7 @@ async function dataDragonVersionForMatch(
 }
 
 function recentWinRate(matches: PublicLolRecentMatch[]): number {
-  const decided = matches.filter((match) => match.result !== "unknown");
+  const decided = matches.filter((match) => match.result === "win" || match.result === "loss");
   if (decided.length === 0) return 0;
   return Math.round((decided.filter((match) => match.result === "win").length / decided.length) * 100);
 }
@@ -5383,7 +5393,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
       rankedStats: profile.rankedStats ? { ...profile.rankedStats } : undefined,
       performanceStats: profile.performanceStats ? { ...profile.performanceStats } : undefined,
       recentMatches: profileRecentMatchesForCache(profile.recentMatches),
-      rankHistory: profile.rankHistory?.map((point) => ({ ...point })) ?? existing?.rankHistory,
+      rankHistory: profile.rankHistory ? {
+        solo: profile.rankHistory.solo?.map((point) => ({ ...point })),
+        flex: profile.rankHistory.flex?.map((point) => ({ ...point })),
+        ranked5v5: profile.rankHistory.ranked5v5?.map((point) => ({ ...point }))
+      } : existing?.rankHistory,
       championSkinOverridesKey: existing?.championSkinOverridesKey,
       analyzedAt: profile.fetchedAt
     });
@@ -8132,7 +8146,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
       mapId: match.info.mapId,
       startedAt: matchStartedAt(match),
       durationSeconds: matchDurationSeconds(match),
-      result: participant.win === true ? "win" : participant.win === false ? "loss" : "unknown",
+      result: participant.gameEndedInEarlySurrender === true
+        ? "remake"
+        : participant.win === true ? "win" : participant.win === false ? "loss" : "unknown",
       kills: safeMatchStat(participant.kills),
       deaths: safeMatchStat(participant.deaths),
       assists: safeMatchStat(participant.assists),
@@ -8610,13 +8626,14 @@ export function createHttpHandler(input: HttpHandlerInput) {
       account.gameName || parsed.gameName,
       account.tagLine || parsed.tagLine
     );
-    const recentWins = visibleRecentMatches.filter((match) => match.result === "win").length;
-    const recentKills = visibleRecentMatches.reduce((sum, match) => sum + match.kills, 0);
-    const recentDeaths = visibleRecentMatches.reduce((sum, match) => sum + match.deaths, 0);
-    const recentAssists = visibleRecentMatches.reduce((sum, match) => sum + match.assists, 0);
+    const ratedRecentMatches = visibleRecentMatches.filter((match) => match.result !== "remake");
+    const recentWins = ratedRecentMatches.filter((match) => match.result === "win").length;
+    const recentKills = ratedRecentMatches.reduce((sum, match) => sum + match.kills, 0);
+    const recentDeaths = ratedRecentMatches.reduce((sum, match) => sum + match.deaths, 0);
+    const recentAssists = ratedRecentMatches.reduce((sum, match) => sum + match.assists, 0);
 
     const fetchedAt = new Date().toISOString();
-    const rankHistory = buildRankHistory(existingProfile?.rankHistory, rankedStats, fetchedAt);
+    const rankHistory = buildRankHistoryByQueue(existingProfile?.rankHistory, rankedQueues, fetchedAt);
     const response: PublicLolProfileResponse = {
       status: "ready",
       riotId: `${account.gameName || parsed.gameName}#${account.tagLine || parsed.tagLine}`,
@@ -8644,22 +8661,22 @@ export function createHttpHandler(input: HttpHandlerInput) {
       nextRecentMatchStart: matchPage.nextRecentMatchStart,
       hasMoreRecentMatches: matchPage.hasMoreRecentMatches,
       summary: {
-        recentGames: visibleRecentMatches.length,
+        recentGames: ratedRecentMatches.length,
         recentWins,
-        recentWinRate: recentWinRate(visibleRecentMatches),
-        averageKda: visibleRecentMatches.length > 0 ? kdaFromTotals(recentKills, recentDeaths, recentAssists) : undefined,
-        averageCsPerMinute: averageDefined(visibleRecentMatches.map((match) => match.csPerMinute), 1),
-        averageKillParticipation: averageDefined(visibleRecentMatches.map((match) => match.killParticipation), 0),
-        averageDamagePerMinute: averageDefined(visibleRecentMatches.map((match) => match.damagePerMinute), 0),
-        averageDamageShare: averageDefined(visibleRecentMatches.map((match) => match.damageShare), 1),
-        averageGoldPerMinute: averageDefined(visibleRecentMatches.map((match) => match.goldPerMinute), 0),
-        averageVisionScore: averageDefined(visibleRecentMatches.map((match) => match.visionScore), 1),
+        recentWinRate: recentWinRate(ratedRecentMatches),
+        averageKda: ratedRecentMatches.length > 0 ? kdaFromTotals(recentKills, recentDeaths, recentAssists) : undefined,
+        averageCsPerMinute: averageDefined(ratedRecentMatches.map((match) => match.csPerMinute), 1),
+        averageKillParticipation: averageDefined(ratedRecentMatches.map((match) => match.killParticipation), 0),
+        averageDamagePerMinute: averageDefined(ratedRecentMatches.map((match) => match.damagePerMinute), 0),
+        averageDamageShare: averageDefined(ratedRecentMatches.map((match) => match.damageShare), 1),
+        averageGoldPerMinute: averageDefined(ratedRecentMatches.map((match) => match.goldPerMinute), 0),
+        averageVisionScore: averageDefined(ratedRecentMatches.map((match) => match.visionScore), 1),
         totalKills: recentKills,
         totalDeaths: recentDeaths,
         totalAssists: recentAssists
       },
-      championPerformance: championPerformance(visibleRecentMatches),
-      rolePerformance: rolePerformance(visibleRecentMatches),
+      championPerformance: championPerformance(ratedRecentMatches),
+      rolePerformance: rolePerformance(ratedRecentMatches),
       fetchedAt
     };
     rememberPublicLolProfile(response, account.puuid);
@@ -9193,7 +9210,9 @@ export function createHttpHandler(input: HttpHandlerInput) {
         participantId,
         riotId: participantRiotId(participant),
         teamId: participant.teamId,
-        result: participant.win === true ? "win" : participant.win === false ? "loss" : "unknown",
+        result: participant.gameEndedInEarlySurrender === true
+          ? "remake"
+          : participant.win === true ? "win" : participant.win === false ? "loss" : "unknown",
         champion,
         score: participantImpactScore(match, participant),
         items: await participantItems(input.dataDragon, participant, dataDragonVersion),

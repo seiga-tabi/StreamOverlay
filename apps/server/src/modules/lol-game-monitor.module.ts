@@ -143,7 +143,11 @@ function streamerProfileFromPatch(displayName: string, tagLine: string, patch: L
     rankedStats: patch.rankedStats ? { ...patch.rankedStats } : undefined,
     performanceStats: patch.performanceStats ? { ...patch.performanceStats } : undefined,
     recentMatches: patch.recentMatches?.map((match) => ({ ...match })),
-    rankHistory: patch.rankHistory?.map((point) => ({ ...point }))
+    rankHistory: patch.rankHistory ? {
+      solo: patch.rankHistory.solo?.map((point) => ({ ...point })),
+      flex: patch.rankHistory.flex?.map((point) => ({ ...point })),
+      ranked5v5: patch.rankHistory.ranked5v5?.map((point) => ({ ...point }))
+    } : undefined
   };
 }
 

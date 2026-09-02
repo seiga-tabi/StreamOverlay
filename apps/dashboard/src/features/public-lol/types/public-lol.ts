@@ -1,4 +1,4 @@
-import type { LolChampionSummary, LolPerformanceStats, LolRankHistoryPoint, LolRankedStats, LolRole, LolRoleAnalysis, ParticipationStatus, StreamerRiotIdRequest } from "@streamops/shared";
+import type { LolChampionSummary, LolPerformanceStats, LolRankHistoryByQueue, LolRankedStats, LolRole, LolRoleAnalysis, ParticipationStatus, StreamerRiotIdRequest } from "@streamops/shared";
 
 export type { PublicLolMatchRankParticipant, PublicLolMatchRankResponse } from "@streamops/shared";
 
@@ -50,7 +50,7 @@ export type PublicLolMatchParticipant = {
 
 export type PublicLolMatchTeamDetail = {
   teamId: number;
-  result: "win" | "loss" | "unknown";
+  result: "win" | "loss" | "remake" | "unknown";
   kills: number;
   deaths: number;
   assists: number;
@@ -82,7 +82,7 @@ export type PublicLolMatchBuildParticipant = {
   participantId?: number;
   riotId?: string;
   teamId?: number;
-  result: "win" | "loss" | "unknown";
+  result: "win" | "loss" | "remake" | "unknown";
   champion: LolChampionSummary;
   score: number;
   items: PublicLolMatchItem[];
@@ -159,7 +159,7 @@ export type PublicLolRecentMatch = {
   /* 다시보기 점프 지점(서버 twitch-vod-index). 스트리머 연동 프로필이고 그 경기를
      담은 Twitch 아카이브가 남아 있을 때만 옵니다 — 없으면 버튼을 그리지 않습니다. */
   replay?: { vodId: string; offsetSeconds: number };
-  result: "win" | "loss" | "unknown";
+  result: "win" | "loss" | "remake" | "unknown";
   kills: number;
   deaths: number;
   assists: number;
@@ -519,7 +519,7 @@ export type PublicLolProfile = {
     flex?: LolRankedStats;
     ranked5v5?: LolRankedStats;
   };
-  rankHistory?: LolRankHistoryPoint[];
+  rankHistory?: LolRankHistoryByQueue;
   twitchStream?: PublicLolTwitchStream;
   performanceStats?: LolPerformanceStats;
   roleAnalysis?: LolRoleAnalysis;

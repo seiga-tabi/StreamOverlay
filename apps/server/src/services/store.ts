@@ -364,7 +364,11 @@ function cloneParticipationStreamerProfile(profile: ParticipationStreamerProfile
     rankedStats: profile.rankedStats ? { ...profile.rankedStats } : undefined,
     performanceStats: profile.performanceStats ? { ...profile.performanceStats } : undefined,
     recentMatches: profile.recentMatches?.map((match) => ({ ...match })),
-    rankHistory: profile.rankHistory?.map((point) => ({ ...point }))
+    rankHistory: profile.rankHistory ? {
+      solo: profile.rankHistory.solo?.map((point) => ({ ...point })),
+      flex: profile.rankHistory.flex?.map((point) => ({ ...point })),
+      ranked5v5: profile.rankHistory.ranked5v5?.map((point) => ({ ...point }))
+    } : undefined
   } : undefined;
 }
 

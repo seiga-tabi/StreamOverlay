@@ -73,6 +73,7 @@ export type RiotMatchParticipant = {
   kills?: number;
   deaths?: number;
   assists?: number;
+  gameEndedInEarlySurrender?: boolean;
   win?: boolean;
   goldEarned?: number;
   totalDamageDealtToChampions?: number;

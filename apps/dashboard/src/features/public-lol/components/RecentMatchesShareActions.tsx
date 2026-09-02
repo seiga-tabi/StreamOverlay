@@ -3,7 +3,7 @@ import { Button } from "../../../shared/ui/Button";
 
 export type RecentMatchShareItem = {
   key: string;
-  result: "win" | "loss" | "unknown";
+  result: "win" | "loss" | "remake" | "unknown";
   resultLabel: string;
   championName: string;
   championIconUrl?: string;

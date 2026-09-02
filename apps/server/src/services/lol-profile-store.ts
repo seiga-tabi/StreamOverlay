@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { LolChampionSummary, LolMainRole, LolPerformanceStats, LolProfileStatus, LolRankedStats, LolRecentMatchChampion, LolRankHistoryPoint } from "@streamops/shared";
+import type { LolChampionSummary, LolMainRole, LolPerformanceStats, LolProfileStatus, LolRankedStats, LolRecentMatchChampion, LolRankHistoryByQueue, LolRankHistoryPoint } from "@streamops/shared";
 import { normalizeRiotIdKey } from "@streamops/shared";
 
 export type LolProfileCacheEntry = {
@@ -18,7 +18,7 @@ export type LolProfileCacheEntry = {
   rankedStats?: LolRankedStats;
   performanceStats?: LolPerformanceStats;
   recentMatches?: LolRecentMatchChampion[];
-  rankHistory?: LolRankHistoryPoint[];
+  rankHistory?: LolRankHistoryByQueue;
   championSkinOverridesKey?: string;
   analyzedAt?: string;
   failedReason?: string;
@@ -34,9 +34,30 @@ export interface LolProfileRepository {
   save(entry: LolProfileCacheEntry): LolProfileCacheEntry;
 }
 
-type PersistedProfiles = {
-  profiles: LolProfileCacheEntry[];
+type PersistedLolProfileCacheEntry = Omit<LolProfileCacheEntry, "rankHistory"> & {
+  rankHistory?: LolRankHistoryByQueue | LolRankHistoryPoint[];
 };
+
+type PersistedProfiles = {
+  profiles: PersistedLolProfileCacheEntry[];
+};
+
+function cloneRankHistory(history: LolRankHistoryByQueue | undefined): LolRankHistoryByQueue | undefined {
+  return history ? {
+    solo: history.solo?.map((point) => ({ ...point })),
+    flex: history.flex?.map((point) => ({ ...point })),
+    ranked5v5: history.ranked5v5?.map((point) => ({ ...point }))
+  } : undefined;
+}
+
+function normalizePersistedRankHistory(
+  history: LolRankHistoryByQueue | LolRankHistoryPoint[] | undefined
+): LolRankHistoryByQueue | undefined {
+  if (Array.isArray(history)) {
+    return { solo: history.map((point) => ({ ...point })) };
+  }
+  return cloneRankHistory(history);
+}
 
 function clone(entry: LolProfileCacheEntry): LolProfileCacheEntry {
   return {
@@ -45,7 +66,7 @@ function clone(entry: LolProfileCacheEntry): LolProfileCacheEntry {
     rankedStats: entry.rankedStats ? { ...entry.rankedStats } : undefined,
     performanceStats: entry.performanceStats ? { ...entry.performanceStats } : undefined,
     recentMatches: entry.recentMatches?.map((match) => ({ ...match })),
-    rankHistory: entry.rankHistory?.map((point) => ({ ...point }))
+    rankHistory: cloneRankHistory(entry.rankHistory)
   };
 }
 
@@ -119,7 +140,8 @@ export class LocalJsonLolProfileRepository implements LolProfileRepository {
       if (!profile.riotPuuid) continue;
       this.profiles.set(profile.riotPuuid, {
         ...profile,
-        riotIdKey: profile.riotIdKey || normalizeRiotIdKey(profile.riotGameName, profile.riotTagLine)
+        riotIdKey: profile.riotIdKey || normalizeRiotIdKey(profile.riotGameName, profile.riotTagLine),
+        rankHistory: normalizePersistedRankHistory(profile.rankHistory)
       });
     }
   }

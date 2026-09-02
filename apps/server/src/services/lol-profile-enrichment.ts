@@ -1,4 +1,4 @@
-import type { LolChampionSummary, LolMainRole, LolPerformanceStats, LolProfileStatus, LolRankedStats, LolRankHistoryPoint, LolRankTier, LolRecentMatchChampion, ParticipationEntry } from "@streamops/shared";
+import type { LolChampionSummary, LolMainRole, LolPerformanceStats, LolProfileStatus, LolRankedStats, LolRankHistoryByQueue, LolRankHistoryPoint, LolRankTier, LolRecentMatchChampion, ParticipationEntry } from "@streamops/shared";
 import { formatRiotId, normalizeLolPlatformId, normalizeRiotIdKey, toSafeErrorMessage } from "@streamops/shared";
 import type { JsonlLogger } from "../logging/jsonl-logger.js";
 import { DataDragonService } from "./data-dragon.js";
@@ -29,10 +29,17 @@ export type LolProfilePatch = {
   rankedStats?: LolRankedStats;
   performanceStats?: LolPerformanceStats;
   recentMatches?: LolRecentMatchChampion[];
-  rankHistory?: LolRankHistoryPoint[];
+  rankHistory?: LolRankHistoryByQueue;
   verifiedRank?: string;
   profileAnalyzedAt?: string;
   riotPuuid?: string;
+};
+
+type LolRankedQueues = {
+  solo?: LolRankedStats;
+  flex?: LolRankedStats;
+  ranked5v5?: LolRankedStats;
+  primary?: LolRankedStats;
 };
 
 const ROLE_ORDER: LolMainRole[] = ["TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"];
@@ -240,6 +247,26 @@ export function buildRankHistory(previous: LolRankHistoryPoint[] | undefined, st
   return history.slice(-RANK_HISTORY_MAX_POINTS);
 }
 
+export function buildRankHistoryByQueue(
+  previous: LolRankHistoryByQueue | undefined,
+  queues: { solo?: LolRankedStats; flex?: LolRankedStats; ranked5v5?: LolRankedStats },
+  analyzedAt: string
+): LolRankHistoryByQueue {
+  return {
+    solo: buildRankHistory(previous?.solo, queues.solo, analyzedAt),
+    flex: buildRankHistory(previous?.flex, queues.flex, analyzedAt),
+    ranked5v5: buildRankHistory(previous?.ranked5v5, queues.ranked5v5, analyzedAt)
+  };
+}
+
+function cloneRankHistoryByQueue(history: LolRankHistoryByQueue | undefined): LolRankHistoryByQueue | undefined {
+  return history ? {
+    solo: history.solo?.map((point) => ({ ...point })),
+    flex: history.flex?.map((point) => ({ ...point })),
+    ranked5v5: history.ranked5v5?.map((point) => ({ ...point }))
+  } : undefined;
+}
+
 function patchFromProfile(profile: LolProfileCacheEntry): LolProfilePatch {
   return {
     profileStatus: profile.status,
@@ -250,7 +277,7 @@ function patchFromProfile(profile: LolProfileCacheEntry): LolProfilePatch {
     rankedStats: profile.rankedStats ? { ...profile.rankedStats } : undefined,
     performanceStats: profile.performanceStats ? { ...profile.performanceStats } : undefined,
     recentMatches: profile.recentMatches?.map((match) => ({ ...match })),
-    rankHistory: profile.rankHistory?.map((point) => ({ ...point })),
+    rankHistory: cloneRankHistoryByQueue(profile.rankHistory),
     verifiedRank: rankLabel(profile.rankedStats),
     profileAnalyzedAt: profile.analyzedAt,
     profileFailureReason: profile.failedReason,
@@ -323,16 +350,24 @@ export class LolProfileEnrichmentService {
         : await this.riot.getAccountByRiotId(riotGameName, riotTagLine);
       if (!account) return this.saveFailure(entry, "failed", "Riot 계정을 찾을 수 없습니다.", "account_not_found");
 
-      const [topChampions, rankedStats, ladderRank, matches] = await Promise.all([
+      const [topChampions, rankedQueues, ladderRank, matches] = await Promise.all([
         this.getTopChampions(account.puuid, skinOverrides).catch((error) => {
           if (shouldFailProfileAnalysis(error)) throw error;
           this.logger.error({ type: "lol_profile.mastery_lookup_failed", error: toSafeErrorMessage(error), riotId: formatRiotId(riotGameName, riotTagLine) });
           return [];
         }),
-        this.riot.getRankedStatsByPuuid(account.puuid, isStreamerProfile ? ["RANKED_SOLO_5x5"] : undefined).catch((error) => {
+        (isStreamerProfile || typeof this.riot.getRankedQueueStatsByPuuid !== "function"
+          ? this.riot.getRankedStatsByPuuid(account.puuid, isStreamerProfile ? ["RANKED_SOLO_5x5"] : undefined).then((stats) => ({
+            solo: stats?.queueType === "RANKED_SOLO_5x5" ? stats : undefined,
+            flex: stats?.queueType === "RANKED_FLEX_SR" ? stats : undefined,
+            ranked5v5: stats?.queueType === "RANKED_TEAM_5x5" ? stats : undefined,
+            primary: stats
+          }))
+          : this.riot.getRankedQueueStatsByPuuid(account.puuid)
+        ).catch((error): LolRankedQueues => {
           if (shouldFailProfileAnalysis(error)) throw error;
           this.logger.error({ type: "lol_profile.rank_lookup_failed", error: toSafeErrorMessage(error), riotId: formatRiotId(riotGameName, riotTagLine) });
-          return undefined;
+          return {};
         }),
         isStreamerProfile && typeof this.riot.getLadderRankByPuuid === "function"
           ? this.riot.getLadderRankByPuuid(account.puuid, ["RANKED_SOLO_5x5"]).catch((error) => {
@@ -348,6 +383,7 @@ export class LolProfileEnrichmentService {
         })
       ]);
 
+      const rankedStats = rankedQueues.primary;
       const role = inferMainRoleFromMatches(matches, account.puuid, config.mainRoleMinConfidence);
       const performanceStats = performanceStatsFromMatches(matches, account.puuid);
       const recentMatches = await this.recentMatchChampionsFromMatches(matches, account.puuid);
@@ -356,7 +392,7 @@ export class LolProfileEnrichmentService {
         : await Promise.all(topChampionsFromMatches(matches, account.puuid).map((champion) => this.dataDragon.mapChampionSummary({ ...champion, skinOverrides })));
       const analyzedAt = new Date().toISOString();
       const resolvedLadderRank = ladderRank ?? cached?.ladderRank;
-      const rankHistory = buildRankHistory(cached?.rankHistory, rankedStats, analyzedAt);
+      const rankHistory = buildRankHistoryByQueue(cached?.rankHistory, rankedQueues, analyzedAt);
       const profile = this.profiles.save({
         riotPuuid: account.puuid,
         riotGameName: account.gameName,

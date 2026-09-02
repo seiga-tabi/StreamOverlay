@@ -49,22 +49,27 @@ export function winRateFromTotals(wins: number, games: number): number {
   return Math.round((wins / games) * 100);
 }
 
-export function summarizeMatches(matches: PublicLolRecentMatch[]): PublicLolProfile["summary"] {
-  const recentWins = matches.filter((match) => match.result === "win").length;
-  const totalKills = matches.reduce((sum, match) => sum + match.kills, 0);
-  const totalDeaths = matches.reduce((sum, match) => sum + match.deaths, 0);
-  const totalAssists = matches.reduce((sum, match) => sum + match.assists, 0);
+export function excludeRemakeMatches(matches: readonly PublicLolRecentMatch[]): PublicLolRecentMatch[] {
+  return matches.filter((match) => match.result !== "remake");
+}
+
+export function summarizeMatches(matches: readonly PublicLolRecentMatch[]): PublicLolProfile["summary"] {
+  const ratedMatches = excludeRemakeMatches(matches);
+  const recentWins = ratedMatches.filter((match) => match.result === "win").length;
+  const totalKills = ratedMatches.reduce((sum, match) => sum + match.kills, 0);
+  const totalDeaths = ratedMatches.reduce((sum, match) => sum + match.deaths, 0);
+  const totalAssists = ratedMatches.reduce((sum, match) => sum + match.assists, 0);
   return {
-    recentGames: matches.length,
+    recentGames: ratedMatches.length,
     recentWins,
-    recentWinRate: winRateFromTotals(recentWins, matches.length),
-    averageKda: matches.length > 0 ? kdaFromTotals(totalKills, totalDeaths, totalAssists) : undefined,
-    averageCsPerMinute: averageNumbers(matches.map((match) => match.csPerMinute), 1),
-    averageKillParticipation: averageNumbers(matches.map((match) => match.killParticipation), 0),
-    averageDamagePerMinute: averageNumbers(matches.map((match) => match.damagePerMinute), 0),
-    averageDamageShare: averageNumbers(matches.map((match) => match.damageShare), 1),
-    averageGoldPerMinute: averageNumbers(matches.map((match) => match.goldPerMinute), 0),
-    averageVisionScore: averageNumbers(matches.map((match) => match.visionScore), 1),
+    recentWinRate: winRateFromTotals(recentWins, ratedMatches.length),
+    averageKda: ratedMatches.length > 0 ? kdaFromTotals(totalKills, totalDeaths, totalAssists) : undefined,
+    averageCsPerMinute: averageNumbers(ratedMatches.map((match) => match.csPerMinute), 1),
+    averageKillParticipation: averageNumbers(ratedMatches.map((match) => match.killParticipation), 0),
+    averageDamagePerMinute: averageNumbers(ratedMatches.map((match) => match.damagePerMinute), 0),
+    averageDamageShare: averageNumbers(ratedMatches.map((match) => match.damageShare), 1),
+    averageGoldPerMinute: averageNumbers(ratedMatches.map((match) => match.goldPerMinute), 0),
+    averageVisionScore: averageNumbers(ratedMatches.map((match) => match.visionScore), 1),
     totalKills,
     totalDeaths,
     totalAssists
@@ -405,12 +410,13 @@ export function filteredMatches(profile: PublicLolProfile, filters: PublicMatchF
 }
 
 export function profileWithMatches(profile: PublicLolProfile, matches: PublicLolRecentMatch[]): PublicLolProfile {
+  const ratedMatches = excludeRemakeMatches(matches);
   return {
     ...profile,
     recentMatches: matches,
-    summary: summarizeMatches(matches),
-    championPerformance: championPerformanceFromMatches(matches),
-    rolePerformance: rolePerformanceFromMatches(matches)
+    summary: summarizeMatches(ratedMatches),
+    championPerformance: championPerformanceFromMatches(ratedMatches),
+    rolePerformance: rolePerformanceFromMatches(ratedMatches)
   };
 }
 

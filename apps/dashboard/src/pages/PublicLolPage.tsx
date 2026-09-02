@@ -8,7 +8,6 @@ import {
   type LolChampionSummary,
   type LolPerformanceStats,
   type LolPlatformId,
-  type LolRankHistoryPoint,
   type LolRankedStats,
   type LolRole,
   type LolRoleAnalysis,
@@ -275,6 +274,7 @@ import {
   averageNumbers,
   championAnalysisTableRows,
   championSpotlights,
+  excludeRemakeMatches,
   isBootItem,
   SIGNATURE_BUILD_MAX_ITEMS,
   signatureBuilds,
@@ -303,9 +303,11 @@ import {
   rankTierLabel,
   rankTrendLine,
   rankTrendTierClass,
+  rankedStatsForQueue,
   shortRankLabel,
   tierKeyFromScore,
   totalGames,
+  type PublicLolRankQueueId,
 } from "../features/public-lol/utils/rank";
 
 const TOURNAMENT_PLAYER_PROFILE_LIMIT = 30;
@@ -751,6 +753,7 @@ function matchRankForPlayer(
 function resultLabel(result: PublicLolRecentMatch["result"]): string {
   if (result === "win") return t().win;
   if (result === "loss") return t().loss;
+  if (result === "remake") return t().remake;
   return t().unknown;
 }
 
@@ -759,6 +762,7 @@ function resultLabel(result: PublicLolRecentMatch["result"]): string {
 function resultShortLabel(result: PublicLolRecentMatch["result"]): string {
   if (result === "win") return t().winShort;
   if (result === "loss") return t().lossShort;
+  if (result === "remake") return t().remake;
   return "—";
 }
 
@@ -924,15 +928,15 @@ function championName(champion: LolChampionSummary | undefined, locale: PublicLo
 }
 
 function soloRankStats(profile: PublicLolProfile): LolRankedStats | undefined {
-  return profile.rankedQueues?.solo ?? (profile.rankedStats?.queueType === "RANKED_SOLO_5x5" ? profile.rankedStats : undefined);
+  return rankedStatsForQueue(profile, "solo");
 }
 
 function flexRankStats(profile: PublicLolProfile): LolRankedStats | undefined {
-  return profile.rankedQueues?.flex ?? (profile.rankedStats?.queueType === "RANKED_FLEX_SR" ? profile.rankedStats : undefined);
+  return rankedStatsForQueue(profile, "flex");
 }
 
 function ranked5v5Stats(profile: PublicLolProfile): LolRankedStats | undefined {
-  return profile.rankedQueues?.ranked5v5 ?? (profile.rankedStats?.queueType === "RANKED_TEAM_5x5" ? profile.rankedStats : undefined);
+  return rankedStatsForQueue(profile, "ranked5v5");
 }
 
 function multikillLabel(value: number | undefined): string {
@@ -1087,17 +1091,18 @@ function clampScore(value: number): number {
 }
 
 function matchAiScore(match: PublicLolRecentMatch): number {
-  const resultScore = match.result === "win" ? 18 : match.result === "loss" ? 6 : 10;
-  const kdaScore = Math.min(30, match.kda * 5);
-  const killParticipationScore = Math.min(18, (match.killParticipation ?? 0) * .18);
-  const csScore = Math.min(14, (match.csPerMinute ?? 0) * 1.7);
-  const damageScore = Math.min(12, (match.damageShare ?? 0) * .45);
-  const visionScore = Math.min(8, (match.visionScorePerMinute ?? 0) * 4);
-  return clampScore(18 + resultScore + kdaScore + killParticipationScore + csScore + damageScore + visionScore);
+  const resultScore = match.result === "win" ? 22 : match.result === "loss" ? 4 : 12;
+  const kdaScore = Math.min(20, match.kda * 3.33);
+  const killParticipationScore = Math.min(20, (match.killParticipation ?? 0) * .20);
+  const csScore = Math.min(15, (match.csPerMinute ?? 0) * 1.15);
+  const damageScore = Math.min(12, (match.damageShare ?? 0) * .30);
+  const visionScore = Math.min(8, (match.visionScorePerMinute ?? 0) * 2.2);
+  const deathPenalty = Math.min(10, (match.deaths ?? 0) * 0.9);
+  return clampScore(resultScore + kdaScore + killParticipationScore + csScore + damageScore + visionScore - deathPenalty);
 }
 
 function recentAnalysisMatches(profile: PublicLolProfile): PublicLolRecentMatch[] {
-  return profile.recentMatches.slice(0, RECENT_ANALYSIS_MATCH_LIMIT);
+  return excludeRemakeMatches(profile.recentMatches.slice(0, RECENT_ANALYSIS_MATCH_LIMIT));
 }
 
 function averageAiScore(profile: PublicLolProfile): number {
@@ -1840,8 +1845,8 @@ function profileHeroRankQueues(profile: PublicLolProfile): ProfileHeroRankQueue[
   ];
 }
 
-function profileHeroRankTrend(profile: PublicLolProfile): ProfileHeroRankTrend | undefined {
-  const trend = rankTrendLine(profile);
+function profileHeroRankTrend(profile: PublicLolProfile, queueId: PublicLolRankQueueId): ProfileHeroRankTrend | undefined {
+  const trend = rankTrendLine(profile, queueId);
   if (!trend || trend.points.length < 2) return undefined;
   return {
     ariaLabel: `${t().rankLpTrendLabel} ${t().period30}`,
@@ -2157,10 +2162,10 @@ function ProfileTopPanel({
   const rankQueues = profileHeroRankQueues(profile);
   // 랭크가 있는 큐를 기본 선택합니다. 전부 언랭크면 솔로랭크를 보여 줍니다.
   const defaultRankQueueId = rankQueues.find((queue) => queue.ranked)?.id ?? rankQueues[0]?.id ?? "solo";
-  const selectedRankQueueId = rankQueues.some((queue) => queue.id === activeRankQueue)
+  const selectedRankQueueId = (rankQueues.some((queue) => queue.id === activeRankQueue)
     ? activeRankQueue ?? defaultRankQueueId
-    : defaultRankQueueId;
-  const heroTrend = profileHeroRankTrend(profile);
+    : defaultRankQueueId) as PublicLolRankQueueId;
+  const heroTrend = profileHeroRankTrend(profile, selectedRankQueueId);
   /* 퍼포먼스 지표는 큐가 아니라 최근 20경기(큐 무관) 집계라 탭 전환과 무관합니다 —
      패널 헤더의 "큐 구분 없음" 캡션이 그 사실을 고정으로 알립니다(목업 §1-C). */
   const performanceMetrics = profilePerformanceMetrics(profile);
@@ -2217,7 +2222,6 @@ function ProfileTopPanel({
             lpTrendTitle: t().rankLpTrendLabel,
             lpTrendAfterPlacementNote: t().rankLpTrendAfterPlacement,
             lpTrendNoSamplesNote: t().rankLpTrendNoSamples,
-            lpTrendSoloOnlyNote: t().rankLpTrendSoloOnly,
             masteryTitle: t().masteryChampionsTitle,
             queueSwitcherLabel: t().rankQueueSwitcher,
             unrankedTitle: t().rankUnrankedTitle,
@@ -2422,7 +2426,7 @@ function RankSummaryPanel({ profile }: { profile: PublicLolProfile }) {
         ))}
       </div>
       <div className={`public-rank-mini-chart ${rankTrendTierClass(stats)}`}>
-        <LpTrendLineChart profile={profile} compact />
+        <LpTrendLineChart profile={profile} queueId="solo" compact />
       </div>
     </section>
   );
@@ -2546,8 +2550,8 @@ function ProfilePlaytimeSection({ profile }: { profile: PublicLolProfile }) {
   );
 }
 
-function profileLpChangeEntries(profile: PublicLolProfile): ProfileLpChangeEntry[] {
-  const history = [...(profile.rankHistory ?? [])]
+function profileLpChangeEntries(profile: PublicLolProfile, queueId: PublicLolRankQueueId): ProfileLpChangeEntry[] {
+  const history = [...(profile.rankHistory?.[queueId] ?? [])]
     .filter((point) => Number.isFinite(Date.parse(point.date)))
     .sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
   const entries: ProfileLpChangeEntry[] = [];
@@ -2963,20 +2967,24 @@ function ProfileRecentChampionsSideCard({ profile }: { profile: PublicLolProfile
   );
 }
 
-/* LP 기록 큐 탭(목업 §3-7) — 탭 자체가 큐별 30일 증감이라 고르기 전에도 비교됩니다.
-   rankHistory 가 솔로 단일 시계열이라(§4) 자유·5:5 는 증감 "—" + 빈 상태만 둡니다. */
-type LpRecordQueueId = "solo" | "flex" | "ranked5v5";
+/* LP 기록 큐 탭(목업 §3-7) — 탭 자체가 큐별 30일 증감이라 고르기 전에도 비교됩니다. */
+type LpRecordQueueId = PublicLolRankQueueId;
 
 function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
   const summary = profile.summary;
   const aggregateSummary = summarizeMatches(recentAnalysisMatches(profile));
   const aggregateGrade = aggregatePerformanceGrade(profile);
   const aggregateScore = aggregatePerformanceScore(profile);
-  const trend = rankTrendLine(profile);
-  const soloStats = soloRankStats(profile) ?? profile.rankedStats;
-  const lpEntries = profileLpChangeEntries(profile);
   const mainRole = profile.roleAnalysis?.mainRole;
   const [lpQueue, setLpQueue] = useState<LpRecordQueueId>("solo");
+  const trendsByQueue: Record<LpRecordQueueId, ReturnType<typeof rankTrendLine>> = {
+    solo: rankTrendLine(profile, "solo"),
+    flex: rankTrendLine(profile, "flex"),
+    ranked5v5: rankTrendLine(profile, "ranked5v5"),
+  };
+  const trend = trendsByQueue[lpQueue];
+  const soloStats = soloRankStats(profile);
+  const lpEntries = profileLpChangeEntries(profile, lpQueue);
   const lpQueueDefs: Array<{ id: LpRecordQueueId; label: string; stats?: LolRankedStats }> = [
     { id: "solo", label: t().soloRank, stats: soloStats },
     { id: "flex", label: t().flexRank, stats: flexRankStats(profile) },
@@ -2984,8 +2992,6 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
   ];
   const lpSelected = lpQueueDefs.find((queue) => queue.id === lpQueue) ?? lpQueueDefs[0]!;
   const lpSelectedRanked = lpSelected.stats !== undefined && lpSelected.stats.tier !== "UNRANKED";
-  const lpSoloSelected = lpQueue === "solo";
-
   const metrics: ProfileMetricRow[] = [
     { key: "kda", label: t().kda, value: formatDecimal(summary.averageKda, 2), ratio: metricRatio(summary.averageKda, METRIC_SCALE_MAX.kda) },
     { key: "kill-participation", label: t().killParticipation, value: formatPercent(summary.averageKillParticipation), ratio: metricRatio(summary.averageKillParticipation, METRIC_SCALE_MAX.killParticipation) },
@@ -3010,29 +3016,28 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
       {/* 목업 §2H 순서: LP 기록 → 플레이 시간대 → 최근 20경기 지표 →
           함께 플레이 → 최근 챔피언 → 포지션. */}
       <FeatureProfileLpRecordCard
-        changeLabel={lpSoloSelected && trend
+        changeLabel={trend
           ? (trend.change === 0 ? t().lpNoChange : `${trend.change > 0 ? "+" : ""}${trend.change} LP`)
           : undefined}
-        changeTone={lpSoloSelected && trend ? (trend.change > 0 ? "up" : trend.change < 0 ? "down" : "flat") : "flat"}
-        chart={lpSoloSelected && trend && trend.points.length > 1 ? (
+        changeTone={trend ? (trend.change > 0 ? "up" : trend.change < 0 ? "down" : "flat") : "flat"}
+        chart={trend && trend.points.length > 1 ? (
           <ProfileSidebarLpChart points={trend.points.map((point) => ({ value: point.value, tierKey: tierKeyFromScore(point.value) }))} />
         ) : undefined}
         currentLabel={lpSelectedRanked && lpSelected.stats
           ? `${rankTierLabel(lpSelected.stats)} ${lpSelected.stats.leaguePoints} LP`
           : t().unranked}
         currentTierKey={lpSelectedRanked && lpSelected.stats ? lpSelected.stats.tier.toLocaleLowerCase() : undefined}
-        entries={lpSoloSelected ? lpEntries : []}
+        entries={lpEntries}
         queueTabs={(
           <div aria-label={t().rankQueueSwitcher} className="public-profile-lp-queues" role="tablist">
             {lpQueueDefs.map((queue) => {
               const active = queue.id === lpQueue;
-              /* 큐별 30일 증감 — rankHistory 가 솔로 단일 시계열이라(§4)
-                 자유·5:5 는 "—" 를 둡니다. 가짜 수치를 만들지 않습니다. */
-              const delta = queue.id === "solo" && trend
-                ? (trend.change === 0 ? "0 LP" : `${trend.change > 0 ? "+" : ""}${trend.change} LP`)
+              const queueTrend = trendsByQueue[queue.id];
+              const delta = queueTrend
+                ? (queueTrend.change === 0 ? "0 LP" : `${queueTrend.change > 0 ? "+" : ""}${queueTrend.change} LP`)
                 : undefined;
-              const deltaTone = queue.id === "solo" && trend
-                ? (trend.change > 0 ? "up" : trend.change < 0 ? "down" : "flat")
+              const deltaTone = queueTrend
+                ? (queueTrend.change > 0 ? "up" : queueTrend.change < 0 ? "down" : "flat")
                 : "flat";
               return (
                 <button
@@ -3052,7 +3057,7 @@ function OverviewMetricPanel({ profile }: { profile: PublicLolProfile }) {
             })}
           </div>
         )}
-        recordCount={lpSoloSelected ? trend?.sampleCount ?? 0 : 0}
+        recordCount={trend?.sampleCount ?? 0}
         text={{
           emptyDescription: t().lpRecordEmptyDescription,
           emptyTitle: t().lpRecordEmptyTitle,
@@ -6353,7 +6358,7 @@ function RecentMatches({
                 </>
               )}
               key={match.matchId}
-              hideScore={arena}
+              hideScore={arena || match.result === "remake"}
               loadoutGridItems={arena ? augmentItems : undefined}
               matchAriaLabel={`${arena ? t().arenaPlacement.replace("{n}", String(arenaPlacement)) : resultLabel(match.result)} · ${championName(match.champion)} · ${match.kills}/${match.deaths}/${match.assists}`}
               metrics={matchMetrics}

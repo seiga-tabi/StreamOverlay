@@ -22,7 +22,7 @@ export type LolDailySummary = {
   /** 데스 합 0이면 "perfect" */
   averageKda: number | "perfect";
   /** 시간순(이른 경기부터) 승패 — 점 막대용 */
-  results: readonly ("win" | "loss" | "unknown")[];
+  results: readonly ("win" | "loss" | "remake" | "unknown")[];
 };
 
 export type LolDailyMatchGroup = {

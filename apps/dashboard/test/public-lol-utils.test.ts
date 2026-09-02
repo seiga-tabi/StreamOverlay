@@ -3,6 +3,7 @@ import test from "node:test";
 import { formatCooldown, formatDecimal, formatDuration, formatPercent } from "../src/features/public-lol/utils/format";
 import {
   compactMatchBadgeSelection,
+  excludeRemakeMatches,
   filteredMatches,
   profileWithPreservedStreamerStateAfterRefresh,
   summarizeMatches,
@@ -238,6 +239,25 @@ test("매치 요약과 필터 계산을 기존 규칙으로 유지한다", () =>
   );
 });
 
+test("프런트 평점·통계 표본에서 다시하기를 제외한다", () => {
+  const matches = [
+    match({ matchId: "win-1", result: "win", kills: 8, deaths: 2, assists: 10 }),
+    match({ matchId: "remake", result: "remake", kills: 99, deaths: 99, assists: 99 }),
+    match({ matchId: "loss-1", result: "loss", kills: 2, deaths: 5, assists: 4 }),
+    match({ matchId: "win-2", result: "win", kills: 7, deaths: 3, assists: 8 }),
+    match({ matchId: "loss-2", result: "loss", kills: 1, deaths: 6, assists: 3 })
+  ];
+
+  const ratedMatches = excludeRemakeMatches(matches);
+  assert.deepEqual(ratedMatches.map((entry) => entry.matchId), ["win-1", "loss-1", "win-2", "loss-2"]);
+
+  const summary = summarizeMatches(matches);
+  assert.equal(summary.recentGames, 4);
+  assert.equal(summary.recentWins, 2);
+  assert.equal(summary.recentWinRate, 50);
+  assert.equal(summary.totalKills, 18, "다시하기의 전투 수치도 통계 표본에 섞이지 않아야 합니다");
+});
+
 test("전적 갱신 응답은 동일한 프로필의 지연 로딩된 스트리머 정보를 보존한다", () => {
   const twitchStream = {
     twitchUserId: "streamer-1",
@@ -279,30 +299,32 @@ test("랭크 점수와 추이 좌표가 유효 범위 안에 유지된다", () =
 
   const profile = {
     riotId: "tester#JP1",
-    rankedStats,
-    rankHistory: [
-      {
-        date: new Date(Date.now() - 2 * 86_400_000).toISOString(),
-        tier: "PLATINUM",
-        rank: "I",
-        leaguePoints: 80,
-        wins: 9,
-        losses: 8,
-        rankScore: 80
-      },
-      {
-        date: new Date(Date.now() - 86_400_000).toISOString(),
-        tier: "PLATINUM",
-        rank: "I",
-        leaguePoints: 8,
-        wins: 10,
-        losses: 8,
-        rankScore: 8
-      }
-    ],
+    rankedStats: { ...rankedStats, queueType: "RANKED_SOLO_5x5" },
+    rankHistory: {
+      solo: [
+        {
+          date: new Date(Date.now() - 2 * 86_400_000).toISOString(),
+          tier: "PLATINUM",
+          rank: "I",
+          leaguePoints: 80,
+          wins: 9,
+          losses: 8,
+          rankScore: 80
+        },
+        {
+          date: new Date(Date.now() - 86_400_000).toISOString(),
+          tier: "PLATINUM",
+          rank: "I",
+          leaguePoints: 8,
+          wins: 10,
+          losses: 8,
+          rankScore: 8
+        }
+      ]
+    },
     recentMatches: []
   } as PublicLolProfile;
-  const trend = rankTrendLine(profile);
+  const trend = rankTrendLine(profile, "solo");
   assert.ok(trend);
   assert.equal(trend.points.length, 2);
   assert.deepEqual(trend.points.map((point) => point.value), [1980, 1908]);
@@ -333,13 +355,13 @@ test("LP 추이는 랭크 큐 경기만 반영하고 다른 큐 승리로는 오
     startedAt: new Date(Date.now() - hoursAgo * 3_600_000).toISOString()
   } as PublicLolRecentMatch);
 
-  const base = { riotId: "tester#JP1", rankedStats, rankHistory: [] };
+  const base = { riotId: "tester#JP1", rankedStats, rankHistory: { solo: [] } };
 
   /* 솔로랭크 기록이 없고 칼바람·일반만 이긴 경우 — 선이 평평해야 합니다. */
   const nonRanked = rankTrendLine({
     ...base,
     recentMatches: [match("m1", 450, "win", 1), match("m2", 400, "win", 2), match("m3", 450, "win", 3)]
-  } as PublicLolProfile);
+  } as PublicLolProfile, "solo");
   assert.ok(nonRanked);
   assert.equal(nonRanked.change, 0);
   assert.deepEqual([...new Set(nonRanked.points.map((point) => point.value))].length, 1);
@@ -348,7 +370,7 @@ test("LP 추이는 랭크 큐 경기만 반영하고 다른 큐 승리로는 오
   const flexOnly = rankTrendLine({
     ...base,
     recentMatches: [match("f1", 440, "win", 1), match("f2", 440, "win", 2)]
-  } as PublicLolProfile);
+  } as PublicLolProfile, "solo");
   assert.ok(flexOnly);
   assert.equal(flexOnly.change, 0);
 
@@ -356,9 +378,73 @@ test("LP 추이는 랭크 큐 경기만 반영하고 다른 큐 승리로는 오
   const soloOnly = rankTrendLine({
     ...base,
     recentMatches: [match("s1", 420, "win", 1), match("s2", 420, "loss", 2), match("s3", 450, "win", 3)]
-  } as PublicLolProfile);
+  } as PublicLolProfile, "solo");
   assert.ok(soloOnly);
   assert.equal(soloOnly.change, 2);
+});
+
+test("자유랭크 LP 추이는 솔로 이력과 섞이지 않고 flex 큐 데이터만 사용한다", () => {
+  const point = (date: string, tier: "GOLD" | "DIAMOND", leaguePoints: number) => ({
+    date,
+    tier,
+    rank: "II",
+    leaguePoints,
+    wins: 10,
+    losses: 8,
+    rankScore: 0
+  });
+  const profile = {
+    riotId: "tester#JP1",
+    rankedQueues: {
+      solo: { queueType: "RANKED_SOLO_5x5", tier: "DIAMOND", rank: "II", leaguePoints: 90, wins: 10, losses: 8, winRate: 56 },
+      flex: { queueType: "RANKED_FLEX_SR", tier: "GOLD", rank: "II", leaguePoints: 40, wins: 10, losses: 8, winRate: 56 }
+    },
+    rankHistory: {
+      solo: [
+        point(new Date(Date.now() - 2 * 86_400_000).toISOString(), "DIAMOND", 70),
+        point(new Date(Date.now() - 86_400_000).toISOString(), "DIAMOND", 90)
+      ],
+      flex: [
+        point(new Date(Date.now() - 2 * 86_400_000).toISOString(), "GOLD", 10),
+        point(new Date(Date.now() - 86_400_000).toISOString(), "GOLD", 40)
+      ]
+    },
+    recentMatches: []
+  } as PublicLolProfile;
+
+  const trend = rankTrendLine(profile, "flex");
+  assert.ok(trend);
+  assert.deepEqual(trend.points.map((entry) => entry.value), [1410, 1440]);
+  assert.equal(trend.change, 30);
+});
+
+test("5v5 랭크 추정 추이는 신규 queueId 710만 반영하고 폐기된 42는 제외한다", () => {
+  const match = (matchId: string, queueId: number): PublicLolRecentMatch => ({
+    matchId,
+    queueId,
+    result: "win",
+    startedAt: new Date(Date.now() - 3_600_000).toISOString()
+  } as PublicLolRecentMatch);
+  const profile = {
+    riotId: "tester#JP1",
+    rankedQueues: {
+      ranked5v5: {
+        queueType: "RANKED_TEAM_5x5",
+        tier: "GOLD",
+        rank: "II",
+        leaguePoints: 50,
+        wins: 10,
+        losses: 8,
+        winRate: 56
+      }
+    },
+    rankHistory: { ranked5v5: [] },
+    recentMatches: [match("new-ranked-5v5", 710), match("legacy-ranked-5v5", 42)]
+  } as PublicLolProfile;
+
+  const trend = rankTrendLine(profile, "ranked5v5");
+  assert.ok(trend);
+  assert.equal(trend.change, 20);
 });
 
 test("플레이 시간대 요약은 플랫폼 현지 시간으로 집계하고 표본 규칙을 지킨다", () => {

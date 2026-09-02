@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 const { DataDragonService } = await import("../dist/services/data-dragon.js");
-const { buildRankHistory, inferMainRoleFromMatches, LolProfileEnrichmentService, performanceStatsFromMatches } = await import("../dist/services/lol-profile-enrichment.js");
+const { buildRankHistory, buildRankHistoryByQueue, inferMainRoleFromMatches, LolProfileEnrichmentService, performanceStatsFromMatches } = await import("../dist/services/lol-profile-enrichment.js");
 const { LocalJsonLolProfileRepository } = await import("../dist/services/lol-profile-store.js");
 const { RiotApiHttpError } = await import("../dist/services/riot-api.js");
 
@@ -59,6 +59,73 @@ test("랭크 이력은 저장된 계산값 대신 티어·단계·LP로 점수�
   ], undefined, "2026-06-16T00:00:00.000Z");
 
   assert.equal(history?.[0]?.rankScore, 1855);
+});
+
+test("큐별 랭크 이력은 갱신된 큐만 누적하고 나머지 큐의 이전 값을 유지한다", () => {
+  const previousPoint = (date, queueType, leaguePoints) => ({
+    date,
+    tier: queueType === "RANKED_TEAM_5x5" ? "GOLD" : "PLATINUM",
+    rank: "II",
+    leaguePoints,
+    wins: 10,
+    losses: 8,
+    rankScore: 0
+  });
+  const analyzedAt = "2026-06-16T00:30:00.000Z";
+  const previous = {
+    solo: [previousPoint("2026-06-15T00:00:00.000Z", "RANKED_SOLO_5x5", 40)],
+    flex: [previousPoint("2026-06-15T00:00:00.000Z", "RANKED_FLEX_SR", 50)],
+    ranked5v5: [previousPoint("2026-06-15T00:00:00.000Z", "RANKED_TEAM_5x5", 60)]
+  };
+  const history = buildRankHistoryByQueue(previous, {
+    flex: {
+      queueType: "RANKED_FLEX_SR",
+      tier: "PLATINUM",
+      rank: "II",
+      leaguePoints: 72,
+      wins: 11,
+      losses: 8,
+      winRate: 58,
+      fetchedAt: analyzedAt
+    }
+  }, analyzedAt);
+
+  assert.equal(history.solo?.length, 1);
+  assert.equal(history.solo?.[0]?.leaguePoints, 40);
+  assert.equal(history.flex?.length, 2);
+  assert.equal(history.flex?.[1]?.leaguePoints, 72);
+  assert.equal(history.ranked5v5?.length, 1);
+  assert.equal(history.ranked5v5?.[0]?.leaguePoints, 60);
+});
+
+test("이전 배열 형식의 랭크 캐시는 로드할 때 solo 큐 이력으로 변환한다", () => {
+  const directory = mkdtempSync(join(tmpdir(), "lol-profile-legacy-history-"));
+  const filePath = join(directory, "profiles.json");
+  const legacyPoint = {
+    date: "2026-06-15T00:00:00.000Z",
+    tier: "DIAMOND",
+    rank: "III",
+    leaguePoints: 33,
+    wins: 30,
+    losses: 20,
+    rankScore: 2533
+  };
+  writeFileSync(filePath, JSON.stringify({
+    profiles: [{
+      riotPuuid: "legacy-puuid",
+      riotGameName: "Legacy",
+      riotTagLine: "JP1",
+      riotIdKey: "legacy#jp1",
+      status: "ready",
+      rankHistory: [legacyPoint]
+    }]
+  }));
+
+  const repository = new LocalJsonLolProfileRepository(filePath);
+  const loaded = repository.getByPuuid("legacy-puuid");
+  assert.deepEqual(loaded?.rankHistory?.solo, [legacyPoint]);
+  assert.equal(loaded?.rankHistory?.flex, undefined);
+  assert.equal(loaded?.rankHistory?.ranked5v5, undefined);
 });
 
 test("DataDragonService는 championId를 ko_KR/ja_JP/en_US 이름과 챔피언 이미지로 매핑한다", async () => {
@@ -386,9 +453,11 @@ test("LolProfileEnrichmentService는 방송자 프로필 최근 전적을 솔로
   assert.equal(patch.ladderRank, 12);
   assert.equal(patch.recentMatches?.length, 10);
   assert.deepEqual(patch.recentMatches?.map((match) => match.championId), [101, 102, 103, 104, 105, 106, 107, 108, 109, 110]);
-  assert.equal(patch.rankHistory?.length, 1);
-  assert.equal(patch.rankHistory?.[0]?.tier, "DIAMOND");
-  assert.equal(patch.rankHistory?.[0]?.leaguePoints, 64);
+  assert.equal(patch.rankHistory?.solo?.length, 1);
+  assert.equal(patch.rankHistory?.solo?.[0]?.tier, "DIAMOND");
+  assert.equal(patch.rankHistory?.solo?.[0]?.leaguePoints, 64);
+  assert.equal(patch.rankHistory?.flex, undefined);
+  assert.equal(patch.rankHistory?.ranked5v5, undefined);
 });
 
 test("LolProfileEnrichmentService는 Riot API key 오류를 failed profile로 표시한다", async () => {
