@@ -19,11 +19,17 @@
      서체(여기) 둘인데 1차 리스킨이 색만 이어 본문이 Inter 로 남았습니다(2차 §2-1).
      스택을 복사하지 않고 선택자만 잇습니다 — 지면·글자색은 값이 같고
      (--home-bg/-ink = --public-gray-page/-text), 배경은 legacy !important 가 계속
-     소유하므로 실질 변화는 서체·tabular-nums 뿐입니다. */
+     소유하므로 실질 변화는 서체·tabular-nums 뿐입니다.
+     .public-legal-page — /terms·/privacy·/contact 본문. 같은 이유로 선택자만
+     잇습니다(법률 페이지 홈 톤 전환). 교체 전 이 화면은 02-legacy.css 에
+     하늘색 고정 배색만 있고 테마 분기가 한 줄도 없어, 테마를 토글해도 본문
+     픽셀이 그대로였습니다 — 분기를 여기 토큰 스왑 한 곳으로 모읍니다.
+     아래 라이트 블록에도 같은 페어를 이어야 반쪽만 반응하지 않습니다. */
   .yoro-home-shell,
   .yoro-home-chrome,
   .yoro-pn-page,
-  .public-aram-page {
+  .public-aram-page,
+  .public-legal-page {
     /* 다크(기본) */
     --home-bg: #1C1D22;
     --home-card: #252730;
@@ -42,6 +48,10 @@
     --home-blob2: #3A404B;
     --home-win: #87A183;
     --home-loss: #DC4A5E;
+    /* 백색 글자를 얹는 홍옥 바탕(테마 공통) — LIVE 배지가 쓰던 값과 같습니다.
+       --home-loss(#DC4A5E)는 흰 글자 4.05:1 로 미달이라 글자 바탕에는 쓸 수
+       없어, 알람 라벨을 반전 배지로 만드는 자리에서만 이 값을 참조합니다. */
+    --home-live-bg: #C93850;
     --home-g1: #F5F6F8;
     --home-g2: #B9C3D0;
     --home-g3: #7C8B9C;
@@ -85,7 +95,9 @@
   .theme-light .yoro-pn-page,
   :root[data-public-theme="light"] .yoro-pn-page,
   .theme-light .public-aram-page,
-  :root[data-public-theme="light"] .public-aram-page {
+  :root[data-public-theme="light"] .public-aram-page,
+  .theme-light .public-legal-page,
+  :root[data-public-theme="light"] .public-legal-page {
     --home-bg: #F5F6F8;
     --home-card: #FFFFFF;
     --home-ink: #1C1D22;
@@ -112,7 +124,8 @@
 
   .yoro-home-shell:lang(ja),
   .yoro-pn-page:lang(ja),
-  .public-aram-page:lang(ja) {
+  .public-aram-page:lang(ja),
+  .public-legal-page:lang(ja) {
     --home-serif: "Noto Serif JP", serif;
     font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", system-ui, sans-serif;
   }

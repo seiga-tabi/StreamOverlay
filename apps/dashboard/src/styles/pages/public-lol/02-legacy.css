@@ -3475,156 +3475,324 @@
   }
 }
 
+/* ── /terms · /privacy · /contact — 홈 톤(백자·수묵) 문서 화면 ──────────────
+   목업 docs/mockups/legal-pages-redesign-v1.html §1~§6(승인본).
+
+   교체 전 이 블록은 하늘색 글래스모피즘 고정값(그라디언트 3겹 · 그림자 3겹 ·
+   라운드 24/18px · 굵기 950)이었고 .theme-light/.theme-dark 분기가 한 줄도
+   없어, 테마를 토글해도 본문 픽셀이 완전히 동일했습니다(실측). 팔레트를 전부
+   --home-* 참조로 옮기고 테마 분기는 01-public-home.css 의 토큰 스왑 한 곳에
+   맡깁니다 — 그래서 아래에는 테마별 값이 한 개도 없습니다.
+   지면·글자·서체(명조 스택 포함)도 그 토큰 블록이 소유합니다.
+
+   경고색 규칙(목업 §경고 톤 판단): 홍옥(--home-loss)은 보더·점 같은 비텍스트
+   에만 씁니다. #DC4A5E 는 카드 위 다크 3.67:1 · 라이트 4.05:1 로 양쪽 다 본문
+   AA(4.5:1) 미달이라, 글자로 알람이 필요한 라벨 하나만 LIVE 배지와 같은 반전
+   배지(--home-live-bg + 백색 5.04:1, 테마 공통)로 만듭니다. */
+
+/* 문서 열 — 카드가 곧 페이지였던 구조를 지면 위 한 열로 풉니다.
+   .public-panel 은 TSX 에서 뗐습니다(그 상속이 배경·보더를 !important 로
+   덮어 이 블록이 통째로 무효가 됩니다 — 04-followers.css §공개 셸 패널). */
 .public-legal-page {
-  max-width: min(1040px, calc(100% - 32px));
-  margin: 28px auto;
-  overflow: hidden;
-  border: 1px solid rgba(126, 177, 223, 0.56);
-  border-radius: 24px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(213, 241, 255, 0.72)),
-    #f3f7fb;
-  color: #233b59;
-  box-shadow: 0 24px 60px rgba(97, 157, 214, 0.18);
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+.public-legal-page :focus-visible {
+  outline: 2px solid var(--home-stroke);
+  outline-offset: 2px;
 }
 
 .public-legal-hero {
-  padding: 34px 34px 26px;
-  border-bottom: 1px solid rgba(126, 177, 223, 0.34);
-  background: linear-gradient(135deg, rgba(191, 227, 255, 0.42), rgba(255, 255, 255, 0.9));
+  padding: 0 0 1.5rem;
+  border-bottom: 0.5px solid var(--home-line);
 }
 
+.public-legal-hero .public-section-kicker {
+  display: block;
+  color: var(--home-mid);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+/* 명조는 이 한 층에만 — 홈 히어로 헤드라인과 같은 규칙. */
 .public-legal-hero h1 {
-  margin: 10px 0 12px;
-  color: #0e1f38;
-  font-size: clamp(30px, 4vw, 46px);
-  font-weight: 950;
-  line-height: 1.1;
+  margin: 10px 0 0;
+  color: var(--home-ink);
+  font-family: var(--home-serif);
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.3;
   letter-spacing: 0;
+  word-break: keep-all;
+}
+
+/* 꼬리 밑줄 — 홈 헤드라인 시그니처(.yoro-home-headline-tail 과 같은 규격). */
+.public-legal-headline-tail {
+  display: block;
+  margin-top: 8px;
+  height: 6px;
+  color: var(--home-mid);
 }
 
 .public-legal-hero p {
-  max-width: 780px;
-  margin: 0;
-  color: #4f6682;
-  font-weight: 850;
-  line-height: 1.75;
+  max-width: 44rem;
+  margin: 14px 0 0;
+  color: var(--home-sub);
+  font-size: 15px;
+  line-height: 1.8;
+  word-break: keep-all;
 }
 
+/* 시행일 칩. 시행일이 비어 있으면 문서가 법적으로 미완성입니다 — 보더만
+   홍옥(비텍스트 3:1)이고 글자는 --home-sub 를 유지합니다. */
 .public-legal-hero > span:not(.public-section-kicker) {
   display: inline-flex;
-  margin-top: 14px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.78);
-  color: #5b708c;
-  padding: 7px 12px;
-  font-size: 13px;
-  font-weight: 950;
+  align-items: center;
+  min-height: 28px;
+  margin-top: 16px;
+  padding: 0 10px;
+  border: 0.5px solid var(--home-line);
+  border-radius: 2px;
+  color: var(--home-sub);
+  font-size: 12px;
+  font-weight: 700;
 }
 
+.public-legal-hero > span[data-state="missing"] {
+  border-color: var(--home-loss);
+}
+
+.public-legal-hero > span[data-state="missing"]::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  margin-right: 7px;
+  border-radius: 99px;
+  background: var(--home-loss);
+}
+
+/* 조항 카드가 서로 붙어 한 장의 문서가 되어야 해서 gap 을 쓰지 않고
+   블록별 margin-top 으로 간격을 둡니다. */
 .public-legal-sections {
   display: grid;
-  gap: 18px;
-  padding: 28px 34px 34px;
+  gap: 0;
+  padding: 0;
 }
 
-.public-legal-notice,
-.public-legal-sections article,
-.public-contact-card {
-  border: 1px solid rgba(126, 177, 223, 0.48);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.78);
-  padding: 18px;
-  box-shadow: 0 16px 32px rgba(97, 157, 214, 0.1);
-}
-
+/* 안내 박스 — 기본은 중립(상태 설명), 운영정보 미설정일 때만 결함 경고. */
 .public-legal-notice {
-  background: linear-gradient(135deg, rgba(191, 227, 255, 0.58), rgba(213, 241, 255, 0.48));
+  display: grid;
+  gap: 6px;
+  margin-top: 1.25rem;
+  padding: 14px 16px;
+  border: 0.5px solid var(--home-line);
+  border-radius: 3px;
+  background: var(--home-card);
 }
 
-.public-legal-sections h2 {
-  margin: 0 0 8px;
-  color: #0e1f38;
-  font-size: 18px;
-  font-weight: 950;
-  line-height: 1.35;
+.public-legal-notice > span {
+  color: var(--home-mid);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
 }
 
-.public-legal-sections p,
-.public-legal-notice p,
-.public-contact-card p {
+.public-legal-notice p {
   margin: 0;
-  color: #4f6682;
-  font-weight: 820;
-  line-height: 1.75;
+  color: var(--home-sub);
+  font-size: 13.5px;
+  line-height: 1.8;
+  word-break: keep-all;
+}
+
+.public-legal-notice[data-tone="alert"] {
+  border-color: var(--home-loss);
+}
+
+.public-legal-notice[data-tone="alert"] > span {
+  justify-self: start;
+  padding: 2px 7px;
+  border-radius: 2px;
+  background: var(--home-live-bg);
+  color: #ffffff;
+  font-weight: 800;
+}
+
+/* 운영자·법적 고지 표 — 라벨 --home-sub / 값 --home-ink(수묵 카드 관례). */
+.public-legal-runtime-details {
+  margin-top: 1.25rem;
+  border: 0.5px solid var(--home-line);
+  border-radius: 3px;
+  background: var(--home-card);
+}
+
+.public-legal-runtime-details > h2 {
+  margin: 0;
+  padding: 14px 16px;
+  border-bottom: 0.5px solid var(--home-line);
+  color: var(--home-ink);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.5;
 }
 
 .public-legal-runtime-grid {
-  display: grid;
-  gap: 10px;
+  margin: 0;
 }
 
 .public-legal-runtime-row {
   display: grid;
-  grid-template-columns: minmax(180px, 0.32fr) minmax(0, 1fr);
-  gap: 14px;
+  grid-template-columns: minmax(9.5rem, 0.3fr) minmax(0, 1fr);
+  gap: 1rem;
   align-items: start;
-  padding: 12px 0;
-  border-top: 1px solid rgba(126, 177, 223, 0.28);
+  padding: 11px 16px;
+  border-top: 0.5px solid var(--home-line);
 }
 
 .public-legal-runtime-row:first-child {
   border-top: 0;
 }
 
-.public-legal-runtime-row strong {
-  color: #0e1f38;
-  font-weight: 950;
+.public-legal-runtime-row dt {
+  color: var(--home-sub);
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.7;
+  word-break: keep-all;
 }
 
-.public-legal-runtime-row span {
+.public-legal-runtime-row dd {
+  margin: 0;
   min-width: 0;
-  color: #4f6682;
-  font-weight: 820;
-  line-height: 1.65;
+  color: var(--home-ink);
+  font-size: 13.5px;
+  line-height: 1.7;
   overflow-wrap: anywhere;
 }
 
+/* 한 표에 8~9개가 동시에 뜰 수 있어 글자를 붉히지 않고 값 앞에 점 하나만
+   답니다(붉은 글자는 양쪽 테마 모두 AA 미달 — 위 블록 주석). */
+.public-legal-runtime-row dd[data-state="missing"]::before {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-right: 7px;
+  border-radius: 99px;
+  background: var(--home-loss);
+  vertical-align: 2px;
+}
+
+/* 약관·방침 본문 — 조항이 각자 카드였던 것을 문서 한 장 + 0.5px 헤어라인
+   구분으로 합칩니다. 각 조항이 위쪽 테두리만 갖고 마지막 조항만 아래를 닫아
+   경계선이 겹치지 않습니다. */
+.public-legal-sections > article:not(.public-legal-runtime-details) {
+  padding: 20px 22px;
+  border: 0.5px solid var(--home-line);
+  border-bottom: 0;
+  background: var(--home-card);
+}
+
+.public-legal-runtime-details + article {
+  margin-top: 1.25rem;
+  border-radius: 3px 3px 0 0;
+}
+
+.public-legal-sections > article:not(.public-legal-runtime-details):last-child {
+  border-bottom: 0.5px solid var(--home-line);
+  border-radius: 0 0 3px 3px;
+}
+
+.public-legal-sections > article:not(.public-legal-runtime-details) h2 {
+  display: flex;
+  gap: 10px;
+  margin: 0 0 10px;
+  color: var(--home-ink);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+.public-legal-clause-no {
+  flex: none;
+  color: var(--home-mid);
+  font-weight: 500;
+}
+
+.public-legal-sections > article:not(.public-legal-runtime-details) p {
+  margin: 0;
+  color: var(--home-sub);
+  font-size: 14px;
+  line-height: 1.9;
+  word-break: keep-all;
+}
+
+/* 문의 카드 */
 .public-contact-card {
   display: grid;
-  gap: 16px;
-  margin: 28px 34px 34px;
+  gap: 1.125rem;
+  margin: 1.25rem 0 0;
+  padding: 22px;
+  border: 0.5px solid var(--home-line);
+  border-radius: 3px;
+  background: var(--home-card);
+}
+
+.public-contact-card > p {
+  margin: 0;
+  color: var(--home-sub);
+  font-size: 14px;
+  line-height: 1.9;
+  word-break: keep-all;
 }
 
 .public-contact-card div {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  align-items: baseline;
+  gap: 14px;
   flex-wrap: wrap;
+  padding: 14px 0;
+  border-top: 0.5px solid var(--home-line);
+  border-bottom: 0.5px solid var(--home-line);
 }
 
 .public-contact-card strong {
-  color: #0e1f38;
-  font-weight: 950;
+  color: var(--home-sub);
+  font-size: 12.5px;
+  font-weight: 500;
 }
 
-.public-contact-card a {
-  color: #4d63ff;
-  font-weight: 950;
+/* 버튼을 제외해 링크 규칙(2클래스)이 버튼 규칙(1클래스)을 이기지 않게 합니다
+   — 예전 !important 는 이 충돌을 덮으려던 것이었습니다. */
+.public-contact-card a:not(.public-contact-mail-button) {
+  color: var(--home-ink);
+  border-bottom: 0.5px solid var(--home-mid);
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  overflow-wrap: anywhere;
 }
 
+/* 주 CTA — 홈의 검색 제출·게임 칩과 같은 반전 solid(그림자·그라디언트 없음).
+   홍옥은 이 화면군에서 "운영정보 미설정" 결함 신호로 예약돼 있어 쓰지 않습니다. */
 .public-contact-mail-button {
   justify-self: start;
-  min-height: 46px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #5c7cff, #7365ff);
-  color: #fff !important;
-  padding: 0 18px;
+  min-height: 48px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: 2px;
+  background: var(--home-inv-bg);
+  color: var(--home-inv-ink);
+  font-size: 15px;
+  font-weight: 800;
   text-decoration: none;
-  box-shadow: 0 14px 26px rgba(92, 124, 255, 0.24);
 }
 
 html[lang="ja"] .public-dashboard-shell,
@@ -3694,30 +3862,37 @@ html[lang="ja"] .public-dashboard-shell .public-participation-streamer-head > sp
   font-weight: var(--yoro-font-weight-ja-medium);
 }
 
-@media (max-width: 760px) {
+/* 모바일(<30rem) — 표는 라벨/값 2행으로 풀고 좌우 여백을 조입니다(목업 §5). */
+@media (max-width: 30rem) {
   .public-legal-page {
-    max-width: calc(100% - 20px);
-    margin: 18px auto;
-    border-radius: 20px;
+    padding: 1.75rem 1rem 3rem;
   }
 
-  .public-legal-hero,
-  .public-legal-sections,
-  .public-contact-card {
-    padding: 22px 18px;
+  .public-legal-hero h1 {
+    font-size: 24px;
+  }
+
+  .public-legal-hero p {
+    font-size: 14px;
+  }
+
+  .public-legal-runtime-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+    padding: 12px 14px;
+  }
+
+  .public-legal-sections > article:not(.public-legal-runtime-details) {
+    padding: 18px 14px;
   }
 
   .public-contact-card {
-    margin: 18px;
+    padding: 16px 14px;
   }
 
   .public-contact-mail-button {
     justify-self: stretch;
-  }
-
-  .public-legal-runtime-row {
-    grid-template-columns: 1fr;
-    gap: 5px;
+    width: 100%;
   }
 }
 

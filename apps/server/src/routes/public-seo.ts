@@ -165,29 +165,34 @@ const SOCIAL_IMAGES_BY_PREFIX: readonly {
   }
 ];
 
-/* 홈 대표 이미지는 로케일별 동적 렌더링(/social/home/<locale>.png)을 씁니다 —
- * 이전 정적 PNG 1장을 ko/ja/en 전부가 공유해 다국어가 전혀 반영되지 않던 문제의
- * 수정점입니다(실측 확인, docs/mockups/yorogg-home-og-redesign-v1.html 승인).
- * 렌더러: apps/server/src/services/home-social-card.ts */
+/* 홈 대표 이미지는 로케일 구분 없이 정적 PNG 1장으로 고정합니다.
+ *
+ * 이전에는 로케일별 동적 렌더링(/social/home/<locale>.png, home-social-card.ts)을
+ * 가리켰지만 프로덕션에서 그 렌더링이 상시 실패해 실제로는 폴백 이미지가 나가고
+ * 있었습니다(실측 확인). 승인된 마스코트 카드(1200×630, 영문 카피)를 그 자리에
+ * 바로 놓아 크롤러가 받는 이미지를 코드와 일치시킵니다.
+ * 원본 목업: docs/mockups/home-og-mascot-redesign-v1.html (v3-⑥ A안, 승인 완료)
+ * 생성 스크립트: scripts/generate-home-og-mascot.mjs */
+const HOME_SOCIAL_IMAGE_URL = `${PUBLIC_SEO_ORIGIN}/images/yorogg-og-home-mascot.png`;
+
+/* 카드 안 문구가 영어 한 벌뿐이라 alt 도 로케일과 무관하게 같은 영문을 씁니다 —
+   이미지에 없는 문장을 로케일별로 지어내면 alt 가 실제 그림과 어긋납니다. */
+const HOME_SOCIAL_IMAGE_ALT_TEXT = "YORO.gg — Game data, one search away";
 const HOME_SOCIAL_IMAGE_ALT: PublicSeoLocaleText = {
-  ko: "YORO.gg — 게임 데이터, 검색 한 번",
-  ja: "YORO.gg — ゲームデータ、検索ひとつで",
-  en: "YORO.gg — Game data, one search away"
+  ko: HOME_SOCIAL_IMAGE_ALT_TEXT,
+  ja: HOME_SOCIAL_IMAGE_ALT_TEXT,
+  en: HOME_SOCIAL_IMAGE_ALT_TEXT
 };
 
-function homeSocialImage(locale: PublicUrlLocale): { url: string; alt: PublicSeoLocaleText } {
-  const servedLocale = locale === "en" ? "en" : locale === "ja" ? "ja" : "ko";
-  return {
-    url: `${PUBLIC_SEO_ORIGIN}/social/home/${servedLocale}.png`,
-    alt: HOME_SOCIAL_IMAGE_ALT
-  };
+function homeSocialImage(): { url: string; alt: PublicSeoLocaleText } {
+  return { url: HOME_SOCIAL_IMAGE_URL, alt: HOME_SOCIAL_IMAGE_ALT };
 }
 
 export function socialImageForPath(normalizedPath: string, locale: PublicUrlLocale = "ko"): {
   url: string;
   alt: PublicSeoLocaleText;
 } {
-  if (normalizedPath === "/") return homeSocialImage(locale);
+  if (normalizedPath === "/") return homeSocialImage();
   const match = SOCIAL_IMAGES_BY_PREFIX.find(({ prefix }) =>
     normalizedPath === prefix || normalizedPath.startsWith(`${prefix}/`));
   if (match) return { url: locale === "ja" && match.urlJa ? match.urlJa : match.url, alt: match.alt };
@@ -2246,7 +2251,7 @@ export function publicSeoMetadataForPath(
   options: { minecraftPatchNotesReady?: boolean } = {}
 ): PublicSeoMetadata {
   const normalizedPath = normalizePublicSeoPath(pathname);
-  const locale = servedSeoLocale(normalizedPath, publicUrlLocaleFromPathname(pathname) ?? "ko");
+  const locale = servedSeoLocale(normalizedPath, publicUrlLocaleFromPathname(pathname) ?? "en");
   const content = contentForPath(normalizedPath, locale, options);
   const canonicalUrl = localizedPublicSeoUrl(normalizedPath, locale);
   const structuredData: unknown[] = [websiteStructuredData(locale)];

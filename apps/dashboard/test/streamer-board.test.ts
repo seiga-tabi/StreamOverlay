@@ -1,5 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import {
+  StreamersChrome,
+  streamerScopeItems,
+} from "../src/features/public-streamers/components/StreamersChrome";
 import {
   isStreamersPath,
   streamerOfficialProfileFromPath,
@@ -10,6 +16,7 @@ import {
   streamersScopePath,
 } from "../src/features/public-streamers/utils/routes";
 import { parseStreamerComment, parseStreamerPost, parseStreamerPostList, streamerChannelKey } from "../src/features/public-streamers/types/streamer-post";
+import { setActivePublicLocale } from "../src/features/public-lol/i18n/public-lol-i18n";
 import { isLocalizablePublicPath, localizedPublicUrl } from "../src/features/public-lol/utils/public-locale-path";
 import { streamersSeoMetadata } from "../src/features/public-streamers/utils/seo";
 
@@ -44,6 +51,33 @@ test("게임 범위는 query 로 다니고 모르는 값은 전체로 떨어진�
   assert.equal(streamerScopeFromSearch(""), "all");
   assert.equal(streamersScopePath("all"), "/streamers");
   assert.equal(streamersScopePath("valorant"), "/streamers?game=valorant");
+});
+
+test("스트리머 크롬은 공통 HomeHeader와 5개 게임 범위 메뉴 및 활성 상태를 유지한다", () => {
+  setActivePublicLocale("ko");
+  const markup = renderToStaticMarkup(React.createElement(StreamersChrome, {
+    connected: false,
+    locale: "ko",
+    onLocale: () => undefined,
+    onLoginOpen: () => undefined,
+    onLogout: () => undefined,
+    onToggleTheme: () => undefined,
+    scope: "valorant",
+  }));
+
+  assert.equal(streamerScopeItems.length, 5);
+  assert.match(markup, /class="yoro-app-shell__header yoro-home-chrome streamers-chrome"/u);
+  assert.match(markup, /class="yoro-home-header"/u);
+  assert.match(markup, /aria-current="page" class="yoro-home-nav-home" href="\/ko\/streamers"/u);
+  assert.doesNotMatch(markup, /yoro-home-games-trigger-name/u);
+  assert.equal((markup.match(/yoro-lol-subnav-item/gu) ?? []).length, 5);
+  for (const item of streamerScopeItems) {
+    assert.match(markup, new RegExp(`data-en="${item.en}"`, "u"));
+    assert.match(markup, new RegExp(`data-ja="${item.ja}"`, "u"));
+    assert.match(markup, new RegExp(`data-ko="${item.ko}"`, "u"));
+  }
+  assert.match(markup, /aria-current="page"[^>]*data-ko="발로란트"|data-ko="발로란트"[^>]*aria-current="page"/u);
+  assert.doesNotMatch(markup, /public-header-menu-icon|PublicGameHeaderFrame|PublicMobileMenuSheet/u);
 });
 
 const basePost = {

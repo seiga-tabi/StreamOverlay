@@ -118,7 +118,7 @@ const LOCALE_OPTIONS: ReadonlyArray<{ locale: PublicLocale; label: string }> = [
   { locale: "en", label: "English" }
 ];
 
-export type HomeActiveGame = "lol" | "palworld" | "valorant" | "minecraft";
+export type HomeActiveGame = "lol" | "palworld" | "valorant" | "minecraft" | "streamers";
 
 export type HomeGameKey = "lol" | "palworld" | "valorant" | "minecraft";
 
@@ -210,6 +210,8 @@ export function HomeHeader({ text, locale, onLocale, onToggleTheme, accountName,
 }) {
   const [openMenu, setOpenMenu] = useState<"games" | "lang" | "account" | null>(null);
   const rootRef = useRef<HTMLElement>(null);
+  /* 스트리머 게시판은 독립 상단 링크이므로 게임 드롭다운의 활성 게임으로 취급하지 않습니다. */
+  const activeHomeGame = activeGame === "streamers" ? undefined : activeGame;
 
   /* 바깥 클릭·Escape 로 드롭다운을 닫습니다 — 홈은 전역 keydown 을 삼키지 않고
      열려 있을 때만 반응합니다. */
@@ -256,9 +258,9 @@ export function HomeHeader({ text, locale, onLocale, onToggleTheme, accountName,
             onClick={() => toggle("games")}
             type="button"
           >
-            {activeGame ? (
+            {activeHomeGame ? (
               <span className="yoro-home-games-trigger-name">
-                {HOME_GAMES.find((game) => game.key === activeGame)?.name(text) ?? text.navGames}
+                {HOME_GAMES.find((game) => game.key === activeHomeGame)?.name(text) ?? text.navGames}
                 <TailUnderline className="yoro-home-games-trigger-tail" height={6} width={56} />
               </span>
             ) : (
@@ -268,11 +270,17 @@ export function HomeHeader({ text, locale, onLocale, onToggleTheme, accountName,
           </button>
           {openMenu === "games" ? (
             <div className="yoro-home-menu-panel" role="menu">
-              <HomeGamesMenuRows activeGame={activeGame} text={text} />
+              <HomeGamesMenuRows activeGame={activeHomeGame} text={text} />
             </div>
           ) : null}
         </div>
-        <a className="yoro-home-nav-link" href={localizedPublicUrlForCurrentLocale("/streamers")}>{text.navStreamers}</a>
+        <a
+          aria-current={activeGame === "streamers" ? "page" : undefined}
+          className={activeGame === "streamers" ? "yoro-home-nav-home" : "yoro-home-nav-link"}
+          href={localizedPublicUrlForCurrentLocale("/streamers")}
+        >
+          {text.navStreamers}
+        </a>
         <a className="yoro-home-nav-link" href={localizedPublicUrlForCurrentLocale("/bot")}>{text.navBot}</a>
       </nav>
       <div className="yoro-home-header-actions">

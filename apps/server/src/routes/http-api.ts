@@ -5048,9 +5048,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
     }
   }
 
-  /* /social/home/<locale>.png — yoro.gg 를 그냥 공유했을 때(홈 og:image) 나오는
-     대표 이미지. 이전에는 정적 PNG 1장을 ko/ja/en 전부가 공유해 다국어가 전혀
-     반영되지 않았습니다(실측 확인) — 로케일별 실텍스트를 굽는 동적 이미지로 전환. */
+  /* /social/home/<locale>.png — 로케일별 실텍스트를 굽는 동적 홈 카드.
+     현재 홈 og:image 는 이 경로를 더 이상 가리키지 않습니다: 이 렌더링이 프로덕션에서
+     상시 실패해 폴백만 나가고 있었고(실측 확인), 승인된 마스코트 카드 정적 PNG
+     (/images/yorogg-og-home-mascot.png)로 고정했습니다 — public-seo.ts 참고.
+     이미 공유된 링크가 이 URL 을 물고 있을 수 있어 라우트는 그대로 둡니다. */
   async function sendHomeSocialImage(
     req: IncomingMessage,
     res: ServerResponse,

@@ -4289,20 +4289,30 @@ const PUBLIC_TERMS_SECTIONS: Array<{ title: PublicTextKey; body: PublicTextKey }
   { title: "termsContactTitle", body: "termsContactBody" }
 ];
 
-function PublicLegalText({ textKey, as = "p" }: { textKey: PublicTextKey; as?: "p" | "span" | "strong" | "h1" | "h2" }) {
+/* prefix 는 조항 번호(01, 02 …) 자리입니다. 자식이 생기면 i18n.ts 의
+   applyDashboardLocale 이 textContent 를 덮어쓰지 않고 건너뛰므로
+   (children.length === 0 가드) 번호가 지워지지 않습니다. 로케일 전환은
+   activePublicLocale 로 React 가 다시 그립니다. */
+function PublicLegalText({ textKey, as = "p", prefix }: { textKey: PublicTextKey; as?: "p" | "span" | "strong" | "dt" | "h1" | "h2"; prefix?: ReactNode }) {
   const props = { "data-ko": publicKoText(textKey), "data-ja": publicJaText(textKey) };
   const content = publicText(textKey);
   if (as === "h1") return <h1 {...props}>{content}</h1>;
-  if (as === "h2") return <h2 {...props}>{content}</h2>;
+  if (as === "h2") return <h2 {...props}>{prefix}{content}</h2>;
   if (as === "span") return <span {...props}>{content}</span>;
   if (as === "strong") return <strong {...props}>{content}</strong>;
+  if (as === "dt") return <dt {...props}>{content}</dt>;
   return <p {...props}>{content}</p>;
 }
 
-function publicLegalRuntimeValue(valueKo: string, valueJa = valueKo): { ko: string; ja: string; current: string } {
-  const ko = valueKo.trim() || publicI18n.ko.legalNotConfigured;
-  const ja = valueJa.trim() || publicI18n.ja.legalNotConfigured;
-  return { ko, ja, current: activePublicLocale === "ja" ? ja : ko };
+function publicLegalRuntimeValue(valueKo: string, valueJa = valueKo): { ko: string; ja: string; current: string; missing: boolean } {
+  const rawKo = valueKo.trim();
+  const rawJa = valueJa.trim();
+  const ko = rawKo || publicI18n.ko.legalNotConfigured;
+  const ja = rawJa || publicI18n.ja.legalNotConfigured;
+  const isJa = activePublicLocale === "ja";
+  /* 화면에 실제로 보이는 로케일 값이 비었는지로 판단합니다 — 표시값과 홍옥 점이
+     어긋나지 않게. */
+  return { ko, ja, current: isJa ? ja : ko, missing: !(isJa ? rawJa : rawKo) };
 }
 
 function PublicLegalRuntimeLine({
@@ -4317,8 +4327,8 @@ function PublicLegalRuntimeLine({
   const value = publicLegalRuntimeValue(valueKo, valueJa);
   return (
     <div className="public-legal-runtime-row">
-      <PublicLegalText textKey={labelKey} as="strong" />
-      <span  >{value.current}</span>
+      <PublicLegalText textKey={labelKey} as="dt" />
+      <dd data-state={value.missing ? "missing" : undefined}>{value.current}</dd>
     </div>
   );
 }
@@ -4332,7 +4342,7 @@ function PublicLegalRuntimeDetails({ page }: { page: Exclude<PublicLegalPageKey,
   return (
     <article className="public-legal-runtime-details">
       <PublicLegalText textKey="legalOperatorTitle" as="h2" />
-      <div className="public-legal-runtime-grid">
+      <dl className="public-legal-runtime-grid">
         <PublicLegalRuntimeLine labelKey="legalOperatorNameLabel" valueKo={PUBLIC_LEGAL_CONFIG.operatorName} />
         <PublicLegalRuntimeLine labelKey="legalContactAddressLabel" valueKo={PUBLIC_LEGAL_CONFIG.contactAddress} />
         <PublicLegalRuntimeLine labelKey="legalPrivacyOfficerLabel" valueKo={PUBLIC_LEGAL_CONFIG.privacyOfficerName} />
@@ -4353,7 +4363,7 @@ function PublicLegalRuntimeDetails({ page }: { page: Exclude<PublicLegalPageKey,
             <PublicLegalRuntimeLine labelKey="legalDisputeVenueLabel" valueKo={PUBLIC_LEGAL_CONFIG.disputeVenueKo} valueJa={PUBLIC_LEGAL_CONFIG.disputeVenueJa} />
           </>
         )}
-      </div>
+      </dl>
     </article>
   );
 }
@@ -4363,16 +4373,33 @@ function PublicLegalPage({ page }: { page: PublicLegalPageKey }) {
   const introKey: PublicTextKey = page === "privacy" ? "privacyIntro" : page === "terms" ? "termsIntro" : "contactIntro";
   const sections = page === "privacy" ? PUBLIC_PRIVACY_SECTIONS : page === "terms" ? PUBLIC_TERMS_SECTIONS : [];
   const mailHref = `mailto:${PUBLIC_CONTACT_EMAIL}?subject=${encodeURIComponent(publicText("contactMailSubject"))}`;
-  const effectiveDateKo = `${publicI18n.ko.legalEffectiveDate}: ${PUBLIC_LEGAL_CONFIG.effectiveDate || publicI18n.ko.legalNotConfigured}`;
-  const effectiveDateJa = `${publicI18n.ja.legalEffectiveDate}: ${PUBLIC_LEGAL_CONFIG.effectiveDate || publicI18n.ja.legalNotConfigured}`;
+  /* 칩 안 구분자는 콜론이 아니라 가운뎃점입니다(홈 칩 관례). */
+  const effectiveDateKo = `${publicI18n.ko.legalEffectiveDate} · ${PUBLIC_LEGAL_CONFIG.effectiveDate || publicI18n.ko.legalNotConfigured}`;
+  const effectiveDateJa = `${publicI18n.ja.legalEffectiveDate} · ${PUBLIC_LEGAL_CONFIG.effectiveDate || publicI18n.ja.legalNotConfigured}`;
+  /* 제목이 긴 방침만 꼬리를 넓게 — 홈 헤드라인처럼 제목 폭에 맞춥니다. */
+  const tailWidth = page === "privacy" ? 68 : 44;
 
   return (
-    <section className="public-legal-page public-panel">
+    <section className="public-legal-page">
       <div className="public-legal-hero">
         <span className="public-section-kicker"  >{t().brand}</span>
         <PublicLegalText textKey={titleKey} as="h1" />
+        <svg
+          aria-hidden="true"
+          className="public-legal-headline-tail"
+          fill="none"
+          height="6"
+          stroke="currentColor"
+          strokeWidth="1"
+          viewBox={`0 0 ${tailWidth} 6`}
+          width={tailWidth}
+        >
+          <path d={`M1 4.6 C ${tailWidth * 0.27} 1.2, ${tailWidth * 0.68} 1.2, ${tailWidth - 1} 3.4`} />
+        </svg>
         <PublicLegalText textKey={introKey} />
-        <span  >{activePublicLocale === "ja" ? effectiveDateJa : effectiveDateKo}</span>
+        <span data-state={PUBLIC_LEGAL_CONFIG.effectiveDate ? undefined : "missing"}>
+          {activePublicLocale === "ja" ? effectiveDateJa : effectiveDateKo}
+        </span>
       </div>
 
       {page === "contact" ? (
@@ -4388,13 +4415,27 @@ function PublicLegalPage({ page }: { page: PublicLegalPageKey }) {
         </div>
       ) : (
         <div className="public-legal-sections">
-          <aside className="public-legal-notice">
+          {/* 정상 운영 안내는 상태 설명이라 중립, 운영정보 미설정만 결함 경고입니다. */}
+          <aside className="public-legal-notice" data-tone={PUBLIC_LEGAL_CONFIG.configured ? undefined : "alert"}>
+            <PublicLegalText
+              as="span"
+              textKey={PUBLIC_LEGAL_CONFIG.configured ? "legalNoticeLabel" : "legalDraftNoticeLabel"}
+            />
             <PublicLegalText textKey={PUBLIC_LEGAL_CONFIG.configured ? "legalOperationalNotice" : "legalDraftNotice"} />
           </aside>
           <PublicLegalRuntimeDetails page={page} />
-          {sections.map((section) => (
+          {sections.map((section, index) => (
             <article key={section.title}>
-              <PublicLegalText textKey={section.title} as="h2" />
+              <PublicLegalText
+                as="h2"
+                prefix={(
+                  /* 스크린리더가 "01 약관 동의와 적용"을 읽을 필요는 없습니다. */
+                  <span aria-hidden="true" className="public-legal-clause-no">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                )}
+                textKey={section.title}
+              />
               <PublicLegalText textKey={section.body} />
             </article>
           ))}
@@ -7863,11 +7904,15 @@ export function PublicLolPage({
   if (activeMainPage !== "search" || (!profile && !loading)) {
     return (
       <AppShell
-        /* 패치 노트·시청자 참여·증강 칼바람은 전적 프로필과 같은 수묵 셸(platform-v2)을
-           씁니다 — 셸 지면이 테마를 따라 뒤집히고(20-profile-platform.css), 상단 컴팩트
-           검색바가 프로필과 같은 잉크 규격을 받습니다. 다른 메뉴 페이지는 각자 리스킨
-           문서가 소유합니다. */
-        className={`public-lol-shell public-dashboard-shell${["patchNotes", "followJoin", "aram"].includes(activeMainPage) ? " public-profile-platform-v2" : ""} theme-${theme}`}
+        /* 패치 노트·시청자 참여·증강 칼바람·법률 문서(약관·방침·문의)는 전적 프로필과
+           같은 수묵 셸(platform-v2)을 씁니다 — 셸 지면이 테마를 따라 뒤집히고
+           (20-profile-platform.css), 상단 컴팩트 검색바가 프로필과 같은 잉크 규격을
+           받습니다. 다른 메뉴 페이지는 각자 리스킨 문서가 소유합니다.
+           법률 3화면이 여기 들어온 이유: 03-product-gray.css 의 회색 지면
+           !important 가 :not(.public-profile-platform-v2) 로만 비켜서고, 그 회색은
+           테마 무관 고정값이라 본문만 홈 톤으로 바꿔도 지면이 테마를 따라오지
+           못했습니다(법률 페이지 홈 톤 전환, 실측). */
+        className={`public-lol-shell public-dashboard-shell${["patchNotes", "followJoin", "aram", "privacy", "terms", "contact"].includes(activeMainPage) ? " public-profile-platform-v2" : ""} theme-${theme}`}
         mainId="public-main"
         sidebarMode="none"
         skipLinkLabel={t().skipToContent}

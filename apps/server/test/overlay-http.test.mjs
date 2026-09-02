@@ -262,9 +262,9 @@ test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => 
     const aramRes = createResponse();
     await handler(createRequest("GET", "/lol/aram"), aramRes);
     assert.equal(aramRes.statusCode, 200);
-    assert.match(aramRes.body, /<title>증강 칼바람 \| YORO\.gg<\/title>/);
-    assert.match(aramRes.body, /<link rel="canonical" href="https:\/\/yoro\.gg\/ko\/lol\/aram">/);
-    assert.match(aramRes.body, /<meta property="og:url" content="https:\/\/yoro\.gg\/ko\/lol\/aram">/);
+    assert.match(aramRes.body, /<title>Augment ARAM \| YORO\.gg<\/title>/);
+    assert.match(aramRes.body, /<link rel="canonical" href="https:\/\/yoro\.gg\/en\/lol\/aram">/);
+    assert.match(aramRes.body, /<meta property="og:url" content="https:\/\/yoro\.gg\/en\/lol\/aram">/);
 
     const aramApiRes = createResponse();
     await handler(createRequest("GET", "/api/public/aram/augments"), aramApiRes);

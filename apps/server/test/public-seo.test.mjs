@@ -286,6 +286,27 @@ test("공개 홈은 WebSite SearchAction과 Organization JSON-LD를 제공한다
   assert.equal(website.potentialAction["@type"], "SearchAction");
 });
 
+test("로케일 프리픽스 없는 홈은 영어 OG 메타와 영어 소셜 이미지를 제공한다", () => {
+  const html = render("/");
+  assert.match(html, /<meta property="og:title" content="YORO\.gg — Game data, one search">/u);
+  assert.match(html, /<meta property="og:description" content="LoL match history,[^"]*">/u);
+  assert.match(html, /<meta property="og:image" content="https:\/\/yoro\.gg\/images\/yorogg-og-home-mascot\.png" \/>/u);
+});
+
+test("명시적인 /ko/ 홈도 같은 마스코트 카드를 쓰고 OG 문구만 한국어를 유지한다", () => {
+  const html = render("/ko/");
+  assert.match(html, /<meta property="og:title" content="YORO\.gg — 게임 데이터, 검색 한 번">/u);
+  /* 홈 대표 이미지는 로케일 구분 없이 승인된 정적 카드 1장으로 고정되어 있습니다. */
+  assert.match(html, /<meta property="og:image" content="https:\/\/yoro\.gg\/images\/yorogg-og-home-mascot\.png" \/>/u);
+});
+
+test("영어 카피가 없는 프리픽스 없는 경로는 기존 한국어 메타로 접힌다", () => {
+  const metadata = publicSeoMetadataForPath("/participation");
+  assert.equal(metadata.locale, "ko");
+  assert.equal(metadata.title, "시청자 참여 | YORO.gg");
+  assert.equal(metadata.canonicalUrl, "https://yoro.gg/ko/participation");
+});
+
 test("하위 경로는 BreadcrumbList를 제공한다", () => {
   const html = render("/ko/palworld/skills");
   const script = /<script type="application\/ld\+json"[^>]*>(\{"@context":"https:\/\/schema\.org","@type":"BreadcrumbList[\s\S]*?)<\/script>/u.exec(html);
@@ -722,22 +743,25 @@ test("소셜 이미지는 게임별 경로 접두사로 매핑되고 그 외에�
   assert.equal(image("/ko/minecraft/recipes"), "https://yoro.gg/social/game/minecraft.png");
   assert.equal(image("/valorant/agents"), "https://yoro.gg/social/game/valorant.png");
   assert.equal(image("/bot/commands"), "https://yoro.gg/social/game/bot.png");
-  /* LoL 생태는 LoL 이미지를 대표로 겸용합니다. 홈은 별도 동적 렌더링(로케일별
-     실텍스트, home-social-card.ts)을 쓰므로 분리해 검증합니다. */
+  /* LoL 생태는 LoL 이미지를 대표로 겸용합니다. 홈은 전용 마스코트 카드를 쓰므로
+     분리해 검증합니다. */
   for (const path of ["/lol", "/lol/aram", "/patch-notes", "/follow", "/participation"]) {
     assert.equal(image(path), "https://yoro.gg/social/game/lol.png", path);
   }
-  /* 홈은 정적 이미지 대신 로케일별 동적 렌더링을 씁니다 — 이전엔 ko/ja/en 전부가
-     같은 한국어 텍스트 박힌 정적 PNG를 공유해 다국어가 반영되지 않았습니다. */
-  assert.equal(publicSeoMetadataForPath("/").imageUrl, "https://yoro.gg/social/home/ko.png");
-  assert.equal(publicSeoMetadataForPath("/ja").imageUrl, "https://yoro.gg/social/home/ja.png");
-  assert.equal(publicSeoMetadataForPath("/en").imageUrl, "https://yoro.gg/social/home/en.png");
+  /* 홈은 로케일과 무관하게 승인된 마스코트 카드 1장으로 고정합니다 — 로케일별
+     동적 렌더링(/social/home/<locale>.png)은 프로덕션에서 상시 실패해 폴백만
+     나가고 있었으므로 og:image 가 실제 나가는 그림과 일치하게 맞췄습니다. */
+  const homeImage = "https://yoro.gg/images/yorogg-og-home-mascot.png";
+  for (const path of ["/", "/ko", "/ja", "/en"]) {
+    assert.equal(publicSeoMetadataForPath(path).imageUrl, homeImage, path);
+    assert.equal(publicSeoMetadataForPath(path).imageAlt, "YORO.gg — Game data, one search away", path);
+  }
   /* 게임 외 화면은 기존 범용 이미지 유지 — 접두사 오탐(/bottle 류)도 범용으로. */
   for (const path of ["/privacy", "/terms", "/contact", "/bottle"]) {
     assert.equal(image(path), "https://yoro.gg/images/yorogg-og.png", path);
   }
   /* imageAlt 는 게임·locale 별 문구를 씁니다. */
-  assert.match(publicSeoMetadataForPath("/minecraft").imageAlt, /마인크래프트/u);
+  assert.match(publicSeoMetadataForPath("/ko/minecraft").imageAlt, /마인크래프트/u);
   assert.match(publicSeoMetadataForPath("/ja/minecraft").imageAlt, /マインクラフト/u);
 
   /* Palworld 엔티티 상세도 팰월드 이미지를 씁니다. */

@@ -856,6 +856,10 @@ const publicI18nBase = {
     legalEffectiveDate: "시행일",
     legalOperationalNotice: "본 문서는 공개된 운영정보와 YORO.gg의 실제 데이터 처리 동작을 기준으로 적용됩니다. 처리 내용이 변경되면 방침과 시스템을 함께 갱신합니다.",
     legalDraftNotice: "필수 운영정보가 설정되지 않아 이 문서는 개발 미리보기 상태입니다. 운영자 정보, 위탁·국외 이전, 준거법과 분쟁 관할을 확정하기 전에는 서비스를 공개할 수 없습니다.",
+    /* 안내 박스 라벨 두 개. 결함 경고와 정상 안내가 보더 색 하나로만 갈리면
+       색각 이상 사용자에게 구분이 남지 않아 라벨로도 뜻을 적습니다. */
+    legalNoticeLabel: "적용 기준",
+    legalDraftNoticeLabel: "개발 미리보기",
     legalNotConfigured: "운영 정보 미설정",
     legalOperatorTitle: "개인 운영자 및 법적 고지",
     legalOperatorNameLabel: "개인 운영자",
@@ -1778,6 +1782,8 @@ const publicI18nBase = {
     legalEffectiveDate: "施行日",
     legalOperationalNotice: "本書は、公開された運営情報およびYORO.ggの実際のデータ処理に基づいて適用されます。取扱内容を変更する場合は、本書とシステムを併せて更新します。",
     legalDraftNotice: "必須の運営情報が設定されていないため、本書は開発プレビューです。運営者情報、委託・国外移転、準拠法および紛争管轄を確定するまでサービスを公開できません。",
+    legalNoticeLabel: "適用基準",
+    legalDraftNoticeLabel: "開発プレビュー",
     legalNotConfigured: "運営情報未設定",
     legalOperatorTitle: "個人運営者および法的表示",
     legalOperatorNameLabel: "個人運営者",
@@ -2702,6 +2708,8 @@ const publicI18nEn = {
     legalEffectiveDate: "Effective date",
     legalOperationalNotice: "This document applies based on published operating information and how YORO.gg actually processes data. When processing changes, the policy and the system are updated together.",
     legalDraftNotice: "Required operating information is not configured, so this document is in development preview. The service cannot launch before the operator info, processors and cross-border transfers, governing law, and dispute venue are finalized.",
+    legalNoticeLabel: "Basis of application",
+    legalDraftNoticeLabel: "Development preview",
     legalNotConfigured: "Operating info not configured",
     legalOperatorTitle: "Individual operator and legal notice",
     legalOperatorNameLabel: "Individual operator",

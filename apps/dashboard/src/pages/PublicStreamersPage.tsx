@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import "../styles/pages/public-streamers/streamers-route.css";
-import { AppShell, AppShellHeader, AppShellMain } from "../shared/ui/AppShell";
+import { AppShell, AppShellMain } from "../shared/ui/AppShell";
 import { usePublicLocale } from "../features/public-lol/hooks/usePublicLocale";
 import { usePublicTheme } from "../features/public-lol/hooks/usePublicTheme";
 import { setActivePublicLocale } from "../features/public-lol/i18n/public-lol-i18n";
 import { usePublicAccountLogin } from "../shared/public-account-login";
-import { StreamersHeader } from "../features/public-streamers/components/StreamersHeader";
+import { StreamersChrome } from "../features/public-streamers/components/StreamersChrome";
 import { StreamerComposePage } from "../features/public-streamers/components/StreamerComposePage";
 import { StreamerDetailPage } from "../features/public-streamers/components/StreamerDetailPage";
 import { StreamerListPage } from "../features/public-streamers/components/StreamerListPage";
@@ -22,13 +22,13 @@ const noServerLocalePreference = async (): Promise<StreamersLocale | undefined> 
 export function PublicStreamersPage() {
   const { locale: rawLocale, changeLocale } = usePublicLocale(noServerLocalePreference);
   const locale = rawLocale;
-  const { theme } = usePublicTheme();
+  const { theme, toggleTheme } = usePublicTheme();
   const { page, postId, officialProfile, scope } = useStreamersRoute();
   const viewerTwitch = usePublicViewerTwitch();
   /* 글·댓글·신고를 쓸 수 있는 기준은 "공개 페이지에 로그인돼 있는가" 입니다.
      계정 세션만 보면 LoL 화면에서 Twitch 로 로그인한 사람이 여기서만 비로그인으로
      취급돼 "로그인이 필요합니다" 를 만납니다(실사례). 두 세션을 합쳐서 봅니다. */
-  const { accountConnected, loginWithTwitch } = usePublicAccountLogin({
+  const account = usePublicAccountLogin({
     viewerTwitch: {
       connected: viewerTwitch.status.connected,
       ...(viewerTwitch.status.user ? { user: viewerTwitch.status.user } : {}),
@@ -64,9 +64,18 @@ export function PublicStreamersPage() {
       skipLinkLabel={text.skipToContent}
       variant="public"
     >
-      <AppShellHeader as="div" className="streamers-shell-header">
-        <StreamersHeader locale={locale} onLocale={handleLocale} scope={scope} />
-      </AppShellHeader>
+      <StreamersChrome
+        accountName={account.accountUser?.displayName}
+        connected={account.yoroConnected}
+        isStreamerAdmin={account.isStreamerAdmin}
+        locale={locale}
+        onLocale={handleLocale}
+        onLoginOpen={account.loginWithTwitch}
+        onLogout={account.logout}
+        onStreamerAdmin={account.openStreamerAdmin}
+        onToggleTheme={toggleTheme}
+        scope={scope}
+      />
       <AppShellMain className="streamers-main" id="streamers-main">
         <section aria-label={text.brand} className="streamers-page-section">
           {page === null ? (
@@ -77,12 +86,12 @@ export function PublicStreamersPage() {
             </div>
           ) : null}
           {page === "list" ? (
-            <StreamerListPage canPost={accountConnected} onLogin={loginWithTwitch} scope={scope} text={text} />
+            <StreamerListPage canPost={account.accountConnected} onLogin={account.loginWithTwitch} scope={scope} text={text} />
           ) : null}
           {page === "detail" && (postId || officialProfile) ? (
             <StreamerDetailPage
-              canPost={accountConnected}
-              onLogin={loginWithTwitch}
+              canPost={account.accountConnected}
+              onLogin={account.loginWithTwitch}
               onTitle={setPostTitle}
               {...(postId ? { postId } : {})}
               {...(officialProfile ? { officialProfile } : {})}
@@ -90,7 +99,7 @@ export function PublicStreamersPage() {
             />
           ) : null}
           {page === "compose" ? (
-            <StreamerComposePage canPost={accountConnected} onLogin={loginWithTwitch} text={text} />
+            <StreamerComposePage canPost={account.accountConnected} onLogin={account.loginWithTwitch} text={text} />
           ) : null}
         </section>
       </AppShellMain>

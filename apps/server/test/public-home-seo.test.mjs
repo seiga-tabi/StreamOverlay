@@ -59,10 +59,11 @@ test("루트 메타는 화면이 덮어쓸 문구와 같다", () => {
     assert.equal(metadata.fallback.summary, copy.description, pathname);
   }
 
-  /* 프리픽스 없는 루트는 한국어 판입니다(사이트 전체 규칙). */
+  /* 프리픽스 없는 루트의 서버 SEO 기본값은 영어입니다. */
   const bare = publicSeoMetadataForPath("/");
-  assert.equal(bare.title, homeSeoCopy("ko").title);
-  assert.equal(bare.locale, "ko");
+  assert.equal(bare.title, homeSeoCopy("en").title);
+  assert.equal(bare.locale, "en");
+  assert.equal(bare.canonicalUrl, "https://yoro.gg/en/");
 });
 
 /* 화면마다 경로와 원본 모듈이 다릅니다. 새 화면을 만들면 여기 한 줄만 늘립니다. */
