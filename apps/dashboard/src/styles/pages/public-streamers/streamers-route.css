@@ -71,6 +71,15 @@
   background: var(--home-bg);
 }
 
+/* AppShell.css 의 .yoro-app-shell__main 은 배경을 지정하지 않아(패딩만 있음)
+   투명으로 남습니다 — 평소엔 셸 배경이 그대로 비쳐 보이지만, 뷰포트 크기·줌·
+   렌더링 조건에 따라 셸과 본문 사이에 테마 미적용 틈(구 배경색)이 보일 수
+   있어 이 지면 전용 배경을 명시적으로 한 번 더 칠합니다(실측 버그 리포트:
+   스트리머 페이지 여백이 body 기본값(다크)으로 보임). */
+.streamers-shell .streamers-main {
+  background: var(--home-bg);
+}
+
 .streamers-shell .public-game-header,
 .streamers-shell .public-bottom-tab-bar,
 .streamers-shell .public-bottom-sheet {
