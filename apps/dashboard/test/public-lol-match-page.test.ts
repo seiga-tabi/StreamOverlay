@@ -166,7 +166,7 @@ test("match-ranks 오류는 전적 상세를 유지하고 티어 섹션에 안�
   assert.match(source, /setMatchRankErrors\(\(current\) => \(\{ \.\.\.current, \[matchId\]: t\(\)\.tierUnavailable \}\)\)/u);
 });
 
-test("프로필에서 LoL 서버를 바꾸면 같은 Riot ID를 새 서버에서 다시 검색한다", () => {
+test("프로필에서 LoL 서버만 바꾸면 기존 프로필을 유지하고 자동 검색하지 않는다", () => {
   const source = readFileSync(new URL("../src/pages/PublicLolPage.tsx", import.meta.url), "utf8");
   const start = source.indexOf("function changeLolPlatform");
   const end = source.indexOf("function clearSearch", start);
@@ -175,6 +175,9 @@ test("프로필에서 LoL 서버를 바꾸면 같은 Riot ID를 새 서버에서
   assert.notEqual(end, -1);
   const changeLolPlatformSource = source.slice(start, end);
 
-  assert.match(changeLolPlatformSource, /void runSearch\(profile\.riotId, \{ platform \}\);/u);
+  assert.match(changeLolPlatformSource, /setSelectedLolPlatform\(platform\);/u);
+  assert.doesNotMatch(changeLolPlatformSource, /runSearch\(/u);
+  assert.doesNotMatch(changeLolPlatformSource, /setProfile\(/u);
+  assert.doesNotMatch(changeLolPlatformSource, /setFilters\(/u);
   assert.doesNotMatch(changeLolPlatformSource, /setPublicPath\(/u);
 });

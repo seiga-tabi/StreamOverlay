@@ -7673,11 +7673,6 @@ export function PublicLolPage({
     setMoreMatchesError("");
     setRemoteSuggestions([]);
     setError("");
-    if (profile && normalizeLolPlatformId(profile.lolPlatform) !== platform) {
-      setProfile(null);
-      setFilters(DEFAULT_MATCH_FILTERS);
-      void runSearch(profile.riotId, { platform });
-    }
   }
 
 	  function clearSearch(): void {
