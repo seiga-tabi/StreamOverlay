@@ -289,6 +289,7 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
     pathname === "/api/lol/match-ranks" ||
     pathname === "/api/lol/match-build" ||
     pathname === "/api/lol/match-detail" ||
+    pathname === "/api/lol/champion-build-stats" ||
     pathname === "/api/public/locale"
   )) return "PUBLIC";
   if (
