@@ -1,0 +1,219 @@
+/* 챔피언 글로벌 빌드 통계 패널 — 통계 탭, 시그니처 빌드 아래.
+ *
+ * 패널 프레임·헤더·빈 상태는 36-champion-analysis.css 의 .public-champ-* 를, 빌드
+ * 카드(룬 헤드·채용률 바·아이템 칸)는 37-signature-builds.css 의 .public-sig-* 를
+ * 그대로 빌려 쓰고, 이 파일은 .public-gbs-* (챔피언 칩·포지션 탭·3열 그리드·
+ * 스펠 쌍·포지션 목록)만 단독 소유합니다. 두 원본 파일은 수정하지 않습니다.
+ * !important 금지. 팔레트는 .public-profile-platform-v2 토큰만.
+ */
+
+@layer pages {
+  .public-gbs-panel { margin-top: var(--yoro-space-3); }
+
+  /* 헤드 라벨은 시그니처 빌드와 같은 우측 헤어라인 칩. */
+  .public-gbs-panel .public-champ-pill {
+    margin-left: auto;
+    padding: 3px 9px;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
+    font-weight: 700;
+  }
+
+  .public-gbs-controls {
+    display: flex;
+    flex-direction: column;
+    gap: .625rem;
+    padding: 0 1.125rem .875rem;
+  }
+
+  /* 챔피언 칩 줄 — 좁은 폭에서는 가로 스크롤(줄바꿈 대신), 스크롤바는 숨기지 않음. */
+  .public-gbs-champs {
+    display: flex;
+    gap: .375rem;
+    min-width: 0;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: thin;
+  }
+
+  .public-gbs-champ {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    min-height: var(--yoro-size-touch-target, 2.75rem);
+    margin: 0;
+    padding: 0 .75rem 0 .25rem;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 99px;
+    background: transparent;
+    color: var(--public-gray-muted);
+    font: inherit;
+    font-size: .75rem;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .public-gbs-champ:hover { color: var(--public-gray-text); }
+
+  .public-gbs-champ[aria-pressed="true"] {
+    border-color: var(--public-gray-muted);
+    background: var(--profile-row-wash);
+    color: var(--public-gray-text);
+  }
+
+  .public-gbs-champ:focus-visible {
+    outline: var(--yoro-focus-ring-width) solid var(--yoro-color-focus-ring);
+    outline-offset: var(--yoro-focus-ring-offset);
+  }
+
+  .public-gbs-champ-ava {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 99px;
+    background: var(--public-gray-page);
+    font-size: .6875rem;
+    font-weight: 800;
+    overflow: hidden;
+  }
+
+  .public-gbs-champ-ava > img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
+
+  /* 포지션 탭 — 헤어라인 칩 5개, 활성이면 먹빛 테두리. 표본 수는 작은 글자로. */
+  .public-gbs-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .375rem;
+  }
+
+  .public-gbs-tab {
+    display: inline-flex;
+    flex: 1 1 auto;
+    align-items: baseline;
+    justify-content: center;
+    gap: .375rem;
+    min-height: var(--yoro-size-touch-target, 2.75rem);
+    margin: 0;
+    padding: 0 .625rem;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--public-gray-muted);
+    font: inherit;
+    font-size: .75rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .public-gbs-tab > small { font-size: .6875rem; font-weight: 400; }
+
+  .public-gbs-tab:hover { color: var(--public-gray-text); }
+
+  .public-gbs-tab[aria-selected="true"] {
+    border-color: var(--public-gray-muted);
+    color: var(--public-gray-text);
+  }
+
+  .public-gbs-tab:focus-visible {
+    outline: var(--yoro-focus-ring-width) solid var(--yoro-color-focus-ring);
+    outline-offset: var(--yoro-focus-ring-offset);
+  }
+
+  @media (min-width: 48rem) {
+    .public-gbs-tab { flex: none; }
+  }
+
+  /* 전체 표본 요약 — 승률 무채 800 + 게임 수. */
+  .public-gbs-summary {
+    display: flex;
+    align-items: baseline;
+    gap: .5rem;
+    padding: 0 1.125rem .75rem;
+    color: var(--public-gray-muted);
+    font-size: .75rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .public-gbs-summary > b { color: var(--public-gray-text); font-size: 1rem; font-weight: 800; }
+
+  /* 3열 그리드 — 64rem+ 에서 룬 / 아이템 / 스펠+포지션, 그 미만 1열. */
+  .public-gbs-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: .875rem;
+    align-items: start;
+    padding: 0 1.125rem 1rem;
+  }
+
+  @media (min-width: 64rem) {
+    .public-gbs-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+
+  .public-gbs-col {
+    display: flex;
+    flex-direction: column;
+    gap: .625rem;
+    min-width: 0;
+  }
+
+  .public-gbs-col-title {
+    margin: 0;
+    color: var(--public-gray-muted);
+    font-size: .6875rem;
+    font-weight: 800;
+    letter-spacing: .06em;
+  }
+
+  /* 열 안에 표시 조합이 없을 때(전부 10% 미만) — 점선 안내 한 줄. */
+  .public-gbs-col-empty {
+    padding: .75rem;
+    border: .5px dashed var(--public-gray-border-strong);
+    border-radius: 2px;
+    color: var(--public-gray-muted);
+    font-size: .6875rem;
+    text-align: center;
+  }
+
+  /* 스펠 쌍 — 사각 헤어라인 칸 2개. */
+  .public-gbs-spells { display: flex; flex: 1; align-items: center; gap: .25rem; min-width: 0; }
+
+  .public-gbs-spell {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 1.375rem;
+    height: 1.375rem;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
+    background: var(--public-gray-page);
+    color: var(--public-gray-muted);
+    font-size: .5rem;
+    font-weight: 700;
+    overflow: hidden;
+  }
+
+  .public-gbs-spell > img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* 포지션별 승률 — 챔피언 탭 포지션 셀 문법 재사용, 세로 목록. */
+  .public-gbs-positions {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+  }
+
+  .public-gbs-positions .public-champ-role-cell { padding-block: .125rem; }
+
+  /* 오류 빈 상태 안의 재시도 버튼(아웃라인은 .public-sig-view 차용) — 안내 문장과 간격. */
+  .public-gbs-retry { margin-top: var(--yoro-space-2); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .public-gbs-champ, .public-gbs-tab { transition: none; }
+  }
+}

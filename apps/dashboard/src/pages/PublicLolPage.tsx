@@ -38,6 +38,7 @@ import { safeTwitchStreamPreviewUrl } from "../features/public-twitch/stream-pre
 import { useViewerTwitchOAuthReturn } from "../shared/useViewerTwitchOAuthReturn";
 import { usePublicAccountLogin } from "../shared/public-account-login";
 import { withLolDailySummaryBars } from "../features/public-lol/components/LolDailySummaryBar";
+import { GlobalBuildStatsPanel } from "../features/public-lol/components/GlobalBuildStatsPanel";
 import { LolAugmentIcon } from "../features/public-lol/components/LolAugmentIcon";
 import { streamerBuckets, type StreamerFilter } from "../features/public-lol/utils/streamers";
 import { arenaPlacementClass, isArenaQueue, matchGap } from "../features/public-lol/utils/match-lanes";
@@ -8033,6 +8034,18 @@ export function PublicLolPage({
                         onChampionPick={(championId) => {
                           setFilters({ ...DEFAULT_MATCH_FILTERS, championId: String(championId) });
                           setProfileTab("overview");
+                        }}
+                      />
+                      {/* 전체 유저 누적 글로벌 빌드 — 시그니처 빌드(개인 최근 매치)와 별개 데이터.
+                          프로필이 바뀌면 key 로 선택 상태를 초기화합니다. */}
+                      <GlobalBuildStatsPanel
+                        key={activeProfile.riotId}
+                        profile={activeProfile}
+                        helpers={{
+                          championName: (champion) => championName(champion),
+                          positionLabel: mainRoleLabel,
+                          assetUrl,
+                          spellIconUrl: summonerSpellIconUrl
                         }}
                       />
                       <MiniGamesLabBanner />

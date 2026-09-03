@@ -1,5 +1,11 @@
 import type { LolChampionSummary, LolMainRole, LolPerformanceStats, LolProfileStatus, LolRankedStats, LolRankHistoryByQueue, LolRankHistoryPoint, LolRankTier, LolRecentMatchChampion, ParticipationEntry } from "@streamops/shared";
 import { formatRiotId, normalizeLolPlatformId, normalizeRiotIdKey, toSafeErrorMessage } from "@streamops/shared";
+import { appConfig } from "../config.js";
+import { databasePool } from "../database/pool.js";
+import {
+  recordChampionMatchBuilds,
+  type ChampionMatchBuildRecord
+} from "../database/repositories/champion-build-stats-repository.js";
 import type { JsonlLogger } from "../logging/jsonl-logger.js";
 import { DataDragonService } from "./data-dragon.js";
 import { RiotApiClient, RiotApiHttpError, RiotRateLimitError, type RiotMatch } from "./riot-api.js";
@@ -76,6 +82,84 @@ const POSITION_ALIASES: Record<string, LolMainRole> = {
   UTILITY: "UTILITY",
   SUPPORT: "UTILITY"
 };
+
+function optionalInteger(value: number | undefined): number | undefined {
+  return Number.isSafeInteger(value) ? value : undefined;
+}
+
+/* "15.17.703.1234"(Match-V5 gameVersion) 또는 "15.17.1"(Data Dragon 버전) → "15.17".
+   수집(championMatchBuildRecordsFromMatch)과 조회 라우트(/api/lol/champion-build-stats)가
+   같은 patch 키를 쓰도록 export 합니다. */
+export function normalizedMatchPatch(gameVersion: string | undefined): string | undefined {
+  const matched = gameVersion?.match(/^(\d+)\.(\d+)(?:\.|$)/u);
+  return matched ? `${matched[1]}.${matched[2]}` : undefined;
+}
+
+export function championMatchBuildRecordsFromMatch(
+  match: RiotMatch
+): ChampionMatchBuildRecord[] {
+  const queueId = match.info.queueId;
+  const patch = normalizedMatchPatch(match.info.gameVersion);
+  const gameCreation = match.info.gameCreation;
+  const matchId = match.metadata.matchId.trim();
+  if (
+    !Number.isSafeInteger(queueId)
+    || queueId === undefined
+    || !patch
+    || typeof gameCreation !== "number"
+    || !Number.isFinite(gameCreation)
+    || !matchId
+  ) {
+    return [];
+  }
+  const matchCreatedAtDate = new Date(gameCreation);
+  if (!Number.isFinite(matchCreatedAtDate.getTime())) return [];
+  const matchCreatedAt = matchCreatedAtDate.toISOString();
+
+  const records: ChampionMatchBuildRecord[] = [];
+  for (const participant of match.info.participants) {
+    const puuid = participant.puuid.trim();
+    if (
+      !puuid
+      || !Number.isSafeInteger(participant.championId)
+      || participant.championId <= 0
+      || typeof participant.win !== "boolean"
+    ) {
+      continue;
+    }
+    const primaryStyle = participant.perks?.styles?.[0];
+    const subStyle = participant.perks?.styles?.[1];
+    records.push({
+      matchId,
+      puuid,
+      championId: participant.championId,
+      teamPosition: participant.teamPosition?.trim()
+        || participant.individualPosition?.trim()
+        || "UNKNOWN",
+      queueId,
+      patch,
+      win: participant.win,
+      // 현재 티어를 얻기 위한 추가 조회는 하지 않습니다. 다음 단계에서 프로필의
+      // rankedStats를 재사용할 수 있을 때 observedTier를 채울 수 있습니다.
+      observedTier: undefined,
+      keystonePerkId: optionalInteger(primaryStyle?.selections?.[0]?.perk),
+      primaryStyleId: optionalInteger(primaryStyle?.style),
+      subStyleId: optionalInteger(subStyle?.style),
+      summonerSpell1: optionalInteger(participant.summoner1Id),
+      summonerSpell2: optionalInteger(participant.summoner2Id),
+      items: [
+        optionalInteger(participant.item0),
+        optionalInteger(participant.item1),
+        optionalInteger(participant.item2),
+        optionalInteger(participant.item3),
+        optionalInteger(participant.item4),
+        optionalInteger(participant.item5)
+      ],
+      matchCreatedAt
+    });
+  }
+  return records;
+}
 
 export function inferMainRoleFromMatches(matches: RiotMatch[], puuid: string, minConfidence = 45): {
   mainRole: LolMainRole;
@@ -439,9 +523,25 @@ export class LolProfileEnrichmentService {
     const matches: RiotMatch[] = [];
     for (const matchId of matchIds.slice(0, count)) {
       const match = await this.riot.getMatch(matchId);
-      if (match) matches.push(match);
+      if (!match) continue;
+      void this.recordMatchBuildsSafely(match).catch((error) => {
+        this.logger.error({
+          type: "champion_build_stats.record_failed",
+          error: String(error)
+        });
+      });
+      matches.push(match);
     }
     return matches;
+  }
+
+  private async recordMatchBuildsSafely(match: RiotMatch): Promise<void> {
+    if (!appConfig.database.enabled) return;
+    const records = championMatchBuildRecordsFromMatch(match);
+    if (records.length === 0) return;
+    const pool = databasePool();
+    if (!pool) return;
+    await recordChampionMatchBuilds(pool, records);
   }
 
   private async recentMatchChampionsFromMatches(matches: RiotMatch[], puuid: string): Promise<LolRecentMatchChampion[]> {

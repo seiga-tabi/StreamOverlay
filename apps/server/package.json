@@ -18,6 +18,7 @@
     "db:migrate:plan": "tsx src/scripts/database-migrate.ts plan",
     "db:migrate:apply": "tsx src/scripts/database-migrate.ts apply",
     "db:audit": "tsx src/scripts/database-audit.ts",
+    "champion-build-stats:retention": "node dist/scripts/champion-build-stats-retention.js",
     "test:database": "node --test test-database/database-integration.test.mjs",
     "migrate:twitch-token-encryption": "tsx src/scripts/migrate-twitch-token-encryption.ts",
     "migrate:remove-tournament-state": "tsx src/scripts/remove-retired-tournament-state.ts",

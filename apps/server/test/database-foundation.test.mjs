@@ -47,7 +47,8 @@ test("migration manifest와 SQL checksum을 strict하게 검증한다", async ()
       "0023_reaction_records",
       "0024_streamer_board",
       "0025_admin_audit_admin_access",
-      "0026_streamer_official_profiles"
+      "0026_streamer_official_profiles",
+      "0027_champion_global_build_stats"
     ]
   );
 
@@ -114,6 +115,23 @@ test("0022 Twitch Extension 설정은 계정·채널 소유권과 허용값을 D
   assert.match(sql, /inactive_behavior IN \('hide', 'message'\)/u);
   assert.match(sql, /extension_type IN \('panel', 'overlay'\)/u);
   assert.match(sql, /revision BIGINT NOT NULL DEFAULT 1 CHECK \(revision >= 1\)/u);
+});
+
+test("0027 챔피언 글로벌 빌드는 매치 참가자 중복과 보존 조회 경계를 선언한다", () => {
+  const sql = readFileSync(
+    path.join(migrationsRoot, "0027_champion_global_build_stats.sql"),
+    "utf8"
+  );
+  assert.match(sql, /CREATE TABLE lol_champion_match_builds/u);
+  assert.match(sql, /UNIQUE \(match_id, puuid\)/u);
+  assert.match(
+    sql,
+    /lol_champion_match_builds_lookup_idx\s+ON lol_champion_match_builds \(champion_id, team_position, queue_id, patch\)/u
+  );
+  assert.match(
+    sql,
+    /lol_champion_match_builds_created_idx\s+ON lol_champion_match_builds \(match_created_at\)/u
+  );
 });
 
 test("migration check는 빈 Database를 변경하지 않고 pending으로 판정한다", async () => {

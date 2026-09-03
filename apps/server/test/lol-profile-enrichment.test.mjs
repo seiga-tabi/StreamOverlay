@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 const { DataDragonService } = await import("../dist/services/data-dragon.js");
-const { buildRankHistory, buildRankHistoryByQueue, inferMainRoleFromMatches, LolProfileEnrichmentService, performanceStatsFromMatches } = await import("../dist/services/lol-profile-enrichment.js");
+const { buildRankHistory, buildRankHistoryByQueue, championMatchBuildRecordsFromMatch, inferMainRoleFromMatches, LolProfileEnrichmentService, performanceStatsFromMatches } = await import("../dist/services/lol-profile-enrichment.js");
 const { LocalJsonLolProfileRepository } = await import("../dist/services/lol-profile-store.js");
 const { RiotApiHttpError } = await import("../dist/services/riot-api.js");
 
@@ -335,6 +335,78 @@ test("최근 경기 기반 performance stats는 평균 KDA 지표만 집계한�
     kda: 4.5
   });
   assert.equal(performanceStatsFromMatches(matches, "missing"), undefined);
+});
+
+test("매치 빌드 부산물은 프로필 소유자뿐 아니라 유효한 참가자 전원을 매핑한다", () => {
+  const match = {
+    metadata: { matchId: "KR_123", participants: ["owner", "other", "invalid"] },
+    info: {
+      queueId: 420,
+      gameVersion: "14.18.567.1234",
+      gameCreation: Date.parse("2026-06-16T01:02:03.000Z"),
+      participants: [
+        {
+          puuid: "owner",
+          championId: 103,
+          teamPosition: "MIDDLE",
+          win: true,
+          summoner1Id: 4,
+          summoner2Id: 14,
+          item0: 1001,
+          item1: 3157,
+          item6: 3340,
+          perks: {
+            styles: [
+              { style: 8100, selections: [{ perk: 8112 }] },
+              { style: 8300, selections: [{ perk: 8345 }] }
+            ]
+          }
+        },
+        {
+          puuid: "other",
+          championId: 266,
+          individualPosition: "TOP",
+          win: false
+        },
+        {
+          puuid: "invalid",
+          championId: 238,
+          teamPosition: "MIDDLE"
+        }
+      ]
+    }
+  };
+
+  const records = championMatchBuildRecordsFromMatch(match);
+  assert.equal(records.length, 2);
+  assert.deepEqual(records[0], {
+    matchId: "KR_123",
+    puuid: "owner",
+    championId: 103,
+    teamPosition: "MIDDLE",
+    queueId: 420,
+    patch: "14.18",
+    win: true,
+    observedTier: undefined,
+    keystonePerkId: 8112,
+    primaryStyleId: 8100,
+    subStyleId: 8300,
+    summonerSpell1: 4,
+    summonerSpell2: 14,
+    items: [1001, 3157, undefined, undefined, undefined, undefined],
+    matchCreatedAt: "2026-06-16T01:02:03.000Z"
+  });
+  assert.equal(records[1].puuid, "other");
+  assert.equal(records[1].teamPosition, "TOP");
+  assert.equal(records[1].win, false);
+  assert.deepEqual(championMatchBuildRecordsFromMatch({
+    ...match,
+    info: { ...match.info, queueId: undefined }
+  }), []);
+  assert.deepEqual(championMatchBuildRecordsFromMatch({
+    ...match,
+    info: { ...match.info, gameVersion: "invalid" }
+  }), []);
 });
 
 test("LolProfileEnrichmentService는 fresh cache hit를 즉시 반환하고 miss는 undefined를 반환한다", () => {

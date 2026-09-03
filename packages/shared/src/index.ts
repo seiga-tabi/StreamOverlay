@@ -7,6 +7,7 @@ export * from "./discord-bot-messages.js";
 export * from "./bot-management.js";
 export * from "./events.js";
 export * from "./followers.js";
+export * from "./lol-champion-build-stats.js";
 export * from "./lol-platform.js";
 export * from "./minecraft.js";
 export * from "./palworld.js";

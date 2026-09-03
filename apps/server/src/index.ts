@@ -77,6 +77,7 @@ import { DiscordBotCommandPolicyService } from "./services/discord-bot-command-p
 import { AdminAuditLogRepository } from "./database/repositories/admin-audit-log-repository.js";
 import { TwitchExtensionSettingsRepository } from "./database/repositories/twitch-extension-settings-repository.js";
 import { ReactionRecordsRepository } from "./database/repositories/reaction-records-repository.js";
+import { createChampionBuildStatsReader } from "./database/repositories/champion-build-stats-repository.js";
 import { StreamerBoardRepository } from "./database/repositories/streamer-board-repository.js";
 import { TwitchExtensionJwtVerifier } from "./security/twitch-extension-jwt.js";
 import {
@@ -152,6 +153,10 @@ const twitchExtensionSettings = postgresPool
 /* DB 가 없으면 undefined — 라우트가 503 을 내고 프런트는 기록 UI 를 숨깁니다. */
 const reactionRecords = postgresPool
   ? new ReactionRecordsRepository(postgresPool)
+  : undefined;
+/* DB 가 없으면 undefined — /api/lol/champion-build-stats 가 503 을 냅니다. */
+const championBuildStats = postgresPool
+  ? createChampionBuildStatsReader(postgresPool)
   : undefined;
 /* DB 가 없으면 undefined — 라우트가 503 을 내고 프런트는 "준비 중" 화면으로 닫습니다. */
 const streamerBoard = postgresPool
@@ -725,6 +730,7 @@ const server = http.createServer(createHttpHandler({
   dataDragon,
   profileRepository: lolProfileRepository,
   publicLolSnapshotStore,
+  championBuildStats,
   twitchAuth,
   streamerFollowerAuth,
   publicTwitchAuth,

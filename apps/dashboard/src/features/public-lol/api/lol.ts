@@ -1,5 +1,10 @@
 import { apiBase } from "../../../api/client";
-import { parsePublicLolMatchRankResponse, type LolPlatformId } from "@streamops/shared";
+import {
+  parsePublicLolMatchRankResponse,
+  type LolChampionBuildStatsPosition,
+  type LolChampionBuildStatsResponse,
+  type LolPlatformId
+} from "@streamops/shared";
 import { t } from "../i18n/public-lol-i18n";
 import type {
   MatchQueueFilter,
@@ -216,6 +221,33 @@ export async function getPublicLolMatchBuild(matchId: string): Promise<PublicLol
   });
   if (!response.ok) throw new Error(await readPublicApiErrorMessage(response));
   return (await response.json()) as PublicLolMatchBuildResponse;
+}
+
+/* 챔피언 글로벌 빌드 통계 — 플랫폼 무관 전역 집계라 platform 을 보내지 않습니다.
+   patch 는 서버가 최신 패치로 정합니다(요청 파라미터 없음). */
+export async function fetchChampionBuildStats(
+  championId: number,
+  teamPosition: LolChampionBuildStatsPosition,
+  options: { queueId?: number; signal?: AbortSignal } = {}
+): Promise<LolChampionBuildStatsResponse> {
+  const params = new URLSearchParams({ championId: String(championId), teamPosition });
+  if (options.queueId !== undefined) params.set("queueId", String(options.queueId));
+  const response = await fetch(`${apiBase}/api/lol/champion-build-stats?${params.toString()}`, {
+    credentials: "include",
+    signal: options.signal
+  });
+  if (!response.ok) throw new Error(await readPublicApiErrorMessage(response));
+  const body: unknown = await response.json();
+  if (
+    typeof body !== "object"
+    || body === null
+    || typeof (body as { championId?: unknown }).championId !== "number"
+    || typeof (body as { totalGames?: unknown }).totalGames !== "number"
+    || typeof (body as { sampleInsufficient?: unknown }).sampleInsufficient !== "boolean"
+  ) {
+    throw new Error(t().globalBuildStatsErrorTitle);
+  }
+  return body as LolChampionBuildStatsResponse;
 }
 
 export async function getPublicLolMatchDetail(

@@ -11,6 +11,11 @@ import {
   inspectMigrationState
 } from "../dist/database/migration-runner.js";
 import { EntitlementRepository } from "../dist/database/repositories/entitlement-repository.js";
+import {
+  countChampionMatchBuildsOlderThan,
+  deleteChampionMatchBuildsOlderThan,
+  recordChampionMatchBuilds
+} from "../dist/database/repositories/champion-build-stats-repository.js";
 import { DiscordOnboardingRepository } from "../dist/database/repositories/discord-onboarding-repository.js";
 import { DiscordManagementRepository } from "../dist/database/repositories/discord-management-repository.js";
 import { DiscordBotControlRepository } from "../dist/database/repositories/discord-bot-control-repository.js";
@@ -107,6 +112,61 @@ test("PostgreSQL migration과 tenant 격리를 실제 Database에서 검증한�
         dirty: false
       }))
     );
+  });
+
+  await t.test("챔피언 빌드는 재관측을 무시하고 cutoff 이전 행만 삭제한다", async () => {
+    const oldRecord = {
+      matchId: "KR_test_old",
+      puuid: "test-puuid-old",
+      championId: 103,
+      teamPosition: "MIDDLE",
+      queueId: 420,
+      patch: "14.18",
+      win: true,
+      keystonePerkId: 8112,
+      primaryStyleId: 8100,
+      subStyleId: 8300,
+      summonerSpell1: 4,
+      summonerSpell2: 14,
+      items: [1001, 3157, 3089, undefined, undefined, undefined],
+      matchCreatedAt: "2026-05-31T23:59:59.999Z"
+    };
+    const boundaryRecord = {
+      ...oldRecord,
+      matchId: "KR_test_boundary",
+      puuid: "test-puuid-boundary",
+      championId: 266,
+      items: [1055, 3071, undefined, undefined, undefined, undefined],
+      matchCreatedAt: "2026-06-01T00:00:00.000Z"
+    };
+
+    await recordChampionMatchBuilds(pool, [oldRecord, boundaryRecord]);
+    await recordChampionMatchBuilds(pool, [{
+      ...oldRecord,
+      items: [9999, undefined, undefined, undefined, undefined, undefined]
+    }]);
+
+    const stored = await pool.query(
+      `SELECT match_id, item_0
+         FROM lol_champion_match_builds
+        WHERE match_id LIKE 'KR_test_%'
+        ORDER BY match_id`
+    );
+    assert.deepEqual(stored.rows, [
+      { match_id: "KR_test_boundary", item_0: 1055 },
+      { match_id: "KR_test_old", item_0: 1001 }
+    ]);
+
+    const cutoff = "2026-06-01T00:00:00.000Z";
+    assert.equal(await countChampionMatchBuildsOlderThan(pool, cutoff), 1);
+    assert.equal(await deleteChampionMatchBuildsOlderThan(pool, cutoff), 1);
+    const remaining = await pool.query(
+      `SELECT match_id
+         FROM lol_champion_match_builds
+        WHERE match_id LIKE 'KR_test_%'
+        ORDER BY match_id`
+    );
+    assert.deepEqual(remaining.rows, [{ match_id: "KR_test_boundary" }]);
   });
 
   await t.test("전역 관리자 감사 로그는 started insert와 단방향 finalize만 허용한다", async () => {

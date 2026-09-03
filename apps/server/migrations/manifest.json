@@ -208,6 +208,14 @@
       "checksumSha256": "121e30dd1b9f0565a87c27a1958aac976aec5b023b9d8aa7b34c3d15aebc316f",
       "destructive": false,
       "transaction": true
+    },
+    {
+      "id": "0027_champion_global_build_stats",
+      "file": "0027_champion_global_build_stats.sql",
+      "description": "프로필 조회 매치 부산물 기반 챔피언 글로벌 빌드 스냅샷",
+      "checksumSha256": "62b24680cda2057bc51e926d79725d5e2a00df005161d9a2c8768aea70d4b734",
+      "destructive": false,
+      "transaction": true
     }
   ]
 }

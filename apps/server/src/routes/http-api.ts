@@ -164,7 +164,16 @@ import {
   type LolGameMonitorConfig
 } from "../modules/lol-game-monitor.module.js";
 import { loadLolParticipationProfileSettings, saveLolParticipationProfileSettings, type LolParticipationProfileSettings } from "../modules/lol-profile-enrichment.module.js";
-import { buildRankHistoryByQueue, inferMainRoleFromMatches, performanceStatsFromMatches } from "../services/lol-profile-enrichment.js";
+import { buildRankHistoryByQueue, inferMainRoleFromMatches, normalizedMatchPatch, performanceStatsFromMatches } from "../services/lol-profile-enrichment.js";
+import type { ChampionBuildStatsReader } from "../database/repositories/champion-build-stats-repository.js";
+import {
+  LOL_CHAMPION_BUILD_STATS_DEFAULT_QUEUE_ID,
+  LOL_CHAMPION_BUILD_STATS_MIN_TOTAL_GAMES,
+  isLolChampionBuildStatsPosition,
+  type LolChampionBuildStatsAsset,
+  type LolChampionBuildStatsPosition,
+  type LolChampionBuildStatsResponse
+} from "@streamops/shared";
 import type { JsonlLogger } from "../logging/jsonl-logger.js";
 import type { TwitchExtensionSettingsRepository } from "../database/repositories/twitch-extension-settings-repository.js";
 import {
@@ -2647,6 +2656,9 @@ type HttpHandlerInput = {
   dataDragon?: DataDragonService;
   profileRepository?: LolProfileRepository;
   publicLolSnapshotStore?: PublicLolSnapshotStore;
+  /* 챔피언 글로벌 빌드 통계(migration 0027) 읽기. DB 가 없으면 undefined — 라우트가
+     503 을 내고 프런트는 오류 상태를 그립니다. */
+  championBuildStats?: ChampionBuildStatsReader;
   twitchAuth: TwitchAuthService;
   streamerFollowerAuth?: StreamerFollowerAuthService;
   publicTwitchAuth?: PublicTwitchAuthService;
@@ -3534,6 +3546,125 @@ async function profileIconUrl(dataDragon: DataDragonService | undefined, profile
 async function dataDragonLatestVersion(dataDragon: DataDragonService | undefined): Promise<string | undefined> {
   if (!dataDragon || typeof dataDragon.getLatestVersion !== "function") return undefined;
   return dataDragon.getLatestVersion().catch(() => undefined);
+}
+
+/* ── 챔피언 글로벌 빌드 통계(GET /api/lol/champion-build-stats) ──────────────
+ *
+ * DB 조회만 하고 Riot API 는 부르지 않습니다(rate limit 큐와 무관). 패치는 요청에서
+ * 받지 않고 Data Dragon 최신 버전에서 "X.Y" 를 뽑아 씁니다 — 수집 쪽
+ * (championMatchBuildRecordsFromMatch)과 같은 normalizedMatchPatch 규칙. */
+
+const PUBLIC_LOL_CHAMPION_BUILD_STATS_CACHE_CONTROL = "public, max-age=1800, stale-while-revalidate=3600";
+const PUBLIC_LOL_CHAMPION_BUILD_STATS_INPUT_INVALID = "LOL_CHAMPION_BUILD_STATS_INPUT_INVALID";
+
+type PublicLolChampionBuildStatsRequest = {
+  championId: number;
+  teamPosition: LolChampionBuildStatsPosition;
+  queueId: number;
+};
+
+function championBuildStatsInputError(message: string): HttpRequestError {
+  return new HttpRequestError(400, { error: message, code: PUBLIC_LOL_CHAMPION_BUILD_STATS_INPUT_INVALID });
+}
+
+function positiveIntegerParam(value: string | null): number | undefined {
+  if (value === null) return undefined;
+  const trimmed = value.trim();
+  if (!/^\d{1,6}$/u.test(trimmed)) return undefined;
+  const parsed = Number(trimmed);
+  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : undefined;
+}
+
+export function parsePublicLolChampionBuildStatsRequest(searchParams: URLSearchParams): PublicLolChampionBuildStatsRequest {
+  const championId = positiveIntegerParam(searchParams.get("championId"));
+  if (championId === undefined) throw championBuildStatsInputError("championId는 양의 정수여야 합니다.");
+  const teamPosition = searchParams.get("teamPosition");
+  if (!isLolChampionBuildStatsPosition(teamPosition)) {
+    throw championBuildStatsInputError("teamPosition은 TOP, JUNGLE, MIDDLE, BOTTOM, UTILITY 중 하나여야 합니다.");
+  }
+  const queueId = searchParams.has("queueId")
+    ? positiveIntegerParam(searchParams.get("queueId"))
+    : LOL_CHAMPION_BUILD_STATS_DEFAULT_QUEUE_ID;
+  if (queueId === undefined) throw championBuildStatsInputError("queueId는 양의 정수여야 합니다.");
+  return { championId, teamPosition, queueId };
+}
+
+function buildStatsAsset(entry: { runeId?: number; itemId?: number; nameKo?: string; nameJa?: string; nameEn?: string; iconUrl?: string }, id: number): LolChampionBuildStatsAsset {
+  return {
+    id,
+    ...(entry.nameKo ? { nameKo: entry.nameKo } : {}),
+    ...(entry.nameJa ? { nameJa: entry.nameJa } : {}),
+    ...(entry.nameEn ? { nameEn: entry.nameEn } : {}),
+    ...(entry.iconUrl ? { iconUrl: entry.iconUrl } : {})
+  };
+}
+
+async function buildPublicLolChampionBuildStats(
+  input: Pick<HttpHandlerInput, "championBuildStats" | "dataDragon">,
+  request: PublicLolChampionBuildStatsRequest
+): Promise<LolChampionBuildStatsResponse> {
+  if (!input.championBuildStats) {
+    throw new HttpRequestError(503, { error: "챔피언 빌드 통계를 사용할 수 없습니다.", code: "LOL_CHAMPION_BUILD_STATS_UNAVAILABLE" });
+  }
+  const dataDragonVersion = await dataDragonLatestVersion(input.dataDragon);
+  const patch = normalizedMatchPatch(dataDragonVersion);
+  if (!patch) {
+    throw new HttpRequestError(503, { error: "현재 패치 정보를 확인할 수 없습니다.", code: "LOL_CHAMPION_BUILD_STATS_PATCH_UNAVAILABLE" });
+  }
+
+  let stats: Awaited<ReturnType<ChampionBuildStatsReader["query"]>>;
+  try {
+    stats = await input.championBuildStats.query({ ...request, patch });
+  } catch (error) {
+    if (error instanceof SafeDatabaseError) {
+      throw new HttpRequestError(503, { error: "챔피언 빌드 통계를 사용할 수 없습니다.", code: "LOL_CHAMPION_BUILD_STATS_UNAVAILABLE" });
+    }
+    throw error;
+  }
+
+  const base = {
+    championId: request.championId,
+    teamPosition: request.teamPosition,
+    queueId: request.queueId,
+    patch,
+    ...(dataDragonVersion ? { dataDragonVersion } : {}),
+    totalGames: stats.totalGames,
+    positions: stats.positions,
+    updatedAt: new Date().toISOString()
+  };
+  if (stats.totalGames < LOL_CHAMPION_BUILD_STATS_MIN_TOTAL_GAMES) {
+    return { ...base, sampleInsufficient: true };
+  }
+
+  /* 룬/아이템 표시 정보는 부가 정보라 Data Dragon 이 흔들려도 id 만으로 응답합니다. */
+  const runeIds = [...new Set(stats.runeGroups.flatMap((group) => [group.keystonePerkId, group.primaryStyleId, group.subStyleId]).filter((id) => id > 0))];
+  const itemIds = [...new Set(stats.itemGroups.flatMap((group) => group.itemIds))];
+  const [runeSummaries, itemSummaries] = await Promise.all([
+    input.dataDragon && runeIds.length > 0 ? input.dataDragon.mapRuneSummaries(runeIds, dataDragonVersion).catch(() => []) : Promise.resolve([]),
+    input.dataDragon && itemIds.length > 0 ? input.dataDragon.mapItemSummaries(itemIds, dataDragonVersion).catch(() => []) : Promise.resolve([])
+  ]);
+  const runeById = new Map(runeSummaries.map((rune) => [rune.runeId, buildStatsAsset(rune, rune.runeId)]));
+  const itemById = new Map(itemSummaries.map((item) => [item.itemId, buildStatsAsset(item, item.itemId)]));
+
+  return {
+    ...base,
+    sampleInsufficient: false,
+    winRate: Math.round((stats.wins / stats.totalGames) * 1000) / 10,
+    runeGroups: stats.runeGroups.map((group) => ({
+      ...group,
+      ...(runeById.has(group.keystonePerkId) ? { keystone: runeById.get(group.keystonePerkId) } : {}),
+      ...(runeById.has(group.primaryStyleId) ? { primaryStyle: runeById.get(group.primaryStyleId) } : {}),
+      ...(runeById.has(group.subStyleId) ? { subStyle: runeById.get(group.subStyleId) } : {})
+    })),
+    itemGroups: stats.itemGroups.map((group) => ({
+      ...group,
+      items: group.itemIds.map((itemId) => itemById.get(itemId) ?? { id: itemId })
+    })),
+    spellGroups: stats.spellGroups,
+    otherRuneGames: stats.otherRuneGames,
+    otherItemGames: stats.otherItemGames,
+    otherSpellGames: stats.otherSpellGames
+  };
 }
 
 async function dataDragonVersionForMatch(
@@ -12898,6 +13029,13 @@ export function createHttpHandler(input: HttpHandlerInput) {
           url.searchParams.get("riotId") ?? ""
         );
         return sendJson(req, res, 200, detail, publicLolCacheHeaders("match-detail", detail, "public, max-age=300, stale-while-revalidate=1800"));
+      }
+      if (req.method === "GET" && url.pathname === "/api/lol/champion-build-stats") {
+        /* 플랫폼(서버) 파라미터는 받지 않습니다 — 전 서버 누적 전역 집계. updatedAt 이
+           매 응답마다 달라 ETag 는 붙이지 않고 Cache-Control 만 보냅니다. */
+        const request = parsePublicLolChampionBuildStatsRequest(url.searchParams);
+        const stats = await buildPublicLolChampionBuildStats(input, request);
+        return sendJson(req, res, 200, stats, { "Cache-Control": PUBLIC_LOL_CHAMPION_BUILD_STATS_CACHE_CONTROL });
       }
       if (req.method === "GET" && url.pathname === "/api/lol/suggestions") {
         const routing = publicLolRouting(url.searchParams.get("platform"), input.riot);
