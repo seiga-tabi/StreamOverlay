@@ -551,6 +551,32 @@ function roleIconKey(role: string | undefined): PublicRoleIconKey {
   return "unknown";
 }
 
+type MatchScoreRoleKey = "top" | "jungle" | "mid" | "bottom" | "support" | "default";
+
+const MATCH_SCORE_ROLE_COEFFICIENTS: Record<MatchScoreRoleKey, {
+  kda: number;
+  killParticipation: number;
+  cs: number;
+  damage: number;
+  vision: number;
+}> = {
+  top: { kda: 5.00, killParticipation: 0.271, cs: 1.30, damage: 0.325, vision: 5.20 },
+  jungle: { kda: 4.64, killParticipation: 0.210, cs: 1.88, damage: 0.433, vision: 3.71 },
+  mid: { kda: 4.48, killParticipation: 0.224, cs: 1.18, damage: 0.289, vision: 5.20 },
+  bottom: { kda: 4.19, killParticipation: 0.224, cs: 1.12, damage: 0.269, vision: 5.20 },
+  support: { kda: 4.82, killParticipation: 0.217, cs: 7.50, damage: 0.709, vision: 2.17 },
+  /* position이 없거나 fill/unknown 등 5라인에 매칭되지 않으면 기존 공통 계수로
+     폴백해 구버전 데이터의 점수 동작을 그대로 보존한다. */
+  default: { kda: 3.33, killParticipation: 0.20, cs: 1.15, damage: 0.30, vision: 2.2 },
+};
+
+function matchScoreRole(position: string | undefined): MatchScoreRoleKey {
+  const key = roleIconKey(position);
+  return key === "top" || key === "jungle" || key === "mid" || key === "bottom" || key === "support"
+    ? key
+    : "default";
+}
+
 function RoleIcon({ role }: { role: string | undefined }) {
   const icon = roleIconKey(role);
   const iconSrc = roleIconAssets[icon];
@@ -1088,11 +1114,12 @@ function clampScore(value: number): number {
 
 export function matchAiScore(match: PublicLolRecentMatch): number {
   const resultScore = match.result === "win" ? 22 : match.result === "loss" ? 4 : 12;
-  const kdaScore = Math.min(20, match.kda * 3.33);
-  const killParticipationScore = Math.min(20, (match.killParticipation ?? 0) * .20);
-  const csScore = Math.min(15, (match.csPerMinute ?? 0) * 1.15);
-  const damageScore = Math.min(12, (match.damageShare ?? 0) * .30);
-  const visionScore = Math.min(8, (match.visionScorePerMinute ?? 0) * 2.2);
+  const roleCoef = MATCH_SCORE_ROLE_COEFFICIENTS[matchScoreRole(match.position)];
+  const kdaScore = Math.min(20, match.kda * roleCoef.kda);
+  const killParticipationScore = Math.min(20, (match.killParticipation ?? 0) * roleCoef.killParticipation);
+  const csScore = Math.min(15, (match.csPerMinute ?? 0) * roleCoef.cs);
+  const damageScore = Math.min(12, (match.damageShare ?? 0) * roleCoef.damage);
+  const visionScore = Math.min(8, (match.visionScorePerMinute ?? 0) * roleCoef.vision);
   const baseScore = resultScore + kdaScore + killParticipationScore + csScore + damageScore + visionScore;
 
   /* 데스는 더 이상 baseScore에서 직접 빼지 않는다(KDA가 이미 나눗셈으로 반영 중이라

@@ -14,6 +14,7 @@ type MatchAiScoreScenario = Pick<
   | "csPerMinute"
   | "damageShare"
   | "visionScorePerMinute"
+  | "position"
 >;
 
 const scenarios: Array<{
@@ -110,6 +111,69 @@ const scenarios: Array<{
       visionScorePerMinute: 0.4,
     },
     expectedScore: 8,
+  },
+  {
+    name: "G 원딜 낮은KDA낮은시야(프로스타일, Peyz 실측 기준)",
+    match: {
+      position: "BOTTOM",
+      result: "win",
+      kills: 5,
+      deaths: 6,
+      assists: 8,
+      kda: 2.17,
+      killParticipation: 56,
+      csPerMinute: 8.9,
+      damageShare: 28.5,
+      visionScorePerMinute: 0.94,
+    },
+    expectedScore: 66,
+  },
+  {
+    name: "H 서포터 시야낮음",
+    match: {
+      position: "UTILITY",
+      result: "loss",
+      kills: 2,
+      deaths: 5,
+      assists: 10,
+      kda: 2.4,
+      killParticipation: 45,
+      csPerMinute: 1.0,
+      damageShare: 8,
+      visionScorePerMinute: 0.8,
+    },
+    expectedScore: 40,
+  },
+  {
+    name: "I 서포터 시야높음",
+    match: {
+      position: "UTILITY",
+      result: "win",
+      kills: 3,
+      deaths: 3,
+      assists: 12,
+      kda: 5.0,
+      killParticipation: 65,
+      csPerMinute: 1.5,
+      damageShare: 12,
+      visionScorePerMinute: 3.5,
+    },
+    expectedScore: 83,
+  },
+  {
+    name: "J position 없음(폴백 확인, 기존 C시나리오와 동일 스탯)",
+    match: {
+      result: "win",
+      kills: 6,
+      deaths: 8,
+      assists: 6,
+      kda: 1.5,
+      killParticipation: 55,
+      csPerMinute: 7,
+      damageShare: 22,
+      visionScorePerMinute: 1.0,
+    },
+    expectedScore: 55,
   },
 ];
 
