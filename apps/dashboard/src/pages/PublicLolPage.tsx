@@ -1086,15 +1086,32 @@ function clampScore(value: number): number {
   return Math.max(0, Math.min(100, Math.round(value)));
 }
 
-function matchAiScore(match: PublicLolRecentMatch): number {
+export function matchAiScore(match: PublicLolRecentMatch): number {
   const resultScore = match.result === "win" ? 22 : match.result === "loss" ? 4 : 12;
   const kdaScore = Math.min(20, match.kda * 3.33);
   const killParticipationScore = Math.min(20, (match.killParticipation ?? 0) * .20);
   const csScore = Math.min(15, (match.csPerMinute ?? 0) * 1.15);
   const damageScore = Math.min(12, (match.damageShare ?? 0) * .30);
   const visionScore = Math.min(8, (match.visionScorePerMinute ?? 0) * 2.2);
-  const deathPenalty = Math.min(10, (match.deaths ?? 0) * 0.9);
-  return clampScore(resultScore + kdaScore + killParticipationScore + csScore + damageScore + visionScore - deathPenalty);
+  const baseScore = resultScore + kdaScore + killParticipationScore + csScore + damageScore + visionScore;
+
+  /* 데스는 더 이상 baseScore에서 직접 빼지 않는다(KDA가 이미 나눗셈으로 반영 중이라
+     기존 deathPenalty와 이중 차감이었음). 대신 "평범한 데스는 무감점, 과다한 데스만
+     비율로 감점하되 킬+어시(테이크다운)로 열심히 싸웠는지를 반영해 상쇄"하는 생존
+     배율을 곱한다 — 같은 데스 수라도 "캐리하다 죽음"과 "방치/포기"를 구분한다. */
+  const deathFreeThreshold = 6;
+  const engageOffsetDivisor = 2;
+  const excessDeathDecay = 0.04;
+  const survivalFactorFloor = 0.7;
+
+  const deaths = match.deaths ?? 0;
+  const takedowns = (match.kills ?? 0) + (match.assists ?? 0);
+  const excessDeaths = Math.max(0, deaths - deathFreeThreshold);
+  const engageOffset = Math.floor(takedowns / engageOffsetDivisor);
+  const effectiveExcessDeaths = Math.max(0, excessDeaths - engageOffset);
+  const survivalFactor = Math.max(survivalFactorFloor, 1 - effectiveExcessDeaths * excessDeathDecay);
+
+  return clampScore(baseScore * survivalFactor);
 }
 
 function recentAnalysisMatches(profile: PublicLolProfile): PublicLolRecentMatch[] {
