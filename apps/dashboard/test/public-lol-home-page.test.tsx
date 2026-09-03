@@ -38,7 +38,7 @@ test("LoL 홈 헤더의 게임 트리거는 '리그 오브 레전드' 활성 상
   assert.doesNotMatch(html, /aria-current="page"/u);
 });
 
-test("2행 LoL 메뉴는 실제 5항목(홈·스트리머·시청자 참여·증강 칼바람·패치노트)이고 홈은 LoL 홈으로 간다", () => {
+test("2행 LoL 메뉴는 실제 5항목(홈·팔로우·시청자 참여·증강 칼바람·패치노트)이고 홈은 LoL 홈으로 간다", () => {
   const html = renderToStaticMarkup(<LolSubnav text={lolHomeI18n.ko} />);
   assert.match(html, /yoro-lol-subnav/u);
   assert.match(html, /yoro-lol-subnav-tail/u);
@@ -46,7 +46,7 @@ test("2행 LoL 메뉴는 실제 5항목(홈·스트리머·시청자 참여·증
   assert.match(html, /href="\/ko\/lol"/u);
   assert.match(html, />홈</u);
   assert.match(html, /\/follow/u);
-  assert.match(html, /스트리머/u);
+  assert.match(html, /팔로우/u);
   assert.match(html, /\/participation/u);
   assert.match(html, /시청자 참여/u);
   assert.match(html, /\/lol\/aram/u);
@@ -93,7 +93,7 @@ test("LoL 모바일 하단 탭바는 실서비스 5탭 구성(축약 라벨)으�
   /* 모바일에선 헤더 nav 가 숨겨지므로 홈 탭이 메인 홈(/)으로 가는 유일한 경로입니다. */
   assert.match(html, /href="\/ko\/"/u);
   assert.match(html, />홈</u);
-  assert.match(html, /스트리머/u);
+  assert.match(html, /팔로우/u);
   /* 모바일 탭은 실서비스 탭바와 같은 축약 라벨(참여·칼바람)을 씁니다. */
   assert.match(html, />참여</u);
   assert.match(html, />칼바람</u);

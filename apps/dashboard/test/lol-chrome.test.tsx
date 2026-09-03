@@ -40,7 +40,7 @@ test("LolChrome 은 1행 헤더와 2행 LoL 메뉴를 yoro-home-chrome 래퍼 �
 });
 
 test("다섯 active 값 각각에서 2행 항목이 5개·순서 고정이고 활성이 정확히 하나다", () => {
-  const order = ["홈", "스트리머", "시청자 참여", "증강 칼바람", "패치노트"];
+  const order = ["홈", "팔로우", "시청자 참여", "증강 칼바람", "패치노트"];
   const actives: LolSubnavItem[] = ["home", "streamers", "participation", "aram", "patchNotes"];
   for (const active of actives) {
     const html = renderChrome(active);
