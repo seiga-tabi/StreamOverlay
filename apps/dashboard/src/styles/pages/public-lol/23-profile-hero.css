@@ -1194,30 +1194,40 @@
 
   /* 레이아웃용 래퍼는 컴팩트 뷰에서 박스를 만들지 않아 기존 세로 배치를 보존합니다. */
   .public-hero-rank-text { display: contents; }
+  .public-hero-rank-identity { display: contents; }
 
-  /* 승인된 After B — 일반 뷰에서 크레스트와 텍스트 블록을 가로로 배치합니다.
+  /* 승인된 After B — 일반 뷰에서 크레스트와 티어 정보를 위쪽에 배치합니다.
      has-cast 전용 규칙은 건드리지 않고 컴팩트 뷰를 계속 세로로 유지합니다. */
   .public-profile-hero-top:not(.has-cast) .public-hero-rank-main {
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 1rem;
-    text-align: left;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .875rem;
+  }
+
+  .public-profile-hero-top:not(.has-cast) .public-hero-rank-main .public-hero-rank-identity {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    align-self: stretch;
+    gap: .375rem;
   }
 
   .public-profile-hero-top:not(.has-cast) .public-hero-rank-main .public-profile-hero-crest {
     width: 8.75rem;
     height: 8.75rem;
     flex: none;
+    align-self: center;
   }
 
   .public-profile-hero-top:not(.has-cast) .public-hero-rank-main .public-hero-rank-text {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    text-align: left;
-    gap: .5rem;
-    min-width: 0;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    padding-top: .75rem;
+    border-top: .5px solid var(--public-gray-border, var(--yoro-color-border-on-dark));
   }
 
   .public-profile-hero-top:not(.has-cast) .public-hero-rank-main .public-hero-rank-card-tier {
@@ -1234,6 +1244,11 @@
     flex-direction: column;
     align-items: flex-start;
     gap: .25rem;
+  }
+
+  .public-profile-hero-top:not(.has-cast) .public-hero-rank-main .public-profile-hero-goal {
+    flex: 1 1 auto;
+    max-width: none;
   }
 
   /* 한 줄 블록 공통(§4-A) — baseline 정렬이라 크기가 다른 두 값이 같은 밑선에 앉습니다. */

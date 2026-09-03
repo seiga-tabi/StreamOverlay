@@ -191,14 +191,14 @@ function RankQueuePanelBody({
   return (
     <div className="public-hero-rank-split">
       <div className="public-hero-rank-main">
-        <span className={`public-profile-hero-crest${queue.ranked ? "" : " is-unranked"}`}>
-          {queue.ranked
-            ? (queue.tierIconUrl
-              ? <img src={queue.tierIconUrl} alt="" />
-              : <b aria-hidden="true">{queue.tierFallbackLabel}</b>)
-            : <UnrankedCrestSilhouette />}
-        </span>
-        <div className="public-hero-rank-text">
+        <div className="public-hero-rank-identity">
+          <span className={`public-profile-hero-crest${queue.ranked ? "" : " is-unranked"}`}>
+            {queue.ranked
+              ? (queue.tierIconUrl
+                ? <img src={queue.tierIconUrl} alt="" />
+                : <b aria-hidden="true">{queue.tierFallbackLabel}</b>)
+              : <UnrankedCrestSilhouette />}
+          </span>
           {/* 구분점(·)은 DOM 요소가 아니라 두 번째 값의 ::before 입니다 — 로케일 문자열을 건드리지
               않고 CSS 로 켜고 끌 수 있으며, 값이 하나뿐인 언랭크 큐에서는 자동으로 사라집니다. */}
           <span className="public-hero-rank-line is-tier">
@@ -207,6 +207,8 @@ function RankQueuePanelBody({
               ? <span className="public-hero-rank-lp">{queue.leaguePointsLabel}</span>
               : null}
           </span>
+        </div>
+        <div className="public-hero-rank-text">
           {queue.ranked ? (
             <span className="public-hero-rank-line public-hero-rank-record">
               <span className="public-hero-rank-card-record">
