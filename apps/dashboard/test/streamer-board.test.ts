@@ -164,6 +164,7 @@ test("전적 프로필은 리그 오브 레전드 글에만 붙는다", () => {
   /* 서버는 티어 코드와 단계를 줍니다 — 표기는 다른 LoL 화면과 같은 규칙으로 만듭니다. */
   const lolProfile = {
     riotId: "밤톨#KR1", tier: "DIAMOND", rank: "II", leaguePoints: 42,
+    tierIconUrl: "/riot/ranked-emblems/diamond.png?v=ranked-emblems-1",
     winRate: 57.14, wins: 24, losses: 18,
     recentResults: ["win", "win", "loss", "win", "win", "win"],
   };
@@ -171,9 +172,22 @@ test("전적 프로필은 리그 오브 레전드 글에만 붙는다", () => {
   assert.equal(lolPost?.lolProfile?.tier, "Diamond II");
   /* 표기만 남기면 카드가 티어 엠블럼 색을 고를 수 없습니다 — 원본 코드와 LP도 보존합니다. */
   assert.equal(lolPost?.lolProfile?.tierCode, "DIAMOND");
+  assert.equal(lolPost?.lolProfile?.tierIconUrl, lolProfile.tierIconUrl);
   assert.equal(lolPost?.lolProfile?.leaguePoints, 42);
   assert.equal(lolPost?.lolProfile?.winRate, 57.1, "소수 한 자리로 고정합니다");
   assert.equal(lolPost?.lolProfile?.recentResults.length, 5, "최근 5경기까지");
+
+  for (const unsafeUrl of [
+    "http://evil.com/x.png",
+    "/riot/ranked-emblems/../../etc",
+    "/riot/ranked-emblems/diamond.png?next=https://evil.com",
+  ]) {
+    const parsed = parseStreamerPost({
+      ...basePost,
+      lolProfile: { ...lolProfile, tierIconUrl: unsafeUrl },
+    });
+    assert.equal(parsed?.lolProfile?.tierIconUrl, undefined, unsafeUrl);
+  }
 
   /* 모르는 티어 값은 전적을 통째로 버립니다 — 화면에 원문 코드를 노출하지 않습니다. */
   assert.equal(

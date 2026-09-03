@@ -31,6 +31,9 @@ declare global {
 }
 
 export function runtimeConfig(): StreamOpsRuntimeConfig {
+  /* SSR·정적 렌더 테스트에는 window 가 없습니다. 이때는 빌드 시 기본 설정을 쓰도록
+     빈 런타임 설정을 돌려주고, 브라우저에서는 기존 주입값을 그대로 우선합니다. */
+  if (typeof window === "undefined") return {};
   return window.__STREAMOPS_CONFIG__ ?? {};
 }
 

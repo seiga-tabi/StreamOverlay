@@ -32,6 +32,7 @@ const lolProfile = {
   riotId: "별빛수달#KR1",
   tier: "Diamond II",
   tierCode: "DIAMOND" as const,
+  tierIconUrl: "/riot/ranked-emblems/diamond.png?v=ranked-emblems-1",
   leaguePoints: 74,
   winRate: 57.6,
   wins: 132,
@@ -43,14 +44,16 @@ test("LoL 카드는 티어 엠블럼 슬롯과 정수 승률 게이지를 그린
   const html = renderToStaticMarkup(<StreamerPostCard post={post({ lolProfile })} text={text} />);
 
   /* 티어 색은 원본 코드로 고릅니다 — 표기 문자열로는 고를 수 없습니다. */
-  assert.match(html, /class="streamers-media" data-tier="diamond"/u);
-  assert.match(html, /streamers-media__tier">Diamond II</u);
-  assert.match(html, /streamers-media__lp">74 LP</u);
+  assert.match(html, /class="streamers-media v2-tier" data-tier="diamond"/u);
+  assert.match(html, /class="v2-tier__emblem" loading="lazy" src="http:\/\/localhost:3000\/riot\/ranked-emblems\/diamond\.png\?v=ranked-emblems-1"/u);
+  assert.match(html, /alt=""/u);
+  assert.match(html, /v2-tier__name">Diamond II</u);
+  assert.match(html, /v2-tier__lp">74 LP</u);
 
   /* 서버 winRate 는 정수라 소수 자리를 만들어 붙이지 않습니다(58.4% 는 나올 수 없는 값). */
-  assert.match(html, /streamers-rank-meter[\s\S]*?<b>58%<\/b>/u);
+  assert.match(html, /v2-meter[\s\S]*?v2-meter__pct">58%/u);
   assert.doesNotMatch(html, /57\.6%|58\.0%/u);
-  assert.match(html, /class="streamers-rank-bar"[^>]*style="width:58%"|width:58%/u);
+  assert.match(html, /class="v2-meter__bar"[^>]*style="width:58%"|width:58%/u);
   assert.match(html, /aria-label="승률 58%, 132승 94패"/u);
 
   /* 최근 경기 결과는 서버가 아직 싣지 않습니다 — 막대 자리를 빈 채로 두지 않습니다. */
@@ -69,6 +72,23 @@ test("전적이 없는 LoL 글은 빈 액자 대신 게임 마크와 이유를 �
   assert.doesNotMatch(html, /streamers-card__rank/u);
 });
 
+test("최근 폼·LIVE·투표 상태는 실제 데이터 개수와 상태값만큼 렌더링한다", () => {
+  const recentResults = ["win", "loss", "win"] as const;
+  const html = renderToStaticMarkup(
+    <StreamerPostCard
+      post={post({ live: true, voted: true, lolProfile: { ...lolProfile, recentResults } })}
+      text={text}
+    />
+  );
+  assert.match(html, /class="v2-vote" data-voted="true"/u);
+  assert.match(html, /class="v2-avatar v2b-avatar" data-live="true"/u);
+  assert.match(html, /class="v2-live"/u);
+  assert.match(html, /v2-form__label">최근 3/u);
+  assert.equal((html.match(/data-r=/gu) ?? []).length, 2, "승리 도트만 data-r=w를 갖습니다");
+  assert.equal((html.match(/v2-form__dots[\s\S]*?<i/gu) ?? []).length, 1);
+  assert.equal((html.match(/<i(?: data-r="w")?><\/i>/gu) ?? []).length, 3, "최근 경기 수만큼 도트를 그립니다");
+});
+
 test("타게임 글은 주 게임(첫 태그) 박스아트 자리를 쓰고 전적 힌트는 붙이지 않는다", () => {
   const html = renderToStaticMarkup(
     <StreamerPostCard post={post({ games: ["valorant", "palworld"], lolProfile: undefined })} text={text} />
@@ -78,19 +98,17 @@ test("타게임 글은 주 게임(첫 태그) 박스아트 자리를 쓰고 전�
   assert.doesNotMatch(html, /streamers-media__hint/u);
 });
 
-test("카드 그리드는 미디어 열을 갖고 좁은 화면 규칙이 슬롯을 함께 내린다", () => {
+test("카드는 승인된 2단 구조와 좁은 화면 재배치를 유지한다", () => {
   const css = readFileSync(
     new URL("../src/styles/pages/public-streamers/streamers-route.css", import.meta.url),
     "utf8"
   );
-  /* 5열 — 미디어는 고정 6rem 이라 본문(1fr)만 늘고 줄어듭니다. */
-  assert.match(css, /\.streamers-card \{[\s\S]*?grid-template-columns: 3\.5rem 3\.5rem minmax\(0, 1fr\) 6rem auto;/u);
-  /* 액자 비율은 박스아트 원본 285x380 입니다. */
-  assert.match(css, /\.streamers-media__frame \{[\s\S]*?aspect-ratio: 285 \/ 380;/u);
-  /* 좁은 화면 규칙에서 슬롯을 빠뜨리면 카드가 깨집니다(목업 §v2 경고). */
+  assert.match(css, /\.v2b-card__top \{[\s\S]*?display: flex;[\s\S]*?padding: 14px 16px 12px;/u);
+  assert.match(css, /\.v2b-card__strip \{[\s\S]*?border-top: \.5px solid var\(--home-line\);[\s\S]*?background: rgba\(255, 255, 255, \.015\);/u);
+  assert.match(css, /\.v2-meter__bar \{[\s\S]*?width: 132px;[\s\S]*?height: 7px;[\s\S]*?background: #454C58;/u);
   const narrow = css.slice(css.indexOf("@media (max-width: 47.5rem)"));
-  assert.match(narrow, /\.streamers-media \{[\s\S]*?grid-column: 1 \/ -1;/u);
-  assert.match(narrow, /\.streamers-media__frame \{ width: 3\.5rem; \}/u);
+  assert.match(narrow, /\.streamers-card\.v2b-card \{[\s\S]*?padding: 0;/u);
+  assert.match(narrow, /\.streamers-media\.v2-tier,[\s\S]*?grid-column: 1 \/ -1;/u);
 });
 
 test("게시판 톤은 홈 토큰·헤어라인·2~3px 라운드만 쓰고 보라 강조를 버렸다", () => {

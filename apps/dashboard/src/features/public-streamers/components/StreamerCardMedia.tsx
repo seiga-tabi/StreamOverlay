@@ -6,6 +6,7 @@
  * 실제 boxArtUrl 이 null 일 때 나오는 화면이 곧 이 그림입니다.
  */
 
+import { apiBase } from "../../../api/client";
 import { formatStreamersText, type StreamersText } from "../i18n/streamers-i18n";
 import type { StreamerGame, StreamerPost } from "../types/streamer-post";
 
@@ -63,7 +64,7 @@ function GameArt({ game }: { game: StreamerGame }) {
 /* 티어 메달 — 색은 [data-tier] 가 정합니다(23-profile-hero.css 의 --tier-color). */
 function TierEmblem() {
   return (
-    <svg aria-hidden="true" className="streamers-media__emblem" fill="none" stroke="currentColor" strokeLinejoin="round" viewBox="0 0 48 48">
+    <svg aria-hidden="true" className="streamers-media__emblem v2-tier__emblem" fill="none" stroke="currentColor" strokeLinejoin="round" viewBox="0 0 48 48">
       <circle cx="24" cy="24" r="20" strokeWidth="1" />
       <circle cx="24" cy="24" r="15.5" strokeWidth=".6" />
       <path d="M24 11.5 L33 24 L24 36.5 L15 24 Z" strokeWidth="1.4" />
@@ -72,17 +73,28 @@ function TierEmblem() {
   );
 }
 
+function assetUrl(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  if (/^https?:\/\//iu.test(url)) return url;
+  return `${apiBase}${url}`;
+}
+
 export function StreamerCardMedia({ post, text }: { post: StreamerPost; text: StreamersText }) {
   const lol = post.lolProfile;
   if (lol) {
+    const tierIconUrl = assetUrl(lol.tierIconUrl);
     return (
-      <div className="streamers-media" data-tier={lol.tierCode.toLowerCase()}>
-        <div className="streamers-media__frame"><TierEmblem /></div>
-        <div className="streamers-media__cap">
-          {/* 티어 이름 글자는 티어색이 아니라 본문색입니다 — 밝은 티어색은 라이트에서 무너집니다. */}
-          <span className="streamers-media__tier">{lol.tier}</span>
-          <span className="streamers-media__lp">{formatStreamersText(text.rankLp, { lp: lol.leaguePoints })}</span>
-        </div>
+      <div
+        className={`streamers-media v2-tier${lol.tierCode === "UNRANKED" ? " v2-tier--empty" : ""}`}
+        data-tier={lol.tierCode.toLowerCase()}
+      >
+        {tierIconUrl ? (
+          <img alt="" className="v2-tier__emblem" loading="lazy" src={tierIconUrl} />
+        ) : <TierEmblem />}
+        <span className="v2-tier__text">
+          <span className="v2-tier__name">{lol.tier}</span>
+          <span className="v2-tier__lp">{formatStreamersText(text.rankLp, { lp: lol.leaguePoints })}</span>
+        </span>
       </div>
     );
   }

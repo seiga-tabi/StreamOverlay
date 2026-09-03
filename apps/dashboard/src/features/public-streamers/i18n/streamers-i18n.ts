@@ -53,6 +53,7 @@ export const streamersI18n = {
     liveOfflineBody: "다음 방송은 채널에서 확인해 주세요.",
     soloRank: "솔로랭크",
     winsLosses: "{wins}승 {losses}패",
+    recentForm: "최근 {count}",
     recentGames: "최근 {count}경기",
     /* 승률 막대는 그림이라 값을 읽어 주지 않습니다 — 스크린 리더용 문장을 따로 둡니다. */
     winRateAria: "승률 {rate}%, {wins}승 {losses}패",
@@ -168,6 +169,7 @@ export const streamersI18n = {
     liveOfflineBody: "次回の配信はチャンネルでご確認ください。",
     soloRank: "ソロランク",
     winsLosses: "{wins}勝 {losses}敗",
+    recentForm: "直近 {count}",
     recentGames: "直近{count}試合",
     winRateAria: "勝率 {rate}%、{wins}勝 {losses}敗",
     rankLp: "{lp} LP",
@@ -277,6 +279,7 @@ export const streamersI18n = {
     liveOfflineBody: "Visit the channel for the next stream.",
     soloRank: "Solo queue",
     winsLosses: "{wins}W {losses}L",
+    recentForm: "Last {count}",
     recentGames: "Last {count} games",
     winRateAria: "{rate}% win rate, {wins}W {losses}L",
     rankLp: "{lp} LP",

@@ -9767,6 +9767,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       riotId: post.riotId,
       tier: stats.tier,
       ...(stats.rank ? { rank: stats.rank } : {}),
+      ...(stats.tierIconUrl ? { tierIconUrl: stats.tierIconUrl } : {}),
       leaguePoints: stats.leaguePoints,
       wins: stats.wins,
       losses: stats.losses,

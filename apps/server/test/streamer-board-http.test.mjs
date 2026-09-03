@@ -172,7 +172,7 @@ function fakeBoard(overrides = {}) {
 }
 
 /** 로그인 상태 두 가지를 각각 흉내 냅니다. */
-function handlerWith({ board = fakeBoard(), session } = {}) {
+function handlerWith({ board = fakeBoard(), riot, session } = {}) {
   const user = { id: "4211", login: "cookie", displayName: "쿠키맛젤리" };
   const yoroAccounts = session === "yoro"
     ? { async getTwitchAccessContext() { return { user, tokenExpiresAt: Date.now() + 60_000 }; } }
@@ -192,6 +192,7 @@ function handlerWith({ board = fakeBoard(), session } = {}) {
       actions: { async dispatchOne() {} },
       yoroAccounts,
       publicTwitchAuth,
+      riot,
       streamerBoard: board,
     }),
   };
@@ -212,12 +213,37 @@ test("게시판 경로는 공개로 통과시키고 세션 검사는 라우트�
 test("공식 프로필 고정 URL API는 관리자 등록 메타데이터와 기존 댓글을 함께 돌려준다", async () => {
   const { handler, board } = handlerWith();
   const result = await call(handler, "GET", "/api/public/streamers/profile/twitch/bamtol");
-  assert.equal(result.status, 200);
+  assert.equal(result.status, 200, result.raw);
   assert.equal(result.json.post.registeredByAdmin, true);
   assert.deepEqual(result.json.post.officialProfile, OFFICIAL_POST.officialProfile);
   assert.equal(result.json.post.channelUrl, POST.channelUrl, "공식 프로필 채널은 비로그인에도 공개됩니다");
   assert.equal(result.json.comments.length, 2);
   assert.ok(board.calls.some(([name]) => name === "findOfficialProfile"));
+});
+
+test("LoL 공식 프로필 응답은 Riot 티어 엠블럼의 자체 자산 경로를 보존한다", async () => {
+  const riot = {
+    isConfigured() { return true; },
+    routingStatus() { return { lolPlatform: "jp1" }; },
+    async getAccountByRiotId() { return { puuid: "puuid-bamtol" }; },
+    async getRankedStatsByPuuidWithoutSummoner() {
+      return {
+        queueType: "RANKED_SOLO_5x5",
+        tier: "DIAMOND",
+        rank: "II",
+        tierIconUrl: "/riot/ranked-emblems/diamond.png?v=ranked-emblems-1",
+        leaguePoints: 42,
+        wins: 24,
+        losses: 18,
+        winRate: 57,
+        fetchedAt: "2026-09-03T00:00:00.000Z",
+      };
+    },
+  };
+  const { handler } = handlerWith({ riot });
+  const result = await call(handler, "GET", "/api/public/streamers/profile/twitch/bamtol");
+  assert.equal(result.status, 200, result.raw);
+  assert.equal(result.json.post.lolProfile.tierIconUrl, "/riot/ranked-emblems/diamond.png?v=ranked-emblems-1");
 });
 
 test("관리자 공식 프로필 API는 생성·수정·비활성화를 지원하고 플랫폼별 라이브 정책을 강제한다", async () => {

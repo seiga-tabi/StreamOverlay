@@ -1,6 +1,7 @@
 import { getDashboardCsrfToken, runtimeConfig, setDashboardCsrfToken } from "../runtime-config";
 
-const API_BASE = runtimeConfig().apiBase ?? import.meta.env.VITE_API_BASE ?? "http://localhost:3000";
+/* Node 기반 SSR·컴포넌트 테스트에서는 Vite가 import.meta.env를 주입하지 않습니다. */
+const API_BASE = runtimeConfig().apiBase ?? import.meta.env?.VITE_API_BASE ?? "http://localhost:3000";
 
 export type DashboardStreamerProfileLink = {
   id: string;

@@ -790,6 +790,421 @@
     font-weight: 500;
   }
 
+  /* ── 승인안 After B: 아이덴티티 행 + 전적 스트립 ───────────── */
+  .streamers-card.v2b-card {
+    display: block;
+    padding: 0;
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+    background: var(--home-card);
+    overflow: hidden;
+  }
+
+  .streamers-card.v2b-card:hover { border-color: var(--home-stroke); }
+
+  .v2b-card__top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px 12px;
+  }
+
+  /* 추천 API가 없는 현재 계약에서는 표시 전용이며, voted 상태만 시각적으로 반영합니다. */
+  .v2-vote {
+    display: flex;
+    flex: 0 0 48px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    width: 48px;
+    padding: 7px 0;
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+    background: transparent;
+    color: var(--home-sub);
+    font-family: inherit;
+    cursor: default;
+  }
+
+  .v2-vote svg {
+    display: block;
+    width: 13px;
+    height: 13px;
+  }
+
+  .v2-vote strong {
+    color: var(--home-ink);
+    font-size: 16px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.15;
+  }
+
+  .v2-vote span {
+    color: var(--home-mid);
+    font-size: 10px;
+    letter-spacing: -.01em;
+  }
+
+  .v2-vote[data-voted="true"] {
+    border-color: var(--home-loss);
+    color: var(--home-loss);
+  }
+
+  .v2-avatar {
+    position: relative;
+    flex: 0 0 auto;
+  }
+
+  .v2b-avatar .streamers-avatar {
+    display: flex;
+    width: 56px;
+    height: 56px;
+  }
+
+  .v2-avatar[data-live="true"] .streamers-avatar { border: 1.5px solid var(--home-loss); }
+
+  .v2-live {
+    position: absolute;
+    bottom: -7px;
+    left: 50%;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 1px 5px;
+    border-radius: 2px;
+    background: var(--home-loss);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    white-space: nowrap;
+    transform: translateX(-50%);
+  }
+
+  .v2-live i {
+    display: block;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #fff;
+  }
+
+  .v2b-card__id {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+  }
+
+  .v2b-card__idline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .v2-name {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    line-height: 1.25;
+  }
+
+  .v2-name a {
+    color: var(--home-ink);
+    text-decoration: none;
+  }
+
+  .v2-name a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .v2-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 1px 6px;
+    border: .5px solid var(--home-line);
+    border-radius: 2px;
+    color: var(--home-sub);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.6;
+  }
+
+  .v2-badge i {
+    display: block;
+    width: 5px;
+    height: 5px;
+    border-radius: 1px;
+    background: var(--home-mid);
+  }
+
+  .v2-badge[data-platform="twitch"] i { background: #9146FF; }
+  .v2-badge[data-platform="chzzk"] i { background: #00FFA3; }
+
+  .v2-badge[data-official="true"] {
+    border-color: var(--home-stroke);
+    color: var(--home-ink);
+  }
+
+  .v2-badge[data-official="true"] svg {
+    width: 10px;
+    height: 10px;
+  }
+
+  .v2b-card__riot {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--home-sub);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .v2b-card__riot span {
+    color: var(--home-mid);
+    font-weight: 400;
+  }
+
+  .v2-handle {
+    color: var(--home-mid);
+    font-size: 12px;
+    text-decoration: none;
+  }
+
+  .v2-handle:hover {
+    color: var(--home-sub);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .v2-handle--locked {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .v2-handle--locked:hover { text-decoration: none; }
+
+  .v2-handle--locked svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  /* 실제 티어 엠블럼은 방패 형태를 보존하도록 자르지 않습니다. */
+  .streamers-media.v2-tier {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    width: auto;
+    padding: 8px 12px 8px 10px;
+    border: .5px solid var(--home-line);
+    border-radius: 3px;
+  }
+
+  .streamers-media.v2-tier:not([data-tier="unranked"]) { border-color: color-mix(in srgb, var(--tier-color) 45%, transparent); }
+
+  .v2-tier__emblem {
+    display: block;
+    flex: 0 0 52px;
+    width: 52px;
+    height: 52px;
+    color: var(--tier-color);
+    object-fit: contain;
+  }
+
+  .v2-tier__text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+  }
+
+  .v2-tier__name {
+    color: var(--streamers-ink);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: -.01em;
+    white-space: nowrap;
+  }
+
+  .v2-tier__lp {
+    color: var(--home-mid);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .v2-tier--empty { border-style: dashed; }
+
+  .v2-tier--empty .v2-tier__name {
+    color: var(--home-mid);
+    font-weight: 500;
+  }
+
+  /* 타게임의 기존 GameArt 분기는 같은 top 행 안에서 56px 표식으로 정돈합니다. */
+  .v2b-card__top > .streamers-media:not(.v2-tier) {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 10px;
+    width: auto;
+  }
+
+  .v2b-card__top > .streamers-media:not(.v2-tier) .streamers-media__frame {
+    width: 56px;
+    aspect-ratio: 1;
+  }
+
+  .v2b-card__top > .streamers-media:not(.v2-tier) .streamers-media__cap {
+    justify-items: start;
+    min-height: 0;
+    text-align: left;
+  }
+
+  .v2b-card__strip {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 10px 16px;
+    border-top: .5px solid var(--home-line);
+    background: rgba(255, 255, 255, .015);
+    flex-wrap: wrap;
+  }
+
+  .streamers-shell.theme-light .v2b-card__strip { background: rgba(0, 0, 0, .018); }
+
+  .v2-meter {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+
+  .v2-meter__label {
+    color: var(--home-mid);
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .v2-meter__bar {
+    position: relative;
+    display: block;
+    flex: 0 0 132px;
+    width: 132px;
+    height: 7px;
+    border-radius: 2px;
+    background: #454C58;
+    overflow: hidden;
+  }
+
+  .v2-meter__bar i {
+    display: block;
+    height: 100%;
+    background: var(--home-win);
+  }
+
+  .v2-meter__bar::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    background: var(--home-bg);
+    opacity: .9;
+  }
+
+  .v2-meter__pct {
+    font-size: 14px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.01em;
+  }
+
+  .v2-meter__record {
+    color: var(--home-mid);
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .v2-meter__record b {
+    color: var(--home-win);
+    font-weight: 700;
+  }
+
+  .v2-meter__record em {
+    color: var(--home-sub);
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  .v2-form {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .v2-form__label {
+    color: var(--home-mid);
+    font-size: 11px;
+  }
+
+  .v2-form__dots {
+    display: flex;
+    gap: 3px;
+  }
+
+  .v2-form__dots i {
+    display: block;
+    width: 7px;
+    height: 7px;
+    border-radius: 1px;
+    background: #454C58;
+  }
+
+  .v2-form__dots i[data-r="w"] { background: var(--home-win); }
+
+  .v2-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+    color: var(--home-mid);
+    font-size: 11px;
+  }
+
+  .v2-meta__dot {
+    display: block;
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: var(--home-line);
+  }
+
+  .v2-meta b {
+    color: var(--home-sub);
+    font-weight: 600;
+  }
+
+  .v2b-card__strip--empty {
+    color: var(--home-mid);
+    font-size: 12px;
+  }
+
+  .v2b-card__strip .streamers-rank-empty {
+    min-height: 0;
+    margin-left: 0;
+    padding: 0;
+    border: 0;
+  }
+
   /* ── 상태 ──────────────────────────────────────────────────── */
   .streamers-state {
     display: grid;
@@ -1337,6 +1752,11 @@
   .streamers-shell.theme-light .streamers-media[data-tier="master"] { --tier-color: #af74ef; }
   .streamers-shell.theme-light .streamers-media[data-tier="challenger"] { --tier-color: #be8512; }
 
+  .streamers-shell.theme-light .v2-meter__bar,
+  .streamers-shell.theme-light .v2-form__dots i { background: #DDE1E7; }
+
+  .streamers-shell.theme-light .v2-meter__bar::after { background: #FFFFFF; }
+
   /* ── 등록 폼 ───────────────────────────────────────────────── */
   .streamers-form {
     display: grid;
@@ -1561,5 +1981,52 @@
     .streamers-rank-bar { width: 6.5rem; }
     .streamers-rank-form,
     .streamers-rank-empty { margin-left: 0; }
+
+    .streamers-card.v2b-card {
+      display: block;
+      padding: 0;
+    }
+
+    .v2b-card__top {
+      display: grid;
+      grid-template-columns: 48px 56px minmax(0, 1fr);
+      gap: 12px;
+      padding: 12px;
+    }
+
+    .v2b-card__id { grid-column: 3; }
+
+    .streamers-media.v2-tier,
+    .v2b-card__top > .streamers-media:not(.v2-tier) {
+      grid-column: 1 / -1;
+      justify-self: stretch;
+    }
+
+    .streamers-media.v2-tier {
+      display: flex;
+      width: auto;
+    }
+
+    .v2b-card__strip {
+      align-items: flex-start;
+      gap: 10px 14px;
+      padding: 10px 12px;
+    }
+
+    .v2-meter {
+      width: 100%;
+      flex-wrap: wrap;
+    }
+
+    .v2-meter__bar {
+      flex: 1 1 96px;
+      width: auto;
+      min-width: 96px;
+    }
+
+    .v2-meta {
+      width: 100%;
+      margin-left: 0;
+    }
   }
 }

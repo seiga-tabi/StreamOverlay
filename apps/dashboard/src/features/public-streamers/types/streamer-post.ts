@@ -31,6 +31,7 @@ export type StreamerLolProfile = {
   /* 표기(tier)는 rankTierLabel 이 접은 문자열이라 티어 엠블럼 색을 고를 수 없습니다.
      서버가 이미 보내 주는 원본 코드를 함께 남겨 카드가 색을 직접 고릅니다. */
   tierCode: LolRankTier;
+  tierIconUrl?: string;
   leaguePoints: number;
   /** 0~100. */
   winRate: number;
@@ -136,6 +137,15 @@ function safeImageUrl(value: unknown): string | undefined {
   return AVATAR_PATH_PATTERN.test(text) ? text : undefined;
 }
 
+/* 티어 엠블럼은 서버가 만드는 우리 자체 정적 자산 경로만 허용합니다
+   (riot-api.ts:rankedTierIconUrl 과 계약 일치) — 외부 URL은 신뢰하지 않습니다. */
+const TIER_ICON_PATH_PATTERN = /^\/riot\/ranked-emblems\/[a-z]+\.png(\?[a-zA-Z0-9=_-]*)?$/u;
+
+function safeTierIconUrl(value: unknown): string | undefined {
+  const text = typeof value === "string" ? value.trim() : "";
+  return TIER_ICON_PATH_PATTERN.test(text) ? text : undefined;
+}
+
 const LOL_RANK_TIERS: readonly LolRankTier[] = [
   "IRON", "BRONZE", "SILVER", "GOLD", "PLATINUM",
   "EMERALD", "DIAMOND", "MASTER", "GRANDMASTER", "CHALLENGER", "UNRANKED",
@@ -174,6 +184,7 @@ function parseLolProfile(value: unknown): StreamerLolProfile | undefined {
   const winRate = finiteNumber(value.winRate);
   const wins = finiteNumber(value.wins);
   const losses = finiteNumber(value.losses);
+  const tierIconUrl = safeTierIconUrl(value.tierIconUrl);
   if (!riotId || !tier) return undefined;
   if (winRate === undefined || winRate < 0 || winRate > 100) return undefined;
   if (wins === undefined || losses === undefined || wins < 0 || losses < 0) return undefined;
@@ -186,6 +197,7 @@ function parseLolProfile(value: unknown): StreamerLolProfile | undefined {
     riotId,
     tier: tier.label,
     tierCode: tier.code,
+    ...(tierIconUrl ? { tierIconUrl } : {}),
     leaguePoints: tier.leaguePoints,
     winRate: Math.round(winRate * 10) / 10,
     wins: Math.trunc(wins),
