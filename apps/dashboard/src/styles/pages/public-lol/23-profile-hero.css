@@ -1175,10 +1175,8 @@
 
   .public-hero-rank-split > * { min-width: 0; }
 
-  /* v4 §4-A — 왼쪽 절반을 "텍스트 5줄"에서 4블록으로 묶습니다.
-     크레스트 / [티어명 · LP] / [승패 · 승률] / 게이지. 줄 수가 줄며 확보된 세로는
-     전부 블록 사이 여백(.3rem → .6rem)으로 되돌려 "빽빽한 목록"이 아니라
-     "앵커 + 두 줄 + 게이지"로 읽히게 합니다. 표시되는 값은 하나도 빠지지 않습니다. */
+  /* 스트리머 컴팩트 뷰의 세로 배치를 기본값으로 유지합니다.
+     일반 뷰는 아래 :not(.has-cast) 규칙에서 승인된 가로 배치로 전환합니다. */
   .public-hero-rank-main {
     display: flex;
     flex-direction: column;
@@ -1187,13 +1185,56 @@
     text-align: center;
   }
 
-  /* 크레스트는 왼쪽 절반의 시각 앵커입니다 — v3 4.5rem(72px) → v4 5.75rem(92px).
-     절반 폭이 ≈203px 이므로 92px 는 폭의 45%. 텍스트가 줄어든 자리를 앵커가 가져갑니다. */
+  /* 스트리머 컴팩트 뷰가 상속할 기본 크레스트 크기입니다. */
   .public-hero-rank-main .public-profile-hero-crest { width: 5.75rem; height: 5.75rem; }
   /* 언랭크 실루엣은 고정 34×38 로 그려져 확대된 슬롯 안에서 혼자 작게 남습니다 —
      슬롯을 채우도록 상속시킵니다(랭크 크레스트와 눈높이를 맞추기 위함). */
   .public-hero-rank-main .public-profile-hero-crest > svg { width: 100%; height: 100%; }
   .public-hero-rank-main .public-hero-rank-card-tier { font-size: 1.0625rem; }
+
+  /* 레이아웃용 래퍼는 컴팩트 뷰에서 박스를 만들지 않아 기존 세로 배치를 보존합니다. */
+  .public-hero-rank-text { display: contents; }
+
+  /* 승인된 After B — 일반 뷰에서 크레스트와 텍스트 블록을 가로로 배치합니다.
+     has-cast 전용 규칙은 건드리지 않고 컴팩트 뷰를 계속 세로로 유지합니다. */
+  .public-profile-hero-top:not(.has-cast) .public-hero-rank-main {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+    text-align: left;
+  }
+
+  .public-profile-hero-top:not(.has-cast) .public-hero-rank-main .public-profile-hero-crest {
+    width: 8.75rem;
+    height: 8.75rem;
+    flex: none;
+  }
+
+  .public-profile-hero-top:not(.has-cast) .public-hero-rank-main .public-hero-rank-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    gap: .5rem;
+    min-width: 0;
+  }
+
+  .public-profile-hero-top:not(.has-cast) .public-hero-rank-main .public-hero-rank-card-tier {
+    font-size: 1.25rem;
+  }
+
+  .public-profile-hero-top:not(.has-cast) .public-hero-rank-main .public-hero-rank-line.is-tier {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .15rem;
+  }
+
+  .public-profile-hero-top:not(.has-cast) .public-hero-rank-main .public-hero-rank-record {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .25rem;
+  }
 
   /* 한 줄 블록 공통(§4-A) — baseline 정렬이라 크기가 다른 두 값이 같은 밑선에 앉습니다. */
   .public-hero-rank-line {

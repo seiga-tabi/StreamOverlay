@@ -166,8 +166,8 @@ function UnrankedCrestSilhouette() {
 }
 
 /* 탭 패널 내부 — 좌우 반반(목업 §1-A).
-   왼쪽: 크레스트(위) → [티어명 · LP] → [승패 · 승률] → 다음 티어 게이지 = 4블록(v4 §4-A).
-   텍스트 5줄을 관계 있는 값끼리 묶어 두 줄로 줄이되 값은 하나도 빼지 않습니다.
+   왼쪽: 크레스트 옆에 [티어명 · LP] → [승패 · 승률] → 다음 티어 게이지를 세로로 묶습니다.
+   텍스트 5줄을 관계 있는 값끼리 묶되 값은 하나도 빼지 않습니다.
    좁은 폭(스트리머 절반 ≈148px)에서 승패·승률을 두 줄로 푸는 분기는 전부 CSS 입니다 —
    여기에 폭 조건문을 두지 않습니다(§5-A).
    오른쪽: LP 추이 스파크라인. 그릴 표본이 없는 큐는 같은 자리에 사유 한 줄 +
@@ -198,34 +198,36 @@ function RankQueuePanelBody({
               : <b aria-hidden="true">{queue.tierFallbackLabel}</b>)
             : <UnrankedCrestSilhouette />}
         </span>
-        {/* 구분점(·)은 DOM 요소가 아니라 두 번째 값의 ::before 입니다 — 로케일 문자열을 건드리지
-            않고 CSS 로 켜고 끌 수 있으며, 값이 하나뿐인 언랭크 큐에서는 자동으로 사라집니다. */}
-        <span className="public-hero-rank-line is-tier">
-          <b className="public-hero-rank-card-tier">{queue.ranked ? queue.rankLabel : text.unrankedTitle}</b>
-          {queue.ranked && queue.leaguePointsLabel
-            ? <span className="public-hero-rank-lp">{queue.leaguePointsLabel}</span>
-            : null}
-        </span>
-        {queue.ranked ? (
-          <span className="public-hero-rank-line public-hero-rank-record">
-            <span className="public-hero-rank-card-record">
-              <em>{queue.wins}{queue.winsLabel}</em>
-              {" "}
-              <i>{queue.losses}{queue.lossesLabel}</i>
-            </span>
-            <span className="public-hero-rank-card-record">{text.winRateLabel} {queue.winRate}%</span>
+        <div className="public-hero-rank-text">
+          {/* 구분점(·)은 DOM 요소가 아니라 두 번째 값의 ::before 입니다 — 로케일 문자열을 건드리지
+              않고 CSS 로 켜고 끌 수 있으며, 값이 하나뿐인 언랭크 큐에서는 자동으로 사라집니다. */}
+          <span className="public-hero-rank-line is-tier">
+            <b className="public-hero-rank-card-tier">{queue.ranked ? queue.rankLabel : text.unrankedTitle}</b>
+            {queue.ranked && queue.leaguePointsLabel
+              ? <span className="public-hero-rank-lp">{queue.leaguePointsLabel}</span>
+              : null}
           </span>
-        ) : (
-          <span className="public-hero-rank-card-record">{queue.unrankedDescription ?? queue.recordCaption}</span>
-        )}
-        {queue.ranked && queue.goal ? (
-          <span className="public-profile-hero-goal">
-            <span>{queue.goal.label}</span>
-            <span aria-hidden="true" className="public-profile-hero-goal-track">
-              <em style={{ width: `${Math.max(0, Math.min(100, queue.goal.percent))}%` }} />
+          {queue.ranked ? (
+            <span className="public-hero-rank-line public-hero-rank-record">
+              <span className="public-hero-rank-card-record">
+                <em>{queue.wins}{queue.winsLabel}</em>
+                {" "}
+                <i>{queue.losses}{queue.lossesLabel}</i>
+              </span>
+              <span className="public-hero-rank-card-record">{text.winRateLabel} {queue.winRate}%</span>
             </span>
-          </span>
-        ) : null}
+          ) : (
+            <span className="public-hero-rank-card-record">{queue.unrankedDescription ?? queue.recordCaption}</span>
+          )}
+          {queue.ranked && queue.goal ? (
+            <span className="public-profile-hero-goal">
+              <span>{queue.goal.label}</span>
+              <span aria-hidden="true" className="public-profile-hero-goal-track">
+                <em style={{ width: `${Math.max(0, Math.min(100, queue.goal.percent))}%` }} />
+              </span>
+            </span>
+          ) : null}
+        </div>
       </div>
       <div className={`public-hero-rank-side${hasTrend ? "" : " is-note"}`}>
         {hasTrend && trend ? (
