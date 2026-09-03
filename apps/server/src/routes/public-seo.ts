@@ -1317,6 +1317,7 @@ function organizationStructuredData(): unknown {
 const BREADCRUMB_SEGMENT_LABELS: Readonly<Record<string, PublicSeoLocaleText>> = {
   "/lol": { ko: "LoL 전적 검색", ja: "LoL戦績検索", en: "LoL stats" },
   "/lol/aram": { ko: "증강 칼바람", ja: "オーグメントARAM", en: "Augment ARAM" },
+  "/lol/champions": { ko: "전체 챔피언", ja: "全チャンピオン", en: "All champions" },
   "/patch-notes": { ko: "패치 노트", ja: "パッチノート", en: "Patch notes" },
   /* "/lol/summoners"(목록)는 실제 라우트가 없어 404입니다 — 여기 두면
      genericFallback의 sibling 링크와 breadcrumb JSON-LD가 404 URL을
@@ -1742,6 +1743,10 @@ const KOREAN_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
     title: "증강 칼바람 | YORO.gg",
     description: "League of Legends 증강 칼바람에서 사용할 수 있는 증강을 이름과 설명으로 검색하고 실버·골드·프리즘·레전드 등급별로 필터링하세요. 각 증강의 효과와 아이콘을 확인하고, 검색한 소환사의 최근 경기에서 선택한 증강 기록도 함께 살펴볼 수 있습니다."
   },
+  "/lol/champions": {
+    title: "LoL 전체 챔피언 | YORO.gg",
+    description: "League of Legends 챔피언을 이름으로 검색하고, 챔피언 하나를 골라 전체 유저가 실제로 사용한 룬·최종 아이템·소환사 주문 조합의 채용률과 승률을 확인하세요. 포지션별 표본 수와 현재 패치 기준 통계를 함께 봅니다."
+  },
   "/patch-notes": {
     title: "LoL 패치 노트 | YORO.gg",
     description: "League of Legends 패치 노트를 최신순으로 시즌별 확인하세요. 패치 번호나 제목으로 목록을 검색하고, 소환사 Riot ID를 입력하면 각 패치 기간에 플레이한 최근 경기와 승률을 함께 볼 수 있습니다. 전체 변경 내용은 연결된 Riot Games 공식 원문에서 확인합니다."
@@ -1891,6 +1896,10 @@ const JAPANESE_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
   "/lol/aram": {
     title: "オーグメントARAM | YORO.gg",
     description: "League of LegendsのオーグメントARAMで利用できるオーグメントを名前や説明から検索し、シルバー・ゴールド・プリズム・レジェンドのレアリティ別に絞り込めます。各効果とアイコンを確認し、検索したサモナーが最近の試合で選んだオーグメント記録もあわせて閲覧できます。"
+  },
+  "/lol/champions": {
+    title: "LoL 全チャンピオン | YORO.gg",
+    description: "League of Legendsのチャンピオンを名前で検索し、選んだチャンピオンについて全ユーザーが実際に使用したルーン・最終アイテム・サモナースペル構成の採用率と勝率を確認できます。ロール別のサンプル数と現在のパッチ基準の統計もあわせて閲覧できます。"
   },
   "/patch-notes": {
     title: "LoLパッチノート | YORO.gg",
@@ -2085,6 +2094,10 @@ const ENGLISH_CONTENT: Readonly<Record<string, PublicSeoContent>> = {
     title: "Augment ARAM | YORO.gg",
     description: "Search Augment ARAM effects by name or description, filter by Silver, Gold, Prismatic, or Legend rarity, and review augments used in recent matches."
   },
+  "/lol/champions": {
+    title: "LoL Champions | YORO.gg",
+    description: "Search LoL champions by name, then review pick and win rates for rune, final item, and summoner spell builds, samples by position, and current-patch stats."
+  },
   "/bot": {
     title: "YORO Bot | Discord Game Server Assistant",
     description: "Check Palworld server status, players, game version, and latency in Discord while managing Organizations, read-only REST access, and commands in the Dashboard."
@@ -2232,6 +2245,20 @@ function contentForPath(
   }
   const exact = table[normalizedPath];
   if (exact) return exact;
+  /* 챔피언 상세(/lol/champions/<championId>) — 챔피언 이름은 서버가 알지 못하므로
+     (Data Dragon 왕복이 필요) 공용 문구를 씁니다. 여기 없으면 공유 링크가
+     사이트 루트 제목을 달고 나갑니다. */
+  if (normalizedPath.startsWith("/lol/champions/")) {
+    return locale === "ja"
+      ? {
+          title: "チャンピオン グローバルビルド | YORO.gg",
+          description: "全ユーザーが実際に使用したルーン・最終アイテム・サモナースペル構成の採用率と勝率を、ロール別・現在のパッチ基準で確認できます。"
+        }
+      : {
+          title: "챔피언 글로벌 빌드 | YORO.gg",
+          description: "전체 유저가 실제로 사용한 룬·최종 아이템·소환사 주문 조합의 채용률과 승률을 포지션별로, 현재 패치 기준으로 확인하세요."
+        };
+  }
   if (normalizedPath.startsWith("/lol/summoners/")) {
     return locale === "ja"
       ? {

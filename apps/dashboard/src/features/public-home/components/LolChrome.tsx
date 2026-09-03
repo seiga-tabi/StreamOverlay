@@ -24,6 +24,7 @@ export function lolSubnavActive(page: PublicMainPage): LolSubnavItem | "none" {
     case "subscriptions": return "streamers";
     case "followJoin": return "participation";
     case "aram": return "aram";
+    case "champions": return "champions";
     case "patchNotes": return "patchNotes";
     default: return "none";
   }

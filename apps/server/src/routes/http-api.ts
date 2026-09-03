@@ -172,7 +172,8 @@ import {
   isLolChampionBuildStatsPosition,
   type LolChampionBuildStatsAsset,
   type LolChampionBuildStatsPosition,
-  type LolChampionBuildStatsResponse
+  type LolChampionBuildStatsResponse,
+  type LolChampionListResponse
 } from "@streamops/shared";
 import type { JsonlLogger } from "../logging/jsonl-logger.js";
 import type { TwitchExtensionSettingsRepository } from "../database/repositories/twitch-extension-settings-repository.js";
@@ -3546,6 +3547,33 @@ async function profileIconUrl(dataDragon: DataDragonService | undefined, profile
 async function dataDragonLatestVersion(dataDragon: DataDragonService | undefined): Promise<string | undefined> {
   if (!dataDragon || typeof dataDragon.getLatestVersion !== "function") return undefined;
   return dataDragon.getLatestVersion().catch(() => undefined);
+}
+
+/* ── 전체 챔피언 목록(GET /api/lol/champions) ───────────────────────────────
+ *
+ * DataDragonService.getChampionMap() 이 이미 만들어 둔 맵을 그대로 JSON 으로
+ * 내보냅니다 — 이름(ko/ja/en)·아이콘 URL 조립을 여기서 다시 하지 않습니다.
+ * DB 도 Riot API 도 건드리지 않습니다(rate limit 큐와 무관).
+ *
+ * 챔피언 목록은 패치당 한 번 바뀌므로 빌드 통계(30분)보다 긴 캐시를 씁니다. */
+
+const PUBLIC_LOL_CHAMPIONS_CACHE_CONTROL = "public, max-age=3600, stale-while-revalidate=86400";
+
+async function buildPublicLolChampionList(
+  input: Pick<HttpHandlerInput, "dataDragon">
+): Promise<LolChampionListResponse> {
+  if (!input.dataDragon) {
+    throw new HttpRequestError(503, { error: "챔피언 목록을 사용할 수 없습니다.", code: "LOL_CHAMPIONS_UNAVAILABLE" });
+  }
+  try {
+    const dataDragonVersion = await input.dataDragon.getLatestVersion();
+    const championMap = await input.dataDragon.getChampionMap(dataDragonVersion);
+    return { dataDragonVersion, champions: [...championMap.values()] };
+  } catch {
+    /* Data Dragon 이 흔들리면 빈 목록 대신 503 — 챔피언이 사라진 화면을
+       "정상 응답"으로 보여 주지 않습니다. */
+    throw new HttpRequestError(503, { error: "챔피언 목록을 사용할 수 없습니다.", code: "LOL_CHAMPIONS_UNAVAILABLE" });
+  }
 }
 
 /* ── 챔피언 글로벌 빌드 통계(GET /api/lol/champion-build-stats) ──────────────
@@ -13029,6 +13057,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
           url.searchParams.get("riotId") ?? ""
         );
         return sendJson(req, res, 200, detail, publicLolCacheHeaders("match-detail", detail, "public, max-age=300, stale-while-revalidate=1800"));
+      }
+      if (req.method === "GET" && url.pathname === "/api/lol/champions") {
+        /* 요청 파라미터가 없습니다 — 패치·언어 무관 전체 목록 한 벌입니다.
+           security/auth.ts 의 PUBLIC 화이트리스트에 같이 등록돼 있어야 합니다. */
+        const champions = await buildPublicLolChampionList(input);
+        return sendJson(req, res, 200, champions, { "Cache-Control": PUBLIC_LOL_CHAMPIONS_CACHE_CONTROL });
       }
       if (req.method === "GET" && url.pathname === "/api/lol/champion-build-stats") {
         /* 플랫폼(서버) 파라미터는 받지 않습니다 — 전 서버 누적 전역 집계. updatedAt 이

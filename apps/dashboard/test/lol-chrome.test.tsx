@@ -39,13 +39,15 @@ test("LolChrome 은 1행 헤더와 2행 LoL 메뉴를 yoro-home-chrome 래퍼 �
   assert.match(html, /yoro-home-games-trigger-name/u);
 });
 
-test("다섯 active 값 각각에서 2행 항목이 5개·순서 고정이고 활성이 정확히 하나다", () => {
-  const order = ["홈", "팔로우", "시청자 참여", "증강 칼바람", "패치노트"];
-  const actives: LolSubnavItem[] = ["home", "streamers", "participation", "aram", "patchNotes"];
+/* 챔피언(/lol/champions)이 홈 바로 다음에 들어와 여섯 항목이 됐습니다
+   (전체 챔피언 목록 목업 §04 — 사전 성격의 목적지라 증강 도감과 같은 축). */
+test("여섯 active 값 각각에서 2행 항목이 6개·순서 고정이고 활성이 정확히 하나다", () => {
+  const order = ["홈", "챔피언", "팔로우", "시청자 참여", "증강 칼바람", "패치노트"];
+  const actives: LolSubnavItem[] = ["home", "champions", "streamers", "participation", "aram", "patchNotes"];
   for (const active of actives) {
     const html = renderChrome(active);
     const items = html.match(/yoro-lol-subnav-item/gu) ?? [];
-    assert.equal(items.length, 5, `active=${active}: 항목 5개`);
+    assert.equal(items.length, 6, `active=${active}: 항목 6개`);
     assert.equal((html.match(/yoro-lol-subnav-item is-active/gu) ?? []).length, 1, `active=${active}: 활성 1개`);
     assert.equal((html.match(/aria-current="page"[^>]*class="yoro-lol-subnav-item/gu) ?? []).length, 1);
     let cursor = html.indexOf("yoro-lol-subnav");
@@ -73,10 +75,11 @@ test("className 과 children 은 래퍼에 덧붙는다(전적 상세의 진행 
   assert.ok(html.indexOf("yoro-lol-subnav") < html.indexOf("public-profile-progress"));
 });
 
-test("lolSubnavActive 는 메뉴 페이지 넷만 활성으로 매핑하고 나머지는 none 이다", () => {
+test("lolSubnavActive 는 메뉴 페이지 다섯만 활성으로 매핑하고 나머지는 none 이다", () => {
   assert.equal(lolSubnavActive("subscriptions"), "streamers");
   assert.equal(lolSubnavActive("followJoin"), "participation");
   assert.equal(lolSubnavActive("aram"), "aram");
+  assert.equal(lolSubnavActive("champions"), "champions");
   assert.equal(lolSubnavActive("patchNotes"), "patchNotes");
   for (const page of ["search", "palworld", "valorant", "minecraft", "bot", "games", "streamers", "privacy", "terms", "contact"] as const) {
     assert.equal(lolSubnavActive(page), "none", `page=${page}`);

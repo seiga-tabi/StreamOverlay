@@ -8,7 +8,7 @@ const { SafeDatabaseError } = await import("../dist/database/errors.js");
 
 const { createHttpHandler } = await import("../dist/routes/http-api.js");
 const { appConfig } = await import("../dist/config.js");
-const { DashboardSessionStore, ADMIN_DASHBOARD_SESSION_COOKIE, STREAMER_DASHBOARD_SESSION_COOKIE, DASHBOARD_SESSION_COOKIE, authorizeHttpRequest } = await import("../dist/security/auth.js");
+const { DashboardSessionStore, ADMIN_DASHBOARD_SESSION_COOKIE, STREAMER_DASHBOARD_SESSION_COOKIE, DASHBOARD_SESSION_COOKIE, authorizeHttpRequest, requiredHttpPrincipal } = await import("../dist/security/auth.js");
 const { PUBLIC_TWITCH_VIEWER_SESSION_COOKIE } = await import("../dist/services/public-twitch-auth.js");
 const { resetSecurityRateLimiters } = await import("../dist/security/rate-limit.js");
 const { Store } = await import("../dist/services/store.js");
@@ -140,6 +140,22 @@ test("공개 LoL 전적 API는 dashboard 세션 없이 접근할 수 있다", as
 
     assert.equal(res.statusCode, 503);
     assert.match(JSON.parse(res.body).error, /Riot API client/);
+  });
+});
+
+test("전체 챔피언 API는 dashboard 인증 없이 PUBLIC 경로로 접근할 수 있다", async () => {
+  await withAuthConfig(async () => {
+    assert.equal(requiredHttpPrincipal("GET", "/api/lol/champions"), "PUBLIC");
+
+    const handler = handlerWithSessionStore(new DashboardSessionStore());
+    const req = createRequest("GET", "/api/lol/champions");
+    const res = createResponse();
+
+    await handler(req, res);
+
+    assert.equal(res.statusCode, 503);
+    assert.notEqual(res.statusCode, 401);
+    assert.notEqual(res.statusCode, 403);
   });
 });
 

@@ -255,6 +255,92 @@ function ReadyColumns({ data, helpers }: { data: LolChampionBuildStatsReadyRespo
   );
 }
 
+/* ── 아래 둘은 프로필 패널과 단독 챔피언 화면(PublicChampionBuildPage)이 공유합니다.
+      챔피언 칩(프로필 후보 목록)만 패널 쪽에 남습니다 — 단독 화면에는 프로필이
+      없어 후보를 만들 근거가 없습니다. ─────────────────────────────────────── */
+
+/** 포지션 탭 5개. `positionGames` 가 없으면(아직 로딩) 표본 수를 적지 않습니다. */
+export function GlobalBuildStatsPositionTabs({ position, positionGames, helpers, onPositionChange }: {
+  position: LolChampionBuildStatsPosition;
+  positionGames: Map<string, number> | undefined;
+  helpers: Pick<GlobalBuildStatsHelpers, "positionLabel">;
+  onPositionChange: (position: LolChampionBuildStatsPosition) => void;
+}) {
+  return (
+    <div aria-label={t().globalBuildStatsPositionTabs} className="public-gbs-tabs" role="tablist">
+      {LOL_CHAMPION_BUILD_STATS_POSITIONS.map((entry) => {
+        const games = positionGames?.get(entry);
+        const label = helpers.positionLabel(entry);
+        const ariaLabel = games === undefined || games === 0
+          ? fill(t().globalBuildStatsPositionNoGames, { position: label })
+          : fill(t().globalBuildStatsPositionGames, { position: label, count: games });
+        return (
+          <button
+            aria-controls="public-gbs-body"
+            aria-label={positionGames ? ariaLabel : label}
+            aria-selected={entry === position}
+            className="public-gbs-tab"
+            key={entry}
+            onClick={() => onPositionChange(entry)}
+            role="tab"
+            type="button"
+          >
+            {label}
+            {positionGames ? <small aria-hidden="true">{games ?? 0}</small> : null}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** 로딩·오류·표본 부족·정상 네 상태의 본문(챔피언 선택 UI 는 포함하지 않습니다). */
+export function GlobalBuildStatsBody({ state, championLabel, helpers, onRetry }: {
+  state: GlobalBuildStatsState;
+  /** 표본 부족 문구에 넣을 챔피언 표시 이름. */
+  championLabel: string;
+  helpers: GlobalBuildStatsHelpers;
+  onRetry: () => void;
+}) {
+  if (state.status === "loading") {
+    return (
+      <div aria-busy="true" className="public-champ-empty public-gbs-loading" role="status">
+        <strong>{t().globalBuildStatsLoading}</strong>
+      </div>
+    );
+  }
+  if (state.status === "error") {
+    return (
+      <div className="public-champ-empty public-gbs-error" role="alert">
+        <strong>{t().globalBuildStatsErrorTitle}</strong>
+        <span>{state.message}</span>
+        <button className="public-sig-view public-gbs-retry" onClick={onRetry} type="button">{t().globalBuildStatsRetry}</button>
+      </div>
+    );
+  }
+  if (state.data.sampleInsufficient) {
+    return (
+      <div className="public-champ-empty public-gbs-insufficient" role="status">
+        <strong>{t().globalBuildStatsInsufficientTitle}</strong>
+        <span>
+          {fill(t().globalBuildStatsInsufficientDescription, {
+            position: helpers.positionLabel(state.data.teamPosition),
+            name: championLabel,
+            count: state.data.totalGames,
+            min: LOL_CHAMPION_BUILD_STATS_MIN_TOTAL_GAMES
+          })}
+        </span>
+      </div>
+    );
+  }
+  return <ReadyColumns data={state.data} helpers={helpers} />;
+}
+
+/** 상단 알약 문구("전체 유저 · 패치 X · 솔로랭크") — 패치가 확인되기 전에는 축약형. */
+export function globalBuildStatsPillText(data: LolChampionBuildStatsResponse | undefined): string {
+  return data ? fill(t().globalBuildStatsPill, { patch: data.patch }) : t().globalBuildStatsPillPending;
+}
+
 export type GlobalBuildStatsViewProps = {
   candidates: GlobalBuildStatsCandidate[];
   selectedChampion: LolChampionSummary | undefined;
@@ -278,15 +364,14 @@ export function GlobalBuildStatsView({
   onRetry
 }: GlobalBuildStatsViewProps) {
   const ready = state.status === "ready" ? state.data : undefined;
-  const positionGames = new Map((ready?.positions ?? []).map((entry) => [entry.teamPosition, entry.games]));
-  const pill = ready
-    ? fill(t().globalBuildStatsPill, { patch: ready.patch })
-    : t().globalBuildStatsPillPending;
+  const positionGames = ready
+    ? new Map(ready.positions.map((entry) => [entry.teamPosition, entry.games]))
+    : undefined;
 
   const head = (
     <div className="public-champ-head">
       <h2>{t().globalBuildStatsTitle}</h2>
-      <span className="public-champ-pill">{pill}</span>
+      <span className="public-champ-pill">{globalBuildStatsPillText(ready)}</span>
     </div>
   );
 
@@ -300,39 +385,6 @@ export function GlobalBuildStatsView({
         </div>
       </section>
     );
-  }
-
-  let body: ReactNode;
-  if (state.status === "loading") {
-    body = (
-      <div aria-busy="true" className="public-champ-empty public-gbs-loading" role="status">
-        <strong>{t().globalBuildStatsLoading}</strong>
-      </div>
-    );
-  } else if (state.status === "error") {
-    body = (
-      <div className="public-champ-empty public-gbs-error" role="alert">
-        <strong>{t().globalBuildStatsErrorTitle}</strong>
-        <span>{state.message}</span>
-        <button className="public-sig-view public-gbs-retry" onClick={onRetry} type="button">{t().globalBuildStatsRetry}</button>
-      </div>
-    );
-  } else if (state.data.sampleInsufficient) {
-    body = (
-      <div className="public-champ-empty public-gbs-insufficient" role="status">
-        <strong>{t().globalBuildStatsInsufficientTitle}</strong>
-        <span>
-          {fill(t().globalBuildStatsInsufficientDescription, {
-            position: helpers.positionLabel(state.data.teamPosition),
-            name: helpers.championName(selectedChampion),
-            count: state.data.totalGames,
-            min: LOL_CHAMPION_BUILD_STATS_MIN_TOTAL_GAMES
-          })}
-        </span>
-      </div>
-    );
-  } else {
-    body = <ReadyColumns data={state.data} helpers={helpers} />;
   }
 
   return (
@@ -359,32 +411,21 @@ export function GlobalBuildStatsView({
             );
           })}
         </div>
-        <div aria-label={t().globalBuildStatsPositionTabs} className="public-gbs-tabs" role="tablist">
-          {LOL_CHAMPION_BUILD_STATS_POSITIONS.map((entry) => {
-            const games = positionGames.get(entry);
-            const label = helpers.positionLabel(entry);
-            const ariaLabel = games === undefined || games === 0
-              ? fill(t().globalBuildStatsPositionNoGames, { position: label })
-              : fill(t().globalBuildStatsPositionGames, { position: label, count: games });
-            return (
-              <button
-                aria-controls="public-gbs-body"
-                aria-label={ready ? ariaLabel : label}
-                aria-selected={entry === position}
-                className="public-gbs-tab"
-                key={entry}
-                onClick={() => onPositionChange(entry)}
-                role="tab"
-                type="button"
-              >
-                {label}
-                {ready ? <small aria-hidden="true">{games ?? 0}</small> : null}
-              </button>
-            );
-          })}
-        </div>
+        <GlobalBuildStatsPositionTabs
+          helpers={helpers}
+          onPositionChange={onPositionChange}
+          position={position}
+          positionGames={positionGames}
+        />
       </div>
-      <div id="public-gbs-body" role="tabpanel">{body}</div>
+      <div id="public-gbs-body" role="tabpanel">
+        <GlobalBuildStatsBody
+          championLabel={helpers.championName(selectedChampion)}
+          helpers={helpers}
+          onRetry={onRetry}
+          state={state}
+        />
+      </div>
       <p className="public-sig-foot">{t().globalBuildStatsFoot}</p>
     </section>
   );

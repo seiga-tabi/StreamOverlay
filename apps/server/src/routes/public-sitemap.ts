@@ -51,6 +51,10 @@ export const PUBLIC_SITEMAP_STATIC_PATHS: readonly string[] = [
   "/",
   "/lol",
   "/lol/aram",
+  /* 전체 챔피언 목록. 챔피언 상세(/lol/champions/<id>)는 서버가 목록을 알아야
+     열거할 수 있어(Data Dragon 왕복) 여기 넣지 않습니다 — 목록 화면의 카드
+     링크가 크롤 경로입니다. */
+  "/lol/champions",
   "/patch-notes",
   "/bot",
   "/bot/getting-started",

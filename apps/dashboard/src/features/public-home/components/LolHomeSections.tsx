@@ -23,7 +23,7 @@ function fill(template: string, value: string): string {
 
 /* ── 2행: LoL 전용 메뉴(중앙 정렬) — 목업 v11 ─────────────── */
 
-export type LolSubnavItem = "home" | "streamers" | "participation" | "aram" | "patchNotes";
+export type LolSubnavItem = "home" | "champions" | "streamers" | "participation" | "aram" | "patchNotes";
 
 /* 홈 항목은 LoL 홈(/lol)으로 갑니다(2026-08-20 변경 — 이전의 "메인 홈 출구" 결정을
    번복). 메인 홈(/)으로 나가는 출구는 1행 헤더의 워드마크와 "홈" 링크가 담당합니다.
@@ -32,6 +32,8 @@ export type LolSubnavItem = "home" | "streamers" | "participation" | "aram" | "p
 export function LolSubnav({ text, active = "home" }: { text: LolHomeText; active?: LolSubnavItem | "none" }) {
   const items: Array<{ id: LolSubnavItem; href: string; label: string; tailWidth: number }> = [
     { id: "home", href: "/lol", label: text.tabHome, tailWidth: 30 },
+    /* 챔피언 — 홈 바로 다음(사전 성격의 목적지라 증강 도감과 같은 축, 목업 §04). */
+    { id: "champions", href: "/lol/champions", label: text.tabChampions, tailWidth: 40 },
     { id: "streamers", href: "/follow", label: text.tabStreamers, tailWidth: 40 },
     { id: "participation", href: "/participation", label: text.tabParticipation, tailWidth: 48 },
     { id: "aram", href: "/lol/aram", label: text.tabAram, tailWidth: 48 },

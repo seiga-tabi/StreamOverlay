@@ -3,6 +3,7 @@ import {
   parsePublicLolMatchRankResponse,
   type LolChampionBuildStatsPosition,
   type LolChampionBuildStatsResponse,
+  type LolChampionListResponse,
   type LolPlatformId
 } from "@streamops/shared";
 import { t } from "../i18n/public-lol-i18n";
@@ -221,6 +222,26 @@ export async function getPublicLolMatchBuild(matchId: string): Promise<PublicLol
   });
   if (!response.ok) throw new Error(await readPublicApiErrorMessage(response));
   return (await response.json()) as PublicLolMatchBuildResponse;
+}
+
+/* 전체 챔피언 목록 — 요청 파라미터가 없는 정적 목록(서버가 1시간 캐시).
+   역할·최근 업데이트 시각은 이 응답에 없습니다(계약 주석 참조). */
+export async function getPublicLolChampions(signal?: AbortSignal): Promise<LolChampionListResponse> {
+  const response = await fetch(`${apiBase}/api/lol/champions`, {
+    credentials: "include",
+    signal
+  });
+  if (!response.ok) throw new Error(await readPublicApiErrorMessage(response));
+  const body: unknown = await response.json();
+  if (
+    typeof body !== "object"
+    || body === null
+    || !Array.isArray((body as { champions?: unknown }).champions)
+    || typeof (body as { dataDragonVersion?: unknown }).dataDragonVersion !== "string"
+  ) {
+    throw new Error(t().championListErrorTitle);
+  }
+  return body as LolChampionListResponse;
 }
 
 /* 챔피언 글로벌 빌드 통계 — 플랫폼 무관 전역 집계라 platform 을 보내지 않습니다.

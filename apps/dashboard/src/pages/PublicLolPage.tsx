@@ -236,6 +236,7 @@ import {
   splitRiotIdText,
   suggestionRiotId,
 } from "../features/public-lol/utils/riot-id";
+import { championName } from "../features/public-lol/utils/champion";
 import { formatCooldown, formatDecimal, formatDuration, formatNumber, formatPercent, refreshRemainingMs } from "../features/public-lol/utils/format";
 import {
   isPublicLocale,
@@ -248,6 +249,7 @@ import {
 } from "../features/public-lol/utils/public-locale-path";
 import {
   PUBLIC_LOL_HOME_PATH,
+  publicChampionIdFromPath,
   publicLegalPath,
   publicPageRouteFromPath,
   publicPathForPage,
@@ -255,6 +257,8 @@ import {
   type PublicLegalPageKey,
 } from "../features/public-lol/utils/routes";
 import { PublicAramPage } from "../features/public-lol/pages/PublicAramPage";
+import { PublicChampionBuildPage } from "../features/public-lol/pages/PublicChampionBuildPage";
+import { PublicChampionListPage } from "../features/public-lol/pages/PublicChampionListPage";
 import { PublicPatchNotesPage } from "../features/public-lol/pages/PublicPatchNotesPage";
 import {
   favoriteFromProfile,
@@ -937,18 +941,6 @@ function damagePerMinuteTone(value: number | undefined): MetricTone {
 function mainRoleLabel(role: string | undefined): string {
   if (!role) return "-";
   return roleLabels[activePublicLocale][role.toUpperCase()] ?? role;
-}
-
-function championName(champion: LolChampionSummary | undefined, locale: PublicLocale = activePublicLocale): string {
-  if (!champion) return "-";
-  if (locale === "ja") return champion.nameJa ?? champion.nameKo ?? champion.championKey ?? `Champion ${champion.championId}`;
-  /* en — 응답에 영문 표시명이 따로 없어 Data Dragon championKey("MissFortune")를
-     대문자 경계로 띄웁니다. 아포스트로피류(Kha'Zix 등)는 근사 표기입니다. */
-  if (locale === "en") {
-    const englishName = champion.championKey?.replace(/([a-z])([A-Z])/g, "$1 $2");
-    return englishName ?? champion.nameKo ?? champion.nameJa ?? `Champion ${champion.championId}`;
-  }
-  return champion.nameKo ?? champion.nameJa ?? champion.championKey ?? `Champion ${champion.championId}`;
 }
 
 function soloRankStats(profile: PublicLolProfile): LolRankedStats | undefined {
@@ -7155,6 +7147,20 @@ export function PublicLolPage({
     };
   }, [profile?.riotId, profile?.lolPlatform, selectedLolPlatform]);
 
+  /* 챔피언 목록(/lol/champions)과 챔피언 단독 빌드 통계(/lol/champions/<id>)는
+     같은 activeMainPage("champions") 안에서 주소만 바뀝니다 — 페이지 전환으로는
+     잡히지 않으므로 경로 변경을 직접 구독합니다(패치 노트 상세와 같은 구조). */
+  const [championDetailId, setChampionDetailId] = useState<number | undefined>(() => publicChampionIdFromPath());
+  useEffect(() => {
+    const syncChampionRoute = () => setChampionDetailId(publicChampionIdFromPath());
+    window.addEventListener("popstate", syncChampionRoute);
+    window.addEventListener("publicroutechange", syncChampionRoute);
+    return () => {
+      window.removeEventListener("popstate", syncChampionRoute);
+      window.removeEventListener("publicroutechange", syncChampionRoute);
+    };
+  }, []);
+
   useEffect(() => {
     const loadFromPath = (replaceUrl = true) => {
       const route = publicPageRouteFromPath();
@@ -7794,6 +7800,24 @@ export function PublicLolPage({
         />
       );
     }
+    if (activeMainPage === "champions") {
+      /* 목록 → 카드 클릭 → 그 챔피언의 전체 유저 글로벌 빌드 통계.
+         전적 검색 흐름의 시그니처·글로벌 빌드 패널과는 별개 화면입니다(프로필 없음). */
+      if (championDetailId !== undefined) {
+        return (
+          <PublicChampionBuildPage
+            championId={championDetailId}
+            helpers={{
+              championName: (champion) => championName(champion),
+              positionLabel: mainRoleLabel,
+              assetUrl,
+              spellIconUrl: summonerSpellIconUrl
+            }}
+          />
+        );
+      }
+      return <PublicChampionListPage />;
+    }
     if (activeMainPage === "patchNotes") {
       return <PublicPatchNotesPage locale={locale} />;
     }
@@ -7853,7 +7877,7 @@ export function PublicLolPage({
            !important 가 :not(.public-profile-platform-v2) 로만 비켜서고, 그 회색은
            테마 무관 고정값이라 본문만 홈 톤으로 바꿔도 지면이 테마를 따라오지
            못했습니다(법률 페이지 홈 톤 전환, 실측). */
-        className={`public-lol-shell public-dashboard-shell${["patchNotes", "followJoin", "aram", "privacy", "terms", "contact"].includes(activeMainPage) ? " public-profile-platform-v2" : ""} theme-${theme}`}
+        className={`public-lol-shell public-dashboard-shell${["patchNotes", "followJoin", "aram", "champions", "privacy", "terms", "contact"].includes(activeMainPage) ? " public-profile-platform-v2" : ""} theme-${theme}`}
         mainId="public-main"
         sidebarMode="none"
         skipLinkLabel={t().skipToContent}

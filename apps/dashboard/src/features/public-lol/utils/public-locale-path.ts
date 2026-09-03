@@ -39,6 +39,7 @@ const LOCALIZABLE_PUBLIC_EXACT_PATHS = new Set([
   "/minecraft/library",
   "/minecraft/patch-notes",
   "/lol/aram",
+  "/lol/champions",
   "/patch-notes",
   /* 미니게임 — 여기에 없으면 localizedPublicUrl 이 경로를 그대로 돌려주어
      canonical 이 /games 가 됩니다. 서버는 /ko/games 를 주므로 같은 페이지에
@@ -53,6 +54,10 @@ const LOCALIZABLE_PUBLIC_EXACT_PATHS = new Set([
 
 const LOCALIZABLE_PUBLIC_PATH_PREFIXES = [
   "/lol/summoners/",
+  /* 챔피언 글로벌 빌드 통계 상세(/lol/champions/<championId>) — championId 가
+     가변이라 정확 목록으로 못 덮습니다. 서버 목록(public-dashboard-routes.ts 의
+     PUBLIC_DASHBOARD_PATH_PREFIXES)과 짝. */
+  "/lol/champions/",
   /* 반응속도 공유 링크(/games/reaction/r/<shareId>) — 여기 없으면 ja 상태에서
      복사한 링크에 로케일 프리픽스가 빠져 SNS 크롤러가 기본(한국어) OG 를 받습니다
      (2026-08-17 실사례). shareId 가 가변이라 정확 목록 대신 prefix 로 커버합니다. */

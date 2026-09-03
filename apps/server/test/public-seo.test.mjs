@@ -125,6 +125,7 @@ const NEW_ENGLISH_STATIC_PAGES = {
   "/games": "Mini-games | YORO.gg",
   "/games/reaction": "Reaction Time Test | YORO.gg",
   "/lol/aram": "Augment ARAM | YORO.gg",
+  "/lol/champions": "LoL Champions | YORO.gg",
   "/minecraft": "Minecraft Wiki | YORO.gg",
   "/minecraft/enchants": "Minecraft Enchantments | YORO.gg",
   "/minecraft/items": "Minecraft Items | YORO.gg",
@@ -133,7 +134,7 @@ const NEW_ENGLISH_STATIC_PAGES = {
   "/streamers": "Streamer Recommendations | YORO.gg",
 };
 
-test("새 영어 정적 페이지 13개는 en lang·자기 canonical·en hreflang·영문 fallback을 낸다", () => {
+test("새 영어 정적 페이지 14개는 en lang·자기 canonical·en hreflang·영문 fallback을 낸다", () => {
   for (const [path, title] of Object.entries(NEW_ENGLISH_STATIC_PAGES)) {
     const metadata = publicSeoMetadataForPath(`/en${path}`, {
       minecraftPatchNotesReady: path === "/minecraft/patch-notes",
@@ -150,9 +151,9 @@ test("새 영어 정적 페이지 13개는 en lang·자기 canonical·en hreflan
   }
 });
 
-test("정적 페이지 23개의 KO·JA·EN description은 120~160자다", () => {
+test("정적 페이지 24개의 KO·JA·EN description은 120~160자다", () => {
   const paths = [...PUBLIC_SITEMAP_STATIC_PATHS, "/minecraft/patch-notes"];
-  assert.equal(paths.length, 23);
+  assert.equal(paths.length, 24);
   for (const path of paths) {
     for (const locale of ["ko", "ja", "en"]) {
       const metadata = publicSeoMetadataForPath(`/${locale}${path === "/" ? "/" : path}`, {

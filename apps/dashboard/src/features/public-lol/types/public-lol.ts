@@ -580,7 +580,7 @@ export type SearchSuggestion = {
 
 export type PublicNavTarget = "search" | "ranking" | "champion" | "stats" | "ingame" | "promotion" | "community";
 
-export type PublicMainPage = "search" | "palworld" | "valorant" | "minecraft" | "bot" | "games" | "streamers" | "subscriptions" | "followJoin" | "aram" | "patchNotes" | "privacy" | "terms" | "contact";
+export type PublicMainPage = "search" | "palworld" | "valorant" | "minecraft" | "bot" | "games" | "streamers" | "subscriptions" | "followJoin" | "aram" | "champions" | "patchNotes" | "privacy" | "terms" | "contact";
 
 export type PublicProfileTab = "overview" | "champions" | "ingame" | "stats";
 

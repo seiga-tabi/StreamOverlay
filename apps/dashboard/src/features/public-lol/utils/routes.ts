@@ -7,6 +7,7 @@ import {
 } from "./public-locale-path";
 
 export const PUBLIC_ARAM_PATH = "/lol/aram";
+export const PUBLIC_CHAMPIONS_PATH = "/lol/champions";
 export const PUBLIC_PATCH_NOTES_PATH = "/patch-notes";
 const PUBLIC_PRIVACY_PATH = "/privacy";
 const PUBLIC_TERMS_PATH = "/terms";
@@ -22,6 +23,7 @@ const PUBLIC_PAGE_PATHS: Partial<Record<PublicMainPage, string>> = {
   subscriptions: "/follow",
   followJoin: "/participation",
   aram: PUBLIC_ARAM_PATH,
+  champions: PUBLIC_CHAMPIONS_PATH,
   patchNotes: PUBLIC_PATCH_NOTES_PATH,
   privacy: PUBLIC_PRIVACY_PATH,
   terms: PUBLIC_TERMS_PATH,
@@ -34,6 +36,21 @@ export type PublicPageRoute = {
   page: PublicMainPage;
   postId?: string;
 };
+
+/* 챔피언 글로벌 빌드 통계 상세 — `/lol/champions/<championId>`.
+   championId 는 Data Dragon 의 숫자 key 라 자릿수만 검사합니다(존재 여부는 화면이
+   목록과 대조해 판단합니다 — 여기서 챔피언 목록을 알 필요가 없습니다). */
+const PUBLIC_CHAMPION_DETAIL_PATTERN = /^\/lol\/champions\/(\d{1,6})$/u;
+
+export function publicChampionIdFromPath(pathname: string = window.location.pathname): number | undefined {
+  const match = PUBLIC_CHAMPION_DETAIL_PATTERN.exec(normalizedPublicPath(pathname));
+  const championId = match?.[1] ? Number(match[1]) : undefined;
+  return championId !== undefined && Number.isSafeInteger(championId) && championId > 0 ? championId : undefined;
+}
+
+export function publicChampionDetailPath(championId: number): string {
+  return `${PUBLIC_CHAMPIONS_PATH}/${championId}`;
+}
 
 /** 서버의 `/patch-notes/26-17` 상세 경로를 기존 목록이 쓰는 `26.17`로 복원합니다. */
 export function patchNotesDetailFromPath(pathname: string): string | null {
@@ -51,6 +68,9 @@ function normalizedPublicPath(pathname: string): string {
 
 export function publicPageRouteFromPath(pathname: string = window.location.pathname): PublicPageRoute | undefined {
   if (patchNotesDetailFromPath(pathname)) return { page: "patchNotes" };
+  /* 챔피언 상세도 "champions" 페이지입니다 — 목록/상세 구분은 화면이 경로에서
+     다시 읽습니다(패치 노트 상세와 같은 방식). */
+  if (publicChampionIdFromPath(pathname) !== undefined) return { page: "champions" };
   const normalized = normalizedPublicPath(pathname);
   const legalRoute = legalPageFromPublicPath(normalized);
   if (legalRoute) return { page: legalRoute };

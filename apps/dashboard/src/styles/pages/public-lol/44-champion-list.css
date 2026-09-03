@@ -1,0 +1,299 @@
+@layer pages {
+  /* 전체 챔피언 목록 + 챔피언 단독 빌드 통계 —
+     목업 `docs/mockups/lol-champion-list.approved-spec.html` 의 실측값입니다.
+   *
+   * 색은 한 개도 새로 만들지 않았습니다. 무채·그래프 램프는
+   * 20-profile-platform.css 의 `.public-profile-platform-v2` 토큰 다리에서,
+   * 서체(명조 제목)·포커스 링은 01-public-home.css 의 크롬 다리에서 옵니다.
+   * 두 다리 모두 셸(`public-profile-platform-v2` + `yoro-home-*`)이 이미 걸어 두므로
+   * 여기서 값을 다시 선언하지 않습니다 — 라이트 테마도 그 토큰이 뒤집히면서
+   * 구조·간격·굵기 한 줄 바꾸지 않고 따라옵니다(목업 §06).
+   *
+   * 카탈로그 문법(격자·카드 표면·도구줄)은 34-aram-augments.css 를 계승하고,
+   * 챔피언이라는 소재 때문에 달라져야 하는 곳만 조정했습니다(목업 §02):
+   *   ① 아이콘 44px → 64px — 챔피언은 얼굴이 이름보다 먼저 읽힙니다.
+   *   ② 카드에서 설명 문장을 뺐습니다 — 챔피언 카드에는 문장이 없습니다.
+   * 역할 배지는 데이터가 없어 이번 범위에 없습니다(목업 §08, 페이지 주석 참조). */
+
+  .public-champions-page,
+  .public-champion-build-page {
+    display: grid;
+    gap: 20px;
+    width: min(100%, 1180px);
+    margin-inline: auto;
+  }
+
+  /* ── 페이지 머리 — 증강 도감 .yoro-aram-head 와 같은 3겹 규격 ───────────── */
+  .yoro-champions-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .yoro-champions-head-norigae {
+    flex: none;
+    margin-top: 4px;
+    color: var(--public-gray-muted);
+  }
+
+  .yoro-champions-head-copy {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .yoro-champions-head-eyebrow {
+    margin: 0;
+    color: var(--public-gray-muted);
+    font-size: 11px;
+    letter-spacing: .08em;
+  }
+
+  .yoro-champions-head-title {
+    margin: 6px 0 0;
+    font-size: 26px;
+    font-weight: 700;
+    font-family: var(--home-serif, "Noto Serif KR", "Noto Serif JP", serif);
+    line-height: 1.2;
+  }
+
+  .yoro-champions-head-title-word {
+    position: relative;
+    display: inline-block;
+  }
+
+  .yoro-champions-head-tail {
+    position: absolute;
+    left: 0;
+    bottom: -10px;
+    color: var(--public-gray-border-strong);
+  }
+
+  .yoro-champions-head-desc {
+    margin: 18px 0 0;
+    color: var(--public-gray-muted);
+    font-size: 13px;
+  }
+
+  /* 총 챔피언 수 태그 — 20px · r2 · 외곽선 · 10px/800(증강 도감 상태 태그와 같은 규격). */
+  .yoro-champions-head-status {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    min-height: 20px;
+    padding: 0 7px;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
+    color: var(--public-gray-muted);
+    font-size: 10px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  /* ── 도구줄 — 검색칸이 남는 폭을 먹습니다(증강 도감 .public-aram-toolbar) ── */
+  .public-champions-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+
+  /* Form.css 는 레이어 밖(JS import)이라 속성으로 못 이깁니다 — 토큰만 갈아끼웁니다. */
+  .public-champions-toolbar .yoro-input {
+    --yoro-radius-md: 2px;
+    --yoro-color-border: var(--public-gray-border);
+    --yoro-color-surface-strong: transparent;
+    --yoro-color-text: var(--public-gray-text);
+    --yoro-color-text-muted: var(--public-gray-muted);
+
+    flex: 1 1 300px;
+    width: auto;
+    min-width: 300px;
+    font-size: 13px;
+  }
+
+  .public-champions-toolbar > label,
+  .public-champions-toolbar > .yoro-form-field {
+    flex: 1 1 300px;
+    min-width: 300px;
+  }
+
+  .public-champions-count {
+    margin: 0;
+    color: var(--public-gray-muted);
+    font-size: 12px;
+  }
+
+  /* ── 격자 — auto-fill 최소 180px · gap 12(1440 지면에서 6열, 좁아지면 자연히 줄어듦) ── */
+  .public-champions-grid,
+  .public-champions-loading {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+  }
+
+  /* ── 챔피언 카드 — 먹 표면 · .5px 헤어라인 · r3 · 그림자 0(증강 카드와 같은 문법) ── */
+  .public-champion-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    min-height: 44px;
+    padding: 12px 14px;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 3px;
+    background: var(--public-gray-surface);
+    color: var(--public-gray-text);
+    box-shadow: none;
+    text-decoration: none;
+  }
+
+  .public-champion-card:hover {
+    border-color: var(--public-gray-border-strong);
+    background: color-mix(in srgb, var(--public-gray-text) 4%, var(--public-gray-surface));
+  }
+
+  .public-champion-card:focus-visible {
+    outline: 2px solid var(--home-stroke, var(--public-gray-border-strong));
+    outline-offset: 2px;
+    border-color: var(--public-gray-border-strong);
+  }
+
+  /* 아이콘 — 64×64 정사각 · r2 · 지면색 바탕 + 헤어라인(증강 아이콘 규격에서 크기만 확대). */
+  .public-champion-card-icon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    width: 64px;
+    height: 64px;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
+    background: var(--public-gray-page);
+    color: var(--graph-fill);
+    font-size: 20px;
+    font-weight: 800;
+    font-family: var(--home-serif, "Noto Serif KR", "Noto Serif JP", serif);
+  }
+
+  .public-champion-card-icon > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .public-champion-card-copy {
+    min-width: 0;
+    display: grid;
+    gap: 6px;
+    justify-items: start;
+  }
+
+  .public-champion-card-name {
+    color: var(--public-gray-text);
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+
+  /* ── 챔피언 단독 빌드 통계 화면 ─────────────────────────────────────────── */
+
+  /* 목록으로 돌아가는 길 — 44px 터치 타깃, 채우지 않고 헤어라인만. */
+  .public-champion-build-back {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 12px;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
+    color: var(--public-gray-muted);
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .public-champion-build-back:hover,
+  .public-champion-build-back:focus-visible {
+    border-color: var(--public-gray-border-strong);
+    color: var(--public-gray-text);
+  }
+
+  /* 머리의 노리개 자리를 챔피언 얼굴이 대신합니다 — 카드 아이콘과 같은 규격, 크기만 48px. */
+  .public-champion-build-face {
+    flex: none;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    width: 48px;
+    height: 48px;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
+    background: var(--public-gray-page);
+  }
+
+  .public-champion-build-face > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* ── 반응형 — 증강 도감의 두 분기점(64rem · 48rem)을 그대로 씁니다(목업 §03) ── */
+  @media (max-width: 64rem) {
+    .public-champions-grid,
+    .public-champions-loading {
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+  }
+
+  @media (max-width: 48rem) {
+    .public-champions-page,
+    .public-champion-build-page {
+      gap: 16px;
+    }
+
+    /* 모바일은 1열이 아니라 2열입니다 — 챔피언 카드에는 설명 문장이 없어
+       390px 1열이면 카드가 가로로 텅 비고 스크롤만 길어집니다(목업 §03). */
+    .public-champions-grid,
+    .public-champions-loading {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    /* 172px 폭에 64px 아이콘을 가로로 두면 글자 칸이 100px 남아 긴 이름이 세 줄이
+       됩니다. 축만 세로로 접고 카드 문법(헤어라인·표면·radius)은 그대로 둡니다. */
+    .public-champion-card {
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 8px;
+      text-align: center;
+    }
+
+    .public-champion-card-icon {
+      width: 56px;
+      height: 56px;
+      font-size: 18px;
+    }
+
+    .public-champion-card-copy {
+      justify-items: center;
+      gap: 5px;
+    }
+
+    .public-champion-card-name {
+      font-size: 13px;
+    }
+
+    .public-champions-toolbar .yoro-input,
+    .public-champions-toolbar > label,
+    .public-champions-toolbar > .yoro-form-field {
+      flex: 1 1 100%;
+      min-width: 0;
+    }
+
+    .yoro-champions-head-title {
+      font-size: 22px;
+    }
+  }
+}

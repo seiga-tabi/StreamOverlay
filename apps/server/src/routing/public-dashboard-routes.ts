@@ -69,6 +69,10 @@ const PUBLIC_DASHBOARD_EXACT_PATHS = new Set([
   "/minecraft/patch-notes/",
   "/lol/aram",
   "/lol/aram/",
+  /* 전체 챔피언 목록. 챔피언 상세(/lol/champions/<championId>)는 id 가 가변이라
+     아래 prefix 목록이 받습니다 — 여기 없으면 새로고침·공유 링크가 404 입니다. */
+  "/lol/champions",
+  "/lol/champions/",
   "/patch-notes",
   "/patch-notes/",
   /* 미니게임 — 여기에 없으면 /ko/games 가 공개 라우트로 인식되지 않아
@@ -100,6 +104,9 @@ const NON_LOCALIZED_PUBLIC_PATHS = new Set([
 
 const PUBLIC_DASHBOARD_PATH_PREFIXES = [
   "/lol/summoners/",
+  /* 챔피언 글로벌 빌드 통계 상세 — championId 마다 고유 URL 이라 prefix 로 받습니다.
+     프런트 목록(apps/dashboard/src/features/public-lol/utils/public-locale-path.ts)과 짝. */
+  "/lol/champions/",
   // Palworld 상세는 query가 아니라 고유 URL을 가져야 검색에 색인되고 공유·북마크가 동작합니다.
   "/palworld/pals/",
   "/palworld/breeding/",

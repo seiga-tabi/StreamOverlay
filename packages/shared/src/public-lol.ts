@@ -1,4 +1,4 @@
-import type { LolRankedStats } from "./participation.js";
+import type { LolChampionSummary, LolRankedStats } from "./participation.js";
 
 const PUBLIC_LOL_RANK_QUEUES = [
   "RANKED_SOLO_5x5",
@@ -34,6 +34,19 @@ export type PublicLolMatchRankResponse = {
   matchId: string;
   participants: PublicLolMatchRankParticipant[];
   fetchedAt: string;
+};
+
+/* 전체 챔피언 목록(GET /api/lol/champions) — Data Dragon 챔피언 맵을 그대로 내보냅니다.
+ *
+ * 라인(탑·정글·미드·원딜·서포터) 대표 역할과 "최근 업데이트" 시각은 Data Dragon 이
+ * 주지 않으므로 이 계약에 없습니다. 없는 값을 추정해 채우지 않습니다 — 역할 축이
+ * 필요해지면 전적 집계(lol_champion_match_builds)의 포지션 분포를 내려주는 별도
+ * 계약을 새로 맺어야 합니다. */
+export type LolChampionListResponse = {
+  /** 아이콘 URL 조립·캐시 검증용 Data Dragon 버전("15.x.y"). */
+  dataDragonVersion: string;
+  /** championId 오름차순이 아니라 Data Dragon 응답 순서 그대로(정렬은 화면이 정합니다). */
+  champions: LolChampionSummary[];
 };
 
 function exactRecord(value: unknown, allowedKeys: readonly string[]): Record<string, unknown> | undefined {

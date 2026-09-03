@@ -10,6 +10,7 @@ import type { PublicLocale } from "../../public-lol/i18n/public-lol-i18n";
 export type LolHomeText = {
   subnavLabel: string;
   tabHome: string;
+  tabChampions: string;
   tabStreamers: string;
   tabParticipation: string;
   tabAram: string;
@@ -43,6 +44,7 @@ export const lolHomeI18n: Record<PublicLocale, LolHomeText> = {
   ko: {
     subnavLabel: "LoL 메뉴",
     tabHome: "홈",
+    tabChampions: "챔피언",
     tabStreamers: "팔로우",
     tabParticipation: "시청자 참여",
     tabAram: "증강 칼바람",
@@ -73,6 +75,7 @@ export const lolHomeI18n: Record<PublicLocale, LolHomeText> = {
   ja: {
     subnavLabel: "LoLメニュー",
     tabHome: "ホーム",
+    tabChampions: "チャンピオン",
     tabStreamers: "フォロー",
     tabParticipation: "視聴者参加",
     tabAram: "オーグメントARAM",
@@ -103,6 +106,7 @@ export const lolHomeI18n: Record<PublicLocale, LolHomeText> = {
   en: {
     subnavLabel: "LoL menu",
     tabHome: "Home",
+    tabChampions: "Champions",
     tabStreamers: "Follow",
     tabParticipation: "Viewer games",
     tabAram: "ARAM augments",
