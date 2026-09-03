@@ -31,8 +31,8 @@ const headerMenu = await readFile(
   new URL("../src/features/public-lol/components/PublicHeaderMenu.tsx", import.meta.url),
   "utf8"
 );
-const stylesIndex = await readFile(
-  new URL("../src/styles/index.css", import.meta.url),
+const lolRouteCss = await readFile(
+  new URL("../src/styles/pages/public-lol/lol-route.css", import.meta.url),
   "utf8"
 );
 
@@ -94,7 +94,7 @@ test("스타일은 pages layer 안에 있고 !important 를 쓰지 않는다", (
   const rules = css.replace(/\/\*[\s\S]*?\*\//gu, "");
   assert.match(css, /^@layer pages \{/u);
   assert.equal(rules.includes("!important"), false);
-  assert.match(stylesIndex, /@import "\.\/pages\/public-lol\/35-patch-notes\.css";/u);
+  assert.match(lolRouteCss, /@import "\.\/35-patch-notes\.css";/u);
   // 존재하지 않는 토큰을 쓰면 fallback 값으로만 동작합니다.
   const tokens = [...rules.matchAll(/var\((--yoro-[a-z0-9-]+)/gu)].map((match) => match[1]);
   for (const token of new Set(tokens)) {

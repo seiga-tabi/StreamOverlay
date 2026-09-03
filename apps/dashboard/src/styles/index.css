@@ -3,6 +3,7 @@
 /* 서버가 주입하는 SEO fallback 본문. React mount 전 잠깐 보이는 동안의 표시 규칙입니다. */
 @import "./shared/seo-fallback.css";
 @import "./legacy/01-core.css" layer(legacy);
+/* 공용 셸 선택자를 포함하므로 LoL 외 페이지에도 필요한 legacy 규칙입니다. */
 @import "./pages/public-lol/02-legacy.css" layer(legacy);
 @import "./legacy/03-product-gray.css" layer(legacy);
 @import "./pages/dashboard/04-followers.css" layer(legacy);
@@ -31,30 +32,15 @@
    합니다(레이어에 속한 스타일은 특이성이 아무리 높아도 레이어 없는 스타일을 못 이깁니다). */
 @import "./shared/app-shell-page-overrides.css";
 @import "./pages/account/19-participation-management.css" layer(legacy);
-@import "./pages/public-lol/20-profile-platform.css" layer(legacy);
-@import "./pages/public-lol/21-aram.css" layer(legacy);
-/* 매치 카드 리디자인. 파일 안에서 직접 pages layer 를 선언해 legacy 뒤에 놓입니다. */
-@import "./pages/public-lol/22-match-card.css";
-/* 프로필 히어로 리디자인. 같은 방식으로 pages layer 에서 레이아웃을 단독 소유합니다. */
-@import "./pages/public-lol/23-profile-hero.css";
 /* 홈 검색바 모바일 잘림 보정. */
 @import "./pages/public-lol/24-home-search.css";
-/* 전적 사이드바 리디자인. pages layer 에서 단독 소유합니다. */
-@import "./pages/public-lol/25-profile-sidebar.css";
-/* 참여 페이지 리디자인. pages layer 에서 단독 소유합니다. */
-@import "./pages/public-lol/26-participation.css";
-/* 모바일 상단 탐색 줄 항목 이탈 보정. */
+/* 모바일 상단 탐색 줄 항목 이탈 보정. 팔월드/발로란트/마인크래프트/게임즈/
+   봇/대시보드 헤더에도 스코프 없이 적용되는 공용 규칙이라 eager 유지합니다. */
 @import "./pages/public-lol/27-mobile-nav.css";
-/* 서버 선택 메뉴 4글자 코드 보정. */
-@import "./pages/public-lol/28-server-menu.css";
-/* 스트리머 페이지 리디자인. pages layer 에서 단독 소유합니다. */
-@import "./pages/public-lol/29-streamers.css";
-/* 전적 상세·빌드 리디자인. pages layer 에서 단독 소유합니다. */
-@import "./pages/public-lol/30-match-detail.css";
-/* 모바일 하단 탭바(상단바 리디자인). LoL 헤더에서만 가로 스크롤 nav를 대체합니다. */
+/* 모바일 하단 탭바(상단바 리디자인). public-bottom-tab-bar__item 은 LoL 뿐
+   아니라 팔월드/발로란트/마인크래프트/게임즈/대시보드 탭바가 공유하는 유일한
+   정의라 eager 유지합니다. */
 @import "./pages/public-lol/31-bottom-tab-bar.css";
-/* 데스크톱 상단바 1행 통합(상단바 리디자인). 80rem 이상에서만 nav를 합칩니다. */
-@import "./pages/public-lol/32-desktop-header-row.css";
 /* Dashboard 홈 리디자인. pages layer 에서 단독 소유합니다. */
 @import "./pages/account/31-dashboard-home.css";
 /* 참여 모집 Discord 알림 설정. pages layer 에서 단독 소유합니다. */
@@ -63,22 +49,5 @@
 @import "./pages/account/33-admin-console.css";
 /* Twitch Extension viewer + 관리 카드. pages layer 에서 단독 소유합니다. */
 @import "./pages/account/34-twitch-extension.css";
-/* 증강 칼바람 보정. pages layer 에서 단독 소유합니다. */
-@import "./pages/public-lol/34-aram-augments.css";
-/* 패치 노트 목록. pages layer 에서 단독 소유합니다. */
-@import "./pages/public-lol/35-patch-notes.css";
-
-@import "./pages/public-lol/36-champion-analysis.css";
-
-@import "./pages/public-lol/37-signature-builds.css";
-
-/* 프로필 수묵 리스킨 — 20-profile-platform 토큰을 마지막에 덮습니다. */
-@import "./pages/public-lol/38-ink-profile.css";
-/* 인게임 탭 수묵 리디자인 — 신설 .public-ingame-board 네임스페이스 단독 소유. */
-@import "./pages/public-lol/39-ink-ingame.css";
-/* 전적검색 로딩(진행 헤어라인 + 스켈레톤). pages layer 를 파일 안에서 선언합니다. */
-@import "./pages/public-lol/40-ink-loading.css";
-@import "./pages/public-lol/41-ink-match-detail.css";
-@import "./pages/public-lol/42-ink-patch-notes.css";
 /* Organization 콘솔(개요·Bot 제어·Palworld 서버) 리디자인. pages layer 소유. */
 @import "./pages/bot/18-bot-console-redesign.css";

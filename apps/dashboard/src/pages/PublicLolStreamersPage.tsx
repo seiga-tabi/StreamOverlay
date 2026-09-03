@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import "../styles/pages/public-lol/lol-route.css";
 import "../styles/pages/home/03-lol-streamers.css";
 import { usePublicLocale } from "../features/public-lol/hooks/usePublicLocale";
 import { setActivePublicLocale, type PublicLocale } from "../features/public-lol/i18n/public-lol-i18n";

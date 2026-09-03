@@ -1,0 +1,28 @@
+/* LoL 라우트 전용 CSS 묶음. PublicLolPage / PublicLolHomePage /
+   PublicLolStreamersPage lazy 청크가 이 파일을 소유합니다 —
+   LoL과 무관한 페이지(팔월드/발로란트/홈 등)를 처음부터 직접 방문하면 이 CSS를
+   다운로드하지 않습니다(단, App.tsx의 prefetch로 팔월드 경로 방문 1.5초 뒤
+   LoL 페이지 청크가 미리 로드되면 이 CSS도 함께 로드됩니다 — 선택자가 전부
+   LoL 전용 조상에 스코프돼 있어 다른 페이지 스타일에는 영향 없습니다).
+   20·21번은 layer(legacy)로 감싸 import하고, 나머지는 파일 자체가
+   @layer pages를 선언합니다 — 두 경우 모두 아래 순서가 그 layer 안에서의
+   적용 순서이므로 절대 바꾸지 마세요. */
+@import "./20-profile-platform.css" layer(legacy);
+@import "./21-aram.css" layer(legacy);
+@import "./22-match-card.css";
+@import "./23-profile-hero.css";
+@import "./25-profile-sidebar.css";
+@import "./26-participation.css";
+@import "./28-server-menu.css";
+@import "./29-streamers.css";
+@import "./30-match-detail.css";
+@import "./32-desktop-header-row.css";
+@import "./34-aram-augments.css";
+@import "./35-patch-notes.css";
+@import "./36-champion-analysis.css";
+@import "./37-signature-builds.css";
+@import "./38-ink-profile.css";
+@import "./39-ink-ingame.css";
+@import "./40-ink-loading.css";
+@import "./41-ink-match-detail.css";
+@import "./42-ink-patch-notes.css";

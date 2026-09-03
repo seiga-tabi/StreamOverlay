@@ -2,6 +2,7 @@ import { LolChrome, lolSubnavActive } from "../features/public-home/components/L
 import { LolBottomTabBar } from "../features/public-home/components/HomeTabBar";
 import { lolHomeI18n } from "../features/public-home/i18n/lol-home-i18n";
 import { Fragment, useEffect, useId, useMemo, useRef, useState, type FormEvent, type MouseEvent, type ReactNode } from "react";
+import "../styles/pages/public-lol/lol-route.css";
 import {
   normalizeLolPlatformId,
   parseRiotIdDetailed,
