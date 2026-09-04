@@ -12,7 +12,10 @@ const {
   PatchChangeSummaryService,
   buildPatchChangeSummary,
   championChangeDirection,
+  championSkillChangesFor,
   comparedVersionsForPatch,
+  cooldownChangeDirection,
+  latestPatchVersionFrom,
 } = await import("../dist/services/patch-change-summary.js");
 
 function note(patchVersion, dataDragonVersion) {
@@ -116,6 +119,59 @@ test("방향은 스탯별 표로 판정하고 상충하면 adjust 다", () => {
     { stat: "unknownstat", from: 1, to: 2 },
     { stat: "hp", from: 600, to: 650 },
   ]), "buff");
+});
+
+test("최신 패치 번호는 목록 순서가 아니라 번호로 고른다", () => {
+  /* 문자열 비교로는 "26.9" > "26.16" 이 되어 최신을 한 칸 놓칩니다. */
+  assert.equal(latestPatchVersionFrom([note("26.9", "16.9.1"), note("26.16", "16.16.1")]), "26.16");
+  /* 패치 번호 없는 공지가 첫 항목이어도 최신 패치를 찾습니다. */
+  assert.equal(latestPatchVersionFrom([{ ...note("26.16", "16.16.1"), patchVersion: undefined }, note("26.15", "16.15.1")]), "26.15");
+  assert.equal(latestPatchVersionFrom([]), undefined);
+});
+
+test("쿨타임은 값이 작아져야 강화이고, 섞이거나 레벨 수가 달라지면 판정하지 않는다", () => {
+  /* 스탯과 극성이 반대입니다 — 140/120/100 → 130/110/90 이 초록입니다(스펙 §06). */
+  assert.equal(cooldownChangeDirection([140, 120, 100], [130, 110, 90]), "buff");
+  assert.equal(cooldownChangeDirection([9, 8, 7, 6, 5], [10, 9, 8, 7, 6]), "nerf");
+  /* 일부 레벨만 내려간 경우도 오른 레벨이 없으면 강화입니다. */
+  assert.equal(cooldownChangeDirection([140, 120, 100], [140, 110, 90]), "buff");
+  /* 오르내림이 섞이면 하나의 판정으로 요약할 수 없습니다 — 틀린 색보다 무표시가 낫습니다. */
+  assert.equal(cooldownChangeDirection([140, 120, 100], [130, 130, 90]), undefined);
+  assert.equal(cooldownChangeDirection([7, 7, 7], [7, 7, 7]), undefined);
+  /* 레벨 수가 달라졌으면(스킬 개편) 비교하지 않습니다. */
+  assert.equal(cooldownChangeDirection([140, 120, 100], [130, 110, 90, 70]), undefined);
+  assert.equal(cooldownChangeDirection([], []), undefined);
+});
+
+test("스킬 변경은 두 시점의 쿨타임만 비교하고 판정 가능한 것만 싣는다", async () => {
+  const byVersion = {
+    "16.15.1": new Map([["Q", [7, 7, 7, 7, 7]], ["W", [9, 8, 7, 6, 5]], ["R", [140, 120, 100]]]),
+    "16.16.1": new Map([["Q", [7, 7, 7, 7, 7]], ["W", [10, 9, 8, 7, 6]], ["R", [130, 110, 90]], ["E", [12, 12, 12]]]),
+  };
+  const requested = [];
+  const changes = await championSkillChangesFor(103, "16.15.1", "16.16.1", {
+    async cooldowns(championId, version) {
+      requested.push([championId, version]);
+      return byVersion[version] ?? new Map();
+    },
+  });
+
+  assert.deepEqual(requested, [[103, "16.15.1"], [103, "16.16.1"]]);
+  /* Q 는 그대로라 빠지고, E 는 이전 시점에 없어 "변경"이 아닙니다. */
+  assert.deepEqual(changes, [
+    { key: "W", direction: "nerf", fields: [{ field: "cooldown", from: [9, 8, 7, 6, 5], to: [10, 9, 8, 7, 6] }] },
+    { key: "R", direction: "buff", fields: [{ field: "cooldown", from: [140, 120, 100], to: [130, 110, 90] }] },
+  ]);
+
+  /* 같은 버전끼리는 비교 자체가 성립하지 않습니다 — 요청도 보내지 않습니다. */
+  let called = false;
+  assert.deepEqual(await championSkillChangesFor(103, "16.16.1", "16.16.1", {
+    async cooldowns() {
+      called = true;
+      return new Map();
+    },
+  }), []);
+  assert.equal(called, false);
 });
 
 test("아이템은 가격 변경·신규·삭제를 구분한다", () => {

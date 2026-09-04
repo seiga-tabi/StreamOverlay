@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState, type MouseEvent } from "react";
-import { type LolChampionBuildStatsPosition, type LolChampionSummary } from "@streamops/shared";
+import { type LolChampionBuildStatsPosition, type LolChampionDetailResponse, type LolChampionSummary } from "@streamops/shared";
 import { NorigaeMark, TailUnderline } from "../../public-home/components/HomeMarks";
-import { fetchChampionBuildStats, getPublicLolChampions } from "../api/lol";
+import { fetchChampionBuildStats, getChampionDetail, getPublicLolChampions } from "../api/lol";
+import { ChampionBaseStatsPanel } from "../components/ChampionBaseStatsPanel";
+import { ChampionSkillsPanel } from "../components/ChampionSkillsPanel";
 import {
   GlobalBuildStatsBody,
   GlobalBuildStatsPositionTabs,
@@ -42,6 +44,8 @@ export function PublicChampionBuildPage({ championId, helpers }: {
   const [championListStatus, setChampionListStatus] = useState<"pending" | "ready" | "failed">("pending");
   const [position, setPosition] = useState<LolChampionBuildStatsPosition>(DEFAULT_CHAMPION_BUILD_POSITION);
   const [state, setState] = useState<GlobalBuildStatsState>({ status: "loading" });
+  /* 스킬·기본 스탯. 없으면 두 패널을 아예 그리지 않습니다(빈 패널 금지). */
+  const [detail, setDetail] = useState<LolChampionDetailResponse>();
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
@@ -57,6 +61,23 @@ export function PublicChampionBuildPage({ championId, helpers }: {
       .catch(() => {
         if (controller.signal.aborted) return;
         setChampionListStatus("failed");
+      });
+    return () => controller.abort();
+  }, [championId]);
+
+  /* 스킬·기본 스탯·이번 패치 변경은 빌드 통계와 완전히 다른 원천이라 fail-soft 입니다 —
+     실패하면 두 패널만 조용히 빠지고 기존 통계 화면은 그대로 살아 있습니다
+     (챔피언 목록 페이지의 배지 로직과 같은 원칙, 목업 §07·§11). */
+  useEffect(() => {
+    const controller = new AbortController();
+    setDetail(undefined);
+    void getChampionDetail(championId, controller.signal)
+      .then((data) => {
+        if (controller.signal.aborted) return;
+        setDetail(data);
+      })
+      .catch(() => {
+        /* 취소·네트워크·형식 오류 모두 패널 없는 기존 화면으로 끝냅니다. */
       });
     return () => controller.abort();
   }, [championId]);
@@ -137,6 +158,11 @@ export function PublicChampionBuildPage({ championId, helpers }: {
           <p className="yoro-champions-head-desc">{t().globalBuildStatsFoot}</p>
         </div>
       </header>
+
+      {/* 통계보다 먼저 놓습니다 — 통계는 표본이 모자라면 비어 보이는 화면이지만
+          스킬·스탯은 항상 있는 정보라, 먼저 놓아야 빈 첫 화면이 나오지 않습니다(목업 §01). */}
+      {detail ? <ChampionSkillsPanel detail={detail} /> : null}
+      {detail ? <ChampionBaseStatsPanel detail={detail} /> : null}
 
       <section className="public-champ-panel public-gbs-panel" id="public-global-build-stats">
         <div className="public-champ-head">

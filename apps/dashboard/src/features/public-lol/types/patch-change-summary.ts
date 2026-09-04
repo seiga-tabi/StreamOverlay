@@ -168,6 +168,9 @@ const STAT_LABELS: Record<string, { ko: string; ja: string; en: string }> = {
   mpregen: { ko: "마나 재생", ja: "マナ回復", en: "Mana regen" },
   mpregenperlevel: { ko: "레벨당 마나 재생", ja: "レベルごとのマナ回復", en: "Mana regen per level" },
   crit: { ko: "치명타", ja: "クリティカル", en: "Critical strike" },
+  /* ddragon stats 는 키가 20개인데 이 사전에 19개만 있어 챔피언 상세의 기본 스탯
+     격자에 영문 키가 그대로 노출됐습니다(목업 §04 에서 발견 · 라벨 추가로 결정). */
+  critperlevel: { ko: "레벨당 치명타", ja: "レベルごとのクリティカル", en: "Critical strike per level" },
   attackdamage: { ko: "공격력", ja: "攻撃力", en: "Attack damage" },
   attackdamageperlevel: { ko: "레벨당 공격력", ja: "レベルごとの攻撃力", en: "Attack damage per level" },
   attackspeed: { ko: "공격 속도", ja: "攻撃速度", en: "Attack speed" },
@@ -178,4 +181,10 @@ export type PatchStatLabelLocale = "ko" | "ja" | "en";
 
 export function patchStatLabel(stat: string, locale: PatchStatLabelLocale): string {
   return STAT_LABELS[stat]?.[locale] ?? stat;
+}
+
+/** 라벨이 없어 영문 키가 그대로 나가는 상태인지. 화면은 그 칸을 다른 서체로 표시합니다
+ *  — 앞으로 ddragon 이 스탯 키를 늘렸을 때를 위한 보험입니다(목업 §04). */
+export function hasPatchStatLabel(stat: string): boolean {
+  return stat in STAT_LABELS;
 }

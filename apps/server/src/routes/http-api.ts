@@ -8,7 +8,13 @@ import type { AdminAccount, Store } from "../services/store.js";
 import { loadAramAugmentCatalog } from "../services/aram-augment-catalog.js";
 import type { GameBoxartService } from "../services/game-boxart.js";
 import type { PatchNotesService } from "../services/patch-notes-service.js";
-import type { PatchChangeSummaryService } from "../services/patch-change-summary.js";
+import {
+  championChangeDirection,
+  championSkillChangesFor,
+  comparedVersionsForPatch,
+  latestPatchVersionFrom,
+  type PatchChangeSummaryService
+} from "../services/patch-change-summary.js";
 import { storeParticipationRepository } from "../services/participation-repository.js";
 import { publishParticipationSnapshot as publishAtomicParticipationSnapshot } from "../services/participation-snapshot.js";
 import type { ActionDispatcher } from "../core/action-dispatcher.js";
@@ -173,7 +179,9 @@ import {
   type LolChampionBuildStatsAsset,
   type LolChampionBuildStatsPosition,
   type LolChampionBuildStatsResponse,
-  type LolChampionListResponse
+  type LolChampionDetailResponse,
+  type LolChampionListResponse,
+  type LolChampionPatchChanges
 } from "@streamops/shared";
 import type { JsonlLogger } from "../logging/jsonl-logger.js";
 import type { TwitchExtensionSettingsRepository } from "../database/repositories/twitch-extension-settings-repository.js";
@@ -3574,6 +3582,114 @@ async function buildPublicLolChampionList(
        "정상 응답"으로 보여 주지 않습니다. */
     throw new HttpRequestError(503, { error: "챔피언 목록을 사용할 수 없습니다.", code: "LOL_CHAMPIONS_UNAVAILABLE" });
   }
+}
+
+/* ── 챔피언 상세(GET /api/lol/champion-detail) ──────────────────────────────
+ *
+ * 목업 `docs/mockups/lol-champion-detail-skills-stats.approved-spec.html` §11.
+ * 한 화면이 네 종류(패시브·스킬·기본 스탯·패치 변경)를 동시에 쓰므로 요청 4번
+ * 대신 1번으로 묶습니다. DB 도 Riot API 도 건드리지 않습니다.
+ *
+ * 이름·설명은 ko/ja/en 을 함께 보냅니다 — 목록 API 와 같은 규칙이라 locale 파라미터가
+ * 없고, 응답 하나를 모든 언어가 공유합니다(공용 캐시 가능). 스탯 라벨은 서버가
+ * 붙이지 않습니다(언어를 응답에 섞지 않습니다). */
+
+const PUBLIC_LOL_CHAMPION_DETAIL_CACHE_CONTROL = "public, max-age=3600, stale-while-revalidate=86400";
+
+/**
+ * 이번 패치의 이 챔피언 변경. 못 구하면 undefined 이고 화면은 배지 없는 기본
+ * 상태(목업 §07)로 그립니다 — 스킬·스탯까지 같이 실패시키지 않습니다.
+ *
+ * 스탯은 이미 있는 PatchChangeSummaryService(6시간 캐시)를 그대로 재사용합니다.
+ * 챔피언 목록 배지와 같은 계산이므로 두 화면이 다른 말을 하지 않습니다. locale 을
+ * ko 로 고정하는 이유: 여기서 읽는 것은 스탯 키와 수치뿐이라 언어가 결과를 바꾸지
+ * 않고, 목록 화면이 이미 채워 둔 캐시를 그대로 쓸 수 있습니다.
+ */
+async function championDetailPatchChanges(
+  input: Pick<HttpHandlerInput, "dataDragon" | "patchNotes" | "patchChangeSummary">,
+  championId: number,
+  championKey: string
+): Promise<LolChampionPatchChanges | undefined> {
+  const dataDragon = input.dataDragon;
+  if (!dataDragon || !input.patchNotes || !input.patchChangeSummary) return undefined;
+  const notes = (await input.patchNotes.getFeed("ko"))?.notes ?? [];
+  const patchVersion = latestPatchVersionFrom(notes);
+  if (!patchVersion) return undefined;
+  /* 비교 경계는 날짜로 추측하지 않습니다 — 노트가 주는 dataDragonVersion 쌍입니다. */
+  const comparedVersions = comparedVersionsForPatch(notes, patchVersion);
+  if (!comparedVersions) return undefined;
+
+  const summary = await input.patchChangeSummary.summaryFor(patchVersion, "ko");
+  const championChange = summary?.championChanges.find((entry) => entry.championId === championId);
+  const stats = (championChange?.changes ?? []).map((change) => ({
+    ...change,
+    /* 스탯 하나짜리 묶음의 판정이 곧 그 스탯의 판정입니다(모르는 키는 adjust). */
+    direction: championChangeDirection([change])
+  }));
+
+  /* 스킬 쿨타임은 패치 요약이 보지 않는 값이라(skillChangesIncluded: false) 여기서만
+     따로 비교합니다 — 챔피언 한 명 분량의 champion/<Key>.json 두 판입니다. */
+  const spells = await championSkillChangesFor(championId, comparedVersions[0], comparedVersions[1], {
+    cooldowns: (_championId, version) => dataDragon.getChampionSpellCooldowns(championKey, version)
+  });
+
+  /* 스탯도 스킬도 안 바뀌었으면 "변경 없음"을 필드 부재로 분명히 말합니다. */
+  if (stats.length === 0 && spells.length === 0) return undefined;
+  return { patchVersion, comparedVersions, stats, spells };
+}
+
+async function buildPublicLolChampionDetail(
+  input: Pick<HttpHandlerInput, "dataDragon" | "patchNotes" | "patchChangeSummary" | "logger">,
+  championId: number
+): Promise<{ detail: LolChampionDetailResponse; cacheControl: string }> {
+  const dataDragon = input.dataDragon;
+  if (!dataDragon) {
+    throw new HttpRequestError(503, { error: "챔피언 정보를 사용할 수 없습니다.", code: "LOL_CHAMPION_DETAIL_UNAVAILABLE" });
+  }
+
+  let dataDragonVersion: string;
+  let abilities: Awaited<ReturnType<DataDragonService["getChampionAbilityDetails"]>>;
+  let baseStats: Readonly<Record<string, number>> | undefined;
+  try {
+    dataDragonVersion = await dataDragon.getLatestVersion();
+    [abilities, baseStats] = await Promise.all([
+      dataDragon.getChampionAbilityDetails(championId, dataDragonVersion),
+      dataDragon.getChampionBaseStats(championId, dataDragonVersion)
+    ]);
+  } catch {
+    /* Data Dragon 이 흔들리면 빈 화면 대신 503 — 스킬이 사라진 화면을
+       "정상 응답"으로 보여 주지 않습니다(챔피언 목록과 같은 규칙). */
+    throw new HttpRequestError(503, { error: "챔피언 정보를 사용할 수 없습니다.", code: "LOL_CHAMPION_DETAIL_UNAVAILABLE" });
+  }
+  if (!abilities) {
+    throw new HttpRequestError(404, { error: "챔피언을 찾을 수 없습니다.", code: "LOL_CHAMPION_NOT_FOUND" });
+  }
+
+  let patchChanges: LolChampionPatchChanges | undefined;
+  try {
+    patchChanges = await championDetailPatchChanges(input, championId, abilities.championKey);
+  } catch (error) {
+    /* 패치 비교는 부가 정보입니다. 실패해도 스킬·스탯은 그대로 나갑니다(목업 §11). */
+    input.logger?.error({
+      type: "public_lol.champion_detail_patch_changes_failed",
+      errorCode: "patch_change_summary_unavailable",
+      error: toSafeErrorMessage(error)
+    });
+  }
+  if (patchChanges?.comparedVersions[1] !== dataDragonVersion) patchChanges = undefined;
+
+  return {
+    detail: {
+      championId,
+      championKey: abilities.championKey,
+      dataDragonVersion,
+      ...(abilities.passive ? { passive: abilities.passive } : {}),
+      spells: abilities.spells,
+      baseStats: { ...(baseStats ?? {}) },
+      ...(patchChanges ? { patchChanges } : {})
+    },
+    cacheControl: abilities.localesComplete ? PUBLIC_LOL_CHAMPION_DETAIL_CACHE_CONTROL : "no-store"
+  };
 }
 
 /* ── 챔피언 글로벌 빌드 통계(GET /api/lol/champion-build-stats) ──────────────
@@ -13063,6 +13179,19 @@ export function createHttpHandler(input: HttpHandlerInput) {
            security/auth.ts 의 PUBLIC 화이트리스트에 같이 등록돼 있어야 합니다. */
         const champions = await buildPublicLolChampionList(input);
         return sendJson(req, res, 200, champions, { "Cache-Control": PUBLIC_LOL_CHAMPIONS_CACHE_CONTROL });
+      }
+      if (req.method === "GET" && url.pathname === "/api/lol/champion-detail") {
+        /* security/auth.ts 의 PUBLIC 화이트리스트에 같이 등록돼 있어야 합니다
+           (커밋 db73d90 에서 빌드 통계 API 가 누락으로 막혔던 전례). */
+        const championId = positiveIntegerParam(url.searchParams.get("championId"));
+        if (championId === undefined) {
+          return sendJson(req, res, 400, {
+            error: "championId는 양의 정수여야 합니다.",
+            code: "LOL_CHAMPION_DETAIL_INPUT_INVALID"
+          }, { "Cache-Control": "no-store" });
+        }
+        const { detail, cacheControl } = await buildPublicLolChampionDetail(input, championId);
+        return sendJson(req, res, 200, detail, { "Cache-Control": cacheControl });
       }
       if (req.method === "GET" && url.pathname === "/api/lol/champion-build-stats") {
         /* 플랫폼(서버) 파라미터는 받지 않습니다 — 전 서버 누적 전역 집계. updatedAt 이

@@ -159,6 +159,23 @@ test("전체 챔피언 API는 dashboard 인증 없이 PUBLIC 경로로 접근할
   });
 });
 
+test("챔피언 상세 API는 dashboard 인증 없이 PUBLIC 경로로 접근할 수 있다", async () => {
+  await withAuthConfig(async () => {
+    /* 커밋 db73d90 에서 챔피언 빌드 통계 API 가 화이트리스트 누락으로 막혔던 전례가
+       있어, 공개 화면이 쓰는 신규 경로는 등록 여부를 테스트로 못 박습니다. */
+    assert.equal(requiredHttpPrincipal("GET", "/api/lol/champion-detail"), "PUBLIC");
+
+    const handler = handlerWithSessionStore(new DashboardSessionStore());
+    const req = createRequest("GET", "/api/lol/champion-detail?championId=103");
+    const res = createResponse();
+
+    await handler(req, res);
+
+    assert.notEqual(res.statusCode, 401);
+    assert.notEqual(res.statusCode, 403);
+  });
+});
+
 test("공개 LoL 전적 API는 허용 목록 밖의 서버 값을 외부 요청 전에 거부한다", async () => {
   await withAuthConfig(async () => {
     const handler = handlerWithSessionStore(new DashboardSessionStore());

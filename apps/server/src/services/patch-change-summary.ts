@@ -13,7 +13,12 @@
  * 정보를 지어내지 않게 하는 장치입니다.
  */
 
-import type { PatchNote, PatchNoteLocale } from "@streamops/shared";
+import type {
+  LolChampionPatchSpellChange,
+  LolChampionSpellKey,
+  PatchNote,
+  PatchNoteLocale
+} from "@streamops/shared";
 
 /** 같은 변경을 받은 챔피언이 이 수 이상이면 시스템 변경으로 묶습니다. */
 export const PATCH_SYSTEM_CHANGE_MIN_CHAMPIONS = 5;
@@ -140,6 +145,24 @@ export function comparedVersionsForPatch(
   return [previous, current];
 }
 
+/**
+ * 노트 목록에서 가장 최신 패치 번호.
+ *
+ * 피드가 최신순으로 온다는 사실에 기대지 않고 번호 자체를 비교합니다 — 첫 항목이
+ * 패치 번호 없는 공지인 경우에도 최신 패치를 찾아야 합니다(프런트
+ * utils/patch-version.ts 의 latestPatchVersion 과 같은 규칙).
+ */
+export function latestPatchVersionFrom(notes: readonly PatchNote[]): string | undefined {
+  let best: { version: string; order: number } | undefined;
+  for (const note of notes) {
+    if (!note.patchVersion) continue;
+    const order = patchVersionOrder(note.patchVersion);
+    if (order === undefined) continue;
+    if (!best || order > best.order) best = { version: note.patchVersion, order };
+  }
+  return best?.version;
+}
+
 /** "26.16" → 26016. 형식을 벗어나면 undefined. */
 function patchVersionOrder(patchVersion: string): number | undefined {
   const match = /^(\d{1,3})\.(\d{1,3})$/u.exec(patchVersion);
@@ -264,6 +287,75 @@ export function buildPatchChangeSummary(input: PatchChangeSummaryInput): PatchCh
 
 function statChangeKey(change: PatchStatChange): string {
   return `${change.stat}|${change.from}|${change.to}`;
+}
+
+/* ── 스킬 쿨타임 비교 (챔피언 상세 전용) ─────────────────────────────────────
+ *
+ * buildPatchChangeSummary 는 champion.json 의 기본 스탯만 비교하고, 그 사실을
+ * skillChangesIncluded: false 로 밝힙니다. 아래 함수들은 그 한계를 바꾸지 않습니다
+ * — 챔피언 한 명을 열었을 때만 champion/<Key>.json 두 판을 받아 쿨타임을 비교하는
+ * 별도 경로입니다(전체 패치 요약에는 여전히 스킬 변경이 들어가지 않습니다).
+ *
+ * 소모값·사거리는 범위 밖입니다(목업 §11 이 쿨타임만 명시). */
+
+export type PatchSpellCooldowns = ReadonlyMap<LolChampionSpellKey, readonly number[]>;
+
+export type ChampionSkillChangeDeps = {
+  /** 해당 버전의 레벨별 쿨타임. 못 받으면 비교하지 않습니다. */
+  cooldowns(championId: number, version: string): Promise<PatchSpellCooldowns>;
+};
+
+/**
+ * 쿨타임 배열 하나의 방향.
+ *
+ * 쿨타임은 스탯과 극성이 반대입니다 — 값이 **작아져야** 강화입니다(목업 §06).
+ * 레벨 수가 달라졌거나 오르내림이 섞이면 하나의 판정으로 요약할 수 없으므로
+ * undefined 로 떨어뜨립니다. 틀린 초록/빨강은 정보가 없는 것보다 나쁩니다.
+ */
+export function cooldownChangeDirection(
+  from: readonly number[],
+  to: readonly number[]
+): "buff" | "nerf" | undefined {
+  if (from.length === 0 || from.length !== to.length) return undefined;
+  let lower = 0;
+  let higher = 0;
+  for (const [index, previous] of from.entries()) {
+    const current = to[index];
+    if (current === undefined) return undefined;
+    if (current < previous) lower += 1;
+    else if (current > previous) higher += 1;
+  }
+  if (lower > 0 && higher === 0) return "buff";
+  if (higher > 0 && lower === 0) return "nerf";
+  return undefined;
+}
+
+/**
+ * 두 패치 시점의 쿨타임을 비교합니다. 변경이 없거나 판정할 수 없으면 빈 배열입니다
+ * — 빈 배열이 곧 "이 스킬은 이번 패치에서 안 바뀌었다"는 뜻입니다(§07 기본 상태).
+ */
+export async function championSkillChangesFor(
+  championId: number,
+  previousVersion: string,
+  currentVersion: string,
+  deps: ChampionSkillChangeDeps
+): Promise<LolChampionPatchSpellChange[]> {
+  if (previousVersion === currentVersion) return [];
+  const [previous, current] = await Promise.all([
+    deps.cooldowns(championId, previousVersion),
+    deps.cooldowns(championId, currentVersion)
+  ]);
+
+  const changes: LolChampionPatchSpellChange[] = [];
+  for (const [key, to] of current) {
+    const from = previous.get(key);
+    /* 이전 패치에 없던 스킬(신규 챔피언·스킬 개편)은 "변경"이 아닙니다. */
+    if (!from) continue;
+    const direction = cooldownChangeDirection(from, to);
+    if (!direction) continue;
+    changes.push({ key, direction, fields: [{ field: "cooldown", from: [...from], to: [...to] }] });
+  }
+  return changes;
 }
 
 export type PatchChangeSummaryDeps = {

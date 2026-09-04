@@ -1,4 +1,10 @@
-import type { LolChampionSkinOption, LolChampionSummary } from "@streamops/shared";
+import type {
+  LolChampionPassiveDetail,
+  LolChampionSkinOption,
+  LolChampionSpellDetail,
+  LolChampionSpellKey,
+  LolChampionSummary
+} from "@streamops/shared";
 
 type DataDragonChampion = {
   id: string;
@@ -9,13 +15,39 @@ type DataDragonChampion = {
   image?: {
     full?: string;
   };
+  /** 챔피언 자원 이름("마나"·"기력"·"없음"). 스킬 소모값 라벨이 여기서 옵니다. */
+  partype?: string;
+  /** 패시브. champion/<Key>.json 에만 있고 목록 champion.json 에는 없습니다. */
+  passive?: DataDragonChampionPassive;
   spells?: DataDragonChampionSpell[];
   skins?: DataDragonSkin[];
+};
+
+type DataDragonChampionPassive = {
+  name: string;
+  /** 완성된 문장입니다. 스킬과 달리 tooltip 필드 자체가 없습니다. */
+  description?: string;
+  image?: {
+    full?: string;
+  };
 };
 
 type DataDragonChampionSpell = {
   id: string;
   name: string;
+  /* description 만 씁니다. tooltip 은 `{{ rbasedamage }}` 같은 미해결 변수가
+     그대로 있어 화면에 깨진 문장이 됩니다(목업 §11). */
+  description?: string;
+  cooldown?: number[];
+  cost?: number[];
+  /** "55/65/75/85/95". 레벨별 값이 모두 같으면 Data Dragon 이 이미 접어 줍니다. */
+  costBurn?: string;
+  /* costType 은 미해결 템플릿(" {{ cost }}")으로 오는 경우가 있어 쓰지 않습니다.
+     resource 는 소모값 문장 틀입니다 — "{{ abilityresourcename }} {{ cost }}" 처럼
+     챔피언 자원을 가리키는 경우에만 partype 을 라벨로 쓸 수 있습니다(실측 16.17.1). */
+  resource?: string;
+  /** 숫자 배열이거나 "self" 문자열입니다(순간이동형 스킬). */
+  range?: number[] | string;
   image?: {
     full?: string;
   };
@@ -108,6 +140,79 @@ export type LolChampionAbilitySummary = {
   nameEn?: string;
   iconUrl?: string;
 };
+
+/** 챔피언 상세 화면이 쓰는 스킬 묶음(패시브 + Q/W/E/R). */
+export type LolChampionAbilityDetails = {
+  championKey: string;
+  localesComplete: boolean;
+  passive?: LolChampionPassiveDetail;
+  spells: LolChampionSpellDetail[];
+};
+
+const SPELL_KEYS: readonly LolChampionSpellKey[] = ["Q", "W", "E", "R"];
+
+/** 숫자 배열만 통과시킵니다 — range 는 "self" 문자열로 오는 스킬이 있습니다. */
+function finiteNumberArray(value: unknown): number[] | undefined {
+  if (!Array.isArray(value) || value.length === 0) return undefined;
+  const numbers = value.filter((entry): entry is number => typeof entry === "number" && Number.isFinite(entry));
+  return numbers.length === value.length ? numbers : undefined;
+}
+
+/* 소모값 표기 규칙 — 2026-09-04 실측(ddragon 16.17.1 ko_KR)에서 정했습니다.
+ *
+ *   Ahri  Q : costType " {{ cost }}" · resource "{{ abilityresourcename }} {{ cost }}" · costBurn "55/65/75/85/95"
+ *   Mundo Q : costType ""            · resource "체력 {{ healthcost }}"                · costBurn "0"
+ *   Garen Q : costType "소모값 없음"  · resource "소모값 없음"                          · costBurn "0"
+ *
+ * costType 은 미해결 템플릿이라 화면에 그대로 나가면 「{{ cost }} 55/65/…」가 됩니다.
+ * 그래서 자원 이름은 챔피언의 partype("마나")에서 가져오되, ddragon 자신이
+ * "{{ abilityresourcename }}" 로 그 자리를 가리킬 때만 씁니다 — 체력을 쓰는 스킬에
+ * 「마나」라고 적지 않기 위해서입니다. 소모값이 0 이면 항목 자체를 내보내지 않습니다. */
+const ABILITY_RESOURCE_TEMPLATE = "{{ abilityresourcename }}";
+
+/** 미해결 템플릿이 섞인 문자열은 화면에 올리지 않습니다. */
+function plainDataDragonText(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  const text = value.trim();
+  return text && !text.includes("{{") ? text : undefined;
+}
+
+function championResourceLabel(spell: DataDragonChampionSpell, champion: DataDragonChampion | undefined): string | undefined {
+  if (!spell.resource?.includes(ABILITY_RESOURCE_TEMPLATE)) return undefined;
+  return plainDataDragonText(champion?.partype);
+}
+
+/** "0"·"0/0/0" 은 소모값이 없다는 뜻입니다 — 「소모값 0」을 적지 않습니다. */
+function meaningfulCostBurn(costBurn: string | undefined): string | undefined {
+  const text = plainDataDragonText(costBurn);
+  return text && /[1-9]/u.test(text) ? text : undefined;
+}
+
+/**
+ * 쿨타임이 전 레벨 0 이면 항목을 내보내지 않습니다.
+ *
+ * 2026-09-04 실측: 베인 W 「은화살」의 cooldown 은 [0,0,0,0,0] 입니다 — 쿨타임이
+ * 0초라는 뜻이 아니라 쿨타임 개념이 없는 스킬이라는 뜻입니다. 소모값 0 과 같은
+ * 규칙으로 다룹니다. 패치 비교(getChampionSpellCooldowns)는 이 필터를 거치지
+ * 않습니다 — 0 → 8 같은 변화도 비교에서는 사실이기 때문입니다.
+ */
+function meaningfulCooldown(cooldown: unknown): number[] | undefined {
+  const numbers = finiteNumberArray(cooldown);
+  return numbers?.some((value) => value > 0) ? numbers : undefined;
+}
+
+/**
+ * 자기 대상 스킬의 사거리 표식은 걷어냅니다.
+ *
+ * Data Dragon 은 자기 자신에게 쓰는 스킬의 range 를 "self" 문자열이나 1 로 줍니다
+ * (2026-09-04 실측: 베인 R 「최후의 심판」 range [1,1,1]). 1유닛 사거리는 게임에
+ * 존재하지 않으므로 이것은 수치가 아니라 표식입니다 — 「사거리 1」이라고 적으면
+ * 화면이 사실이 아닌 것을 말하게 됩니다.
+ */
+function meaningfulRange(range: unknown): number[] | undefined {
+  const numbers = finiteNumberArray(range);
+  return numbers?.some((value) => value > 1) ? numbers : undefined;
+}
 
 const DATA_DRAGON_BASE = "https://ddragon.leagueoflegends.com";
 const NEUTRAL_IMAGE_LOCALE = "neutral" as const;
@@ -423,6 +528,105 @@ export class DataDragonService {
       nameEn: enBySpellId.get(spell.id)?.name,
       iconUrl: spell.image?.full ? `${DATA_DRAGON_BASE}/cdn/${resolvedVersion}/img/spell/${spell.image.full}` : undefined
     }));
+  }
+
+  /**
+   * 챔피언 상세 화면용 스킬 묶음(GET /api/lol/champion-detail).
+   *
+   * getChampionAbilities 와 원천은 같지만 담는 것이 다릅니다 — 저쪽은 이름·아이콘만
+   * 필요한 자리(전적 상세)의 요약이고, 이쪽은 설명문·쿨타임·소모값·사거리와
+   * 패시브까지 넣습니다. 두 함수가 같은 fetchChampionDetail 캐시를 공유하므로
+   * 같은 버전·언어를 두 번 내려받지 않습니다.
+   */
+  async getChampionAbilityDetails(championId: number, version?: string): Promise<LolChampionAbilityDetails | undefined> {
+    const resolvedVersion = version ?? await this.getLatestVersion();
+    const map = await this.getChampionMap(resolvedVersion);
+    const champion = map.get(championId);
+    if (!champion) return undefined;
+    const [ko, ja, en] = await Promise.all([
+      this.fetchChampionDetail(resolvedVersion, "ko_KR", champion.championKey),
+      this.fetchChampionDetail(resolvedVersion, "ja_JP", champion.championKey).catch(() => undefined),
+      this.fetchChampionDetail(resolvedVersion, "en_US", champion.championKey).catch(() => undefined)
+    ]);
+    if (!ko) return undefined;
+
+    const jaBySpellId = new Map((ja?.spells ?? []).map((spell) => [spell.id, spell]));
+    const enBySpellId = new Map((en?.spells ?? []).map((spell) => [spell.id, spell]));
+    const spells = (ko.spells ?? []).slice(0, 4).map((spell, index) => {
+      const jaSpell = jaBySpellId.get(spell.id);
+      const enSpell = enBySpellId.get(spell.id);
+      const cooldown = meaningfulCooldown(spell.cooldown);
+      const range = meaningfulRange(spell.range);
+      /* 소모값은 Data Dragon 이 이미 접어 준 문자열을 그대로 씁니다 — 레벨별로
+         같으면 "30", 다르면 "55/65/75/85/95" 입니다(파싱하지 않습니다). */
+      const costBurn = meaningfulCostBurn(spell.costBurn);
+      const costTypeKo = costBurn ? championResourceLabel(spell, ko) : undefined;
+      const costTypeJa = costBurn && jaSpell ? championResourceLabel(jaSpell, ja) : undefined;
+      const costTypeEn = costBurn && enSpell ? championResourceLabel(enSpell, en) : undefined;
+      return {
+        key: SPELL_KEYS[index] ?? "Q",
+        spellId: spell.id,
+        nameKo: spell.name,
+        ...(jaSpell?.name ? { nameJa: jaSpell.name } : {}),
+        ...(enSpell?.name ? { nameEn: enSpell.name } : {}),
+        /* 미해결 변수가 섞인 문장은 통째로 뺍니다 — 깨진 문장보다 없는 편이 낫습니다. */
+        ...(plainDataDragonText(spell.description) ? { descriptionKo: spell.description as string } : {}),
+        ...(plainDataDragonText(jaSpell?.description) ? { descriptionJa: jaSpell?.description as string } : {}),
+        ...(plainDataDragonText(enSpell?.description) ? { descriptionEn: enSpell?.description as string } : {}),
+        ...(cooldown ? { cooldown } : {}),
+        ...(costBurn ? { costBurn } : {}),
+        ...(costTypeKo ? { costTypeKo } : {}),
+        ...(costTypeJa ? { costTypeJa } : {}),
+        ...(costTypeEn ? { costTypeEn } : {}),
+        ...(range ? { range } : {}),
+        ...(spell.image?.full ? { iconUrl: `${DATA_DRAGON_BASE}/cdn/${resolvedVersion}/img/spell/${spell.image.full}` } : {})
+      } satisfies LolChampionSpellDetail;
+    });
+
+    const passive = ko.passive
+      ? {
+        nameKo: ko.passive.name,
+        ...(ja?.passive?.name ? { nameJa: ja.passive.name } : {}),
+        ...(en?.passive?.name ? { nameEn: en.passive.name } : {}),
+        ...(plainDataDragonText(ko.passive.description) ? { descriptionKo: ko.passive.description as string } : {}),
+        ...(plainDataDragonText(ja?.passive?.description) ? { descriptionJa: ja?.passive?.description as string } : {}),
+        ...(plainDataDragonText(en?.passive?.description) ? { descriptionEn: en?.passive?.description as string } : {}),
+        ...(ko.passive.image?.full ? { iconUrl: `${DATA_DRAGON_BASE}/cdn/${resolvedVersion}/img/passive/${ko.passive.image.full}` } : {})
+      } satisfies LolChampionPassiveDetail
+      : undefined;
+
+    return {
+      championKey: champion.championKey,
+      localesComplete: Boolean(ja && en),
+      ...(passive ? { passive } : {}),
+      spells
+    };
+  }
+
+  /**
+   * 패치 비교용 레벨별 쿨타임(Q/W/E/R).
+   *
+   * 쿨타임 숫자는 언어와 무관하므로 ko_KR 한 판만 받습니다. championId 가 아니라
+   * championKey 를 받는 이유: 이전 패치 버전의 champion.json(약 210KB)을 이름 맵
+   * 때문에 새로 내려받지 않기 위해서입니다 — 챔피언 키는 두 버전에서 같습니다.
+   */
+  async getChampionSpellCooldowns(championKey: string, version: string): Promise<Map<LolChampionSpellKey, number[]>> {
+    const detail = await this.fetchChampionDetail(version, "ko_KR", championKey);
+    const cooldowns = new Map<LolChampionSpellKey, number[]>();
+    (detail?.spells ?? []).slice(0, 4).forEach((spell, index) => {
+      const cooldown = finiteNumberArray(spell.cooldown);
+      const key = SPELL_KEYS[index];
+      if (cooldown && key) cooldowns.set(key, cooldown);
+    });
+    return cooldowns;
+  }
+
+  /**
+   * 챔피언 한 명의 기본 스탯. 패치 비교가 쓰는 championStatsCache 를 그대로
+   * 재사용합니다 — 공개 응답을 위해 champion.json 을 다시 받지 않습니다.
+   */
+  async getChampionBaseStats(championId: number, version: string): Promise<Readonly<Record<string, number>> | undefined> {
+    return (await this.getChampionStatsMap(version)).get(championId);
   }
 
   async mapChampionSummary(input: {

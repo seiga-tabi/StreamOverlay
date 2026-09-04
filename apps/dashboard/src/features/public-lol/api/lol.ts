@@ -3,6 +3,7 @@ import {
   parsePublicLolMatchRankResponse,
   type LolChampionBuildStatsPosition,
   type LolChampionBuildStatsResponse,
+  type LolChampionDetailResponse,
   type LolChampionListResponse,
   type LolPlatformId
 } from "@streamops/shared";
@@ -242,6 +243,33 @@ export async function getPublicLolChampions(signal?: AbortSignal): Promise<LolCh
     throw new Error(t().championListErrorTitle);
   }
   return body as LolChampionListResponse;
+}
+
+/* 챔피언 상세(스킬·기본 스탯·이번 패치 변경) — 목업
+   `lol-champion-detail-skills-stats.approved-spec.html` §11 계약.
+   locale 파라미터가 없습니다(응답이 ko/ja/en 을 함께 담습니다). 이 요청이 실패해도
+   기존 빌드 통계 화면은 그대로 살아 있어야 합니다 — 호출부가 fail-soft 로 감쌉니다. */
+export async function getChampionDetail(
+  championId: number,
+  signal?: AbortSignal
+): Promise<LolChampionDetailResponse> {
+  const response = await fetch(`${apiBase}/api/lol/champion-detail?championId=${encodeURIComponent(String(championId))}`, {
+    credentials: "include",
+    signal
+  });
+  if (!response.ok) throw new Error(await readPublicApiErrorMessage(response));
+  const body: unknown = await response.json();
+  if (
+    typeof body !== "object"
+    || body === null
+    || (body as { championId?: unknown }).championId !== championId
+    || !Array.isArray((body as { spells?: unknown }).spells)
+    || typeof (body as { baseStats?: unknown }).baseStats !== "object"
+    || (body as { baseStats?: unknown }).baseStats === null
+  ) {
+    throw new Error(t().championDetailSkillsTitle);
+  }
+  return body as LolChampionDetailResponse;
 }
 
 /* 챔피언 글로벌 빌드 통계 — 플랫폼 무관 전역 집계라 platform 을 보내지 않습니다.

@@ -158,6 +158,115 @@ test("DataDragonService는 championId를 ko_KR/ja_JP/en_US 이름과 챔피언 �
   assert.equal(champion.masteryLevel, 7);
 });
 
+test("DataDragonService는 스킬 상세에서 tooltip 을 빼고 미해결 템플릿 소모값을 화면에 올리지 않는다", async () => {
+  /* 픽스처 모양은 2026-09-04 실측(ddragon 16.17.1 ko_KR)입니다 — costType 이
+     " {{ cost }}" 로 오고, 자원 이름은 챔피언 partype 에만 온전한 값이 있습니다. */
+  const championDetail = (locale) => ({
+    data: {
+      Ahri: {
+        id: "Ahri",
+        key: "103",
+        name: locale === "ja" ? "アーリ" : locale === "en" ? "Ahri" : "아리",
+        partype: locale === "ja" ? "マナ" : locale === "en" ? "Mana" : "마나",
+        passive: {
+          name: locale === "en" ? "Essence Theft" : "정기 흡수",
+          description: locale === "en" ? "Ahri heals." : "아리가 체력을 회복합니다.<br>더 많은 체력을 회복합니다.",
+          image: { full: "Ahri_SoulEater2.png" }
+        },
+        spells: [
+          {
+            id: "AhriQ",
+            name: locale === "en" ? "Orb of Deception" : "현혹의 구슬",
+            description: locale === "en" ? "Ahri throws her orb." : "아리가 구슬을 던지고 다시 받습니다.",
+            tooltip: "마법 피해 {{ qbasedamage }}",
+            cooldown: [7, 7, 7, 7, 7],
+            costType: " {{ cost }}",
+            resource: "{{ abilityresourcename }} {{ cost }}",
+            costBurn: "55/65/75/85/95",
+            range: [970, 970, 970, 970, 970],
+            image: { full: "AhriQ.png" }
+          },
+          {
+            /* 체력을 쓰는 스킬 — 자원 이름 자리가 챔피언 자원이 아니고 소모값은 0 입니다.
+               「마나 0」이라고 적으면 화면이 사실이 아닌 것을 말하게 됩니다. */
+            id: "AhriW",
+            name: "여우불",
+            description: "설명 {{ wdamage }}",
+            cooldown: [9, 8, 7, 6, 5],
+            costType: "",
+            resource: "체력 {{ healthcost }}",
+            costBurn: "0",
+            range: "self",
+            image: { full: "AhriW.png" }
+          },
+          {
+            /* 자기 대상 스킬 — ddragon 은 사거리를 1 로 표시합니다(베인 R 실측 형태). */
+            id: "AhriE",
+            name: "매혹",
+            description: "아리가 입맞춤을 날립니다.",
+            cooldown: [0, 0, 0, 0, 0],
+            costType: "소모값 없음",
+            resource: "소모값 없음",
+            costBurn: "0",
+            range: [1, 1, 1, 1, 1],
+            image: { full: "AhriE.png" }
+          }
+        ]
+      }
+    }
+  });
+  const fetchImpl = async (url) => {
+    const target = String(url);
+    if (target.endsWith("/api/versions.json")) return new Response(JSON.stringify(["16.17.1"]), { status: 200 });
+    const locale = target.includes("/ja_JP/") ? "ja" : target.includes("/en_US/") ? "en" : "ko";
+    if (target.includes("/champion/Ahri.json")) return new Response(JSON.stringify(championDetail(locale)), { status: 200 });
+    if (target.includes("/champion.json")) {
+      return new Response(JSON.stringify({
+        data: { Ahri: { id: "Ahri", key: "103", name: "아리", image: { full: "Ahri.png" }, stats: { hp: 590, critperlevel: 0 } } }
+      }), { status: 200 });
+    }
+    return new Response("not found", { status: 404 });
+  };
+
+  const service = new DataDragonService(fetchImpl);
+  const details = await service.getChampionAbilityDetails(103);
+
+  assert.equal(details.championKey, "Ahri");
+  assert.equal(details.passive.nameKo, "정기 흡수");
+  assert.equal(details.passive.nameEn, "Essence Theft");
+  assert.equal(details.passive.iconUrl, "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/passive/Ahri_SoulEater2.png");
+
+  const [q, w, e] = details.spells;
+  assert.equal(q.key, "Q");
+  assert.equal(q.descriptionKo, "아리가 구슬을 던지고 다시 받습니다.");
+  assert.equal(q.tooltip, undefined, "tooltip 은 계약에 없습니다");
+  assert.deepEqual(q.cooldown, [7, 7, 7, 7, 7]);
+  assert.equal(q.costBurn, "55/65/75/85/95");
+  /* 자원 이름은 partype 에서 오고 언어별로 갈립니다 — costType 의 템플릿은 버립니다. */
+  assert.equal(q.costTypeKo, "마나");
+  assert.equal(q.costTypeJa, "マナ");
+  assert.equal(q.costTypeEn, "Mana");
+  assert.deepEqual(q.range, [970, 970, 970, 970, 970]);
+
+  assert.equal(w.costBurn, undefined, "소모값 0 은 항목 자체를 내보내지 않습니다");
+  assert.equal(w.costTypeKo, undefined);
+  assert.equal(w.descriptionKo, undefined, "미해결 변수가 섞인 문장은 통째로 뺍니다");
+  assert.equal(w.range, undefined, '"self" 는 숫자 사거리가 아닙니다');
+  assert.deepEqual(w.cooldown, [9, 8, 7, 6, 5]);
+  assert.equal(e.range, undefined, "사거리 1 은 자기 대상 표식이라 「사거리 1」로 적지 않습니다");
+  assert.equal(e.costBurn, undefined);
+  assert.equal(e.cooldown, undefined, "전 레벨 0 은 쿨타임이 없다는 뜻입니다 — 「쿨타임 0초」로 적지 않습니다");
+
+  /* 기본 스탯은 패치 비교가 쓰는 캐시를 그대로 재사용합니다. */
+  assert.deepEqual(await service.getChampionBaseStats(103, "16.17.1"), { hp: 590, critperlevel: 0 });
+  /* 쿨타임만 뽑는 경로는 ko_KR 한 판만 보고, 표시용 필터도 거치지 않습니다 —
+     0 → 8 같은 변화도 패치 비교에서는 사실이기 때문입니다. */
+  assert.deepEqual(
+    [...(await service.getChampionSpellCooldowns("Ahri", "16.17.1"))],
+    [["Q", [7, 7, 7, 7, 7]], ["W", [9, 8, 7, 6, 5]], ["E", [0, 0, 0, 0, 0]]]
+  );
+});
+
 test("DataDragonService는 동시 챔피언 매핑에서 Data Dragon 조회를 한 번으로 합친다", async () => {
   const calls = [];
   const fetchImpl = async (url) => {
