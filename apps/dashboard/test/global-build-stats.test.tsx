@@ -290,11 +290,14 @@ test("fetchChampionBuildStats 는 platform 없이 championId·teamPosition 만 �
   }
 });
 
-test("통계 탭은 시그니처 빌드 아래에 글로벌 빌드 패널을 렌더하고 CSS 청크가 import 된다", () => {
+test("통계 탭은 시그니처 빌드만 렌더하고 전체 유저 글로벌 빌드 패널을 더 이상 임베드하지 않는다(중복 제거, 챔피언 독립 페이지로 이전됨)", () => {
   const page = readFileSync(new URL("../src/pages/PublicLolPage.tsx", import.meta.url), "utf8");
+  assert.doesNotMatch(page, /GlobalBuildStatsPanel/u, "PublicLolPage 는 GlobalBuildStatsPanel 을 더 이상 import/렌더하지 않는다");
   const statsTab = page.slice(page.indexOf('profileTab === "stats"'));
-  assert.ok(statsTab.indexOf("<SignatureBuildsPanel") < statsTab.indexOf("<GlobalBuildStatsPanel"));
-  assert.ok(statsTab.indexOf("<GlobalBuildStatsPanel") < statsTab.indexOf("<MiniGamesLabBanner"));
+  assert.ok(statsTab.indexOf("<SignatureBuildsPanel") < statsTab.indexOf("<MiniGamesLabBanner"));
+});
+
+test("43-global-build-stats.css 는 챔피언 독립 빌드 화면에서 계속 import 되고 .public-sig-* 규칙을 재정의하지 않는다", () => {
   const route = readFileSync(new URL("../src/styles/pages/public-lol/lol-route.css", import.meta.url), "utf8");
   assert.match(route, /43-global-build-stats\.css/u);
   const css = readFileSync(new URL("../src/styles/pages/public-lol/43-global-build-stats.css", import.meta.url), "utf8");
