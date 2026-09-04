@@ -16,7 +16,6 @@ import {
   type PublicUrlLocale
 } from "../routing/public-dashboard-routes.js";
 import type { PatchNote } from "@streamops/shared";
-import type { PatchChangeSummary } from "../services/patch-change-summary.js";
 
 export const PUBLIC_SEO_ORIGIN = "https://yoro.gg";
 /** 서버가 메타를 내보내는 로케일 전체. 경로별로 실제 붙는 목록은 아래를 씁니다. */
@@ -1130,31 +1129,10 @@ export function palworldBreedingSeoMetadata(
   };
 }
 
-function patchChangeDirectionLabel(
-  locale: "ko" | "ja",
-  direction: "buff" | "nerf" | "adjust"
-): string {
-  if (locale === "ja") {
-    return direction === "buff" ? "強化" : direction === "nerf" ? "弱体化" : "調整";
-  }
-  return direction === "buff" ? "버프" : direction === "nerf" ? "너프" : "조정";
-}
-
-function patchItemChangeLabel(
-  locale: "ko" | "ja",
-  kind: "price" | "new" | "removed"
-): string {
-  if (locale === "ja") {
-    return kind === "price" ? "価格変更" : kind === "new" ? "追加" : "削除";
-  }
-  return kind === "price" ? "가격 변경" : kind === "new" ? "추가" : "제거";
-}
-
-/** Riot 본문이 아닌 Data Dragon 비교 결과로 패치 상세 metadata와 fallback을 만듭니다. */
+/** PatchNote의 공개일·요약·원문 링크로 패치 상세 metadata와 fallback을 만듭니다. */
 export function patchNotesDetailSeoMetadata(
   route: PatchNotesDetailRoute,
-  note: PatchNote,
-  changes: PatchChangeSummary | undefined
+  note: PatchNote
 ): PublicSeoMetadata {
   const { locale, patchVersion } = route;
   const normalizedPath = patchNotesDetailPath(patchVersion);
@@ -1165,54 +1143,19 @@ export function patchNotesDetailSeoMetadata(
     `LoL パッチ ${patchVersion} 変更点 | YORO.gg`,
     ""
   );
-  const championCount = changes?.championChanges.length ?? 0;
-  const itemCount = changes?.itemChanges.length ?? 0;
-  const description = changes
-    ? t(
-        locale,
-        `챔피언 ${championCount}종 변경 · 아이템 ${itemCount}종 변경 · ${patchVersion} 패치 요약`,
-        `チャンピオン${championCount}体変更 · アイテム${itemCount}種変更 · パッチ${patchVersion}まとめ`,
-        ""
-      )
-    : t(
-        locale,
-        `LoL ${patchVersion} 패치의 공개 데이터 기반 변경 요약과 Riot 공식 패치노트를 확인하세요.`,
-        `LoL パッチ${patchVersion}の公開データに基づく変更概要とRiot公式パッチノートを確認できます。`,
-        ""
-      );
-  const buffCount = changes?.championChanges.filter((change) => change.direction === "buff").length ?? 0;
-  const nerfCount = changes?.championChanges.filter((change) => change.direction === "nerf").length ?? 0;
-  const adjustCount = changes?.championChanges.filter((change) => change.direction === "adjust").length ?? 0;
-  const representativeChanges = changes
-    ? [
-        ...changes.championChanges.map((change) => (
-          `${change.name} · ${patchChangeDirectionLabel(locale, change.direction)}`
-        )),
-        ...changes.itemChanges.map((change) => (
-          `${change.name} · ${patchItemChangeLabel(locale, change.kind)}`
-        ))
-      ].slice(0, 20)
-    : [];
+  const description = t(
+    locale,
+    `LoL ${patchVersion} 패치의 Riot 공식 패치노트를 확인하세요.`,
+    `LoL パッチ${patchVersion}のRiot公式パッチノートを確認できます。`,
+    ""
+  );
   const publishedDate = Number.isFinite(Date.parse(note.publishedAt))
     ? new Date(note.publishedAt).toISOString().slice(0, 10)
     : note.publishedAt;
-  const fallbackFacts: PublicSeoFact[] = [
-    { label: t(locale, "패치", "パッチ", ""), value: patchVersion },
-    { label: t(locale, "공개일", "公開日", ""), value: publishedDate },
-    ...(changes
-      ? [
-          { label: t(locale, "시스템 변경", "システム変更", ""), value: String(changes.systemChanges.length) },
-          { label: t(locale, "챔피언 버프", "チャンピオン強化", ""), value: String(buffCount) },
-          { label: t(locale, "챔피언 너프", "チャンピオン弱体化", ""), value: String(nerfCount) },
-          { label: t(locale, "챔피언 조정", "チャンピオン調整", ""), value: String(adjustCount) },
-          { label: t(locale, "아이템 변경", "アイテム変更", ""), value: String(itemCount) }
-        ]
-      : [])
-  ];
   const footer = t(
     locale,
-    "정확한 스킬 변경 및 상세 설명은 Riot 공식 패치노트를 확인하세요.",
-    "正確なスキル変更と詳細説明はRiot公式パッチノートをご確認ください。",
+    "정확한 변경 및 상세 설명은 Riot 공식 패치노트를 확인하세요.",
+    "正確な変更と詳細説明はRiot公式パッチノートをご確認ください。",
     ""
   );
   return {
@@ -1223,43 +1166,26 @@ export function patchNotesDetailSeoMetadata(
     canonicalUrl,
     description,
     fallback: {
-      facts: fallbackFacts,
+      facts: [
+        { label: t(locale, "패치", "パッチ", ""), value: patchVersion },
+        { label: t(locale, "공개일", "公開日", ""), value: publishedDate }
+      ],
       heading: title.replace(" | YORO.gg", ""),
       links: [
         { href: `/${locale}/patch-notes`, label: t(locale, "전체 패치 노트", "パッチノート一覧", "") },
         { href: note.url, label: t(locale, "Riot 공식 패치노트 원문 보기", "Riot公式パッチノートを見る", "") }
       ],
-      summary: changes
-        ? description
-        : t(
-            locale,
-            "이 패치는 유효합니다. 비교 가능한 Data Dragon 변경 요약은 없으며 Riot 원문 링크를 제공합니다.",
-            "このパッチは有効です。比較可能なData Dragon変更概要はなく、Riot原文へのリンクを案内します。",
-            ""
-          ),
-      sections: [
-        ...(representativeChanges.length > 0
-          ? [{
-              heading: t(locale, "대표 변경 항목", "主な変更項目", ""),
-              items: representativeChanges,
-              ...(championCount + itemCount > representativeChanges.length
-                ? {
-                    note: t(
-                      locale,
-                      `전체 ${championCount + itemCount}개 중 상위 ${representativeChanges.length}개`,
-                      `全${championCount + itemCount}件中${representativeChanges.length}件を表示`,
-                      ""
-                    )
-                  }
-                : {})
-            }]
-          : []),
-        {
-          heading: t(locale, "상세 안내", "詳細案内", ""),
-          links: [{ href: note.url, label: t(locale, "Riot 공식 패치노트", "Riot公式パッチノート", "") }],
-          note: footer
-        }
-      ]
+      summary: t(
+        locale,
+        "이 패치는 유효하며 Riot 공식 패치노트 원문 링크를 제공합니다.",
+        "このパッチは有効で、Riot公式パッチノートへのリンクを案内します。",
+        ""
+      ),
+      sections: [{
+        heading: t(locale, "상세 안내", "詳細案内", ""),
+        links: [{ href: note.url, label: t(locale, "Riot 공식 패치노트", "Riot公式パッチノート", "") }],
+        note: footer
+      }]
     },
     imageAlt: t(locale, `LoL 패치 ${patchVersion} 변경사항`, `LoL パッチ ${patchVersion} 変更点`, ""),
     imageUrl: socialImageForPath(normalizedPath, locale).url,

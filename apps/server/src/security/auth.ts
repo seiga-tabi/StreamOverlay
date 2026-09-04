@@ -307,9 +307,7 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
     (method === "GET" && pathname === "/api/public/aram/augments") ||
     (method === "GET" && pathname === "/api/public/game-boxart") ||
     (method === "GET" && pathname === "/api/public/patch-notes") ||
-    (method === "GET" && pathname === "/api/public/patch-notes/summary") ||
-    (method === "GET" && pathname === "/api/public/patch-notes/changes") ||
-    (method === "GET" && pathname === "/api/public/patch-notes/keyart")
+    (method === "GET" && pathname === "/api/public/patch-notes/summary")
   ) return "PUBLIC";
   if (method === "GET" && (pathname === "/api/public/twitch/auth/start" || pathname === "/api/public/twitch/auth/callback")) return "OAUTH_CALLBACK";
   if (

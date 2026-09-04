@@ -2109,7 +2109,7 @@ test("패치 상세 sitemap은 서비스가 있을 때만 index에 등록되고 
   assert.match(detailResponse.body, /2026-08-26T00:00:00\.000Z/u);
 });
 
-test("LoL 패치 상세 route는 정상·부분 실패·404·503을 fail-closed로 구분한다", async () => {
+test("LoL 패치 상세 route는 정상·404·503을 fail-closed로 구분한다", async () => {
   const previousDashboardStatic = appConfig.paths.dashboardStatic;
   const dir = mkdtempSync(path.join(tmpdir(), "streamops-patch-detail-"));
   const appShell = "<!doctype html><html lang=\"ko\"><head><meta name=\"description\" content=\"home\"><link rel=\"canonical\" href=\"https://yoro.gg/\"><meta property=\"og:title\" content=\"home\"><meta property=\"og:description\" content=\"home\"><meta property=\"og:url\" content=\"https://yoro.gg/\"><meta name=\"twitter:title\" content=\"home\"><meta name=\"twitter:description\" content=\"home\"><script nonce=\"__STREAMOPS_CSP_NONCE__\" src=\"/dashboard/config.js\"></script><title>YORO.gg</title></head><body><div id=\"root\"></div></body></html>";
@@ -2138,34 +2138,14 @@ test("LoL 패치 상세 route는 정상·부분 실패·404·503을 fail-closed�
     writeFileSync(path.join(dir, "index.html"), appShell);
     appConfig.paths.dashboardStatic = dir;
 
-    const completeHandler = createHttpHandler({
-      store: {}, twitchAuth: {}, actions, patchNotes,
-      patchChangeSummary: {
-        async summaryFor() {
-          return {
-            patchVersion: "26.17",
-            comparedVersions: ["16.16.1", "16.17.1"],
-            systemChanges: [{ stat: "armor", from: 20, to: 21, championCount: 5 }],
-            championChanges: [{
-              championId: 1,
-              name: "애니",
-              direction: "buff",
-              changes: [{ stat: "hp", from: 500, to: 520 }],
-            }],
-            itemChanges: [{ itemId: 1001, name: "롱소드", kind: "price", from: 350, to: 400 }],
-            skillChangesIncluded: false,
-          };
-        },
-      },
-    });
+    const completeHandler = createHttpHandler({ store: {}, twitchAuth: {}, actions, patchNotes });
     const complete = createResponse();
     await completeHandler(createRequest("GET", "/ko/patch-notes/26-17"), complete);
     assert.equal(complete.statusCode, 200);
     assert.match(complete.body, /<title>LoL 패치 26\.17 변경사항 \| YORO\.gg<\/title>/u);
-    assert.match(complete.body, /애니 · 버프/u);
-    assert.match(complete.body, /롱소드 · 가격 변경/u);
+    assert.match(complete.body, /Riot 공식 패치노트 원문 링크를 제공합니다/u);
 
-    /* 변경 요약 서비스가 없어도 유효한 피드 노트는 기본 정보로 안전하게 남습니다. */
+    /* 다른 언어의 유효한 피드 노트도 기본 정보로 안전하게 남습니다. */
     const partialHandler = createHttpHandler({ store: {}, twitchAuth: {}, actions, patchNotes });
     const partial = createResponse();
     await partialHandler(createRequest("GET", "/ja/patch-notes/26-17"), partial);

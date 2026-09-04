@@ -35,13 +35,6 @@ export function foldLevelValues(values: readonly number[]): string | undefined {
   return values.map(formatChampionNumber).join("/");
 }
 
-/** 증감 부호 — 색을 못 보는 사용자에게 방향을 전하는 세 장치 중 하나입니다(목업 §10). */
-export function formatChampionDelta(from: number, to: number): string {
-  const difference = Math.round((to - from) * 1_000) / 1_000;
-  /* 하이픈이 아니라 U+2212 마이너스입니다 — 목업 표기 그대로. */
-  return difference > 0 ? `+${formatChampionNumber(difference)}` : `−${formatChampionNumber(Math.abs(difference))}`;
-}
-
 const HTML_ENTITIES: Readonly<Record<string, string>> = {
   "&nbsp;": " ",
   "&amp;": "&",

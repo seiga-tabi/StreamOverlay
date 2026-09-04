@@ -1,14 +1,13 @@
-import type { LolChampionDetailResponse, LolChampionPatchStatChange } from "@streamops/shared";
+import type { LolChampionDetailResponse } from "@streamops/shared";
 import { activePublicLocale, t } from "../i18n/public-lol-i18n";
-import { hasPatchStatLabel, patchStatLabel, type PatchStatLabelLocale } from "../types/patch-change-summary";
-import { fillChampionText, formatChampionDelta, formatChampionNumber } from "../utils/champion-detail";
+import { fillChampionText, formatChampionNumber } from "../utils/champion-detail";
 
 /* 챔피언 상세 「기본 정보」 패널 — 목업
  * `docs/mockups/lol-champion-detail-skills-stats.approved-spec.html` §04·§05.
  *
  * ddragon stats 20키를 자동 격자(minmax 200px)에 담습니다. 값이 0 인 칸(아리의
  * 레벨당 공격력·치명타)도 숨기지 않습니다 — 칸이 비면 "아직 안 불러왔나"로 읽힙니다.
- * 라벨은 패치 노트 화면과 같은 사전(STAT_LABELS)을 그대로 씁니다.
+ * 라벨은 화면 언어에 맞춘 전용 사전을 씁니다.
  */
 
 /* 표시 순서 — 목업 §04 격자 그대로입니다(체력계 → 마나계 → 공격 → 방어 → 이동·사거리 →
@@ -36,10 +35,39 @@ const STAT_ORDER: readonly string[] = [
   "critperlevel"
 ];
 
-function statLabelLocale(): PatchStatLabelLocale {
+type StatLabelLocale = "ko" | "ja" | "en";
+
+const STAT_LABELS: Readonly<Record<string, Readonly<Record<StatLabelLocale, string>>>> = {
+  hp: { ko: "체력", ja: "体力", en: "Health" },
+  hpperlevel: { ko: "레벨당 체력", ja: "レベルごとの体力", en: "Health per level" },
+  hpregen: { ko: "체력 재생", ja: "体力回復", en: "Health regen" },
+  hpregenperlevel: { ko: "레벨당 체력 재생", ja: "レベルごとの体力回復", en: "Health regen per level" },
+  mp: { ko: "마나", ja: "マナ", en: "Mana" },
+  mpperlevel: { ko: "레벨당 마나", ja: "レベルごとのマナ", en: "Mana per level" },
+  mpregen: { ko: "마나 재생", ja: "マナ回復", en: "Mana regen" },
+  mpregenperlevel: { ko: "레벨당 마나 재생", ja: "レベルごとのマナ回復", en: "Mana regen per level" },
+  attackdamage: { ko: "공격력", ja: "攻撃力", en: "Attack damage" },
+  attackdamageperlevel: { ko: "레벨당 공격력", ja: "レベルごとの攻撃力", en: "Attack damage per level" },
+  attackspeed: { ko: "공격 속도", ja: "攻撃速度", en: "Attack speed" },
+  attackspeedperlevel: { ko: "레벨당 공격 속도", ja: "レベルごとの攻撃速度", en: "Attack speed per level" },
+  armor: { ko: "방어력", ja: "物理防御", en: "Armor" },
+  armorperlevel: { ko: "레벨당 방어력", ja: "レベルごとの物理防御", en: "Armor per level" },
+  spellblock: { ko: "마법 저항력", ja: "魔法防御", en: "Magic resist" },
+  spellblockperlevel: { ko: "레벨당 마법 저항력", ja: "レベルごとの魔法防御", en: "Magic resist per level" },
+  movespeed: { ko: "이동 속도", ja: "移動速度", en: "Move speed" },
+  attackrange: { ko: "사거리", ja: "攻撃距離", en: "Attack range" },
+  crit: { ko: "치명타", ja: "クリティカル", en: "Critical strike" },
+  critperlevel: { ko: "레벨당 치명타", ja: "レベルごとのクリティカル", en: "Critical strike per level" }
+};
+
+function statLabelLocale(): StatLabelLocale {
   if (activePublicLocale === "ja") return "ja";
   if (activePublicLocale === "en") return "en";
   return "ko";
+}
+
+function statLabel(stat: string, locale: StatLabelLocale): string {
+  return STAT_LABELS[stat]?.[locale] ?? stat;
 }
 
 /** 알려진 순서 먼저, 그 뒤에 ddragon 이 나중에 늘린 키를 이름순으로 붙입니다. */
@@ -51,29 +79,10 @@ function orderedStatKeys(baseStats: Readonly<Record<string, number>>): string[] 
   return [...present, ...extra];
 }
 
-function StatDelta({ change }: { change: LolChampionPatchStatChange }) {
-  /* 방향을 모르는 스탯(HIGHER_IS_BETTER 밖의 키)은 adjust 로 옵니다 — 그때는 판정색을
-     붙이지 않고 무채로 둡니다. 틀린 초록/빨강은 정보가 없는 것보다 나쁩니다(목업 §11). */
-  const direction = change.direction === "adjust" ? undefined : change.direction;
-  return (
-    <span className="public-cstat-delta" {...(direction ? { "data-direction": direction } : {})}>
-      <span className="public-cstat-from">{formatChampionNumber(change.from)}</span>
-      {/* 화살표는 "오른쪽 화살표"로 읽히면 방해라 감추고, 방향은 이 조각이 말합니다(§10). */}
-      <span className="yoro-u-sr-only">{t().championDetailDeltaFrom}</span>
-      <span aria-hidden="true" className="public-cstat-arrow">→</span>
-      <em className="public-cstat-to">{formatChampionNumber(change.to)}</em>
-      <span className="public-cstat-amount">{formatChampionDelta(change.from, change.to)}</span>
-    </span>
-  );
-}
-
 export function ChampionBaseStatsPanel({ detail }: { detail: LolChampionDetailResponse }) {
   const stats = orderedStatKeys(detail.baseStats);
   if (stats.length === 0) return null;
 
-  const changeByStat = new Map<string, LolChampionPatchStatChange>(
-    (detail.patchChanges?.stats ?? []).map((change) => [change.stat, change])
-  );
   const locale = statLabelLocale();
 
   return (
@@ -85,25 +94,16 @@ export function ChampionBaseStatsPanel({ detail }: { detail: LolChampionDetailRe
         </span>
       </div>
 
-      {changeByStat.size > 0 ? (
-        <p className="public-cpatch-note">
-          {fillChampionText(t().championDetailStatChangeNote, { count: changeByStat.size })}
-        </p>
-      ) : null}
-
       <div className="public-cstat-grid">
         {stats.map((stat) => {
           const value = detail.baseStats[stat];
           if (value === undefined) return null;
-          const change = changeByStat.get(stat);
-          const direction = change && change.direction !== "adjust" ? change.direction : undefined;
           return (
-            <div className="public-cstat" data-direction={direction} key={stat}>
-              <span className="public-cstat-label" data-fallback={hasPatchStatLabel(stat) ? undefined : "true"}>
-                {patchStatLabel(stat, locale)}
+            <div className="public-cstat" key={stat}>
+              <span className="public-cstat-label" data-fallback={STAT_LABELS[stat] ? undefined : "true"}>
+                {statLabel(stat, locale)}
               </span>
               <span className="public-cstat-value">{formatChampionNumber(value)}</span>
-              {change ? <StatDelta change={change} /> : null}
             </div>
           );
         })}

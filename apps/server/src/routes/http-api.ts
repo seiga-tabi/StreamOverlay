@@ -8,13 +8,6 @@ import type { AdminAccount, Store } from "../services/store.js";
 import { loadAramAugmentCatalog } from "../services/aram-augment-catalog.js";
 import type { GameBoxartService } from "../services/game-boxart.js";
 import type { PatchNotesService } from "../services/patch-notes-service.js";
-import {
-  championChangeDirection,
-  championSkillChangesFor,
-  comparedVersionsForPatch,
-  latestPatchVersionFrom,
-  type PatchChangeSummaryService
-} from "../services/patch-change-summary.js";
 import { storeParticipationRepository } from "../services/participation-repository.js";
 import { publishParticipationSnapshot as publishAtomicParticipationSnapshot } from "../services/participation-snapshot.js";
 import type { ActionDispatcher } from "../core/action-dispatcher.js";
@@ -180,8 +173,7 @@ import {
   type LolChampionBuildStatsPosition,
   type LolChampionBuildStatsResponse,
   type LolChampionDetailResponse,
-  type LolChampionListResponse,
-  type LolChampionPatchChanges
+  type LolChampionListResponse
 } from "@streamops/shared";
 import type { JsonlLogger } from "../logging/jsonl-logger.js";
 import type { TwitchExtensionSettingsRepository } from "../database/repositories/twitch-extension-settings-repository.js";
@@ -2707,7 +2699,6 @@ type HttpHandlerInput = {
   patchNotes?: PatchNotesService;
   gameBoxart?: GameBoxartService;
   gameSocialCard?: Pick<GameSocialCardRenderer, "render">;
-  patchChangeSummary?: PatchChangeSummaryService;
   patchNotesSocialCard?: PatchNotesSocialCardRenderer;
   adminAuditLogs?: Pick<
     AdminAuditLogRepository,
@@ -3587,8 +3578,8 @@ async function buildPublicLolChampionList(
 /* ── 챔피언 상세(GET /api/lol/champion-detail) ──────────────────────────────
  *
  * 목업 `docs/mockups/lol-champion-detail-skills-stats.approved-spec.html` §11.
- * 한 화면이 네 종류(패시브·스킬·기본 스탯·패치 변경)를 동시에 쓰므로 요청 4번
- * 대신 1번으로 묶습니다. DB 도 Riot API 도 건드리지 않습니다.
+ * 한 화면이 패시브·스킬·기본 스탯을 동시에 쓰므로 요청을 하나로 묶습니다.
+ * DB 도 Riot API 도 건드리지 않습니다.
  *
  * 이름·설명은 ko/ja/en 을 함께 보냅니다 — 목록 API 와 같은 규칙이라 locale 파라미터가
  * 없고, 응답 하나를 모든 언어가 공유합니다(공용 캐시 가능). 스탯 라벨은 서버가
@@ -3596,50 +3587,8 @@ async function buildPublicLolChampionList(
 
 const PUBLIC_LOL_CHAMPION_DETAIL_CACHE_CONTROL = "public, max-age=3600, stale-while-revalidate=86400";
 
-/**
- * 이번 패치의 이 챔피언 변경. 못 구하면 undefined 이고 화면은 배지 없는 기본
- * 상태(목업 §07)로 그립니다 — 스킬·스탯까지 같이 실패시키지 않습니다.
- *
- * 스탯은 이미 있는 PatchChangeSummaryService(6시간 캐시)를 그대로 재사용합니다.
- * 챔피언 목록 배지와 같은 계산이므로 두 화면이 다른 말을 하지 않습니다. locale 을
- * ko 로 고정하는 이유: 여기서 읽는 것은 스탯 키와 수치뿐이라 언어가 결과를 바꾸지
- * 않고, 목록 화면이 이미 채워 둔 캐시를 그대로 쓸 수 있습니다.
- */
-async function championDetailPatchChanges(
-  input: Pick<HttpHandlerInput, "dataDragon" | "patchNotes" | "patchChangeSummary">,
-  championId: number,
-  championKey: string
-): Promise<LolChampionPatchChanges | undefined> {
-  const dataDragon = input.dataDragon;
-  if (!dataDragon || !input.patchNotes || !input.patchChangeSummary) return undefined;
-  const notes = (await input.patchNotes.getFeed("ko"))?.notes ?? [];
-  const patchVersion = latestPatchVersionFrom(notes);
-  if (!patchVersion) return undefined;
-  /* 비교 경계는 날짜로 추측하지 않습니다 — 노트가 주는 dataDragonVersion 쌍입니다. */
-  const comparedVersions = comparedVersionsForPatch(notes, patchVersion);
-  if (!comparedVersions) return undefined;
-
-  const summary = await input.patchChangeSummary.summaryFor(patchVersion, "ko");
-  const championChange = summary?.championChanges.find((entry) => entry.championId === championId);
-  const stats = (championChange?.changes ?? []).map((change) => ({
-    ...change,
-    /* 스탯 하나짜리 묶음의 판정이 곧 그 스탯의 판정입니다(모르는 키는 adjust). */
-    direction: championChangeDirection([change])
-  }));
-
-  /* 스킬 쿨타임은 패치 요약이 보지 않는 값이라(skillChangesIncluded: false) 여기서만
-     따로 비교합니다 — 챔피언 한 명 분량의 champion/<Key>.json 두 판입니다. */
-  const spells = await championSkillChangesFor(championId, comparedVersions[0], comparedVersions[1], {
-    cooldowns: (_championId, version) => dataDragon.getChampionSpellCooldowns(championKey, version)
-  });
-
-  /* 스탯도 스킬도 안 바뀌었으면 "변경 없음"을 필드 부재로 분명히 말합니다. */
-  if (stats.length === 0 && spells.length === 0) return undefined;
-  return { patchVersion, comparedVersions, stats, spells };
-}
-
 async function buildPublicLolChampionDetail(
-  input: Pick<HttpHandlerInput, "dataDragon" | "patchNotes" | "patchChangeSummary" | "logger">,
+  input: Pick<HttpHandlerInput, "dataDragon">,
   championId: number
 ): Promise<{ detail: LolChampionDetailResponse; cacheControl: string }> {
   const dataDragon = input.dataDragon;
@@ -3665,19 +3614,6 @@ async function buildPublicLolChampionDetail(
     throw new HttpRequestError(404, { error: "챔피언을 찾을 수 없습니다.", code: "LOL_CHAMPION_NOT_FOUND" });
   }
 
-  let patchChanges: LolChampionPatchChanges | undefined;
-  try {
-    patchChanges = await championDetailPatchChanges(input, championId, abilities.championKey);
-  } catch (error) {
-    /* 패치 비교는 부가 정보입니다. 실패해도 스킬·스탯은 그대로 나갑니다(목업 §11). */
-    input.logger?.error({
-      type: "public_lol.champion_detail_patch_changes_failed",
-      errorCode: "patch_change_summary_unavailable",
-      error: toSafeErrorMessage(error)
-    });
-  }
-  if (patchChanges?.comparedVersions[1] !== dataDragonVersion) patchChanges = undefined;
-
   return {
     detail: {
       championId,
@@ -3685,8 +3621,7 @@ async function buildPublicLolChampionDetail(
       dataDragonVersion,
       ...(abilities.passive ? { passive: abilities.passive } : {}),
       spells: abilities.spells,
-      baseStats: { ...(baseStats ?? {}) },
-      ...(patchChanges ? { patchChanges } : {})
+      baseStats: { ...(baseStats ?? {}) }
     },
     cacheControl: abilities.localesComplete ? PUBLIC_LOL_CHAMPION_DETAIL_CACHE_CONTROL : "no-store"
   };
@@ -10645,25 +10580,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
             candidate.patchVersion === patchNotesDetailRoute.patchVersion
           ));
           if (!note) return sendPublicNotFound(req, res, url.pathname);
-          let changes: Awaited<ReturnType<PatchChangeSummaryService["summaryFor"]>>;
-          if (input.patchChangeSummary) {
-            try {
-              const resolved = await input.patchChangeSummary.summaryFor(
-                patchNotesDetailRoute.patchVersion,
-                patchNotesDetailRoute.locale
-              );
-              if (resolved?.patchVersion === patchNotesDetailRoute.patchVersion) changes = resolved;
-            } catch (error) {
-              /* 변경 비교는 부분 데이터입니다. 실패해도 유효한 패치 상세는 원문 링크와
-                 공개일을 포함한 기본 fallback으로 계속 서빙합니다. */
-              input.logger?.error({
-                type: "public_seo.patch_notes_detail_failed",
-                errorCode: "patch_change_summary_unavailable",
-                error: toSafeErrorMessage(error)
-              });
-            }
-          }
-          const seoMetadata = patchNotesDetailSeoMetadata(patchNotesDetailRoute, note, changes);
+          const seoMetadata = patchNotesDetailSeoMetadata(patchNotesDetailRoute, note);
           await sendStaticFile(
             req,
             res,
@@ -13388,83 +13305,6 @@ export function createHttpHandler(input: HttpHandlerInput) {
             ? (feed.stale ? "public, max-age=60" : "public, max-age=900, stale-while-revalidate=21600")
             : (feed.stale ? "private, max-age=60" : "private, max-age=900"),
           Vary: "Accept-Language"
-        });
-      }
-      if (req.method === "GET" && url.pathname === "/api/public/patch-notes/keyart") {
-        /* 공유 카드가 키 아트를 캔버스에 그리려면 같은 origin 에서 받아야 합니다 —
-           Riot CDN 은 CORS 헤더를 주지 않아 canvas 가 오염됩니다(2026-08-18 실측).
-           대상 URL 은 이용자 입력이 아니라 우리가 수집한 노트의 imageUrl 이고,
-           공유 카드가 쓰는 것과 같은 allowlist·타임아웃·크기 상한을 지납니다. */
-        const patchVersion = url.searchParams.get("patch") ?? "";
-        if (!/^\d{1,3}\.\d{1,3}$/u.test(patchVersion)) {
-          return sendJson(req, res, 400, {
-            error: "패치 번호 형식이 올바르지 않습니다.",
-            code: "INVALID_PATCH_VERSION"
-          }, { "Cache-Control": "no-store" });
-        }
-        const keyArtLocale = patchNoteLocaleFrom(url.searchParams.get("locale")) ?? "ko";
-        const feed = input.patchNotes ? await input.patchNotes.getFeed(keyArtLocale) : undefined;
-        const note = feed?.notes.find((candidate) => candidate.patchVersion === patchVersion);
-        /* 패치 번호가 없는 노트는 카드 모델이 만들어지지 않습니다(형식 미달). */
-        const keyArtModel = note ? patchNotesCardModel(note) : undefined;
-        const keyArt = keyArtModel
-          ? await patchNotesSocialCardRenderer.keyArt(keyArtModel).catch(() => undefined)
-          : undefined;
-        if (!keyArt) {
-          /* 키 아트가 없으면 화면은 그라디언트 폴백으로 닫힙니다 — 카드는 정상입니다. */
-          return sendJson(req, res, 404, {
-            error: "해당 패치의 키 아트가 없습니다.",
-            code: "PATCH_KEYART_NOT_FOUND"
-          }, { "Cache-Control": "public, max-age=600" });
-        }
-        const keyArtEtag = `"patch-keyart-${keyArtLocale}-${patchVersion}"`;
-        if (req.headers["if-none-match"] === keyArtEtag) {
-          res.writeHead(304, { ETag: keyArtEtag, "Cache-Control": "public, max-age=86400" });
-          res.end();
-          return true;
-        }
-        res.writeHead(200, {
-          "Content-Type": "image/png",
-          "Content-Length": String(keyArt.length),
-          ETag: keyArtEtag,
-          /* 패치 번호가 URL 에 있으므로 새 패치는 새 URL 입니다. */
-          "Cache-Control": "public, max-age=86400, stale-while-revalidate=604800"
-        });
-        res.end(keyArt);
-        return true;
-      }
-      if (req.method === "GET" && url.pathname === "/api/public/patch-notes/changes") {
-        /* 경로가 /summary 가 아니라 /changes 인 이유: summary 는 이미 패치별 개인
-           전적이 쓰고 있습니다(바로 아래). 이쪽은 공개 데이터 계산 결과라 캐시
-           정책도 반대입니다 — 누구에게나 같은 값이므로 공용 캐시에 둡니다. */
-        const patchVersion = url.searchParams.get("patch") ?? "";
-        if (!/^\d{1,3}\.\d{1,3}$/u.test(patchVersion)) {
-          return sendJson(req, res, 400, {
-            error: "패치 번호 형식이 올바르지 않습니다.",
-            code: "INVALID_PATCH_VERSION"
-          }, { "Cache-Control": "no-store" });
-        }
-        if (!input.patchChangeSummary) {
-          return sendJson(req, res, 503, {
-            error: "패치 변경 요약을 사용할 수 없습니다.",
-            code: "PATCH_CHANGES_UNAVAILABLE"
-          }, { "Cache-Control": "no-store" });
-        }
-        const changesLocale = patchNoteLocaleFrom(url.searchParams.get("locale")) ?? "ko";
-        const changes = await input.patchChangeSummary.summaryFor(patchVersion, changesLocale)
-          .catch(() => undefined);
-        /* 비교 경계를 못 잡았거나 변경이 0건이면 보여 줄 것이 없습니다. 프런트는
-           404 를 받으면 패널을 통째로 숨깁니다(빈 패널 금지). */
-        if (!changes) {
-          return sendJson(req, res, 404, {
-            error: "해당 패치의 변경 요약이 없습니다.",
-            code: "PATCH_CHANGES_NOT_FOUND"
-          }, { "Cache-Control": "public, max-age=600" });
-        }
-        return sendJson(req, res, 200, changes, {
-          /* locale 이 URL 에 있으므로 URL 이 응답을 결정합니다 — 공용 캐시 가능.
-             패치가 나오기 전에는 값이 바뀌지 않아 길게 잡습니다. */
-          "Cache-Control": "public, max-age=21600, stale-while-revalidate=86400"
         });
       }
       if (req.method === "GET" && url.pathname === "/api/public/patch-notes/summary") {

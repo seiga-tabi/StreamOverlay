@@ -257,14 +257,8 @@ test("DataDragonService는 스킬 상세에서 tooltip 을 빼고 미해결 템�
   assert.equal(e.costBurn, undefined);
   assert.equal(e.cooldown, undefined, "전 레벨 0 은 쿨타임이 없다는 뜻입니다 — 「쿨타임 0초」로 적지 않습니다");
 
-  /* 기본 스탯은 패치 비교가 쓰는 캐시를 그대로 재사용합니다. */
+  /* 기본 스탯은 챔피언 목록을 읽을 때 채운 캐시를 그대로 재사용합니다. */
   assert.deepEqual(await service.getChampionBaseStats(103, "16.17.1"), { hp: 590, critperlevel: 0 });
-  /* 쿨타임만 뽑는 경로는 ko_KR 한 판만 보고, 표시용 필터도 거치지 않습니다 —
-     0 → 8 같은 변화도 패치 비교에서는 사실이기 때문입니다. */
-  assert.deepEqual(
-    [...(await service.getChampionSpellCooldowns("Ahri", "16.17.1"))],
-    [["Q", [7, 7, 7, 7, 7]], ["W", [9, 8, 7, 6, 5]], ["E", [0, 0, 0, 0, 0]]]
-  );
 });
 
 test("DataDragonService는 동시 챔피언 매핑에서 Data Dragon 조회를 한 번으로 합친다", async () => {

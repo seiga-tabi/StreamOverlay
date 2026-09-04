@@ -46,22 +46,6 @@ const PATCH_NOTE_FIXTURE = {
   url: "https://www.leagueoflegends.com/ko-kr/news/game-updates/patch-26-17-notes/",
 };
 
-const PATCH_CHANGES_FIXTURE = {
-  patchVersion: "26.17",
-  comparedVersions: ["16.16.1", "16.17.1"],
-  systemChanges: [{ stat: "armor", from: 20, to: 21, championCount: 5 }],
-  championChanges: [
-    { championId: 1, name: "애니", direction: "buff", changes: [{ stat: "hp", from: 500, to: 520 }] },
-    { championId: 2, name: "올라프", direction: "nerf", changes: [{ stat: "armor", from: 35, to: 33 }] },
-    { championId: 3, name: "갈리오", direction: "adjust", changes: [{ stat: "movespeed", from: 335, to: 340 }] },
-  ],
-  itemChanges: [
-    { itemId: 1001, name: "롱소드", kind: "price", from: 350, to: 400 },
-    { itemId: 1002, name: "새 아이템", kind: "new" },
-  ],
-  skillChangesIncluded: false,
-};
-
 const APP_SHELL = '<!doctype html><html lang="ko"><head>'
   + '<meta name="description" content="home">'
   + '<link rel="canonical" href="https://yoro.gg/">'
@@ -213,62 +197,39 @@ test("LoL 패치 상세 slug는 점과 하이픈을 엄격하게 왕복 변환�
   assert.throws(() => patchNotesDetailPath("26-17"), /패치 번호 형식/u);
 });
 
-test("LoL 패치 상세 metadata와 fallback은 자체 계산 변경 데이터만 나열한다", () => {
+test("LoL 패치 상세 metadata와 fallback은 PatchNote 기본 정보와 원문 링크를 제공한다", () => {
   const route = patchNotesDetailRouteForPath("/ko/patch-notes/26-17");
   assert.ok(route);
-  const metadata = patchNotesDetailSeoMetadata(route, PATCH_NOTE_FIXTURE, PATCH_CHANGES_FIXTURE);
+  const metadata = patchNotesDetailSeoMetadata(route, PATCH_NOTE_FIXTURE);
   assert.equal(metadata.title, "LoL 패치 26.17 변경사항 | YORO.gg");
-  assert.equal(metadata.description, "챔피언 3종 변경 · 아이템 2종 변경 · 26.17 패치 요약");
+  assert.equal(metadata.description, "LoL 26.17 패치의 Riot 공식 패치노트를 확인하세요.");
   assert.equal(metadata.canonicalUrl, "https://yoro.gg/ko/patch-notes/26-17");
   assert.deepEqual(Object.keys(metadata.alternateUrls).sort(), ["ja", "ko"]);
   assert.equal(metadata.robotsNoindex, undefined);
 
   const html = applyPublicSeoMetadata(APP_SHELL, metadata);
-  assert.match(html, /애니 · 버프/u);
-  assert.match(html, /올라프 · 너프/u);
-  assert.match(html, /롱소드 · 가격 변경/u);
-  assert.match(html, /<dt>시스템 변경<\/dt><dd>1<\/dd>/u);
-  assert.match(html, /정확한 스킬 변경 및 상세 설명은 Riot 공식 패치노트를 확인하세요/u);
+  assert.match(html, /이 패치는 유효하며 Riot 공식 패치노트 원문 링크를 제공합니다/u);
+  assert.match(html, /정확한 변경 및 상세 설명은 Riot 공식 패치노트를 확인하세요/u);
   assert.match(html, /Riot 공식 패치노트 원문 보기/u);
-  /* Riot 목록의 title·summary는 새 fallback 본문에 복제하지 않습니다. */
-  assert.doesNotMatch(html, /Riot 목록 요약/u);
   assert.doesNotMatch(html, /리그 오브 레전드 26\.17 패치 노트/u);
+  assert.doesNotMatch(html, /Riot 목록 요약/u);
   assert.doesNotMatch(html, /hreflang="en"/u);
 });
 
-test("변경 비교가 없는 유효한 패치는 noindex 없이 기본 정보와 원문 링크를 제공한다", () => {
+test("요약이 없는 유효한 패치는 noindex 없이 기본 정보와 원문 링크를 제공한다", () => {
   const route = patchNotesDetailRouteForPath("/ja/patch-notes/26-17");
   assert.ok(route);
-  const metadata = patchNotesDetailSeoMetadata(route, PATCH_NOTE_FIXTURE, undefined);
+  const metadata = patchNotesDetailSeoMetadata(route, { ...PATCH_NOTE_FIXTURE, summary: undefined });
   assert.equal(metadata.robotsNoindex, undefined);
   assert.equal(metadata.fallback.facts.length, 2);
   const html = applyPublicSeoMetadata(APP_SHELL, metadata);
   assert.match(html, /<html lang="ja"/u);
   assert.match(html, /2026-08-26/u);
   assert.match(html, /Riot公式パッチノートを見る/u);
+  assert.match(html, /Riot公式パッチノートを確認できます/u);
   assert.doesNotMatch(html, /name="robots"/u);
-  assert.doesNotMatch(html, /チャンピオン強化/u);
 });
 
-test("LoL 패치 상세 fallback은 Data Dragon 이름의 HTML을 escape한다", () => {
-  const route = patchNotesDetailRouteForPath("/ko/patch-notes/26-17");
-  assert.ok(route);
-  const maliciousChanges = {
-    ...PATCH_CHANGES_FIXTURE,
-    championChanges: [{
-      ...PATCH_CHANGES_FIXTURE.championChanges[0],
-      name: "애니 <script>alert(1)</script>",
-    }],
-    itemChanges: [{ ...PATCH_CHANGES_FIXTURE.itemChanges[0], name: "검 & <script>" }],
-  };
-  const html = applyPublicSeoMetadata(
-    APP_SHELL,
-    patchNotesDetailSeoMetadata(route, PATCH_NOTE_FIXTURE, maliciousChanges),
-  );
-  assert.match(html, /애니 &lt;script&gt;alert\(1\)&lt;\/script&gt; · 버프/u);
-  assert.match(html, /검 &amp; &lt;script&gt; · 가격 변경/u);
-  assert.doesNotMatch(html, /애니 <script>|검 & <script>/u);
-});
 
 test("hreflang은 비지역화 경로에는 붙지 않는다", () => {
   const html = render("/login");

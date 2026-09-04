@@ -1,13 +1,11 @@
 import test, { after, before } from "node:test";
 import assert from "node:assert/strict";
 
-/* GET /api/lol/champion-detail — 챔피언 상세(스킬·기본 스탯·이번 패치 변경) 계약.
+/* GET /api/lol/champion-detail — 챔피언 상세(스킬·기본 스탯) 계약.
  *
  * 승인 스펙 `docs/mockups/lol-champion-detail-skills-stats.approved-spec.html` §11.
- * Data Dragon 과 패치 요약 서비스는 페이크를 주입합니다. 여기서 검증할 것은
- * 네트워크가 아니라 라우트 계약입니다 — 입력 검증, tooltip 미포함, 패치 변경 결합,
- * 변경 없음(필드 부재), 그리고 패치 비교가 실패해도 스킬·스탯은 나간다는 fail-soft.
- * 쿨타임 비교 규칙 자체는 patch-change-summary.test.mjs 가 담당합니다. */
+ * Data Dragon 페이크를 주입하고 입력 검증, tooltip 미포함, 스킬·기본 스탯 응답을
+ * 검증합니다. */
 
 const { createHttpHandler } = await import("../dist/routes/http-api.js");
 const { appConfig } = await import("../dist/config.js");
@@ -83,16 +81,8 @@ const AHRI_STATS = {
   movespeed: 330, attackrange: 550, crit: 0, critperlevel: 0
 };
 
-/* 쿨타임 비교용 두 시점. 이전 패치는 R 이 140/120/100 이었다고 둡니다(강화). */
-const COOLDOWNS_BY_VERSION = {
-  "16.16.1": new Map([["Q", [7, 7, 7, 7, 7]], ["W", [9, 8, 7, 6, 5]], ["E", [12, 12, 12, 12, 12]], ["R", [140, 120, 100]]]),
-  "16.17.1": new Map([["Q", [7, 7, 7, 7, 7]], ["W", [9, 8, 7, 6, 5]], ["E", [12, 12, 12, 12, 12]], ["R", [130, 110, 90]]])
-};
-
-function fakeDataDragon({ version = "16.17.1", cooldowns = COOLDOWNS_BY_VERSION, localesComplete = true } = {}) {
-  const calls = { cooldowns: [] };
+function fakeDataDragon({ version = "16.17.1", localesComplete = true } = {}) {
   return {
-    calls,
     async getLatestVersion() {
       return version;
     },
@@ -101,43 +91,13 @@ function fakeDataDragon({ version = "16.17.1", cooldowns = COOLDOWNS_BY_VERSION,
     },
     async getChampionBaseStats(championId) {
       return championId === 103 ? AHRI_STATS : undefined;
-    },
-    async getChampionSpellCooldowns(championKey, requestedVersion) {
-      calls.cooldowns.push([championKey, requestedVersion]);
-      return cooldowns[requestedVersion] ?? new Map();
     }
   };
 }
 
-function fakePatchNotes(notes = [
-  { slug: "p-26-17", title: "패치 26.17", publishedAt: "2026-09-01T00:00:00.000Z", url: "https://example.test/26.17", patchVersion: "26.17", dataDragonVersion: "16.17.1" },
-  { slug: "p-26-16", title: "패치 26.16", publishedAt: "2026-08-18T00:00:00.000Z", url: "https://example.test/26.16", patchVersion: "26.16", dataDragonVersion: "16.16.1" }
-]) {
-  return { async getFeed() { return { schemaVersion: 1, locale: "ko", fetchedAt: "2026-09-01T00:00:00.000Z", stale: false, notes }; } };
-}
-
-function fakePatchChangeSummary(championChanges = []) {
-  const calls = [];
-  return {
-    calls,
-    async summaryFor(patchVersion, locale) {
-      calls.push([patchVersion, locale]);
-      if (championChanges.length === 0) return undefined;
-      return {
-        patchVersion,
-        comparedVersions: ["16.16.1", "16.17.1"],
-        systemChanges: [],
-        championChanges,
-        itemChanges: [],
-        skillChangesIncluded: false
-      };
-    }
-  };
-}
-
-function setup({ dataDragon = fakeDataDragon(), patchNotes = fakePatchNotes(), patchChangeSummary = fakePatchChangeSummary() } = {}) {
-  const handler = createHttpHandler({ dataDragon, patchNotes, patchChangeSummary });
-  return { handler, dataDragon, patchChangeSummary };
+function setup({ dataDragon = fakeDataDragon() } = {}) {
+  const handler = createHttpHandler({ dataDragon });
+  return { handler, dataDragon };
 }
 
 test("championId 가 없거나 양의 정수가 아니면 400 과 안전한 코드로 답한다", async () => {
@@ -181,81 +141,6 @@ test("일본어 또는 영어 상세를 못 받았으면 200 응답을 공개 �
   assert.equal(response.headers["Cache-Control"], "no-store");
   assert.equal(response.json.passive.nameKo, "정기 흡수");
   assert.equal(response.json.spells.length, 4);
-});
-
-test("이번 패치에 변경이 있으면 스탯과 스킬 쿨타임을 함께 담는다", async () => {
-  const { handler, dataDragon, patchChangeSummary } = setup({
-    patchChangeSummary: fakePatchChangeSummary([
-      { championId: 103, name: "아리", direction: "buff", changes: [{ stat: "hp", from: 590, to: 610 }] },
-      { championId: 84, name: "아칼리", direction: "nerf", changes: [{ stat: "armor", from: 23, to: 21 }] }
-    ])
-  });
-  const body = (await get(handler, "/api/lol/champion-detail?championId=103")).json;
-
-  assert.equal(body.patchChanges.patchVersion, "26.17");
-  assert.deepEqual(body.patchChanges.comparedVersions, ["16.16.1", "16.17.1"]);
-  /* 다른 챔피언의 변경은 섞이지 않습니다. */
-  assert.deepEqual(body.patchChanges.stats, [{ stat: "hp", from: 590, to: 610, direction: "buff" }]);
-  /* 쿨타임은 값이 작아져야 강화입니다 — 140/120/100 → 130/110/90 은 buff 입니다. */
-  assert.deepEqual(body.patchChanges.spells, [
-    { key: "R", direction: "buff", fields: [{ field: "cooldown", from: [140, 120, 100], to: [130, 110, 90] }] }
-  ]);
-  /* 스탯 비교는 기존 패치 요약 서비스(6시간 캐시)를 재사용합니다 — 목록 배지와 같은 계산. */
-  assert.deepEqual(patchChangeSummary.calls, [["26.17", "ko"]]);
-  /* 쿨타임은 이전·현재 두 버전만 봅니다(이름 맵을 다시 받지 않도록 championKey 로). */
-  assert.deepEqual(dataDragon.calls.cooldowns.map(([key]) => key), ["Ahri", "Ahri"]);
-});
-
-test("표시 버전과 패치 비교의 현재 버전이 다르면 patchChanges를 생략한다", async () => {
-  const { handler } = setup({
-    dataDragon: fakeDataDragon({ version: "16.17.2" }),
-    patchChangeSummary: fakePatchChangeSummary([
-      { championId: 103, name: "아리", direction: "buff", changes: [{ stat: "hp", from: 590, to: 610 }] }
-    ])
-  });
-  const response = await get(handler, "/api/lol/champion-detail?championId=103");
-
-  assert.equal(response.status, 200);
-  assert.equal(response.json.dataDragonVersion, "16.17.2");
-  assert.equal(response.json.patchChanges, undefined);
-});
-
-test("스탯도 스킬도 안 바뀌었으면 patchChanges 필드 자체가 없다", async () => {
-  const { handler } = setup({
-    dataDragon: fakeDataDragon({
-      cooldowns: { "16.16.1": COOLDOWNS_BY_VERSION["16.17.1"], "16.17.1": COOLDOWNS_BY_VERSION["16.17.1"] }
-    })
-  });
-  const body = (await get(handler, "/api/lol/champion-detail?championId=103")).json;
-
-  /* "변경 없음"을 빈 배열이 아니라 필드 부재로 말합니다 — 화면은 배지·태그 없이 그립니다. */
-  assert.equal(body.patchChanges, undefined);
-  assert.equal(body.spells.length, 4);
-  assert.equal(body.baseStats.hp, 590);
-});
-
-test("패치 비교가 실패해도 스킬·스탯은 그대로 나간다(fail-soft)", async () => {
-  const { handler } = setup({
-    patchChangeSummary: {
-      async summaryFor() {
-        throw new Error("patch feed down");
-      }
-    }
-  });
-  const response = await get(handler, "/api/lol/champion-detail?championId=103");
-
-  assert.equal(response.status, 200);
-  assert.equal(response.json.patchChanges, undefined);
-  assert.equal(response.json.spells.length, 4);
-  assert.equal(response.json.passive.nameKo, "정기 흡수");
-});
-
-test("패치 노트 서비스가 없으면 패치 변경 없이 200 으로 답한다", async () => {
-  const handler = createHttpHandler({ dataDragon: fakeDataDragon() });
-  const response = await get(handler, "/api/lol/champion-detail?championId=103");
-
-  assert.equal(response.status, 200);
-  assert.equal(response.json.patchChanges, undefined);
 });
 
 test("없는 championId 는 404, Data Dragon 이 없으면 503 이다", async () => {

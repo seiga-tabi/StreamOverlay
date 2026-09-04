@@ -1,21 +1,20 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
 import type { LolChampionDetailResponse, LolChampionSummary } from "@streamops/shared";
 
-/* 챔피언 상세의 스킬·기본 스탯·이번 패치 변경 표시 —
+/* 챔피언 상세의 스킬·기본 스탯 표시 —
    승인 스펙 `docs/mockups/lol-champion-detail-skills-stats.approved-spec.html`
-   §02(배치안 A) · §04 · §05 · §06 · §07 · §09 · §10 계약입니다.
+   §02(배치안 A) · §09 · §10 계약입니다.
+
+   이번 패치 변경 배지/before→after 표기(§05·§06)는 챔피언 패치 변경 자동감지
+   기능 3개 제거(2026-09-04)와 함께 삭제되었습니다 — 아래 픽스처와 테스트는
+   그 부분만 정리하고 스킬·기본 스탯 표시 자체(패시브+QWER, 20종 스탯, fail-soft,
+   모바일 반응형)는 그대로 유지합니다.
 
    이 두 패널은 글로벌 빌드 통계와 다른 원천이라 fail-soft 여야 합니다. 그래서
    "스킬이 뜬다"만 보지 않고 "상세 API 가 죽어도 빌드 통계는 그대로 산다"를 함께 봅니다.
 
    스킬 문장·수치와 기본 스탯 20종은 Data Dragon 실제 응답값입니다
-   (16.17.1 · ko_KR · 아리 championId 103). patchChanges 두 건만 화면 시연용
-   가상 수치입니다 — 스펙 §05·§06 과 같은 형태입니다.
-
-   주의: baseStats 는 **현재 패치의 값**이므로 언제나 patchChanges 의 도착값과 같습니다.
-   그래서 시연값을 스펙의 590→610 대신 570→590 으로 둡니다 — 응답 안에서 앞뒤가 맞지
-   않는 픽스처(현재 체력 590인데 이번 패치에 610이 되었다)는 화면이 아니라 픽스처를
-   검증하게 됩니다. 카드에 크게 뜨는 값(590)이 곧 도착값입니다. */
+   (16.17.1 · ko_KR · 아리 championId 103). */
 
 const CHAMPIONS: LolChampionSummary[] = [
   { championId: 103, championKey: "Ahri", nameKo: "아리", nameJa: "アーリ", nameEn: "Ahri" }
@@ -82,19 +81,8 @@ const AHRI_DETAIL: LolChampionDetailResponse = {
     attackdamage: 53, attackdamageperlevel: 0, attackspeed: 0.668, attackspeedperlevel: 2.2,
     armor: 21, armorperlevel: 4.2, spellblock: 30, spellblockperlevel: 1.3,
     movespeed: 330, attackrange: 550, crit: 0, critperlevel: 0
-  },
-  patchChanges: {
-    patchVersion: "16.17",
-    comparedVersions: ["16.16.1", "16.17.1"],
-    stats: [{ stat: "hp", from: 570, to: 590, direction: "buff" }],
-    spells: [{ key: "R", direction: "buff", fields: [{ field: "cooldown", from: [140, 120, 100], to: [130, 110, 90] }] }]
   }
 };
-
-function unchangedDetail(): LolChampionDetailResponse {
-  const { patchChanges: _ignored, ...rest } = AHRI_DETAIL;
-  return rest;
-}
 
 const transparentPng = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
@@ -174,7 +162,7 @@ async function installChampionDetailFixtures(page: Page, fixtures: Fixtures = {}
 }
 
 test("스킬 5줄과 기본 스탯 20칸이 머리와 빌드 통계 사이에 들어간다", async ({ page }) => {
-  await installChampionDetailFixtures(page, { detail: unchangedDetail() });
+  await installChampionDetailFixtures(page, { detail: AHRI_DETAIL });
   await page.goto("/lol/champions/103");
 
   const rows = page.locator(".public-cskill-row");
@@ -211,7 +199,7 @@ test("스킬 5줄과 기본 스탯 20칸이 머리와 빌드 통계 사이에 �
 });
 
 test("변경이 없으면 배지·태그·알림 줄이 전부 사라진다(기본 상태)", async ({ page }) => {
-  await installChampionDetailFixtures(page, { detail: unchangedDetail() });
+  await installChampionDetailFixtures(page, { detail: AHRI_DETAIL });
   await page.goto("/lol/champions/103");
   await expect(page.locator(".public-cskill-row")).toHaveCount(5);
 
@@ -221,63 +209,6 @@ test("변경이 없으면 배지·태그·알림 줄이 전부 사라진다(기�
   await expect(page.locator(".public-cpatch-note")).toHaveCount(0);
   /* "변경 없음" 이라는 빈 상태 문구도 넣지 않습니다 — 이것이 예외가 아니라 기본형입니다. */
   await expect(page.locator(".public-cstat[data-direction]")).toHaveCount(0);
-});
-
-test("이번 패치에 바뀐 스탯·스킬만 before → after 를 얹는다", async ({ page }) => {
-  await installChampionDetailFixtures(page);
-  await page.goto("/lol/champions/103");
-  await expect(page.locator(".public-cskill-row")).toHaveCount(5);
-
-  /* 알림 줄은 두 패널 각각 한 줄씩입니다. */
-  const notes = await page.locator(".public-cpatch-note").allInnerTexts();
-  expect(notes).toEqual(["이번 패치에서 1개 스킬이 바뀌었습니다.", "이번 패치에서 1개 항목이 바뀌었습니다."]);
-
-  /* 스킬 — R 한 줄에만 배지·태그·쿨타임 변경 줄이 붙습니다. */
-  await expect(page.locator(".public-cskill-row .public-champion-card-badge")).toHaveCount(1);
-  const ultimate = page.locator(".public-cskill-row").nth(4);
-  await expect(ultimate.locator('.public-champion-card-badge[data-direction="buff"]')).toHaveCount(1);
-  /* 배지는 아이콘 형제여야 잘리지 않습니다(아이콘은 overflow: hidden). */
-  await expect(ultimate.locator(".public-cskill-figure > .public-champion-card-badge")).toHaveCount(1);
-  await expect(ultimate.locator(".public-cskill-tag")).toHaveText("이번 패치에서 강화됨");
-  /* 쿨타임은 값이 작아져야 강화입니다 — 140/120/100 → 130/110/90 이 buff 입니다(§06). */
-  const cooldownChange = ultimate.locator(".public-cskill-meta-change");
-  await expect(cooldownChange.locator("dt")).toHaveText("쿨타임 변경");
-  await expect(cooldownChange.locator(".public-cstat-from")).toHaveText("140/120/100초");
-  await expect(cooldownChange.locator(".public-cstat-to")).toHaveText("130/110/90초");
-  /* 배열이 통째로 바뀌면 하나의 증감 수로 요약할 수 없어 화살표만 씁니다. */
-  await expect(cooldownChange.locator(".public-cstat-amount")).toHaveCount(0);
-
-  /* 스탯 — 체력 카드에만 테두리 판정색과 한 줄이 붙습니다. */
-  await expect(page.locator(".public-cstat[data-direction]")).toHaveCount(1);
-  const hpCard = page.locator('.public-cstat[data-direction="buff"]');
-  await expect(hpCard.locator(".public-cstat-label")).toHaveText("체력");
-  /* 큰 수치는 현재 값(=도착값)이고, 작은 줄이 출발값 → 도착값을 다시 말합니다(§05 (가)안). */
-  await expect(hpCard.locator(".public-cstat-value")).toHaveText("590");
-  await expect(hpCard.locator(".public-cstat-from")).toHaveText("570");
-  await expect(hpCard.locator(".public-cstat-to")).toHaveText("590");
-  await expect(hpCard.locator(".public-cstat-amount")).toHaveText("+20");
-
-  /* 색은 --graph-win-ink 참조뿐입니다 — 도착값만 판정색, 출발값·화살표는 무채입니다. */
-  const inks = await hpCard.evaluate((node) => {
-    const to = node.querySelector(".public-cstat-to") as HTMLElement;
-    const from = node.querySelector(".public-cstat-from") as HTMLElement;
-    const style = window.getComputedStyle(node);
-    return {
-      token: style.getPropertyValue("--graph-win-ink").trim().toLowerCase(),
-      muted: style.getPropertyValue("--public-gray-muted").trim().toLowerCase(),
-      to: window.getComputedStyle(to).color,
-      from: window.getComputedStyle(from).color
-    };
-  });
-  expect(["#63c375", "#1d8139"]).toContain(inks.token);
-  expect(inks.to).not.toBe(inks.from);
-
-  /* 배지는 aria-hidden 이고 판정을 말하는 것은 태그 텍스트입니다(§10). */
-  await expect(page.locator('.public-cskill-row .public-champion-card-badge[aria-hidden="true"]')).toHaveCount(1);
-  await expect(page.getByText("이번 패치에서 강화됨")).toBeVisible();
-  /* 화살표는 낭독되지 않고, 방향은 sr-only 조각이 말합니다("590에서 610"). */
-  await expect(hpCard.locator('.public-cstat-arrow[aria-hidden="true"]')).toHaveCount(1);
-  await expect(hpCard.locator(".yoro-u-sr-only")).toHaveText("에서");
 });
 
 test("상세 API 가 죽어도 두 패널만 빠지고 빌드 통계 화면은 그대로 산다", async ({ page }) => {

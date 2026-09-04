@@ -10,7 +10,7 @@ type DataDragonChampion = {
   id: string;
   key: string;
   name: string;
-  /** 기본 스탯. 패치 비교(getChampionStatsMap)가 쓰는 값입니다. */
+  /** 챔피언 상세 화면에 표시할 기본 스탯입니다. */
   stats?: Record<string, number>;
   image?: {
     full?: string;
@@ -69,8 +69,6 @@ type DataDragonItem = {
   image?: {
     full?: string;
   };
-  /** 총 구매가. 패치 비교(getItemGoldMap)가 쓰는 값입니다. */
-  gold?: { total?: number };
 };
 
 type ItemDataResponse = {
@@ -193,8 +191,7 @@ function meaningfulCostBurn(costBurn: string | undefined): string | undefined {
  *
  * 2026-09-04 실측: 베인 W 「은화살」의 cooldown 은 [0,0,0,0,0] 입니다 — 쿨타임이
  * 0초라는 뜻이 아니라 쿨타임 개념이 없는 스킬이라는 뜻입니다. 소모값 0 과 같은
- * 규칙으로 다룹니다. 패치 비교(getChampionSpellCooldowns)는 이 필터를 거치지
- * 않습니다 — 0 → 8 같은 변화도 비교에서는 사실이기 때문입니다.
+ * 규칙으로 다룹니다.
  */
 function meaningfulCooldown(cooldown: unknown): number[] | undefined {
   const numbers = finiteNumberArray(cooldown);
@@ -287,18 +284,6 @@ function championStatsFrom(data: ChampionDataResponse): Map<number, Readonly<Rec
   return map;
 }
 
-/** item.json → itemId 별 총 구매가. 0골드 아이템(퀘스트 완성품 등)도 그대로 둡니다. */
-function itemGoldFrom(data: ItemDataResponse): Map<number, number> {
-  const map = new Map<number, number>();
-  for (const [rawItemId, item] of Object.entries(data.data)) {
-    const itemId = Number(rawItemId);
-    const total = item.gold?.total;
-    if (!Number.isInteger(itemId) || itemId <= 0) continue;
-    if (typeof total === "number" && Number.isFinite(total)) map.set(itemId, total);
-  }
-  return map;
-}
-
 function firstDataDragonVersion(versions: string[]): string {
   const version = versions[0];
   if (!version) throw new Error("Data Dragon version list is empty");
@@ -316,12 +301,10 @@ export class DataDragonService {
   private runeMapRequests = new Map<string, Promise<Map<number, LolRuneSummary>>>();
   private itemCache = new Map<string, Map<number, LolItemSummary>>();
   private itemMapRequests = new Map<string, Promise<Map<number, LolItemSummary>>>();
-  /* 패치 비교용 원시 수치. 이름·아이콘 맵이 같은 champion.json/item.json 을 이미
-     받았다면 그 과정에서 함께 채워지므로 같은 파일을 두 번 내려받지 않습니다. */
+  /* 챔피언 기본 스탯. 이름·아이콘 맵이 같은 champion.json 을 이미 받았다면
+     그 과정에서 함께 채워지므로 같은 파일을 두 번 내려받지 않습니다. */
   private championStatsCache = new Map<string, Map<number, Readonly<Record<string, number>>>>();
   private championStatsRequests = new Map<string, Promise<Map<number, Readonly<Record<string, number>>>>>();
-  private itemGoldCache = new Map<string, Map<number, number>>();
-  private itemGoldRequests = new Map<string, Promise<Map<number, number>>>();
 
   constructor(private readonly fetchImpl: typeof fetch = fetch) {}
 
@@ -370,7 +353,7 @@ export class DataDragonService {
       const jaByKey = new Map(Object.values(ja?.data ?? {}).map((champion) => [champion.key, champion]));
       const enByKey = new Map(Object.values(en?.data ?? {}).map((champion) => [champion.key, champion]));
       const map = new Map<number, ChampionMapEntry>();
-      /* 같은 응답에서 스탯도 걷어 둡니다 — 패치 비교가 champion.json 을 다시 받지 않게. */
+      /* 같은 응답에서 스탯도 걷어 두어 챔피언 상세 요청의 재다운로드를 피합니다. */
       this.championStatsCache.set(resolvedVersion, championStatsFrom(ko));
 
       for (const champion of Object.values(ko.data)) {
@@ -478,8 +461,6 @@ export class DataDragonService {
       const jaById = new Map(Object.entries(ja?.data ?? {}).map(([itemId, item]) => [itemId, item]));
       const enById = new Map(Object.entries(en?.data ?? {}).map(([itemId, item]) => [itemId, item]));
       const map = new Map<number, LolItemSummary>();
-      this.itemGoldCache.set(resolvedVersion, itemGoldFrom(ko));
-
       for (const [rawItemId, item] of Object.entries(ko.data)) {
         const itemId = Number(rawItemId);
         if (!Number.isInteger(itemId) || itemId <= 0) continue;
@@ -603,28 +584,7 @@ export class DataDragonService {
     };
   }
 
-  /**
-   * 패치 비교용 레벨별 쿨타임(Q/W/E/R).
-   *
-   * 쿨타임 숫자는 언어와 무관하므로 ko_KR 한 판만 받습니다. championId 가 아니라
-   * championKey 를 받는 이유: 이전 패치 버전의 champion.json(약 210KB)을 이름 맵
-   * 때문에 새로 내려받지 않기 위해서입니다 — 챔피언 키는 두 버전에서 같습니다.
-   */
-  async getChampionSpellCooldowns(championKey: string, version: string): Promise<Map<LolChampionSpellKey, number[]>> {
-    const detail = await this.fetchChampionDetail(version, "ko_KR", championKey);
-    const cooldowns = new Map<LolChampionSpellKey, number[]>();
-    (detail?.spells ?? []).slice(0, 4).forEach((spell, index) => {
-      const cooldown = finiteNumberArray(spell.cooldown);
-      const key = SPELL_KEYS[index];
-      if (cooldown && key) cooldowns.set(key, cooldown);
-    });
-    return cooldowns;
-  }
-
-  /**
-   * 챔피언 한 명의 기본 스탯. 패치 비교가 쓰는 championStatsCache 를 그대로
-   * 재사용합니다 — 공개 응답을 위해 champion.json 을 다시 받지 않습니다.
-   */
+  /** 챔피언 한 명의 기본 스탯. 기존 캐시를 재사용해 champion.json 재요청을 피합니다. */
   async getChampionBaseStats(championId: number, version: string): Promise<Readonly<Record<string, number>> | undefined> {
     return (await this.getChampionStatsMap(version)).get(championId);
   }
@@ -713,10 +673,8 @@ export class DataDragonService {
   }
 
   /**
-   * 패치 비교용 챔피언 기본 스탯.
-   *
-   * 스탯은 언어와 무관하므로 ko_KR 한 판만 받습니다. 이름·아이콘 맵을 이미 받은
-   * 버전이면 그때 채워 둔 캐시를 그대로 씁니다(같은 파일 재다운로드 금지).
+   * 챔피언 기본 스탯은 언어와 무관하므로 ko_KR 한 판만 받습니다. 이름·아이콘 맵을
+   * 이미 받은 버전이면 그때 채워 둔 캐시를 그대로 씁니다(같은 파일 재다운로드 금지).
    */
   async getChampionStatsMap(version: string): Promise<Map<number, Readonly<Record<string, number>>>> {
     const cached = this.championStatsCache.get(version);
@@ -732,24 +690,6 @@ export class DataDragonService {
       this.championStatsRequests.delete(version);
     });
     this.championStatsRequests.set(version, request);
-    return request;
-  }
-
-  /** 패치 비교용 아이템 총 구매가. getChampionStatsMap 과 같은 규칙입니다. */
-  async getItemGoldMap(version: string): Promise<Map<number, number>> {
-    const cached = this.itemGoldCache.get(version);
-    if (cached) return cached;
-    const running = this.itemGoldRequests.get(version);
-    if (running) return running;
-    const request = (async () => {
-      const data = await this.fetchItemData(version, "ko_KR");
-      const map = itemGoldFrom(data);
-      this.itemGoldCache.set(version, map);
-      return map;
-    })().finally(() => {
-      this.itemGoldRequests.delete(version);
-    });
-    this.itemGoldRequests.set(version, request);
     return request;
   }
 
