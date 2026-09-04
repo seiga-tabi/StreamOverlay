@@ -8,7 +8,37 @@
  */
 
 @layer pages {
-  .public-gbs-panel { margin-top: var(--yoro-space-3); }
+  /* 채용률·포지션 비중 강조색(승인 목업 §08) — 새 색 체계가 아니라
+     20-profile-platform.css 72·208행의 먹금(--yoro-color-accent-gold, 다크 #C7A15C ·
+     라이트 #8A6B2E)에서 hue 만 돌린 파생 3단입니다. 골드 → 앰버 → 브론즈 회갈로
+     색조가 바뀌되 hue 24~54° 의 따뜻한 금속색 띠 안에 머물러, 승패색(초록 131° ·
+     홍옥 352°)과 색상군이 겹치지 않습니다 — 채용률은 빈도일 뿐 좋고 나쁨이 아니라서
+     승패색을 쓰면 없는 뜻이 생깁니다. 대비는 다크 카드 #252730 위 10.36 / 6.73 / 4.94,
+     바 트랙 #1C1D22 위 11.71 / 7.62 / 5.59 로 가장 옅은 단도 본문 AA 를 넘습니다. */
+  .public-gbs-panel {
+    margin-top: var(--yoro-space-3);
+    --metric-accent-ink-hi: #e5da76;  /* hsl(54 68% 68%) 골드 */
+    --metric-accent-ink: #d6a666;     /* hsl(34 58% 62%) 앰버 */
+    --metric-accent-ink-lo: #a9907e;  /* hsl(24 20% 58%) 브론즈 회갈 */
+  }
+
+  /* 라이트는 흰 면 위라 램프가 어두운 쪽으로 갑니다. 다크와 같은 순서·같은 폭을
+     유지하되 hue 52 / 32 / 26°, 명도 21 / 32 / 42% 로 벌려 단이 뭉치지 않게 합니다.
+     흰 패널 #FFFFFF 위 7.75 / 6.39 / 5.22, 페이지 #F5F6F8 위 7.17 / 5.91 / 4.82. */
+  .public-profile-platform-v2.theme-light .public-gbs-panel,
+  :root[data-public-theme="light"] .public-gbs-panel {
+    --metric-accent-ink-hi: #5d530e;  /* hsl(52 74% 21%) 골드 */
+    --metric-accent-ink: #835521;     /* hsl(32 60% 32%) 앰버 */
+    --metric-accent-ink-lo: #7c695a;  /* hsl(26 16% 42%) 회갈 */
+  }
+
+  /* 3단 임계값(목업 §08) — 카드에 뜨는 채용률 구간은 10~100%(그 미만은 "그 외"로
+     묶여 카드가 안 나옴)이고, 이를 40% 이상 / 20~40% / 그 미만으로 끊습니다.
+     단계 클래스는 카드(.public-gbs-build)와 탭 수치(b)에 직접 붙고, 색은
+     --metric-tone 한 겹을 상속으로 흘려보내 숫자(em)와 바(i)가 늘 같은 단을 봅니다. */
+  .public-gbs-pick-hi { --metric-tone: var(--metric-accent-ink-hi); }
+  .public-gbs-pick-mid { --metric-tone: var(--metric-accent-ink); }
+  .public-gbs-pick-lo { --metric-tone: var(--metric-accent-ink-lo); }
 
   /* 헤드 라벨은 시그니처 빌드와 같은 우측 헤어라인 칩. */
   .public-gbs-panel .public-champ-pill {
@@ -84,7 +114,8 @@
 
   .public-gbs-champ-ava > img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
 
-  /* 포지션 탭 — 헤어라인 칩 5개, 활성이면 먹빛 테두리. 표본 수는 작은 글자로. */
+  /* 포지션 탭 — 헤어라인 칩 5개. 라인 아이콘 + 라인 이름 + 포지션 비중(%) 한 칸.
+     게임 수 절대값은 화면에서 빼고 aria-label 에만 남깁니다(목업 §08). */
   .public-gbs-tabs {
     display: flex;
     flex-wrap: wrap;
@@ -94,7 +125,7 @@
   .public-gbs-tab {
     display: inline-flex;
     flex: 1 1 auto;
-    align-items: baseline;
+    align-items: center;
     justify-content: center;
     gap: .375rem;
     min-height: var(--yoro-size-touch-target, 2.75rem);
@@ -112,13 +143,59 @@
     cursor: pointer;
   }
 
-  .public-gbs-tab > small { font-size: .6875rem; font-weight: 400; }
+  /* 비중 칸 — 자식이 하나여도 column 축을 유지해야 탭마다 % 끝자리가 같은 x 에 섭니다. */
+  .public-gbs-tab-share {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    line-height: 1.15;
+  }
+
+  .public-gbs-tab-share > b { font-size: .8125rem; font-weight: 800; letter-spacing: -.01em; }
+
+  /* 비선택 탭만 먹금 3단으로 물들입니다 — 선택 칩 면(--public-gray-border-strong,
+     다크 #4A5563 · 라이트 #CFD6DE)은 양쪽 테마에서 중간 명도라 그 위 먹금이
+     다크 3.13:1 · 라이트 3.39:1 로 AA 미달이고, 중간 명도 면 위 4.5:1 을 넘는
+     유채색이 이 팔레트에 없습니다. 선택 탭은 칩 채움이 이미 강조를 맡으므로
+     대비가 가장 큰 --public-gray-text 로 남깁니다(다크 6.9:1 · 라이트 11.6:1). */
+  .public-gbs-tab[aria-selected="false"] .public-gbs-tab-share > b {
+    color: var(--metric-tone, var(--metric-accent-ink));
+  }
 
   .public-gbs-tab:hover { color: var(--public-gray-text); }
 
+  /* 선택 탭은 면으로 채웁니다 — 다크에서 surface-strong 채움은 카드 표면(#252730)보다
+     오히려 어두워 "칠했는지"가 안 보였습니다. 새 색 없이 hover·focus 테두리에 이미
+     쓰는 무채 --public-gray-border-strong 을 그대로 면으로 씁니다. */
   .public-gbs-tab[aria-selected="true"] {
-    border-color: var(--public-gray-muted);
+    border-color: var(--public-gray-border-strong);
+    background: var(--public-gray-border-strong);
     color: var(--public-gray-text);
+  }
+
+  /* 라인 아이콘 — 전적 행에서 이미 쓰는 /images/roles/position-*.svg 그대로입니다.
+     원본이 금빛 2색(#785A28 / #C8AA6E)이라 이 화면의 무채 규칙과 안 맞아, 새 색을
+     만드는 대신 grayscale 로 명도만 남깁니다(두 색의 명도차가 남아 16px 에서도
+     라인 모양이 구분됩니다). 글자를 대신하지 않는 보조 표식이라 alt 는 비웁니다. */
+  .public-gbs-pos-icon {
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    object-fit: contain;
+    filter: grayscale(1) brightness(1.05);
+    opacity: .72;
+  }
+
+  .public-gbs-tab[aria-selected="true"] .public-gbs-pos-icon { filter: grayscale(1) brightness(1.3); opacity: 1; }
+
+  .public-profile-platform-v2.theme-light .public-gbs-pos-icon,
+  :root[data-public-theme="light"] .public-gbs-pos-icon { filter: grayscale(1) brightness(.72); opacity: .8; }
+
+  .public-profile-platform-v2.theme-light .public-gbs-tab[aria-selected="true"] .public-gbs-pos-icon,
+  :root[data-public-theme="light"] .public-gbs-tab[aria-selected="true"] .public-gbs-pos-icon {
+    filter: grayscale(1) brightness(.5);
+    opacity: 1;
   }
 
   .public-gbs-tab:focus-visible {
@@ -130,18 +207,27 @@
     .public-gbs-tab { flex: none; }
   }
 
-  /* 전체 표본 요약 — 승률 무채 800 + 게임 수. */
+  /* 전체 표본 요약 — 작은 라벨("승률") + 큰 숫자. 게임 수 앞머리를 지우면서 순서를
+     뒤집었습니다(목업 §08): 그냥 지우면 "{count}게임 · 승률 {rate}%" 의 뒷부분이
+     바로 위 큰 숫자와 같은 값을 두 번 찍게 됩니다. 이 화면에서 제일 먼저 읽혀야 하는
+     수치라 크기를 1rem → 1.5rem 으로 올리고, baseline 정렬로 라벨과 밑동을 맞춥니다. */
   .public-gbs-summary {
     display: flex;
     align-items: baseline;
     gap: .5rem;
-    padding: 0 1.125rem .75rem;
+    padding: 0 1.125rem .875rem;
     color: var(--public-gray-muted);
     font-size: .75rem;
     font-variant-numeric: tabular-nums;
   }
 
-  .public-gbs-summary > b { color: var(--public-gray-text); font-size: 1rem; font-weight: 800; }
+  .public-gbs-summary > b {
+    color: var(--public-gray-text);
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    line-height: 1.1;
+  }
 
   /* 3열 그리드 — 64rem+ 에서 룬 / 아이템 / 스펠+포지션, 그 미만 1열. */
   .public-gbs-grid {
@@ -163,13 +249,20 @@
     min-width: 0;
   }
 
+  /* 열 제목 — 카드 테두리와 같은 헤어라인을 밑에 깔아 "여기부터 이 열" 경계를
+     만듭니다(새 색 없음). margin-bottom 은 flex gap 에 더해집니다. */
   .public-gbs-col-title {
-    margin: 0;
+    margin: 0 0 .1875rem;
+    padding-bottom: .375rem;
+    border-bottom: .5px solid var(--public-gray-border);
     color: var(--public-gray-muted);
     font-size: .6875rem;
     font-weight: 800;
     letter-spacing: .06em;
   }
+
+  /* 스펠 열의 두 번째 제목("포지션별 승률")은 위 블록과 붙지 않게 한 칸 띄웁니다. */
+  .public-gbs-col-title:not(:first-child) { margin-top: .625rem; }
 
   /* 열 안에 표시 조합이 없을 때(전부 10% 미만) — 점선 안내 한 줄. */
   .public-gbs-col-empty {
@@ -179,6 +272,126 @@
     color: var(--public-gray-muted);
     font-size: .6875rem;
     text-align: center;
+  }
+
+  /* ── 빌드 카드(.public-sig-build 차용)의 이 화면 전용 변형 ──────────────────
+     원본 37-signature-builds.css 는 한 줄도 고치지 않고, 이 화면의 마크업에만
+     함께 붙는 .public-gbs-* 클래스로 덮습니다. */
+
+  /* 카드 머리는 2행 grid — 윗줄은 랭크 배지 + 룬/스펠 이름, 아랫줄은 수치 한 줄이
+     카드 폭을 통째로 씁니다. 수치를 오른쪽 칸에 세로로 세워 두면 3열 배치(열 폭
+     372px)에서 룬 이름에 128px 밖에 안 남아 "정밀 + 지배" 같은 계열 이름부터
+     잘립니다. 2.25rem = 랭크 배지 실측 폭. */
+  .public-gbs-panel .public-gbs-build-head {
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+    align-items: center;
+    column-gap: .625rem;
+    row-gap: .375rem;
+    min-width: 0;
+  }
+
+  /* 세로로 쌓여 있던 채용률/승률을 "채용률 46.1% │ 승률 52.6%" 한 줄로 눕힙니다.
+     앞 덩어리의 min-width 6.25rem 은 가장 긴 "채용률 100.0%" 가 들어가는 폭이고,
+     이 고정 폭 덕분에 1~3위 카드가 세로로 쌓여도 구분선과 승률이 같은 x 에 섭니다. */
+  .public-gbs-panel .public-gbs-pick {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    display: flex;
+    align-items: baseline;
+    gap: .5rem;
+    min-width: 0;
+    margin-left: 0;
+    text-align: left;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.35;
+  }
+
+  .public-gbs-panel .public-gbs-pick > b {
+    flex: none;
+    display: inline-flex;
+    align-items: baseline;
+    gap: .3125rem;
+    min-width: 6.25rem;
+    font-size: .875rem;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  /* 숫자만 한 단계 키워 카드에서 제일 큰 글자로 만들고 먹금 3단을 얹습니다.
+     라벨("채용률")은 무채로 남겨 "숫자가 1차"라는 위계를 지킵니다. */
+  .public-gbs-pick > b > em {
+    color: var(--metric-tone, var(--metric-accent-ink));
+    font-style: normal;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: -.01em;
+  }
+
+  .public-gbs-pick-label { color: var(--public-gray-muted); font-size: .6875rem; font-weight: 700; }
+
+  /* 승률은 헤어라인 한 겹으로 끊습니다 — 가운뎃점을 또 찍으면 어디까지가 채용률인지
+     흐려집니다. 색은 카드 테두리와 같은 --public-gray-border. */
+  .public-gbs-panel .public-gbs-pick > small {
+    flex: none;
+    margin-top: 0;
+    padding-left: .5rem;
+    border-left: .5px solid var(--public-gray-border);
+    color: var(--public-gray-muted);
+    font-size: .6875rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .public-gbs-pick > small > em { font-style: normal; font-weight: 800; }
+
+  /* 승률'만' 승패색을 씁니다(좋고 나쁨이 있는 값). 채용률은 위 먹금 3단. */
+  .public-gbs-win { color: var(--graph-win-ink); }
+  .public-gbs-loss { color: var(--graph-loss-ink); }
+
+  /* 채용률 바 — 트랙·높이는 원본 그대로 두고 채움만 숫자와 같은 단을 씁니다.
+     5px 무채 막대가 세 카드 모두 같은 회색이라 숫자에만 색이 있고 바는 따로 노는
+     상태였습니다. 트랙(--public-gray-page)이 카드 면보다 어두워 대비는 더 큽니다. */
+  .public-gbs-panel .public-gbs-bar > i { background: var(--metric-tone, var(--graph-fill)); }
+
+  /* 룬트리 두 칸 — 응답의 primaryStyle/subStyle 을 키스톤 원(22) 옆 14×14 칸
+     둘로 주 → 보조 순서로 그립니다. 14px 는 라인명 옆 포지션 아이콘과 같은 치수라
+     새 규격이 아니고, 22 − 14 = 8px 차이가 "키스톤이 주인공, 트리는 보조"를
+     크기로 말합니다. 안쪽 간격 4px, 이름까지는 .public-sig-rune 의 8px — 간격을
+     다르게 둬야 "아이콘 셋"이 아니라 "룬 정체성 한 덩어리 + 이름"으로 읽힙니다. */
+  .public-gbs-rune-icons { flex: none; display: flex; align-items: center; gap: .25rem; }
+
+  .public-gbs-styles { flex: none; display: flex; align-items: center; gap: .1875rem; }
+
+  .public-gbs-style {
+    display: grid;
+    place-items: center;
+    width: .875rem;
+    height: .875rem;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
+    background: var(--public-gray-page);
+    overflow: hidden;
+    color: var(--public-gray-muted);
+    font-size: .5rem;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 1;
+    box-sizing: border-box;
+  }
+
+  .public-gbs-style > img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* 1위 조합의 아이콘 칸(키스톤 · 룬트리 2칸 · 아이템 · 스펠)만 테두리를 헤어라인
+     → 1px 먹빛으로 한 단계 올려 "가장 많이 쓰는 조합"이 한눈에 잡히게 합니다.
+     새 색은 없고 두께만 한 단계이며, box-sizing: border-box 라 바깥 치수와 줄
+     높이는 그대로여서 2·3위와 세로로 어긋나지 않습니다. */
+  .public-gbs-build:not(.is-alt) .public-gbs-keystone,
+  .public-gbs-build:not(.is-alt) .public-gbs-style,
+  .public-gbs-build:not(.is-alt) .public-gbs-item:not(.is-empty) > i,
+  .public-gbs-build:not(.is-alt) .public-gbs-spell {
+    border-width: 1px;
+    border-color: var(--public-gray-muted);
   }
 
   /* 스펠 쌍 — 사각 헤어라인 칸 2개. */
@@ -201,14 +414,33 @@
 
   .public-gbs-spell > img { width: 100%; height: 100%; object-fit: cover; }
 
-  /* 포지션별 승률 — 챔피언 탭 포지션 셀 문법 재사용, 세로 목록. */
+  /* 포지션별 승률 — 챔피언 탭 포지션 셀 문법 재사용, 라인명 + 승률 2칸 표.
+     줄 간격을 0 으로 붙여 셀마다 있는 왼쪽 헤어라인이 끊기지 않고 이어져 표의
+     세로 괘선 한 줄이 됩니다. 세 번째 칸이던 게임 수(3.5rem)를 지우고 남는
+     3.5rem + gap .5rem = 64px 는 라인명 칸이 흡수합니다(minmax(0,1fr)).
+     승률 칸 5.5rem 은 가장 긴 "승률 표본 부족"이 한 줄로 들어가는 폭입니다. */
   .public-gbs-positions {
     display: flex;
     flex-direction: column;
-    gap: .5rem;
+    gap: 0;
   }
 
-  .public-gbs-positions .public-champ-role-cell { padding-block: .125rem; }
+  .public-gbs-positions .public-champ-role-cell {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 5.5rem;
+    align-items: baseline;
+    column-gap: .5rem;
+    padding-block: .25rem;
+  }
+
+  /* 라인 아이콘이 라인명 글자 높이의 세로 중앙에 놓이게 합니다 — 이미지 flex
+     아이템의 baseline 은 아래 모서리여서 baseline 정렬이면 아이콘이 떠 보입니다. */
+  .public-gbs-positions .public-champ-role-name { align-items: center; }
+
+  /* 표 꼴이라 아이콘이 커지면 괘선이 흔들립니다 — 탭보다 한 급 작게. */
+  .public-gbs-positions .public-gbs-pos-icon { width: .875rem; height: .875rem; }
+
+  .public-gbs-positions .public-champ-role-stat { margin-top: 0; text-align: right; white-space: nowrap; }
 
   /* 오류 빈 상태 안의 재시도 버튼(아웃라인은 .public-sig-view 차용) — 안내 문장과 간격. */
   .public-gbs-retry { margin-top: var(--yoro-space-2); }

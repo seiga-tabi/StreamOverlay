@@ -22,7 +22,7 @@ import { PUBLIC_CHAMPIONS_PATH, setPublicPath } from "../utils/routes";
 
 /* 기본 포지션 — 프로필이 없어 "이 사람이 가장 많이 한 라인"을 알 수 없고, 챔피언별
    대표 라인 데이터도 없습니다. 그래서 고정값으로 열고 탭으로 옮기게 둡니다.
-   포지션 탭에는 표본 수가 함께 나오므로 어느 라인에 데이터가 있는지 바로 보입니다. */
+   포지션 탭에는 포지션 비중(%)이 함께 나오므로 주 라인이 어디인지 바로 보입니다. */
 const DEFAULT_CHAMPION_BUILD_POSITION: LolChampionBuildStatsPosition = "MIDDLE";
 
 function isPlainLeftClick(event: MouseEvent<HTMLAnchorElement>): boolean {

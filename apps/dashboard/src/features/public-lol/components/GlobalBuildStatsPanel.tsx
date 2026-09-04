@@ -22,11 +22,23 @@ import { championAnalysisRows } from "../utils/match";
  * 선택자는 .public-gbs-* 만 씁니다(43-global-build-stats.css).
  *
  * 진입 경로: 패널 상단 챔피언 칩(숙련도 순 상위 + 최근 성과 챔피언)에서 고르고,
- * 포지션 탭은 5개 라인을 항상 보여주되 표본 수를 함께 적어 빈 탭을 예고합니다.
+ * 포지션 탭은 5개 라인을 항상 보여주되 포지션 비중(%)을 함께 적어 어느 라인이 주
+ * 라인인지 누르기 전에 보이게 합니다.
  * 기본 포지션은 이 프로필이 그 챔피언을 가장 많이 플레이한 라인입니다. */
 
 export const GLOBAL_BUILD_STATS_MAX_CANDIDATES = 6;
 export const GLOBAL_BUILD_STATS_ITEM_SLOTS = 6;
+
+/* 라인 아이콘 — 전적 행에서 이미 쓰는 서비스 자산 그대로입니다(새로 그리지 않았고
+   무채화는 CSS 의 grayscale 필터가 맡습니다). 라인 이름 텍스트가 접근성 이름을
+   맡으므로 아이콘은 alt="" 장식입니다. */
+const POSITION_ICON_URLS: Record<LolChampionBuildStatsPosition, string> = {
+  TOP: "/images/roles/position-top.svg",
+  JUNGLE: "/images/roles/position-jungle.svg",
+  MIDDLE: "/images/roles/position-middle.svg",
+  BOTTOM: "/images/roles/position-bottom.svg",
+  UTILITY: "/images/roles/position-utility.svg"
+};
 
 const POSITION_ALIASES: Record<string, LolChampionBuildStatsPosition> = {
   TOP: "TOP",
@@ -114,47 +126,92 @@ function rateText(rate: number): string {
   return formatPercent(rate, rate % 1 === 0 ? 0 : 1).replace("%", "");
 }
 
-function rateLine(winRate: number | undefined): string {
-  return winRate === undefined ? t().globalBuildStatsWinRateHidden : fill(t().globalBuildStatsWinRate, { rate: rateText(winRate) });
+/* 문구 템플릿을 "{rate}%" 기준으로 갈라 숫자만 <em> 으로 감쌉니다. 로케일마다 라벨
+   위치가 달라서(ko "채용률 {rate}%" · en "{rate}% pick rate") 앞뒤 조각을 그대로
+   두고 강조만 숫자에 붙입니다 — 색·크기가 라벨까지 번지면 위계가 사라집니다. */
+function splitRateTemplate(template: string): [string, string] {
+  const [before = "", after = ""] = template.split("{rate}%");
+  return [before, after];
 }
 
-function pickLine(pickRate: number, games: number): string {
-  return `${fill(t().globalBuildStatsPickRate, { rate: rateText(pickRate) })} · ${fill(t().globalBuildStatsGamesCount, { count: games })}`;
+/* 채용률·포지션 비중 3단(승인 목업 §08) — 카드에 뜨는 구간 10~100% 를
+   40% 이상(사실상 표준) / 20~40%(유력한 대안) / 그 미만(소수 선택)으로 끊습니다.
+   색은 CSS 의 --metric-tone 이 맡고 여기서는 단계 클래스만 정합니다. */
+function metricToneClass(rate: number): string {
+  if (rate >= 40) return "public-gbs-pick-hi";
+  if (rate >= 20) return "public-gbs-pick-mid";
+  return "public-gbs-pick-lo";
 }
 
-function BuildCardHead({ index, children, pickRate, games, winRate }: {
-  index: number;
-  children: ReactNode;
-  pickRate: number;
-  games: number;
-  winRate: number | undefined;
-}) {
+/** 승률만 승패색(50% 경계). 채용률은 빈도라 승패색을 쓰지 않습니다. */
+function winToneClass(winRate: number): string {
+  return winRate >= 50 ? "public-gbs-win" : "public-gbs-loss";
+}
+
+function WinRateText({ winRate }: { winRate: number | undefined }) {
+  if (winRate === undefined) return <>{t().globalBuildStatsWinRateHidden}</>;
+  const [before, after] = splitRateTemplate(t().globalBuildStatsWinRate);
   return (
     <>
-      <div className="public-sig-build-head">
-        <span className="public-sig-build-no">{fill(t().globalBuildStatsRank, { n: index + 1 })}</span>
-        {children}
-        <span className="public-sig-build-pick">
-          <b>{pickLine(pickRate, games)}</b>
-          <small>{rateLine(winRate)}</small>
-        </span>
-      </div>
-      <span aria-hidden="true" className="public-sig-build-bar"><i style={{ width: `${Math.min(100, Math.max(0, pickRate))}%` }} /></span>
+      {before}
+      <em className={winToneClass(winRate)}>{rateText(winRate)}%</em>
+      {after}
     </>
   );
 }
 
-function ColumnOther({ games }: { games: number }) {
-  if (games <= 0) return null;
-  return <span className="public-sig-other">{fill(t().globalBuildStatsOther, { count: games })}</span>;
+function PickRateText({ pickRate }: { pickRate: number }) {
+  const [before, after] = splitRateTemplate(t().globalBuildStatsPickRate);
+  return (
+    <>
+      {before ? <span className="public-gbs-pick-label">{before}</span> : null}
+      <em>{rateText(pickRate)}%</em>
+      {after ? <span className="public-gbs-pick-label">{after}</span> : null}
+    </>
+  );
+}
+
+/** 카드 클래스 — 단계 클래스를 카드에 직접 붙여 숫자(em)와 바(i)가 같은 단을 봅니다. */
+function buildCardClassName(index: number, pickRate: number): string {
+  return `public-sig-build public-gbs-build ${metricToneClass(pickRate)}${index > 0 ? " is-alt" : ""}`;
+}
+
+/* 화면에 노출되는 게임 수 절대값은 전부 뺐습니다(목업 §08) — 카드 표본("· 190게임"),
+   "그 외 N게임", 탭 보조 줄, 포지션 표 세 번째 칸, 상단 요약 앞머리. 표본 수는 탭
+   aria-label 에 남고, "20게임 미만 → 승률 표본 부족" 상태 문구도 그대로 둡니다. */
+function BuildCardHead({ index, children, pickRate, winRate }: {
+  index: number;
+  children: ReactNode;
+  pickRate: number;
+  winRate: number | undefined;
+}) {
+  return (
+    <>
+      <div className="public-sig-build-head public-gbs-build-head">
+        <span className="public-sig-build-no">{fill(t().globalBuildStatsRank, { n: index + 1 })}</span>
+        {children}
+        <span className="public-sig-build-pick public-gbs-pick">
+          <b><PickRateText pickRate={pickRate} /></b>
+          <small><WinRateText winRate={winRate} /></small>
+        </span>
+      </div>
+      <span aria-hidden="true" className="public-sig-build-bar public-gbs-bar"><i style={{ width: `${Math.min(100, Math.max(0, pickRate))}%` }} /></span>
+    </>
+  );
+}
+
+/** 라인 아이콘 한 칸(장식) — 라인 이름 텍스트가 접근성 이름을 맡습니다. */
+function PositionIcon({ position }: { position: LolChampionBuildStatsPosition | undefined }) {
+  if (!position) return null;
+  return <img alt="" className="public-gbs-pos-icon" decoding="async" src={POSITION_ICON_URLS[position]} />;
 }
 
 function ReadyColumns({ data, helpers }: { data: LolChampionBuildStatsReadyResponse; helpers: GlobalBuildStatsHelpers }) {
   return (
     <>
       <div className="public-gbs-summary">
+        <small>{t().globalBuildStatsSummaryLabel}</small>
         <b>{rateText(data.winRate)}%</b>
-        <small>{fill(t().globalBuildStatsSummary, { count: data.totalGames, rate: rateText(data.winRate) })}</small>
       </div>
       <div className="public-gbs-grid">
         <section className="public-gbs-col" aria-labelledby="public-gbs-runes-title">
@@ -162,16 +219,35 @@ function ReadyColumns({ data, helpers }: { data: LolChampionBuildStatsReadyRespo
           {data.runeGroups.length === 0 ? <p className="public-gbs-col-empty">{t().globalBuildStatsColumnEmpty}</p> : null}
           {data.runeGroups.map((group, index) => {
             const keystoneName = buildStatsAssetName(group.keystone, `#${group.keystonePerkId}`);
-            const styleNames = [
-              group.primaryStyleId > 0 ? buildStatsAssetName(group.primaryStyle, `#${group.primaryStyleId}`) : "",
-              group.subStyleId > 0 ? buildStatsAssetName(group.subStyle, `#${group.subStyleId}`) : ""
-            ].filter(Boolean).join(" + ");
+            /* 응답은 keystone 말고도 주·보조 룬트리 에셋을 들고 옵니다 — 예전 마크업은
+               키스톤 원 하나만 그려 둘의 아이콘 자리를 통째로 버리고 있었습니다.
+               아이콘 URL 이 없으면 URL 을 지어내지 않고 이름 한 글자 약칭만 둡니다. */
+            const styles = [
+              { id: group.primaryStyleId, asset: group.primaryStyle },
+              { id: group.subStyleId, asset: group.subStyle }
+            ].filter((style) => style.id > 0);
+            const styleNames = styles
+              .map((style) => buildStatsAssetName(style.asset, `#${style.id}`))
+              .join(" + ");
             return (
-              <div className={`public-sig-build${index > 0 ? " is-alt" : ""}`} key={group.key}>
-                <BuildCardHead games={group.games} index={index} pickRate={group.pickRate} winRate={group.winRate}>
+              <div className={buildCardClassName(index, group.pickRate)} key={group.key}>
+                <BuildCardHead index={index} pickRate={group.pickRate} winRate={group.winRate}>
                   <span className="public-sig-rune">
-                    <span className="public-sig-keystone">
-                      {group.keystone?.iconUrl ? <img alt="" src={helpers.assetUrl(group.keystone.iconUrl)} /> : <span>{keystoneName.slice(0, 2)}</span>}
+                    <span aria-hidden="true" className="public-gbs-rune-icons">
+                      <span className="public-sig-keystone public-gbs-keystone">
+                        {group.keystone?.iconUrl ? <img alt="" src={helpers.assetUrl(group.keystone.iconUrl)} /> : <span>{keystoneName.slice(0, 2)}</span>}
+                      </span>
+                      {styles.length > 0 ? (
+                        <span className="public-gbs-styles">
+                          {styles.map((style) => (
+                            <i className="public-gbs-style" key={style.id}>
+                              {style.asset?.iconUrl
+                                ? <img alt="" src={helpers.assetUrl(style.asset.iconUrl)} />
+                                : buildStatsAssetName(style.asset, "").slice(0, 1)}
+                            </i>
+                          ))}
+                        </span>
+                      ) : null}
                     </span>
                     <span className="public-sig-rune-names">
                       <b>{keystoneName}</b>
@@ -182,7 +258,6 @@ function ReadyColumns({ data, helpers }: { data: LolChampionBuildStatsReadyRespo
               </div>
             );
           })}
-          <ColumnOther games={data.otherRuneGames} />
         </section>
 
         <section className="public-gbs-col" aria-labelledby="public-gbs-items-title">
@@ -191,18 +266,20 @@ function ReadyColumns({ data, helpers }: { data: LolChampionBuildStatsReadyRespo
           {data.itemGroups.map((group, index) => {
             const items = group.itemIds.map((itemId) => group.items?.find((item) => item.id === itemId) ?? { id: itemId });
             return (
-              <div className={`public-sig-build${index > 0 ? " is-alt" : ""}`} key={group.key}>
-                <BuildCardHead games={group.games} index={index} pickRate={group.pickRate} winRate={group.winRate}>
+              <div className={buildCardClassName(index, group.pickRate)} key={group.key}>
+                <BuildCardHead index={index} pickRate={group.pickRate} winRate={group.winRate}>
                   <span className="public-sig-rune" />
                 </BuildCardHead>
                 <div className="public-sig-items">
                   {items.map((item) => (
-                    <span className="public-sig-item" key={item.id} title={buildStatsAssetName(item, `#${item.id}`)}>
-                      <i>{item.iconUrl ? <img alt={buildStatsAssetName(item, `#${item.id}`)} src={helpers.assetUrl(item.iconUrl)} /> : buildStatsAssetName(item, `#${item.id}`).slice(0, 4)}</i>
+                    <span className="public-sig-item public-gbs-item" key={item.id} title={buildStatsAssetName(item, `#${item.id}`)}>
+                      {/* 아이콘이 오면 그림, 못 풀면 이름 앞 두 글자 — 22px 칸(내부 20.6px)에
+                          8.5px 글자 세 자 이상은 줄바꿈·잘림이 납니다. */}
+                      <i>{item.iconUrl ? <img alt={buildStatsAssetName(item, `#${item.id}`)} src={helpers.assetUrl(item.iconUrl)} /> : buildStatsAssetName(item, `#${item.id}`).slice(0, 2)}</i>
                     </span>
                   ))}
                   {Array.from({ length: Math.max(0, GLOBAL_BUILD_STATS_ITEM_SLOTS - items.length) }, (_, slot) => (
-                    <span aria-hidden="true" className="public-sig-item is-empty" key={`empty:${slot}`}>
+                    <span aria-hidden="true" className="public-sig-item public-gbs-item is-empty" key={`empty:${slot}`}>
                       <i />
                     </span>
                   ))}
@@ -210,15 +287,14 @@ function ReadyColumns({ data, helpers }: { data: LolChampionBuildStatsReadyRespo
               </div>
             );
           })}
-          <ColumnOther games={data.otherItemGames} />
         </section>
 
         <section className="public-gbs-col" aria-labelledby="public-gbs-spells-title">
           <h3 className="public-gbs-col-title" id="public-gbs-spells-title">{t().globalBuildStatsSpellsTitle}</h3>
           {data.spellGroups.length === 0 ? <p className="public-gbs-col-empty">{t().globalBuildStatsColumnEmpty}</p> : null}
           {data.spellGroups.map((group, index) => (
-            <div className={`public-sig-build${index > 0 ? " is-alt" : ""}`} key={group.key}>
-              <BuildCardHead games={group.games} index={index} pickRate={group.pickRate} winRate={group.winRate}>
+            <div className={buildCardClassName(index, group.pickRate)} key={group.key}>
+              <BuildCardHead index={index} pickRate={group.pickRate} winRate={group.winRate}>
                 <span className="public-gbs-spells">
                   {[group.summonerSpell1, group.summonerSpell2].map((spellId) => {
                     const iconUrl = helpers.spellIconUrl(spellId, data.dataDragonVersion);
@@ -232,19 +308,18 @@ function ReadyColumns({ data, helpers }: { data: LolChampionBuildStatsReadyRespo
               </BuildCardHead>
             </div>
           ))}
-          <ColumnOther games={data.otherSpellGames} />
 
           <h3 className="public-gbs-col-title" id="public-gbs-positions-title">{t().globalBuildStatsPositionsTitle}</h3>
           <div className="public-gbs-positions" aria-labelledby="public-gbs-positions-title" role="list">
             {data.positions.map((entry) => (
               <div className="public-champ-role-cell" key={entry.teamPosition} role="listitem">
                 <span className="public-champ-role-name">
+                  <PositionIcon position={normalizeBuildStatsPosition(entry.teamPosition)} />
                   <b>{helpers.positionLabel(entry.teamPosition)}</b>
                   {entry.teamPosition === data.teamPosition ? <i aria-hidden="true">●</i> : null}
                 </span>
                 <span className="public-champ-role-stat">
                   {entry.winRate === undefined ? t().globalBuildStatsWinRateHidden : <b>{formatPercent(entry.winRate)}</b>}
-                  {" · "}{fill(t().globalBuildStatsGamesCount, { count: entry.games })}
                 </span>
               </div>
             ))}
@@ -259,21 +334,33 @@ function ReadyColumns({ data, helpers }: { data: LolChampionBuildStatsReadyRespo
       챔피언 칩(프로필 후보 목록)만 패널 쪽에 남습니다 — 단독 화면에는 프로필이
       없어 후보를 만들 근거가 없습니다. ─────────────────────────────────────── */
 
-/** 포지션 탭 5개. `positionGames` 가 없으면(아직 로딩) 표본 수를 적지 않습니다. */
+/** 포지션 탭 5개. `positionGames` 가 없으면(아직 로딩) 비중을 적지 않습니다.
+ *
+ * 화면에 적는 수치는 다섯 포지션 games 합계 대비 비중(%) 하나입니다 — 절대값
+ * 하나로는 판단이 안 되기 때문입니다(1284 이 많은 수인지 알려면 나머지 네 탭을 다
+ * 읽어야 하지만, 70.2% 는 한 칸만 봐도 "사실상 정글"이 읽힙니다). 새 API 필드는
+ * 필요 없고 이미 오는 positions[].games 를 나누기만 합니다. 표본 크기는 화면에서
+ * 사라지지만 aria-label 에는 게임 수가 그대로 남습니다(목업 §08). */
 export function GlobalBuildStatsPositionTabs({ position, positionGames, helpers, onPositionChange }: {
   position: LolChampionBuildStatsPosition;
   positionGames: Map<string, number> | undefined;
   helpers: Pick<GlobalBuildStatsHelpers, "positionLabel">;
   onPositionChange: (position: LolChampionBuildStatsPosition) => void;
 }) {
+  const totalGames = positionGames
+    ? LOL_CHAMPION_BUILD_STATS_POSITIONS.reduce((sum, entry) => sum + (positionGames.get(entry) ?? 0), 0)
+    : 0;
   return (
     <div aria-label={t().globalBuildStatsPositionTabs} className="public-gbs-tabs" role="tablist">
       {LOL_CHAMPION_BUILD_STATS_POSITIONS.map((entry) => {
-        const games = positionGames?.get(entry);
+        const games = positionGames?.get(entry) ?? 0;
+        /* 반올림 합이 99.9% 가 되는 것은 자리올림 잔차이고 보정하지 않습니다. */
+        const share = totalGames > 0 ? (games * 100) / totalGames : 0;
+        const shareText = share.toFixed(1);
         const label = helpers.positionLabel(entry);
-        const ariaLabel = games === undefined || games === 0
-          ? fill(t().globalBuildStatsPositionNoGames, { position: label })
-          : fill(t().globalBuildStatsPositionGames, { position: label, count: games });
+        const ariaLabel = games === 0
+          ? fill(t().globalBuildStatsPositionNoGames, { position: label, share: shareText })
+          : fill(t().globalBuildStatsPositionGames, { position: label, share: shareText, count: games });
         return (
           <button
             aria-controls="public-gbs-body"
@@ -285,8 +372,13 @@ export function GlobalBuildStatsPositionTabs({ position, positionGames, helpers,
             role="tab"
             type="button"
           >
+            <PositionIcon position={entry} />
             {label}
-            {positionGames ? <small aria-hidden="true">{games ?? 0}</small> : null}
+            {positionGames ? (
+              <span aria-hidden="true" className="public-gbs-tab-share">
+                <b className={metricToneClass(share)}>{shareText}%</b>
+              </span>
+            ) : null}
           </button>
         );
       })}

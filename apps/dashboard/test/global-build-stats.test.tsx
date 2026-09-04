@@ -135,8 +135,9 @@ test("로딩 상태 — 칩·탭은 유지하고 본문은 role=status 로 안�
   assert.match(html, /aria-busy="true"[^>]*class="public-champ-empty public-gbs-loading" role="status"/u);
   assert.match(html, /글로벌 빌드 통계를 불러오는 중/u);
   assert.match(html, /aria-pressed="true"[^>]*class="public-gbs-champ"[^>]*>[\s\S]*?아리/u);
-  assert.match(html, /aria-selected="true"[^>]*role="tab"[^>]*>미드/u);
+  assert.match(html, /aria-selected="true"[^>]*role="tab"[^>]*>.*?미드/u);
   assert.equal((html.match(/role="tab"/gu) ?? []).length, 5, "5개 라인 탭을 항상 그린다");
+  assert.doesNotMatch(html, /public-gbs-tab-share/u, "표본이 없으면 비중도 적지 않는다");
   assert.match(html, /전체 유저 · 솔로랭크/u, "패치를 아직 모르면 패치 없는 칩 문구");
 });
 
@@ -161,40 +162,50 @@ test("표본 부족 상태 — 챔피언·포지션·표본 수를 문장에 넣
   assert.match(html, /패치 15\.17/u);
 });
 
-test("정상 상태 — 3열(룬/아이템/스펠+포지션)과 채용률·승률·그 외·표본부족 승률 숨김을 그린다", () => {
+test("정상 상태 — 3열(룬/아이템/스펠+포지션)과 채용률·승률·표본부족 승률 숨김을 그린다", () => {
   const html = render({ status: "ready", data: readyData() });
   assert.equal((html.match(/class="public-gbs-col"/gu) ?? []).length, 3);
-  assert.match(html, /<b>55%<\/b>/u);
-  assert.match(html, /120게임 · 승률 55%/u);
-  /* 룬 열 */
+  /* 상단 요약 — 라벨 + 큰 숫자, 게임 수 없음 */
+  assert.match(html, /<small>승률<\/small><b>55%<\/b>/u);
+  /* 룬 열 — 키스톤 + 주·보조 룬트리 두 칸 */
   assert.match(html, /감전/u);
   assert.match(html, /지배 \+ 영감/u);
-  assert.match(html, /채용률 66\.7% · 80게임/u);
-  assert.match(html, /승률 56\.3%/u);
+  assert.equal((html.match(/class="public-gbs-style"/gu) ?? []).length, 4, "룬 그룹마다 주·보조 룬트리 두 칸");
+  assert.match(html, /<span class="public-gbs-pick-label">채용률 <\/span><em>66\.7%<\/em>/u);
+  assert.match(html, /승률 <em class="public-gbs-win">56\.3%<\/em>/u);
   assert.match(html, /승률 표본 부족/u, "15게임 조합은 승률 대신 표본 부족 문구");
-  assert.match(html, /그 외 25게임/u);
+  /* 채용률 3단 — 66.7% 골드 · 33.3% 앰버 · 12.5% 회갈 */
+  assert.match(html, /class="public-sig-build public-gbs-build public-gbs-pick-hi"/u);
+  assert.match(html, /class="public-sig-build public-gbs-build public-gbs-pick-mid"/u);
+  assert.match(html, /class="public-sig-build public-gbs-build public-gbs-pick-lo is-alt"/u);
   /* 아이템 열 — 2개 아이템 + 빈 슬롯 4개 */
   assert.match(html, /img\/item\/1001\.png/u);
-  assert.equal((html.match(/public-sig-item is-empty/gu) ?? []).length, 4);
-  assert.match(html, /그 외 80게임/u);
+  assert.equal((html.match(/public-sig-item public-gbs-item is-empty/gu) ?? []).length, 4);
   /* 스펠 열 — Data Dragon 버전으로 아이콘 URL 조립 */
   assert.match(html, /img\/spell\/4\.png/u);
   assert.match(html, /img\/spell\/14\.png/u);
-  assert.match(html, /그 외 20게임/u);
-  /* 포지션 분포 */
+  /* 포지션 분포 — 라인 아이콘 + 라인명 + 승률 2칸(게임 수 칸 없음) */
   assert.match(html, /포지션별 승률/u);
   assert.match(html, /role="listitem"/u);
-  assert.match(html, /탑<\/b>/u);
-  /* 탭에 표본 수 */
-  assert.match(html, /aria-label="미드 · 120게임"/u);
-  assert.match(html, /aria-label="정글 · 표본 없음"/u);
+  assert.match(html, /position-top\.svg[^>]*\/><b>탑<\/b>/u);
+  /* 탭 — 화면은 비중(%)만, 게임 수는 aria-label 에만 */
+  assert.match(html, /aria-label="미드 · 포지션 비중 93\.8% · 120게임"/u);
+  assert.match(html, /aria-label="정글 · 포지션 비중 0\.0% · 표본 없음"/u);
+  assert.match(html, /class="public-gbs-tab-share"><b class="public-gbs-pick-hi">93\.8%<\/b>/u);
+  assert.match(html, /<b class="public-gbs-pick-lo">6\.3%<\/b>/u, "탑 8게임 = 6.3%");
+  assert.match(html, /position-jungle\.svg/u);
   assert.match(html, /패치 15\.17 · 솔로랭크/u);
+  /* 화면에 노출되는 게임 수는 전부 삭제 — 게임 수가 남는 곳은 탭 aria-label 과
+     각주("표본 20게임 미만…")뿐이고, 눈에 보이는 텍스트 노드에는 없습니다. */
+  assert.doesNotMatch(html, /그 외/u);
+  const visible = html.replace(/aria-label="[^"]*"/gu, "").replace(/<p class="public-sig-foot">[^<]*<\/p>/u, "");
+  assert.doesNotMatch(visible, /게임/u);
 });
 
 test("표시 조합이 없는 열은 안내 한 줄로 채운다", () => {
   const html = render({ status: "ready", data: readyData({ itemGroups: [], otherItemGames: 120 }) });
   assert.match(html, /채용률 10% 이상인 조합이 없습니다/u);
-  assert.match(html, /그 외 120게임/u);
+  assert.doesNotMatch(html, /그 외 120게임/u);
 });
 
 test("후보 챔피언이 없으면 빈 상태만 그린다", () => {
