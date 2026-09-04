@@ -1,7 +1,7 @@
 @layer pages {
-  /* 챔피언 상세 — 스킬 리스트 + 기본 스탯 격자.
+  /* 챔피언 상세 — 스킬 리스트.
      승인 스펙 `docs/mockups/lol-champion-detail-skills-stats.approved-spec.html`
-     (배치안 A 세로 리스트 · 모바일 2열 고정)의 실측값입니다.
+     (배치안 A 세로 리스트)의 실측값입니다.
    *
    * 패널 프레임(.public-champ-panel/.public-champ-head)은 36-champion-analysis.css
    * 를 그대로 쓰고, 여기서는 그 안의 내용만 정의합니다. */
@@ -137,55 +137,6 @@
     font-weight: 700;
   }
 
-  /* 패시브에는 쿨타임·소모값이 없다는 사실 자체를 한 줄로 말합니다(빈 칸 대신). */
-  .public-cskill-meta-none {
-    color: var(--public-gray-muted);
-    font-weight: 500;
-  }
-
-  /* ── 기본 스탯 격자(스펙 §04) ────────────────────────────────────────────
-     720px 폭에서 3열입니다. 값이 0 인 칸도 숨기지 않습니다 — 칸이 비면
-     "아직 안 불러왔나"로 읽힙니다. */
-  .public-cstat-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 8px;
-    padding: 0 1.125rem 1.125rem;
-  }
-
-  .public-cstat {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    min-width: 0;
-    padding: 9px 11px;
-    border: .5px solid var(--public-gray-border);
-    border-radius: 2px;
-    background: var(--public-gray-page);
-  }
-
-  .public-cstat-label {
-    color: var(--public-gray-muted);
-    font-size: 11px;
-    font-weight: 700;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  /* STAT_LABELS 에 없는 키는 영문 키가 그대로 나옵니다 — ddragon 이 키를 늘렸을
-     때를 위한 보험입니다(현재 20키는 모두 라벨이 있습니다). */
-  .public-cstat-label[data-fallback="true"] {
-    font-family: var(--yoro-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
-    letter-spacing: 0;
-  }
-
-  .public-cstat-value {
-    font-size: 15px;
-    font-weight: 800;
-    letter-spacing: -.01em;
-  }
-
   /* ── 반응형(스펙 §09) ───────────────────────────────────────────────────
      좌우 여백은 목록 화면과 같은 48rem 분기에서 줄이고, 아이콘은 48 → 40px. */
   @media (max-width: 48rem) {
@@ -205,19 +156,9 @@
       padding-right: 8px;
     }
 
-    .public-cdetail-panel .public-champ-head,
-    .public-cstat-grid {
+    .public-cdetail-panel .public-champ-head {
       padding-left: .875rem;
       padding-right: .875rem;
-    }
-  }
-
-  /* 자동 격자라면 1열로 떨어질 폭에서만 2열로 고정합니다 — 「체력 590」한 줄이
-     화면 폭을 다 먹는 것은 낭비이고, 20개 스탯이 20줄이 되면 세로가 너무 깁니다.
-     칸 폭 약 163px 로 가장 긴 라벨(「레벨당 마법 저항력」)까지 들어갑니다. */
-  @media (max-width: 30rem) {
-    .public-cstat-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 }

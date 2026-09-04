@@ -40,8 +40,6 @@ type SkillRow = {
   descriptionLines: string[];
   iconUrl?: string;
   meta: SkillMetaEntry[];
-  /** 패시브에는 쿨타임·소모값이 아예 없습니다 — 빈 칸 대신 사실을 한 줄로 말합니다(§02). */
-  metaNone?: string;
 };
 
 function cooldownText(cooldown: readonly number[] | undefined): string | undefined {
@@ -73,8 +71,7 @@ function skillRows(detail: LolChampionDetailResponse): SkillRow[] {
         localizedChampionText({ ko: passive.descriptionKo, ja: passive.descriptionJa, en: passive.descriptionEn })
       ),
       ...(passive.iconUrl ? { iconUrl: passive.iconUrl } : {}),
-      meta: [],
-      metaNone: t().championDetailSkillPassiveMeta
+      meta: []
     });
   }
 
@@ -146,11 +143,8 @@ export function ChampionSkillsPanel({ detail }: { detail: LolChampionDetailRespo
                   ))}
                 </p>
               ) : null}
-              {row.meta.length > 0 || row.metaNone ? (
+              {row.meta.length > 0 ? (
                 <dl className="public-cskill-meta">
-                  {row.metaNone ? (
-                    <div><dd className="public-cskill-meta-none">{row.metaNone}</dd></div>
-                  ) : null}
                   {row.meta.map((entry) => (
                     <div key={entry.label}>
                       <dt>{entry.label}</dt>

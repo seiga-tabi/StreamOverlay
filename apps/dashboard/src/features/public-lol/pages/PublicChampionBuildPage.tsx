@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState, type MouseEvent } from "react";
 import { type LolChampionBuildStatsPosition, type LolChampionDetailResponse, type LolChampionSummary } from "@streamops/shared";
 import { NorigaeMark, TailUnderline } from "../../public-home/components/HomeMarks";
 import { fetchChampionBuildStats, getChampionDetail, getPublicLolChampions } from "../api/lol";
-import { ChampionBaseStatsPanel } from "../components/ChampionBaseStatsPanel";
 import { ChampionSkillsPanel } from "../components/ChampionSkillsPanel";
 import {
   GlobalBuildStatsBody,
@@ -160,9 +159,8 @@ export function PublicChampionBuildPage({ championId, helpers }: {
       </header>
 
       {/* 통계보다 먼저 놓습니다 — 통계는 표본이 모자라면 비어 보이는 화면이지만
-          스킬·스탯은 항상 있는 정보라, 먼저 놓아야 빈 첫 화면이 나오지 않습니다(목업 §01). */}
+          스킬은 항상 있는 정보라, 먼저 놓아야 빈 첫 화면이 나오지 않습니다(목업 §01). */}
       {detail ? <ChampionSkillsPanel detail={detail} /> : null}
-      {detail ? <ChampionBaseStatsPanel detail={detail} /> : null}
 
       <section className="public-champ-panel public-gbs-panel" id="public-global-build-stats">
         <div className="public-champ-head">

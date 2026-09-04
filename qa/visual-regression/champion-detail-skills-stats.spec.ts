@@ -1,19 +1,18 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
 import type { LolChampionDetailResponse, LolChampionSummary } from "@streamops/shared";
 
-/* 챔피언 상세의 스킬·기본 스탯 표시 —
+/* 챔피언 상세의 스킬 표시 —
    승인 스펙 `docs/mockups/lol-champion-detail-skills-stats.approved-spec.html`
-   §02(배치안 A) · §09 · §10 계약입니다.
+   §02(배치안 A) · §10 계약입니다.
 
-   이번 패치 변경 배지/before→after 표기(§05·§06)는 챔피언 패치 변경 자동감지
-   기능 3개 제거(2026-09-04)와 함께 삭제되었습니다 — 아래 픽스처와 테스트는
-   그 부분만 정리하고 스킬·기본 스탯 표시 자체(패시브+QWER, 20종 스탯, fail-soft,
-   모바일 반응형)는 그대로 유지합니다.
+   기본 정보 패널과 패시브의 "쿨타임·소모값 없음" 메타 문구는 화면에서 제거됐습니다.
+   아래 테스트는 패시브+QWER 5줄, 액티브 스킬 메타, 상세 API fail-soft 동작을
+   검증합니다. baseStats 픽스처는 API 계약이 유지되므로 그대로 둡니다.
 
-   이 두 패널은 글로벌 빌드 통계와 다른 원천이라 fail-soft 여야 합니다. 그래서
+   스킬 패널은 글로벌 빌드 통계와 다른 원천이라 fail-soft 여야 합니다. 그래서
    "스킬이 뜬다"만 보지 않고 "상세 API 가 죽어도 빌드 통계는 그대로 산다"를 함께 봅니다.
 
-   스킬 문장·수치와 기본 스탯 20종은 Data Dragon 실제 응답값입니다
+   스킬 문장·수치는 Data Dragon 실제 응답값입니다
    (16.17.1 · ko_KR · 아리 championId 103). */
 
 const CHAMPIONS: LolChampionSummary[] = [
@@ -161,7 +160,7 @@ async function installChampionDetailFixtures(page: Page, fixtures: Fixtures = {}
   });
 }
 
-test("스킬 5줄과 기본 스탯 20칸이 머리와 빌드 통계 사이에 들어간다", async ({ page }) => {
+test("스킬 5줄이 머리와 빌드 통계 사이에 들어간다", async ({ page }) => {
   await installChampionDetailFixtures(page, { detail: AHRI_DETAIL });
   await page.goto("/lol/champions/103");
 
@@ -176,26 +175,17 @@ test("스킬 5줄과 기본 스탯 20칸이 머리와 빌드 통계 사이에 �
   expect(qMeta).toEqual(["7초", "마나 55/65/75/85/95", "970"]);
   const wMeta = await rows.nth(2).locator(".public-cskill-meta dd").allInnerTexts();
   expect(wMeta).toEqual(["9/8/7/6/5초", "마나 30", "700"]);
-  /* 패시브는 쿨타임·소모값이 아예 없다는 사실을 문장으로 말합니다(빈 칸 금지 · §10). */
-  await expect(rows.nth(0).locator(".public-cskill-meta-none")).toHaveText("지속 효과 — 쿨타임·소모값 없음");
+  /* 메타 항목이 없는 패시브에는 빈 정의 목록을 렌더하지 않습니다. */
+  await expect(rows.nth(0).locator(".public-cskill-meta")).toHaveCount(0);
 
   /* 설명은 원문의 <br> 를 줄바꿈으로만 살립니다 — 태그가 글자로 새지 않아야 합니다. */
   const passiveText = await rows.nth(0).locator(".public-cskill-desc").innerText();
   expect(passiveText).toContain("아리가 미니언 또는 몬스터를 9마리 처치하면 체력을 회복합니다.");
   expect(passiveText).not.toContain("<br>");
 
-  /* 기본 스탯 20칸 — 0 인 칸도 숨기지 않습니다(빈 칸은 "로딩 중"으로 읽힙니다). */
-  await expect(page.locator(".public-cstat")).toHaveCount(20);
-  const firstCard = page.locator(".public-cstat").first();
-  await expect(firstCard.locator(".public-cstat-label")).toHaveText("체력");
-  await expect(firstCard.locator(".public-cstat-value")).toHaveText("590");
-  /* critperlevel 라벨이 없으면 영문 키가 그대로 노출됩니다(STAT_LABELS 20번째 키). */
-  await expect(page.locator(".public-cstat-label").last()).toHaveText("레벨당 치명타");
-  await expect(page.locator('.public-cstat-label[data-fallback="true"]')).toHaveCount(0);
-
-  /* 순서 — 스킬 → 기본 정보 → 글로벌 빌드 통계(스펙 §01). */
+  /* 순서 — 스킬 → 글로벌 빌드 통계. */
   const headings = await page.locator(".public-champion-build-page h2").allInnerTexts();
-  expect(headings).toEqual(["스킬", "기본 정보", "챔피언 글로벌 빌드"]);
+  expect(headings).toEqual(["스킬", "챔피언 글로벌 빌드"]);
 });
 
 test("변경이 없으면 배지·태그·알림 줄이 전부 사라진다(기본 상태)", async ({ page }) => {
@@ -205,13 +195,10 @@ test("변경이 없으면 배지·태그·알림 줄이 전부 사라진다(기�
 
   await expect(page.locator(".public-champion-card-badge")).toHaveCount(0);
   await expect(page.locator(".public-cskill-tag")).toHaveCount(0);
-  await expect(page.locator(".public-cstat-delta")).toHaveCount(0);
   await expect(page.locator(".public-cpatch-note")).toHaveCount(0);
-  /* "변경 없음" 이라는 빈 상태 문구도 넣지 않습니다 — 이것이 예외가 아니라 기본형입니다. */
-  await expect(page.locator(".public-cstat[data-direction]")).toHaveCount(0);
 });
 
-test("상세 API 가 죽어도 두 패널만 빠지고 빌드 통계 화면은 그대로 산다", async ({ page }) => {
+test("상세 API 가 죽어도 스킬 패널만 빠지고 빌드 통계 화면은 그대로 산다", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await installChampionDetailFixtures(page, { detail: 503 });
@@ -220,36 +207,7 @@ test("상세 API 가 죽어도 두 패널만 빠지고 빌드 통계 화면은 �
   await expect(page.locator("#public-global-build-stats")).toBeVisible();
   await expect(page.getByRole("heading", { name: "아리" })).toBeVisible();
   await expect(page.locator(".public-cskill-row")).toHaveCount(0);
-  await expect(page.locator(".public-cstat")).toHaveCount(0);
   /* 부가 정보의 실패를 화면에 올리지 않습니다 — 오류 배너가 뜨면 안 됩니다. */
   await expect(page.getByRole("alert")).toHaveCount(0);
   expect(errors).toEqual([]);
-});
-
-test("모바일 390px 에서 스탯 격자는 2열을 유지하고 가로 오버플로가 없다", async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== "mobile-chromium", "모바일 뷰포트 전용");
-  await installChampionDetailFixtures(page);
-  await page.goto("/lol/champions/103");
-  await expect(page.locator(".public-cstat")).toHaveCount(20);
-
-  const columns = await page.locator(".public-cstat-grid").evaluate((node) => (
-    window.getComputedStyle(node).gridTemplateColumns.split(" ").length
-  ));
-  expect(columns).toBe(2);
-
-  /* 스킬 행은 minmax(0, 1fr) 이라 긴 문장에서도 가로로 넘치지 않아야 합니다(§09). */
-  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-  expect(overflow).toBeLessThanOrEqual(0);
-
-  /* 최악 케이스는 Q 의 「마나 55/65/75/85/95」입니다 — 이 항목 때문에 「사거리 970」이
-     다음 줄로 접힙니다. 접힌 줄의 첫 항목 왼쪽에 구분선이 홀로 남으면 안 됩니다(§09). */
-  const qMeta = await page.locator(".public-cskill-row").nth(1).locator(".public-cskill-meta > div").evaluateAll((items) => items.map((item) => ({
-    top: (item as HTMLElement).offsetTop,
-    left: (item as HTMLElement).offsetLeft,
-    borderLeft: window.getComputedStyle(item).borderLeftWidth
-  })));
-  expect(qMeta).toHaveLength(3);
-  expect(qMeta[2]?.top).toBeGreaterThan(qMeta[0]?.top ?? 0);
-  expect(qMeta[2]?.left).toBe(qMeta[0]?.left);
-  expect(qMeta.map((item) => item.borderLeft)).toEqual(["0px", "0px", "0px"]);
 });
