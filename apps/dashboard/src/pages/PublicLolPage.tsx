@@ -7815,7 +7815,7 @@ export function PublicLolPage({
           />
         );
       }
-      return <PublicChampionListPage />;
+      return <PublicChampionListPage locale={locale} />;
     }
     if (activeMainPage === "patchNotes") {
       return <PublicPatchNotesPage locale={locale} />;

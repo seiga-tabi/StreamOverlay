@@ -182,6 +182,73 @@
     object-fit: cover;
   }
 
+  /* ── 최신 패치 버프/너프 배지 — 목업 `lol-champion-buff-nerf.approved-spec.html` §02(A안).
+     아이콘은 `overflow: hidden` 이라 배지를 자식으로 넣으면 잘립니다. 아이콘을
+     relative 상자로 한 겹 감싸고 배지를 형제로 둡니다(목업 §07).
+     18×18 · r2 · .5px 헤어라인 · 배경은 카드 표면과 같은 무채값이고, 보더색만
+     판정색 40% 혼합(42-ink-patch-notes.css 233~234행과 같은 계산), 화살표만 판정색입니다.
+     판정색은 --graph-win-ink/--graph-loss-ink 참조뿐이라 라이트 스왑은 자동입니다. */
+  .public-champion-card-figure {
+    position: relative;
+    flex: none;
+  }
+
+  .public-champion-card-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    display: grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    border: .5px solid var(--public-gray-border);
+    border-radius: 2px;
+    background: var(--public-gray-surface);
+    box-shadow: none;
+  }
+
+  .public-champion-card-badge > svg {
+    display: block;
+  }
+
+  .public-champion-card-badge[data-direction="buff"] {
+    border-color: color-mix(in srgb, var(--graph-win-ink) 40%, var(--public-gray-border));
+    color: var(--graph-win-ink);
+  }
+
+  .public-champion-card-badge[data-direction="nerf"] {
+    border-color: color-mix(in srgb, var(--graph-loss-ink) 40%, var(--public-gray-border));
+    color: var(--graph-loss-ink);
+  }
+
+  /* ── 정렬 그룹 구분 줄 — 목업 §03 배치안 1. 격자 전체 폭 한 줄이라 카드 칸을
+     먹지 않습니다. 판정색은 쓰지 않습니다 — 이 줄은 판정이 아니라 경계 표시라
+     머리 상태 태그(.yoro-champions-head-status)와 같은 무채 규격을 씁니다. */
+  .public-champions-groupline {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    margin: 8px 0 0;
+    color: var(--public-gray-muted);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    white-space: nowrap;
+  }
+
+  .public-champions-groupline::after {
+    content: "";
+    flex: 1;
+    min-width: 0;
+    border-top: .5px solid var(--public-gray-border);
+  }
+
+  .public-champions-groupline:first-child {
+    margin-top: 0;
+  }
+
   .public-champion-card-copy {
     min-width: 0;
     display: grid;

@@ -29,6 +29,8 @@
   .yoro-home-chrome,
   .yoro-pn-page,
   .public-aram-page,
+  .public-champions-page,
+  .public-champion-build-page,
   .public-legal-page {
     /* 다크(기본) */
     --home-bg: #1C1D22;
@@ -96,6 +98,10 @@
   :root[data-public-theme="light"] .yoro-pn-page,
   .theme-light .public-aram-page,
   :root[data-public-theme="light"] .public-aram-page,
+  .theme-light .public-champions-page,
+  :root[data-public-theme="light"] .public-champions-page,
+  .theme-light .public-champion-build-page,
+  :root[data-public-theme="light"] .public-champion-build-page,
   .theme-light .public-legal-page,
   :root[data-public-theme="light"] .public-legal-page {
     --home-bg: #F5F6F8;

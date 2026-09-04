@@ -4,7 +4,9 @@
    선택자만 잇습니다(수묵 리스킨 §3-1·aram 전환 §2-1). 값을 복사해 두 곳에 두지 않습니다. */
 .public-profile-platform-v2,
 .yoro-pn-page,
-.public-aram-page {
+.public-aram-page,
+.public-champions-page,
+.public-champion-build-page {
   /* 수묵 리스킨(목업 yoro-home-redesign page-4) — 홈(/)·/lol·/follow 와 같은
      백자·수묵 팔레트. 화면 전체가 이 토큰을 참조하므로 여기 한 곳만 바꿉니다. */
   --public-gray-page: #1c1d22;
@@ -172,7 +174,11 @@
 .theme-light .yoro-pn-page,
 :root[data-public-theme="light"] .yoro-pn-page,
 .theme-light .public-aram-page,
-:root[data-public-theme="light"] .public-aram-page {
+:root[data-public-theme="light"] .public-aram-page,
+.theme-light .public-champions-page,
+:root[data-public-theme="light"] .public-champions-page,
+.theme-light .public-champion-build-page,
+:root[data-public-theme="light"] .public-champion-build-page {
   --public-gray-page: #f5f6f8;
   --public-gray-page-deep: #eceef2;
   --public-gray-surface: #ffffff;
