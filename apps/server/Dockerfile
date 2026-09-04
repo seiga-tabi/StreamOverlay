@@ -3,19 +3,32 @@ WORKDIR /app
 ARG APP_VERSION
 ARG GIT_SHA
 ARG BUILD_TIME
+ENV NODE_ENV=production \
+    APP_VERSION=${APP_VERSION} \
+    GIT_SHA=${GIT_SHA} \
+    BUILD_TIME=${BUILD_TIME}
+# ── 의존성 설치 레이어 — manifest만 먼저 복사합니다 ──────────────────────────
+# npm workspaces가 package.json을 찾을 수 있도록 각 워크스페이스의 manifest만
+# 먼저 들여오고, 전체 소스는 npm ci 이후에 복사합니다. 순서를 바꾸면(소스를
+# 먼저 넣으면) 코드 한 줄만 바뀌어도 이 COPY 레이어가 깨지면서 그 아래
+# npm ci 레이어까지 매번 무효화됩니다 — lockfile이 그대로여도 재설치가
+# 발생하던 원인이었습니다(2026-09-04 빌드 지연 조사).
+# email-worker는 server 런타임이 참조하지 않는 별개 Cloudflare Worker라
+# manifest만 들여 workspace 해석에 쓰고, 전체 소스는 복사하지 않습니다.
 COPY package.json package-lock.json* tsconfig.base.json ./
+COPY packages/shared/package.json ./packages/shared/package.json
+COPY apps/server/package.json ./apps/server/package.json
+COPY apps/dashboard/package.json ./apps/dashboard/package.json
+COPY apps/email-worker/package.json ./apps/email-worker/package.json
+RUN --mount=type=cache,target=/root/.npm,sharing=locked \
+    npm ci --include=dev
+# ── 소스 복사 — npm ci 이후. 코드 변경은 이 지점부터만 캐시를 깹니다 ────────
 COPY .git /tmp/yoro-git
 COPY scripts/generate-image-release-metadata.mjs ./scripts/generate-image-release-metadata.mjs
 COPY packages ./packages
 COPY apps/server ./apps/server
 COPY apps/dashboard ./apps/dashboard
-COPY apps/email-worker ./apps/email-worker
-ENV NODE_ENV=production \
-    APP_VERSION=${APP_VERSION} \
-    GIT_SHA=${GIT_SHA} \
-    BUILD_TIME=${BUILD_TIME}
 RUN node scripts/generate-image-release-metadata.mjs /tmp/yoro-release.json /tmp/yoro-git
-RUN npm ci --include=dev
 RUN npm run build:shared
 RUN npm run build:server
 RUN node apps/server/dist/scripts/validate-palworld-translations.js \
@@ -48,7 +61,8 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 COPY apps/server/assets/fonts/yuji-boku.ttf /usr/share/fonts/truetype/yuji-boku/yuji-boku.ttf
 RUN fc-cache -f
-RUN npm ci --omit=dev --include-workspace-root=false --workspace @streamops/shared --workspace @streamops/server
+RUN --mount=type=cache,target=/root/.npm,sharing=locked \
+    npm ci --omit=dev --include-workspace-root=false --workspace @streamops/shared --workspace @streamops/server
 COPY --from=build /app/packages/shared/dist ./packages/shared/dist
 COPY --from=build /app/apps/server/dist ./apps/server/dist
 RUN find /app/node_modules /app/packages/shared/dist /app/apps/server/dist -type f \
