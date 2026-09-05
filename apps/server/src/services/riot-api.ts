@@ -855,10 +855,15 @@ export class RiotApiClient {
     return rankedEntry ? rankedStatsFromEntry(rankedEntry, null) : undefined;
   }
 
-  async getRankedQueueStatsByPuuid(puuid: string, routing?: LolRoutingContext, signal?: AbortSignal): Promise<{ solo?: LolRankedStats; flex?: LolRankedStats; ranked5v5?: LolRankedStats; primary?: LolRankedStats }> {
+  async getRankedQueueStatsByPuuid(
+    puuid: string,
+    routing?: LolRoutingContext,
+    signal?: AbortSignal,
+    options?: { summoner: RiotSummoner }
+  ): Promise<{ solo?: LolRankedStats; flex?: LolRankedStats; ranked5v5?: LolRankedStats; primary?: LolRankedStats; resolvedSummoner?: RiotSummoner | null }> {
     if (!this.isConfigured()) return {};
     const [summoner, entries] = await Promise.all([
-      this.getSummonerByPuuid(puuid, routing, signal),
+      options ? Promise.resolve(options.summoner) : this.getSummonerByPuuid(puuid, routing, signal),
       this.getLeagueEntriesByPuuid(puuid, routing, signal)
     ]);
     const soloEntry = entries.find((entry) => entry.queueType === "RANKED_SOLO_5x5");
@@ -871,7 +876,8 @@ export class RiotApiClient {
       solo,
       flex,
       ranked5v5,
-      primary: solo ?? flex ?? ranked5v5 ?? unrankedStatsFromSummoner(summoner)
+      primary: solo ?? flex ?? ranked5v5 ?? unrankedStatsFromSummoner(summoner),
+      resolvedSummoner: summoner
     };
   }
 }

@@ -120,6 +120,48 @@ test("RiotApiClient는 솔로랭크, 자유랭크, 5v5 랭크를 각각 반환�
   assert.equal(stats.ranked5v5?.tier, "GOLD");
   assert.equal(stats.ranked5v5?.summonerLevel, 512);
   assert.equal(stats.primary?.queueType, "RANKED_SOLO_5x5");
+  assert.deepEqual(stats.resolvedSummoner, {
+    puuid: "puuid-three-ranks",
+    profileIconId: 31,
+    revisionDate: 1,
+    summonerLevel: 512
+  });
+});
+
+test("RiotApiClient는 이미 조회한 소환사 정보가 주어지면 summoner API를 다시 호출하지 않는다", async () => {
+  let summonerLookups = 0;
+  globalThis.fetch = async (url) => {
+    const target = String(url);
+    if (target.includes("/lol/summoner/v4/summoners/by-puuid/")) {
+      summonerLookups += 1;
+      return jsonResponse({ status: { message: "중복 summoner 호출" } }, 500);
+    }
+    if (target.includes("/lol/league/v4/entries/by-puuid/")) {
+      return jsonResponse([
+        { queueType: "RANKED_SOLO_5x5", tier: "DIAMOND", rank: "II", leaguePoints: 64, wins: 92, losses: 74 }
+      ]);
+    }
+    return jsonResponse({ status: { message: "not found" } }, 404);
+  };
+
+  const client = new RiotApiClient();
+  const reusedSummoner = {
+    puuid: "puuid-reused-summoner",
+    profileIconId: 31,
+    revisionDate: 1,
+    summonerLevel: 512
+  };
+  const stats = await client.getRankedQueueStatsByPuuid(
+    "puuid-reused-summoner",
+    undefined,
+    undefined,
+    { summoner: reusedSummoner }
+  );
+
+  assert.equal(summonerLookups, 0);
+  assert.equal(stats.solo?.summonerLevel, 512);
+  assert.equal(stats.primary?.queueType, "RANKED_SOLO_5x5");
+  assert.strictEqual(stats.resolvedSummoner, reusedSummoner);
 });
 
 test("RiotApiClient는 랭크 기록이 없으면 UNRANKED 전적을 반환한다", async () => {

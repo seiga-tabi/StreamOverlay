@@ -1572,6 +1572,411 @@ test("공개 LoL 전적 API는 솔로랭크, 자유랭크, 5v5 랭크를 모두 
   });
 });
 
+test("공개 LoL 전적 API는 플랫폼 검증에서 조회한 소환사 정보를 랭크 조회에 재사용한다", async () => {
+  await withAuthConfig(async () => {
+    let summonerLookups = 0;
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      actions: {
+        async dispatchOne() {}
+      },
+      sessions: new DashboardSessionStore(),
+      riot: {
+        isConfigured() {
+          return true;
+        },
+        routingStatus() {
+          return { configured: true, source: "runtime", accountRegion: "asia", lolPlatform: "kr" };
+        },
+        async getAccountByRiotId(gameName, tagLine) {
+          return { puuid: "summoner-reuse-puuid", gameName, tagLine };
+        },
+        async getSummonerByPuuid(puuid) {
+          summonerLookups += 1;
+          return {
+            puuid,
+            id: "summoner-reuse-id",
+            profileIconId: 31,
+            revisionDate: 1,
+            summonerLevel: 512
+          };
+        },
+        async getRankedQueueStatsByPuuid(puuid, routing, signal, options) {
+          const summoner = options?.summoner ?? await this.getSummonerByPuuid(puuid, routing, signal);
+          return {
+            primary: {
+              queueType: "UNRANKED",
+              tier: "UNRANKED",
+              rank: "",
+              leaguePoints: 0,
+              wins: 0,
+              losses: 0,
+              winRate: 0,
+              profileIconId: summoner.profileIconId,
+              summonerLevel: summoner.summonerLevel,
+              fetchedAt: "2026-09-05T00:00:00.000Z"
+            }
+          };
+        },
+        async getChampionMasteryTopByPuuid() {
+          return [];
+        },
+        async getRecentMatchIdsByPuuid() {
+          return [];
+        }
+      }
+    });
+    const req = createRequest(
+      "GET",
+      "/api/lol/profile?riotId=SummonerReuse%23KR1&platform=kr",
+      undefined,
+      { origin: DASHBOARD_ORIGIN }
+    );
+    const res = createResponse();
+
+    await handler(req, res);
+
+    assert.equal(res.statusCode, 200, res.body);
+    assert.equal(summonerLookups, 1, "신선한 전적 검색 한 건은 summoner API를 한 번만 호출해야 합니다");
+    assert.equal(JSON.parse(res.body).summonerLevel, 512);
+  });
+});
+
+test("공개 LoL 전적 API는 소환사 정보 캐시가 만료되면 멤버십 검증 캐시를 유지하고 소환사 정보를 다시 조회한다", async () => {
+  await withAuthConfig(async () => {
+    const originalDateNow = Date.now;
+    let now = 1_000_000;
+    Date.now = () => now;
+    try {
+      let summonerLookups = 0;
+      const rankedSummonerOptions = [];
+      const handler = createHttpHandler({
+        store: {},
+        twitchAuth: {},
+        actions: {
+          async dispatchOne() {}
+        },
+        sessions: new DashboardSessionStore(),
+        dataDragon: {
+          async getLatestVersion() {
+            return "16.11.1";
+          }
+        },
+        riot: {
+          isConfigured() {
+            return true;
+          },
+          routingStatus() {
+            return { configured: true, source: "runtime", accountRegion: "asia", lolPlatform: "kr" };
+          },
+          async getAccountByRiotId(gameName, tagLine) {
+            return { puuid: "summoner-expiry-puuid", gameName, tagLine };
+          },
+          async getSummonerByPuuid(puuid) {
+            summonerLookups += 1;
+            return {
+              puuid,
+              id: "summoner-expiry-id",
+              profileIconId: summonerLookups === 1 ? 31 : 32,
+              revisionDate: 1,
+              summonerLevel: summonerLookups === 1 ? 512 : 513
+            };
+          },
+          async getRankedQueueStatsByPuuid(puuid, routing, signal, options) {
+            rankedSummonerOptions.push(options?.summoner);
+            const summoner = options?.summoner ?? await this.getSummonerByPuuid(puuid, routing, signal);
+            return {
+              primary: {
+                queueType: "UNRANKED",
+                tier: "UNRANKED",
+                rank: "",
+                leaguePoints: 0,
+                wins: 0,
+                losses: 0,
+                winRate: 0,
+                profileIconId: summoner.profileIconId,
+                summonerLevel: summoner.summonerLevel,
+                fetchedAt: "2026-09-05T00:00:00.000Z"
+              }
+            };
+          },
+          async getChampionMasteryTopByPuuid() {
+            return [];
+          },
+          async getRecentMatchIdsByPuuid() {
+            return [];
+          }
+        }
+      });
+      const firstReq = createRequest(
+        "GET",
+        "/api/lol/profile?riotId=SummonerBeforeExpiry%23KR1&platform=kr",
+        undefined,
+        { origin: DASHBOARD_ORIGIN }
+      );
+      const firstRes = createResponse();
+
+      await handler(firstReq, firstRes);
+
+      now += 10 * 60_000;
+      const secondReq = createRequest(
+        "GET",
+        "/api/lol/profile?riotId=SummonerAfterExpiry%23KR1&platform=kr",
+        undefined,
+        { origin: DASHBOARD_ORIGIN }
+      );
+      const secondRes = createResponse();
+
+      await handler(secondReq, secondRes);
+
+      assert.equal(firstRes.statusCode, 200, firstRes.body);
+      assert.equal(secondRes.statusCode, 200, secondRes.body);
+      assert.equal(rankedSummonerOptions[0]?.summonerLevel, 512);
+      assert.equal(rankedSummonerOptions[1], undefined, "만료된 summoner는 랭크 조회 옵션으로 재사용하지 않아야 합니다");
+      assert.equal(summonerLookups, 2, "10분 경계에서는 멤버십 재검증 없이 summoner API만 다시 호출해야 합니다");
+      const secondBody = JSON.parse(secondRes.body);
+      assert.equal(secondBody.summonerLevel, 513);
+      assert.equal(secondBody.profileIconUrl, "https://ddragon.leagueoflegends.com/cdn/16.11.1/img/profileicon/32.png");
+    } finally {
+      Date.now = originalDateNow;
+    }
+  });
+});
+
+test("공개 LoL 전적 API는 만료 후 다시 조회한 소환사 정보를 같은 PUUID의 다음 검색에 재사용한다", async () => {
+  await withAuthConfig(async () => {
+    const originalDateNow = Date.now;
+    let now = 1_000_000;
+    Date.now = () => now;
+    try {
+      let summonerLookups = 0;
+      let rankedLookups = 0;
+      const rankedSummonerOptions = [];
+      let freshSummoner;
+      const handler = createHttpHandler({
+        store: {},
+        twitchAuth: {},
+        actions: {
+          async dispatchOne() {}
+        },
+        sessions: new DashboardSessionStore(),
+        dataDragon: {
+          async getLatestVersion() {
+            return "16.11.1";
+          }
+        },
+        riot: {
+          isConfigured() {
+            return true;
+          },
+          routingStatus() {
+            return { configured: true, source: "runtime", accountRegion: "asia", lolPlatform: "kr" };
+          },
+          async getAccountByRiotId(gameName, tagLine) {
+            return { puuid: "summoner-expiry-puuid", gameName, tagLine };
+          },
+          async getSummonerByPuuid(puuid) {
+            summonerLookups += 1;
+            const summoner = {
+              puuid,
+              id: "summoner-expiry-id",
+              profileIconId: summonerLookups === 1 ? 31 : 32,
+              revisionDate: 1,
+              summonerLevel: summonerLookups === 1 ? 512 : 513
+            };
+            if (summonerLookups === 2) freshSummoner = summoner;
+            return summoner;
+          },
+          async getRankedQueueStatsByPuuid(puuid, routing, signal, options) {
+            rankedLookups += 1;
+            rankedSummonerOptions.push(options?.summoner);
+            const summoner = options?.summoner ?? await this.getSummonerByPuuid(puuid, routing, signal);
+            return {
+              primary: {
+                queueType: "UNRANKED",
+                tier: "UNRANKED",
+                rank: "",
+                leaguePoints: 0,
+                wins: 0,
+                losses: 0,
+                winRate: 0,
+                profileIconId: summoner.profileIconId,
+                summonerLevel: summoner.summonerLevel,
+                fetchedAt: "2026-09-05T00:00:00.000Z"
+              },
+              resolvedSummoner: summoner
+            };
+          },
+          async getChampionMasteryTopByPuuid() {
+            return [];
+          },
+          async getRecentMatchIdsByPuuid() {
+            return [];
+          }
+        }
+      });
+      const firstReq = createRequest(
+        "GET",
+        "/api/lol/profile?riotId=SummonerBeforeExpiry%23KR1&platform=kr",
+        undefined,
+        { origin: DASHBOARD_ORIGIN }
+      );
+      const firstRes = createResponse();
+
+      await handler(firstReq, firstRes);
+
+      now += 10 * 60_000;
+      const secondReq = createRequest(
+        "GET",
+        "/api/lol/profile?riotId=SummonerAfterExpiry%23KR1&platform=kr",
+        undefined,
+        { origin: DASHBOARD_ORIGIN }
+      );
+      const secondRes = createResponse();
+
+      await handler(secondReq, secondRes);
+
+      const thirdReq = createRequest(
+        "GET",
+        "/api/lol/profile?riotId=SummonerAfterRefresh%23KR1&platform=kr",
+        undefined,
+        { origin: DASHBOARD_ORIGIN }
+      );
+      const thirdRes = createResponse();
+
+      await handler(thirdReq, thirdRes);
+
+      assert.equal(firstRes.statusCode, 200, firstRes.body);
+      assert.equal(secondRes.statusCode, 200, secondRes.body);
+      assert.equal(thirdRes.statusCode, 200, thirdRes.body);
+      assert.equal(rankedSummonerOptions[0]?.summonerLevel, 512);
+      assert.equal(rankedSummonerOptions[1], undefined, "만료된 summoner는 랭크 조회 옵션으로 재사용하지 않아야 합니다");
+      assert.strictEqual(rankedSummonerOptions[2], freshSummoner, "fresh 조회 결과와 같은 summoner 객체를 다음 검색에 전달해야 합니다");
+      assert.equal(summonerLookups, 2, "10분 경계에서는 멤버십 재검증 없이 summoner API만 다시 호출해야 합니다");
+      assert.equal(rankedLookups, 3, "서로 다른 Riot ID 검색은 각각 랭크를 조회해야 합니다");
+      const secondBody = JSON.parse(secondRes.body);
+      assert.equal(secondBody.summonerLevel, 513);
+      assert.equal(secondBody.profileIconUrl, "https://ddragon.leagueoflegends.com/cdn/16.11.1/img/profileicon/32.png");
+      const thirdBody = JSON.parse(thirdRes.body);
+      assert.equal(thirdBody.summonerLevel, 513);
+      assert.equal(thirdBody.profileIconUrl, "https://ddragon.leagueoflegends.com/cdn/16.11.1/img/profileicon/32.png");
+    } finally {
+      Date.now = originalDateNow;
+    }
+  });
+});
+
+test("공개 LoL 전적 갱신이 겹쳐도 늦게 끝난 이전 요청은 최신 소환사 캐시를 덮어쓰지 않는다", async () => {
+  await withAuthConfig(async () => {
+    const originalDateNow = Date.now;
+    let now = 1_000_000;
+    Date.now = () => now;
+    try {
+      const deferred = () => {
+        let resolve;
+        const promise = new Promise((done) => { resolve = done; });
+        return { promise, resolve };
+      };
+      const freshRequests = [
+        { started: deferred(), result: deferred() },
+        { started: deferred(), result: deferred() }
+      ];
+      let summonerLookups = 0;
+      const rankedSummonerOptions = [];
+      const initialSummoner = {
+        puuid: "overlap-summoner-puuid",
+        id: "overlap-summoner-id",
+        profileIconId: 31,
+        revisionDate: 1,
+        summonerLevel: 512
+      };
+      const olderSummoner = { ...initialSummoner, profileIconId: 32, summonerLevel: 513 };
+      const newerSummoner = { ...initialSummoner, profileIconId: 33, summonerLevel: 514 };
+      const handler = createHttpHandler({
+        store: {},
+        twitchAuth: {},
+        actions: { async dispatchOne() {} },
+        sessions: new DashboardSessionStore(),
+        riot: {
+          isConfigured() { return true; },
+          routingStatus() {
+            return { configured: true, source: "runtime", accountRegion: "asia", lolPlatform: "kr" };
+          },
+          async getAccountByRiotId(gameName, tagLine) {
+            return { puuid: initialSummoner.puuid, gameName, tagLine };
+          },
+          async getSummonerByPuuid() {
+            summonerLookups += 1;
+            if (summonerLookups === 1) return initialSummoner;
+            const request = freshRequests[summonerLookups - 2];
+            request.started.resolve();
+            return request.result.promise;
+          },
+          async getRankedQueueStatsByPuuid(puuid, routing, signal, options) {
+            rankedSummonerOptions.push(options?.summoner);
+            const summoner = options?.summoner ?? await this.getSummonerByPuuid(puuid, routing, signal);
+            return {
+              primary: {
+                queueType: "UNRANKED",
+                tier: "UNRANKED",
+                rank: "",
+                leaguePoints: 0,
+                wins: 0,
+                losses: 0,
+                winRate: 0,
+                profileIconId: summoner.profileIconId,
+                summonerLevel: summoner.summonerLevel,
+                fetchedAt: "2026-09-05T00:00:00.000Z"
+              },
+              resolvedSummoner: summoner
+            };
+          },
+          async getChampionMasteryTopByPuuid() { return []; },
+          async getRecentMatchIdsByPuuid() { return []; }
+        }
+      });
+      const search = async (gameName, refresh = false) => {
+        const res = createResponse();
+        await handler(createRequest(
+          "GET",
+          `/api/lol/profile?riotId=${gameName}%23KR1&platform=kr${refresh ? "&refresh=1" : ""}`,
+          undefined,
+          { origin: DASHBOARD_ORIGIN }
+        ), res);
+        assert.equal(res.statusCode, 200, res.body);
+        return JSON.parse(res.body);
+      };
+
+      // 같은 PUUID의 서로 다른 검색 키를 준비해 기존 갱신 제한을 그대로 적용합니다.
+      await search("OverlapOlder");
+      await search("OverlapNewer");
+      now += 100;
+      const olderRequest = search("OverlapOlder", true);
+      await freshRequests[0].started.promise;
+      now += 100;
+      const newerRequest = search("OverlapNewer", true);
+      await freshRequests[1].started.promise;
+      assert.deepEqual(rankedSummonerOptions.slice(2), [undefined, undefined], "두 갱신 요청 모두 fresh 조회여야 합니다");
+
+      now += 100;
+      freshRequests[1].result.resolve(newerSummoner);
+      assert.equal((await newerRequest).summonerLevel, 514);
+      now += 100;
+      freshRequests[0].result.resolve(olderSummoner);
+      assert.equal((await olderRequest).summonerLevel, 513);
+
+      // 별도 검색 키로 프로필 캐시를 우회하고 멤버십 캐시에 남은 객체를 검증합니다.
+      const cached = await search("OverlapAfterRefresh");
+      assert.strictEqual(rankedSummonerOptions[4], newerSummoner, "늦게 도착한 이전 응답이 최신 캐시를 덮어쓰면 안 됩니다");
+      assert.equal(cached.summonerLevel, 514);
+      assert.equal(summonerLookups, 3, "멤버십 최초 검증과 두 fresh 조회 외에는 소환사를 재조회하지 않아야 합니다");
+    } finally {
+      Date.now = originalDateNow;
+    }
+  });
+});
+
 test("공개 LoL 경기 티어 API는 펼친 경기 참가자 랭크만 조회하고 PUUID를 노출하지 않는다", async () => {
   await withAuthConfig(async () => {
     const rankedCalls = [];
@@ -3109,6 +3514,101 @@ test("공개 LoL 전적 갱신은 같은 Riot ID 기준 10분 쿨다운을 적�
     assert.equal(secondRes.statusCode, 429);
     assert.equal(JSON.parse(secondRes.body).code, "REFRESH_COOLDOWN");
     assert.equal(accountLookups, 1);
+  });
+});
+
+test("공개 LoL 전적 갱신은 캐시된 소환사 정보를 즉시 다시 조회한다", async () => {
+  await withAuthConfig(async () => {
+    let summonerLookups = 0;
+    const rankedSummonerOptions = [];
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      actions: {
+        async dispatchOne() {}
+      },
+      sessions: new DashboardSessionStore(),
+      dataDragon: {
+        async getLatestVersion() {
+          return "16.11.1";
+        }
+      },
+      riot: {
+        isConfigured() {
+          return true;
+        },
+        routingStatus() {
+          return { configured: true, source: "runtime", accountRegion: "asia", lolPlatform: "jp1" };
+        },
+        async getAccountByRiotId(gameName, tagLine) {
+          return { puuid: "refresh-summoner-puuid", gameName, tagLine };
+        },
+        async getSummonerByPuuid(puuid) {
+          summonerLookups += 1;
+          return {
+            puuid,
+            id: "refresh-summoner-id",
+            profileIconId: summonerLookups === 1 ? 31 : 32,
+            revisionDate: 1,
+            summonerLevel: summonerLookups === 1 ? 512 : 513
+          };
+        },
+        async getRankedQueueStatsByPuuid(puuid, routing, signal, options) {
+          rankedSummonerOptions.push(options?.summoner);
+          const summoner = options?.summoner ?? await this.getSummonerByPuuid(puuid, routing, signal);
+          return {
+            primary: {
+              queueType: "UNRANKED",
+              tier: "UNRANKED",
+              rank: "",
+              leaguePoints: 0,
+              wins: 0,
+              losses: 0,
+              winRate: 0,
+              profileIconId: summoner.profileIconId,
+              summonerLevel: summoner.summonerLevel,
+              fetchedAt: "2026-09-05T00:00:00.000Z"
+            }
+          };
+        },
+        async getChampionMasteryTopByPuuid() {
+          return [];
+        },
+        async getRecentMatchIdsByPuuid() {
+          return [];
+        }
+      }
+    });
+    const firstReq = createRequest(
+      "GET",
+      "/api/lol/profile?riotId=RefreshSummoner%23JP1&platform=jp1",
+      undefined,
+      { origin: DASHBOARD_ORIGIN }
+    );
+    const firstRes = createResponse();
+    await handler(firstReq, firstRes);
+    assert.equal(firstRes.statusCode, 200, firstRes.body);
+    assert.equal(summonerLookups, 1, "일반 조회는 summoner 캐시를 채워야 합니다");
+    const firstBody = JSON.parse(firstRes.body);
+    assert.equal(firstBody.summonerLevel, 512);
+    assert.equal(firstBody.profileIconUrl, "https://ddragon.leagueoflegends.com/cdn/16.11.1/img/profileicon/31.png");
+
+    const refreshReq = createRequest(
+      "GET",
+      "/api/lol/profile?riotId=RefreshSummoner%23JP1&platform=jp1&refresh=1",
+      undefined,
+      { origin: DASHBOARD_ORIGIN }
+    );
+    const refreshRes = createResponse();
+    await handler(refreshReq, refreshRes);
+
+    assert.equal(refreshRes.statusCode, 200, refreshRes.body);
+    assert.equal(summonerLookups, 2, "refresh=1 요청은 summoner API를 다시 호출해야 합니다");
+    assert.equal(rankedSummonerOptions[0]?.summonerLevel, 512);
+    assert.equal(rankedSummonerOptions[1], undefined, "refresh=1은 멤버십 판정을 유지하고 summoner 신선도만 무효화해야 합니다");
+    const refreshBody = JSON.parse(refreshRes.body);
+    assert.equal(refreshBody.summonerLevel, 513);
+    assert.equal(refreshBody.profileIconUrl, "https://ddragon.leagueoflegends.com/cdn/16.11.1/img/profileicon/32.png");
   });
 });
 

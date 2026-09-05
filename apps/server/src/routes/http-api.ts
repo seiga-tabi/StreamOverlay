@@ -123,7 +123,7 @@ import {
   publicTwitchViewerSessionCookie,
   publicTwitchViewerSessionIdFromRequest
 } from "../services/public-twitch-auth.js";
-import { isAbortError, RiotApiHttpError, RiotRateLimitError, RiotRequestAbortedError, type RiotApiClient, type RiotCurrentGameInfo, type RiotMatch, type RiotMatchParticipant, type RiotMatchTimeline } from "../services/riot-api.js";
+import { isAbortError, RiotApiHttpError, RiotRateLimitError, RiotRequestAbortedError, type RiotApiClient, type RiotCurrentGameInfo, type RiotMatch, type RiotMatchParticipant, type RiotMatchTimeline, type RiotSummoner } from "../services/riot-api.js";
 import {
   PalworldServerMonitorInputError,
   PalworldServerMonitorRateLimitError,
@@ -441,6 +441,7 @@ const PUBLIC_LOL_PROFILE_STALE_TTL_MS = 24 * 60 * 60_000;
 const PUBLIC_LOL_PROFILE_REFRESH_COOLDOWN_MS = 10 * 60_000;
 const PUBLIC_LOL_PROFILE_CACHE_KEY_VERSION = "v2";
 const PUBLIC_LOL_PLATFORM_MEMBERSHIP_CACHE_TTL_MS = 6 * 60 * 60_000;
+const PUBLIC_LOL_PLATFORM_SUMMONER_CACHE_TTL_MS = 10 * 60_000;
 const PUBLIC_LOL_PLATFORM_MEMBERSHIP_MISS_TTL_MS = 60_000;
 const PUBLIC_PARTICIPATION_MAX_QUEUE_SIZE = 100;
 const PUBLIC_LOL_CURRENT_GAME_LIVE_CACHE_TTL_MS = 20_000;
@@ -4165,7 +4166,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
   const publicLolProfileRefreshAvailableAt = new Map<string, number>();
   const publicLolProfileCacheGeneration = new Map<string, number>();
   const publicLolProfilePuuidCache = new Map<string, string>();
-  const publicLolPlatformMembershipCache = new Map<string, { expiresAt: number; verified: boolean }>();
+  const publicLolPlatformMembershipCache = new Map<string, {
+    expiresAt: number;
+    verified: boolean;
+    summoner: RiotSummoner | null;
+    summonerExpiresAt: number;
+  }>();
   const publicLolPlatformMembershipInFlight = new Map<string, Promise<boolean>>();
   const publicLolSocialCardRenderer = new PublicLolSocialCardRenderer();
   /* 테스트가 원격 호출 없이 이미지 경로를 검증할 수 있도록 주입 지점을 둡니다. */
@@ -4213,6 +4219,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
         const verified = Boolean(summoner?.puuid || summoner?.id);
         publicLolPlatformMembershipCache.set(key, {
           verified,
+          summoner: verified ? summoner : null,
+          summonerExpiresAt: verified ? Date.now() + PUBLIC_LOL_PLATFORM_SUMMONER_CACHE_TTL_MS : 0,
           expiresAt: Date.now() + (verified
             ? PUBLIC_LOL_PLATFORM_MEMBERSHIP_CACHE_TTL_MS
             : PUBLIC_LOL_PLATFORM_MEMBERSHIP_MISS_TTL_MS),
@@ -4230,7 +4238,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
   async function requirePublicLolPlatformMembership(
     puuid: string,
     routing: LolRoutingContext,
-  ): Promise<void> {
+  ): Promise<RiotSummoner | undefined> {
     let verified: boolean;
     try {
       verified = await verifyPublicLolPlatformMembership(puuid, routing);
@@ -4246,6 +4254,10 @@ export function createHttpHandler(input: HttpHandlerInput) {
         code: "LOL_PROFILE_NOT_ON_PLATFORM",
       });
     }
+    const cached = publicLolPlatformMembershipCache.get(`${routing.lolPlatform}:${puuid}`);
+    return cached && cached.summonerExpiresAt > Date.now()
+      ? cached.summoner ?? undefined
+      : undefined;
   }
 
   async function resolveCachedPublicLolSocialProfile(
@@ -8788,7 +8800,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
        공유 결과까지 오염시킬 수 있습니다(getMatch/getMatchTimeline과 동일한
        설계 원칙 — 4-5절). 큐 소비 비용도 이 호출 하나뿐이라 상대적으로
        작습니다. */
-    await requirePublicLolPlatformMembership(account.puuid, routing);
+    const membershipSummoner = await requirePublicLolPlatformMembership(account.puuid, routing);
     if (signal?.aborted) throw new RiotRequestAbortedError("public_lol.profile_build");
     const accountResolvedAt = Date.now();
 
@@ -8798,8 +8810,24 @@ export function createHttpHandler(input: HttpHandlerInput) {
     publicLolProfilePuuidCache.set(requestedCacheKey, account.puuid);
     publicLolProfilePuuidCache.set(responseCacheKey, account.puuid);
     pruneMapToMax(publicLolProfilePuuidCache, PUBLIC_LOL_PROFILE_CACHE_MAX * 2);
+    const requestStartedAt = Date.now();
     const rankedQueuesRequest: Promise<PublicLolRankedQueues> = typeof input.riot.getRankedQueueStatsByPuuid === "function"
-      ? input.riot.getRankedQueueStatsByPuuid(account.puuid, routing, signal).catch((): PublicLolRankedQueues => ({}))
+      ? input.riot.getRankedQueueStatsByPuuid(
+        account.puuid,
+        routing,
+        signal,
+        membershipSummoner ? { summoner: membershipSummoner } : undefined
+      ).then((queues): PublicLolRankedQueues => {
+        if (!membershipSummoner && queues.resolvedSummoner) {
+          const entry = publicLolPlatformMembershipCache.get(`${routing.lolPlatform}:${account.puuid}`);
+          // 요청 시작 이후 갱신된 소환사 정보는 늦게 도착한 응답으로 덮어쓰지 않습니다.
+          if (entry && entry.summonerExpiresAt <= requestStartedAt + PUBLIC_LOL_PLATFORM_SUMMONER_CACHE_TTL_MS) {
+            entry.summoner = queues.resolvedSummoner;
+            entry.summonerExpiresAt = Date.now() + PUBLIC_LOL_PLATFORM_SUMMONER_CACHE_TTL_MS;
+          }
+        }
+        return queues;
+      }).catch((): PublicLolRankedQueues => ({}))
       : input.riot.getRankedStatsByPuuid(account.puuid, undefined, routing, signal).then((stats): PublicLolRankedQueues => ({
         solo: stats?.queueType === "RANKED_SOLO_5x5" ? stats : undefined,
         flex: stats?.queueType === "RANKED_FLEX_SR" ? stats : undefined,
@@ -8910,12 +8938,23 @@ export function createHttpHandler(input: HttpHandlerInput) {
     return { ...response, refreshAvailableAt: new Date(availableAt).toISOString() };
   }
 
-  function invalidatePublicLolProfileCaches(key: string): void {
+  function invalidatePublicLolProfileCaches(key: string, lolPlatform: string): void {
     publicLolProfileCacheGeneration.set(key, (publicLolProfileCacheGeneration.get(key) ?? 0) + 1);
     pruneMapToMax(publicLolProfileCacheGeneration, PUBLIC_LOL_PROFILE_CACHE_MAX * 2);
     publicLolProfileCache.delete(key);
     publicLolProfileInFlight.delete(key);
+    const puuid = publicLolProfilePuuidCache.get(key);
     publicLolProfilePuuidCache.delete(key);
+    if (puuid) {
+      const membershipKey = `${lolPlatform}:${puuid}`;
+      const membership = publicLolPlatformMembershipCache.get(membershipKey);
+      if (membership) {
+        publicLolPlatformMembershipCache.set(membershipKey, {
+          ...membership,
+          summonerExpiresAt: 0
+        });
+      }
+    }
     publicLolCurrentGameCache.delete(key);
     publicLolCurrentGameInFlight.delete(key);
     const matchPagePrefix = `${key}:matches:`;
@@ -8947,7 +8986,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
   function invalidatePublicLolProfileCachesForRiotId(gameName: string | undefined, tagLine: string | undefined): void {
     if (!gameName || !tagLine) return;
     const routing = publicLolRouting(input.riot?.routingStatus().lolPlatform, input.riot);
-    invalidatePublicLolProfileCaches(publicLolProfileCacheKey(gameName, tagLine, routing.lolPlatform));
+    invalidatePublicLolProfileCaches(publicLolProfileCacheKey(gameName, tagLine, routing.lolPlatform), routing.lolPlatform);
   }
 
   /* 채팅 명령(!join)을 포함한 모든 참여 신청 경로가 이 이벤트를 발행한다
@@ -9053,7 +9092,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       }
       publicLolProfileRefreshAvailableAt.set(key, now + PUBLIC_LOL_PROFILE_REFRESH_COOLDOWN_MS);
       pruneMapToMax(publicLolProfileRefreshAvailableAt, PUBLIC_LOL_PROFILE_CACHE_MAX * 2);
-      invalidatePublicLolProfileCaches(key);
+      invalidatePublicLolProfileCaches(key, routing.lolPlatform);
     }
     let cached = publicLolProfileCache.get(key);
     if (!options.refresh && !cached && input.publicLolSnapshotStore) {
