@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { BottomSheet } from "../../../shared/ui/BottomSheet";
+import type { PublicLocale } from "../../public-lol/i18n/public-lol-i18n";
 import type { PublicMainPage } from "../../public-lol/types/public-lol";
 import { localizedPublicUrlForCurrentLocale } from "../../public-lol/utils/public-locale-path";
 import type { HomeText } from "../i18n/home-i18n";
@@ -242,7 +243,11 @@ export function lolTabBarActive(page: PublicMainPage): LolTabActive {
  * 씁니다 — 포커스 트랩·스크롤 락·ESC·복귀 포커스가 이미 그 안에 있습니다.
  * 홈 탭은 메인 홈(/)으로 나가는 출구입니다(2026-08-19 결정 — 활성이어도 aria-current
  * 없음) — 모바일에선 헤더 nav 가 숨겨져 이 탭이 메인 홈으로 가는 유일한 경로입니다. */
-export function LolBottomTabBar({ text, active = "home" }: { text: LolHomeText; active?: LolTabActive }) {
+export function LolBottomTabBar({ text, locale, active = "home" }: {
+  text: LolHomeText;
+  locale: PublicLocale;
+  active?: LolTabActive;
+}) {
   const [moreOpen, setMoreOpen] = useState(false);
   const moreTriggerRef = useRef<HTMLButtonElement>(null);
   /* 더보기의 활성은 둘: 시트가 열려 있는 동안, 그리고 시트 안 항목이 현재
@@ -251,7 +256,12 @@ export function LolBottomTabBar({ text, active = "home" }: { text: LolHomeText; 
 
   const items: Array<{ id: LolTabItem; href: string; label: string; icon: React.ReactNode }> = [
     { id: "home", href: "/", label: text.tabHome, icon: <HouseIcon /> },
-    { id: "champions", href: "/lol/champions", label: text.tabChampions, icon: <CrownIcon /> },
+    {
+      id: "champions",
+      href: "/lol/champions",
+      label: locale === "ja" ? text.tabChampionsShort : text.tabChampions,
+      icon: <CrownIcon />
+    },
     { id: "aram", href: "/lol/aram", label: text.tabAramShort, icon: <StarIcon /> },
     { id: "patchNotes", href: "/patch-notes", label: text.tabPatchNotes, icon: <DocIcon /> }
   ];
@@ -285,7 +295,7 @@ export function LolBottomTabBar({ text, active = "home" }: { text: LolHomeText; 
           type="button"
         >
           <MoreIcon />
-          <span>{text.tabMore}</span>
+          <span>{locale === "ja" ? text.tabMoreShort : text.tabMore}</span>
           {moreActive ? <TabActiveMark /> : null}
         </button>
       </nav>

@@ -88,7 +88,7 @@ test("시청자 참여 배너는 노리개 표식과 참여 페이지 링크를 
 });
 
 test("LoL 모바일 하단 탭바는 상시 4탭 + 더보기로 렌더하고 홈은 메인 홈으로 나간다", () => {
-  const html = renderToStaticMarkup(<LolBottomTabBar text={lolHomeI18n.ko} />);
+  const html = renderToStaticMarkup(<LolBottomTabBar locale="ko" text={lolHomeI18n.ko} />);
   assert.match(html, /yoro-home-tabbar--five/u);
   /* 모바일에선 헤더 nav 가 숨겨지므로 홈 탭이 메인 홈(/)으로 가는 유일한 경로입니다. */
   assert.match(html, /href="\/ko\/"/u);
@@ -106,6 +106,12 @@ test("LoL 모바일 하단 탭바는 상시 4탭 + 더보기로 렌더하고 홈
   assert.doesNotMatch(html, /팔로우|\/follow|\/participation/u);
   assert.match(html, /aria-haspopup="dialog"/u);
   assert.match(html, /aria-expanded="false"/u);
+
+  const ja = renderToStaticMarkup(<LolBottomTabBar locale="ja" text={lolHomeI18n.ja} />);
+  assert.match(ja, />チャンプ</u);
+  assert.match(ja, />その他</u);
+  assert.doesNotMatch(ja, />チャンピオン</u);
+  assert.doesNotMatch(ja, />もっと見る</u);
 });
 
 test("LoL 홈 i18n 은 ko·ja·en 세 로케일에 같은 키를 제공한다", () => {

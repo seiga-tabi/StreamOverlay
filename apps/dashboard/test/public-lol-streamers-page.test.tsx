@@ -182,7 +182,7 @@ test("2행 메뉴는 스트리머 항목을, 하단 탭바는 더보기 탭을 �
 
   /* 팔로우는 더보기 시트 안 항목이라 활성색을 더보기 탭이 이어받습니다 —
      탭바 자체에는 /follow 링크도 aria-current 도 없습니다(닫힌 시트는 미렌더). */
-  const tabbar = renderToStaticMarkup(<LolBottomTabBar active="streamers" text={lolHomeI18n.ko} />);
+  const tabbar = renderToStaticMarkup(<LolBottomTabBar active="streamers" locale="ko" text={lolHomeI18n.ko} />);
   assert.match(tabbar, /aria-controls="lol-home-more-menu"[^>]*class="yoro-home-tabbar-item is-active"/u);
   assert.match(tabbar, /yoro-home-tabbar-tail/u);
   assert.doesNotMatch(tabbar, /aria-current="page"/u);

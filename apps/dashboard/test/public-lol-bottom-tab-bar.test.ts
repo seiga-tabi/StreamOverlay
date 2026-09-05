@@ -41,11 +41,12 @@ test("하단 탭바는 헤더가 아니라 AppShell 직계 자식으로 렌더�
   const renderCount = lolPage.match(/<PublicBottomTabBar\b/gu)?.length ?? 0;
   assert.equal(renderCount, 2, "AppShell 2개 조기 반환 분기(등록·비검색)에 기존 탭바가 있어야 합니다");
   /* 활성 탭은 리터럴이 아니라 activeMainPage 매핑으로 넘깁니다(2026-09-05 탭바 개편). */
-  assert.match(lolPage, /<LolBottomTabBar active=\{lolTabBarActive\(activeMainPage\)\} text=\{lolHomeI18n\[locale\]\} \/>/u);
+  assert.match(lolPage, /<LolBottomTabBar active=\{lolTabBarActive\(activeMainPage\)\} locale=\{locale\} text=\{lolHomeI18n\[locale\]\} \/>/u);
 
   for (const match of lolPage.matchAll(/<PublicBottomTabBar\b[^/]*\/>/gu)) {
     assert.match(match[0], /activePage=\{activeMainPage\}/u);
     assert.match(match[0], /activeTarget=\{activeNav\}/u);
+    assert.match(match[0], /locale=\{locale\}/u);
     /* 홈 메뉴는 루트 메인 홈(/)으로 나가는 navigateFromMenu 를 씁니다(2026-08-19). */
     assert.match(match[0], /onPage=\{navigateFromMenu\}/u);
   }
@@ -95,7 +96,7 @@ test("모바일에서 탭바를 쓰는 4개 게임 헤더의 상단 nav 가 전�
 test("메뉴 화면 하단 탭바는 4탭(홈·챔피언·칼바람·패치노트) + 더보기 시트다", () => {
   assert.match(bottomTabBar, /const TAB_ICONS = \["home", "champions", "aram", "patchNotes"\] as const;/u);
   assert.match(bottomTabBar, /const MORE_ICONS = \["streamers", "participation"\] as const;/u);
-  // 챔피언 항목은 상단 nav 와 공유하는 같은 데이터에서 옵니다 — 라벨이 갈리지 않습니다.
+  // 챔피언 항목은 상단 nav 와 공유하는 같은 데이터에서 오고, 일본어 탭 칸만 축약합니다.
   assert.match(headerMenu, /icon: "champions",\s*page: "champions",/u);
   assert.match(headerMenu, /champions: <>/u);
 
@@ -117,6 +118,23 @@ test("챔피언 탭 라벨은 3개 로케일에 함께 있다", () => {
       new RegExp(`championsHeaderNav: "${label}",`, "u"),
       `${locale} championsHeaderNav 없음`
     );
+  }
+
+  for (const [key, labels] of [
+    ["championsHeaderNavShort", ["챔피언", "チャンプ", "Champions"]],
+    ["moreMenuShort", ["더보기", "その他", "More"]]
+  ] as const) {
+    for (const label of labels) {
+      assert.match(publicI18nSource, new RegExp(`${key}: "${label}",`, "u"));
+    }
+  }
+  assert.match(bottomTabBar, /locale === "ja" && item\.icon === "champions"/u);
+  assert.match(bottomTabBar, /locale === "ja" \? text\.moreMenuShort : text\.moreMenu/u);
+});
+
+test("팔로우 내비 라벨은 3개 로케일에서 같은 의미를 쓴다", () => {
+  for (const label of ["팔로우", "フォロー", "Follow"]) {
+    assert.match(publicI18nSource, new RegExp(`streamersNav: "${label}",`, "u"));
   }
 });
 

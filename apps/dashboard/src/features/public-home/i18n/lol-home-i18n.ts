@@ -11,16 +11,18 @@ export type LolHomeText = {
   subnavLabel: string;
   tabHome: string;
   tabChampions: string;
+  tabChampionsShort: string;
   tabStreamers: string;
   tabParticipation: string;
   tabAram: string;
   tabPatchNotes: string;
-  /* 모바일 하단 탭 축약 라벨 — 실서비스 탭바(참여·칼바람)와 같은 축약 관례. */
+  /* 모바일 하단 탭 축약 라벨 — 실서비스 탭바(챔피언·참여·칼바람)와 같은 축약 관례. */
   tabParticipationShort: string;
   tabAramShort: string;
   /* 하단 탭바 다섯 번째 칸 — 팔로우·참여를 담는 시트를 여는 트리거입니다.
-     문구는 public-lol-i18n.ts 의 moreMenu(ja: もっと見る)와 같은 관례를 씁니다. */
+     전체 라벨은 시트 제목, 축약 라벨은 일본어 탭 칸에서만 사용합니다. */
   tabMore: string;
+  tabMoreShort: string;
   closeMobileMenu: string;
   heroTitle: string;
   heroSub: string;
@@ -49,6 +51,7 @@ export const lolHomeI18n: Record<PublicLocale, LolHomeText> = {
     subnavLabel: "LoL 메뉴",
     tabHome: "홈",
     tabChampions: "챔피언",
+    tabChampionsShort: "챔피언",
     tabStreamers: "팔로우",
     tabParticipation: "시청자 참여",
     tabAram: "증강 칼바람",
@@ -56,6 +59,7 @@ export const lolHomeI18n: Record<PublicLocale, LolHomeText> = {
     tabParticipationShort: "참여",
     tabAramShort: "칼바람",
     tabMore: "더보기",
+    tabMoreShort: "더보기",
     closeMobileMenu: "메뉴 닫기",
     heroTitle: "LoL 전적, 검색 한 번",
     heroSub: "전적을 보고, 방송 중인 스트리머의 판에 시청자로 참여합니다.",
@@ -82,6 +86,7 @@ export const lolHomeI18n: Record<PublicLocale, LolHomeText> = {
     subnavLabel: "LoLメニュー",
     tabHome: "ホーム",
     tabChampions: "チャンピオン",
+    tabChampionsShort: "チャンプ",
     tabStreamers: "フォロー",
     tabParticipation: "視聴者参加",
     tabAram: "オーグメントARAM",
@@ -89,6 +94,7 @@ export const lolHomeI18n: Record<PublicLocale, LolHomeText> = {
     tabParticipationShort: "参加",
     tabAramShort: "ARAM",
     tabMore: "もっと見る",
+    tabMoreShort: "その他",
     closeMobileMenu: "メニューを閉じる",
     heroTitle: "LoL戦績、検索ひとつで",
     heroSub: "戦績を確認し、配信中のストリーマーの試合に視聴者として参加できます。",
@@ -115,6 +121,7 @@ export const lolHomeI18n: Record<PublicLocale, LolHomeText> = {
     subnavLabel: "LoL menu",
     tabHome: "Home",
     tabChampions: "Champions",
+    tabChampionsShort: "Champions",
     tabStreamers: "Follow",
     tabParticipation: "Viewer games",
     tabAram: "ARAM augments",
@@ -122,6 +129,7 @@ export const lolHomeI18n: Record<PublicLocale, LolHomeText> = {
     tabParticipationShort: "Join",
     tabAramShort: "ARAM",
     tabMore: "More",
+    tabMoreShort: "More",
     closeMobileMenu: "Close menu",
     heroTitle: "LoL stats. One search.",
     heroSub: "Check stats and join live streamers' games as a viewer.",

@@ -89,7 +89,7 @@ export function PublicLolHomePage() {
         <LolParticipationBanner text={text} />
       </main>
       <HomeFooter locale={locale} onLocale={handleLocale} text={homeText} />
-      <LolBottomTabBar text={text} />
+      <LolBottomTabBar locale={locale} text={text} />
       <HomeLoginModal
         onClose={() => setLoginOpen(false)}
         onTwitchLogin={account.loginWithTwitch}

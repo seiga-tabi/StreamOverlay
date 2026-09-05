@@ -92,7 +92,7 @@ export function PublicLolStreamersPage() {
         />
       </main>
       <HomeFooter locale={locale} onLocale={handleLocale} text={homeText} />
-      <LolBottomTabBar active="streamers" text={lolText} />
+      <LolBottomTabBar active="streamers" locale={locale} text={lolText} />
       <HomeLoginModal
         onClose={() => setLoginOpen(false)}
         onTwitchLogin={account.loginWithTwitch}

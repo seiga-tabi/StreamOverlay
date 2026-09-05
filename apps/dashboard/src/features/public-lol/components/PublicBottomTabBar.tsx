@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { BottomSheet } from "../../../shared/ui/BottomSheet";
 import { publicI18n, t } from "../i18n/public-lol-i18n";
+import type { PublicLocale } from "../i18n/public-lol-i18n";
 import type { PublicMainPage } from "../types/public-lol";
 import {
   PublicHeaderMenuIcon,
@@ -12,7 +13,8 @@ import {
 
 /* 모바일 전용 하단 고정 탭바 — 상시 4탭(홈·챔피언·칼바람·패치노트) + 더보기 시트.
  *
- * 라벨·아이콘·활성 판정은 여전히 PublicHeaderMenu 의 항목 데이터를 그대로 씁니다.
+ * 라벨·아이콘·활성 판정은 PublicHeaderMenu 의 항목 데이터를 기준으로 씁니다.
+ * 단, 일본어 챔피언과 더보기는 360px 탭 칸에서만 i18n 축약 라벨을 사용합니다.
  * 달라진 건 배치뿐입니다: 5칸이 이미 홈·스트리머·참여·칼바람·패치노트로 차 있어
  * 모바일에는 챔피언 진입점이 아예 없었습니다(모바일에서는 상단 nav 가 숨습니다).
  * 그래서 사용 빈도가 낮은 스트리머·참여를 "더보기" 시트로 내리고 그 자리에
@@ -56,7 +58,9 @@ function MoreIcon() {
   );
 }
 
-export function PublicBottomTabBar({ activePage, activeTarget, onPage }: PublicHeaderMenuProps) {
+export function PublicBottomTabBar({ activePage, activeTarget, locale, onPage }: PublicHeaderMenuProps & {
+  locale: PublicLocale;
+}) {
   const [moreOpen, setMoreOpen] = useState(false);
   const moreTriggerRef = useRef<HTMLButtonElement>(null);
   const items = publicHeaderMenuItems(activePage);
@@ -77,19 +81,22 @@ export function PublicBottomTabBar({ activePage, activeTarget, onPage }: PublicH
       <nav aria-label={text.mainMenu} className="public-bottom-tab-bar" data-testid="lol-bottom-tab-bar">
         {tabItems.map((item) => {
           const isActive = isHeaderMenuItemActive(item, activePage, activeTarget);
+          const label = locale === "ja" && item.icon === "champions"
+            ? publicI18n.ja.championsHeaderNavShort
+            : item.label;
 
           return (
             <button
               aria-current={isActive ? "page" : undefined}
               className={`public-bottom-tab-bar__item ${isActive ? "active" : ""}`}
-              data-ja={item.ja}
+              data-ja={item.icon === "champions" ? publicI18n.ja.championsHeaderNavShort : item.ja}
               data-ko={item.ko}
               key={item.icon}
               onClick={() => go(item.page)}
               type="button"
             >
               <PublicHeaderMenuIcon icon={item.icon} />
-              <span>{item.label}</span>
+              <span>{label}</span>
             </button>
           );
         })}
@@ -98,14 +105,14 @@ export function PublicBottomTabBar({ activePage, activeTarget, onPage }: PublicH
           aria-expanded={moreOpen}
           aria-haspopup="dialog"
           className={`public-bottom-tab-bar__item ${moreActive ? "active" : ""}`}
-          data-ja={publicI18n.ja.moreMenu}
+          data-ja={publicI18n.ja.moreMenuShort}
           data-ko={publicI18n.ko.moreMenu}
           onClick={() => setMoreOpen((open) => !open)}
           ref={moreTriggerRef}
           type="button"
         >
           <MoreIcon />
-          <span>{text.moreMenu}</span>
+          <span>{locale === "ja" ? text.moreMenuShort : text.moreMenu}</span>
         </button>
       </nav>
       <BottomSheet

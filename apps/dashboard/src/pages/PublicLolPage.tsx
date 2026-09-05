@@ -7856,7 +7856,7 @@ export function PublicLolPage({
             }}
           />
         </AppShellMain>
-        <PublicBottomTabBar activePage={activeMainPage} activeTarget={activeNav} onPage={navigateFromMenu} />
+        <PublicBottomTabBar activePage={activeMainPage} activeTarget={activeNav} locale={locale} onPage={navigateFromMenu} />
         <PublicSiteFooter onPage={navigateFromMenu} text={publicSiteFooterText()} />
         <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
       </AppShell>
@@ -7926,7 +7926,7 @@ export function PublicLolPage({
             </div>
           </div>
         </AppShellMain>
-        <PublicBottomTabBar activePage={activeMainPage} activeTarget={activeNav} onPage={navigateFromMenu} />
+        <PublicBottomTabBar activePage={activeMainPage} activeTarget={activeNav} locale={locale} onPage={navigateFromMenu} />
         <PublicSiteFooter onPage={navigateFromMenu} text={publicSiteFooterText()} />
         <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
       </AppShell>
@@ -8094,7 +8094,7 @@ export function PublicLolPage({
           매핑 결과는 사실상 "none" 이지만, 셸 조건이 바뀌어도 활성 탭이 어긋나지
           않도록 리터럴 대신 매핑 함수로 넘깁니다(2행 메뉴의 lolSubnavActive 와 같은 꼴). */}
       <div className="yoro-home-chrome public-profile-ink-tabbar">
-        <LolBottomTabBar active={lolTabBarActive(activeMainPage)} text={lolHomeI18n[locale]} />
+        <LolBottomTabBar active={lolTabBarActive(activeMainPage)} locale={locale} text={lolHomeI18n[locale]} />
       </div>
       <PublicSiteFooter onPage={navigateFromMenu} text={publicSiteFooterText()} />
       <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />
