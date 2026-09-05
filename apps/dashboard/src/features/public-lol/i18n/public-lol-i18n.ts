@@ -42,6 +42,9 @@ const publicI18nBase = {
     homeParticipationDescription: "방송 참여 대기열과 함께 플레이할 팀원을 확인하세요.",
     homeAramTitle: "증강 칼바람",
     homeAramDescription: "증강과 조합 데이터를 한곳에서 확인할 수 있도록 준비 중입니다.",
+    /* 하단 탭바·nav 의 챔피언 칸. championListTitleWord 는 "전체 챔피언" 제목을
+       쪼갠 조각이라(en: "champions" 소문자) 탭 라벨로 쓸 수 없어 별도 키입니다. */
+    championsHeaderNav: "챔피언",
     aramHeaderNav: "칼바람",
     aramEyebrow: "League of Legends",
     aramTitle: "증강 칼바람",
@@ -1031,6 +1034,7 @@ const publicI18nBase = {
     homeParticipationDescription: "配信参加待機列と一緒にプレイするメンバーを確認できます。",
     homeAramTitle: "オーグメントARAM",
     homeAramDescription: "オーグメントと組み合わせデータをまとめて確認できるよう準備中です。",
+    championsHeaderNav: "チャンピオン",
     aramHeaderNav: "ARAM",
     aramEyebrow: "League of Legends",
     aramTitle: "オーグメントARAM",
@@ -2002,6 +2006,7 @@ const publicI18nEn = {
     homeParticipationDescription: "Check stream viewer queues and find teammates to play with.",
     homeAramTitle: "Augment ARAM",
     homeAramDescription: "We are preparing augment and comp data in one place.",
+    championsHeaderNav: "Champions",
     aramHeaderNav: "ARAM",
     aramEyebrow: "League of Legends",
     aramTitle: "Augment ARAM",

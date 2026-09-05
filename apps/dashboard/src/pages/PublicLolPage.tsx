@@ -1,5 +1,5 @@
 import { LolChrome, lolSubnavActive } from "../features/public-home/components/LolChrome";
-import { LolBottomTabBar } from "../features/public-home/components/HomeTabBar";
+import { LolBottomTabBar, lolTabBarActive } from "../features/public-home/components/HomeTabBar";
 import { lolHomeI18n } from "../features/public-home/i18n/lol-home-i18n";
 import { Fragment, useEffect, useId, useMemo, useRef, useState, type FormEvent, type MouseEvent, type ReactNode } from "react";
 import "../styles/pages/public-lol/lol-route.css";
@@ -8089,9 +8089,12 @@ export function PublicLolPage({
       {/* 하단 탭바는 헤더가 아니라 AppShell 직계 자식으로 둡니다 — 전적검색 결과
           헤더의 backdrop-filter가 position:fixed 의 기준(containing block)을
           가로채 탭바를 화면 하단이 아닌 상단바 밑에 붙였습니다. */}
-      {/* 모바일 하단 탭바 — 목업 page-4 크롬(홈·스트리머·참여·칼바람·패치노트, 활성 없음). */}
+      {/* 모바일 하단 탭바 — 홈·챔피언·칼바람·패치노트 + 더보기(팔로우·참여) 시트.
+          이 셸은 activeMainPage === "search" 일 때만 렌더되므로(위 조기 반환)
+          매핑 결과는 사실상 "none" 이지만, 셸 조건이 바뀌어도 활성 탭이 어긋나지
+          않도록 리터럴 대신 매핑 함수로 넘깁니다(2행 메뉴의 lolSubnavActive 와 같은 꼴). */}
       <div className="yoro-home-chrome public-profile-ink-tabbar">
-        <LolBottomTabBar active="none" text={lolHomeI18n[locale]} />
+        <LolBottomTabBar active={lolTabBarActive(activeMainPage)} text={lolHomeI18n[locale]} />
       </div>
       <PublicSiteFooter onPage={navigateFromMenu} text={publicSiteFooterText()} />
       <PublicPremiumDialog open={premiumOpen} onClose={() => setPremiumOpen(false)} onOpenAdmin={onOpenAdmin} />

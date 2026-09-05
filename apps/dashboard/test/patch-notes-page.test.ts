@@ -199,8 +199,9 @@ test("커뮤니티가 있던 nav 자리를 패치 노트가 이어받는다", ()
   assert.match(headerMenu, /page: "patchNotes"/u);
   assert.match(headerMenu, /publicI18n\.ko\.patchNotesHeaderNav/u);
   assert.match(headerMenu, /publicI18n\.ja\.patchNotesHeaderNav/u);
-  // 하단 탭바는 5개를 넘기지 않습니다.
-  assert.equal([...headerMenu.matchAll(/^\s{6}icon: "/gmu)].length, 5);
+  /* 하단 탭바는 6개 항목 중 4개만 칸으로 노출하고 스트리머·참여는 "더보기"
+     시트로 내립니다(2026-09-05 탭바 개편) — 항목 수 자체는 6을 넘기지 않습니다. */
+  assert.equal([...headerMenu.matchAll(/^\s{6}icon: "/gmu)].length, 6);
 });
 
 test("모든 문구가 한국어와 일본어로 함께 있다", () => {

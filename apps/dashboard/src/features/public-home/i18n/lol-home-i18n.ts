@@ -18,6 +18,10 @@ export type LolHomeText = {
   /* 모바일 하단 탭 축약 라벨 — 실서비스 탭바(참여·칼바람)와 같은 축약 관례. */
   tabParticipationShort: string;
   tabAramShort: string;
+  /* 하단 탭바 다섯 번째 칸 — 팔로우·참여를 담는 시트를 여는 트리거입니다.
+     문구는 public-lol-i18n.ts 의 moreMenu(ja: もっと見る)와 같은 관례를 씁니다. */
+  tabMore: string;
+  closeMobileMenu: string;
   heroTitle: string;
   heroSub: string;
   recentLabel: string;
@@ -51,6 +55,8 @@ export const lolHomeI18n: Record<PublicLocale, LolHomeText> = {
     tabPatchNotes: "패치노트",
     tabParticipationShort: "참여",
     tabAramShort: "칼바람",
+    tabMore: "더보기",
+    closeMobileMenu: "메뉴 닫기",
     heroTitle: "LoL 전적, 검색 한 번",
     heroSub: "전적을 보고, 방송 중인 스트리머의 판에 시청자로 참여합니다.",
     recentLabel: "최근 검색",
@@ -82,6 +88,8 @@ export const lolHomeI18n: Record<PublicLocale, LolHomeText> = {
     tabPatchNotes: "パッチノート",
     tabParticipationShort: "参加",
     tabAramShort: "ARAM",
+    tabMore: "もっと見る",
+    closeMobileMenu: "メニューを閉じる",
     heroTitle: "LoL戦績、検索ひとつで",
     heroSub: "戦績を確認し、配信中のストリーマーの試合に視聴者として参加できます。",
     recentLabel: "最近の検索",
@@ -113,6 +121,8 @@ export const lolHomeI18n: Record<PublicLocale, LolHomeText> = {
     tabPatchNotes: "Patch notes",
     tabParticipationShort: "Join",
     tabAramShort: "ARAM",
+    tabMore: "More",
+    closeMobileMenu: "Close menu",
     heroTitle: "LoL stats. One search.",
     heroSub: "Check stats and join live streamers' games as a viewer.",
     recentLabel: "Recent",

@@ -1,4 +1,4 @@
-/* 모바일 하단 고정 탭바 — LoL(5칸)·Palworld(4+더보기) 공용.
+/* 모바일 하단 고정 탭바 — LoL·Palworld 공용(둘 다 4탭 + 더보기 시트).
  *
  * 기존 상단 가로 스크롤 nav(27-mobile-nav.css)는 폭을 정확히 나눠 잘림을
  * 막았지만, 스크롤이 필요한 방식 자체는 그대로였습니다. 이 파일은 그 nav를
@@ -158,4 +158,117 @@
       transition: none;
     }
   }
+
+  /* ══ 수묵 셸 위의 활성 표시 보정 ═══════════════════════════════════════════
+     LoL 메뉴 화면(패치 노트·칼바람·챔피언·참여·법률 3종)의 셸은 수묵 팔레트라
+     --yoro-color-public-primary 를 심회(#4A5563)로 재정의합니다
+     (20-profile-platform.css) — "흰 글자 대비 8.9:1" 이라는 주석 그대로 채움용
+     값입니다. 탭바는 그 값을 글자색(--public-game-accent)으로 읽고 있어서, 실측
+     (391px)에서 활성 탭이 지면(#1C1D22) 위 2.4:1 로 비활성(#DEE2E6)보다 오히려
+     어두워졌습니다 — 켜진 탭이 꺼져 보이는 역전입니다.
+
+     수묵은 강조를 색이 아니라 명도로 합니다(승인 스펙 §6, 1단계 탭바와 같은
+     규칙: 활성 = 잉크색). 그래서 이 셸에서만 accent 를 잉크색으로, 비활성은 한
+     단 낮춘 수묵 회색으로 되돌리고 굵기 차이를 더합니다. 다른 게임 탭바
+     (Palworld·발로란트·마인크래프트)는 이 셸 클래스를 쓰지 않아 영향 밖입니다. */
+  .public-profile-platform-v2 .public-bottom-tab-bar {
+    --public-game-accent: var(--public-gray-text);
+    --public-game-chrome-text-muted: var(--public-gray-muted);
+  }
+
+  .public-profile-platform-v2 .public-bottom-tab-bar__item.active {
+    font-weight: var(--yoro-font-weight-bold);
+  }
+
+  /* 명도만으로는 다크에서 백자(#F5F6F8)와 수묵 회색(#B9C3D0)의 간격이 좁습니다 —
+     1단계 탭바의 꼬리 밑줄과 같은 자리에 짧은 잉크 밑줄을 함께 둡니다.
+     흐름이 아니라 absolute 로 띄우는 이유: 탭바는 높이가 고정(터치타겟 + 여백)이고
+     칸 내용(아이콘 20px + 2줄분 라벨)이 이미 그 높이를 거의 채워, 밑줄을 flex 항목으로
+     넣으면 칸이 바 밖으로 밀려납니다. */
+  .public-profile-platform-v2 .public-bottom-tab-bar__item {
+    position: relative;
+  }
+
+  .public-profile-platform-v2 .public-bottom-tab-bar__item.active::after {
+    content: "";
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline-start: 50%;
+    inline-size: var(--yoro-space-4);
+    block-size: .125rem;
+    border-radius: var(--yoro-radius-pill);
+    background: currentColor;
+    translate: -50% 0;
+  }
+
+  /* ══ 하단 탭바 "더보기" 시트의 목록 ═══════════════════════════════════════
+     상시 4탭(홈·챔피언·칼바람·패치노트) 밖으로 내려온 스트리머·참여가 들어갑니다.
+     판·머리줄·닫기 버튼·포커스 트랩은 공용 BottomSheet 가 소유하고, 여기는 목록
+     항목만 정의합니다(Palworld 의 .palworld-more-menu 와 같은 분담).
+
+     미디어 쿼리 밖에 두는 이유: 시트 자체가 모바일 트리거(탭바)에서만 열리고,
+     뷰포트가 넓어지면 BottomSheet 가 스스로 닫습니다(> 768px resize 핸들러). */
+  .public-bottom-tab-bar-more {
+    display: grid;
+    gap: var(--yoro-space-1);
+  }
+
+  .public-bottom-tab-bar-more__item {
+    display: flex;
+    align-items: center;
+    gap: var(--yoro-space-3);
+    min-block-size: var(--yoro-size-touch-target);
+    padding: 0 var(--yoro-space-3);
+    border: 0;
+    border-radius: var(--yoro-radius-md);
+    background: transparent;
+    color: var(--yoro-color-product-gray-muted);
+    font-size: var(--yoro-font-size-sm);
+    text-align: start;
+    cursor: pointer;
+  }
+
+  /* 아이콘 기본값은 legacy layer 의 display:none 입니다(데스크톱 nav 규격) —
+     시트 안에서는 항상 보여야 하므로 여기서 되돌립니다. */
+  .public-bottom-tab-bar-more__item .public-header-menu-icon {
+    display: block;
+    flex: none;
+    inline-size: var(--yoro-space-5);
+    block-size: var(--yoro-space-5);
+  }
+
+  /* 활성 표시는 탭바와 같은 문법입니다 — 잉크색 글자 + 굵기 + 잉크 레일.
+     accent 색을 쓰지 않는 이유: portal 로 셸 밖에 나간 시트에서 accent 는 전역
+     보라(hsl 252 100% 68%)로 되돌아가는데, 그 색은 시트 판(#212529) 위 3.55:1 로
+     본문 AA(4.5:1)에 못 미치고 아래 수묵 화면과도 어긋납니다. */
+  .public-bottom-tab-bar-more__item.active {
+    background: color-mix(in srgb, var(--yoro-color-product-gray-text) 10%, transparent);
+    box-shadow: inset var(--yoro-space-1) 0 0 0 var(--yoro-color-product-gray-text);
+    color: var(--yoro-color-product-gray-text);
+    font-weight: var(--yoro-font-weight-bold);
+  }
+
+  .public-bottom-tab-bar-more__item:hover {
+    background: color-mix(in srgb, var(--yoro-color-product-gray-text) 8%, transparent);
+    color: var(--yoro-color-product-gray-text);
+  }
+
+  .public-bottom-tab-bar-more__item:focus-visible {
+    outline: none;
+    box-shadow: var(--yoro-shadow-focus);
+  }
+}
+
+/* 라이트 테마의 시트 판 — @layer 밖입니다.
+   BottomSheet.css·Modal.css 는 JS import 라 레이어가 없고, 레이어 없는 규칙은
+   모든 @layer 를 이깁니다(01-public-home.css 의 1단계 시트와 같은 함정).
+   여기서 뒤집는 건 판(dialog)이 읽는 토큰뿐입니다 — 루트(.public-bottom-sheet)의
+   백드롭도 같은 토큰을 쓰므로, 루트에서 바꾸면 어둡게 깔려야 할 백드롭이 흰색으로
+   밝아집니다. 기본(다크)은 공용 값 그대로라 선언이 필요 없습니다. */
+:root[data-public-theme="light"] .public-bottom-sheet--lol-nav .yoro-modal__dialog {
+  --yoro-color-product-gray-field-text: #ffffff;
+  --yoro-color-product-gray-surface: #f5f6f8;
+  --yoro-color-product-gray-border: #e4e8ed;
+  --yoro-color-product-gray-text: #1c1d22;
+  --yoro-color-product-gray-muted: #5f6e80;
 }

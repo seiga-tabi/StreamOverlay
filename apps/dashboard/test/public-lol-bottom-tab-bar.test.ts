@@ -16,6 +16,18 @@ const tabBarCss = readFileSync(
   new URL("../src/styles/pages/public-lol/31-bottom-tab-bar.css", import.meta.url),
   "utf8"
 );
+const bottomTabBar = readFileSync(
+  new URL("../src/features/public-lol/components/PublicBottomTabBar.tsx", import.meta.url),
+  "utf8"
+);
+const headerMenu = readFileSync(
+  new URL("../src/features/public-lol/components/PublicHeaderMenu.tsx", import.meta.url),
+  "utf8"
+);
+const publicI18nSource = readFileSync(
+  new URL("../src/features/public-lol/i18n/public-lol-i18n.ts", import.meta.url),
+  "utf8"
+);
 
 /* 하단 탭바를 헤더 안으로 되돌리면 전적검색 결과 화면에서만 탭바가 화면 하단에
    닿지 않습니다 — 그 헤더에는 backdrop-filter 가 걸려 있어 자손 position:fixed 의
@@ -28,7 +40,8 @@ test("하단 탭바는 헤더가 아니라 AppShell 직계 자식으로 렌더�
   /* 전적검색 결과 분기는 목업 page-4 크롬(LolBottomTabBar)으로 전환했습니다(2026-08-20). */
   const renderCount = lolPage.match(/<PublicBottomTabBar\b/gu)?.length ?? 0;
   assert.equal(renderCount, 2, "AppShell 2개 조기 반환 분기(등록·비검색)에 기존 탭바가 있어야 합니다");
-  assert.match(lolPage, /<LolBottomTabBar active="none" text=\{lolHomeI18n\[locale\]\} \/>/u);
+  /* 활성 탭은 리터럴이 아니라 activeMainPage 매핑으로 넘깁니다(2026-09-05 탭바 개편). */
+  assert.match(lolPage, /<LolBottomTabBar active=\{lolTabBarActive\(activeMainPage\)\} text=\{lolHomeI18n\[locale\]\} \/>/u);
 
   for (const match of lolPage.matchAll(/<PublicBottomTabBar\b[^/]*\/>/gu)) {
     assert.match(match[0], /activePage=\{activeMainPage\}/u);
@@ -73,6 +86,51 @@ test("모바일에서 탭바를 쓰는 4개 게임 헤더의 상단 nav 가 전�
   assert.match(
     tabBarCss,
     /\.palworld-shell \.public-bottom-tab-bar \{[\s\S]{0,120}--public-game-accent: var\(--yoro-color-success\);/u
+  );
+});
+
+/* 2026-09-05 개편 — 모바일에서는 상단 nav 가 숨어 탭바가 유일한 내비인데 5칸이
+   홈·스트리머·참여·칼바람·패치노트로 차 있어 챔피언 진입점이 없었습니다. 상시
+   4탭 + 더보기 시트 구조가 되살아나지 않게 고정합니다(승인 스펙 §1·§4). */
+test("메뉴 화면 하단 탭바는 4탭(홈·챔피언·칼바람·패치노트) + 더보기 시트다", () => {
+  assert.match(bottomTabBar, /const TAB_ICONS = \["home", "champions", "aram", "patchNotes"\] as const;/u);
+  assert.match(bottomTabBar, /const MORE_ICONS = \["streamers", "participation"\] as const;/u);
+  // 챔피언 항목은 상단 nav 와 공유하는 같은 데이터에서 옵니다 — 라벨이 갈리지 않습니다.
+  assert.match(headerMenu, /icon: "champions",\s*page: "champions",/u);
+  assert.match(headerMenu, /champions: <>/u);
+
+  /* 시트 안 항목이 현재 위치면 더보기 탭이 활성색을 이어받아야 합니다 —
+     빠지면 스트리머·참여에 있는 동안 탭바에서 현재 위치가 사라집니다. */
+  assert.match(
+    bottomTabBar,
+    /const moreActive = moreOpen \|\| moreItems\.some\(\(item\) => isHeaderMenuItemActive\(item, activePage, activeTarget\)\);/u
+  );
+  // 시트는 공용 BottomSheet 재사용 — 포커스 트랩·스크롤 락을 다시 구현하지 않습니다.
+  assert.match(bottomTabBar, /<BottomSheet\b/u);
+  assert.match(bottomTabBar, /returnFocusRef=\{moreTriggerRef\}/u);
+});
+
+test("챔피언 탭 라벨은 3개 로케일에 함께 있다", () => {
+  for (const [locale, label] of [["ko", "챔피언"], ["ja", "チャンピオン"], ["en", "Champions"]]) {
+    assert.match(
+      publicI18nSource,
+      new RegExp(`championsHeaderNav: "${label}",`, "u"),
+      `${locale} championsHeaderNav 없음`
+    );
+  }
+});
+
+/* 수묵 셸은 --yoro-color-public-primary 를 심회(#4A5563)로 재정의합니다 — 채움용
+   값이라 글자색으로 쓰면 다크 지면 위 2.4:1 로 비활성보다 어두워져 켜진 탭이 꺼져
+   보였습니다(391px 실측). 활성은 색이 아니라 명도로 말해야 합니다. */
+test("수묵 메뉴 화면에서 활성 탭은 잉크색과 밑줄로 구분된다", () => {
+  assert.match(
+    tabBarCss,
+    /\.public-profile-platform-v2 \.public-bottom-tab-bar \{[\s\S]{0,160}--public-game-accent: var\(--public-gray-text\);/u
+  );
+  assert.match(
+    tabBarCss,
+    /\.public-profile-platform-v2 \.public-bottom-tab-bar__item\.active::after \{/u
   );
 });
 

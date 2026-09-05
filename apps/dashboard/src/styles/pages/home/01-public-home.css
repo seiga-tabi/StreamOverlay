@@ -1618,3 +1618,90 @@
     .yoro-lol-fallback-stage { grid-template-columns: minmax(0, 1fr); }
   }
 }
+
+/* ══ LoL 하단 탭바 "더보기" 시트(팔로우·참여) ══════════════════════════════
+   공용 BottomSheet 는 document.body 로 portal 되어 홈 셸 밖에 놓입니다 — 조상의
+   .theme-light 도, .yoro-home-shell 의 --home-* 선언도 닿지 않습니다. 그래서
+   토큰을 이 스코프에서 다시 선언하고(minecraft-route.css 의
+   .public-bottom-sheet--minecraft 와 같은 선례), 라이트 전환은 useHomeTheme 가
+   <html> 에 남기는 data-public-theme 로 잡습니다(.yoro-pn-page 와 같은 페어).
+   레이어 밖에 두는 이유: BottomSheet.css·Modal.css 가 JS import(레이어 없음)라
+   @layer home 안에서는 판 색을 이기지 못합니다(AppShell.css 와 같은 함정). */
+.public-bottom-sheet--lol-home {
+  --home-bg: #1C1D22;
+  --home-card: #252730;
+  --home-ink: #F5F6F8;
+  --home-sub: #B9C3D0;
+  --home-line: #3A404B;
+  --home-mid: #8795A6;
+  --home-stroke: #B9C3D0;
+
+  font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+}
+
+:root[data-public-theme="light"] .public-bottom-sheet--lol-home {
+  --home-bg: #F5F6F8;
+  --home-card: #FFFFFF;
+  --home-ink: #1C1D22;
+  --home-sub: #5F6E80;
+  --home-line: #E4E8ED;
+  --home-mid: #5F6E80;
+  --home-stroke: #4A5563;
+}
+
+/* 판·머리줄·닫기 버튼은 공용 CSS 가 제품 회색 토큰으로 그리는데 그 값은 테마
+   고정(먹 #212529)이라 라이트에서 판이 통째로 먹빛이 됩니다 — 값을 수묵으로
+   갈아 끼웁니다(16-palworld-ink.css 와 같은 처리). 백드롭은 .public-bottom-sheet
+   루트가 같은 토큰을 쓰므로 판(dialog)에서만 바꿉니다 — 루트에서 바꾸면 어둡게
+   깔리는 백드롭이 카드색으로 밝아집니다. */
+.public-bottom-sheet--lol-home .yoro-modal__dialog {
+  --yoro-color-product-gray-field-text: var(--home-card);
+  --yoro-color-product-gray-text: var(--home-ink);
+  --yoro-color-product-gray-surface: var(--home-bg);
+  --yoro-color-product-gray-border: var(--home-line);
+  --yoro-color-border-strong: var(--home-line);
+}
+
+.public-bottom-sheet--lol-home .yoro-home-sheet-list {
+  display: grid;
+  gap: 2px;
+}
+
+/* 탭바 항목과 같은 문법 — 미활성은 --home-sub, 활성은 지면색 판 + 잉크 글자 +
+   꼬리 밑줄. 수묵 팔레트에서 녹색은 승패 표기 전용이라 Palworld 의 성공색 틴트
+   대신 명도 차이와 시그니처 마크로만 구분합니다(승인 스펙 §6). */
+.public-bottom-sheet--lol-home .yoro-home-sheet-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--home-sub);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.public-bottom-sheet--lol-home .yoro-home-sheet-item.is-active {
+  background: var(--home-bg);
+  color: var(--home-ink);
+  font-weight: 700;
+}
+
+.public-bottom-sheet--lol-home .yoro-home-sheet-tail {
+  position: absolute;
+  left: 42px;
+  bottom: 8px;
+  color: var(--home-mid);
+}
+
+.public-bottom-sheet--lol-home .yoro-home-sheet-item:focus-visible {
+  outline: 2px solid var(--home-stroke);
+  outline-offset: 2px;
+}

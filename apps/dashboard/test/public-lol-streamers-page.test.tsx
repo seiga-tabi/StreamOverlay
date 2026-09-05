@@ -172,7 +172,7 @@ test("오류 상태는 다시 시도 버튼을, 빈 팔로우는 안내 문구�
   assert.match(empty, /팔로우한 LoL 스트리머가 없습니다/u);
 });
 
-test("2행 메뉴와 하단 탭바는 스트리머 항목을 활성(꼬리 밑줄 + aria-current)으로 표시한다", () => {
+test("2행 메뉴는 스트리머 항목을, 하단 탭바는 더보기 탭을 활성으로 표시한다", () => {
   const subnav = renderToStaticMarkup(<LolSubnav active="streamers" text={lolHomeI18n.ko} />);
   assert.match(subnav, /yoro-lol-subnav-item is-active"[^>]*href="\/ko\/follow"/u);
   assert.match(subnav, /aria-current="page"/u);
@@ -180,9 +180,13 @@ test("2행 메뉴와 하단 탭바는 스트리머 항목을 활성(꼬리 밑�
   /* 홈은 활성 아니고 LoL 홈(/lol) 링크(2026-08-20 변경) */
   assert.match(subnav, /href="\/ko\/lol"/u);
 
+  /* 팔로우는 더보기 시트 안 항목이라 활성색을 더보기 탭이 이어받습니다 —
+     탭바 자체에는 /follow 링크도 aria-current 도 없습니다(닫힌 시트는 미렌더). */
   const tabbar = renderToStaticMarkup(<LolBottomTabBar active="streamers" text={lolHomeI18n.ko} />);
-  assert.match(tabbar, /is-active"[^>]*href="\/ko\/follow"/u);
-  assert.match(tabbar, /aria-current="page"/u);
+  assert.match(tabbar, /aria-controls="lol-home-more-menu"[^>]*class="yoro-home-tabbar-item is-active"/u);
+  assert.match(tabbar, /yoro-home-tabbar-tail/u);
+  assert.doesNotMatch(tabbar, /aria-current="page"/u);
+  assert.doesNotMatch(tabbar, /\/follow/u);
 });
 
 test("스트리머 i18n 은 ko·ja·en 세 로케일에 같은 키를 제공한다", () => {

@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { BottomSheet } from "../../../shared/ui/BottomSheet";
+import type { PublicMainPage } from "../../public-lol/types/public-lol";
 import { localizedPublicUrlForCurrentLocale } from "../../public-lol/utils/public-locale-path";
 import type { HomeText } from "../i18n/home-i18n";
 import type { LolHomeText } from "../i18n/lol-home-i18n";
@@ -87,8 +89,55 @@ function DocIcon() {
   );
 }
 
+/* 챔피언 탭 — 전적검색 챔피언 분석이 쓰던 ♛ 를 다른 탭 아이콘과 같은 line-icon
+ * 문법(20×20 · fill none · stroke 1.2)으로 옮긴 것입니다. 꼭짓점이 miter 로 길게
+ * 튀지 않도록 join/cap 만 round 를 씁니다(승인 스펙 §5). */
+function CrownIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="20"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.2"
+      viewBox="0 0 20 20"
+      width="20"
+    >
+      <path d="M4.6 14 L 3.4 6.4 L 6.6 9.6 L 10 4.6 L 13.4 9.6 L 16.6 6.4 L 15.4 14 Z" />
+      <path d="M5.4 16.6 h9.2" />
+    </svg>
+  );
+}
+
+/* 더보기 — Palworld 탭바(PalworldBottomTabBar.tsx)의 MoreIcon 원문.
+ * 크기만 다른 홈 탭 아이콘과 맞춰 20×20 으로 고정합니다(홈 탭바에는 Palworld 가
+ * 가진 `.public-bottom-tab-bar__item svg` 같은 크기 규칙이 없습니다). */
+function MoreIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="20"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2.4"
+      viewBox="0 0 24 24"
+      width="20"
+    >
+      <path d="M5 12h.01M12 12h.01M19 12h.01" />
+    </svg>
+  );
+}
+
 function TabActiveMark() {
   return <TailUnderline className="yoro-home-tabbar-tail" height={4} width={26} />;
+}
+
+function SheetActiveMark() {
+  return <TailUnderline className="yoro-home-sheet-tail" height={4} width={26} />;
 }
 
 /* 루트 홈: 헤더 정보구조(홈·게임·YORO Bot·로그인)를 그대로 옮긴 4탭.
@@ -160,33 +209,110 @@ export function HomeBottomTabBar({ text, connected, onLoginOpen }: {
   );
 }
 
-export type LolTabItem = "home" | "streamers" | "participation" | "aram" | "patchNotes";
+/** 상시 노출되는 하단 탭 4개. */
+export type LolTabItem = "home" | "champions" | "aram" | "patchNotes";
+/** "더보기" 시트 안에서만 나타나는 항목 — 탭 칸을 차지하지 않습니다. */
+export type LolMoreItem = "streamers" | "participation";
+export type LolTabActive = LolTabItem | LolMoreItem | "none";
 
-/* LoL 하단 탭: 실서비스 탭 구성(홈·스트리머·참여·칼바람·패치노트)을 수묵 스타일로.
+const LOL_MORE_ITEMS = ["streamers", "participation"] as const;
+
+function isLolMoreItem(active: LolTabActive): active is LolMoreItem {
+  return (LOL_MORE_ITEMS as readonly LolTabActive[]).includes(active);
+}
+
+/** activeMainPage → 하단 탭 활성 항목. 2행 메뉴의 lolSubnavActive 와 같은 매핑이지만
+ * 하단 탭은 팔로우·참여가 시트로 내려가 반환 타입이 다릅니다(시트 활성 = 더보기 활성). */
+export function lolTabBarActive(page: PublicMainPage): LolTabActive {
+  switch (page) {
+    case "subscriptions": return "streamers";
+    case "followJoin": return "participation";
+    case "aram": return "aram";
+    case "champions": return "champions";
+    case "patchNotes": return "patchNotes";
+    default: return "none";
+  }
+}
+
+/* LoL 하단 탭: 상시 4탭(홈·챔피언·칼바람·패치노트) + 더보기 시트(팔로우·참여).
+ * 모바일에서는 헤더 nav 가 숨겨져 탭바가 유일한 내비인데 5칸이 이미 차 있어
+ * 챔피언 진입점이 없었습니다 — Palworld 가 실서비스에 쓰는 "더보기 + 시트"로
+ * 사용 빈도가 낮은 팔로우·참여를 묶고 그 자리에 챔피언을 넣습니다(승인 스펙 §1·§4).
+ * 시트는 목업의 하단 시트가 아니라 공용 BottomSheet(우측 풀스크린 드로어)를 그대로
+ * 씁니다 — 포커스 트랩·스크롤 락·ESC·복귀 포커스가 이미 그 안에 있습니다.
  * 홈 탭은 메인 홈(/)으로 나가는 출구입니다(2026-08-19 결정 — 활성이어도 aria-current
  * 없음) — 모바일에선 헤더 nav 가 숨겨져 이 탭이 메인 홈으로 가는 유일한 경로입니다. */
-export function LolBottomTabBar({ text, active = "home" }: { text: LolHomeText; active?: LolTabItem | "none" }) {
+export function LolBottomTabBar({ text, active = "home" }: { text: LolHomeText; active?: LolTabActive }) {
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreTriggerRef = useRef<HTMLButtonElement>(null);
+  /* 더보기의 활성은 둘: 시트가 열려 있는 동안, 그리고 시트 안 항목이 현재
+     위치일 때(Palworld 의 moreActive 규칙 + 승인 스펙 §6). */
+  const moreActive = isLolMoreItem(active) || moreOpen;
+
   const items: Array<{ id: LolTabItem; href: string; label: string; icon: React.ReactNode }> = [
     { id: "home", href: "/", label: text.tabHome, icon: <HouseIcon /> },
-    { id: "streamers", href: "/follow", label: text.tabStreamers, icon: <MonitorIcon /> },
-    { id: "participation", href: "/participation", label: text.tabParticipationShort, icon: <PersonPlusIcon /> },
+    { id: "champions", href: "/lol/champions", label: text.tabChampions, icon: <CrownIcon /> },
     { id: "aram", href: "/lol/aram", label: text.tabAramShort, icon: <StarIcon /> },
     { id: "patchNotes", href: "/patch-notes", label: text.tabPatchNotes, icon: <DocIcon /> }
   ];
+  const moreItems: Array<{ id: LolMoreItem; href: string; label: string; icon: React.ReactNode }> = [
+    { id: "streamers", href: "/follow", label: text.tabStreamers, icon: <MonitorIcon /> },
+    { id: "participation", href: "/participation", label: text.tabParticipationShort, icon: <PersonPlusIcon /> }
+  ];
+
   return (
-    <nav aria-label={text.subnavLabel} className="yoro-home-tabbar yoro-home-tabbar--five">
-      {items.map((item) => (
-        <a
-          aria-current={item.id === active && item.id !== "home" ? "page" : undefined}
-          className={`yoro-home-tabbar-item${item.id === active ? " is-active" : ""}`}
-          href={localizedPublicUrlForCurrentLocale(item.href)}
-          key={item.id}
+    <>
+      <nav aria-label={text.subnavLabel} className="yoro-home-tabbar yoro-home-tabbar--five">
+        {items.map((item) => (
+          <a
+            aria-current={item.id === active && item.id !== "home" ? "page" : undefined}
+            className={`yoro-home-tabbar-item${item.id === active ? " is-active" : ""}`}
+            href={localizedPublicUrlForCurrentLocale(item.href)}
+            key={item.id}
+          >
+            {item.icon}
+            <span>{item.label}</span>
+            {item.id === active ? <TabActiveMark /> : null}
+          </a>
+        ))}
+        <button
+          aria-controls="lol-home-more-menu"
+          aria-expanded={moreOpen}
+          aria-haspopup="dialog"
+          className={`yoro-home-tabbar-item${moreActive ? " is-active" : ""}`}
+          onClick={() => setMoreOpen((open) => !open)}
+          ref={moreTriggerRef}
+          type="button"
         >
-          {item.icon}
-          <span>{item.label}</span>
-          {item.id === active ? <TabActiveMark /> : null}
-        </a>
-      ))}
-    </nav>
+          <MoreIcon />
+          <span>{text.tabMore}</span>
+          {moreActive ? <TabActiveMark /> : null}
+        </button>
+      </nav>
+      <BottomSheet
+        className="public-bottom-sheet--lol-home"
+        closeLabel={text.closeMobileMenu}
+        id="lol-home-more-menu"
+        onClose={() => setMoreOpen(false)}
+        open={moreOpen}
+        returnFocusRef={moreTriggerRef}
+        title={text.tabMore}
+      >
+        <div className="yoro-home-sheet-list">
+          {moreItems.map((item) => (
+            <a
+              aria-current={item.id === active ? "page" : undefined}
+              className={`yoro-home-sheet-item${item.id === active ? " is-active" : ""}`}
+              href={localizedPublicUrlForCurrentLocale(item.href)}
+              key={item.id}
+            >
+              {item.icon}
+              <span>{item.label}</span>
+              {item.id === active ? <SheetActiveMark /> : null}
+            </a>
+          ))}
+        </div>
+      </BottomSheet>
+    </>
   );
 }
