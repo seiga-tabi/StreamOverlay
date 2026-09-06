@@ -3754,6 +3754,77 @@ test("공개 LoL 전적 갱신은 더보기와 경기 티어 캐시를 무효화
   });
 });
 
+test("공개 LoL 경기 참가자 연관검색은 실제 플랫폼을 저장하고 같은 Riot ID의 플랫폼별 캐시를 분리한다", async () => {
+  await withAuthConfig(async () => {
+    const handler = createHttpHandler({
+      store: {},
+      twitchAuth: {},
+      actions: { async dispatchOne() {} },
+      sessions: new DashboardSessionStore(),
+      riot: {
+        isConfigured() { return true; },
+        routingStatus() {
+          return { configured: true, source: "runtime", accountRegion: "asia", lolPlatform: "jp1" };
+        },
+        async getMatch(matchId, routing) {
+          const platform = matchId.startsWith("KR_") ? "kr" : "jp1";
+          assert.equal(routing.lolPlatform, platform);
+          return {
+            metadata: { matchId, participants: [`${platform}-participant-puuid`] },
+            info: {
+              participants: [{
+                puuid: `${platform}-participant-puuid`,
+                teamId: 100,
+                championId: 103,
+                riotIdGameName: "Hide on bush",
+                riotIdTagline: "KR1"
+              }]
+            }
+          };
+        },
+        async getRankedStatsByPuuidWithoutSummoner(puuid, _options, routing) {
+          assert.equal(puuid, `${routing.lolPlatform}-participant-puuid`);
+          return {
+            queueType: "RANKED_SOLO_5x5",
+            tier: routing.lolPlatform === "kr" ? "DIAMOND" : "GOLD",
+            rank: "IV",
+            leaguePoints: 54,
+            wins: 12,
+            losses: 8,
+            winRate: 60,
+            fetchedAt: "2026-09-06T00:00:00.000Z"
+          };
+        }
+      }
+    });
+    const get = async (url) => {
+      const res = createResponse();
+      await handler(createRequest("GET", url, undefined, { origin: DASHBOARD_ORIGIN }), res);
+      assert.equal(res.statusCode, 200, res.body);
+      return JSON.parse(res.body);
+    };
+    const suggestions = async (platform) => {
+      const body = await get(`/api/lol/suggestions?q=hide&platform=${platform}`);
+      return body.suggestions.map((item) => ({
+        riotId: item.riotId,
+        lolPlatform: item.lolPlatform,
+        tier: item.rankedStats?.tier
+      }));
+    };
+    const krSuggestion = { riotId: "Hide on bush#KR1", lolPlatform: "kr", tier: "DIAMOND" };
+
+    // 기본 서버가 JP여도 KR 경기 참가자는 KR 연관검색에만 저장되어야 합니다.
+    await get("/api/lol/match-ranks?matchId=KR_91001");
+    assert.deepEqual(await suggestions("kr"), [krSuggestion]);
+    assert.deepEqual(await suggestions("jp1"), []);
+
+    // 같은 Riot ID를 JP 경기에서 저장해도 기존 KR 항목을 덮어쓰면 안 됩니다.
+    await get("/api/lol/match-ranks?matchId=JP1_91002");
+    assert.deepEqual(await suggestions("jp1"), [{ riotId: "Hide on bush#KR1", lolPlatform: "jp1", tier: "GOLD" }]);
+    assert.deepEqual(await suggestions("kr"), [krSuggestion]);
+  });
+});
+
 test("공개 LoL 연관검색 API는 저장된 프로필 캐시를 부분 검색 후보로 반환한다", async () => {
   await withAuthConfig(async () => {
     const handler = createHttpHandler({

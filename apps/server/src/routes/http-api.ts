@@ -7084,11 +7084,11 @@ export function createHttpHandler(input: HttpHandlerInput) {
     };
   }
 
-  function rememberPublicLolParticipantRank(riotId: string | undefined, rankedStats: LolRankedStats | undefined, fetchedAt: string): void {
+  function rememberPublicLolParticipantRank(riotId: string | undefined, rankedStats: LolRankedStats | undefined, fetchedAt: string, lolPlatform: LolPlatformId): void {
     if (!riotId || !rankedStats) return;
     const parsed = parseRiotIdDetailed(riotId);
     if (!parsed.ok) return;
-    const key = publicLolSuggestionKey(parsed.gameName, parsed.tagLine);
+    const key = publicLolSuggestionKey(parsed.gameName, parsed.tagLine, lolPlatform);
     const existing = publicLolSuggestionCache.get(key);
     publicLolSuggestionCache.set(key, {
       riotId,
@@ -7097,7 +7097,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       source: existing?.source ?? "recent",
       profileIconUrl: existing?.profileIconUrl,
       summonerLevel: rankedStats.summonerLevel ?? existing?.summonerLevel,
-      lolPlatform: input.riot?.routingStatus().lolPlatform ?? existing?.lolPlatform,
+      lolPlatform,
       rankedStats: { ...rankedStats },
       lastSeenAt: fetchedAt
     });
@@ -8638,7 +8638,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
     if (!rankedStats && participant.puuid && input.riot && typeof input.riot.getRankedStatsByPuuid === "function") {
       rankedStats = await input.riot.getRankedStatsByPuuid(participant.puuid, undefined, routing).catch(() => undefined);
     }
-    rememberPublicLolParticipantRank(riotId, rankedStats, fetchedAt);
+    rememberPublicLolParticipantRank(riotId, rankedStats, fetchedAt, routing.lolPlatform);
     return rankedStats ? { ...rankedStats } : undefined;
   }
 
@@ -9348,7 +9348,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
           ? cachedRankedStatsForRiotId(parsed.gameName, parsed.tagLine, { allowStale: true })
           : undefined;
       }
-      rememberPublicLolParticipantRank(riotId, rankedStats, fetchedAt);
+      rememberPublicLolParticipantRank(riotId, rankedStats, fetchedAt, routing.lolPlatform);
       return {
         riotId,
         teamId: participant.teamId,
