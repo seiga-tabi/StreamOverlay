@@ -150,7 +150,7 @@ test("SSR 캐시 미스는 즉시 noindex를 반환하고 백그라운드 예열
     for (const response of firstResponses) {
       assert.equal(response.statusCode, 200);
       assert.equal(response.headers["X-Robots-Tag"], "noindex, nofollow");
-      assert.match(response.body, /<meta name="robots" content="noindex" \/>/u);
+      assert.match(response.body, /<meta name="robots" content="noindex, nofollow" \/>/u);
       assert.doesNotMatch(response.body, /Challenger 1,234 LP/u);
     }
     assert.equal(calls.account, 1, "동일 key의 동시 SSR 예열은 한 번만 Riot 조회해야 합니다");
@@ -200,7 +200,7 @@ test("형식이 유효하지 않은 경로는 조회하지 않고 존재하지 �
     const missing = await get(handler, "/ko/lol/summoners/kr/DefinitelyMissing-ZZ999");
     assert.equal(missing.statusCode, 200);
     assert.equal(missing.headers["X-Robots-Tag"], "noindex, nofollow");
-    assert.match(missing.body, /<meta name="robots" content="noindex" \/>/u);
+    assert.match(missing.body, /<meta name="robots" content="noindex, nofollow" \/>/u);
     await waitFor(
       () => errors.some((entry) => entry.type === "public_lol.social_metadata_background_build_failed"),
       "존재하지 않는 Riot ID의 백그라운드 실패 로그가 남지 않았습니다.",

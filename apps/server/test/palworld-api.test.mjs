@@ -135,14 +135,24 @@ test("펠월드 공개 API는 인증 없이 meta와 cache header를 제공한다
   assert.equal(body.gates.imageAssets.fallbackPals, 0);
 });
 
-test("교배 sitemap index와 개별 SSR URL은 실제 runtime 조합을 제공한다", async () => {
+test("교배 sitemap은 철회하고 개별 SSR URL은 noindex로 실제 조합을 제공한다", async () => {
   const handler = createHandler();
   const indexResponse = createResponse();
   await handler(createRequest("GET", "/sitemap.xml"), indexResponse);
   assert.equal(indexResponse.statusCode, 200);
-  assert.match(indexResponse.body, /sitemap-palworld-breeding\.xml/u);
-  assert.match(indexResponse.body, /sitemap-palworld-breeding-2\.xml/u);
-  assert.match(indexResponse.body, /sitemap-palworld-breeding-3\.xml/u);
+  assert.doesNotMatch(indexResponse.body, /sitemap-palworld-breeding/u);
+  for (const path of ["/sitemap-palworld-breeding.xml", "/sitemap-palworld-breeding-2.xml", "/sitemap-palworld-breeding-3.xml"]) {
+    for (const method of ["GET", "HEAD"]) {
+      const retired = createResponse();
+      await handler(createRequest(method, path), retired);
+      assert.equal(retired.statusCode, 410);
+      if (method === "HEAD") assert.equal(retired.body, "");
+    }
+  }
+  const list = createResponse();
+  await handler(createRequest("GET", "/ko/palworld/breeding"), list);
+  assert.equal(list.statusCode, 200);
+  assert.doesNotMatch(list.body, /<meta[^>]+name="robots"[^>]+content="[^"]*noindex/u);
 
   const pair = palworldDataService.listBreedingPairs({ offset: 0, limit: 1 }).items[0];
   assert.ok(pair);
@@ -152,6 +162,9 @@ test("교배 sitemap index와 개별 SSR URL은 실제 runtime 조합을 제공�
   assert.equal(detailResponse.statusCode, 200);
   assert.match(detailResponse.headers["Content-Type"], /text\/html/u);
   assert.match(detailResponse.body, /교배 결과/u);
+  assert.equal(detailResponse.headers["X-Robots-Tag"], "noindex");
+  assert.match(detailResponse.body, /name="robots" content="noindex"/u);
+  assert.doesNotMatch(detailResponse.body, /<meta[^>]+name="robots"[^>]+content="[^"]*nofollow/u);
   assert.match(detailResponse.body, /data-seo-fallback="true"/u);
   assert.match(
     detailResponse.body,

@@ -619,6 +619,9 @@ const riotApiKeyStore = new LocalJsonRiotApiKeyStore();
 const riot = new RiotApiClient(riotApiKeyStore);
 logger.event({ type: "riot.config", ...riot.routingStatus() });
 const dataDragon = new DataDragonService();
+void dataDragon.warmChampionDirectory((error) => {
+  logger.error({ type: "public_lol.champion_directory_warmup_failed", error: toSafeErrorMessage(error) });
+});
 void dataDragon.getLatestVersion()
   .then(async (version) => {
     await Promise.all([

@@ -287,8 +287,8 @@ test("준비 중인 발로란트 공개 경로는 locale별 metadata를 제공�
   assert.match(ko, /<link rel="canonical" href="https:\/\/yoro\.gg\/ko\/valorant\/agents">/u);
   assert.match(ja, /<html lang="ja"/u);
   assert.match(ja, /<link rel="canonical" href="https:\/\/yoro\.gg\/ja\/valorant\/ranked">/u);
-  assert.match(ko, /name="robots" content="noindex"/u);
-  assert.match(ja, /name="robots" content="noindex"/u);
+  assert.match(ko, /name="robots" content="noindex, nofollow"/u);
+  assert.match(ja, /name="robots" content="noindex, nofollow"/u);
   const sitemap = buildStaticSitemap();
   assert.doesNotMatch(sitemap, /\/valorant/u);
 });
@@ -306,7 +306,7 @@ test("마인크래프트 실데이터 경로는 고유 metadata를 제공하고 
   const patchNotes = publicSeoMetadataForPath("/ja/minecraft/patch-notes");
   assert.equal(library.robotsNoindex, true);
   assert.equal(patchNotes.robotsNoindex, true);
-  assert.match(applyPublicSeoMetadata(APP_SHELL, library), /name="robots" content="noindex"/u);
+  assert.match(applyPublicSeoMetadata(APP_SHELL, library), /name="robots" content="noindex, nofollow"/u);
 
   const sitemap = buildStaticSitemap();
   assert.match(sitemap, /\/ko\/minecraft\/recipes/u);
@@ -606,7 +606,7 @@ test("robotsNoindex metadata는 noindex 메타를 주입하고, 기본 페이지
   assert.doesNotMatch(indexed, /name="robots"/u);
 
   const blocked = applyPublicSeoMetadata(APP_SHELL, { ...metadata, robotsNoindex: true });
-  assert.match(blocked, /<meta name="robots" content="noindex" \/>/u);
+  assert.match(blocked, /<meta name="robots" content="noindex, nofollow" \/>/u);
   // strip이 동작해 재적용해도 중복되지 않습니다.
   const reapplied = applyPublicSeoMetadata(blocked, { ...metadata, robotsNoindex: true });
   assert.equal((reapplied.match(/name="robots"/gu) ?? []).length, 1);

@@ -20,6 +20,7 @@ import { PATCH_NOTES_MAX_ITEMS, type PatchNote } from "@streamops/shared";
 /** sitemap 하나에 담는 URL 상한. 규격 상한(50,000)보다 낮게 잡아 응답 크기를 억제합니다. */
 export const SITEMAP_MAX_URLS = 20_000;
 /** 교배 상세는 ko·ja·en 3개 URL이 생기므로 shard당 논리 조합 수를 50,000/3으로 제한합니다. */
+// 운영에서는 사용하지 않으며 구 shard 경로·형식 회귀 테스트용으로 유지합니다.
 export const PALWORLD_BREEDING_PAIRS_PER_SITEMAP = 16_666;
 
 export const PUBLIC_SITEMAP_PATHS = {
@@ -213,7 +214,7 @@ export function buildPalworldEntitySitemap(
   );
 }
 
-/** 첫 shard는 요청된 고정 파일명을 유지하고, 두 번째부터 번호를 붙입니다. */
+/** 운영 미사용: 구 shard 경로 파싱 회귀 테스트용 경로 생성기입니다. */
 export function palworldBreedingSitemapPaths(totalPairs: number): string[] {
   if (!Number.isSafeInteger(totalPairs) || totalPairs <= 0) return [];
   const count = Math.ceil(totalPairs / PALWORLD_BREEDING_PAIRS_PER_SITEMAP);
@@ -233,6 +234,7 @@ export function palworldBreedingSitemapShard(pathname: string): number | undefin
   return Number.isSafeInteger(number) ? number - 1 : undefined;
 }
 
+/** 운영 미사용: 구 shard 형식 회귀 테스트와 경로 파싱 검증용으로만 유지합니다. */
 export function buildPalworldBreedingSitemap(
   pairs: readonly PalworldSeoBreedingPair[],
   lastmod?: string

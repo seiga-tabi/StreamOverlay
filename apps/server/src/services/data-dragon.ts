@@ -291,6 +291,8 @@ function firstDataDragonVersion(versions: string[]): string {
 }
 
 export class DataDragonService {
+  private championDirectoryWarmup?: (error: unknown) => void;
+  private readyChampionVersion?: string;
   private versionsCache?: { versions: string[]; fetchedAt: number };
   private versionRequest?: Promise<string[]>;
   private championCache = new Map<string, Map<number, ChampionMapEntry>>();
@@ -308,15 +310,25 @@ export class DataDragonService {
 
   constructor(private readonly fetchImpl: typeof fetch = fetch) {}
 
+  /** 기동 시 호출하며 이후 버전 목록 갱신 때도 챔피언 캐시를 준비합니다. */
+  async warmChampionDirectory(onError: (error: unknown) => void): Promise<void> {
+    try { await this.getChampionMap(); } catch (error) { onError(error); }
+    this.championDirectoryWarmup = onError;
+  }
+
   async getVersions(): Promise<string[]> {
     if (this.versionsCache && Date.now() - this.versionsCache.fetchedAt < 6 * 60 * 60 * 1000) return this.versionsCache.versions;
     if (this.versionRequest) return this.versionRequest;
     this.versionRequest = (async () => {
-      const response = await this.fetchImpl(`${DATA_DRAGON_BASE}/api/versions.json`);
+      const response = await this.fetchImpl(`${DATA_DRAGON_BASE}/api/versions.json`, { signal: AbortSignal.timeout(10_000) });
       if (!response.ok) throw new Error(`Data Dragon versions lookup failed: ${response.status}`);
       const versions = (await response.json()) as string[];
       if (!versions[0]) throw new Error("Data Dragon version list is empty");
       this.versionsCache = { versions, fetchedAt: Date.now() };
+      if (this.championDirectoryWarmup) {
+        // 명시적 버전을 넘겨 getVersions 재진입을 피하고 진행 중 요청을 공유합니다.
+        await this.getChampionMap(versions[0]).catch(this.championDirectoryWarmup);
+      }
       return versions;
     })().finally(() => {
       this.versionRequest = undefined;
@@ -335,6 +347,13 @@ export class DataDragonService {
     if (!match) return latestVersion;
     const prefix = `${match[1]}.${match[2]}.`;
     return versions.find((version) => version.startsWith(prefix)) ?? latestVersion;
+  }
+
+  /** SSR은 외부 요청을 기다리지 않고 현재 버전의 준비된 목록만 사용합니다. */
+  peekChampionMap(): ReadonlyMap<number, ChampionMapEntry> | undefined {
+    const version = this.versionsCache?.versions[0];
+    return (version ? this.championCache.get(version) : undefined)
+      ?? (this.readyChampionVersion ? this.championCache.get(this.readyChampionVersion) : undefined);
   }
 
   async getChampionMap(version?: string): Promise<Map<number, ChampionMapEntry>> {
@@ -370,6 +389,7 @@ export class DataDragonService {
       }
 
       this.championCache.set(resolvedVersion, map);
+      this.readyChampionVersion = resolvedVersion;
       return map;
     })().finally(() => {
       this.championMapRequests.delete(resolvedVersion);
@@ -694,7 +714,7 @@ export class DataDragonService {
   }
 
   private async fetchChampionData(version: string, language: "ko_KR" | "ja_JP" | "en_US"): Promise<ChampionDataResponse> {
-    const response = await this.fetchImpl(`${DATA_DRAGON_BASE}/cdn/${version}/data/${language}/champion.json`);
+    const response = await this.fetchImpl(`${DATA_DRAGON_BASE}/cdn/${version}/data/${language}/champion.json`, { signal: AbortSignal.timeout(10_000) });
     if (!response.ok) throw new Error(`Data Dragon champion lookup failed: ${response.status}`);
     return (await response.json()) as ChampionDataResponse;
   }

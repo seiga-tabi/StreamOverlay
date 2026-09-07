@@ -295,7 +295,7 @@ test("공개 소환사 URL은 dashboard 앱 index를 서빙한다", async () => 
       await handler(createRequest("GET", pathname), noindexRes);
       assert.equal(noindexRes.statusCode, 200, pathname);
       assert.equal(noindexRes.headers["X-Robots-Tag"], "noindex, nofollow", pathname);
-      assert.match(noindexRes.body, /<meta name="robots" content="noindex" \/>/, pathname);
+      assert.match(noindexRes.body, /<meta name="robots" content="noindex, nofollow" \/>/, pathname);
     }
 
     const japanesePalworldRes = createResponse();

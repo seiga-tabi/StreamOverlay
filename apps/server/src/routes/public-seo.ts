@@ -276,9 +276,16 @@ export type PublicSeoMetadata = {
    * 유지하되 noindex로 색인 대상에서만 제외합니다.
    */
   robotsNoindex?: boolean;
+  /** 색인은 제외하되 내부 링크 크롤을 허용하는 교배 상세 전용 예외입니다. */
+  robotsFollow?: boolean;
   structuredData: readonly unknown[];
   title: string;
 };
+
+/** HTML 메타와 HTTP 헤더가 같은 색인 지시어를 사용합니다. */
+export function publicSeoRobotsDirective(metadata: PublicSeoMetadata): string | undefined {
+  return metadata.robotsNoindex ? (metadata.robotsFollow ? "noindex" : "noindex, nofollow") : undefined;
+}
 
 export type PalworldEntityKind = "pal" | "item" | "skill";
 
@@ -351,7 +358,10 @@ export type PalworldSeoEntity = {
   /** 이 팰을 부모로 했을 때 나오는 자식(대표 N개). */
   breedingChildren?: readonly { partner: string; child: string }[];
   breedingChildrenTotal?: number;
+  /** 아이템·스킬의 같은 분류 비교 목록입니다. */
+  comparisonEntries?: readonly { id: string; name: string; description?: string }[];
   /* ── 본문용(아이템) ── */
+  recipes?: readonly { resultCount: number; workAmount?: number; materials: readonly { name: string; count: number }[] }[];
   sellPrice?: number;
   weight?: number;
   maxStack?: number;
@@ -366,6 +376,7 @@ export type PalworldSeoEntity = {
   dropPals?: readonly { id: string; name: string }[];
   dropPalsTotal?: number;
   /* ── 본문용(스킬) ── */
+  passiveEffectState?: string;
   skillType?: string;
   element?: string;
   power?: number;
@@ -857,6 +868,17 @@ function palworldItemSections(
     });
   }
 
+  if (entity.recipes?.length) {
+    sections.push({
+      heading: t(locale, "제작식별 생산 정보", "レシピ別の生産情報", "Production by recipe"),
+      items: entity.recipes.slice(0, PALWORLD_FALLBACK_LIST_LIMIT).map((recipe) => t(locale,
+        `제작 1회 결과 수량은 ${recipe.resultCount}개입니다. 재료: ${recipe.materials.map((m) => `${m.name} ×${m.count}`).join(", ")}.${recipe.workAmount === undefined ? "" : ` 필요한 작업량은 ${recipe.workAmount}입니다.`}`,
+        `製作1回の完成数は${recipe.resultCount}個です。素材: ${recipe.materials.map((m) => `${m.name} ×${m.count}`).join(", ")}。${recipe.workAmount === undefined ? "" : `必要作業量は${recipe.workAmount}です。`}`,
+        `Each craft produces ${recipe.resultCount}. Materials: ${recipe.materials.map((m) => `${m.name} ×${m.count}`).join(", ")}.${recipe.workAmount === undefined ? "" : ` Required work: ${recipe.workAmount}.`}`)),
+      note: t(locale, "작업량은 제작에 필요한 작업 수치이며 소요 시간(초)이 아닙니다. 실제 시간은 작업 속도에 따라 달라집니다. 획득 목록에 포함되어 있다는 정보는 확정 획득이나 드랍 확률을 뜻하지 않습니다.", "作業量は製作に必要な作業値で、所要時間（秒）ではありません。実際の時間は作業速度により異なります。入手候補への収録は確定入手やドロップ率を意味しません。", "Work amount is a work requirement, not a duration in seconds. Actual time depends on work speed. An acquisition listing does not imply a guaranteed drop or specify its probability.")
+    });
+  }
+  sections.push(...palworldComparisonSections(entity, "item", locale));
   return sections;
 }
 
@@ -913,7 +935,29 @@ function palworldSkillSections(
     });
   }
 
+  if (entity.passiveEffectState === "source_mismatch") {
+    sections.push({
+      heading: t(locale, "효과 데이터 확인 상태", "効果データの確認状況", "Effect data status"),
+      note: t(locale, "이 스킬은 원본 설명과 구조화된 효과 데이터가 일치하지 않는 상태입니다. 설명에 적힌 수치를 확정된 계산 효과로 사용하지 않으며, 연관 팰이 등록되어 있지 않더라도 해당 스킬을 가질 수 없다는 뜻은 아닙니다.", "このスキルは原文の説明と構造化された効果データが一致していません。説明中の数値を確定した計算効果として使用しません。関連パルが未登録でも、このスキルを持てないことを意味しません。", "The source description and structured effect data do not match for this skill. Description values are not treated as confirmed calculation effects. An empty related-Pal list does not mean no Pal can have this skill.")
+    });
+  }
+  sections.push(...palworldComparisonSections(entity, "skill", locale));
   return sections;
+}
+
+/** 같은 분류의 실제 데이터를 비교용으로 제공하며 소유·획득 관계로 해석하지 않습니다. */
+function palworldComparisonSections(entity: PalworldSeoEntity, kind: "item" | "skill", locale: PublicUrlLocale): PublicSeoSection[] {
+  if (!entity.comparisonEntries?.length) return [];
+  return [{
+    heading: kind === "item"
+      ? t(locale, "같은 분류의 아이템 비교", "同じ分類のアイテム比較", "Compare items in this category")
+      : t(locale, "같은 종류의 스킬 비교", "同じ種類のスキル比較", "Compare skills of this type"),
+    links: entity.comparisonEntries.slice(0, 12).map((entry) => ({
+      href: `/${locale}${palworldEntityPath(kind, entry.id)}`,
+      label: entry.name
+    })),
+    note: t(locale, "이 목록은 같은 분류에서 비교할 수 있는 항목입니다. 제작 재료, 교배로 얻는 효과, 동시에 적용되는 효과를 뜻하지 않습니다. 각 상세 페이지에서 개별 조건과 설명을 확인하세요.", "同じ分類から比較できる項目を掲載しています。製作素材、配合で得る効果、同時に適用される効果を示すものではありません。各詳細ページで個別の条件と説明をご確認ください。", "These entries share a category for comparison. They are not crafting ingredients, breeding outcomes, or effects applied together. Open each detail page for its own conditions and description.")
+  }];
 }
 
 function palworldEntityFallback(
@@ -970,7 +1014,9 @@ function palworldEntityFallback(
     facts,
     heading: name,
     links,
-    summary: palworldEntityDescription(entity, kind, locale),
+    summary: kind === "pal" ? palworldEntityDescription(entity, kind, locale)
+      : (locale === "ja" ? entity.descriptionJa : locale === "en" ? entity.descriptionEn : entity.descriptionKo)
+        ?.trim() || entity.descriptionEn?.trim() || palworldEntityDescription(entity, kind, locale),
     ...(sections.length > 0 ? { sections } : {})
   };
 }
@@ -1062,6 +1108,8 @@ export function palworldBreedingSeoMetadata(
   return {
     alternateUrls: publicSeoAlternateUrls(normalizedPath),
     canonicalUrl,
+    robotsNoindex: true,
+    robotsFollow: true,
     description,
     fallback: {
       facts: [
@@ -2208,8 +2256,9 @@ export function publicSeoMetadataForPath(
   const content = contentForPath(normalizedPath, locale, options);
   const canonicalUrl = localizedPublicSeoUrl(normalizedPath, locale);
   const structuredData: unknown[] = [websiteStructuredData(locale)];
-  const robotsNoindex = PUBLIC_SEO_NOINDEX_PATHS.has(normalizedPath)
-    && !(normalizedPath === "/minecraft/patch-notes" && options.minecraftPatchNotesReady);
+  const robotsNoindex = Boolean(palworldBreedingRouteForPath(pathname))
+    || (PUBLIC_SEO_NOINDEX_PATHS.has(normalizedPath)
+      && !(normalizedPath === "/minecraft/patch-notes" && options.minecraftPatchNotesReady));
   if (normalizedPath !== "/") structuredData.push(breadcrumbStructuredData(normalizedPath, locale));
   if (normalizedPath === "/") {
     structuredData.push({ "@context": "https://schema.org", ...(organizationStructuredData() as object) });
@@ -2225,6 +2274,7 @@ export function publicSeoMetadataForPath(
     locale,
     openGraphType: "website",
     ...(robotsNoindex ? { robotsNoindex: true } : {}),
+    ...(palworldBreedingRouteForPath(pathname) ? { robotsFollow: true } : {}),
     structuredData,
     title: content.title
   };
@@ -2391,8 +2441,9 @@ export function applyPublicSeoMetadata(html: string, metadata: PublicSeoMetadata
     `<title>${escapeSeoHtml(metadata.title)}</title>`
   );
   nextHtml = nextHtml.replace(/<html\s+lang="[^"]*"/u, `<html lang="${metadata.locale}"`);
-  if (metadata.robotsNoindex) {
-    nextHtml = nextHtml.replace(/<\/head>/iu, '<meta name="robots" content="noindex" /></head>');
+  const robotsDirective = publicSeoRobotsDirective(metadata);
+  if (robotsDirective) {
+    nextHtml = nextHtml.replace(/<\/head>/iu, `<meta name="robots" content="${robotsDirective}" /></head>`);
   }
   for (const [pattern, value] of replacements) {
     nextHtml = nextHtml.replace(pattern, (_match, prefix: string, suffix: string) => (
