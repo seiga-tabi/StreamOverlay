@@ -360,11 +360,12 @@ export function HomeGameDataSection({ text, locale }: { text: HomeText; locale: 
 
 /* ── 로그인 팝업 — 목업 v8 LoginModal ─────────────────────── */
 
-export function HomeLoginModal({ text, open, onClose, onTwitchLogin }: {
+export function HomeLoginModal({ text, open, onClose, onTwitchLogin, onChzzkLogin }: {
   text: HomeText;
   open: boolean;
   onClose: () => void;
   onTwitchLogin: () => void;
+  onChzzkLogin: () => void;
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
 
@@ -409,6 +410,10 @@ export function HomeLoginModal({ text, open, onClose, onTwitchLogin }: {
             <path d="M9 6.5 L 9 10" />
           </svg>
           {text.loginTwitchCta}
+        </button>
+        <button className="yoro-home-outline-button yoro-home-modal-chzzk" onClick={onChzzkLogin} type="button">
+          <img className="yoro-home-modal-chzzk-icon" src="/images/brand/chzzk-symbol-neon.png" alt="" aria-hidden="true" />
+          {text.loginChzzkCta}
         </button>
         <div className="yoro-home-modal-fine">
           <p>{text.loginFinePrint}</p>

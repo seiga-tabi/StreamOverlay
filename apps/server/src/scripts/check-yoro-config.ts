@@ -50,6 +50,12 @@ const requirements: Array<{
     required: runtime.features.database
   },
   {
+    label: "chzzkClientSecret",
+    path: YORO_SECRET_FILES.chzzkClientSecret,
+    active: Boolean(runtime.chzzk),
+    required: Boolean(runtime.chzzk)
+  },
+  {
     label: "twitchClientSecret",
     path: YORO_SECRET_FILES.twitchClientSecret,
     active: Boolean(runtime.twitch),
@@ -119,6 +125,7 @@ if (command === "check") {
   console.log(`discordBot: ${runtime.features.discordBot ? "enabled" : "disabled"}, ${configured.get("discordInternalAuth") ? "configured" : "not configured"}`);
   console.log(`discordParticipationAnnounce: ${runtime.features.discordParticipationAnnounce ? "enabled" : "disabled"}`);
   console.log(`twitchEventSub: ${runtime.features.twitchEventSub ? "enabled" : "disabled"}, ${configured.get("twitchClientSecret") ? "configured" : "not configured"}`);
+  console.log(`chzzk: ${runtime.chzzk ? (configured.get("chzzkClientSecret") ? "configured (설정됨)" : "not configured (설정되지 않음)") : "disabled (비활성)"}`);
   console.log(`twitchExtension: ${runtime.features.twitchExtension ? (configured.get("twitchExtensionSecret") ? "configured" : "not configured") : "disabled"}`);
   console.log(`riotApi: ${runtime.riot ? (configured.get("riotApi") ? "configured" : "not configured") : "disabled"}`);
   console.log(`riotRso: ${runtime.features.riotRso ? (configured.get("riotRsoClientSecret") ? "configured" : "not configured") : "disabled"}`);

@@ -48,7 +48,8 @@ test("migration manifest와 SQL checksum을 strict하게 검증한다", async ()
       "0024_streamer_board",
       "0025_admin_audit_admin_access",
       "0026_streamer_official_profiles",
-      "0027_champion_global_build_stats"
+      "0027_champion_global_build_stats",
+      "0028_yoro_chzzk_account_identity"
     ]
   );
 

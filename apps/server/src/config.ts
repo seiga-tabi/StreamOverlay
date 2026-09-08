@@ -278,6 +278,14 @@ export const appConfig = {
   publicBaseUrl: configuredRuntime?.public.baseUrl ?? env("PUBLIC_BASE_URL", "http://localhost:3000"),
   dashboardBaseUrl: configuredRuntime?.public.dashboardOrigin
     ?? env("DASHBOARD_BASE_URL", "http://localhost:5173"),
+  chzzk: {
+    clientId: configuredRuntime?.chzzk?.clientId ?? env("CHZZK_CLIENT_ID"),
+    clientSecret: configuredRuntime
+      ? configuredRuntime.chzzk ? loadFixedSecret(YORO_SECRET_FILES.chzzkClientSecret, { required: true }) : ""
+      : envOrFile("CHZZK_CLIENT_SECRET"),
+    redirectUri: configuredRuntime?.chzzk?.redirectUri
+      ?? env("CHZZK_REDIRECT_URI", "https://yoro.gg/api/account/oauth/chzzk/callback")
+  },
   twitch: {
     enableEventSub: twitchEventSubEnabled,
     eventSubSubscriptions: configuredRuntime?.twitch?.eventSubSubscriptions

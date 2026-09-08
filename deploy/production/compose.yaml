@@ -23,6 +23,7 @@ x-server-config-mounts: &server-config-mounts
   - /etc/yoro/legal.json:/etc/yoro/legal.json:ro
   - /etc/yoro/secrets/database_url:/run/secrets/database_url:ro
   - /etc/yoro/secrets/twitch_client_secret:/run/secrets/twitch_client_secret:ro
+  - /etc/yoro/secrets/chzzk_client_secret:/run/secrets/chzzk_client_secret:ro
   - /etc/yoro/secrets/twitch_token_encryption_key:/run/secrets/twitch_token_encryption_key:ro
   - /etc/yoro/secrets/riot_api_key:/run/secrets/riot_api_key:ro
   - /etc/yoro/secrets/discord_client_secret:/run/secrets/discord_client_secret:ro
@@ -156,6 +157,7 @@ services:
       - /etc/yoro/legal.json:/etc/yoro/legal.json:ro
       - /etc/yoro/secrets/database_url:/run/secrets/database_url:ro
       - /etc/yoro/secrets/twitch_client_secret:/run/secrets/twitch_client_secret:ro
+      - /etc/yoro/secrets/chzzk_client_secret:/run/secrets/chzzk_client_secret:ro
       - /etc/yoro/secrets/twitch_token_encryption_key:/run/secrets/twitch_token_encryption_key:ro
       - /etc/yoro/secrets/riot_api_key:/run/secrets/riot_api_key:ro
       - /etc/yoro/secrets/discord_client_secret:/run/secrets/discord_client_secret:ro

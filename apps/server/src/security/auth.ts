@@ -313,8 +313,9 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
   if (
     method === "GET"
     && (
-      /^\/api\/account\/oauth\/(?:discord|twitch|riot)\/start$/u.test(pathname)
+      /^\/api\/account\/oauth\/(?:discord|twitch|chzzk|riot)\/start$/u.test(pathname)
       || pathname === "/api/account/oauth/riot/callback"
+      || pathname === "/api/account/oauth/chzzk/callback"
     )
   ) return "OAUTH_CALLBACK";
   if (
@@ -328,7 +329,7 @@ export function requiredHttpPrincipal(method: string | undefined, pathname: stri
     || pathname === "/api/account/streamer"
     || pathname.startsWith("/api/account/streamer/")
     || pathname === "/api/account/riot/valorant-record-consent"
-    || /^\/api\/account\/connections\/(?:discord|twitch|riot)$/u.test(pathname)
+    || /^\/api\/account\/connections\/(?:discord|twitch|chzzk|riot)$/u.test(pathname)
   ) return "PUBLIC";
   if (method === "GET" && (pathname === "/api/twitch/auth/start" || pathname === "/api/twitch/auth/callback")) return "OAUTH_CALLBACK";
   if (

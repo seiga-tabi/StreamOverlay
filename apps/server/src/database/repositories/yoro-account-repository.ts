@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import { requireUuid } from "../tenant-context.js";
 import { repositoryQuery, requireBoundedText, type RepositoryQueryable } from "./types.js";
 
-export type YoroAuthenticationProvider = "discord" | "twitch";
+export type YoroAuthenticationProvider = "discord" | "twitch" | "chzzk";
 export type YoroIdentityProvider = YoroAuthenticationProvider | "riot";
 export type YoroOAuthPurpose = "login" | "link_identity";
 
@@ -197,7 +197,7 @@ export class YoroAccountRepository {
       return revoked.rows[0].user_id;
     }
 
-    const legacyAccount = await repositoryQuery<{ id: string }>(
+    const legacyAccount = input.provider === "chzzk" ? { rows: [] } : await repositoryQuery<{ id: string }>(
       this.queryable,
       input.provider === "discord"
         ? "SELECT id FROM users WHERE discord_user_id = $1 FOR UPDATE"
@@ -298,7 +298,7 @@ export class YoroAccountRepository {
           userId
         ]
       );
-      if (input.provider !== "riot") {
+      if (input.provider === "discord" || input.provider === "twitch") {
         await this.setLegacyProviderId(userId, input.provider, input.providerSubject);
       }
       return existing.rows[0].revoked_at ? "linked" : "already_linked";
@@ -317,7 +317,7 @@ export class YoroAccountRepository {
         input.avatarReference ?? null
       ]
     );
-    if (input.provider !== "riot") {
+    if (input.provider === "discord" || input.provider === "twitch") {
       await this.setLegacyProviderId(userId, input.provider, input.providerSubject);
     }
     return "linked";
@@ -611,7 +611,7 @@ export class YoroAccountRepository {
       [id]
     );
     const authenticationIdentityCount = identities.rows.filter(
-      (identity) => identity.provider === "discord" || identity.provider === "twitch"
+      (identity) => identity.provider === "discord" || identity.provider === "twitch" || identity.provider === "chzzk"
     ).length;
     if (provider !== "riot" && authenticationIdentityCount <= 1) return false;
     const result = await repositoryQuery(
@@ -634,7 +634,7 @@ export class YoroAccountRepository {
           [id]
         );
       }
-      if (provider !== "riot") {
+      if (provider === "discord" || provider === "twitch") {
         await repositoryQuery(
           this.queryable,
           provider === "discord"
@@ -714,7 +714,7 @@ export class YoroAccountRepository {
 
   private async setLegacyProviderId(
     userId: string,
-    provider: YoroAuthenticationProvider,
+    provider: "discord" | "twitch",
     providerSubject: string
   ): Promise<void> {
     await repositoryQuery(

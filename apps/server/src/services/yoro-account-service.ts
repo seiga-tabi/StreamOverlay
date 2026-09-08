@@ -158,6 +158,11 @@ function validOAuthToken(value: unknown): value is string {
     && !/[\u0000-\u001f\u007f]/u.test(value);
 }
 
+function validChzzkToken(value: unknown): value is string {
+  // Bearer 헤더에 그대로 사용할 수 있는 공백 없는 ASCII 토큰만 허용합니다.
+  return validOAuthToken(value) && /^[\x21-\x7e]+$/u.test(value);
+}
+
 function validTwitchUserId(value: unknown): value is string {
   return typeof value === "string" && /^[0-9]{1,64}$/u.test(value);
 }
@@ -320,7 +325,7 @@ function safeTwitchAvatarUrl(value: unknown): string | undefined {
 }
 
 function publicAvatarUrl(identity: YoroExternalIdentity): string | undefined {
-  if (!identity.avatarReference) return undefined;
+  if (identity.provider === "chzzk" || !identity.avatarReference) return undefined;
   if (identity.provider === "twitch") {
     return safeTwitchAvatarUrl(identity.avatarReference);
   }
@@ -416,6 +421,9 @@ export class YoroAccountService {
     returnPath?: string;
     sessionCookie?: string;
   }): Promise<{ authorizationUrl: string; cookieValue: string }> {
+    if (input.provider === "chzzk" && (
+      !appConfig.chzzk.clientId || !appConfig.chzzk.clientSecret || !appConfig.chzzk.redirectUri
+    )) throw new YoroAccountError("feature_unavailable", 503);
     if (input.provider === "riot") {
       if (!appConfig.riot.rsoEnabled) {
         throw new YoroAccountError("feature_unavailable", 503);
@@ -472,7 +480,9 @@ export class YoroAccountService {
       ? this.discordAuthorizationUrl(state, verifier!)
       : input.provider === "twitch"
         ? this.twitchAuthorizationUrl(state)
-        : this.riotAuthorizationUrl(state);
+        : input.provider === "chzzk"
+          ? this.chzzkAuthorizationUrl(state)
+          : this.riotAuthorizationUrl(state);
     this.logger?.event?.({
       type: "yoro.account.oauth_started",
       provider: input.provider,
@@ -534,11 +544,13 @@ export class YoroAccountService {
           }
         : input.provider === "twitch"
           ? await this.completeTwitchProvider(input.code)
-          : { profile: await this.completeRiotProvider(input.code) };
+          : input.provider === "chzzk"
+            ? { profile: await this.completeChzzkProvider(input.code, input.state) }
+            : { profile: await this.completeRiotProvider(input.code) };
       const sessionToken = discordSafeToken();
       const csrfToken = discordSafeToken();
       const now = Date.now();
-      await withTransaction(this.pool, async (client) => {
+      const completed = await withTransaction(this.pool, async (client) => {
         const transactionRepository = new YoroAccountRepository(client);
         let userId: string;
         if (oauth.purpose === "link_identity") {
@@ -549,7 +561,8 @@ export class YoroAccountService {
             ...providerResult.profile
           });
           if (linked === "conflict") {
-            throw new YoroAccountError("identity_conflict", 409);
+            // 충돌 경로는 조회·잠금만 수행하므로 도메인 오류를 콜백 밖에서 던집니다.
+            return false;
           }
           userId = oauth.target_user_id;
           await transactionRepository.revokeUserSessions(userId);
@@ -589,7 +602,9 @@ export class YoroAccountService {
           )
         });
         await transactionRepository.clearOAuthVerifier(oauth.id);
+        return true;
       });
+      if (!completed) throw new YoroAccountError("identity_conflict", 409);
       this.logger?.event?.({
         type: oauth.purpose === "link_identity"
           ? "yoro.account.identity_linked"
@@ -843,16 +858,19 @@ export class YoroAccountService {
       input.sessionCookie,
       input.csrfToken
     );
-    await withTransaction(this.pool, async (client) => {
+    const revoked = await withTransaction(this.pool, async (client) => {
       const repository = new YoroAccountRepository(client);
       if (!await repository.revokeIdentity(session.userId, input.provider)) {
-        throw new YoroAccountError("last_identity_required", 409);
+        // DB 오류 변환기가 도메인 오류를 덮지 않도록 쓰기 없는 거부 결과를 반환합니다.
+        return false;
       }
       if (input.provider === "twitch") {
         await repository.revokeTwitchCredential(session.userId);
       }
       await repository.revokeUserSessions(session.userId);
+      return true;
     });
+    if (!revoked) throw new YoroAccountError("last_identity_required", 409);
     if (input.provider === "riot") this.valorantVisibilityInvalidator?.(session.userId);
     this.logger?.event?.({
       type: "yoro.account.identity_unlinked",
@@ -944,6 +962,94 @@ export class YoroAccountService {
     url.searchParams.set("scope", TWITCH_PUBLIC_VIEWER_SCOPES.join(" "));
     url.searchParams.set("state", state);
     return url.toString();
+  }
+
+  private chzzkAuthorizationUrl(state: string): string {
+    const url = new URL("https://chzzk.naver.com/account-interlock");
+    url.searchParams.set("clientId", appConfig.chzzk.clientId);
+    url.searchParams.set("redirectUri", appConfig.chzzk.redirectUri);
+    url.searchParams.set("state", state);
+    return url.toString();
+  }
+
+  private async chzzkContent(url: string, init: RequestInit): Promise<Record<string, unknown>> {
+    try {
+      const response = await this.fetchImpl(url, {
+        ...init,
+        redirect: "error",
+        signal: AbortSignal.timeout(10_000)
+      });
+      if (!response.ok) throw new Error();
+      const value: unknown = await response.json();
+      if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error();
+      const wrapper = value as Record<string, unknown>;
+      if (wrapper.code !== 200 || !wrapper.content
+        || typeof wrapper.content !== "object" || Array.isArray(wrapper.content)) throw new Error();
+      return wrapper.content as Record<string, unknown>;
+    } catch {
+      // 외부 응답과 토큰을 오류 또는 로그에 포함하지 않습니다.
+      throw new YoroAccountError("oauth_failed", 401);
+    }
+  }
+
+  private async exchangeChzzkToken(grant:
+    | { grantType: "authorization_code"; code: string; state: string }
+    | { grantType: "refresh_token"; refreshToken: string }
+  ): Promise<{ accessToken: string; refreshToken: string; tokenType: "Bearer"; expiresIn: number }> {
+    const value = await this.chzzkContent("https://openapi.chzzk.naver.com/auth/v1/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...grant, clientId: appConfig.chzzk.clientId,
+        clientSecret: appConfig.chzzk.clientSecret })
+    });
+    // 치지직 공식 문서는 expiresIn 타입을 String으로 명시하지만(예: "86400"),
+    // 실제 값이 숫자로 오는 경우도 방어적으로 함께 허용합니다.
+    const expiresIn = typeof value.expiresIn === "number"
+      ? value.expiresIn
+      : typeof value.expiresIn === "string" && /^[0-9]+$/u.test(value.expiresIn)
+        ? Number(value.expiresIn)
+        : Number.NaN;
+    if (!validChzzkToken(value.accessToken) || !validChzzkToken(value.refreshToken)
+      || value.tokenType !== "Bearer" || !Number.isSafeInteger(expiresIn)
+      || expiresIn <= 0 || expiresIn > 86_400) {
+      throw new YoroAccountError("oauth_failed", 401);
+    }
+    return { accessToken: value.accessToken, refreshToken: value.refreshToken,
+      tokenType: "Bearer", expiresIn };
+  }
+
+  private async refreshChzzkToken(refreshToken: string) {
+    if (!validChzzkToken(refreshToken)) throw new YoroAccountError("oauth_failed", 401);
+    return this.exchangeChzzkToken({ grantType: "refresh_token", refreshToken });
+  }
+
+  private async fetchChzzkProfile(accessToken: string): Promise<ProviderProfile> {
+    if (!validChzzkToken(accessToken)) throw new YoroAccountError("oauth_failed", 401);
+    const value = await this.chzzkContent("https://openapi.chzzk.naver.com/open/v1/users/me", {
+      method: "GET",
+      headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" }
+    });
+    // 식별자는 대소문자·내용을 변환하지 않는 최대 256자 opaque 값입니다.
+    if (typeof value.channelId !== "string" || Array.from(value.channelId).length < 1
+      || Array.from(value.channelId).length > 256 || /[\u0000-\u001f\u007f-\u009f]/u.test(value.channelId)
+      || value.channelId.startsWith(" ") || value.channelId.endsWith(" ")
+      || typeof value.channelName !== "string" || !value.channelName.trim()
+      || /[\u0000-\u001f\u007f-\u009f]/u.test(value.channelName)) {
+      throw new YoroAccountError("oauth_failed", 401);
+    }
+    // 기존 저장소의 UTF-16 길이 제한에 맞추되 이모지의 서로게이트 쌍은 자르지 않습니다.
+    let displayName = "";
+    for (const character of value.channelName.trim()) {
+      if (displayName.length + character.length > 80) break;
+      displayName += character;
+    }
+    return { providerSubject: value.channelId, displayName };
+  }
+
+  private async completeChzzkProvider(code: string, state: string): Promise<ProviderProfile> {
+    const token = await this.exchangeChzzkToken({ grantType: "authorization_code", code, state });
+    // 1단계는 계정 확인만 수행하며 access/refresh 토큰을 영속 보관하지 않습니다.
+    return this.fetchChzzkProfile(token.accessToken);
   }
 
   private riotAuthorizationUrl(state: string): string {

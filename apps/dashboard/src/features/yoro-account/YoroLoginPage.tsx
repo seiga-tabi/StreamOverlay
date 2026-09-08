@@ -7,9 +7,11 @@ const text = {
   ko: {
     eyebrow: "YORO ACCOUNT",
     title: "YORO.gg 로그인",
-    description: "별도 비밀번호 없이 Discord 또는 Twitch 계정으로 안전하게 로그인합니다.",
+    description: "별도 비밀번호 없이 Discord, Twitch 또는 치지직 계정으로 안전하게 로그인합니다.",
     discord: "Discord로 계속하기",
     discordDescription: "YORO Bot, Organization과 게임 서버를 관리합니다.",
+    chzzk: "치지직으로 계속하기",
+    chzzkDescription: "치지직 계정으로 YORO.gg에 로그인합니다.",
     twitch: "Twitch로 계속하기",
     twitchDescription: "방송·참여 기능에 사용할 Twitch identity를 연결합니다.",
     account: "연결된 계정 관리",
@@ -21,9 +23,11 @@ const text = {
   ja: {
     eyebrow: "YORO ACCOUNT",
     title: "YORO.gg ログイン",
-    description: "専用パスワードを作らず、Discord または Twitch アカウントで安全にログインします。",
+    description: "専用パスワードを作らず、Discord、Twitch、CHZZK のいずれかのアカウントで安全にログインします。",
     discord: "Discord で続行",
     discordDescription: "YORO Bot、Organization、ゲームサーバーを管理します。",
+    chzzk: "CHZZKで続ける",
+    chzzkDescription: "CHZZKアカウントでYORO.ggにログインします。",
     twitch: "Twitch で続行",
     twitchDescription: "配信・参加機能で使用する Twitch identity を連携します。",
     account: "連携アカウントを管理",
@@ -88,6 +92,10 @@ export function YoroLoginPage() {
             >
               <span className="yoro-login-option__icon" aria-hidden="true">T</span>
               <span><strong>{copy.twitch}</strong><small>{copy.twitchDescription}</small></span>
+            </a>
+            <a className="yoro-login-option is-chzzk" href={accountOAuthUrl("chzzk", "login", requestedReturnPath())}>
+              <span className="yoro-login-option__icon is-chzzk"><img src="/images/brand/chzzk-symbol-neon.png" alt="" aria-hidden="true" /></span>
+              <span><strong>{copy.chzzk}</strong><small>{copy.chzzkDescription}</small></span>
             </a>
           </div>
         ) : null}

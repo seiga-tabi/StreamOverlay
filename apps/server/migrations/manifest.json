@@ -216,6 +216,14 @@
       "checksumSha256": "62b24680cda2057bc51e926d79725d5e2a00df005161d9a2c8768aea70d4b734",
       "destructive": false,
       "transaction": true
+    },
+    {
+      "id": "0028_yoro_chzzk_account_identity",
+      "file": "0028_yoro_chzzk_account_identity.sql",
+      "description": "CHZZK 로그인·계정 연결과 외부 identity 전용 계정 지원",
+      "checksumSha256": "371a0fe0b49f812594e4f7474435457748dbd4f5a373f2bffad906eadd5e13aa",
+      "destructive": false,
+      "transaction": true
     }
   ]
 }

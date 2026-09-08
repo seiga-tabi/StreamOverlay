@@ -229,3 +229,32 @@ test("legacy 참여 모집 Discord 알림은 의존 기능 없이 활성화할 �
     true
   );
 });
+
+test("CHZZK 런타임 설정을 켜면 서버 시작과 secrets 검사가 누락된 비밀값을 거부한다", () => {
+  const directory = temporaryDirectory();
+  const file = path.join(directory, "runtime.json");
+  fs.writeFileSync(file, JSON.stringify({
+    schemaVersion: 1,
+    environment: "development",
+    public: { baseUrl: "https://yoro.gg", dashboardOrigin: "https://yoro.gg" },
+    features: { database: false, discordSaas: false, discordBot: false,
+      discordBotManagement: false, twitchEventSub: false },
+    chzzk: { clientId: "test-client", redirectUri: "https://yoro.gg/api/account/oauth/chzzk/callback" }
+  }), { mode: 0o600 });
+  try {
+    for (const modulePath of ["./dist/config.js", "./dist/scripts/check-yoro-config.js"]) {
+      const result = spawnSync(process.execPath, ["--input-type=module", "-e", `
+        import fs from "node:fs";
+        const exists = fs.existsSync;
+        fs.existsSync = (file) => file === "/run/secrets/chzzk_client_secret" ? false : exists(file);
+        process.argv[2] = "secrets";
+        await import(${JSON.stringify(modulePath)});
+      `], {
+        cwd: path.resolve(import.meta.dirname, ".."), encoding: "utf8",
+        env: { PATH: process.env.PATH ?? "", YORO_CONFIG_FILE: file }
+      });
+      assert.notEqual(result.status, 0);
+      assert.match(result.stderr, /secret_file_load_failed:chzzk_client_secret:secret_missing/u);
+    }
+  } finally { fs.rmSync(directory, { recursive: true }); }
+});

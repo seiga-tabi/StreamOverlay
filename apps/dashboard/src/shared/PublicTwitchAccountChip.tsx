@@ -6,8 +6,8 @@ export type PublicTwitchAccountUser = {
   login?: string;
   displayName: string;
   profileImageUrl?: string;
-  provider?: "discord" | "twitch";
-  linkedProviders?: Array<"discord" | "twitch" | "riot">;
+  provider?: "discord" | "twitch" | "chzzk";
+  linkedProviders?: Array<"discord" | "twitch" | "chzzk" | "riot">;
 };
 
 export type PublicTwitchAccountMenuAction = {
@@ -71,21 +71,23 @@ function AccountProviderIcon({
 }: {
   provider: PublicTwitchAccountUser["provider"];
 }) {
+  if (provider === "chzzk") return <img src="/images/brand/chzzk-symbol-neon.png" width="17" height="17" alt="" aria-hidden="true" />;
   return provider === "discord" ? <DiscordSymbolIcon /> : <TwitchGlitchIcon />;
 }
 
 function accountProviderLabel(user: PublicTwitchAccountUser | undefined): string | undefined {
   if (user?.provider === "discord") return "Discord";
   if (user?.provider === "twitch") return "Twitch";
+  if (user?.provider === "chzzk") return "CHZZK";
   return undefined;
 }
 
 function linkedAccountProviders(
   user: PublicTwitchAccountUser | undefined
-): Array<"twitch" | "discord"> {
+): Array<"twitch" | "discord" | "chzzk"> {
   const providers = new Set(user?.linkedProviders ?? []);
   if (user?.provider) providers.add(user.provider);
-  return (["twitch", "discord"] as const).filter((provider) => providers.has(provider));
+  return (["twitch", "discord", "chzzk"] as const).filter((provider) => providers.has(provider));
 }
 
 function accountMenuActions(
@@ -222,7 +224,7 @@ export function PublicTwitchAccountPanel({
               className="public-twitch-account-panel__providers"
             >
               {linkedProviders.map((provider) => (
-                <span aria-label={provider === "twitch" ? "Twitch" : "Discord"} key={provider}>
+                <span aria-label={provider === "chzzk" ? "CHZZK" : provider === "twitch" ? "Twitch" : "Discord"} key={provider}>
                   <AccountProviderIcon provider={provider} />
                 </span>
               ))}

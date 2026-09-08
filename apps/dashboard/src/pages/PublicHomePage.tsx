@@ -92,6 +92,7 @@ export function PublicHomePage() {
       <HomeLoginModal
         onClose={() => setLoginOpen(false)}
         onTwitchLogin={account.loginWithTwitch}
+        onChzzkLogin={account.loginWithChzzk}
         open={loginOpen}
         text={text}
       />

@@ -129,6 +129,10 @@ export function usePublicAccountLogin(options?: {
     trackGoogleAnalyticsEvent("twitch_click", { link_context: linkContext });
     window.location.assign(accountOAuthUrl("twitch", "login", returnPath));
   };
+  const loginWithChzzk = () => {
+    const returnPath = `${window.location.pathname}${window.location.search}`;
+    window.location.assign(accountOAuthUrl("chzzk", "login", returnPath));
+  };
   const logout = async (): Promise<void> => {
     try {
       if (yoroConnected) await yoroAccount.logout();
@@ -145,6 +149,7 @@ export function usePublicAccountLogin(options?: {
     isStreamerAdmin,
     loginWithDiscord,
     loginWithTwitch,
+    loginWithChzzk,
     logout,
     openDashboard: openYoroDashboard,
     openStreamerAdmin: openYoroStreamerAdmin,

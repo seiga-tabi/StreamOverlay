@@ -212,3 +212,15 @@ test("정상 runtime config를 정규화하고 제거된 legacy 설정은 활성
   assert.equal(parsed.database?.poolMax, 10);
   assert.equal(parsed.discord?.prefixCommandsEnabled, true);
 });
+
+test("CHZZK 런타임은 공개 설정과 정확한 HTTPS 콜백만 허용한다", () => {
+  const chzzk = { clientId: "chzzk-client", redirectUri: "https://yoro.gg/api/account/oauth/chzzk/callback" };
+  assert.deepEqual(parseYoroRuntimeConfig({ ...validRuntime(), chzzk }).chzzk, chzzk);
+  assert.equal(parseYoroRuntimeConfig(validRuntime()).chzzk, undefined);
+  for (const invalid of [
+    { ...chzzk, clientSecret: "금지" }, { ...chzzk, clientId: "" },
+    { ...chzzk, redirectUri: "http://yoro.gg/api/account/oauth/chzzk/callback" },
+    { ...chzzk, redirectUri: "https://yoro.gg/api/account/oauth/twitch/callback" },
+    { ...chzzk, redirectUri: chzzk.redirectUri + "?code=x" }
+  ]) assert.throws(() => parseYoroRuntimeConfig({ ...validRuntime(), chzzk: invalid }), YoroRuntimeConfigError);
+});

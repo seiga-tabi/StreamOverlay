@@ -1270,6 +1270,9 @@
     min-height: 48px;
   }
 
+  .yoro-home-modal-chzzk { width: 100%; min-height: 48px; font-size: 15px; gap: 8px; }
+  .yoro-home-modal-chzzk-icon { width: 17px; height: 17px; object-fit: contain; border-radius: 3px; flex: none; }
+
   .yoro-home-modal-fine {
     border-top: .5px solid var(--home-line);
     padding-top: 12px;
@@ -1281,6 +1284,13 @@
     line-height: 1.6;
     color: var(--home-mid);
     word-break: keep-all;
+  }
+
+  /* 일본어 안내문은 공백이 없어도 모달 안에서 자연스럽게 줄바꿈합니다. */
+  .yoro-home-modal:lang(ja) .yoro-home-modal-desc,
+  .yoro-home-modal:lang(ja) .yoro-home-modal-fine p {
+    word-break: normal;
+    overflow-wrap: anywhere;
   }
 
   /* ── 모바일 하단 탭바 — 목업 v12(루트 4탭)·v10(LoL 5탭) ── */
@@ -1354,6 +1364,7 @@
     .yoro-home-live-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
     .yoro-home-breeding-picker { min-height: 52px; padding: 0 16px; }
     .yoro-home-primary-button { min-height: 52px; padding: 0 22px; font-size: 14px; }
+    .yoro-home-modal-chzzk { min-height: 52px; font-size: 14px; }
     .yoro-home-bot { gap: 18px; padding: 22px 24px; }
     .yoro-home-footer { margin-top: 44px; padding: 26px 40px 30px; }
     /* 브랜드 문구가 640px 를 고집하면 768px 에서 우측 링크가 글자 단위로 세로로

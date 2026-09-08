@@ -1,6 +1,6 @@
 import { runtimeConfig } from "../../runtime-config";
 
-export type YoroAuthenticationProvider = "discord" | "twitch";
+export type YoroAuthenticationProvider = "discord" | "twitch" | "chzzk";
 export type YoroIdentityProvider = YoroAuthenticationProvider | "riot";
 
 export const YORO_DASHBOARD_PATH = "/dashboard";

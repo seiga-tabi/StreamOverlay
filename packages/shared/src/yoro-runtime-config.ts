@@ -41,6 +41,10 @@ export type YoroRuntimeConfig = Readonly<{
     chatMode?: "broadcaster" | "bot";
     extensionClientId?: string;
   }>;
+  chzzk?: Readonly<{
+    clientId: string;
+    redirectUri: string;
+  }>;
   riot?: Readonly<{
     accountRegion?: string;
     lolPlatform?: string;
@@ -165,6 +169,7 @@ export function parseYoroRuntimeConfig(value: unknown): YoroRuntimeConfig {
     "discord",
     "twitch",
     "riot",
+    "chzzk",
     "agent"
   ], "runtime");
   if (root.schemaVersion !== 1) throw new YoroRuntimeConfigError("runtime_schema_version_unsupported");
@@ -372,6 +377,17 @@ export function parseYoroRuntimeConfig(value: unknown): YoroRuntimeConfig {
     };
   }
 
+  let chzzk: YoroRuntimeConfig["chzzk"];
+  if (root.chzzk !== undefined) {
+    const item = record(root.chzzk, "runtime_chzzk");
+    exactKeys(item, ["clientId", "redirectUri"], "runtime_chzzk");
+    chzzk = {
+      clientId: text(item.clientId, "runtime_chzzk_client_id", 128),
+      redirectUri: callbackUrl(item.redirectUri, "runtime_chzzk_redirect_uri",
+        "/api/account/oauth/chzzk/callback", environment)
+    };
+  }
+
   let riot: YoroRuntimeConfig["riot"];
   if (root.riot !== undefined) {
     const item = record(root.riot, "runtime_riot");
@@ -551,6 +567,7 @@ export function parseYoroRuntimeConfig(value: unknown): YoroRuntimeConfig {
     ...(database ? { database: Object.freeze(database) } : {}),
     ...(discord ? { discord: Object.freeze(discord) } : {}),
     ...(twitch ? { twitch: Object.freeze(twitch) } : {}),
+    ...(chzzk ? { chzzk: Object.freeze(chzzk) } : {}),
     ...(riot ? { riot: Object.freeze(riot) } : {})
   });
 }

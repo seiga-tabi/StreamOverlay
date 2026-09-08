@@ -516,3 +516,74 @@ test("계정 OAuth return_to 는 공개 route 목록을 단일 원본으로 판�
     assert.equal(await resolveReturnPath(path), "/account/connections", `${path} 는 거부되어야 합니다.`);
   }
 });
+
+for (const provider of ["discord", "twitch", "riot"]) {
+  for (const outcome of ["linked", "already_linked", "target_conflict", "owner_conflict", "database_error"]) {
+    test(`${provider} 공유 연결 경로: ${outcome}의 세션·오류·트랜잭션을 보존한다`, async () => withRiotRsoConfig(async () => {
+      const userId = "22222222-2222-4222-8222-222222222222";
+      const queries = [];
+      const poolQueries = [];
+      const client = {
+        async query(text, values = []) {
+          queries.push({ text, values });
+          if (text.includes("SELECT provider_subject")) {
+            return { rows: outcome === "target_conflict" ? [{ provider_subject: "other-subject" }] : [] };
+          }
+          if (text.includes("SELECT user_id, revoked_at")) {
+            return { rows: outcome === "owner_conflict"
+              ? [{ user_id: "44444444-4444-4444-8444-444444444444", revoked_at: null }]
+              : outcome === "already_linked" ? [{ user_id: userId, revoked_at: null }] : [] };
+          }
+          if (outcome === "database_error" && text.includes("INSERT INTO yoro_sessions")) {
+            throw new Error("테스트용 DB 실패");
+          }
+          return { rows: [], rowCount: 1 };
+        },
+        release() {}
+      };
+      const service = new YoroAccountService({
+        async query(text) {
+          poolQueries.push(text);
+          return { rows: [{
+            id: "33333333-3333-4333-8333-333333333333", provider,
+            purpose: "link_identity", target_user_id: userId,
+            pkce_verifier_encrypted: null, return_path: "/dashboard/account"
+          }] };
+        },
+        async connect() { return client; }
+      });
+      // 외부 provider 통신만 대체하고 실제 저장소와 트랜잭션 오류 변환을 통과시킵니다.
+      const profile = { providerSubject: "123456789", displayName: "테스트 사용자" };
+      service.completeDiscordProvider = async () => profile;
+      service.completeRiotProvider = async () => profile;
+      service.completeTwitchProvider = async () => ({ profile, credential: {
+        version: 1, accessToken: "test-access", refreshToken: "test-refresh", scopes: [],
+        expiresAt: Date.now() + 3600000, user: { id: profile.providerSubject, login: "tester", displayName: profile.displayName }
+      } });
+      service.encryptTwitchCredential = () => "테스트 암호문";
+      service.requireSession = async () => ({ userId, authenticationProvider: "twitch", authenticatedAt: new Date() });
+      const operation = service.completeOAuth({ provider, state: "s".repeat(40), code: "test-code", oauthCookie: "o".repeat(40) });
+      if (outcome.endsWith("conflict")) {
+        await assert.rejects(operation, { code: "identity_conflict", status: 409 });
+        assert.equal(queries.some((q) => /^\s*(INSERT|UPDATE|DELETE)\b/u.test(q.text)), false);
+        assert.ok(queries.some((q) => q.text === "COMMIT"));
+        assert.ok(poolQueries.some((q) => q.includes("SET status = 'security_failed'")));
+      } else if (outcome === "database_error") {
+        await assert.rejects(operation, { code: "oauth_failed", status: 503 });
+        assert.ok(queries.some((q) => q.text === "ROLLBACK"));
+        assert.equal(queries.some((q) => q.text === "COMMIT"), false);
+      } else {
+        const result = await operation;
+        assert.equal(result.returnPath, "/dashboard/account");
+        assert.equal(result.sessionToken.split(".").length, 2);
+        const session = queries.find((q) => q.text.includes("INSERT INTO yoro_sessions"));
+        assert.equal(session.values[1], userId);
+        assert.equal(session.values[4], provider === "riot" ? "twitch" : provider);
+        assert.ok(queries.some((q) => q.text.includes("UPDATE yoro_sessions")));
+        assert.equal(queries.some((q) => q.text.includes("INSERT INTO yoro_twitch_viewer_credentials")), provider === "twitch");
+        assert.ok(queries.some((q) => q.text === "COMMIT"));
+        assert.equal(poolQueries.some((q) => q.includes("SET status = 'security_failed'")), false);
+      }
+    }));
+  }
+}

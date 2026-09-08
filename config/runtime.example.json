@@ -39,6 +39,10 @@
       "channel.channel_points_custom_reward_redemption.add"
     ]
   },
+  "chzzk": {
+    "clientId": "public-chzzk-client-id",
+    "redirectUri": "https://yoro.gg/api/account/oauth/chzzk/callback"
+  },
   "riot": {
     "accountRegion": "asia",
     "lolPlatform": "kr",

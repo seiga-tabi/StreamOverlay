@@ -12,6 +12,7 @@ const PROJECT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 
 
 export const YORO_SECRET_FILES = Object.freeze({
   databaseUrl: "/run/secrets/database_url",
+  chzzkClientSecret: "/run/secrets/chzzk_client_secret",
   twitchClientSecret: "/run/secrets/twitch_client_secret",
   twitchTokenEncryptionKey: "/run/secrets/twitch_token_encryption_key",
   twitchExtensionSecret: "/run/secrets/twitch_extension_secret",

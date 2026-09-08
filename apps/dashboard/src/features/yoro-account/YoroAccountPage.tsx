@@ -17,18 +17,19 @@ const text = {
   ko: {
     eyebrow: "YORO ACCOUNT",
     title: "연결된 계정",
-    description: "Discord와 Twitch는 로그인 수단이며, Riot은 본인 게임 계정 확인과 데이터 공개 동의를 위한 연결 계정입니다.",
+    description: "Discord·Twitch·치지직은 로그인 수단이며, Riot은 본인 게임 계정 확인과 데이터 공개 동의를 위한 연결 계정입니다.",
     connected: "연결됨",
     notConnected: "연결되지 않음",
     discord: "Discord",
     twitch: "Twitch",
+    chzzk: "CHZZK",
     riot: "Riot Games",
     connect: "계정 연결",
     unlink: "연결 해제",
     logout: "로그아웃",
     dashboard: "Bot Dashboard",
     loginRequired: "YORO.gg 로그인이 필요합니다.",
-    loginDescription: "Discord 또는 Twitch 계정으로 로그인하면 연결된 계정을 확인하고 관리할 수 있습니다.",
+    loginDescription: "Discord, Twitch 또는 치지직 계정으로 로그인하면 연결된 계정을 확인하고 관리할 수 있습니다.",
     login: "로그인",
     loading: "계정 정보를 불러오는 중입니다.",
     failed: "계정 정보를 불러오지 못했습니다.",
@@ -36,6 +37,7 @@ const text = {
     relogin: "계정 연결 상태가 변경되어 다시 로그인해야 합니다.",
     riotTwitchRequired: "Riot 계정 연결 전 Twitch로 다시 인증해주세요.",
     riotReconnectTwitch: "Twitch로 다시 인증",
+    chzzkDescription: "치지직 계정을 연결하면 치지직으로도 로그인할 수 있습니다.",
     riotConsent: "연결하면 Riot PUUID와 Riot ID를 저장해 본인 계정과 데이터 공개 동의를 확인합니다.",
     privacy: "개인정보 처리방침",
     terms: "서비스 약관",
@@ -48,18 +50,19 @@ const text = {
   ja: {
     eyebrow: "YORO ACCOUNT",
     title: "連携アカウント",
-    description: "Discord と Twitch はログイン手段として使用し、Riot は本人のゲームアカウント確認とデータ公開同意のために連携します。",
+    description: "Discord・Twitch・CHZZK はログイン手段として使用し、Riot は本人のゲームアカウント確認とデータ公開同意のために連携します。",
     connected: "連携済み",
     notConnected: "未連携",
     discord: "Discord",
     twitch: "Twitch",
+    chzzk: "CHZZK",
     riot: "Riot Games",
     connect: "アカウントを連携",
     unlink: "連携解除",
     logout: "ログアウト",
     dashboard: "Bot Dashboard",
     loginRequired: "YORO.gg へのログインが必要です。",
-    loginDescription: "Discord または Twitch アカウントでログインすると、連携アカウントを確認・管理できます。",
+    loginDescription: "Discord、Twitch または CHZZK アカウントでログインすると、連携アカウントを確認・管理できます。",
     login: "ログイン",
     loading: "アカウント情報を読み込んでいます。",
     failed: "アカウント情報を読み込めませんでした。",
@@ -67,6 +70,7 @@ const text = {
     relogin: "連携状態が変更されたため、再ログインが必要です。",
     riotTwitchRequired: "Riotアカウントを連携する前にTwitchで再認証してください。",
     riotReconnectTwitch: "Twitchで再認証",
+    chzzkDescription: "CHZZKアカウントを連携すると、CHZZKでもログインできます。",
     riotConsent: "連携するとRiot PUUIDとRiot IDを保存し、本人アカウントとデータ公開への同意を確認します。",
     privacy: "プライバシーポリシー",
     terms: "利用規約",
@@ -103,8 +107,8 @@ export function YoroAccountPage({ embedded = false }: { embedded?: boolean }) {
   );
   const providers = useMemo<readonly YoroIdentityProvider[]>(() => (
     session?.authenticated && session.connectionCapabilities.riotRsoAvailable
-      ? ["discord", "twitch", "riot"]
-      : ["discord", "twitch"]
+      ? ["discord", "twitch", "chzzk", "riot"]
+      : ["discord", "twitch", "chzzk"]
   ), [session]);
   const accountResult = typeof window === "undefined"
     ? undefined
@@ -208,7 +212,9 @@ export function YoroAccountPage({ embedded = false }: { embedded?: boolean }) {
                         ? <DiscordSymbolIcon />
                         : provider === "twitch"
                           ? <TwitchGlitchIcon />
-                          : "R"}
+                          : provider === "chzzk"
+                            ? <img src="/images/brand/chzzk-symbol-neon.png" alt="" aria-hidden="true" />
+                            : "R"}
                     </span>
                     <div>
                       <h2>{copy[provider]}</h2>
@@ -216,6 +222,7 @@ export function YoroAccountPage({ embedded = false }: { embedded?: boolean }) {
                         {identity ? copy.connected : copy.notConnected}
                       </strong>
                       {identity ? <p>{identity.displayName}</p> : null}
+                      {provider === "chzzk" && !identity ? <p>{copy.chzzkDescription}</p> : null}
                       {provider === "riot" && !identity ? (
                         <p>{riotNeedsTwitch ? copy.riotTwitchRequired : copy.riotConsent}</p>
                       ) : null}

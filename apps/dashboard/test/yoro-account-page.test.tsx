@@ -64,7 +64,7 @@ test("YORO 계정 페이지는 Discord·Twitch 로그인과 Riot opt-in 연결�
   );
 
   assert.match(markup, /연결된 계정/u);
-  assert.match(markup, /Discord와 Twitch는 로그인 수단/u);
+  assert.match(markup, /Discord·Twitch·치지직은 로그인 수단/u);
   assert.match(source, /Riot PUUID와 Riot ID/u);
   assert.match(source, /identities\.has\("twitch"\) \? "login" : "link_identity"/u);
   assert.match(source, /if \(session && !session\.authenticated\)/u);

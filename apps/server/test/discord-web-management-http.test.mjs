@@ -1617,3 +1617,50 @@ test("참여 알림 폴링은 변경분만 내려주고 30초 편집 간격을 �
     assert.equal(acks.at(-1).input.dropMessage, true);
   });
 });
+
+test("CHZZK HTTP 시작·콜백·해제는 기존 cookie와 Origin 경계를 사용한다", async () => {
+  await withDiscordConfig(async () => {
+    const calls = [];
+    const { handler } = createDiscordHandler({ handlerInput: { yoroAccounts: {
+      async beginOAuth(input) { calls.push(input); return { authorizationUrl: "https://chzzk.naver.com/account-interlock?clientId=test", cookieValue: "b".repeat(40) }; },
+      async completeOAuth(input) { calls.push(input); return { returnPath: "/account/connections", sessionToken: `${"s".repeat(40)}.${"c".repeat(40)}` }; },
+      async unlinkIdentity(input) { calls.push(input); }
+    } } });
+    const start = await request(handler, "GET", "/api/account/oauth/chzzk/start?purpose=login");
+    assert.equal(start.statusCode, 302);
+    assert.equal(calls[0].provider, "chzzk");
+    assert.match(String(start.headers["Set-Cookie"]), /yoro_oauth=/u);
+    const callback = await request(handler, "GET", `/api/account/oauth/chzzk/callback?code=test&state=${"a".repeat(40)}`, undefined, { cookie: `yoro_oauth=${"b".repeat(40)}` });
+    assert.equal(callback.statusCode, 302);
+    assert.equal(new URL(callback.headers.Location).pathname, "/account/connections");
+    assert.equal(calls[1].oauthCookie, "b".repeat(40));
+    assert.equal(calls[1].provider, "chzzk");
+    assert.match(String(callback.headers["Set-Cookie"]), /yoro_session=/u);
+    for (const query of ["code=x&state=x&state=y", "error=denied", "code=x&unknown=y"]) {
+      const result = await request(handler, "GET", `/api/account/oauth/chzzk/callback?${query}`);
+      assert.equal(new URL(result.headers.Location).searchParams.get("account"), "oauth_failed");
+      assert.equal(new URL(result.headers.Location).pathname, "/login");
+    }
+    assert.equal(calls.length, 2);
+    const denied = await request(handler, "DELETE", "/api/account/connections/chzzk", undefined, { origin: "https://evil.example" });
+    assert.equal(denied.statusCode, 403);
+    const unlinked = await request(handler, "DELETE", "/api/account/connections/chzzk", undefined, { origin: DASHBOARD_ORIGIN, "x-yoro-csrf": "c".repeat(40) });
+    assert.equal(unlinked.statusCode, 204);
+    assert.equal(calls[2].provider, "chzzk");
+    assert.equal(calls[2].csrfToken, "c".repeat(40));
+  });
+});
+
+test("CHZZK 콜백 처리 실패는 로그인 오류 안내로 돌아가고 OAuth 쿠키를 지운다", async () => {
+  await withDiscordConfig(async () => {
+    const { handler } = createDiscordHandler({ handlerInput: { yoroAccounts: {
+      async completeOAuth() { throw new Error("모의 OAuth 실패"); }
+    } } });
+    const result = await request(handler, "GET", "/api/account/oauth/chzzk/callback?code=test&state=test");
+    assert.equal(result.statusCode, 302);
+    assert.equal(new URL(result.headers.Location).pathname, "/login");
+    assert.equal(new URL(result.headers.Location).searchParams.get("account"), "oauth_failed");
+    assert.match(String(result.headers["Set-Cookie"]), /yoro_oauth=;.*Max-Age=0/u);
+    assert.equal(result.headers["Cache-Control"], "no-store");
+  });
+});

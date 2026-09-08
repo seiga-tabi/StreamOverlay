@@ -21,6 +21,7 @@ docker compose up -d --build --force-recreate --wait
 /etc/yoro/secrets/database_url
 /etc/yoro/secrets/postgres_password
 /etc/yoro/secrets/twitch_client_secret
+/etc/yoro/secrets/chzzk_client_secret
 /etc/yoro/secrets/twitch_token_encryption_key
 /etc/yoro/secrets/riot_api_key
 /etc/yoro/secrets/discord_client_secret
@@ -65,6 +66,25 @@ down -v` 또는 `docker volume rm yoro-production_discord_internal_auth`는
 `0017`·`0018`의 backup·plan·apply·검증이 끝난 뒤에만 활성화합니다. 활성 기능에
 필요한 secret이 하나라도 없으면 `config-check`가 실제 서비스를 시작하기 전에
 실패하며 secret 값은 로그에 출력하지 않습니다.
+
+치지직 로그인을 활성화하려면 `config/runtime.example.json`의 `chzzk` 항목처럼
+발급받은 공개 `clientId`와 `redirectUri`를 운영 runtime에 설정하고,
+`/etc/yoro/secrets/chzzk_client_secret`에 비밀값을 별도로 준비합니다.
+콜백 주소는 `https://yoro.gg/api/account/oauth/chzzk/callback`입니다.
+기본 Compose의 `config-check`와 `server`, 루트 `docker-compose.production.yml`의
+`server`는 이 파일을 `/run/secrets/chzzk_client_secret`에 읽기 전용으로 연결합니다.
+치지직 설정이 있는데 필수 secret이 없으면 기존 안전 정책대로 시작이 실패합니다.
+예시 파일에는 실제 비밀값을 넣지 않습니다.
+
+이 secret 마운트는 조건부가 아니므로, 치지직 비활성 상태라도 기본 Compose를
+그대로 사용하려면 다음 배포 **전에 일반 파일을 먼저 준비**해야 합니다. 파일 없이
+실행하면 Docker가 같은 경로에 디렉터리를 만들 수 있습니다. 치지직을 사용하지 않아
+secret을 준비하지 않는 운영 구성에서는 `chzzk` runtime 항목을 생략하고 해당
+마운트도 `config-check`와 `server` 양쪽에서 제외합니다(루트 운영 override는
+`server`에서 제외). 이미 디렉터리가 생겼다면 관련 컨테이너를 중지하고 해당
+경로가 빈 디렉터리인지 확인한 뒤 `rmdir /etc/yoro/secrets/chzzk_client_secret`으로
+제거합니다. 이후 정상 secret 파일과 기존 secret과 동일한 소유권·권한을 준비한
+뒤 다시 기동합니다. 비어 있지 않다면 내용을 확인하기 전에는 삭제하지 않습니다.
 
 Riot RSO는 별도 승인을 받은 뒤에만 `features.riotRso=true`로 활성화합니다.
 승인 전에는 `false`를 유지하며 기본 Compose는 RSO secret을 mount하지 않습니다.

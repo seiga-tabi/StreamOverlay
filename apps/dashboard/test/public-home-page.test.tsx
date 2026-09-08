@@ -155,14 +155,19 @@ test("교배·봇·푸터는 실제 경로와 법적 표기를 한국어·일본
 
 test("로그인 팝업은 노리개 표식·Twitch 계속하기·약관 고지를 갖추고 닫힌 상태에선 렌더하지 않는다", () => {
   const open = renderToStaticMarkup(
-    <HomeLoginModal onClose={noop} onTwitchLogin={noop} open text={homeI18n.ko} />
+    <HomeLoginModal onChzzkLogin={noop} onClose={noop} onTwitchLogin={noop} open text={homeI18n.ko} />
   );
   assert.match(open, /role="dialog"/u);
   assert.match(open, /Twitch로 계속하기/u);
+  assert.match(open, /치지직으로 계속하기/u);
+  assert.match(open, /yoro-home-outline-button yoro-home-modal-chzzk/u);
+  assert.match(open, /images\/brand\/chzzk-symbol-neon\.png/u);
+  const ja = renderToStaticMarkup(<HomeLoginModal onChzzkLogin={noop} onClose={noop} onTwitchLogin={noop} open text={homeI18n.ja} />);
+  assert.match(ja, /CHZZKで続ける/u);
   assert.match(open, /이용약관과 개인정보처리방침에 동의/u);
 
   const closed = renderToStaticMarkup(
-    <HomeLoginModal onClose={noop} onTwitchLogin={noop} open={false} text={homeI18n.ko} />
+    <HomeLoginModal onChzzkLogin={noop} onClose={noop} onTwitchLogin={noop} open={false} text={homeI18n.ko} />
   );
   assert.equal(closed, "");
 });

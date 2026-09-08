@@ -84,6 +84,7 @@ export type HomeText = {
   loginTitle: string;
   loginDescription: string;
   loginTwitchCta: string;
+  loginChzzkCta: string;
   loginFinePrint: string;
   /** 라우트 폴백 상태 문구 — App.tsx 의 Suspense 폴백이 씁니다. */
   loading: string;
@@ -168,8 +169,9 @@ export const homeI18n: Record<HomeLocale, HomeText> = {
     footerPrivacy: "개인정보처리방침",
     footerContact: "문의",
     loginTitle: "로그인",
-    loginDescription: "Twitch 계정으로 yoro.gg에 로그인합니다. 팔로우한 스트리머의 방송 상태와 시청자 참여 기능이 연결됩니다.",
+    loginDescription: "Twitch 또는 치지직 계정으로 yoro.gg에 로그인합니다. 팔로우한 스트리머의 방송 상태와 시청자 참여 기능이 연결됩니다.",
     loginTwitchCta: "Twitch로 계속하기",
+    loginChzzkCta: "치지직으로 계속하기",
     loginFinePrint: "로그인하면 이용약관과 개인정보처리방침에 동의하는 것으로 간주됩니다. 방송인 기능은 로그인 후 방송인 등록에서 활성화합니다.",
     loading: "화면을 불러오는 중입니다.",
     seoTitle: "YORO.gg — 게임 데이터, 검색 한 번",
@@ -251,8 +253,9 @@ export const homeI18n: Record<HomeLocale, HomeText> = {
     footerPrivacy: "プライバシーポリシー",
     footerContact: "お問い合わせ",
     loginTitle: "ログイン",
-    loginDescription: "Twitchアカウントでyoro.ggにログインします。フォロー中のストリーマーの配信状況と視聴者参加機能が連携されます。",
+    loginDescription: "TwitchまたはCHZZKアカウントでyoro.ggにログインします。フォロー中のストリーマーの配信状況と視聴者参加機能が連携されます。",
     loginTwitchCta: "Twitchで続ける",
+    loginChzzkCta: "CHZZKで続ける",
     loginFinePrint: "ログインすると利用規約とプライバシーポリシーに同意したものとみなされます。配信者機能はログイン後、配信者登録から有効化します。",
     loading: "画面を読み込んでいます。",
     seoTitle: "YORO.gg — ゲームデータ、検索ひとつで",
@@ -334,8 +337,9 @@ export const homeI18n: Record<HomeLocale, HomeText> = {
     footerPrivacy: "Privacy",
     footerContact: "Contact",
     loginTitle: "Log in",
-    loginDescription: "Log in to yoro.gg with your Twitch account to connect live status and viewer participation for streamers you follow.",
+    loginDescription: "Log in to yoro.gg with your Twitch or CHZZK account to connect live status and viewer participation for streamers you follow.",
     loginTwitchCta: "Continue with Twitch",
+    loginChzzkCta: "Continue with CHZZK",
     loginFinePrint: "By logging in you agree to the Terms and Privacy Policy. Streamer features are enabled from streamer registration after login.",
     loading: "Loading this page.",
     seoTitle: "YORO.gg — Game data, one search",

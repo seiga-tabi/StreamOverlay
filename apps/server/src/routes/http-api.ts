@@ -11640,7 +11640,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
           return sendJson(req, res, 200, { preferences }, noStoreHeaders());
         }
         const oauthStartMatch = url.pathname.match(
-          /^\/api\/account\/oauth\/(discord|twitch|riot)\/start$/u
+          /^\/api\/account\/oauth\/(discord|twitch|chzzk|riot)\/start$/u
         );
         if (req.method === "GET" && oauthStartMatch) {
           if (
@@ -11652,7 +11652,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
           ) {
             return sendJson(req, res, 400, { error: "허용되지 않은 query입니다." });
           }
-          const provider = oauthStartMatch[1] as "discord" | "twitch" | "riot";
+          const provider = oauthStartMatch[1] as "discord" | "twitch" | "chzzk" | "riot";
           if (
             provider === "riot"
             && url.searchParams.get("purpose") !== "link_identity"
@@ -11676,6 +11676,55 @@ export function createHttpHandler(input: HttpHandlerInput) {
             "Cache-Control": "no-store",
             "Referrer-Policy": "no-referrer"
           });
+        }
+        if (req.method === "GET" && url.pathname === "/api/account/oauth/chzzk/callback") {
+          const allowed = new Set(["code", "state", "error", "error_description"]);
+          if (
+            [...url.searchParams.keys()].some((key) => !allowed.has(key))
+            || [...allowed].some((key) => url.searchParams.getAll(key).length > 1)
+            || url.searchParams.has("error")
+          ) {
+            return sendRedirect(
+              res,
+              yoroAccountReturnUrl("/login", "oauth_failed"),
+              {
+                "Set-Cookie": clearYoroCookie(YORO_OAUTH_COOKIE),
+                "Cache-Control": "no-store",
+                "Referrer-Policy": "no-referrer"
+              }
+            );
+          }
+          try {
+            const completed = await input.yoroAccounts.completeOAuth({
+              provider: "chzzk",
+              state: url.searchParams.get("state") ?? "",
+              code: url.searchParams.get("code") ?? "",
+              oauthCookie: requestCookie(req, YORO_OAUTH_COOKIE),
+              sessionCookie
+            });
+            return sendRedirect(
+              res,
+              yoroAccountReturnUrl(completed.returnPath),
+              {
+                "Set-Cookie": [
+                  clearYoroCookie(YORO_OAUTH_COOKIE),
+                  yoroSessionCookie(completed.sessionToken)
+                ],
+                "Cache-Control": "no-store",
+                "Referrer-Policy": "no-referrer"
+              }
+            );
+          } catch {
+            return sendRedirect(
+              res,
+              yoroAccountReturnUrl("/login", "oauth_failed"),
+              {
+                "Set-Cookie": clearYoroCookie(YORO_OAUTH_COOKIE),
+                "Cache-Control": "no-store",
+                "Referrer-Policy": "no-referrer"
+              }
+            );
+          }
         }
         if (req.method === "GET" && url.pathname === "/api/account/oauth/riot/callback") {
           const allowed = new Set(["code", "state", "error", "error_description"]);
@@ -11780,7 +11829,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
           });
         }
         const connectionMatch = url.pathname.match(
-          /^\/api\/account\/connections\/(discord|twitch|riot)$/u
+          /^\/api\/account\/connections\/(discord|twitch|chzzk|riot)$/u
         );
         if (req.method === "DELETE" && connectionMatch) {
           if (!stateChangingRequestHasTrustedOrigin(req)) {
@@ -11790,7 +11839,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
             });
           }
           await input.yoroAccounts.unlinkIdentity({
-            provider: connectionMatch[1] as "discord" | "twitch" | "riot",
+            provider: connectionMatch[1] as "discord" | "twitch" | "chzzk" | "riot",
             sessionCookie,
             csrfToken: requestHeaderValue(req, "x-yoro-csrf")
           });
