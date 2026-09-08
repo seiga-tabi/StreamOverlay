@@ -286,7 +286,7 @@ export function HomeGameDataSection({ text, locale }: { text: HomeText; locale: 
     })();
     void (async () => {
       try {
-        const response = await getPalworldPals(new URLSearchParams([["pageSize", "1"]]), controller.signal);
+        const response = await getPalworldPals(new URLSearchParams([["limit", "1"]]), controller.signal);
         const entries = [...response.facets.elements]
           .sort((a, b) => b.count - a.count)
           .slice(0, 5)
