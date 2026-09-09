@@ -703,11 +703,18 @@ export default defineConfig(({ command }) => ({
   build: {
     cssMinify: "lightningcss",
     rollupOptions: {
+      // 의존성을 재귀 포함하지 않는 청크의 안전성을 위해 진입점 서명을 고정하지 않습니다.
+      preserveEntrySignatures: false,
       output: {
+        // 순환 청크에서도 모듈 초기화 순서를 보장합니다.
+        strictExecutionOrder: true,
         // rolldown은 CJS 본문 모듈을 manualChunks 반환값과 다르게 배치합니다. react runtime이
         // admin page chunk에 흡수되면 entry 정적 graph가 admin CSS까지 끌고 와 공개 페이지가
         // 쓰지 않는 CSS를 render-blocking으로 받게 되므로 advancedChunks로 배치를 고정합니다.
         advancedChunks: {
+          // 페이지가 @streamops/shared 같은 공용 의존성까지 흡수하면 공개 entry가
+          // 관리자 청크를 다시 정적으로 참조합니다. 각 그룹은 매칭한 모듈만 소유합니다.
+          includeDependenciesRecursively: false,
           groups: [
             {
               name: "vendor-react",
@@ -731,18 +738,22 @@ export default defineConfig(({ command }) => ({
             {
               name: "dashboard-admin-pages",
               priority: 40,
-              test: /[\\/](?:CommunityModeration|EventLog|Events|ServerStatus|StreamerRiotRequests|SupportInbox)Page\.(?:tsx|css)$/
+              test: /[\\/](?:Events|StreamerRiotRequests|StreamerProfiles|SupportInbox)Page\.(?:tsx|css)$/
             },
             {
               name: "dashboard-settings-pages",
               priority: 40,
-              test: /[\\/](?:Followers|Settings|TwitchConnection)Page\.(?:tsx|css)$/
+              test: /[\\/]SettingsPage\.(?:tsx|css)$/
             },
-            {
-              name: "dashboard-operations-pages",
+            // 실제 lazy 진입점과 CSS만 묶습니다. feature 디렉터리 전체를 매칭하면
+            // App의 경로 판별·로딩 화면까지 묶여 기능 CSS가 다시 eager로 올라옵니다.
+            ...["palworld", "minecraft", "valorant", "streamers", "games"].map((feature) => ({
+              name: `public-${feature}-pages`,
               priority: 40,
-              test: /[\\/](?:Dashboard|LolOperations|OverlayOps)Page\.(?:tsx|css)$/
-            }
+              test: new RegExp(
+                `[/\\\\]src[/\\\\](?:pages[/\\\\]Public${feature[0].toUpperCase()}${feature.slice(1)}Page\\.tsx|styles[/\\\\]pages[/\\\\]public-${feature}[/\\\\]${feature}-route\\.css)$`
+              )
+            }))
           ]
         }
       }
