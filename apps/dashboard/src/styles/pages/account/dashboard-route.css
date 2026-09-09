@@ -1,0 +1,5 @@
+/* 해당 기능의 lazy 진입점이 소유하며 기존 CSS 선언과 레이어 순서를 유지합니다. */
+@import "./18-yoro-dashboard.css" layer(legacy);
+@import "./19-participation-management.css" layer(legacy);
+@import "./31-dashboard-home.css";
+@import "./32-participation-announcement.css";

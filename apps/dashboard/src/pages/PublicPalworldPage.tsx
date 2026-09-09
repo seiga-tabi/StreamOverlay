@@ -21,7 +21,7 @@ import { SkeletonCard } from "../shared/ui/Skeleton";
 import { lazyNamed } from "../shared/lazyNamed";
 import { usePublicLocale } from "../features/public-lol/hooks/usePublicLocale";
 import { usePublicTheme } from "../features/public-lol/hooks/usePublicTheme";
-import { setActivePublicLocale } from "../features/public-lol/i18n/public-lol-i18n";
+import { setActivePublicLocale } from "../features/public-lol/i18n/public-locale";
 import { PalworldBottomTabBar } from "../features/public-palworld/components/PalworldBottomTabBar";
 import { PalworldChrome } from "../features/public-palworld/components/PalworldChrome";
 import { PalworldHome } from "../features/public-palworld/components/PalworldHome";

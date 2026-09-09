@@ -5,7 +5,7 @@ import { AppShellHeader } from "../../../shared/ui/AppShell";
 import { homeI18n } from "../i18n/home-i18n";
 import { lolHomeI18n } from "../i18n/lol-home-i18n";
 import { HomeHeader } from "./HomeHeader";
-import { LolSubnav, type LolSubnavItem } from "./LolHomeSections";
+import { LolSubnav, type LolSubnavItem } from "./LolSubnav";
 
 /* LoL 상단바 한 벌 — 1행(HomeHeader) + 2행(LolSubnav)을 항상 같이 렌더하는
  * 단일 조립 지점입니다(2026-08-21 통합 프롬프트 §2-1). 다섯 화면(/lol·/follow·

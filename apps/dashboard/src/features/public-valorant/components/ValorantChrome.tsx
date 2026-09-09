@@ -3,7 +3,7 @@ import { AppShellHeader } from "../../../shared/ui/AppShell";
 import { HomeHeader } from "../../public-home/components/HomeHeader";
 import { TailUnderline } from "../../public-home/components/HomeMarks";
 import { homeI18n } from "../../public-home/i18n/home-i18n";
-import { publicContentLocale } from "../../public-lol/i18n/public-lol-i18n";
+import { publicContentLocale } from "../../public-lol/i18n/public-locale";
 import { localizedPublicUrl } from "../../public-lol/utils/public-locale-path";
 import { valorantI18n, type ValorantLocale } from "../i18n/valorant-i18n";
 import { setValorantUrl, valorantPathForPage, type ValorantPage } from "../utils/routes";

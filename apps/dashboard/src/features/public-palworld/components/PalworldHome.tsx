@@ -6,7 +6,7 @@ import {
 import { HomeLiveSection } from "../../public-home/components/HomeSections";
 import { homeI18n } from "../../public-home/i18n/home-i18n";
 import { palworldI18n, type PalworldLocale, type PalworldTextKey } from "../i18n/palworld-i18n";
-import { publicContentLocale } from "../../public-lol/i18n/public-lol-i18n";
+import { publicContentLocale } from "../../public-lol/i18n/public-locale";
 import {
   PalworldHomeDashboard,
   PalworldHomeQuickSearch,

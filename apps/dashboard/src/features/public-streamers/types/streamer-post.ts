@@ -7,7 +7,7 @@
 
 import { streamerChannelHandle, streamerChannelKey, streamerOfficialChannelKey } from "@streamops/shared";
 import type { LolRankTier } from "@streamops/shared";
-import { rankTierLabel } from "../../public-lol/utils/rank";
+import { rankTierLabel } from "../../public-lol/utils/rank-label";
 import type { StreamerScope } from "../utils/routes";
 
 /* 채널 정규화 규칙은 서버와 공유합니다(packages/shared/src/streamer-board.ts).

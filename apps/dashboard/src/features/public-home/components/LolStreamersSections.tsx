@@ -3,7 +3,7 @@ import type { PublicLocale } from "../../public-lol/i18n/public-lol-i18n";
 import type { PublicTwitchFollowedLolChannel, PublicTwitchFollowedLolResponse } from "../../public-lol/types/public-lol";
 import { formatNumber } from "../../public-lol/utils/format";
 import { localizedPublicUrlForCurrentLocale } from "../../public-lol/utils/public-locale-path";
-import { rankTierLabel } from "../../public-lol/utils/rank";
+import { rankTierLabel } from "../../public-lol/utils/rank-label";
 import { publicSummonerPath } from "../../public-lol/utils/riot-id";
 import { streamerBuckets, type StreamerFilter } from "../../public-lol/utils/streamers";
 import { safeTwitchStreamPreviewUrl } from "../../public-twitch/stream-preview";

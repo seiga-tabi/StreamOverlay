@@ -4,7 +4,7 @@ import { parseAramAugmentCatalog, type AramAugmentRarity } from "@streamops/shar
 import type { PublicLocale } from "../../public-lol/i18n/public-lol-i18n";
 import type { PublicTwitchFollowedLolChannel, PublicTwitchFollowedLolResponse } from "../../public-lol/types/public-lol";
 import { localizedPublicUrlForCurrentLocale } from "../../public-lol/utils/public-locale-path";
-import { rankTierLabel } from "../../public-lol/utils/rank";
+import { rankTierLabel } from "../../public-lol/utils/rank-label";
 import { safeTwitchStreamPreviewUrl } from "../../public-twitch/stream-preview";
 import { getPalworldPals } from "../../public-palworld/api/palworld";
 import { elementLabel } from "../../public-palworld/utils/labels";

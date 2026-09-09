@@ -3,7 +3,7 @@ import "../styles/pages/public-streamers/streamers-route.css";
 import { AppShell, AppShellMain } from "../shared/ui/AppShell";
 import { usePublicLocale } from "../features/public-lol/hooks/usePublicLocale";
 import { usePublicTheme } from "../features/public-lol/hooks/usePublicTheme";
-import { setActivePublicLocale } from "../features/public-lol/i18n/public-lol-i18n";
+import { setActivePublicLocale } from "../features/public-lol/i18n/public-locale";
 import { usePublicAccountLogin } from "../shared/public-account-login";
 import { StreamersChrome } from "../features/public-streamers/components/StreamersChrome";
 import { StreamerComposePage } from "../features/public-streamers/components/StreamerComposePage";

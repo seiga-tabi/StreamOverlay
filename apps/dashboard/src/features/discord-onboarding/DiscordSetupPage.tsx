@@ -1,3 +1,4 @@
+import "../../styles/pages/discord/discord-route.css";
 import React, { useEffect, useRef, useState } from "react";
 import { detectDashboardLocale, type DashboardLocale } from "../../i18n";
 import { Button } from "../../shared/ui/Button";

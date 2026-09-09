@@ -1,3 +1,4 @@
+import "../../styles/pages/bot/bot-management-route.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   BotManagementGameServer,

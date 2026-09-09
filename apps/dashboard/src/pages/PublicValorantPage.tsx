@@ -3,7 +3,7 @@ import "../styles/pages/public-valorant/valorant-route.css";
 import { AppShell, AppShellMain } from "../shared/ui/AppShell";
 import { usePublicLocale } from "../features/public-lol/hooks/usePublicLocale";
 import { usePublicTheme } from "../features/public-lol/hooks/usePublicTheme";
-import { publicContentLocale, setActivePublicLocale } from "../features/public-lol/i18n/public-lol-i18n";
+import { publicContentLocale, setActivePublicLocale } from "../features/public-lol/i18n/public-locale";
 import { ValorantBottomTabBar } from "../features/public-valorant/components/ValorantBottomTabBar";
 import { ValorantChrome } from "../features/public-valorant/components/ValorantChrome";
 import { ValorantComingSoonPage } from "../features/public-valorant/components/ValorantComingSoonPage";

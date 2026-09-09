@@ -1,6 +1,7 @@
 import { minecraftI18n, type MinecraftLocale } from "../i18n/minecraft-i18n";
 import { setMinecraftUrl, minecraftPathForPage, type MinecraftPage } from "../utils/routes";
-import { MinecraftNavIcon, minecraftTabItems } from "./MinecraftHeader";
+import { MinecraftNavIcon } from "./MinecraftNavIcon";
+import { minecraftTabItems } from "./minecraft-navigation";
 
 /* 모바일 하단 고정 탭바 — 마인크래프트는 6개 메뉴 중 5개만 탭바에 노출합니다(인챈트는 상단 nav·홈 타일).
    LoL·Palworld 와 같은 .public-bottom-tab-bar CSS 를 그대로 씁니다.

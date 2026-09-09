@@ -1,5 +1,5 @@
 import type { PublicLocale } from "../../public-lol/i18n/public-lol-i18n";
-import { publicContentLocale } from "../../public-lol/i18n/public-lol-i18n";
+import { publicContentLocale } from "../../public-lol/i18n/public-locale";
 import { valorantI18n } from "../../public-valorant/i18n/valorant-i18n";
 import { ValorantChrome } from "../../public-valorant/components/ValorantChrome";
 

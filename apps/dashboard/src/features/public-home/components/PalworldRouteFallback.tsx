@@ -1,5 +1,5 @@
 import type { PublicLocale } from "../../public-lol/i18n/public-lol-i18n";
-import { publicContentLocale } from "../../public-lol/i18n/public-lol-i18n";
+import { publicContentLocale } from "../../public-lol/i18n/public-locale";
 import { palworldI18n } from "../../public-palworld/i18n/palworld-i18n";
 import { PalworldChrome } from "../../public-palworld/components/PalworldChrome";
 

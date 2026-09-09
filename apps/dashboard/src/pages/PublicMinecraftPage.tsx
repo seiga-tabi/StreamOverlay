@@ -3,7 +3,7 @@ import "../styles/pages/public-minecraft/minecraft-route.css";
 import { AppShell, AppShellMain } from "../shared/ui/AppShell";
 import { usePublicLocale } from "../features/public-lol/hooks/usePublicLocale";
 import { usePublicTheme } from "../features/public-lol/hooks/usePublicTheme";
-import { publicContentLocale, setActivePublicLocale } from "../features/public-lol/i18n/public-lol-i18n";
+import { publicContentLocale, setActivePublicLocale } from "../features/public-lol/i18n/public-locale";
 import { MinecraftBottomTabBar } from "../features/public-minecraft/components/MinecraftBottomTabBar";
 import { MinecraftChrome } from "../features/public-minecraft/components/MinecraftChrome";
 import { MinecraftComingSoonPage } from "../features/public-minecraft/components/MinecraftComingSoonPage";

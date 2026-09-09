@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { usePublicLocale } from "../features/public-lol/hooks/usePublicLocale";
-import { setActivePublicLocale, type PublicLocale } from "../features/public-lol/i18n/public-lol-i18n";
+import type { PublicLocale } from "../features/public-lol/i18n/public-lol-i18n";
+import { setActivePublicLocale } from "../features/public-lol/i18n/public-locale";
 import { usePublicViewerTwitchSession } from "../shared/usePublicViewerTwitchSession";
 import { HomeHeader } from "../features/public-home/components/HomeHeader";
 import { HomeHero } from "../features/public-home/components/HomeHero";

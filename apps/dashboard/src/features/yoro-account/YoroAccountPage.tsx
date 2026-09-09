@@ -1,3 +1,4 @@
+import "../../styles/pages/account/account-route.css";
 import { useEffect, useMemo, useState } from "react";
 import { DiscordSymbolIcon } from "../../shared/DiscordSymbolIcon";
 import { TwitchGlitchIcon } from "../../shared/TwitchGlitchIcon";

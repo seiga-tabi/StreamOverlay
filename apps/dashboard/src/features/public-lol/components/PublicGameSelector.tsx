@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { publicI18n, t } from "../i18n/public-lol-i18n";
+import { publicShellI18n as publicI18n, publicShellText as t } from "../i18n/public-shell-i18n";
 import type { PublicMainPage } from "../types/public-lol";
 import { DISCORD_SYMBOL_ICON_SRC } from "../../../shared/DiscordSymbolIcon";
 

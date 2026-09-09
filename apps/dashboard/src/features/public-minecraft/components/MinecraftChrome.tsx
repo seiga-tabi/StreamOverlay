@@ -3,17 +3,17 @@ import { AppShellHeader } from "../../../shared/ui/AppShell";
 import { HomeHeader } from "../../public-home/components/HomeHeader";
 import { TailUnderline } from "../../public-home/components/HomeMarks";
 import { homeI18n } from "../../public-home/i18n/home-i18n";
-import { publicContentLocale } from "../../public-lol/i18n/public-lol-i18n";
+import { publicContentLocale } from "../../public-lol/i18n/public-locale";
 import { localizedPublicUrl } from "../../public-lol/utils/public-locale-path";
 import { minecraftI18n, type MinecraftLocale } from "../i18n/minecraft-i18n";
 import { minecraftPathForPage, setMinecraftUrl, type MinecraftPage } from "../utils/routes";
-import { minecraftNavItems } from "./MinecraftHeader";
+import { minecraftNavItems } from "./minecraft-navigation";
 
 /* 마인크래프트 상단바 한 벌 — 메인 홈과 같은 1행(HomeHeader) + 마인크래프트 2행 메뉴.
  * PalworldChrome/ValorantChrome과 같은 조립 문법(LoL/Palworld/Valorant는 이미
  * 이 크롬으로 전환됨 — 마인크래프트만 구형 MinecraftHeader/PublicGameHeaderFrame이
  * 남아 있던 결함 수정, 2026-08-28). 2행은 공용 .yoro-lol-subnav 클래스를 그대로
- * 재사용하고, 항목 원본(minecraftNavItems)은 MinecraftHeader.tsx에 남겨
+ * 재사용하고, 항목 원본(minecraftNavItems)은 minecraft-navigation.ts에서
  * MinecraftBottomTabBar와 계속 공유합니다. */
 
 const SUBNAV_TAIL_WIDTH: Record<MinecraftPage, number> = {

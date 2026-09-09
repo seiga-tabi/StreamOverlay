@@ -3,7 +3,7 @@ import "../styles/pages/public-games/games-route.css";
 import { AppShell, AppShellHeader, AppShellMain } from "../shared/ui/AppShell";
 import { usePublicLocale } from "../features/public-lol/hooks/usePublicLocale";
 import { usePublicTheme } from "../features/public-lol/hooks/usePublicTheme";
-import { publicContentLocale, setActivePublicLocale } from "../features/public-lol/i18n/public-lol-i18n";
+import { publicContentLocale, setActivePublicLocale } from "../features/public-lol/i18n/public-locale";
 import { GamesBottomTabBar } from "../features/public-games/components/GamesBottomTabBar";
 import { GamesHeader } from "../features/public-games/components/GamesHeader";
 import { GamesHub } from "../features/public-games/components/GamesHub";

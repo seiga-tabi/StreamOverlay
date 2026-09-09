@@ -1,5 +1,5 @@
 import type { PublicLocale } from "../../public-lol/i18n/public-lol-i18n";
-import { publicContentLocale } from "../../public-lol/i18n/public-lol-i18n";
+import { publicContentLocale } from "../../public-lol/i18n/public-locale";
 import { minecraftI18n } from "../../public-minecraft/i18n/minecraft-i18n";
 import { MinecraftChrome } from "../../public-minecraft/components/MinecraftChrome";
 

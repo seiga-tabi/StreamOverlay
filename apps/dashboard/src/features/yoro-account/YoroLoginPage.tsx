@@ -1,3 +1,4 @@
+import "../../styles/pages/account/account-route.css";
 import { useEffect, useState } from "react";
 import { DiscordSymbolIcon } from "../../shared/DiscordSymbolIcon";
 import { detectDashboardLocale, type DashboardLocale } from "../../i18n";

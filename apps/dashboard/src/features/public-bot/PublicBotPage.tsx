@@ -13,11 +13,8 @@ import {
   PublicLocaleSelector,
 } from "../public-lol/components/PublicLocaleSelector";
 import { usePublicLocale } from "../public-lol/hooks/usePublicLocale";
-import { publicContentLocale,
-  publicI18n,
-  setActivePublicLocale,
-  type PublicLocale,
-} from "../public-lol/i18n/public-lol-i18n";
+import type { PublicLocale } from "../public-lol/i18n/public-lol-i18n";
+import { publicContentLocale, setActivePublicLocale } from "../public-lol/i18n/public-locale";
 import type { PublicMainPage } from "../public-lol/types/public-lol";
 import { PUBLIC_LOL_HOME_PATH, setPublicPath } from "../public-lol/utils/routes";
 import {

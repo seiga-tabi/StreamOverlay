@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
-import { t, type PublicLocale } from "../i18n/public-lol-i18n";
+import type { PublicLocale } from "../i18n/public-lol-i18n";
+import { publicShellText as t } from "../i18n/public-shell-i18n";
 
 export type PublicLocaleSelectorProps = {
   locale: PublicLocale;
