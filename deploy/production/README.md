@@ -1,11 +1,73 @@
 # 운영 원클릭 Compose
 
 이 디렉터리는 운영 호스트에서 다음 명령 하나로 YORO Server, PostgreSQL,
-Discord Bot을 build·기동하기 위한 독립 Compose 프로젝트입니다.
+Discord Bot을 build·기동하기 위한 독립 Compose 프로젝트입니다. 운영 업데이트는
+[SQL migration 런북](../../docs/SQL_MIGRATION_APPLICATION_RUNBOOK.md) §7~9를 따르는
+배포 스크립트로 실행합니다.
 
 ```bash
 cd deploy/production
-docker compose up -d --build --force-recreate --wait
+./deploy.sh
+```
+
+기존 PostgreSQL이 healthy인 운영 호스트의 maintenance window에서 실행합니다.
+호스트에 Bash, Git, Docker Compose v2, `jq`, `flock`(util-linux), `curl`,
+`sha256sum`(coreutils), `df`, `awk`가 필요합니다. Docker 접근과 `/var/run/yoro-deploy.lock`,
+`/var/backups/yoro/postgres` 생성 권한이 있는 운영 계정(런북은 root 기준)을 사용합니다.
+최초 설치에서는 아래 설정·secret 준비와 PostgreSQL 기동을 먼저 완료합니다.
+
+```bash
+docker compose up -d postgres
+./deploy.sh                 # 최초 배포도 빌드부터 실행
+```
+
+실행 옵션 (`--dry-run`만 기존 이미지가 필요하며, `--yes`는 빌드부터 수행):
+
+```bash
+./deploy.sh --dry-run       # 기존 이미지로 읽기 전용 check/plan만 조회
+./deploy.sh --yes           # 비파괴 migration 승인만 명시적으로 생략
+```
+
+기본 실행은 이미지 build → check/plan → `yes` 승인 → 새 백업·archive/checksum
+검증 → writer 중지 → 동일 plan 재확인 → apply → check → 기동·호스트 health
+확인 순서입니다. pending이 없으면 백업·중지·apply 없이 기동합니다. 미커밋 변경은
+`--yes`/`--auto-confirm`에서도 반드시 별도 `yes` 입력이 필요합니다. destructive는
+어떤 옵션에서도 중단하며 런북 §8.7의 수동 검토·승인 절차를 따릅니다.
+
+`--dry-run`은 빌드·이미지 pull·의존 서비스 기동·백업·중지·apply·서버 기동을
+수행하지 않습니다. 기존 로컬 server 이미지로 `--no-deps` check/plan 컨테이너만
+실행하므로 PostgreSQL이 실행 중이고 이미지와 설정이 준비돼 있어야 합니다.
+빌드하지 않은 소스의 migration은 확인할 수 없습니다. 잠금과 임시 결과 파일을
+사용하며 Compose가 없는 network/volume을 생성할 수 있습니다. 읽기 전용 조회도
+일회성 컨테이너 실행은 필요합니다. destructive 또는 상태 불일치가 있으면
+0이 아닌 종료 코드로 끝납니다.
+
+백업 실패 시 `.partial`은 조사용으로 남고 apply하지 않습니다. apply 또는 적용 후
+check 실패 시 자동 재기동·재시도·down·복원은 하지 않습니다. 런북 §10~11을
+따라 원인을 확인하십시오. 호스트의 HTTP health와 Server·Bot 컨테이너 health를
+약 180초간 확인합니다. 실패해도 마지막 응답 본문, Compose 상태와 릴리스 요약을
+출력한 후 실패 코드로 종료합니다.
+요약에는 Git SHA, server image ID, 빌드/apply 시각, 실행자, 백업 경로·체크섬,
+적용 전후 pending ID와 이번 적용 ID, check·health 결과가 포함됩니다.
+백업은 런북 순서대로 writer 중지 전에 생성하므로 복원하면 백업 이후 쓰기가
+유실될 수 있습니다. 격리 restore rehearsal은 자동 수행하지 않으며 운영자가
+가능한 경우 별도로 수행합니다. Compose 설정 추출 실패 시 실제 이미지와 DB
+대상을 보장할 수 없으므로 즉시 중단합니다. 백업 전 DB 크기의 2배 + 1GiB
+여유 공간을 요구하며 크기·용량 조회 실패도 중단합니다. 이는 사전 추정치이므로
+백업 중 동시 디스크 사용까지 보장하지는 않습니다. 기존 TOC·checksum 검증 후
+`pg_restore -f /dev/null`로 데이터 블록 전체를 읽어 검증합니다.
+기존 적용 이력 전체 ID는 CLI가 제공하지 않으므로 요약에 포함하지 않습니다.
+런북 §9.3~§9.4의 로그와 실제 기능 smoke test는 운영자가 추가 확인합니다.
+출력을 보관하려면 백업 디렉터리 대신 접근 권한을 제한한 별도
+`/var/log/yoro/deploy/`의 로그에 append합니다.
+
+로컬에서는 실제 Docker/DB 실행 없이 다음으로 분기와 실패 중단을 검증합니다.
+
+```bash
+bash -n deploy.sh
+shellcheck deploy.sh
+python3 test-deploy.py
+python3 test-deploy.py --mutations  # 임시 사본에서 안전장치 제거 6종 탐지 확인
 ```
 
 루트의 `docker-compose.yml`은 로컬 개발 호환용입니다. 운영에서는 반드시 이
@@ -37,7 +99,8 @@ Cloudflare Tunnel은 기본 배포의 필수 항목이 아닙니다. 외부 Tunn
 `edge` profile을 사용합니다.
 
 ```bash
-docker compose --profile edge up -d --build --force-recreate --wait
+./deploy.sh
+docker compose --profile edge up -d --no-build cloudflared
 ```
 
 Palworld REST 연결용 AES key는 위 목록에 포함되지 않습니다. Compose의
@@ -99,7 +162,7 @@ Twitch Extension도 기본 배포에서는 비활성입니다. 활성화할 때�
 
 ```bash
 cp twitch-extension.override.example.yaml twitch-extension.override.yaml
-docker compose -f compose.yaml -f twitch-extension.override.yaml up -d --build --force-recreate --wait
+COMPOSE_FILE=compose.yaml:twitch-extension.override.yaml ./deploy.sh
 ```
 
 발로란트 공개 카탈로그는 `features.valorantPublic=true`로 승인 전에 배포할 수
@@ -141,9 +204,9 @@ curl -fsS http://127.0.0.1:3000/health/ready
 docker compose --profile edge stop cloudflared
 ```
 
-PostgreSQL migration은 자동 적용하지 않습니다. pending migration이 있으면
-Server는 fail-closed 상태가 되며, backup과 migration plan 검토 후 별도 승인
-절차로 적용해야 합니다.
+Server 자체는 PostgreSQL migration을 자동 적용하지 않습니다. pending이 있으면
+fail-closed 상태가 되므로 위 `deploy.sh`에서 plan 승인과 백업 검증을 거쳐
+적용하거나, 런북의 수동 절차를 따릅니다.
 
 ## 중지
 
