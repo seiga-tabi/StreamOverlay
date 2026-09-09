@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 5173",
-    "build": "tsc -p tsconfig.json && vite build",
+    "build": "tsc -p tsconfig.json && vite build && node scripts/check-chunk-cycles.mjs",
+    "build:check-chunks": "node scripts/check-chunk-cycles.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:run": "node --no-warnings --import tsx --loader ../../scripts/css-module-loader.mjs --test test/*.test.ts test/*.test.tsx",
     "preview": "vite preview --port 5173",

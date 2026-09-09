@@ -706,7 +706,9 @@ export default defineConfig(({ command }) => ({
       // 의존성을 재귀 포함하지 않는 청크의 안전성을 위해 진입점 서명을 고정하지 않습니다.
       preserveEntrySignatures: false,
       output: {
-        // 순환 청크에서도 모듈 초기화 순서를 보장합니다.
+        // 순환이 있으면 lazy 파사드가 아직 평가되지 않은 그룹 청크의 var를 호출하여
+        // TypeError를 유발할 수 있습니다. 초기화 순환을 방지하는 옵션이 아니므로
+        // build 스크립트에 연결된 청크 순환 검사를 반드시 함께 유지합니다.
         strictExecutionOrder: true,
         // rolldown은 CJS 본문 모듈을 manualChunks 반환값과 다르게 배치합니다. react runtime이
         // admin page chunk에 흡수되면 entry 정적 graph가 admin CSS까지 끌고 와 공개 페이지가
@@ -736,24 +738,17 @@ export default defineConfig(({ command }) => ({
               test: /[\\/]apps[\\/]dashboard[\\/]src[\\/](?:(?:api|routing|analytics|fonts)[\\/]|shared[\\/]lazyNamed\.ts$|(?:i18n|runtime-config)\.ts$)/
             },
             {
+              // 그룹 내 lazy 진입점이 2개 이상이면 그룹 밖 의존성이 다른 페이지의
+              // 파사드 청크에만 배치되지 않아야 합니다. 그룹 밖 import 자체는 허용합니다.
+              // 추가/변경 시 반드시 npm run build 후 청크 순환 검사를 통과해야 합니다.
               name: "dashboard-admin-pages",
               priority: 40,
-              test: /[\\/](?:Events|StreamerRiotRequests|StreamerProfiles|SupportInbox)Page\.(?:tsx|css)$/
-            },
-            {
-              name: "dashboard-settings-pages",
-              priority: 40,
-              test: /[\\/]SettingsPage\.(?:tsx|css)$/
-            },
-            // 실제 lazy 진입점과 CSS만 묶습니다. feature 디렉터리 전체를 매칭하면
-            // App의 경로 판별·로딩 화면까지 묶여 기능 CSS가 다시 eager로 올라옵니다.
-            ...["palworld", "minecraft", "valorant", "streamers", "games"].map((feature) => ({
-              name: `public-${feature}-pages`,
-              priority: 40,
-              test: new RegExp(
-                `[/\\\\]src[/\\\\](?:pages[/\\\\]Public${feature[0].toUpperCase()}${feature.slice(1)}Page\\.tsx|styles[/\\\\]pages[/\\\\]public-${feature}[/\\\\]${feature}-route\\.css)$`
-              )
-            }))
+              // EventsPage와 StreamerProfilesPage는 그룹 밖 의존성이 lazy 파사드에
+              // 배치되면 관리자 청크와 순환하므로 자동 청크 분할에 맡깁니다.
+              test: /[\\/](?:StreamerRiotRequests|SupportInbox)Page\.(?:tsx|css)$/
+            }
+            // 공개 페이지의 JS와 라우트 CSS는 기본 분할에 맡깁니다.
+            // CSS 전용 그룹은 빈 JS 청크를 만들고, feature 전체 그룹은 CSS를 eager로 올립니다.
           ]
         }
       }
