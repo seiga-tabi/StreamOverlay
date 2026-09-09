@@ -63,6 +63,8 @@ main() {
   fi
   stage='Compose 설정 추출'
   # 전체 config에는 secret이 있을 수 있으므로 출력하거나 파일에 저장하지 않는다.
+  # compose.yaml은 POSTGRES_USER/POSTGRES_DB를 항상 명시적으로 설정한다.
+  # 아래 기본값은 fallback 용도이며 실제로 사용되면 안 된다.
   local settings
   if settings=$(docker compose config --format json | jq -er '
     .services | [.server.image, (.postgres.environment.POSTGRES_USER // "streamops_app"),
@@ -140,7 +142,9 @@ main() {
   assert_image
   local up_rc=0 ps_rc=0
   docker compose up -d server discord-bot || up_rc=$?
-  # 기동 실패도 그대로 표시한 뒤, 마지막 health 응답과 Compose 상태를 남긴다.
+  if (( up_rc != 0 )); then
+    fail "서비스 기동 실패(up=$up_rc). 런북 §9·§10에 따라 config-check와 서비스 상태를 확인하십시오."
+  fi
   poll_health
   docker compose ps -a || ps_rc=$?
   if (( up_rc != 0 || ps_rc != 0 )) || [[ "$health_live" != 성공 || "$health_ready" != 성공 || "$compose_health" != 성공 ]]; then
@@ -290,6 +294,7 @@ poll_health() {
       timeout=$remaining
       (( timeout <= 5 )) || timeout=5
       # --fail은 오류 본문을 버리므로 HTTP 상태를 별도로 판단한다.
+      : > "$scratch/$endpoint.body"
       if code=$(curl -sS --connect-timeout 2 --max-time "$timeout" \
         -o "$scratch/$endpoint.body" -w '%{http_code}' "http://127.0.0.1:3000/health/$endpoint"); then
         if [[ "$code" == 2[0-9][0-9] ]]; then

@@ -12,7 +12,7 @@ cd deploy/production
 
 기존 PostgreSQL이 healthy인 운영 호스트의 maintenance window에서 실행합니다.
 호스트에 Bash, Git, Docker Compose v2, `jq`, `flock`(util-linux), `curl`,
-`sha256sum`(coreutils), `df`, `awk`가 필요합니다. Docker 접근과 `/var/run/yoro-deploy.lock`,
+`sha256sum`(coreutils), `install`, `mktemp`, `df`, `awk`가 필요합니다. Docker 접근과 `/var/run/yoro-deploy.lock`,
 `/var/backups/yoro/postgres` 생성 권한이 있는 운영 계정(런북은 root 기준)을 사용합니다.
 최초 설치에서는 아래 설정·secret 준비와 PostgreSQL 기동을 먼저 완료합니다.
 
@@ -44,8 +44,10 @@ docker compose up -d postgres
 
 백업 실패 시 `.partial`은 조사용으로 남고 apply하지 않습니다. apply 또는 적용 후
 check 실패 시 자동 재기동·재시도·down·복원은 하지 않습니다. 런북 §10~11을
-따라 원인을 확인하십시오. 호스트의 HTTP health와 Server·Bot 컨테이너 health를
-약 180초간 확인합니다. 실패해도 마지막 응답 본문, Compose 상태와 릴리스 요약을
+따라 원인을 확인하십시오. `docker compose up -d` 자체가 실패하면 health 확인 없이
+릴리스 요약을 출력하고 즉시 중단합니다. 기동 명령이 성공한 경우에만 호스트의 HTTP
+health와 Server·Bot 컨테이너 health를 약 180초간 확인합니다.
+health 확인 실패 시 마지막 응답 본문, Compose 상태와 릴리스 요약을
 출력한 후 실패 코드로 종료합니다.
 요약에는 Git SHA, server image ID, 빌드/apply 시각, 실행자, 백업 경로·체크섬,
 적용 전후 pending ID와 이번 적용 ID, check·health 결과가 포함됩니다.
@@ -67,7 +69,7 @@ check 실패 시 자동 재기동·재시도·down·복원은 하지 않습니�
 bash -n deploy.sh
 shellcheck deploy.sh
 python3 test-deploy.py
-python3 test-deploy.py --mutations  # 임시 사본에서 안전장치 제거 6종 탐지 확인
+python3 test-deploy.py --mutations  # 임시 사본에서 안전장치 제거 8종 탐지 확인
 ```
 
 루트의 `docker-compose.yml`은 로컬 개발 호환용입니다. 운영에서는 반드시 이

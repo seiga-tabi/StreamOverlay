@@ -45,6 +45,13 @@ elif name == "df":
     print(f"fixture 209715200 1 {available} 1% /backup")
 elif name == "curl":
     body = Path(args[args.index("-o") + 1])
+    if scenario == "health_connection_fail":
+        if count(body.stem + "-curl-count") == 1:
+            body.write_text("이전 반복의 응답 본문")
+            print("503", end="")
+            sys.exit(0)
+        print("000", end="")
+        sys.exit(7)
     body.write_text('{"ok":false,"reason":"fixture"}' if scenario in ("health_fail", "pending_health_fail") else '{"ok":true}')
     print("503" if scenario in ("health_fail", "pending_health_fail") else "200", end="")
 elif name == "docker":
@@ -66,7 +73,7 @@ elif name == "docker":
             n = count("check-count")
             if scenario == "check_exec_fail": sys.exit(1)
             if scenario == "invalid_json": print("garbage"); sys.exit(0)
-            status = "ready" if scenario in ("ready", "dirty", "up_fail", "health_fail", "bot_unhealthy") or n > 1 else "pending"
+            status = "ready" if scenario in ("ready", "dirty", "up_fail", "health_fail", "bot_unhealthy", "health_connection_fail") or n > 1 else "pending"
             if scenario == "mismatch": status = "mismatch"
             if scenario == "post_pending": status = "pending"
             emit({"command": "check", "status": status, "applied": 27 if status != "ready" else 28,
@@ -130,6 +137,12 @@ class DeployTest(unittest.TestCase):
             content = content.replace("/var/backups/yoro/postgres", str(root / "backups"))
             if scenario in ("health_fail", "bot_unhealthy", "pending_health_fail"):
                 content = content.replace("SECONDS + 180", "SECONDS + 1")
+            if scenario == "health_connection_fail":
+                # 두 반복을 실행한 뒤 가상 시간을 전진시켜 실제 대기 없이 만료시킨다.
+                sleep_line = "\n    sleep 1\n"
+                self.assertEqual(content.count(sleep_line), 1)
+                content = content.replace(sleep_line, "\n    health_test_ticks=$((${health_test_ticks:-0} + 1)); "
+                                          "if (( health_test_ticks >= 2 )); then SECONDS=1000; fi\n", 1)
             script = root / "deploy.sh"
             script.write_text(content)
             result = subprocess.run(["bash", str(script), *flags], input=stdin, text=True,
@@ -235,12 +248,27 @@ class DeployTest(unittest.TestCase):
                     self.assertIn("never", c)
 
     def test_health_and_up_failure_report(self):
-        for scenario in ("health_fail", "bot_unhealthy", "up_fail"):
+        for scenario in ("health_fail", "bot_unhealthy"):
             calls, output = self.run_case(scenario)
             self.assertIn("마지막 응답 본문", output)
             self.assertIn("배포 기록", output)
             self.assertEqual(calls[-1], ["docker", "compose", "ps", "-a"])
+
+    def test_up_failure_skips_health_polling(self):
+        calls, output = self.run_case("up_fail")
         self.assertIn("fixture config-check failure", output)
+        self.assertIn("서비스 기동 실패(up=1)", output)
+        self.assertIn("배포 기록", output)
+        self.assertFalse(self.has(calls, "curl"))
+        self.assertFalse(any(c[:4] == ["docker", "compose", "ps", "--format"] for c in calls))
+        self.assertNotIn("마지막 응답 본문", output)
+
+    def test_connection_failure_clears_previous_body(self):
+        calls, output = self.run_case("health_connection_fail")
+        self.assertEqual(sum(c[0] == "curl" for c in calls), 4)
+        self.assertIn("/health/live 마지막 응답 본문:\n\n", output)
+        self.assertIn("/health/ready 마지막 응답 본문:\n\n", output)
+        self.assertNotIn("이전 반복의 응답 본문", output)
 
     def test_config_extraction_fails_closed(self):
         for flags in (("--yes",), ("--dry-run",)):
@@ -291,7 +319,7 @@ class DeployTest(unittest.TestCase):
 
 
 def run_mutations():
-    """운영 파일 대신 임시 사본에서 안전장치 6종을 하나씩 무력화한다."""
+    """운영 파일 대신 임시 사본에서 안전장치 8종을 하나씩 무력화한다."""
     global SCRIPT
     original = SCRIPT
     source = original.read_text()
@@ -302,6 +330,8 @@ def run_mutations():
         ("TOC 빈 목록 차단 제거", "archive_empty", "fail '복원 가능한 archive 목록이 비어 있습니다. apply하지 않습니다.'", "true"),
         ("checksum 실패 무시", "checksum_fail", "fail '백업 checksum 검증 실패. 파일 손상·경로·권한을 확인하십시오. apply하지 않습니다.'", "true"),
         ("apply 종료 코드 무시", "apply_fail", "fail 'apply 실패. 런북 §10·§11에 따라 실패 ID, timeout, advisory lock 및 백업을 확인하십시오.'", "true"),
+        ("pg_restore 전체 읽기 검증 차단 제거", "archive_data_fail", "fail 'pg_restore 전체 읽기 검증 실패. 백업을 확인하십시오. apply하지 않습니다.'", "true"),
+        ("디스크 사전 점검 차단 제거", "disk_low", 'fail "백업 디스크 공간 부족 또는 용량 응답 오류(필요 ${required_kb} KiB). apply하지 않습니다."', "true"),
     ]
     detected = 0
     try:
