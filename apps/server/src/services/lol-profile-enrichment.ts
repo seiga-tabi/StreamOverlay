@@ -522,6 +522,8 @@ export class LolProfileEnrichmentService {
     const matchIds = await this.riot.getRecentMatchIdsByPuuid(puuid, count, queueIds);
     const matches: RiotMatch[] = [];
     for (const matchId of matchIds.slice(0, count)) {
+      // 분석 작업 큐와 게임 모니터가 공유 상태에 저장하는 백그라운드 작업입니다.
+      // 개별 HTTP 연결 종료와 수명이 다르므로 요청 signal을 전파하지 않습니다.
       const match = await this.riot.getMatch(matchId);
       if (!match) continue;
       void this.recordMatchBuildsSafely(match).catch((error) => {

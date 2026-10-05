@@ -1,3 +1,4 @@
+import { PublicLolMatchIdsCache } from "./public-lol-match-ids.js";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
@@ -4179,6 +4180,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
   const publicLolCurrentGameCache = new Map<string, { expiresAt: number; response: PublicLolCurrentGame }>();
   const publicLolCurrentGameInFlight = new Map<string, Promise<PublicLolCurrentGame>>();
   let publicLolParticipantRankCacheInvalidatedAt = 0;
+  const publicLolRawMatchIdsCache = new PublicLolMatchIdsCache(PUBLIC_LOL_MATCH_CACHE_MAX);
   const publicLolMatchPageCache = new Map<string, { expiresAt: number; response: PublicLolMatchPageResponse }>();
   const publicLolMatchPageInFlight = new Map<string, Promise<PublicLolMatchPageResponse>>();
   const publicLolMatchPageInFlightRefCount = new Map<string, number>();
@@ -4187,6 +4189,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
   const publicLolMatchRankInFlight = new Map<string, Promise<PublicLolMatchRankResponse>>();
   const publicLolMatchBuildCache = new Map<string, { expiresAt: number; response: PublicLolMatchBuildResponse }>();
   const publicLolMatchBuildInFlight = new Map<string, Promise<PublicLolMatchBuildResponse>>();
+  const publicLolMatchBuildInFlightRefCount = new Map<string, number>();
+  const publicLolMatchBuildInFlightController = new Map<string, AbortController>();
   const publicLolMatchTeamsCache = new Map<string, { expiresAt: number; response: PublicLolMatchTeamsResponse }>();
   const publicLolMatchTeamsInFlight = new Map<string, Promise<PublicLolMatchTeamsResponse>>();
   const publicLolMatchDetailCache = new Map<string, { expiresAt: number; match: RiotMatch }>();
@@ -8440,6 +8444,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
     const running = publicLolMatchDetailInFlight.get(cacheKey);
     if (running) return running;
 
+    // 여러 사용자가 같은 in-flight 상세 결과를 기다리므로 개별 요청 signal은 전달하지 않습니다.
     const request = input.riot.getMatch(matchId, publicLolMatchRouting(matchId, routing))
       .then((match) => {
         if (match) rememberPublicLolMatchDetail(match);
@@ -8554,7 +8559,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
     const queueIds = [...PUBLIC_LOL_MATCH_QUEUE_IDS[queueFilter]];
     /* ID 조회는 요청 페이지 크기 + 1 — 상수(11) 고정이면 초기 페이지 크기
        (PUBLIC_LOL_PROFILE_INITIAL_MATCH_COUNT=20)를 키워도 11개만 조회되던 결함. */
-    const matchIds = await input.riot.getRecentMatchIdsByPuuid(
+    const matchIds = await publicLolRawMatchIdsCache.get(
+      input.riot,
       account.puuid,
       matchCount + 1,
       queueIds,
@@ -8947,6 +8953,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
     const puuid = publicLolProfilePuuidCache.get(key);
     publicLolProfilePuuidCache.delete(key);
     if (puuid) {
+      publicLolRawMatchIdsCache.invalidate(puuid);
       const membershipKey = `${lolPlatform}:${puuid}`;
       const membership = publicLolPlatformMembershipCache.get(membershipKey);
       if (membership) {
@@ -8970,6 +8977,8 @@ export function createHttpHandler(input: HttpHandlerInput) {
     publicLolParticipantRankCacheInvalidatedAt = Date.now();
     publicLolMatchBuildCache.clear();
     publicLolMatchBuildInFlight.clear();
+    publicLolMatchBuildInFlightRefCount.clear();
+    publicLolMatchBuildInFlightController.clear();
     publicLolMatchTeamsCache.clear();
     publicLolMatchTeamsInFlight.clear();
   }
@@ -9434,7 +9443,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
       });
   }
 
-  async function buildPublicLolMatchBuild(matchId: string): Promise<PublicLolMatchBuildResponse> {
+  async function buildPublicLolMatchBuild(matchId: string, signal: AbortSignal): Promise<PublicLolMatchBuildResponse> {
     if (!input.riot) throw new HttpRequestError(503, { error: "Riot API client를 사용할 수 없습니다." });
     if (!input.riot.isConfigured()) throw new HttpRequestError(503, { error: "Riot API key가 설정되어 있지 않습니다." });
 
@@ -9444,7 +9453,12 @@ export function createHttpHandler(input: HttpHandlerInput) {
     });
     if (!match) throw new HttpRequestError(404, { error: "경기 상세 정보를 찾지 못했습니다." });
 
-    const timeline = await input.riot.getMatchTimeline(match.metadata.matchId || matchId, routing).catch(() => null);
+    // 상세 캐시는 공유를 유지하고, 타임라인에는 전체 대기자를 대표하는 signal만 전달합니다.
+    if (signal.aborted) throw new RiotRequestAbortedError("public_lol.match_build");
+    const timeline = await input.riot.getMatchTimeline(match.metadata.matchId || matchId, routing, signal).catch((error) => {
+      if (isAbortError(error)) throw error;
+      return null;
+    });
     const fallbackDataDragonVersion = await dataDragonLatestVersion(input.dataDragon);
     const dataDragonVersion = await dataDragonVersionForMatch(input.dataDragon, match, fallbackDataDragonVersion);
     const participants = await Promise.all(match.info.participants.map(async (participant): Promise<PublicLolMatchBuildParticipant> => {
@@ -9483,30 +9497,73 @@ export function createHttpHandler(input: HttpHandlerInput) {
     };
   }
 
-  async function getPublicLolMatchBuild(rawMatchId: string): Promise<PublicLolMatchBuildResponse> {
+  async function getPublicLolMatchBuild(rawMatchId: string, signal: AbortSignal): Promise<PublicLolMatchBuildResponse> {
+    if (signal.aborted) throw new RiotRequestAbortedError("public_lol.match_build");
     const matchId = validPublicLolMatchId(rawMatchId);
     const cacheKey = matchId.toUpperCase();
     const cached = publicLolMatchBuildCache.get(cacheKey);
     if (cached && cached.expiresAt > Date.now()) return cached.response;
     if (cached) publicLolMatchBuildCache.delete(cacheKey);
 
-    const running = publicLolMatchBuildInFlight.get(cacheKey);
-    if (running) return running;
-
-    const request = buildPublicLolMatchBuild(matchId)
-      .then((response) => {
-        publicLolMatchBuildCache.set(cacheKey, {
-          response,
-          expiresAt: Date.now() + PUBLIC_LOL_MATCH_BUILD_CACHE_TTL_MS
+    let sharedRequest = publicLolMatchBuildInFlight.get(cacheKey);
+    if (!sharedRequest) {
+      const controller = new AbortController();
+      publicLolMatchBuildInFlightController.set(cacheKey, controller);
+      sharedRequest = buildPublicLolMatchBuild(matchId, controller.signal)
+        .then((response) => {
+          if (controller.signal.aborted) throw new RiotRequestAbortedError("public_lol.match_build");
+          if (publicLolMatchBuildInFlight.get(cacheKey) === sharedRequest) {
+            publicLolMatchBuildCache.set(cacheKey, {
+              response,
+              expiresAt: Date.now() + PUBLIC_LOL_MATCH_BUILD_CACHE_TTL_MS
+            });
+            pruneMapToMax(publicLolMatchBuildCache, PUBLIC_LOL_MATCH_CACHE_MAX);
+          }
+          return response;
+        })
+        .finally(() => {
+          // 이전 요청의 지연된 정리가 새 요청의 참조 수와 controller를 삭제하지 않게 합니다.
+          if (publicLolMatchBuildInFlight.get(cacheKey) === sharedRequest) {
+            publicLolMatchBuildInFlight.delete(cacheKey);
+            publicLolMatchBuildInFlightRefCount.delete(cacheKey);
+            publicLolMatchBuildInFlightController.delete(cacheKey);
+          }
         });
-        pruneMapToMax(publicLolMatchBuildCache, PUBLIC_LOL_MATCH_CACHE_MAX);
-        return response;
-      })
-      .finally(() => {
+      publicLolMatchBuildInFlight.set(cacheKey, sharedRequest);
+      publicLolMatchBuildInFlightRefCount.set(cacheKey, 0);
+    }
+
+    const callerSpecific = sharedRequest;
+    const controller = publicLolMatchBuildInFlightController.get(cacheKey);
+    publicLolMatchBuildInFlightRefCount.set(cacheKey, (publicLolMatchBuildInFlightRefCount.get(cacheKey) ?? 0) + 1);
+    let released = false;
+    const releaseRef = () => {
+      if (released) return;
+      released = true;
+      if (publicLolMatchBuildInFlight.get(cacheKey) !== callerSpecific) return;
+      const remaining = (publicLolMatchBuildInFlightRefCount.get(cacheKey) ?? 1) - 1;
+      if (remaining <= 0) {
+        // 전원 취소 직후의 새 호출자는 취소된 Promise에 합류하지 않습니다.
         publicLolMatchBuildInFlight.delete(cacheKey);
+        publicLolMatchBuildInFlightRefCount.delete(cacheKey);
+        publicLolMatchBuildInFlightController.delete(cacheKey);
+        controller?.abort();
+      } else {
+        publicLolMatchBuildInFlightRefCount.set(cacheKey, remaining);
+      }
+    };
+
+    return new Promise<PublicLolMatchBuildResponse>((resolve, reject) => {
+      const onAbort = () => {
+        releaseRef();
+        reject(new RiotRequestAbortedError("public_lol.match_build"));
+      };
+      signal.addEventListener("abort", onAbort, { once: true });
+      callerSpecific.then(resolve, reject).finally(() => {
+        signal.removeEventListener("abort", onAbort);
+        releaseRef();
       });
-    publicLolMatchBuildInFlight.set(cacheKey, request);
-    return request;
+    });
   }
 
   function validPublicLolMatchId(rawMatchId: string): string {
@@ -13171,7 +13228,7 @@ export function createHttpHandler(input: HttpHandlerInput) {
         return sendJson(req, res, 200, ranks, publicLolCacheHeaders("match-ranks", ranks, "public, max-age=300, stale-while-revalidate=1800"));
       }
       if (req.method === "GET" && url.pathname === "/api/lol/match-build") {
-        const build = await getPublicLolMatchBuild(url.searchParams.get("matchId") ?? "");
+        const build = await getPublicLolMatchBuild(url.searchParams.get("matchId") ?? "", requestSignal);
         return sendJson(req, res, 200, build, publicLolCacheHeaders("match-build", build, "public, max-age=3600, stale-while-revalidate=86400"));
       }
       if (req.method === "GET" && url.pathname === "/api/lol/match-detail") {

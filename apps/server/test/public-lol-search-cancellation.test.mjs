@@ -163,3 +163,94 @@ test("(회귀) 같은 소환사를 동시에 검색하는 두 요청 중 하나(
   assert.equal(resA.statusCode, 0, "A는 취소되어 응답을 시도하지 않아야 합니다");
   assert.equal(resB.statusCode, 200, "A의 취소가 B의 공유 dedup 응답까지 오염시키면 안 됩니다: " + resB.body);
 });
+
+function deferred() {
+  let resolve;
+  let reject;
+  const promise = new Promise((res, rej) => { resolve = res; reject = rej; });
+  return { promise, resolve, reject };
+}
+
+function timelineFixture() {
+  const calls = [];
+  const started = deferred();
+  const handler = createHttpHandler(baseHandlerInput({
+    async getMatch(matchId, routing, signal) {
+      assert.equal(signal, undefined, "공개 상세 캐시에는 signal을 전달하지 않습니다");
+      return { metadata: { matchId }, info: { participants: [] } };
+    },
+    getMatchTimeline(matchId, routing, signal) {
+      const result = deferred();
+      calls.push({ signal, ...result });
+      started.resolve();
+      return result.promise;
+    }
+  }));
+  function request() {
+    const req = new MockRequest("GET", "/api/lol/match-build?matchId=JP1_SHARED");
+    const res = createResponse();
+    return { req, res, done: handler(req, res) };
+  }
+  return { calls, started: started.promise, request };
+}
+
+for (const cancelledIndex of [0, 1]) {
+  test(`타임라인 공유 대기자 ${cancelledIndex + 1}명째만 취소하면 다른 대기자는 정상 결과를 받는다`, async () => {
+    const fixture = timelineFixture();
+    const requests = [fixture.request(), fixture.request()];
+    await fixture.started;
+    // 두 라우트가 공유 Promise에 합류한 뒤 취소합니다.
+    await new Promise(setImmediate);
+    assert.equal(fixture.calls.length, 1);
+    const cancelled = requests[cancelledIndex];
+    const remaining = requests[1 - cancelledIndex];
+    cancelled.req.emit("close");
+    await cancelled.done;
+    assert.equal(cancelled.res.statusCode, 0);
+    assert.equal(fixture.calls[0].signal.aborted, false);
+    fixture.calls[0].resolve({ info: { frames: [] } });
+    await remaining.done;
+    assert.equal(remaining.res.statusCode, 200, remaining.res.body);
+    assert.equal(JSON.parse(remaining.res.body).matchId, "JP1_SHARED");
+    assert.equal(fixture.calls[0].signal.aborted, false, "정상 완료는 실제 abort를 일으키지 않습니다");
+    const cached = fixture.request();
+    await cached.done;
+    assert.equal(cached.res.statusCode, 200);
+    assert.equal(fixture.calls.length, 1);
+  });
+}
+
+test("타임라인 대기자 전원 취소는 실제 signal을 중단하고 새 요청은 독립적으로 공유한다", async () => {
+  const fixture = timelineFixture();
+  const first = fixture.request();
+  const second = fixture.request();
+  await fixture.started;
+  await new Promise(setImmediate);
+  let abortCount = 0;
+  fixture.calls[0].signal.addEventListener("abort", () => { abortCount += 1; });
+  first.req.emit("close");
+  assert.equal(abortCount, 0);
+  second.req.emit("close");
+  assert.equal(abortCount, 1);
+  assert.equal(fixture.calls[0].signal.aborted, true);
+  await Promise.all([first.done, second.done]);
+  assert.equal(first.res.statusCode, 0);
+  assert.equal(second.res.statusCode, 0);
+
+  const third = fixture.request();
+  await new Promise(setImmediate);
+  assert.equal(fixture.calls.length, 2, "취소된 요청이 정리되기 전에도 새 조회를 시작합니다");
+  const error = new Error("테스트 요청 취소");
+  error.name = "AbortError";
+  fixture.calls[0].reject(error);
+  await new Promise(setImmediate);
+  const fourth = fixture.request();
+  await new Promise(setImmediate);
+  assert.equal(fixture.calls.length, 2, "이전 finally가 새 공유 요청을 삭제하면 안 됩니다");
+  third.req.emit("close");
+  await third.done;
+  assert.equal(fixture.calls[1].signal.aborted, false);
+  fixture.calls[1].resolve({ info: { frames: [] } });
+  await fourth.done;
+  assert.equal(fourth.res.statusCode, 200, fourth.res.body);
+});

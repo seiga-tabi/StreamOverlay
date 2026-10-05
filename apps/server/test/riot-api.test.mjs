@@ -395,7 +395,7 @@ test("RiotApiClient는 enabledQueues를 Match-V5 queue query로 전달하고 중
   const client = new RiotApiClient();
   const ids = await client.getRecentMatchIdsByPuuid("puuid-queue", 20, [420, 440, 420]);
 
-  assert.deepEqual(ids, ["KR_1", "KR_2", "KR_3"]);
+  assert.deepEqual(ids, ["KR_3", "KR_2", "KR_1"]);
   assert.equal(calls.length, 2);
   assert.ok(calls.every((call) => call.url.startsWith("https://asia.api.riotgames.com/lol/match/v5/")));
   assert.ok(calls.some((call) => call.url.includes("queue=420")));
@@ -734,4 +734,120 @@ test("I. 큐 waiter의 abort listener는 실행/취소/timeout 어느 경로에�
     const result = await pending;
     assert.ok(isAbortError(result));
   }
+});
+
+for (const queueIds of [[400, 430], [420, 440]]) {
+  test(`멀티 큐 ${queueIds.join('/')}는 더보기를 반복해도 양쪽 전적을 빠짐없이 반환한다`, async () => {
+    const histories = new Map([
+      [queueIds[0], Array.from({ length: 135 }, (_, i) => `KR_${400 - i * 2}`)],
+      [queueIds[1], Array.from({ length: 27 }, (_, i) => `KR_${399 - i * 2}`)]
+    ]);
+    const calls = [];
+    globalThis.fetch = async (url) => {
+      const params = new URL(url).searchParams;
+      const queue = Number(params.get('queue'));
+      const start = Number(params.get('start'));
+      const count = Number(params.get('count'));
+      calls.push({ queue, start, count });
+      return jsonResponse(histories.get(queue).slice(start, start + count));
+    };
+    const client = new RiotApiClient(undefined, { rateLimiter: new RiotRequestLimiter({ enabled: false }) });
+    const actual = [];
+    // 공개 페이지와 동일하게 1개 미리보기, 상세 조회 전 자르기, start + count를 적용합니다.
+    for (let start = 0; start < 200; start += 20) {
+      const ids = await client.getRecentMatchIdsByPuuid('puuid-pages', 21, queueIds, start);
+      actual.push(...ids.slice(0, 20));
+      if (ids.length <= 20) break;
+    }
+    const expected = [...histories.values()].flat().sort((a, b) => Number(b.split('_')[1]) - Number(a.split('_')[1]));
+    assert.deepEqual(actual, expected);
+    assert.equal(new Set(actual).size, expected.length);
+    assert.ok(calls.some((call) => call.start === 100));
+    assert.ok(calls.every((call) => call.count <= 100));
+    // 큐 순서를 바꿔도 동일한 병합 페이지가 나와야 합니다.
+    assert.deepEqual(await client.getRecentMatchIdsByPuuid('puuid-pages', 21, [...queueIds].reverse()), expected.slice(0, 21));
+  });
+}
+
+test('멀티 큐는 빈 큐와 숫자 자릿수가 달라도 정상 병합하고 최대 오프셋에서 유한하게 종료한다', async () => {
+  const calls = [];
+  globalThis.fetch = async (url) => {
+    const params = new URL(url).searchParams;
+    const start = Number(params.get('start'));
+    const count = Number(params.get('count'));
+    const queue = Number(params.get('queue'));
+    calls.push({ start, count, queue });
+    return jsonResponse(queue === 400 ? [] : Array.from({ length: count }, (_, i) => `KR_${1100 - start - i}`));
+  };
+  const client = new RiotApiClient(undefined, { rateLimiter: new RiotRequestLimiter({ enabled: false }) });
+  const ids = await client.getRecentMatchIdsByPuuid('puuid-limit', 100, [400, 430], 1000);
+  assert.deepEqual(ids, []);
+  assert.equal(calls.length, 0);
+  await client.getRecentMatchIdsByPuuid('puuid-limit', 100, [400, 430], 250);
+  assert.equal(calls.filter((call) => call.queue === 400).length, 1);
+  assert.equal(calls.filter((call) => call.queue === 430).length, 3);
+});
+
+test('all과 단일 큐는 기존 start/count로 한 번만 조회한다', async () => {
+  const calls = [];
+  globalThis.fetch = async (url) => {
+    calls.push(new URL(url));
+    return jsonResponse(['KR_10', 'KR_9']);
+  };
+  const client = new RiotApiClient();
+  for (const queues of [[], [420], [440], [450]]) {
+    assert.deepEqual(await client.getRecentMatchIdsByPuuid('puuid-single', 20, queues, 40), ['KR_10', 'KR_9']);
+  }
+  assert.equal(calls.length, 4);
+  calls.forEach((url, index) => {
+    assert.equal(url.searchParams.get('start'), '40');
+    assert.equal(url.searchParams.get('count'), '20');
+    assert.equal(url.searchParams.get('queue'), [null, '420', '440', '450'][index]);
+  });
+});
+
+for (const method of ['getMatch', 'getMatchTimeline']) {
+  test(`${method}는 대기 중 취소된 요청을 실행하지 않고 signal 없는 공유 호출은 유지한다`, async () => {
+    const calls = [];
+    globalThis.fetch = async (url) => {
+      calls.push(String(url));
+      return jsonResponse({ metadata: { matchId: 'KR_1' } });
+    };
+    const limiter = new RiotRequestLimiter({ windows: [{ limit: 1, windowMs: 50 }], maxQueueSize: 10 });
+    const client = new RiotApiClient(undefined, { rateLimiter: limiter });
+    await client[method]('KR_1');
+    const controller = new AbortController();
+    const pending = client[method]('KR_2', undefined, controller.signal);
+    const rejected = assert.rejects(pending, (error) => error instanceof RiotRequestAbortedError);
+    controller.abort();
+    await rejected;
+    await client[method]('KR_3');
+    assert.equal(calls.length, 2);
+    assert.ok(calls.every((url) => !url.includes('KR_2')));
+  });
+
+  test(`${method}는 실행 중 fetch 취소를 전파한다`, async () => {
+    let started;
+    const fetching = new Promise((resolve) => { started = resolve; });
+    globalThis.fetch = (_url, init) => new Promise((_resolve, reject) => {
+      init.signal.addEventListener('abort', () => reject(init.signal.reason), { once: true });
+      started();
+    });
+    const client = new RiotApiClient();
+    const controller = new AbortController();
+    const pending = client[method]('KR_1', undefined, controller.signal);
+    const rejected = assert.rejects(pending, (error) => error instanceof RiotRequestAbortedError);
+    await fetching;
+    controller.abort();
+    await rejected;
+  });
+}
+
+ test('멀티 큐는 플랫폼보다 숫자 ID를 먼저 비교하고 큰 정수의 정밀도를 유지한다', async () => {
+  globalThis.fetch = async (url) => jsonResponse(new URL(url).searchParams.get('queue') === '400'
+    ? ['KR_9', 'KR_9007199254740992', 'KR_10']
+    : ['JP1_10', 'JP1_9007199254740993']);
+  const client = new RiotApiClient(undefined, { rateLimiter: new RiotRequestLimiter({ enabled: false }) });
+  assert.deepEqual(await client.getRecentMatchIdsByPuuid('puuid-regions', 20, [400, 430]),
+    ['JP1_9007199254740993', 'KR_9007199254740992', 'KR_10', 'JP1_10', 'KR_9']);
 });

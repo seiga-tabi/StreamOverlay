@@ -10,6 +10,16 @@ import {
 } from "@streamops/shared";
 import { riotApiKeyStatus, type RiotApiKeyProvider, type RiotApiKeyStatus } from "./riot-api-key-store.js";
 
+// 플랫폼 이전 계정도 숫자 ID를 먼저 비교하고, 같은 숫자에서만 접두사를 비교합니다.
+export function compareRiotMatchIdsDescending(a: string, b: string): number {
+  const aParts = /^(.*)_(\d+)$/.exec(a);
+  const bParts = /^(.*)_(\d+)$/.exec(b);
+  if (!aParts || !bParts) return b.localeCompare(a, "en", { numeric: true });
+  const aNumber = BigInt(aParts[2]!);
+  const bNumber = BigInt(bParts[2]!);
+  return aNumber === bNumber ? bParts[1]!.localeCompare(aParts[1]!, "en") : aNumber > bNumber ? -1 : 1;
+}
+
 export type RiotAccount = {
   puuid: string;
   gameName: string;
@@ -757,8 +767,8 @@ export class RiotApiClient {
   async getRecentMatchIdsByPuuid(puuid: string, count = 20, queueIds: number[] = [], start = 0, routing?: LolRoutingContext, signal?: AbortSignal): Promise<string[]> {
     if (!this.isConfigured()) return [];
     const accountRegion = this.routing(routing).accountRegion;
-    const safeStart = Math.max(0, Math.min(1000, Math.trunc(start)));
-    const safeCount = Math.max(1, Math.min(100, Math.trunc(count)));
+    const safeStart = Number.isFinite(start) ? Math.max(0, Math.min(1000, Math.trunc(start))) : 0;
+    const safeCount = Number.isFinite(count) ? Math.max(1, Math.min(100, Math.trunc(count))) : 20;
     const safeQueueIds = [...new Set(queueIds)]
       .map((queueId) => Math.trunc(queueId))
       .filter((queueId) => queueId > 0);
@@ -767,28 +777,50 @@ export class RiotApiClient {
       return (await this.fetchJson<string[]>(url, "match.ids", signal)) ?? [];
     }
 
-    const ids = new Set<string>();
-    for (const queueId of safeQueueIds) {
+    if (safeQueueIds.length === 1) {
       if (signal?.aborted) throw new RiotRequestAbortedError("match.ids", accountRegion);
-      const url = `https://${accountRegion}.api.riotgames.com/lol/match/v5/matches/by-puuid/${encodeURIComponent(puuid)}/ids?start=${safeStart}&count=${safeCount}&queue=${queueId}`;
-      for (const matchId of await this.fetchJson<string[]>(url, "match.ids", signal) ?? []) {
-        ids.add(matchId);
-        if (ids.size >= safeCount) return [...ids];
+      const url = `https://${accountRegion}.api.riotgames.com/lol/match/v5/matches/by-puuid/${encodeURIComponent(puuid)}/ids?start=${safeStart}&count=${safeCount}&queue=${safeQueueIds[0]}`;
+      return [...new Set(await this.fetchJson<string[]>(url, "match.ids", signal) ?? [])].slice(0, safeCount);
+    }
+
+    /* start는 합친 목록의 오프셋입니다. 큐마다 start를 적용하면 아직 반환하지 않은
+       다른 큐의 경기를 건너뜁니다. 각 큐의 앞부분을 독립적으로 수집한 뒤 병합합니다.
+       상세 조회 전에도 호출자가 자르므로 여기서 matchId의 숫자 상대 순서를 적용합니다.
+       상세 시각 기준 최종 정렬은 기존 호출자가 담당합니다. */
+    const ids = new Set<string>();
+    // 호출부의 페이지 제한과 무관하게 멀티 큐는 큐당 최대 300개만 탐색합니다.
+    const targetCount = Math.min(300, safeStart + safeCount);
+    if (safeStart >= targetCount) return [];
+    for (const queueId of safeQueueIds) {
+      let offset = 0;
+      let remaining = targetCount;
+      // 과도한 오프셋으로 레이트리밋 예산을 소진하지 않도록 큐당 3회로 제한합니다.
+      for (let page = 0; page < 3 && remaining > 0; page += 1) {
+        if (signal?.aborted) throw new RiotRequestAbortedError("match.ids", accountRegion);
+        const pageCount = Math.min(100, remaining);
+        const url = `https://${accountRegion}.api.riotgames.com/lol/match/v5/matches/by-puuid/${encodeURIComponent(puuid)}/ids?start=${offset}&count=${pageCount}&queue=${queueId}`;
+        const pageIds = await this.fetchJson<string[]>(url, "match.ids", signal) ?? [];
+        for (const matchId of pageIds) ids.add(matchId);
+        offset += pageIds.length;
+        remaining -= pageIds.length;
+        if (pageIds.length < pageCount) break;
       }
     }
-    return [...ids];
+    return [...ids]
+      .sort(compareRiotMatchIdsDescending)
+      .slice(safeStart, safeStart + safeCount);
   }
 
-  async getMatch(matchId: string, routing?: LolRoutingContext): Promise<RiotMatch | null> {
+  async getMatch(matchId: string, routing?: LolRoutingContext, signal?: AbortSignal): Promise<RiotMatch | null> {
     if (!this.isConfigured()) return null;
     const url = `https://${this.routing(routing).accountRegion}.api.riotgames.com/lol/match/v5/matches/${encodeURIComponent(matchId)}`;
-    return this.fetchJson<RiotMatch>(url, "match.detail");
+    return this.fetchJson<RiotMatch>(url, "match.detail", signal);
   }
 
-  async getMatchTimeline(matchId: string, routing?: LolRoutingContext): Promise<RiotMatchTimeline | null> {
+  async getMatchTimeline(matchId: string, routing?: LolRoutingContext, signal?: AbortSignal): Promise<RiotMatchTimeline | null> {
     if (!this.isConfigured()) return null;
     const url = `https://${this.routing(routing).accountRegion}.api.riotgames.com/lol/match/v5/matches/${encodeURIComponent(matchId)}/timeline`;
-    return this.fetchJson<RiotMatchTimeline>(url, "match.timeline");
+    return this.fetchJson<RiotMatchTimeline>(url, "match.timeline", signal);
   }
 
   async getCurrentGameByPuuid(puuid: string, routing?: LolRoutingContext, signal?: AbortSignal): Promise<RiotCurrentGameInfo | null> {
