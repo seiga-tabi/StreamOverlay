@@ -634,7 +634,11 @@ void dataDragon.getLatestVersion()
   .catch((error) => {
     logger.error({ type: "public_lol.data_dragon_prewarm_failed", error: toSafeErrorMessage(error) });
   });
-const lolProfileRepository = new LocalJsonLolProfileRepository(`${appConfig.paths.state}/lol-profiles.json`);
+const lolProfileRepository = new LocalJsonLolProfileRepository(
+  `${appConfig.paths.state}/lol-profiles.json`,
+  (error) => logger.error({ type: "lol_profile.persistence_failed", error: toSafeErrorMessage(error) }),
+  appConfig.lolProfileCache.ttlDays
+);
 const publicLolSnapshotStore = new LocalPublicLolSnapshotStore(`${appConfig.paths.state}/lol-public-profile-snapshots`);
 const lolProfileEnrichment = new LolProfileEnrichmentService(riot, dataDragon, lolProfileRepository, logger);
 const patchNotes = new PatchNotesService({
@@ -777,8 +781,20 @@ function shutdown(signal: NodeJS.Signals): void {
   let forceTimer: NodeJS.Timeout;
   server.close((error) => {
     clearTimeout(forceTimer);
-    void Promise.allSettled([store.closeAsync(), closeDatabasePool()])
+    void Promise.allSettled([
+      store.closeAsync(),
+      closeDatabasePool(),
+      Promise.resolve().then(() => lolProfileRepository.flush())
+    ])
       .then((results) => {
+        const profileFlushResult = results[2];
+        if (profileFlushResult.status === "rejected") {
+          logger.error({
+            type: "lol_profile.shutdown_persistence_failed",
+            signal,
+            error: toSafeErrorMessage(profileFlushResult.reason)
+          });
+        }
         const closeFailed = results.some((result) => result.status === "rejected");
         if (error) {
           logger.error({ type: "server.shutdown_failed", signal, error: toSafeErrorMessage(error) });
@@ -812,6 +828,15 @@ function shutdown(signal: NodeJS.Signals): void {
 
 process.once("SIGTERM", shutdown);
 process.once("SIGINT", shutdown);
+// 강제 종료 경로 및 HTTP 종료 이후 완료된 백그라운드 분석의 마지막 변경도 저장합니다.
+process.once("exit", () => {
+  try {
+    lolProfileRepository.flush();
+  } catch (error) {
+    logger.error({ type: "lol_profile.shutdown_persistence_failed", error: toSafeErrorMessage(error) });
+    process.exitCode = 1;
+  }
+});
 
 server.listen(appConfig.port, () => {
   logger.event({ type: "server.started", port: appConfig.port, build: appConfig.build });

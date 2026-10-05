@@ -730,6 +730,7 @@ test("LocalJsonLolProfileRepository는 손상된 cache 파일을 무시하고 �
     analyzedAt: new Date().toISOString()
   });
 
+  repo.flush();
   const parsed = JSON.parse(readFileSync(filePath, "utf8"));
   assert.equal(parsed.profiles.length, 1);
   assert.ok(readdirSync(dir).some((name) => name.startsWith("profiles.json.broken-")));

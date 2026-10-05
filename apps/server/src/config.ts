@@ -491,6 +491,9 @@ export const appConfig = {
       ? DEFAULTS.logging.maxFiles
       : Math.max(1, Math.min(20, intEnv("LOG_MAX_FILES", DEFAULTS.logging.maxFiles)))
   },
+  lolProfileCache: {
+    ttlDays: configuredRuntime ? 90 : Math.max(1, intEnv("LOL_PROFILE_CACHE_TTL_DAYS", 90))
+  },
   supportMailbox: {
     enabled: configuredRuntime ? false : boolEnv("SUPPORT_MAILBOX_ENABLED", false),
     address: configuredRuntime ? "support@yoro.gg" : env("SUPPORT_MAILBOX_ADDRESS", "support@yoro.gg").trim().toLowerCase(),
