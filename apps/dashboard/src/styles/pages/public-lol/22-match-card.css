@@ -523,7 +523,7 @@
   .public-match-card-summary {
     display: grid;
     /* 목업 "전적 행 — 네 가지 수정" 격자 — 모든 행이 이 고정 트랙을 공유해야
-       세로줄이 맞습니다. 트랙 합 752px + gap 18×5 = 842px.
+       세로줄이 맞습니다. 트랙 합 768px + gap 18×5 = 858px.
        마지막 트랙만 minmax(28px, 1fr) — 캐럿이 오른쪽 끝에서 남는 폭을
        흡수합니다(고정 28px 로 두면 본문이 넓을 때 캐럿이 행 안쪽에 뜹니다). */
     grid-template-columns:
@@ -531,13 +531,13 @@
       11rem                    /* 2 챔피언(176px) — 3과 병합 셀 */
       7.25rem                  /* 3 KDA·평점(116px) */
       9.5rem                   /* 4 CS·시야·킬관여(152px) */
-      10.5rem                  /* 5 팀원 2열(168px = 78+12+78) */
+      11.5rem                  /* 5 팀원 2열(184px = 86+12+86) */
       minmax(1.75rem, 1fr);    /* 6 펼침 캐럿 */
     align-items: center;
-    /* 목업: gap 18px · padding 14px 18px. */
+    /* 목업: gap 18px · padding 16px 18px. */
     column-gap: 1.125rem;
     row-gap: var(--yoro-space-2);
-    padding: .875rem 1.125rem;
+    padding: 1rem 1.125rem;
     cursor: pointer;
   }
 
@@ -547,16 +547,14 @@
     grid-template-columns: 7rem 11rem 7.25rem 9.5rem minmax(1.75rem, 1fr);
   }
 
-  /* 병합 셀(트랙 2–3) — 안쪽 트랙과 column-gap 은 바깥 격자와 같은 값이어야
-     챔피언/평점 경계가 행마다 밀리지 않습니다.
-     KDA 를 행 중앙에 세우려고 열을 194/98 로 나눕니다(합계 310px 은 그대로,
-     바깥 트랙은 손대지 않습니다) — 아이템 묶음(실측 193.9px = 24×6 + gap 4×5
-     + gap 6 + 와드 24)이 왼쪽 칸 안에 들어가야 KDA 가 두 줄을 차지할 수 있습니다.
-     KDA 최대 폭은 10/8/12 기준 71.9px 이라 98px 에 여유가 있습니다. */
+  /* 병합 셀(트랙 2–3) — 승인된 크기 스펙에 따라 내부만 208/84로 나눕니다.
+     아이템 묶음(26×6 + gap 4×5 + gap 6 + 와드 26 = 208px)을 왼쪽 칸에
+     수용하고, KDA 최대 실측폭 71.9px은 오른쪽 84px에 들어갑니다.
+     column-gap 18px을 포함한 합계 310px과 바깥 트랙은 유지합니다. */
   .public-match-card-champ-block {
     grid-column: span 2;
     display: grid;
-    grid-template-columns: 12.125rem 6.125rem;   /* 194px 98px */
+    grid-template-columns: 13rem 5.25rem;   /* 208px 84px */
     column-gap: 1.125rem;
     row-gap: .375rem;
     align-items: center;
@@ -672,14 +670,14 @@
   /* 왼쪽 열은 소환사 주문(D 위 / F 아래), 오른쪽 열은 룬(주 룬 위 / 보조 룬 아래)입니다. */
   .public-match-card-loadout-column {
     display: grid;
-    grid-template-rows: repeat(2, 1.25rem);
+    grid-template-rows: repeat(2, 1.375rem);
     gap: .1875rem;
   }
 
   .public-match-card-loadout :is(span, img) {
     display: block;
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 1.375rem;
+    height: 1.375rem;
     border-radius: var(--yoro-radius-xs);
     overflow: hidden;
   }
@@ -933,21 +931,20 @@
     gap: 6px;
   }
 
-  /* 목업 §2-4: 24px 정사각 한 줄 6칸(gap 4px), radius 2px, .5px 헤어라인 —
-     아이템 줄이 병합 셀 아래 전폭(310px)을 쓰므로 칸이 20→24px 로 커졌습니다.
-     스펠·룬·mini(18px)는 그대로입니다. */
+  /* 승인된 크기 스펙: 26px 정사각 6칸과 트링킷, gap 4px/6px으로 총 208px.
+     radius 2px과 .5px 헤어라인은 유지합니다. */
   .public-match-card-item-grid {
     display: grid;
-    grid-template-columns: repeat(6, 1.5rem);
-    grid-auto-rows: 1.5rem;
+    grid-template-columns: repeat(6, 1.625rem);
+    grid-auto-rows: 1.625rem;
     gap: .25rem;
   }
 
   .public-match-card-item-grid > span,
   .public-match-card-trinket {
     display: block;
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 1.625rem;
+    height: 1.625rem;
     border: .5px solid var(--yoro-color-border-on-dark);
     box-sizing: border-box;
     overflow: hidden;
@@ -977,12 +974,12 @@
     outline-offset: var(--yoro-focus-ring-offset);
   }
 
-  /* 5 팀원 2열 — 목업 §2-2: 아군 5 · 상대 5, 열 78px + gap 12px + 78px = 168px.
-     항목은 mini 18px 원형 + 이름 56px 말줄임(9px). 라벨은 열 폭을 밀어 접고
+  /* 5 팀원 2열 — 목업 §2-2: 아군 5 · 상대 5, 열 86px + gap 12px + 86px = 184px.
+     항목은 mini 22px 원형 + 이름 최대 64px 말줄임(11px). 라벨은 열 폭을 밀어 접고
      aria-label(compositionLabel)이 대신 읽힙니다. */
   .public-match-card-team {
     display: grid;
-    grid-template-columns: 4.875rem 4.875rem;
+    grid-template-columns: 5.375rem 5.375rem;
     align-items: start;
     justify-self: start;
     gap: .75rem;
@@ -1010,8 +1007,8 @@
     display: grid;
     flex: none;
     place-items: center;
-    width: 1.125rem;
-    height: 1.125rem;
+    width: 1.375rem;
+    height: 1.375rem;
     border: .5px solid var(--yoro-color-border-on-dark);
     border-radius: var(--yoro-radius-circle);
     box-sizing: border-box;
@@ -1023,11 +1020,11 @@
   }
 
   .public-match-card-team-name {
-    max-width: 3.5rem;
+    max-width: 4rem;
     overflow: hidden;
     color: var(--yoro-color-text-on-dark-muted);
     font-style: normal;
-    font-size: .5625rem;
+    font-size: .6875rem;
     white-space: nowrap;
     text-overflow: ellipsis;
   }
@@ -1214,9 +1211,9 @@
   }
 
   /* ── 반응형 축약 ─────────────────────────────────────────── */
-  /* 좁아질 때의 규칙(목업 §2-3): 팀원(168) → CS(152) 순서로 접고, 접힌
+  /* 좁아질 때의 규칙(목업 §2-3): 팀원(184) → CS(152) 순서로 접고, 접힌
      트랙은 템플릿에서 제거해 남은 열이 자리를 나눠 갖습니다(빈 칸 금지).
-     임계 878 = 트랙 합 752 + gap 90 + padding 36. 아이템은 병합 셀 안이라
+     기존 접힘 임계 878px은 승인 목업대로 유지합니다. 아이템은 병합 셀 안이라
      접기 후보가 아닙니다. */
   @container match-list (max-width: 877px) {
     .public-match-card-team { display: none; }
@@ -1545,7 +1542,7 @@
   }
 
   /* 아레나 행도 공통 격자를 씁니다(목업 §2-3 — 모든 행이 같은 트랙이어야
-     세로줄이 맞습니다). 내 팀 3인은 공통 팀원 열(168px) 왼쪽 열에 들어가고,
+     세로줄이 맞습니다). 내 팀 3인은 공통 팀원 열(184px) 왼쪽 열에 들어가고,
      표시/접힘도 공통 877 규칙을 따릅니다. */
   .public-match-card.arena .public-match-card-team { grid-template-columns: minmax(0, 1fr); }
 

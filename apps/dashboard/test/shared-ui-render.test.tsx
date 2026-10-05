@@ -911,16 +911,16 @@ test("모바일 최근 전적은 스트립 + 본문 한 행으로 접고 세 묶
 
   // 소환사 주문은 왼쪽 열에 D 위 / F 아래, 룬은 오른쪽 열에 주 룬 위 / 보조 룬 아래로 쌓습니다.
   assert.match(cardCss, /\.public-match-card-loadout\s*\{[\s\S]*?display:\s*flex/u);
-  assert.match(cardCss, /\.public-match-card-loadout-column\s*\{[\s\S]*?display:\s*grid[\s\S]*?grid-template-rows:\s*repeat\(2, 1\.25rem\)/u);
+  assert.match(cardCss, /\.public-match-card-loadout-column\s*\{[\s\S]*?display:\s*grid[\s\S]*?grid-template-rows:\s*repeat\(2, 1\.375rem\)/u);
 
   // 목업 "전적 행 — 네 가지 수정": 모든 행이 같은 고정 트랙을 공유합니다
-  // (112/176/116/152/168 + 캐럿 minmax(28px,1fr)) — 세로줄이 행마다 같은 자리에서 끊깁니다.
-  assert.match(cardCss, /\.public-match-card-summary\s*\{[\s\S]*?7rem[\s\S]*?11rem[\s\S]*?7\.25rem[\s\S]*?9\.5rem[\s\S]*?10\.5rem[\s\S]*?minmax\(1\.75rem, 1fr\)/u);
+  // (112/176/116/152/184 + 캐럿 minmax(28px,1fr)) — 세로줄이 행마다 같은 자리에서 끊깁니다.
+  assert.match(cardCss, /\.public-match-card-summary\s*\{[\s\S]*?7rem[\s\S]*?11rem[\s\S]*?7\.25rem[\s\S]*?9\.5rem[\s\S]*?11\.5rem[\s\S]*?minmax\(1\.75rem, 1fr\)/u);
   /* 병합 셀(트랙 2–3)의 안쪽 트랙 합과 gap 은 바깥 격자와 같아야 합니다.
-     2026-08-24: KDA 를 행 세로 중앙에 세우려고 안쪽만 194/98 로 다시 나눴습니다
-     (176+18+116 = 194+18+98 = 310 — 바깥 트랙은 그대로). 아이템 묶음 실측
-     193.9px 가 왼쪽 칸에 들어가야 KDA 가 두 줄을 차지할 수 있습니다. */
-  assert.match(cardCss, /\.public-match-card-champ-block\s*\{[\s\S]*?grid-column:\s*span 2[\s\S]*?grid-template-columns:\s*12\.125rem 6\.125rem[\s\S]*?column-gap:\s*1\.125rem/u);
+     2026-10-05 승인 스펙: 아이템 확대에 맞춰 안쪽만 208/84로 나눕니다.
+     (176+18+116 = 208+18+84 = 310 — 바깥 트랙은 그대로). 아이템 묶음
+     208px이 왼쪽 칸에 들어가야 KDA가 두 줄을 차지할 수 있습니다. */
+  assert.match(cardCss, /\.public-match-card-champ-block\s*\{[\s\S]*?grid-column:\s*span 2[\s\S]*?grid-template-columns:\s*13rem 5\.25rem[\s\S]*?column-gap:\s*1\.125rem/u);
   // KDA 는 챔피언 줄과 아이템 줄을 통째로 차지하고 그 안에서 세로 가운데에 섭니다.
   assert.match(cardCss, /\.public-match-card-champ-block > \.public-match-card-perf\s*\{[\s\S]*?grid-column:\s*2;\s*grid-row:\s*1 \/ span 2;\s*align-self:\s*center/u);
   // MVP·ACE 는 지표가 셋뿐이라 비어 있던 네 번째 칸(= CS 아래)에 왼쪽 맞춤으로 놓입니다.
